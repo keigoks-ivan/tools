@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>13 · Market &amp; Submarket Analysis | CRE Investing Course | InvestMQuest</title>
+<meta name="description" content="How to read demand drivers by asset type, the permits-to-deliveries supply funnel, submarket selection, and market-tightness metrics that separate a real read from a lagging one. 依資產類型判讀需求驅動因子、從許可到交屋的供給漏斗、子市場選址，以及分辨真實市場緊縮與落後指標假象的市場緊度指標。">
+<meta name="color-scheme" content="light">
+<link rel="stylesheet" href="/learn-cre/learn.css">
+</head>
+<body>
+
+<nav class="course-nav">
+  <div class="course-nav-inner">
+    <div class="course-nav-brand">
+      <a href="/cre.html">&larr; <span class="lang-en">CRE Monitor</span><span class="lang-zh" style="display:none">CRE 監測儀表板</span></a>
+      <span class="course-nav-sep">/</span>
+      <a href="/learn-cre/index.html" class="course-nav-home"><span class="lang-en">Course Home</span><span class="lang-zh" style="display:none">課程首頁</span></a>
+    </div>
+    <div class="course-nav-pager">
+      <a href="12-capstone.html">&larr; <span class="lang-en">Capstone</span><span class="lang-zh" style="display:none">畢業考</span></a>
+      <a href="14-development.html"><span class="lang-en">Development Basics</span><span class="lang-zh" style="display:none">開發入門</span> &rarr;</a>
+    </div>
+    <div class="course-nav-lang">
+      <button class="lang-btn" data-lang="en" onclick="setLang('en')">EN</button>
+      <button class="lang-btn" data-lang="zh" onclick="setLang('zh')">中文</button>
+    </div>
+  </div>
+</nav>
+
+<div class="lc-wrap">
+
+  <header class="module-header">
+    <span class="module-eyebrow lang-en">ADVANCED 13</span>
+    <span class="module-eyebrow lang-zh" style="display:none">進階 13</span>
+    <h1 class="lang-en">Market &amp; Submarket Analysis</h1>
+    <h1 class="lang-zh" style="display:none">市場與子市場分析</h1>
+    <div class="module-goals">
+      <div class="module-goals-title"><span class="lang-en">What You'll Learn</span><span class="lang-zh" style="display:none">這一課學什麼</span></div>
+      <ul>
+        <li><span class="lang-en">How to translate employment, population, and consumer-spending growth into real space demand for each asset type &mdash; and why the wrong headline number (total employment instead of office-using employment, population instead of household formation) quietly wrecks a demand forecast.</span><span class="lang-zh" style="display:none">如何把就業、人口與消費支出成長換算成各資產類型的真實空間需求&mdash;&mdash;以及為什麼用錯了指標（用總就業取代辦公室使用就業、用人口取代家戶形成）會在不知不覺間毀掉一份需求預測。</span></li>
+        <li><span class="lang-en">The permits &rarr; starts &rarr; deliveries supply funnel, how to compute pipeline-as-a-percentage-of-stock and months-of-supply from raw pipeline data, and why supply is simultaneously the most forecastable variable in real estate and the one most often ignored at a cycle peak.</span><span class="lang-zh" style="display:none">從許可到動工到交屋的供給漏斗、如何用原始管線資料算出「管線佔存量比例」與「去化月數」，以及為什麼供給明明是房地產裡最容易預測的變數，卻是週期高點時最常被忽略的一個。</span></li>
+        <li><span class="lang-en">How to choose between an established core and a path-of-growth submarket, including the real risk-reward trade-off behind the "second-best submarket" thesis.</span><span class="lang-zh" style="display:none">如何在成熟核心區與成長路徑子市場之間做選擇，包含「次佳子市場」論點背後真正的風險報酬取捨。</span></li>
+        <li><span class="lang-en">The market-tightness metrics that separate a market that is actually tightening right now from one that merely looks tight on a lagging vacancy number &mdash; and how rising concessions can hide a deteriorating effective-rent trend behind flat asking rents.</span><span class="lang-zh" style="display:none">分辨「現在正在真正緊縮的市場」與「只是落後空置率數字看起來緊」的市場緊度指標&mdash;&mdash;以及租讓誘因上升如何在持平的表價租金背後掩蓋惡化中的有效租金趨勢。</span></li>
+        <li><span class="lang-en">How to use the CRE Monitor's 57-city spread / vacancy / rent-YoY screen as a first-pass filter, and how to weight broker research against government statistics and REIT public disclosures when the numbers disagree.</span><span class="lang-zh" style="display:none">如何用 CRE Monitor 涵蓋 57 個城市的利差、空置率、租金年增率三欄篩選作為初步過濾器，以及當數字互相矛盾時，如何權衡經紀商研究、政府統計與 REIT 公開揭露之間的可信度。</span></li>
+      </ul>
+    </div>
+  </header>
+
+  <section>
+    <p class="lang-en">Tokyo's office vacancy rate sits at 0.7%. Chicago's sits at 26.8%. Both numbers describe the same asset class &mdash; multi-tenant office buildings &mdash; measured the same way, in the same quarter. The gap between them is not noise or a measurement quirk; it is two different markets in two different structural positions in their supply-and-demand cycle, and a large part of what separates a disciplined market analyst from someone reciting a national cap-rate average is being able to explain exactly why that 26-point gap exists and which side of it a given submarket is closer to. This module builds that explanation from the ground up: demand by asset type, the supply pipeline that determines how much new space is coming regardless of how strong demand looks today, how to pick a submarket within a market, the handful of metrics that read tightness in real time rather than in the rear-view mirror, and where to find the data to do all of this without paying for a Wall Street research subscription.</p>
+    <p class="lang-zh" style="display:none">東京的辦公室空置率是 0.7%。芝加哥是 26.8%。這兩個數字描述的是同一種資產類別&mdash;&mdash;多租戶辦公大樓&mdash;&mdash;用同樣的方法、在同一季測得。兩者之間的落差不是雜訊或量測上的怪癖，而是兩個市場處在供需週期裡截然不同的結構位置；能不能精確解釋這 26 個百分點的落差從何而來、又能判斷一個特定子市場比較靠近哪一側，正是一個有紀律的市場分析師與只會複誦全國平均資本化率的人之間，很大一部分的差別所在。這一課從頭把這個解釋建立起來：依資產類型拆解需求、決定新增空間多寡的供給管線（無論今天的需求看起來多強都一樣）、如何在市場內挑子市場、少數幾個能即時而非事後才讀出緊度的指標，以及不用付華爾街研究訂閱費也能找到這些資料的地方。</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 1. DEMAND ANALYSIS BY ASSET TYPE -->
+  <!-- ============================================================ -->
+  <section>
+    <h2 class="lang-en">1. Demand analysis by asset type</h2>
+    <h2 class="lang-zh" style="display:none">一、依資產類型拆解需求</h2>
+    <p class="lang-en">"Demand" is not one thing. Each asset type is filled by a different economic activity, and pulling the wrong headline statistic &mdash; a plausible-sounding one, often reported right next to the correct one in the same government release &mdash; produces a demand forecast that is confidently wrong. The four sections below walk through what actually drives space absorption for office, multifamily, retail, and industrial, and where analysts most often substitute the convenient number for the correct one.</p>
+    <p class="lang-zh" style="display:none">「需求」不是單一一件事。每種資產類型是被不同的經濟活動填滿的，而抓錯了頭條統計數字&mdash;&mdash;一個聽起來很合理、常常就出現在同一份政府統計發布裡、緊挨著正確數字旁邊的數字&mdash;&mdash;會做出一份自信滿滿卻是錯的需求預測。以下四節逐一拆解辦公室、住宅、零售與工業空間真正的空間去化驅動力，以及分析師最常在哪裡用方便取得的數字取代了正確的數字。</p>
+
+    <h3 class="lang-en">Office: office-using employment, not total employment</h3>
+    <h3 class="lang-zh" style="display:none">辦公室：辦公室使用就業，而非總就業</h3>
+    <p class="lang-en">A metro can post strong headline job growth while its office market keeps deteriorating, because most job categories never sit in an office building. The number that actually drives office demand is <span class="key-term" tabindex="0">office-using employment<span class="key-term-tip"><span class="lang-en">The subset of total employment in job categories that typically occupy conventional office space &mdash; principally financial activities, professional and business services, information/tech, and legal services. It excludes retail, leisure and hospitality, healthcare delivery, construction, and manufacturing employment, which occupy retail, medical, industrial, or field-based space instead.</span><span class="lang-zh" style="display:none">總就業中，通常會佔用傳統辦公空間的職類子集合&mdash;&mdash;主要是金融活動、專業與商業服務、資訊科技與法律服務。不包含零售、休閒與住宿、醫療照護、營建與製造業就業，這些職類佔用的是零售、醫療、工業或現場型空間。</span></span></span>: finance, professional and business services, information/technology, and legal, roughly. A city adding warehouse jobs, restaurant jobs, and hospital jobs can show a healthy unemployment rate and payroll count while its downtown office towers keep bleeding tenants, because none of those job categories rent office suites.</p>
+    <p class="lang-zh" style="display:none">一個都會區可以在總體就業數字上表現亮眼，辦公室市場卻持續惡化，因為多數職類本來就不會坐在辦公大樓裡。真正驅動辦公室需求的數字是<span class="key-term" tabindex="0">辦公室使用就業<span class="key-term-tip"><span class="lang-en">The subset of total employment in job categories that typically occupy conventional office space &mdash; principally financial activities, professional and business services, information/tech, and legal services. It excludes retail, leisure and hospitality, healthcare delivery, construction, and manufacturing employment, which occupy retail, medical, industrial, or field-based space instead.</span><span class="lang-zh" style="display:none">總就業中，通常會佔用傳統辦公空間的職類子集合&mdash;&mdash;主要是金融活動、專業與商業服務、資訊科技與法律服務。不包含零售、休閒與住宿、醫療照護、營建與製造業就業，這些職類佔用的是零售、醫療、工業或現場型空間。</span></span></span>&mdash;&mdash;大致上是金融、專業與商業服務、資訊科技，以及法律這幾類。一個城市可能新增了倉儲、餐飲與醫院的工作機會，失業率與薪資統計都很健康，市中心的辦公大樓卻持續流失租戶，因為這些職類根本不租辦公室套房。</p>
+    <p class="lang-en">To translate a job-growth forecast into a square-footage demand forecast, an analyst multiplies projected office-using job growth by an assumed square-feet-per-employee ratio. That ratio is a rough, market-specific rule of thumb &mdash; commonly cited figures have historically clustered somewhere in the 150&ndash;250 sf-per-employee range depending on industry mix and building class &mdash; and it is not a fixed constant. It has been trending down for two structural reasons: open-plan densification that started well before the pandemic, and post-pandemic hybrid-work schedules that let a company sign for fewer seats than it has headcount. Any demand forecast that plugs in a static, decade-old sf-per-employee ratio will overstate the office space a given amount of job growth actually pulls through.</p>
+    <p class="lang-zh" style="display:none">要把就業成長預測換算成坪數需求預測，分析師會把預估的辦公室使用就業成長，乘上一個假設的「每位員工平方英尺數」比例。這個比例只是一個粗略、因市場而異的經驗法則&mdash;&mdash;常見引用的數字歷史上大致落在每員工 150 至 250 平方英尺之間，隨產業組合與大樓等級而異&mdash;&mdash;而且它不是一個固定常數。它一直在往下走，有兩個結構性原因：早在疫情之前就開始的開放式辦公空間密集化，以及疫情後的混合辦公排程，讓公司可以簽下比實際員工人數更少的座位數。任何套用一個靜態、十年前比例的需求預測，都會高估某一定量的就業成長實際能拉動多少辦公空間。</p>
+
+    <div class="pitfall">
+      <span class="pitfall-icon">⚠️</span>
+      <div class="pitfall-body">
+        <strong><span class="lang-en">Pitfall:</span><span class="lang-zh" style="display:none">常見陷阱：</span></strong>
+        <span class="lang-en">Citing a metro's total nonfarm payroll growth as evidence of office-market strength. A market can add 3% total jobs and still lose office-using employment if the growth is concentrated in leisure, hospitality, healthcare, and warehousing &mdash; check the office-using subtotal specifically before treating a headline jobs number as bullish for office.</span>
+        <span class="lang-zh" style="display:none">拿一個都會區的總非農就業成長率，當成辦公室市場強勁的證據。如果成長集中在休閒、住宿、醫療與倉儲業，一個市場的總就業成長 3%，辦公室使用就業卻可能反而在流失&mdash;&mdash;在把頭條就業數字當成辦公室市場利多之前，一定要先個別檢查辦公室使用就業的子項目。</span>
+      </div>
+    </div>
+
+    <div class="quiz-block" data-quiz-id="m13-q1" data-quiz='[
+      {
+        "q":{"en":"A metro reports 3.5% total nonfarm payroll growth this year, driven almost entirely by hiring in leisure/hospitality, healthcare, and warehousing. What should an analyst conclude about office demand?","zh":"某都會區今年總非農就業成長 3.5%，幾乎全部來自休閒／住宿、醫療與倉儲業的雇用。分析師應該對辦公室需求得出什麼結論？"},
+        "opts":[
+          {"en":"Office demand is likely weak or flat, because none of the reported job growth is in office-using categories &mdash; the headline number is not the relevant one.","zh":"辦公室需求可能偏弱或持平，因為所報告的就業成長沒有一項屬於辦公室使用職類&mdash;&mdash;頭條數字並不是相關的指標。"},
+          {"en":"Office demand is strong, since 3.5% payroll growth is well above the national average.","zh":"辦公室需求強勁，因為 3.5% 的就業成長遠高於全國平均。"},
+          {"en":"Office demand cannot be assessed without knowing the vacancy rate.","zh":"沒有空置率資料就無法評估辦公室需求。"},
+          {"en":"Office demand will rise proportionally with total employment regardless of job mix.","zh":"無論職類組合如何，辦公室需求都會與總就業成長成比例上升。"}
+        ],
+        "a":0,
+        "exp":{"en":"Office space is filled by office-using employment (finance, professional/business services, info/tech, legal) &mdash; not by leisure, healthcare, or warehouse jobs. Strong headline payroll growth concentrated outside those categories tells you almost nothing positive about office absorption.","zh":"辦公空間是被辦公室使用就業（金融、專業／商業服務、資訊科技、法律）填滿的&mdash;&mdash;不是休閒、醫療或倉儲業的工作機會。頭條就業成長強勁但集中在這些職類之外，對辦公室去化幾乎說明不了什麼正面的事。"}
+      }
+    ]'></div>
+
+    <h3 class="lang-en">Multifamily: population growth is not household formation</h3>
+    <h3 class="lang-zh" style="display:none">住宅：人口成長不等於家戶形成</h3>
+    <p class="lang-en">Apartment demand is driven by units, not people, and the number of units a given population needs depends on the <span class="key-term" tabindex="0">household formation rate<span class="key-term-tip"><span class="lang-en">The rate at which new, separate households (people living independently, whether alone, as a couple, or with roommates who each maintain their own household) are formed within a population, distinct from the population growth rate itself.</span><span class="lang-zh" style="display:none">在一群人口中，新的獨立家戶（無論獨居、成雙居住，或與室友同住但各自維持獨立家戶）形成的速度，與人口成長率本身是兩件不同的事。</span></span></span> &mdash; a distinct number from the population growth rate itself. Population can grow while household formation stalls: the clearest example is adult children delaying moving out and staying in a parent's household longer, whether from high rents, student debt, or weak entry-level job markets. A metro can add residents on net migration while the actual count of new, separate households &mdash; the number that matters for apartment absorption &mdash; grows much more slowly, because a chunk of the population growth is landing inside existing households rather than forming new ones.</p>
+    <p class="lang-zh" style="display:none">公寓需求是被戶數而不是人數驅動的，而一定人口所需要的戶數，取決於<span class="key-term" tabindex="0">家戶形成率<span class="key-term-tip"><span class="lang-en">The rate at which new, separate households (people living independently, whether alone, as a couple, or with roommates who each maintain their own household) are formed within a population, distinct from the population growth rate itself.</span><span class="lang-zh" style="display:none">在一群人口中，新的獨立家戶（無論獨居、成雙居住，或與室友同住但各自維持獨立家戶）形成的速度，與人口成長率本身是兩件不同的事。</span></span></span>&mdash;&mdash;這是一個跟人口成長率本身不同的數字。人口可以成長，但家戶形成卻停滯：最明顯的例子就是成年子女延後搬出、在父母家戶裡待得更久，原因可能是高房租、學貸，或疲弱的新鮮人就業市場。一個都會區可能靠淨遷入淨增加了居民，但真正新增、獨立的家戶數&mdash;&mdash;這才是公寓去化真正在意的數字&mdash;&mdash;成長得慢很多，因為有一部分人口成長是落進了既有家戶裡，而不是形成新的家戶。</p>
+    <p class="lang-en">A second layer sits on top of household formation: the renter-versus-owner tenure split within newly formed households. A market where mortgage rates and home prices push a larger share of new households toward renting (rather than buying) sees apartment demand run ahead of household formation alone; a market where affordability improves and ownership becomes more attainable sees the opposite &mdash; new households forming, but a smaller share of them renting. Reading multifamily demand correctly means checking both layers: how many new households are forming, and what share of them will rent.</p>
+    <p class="lang-zh" style="display:none">在家戶形成之上還有第二層：新形成家戶中，租屋與購屋的比例分布。如果房貸利率與房價把更大比例的新家戶推向租屋（而非購屋），公寓需求成長就會跑在單純的家戶形成之前；如果可負擔性改善、購屋變得更容易入手，就會出現相反情況&mdash;&mdash;新家戶照樣在形成，但租屋的比例變小。正確判讀住宅需求代表兩層都要查：有多少新家戶正在形成，以及其中有多少比例會選擇租屋。</p>
+
+    <div class="quiz-block" data-quiz-id="m13-q2" data-quiz='[
+      {
+        "q":{"en":"A metro area&#39;s population grows 2.0% this year, but its household formation rate implies only 0.6% growth in the number of separate households. What is the most likely explanation, and what does it mean for apartment demand?","zh":"某都會區今年人口成長 2.0%，但其家戶形成率顯示獨立家戶數只成長了 0.6%。最可能的解釋是什麼，這對公寓需求代表什麼？"},
+        "opts":[
+          {"en":"The population data must be wrong, since population growth and household growth should always match.","zh":"人口數據一定有誤，因為人口成長跟家戶成長理應永遠一致。"},
+          {"en":"A meaningful share of the added population is landing inside existing households (e.g. adult children staying home) rather than forming new ones &mdash; apartment demand should be modeled off the 0.6% household figure, not the 2.0% population figure.","zh":"新增人口中有相當一部分是落進既有家戶（例如成年子女待在家裡），而不是形成新家戶&mdash;&mdash;公寓需求應該用 0.6% 的家戶數字建模，而不是 2.0% 的人口數字。"},
+          {"en":"Apartment demand should be modeled off the 2.0% population figure, since more people always eventually need more units.","zh":"公寓需求應該用 2.0% 的人口數字建模，因為人多了最終總是需要更多戶數。"},
+          {"en":"The gap indicates the metro is losing renters to homeownership.","zh":"這個落差代表該都會區的租客正在流失去買房。"}
+        ],
+        "a":1,
+        "exp":{"en":"Apartment absorption is driven by new, separate households, not raw population. A gap this size between population growth and household formation almost always means population is growing inside existing households (adult children, multi-generational doubling-up) rather than spinning off new ones &mdash; the correct demand driver is the 0.6% figure.","zh":"公寓去化是由新的、獨立的家戶驅動的，不是原始人口。人口成長與家戶形成之間出現這麼大的落差，幾乎總是代表人口成長是發生在既有家戶內（成年子女、多代同堂），而不是分出新家戶&mdash;&mdash;正確的需求驅動因子是那個 0.6% 的數字。"}
+      }
+    ]'></div>
+
+    <div class="pitfall">
+      <span class="pitfall-icon">⚠️</span>
+      <div class="pitfall-body">
+        <strong><span class="lang-en">Pitfall:</span><span class="lang-zh" style="display:none">常見陷阱：</span></strong>
+        <span class="lang-en">Modeling apartment demand directly off a population-growth forecast without checking the household-formation rate behind it. A metro can look like a strong renter-demand story on population alone while the actual pace of new, separate households forming &mdash; the number that fills units &mdash; is running well below it.</span>
+        <span class="lang-zh" style="display:none">直接用人口成長預測來建模公寓需求，卻沒有查核背後的家戶形成率。單看人口，一個都會區可能看起來像是強勁的租屋需求故事，但真正在形成、能填滿戶數的新獨立家戶速度，實際上遠低於人口成長速度。</span>
+      </div>
+    </div>
+
+    <h3 class="lang-en">Retail: trade area, drive-time, and gravity</h3>
+    <h3 class="lang-zh" style="display:none">零售：商圈、車程分析與重力模型</h3>
+    <p class="lang-en">Retail demand is local in a way office and industrial demand are not: a shopping center draws customers from a defined <span class="key-term" tabindex="0">trade area<span class="key-term-tip"><span class="lang-en">The geographic area from which a retail property draws the majority of its customers, typically segmented into primary (closest, highest-spend-capture), secondary, and tertiary rings or drive-time bands.</span><span class="lang-zh" style="display:none">一個零售物件吸引大多數顧客所來自的地理範圍，通常再細分為主要（最近、消費捕捉率最高）、次要與再次要的環圈或車程分帶。</span></span></span>, and the analysis question is how to define that area accurately. The crude method is a simple radius ring &mdash; draw a 3-mile or 5-mile circle around the site and count the population and income inside it. The more accurate method is <span class="key-term" tabindex="0">drive-time analysis<span class="key-term-tip"><span class="lang-en">Defining a trade area by actual travel time along the real road network (e.g. a 10-minute drive-time polygon) rather than a straight-line radius, so it naturally accounts for highways, bridges, rivers, and other barriers that shape how people actually reach a site.</span><span class="lang-zh" style="display:none">用實際道路網絡上的真實車程時間（例如 10 分鐘車程多邊形）而非直線半徑來定義商圈，因此能自然反映高速公路、橋樑、河流等實際影響人們如何抵達該地點的地理屏障。</span></span></span> &mdash; mapping how far a customer can actually drive in, say, 10 minutes along the real road network, rather than as the crow flies.</p>
+    <p class="lang-zh" style="display:none">零售需求具有一種辦公室與工業需求所沒有的在地性：一座購物中心的顧客來自一個界定明確的<span class="key-term" tabindex="0">商圈<span class="key-term-tip"><span class="lang-en">The geographic area from which a retail property draws the majority of its customers, typically segmented into primary (closest, highest-spend-capture), secondary, and tertiary rings or drive-time bands.</span><span class="lang-zh" style="display:none">一個零售物件吸引大多數顧客所來自的地理範圍，通常再細分為主要（最近、消費捕捉率最高）、次要與再次要的環圈或車程分帶。</span></span></span>，而分析的問題在於如何精確定義這個範圍。粗略的方法是簡單的半徑環圈&mdash;&mdash;在基地周圍畫一個 3 英里或 5 英里的圓，再算出圈內的人口與所得。更精確的方法是<span class="key-term" tabindex="0">車程分析<span class="key-term-tip"><span class="lang-en">Defining a trade area by actual travel time along the real road network (e.g. a 10-minute drive-time polygon) rather than a straight-line radius, so it naturally accounts for highways, bridges, rivers, and other barriers that shape how people actually reach a site.</span><span class="lang-zh" style="display:none">用實際道路網絡上的真實車程時間（例如 10 分鐘車程多邊形）而非直線半徑來定義商圈，因此能自然反映高速公路、橋樑、河流等實際影響人們如何抵達該地點的地理屏障。</span></span></span>&mdash;&mdash;測繪顧客實際能在例如 10 分鐘內、沿著真實道路網絡開到多遠，而不是直線距離。</p>
+    <p class="lang-en">The reason drive-time wins is that a radius ring treats geography as if it were a featureless plane. It counts households on the far side of a river with no nearby bridge as equally reachable as households a block away. It ignores a competing shopping center two miles down the highway that intercepts most of the traffic before it reaches the subject site. Drive-time polygons pick all of that up automatically because they are built on the actual road network and can route around barriers &mdash; which is why serious retail underwriting uses drive-time as the real analysis and treats the radius ring as a first-pass screening shortcut, useful for a five-minute gut check but not for a final trade-area definition. Once the trade area is defined correctly, the next inputs are the trade area's aggregate household count and per-household spending on the retail category in question (translated from regional consumer-spending survey data), set against the square footage of competing retail already capturing that spending &mdash; the same logic as an office sf/employee ratio, just applied to dollars of spend per household instead of square feet per job.</p>
+    <p class="lang-zh" style="display:none">車程分析之所以更準，是因為半徑環圈把地理當成一個沒有任何特徵的平面來處理。它會把河對岸、附近沒有橋樑可過的家戶，跟一街之隔的家戶視為同樣容易抵達。它也會忽略掉高速公路兩英里外一座正在攔截大部分車流、讓車流到不了標的基地的競爭型購物中心。車程多邊形能自動抓到這一切，因為它是建立在真實道路網絡上、能繞開屏障&mdash;&mdash;這正是為什麼認真的零售核算會把車程分析當成真正的分析工具，而把半徑環圈當成初步篩選的捷徑，適合拿來做五分鐘的直覺檢查，但不適合當成最終的商圈定義。一旦商圈正確定義好，接下來的輸入就是商圈內的家戶總數，以及每戶在該零售類別上的消費支出（從區域消費支出調查資料換算而來），再對照已經在瓜分那筆支出的競爭零售面積&mdash;&mdash;邏輯跟辦公室的每員工平方英尺比例一樣，只是套用在「每戶消費金額」而非「每份工作平方英尺」上。</p>
+
+    <ul class="checklist">
+      <li class="checklist-item"><input type="checkbox" id="chk-retail-1"><label for="chk-retail-1"><span class="lang-en">Trade area defined by drive-time polygons (e.g. 5/10/15-minute bands), not a simple radius ring, unless the ring is being used only as a quick first-pass screen.</span><span class="lang-zh" style="display:none">商圈用車程多邊形定義（例如 5／10／15 分鐘分帶），而非簡單的半徑環圈，除非該環圈只是用來做快速的初步篩選。</span></label></li>
+      <li class="checklist-item"><input type="checkbox" id="chk-retail-2"><label for="chk-retail-2"><span class="lang-en">Natural and man-made barriers (rivers, highways without nearby crossings, rail lines) checked against the trade-area map, not assumed away.</span><span class="lang-zh" style="display:none">對照商圈地圖檢查天然與人為屏障（河流、附近沒有跨越點的高速公路、鐵路），而不是假設它們不存在。</span></label></li>
+      <li class="checklist-item"><input type="checkbox" id="chk-retail-3"><label for="chk-retail-3"><span class="lang-en">Competing retail square footage within the same trade area inventoried, not just the subject property's own catchment assumed uncontested.</span><span class="lang-zh" style="display:none">已盤點同一商圈內的競爭零售面積，而不是假設標的物件的商圈毫無競爭。</span></label></li>
+      <li class="checklist-item"><input type="checkbox" id="chk-retail-4"><label for="chk-retail-4"><span class="lang-en">Per-household spending figure for the relevant retail category sourced from consumer-spending survey data, not eyeballed.</span><span class="lang-zh" style="display:none">相關零售類別的每戶消費支出數字有可靠的消費支出調查資料來源，而不是憑感覺估的。</span></label></li>
+    </ul>
+
+    <div class="quiz-block" data-quiz-id="m13-q3" data-quiz='[
+      {
+        "q":{"en":"Two candidate retail sites have identical 3-mile-radius household counts. Site A sits next to a river with the nearest bridge two miles away; Site B has unobstructed road access in all directions. Why does drive-time analysis matter here?","zh":"兩個候選零售基地在 3 英里半徑內的家戶數完全相同。基地 A 緊鄰一條河，最近的橋樑在兩英里外；基地 B 各方向的道路通行都無阻礙。為什麼車程分析在這裡很重要？"},
+        "opts":[
+          {"en":"It doesn&#39;t matter &mdash; radius rings and drive-time analysis produce the same trade area whenever household counts match.","zh":"不重要&mdash;&mdash;只要家戶數相同，半徑環圈與車程分析算出來的商圈就會一樣。"},
+          {"en":"Site A&#39;s true trade area is smaller than its radius ring suggests, because the river cuts off easy access to households on the far bank &mdash; the radius ring overstates Site A&#39;s effective demand relative to Site B.","zh":"基地 A 的真實商圈比其半徑環圈所顯示的要小，因為那條河切斷了對岸家戶的便利可及性&mdash;&mdash;半徑環圈相對於基地 B 高估了基地 A 的有效需求。"},
+          {"en":"Site B&#39;s trade area is smaller because open road access means customers can also easily leave for competitors.","zh":"基地 B 的商圈比較小，因為道路暢通也代表顧客同樣容易跑去競爭對手那裡。"},
+          {"en":"Drive-time analysis is only relevant for industrial sites, not retail.","zh":"車程分析只跟工業基地有關，跟零售無關。"}
+        ],
+        "a":1,
+        "exp":{"en":"A radius ring counts population as reachable regardless of physical barriers. Site A&#39;s river with a distant bridge means a meaningful share of the &#39;3-mile&#39; households actually face a much longer real drive-time to the site &mdash; drive-time analysis reveals Site A&#39;s effective trade area is smaller and more constrained than the raw radius count implies.","zh":"半徑環圈把人口都算成可以觸及，不管實際地理屏障。基地 A 有一條河、橋樑又遠，代表所謂「3 英里內」的家戶中，有相當一部分實際上要開更長的真實車程才能到基地&mdash;&mdash;車程分析會揭露基地 A 的有效商圈比半徑數字所暗示的更小、限制也更多。"}
+      }
+    ]'></div>
+
+    <h3 class="lang-en">Industrial and logistics: proximity, access, and last-mile economics</h3>
+    <h3 class="lang-zh" style="display:none">工業與物流：鄰近性、通行條件與最後一哩經濟學</h3>
+    <p class="lang-en">Industrial demand is driven by the physics and economics of moving goods, and three location factors dominate: proximity to ports for import-heavy tenants, direct access to the interstate/highway network for anything trucked regionally, and &mdash; increasingly, the largest single driver of new industrial development &mdash; <span class="key-term" tabindex="0">last-mile logistics<span class="key-term-tip"><span class="lang-en">The final leg of a delivery, from a local distribution facility to the end customer's door. Because delivery-time promises (same-day, next-day) are a fixed constraint, last-mile facilities must sit close to the population they serve regardless of land cost, which is why they cluster in dense metros even where land is far cheaper an hour away.</span><span class="lang-zh" style="display:none">配送流程的最後一段：從在地配送設施到終端顧客家門口。因為送貨時效承諾（當日達、隔日達）是固定限制，最後一哩設施必須緊鄰其服務的人口，無論土地成本高低，這也是為什麼即使一小時車程外土地便宜得多，這類設施仍會群聚在人口密集的都會區。</span></span></span> positioning near dense population centers.</p>
+    <p class="lang-zh" style="display:none">工業需求是由貨物移動的物理與經濟學所驅動的，其中三個區位因素最為主導：對進口導向承租戶而言的港口鄰近性、對區域卡車運輸而言的州際公路／高速公路直接通行條件，以及&mdash;&mdash;如今日益成為新增工業開發最大單一驅動力的&mdash;&mdash;<span class="key-term" tabindex="0">最後一哩物流<span class="key-term-tip"><span class="lang-en">The final leg of a delivery, from a local distribution facility to the end customer's door. Because delivery-time promises (same-day, next-day) are a fixed constraint, last-mile facilities must sit close to the population they serve regardless of land cost, which is why they cluster in dense metros even where land is far cheaper an hour away.</span><span class="lang-zh" style="display:none">配送流程的最後一段：從在地配送設施到終端顧客家門口。因為送貨時效承諾（當日達、隔日達）是固定限制，最後一哩設施必須緊鄰其服務的人口，無論土地成本高低，這也是為什麼即使一小時車程外土地便宜得多，這類設施仍會群聚在人口密集的都會區。</span></span></span>&mdash;&mdash;貼近人口密集區域的定位。</p>
+    <p class="lang-en">The reason last-mile facilities cluster near dense population regardless of cheaper land an hour away is pure delivery-time economics: a same-day or next-day delivery promise is a hard time budget, and every extra mile between the facility and the customer eats into that budget. Land a warehouse forty minutes further out might save meaningfully on rent per square foot, but if that extra distance breaks the delivery-time promise for a large share of the customer base, the cheaper land is not actually usable for that function &mdash; it just gets used for a different tier of the network (regional distribution, bulk storage) that doesn't carry a same-day constraint. This is also where the rail-served versus truck-only distinction matters: a rail-served industrial building can receive full unit trains of bulk freight at a materially lower cost per ton-mile than an equivalent truck-only facility, which matters enormously for manufacturers and bulk-commodity distributors, but is largely irrelevant to a last-mile parcel-delivery tenant, whose whole model runs on trucks and vans making short local hops. The right industrial submarket depends entirely on which of these tenant profiles the analysis is underwriting for.</p>
+    <p class="lang-zh" style="display:none">最後一哩設施之所以會群聚在人口密集區、而不是選一小時車程外更便宜的土地，純粹是送貨時效的經濟學：當日達或隔日達的承諾是一個硬性的時間預算，設施與顧客之間每多一英里，都在消耗這個預算。把倉庫設在再往外四十分鐘的地方，每平方英尺租金或許能省下不少，但如果那多出來的距離讓一大部分顧客群的送貨時效承諾破功，這塊便宜的土地其實對那個功能來說並不真正可用&mdash;&mdash;它只會被用在網絡裡不需要當日達限制的另一個層級（區域配送、大宗倉儲）。這也是為什麼「有無鐵路服務」與「純卡車運輸」的區分很重要：一座有鐵路服務的工業建築，能以顯著更低的每噸英里成本接收整列大宗貨運火車，這對製造業者與大宗商品配送業者來說極為重要，但對一個最後一哩包裹配送承租戶來說幾乎無關緊要，因為它的整套模式都靠卡車與貨車做短程在地接駁。正確的工業子市場選擇，完全取決於分析要核算的是哪一種承租戶輪廓。</p>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 2. SUPPLY ANALYSIS -->
+  <!-- ============================================================ -->
+  <section>
+    <h2 class="lang-en">2. Supply analysis: the pipeline math</h2>
+    <h2 class="lang-zh" style="display:none">二、供給分析：管線的算法</h2>
+    <p class="lang-en">Supply moves through a predictable funnel: a developer files for <span class="key-term" tabindex="0">permits<span class="key-term-tip"><span class="lang-en">Government approvals filed before construction can legally begin. Permit issuance is the earliest, most visible signal of future supply &mdash; and the least reliable one, since a meaningful share of permitted projects never break ground.</span><span class="lang-zh" style="display:none">動工前依法須先取得的政府核准。核發許可是未來供給最早、最容易觀察到的訊號&mdash;&mdash;但也是最不可靠的一個，因為有相當一部分取得許可的專案最終並未真的動工。</span></span></span>, some share of permitted projects actually break ground (<em>starts</em>), and some share of started projects actually reach completion and open for lease (<em>deliveries</em>). At every stage of that funnel, projects fall out: financing collapses, entitlement fights drag past a developer's return threshold, a construction lender pulls back, a pre-leasing target isn't hit and the deal gets shelved. Treating the raw permit count as if it equals future deliveries systematically overstates the coming supply wave; treating deliveries data alone as the read on future supply misses the wave that hasn't broken ground yet. A correct read tracks all three stages and applies realistic attrition between them.</p>
+    <p class="lang-zh" style="display:none">供給是透過一個可預測的漏斗往下走的：開發商申請<span class="key-term" tabindex="0">建照許可<span class="key-term-tip"><span class="lang-en">Government approvals filed before construction can legally begin. Permit issuance is the earliest, most visible signal of future supply &mdash; and the least reliable one, since a meaningful share of permitted projects never break ground.</span><span class="lang-zh" style="display:none">動工前依法須先取得的政府核准。核發許可是未來供給最早、最容易觀察到的訊號&mdash;&mdash;但也是最不可靠的一個，因為有相當一部分取得許可的專案最終並未真的動工。</span></span></span>，其中一部分取得許可的專案真正動工（<em>動工量</em>），而動工的專案中又有一部分真正完工、開放出租（<em>交屋量</em>）。在這個漏斗的每一階段，都會有專案脫隊：融資談不成、爭取權益的抗爭拖過開發商的報酬門檻、營建貸款方抽手、預租目標沒達到，交易就被擱置。把原始許可數字直接當成未來交屋量來看待，會系統性地高估即將到來的供給浪潮；只看交屋資料來判讀未來供給，又會漏掉還沒動工的那波。正確的判讀方式，要同時追蹤這三個階段，並在階段之間套用符合現實的流失率。</p>
+
+    <p class="lang-en">Two derived metrics turn that pipeline into something usable for underwriting. <span class="key-term" tabindex="0">Pipeline-as-a-percentage-of-stock<span class="key-term-tip"><span class="lang-en">Expected future deliveries divided by the existing stock of a given asset type in the market, expressed as a percentage &mdash; a quick read on how much the market's total inventory is about to grow.</span><span class="lang-zh" style="display:none">預期未來交屋量除以該市場既有資產存量，以百分比表示&mdash;&mdash;快速判斷該市場總存量即將成長多少的指標。</span></span></span> answers "how much bigger is this market about to get." <span class="key-term" tabindex="0">Months of supply<span class="key-term-tip"><span class="lang-en">Pipeline units or square feet divided by the trailing monthly net absorption rate &mdash; how many months it would take the current absorption pace to lease up the pipeline alone, holding the absorption rate constant.</span><span class="lang-zh" style="display:none">管線戶數或坪數除以近期月均淨去化量&mdash;&mdash;假設去化速度維持不變，單靠目前的去化速度要花多少個月才能把管線去化完畢。</span></span></span> answers "at the current pace of demand, how long would it take to absorb everything that's coming." A high pipeline-as-%-of-stock number paired with a demand run-rate that can only absorb it slowly is the single cleanest quantitative early-warning signal of an oversupply cycle.</p>
+    <p class="lang-zh" style="display:none">兩個衍生指標可以把這條管線變成核算真正能用的東西。<span class="key-term" tabindex="0">管線佔存量比例<span class="key-term-tip"><span class="lang-en">Expected future deliveries divided by the existing stock of a given asset type in the market, expressed as a percentage &mdash; a quick read on how much the market's total inventory is about to grow.</span><span class="lang-zh" style="display:none">預期未來交屋量除以該市場既有資產存量，以百分比表示&mdash;&mdash;快速判斷該市場總存量即將成長多少的指標。</span></span></span>回答的是「這個市場即將變大多少」。<span class="key-term" tabindex="0">去化月數<span class="key-term-tip"><span class="lang-en">Pipeline units or square feet divided by the trailing monthly net absorption rate &mdash; how many months it would take the current absorption pace to lease up the pipeline alone, holding the absorption rate constant.</span><span class="lang-zh" style="display:none">管線戶數或坪數除以近期月均淨去化量&mdash;&mdash;假設去化速度維持不變，單靠目前的去化速度要花多少個月才能把管線去化完畢。</span></span></span>回答的是「照目前的需求速度，要花多久才能把即將到來的一切去化完畢」。當「管線佔存量比例」很高、而需求速度只能緩慢去化它時，這就是供給過剩週期最乾淨的量化早期警訊。</p>
+
+    <div class="worked-example">
+      <div class="worked-example-title"><span class="lang-en">Worked Example &mdash; Supply Pipeline Math (Hypothetical Metro)</span><span class="lang-zh" style="display:none">逐步演算範例&mdash;&mdash;供給管線算法（假設都會區）</span></div>
+      <ol class="worked-example-steps">
+        <li class="worked-example-step">
+          <span class="we-step-num">1</span>
+          <span class="we-step-body">
+            <span class="lang-en">Hypothetical multifamily metro "Brookhaven": existing stock is <span class="we-formula">38,000 units</span>.</span>
+            <span class="lang-zh" style="display:none">假設住宅都會區「Brookhaven」：既有存量為<span class="we-formula">38,000 戶</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">2</span>
+          <span class="we-step-body">
+            <span class="lang-en">Permits issued trailing 12 months: <span class="we-formula">4,200 units</span>.</span>
+            <span class="lang-zh" style="display:none">過去 12 個月核發的建照許可：<span class="we-formula">4,200 戶</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">3</span>
+          <span class="we-step-body">
+            <span class="lang-en">Apply a permit-to-start attrition rate (hypothetical, based on this metro's historical average of projects that never break ground): <span class="we-formula">4,200 &times; (1 &minus; 12%) &asymp; 3,700 units start construction</span>.</span>
+            <span class="lang-zh" style="display:none">套用「許可到動工」的流失率（假設值，依此都會區歷史上從未動工專案的平均比例）：<span class="we-formula">4,200 &times;（1 &minus; 12%）&asymp; 3,700 戶實際動工</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">4</span>
+          <span class="we-step-body">
+            <span class="lang-en">Apply a further start-to-delivery attrition rate (delays, partial cancellations, financing failures mid-construction): <span class="we-formula">3,700 &times; (1 &minus; 5%) &asymp; 3,500 units expected to actually deliver</span>.</span>
+            <span class="lang-zh" style="display:none">再套用「動工到交屋」的流失率（延遲、部分取消、興建中融資失敗）：<span class="we-formula">3,700 &times;（1 &minus; 5%）&asymp; 3,500 戶預期真正交屋</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">5</span>
+          <span class="we-step-body">
+            <span class="lang-en">Pipeline as % of existing stock: <span class="we-formula">3,500 &divide; 38,000 &asymp; 9.2%</span> &mdash; the market's total inventory is about to grow by roughly a tenth.</span>
+            <span class="lang-zh" style="display:none">管線佔既有存量比例：<span class="we-formula">3,500 &divide; 38,000 &asymp; 9.2%</span>&mdash;&mdash;這個市場的總存量即將成長約十分之一。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">6</span>
+          <span class="we-step-body">
+            <span class="lang-en">Trailing net absorption run-rate for this hypothetical metro: <span class="we-formula">1,200 units/year &asymp; 100 units/month</span>.</span>
+            <span class="lang-zh" style="display:none">此假設都會區近期淨去化速度：<span class="we-formula">每年 1,200 戶 &asymp; 每月 100 戶</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">7</span>
+          <span class="we-step-body">
+            <span class="lang-en">Months of supply: <span class="we-formula">3,500 &divide; 100 &asymp; 35 months</span>. At the current absorption pace, the pipeline alone represents nearly three years of demand &mdash; a signature of building oversupply risk even before a single new unit delivers.</span>
+            <span class="lang-zh" style="display:none">去化月數：<span class="we-formula">3,500 &divide; 100 &asymp; 35 個月</span>。以目前的去化速度，光是管線就代表將近三年的需求量&mdash;&mdash;即使一戶新單位都還沒交屋，已經是供給過剩風險正在累積的訊號。</span>
+          </span>
+        </li>
+      </ol>
+    </div>
+
+    <p class="lang-en">The deeper point behind this arithmetic is that supply is, by a wide margin, the most forecastable variable in real estate. Construction takes years from permit to delivery &mdash; long enough that a disciplined analyst can see most of a supply wave coming well before it hits the market, simply by pulling permit and under-construction data. Demand, by contrast, is genuinely hard to forecast: it depends on the future path of employment, interest rates, and consumer behavior, none of which is knowable with precision years out. And yet supply is also the variable most commonly ignored at cycle peaks &mdash; not because the data isn't available, but for a behavioral reason. Near the top of a cycle, rent growth has usually been strong for several consecutive years, and sponsors underwriting a new deal tend to extrapolate that recent, visible, emotionally salient trend forward, rather than pulling up the permit data that would show a large wave of new supply about to hit the same submarket. Recency bias on rent growth is a stronger pull on judgment than a spreadsheet column of permits filed eighteen months ago, even though the permit data is the more reliable forecast of the two.</p>
+    <p class="lang-zh" style="display:none">這套算法背後更深一層的重點是：供給在房地產裡是遙遙領先、最容易被預測的變數。從許可到交屋，營建工程要花上好幾年&mdash;&mdash;時間長到一個有紀律的分析師只要調出許可與興建中資料，就能在供給浪潮真正打到市場之前，看到它大部分的樣貌。相對地，需求真的很難預測：它取決於就業、利率與消費者行為未來的走向，這些在好幾年前都不可能被精確得知。然而供給也恰恰是週期高點時最常被忽略的變數&mdash;&mdash;不是因為資料拿不到，而是有一個行為上的原因。在週期接近高點時，租金成長通常已經連續好幾年強勁，而正在核算新交易的發起人，傾向把這個近期、看得到、情緒上有感的趨勢往後外推，而不是去調出許可資料&mdash;&mdash;那份資料會顯示一大波新供給即將打到同一個子市場。租金成長的近因偏誤，對判斷的拉力遠強過一欄十八個月前申請的建照許可資料，儘管許可資料其實是兩者之中更可靠的預測依據。</p>
+
+    <div class="pitfall">
+      <span class="pitfall-icon">⚠️</span>
+      <div class="pitfall-body">
+        <strong><span class="lang-en">Pitfall:</span><span class="lang-zh" style="display:none">常見陷阱：</span></strong>
+        <span class="lang-en">Underwriting a deal off trailing rent growth without pulling the submarket's permit and under-construction data. Three consecutive years of strong rent growth is exactly the environment in which developers respond by filing a wave of permits &mdash; the strong trailing trend and the coming supply wave are not independent facts, they are cause and effect.</span>
+        <span class="lang-zh" style="display:none">只用近期租金成長核算一筆交易，卻沒有調出子市場的建照許可與興建中資料。連續三年租金成長強勁，正是開發商會回應而申請一波建照許可的環境&mdash;&mdash;強勁的近期趨勢跟即將到來的供給浪潮，並不是兩件互相獨立的事實，而是因果關係。</span>
+      </div>
+    </div>
+
+    <div class="quiz-block" data-quiz-id="m13-q4" data-quiz='[
+      {
+        "q":{"en":"Why is supply widely considered the most forecastable variable in real estate, and why is it still the variable most commonly ignored at cycle peaks?","zh":"為什麼供給普遍被認為是房地產裡最容易預測的變數，卻仍然是週期高點時最常被忽略的變數？"},
+        "opts":[
+          {"en":"Supply data is actually unreliable and often wrong, which is why analysts tend to disregard it.","zh":"供給資料其實不可靠、常常出錯，這就是分析師往往忽略它的原因。"},
+          {"en":"Long construction lead times mean permit and under-construction data reveal most of a supply wave years in advance, but analysts near a cycle peak tend to extrapolate recent strong rent growth instead of pulling the visible pipeline data &mdash; a behavioral bias, not a data-availability problem.","zh":"漫長的營建前置期意味著許可與興建中資料能在好幾年前就揭露大部分的供給浪潮，但週期高點附近的分析師傾向把近期強勁的租金成長往後外推，而不是去調出看得到的管線資料&mdash;&mdash;這是行為偏誤，不是資料取得的問題。"},
+          {"en":"Supply is forecastable but irrelevant, since demand always adjusts to match whatever supply is delivered.","zh":"供給雖可預測但無關緊要，因為需求永遠會自動調整以配合交付的供給量。"},
+          {"en":"Permit data is confidential and unavailable to most analysts until deliveries actually happen.","zh":"許可資料屬於機密，大多數分析師要等到真正交屋才拿得到。"}
+        ],
+        "a":1,
+        "exp":{"en":"Construction&#39;s multi-year lead time makes the pipeline visible via public permit and under-construction data well before it hits the market &mdash; that&#39;s what makes supply forecastable. It gets ignored at peaks because recency bias on strong trailing rent growth is a more emotionally compelling input than a spreadsheet of permits filed a year or two earlier, even though the permit data is the more reliable signal.","zh":"營建工程長達數年的前置期，讓管線透過公開的許可與興建中資料，能在打到市場之前就被看見&mdash;&mdash;這正是供給可被預測的原因。之所以在高點被忽略，是因為對近期強勁租金成長的近因偏誤，比一份一兩年前申請許可的試算表更有情緒說服力，儘管許可資料其實是更可靠的訊號。"}
+      }
+    ]'></div>
+  </section>
+
+  <div class="war-story">
+    <div class="war-story-head">
+      <span class="war-story-icon">🎙</span>
+      <span class="war-story-intro lang-en">From the Trenches</span>
+      <span class="war-story-intro lang-zh" style="display:none">來自實戰</span>
+    </div>
+    <div class="war-story-body">
+      <p class="lang-en">The Sun Belt multifamily supply glut of 2023&ndash;2024 is one of the most widely documented recent examples of exactly this pattern. Low interest rates and strong in-migration into Sun Belt metros through 2021 and into 2022 pushed rent growth to some of the strongest levels those markets had seen in years, and developers responded the way the pipeline math predicts: a large wave of permits and construction starts followed. Because apartment construction takes roughly two years from groundbreaking to delivery, that wave landed on the same markets in 2023 and 2024 &mdash; right as the migration and rent-growth tailwind that triggered it in the first place was cooling. The result, widely reported across the industry's data providers, was a sharp deceleration in rent growth and a rise in concessions across several fast-growing Sun Belt metros, concentrated almost entirely in the submarkets that had absorbed the heaviest share of new deliveries. None of this required unusual foresight to see coming &mdash; the permit data was public well before the deliveries hit.</p>
+      <p class="lang-zh" style="display:none">2023 至 2024 年間陽光地帶（Sun Belt）住宅市場的供給過剩，是這個模式近期最廣為人知的紀錄之一。2021 年到 2022 年間，低利率與強勁的淨遷入把陽光地帶多個都會區的租金成長推到多年來最強勁的水準，而開發商的反應也正如管線算法所預測的：緊接著出現一大波建照許可與動工申請。由於公寓興建從動工到交屋大約要花兩年時間，這一波供給浪潮正好在 2023 年與 2024 年打到同一批市場&mdash;&mdash;恰好是當初觸發這波移民與租金成長順風的力道正在降溫的時候。結果，業界多家資料供應商都廣泛報導了這件事：多個高速成長的陽光地帶都會區出現租金成長急速放緩、租讓誘因上升，而且幾乎全數集中在那些吸收了最大比例新交屋量的子市場。這一切完全不需要什麼異於常人的先見之明才看得出來&mdash;&mdash;許可資料在交屋量打到市場之前，早就是公開的。</p>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- 3. SUBMARKET SELECTION -->
+  <!-- ============================================================ -->
+  <section>
+    <h2 class="lang-en">3. Submarket selection: path of growth vs. established core</h2>
+    <h2 class="lang-zh" style="display:none">三、子市場選擇：成長路徑對比成熟核心區</h2>
+    <p class="lang-en">Once demand and supply are understood at the metro level, the practical decision is which submarket within that metro to target, and the classic framework splits into two poles. An <em>established core</em> submarket already has the infrastructure, amenities, and tenant base in place &mdash; the risk is mostly priced in, competition for deals is intense, and basis (price per unit or per square foot) tends to run at a premium. A <em>path-of-growth</em> submarket is betting on where demand is headed rather than where it already sits &mdash; typically an area with improving infrastructure, rezoning momentum, or spillover demand from an adjacent, more expensive core, where basis is lower precisely because the market hasn't fully priced in the growth yet.</p>
+    <p class="lang-zh" style="display:none">一旦在都會區層級理解了需求與供給，接下來實務上的決策就是要鎖定該都會區裡的哪一個子市場，而經典的框架分成兩極。<em>成熟核心區</em>子市場已經具備基礎建設、生活機能與承租戶基礎&mdash;&mdash;風險大多已反映在價格裡，交易競爭激烈，而基準單價（每戶或每平方英尺價格）往往偏高。<em>成長路徑</em>子市場則是在賭需求未來的走向，而不是它現在所在的位置&mdash;&mdash;通常是基礎建設正在改善、重劃有動能，或從鄰近、更昂貴的核心區溢出需求的地區，其基準單價之所以較低，正是因為市場還沒把成長完全反映進價格裡。</p>
+    <p class="lang-en"><span class="key-term" tabindex="0">Infrastructure-led growth<span class="key-term-tip"><span class="lang-en">Submarket value appreciation driven by new or improved infrastructure &mdash; most commonly transit access &mdash; rather than by organic demand growth alone. It is one of the most consistently documented value drivers in urban real estate research.</span><span class="lang-zh" style="display:none">由新增或改善的基礎建設&mdash;&mdash;最常見的是交通運輸可及性&mdash;&mdash;而非單純有機需求成長所驅動的子市場價值提升，是都市不動產研究中最一致被記錄的價值驅動因子之一。</span></span></span> is one of the best-documented categories of submarket transformation: new or extended transit lines lifting nearby land and commercial values over time is a consistently observed pattern across many transit systems and metros, well established in urban economics research, because a new station converts a location's core input &mdash; access &mdash; without anyone having to build anything on the site itself. The mechanism is straightforward: a station cuts commute time to job centers, which widens the pool of tenants and residents willing to consider that location, which raises achievable rents, which raises land value, roughly in that order.</p>
+    <p class="lang-zh" style="display:none"><span class="key-term" tabindex="0">基礎建設驅動的成長<span class="key-term-tip"><span class="lang-en">Submarket value appreciation driven by new or improved infrastructure &mdash; most commonly transit access &mdash; rather than by organic demand growth alone. It is one of the most consistently documented value drivers in urban real estate research.</span><span class="lang-zh" style="display:none">由新增或改善的基礎建設&mdash;&mdash;最常見的是交通運輸可及性&mdash;&mdash;而非單純有機需求成長所驅動的子市場價值提升，是都市不動產研究中最一致被記錄的價值驅動因子之一。</span></span></span>是子市場轉型中最有紀錄可循的一類：新增或延伸的交通運輸線隨時間拉抬周邊土地與商用不動產價值，是橫跨許多運輸系統與都會區都一致觀察到的模式，在都市經濟學研究中已有紮實的文獻基礎，因為一個新車站改變了一個地點的核心輸入條件&mdash;&mdash;可及性&mdash;&mdash;卻不需要任何人在基地本身動一磚一瓦。這個機制很直接：一座車站縮短了到就業中心的通勤時間，擴大了願意考慮這個地點的承租戶與居民池，進而拉高可實現的租金，再拉高土地價值，大致依這個順序發生。</p>
+
+    <p class="lang-en">The practical trade-off that sits under all of this is often called the <span class="key-term" tabindex="0">"second-best submarket" thesis<span class="key-term-tip"><span class="lang-en">The argument that the #2 submarket in a metro (adjacent to, or one tier below, the recognized core) can offer a better risk-adjusted entry than the #1 core &mdash; a less-competed basis capturing similar demand spillover, at the cost of less certainty that institutional-grade fundamentals (tenant quality, liquidity, amenity base) actually follow.</span><span class="lang-zh" style="display:none">主張都會區內排名第二的子市場（緊鄰公認核心區，或比核心區低一個等級）能提供比排名第一的核心區更好的風險調整後進場條件&mdash;&mdash;以較不被競爭的基準單價，捕捉類似的需求溢出，代價是機構等級的基本面（承租戶品質、流動性、生活機能基礎）是否真的會跟上，確定性較低。</span></span></span>: the #2 submarket in a metro &mdash; adjacent to, or one tier below, the recognized core &mdash; can offer a better risk-adjusted entry than the #1 core itself, because its basis is less competed while it still captures meaningful demand spillover from the core next door. But this is genuinely not free money, and the risk side of the trade deserves equal weight. Adjacency to a strong core does not guarantee that a submarket ever develops institutional-grade fundamentals of its own &mdash; a deep enough tenant pool, the amenity base that keeps residents or tenants long-term, and enough transaction liquidity that an eventual exit isn't a forced sale into a thin buyer pool. Some "second-best" submarkets do graduate into their own right; others stay permanently in the shadow of the core next door, capturing overflow demand in good times and getting hit hardest when demand pulls back toward the safer, more liquid core. The thesis is a real edge, not a guarantee.</p>
+    <p class="lang-zh" style="display:none">這一切背後真正的實務取捨，常被稱為<span class="key-term" tabindex="0">「次佳子市場」論點<span class="key-term-tip"><span class="lang-en">The argument that the #2 submarket in a metro (adjacent to, or one tier below, the recognized core) can offer a better risk-adjusted entry than the #1 core &mdash; a less-competed basis capturing similar demand spillover, at the cost of less certainty that institutional-grade fundamentals (tenant quality, liquidity, amenity base) actually follow.</span><span class="lang-zh" style="display:none">主張都會區內排名第二的子市場（緊鄰公認核心區，或比核心區低一個等級）能提供比排名第一的核心區更好的風險調整後進場條件&mdash;&mdash;以較不被競爭的基準單價，捕捉類似的需求溢出，代價是機構等級的基本面（承租戶品質、流動性、生活機能基礎）是否真的會跟上，確定性較低。</span></span></span>：都會區裡排名第二的子市場&mdash;&mdash;緊鄰公認的核心區，或比核心區低一個等級&mdash;&mdash;能提供比排名第一的核心區本身更好的風險調整後進場條件，因為它的基準單價競爭較少，卻仍能捕捉到隔壁核心區溢出的可觀需求。但這確實不是白撿的錢，這筆交易的風險面同樣值得重視。緊鄰一個強勢核心區，並不保證一個子市場最終會發展出屬於自己的機構等級基本面&mdash;&mdash;足夠深的承租戶池、能讓居民或租戶長期留下的生活機能基礎，以及足夠的交易流動性讓未來出場時不會被迫賤賣給稀少的買方群。有些「次佳」子市場確實會成功晉升為獨當一面的市場；有些則永遠留在隔壁核心區的陰影下，景氣好時承接溢出需求，而在需求回流到更安全、流動性更好的核心區時首當其衝受創。這個論點是一種真實存在的優勢，不是一項保證。</p>
+
+    <ul class="checklist">
+      <li class="checklist-item"><input type="checkbox" id="chk-sub-1"><label for="chk-sub-1"><span class="lang-en">Distance and commute time (not straight-line miles) from the candidate submarket to the metro's primary employment/demand center measured explicitly.</span><span class="lang-zh" style="display:none">明確測量候選子市場到都會區主要就業／需求中心的距離與通勤時間（而非直線距離）。</span></label></li>
+      <li class="checklist-item"><input type="checkbox" id="chk-sub-2"><label for="chk-sub-2"><span class="lang-en">Any documented, funded (not merely proposed) infrastructure project affecting the submarket identified, with its realistic delivery timeline.</span><span class="lang-zh" style="display:none">已辨識出任何有明確紀錄、已獲資金核准（而非僅是提案）並影響該子市場的基礎建設專案，並掌握其實際完工時程。</span></label></li>
+      <li class="checklist-item"><input type="checkbox" id="chk-sub-3"><label for="chk-sub-3"><span class="lang-en">Own-fundamentals test applied to a "second-best" submarket: does it have (or show a credible path to) its own tenant pool, amenity base, and transaction liquidity, rather than relying entirely on the core's spillover.</span><span class="lang-zh" style="display:none">對「次佳」子市場套用自身基本面檢驗：它是否具備（或有可信的路徑發展出）屬於自己的承租戶池、生活機能基礎與交易流動性，而不是完全仰賴核心區的溢出需求。</span></label></li>
+    </ul>
+
+    <div class="pitfall">
+      <span class="pitfall-icon">⚠️</span>
+      <div class="pitfall-body">
+        <strong><span class="lang-en">Pitfall:</span><span class="lang-zh" style="display:none">常見陷阱：</span></strong>
+        <span class="lang-en">Treating a lower basis next to a strong core as proof of a good deal on its own. A cheaper submarket is only a genuine edge if it clears the own-fundamentals test above &mdash; without it, "cheap and adjacent" can just mean the submarket is priced to reflect real, structural weakness that never gets better.</span>
+        <span class="lang-zh" style="display:none">把「緊鄰強勢核心區、基準單價較低」直接當成一筆好交易的證明。一個較便宜的子市場，只有在通過上方的自身基本面檢驗時，才是真正的優勢&mdash;&mdash;沒有通過，「便宜又鄰近」也可能只是代表這個子市場的定價，反映的是永遠不會改善的真實結構性弱點。</span>
+      </div>
+    </div>
+
+    <div class="quiz-block" data-quiz-id="m13-q5" data-quiz='[
+      {
+        "q":{"en":"A submarket sits directly adjacent to a metro&#39;s established core, with a materially lower basis and clear demand spillover from the core. Which statement best captures the real risk-reward trade-off?","zh":"某子市場緊鄰都會區的成熟核心區，基準單價明顯較低，且明顯承接核心區溢出的需求。以下哪一個說法最能捕捉真正的風險報酬取捨？"},
+        "opts":[
+          {"en":"Adjacency alone guarantees the submarket will eventually match the core&#39;s fundamentals, so the lower basis is close to free money.","zh":"光是地理鄰近就保證這個子市場遲早會追上核心區的基本面，所以較低的基準單價幾乎等於白撿的錢。"},
+          {"en":"The lower basis reflects a real edge (less-competed pricing, real spillover demand), but it is not free &mdash; the submarket may never develop its own institutional-grade tenant pool, amenity base, or exit liquidity, and could get hit hardest when demand retreats toward the safer core.","zh":"較低的基準單價反映了真實的優勢（較不被競爭的定價、真實的溢出需求），但這不是白撿的&mdash;&mdash;該子市場可能永遠發展不出屬於自己的機構等級承租戶池、生活機能基礎或出場流動性，而且在需求回流到更安全的核心區時可能首當其衝受創。"},
+          {"en":"Second-best submarkets should always be avoided in favor of the core, regardless of basis.","zh":"無論基準單價如何，永遠應該避開次佳子市場、選擇核心區。"},
+          {"en":"Basis differences between adjacent submarkets are usually just measurement error and can be ignored.","zh":"相鄰子市場間的基準單價差異通常只是量測誤差，可以忽略。"}
+        ],
+        "a":1,
+        "exp":{"en":"The second-best submarket thesis is a genuine risk-adjusted edge, not a free lunch: the lower basis is compensation for real uncertainty about whether the submarket ever earns its own institutional-grade fundamentals, and it tends to underperform the core precisely when demand gets more risk-averse.","zh":"次佳子市場論點是一種真實存在的風險調整後優勢，不是白吃的午餐：較低的基準單價，是對「這個子市場是否真能發展出自己的機構等級基本面」這項真實不確定性的補償，而且在需求變得更保守、更趨避風險時，它往往正好會表現得比核心區更差。"}
+      }
+    ]'></div>
+  </section>
+
+  <div class="war-story">
+    <div class="war-story-head">
+      <span class="war-story-icon">🎙</span>
+      <span class="war-story-intro lang-en">From the Trenches</span>
+      <span class="war-story-intro lang-zh" style="display:none">來自實戰</span>
+    </div>
+    <div class="war-story-body">
+      <p class="lang-en">Transit-driven submarket transformation is one of the most consistently repeated patterns across global real estate markets: cities that have opened new rail or metro lines have, across many documented studies and market cycles, seen land and commercial values near the new stations rise measurably faster than comparable areas without transit access, with the effect typically strongest within a short walk of the station and fading with distance. The pattern holds across very different cities, transit technologies, and decades, which is part of why it's treated as one of the more reliable, non-speculative theses in submarket selection &mdash; it isn't a bet on a single project's execution, it's a bet on a well-documented general mechanism. The caveat submarket analysts learn quickly is timing: the value lift tends to price in well before a station actually opens, once funding is secured and the alignment is finalized, so buying "on the transit thesis" after ribbon-cutting day is usually buying after most of the easy repricing has already happened.</p>
+      <p class="lang-zh" style="display:none">交通運輸驅動的子市場轉型，是全球不動產市場中最一致被重複觀察到的模式之一：開通新的軌道或地鐵路線的城市，在許多有紀錄可循的研究與市場週期中，新車站周邊的土地與商用不動產價值，成長速度都可觀地快過沒有交通可及性的可比地區，這個效應通常在車站步行可達範圍內最強、隨距離拉遠而遞減。這個模式橫跨截然不同的城市、不同的運輸科技與不同的年代都成立，這也是它之所以被視為子市場選擇中較為可靠、非投機性論點之一的部分原因&mdash;&mdash;它賭的不是單一專案能否順利執行，而是一個有紮實紀錄的一般性機制。子市場分析師很快就會學到的一個提醒是時機：一旦資金到位、路線定案，這股價值提升往往在車站真正啟用之前就已經反映進價格了，所以在剪綵當天之後才去追「交通運輸論點」進場，通常等於是在大部分容易賺的重定價已經發生之後才進場。</p>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- 4. MARKET-LEVEL TIGHTNESS METRICS -->
+  <!-- ============================================================ -->
+  <section>
+    <h2 class="lang-en">4. Market-level tightness metrics</h2>
+    <h2 class="lang-zh" style="display:none">四、市場緊度指標</h2>
+    <p class="lang-en">Vacancy rate is the most quoted number in market analysis and also the most misleading one when read in isolation, because it is a <em>stock</em> measure &mdash; a snapshot of the current ratio of empty to total space &mdash; while the forces that will move it forward are <em>flow</em> measures. Reading a market's real-time trajectory correctly means looking past the single vacancy number to three things: the relationship between absorption and deliveries, the trend in vacancy rather than its level, and effective rent rather than headline asking rent.</p>
+    <p class="lang-zh" style="display:none">空置率是市場分析裡最常被引用的數字，但單獨拿它來看時也是最容易誤導的一個，因為它是一個<em>存量</em>指標&mdash;&mdash;目前空置與總空間比例的一張快照&mdash;&mdash;而真正將推動它未來走向的力量，是<em>流量</em>指標。要正確判讀一個市場的即時軌跡，必須看穿單一的空置率數字，改看三件事：淨去化量與交屋量的關係、空置率的趨勢而非其水準，以及有效租金而非表價租金。</p>
+
+    <h3 class="lang-en">Net absorption vs. deliveries</h3>
+    <h3 class="lang-zh" style="display:none">淨去化量對比交屋量</h3>
+    <p class="lang-en"><span class="key-term" tabindex="0">Net absorption<span class="key-term-tip"><span class="lang-en">The net change in occupied space over a period &mdash; space newly leased minus space vacated. It is the cleanest real-time read on demand because it nets out both sides of tenant movement in one number.</span><span class="lang-zh" style="display:none">一段期間內已佔用空間的淨變化&mdash;&mdash;新承租的空間減去退租的空間。因為它把租戶進出雙向的動態淨算成一個數字，是判讀當下需求最乾淨的指標。</span></span></span> compared against deliveries in the same period is the single cleanest real-time read on tightness: when absorption exceeds deliveries, the market is tightening &mdash; occupied space is growing faster than the total stock, so vacancy is mechanically falling even before the vacancy rate itself catches up and shows it. When deliveries exceed absorption, the opposite is happening, even if the current vacancy level still looks comfortable. This reads cleaner than the vacancy level alone because vacancy is a lagging stock number that only reports where things already stand, while absorption-versus-deliveries reports which direction things are actively moving right now, in the same period being measured.</p>
+    <p class="lang-zh" style="display:none">將<span class="key-term" tabindex="0">淨去化量<span class="key-term-tip"><span class="lang-en">The net change in occupied space over a period &mdash; space newly leased minus space vacated. It is the cleanest real-time read on demand because it nets out both sides of tenant movement in one number.</span><span class="lang-zh" style="display:none">一段期間內已佔用空間的淨變化&mdash;&mdash;新承租的空間減去退租的空間。因為它把租戶進出雙向的動態淨算成一個數字，是判讀當下需求最乾淨的指標。</span></span></span>與同期的交屋量相比，是判讀緊度最乾淨的即時指標：當去化量超過交屋量時，市場正在緊縮&mdash;&mdash;已佔用空間的成長速度快過總存量，所以空置率其實已經機械性地在下降，即使空置率這個數字本身還沒追上去、還沒顯示出來。當交屋量超過去化量時，情況正好相反，即使當下的空置率水準看起來還算舒適。這比單看空置率水準更乾淨，因為空置率是一個落後的存量數字，只回報目前已經走到哪裡，而去化量對比交屋量，回報的是同一段被測量的期間內，事情正朝哪個方向積極移動。</p>
+
+    <h3 class="lang-en">Vacancy trend vs. vacancy level</h3>
+    <h3 class="lang-zh" style="display:none">空置率趨勢對比空置率水準</h3>
+    <p class="lang-en">Two markets can both sit at 8% vacancy and be in completely different positions in their cycle. A market at 8% and falling from 12% a year ago is tightening &mdash; landlords are gaining leverage, concessions are likely shrinking, and rent growth is probably accelerating. A market at 8% and rising from 5% a year ago is loosening &mdash; even though the current level is identical, the trajectory says landlords are losing leverage and concessions are probably growing. An analyst or underwriter who reads only the current 8% and treats both markets the same is missing the entire story; the trend line, not the snapshot, tells you which direction pricing power is headed.</p>
+    <p class="lang-zh" style="display:none">兩個市場可能都停在 8% 的空置率，卻處於週期裡截然不同的位置。一個市場現在 8%、去年是 12% 一路降下來，這是在緊縮&mdash;&mdash;房東正在取得議價優勢，租讓誘因很可能在縮小，租金成長很可能正在加速。另一個市場現在 8%、去年是 5% 一路升上來，這是在鬆動&mdash;&mdash;儘管目前的水準完全相同，走勢卻顯示房東的議價優勢正在流失，租讓誘因很可能正在擴大。一個只看當下 8% 這個數字、把兩個市場一視同仁的分析師或核算人員，會漏掉整個故事；告訴你定價力量正朝哪個方向走的，是趨勢線，而不是那張快照。</p>
+
+    <div class="quiz-block" data-quiz-id="m13-q6" data-quiz='[
+      {
+        "q":{"en":"Market X is at 8% office vacancy, down from 12% a year ago. Market Y is also at 8%, up from 5% a year ago. Both markets show the same current vacancy level. What should an analyst conclude?","zh":"X 市場的辦公室空置率為 8%，去年是 12%，一路下降。Y 市場目前也是 8%，去年是 5%，一路上升。兩個市場目前的空置率水準相同。分析師應該得出什麼結論？"},
+        "opts":[
+          {"en":"Both markets are in an identical competitive position for landlords, since the current vacancy level is the same.","zh":"對房東來說兩個市場的競爭處境完全相同，因為目前的空置率水準一樣。"},
+          {"en":"Market X is tightening (landlords gaining leverage) and Market Y is loosening (landlords losing leverage), despite identical current levels &mdash; the trend, not the snapshot, indicates which direction pricing power is headed.","zh":"X 市場正在緊縮（房東正在取得議價優勢），Y 市場正在鬆動（房東正在流失議價優勢），儘管目前水準相同&mdash;&mdash;趨勢而非快照，才顯示出定價力量正朝哪個方向走。"},
+          {"en":"Market Y is the better market to invest in right now because it has more room for vacancy to fall before matching Market X.","zh":"Y 市場現在比較值得投資，因為它在追上 X 市場之前還有更多空置率下降的空間。"},
+          {"en":"Vacancy trend is irrelevant once the current level is known.","zh":"一旦知道目前的水準，空置率趨勢就無關緊要了。"}
+        ],
+        "a":1,
+        "exp":{"en":"Vacancy level alone is a lagging snapshot. Two identical levels can sit on opposite trajectories &mdash; Market X&#39;s falling trend signals tightening and rising landlord leverage; Market Y&#39;s rising trend signals loosening and falling landlord leverage, even at the same current number.","zh":"空置率水準本身只是一張落後的快照。兩個相同的水準可能處在完全相反的走勢上&mdash;&mdash;X 市場下降的趨勢代表正在緊縮、房東議價優勢正在上升；Y 市場上升的趨勢代表正在鬆動、房東議價優勢正在流失，即使目前的數字相同。"}
+      }
+    ]'></div>
+
+    <h3 class="lang-en">Effective rent vs. asking rent</h3>
+    <h3 class="lang-zh" style="display:none">有效租金對比表價租金</h3>
+    <p class="lang-en">Asking (or "face") rent is the headline number in a listing; <span class="key-term" tabindex="0">effective rent<span class="key-term-tip"><span class="lang-en">The economic rent a landlord actually receives after netting out concessions &mdash; free-rent periods and tenant-improvement (TI) allowances &mdash; amortized over the lease term. Two leases with identical asking rent can have very different effective rent depending on how much concession was granted to get the deal signed.</span><span class="lang-zh" style="display:none">房東在扣除租讓誘因（免租期與租戶裝修津貼）並攤提到整個租期後，實際拿到的經濟租金。兩份表價租金相同的租約，實際有效租金可能差異很大，取決於為了促成簽約而給了多少讓步。</span></span></span> is what a landlord actually nets after amortizing concessions &mdash; free-rent periods and tenant-improvement (TI) allowances &mdash; over the lease term. A market can report flat or even slightly positive asking-rent growth while its real economics are deteriorating, because landlords facing weaker demand hold the headline number steady (a stated rent cut looks bad in a broker's marketing package and can be read by other tenants as landlord weakness) and instead quietly widen the concession package: more months of free rent, a bigger TI allowance. The mechanics: a tenant signing a five-year lease at a headline rent that looks unchanged from last year, but with two extra months of free rent and $10 more per square foot in TI than last year's comparable deal, is paying a materially lower effective rent &mdash; the deterioration is real, it's just been moved from the number everyone quotes into the fine print of the lease abstract.</p>
+    <p class="lang-zh" style="display:none">表價（或稱「面額」）租金是招租廣告上的頭條數字；<span class="key-term" tabindex="0">有效租金<span class="key-term-tip"><span class="lang-en">The economic rent a landlord actually receives after netting out concessions &mdash; free-rent periods and tenant-improvement (TI) allowances &mdash; amortized over the lease term. Two leases with identical asking rent can have very different effective rent depending on how much concession was granted to get the deal signed.</span><span class="lang-zh" style="display:none">房東在扣除租讓誘因（免租期與租戶裝修津貼）並攤提到整個租期後，實際拿到的經濟租金。兩份表價租金相同的租約，實際有效租金可能差異很大，取決於為了促成簽約而給了多少讓步。</span></span></span>則是房東把租讓誘因&mdash;&mdash;免租期與租戶裝修（TI）津貼&mdash;&mdash;攤提到整個租期後，實際淨得的租金。一個市場可能表價租金成長持平、甚至微幅上升，但真實的經濟狀況卻在惡化，因為面對需求走弱的房東，會把頭條數字守住不動（公開宣布降租，在經紀商的行銷資料裡看起來很難看，也可能被其他租戶解讀成房東的弱勢），改為悄悄放寬租讓組合：多給幾個月的免租期、加碼租戶裝修津貼。實際運作是這樣的：一個租戶簽了一份五年租約，頭條租金看起來跟去年沒變，但比起去年類似的交易，多拿到兩個月免租期、每平方英尺多 10 美元的裝修津貼，那麼他實際支付的有效租金明顯更低&mdash;&mdash;惡化是真實發生的，只是從人人都會引用的那個數字，被搬進了租約摘要裡的小字條款當中。</p>
+
+    <div class="pitfall">
+      <span class="pitfall-icon">⚠️</span>
+      <div class="pitfall-body">
+        <strong><span class="lang-en">Pitfall:</span><span class="lang-zh" style="display:none">常見陷阱：</span></strong>
+        <span class="lang-en">Underwriting future rent growth off a broker report's headline asking-rent trend without checking the concession trend in the same market. Flat asking rent plus rapidly rising free-rent and TI packages is a deteriorating market wearing a stable-looking mask.</span>
+        <span class="lang-zh" style="display:none">只用經紀商報告裡頭條的表價租金趨勢來核算未來租金成長，卻沒有查核同一市場的租讓誘因趨勢。表價租金持平、加上迅速攀升的免租期與裝修津貼組合，是一個戴著看似穩定面具的正在惡化市場。</span>
+      </div>
+    </div>
+
+    <div class="quiz-block" data-quiz-id="m13-q7" data-quiz='[
+      {
+        "q":{"en":"A market&#39;s asking office rent has been flat for four straight quarters. Over the same period, average free-rent periods on new leases have grown from one month to four months, and TI allowances have risen sharply. What does this actually indicate?","zh":"某市場的辦公室表價租金已連續四季持平。同一段期間，新租約平均免租期從一個月拉長到四個月，租戶裝修津貼也大幅上升。這實際上代表什麼？"},
+        "opts":[
+          {"en":"Market economics are stable, since the headline rent number hasn&#39;t moved.","zh":"市場經濟狀況穩定，因為頭條租金數字沒有變動。"},
+          {"en":"Effective rent is falling meaningfully even though asking rent looks flat &mdash; landlords are absorbing the weakness through rising concessions rather than cutting the headline number, so the real trend is worse than the asking-rent series suggests.","zh":"儘管表價租金看起來持平，有效租金其實正明顯下滑&mdash;&mdash;房東是靠增加租讓誘因來吸收弱勢，而不是直接砍頭條數字，所以真實趨勢比表價租金數列所顯示的更差。"},
+          {"en":"Rising TI allowances mean tenants are investing more in their space, which is a bullish signal for the market.","zh":"租戶裝修津貼上升代表租戶更願意投資自己的空間，這對市場來說是利多訊號。"},
+          {"en":"Free-rent and TI trends are unrelated to effective rent and can be ignored when reading market health.", "zh":"免租期與裝修津貼趨勢跟有效租金無關，判讀市場健康度時可以忽略。"}
+        ],
+        "a":1,
+        "exp":{"en":"Rising concessions against flat asking rent is the classic way a deteriorating market hides in the headline number. Effective rent &mdash; asking rent net of amortized free rent and TI &mdash; is falling, even though the number everyone quotes hasn&#39;t moved.","zh":"表價租金持平、租讓誘因卻上升，是惡化中的市場藏在頭條數字背後的經典方式。有效租金&mdash;&mdash;表價租金扣除攤提後的免租期與裝修津貼&mdash;&mdash;正在下滑，即使人人引用的那個數字沒有變動。"}
+      }
+    ]'></div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 5. FULL WORKED HYPOTHETICAL MARKET STUDY -->
+  <!-- ============================================================ -->
+  <section>
+    <h2 class="lang-en">5. A full worked market study: 3-year vacancy forecast</h2>
+    <h2 class="lang-zh" style="display:none">五、完整市場研究演算：三年空置率預測</h2>
+    <p class="lang-en">The example below pulls together demand and supply into a single forward vacancy forecast for a hypothetical office market, "Fairbridge." Every figure is explicitly hypothetical, chosen to make the arithmetic clean rather than to represent any real city; the method &mdash; not the specific numbers &mdash; is what should transfer to a real market study.</p>
+    <p class="lang-zh" style="display:none">以下範例把需求與供給結合成單一一份假設辦公室市場「Fairbridge」的前瞻空置率預測。所有數字都明確是假設值，選擇這些數字是為了讓算式乾淨好懂，而不是要對應任何真實城市；應該被帶到真實市場研究裡的，是這套方法，而不是這些具體數字。</p>
+
+    <div class="worked-example">
+      <div class="worked-example-title"><span class="lang-en">Worked Example &mdash; Setup &amp; Assumptions (Hypothetical: "Fairbridge" Office Market)</span><span class="lang-zh" style="display:none">逐步演算範例&mdash;&mdash;設定與假設（假設市場：「Fairbridge」辦公室市場）</span></div>
+      <ol class="worked-example-steps">
+        <li class="worked-example-step">
+          <span class="we-step-num">1</span>
+          <span class="we-step-body">
+            <span class="lang-en">Existing office stock: <span class="we-formula">20,000,000 sf</span>. Current vacancy: <span class="we-formula">12%</span> &rarr; vacant space <span class="we-formula">= 2,400,000 sf</span>, occupied space <span class="we-formula">= 17,600,000 sf</span>.</span>
+            <span class="lang-zh" style="display:none">既有辦公室存量：<span class="we-formula">20,000,000 平方英尺</span>。目前空置率：<span class="we-formula">12%</span> &rarr; 空置面積<span class="we-formula">＝2,400,000 平方英尺</span>，已佔用面積<span class="we-formula">＝17,600,000 平方英尺</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">2</span>
+          <span class="we-step-body">
+            <span class="lang-en">Office-using employment base: <span class="we-formula">150,000 jobs</span>, forecast to grow <span class="we-formula">2.0%/year</span> for the next three years (hypothetical, compounding).</span>
+            <span class="lang-zh" style="display:none">辦公室使用就業基數：<span class="we-formula">150,000 個工作</span>，預測未來三年每年成長<span class="we-formula">2.0%</span>（假設值，複利計算）。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">3</span>
+          <span class="we-step-body">
+            <span class="lang-en">Assumed sf-per-employee ratio: <span class="we-formula">220 sf/employee</span> (a typical, approximate figure for this hypothetical market's tenant mix &mdash; noted in Section 1 as trending down over time and varying by industry, used here only to make the arithmetic concrete).</span>
+            <span class="lang-zh" style="display:none">假設的每員工平方英尺比例：<span class="we-formula">每員工 220 平方英尺</span>（此假設市場承租戶組合的典型、概略數字&mdash;&mdash;如第一節所述，這個比例會隨時間下降且因產業而異，此處僅用來讓算式具體化）。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">4</span>
+          <span class="we-step-body">
+            <span class="lang-en">Development pipeline: <span class="we-formula">800,000 sf</span> currently under construction, assumed (for simplicity, and stated explicitly as a simplifying assumption) to deliver evenly over the next three years &mdash; roughly <span class="we-formula">267,000 sf/year</span>, with no further attrition applied since this space has already broken ground.</span>
+            <span class="lang-zh" style="display:none">開發管線：目前興建中的<span class="we-formula">800,000 平方英尺</span>，為求簡化（並在此明確聲明這是簡化假設）假設未來三年平均交屋&mdash;&mdash;約每年<span class="we-formula">267,000 平方英尺</span>，由於這批空間已經動工，不再套用進一步的流失率。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">5</span>
+          <span class="we-step-body">
+            <span class="lang-en">Simplifying assumption stated explicitly: all new office-using job growth translates into occupied space at the stated ratio, and all of that demand is absorbed into the market's total stock (existing plus new deliveries) in the same year it's created. Real markets absorb demand less smoothly than this, but the simplification keeps the mechanics visible.</span>
+            <span class="lang-zh" style="display:none">明確聲明的簡化假設：所有新增辦公室使用就業成長，都依所述比例轉換成已佔用空間，且這些需求都在產生的同一年被市場總存量（既有加上新交屋）吸收。真實市場的需求吸收不會這麼平滑，但這個簡化能讓整個運算機制清楚可見。</span>
+          </span>
+        </li>
+      </ol>
+    </div>
+
+    <div class="worked-example">
+      <div class="worked-example-title"><span class="lang-en">Worked Example &mdash; Year-by-Year Vacancy Roll-Forward</span><span class="lang-zh" style="display:none">逐步演算範例&mdash;&mdash;逐年空置率推演</span></div>
+      <ol class="worked-example-steps">
+        <li class="worked-example-step">
+          <span class="we-step-num">1</span>
+          <span class="we-step-body">
+            <span class="lang-en"><strong>Year 1 demand:</strong> new office-using jobs <span class="we-formula">= 150,000 &times; 2.0% = 3,000</span>; new demand sf <span class="we-formula">= 3,000 &times; 220 = 660,000 sf</span>.</span>
+            <span class="lang-zh" style="display:none"><strong>第一年需求：</strong>新增辦公室使用就業<span class="we-formula">＝150,000 &times; 2.0%＝3,000</span>；新增需求面積<span class="we-formula">＝3,000 &times; 220＝660,000 平方英尺</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">2</span>
+          <span class="we-step-body">
+            <span class="lang-en"><strong>Year 1 supply &amp; result:</strong> deliveries <span class="we-formula">= 267,000 sf</span> &rarr; stock <span class="we-formula">= 20,267,000 sf</span>; occupied <span class="we-formula">= 17,600,000 + 660,000 = 18,260,000 sf</span> &rarr; vacancy <span class="we-formula">= (20,267,000 &minus; 18,260,000) &divide; 20,267,000 &asymp; 9.9%</span>.</span>
+            <span class="lang-zh" style="display:none"><strong>第一年供給與結果：</strong>交屋量<span class="we-formula">＝267,000 平方英尺</span> &rarr; 存量<span class="we-formula">＝20,267,000 平方英尺</span>；已佔用<span class="we-formula">＝17,600,000＋660,000＝18,260,000 平方英尺</span> &rarr; 空置率<span class="we-formula">＝（20,267,000 &minus; 18,260,000）&divide; 20,267,000 &asymp; 9.9%</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">3</span>
+          <span class="we-step-body">
+            <span class="lang-en"><strong>Year 2 demand:</strong> job base grows to <span class="we-formula">153,000</span>; new jobs <span class="we-formula">= 153,000 &times; 2.0% = 3,060</span>; new demand sf <span class="we-formula">= 3,060 &times; 220 = 673,200 sf</span>.</span>
+            <span class="lang-zh" style="display:none"><strong>第二年需求：</strong>就業基數成長至<span class="we-formula">153,000</span>；新增就業<span class="we-formula">＝153,000 &times; 2.0%＝3,060</span>；新增需求面積<span class="we-formula">＝3,060 &times; 220＝673,200 平方英尺</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">4</span>
+          <span class="we-step-body">
+            <span class="lang-en"><strong>Year 2 supply &amp; result:</strong> stock <span class="we-formula">= 20,267,000 + 267,000 = 20,534,000 sf</span>; occupied <span class="we-formula">= 18,260,000 + 673,200 = 18,933,200 sf</span> &rarr; vacancy <span class="we-formula">= (20,534,000 &minus; 18,933,200) &divide; 20,534,000 &asymp; 7.8%</span>.</span>
+            <span class="lang-zh" style="display:none"><strong>第二年供給與結果：</strong>存量<span class="we-formula">＝20,267,000＋267,000＝20,534,000 平方英尺</span>；已佔用<span class="we-formula">＝18,260,000＋673,200＝18,933,200 平方英尺</span> &rarr; 空置率<span class="we-formula">＝（20,534,000 &minus; 18,933,200）&divide; 20,534,000 &asymp; 7.8%</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">5</span>
+          <span class="we-step-body">
+            <span class="lang-en"><strong>Year 3 demand:</strong> job base grows to <span class="we-formula">156,060</span>; new jobs <span class="we-formula">&asymp; 3,121</span>; new demand sf <span class="we-formula">&asymp; 3,121 &times; 220 = 686,620 sf</span>.</span>
+            <span class="lang-zh" style="display:none"><strong>第三年需求：</strong>就業基數成長至<span class="we-formula">156,060</span>；新增就業<span class="we-formula">&asymp; 3,121</span>；新增需求面積<span class="we-formula">&asymp; 3,121 &times; 220＝686,620 平方英尺</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">6</span>
+          <span class="we-step-body">
+            <span class="lang-en"><strong>Year 3 supply &amp; result:</strong> stock <span class="we-formula">= 20,534,000 + 267,000 = 20,801,000 sf</span>; occupied <span class="we-formula">= 18,933,200 + 686,620 = 19,619,820 sf</span> &rarr; vacancy <span class="we-formula">= (20,801,000 &minus; 19,619,820) &divide; 20,801,000 &asymp; 5.7%</span>.</span>
+            <span class="lang-zh" style="display:none"><strong>第三年供給與結果：</strong>存量<span class="we-formula">＝20,534,000＋267,000＝20,801,000 平方英尺</span>；已佔用<span class="we-formula">＝18,933,200＋686,620＝19,619,820 平方英尺</span> &rarr; 空置率<span class="we-formula">＝（20,801,000 &minus; 19,619,820）&divide; 20,801,000 &asymp; 5.7%</span>。</span>
+          </span>
+        </li>
+        <li class="worked-example-step">
+          <span class="we-step-num">7</span>
+          <span class="we-step-body">
+            <span class="lang-en"><strong>Read:</strong> vacancy is forecast to fall from 12% to roughly 5.7% over three years &mdash; consistent with Section 4's absorption-vs-deliveries logic, since projected annual demand (&asymp;660,000&ndash;687,000 sf) exceeds annual deliveries (267,000 sf) in every year of the forecast, this hypothetical market is tightening throughout the period, not just at the endpoint.</span>
+            <span class="lang-zh" style="display:none"><strong>判讀：</strong>預測空置率三年內會從 12% 降到約 5.7%&mdash;&mdash;這與第四節「去化量對比交屋量」的邏輯一致，因為預測的年度需求（約 660,000 至 687,000 平方英尺）在預測期間每一年都超過年度交屋量（267,000 平方英尺），這個假設市場在整段期間內都持續在緊縮，不只是在終點才緊縮。</span>
+          </span>
+        </li>
+      </ol>
+    </div>
+
+    <div class="quiz-block" data-quiz-id="m13-q8" data-quiz='[
+      {
+        "q":{"en":"In the Fairbridge worked example, projected annual demand (roughly 660,000&ndash;687,000 sf/year) exceeds annual deliveries (267,000 sf/year) in every forecast year. What does this imply about the market&#39;s trajectory, independent of the specific vacancy percentages computed?","zh":"在 Fairbridge 演算範例中，預測的年度需求（約每年 660,000 至 687,000 平方英尺）在預測期間每一年都超過年度交屋量（每年 267,000 平方英尺）。撇開實際算出的空置率百分比不談，這對市場的走向代表什麼？"},
+        "opts":[
+          {"en":"Nothing can be concluded about trajectory without the exact vacancy percentages.","zh":"沒有確切的空置率百分比，就無法對走向下任何結論。"},
+          {"en":"The market is tightening throughout the entire forecast period, not just arriving at a lower endpoint &mdash; absorption exceeding deliveries every year is itself the tightening signal, consistent with the absorption-vs-deliveries framework.", "zh":"市場在整個預測期間都持續在緊縮，而不只是最後到達一個較低的終點&mdash;&mdash;每年去化量都超過交屋量，這件事本身就是緊縮訊號，與去化量對比交屋量的框架一致。"},
+          {"en":"The market is loosening, since more space is being demanded than the pipeline can supply.","zh":"市場正在鬆動，因為需求的空間量超過管線能供給的量。"},
+          {"en":"Demand exceeding deliveries only matters in the final year of a multi-year forecast.","zh":"需求超過交屋量這件事只在多年期預測的最後一年才有意義。"}
+        ],
+        "a":1,
+        "exp":{"en":"Per Section 4, absorption (here, demand translating into occupied space) exceeding deliveries in a given period is itself the definition of a tightening market in that period &mdash; it holds every single year in this example, which is why vacancy falls continuously rather than jumping only at the three-year mark.","zh":"依第四節所述，某段期間內去化量（此處即需求轉換成已佔用空間）超過交屋量，這件事本身就是該期間市場正在緊縮的定義&mdash;&mdash;在這個範例裡每一年都成立，這也是為什麼空置率是連續下降，而不是只在第三年才突然跳動。"}
+      }
+    ]'></div>
+  </section>
+
+  <!-- ============================================================ -->
+  <!-- 6. CRE MONITOR DASHBOARD AS A SCREENING LAYER -->
+  <!-- ============================================================ -->
+  <section>
+    <h2 class="lang-en">6. Using the CRE Monitor dashboard as a screening layer</h2>
+    <h2 class="lang-zh" style="display:none">六、用 CRE Monitor 儀表板做初步篩選</h2>
+    <p class="lang-en">A 57-city dashboard cannot replace the submarket-level work in Sections 1&ndash;5, but it is genuinely useful for what it's built for: a first-pass filter across markets before spending real time on any one of them. The practical screen runs on three columns read together, not in isolation: <span class="key-term" tabindex="0">spread<span class="key-term-tip"><span class="lang-en">A market's cap rate minus a risk-free reference rate (typically the local government bond / treasury yield), read as the risk premium the market is currently pricing for real estate over a "safe" alternative. A thin or negative spread means real estate is priced with little compensation for its extra risk versus the risk-free rate.</span><span class="lang-zh" style="display:none">一個市場的資本化率減去無風險參考利率（通常是當地公債／國庫券殖利率），讀作該市場目前為不動產相對於「安全」替代選項所定的風險溢酬。利差偏薄或為負，代表不動產的定價幾乎沒有為它相對無風險利率的額外風險提供補償。</span></span></span> (cap rate minus the local risk-free/treasury rate, a read on the risk premium the market is currently pricing), vacancy (the tightness read from Section 4), and rent growth year-over-year (the momentum read). A market showing a wide spread, low and falling vacancy, and accelerating rent growth is screening as attractively priced and structurally tightening at the same time &mdash; worth the time to go deeper into submarket-level work. A market with a thin spread, high or rising vacancy, and decelerating rent growth is screening as expensive and loosening &mdash; not automatically uninvestable, but it needs a specific, well-supported thesis to override what the screen is showing.</p>
+    <p class="lang-zh" style="display:none">一個涵蓋 57 個城市的儀表板無法取代第一到第五節的子市場層級功夫，但它對它原本設計的用途來說確實有用：在真正花時間深入研究任何一個市場之前，先做跨市場的初步篩選。實務上的篩選會一起讀三個欄位，而不是分開看：<span class="key-term" tabindex="0">利差<span class="key-term-tip"><span class="lang-en">A market's cap rate minus a risk-free reference rate (typically the local government bond / treasury yield), read as the risk premium the market is currently pricing for real estate over a "safe" alternative. A thin or negative spread means real estate is priced with little compensation for its extra risk versus the risk-free rate.</span><span class="lang-zh" style="display:none">一個市場的資本化率減去無風險參考利率（通常是當地公債／國庫券殖利率），讀作該市場目前為不動產相對於「安全」替代選項所定的風險溢酬。利差偏薄或為負，代表不動產的定價幾乎沒有為它相對無風險利率的額外風險提供補償。</span></span></span>（資本化率減去當地無風險／公債利率，用來判讀該市場目前為不動產定的風險溢酬）、空置率（第四節的緊度判讀），以及租金年增率（動能判讀）。一個利差寬、空置率低且持續下降、租金成長正在加速的市場，同時篩選出「定價有吸引力」與「結構上正在緊縮」兩個訊號&mdash;&mdash;值得花時間深入到子市場層級的功夫。一個利差薄、空置率高或持續上升、租金成長正在減速的市場，篩選出的是「定價偏貴」與「正在鬆動」&mdash;&mdash;這不代表自動不能投資，但需要一個具體、有充分支撐的論點，才能推翻篩選器顯示出來的結果。</p>
+
+    <p class="lang-en">Tokyo's 0.7% office vacancy against Chicago's 26.8% &mdash; the two poles cited at the top of this module &mdash; is a real, documented illustration of how far apart the same asset class can sit globally, and both sides trace back to structural causes visible in the frameworks above rather than to chance. Tokyo's extreme tightness reflects, on the supply side, genuine land scarcity plus a slow, permit-gated development process that keeps new office deliveries structurally limited relative to demand, and on the demand side a large, durable base of office-using employment concentrated in a geographically constrained core. Chicago's extreme looseness concentrates specifically in older CBD office stock and reflects the demand side collapsing faster than the supply side can adjust: hybrid-work-driven reductions in office-using space needs hit hardest in exactly the class of building &mdash; older, less-amenitized, harder and more expensive to reposition &mdash; that has the least ability to compete for the tenant demand that remains. Neither number is a mystery once the demand and supply frameworks from Sections 1 and 2 are applied to it; they are what those frameworks predict at their extremes.</p>
+    <p class="lang-zh" style="display:none">東京 0.7% 的辦公室空置率對比芝加哥的 26.8%&mdash;&mdash;本課開頭引用的兩極案例&mdash;&mdash;是同一資產類別在全球範圍內能夠相差多遠的真實、有紀錄可循的例證，而兩端都能追溯回上述框架中看得見的結構性成因，而非偶然。東京的極端緊縮，在供給端反映了真正的土地稀缺，加上緩慢、受許可管制的開發流程，讓新增辦公室交屋量相對需求維持結構性受限；在需求端則反映了一個龐大、持久、集中在地理範圍受限核心區的辦公室使用就業基礎。芝加哥的極端鬆動，特別集中在較老舊的中央商業區辦公室存量，反映的是需求端崩落的速度快過供給端能夠調整的速度：混合辦公驅動的辦公空間需求縮減，打擊最重的正好就是那一類建築&mdash;&mdash;較老舊、生活機能較少、要重新定位既困難又昂貴&mdash;&mdash;而這類建築競爭剩餘承租需求的能力也最弱。一旦把第一、二節的需求與供給框架套用上去，這兩個數字都不再神秘；它們正是這些框架在極端情況下所預測出來的結果。</p>
+
+    <ul class="checklist">
+      <li class="checklist-item"><input type="checkbox" id="chk-dash-1"><label for="chk-dash-1"><span class="lang-en">Spread, vacancy, and rent YoY read together as one screen, not as three independent, unrelated numbers.</span><span class="lang-zh" style="display:none">利差、空置率與租金年增率一起讀成一個篩選器，而不是三個各自獨立、互不相關的數字。</span></label></li>
+      <li class="checklist-item"><input type="checkbox" id="chk-dash-2"><label for="chk-dash-2"><span class="lang-en">A market screening as attractive treated as a shortlist candidate for deeper submarket work, not as an investment decision on its own.</span><span class="lang-zh" style="display:none">篩選結果顯示有吸引力的市場，被當成值得進一步做子市場深度功夫的候選名單，而不是本身就等於一項投資決策。</span></label></li>
+      <li class="checklist-item"><input type="checkbox" id="chk-dash-3"><label for="chk-dash-3"><span class="lang-en">A market screening as unattractive not automatically ruled out, but flagged as needing a specific, well-supported thesis before proceeding.</span><span class="lang-zh" style="display:none">篩選結果顯示沒有吸引力的市場不會自動被排除，但會被標記為在繼續深入之前，需要一個具體、有充分支撐的論點。</span></label></li>
+    </ul>
+
+    <div class="quiz-block" data-quiz-id="m13-q9" data-quiz='[
+      {
+        "q":{"en":"On the CRE Monitor&#39;s three-column screen, Market A shows a wide cap-rate-to-risk-free spread, low and falling vacancy, and accelerating rent growth YoY. What is the correct interpretation and next step?","zh":"在 CRE Monitor 的三欄篩選中，A 市場顯示資本化率對無風險利率的利差寬、空置率低且持續下降、租金年增率正在加速。正確的解讀與下一步是什麼？"},
+        "opts":[
+          {"en":"The screen alone is sufficient to commit capital &mdash; no further submarket-level work is needed.","zh":"光靠這個篩選器就足以進行資金配置&mdash;&mdash;不需要進一步的子市場層級功夫。"},
+          {"en":"Market A is screening as attractively priced and structurally tightening at the same time &mdash; it&#39;s a strong candidate to prioritize for deeper submarket-level demand, supply, and tightness analysis, not a standalone investment decision.","zh":"A 市場同時篩選出「定價有吸引力」與「結構上正在緊縮」兩個訊號&mdash;&mdash;它是值得優先深入子市場層級需求、供給與緊度分析的強力候選對象，但不是一個獨立的投資決策。"},
+          {"en":"A wide spread alone always means a market should be avoided as too risky.","zh":"光是利差寬，就永遠代表這個市場太過冒險、應該避開。"},
+          {"en":"Vacancy and rent growth trends are redundant with the spread column and can be ignored once spread is known.","zh":"空置率與租金成長趨勢跟利差欄位是重複的，一旦知道利差就可以忽略它們。"}
+        ],
+        "a":1,
+        "exp":{"en":"The dashboard is explicitly a first-pass filter, not a substitute for submarket-level demand, supply, and tightness work. All three columns pointing the same direction (wide spread, tightening vacancy, accelerating rent growth) makes Market A a strong candidate to prioritize for that deeper work &mdash; not a decision on its own.","zh":"儀表板明確是一個初步篩選器，不能取代子市場層級的需求、供給與緊度功夫。三個欄位都指向同一個方向（利差寬、空置率緊縮、租金成長加速），讓 A 市場成為值得優先進行深度功夫的強力候選對象&mdash;&mdash;但本身不是一項決策。"}
+      }
+    ]'></div>
+  </section>
+
+  <div class="war-story">
+    <div class="war-story-head">
+      <span class="war-story-icon">🎙</span>
+      <span class="war-story-intro lang-en">From the Trenches</span>
+      <span class="war-story-intro lang-zh" style="display:none">來自實戰</span>
+    </div>
+    <div class="war-story-body">
+      <p class="lang-en">Tokyo and Chicago office vacancy sitting at 0.7% and 26.8% respectively, in the same asset class in the same reporting period, is worth sitting with for a moment rather than treating as a footnote. It is a reminder that "the office market" is not a single global story with local variations &mdash; it is dozens of genuinely independent local markets that happen to share an asset-class label, each shaped by its own supply constraints, its own demand base, and its own building-stock age profile. A capital allocator reading a national or global office cap-rate average and concluding anything useful about a specific submarket from it is making close to the same mistake as reading a national jobs number and concluding something about office-using employment specifically: the aggregate number is real, but it isn't the number that determines the outcome on the ground.</p>
+      <p class="lang-zh" style="display:none">東京與芝加哥的辦公室空置率，在同一資產類別、同一報告期間，分別是 0.7% 與 26.8%，這件事值得花點時間好好體會，而不是當成一個附註帶過。它提醒我們，「辦公室市場」不是一個帶著在地變化的全球單一故事&mdash;&mdash;而是數十個真正各自獨立的在地市場，只是剛好共用同一個資產類別標籤，各自由自己的供給限制、自己的需求基礎，以及自己的建築存量年齡結構所塑造。一個資金配置者讀著全國或全球的辦公室資本化率平均值，就對某個特定子市場下結論，跟讀著全國就業數字，就對辦公室使用就業本身下結論，犯的幾乎是同一種錯誤：加總數字是真實的，但它不是決定實地結果的那個數字。</p>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- 7. DATA SOURCE HIERARCHY -->
+  <!-- ============================================================ -->
+  <section>
+    <h2 class="lang-en">7. Data source hierarchy: broker research, government stats, and REIT disclosures</h2>
+    <h2 class="lang-zh" style="display:none">七、資料來源的可信度層級：經紀商研究、政府統計與 REIT 揭露</h2>
+    <p class="lang-en">A practitioner without a Wall Street research subscription has three realistic, freely or cheaply accessible source categories, and each has a different tradeoff between speed, bias, and granularity. Reading all three together, and knowing which to trust when they disagree, is a skill on its own.</p>
+    <p class="lang-zh" style="display:none">一個沒有華爾街研究訂閱的實務工作者，實際上能取得的免費或低成本資料來源有三大類，各自在速度、偏誤與細緻度之間有不同的取捨。把三者一起讀、並且知道彼此矛盾時該信誰，本身就是一項技能。</p>
+
+    <p class="lang-en"><strong><span class="lang-en">Broker research</span></strong> &mdash; the quarterly market reports published free by the major global brokerage research shops (CBRE, JLL, Cushman &amp; Wakefield, Colliers, and similar firms) &mdash; is fast, covers essentially every market the firm operates in, and is genuinely useful for a directional read: current vacancy, recent absorption, headline rent, and a qualitative narrative about the market's momentum. The tradeoff is that this research is produced by firms whose core business is transacting in the same markets they're reporting on, so the framing tends to run marketing-flavored and directionally optimistic &mdash; a market described as "resilient" or "well-positioned" in a brokerage report is a real data point, but it should be read with a discount for the fact that the firm publishing it benefits from transaction activity in that market.</p>
+    <p class="lang-zh" style="display:none"><strong><span class="lang-en">經紀商研究</span></strong>&mdash;&mdash;由全球主要經紀商研究部門（CBRE、JLL、Cushman &amp; Wakefield、Colliers 等類似機構）免費發布的季度市場報告&mdash;&mdash;速度快，涵蓋該機構有業務的幾乎每一個市場，對於方向性判讀確實有用：目前空置率、近期去化量、頭條租金，以及對市場動能的定性敘事。取捨在於，這些研究是由核心業務就是在同一批市場裡促成交易的機構所產出的，所以論述傾向帶有行銷色彩、方向上偏樂觀&mdash;&mdash;經紀商報告裡把一個市場描述成「有韌性」或「處於有利位置」，是一個真實的數據點，但讀的時候應該打個折扣，因為發布這份報告的機構，本身就受惠於該市場的交易活動。</p>
+
+    <p class="lang-en"><strong><span class="lang-en">Government statistics</span></strong> &mdash; employment data (such as the U.S. Bureau of Labor Statistics' payroll surveys), census population and household data, and building-permit survey data published by national statistical agencies &mdash; are the slowest of the three to update and the least granular at the submarket level, but they carry no transactional bias whatsoever: no one publishing a permit survey benefits from a specific building getting built or not. This is the right source for the metro-level employment, population, and permit inputs that feed directly into the demand and supply frameworks earlier in this module.</p>
+    <p class="lang-zh" style="display:none"><strong><span class="lang-en">政府統計</span></strong>&mdash;&mdash;就業資料（例如美國勞工統計局的薪資調查）、普查人口與家戶資料，以及各國統計機構發布的建照許可調查資料&mdash;&mdash;是這三者之中更新最慢、在子市場層級最不細緻的，但完全沒有交易面的偏誤：發布許可調查的機構不會因為某棟特定建築有蓋或沒蓋而受益。這是本課前面需求與供給框架所需要的都會區層級就業、人口與許可輸入資料的正確來源。</p>
+
+    <p class="lang-en"><strong><span class="lang-en">REIT public disclosures</span></strong> &mdash; annual and quarterly filings (10-Ks and 10-Qs) and earnings-call commentary from publicly listed real estate investment trusts &mdash; sit in a distinct category: same-store NOI and occupancy figures reported by a REIT describe a real, specific portfolio of buildings the REIT actually owns and operates, disclosed under securities-law accuracy obligations rather than marketing incentives. A REIT that misstates its same-store performance in a public filing faces securities-fraud exposure, not just a bad look, which is a materially stronger accuracy incentive than a brokerage marketing report faces. The tradeoff is coverage: a REIT's disclosures only describe the specific buildings and submarkets it happens to own, not the market as a whole, so they function as high-confidence "ground truth" spot-checks on specific submarkets rather than a comprehensive market read.</p>
+    <p class="lang-zh" style="display:none"><strong><span class="lang-en">REIT 公開揭露</span></strong>&mdash;&mdash;上市不動產投資信託的年度與季度申報文件（10-K 與 10-Q）以及財報電話會議上的說明&mdash;&mdash;屬於一個獨立的類別：REIT 揭露的同店淨營運收益與出租率數字，描述的是一批 REIT 真正持有並營運的具體建築物，而且是在證券法的準確性義務下揭露的，而不是出於行銷誘因。一家 REIT 若在公開申報文件裡誤報同店表現，面對的是證券詐欺的法律風險，不只是名聲不好看，這是遠比經紀商行銷報告所面對更強的準確性誘因。取捨在於涵蓋範圍：一家 REIT 的揭露只描述它剛好持有的特定建築物與子市場，不是整個市場，所以它的功能是對特定子市場做高可信度的「地面真實」抽查，而不是全面性的市場判讀。</p>
+
+    <ul class="checklist">
+      <li class="checklist-item"><input type="checkbox" id="chk-data-1"><label for="chk-data-1"><span class="lang-en">Broker research used for speed and breadth of coverage, with an explicit discount applied to any qualitative "market strength" language.</span><span class="lang-zh" style="display:none">經紀商研究用於速度與涵蓋廣度，並對任何定性的「市場強勢」用語明確打上折扣。</span></label></li>
+      <li class="checklist-item"><input type="checkbox" id="chk-data-2"><label for="chk-data-2"><span class="lang-en">Government employment, population, and permit data pulled directly for any number feeding the demand/supply frameworks, rather than taking a broker report's restatement of it.</span><span class="lang-zh" style="display:none">任何要餵進需求／供給框架的數字，直接調用政府的就業、人口與許可資料，而不是採用經紀商報告裡的轉述版本。</span></label></li>
+      <li class="checklist-item"><input type="checkbox" id="chk-data-3"><label for="chk-data-3"><span class="lang-en">Where a REIT owns comparable assets in the target submarket, its 10-K/10-Q same-store NOI and occupancy commentary checked as a ground-truth spot-check against the broker-report narrative.</span><span class="lang-zh" style="display:none">若有 REIT 在目標子市場持有可比資產，用其 10-K／10-Q 的同店淨營運收益與出租率說明，對經紀商報告的敘事做地面真實抽查。</span></label></li>
+      <li class="checklist-item"><input type="checkbox" id="chk-data-4"><label for="chk-data-4"><span class="lang-en">Any disagreement between the three sources treated as a signal worth investigating, not resolved by defaulting to whichever source is most convenient.</span><span class="lang-zh" style="display:none">三個來源之間的任何分歧，都被當成值得深入調查的訊號，而不是直接以最方便取得的那個來源為準草草解決。</span></label></li>
+    </ul>
+  </section>
+
+  <div class="lc-pager">
+    <a href="12-capstone.html">
+      <span class="lc-pager-dir lang-en">Previous</span><span class="lc-pager-dir lang-zh" style="display:none">上一課</span>
+      <div class="lc-pager-label lang-en">Capstone</div>
+      <div class="lc-pager-label lang-zh" style="display:none">畢業考</div>
+    </a>
+    <a href="14-development.html" class="lc-pager-next">
+      <span class="lc-pager-dir lang-en">Next</span><span class="lc-pager-dir lang-zh" style="display:none">下一課</span>
+      <div class="lc-pager-label lang-en">Development Basics</div>
+      <div class="lc-pager-label lang-zh" style="display:none">開發入門</div>
+    </a>
+  </div>
+
+  <footer class="lc-footer">
+    <a href="/learn-cre/index.html"><span class="lang-en">&larr; Course Home</span><span class="lang-zh" style="display:none">&larr; 課程首頁</span></a>
+    <span class="lc-footer-note">INVESTMQUEST &middot; LEARN CRE &middot; MODULE 13</span>
+  </footer>
+
+</div>
+
+<script src="/learn-cre/learn.js"></script>
+</body>
+</html>
