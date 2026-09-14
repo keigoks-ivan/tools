@@ -8,10 +8,13 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+import { batchStaticWorld } from './scene-optimizer.js';
+import { releaseTransient } from './transient-resources.js';
 
 const MODEL_YAW = 0;              // glTF 標準：模型原生面向 +Z，rotation.y 直接用 yaw
 const NEON = [0xff4fd8, 0xff2fa0, 0x8a4fff, 0x4fd8ff, 0xff6ab0, 0xb47aff];
 const IS_MOBILE = matchMedia('(pointer: coarse)').matches;
+const REDUCED_MOTION = matchMedia('(prefers-reduced-motion: reduce)');
 if (IS_MOBILE) document.body.classList.add('is-touch');
 
 // 關卡（同一條街廊道，分區沿 -Z 推進；Stage 2 為血月變體）
@@ -78,7 +81,7 @@ renderer.setSize(innerWidth, innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.15;
+renderer.toneMappingExposure = 1.06;
 app.appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
@@ -93,7 +96,8 @@ const composer = new EffectComposer(renderer, new THREE.WebGLRenderTarget(innerW
 }));
 composer.addPass(new RenderPass(scene, camera));
 // 泛光用半解析度算（模糊效果看不出差別，GPU 省一大塊）
-composer.addPass(new UnrealBloomPass(new THREE.Vector2(innerWidth / 2, innerHeight / 2), 0.62, 0.55, 0.6));
+const bloomPass = new UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.38, 0.42, 0.82);
+composer.addPass(bloomPass);
 composer.addPass(new OutputPass());
 
 addEventListener('resize', () => {
@@ -1256,7 +1260,7 @@ const gradTex = (() => {
 })();
 // 主角專用四階漸層（暗部/中間調/亮部層次更細）
 const gradTex4 = (() => {
-  const t = new THREE.DataTexture(new Uint8Array([60, 128, 210, 255]), 4, 1, THREE.RedFormat);
+  const t = new THREE.DataTexture(new Uint8Array([88, 150, 212, 255]), 4, 1, THREE.RedFormat);
   t.minFilter = t.magFilter = THREE.NearestFilter;
   t.needsUpdate = true;
   return t;
@@ -1327,18 +1331,33 @@ const crescentTex = (() => {
   return t;
 })();
 const sparks = [];
+const FX_LIMITS = IS_MOBILE
+  ? { sparks: 44, slashes: 24, shockwaves: 16, pillars: 8 }
+  : { sparks: 88, slashes: 48, shockwaves: 28, pillars: 12 };
+function trimFx(list, limit) {
+  while (list.length >= limit) {
+    const oldest = list.shift();
+    scene.remove(oldest);
+    if (!oldest.isSprite) oldest.geometry.dispose();
+    oldest.material.dispose();
+  }
+}
 function spawnSpark(pos, scale = 1, color = 0xffffff, opts = {}) {
+  trimFx(sparks, FX_LIMITS.sparks);
   const s = new THREE.Sprite(new THREE.SpriteMaterial({
     map: sparkTex, color, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false,
   }));
   s.position.copy(pos);
   s.scale.setScalar(0.4 * scale);
-  s.userData = { t: 0, dur: opts.dur || 0.22, scale, rise: opts.rise || 0 };
+  s.userData = { t: 0, dur: opts.dur || 0.22, scale, rise: opts.rise || 0,
+    vx: opts.vx || 0, vz: opts.vz || 0, streak: opts.streak || false };
+  if (opts.streak) s.material.rotation = Math.PI * 0.25;
   scene.add(s);
   sparks.push(s);
 }
 const pillars = [];
 function spawnPillar(x, z, color = 0xffd84f, big = 1) {
+  trimFx(pillars, FX_LIMITS.pillars);
   const m = new THREE.Mesh(
     new THREE.CylinderGeometry(0.9 * big, 1.5 * big, 16, 16, 1, true),
     new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.7, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })
@@ -1352,6 +1371,7 @@ let screenFlash = 0;
 const flashEl = document.getElementById('flash');
 const shockwaves = [];
 function spawnShockwave(x, z, { maxR = 4, dur = 0.35, color = 0xc9a4ff } = {}) {
+  trimFx(shockwaves, FX_LIMITS.shockwaves);
   const m = new THREE.Mesh(
     new THREE.RingGeometry(0.86, 1, 48),
     new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide })
@@ -1366,7 +1386,9 @@ function makeFanGeo(inner, outer, ang, segs = 24) {
   const pos = [], idx = [];
   for (let i = 0; i <= segs; i++) {
     const a = -ang / 2 + (i / segs) * ang;
-    pos.push(Math.sin(a) * inner, 0, Math.cos(a) * inner);
+    const taper = Math.pow(Math.sin(Math.PI * i / segs), 0.65);
+    const edge = outer - (outer - inner) * taper;
+    pos.push(Math.sin(a) * edge, 0, Math.cos(a) * edge);
     pos.push(Math.sin(a) * outer, 0, Math.cos(a) * outer);
   }
   for (let i = 0; i < segs; i++) {
@@ -1381,6 +1403,7 @@ function makeFanGeo(inner, outer, ang, segs = 24) {
 const slashes = [];
 function spawnSlash(x, z, yaw, { ang = 2.4, outer = 2.9, dur = 0.18, color = 0xc9a4ff, dir = 1 }) {
   const mk = (inner, out, col, op, spinMul, tilt) => {
+    trimFx(slashes, FX_LIMITS.slashes);
     const m = new THREE.Mesh(makeFanGeo(inner, out, ang), new THREE.MeshBasicMaterial({
       color: col, transparent: true, opacity: op, side: THREE.DoubleSide,
       blending: THREE.AdditiveBlending, depthWrite: false,
@@ -1388,13 +1411,13 @@ function spawnSlash(x, z, yaw, { ang = 2.4, outer = 2.9, dur = 0.18, color = 0xc
     m.position.set(x, 1.15, z);
     m.rotation.y = yaw;
     m.rotation.x = tilt;
-    m.userData = { t: 0, dur, dir: dir * spinMul };
+    m.userData = { t: 0, dur, dir: dir * spinMul, opacity: op };
     scene.add(m);
     slashes.push(m);
   };
-  mk(0.7, outer, color, 0.7, 1, 0);               // 外圈色彩
-  mk(0.9, outer * 0.82, 0xffffff, 0.9, 1.35, 0);  // 白熱核心（轉更快）
-  mk(0.7, outer * 1.05, color, 0.35, 0.7, 0.18);  // 殘影層（微傾斜）
+  mk(outer * 0.68, outer, color, 0.62, 1, 0);              // 漸細的彩色刀弧
+  mk(outer * 0.91, outer, 0xffffff, 0.86, 1, 0);           // 窄刃亮邊
+  mk(outer * 0.8, outer * 1.03, color, 0.2, 0.7, 0.12);   // 淡色殘影
 }
 const drops = [];
 function spawnDrop(x, z) {
@@ -1732,21 +1755,40 @@ const heroAura = (() => {
 
 // ---------- 音訊（BGM＝授權音樂素材、SFX＝多層合成；合成 BGM 作為載入失敗 fallback） ----------
 const AU = { ctx: null, master: null, music: null, sfx: null, noise: null, muted: false, timer: null, nextBar: 0, bar: 0,
-  bgmGain: null, bgm: { bufs: {}, raw: {}, cur: null, want: null, src: null, srcGain: null } };
+  bgmGain: null, bgm: { bufs: {}, pending: {}, failed: new Set(), request: 0, cur: null, want: null, src: null, srcGain: null } };
 const BGM_FILES = ['assets/audio/bgm_stage1.mp3', 'assets/audio/bgm_stage2.ogg', 'assets/audio/bgm_stage3.mp3', 'assets/audio/bgm_stage4.m4a'];
 const BGM_TITLE = 'assets/audio/bgm_title.ogg';
 function midi(n) { return 440 * Math.pow(2, (n - 69) / 12); }
 function playBgm(key) {
+  const changed = AU.bgm.want !== key;
+  if (changed && AU.bgm.pending[key]) delete AU.bgm.pending[key];
   AU.bgm.want = key;
-  if (!AU.ctx || AU.bgm.cur === key) return;
+  if (changed) AU.bgm.request++;
+  const request = AU.bgm.request;
+  if (AU.muted || !AU.ctx || AU.bgm.cur === key) return;
   const buf = AU.bgm.bufs[key];
   if (!buf) {
-    // 惰性解碼：用到才解（省下整包 PCM 常駐記憶體）；raw 複本保留供之後重解
-    const raw = AU.bgm.raw[key];
-    if (!raw) return;   // 檔案未抓到，抓到後 loadBgm 會回呼
-    AU.ctx.decodeAudioData(raw.slice(0))
-      .then(b => { AU.bgm.bufs[key] = b; if (AU.bgm.want === key) playBgm(key); })
-      .catch(() => {});
+    // 只載入當前曲目；同曲的請求與解碼共用一個工作，切關後不保留過期 PCM。
+    if (AU.bgm.pending[key] || AU.bgm.failed.has(key)) return;
+    const pending = Promise.resolve().then(() => fetch(key === 'title' ? BGM_TITLE : BGM_FILES[key]))
+      .then(r => { if (!r.ok) throw new Error('BGM unavailable'); return r.arrayBuffer(); })
+      .then(raw => {
+        if (request !== AU.bgm.request || AU.muted || AU.bgm.want !== key || !AU.ctx) return null;
+        return AU.ctx.decodeAudioData(raw);
+      })
+      .then(b => {
+        if (b && request === AU.bgm.request && !AU.muted && AU.bgm.want === key) {
+          AU.bgm.bufs[key] = b;
+          playBgm(key);
+        }
+      })
+      .catch(() => {
+        if (request === AU.bgm.request && !AU.muted && AU.bgm.want === key) AU.bgm.failed.add(key);
+      })
+      .finally(() => {
+        if (AU.bgm.pending[key] === pending) delete AU.bgm.pending[key];
+      });
+    AU.bgm.pending[key] = pending;
     return;
   }
   const t = AU.ctx.currentTime;
@@ -1755,6 +1797,7 @@ function playBgm(key) {
     og.gain.setValueAtTime(og.gain.value, t);
     og.gain.linearRampToValueAtTime(0.0001, t + 0.8);
     old.stop(t + 0.85);
+    old.onended = () => { old.disconnect(); og.disconnect(); old.buffer = null; };
   }
   const src = AU.ctx.createBufferSource();
   src.buffer = buf;
@@ -1765,31 +1808,39 @@ function playBgm(key) {
   src.connect(g).connect(AU.bgmGain);
   src.start(t);
   AU.bgm.src = src; AU.bgm.srcGain = g; AU.bgm.cur = key;
-  // 釋放其他曲目的解碼 PCM（title 檔小保留），大幅降低常駐記憶體
+  // 舊曲交叉淡出結束後由 onended 釋放，不常駐其他曲目的 PCM。
   for (const k of Object.keys(AU.bgm.bufs)) {
-    if (k !== String(key) && k !== 'title') delete AU.bgm.bufs[k];
+    if (k !== String(key)) delete AU.bgm.bufs[k];
   }
 }
-function initAudio() {
-  if (AU.ctx) { AU.ctx.resume(); return; }
-  const ctx = new (window.AudioContext || window.webkitAudioContext)();
-  AU.ctx = ctx;
-  ctx.resume();   // iOS：即使在手勢內建立也可能是 suspended
-  // iOS 響鈴靜音開關會蓋掉 WebAudio：播一個近無聲 <audio> 把音訊 session 切到 playback
+function resumeAudio() {
+  if (!AU.ctx || AU.muted || document.hidden) return;
   try {
-    const un = document.createElement('audio');
-    un.setAttribute('playsinline', '');
-    un.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA=';
-    un.loop = true;
-    un.volume = 0.01;
-    un.play().catch(() => {});
-  } catch (e) { /* 不支援就算了 */ }
+    const p = AU.ctx.resume();
+    if (p && typeof p.catch === 'function') p.catch(() => {});
+  } catch (e) { /* audio may be unavailable */ }
+}
+function suspendAudio() {
+  if (!AU.ctx) return;
+  try {
+    const p = AU.ctx.suspend();
+    if (p && typeof p.catch === 'function') p.catch(() => {});
+  } catch (e) { /* audio may be unavailable */ }
+}
+function initAudio() {
+  if (AU.muted) return;
+  if (AU.ctx) { resumeAudio(); return; }
+  let ctx;
+  try { ctx = new (window.AudioContext || window.webkitAudioContext)(); }
+  catch (e) { return; }
+  AU.ctx = ctx;
+  resumeAudio();   // iOS：即使在手勢內建立也可能是 suspended
   // 母帶鏈：master → 壓縮器 → 輸出（把各層黏成一體、避免爆音）
   const comp = ctx.createDynamicsCompressor();
   comp.threshold.value = -16; comp.knee.value = 22; comp.ratio.value = 4;
   comp.attack.value = 0.004; comp.release.value = 0.16;
   comp.connect(ctx.destination);
-  AU.master = ctx.createGain(); AU.master.gain.value = 0.8; AU.master.connect(comp);
+  AU.master = ctx.createGain(); AU.master.gain.value = AU.muted ? 0 : 0.8; AU.master.connect(comp);
   AU.music = ctx.createGain(); AU.music.gain.value = 0.42; AU.music.connect(AU.master);
   AU.bgmGain = ctx.createGain(); AU.bgmGain.gain.value = 0.55; AU.bgmGain.connect(AU.master);
   AU.sfx = ctx.createGain(); AU.sfx.gain.value = 0.9; AU.sfx.connect(AU.master);
@@ -1804,13 +1855,6 @@ function initAudio() {
   const verbGain = ctx.createGain(); verbGain.gain.value = 0.2;
   verb.connect(verbGain); verbGain.connect(AU.master);
   AU.sfx.connect(verb);
-  // BGM 音樂素材：只抓壓縮檔（輕），解碼延後到 playBgm 用到才做（失敗則維持合成 fallback）
-  const loadBgm = (key, url) => fetch(url)
-    .then(r => { if (!r.ok) throw 0; return r.arrayBuffer(); })
-    .then(ab => { AU.bgm.raw[key] = ab; if (AU.bgm.want === key) playBgm(key); })
-    .catch(() => {});
-  loadBgm('title', BGM_TITLE);
-  BGM_FILES.forEach((u, i) => loadBgm(i, u));
   const nb = ctx.createBuffer(1, ctx.sampleRate * 0.5, ctx.sampleRate);
   const nd = nb.getChannelData(0);
   for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
@@ -1874,6 +1918,7 @@ const MUSIC = [
   },
 ];
 function tone(type, freq, t, dur, gain, dest, freqEnd) {
+  if (!AU.ctx || AU.muted || !dest) return;
   const o = AU.ctx.createOscillator(), g = AU.ctx.createGain();
   o.type = type;
   o.frequency.setValueAtTime(freq, t);
@@ -1885,6 +1930,7 @@ function tone(type, freq, t, dur, gain, dest, freqEnd) {
   o.start(t); o.stop(t + dur + 0.05);
 }
 function noiseHit(t, dur, gain, filterType, freq, dest, q = 1) {
+  if (!AU.ctx || AU.muted || !dest || !AU.noise) return;
   const src = AU.ctx.createBufferSource(); src.buffer = AU.noise;
   const f = AU.ctx.createBiquadFilter(); f.type = filterType; f.frequency.value = freq; f.Q.value = q;
   const g = AU.ctx.createGain();
@@ -1895,7 +1941,7 @@ function noiseHit(t, dur, gain, filterType, freq, dest, q = 1) {
 }
 function scheduleMusic() {
   const ctx = AU.ctx;
-  if (!ctx || ctx.state !== 'running') return;
+  if (!ctx || AU.muted || ctx.state !== 'running') return;
   // 音樂素材檔在放（或標題畫面）就不跑合成 BGM——合成只作為檔案載入失敗的 fallback
   if (state === 'title' || AU.bgm.cur === AU.bgm.want) { AU.nextBar = ctx.currentTime + 0.1; return; }
   const cfg = MUSIC[Math.min(stageIdx, MUSIC.length - 1)];
@@ -2036,19 +2082,45 @@ const S = {
     tone('sawtooth', midi(45), t, 1.2, 0.06, AU.sfx);            // 低音鋪底
   },
 };
-document.getElementById('mute').addEventListener('click', () => {
+function toggleMute() {
   AU.muted = !AU.muted;
-  if (AU.master) AU.master.gain.value = AU.muted ? 0 : 0.8;
+  if (AU.muted) {
+    AU.bgm.request++;
+    AU.bgm.pending = {};
+    if (AU.master) AU.master.gain.value = 0;
+    suspendAudio();
+  } else {
+    if (AU.master) AU.master.gain.value = 0.8;
+    if (AU.ctx) resumeAudio();
+    else if (AU.bgm.want != null) initAudio();
+    if (AU.bgm.want != null) playBgm(AU.bgm.want);
+  }
   document.getElementById('mute').textContent = AU.muted ? '🔇' : '🔊';
-});
-document.addEventListener('visibilitychange', () => {
-  if (!AU.ctx) return;
-  if (document.hidden) AU.ctx.suspend();
-  else AU.ctx.resume();
-});
+  document.getElementById('mute').setAttribute('aria-label', AU.muted ? '開啟聲音' : '靜音');
+  document.getElementById('mute').setAttribute('aria-pressed', String(AU.muted));
+}
+document.getElementById('mute').addEventListener('click', toggleMute);
+const touchMove = { active: false, mx: 0, mz: 0 };
+let clearTouchMove = () => {
+  touchMove.active = false; touchMove.mx = 0; touchMove.mz = 0;
+};
+function handleVisibilityChange() {
+  if (document.hidden) {
+    cancelAnimationFrame(animationFrame);
+    animationFrame = 0;
+    keys.clear();
+    atkPressed = heavyPressed = jumpPressed = dodgePressed = musouPressed = heavyHold = false;
+    clearTouchMove();
+    suspendAudio();
+  } else {
+    resumeFrames();
+    resumeAudio();
+  }
+}
+document.addEventListener('visibilitychange', handleVisibilityChange);
 // 行動裝置保險：任何觸碰時若音訊被系統暫停就喚醒
 document.addEventListener('pointerdown', () => {
-  if (AU.ctx && AU.ctx.state !== 'running') AU.ctx.resume();
+  resumeAudio();
 }, true);
 
 // ---------- 輸入 ----------
@@ -2056,7 +2128,8 @@ const keys = new Set();
 let atkPressed = false, heavyPressed = false, jumpPressed = false, dodgePressed = false, musouPressed = false;
 let heavyHold = false;   // 重攻擊按住中（蓄力判定用）
 addEventListener('keydown', e => {
-  if ([' ', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key)) e.preventDefault();
+  if (e.target instanceof Element && e.target.closest('button') && ['Enter', 'Space'].includes(e.code)) return;
+  if (state === 'play' && [' ', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key)) e.preventDefault();
   if (e.code === 'Tab' && state === 'play') { toggleLock(); return; }
   if (typeof dlg !== 'undefined' && dlg.active) {
     if (e.code === 'KeyJ' || e.code === 'Space' || e.code === 'Enter' || e.code === 'KeyZ') nextDialog();
@@ -2067,7 +2140,7 @@ addEventListener('keydown', e => {
   if (e.code === 'KeyK' || e.code === 'KeyX') { heavyPressed = true; heavyHold = true; }
   if (e.code === 'Space') jumpPressed = true;
   if (e.code === 'ShiftLeft' || e.code === 'ShiftRight' || e.code === 'KeyL') dodgePressed = true;
-  if (e.code === 'KeyM') document.getElementById('mute').click();
+  if (e.code === 'KeyM') toggleMute();
   if (e.code === 'KeyQ' && state === 'play') switchWeapon();
   if (e.code === 'KeyE') musouPressed = true;
   if (e.code === 'KeyR' && state === 'dead') restart();
@@ -2096,7 +2169,6 @@ addEventListener('keyup', e => {
 });
 
 // 觸控：左半螢幕虛擬搖桿＋右側按鍵
-const touchMove = { active: false, mx: 0, mz: 0 };
 (function setupTouch() {
   const zone = document.getElementById('stickZone');
   const base = document.getElementById('stickBase');
@@ -2124,6 +2196,14 @@ const touchMove = { active: false, mx: 0, mz: 0 };
   });
   const end = e => {
     if (e.pointerId !== pid) return;
+    pid = null;
+    touchMove.active = false; touchMove.mx = 0; touchMove.mz = 0;
+    base.style.display = knob.style.display = 'none';
+  };
+  clearTouchMove = () => {
+    if (pid !== null && zone.releasePointerCapture) {
+      try { zone.releasePointerCapture(pid); } catch (e) { /* already released */ }
+    }
     pid = null;
     touchMove.active = false; touchMove.mx = 0; touchMove.mz = 0;
     base.style.display = knob.style.display = 'none';
@@ -2320,7 +2400,7 @@ function updateBolts(dt) {
     }
     if (dead) {
       spawnSpark(new THREE.Vector3(b.x, 1.3, b.z), 0.9, 0x7ad0ff);
-      scene.remove(b.spr); b.spr.material.dispose();
+      releaseTransient(b.spr);
       bolts.splice(i, 1);
     }
   }
@@ -2479,6 +2559,7 @@ function buildHero(char) {
   setupSwordFx(root, char);
   heroLight.color.set(char.light);
   document.getElementById('hpname').textContent = char.name;
+  document.body.style.setProperty('--hero-color', '#' + new THREE.Color(char.fx).getHexString());
   syncPlayer();
 }
 const tryLoad = url => loader.loadAsync(url).catch(() => null);
@@ -2526,6 +2607,22 @@ Promise.all([
   };
 
   placeCityProps(Object.fromEntries(CITY_PROPS.map((n, i) => [n, city[i].scene])));
+
+  const animatedMeshes = new Set([
+    ...Object.values(w2anim).flat(), ...Object.values(w3anim).flat(), ...Object.values(w4anim).flat(),
+  ].map(item => item.m));
+  const occlusionMaterials = new Set(blockersRegBy.flatMap(regs => regs.flatMap(reg => reg.mats)));
+  const batching = [world1, world2, world3, world4].map(world => {
+    const excluded = new Set(animatedMeshes);
+    for (const mesh of world.children) {
+      if (occlusionMaterials.has(mesh.material)) excluded.add(mesh);
+    }
+    return batchStaticWorld(world, excluded);
+  });
+  console.info('[HUNTR/X] Static scene batching', batching.map((b, i) => ({
+    stage: i + 1, meshesBefore: b.before.meshes, meshesAfter: b.after.meshes,
+    trianglesBefore: b.before.triangles, trianglesAfter: b.after.triangles,
+  })));
 
   // 濕地面反射：對街景烘一次靜態 cubemap
   const cubeRT = new THREE.WebGLCubeRenderTarget(256);
@@ -2676,6 +2773,18 @@ function drawOfficerBar(e) {
   g.fillStyle = '#ff3a4a';
   g.fillRect(50, 38, 156 * Math.max(0, e.hp / e.hpMax), 8);
   e.bar.tex.needsUpdate = true;
+}
+function releaseEnemy(e) {
+  scene.remove(e.root); scene.remove(e.shadow);
+  e.rig.mixer.stopAllAction();
+  e.rig.mixer.uncacheRoot(e.root);
+  for (const m of new Set(e.mats)) m.dispose();
+  const skeletons = new Set();
+  e.root.traverse(o => { if (o.isSkinnedMesh) skeletons.add(o.skeleton); });
+  for (const skeleton of skeletons) skeleton.dispose();
+  e.shadow.geometry.dispose();
+  e.shadow.material.dispose();
+  if (e.bar) { e.bar.tex.dispose(); e.bar.sp.material.dispose(); }
 }
 function killEnemy(e) {
   S.kill();
@@ -2851,8 +2960,7 @@ function updateEnemies(dt) {
     e.shadow.position.set(e.x, 0.04, e.z);
     e.shadow.material.opacity = (e.st === 'dead' ? Math.max(0, 1 - e.deadT) : 1) * 0.5;
     if (e.st === 'dead' && e.deadT > 1.5) {
-      scene.remove(e.root); scene.remove(e.shadow);
-      e.rig.mixer.stopAllAction();
+      releaseEnemy(e);
       enemies.splice(i, 1);
     }
   }
@@ -2999,11 +3107,14 @@ function startBossPhase() {
   showToast(cfg.bossLabel + ' 現身！');
   showDialog(STORY['s' + (stageIdx + 1) + 'boss'] || []);
 }
+function setObjective(text, go = false) {
+  if (hud.objective.textContent !== text) hud.objective.textContent = text;
+  if (hud.objective.classList.contains('go') !== go) hud.objective.classList.toggle('go', go);
+}
 function updateLevel(dt) {
   const alive = enemies.filter(e => e.st !== 'dead').length;
   if (level.bossPhase) {
-    hud.objective.textContent = '擊破 ' + STAGES[stageIdx].bossLabel;
-    hud.objective.classList.remove('go');
+    setObjective('擊破 ' + STAGES[stageIdx].bossLabel);
     if (level.boss) hud.bossfill.style.width = Math.max(0, level.boss.hp / level.boss.hpMax * 100) + '%';
     if (alive < 14 && Math.random() < 0.05) {
       const a = Math.random() * 6.28;
@@ -3124,21 +3235,19 @@ function updateLevel(dt) {
   }
   // 目標提示
   if (engaged) {
-    if (engaged.type === 'kill') hud.objective.textContent = `${engaged.name}　殲滅 ${Math.min(engaged.kills, engaged.need)}／${engaged.need}`;
+    if (engaged.type === 'kill') setObjective(`${engaged.name}　殲滅 ${Math.min(engaged.kills, engaged.need)}／${engaged.need}`);
     else if (engaged.type === 'capture') {
       const inside = Math.hypot(player.x - engaged.pos[0], player.z - engaged.pos[1]) < 4;
       const contested = enemies.some(e => e.st !== 'dead' && e.st !== 'spawn' && Math.hypot(e.x - engaged.pos[0], e.z - engaged.pos[1]) < 5);
-      hud.objective.textContent = `${engaged.name}　制壓 ${Math.round(engaged.capT)}%${inside && contested ? '（拮抗中！）' : ''}`;
+      setObjective(`${engaged.name}　制壓 ${Math.round(engaged.capT)}%${inside && contested ? '（拮抗中！）' : ''}`);
     }
-    else if (engaged.type === 'defend') hud.objective.textContent = `${engaged.name}　守護 ${Math.max(0, Math.ceil(engaged.time - engaged.defT))}s ・ 魂燈 ${Math.max(0, Math.round(engaged.lampHp / engaged.lampMax * 100))}%`;
-    else if (engaged.type === 'trial') hud.objective.textContent = `${engaged.name}　${Math.min(engaged.kills, engaged.need)}／${engaged.need} ・ 剩 ${Math.max(0, Math.ceil(engaged.trialT))}s`;
-    else if (engaged.type === 'rift') hud.objective.textContent = `${engaged.name}　攻擊裂口！ ${Math.max(0, Math.round(engaged.riftHp / engaged.riftHpMax * 100))}%`;
-    else if (engaged.type === 'horde') hud.objective.textContent = `千人斬　${Math.min(engaged.kills, engaged.need)}／${engaged.need}`;
-    else hud.objective.textContent = `${engaged.name}　討伐敵將 ${engaged.officers - engaged.officersLeft}／${engaged.officers}`;
-    hud.objective.classList.remove('go');
+    else if (engaged.type === 'defend') setObjective(`${engaged.name}　守護 ${Math.max(0, Math.ceil(engaged.time - engaged.defT))}s ・ 魂燈 ${Math.max(0, Math.round(engaged.lampHp / engaged.lampMax * 100))}%`);
+    else if (engaged.type === 'trial') setObjective(`${engaged.name}　${Math.min(engaged.kills, engaged.need)}／${engaged.need} ・ 剩 ${Math.max(0, Math.ceil(engaged.trialT))}s`);
+    else if (engaged.type === 'rift') setObjective(`${engaged.name}　攻擊裂口！ ${Math.max(0, Math.round(engaged.riftHp / engaged.riftHpMax * 100))}%`);
+    else if (engaged.type === 'horde') setObjective(`千人斬　${Math.min(engaged.kills, engaged.need)}／${engaged.need}`);
+    else setObjective(`${engaged.name}　討伐敵將 ${engaged.officers - engaged.officersLeft}／${engaged.officers}`);
   } else {
-    hud.objective.textContent = `剩餘目標 ${remaining}——依小地圖光點推進`;
-    hud.objective.classList.add('go');
+    setObjective(`剩餘目標 ${remaining}——依小地圖光點推進`, true);
   }
   // 巡遊敵（地圖上的野生威脅）
   const roamers = enemies.filter(e => !e.obj && !e.kindName.startsWith('boss') && e.st !== 'dead').length;
@@ -3270,7 +3379,8 @@ function hitEnemy(e, dmg, kb, ux, uz, sparkScale = 1.4) {
   e.flash = 0.13;
   e.vx += ux * kb * e.kind.kbMul;
   e.vz += uz * kb * e.kind.kbMul;
-  spawnSpark(new THREE.Vector3(e.x, 1.2, e.z), sparkScale * 1.25);
+  spawnSpark(new THREE.Vector3(e.x, 1.2, e.z), sparkScale, curChar.fxHi,
+    { dur: 0.16, vx: ux * 2.4, vz: uz * 2.4, streak: true });
   if (player.st !== 'musou') musou = Math.min(100, musou + 0.5);
   if (dmg >= 2 || Math.random() < 0.4) spawnShockwave(e.x, e.z, { maxR: 1.3, dur: 0.16, color: 0xffffff });
   combo++; comboTimer = 2.2;
@@ -3643,7 +3753,7 @@ function updatePlayer(dt) {
       p.hp = Math.min(p.hpMax, p.hp + 14);
       S.pickup();
       spawnSpark(new THREE.Vector3(p.x, 1.2, p.z), 1.4, 0x8fffbf);
-      scene.remove(dr); drops.splice(i, 1);
+      releaseTransient(dr); drops.splice(i, 1);
     }
   }
 }
@@ -3711,8 +3821,11 @@ function updateFx(dt) {
     s.userData.t += dt;
     const k = s.userData.t / s.userData.dur;
     if (k >= 1) { scene.remove(s); s.material.dispose(); sparks.splice(i, 1); continue; }
-    s.scale.setScalar((0.4 + k * 1.8) * s.userData.scale);
-    s.material.opacity = 1 - k;
+    const size = (0.4 + k * 1.3) * s.userData.scale;
+    s.scale.set(size * (s.userData.streak ? 1.8 : 1), size * (s.userData.streak ? 0.3 : 1), 1);
+    s.material.opacity = (1 - k) * (1 - k);
+    s.position.x += s.userData.vx * dt;
+    s.position.z += s.userData.vz * dt;
     if (s.userData.rise) s.position.y += s.userData.rise * dt;
   }
   for (let i = slashes.length - 1; i >= 0; i--) {
@@ -3721,7 +3834,7 @@ function updateFx(dt) {
     const k = m.userData.t / m.userData.dur;
     if (k >= 1) { scene.remove(m); m.geometry.dispose(); m.material.dispose(); slashes.splice(i, 1); continue; }
     m.rotation.y += m.userData.dir * dt * 6;
-    m.material.opacity = 0.85 * (1 - k);
+    m.material.opacity = m.userData.opacity * (1 - k);
     const s = 1 + k * 0.25;
     m.scale.set(s, 1, s);
   }
@@ -3800,6 +3913,7 @@ function updateAmbient(dt) {
     }
   }
   // 雨
+  if (rain.pts.visible) {
   const rp = rain.pos;
   for (let i = 0; i < rain.N; i++) {
     rp[i * 3 + 1] -= 24 * dt;
@@ -3810,6 +3924,7 @@ function updateAmbient(dt) {
     }
   }
   rain.pts.geometry.attributes.position.needsUpdate = true;
+  }
   // 魂門旋渦
   if (honmoon.userData.swirl) honmoon.userData.swirl.rotation.z -= dt * 1.3;
   // 招牌閃爍
@@ -3834,7 +3949,7 @@ function updateAmbient(dt) {
     hemi.intensity = LIGHT_BASE.hemi * (1 - 0.75 * k);
     sun.intensity = LIGHT_BASE.sun * (1 - 0.75 * k);
     warmFill.intensity = LIGHT_BASE.warm * (1 - 0.6 * k);
-    rimLight.intensity = LIGHT_BASE.rim * (1 - 0.5 * k);
+    rimLight.intensity = LIGHT_BASE.rim * (1 - 0.15 * k);
     scene.fog.color.copy(LIGHT_BASE.fog).multiplyScalar(1 - 0.7 * k);
     if (LIGHT_BASE.sky && skyMat) skyMat.color.copy(LIGHT_BASE.sky).multiplyScalar(1 - 0.65 * k);
     heroLight.intensity = 1.4 + 2.8 * k;
@@ -3858,6 +3973,7 @@ function updateAmbient(dt) {
 // ---------- 鏡頭（真三式：貼背低角度、隨朝向旋轉） ----------
 let camYaw = Math.PI;
 const camPos = { x: 0, z: 0 };
+const cameraWant = new THREE.Vector3();
 function updateCamera(dt) {
   const p = player;
   // 鏡頭緩慢轉到玩家背後（移動中轉快、靜止轉慢）；鎖定中則朝向鎖定目標
@@ -3865,20 +3981,31 @@ function updateCamera(dt) {
   const wantYaw = lockTarget && lockTarget.st !== 'dead' ? Math.atan2(lockTarget.x - p.x, lockTarget.z - p.z) : p.yaw;
   camYaw += angDiff(camYaw, wantYaw) * Math.min(1, dt * (lockTarget ? 3 : ease));
   const fx = Math.sin(camYaw), fz = Math.cos(camYaw);
-  const camDist = musouSlowT > 0 ? 5.1 : 6.5;   // 大絕慢動作時鏡頭推近
+  let nearby = 0;
+  for (const e of enemies) {
+    if (e.st !== 'dead' && (e.x - p.x) ** 2 + (e.z - p.z) ** 2 < 64) nearby++;
+  }
+  const crowd = Math.min(1, Math.max(0, (nearby - 3) / 12));
+  const camDist = (musouSlowT > 0 && !REDUCED_MOTION.matches ? 5.6 : 6.5) + crowd * 2.5;
   camPos.x = p.x - fx * camDist;
   camPos.z = p.z - fz * camDist;
   collideCircle(camPos, 0.7);   // 鏡頭不穿進建築
-  const want = new THREE.Vector3(camPos.x, 3.4 + p.y * 0.5, camPos.z);
-  camera.position.lerp(want, Math.min(1, dt * 6));
+  cameraWant.set(camPos.x, 3.4 + crowd * 5.6 + p.y * 0.5, camPos.z);
+  camera.position.lerp(cameraWant, Math.min(1, dt * 6));
+  const targetFov = REDUCED_MOTION.matches ? 50 : p.st === 'run' ? 53 : musouSlowT > 0 ? 48 : 50;
+  const fov = THREE.MathUtils.lerp(camera.fov, targetFov, Math.min(1, dt * 5));
+  if (Math.abs(fov - camera.fov) > 0.01) { camera.fov = fov; camera.updateProjectionMatrix(); }
   let ox = 0, oy = 0;
   if (shakeT > 0) {
     shakeT -= dt;
-    ox = (Math.random() * 2 - 1) * shakeAmp;
-    oy = (Math.random() * 2 - 1) * shakeAmp;
+    const amp = REDUCED_MOTION.matches ? 0 : shakeAmp * Math.min(1, shakeT / 0.18);
+    ox = (Math.random() * 2 - 1) * amp;
+    oy = (Math.random() * 2 - 1) * amp * 0.6;
   }
   camera.position.x += ox; camera.position.y += oy;
-  camera.lookAt(p.x + fx * 2.7, 1.95 + p.y * 0.6, p.z + fz * 2.7);
+  const focus = lockTarget && lockTarget.st !== 'dead' ? lockTarget : null;
+  const lead = (focus ? Math.min(4.5, Math.hypot(focus.x - p.x, focus.z - p.z) * 0.4) : 2.7) * (1 - crowd * 0.7);
+  camera.lookAt(p.x + fx * lead, 1.95 - crowd * 0.6 + p.y * 0.6, p.z + fz * lead);
 }
 
 // ---------- 小地圖（方形戰場） ----------
@@ -3939,6 +4066,7 @@ const musouBarEl = document.getElementById('musoubar');
 const musouFillEl = document.getElementById('musoufill');
 const btnUEl = document.getElementById('btnU');
 function updateHUD() {
+  if (document.body.dataset.gameState !== state) document.body.dataset.gameState = state;
   if (state === 'play') drawMinimap();
   if (player.hp !== lastHp) { lastHp = player.hp; hud.hp.style.width = (player.hp / player.hpMax * 100) + '%'; }
   if (musou !== lastMusou) {
@@ -4029,6 +4157,17 @@ const STORY = {
 
 // ---------- 流程 ----------
 function applyStageTint(i) {
+  const look = [
+    { exposure: 1.06, bloom: 0.38, rim: 0x72e4ff, rimPower: 0.85 },
+    { exposure: 1.08, bloom: 0.28, rim: 0xffdfa4, rimPower: 0.65 },
+    { exposure: 1.02, bloom: 0.3, rim: 0x9fdfff, rimPower: 0.7 },
+    { exposure: 1.08, bloom: 0.42, rim: 0x60e6ff, rimPower: 0.95 },
+  ][i];
+  renderer.toneMappingExposure = look.exposure;
+  bloomPass.strength = look.bloom;
+  rimLight.color.set(look.rim);
+  rimLight.intensity = look.rimPower;
+  heroLight.color.set(curChar.light);
   world1.visible = i === 0;
   world2.visible = i === 1;
   world3.visible = i === 2;
@@ -4046,7 +4185,6 @@ function applyStageTint(i) {
     rain.pts.visible = false;
     embers.pts.material.color.set(0x80e8ff);
     embers.pts.material.size = 0.18;
-    heroLight.color.set(0x9ad8ff);
     return;
   }
   if (i === 2) {
@@ -4061,7 +4199,6 @@ function applyStageTint(i) {
     rain.pts.visible = false;
     embers.pts.material.color.set(0xbfe8ff);
     embers.pts.material.size = 0.14;
-    heroLight.color.set(0xffe0b0);
     return;
   }
   if (i === 1) {
@@ -4078,14 +4215,13 @@ function applyStageTint(i) {
     rain.pts.visible = false;
     embers.pts.material.color.set(0xffc880);
     embers.pts.material.size = 0.2;
-    heroLight.color.set(0xffc080);
   } else {
     if (skyMat && skyTex1) { skyMat.map = skyTex1; skyMat.needsUpdate = true; }
-    scene.fog.color.set(0x140f28);
-    scene.fog.near = 26; scene.fog.far = 100;
-    hemi.color.set(0x9a8aff); hemi.groundColor.set(0x241540); hemi.intensity = 1.25;
-    sun.color.set(0xbfcaff); sun.intensity = 1.35;
-    warmFill.color.set(0xff4fd0); warmFill.intensity = 0.35;
+    scene.fog.color.set(0x101b31);
+    scene.fog.near = 30; scene.fog.far = 105;
+    hemi.color.set(0xabc4ee); hemi.groundColor.set(0x202039); hemi.intensity = 1.05;
+    sun.color.set(0xe3d7f0); sun.intensity = 1.4;
+    warmFill.color.set(0xff77be); warmFill.intensity = 0.28;
     if (skyMat) skyMat.color.set(0xffffff);
     honmoon.children[0].material.color.set(0xa04fff);
     honmoon.children[1].material.color.set(0xff4fa3);
@@ -4096,7 +4232,6 @@ function applyStageTint(i) {
     rain.pts.visible = true;
     embers.pts.material.color.set(0xff7ad0);
     embers.pts.material.size = 0.17;
-    heroLight.color.set(0xff4fa3);
   }
 }
 function loadStage(i) {
@@ -4106,15 +4241,16 @@ function loadStage(i) {
   blockersReg = blockersRegBy[Math.min(i, blockersRegBy.length - 1)];
   applyStageTint(i);
   captureLightBase();   // 記錄本關燈光基準（大絕暗轉用）
-  for (const e of enemies) { scene.remove(e.root); scene.remove(e.shadow); e.rig.mixer.stopAllAction(); }
+  for (const e of enemies) releaseEnemy(e);
   enemies.length = 0;
-  for (const dr of drops) scene.remove(dr);
+  for (const dr of drops) releaseTransient(dr);
   drops.length = 0;
-  for (const b of bolts) scene.remove(b.spr);
+  for (const b of bolts) releaseTransient(b.spr);
   bolts.length = 0;
-  for (const pr of level.props) scene.remove(pr);
+  for (const pr of level.props) releaseTransient(pr);
   level.props = [];
   const cfg = STAGES[i];
+  setObjective(cfg.name);
   level.objs = cfg.objectives.map(o => ({ ...o, state: 'dormant', kills: 0, spawned: 0, capT: 0, officersLeft: o.officers || 0, ambushDone: false, defT: 0, lampHp: 0, lampMax: 1, trialT: 0, riftHpMax: o.riftHp || 1 }));
   level.bossPhase = false;
   level.boss = null;
@@ -4137,7 +4273,10 @@ function loadStage(i) {
   p.hp = p.hpMax;
   p.invuln = 0; p.st = 'idle';
   if (p.rig) play(p.rig, 'idle', { fade: 0 });
+  syncPlayer();
   state = 'play';
+  updateCamera(1);
+  resumeFrames();
   runStartT = performance.now();
   showToast(STAGES[i].name);
   showDialog(i === 0 ? STORY.s1open : i === 1 ? STORY.s2open : i === 2 ? STORY.s3open : STORY.s4open);
@@ -4214,8 +4353,24 @@ function perfTick(raw) {
 // ---------- 主迴圈 ----------
 const clock = new THREE.Clock();
 let lastFrameTs = 0;
+let animationFrame = 0;
+function resumeFrames() {
+  if (document.hidden || animationFrame) return;
+  clock.getDelta();
+  lastFrameTs = 0;
+  perfAcc = 0; perfN = 0;
+  animationFrame = requestAnimationFrame(loop);
+}
 function loop(ts) {
-  requestAnimationFrame(loop);
+  animationFrame = 0;
+  // 選單完全覆蓋 3D；結算覆蓋層出現後保留最後一幀，停止 GPU 工作。
+  if (document.hidden || state === 'title'
+    || (state === 'dead' && !hud.dead.classList.contains('hidden'))
+    || (state === 'win' && !hud.win.classList.contains('hidden'))) {
+    updateHUD();
+    return;
+  }
+  animationFrame = requestAnimationFrame(loop);
   // 鎖 60fps：120Hz 螢幕跳一半幀，GPU 負載/風扇直接砍半
   if (ts !== undefined && lastFrameTs && ts - lastFrameTs < 15.5) return;
   if (ts !== undefined) lastFrameTs = ts;
@@ -4232,9 +4387,6 @@ function loop(ts) {
     updateEnemies(witchT > 0 ? dt * 0.22 : dt);   // 子彈時間：敵人慢動作
     if (state === 'play') updateLevel(dt);
     updateFx(dt);
-  } else if (player.root) {
-    player.rig.mixer.update(raw);
-    player.root.rotation.y += raw * 0.4;
   }
   perfTick(raw);
   updateAmbient(raw);

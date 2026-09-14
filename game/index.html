@@ -101,11 +101,12 @@
   #dlgHint{margin-top:8px;text-align:right;font-size:12px;color:rgba(255,255,255,.4)}
   @media (orientation: portrait){ body.is-touch #rotate{display:flex} }
 </style>
+<link rel="stylesheet" href="ui.css?v=20260914b">
 </head>
-<body>
+<body data-game-state="title">
 <div id="app"></div>
 <div id="vignette"></div>
-<button id="mute">🔊</button>
+<button id="mute" aria-label="靜音" aria-pressed="false">🔊</button>
 <div id="rotate">📱 請把手機轉成橫向<br>體驗最佳戰鬥視野</div>
 <div id="touch">
   <div id="stickZone">
@@ -144,49 +145,68 @@
   <div id="hint">WASD 移動 · J 連段 · K 重擊（長按蓄力／跑動衝刺） · Tab 鎖定武將 · Q 換武器 · Space 跳 · Shift 極限閃避 · E 大絕</div>
 </div>
 <div id="title" class="overlay">
-  <h1>HUNTR/X：魂門之戰</h1>
-  <h2>四關戰役 · HUNTR/X 三獵魔士選角參戰</h2>
-  <p>WASD 移動 · J 輕攻擊（連段） · K 重攻擊 · Space 跳躍 · Shift 翻滾</p>
-  <p>沿夜市大街往前推進，肅清四個區域，擊破魂門前的陰差隊長</p>
-  <button class="btn" id="startBtn">開始狩獵</button>
-  <div id="loadtext">載入中…</div>
-  <p style="font-size:11px;color:rgba(255,255,255,.4);margin-top:14px">音樂：Matthew Pablo・jobro・Tomasz Kucza（CC-BY）／Cleyton Kauffman・nene（CC0）via OpenGameArt</p>
+  <div class="title-shell">
+    <div class="title-kicker"><span>FIELD OPERATION 00</span><i></i><span>SOUL GATE INCIDENT</span></div>
+    <h1><span>HUNTR</span><b>/</b><span>X</span></h1>
+    <h2>魂門之戰 <em>THE SOUL GATE WAR</em></h2>
+    <div class="title-rule"><span></span><small>NEON EXORCIST UNIT</small></div>
+    <p class="title-lead">千人斬、魂燈防衛、天界試煉與裂口封印。</p>
+    <p class="title-copy">四關戰役，沿夜市大街推進，逐區完成戰術目標。<br>選擇你的獵魔士，開始作戰。</p>
+    <button class="btn" id="startBtn"><span>開始狩獵</span><b>ENTER　↗</b></button>
+    <div id="loadtext">載入中…</div>
+    <p class="license">音樂：Matthew Pablo・jobro・Tomasz Kucza（CC-BY）／Cleyton Kauffman・nene（CC0）via OpenGameArt</p>
+  </div>
+  <div class="title-corner title-corner-tl">SEOUL NIGHT MARKET</div>
+  <div class="title-corner title-corner-br">HUNTR/X · 魂門之戰</div>
 </div>
 <div id="charsel" class="overlay hidden">
-  <h1>選擇獵魔士</h1>
-  <div id="charCards">
-    <div class="ccard" data-char="rumi" style="--cc:#c9a4ff">
-      <div class="cname">RUMI</div>
-      <div class="ckr">루미 · 靈力長劍</div>
-      <div class="cdesc">四段連段的王道劍士<br>攻擊 ●●●○○<br>速度 ●●●○○<br>體力 ●●●○○</div>
-      <div class="ckey">按 1 選擇</div>
-    </div>
-    <div class="ccard" data-char="mira" style="--cc:#6aa8ff">
-      <div class="cname">MIRA</div>
-      <div class="ckr">미라 · 破魔大劍</div>
-      <div class="cdesc">三段重斬・跳壓地裂<br>攻擊 ●●●●●<br>速度 ●●○○○<br>體力 ●●●●○</div>
-      <div class="ckey">按 2 選擇</div>
-    </div>
-    <div class="ccard" data-char="zoey" style="--cc:#ffd84f">
-      <div class="cname">ZOEY</div>
-      <div class="ckr">조이 · 疾風短刃</div>
-      <div class="cdesc">六段疾風連段・穿風突進<br>攻擊 ●●○○○<br>速度 ●●●●●<br>體力 ●●○○○</div>
-      <div class="ckey">按 3 選擇</div>
-    </div>
+  <div class="charsel-head">
+    <div class="eyebrow">HUNTR/X · OPERATIVE SELECT</div>
+    <h1>選擇獵魔士 <span>SELECT YOUR HUNTER</span></h1>
+    <p>三種戰鬥流派，四關戰役。按下卡片或鍵盤 1 / 2 / 3 出擊。</p>
   </div>
-  <p style="font-size:13px;color:rgba(255,255,255,.5);margin-top:22px">MIRA／ZOEY 目前為靈氣變體外觀，專屬模型製作中</p>
+  <div id="charCards">
+    <button type="button" class="ccard" data-char="rumi" style="--cc:#c9a4ff">
+      <span class="card-top"><span class="card-no">01</span><span class="card-role">BALANCED / LEAD</span></span>
+      <span class="cname">RUMI</span>
+      <span class="ckr">루미 · 靈力長劍</span>
+      <span class="cdesc">四段連段的王道劍士<br><strong>戰鬥定位</strong> 連續斬擊・均衡攻防<br><span class="statline">攻擊 <b>●●●○○</b></span><span class="statline">速度 <b>●●●○○</b></span><span class="statline">體力 <b>●●●○○</b></span></span>
+      <span class="ckey">按 1 選擇</span>
+    </button>
+    <button type="button" class="ccard" data-char="mira" style="--cc:#6aa8ff">
+      <span class="card-top"><span class="card-no">02</span><span class="card-role">BREAKER / HEAVY</span></span>
+      <span class="cname">MIRA</span>
+      <span class="ckr">미라 · 破魔大劍</span>
+      <span class="cdesc">三段重斬・跳壓地裂<br><strong>戰鬥定位</strong> 破防重擊・範圍壓制<br><span class="statline">攻擊 <b>●●●●●</b></span><span class="statline">速度 <b>●●○○○</b></span><span class="statline">體力 <b>●●●●○</b></span></span>
+      <span class="ckey">按 2 選擇</span>
+    </button>
+    <button type="button" class="ccard" data-char="zoey" style="--cc:#ffd84f">
+      <span class="card-top"><span class="card-no">03</span><span class="card-role">RUSH / VELOCITY</span></span>
+      <span class="cname">ZOEY</span>
+      <span class="ckr">조이 · 疾風短刃</span>
+      <span class="cdesc">六段疾風連段・穿風突進<br><strong>戰鬥定位</strong> 高速突襲・閃避反擊<br><span class="statline">攻擊 <b>●●○○○</b></span><span class="statline">速度 <b>●●●●●</b></span><span class="statline">體力 <b>●●○○○</b></span></span>
+      <span class="ckey">按 3 選擇</span>
+    </button>
+  </div>
+  <p class="charsel-note">MIRA／ZOEY 目前為靈氣變體外觀，專屬模型製作中</p>
 </div>
 <div id="dead" class="overlay hidden">
-  <h1>妳倒下了</h1>
-  <p id="deadStats"></p>
-  <button class="btn" id="retryBtn">再來一次（R）</button>
+  <div class="result-panel result-dead">
+    <div class="result-kicker">MISSION FAILED / SOUL SIGNAL LOST</div>
+    <h1>妳倒下了</h1>
+    <p id="deadStats"></p>
+    <button class="btn" id="retryBtn">再來一次（R）</button>
+  </div>
 </div>
 <div id="win" class="overlay hidden">
-  <h1 id="winTitle">魂門守住了</h1>
-  <div id="grade">S</div>
-  <p id="winStats"></p>
-  <button class="btn" id="nextBtn">前往下一關 ▶</button>
-  <button class="btn" id="againBtn">再打一輪</button>
+  <div class="result-panel result-win">
+    <div class="result-kicker">OPERATION COMPLETE / GATE STABILIZED</div>
+    <h1 id="winTitle">魂門守住了</h1>
+    <div id="grade">S</div>
+    <p id="winStats"></p>
+    <button class="btn" id="nextBtn">前往下一關 ▶</button>
+    <button class="btn" id="againBtn">再打一輪</button>
+  </div>
 </div>
 <script type="importmap">
 {
@@ -196,6 +216,6 @@
   }
 }
 </script>
-<script type="module" src="main.js?v=20260719r"></script>
+<script type="module" src="main.js?v=20260914b"></script>
 </body>
 </html>
