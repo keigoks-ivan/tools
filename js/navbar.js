@@ -73,6 +73,13 @@ var SECONDARY_TOOLS = [
   {k:'personal-fit',href:'/tools/personal-fit.html',en:'Personal Fit',zh:'個人匹配',icon:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/>'}
 ];
 
+/* EDUCATION — Chinese-only learning pages requested for the main navigation. */
+var EDUCATION_TOOLS = [
+  {k:'zhuyin',href:'/education/',label:'注音小樂園',icon:'<path d="M4 5h6a3 3 0 013 3v11a3 3 0 00-3-3H4z"/><path d="M20 5h-6a3 3 0 00-3 3v11a3 3 0 013-3h6z"/>'},
+  {k:'learn-resi',href:'/learn-resi/',label:'住宅房產課程',icon:'<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/>'},
+  {k:'learn-cre',href:'/learn-cre/',label:'商用房產課程',icon:'<rect x="4" y="3" width="16" height="18" rx="1"/><path d="M8 7h2M14 7h2M8 11h2M14 11h2M8 15h2M14 15h2"/>'}
+];
+
 /* ---------- detect active ---------- */
 var path = location.pathname;
 if (path === '' || path === '/') path = '/home.html';
@@ -87,7 +94,7 @@ var mk = MARKETS.filter(function(m){return m.k===firstSeg;})[0];
 if (mk) {
   activeMarket = mk.k;
 } else {
-  var allTools = TOOLS.concat(SECONDARY_TOOLS);
+  var allTools = TOOLS.concat(SECONDARY_TOOLS).concat(EDUCATION_TOOLS);
   var t = allTools.filter(function(x){
     var href=x.href.replace(/^\//,'');
     return href===fileSeg || href===path.replace(/^\//,'') || href===(path.replace(/^\//,'').replace(/\.html$/,'')+'.html');
@@ -119,6 +126,24 @@ var toolsDropdownHtml = '<div class="imq-tools-dd-wrap">'+
   '</button>'+
   '<div class="imq-tools-dd-menu">'+secLinksHtml+'</div>'+
 '</div>';
+
+/* Education dropdown — intentionally Chinese only. */
+var eduActiveCls = EDUCATION_TOOLS.some(function(s){return s.k===activeTool;}) ? ' on' : '';
+var eduLinksHtml = EDUCATION_TOOLS.map(function(s){
+  var iconHtml = '<svg class="imq-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+s.icon+'</svg>';
+  var cls = 'imq-tools-dd-link'+(s.k===activeTool?' on':'');
+  return '<a class="'+cls+'" href="'+s.href+'">'+iconHtml+'<span>'+s.label+'</span></a>';
+}).join('');
+var educationDropdownHtml = '<div class="imq-tools-dd-wrap imq-edu-dd-wrap">'+
+  '<button class="imq-tool imq-tools-dd-btn'+eduActiveCls+'" type="button" aria-label="開啟教育選單" aria-haspopup="true" aria-expanded="false">'+
+    '<svg class="imq-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h6a3 3 0 013 3v11a3 3 0 00-3-3H4z"/><path d="M20 5h-6a3 3 0 00-3 3v11a3 3 0 013-3h6z"/></svg>'+
+    '<span>教育</span><span class="imq-caret">▾</span>'+
+  '</button>'+
+  '<div class="imq-tools-dd-menu">'+eduLinksHtml+'</div>'+
+'</div>';
+var mobileEducationHtml = '<a class="imq-tool imq-mobile-edu-link'+eduActiveCls+'" href="/education/">'+
+  '<svg class="imq-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h6a3 3 0 013 3v11a3 3 0 00-3-3H4z"/><path d="M20 5h-6a3 3 0 00-3 3v11a3 3 0 013-3h6z"/></svg>'+
+  '<span>教育・注音小樂園</span></a>';
 
 /* Row 2: market flags with hover dropdowns */
 var flagsHtml = MARKETS.map(function(m){
@@ -170,7 +195,8 @@ var html = ''+
   '<div class="imq-row1">'+
     '<div class="imq-left">'+
       '<a class="imq-logo" href="/home.html">PROPERTY<span class="imq-dot">·</span>MONITOR<span class="imq-sub">investmquest</span></a>'+
-      '<div class="imq-tools">'+toolsHtml+'</div>'+
+      '<div class="imq-tools">'+toolsHtml+mobileEducationHtml+'</div>'+
+      educationDropdownHtml+
       toolsDropdownHtml+
     '</div>'+
     '<div class="imq-right">'+
@@ -207,6 +233,7 @@ var css = ''+
 '.imq-tool-icon{width:14px;height:14px;flex-shrink:0;color:rgba(255,255,255,.85)}'+
 '.imq-tool:hover .imq-tool-icon{color:#fff}'+
 '.imq-tool.on .imq-tool-icon{color:#fff}'+
+'.imq-mobile-edu-link{display:none}'+
 '.imq-lang{display:flex;gap:4px}'+
 '.imq-lbtn{padding:6px 13px;border:1px solid rgba(255,255,255,.15);border-radius:5px;font-size:13px;cursor:pointer;background:transparent;color:rgba(255,255,255,.75);font-family:inherit;font-weight:500;transition:all .15s}'+
 '.imq-lbtn:hover{color:#fff;border-color:rgba(255,255,255,.3)}'+
@@ -266,6 +293,8 @@ var css = ''+
   '.imq-sub{display:none}'+
   '.imq-tools{display:none}'+
   '.imq-tools-dd-wrap{display:none}'+
+  '.imq-edu-dd-wrap{display:block;margin-left:0}'+
+  '.imq-edu-dd-wrap .imq-tools-dd-menu{position:fixed;top:56px;left:8px;right:8px;min-width:0;margin-top:0}'+
   '.imq-burger{display:inline-block}'+
   '.imq-flags{overflow-x:auto;padding:4px 0}'+
   '.imq-flag-name{display:none}'+
@@ -279,9 +308,13 @@ var css = ''+
   '.imq-sub-sep{display:none}'+
   '.imq-tool-icon{width:13px;height:13px}'+
   '.imq-tools.open{display:flex!important;flex-direction:column;position:absolute;top:52px;left:0;right:0;background:#0f172a;padding:10px;border-top:1px solid rgba(255,255,255,.1);z-index:150}'+
+  '.imq-tools.open .imq-mobile-edu-link{display:inline-flex}'+
   '.imq-dd{position:fixed;top:auto;left:8px;right:8px;bottom:8px;min-width:0;max-height:60vh;overflow-y:auto}'+
   '.imq-flag-wrap:hover .imq-dd{display:none}'+
   '.imq-flag-wrap.open .imq-dd{display:grid}'+
+'}'+
+'@media(max-width:480px){'+
+  '.imq-edu-dd-wrap{display:none}'+
 '}';
 
 /* ---------- inject ---------- */
@@ -359,13 +392,22 @@ root.querySelectorAll('.imq-tools-dd-wrap').forEach(function(wrap){
     e.stopPropagation();
     var isOpen = wrap.classList.contains('open');
     /* close any other open dropdowns */
-    root.querySelectorAll('.imq-tools-dd-wrap.open').forEach(function(w){w.classList.remove('open');});
+    root.querySelectorAll('.imq-tools-dd-wrap.open').forEach(function(w){
+      w.classList.remove('open');
+      var otherBtn = w.querySelector('.imq-tools-dd-btn');
+      if (otherBtn) otherBtn.setAttribute('aria-expanded','false');
+    });
     if (!isOpen) wrap.classList.add('open');
+    btn.setAttribute('aria-expanded', String(!isOpen));
   });
 });
 document.addEventListener('click', function(e){
   if (!e.target.closest('.imq-tools-dd-wrap')) {
-    root.querySelectorAll('.imq-tools-dd-wrap.open').forEach(function(w){w.classList.remove('open');});
+    root.querySelectorAll('.imq-tools-dd-wrap.open').forEach(function(w){
+      w.classList.remove('open');
+      var btn = w.querySelector('.imq-tools-dd-btn');
+      if (btn) btn.setAttribute('aria-expanded','false');
+    });
   }
 });
 

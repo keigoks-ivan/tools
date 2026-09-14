@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#fff7df">
+<title>注音小樂園｜聽聲音、玩注音、認國字</title>
+<meta name="description" content="給台灣幼兒的注音與繁體中文互動遊戲，從聽聲音開始，逐步認識注音、拼音與生活常用字。">
+<style>
+:root{
+  --ink:#26334d;
+  --muted:#65728a;
+  --paper:#fffdf8;
+  --cream:#fff7df;
+  --yellow:#ffd45c;
+  --orange:#ff8a5b;
+  --blue:#5b8def;
+  --green:#42b883;
+  --purple:#9a72db;
+  --line:#eadfca;
+  --shadow:0 12px 30px rgba(71,55,30,.10);
+}
+*{box-sizing:border-box}
+html{background:var(--cream)}
+body{margin:0;color:var(--ink);font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;background:radial-gradient(circle at 12% 8%,#fff 0 7%,transparent 7.2%),linear-gradient(160deg,#fffaf0 0%,#fff3ca 100%);min-height:100vh}
+button,a{font:inherit}
+button{color:inherit}
+.skip{position:fixed;left:12px;top:-60px;background:#fff;color:var(--ink);padding:10px 16px;border-radius:10px;z-index:20}
+.skip:focus{top:12px}
+.topbar{min-height:68px;padding:10px clamp(16px,4vw,48px);display:flex;align-items:center;justify-content:space-between;gap:16px;background:rgba(255,253,248,.92);border-bottom:1px solid var(--line);backdrop-filter:blur(10px);position:sticky;top:0;z-index:10}
+.brand{display:flex;align-items:center;gap:10px;font-size:clamp(18px,2vw,23px);font-weight:900;letter-spacing:.04em}
+.brand-badge{display:grid;place-items:center;width:44px;height:44px;border-radius:14px;background:var(--yellow);box-shadow:inset 0 -3px 0 rgba(0,0,0,.08);font-size:25px}
+.top-actions{display:flex;align-items:center;gap:10px}
+.stars{display:flex;align-items:center;gap:6px;padding:9px 13px;background:#fff;border:1px solid var(--line);border-radius:999px;font-weight:800}
+.home-link{display:inline-flex;align-items:center;min-height:44px;padding:9px 14px;border-radius:12px;color:var(--ink);text-decoration:none;border:1px solid var(--line);background:#fff;font-weight:700}
+.home-link:hover{border-color:var(--blue)}
+.layout{width:min(1180px,100%);margin:0 auto;padding:clamp(18px,4vw,44px);display:grid;grid-template-columns:230px minmax(0,1fr);gap:24px}
+.sidebar{align-self:start;position:sticky;top:92px}
+.hello{background:#fff;border:1px solid var(--line);border-radius:22px;padding:20px;box-shadow:var(--shadow);margin-bottom:14px}
+.hello h1{font-size:25px;margin:0 0 8px;line-height:1.25}
+.hello p{font-size:15px;color:var(--muted);margin:0;line-height:1.65}
+.stage-list{display:grid;gap:10px}
+.stage-btn{width:100%;min-height:62px;border:1px solid var(--line);background:rgba(255,255,255,.78);border-radius:17px;padding:10px 13px;display:flex;align-items:center;gap:11px;text-align:left;cursor:pointer;transition:transform .16s,border-color .16s,background .16s}
+.stage-btn:hover{transform:translateY(-1px);border-color:var(--blue)}
+.stage-btn.active{background:#fff;border:2px solid var(--blue);box-shadow:0 7px 18px rgba(91,141,239,.16)}
+.stage-icon{display:grid;place-items:center;width:39px;height:39px;border-radius:13px;background:var(--stage,#e7efff);font-size:21px;flex:0 0 auto}
+.stage-text strong{display:block;font-size:16px}
+.stage-text small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.play-card{position:relative;overflow:hidden;background:var(--paper);border:1px solid var(--line);border-radius:28px;box-shadow:var(--shadow);min-height:610px;padding:clamp(20px,4vw,42px)}
+.play-card::after{content:"";position:absolute;width:180px;height:180px;border-radius:50%;right:-90px;top:-80px;background:rgba(255,212,92,.23);pointer-events:none}
+.activity-head{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:28px;position:relative;z-index:1}
+.eyebrow{font-size:13px;font-weight:900;letter-spacing:.12em;color:var(--blue);margin-bottom:5px}
+.activity-head h2{font-size:clamp(25px,3vw,36px);line-height:1.2;margin:0 0 8px}
+.activity-head p{color:var(--muted);margin:0;font-size:16px;line-height:1.6}
+.adult-btn{border:0;background:#f3eee4;border-radius:999px;padding:9px 13px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap}
+.panel{display:none;animation:rise .22s ease-out}
+.panel.active{display:block}
+@keyframes rise{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+.listen-zone{text-align:center;padding:12px 0}
+.sound-btn{width:min(230px,65vw);aspect-ratio:1;border:0;border-radius:50%;background:linear-gradient(145deg,#79a8ff,var(--blue));color:#fff;box-shadow:0 15px 0 #3f6fcb,0 24px 34px rgba(63,111,203,.22);cursor:pointer;display:inline-grid;place-items:center;margin:0 auto 34px;transition:transform .12s,box-shadow .12s}
+.sound-btn:hover{transform:translateY(-2px)}
+.sound-btn:active{transform:translateY(8px);box-shadow:0 7px 0 #3f6fcb,0 13px 22px rgba(63,111,203,.2)}
+.sound-btn .speaker{font-size:70px;line-height:1}
+.sound-btn small{font-size:18px;font-weight:900;margin-top:-28px}
+.choices{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;width:min(690px,100%);margin:0 auto}
+.choice{min-height:150px;border:2px solid var(--line);background:#fff;border-radius:22px;padding:18px 12px;cursor:pointer;display:grid;place-items:center;gap:5px;transition:transform .14s,border-color .14s,box-shadow .14s}
+.choice:hover{transform:translateY(-3px);border-color:var(--blue);box-shadow:0 9px 18px rgba(91,141,239,.13)}
+.choice .emoji{font-size:62px;line-height:1.05}
+.choice .label{font-size:25px;font-weight:900}
+.choice.correct{border-color:var(--green);background:#effcf6}
+.choice.wrong{border-color:var(--orange);background:#fff3ee}
+.prompt-card{width:min(560px,100%);margin:8px auto 25px;padding:24px;background:#fff8e6;border:2px dashed #efc766;border-radius:22px;text-align:center}
+.prompt-emoji{font-size:76px;line-height:1.15}
+.prompt-word{font-size:42px;font-weight:900;margin:2px 0}
+.prompt-zhuyin{font-size:27px;font-weight:800;color:var(--blue);letter-spacing:.08em}
+.mini-sound{margin-top:12px;min-height:46px;border:0;background:var(--blue);color:#fff;border-radius:999px;padding:9px 18px;font-weight:900;cursor:pointer}
+.symbol-choice{min-height:116px;font-size:45px;font-weight:900}
+.build-board{width:min(650px,100%);margin:0 auto;text-align:center}
+.build-target{font-size:88px;line-height:1.2;margin:4px 0 12px}
+.build-name{font-size:24px;font-weight:900;margin-bottom:17px}
+.build-slots{min-height:88px;padding:14px;display:flex;align-items:center;justify-content:center;gap:10px;background:#fff8e6;border:2px dashed #efc766;border-radius:20px;margin-bottom:18px}
+.slot{min-width:64px;height:58px;display:grid;place-items:center;border-radius:14px;background:#fff;border:2px solid #eadfca;font-size:31px;font-weight:900}
+.piece-tray{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+.piece{min-width:75px;min-height:64px;border:2px solid #cddbf7;background:#eef4ff;border-radius:16px;font-size:31px;font-weight:900;cursor:pointer}
+.piece:disabled{opacity:.25;cursor:default}
+.reset-btn{margin-top:18px;border:0;background:#eee8dc;border-radius:999px;padding:10px 18px;font-weight:800;cursor:pointer}
+.word-choice{min-height:130px;font-size:38px;font-weight:900}
+.symbol-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:10px;margin-top:6px}
+.symbol-btn{aspect-ratio:1;border:2px solid var(--line);background:#fff;border-radius:17px;font-size:29px;font-weight:900;cursor:pointer;transition:transform .12s,background .12s}
+.symbol-btn:hover,.symbol-btn:focus-visible{transform:translateY(-2px);background:#eef4ff;border-color:var(--blue)}
+.symbol-note{margin:18px auto 0;padding:15px 18px;border-radius:16px;background:#f3f7ff;color:var(--muted);text-align:center;max-width:700px;font-size:15px}
+.feedback{min-height:62px;margin:22px auto 0;display:flex;align-items:center;justify-content:center;gap:12px;text-align:center;font-size:18px;font-weight:900}
+.feedback.good{color:#18875d}.feedback.try{color:#c65d35}
+.next-btn{display:none;margin:0 auto;min-height:52px;padding:11px 25px;border:0;border-radius:16px;background:var(--green);color:#fff;font-weight:900;font-size:18px;cursor:pointer;box-shadow:0 6px 0 #26865e}
+.next-btn.show{display:block}
+.adult-note{display:none;margin:0 0 24px;padding:18px 20px;border-radius:18px;background:#f4f0e9;border-left:5px solid var(--purple);color:#4f5870;line-height:1.7;font-size:15px}
+.adult-note.show{display:block}
+.footer-note{text-align:center;color:#7a766e;font-size:13px;padding:0 20px 28px}
+button:focus-visible,a:focus-visible{outline:4px solid rgba(91,141,239,.35);outline-offset:3px}
+@media(max-width:850px){
+  .layout{grid-template-columns:1fr;padding:18px}
+  .sidebar{position:static}
+  .hello{margin-bottom:12px}
+  .stage-list{grid-template-columns:repeat(5,minmax(115px,1fr));overflow-x:auto;padding-bottom:6px}
+  .stage-btn{min-width:124px;min-height:58px}
+  .stage-text small{display:none}
+  .play-card{min-height:590px}
+}
+@media(max-width:600px){
+  .topbar{padding:9px 12px}.brand{font-size:17px}.brand-badge{width:40px;height:40px}.home-link{font-size:0;width:44px;padding:0;justify-content:center}.home-link::after{content:"⌂";font-size:23px}.stars{padding:8px 10px}
+  .layout{padding:12px;gap:13px}.hello{padding:16px}.hello h1{font-size:21px}.hello p{display:none}
+  .play-card{padding:20px 14px;border-radius:22px;min-height:570px}
+  .activity-head{display:block;margin-bottom:19px}.activity-head h2{font-size:25px}.activity-head p{font-size:14px;padding-right:50px}.adult-btn{position:absolute;right:0;top:0;font-size:0;width:43px;height:43px;padding:0}.adult-btn::after{content:"ⓘ";font-size:23px}
+  .sound-btn{width:165px;margin-bottom:28px}.sound-btn .speaker{font-size:54px}.sound-btn small{font-size:15px;margin-top:-21px}
+  .choices{gap:8px}.choice{min-height:118px;border-radius:17px;padding:12px 5px}.choice .emoji{font-size:45px}.choice .label{font-size:20px}.symbol-choice{font-size:35px}.word-choice{font-size:29px}
+  .prompt-card{padding:15px}.prompt-emoji{font-size:58px}.prompt-word{font-size:35px}.prompt-zhuyin{font-size:23px}
+  .build-target{font-size:68px}.slot{min-width:52px;height:52px;font-size:27px}.piece{min-width:64px;min-height:57px;font-size:27px}
+  .symbol-grid{grid-template-columns:repeat(6,1fr);gap:7px}.symbol-btn{border-radius:12px;font-size:24px}
+}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#play">跳到遊戲</a>
+<header class="topbar">
+  <div class="brand"><span class="brand-badge" aria-hidden="true">ㄅ</span><span>注音小樂園</span></div>
+  <div class="top-actions">
+    <div class="stars" aria-label="獲得的星星"><span aria-hidden="true">⭐</span><span id="starCount">0</span></div>
+    <a class="home-link" href="/home.html">回工具首頁</a>
+  </div>
+</header>
+
+<main class="layout" id="play">
+  <aside class="sidebar">
+    <div class="hello">
+      <h1>今天想玩哪一個？</h1>
+      <p>先聽，再看，最後動手拼。每次玩幾分鐘就很好。</p>
+    </div>
+    <nav class="stage-list" aria-label="學習活動">
+      <button class="stage-btn active" data-stage="listen" style="--stage:#e7efff"><span class="stage-icon">🔊</span><span class="stage-text"><strong>聽聲音</strong><small>聽一聽，找圖片</small></span></button>
+      <button class="stage-btn" data-stage="symbol" style="--stage:#fff0d0"><span class="stage-icon">ㄅ</span><span class="stage-text"><strong>找注音</strong><small>聲音和符號配對</small></span></button>
+      <button class="stage-btn" data-stage="build" style="--stage:#e8f8ef"><span class="stage-icon">🚂</span><span class="stage-text"><strong>拼拼看</strong><small>把注音排好</small></span></button>
+      <button class="stage-btn" data-stage="word" style="--stage:#f2eaff"><span class="stage-icon">字</span><span class="stage-text"><strong>認國字</strong><small>圖片和國字配對</small></span></button>
+      <button class="stage-btn" data-stage="chart" style="--stage:#ffe9e1"><span class="stage-icon">🎵</span><span class="stage-text"><strong>注音表</strong><small>點一下就會念</small></span></button>
+    </nav>
+  </aside>
+
+  <section class="play-card" aria-live="polite">
+    <div class="activity-head">
+      <div><div class="eyebrow" id="eyebrow">第一站</div><h2 id="activityTitle">聽一聽，找朋友</h2><p id="activityIntro">按下大喇叭，找出你聽到的東西。</p></div>
+      <button class="adult-btn" id="adultBtn" type="button" aria-expanded="false">給大人的話</button>
+    </div>
+    <div class="adult-note" id="adultNote">讓孩子自己按「聽一聽」，答錯時先再播一次，不急著說答案。這個版本使用裝置內的台灣中文語音；若沒有聲音，請確認瀏覽器與裝置音量，並改用最新版 Safari、Chrome 或 Edge。</div>
+
+    <div class="panel active" id="panel-listen">
+      <div class="listen-zone"><button class="sound-btn" id="listenSound" type="button" aria-label="播放題目聲音"><span class="speaker">🔊</span><small>聽一聽</small></button></div>
+      <div class="choices" id="listenChoices"></div>
+    </div>
+
+    <div class="panel" id="panel-symbol">
+      <div class="prompt-card" id="symbolPrompt"></div>
+      <div class="choices" id="symbolChoices"></div>
+    </div>
+
+    <div class="panel" id="panel-build">
+      <div class="build-board">
+        <div class="build-target" id="buildEmoji"></div><div class="build-name" id="buildName"></div>
+        <div class="build-slots" id="buildSlots" aria-label="已選的注音"></div>
+        <div class="piece-tray" id="pieceTray"></div>
+        <button class="reset-btn" id="resetBuild" type="button">重新排一次</button>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-word">
+      <div class="prompt-card" id="wordPrompt"></div>
+      <div class="choices" id="wordChoices"></div>
+    </div>
+
+    <div class="panel" id="panel-chart">
+      <div class="symbol-grid" id="symbolGrid"></div>
+      <div class="symbol-note" id="symbolNote">點一個注音，聽聽它藏在哪個生活詞裡。</div>
+    </div>
+
+    <div class="feedback" id="feedback"></div>
+    <button class="next-btn" id="nextBtn" type="button">下一題</button>
+  </section>
+</main>
+<div class="footer-note">建議由大人陪著玩，每回合約 5 分鐘；聽、說、認就好，不要求幼兒大量抄寫。</div>
+
+<script>
+(function(){
+  'use strict';
+  var words = [
+    {word:'貓',emoji:'🐱',zhuyin:'ㄇㄠ',parts:['ㄇ','ㄠ'],first:'ㄇ'},
+    {word:'狗',emoji:'🐶',zhuyin:'ㄍㄡˇ',parts:['ㄍ','ㄡ','ˇ'],first:'ㄍ'},
+    {word:'魚',emoji:'🐟',zhuyin:'ㄩˊ',parts:['ㄩ','ˊ'],first:'ㄩ'},
+    {word:'鳥',emoji:'🐦',zhuyin:'ㄋㄧㄠˇ',parts:['ㄋ','ㄧ','ㄠ','ˇ'],first:'ㄋ'},
+    {word:'花',emoji:'🌼',zhuyin:'ㄏㄨㄚ',parts:['ㄏ','ㄨ','ㄚ'],first:'ㄏ'},
+    {word:'書',emoji:'📖',zhuyin:'ㄕㄨ',parts:['ㄕ','ㄨ'],first:'ㄕ'},
+    {word:'家',emoji:'🏠',zhuyin:'ㄐㄧㄚ',parts:['ㄐ','ㄧ','ㄚ'],first:'ㄐ'},
+    {word:'車',emoji:'🚗',zhuyin:'ㄔㄜ',parts:['ㄔ','ㄜ'],first:'ㄔ'},
+    {word:'月',emoji:'🌙',zhuyin:'ㄩㄝˋ',parts:['ㄩ','ㄝ','ˋ'],first:'ㄩ'},
+    {word:'山',emoji:'⛰️',zhuyin:'ㄕㄢ',parts:['ㄕ','ㄢ'],first:'ㄕ'},
+    {word:'雨',emoji:'🌧️',zhuyin:'ㄩˇ',parts:['ㄩ','ˇ'],first:'ㄩ'},
+    {word:'米',emoji:'🍚',zhuyin:'ㄇㄧˇ',parts:['ㄇ','ㄧ','ˇ'],first:'ㄇ'}
+  ];
+  var symbolData = [
+    ['ㄅ','爸爸'],['ㄆ','葡萄'],['ㄇ','媽媽'],['ㄈ','飛機'],['ㄉ','大象'],['ㄊ','兔子'],['ㄋ','牛奶'],['ㄌ','老虎'],
+    ['ㄍ','哥哥'],['ㄎ','蝌蚪'],['ㄏ','河馬'],['ㄐ','積木'],['ㄑ','氣球'],['ㄒ','西瓜'],['ㄓ','蜘蛛'],['ㄔ','吃飯'],
+    ['ㄕ','獅子'],['ㄖ','太陽'],['ㄗ','早安'],['ㄘ','草莓'],['ㄙ','雨傘'],['ㄧ','衣服'],['ㄨ','烏龜'],['ㄩ','小魚'],
+    ['ㄚ','阿姨'],['ㄛ','喔喔叫'],['ㄜ','白鵝'],['ㄝ','耶誕節'],['ㄞ','矮人'],['ㄟ','嘿呦'],['ㄠ','棉襖'],['ㄡ','海鷗'],
+    ['ㄢ','安全'],['ㄣ','恩人'],['ㄤ','骯髒'],['ㄥ','老鷹'],['ㄦ','耳朵']
+  ];
+  var meta = {
+    listen:['第一站','聽一聽，找朋友','按下大喇叭，找出你聽到的東西。'],
+    symbol:['第二站','哪一個注音開頭？','看看圖片、聽聽聲音，再找出第一個注音。'],
+    build:['第三站','讓注音坐上小火車','依照順序點選注音，把這個字的聲音拼起來。'],
+    word:['第四站','看圖片，找國字','看看圖片，選出它的繁體中文字。'],
+    chart:['自由探索','會說話的注音表','點一個符號，聽它和生活中的詞。']
+  };
+  var stage = 'listen';
+  var current = null;
+  var currentOptions = [];
+  var buildAnswer = [];
+  var stars = Number(localStorage.getItem('zhuyin-stars') || 0);
+  var voice = null;
+
+  function $(id){return document.getElementById(id);}
+  function shuffle(list){
+    var out = list.slice();
+    for(var i=out.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=out[i];out[i]=out[j];out[j]=t;}
+    return out;
+  }
+  function pickWord(){
+    var choices = words.filter(function(w){return !current || w.word !== current.word;});
+    current = choices[Math.floor(Math.random()*choices.length)];
+    currentOptions = shuffle([current].concat(shuffle(words.filter(function(w){return w.word!==current.word;})).slice(0,2)));
+  }
+  function findVoice(){
+    if(!('speechSynthesis' in window)) return;
+    var voices = window.speechSynthesis.getVoices();
+    voice = voices.find(function(v){return /^zh[-_]TW/i.test(v.lang);}) || voices.find(function(v){return /^zh/i.test(v.lang);}) || null;
+  }
+  function speak(text){
+    if(!('speechSynthesis' in window)){
+      showFeedback('這台裝置暫時不能播放語音，請大人幫忙念一次。','try');
+      return;
+    }
+    window.speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(text);
+    u.lang = 'zh-TW'; u.rate = .76; u.pitch = 1.12; u.volume = 1;
+    if(voice) u.voice = voice;
+    window.speechSynthesis.speak(u);
+  }
+  findVoice();
+  if('speechSynthesis' in window) window.speechSynthesis.onvoiceschanged = findVoice;
+
+  function addStar(){
+    stars += 1; localStorage.setItem('zhuyin-stars',String(stars)); $('starCount').textContent = stars;
+  }
+  function showFeedback(text,type){
+    $('feedback').className='feedback '+(type||''); $('feedback').textContent=text;
+  }
+  function clearFeedback(){
+    $('feedback').className='feedback'; $('feedback').textContent=''; $('nextBtn').classList.remove('show');
+  }
+  function done(message){
+    addStar(); showFeedback('⭐ '+message,'good'); $('nextBtn').classList.add('show'); speak('答對了！'+message);
+  }
+  function tryAgain(){showFeedback('再聽一次，你快找到了！','try'); speak('再聽一次，'+current.word);}
+  function makeChoice(content,label,handler,extraClass){
+    var b=document.createElement('button'); b.type='button'; b.className='choice '+(extraClass||'');
+    b.innerHTML=content; b.setAttribute('aria-label',label); b.addEventListener('click',function(){handler(b);}); return b;
+  }
+  function lockChoices(container){container.querySelectorAll('button').forEach(function(b){b.disabled=true;});}
+
+  function renderListen(){
+    pickWord(); clearFeedback(); var box=$('listenChoices'); box.innerHTML='';
+    currentOptions.forEach(function(w){
+      box.appendChild(makeChoice('<span class="emoji" aria-hidden="true">'+w.emoji+'</span>',w.word,function(btn){
+        if(w.word===current.word){btn.classList.add('correct');lockChoices(box);done('這是「'+w.word+'」');}
+        else{btn.classList.add('wrong');setTimeout(function(){btn.classList.remove('wrong');},450);tryAgain();}
+      }));
+    });
+  }
+  function renderSymbol(){
+    pickWord(); clearFeedback();
+    $('symbolPrompt').innerHTML='<div class="prompt-emoji">'+current.emoji+'</div><div class="prompt-word">'+current.word+'</div><div class="prompt-zhuyin">'+current.zhuyin+'</div><button class="mini-sound" type="button">🔊 聽「'+current.word+'」</button>';
+    $('symbolPrompt').querySelector('button').addEventListener('click',function(){speak(current.word);});
+    var distractors=shuffle(symbolData.map(function(x){return x[0];}).filter(function(s){return s!==current.first;})).slice(0,2);
+    var options=shuffle([current.first].concat(distractors)); var box=$('symbolChoices');box.innerHTML='';
+    options.forEach(function(s){box.appendChild(makeChoice(s,'注音 '+s,function(btn){
+      if(s===current.first){btn.classList.add('correct');lockChoices(box);done('「'+current.word+'」從 '+s+' 開始');}
+      else{btn.classList.add('wrong');setTimeout(function(){btn.classList.remove('wrong');},450);tryAgain();}
+    },'symbol-choice'));});
+  }
+  function renderBuild(){
+    pickWord(); clearFeedback(); buildAnswer=[]; $('buildEmoji').textContent=current.emoji; $('buildName').textContent='幫「'+current.word+'」排出注音';
+    $('buildSlots').innerHTML=current.parts.map(function(){return '<span class="slot">？</span>';}).join('');
+    var extras=shuffle(symbolData.map(function(x){return x[0];}).filter(function(s){return current.parts.indexOf(s)<0;})).slice(0,Math.max(1,4-current.parts.length));
+    var pieces=shuffle(current.parts.concat(extras)); var tray=$('pieceTray');tray.innerHTML='';
+    pieces.forEach(function(piece,index){
+      var b=document.createElement('button');b.type='button';b.className='piece';b.textContent=piece;b.dataset.index=index;
+      b.addEventListener('click',function(){
+        if(buildAnswer.length>=current.parts.length)return;
+        buildAnswer.push(piece);b.disabled=true;
+        var slots=$('buildSlots').querySelectorAll('.slot');slots[buildAnswer.length-1].textContent=piece;
+        if(buildAnswer.length===current.parts.length){
+          if(buildAnswer.join('')===current.parts.join('')){tray.querySelectorAll('button').forEach(function(x){x.disabled=true;});done('拼成 '+current.zhuyin+'，'+current.word);}
+          else{showFeedback('順序不太一樣，再排一次看看。','try');setTimeout(resetBuild,650);}
+        }
+      }); tray.appendChild(b);
+    });
+  }
+  function resetBuild(){
+    buildAnswer=[];$('buildSlots').querySelectorAll('.slot').forEach(function(s){s.textContent='？';});$('pieceTray').querySelectorAll('button').forEach(function(b){b.disabled=false;});clearFeedback();
+  }
+  function renderWord(){
+    pickWord();clearFeedback();
+    $('wordPrompt').innerHTML='<div class="prompt-emoji">'+current.emoji+'</div><button class="mini-sound" type="button">🔊 聽聲音</button>';
+    $('wordPrompt').querySelector('button').addEventListener('click',function(){speak(current.word);});
+    var box=$('wordChoices');box.innerHTML='';
+    currentOptions.forEach(function(w){box.appendChild(makeChoice(w.word,w.word,function(btn){
+      if(w.word===current.word){btn.classList.add('correct');lockChoices(box);done('這個字是「'+w.word+'」');}
+      else{btn.classList.add('wrong');setTimeout(function(){btn.classList.remove('wrong');},450);showFeedback('看看圖片，再試一次。','try');}
+    },'word-choice'));});
+  }
+  function renderChart(){
+    clearFeedback();var box=$('symbolGrid');if(box.childElementCount)return;
+    symbolData.forEach(function(item){
+      var b=document.createElement('button');b.type='button';b.className='symbol-btn';b.textContent=item[0];b.setAttribute('aria-label',item[0]+'，'+item[1]);
+      b.addEventListener('click',function(){$('symbolNote').textContent=item[0]+'，在「'+item[1]+'」裡可以聽到。';speak(item[1]+'，'+item[0]);});box.appendChild(b);
+    });
+  }
+  function render(){
+    document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});$('panel-'+stage).classList.add('active');
+    $('eyebrow').textContent=meta[stage][0];$('activityTitle').textContent=meta[stage][1];$('activityIntro').textContent=meta[stage][2];
+    if(stage==='listen')renderListen();else if(stage==='symbol')renderSymbol();else if(stage==='build')renderBuild();else if(stage==='word')renderWord();else renderChart();
+  }
+  document.querySelectorAll('.stage-btn').forEach(function(btn){btn.addEventListener('click',function(){
+    stage=btn.dataset.stage;document.querySelectorAll('.stage-btn').forEach(function(b){b.classList.toggle('active',b===btn);});render();
+  });});
+  $('listenSound').addEventListener('click',function(){speak(current.word);});
+  $('resetBuild').addEventListener('click',resetBuild);
+  $('nextBtn').addEventListener('click',render);
+  $('adultBtn').addEventListener('click',function(){var open=$('adultNote').classList.toggle('show');this.setAttribute('aria-expanded',String(open));});
+  $('starCount').textContent=stars;renderListen();
+})();
+</script>
+</body>
+</html>
