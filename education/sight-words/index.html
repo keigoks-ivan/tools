@@ -372,13 +372,15 @@
     return !!(currentVoice && /Samantha|Ava|Allison|Susan|Google US English/i.test(currentVoice.name));
   }
   function updateVoiceStatus() {
-    if (hasGoodBrowserVoice() || !audioManifest) {
+    const useRecordings = !!audioManifest && !hasGoodBrowserVoice();
+    if (!useRecordings) {
       voiceStatus.textContent = currentVoice
         ? `Voice: ${currentVoice.name} (${currentVoice.lang})`
         : 'Voice: browser default';
     } else {
       voiceStatus.textContent = `Voice: 錄音檔（Kokoro ${audioManifest.meta && audioManifest.meta.voice || ''}）`;
     }
+    if (audioCredit) audioCredit.classList.toggle('hidden', !useRecordings);
   }
   function chooseVoice() {
     const voices = speechSynthesis.getVoices();
@@ -468,8 +470,8 @@
       updateVoiceStatus();
       if (audioCredit) {
         audioCredit.textContent = `English audio: Kokoro TTS, ${voiceName || ''} (${license || ''})`;
-        audioCredit.classList.remove('hidden');
       }
+      updateVoiceStatus();
     })
     .catch(() => { /* no manifest / fetch failed: keep speechSynthesis path */ });
 
