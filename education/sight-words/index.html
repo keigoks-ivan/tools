@@ -235,7 +235,7 @@
 </head>
 <body>
   <main class="wrap">
-    <a href="../" style="display:inline-block;margin-bottom:12px;color:#718096;text-decoration:none;font-weight:700">← 回海象注音小樂園</a>
+    <a href="../" style="display:inline-block;margin-bottom:12px;color:#718096;text-decoration:none;font-weight:700">← 回海象小樂園</a>
     <div class="header">
       <div>
         <h1>Kindergarten Sight Words Practice</h1>
@@ -253,6 +253,7 @@
         <select id="weekSelect"></select>
         <div id="sideNote" class="side-note"></div>
         <div id="voiceStatus" class="voice-status">Voice: detecting...</div>
+        <div id="audioCredit" class="voice-status hidden"></div>
       </aside>
 
       <section>
@@ -311,6 +312,8 @@
       Sight words 先以快速認讀為主。Quiz 採「累積式」設計：選 Week 3 時，會考 Week 1～Week 3；其中約 60% 題目優先抽當週新字，40% 複習之前週次。
     </div>
   </main>
+
+  <audio id="audioPlayer" class="hidden" preload="none"></audio>
 
 <script>
 (() => {
@@ -375,9 +378,11 @@
       voices.find(v => /^en/i.test(v.lang)) ||
       null;
 
-    voiceStatus.textContent = currentVoice
-      ? `Voice: ${currentVoice.name} (${currentVoice.lang})`
-      : 'Voice: browser default';
+    if (!audioManifest) {
+      voiceStatus.textContent = currentVoice
+        ? `Voice: ${currentVoice.name} (${currentVoice.lang})`
+        : 'Voice: browser default';
+    }
   }
 
   if ('speechSynthesis' in window) {
@@ -387,7 +392,35 @@
     voiceStatus.textContent = 'Voice: speech synthesis not supported';
   }
 
-  function speak(text, rate=0.90) {
+  let audioManifest = null;
+  let sentenceAudioIndex = {};
+  const audioPlayer = document.getElementById('audioPlayer');
+  const audioCredit = document.getElementById('audioCredit');
+
+  function buildSentenceIndex(manifest) {
+    const index = {};
+    weeks.forEach(wk => {
+      const files = manifest.sentences && manifest.sentences[wk.w];
+      if (!files) return;
+      wk.s.forEach((sentText, i) => {
+        if (files[i] && !(sentText in index)) index[sentText] = files[i];
+      });
+    });
+    return index;
+  }
+
+  function resolveAudioPath(text) {
+    if (!audioManifest) return null;
+    if (Object.prototype.hasOwnProperty.call(audioManifest.words, text)) {
+      return 'audio/' + audioManifest.words[text];
+    }
+    if (Object.prototype.hasOwnProperty.call(sentenceAudioIndex, text)) {
+      return 'audio/' + sentenceAudioIndex[text];
+    }
+    return null;
+  }
+
+  function speakWithSynthesis(text, rate) {
     if (!('speechSynthesis' in window)) return;
     speechSynthesis.cancel();
 
@@ -401,6 +434,38 @@
     if (currentVoice) u.voice = currentVoice;
     speechSynthesis.speak(u);
   }
+
+  function speak(text, rate=0.90) {
+    const src = resolveAudioPath(text);
+    if (src && audioPlayer) {
+      audioPlayer.onerror = () => speakWithSynthesis(text, rate);
+      audioPlayer.pause();
+      audioPlayer.src = src;
+      const playPromise = audioPlayer.play();
+      if (playPromise && typeof playPromise.catch === 'function') {
+        playPromise.catch(() => speakWithSynthesis(text, rate));
+      }
+      return;
+    }
+    speakWithSynthesis(text, rate);
+  }
+
+  fetch('./audio/manifest.json')
+    .then(r => r.ok ? r.json() : Promise.reject(new Error('no manifest')))
+    .then(data => {
+      audioManifest = data;
+      sentenceAudioIndex = buildSentenceIndex(data);
+      const voiceName = data.meta && data.meta.voice;
+      const license = data.meta && data.meta.license;
+      if (voiceName) {
+        voiceStatus.textContent = `Voice: 錄音檔（Kokoro ${voiceName}）`;
+      }
+      if (audioCredit) {
+        audioCredit.textContent = `English audio: Kokoro TTS, ${voiceName || ''} (${license || ''})`;
+        audioCredit.classList.remove('hidden');
+      }
+    })
+    .catch(() => { /* no manifest / fetch failed: keep speechSynthesis path */ });
 
   function renderLearn() {
     const wk = weeks[weekIndex];
