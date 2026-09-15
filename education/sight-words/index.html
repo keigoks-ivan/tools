@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kindergarten Sight Words Practice</title>
+  <style>
+    :root{
+      --bg:#fffaf2;
+      --card:#ffffff;
+      --text:#334155;
+      --muted:#718096;
+      --border:#e9dfd2;
+      --accent:#ff8a65;
+      --accent-soft:#fff0e8;
+      --good:#2f9e6f;
+      --bad:#d95d5d;
+      --yellow:#ffd86b;
+      --mint:#bfe8d5;
+      --sky:#cce7ff;
+      --lav:#e3d5ff;
+      --shadow:0 10px 26px rgba(80,70,55,.10);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+      background:
+        radial-gradient(circle at 10% 10%, rgba(255,216,107,.25) 0 70px, transparent 72px),
+        radial-gradient(circle at 90% 16%, rgba(204,231,255,.35) 0 95px, transparent 98px),
+        radial-gradient(circle at 82% 88%, rgba(227,213,255,.28) 0 100px, transparent 103px),
+        var(--bg);
+      color:var(--text);
+    }
+    .wrap{
+      max-width:1100px;
+      margin:0 auto;
+      padding:24px;
+    }
+    .header{
+      display:flex;
+      justify-content:space-between;
+      gap:16px;
+      align-items:end;
+      flex-wrap:wrap;
+      margin-bottom:20px;
+    }
+    h1{margin:0;font-size:32px;line-height:1.15}
+    h1::before{content:"🌈 ";}
+    .subtitle{color:var(--muted);margin-top:6px}
+    .mode-switch{display:flex;gap:8px;flex-wrap:wrap}
+    button, select{
+      font:inherit;
+    }
+    button{
+      cursor:pointer;
+      border:1px solid var(--border);
+      background:#fff;
+      border-radius:12px;
+      padding:11px 16px;
+      min-height:44px;
+    }
+    button:hover{border-color:#aeb9c8}
+    button.active{
+      background:var(--accent-soft);
+      border-color:var(--accent);
+      font-weight:700;
+    }
+    .layout{
+      display:grid;
+      grid-template-columns:220px minmax(0,1fr);
+      gap:18px;
+      align-items:start;
+    }
+    .side, .card, .note{
+      background:var(--card);
+      border:2px solid var(--border);
+      border-radius:24px;
+      box-shadow:var(--shadow);
+    }
+    .side{padding:16px}
+    .side label{
+      font-weight:700;
+      display:block;
+      margin-bottom:8px;
+    }
+    select{
+      width:100%;
+      padding:12px;
+      border:1px solid var(--border);
+      border-radius:10px;
+      background:#fff;
+      font-size:16px;
+    }
+    .side-note{
+      margin-top:14px;
+      color:var(--muted);
+      line-height:1.6;
+      font-size:14px;
+    }
+    .tabs{
+      display:flex;
+      flex-wrap:wrap;
+      gap:8px;
+      margin-bottom:14px;
+    }
+    .tabs button{
+      font-weight:700;
+      padding:10px 14px;
+    }
+    .card{
+      padding:26px;
+    }
+    .label{
+      color:var(--muted);
+      font-size:13px;
+      font-weight:800;
+      letter-spacing:.06em;
+    }
+    .word-row{
+      display:flex;
+      justify-content:space-between;
+      gap:18px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .big-word{
+      font-size:86px;
+      line-height:1;
+      font-weight:900;
+      margin-top:8px;
+      letter-spacing:-.03em;
+      display:inline-block;
+      padding:10px 18px 14px;
+      border-radius:22px;
+      background:linear-gradient(135deg,var(--yellow),#fff2b5);
+      border:3px solid #f5c84f;
+    }
+    .primary{
+      background:var(--accent-soft);
+      border:2px solid var(--accent);
+      font-weight:800;
+      box-shadow:0 4px 0 rgba(255,138,101,.22);
+    }
+    .primary:active{transform:translateY(2px);box-shadow:none}
+    .sentence-box{
+      border-top:1px solid var(--border);
+      margin-top:24px;
+      padding-top:20px;
+    }
+    .sentence{
+      margin-top:8px;
+      font-size:28px;
+      font-weight:700;
+      line-height:1.4;
+    }
+    .bottom-row{
+      margin-top:14px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .muted{color:var(--muted)}
+    .quiz-title{
+      font-size:20px;
+      font-weight:800;
+      margin-top:4px;
+    }
+    .choices{
+      margin-top:22px;
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:12px;
+    }
+    .choices button{
+      font-size:26px;
+      font-weight:900;
+      min-height:70px;
+      background:#fff;
+      border-width:2px;
+      transition:transform .12s ease, background .12s ease;
+    }
+    .choices button:nth-child(4n+1){background:#fff8db}
+    .choices button:nth-child(4n+2){background:#eef8ff}
+    .choices button:nth-child(4n+3){background:#f4efff}
+    .choices button:nth-child(4n){background:#effaf5}
+    .choices button:active{transform:scale(.97)}
+    .choices button.correct{
+      border-color:#5cbf8a;
+      background:#ecfbf3;
+    }
+    .choices button.wrong{
+      border-color:#e49a91;
+      background:#fff2f0;
+    }
+    .feedback{
+      min-height:34px;
+      margin-top:16px;
+      font-size:20px;
+      font-weight:800;
+    }
+    .feedback.good{color:var(--good)}
+    .feedback.bad{color:var(--bad)}
+    .score-row{
+      margin-top:16px;
+      border-top:1px solid var(--border);
+      padding-top:16px;
+      display:flex;
+      justify-content:space-between;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    .note{
+      margin-top:18px;
+      padding:16px 18px;
+      line-height:1.6;
+    }
+    .hidden{display:none!important}
+    .voice-status{
+      margin-top:10px;
+      font-size:13px;
+      color:var(--muted);
+    }
+    @media (max-width:760px){
+      .wrap{padding:14px}
+      .layout{grid-template-columns:1fr}
+      .big-word{font-size:58px}
+      .sentence{font-size:23px}
+      .choices{grid-template-columns:repeat(2,1fr)}
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <div class="header">
+      <div>
+        <h1>Kindergarten Sight Words Practice</h1>
+        <div class="subtitle">⭐ Kindergarten → G1｜每天 10–15 分鐘｜聽一聽・找一找・讀一讀 ⭐</div>
+      </div>
+      <div class="mode-switch">
+        <button id="learnMode" class="active" type="button">📚 Learn</button>
+        <button id="quizMode" type="button">🎯 Quiz</button>
+      </div>
+    </div>
+
+    <div class="layout">
+      <aside class="side">
+        <label for="weekSelect">學習週次</label>
+        <select id="weekSelect"></select>
+        <div id="sideNote" class="side-note"></div>
+        <div id="voiceStatus" class="voice-status">Voice: detecting...</div>
+      </aside>
+
+      <section>
+        <div id="learnPanel">
+          <div id="wordTabs" class="tabs"></div>
+          <div class="card">
+            <div class="word-row">
+              <div>
+                <div class="label">✨ SIGHT WORD ✨</div>
+                <div id="bigWord" class="big-word">I</div>
+              </div>
+              <button id="speakWord" class="primary" type="button">🔊 聽聽看</button>
+            </div>
+
+            <div class="sentence-box">
+              <div class="label">READ IT IN A SENTENCE</div>
+              <div id="sentence" class="sentence"></div>
+              <button id="speakSentence" type="button" style="margin-top:14px;">🔊 讀句子</button>
+            </div>
+          </div>
+
+          <div class="bottom-row">
+            <div id="progress" class="muted"></div>
+            <div>
+              <button id="prevWord" type="button">← Previous</button>
+              <button id="nextWord" type="button">Next →</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="quizPanel" class="hidden">
+          <div class="card">
+            <div class="word-row">
+              <div>
+                <div class="label">👂 LISTEN & CHOOSE</div>
+                <div class="quiz-title">聽發音，選出正確的字</div>
+                <div id="quizScope" class="muted" style="margin-top:6px;"></div>
+              </div>
+              <button id="quizSpeak" class="primary" type="button">🔊 聽聽看</button>
+            </div>
+
+            <div id="choices" class="choices"></div>
+            <div id="feedback" class="feedback" aria-live="polite"></div>
+
+            <div class="score-row">
+              <div id="score" class="muted" style="font-weight:700;">Score: 0 / 0</div>
+              <button id="nextQuestion" type="button">下一題 🚀</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="note">
+      <strong>學習原則：</strong>
+      Sight words 先以快速認讀為主。Quiz 採「累積式」設計：選 Week 3 時，會考 Week 1～Week 3；其中約 60% 題目優先抽當週新字，40% 複習之前週次。
+    </div>
+  </main>
+
+<script>
+(() => {
+  const weeks = [
+    {w:'Week 1', words:['I','a','the','my','is'], s:['I am here.','I see a cat.','The dog is here.','This is my dog.','It is red.']},
+    {w:'Week 2', words:['you','me','it','in','on'], s:['I see you.','Come with me.','It is red.','It is in the box.','It is on the box.']},
+    {w:'Week 3', words:['he','she','we','are','am'], s:['He is here.','She is my friend.','We like to play.','We are here.','I am happy.']},
+    {w:'Week 4', words:['see','look','at','this','that'], s:['I see a dog.','Look at me.','Look at the cat.','This is my book.','That is a red ball.']},
+    {w:'Week 5', words:['like','want','have','get','give'], s:['I like this.','I want the red one.','I have a dog.','Go get it.','Give it to me.']},
+    {w:'Week 6', words:['go','come','run','play','eat'], s:['Go with me.','Come here.','I can run.','We like to play.','I like to eat.']},
+    {w:'Week 7', words:['to','from','for','with','and'], s:['I like to run.','This is from me.','This is for you.','Come with me.','You and me.']},
+    {w:'Week 8', words:['here','there','up','out','away'], s:['Come here.','Look over there.','Look up.','Go out.','Go away.']},
+    {w:'Week 9', words:['his','her','your','us','they'], s:['This is his book.','This is her cat.','I like your dog.','Come with us.','They are here.']},
+    {w:'Week 10', words:['what','who','where','when','why'], s:['What is this?','Who is there?','Where is my book?','When will we go?','Why is it red?']},
+    {w:'Week 11', words:['do','has','got','make','be'], s:['What do you see?','She has a cat.','I got it.','We can make it.','Be good.']},
+    {w:'Week 12', words:['good','all','some','too','so'], s:['It is good.','We all play.','I want some.','Me too.','It is so good.']},
+    {w:'Week 13', words:['no','but','of','as','off'], s:['No, not that.','I like it, but not that.','One of them.','It is as big as this.','Take it off.']},
+    {w:'Week 14', words:['was','were','went','then','again'], s:['It was here.','They were here.','We went out.','Then we went home.','Do it again.']},
+    {w:'Week 15', words:['say','day','new','him','will'], s:['What did you say?','It is a good day.','This is new.','Give it to him.','I will go.']},
+    {w:'Week 16', words:['one','two','three','four','five','six','seven','eight','nine','ten'], s:['I see one cat.','I see two dogs.','I have three books.','I see four fish.','I have five.','I see six.','I see seven.','I see eight.','I see nine.','I see ten.']},
+    {w:'Colors', words:['red','purple','green','brown','yellow','blue','white','black','pink'], s:['It is red.','I like purple.','It is green.','I see brown.','It is yellow.','I like blue.','It is white.','It is black.','I see pink.']}
+  ];
+
+  let weekIndex = 0;
+  let wordIndex = 0;
+  let mode = 'learn';
+  let currentAnswer = '';
+  let scoreCorrect = 0;
+  let scoreTotal = 0;
+  let currentVoice = null;
+
+  const weekSelect = document.getElementById('weekSelect');
+  const wordTabs = document.getElementById('wordTabs');
+  const bigWord = document.getElementById('bigWord');
+  const sentence = document.getElementById('sentence');
+  const progress = document.getElementById('progress');
+  const sideNote = document.getElementById('sideNote');
+  const voiceStatus = document.getElementById('voiceStatus');
+  const learnPanel = document.getElementById('learnPanel');
+  const quizPanel = document.getElementById('quizPanel');
+  const feedback = document.getElementById('feedback');
+  const score = document.getElementById('score');
+  const quizScope = document.getElementById('quizScope');
+
+  weeks.forEach((x,i) => {
+    const o = document.createElement('option');
+    o.value = i;
+    o.textContent = `${x.w} — ${x.words.join(', ')}`;
+    weekSelect.appendChild(o);
+  });
+
+  function chooseVoice() {
+    const voices = speechSynthesis.getVoices();
+    currentVoice =
+      voices.find(v => /Samantha/i.test(v.name) && /^en(-US)?$/i.test(v.lang)) ||
+      voices.find(v => /Samantha/i.test(v.name)) ||
+      voices.find(v => /Ava/i.test(v.name) && /^en(-US)?$/i.test(v.lang)) ||
+      voices.find(v => /Allison/i.test(v.name) && /^en(-US)?$/i.test(v.lang)) ||
+      voices.find(v => /Susan/i.test(v.name) && /^en(-US)?$/i.test(v.lang)) ||
+      voices.find(v => /Google US English/i.test(v.name)) ||
+      voices.find(v => /^en-US$/i.test(v.lang)) ||
+      voices.find(v => /^en/i.test(v.lang)) ||
+      null;
+
+    voiceStatus.textContent = currentVoice
+      ? `Voice: ${currentVoice.name} (${currentVoice.lang})`
+      : 'Voice: browser default';
+  }
+
+  if ('speechSynthesis' in window) {
+    chooseVoice();
+    speechSynthesis.onvoiceschanged = chooseVoice;
+  } else {
+    voiceStatus.textContent = 'Voice: speech synthesis not supported';
+  }
+
+  function speak(text, rate=0.90) {
+    if (!('speechSynthesis' in window)) return;
+    speechSynthesis.cancel();
+
+    // Some browser voices pronounce a standalone capital I as "capital I".
+    // Using the homophone "eye" produces the intended pronoun sound /aɪ/.
+    const spokenText = text === 'I' ? 'eye' : text;
+    const u = new SpeechSynthesisUtterance(spokenText);
+    u.lang = 'en-US';
+    u.rate = rate;
+    u.pitch = 1.08;
+    if (currentVoice) u.voice = currentVoice;
+    speechSynthesis.speak(u);
+  }
+
+  function renderLearn() {
+    const wk = weeks[weekIndex];
+    wordIndex = Math.max(0, Math.min(wordIndex, wk.words.length - 1));
+    wordTabs.innerHTML = '';
+
+    wk.words.forEach((word, i) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = word;
+      if (i === wordIndex) b.classList.add('active');
+      b.addEventListener('click', () => {
+        wordIndex = i;
+        renderLearn();
+      });
+      wordTabs.appendChild(b);
+    });
+
+    bigWord.textContent = wk.words[wordIndex];
+    sentence.textContent = wk.s[wordIndex];
+    progress.textContent = `${wordIndex + 1} / ${wk.words.length}`;
+    sideNote.innerHTML = wk.w === 'Colors'
+      ? '顏色字以句子與遊戲穿插複習。'
+      : `本週核心：<strong>${wk.words.length}</strong> 個字`;
+  }
+
+  function cumulativePool() {
+    if (weeks[weekIndex].w === 'Colors') {
+      return [...weeks[weekIndex].words];
+    }
+    return weeks
+      .slice(0, weekIndex + 1)
+      .filter(w => w.w !== 'Colors')
+      .flatMap(w => w.words);
+  }
+
+  function earlierPool() {
+    if (weekIndex === 0 || weeks[weekIndex].w === 'Colors') return [];
+    return weeks.slice(0, weekIndex).flatMap(w => w.words);
+  }
+
+  function pickAnswer() {
+    const currentWords = weeks[weekIndex].words;
+    const oldWords = earlierPool();
+
+    if (weeks[weekIndex].w === 'Colors') {
+      return currentWords[Math.floor(Math.random() * currentWords.length)];
+    }
+
+    if (weekIndex === 0 || oldWords.length === 0) {
+      return currentWords[Math.floor(Math.random() * currentWords.length)];
+    }
+
+    // 60% current week, 40% previous weeks
+    const useCurrent = Math.random() < 0.60;
+    const pool = useCurrent ? currentWords : oldWords;
+    return pool[Math.floor(Math.random() * pool.length)];
+  }
+
+  function shuffle(arr) {
+    return arr
+      .map(v => ({v, r: Math.random()}))
+      .sort((a,b) => a.r - b.r)
+      .map(x => x.v);
+  }
+
+  function newQuestion() {
+    currentAnswer = pickAnswer();
+    feedback.textContent = '';
+    feedback.className = 'feedback';
+
+    const fullPool = [...new Set(cumulativePool())];
+    const wrongPool = shuffle(fullPool.filter(w => w !== currentAnswer));
+    const options = shuffle([currentAnswer, ...wrongPool.slice(0, Math.min(5, wrongPool.length))]);
+
+    const choices = document.getElementById('choices');
+    choices.innerHTML = '';
+
+    options.forEach(word => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = word;
+      b.addEventListener('click', () => checkAnswer(b, word));
+      choices.appendChild(b);
+    });
+
+    const scopeLabel = weeks[weekIndex].w === 'Colors'
+      ? 'Quiz 範圍：Colors'
+      : `Quiz 範圍：Week 1 ～ ${weeks[weekIndex].w}`;
+    quizScope.textContent = scopeLabel;
+
+    setTimeout(() => speak(currentAnswer, 0.90), 180);
+  }
+
+  function checkAnswer(button, word) {
+    const buttons = [...document.querySelectorAll('#choices button')];
+    if (buttons.some(b => b.dataset.answered === '1')) return;
+
+    buttons.forEach(b => b.dataset.answered = '1');
+    scoreTotal += 1;
+
+    if (word === currentAnswer) {
+      scoreCorrect += 1;
+      button.classList.add('correct');
+      feedback.textContent = '🌟 Great job! Correct!';
+      feedback.className = 'feedback good';
+    } else {
+      button.classList.add('wrong');
+      const rightBtn = buttons.find(b => b.textContent === currentAnswer);
+      if (rightBtn) rightBtn.classList.add('correct');
+      feedback.textContent = `💛 Nice try! The answer is “${currentAnswer}”.`;
+      feedback.className = 'feedback bad';
+    }
+
+    score.textContent = `Score: ${scoreCorrect} / ${scoreTotal}`;
+  }
+
+  function setMode(nextMode) {
+    mode = nextMode;
+    const learnBtn = document.getElementById('learnMode');
+    const quizBtn = document.getElementById('quizMode');
+
+    learnBtn.classList.toggle('active', mode === 'learn');
+    quizBtn.classList.toggle('active', mode === 'quiz');
+    learnPanel.classList.toggle('hidden', mode !== 'learn');
+    quizPanel.classList.toggle('hidden', mode !== 'quiz');
+
+    if (mode === 'quiz') newQuestion();
+  }
+
+  weekSelect.addEventListener('change', () => {
+    weekIndex = Number(weekSelect.value) || 0;
+    wordIndex = 0;
+    renderLearn();
+    if (mode === 'quiz') newQuestion();
+  });
+
+  document.getElementById('learnMode').addEventListener('click', () => setMode('learn'));
+  document.getElementById('quizMode').addEventListener('click', () => setMode('quiz'));
+
+  document.getElementById('speakWord').addEventListener('click', () => {
+    speak(weeks[weekIndex].words[wordIndex], 0.90);
+  });
+  document.getElementById('speakSentence').addEventListener('click', () => {
+    speak(weeks[weekIndex].s[wordIndex], 0.85);
+  });
+  document.getElementById('prevWord').addEventListener('click', () => {
+    wordIndex = (wordIndex - 1 + weeks[weekIndex].words.length) % weeks[weekIndex].words.length;
+    renderLearn();
+  });
+  document.getElementById('nextWord').addEventListener('click', () => {
+    wordIndex = (wordIndex + 1) % weeks[weekIndex].words.length;
+    renderLearn();
+  });
+  document.getElementById('quizSpeak').addEventListener('click', () => {
+    speak(currentAnswer, 0.90);
+  });
+  document.getElementById('nextQuestion').addEventListener('click', newQuestion);
+
+  renderLearn();
+})();
+</script>
+</body>
+</html>
