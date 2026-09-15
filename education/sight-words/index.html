@@ -368,6 +368,18 @@
   let audioManifest = null;
   let sentenceAudioIndex = {};
   const audioPlayer = document.getElementById('audioPlayer');
+  function hasGoodBrowserVoice() {
+    return !!(currentVoice && /Samantha|Ava|Allison|Susan|Google US English/i.test(currentVoice.name));
+  }
+  function updateVoiceStatus() {
+    if (hasGoodBrowserVoice() || !audioManifest) {
+      voiceStatus.textContent = currentVoice
+        ? `Voice: ${currentVoice.name} (${currentVoice.lang})`
+        : 'Voice: browser default';
+    } else {
+      voiceStatus.textContent = `Voice: 錄音檔（Kokoro ${audioManifest.meta && audioManifest.meta.voice || ''}）`;
+    }
+  }
   function chooseVoice() {
     const voices = speechSynthesis.getVoices();
     currentVoice =
@@ -381,11 +393,7 @@
       voices.find(v => /^en/i.test(v.lang)) ||
       null;
 
-    if (!audioManifest) {
-      voiceStatus.textContent = currentVoice
-        ? `Voice: ${currentVoice.name} (${currentVoice.lang})`
-        : 'Voice: browser default';
-    }
+    updateVoiceStatus();
   }
 
   if ('speechSynthesis' in window) {
@@ -436,7 +444,7 @@
   }
 
   function speak(text, rate=0.90) {
-    const src = resolveAudioPath(text);
+    const src = hasGoodBrowserVoice() ? null : resolveAudioPath(text);
     if (src && audioPlayer) {
       audioPlayer.onerror = () => speakWithSynthesis(text, rate);
       audioPlayer.pause();
@@ -457,9 +465,7 @@
       sentenceAudioIndex = buildSentenceIndex(data);
       const voiceName = data.meta && data.meta.voice;
       const license = data.meta && data.meta.license;
-      if (voiceName) {
-        voiceStatus.textContent = `Voice: 錄音檔（Kokoro ${voiceName}）`;
-      }
+      updateVoiceStatus();
       if (audioCredit) {
         audioCredit.textContent = `English audio: Kokoro TTS, ${voiceName || ''} (${license || ''})`;
         audioCredit.classList.remove('hidden');
