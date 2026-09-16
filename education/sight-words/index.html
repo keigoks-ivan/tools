@@ -20,6 +20,12 @@
       --sky:#cce7ff;
       --lav:#e3d5ff;
       --shadow:0 10px 26px rgba(80,70,55,.10);
+      --cup-blue:#3f72d8;
+      --cup-blue-soft:#eaf3ff;
+      --cup-blue-deep:#2c56ab;
+      --cup-orange:#df7049;
+      --cup-orange-light:#ffb38a;
+      --cup-yellow-soft:#fff3cf;
     }
     *{box-sizing:border-box}
     body{
@@ -320,6 +326,168 @@
       70%{transform:scale(1.12);opacity:1}
       100%{transform:scale(1)}
     }
+    .cups-stage{
+      position:relative;
+      margin-top:16px;
+      padding:14px 14px 22px;
+      border-radius:26px;
+      border:3px solid var(--cup-blue-soft);
+      background:linear-gradient(180deg,var(--cup-blue-soft) 0%,#fdf6e6 60%,var(--bg) 100%);
+      box-shadow:0 12px 0 rgba(76,103,151,.06),0 16px 32px rgba(40,55,95,.10);
+    }
+    .cups-board{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:14px;
+      max-width:500px;
+      margin:0 auto;
+    }
+    .cup-slot{
+      position:relative;
+      aspect-ratio:1/1.05;
+    }
+    .cup-plate{
+      position:absolute;
+      left:50%;
+      bottom:6%;
+      width:72%;
+      aspect-ratio:3/1;
+      transform:translateX(-50%);
+      border-radius:50%;
+      background:var(--cup-yellow-soft);
+      border:2px solid #f0d98a;
+      opacity:0;
+      transition:opacity .25s ease .12s;
+    }
+    .cup.flipped .cup-plate{opacity:1}
+    .cup-reveal{
+      position:absolute;
+      left:0;
+      right:0;
+      bottom:9%;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:clamp(20px,6vw,30px);
+      opacity:0;
+      transition:opacity .25s ease .15s;
+    }
+    .cup.flipped .cup-reveal{opacity:1}
+    .ball{
+      position:relative;
+      width:45%;
+      aspect-ratio:1/1;
+      border-radius:50%;
+      background:radial-gradient(circle at 35% 30%,#ffa46b 0%,#e2683d 75%);
+      box-shadow:
+        -14px -5px 0 -6px #ffcba8,
+        14px -6px 0 -6px #ffcba8,
+        -11px 11px 0 -6px #f2a878,
+        12px 12px 0 -6px #f2a878,
+        0 -15px 0 -6px #ffd9bd,
+        -17px 3px 0 -7px #f7b98c,
+        17px 3px 0 -7px #f7b98c,
+        0 16px 0 -6px #eea471;
+    }
+    .ball::before{
+      content:"";
+      position:absolute;
+      top:18%;
+      left:22%;
+      width:28%;
+      height:22%;
+      border-radius:50%;
+      background:rgba(255,255,255,.75);
+    }
+    .cup.found .ball{animation:ball-bounce .7s ease}
+    @keyframes ball-bounce{
+      0%{transform:scale(.4) translateY(6px)}
+      30%{transform:scale(1.18) translateY(-10px)}
+      50%{transform:scale(.95) translateY(2px)}
+      70%{transform:scale(1.08) translateY(-6px)}
+      100%{transform:scale(1) translateY(0)}
+    }
+    .cup-body{
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      transition:transform .35s ease;
+    }
+    .cup-shape{
+      position:absolute;
+      inset:0;
+      background:linear-gradient(180deg,var(--cup-blue-soft) 0%,var(--cup-blue) 100%);
+      border:3px solid var(--cup-blue-deep);
+      clip-path:polygon(0% 0%, 100% 0%, 82% 100%, 18% 100%);
+      border-radius:12px 12px 0 0;
+      box-shadow:0 8px 0 rgba(44,86,171,.18);
+      overflow:hidden;
+      transition:opacity .35s ease;
+    }
+    .cup-highlight{
+      position:absolute;
+      top:8%;
+      left:20%;
+      width:14%;
+      height:72%;
+      border-radius:50%;
+      background:linear-gradient(180deg,rgba(255,255,255,.6),rgba(255,255,255,0));
+      transform:skewX(-8deg);
+    }
+    .cup-rim{
+      position:absolute;
+      top:-6px;
+      left:0;
+      right:0;
+      height:14px;
+      border-radius:50%;
+      background:var(--cup-blue-soft);
+      border:3px solid var(--cup-blue-deep);
+      transition:opacity .35s ease;
+    }
+    .cup-word{
+      position:relative;
+      z-index:1;
+      font-weight:900;
+      color:#fff;
+      text-shadow:0 1px 3px rgba(30,50,90,.45);
+      padding:0 6%;
+      max-width:88%;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      text-align:center;
+      font-size:clamp(16px,5.5vw,28px);
+      letter-spacing:-.01em;
+      transition:opacity .35s ease, color .35s ease;
+    }
+    .cup.flipped .cup-body{
+      transform:translateY(-45px) rotate(-12deg);
+      pointer-events:none;
+    }
+    .cup.flipped .cup-shape,
+    .cup.flipped .cup-rim{
+      opacity:.35;
+    }
+    .cup.flipped .cup-word{opacity:.5}
+    .cup.found .cup-word{
+      opacity:1;
+      color:#ffd54a;
+      text-shadow:0 1px 3px rgba(120,80,10,.45);
+    }
+    .cup.shake{animation:bingo-shake .5s}
+    @media (prefers-reduced-motion:reduce){
+      .cup,.cup *{animation:none!important;transition:none!important}
+    }
+    .cups-win-text{
+      font-size:28px;
+      font-weight:900;
+      color:var(--cup-orange);
+      animation:bingo-pop .5s ease;
+    }
     @media (max-width:760px){
       .wrap{padding:14px}
       .layout{grid-template-columns:1fr}
@@ -341,6 +509,7 @@
         <button id="learnMode" class="active" type="button">📚 Learn</button>
         <button id="quizMode" type="button">🎯 Quiz</button>
         <button id="bingoMode" type="button">🎲 Bingo</button>
+        <button id="cupsMode" type="button">🏆 尋寶杯</button>
       </div>
     </div>
 
@@ -437,6 +606,47 @@
             </div>
           </div>
         </div>
+
+        <div id="cupsPanel" class="hidden">
+          <div class="card">
+            <div class="word-row">
+              <div style="display:flex;align-items:center;gap:10px;">
+                <img src="../zhuyin/assets/walrus-mascot.png" alt="" style="width:64px;height:64px;object-fit:contain;flex:0 0 auto;" />
+                <div>
+                  <div class="label">🏆 尋寶杯</div>
+                  <div class="quiz-title">尋寶杯：聽海象念，點那個杯子，看看毛球藏在哪裡！</div>
+                  <div id="cupsScope" class="muted" style="margin-top:6px;"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="cups-stage">
+              <div class="word-row">
+                <div>
+                  <div id="cupsPrompt" class="bingo-prompt">毛球藏在哪個杯子下面？先聽海象念，點那個杯子。</div>
+                  <div id="cupsFound" class="muted" style="margin-top:6px;"></div>
+                </div>
+                <div>
+                  <button id="cupsStartBtn" class="primary" type="button">🔊 開始</button>
+                  <button id="cupsReplay" class="hidden" type="button">🔊 再聽一次</button>
+                </div>
+              </div>
+
+              <div id="cupsBoard" class="cups-board" style="margin-top:14px;"></div>
+            </div>
+
+            <div id="cupsWin" class="hidden bingo-win">
+              <div class="bingo-confetti" aria-hidden="true">
+                <span>🎉</span><span>🟠</span><span>🎊</span><span>🟠</span><span>🎉</span>
+              </div>
+              <div class="cups-win-text">🎉 找到了！</div>
+              <div id="cupsWinDetail" class="muted" style="margin-top:6px;text-align:center;"></div>
+              <div class="bottom-row" style="justify-content:center;margin-top:16px;">
+                <button id="cupsPlayAgain" class="primary" type="button">🎉 再玩一次</button>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
     </div>
 
@@ -524,6 +734,23 @@
   let bingoStarted = false;
   let bingoWon = false;
   let bingoToneContext = null;
+
+  const cupsPanel = document.getElementById('cupsPanel');
+  const cupsBoardEl = document.getElementById('cupsBoard');
+  const cupsPromptEl = document.getElementById('cupsPrompt');
+  const cupsFoundEl = document.getElementById('cupsFound');
+  const cupsScopeEl = document.getElementById('cupsScope');
+  const cupsStartBtn = document.getElementById('cupsStartBtn');
+  const cupsReplayBtn = document.getElementById('cupsReplay');
+  const cupsWinEl = document.getElementById('cupsWin');
+  const cupsWinDetailEl = document.getElementById('cupsWinDetail');
+
+  let cupsCells = [];
+  let cupsCurrentWord = null;
+  let cupsToken = 0;
+  let cupsStarted = false;
+  let cupsWon = false;
+  let cupsFlippedCount = 0;
 
   weeks.forEach((x,i) => {
     const o = document.createElement('option');
@@ -921,6 +1148,162 @@
     bingoCurrentWord = null;
   }
 
+  function cupsFontScale(word) {
+    const len = word.length;
+    if (len <= 4) return 1;
+    if (len <= 6) return 0.85;
+    return 0.7;
+  }
+
+  function buildCupsGame() {
+    cupsToken += 1;
+    cupsStarted = false;
+    cupsWon = false;
+    cupsCurrentWord = null;
+    cupsFlippedCount = 0;
+
+    const pool = [...new Set(cumulativePool())];
+    const need = 6;
+    let words;
+    if (pool.length >= need) {
+      words = shuffle(pool).slice(0, need);
+    } else {
+      words = [];
+      while (words.length < need) words = words.concat(shuffle(pool));
+      words = words.slice(0, need);
+    }
+
+    const ballIndex = Math.floor(Math.random() * need);
+    cupsCells = words.map((word, i) => ({
+      word,
+      el: null,
+      flipped: false,
+      hasBall: i === ballIndex
+    }));
+
+    cupsScopeEl.textContent = weeks[weekIndex].w === 'Colors'
+      ? '尋寶杯範圍：Colors'
+      : `尋寶杯範圍：Week 1 ～ ${weeks[weekIndex].w}`;
+
+    renderCupsBoard();
+    cupsWinEl.classList.add('hidden');
+    cupsBoardEl.classList.remove('hidden');
+    cupsStartBtn.classList.remove('hidden');
+    cupsReplayBtn.classList.add('hidden');
+    cupsPromptEl.textContent = '毛球藏在哪個杯子下面？先聽海象念，點那個杯子。';
+    updateCupsFoundCount();
+  }
+
+  function renderCupsBoard() {
+    cupsBoardEl.innerHTML = '';
+    cupsCells.forEach((cell, idx) => {
+      const cup = document.createElement('div');
+      cup.className = 'cup';
+
+      const slot = document.createElement('div');
+      slot.className = 'cup-slot';
+
+      const plate = document.createElement('div');
+      plate.className = 'cup-plate';
+
+      const reveal = document.createElement('div');
+      reveal.className = 'cup-reveal';
+      reveal.innerHTML = cell.hasBall ? '<div class="ball"></div>' : '✨';
+
+      const body = document.createElement('div');
+      body.className = 'cup-body';
+      body.innerHTML = '<div class="cup-shape"><div class="cup-highlight"></div></div><div class="cup-rim"></div>';
+
+      const wordEl = document.createElement('div');
+      wordEl.className = 'cup-word';
+      wordEl.textContent = cell.word;
+      wordEl.style.fontSize = `calc(clamp(16px,5.5vw,28px) * ${cupsFontScale(cell.word)})`;
+      body.appendChild(wordEl);
+
+      body.addEventListener('click', () => onCupClick(idx));
+
+      slot.appendChild(plate);
+      slot.appendChild(reveal);
+      slot.appendChild(body);
+      cup.appendChild(slot);
+      cupsBoardEl.appendChild(cup);
+      cell.el = cup;
+    });
+  }
+
+  function updateCupsFoundCount() {
+    cupsFoundEl.textContent = `翻開 ${cupsFlippedCount} / ${cupsCells.length}`;
+  }
+
+  function pickCupsCall() {
+    const candidates = cupsCells.filter(c => !c.flipped);
+    if (candidates.length === 0) return null;
+    return candidates[Math.floor(Math.random() * candidates.length)].word;
+  }
+
+  function callNextCupsWord() {
+    const token = cupsToken;
+    const word = pickCupsCall();
+    if (!word) return;
+    cupsCurrentWord = word;
+    cupsPromptEl.textContent = '聽聽看，點那個杯子';
+    cupsReplayBtn.classList.remove('hidden');
+    console.log('[cups] call:', word);
+    setTimeout(() => {
+      if (token !== cupsToken) return;
+      speak(word, 0.90);
+    }, 200);
+  }
+
+  function startCups() {
+    cupsStarted = true;
+    cupsStartBtn.classList.add('hidden');
+    callNextCupsWord();
+  }
+
+  function onCupClick(idx) {
+    if (!cupsStarted || cupsWon) return;
+    const cell = cupsCells[idx];
+    if (cell.flipped || !cupsCurrentWord) return;
+
+    if (cell.word === cupsCurrentWord) {
+      cell.flipped = true;
+      cell.el.classList.add('flipped');
+      cupsFlippedCount += 1;
+      updateCupsFoundCount();
+      playBingoCheer();
+
+      if (cell.hasBall) {
+        cupsWon = true;
+        cupsToken += 1;
+        cupsCurrentWord = null;
+        cell.el.classList.add('found');
+        cupsPromptEl.textContent = '找到了！';
+        cupsReplayBtn.classList.add('hidden');
+        cupsWinDetailEl.textContent = `這一輪 ${cupsFlippedCount} 個字`;
+        cupsWinEl.classList.remove('hidden');
+        return;
+      }
+
+      const token = cupsToken;
+      setTimeout(() => {
+        if (token !== cupsToken) return;
+        callNextCupsWord();
+      }, 1000);
+    } else {
+      cell.el.classList.remove('shake');
+      void cell.el.offsetWidth;
+      cell.el.classList.add('shake');
+      playBingoWrongTone();
+      speak(cupsCurrentWord, 0.90);
+    }
+  }
+
+  function stopCups() {
+    cupsToken += 1;
+    cupsCurrentWord = null;
+  }
+
   function newQuestion() {
     currentAnswer = pickAnswer();
     feedback.textContent = '';
@@ -977,18 +1360,23 @@
     const learnBtn = document.getElementById('learnMode');
     const quizBtn = document.getElementById('quizMode');
     const bingoBtn = document.getElementById('bingoMode');
+    const cupsBtn = document.getElementById('cupsMode');
 
     learnBtn.classList.toggle('active', mode === 'learn');
     quizBtn.classList.toggle('active', mode === 'quiz');
     bingoBtn.classList.toggle('active', mode === 'bingo');
+    cupsBtn.classList.toggle('active', mode === 'cups');
     learnPanel.classList.toggle('hidden', mode !== 'learn');
     quizPanel.classList.toggle('hidden', mode !== 'quiz');
     bingoPanel.classList.toggle('hidden', mode !== 'bingo');
+    cupsPanel.classList.toggle('hidden', mode !== 'cups');
 
     if (mode !== 'bingo') stopBingo();
+    if (mode !== 'cups') stopCups();
 
     if (mode === 'quiz') newQuestion();
     if (mode === 'bingo') buildBingoGame();
+    if (mode === 'cups') buildCupsGame();
   }
 
   weekSelect.addEventListener('change', () => {
@@ -997,11 +1385,13 @@
     renderLearn();
     if (mode === 'quiz') newQuestion();
     if (mode === 'bingo') buildBingoGame();
+    if (mode === 'cups') buildCupsGame();
   });
 
   document.getElementById('learnMode').addEventListener('click', () => setMode('learn'));
   document.getElementById('quizMode').addEventListener('click', () => setMode('quiz'));
   document.getElementById('bingoMode').addEventListener('click', () => setMode('bingo'));
+  document.getElementById('cupsMode').addEventListener('click', () => setMode('cups'));
 
   document.getElementById('speakWord').addEventListener('click', () => {
     speak(weeks[weekIndex].words[wordIndex], 0.90);
@@ -1031,6 +1421,12 @@
     weekSelect.focus();
     weekSelect.scrollIntoView({behavior: 'smooth', block: 'center'});
   });
+
+  cupsStartBtn.addEventListener('click', startCups);
+  cupsReplayBtn.addEventListener('click', () => {
+    if (cupsCurrentWord) speak(cupsCurrentWord, 0.90);
+  });
+  document.getElementById('cupsPlayAgain').addEventListener('click', buildCupsGame);
 
   renderLearn();
 })();
