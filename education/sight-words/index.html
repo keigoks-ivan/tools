@@ -224,6 +224,102 @@
       font-size:13px;
       color:var(--muted);
     }
+    .bingo-prompt{
+      font-size:20px;
+      font-weight:800;
+    }
+    .bingo-board{
+      display:grid;
+      gap:8px;
+    }
+    .bingo-cell{
+      position:relative;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      min-height:78px;
+      padding:8px;
+      border-radius:14px;
+      border:2px solid var(--border);
+      background:#fff9ef;
+      font-weight:900;
+      letter-spacing:-.01em;
+      line-height:1.15;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      cursor:pointer;
+      font-size:clamp(16px,5.5vw,28px);
+      transition:transform .12s ease, background .12s ease;
+    }
+    .bingo-board[data-size="5"] .bingo-cell{
+      min-height:60px;
+      padding:4px;
+      font-size:clamp(13px,4vw,20px);
+    }
+    .bingo-cell:active{transform:scale(.96)}
+    .bingo-cell.free{
+      background:var(--lav);
+      border-color:var(--accent);
+      font-size:clamp(14px,4.5vw,20px);
+      cursor:default;
+    }
+    .bingo-cell.marked{
+      background:var(--mint);
+      border-color:var(--good);
+    }
+    .bingo-cell.marked[data-alt="1"]{
+      background:var(--yellow);
+      border-color:#f5c84f;
+    }
+    .bingo-cell .star{
+      position:absolute;
+      top:2px;
+      right:6px;
+      font-size:14px;
+    }
+    @keyframes bingo-shake{
+      10%,90%{transform:translateX(-3px)}
+      20%,80%{transform:translateX(5px)}
+      30%,50%,70%{transform:translateX(-9px)}
+      40%,60%{transform:translateX(9px)}
+    }
+    .bingo-cell.shake{animation:bingo-shake .5s}
+    .bingo-win{
+      margin-top:22px;
+      text-align:center;
+      border-top:1px solid var(--border);
+      padding-top:22px;
+    }
+    .bingo-confetti{
+      font-size:30px;
+      margin-bottom:6px;
+    }
+    .bingo-confetti span{
+      display:inline-block;
+      margin:0 6px;
+      animation:bingo-bounce 1s ease-in-out infinite alternate;
+    }
+    .bingo-confetti span:nth-child(2){animation-delay:.15s}
+    .bingo-confetti span:nth-child(3){animation-delay:.3s}
+    .bingo-confetti span:nth-child(4){animation-delay:.45s}
+    .bingo-confetti span:nth-child(5){animation-delay:.6s}
+    @keyframes bingo-bounce{
+      from{transform:translateY(-4px) rotate(-6deg)}
+      to{transform:translateY(4px) rotate(6deg)}
+    }
+    .bingo-win-text{
+      font-size:40px;
+      font-weight:900;
+      color:var(--good);
+      animation:bingo-pop .5s ease;
+    }
+    @keyframes bingo-pop{
+      0%{transform:scale(.5);opacity:0}
+      70%{transform:scale(1.12);opacity:1}
+      100%{transform:scale(1)}
+    }
     @media (max-width:760px){
       .wrap{padding:14px}
       .layout{grid-template-columns:1fr}
@@ -244,6 +340,7 @@
       <div class="mode-switch">
         <button id="learnMode" class="active" type="button">📚 Learn</button>
         <button id="quizMode" type="button">🎯 Quiz</button>
+        <button id="bingoMode" type="button">🎲 Bingo</button>
       </div>
     </div>
 
@@ -304,6 +401,42 @@
             </div>
           </div>
         </div>
+
+        <div id="bingoPanel" class="hidden">
+          <div class="card">
+            <div class="word-row">
+              <div>
+                <div class="label">🎲 SIGHT WORDS BINGO</div>
+                <div class="quiz-title">賓果：聽海象念，點那個字。連成一線就贏！</div>
+                <div id="bingoScope" class="muted" style="margin-top:6px;"></div>
+              </div>
+            </div>
+
+            <div class="word-row" style="margin-top:16px;">
+              <div>
+                <div id="bingoPrompt" class="bingo-prompt">按「開始」，海象會念一個字</div>
+                <div id="bingoFound" class="muted" style="margin-top:6px;"></div>
+              </div>
+              <div>
+                <button id="bingoStartBtn" class="primary" type="button">🔊 開始</button>
+                <button id="bingoReplay" class="hidden" type="button">🔊 再聽一次</button>
+              </div>
+            </div>
+
+            <div id="bingoBoard" class="bingo-board" style="margin-top:20px;"></div>
+
+            <div id="bingoWin" class="hidden bingo-win">
+              <div class="bingo-confetti" aria-hidden="true">
+                <span>🎉</span><span>⭐</span><span>🎊</span><span>⭐</span><span>🎉</span>
+              </div>
+              <div class="bingo-win-text">BINGO!</div>
+              <div class="bottom-row" style="justify-content:center;margin-top:16px;">
+                <button id="bingoPlayAgain" class="primary" type="button">🎉 再玩一次</button>
+                <button id="bingoChangeWeek" type="button">換週次再玩</button>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
     </div>
 
@@ -314,6 +447,7 @@
   </main>
 
   <audio id="audioPlayer" class="hidden" preload="none"></audio>
+  <audio id="bingoCheer" class="hidden" preload="none" src="../zhuyin/assets/walrus-cheer.mp3"></audio>
 
 <script>
 (() => {
@@ -372,6 +506,24 @@
   const feedback = document.getElementById('feedback');
   const score = document.getElementById('score');
   const quizScope = document.getElementById('quizScope');
+
+  const bingoPanel = document.getElementById('bingoPanel');
+  const bingoBoardEl = document.getElementById('bingoBoard');
+  const bingoPromptEl = document.getElementById('bingoPrompt');
+  const bingoFoundEl = document.getElementById('bingoFound');
+  const bingoScopeEl = document.getElementById('bingoScope');
+  const bingoStartBtn = document.getElementById('bingoStartBtn');
+  const bingoReplayBtn = document.getElementById('bingoReplay');
+  const bingoWinEl = document.getElementById('bingoWin');
+  const bingoCheer = document.getElementById('bingoCheer');
+
+  let bingoSize = 3;
+  let bingoCells = [];
+  let bingoCurrentWord = null;
+  let bingoToken = 0;
+  let bingoStarted = false;
+  let bingoWon = false;
+  let bingoToneContext = null;
 
   weeks.forEach((x,i) => {
     const o = document.createElement('option');
@@ -555,6 +707,220 @@
       .map(x => x.v);
   }
 
+  function bingoPool() {
+    return [...new Set(cumulativePool())];
+  }
+
+  function buildBingoGame() {
+    bingoToken += 1;
+    bingoStarted = false;
+    bingoWon = false;
+    bingoCurrentWord = null;
+
+    const pool = bingoPool();
+    let size, hasFree, allowDup;
+    if (pool.length >= 25) { size = 5; hasFree = true; allowDup = false; }
+    else if (pool.length >= 9) { size = 3; hasFree = false; allowDup = false; }
+    else { size = 3; hasFree = false; allowDup = true; }
+
+    const total = size * size;
+    const freeIndex = hasFree ? Math.floor(total / 2) : -1;
+    const need = hasFree ? total - 1 : total;
+
+    let words;
+    if (allowDup) {
+      words = [];
+      while (words.length < need) words = words.concat(shuffle(pool));
+      words = shuffle(words.slice(0, need));
+    } else {
+      words = shuffle(pool).slice(0, need);
+    }
+
+    bingoSize = size;
+    bingoCells = [];
+    let wi = 0;
+    for (let i = 0; i < total; i++) {
+      if (i === freeIndex) {
+        bingoCells.push({word: null, isFree: true, marked: true, el: null});
+      } else {
+        bingoCells.push({word: words[wi++], isFree: false, marked: false, el: null});
+      }
+    }
+
+    bingoScopeEl.textContent = weeks[weekIndex].w === 'Colors'
+      ? 'Bingo 範圍：Colors'
+      : `Bingo 範圍：Week 1 ～ ${weeks[weekIndex].w}`;
+
+    renderBingoBoard();
+    bingoWinEl.classList.add('hidden');
+    bingoBoardEl.classList.remove('hidden');
+    bingoStartBtn.classList.remove('hidden');
+    bingoReplayBtn.classList.add('hidden');
+    bingoPromptEl.textContent = '按「開始」，海象會念一個字';
+    updateBingoFoundCount();
+  }
+
+  function bingoFontScaleFor(word) {
+    if (!word) return 1;
+    const len = word.length;
+    if (len <= 4) return 1;
+    if (len <= 6) return 0.85;
+    return 0.7;
+  }
+
+  function bingoBaseFontExpr() {
+    return bingoSize === 5 ? 'clamp(13px,4vw,20px)' : 'clamp(16px,5.5vw,28px)';
+  }
+
+  function renderBingoBoard() {
+    bingoBoardEl.innerHTML = '';
+    bingoBoardEl.dataset.size = String(bingoSize);
+    bingoBoardEl.style.gridTemplateColumns = `repeat(${bingoSize}, 1fr)`;
+
+    bingoCells.forEach((cell, idx) => {
+      const div = document.createElement('div');
+      div.className = 'bingo-cell';
+      if (cell.isFree) {
+        div.classList.add('free', 'marked');
+        div.innerHTML = '⭐<br>FREE';
+      } else {
+        div.textContent = cell.word;
+        div.style.fontSize = `calc(${bingoBaseFontExpr()} * ${bingoFontScaleFor(cell.word)})`;
+        if (idx % 2 === 0) div.dataset.alt = '1';
+        div.addEventListener('click', () => onBingoCellClick(idx));
+      }
+      bingoBoardEl.appendChild(div);
+      cell.el = div;
+    });
+  }
+
+  function updateBingoFoundCount() {
+    const total = bingoCells.length;
+    const found = bingoCells.filter(c => c.marked).length;
+    bingoFoundEl.textContent = `已找到 ${found} / ${total}`;
+  }
+
+  function pickBingoCall() {
+    const candidates = bingoCells.filter(c => !c.isFree && !c.marked);
+    if (candidates.length === 0) return null;
+    return candidates[Math.floor(Math.random() * candidates.length)].word;
+  }
+
+  function callNextBingoWord() {
+    const token = bingoToken;
+    const word = pickBingoCall();
+    if (!word) return;
+    bingoCurrentWord = word;
+    bingoPromptEl.textContent = '聽聽看，點那個字';
+    bingoReplayBtn.classList.remove('hidden');
+    console.log('[bingo] call:', word);
+    setTimeout(() => {
+      if (token !== bingoToken) return;
+      speak(word, 0.90);
+    }, 200);
+  }
+
+  function startBingo() {
+    bingoStarted = true;
+    bingoStartBtn.classList.add('hidden');
+    callNextBingoWord();
+  }
+
+  function checkBingoWin() {
+    const n = bingoSize;
+    const marked = (r, c) => bingoCells[r * n + c].marked;
+    for (let r = 0; r < n; r++) {
+      let ok = true;
+      for (let c = 0; c < n; c++) if (!marked(r, c)) { ok = false; break; }
+      if (ok) return true;
+    }
+    for (let c = 0; c < n; c++) {
+      let ok = true;
+      for (let r = 0; r < n; r++) if (!marked(r, c)) { ok = false; break; }
+      if (ok) return true;
+    }
+    let d1 = true, d2 = true;
+    for (let i = 0; i < n; i++) {
+      if (!marked(i, i)) d1 = false;
+      if (!marked(i, n - 1 - i)) d2 = false;
+    }
+    return d1 || d2;
+  }
+
+  function playBingoCheer() {
+    try {
+      bingoCheer.pause();
+      bingoCheer.currentTime = 0;
+      const p = bingoCheer.play();
+      if (p && typeof p.catch === 'function') p.catch(() => {});
+    } catch (e) { /* ignore */ }
+  }
+
+  function playBingoWrongTone() {
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    try {
+      if (!bingoToneContext) bingoToneContext = new AC();
+      if (bingoToneContext.state === 'suspended') bingoToneContext.resume();
+      const ctx = bingoToneContext;
+      const now = ctx.currentTime;
+      [246.94, 196].forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(.0001, now + i * .1);
+        gain.gain.exponentialRampToValueAtTime(.07, now + i * .1 + .015);
+        gain.gain.exponentialRampToValueAtTime(.0001, now + i * .1 + .12);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now + i * .1);
+        osc.stop(now + i * .1 + .14);
+      });
+    } catch (e) { /* ignore */ }
+  }
+
+  function onBingoCellClick(idx) {
+    if (!bingoStarted || bingoWon) return;
+    const cell = bingoCells[idx];
+    if (cell.marked || !bingoCurrentWord) return;
+
+    if (cell.word === bingoCurrentWord) {
+      cell.marked = true;
+      cell.el.classList.add('marked');
+      cell.el.innerHTML = cell.word + '<span class="star">⭐</span>';
+      updateBingoFoundCount();
+      playBingoCheer();
+
+      if (checkBingoWin()) {
+        bingoWon = true;
+        bingoToken += 1;
+        bingoCurrentWord = null;
+        bingoPromptEl.textContent = '';
+        bingoReplayBtn.classList.add('hidden');
+        bingoWinEl.classList.remove('hidden');
+        return;
+      }
+
+      const token = bingoToken;
+      setTimeout(() => {
+        if (token !== bingoToken) return;
+        callNextBingoWord();
+      }, 1000);
+    } else {
+      cell.el.classList.remove('shake');
+      void cell.el.offsetWidth;
+      cell.el.classList.add('shake');
+      playBingoWrongTone();
+      speak(bingoCurrentWord, 0.90);
+    }
+  }
+
+  function stopBingo() {
+    bingoToken += 1;
+    bingoCurrentWord = null;
+  }
+
   function newQuestion() {
     currentAnswer = pickAnswer();
     feedback.textContent = '';
@@ -610,13 +976,19 @@
     mode = nextMode;
     const learnBtn = document.getElementById('learnMode');
     const quizBtn = document.getElementById('quizMode');
+    const bingoBtn = document.getElementById('bingoMode');
 
     learnBtn.classList.toggle('active', mode === 'learn');
     quizBtn.classList.toggle('active', mode === 'quiz');
+    bingoBtn.classList.toggle('active', mode === 'bingo');
     learnPanel.classList.toggle('hidden', mode !== 'learn');
     quizPanel.classList.toggle('hidden', mode !== 'quiz');
+    bingoPanel.classList.toggle('hidden', mode !== 'bingo');
+
+    if (mode !== 'bingo') stopBingo();
 
     if (mode === 'quiz') newQuestion();
+    if (mode === 'bingo') buildBingoGame();
   }
 
   weekSelect.addEventListener('change', () => {
@@ -624,10 +996,12 @@
     wordIndex = 0;
     renderLearn();
     if (mode === 'quiz') newQuestion();
+    if (mode === 'bingo') buildBingoGame();
   });
 
   document.getElementById('learnMode').addEventListener('click', () => setMode('learn'));
   document.getElementById('quizMode').addEventListener('click', () => setMode('quiz'));
+  document.getElementById('bingoMode').addEventListener('click', () => setMode('bingo'));
 
   document.getElementById('speakWord').addEventListener('click', () => {
     speak(weeks[weekIndex].words[wordIndex], 0.90);
@@ -647,6 +1021,16 @@
     speak(currentAnswer, 0.90);
   });
   document.getElementById('nextQuestion').addEventListener('click', newQuestion);
+
+  bingoStartBtn.addEventListener('click', startBingo);
+  bingoReplayBtn.addEventListener('click', () => {
+    if (bingoCurrentWord) speak(bingoCurrentWord, 0.90);
+  });
+  document.getElementById('bingoPlayAgain').addEventListener('click', buildBingoGame);
+  document.getElementById('bingoChangeWeek').addEventListener('click', () => {
+    weekSelect.focus();
+    weekSelect.scrollIntoView({behavior: 'smooth', block: 'center'});
+  });
 
   renderLearn();
 })();
