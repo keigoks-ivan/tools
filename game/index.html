@@ -57,10 +57,13 @@
   .ccard{pointer-events:auto;cursor:pointer;width:196px;padding:20px 16px 14px;border-radius:16px;text-align:center;
     background:rgba(14,10,30,.85);border:2px solid var(--cc);box-shadow:0 0 20px rgba(120,60,220,.35);transition:transform .12s,box-shadow .12s}
   .ccard:hover{transform:translateY(-6px) scale(1.04);box-shadow:0 0 30px var(--cc)}
+  .ccard:disabled{cursor:wait;opacity:.58;transform:none;box-shadow:none}
   .ccard .cname{font-size:27px;font-weight:900;letter-spacing:3px;color:var(--cc)}
   .ccard .ckr{font-size:13px;color:rgba(255,255,255,.6);margin:2px 0 10px}
   .ccard .cdesc{font-size:13px;line-height:1.65;color:rgba(255,255,255,.85)}
   .ccard .ckey{margin-top:10px;font-size:11px;color:rgba(255,255,255,.4)}
+  #charLoadStatus{min-height:1.5em;margin:14px 0 0;color:#e8d8ff;font-size:14px}
+  #charLoadRetry{margin:8px 0 0;padding:8px 20px;border:1px solid #c9a4ff;border-radius:999px;background:#211735;color:#fff;cursor:pointer}
   @media (max-width:900px){ .ccard{width:150px;padding:14px 10px 10px} .ccard .cname{font-size:20px} #charsel h1{font-size:26px} }
   #dead h1{color:#ff5a7a;text-shadow:0 0 30px #ff2050}
   #win h1{color:#ffd84f;text-shadow:0 0 34px #ff9d2e}
@@ -188,7 +191,9 @@
       <span class="ckey">按 3 選擇</span>
     </button>
   </div>
-  <p class="charsel-note">MIRA／ZOEY 目前為靈氣變體外觀，專屬模型製作中</p>
+  <p id="charLoadStatus" role="status" aria-live="polite"></p>
+  <button id="charLoadRetry" class="hidden" type="button">重試載入角色</button>
+  <p class="charsel-note">三位獵魔士均有專屬造型與武器，可使用鍵盤 1 / 2 / 3 選擇。</p>
 </div>
 <div id="dead" class="overlay hidden">
   <div class="result-panel result-dead">
@@ -220,6 +225,6 @@
   }
 }
 </script>
-<script type="module" src="boot.js?v=20260923c"></script>
+<script type="module" src="boot.js?v=20260924a"></script>
 </body>
 </html>

@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#07101e">
+<title>角色工坊｜HUNTR/X</title>
+<script type="importmap">
+{"imports":{"three":"./lib/three.module.js","three/addons/":"./lib/addons/"}}
+</script>
+<style>
+  :root{color-scheme:dark;--ink:#eaf1ff;--muted:#8794aa;--line:rgba(183,205,244,.13);--panel:rgba(10,20,36,.88);--cyan:#7de3e3;--gold:#f1c982}
+  *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#07101e;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC",sans-serif}
+  body{background:radial-gradient(ellipse at 53% 48%,#15253a 0,#0b1728 40%,#07101e 78%)}
+  #stage{position:absolute;inset:0}canvas{display:block;width:100%;height:100%;touch-action:none}
+  .topbar{position:absolute;top:0;left:0;right:0;height:76px;padding:0 34px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);background:linear-gradient(180deg,rgba(6,14,26,.9),rgba(6,14,26,.22));pointer-events:none}
+  .brand{display:flex;align-items:center;gap:13px}.brand-mark{width:30px;height:30px;border:1px solid rgba(125,227,227,.5);transform:rotate(45deg);display:grid;place-items:center}.brand-mark i{width:8px;height:8px;background:var(--cyan);box-shadow:0 0 16px var(--cyan)}.brand-title{font-size:14px;letter-spacing:.17em;font-weight:700}.brand-sub{margin-top:4px;color:#78869d;font-size:9px;letter-spacing:.2em}.top-meta{font-size:10px;letter-spacing:.16em;color:#76849a}.top-meta b{color:var(--cyan);font-weight:600}
+  .sidepanel{position:absolute;left:30px;top:108px;bottom:28px;width:276px;display:flex;flex-direction:column;gap:18px;pointer-events:none}.sidepanel>*{pointer-events:auto}.eyebrow{font-size:9px;letter-spacing:.2em;color:#8391a7}.heading{margin:7px 0 0;font-weight:500;font-size:24px;letter-spacing:.08em}.subhead{font-size:11px;color:#8996aa;margin-top:7px;line-height:1.6}.panel{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:16px;box-shadow:0 15px 45px rgba(0,0,0,.2);backdrop-filter:blur(14px)}.panel-label{font-size:9px;color:#8391a7;letter-spacing:.18em;margin-bottom:12px}.hero-list{display:grid;gap:7px}.hero-button,.control-button,.pause-button{font:inherit;color:inherit;cursor:pointer}.hero-button{height:49px;padding:0 12px;border:1px solid transparent;border-radius:9px;background:rgba(255,255,255,.025);display:flex;align-items:center;gap:11px;text-align:left;transition:.18s}.hero-button:hover{background:rgba(255,255,255,.06)}.hero-button.active{border-color:rgba(125,227,227,.38);background:linear-gradient(90deg,rgba(83,188,194,.13),rgba(83,188,194,.025))}.hero-index{font-size:9px;color:#748197;letter-spacing:.1em}.hero-name{font-size:12px;font-weight:650;letter-spacing:.15em}.hero-role{margin-left:auto;font-size:9px;color:#8190a5}.dot{width:6px;height:6px;border-radius:50%;background:#64758b}.active .dot{background:var(--cyan);box-shadow:0 0 10px var(--cyan)}
+  .view-row,.anim-grid{display:grid;gap:7px}.view-row{grid-template-columns:repeat(4,minmax(0,1fr))}.anim-grid{grid-template-columns:repeat(3,1fr)}.control-button{min-height:34px;padding:0 9px;background:rgba(255,255,255,.035);border:1px solid var(--line);border-radius:7px;font-size:10px;color:#9aa8bb;transition:.16s}.control-button:hover{border-color:rgba(125,227,227,.4);color:var(--ink)}.control-button.active{background:rgba(125,227,227,.12);border-color:rgba(125,227,227,.35);color:#c9ffff}.pause-button{height:38px;width:100%;margin-top:9px;border:1px solid rgba(241,201,130,.25);border-radius:8px;background:rgba(241,201,130,.07);color:#e6c98f;font-size:10px;letter-spacing:.12em}.pause-button:hover{background:rgba(241,201,130,.12)}
+  .status{margin-top:auto;display:flex;align-items:center;gap:8px;font-size:10px;color:#78869b}.status-light{width:6px;height:6px;border-radius:50%;background:#748196;flex:none}.status-light.ready{background:#8bd5ac;box-shadow:0 0 8px #8bd5ac}.status-light.error{background:#f08c8c}.status-text{line-height:1.55}.retry-button{display:none;margin:9px 0 0 14px;padding:6px 10px;border:1px solid rgba(125,227,227,.28);border-radius:6px;color:#a9eeee;background:rgba(125,227,227,.07);font:inherit;font-size:10px;cursor:pointer}.retry-button.visible{display:inline-block}.stage-caption{position:absolute;right:34px;bottom:25px;text-align:right;color:#718097;font-size:9px;letter-spacing:.14em;pointer-events:none}.stage-caption strong{display:block;color:#acb8ca;font-weight:500;font-size:11px;letter-spacing:.11em;margin-bottom:6px}.corner{position:absolute;right:28px;top:101px;font-size:9px;letter-spacing:.18em;color:#63738a;writing-mode:vertical-rl;pointer-events:none}
+  @media(max-width:700px){.topbar{height:62px;padding:0 17px}.top-meta{display:none}.sidepanel{left:14px;top:78px;bottom:12px;width:210px;gap:10px}.heading{font-size:20px}.panel{padding:12px}.hero-button{height:41px}.hero-role{display:none}.anim-grid{grid-template-columns:repeat(2,1fr)}.stage-caption{right:14px;bottom:12px;font-size:8px}.corner{display:none}}
+  @media(max-width:700px) and (orientation:portrait){
+    #stage{inset:50px 0 45vh;z-index:0}
+    .topbar{height:50px;padding:0 14px;z-index:4}.brand-mark{width:23px;height:23px}.brand{gap:10px}.brand-title{font-size:12px}
+    .sidepanel{z-index:3;left:0;right:0;top:auto;bottom:0;width:auto;height:45vh;max-height:45vh;overflow-y:auto;overscroll-behavior:contain;padding:7px 9px 10px;gap:5px;background:rgba(7,16,30,.97);border-top:1px solid var(--line)}
+    .sidepanel>div:first-child .eyebrow,.sidepanel>div:first-child .subhead{display:none}.heading{font-size:16px;margin:0 0 1px}.panel{padding:8px;border-radius:9px}.panel-label{margin-bottom:6px;font-size:8px}
+    .hero-list{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.hero-button{height:33px;padding:0 4px;justify-content:center;gap:4px}.hero-button .dot,.hero-index,.hero-role{display:none}.hero-name{font-size:10px}
+    .view-row{gap:4px}.control-button{min-height:30px;padding:0 3px;font-size:9px}.anim-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}.pause-button{height:31px;margin-top:6px}
+    .sidepanel>.panel:nth-of-type(2) .panel-label,.sidepanel>.panel:nth-of-type(3) .panel-label{margin-bottom:5px}
+    .status{font-size:9px}.retry-button{margin:5px 0 0 14px;padding:4px 8px}.stage-caption{right:12px;bottom:calc(45vh + 8px);font-size:8px}.stage-caption strong{font-size:10px}.corner{display:none}
+  }
+  @media(max-height:550px) and (orientation:landscape){
+    #stage{inset:48px 0 0 210px;z-index:0}
+    .topbar{height:48px;padding:0 17px;z-index:4}.brand-mark{width:22px;height:22px}.brand-title{font-size:12px}.brand-sub{font-size:8px;margin-top:2px}
+    .sidepanel{z-index:3;left:10px;top:54px;bottom:6px;width:190px;overflow-y:auto;overscroll-behavior:contain;gap:7px;padding-right:2px}
+    .eyebrow{font-size:8px}.heading{font-size:18px;margin:4px 0 0}.subhead{font-size:9px;line-height:1.35;margin-top:4px}.panel{padding:9px;border-radius:9px}.panel-label{font-size:8px;margin-bottom:6px}
+    .hero-list{gap:4px}.hero-button{height:34px;padding:0 8px;gap:7px}.hero-name{font-size:10px}.hero-index{font-size:8px}.hero-role{display:none}
+    .view-row,.anim-grid{gap:4px}.control-button{min-height:29px;padding:0 4px;font-size:9px}.anim-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.pause-button{height:31px;margin-top:6px}
+    .stage-caption{right:12px;bottom:9px;font-size:8px}.stage-caption strong{font-size:10px}.corner{display:none}
+  }
+</style>
+</head>
+<body>
+<div id="stage" aria-label="3D 角色預覽"></div>
+<header class="topbar"><div class="brand"><span class="brand-mark"><i></i></span><div><div class="brand-title">角色工坊</div><div class="brand-sub">HUNTR/X　·　MODEL REVIEW</div></div></div><div class="top-meta">ASSET REVIEW　 /　 <b>HERO SERIES 01</b></div></header>
+<aside class="sidepanel">
+  <div><div class="eyebrow">OPERATIVE PREVIEW</div><h1 class="heading">角色檢視</h1><div class="subhead">拖曳旋轉角色 · 點選動作檢查骨架與外觀</div></div>
+  <section class="panel"><div class="panel-label">角色　/　CHARACTER</div><div class="hero-list">
+    <button class="hero-button active" data-hero="rumi"><span class="dot"></span><span class="hero-index">01</span><span class="hero-name">RUMI</span><span class="hero-role">LEAD</span></button>
+    <button class="hero-button" data-hero="mira"><span class="dot"></span><span class="hero-index">02</span><span class="hero-name">MIRA</span><span class="hero-role">BREAKER</span></button>
+    <button class="hero-button" data-hero="zoey"><span class="dot"></span><span class="hero-index">03</span><span class="hero-name">ZOEY</span><span class="hero-role">RUSH</span></button>
+  </div></section>
+  <section class="panel"><div class="panel-label">視角　/　VIEW</div><div class="view-row">
+    <button class="control-button active" data-view="front">正面</button><button class="control-button" data-view="side">側面</button><button class="control-button" data-view="back">背面</button><button class="control-button" data-view="face">臉部</button>
+  </div></section>
+  <section class="panel"><div class="panel-label">動作　/　ANIMATION</div><div class="anim-grid">
+    <button class="control-button active" data-animation="idle">待機</button><button class="control-button" data-animation="run">跑步</button><button class="control-button" data-animation="slash1">斬擊</button><button class="control-button" data-animation="heavy">重擊</button><button class="control-button" data-animation="roll">翻滾</button><button class="control-button" id="bind-pose">綁定姿勢</button>
+  </div><button class="pause-button" id="pause">Ⅱ　暫停動作</button></section>
+  <div><div class="status"><span class="status-light" id="status-light"></span><span class="status-text" id="status-text" role="status">準備載入角色模型…</span></div><button class="retry-button" id="retry">重新載入</button></div>
+</aside>
+<div class="corner">DRAG TO ORBIT　·　HUNTR/X CHARACTER LAB</div>
+<div class="stage-caption"><strong id="caption-name">RUMI　/　01</strong>MODEL SCALE　·　1.78 M</div>
+<script type="module" src="./model-lab.js?v=20260924a"></script>
+</body>
+</html>

@@ -29,3 +29,14 @@ PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s game/tests -p 'test_ru
 ```
 
 The packer drops unreachable animation data and the Maria normal map that `toonify()` discards. The two Python asset tests cover the enemy GLBs and Maria GLB. Maria's base-color images are encoded as lossless WebP; the checks compare decoded pixels exactly with the source, alongside geometry, skeletons and animation data. Pillow must include WebP support for generation and these tests. They inspect files without loading the game or using a GPU. Bump `RUNTIME_ASSET_VERSION` in main.js when publishing regenerated GLBs.
+
+## Authored hero GLBs
+
+Rebuild the three new hero surfaces against the existing Maria animation rig:
+
+```sh
+node --experimental-default-type=module --loader ./game/tests/three-loader.mjs game/scripts/build_hero_assets.mjs
+node --experimental-default-type=module --loader ./game/tests/three-loader.mjs --test game/tests/hero-assets.test.mjs game/tests/hero-loading.test.mjs
+```
+
+The hero builder runs offline and is not imported by the game. Exported GLBs contain four indexed, vertex-colored skinned surfaces, no images, and all 13 source clips. Tests parse the actual files, validate weights and bone indices, sample every action for finite/bounded geometry, and verify animation deformation. Loading checks cover shared requests, retry, nested GLB metadata, duplicate selections and cached geometry ownership. Inspect `game/model-lab.html` for facial details, clothing intersections, front/back appearance and animation; tests cannot judge art quality or guarantee a frame rate.

@@ -76,7 +76,6 @@ const OFFICER_NAMES = ['陰差百夫長', '陰差千夫長', '夜叉先鋒', '�
 let stageIdx = 0;
 
 // ---------- 可操作角色（HUNTR/X 三人組） ----------
-// 專屬模型上線後在角色設定加入 modelFile；目前以 Rumi 模型＋靈氣配色代身。
 const CHARS = {
   rumi: { key: 'rumi', name: 'RUMI', weapon: 'sword', tint: null,     hair: 0x8a5ae0, outfit: 0x2a2240, metal: 0xc8a860, fx: 0xc9a4ff, fxHi: 0xe0ccff, boltCol: 0x7ad0ff, spd: 6.5, dmgMul: 1,    hpMul: 1,    atkTs: 1,    rangeMul: 1,    light: 0xff4fa3 },
   mira: { key: 'mira', name: 'MIRA', weapon: 'great', tint: 0x4a78ff, hair: 0x3a5090, outfit: 0x1e2c48, metal: 0x9ab0cc, fx: 0x6aa8ff, fxHi: 0xaad4ff, boltCol: 0x6ab8ff, spd: 5.9, dmgMul: 1.28, hpMul: 1.18, atkTs: 0.86, rangeMul: 1.2,  light: 0x5a8aff },
@@ -1280,7 +1279,8 @@ function makeOutlineMat(width = 0.028) {
 function addOutline(root, matsArr, width = 0.028) {
   const targets = [];
   root.traverse(o => {
-    if (o.isMesh && o.visible && o.material?.name !== 'Glow' && !o.userData.isOutline) targets.push(o);
+    if (o.isMesh && o.visible && o.material?.name !== 'Glow' && o.material?.name !== 'HeroDetails'
+      && !o.userData.isOutline && !o.userData.noOutline) targets.push(o);
   });
   const mat = makeOutlineMat(width);
   if (matsArr) matsArr.push(mat);
@@ -1314,7 +1314,14 @@ function toonify(root, grad = gradTex) {
     o.castShadow = true;
     const conv = m => {
       if (m.name === 'Glow') return new THREE.MeshBasicMaterial({ color: 0xff3a6a, name: 'Glow' });
-      return new THREE.MeshToonMaterial({ map: m.map || null, color: m.color.clone(), gradientMap: grad, name: m.name });
+      if (m.name === 'HeroDetails') return new THREE.MeshBasicMaterial({
+        map: m.map || null, color: m.color.clone(), vertexColors: m.vertexColors,
+        side: THREE.DoubleSide, name: 'HeroDetails',
+      });
+      return new THREE.MeshToonMaterial({
+        map: m.map || null, color: m.color.clone(), gradientMap: grad,
+        vertexColors: m.vertexColors, name: m.name,
+      });
     };
     o.material = Array.isArray(o.material) ? o.material.map(conv) : conv(o.material);
   });
@@ -1670,9 +1677,17 @@ function setupOutfit(root, char, hScale) {
   }
 }
 const trail = { pts: [], max: 16, mesh: null, mat: null, base: null, tip: null, color: new THREE.Color(0xc9a4ff) };
-function setupSwordFx(root, char) {
-  if (trail.mesh) { scene.remove(trail.mesh); trail.mesh.geometry.dispose(); trail.mat.dispose(); trail.mesh = null; }
+function clearSwordFx() {
+  if (trail.mesh) {
+    scene.remove(trail.mesh);
+    trail.mesh.geometry.dispose();
+    trail.mat.dispose();
+    trail.mesh = null;
+  }
   trail.pts = []; trail.base = null; trail.tip = null;
+}
+function setupSwordFx(root, char) {
+  clearSwordFx();
   const hand = root.getObjectByName('mixamorigRightHand');
   let sword = null;
   root.traverse(o => { if (o.isMesh && /sword/i.test(o.name) && !o.userData.isOutline) sword = o; });
@@ -1695,7 +1710,7 @@ function setupSwordFx(root, char) {
   const tipL = hand.worldToLocal(tipW.clone());
   const dirL = tipL.clone().sub(nearL).normalize();
   const bladeLen = tipL.distanceTo(nearL);
-  if (char.weapon === 'great' || char.weapon === 'short') {
+  if ((char.weapon === 'great' || char.weapon === 'short') && !root.userData.authoredHero) {
     // 換裝程序生成武器：隱藏原劍（含描邊複製），大劍 1.3x／短刃 0.68x
     const swordGeo = sword.geometry;
     root.traverse(o => { if (o.isMesh && o.geometry === swordGeo) o.visible = false; });
@@ -2202,9 +2217,7 @@ addEventListener('keydown', e => {
     } else {
       const pick = { Digit1: 'rumi', Digit2: 'mira', Digit3: 'zoey' }[e.code];
       if (pick) {
-        buildHero(CHARS[pick]);
-        sel.classList.add('hidden');
-        start();
+        chooseHero(pick);
       }
     }
   }
@@ -2324,11 +2337,12 @@ el('startBtn').addEventListener('click', () => {
 for (const card of document.querySelectorAll('.ccard')) {
   card.addEventListener('click', () => {
     if (!ready || state !== 'title') return;
-    buildHero(CHARS[card.dataset.char]);
-    document.getElementById('charsel').classList.add('hidden');
-    start();
+    chooseHero(card.dataset.char);
   });
 }
+el('charLoadRetry').addEventListener('click', () => {
+  if (pendingHeroKey) chooseHero(pendingHeroKey);
+});
 el('retryBtn').addEventListener('click', () => restart());
 el('againBtn').addEventListener('click', () => restart());
 el('nextBtn').addEventListener('click', () => requestStage(stageIdx + 1));
@@ -2599,36 +2613,82 @@ function lockHips(animations) {
     }
   }
 }
-let heroBase = null;
+const heroAssets = new Map();
+const heroOwnedResources = new WeakMap();
+let heroSelectionPending = false;
+let pendingHeroKey = null;
+let heroPreloadFailed = false;
 function prepHeroModel(gltf) {
   lockHips(gltf.animations);
   toonify(gltf.scene, gradTex4);
   gltf.scene.traverse(o => { if (o.isMesh) o.frustumCulled = false; });
-  // 依模型實際身高標定為 1.78m（Mixamo FBX 單位是公分）
+  let heroModel = gltf.scene.userData.heroModel;
+  if (typeof heroModel !== 'string') {
+    gltf.scene.traverse(object => {
+      if (typeof heroModel !== 'string' && typeof object.userData.heroModel === 'string') heroModel = object.userData.heroModel;
+    });
+    if (typeof heroModel === 'string') gltf.scene.userData.heroModel = heroModel;
+  }
+  const authored = typeof heroModel === 'string';
   const bbox = new THREE.Box3().setFromObject(gltf.scene);
-  return { scene: gltf.scene, clips: gltf.animations, hScale: 1.78 / (bbox.max.y - bbox.min.y) };
+  return { scene: gltf.scene, clips: gltf.animations, hScale: 1.78 / (bbox.max.y - bbox.min.y), authored };
+}
+function loadHeroAsset(key) {
+  if (heroAssets.has(key)) return heroAssets.get(key);
+  const request = loader.loadAsync(`assets/heroes/${key}.glb?v=20260924a`)
+    .then(prepHeroModel)
+    .then(base => {
+      if (!base.authored || base.scene.userData.heroModel !== key) throw new Error(`Hero asset does not match ${key}`);
+      CHARS[key].model = base;
+      return base;
+    })
+    .catch(error => {
+      heroAssets.delete(key);
+      throw error;
+    });
+  heroAssets.set(key, request);
+  return request;
+}
+function cloneHeroMaterials(root) {
+  const materials = new Map();
+  root.traverse(object => {
+    if (!object.isMesh) return;
+    const clone = material => {
+      if (!materials.has(material)) materials.set(material, material.clone());
+      return materials.get(material);
+    };
+    object.material = Array.isArray(object.material) ? object.material.map(clone) : clone(object.material);
+  });
+  return [...materials.values()];
+}
+function disposeHero(root, shadow, rig) {
+  if (root) {
+    scene.remove(root);
+    rig?.mixer.stopAllAction();
+    const owned = heroOwnedResources.get(root);
+    for (const skeleton of owned?.skeletons || []) skeleton.dispose();
+    for (const geometry of owned?.geometries || []) geometry.dispose();
+    for (const material of owned?.materials || []) material.dispose();
+    heroOwnedResources.delete(root);
+  }
+  if (shadow) {
+    scene.remove(shadow);
+    shadow.geometry.dispose();
+    shadow.material.dispose();
+  }
 }
 function buildHero(char) {
+  const base = char.model;
+  if (!base?.authored) throw new Error(`The ${char.name} model is not ready`);
   curChar = char;
-  if (player.root) {
-    scene.remove(player.root);
-    player.rig.mixer.stopAllAction();
-    scene.remove(player.shadow);
-  }
-  const base = char.model || heroBase;
+  clearSwordFx();
+  if (player.root || player.shadow) disposeHero(player.root, player.shadow, player.rig);
   const root = SkeletonUtils.clone(base.scene);
   shareClonedSkeletons(root);
-  if (!char.model && char.tint) {
-    // 專屬模型未到位前：靈氣配色代身
-    const tc = new THREE.Color(char.tint);
-    root.traverse(o => {
-      if (!o.isMesh || o.userData.isOutline) return;
-      o.material = Array.isArray(o.material) ? o.material.map(m => m.clone()) : o.material.clone();
-      for (const m of Array.isArray(o.material) ? o.material : [o.material]) {
-        if (m.color && m.name !== 'Glow') m.color.lerp(tc, 0.3);
-      }
-    });
-  }
+  root.userData.authoredHero = true;
+  const ownedMaterials = new Set(cloneHeroMaterials(root));
+  const cachedGeometry = new Set();
+  base.scene.traverse(object => { if (object.isMesh) cachedGeometry.add(object.geometry); });
   root.scale.setScalar(base.hScale);
   player.root = root;
   scene.add(root);
@@ -2636,17 +2696,71 @@ function buildHero(char) {
     'idle', 'run', 'roll', 'hurt', 'death', 'win', 'jump',
     'slash1', 'slash2', 'slash3', 'slash4', 'heavy', 'heavyfin',
   ]);
-  setupHair(root, char, base.hScale);     // 在描邊前掛髮/裝備，一起吃描邊
-  setupOutfit(root, char, base.hScale);
-  addOutline(root, null, 0.028 / base.hScale);
+  if (!root.userData.authoredHero) {
+    setupHair(root, char, base.hScale);
+    setupOutfit(root, char, base.hScale);
+  }
+  const outlineMaterials = [];
+  addOutline(root, outlineMaterials, (base.authored ? 0.0035 : 0.028) / base.hScale);
+  const ownedGeometries = new Set();
+  const ownedSkeletons = new Set();
+  root.traverse(object => {
+    if (object.isMesh && !cachedGeometry.has(object.geometry)) ownedGeometries.add(object.geometry);
+    if (object.isSkinnedMesh && object.skeleton) ownedSkeletons.add(object.skeleton);
+  });
+  for (const material of outlineMaterials) ownedMaterials.add(material);
   play(player.rig, 'idle');
   player.shadow = makeBlobShadow(1.1);
   player.spd = char.spd;
   setupSwordFx(root, char);
+  const sourceMaterials = new Set();
+  base.scene.traverse(object => {
+    const source = Array.isArray(object.material) ? object.material : [object.material];
+    for (const material of source) if (material) sourceMaterials.add(material);
+  });
+  root.traverse(object => {
+    const used = Array.isArray(object.material) ? object.material : [object.material];
+    for (const material of used) if (material && !sourceMaterials.has(material)) ownedMaterials.add(material);
+  });
+  heroOwnedResources.set(root, {
+    materials: [...ownedMaterials],
+    geometries: [...ownedGeometries],
+    skeletons: [...ownedSkeletons],
+  });
   heroLight.color.set(char.light);
   document.getElementById('hpname').textContent = char.name;
   document.body.style.setProperty('--hero-color', '#' + new THREE.Color(char.fx).getHexString());
   syncPlayer();
+}
+function setHeroCardsDisabled(disabled) {
+  for (const card of document.querySelectorAll('.ccard')) card.disabled = disabled;
+  document.getElementById('charsel').setAttribute('aria-busy', String(disabled));
+}
+async function chooseHero(key) {
+  const char = CHARS[key];
+  if (!char || !ready || state !== 'title' || heroSelectionPending) return;
+  heroSelectionPending = true;
+  pendingHeroKey = key;
+  const status = document.getElementById('charLoadStatus');
+  const retry = document.getElementById('charLoadRetry');
+  retry.classList.add('hidden');
+  status.textContent = `正在載入 ${char.name}…`;
+  setHeroCardsDisabled(true);
+  try {
+    char.model = await loadHeroAsset(key);
+    clearHeldInput();
+    buildHero(char);
+    document.getElementById('charsel').classList.add('hidden');
+    start();
+    heroPreloadFailed = false;
+  } catch (error) {
+    console.error(`Unable to load ${char.name} hero model`, error);
+    status.textContent = `${char.name} 模型載入失敗，請檢查連線後重試。`;
+    retry.classList.remove('hidden');
+  } finally {
+    heroSelectionPending = false;
+    setHeroCardsDisabled(false);
+  }
 }
 const ENEMY_FILES = {
   minion: 'Skeleton_Minion', warrior: 'Skeleton_Warrior',
@@ -2737,21 +2851,18 @@ async function prepareStage(i, report = () => {}) {
 
 export async function prepareGame() {
   hud.load.textContent = '載入獵魔士…';
-  const [hero] = await Promise.all([
-    loader.loadAsync(`assets/runtime/maria.glb?v=${RUNTIME_ASSET_VERSION}`),
-    loadEnemyAsset('minion'),
-  ]);
-  heroBase = prepHeroModel(hero);
-  // 只下載已列入設定的專屬模型，避免不存在的檔案拖住選角。
-  await Promise.all(Object.values(CHARS).filter(char => char.modelFile).map(async char => {
-    const gltf = await loader.loadAsync(char.modelFile).catch(() => null);
-    if (gltf) char.model = prepHeroModel(gltf);
-  }));
+  const [rumiResult] = await Promise.allSettled([loadHeroAsset('rumi'), loadEnemyAsset('minion')]);
+  heroPreloadFailed = rumiResult.status === 'rejected';
   await prepareStage(0, text => { hud.load.textContent = text; });
   ready = true;
   hud.load.textContent = '載入完成';
   hud.title.classList.add('hidden');
   document.getElementById('charsel').classList.remove('hidden');
+  if (heroPreloadFailed) {
+    document.getElementById('charLoadStatus').textContent = 'RUMI 模型載入失敗，請重試或選擇其他角色。';
+    pendingHeroKey = 'rumi';
+    document.getElementById('charLoadRetry').classList.remove('hidden');
+  }
 }
 
 // ---------- 城市道具擺設 ----------
