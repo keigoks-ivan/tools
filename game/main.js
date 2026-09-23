@@ -399,7 +399,7 @@ let lightPool = null;
 const groundMats = [];
 const flickers = [];
 const ENV = { signs: [], fronts: [], wins: [], tentGlows: [] };
-(function buildOpenCity() {
+function buildOpenCity() {
   // 柏油地面
   const ac = document.createElement('canvas');
   ac.width = ac.height = 512;
@@ -603,10 +603,10 @@ const ENV = { signs: [], fronts: [], wins: [], tentGlows: [] };
     grp.rotation.y = Math.random() * 6.28;
     world1.add(grp);
   });
-})();
+}
 
 // ---------- 遠景：外環大樓＋南山塔（world1） ----------
-(function buildBackdrop() {
+function buildBackdrop() {
   const mats = [46, 190, 285].map(h => new THREE.MeshBasicMaterial({ map: makeWindowTex(h) }));
   let i = 0;
   for (let a = 0; a < Math.PI * 2; a += 0.16) {
@@ -642,12 +642,12 @@ const ENV = { signs: [], fronts: [], wins: [], tentGlows: [] };
   const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.35, 8, 6), new THREE.MeshBasicMaterial({ color: 0xff3a3a, fog: false }));
   beacon.position.set(42, 44, -78);
   world1.add(beacon);
-})();
+}
 
 // ---------- 魂界（第二關場景：黑曜岩裂谷） ----------// ---------- 魂界（第二關：黑曜荒原，開放版） ----------
 let skyTex2 = null;
 const w2anim = { flames: [], rocks: [] };
-(function buildNetherField() {
+function buildNetherField() {
   // 暮金天空＋巨大金月＋雲帶剪影＋疏星
   const c = document.createElement('canvas');
   c.width = 1024; c.height = 512;
@@ -835,12 +835,12 @@ const w2anim = { flames: [], rocks: [] };
     mtn.position.set(Math.cos(a) * r, h / 2 - 4, Math.sin(a) * r);
     world2.add(mtn);
   }
-})();
+}
 
 // ---------- 天界（第三關場景：雲海聖域） ----------// ---------- 天界（第三關：雲海聖域，開放版） ----------
 let skyTex3 = null;
 const w3anim = { clouds: [], lanterns: [], shafts: [] };
-(function buildHeaven() {
+function buildHeaven() {
   const c = document.createElement('canvas');
   c.width = 1024; c.height = 512;
   const g = c.getContext('2d');
@@ -1002,12 +1002,12 @@ const w3anim = { clouds: [], lanterns: [], shafts: [] };
     top.position.set(isle.position.x, isle.position.y + w * 0.45 + 1, isle.position.z);
     world3.add(top);
   }
-})();
+}
 
 // ---------- 虛空（第四關：魂門之心） ----------
 let skyTex4 = null;
 const w4anim = { shards: [], rings: [] };
-(function buildVoid() {
+function buildVoid() {
   const c = document.createElement('canvas');
   c.width = 1024; c.height = 512;
   const g = c.getContext('2d');
@@ -1115,7 +1115,7 @@ const w4anim = { shards: [], rings: [] };
       world4.add(cr);
     }
   }
-})();
+}
 
 // ---------- 據點制壓法陣 ----------
 const capturePoint = (() => {
@@ -1754,7 +1754,7 @@ const heroAura = (() => {
 })();
 
 // ---------- 音訊（BGM＝授權音樂素材、SFX＝多層合成；合成 BGM 作為載入失敗 fallback） ----------
-const AU = { ctx: null, master: null, music: null, sfx: null, noise: null, muted: false, timer: null, nextBar: 0, bar: 0,
+const AU = { ctx: null, master: null, music: null, sfx: null, noise: null, muted: document.getElementById('mute').getAttribute('aria-pressed') === 'true', timer: null, nextBar: 0, bar: 0,
   bgmGain: null, bgm: { bufs: {}, pending: {}, failed: new Set(), request: 0, cur: null, want: null, src: null, srcGain: null } };
 const BGM_FILES = ['assets/audio/bgm_stage1.mp3', 'assets/audio/bgm_stage2.ogg', 'assets/audio/bgm_stage3.mp3', 'assets/audio/bgm_stage4.m4a'];
 const BGM_TITLE = 'assets/audio/bgm_title.ogg';
@@ -2128,6 +2128,7 @@ const keys = new Set();
 let atkPressed = false, heavyPressed = false, jumpPressed = false, dodgePressed = false, musouPressed = false;
 let heavyHold = false;   // 重攻擊按住中（蓄力判定用）
 addEventListener('keydown', e => {
+  if (!ready || state === 'loading') return;
   if (e.target instanceof Element && e.target.closest('button') && ['Enter', 'Space'].includes(e.code)) return;
   if (state === 'play' && [' ', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.key)) e.preventDefault();
   if (e.code === 'Tab' && state === 'play') { toggleLock(); return; }
@@ -2253,10 +2254,7 @@ for (const card of document.querySelectorAll('.ccard')) {
 }
 el('retryBtn').addEventListener('click', () => restart());
 el('againBtn').addEventListener('click', () => restart());
-el('nextBtn').addEventListener('click', () => {
-  hud.win.classList.add('hidden');
-  loadStage(stageIdx + 1);
-});
+el('nextBtn').addEventListener('click', () => requestStage(stageIdx + 1));
 function showToastMini(text) { showToast(text); }
 function showToast(text) {
   hud.toast.textContent = text;
@@ -2417,7 +2415,7 @@ const player = {
 };
 
 const enemies = [];
-let assets = null;
+const assets = {};
 
 const KINDS = {
   // 2026-07-18 全面縮小：骷髏原尺寸比真人比例主角還大隻
@@ -2562,85 +2560,99 @@ function buildHero(char) {
   document.body.style.setProperty('--hero-color', '#' + new THREE.Color(char.fx).getHexString());
   syncPlayer();
 }
-const tryLoad = url => loader.loadAsync(url).catch(() => null);
-Promise.all([
-  loader.loadAsync('assets/maria.glb'),
-  loader.loadAsync('assets/Skeleton_Minion.glb'),
-  loader.loadAsync('assets/Skeleton_Warrior.glb'),
-  loader.loadAsync('assets/Barbarian.glb'),
-  loader.loadAsync('assets/Knight.glb'),
-  loader.loadAsync('assets/Rogue.glb'),
-  tryLoad('assets/mira.glb'),
-  tryLoad('assets/zoey.glb'),
-  ...CITY_PROPS.map(n => loader.loadAsync(`assets/city/${n}.gltf`)),
-]).then(([maria, minion, warrior, barb, knight, rogue, mira, zoey, ...city]) => {
-  heroBase = prepHeroModel(maria);
-  if (mira) CHARS.mira.model = prepHeroModel(mira);
-  if (zoey) CHARS.zoey.model = prepHeroModel(zoey);
-  buildHero(CHARS.rumi);
+const ENEMY_FILES = {
+  minion: 'Skeleton_Minion', warrior: 'Skeleton_Warrior',
+  barbarian: 'Barbarian', knight: 'Knight', rogue: 'Rogue',
+};
+const STAGE_ASSETS = [
+  ['minion', 'warrior'], ['minion', 'barbarian'],
+  ['minion', 'knight'], ['minion', 'rogue', 'barbarian'],
+];
+const builtWorlds = new Set();
+const preparedStages = new Set();
+let streetReflection = null;
+const yieldLoading = () => new Promise(resolve => setTimeout(resolve, 0));
 
-  // 去Q版：KayKit 模型頭身比修正——動畫的 head.scale 軌道整批縮小
-  // 骷髏頭骨最搶眼縮最多；冒險者有兜帽/頭盔，微縮即可
-  const dechibify = (gltf, k) => {
-    for (const clip of gltf.animations) {
-      for (const tr of clip.tracks) {
-        if (/(^|\.)head\.scale$/.test(tr.name)) {
-          for (let i = 0; i < tr.values.length; i++) tr.values[i] *= k;
-        }
+async function loadEnemyAsset(key) {
+  if (assets[key]) return;
+  const gltf = await loader.loadAsync(`assets/${ENEMY_FILES[key]}.glb`);
+  // 保留原本的頭身比例與動作，只改變載入時機。
+  const k = key === 'minion' || key === 'warrior' ? 0.62 : 0.78;
+  for (const clip of gltf.animations) {
+    for (const tr of clip.tracks) {
+      if (/(^|\.)head\.scale$/.test(tr.name)) {
+        for (let i = 0; i < tr.values.length; i++) tr.values[i] *= k;
       }
     }
-  };
-  dechibify(minion, 0.62);
-  dechibify(warrior, 0.62);
-  for (const g of [barb, knight, rogue]) dechibify(g, 0.78);
-  toonify(minion.scene);
-  toonify(warrior.scene);
-  toonify(barb.scene);
-  toonify(knight.scene);
-  toonify(rogue.scene);
-  assets = {
-    minion: { scene: minion.scene, clips: minion.animations },
-    warrior: { scene: warrior.scene, clips: warrior.animations },
-    barbarian: { scene: barb.scene, clips: barb.animations },
-    knight: { scene: knight.scene, clips: knight.animations },
-    rogue: { scene: rogue.scene, clips: rogue.animations },
-  };
+  }
+  toonify(gltf.scene);
+  assets[key] = { scene: gltf.scene, clips: gltf.animations };
+}
 
-  placeCityProps(Object.fromEntries(CITY_PROPS.map((n, i) => [n, city[i].scene])));
-
-  const animatedMeshes = new Set([
+async function prepareStage(i, report = () => {}) {
+  if (preparedStages.has(i)) return;
+  if (!STAGES[i]) throw new Error('找不到這個關卡');
+  for (const key of STAGE_ASSETS[i]) {
+    report(`準備第 ${i + 1} 關角色…`);
+    await loadEnemyAsset(key);
+    await yieldLoading();
+  }
+  const world = [world1, world2, world3, world4][i];
+  report(`建立第 ${i + 1} 關場景…`);
+  await yieldLoading();
+  if (!builtWorlds.has(i)) {
+    [buildOpenCity, buildNetherField, buildHeaven, buildVoid][i]();
+    if (i === 0) buildBackdrop();
+    builtWorlds.add(i);
+  }
+  if (i === 0) {
+    const props = {};
+    for (const name of CITY_PROPS) {
+      props[name] = (await loader.loadAsync(`assets/city/${name}.gltf`)).scene;
+    }
+    placeCityProps(props);
+  }
+  await yieldLoading();
+  const excluded = new Set([
     ...Object.values(w2anim).flat(), ...Object.values(w3anim).flat(), ...Object.values(w4anim).flat(),
   ].map(item => item.m));
-  const occlusionMaterials = new Set(blockersRegBy.flatMap(regs => regs.flatMap(reg => reg.mats)));
-  const batching = [world1, world2, world3, world4].map(world => {
-    const excluded = new Set(animatedMeshes);
-    for (const mesh of world.children) {
-      if (occlusionMaterials.has(mesh.material)) excluded.add(mesh);
-    }
-    return batchStaticWorld(world, excluded);
-  });
-  console.info('[HUNTR/X] Static scene batching', batching.map((b, i) => ({
-    stage: i + 1, meshesBefore: b.before.meshes, meshesAfter: b.after.meshes,
-    trianglesBefore: b.before.triangles, trianglesAfter: b.after.triangles,
-  })));
-
-  // 濕地面反射：對街景烘一次靜態 cubemap
-  const cubeRT = new THREE.WebGLCubeRenderTarget(256);
-  const cubeCam = new THREE.CubeCamera(0.5, 250, cubeRT);
-  cubeCam.position.set(0, 1.6, -40);
-  cubeCam.update(renderer, scene);
+  const occlusionMaterials = new Set(blockersRegBy[i].flatMap(reg => reg.mats));
+  for (const mesh of world.children) {
+    if (occlusionMaterials.has(mesh.material)) excluded.add(mesh);
+  }
+  batchStaticWorld(world, excluded);
+  await yieldLoading();
+  if (i === 0 && !streetReflection) {
+    report('準備街景反射…');
+    await yieldLoading();
+    streetReflection = new THREE.WebGLCubeRenderTarget(256);
+    const cubeCam = new THREE.CubeCamera(0.5, 250, streetReflection);
+    cubeCam.position.set(0, 1.6, -40);
+    cubeCam.update(renderer, scene);
+  }
+  // 第四關地面延後建立，仍沿用原本的環境反射。
   for (const m of groundMats) {
-    m.envMap = cubeRT.texture;
+    m.envMap = streetReflection?.texture || null;
     m.envMapIntensity = m.roughness < 0.4 ? 1.25 : 0.65;
     m.needsUpdate = true;
   }
+  preparedStages.add(i);
+}
 
+export async function prepareGame() {
+  hud.load.textContent = '載入獵魔士…';
+  heroBase = prepHeroModel(await loader.loadAsync('assets/maria.glb'));
+  // 專屬模型仍為可選；缺檔時維持原本的配色代身。
+  for (const key of ['mira', 'zoey']) {
+    const gltf = await loader.loadAsync(`assets/${key}.glb`).catch(() => null);
+    if (gltf) CHARS[key].model = prepHeroModel(gltf);
+  }
+  await prepareStage(0, text => { hud.load.textContent = text; });
   ready = true;
   hud.load.textContent = '載入完成';
-}).catch(err => {
-  hud.load.textContent = '載入失敗：' + err.message;
-  console.error(err);
-});
+  hud.title.classList.add('hidden');
+  document.getElementById('charsel').classList.remove('hidden');
+}
 
 // ---------- 城市道具擺設 ----------
 function placeCityProps(props) {
@@ -4156,6 +4168,46 @@ const STORY = {
 };
 
 // ---------- 流程 ----------
+let stageRequest = null;
+function requestStage(i) {
+  if (stageRequest) return stageRequest;
+  const overlay = el('stageLoading');
+  const message = el('stageLoadText');
+  const retry = el('stageRetry');
+  state = 'loading';
+  cancelAnimationFrame(animationFrame);
+  animationFrame = 0;
+  keys.clear();
+  atkPressed = heavyPressed = jumpPressed = dodgePressed = musouPressed = heavyHold = false;
+  clearTouchMove();
+  suspendAudio();
+  retry.classList.add('hidden');
+  overlay.classList.remove('hidden');
+  message.textContent = `準備第 ${i + 1} 關…`;
+  updateHUD();
+  stageRequest = (async () => {
+    try {
+      await yieldLoading();
+      await prepareStage(i, text => { message.textContent = text; });
+      hud.dead.classList.add('hidden');
+      hud.win.classList.add('hidden');
+      loadStage(i);
+      overlay.classList.add('hidden');
+      resumeAudio();
+    } catch (err) {
+      state = 'loading';
+      cancelAnimationFrame(animationFrame);
+      animationFrame = 0;
+      message.textContent = '關卡載入失敗，請檢查連線後重試。';
+      retry.classList.remove('hidden');
+      retry.onclick = () => requestStage(i);
+      console.error(err);
+    } finally {
+      stageRequest = null;
+    }
+  })();
+  return stageRequest;
+}
 function applyStageTint(i) {
   const look = [
     { exposure: 1.06, bloom: 0.38, rim: 0x72e4ff, rimPower: 0.85 },
@@ -4299,7 +4351,7 @@ function restart() {
 window.__dbg = () => ({ state, stageIdx, weapon, musou, kills, combo, objs: (level.objs || []).map(o => o.state), bossPhase: level.bossPhase, bossHp: level.boss?.hp, player, enemies: enemies.length, alive: enemies.filter(e => e.st !== 'dead').length });
 window.__lvl = level;
 window.__occ = updateOcclusion;
-window.__stage = loadStage;
+window.__stage = requestStage;
 window.__switch = switchWeapon;
 window.__E = enemies;
 window.__P = player;
@@ -4364,7 +4416,7 @@ function resumeFrames() {
 function loop(ts) {
   animationFrame = 0;
   // 選單完全覆蓋 3D；結算覆蓋層出現後保留最後一幀，停止 GPU 工作。
-  if (document.hidden || state === 'title'
+  if (document.hidden || state === 'title' || state === 'loading'
     || (state === 'dead' && !hud.dead.classList.contains('hidden'))
     || (state === 'win' && !hud.win.classList.contains('hidden'))) {
     updateHUD();
