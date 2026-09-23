@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
+import { FramePacer } from '../frame-pacing.js';
 
 const source = fs.readFileSync(new URL('../main.js', import.meta.url), 'utf8');
 
@@ -59,9 +60,9 @@ function makeNode(extra = {}) {
     setInterval: () => { calls.intervals++; return 1; },
     clearInterval() {}, Promise, Math, Float32Array,
   });
-  const names = extra.names ?? ['resumeAudio', 'suspendAudio', 'initAudio', 'playBgm', 'scheduleMusic', 'toggleMute', 'handleVisibilityChange'];
+  const names = extra.names ?? ['resumeAudio', 'suspendAudio', 'initAudio', 'playBgm', 'scheduleMusic', 'toggleMute', 'clearHeldInput', 'handleVisibilityChange'];
   Object.assign(context, {
-    animationFrame: 0, keys: new Set(), clearTouchMove() {},
+    animationFrame: 0, keys: new Set(), clearTouchMove() {}, clearCombatBuffer() {},
     atkPressed: false, heavyPressed: false, jumpPressed: false, dodgePressed: false, musouPressed: false, heavyHold: false,
     cancelAnimationFrame() {}, resumeFrames() {},
   });
@@ -175,7 +176,8 @@ test('loadStage synchronizes the spawned player before updating the camera', () 
     applyStageTint() {}, captureLightBase() {}, enemies: [], drops: [], bolts: [], level: { props: [] },
     STAGES: [{ name: 'stage', objectives: [{ name: 'objective', type: 'kill' }], }], capturePoint: { position: {}, visible: false },
     STORY: { s1open: [] },
-    musou: 0, lockTarget: null, BGM_FILES: ['stage.mp3'], AU: { ctx: null }, hud: {
+    musou: 0, lockTarget: null, BGM_FILES: ['stage.mp3'], AU: { ctx: null },
+    combatBuffer: { dodge: 0.15, jump: 0.1, light: 0.1, heavy: 0.1 }, hud: {
       bosswrap: { style: {} },
       objective: { textContent: 'old progress', classList: { contains: () => false, toggle() {} } },
     },
@@ -185,9 +187,11 @@ test('loadStage synchronizes the spawned player before updating the camera', () 
     playBgm() {}, scene: { remove() {} }, releaseEnemy() {},
   });
   vm.runInContext(functionSource('syncPlayer'), context);
+  vm.runInContext(functionSource('clearCombatBuffer'), context);
   vm.runInContext(functionSource('setObjective'), context);
   vm.runInContext(functionSource('loadStage'), context);
   context.loadStage(0);
+  assert.deepEqual(context.combatBuffer, { dodge: 0, jump: 0, light: 0, heavy: 0 });
   assert.deepEqual({ x: root.position.x, y: root.position.y, z: root.position.z }, { x: 0, y: 0, z: 36 });
   assert.equal(cameraSawSpawn, true);
   assert.equal(context.hud.objective.textContent, 'stage');
@@ -198,15 +202,16 @@ test('RAF loop has no duplicate requests, stops while hidden, and resumes cleanl
   let nextId = 0;
   const context = vm.createContext({
     document: { hidden: false }, animationFrame: 0, state: 'title',
+    IS_MOBILE: false, window: { innerWidth: 1024, innerHeight: 768 },
     requestAnimationFrame() { events.requests++; return ++nextId; },
-    clock: { getDelta: () => 0.016 }, perfAcc: 0, perfN: 0, lastFrameTs: 0,
+    clock: { getDelta: () => 0.016 }, framePacer: new FramePacer(),
     hud: { dead: { classList: { contains: () => true } }, win: { classList: { contains: () => true } } },
     updateHUD() { events.hud++; }, composer: { render() { events.renders++; } },
     dlg: { active: false }, player: { root: null }, hitStopT: 0, musouSlowT: 0, witchT: 0,
     updatePlayer() { events.updates++; }, updateEnemies() {}, updateLevel() {}, updateFx() {}, perfTick() {},
     updateAmbient() {}, updateLock() {}, updateCamera() {}, updateOcclusion() {}, updateTrail() {},
   });
-  vm.runInContext(`${functionSource('resumeFrames')}\n${functionSource('loop')}`, context);
+  vm.runInContext(`${functionSource('isPlayPortrait')}\n${functionSource('resumeFrames')}\n${functionSource('loop')}`, context);
   context.loop(1);
   assert.equal(events.renders, 0);
   assert.equal(events.requests, 0);
@@ -224,4 +229,49 @@ test('RAF loop has no duplicate requests, stops while hidden, and resumes cleanl
   assert.equal(events.requests, 2);
   context.resumeFrames();
   assert.equal(events.requests, 2);
+});
+
+test('mobile play pauses under the portrait overlay and resumes from a fresh clock delta', () => {
+  const events = { requests: 0, cancels: [], renders: 0, updates: 0, deltaReads: 0 };
+  let nextId = 0;
+  const context = vm.createContext({
+    document: { hidden: false }, animationFrame: 7, state: 'play', IS_MOBILE: true,
+    window: { innerWidth: 375, innerHeight: 667 },
+    requestAnimationFrame() { events.requests++; return ++nextId; },
+    cancelAnimationFrame(id) { events.cancels.push(id); },
+    clock: { getDelta() { events.deltaReads++; return 0.016; } }, framePacer: new FramePacer(),
+    keys: new Set(['KeyW']), clearTouchMove() {}, clearCombatBuffer() {},
+    atkPressed: true, heavyPressed: false, jumpPressed: false, dodgePressed: false, musouPressed: false, heavyHold: false,
+    updateHUD() {}, composer: { render() { events.renders++; } },
+    hud: { dead: { classList: { contains: () => true } }, win: { classList: { contains: () => true } } },
+    dlg: { active: false }, player: { root: null }, hitStopT: 0, musouSlowT: 0, witchT: 0,
+    updatePlayer() { events.updates++; }, updateEnemies() {}, updateLevel() {}, updateFx() {},
+    updateAmbient() {}, updateLock() {}, updateCamera() {}, updateOcclusion() {}, updateTrail() {},
+  });
+  vm.runInContext([
+    functionSource('clearHeldInput'), functionSource('isPlayPortrait'),
+    functionSource('resumeFrames'), functionSource('handleViewportChange'), functionSource('loop'),
+  ].join('\n'), context);
+
+  context.handleViewportChange();
+  context.loop(16);
+  context.resumeFrames();
+  assert.equal(events.updates, 0);
+  assert.equal(events.renders, 0);
+  assert.equal(events.requests, 0, 'portrait play must not keep scheduling frames');
+
+  context.handleViewportChange();
+  assert.deepEqual(events.cancels, [7]);
+  assert.equal(context.animationFrame, 0);
+  assert.equal(context.atkPressed, false);
+  assert.equal(context.keys.size, 0);
+  context.window.innerWidth = 667;
+  context.window.innerHeight = 375;
+  context.handleViewportChange();
+  assert.equal(events.requests, 1, 'landscape starts exactly one frame loop');
+  assert.equal(events.deltaReads, 1, 'resume consumes the old clock delta');
+  assert.equal(context.framePacer.nextFrameAt, null);
+  context.loop(64);
+  assert.equal(events.updates, 1);
+  assert.equal(events.renders, 1);
 });

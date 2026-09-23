@@ -5,14 +5,18 @@ in assets/; generated files live in assets/runtime/. No browser or GPU is used.
 """
 import argparse
 import copy
+from io import BytesIO
 import json
 from pathlib import Path
 import re
 import struct
 
+from PIL import Image
+
 GAME = Path(__file__).resolve().parents[1]
 ASSETS = GAME / 'assets'
 ENEMIES = ['Skeleton_Minion', 'Skeleton_Warrior', 'Barbarian', 'Knight', 'Rogue']
+WEBP_EXTENSION = 'EXT_texture_webp'
 
 
 def read_glb(path):
@@ -91,7 +95,16 @@ def select_entries(doc, collection, slots):
         obj[key] = remap[obj[key]]
 
 
-def pack(source, binary, *, keep_animations=None, drop_normal=False):
+def lossless_webp(payload):
+    """Encode an embedded image as lossless WebP without changing RGBA pixels."""
+    with Image.open(BytesIO(payload)) as image:
+        rgba = image.convert('RGBA')
+        encoded = BytesIO()
+        rgba.save(encoded, format='WEBP', lossless=True, exact=True, method=6)
+        return encoded.getvalue()
+
+
+def pack(source, binary, *, keep_animations=None, drop_normal=False, webp_images=False):
     doc = copy.deepcopy(source)
     if keep_animations is not None:
         doc['animations'] = [clip for clip in doc['animations'] if clip['name'] in keep_animations]
@@ -103,14 +116,29 @@ def pack(source, binary, *, keep_animations=None, drop_normal=False):
     select_entries(doc, 'samplers', ((tex, 'sampler') for tex in doc['textures'] if 'sampler' in tex))
     select_entries(doc, 'accessors', accessor_slots(doc))
     select_entries(doc, 'bufferViews', view_slots(doc))
+    webp_payloads = {}
+    if webp_images:
+        for image in doc.get('images', []):
+            view_index = image['bufferView']
+            view = doc['bufferViews'][view_index]
+            start = view.get('byteOffset', 0)
+            payload = binary[start:start + view['byteLength']]
+            webp_payloads[view_index] = lossless_webp(payload)
+            image['mimeType'] = 'image/webp'
+        for texture in doc['textures']:
+            image_index = texture.pop('source')
+            texture.setdefault('extensions', {})[WEBP_EXTENSION] = {'source': image_index}
+        doc['extensionsUsed'] = sorted(set(doc.get('extensionsUsed', [])) | {WEBP_EXTENSION})
+        doc['extensionsRequired'] = sorted(set(doc.get('extensionsRequired', [])) | {WEBP_EXTENSION})
     packed = bytearray()
-    for view in doc['bufferViews']:
+    for index, view in enumerate(doc['bufferViews']):
         assert view['buffer'] == 0
         offset, length = view.get('byteOffset', 0), view['byteLength']
         assert offset + length <= len(binary)
-        payload = binary[offset:offset + length]
+        payload = webp_payloads.get(index, binary[offset:offset + length])
         packed.extend(b'\0' * (-len(packed) % 4))
         view['byteOffset'] = len(packed)
+        view['byteLength'] = len(payload)
         packed.extend(payload)
     doc['buffers'][0]['byteLength'] = len(packed)
     return doc, bytes(packed)
@@ -133,7 +161,8 @@ def main():
         source, binary = read_glb(ASSETS / f'{name}.glb')
         optimized, payload = pack(source, binary,
                                   keep_animations=enemy_animations() if name in ENEMIES else None,
-                                  drop_normal=name == 'maria')
+                                  drop_normal=name == 'maria',
+                                  webp_images=name == 'maria')
         result = write_glb(optimized, payload)
         output = target / f'{name}.glb'
         if args.check:

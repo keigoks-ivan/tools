@@ -10,9 +10,18 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { batchStaticWorld } from './scene-optimizer.js';
 import { releaseTransient } from './transient-resources.js';
+import { paintStreetSurface } from './street-surface.js';
+import { mapStorefrontPanel } from './street-art.js';
+import { shareClonedSkeletons } from './skeleton-sharing.js';
+import { mergeSkinnedParts } from './merge-skinned-parts.js';
+import { FramePacer } from './frame-pacing.js';
+import {
+  MAX_ACTIVE_ENEMIES, canSpawnEnemy, countActiveEnemies,
+  encounterStepReady, hordeKindAt, attackTelegraphMaxRadius,
+} from './encounter-policy.js';
 
 const MODEL_YAW = 0;              // glTF 標準：模型原生面向 +Z，rotation.y 直接用 yaw
-const NEON = [0xff4fd8, 0xff2fa0, 0x8a4fff, 0x4fd8ff, 0xff6ab0, 0xb47aff];
+const NEON = [0xffcb7a, 0x65c5ce, 0xe28ca2, 0x8eadd0];
 const IS_MOBILE = matchMedia('(pointer: coarse)').matches;
 const REDUCED_MOTION = matchMedia('(prefers-reduced-motion: reduce)');
 if (IS_MOBILE) document.body.classList.add('is-touch');
@@ -20,10 +29,12 @@ if (IS_MOBILE) document.body.classList.add('is-touch');
 // 關卡（同一條街廊道，分區沿 -Z 推進；Stage 2 為血月變體）
 const STAGES = [
   {
-    // 第一關＝千人斬爽關：全程高密度屍潮，滿千見魔王
-    name: '第一關　首爾夜市・千人斬', bossKind: 'boss', bossLabel: '陰差隊長',
+    // Three short waves keep the opening focused on readable squad combat.
+    name: '第一關　首爾夜市・突圍戰', bossKind: 'boss', bossLabel: '陰差隊長',
     objectives: [
-      { name: '千人斬', type: 'horde', need: 1000, pos: [0, 0], fast: 0.28 },
+      { name: '夜市突圍・第一波', type: 'horde', need: 30, phase: 0, pos: [0, 0] },
+      { name: '夜市突圍・第二波', type: 'horde', need: 30, phase: 1, pos: [0, 0] },
+      { name: '夜市突圍・第三波', type: 'horde', need: 30, phase: 2, pos: [0, 0] },
     ],
     bossPos: [0, -35],
   },
@@ -65,7 +76,7 @@ const OFFICER_NAMES = ['陰差百夫長', '陰差千夫長', '夜叉先鋒', '�
 let stageIdx = 0;
 
 // ---------- 可操作角色（HUNTR/X 三人組） ----------
-// mira.glb / zoey.glb 若存在（tmp-convert 管線產出）自動採用；否則以 Rumi 模型＋靈氣配色代身
+// 專屬模型上線後在角色設定加入 modelFile；目前以 Rumi 模型＋靈氣配色代身。
 const CHARS = {
   rumi: { key: 'rumi', name: 'RUMI', weapon: 'sword', tint: null,     hair: 0x8a5ae0, outfit: 0x2a2240, metal: 0xc8a860, fx: 0xc9a4ff, fxHi: 0xe0ccff, boltCol: 0x7ad0ff, spd: 6.5, dmgMul: 1,    hpMul: 1,    atkTs: 1,    rangeMul: 1,    light: 0xff4fa3 },
   mira: { key: 'mira', name: 'MIRA', weapon: 'great', tint: 0x4a78ff, hair: 0x3a5090, outfit: 0x1e2c48, metal: 0x9ab0cc, fx: 0x6aa8ff, fxHi: 0xaad4ff, boltCol: 0x6ab8ff, spd: 5.9, dmgMul: 1.28, hpMul: 1.18, atkTs: 0.86, rangeMul: 1.2,  light: 0x5a8aff },
@@ -155,48 +166,60 @@ let skyTex1 = null;
 
 // ---------- 共用貼圖工具 ----------
 function makeWindowTex(hue) {
-  // 寫實立面：混凝土基底＋樓層帶＋窗框＋污漬＋垂直明暗（2x 解析度繪製）
+  // Stylized Seoul facade: broad masonry bays and a few deliberate lit windows.
   const c = document.createElement('canvas');
   c.width = 256; c.height = 512;
   const g = c.getContext('2d');
   g.scale(2, 2);
-  const bg = g.createLinearGradient(0, 0, 0, 256);
-  bg.addColorStop(0, '#26263a');
-  bg.addColorStop(0.6, '#1b1b2a');
-  bg.addColorStop(1, '#12121f');
+  const paletteIndex = hue >= 250 && hue < 310 ? 2 : hue >= 150 && hue < 250 ? 1 : 0;
+  const palette = [
+    { wall: '#263145', shade: '#151f32', trim: '#526079' },
+    { wall: '#26343a', shade: '#15242d', trim: '#4c6870' },
+    { wall: '#332d3c', shade: '#201d30', trim: '#69596b' },
+  ][paletteIndex];
+  const bg = g.createLinearGradient(0, 0, 128, 256);
+  bg.addColorStop(0, palette.wall);
+  bg.addColorStop(0.52, '#202a3b');
+  bg.addColorStop(1, palette.shade);
   g.fillStyle = bg; g.fillRect(0, 0, 128, 256);
-  for (let i = 0; i < 42; i++) {           // 立面污漬直紋
-    g.fillStyle = `rgba(${8 + Math.random() * 20},${8 + Math.random() * 18},${16 + Math.random() * 24},${0.1 + Math.random() * 0.16})`;
-    const w = 3 + Math.random() * 9;
-    g.fillRect(Math.random() * 128, Math.random() * 256, w, w * (2 + Math.random() * 6));
-  }
-  for (let y = 8; y < 250; y += 16) {      // 樓層分割帶
-    g.fillStyle = 'rgba(0,0,0,0.35)';
-    g.fillRect(0, y + 12, 128, 2);
-    g.fillStyle = 'rgba(255,255,255,0.05)';
-    g.fillRect(0, y + 14, 128, 1);
-  }
-  for (let y = 8; y < 242; y += 16) {      // 窗（亮/暗/窗簾）
-    for (let x = 6; x < 118; x += 12) {
-      const lit = Math.random() < 0.36;
-      if (lit) {
-        const warm = Math.random() < 0.6;
-        const wg = g.createLinearGradient(0, y, 0, y + 10);
-        wg.addColorStop(0, warm ? '#ffe9c0' : `hsl(${hue},75%,80%)`);
-        wg.addColorStop(1, warm ? '#e8a95e' : `hsl(${hue},60%,52%)`);
-        g.fillStyle = wg;
-      } else {
-        g.fillStyle = `rgba(${20 + Math.random() * 18},${26 + Math.random() * 20},${46 + Math.random() * 26},0.92)`;
-      }
-      g.fillRect(x, y, 8, 10);
-      g.fillStyle = 'rgba(255,255,255,0.12)';
-      g.fillRect(x, y, 8, 1);
-      if (lit && Math.random() < 0.35) {   // 半掩窗簾
-        g.fillStyle = 'rgba(28,18,30,0.6)';
-        g.fillRect(x, y, 8, 3 + Math.random() * 4);
+  // Deep vertical pilasters and restrained floor bands give the repeated
+  // texture a legible architectural rhythm at game-camera distance.
+  g.fillStyle = 'rgba(7, 12, 23, 0.24)';
+  for (let x = 0; x < 128; x += 32) g.fillRect(x, 0, 2, 256);
+  g.fillStyle = 'rgba(161, 185, 198, 0.11)';
+  for (let y = 0; y < 256; y += 20) g.fillRect(0, y, 128, 1.1);
+  g.fillStyle = `rgba(${parseInt(palette.trim.slice(1, 3), 16)}, ${parseInt(palette.trim.slice(3, 5), 16)}, ${parseInt(palette.trim.slice(5, 7), 16)}, 0.48)`;
+  for (let x = 29; x < 128; x += 32) g.fillRect(x, 0, 1.2, 256);
+
+  // Fixed hue-seeded pattern: 4 broad window bays, with roughly one in five
+  // illuminated. Warm interiors dominate; occasional cool panes echo signs.
+  let seed = (Math.round(hue * 991) ^ 0x1c4a71) >>> 0;
+  const rand = () => {
+    seed ^= seed << 13; seed ^= seed >>> 17; seed ^= seed << 5;
+    return (seed >>> 0) / 0x100000000;
+  };
+  for (let row = 0; row < 12; row++) {
+    const y = 7 + row * 20;
+    for (let col = 0; col < 4; col++) {
+      const x = 5 + col * 32;
+      const lit = rand() < 0.2;
+      g.fillStyle = 'rgba(7, 13, 24, 0.74)';
+      g.fillRect(x, y, 24, 11);
+      g.fillStyle = lit
+        ? (rand() < 0.78 ? 'rgba(224, 177, 112, 0.86)' : 'rgba(111, 185, 194, 0.78)')
+        : 'rgba(38, 54, 72, 0.86)';
+      g.fillRect(x + 1.4, y + 1.3, 21.2, 8.4);
+      g.fillStyle = 'rgba(9, 17, 29, 0.54)';
+      g.fillRect(x + 11.5, y + 1.3, 1, 8.4);
+      if (lit && rand() < 0.35) {
+        g.fillStyle = 'rgba(29, 32, 44, 0.62)';
+        g.fillRect(x + 1.4, y + 1.3, 10.4, 8.4);
       }
     }
   }
+  // A few subdued ledge seams keep the facade tactile without speckle noise.
+  g.fillStyle = 'rgba(203, 174, 132, 0.11)';
+  for (let y = 19; y < 256; y += 40) g.fillRect(0, y, 128, 0.8);
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
   t.anisotropy = MAX_ANISO;
@@ -205,7 +228,7 @@ function makeWindowTex(hue) {
 
 // 韓文招牌
 const KR_WORDS = ['치킨', '노래방', 'PC방', '분식', '호프', '편의점', '미용실', '약국', '곱창', '떡볶이', '삼겹살', '카페', '만화방', '슈퍼', '세탁소', '핸드폰'];
-const SIGN_NEON = ['#ff5fd0', '#5fe0ff', '#b47aff', '#ff8fe0', '#7a9fff', '#ff4fa8'];
+const SIGN_NEON = ['#efbd70', '#70c8cf', '#db819b', '#99b4d2'];
 const SIGN_STYLES = SIGN_NEON.map(c => ['#14101f', c]);
 function makeSignTex(word, w = 256, h = 72) {
   const c = document.createElement('canvas');
@@ -214,20 +237,16 @@ function makeSignTex(word, w = 256, h = 72) {
   g.scale(2, 2);
   const [bg, fg] = SIGN_STYLES[Math.floor(Math.random() * SIGN_STYLES.length)];
   g.fillStyle = bg; g.fillRect(0, 0, w, h);
-  g.strokeStyle = fg; g.globalAlpha = 0.5; g.lineWidth = 3;
-  g.shadowColor = fg; g.shadowBlur = 10;
+  g.strokeStyle = fg; g.globalAlpha = 0.65; g.lineWidth = 1.5;
+  g.shadowColor = fg; g.shadowBlur = 4;
   g.strokeRect(5, 5, w - 10, h - 10);
   g.globalAlpha = 1;
-  g.font = `900 ${Math.floor(h * 0.6)}px "Apple SD Gothic Neo","Noto Sans KR",sans-serif`;
+  g.font = `800 ${Math.floor(h * 0.54)}px "Apple SD Gothic Neo","Noto Sans KR",sans-serif`;
   g.textAlign = 'center'; g.textBaseline = 'middle';
-  g.shadowBlur = 18;
+  g.shadowBlur = 6;
   g.fillStyle = fg;
-  g.fillText(word, w / 2, h / 2 + 2);
-  g.fillText(word, w / 2, h / 2 + 2);
+  g.fillText(word, w / 2, h / 2 + 1);
   g.shadowBlur = 0;
-  g.fillStyle = '#ffffff'; g.globalAlpha = 0.85;
-  g.fillText(word, w / 2, h / 2 + 2);
-  g.globalAlpha = 1;
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
   t.anisotropy = MAX_ANISO;
@@ -240,27 +259,36 @@ function makeVSignTex(word) {
   g.scale(2, 2);
   const [bg, fg] = SIGN_STYLES[Math.floor(Math.random() * SIGN_STYLES.length)];
   g.fillStyle = bg; g.fillRect(0, 0, 64, 256);
-  g.strokeStyle = fg; g.globalAlpha = 0.5; g.lineWidth = 3;
-  g.shadowColor = fg; g.shadowBlur = 8;
+  g.strokeStyle = fg; g.globalAlpha = 0.65; g.lineWidth = 1.5;
+  g.shadowColor = fg; g.shadowBlur = 4;
   g.strokeRect(4, 4, 56, 248);
   g.globalAlpha = 1;
   g.font = '900 38px "Apple SD Gothic Neo","Noto Sans KR",sans-serif';
   g.textAlign = 'center'; g.textBaseline = 'middle';
   const chars = [...word].slice(0, 4);
   const step = 256 / (chars.length + 1);
-  g.shadowBlur = 14;
+  g.shadowBlur = 5;
   g.fillStyle = fg;
-  chars.forEach((ch, i) => { g.fillText(ch, 32, step * (i + 1) + 6); g.fillText(ch, 32, step * (i + 1) + 6); });
-  g.shadowBlur = 0;
-  g.fillStyle = '#ffffff'; g.globalAlpha = 0.85;
   chars.forEach((ch, i) => g.fillText(ch, 32, step * (i + 1) + 6));
-  g.globalAlpha = 1;
+  g.shadowBlur = 0;
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
   t.anisotropy = MAX_ANISO;
   return t;
 }
 // 一樓店面（發光玻璃＋門＋雨棚）
+let storefrontAtlas = null;
+let storefrontLoad = null;
+function loadStreetArt() {
+  if (!storefrontLoad) storefrontLoad = new THREE.TextureLoader()
+    .loadAsync('assets/art/storefront-atlas.webp?v=20260923c')
+    .then(texture => {
+      texture.colorSpace = THREE.SRGBColorSpace;
+      texture.anisotropy = MAX_ANISO;
+      storefrontAtlas = texture;
+    }).catch(error => console.warn('店面美術載入失敗，使用原有店面', error));
+  return storefrontLoad;
+}
 function makeStorefrontTex() {
   const c = document.createElement('canvas');
   c.width = 512; c.height = 256;
@@ -300,7 +328,7 @@ world4.visible = false;
 
 // 開放戰場：正方形地圖，每關獨立佈局（碰撞/遮擋/小地圖跟著切換）
 const MAP_HALF = 47;
-// 第一關：千人斬大廣場——只留外圈少量街區，中央全開放屍潮
+// 第一關：夜市突圍廣場——只留外圈少量街區，中央保持開放
 function genCityBlocks() {
   return [
     { x: -34, z: 34, hx: 7, hz: 7 }, { x: 34, z: 34, hx: 7, hz: 7 },
@@ -400,42 +428,42 @@ const groundMats = [];
 const flickers = [];
 const ENV = { signs: [], fronts: [], wins: [], tentGlows: [] };
 function buildOpenCity() {
-  // 柏油地面
+  // 一次繪製的夜市石板路貼圖
   const ac = document.createElement('canvas');
   ac.width = ac.height = 512;
   const ag = ac.getContext('2d');
-  ag.scale(2, 2);
-  ag.fillStyle = '#191922'; ag.fillRect(0, 0, 256, 256);
-  for (let i = 0; i < 900; i++) {
-    ag.fillStyle = `rgba(${120 + Math.random() * 60},${120 + Math.random() * 60},${130 + Math.random() * 60},${0.05 + Math.random() * 0.07})`;
-    ag.fillRect(Math.random() * 256, Math.random() * 256, 2, 2);
-  }
+  paintStreetSurface(ag, 512);
   const asphalt = new THREE.CanvasTexture(ac);
   asphalt.wrapS = asphalt.wrapT = THREE.RepeatWrapping;
   asphalt.repeat.set(18, 18);
   asphalt.colorSpace = THREE.SRGBColorSpace;
   asphalt.anisotropy = MAX_ANISO;
-  const roadMat = new THREE.MeshStandardMaterial({ map: asphalt, roughness: 0.32, metalness: 0.62 });
+  const roadMat = new THREE.MeshStandardMaterial({ map: asphalt, roughness: 0.5, metalness: 0.28 });
   groundMats.push(roadMat);
   const ground = new THREE.Mesh(new THREE.PlaneGeometry(104, 104), roadMat);
   ground.rotation.x = -Math.PI / 2;
   ground.receiveShadow = true;
   world1.add(ground);
-  // 兩條主幹道虛線
-  const dashMat = new THREE.MeshBasicMaterial({ color: 0x8a8a80 });
-  for (let k = -44; k <= 44; k += 5) {
-    const d1 = new THREE.Mesh(new THREE.PlaneGeometry(0.18, 1.8), dashMat);
-    d1.rotation.x = -Math.PI / 2;
-    d1.position.set(0, 0.012, k);
-    world1.add(d1);
-    const d2 = new THREE.Mesh(new THREE.PlaneGeometry(1.8, 0.18), dashMat);
-    d2.rotation.x = -Math.PI / 2;
-    d2.position.set(k, 0.012, 0);
-    world1.add(d2);
+  // Twin avenue edges frame the plaza and lead directly into the crossing.
+  const avenueMat = new THREE.MeshBasicMaterial({ color: 0x82919c, transparent: true, opacity: 0.36 });
+  const avenueNorthSouth = new THREE.PlaneGeometry(0.13, 104);
+  const avenueEastWest = new THREE.PlaneGeometry(104, 0.13);
+  for (const offset of [-5.4, 5.4]) {
+    const northSouth = new THREE.Mesh(avenueNorthSouth, avenueMat);
+    northSouth.rotation.x = -Math.PI / 2;
+    northSouth.position.set(offset, 0.012, 0);
+    world1.add(northSouth);
+    const eastWest = new THREE.Mesh(avenueEastWest, avenueMat);
+    eastWest.rotation.x = -Math.PI / 2;
+    eastWest.position.set(0, 0.012, offset);
+    world1.add(eastWest);
   }
   // 街區：人行道座台＋組合式樓體（裙樓＋退縮塔身＋女兒牆＋屋頂設備）＋招牌
   const winTexs = [makeWindowTex(46), makeWindowTex(190), makeWindowTex(285), makeWindowTex(210), makeWindowTex(320)];
-  const paveMat = new THREE.MeshLambertMaterial({ color: 0x2e2a3a });
+  const paveMat = new THREE.MeshLambertMaterial({ color: 0x252d40 });
+  const podiumColors = [0x263042, 0x283943, 0x302c3d, 0x283444, 0x353141, 0x253442];
+  const lipColors = [0x171f31, 0x18252c, 0x211e2f, 0x1b2433, 0x252234, 0x18252e];
+  const roofColors = [0x303c50, 0x30454a, 0x433849, 0x334151, 0x47404b, 0x2f4148];
   let wi = 0;
   const OBS1 = OBSTACLES_BY_STAGE[0], REG1 = blockersRegBy[0];
   for (const b of OBS1) {
@@ -446,27 +474,29 @@ function buildOpenCity() {
     plate.receiveShadow = true;
     world1.add(plate);
     // 裙樓（1-2F 商場帶）＋女兒牆
-    const podMat = reg(new THREE.MeshLambertMaterial({ color: 0x252134 }));
-    const pod = new THREE.Mesh(new THREE.BoxGeometry(b.hx * 2, 3.6, b.hz * 2), podMat);
-    pod.position.set(b.x, 1.9, b.z);
+    const podHeight = 4.35;
+    const roofY = podHeight + 0.2;
+    const podMat = reg(new THREE.MeshLambertMaterial({ color: podiumColors[wi % podiumColors.length] }));
+    const pod = new THREE.Mesh(new THREE.BoxGeometry(b.hx * 2, podHeight, b.hz * 2), podMat);
+    pod.position.set(b.x, podHeight / 2, b.z);
     pod.castShadow = true;
     world1.add(pod);
-    const lipMat = reg(new THREE.MeshLambertMaterial({ color: 0x171422 }));
+    const lipMat = reg(new THREE.MeshLambertMaterial({ color: lipColors[wi % lipColors.length] }));
     const podLip = new THREE.Mesh(new THREE.BoxGeometry(b.hx * 2 + 0.3, 0.28, b.hz * 2 + 0.3), lipMat);
-    podLip.position.set(b.x, 3.85, b.z);
+    podLip.position.set(b.x, roofY, b.z);
     world1.add(podLip);
     // 塔身（退縮 + 隨機第二段退縮）
-    const h = 10 + Math.random() * 9;
+    const h = 17 + Math.random() * 10 + (wi % 3) * 1.5;
     const winMat = reg(new THREE.MeshBasicMaterial({ map: winTexs[wi % winTexs.length] }));
     ENV.wins.push(winMat);
     const inset = 0.8 + Math.random() * 0.8;
     const tw = b.hx * 2 - inset * 2, td = b.hz * 2 - inset * 2;
     const tx = b.x + (Math.random() * 2 - 1) * inset * 0.4, tz = b.z + (Math.random() * 2 - 1) * inset * 0.4;
     const tower = new THREE.Mesh(new THREE.BoxGeometry(tw, h, td), winMat);
-    tower.position.set(tx, h / 2 + 3.9, tz);
+    tower.position.set(tx, h / 2 + roofY + 0.14, tz);
     tower.castShadow = true;
     world1.add(tower);
-    let topY = h + 3.9, topW = tw, topD = td;
+    let topY = h + roofY + 0.14, topW = tw, topD = td;
     if (Math.random() < 0.55) {
       const h2 = 3.5 + Math.random() * 5;
       const winMat2 = reg(new THREE.MeshBasicMaterial({ map: winTexs[(wi + 2) % winTexs.length] }));
@@ -490,7 +520,7 @@ function buildOpenCity() {
     trim.position.set(tx, topY + 0.26, tz);
     world1.add(trim);
     // 屋頂設備：水塔＋空調＋天線（紅色警示燈）
-    const roofMat = reg(new THREE.MeshLambertMaterial({ color: 0x2a2738 }));
+    const roofMat = reg(new THREE.MeshLambertMaterial({ color: roofColors[wi % roofColors.length] }));
     const tank = new THREE.Mesh(new THREE.CylinderGeometry(0.7, 0.7, 1.5, 8), roofMat);
     tank.position.set(tx - topW * 0.26, topY + 0.95, tz - topD * 0.2);
     world1.add(tank);
@@ -510,18 +540,20 @@ function buildOpenCity() {
     flickers.push({ mat: beaconMat, base: new THREE.Color(0xff3a3a), speed: 0.3 + Math.random() * 0.3, phase: Math.random() * 10 });
     // 四面一樓店面＋裙樓頂看板
     for (const [dx, dz, ry] of [[0, b.hz + 0.06, 0], [0, -b.hz - 0.06, Math.PI], [b.hx + 0.06, 0, Math.PI / 2], [-b.hx - 0.06, 0, -Math.PI / 2]]) {
-      const frontMat = new THREE.MeshBasicMaterial({ map: makeStorefrontTex() });
+      const panel = ENV.fronts.length;
+      const frontMat = new THREE.MeshBasicMaterial({ map: storefrontAtlas || makeStorefrontTex() });
       ENV.fronts.push(frontMat);
       blockReg.mats.push(frontMat);
-      const front = new THREE.Mesh(new THREE.PlaneGeometry(b.hx * 2 - 1.2, 3.1), frontMat);
-      front.position.set(b.x + dx, 1.68, b.z + dz);
+      const front = new THREE.Mesh(new THREE.PlaneGeometry(b.hx * 2 - 1.2, 3.85), frontMat);
+      if (storefrontAtlas) mapStorefrontPanel(front.geometry, panel, storefrontAtlas.image.width, storefrontAtlas.image.height);
+      front.position.set(b.x + dx, 2.15, b.z + dz);
       front.rotation.y = ry;
       world1.add(front);
       const signMat = new THREE.MeshBasicMaterial({ map: makeSignTex(KR_WORDS[Math.floor(Math.random() * KR_WORDS.length)]) });
       ENV.signs.push(signMat);
       blockReg.mats.push(signMat);
-      const sign = new THREE.Mesh(new THREE.PlaneGeometry(b.hx * 2 - 2, 1.2), signMat);
-      sign.position.set(b.x + dx * 1.012, 4.62, b.z + dz * 1.012);
+      const sign = new THREE.Mesh(new THREE.PlaneGeometry(b.hx * 2 - 2.2, 0.95), signMat);
+      sign.position.set(b.x + dx * 1.012, roofY + 0.72, b.z + dz * 1.012);
       sign.rotation.y = ry;
       world1.add(sign);
       if (Math.random() < 0.4) flickers.push({ mat: signMat, speed: 0.5 + Math.random(), phase: Math.random() * 10 });
@@ -537,15 +569,15 @@ function buildOpenCity() {
     ENV.signs.push(vMats[0], vMats[1]);
     blockReg.mats.push(vMats[0], vMats[1], vDark);
     const v = new THREE.Mesh(new THREE.BoxGeometry(0.3, 3.6, 1), vMats);
-    v.position.set(b.x + b.hx - 0.4, 5.9, b.z + b.hz + 0.35);
+    v.position.set(b.x + b.hx - 0.4, roofY + 1.75, b.z + b.hz + 0.35);
     world1.add(v);
     const vPole = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 2.2, 5), vDark);
-    vPole.position.set(b.x + b.hx - 0.4, 4.6, b.z + b.hz - 0.1);
+    vPole.position.set(b.x + b.hx - 0.4, roofY + 0.45, b.z + b.hz - 0.1);
     world1.add(vPole);
     wi++;
   }
   // 斑馬線（中央十字路口四向）
-  const cwMat = new THREE.MeshBasicMaterial({ color: 0x8f8f88 });
+  const cwMat = new THREE.MeshBasicMaterial({ color: 0x9b9b8c });
   for (let i = -2; i <= 2; i++) {
     for (const [px, pz, w, d2] of [[i * 1.15, 7.4, 0.55, 2.2], [i * 1.15, -7.4, 0.55, 2.2], [7.4, i * 1.15, 2.2, 0.55], [-7.4, i * 1.15, 2.2, 0.55]]) {
       const s = new THREE.Mesh(new THREE.PlaneGeometry(w, d2), cwMat);
@@ -574,8 +606,8 @@ function buildOpenCity() {
     world1.add(m);
   };
   // 布帳馬車（各據點廣場旁）
-  const tentMats = [0x3a4a8a, 0x4a3a7a, 0x2e3a6e].map(c => new THREE.MeshLambertMaterial({ color: c }));
-  const tentGlow = new THREE.MeshBasicMaterial({ color: 0xffa8d8 });
+  const tentMats = [0x35445b, 0x4a4054, 0x344b55].map(c => new THREE.MeshLambertMaterial({ color: c }));
+  const tentGlow = new THREE.MeshBasicMaterial({ color: 0xe9bf7f });
   ENV.tentGlows.push(tentGlow);
   const counterMat = new THREE.MeshLambertMaterial({ color: 0x3a3548 });
   const poleMat = new THREE.MeshLambertMaterial({ color: 0x585868 });
@@ -609,17 +641,22 @@ function buildOpenCity() {
 function buildBackdrop() {
   const mats = [46, 190, 285].map(h => new THREE.MeshBasicMaterial({ map: makeWindowTex(h) }));
   let i = 0;
-  for (let a = 0; a < Math.PI * 2; a += 0.16) {
-    const r = 62 + Math.random() * 14;
-    const w = 7 + Math.random() * 9;
-    const h = 14 + Math.random() * 28;
+  for (let step = 0; step < 40; step++) {
+    // A staggered skyline with deliberate tall/low groups reads as a city
+    // horizon instead of a ring of identical cubes.
+    const a = step / 40 * Math.PI * 2 + (Math.random() - 0.5) * 0.035;
+    const r = 64 + Math.random() * 12;
+    const w = 6 + Math.random() * 6;
+    const d = w * (0.72 + Math.random() * 0.48);
+    const rhythm = 0.5 + 0.5 * Math.sin(step * 1.57 + 0.4);
+    const h = 17 + rhythm * 22 + Math.random() * 3;
     const bx = Math.cos(a) * r, bz = Math.sin(a) * r;
-    const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, w), mats[i++ % 3]);
+    const b = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mats[i++ % 3]);
     b.position.set(bx, h / 2 - 0.5, bz);
-    b.rotation.y = Math.random() * Math.PI;
+    b.rotation.y = -a + Math.PI / 2 + (Math.random() - 0.5) * 0.18;
     world1.add(b);
     if (Math.random() < 0.4) {   // 頂部退縮層：打破方塊剪影
-      const t2 = new THREE.Mesh(new THREE.BoxGeometry(w * 0.55, h * 0.22, w * 0.55), mats[i % 3]);
+      const t2 = new THREE.Mesh(new THREE.BoxGeometry(w * 0.55, h * 0.22, d * 0.55), mats[i % 3]);
       t2.position.set(bx, h + h * 0.11 - 0.5, bz);
       t2.rotation.y = b.rotation.y;
       world1.add(t2);
@@ -630,17 +667,17 @@ function buildBackdrop() {
       world1.add(sp);
     }
   }
-  const hill = new THREE.Mesh(new THREE.ConeGeometry(30, 16, 6), new THREE.MeshBasicMaterial({ color: 0x0c0a18, fog: false }));
-  hill.position.set(42, 7, -78);
+  const hill = new THREE.Mesh(new THREE.ConeGeometry(26, 13, 6), new THREE.MeshBasicMaterial({ color: 0x0c0a18, fog: false }));
+  hill.position.set(8, 5.5, -82);
   world1.add(hill);
-  const tower = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 1.2, 20, 8), new THREE.MeshBasicMaterial({ color: 0x262040, fog: false }));
-  tower.position.set(42, 25, -78);
+  const tower = new THREE.Mesh(new THREE.CylinderGeometry(0.75, 1.15, 18, 8), new THREE.MeshBasicMaterial({ color: 0x303d52, fog: false }));
+  tower.position.set(8, 20.5, -82);
   world1.add(tower);
-  const deck = new THREE.Mesh(new THREE.CylinderGeometry(2.6, 2.2, 2.2, 10), new THREE.MeshBasicMaterial({ color: 0xffd9a0, fog: false }));
-  deck.position.set(42, 36, -78);
+  const deck = new THREE.Mesh(new THREE.CylinderGeometry(2.3, 2, 1.8, 10), new THREE.MeshBasicMaterial({ color: 0xd8ad70, fog: false }));
+  deck.position.set(8, 30.4, -82);
   world1.add(deck);
-  const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.35, 8, 6), new THREE.MeshBasicMaterial({ color: 0xff3a3a, fog: false }));
-  beacon.position.set(42, 44, -78);
+  const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.3, 8, 6), new THREE.MeshBasicMaterial({ color: 0xffcf86, fog: false }));
+  beacon.position.set(8, 37.4, -82);
   world1.add(beacon);
 }
 
@@ -1142,33 +1179,39 @@ const capturePoint = (() => {
 const honmoon = new THREE.Group();
 (function buildHonmoon() {
   const ring = new THREE.Mesh(
-    new THREE.TorusGeometry(10, 0.55, 12, 64),
+    new THREE.TorusGeometry(10, 0.22, 12, 64),
     new THREE.MeshBasicMaterial({ color: 0xa04fff, fog: false })
   );
   const ring2 = new THREE.Mesh(
-    new THREE.TorusGeometry(8, 0.2, 8, 64),
+    new THREE.TorusGeometry(8, 0.1, 8, 64),
     new THREE.MeshBasicMaterial({ color: 0xff4fa3, fog: false })
   );
   const disc = new THREE.Mesh(
     new THREE.CircleGeometry(9.6, 48),
-    new THREE.MeshBasicMaterial({ color: 0x30104f, transparent: true, opacity: 0.6, side: THREE.DoubleSide, fog: false })
+    new THREE.MeshBasicMaterial({ color: 0x10172f, transparent: true, opacity: 0.72, side: THREE.DoubleSide, fog: false })
   );
-  // 旋渦漩流
+  // 封印環：同一張貼圖繪製弧線與符紋，取代粗大的漩渦條紋。
   const sc = document.createElement('canvas');
   sc.width = sc.height = 256;
   const sg = sc.getContext('2d');
   sg.translate(128, 128);
-  for (let arm = 0; arm < 3; arm++) {
-    sg.rotate((Math.PI * 2) / 3);
+  const halo = sg.createRadialGradient(0, 0, 16, 0, 0, 122);
+  halo.addColorStop(0, 'rgba(207,186,255,0.3)');
+  halo.addColorStop(0.6, 'rgba(111,92,207,0.06)');
+  halo.addColorStop(0.92, 'rgba(168,142,255,0.26)');
+  halo.addColorStop(1, 'rgba(168,142,255,0)');
+  sg.fillStyle = halo; sg.fillRect(-128, -128, 256, 256);
+  for (let arm = 0; arm < 6; arm++) {
+    const a = arm * Math.PI / 3;
     sg.beginPath();
-    for (let t = 0; t < 6; t += 0.08) {
-      const r = 6 + t * 19;
-      sg.lineTo(Math.cos(t) * r, Math.sin(t) * r);
-    }
-    sg.strokeStyle = arm === 0 ? 'rgba(255,120,220,0.9)' : 'rgba(190,110,255,0.7)';
-    sg.lineWidth = 10 - arm * 2;
-    sg.shadowColor = '#ff5fd0'; sg.shadowBlur = 12;
+    sg.arc(0, 0, 102, a + 0.09, a + 0.84);
+    sg.strokeStyle = 'rgba(220,206,255,0.82)'; sg.lineWidth = 2;
     sg.stroke();
+    sg.save(); sg.rotate(a);
+    sg.strokeStyle = 'rgba(226,194,133,0.86)'; sg.lineWidth = 1.4;
+    sg.strokeRect(-4, -89, 8, 12);
+    sg.beginPath(); sg.moveTo(0, -93); sg.lineTo(0, -73); sg.stroke();
+    sg.restore();
   }
   const swirlTex = new THREE.CanvasTexture(sc);
   const swirl = new THREE.Mesh(
@@ -1178,7 +1221,7 @@ const honmoon = new THREE.Group();
   swirl.position.z = 0.1;
   honmoon.add(ring, ring2, disc, swirl);
   honmoon.userData.swirl = swirl;
-  honmoon.position.set(0, 14, -64);
+  honmoon.position.set(0, 18, -52);
   scene.add(honmoon);
 })();
 
@@ -1197,7 +1240,7 @@ const embers = (() => {
   const geo = new THREE.BufferGeometry();
   geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
   const pts = new THREE.Points(geo, new THREE.PointsMaterial({
-    color: 0xff7ad0, size: 0.17, transparent: true, opacity: 0.75,
+    color: 0xc6b5ef, size: 0.17, transparent: true, opacity: 0.42,
     blending: THREE.AdditiveBlending, depthWrite: false,
   }));
   scene.add(pts);
@@ -1307,6 +1350,7 @@ const sparkTex = (() => {
   g.fillStyle = rg; g.fillRect(0, 0, 64, 64);
   return new THREE.CanvasTexture(c);
 })();
+embers.pts.material.map = sparkTex;
 // 新月形劍氣貼圖（外層彩光＋內層白熱核心）
 const crescentTex = (() => {
   const c = document.createElement('canvas');
@@ -1386,7 +1430,7 @@ function makeFanGeo(inner, outer, ang, segs = 24) {
   const pos = [], idx = [];
   for (let i = 0; i <= segs; i++) {
     const a = -ang / 2 + (i / segs) * ang;
-    const taper = Math.pow(Math.sin(Math.PI * i / segs), 0.65);
+    const taper = Math.pow(Math.sin(Math.PI * i / segs), 1.25);
     const edge = outer - (outer - inner) * taper;
     pos.push(Math.sin(a) * edge, 0, Math.cos(a) * edge);
     pos.push(Math.sin(a) * outer, 0, Math.cos(a) * outer);
@@ -1415,9 +1459,9 @@ function spawnSlash(x, z, yaw, { ang = 2.4, outer = 2.9, dur = 0.18, color = 0xc
     scene.add(m);
     slashes.push(m);
   };
-  mk(outer * 0.68, outer, color, 0.62, 1, 0);              // 漸細的彩色刀弧
-  mk(outer * 0.91, outer, 0xffffff, 0.86, 1, 0);           // 窄刃亮邊
-  mk(outer * 0.8, outer * 1.03, color, 0.2, 0.7, 0.12);   // 淡色殘影
+  mk(outer * 0.76, outer, color, 0.68, 1, 0);             // 尖端收束的彩色刀弧
+  mk(outer * 0.95, outer, 0xffffff, 0.9, 1, 0);           // 俐落白熱刃口
+  mk(outer * 0.87, outer * 1.03, color, 0.2, 0.7, 0.12); // 淡色殘影
 }
 const drops = [];
 function spawnDrop(x, z) {
@@ -2108,9 +2152,7 @@ function handleVisibilityChange() {
   if (document.hidden) {
     cancelAnimationFrame(animationFrame);
     animationFrame = 0;
-    keys.clear();
-    atkPressed = heavyPressed = jumpPressed = dodgePressed = musouPressed = heavyHold = false;
-    clearTouchMove();
+    clearHeldInput();
     suspendAudio();
   } else {
     resumeFrames();
@@ -2127,6 +2169,9 @@ document.addEventListener('pointerdown', () => {
 const keys = new Set();
 let atkPressed = false, heavyPressed = false, jumpPressed = false, dodgePressed = false, musouPressed = false;
 let heavyHold = false;   // 重攻擊按住中（蓄力判定用）
+const COMBAT_INPUT_BUFFER = 0.15;
+const COMBO_INPUT_BUFFER = 0.42;
+const combatBuffer = { dodge: 0, jump: 0, light: 0, heavy: 0 };
 addEventListener('keydown', e => {
   if (!ready || state === 'loading') return;
   if (e.target instanceof Element && e.target.closest('button') && ['Enter', 'Space'].includes(e.code)) return;
@@ -2169,6 +2214,13 @@ addEventListener('keyup', e => {
   if (e.code === 'KeyK' || e.code === 'KeyX') heavyHold = false;
 });
 
+function clearHeldInput() {
+  keys.clear();
+  atkPressed = heavyPressed = jumpPressed = dodgePressed = musouPressed = heavyHold = false;
+  clearCombatBuffer();
+  clearTouchMove();
+}
+
 // 觸控：左半螢幕虛擬搖桿＋右側按鍵
 (function setupTouch() {
   const zone = document.getElementById('stickZone');
@@ -2176,9 +2228,13 @@ addEventListener('keyup', e => {
   const knob = document.getElementById('stickKnob');
   if (!zone) return;
   let pid = null, cx = 0, cy = 0;
+  let heavyPid = null;
   const R = 55;
   zone.addEventListener('pointerdown', e => {
-    pid = e.pointerId; cx = e.clientX; cy = e.clientY;
+    if (pid !== null) return;
+    pid = e.pointerId;
+    const rect = zone.getBoundingClientRect();
+    cx = e.clientX - rect.left; cy = e.clientY - rect.top;
     base.style.left = knob.style.left = cx + 'px';
     base.style.top = knob.style.top = cy + 'px';
     base.style.display = knob.style.display = 'block';
@@ -2187,7 +2243,8 @@ addEventListener('keyup', e => {
   });
   zone.addEventListener('pointermove', e => {
     if (e.pointerId !== pid) return;
-    let dx = e.clientX - cx, dy = e.clientY - cy;
+    const rect = zone.getBoundingClientRect();
+    let dx = e.clientX - rect.left - cx, dy = e.clientY - rect.top - cy;
     const d = Math.hypot(dx, dy);
     if (d > R) { dx = dx / d * R; dy = dy / d * R; }
     knob.style.left = (cx + dx) + 'px';
@@ -2202,24 +2259,44 @@ addEventListener('keyup', e => {
     base.style.display = knob.style.display = 'none';
   };
   clearTouchMove = () => {
-    if (pid !== null && zone.releasePointerCapture) {
-      try { zone.releasePointerCapture(pid); } catch (e) { /* already released */ }
-    }
+    const activePid = pid;
     pid = null;
     touchMove.active = false; touchMove.mx = 0; touchMove.mz = 0;
     base.style.display = knob.style.display = 'none';
+    if (activePid !== null && zone.releasePointerCapture) {
+      try { zone.releasePointerCapture(activePid); } catch (e) { /* already released */ }
+    }
+    const activeHeavyPid = heavyPid;
+    heavyPid = null;
+    heavyHold = false;
+    if (activeHeavyPid !== null && bB.releasePointerCapture) {
+      try { bB.releasePointerCapture(activeHeavyPid); } catch (e) { /* already released */ }
+    }
   };
   zone.addEventListener('pointerup', end);
   zone.addEventListener('pointercancel', end);
+  zone.addEventListener('lostpointercapture', end);
   const bind = (id, fn) => {
     const el2 = document.getElementById(id);
     el2.addEventListener('pointerdown', e => { e.preventDefault(); fn(); });
   };
   bind('btnA', () => { atkPressed = true; });
   const bB = document.getElementById('btnB');
-  bB.addEventListener('pointerdown', e => { e.preventDefault(); heavyPressed = true; heavyHold = true; });
-  bB.addEventListener('pointerup', () => { heavyHold = false; });
-  bB.addEventListener('pointercancel', () => { heavyHold = false; });
+  bB.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    if (heavyPid !== null) return;
+    heavyPid = e.pointerId;
+    heavyPressed = true; heavyHold = true;
+    bB.setPointerCapture(heavyPid);
+  });
+  const endHeavy = e => {
+    if (e.pointerId !== heavyPid) return;
+    heavyPid = null;
+    heavyHold = false;
+  };
+  bB.addEventListener('pointerup', endHeavy);
+  bB.addEventListener('pointercancel', endHeavy);
+  bB.addEventListener('lostpointercapture', endHeavy);
   bind('btnJ', () => { jumpPressed = true; });
   bind('btnR', () => { dodgePressed = true; });
   bind('btnW', () => { if (state === 'play') switchWeapon(); });
@@ -2333,6 +2410,16 @@ const MOVES = {
   },
 };
 const curMoves = () => MOVES[curChar.key];
+const COMBO_HEAVY_ROUTES = {
+  rumi: [0, 1, 2, 2],
+  mira: [0, 1, 2],
+  zoey: [0, 1, 2, 2, 2, 2],
+};
+function comboHeavyMove(stage) {
+  const route = COMBO_HEAVY_ROUTES[curChar.key];
+  const branch = route[Math.min(Math.max(0, stage), route.length - 1)];
+  return curMoves()[['heavySolo', 'dash', 'heavyFinish'][branch]];
+}
 let weapon = 'melee';
 const curLight = () => weapon === 'melee' ? curMoves().light : curMoves().rlight;
 function switchWeapon() {
@@ -2409,7 +2496,7 @@ const player = {
   x: 0, y: 0, z: 0, vy: 0, yaw: Math.PI,
   hp: 100, hpMax: 100, spd: 6.5,
   st: 'idle',
-  curAtk: null, atkStage: -1, atkT: 0, atkDur: 0, didHit: false, queuedLight: false, queuedHeavy: false,
+  curAtk: null, atkStage: -1, atkT: 0, atkDur: 0, didHit: false,
   dodgeT: 0, dodgeDur: 0, dodgeDx: 0, dodgeDz: 0,
   hurtT: 0, invuln: 0,
 };
@@ -2530,6 +2617,7 @@ function buildHero(char) {
   }
   const base = char.model || heroBase;
   const root = SkeletonUtils.clone(base.scene);
+  shareClonedSkeletons(root);
   if (!char.model && char.tint) {
     // 專屬模型未到位前：靈氣配色代身
     const tc = new THREE.Color(char.tint);
@@ -2568,7 +2656,7 @@ const STAGE_ASSETS = [
   ['minion', 'warrior'], ['minion', 'barbarian'],
   ['minion', 'knight'], ['minion', 'rogue', 'barbarian'],
 ];
-const RUNTIME_ASSET_VERSION = '20260923b';
+const RUNTIME_ASSET_VERSION = '20260923c';
 const builtWorlds = new Set();
 const preparedStages = new Set();
 let streetReflection = null;
@@ -2577,6 +2665,7 @@ const yieldLoading = () => new Promise(resolve => setTimeout(resolve, 0));
 async function loadEnemyAsset(key) {
   if (assets[key]) return;
   const gltf = await loader.loadAsync(`assets/runtime/${ENEMY_FILES[key]}.glb?v=${RUNTIME_ASSET_VERSION}`);
+  mergeSkinnedParts(gltf.scene, gltf.animations);
   // 保留原本的頭身比例與動作，只改變載入時機。
   const k = key === 'minion' || key === 'warrior' ? 0.62 : 0.78;
   for (const clip of gltf.animations) {
@@ -2593,12 +2682,14 @@ async function loadEnemyAsset(key) {
 async function prepareStage(i, report = () => {}) {
   if (preparedStages.has(i)) return;
   if (!STAGES[i]) throw new Error('找不到這個關卡');
+  const streetArtReady = i === 0 ? loadStreetArt() : null;
   for (const key of STAGE_ASSETS[i]) {
     report(`準備第 ${i + 1} 關角色…`);
     await loadEnemyAsset(key);
     await yieldLoading();
   }
   const world = [world1, world2, world3, world4][i];
+  await streetArtReady;
   report(`建立第 ${i + 1} 關場景…`);
   await yieldLoading();
   if (!builtWorlds.has(i)) {
@@ -2651,10 +2742,10 @@ export async function prepareGame() {
     loadEnemyAsset('minion'),
   ]);
   heroBase = prepHeroModel(hero);
-  // 專屬模型仍為可選；缺檔時維持原本的配色代身。
-  await Promise.all(['mira', 'zoey'].map(async key => {
-    const gltf = await loader.loadAsync(`assets/${key}.glb`).catch(() => null);
-    if (gltf) CHARS[key].model = prepHeroModel(gltf);
+  // 只下載已列入設定的專屬模型，避免不存在的檔案拖住選角。
+  await Promise.all(Object.values(CHARS).filter(char => char.modelFile).map(async char => {
+    const gltf = await loader.loadAsync(char.modelFile).catch(() => null);
+    if (gltf) char.model = prepHeroModel(gltf);
   }));
   await prepareStage(0, text => { hud.load.textContent = text; });
   ready = true;
@@ -2681,8 +2772,8 @@ function placeCityProps(props) {
   for (let i = 0; i < 12; i++) {
     const k = -44 + i * 8 + Math.random() * 3;
     if (Math.abs(k) < 8) continue;
-    put(carTypes[i % 3], (i % 2 === 0 ? 3.6 : -3.6), k, i % 2 === 0 ? 0 : Math.PI, 1.05);
-    put(carTypes[(i + 1) % 3], k, (i % 2 === 0 ? -3.6 : 3.6), i % 2 === 0 ? Math.PI / 2 : -Math.PI / 2, 1.05);
+    put(carTypes[i % 3], (i % 2 === 0 ? 3.6 : -3.6), k, i % 2 === 0 ? 0 : Math.PI, 2.1);
+    put(carTypes[(i + 1) % 3], k, (i % 2 === 0 ? -3.6 : 3.6), i % 2 === 0 ? Math.PI / 2 : -Math.PI / 2, 2.1);
   }
   // 路燈＋光池（幹道沿線）
   for (let i = 0; i < 7; i++) {
@@ -2714,7 +2805,8 @@ const E_ANIMS = [
 ];
 const MAX_ATTACKERS = 4;
 
-function spawnEnemy(kindName, fx, fz) {
+function spawnEnemy(kindName, fx, fz, role = 'regular') {
+  if (!canSpawnEnemy(enemies, kindName, role)) return null;
   const kind = KINDS[kindName];
   let x, z;
   if (fx !== undefined) { x = fx; z = fz; }
@@ -2726,6 +2818,7 @@ function spawnEnemy(kindName, fx, fz) {
   }
   const src = assets[kind.file];
   const root = SkeletonUtils.clone(src.scene);
+  shareClonedSkeletons(root);
   const mats = [];
   root.traverse(o => {
     if (o.isMesh) {
@@ -2754,7 +2847,8 @@ function spawnEnemy(kindName, fx, fz) {
   const rig = makeRig(root, src.clips, E_ANIMS);
   const hasSpawn = !!rig.actions['Spawn_Ground'];   // 冒險者模型無破土動畫→短暫待機出場
   const e = {
-    kind, kindName, root, rig, mats,
+    kind, kindName, root, rig, mats, spawnRole: role,
+    flankAngle: Math.random() * Math.PI * 2,
     shadow: makeBlobShadow(kind.shadowR),
     x, z, yaw: 0, vx: 0, vz: 0,
     hp: kind.hp, hpMax: kind.hp,
@@ -2817,7 +2911,7 @@ function killEnemy(e) {
   spawnSpark(new THREE.Vector3(e.x, 1.0, e.z), e.kindName === 'boss' ? 4 : 2.2, 0xa04fff);
   if (!e.noCount && e.obj) e.obj.kills = (e.obj.kills || 0) + 1;
   else if (!e.noCount && !e.kindName.startsWith('boss')) {
-    // 千人斬：野生敵擊殺也計入
+    // Unassigned kills contribute to the currently active assault wave.
     const horde = (level.objs || []).find(o => o.type === 'horde' && o.state === 'active');
     if (horde) horde.kills++;
   }
@@ -2827,11 +2921,12 @@ function killEnemy(e) {
     showToast('敵將討破！');
     S.zone();
     spawnShockwave(e.x, e.z, { maxR: 12, dur: 0.5, color: 0xffb056 });
+    musou = Math.min(100, musou + 18);
     for (const m of [...enemies]) {
       if (m.st === 'dead' || m.officer || m.kindName.startsWith('boss')) continue;
       if ((m.kindName === 'minion' || m.kindName === 'runner') && Math.hypot(m.x - e.x, m.z - e.z) < 14) {
-        m.noCount = true;
-        killEnemy(m);
+        m.st = 'hit'; m.hitT = 0.9;
+        play(m.rig, 'Hit_A', { once: true, ts: 1.3 });
       }
     }
   }
@@ -2862,16 +2957,22 @@ function updateEnemies(dt) {
     const dx = tX - e.x, dz = tZ - e.z;
     const d = Math.hypot(dx, dz) || 1;
     const targetYaw = Math.atan2(dx, dz);
+    const flank = e.kindName === 'runner' && !e.lampTgt;
+    const moveX = flank ? tX + Math.cos(e.flankAngle) * 1.4 : tX;
+    const moveZ = flank ? tZ + Math.sin(e.flankAngle) * 1.4 : tZ;
+    const moveDx = moveX - e.x, moveDz = moveZ - e.z;
+    const moveD = Math.hypot(moveDx, moveDz) || 1;
     const isBoss = e.kindName.startsWith('boss');
 
     if (e.st === 'spawn') {
       e.t -= dt;
       if (e.t <= 0) { e.st = 'chase'; play(e.rig, 'Running_A', { ts: 1.2 }); }
     } else if (e.st === 'chase') {
-      e.yaw += angDiff(e.yaw, targetYaw) * Math.min(1, dt * 8);
+      const chaseYaw = flank ? Math.atan2(moveDx, moveDz) : targetYaw;
+      e.yaw += angDiff(e.yaw, chaseYaw) * Math.min(1, dt * 8);
       if (d > e.kind.atkRange - 0.2) {
-        e.x += (dx / d) * e.spd * dt;
-        e.z += (dz / d) * e.spd * dt;
+        e.x += (moveDx / moveD) * e.spd * dt;
+        e.z += (moveDz / moveD) * e.spd * dt;
       }
       e.atkCd -= dt;
       if (isBoss) {
@@ -2898,7 +2999,13 @@ function updateEnemies(dt) {
         e.t = 0; e.hitAppl = false;
         e.atkDur = clipDur(e.rig, clip, e.kind.atkTs);
         play(e.rig, clip, { once: true, ts: e.kind.atkTs });
-        spawnShockwave(e.x, e.z, { maxR: e.kind.hitRange * 0.55, dur: e.atkDur * 0.45, color: 0xff3a5a });
+        // The expanding ring reaches the damage radius at the hit frame and
+        // stays readable briefly as the attack lands.
+        spawnShockwave(e.x, e.z, {
+          maxR: attackTelegraphMaxRadius(e.kind.hitRange),
+          dur: e.atkDur * 0.7,
+          color: 0xff294f,
+        });
       }
     } else if (e.st === 'attack') {
       e.yaw += angDiff(e.yaw, targetYaw) * Math.min(1, dt * 4);
@@ -2914,7 +3021,8 @@ function updateEnemies(dt) {
       }
       if (e.t >= e.atkDur * 0.95) {
         e.st = 'chase';
-        e.atkCd = (isBoss ? 1.1 : 1.7) + Math.random() * 1.5;
+        const recovery = isBoss ? 1.1 : e.kindName === 'minion' ? 1.7 : 1.35;
+        e.atkCd = recovery + Math.random() * (isBoss ? 1.0 : e.kindName === 'minion' ? 1.5 : 0.9);
         play(e.rig, 'Running_A', { ts: 1.2 });
       }
     } else if (e.st === 'cast') {
@@ -2966,9 +3074,14 @@ function updateEnemies(dt) {
       if (b.st === 'dead') continue;
       const dx = b.x - a.x, dz = b.z - a.z;
       const d = Math.hypot(dx, dz);
-      const min = 1.35 * Math.max(a.kind.scale, b.kind.scale);
-      if (d > 0 && d < min) {
-        const push = (min - d) / 2, ux = dx / d, uz = dz / d;
+      const min = 1.6 * Math.max(a.kind.scale, b.kind.scale);
+      if (d < min) {
+        // Simultaneous spawns can land at precisely the same point. Give that
+        // pair a stable separation direction instead of leaving them merged.
+        const angle = d > 1e-4 ? 0 : (i * 2.399963 + j * 1.618034);
+        const ux = d > 1e-4 ? dx / d : Math.cos(angle);
+        const uz = d > 1e-4 ? dz / d : Math.sin(angle);
+        const push = (min - d) / 2;
         a.x -= ux * push; a.z -= uz * push;
         b.x += ux * push; b.z += uz * push;
       }
@@ -3049,27 +3162,46 @@ function damageRifts(x, z, range, dmg) {
   }
   return hits;
 }
-function objSpawn(o, kindName) {
+function objSpawn(o, kindName, role = 'regular') {
   const a = Math.random() * 6.28;
   const r = 7 + Math.random() * 9;
   const e = spawnEnemy(kindName,
     Math.max(-MAP_HALF + 2, Math.min(MAP_HALF - 2, o.pos[0] + Math.cos(a) * r)),
-    Math.max(-MAP_HALF + 2, Math.min(MAP_HALF - 2, o.pos[1] + Math.sin(a) * r)));
+    Math.max(-MAP_HALF + 2, Math.min(MAP_HALF - 2, o.pos[1] + Math.sin(a) * r)), role);
+  if (!e) return null;
   e.obj = o;
   return e;
+}
+function spawnObjectiveOfficer(o) {
+  const index = o.officersSpawned || 0;
+  const off = objSpawn(o, OFFICER_KINDS[Math.min(stageIdx, OFFICER_KINDS.length - 1)], 'officer');
+  if (!off) return false;
+  off.officer = true;
+  off.hp = off.hpMax = 14 + stageIdx * 4;
+  makeOfficerBar(off, OFFICER_NAMES[index % OFFICER_NAMES.length]);
+  o.officersSpawned = index + 1;
+  return true;
+}
+function spawnHordeGroup(o, count) {
+  const angle = Math.random() * Math.PI * 2;
+  const radius = 10 + Math.random() * 2;
+  const sideX = -Math.sin(angle), sideZ = Math.cos(angle);
+  for (let i = 0; i < count; i++) {
+    const spread = (i - (count - 1) / 2) * 1.2;
+    const x = player.x + Math.cos(angle) * radius + sideX * spread;
+    const z = player.z + Math.sin(angle) * radius + sideZ * spread;
+    const e = spawnEnemy(hordeKindAt(o.phase / 2, o.spawnIndex++),
+      Math.max(-MAP_HALF + 2, Math.min(MAP_HALF - 2, x)),
+      Math.max(-MAP_HALF + 2, Math.min(MAP_HALF - 2, z)));
+    if (e) e.obj = o;
+  }
 }
 function activateObjective(o) {
   o.state = 'active';
   showToast(o.name);
   S.zone();
   if (o.type === 'officer') {
-    const names = [...OFFICER_NAMES].sort(() => Math.random() - 0.5);
-    for (let i = 0; i < o.officers; i++) {
-      const off = objSpawn(o, OFFICER_KINDS[Math.min(stageIdx, OFFICER_KINDS.length - 1)]);
-      off.officer = true;
-      off.hp = off.hpMax = 14 + stageIdx * 4;
-      makeOfficerBar(off, names[i % names.length]);
-    }
+    while ((o.officersSpawned || 0) < o.officers && spawnObjectiveOfficer(o)) {}
     for (let i = 0; i < 4; i++) objSpawn(o, spawnKindFor(o));
   } else if (o.type === 'defend') {
     o.lampMax = 120; o.lampHp = 120; o.defT = 0;
@@ -3083,21 +3215,15 @@ function activateObjective(o) {
     o.rift = makeRift(o.pos[0], o.pos[1]);
     for (let i = 0; i < 6; i++) objSpawn(o, spawnKindFor(o));
   } else if (o.type === 'horde') {
-    o.mile = 100; o.spawnT = 0;
-    for (let i = 0; i < 14; i++) {
-      const a = Math.random() * 6.28, r = 9 + Math.random() * 10;
-      const e = spawnEnemy(Math.random() < (o.fast || 0) ? 'runner' : 'minion',
-        Math.max(-MAP_HALF + 2, Math.min(MAP_HALF - 2, player.x + Math.cos(a) * r)),
-        Math.max(-MAP_HALF + 2, Math.min(MAP_HALF - 2, player.z + Math.sin(a) * r)));
-      e.obj = o;
-    }
+    o.spawnIndex = 0; o.spawnT = 0.8;
+    spawnHordeGroup(o, 10);
   } else {
     for (let i = 0; i < 10; i++) objSpawn(o, spawnKindFor(o));
   }
 }
 function completeObjective(o) {
   o.state = 'done';
-  showToast(o.type === 'capture' ? '據點制壓！' : o.type === 'officer' ? '敵將全滅！'
+  showToast(o.type === 'horde' ? '突圍完成！魂力回復' : o.type === 'capture' ? '據點制壓！' : o.type === 'officer' ? '敵將全滅！'
     : o.type === 'defend' ? '魂燈守住了！' : o.type === 'trial' ? '試煉突破！'
     : o.type === 'rift' ? '裂口封印！' : '目標達成！');
   S.zone();
@@ -3118,22 +3244,24 @@ function completeObjective(o) {
   spawnShockwave(o.pos[0], o.pos[1], { maxR: 10, dur: 0.5, color: 0x8fffbf });
 }
 function startBossPhase() {
-  level.bossPhase = true;
   const cfg = STAGES[stageIdx];
+  level.boss = spawnEnemy(cfg.bossKind, cfg.bossPos[0], cfg.bossPos[1], 'boss');
+  if (!level.boss) return false;
+  level.bossPhase = true;
   document.getElementById('bossname').textContent = cfg.bossLabel;
   hud.bosswrap.style.display = 'block';
   S.roar();
-  level.boss = spawnEnemy(cfg.bossKind, cfg.bossPos[0], cfg.bossPos[1]);
   for (let i = 0; i < 8; i++) spawnEnemy('minion', cfg.bossPos[0] + (Math.random() * 2 - 1) * 10, cfg.bossPos[1] + (Math.random() * 2 - 1) * 10);
   showToast(cfg.bossLabel + ' 現身！');
   showDialog(STORY['s' + (stageIdx + 1) + 'boss'] || []);
+  return true;
 }
 function setObjective(text, go = false) {
   if (hud.objective.textContent !== text) hud.objective.textContent = text;
   if (hud.objective.classList.contains('go') !== go) hud.objective.classList.toggle('go', go);
 }
 function updateLevel(dt) {
-  const alive = enemies.filter(e => e.st !== 'dead').length;
+  const alive = countActiveEnemies(enemies);
   if (level.bossPhase) {
     setObjective('擊破 ' + STAGES[stageIdx].bossLabel);
     if (level.boss) hud.bossfill.style.width = Math.max(0, level.boss.hp / level.boss.hpMax * 100) + '%';
@@ -3147,18 +3275,19 @@ function updateLevel(dt) {
   }
   let remaining = 0;
   let engaged = null;
-  for (const o of level.objs) {
+  for (let oi = 0; oi < level.objs.length; oi++) {
+    const o = level.objs[oi];
     if (o.state === 'done') continue;
     remaining++;
     const d = Math.hypot(player.x - o.pos[0], player.z - o.pos[1]);
-    if (o.state === 'dormant' && (o.type === 'horde' || d < 20)) activateObjective(o);
+    const stepReady = o.type !== 'horde' || stageIdx !== 0 || encounterStepReady(level.objs, oi);
+    if (o.state === 'dormant' && stepReady && (o.type === 'horde' || d < 20)) activateObjective(o);
     if (o.state !== 'active') continue;
     if (!engaged || d < Math.hypot(player.x - engaged.pos[0], player.z - engaged.pos[1])) engaged = o;
     const objAlive = enemies.filter(e => e.obj === o && e.st !== 'dead').length;
     if (o.type === 'kill') {
-      if (o.spawned < o.need && objAlive < 16 && alive < 34 && Math.random() < 0.55) {
-        objSpawn(o, spawnKindFor(o));
-        o.spawned++;
+      if (o.spawned < o.need && objAlive < 16 && alive < MAX_ACTIVE_ENEMIES && Math.random() < 0.55) {
+        if (objSpawn(o, spawnKindFor(o))) o.spawned++;
       }
       if (o.ambush && !o.ambushDone && o.kills >= o.need * 0.5) {
         o.ambushDone = true;
@@ -3168,7 +3297,7 @@ function updateLevel(dt) {
           const a = Math.random() * 6.28;
           const e = spawnEnemy(Math.random() < 0.5 ? 'runner' : 'minion',
             player.x + Math.cos(a) * 9, player.z + Math.sin(a) * 9);
-          e.noCount = true;
+          if (e) e.noCount = true;
         }
       }
       if (o.kills >= o.need) completeObjective(o);
@@ -3176,14 +3305,15 @@ function updateLevel(dt) {
       const inside = Math.hypot(player.x - o.pos[0], player.z - o.pos[1]) < 4 && player.y < 1;
       const contested = enemies.some(e => e.st !== 'dead' && e.st !== 'spawn' && Math.hypot(e.x - o.pos[0], e.z - o.pos[1]) < 5);
       if (inside) o.capT = Math.min(100, o.capT + dt * (contested ? 5 : 14));
-      if (objAlive < 13 && alive < 34 && Math.random() < 0.42) objSpawn(o, spawnKindFor(o));
+      if (objAlive < 13 && alive < MAX_ACTIVE_ENEMIES && Math.random() < 0.42) objSpawn(o, spawnKindFor(o));
       if (o.capT >= 100) completeObjective(o);
     } else if (o.type === 'officer') {
-      if (objAlive < 13 && alive < 34 && Math.random() < 0.38) objSpawn(o, spawnKindFor(o));
+      while ((o.officersSpawned || 0) < o.officers && spawnObjectiveOfficer(o)) {}
+      if (objAlive < 13 && alive < MAX_ACTIVE_ENEMIES && Math.random() < 0.38) objSpawn(o, spawnKindFor(o));
       if (o.officersLeft <= 0) completeObjective(o);
     } else if (o.type === 'defend') {
       o.defT += dt;
-      if (objAlive < 12 && alive < 34 && Math.random() < 0.5) objSpawn(o, spawnKindFor(o));
+      if (objAlive < 12 && alive < MAX_ACTIVE_ENEMIES && Math.random() < 0.5) objSpawn(o, spawnKindFor(o));
       if (o.lamp) {
         const lk = 1 + Math.sin(worldT * 4) * 0.12;
         o.lamp.userData.glow.scale.set(3.2 * lk, 3.2 * lk, 1);
@@ -3199,7 +3329,7 @@ function updateLevel(dt) {
       if (o.defT >= o.time) completeObjective(o);
     } else if (o.type === 'trial') {
       o.trialT -= dt;
-      if (objAlive < 16 && alive < 34 && Math.random() < 0.6) objSpawn(o, spawnKindFor(o));
+      if (objAlive < 16 && alive < MAX_ACTIVE_ENEMIES && Math.random() < 0.6) objSpawn(o, spawnKindFor(o));
       if (o.kills >= o.need) completeObjective(o);
       else if (o.trialT <= 0) {
         o.kills = 0; o.trialT = o.tlimit;
@@ -3213,45 +3343,21 @@ function updateLevel(dt) {
         const rk = 1 + Math.sin(worldT * 5) * 0.1;
         o.rift.userData.outer.scale.setScalar(rk);
       }
-      if (objAlive < 10 && alive < 34 && Math.random() < 0.35) objSpawn(o, spawnKindFor(o));
+      if (objAlive < 10 && alive < MAX_ACTIVE_ENEMIES && Math.random() < 0.35) objSpawn(o, spawnKindFor(o));
       if (o.riftHp <= 0) completeObjective(o);
     } else if (o.type === 'horde') {
-      // 千人斬：貼著玩家高密度刷屍潮，殺越多敵人越強越快
-      const cap = IS_MOBILE ? 24 : 40;
-      const prog = Math.min(1, o.kills / o.need);   // 0→1 難度進度
+      // Refresh with small groups; harder waves mix in runners and a few elites.
       o.spawnT -= dt;
-      if (o.spawnT <= 0 && alive < cap) {
-        o.spawnT = Math.max(0.18, 0.35 - prog * 0.15);
-        const n = Math.min(cap - alive, 3 + Math.floor(Math.random() * 3) + Math.floor(prog * 2));
-        for (let k = 0; k < n; k++) {
-          const roll = Math.random();
-          let kind;
-          if (prog > 0.35 && roll < 0.04 + prog * 0.07) kind = 'brute';        // 中盤起混入蠻力鬼
-          else if (prog > 0.6 && roll < 0.14 + prog * 0.08) kind = 'shade';    // 後段影刺穿插
-          else if (roll < 0.04 + prog * 0.1) kind = 'elite';
-          else kind = Math.random() < (o.fast || 0) + prog * 0.4 ? 'runner' : 'minion';
-          const a = Math.random() * 6.28, r = 11 + Math.random() * 9;
-          const e = spawnEnemy(kind,
-            Math.max(-MAP_HALF + 2, Math.min(MAP_HALF - 2, player.x + Math.cos(a) * r)),
-            Math.max(-MAP_HALF + 2, Math.min(MAP_HALF - 2, player.z + Math.sin(a) * r)));
-          e.obj = o;
-          // 屍潮強化：滿千時 HP×2.2、速度+1.5、攻擊+80%
-          e.hp = e.hpMax = e.kind.hp * (1 + prog * 1.2);
-          e.spd += prog * 1.5;
-          e.dmgMul = 1 + prog * 0.8;
-        }
+      if (o.spawnT <= 0 && objAlive < 6 && alive < MAX_ACTIVE_ENEMIES) {
+        o.spawnT = 0.5;
+        spawnHordeGroup(o, 4);
       }
-      // 每百人斬里程碑：爆氣獎勵；每三百斬敵軍升級吼聲警示
-      if (o.kills >= o.mile && o.mile <= 900) {
-        const digits = ['一', '二', '三', '四', '五', '六', '七', '八', '九'];
-        showToast(`${digits[Math.floor(o.mile / 100) - 1]}百人斬！`);
-        if (o.mile % 300 === 0) S.roar();
-        o.mile += 100;
+      if (o.kills >= o.need) {
         S.win();
         musou = Math.min(100, musou + 25);
         spawnShockwave(player.x, player.z, { maxR: 8, dur: 0.5, color: 0xffd84f });
+        completeObjective(o);
       }
-      if (o.kills >= o.need) completeObjective(o);
     }
   }
   // 目標提示
@@ -3265,22 +3371,23 @@ function updateLevel(dt) {
     else if (engaged.type === 'defend') setObjective(`${engaged.name}　守護 ${Math.max(0, Math.ceil(engaged.time - engaged.defT))}s ・ 魂燈 ${Math.max(0, Math.round(engaged.lampHp / engaged.lampMax * 100))}%`);
     else if (engaged.type === 'trial') setObjective(`${engaged.name}　${Math.min(engaged.kills, engaged.need)}／${engaged.need} ・ 剩 ${Math.max(0, Math.ceil(engaged.trialT))}s`);
     else if (engaged.type === 'rift') setObjective(`${engaged.name}　攻擊裂口！ ${Math.max(0, Math.round(engaged.riftHp / engaged.riftHpMax * 100))}%`);
-    else if (engaged.type === 'horde') setObjective(`千人斬　${Math.min(engaged.kills, engaged.need)}／${engaged.need}`);
+    else if (engaged.type === 'horde') setObjective(`${engaged.name}　擊破 ${Math.min(engaged.kills, engaged.need)}／${engaged.need}`);
     else setObjective(`${engaged.name}　討伐敵將 ${engaged.officers - engaged.officersLeft}／${engaged.officers}`);
   } else {
     setObjective(`剩餘目標 ${remaining}——依小地圖光點推進`, true);
   }
   // 巡遊敵（地圖上的野生威脅）
   const roamers = enemies.filter(e => !e.obj && !e.kindName.startsWith('boss') && e.st !== 'dead').length;
-  if (roamers < 12 && alive < 34 && Math.random() < 0.06) {
+  if (roamers < 4 && alive < MAX_ACTIVE_ENEMIES - 3 && Math.random() < 0.06) {
     const a = Math.random() * 6.28;
     const cx = Math.max(-MAP_HALF + 4, Math.min(MAP_HALF - 4, player.x + Math.cos(a) * (14 + Math.random() * 6)));
     const cz = Math.max(-MAP_HALF + 4, Math.min(MAP_HALF - 4, player.z + Math.sin(a) * (14 + Math.random() * 6)));
-    const n = 2 + Math.floor(Math.random() * 2);
-    for (let i = 0; i < n; i++) {
-      spawnEnemy(Math.random() < 0.3 ? 'runner' : 'minion',
-        Math.max(-MAP_HALF + 2, Math.min(MAP_HALF - 2, cx + (Math.random() * 2 - 1) * 3)),
-        Math.max(-MAP_HALF + 2, Math.min(MAP_HALF - 2, cz + (Math.random() * 2 - 1) * 3)));
+    const sideX = -Math.sin(a), sideZ = Math.cos(a);
+    for (let i = 0; i < 3; i++) {
+      const spread = (i - 1) * 1.3;
+      spawnEnemy(i === 1 ? 'runner' : 'minion',
+        Math.max(-MAP_HALF + 2, Math.min(MAP_HALF - 2, cx + sideX * spread)),
+        Math.max(-MAP_HALF + 2, Math.min(MAP_HALF - 2, cz + sideZ * spread)));
     }
   }
   if (remaining === 0) startBossPhase();
@@ -3494,6 +3601,7 @@ function damagePlayer(dmg, from) {
   const d = Math.hypot(dx, dz) || 1;
   p.x += (dx / d) * 0.7; p.z += (dz / d) * 0.7;
   if (p.hp <= 0) {
+    clearCombatBuffer();
     p.hp = 0; p.st = 'dead';
     play(p.rig, 'death', { once: true, ts: 1.1 });
     state = 'dead';
@@ -3510,12 +3618,70 @@ function damagePlayer(dmg, from) {
 
 // ---------- 玩家 ----------
 const GRAV = 26, JUMP_V = 9.5;
+function clearCombatBuffer() {
+  combatBuffer.dodge = combatBuffer.jump = combatBuffer.light = combatBuffer.heavy = 0;
+}
+function bufferCombatInputs(dt, inAttack = false) {
+  for (const action of Object.keys(combatBuffer)) combatBuffer[action] = Math.max(0, combatBuffer[action] - dt);
+  if (dodgePressed) combatBuffer.dodge = COMBAT_INPUT_BUFFER;
+  if (jumpPressed) combatBuffer.jump = COMBAT_INPUT_BUFFER;
+  if (atkPressed) combatBuffer.light = inAttack ? COMBO_INPUT_BUFFER : COMBAT_INPUT_BUFFER;
+  if (heavyPressed) combatBuffer.heavy = inAttack ? COMBO_INPUT_BUFFER : COMBAT_INPUT_BUFFER;
+}
+function takeBufferedCombatInput(action) {
+  if (combatBuffer[action] <= 0) return false;
+  combatBuffer[action] = 0;
+  return true;
+}
+function startJump(p) {
+  clearCombatBuffer();
+  p.st = 'jump'; p.vy = JUMP_V;
+  S.jump();
+  play(p.rig, 'jump', { once: true, ts: 1.15, fade: 0.06 });
+}
+function resolveGroundCombatInput(p, mx, mz, ml) {
+  if (takeBufferedCombatInput('dodge')) { startDodge(mx, mz, ml); return 'dodge'; }
+  if (musouPressed && musou >= 100) { musouPressed = false; startMusou(); return 'musou'; }
+  if (takeBufferedCombatInput('light')) { startAttack(curLight()[0], 0, mx, mz, ml); return 'light'; }
+  if (takeBufferedCombatInput('heavy')) {
+    clearCombatBuffer();
+    p.st = 'charge'; p.chargeT = 0; p.chargeFx = 0; p.chargeCue = false;
+    play(p.rig, ml > 0 ? 'run' : 'idle', { ts: ml > 0 ? 0.7 : 0.6 });
+    return 'heavy';
+  }
+  if (takeBufferedCombatInput('jump')) { startJump(p); return 'jump'; }
+  return null;
+}
+function resolveAttackCombatInput(p, mx, mz, ml) {
+  if (p.didHit && takeBufferedCombatInput('dodge')) { startDodge(mx, mz, ml); return 'dodge'; }
+  if (musouPressed && musou >= 100) { musouPressed = false; startMusou(); return 'musou'; }
+  if (!p.didHit || p.atkT < p.atkDur * 0.5) return null;
+  if (takeBufferedCombatInput('heavy')) {
+    const mv = curMoves();
+    startAttack(weapon === 'melee' ? comboHeavyMove(p.atkStage) : mv.rheavy, -1, mx, mz, ml);
+    return 'heavy';
+  }
+  if (p.atkStage >= 0 && takeBufferedCombatInput('light')) {
+    const lt = curLight();
+    const nextStage = (p.atkStage + 1) % lt.length;
+    startAttack(lt[nextStage], nextStage, mx, mz, ml);
+    return 'light';
+  }
+  return null;
+}
+function cancelChargeForDodge(p, mx, mz, ml) {
+  if (!takeBufferedCombatInput('dodge')) return false;
+  p.chargeCue = false;
+  startDodge(mx, mz, ml);
+  return true;
+}
 function updatePlayer(dt) {
   const p = player;
   if (!p.root) return;
   p.rig.mixer.update(dt);
   if (p.st === 'dead' || state === 'win') { syncPlayer(); return; }
   p.invuln = Math.max(0, p.invuln - dt);
+  bufferCombatInputs(dt, p.st === 'atk');
 
   let mx = 0, mz = 0;
   if (keys.has('KeyW') || keys.has('ArrowUp')) mz -= 1;
@@ -3535,6 +3701,7 @@ function updatePlayer(dt) {
     mx = wx; mz = wz;
   }
 
+  if (p.st === 'charge') cancelChargeForDodge(p, mx, mz, ml);
   if (p.st === 'hurt') {
     p.hurtT -= dt;
     if (p.hurtT <= 0) { p.st = 'idle'; play(p.rig, 'idle'); }
@@ -3552,8 +3719,8 @@ function updatePlayer(dt) {
     }
     if (p.st === 'jump') {
       p.vy -= GRAV * dt;
-      if (atkPressed) {
-        atkPressed = false;
+      if (takeBufferedCombatInput('light')) {
+        clearCombatBuffer();
         p.st = 'plunge'; p.vy = -22;
         play(p.rig, 'slash4', { once: true, ts: 1.3, fade: 0.06 });
       }
@@ -3727,19 +3894,14 @@ function updatePlayer(dt) {
     if (a.dash && Math.random() < 0.6) spawnSpark(new THREE.Vector3(p.x, 0.9 + Math.random() * 0.6, p.z), 0.9, curChar.fx, { dur: 0.2 });
     if (ml > 0) p.yaw += angDiff(p.yaw, Math.atan2(mx, mz)) * Math.min(1, dt * 4);
     if (!p.didHit && p.atkT >= p.atkDur * a.hitAt) { p.didHit = true; applyPlayerHit(a); }
-    if (musouPressed && musou >= 100) { musouPressed = false; startMusou(); return; }
-    if (atkPressed) { p.queuedLight = true; atkPressed = false; }
-    if (heavyPressed) { p.queuedHeavy = true; heavyPressed = false; }
-    if (dodgePressed && p.didHit) { dodgePressed = false; startDodge(mx, mz, ml); }
-    else if (p.atkT >= p.atkDur * 0.5 && p.queuedHeavy) {
-      const mv = curMoves();
-      startAttack(weapon === 'melee' ? (p.atkStage >= 1 ? mv.heavyFinish : mv.heavySolo) : mv.rheavy, -1, mx, mz, ml);
-    } else if (p.atkT >= p.atkDur * 0.5 && p.queuedLight && p.atkStage >= 0) {
-      const lt = curLight();
-      startAttack(lt[(p.atkStage + 1) % lt.length], (p.atkStage + 1) % lt.length, mx, mz, ml);
-    } else if (p.atkT >= p.atkDur * 0.86) {
-      p.st = 'idle';
-      play(p.rig, ml > 0 ? 'run' : 'idle', { ts: ml > 0 ? 1.15 : 1 });
+    const action = resolveAttackCombatInput(p, mx, mz, ml);
+    if (action === 'musou') return;
+    if (!action && p.atkT >= p.atkDur * 0.86 && p.didHit) {
+      if (takeBufferedCombatInput('jump')) startJump(p);
+      else {
+        p.st = 'idle';
+        play(p.rig, ml > 0 ? 'run' : 'idle', { ts: ml > 0 ? 1.15 : 1 });
+      }
     }
   } else {
     if (ml > 0) {
@@ -3748,20 +3910,7 @@ function updatePlayer(dt) {
       p.yaw += angDiff(p.yaw, Math.atan2(mx, mz)) * Math.min(1, dt * 12);
       if (p.st !== 'run') { p.st = 'run'; play(p.rig, 'run', { ts: 1.15 }); }
     } else if (p.st !== 'idle') { p.st = 'idle'; play(p.rig, 'idle'); }
-    if (musouPressed && musou >= 100) { musouPressed = false; startMusou(); }
-    else if (atkPressed) { atkPressed = false; startAttack(curLight()[0], 0, mx, mz, ml); }
-    else if (heavyPressed) {
-      heavyPressed = false;
-      p.st = 'charge'; p.chargeT = 0; p.chargeFx = 0; p.chargeCue = false;
-      play(p.rig, ml > 0 ? 'run' : 'idle', { ts: ml > 0 ? 0.7 : 0.6 });
-    }
-    else if (jumpPressed) {
-      jumpPressed = false;
-      p.st = 'jump'; p.vy = JUMP_V;
-      S.jump();
-      play(p.rig, 'jump', { once: true, ts: 1.15, fade: 0.06 });
-    }
-    else if (dodgePressed) { dodgePressed = false; startDodge(mx, mz, ml); }
+    resolveGroundCombatInput(p, mx, mz, ml);
   }
   atkPressed = heavyPressed = jumpPressed = dodgePressed = musouPressed = false;
 
@@ -3789,16 +3938,18 @@ function syncPlayer() {
 }
 function startAttack(a, stage, mx, mz, ml) {
   const p = player;
+  clearCombatBuffer();
   if (lockTarget && lockTarget.st !== 'dead') p.yaw = Math.atan2(lockTarget.x - p.x, lockTarget.z - p.z);
   else if (ml > 0) p.yaw = Math.atan2(mx, mz);
   p.st = 'atk'; p.curAtk = a; p.atkStage = stage;
-  p.atkT = 0; p.didHit = false; p.queuedLight = false; p.queuedHeavy = false;
+  p.atkT = 0; p.didHit = false;
   const ts = a.ts * (curChar.atkTs || 1);   // 角色武器：重刃慢、短刃快
   p.atkDur = clipDur(p.rig, a.clip, ts);
   play(p.rig, a.clip, { once: true, ts, fade: 0.07 });
 }
 function startMusou() {
   const p = player;
+  clearCombatBuffer();
   p.st = 'musou'; p.musouT = 0; p.musouTick = 0; p.musouBoltT = 0.3; p.musouN = 0;
   p.invuln = 4.4;
   musou = 0;
@@ -3824,6 +3975,7 @@ function startMusou() {
 }
 function startDodge(mx, mz, ml) {
   const p = player;
+  clearCombatBuffer();
   if (ml > 0) { p.dodgeDx = mx; p.dodgeDz = mz; p.yaw = Math.atan2(mx, mz); }
   else { p.dodgeDx = Math.sin(p.yaw); p.dodgeDz = Math.cos(p.yaw); }
   p.st = 'dodge'; p.dodgeT = 0;
@@ -4138,8 +4290,8 @@ function nextDialog(first = false) {
 dlgBox.addEventListener('pointerdown', e => { e.stopPropagation(); nextDialog(); });
 const STORY = {
   s1open: [
-    ['RUMI', '魂門出現裂縫了……整條街都是陰差。數不完的陰差。'],
-    ['RUMI', '那就全部斬掉。今晚的目標——千人斬！'],
+    ['RUMI', '魂門出現裂縫了……陰差把整條夜市都堵住了。'],
+    ['RUMI', '先殺出一條路。前面還有個守門的隊長！'],
   ],
   s1boss: [
     ['陰差隊長', '渺小的獵魔士……魂門將為吾等而開！'],
@@ -4188,6 +4340,7 @@ function requestStage(i) {
   animationFrame = 0;
   keys.clear();
   atkPressed = heavyPressed = jumpPressed = dodgePressed = musouPressed = heavyHold = false;
+  clearCombatBuffer();
   clearTouchMove();
   suspendAudio();
   retry.classList.add('hidden');
@@ -4296,6 +4449,7 @@ function applyStageTint(i) {
   }
 }
 function loadStage(i) {
+  clearCombatBuffer();
   stageIdx = i;
   // 切換本關的碰撞/遮擋佈局（小地圖跟著換）
   OBSTACLES = OBSTACLES_BY_STAGE[Math.min(i, OBSTACLES_BY_STAGE.length - 1)];
@@ -4312,7 +4466,7 @@ function loadStage(i) {
   level.props = [];
   const cfg = STAGES[i];
   setObjective(cfg.name);
-  level.objs = cfg.objectives.map(o => ({ ...o, state: 'dormant', kills: 0, spawned: 0, capT: 0, officersLeft: o.officers || 0, ambushDone: false, defT: 0, lampHp: 0, lampMax: 1, trialT: 0, riftHpMax: o.riftHp || 1 }));
+  level.objs = cfg.objectives.map(o => ({ ...o, state: 'dormant', kills: 0, spawned: 0, capT: 0, officersLeft: o.officers || 0, officersSpawned: 0, ambushDone: false, defT: 0, lampHp: 0, lampMax: 1, trialT: 0, riftHpMax: o.riftHp || 1 }));
   level.bossPhase = false;
   level.boss = null;
   const capObj = level.objs.find(o => o.type === 'capture');
@@ -4394,47 +4548,43 @@ window.__key = (code, downMs = 60) => {
   setTimeout(() => dispatchEvent(new KeyboardEvent('keyup', { code, bubbles: true })), downMs);
 };
 
-// ---------- 自適應畫質：偵測掉幀自動降渲染解析度（速度優先，機器順就保持最高細緻） ----------
-let perfAcc = 0, perfN = 0;
-let curPR = Math.min(devicePixelRatio, IS_MOBILE ? 1.3 : 2);
-function perfTick(raw) {
-  perfAcc += raw; perfN++;
-  if (perfN >= 90) {
-    const avg = perfAcc / perfN;
-    perfAcc = 0; perfN = 0;
-    if (avg > 0.024 && curPR > 1.2) {   // 平均低於 ~42fps 就降一階
-      curPR = Math.max(1.15, curPR - 0.25);
-      renderer.setPixelRatio(curPR);
-      composer.setPixelRatio(curPR);
-      composer.setSize(innerWidth, innerHeight);
-    }
-  }
-}
-
 // ---------- 主迴圈 ----------
 const clock = new THREE.Clock();
-let lastFrameTs = 0;
+const framePacer = new FramePacer(60);
 let animationFrame = 0;
+function isPlayPortrait() {
+  return IS_MOBILE && state === 'play' && window.innerHeight > window.innerWidth;
+}
 function resumeFrames() {
-  if (document.hidden || animationFrame) return;
+  if (document.hidden || isPlayPortrait() || animationFrame) return;
   clock.getDelta();
-  lastFrameTs = 0;
-  perfAcc = 0; perfN = 0;
+  framePacer.reset();
   animationFrame = requestAnimationFrame(loop);
 }
+function handleViewportChange() {
+  clearHeldInput();
+  if (isPlayPortrait()) {
+    if (animationFrame) cancelAnimationFrame(animationFrame);
+    animationFrame = 0;
+    framePacer.reset();
+  } else if (!document.hidden && state === 'play') {
+    resumeFrames();
+  }
+}
+addEventListener('orientationchange', handleViewportChange);
+addEventListener('resize', handleViewportChange);
 function loop(ts) {
   animationFrame = 0;
   // 選單完全覆蓋 3D；結算覆蓋層出現後保留最後一幀，停止 GPU 工作。
-  if (document.hidden || state === 'title' || state === 'loading'
+  if (document.hidden || isPlayPortrait() || state === 'title' || state === 'loading'
     || (state === 'dead' && !hud.dead.classList.contains('hidden'))
     || (state === 'win' && !hud.win.classList.contains('hidden'))) {
     updateHUD();
     return;
   }
   animationFrame = requestAnimationFrame(loop);
-  // 鎖 60fps：120Hz 螢幕跳一半幀，GPU 負載/風扇直接砍半
-  if (ts !== undefined && lastFrameTs && ts - lastFrameTs < 15.5) return;
-  if (ts !== undefined) lastFrameTs = ts;
+  // 以固定時序限制 60 FPS，避免回呼時間抖動持續偏移繪製節奏。
+  if (ts !== undefined && !framePacer.shouldRender(ts)) return;
   const raw = Math.min(clock.getDelta(), 0.05);
   let dt = raw;
   if (hitStopT > 0) { hitStopT -= raw; dt = raw * 0.06; }
@@ -4449,7 +4599,6 @@ function loop(ts) {
     if (state === 'play') updateLevel(dt);
     updateFx(dt);
   }
-  perfTick(raw);
   updateAmbient(raw);
   updateLock();
   updateCamera(raw);

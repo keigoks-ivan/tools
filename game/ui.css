@@ -373,13 +373,24 @@ body[data-game-state="win"] #touch { visibility: hidden; }
 /* Touch controls stay in the lower playfield, below the HUD line. */
 body.is-touch #rotate { display: none; }
 .tbtn { width: 62px; height: 62px; border: 1px solid rgba(207, 180, 255, .58); border-radius: 0; background: rgba(24, 20, 55, .72); box-shadow: 0 8px 18px rgba(0, 0, 0, .25); }
-#btnA { right: 26px; bottom: 26px; width: 76px; height: 76px; }
-#btnB { right: 118px; bottom: 32px; }
-#btnJ { right: 28px; bottom: 116px; }
-#btnR { right: 122px; bottom: 100px; }
-#btnW { right: 204px; bottom: 114px; width: 52px; height: 52px; }
-#btnL { right: 122px; bottom: 184px; width: 52px; height: 52px; }
-#btnU { right: 204px; bottom: 28px; width: 58px; height: 58px; }
+#btnA { right: calc(24px + env(safe-area-inset-right, 0px)); bottom: calc(20px + env(safe-area-inset-bottom, 0px)); width: 76px; height: 76px; }
+#btnB { right: calc(112px + env(safe-area-inset-right, 0px)); bottom: calc(24px + env(safe-area-inset-bottom, 0px)); }
+#btnJ { right: calc(24px + env(safe-area-inset-right, 0px)); bottom: calc(108px + env(safe-area-inset-bottom, 0px)); }
+#btnR { right: calc(112px + env(safe-area-inset-right, 0px)); bottom: calc(100px + env(safe-area-inset-bottom, 0px)); }
+#btnW { right: calc(188px + env(safe-area-inset-right, 0px)); bottom: calc(108px + env(safe-area-inset-bottom, 0px)); width: 52px; height: 52px; }
+#btnL { right: calc(112px + env(safe-area-inset-right, 0px)); bottom: calc(176px + env(safe-area-inset-bottom, 0px)); width: 52px; height: 52px; }
+#btnU { right: calc(188px + env(safe-area-inset-right, 0px)); bottom: calc(20px + env(safe-area-inset-bottom, 0px)); width: 58px; height: 58px; }
+
+@media (max-height: 500px) and (orientation: landscape) {
+  #minimap { top: calc(60px + env(safe-area-inset-top, 0px)); right: calc(14px + env(safe-area-inset-right, 0px)); width: 58px; height: 58px; }
+  #btnA { width: 66px; height: 66px; right: calc(18px + env(safe-area-inset-right, 0px)); bottom: calc(10px + env(safe-area-inset-bottom, 0px)); }
+  #btnB { width: 54px; height: 54px; right: calc(96px + env(safe-area-inset-right, 0px)); bottom: calc(14px + env(safe-area-inset-bottom, 0px)); }
+  #btnJ { width: 54px; height: 54px; right: calc(18px + env(safe-area-inset-right, 0px)); bottom: calc(82px + env(safe-area-inset-bottom, 0px)); }
+  #btnR { width: 54px; height: 54px; right: calc(96px + env(safe-area-inset-right, 0px)); bottom: calc(78px + env(safe-area-inset-bottom, 0px)); }
+  #btnW { width: 48px; height: 48px; right: calc(160px + env(safe-area-inset-right, 0px)); bottom: calc(136px + env(safe-area-inset-bottom, 0px)); }
+  #btnL { width: 48px; height: 48px; right: calc(96px + env(safe-area-inset-right, 0px)); bottom: calc(144px + env(safe-area-inset-bottom, 0px)); }
+  #btnU { width: 50px; height: 50px; right: calc(160px + env(safe-area-inset-right, 0px)); bottom: calc(10px + env(safe-area-inset-bottom, 0px)); }
+}
 
 @media (max-width: 900px) {
   #hpwrap { top: 14px; left: 14px; width: 180px; padding: 9px 10px; }
@@ -389,7 +400,7 @@ body.is-touch #rotate { display: none; }
   #objective::before { display: none; }
   #kills { top: 14px; right: 72px; font-size: 16px; }
   #combo { top: 65px; right: 84px; font-size: 22px; }
-  #minimap { top: 111px; right: 14px; width: 90px; height: 90px; }
+  #minimap { top: calc(111px + env(safe-area-inset-top, 0px)); right: calc(14px + env(safe-area-inset-right, 0px)); width: 90px; height: 90px; }
   #mute { top: 14px; right: 14px; }
   #bosswrap { top: 106px; width: min(360px, calc(100% - 390px)); }
   #hint { display: none; }
@@ -406,7 +417,7 @@ body.is-touch #rotate { display: none; }
 }
 
 @media (max-height: 360px) and (orientation: landscape) {
-  #minimap { top: 76px; width: 60px; height: 60px; }
+  #minimap { top: calc(60px + env(safe-area-inset-top, 0px)); right: calc(14px + env(safe-area-inset-right, 0px)); width: 58px; height: 58px; }
   #combo { top: 50px; font-size: 20px; }
 }
 
@@ -446,6 +457,10 @@ body.is-touch #rotate { display: none; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; }
+}
+
+@media (max-height: 500px) and (max-width: 900px) and (orientation: landscape) {
+  #minimap { top: calc(60px + env(safe-area-inset-top, 0px)); right: calc(14px + env(safe-area-inset-right, 0px)); width: 58px; height: 58px; }
 }
 
 /* 載入時覆蓋劇情與觸控提示，避免重複操作。 */

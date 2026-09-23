@@ -1,10 +1,14 @@
 """Static integrity checks for the generated runtime GLB assets."""
 import copy
+from hashlib import sha256
+from io import BytesIO
 import json
 from pathlib import Path
 import re
 import struct
 import unittest
+
+from PIL import Image
 
 
 GAME = Path(__file__).resolve().parents[1]
@@ -12,6 +16,7 @@ ASSETS = GAME / 'assets'
 RUNTIME = ASSETS / 'runtime'
 ENEMIES = ('Skeleton_Minion', 'Skeleton_Warrior', 'Barbarian', 'Knight', 'Rogue')
 COMPONENT_BYTES = {5120: 1, 5121: 1, 5122: 2, 5123: 2, 5125: 4, 5126: 4}
+WEBP_EXTENSION = 'EXT_texture_webp'
 TYPE_COMPONENTS = {
     'SCALAR': 1, 'VEC2': 2, 'VEC3': 3, 'VEC4': 4,
     'MAT2': 4, 'MAT3': 9, 'MAT4': 16,
@@ -154,11 +159,20 @@ def image_bytes(doc, binary, image_index):
     return image.get('mimeType'), binary[start:end]
 
 
-def texture_fingerprint(doc, binary, texture_index):
+def texture_fingerprint(doc, binary, texture_index, *, compare_pixels=False):
     texture = doc['textures'][texture_index]
-    mime, payload = image_bytes(doc, binary, texture['source'])
+    image_index = texture.get('source')
+    if image_index is None:
+        image_index = texture['extensions'][WEBP_EXTENSION]['source']
+    mime, payload = image_bytes(doc, binary, image_index)
+    if compare_pixels:
+        with Image.open(BytesIO(payload)) as image:
+            rgba = image.convert('RGBA')
+            image_data = (rgba.size, sha256(rgba.tobytes()).digest())
+    else:
+        image_data = (mime, payload)
     sampler = doc.get('samplers', [])[texture['sampler']] if 'sampler' in texture else None
-    return sampler, mime, payload
+    return sampler, image_data
 
 
 def texture_refs(value):
@@ -173,23 +187,27 @@ def texture_refs(value):
             yield from texture_refs(child)
 
 
-def normalized_materials(doc, binary, *, ignore_normal=False):
+def normalized_materials(doc, binary, *, ignore_normal=False, compare_image_pixels=False):
     materials = copy.deepcopy(doc.get('materials', []))
     for material in materials:
         if ignore_normal:
             material.pop('normalTexture', None)
         for ref, key in texture_refs(material):
-            ref[key] = texture_fingerprint(doc, binary, ref[key])
+            ref[key] = texture_fingerprint(doc, binary, ref[key],
+                                           compare_pixels=compare_image_pixels)
     return materials
 
 
-def base_color_pngs(doc, binary):
+def base_color_images(doc, binary):
     result = []
     for material in doc.get('materials', []):
         info = material.get('pbrMetallicRoughness', {}).get('baseColorTexture')
         if info:
-            result.append(image_bytes(doc, binary,
-                                      doc['textures'][info['index']]['source']))
+            texture = doc['textures'][info['index']]
+            image_index = texture.get('source')
+            if image_index is None:
+                image_index = texture['extensions'][WEBP_EXTENSION]['source']
+            result.append(image_bytes(doc, binary, image_index))
     return result
 
 
@@ -319,14 +337,16 @@ class RuntimeAssetTests(unittest.TestCase):
         cls.enemy_names = e_anims()
 
     def compare_common_scene_data(self, before, before_bin, after, after_bin,
-                                  *, ignore_normal=False):
+                                  *, ignore_normal=False, compare_image_pixels=False):
         self.assertEqual(before.get('nodes', []), after.get('nodes', []))
         self.assertEqual(before.get('scenes', []), after.get('scenes', []))
         self.assertEqual(before.get('scene'), after.get('scene'))
         mesh_data(self, before, before_bin, after, after_bin)
         skin_data(self, before, before_bin, after, after_bin)
-        self.assertEqual(normalized_materials(before, before_bin, ignore_normal=ignore_normal),
-                         normalized_materials(after, after_bin, ignore_normal=ignore_normal))
+        self.assertEqual(normalized_materials(before, before_bin, ignore_normal=ignore_normal,
+                                              compare_image_pixels=compare_image_pixels),
+                         normalized_materials(after, after_bin, ignore_normal=ignore_normal,
+                                              compare_image_pixels=compare_image_pixels))
 
     def test_enemy_geometry_rig_materials_and_referenced_animations_are_preserved(self):
         for name in ENEMIES:
@@ -341,12 +361,12 @@ class RuntimeAssetTests(unittest.TestCase):
                 compare_animations(self, before, before_bin, after, after_bin,
                                    expected_names)
 
-    def test_maria_keeps_all_animations_geometry_and_base_color_pngs(self):
+    def test_maria_keeps_all_animations_geometry_and_base_color_pixels(self):
         before, before_bin = read_glb(ASSETS / 'maria.glb')
         after, after_bin = read_glb(RUNTIME / 'maria.glb')
         assert_references_in_bounds(self, after, after_bin)
         self.compare_common_scene_data(before, before_bin, after, after_bin,
-                                       ignore_normal=True)
+                                       ignore_normal=True, compare_image_pixels=True)
         compare_animations(self, before, before_bin, after, after_bin,
                            {clip.get('name') for clip in before.get('animations', [])})
 
@@ -354,17 +374,25 @@ class RuntimeAssetTests(unittest.TestCase):
                             for material in before.get('materials', [])))
         self.assertTrue(all('normalTexture' not in material
                             for material in after.get('materials', [])))
-        source_pngs = base_color_pngs(before, before_bin)
-        runtime_pngs = base_color_pngs(after, after_bin)
-        self.assertTrue(source_pngs, 'Maria should have base-color PNG textures')
-        self.assertEqual(source_pngs, runtime_pngs)
-        for mime, payload in runtime_pngs:
-            self.assertEqual(mime, 'image/png')
-            self.assertGreaterEqual(len(payload), 24)
-            self.assertEqual(payload[:8], b'\x89PNG\r\n\x1a\n')
-            width, height = struct.unpack('>II', payload[16:24])
-            self.assertGreater(width, 0)
-            self.assertGreater(height, 0)
+        source_images = base_color_images(before, before_bin)
+        runtime_images = base_color_images(after, after_bin)
+        self.assertTrue(source_images, 'Maria should have base-color textures')
+        self.assertEqual(len(source_images), len(runtime_images))
+        self.assertIn(WEBP_EXTENSION, after.get('extensionsUsed', []))
+        self.assertIn(WEBP_EXTENSION, after.get('extensionsRequired', []))
+        for texture in after.get('textures', []):
+            self.assertNotIn('source', texture, 'required WebP texture should not carry a PNG fallback')
+            self.assertIn(WEBP_EXTENSION, texture.get('extensions', {}))
+        for (source_mime, source_payload), (runtime_mime, runtime_payload) in zip(
+                source_images, runtime_images):
+            self.assertEqual(source_mime, 'image/png')
+            self.assertEqual(runtime_mime, 'image/webp')
+            with Image.open(BytesIO(source_payload)) as source_image, \
+                    Image.open(BytesIO(runtime_payload)) as runtime_image:
+                source_rgba = source_image.convert('RGBA')
+                runtime_rgba = runtime_image.convert('RGBA')
+                self.assertEqual(source_rgba.size, runtime_rgba.size)
+                self.assertEqual(source_rgba.tobytes(), runtime_rgba.tobytes())
 
 
 if __name__ == '__main__':

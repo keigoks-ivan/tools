@@ -95,9 +95,10 @@ function stageHarness() {
   const context = vm.createContext({
     assets,
     loader: { async loadAsync(path) { events.loads.push(path.split('?')[0]); return { scene: { path }, animations: [] }; } },
-    toonify() {},
+    toonify() {}, mergeSkinnedParts() {},
     STAGES: [{}, {}, {}, {}],
     CITY_PROPS: [],
+    loadStreetArt: async () => {},
     ...Object.fromEntries(worlds.map((world, i) => [`world${i + 1}`, world])),
     w2anim: {}, w3anim: {}, w4anim: {},
     blockersRegBy: [[], [], [], []],
@@ -123,7 +124,7 @@ function stageHarness() {
 }
 
 function requestStageHarness(prepareStage) {
-  const events = { prepares: [], loaded: [], updates: 0, suspended: 0, resumed: 0 };
+  const events = { prepares: [], loaded: [], updates: 0, suspended: 0, resumed: 0, clearedCombatBuffer: 0 };
   const elements = Object.fromEntries(['stageLoading', 'stageLoadText', 'stageRetry'].map(id => [id, makeElement()]));
   const hud = { dead: makeElement(), win: makeElement() };
   const context = vm.createContext({
@@ -131,7 +132,7 @@ function requestStageHarness(prepareStage) {
     el: id => elements[id], hud,
     keys: new Set(['KeyW']),
     atkPressed: true, heavyPressed: false, jumpPressed: false, dodgePressed: false, musouPressed: false, heavyHold: false,
-    clearTouchMove() {}, cancelAnimationFrame() {}, updateHUD() { events.updates++; },
+    clearTouchMove() {}, clearCombatBuffer() { events.clearedCombatBuffer++; }, cancelAnimationFrame() {}, updateHUD() { events.updates++; },
     suspendAudio() { events.suspended++; }, resumeAudio() { events.resumed++; },
     async prepareStage(i, report) { events.prepares.push(i); return prepareStage(i, report); },
     loadStage(i) { events.loaded.push(i); },
@@ -142,7 +143,7 @@ function requestStageHarness(prepareStage) {
   return { context, events, elements, hud };
 }
 
-const flush = async () => { for (let i = 0; i < 12; i++) await Promise.resolve(); };
+const flush = async () => { for (let i = 0; i < 24; i++) await Promise.resolve(); };
 
 test('boot waits for Start, allows title mute, and imports only once for duplicate Start', async () => {
   let resolveLoad;
@@ -213,6 +214,7 @@ test('requestStage holds the loading overlay, shares in-flight work, then loads 
   const first = h.context.requestStage(1);
   const second = h.context.requestStage(1);
   assert.equal(first, second);
+  assert.equal(h.events.clearedCombatBuffer, 1);
   await flush();
   assert.equal(h.events.prepares.length, 1);
   assert.equal(h.elements.stageLoading.classList.contains('hidden'), false);
@@ -239,6 +241,7 @@ test('requestStage failure keeps retry visible and a retry can succeed', async (
   assert.equal(h.context.state, 'loading');
   assert.equal(h.context.animationFrame, 0);
   assert.equal(h.context.keys.size, 0);
+  assert.equal(h.events.clearedCombatBuffer, 1);
   await h.elements.stageRetry.onclick();
   assert.equal(attempts, 2);
   assert.deepEqual(h.events.loaded, [2]);
