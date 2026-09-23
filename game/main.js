@@ -2568,6 +2568,7 @@ const STAGE_ASSETS = [
   ['minion', 'warrior'], ['minion', 'barbarian'],
   ['minion', 'knight'], ['minion', 'rogue', 'barbarian'],
 ];
+const RUNTIME_ASSET_VERSION = '20260923b';
 const builtWorlds = new Set();
 const preparedStages = new Set();
 let streetReflection = null;
@@ -2575,7 +2576,7 @@ const yieldLoading = () => new Promise(resolve => setTimeout(resolve, 0));
 
 async function loadEnemyAsset(key) {
   if (assets[key]) return;
-  const gltf = await loader.loadAsync(`assets/${ENEMY_FILES[key]}.glb`);
+  const gltf = await loader.loadAsync(`assets/runtime/${ENEMY_FILES[key]}.glb?v=${RUNTIME_ASSET_VERSION}`);
   // 保留原本的頭身比例與動作，只改變載入時機。
   const k = key === 'minion' || key === 'warrior' ? 0.62 : 0.78;
   for (const clip of gltf.animations) {
@@ -2607,8 +2608,12 @@ async function prepareStage(i, report = () => {}) {
   }
   if (i === 0) {
     const props = {};
-    for (const name of CITY_PROPS) {
-      props[name] = (await loader.loadAsync(`assets/city/${name}.gltf`)).scene;
+    // 小型道具每次下載兩份，避免逐一等待網路往返，也不集中解析全部。
+    for (let offset = 0; offset < CITY_PROPS.length; offset += 2) {
+      await Promise.all(CITY_PROPS.slice(offset, offset + 2).map(async name => {
+        props[name] = (await loader.loadAsync(`assets/city/${name}.gltf`)).scene;
+      }));
+      await yieldLoading();
     }
     placeCityProps(props);
   }
@@ -2641,12 +2646,16 @@ async function prepareStage(i, report = () => {}) {
 
 export async function prepareGame() {
   hud.load.textContent = '載入獵魔士…';
-  heroBase = prepHeroModel(await loader.loadAsync('assets/maria.glb'));
+  const [hero] = await Promise.all([
+    loader.loadAsync(`assets/runtime/maria.glb?v=${RUNTIME_ASSET_VERSION}`),
+    loadEnemyAsset('minion'),
+  ]);
+  heroBase = prepHeroModel(hero);
   // 專屬模型仍為可選；缺檔時維持原本的配色代身。
-  for (const key of ['mira', 'zoey']) {
+  await Promise.all(['mira', 'zoey'].map(async key => {
     const gltf = await loader.loadAsync(`assets/${key}.glb`).catch(() => null);
     if (gltf) CHARS[key].model = prepHeroModel(gltf);
-  }
+  }));
   await prepareStage(0, text => { hud.load.textContent = text; });
   ready = true;
   hud.load.textContent = '載入完成';

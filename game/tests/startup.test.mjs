@@ -94,7 +94,7 @@ function stageHarness() {
   const groundMats = [{ roughness: 0.2 }];
   const context = vm.createContext({
     assets,
-    loader: { async loadAsync(path) { events.loads.push(path); return { scene: { path }, animations: [] }; } },
+    loader: { async loadAsync(path) { events.loads.push(path.split('?')[0]); return { scene: { path }, animations: [] }; } },
     toonify() {},
     STAGES: [{}, {}, {}, {}],
     CITY_PROPS: [],
@@ -182,7 +182,7 @@ test('boot exposes reload action after startup failure', async () => {
 test('preparing stage 0 loads and batches only stage 0 assets and world', async () => {
   const h = stageHarness();
   await h.context.prepareStage(0);
-  assert.deepEqual(h.events.loads, ['assets/Skeleton_Minion.glb', 'assets/Skeleton_Warrior.glb']);
+  assert.deepEqual(h.events.loads, ['assets/runtime/Skeleton_Minion.glb', 'assets/runtime/Skeleton_Warrior.glb']);
   assert.deepEqual(h.events.builds, [0]);
   assert.deepEqual(h.events.batches, ['world1']);
   assert.deepEqual(Object.keys(h.assets).sort(), ['minion', 'warrior']);
@@ -195,7 +195,7 @@ test('stage 4 loads rogue and barbarian with reflection, and cached preparation 
   await h.context.prepareStage(0);
   const stage0Loads = h.events.loads.length;
   await h.context.prepareStage(3);
-  assert.deepEqual(h.events.loads.slice(stage0Loads), ['assets/Rogue.glb', 'assets/Barbarian.glb']);
+  assert.deepEqual(h.events.loads.slice(stage0Loads), ['assets/runtime/Rogue.glb', 'assets/runtime/Barbarian.glb']);
   assert.deepEqual(h.events.builds, [0, 3]);
   assert.deepEqual(h.events.batches, ['world1', 'world4']);
   assert.equal(h.groundMats.length, 2);
@@ -258,8 +258,38 @@ test('middle stages load their own officer and boss models only', async () => {
   for (const [stage, model] of [[1, 'Barbarian'], [2, 'Knight']]) {
     const h = stageHarness();
     await h.context.prepareStage(stage);
-    assert.deepEqual(h.events.loads, ['assets/Skeleton_Minion.glb', `assets/${model}.glb`]);
+    assert.deepEqual(h.events.loads, ['assets/runtime/Skeleton_Minion.glb', `assets/runtime/${model}.glb`]);
     assert.deepEqual(h.events.builds, [stage]);
     assert.deepEqual(h.events.batches, [`world${stage + 1}`]);
   }
+});
+
+
+test('city props load two at a time and are all present before placement', async () => {
+  const h = stageHarness();
+  h.context.CITY_PROPS = ['one', 'two', 'three', 'four', 'five'];
+  let active = 0, peak = 0;
+  const pending = [];
+  const basicLoad = h.context.loader.loadAsync;
+  h.context.loader.loadAsync = path => {
+    if (!path.includes('/city/')) return basicLoad(path);
+    active++;
+    peak = Math.max(peak, active);
+    return new Promise(resolve => pending.push(() => {
+      active--;
+      resolve({ scene: { path } });
+    }));
+  };
+  let placed = null;
+  h.context.placeCityProps = props => { placed = Object.keys(props); };
+  const loading = h.context.prepareStage(0);
+  for (const batchSize of [2, 2, 1]) {
+    await flush();
+    assert.equal(pending.length, batchSize);
+    assert.equal(placed, null);
+    pending.splice(0).forEach(resolve => resolve());
+  }
+  await loading;
+  assert.equal(peak, 2);
+  assert.deepEqual(placed.sort(), ['five', 'four', 'one', 'three', 'two']);
 });

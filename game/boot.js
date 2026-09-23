@@ -25,7 +25,7 @@ async function beginLoading() {
   // 引擎會從按鈕讀取靜音設定，並接手後續的音訊控制。
   muteButton.removeEventListener('click', toggleTitleMute);
   try {
-    const game = await import('./main.js?v=20260923a');
+    const game = await import('./main.js?v=20260923b');
     await game.prepareGame();
     startButton.removeEventListener('click', beginLoading);
     window.removeEventListener('keydown', titleKeydown);
