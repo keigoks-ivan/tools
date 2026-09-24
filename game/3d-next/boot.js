@@ -2,15 +2,52 @@ const startButton = document.getElementById('start');
 const loadStatus = document.getElementById('loadstatus');
 let loading = false;
 
+// ?hero=vroid：有聲試作（audio.js，程式合成的原創配樂＋音效）；預設 Rumi 頁面不載入音訊、維持靜音
+const vroid = new URLSearchParams(location.search).get('hero') === 'vroid';
+let audio = null;
+const audioReady = vroid
+  ? import('./audio.js?v=20260925a').then(({ createAudio }) => {
+    audio = createAudio({ baseUrl: '../assets/audio/march/' });
+    if (new URLSearchParams(location.search).has('debug')) window.__audio = audio;
+    setupSoundUi();
+    return audio;
+  })
+    .catch(error => { console.warn('audio unavailable', error); return null; })
+  : Promise.resolve(null);
+
+function setupSoundUi() {
+  const note = document.getElementById('soundNote');
+  const toggle = document.getElementById('soundToggle');
+  const hudButton = document.getElementById('soundBtn');
+  const state = document.getElementById('soundState');
+  const render = s => {
+    if (note) note.textContent = s.muted ? '已靜音' : '有聲試作';
+    if (toggle) { toggle.hidden = false; toggle.textContent = s.muted ? '🔇 聲音：關' : '🔊 聲音：開'; toggle.setAttribute('aria-pressed', String(s.muted)); }
+    if (hudButton) { hudButton.hidden = false; hudButton.textContent = s.muted ? '🔇' : '🔊'; hudButton.setAttribute('aria-pressed', String(s.muted)); hudButton.setAttribute('aria-label', s.muted ? '開啟聲音' : '靜音'); }
+    if (state) state.textContent = s.muted ? '已靜音（M）' : '聲音開（M）';
+  };
+  const flip = () => { audio.unlock(); audio.toggleMuted(); audio.ui(); };
+  audio.subscribe(render);
+  render(audio.state());
+  toggle?.addEventListener('click', flip);
+  hudButton?.addEventListener('click', flip);
+  window.addEventListener('keydown', event => { if (event.code === 'KeyM' && !event.repeat) flip(); });
+  document.addEventListener('click', event => { if (event.target.closest?.('#pauseBtn, #resume, #retry')) audio.ui(); });
+}
+
 async function start() {
   if (loading) return;
   loading = true;
+  // the Start click is the user gesture iOS / Android need: unlock synchronously, before any await
+  audio?.unlock();
+  audio?.ui();
   startButton.disabled = true;
   loadStatus.textContent = '正在載入 3D 角色與夜市…';
   document.body.dataset.mode = 'loading';
   try {
-    const { createBattle } = await import('./battle.js?v=20260924a');
-    const battle = await createBattle(document.getElementById('battle'));
+    const [{ createBattle }] = await Promise.all([import('./battle.js?v=20260925c'), audioReady]);
+    audio?.unlock();   // no-op when already unlocked; covers a click that beat the audio module download
+    const battle = await createBattle(document.getElementById('battle'), { audio });
     document.getElementById('title').hidden = true;
     document.body.dataset.mode = 'play';
     battle.start();

@@ -14,6 +14,12 @@
 
 [第三版服裝與姿勢試件](vroid-swordswoman-v3-review.md)加入可編輯的本機 Blender 服裝、刀與三視圖，並明列和方向圖及正式遊戲角色之間的落差。第三版尚未接入遊戲。
 
+[第四版定裝與動作驗收](vroid-swordswoman-v4-review.md)在 Blender 精修臉部與眼睛、加上完整服裝與可握刀的右手，腿部拉長 12%，並套上 13 段基本動作加無雙連段，髮辮全程做了彈簧模擬；面數超出預算、臉部仍偏年輕等落差列在文中。GLB 在 `game/assets/heroes/swordswoman-v4.glb`。
+
+[鬼兵第二版](oni-v2/README.md)用程式直接建構小兵與頭目共用一副骨架的網格，兩者共用同一張貼圖圖集，接了 15 段對應遊戲狀態的重定向動作；GLB 在 `game/assets/enemies/oni-v2.glb`，眼睛發光不夠、揮擊轉側身等落差列在文中。
+
+[3D 第一關：夜市大街到魂門](level-night-market-march.md)沿一條夜市大街分四段推進到魂門，最後在魂門頂端單挑守將；設計稿待使用者確認，尚未實作。
+
 製作方式：內建 image_gen 工具，無 CLI/API fallback。
 
 ## 最終生成提示

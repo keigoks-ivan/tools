@@ -12,6 +12,15 @@ function closeEnemy(arena, index = 0, { x = arena.hero.x + 90, y = arena.hero.y,
   return enemy;
 }
 
+// Advances the musou light chain past the current step's cancel window, then
+// presses attack again to consume it (matching a player buffering the next hit).
+function advanceMusouChain(arena) {
+  while (arena.hero.action === 'attack' && arena.hero.actionTime < arena.attack.cancel) {
+    arena.update(0.02);
+  }
+  arena.update(0.02, { attack: true });
+}
+
 test('reset is seeded, bounded and begins with a readable small group', () => {
   const a = new Arena({ seed: 42 });
   const b = new Arena({ seed: 42 });
@@ -313,4 +322,80 @@ test('seeded public-input playthrough reaches and defeats the boss', () => {
   assert.ok(arena.kills >= 60);
   assert.ok(arena.hero.hp > 0);
   assert.ok(frames * dt < 90, 'the encounter should finish within a reasonable simulated time');
+});
+
+test('musou light chain advances through all five steps and restarts at 1', () => {
+  const arena = new Arena({ seed: 20, musou: true });
+  arena.enemies = [];
+  arena.hero.x = 640; arena.hero.y = 400; arena.hero.facing = 0;
+  arena.update(0.02, { attack: true });
+  const combos = [arena.hero.combo];
+  for (let i = 0; i < 5; i++) {
+    advanceMusouChain(arena);
+    combos.push(arena.hero.combo);
+  }
+  assert.deepEqual(combos, [1, 2, 3, 4, 5, 1]);
+});
+
+test('musou combo 4 has a 360 degree arc and lands both hits on an enemy behind the hero', () => {
+  const arena = new Arena({ seed: 21, musou: true });
+  arena.enemies = [];
+  arena.hero.x = 640; arena.hero.y = 400; arena.hero.facing = 0;
+  arena.update(0.02, { attack: true }); // combo 1
+  advanceMusouChain(arena); // combo 2
+  advanceMusouChain(arena); // combo 3
+  advanceMusouChain(arena); // combo 4
+  assert.equal(arena.hero.combo, 4);
+  assert.equal(arena.attack.arc, Math.PI * 2);
+  arena._spawn('grunt');
+  // Keep the enemy directly behind the hero's facing as the step's forward
+  // dash moves the hero, so both hits stay in range regardless of drift.
+  const enemy = closeEnemy(arena, 0, { x: arena.hero.x - 120, y: arena.hero.y, hp: 50 });
+  arena.drainEvents();
+  while (arena.hero.action === 'attack') {
+    enemy.x = arena.hero.x - 120 * Math.cos(arena.hero.facing);
+    enemy.y = arena.hero.y - 120 * Math.sin(arena.hero.facing);
+    arena.update(0.02);
+  }
+  const swings = arena.drainEvents().filter(event => event.type === 'swing' && event.combo === 4);
+  assert.equal(swings.length, 2);
+  assert.equal(enemy.hp, 50 - 4 - 4);
+});
+
+test('musou special lasts ~2s, hits three times, keeps the hero invulnerable and only reaches radius 300', () => {
+  const arena = new Arena({ seed: 22, musou: true });
+  arena.enemies = [];
+  arena.hero.x = 640; arena.hero.y = 400; arena.hero.facing = 0;
+  arena.hero.energy = 100;
+  arena._spawn('grunt');
+  const near = closeEnemy(arena, 0, { x: 850, y: 400, hp: 80 }); // distance 210 < 300
+  arena._spawn('grunt');
+  const far = closeEnemy(arena, 1, { x: 1050, y: 400, hp: 80 }); // distance 410 > 300
+  // A 2s special gives normal chase AI time to close distance; hold both enemies
+  // still so the radius check is what's actually being tested here.
+  near.range = far.range = 999;
+  arena.update(0.02, { special: true });
+  assert.equal(arena.hero.action, 'special');
+  let elapsed = 0.02;
+  let minInvulnerable = arena.hero.invulnerable;
+  while (arena.hero.action === 'special') {
+    arena.update(0.02);
+    elapsed += 0.02;
+    minInvulnerable = Math.min(minInvulnerable, arena.hero.invulnerable);
+  }
+  assert.ok(elapsed > 1.9 && elapsed < 2.1, `special should last ~2.0s, was ${elapsed}`);
+  assert.ok(minInvulnerable > 0, 'hero must stay invulnerable for the whole special');
+  const swings = arena.drainEvents().filter(event => event.type === 'swing' && event.kind === 'special');
+  assert.equal(swings.length, 3);
+  assert.equal(near.hp, 80 - 36);
+  assert.equal(far.hp, 80);
+});
+
+test('a non-musou Arena never emits swing events for a light attack', () => {
+  const arena = new Arena({ seed: 23 });
+  arena.enemies = [];
+  arena.hero.x = 640; arena.hero.y = 400; arena.hero.facing = 0;
+  arena.update(0.05, { attack: true });
+  for (let i = 0; i < 10; i++) arena.update(0.05);
+  assert.equal(arena.drainEvents().filter(event => event.type === 'swing').length, 0);
 });
