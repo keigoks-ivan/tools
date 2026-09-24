@@ -1,5 +1,7 @@
 import { Arena } from './combat.js';
 import { FramePacer } from '../frame-pacing.js';
+import { installGameGestures } from './touch-gestures.js';
+import { depthScaleAt, FollowCamera } from './depth-view.js';
 
 const $ = id => document.getElementById(id);
 const canvas = $('battle');
@@ -9,6 +11,11 @@ const artCtx = art.getContext('2d');
 const arena = new Arena({ seed: 17 });
 const pacer = new FramePacer(60);
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const camera = new FollowCamera({ enabled: !reducedMotion });
+installGameGestures($('game'));
+const distanceHaze = ctx.createLinearGradient(0, 160, 0, 430);
+distanceHaze.addColorStop(0, 'rgba(160,166,199,.12)');
+distanceHaze.addColorStop(1, 'rgba(160,166,199,0)');
 const keys = new Set();
 const edges = {};
 const joystick = { x: 0, y: 0, pointer: null };
@@ -142,6 +149,7 @@ function tick(timestamp) {
       if (effects[i].age >= effects[i].life) effects.splice(i, 1);
     }
     shake = Math.max(0, shake - dt * 28);
+    camera.update(dt, arena.hero);
     drawBattle();
     if (clock >= hudAt) { updateHud(); hudAt = clock + 0.1; }
     if (arena.state !== 'play') finish();
@@ -197,8 +205,10 @@ function drawBattle() {
   if (!images.arena || !heroFrames || !enemyFrames) return;
   ctx.translate(view.x, view.y); ctx.scale(view.scale, view.scale);
   ctx.save(); ctx.beginPath(); ctx.rect(0, 0, 1280, 720); ctx.clip();
+  camera.apply(ctx);
   if (shake > 0) ctx.translate(Math.sin(clock * 110) * shake, Math.cos(clock * 90) * shake * 0.6);
   ctx.drawImage(images.arena, 0, 0, 1280, 720);
+  ctx.fillStyle = distanceHaze; ctx.fillRect(0, 160, 1280, 270);
   const actors = [...arena.enemies, { ...arena.hero, role: 'hero', id: 0 }].sort((a, b) => a.y - b.y);
   for (const enemy of arena.enemies) {
     if (enemy.action === 'telegraph' || enemy.action === 'attack') {
@@ -210,7 +220,10 @@ function drawBattle() {
   }
   for (const actor of actors) {
     const hero = actor.role === 'hero', elite = actor.role === 'elite' || actor.role === 'boss';
+    const depth = depthScaleAt(actor.y);
+    ctx.save(); ctx.translate(actor.x, actor.y); ctx.scale(depth, depth); ctx.translate(-actor.x, -actor.y);
     const size = hero ? 0.48 : actor.role === 'boss' ? 0.76 : elite ? 0.53 : 0.43;
+    ellipse(actor.x - 10, actor.y + 3, hero ? 42 : elite ? 48 : 34, 12, 'rgba(4,5,12,.13)');
     ellipse(actor.x, actor.y - 1, hero ? 30 : elite ? 36 : 25, 9, 'rgba(4,5,12,.45)');
     if (hero) {
       ellipse(actor.x, actor.y, 35, 10, 'rgba(178,145,255,.14)');
@@ -231,6 +244,7 @@ function drawBattle() {
         if (elite) { ctx.font = '10px sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#f0d9b7'; ctx.fillText(actor.role === 'boss' ? '魂門守將' : '妖將', actor.x, top - 7); }
       }
     }
+    ctx.restore();
   }
   for (const fx of effects) drawEffect(fx);
   ctx.restore();
@@ -277,7 +291,7 @@ async function start() {
   if ($('start').disabled) return;
   $('start').disabled = titleArtButton.disabled = true; $('loadstatus').textContent = '正在準備角色與夜市場景…';
   try {
-    await loadAssets(); arena.reset(); effects.length = 0; hitStop = shake = clock = hudAt = 0; clearInput();
+    await loadAssets(); arena.reset(); camera.reset(); effects.length = 0; hitStop = shake = clock = hudAt = 0; clearInput();
     mode = 'play'; paused = false; $('title').hidden = true; $('result').hidden = true; $('pauseOverlay').hidden = true;
     document.body.dataset.mode = mode; $('loadstatus').textContent = ''; consumeEvents(); updateHud(); resize();
   } catch (error) { $('loadstatus').textContent = error.message; }
@@ -328,6 +342,10 @@ titleArtButton.addEventListener('click', () => openArt().catch(() => { $('loadst
 $('loadstatus').before(titleArtButton);
 const pauseArtButton = document.createElement('button'); pauseArtButton.type = 'button'; pauseArtButton.className = 'title-art-button'; pauseArtButton.textContent = '角色與動作近看';
 pauseArtButton.addEventListener('click', openArt); $('resume').after(pauseArtButton);
+const cameraButton = document.createElement('button'); cameraButton.type = 'button'; cameraButton.className = 'title-art-button';
+function updateCameraButton() { cameraButton.textContent = `鏡頭跟隨：${camera.enabled ? '開' : '關'}`; cameraButton.setAttribute('aria-pressed', String(camera.enabled)); }
+cameraButton.addEventListener('click', () => { camera.enabled = !camera.enabled; camera.reset(); updateCameraButton(); drawBattle(); });
+updateCameraButton(); pauseArtButton.after(cameraButton);
 const actionKeys = { j: 'attack', k: 'heavy', shift: 'dodge', e: 'special' };
 addEventListener('keydown', event => {
   const key = event.key.toLowerCase();
