@@ -3,7 +3,7 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 
 const HEROES = [
-  { id: 'rumi', name: 'RUMI', number: '01', file: './assets/heroes/rumi.glb?v=20260924a' },
+  { id: 'rumi', name: 'RUMI', number: '01', file: new URLSearchParams(location.search).has('rumi-v2') ? './assets/heroes/rumi-v2.glb?v=20260924b' : './assets/heroes/rumi.glb?v=20260924a' },
   { id: 'mira', name: 'MIRA', number: '02', file: './assets/heroes/mira.glb?v=20260924a' },
   { id: 'zoey', name: 'ZOEY', number: '03', file: './assets/heroes/zoey.glb?v=20260924a' },
 ];

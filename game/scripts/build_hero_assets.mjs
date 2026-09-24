@@ -13,7 +13,11 @@ const rootDir = fileURLToPath(new URL('../', import.meta.url));
 const sourcePath = path.join(rootDir, 'assets/runtime/maria.glb');
 const outputDir = path.join(rootDir, 'assets/heroes');
 const EXPECTED_CLIPS = ['idle', 'run', 'slash1', 'slash2', 'slash3', 'slash4', 'heavy', 'heavyfin', 'hurt', 'death', 'jump', 'win', 'roll'];
-const HERO_KEYS = ['rumi', 'mira', 'zoey'];
+const requestedHero = process.argv.find(arg => arg.startsWith('--hero='))?.slice('--hero='.length);
+const outputSuffix = process.argv.find(arg => arg.startsWith('--suffix='))?.slice('--suffix='.length) || '';
+const HERO_KEYS = requestedHero ? [requestedHero] : ['rumi', 'mira', 'zoey'];
+assert.ok(HERO_KEYS.every(key => ['rumi', 'mira', 'zoey'].includes(key)), 'unknown hero key');
+assert.match(outputSuffix, /^(-[a-z0-9]+)?$/, 'suffix must be a short filename token');
 
 // GLTFExporter only needs FileReader for image/data-URL conversion. Our models
 // deliberately have no image textures, but this shim keeps the vendored API
@@ -82,7 +86,7 @@ for (const key of HERO_KEYS) {
     assert.ok(visibleBoneNames.has(bone), `${key}: missing required animated bone ${bone}`);
   }
   assert.ok(bytes.byteLength < 2 * 1024 * 1024, `${key}: GLB is over 2 MiB (${bytes.byteLength})`);
-  const destination = path.join(outputDir, `${key}.glb`);
+  const destination = path.join(outputDir, `${key}${outputSuffix}.glb`);
   await writeFile(destination, cleaned);
   console.log(`${key}: ${(cleaned.byteLength / 1048576).toFixed(2)} MiB, ${skinned.length} skinned meshes, ${check.animations.length} clips${stats?.vertices ? `, ${stats.vertices} vertices` : ''} → ${destination}`);
 }

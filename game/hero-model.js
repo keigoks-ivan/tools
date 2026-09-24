@@ -5,7 +5,7 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 // All garments, facial features and hair are genuine skinned geometry. Each
 // character uses four merged surfaces, one rig, vertex colour and no textures.
 export const HERO_LOOKS = {
-  rumi: { skin: '#f2c7b0', hair: '#68449b', highlight: '#8363b1', cloth: '#eee7d9', dark: '#29243e', accent: '#8a68be', metal: '#dbb86c', eye: '#79509b' },
+  rumi: { skin: '#f2c7b0', hair: '#513079', highlight: '#814bb0', cloth: '#242033', dark: '#171321', accent: '#593078', metal: '#c1934b', eye: '#79509b' },
   mira: { skin: '#f1c4b1', hair: '#b73b60', highlight: '#cf5f7e', cloth: '#2b293d', dark: '#171c2a', accent: '#a44e74', metal: '#c5c8df', eye: '#869bae' },
   zoey: { skin: '#e9bd9e', hair: '#242738', highlight: '#515878', cloth: '#35948b', dark: '#202536', accent: '#e1b353', metal: '#dbc37d', eye: '#745548' },
 };
@@ -189,8 +189,13 @@ export function buildAnimeHero(root, key) {
     const shoulder = arm.clone(); shoulder.x -= sign * 2;
     oval(arm.toArray(), [7.1, 6.8, 6.5], look.cloth, rigid(`${side}Arm`));
     const sleeveEnd = elbow.clone().lerp(wrist, key === 'mira' ? -.42 : .28);
-    strand([shoulder.toArray(), arm.clone().lerp(elbow, .45).toArray(), sleeveEnd.toArray()],
+    if (key !== 'rumi') strand([shoulder.toArray(), arm.clone().lerp(elbow, .45).toArray(), sleeveEnd.toArray()],
       key === 'mira' ? [5.7, 5.2, 4.3] : [6.8, 6.1, 4.6], look.cloth, armWeights, 'body', 16, 12);
+    else {
+      oval(arm.toArray(), [7.2, 4.7, 6.9], look.dark, rigid(`${side}Arm`), 'body');
+      strand([[arm.x - sign * 3.6, arm.y + 2.5, arm.z + 5.7], [arm.x, arm.y + 3.6, arm.z + 7.0], [arm.x + sign * 3.8, arm.y + 2.5, arm.z + 5.7]],
+        [.48, .7, .48], look.metal, rigid(`${side}Arm`), 'detail', 6, 8);
+    }
     strand([arm.toArray(), elbow.toArray(), wrist.toArray()], [5.2, 3.7, 2.6], look.skin, armWeights, 'body', 16, 18);
     const cuff = elbow.clone().lerp(wrist, .65), cuffEnd = elbow.clone().lerp(wrist, .91);
     strand([cuff.toArray(), cuffEnd.toArray()], [3.1, 2.8], look.dark, rigid(`${side}ForeArm`), 'body', 12, 3);
@@ -236,6 +241,20 @@ export function buildAnimeHero(root, key) {
     const length = key === 'mira' ? 49 : key === 'rumi' ? 31 : 16;
     strand([[s * 14.8, 106, -4], [s * 18, 94, -6], [s * 19, 106 - length, -9]],
       [key === 'mira' ? 5.3 : 2, 3, .18], look.accent, rigid('Hips'), 'body', 8, 12, .16);
+  }
+  if (key === 'rumi') {
+    // Split layered waistcloth reads clearly from the chase camera and echoes
+    // the painted silhouette without adding independently drawn meshes.
+    for (const s of [-1, 1]) {
+      panel([[s * 4, 108, -8], [s * 17, 106, -8], [s * 23, 61, -13], [s * 10, 68, -16]],
+        look.accent, rigid('Hips'), 'body');
+      panel([[s * 3, 108, -8.5], [s * 12, 104, -9], [s * 16, 72, -16], [s * 5, 65, -16]],
+        look.dark, rigid('Hips'), 'body');
+      strand([[s * 17, 105, -8], [s * 20, 84, -11], [s * 23, 61, -13]],
+        [.48, .48, .18], look.metal, rigid('Hips'), 'detail', 5, 10);
+      panel([[s * 13, 80, -15.6], [s * 16, 75, -15.7], [s * 12, 71, -15.8], [s * 9, 75, -15.7]],
+        look.metal, rigid('Hips'), 'detail');
+    }
   }
 
   // Sculpted face: tapered chin, cheeks, brow and crown, with modelled eyes.
@@ -294,13 +313,13 @@ export function buildAnimeHero(root, key) {
       const points = [], radii = [];
       for (let i = 0; i <= 24; i++) {
         const t = i / 24, a = t * Math.PI * 8 + n * Math.PI * 2 / 3;
-        points.push([3 + t * 6 + Math.cos(a) * (2.4 - t * .9), 164 - t * 59, -14 - t * 2 + Math.sin(a) * 1.5]);
-        radii.push(1.8 * (1 - t * .65));
+        points.push([3 + t * 8 + Math.cos(a) * (3.1 - t * 1.2), 164 - t * 95, -14 - t * 4 + Math.sin(a) * 2]);
+        radii.push(2.3 * (1 - t * .63));
       }
       strand(points, radii, n === 1 ? look.highlight : look.hair, longHairWeights, 'hair', 8, 56);
     }
-    oval([9, 105, -16], [2.6, 1.7, 2], look.metal, longHairWeights, 'detail');
-    strand([[9, 104, -16], [11, 99, -16], [12, 96, -15]], [2, 1.4, .02], look.hair, longHairWeights, 'hair', 8, 8);
+    oval([11, 69, -18], [3.1, 2, 2.5], look.metal, longHairWeights, 'detail');
+    strand([[11, 68, -18], [13, 61, -18], [14, 54, -17]], [2.5, 1.8, .02], look.hair, longHairWeights, 'hair', 8, 8);
   } else if (key === 'mira') {
     for (let n = 0; n < 9; n++) {
       const x = (n - 4) * 2.35;
@@ -334,7 +353,7 @@ export function buildAnimeHero(root, key) {
   const weapon = (g, hex) => { g.applyQuaternion(rotation); g.translate(start.x, start.y, start.z); add(g, hex, rigid('RightHand'), 'sword'); };
   const width = key === 'mira' ? 5.5 : key === 'zoey' ? 2.0 : 2.8;
   const blade = new THREE.CylinderGeometry(0, width, length * .78, 4, 1);
-  blade.scale(1, 1, .24); blade.rotateY(Math.PI / 4); blade.translate(0, length * .59, 0); weapon(blade, '#d7def1');
+  blade.scale(1, 1, .24); blade.rotateY(Math.PI / 4); blade.translate(0, length * .59, 0); weapon(blade, key === 'rumi' ? '#b991ea' : '#d7def1');
   const spine = new THREE.BoxGeometry(width * .24, length * .65, 1.1); spine.translate(0, length * .55, 0); weapon(spine, look.accent);
   const guard = new THREE.BoxGeometry(width * 3.5, 2.6, 2.3); guard.translate(0, length * .18, 0); weapon(guard, look.metal);
   const grip = new THREE.CylinderGeometry(1.4, 1.6, length * .17, 10); grip.translate(0, length * .075, 0); weapon(grip, look.dark);
