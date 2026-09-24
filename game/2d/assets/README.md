@@ -7,6 +7,11 @@ Built-in `image_gen` mode, generated 2026-09-24. Art direction reference: `game/
 | `rumi-actions-v2.png` | 1254×1254 RGBA | 9 key poses: idle, 2 run, 3 light-slash, 3 heavy-slash |
 | `enemies-actions-v1.png` | 1254×1254 RGBA | 2 enemy designs, 8 poses each |
 | `night-market-v1.png` | 1672×941 RGB | Prepainted arena |
+| `rumi-rear-source-v1.png` | 1254×1254 RGBA | Generated rear-view four-pose source sheet |
+| `rumi-rear-v1.png` | 2048×1536 RGBA | Four aligned rear-view frames, packed without painting changes |
+| `night-market-chase-v1.png` | 1672×941 RGB | Third-person chase-view background |
+
+The rear-view and chase-view sources use the original direction board as a style reference. `game/scripts/pack_warrior_assets.py` isolates the four connected figure regions, aligns their foot anchors, and produces lossless WebP files. It checks that every visible output pixel matches the PNG. These assets load only in `?view=warrior`, so the original oblique-view download remains unchanged. The two generation prompts requested (1) a clean third-person night-market floor with the gate in the distance and no characters, and (2) four full-body, three-quarter-rear Rumi poses in idle, run, horizontal slash and overhead slash with transparent background, retaining the direction-board costume and braid.
 
 The request sizes below are generation targets, not the actual output sizes. The first Rumi 4×4 attempt had crowded gutters and is not shipped or loaded. The final sheet was generated from that intermediate character reference, itself based on the original direction board. The playable art uses no per-pixel background-removal or creative editing script.
 

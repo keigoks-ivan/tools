@@ -2,6 +2,7 @@ import { Arena } from './combat.js';
 import { FramePacer } from '../frame-pacing.js';
 import { installGameGestures } from './touch-gestures.js';
 import { depthScaleAt, FollowCamera } from './depth-view.js';
+import { projectWarriorPoint, warriorBackgroundCrop } from './warrior-view.js';
 
 const $ = id => document.getElementById(id);
 const canvas = $('battle');
@@ -11,6 +12,8 @@ const artCtx = art.getContext('2d');
 const arena = new Arena({ seed: 17 });
 const pacer = new FramePacer(60);
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const warriorView = new URLSearchParams(location.search).get('view') === 'warrior';
+document.body.dataset.view = warriorView ? 'warrior' : 'arena';
 const camera = new FollowCamera({ enabled: !reducedMotion });
 installGameGestures($('game'));
 const distanceHaze = ctx.createLinearGradient(0, 160, 0, 430);
@@ -72,7 +75,14 @@ function loadImage(name, url) {
   return imagePromises[name];
 }
 function loadHero() {
-  return loadImage('hero', './assets/rumi-actions-v2.webp').then(() => {
+  return loadImage('hero', warriorView ? './assets/rumi-rear-v1.webp' : './assets/rumi-actions-v2.webp').then(() => {
+    if (warriorView) {
+      heroFrames ||= [0, 1, 2, 3].map(index => ({
+        x: index % 2 * 1024, y: Math.floor(index / 2) * 768,
+        w: 1024, h: 768, ax: 512, ay: 700,
+      }));
+      return;
+    }
     // The painted sheet uses uneven gutters; explicit crops preserve whole
     // blades and align pelvis/ground anchors instead of assuming a grid.
     heroFrames ||= [
@@ -91,7 +101,7 @@ async function loadAssets() {
     assetsPromise = Promise.all([
       track(loadHero()),
       track(loadImage('enemies', './assets/enemies-actions-v1.webp')),
-      track(loadImage('arena', './assets/night-market-v1.webp')),
+      track(loadImage('arena', warriorView ? './assets/night-market-chase-v1.webp' : './assets/night-market-v1.webp')),
     ]).then(() => {
       enemyFrames = atlas(images.enemies, 4, 4, [0, 312, 610, 934, images.enemies.height]);
     }).catch(error => { assetsPromise = null; throw error; }).finally(() => { active = false; });
@@ -185,6 +195,7 @@ function consumeEvents() {
   }
 }
 function heroFrame(action, time, animationClock = clock) {
+  if (warriorView) return action === 'run' || action === 'dodge' ? 1 : action === 'attack' ? 2 : action === 'heavy' || action === 'special' ? 3 : 0;
   if (action === 'run' || action === 'dodge') return 1 + Math.floor(animationClock * 9) % 2;
   if (action === 'attack') return time < 0.11 ? 3 : time < 0.25 ? 4 : 5;
   if (action === 'heavy' || action === 'special') return time < 0.27 ? 6 : time < 0.49 ? 7 : 8;
@@ -206,32 +217,43 @@ function drawBattle() {
   ctx.translate(view.x, view.y); ctx.scale(view.scale, view.scale);
   ctx.save(); ctx.beginPath(); ctx.rect(0, 0, 1280, 720); ctx.clip();
   if (shake > 0) ctx.translate(Math.sin(clock * 110) * shake, Math.cos(clock * 90) * shake * 0.6);
-  ctx.drawImage(images.arena, 0, 0, 1280, 720);
-  ctx.fillStyle = distanceHaze; ctx.fillRect(0, 160, 1280, 270);
-  ctx.save(); camera.apply(ctx);
+  if (warriorView) {
+    const crop = warriorBackgroundCrop(arena.hero, images.arena.width, images.arena.height);
+    ctx.drawImage(images.arena, crop.x, crop.y, crop.width, crop.height, 0, 0, 1280, 720);
+  } else {
+    ctx.drawImage(images.arena, 0, 0, 1280, 720);
+    ctx.fillStyle = distanceHaze; ctx.fillRect(0, 160, 1280, 270);
+  }
+  ctx.save(); if (!warriorView) camera.apply(ctx);
   const actors = [...arena.enemies].sort((a, b) => a.y - b.y);
   actors.push({ ...arena.hero, role: 'hero', id: 0 });
   for (const enemy of arena.enemies) {
     if (enemy.action === 'telegraph' || enemy.action === 'attack') {
+      ctx.save();
+      if (warriorView) {
+        const point = projectWarriorPoint(enemy, arena.hero);
+        ctx.translate(point.x, point.y); ctx.scale(point.scale / 0.68 * 0.76, 0.64); ctx.translate(-enemy.x, -enemy.y);
+      }
       const progress = enemy.action === 'attack' ? 1 : Math.min(1, enemy.actionTime / (enemy.actionTime + enemy.telegraph));
       ellipse(enemy.x, enemy.y, enemy.range + 20, (enemy.range + 20) * 0.56, `rgba(255,105,95,${0.04 + progress * 0.14})`);
       ctx.strokeStyle = `rgba(255,166,108,${0.4 + progress * 0.6})`; ctx.lineWidth = 2.5;
       ctx.beginPath(); ctx.ellipse(enemy.x, enemy.y, (enemy.range + 20) * progress, (enemy.range + 20) * 0.56 * progress, 0, 0, Math.PI * 2); ctx.stroke();
+      ctx.restore();
     }
   }
   for (const actor of actors) {
     const hero = actor.role === 'hero', elite = actor.role === 'elite' || actor.role === 'boss';
-    const depth = depthScaleAt(actor.y);
-    ctx.save(); ctx.translate(actor.x, actor.y); ctx.scale(depth, depth); ctx.translate(-actor.x, -actor.y);
-    const size = hero ? 0.48 : actor.role === 'boss' ? 0.76 : elite ? 0.53 : 0.43;
-    ellipse(actor.x - 10, actor.y + 3, hero ? 42 : elite ? 48 : 34, 12, 'rgba(4,5,12,.13)');
-    ellipse(actor.x, actor.y - 1, hero ? 30 : elite ? 36 : 25, 9, 'rgba(4,5,12,.45)');
+    const point = warriorView ? projectWarriorPoint(actor, arena.hero) : { x: actor.x, y: actor.y, scale: depthScaleAt(actor.y) };
+    ctx.save(); ctx.translate(point.x, point.y); ctx.scale(point.scale, point.scale); ctx.translate(-actor.x, -actor.y);
+    const size = warriorView ? hero ? 0.95 : actor.role === 'boss' ? 1.35 : elite ? 1.05 : 0.95 : hero ? 0.48 : actor.role === 'boss' ? 0.76 : elite ? 0.53 : 0.43;
+    ellipse(actor.x - 10, actor.y + 3, warriorView ? hero ? 98 : 52 : hero ? 42 : elite ? 48 : 34, warriorView ? 17 : 12, 'rgba(4,5,12,.13)');
+    ellipse(actor.x, actor.y - 1, warriorView ? hero ? 75 : 42 : hero ? 30 : elite ? 36 : 25, warriorView ? 14 : 9, 'rgba(4,5,12,.45)');
     if (hero) {
-      ellipse(actor.x, actor.y, 35, 10, 'rgba(178,145,255,.14)');
-      ctx.strokeStyle = '#c9b1f0'; ctx.lineWidth = 1; ctx.beginPath(); ctx.ellipse(actor.x, actor.y, 35, 10, 0, 0, Math.PI * 2); ctx.stroke();
+      ellipse(actor.x, actor.y, warriorView ? 80 : 35, warriorView ? 14 : 10, 'rgba(178,145,255,.14)');
+      ctx.strokeStyle = '#c9b1f0'; ctx.lineWidth = 1; ctx.beginPath(); ctx.ellipse(actor.x, actor.y, warriorView ? 80 : 35, warriorView ? 14 : 10, 0, 0, Math.PI * 2); ctx.stroke();
       // Facing is a combat angle; the painted atlas has two mirrored headings.
       sprite(ctx, images.hero, heroFrames, heroFrame(actor.action, actor.actionTime), actor.x, actor.y, size, Math.cos(actor.facing) < -0.05, actor.invulnerable > 0 && Math.floor(clock * 15) % 2 ? 0.7 : 1);
-      ctx.save(); ctx.translate(actor.x, actor.y); ctx.rotate(actor.facing); ctx.fillStyle = '#e7cef9'; ctx.beginPath(); ctx.moveTo(44, 0); ctx.lineTo(35, -4); ctx.lineTo(35, 4); ctx.fill(); ctx.restore();
+      if (!warriorView) { ctx.save(); ctx.translate(actor.x, actor.y); ctx.rotate(actor.facing); ctx.fillStyle = '#e7cef9'; ctx.beginPath(); ctx.moveTo(44, 0); ctx.lineTo(35, -4); ctx.lineTo(35, 4); ctx.fill(); ctx.restore(); }
     } else {
       let index = elite ? 8 : 0;
       if (actor.action === 'chase') index += 2 + Math.floor(clock * 7 + actor.id) % 2;
@@ -247,7 +269,13 @@ function drawBattle() {
     }
     ctx.restore();
   }
-  for (const fx of effects) drawEffect(fx);
+  for (const fx of effects) {
+    if (warriorView) {
+      const point = projectWarriorPoint(fx, arena.hero);
+      ctx.save(); ctx.translate(point.x, point.y); ctx.scale(point.scale, point.scale); ctx.translate(-fx.x, -fx.y);
+      drawEffect(fx); ctx.restore();
+    } else drawEffect(fx);
+  }
   ctx.restore();
   ctx.restore();
 }
@@ -313,7 +341,7 @@ function drawArt() {
   artCtx.setTransform(view.dpr, 0, 0, view.dpr, 0, 0); artCtx.clearRect(0, 0, w, h);
   const t = artClock % (artAction === 'attack' ? 0.8 : 1.2);
   const action = artAction === 'attack' && t > 0.42 || artAction === 'heavy' && t > 0.7 ? 'idle' : artAction;
-  const size = Math.min(w / 476 * 0.88, h / 439 * 0.88);
+  const size = warriorView ? Math.min(w / 1024 * 0.9, h / 768 * 0.9) : Math.min(w / 476 * 0.88, h / 439 * 0.88);
   sprite(artCtx, images.hero, heroFrames, heroFrame(action, t, artClock), w / 2, h * 0.94, size, false);
 }
 async function openArt() {
@@ -347,7 +375,7 @@ pauseArtButton.addEventListener('click', openArt); $('resume').after(pauseArtBut
 const cameraButton = document.createElement('button'); cameraButton.type = 'button'; cameraButton.className = 'title-art-button';
 function updateCameraButton() { cameraButton.textContent = `鏡頭跟隨：${camera.enabled ? '開' : '關'}`; cameraButton.setAttribute('aria-pressed', String(camera.enabled)); }
 cameraButton.addEventListener('click', () => { camera.enabled = !camera.enabled; camera.reset(); updateCameraButton(); drawBattle(); });
-updateCameraButton(); pauseArtButton.after(cameraButton);
+updateCameraButton(); if (!warriorView) pauseArtButton.after(cameraButton);
 const actionKeys = { j: 'attack', k: 'heavy', shift: 'dodge', e: 'special' };
 addEventListener('keydown', event => {
   const key = event.key.toLowerCase();
@@ -377,4 +405,11 @@ for (const button of document.querySelectorAll('[data-action]')) button.addEvent
 addEventListener('resize', resize);
 addEventListener('blur', () => { clearInput(); pause(true); });
 document.addEventListener('visibilitychange', () => { clearInput(); if (document.hidden) pause(true); syncLoop(); });
+if (warriorView) {
+  $('game').setAttribute('aria-label', 'HUNTR/X 第三人稱戰鬥視角試作');
+  document.querySelector('.title-subtitle').textContent = '第三人稱戰鬥視角試作';
+  document.querySelector('.title-copy').textContent = '從 Rumi 身後進入夜市，迎戰魂門前的敵群。';
+  $('start').querySelector('span').textContent = '進入魂門街區';
+  document.title = 'HUNTR/X 魂門之戰｜第三人稱試作';
+}
 document.body.dataset.mode = mode; $('rotateOverlay').hidden = true; resize();
