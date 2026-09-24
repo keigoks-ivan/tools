@@ -10,6 +10,8 @@
 
 使用者後續允許脫離獵魔女團題材，改以本機 VRoid 底模重設角色。新的[紫刃劍士方向圖](vroid-swordswoman-direction-v1.png)與[製作要點及提示](vroid-swordswoman-direction-v1.md)是候選方向；[可編輯 VRoid 工程](vroid-swordswoman-base.vroid)和[匯出 VRM](vroid-swordswoman-base.vrm)保留了目前的臉、髮和基本身形。服裝、武器及動畫尚未達到方向圖的完成度，尚未替換正式遊戲角色；[離線轉換與骨架限制](vroid-offline-pipeline-notes.md)另有記錄。
 
+[第二版可編輯工程](vroid-swordswoman-base-v2.vroid)與[第二版 VRM](vroid-swordswoman-base-v2.vrm)調整了虹膜、眼尾、側分瀏海與高馬尾，並改用無袖上衣底層。正面、側面與背面的實際模型檢視見[第二版落差紀錄](vroid-swordswoman-v2-review.md)。這仍是建模底模，並非完成角色，也沒有替換正式遊戲素材。
+
 製作方式：內建 image_gen 工具，無 CLI/API fallback。
 
 ## 最終生成提示
