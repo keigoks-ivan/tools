@@ -1,6 +1,6 @@
 # 2D runtime art
 
-Built-in `image_gen` mode, generated 2026-09-24. Art direction reference: `game/design/anime-direction-v2.png`. These are actual runtime PNG assets; no API-key or external CLI image generation was used. Original generated pixels and alpha are retained. Cropping and ground-anchor metadata live in `../main.js`; the generated atlases did not exactly obey the requested grid, so the hero uses individually inspected crop rectangles.
+Built-in `image_gen` mode, generated 2026-09-24. Art direction reference: `game/design/anime-direction-v2.png`. Original PNGs are retained; the runtime uses lossless WebP format copies. No API-key or external CLI image generation was used. Cropping and ground-anchor metadata live in `../main.js`; the generated atlases did not exactly obey the requested grid, so the hero uses individually inspected crop rectangles.
 
 | File | Pixels | Use |
 | --- | --- | --- |
@@ -10,7 +10,9 @@ Built-in `image_gen` mode, generated 2026-09-24. Art direction reference: `game/
 
 The request sizes below are generation targets, not the actual output sizes. The first Rumi 4×4 attempt had crowded gutters and is not shipped or loaded. The final sheet was generated from that intermediate character reference, itself based on the original direction board. The playable art uses no per-pixel background-removal or creative editing script.
 
-Total transfer size: 6,057,181 bytes (5.78 MiB). Combined RGBA pixel storage: 18,873,536 bytes (18.0 MiB), excluding canvas backing stores, browser caches and compositor resources.
+Original PNG total: 6,057,181 bytes (5.78 MiB). Runtime WebP total: 4,524,910 bytes (4.32 MiB), 25.3% smaller. Combined RGBA pixel storage remains 18,873,536 bytes (18.0 MiB), excluding canvas backing stores, browser caches and compositor resources. Character preview needs only the 1,034,738-byte hero atlas, alongside the title's CSS background.
+
+`node game/scripts/prepare_2d_assets.mjs` creates the lossless format copies using the offline `sharp` package; `--check` only verifies them. The check compares dimensions, every alpha value and every nonzero-alpha RGB channel against the PNG sources. Fully transparent RGB values may be cleared by WebP; they have no visible contribution. No resizing, quantization or creative image edits occur during packaging. Sharp is an offline dependency only; the website loads no image-processing package.
 
 ## Final prompt set
 

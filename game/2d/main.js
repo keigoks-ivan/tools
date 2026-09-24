@@ -14,6 +14,7 @@ const edges = {};
 const joystick = { x: 0, y: 0, pointer: null };
 const effects = [];
 const images = {};
+const imagePromises = {};
 let assetsPromise, heroFrames, enemyFrames, mode = 'title', paused = false, rotated = false;
 let frameId = 0, lastTime = 0, clock = 0, hudAt = 0, hitStop = 0, shake = 0;
 let view = { scale: 1, x: 0, y: 0, dpr: 1 }, artAction = 'idle', artClock = 0, artWasPaused = false;
@@ -50,28 +51,44 @@ function atlas(image, columns, rows, rowEdges) {
 }
 
 function loadImage(name, url) {
-  return new Promise((resolve, reject) => {
+  if (imagePromises[name]) return imagePromises[name];
+  imagePromises[name] = new Promise((resolve, reject) => {
     const image = new Image();
-    image.onload = () => { images[name] = image; resolve(image); };
-    image.onerror = () => reject(new Error('圖片載入失敗，請再試一次。'));
+    const timeout = setTimeout(() => {
+      image.onload = image.onerror = null; image.src = '';
+      reject(new Error('下載等候較久，請再按一次重試。'));
+    }, 45000);
+    image.onload = () => { clearTimeout(timeout); images[name] = image; resolve(image); };
+    image.onerror = () => { clearTimeout(timeout); reject(new Error('圖片載入失敗，請再試一次。')); };
     image.src = url;
-  });
+  }).catch(error => { delete imagePromises[name]; throw error; });
+  return imagePromises[name];
 }
-async function loadAssets() {
-  if (!assetsPromise) assetsPromise = Promise.all([
-    loadImage('hero', './assets/rumi-actions-v2.png'),
-    loadImage('enemies', './assets/enemies-actions-v1.png'),
-    loadImage('arena', './assets/night-market-v1.png'),
-  ]).then(() => {
+function loadHero() {
+  return loadImage('hero', './assets/rumi-actions-v2.webp').then(() => {
     // The painted sheet uses uneven gutters; explicit crops preserve whole
     // blades and align pelvis/ground anchors instead of assuming a grid.
-    heroFrames = [
+    heroFrames ||= [
       [0, 0, 416, 439, 220, 430], [438, 0, 360, 439, 185, 419], [856, 0, 398, 439, 220, 419],
       [0, 440, 416, 396, 220, 384], [417, 440, 476, 396, 213, 384], [897, 440, 357, 396, 180, 384],
       [0, 838, 416, 416, 220, 369], [422, 838, 414, 416, 210, 367], [851, 838, 403, 416, 221, 365],
     ].map(([x, y, w, h, ax, ay]) => ({ x, y, w, h, ax, ay }));
-    enemyFrames = atlas(images.enemies, 4, 4, [0, 312, 610, 934, images.enemies.height]);
-  }).catch(error => { assetsPromise = null; throw error; });
+  });
+}
+async function loadAssets() {
+  if (!assetsPromise) {
+    let completed = 0, active = true;
+    const track = promise => promise.then(() => {
+      if (active) $('loadstatus').textContent = `正在準備夜市戰鬥… ${++completed} / 3`;
+    });
+    assetsPromise = Promise.all([
+      track(loadHero()),
+      track(loadImage('enemies', './assets/enemies-actions-v1.webp')),
+      track(loadImage('arena', './assets/night-market-v1.webp')),
+    ]).then(() => {
+      enemyFrames = atlas(images.enemies, 4, 4, [0, 312, 610, 934, images.enemies.height]);
+    }).catch(error => { assetsPromise = null; throw error; }).finally(() => { active = false; });
+  }
   return assetsPromise;
 }
 
@@ -177,7 +194,7 @@ function ellipse(x, y, rx, ry, fill) {
 function drawBattle() {
   ctx.setTransform(view.dpr, 0, 0, view.dpr, 0, 0);
   ctx.fillStyle = '#080c16'; ctx.fillRect(0, 0, canvas.width / view.dpr, canvas.height / view.dpr);
-  if (!images.arena || !heroFrames) return;
+  if (!images.arena || !heroFrames || !enemyFrames) return;
   ctx.translate(view.x, view.y); ctx.scale(view.scale, view.scale);
   ctx.save(); ctx.beginPath(); ctx.rect(0, 0, 1280, 720); ctx.clip();
   if (shake > 0) ctx.translate(Math.sin(clock * 110) * shake, Math.cos(clock * 90) * shake * 0.6);
@@ -288,7 +305,7 @@ async function openArt() {
   $('start').disabled = titleArtButton.disabled = true;
   $('loadstatus').textContent = '正在準備角色動作…';
   try {
-    await loadAssets(); artWasPaused = paused; clearInput(); mode = 'art'; $('artOverlay').hidden = false;
+    await loadHero(); artWasPaused = paused; clearInput(); mode = 'art'; $('artOverlay').hidden = false;
     $('rotateOverlay').hidden = true; resizeArt(); drawArt(); syncLoop();
     $('loadstatus').textContent = '準備就緒';
   } catch (error) { $('loadstatus').textContent = error.message; }
