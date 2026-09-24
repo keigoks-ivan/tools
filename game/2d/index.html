@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#090f1b">
+  <title>HUNTR/X 魂門之戰｜2D 試作</title>
+  <link rel="stylesheet" href="./style.css?v=20260924b">
+</head>
+<body>
+  <main id="game" aria-label="HUNTR/X 2D 美術與戰鬥試作">
+    <canvas id="battle" aria-label="夜市戰鬥畫面"></canvas>
+
+    <section id="title" class="screen title-screen" aria-labelledby="gameTitle">
+      <div class="title-art" aria-hidden="true"></div>
+      <div class="title-content">
+        <div class="edition"><span class="edition-mark"></span> HUNTR/X　／　FIELD TEST 01</div>
+        <h1 id="gameTitle">HUNTR<span>/</span>X<br><em>魂門之戰</em></h1>
+        <p class="title-subtitle">2D 美術與戰鬥試作</p>
+        <p class="title-copy">走進首爾夜市，試玩 Rumi 的第一場戰鬥。</p>
+        <p class="prototype-note">單角色原型　·　靜音試作</p>
+        <button id="start" class="primary-button" type="button"><span>進入夜市</span><b aria-hidden="true">↗</b></button>
+        <p id="loadstatus" role="status" aria-live="polite">準備就緒</p>
+      </div>
+      <div class="title-credit">NEON STREET　·　SEOUL, 01:17 AM</div>
+    </section>
+
+    <section id="hud" class="hud" aria-label="戰鬥狀態" aria-live="off">
+      <div class="hud-topline">
+        <div class="vitals-card">
+          <div class="vital-heading"><span class="hero-mark">R</span><div><b>RUMI</b><small>靈力長劍</small></div></div>
+          <div class="meter-row"><span class="meter-label">體力</span><div class="meter"><i id="hpFill"></i></div><span id="hpText" class="meter-value">100</span></div>
+          <div class="meter-row"><span class="meter-label">靈力</span><div class="meter energy"><i id="energyFill"></i></div><span class="meter-value">　</span></div>
+        </div>
+        <div class="round-card"><span>夜市突圍</span><b id="waveText">第一波</b></div>
+        <div class="score-card"><span>擊倒</span><b id="killText">00</b></div>
+        <button id="pauseBtn" class="icon-button" type="button" aria-label="暫停" title="暫停（P）"><span></span><span></span></button>
+      </div>
+      <div id="comboText" class="combo-text" aria-live="polite"></div>
+      <div id="toast" class="battle-toast" role="status" aria-live="polite"></div>
+      <div class="hud-footer"><span>RUMI　／　SOUL GATE INCIDENT</span><button id="artToggle" type="button">角色近看 <span aria-hidden="true">↗</span></button></div>
+    </section>
+
+    <section id="touchControls" class="touch-controls" aria-label="觸控操作">
+      <div id="stick" class="stick" role="application" aria-label="方向控制">
+        <span class="stick-ring"></span><span id="knob" class="stick-knob"></span>
+      </div>
+      <div class="touch-actions">
+        <button type="button" data-action="special" aria-label="絕招">絕</button>
+        <button type="button" data-action="dodge" aria-label="閃避">閃</button>
+        <button type="button" data-action="heavy" aria-label="重擊">重</button>
+        <button type="button" data-action="attack" aria-label="攻擊">攻</button>
+      </div>
+    </section>
+
+    <section id="result" class="dialog-screen result-screen" hidden aria-labelledby="resultTitle">
+      <div class="dialog-card"><div class="section-kicker">NIGHT MARKET　／　FIELD REPORT</div><h2 id="resultTitle">夜市暫告一段落</h2><p id="resultText">戰鬥結果會顯示在這裡。</p><button id="retry" class="primary-button" type="button"><span>再試一次</span><b aria-hidden="true">↗</b></button></div>
+    </section>
+
+    <section id="pauseOverlay" class="dialog-screen" hidden aria-labelledby="pauseTitle">
+      <div class="dialog-card pause-card"><div class="section-kicker">FIELD TEST　／　PAUSED</div><h2 id="pauseTitle">先歇一下</h2><p>準備好後繼續夜市突圍。</p><button id="resume" class="primary-button" type="button"><span>繼續戰鬥</span><b aria-hidden="true">↗</b></button></div>
+    </section>
+
+    <section id="rotateOverlay" class="rotate-overlay" role="status" aria-live="polite">
+      <div class="rotate-card"><span class="rotate-icon" aria-hidden="true">↻</span><b>請轉橫向遊玩</b><span>畫面已暫停，轉回橫向即可繼續。</span></div>
+    </section>
+
+    <section id="artOverlay" class="art-overlay" hidden aria-labelledby="artTitle">
+      <div class="art-topbar"><div><span class="section-kicker">CHARACTER STUDY　／　01</span><h2 id="artTitle">Rumi　角色近看</h2></div><button id="artClose" class="close-button" type="button" aria-label="關閉角色近看">關閉 <span aria-hidden="true">×</span></button></div>
+      <canvas id="artCanvas" aria-label="Rumi 角色立繪"></canvas>
+      <p class="art-caption">RUMI　·　SOUL SWORD　·　PROTOTYPE</p>
+    </section>
+
+    <footer id="help" class="help-bar" aria-label="操作說明">
+      <span class="desktop-help"><b>移動</b> WASD / ↑↓←→ <i></i> <b>攻擊</b> J <i></i> <b>重擊</b> K <i></i> <b>閃避</b> Shift <i></i> <b>絕招</b> E <i></i> <b>暫停</b> P</span>
+      <span class="touch-help">左側移動　·　右側攻擊</span>
+      <span class="silent-note">靜音試作</span>
+    </footer>
+  </main>
+  <script type="module" src="./main.js?v=20260924b"></script>
+</body>
+</html>
