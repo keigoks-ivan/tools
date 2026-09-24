@@ -30,11 +30,12 @@ function createHarness(warriorView = false) {
     atlas(image, columns, rows, rowEdges) { return [{ image, columns, rows, rowEdges }]; },
     console,
   });
-  vm.runInContext(`const warriorView = ${warriorView};\nconst images = {};\nconst imagePromises = {};\nlet assetsPromise, heroFrames, enemyFrames;\n${loadingFunctions}\nthis.api = {
+  vm.runInContext(`const warriorView = ${warriorView};\nconst images = {};\nconst imagePromises = {};\nlet assetsPromise, heroFrames, actionFrames, enemyFrames;\n${loadingFunctions}\nthis.api = {
     loadImage, loadHero, loadAssets,
     get images() { return images; },
     get imagePromises() { return imagePromises; },
     get heroFrames() { return heroFrames; },
+    get actionFrames() { return actionFrames; },
     get enemyFrames() { return enemyFrames; },
     get assetsPromise() { return assetsPromise; },
   };`, context);
@@ -98,14 +99,17 @@ test('hero preview loads only the hero, then full loading reuses it and fetches 
 test('third-person preview and battle load only their own hero and arena art', async () => {
   const h = createHarness(true);
   const preview = h.api.loadHero();
-  assert.deepEqual(h.requested, ['./assets/rumi-rear-v1.webp']);
+  assert.deepEqual(h.requested, ['./assets/rumi-rear-v1.webp', './assets/rumi-rear-actions-v2.webp']);
   h.finish('./assets/rumi-rear-v1.webp');
+  h.finish('./assets/rumi-rear-actions-v2.webp');
   await preview;
   assert.equal(h.api.heroFrames.length, 4);
+  assert.equal(h.api.actionFrames.length, 4);
 
   const battle = h.api.loadAssets();
   assert.deepEqual(h.requested, [
     './assets/rumi-rear-v1.webp',
+    './assets/rumi-rear-actions-v2.webp',
     './assets/enemies-actions-v1.webp',
     './assets/night-market-chase-v1.webp',
   ]);

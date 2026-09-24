@@ -10,8 +10,11 @@ const MAX_EVENTS = 96;
  * in [-1, 1]; attack, heavy, dodge and special are one-frame press edges.
  */
 export class Arena {
-  constructor({ seed = 1 } = {}) {
+  constructor({ seed = 1, warriorMode = false } = {}) {
     this.seed = seed >>> 0;
+    this.warriorMode = warriorMode;
+    this.waveGoal = warriorMode ? 10 : 20;
+    this.finalWave = warriorMode ? 2 : 3;
     this.reset();
   }
 
@@ -38,8 +41,9 @@ export class Arena {
     this.attackerTokens = 0;
     this.lastLightAt = -Infinity;
     this.attackSerial = 0;
+    this.moveInput = { x: 0, y: 0 };
     this._emit('wave', { wave: 1, x: this.hero.x, y: this.hero.y });
-    for (let i = 0; i < 5; i++) this._spawn(i === 4 ? 'runner' : 'grunt');
+    for (let i = 0; i < (this.warriorMode ? 4 : 5); i++) this._spawn(i === (this.warriorMode ? 3 : 4) ? 'runner' : 'grunt');
     return this.snapshot();
   }
 
@@ -63,7 +67,7 @@ export class Arena {
       this.bossQueued = false;
       this._spawn('boss');
     }
-    if (this.enemies.length < MAX_ENEMIES && !this.bossQueued && this.waveKills < 20) {
+    if (this.enemies.length < (this.warriorMode ? 8 : MAX_ENEMIES) && !this.bossQueued && this.waveKills < this.waveGoal) {
       this.spawnClock -= dt;
       if (this.spawnClock <= 0) {
         this._spawn(this._nextRole());
@@ -81,7 +85,7 @@ export class Arena {
       state: this.state,
       wave: this.wave,
       waveKills: this.waveKills,
-      waveGoal: 20,
+      waveGoal: this.waveGoal,
       kills: this.kills,
       attackerTokens: this.attackerTokens,
       maxAttackers: MAX_ATTACKERS,
@@ -103,7 +107,8 @@ export class Arena {
     const length = Math.hypot(dx, dy);
     const moveX = length > 1 ? dx / length : dx;
     const moveY = length > 1 ? dy / length : dy;
-    if (length > 0.01) hero.facing = Math.atan2(moveY, moveX);
+    this.moveInput = { x: moveX, y: moveY };
+    if (length > 0.01 && (!this.warriorMode || hero.action !== 'attack' && hero.action !== 'heavy')) hero.facing = Math.atan2(moveY, moveX);
 
     if (pressed(input.special)) {
       this.inputBuffer = null;
@@ -141,6 +146,7 @@ export class Arena {
     const hero = this.hero;
     if (hero.action === 'idle' || hero.action === 'run') return true;
     if (hero.action !== 'attack') return false;
+    if (this.warriorMode) return hero.actionTime >= 0.15 && hero.actionTime <= 0.3;
     return kind === 'heavy'
       ? hero.actionTime >= 0.16 && hero.actionTime <= 0.34
       : hero.actionTime >= 0.2 && hero.actionTime <= 0.37;
@@ -149,6 +155,15 @@ export class Arena {
   _startAttack(kind, branch = false) {
     const hero = this.hero;
     const now = this.time || 0;
+    if (this.warriorMode) {
+      const freeAim = Math.hypot(this.moveInput.x, this.moveInput.y) < 0.1;
+      const nearest = this.enemies.filter(enemy => enemy.action !== 'dead')
+        .map(enemy => ({ enemy, distance: distance(hero, enemy) }))
+        .filter(candidate => candidate.distance <= 230 && (freeAim ||
+          Math.abs(angleDifference(hero.facing, Math.atan2(candidate.enemy.y - hero.y, candidate.enemy.x - hero.x))) < 1.2))
+        .sort((a, b) => a.distance - b.distance)[0];
+      if (nearest) hero.facing = Math.atan2(nearest.enemy.y - hero.y, nearest.enemy.x - hero.x);
+    }
     if (kind === 'attack') {
       hero.combo = now - this.lastLightAt <= 0.8 ? Math.min(3, hero.combo + 1) : 1;
       this.lastLightAt = now;
@@ -158,12 +173,12 @@ export class Arena {
     this.attackSerial++;
     this.attack = {
       kind,
-      duration: kind === 'attack' ? 0.42 : 0.7,
-      activeStart: kind === 'attack' ? 0.11 : 0.27,
-      activeEnd: kind === 'attack' ? 0.24 : 0.48,
+      duration: kind === 'attack' ? (this.warriorMode ? 0.36 : 0.42) : (this.warriorMode ? 0.58 : 0.7),
+      activeStart: kind === 'attack' ? (this.warriorMode ? 0.075 : 0.11) : (this.warriorMode ? 0.22 : 0.27),
+      activeEnd: kind === 'attack' ? (this.warriorMode ? 0.19 : 0.24) : (this.warriorMode ? 0.42 : 0.48),
       radius: kind === 'attack' ? 145 + Math.min(hero.combo, 3) * 8 : branch ? 215 : 190,
       arc: kind === 'attack' ? Math.PI * 0.78 : Math.PI * 0.94,
-      damage: kind === 'attack' ? (hero.combo === 3 ? 4 : 3) : branch ? 10 : 8,
+      damage: kind === 'attack' ? (this.warriorMode ? hero.combo === 3 ? 7 : 5 : hero.combo === 3 ? 4 : 3) : branch ? 10 : 8,
       serial: this.attackSerial,
       hitDone: false,
       branch,
@@ -206,6 +221,14 @@ export class Arena {
       const attack = this.attack;
       const before = hero.actionTime;
       hero.actionTime += dt;
+      if (this.warriorMode && attack && before < attack.activeEnd) {
+        const moving = Math.hypot(this.moveInput.x, this.moveInput.y) > 0.1;
+        const speed = moving ? 100 : attack.kind === 'attack' ? 90 : 70;
+        const dx = moving ? this.moveInput.x : Math.cos(hero.facing);
+        const dy = moving ? this.moveInput.y : Math.sin(hero.facing);
+        hero.x = clamp(hero.x + dx * speed * dt, BOUNDS.minX, BOUNDS.maxX);
+        hero.y = clamp(hero.y + dy * speed * dt * 0.8, BOUNDS.minY, BOUNDS.maxY);
+      }
       if (attack && !attack.hitDone && before <= attack.activeEnd && hero.actionTime >= attack.activeStart) {
         attack.hitDone = true;
         this._resolveSlash(attack);
@@ -261,7 +284,7 @@ export class Arena {
     this._emit('hitstop', { x: enemy.x, y: enemy.y, duration: source === 'special' ? 0.06 : 0.035 });
     this._gainEnergy(enemy.role === 'boss' ? 5 : 2);
     if (enemy.hp === 0) {
-      this._emit('kill', { x: enemy.x, y: enemy.y, enemyId: enemy.id, role: enemy.role });
+      this._emit('kill', { x: enemy.x, y: enemy.y, enemyId: enemy.id, role: enemy.role, facing: enemy.facing });
       if (enemy.role !== 'boss') this._countWaveKill();
       else this._win();
     }
@@ -269,10 +292,10 @@ export class Arena {
 
   _countWaveKill() {
     this.kills++;
-    if (this.waveKills >= 20) return;
+    if (this.waveKills >= this.waveGoal) return;
     this.waveKills++;
-    if (this.waveKills < 20) return;
-    if (this.wave < 3) {
+    if (this.waveKills < this.waveGoal) return;
+    if (this.wave < this.finalWave) {
       this.wave++;
       this.waveKills = 0;
       const heal = Math.min(8, this.hero.maxHp - this.hero.hp);
@@ -379,7 +402,8 @@ export class Arena {
         if (b.action === 'dead') continue;
         const dx = b.x - a.x, dy = b.y - a.y;
         const d = Math.hypot(dx, dy) || 0.001;
-        const min = a.role === 'boss' || b.role === 'boss' ? 76 : 34;
+        const min = this.warriorMode ? a.role === 'boss' || b.role === 'boss' ? 170 : 145
+          : a.role === 'boss' || b.role === 'boss' ? 76 : 34;
         if (d >= min) continue;
         const push = (min - d) * 0.5;
         a.x = clamp(a.x - dx / d * push, BOUNDS.minX, BOUNDS.maxX);
@@ -391,19 +415,22 @@ export class Arena {
   }
 
   _spawn(role) {
-    if (this.enemies.length >= MAX_ENEMIES) return null;
+    if (this.enemies.length >= (this.warriorMode ? 8 : MAX_ENEMIES)) return null;
     const id = this.nextEnemyId++;
     const boss = role === 'boss';
     let x, y;
     if (boss) {
       x = WIDTH * 0.5;
       y = BOUNDS.minY + 35;
+    } else if (this.warriorMode) {
+      x = 260 + this._rand() * 760;
+      y = BOUNDS.minY + 15 + this._rand() * 100;
     } else {
       const side = Math.floor(this._rand() * 4);
       x = side < 2 ? BOUNDS.minX + 12 : BOUNDS.maxX - 12;
       y = BOUNDS.minY + 20 + this._rand() * (BOUNDS.maxY - BOUNDS.minY - 40);
     }
-    const hp = role === 'boss' ? 180 : role === 'elite' ? 11 : role === 'runner' ? 4 : 5;
+    const hp = role === 'boss' ? (this.warriorMode ? 65 : 180) : role === 'elite' ? 11 : role === 'runner' ? 4 : 5;
     const enemy = {
       id, role, x, y, hp, maxHp: hp,
       action: 'chase', actionTime: 0, facing: Math.PI / 2,

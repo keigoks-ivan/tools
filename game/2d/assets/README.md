@@ -1,6 +1,6 @@
 # 2D runtime art
 
-Built-in `image_gen` mode, generated 2026-09-24. Art direction reference: `game/design/anime-direction-v2.png`. Original PNGs are retained; the runtime uses lossless WebP format copies. No API-key or external CLI image generation was used. Cropping and ground-anchor metadata live in `../main.js`; the generated atlases did not exactly obey the requested grid, so the hero uses individually inspected crop rectangles.
+Built-in `image_gen` mode, generated 2026-09-24. Art direction reference: `game/design/anime-direction-v2.png`. Original PNGs are retained; the first runtime atlases use lossless WebP, while the extra third-person action atlas uses quality-90 WebP to keep the additional download small. No API-key or external CLI image generation was used. Cropping and ground-anchor metadata live in `../main.js`; the generated atlases did not exactly obey the requested grid, so the hero uses individually inspected crop rectangles.
 
 | File | Pixels | Use |
 | --- | --- | --- |
@@ -9,9 +9,15 @@ Built-in `image_gen` mode, generated 2026-09-24. Art direction reference: `game/
 | `night-market-v1.png` | 1672×941 RGB | Prepainted arena |
 | `rumi-rear-source-v1.png` | 1254×1254 RGBA | Generated rear-view four-pose source sheet |
 | `rumi-rear-v1.png` | 2048×1536 RGBA | Four aligned rear-view frames, packed without painting changes |
+| `rumi-rear-action-source-v2.png` | 1448×1086 RGBA | Four additional rear-view attack poses generated from the existing Rumi atlas |
+| `rumi-rear-actions-v2.webp` | 1536×1280 RGBA | Four aligned windup, swing, impact and recovery frames; 281,382 bytes |
 | `night-market-chase-v1.png` | 1672×941 RGB | Third-person chase-view background |
 
 The rear-view and chase-view sources use the original direction board as a style reference. `game/scripts/pack_warrior_assets.py` isolates the four connected figure regions, aligns their foot anchors, and produces lossless WebP files. It checks that every visible output pixel matches the PNG. These assets load only in `?view=warrior`, so the original oblique-view download remains unchanged. The two generation prompts requested (1) a clean third-person night-market floor with the gate in the distance and no characters, and (2) four full-body, three-quarter-rear Rumi poses in idle, run, horizontal slash and overhead slash with transparent background, retaining the direction-board costume and braid.
+
+`game/scripts/pack_warrior_action_assets.py` takes four more generated action poses, removes disconnected transparent-image artifacts, aligns ground contact, and packs a smaller atlas. This atlas is also exclusive to `?view=warrior`; the game uses action time to select a distinct frame during each part of the swing. Source generation prompt (built-in image tool):
+
+> Use case: stylized-concept. Asset type: transparent frame atlas for an actual real-time action game. The reference is the EXISTING playable character Rumi, an adult anime sword hunter viewed from behind and slightly above. Preserve the same exact character identity: long thick purple braid, black-and-gold sleeveless armor, purple layered waistcloth, tall black boots and purple long sword; keep the camera angle, clothing details, head size and mature anatomy consistent with reference. Make FOUR DISTINCT SEQUENTIAL action poses, isolated on fully transparent background, arranged as exactly two columns by two rows with generous gutters; no figure, sword, cloth or braid may cross a cell boundary. Top-left: light attack anticipation, knees bent, torso wound clockwise, sword drawn behind right shoulder, both feet grounded. Top-right: light attack blade halfway through a wide horizontal swing, strong torso rotation, braid and skirt lag naturally. Bottom-left: heavy overhead downswing at the instant of impact, sword blade low in front of body, deep forward lunge, weight over front foot. Bottom-right: post-strike recovery, sword sweeping across body back toward guard, balanced feet. Every whole figure and entire sword fits safely in its individual cell, same ground-contact height within each cell. Crisp premium painted anime art matching reference; no labels, text, frame lines, effects, trails, glow, background, checkerboard or duplicate limbs. Actual transparent RGBA.
 
 The request sizes below are generation targets, not the actual output sizes. The first Rumi 4×4 attempt had crowded gutters and is not shipped or loaded. The final sheet was generated from that intermediate character reference, itself based on the original direction board. The playable art uses no per-pixel background-removal or creative editing script.
 

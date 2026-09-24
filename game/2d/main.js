@@ -1,18 +1,19 @@
-import { Arena } from './combat.js';
+import { Arena } from './combat.js?v=20260924g';
 import { FramePacer } from '../frame-pacing.js';
 import { installGameGestures } from './touch-gestures.js';
 import { depthScaleAt, FollowCamera } from './depth-view.js';
 import { projectWarriorPoint, warriorBackgroundCrop } from './warrior-view.js';
+import { warriorFrameAt } from './warrior-animation.js';
 
 const $ = id => document.getElementById(id);
 const canvas = $('battle');
 const ctx = canvas.getContext('2d', { alpha: false });
 const art = $('artCanvas');
 const artCtx = art.getContext('2d');
-const arena = new Arena({ seed: 17 });
+const warriorView = new URLSearchParams(location.search).get('view') === 'warrior';
+const arena = new Arena({ seed: 17, warriorMode: warriorView });
 const pacer = new FramePacer(60);
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const warriorView = new URLSearchParams(location.search).get('view') === 'warrior';
 document.body.dataset.view = warriorView ? 'warrior' : 'arena';
 const camera = new FollowCamera({ enabled: !reducedMotion });
 installGameGestures($('game'));
@@ -25,7 +26,7 @@ const joystick = { x: 0, y: 0, pointer: null };
 const effects = [];
 const images = {};
 const imagePromises = {};
-let assetsPromise, heroFrames, enemyFrames, mode = 'title', paused = false, rotated = false;
+let assetsPromise, heroFrames, actionFrames, enemyFrames, mode = 'title', paused = false, rotated = false;
 let frameId = 0, lastTime = 0, clock = 0, hudAt = 0, hitStop = 0, shake = 0;
 let view = { scale: 1, x: 0, y: 0, dpr: 1 }, artAction = 'idle', artClock = 0, artWasPaused = false;
 let toastUntil = 0, fpsFrames = 0, fpsAt = 0, framesDrawn = 0;
@@ -75,11 +76,17 @@ function loadImage(name, url) {
   return imagePromises[name];
 }
 function loadHero() {
-  return loadImage('hero', warriorView ? './assets/rumi-rear-v1.webp' : './assets/rumi-actions-v2.webp').then(() => {
+  const requests = [loadImage('hero', warriorView ? './assets/rumi-rear-v1.webp' : './assets/rumi-actions-v2.webp')];
+  if (warriorView) requests.push(loadImage('heroAction', './assets/rumi-rear-actions-v2.webp'));
+  return Promise.all(requests).then(() => {
     if (warriorView) {
       heroFrames ||= [0, 1, 2, 3].map(index => ({
         x: index % 2 * 1024, y: Math.floor(index / 2) * 768,
         w: 1024, h: 768, ax: 512, ay: 700,
+      }));
+      actionFrames ||= [0, 1, 2, 3].map(index => ({
+        x: index % 2 * 768, y: Math.floor(index / 2) * 640,
+        w: 768, h: 640, ax: 384, ay: 590,
       }));
       return;
     }
@@ -186,7 +193,7 @@ function consumeEvents() {
       hitStop = Math.max(hitStop, event.source === 'heavy' ? 0.045 : 0.022);
       shake = reducedMotion ? 0 : Math.max(shake, event.source === 'heavy' ? 3 : 1.2);
     }
-    if (event.type === 'kill') effect('soul', event, 0.6);
+    if (event.type === 'kill') { effect('soul', event, 0.6); if (warriorView) effect('defeat', event, 0.28); }
     if (event.type === 'special') { effect('nova', event, 0.65); shake = reducedMotion ? 0 : 5; announce('魂刃解放', 1); }
     if (event.type === 'dodge') effect('dash', event, 0.3);
     if (event.type === 'hurt') { effect('hurt', event, 0.3); shake = reducedMotion ? 0 : 3; }
@@ -194,16 +201,22 @@ function consumeEvents() {
     if (event.type === 'wave') announce(event.wave === 'boss' ? '魂門守將現身' : `第 ${event.wave} 波　／　${event.wave === 1 ? '夜市突圍' : '敵勢增強'}`, 2.5);
   }
 }
-function heroFrame(action, time, animationClock = clock) {
-  if (warriorView) return action === 'run' || action === 'dodge' ? 1 : action === 'attack' ? 2 : action === 'heavy' || action === 'special' ? 3 : 0;
+function heroFrame(action, time, animationClock = clock, combo = 1) {
+  if (warriorView) return warriorFrameAt(action, time, animationClock, combo);
   if (action === 'run' || action === 'dodge') return 1 + Math.floor(animationClock * 9) % 2;
   if (action === 'attack') return time < 0.11 ? 3 : time < 0.25 ? 4 : 5;
   if (action === 'heavy' || action === 'special') return time < 0.27 ? 6 : time < 0.49 ? 7 : 8;
   return 0;
 }
+function heroSprite(context, action, time, x, y, size, flip, opacity = 1, animationClock = clock, combo = 1) {
+  const index = heroFrame(action, time, animationClock, combo);
+  const heading = warriorView && action === 'attack' && combo === 2 ? !flip : flip;
+  if (warriorView && index >= 4) sprite(context, images.heroAction, actionFrames, index - 4, x, y, size * 1.12, heading, opacity);
+  else sprite(context, images.hero, heroFrames, index, x, y, size, heading, opacity);
+}
 function sprite(context, image, frames, index, x, y, scale, flip, opacity = 1) {
   const frame = frames[index];
-  context.save(); context.translate(x, y); context.scale(flip ? -scale : scale, scale); context.globalAlpha = opacity;
+  context.save(); context.translate(x, y); context.scale(flip ? -scale : scale, scale); context.globalAlpha *= opacity;
   context.drawImage(image, frame.x, frame.y, frame.w, frame.h, -frame.ax, -frame.ay, frame.w, frame.h);
   context.restore();
 }
@@ -245,28 +258,44 @@ function drawBattle() {
     const hero = actor.role === 'hero', elite = actor.role === 'elite' || actor.role === 'boss';
     const point = warriorView ? projectWarriorPoint(actor, arena.hero) : { x: actor.x, y: actor.y, scale: depthScaleAt(actor.y) };
     ctx.save(); ctx.translate(point.x, point.y); ctx.scale(point.scale, point.scale); ctx.translate(-actor.x, -actor.y);
-    const size = warriorView ? hero ? 0.95 : actor.role === 'boss' ? 1.35 : elite ? 1.05 : 0.95 : hero ? 0.48 : actor.role === 'boss' ? 0.76 : elite ? 0.53 : 0.43;
+    const size = warriorView ? hero ? 0.78 : actor.role === 'boss' ? 1.65 : elite ? 1.4 : 1.25 : hero ? 0.48 : actor.role === 'boss' ? 0.76 : elite ? 0.53 : 0.43;
     ellipse(actor.x - 10, actor.y + 3, warriorView ? hero ? 98 : 52 : hero ? 42 : elite ? 48 : 34, warriorView ? 17 : 12, 'rgba(4,5,12,.13)');
     ellipse(actor.x, actor.y - 1, warriorView ? hero ? 75 : 42 : hero ? 30 : elite ? 36 : 25, warriorView ? 14 : 9, 'rgba(4,5,12,.45)');
     if (hero) {
       ellipse(actor.x, actor.y, warriorView ? 80 : 35, warriorView ? 14 : 10, 'rgba(178,145,255,.14)');
       ctx.strokeStyle = '#c9b1f0'; ctx.lineWidth = 1; ctx.beginPath(); ctx.ellipse(actor.x, actor.y, warriorView ? 80 : 35, warriorView ? 14 : 10, 0, 0, Math.PI * 2); ctx.stroke();
       // Facing is a combat angle; the painted atlas has two mirrored headings.
-      sprite(ctx, images.hero, heroFrames, heroFrame(actor.action, actor.actionTime), actor.x, actor.y, size, Math.cos(actor.facing) < -0.05, actor.invulnerable > 0 && Math.floor(clock * 15) % 2 ? 0.7 : 1);
+      heroSprite(ctx, actor.action, actor.actionTime, actor.x, actor.y - (warriorView && actor.action === 'run' ? Math.sin(clock * 18) * 4 : 0), size, Math.cos(actor.facing) < -0.05, actor.invulnerable > 0 && Math.floor(clock * 15) % 2 ? 0.7 : 1, clock, actor.combo);
       if (!warriorView) { ctx.save(); ctx.translate(actor.x, actor.y); ctx.rotate(actor.facing); ctx.fillStyle = '#e7cef9'; ctx.beginPath(); ctx.moveTo(44, 0); ctx.lineTo(35, -4); ctx.lineTo(35, 4); ctx.fill(); ctx.restore(); }
     } else {
       let index = elite ? 8 : 0;
       if (actor.action === 'chase') index += 2 + Math.floor(clock * 7 + actor.id) % 2;
       else if (actor.action === 'telegraph') index += 4;
       else if (actor.action === 'attack') index += 5 + Math.min(2, Math.floor(actor.actionTime * 12));
-      sprite(ctx, images.enemies, enemyFrames, index, actor.x, actor.y, size, Math.cos(actor.facing) > 0, actor.action === 'hit' ? 0.72 : 1);
+      if (warriorView && actor.action === 'hit') { ctx.translate(actor.x, actor.y); ctx.rotate(Math.sin(actor.actionTime * 22) * 0.075); ctx.translate(-actor.x, -actor.y); }
+      sprite(ctx, images.enemies, enemyFrames, index, actor.x, actor.y, size, Math.cos(actor.facing) > 0, actor.action === 'hit' ? warriorView ? 0.85 : 0.72 : 1);
       if (elite || actor.hp < actor.maxHp) {
-        const width = actor.role === 'boss' ? 100 : 44, top = actor.y - (elite ? 175 : 138);
+        const width = actor.role === 'boss' ? 100 : 44;
+        const top = actor.y - (warriorView ? actor.role === 'boss' ? 340 : elite ? 310 : 280 : elite ? 175 : 138);
         ctx.fillStyle = '#181521'; ctx.fillRect(actor.x - width / 2, top, width, 4);
         ctx.fillStyle = elite ? '#e6b985' : '#c09eb9'; ctx.fillRect(actor.x - width / 2, top, width * actor.hp / actor.maxHp, 4);
         if (elite) { ctx.font = '10px sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#f0d9b7'; ctx.fillText(actor.role === 'boss' ? '魂門守將' : '妖將', actor.x, top - 7); }
       }
     }
+    ctx.restore();
+  }
+  if (warriorView) for (const enemy of arena.enemies) {
+    if (enemy.action !== 'telegraph') continue;
+    const point = projectWarriorPoint(enemy, arena.hero);
+    const markerY = point.y - (enemy.role === 'boss' ? 350 : enemy.role === 'elite' ? 320 : 290) * point.scale;
+    const duration = enemy.role === 'boss' ? 0.9 : enemy.role === 'elite' ? 0.82 : 0.72;
+    const urgency = 1 - enemy.telegraph / duration;
+    ctx.save(); ctx.translate(point.x, markerY);
+    ctx.fillStyle = `rgba(175,42,59,${0.62 + urgency * 0.28})`;
+    ctx.beginPath(); ctx.moveTo(0, -14); ctx.lineTo(12, 0); ctx.lineTo(0, 14); ctx.lineTo(-12, 0); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = '#fff0d7'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(0, 0, 17, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * urgency); ctx.stroke();
+    ctx.fillStyle = '#fff2e8'; ctx.textAlign = 'center'; ctx.font = 'bold 15px sans-serif'; ctx.fillText('!', 0, 5);
     ctx.restore();
   }
   for (const fx of effects) {
@@ -283,6 +312,23 @@ function drawEffect(fx) {
   const p = fx.age / fx.life;
   ctx.save(); ctx.translate(fx.x, fx.y); ctx.globalAlpha = Math.max(0, 1 - p);
   if (fx.type === 'slash') {
+    if (warriorView) {
+      const finisher = fx.kind === 'attack' && fx.combo === 3;
+      const heavy = fx.kind === 'heavy' || finisher;
+      const start = finisher ? 0.07 : heavy ? 0.21 : 0.07;
+      const end = finisher ? 0.27 : heavy ? 0.43 : 0.27;
+      if (fx.age < start || fx.age > end) { ctx.restore(); return; }
+      const phase = (fx.age - start) / (end - start);
+      ctx.translate(0, -340); ctx.scale((Math.cos(fx.facing) < 0 ? -1 : 1) * (fx.kind === 'attack' && fx.combo === 2 ? -1 : 1), 1);
+      ctx.globalAlpha *= Math.min(1, (1 - phase) * 2.2);
+      ctx.lineCap = 'round'; ctx.setLineDash([370, 370]); ctx.lineDashOffset = 370 * (1 - phase);
+      ctx.beginPath();
+      if (heavy) { ctx.moveTo(60, -180); ctx.quadraticCurveTo(205, -55, 155, 215); }
+      else { ctx.moveTo(35, -105); ctx.quadraticCurveTo(220, -115, 240, 65); }
+      ctx.strokeStyle = heavy ? '#c7a2ff' : '#a99cf5'; ctx.lineWidth = heavy ? 19 : 14; ctx.stroke();
+      ctx.strokeStyle = '#fff5de'; ctx.lineWidth = heavy ? 5 : 4; ctx.stroke();
+      ctx.restore(); return;
+    }
     const heavy = fx.kind === 'heavy', delay = heavy ? 0.27 : 0.11;
     if (fx.age < delay) { ctx.restore(); return; }
     const q = (fx.age - delay) / (fx.life - delay), radius = heavy ? (fx.branch ? 215 : 190) : 145 + Math.min(fx.combo, 3) * 8;
@@ -290,6 +336,11 @@ function drawEffect(fx) {
     ctx.strokeStyle = heavy ? '#dec8ff' : '#c7b5f8'; ctx.lineWidth = (heavy ? 20 : 12) * (1 - q) + 1;
     ctx.beginPath(); ctx.arc(0, 0, radius * (0.8 + q * 0.2), -1.15 + q * 0.7, 0.8 + q * 0.6); ctx.stroke();
     ctx.strokeStyle = '#fff4e2'; ctx.lineWidth = 2; ctx.stroke();
+  } else if (fx.type === 'defeat') {
+    ctx.translate(0, p * 16); ctx.rotate((Math.cos(fx.facing) < 0 ? -1 : 1) * p * 0.8);
+    const index = fx.role === 'boss' || fx.role === 'elite' ? 8 : 0;
+    const size = warriorView ? fx.role === 'boss' ? 1.65 : fx.role === 'elite' ? 1.4 : 1.25 : fx.role === 'boss' ? 0.76 : fx.role === 'elite' ? 0.53 : 0.43;
+    sprite(ctx, images.enemies, enemyFrames, index, 0, 0, size, Math.cos(fx.facing) > 0);
   } else if (fx.type === 'number') {
     ctx.font = `${fx.damage >= 8 ? 'bold 24' : '18'}px Georgia`; ctx.textAlign = 'center'; ctx.fillStyle = fx.damage >= 8 ? '#f7deb4' : '#fff5e8';
     ctx.fillText(fx.damage, 0, -90 - p * 45);
@@ -311,7 +362,7 @@ function updateHud() {
   const hero = arena.hero;
   $('hpFill').style.width = `${hero.hp}%`; $('hpText').textContent = Math.ceil(hero.hp);
   $('energyFill').style.width = `${hero.energy}%`;
-  $('waveText').textContent = arena.bossQueued || arena.enemies.some(e => e.role === 'boss') ? '魂門守將' : `第 ${arena.wave} 波 · ${Math.min(arena.waveKills, 20)} / 20`;
+  $('waveText').textContent = arena.bossQueued || arena.enemies.some(e => e.role === 'boss') ? '魂門守將' : `第 ${arena.wave} 波 · ${Math.min(arena.waveKills, arena.waveGoal)} / ${arena.waveGoal}`;
   $('killText').textContent = String(arena.kills).padStart(2, '0');
   $('comboText').textContent = hero.combo > 1 && hero.action === 'attack' ? `${hero.combo} 連斬` : '';
   if (clock > toastUntil) $('toast').textContent = '';
@@ -339,10 +390,13 @@ function finish() {
 function drawArt() {
   const w = art.width / view.dpr, h = art.height / view.dpr;
   artCtx.setTransform(view.dpr, 0, 0, view.dpr, 0, 0); artCtx.clearRect(0, 0, w, h);
-  const t = artClock % (artAction === 'attack' ? 0.8 : 1.2);
-  const action = artAction === 'attack' && t > 0.42 || artAction === 'heavy' && t > 0.7 ? 'idle' : artAction;
+  const chained = artAction === 'attack';
+  const t = artClock % (chained ? 1.35 : artAction === 'attack' ? 0.8 : 1.2);
+  const combo = chained ? Math.floor(t / 0.45) + 1 : 1;
+  const phase = chained ? t % 0.45 : t;
+  const action = artAction === 'attack' && phase > (chained ? 0.36 : 0.42) || artAction === 'heavy' && phase > 0.7 ? 'idle' : artAction;
   const size = warriorView ? Math.min(w / 1024 * 0.9, h / 768 * 0.9) : Math.min(w / 476 * 0.88, h / 439 * 0.88);
-  sprite(artCtx, images.hero, heroFrames, heroFrame(action, t, artClock), w / 2, h * 0.94, size, false);
+  heroSprite(artCtx, action, phase, w / 2, h * 0.94, size, false, 1, artClock, combo);
 }
 async function openArt() {
   if ($('start').disabled) return;
