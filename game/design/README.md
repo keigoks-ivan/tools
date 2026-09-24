@@ -4,6 +4,8 @@
 
 `anime-direction-v2.png` 是美術概念稿，不是實機截圖、不表示模型或場景已經完成。遊戲不引用這張圖，因此不增加遊玩時的下載或 GPU 負擔。
 
+2026-09-24 的 3D 試作未通過使用者美術驗收。後續角色與敵人製作以 [3D 角色重製規格](3d-rebuild-brief.md)、[Rumi 三視圖](rumi-3d-turnaround-v1.png)與[鬼兵三視圖](oni-3d-turnaround-v1.png)為對照；這些圖只供建模參考，不在遊戲中載入。
+
 製作方式：內建 image_gen 工具，無 CLI/API fallback。
 
 ## 最終生成提示
