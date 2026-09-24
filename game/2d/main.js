@@ -1,4 +1,4 @@
-import { Arena } from './combat.js?v=20260924g';
+import { Arena } from './combat.js?v=20260924h';
 import { FramePacer } from '../frame-pacing.js';
 import { installGameGestures } from './touch-gestures.js';
 import { depthScaleAt, FollowCamera } from './depth-view.js';
@@ -76,7 +76,7 @@ function loadImage(name, url) {
   return imagePromises[name];
 }
 function loadHero() {
-  const requests = [loadImage('hero', warriorView ? './assets/rumi-rear-v1.webp' : './assets/rumi-actions-v2.webp')];
+  const requests = [loadImage('hero', warriorView ? './assets/rumi-rear-v2.webp' : './assets/rumi-actions-v2.webp')];
   if (warriorView) requests.push(loadImage('heroAction', './assets/rumi-rear-actions-v2.webp'));
   return Promise.all(requests).then(() => {
     if (warriorView) {
@@ -107,8 +107,8 @@ async function loadAssets() {
     });
     assetsPromise = Promise.all([
       track(loadHero()),
-      track(loadImage('enemies', './assets/enemies-actions-v1.webp')),
-      track(loadImage('arena', warriorView ? './assets/night-market-chase-v1.webp' : './assets/night-market-v1.webp')),
+      track(loadImage('enemies', warriorView ? './assets/enemies-actions-v2.webp' : './assets/enemies-actions-v1.webp')),
+      track(loadImage('arena', warriorView ? './assets/night-market-chase-v2.webp' : './assets/night-market-v1.webp')),
     ]).then(() => {
       enemyFrames = atlas(images.enemies, 4, 4, [0, 312, 610, 934, images.enemies.height]);
     }).catch(error => { assetsPromise = null; throw error; }).finally(() => { active = false; });

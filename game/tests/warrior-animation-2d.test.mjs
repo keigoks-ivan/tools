@@ -28,6 +28,17 @@ test('third-person combat starts with a smaller forward group and keeps momentum
   assert.ok(arena.drainEvents().some(event => event.type === 'kill'));
 });
 
+test('third-person enemies fan out while no more than two commit to an attack', () => {
+  const arena = new Arena({ seed: 17, warriorMode: true });
+  for (let i = 0; i < 40; i++) arena.update(0.05);
+  const resting = arena.enemies.filter(enemy => !enemy.engaged);
+  assert.equal(arena.snapshot().maxAttackers, 2);
+  assert.ok(arena.attackerTokens <= 2);
+  assert.ok(resting.length >= 3);
+  assert.ok(resting.every(enemy => enemy.y < arena.hero.y));
+  assert.ok(Math.max(...resting.map(enemy => enemy.x)) - Math.min(...resting.map(enemy => enemy.x)) > 300);
+});
+
 test('third-person encounter can be completed with movement, attacks and dodge inputs', () => {
   const arena = new Arena({ seed: 42, warriorMode: true });
   const dt = 0.05;

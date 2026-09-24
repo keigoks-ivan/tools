@@ -99,8 +99,8 @@ test('hero preview loads only the hero, then full loading reuses it and fetches 
 test('third-person preview and battle load only their own hero and arena art', async () => {
   const h = createHarness(true);
   const preview = h.api.loadHero();
-  assert.deepEqual(h.requested, ['./assets/rumi-rear-v1.webp', './assets/rumi-rear-actions-v2.webp']);
-  h.finish('./assets/rumi-rear-v1.webp');
+  assert.deepEqual(h.requested, ['./assets/rumi-rear-v2.webp', './assets/rumi-rear-actions-v2.webp']);
+  h.finish('./assets/rumi-rear-v2.webp');
   h.finish('./assets/rumi-rear-actions-v2.webp');
   await preview;
   assert.equal(h.api.heroFrames.length, 4);
@@ -108,13 +108,13 @@ test('third-person preview and battle load only their own hero and arena art', a
 
   const battle = h.api.loadAssets();
   assert.deepEqual(h.requested, [
-    './assets/rumi-rear-v1.webp',
+    './assets/rumi-rear-v2.webp',
     './assets/rumi-rear-actions-v2.webp',
-    './assets/enemies-actions-v1.webp',
-    './assets/night-market-chase-v1.webp',
+    './assets/enemies-actions-v2.webp',
+    './assets/night-market-chase-v2.webp',
   ]);
-  h.finish('./assets/enemies-actions-v1.webp');
-  h.finish('./assets/night-market-chase-v1.webp');
+  h.finish('./assets/enemies-actions-v2.webp');
+  h.finish('./assets/night-market-chase-v2.webp');
   await battle;
 });
 

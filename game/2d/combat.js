@@ -88,7 +88,7 @@ export class Arena {
       waveGoal: this.waveGoal,
       kills: this.kills,
       attackerTokens: this.attackerTokens,
-      maxAttackers: MAX_ATTACKERS,
+      maxAttackers: this.warriorMode ? 2 : MAX_ATTACKERS,
       hero: { ...this.hero },
       enemies: this.enemies.map(enemy => ({ ...enemy })),
     };
@@ -267,6 +267,7 @@ export class Arena {
     if (enemy.action === 'dead') return;
     enemy.hp = Math.max(0, enemy.hp - damage);
     enemy.action = enemy.hp === 0 ? 'dead' : 'hit';
+    if (this.warriorMode) { enemy.engaged = false; enemy.cooldown = Math.max(enemy.cooldown, 0.8); }
     enemy.actionTime = 0;
     enemy.hitStun = enemy.hp === 0 ? 0 : 0.22;
     const push = source === 'special' ? [22, 16] : source === 'heavy' ? [18, 12] : [4, 3];
@@ -314,8 +315,9 @@ export class Arena {
     const hero = this.hero;
     // Reserve slots for every attacker already telegraphing or swinging before
     // allowing any earlier-array chase enemy to claim a new slot.
+    const maxAttackers = this.warriorMode ? 2 : MAX_ATTACKERS;
     let tokens = this.enemies.reduce((count, enemy) =>
-      count + (enemy.action === 'telegraph' || enemy.action === 'attack' ? 1 : 0), 0);
+      count + (enemy.action === 'telegraph' || enemy.action === 'attack' || this.warriorMode && enemy.engaged ? 1 : 0), 0);
     for (const enemy of this.enemies) {
       if (enemy.action === 'dead') continue;
       enemy.cooldown = Math.max(0, enemy.cooldown - dt);
@@ -345,25 +347,41 @@ export class Arena {
         if (enemy.actionTime >= 0.25) {
           enemy.action = 'chase';
           enemy.actionTime = 0;
+          enemy.engaged = false;
           enemy.cooldown = enemy.role === 'boss' ? 1.35 : enemy.role === 'elite' ? 1.7 : 2.0;
         }
       } else {
         const speed = enemy.role === 'runner' ? 108 : enemy.role === 'elite' ? 65 : enemy.role === 'boss' ? 48 : 78;
-        if (distanceToHero > enemy.range * 0.78) {
+        if (this.warriorMode && !enemy.engaged && enemy.cooldown <= 0 && tokens < maxAttackers) {
+          enemy.engaged = true;
+          tokens++;
+        }
+        if (this.warriorMode && !enemy.engaged) {
+          const slot = (enemy.id - 1) % 8;
+          const angle = -Math.PI + (slot + 0.5) * Math.PI / 8;
+          const targetX = clamp(hero.x + Math.cos(angle) * 260, BOUNDS.minX, BOUNDS.maxX);
+          const targetY = clamp(hero.y + Math.sin(angle) * 190, BOUNDS.minY, BOUNDS.maxY);
+          const toX = targetX - enemy.x, toY = targetY - enemy.y;
+          const toSlot = Math.hypot(toX, toY) || 1;
+          if (toSlot > 8) {
+            enemy.x = clamp(enemy.x + toX / toSlot * speed * dt, BOUNDS.minX, BOUNDS.maxX);
+            enemy.y = clamp(enemy.y + toY / toSlot * speed * 0.78 * dt, BOUNDS.minY, BOUNDS.maxY);
+          }
+        } else if (distanceToHero > enemy.range * 0.78) {
           enemy.x = clamp(enemy.x + (dx / distanceToHero) * speed * dt, BOUNDS.minX, BOUNDS.maxX);
           enemy.y = clamp(enemy.y + (dy / distanceToHero) * speed * 0.78 * dt, BOUNDS.minY, BOUNDS.maxY);
-        } else if (enemy.cooldown <= 0 && tokens < MAX_ATTACKERS) {
+        } else if (enemy.cooldown <= 0 && (this.warriorMode ? enemy.engaged : tokens < maxAttackers)) {
           enemy.action = 'telegraph';
           enemy.actionTime = 0;
           enemy.telegraph = enemy.role === 'boss' ? 0.9 : enemy.role === 'elite' ? 0.82 : 0.72;
           enemy.attackResolved = false;
-          tokens++;
+          if (!this.warriorMode) tokens++;
           this._emit('telegraph', { x: enemy.x, y: enemy.y, enemyId: enemy.id, facing: enemy.facing, duration: enemy.telegraph, role: enemy.role });
         }
       }
     }
     this.attackerTokens = this.enemies.reduce((count, enemy) =>
-      count + (enemy.action === 'telegraph' || enemy.action === 'attack' ? 1 : 0), 0);
+      count + (enemy.action === 'telegraph' || enemy.action === 'attack' || this.warriorMode && enemy.engaged ? 1 : 0), 0);
     this._separateEnemies();
   }
 
@@ -437,6 +455,7 @@ export class Arena {
       telegraph: 0, cooldown: role === 'boss' ? 0.6 : 0.3 + this._rand() * 0.8,
       range: role === 'boss' ? 108 : role === 'elite' ? 82 : role === 'runner' ? 64 : 74,
       attackResolved: false, hitStun: 0,
+      engaged: false,
     };
     this.enemies.push(enemy);
     this._emit('spawn', { x, y, enemyId: id, role });
