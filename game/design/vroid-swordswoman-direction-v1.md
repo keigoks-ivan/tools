@@ -1,0 +1,11 @@
+# 紫刃劍士：VRoid 底模改造方向
+
+2026-09-24。這是使用者允許脫離原先獵魔女團題材後，以本機 VRoid Studio 女性底模為基礎重新畫的**原創角色設計候選圖**：[正面、側面、背面與細節](vroid-swordswoman-direction-v1.png)。圖由內建 ImageGen 生成；VRoid 底模與三視圖沒有上傳至第三方 3D 服務。此圖不是遊戲實機，也不是現成可用的 3D 模型。
+
+保留可從 VRoid 起步的臉部比例、紫色虹膜、側分瀏海與高馬尾位置；在 Blender 重做髮尾辮子、炭黑無袖上衣、短立領、紫色開衩腰片、窄褲、長靴、手套與刀。金屬扣件保持少量且集中在胸腰，減少手機視角中難辨識的小飾件。先檢查正面、背面和遊戲鏡頭輪廓，再做材質與骨架；圖中的臉、髮、布料細節仍須人工重建，不能把此圖直接貼在模型上。角色尚未通過 3D 美術驗收，不更新正式遊戲入口。
+
+## 生成方式與提示
+
+內建 ImageGen，參考本機離線 VRoid 候選模型的 Blender 渲染 `/private/tmp/rumi-vroid-threequarter.png`；未使用 CLI/API fallback。
+
+> Use case: stylized-concept. Create a premium ORIGINAL action-game heroine design sheet using the provided VRoid 3D character render as the structural base. Keep the achievable mature anime facial proportions, violet irises, dark-purple side-swept fringe, high ponytail placement and slim adult body proportions from the reference, but redesign her as a compelling independent fantasy action character (NOT a K-pop idol, NOT a demon-hunter group, no franchise references). Character: a confident adult violet swordswoman, late 20s, focused gaze and slight asymmetric smirk; a long thick high ponytail that ends in a loose braid, wearable and riggable. Outfit must be feasible to build by editing this VRoid body in Blender: fitted charcoal sleeveless combat tunic with a short high-collar vest, layered but simple split plum waist panels, narrow dark trousers, knee-high boots, modest brushed-brass closures, fingerless gloves. A single elegant dark steel sword with a muted violet edge. Avoid complicated filigree, lace, floating ornaments, giant pauldrons, and tiny dangling objects. Strong coherent silhouette, premium anime action-game art, sophisticated painted materials and believable 3D construction, stylish but grounded. Layout: one large full-body three-quarter FRONT hero view occupying about 60% of the canvas; smaller full-body BACK and true SIDE views of the exact same design at consistent proportions; a facial close-up and a compact material/weapon callout. Neutral deep slate studio background, controlled rim light, no scene or UI. Subtle very small labels only: FRONT, SIDE, BACK, FACE, MATERIAL. No logos, no watermark, no fake gameplay screenshot. This is a design target, not an existing game model.

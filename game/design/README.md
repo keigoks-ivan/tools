@@ -8,6 +8,8 @@
 
 [Rumi Blender 建模工程](rumi-modeling.blend)已放入三視圖參考，尚未製作角色網格；建模工程不會由遊戲下載。
 
+使用者後續允許脫離獵魔女團題材，改以本機 VRoid 底模重設角色。新的[紫刃劍士方向圖](vroid-swordswoman-direction-v1.png)與[製作要點及提示](vroid-swordswoman-direction-v1.md)是候選方向；[可編輯 VRoid 工程](vroid-swordswoman-base.vroid)和[匯出 VRM](vroid-swordswoman-base.vrm)保留了目前的臉、髮和基本身形。服裝、武器及動畫尚未達到方向圖的完成度，尚未替換正式遊戲角色；[離線轉換與骨架限制](vroid-offline-pipeline-notes.md)另有記錄。
+
 製作方式：內建 image_gen 工具，無 CLI/API fallback。
 
 ## 最終生成提示
