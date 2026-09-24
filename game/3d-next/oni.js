@@ -267,3 +267,230 @@ export function createOni(THREE, role = 'grunt') {
     },
   };
 }
+
+// ---------------------------------------------------------------------------
+// Rigged Mixamo oni (assets/enemies/oni-v2.glb). Only used by the ?hero=vroid path;
+// the procedural createOni above stays the default.
+// One armature "OniRig" carries two skinned meshes (oni_grunt, oni_boss) that share one
+// material/atlas; every enemy is a SkeletonUtils clone that keeps a single mesh.
+// ---------------------------------------------------------------------------
+
+// Clip timing in clip seconds (30 fps source). strike = the frame the claws land.
+const RIG_CLIPS = {
+  attack: { start: 0.4, strike: 1.3 },
+  attack2: { start: 0.55, strike: 1.5 },
+  bossAttack: { start: 0.2, strike: 1.6 },
+};
+const WALK_SPEED = 1.26, RUN_SPEED = 1.81;   // in-place gait speed of the clips at scale 1 (m/s)
+const RIG_SCALE = { grunt: 1, runner: 0.92, elite: 1.12, boss: 1.4 };
+
+/** Build shared resources once: toon material (keeps the emissive seams/eyes), outline, clips. */
+export function prepareRiggedOni(THREE, gltf) {
+  const gradient = new THREE.DataTexture(new Uint8Array([96, 160, 220, 255]), 4, 1, THREE.RedFormat);
+  gradient.minFilter = gradient.magFilter = THREE.NearestFilter;
+  gradient.needsUpdate = true;
+  let source = null;
+  gltf.scene.traverse(object => { if (object.isSkinnedMesh && !source) source = object.material; });
+  const toon = new THREE.MeshToonMaterial({
+    name: 'oni-toon', map: source?.map || null, gradientMap: gradient,
+    emissive: new THREE.Color(0xffffff), emissiveMap: source?.emissiveMap || null,
+    emissiveIntensity: Math.max(1.6, source?.emissiveIntensity || 1),
+  });
+  const outline = new THREE.MeshBasicMaterial({ color: 0x0b0714, side: THREE.BackSide });
+  outline.onBeforeCompile = shader => {
+    shader.vertexShader = shader.vertexShader.replace('#include <project_vertex>', 'transformed += normal * 0.012;\n#include <project_vertex>');
+  };
+  outline.customProgramCacheKey = () => 'oni-outline';
+  const templates = {};
+  gltf.scene.traverse(object => {
+    if (!object.isSkinnedMesh) return;
+    object.material = toon;
+    object.frustumCulled = false;
+    templates[object.name] = object;
+  });
+  const clips = new Map(gltf.animations.map(clip => [clip.name, clip]));
+  return {
+    scene: gltf.scene, clips, toon, outline, gradient, templates,
+    dispose() {
+      toon.dispose(); outline.dispose(); gradient.dispose();
+      source?.map?.dispose(); source?.emissiveMap?.dispose();
+      for (const mesh of Object.values(templates)) mesh.geometry.dispose();
+    },
+  };
+}
+
+/**
+ * Animated oni instance. `clone` is SkeletonUtils.clone. update(action, time, dt, enemy) follows the
+ * Arena state; battle.js forwards combat events through onTelegraph / onHit / onKill.
+ */
+export function createRiggedOni(THREE, shared, role, clone) {
+  const boss = role === 'boss';
+  const keep = boss ? 'oni_boss' : 'oni_grunt';
+  const root = new THREE.Group();
+  root.name = `oni-rig-${role}`;
+  const model = clone(shared.scene);
+  const drop = [];
+  model.traverse(object => { if (object.isSkinnedMesh && object.name !== keep) drop.push(object); });
+  for (const object of drop) object.removeFromParent();
+  let body = null;
+  model.traverse(object => { if (object.isSkinnedMesh) body = object; });
+  if (body) {
+    const shell = body.clone(false);   // shares geometry + skeleton; inverted-hull ink line
+    shell.material = shared.outline;
+    shell.frustumCulled = false;
+    shell.raycast = () => {};
+    body.parent.add(shell);
+  }
+  const scale = RIG_SCALE[role] || 1;
+  model.scale.setScalar(scale);
+  root.add(model);
+  const mixer = new THREE.AnimationMixer(model);
+  const actions = new Map();
+  const action = name => {
+    if (!actions.has(name)) {
+      const clip = shared.clips.get(name);
+      if (!clip) return null;
+      actions.set(name, mixer.clipAction(clip));
+    }
+    return actions.get(name);
+  };
+  let current = null, currentName = '', lock = 0, attackName = '', attackPhase = '', telegraphTotal = 0;
+  let downStage = '', gaitName = '';
+  const idleName = !boss && Math.random() < 0.4 ? 'idle2' : 'idle';
+  const last = new THREE.Vector3(), velocity = { speed: 0, primed: false };
+  let lastAttack = Math.random() < 0.5 ? 'attack' : 'attack2';
+
+  function play(name, { fade = 0.2, loop = true, timeScale = 1, at = 0, hold = false } = {}) {
+    const next = action(name);
+    if (!next) return null;
+    if (current === next && currentName === name && loop) { next.setEffectiveTimeScale(timeScale); return next; }
+    next.reset();
+    next.enabled = true;
+    next.setLoop(loop ? THREE.LoopRepeat : THREE.LoopOnce, loop ? Infinity : 1);
+    next.clampWhenFinished = !loop;
+    next.time = at;
+    next.setEffectiveWeight(1);
+    next.setEffectiveTimeScale(hold ? 0 : timeScale);
+    if (current && current !== next) current.crossFadeTo(next, fade, false);
+    else next.fadeIn(fade);
+    next.play();
+    current = next; currentName = name;
+    return next;
+  }
+
+  function locomotion(dt) {
+    const speed = velocity.speed / scale;
+    let name = speed < 0.15 ? idleName : speed < (gaitName === 'run' ? 1.35 : 1.6) ? 'walk' : 'run';
+    gaitName = name;
+    const rate = name === 'walk' ? Math.min(1.8, Math.max(0.6, speed / WALK_SPEED))
+      : name === 'run' ? Math.min(1.8, Math.max(0.75, speed / RUN_SPEED)) : 1;
+    play(name, { fade: 0.25, timeScale: rate });
+  }
+
+  const actor = {
+    root,
+    rigged: true,
+    role,
+    /** Called when the Arena announces a telegraph for this enemy. */
+    onTelegraph(duration = 0.72) {
+      // the Arena may re-engage before getup finishes: honour the attack and blend out of the floor pose
+      const fromFloor = !!downStage;
+      downStage = '';
+      attackName = boss ? 'bossAttack' : (lastAttack = lastAttack === 'attack' ? 'attack2' : 'attack');
+      telegraphTotal = Math.max(0.2, duration);
+      attackPhase = 'windup';
+      const timing = RIG_CLIPS[attackName];
+      play(attackName, { fade: fromFloor ? 0.3 : 0.12, loop: false, at: timing.start, hold: true });
+      lock = Infinity;
+    },
+    /** source: 'attack' | 'heavy' | 'special' (Arena hit sources). */
+    onHit(source, alive = true) {
+      if (!alive) return;
+      attackPhase = '';
+      const heavy = source === 'heavy' || source === 'special';
+      if (heavy && !boss) {
+        downStage = 'knockdown';
+        play('knockdown', { fade: 0.08, loop: false, timeScale: 1.5 });
+        lock = Infinity;
+      } else if (!downStage) {
+        const big = heavy || boss && source !== 'attack';
+        play(big ? 'hitbig' : 'hit', { fade: 0.06, loop: false, timeScale: big ? 1.35 : 1.5, at: big ? 0 : 0.1 });
+        lock = big ? 0.85 : 0.45;
+      }
+    },
+    onSpawn() {
+      if (boss) { play('roar', { fade: 0.1, loop: false, timeScale: 1.5 }); lock = 3.0; }
+      else locomotion(0);
+    },
+    /** Starts the death clip; the caller keeps the actor alive until finished() is true. */
+    onKill() {
+      attackPhase = ''; downStage = '';
+      const name = boss ? 'bossDeath' : Math.random() < 0.5 ? 'death' : 'death2';
+      play(name, { fade: 0.08, loop: false, timeScale: boss ? 1 : 1.25 });
+      lock = Infinity;
+      actor.dying = 0;
+    },
+    dying: -1,
+    finished() {
+      return actor.dying > 1.3;
+    },
+    /** True while the actor lies on the floor or gets up: battle.js slows its visual catch-up. */
+    grounded() { return !!downStage; },
+    update(state = 'chase', time = 0, dt = 0, enemy = null) {
+      const step = Math.max(0, Math.min(dt || 0, 0.1));
+      if (step > 0) {
+        const moved = Math.hypot(root.position.x - last.x, root.position.z - last.z) / step;
+        velocity.speed = velocity.primed ? velocity.speed + (Math.min(moved, 6) - velocity.speed) * Math.min(1, step * 8) : 0;
+        velocity.primed = true;
+      }
+      last.copy(root.position);
+      if (actor.dying >= 0) {
+        mixer.update(step);
+        const done = !current || current.time >= current.getClip().duration - 0.02;
+        if (actor.dying < 0.5 && root.position.y > 0) root.position.y = Math.max(0, root.position.y - step * 5);
+        if (done) { actor.dying += step; if (actor.dying > 0.5) root.position.y -= step * 0.6; }
+        return;
+      }
+      if (attackPhase === 'windup') {
+        const timing = RIG_CLIPS[attackName];
+        if (state === 'telegraph' && current) {
+          // hold the coil: ease most of the way into the wind-up, then creep while the warning shows
+          const p = Math.min(1, time / telegraphTotal);
+          const eased = p < 0.7 ? 1 - Math.pow(1 - p / 0.7, 2) : 1;
+          const span = timing.strike - timing.start;
+          current.time = timing.start + span * (0.78 * eased + 0.14 * Math.max(0, (p - 0.7) / 0.3));
+        } else if (state === 'attack' || state === 'chase') {
+          // strike resolves now: release the swing and let it follow through
+          attackPhase = 'strike';
+          if (current) current.setEffectiveTimeScale(boss ? 1.5 : 1.6);
+          lock = 0.55;
+        }
+      }
+      if (downStage === 'knockdown' && current && !current.isRunning()) {
+        if (state === 'dead') downStage = '';
+        else {
+          downStage = 'getup';
+          play('getup', { fade: 0.18, loop: false, timeScale: 1.7, at: 0.5 });
+        }
+      } else if (downStage === 'getup' && current && !current.isRunning()) {
+        downStage = ''; lock = 0;
+      }
+      if (lock !== Infinity) lock -= step;
+      if (!downStage && attackPhase !== 'windup' && lock <= 0) {
+        attackPhase = '';
+        if (state === 'telegraph' && enemy) actor.onTelegraph(time + (enemy.telegraph || 0.4));
+        else locomotion(step);
+      }
+      mixer.update(step);
+    },
+    dispose() {
+      mixer.stopAllAction();
+      for (const clipAction of actions.values()) mixer.uncacheAction(clipAction.getClip(), model);
+      mixer.uncacheRoot(model);
+      root.removeFromParent();
+      // geometry, textures and materials are shared through `shared`; skeleton bone textures are per clone
+      model.traverse(object => { if (object.isSkinnedMesh) object.skeleton?.dispose?.(); });
+    },
+  };
+  return actor;
+}
