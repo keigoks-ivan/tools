@@ -9,7 +9,6 @@ export function depthScaleAt(y) {
 export class FollowCamera {
   constructor({ enabled = true } = {}) {
     this.enabled = enabled;
-    this.zoom = 1.1;
     this.reset();
   }
 
@@ -26,8 +25,6 @@ export class FollowCamera {
   }
 
   apply(context) {
-    context.translate(640, 360);
-    context.scale(this.zoom, this.zoom);
-    context.translate(-640 - this.x, -360 - this.y);
+    context.translate(-this.x, -this.y);
   }
 }

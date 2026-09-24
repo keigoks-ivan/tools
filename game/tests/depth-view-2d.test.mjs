@@ -9,20 +9,16 @@ test('actor depth stays bounded and increases toward the foreground', () => {
   assert.ok(depthScaleAt(430) < depthScaleAt(625));
 });
 
-test('camera follows smoothly without exposing the edge of the painted arena', () => {
+test('camera follows smoothly without enlarging the painted arena', () => {
   const camera = new FollowCamera();
   const target = { x: 1190, y: 625 };
   camera.update(1 / 60, target);
   assert.ok(camera.x > 0 && camera.x < 50);
   for (let i = 0; i < 600; i++) camera.update(1 / 60, target);
   assert.ok(camera.x <= 50 && camera.y <= 24);
-  for (const sign of [-1, 1]) {
-    const x = sign * camera.x, y = sign * camera.y;
-    assert.ok(640 + (-640 - x) * camera.zoom <= 0);
-    assert.ok(640 + (640 - x) * camera.zoom >= 1280);
-    assert.ok(360 + (-360 - y) * camera.zoom <= 0);
-    assert.ok(360 + (360 - y) * camera.zoom >= 720);
-  }
+  const calls = [];
+  camera.apply({ translate(...args) { calls.push(['translate', ...args]); }, scale() { calls.push(['scale']); } });
+  assert.deepEqual(calls, [['translate', -camera.x, -camera.y]]);
 });
 
 test('camera convergence is independent of 60 or 120 Hz updates', () => {

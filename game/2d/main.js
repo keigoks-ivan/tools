@@ -106,12 +106,12 @@ function clearInput() {
 }
 function resize() {
   clearInput();
-  const width = innerWidth, height = innerHeight;
+  const width = canvas.clientWidth, height = canvas.clientHeight;
   view.dpr = Math.min(devicePixelRatio || 1, 2);
   canvas.width = Math.round(width * view.dpr); canvas.height = Math.round(height * view.dpr);
   view.scale = Math.min(width / 1280, height / 720);
   view.x = (width - 1280 * view.scale) / 2; view.y = (height - 720 * view.scale) / 2;
-  rotated = width < height;
+  rotated = innerWidth < innerHeight;
   $('rotateOverlay').hidden = !rotated || mode !== 'play';
   if (mode === 'art') { resizeArt(); drawArt(); }
   drawBattle(); syncLoop();
@@ -205,11 +205,12 @@ function drawBattle() {
   if (!images.arena || !heroFrames || !enemyFrames) return;
   ctx.translate(view.x, view.y); ctx.scale(view.scale, view.scale);
   ctx.save(); ctx.beginPath(); ctx.rect(0, 0, 1280, 720); ctx.clip();
-  camera.apply(ctx);
   if (shake > 0) ctx.translate(Math.sin(clock * 110) * shake, Math.cos(clock * 90) * shake * 0.6);
   ctx.drawImage(images.arena, 0, 0, 1280, 720);
   ctx.fillStyle = distanceHaze; ctx.fillRect(0, 160, 1280, 270);
-  const actors = [...arena.enemies, { ...arena.hero, role: 'hero', id: 0 }].sort((a, b) => a.y - b.y);
+  ctx.save(); camera.apply(ctx);
+  const actors = [...arena.enemies].sort((a, b) => a.y - b.y);
+  actors.push({ ...arena.hero, role: 'hero', id: 0 });
   for (const enemy of arena.enemies) {
     if (enemy.action === 'telegraph' || enemy.action === 'attack') {
       const progress = enemy.action === 'attack' ? 1 : Math.min(1, enemy.actionTime / (enemy.actionTime + enemy.telegraph));
@@ -247,6 +248,7 @@ function drawBattle() {
     ctx.restore();
   }
   for (const fx of effects) drawEffect(fx);
+  ctx.restore();
   ctx.restore();
 }
 function drawEffect(fx) {
