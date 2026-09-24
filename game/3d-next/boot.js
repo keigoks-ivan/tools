@@ -1,3 +1,19 @@
+import { installGameGestures } from '../2d/touch-gestures.js';
+
+// 手機防誤觸縮放：連點放大、雙指縮放（iOS gesture*）一律擋下；萬一仍被放大，重設 viewport 讓畫面縮回原比例
+installGameGestures(document.getElementById('game'));
+for (const type of ['gesturestart', 'gesturechange', 'gestureend']) {
+  document.addEventListener(type, event => { if (event.cancelable) event.preventDefault(); }, { passive: false });
+}
+const viewportMeta = document.querySelector('meta[name="viewport"]');
+const baseViewport = viewportMeta?.getAttribute('content') || '';
+function resetZoom() {
+  if (!viewportMeta || !window.visualViewport || window.visualViewport.scale <= 1.01) return;
+  viewportMeta.setAttribute('content', `${baseViewport},maximum-scale=1`);
+  setTimeout(() => viewportMeta.setAttribute('content', baseViewport), 300);
+}
+window.visualViewport?.addEventListener('resize', resetZoom);
+
 const startButton = document.getElementById('start');
 const loadStatus = document.getElementById('loadstatus');
 let loading = false;
