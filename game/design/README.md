@@ -6,6 +6,8 @@
 
 2026-09-24 的 3D 試作未通過使用者美術驗收。後續角色與敵人製作以 [3D 角色重製規格](3d-rebuild-brief.md)、[Rumi 三視圖](rumi-3d-turnaround-v1.png)與[鬼兵三視圖](oni-3d-turnaround-v1.png)為對照；這些圖只供建模參考，不在遊戲中載入。
 
+[Rumi Blender 建模工程](rumi-modeling.blend)已放入三視圖參考，尚未製作角色網格；建模工程不會由遊戲下載。
+
 製作方式：內建 image_gen 工具，無 CLI/API fallback。
 
 ## 最終生成提示
