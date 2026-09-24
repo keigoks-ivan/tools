@@ -12,6 +12,8 @@
 
 [第二版可編輯工程](vroid-swordswoman-base-v2.vroid)與[第二版 VRM](vroid-swordswoman-base-v2.vrm)調整了虹膜、眼尾、側分瀏海與高馬尾，並改用無袖上衣底層。正面、側面與背面的實際模型檢視見[第二版落差紀錄](vroid-swordswoman-v2-review.md)。這仍是建模底模，並非完成角色，也沒有替換正式遊戲素材。
 
+[第三版服裝與姿勢試件](vroid-swordswoman-v3-review.md)加入可編輯的本機 Blender 服裝、刀與三視圖，並明列和方向圖及正式遊戲角色之間的落差。第三版尚未接入遊戲。
+
 製作方式：內建 image_gen 工具，無 CLI/API fallback。
 
 ## 最終生成提示
