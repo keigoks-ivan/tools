@@ -53,6 +53,8 @@
 
 export const STORAGE_KEY = 'huntrx-3d-audio-v1';
 export const DEFAULT_SETTINGS = { muted: false, music: 0.55, sfx: 0.9 };
+// 音效整體再壓低約 6 dB（使用者回饋音效太大聲）；乘在音量設定之上，已存過設定的玩家也會生效
+export const SFX_TRIM = 0.5;
 
 /** Per-sound playback rules. max = simultaneous voices, gap = min seconds between starts,
  *  gain = base linear gain, pitch = random ± semitones, vol = random ± dB, prio (higher survives
@@ -389,7 +391,7 @@ export function createAudio({ baseUrl = '../assets/audio/march/', storage = glob
     sfx.connect(master);
     master.gain.value = settings.muted ? 0 : 1;
     music.gain.value = settings.music;
-    sfx.gain.value = settings.sfx;
+    sfx.gain.value = settings.sfx * SFX_TRIM;
     nodes = { master, comp, music, duck, filter, sfx, lastCutoff: 20000 };
   }
 
@@ -640,7 +642,7 @@ export function createAudio({ baseUrl = '../assets/audio/march/', storage = glob
       paused = Boolean(value);
       if (!ctx || !nodes) return;
       const t = now();
-      nodes.sfx.gain.setTargetAtTime(paused ? 0 : settings.sfx, t, 0.03);
+      nodes.sfx.gain.setTargetAtTime(paused ? 0 : settings.sfx * SFX_TRIM, t, 0.03);
       nodes.filter.frequency.setTargetAtTime(paused ? 1200 : 20000, t, 0.08);
       nodes.lastCutoff = paused ? 1200 : 20000;
       nodes.duck.gain.setTargetAtTime(paused ? 0.5 : 1, t, 0.1);
@@ -674,7 +676,7 @@ export function createAudio({ baseUrl = '../assets/audio/march/', storage = glob
       if (ctx && nodes) {
         const t = now();
         nodes.music.gain.setTargetAtTime(settings.music, t, 0.05);
-        if (!paused) nodes.sfx.gain.setTargetAtTime(settings.sfx, t, 0.05);
+        if (!paused) nodes.sfx.gain.setTargetAtTime(settings.sfx * SFX_TRIM, t, 0.05);
       }
       notify();
     },
