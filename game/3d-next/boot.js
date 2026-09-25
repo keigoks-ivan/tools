@@ -15,7 +15,7 @@ function resetZoom() {
 window.visualViewport?.addEventListener('resize', resetZoom);
 
 // 紫刃版標題：換掉 Rumi 單角色與靜音的說明文字（音訊狀態由 #soundNote 另外更新）
-if (new URLSearchParams(location.search).get('hero') === 'vroid') {
+if (new URLSearchParams(location.search).get('hero') !== 'rumi') {
   const subtitle = document.querySelector('.title-subtitle');
   const copy = document.querySelector('.title-copy');
   const note = document.querySelector('.prototype-note');
@@ -29,7 +29,7 @@ const loadStatus = document.getElementById('loadstatus');
 let loading = false;
 
 // ?hero=vroid：有聲試作（audio.js，程式合成的原創配樂＋音效）；預設 Rumi 頁面不載入音訊、維持靜音
-const vroid = new URLSearchParams(location.search).get('hero') === 'vroid';
+const vroid = new URLSearchParams(location.search).get('hero') !== 'rumi';   // 預設紫刃；?hero=rumi 為舊版靜音頁
 let audio = null;
 const audioReady = vroid
   ? import('./audio.js?v=20260925a').then(({ createAudio }) => {
@@ -71,7 +71,7 @@ async function start() {
   loadStatus.textContent = '正在載入 3D 角色與夜市…';
   document.body.dataset.mode = 'loading';
   try {
-    const [{ createBattle }] = await Promise.all([import('./battle.js?v=20260925d'), audioReady]);
+    const [{ createBattle }] = await Promise.all([import('./battle.js?v=20260925e'), audioReady]);
     audio?.unlock();   // no-op when already unlocked; covers a click that beat the audio module download
     const battle = await createBattle(document.getElementById('battle'), { audio });
     document.getElementById('title').hidden = true;

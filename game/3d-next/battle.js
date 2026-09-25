@@ -22,10 +22,11 @@ function renderRatio(width, height) {
   return Math.max(0.65, Math.min(devicePixelRatio || 1, isMobile() ? 1.25 : 1.5, Math.sqrt(budget / Math.max(1, width * height))));
 }
 
-// ?hero=vroid 載入紫刃劍士候選模型；預設仍是 Rumi，未驗收前不替換
-const heroChoice = new URLSearchParams(location.search).get('hero') === 'vroid' ? 'vroid' : 'rumi';
-// ?hero=vroid&level=march：夜市大街行軍關（march.js 關卡導演＋march-art.js 場景美術；march-world.js 為灰模備用）；其他組合維持原本單場
-const marchLevel = heroChoice === 'vroid' && new URLSearchParams(location.search).get('level') === 'march';
+// 預設：紫刃＋夜市大街行軍關（march.js 關卡導演＋march-art.js 場景美術；march-world.js 為灰模備用）
+// ?hero=rumi 回到舊 Rumi 單場；?level=single 讓紫刃打原本的單場
+const pageParams = new URLSearchParams(location.search);
+const heroChoice = pageParams.get('hero') === 'rumi' ? 'rumi' : 'vroid';
+const marchLevel = heroChoice === 'vroid' && pageParams.get('level') !== 'single';
 
 // ?hero=vroid 同時換上 Mixamo 骨架的新鬼兵（oni-v2.glb）；載入失敗時退回程序化鬼兵
 function loadRiggedOni() {
