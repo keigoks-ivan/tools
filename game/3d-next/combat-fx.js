@@ -91,11 +91,11 @@ export const DECAL_CELLS = { crack: 0, scorch: 1, rune: 2, burst: 3 };
 export const QUALITY = {
   desktop: {
     particles: 480, overlayParticles: 240, stripSlots: 22, stripCols: 48, ghosts: 3, aura: true, particleScale: 1,
-    damageNumbers: 14, trailSubdiv: 4, ghostHair: true, haptics: false, titleGrain: true,
+    damageNumbers: 14, trailSubdiv: 4, ghostHair: true, haptics: false, titleGrain: true, fbmOctaves: 4,
   },
   mobile: {
     particles: 210, overlayParticles: 110, stripSlots: 14, stripCols: 40, ghosts: 1, aura: true, particleScale: 0.55,
-    damageNumbers: 8, trailSubdiv: 3, ghostHair: false, haptics: true, titleGrain: true,
+    damageNumbers: 8, trailSubdiv: 3, ghostHair: false, haptics: true, titleGrain: true, fbmOctaves: 2,
   },
 };
 
@@ -356,7 +356,12 @@ void main() {
 // pass). Each is exactly one Mesh / one Material, created once in createCombatFx and only repositioned or hidden.
 // ---------------------------------------------------------------------------------------------
 
-const NOISE_GLSL = /* glsl */`
+// fbm octave count is baked in at compile time (once per material, via QUALITY.<tier>.fbmOctaves) rather than a
+// uniform/loop-bound variable, since mobile GPUs pay per-octave cost every pixel on two fairly large, always-visible
+// meshes during the musou finale; desktop keeps the full 4 octaves, mobile drops to 2 (fbm2 is still 2 calls in
+// FLAME_FRAGMENT, so this halves that shader's noise cost on mobile without changing its overall look).
+function noiseGLSL(octaves = 4) {
+  return /* glsl */`
 float hash21(vec2 p) { p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
 float vnoise(vec2 p) {
   vec2 i = floor(p), f = fract(p);
@@ -364,13 +369,15 @@ float vnoise(vec2 p) {
   vec2 u = f * f * (3.0 - 2.0 * f);
   return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
 }
-float fbm2(vec2 p) { float v = 0.0, a = 0.55; for (int i = 0; i < 4; i++) { v += a * vnoise(p); p *= 2.02; a *= 0.55; } return v; }`;
+float fbm2(vec2 p) { float v = 0.0, a = 0.55; for (int i = 0; i < ${octaves | 0}; i++) { v += a * vnoise(p); p *= 2.02; a *= 0.55; } return v; }`;
+}
 
 const BLADE_VERTEX = /* glsl */`
 varying vec2 vUv;
 void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`;
 
-const BLADE_FRAGMENT = /* glsl */`${NOISE_GLSL}
+function bladeFragment(octaves) {
+  return /* glsl */`${noiseGLSL(octaves)}
 uniform float uTime; uniform float uReveal; uniform float uOpacity; uniform vec3 uColor; uniform vec3 uEdge;
 varying vec2 vUv;
 void main() {
@@ -389,6 +396,7 @@ void main() {
   float alpha = clamp(silhouette * (0.5 + energy * 0.4) + coreLine * 1.15 + grow, 0.0, 1.0) * uOpacity;
   gl_FragColor = vec4(col * alpha, alpha);
 }`;
+}
 
 const FLAME_VERTEX = /* glsl */`
 attribute float aBlade;
@@ -402,7 +410,8 @@ void main() {
   gl_Position = projectionMatrix * viewMatrix * worldPos;
 }`;
 
-const FLAME_FRAGMENT = /* glsl */`${NOISE_GLSL}
+function flameFragment(octaves) {
+  return /* glsl */`${noiseGLSL(octaves)}
 uniform float uTime; uniform float uOpacity; uniform float uSeed; uniform vec3 uHot; uniform vec3 uCore; uniform vec3 uEdge;
 varying vec2 vUv;
 void main() {
@@ -421,6 +430,7 @@ void main() {
   float alpha = clamp(body * 1.5, 0.0, 1.0) * uOpacity;
   gl_FragColor = vec4(col * alpha, alpha);
 }`;
+}
 
 const SPLIT_VERTEX = /* glsl */`
 varying vec2 vUv;
@@ -889,14 +899,14 @@ function buildSpiritBladeGeometry(THREE, segments = 14) {
 // Real-world size of the spirit blade: ~6-7 m long (mesh.scale.y), ~0.72 m wide at the hilt (mesh.scale.x/z).
 const BLADE_WIDTH = 0.72;
 
-function createSpiritBlade(THREE) {
+function createSpiritBlade(THREE, octaves = 4) {
   const geometry = buildSpiritBladeGeometry(THREE);
   const material = new THREE.ShaderMaterial({
     uniforms: {
       uTime: { value: 0 }, uReveal: { value: 0 }, uOpacity: { value: 0 },
       uColor: { value: new THREE.Color(1.5, 0.9, 2.0) }, uEdge: { value: new THREE.Color(0.5, 0.15, 0.9) },
     },
-    vertexShader: BLADE_VERTEX, fragmentShader: BLADE_FRAGMENT,
+    vertexShader: BLADE_VERTEX, fragmentShader: bladeFragment(octaves),
     transparent: true, depthWrite: false, depthTest: true, toneMapped: false, fog: false, side: THREE.DoubleSide,
     blending: THREE.AdditiveBlending,
   });
@@ -949,14 +959,14 @@ function buildFlameGeometry(THREE) {
   return geometry;
 }
 
-function createFlameShroud(THREE) {
+function createFlameShroud(THREE, octaves = 4) {
   const geometry = buildFlameGeometry(THREE);
   const material = new THREE.ShaderMaterial({
     uniforms: {
       uTime: { value: 0 }, uOpacity: { value: 0 }, uSeed: { value: 0 }, uBladeMatrix: { value: new THREE.Matrix4() },
       uHot: { value: new THREE.Color(2.4, 1.6, 2.8) }, uCore: { value: new THREE.Color(1.7, 0.35, 1.9) }, uEdge: { value: new THREE.Color(0.35, 0.05, 0.55) },
     },
-    vertexShader: FLAME_VERTEX, fragmentShader: FLAME_FRAGMENT,
+    vertexShader: FLAME_VERTEX, fragmentShader: flameFragment(octaves),
     transparent: true, depthWrite: false, depthTest: true, toneMapped: false, fog: false, side: THREE.DoubleSide,
     blending: THREE.AdditiveBlending,
   });
@@ -1200,8 +1210,8 @@ export function createCombatFx(o) {
   const strips = createStripBatch(THREE, q.stripSlots, q.stripCols, stripTexture);
   scene.add(...particles.meshes, strips.mesh);
   // 天刃 (musou-v2): 4 pooled meshes, only ever toggled visible / repositioned during the long-form musou finale.
-  const spiritBlade = createSpiritBlade(THREE);
-  const flameShroud = createFlameShroud(THREE);
+  const spiritBlade = createSpiritBlade(THREE, q.fbmOctaves);
+  const flameShroud = createFlameShroud(THREE, q.fbmOctaves);
   const splitOverlay = createSplitOverlay(THREE);
   const shockwave = createShockwave(THREE);
   scene.add(spiritBlade.mesh, flameShroud.mesh, splitOverlay.mesh, shockwave.mesh);
@@ -1258,6 +1268,20 @@ export function createCombatFx(o) {
   const splitState = { pending: false, active: false, t: 0, dur: 0.25 };
   const shockState = { active: false, t: 0, dur: 0.55, x: 0, y: 0, z: 0, maxR: 4 };
   const hudState = { comboShown: -1, tier: -1, pulse: 0, pulseAmp: 0, fade: 0, bannerT: 9, stampPulse: 0, titleT: 9, hue: 0 };
+  // Shared canonical "true original" material per mesh (round 7 fix): hit-flash and enemy-occlusion both swap
+  // mesh.material, and previously each cached whatever it first read as "the original" independently -- if a hit
+  // landed the same frame an enemy entered occlusion, occlusion could capture the HOT flash clone as its "original",
+  // and the enemy stayed lit forever after the musou. ownedMaterials marks every clone either system creates;
+  // trueOriginalOf() only refreshes its cache from mesh.material when the mesh is NOT currently wearing one of our
+  // own clones, so whichever system reads it first (or after an external change, e.g. battle.js's officer tint)
+  // always gets the same real original, however the two systems interleave within a frame.
+  const trueOriginal = new WeakMap();
+  const ownedMaterials = new WeakSet();
+  function trueOriginalOf(mesh) {
+    const current = mesh.material;
+    if (!ownedMaterials.has(current)) trueOriginal.set(mesh, current);
+    return trueOriginal.get(mesh) ?? current;
+  }
   const flashes = [];                 // active enemy flash records
   const flashByRoot = new WeakMap();
   const flashCache = new Map();       // source material -> { hot, warm }
@@ -1343,6 +1367,7 @@ export function createCombatFx(o) {
       if (source.onBeforeCompile) m.onBeforeCompile = source.onBeforeCompile;
       if (Object.prototype.hasOwnProperty.call(source, 'customProgramCacheKey')) m.customProgramCacheKey = source.customProgramCacheKey;
       setup(m);
+      ownedMaterials.add(m);
       return m;
     };
     if (source.side === THREE.BackSide) {
@@ -1363,18 +1388,23 @@ export function createCombatFx(o) {
     if (!root) return;
     let rec = flashByRoot.get(root);
     if (!rec) {
-      rec = { root, meshes: [], originals: [], t: 0, hot: 0.05, total: 0.14, stage: 0, active: false };
-      root.traverse(object => { if (object.isMesh && object.material && !Array.isArray(object.material)) rec.meshes.push(object); });
-      rec.originals = rec.meshes.map(mesh => mesh.material);
+      rec = { root, meshes: [], t: 0, hot: 0.05, total: 0.14, stage: 0, active: false };
+      // seed trueOriginal right away, in case this is the very first time either system has ever touched this
+      // root -- at this exact point object.material is still whatever it genuinely was (this traversal itself
+      // hasn't swapped anything yet), so it's always safe to cache here regardless of who touches the root next.
+      root.traverse(object => { if (object.isMesh && object.material && !Array.isArray(object.material)) { rec.meshes.push(object); trueOriginalOf(object); } });
       flashByRoot.set(root, rec);
     }
-    if (!rec.active) {
-      // re-read originals in case battle.js swapped a material (e.g. officer tint) since last time
-      for (let i = 0; i < rec.meshes.length; i++) rec.originals[i] = rec.meshes[i].material;
-      rec.active = true;
-      flashes.push(rec);
-    }
+    if (!rec.active) { rec.active = true; flashes.push(rec); }
     rec.t = 0; rec.hot = weight < 0.8 ? 0 : 0.035 + 0.025 * weight; rec.total = 0.1 + 0.06 * weight; rec.stage = -1;
+  }
+  /** Applies whichever material mesh k of a flash record should currently show, honouring trueOriginalOf() so a
+   * flash starting the same frame an enemy enters occlusion (or vice versa) never captures the other effect's clone
+   * as "the original". */
+  function applyFlashMaterial(rec, k) {
+    const mesh = rec.meshes[k];
+    const original = trueOriginalOf(mesh);
+    mesh.material = rec.stage === 0 ? original : flashMaterials(original)[rec.stage === 1 ? 'hot' : 'warm'];
   }
   function updateFlashes(dt) {
     for (let i = flashes.length - 1; i >= 0; i--) {
@@ -1383,46 +1413,54 @@ export function createCombatFx(o) {
       const stage = rec.t < rec.hot ? 1 : rec.t < rec.total ? 2 : 0;
       if (stage !== rec.stage) {
         rec.stage = stage;
-        for (let k = 0; k < rec.meshes.length; k++) {
-          const original = rec.originals[k];
-          rec.meshes[k].material = stage === 0 ? original : flashMaterials(original)[stage === 1 ? 'hot' : 'warm'];
-        }
+        for (let k = 0; k < rec.meshes.length; k++) applyFlashMaterial(rec, k);
       }
       if (stage === 0) { rec.active = false; flashes.splice(i, 1); }
     }
   }
   function releaseFlashes() {
-    for (const rec of flashes) { for (let k = 0; k < rec.meshes.length; k++) rec.meshes[k].material = rec.originals[k]; rec.active = false; }
+    for (const rec of flashes) { rec.stage = 0; for (let k = 0; k < rec.meshes.length; k++) applyFlashMaterial(rec, k); rec.active = false; }
     flashes.length = 0;
   }
 
   // ---- enemy occlusion (dither-fade enemies between the camera and the hero during the musou cuts) ----
-  // Per-enemy-root material clones, created once the first time that root needs to fade (never per frame/hit);
-  // prewarm() precompiles the alphaHash program on a sample enemy so the first real fade has no hitch.
+  // Clones are cached per SOURCE material (like flashCache), not per enemy: most enemies of a role already share one
+  // material instance, so this both cuts clone count and lets dispose() free them all instead of leaking one set per
+  // enemy forever (occlusionByRoot is a WeakMap, but occlusionActive -- needed for restore-on-fade-out -- used to
+  // hold a strong ref to every root that ever mid-faded, which kept them un-GC-able if battle.js deleted the enemy
+  // before its fade finished). prewarm() precompiles the alphaHash program on a sample enemy so the first real fade
+  // has no hitch. If an enemy is both occluded and mid hit-flash, the flash wins the material for its brief window
+  // (see applyOcclusion) rather than the two fighting over mesh.material every frame.
+  const occlusionCache = new Map();   // source material -> dither clone (shared by every mesh using that material)
   const occlusionByRoot = new WeakMap();
   const occlusionActive = new Set();
   function occludeMaterial(source) {
-    const m = source.clone();
-    m.transparent = true;
-    m.alphaHash = true;
-    m.alphaTest = 0;
-    m.depthWrite = true;
-    m.opacity = 1;
-    if (source.onBeforeCompile) m.onBeforeCompile = source.onBeforeCompile;
-    return m;
+    let clone = occlusionCache.get(source);
+    if (clone) return clone;
+    clone = source.clone();
+    clone.transparent = true;
+    clone.alphaHash = true;
+    clone.alphaTest = 0;
+    clone.depthWrite = true;
+    clone.opacity = 1;
+    if (source.onBeforeCompile) clone.onBeforeCompile = source.onBeforeCompile;
+    ownedMaterials.add(clone);
+    occlusionCache.set(source, clone);
+    return clone;
   }
   function ensureOcclusion(root) {
     let rec = occlusionByRoot.get(root);
     if (rec) return rec;
-    rec = { meshes: [], originals: [], clones: [], alpha: 0 };
+    rec = { root, meshes: [], clones: [], alpha: 0 };
     root.traverse(object => {
       if (!object.isMesh || !object.material || Array.isArray(object.material)) return;
-      rec.meshes.push(object); rec.originals.push(object.material); rec.clones.push(occludeMaterial(object.material));
+      rec.meshes.push(object); rec.clones.push(occludeMaterial(trueOriginalOf(object)));
     });
     occlusionByRoot.set(root, rec);
     return rec;
   }
   function applyOcclusion(rec) {
+    if (flashByRoot.get(rec.root)?.active) return;   // let an active hit-flash keep the material this frame
     for (let i = 0; i < rec.meshes.length; i++) {
       const clone = rec.clones[i];
       clone.opacity = 1 - rec.alpha * 0.82;   // dither down toward ~18% density, never fully invisible (readable silhouette)
@@ -1430,12 +1468,25 @@ export function createCombatFx(o) {
     }
   }
   function restoreOcclusion(rec) {
-    for (let i = 0; i < rec.meshes.length; i++) if (rec.meshes[i].material !== rec.originals[i]) rec.meshes[i].material = rec.originals[i];
+    for (let i = 0; i < rec.meshes.length; i++) {
+      const original = trueOriginalOf(rec.meshes[i]);
+      if (rec.meshes[i].material !== original) rec.meshes[i].material = original;
+    }
   }
   const occCam = new THREE.Vector3(), occDir = new THREE.Vector3(), occAt = new THREE.Vector3(), occTo = new THREE.Vector3();
   const occHeroChest = new THREE.Vector3(), occHeroNdc = new THREE.Vector3(), occAtNdc = new THREE.Vector3();
+  const occLiveRoots = new Set();
   const OCC_HERO_RADIUS = 0.55, OCC_ENEMY_RADIUS = 0.55, OCC_NEAR_CAM = 2.5;
   function updateOcclusion(dt, enemiesMap) {
+    // sweep stale recs first: battle.js deletes a killed rigged enemy from the map immediately, which could
+    // previously leave its rec (and clones) stuck in occlusionActive -- and un-GC-able -- forever mid-fade.
+    if (occlusionActive.size) {
+      occLiveRoots.clear();
+      if (enemiesMap) for (const actor of enemiesMap.values()) if (actor?.root) occLiveRoots.add(actor.root);
+      for (const rec of occlusionActive) {
+        if (!occLiveRoots.has(rec.root)) { restoreOcclusion(rec); occlusionActive.delete(rec); occlusionByRoot.delete(rec.root); }
+      }
+    }
     if (!enemiesMap || !enemiesMap.size) return;
     camera.getWorldPosition(occCam);
     camera.getWorldDirection(occDir);
@@ -1929,8 +1980,14 @@ export function createCombatFx(o) {
     // covers her ambient fire, and this burst's long life used to sit on screen for seconds under the finisher's
     // slow-mo, reading as stray pink teardrops in the 07/08 shots.)
     // lifetimes are game time: under the 0.3x / 0.15x finisher they already last 0.3-0.6 s on screen
-    particles.emit(STYLE.impact, x, y + 1.0, z, 0, 0, 0, 0.09, 1.6, 3.2, 2.4, 2.0, 2.8, 1, rnd(0, 6.28), 0);
-    particles.emit(STYLE.flare, x, y + 1.1, z, 0, 0, 0, 0.1, 1.8, 3.6, 2.2, 1.9, 2.8, 0.7, 0, 0);
+    // (round 7) these two bursts' fixed world-space size read as a near-total screen whiteout at the close leap/
+    // cut3 camera framing; scale size (and, with a floor, alpha) by camera distance so they keep roughly the same
+    // on-screen coverage regardless of how close the finale's cuts have gotten. 7 m ~= the far camera distance
+    // these sizes were originally tuned against.
+    camera.getWorldPosition(tmp3);
+    const burstScale = THREE.MathUtils.clamp(tmp3.distanceTo(tmp.set(x, y + 1.0, z)) / 10, 0.3, 1);
+    particles.emit(STYLE.impact, x, y + 1.0, z, 0, 0, 0, 0.09, 1.6 * burstScale, 3.2 * burstScale, 2.4, 2.0, 2.8, Math.max(0.45, burstScale), rnd(0, 6.28), 0);
+    particles.emit(STYLE.flare, x, y + 1.1, z, 0, 0, 0, 0.1, 1.8 * burstScale, 3.6 * burstScale, 2.2, 1.9, 2.8, 0.7 * Math.max(0.45, burstScale), 0, 0);
     cam.calm = false;
     fovPunch(-10, 0.6);
     speedLines(0.65, 1);
@@ -2081,9 +2138,14 @@ export function createCombatFx(o) {
   /** Post-cleave screen split (framebuffer already captured in cameraPost) and the ground shockwave ring. */
   function updateSplitShock(realDt) {
     if (splitState.active) {
+      // canvas resized mid-split (e.g. an orientation change) -- the framebuffer was captured at the old
+      // size/aspect, so it would render as a stretched/misaligned mess at the new one; end the effect right away
+      // instead of showing that for the rest of its (brief) duration.
+      const cw = renderer?.domElement?.width || 0, ch = renderer?.domElement?.height || 0;
+      const resized = (cw && cw !== splitOverlay.texW) || (ch && ch !== splitOverlay.texH);
       splitState.t += realDt;
       const p = splitState.t / splitState.dur;
-      if (p >= 1 || !splitOverlay.texture) { splitState.active = false; splitOverlay.mesh.visible = false; }
+      if (resized || p >= 1 || !splitOverlay.texture) { splitState.active = false; splitOverlay.mesh.visible = false; }
       else {
         splitOverlay.mesh.visible = true;
         splitOverlay.material.uniforms.uSep.value = 0.035 + 0.11 * easeOut(Math.min(1, p / 0.6));
@@ -2777,6 +2839,8 @@ export function createCombatFx(o) {
     for (const texture of owned) texture.dispose();
     for (const entry of flashCache.values()) { entry.hot.dispose(); entry.warm.dispose(); }
     flashCache.clear();
+    for (const clone of occlusionCache.values()) clone.dispose();
+    occlusionCache.clear();
     if (swordOriginal && o.sword) { o.sword.material = swordOriginal; swordMaterial.dispose(); }
     hudObserver?.disconnect();
     hud?.el.layer.remove();
@@ -2812,6 +2876,9 @@ export function createCombatFx(o) {
     /** Diagnostics for the musou-v2 screenshot driver: precise long-form phase (spirit.phase can only be read here,
      * not inferred from game time, since sweep beats are a short real-time window inside the swing timeline). */
     debugMusou: () => ({ active: musou.active, longForm: musou.longForm, isTrue: musou.isTrue, cut: musou.cut, spiritPhase: spirit.phase, leapAt: musou.leapAt, g: musou.g, t: musou.t }),
+    /** Diagnostics for the occlusion leak/dispose tests: how many recs are mid-fade right now, and how many
+     * distinct dither clones exist (shared per source material, so this shouldn't grow with enemy count). */
+    debugOcclusion: () => ({ activeCount: occlusionActive.size, cacheSize: occlusionCache.size }),
     objects: [...particles.meshes, strips.mesh, ...echoes.ghosts.map(g => g.mesh), echoes.aura, spiritBlade.mesh, flameShroud.mesh, splitOverlay.mesh, shockwave.mesh].filter(Boolean),
     quality: q,
   };

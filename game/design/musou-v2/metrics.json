@@ -2535,5 +2535,44 @@
         "cinematicDraws": 4
       }
     }
+  },
+  "round6": {
+    "generatedAt": "2026-09-25T18:45:00.000Z",
+    "scope_note": "Sixth pass (small). Only combat-fx.js touched.",
+    "issue": "hero's head/upper body cut off at top of frame in 05-leap-std-game-after -- battle.js's procedural leap lift (up to ~1.5m) is applied to heroModel.position.y (a child of the hero group); the leap/cut3 camera cuts aimed at hero.position, which never sees the lift.",
+    "fix": "applyCameraCut() now reads heroModel.getWorldPosition() into a preallocated scratch vector once per call, computes lift = worldY - hero.position.y (0 if no heroModel, e.g. some test contexts), and adds it to both the camera height and the look-at target's Y in the 'leap' and 'cut3' branches -- no per-frame allocation. cut1/cut2 untouched (no lift during those phases).",
+    "result": "confirmed via 3 in-game moments (early/apex/near-impact) x std/true: her head and full body now stay in frame with headroom through the leap (previously the head was clipped). The leap window is very short (~0.3 game-s); apex/near-impact land right at the transition into the finisher flash for both variants, as expected. 06-cleave re-verified clean on a fresh run, no regression.",
+    "draw_budget_peak": {
+      "desktop": {
+        "drawCalls": 11,
+        "cinematicDraws": 4
+      },
+      "mobile": {
+        "drawCalls": 9,
+        "cinematicDraws": 4
+      }
+    }
+  },
+  "round7": {
+    "generatedAt": "2026-09-25T19:30:00.000Z",
+    "scope_note": "Seventh pass (code-review bug fixes). Files touched: combat-fx.js, musou-v2.test.mjs (2 new tests + a diagnostic getter). No battle.js/boot.js/?v= changes.",
+    "items": {
+      "1_flash_occlusion_race": "solved -- added a shared canonical-original registry (trueOriginal WeakMap + ownedMaterials WeakSet) that both hit-flash and enemy-occlusion read/seed instead of each independently caching mesh.material; whichever system discovers a root first seeds it correctly regardless of interleaving. Also gave an active hit-flash priority over occlusion's per-frame material re-assignment (applyOcclusion skips a mesh whose root is mid-flash), so the flash is now visible during occlusion instead of being silently overwritten every frame. New test: 'hit-flash and enemy occlusion racing in the same frame do not corrupt the true original material' (fails without the fix, verified by construction).",
+      "2_occlusion_leak": "solved -- occlusion clones are now cached per SOURCE material (occlusionCache, shared like flashCache) instead of per enemy, and disposed in dispose(). updateOcclusion() now sweeps occlusionActive every call and restores+drops any rec whose root is no longer present in the current enemies map, closing the leak where battle.js deleting a killed enemy mid-fade left it (and its clones) stuck in occlusionActive forever. New test: 'occlusion cleanup: removing an enemy mid-fade drops it from occlusionActive, and clones are shared (not per-enemy) across waves' -- also added fx.debugOcclusion() (activeCount, cacheSize) as a diagnostic.",
+      "3_mobile_shader_cost": "solved -- fbm octave count is now a compile-time #define (QUALITY.<tier>.fbmOctaves: desktop 4, mobile 2) baked into the spirit-blade and flame-shroud fragment shaders at material-creation time; FLAME_FRAGMENT calls fbm2 twice per pixel so this roughly halves its noise cost on mobile. No other look changes.",
+      "4_whiteout": "solved -- musouFinisher()'s impact/flare bursts now scale their size (and, with a floor, alpha) by camera distance to the burst, referenced against ~10m (the far end of the finale's camera distances); at the leap/cut3 close framing (~2-3m) this meaningfully shrinks and dims them. Verified: 06-cleave-true-game-after.webp went from a near-total screen whiteout to a fully clean, readable shot (hero, enemies, HUD all visible); 05-leap-true-game-late-after.webp (captured right at/after impact) now shows a contained bright area (ground decal + a modest burst) rather than blowing out the whole frame.",
+      "5_split_resize": "solved -- updateSplitShock() now checks the live canvas size every frame while the split is active and immediately ends the effect (hides the overlay) if it no longer matches the size the framebuffer was captured at, instead of rendering a stretched/misaligned frame for the rest of the split's (brief) duration."
+    },
+    "draw_budget_peak": {
+      "desktop": {
+        "drawCalls": 11,
+        "cinematicDraws": 4
+      },
+      "mobile": {
+        "drawCalls": 9,
+        "cinematicDraws": 4
+      }
+    },
+    "tests": "207/207 passing (2 new: hit-flash/occlusion race, occlusion cleanup/leak). node --check clean."
   }
 }

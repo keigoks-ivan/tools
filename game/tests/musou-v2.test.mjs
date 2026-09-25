@@ -279,6 +279,62 @@ test('enemy occlusion: dither-fades an enemy between the camera and the hero dur
 });
 
 // ---------------------------------------------------------------------------------------------
+// Round 7, item 1: hit-flash and enemy-occlusion both swap mesh.material; each used to cache whatever it first read
+// as "the original" independently. If a hit landed the same frame an enemy entered occlusion, occlusion could
+// capture the hit's hot flash clone as its "original" -- the enemy would then stay lit forever once the musou (and
+// its dither fade) ended, since "restoring" meant reapplying that wrong clone.
+// ---------------------------------------------------------------------------------------------
+
+test('hit-flash and enemy occlusion racing in the same frame do not corrupt the true original material', () => {
+  const { fx, scene, target } = makeFx('desktop');
+  const enemy = new THREE.Mesh(new THREE.BoxGeometry(0.5, 1.6, 0.5), new THREE.MeshStandardMaterial({ color: 0x664488 }));
+  enemy.position.set(0, 1.3, 2);   // same "blocks the hero" spot as the occlusion test above
+  scene.add(enemy);
+  const enemies = new Map([[1, { root: enemy }]]);
+  const original = enemy.material;
+  fx.onEvent({ type: 'special', radius: 280 }, at, target);          // activates a (short-form) musou
+  fx.onEvent({ type: 'hit', source: 'special' }, at, enemy);         // a hit lands on this same enemy, same frame
+  // one update: updateFlashes swaps to the hot clone, then updateOcclusion (same frame, same enemy) sees this root
+  // for the first time and must not capture that hot clone as "the original".
+  fx.update(STEP, STEP, { heroAction: 'special', enemies });
+  assert.notEqual(enemy.material, original, 'showing the flash and/or the occluded look right now');
+  // let the flash finish, then the whole musou (plus its recovery and fade-out) fully end
+  for (let i = 0; i < 200; i++) fx.update(STEP, STEP, { heroAction: i < 5 ? 'special' : 'idle', enemies });
+  assert.equal(enemy.material, original, 'restored to the TRUE original, not stuck on the flash clone');
+  fx.dispose();
+});
+
+// ---------------------------------------------------------------------------------------------
+// Round 7, item 2: battle.js deletes a killed rigged enemy from its `enemies` Map immediately, which could leave
+// that enemy's occlusion record stuck in occlusionActive (a Set holding a strong reference) forever if it was
+// mid-fade -- a leak repeating every wave. Occlusion clones are now cached per SOURCE material (like flashCache),
+// shared by every enemy using that material, instead of one set of clones per enemy.
+// ---------------------------------------------------------------------------------------------
+
+test('occlusion cleanup: removing an enemy mid-fade drops it from occlusionActive, and clones are shared (not per-enemy) across waves', () => {
+  const { fx, scene, target } = makeFx('desktop');
+  fx.onEvent({ type: 'special', radius: 280 }, at, target);
+  const sharedMaterial = new THREE.MeshStandardMaterial({ color: 0x664488 });   // every wave's enemy reuses this
+  let cacheSizeAfterFirstWave = null;
+  for (let wave = 0; wave < 4; wave++) {
+    const enemy = new THREE.Mesh(new THREE.BoxGeometry(0.5, 1.6, 0.5), sharedMaterial);
+    enemy.position.set(0, 1.3, 2);
+    scene.add(enemy);
+    const enemies = new Map([[wave, { root: enemy }]]);
+    for (let i = 0; i < 10; i++) fx.update(STEP, STEP, { heroAction: 'special', enemies });
+    assert.notEqual(enemy.material, sharedMaterial, `wave ${wave}: occluded`);
+    assert.ok(fx.debugOcclusion().activeCount >= 1, `wave ${wave}: tracked as active`);
+    enemies.delete(wave);   // battle.js deletes a killed rigged enemy immediately, mid-fade
+    scene.remove(enemy);
+    fx.update(STEP, STEP, { heroAction: 'special', enemies });   // enemies map no longer has this root
+    assert.equal(fx.debugOcclusion().activeCount, 0, `wave ${wave}: dropped from occlusionActive once removed`);
+    if (wave === 0) cacheSizeAfterFirstWave = fx.debugOcclusion().cacheSize;
+    else assert.equal(fx.debugOcclusion().cacheSize, cacheSizeAfterFirstWave, `wave ${wave}: clone cache did not grow (shared per source material)`);
+  }
+  fx.dispose();
+});
+
+// ---------------------------------------------------------------------------------------------
 // The real Arena emits 'special' first and 'musouStart' right after. combat-fx starts the musou on the first one,
 // so leapAt (only on musouStart) must be merged in — otherwise the leap camera cut never runs in the real game.
 // ---------------------------------------------------------------------------------------------

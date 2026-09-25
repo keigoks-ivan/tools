@@ -10,7 +10,7 @@ import { clone as cloneSkinned } from 'three/addons/utils/SkeletonUtils.js';
 import { Arena } from '../2d/combat.js';
 import { createNightMarket } from './world.js';
 import { prepareRiggedOni, createRiggedOni } from './oni.js';
-import { createCombatFx } from './combat-fx.js?v=20260925g';
+import { createCombatFx } from './combat-fx.js?v=20260925h';
 
 const params = new URLSearchParams(location.search);
 const $ = id => document.getElementById(id);
