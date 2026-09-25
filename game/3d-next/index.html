@@ -24,6 +24,9 @@
     .sound-toggle[hidden],.sound-button[hidden]{display:none}
     .sound-button{font-size:15px;line-height:1;color:#d6c9b4}
     .sound-button[aria-pressed="true"]{opacity:.6}
+    /* 全螢幕：只在滑鼠／觸控板（電腦）且瀏覽器支援時顯示，由 boot.js 取消 hidden */
+    .fullscreen-toggle[hidden],.fullscreen-button[hidden]{display:none}
+    .fullscreen-button{font-size:15px;line-height:1;color:#d6c9b4}
     /* 手機：長按不跳出選單；標題避開瀏海；戰鬥中 HUD 不做背景模糊（疊在每幀更新的 3D 畫面上很耗 GPU）；鍵盤說明列不顯示 */
     #game{-webkit-touch-callout:none}
     @media(max-width:900px) and (orientation:landscape){.title-content{margin-left:max(clamp(24px,6vw,55px),calc(12px + var(--safe-left)))}}
@@ -58,7 +61,7 @@
         <p class="title-subtitle">3D 戰鬥技術樣板</p>
         <p class="title-copy">此版角色與敵人尚未通過美術驗收，僅供檢查 3D 戰鬥與操控。正式試玩請返回 2.5D 版本。</p>
         <p class="prototype-note">未完成美術　·　紫刃單角色　·　<span id="soundNote">靜音測試</span></p>
-        <button id="soundToggle" class="sound-toggle" type="button" aria-pressed="false" hidden>🔊 聲音：開</button>
+        <button id="soundToggle" class="sound-toggle" type="button" aria-pressed="false" hidden>🔊 聲音：開</button> <button id="fullscreenToggle" class="sound-toggle fullscreen-toggle" type="button" aria-pressed="false" hidden>⛶ 全螢幕（F）</button>
         <button id="start" class="primary-button" type="button"><span>進入 3D 夜市</span><b aria-hidden="true">↗</b></button>
         <div id="loadPanel" class="load-panel" hidden><div class="load-head"><span class="load-stage">角色模型</span><b class="load-pct">0%</b></div><div class="load-progress" role="progressbar" aria-label="載入進度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i></i></div></div>
         <p id="loadstatus" role="status" aria-live="polite">按開始後才載入 3D 場景</p>
@@ -71,7 +74,7 @@
         <div class="vitals-card"><div class="vital-heading"><span class="hero-mark">紫</span><div><b>紫刃</b><small>靈力長劍</small></div></div><div class="meter-row"><span class="meter-label">體力</span><div class="meter"><i id="hpFill"></i></div><span id="hpText" class="meter-value">100</span></div><div class="meter-row"><span class="meter-label">靈力</span><div class="meter energy"><i id="energyFill"></i></div><span class="meter-value">　</span></div></div>
         <div class="round-card"><span>夜市突圍</span><b id="waveText">第一波</b></div>
         <div class="score-card"><span>擊倒</span><b id="killText">00</b></div>
-        <button id="soundBtn" class="icon-button sound-button" type="button" aria-label="靜音" aria-pressed="false" title="聲音（M）" hidden>🔊</button><button id="pauseBtn" class="icon-button" type="button" aria-label="暫停" title="暫停（P）"><span></span><span></span></button>
+        <button id="soundBtn" class="icon-button sound-button" type="button" aria-label="靜音" aria-pressed="false" title="聲音（M）" hidden>🔊</button><button id="fullscreenBtn" class="icon-button fullscreen-button" type="button" aria-label="全螢幕" aria-pressed="false" title="全螢幕（F）" hidden>⛶</button><button id="pauseBtn" class="icon-button" type="button" aria-label="暫停" title="暫停（P）"><span></span><span></span></button>
       </div>
       <div id="comboText" class="combo-text" aria-live="polite"></div>
       <div id="toast" class="battle-toast" role="status" aria-live="polite"></div>
@@ -81,9 +84,9 @@
     <section id="result" class="dialog-screen result-screen" hidden aria-labelledby="resultTitle"><div class="dialog-card"><div class="section-kicker">NIGHT MARKET　／　FIELD REPORT</div><h2 id="resultTitle">夜市暫告一段落</h2><p id="resultText"></p><button id="retry" class="primary-button" type="button"><span>再試一次</span><b aria-hidden="true">↗</b></button></div></section>
     <section id="pauseOverlay" class="dialog-screen" hidden aria-labelledby="pauseTitle"><div class="dialog-card pause-card"><div class="section-kicker">FIELD TEST　／　PAUSED</div><h2 id="pauseTitle">先歇一下</h2><p>準備好後繼續夜市突圍。</p><button id="resume" class="primary-button" type="button"><span>繼續戰鬥</span><b aria-hidden="true">↗</b></button></div></section>
     <section id="rotateOverlay" class="rotate-overlay" hidden role="status" aria-live="polite"><div class="rotate-card"><span class="rotate-icon" aria-hidden="true">↻</span><b>請轉橫向遊玩</b><span>畫面已暫停，轉回橫向即可繼續。</span></div></section>
-    <footer id="help" class="help-bar"><span class="desktop-help"><b>移動</b> WASD / ↑↓←→ <i></i> <b>攻擊</b> J <i></i> <b>重擊</b> K <i></i> <b>閃避</b> Shift <i></i> <b>絕招</b> E <i></i> <span data-jump-help hidden><b>跳躍</b> Space <i></i></span> <b>暫停</b> P</span><span class="touch-help">左側移動　·　右側攻擊</span><span class="silent-note" id="soundState">靜音試作</span></footer>
+    <footer id="help" class="help-bar"><span class="desktop-help"><b>移動</b> WASD / ↑↓←→ <i></i> <b>攻擊</b> J <i></i> <b>重擊</b> K <i></i> <b>閃避</b> Shift <i></i> <b>絕招</b> E <i></i> <span data-jump-help hidden><b>跳躍</b> Space <i></i></span> <b>暫停</b> P<span data-fullscreen-help hidden> <i></i> <b>全螢幕</b> F</span></span><span class="touch-help">左側移動　·　右側攻擊</span><span class="silent-note" id="soundState">靜音試作</span></footer>
     <div id="diagnostics"></div>
   </main>
-  <script type="module" src="./boot.js?v=20260925j"></script>
+  <script type="module" src="./boot.js?v=20260925k"></script>
 </body>
 </html>
