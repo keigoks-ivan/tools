@@ -38,12 +38,16 @@ export const MUSOU_FLURRY = {
     // time-scale keys [gameTime, scale] (linear between keys) and real-time freeze frames
     timeScale: [[0, 1], [3.51, 1], [3.51, 0.3], [3.69, 0.3], [4.2, 1]],
     freezes: [{ at: 0, real: 0.08 }, { at: 3.6, real: 0.05 }],
+    leapAt: 3.3,          // 天刃 choreography (3D renderer only): hero leaps from this time to `impact`
+    sweeps: [4, 7, 10],   // 1-based swing numbers where the spirit blade sweeps 360° across the arena (horizontal-spin beats)
   },
   true: {
     duration: 5.0, swingStart: 0.55, swingEnd: 4.0, swings: 12, radius: 220, damage: 4, steer: 80,
     impact: 4.4, finishRadius: 400, finishDamage: 20, damageScale: 1.5,
     timeScale: [[0, 1], [4.325, 1], [4.325, 0.15], [4.475, 0.15], [5.0, 1]],
     freezes: [{ at: 0, real: 0.08 }, { at: 4.4, real: 0.08 }],
+    leapAt: 4.1,
+    sweeps: [4, 7, 10],
   },
   trueHp: 0.3,          // hp / maxHp at or below this → 真・無雙
   swingPush: [8, 6],    // light launch per swing
@@ -59,9 +63,11 @@ export const MUSOU_FLURRY = {
  *   land        { x, y, facing, plunge, radius, damage }      touch-down; plunge:true = shockwave
  *   airEvade    { x, y, sourceId, height }                    a claw / ground attack passed under the hero
  *   musouStart  { x, y, facing, true, duration, radius, finishRadius, swings: [t…], impact, timeScale: [[t, scale]…],
- *                 freezes: [{ at, real }], stunned: [enemyId…] } full timeline at activation
+ *                 freezes: [{ at, real }], stunned: [enemyId…], leapAt, sweeps: [1-based swing numbers…] }
+ *                 full timeline at activation (leapAt / sweeps are opt-in: only present when the profile has them)
  *   special     { x, y, radius, flurry: true, true, duration, finishAt }   (kept for older listeners)
- *   swing       { …, kind: 'special', flurry: true, true, index, last, radius, hits }   every flurry swing
+ *   swing       { …, kind: 'special', flurry: true, true, index, last, radius, hits, sweep }   every flurry swing
+ *               (sweep: true on the swings named in MUSOU_FLURRY.sweeps — the 3D renderer sweeps the spirit blade)
  *   musouFinish { x, y, facing, radius, damage, true }        the blast at `impact`
  *   musouFreeze { x, y, real, at, true }                      hold the frame for `real` seconds (no game time)
  *   musouEnd    { x, y, true }                                control returns
@@ -472,7 +478,8 @@ export class Arena {
         stunned.push(enemy.id);
       }
       const info = { x: hero.x, y: hero.y, facing: hero.facing, true: isTrue, duration: F.duration, radius: F.radius, finishRadius: F.finishRadius,
-        swings: swingTimes, impact: F.impact, timeScale: F.timeScale, freezes: F.freezes, stunned };
+        swings: swingTimes, impact: F.impact, timeScale: F.timeScale, freezes: F.freezes, stunned,
+        ...(Number.isFinite(F.leapAt) ? { leapAt: F.leapAt } : null), ...(Array.isArray(F.sweeps) ? { sweeps: F.sweeps } : null) };
       this._emit('special', { x: hero.x, y: hero.y, radius: F.radius, flurry: true, true: isTrue, duration: F.duration, finishAt: F.impact });
       this._emit('musouStart', info);
       this._emit('musouFreeze', { x: hero.x, y: hero.y, real: F.freezes[0].real, at: 0, true: isTrue });
@@ -570,7 +577,8 @@ export class Arena {
         this._damageEnemy(enemy, F.damage * F.damageScale, 'special', MUSOU_FLURRY.swingPush);
         hits++;
       }
-      this._emit('swing', { x: hero.x, y: hero.y, facing: hero.facing, kind: 'special', combo: hero.combo, index, last: index === attack.swingTimes.length - 1, radius: F.radius, flurry: true, true: attack.true, hits });
+      const sweep = Array.isArray(F.sweeps) && F.sweeps.includes(index + 1);
+      this._emit('swing', { x: hero.x, y: hero.y, facing: hero.facing, kind: 'special', combo: hero.combo, index, last: index === attack.swingTimes.length - 1, radius: F.radius, flurry: true, true: attack.true, hits, sweep });
     }
     if (!attack.finished && hero.actionTime >= F.impact) {
       attack.finished = true;

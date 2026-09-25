@@ -198,7 +198,7 @@ function consumeEvents() {
     if (event.type === 'dodge') effect('dash', event, 0.3);
     if (event.type === 'hurt') { effect('hurt', event, 0.3); shake = reducedMotion ? 0 : 3; }
     if (event.type === 'heal') announce('波次完成　／　恢復少量體力', 1.5);
-    if (event.type === 'wave') announce(event.wave === 'boss' ? '魂門守將現身' : `第 ${event.wave} 波　／　${event.wave === 1 ? '夜市突圍' : '敵勢增強'}`, 2.5);
+    if (event.type === 'wave') announce(event.wave === 'boss' ? '鬼門守將現身' : `第 ${event.wave} 波　／　${event.wave === 1 ? '夜市突圍' : '敵勢增強'}`, 2.5);
   }
 }
 function heroFrame(action, time, animationClock = clock, combo = 1) {
@@ -279,7 +279,7 @@ function drawBattle() {
         const top = actor.y - (warriorView ? actor.role === 'boss' ? 340 : elite ? 310 : 280 : elite ? 175 : 138);
         ctx.fillStyle = '#181521'; ctx.fillRect(actor.x - width / 2, top, width, 4);
         ctx.fillStyle = elite ? '#e6b985' : '#c09eb9'; ctx.fillRect(actor.x - width / 2, top, width * actor.hp / actor.maxHp, 4);
-        if (elite) { ctx.font = '10px sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#f0d9b7'; ctx.fillText(actor.role === 'boss' ? '魂門守將' : '妖將', actor.x, top - 7); }
+        if (elite) { ctx.font = '10px sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = '#f0d9b7'; ctx.fillText(actor.role === 'boss' ? '鬼門守將' : '妖將', actor.x, top - 7); }
       }
     }
     ctx.restore();
@@ -362,7 +362,7 @@ function updateHud() {
   const hero = arena.hero;
   $('hpFill').style.width = `${hero.hp}%`; $('hpText').textContent = Math.ceil(hero.hp);
   $('energyFill').style.width = `${hero.energy}%`;
-  $('waveText').textContent = arena.bossQueued || arena.enemies.some(e => e.role === 'boss') ? '魂門守將' : `第 ${arena.wave} 波 · ${Math.min(arena.waveKills, arena.waveGoal)} / ${arena.waveGoal}`;
+  $('waveText').textContent = arena.bossQueued || arena.enemies.some(e => e.role === 'boss') ? '鬼門守將' : `第 ${arena.wave} 波 · ${Math.min(arena.waveKills, arena.waveGoal)} / ${arena.waveGoal}`;
   $('killText').textContent = String(arena.kills).padStart(2, '0');
   $('comboText').textContent = hero.combo > 1 && hero.action === 'attack' ? `${hero.combo} 連斬` : '';
   if (clock > toastUntil) $('toast').textContent = '';
@@ -460,10 +460,10 @@ addEventListener('resize', resize);
 addEventListener('blur', () => { clearInput(); pause(true); });
 document.addEventListener('visibilitychange', () => { clearInput(); if (document.hidden) pause(true); syncLoop(); });
 if (warriorView) {
-  $('game').setAttribute('aria-label', 'HUNTR/X 第三人稱戰鬥視角試作');
+  $('game').setAttribute('aria-label', '紫刃夜行 第三人稱戰鬥視角試作');
   document.querySelector('.title-subtitle').textContent = '第三人稱戰鬥視角試作';
-  document.querySelector('.title-copy').textContent = '從 Rumi 身後進入夜市，迎戰魂門前的敵群。';
-  $('start').querySelector('span').textContent = '進入魂門街區';
-  document.title = 'HUNTR/X 魂門之戰｜第三人稱試作';
+  document.querySelector('.title-copy').textContent = '從紫刃身後進入夜市，迎戰鬼門前的敵群。';
+  $('start').querySelector('span').textContent = '進入鬼門街區';
+  document.title = '紫刃夜行｜第三人稱試作';
 }
 document.body.dataset.mode = mode; $('rotateOverlay').hidden = true; resize();

@@ -1,5 +1,5 @@
 import { installGameGestures } from '../2d/touch-gestures.js';
-import { assetPlan, createPreloader } from './preload.js?v=20260925b';
+import { assetPlan, createPreloader } from './preload.js?v=20260925c';
 
 // 手機防誤觸縮放：連點放大、雙指縮放（iOS gesture*）一律擋下；萬一仍被放大，重設 viewport 讓畫面縮回原比例
 installGameGestures(document.getElementById('game'));
@@ -21,7 +21,7 @@ if (new URLSearchParams(location.search).get('hero') !== 'rumi') {
   const copy = document.querySelector('.title-copy');
   const note = document.querySelector('.prototype-note');
   if (subtitle) subtitle.textContent = '紫刃・夜市突圍';
-  if (copy) copy.textContent = '沿著夜市大街一路殺到魂門，擊倒敵將，最後單挑魂門守將。';
+  if (copy) copy.textContent = '沿著夜市大街一路殺到鬼門，擊倒敵將，最後單挑鬼門守將。';
   if (note?.firstChild) note.firstChild.textContent = '3D 試作　·　紫刃　·　';
 }
 
@@ -37,7 +37,7 @@ const assets = createPreloader({
   plan: assetPlan({ hero: vroid ? 'vroid' : 'rumi', march: vroid && params.get('level') !== 'single' }),
   loadEngine: () => loadBattleModule().then(async module => { await module.loadLazyModules(); return module; }),
 });
-const loadBattleModule = () => import('./battle.js?v=20260925f');
+const loadBattleModule = () => import('./battle.js?v=20260925g');
 if (params.has('debug')) window.__assets = assets;   // ?debug：各項下載／步驟的開始與完成時間（__assets.progress.items）
 let audio = null;
 const audioReady = vroid
@@ -77,7 +77,7 @@ let battlePromise = null, battleReady = false, prefetching = false;
 // battle.js 的 import 圖：一次全部送出請求，不用等 battle.js 下載完才發現要抓 three.js（版本字串與 battle.js 相同，測試會比對）
 const ENGINE_MODULES = ['../lib/three.module.js', '../lib/addons/loaders/GLTFLoader.js', '../lib/addons/utils/SkeletonUtils.js',
   '../2d/combat.js', '../frame-pacing.js', './world.js', './oni.js', './touch-input.js',
-  ...(vroid ? ['./combat-fx.js?v=20260925e'] : []), ...(vroid && params.get('level') !== 'single' ? ['./march.js', './march-art.js?v=20260925e'] : [])];
+  ...(vroid ? ['./combat-fx.js?v=20260925g'] : []), ...(vroid && params.get('level') !== 'single' ? ['./march.js', './march-art.js?v=20260925f'] : [])];
 function preloadModules() {
   for (const href of ENGINE_MODULES) {
     const link = document.createElement('link');

@@ -35,13 +35,27 @@
  *   kill officer|boss,    0.2x for 0.8 s, camera pushes toward the falling officer, pillar + ring,
  *   officerDown           banner 「敵將 〈name〉 擊破！」 (name from event.name or the earlier 'officer' / 'bossIntro' event)
  *   special | musouStart  activation freeze 0.08 s, HUD dims (hudFade), push-in 15 %, vignette, glow flash, rune circle,
- *                         aura shell + flames, title 「魂門亂舞」 / 「真・魂門亂舞」 (event.true); long form when the event has
- *                         `timeline: { windup, finish, end }` (game seconds from the start) or is 'musouStart'
- *   swing kind special    flurry: rings, wind arcs, shards, light shafts; 0.04 s hit-stop on the first connecting hit of each
- *                         swing; slow camera drift (~12 deg), no shake. Short 3-hit special: third swing = finisher
- *   musouFinish           lead-in 0.3x (0.15x 真) starts `lead` before timeline.finish, impact freeze 0.05 s, white radial
- *                         flash 0.1 s (0.15 s 真), crater + two shock fronts + pillar + debris, fast push-in, ramp back 0.3 s;
- *                         真: 0.4 s portrait cut-in card, magenta grade
+ *                         fresnel rim glow (not a shell) + flames, title 「天刃亂舞」 / 「真・無雙」 (event.true); long form
+ *                         when the event has `timeline: { windup, finish, end }` (game seconds from the start) or is
+ *                         'musouStart'. Long form ("天刃") drives 4 hard camera cuts (CUT1/CUT2/leap/CUT3, see below)
+ *                         and a giant spirit blade that grows from the sword; enemies between the camera and the
+ *                         hero (or just very close to it) dither-fade (alphaHash) for the whole musou so the cuts
+ *                         stay readable.
+ *   swing kind special    flurry: rings, wind arcs, shards, light shafts; hit-stop on the first connecting hit of each
+ *                         swing (data-driven schedule, starts longer and shortens swing to swing); slow orbiting
+ *                         3/4-high-angle CUT 2, no shake. Short 3-hit special: third swing = finisher. Long form:
+ *                         swings named in `event.sweeps` (MUSOU_FLURRY.sweeps, default 1-based [4,7,10]) sweep the
+ *                         spirit blade 360° around the arena; enemies inside the sweep are launched (battle.js).
+ *                         `event.leapAt` (opt-in) cuts to a low medium shot for the leap into the finisher.
+ *   musouFinish           CUT 3 (behind/below the hero, tilted down -- never up, so the arena's finite sky backdrop
+ *                         never shows its edge): vertical cleave, 0.05 s freeze, framebuffer captured once and shown
+ *                         as a sliding screen-split for ~0.25 s, short sharp flash (≤0.08 s, partial opacity, not a
+ *                         whiteout), a small shaped pillar, a fake-distortion ground shockwave ring, lead-in 0.3x
+ *                         (0.15x 真) before the impact; eases from the close cleave framing to a medium shot ~0.3-0.8 s
+ *                         after impact so the launched enemies falling around her stay in frame; ends with a big
+ *                         "NN KO" counter (right of centre) + 撃/斬/破/天 grade stamp. 真: spirit blade wrapped in a
+ *                         scrolling-noise purple flame shader (same mesh also carries a ground/body flame ring around
+ *                         her feet), 2 afterimage ghosts, 0.4 s portrait cut-in card, magenta grade.
  *   jump / airSlash       dust ring + afterimage / slash arc on the sword plane
  *   plunge / land         dive streaks + afterimages + speed lines / after a plunge (or event.radius): crater + shock ring
  *                         + 0.3x hit-stop; plain landing: dust puff
@@ -50,9 +64,15 @@
  *   telegraph, wave, hint, gate / lamp events: not handled — keep battle.js's own warnings and toasts.
  *
  * Draw budget (all FX together, at peak): 2 particle draws (depth-tested world pool + on-top hit overlay) + 1 strip/decal
- * draw + ghosts (desktop 3 / mobile 1) + 1 aura shell = 7 desktop, 5 mobile; 0 when idle. Nothing allocates materials or
- * geometry after createCombatFx (the enemy flash clones each distinct enemy material once, on its first hit; prewarm()
- * does it up front); per-event allocations are small JS objects only. HUD flair is DOM/CSS driven from update().
+ * draw + ghosts (desktop 3 / mobile 1) + 1 aura rim = 7 desktop, 5 mobile; 0 when idle. During the 天刃 long-form musou
+ * finale only, up to 4 more: 1 spirit blade (dissolve/noise shader) + 1 真・無雙 flame shroud (scrolling-noise shader,
+ * only during 真) + 1 screen-split quad (~0.25 s after the cleave) + 1 shockwave ring (~0.4 s after the cleave) = 11
+ * desktop / 9 mobile at the absolute peak; every one of the four is a single pooled mesh created at createCombatFx and
+ * only toggled visible/repositioned, never recreated. Nothing allocates materials or geometry after createCombatFx
+ * (the enemy flash clones each distinct enemy material once, on its first hit; the occlusion dither clones each
+ * enemy's meshes once, the first time that enemy needs to fade; the screen-split FramebufferTexture is allocated once
+ * and only reallocated on an actual canvas resize; prewarm() precompiles all of the above up front). Per-event
+ * allocations are small JS objects only. HUD flair is DOM/CSS driven from update().
  *
  * Coordinates: world metres, y up, same as battle.js. Arena facing f maps to world direction (cos f, 0, sin f).
  * Texture layout constants below must match game/scripts/fx/build_fx_textures.py.
@@ -97,6 +117,21 @@ export function crossedMilestone(before, after, list = KO_MILESTONES) {
   let hit = 0;
   for (const m of list) if (before < m && after >= m) hit = m;
   return hit;
+}
+
+/** 天刃 finale grade stamp: single-character rank from the KOs landed during that one musou. */
+export const KO_GRADE_STEPS = [[0, '撃'], [6, '斬'], [12, '破'], [20, '天']];
+export function koGrade(count, steps = KO_GRADE_STEPS) {
+  let grade = steps[0][1];
+  for (const [min, label] of steps) { if (count >= min) grade = label; else break; }
+  return grade;
+}
+
+/** Data-driven hit-stop schedule for the 10-12 flurry swings: starts longer, shortens toward the last swing. */
+export function swingHitstop(index, total = 10, { first = 0.052, last = 0.03 } = {}) {
+  const n = Math.max(1, total | 0);
+  const p = n > 1 ? Math.min(1, Math.max(0, index / (n - 1))) : 0;
+  return first + (last - first) * p;
 }
 
 /** Visual weight of a hit event: 1 light, 1.7 heavy / finisher, 2 special; armoured hits are dampened. */
@@ -310,8 +345,118 @@ varying vec3 vN; varying vec3 vView; varying float vY;
 void main() {
   float rim = 1.0 - abs(dot(normalize(vN), normalize(vView)));
   float band = 1.0 + uFlicker * (0.5 * sin(vY * 23.0 - uTime * 17.0) + 0.35 * sin(vY * 57.0 + uTime * 29.0));
-  vec3 c = uColor * (uBase + pow(rim, uPower) * 2.1) * band * uOpacity;
+  vec3 c = uColor * (uBase + pow(rim, uPower) * 1.5) * band * uOpacity;
   gl_FragColor = vec4(c, 0.0);
+}`;
+
+// ---------------------------------------------------------------------------------------------
+// 天刃 (musou-v2) shaders: a noise helper shared by the flame shroud and the spirit blade, the spirit blade itself
+// (dissolve-in tapered cross of two strips), the scrolling purple flame shroud (真・無雙 only), the post-cleave
+// screen split (reads one captured framebuffer snapshot) and the ground shockwave (fake distortion, no refraction
+// pass). Each is exactly one Mesh / one Material, created once in createCombatFx and only repositioned or hidden.
+// ---------------------------------------------------------------------------------------------
+
+const NOISE_GLSL = /* glsl */`
+float hash21(vec2 p) { p = fract(p * vec2(123.34, 456.21)); p += dot(p, p + 45.32); return fract(p.x * p.y); }
+float vnoise(vec2 p) {
+  vec2 i = floor(p), f = fract(p);
+  float a = hash21(i), b = hash21(i + vec2(1.0, 0.0)), c = hash21(i + vec2(0.0, 1.0)), d = hash21(i + vec2(1.0, 1.0));
+  vec2 u = f * f * (3.0 - 2.0 * f);
+  return mix(a, b, u.x) + (c - a) * u.y * (1.0 - u.x) + (d - b) * u.x * u.y;
+}
+float fbm2(vec2 p) { float v = 0.0, a = 0.55; for (int i = 0; i < 4; i++) { v += a * vnoise(p); p *= 2.02; a *= 0.55; } return v; }`;
+
+const BLADE_VERTEX = /* glsl */`
+varying vec2 vUv;
+void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`;
+
+const BLADE_FRAGMENT = /* glsl */`${NOISE_GLSL}
+uniform float uTime; uniform float uReveal; uniform float uOpacity; uniform vec3 uColor; uniform vec3 uEdge;
+varying vec2 vUv;
+void main() {
+  float len = vUv.y;
+  if (len > uReveal) discard;
+  float e = abs(vUv.x - 0.5) * 2.0;                          // 0 at the spine .. 1 at the geometric silhouette edge
+  // soft additive falloff that reaches exactly 0 at the true edge -- no hard rectangular border.
+  float silhouette = pow(clamp(1.0 - e, 0.0, 1.0), 0.8);
+  // thin bright white-hot core line running the length of the blade, offset toward one side (the cutting edge)
+  float coreLine = exp(-pow((vUv.x - 0.22) * 11.0, 2.0));
+  float scroll = fbm2(vec2(vUv.x * 2.4, len * 5.5 - uTime * 3.4));
+  float flicker = 0.85 + 0.15 * sin(uTime * 12.0 + len * 8.0);
+  float energy = (0.75 + scroll * 0.5) * flicker;
+  float grow = smoothstep(uReveal - 0.12, uReveal, len);     // bright dissolve-in sweep along the length
+  vec3 col = mix(uEdge, uColor, e) * silhouette * energy + coreLine * vec3(2.7, 2.5, 2.9) * energy + grow * vec3(2.6, 2.2, 2.9);
+  float alpha = clamp(silhouette * (0.5 + energy * 0.4) + coreLine * 1.15 + grow, 0.0, 1.0) * uOpacity;
+  gl_FragColor = vec4(col * alpha, alpha);
+}`;
+
+const FLAME_VERTEX = /* glsl */`
+attribute float aBlade;
+uniform mat4 uBladeMatrix;
+varying vec2 vUv;
+void main() {
+  vUv = uv;
+  // aBlade > 0.5: the blade-wrap quads follow the spirit blade's own matrix (fed in each frame); otherwise the
+  // ground/body flame ring follows this mesh's own (hero-anchored) transform. One draw call either way.
+  vec4 worldPos = aBlade > 0.5 ? uBladeMatrix * vec4(position, 1.0) : modelMatrix * vec4(position, 1.0);
+  gl_Position = projectionMatrix * viewMatrix * worldPos;
+}`;
+
+const FLAME_FRAGMENT = /* glsl */`${NOISE_GLSL}
+uniform float uTime; uniform float uOpacity; uniform float uSeed; uniform vec3 uHot; uniform vec3 uCore; uniform vec3 uEdge;
+varying vec2 vUv;
+void main() {
+  float flow = uTime * 1.6 + uSeed;
+  vec2 p = vec2(vUv.x * 3.0, vUv.y * 4.2 - flow);
+  float n = fbm2(p) * 0.65 + fbm2(p * 2.3 + 11.0) * 0.35;
+  // base-weighted taper: full width right at the ground, tapering to a flickering point toward the tip -- reads as
+  // a licking flame tongue rather than a symmetric drop/petal (the tip position itself flickers over time).
+  float tipFlicker = 0.85 + 0.15 * sin(uTime * 7.0 + uSeed * 6.283 + vUv.x * 4.0);
+  float taper = smoothstep(0.0, 0.06, vUv.y) * smoothstep(1.0, 0.14 * tipFlicker, vUv.y);
+  float edge = pow(clamp(1.0 - abs(vUv.x - 0.5) * 2.0, 0.0, 1.0), 1.3);
+  float body = n * edge * taper;
+  float core = smoothstep(0.35, 0.85, body);
+  vec3 col = mix(uEdge, uCore, smoothstep(0.12, 0.6, body));
+  col = mix(col, uHot, core * core);
+  float alpha = clamp(body * 1.5, 0.0, 1.0) * uOpacity;
+  gl_FragColor = vec4(col * alpha, alpha);
+}`;
+
+const SPLIT_VERTEX = /* glsl */`
+varying vec2 vUv;
+void main() { vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }`;
+
+const SPLIT_FRAGMENT = /* glsl */`
+uniform sampler2D uTex; uniform float uSep; uniform float uAlpha; uniform float uSeed; uniform float uAngle;
+varying vec2 vUv;
+float shash(float x) { return fract(sin(x * 91.345 + 4.7) * 43758.5453); }
+void main() {
+  float lineX = 0.5 + (vUv.y - 0.5) * uAngle;
+  float jag = (shash(floor(vUv.y * 44.0) + uSeed) - 0.5) * 0.032 + (shash(floor(vUv.y * 130.0) + uSeed + 7.0) - 0.5) * 0.01;
+  float lx = lineX + jag;
+  float side = vUv.x < lx ? -1.0 : 1.0;
+  vec2 uv = clamp(vec2(vUv.x - side * uSep, vUv.y), 0.001, 0.999);
+  vec3 col = texture2D(uTex, uv).rgb;
+  float d = abs(vUv.x - lx);
+  float seam = smoothstep(0.02, 0.0, d) + smoothstep(0.05, 0.0, d) * 0.5;
+  col += seam * vec3(3.2, 2.8, 3.8);
+  gl_FragColor = vec4(col, uAlpha);
+}`;
+
+const SHOCK_VERTEX = /* glsl */`
+varying vec2 vLocal;
+void main() { vLocal = position.xy; gl_Position = projectionMatrix * modelViewMatrix * vec4(position.x, 0.0, position.y, 1.0); }`;
+
+const SHOCK_FRAGMENT = /* glsl */`
+uniform float uRadius; uniform float uWidth; uniform float uOpacity; uniform vec3 uColor;
+varying vec2 vLocal;
+void main() {
+  float r = length(vLocal);
+  float bright = smoothstep(uRadius - 0.02, uRadius, r) * (1.0 - smoothstep(uRadius, uRadius + 0.05, r));
+  float trail = smoothstep(uRadius - uWidth, uRadius - 0.03, r) * (1.0 - smoothstep(uRadius - 0.03, uRadius, r));
+  vec3 col = uColor * bright * 3.2 - trail * vec3(0.16, 0.14, 0.2);
+  float alpha = clamp(bright * uOpacity + trail * uOpacity * 0.6, 0.0, 1.0);
+  gl_FragColor = vec4(max(col, 0.0), alpha);
 }`;
 
 // ---------------------------------------------------------------------------------------------
@@ -608,7 +753,8 @@ function createEchoes(THREE, scene, heroModel, settings) {
     mesh.renderOrder = 9;
     ghosts.push({ mesh, age: 1, life: 0.24, strength: 0 });
   }
-  const aura = settings.aura ? makeMesh(makeMaterial([0.78, 0.4, 1.0], 0.02, 1, 0.0, 3.2), false) : null;
+  // Fresnel rim only (uBase 0): a thin glowing outline, not a filled shell, so the costume/blade stay readable.
+  const aura = settings.aura ? makeMesh(makeMaterial([0.78, 0.4, 1.0], 0.016, 1, 0.0, 5.2), false) : null;
   if (aura) aura.renderOrder = 10;
   const ring = new RingIndex(Math.max(1, ghosts.length));
   return {
@@ -711,6 +857,154 @@ function cr(p0, p1, p2, p3, t) {
 }
 
 // ---------------------------------------------------------------------------------------------
+// 天刃 (musou-v2): the giant spirit blade, the 真・無雙 flame shroud that wraps it, the post-cleave screen split
+// and the ground shockwave. Every one of these is exactly one Mesh created once here (hidden by default) and only
+// repositioned / re-toggled per frame by the musou state machine further down; see the draw-budget comment above.
+// ---------------------------------------------------------------------------------------------
+
+/** Tapered cross of two strips (hilt at local y=0 to tip at y=1), width normalized to 1 at the hilt so the caller
+ * can size the actual blade with a single scale.x/z (see BLADE_WIDTH). Reads from most camera angles. The taper
+ * curves to a point (katana-like) rather than a straight wedge, and the spine drifts slightly sideways along its
+ * length for a subtle curved-blade silhouette. */
+function buildSpiritBladeGeometry(THREE, segments = 14) {
+  const position = [], uv = [], index = [];
+  const addStrip = swapAxis => {
+    const base = position.length / 3;
+    for (let i = 0; i <= segments; i++) {
+      const t = i / segments;
+      const width = Math.max(0.015, Math.pow(1 - t, 0.7)) * 0.5;
+      const curve = Math.sin(t * Math.PI * 0.55) * 0.1;
+      if (swapAxis) position.push(0, t, curve - width, 0, t, curve + width); else position.push(curve - width, t, 0, curve + width, t, 0);
+      uv.push(0, t, 1, t);
+    }
+    for (let i = 0; i < segments; i++) { const a = base + i * 2; index.push(a, a + 1, a + 2, a + 1, a + 3, a + 2); }
+  };
+  addStrip(false); addStrip(true);
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(position, 3));
+  geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+  geometry.setIndex(index);
+  return geometry;
+}
+// Real-world size of the spirit blade: ~6-7 m long (mesh.scale.y), ~0.72 m wide at the hilt (mesh.scale.x/z).
+const BLADE_WIDTH = 0.72;
+
+function createSpiritBlade(THREE) {
+  const geometry = buildSpiritBladeGeometry(THREE);
+  const material = new THREE.ShaderMaterial({
+    uniforms: {
+      uTime: { value: 0 }, uReveal: { value: 0 }, uOpacity: { value: 0 },
+      uColor: { value: new THREE.Color(1.5, 0.9, 2.0) }, uEdge: { value: new THREE.Color(0.5, 0.15, 0.9) },
+    },
+    vertexShader: BLADE_VERTEX, fragmentShader: BLADE_FRAGMENT,
+    transparent: true, depthWrite: false, depthTest: true, toneMapped: false, fog: false, side: THREE.DoubleSide,
+    blending: THREE.AdditiveBlending,
+  });
+  const mesh = new THREE.Mesh(geometry, material);
+  mesh.frustumCulled = false;
+  mesh.visible = false;
+  mesh.renderOrder = 16;
+  mesh.name = 'combat-fx-spirit-blade';
+  return { mesh, material, dispose() { geometry.dispose(); material.dispose(); } };
+}
+
+/**
+ * (8) One mesh/material carries BOTH the blade-wrap flame (3 crossed quads, aBlade=1, sized to match the spirit
+ * blade's own BLADE_WIDTH/length so it reads as "the blade is on fire") AND a ground/body flame ring around her
+ * feet (aBlade=0, a handful of quads in a ring) -- so the ambient 真・無雙 fire is this same shader (flow-upward,
+ * hot core -> purple -> transparent edge) instead of the old atlas "petal" particles, with zero extra draw calls.
+ */
+function buildFlameGeometry(THREE) {
+  const position = [], uv = [], index = [], aBlade = [];
+  const quad = (blade, p0, p1, p2, p3) => {
+    const base = position.length / 3;
+    for (const p of [p0, p1, p2, p3]) position.push(...p);
+    uv.push(0, 0, 1, 0, 0, 1, 1, 1);
+    aBlade.push(blade, blade, blade, blade);
+    index.push(base, base + 1, base + 2, base + 1, base + 3, base + 2);
+  };
+  // blade wrap: 3 crossed quads. uBladeMatrix is the spirit blade's own matrixWorld, which already bakes in its
+  // scale (BLADE_WIDTH on x/z, length 6-7 on y) -- so these vertices must be authored in the SAME normalized 0..1
+  // local space the blade's own geometry uses (hilt at y=0, tip at y=1), not in real metres, or the length gets
+  // applied twice (round-4 bug: bh=6.2 here x a scale.y of 6-7 produced a ~40 m tall quad -- read as a giant flat
+  // translucent sheet across the frame). bw is deliberately > the blade's own ~0.5 half-width so the flame reads
+  // as a halo wrapping slightly outside the blade surface; bh slightly overshoots 1.0 so it licks past the tip.
+  const bw = 0.85, bh = 1.05;
+  for (let k = 0; k < 3; k++) {
+    const angle = (k / 3) * Math.PI, cs = Math.cos(angle) * bw, sn = Math.sin(angle) * bw;
+    quad(1, [-cs, 0, -sn], [cs, 0, sn], [-cs, bh, -sn], [cs, bh, sn]);
+  }
+  // ground/body ring: 5 flame cards around the feet, flush with this mesh's own hero-anchored transform.
+  const N = 5, ringR = 0.4, cardW = 0.46, cardH = 1.5;
+  for (let k = 0; k < N; k++) {
+    const angle = (k / N) * Math.PI * 2, cs = Math.cos(angle), sn = Math.sin(angle), tx = -sn * cardW * 0.5, tz = cs * cardW * 0.5;
+    const cx = cs * ringR, cz = sn * ringR;
+    quad(0, [cx - tx, 0, cz - tz], [cx + tx, 0, cz + tz], [cx - tx, cardH, cz - tz], [cx + tx, cardH, cz + tz]);
+  }
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(position, 3));
+  geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+  geometry.setAttribute('aBlade', new THREE.Float32BufferAttribute(aBlade, 1));
+  geometry.setIndex(index);
+  return geometry;
+}
+
+function createFlameShroud(THREE) {
+  const geometry = buildFlameGeometry(THREE);
+  const material = new THREE.ShaderMaterial({
+    uniforms: {
+      uTime: { value: 0 }, uOpacity: { value: 0 }, uSeed: { value: 0 }, uBladeMatrix: { value: new THREE.Matrix4() },
+      uHot: { value: new THREE.Color(2.4, 1.6, 2.8) }, uCore: { value: new THREE.Color(1.7, 0.35, 1.9) }, uEdge: { value: new THREE.Color(0.35, 0.05, 0.55) },
+    },
+    vertexShader: FLAME_VERTEX, fragmentShader: FLAME_FRAGMENT,
+    transparent: true, depthWrite: false, depthTest: true, toneMapped: false, fog: false, side: THREE.DoubleSide,
+    blending: THREE.AdditiveBlending,
+  });
+  const mesh = new THREE.Mesh(geometry, material);
+  mesh.frustumCulled = false;
+  mesh.visible = false;
+  mesh.renderOrder = 15;
+  mesh.name = 'combat-fx-flame-shroud';
+  return { mesh, material, dispose() { geometry.dispose(); material.dispose(); } };
+}
+
+/** Full-NDC quad: samples one captured framebuffer snapshot, split along a jagged diagonal line, sliding apart. */
+function createSplitOverlay(THREE) {
+  const geometry = new THREE.PlaneGeometry(2, 2);
+  const material = new THREE.ShaderMaterial({
+    uniforms: { uTex: { value: null }, uSep: { value: 0 }, uAlpha: { value: 0 }, uSeed: { value: 0 }, uAngle: { value: 0.3 } },
+    vertexShader: SPLIT_VERTEX, fragmentShader: SPLIT_FRAGMENT,
+    transparent: true, depthWrite: false, depthTest: false, toneMapped: false, fog: false,
+  });
+  const mesh = new THREE.Mesh(geometry, material);
+  mesh.frustumCulled = false;
+  mesh.visible = false;
+  mesh.renderOrder = 40;
+  mesh.name = 'combat-fx-split';
+  return {
+    mesh, material, texture: null, texW: 0, texH: 0,
+    dispose() { geometry.dispose(); material.dispose(); this.texture?.dispose(); },
+  };
+}
+
+/** Flat ground ring, fake-distortion look (bright leading edge + dark trailing band), no refraction pass. */
+function createShockwave(THREE, half = 9) {
+  const geometry = new THREE.PlaneGeometry(half * 2, half * 2);
+  const material = new THREE.ShaderMaterial({
+    uniforms: { uRadius: { value: 0 }, uWidth: { value: 1 }, uOpacity: { value: 0 }, uColor: { value: new THREE.Color(1.6, 1.0, 2.2) } },
+    vertexShader: SHOCK_VERTEX, fragmentShader: SHOCK_FRAGMENT,
+    transparent: true, depthWrite: false, depthTest: true, toneMapped: false, fog: false, side: THREE.DoubleSide,
+    blending: THREE.CustomBlending, blendEquation: THREE.AddEquation, blendSrc: THREE.OneFactor, blendDst: THREE.OneMinusSrcAlphaFactor,
+  });
+  const mesh = new THREE.Mesh(geometry, material);
+  mesh.frustumCulled = false;
+  mesh.visible = false;
+  mesh.renderOrder = 8;
+  mesh.name = 'combat-fx-shockwave';
+  return { mesh, material, dispose() { geometry.dispose(); material.dispose(); } };
+}
+
+// ---------------------------------------------------------------------------------------------
 // DOM HUD flair
 // ---------------------------------------------------------------------------------------------
 
@@ -740,6 +1034,13 @@ function hudCss(base) {
 .cfx-dmg{left:0;top:0;font:italic 800 19px/1 Georgia,"Times New Roman",serif;color:#f4ecff;-webkit-text-stroke:1px #1c0b2e;text-shadow:0 2px 0 #12061f;white-space:nowrap}
 .cfx-dmg.h{font-size:30px;color:#ffd66b;text-shadow:0 2px 0 #2a0d00,0 0 10px rgba(255,170,40,.7)}
 .cfx-dmg.s{font-size:34px;color:#ffa6f2;text-shadow:0 2px 0 #24002a,0 0 12px rgba(255,90,230,.75)}
+.cfx-dmg.musou{font-size:38px}
+.cfx-dmg.musou.h{font-size:60px}
+.cfx-dmg.musou.s{font-size:68px}
+.cfx-ko{left:56%;right:4%;top:30%;text-align:center;transform-origin:50% 50%}
+.cfx-ko b{display:inline-block;font:900 128px/1 Georgia,"Times New Roman",serif;color:#fff8ff;-webkit-text-stroke:3px #1a0824;text-shadow:0 4px 0 #0c0316,0 0 30px rgba(200,120,255,.9)}
+.cfx-ko span{display:block;margin-top:-8px;font:italic 800 24px/1 Georgia,serif;letter-spacing:.55em;color:#e6d4ff;text-shadow:0 0 12px rgba(160,90,255,.8)}
+.cfx-ko i{position:absolute;left:50%;top:100%;display:block;margin-top:10px;transform:translateX(-50%);font:900 84px/1 ${CJK_SERIF};color:#ffe37e;-webkit-text-stroke:3px #4a0d1c;text-shadow:0 0 24px rgba(255,150,60,.9);opacity:0}
 .cfx-stamp{left:0;top:0;width:128px;height:128px;margin:-64px 0 0 -64px}
 .cfx-stamp i{position:absolute;inset:8px;border:8px solid #ff3d2e;border-radius:50%;box-shadow:0 0 20px rgba(255,60,30,.65),inset 0 0 14px rgba(255,60,30,.5);-webkit-mask:url(${base}fx-grain.png?v=${FX_VERSION}) center/180% 100%;mask:url(${base}fx-grain.png?v=${FX_VERSION}) center/180% 100%}
 .cfx-stamp b{position:absolute;inset:0;display:grid;place-items:center;font:900 88px/1 ${CJK_SERIF};color:#ffe37e;-webkit-text-stroke:3px #5c0904;text-shadow:0 0 18px rgba(255,120,40,.85),5px 5px 0 #260300}
@@ -748,25 +1049,27 @@ function hudCss(base) {
 .cfx-banner b{position:absolute;left:8%;top:50%;transform:translateY(-54%);font:900 66px/1 ${CJK_SERIF};color:#fff6e2;letter-spacing:.03em;-webkit-text-stroke:2px #1a0830;text-shadow:0 0 16px rgba(255,210,130,.75),4px 5px 0 #12051f;white-space:nowrap}
 .cfx-banner small{position:absolute;left:9%;bottom:8px;font:italic 700 12px/1 Georgia,serif;letter-spacing:.34em;color:#f0dcff;text-shadow:0 1px 0 #000}
 .cfx-grade{inset:0;background:radial-gradient(ellipse 78% 72% at 50% 54%,rgba(60,0,70,0) 42%,rgba(70,0,90,.45) 78%,rgba(40,0,55,.8) 100%)}
-.cfx-cutin{left:0;right:0;top:41%;height:21%;min-height:110px;overflow:hidden}
+.cfx-cutin{left:0;right:0;top:0;height:19%;min-height:100px;overflow:hidden}
 .cfx-cutin .card{position:absolute;inset:0 -6%;transform:skewY(-4deg);background:linear-gradient(90deg,#12031e 0%,#3a0a52 40%,#12031e 100%);border-top:3px solid #f0d8ff;border-bottom:3px solid #f0d8ff;box-shadow:0 0 24px rgba(210,120,255,.8)}
 .cfx-cutin .eyes{position:absolute;inset:0;background:url(${base}fx-cutin.webp?v=${FX_VERSION}) center/auto 118% no-repeat}
 .cfx-cutin .lines{position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(255,255,255,0) 0 22px,rgba(240,220,255,.16) 22px 24px,rgba(255,255,255,0) 24px 57px)}
 .cfx-gauge-full{animation:cfx-gauge .9s ease-in-out infinite}
 @keyframes cfx-gauge{0%,100%{box-shadow:0 0 6px 1px rgba(190,120,255,.55);filter:brightness(1.05)}50%{box-shadow:0 0 16px 4px rgba(225,165,255,.95);filter:brightness(1.55)}}
 .cfx-title{left:0;right:0;top:12%;height:200px}
-.cfx-title .band{position:absolute;left:4%;right:4%;top:6%;bottom:6%;background:linear-gradient(180deg,rgba(255,255,255,0) 30%,rgba(236,210,255,.35) 50%,rgba(255,255,255,0) 70%),linear-gradient(90deg,rgba(8,2,18,0),rgba(46,10,92,.97) 14%,rgba(128,48,230,.97) 52%,rgba(46,10,92,.95) 88%,rgba(8,2,18,0));-webkit-mask:url(${base}fx-brush.png?v=${FX_VERSION}) 0 0/100% 100% no-repeat;mask:url(${base}fx-brush.png?v=${FX_VERSION}) 0 0/100% 100% no-repeat;transform-origin:0 50%}
+.cfx-title .band{position:absolute;left:4%;right:4%;top:34%;bottom:34%;opacity:.8;background:linear-gradient(180deg,rgba(255,255,255,0) 30%,rgba(236,210,255,.3) 50%,rgba(255,255,255,0) 70%),linear-gradient(90deg,rgba(8,2,18,0),rgba(46,10,92,.62) 14%,rgba(128,48,230,.62) 52%,rgba(46,10,92,.58) 88%,rgba(8,2,18,0));-webkit-mask:url(${base}fx-brush.png?v=${FX_VERSION}) 0 0/100% 100% no-repeat;mask:url(${base}fx-brush.png?v=${FX_VERSION}) 0 0/100% 100% no-repeat;transform-origin:0 50%}
 .cfx-title .txt{position:absolute;left:0;right:0;top:50%;display:flex;justify-content:center;gap:.04em;transform:translateY(-56%) skewX(-7deg)}
 .cfx-title .txt span{display:inline-block;font:900 clamp(64px,11.5vw,156px)/1 ${CJK_SERIF};color:#fbf5ff;-webkit-text-stroke:2.5px #14061f;text-shadow:0 0 22px rgba(176,96,255,.95),0 0 4px rgba(255,255,255,.8),6px 7px 0 #0c0317}
 .cfx-title.grain .txt span{-webkit-mask:url(${base}fx-grain.png?v=${FX_VERSION}) center/100% 100%;mask:url(${base}fx-grain.png?v=${FX_VERSION}) center/100% 100%}
 .cfx-title .txt span.dot{font-size:.5em;align-self:center;margin:0 -.1em}
-.cfx-title.true .band{background:linear-gradient(180deg,rgba(255,255,255,0) 30%,rgba(255,200,240,.4) 50%,rgba(255,255,255,0) 70%),linear-gradient(90deg,rgba(8,2,18,0),rgba(70,6,60,.97) 14%,rgba(190,30,170,.97) 52%,rgba(70,6,60,.95) 88%,rgba(8,2,18,0))}
+.cfx-title.true .band{background:linear-gradient(180deg,rgba(255,255,255,0) 30%,rgba(255,200,240,.35) 50%,rgba(255,255,255,0) 70%),linear-gradient(90deg,rgba(8,2,18,0),rgba(70,6,60,.62) 14%,rgba(190,30,170,.62) 52%,rgba(70,6,60,.58) 88%,rgba(8,2,18,0))}
 .cfx-title.true .txt span{text-shadow:0 0 26px rgba(255,80,220,.95),0 0 4px rgba(255,255,255,.8),6px 7px 0 #1a0214}
 .cfx-title .sub{position:absolute;left:0;right:0;bottom:-6px;text-align:center;font:italic 700 13px/1 Georgia,serif;letter-spacing:.6em;color:#dccbff;text-shadow:0 1px 0 #000,0 0 10px rgba(160,100,255,.8)}
 @media (max-width:900px),(pointer:coarse){
  .cfx-combo{right:22%;top:24%}.cfx-combo .n{font-size:46px}.cfx-combo .h{font-size:13px}.cfx-combo .bar{width:92px}
  .cfx-banner{height:84px}.cfx-banner b{font-size:44px}.cfx-title{height:150px}.cfx-stamp{transform:scale(.75)}
  .cfx-dmg{font-size:15px}.cfx-dmg.h{font-size:23px}.cfx-dmg.s{font-size:26px}
+ .cfx-dmg.musou{font-size:30px}.cfx-dmg.musou.h{font-size:46px}.cfx-dmg.musou.s{font-size:52px}
+ .cfx-ko{left:50%;right:3%}.cfx-ko b{font-size:78px}.cfx-ko span{font-size:16px}.cfx-ko i{font-size:56px}
 }
 /* 手機橫向：連擊數移到右側按鈕上方，擊破橫幅與標題放在狀態卡下方，橫幅字級跟著螢幕寬縮小 */
 @media (max-height:500px) and (orientation:landscape){
@@ -792,7 +1095,8 @@ function createHud(container, settings, style = {}) {
     + '<div class="cfx-cutin"><div class="card"><div class="eyes"></div><div class="lines"></div></div></div>'
     + '<div class="cfx-combo"><span class="n">0</span><span class="h">HITS</span><span class="bar"><i></i></span></div>'
     + '<div class="cfx-banner"><div class="band"></div><b></b><small></small></div>'
-    + `<div class="cfx-title${settings.titleGrain ? ' grain' : ''}"><div class="band"></div><div class="txt"></div><div class="sub"></div></div>`;
+    + `<div class="cfx-title${settings.titleGrain ? ' grain' : ''}"><div class="band"></div><div class="txt"></div><div class="sub"></div></div>`
+    + '<div class="cfx-ko"><b>0</b><span>KO</span><i></i></div>';
   container.append(layer);
   const q = sel => layer.querySelector(sel);
   const el = {
@@ -800,13 +1104,14 @@ function createHud(container, settings, style = {}) {
     combo: q('.cfx-combo'), comboNum: q('.cfx-combo .n'), comboBar: q('.cfx-combo .bar i'),
     banner: q('.cfx-banner'), bannerText: q('.cfx-banner b'), bannerSub: q('.cfx-banner small'),
     title: q('.cfx-title'), titleBand: q('.cfx-title .band'), titleText: q('.cfx-title .txt'), titleChars: [], titleSub: q('.cfx-title .sub'),
+    ko: q('.cfx-ko'), koNum: q('.cfx-ko b'), koGrade: q('.cfx-ko i'),
   };
   const damage = [];
   for (let i = 0; i < settings.damageNumbers; i++) {
     const node = doc.createElement('div');
     node.className = 'cfx-dmg';
     layer.append(node);
-    damage.push({ node, age: 1, life: 0.7, x: 0, y: 0, z: 0, kind: '', shown: false });
+    damage.push({ node, age: 1, life: 0.7, x: 0, y: 0, z: 0, kind: '', shown: false, punchy: false });
   }
   const stamps = [];
   for (let i = 0; i < 2; i++) {
@@ -848,7 +1153,7 @@ function show(node, visible) {
  */
 export function createCombatFx(o) {
   const THREE = o.THREE;
-  const { scene, camera, renderer, hero } = o;
+  const { scene, camera, renderer, hero, heroModel } = o;
   const qualityName = typeof o.quality === 'string' ? o.quality : 'desktop';
   const q = { ...QUALITY[qualityName] || QUALITY.desktop, ...(typeof o.quality === 'object' ? o.quality : null) };
   const groundAt = o.groundAt || (() => 0);
@@ -894,6 +1199,12 @@ export function createCombatFx(o) {
   };
   const strips = createStripBatch(THREE, q.stripSlots, q.stripCols, stripTexture);
   scene.add(...particles.meshes, strips.mesh);
+  // 天刃 (musou-v2): 4 pooled meshes, only ever toggled visible / repositioned during the long-form musou finale.
+  const spiritBlade = createSpiritBlade(THREE);
+  const flameShroud = createFlameShroud(THREE);
+  const splitOverlay = createSplitOverlay(THREE);
+  const shockwave = createShockwave(THREE);
+  scene.add(spiritBlade.mesh, flameShroud.mesh, splitOverlay.mesh, shockwave.mesh);
   const echoes = createEchoes(THREE, scene, o.heroModel, q);
   const blade = createBladeSampler(THREE, o.sword);
   const hud = o.hud ? createHud(o.hud, q, o.hudStyle) : null;
@@ -933,7 +1244,19 @@ export function createCombatFx(o) {
   const hudFade = { value: 1, target: 1, applied: 1, targets: [].concat(o.hudFade || []).filter(Boolean) };
   const gauge = { full: false, targets: [].concat(o.gauge || []).filter(Boolean) };
   const overlay = { lines: 0, linesT: 1, linesDur: 0.4, flash: 0, flashT: 1, flashDur: 0.14, shade: 0, hurt: 0 };
-  const musou = { active: false, t: 0, swings: 0, endAt: 0, center: new THREE.Vector3() };
+  const musou = {
+    active: false, t: 0, swings: 0, endAt: 0, center: new THREE.Vector3(),
+    // 天刃 (long-form only): facing/total swings from the activation event, camera-cut bookkeeping, KO tally + reveal.
+    facing: undefined, totalSwings: 10, leapAt: null, cut: null, cutT: 0, cutSeed: 0, orbitBase: 0,
+    sessionKills: 0, koT: 9, koShown: -1, koGradeSet: false,
+  };
+  // Spirit blade / flame-shroud state machine: 'hidden' -> 'growing' -> 'held' (<-> 'sweeping') -> 'cleaving' -> 'fading'.
+  const spirit = { phase: 'hidden', t: 0, reveal: 0, angle: 0, sweepDur: 0.34, seed: 0 };
+  const cutUp = new THREE.Vector3(0, 1, 0), cutDown = new THREE.Vector3(0, -1, 0);
+  const cutTmp = new THREE.Vector3(), cutTmp2 = new THREE.Vector3(), cutQuat = new THREE.Quaternion();
+  const heroBody = new THREE.Vector3();
+  const splitState = { pending: false, active: false, t: 0, dur: 0.25 };
+  const shockState = { active: false, t: 0, dur: 0.55, x: 0, y: 0, z: 0, maxR: 4 };
   const hudState = { comboShown: -1, tier: -1, pulse: 0, pulseAmp: 0, fade: 0, bannerT: 9, stampPulse: 0, titleT: 9, hue: 0 };
   const flashes = [];                 // active enemy flash records
   const flashByRoot = new WeakMap();
@@ -1073,6 +1396,98 @@ export function createCombatFx(o) {
     flashes.length = 0;
   }
 
+  // ---- enemy occlusion (dither-fade enemies between the camera and the hero during the musou cuts) ----
+  // Per-enemy-root material clones, created once the first time that root needs to fade (never per frame/hit);
+  // prewarm() precompiles the alphaHash program on a sample enemy so the first real fade has no hitch.
+  const occlusionByRoot = new WeakMap();
+  const occlusionActive = new Set();
+  function occludeMaterial(source) {
+    const m = source.clone();
+    m.transparent = true;
+    m.alphaHash = true;
+    m.alphaTest = 0;
+    m.depthWrite = true;
+    m.opacity = 1;
+    if (source.onBeforeCompile) m.onBeforeCompile = source.onBeforeCompile;
+    return m;
+  }
+  function ensureOcclusion(root) {
+    let rec = occlusionByRoot.get(root);
+    if (rec) return rec;
+    rec = { meshes: [], originals: [], clones: [], alpha: 0 };
+    root.traverse(object => {
+      if (!object.isMesh || !object.material || Array.isArray(object.material)) return;
+      rec.meshes.push(object); rec.originals.push(object.material); rec.clones.push(occludeMaterial(object.material));
+    });
+    occlusionByRoot.set(root, rec);
+    return rec;
+  }
+  function applyOcclusion(rec) {
+    for (let i = 0; i < rec.meshes.length; i++) {
+      const clone = rec.clones[i];
+      clone.opacity = 1 - rec.alpha * 0.82;   // dither down toward ~18% density, never fully invisible (readable silhouette)
+      if (rec.meshes[i].material !== clone) rec.meshes[i].material = clone;
+    }
+  }
+  function restoreOcclusion(rec) {
+    for (let i = 0; i < rec.meshes.length; i++) if (rec.meshes[i].material !== rec.originals[i]) rec.meshes[i].material = rec.originals[i];
+  }
+  const occCam = new THREE.Vector3(), occDir = new THREE.Vector3(), occAt = new THREE.Vector3(), occTo = new THREE.Vector3();
+  const occHeroChest = new THREE.Vector3(), occHeroNdc = new THREE.Vector3(), occAtNdc = new THREE.Vector3();
+  const OCC_HERO_RADIUS = 0.55, OCC_ENEMY_RADIUS = 0.55, OCC_NEAR_CAM = 2.5;
+  function updateOcclusion(dt, enemiesMap) {
+    if (!enemiesMap || !enemiesMap.size) return;
+    camera.getWorldPosition(occCam);
+    camera.getWorldDirection(occDir);
+    heroChest(occHeroChest);
+    occTo.subVectors(occHeroChest, occCam);
+    const heroDist = Math.max(0.001, occTo.length());
+    const heroForwardDist = occTo.dot(occDir);
+    const vFov = THREE.MathUtils.degToRad(camera.fov || 50) / 2;
+    const hFov = Math.atan(Math.tan(vFov) * (camera.aspect || 16 / 9));
+    // only fade an enemy that actually blocks the hero, not the whole ring around/behind her (round-4 fix: the
+    // previous view-frustum-cone + absolute-distance test faded almost every enemy in shot, killing the "enemies
+    // launched everywhere" payoff). "Blocks" = its own projected screen-space footprint (a small NDC box built from
+    // an assumed body radius, projected the same way the hero's is) overlaps the hero's (expanded ~15%) AND it is
+    // nearer the camera than she is -- or it is simply right on top of the camera regardless of angle.
+    let heroOnScreen = false, heroRx = 0, heroRy = 0;
+    if (heroForwardDist > 0.05) {
+      occHeroNdc.copy(occHeroChest).project(camera);
+      heroRx = (OCC_HERO_RADIUS / heroForwardDist) / Math.tan(hFov) * 1.15;
+      heroRy = (OCC_HERO_RADIUS / heroForwardDist) / Math.tan(vFov) * 1.15;
+      heroOnScreen = true;
+    }
+    for (const actor of enemiesMap.values()) {
+      const root = actor?.root;
+      if (!root) continue;
+      let target = 0;
+      if (musou.active) {
+        root.getWorldPosition(occAt); occAt.y += 1.0;   // approximate chest height, like heroChest()
+        occTo.subVectors(occAt, occCam);
+        const dist = occTo.length();
+        const forwardDist = occTo.dot(occDir);
+        if (dist < OCC_NEAR_CAM) target = 1;
+        else if (heroOnScreen && forwardDist > 0.05 && dist < heroDist - 0.05) {
+          occAtNdc.copy(occAt).project(camera);
+          const ex = (OCC_ENEMY_RADIUS / forwardDist) / Math.tan(hFov);
+          const ey = (OCC_ENEMY_RADIUS / forwardDist) / Math.tan(vFov);
+          if (Math.abs(occAtNdc.x - occHeroNdc.x) < heroRx + ex && Math.abs(occAtNdc.y - occHeroNdc.y) < heroRy + ey) target = 1;
+        }
+      }
+      let rec = occlusionByRoot.get(root);
+      if (!rec) { if (target < 0.01) continue; rec = ensureOcclusion(root); }
+      const wasVisible = rec.alpha > 0.015;
+      rec.alpha += (target - rec.alpha) * Math.min(1, dt * (target > rec.alpha ? 7 : 3));
+      const visible = rec.alpha > 0.015;
+      if (visible !== wasVisible) { if (visible) occlusionActive.add(rec); else { occlusionActive.delete(rec); restoreOcclusion(rec); } }
+      if (visible) applyOcclusion(rec);
+    }
+  }
+  function releaseOcclusion() {
+    for (const rec of occlusionActive) { restoreOcclusion(rec); rec.alpha = 0; }
+    occlusionActive.clear();
+  }
+
   // ---- hit / kill / slam recipes ----
   function hitCentre(target, ground, out) {
     if (target) {
@@ -1199,6 +1614,7 @@ export function createCombatFx(o) {
     killTimes.push({ t: realTime, x: at.x, z: at.z });
     const before = kills;
     kills++;
+    if (musou.active) musou.sessionKills++;   // tally for the "NN KO" counter shown at the end of this musou
     const milestone = crossedMilestone(before, kills);
     if (milestone && hud) banner(`${milestone}人斬`, `KILL COUNT ${milestone}`);
     if (big) officerDown(event, pos, at, milestone);
@@ -1390,12 +1806,26 @@ export function createCombatFx(o) {
       musou.isTrue = musou.isTrue || isTrue;
       if (longForm || event.flurry) { musou.longForm = true; musou.timeline = readTimeline(event, musou.isTrue); }
       if (Array.isArray(event.timeScale)) musou.curve = event.timeScale;
+      // Arena 先送 'special' 再送 'musouStart'：躍起時間與揮刀數只在後者，這裡要補進來
+      if (Number.isFinite(event.leapAt)) musou.leapAt = event.leapAt;
+      if (Array.isArray(event.swings)) musou.totalSwings = event.swings.length;
       if (authored && !musou.authored) { musou.authored = true; slow.cancel('musou'); }
       return;
     }
-    Object.assign(musou, { active: true, t: 0, g: 0, swings: 0, endAt: Infinity, isTrue, finished: false, longForm: longForm || !!event.flurry, leadIn: false, impactT: -1, cutinT: 9, authored, curve: Array.isArray(event.timeScale) ? event.timeScale : null, hitstopSwing: -1 });
+    Object.assign(musou, {
+      active: true, t: 0, g: 0, swings: 0, endAt: Infinity, isTrue, finished: false, longForm: longForm || !!event.flurry, leadIn: false, impactT: -1, cutinT: 9,
+      authored, curve: Array.isArray(event.timeScale) ? event.timeScale : null, hitstopSwing: -1,
+      facing: Number.isFinite(event.facing) ? event.facing : undefined,
+      totalSwings: Array.isArray(event.swings) ? event.swings.length : 10,
+      leapAt: Number.isFinite(event.leapAt) ? event.leapAt : null,
+      cut: null, cutT: 0, sessionKills: 0, koT: 9, koShown: -1, koGradeSet: false,
+    });
     musou.timeline = readTimeline(event, isTrue);
     musou.center.copy(hero.position);
+    spirit.phase = 'hidden'; spirit.t = 0; spirit.reveal = 0; spirit.angle = 0;
+    spiritBlade.mesh.visible = false; flameShroud.mesh.visible = false;
+    splitState.pending = false; splitState.active = false; splitOverlay.mesh.visible = false;
+    shockState.active = false; shockwave.mesh.visible = false;
     // activation: hard freeze (unless the game authors it and sends 'musouFreeze')
     if (!authored) slow.play([[0.08, 0]], { ramp: 0.04, force: true, tag: 'musou' });
     screenFlash(isTrue ? 0.4 : 0.3, 0.16);
@@ -1430,6 +1860,20 @@ export function createCombatFx(o) {
     const tint = MUSOU_TINT[musou.isTrue ? 'true' : 'normal'];
     const flurry = musou.longForm || musou.swings > 3;
     const k = flurry ? 0.75 : 1;
+    // 天刃: the swings named in event.sweeps sweep the spirit blade 360° around the arena (combat-fx side of the
+    // effect; battle.js launches the enemies inside the radius using the same event since the sim stays 2D).
+    if (musou.longForm && event.sweep) {
+      spirit.phase = 'sweeping'; spirit.t = 0; spirit.angle = 0; spirit.sweepDur = 0.34;
+      // (round 4) this ring used to sit safely outside CUT2's old, much farther-back camera; now that CUT2/leap sit
+      // only ~3 m from the hero (item 3, round 3), a 6+ m elevated ring at chest height was being viewed from
+      // beside/inside it -- a large, nearly edge-on flat annulus reads as a big hazy sheet with a hard straight
+      // edge cutting across the frame. Sized down (and narrower) so it stays clear of the closer cameras.
+      const sweepRadius = Math.max(radius * 1.1, 3.2);
+      const sw = slashArc(tmp2.set(x, y + 1.1, z), tmp3.set(1, 0, 0), e1.set(0, 0, 1), sweepRadius,
+        { width: 0.32, angle: 0, sweep: 6.5, life: 0.5, row: STRIP_ROWS.wind, color: [tint[0] * 1.35, tint[1] * 1.5, tint[2] * 1.25], grow: 0.06 });
+      sw.reveal = spirit.sweepDur; sw.spin = 0;
+      addTrauma(0.3);
+    }
     groundRing(x, y + 0.06, z, 0.4, radius * (flurry ? 0.7 : 1.05), { life: 0.42, width: 0.7, color: [tint[0] * 1.15, tint[1] * 1.3, tint[2] * 1.1] });
     if (!flurry || musou.swings % 2) groundRing(x, y + 0.05, z, 0.3, radius * 0.7 * k, { life: 0.6, width: 1.2, row: STRIP_ROWS.dust, color: [0.5, 0.45, 0.62], alpha: 0.5, mode: 1 });
     for (let i = 0; i < count(flurry ? 5 : 8); i++) {
@@ -1466,11 +1910,12 @@ export function createCombatFx(o) {
       if (isTrue) slow.play([[0.05, 0], [0.5, 0.15]], { ramp: 0.3, force: true, tag: 'musou' });
       else slow.play([[0.05, 0], [0.3, 0.3]], { ramp: 0.3, force: true, tag: 'musou' });
     }
-    slam(x, z, { radius: radius * 0.6, debris: 18, palette: 'violet' });
+    slam(x, z, { radius: radius * 0.4, debris: 18, palette: 'violet' });
     groundRing(x, y + 0.09, z, 0.5, radius * 1.1, { life: 0.6, width: 1.1, color: [tint[0] * 1.3, tint[1] * 1.5, tint[2] * 1.2] });
     groundRing(x, y + 0.07, z, 0.3, radius * 0.75, { life: 0.8, width: 0.6, color: [2.2, 2.0, 2.6], alpha: 0.8 });
     groundRing(x, y + 0.05, z, 0.5, radius * 0.95, { life: 0.9, width: 1.8, row: STRIP_ROWS.dust, color: [0.5, 0.45, 0.62], alpha: 0.7, mode: 1 });
-    pillar(x, y, z, 0.25, 0.75, 7, { life: 0.4, color: [tint[0] * 1.1, tint[1] * 1.3, tint[2]], alpha: 0.75 });
+    // (f) smaller, shaped pillar instead of a screen-tall column
+    pillar(x, y, z, 0.12, 0.34, 2.6, { life: 0.28, color: [tint[0] * 1.15, tint[1] * 1.35, tint[2] * 1.05], alpha: 0.55 });
     for (let i = 0; i < count(16); i++) {
       const a = rnd(0, Math.PI * 2), r = rnd(1.0, radius * 0.8);
       particles.emit(STYLE.wisp, x + Math.cos(a) * r, y + 0.1, z + Math.sin(a) * r, 0, rnd(12, 20), 0, rnd(0.3, 0.5), rnd(0.06, 0.1), 0.02, 1.3, 0.8, 2.3, 1);
@@ -1480,22 +1925,27 @@ export function createCombatFx(o) {
       particles.emit(STYLE.shard, x + Math.cos(a) * 0.6, y + rnd(0.4, 1.8), z + Math.sin(a) * 0.6, Math.cos(a) * sp, rnd(1, 6), Math.sin(a) * sp,
         rnd(0.5, 0.8), rnd(0.15, 0.28), 0.06, tint[0] * 0.8, tint[1] * 0.7, tint[2], 1);
     }
-    if (isTrue) for (let i = 0; i < count(26); i++) {
-      const a = rnd(0, Math.PI * 2), r = rnd(0.5, radius * 0.7);
-      particles.emit(STYLE.flame, x + Math.cos(a) * r, y + 0.1, z + Math.sin(a) * r, Math.cos(a) * 1.5, rnd(1, 3), Math.sin(a) * 1.5,
-        rnd(0.5, 0.9), rnd(0.5, 0.9), 0.2, 1.7, 0.4, 1.8, 1, rnd(-0.3, 0.3));
-    }
+    // (真・無雙 no longer bursts atlas "flame" (petal-shaped) particles here -- the flameShroud shader mesh already
+    // covers her ambient fire, and this burst's long life used to sit on screen for seconds under the finisher's
+    // slow-mo, reading as stray pink teardrops in the 07/08 shots.)
     // lifetimes are game time: under the 0.3x / 0.15x finisher they already last 0.3-0.6 s on screen
     particles.emit(STYLE.impact, x, y + 1.0, z, 0, 0, 0, 0.09, 1.6, 3.2, 2.4, 2.0, 2.8, 1, rnd(0, 6.28), 0);
     particles.emit(STYLE.flare, x, y + 1.1, z, 0, 0, 0, 0.1, 1.8, 3.6, 2.2, 1.9, 2.8, 0.7, 0, 0);
     cam.calm = false;
     fovPunch(-10, 0.6);
     speedLines(0.65, 1);
-    screenFlash(0.85, isTrue ? 0.15 : 0.1);
+    // (f) short sharp flash instead of a whole-screen whiteout: high but brief, ≤ 0.08 s
+    screenFlash(0.55, 0.07);
     addTrauma(0.7);
     haptic([40, 30, 90]);
-    if (isTrue && hud) musou.cutinT = -0.12;       // portrait card right after the blast, before recovery
     musou.endAt = musou.t + (isTrue ? 1.0 : 0.75);
+    if (musou.longForm) {
+      // 天刃 CUT 3: the vertical cleave freeze -> one framebuffer capture (done in cameraPost) -> sliding screen
+      // split -> fade, plus a fake-distortion ground shockwave; both are pooled meshes, only toggled here.
+      splitState.pending = true; splitState.t = 0;
+      shockState.active = true; shockState.t = 0; shockState.x = x; shockState.y = y + 0.03; shockState.z = z;
+      shockState.maxR = Math.max(3.5, radius * 1.2);
+    }
   }
   function updateMusou(realDt, gameDt) {
     const g = cam.goal;
@@ -1528,20 +1978,129 @@ export function createCombatFx(o) {
         speedLines(0.8, 0.7);
       }
     }
-    overlay.shade = t < 0.1 ? t / 0.1 * 0.34 : musou.impactT >= 0 ? Math.max(0, 0.34 - (t - musou.impactT) * 0.6) : 0.34;
+    let shade = t < 0.1 ? t / 0.1 * 0.34 : musou.impactT >= 0 ? Math.max(0, 0.34 - (t - musou.impactT) * 0.6) : 0.34;
+    // leap wind-down (3.3-3.6 s / 4.1-4.4 s): darken further while the world is at 0.3x and she leaps
+    if (musou.longForm && musou.impactT < 0 && Number.isFinite(musou.leapAt) && musou.g >= musou.leapAt) {
+      const leapP = Math.min(1, (musou.g - musou.leapAt) / Math.max(0.05, tl.finish - musou.leapAt));
+      shade = Math.max(shade, 0.34 + 0.3 * leapP);
+    }
+    overlay.shade = shade;
+    // hard camera cuts (天刃 long form only): CUT 1 low-angle title/blade-grow, CUT 2 high wide orbit (+leap),
+    // CUT 3 behind/below for the cleave. cameraPre() reads musou.cut every frame; short-form musou never sets it.
+    if (musou.longForm) {
+      const cut = musou.impactT >= 0 ? 'cut3'
+        : (Number.isFinite(musou.leapAt) && musou.g >= musou.leapAt) ? 'leap'
+        : musou.g >= tl.windup ? 'cut2' : musou.t >= 0.08 ? 'cut1' : null;
+      if (cut !== musou.cut) {
+        musou.cut = cut; musou.cutT = 0; musou.cutSeed = rand();
+        if (cut) fovPunch(cut === 'cut2' ? -3 : cut === 'leap' ? 4 : 6, 0.2);
+        // (round 4) portrait cut-in moved from right-after-the-blast (where it covered her face during the cleave
+        // frame) to the start of the leap: it plays out during the leap's own slow-mo, well clear of the cleave.
+        if (cut === 'leap' && musou.isTrue && hud) musou.cutinT = -0.12;
+      }
+      else musou.cutT += realDt;
+    } else musou.cut = null;
     if (heroAction !== 'special' && t > 0.8 && !Number.isFinite(musou.endAt) && !musou.longForm) musou.endAt = t + 0.3;
     if (musou.longForm && musou.g > tl.end + 0.4 && !Number.isFinite(musou.endAt)) musou.endAt = t;   // safety
     if (t > musou.endAt) { endMusou(); return; }
-    // flames licking up around her while the aura is on (真・無雙: more, larger, magenta-violet, and on the blade)
-    const tint = MUSOU_TINT[musou.isTrue ? 'true' : 'normal'];
-    if (rand() < realDt * (musou.isTrue ? 90 : 50)) {
-      const a = rnd(0, Math.PI * 2), r = rnd(0.15, 0.6), y = hero.position.y;
-      particles.emit(STYLE.flame, hero.position.x + Math.cos(a) * r, y + rnd(0, 1.3), hero.position.z + Math.sin(a) * r, 0, rnd(1.2, 2.6), 0,
-        rnd(0.25, 0.45), rnd(0.16, musou.isTrue ? 0.42 : 0.32), 0.06, tint[0] * 0.8, tint[1] * 0.7, tint[2] * 0.95, 0.9, rnd(-0.25, 0.25));
+    // (8) normal musou only: a few atlas-particle flames licking up around her. 真・無雙's feet/body fire is the
+    // flameShroud shader mesh instead (updateSpirit), so it never looks like the old "petal" particles.
+    if (!musou.isTrue) {
+      const tint = MUSOU_TINT.normal;
+      if (rand() < realDt * 50) {
+        const a = rnd(0, Math.PI * 2), r = rnd(0.15, 0.6), y = hero.position.y;
+        particles.emit(STYLE.flame, hero.position.x + Math.cos(a) * r, y + rnd(0, 1.3), hero.position.z + Math.sin(a) * r, 0, rnd(1.2, 2.6), 0,
+          rnd(0.25, 0.45), rnd(0.16, 0.32), 0.06, tint[0] * 0.8, tint[1] * 0.7, tint[2] * 0.95, 0.9, rnd(-0.25, 0.25));
+      }
     }
-    if (musou.isTrue && blade?.count && rand() < realDt * 40) {
-      const tip = blade.tip(0, tmp);
-      particles.emit(STYLE.flame, tip.x, tip.y, tip.z, 0, rnd(0.5, 1.2), 0, rnd(0.25, 0.4), rnd(0.2, 0.35), 0.08, 1.6, 0.45, 1.9, 0.9, rnd(-0.3, 0.3));
+    updateSpirit(realDt, gameDt);
+  }
+  /** Spirit blade + 真・無雙 flame shroud transform/reveal per phase (see the `spirit` state comment above). */
+  function updateSpirit(realDt, gameDt) {
+    if (!musou.active || !musou.longForm) {
+      if (spirit.phase !== 'hidden') { spirit.phase = 'hidden'; spirit.reveal = 0; spiritBlade.mesh.visible = false; flameShroud.mesh.visible = false; }
+      return;
+    }
+    const t = musou.g, isTrue = musou.isTrue;
+    if (spirit.phase === 'hidden' && musou.t >= 0.08) { spirit.phase = 'growing'; spirit.t = 0; spirit.seed = rand() * 100; }
+    else if (spirit.phase === 'growing') {
+      spirit.t += gameDt; spirit.reveal = Math.min(1, spirit.t / 0.4);
+      if (spirit.reveal >= 1) spirit.phase = 'held';
+    } else if (spirit.phase === 'sweeping') {
+      spirit.t += realDt; spirit.angle += realDt * (Math.PI * 2 / spirit.sweepDur);
+      if (spirit.t >= spirit.sweepDur) spirit.phase = 'held';
+    }
+    if (musou.impactT >= 0) {
+      if (spirit.phase !== 'cleaving' && spirit.phase !== 'fading') { spirit.phase = 'cleaving'; spirit.t = 0; }
+      if (spirit.phase === 'cleaving') { spirit.t += realDt; if (spirit.t > 0.28) { spirit.phase = 'fading'; spirit.t = 0; } }
+      if (spirit.phase === 'fading') {
+        spirit.t += realDt; spirit.reveal = Math.max(0, 1 - spirit.t / 0.5);
+        if (spirit.reveal <= 0.01) { spirit.phase = 'hidden'; spiritBlade.mesh.visible = false; flameShroud.mesh.visible = false; return; }
+      }
+    }
+    if (spirit.phase === 'hidden') return;
+    const f = heroForward(fwd, musou.facing);
+    const length = spirit.phase === 'sweeping' ? 7 : 6;
+    if (spirit.phase === 'sweeping') {
+      cutTmp.set(hero.position.x, hero.position.y + 1.1, hero.position.z);
+      cutTmp2.set(Math.cos(spirit.angle), 0, Math.sin(spirit.angle));
+      cutQuat.setFromUnitVectors(cutUp, cutTmp2);
+    } else if (spirit.phase === 'cleaving' || spirit.phase === 'fading') {
+      const p = Math.min(1, spirit.t / 0.28);
+      cutTmp.set(hero.position.x, hero.position.y + 1.4 + 6.5 * (1 - easeOut(p)), hero.position.z);
+      cutQuat.setFromUnitVectors(cutUp, cutDown);
+    } else {
+      cutTmp.set(hero.position.x + f.x * 0.18, hero.position.y + 1.1, hero.position.z + f.z * 0.18);
+      cutTmp2.set(f.x * 0.32, 0.94, f.z * 0.32).normalize();
+      cutQuat.setFromUnitVectors(cutUp, cutTmp2);
+    }
+    spiritBlade.mesh.visible = true;
+    spiritBlade.mesh.position.copy(cutTmp);
+    spiritBlade.mesh.quaternion.copy(cutQuat);
+    spiritBlade.mesh.scale.set(BLADE_WIDTH, length, BLADE_WIDTH);
+    spiritBlade.mesh.updateMatrixWorld(true);
+    spiritBlade.material.uniforms.uTime.value = realTime;
+    spiritBlade.material.uniforms.uReveal.value = spirit.reveal;
+    spiritBlade.material.uniforms.uOpacity.value = 1;   // was never set before -- the blade was fully transparent
+    const tint = MUSOU_TINT[isTrue ? 'true' : 'normal'];
+    spiritBlade.material.uniforms.uColor.value.setRGB(tint[0] * 0.85, tint[1] * 0.7, tint[2]);
+    if (isTrue) {
+      // (8) same mesh/material as the blade wrap: the geometry also carries a ground/body flame ring (aBlade=0,
+      // transformed by the mesh's own hero-anchored matrix) alongside the blade-wrap quads (aBlade=1, transformed
+      // by uBladeMatrix, fed from the spirit blade's own matrix above) -- one draw call for both.
+      flameShroud.mesh.visible = true;
+      flameShroud.mesh.position.set(hero.position.x, hero.position.y, hero.position.z);
+      flameShroud.mesh.quaternion.identity();
+      flameShroud.mesh.scale.set(1, 1, 1);
+      flameShroud.material.uniforms.uBladeMatrix.value.copy(spiritBlade.mesh.matrixWorld);
+      flameShroud.material.uniforms.uTime.value = realTime;
+      flameShroud.material.uniforms.uSeed.value = spirit.seed;
+      flameShroud.material.uniforms.uOpacity.value = spirit.reveal * 0.9;
+    } else if (flameShroud.mesh.visible) flameShroud.mesh.visible = false;
+  }
+  /** Post-cleave screen split (framebuffer already captured in cameraPost) and the ground shockwave ring. */
+  function updateSplitShock(realDt) {
+    if (splitState.active) {
+      splitState.t += realDt;
+      const p = splitState.t / splitState.dur;
+      if (p >= 1 || !splitOverlay.texture) { splitState.active = false; splitOverlay.mesh.visible = false; }
+      else {
+        splitOverlay.mesh.visible = true;
+        splitOverlay.material.uniforms.uSep.value = 0.035 + 0.11 * easeOut(Math.min(1, p / 0.6));
+        splitOverlay.material.uniforms.uAlpha.value = p < 0.45 ? 1 : 1 - (p - 0.45) / 0.55;
+      }
+    }
+    if (shockState.active) {
+      shockState.t += realDt;
+      const p = shockState.t / shockState.dur;
+      if (p >= 1) { shockState.active = false; shockwave.mesh.visible = false; }
+      else {
+        shockwave.mesh.visible = true;
+        shockwave.mesh.position.set(shockState.x, shockState.y, shockState.z);
+        shockwave.material.uniforms.uRadius.value = shockState.maxR * easeOut(p);
+        shockwave.material.uniforms.uWidth.value = Math.max(0.4, shockState.maxR * 0.35 * (1 - p * 0.6));
+        shockwave.material.uniforms.uOpacity.value = 1 - smooth01((p - 0.55) / 0.45);
+      }
     }
   }
   function updateOfficerCam(realDt) {
@@ -1608,7 +2167,10 @@ export function createCombatFx(o) {
     const d = hud.damage[hud.damageRing.next()];
     d.x = at.x + rnd(-0.25, 0.25); d.y = at.y + 0.5 + rnd(0, 0.3); d.z = at.z + rnd(-0.25, 0.25);
     d.age = 0; d.life = kind ? 0.85 : 0.6; d.kind = kind;
-    d.node.className = kind ? `cfx-dmg ${kind}` : 'cfx-dmg';
+    // (c) ~2x bigger during musou, and heavy/special ones get a punchier pop + a brief shake
+    const musouTag = musou.active ? ' musou' : '';
+    d.punchy = musou.active && (kind === 'h' || kind === 's');
+    d.node.className = `cfx-dmg${kind ? ` ${kind}` : ''}${musouTag}`;
     d.node.textContent = String(Math.max(1, Math.round(value)));
     show(d.node, true);
   }
@@ -1619,14 +2181,14 @@ export function createCombatFx(o) {
   }
   function setTitle(isTrue) {
     const el = hud.el;
-    const text = isTrue ? '真・魂門亂舞' : '魂門亂舞';
+    const text = isTrue ? '真・無雙' : '天刃亂舞';
     if (el.titleText.dataset.text !== text) {
       el.titleText.dataset.text = text;
       el.titleText.innerHTML = [...text].map(ch => `<span${ch === '・' ? ' class="dot"' : ''}>${ch}</span>`).join('');
       el.titleChars = [...el.titleText.children];
     }
     el.title.classList.toggle('true', isTrue);
-    el.titleSub.textContent = isTrue ? 'TRUE SOUL GATE RAMPAGE' : 'SOUL GATE RAMPAGE';
+    el.titleSub.textContent = isTrue ? 'TRUE HEAVEN BLADE RAMPAGE' : 'HEAVEN BLADE RAMPAGE';
   }
   function banner(text, sub) {
     hud.el.bannerText.textContent = text;
@@ -1667,8 +2229,10 @@ export function createCombatFx(o) {
       const t = d.age / d.life;
       const s = toScreen(d.x, d.y + t * 0.55, d.z, width, height);
       if (!s) { show(d.node, false); continue; }
-      const pop = d.age < 0.08 ? 1.7 - d.age / 0.08 * 0.7 : 1;
-      d.node.style.transform = `translate3d(${s.x.toFixed(1)}px,${s.y.toFixed(1)}px,0) translate(-50%,-50%) scale(${pop.toFixed(3)})`;
+      const pop = d.age < 0.08 ? (d.punchy ? 2.1 : 1.7) - d.age / 0.08 * (d.punchy ? 1.0 : 0.7) : 1;
+      const shakeAmp = d.punchy ? Math.max(0, 1 - d.age / 0.14) * 3.2 : 0;
+      const jitterX = shakeAmp ? Math.sin(realTime * 90 + d.x * 17) * shakeAmp : 0;
+      d.node.style.transform = `translate3d(${(s.x + jitterX).toFixed(1)}px,${s.y.toFixed(1)}px,0) translate(-50%,-50%) scale(${pop.toFixed(3)})`;
       d.node.style.opacity = (t < 0.7 ? 1 : 1 - (t - 0.7) / 0.3).toFixed(3);
     }
     // 破 stamps
@@ -1728,6 +2292,27 @@ export function createCombatFx(o) {
         el.cutinCard.style.transform = `translateX(${x.toFixed(1)}%) skewY(-4deg)`;
       }
     } else if (el.cutin.style.display !== 'none') show(el.cutin, false);
+    // (d) big centred "NN KO" counter + 撃/斬/破/天 grade stamp, shown from the impact to the end of the musou
+    if (musou.active && musou.impactT >= 0) {
+      const s = musou.t - musou.impactT;
+      const revealDelay = 0.1, countDur = 0.28, holdFor = 0.62;   // fits inside musouFinisher's 0.75 s (真 1.0 s) recovery window
+      show(el.ko, s < holdFor);
+      if (s < holdFor) {
+        const p = Math.min(1, Math.max(0, (s - revealDelay) / countDur));
+        const shown = Math.round(easeOut(p) * musou.sessionKills);
+        if (shown !== musou.koShown) { musou.koShown = shown; el.koNum.textContent = String(shown); }
+        const inT = Math.min(1, Math.max(0, (s - revealDelay) / 0.08));
+        el.ko.style.opacity = inT.toFixed(3);
+        el.ko.style.transform = `translate(0,0) scale(${(1 + Math.max(0, 1 - (s - revealDelay) / 0.16) * 0.35).toFixed(3)})`;
+        const gradeT = s - (revealDelay + countDur);
+        if (gradeT > 0) {
+          if (!musou.koGradeSet) { musou.koGradeSet = true; el.koGrade.textContent = koGrade(musou.sessionKills); }
+          const gp = Math.min(1, gradeT / 0.18);
+          el.koGrade.style.opacity = gp.toFixed(3);
+          el.koGrade.style.transform = `translateX(-50%) scale(${(1.6 - 0.6 * easeOut(gp)).toFixed(3)})`;
+        } else el.koGrade.style.opacity = 0;
+      }
+    } else { show(el.ko, false); musou.koShown = -1; musou.koGradeSet = false; }
     // full-screen overlays
     overlay.linesT += realDt / overlay.linesDur;
     const lines = overlay.linesT < 1 ? overlay.lines * (overlay.linesT < 0.15 ? overlay.linesT / 0.15 : 1 - smooth01((overlay.linesT - 0.4) / 0.6)) : 0;
@@ -1890,9 +2475,13 @@ export function createCombatFx(o) {
       case 'musouFinish': musouFinisher(event); break;
       case 'hitstop': {
         // Hit-stop is presentation time: battle.js drops its own hitstopUntil and multiplies dt by timeScale().
-        // During the musou flurry only the first connecting hit of each swing stops the world, for 0.04 s.
+        // During the musou flurry only the first connecting hit of each swing stops the world; the 天刃 schedule
+        // is data-driven (swingHitstop): it starts longer and shortens toward the last swing (accelerating rhythm).
         if (musou.active && musou.longForm && !musou.finished) {
-          if (musou.hitstopSwing !== musou.swings) { musou.hitstopSwing = musou.swings; slow.play([[0.04, 0.05]], { ramp: 0, tag: 'hitstop' }); }
+          if (musou.hitstopSwing !== musou.swings) {
+            musou.hitstopSwing = musou.swings;
+            slow.play([[swingHitstop(musou.swings - 1, musou.totalSwings), 0.05]], { ramp: 0, tag: 'hitstop' });
+          }
         } else if (!musou.active) slow.play([[(event.duration || 0.035) * 2, 0.06]], { ramp: 0, tag: 'hitstop' });
         break;
       }
@@ -1993,11 +2582,13 @@ export function createCombatFx(o) {
       echoes.snapshot(musou.active ? 1 : 0.8, musou.active ? 0.3 : 0.24);
     }
     if (!attacking && move.kind !== 'dodge') move.echo = false;
-    const auraTarget = musou.active ? (musou.isTrue ? 1.35 : 1) : 0;
+    const auraTarget = musou.active ? (musou.isTrue ? 0.85 : 0.62) : 0;
     trailState.aura = (trailState.aura || 0) + (auraTarget - (trailState.aura || 0)) * Math.min(1, realDt * 8);
     trailState.auraPulse = Math.max(0, (trailState.auraPulse || 0) - realDt * 3);   // glow flash at activation
     echoes.update(fxDt, realTime, trailState.aura + trailState.auraPulse * 1.5);
     updateFlashes(realDt);
+    updateOcclusion(realDt, state.enemies);
+    updateSplitShock(realDt);
     sweepAirborne();
     groupBurstCheck();
     writeItems(fxDt);
@@ -2026,9 +2617,57 @@ export function createCombatFx(o) {
   }
 
   const pivot = new THREE.Vector3();
+  /** Hard camera cuts for the 天刃 long-form finale (CUT 1/2/LEAP/3); replaces the eased offset rig while active. */
+  function applyCameraCut(c, cut) {
+    const f = heroForward(fwd, musou.facing);
+    const hp = hero.position, gy = groundAt(hp.x, hp.z);
+    // battle.js applies its procedural leap lift (up to ~1.5 m) to heroModel.position.y, a child of the hero group --
+    // hp.y (the group's own position) never sees it. Reading heroModel's actual world Y (no per-frame allocation:
+    // heroBody is a preallocated scratch vector) and folding the delta into both the camera height and the look-at
+    // target keeps her full body (and some headroom) in frame through the whole leap instead of just at ground pose.
+    const lift = heroModel ? heroModel.getWorldPosition(heroBody).y - hp.y : 0;
+    if (cut === 'cut1') {           // low-angle close front shot, looking up at her face/blade
+      cutTmp.set(hp.x + f.x * 2.0, gy + 0.55, hp.z + f.z * 2.0);
+      cutTmp2.set(hp.x - f.x * 0.25, hp.y + 1.55, hp.z - f.z * 0.25);
+    } else if (cut === 'cut2') {    // 3/4 high angle, close enough the hero reads at ~25-28% of frame height.
+      // Round 4: the round-3 tuning (radius:3/height:2.2, ~36°) was close enough to graze a level prop/backdrop
+      // that's invisible in fx-preview's own scene but present in the real march level -- it read as a big flat
+      // hard-edged translucent sheet in-game. Confirmed by bisection on real in-game shots (clean at the original
+      // radius:6/height:4.4, reproduces by radius:3.2/height:2.35, clean again here) that this is a MINIMUM-DISTANCE
+      // threshold, not an angle/direction one (tested steeper pitch, near-top-down, a lateral approach, and a much
+      // farther pull-back -- all either kept the exact same artifact or removed it only by going back out to ~7 m,
+      // which regresses hero size). This is the closest distance that reliably stayed clean across bisection.
+      const ang = musou.cutSeed * Math.PI * 2 + musou.g * 0.35;
+      cutTmp.set(hp.x + Math.cos(ang) * 3.75, gy + 2.75, hp.z + Math.sin(ang) * 3.75);
+      cutTmp2.set(hp.x, hp.y + 0.85, hp.z);
+    } else if (cut === 'leap') {    // pulled back and up, tilted DOWN (never up) so no camera geometry choice can
+      // expose the arena backdrop's edge (a finite sky card; some hero facings showed a visible seam when this
+      // looked up, even slightly). Round 5: both the camera height and the look-at target track `lift` (see above)
+      // so she doesn't rise out of frame as she leaps.
+      cutTmp.set(hp.x - f.x * 2.6, gy + 2.8 + lift, hp.z - f.z * 2.6);
+      cutTmp2.set(hp.x, hp.y + 0.7 + lift, hp.z);
+    } else {                        // behind/below at the same safe downward pitch, pulled back further still;
+      // eases back even more so the launched enemies falling around her stay in frame (07/08). Distance/height are
+      // both scaled down ~2.6x from the previous tuning (uniformly, so the pitch ratio -- and the anti-backdrop-edge
+      // guarantee -- is unchanged) so the cleave now reads at ~35% of frame height in the real march level. Round 5:
+      // also tracks `lift`, in case any residual leap lift hasn't settled back to baseline right at the cut3 handoff.
+      const s = Math.max(0, musou.t - musou.impactT);
+      const p = smooth01((s - 0.3) / 0.5);
+      const dist = 2.0 + 1.0 * p, height = 2.15 + 0.69 * p, lookY = 0.7 - 0.1 * p;
+      cutTmp.set(hp.x - f.x * dist, gy + height + lift, hp.z - f.z * dist);
+      cutTmp2.set(hp.x, hp.y + lookY + lift, hp.z);
+    }
+    c.position.copy(cutTmp);
+    look.lookAt(c.position, cutTmp2, up);
+    c.quaternion.setFromRotationMatrix(look);
+    const off = cameraOffset();
+    if (Math.abs(off.fov) > 0.01) { c.fov = cam.savedFov + off.fov; c.updateProjectionMatrix(); }
+    c.updateMatrixWorld();
+  }
   function cameraPre(cameraArg = camera, focus = null) {
     const c = cameraArg;
     cam.saved.copy(c.position); cam.savedQ.copy(c.quaternion); cam.savedFov = c.fov; cam.applied = true;
+    if (musou.active && musou.longForm && musou.cut) { applyCameraCut(c, musou.cut); return; }
     const off = cameraOffset();
     if (Math.abs(off.orbit) > 1e-4 || Math.abs(off.dolly - 1) > 1e-4 || Math.abs(off.lift) > 1e-4 || off.look > 1e-4) {
       const f = off.pivot || focus || heroChest(pivot);
@@ -2054,6 +2693,28 @@ export function createCombatFx(o) {
     if (c.fov !== cam.savedFov) { c.fov = cam.savedFov; c.updateProjectionMatrix(); }
     c.updateMatrixWorld();
     cam.applied = false;
+    // the cleave's screen split needs one frame of the framebuffer *after* it has just been rendered; cameraPost
+    // runs right after renderer.render() in battle.js, so this is the earliest safe moment to copy it.
+    if (splitState.pending) captureSplit();
+  }
+  function ensureSplitTexture() {
+    const w = renderer?.domElement?.width || 0, h = renderer?.domElement?.height || 0;
+    if (!w || !h) return;
+    if (splitOverlay.texW === w && splitOverlay.texH === h && splitOverlay.texture) return;
+    splitOverlay.texture?.dispose();
+    splitOverlay.texture = new THREE.FramebufferTexture(w, h, THREE.RGBAFormat);
+    splitOverlay.texW = w; splitOverlay.texH = h;
+    splitOverlay.material.uniforms.uTex.value = splitOverlay.texture;
+  }
+  function captureSplit() {
+    splitState.pending = false;
+    if (!renderer?.copyFramebufferToTexture) return;
+    ensureSplitTexture();
+    if (!splitOverlay.texture) return;
+    try { renderer.copyFramebufferToTexture(splitOverlay.texture); } catch { return; }
+    splitOverlay.material.uniforms.uSeed.value = rand() * 100;
+    splitOverlay.material.uniforms.uAngle.value = 0.2 + rand() * 0.2;
+    splitState.active = true; splitState.t = 0;
   }
 
   function reset() {
@@ -2062,11 +2723,12 @@ export function createCombatFx(o) {
     blade?.clear();
     echoes.hide();
     releaseFlashes();
+    releaseOcclusion();
     airborne.clear();
     killTimes.length = 0;
     combo.reset();
     slow.reset();
-    musou.active = false;
+    musou.active = false; musou.cut = null;
     cam.trauma = 0; cam.punchT = 1; cam.orbit = 0; cam.dolly = 1; cam.lift = 0; cam.look = 0; cam.calm = false; cam.pivotOnHero = true;
     Object.assign(cam.goal, { orbit: 0, dolly: 1, lift: 0, look: 0 });
     officerCam.t = 9; names.clear(); bannered.clear(); hudFade.target = 1;
@@ -2074,34 +2736,44 @@ export function createCombatFx(o) {
     hudState.comboShown = -1; hudState.fade = 0; hudState.bannerT = 9; hudState.titleT = 9;
     if (renderer?.domElement?.style && hudState.gradeApplied) { renderer.domElement.style.filter = ''; hudState.gradeApplied = 0; }
     musou.cutinT = 9;
+    spirit.phase = 'hidden'; spirit.reveal = 0; spiritBlade.mesh.visible = false; flameShroud.mesh.visible = false;
+    splitState.pending = false; splitState.active = false; splitOverlay.mesh.visible = false;
+    shockState.active = false; shockwave.mesh.visible = false;
     endMusou();
     if (hud) { for (const d of hud.damage) d.age = d.life; for (const s of hud.stamps) s.age = s.life; updateHud(0); }
   }
 
-  /** Compile every FX program up front (avoids a hitch on the first hit). */
+  /** Compile every FX program up front (avoids a hitch on the first hit), including the occlusion dither variant. */
   function prewarm(sampleEnemy = null) {
     if (!renderer?.compile) return;
     const hidden = [];
-    for (const mesh of [...particles.meshes, strips.mesh]) if (!mesh.visible) { mesh.visible = true; hidden.push(mesh); }
+    for (const mesh of [...particles.meshes, strips.mesh, spiritBlade.mesh, flameShroud.mesh, splitOverlay.mesh, shockwave.mesh]) {
+      if (!mesh.visible) { mesh.visible = true; hidden.push(mesh); }
+    }
     for (const ghost of echoes.ghosts) { if (!ghost.mesh.visible) { ghost.mesh.visible = true; hidden.push(ghost.mesh); } }
     if (echoes.aura && !echoes.aura.visible) { echoes.aura.visible = true; hidden.push(echoes.aura); }
-    const swaps = [];
-    if (sampleEnemy) sampleEnemy.traverse(object => {
-      if (!object.isMesh || !object.material || Array.isArray(object.material)) return;
-      const entry = flashMaterials(object.material);
-      swaps.push([object, object.material]);
-      object.material = entry.hot;
-    });
-    try { renderer.compile(scene, camera); } catch { /* ignore */ }
-    for (const [object, material] of swaps) object.material = material;
+    ensureSplitTexture();
+    const variants = sampleEnemy ? [material => flashMaterials(material).hot, material => occludeMaterial(material)] : [null];
+    for (const pick of variants) {
+      const swaps = [];
+      if (pick) sampleEnemy.traverse(object => {
+        if (!object.isMesh || !object.material || Array.isArray(object.material)) return;
+        swaps.push([object, object.material]);
+        object.material = pick(object.material);
+      });
+      try { renderer.compile(scene, camera); } catch { /* ignore */ }
+      for (const [object, material] of swaps) object.material = material;
+    }
     for (const mesh of hidden) mesh.visible = false;
   }
 
   function dispose() {
     if (renderer?.domElement?.style && hudState.gradeApplied) renderer.domElement.style.filter = '';
     releaseFlashes();
-    scene.remove(...particles.meshes, strips.mesh);
+    releaseOcclusion();
+    scene.remove(...particles.meshes, strips.mesh, spiritBlade.mesh, flameShroud.mesh, splitOverlay.mesh, shockwave.mesh);
     particles.dispose(); strips.dispose(); echoes.dispose();
+    spiritBlade.dispose(); flameShroud.dispose(); splitOverlay.dispose(); shockwave.dispose();
     for (const texture of owned) texture.dispose();
     for (const entry of flashCache.values()) { entry.hot.dispose(); entry.warm.dispose(); }
     flashCache.clear();
@@ -2111,11 +2783,13 @@ export function createCombatFx(o) {
   }
 
   function stats() {
+    const cinematicDraws = (spiritBlade.mesh.visible ? 1 : 0) + (flameShroud.mesh.visible ? 1 : 0) + (splitOverlay.mesh.visible ? 1 : 0) + (shockwave.mesh.visible ? 1 : 0);
     return {
       particlesAlive: particles.alive(), particleCap: particles.capacity,
       stripSlotsUsed: strips.used, stripSlots: q.stripSlots,
       ghostsVisible: echoes.ghosts.filter(g => g.mesh.visible).length + (echoes.aura?.visible ? 1 : 0),
-      drawCalls: particles.draws + (strips.mesh.visible ? 1 : 0) + echoes.ghosts.filter(g => g.mesh.visible).length + (echoes.aura?.visible ? 1 : 0),
+      drawCalls: particles.draws + (strips.mesh.visible ? 1 : 0) + echoes.ghosts.filter(g => g.mesh.visible).length + (echoes.aura?.visible ? 1 : 0) + cinematicDraws,
+      cinematicDraws,
       echoVertices: echoes.vertexCount, combo: combo.count, maxCombo: combo.max, kills, timeScale: slow.value(), quality: qualityName,
     };
   }
@@ -2135,7 +2809,10 @@ export function createCombatFx(o) {
       combo.count = value; combo.max = Math.max(combo.max, value); if (value) combo.last = gameTime;
     },
     get combo() { return combo.count; },
-    objects: [...particles.meshes, strips.mesh, ...echoes.ghosts.map(g => g.mesh), echoes.aura].filter(Boolean),
+    /** Diagnostics for the musou-v2 screenshot driver: precise long-form phase (spirit.phase can only be read here,
+     * not inferred from game time, since sweep beats are a short real-time window inside the swing timeline). */
+    debugMusou: () => ({ active: musou.active, longForm: musou.longForm, isTrue: musou.isTrue, cut: musou.cut, spiritPhase: spirit.phase, leapAt: musou.leapAt, g: musou.g, t: musou.t }),
+    objects: [...particles.meshes, strips.mesh, ...echoes.ghosts.map(g => g.mesh), echoes.aura, spiritBlade.mesh, flameShroud.mesh, splitOverlay.mesh, shockwave.mesh].filter(Boolean),
     quality: q,
   };
 }

@@ -6,7 +6,7 @@ import { FramePacer } from '../frame-pacing.js';
 import { createNightMarket } from './world.js';
 import { createOni, prepareRiggedOni, createRiggedOni } from './oni.js';
 import { touchHint, HoldRepeat } from './touch-input.js';
-import { assetPlan, createPreloader } from './preload.js?v=20260925b';
+import { assetPlan, createPreloader } from './preload.js?v=20260925c';
 
 const $ = id => document.getElementById(id);
 const isMobile = () => matchMedia('(pointer: coarse)').matches || innerWidth <= 900;
@@ -35,9 +35,9 @@ let lazyModules = null;
 export function loadLazyModules() {
   if (!lazyModules) {
     lazyModules = Promise.all([
-      marchLevel ? Promise.all([import('./march.js'), import('./march-art.js?v=20260925e')]) : null,
+      marchLevel ? Promise.all([import('./march.js'), import('./march-art.js?v=20260925f')]) : null,
       // ?hero=vroid：打擊特效模組（combat-fx.js）；載入失敗時退回下方原本的特效與時間倍率
-      heroChoice === 'vroid' ? import('./combat-fx.js?v=20260925e').catch(error => { console.warn('combat-fx failed, using built-in effects', error); return null; }) : null,
+      heroChoice === 'vroid' ? import('./combat-fx.js?v=20260925g').catch(error => { console.warn('combat-fx failed, using built-in effects', error); return null; }) : null,
     ]).catch(error => { lazyModules = null; throw error; });
   }
   return lazyModules;
@@ -206,6 +206,7 @@ export async function createBattle(canvas, { audio = null, assets = null } = {})
   assets.progress.begin('battle');
   const groundAt = (x, z) => world ? world.heightAt(x, z) : 0;
 
+  let heroBaseY = 0;   // 建好模型後改成真正的基準高度（見下方）；無雙躍起時疊加在這個基準上，不動 Arena 的模擬
   const hero = new THREE.Group();
   scene.add(hero);
   const heroModel = gltf.scene;
@@ -217,7 +218,7 @@ export async function createBattle(canvas, { audio = null, assets = null } = {})
   const sourceBounds = new THREE.Box3().setFromObject(heroModel);
   const scale = 1.78 / sourceBounds.getSize(new THREE.Vector3()).y;
   heroModel.scale.setScalar(scale);
-  heroModel.position.y = -sourceBounds.min.y * scale;
+  heroModel.position.y = heroBaseY = -sourceBounds.min.y * scale;
   hero.add(heroModel);
   const mixer = new THREE.AnimationMixer(heroModel);
   // 只保留真正出刀的片段：刀尖速度峰值前約 0.2 秒到峰值後約 0.35 秒，避免把整段收招一起快轉
@@ -303,6 +304,11 @@ export async function createBattle(canvas, { audio = null, assets = null } = {})
   let running = false, paused = false, raf = 0, lastAt = 0, cameraYaw = Math.PI;
   let hudAt = 0, toastUntil = 0, lastAnimSerial = 0, frames = 0, fpsAt = 0;
   const viewPosition = new THREE.Vector3(), focus = new THREE.Vector3();
+  // 無雙亂舞期間鏡頭 yaw 停止追人：角色朝向→鏡頭 yaw 追上→（相機相對）輸入方向跟著轉→再改角色朝向，
+  // 若不打斷這個迴圈，握著搖桿不放會讓角色整段無雙一直原地自轉。天刃演出本身也會接管鏡頭（cameraPre/Post）。
+  let musouYawLock = null;
+  // 無雙亂舞躍起（musouStart.leapAt → impact）：hero 模型額外抬升的視覺曲線，與 Arena 模擬（2D）分開疊加
+  let leapWindow = null, leapStarted = false;
 
   function resize() {
     const width = canvas.clientWidth || innerWidth, height = canvas.clientHeight || innerHeight;
@@ -471,13 +477,27 @@ export async function createBattle(canvas, { audio = null, assets = null } = {})
           if (event.last && full) { flash(x, z, 0xd8b0ff, radius * 0.8, 0.36); shake = Math.max(shake, 0.4); }
         }
       }
+      if (event.type === 'musouStart') {
+        leapWindow = Number.isFinite(event.leapAt) && Number.isFinite(event.impact) ? { leapAt: event.leapAt, impact: event.impact } : null;
+        leapStarted = false;
+      }
+      if (event.type === 'musouEnd') { leapWindow = null; leapStarted = false; }
+      if (event.type === 'swing' && event.kind === 'special' && event.sweep) {
+        // 天刃：指定的幾下揮擊會讓靈刃橫掃全場一圈（視覺特效見 combat-fx）；被掃到的敵人一起視覺擊飛
+        const radius = event.radius || 220;
+        for (const enemy of arena.enemies) {
+          if (enemy.action === 'dead' || enemy.prop) continue;
+          const dx = enemy.x - (event.x ?? arena.hero.x), dz = enemy.y - (event.y ?? arena.hero.y);
+          if (Math.hypot(dx, dz) <= radius) launch(enemy.id, 9, 10);
+        }
+      }
       if (event.type === 'special' && event.flurry) {
-        play('musouFlurry', event.finishAt || 3.6); toast(event.true ? '真・魂門亂舞！' : '魂門亂舞！');
+        play('musouFlurry', event.finishAt || 3.6); toast(event.true ? '真・天刃亂舞！' : '天刃亂舞！');
         if (event.true) flash(x, z, 0xa040ff, 2.4, 0.8);
       } else if (event.type === 'special' && arena.musou) {
-        play('musou', 2.0); if (!combatFx) toast('魂門亂舞！');
+        play('musou', 2.0); if (!combatFx) toast('天刃亂舞！');
       } else if (event.type === 'special') {
-        play('heavyfin', 0.68); flash(x, z, 0xcf96ff, 3.4, 0.48); toast('魂門亂舞！');
+        play('heavyfin', 0.68); flash(x, z, 0xcf96ff, 3.4, 0.48); toast('天刃亂舞！');
         for (let i = 0; i < 3; i++) crescent(x, z, arena.hero.facing + i * 2.1, { radius: 4.2, tilt: 0.1 * i, life: 0.45, spin: 2 });
         shake = Math.max(shake, 0.5);
       }
@@ -525,7 +545,7 @@ export async function createBattle(canvas, { audio = null, assets = null } = {})
         enemies.get(event.enemyId)?.onTelegraph?.(event.duration || 0.7);
       }
       if (event.type === 'hurt') { play('hurt', 0.38); toast('注意敵人起手！', 0.9); }
-      if (event.type === 'wave') toast(event.wave === 'boss' ? '魂門守將現身' : `第 ${event.wave} 波敵人`);
+      if (event.type === 'wave') toast(event.wave === 'boss' ? '鬼門守將現身' : `第 ${event.wave} 波敵人`);
       if (event.type === 'kill') {
         if (!combatFx) { flash(x, z, 0x9d66de, event.role === 'boss' ? 2.4 : 0.8, 0.4); burst(x, z, 0xb58cff, 18, 0.9); }
         launch(event.enemyId, 8, 12);
@@ -704,6 +724,21 @@ export async function createBattle(canvas, { audio = null, assets = null } = {})
     if (h.action === 'idle' || h.action === 'run') play(h.action);
     if (h.action === 'dead' && currentName !== 'death') play('death', 1);
     if (h.action === 'win' && currentName !== 'win') play('win', 1.2);
+    // 天刃演出：離地時間到了就播躍起片段（沒有該片段時 play() 會自動退回 idle），
+    // 並在模型上疊加一段程序化抬升曲線（up to ~1.5 m，impact 時剛好落回 0）——只在無雙時發生，Arena 模擬本身不動
+    if (leapWindow && !leapStarted && h.actionTime >= leapWindow.leapAt) {
+      leapStarted = true;
+      play('musouLeap', Math.max(0.08, leapWindow.impact - leapWindow.leapAt));
+    }
+    let lift = 0;
+    if (leapWindow) {
+      const t = h.actionTime;
+      if (t >= leapWindow.leapAt && t <= leapWindow.impact) {
+        const p = (t - leapWindow.leapAt) / Math.max(0.001, leapWindow.impact - leapWindow.leapAt);
+        lift = Math.sin(Math.PI * Math.min(1, Math.max(0, p))) * 1.5;
+      }
+    }
+    heroModel.position.y = heroBaseY + lift;
     mixer.update(dt);
     heroLook.update(performance.now() / 1000);
     hero.updateMatrixWorld(true);
@@ -711,8 +746,10 @@ export async function createBattle(canvas, { audio = null, assets = null } = {})
   }
   function syncCamera(dt) {
     const h = arena.hero;
-    const targetYaw = yawFromFacing(h.facing);
-    cameraYaw = turnToward(cameraYaw, targetYaw, Math.min(1, dt * (h.action === 'run' ? 2.6 : 1.6)));
+    if (musouYawLock === null) {
+      const targetYaw = yawFromFacing(h.facing);
+      cameraYaw = turnToward(cameraYaw, targetYaw, Math.min(1, dt * (h.action === 'run' ? 2.6 : 1.6)));
+    }
     const fx = Math.sin(cameraYaw), fz = Math.cos(cameraYaw);
     const dist = 3.7;
     // 鏡頭跟地面高度，跳躍時只跟七成，避免整個畫面上下晃又不讓角色出框
@@ -729,7 +766,7 @@ export async function createBattle(canvas, { audio = null, assets = null } = {})
     $('hpText').textContent = String(Math.ceil(h.hp));
     $('energyFill').style.width = `${h.energy}%`;
     if (march) updateMarchHud(march.hud());
-    else $('waveText').textContent = arena.bossQueued || arena.enemies.some(enemy => enemy.role === 'boss') ? '魂門守將' : arena.wave === 1 ? '第一波' : '第二波';
+    else $('waveText').textContent = arena.bossQueued || arena.enemies.some(enemy => enemy.role === 'boss') ? '鬼門守將' : arena.wave === 1 ? '第一波' : '第二波';
     $('killText').textContent = String(arena.kills).padStart(2, '0');
     if (!combatFx) $('comboText').textContent = march ? (march.combo >= 3 ? `${march.combo} 連擊` : '') : h.combo > 1 && h.action === 'attack' ? `${h.combo} 連斬` : '';
     document.querySelector('[data-action="special"]')?.classList.toggle('ready', h.energy >= 100);
@@ -763,7 +800,11 @@ export async function createBattle(canvas, { audio = null, assets = null } = {})
     for (const action of holds.tick(realDt)) edges[action] = true;
     const inputX = joystick.x + Number(keys.has('d') || keys.has('arrowright')) - Number(keys.has('a') || keys.has('arrowleft'));
     const inputY = joystick.y + Number(keys.has('s') || keys.has('arrowdown')) - Number(keys.has('w') || keys.has('arrowup'));
-    const fx = Math.sin(cameraYaw), fz = Math.cos(cameraYaw);
+    // 無雙亂舞期間鏡頭 yaw 停在啟動當下：輸入方向改用這個凍結值換算，避免跟 syncCamera 的追人形成迴授而自轉
+    const inMusouFlurry = !!(arena.attack?.flurry && arena.hero.action === 'special');
+    musouYawLock = inMusouFlurry ? (musouYawLock ?? cameraYaw) : null;
+    const yawBasis = musouYawLock ?? cameraYaw;
+    const fx = Math.sin(yawBasis), fz = Math.cos(yawBasis);
     const moveX = fx * -inputY + -fz * inputX;
     const moveZ = fz * -inputY + fx * inputX;
     if (march) march.update(dt, { x: moveX, y: moveZ, ...edges });
@@ -778,7 +819,7 @@ export async function createBattle(canvas, { audio = null, assets = null } = {})
     updatePopups(realDt);
     if (combatFx) {
       if (march) combatFx.setCombo(march.combo);
-      combatFx.update(realDt, dt, { heroAction: arena.hero.action, energy: arena.hero.energy });
+      combatFx.update(realDt, dt, { heroAction: arena.hero.action, energy: arena.hero.energy, enemies });
     }
     audio?.update(realDt, realDt > 0 ? dt / realDt : 1, arena.hero);   // 慢動作：音樂低通＋音效降調；hitstop 短定格不觸發
     if (shake > 0) {
@@ -819,6 +860,7 @@ export async function createBattle(canvas, { audio = null, assets = null } = {})
     audio?.reset();   // 配樂由重置時的 segment／wave 事件啟動（入口市集）
     clearPopups();
     cameraYaw = Math.PI;
+    musouYawLock = null; leapWindow = null; leapStarted = false;
     camera.position.set(0, 2.45, 3.7);
     lastAnimSerial = 0;
     onEvents();

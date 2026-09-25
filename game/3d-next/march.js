@@ -5,8 +5,8 @@
  * (south → north = +z → -z in world metres, large y → small y in Arena px):
  *   1 入口市集  kill 30            → barrier 1 opens
  *   2 夜市廣場  break 3 妖燈, then 敵將「赤角」 → barrier 2 opens
- *   3 魂門階梯  hold the 魂燈 40 s, then 敵將「影爪」 → barrier 3 opens
- *   4 魂門頂端  守將「魂門守將」, two phases → clear + rank
+ *   3 鬼門石階  hold the 魂燈 40 s, then 敵將「影爪」 → barrier 3 opens
+ *   4 鬼門頂端  守將「鬼門守將」, two phases → clear + rank
  *
  * Units: the Arena works in px (60 px = 1 m, x = 640 + wx*60, y = 500 + wz*60). LEVEL is
  * authored in metres; every event and hazard this module emits uses Arena px (x, y, radius,
@@ -55,8 +55,8 @@ export const LAYOUT = {
   segments: [
     { id: 'market', name: '入口市集', shape: 'rect', minX: -7, maxX: 7, minZ: -30, maxZ: 2, entry: { x: 0, z: 0 } },
     { id: 'plaza', name: '夜市廣場', shape: 'circle', cx: 0, cz: -41, r: 12.5, minZ: -52, maxZ: -30, entry: { x: 0, z: -33.5 } },
-    { id: 'stairs', name: '魂門階梯', shape: 'rect', minX: -8, maxX: 8, minZ: -84, maxZ: -52, entry: { x: 0, z: -55.5 } },
-    { id: 'top', name: '魂門頂端', shape: 'circle', cx: 0, cz: -92.5, r: 10, minZ: -102.5, maxZ: -84, entry: { x: 0, z: -87.5 } },
+    { id: 'stairs', name: '鬼門石階', shape: 'rect', minX: -8, maxX: 8, minZ: -84, maxZ: -52, entry: { x: 0, z: -55.5 } },
+    { id: 'top', name: '鬼門頂端', shape: 'circle', cx: 0, cz: -92.5, r: 10, minZ: -102.5, maxZ: -84, entry: { x: 0, z: -87.5 } },
   ],
   gates: [{ z: -30, halfWidth: 7 }, { z: -52, halfWidth: 8 }, { z: -84, halfWidth: 5.3 }],
   enterDepth: 3,
@@ -151,7 +151,7 @@ export const TUNING = {
   },
   // followUpSweep: phase-2 telegraph (s) of the sweep that follows the double slam (0 = off).
   // specialScale 1: the boss takes full musou damage (officers take half); the renderer never launches it.
-  boss: { name: '魂門守將', hp: 315, speed: 55, specialScale: 1, guard: true, turnRate: 1.8, sweepRadius: 3.6, sweepDamage: 16, slamRadius: [3, 4.2], slamDamage: 22, summon: 8, sweepShare: 0.6, followUpSweep: 0.8,
+  boss: { name: '鬼門守將', hp: 315, speed: 55, specialScale: 1, guard: true, turnRate: 1.8, sweepRadius: 3.6, sweepDamage: 16, slamRadius: [3, 4.2], slamDamage: 22, summon: 8, sweepShare: 0.6, followUpSweep: 0.8,
     resummon: { every: 18, count: 4 } },   // phase 2: extra grunts every `every` s (within the enemy budget)
 };
 
@@ -936,7 +936,7 @@ export class MarchDirector {
     this._emit('summon', { enemyId: enemy.id, count: size, x: enemy.x, y: enemy.y });
   }
 
-  /** 魂門守將: jump slam + sweep with ground telegraphs; at half hp roar, summon, double slam. */
+  /** 鬼門守將: jump slam + sweep with ground telegraphs; at half hp roar, summon, double slam. */
   _boss(enemy, dt) {
     const b = TUNING.boss, hero = this.arena.hero;
     const phase2 = enemy.phase === 2;

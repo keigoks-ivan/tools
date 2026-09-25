@@ -3,9 +3,9 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import * as SkeletonUtils from 'three/addons/utils/SkeletonUtils.js';
 
 const HEROES = [
-  { id: 'rumi', name: 'RUMI', number: '01', file: new URLSearchParams(location.search).has('rumi-v2') ? './assets/heroes/rumi-v2.glb?v=20260924b' : './assets/heroes/rumi.glb?v=20260924a' },
-  { id: 'mira', name: 'MIRA', number: '02', file: './assets/heroes/mira.glb?v=20260924a' },
-  { id: 'zoey', name: 'ZOEY', number: '03', file: './assets/heroes/zoey.glb?v=20260924a' },
+  { id: 'rumi', name: '紫刃', number: '01', file: new URLSearchParams(location.search).has('rumi-v2') ? './assets/heroes/rumi-v2.glb?v=20260924b' : './assets/heroes/rumi.glb?v=20260924a' },
+  { id: 'mira', name: '蒼鋒', number: '02', file: './assets/heroes/mira.glb?v=20260924a' },
+  { id: 'zoey', name: '金燕', number: '03', file: './assets/heroes/zoey.glb?v=20260924a' },
 ];
 const ANIMATIONS = ['idle', 'run', 'slash1', 'heavy', 'roll'];
 const stage = document.querySelector('#stage');
@@ -298,7 +298,7 @@ async function loadHero(id) {
   current = null;
   document.querySelectorAll('[data-hero]').forEach(button => button.classList.toggle('active', button.dataset.hero === id));
   document.querySelector('#caption-name').textContent = `${hero.name}　/　${hero.number}`;
-  setStatus(`正在載入 ${hero.name}…`);
+  setStatus(`正在載入${hero.name}…`);
   renderOnce();
 
   let clonedRoot = null;
@@ -349,7 +349,7 @@ async function loadHero(id) {
       if (!clonedRoot) disposeRoot(sourceRoot);
     }
     paused = true;
-    setStatus(`${hero.name} 模型尚未就緒，完成匯出後可重新載入。`, 'error');
+    setStatus(`${hero.name}模型尚未就緒，完成匯出後可重新載入。`, 'error');
     console.info(`Model Lab could not load ${hero.file}:`, error);
     renderOnce();
   }
@@ -462,6 +462,6 @@ window.__modelLab = {
   reload: () => loadHero(selectedHero),
 };
 
-setStatus('正在載入 RUMI…');
+setStatus('正在載入紫刃…');
 resize();
 loadHero('rumi');

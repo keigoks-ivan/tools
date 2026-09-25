@@ -8,7 +8,7 @@ const params = new URLSearchParams(location.search);
 const audio = createAudio({ baseUrl: '../assets/audio/march/' });
 window.__audio = audio;
 const LABELS = {
-  market: '入口市集', plaza: '廣場／階梯', boss: '魂門守將', victory: '勝利', defeat: '敗北',
+  market: '入口市集', plaza: '廣場／階梯', boss: '鬼門守將', victory: '勝利', defeat: '敗北',
   swing_light: '輕斬揮空', swing_heavy: '重斬', swing_musou: '無雙亂舞連斬', hit_light: '輕擊命中', hit_heavy: '重擊命中',
   hit_finisher: '終結重擊', hit_prop: '打木箱', hit_lantern: '打妖燈', guard: '擋', guard_break: '破', oni: '鬼兵聲',
   boss_roar: '守將咆哮', boss_grunt: '守將出招', soul_burst: '擊倒・魂散', launch: '擊飛', land: '落地', jump: '跳躍',

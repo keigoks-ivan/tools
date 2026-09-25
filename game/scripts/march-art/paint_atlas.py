@@ -936,7 +936,7 @@ def plaque():
     d.rectangle((0, 0, w - 1, h - 1), outline=(190, 150, 70), width=7)
     d.rectangle((10, 10, w - 11, h - 11), outline=(90, 60, 30), width=2)
     f = ImageFont.truetype('/System/Library/Fonts/Hiragino Sans GB.ttc', 84) if os.path.exists('/System/Library/Fonts/Hiragino Sans GB.ttc') else font(84)
-    t = '魂門'
+    t = '鬼門'
     bb = d.textbbox((0, 0), t, font=f)
     d.text(((w - bb[2] + bb[0]) / 2 - bb[0], (h - bb[3] + bb[1]) / 2 - bb[1]), t, font=f, fill=(236, 200, 120))
     return img

@@ -449,7 +449,7 @@ function drawHUD() {
   ctx.fillStyle = '#fff';
   ctx.font = 'bold 13px sans-serif';
   ctx.textAlign = 'left';
-  ctx.fillText('RUMI', 26, 34);
+  ctx.fillText('紫刃', 26, 34);
   // 擊殺數
   ctx.textAlign = 'right';
   ctx.font = 'bold 26px sans-serif';
@@ -475,10 +475,10 @@ function drawOverlay() {
   if (state === 'title') {
     ctx.fillStyle = '#a04fff';
     ctx.font = 'bold 52px sans-serif';
-    ctx.fillText('HUNTR/X：魂門之戰', W / 2, H / 2 - 60);
+    ctx.fillText('紫刃夜行', W / 2, H / 2 - 60);
     ctx.fillStyle = '#fff';
     ctx.font = '20px sans-serif';
-    ctx.fillText('M1 手感試作 — Rumi', W / 2, H / 2 - 18);
+    ctx.fillText('M1 手感試作 — 紫刃', W / 2, H / 2 - 18);
     ctx.fillStyle = 'rgba(255,255,255,0.7)';
     ctx.font = '16px sans-serif';
     ctx.fillText('WASD 移動 · J 攻擊（連按四段） · 按任意鍵開始', W / 2, H / 2 + 40);

@@ -1,4 +1,4 @@
-"""Add the jump / air / musou-flurry moveset on top of v4_musou.blend and write v4_moves.blend.
+"""Add the jump / air / musou-leap / musou-flurry moveset on top of v4_musou.blend and write v4_moves.blend.
 
 Same approach as musou_actions.py (sample retargeted candidates, key every non-hair bone, spring-bake the
 hair), plus three things the new moves need:
@@ -28,7 +28,7 @@ bpy.ops.wm.open_mainfile(filepath=HERE + 'v4_musou.blend')
 scene = bpy.context.scene
 FPS = scene.render.fps
 rig = bpy.data.objects['Armature']
-LOADS = {'v4_candidates.blend': ['sns_combo', 'gs_slash2', 'gs_highspin', 'gs_powerup', 'outward', 'gs_jumpattack'],
+LOADS = {'v4_candidates.blend': ['sns_combo', 'gs_slash2', 'gs_highspin', 'gs_powerup', 'outward', 'gs_jumpattack', 'spin360'],
          'v4_cand3.blend': ['gs_jump2', 'gs_casting']}   # v4_cand3 = retargets of great sword jump (2) / casting
 loaded = []
 for fn, names in LOADS.items():
@@ -221,8 +221,27 @@ AIR = Timeline([dict(act='outward', knots=[(0.0, 0.74), (0.10, 0.90), (0.32, 1.1
 # and slams it into the ground in front, impact (kneel, blade on the ground) at 0.18, hold to 0.28, rise to guard.
 PLUNGE = Timeline([dict(act='sns_combo', knots=[(0.0, 2.33), (0.18, 2.57), (0.28, 2.75), (0.50, 3.35)])], [], yaw0=20.0)
 
-# musouFlurry (3.6 s) + musouFinish (0.6 s) share one 4.2 s timeline so the hand-off is continuous.
-# Beat sheet: wind-up 0-0.55, strikes at 0.55 + 0.3k (k = 0..9), finisher wind-up 3.30-3.60, impact at 3.60.
+# gs_jumpattack (2.17 s @ 30 fps, source frames 0-65): crouch 0-0.23, corkscrew launch/spin to ~1.03,
+# lunge-and-connect at 1.23 (deepest/fastest downward reach, measured on the sword hand), then a second
+# wind-up and a solid two-footed landing with the blade held high by 2.17. gs_jumpattack's own native body
+# facing sits ~20 deg off this rig's "straight ahead" (same offset sns_combo needed for PLUNGE's slam).
+GS_JUMPATTACK_YAW = 20.0
+
+# musouLeap (0.3 s game time): takeoff + the corkscrew airborne spin, ending just before the lunge that
+# connects (source frame 31, i.e. before the deepest reach at frame 37). Runs during the game's 0.3x slow-mo,
+# so it's authored native-dense (32 native frames covering all 32 source frames 1:1) rather than at 1x pace
+# like the other moves -- game duration alone would make it a blur.
+LEAP = Timeline([dict(act='gs_jumpattack', knots=[(0.0, 0.0), (0.3, 31 / 30)])], [], yaw0=GS_JUMPATTACK_YAW)
+
+# musouFinish (0.6 s): picks up gs_jumpattack just before the lunge (frame 35) so the blade connects almost
+# immediately (frame 37 at game t=0.03), lands into the wide-stance blade-raised pose by 0.25 (frame 50),
+# then only settles slightly (frame 50 -> 53) through to t=0.6 -- it holds that strong landed pose instead
+# of relaxing all the way to gs_jumpattack's own calm ending (frame 65). Distinct from PLUNGE's kneel-slam.
+FINISH = Timeline([dict(act='gs_jumpattack', knots=[(0.0, 35 / 30), (0.03, 37 / 30), (0.25, 50 / 30), (0.6, 53 / 30)])], [],
+                  yaw0=GS_JUMPATTACK_YAW)
+
+# musouFlurry (3.6 s): wind-up 0-0.55, strikes at 0.55 + 0.3k (k = 0..9), then a crouch-and-anticipate tail
+# 3.37-3.60 (gs_jumpattack's own pre-launch crouch) instead of running into the old slam finisher.
 H = [0.55 + 0.3 * k for k in range(10)]
 MUSOU_SEGS = [
     dict(act='gs_powerup', knots=[(0.0, 0.10), (0.40, 0.55)]),                          # power-up raise
@@ -232,27 +251,27 @@ MUSOU_SEGS = [
     dict(act='gs_slash2', knots=[(H[5], 1.70)]),                                        # strike 6
     dict(act='gs_slash2', knots=[(H[6], 2.60)]),                                        # strike 7
     dict(act='outward', knots=[(H[7], 0.88)]),                                          # strike 8
-    dict(act='sns_combo', knots=[(H[8], 1.23)]),                                        # strike 9
+    dict(act='spin360', knots=[(H[8], 32 / 30)], rate=1.4),                             # strike 9: spin360's fastest burst
     dict(act='gs_highspin', knots=[(H[9], 0.43)]),                                      # strike 10
-    dict(act='sns_combo', knots=[(3.36, 2.10), (3.51, 2.40), (3.60, 2.57), (3.80, 2.80), (4.20, 3.50)]),  # jump-slam
+    dict(act='gs_jumpattack', knots=[(3.37, 0.03), (3.60, 0.23)]),                      # crouch, about to leap
 ]
 MUSOU_JOINS = [0.38, 1.30, 1.60, 1.90, 2.20, 2.50, 2.80, 3.10, 3.37]
-SLAM_YAW = 20.0      # sns_combo's slam lands at blade yaw -110; +20 deg puts it straight ahead
 
 if __name__ == '__main__':
     tl = Timeline(MUSOU_SEGS, MUSOU_JOINS, xf=0.16, yaw0=0.0)
-    # facing is chained across joins; the residual to the slam yaw is spread over the flurry
-    target = SLAM_YAW
-    resid = wrap(target - tl.yaws[-1])
-    tl.ramp = (0.40, 3.30, resid)
+    # facing is chained across joins; the residual to gs_jumpattack's own +20 deg correction (see
+    # GS_JUMPATTACK_YAW) is spread across the flurry so the crouch tail settles facing forward, not slam-yaw
+    resid = wrap(GS_JUMPATTACK_YAW - tl.yaws[-1])
+    tl.ramp = (0.40, 3.60, resid)
     print('MUSOU yaws', [round(y) for y in tl.yaws], 'resid', round(resid))
     MUSOU = tl
 
     write('jump', JUMP, 0.0, 0.80, 19, clamp_up=True)
     write('airSlash', AIR, 0.0, 0.32, 16, clamp_up=True)
     write('plunge', PLUNGE, 0.0, 0.50, 18, clamp_up=True)
+    write('musouLeap', LEAP, 0.0, 0.3, 32, clamp_up=False)
+    write('musouFinish', FINISH, 0.0, 0.6, 20, clamp_up=False)
     write('musouFlurry', MUSOU, 0.0, 3.60, 130, clamp_up=False)
-    write('musouFinish', MUSOU, 3.60, 4.20, 14, clamp_up=False)
 
     for a in loaded:
         bpy.data.actions.remove(a)

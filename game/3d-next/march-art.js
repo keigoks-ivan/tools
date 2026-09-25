@@ -26,7 +26,7 @@
  */
 import { LAYOUT, heightAt as layoutHeightAt, toWorld } from './march.js';
 
-const VERSION = '20260925a';
+const VERSION = '20260925b';
 const TAU = Math.PI * 2;
 
 // Floor lightmap covers this world rectangle (metres) at LM_PPM pixels per metre.

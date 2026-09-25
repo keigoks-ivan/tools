@@ -10,7 +10,7 @@ import { clone as cloneSkinned } from 'three/addons/utils/SkeletonUtils.js';
 import { Arena } from '../2d/combat.js';
 import { createNightMarket } from './world.js';
 import { prepareRiggedOni, createRiggedOni } from './oni.js';
-import { createCombatFx } from './combat-fx.js?v=20260925a';
+import { createCombatFx } from './combat-fx.js?v=20260925g';
 
 const params = new URLSearchParams(location.search);
 const $ = id => document.getElementById(id);
@@ -197,8 +197,9 @@ function handleEvents() {
       if (trueMusou) event.true = true;
       if (flurryDemo) {
         const timeline = trueMusou ? { windup: 0.55, finish: 4.3, end: 5.0 } : { windup: 0.55, finish: 3.6, end: 4.2 };
-        flurry = { start: gameClock, next: 0, done: false, timeline, swings: trueMusou ? 12 : 10 };
-        emitFx({ type: 'musouStart', timeline, true: trueMusou || undefined });
+        const leapAt = trueMusou ? 4.1 : 3.3, sweeps = [4, 7, 10];   // 天刃 choreography: keep in sync with 2d/combat.js MUSOU_FLURRY
+        flurry = { start: gameClock, next: 0, done: false, timeline, swings: trueMusou ? 12 : 10, leapAt, sweeps };
+        emitFx({ type: 'musouStart', timeline, true: trueMusou || undefined, leapAt, sweeps });
       }
     }
     if (flurryDemo && event.type === 'swing' && event.kind === 'special') continue;   // replaced by the synthetic flurry
@@ -272,13 +273,20 @@ function advanceDemos(dt) {
     const t = gameClock - flurry.start, tl = flurry.timeline;
     const gap = (tl.finish - 0.3 - tl.windup) / (flurry.swings - 1);
     while (flurry.next < flurry.swings && t >= tl.windup + flurry.next * gap) {
-      emitFx({ type: 'swing', kind: 'special', index: flurry.next, last: false, radius: 280, true: trueMusou || undefined });
+      const sweep = flurry.sweeps.includes(flurry.next + 1);
+      emitFx({ type: 'swing', kind: 'special', index: flurry.next, last: false, radius: 280, true: trueMusou || undefined, sweep });
       // a connecting swing: the Arena would emit hitstop for its hits
       emitFx({ type: 'hitstop', duration: 0.06 });
+      if (sweep) for (const enemy of arena.enemies) if (Math.hypot(enemy.x - arena.hero.x, enemy.y - arena.hero.y) <= 280) launch(enemy.id, 9, 10);
       if (flurry.next % 4 === 3) play('musou', 1.3);
       flurry.next++;
     }
-    if (!flurry.done && t >= tl.finish) { flurry.done = true; emitFx({ type: 'musouFinish', radius: trueMusou ? 400 : 320, true: trueMusou || undefined }); }
+    if (!flurry.done && t >= tl.finish) {
+      flurry.done = true;
+      const finishRadius = trueMusou ? 400 : 320;
+      emitFx({ type: 'musouFinish', radius: finishRadius, true: trueMusou || undefined });
+      for (const enemy of arena.enemies) if (Math.hypot(enemy.x - arena.hero.x, enemy.y - arena.hero.y) <= finishRadius) launch(enemy.id, 11, 14);
+    }
     if (t >= tl.end) flurry = null;
   }
   if (jumpSim) {
@@ -338,14 +346,22 @@ function step(realDt) {
   updateAirborne(dt);
   syncEnemies(dt);
   const h = arena.hero;
-  hero.position.set(toWorldX(h.x), jumpSim ? jumpSim.y : 0, toWorldZ(h.y));
+  let lift = 0;
+  if (flurry && Number.isFinite(flurry.leapAt)) {
+    const ft = gameClock - flurry.start;
+    if (ft >= flurry.leapAt && ft <= flurry.timeline.finish) {
+      const p = (ft - flurry.leapAt) / Math.max(0.001, flurry.timeline.finish - flurry.leapAt);
+      lift = Math.sin(Math.PI * Math.min(1, Math.max(0, p))) * 1.5;
+    }
+  }
+  hero.position.set(toWorldX(h.x), jumpSim ? jumpSim.y : lift, toWorldZ(h.y));
   hero.rotation.y = yawFromFacing(h.facing);
   if ((h.action === 'idle' || h.action === 'run') && !jumpSim && !flurry) play(h.action);
   mixer.update(dt);
   hero.updateMatrixWorld(true);
   syncCamera(realDt);
   const t0 = performance.now();
-  fx?.update(realDt, dt, { heroAction: jumpSim ? jumpSim.action : flurry ? 'special' : h.action, energy: h.energy });
+  fx?.update(realDt, dt, { heroAction: jumpSim ? jumpSim.action : flurry ? 'special' : h.action, energy: h.energy, enemies });
   fxCost.frame += performance.now() - t0;
   fxCost.total += fxCost.frame; fxCost.frames++; fxCost.peak = Math.max(fxCost.peak, fxCost.frame); fxCost.frame = 0;
   legacy?.update(realDt, dt, h.action);
@@ -445,6 +461,10 @@ if (!capture) requestAnimationFrame(frame);
 
 window.__fx = {
   fx, arena, scene, camera, renderer, mode, quality,
+  // diagnostics for the musou-v2 screenshot driver: precise game-time inside the synthetic long-form flurry
+  // (real time is not a reliable proxy once slow-mo / freezes kick in).
+  getFlurry: () => flurry && { ...flurry, t: gameClock - flurry.start },
+  gameClock: () => gameClock,
   /** Advances the simulation by `seconds` at a fixed 60 Hz step, then renders once. */
   step(seconds, dt = 1 / 60) {
     const n = Math.max(1, Math.round(seconds / dt));

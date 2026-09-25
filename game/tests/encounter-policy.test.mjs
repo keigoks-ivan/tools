@@ -34,7 +34,7 @@ test('assault policy preserves two elite slots and can admit officer leaders', (
 });
 
 test('stage-one waves wait for the previous objective and use weak cleavable squads with limited elites', () => {
-  const firstStage = mainSource.match(/name: '第一關　首爾夜市・突圍戰',[\s\S]*?objectives: \[([\s\S]*?)\],\s*bossPos/);
+  const firstStage = mainSource.match(/name: '第一關　夜市・突圍戰',[\s\S]*?objectives: \[([\s\S]*?)\],\s*bossPos/);
   assert.ok(firstStage, 'stage one keeps a declared objective sequence');
   assert.equal((firstStage[1].match(/type: 'horde', need: 30/g) || []).length, 3);
   const waves = [

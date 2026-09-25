@@ -1,5 +1,5 @@
 // HUNTR/X：魂門之戰 — Stage 1「首爾夜市・魂門裂縫」
-// 3D 無雙式關卡：韓國街頭四區推進＋Boss 陰差隊長
+// 3D 無雙式關卡：韓國街頭四區推進＋Boss 妖燈隊長
 // 資產：KayKit Character/City Packs（CC0，見 assets/LICENSE-*.txt）
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -30,7 +30,7 @@ if (IS_MOBILE) document.body.classList.add('is-touch');
 const STAGES = [
   {
     // Three short waves keep the opening focused on readable squad combat.
-    name: '第一關　首爾夜市・突圍戰', bossKind: 'boss', bossLabel: '陰差隊長',
+    name: '第一關　夜市・突圍戰', bossKind: 'boss', bossLabel: '妖燈隊長',
     objectives: [
       { name: '夜市突圍・第一波', type: 'horde', need: 30, phase: 0, pos: [0, 0] },
       { name: '夜市突圍・第二波', type: 'horde', need: 30, phase: 1, pos: [0, 0] },
@@ -40,7 +40,7 @@ const STAGES = [
   },
   {
     // 第二關主打「魂燈防衛戰」：敵人衝魂燈，時限內守住
-    name: '第二關　黃泉花海・魂燈渡口', bossKind: 'boss2', bossLabel: '陰差大隊長',
+    name: '第二關　黃泉花海・魂燈渡口', bossKind: 'boss2', bossLabel: '妖燈大將',
     objectives: [
       { name: '花田殲滅戰',   type: 'kill',    need: 22, pos: [-27, 18], fast: 0.3, ambush: true },
       { name: '西渡口魂燈',   type: 'defend',  time: 40, pos: [27, 18], fast: 0.35 },
@@ -51,7 +51,7 @@ const STAGES = [
   },
   {
     // 第三關主打「時限試煉」：限時殺夠額度，超時歸零重來
-    name: '第三關　天界・魂門之上', bossKind: 'boss3', bossLabel: '陰差王',
+    name: '第三關　天界・鬼門之上', bossKind: 'boss3', bossLabel: '百鬼王',
     objectives: [
       { name: '雲海據點',     type: 'capture', pos: [-27, 18], fast: 0.4 },
       { name: '百人斬試煉',   type: 'trial',   need: 26, tlimit: 55, pos: [27, 18], fast: 0.45 },
@@ -62,7 +62,7 @@ const STAGES = [
   },
   {
     // 第四關主打「封印裂口」：打破會湧敵的裂口水晶
-    name: '第四關　虛空・魂門之心', bossKind: 'boss4', bossLabel: '魂門之靈',
+    name: '第四關　虛空・鬼門之心', bossKind: 'boss4', bossLabel: '鬼門之主',
     objectives: [
       { name: '北裂口封印',   type: 'rift', riftHp: 55, pos: [-27, 18], fast: 0.45 },
       { name: '虛空武將團',   type: 'officer', officers: 3, pos: [27, 18], fast: 0.5 },
@@ -72,14 +72,14 @@ const STAGES = [
     bossPos: [0, -35],
   },
 ];
-const OFFICER_NAMES = ['陰差百夫長', '陰差千夫長', '夜叉先鋒', '羅刹遊擊', '牛頭督戰', '馬面斥候'];
+const OFFICER_NAMES = ['鬼卒百夫長', '鬼卒千夫長', '夜叉先鋒', '羅刹遊擊', '牛頭督戰', '馬面斥候'];
 let stageIdx = 0;
 
 // ---------- 可操作角色（HUNTR/X 三人組） ----------
 const CHARS = {
-  rumi: { key: 'rumi', name: 'RUMI', weapon: 'sword', tint: null,     hair: 0x8a5ae0, outfit: 0x2a2240, metal: 0xc8a860, fx: 0xc9a4ff, fxHi: 0xe0ccff, boltCol: 0x7ad0ff, spd: 6.5, dmgMul: 1,    hpMul: 1,    atkTs: 1,    rangeMul: 1,    light: 0xff4fa3 },
-  mira: { key: 'mira', name: 'MIRA', weapon: 'great', tint: 0x4a78ff, hair: 0x3a5090, outfit: 0x1e2c48, metal: 0x9ab0cc, fx: 0x6aa8ff, fxHi: 0xaad4ff, boltCol: 0x6ab8ff, spd: 5.9, dmgMul: 1.28, hpMul: 1.18, atkTs: 0.86, rangeMul: 1.2,  light: 0x5a8aff },
-  zoey: { key: 'zoey', name: 'ZOEY', weapon: 'short', tint: 0xffc040, hair: 0xff9ec0, outfit: 0x463020, metal: 0xffd070, fx: 0xffd84f, fxHi: 0xffeaa8, boltCol: 0xffe08a, spd: 7.5, dmgMul: 0.82, hpMul: 0.88, atkTs: 1.18, rangeMul: 0.85, light: 0xffb040 },
+  rumi: { key: 'rumi', name: '紫刃', weapon: 'sword', tint: null,     hair: 0x8a5ae0, outfit: 0x2a2240, metal: 0xc8a860, fx: 0xc9a4ff, fxHi: 0xe0ccff, boltCol: 0x7ad0ff, spd: 6.5, dmgMul: 1,    hpMul: 1,    atkTs: 1,    rangeMul: 1,    light: 0xff4fa3 },
+  mira: { key: 'mira', name: '蒼鋒', weapon: 'great', tint: 0x4a78ff, hair: 0x3a5090, outfit: 0x1e2c48, metal: 0x9ab0cc, fx: 0x6aa8ff, fxHi: 0xaad4ff, boltCol: 0x6ab8ff, spd: 5.9, dmgMul: 1.28, hpMul: 1.18, atkTs: 0.86, rangeMul: 1.2,  light: 0x5a8aff },
+  zoey: { key: 'zoey', name: '金燕', weapon: 'short', tint: 0xffc040, hair: 0xff9ec0, outfit: 0x463020, metal: 0xffd070, fx: 0xffd84f, fxHi: 0xffeaa8, boltCol: 0xffe08a, spd: 7.5, dmgMul: 0.82, hpMul: 0.88, atkTs: 1.18, rangeMul: 0.85, light: 0xffb040 },
 };
 let curChar = CHARS.rumi;
 
@@ -1544,7 +1544,7 @@ function buildWeaponMesh(char, len) {
   grp.add(blade, tip, guard, grip, glow);
   return grp;
 }
-// 長髮（獵魔女團風）：掛頭部骨骼的程序生成髮型——Rumi 長辮／Mira 長直髮／Zoey 雙馬尾
+// 長髮（三人各異）：掛頭部骨骼的程序生成髮型——Rumi 長辮／Mira 長直髮／Zoey 雙馬尾
 function setupHair(root, char, hScale) {
   const head = root.getObjectByName('mixamorigHead');
   if (!head) return;
@@ -1929,7 +1929,7 @@ function initAudio() {
   AU.timer = setInterval(scheduleMusic, 200);
 }
 const MUSIC = [
-  { // 第一關：Golden 風主題曲（原創改編向：大調 anthem、C–G–Am–F、主歌揚升→副歌長音爆發）
+  { // 第一關：熱血英雄風主題曲（原創改編向：大調 anthem、C–G–Am–F、主歌揚升→副歌長音爆發）
     bpm: 106,
     prog: [[48, 52, 55, 59], [55, 59, 62, 65], [57, 60, 64, 67], [53, 57, 60, 64]],
     lead: [
@@ -2744,7 +2744,7 @@ async function chooseHero(key) {
   const status = document.getElementById('charLoadStatus');
   const retry = document.getElementById('charLoadRetry');
   retry.classList.add('hidden');
-  status.textContent = `正在載入 ${char.name}…`;
+  status.textContent = `正在載入${char.name}…`;
   setHeroCardsDisabled(true);
   try {
     char.model = await loadHeroAsset(key);
@@ -2755,7 +2755,7 @@ async function chooseHero(key) {
     heroPreloadFailed = false;
   } catch (error) {
     console.error(`Unable to load ${char.name} hero model`, error);
-    status.textContent = `${char.name} 模型載入失敗，請檢查連線後重試。`;
+    status.textContent = `${char.name}模型載入失敗，請檢查連線後重試。`;
     retry.classList.remove('hidden');
   } finally {
     heroSelectionPending = false;
@@ -2850,7 +2850,7 @@ async function prepareStage(i, report = () => {}) {
 }
 
 export async function prepareGame() {
-  hud.load.textContent = '載入獵魔士…';
+  hud.load.textContent = '載入刀客…';
   const [rumiResult] = await Promise.allSettled([loadHeroAsset('rumi'), loadEnemyAsset('minion')]);
   heroPreloadFailed = rumiResult.status === 'rejected';
   await prepareStage(0, text => { hud.load.textContent = text; });
@@ -2859,7 +2859,7 @@ export async function prepareGame() {
   hud.title.classList.add('hidden');
   document.getElementById('charsel').classList.remove('hidden');
   if (heroPreloadFailed) {
-    document.getElementById('charLoadStatus').textContent = 'RUMI 模型載入失敗，請重試或選擇其他角色。';
+    document.getElementById('charLoadStatus').textContent = '紫刃模型載入失敗，請重試或選擇其他角色。';
     pendingHeroKey = 'rumi';
     document.getElementById('charLoadRetry').classList.remove('hidden');
   }
@@ -3527,7 +3527,7 @@ function onBossDown() {
     const grade = score >= 3 ? 'S' : score === 2 ? 'A' : score === 1 ? 'B' : 'C';
     hud.grade.textContent = grade;
     const isLast = stageIdx >= STAGES.length - 1;
-    document.getElementById('winTitle').textContent = isLast ? '魂門守住了' : '關卡突破！';
+    document.getElementById('winTitle').textContent = isLast ? '鬼門封住了' : '關卡突破！';
     document.getElementById('nextBtn').style.display = isLast ? 'none' : '';
     hud.winStats.textContent = `通關時間 ${m}:${String(s).padStart(2, '0')} · 擊殺 ${kills} · 最大連段 ${maxCombo} · 剩餘 HP ${Math.round(player.hp)}`
       + (isLast ? '' : '　｜　升級獎勵：體力上限 +30、攻擊力 +12%');
@@ -4066,7 +4066,7 @@ function startMusou() {
   musou = 0;
   // 三人大絕各異：起手動畫與招式名
   const intro = {
-    rumi: { clip: 'heavyfin', ts: 1.75, name: '魂門亂舞！' },
+    rumi: { clip: 'heavyfin', ts: 1.75, name: '天刃亂舞！' },
     mira: { clip: 'heavy',    ts: 1.1,  name: '破魔天墜！' },
     zoey: { clip: 'slash3',   ts: 2.4,  name: '疾風無影！' },
   }[curChar.key];
@@ -4392,8 +4392,8 @@ function nextDialog(first = false) {
   }
   const [who, text] = line;
   const nameEl = document.getElementById('dlgName');
-  nameEl.textContent = who === 'RUMI' ? curChar.name : who;
-  nameEl.classList.toggle('enemy', who !== 'RUMI');
+  nameEl.textContent = who === '紫刃' ? curChar.name : who;
+  nameEl.classList.toggle('enemy', who !== '紫刃');
   document.getElementById('dlgText').textContent = text;
   dlgBox.style.display = 'block';
   if (AU.ctx) tone('triangle', midi(81), AU.ctx.currentTime, 0.06, 0.08, AU.sfx);
@@ -4401,41 +4401,41 @@ function nextDialog(first = false) {
 dlgBox.addEventListener('pointerdown', e => { e.stopPropagation(); nextDialog(); });
 const STORY = {
   s1open: [
-    ['RUMI', '魂門出現裂縫了……陰差把整條夜市都堵住了。'],
-    ['RUMI', '先殺出一條路。前面還有個守門的隊長！'],
+    ['紫刃', '鬼門出現裂縫了……鬼卒把整條夜市都堵住了。'],
+    ['紫刃', '先殺出一條路。前面還有個守門的隊長！'],
   ],
   s1boss: [
-    ['陰差隊長', '渺小的獵魔士……魂門將為吾等而開！'],
-    ['RUMI', '守門是我的工作。你，回地府重新排隊。'],
+    ['妖燈隊長', '渺小的刀客……鬼門將為吾等而開！'],
+    ['紫刃', '守門是我的工作。你，回地府重新排隊。'],
   ],
   s2open: [
-    ['RUMI', '穿過裂縫……這裡是黃泉的花海。彼岸花開得像一片火。'],
-    ['RUMI', '渡口的魂燈還亮著——別讓陰差把它們吹熄。'],
+    ['紫刃', '穿過裂縫……這裡是黃泉的花海。彼岸花開得像一片火。'],
+    ['紫刃', '渡口的魂燈還亮著——別讓鬼卒把它們吹熄。'],
   ],
   s2boss: [
-    ['陰差大隊長', '吾乃陰差大隊長！汝之魂，今夜歸吾！'],
-    ['RUMI', '……來取啊。'],
+    ['妖燈大將', '吾乃妖燈大將！汝之魂，今夜歸吾！'],
+    ['紫刃', '……來取啊。'],
   ],
   s3open: [
-    ['RUMI', '雲海之上……天界以「試煉」迎接闖入者。'],
-    ['RUMI', '時限之內斬出答案——這就是獵魔士的回答。'],
+    ['紫刃', '雲海之上……天界以「試煉」迎接闖入者。'],
+    ['紫刃', '時限之內斬出答案——這就是刀客的回答。'],
   ],
   s3boss: [
-    ['陰差王', '獵魔士……汝竟踏入天界。此地，即汝之墓。'],
-    ['RUMI', '墓誌銘我幫你想好了——「敗給了 HUNTR/X」。'],
+    ['百鬼王', '刀客……汝竟踏入天界。此地，即汝之墓。'],
+    ['紫刃', '墓誌銘我幫你想好了——「輸給三名刀客」。'],
   ],
   s4open: [
-    ['RUMI', '虛空……魂門的心臟在跳動，裂口不斷湧出陰差。'],
-    ['RUMI', '封印所有裂口，直搗核心。最後一戰。'],
+    ['紫刃', '虛空……鬼門的心臟在跳動，裂口不斷湧出鬼卒。'],
+    ['紫刃', '封印所有裂口，直搗核心。最後一戰。'],
   ],
   s4boss: [
-    ['魂門之靈', '吾即是門，吾即是界。汝斬不斷「界」本身。'],
-    ['RUMI', '界不界的我不懂——我只知道，你擋路了。'],
+    ['鬼門之主', '吾即是門，吾即是界。汝斬不斷「界」本身。'],
+    ['紫刃', '界不界的我不懂——我只知道，你擋路了。'],
   ],
   ending: [
-    ['RUMI', '魂門，守住了。'],
-    ['RUMI', '但裂縫的另一端……還有更深的東西在看著我們。'],
-    ['RUMI', '下次，三個人一起來。'],
+    ['紫刃', '鬼門，封住了。'],
+    ['紫刃', '但裂縫的另一端……還有更深的東西在看著我們。'],
+    ['紫刃', '下次，三個人一起來。'],
   ],
 };
 

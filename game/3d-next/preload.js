@@ -17,7 +17,7 @@ export const STAGE = {
 export const BYTES_PER_MS = 1100;
 
 const VERSIONS = {
-  hero: '20260925b', rumi: '20260924b', oni: '20260925b', march: '20260925a', fx: '20260925a',
+  hero: '20260925d', rumi: '20260924b', oni: '20260925b', march: '20260925b', fx: '20260925a',
 };
 
 /**
@@ -32,7 +32,7 @@ export function assetPlan({ hero = 'vroid', march = true, base = new URL('../', 
   const file = (id, stage, path, v, bytes, as, extra = {}) => plan.push({ id, stage, kind: 'file', url: url(path, v), bytes, as, blocking: true, ...extra });
   const step = (id, stage, ms) => plan.push({ id, stage, kind: 'step', ms, bytes: Math.round(ms * BYTES_PER_MS), blocking: true });
   if (vroid) {
-    file('hero', 'hero', 'assets/heroes/swordswoman-v4.glb', VERSIONS.hero, 2920836, 'buffer');
+    file('hero', 'hero', 'assets/heroes/swordswoman-v4.glb', VERSIONS.hero, 2946496, 'buffer');
     step('hero-parse', 'hero', 200);
     file('oni', 'oni', 'assets/enemies/oni-v2.glb', VERSIONS.oni, 1144008, 'buffer', { optional: true });
     step('oni-parse', 'oni', 100);
@@ -42,7 +42,7 @@ export function assetPlan({ hero = 'vroid', march = true, base = new URL('../', 
   }
   if (vroid && march) {
     file('march-atlas', 'scene', 'assets/march/atlas.json', VERSIONS.march, 2063, 'json');
-    file('march-props', 'scene', 'assets/march/march-props.webp', VERSIONS.march, 397316, 'blob');
+    file('march-props', 'scene', 'assets/march/march-props.webp', VERSIONS.march, 396774, 'blob');
     file('march-stone', 'scene', 'assets/march/march-stone.webp', VERSIONS.march, 258568, 'blob');
     file('march-sky', 'scene', 'assets/march/march-sky.webp', VERSIONS.march, 95296, 'blob');
     step('world', 'scene', 450);

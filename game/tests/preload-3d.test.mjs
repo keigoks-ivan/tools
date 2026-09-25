@@ -200,7 +200,8 @@ test('asset plan weights match the files on disk', async () => {
 
 test('preload versions and module URLs agree with the modules that consume them', async () => {
   const read = path => readFile(new URL(path, gameRoot), 'utf8');
-  const [boot, battle, index, marchArt, combatFx] = await Promise.all(['3d-next/boot.js', '3d-next/battle.js', '3d-next/index.html', '3d-next/march-art.js', '3d-next/combat-fx.js'].map(read));
+  const [boot, battle, index, marchArt, combatFx, fxPreview] = await Promise.all(
+    ['3d-next/boot.js', '3d-next/battle.js', '3d-next/index.html', '3d-next/march-art.js', '3d-next/combat-fx.js', '3d-next/fx-preview.js'].map(read));
   const plan = assetPlan({ base: gameRoot.href });
   const version = id => new URL(plan.find(item => item.id === id).url).searchParams.get('v');
   assert.equal(version('march-props'), marchArt.match(/const VERSION = '([^']+)'/)[1], 'march texture ?v= differs from march-art.js');
@@ -214,4 +215,8 @@ test('preload versions and module URLs agree with the modules that consume them'
   }
   const battleVersion = boot.match(/import\('\.\/battle\.js(\?v=\w+)'\)/)[1];
   assert.ok(battleVersion, 'boot imports a versioned battle.js');
+  // fx-preview.js is a standalone judge page for combat-fx.js; its import must not go stale against battle.js's
+  const combatFxInBattle = battle.match(/import\('\.\/combat-fx\.js(\?v=\w+)?'\)/)[1] || '';
+  const combatFxInPreview = fxPreview.match(/from '\.\/combat-fx\.js(\?v=\w+)?'/)[1] || '';
+  assert.equal(combatFxInPreview, combatFxInBattle, 'fx-preview.js imports a stale combat-fx.js version');
 });

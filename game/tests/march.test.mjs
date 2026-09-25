@@ -186,7 +186,7 @@ test('boss: phase 1 slams with radius 3 m; at half hp it roars, summons 8, doubl
   march.skipTo(3);
   const boss = march.arena.enemies.find(enemy => enemy.kind === 'boss');
   assert.equal(boss.hp, TUNING.boss.hp);
-  assert.equal(march.hud().foe.name, '魂門守將');
+  assert.equal(march.hud().foe.name, '鬼門守將');
   // Keep the hero across the platform from the boss (≥ 6 m) so it always chooses the jump slam.
   const keepAway = m => {
     godMode(m);
