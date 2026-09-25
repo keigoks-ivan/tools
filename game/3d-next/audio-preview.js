@@ -1,7 +1,7 @@
 // Audition page for audio.js: every music cue (incl. a loop-seam check), every SFX variant, and scripted
 // event scenes that run through the real mapEvent → voice limiter → ducking path.
 //   ?selftest=1  (headless check) unlock without a click, play everything once, write results into #log
-import { createAudio, SOUNDS, MUSIC_TRACKS } from './audio.js?v=20260925c';
+import { createAudio, SOUNDS, MUSIC_TRACKS } from './audio.js?v=20260925d';
 
 const $ = id => document.getElementById(id);
 const params = new URLSearchParams(location.search);
@@ -68,7 +68,7 @@ async function playSeam(name) {
   const entry = manifest.music[name];
   const res = await fetch('../assets/audio/march/' + entry.file);
   const buf = await ctx.decodeAudioData(await res.arrayBuffer());
-  const { smoothLoopSeam } = await import('./audio.js?v=20260925c');
+  const { smoothLoopSeam } = await import('./audio.js?v=20260925d');
   const ch = []; for (let c = 0; c < buf.numberOfChannels; c++) ch.push(buf.getChannelData(c));
   smoothLoopSeam(ch, buf.sampleRate, entry.loopStart, entry.loopEnd);
   audio.stopMusic(0.3);

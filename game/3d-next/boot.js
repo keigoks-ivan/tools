@@ -41,7 +41,7 @@ const loadBattleModule = () => import('./battle.js?v=20260925f');
 if (params.has('debug')) window.__assets = assets;   // ?debug：各項下載／步驟的開始與完成時間（__assets.progress.items）
 let audio = null;
 const audioReady = vroid
-  ? import('./audio.js?v=20260925c').then(({ createAudio }) => {
+  ? import('./audio.js?v=20260925d').then(({ createAudio }) => {
     // mp3 由預載器提供（開戰要用的檔案下載完才抓）；解碼仍在按下開始、解鎖音訊之後
     audio = createAudio({ baseUrl: '../assets/audio/march/', fetchImpl: (url, init) => assets.fetchAudio(url, init) });
     if (params.has('debug')) window.__audio = audio;
@@ -170,5 +170,11 @@ async function start() {
 }
 
 startButton.addEventListener('click', start);
+// 按開始時音訊模組若還沒下載完，改在下一次觸碰（仍是使用者手勢）時解鎖
+audioReady.then(a => {
+  if (!a || a.state().unlocked) return;
+  const late = () => { if (!loading) return; a.unlock(); for (const t of ['pointerdown', 'touchend', 'click']) document.removeEventListener(t, late, true); };
+  for (const t of ['pointerdown', 'touchend', 'click']) document.addEventListener(t, late, true);
+});
 requestAnimationFrame(progressLoop);
 schedulePrefetch();
