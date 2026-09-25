@@ -230,6 +230,61 @@ for (const quality of ['desktop', 'mobile']) {
 }
 
 // ---------------------------------------------------------------------------------------------
+// Round 8: "something white stays on screen after the ultimate" (live bug report). Root cause: once musou.active
+// flipped false, updateMusou()'s early return stopped calling updateSpirit() at all -- the only place that
+// force-hides the spirit blade / flame shroud -- so whatever visible/opacity state they happened to be in at that
+// exact instant froze forever. Compounding it, updateSpirit()'s 'hidden'->'growing' trigger didn't check
+// musou.impactT, so if the blade finished a full cleave->fade->hidden cycle while still inside the post-impact
+// recovery window (musou.active not false yet), it immediately restarted growing, which the impactT>=0 block then
+// forced straight back into 'cleaving' -- an infinite regrow loop that could freeze mid-cycle, mesh visible, the
+// moment musou.active finally went false. Must fully clear within a few seconds of musouEnd, every quality/form.
+// ---------------------------------------------------------------------------------------------
+
+for (const quality of ['desktop', 'mobile']) {
+  for (const isTrue of [false, true]) {
+    test(`musou aftermath (${quality}, ${isTrue ? 'true' : 'std'}): every cinematic mesh/item/draw call is gone 3s after musouEnd`, () => {
+      const { fx, camera, target } = makeFx(quality);
+      runLongMusou(fx, camera, target, { isTrue });
+      // Step in CHUNKY ~0.08s steps like the real game's slow-render frame times (not fine 1/60 steps) -- that
+      // irregular, coarse dt is what actually lands a frame inside the exact window where the round-8 bug's re-grow
+      // loop could get interrupted mid-cycle; fine-grained steps mostly missed it. Track real time since musouEnd
+      // to also check the round-9 "ground crack/dust must be gone by +1.6s" deadline along the way.
+      const chunk = 0.08;
+      let sinceEnd = null, checked1_6 = false;
+      for (let i = 0; i < Math.ceil(3 / chunk); i++) {
+        // gameDt = realDt * timeScale(), same as battle.js -- a flat chunk for both real and game time would skip
+        // right past the round-9 bug entirely (it's specifically about game time lagging real time during the
+        // finisher's own slow-mo).
+        fx.update(chunk, chunk * fx.timeScale(), { heroAction: 'idle' }); fx.cameraPre(camera); fx.cameraPost(camera);
+        const mid = fx.debugAftermath();
+        if (sinceEnd === null && !mid.musou.active) sinceEnd = 0; else if (sinceEnd !== null) sinceEnd += chunk;
+        if (sinceEnd !== null && sinceEnd >= 1.6 && !checked1_6) {
+          checked1_6 = true;
+          // (round 9) "something white stays" part 2: the finisher's ground crack/scorch/burst decals and dust/
+          // colour rings used to age on the slow-mo-biased fxDt, so a nominal ~1.6-1.8s life could take several
+          // real seconds to actually fade out. They now age on real time (see writeItems), so by musouEnd + 1.6s
+          // every one of them (and the finisher's own short-lived particles) must be fully gone.
+          assert.equal(mid.items.length, 0, `musou items (ground crack/dust/rings) gone by musouEnd+1.6s (${quality}, ${isTrue ? 'true' : 'std'})`);
+          assert.equal(mid.particlesAlive, 0, `finisher particles dead by musouEnd+1.6s (${quality}, ${isTrue ? 'true' : 'std'})`);
+        }
+      }
+      assert.ok(checked1_6, 'musou actually ended within the 3s window, so the +1.6s checkpoint ran');
+      const a = fx.debugAftermath();
+      assert.equal(a.musou.active, false, 'musou has ended');
+      assert.equal(a.spiritPhase, 'hidden', 'spirit phase machine settled back to hidden, not stuck mid-cycle');
+      assert.equal(a.spiritBlade.visible, false, 'spirit blade mesh hidden');
+      assert.equal(a.flameShroud.visible, false, 'flame shroud mesh hidden');
+      assert.equal(a.splitOverlay.visible, false, 'split overlay hidden');
+      assert.equal(a.shockwave.visible, false, 'shockwave hidden');
+      assert.equal(a.stripSlotsUsed, 0, 'no strip items (decals/crater/crack/rings) still drawing');
+      assert.equal(a.items.length, 0, 'item pool fully drained');
+      assert.equal(fx.stats().drawCalls, 0, 'combat-fx is fully idle');
+      fx.dispose();
+    });
+  }
+}
+
+// ---------------------------------------------------------------------------------------------
 // Pool bounds: a full 真・無雙 天刃 run (10-12 swings incl. 3 sweeps, leap, cleave, split, shockwave) must not
 // allocate any new GPU resource once its pooled meshes/materials/texture already exist (created once, reused).
 // ---------------------------------------------------------------------------------------------

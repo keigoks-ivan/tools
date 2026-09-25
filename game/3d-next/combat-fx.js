@@ -1342,19 +1342,19 @@ export function createCombatFx(o) {
     setColor(it, color[0], color[1], color[2], alpha);
     return it;
   }
-  function groundRing(x, y, z, r0, r1, { life = 0.4, width = 0.5, row = STRIP_ROWS.ring, color = [1.1, 0.8, 1.6], alpha = 1, mode = 0 } = {}) {
+  function groundRing(x, y, z, r0, r1, { life = 0.4, width = 0.5, row = STRIP_ROWS.ring, color = [1.1, 0.8, 1.6], alpha = 1, mode = 0, musou = false } = {}) {
     const it = item('ring');
-    it.c.set(x, y, z); it.r0 = r0; it.r1 = r1; it.life = life; it.w = width; it.row = row; it.mode = mode;
+    it.c.set(x, y, z); it.r0 = r0; it.r1 = r1; it.life = life; it.w = width; it.row = row; it.mode = mode; it.musou = musou;
     return setColor(it, color[0], color[1], color[2], alpha);
   }
-  function pillar(x, y, z, r0, r1, height, { life = 0.35, color = [1.0, 0.7, 1.6], alpha = 1 } = {}) {
+  function pillar(x, y, z, r0, r1, height, { life = 0.35, color = [1.0, 0.7, 1.6], alpha = 1, musou = false } = {}) {
     const it = item('cyl');
-    it.c.set(x, y, z); it.r0 = r0; it.r1 = r1; it.height = height; it.life = life; it.row = STRIP_ROWS.pillar;
+    it.c.set(x, y, z); it.r0 = r0; it.r1 = r1; it.height = height; it.life = life; it.row = STRIP_ROWS.pillar; it.musou = musou;
     return setColor(it, color[0], color[1], color[2], alpha);
   }
-  function decal(x, y, z, cell, size0, size1, { life = 1.4, angle = 0, color = [1, 1, 1], alpha = 1, mode = 0, fadeFrom = 0.55, spin = 0 } = {}) {
+  function decal(x, y, z, cell, size0, size1, { life = 1.4, angle = 0, color = [1, 1, 1], alpha = 1, mode = 0, fadeFrom = 0.55, spin = 0, musou = false } = {}) {
     const it = item('quad');
-    it.c.set(x, y, z); it.row = cell; it.r0 = size0; it.r1 = size1; it.life = life; it.angle = angle; it.mode = mode; it.fadeFrom = fadeFrom; it.spin = spin;
+    it.c.set(x, y, z); it.row = cell; it.r0 = size0; it.r1 = size1; it.life = life; it.angle = angle; it.mode = mode; it.fadeFrom = fadeFrom; it.spin = spin; it.musou = musou;
     return setColor(it, color[0], color[1], color[2], alpha);
   }
 
@@ -1708,17 +1708,20 @@ export function createCombatFx(o) {
     killTimes.length = 0;
   }
 
-  function slam(x, z, { radius = 3, palette = 'violet', crack = true, debris = 10 } = {}) {
+  // (round 9) `musou`: only musouFinisher's call sets this true. Its crack/scorch/burst decals and dust/colour
+  // rings are otherwise identical to the plunge/heavy/bossSlam callers of this same function -- the difference is
+  // purely which time base they age on (see writeItems), so those other callers' timing is untouched.
+  function slam(x, z, { radius = 3, palette = 'violet', crack = true, debris = 10, musou = false } = {}) {
     const y = groundAt(x, z);
     const tint = palette === 'red' ? [2.2, 0.7, 0.35] : [1.3, 0.7, 2.2];
     if (crack) {
       const angle = rnd(0, Math.PI * 2);
-      decal(x, y + 0.03, z, DECAL_CELLS.scorch, radius * 1.1, radius * 1.2, { life: 1.8, angle, color: [0.01, 0.0, 0.03], alpha: 0.9, mode: 1, fadeFrom: 0.6 });
-      decal(x, y + 0.045, z, DECAL_CELLS.crack, radius * 1.15, radius * 1.25, { life: 1.6, angle, color: palette === 'red' ? [2.6, 1.0, 0.5] : [1.9, 1.3, 3.0], alpha: 1, mode: 0, fadeFrom: 0.35 });
+      decal(x, y + 0.03, z, DECAL_CELLS.scorch, radius * 1.1, radius * 1.2, { life: 1.8, angle, color: [0.01, 0.0, 0.03], alpha: 0.9, mode: 1, fadeFrom: 0.6, musou });
+      decal(x, y + 0.045, z, DECAL_CELLS.crack, radius * 1.15, radius * 1.25, { life: 1.6, angle, color: palette === 'red' ? [2.6, 1.0, 0.5] : [1.9, 1.3, 3.0], alpha: 1, mode: 0, fadeFrom: 0.35, musou });
     }
-    decal(x, y + 0.06, z, DECAL_CELLS.burst, radius * 0.5, radius * 1.3, { life: 0.22, angle: rnd(0, 6.28), color: tint, alpha: 1, fadeFrom: 0.2 });
-    groundRing(x, y + 0.08, z, 0.3, radius * 1.35, { life: 0.36, width: 0.55, color: tint });
-    groundRing(x, y + 0.05, z, 0.4, radius * 1.15, { life: 0.7, width: 1.1, row: STRIP_ROWS.dust, color: [0.5, 0.47, 0.6], alpha: 0.7, mode: 1 });
+    decal(x, y + 0.06, z, DECAL_CELLS.burst, radius * 0.5, radius * 1.3, { life: 0.22, angle: rnd(0, 6.28), color: tint, alpha: 1, fadeFrom: 0.2, musou });
+    groundRing(x, y + 0.08, z, 0.3, radius * 1.35, { life: 0.36, width: 0.55, color: tint, musou });
+    groundRing(x, y + 0.05, z, 0.4, radius * 1.15, { life: 0.7, width: 1.1, row: STRIP_ROWS.dust, color: [0.5, 0.47, 0.6], alpha: 0.7, mode: 1, musou });
     particles.emit(STYLE.impact, x, y + 0.35, z, 0, 0, 0, 0.12, 1.4, 2.8, tint[0] * 1.2, tint[1] * 1.3, tint[2] * 1.1, 1, rnd(0, 6.28), 0);
     particles.emit(STYLE.flare, x, y + 0.4, z, 0, 0, 0, 0.14, 1.6, 3.0, 2.2, 1.9, 2.6, 0.8, 0, 0);
     for (let i = 0; i < count(debris); i++) {
@@ -1961,12 +1964,16 @@ export function createCombatFx(o) {
       if (isTrue) slow.play([[0.05, 0], [0.5, 0.15]], { ramp: 0.3, force: true, tag: 'musou' });
       else slow.play([[0.05, 0], [0.3, 0.3]], { ramp: 0.3, force: true, tag: 'musou' });
     }
-    slam(x, z, { radius: radius * 0.4, debris: 18, palette: 'violet' });
-    groundRing(x, y + 0.09, z, 0.5, radius * 1.1, { life: 0.6, width: 1.1, color: [tint[0] * 1.3, tint[1] * 1.5, tint[2] * 1.2] });
-    groundRing(x, y + 0.07, z, 0.3, radius * 0.75, { life: 0.8, width: 0.6, color: [2.2, 2.0, 2.6], alpha: 0.8 });
-    groundRing(x, y + 0.05, z, 0.5, radius * 0.95, { life: 0.9, width: 1.8, row: STRIP_ROWS.dust, color: [0.5, 0.45, 0.62], alpha: 0.7, mode: 1 });
+    // (round 9) musou:true on every finisher-spawned decal/ring below: they age on real time instead of the
+    // slow-mo-biased fxDt (see writeItems), so a "1.6s life" actually takes ~1.6 real seconds instead of ballooning
+    // to several seconds while the finisher's own slow-mo is active -- that mismatch was why the ground crack/dust
+    // stayed on screen far longer than musouEnd + 1.5s ("something white stays" bug report, part 2).
+    slam(x, z, { radius: radius * 0.4, debris: 18, palette: 'violet', musou: true });
+    groundRing(x, y + 0.09, z, 0.5, radius * 1.1, { life: 0.6, width: 1.1, color: [tint[0] * 1.3, tint[1] * 1.5, tint[2] * 1.2], musou: true });
+    groundRing(x, y + 0.07, z, 0.3, radius * 0.75, { life: 0.8, width: 0.6, color: [2.2, 2.0, 2.6], alpha: 0.8, musou: true });
+    groundRing(x, y + 0.05, z, 0.5, radius * 0.95, { life: 0.9, width: 1.8, row: STRIP_ROWS.dust, color: [0.5, 0.45, 0.62], alpha: 0.7, mode: 1, musou: true });
     // (f) smaller, shaped pillar instead of a screen-tall column
-    pillar(x, y, z, 0.12, 0.34, 2.6, { life: 0.28, color: [tint[0] * 1.15, tint[1] * 1.35, tint[2] * 1.05], alpha: 0.55 });
+    pillar(x, y, z, 0.12, 0.34, 2.6, { life: 0.28, color: [tint[0] * 1.15, tint[1] * 1.35, tint[2] * 1.05], alpha: 0.55, musou: true });
     for (let i = 0; i < count(16); i++) {
       const a = rnd(0, Math.PI * 2), r = rnd(1.0, radius * 0.8);
       particles.emit(STYLE.wisp, x + Math.cos(a) * r, y + 0.1, z + Math.sin(a) * r, 0, rnd(12, 20), 0, rnd(0.3, 0.5), rnd(0.06, 0.1), 0.02, 1.3, 0.8, 2.3, 1);
@@ -2009,6 +2016,12 @@ export function createCombatFx(o) {
     if (!musou.active) {
       Object.assign(g, { orbit: 0, dolly: 1, lift: 0, look: 0, rate: 5 });
       overlay.shade = Math.max(0, overlay.shade - realDt * 2.2);
+      // (round 8) updateSpirit() must still run here: it's the only place that force-hides the spirit blade/flame
+      // shroud once musou stops being active. Without this call, whatever visible/opacity state they happened to
+      // be in at the exact instant musou.active flipped false (see the re-grow bug fixed below -- it could be
+      // mid-'cleaving' again, fully visible) froze forever, since this early return used to skip updateSpirit()
+      // entirely from here on.
+      updateSpirit(realDt, gameDt);
       return;
     }
     musou.t += realDt; musou.g += gameDt;
@@ -2059,7 +2072,7 @@ export function createCombatFx(o) {
     } else musou.cut = null;
     if (heroAction !== 'special' && t > 0.8 && !Number.isFinite(musou.endAt) && !musou.longForm) musou.endAt = t + 0.3;
     if (musou.longForm && musou.g > tl.end + 0.4 && !Number.isFinite(musou.endAt)) musou.endAt = t;   // safety
-    if (t > musou.endAt) { endMusou(); return; }
+    if (t > musou.endAt) { endMusou(); updateSpirit(realDt, gameDt); return; }
     // (8) normal musou only: a few atlas-particle flames licking up around her. 真・無雙's feet/body fire is the
     // flameShroud shader mesh instead (updateSpirit), so it never looks like the old "petal" particles.
     if (!musou.isTrue) {
@@ -2079,7 +2092,12 @@ export function createCombatFx(o) {
       return;
     }
     const t = musou.g, isTrue = musou.isTrue;
-    if (spirit.phase === 'hidden' && musou.t >= 0.08) { spirit.phase = 'growing'; spirit.t = 0; spirit.seed = rand() * 100; }
+    // (round 8) musou.impactT < 0 guards this: without it, once the blade finished a full cleave -> fade -> hidden
+    // cycle *while still inside the post-impact recovery window* (musou.active hadn't flipped false yet), this
+    // condition saw phase 'hidden' and musou.t >= 0.08 (always true by then) and restarted growing -- which the
+    // impactT >= 0 block below immediately forced back into 'cleaving', over and over, until musou.active finally
+    // went false mid-cycle with the meshes visible again -- frozen there forever by the bug fixed above.
+    if (spirit.phase === 'hidden' && musou.impactT < 0 && musou.t >= 0.08) { spirit.phase = 'growing'; spirit.t = 0; spirit.seed = rand() * 100; }
     else if (spirit.phase === 'growing') {
       spirit.t += gameDt; spirit.reveal = Math.min(1, spirit.t / 0.4);
       if (spirit.reveal >= 1) spirit.phase = 'held';
@@ -2395,13 +2413,16 @@ export function createCombatFx(o) {
   }
 
   // ---- strip items -> batch ----
-  function writeItems(dt) {
+  function writeItems(dt, realDt) {
     strips.begin();
     // trail first so it survives a full batch
     if (blade && trailState.visible) writeTrail();
     for (let i = items.length - 1; i >= 0; i--) {
       const it = items[i];
-      it.age += dt;
+      // (round 9) musou-flagged items (the finisher's crack/scorch/burst/rings/pillar, and the rune circle) age on
+      // real time, not `dt` (which is floored at 20% during the finisher's own slow-mo) -- otherwise a nominal
+      // "1.6s life" decal can take several real seconds to actually disappear.
+      it.age += it.musou ? realDt : dt;
       if (it.age >= it.life) { itemPool.push(it); items.splice(i, 1); }
     }
     for (const it of items) {
@@ -2653,7 +2674,7 @@ export function createCombatFx(o) {
     updateSplitShock(realDt);
     sweepAirborne();
     groupBurstCheck();
-    writeItems(fxDt);
+    writeItems(fxDt, realDt);
     particles.update(fxDt);
     // camera envelopes (real time)
     cam.punchT = Math.min(1, cam.punchT + realDt / cam.punchDur);
@@ -2879,6 +2900,26 @@ export function createCombatFx(o) {
     /** Diagnostics for the occlusion leak/dispose tests: how many recs are mid-fade right now, and how many
      * distinct dither clones exist (shared per source material, so this shouldn't grow with enemy count). */
     debugOcclusion: () => ({ activeCount: occlusionActive.size, cacheSize: occlusionCache.size }),
+    /** Diagnostics for the "something white lingers after the musou" bug report: every cinematic mesh's
+     * visible/opacity, the strip-item list (decals/crater/crack/rings included), particle count, and the relevant
+     * state machines, so a screenshot can be correlated with exactly what's still drawing. */
+    debugAftermath: () => ({
+      spiritBlade: { visible: spiritBlade.mesh.visible, opacity: spiritBlade.material.uniforms.uOpacity.value, reveal: spiritBlade.material.uniforms.uReveal.value },
+      flameShroud: { visible: flameShroud.mesh.visible, opacity: flameShroud.material.uniforms.uOpacity.value },
+      splitOverlay: { visible: splitOverlay.mesh.visible, alpha: splitOverlay.material.uniforms.uAlpha.value, sep: splitOverlay.material.uniforms.uSep.value },
+      shockwave: { visible: shockwave.mesh.visible, opacity: shockwave.material.uniforms.uOpacity.value, radius: shockwave.material.uniforms.uRadius.value },
+      aura: echoes.aura ? echoes.aura.visible : null,
+      ghostsVisible: echoes.ghosts.filter(g => g.mesh.visible).length,
+      stripSlotsUsed: strips.used,
+      items: items.map(it => ({ type: it.type, row: it.row, life: +it.life.toFixed(3), age: +it.age.toFixed(3), fadeFrom: it.fadeFrom, alpha: it.alpha, musou: it.musou, follow: it.follow })),
+      particlesAlive: particles.alive(),
+      spiritPhase: spirit.phase,
+      splitState: { ...splitState },
+      shockState: { ...shockState },
+      musou: { active: musou.active, t: +musou.t.toFixed(3), endAt: Number.isFinite(musou.endAt) ? +musou.endAt.toFixed(3) : musou.endAt, longForm: musou.longForm, isTrue: musou.isTrue },
+      drawCalls: (particles.draws + (strips.mesh.visible ? 1 : 0) + echoes.ghosts.filter(g => g.mesh.visible).length + (echoes.aura?.visible ? 1 : 0)
+        + (spiritBlade.mesh.visible ? 1 : 0) + (flameShroud.mesh.visible ? 1 : 0) + (splitOverlay.mesh.visible ? 1 : 0) + (shockwave.mesh.visible ? 1 : 0)),
+    }),
     objects: [...particles.meshes, strips.mesh, ...echoes.ghosts.map(g => g.mesh), echoes.aura, spiritBlade.mesh, flameShroud.mesh, splitOverlay.mesh, shockwave.mesh].filter(Boolean),
     quality: q,
   };

@@ -37,7 +37,7 @@ export function loadLazyModules() {
     lazyModules = Promise.all([
       marchLevel ? Promise.all([import('./march.js'), import('./march-art.js?v=20260925f')]) : null,
       // ?hero=vroid：打擊特效模組（combat-fx.js）；載入失敗時退回下方原本的特效與時間倍率
-      heroChoice === 'vroid' ? import('./combat-fx.js?v=20260925h').catch(error => { console.warn('combat-fx failed, using built-in effects', error); return null; }) : null,
+      heroChoice === 'vroid' ? import('./combat-fx.js?v=20260925i').catch(error => { console.warn('combat-fx failed, using built-in effects', error); return null; }) : null,
     ]).catch(error => { lazyModules = null; throw error; });
   }
   return lazyModules;
