@@ -12,7 +12,7 @@
 
 骨架套了 13 段從 Mixamo 重定向來的基本動作：idle、run、slash1-4、heavy、heavyfin、hurt、death、jump、win、roll。無雙技能另外做了 combo1 到 combo5、charge、musou 七段連段，加上 jump、airSlash、plunge、musouFlurry、musouFinish 五段空中與終結技，動作全部由 Mixamo 的重劍／太刀原始片段裁切拼接而成。每段動作都跑過髮辮的彈簧模擬（spring bake），馬尾和辮尾會依動作甩動，不是死綁在頭上。
 
-GLB 位置在 `game/assets/heroes/swordswoman-v4.glb`，約 5.2 MB。
+GLB 位置在 `game/assets/heroes/swordswoman-v4.glb`，約 2.9 MB（匯出後經 `optimize_glb.mjs` 壓縮，原始匯出約 5.2 MB）。
 
 ## 重建方式
 
@@ -40,6 +40,9 @@ blender -b --python game/design/vroid-v4/scripts/moves_actions.py
 
 # 7. 匯出成遊戲用 GLB
 blender -b --python game/design/vroid-v4/scripts/export_v4.py -- work/v4_moves.blend game/assets/heroes/swordswoman-v4.glb
+
+# 7b. 壓縮動畫與頂點格式（5.2 MB → 2.9 MB，不需要解碼器）
+node game/scripts/optimize_glb.mjs hero game/assets/heroes/swordswoman-v4.glb game/assets/heroes/swordswoman-v4.glb
 
 # 8. 驗證 GLB（骨架、動畫、貼圖是否正常）
 node game/design/vroid-v4/scripts/check_glb.mjs game/assets/heroes/swordswoman-v4.glb

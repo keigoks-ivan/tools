@@ -29,8 +29,23 @@
     @media(max-width:900px) and (orientation:landscape){.title-content{margin-left:max(clamp(24px,6vw,55px),calc(12px + var(--safe-left)))}}
     @media(pointer:coarse){.vitals-card,.round-card,.score-card{-webkit-backdrop-filter:none;backdrop-filter:none}.hud-footer{display:none}}
     @media(max-height:500px) and (orientation:landscape){body.march-level .battle-toast{top:calc(100px + var(--safe-top))}}
+    /* 載入進度：標題畫面是按鈕下的一條細線（背景預載）；按開始後取代按鈕，顯示目前階段與百分比 */
+    .load-panel{width:min(330px,100%);margin-top:12px}
+    .load-head{display:none;align-items:baseline;justify-content:space-between;gap:16px;color:#f1e4ca;font-size:12px;letter-spacing:.14em}
+    .load-head b{color:var(--gold);font-weight:500;letter-spacing:.06em;font-variant-numeric:tabular-nums}
+    .load-progress{position:relative;height:2px;border-radius:2px;background:rgba(225,216,232,.14);overflow:hidden}
+    .load-progress i{position:absolute;inset:0;transform:scaleX(0);transform-origin:0 50%;background:linear-gradient(90deg,#7d58c4,var(--gold) 78%,var(--gold-bright));transition:transform .25s linear}
+    body[data-mode="loading"] #start{display:none}
+    body[data-mode="loading"] .load-panel{display:inline-flex;flex-direction:column;justify-content:center;width:min(240px,100%);min-height:48px;margin-top:30px;vertical-align:bottom}
+    body[data-mode="loading"] #soundToggle:not([hidden])~.load-panel{margin-left:14px;width:min(240px,calc(100% - 150px))}
+    body[data-mode="loading"] .load-head{display:flex}
+    body[data-mode="loading"] .load-progress{height:4px;margin-top:11px}
+    @media(max-width:900px) and (orientation:landscape){body[data-mode="loading"] .load-panel{min-height:44px;margin-top:17px}}
+    @media(max-height:430px) and (orientation:landscape){.load-panel{margin-top:8px}body[data-mode="loading"] .load-panel{margin-top:10px}body[data-mode="loading"] .load-progress{margin-top:8px}}
+    @media(prefers-reduced-motion:reduce){.load-progress i{transition:none}}
   </style>
   <script type="importmap">{"imports":{"three":"../lib/three.module.js","three/addons/":"../lib/addons/"}}</script>
+  <link rel="modulepreload" href="./preload.js?v=20260925b">
 </head>
 <body data-mode="title" data-view="warrior">
   <main id="game" aria-label="HUNTR/X 3D 轉製試作">
@@ -45,6 +60,7 @@
         <p class="prototype-note">未完成美術　·　RUMI 單角色　·　<span id="soundNote">靜音測試</span></p>
         <button id="soundToggle" class="sound-toggle" type="button" aria-pressed="false" hidden>🔊 聲音：開</button>
         <button id="start" class="primary-button" type="button"><span>進入 3D 夜市</span><b aria-hidden="true">↗</b></button>
+        <div id="loadPanel" class="load-panel" hidden><div class="load-head"><span class="load-stage">角色模型</span><b class="load-pct">0%</b></div><div class="load-progress" role="progressbar" aria-label="載入進度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i></i></div></div>
         <p id="loadstatus" role="status" aria-live="polite">按開始後才載入 3D 場景</p>
         <a class="version-link" href="../2d/?view=warrior&amp;v=20260924h">返回 2.5D 版本 ↗</a>
       </div>
@@ -68,6 +84,6 @@
     <footer id="help" class="help-bar"><span class="desktop-help"><b>移動</b> WASD / ↑↓←→ <i></i> <b>攻擊</b> J <i></i> <b>重擊</b> K <i></i> <b>閃避</b> Shift <i></i> <b>絕招</b> E <i></i> <span data-jump-help hidden><b>跳躍</b> Space <i></i></span> <b>暫停</b> P</span><span class="touch-help">左側移動　·　右側攻擊</span><span class="silent-note" id="soundState">靜音試作</span></footer>
     <div id="diagnostics"></div>
   </main>
-  <script type="module" src="./boot.js?v=20260925e"></script>
+  <script type="module" src="./boot.js?v=20260925f"></script>
 </body>
 </html>

@@ -1,4 +1,5 @@
 import { installGameGestures } from '../2d/touch-gestures.js';
+import { assetPlan, createPreloader } from './preload.js?v=20260925b';
 
 // 手機防誤觸縮放：連點放大、雙指縮放（iOS gesture*）一律擋下；萬一仍被放大，重設 viewport 讓畫面縮回原比例
 installGameGestures(document.getElementById('game'));
@@ -29,12 +30,21 @@ const loadStatus = document.getElementById('loadstatus');
 let loading = false;
 
 // ?hero=vroid：有聲試作（audio.js，程式合成的原創配樂＋音效）；預設 Rumi 頁面不載入音訊、維持靜音
-const vroid = new URLSearchParams(location.search).get('hero') !== 'rumi';   // 預設紫刃；?hero=rumi 為舊版靜音頁
+const params = new URLSearchParams(location.search);
+const vroid = params.get('hero') !== 'rumi';   // 預設紫刃；?hero=rumi 為舊版靜音頁
+// 預載器：標題畫面畫好後在背景下載開戰要用的檔案；判斷角色／關卡的規則與 battle.js 相同
+const assets = createPreloader({
+  plan: assetPlan({ hero: vroid ? 'vroid' : 'rumi', march: vroid && params.get('level') !== 'single' }),
+  loadEngine: () => loadBattleModule().then(async module => { await module.loadLazyModules(); return module; }),
+});
+const loadBattleModule = () => import('./battle.js?v=20260925f');
+if (params.has('debug')) window.__assets = assets;   // ?debug：各項下載／步驟的開始與完成時間（__assets.progress.items）
 let audio = null;
 const audioReady = vroid
-  ? import('./audio.js?v=20260925a').then(({ createAudio }) => {
-    audio = createAudio({ baseUrl: '../assets/audio/march/' });
-    if (new URLSearchParams(location.search).has('debug')) window.__audio = audio;
+  ? import('./audio.js?v=20260925b').then(({ createAudio }) => {
+    // mp3 由預載器提供（開戰要用的檔案下載完才抓）；解碼仍在按下開始、解鎖音訊之後
+    audio = createAudio({ baseUrl: '../assets/audio/march/', fetchImpl: (url, init) => assets.fetchAudio(url, init) });
+    if (params.has('debug')) window.__audio = audio;
     setupSoundUi();
     return audio;
   })
@@ -61,6 +71,73 @@ function setupSoundUi() {
   document.addEventListener('click', event => { if (event.target.closest?.('#pauseBtn, #resume, #retry')) audio.ui(); });
 }
 
+// ---- 預載與進度條 ----
+// 背景建好的戰場（createBattle）；失敗時清掉，按開始會重新下載失敗的檔案再建一次
+let battlePromise = null, battleReady = false, prefetching = false;
+// battle.js 的 import 圖：一次全部送出請求，不用等 battle.js 下載完才發現要抓 three.js（版本字串與 battle.js 相同，測試會比對）
+const ENGINE_MODULES = ['../lib/three.module.js', '../lib/addons/loaders/GLTFLoader.js', '../lib/addons/utils/SkeletonUtils.js',
+  '../2d/combat.js', '../frame-pacing.js', './world.js', './oni.js', './touch-input.js',
+  ...(vroid ? ['./combat-fx.js?v=20260925e'] : []), ...(vroid && params.get('level') !== 'single' ? ['./march.js', './march-art.js?v=20260925e'] : [])];
+function preloadModules() {
+  for (const href of ENGINE_MODULES) {
+    const link = document.createElement('link');
+    link.rel = 'modulepreload';
+    link.href = href;
+    document.head.append(link);
+  }
+}
+function prepare() {
+  if (!prefetching) preloadModules();
+  prefetching = true;
+  assets.start();
+  if (!battlePromise) {
+    battlePromise = Promise.all([loadBattleModule(), audioReady])
+      .then(([{ createBattle }]) => createBattle(document.getElementById('battle'), { audio, assets }));
+    battlePromise.then(battle => {
+      battleReady = true;
+      // 還在標題畫面：趁空檔先編 shader、上傳貼圖（約 0.5～1 秒 CPU），按開始後就不用等
+      if (!loading) setTimeout(() => { if (!loading) battle.warm?.(); }, 50);
+    }, error => { battlePromise = null; if (!loading) console.warn('background preload failed; Start will retry', error); });
+  }
+  return battlePromise;
+}
+// 省流量模式不預載；其餘在標題畫面（含背景圖）載完、畫出第一格之後才開始，不跟標題搶頻寬
+function schedulePrefetch() {
+  if (navigator.connection?.saveData) return;
+  const go = () => requestAnimationFrame(() => setTimeout(prepare, 0));
+  if (document.readyState === 'complete') go(); else window.addEventListener('load', go, { once: true });
+}
+
+const panel = document.getElementById('loadPanel');
+const stageText = panel?.querySelector('.load-stage');
+const pctText = panel?.querySelector('.load-pct');
+const bar = panel?.querySelector('.load-progress');
+const barFill = bar?.querySelector('i');
+let shownPct = -1, shownText = '';
+function renderProgress() {
+  const mode = document.body.dataset.mode;
+  if (!panel || (mode !== 'title' && mode !== 'loading')) return false;
+  const pct = Math.floor(assets.progress.display() * 100);
+  panel.hidden = !prefetching;
+  if (pct !== shownPct) {
+    shownPct = pct;
+    barFill.style.transform = `scaleX(${pct / 100})`;
+    bar.setAttribute('aria-valuenow', String(pct));
+    pctText.textContent = `${pct}%`;
+  }
+  const stage = assets.progress.stage();
+  if (stageText.textContent !== stage) stageText.textContent = stage;
+  let text = shownText;
+  if (mode === 'loading') text = '載入完成後自動開始';
+  else if (loadStatus.dataset.error) text = loadStatus.dataset.error;
+  else if (battleReady) text = '已準備好，按下即可開始';
+  else if (prefetching) text = `背景預載 ${pct}%，可直接開始`;
+  if (text && text !== shownText) { shownText = text; loadStatus.textContent = text; }
+  return true;
+}
+function progressLoop() { if (renderProgress()) requestAnimationFrame(progressLoop); }
+const nextPaint = () => new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 0)));
+
 async function start() {
   if (loading) return;
   loading = true;
@@ -68,22 +145,30 @@ async function start() {
   audio?.unlock();
   audio?.ui();
   startButton.disabled = true;
-  loadStatus.textContent = '正在載入 3D 角色與夜市…';
+  delete loadStatus.dataset.error;
   document.body.dataset.mode = 'loading';
+  requestAnimationFrame(progressLoop);
   try {
-    const [{ createBattle }] = await Promise.all([import('./battle.js?v=20260925e'), audioReady]);
+    const battle = await prepare();
     audio?.unlock();   // no-op when already unlocked; covers a click that beat the audio module download
-    const battle = await createBattle(document.getElementById('battle'), { audio });
+    // 最後一步（編 shader、畫第一格）會佔住主執行緒：先把「準備戰場」畫出來
+    assets.progress.begin('start');
+    renderProgress();
+    await nextPaint();
     document.getElementById('title').hidden = true;
     document.body.dataset.mode = 'play';
     battle.start();
+    assets.progress.complete('start');
   } catch (error) {
     console.error(error);
-    loadStatus.textContent = '載入失敗，請檢查連線後重試。';
+    loadStatus.dataset.error = '載入失敗，請檢查連線後重試。';
     document.body.dataset.mode = 'title';
     startButton.disabled = false;
     loading = false;
+    requestAnimationFrame(progressLoop);
   }
 }
 
 startButton.addEventListener('click', start);
+requestAnimationFrame(progressLoop);
+schedulePrefetch();

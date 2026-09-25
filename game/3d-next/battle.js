@@ -6,6 +6,7 @@ import { FramePacer } from '../frame-pacing.js';
 import { createNightMarket } from './world.js';
 import { createOni, prepareRiggedOni, createRiggedOni } from './oni.js';
 import { touchHint, HoldRepeat } from './touch-input.js';
+import { assetPlan, createPreloader } from './preload.js?v=20260925b';
 
 const $ = id => document.getElementById(id);
 const isMobile = () => matchMedia('(pointer: coarse)').matches || innerWidth <= 900;
@@ -28,18 +29,28 @@ const pageParams = new URLSearchParams(location.search);
 const heroChoice = pageParams.get('hero') === 'rumi' ? 'rumi' : 'vroid';
 const marchLevel = heroChoice === 'vroid' && pageParams.get('level') !== 'single';
 
-// ?hero=vroid 同時換上 Mixamo 骨架的新鬼兵（oni-v2.glb）；載入失敗時退回程序化鬼兵
-function loadRiggedOni() {
-  if (heroChoice !== 'vroid') return Promise.resolve(null);
-  return new GLTFLoader().loadAsync('../assets/enemies/oni-v2.glb?v=20260924a')
-    .then(gltf => prepareRiggedOni(THREE, gltf))
-    .catch(error => { console.warn('oni-v2.glb failed, using procedural oni', error); return null; });
+// 檔案由 preload.js 下載（boot.js 在標題畫面就開始抓）；?hero=vroid 同時換上 Mixamo 骨架的新鬼兵（oni-v2.glb），
+// 載入失敗時退回程序化鬼兵。行軍關與打擊特效模組延後載入，boot.js 也會提早呼叫 loadLazyModules()
+let lazyModules = null;
+export function loadLazyModules() {
+  if (!lazyModules) {
+    lazyModules = Promise.all([
+      marchLevel ? Promise.all([import('./march.js'), import('./march-art.js?v=20260925e')]) : null,
+      // ?hero=vroid：打擊特效模組（combat-fx.js）；載入失敗時退回下方原本的特效與時間倍率
+      heroChoice === 'vroid' ? import('./combat-fx.js?v=20260925e').catch(error => { console.warn('combat-fx failed, using built-in effects', error); return null; }) : null,
+    ]).catch(error => { lazyModules = null; throw error; });
+  }
+  return lazyModules;
 }
 
-function loadRumi() {
-  if (heroChoice === 'vroid') return new GLTFLoader().loadAsync('../assets/heroes/swordswoman-v4.glb?v=20260925a');
-  return new GLTFLoader().loadAsync('../assets/heroes/rumi-v2.glb?v=20260924b');
+/** GLB bytes -> gltf（每次呼叫都重新解析，重試時不會拿到上一次改過材質的模型） */
+export function parseGltf(buffer) { return new GLTFLoader().parseAsync(buffer, ''); }
+
+/** 這一頁（?hero／?level）要用的預載器；boot.js 沒傳時 createBattle 自己建一個 */
+export function createBattleAssets(options = {}) {
+  return createPreloader({ plan: assetPlan({ hero: heroChoice, march: marchLevel }), loadEngine: () => loadLazyModules().then(() => ({ parseGltf })), ...options });
 }
+const MARCH_FILES = { 'atlas.json': 'march-atlas', 'march-props.webp': 'march-props', 'march-stone.webp': 'march-stone', 'march-sky.webp': 'march-sky' };
 
 // VRoid 模型：四階卡通明暗＋背面外擴描邊，保留眼睛、眉毛、頭髮貼圖的透明設定
 function toonVroidHero(root) {
@@ -150,11 +161,20 @@ function makeBladeTrail(scene, sword) {
 }
 
 // options.audio：boot.js 在 ?hero=vroid 時傳入的 audio.js 實例（程式合成配樂＋音效）；Rumi 預設為 null＝靜音
-export async function createBattle(canvas, { audio = null } = {}) {
-  const [gltf, riggedOni, marchModules, fxModule] = await Promise.all([loadRumi(), loadRiggedOni(),
-    marchLevel ? Promise.all([import('./march.js'), import('./march-art.js?v=20260925d')]) : null,
-    // ?hero=vroid：打擊特效模組（combat-fx.js）；載入失敗時退回下方原本的特效與時間倍率
-    heroChoice === 'vroid' ? import('./combat-fx.js?v=20260925d').catch(error => { console.warn('combat-fx failed, using built-in effects', error); return null; }) : null]);
+// options.assets：boot.js 的預載器（createBattleAssets()）；已下載的檔案直接從記憶體取用
+export async function createBattle(canvas, { audio = null, assets = null } = {}) {
+  assets ||= createBattleAssets().start();
+  const heroLoad = assets.gltf('hero');
+  heroLoad.catch(() => {});   // rejection is handled by the Promise.all below; avoid an early unhandled-rejection report
+  const oniLoad = heroChoice === 'vroid'
+    ? assets.gltf('oni').then(gltf => prepareRiggedOni(THREE, gltf))
+      .catch(error => { console.warn('oni-v2.glb failed, using procedural oni', error); assets.skip('oni', 'oni-parse'); return null; })
+    : Promise.resolve(null);
+  const fxUrls = heroChoice === 'vroid'
+    ? Promise.all([assets.file('fx-particles'), assets.file('fx-strips')]).then(([particles, strips]) => ({ 'fx-particles.png': particles, 'fx-strips.png': strips }))
+      .catch(error => { console.warn('fx textures preload failed, loading directly', error); assets.skip('fx-particles', 'fx-strips'); return null; })
+    : Promise.resolve(null);
+  const [marchModules, fxModule] = await assets.engine().then(() => loadLazyModules());
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -170,8 +190,20 @@ export async function createBattle(canvas, { audio = null } = {}) {
   const rim = new THREE.DirectionalLight(0x7049dd, 1.2);
   rim.position.set(6, 4, -8);
   scene.add(rim);
-  const world = marchModules ? marchModules[1].createMarchWorld(THREE, scene) : (createNightMarket(THREE, scene), null);
-  if (world?.ready) await world.ready;   // 等場景貼圖與烘焙完成，避免開場跳出
+  // 場景在角色模型還在下載時就先建（貼圖到齊後烘焙），網路與 CPU 同時跑
+  const world = marchModules ? marchModules[1].createMarchWorld(THREE, scene, undefined, { source: file => MARCH_FILES[file] ? assets.file(MARCH_FILES[file]) : null }) : (createNightMarket(THREE, scene), null);
+  const worldReady = world?.ready
+    ? Promise.all(Object.values(MARCH_FILES).map(id => assets.file(id))).then(() => assets.step('world', () => world.ready))
+    : null;
+  let gltf, riggedOni, fxTextureUrls;
+  try {
+    [gltf, riggedOni, fxTextureUrls] = await Promise.all([heroLoad, oniLoad, fxUrls, worldReady]);   // 等場景貼圖與烘焙完成，避免開場跳出
+  } catch (error) {
+    world?.dispose();
+    renderer.dispose();
+    throw error;
+  }
+  assets.progress.begin('battle');
   const groundAt = (x, z) => world ? world.heightAt(x, z) : 0;
 
   const hero = new THREE.Group();
@@ -225,7 +257,7 @@ export async function createBattle(canvas, { audio = null } = {}) {
   try {
     combatFx = fxModule?.createCombatFx({
       THREE, scene, camera, renderer, hero, heroModel, sword, groundAt,
-      hud: document.querySelector('.hud'), quality: isMobile() ? 'mobile' : 'desktop',
+      hud: document.querySelector('.hud'), quality: isMobile() ? 'mobile' : 'desktop', textureUrls: fxTextureUrls || undefined,
       hudFade: [...document.querySelectorAll('.round-card, .score-card, .hud-footer, #toast')],
       gauge: [document.querySelector('.meter.energy'), document.querySelector('[data-action="special"]')],
     }) || null;
@@ -819,6 +851,19 @@ export async function createBattle(canvas, { audio = null } = {}) {
     if (probes[1]) combatFx.prewarm(probes[1].root);
     for (const actor of probes) { scene.remove(actor.root); actor.dispose(); }
   }
+  // 背景預熱（boot.js 在標題畫面、戰場已建好時呼叫）：先編 shader、先上傳貼圖，按開始後只剩重置與第一格
+  let warmed = false;
+  function warm() {
+    if (warmed || running) return;
+    warmed = true;
+    if (combatFx && !fxWarm) { fxWarm = true; prewarmShaders(); }
+    scene.traverse(object => {
+      for (const material of [].concat(object.material || [])) {
+        for (const value of Object.values(material)) if (value?.isTexture) renderer.initTexture(value);
+      }
+    });
+    renderer.compile(scene, camera);
+  }
   function pause(value = !paused) {
     if (!running) return;
     paused = value;
@@ -868,5 +913,7 @@ export async function createBattle(canvas, { audio = null } = {}) {
   canvas.addEventListener('webglcontextlost', event => { event.preventDefault(); stopFrames(); toast('3D 畫面暫停，請重新載入頁面。', 10); });
   if (debug) document.body.classList.add('debug');
   resize();
-  return { start, pause, arena, scene, camera, renderer };
+  assets.progress.complete('battle');
+  assets.release();
+  return { start, warm, pause, arena, scene, camera, renderer };
 }

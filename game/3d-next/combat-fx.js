@@ -844,6 +844,7 @@ function show(node, visible) {
  * @param {(x:number,z:number)=>number} [o.groundAt]
  * @param {number} [o.seed]
  * @param {object} [o.textures]      { particles, strips } THREE textures (tests / custom loading)
+ * @param {object} [o.textureUrls]   { 'fx-particles.png': url, 'fx-strips.png': url } preloaded object URLs
  */
 export function createCombatFx(o) {
   const THREE = o.THREE;
@@ -863,7 +864,8 @@ export function createCombatFx(o) {
   const loadTexture = name => {
     let texture;
     if (typeof document !== 'undefined' && typeof Image !== 'undefined') {
-      loading.push(new Promise(resolve => { texture = new THREE.TextureLoader().load(`${FX_BASE}${name}?v=${FX_VERSION}`, resolve, undefined, resolve); }));
+      const url = o.textureUrls?.[name] || `${FX_BASE}${name}?v=${FX_VERSION}`;   // textureUrls：預載好的 object URL
+      loading.push(new Promise(resolve => { texture = new THREE.TextureLoader().load(url, resolve, undefined, resolve); }));
     } else { texture = new THREE.DataTexture(new Uint8Array([255, 255, 255, 255]), 1, 1); texture.needsUpdate = true; }
     texture.colorSpace = THREE.NoColorSpace;
     texture.generateMipmaps = true;

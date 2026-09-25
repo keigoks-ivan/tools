@@ -31,7 +31,7 @@ blender -b --python game/design/oni-v2/scripts/build_oni.py
 
 # 2. 匯出成遊戲用 GLB，並重新匯入驗證骨架／貼圖／動畫
 blender -b --python game/design/oni-v2/scripts/export_oni.py
-cp game/design/oni-v2/work/oni.glb game/assets/enemies/oni-v2.glb
+node game/scripts/optimize_glb.mjs oni game/design/oni-v2/work/oni.glb game/assets/enemies/oni-v2.glb   # 1.6 MB → 1.1 MB
 
 # 3. 審稿渲染：三視圖、頭部表、姿勢細節、遊戲內視角
 blender -b --python game/design/oni-v2/scripts/render_oni.py -- all

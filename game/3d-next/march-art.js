@@ -57,14 +57,16 @@ export async function createMarchArt(THREE, scene, layout = LAYOUT, options = {}
 
   // ------------------------------------------------------------------ textures
   const loader = new THREE.TextureLoader();
-  const loadTexture = (file, srgb = true) => loader.loadAsync(`${base}${file}?v=${VERSION}`).then(texture => {
+  // options.source(file)：預載好的內容（圖檔為 object URL、atlas.json 為物件，可為 Promise）；沒有就照舊從網路抓
+  const preloaded = file => Promise.resolve(options.source?.(file) ?? null);
+  const loadTexture = (file, srgb = true) => preloaded(file).then(url => loader.loadAsync(url || `${base}${file}?v=${VERSION}`)).then(texture => {
     texture.colorSpace = srgb ? THREE.SRGBColorSpace : THREE.NoColorSpace;
     texture.anisotropy = options.anisotropy ?? 4;
     return texture;
   });
   const timing = { start: performance.now() };
   const [atlasInfo, propsTexture, stoneTexture, skyTexture] = await Promise.all([
-    fetch(`${base}atlas.json?v=${VERSION}`).then(response => response.json()),
+    preloaded('atlas.json').then(json => json || fetch(`${base}atlas.json?v=${VERSION}`).then(response => response.json())),
     loadTexture('march-props.webp'), loadTexture('march-stone.webp'), loadTexture('march-sky.webp'),
   ]);
   timing.fetched = performance.now();
