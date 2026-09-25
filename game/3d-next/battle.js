@@ -5,9 +5,11 @@ import { Arena } from '../2d/combat.js';
 import { FramePacer } from '../frame-pacing.js';
 import { createNightMarket } from './world.js';
 import { createOni, prepareRiggedOni, createRiggedOni } from './oni.js';
+import { touchHint, HoldRepeat } from './touch-input.js';
 
 const $ = id => document.getElementById(id);
 const isMobile = () => matchMedia('(pointer: coarse)').matches || innerWidth <= 900;
+const touchScreen = () => matchMedia('(pointer: coarse)').matches;
 const debug = new URLSearchParams(location.search).has('debug');
 const toWorldX = x => (x - 640) / 60;
 const toWorldZ = y => (y - 500) / 60;
@@ -149,9 +151,9 @@ function makeBladeTrail(scene, sword) {
 // options.audio：boot.js 在 ?hero=vroid 時傳入的 audio.js 實例（程式合成配樂＋音效）；Rumi 預設為 null＝靜音
 export async function createBattle(canvas, { audio = null } = {}) {
   const [gltf, riggedOni, marchModules, fxModule] = await Promise.all([loadRumi(), loadRiggedOni(),
-    marchLevel ? Promise.all([import('./march.js'), import('./march-art.js')]) : null,
+    marchLevel ? Promise.all([import('./march.js'), import('./march-art.js?v=20260925d')]) : null,
     // ?hero=vroid：打擊特效模組（combat-fx.js）；載入失敗時退回下方原本的特效與時間倍率
-    heroChoice === 'vroid' ? import('./combat-fx.js?v=20260925b').catch(error => { console.warn('combat-fx failed, using built-in effects', error); return null; }) : null]);
+    heroChoice === 'vroid' ? import('./combat-fx.js?v=20260925d').catch(error => { console.warn('combat-fx failed, using built-in effects', error); return null; }) : null]);
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -260,6 +262,8 @@ export async function createBattle(canvas, { audio = null } = {}) {
   const keys = new Set();
   const edges = {};
   const joystick = { x: 0, y: 0, pointer: null };
+  // 紫刃：按住「攻」會持續出招（手機連點容易誤觸縮放，也比較累）；其他按鈕仍是按一下一次
+  const holds = new HoldRepeat();
   const stick = $('stick');
   const knob = $('knob');
   const pacer = new FramePacer(60);
@@ -280,11 +284,13 @@ export async function createBattle(canvas, { audio = null } = {}) {
     $('rotateOverlay').hidden = !running || !isPortrait();
     if (isPortrait()) stopFrames();
     else if (running && !paused && !document.hidden) resumeFrames();
+    if (running) audio?.setPaused(paused || isPortrait());   // 直向暫停時音效也一起壓下
   }
   function clearInput() {
     keys.clear();
     for (const action of Object.keys(edges)) delete edges[action];
     joystick.x = joystick.y = 0;
+    holds.clear();
     if (joystick.pointer !== null) {
       try { stick.releasePointerCapture(joystick.pointer); } catch {}
       joystick.pointer = null;
@@ -546,7 +552,7 @@ export async function createBattle(canvas, { audio = null } = {}) {
   }
   function marchEvent(event, x, z) {
     const y = groundAt(x, z);   // flash / burst / crescent add the floor height themselves
-    if (event.type === 'hint') toast(event.text, event.seconds || 3);
+    if (event.type === 'hint') toast(touchScreen() ? touchHint(event.text) : event.text, event.seconds || 3);
     else if (event.type === 'guard') { if (!combatFx) burst(x, z, 0xbfe4ff, 6, 1.1); popText('擋', x, y + 2.1, z, '#cfe8ff'); }
     else if (event.type === 'guardBreak' && !combatFx) { flash(x, z, 0xffd24a, 1.6, 0.4); burst(x, z, 0xffe07a, 20, 1.1); popText('破', x, y + 2.3, z, '#ffd24a'); shake = Math.max(shake, 0.45); }
     else if (event.type === 'sidestep') flash(x, z, 0x9aa4b8, 0.6, 0.2);
@@ -721,6 +727,7 @@ export async function createBattle(canvas, { audio = null } = {}) {
       if (now < slowUntil) dt *= slowScale;
       if (now < freezeUntil) dt = 0;
     }
+    for (const action of holds.tick(realDt)) edges[action] = true;
     const inputX = joystick.x + Number(keys.has('d') || keys.has('arrowright')) - Number(keys.has('a') || keys.has('arrowleft'));
     const inputY = joystick.y + Number(keys.has('s') || keys.has('arrowdown')) - Number(keys.has('w') || keys.has('arrowup'));
     const fx = Math.sin(cameraYaw), fz = Math.cos(cameraYaw);
@@ -785,7 +792,7 @@ export async function createBattle(canvas, { audio = null } = {}) {
     syncEnemies(0);
     syncHero(0);
     syncCamera(1);
-    if (combatFx && !fxWarm) { fxWarm = true; combatFx.prewarm([...enemies.values()][0]?.root); }
+    if (combatFx && !fxWarm) { fxWarm = true; prewarmShaders(); }
     updateHud();
     $('result').hidden = true;
     $('pauseOverlay').hidden = true;
@@ -795,6 +802,21 @@ export async function createBattle(canvas, { audio = null } = {}) {
     resize();
     renderer.render(scene, camera);
     resumeFrames();
+  }
+  // 手機第一次畫到某種材質時才編譯 shader，會卡一下：開場先把鬼兵、守將、閃光圈、火花、浮字的材質一起編好。
+  // 閃光圈等材質用完就 dispose，全部消失時 three 會連 shader 一起刪掉、下次出現再重編；各留一個隱形的在場上，shader 就一直在
+  function prewarmShaders() {
+    const probes = riggedOni ? ['grunt', 'boss'].map(role => makeEnemy(role)) : [];
+    for (const actor of probes) scene.add(actor.root);
+    const effectCount = effects.length, sparkCount = sparks.length, popupCount = popups.length;
+    flash(0, 0);
+    burst(0, 0, 0xffffff, 1);
+    popText('擋', 0, 0, 0);
+    const keepers = [...effects.splice(effectCount).map(effect => effect.mesh), ...sparks.splice(sparkCount).map(spark => spark.mesh), ...popups.splice(popupCount).map(popup => popup.sprite)];
+    for (const keeper of keepers) keeper.visible = false;
+    combatFx.prewarm(probes[0]?.root || [...enemies.values()][0]?.root);
+    if (probes[1]) combatFx.prewarm(probes[1].root);
+    for (const actor of probes) { scene.remove(actor.root); actor.dispose(); }
   }
   function pause(value = !paused) {
     if (!running) return;
@@ -814,7 +836,14 @@ export async function createBattle(canvas, { audio = null } = {}) {
   stick.addEventListener('pointerdown', event => { if (!running || paused || isPortrait() || joystick.pointer !== null) return; event.preventDefault(); joystick.pointer = event.pointerId; stick.setPointerCapture(event.pointerId); moveStick(event); });
   stick.addEventListener('pointermove', moveStick);
   for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) stick.addEventListener(type, event => { if (event.pointerId === joystick.pointer) { joystick.pointer = null; joystick.x = joystick.y = 0; knob.style.transform = ''; } });
-  for (const button of document.querySelectorAll('[data-action]')) button.addEventListener('pointerdown', event => { if (!running || paused || isPortrait()) return; event.preventDefault(); button.setPointerCapture(event.pointerId); edges[button.dataset.action] = true; });
+  for (const button of document.querySelectorAll('[data-action]')) {
+    button.addEventListener('pointerdown', event => {
+      if (!running || paused || isPortrait()) return;
+      event.preventDefault(); button.setPointerCapture(event.pointerId); edges[button.dataset.action] = true;
+      if (heroChoice === 'vroid' && button.dataset.action === 'attack') holds.press('attack', event.pointerId);
+    });
+    for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) button.addEventListener(type, event => holds.release(event.pointerId));
+  }
   window.addEventListener('keydown', event => {
     if (!running) return;
     const key = event.key.toLowerCase();
@@ -831,8 +860,10 @@ export async function createBattle(canvas, { audio = null } = {}) {
   $('retry').addEventListener('click', start);
   window.addEventListener('resize', resize);
   window.addEventListener('orientationchange', resize);
+  window.visualViewport?.addEventListener('resize', resize);   // iOS 網址列收合、分割畫面時 window resize 不一定會觸發
   window.addEventListener('blur', () => { if (running) pause(true); });
-  document.addEventListener('visibilitychange', () => { if (document.hidden) stopFrames(); else resumeFrames(); });
+  // 鎖屏、切 App：回來時停在暫停畫面，不直接接著打
+  document.addEventListener('visibilitychange', () => { if (document.hidden) { if (running) pause(true); stopFrames(); } else resumeFrames(); });
   canvas.addEventListener('webglcontextlost', event => { event.preventDefault(); stopFrames(); toast('3D 畫面暫停，請重新載入頁面。', 10); });
   if (debug) document.body.classList.add('debug');
   resize();

@@ -1476,6 +1476,12 @@ export async function createMarchArt(THREE, scene, layout = LAYOUT, options = {}
   geometries.push(ringGeometry, discGeometry, laneGeometry);
   const decals = new Map();
   const dangerFill = { color: 0xff3b30, transparent: true, depthWrite: false, side: THREE.DoubleSide, toneMapped: false };
+  // 紅圈用完就 dispose，全部消失時 three 會連 shader 一起刪掉，下一次跳砸再重編，手機會在該閃避的瞬間卡一下；
+  // 留一個看不見的同款材質：開場 prewarm 編好後 shader 一直在
+  const decalWarm = new THREE.Mesh(discGeometry, new THREE.MeshBasicMaterial({ ...dangerFill, opacity: 0 }));
+  decalWarm.visible = false;
+  materials.push(decalWarm.material);
+  root.add(decalWarm);
   function decalFor(hazard) {
     let entry = decals.get(hazard.id);
     if (entry) return entry;

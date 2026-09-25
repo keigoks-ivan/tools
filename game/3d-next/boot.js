@@ -14,6 +14,16 @@ function resetZoom() {
 }
 window.visualViewport?.addEventListener('resize', resetZoom);
 
+// 紫刃版標題：換掉 Rumi 單角色與靜音的說明文字（音訊狀態由 #soundNote 另外更新）
+if (new URLSearchParams(location.search).get('hero') === 'vroid') {
+  const subtitle = document.querySelector('.title-subtitle');
+  const copy = document.querySelector('.title-copy');
+  const note = document.querySelector('.prototype-note');
+  if (subtitle) subtitle.textContent = '紫刃・夜市突圍';
+  if (copy) copy.textContent = '沿著夜市大街一路殺到魂門，擊倒敵將，最後單挑魂門守將。';
+  if (note?.firstChild) note.firstChild.textContent = '3D 試作　·　紫刃　·　';
+}
+
 const startButton = document.getElementById('start');
 const loadStatus = document.getElementById('loadstatus');
 let loading = false;
@@ -61,7 +71,7 @@ async function start() {
   loadStatus.textContent = '正在載入 3D 角色與夜市…';
   document.body.dataset.mode = 'loading';
   try {
-    const [{ createBattle }] = await Promise.all([import('./battle.js?v=20260925c'), audioReady]);
+    const [{ createBattle }] = await Promise.all([import('./battle.js?v=20260925d'), audioReady]);
     audio?.unlock();   // no-op when already unlocked; covers a click that beat the audio module download
     const battle = await createBattle(document.getElementById('battle'), { audio });
     document.getElementById('title').hidden = true;

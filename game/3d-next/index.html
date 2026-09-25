@@ -2,8 +2,10 @@
 <html lang="zh-Hant">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover,user-scalable=no">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
   <meta name="theme-color" content="#090f1b">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <title>HUNTR/X 魂門之戰｜3D 轉製試作</title>
   <link rel="stylesheet" href="../2d/style.css?v=20260924h">
   <style>
@@ -22,6 +24,11 @@
     .sound-toggle[hidden],.sound-button[hidden]{display:none}
     .sound-button{font-size:15px;line-height:1;color:#d6c9b4}
     .sound-button[aria-pressed="true"]{opacity:.6}
+    /* 手機：長按不跳出選單；標題避開瀏海；戰鬥中 HUD 不做背景模糊（疊在每幀更新的 3D 畫面上很耗 GPU）；鍵盤說明列不顯示 */
+    #game{-webkit-touch-callout:none}
+    @media(max-width:900px) and (orientation:landscape){.title-content{margin-left:max(clamp(24px,6vw,55px),calc(12px + var(--safe-left)))}}
+    @media(pointer:coarse){.vitals-card,.round-card,.score-card{-webkit-backdrop-filter:none;backdrop-filter:none}.hud-footer{display:none}}
+    @media(max-height:500px) and (orientation:landscape){body.march-level .battle-toast{top:calc(100px + var(--safe-top))}}
   </style>
   <script type="importmap">{"imports":{"three":"../lib/three.module.js","three/addons/":"../lib/addons/"}}</script>
 </head>
@@ -61,6 +68,6 @@
     <footer id="help" class="help-bar"><span class="desktop-help"><b>移動</b> WASD / ↑↓←→ <i></i> <b>攻擊</b> J <i></i> <b>重擊</b> K <i></i> <b>閃避</b> Shift <i></i> <b>絕招</b> E <i></i> <span data-jump-help hidden><b>跳躍</b> Space <i></i></span> <b>暫停</b> P</span><span class="touch-help">左側移動　·　右側攻擊</span><span class="silent-note" id="soundState">靜音試作</span></footer>
     <div id="diagnostics"></div>
   </main>
-  <script type="module" src="./boot.js?v=20260925b"></script>
+  <script type="module" src="./boot.js?v=20260925d"></script>
 </body>
 </html>

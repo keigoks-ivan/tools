@@ -767,6 +767,12 @@ function hudCss(base) {
  .cfx-combo{right:22%;top:24%}.cfx-combo .n{font-size:46px}.cfx-combo .h{font-size:13px}.cfx-combo .bar{width:92px}
  .cfx-banner{height:84px}.cfx-banner b{font-size:44px}.cfx-title{height:150px}.cfx-stamp{transform:scale(.75)}
  .cfx-dmg{font-size:15px}.cfx-dmg.h{font-size:23px}.cfx-dmg.s{font-size:26px}
+}
+/* 手機橫向：連擊數移到右側按鈕上方，擊破橫幅與標題放在狀態卡下方，橫幅字級跟著螢幕寬縮小 */
+@media (max-height:500px) and (orientation:landscape){
+ .cfx-combo{right:calc(14px + var(--safe-right,0px));top:calc(112px + var(--safe-top,0px))}
+ .cfx-banner{top:calc(96px + var(--safe-top,0px))}.cfx-banner b{font-size:clamp(28px,5.2vw,44px)}
+ .cfx-title{top:calc(60px + var(--safe-top,0px))}
 }`;
 }
 
