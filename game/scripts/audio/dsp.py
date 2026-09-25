@@ -592,3 +592,58 @@ def true_peak_db(st):
 
 def sample_peak_db(st):
     return float(20 * np.log10(np.max(np.abs(st)) + 1e-12))
+
+
+# ---------------------------------------------------------------- convolution hall (synthetic IR)
+
+def hall_ir(rt60=2.2, predelay=0.02, length=None, seed=7, hf_rt_ratio=0.45, lf_rt_ratio=1.15, early=0.35, width=1.0):
+    """Stereo room impulse response: sparse early reflections + a dense exponentially decaying tail whose
+    decay time falls with frequency (air / wall absorption). Decorrelated channels for width."""
+    r = rng(seed)
+    length = length or rt60 * 1.3
+    n = secs(length)
+    nfft = 1024
+    hop = 256
+    frames = n // hop + 4
+    freqs = np.fft.rfftfreq(nfft, 1 / SR)
+    rt_f = rt60 * np.interp(np.log10(np.maximum(freqs, 20)), [np.log10(20), np.log10(250), np.log10(2000), np.log10(8000), np.log10(20000)],
+                            [lf_rt_ratio, 1.0, 0.85, hf_rt_ratio, hf_rt_ratio * 0.6])
+    out = np.zeros((n + nfft, 2))
+    win = np.hanning(nfft)
+    for ch in range(2):
+        for fi in range(frames):
+            t = fi * hop / SR
+            mag = 10 ** (-3 * t / rt_f)
+            spec = mag * np.exp(1j * r.uniform(0, 2 * np.pi, len(freqs))) * (r.standard_normal(len(freqs)) * 0.3 + 1)
+            fr = np.fft.irfft(spec, nfft) * win
+            a = fi * hop
+            if a + nfft > len(out):
+                break
+            out[a:a + nfft, ch] += fr
+    out = out[:n]
+    # gentle onset of the diffuse tail
+    ramp = np.clip(np.arange(n) / secs(0.03), 0, 1)
+    out *= ramp[:, None]
+    # early reflections
+    for k in range(18):
+        at = secs(r.uniform(0.004, 0.08))
+        g = early * r.uniform(0.3, 1.0) * np.exp(-at / secs(0.05))
+        ch = k % 2
+        out[at, ch] += g * (1 if r.random() > 0.5 else -1)
+        out[min(n - 1, at + secs(r.uniform(0.0005, 0.003))), 1 - ch] += g * 0.6 * width
+    pd = secs(predelay)
+    out = np.concatenate([np.zeros((pd, 2)), out])[:n + pd]
+    out /= np.sqrt(np.sum(out ** 2) / 2) + 1e-9
+    return out
+
+
+def convolve(st, ir):
+    """FFT convolution of a stereo signal with a stereo IR (L->L, R->R), same length as input + tail cut."""
+    st = np.asarray(st, dtype=float)
+    n = len(st) + len(ir) - 1
+    nf = 1 << (n - 1).bit_length()
+    out = np.zeros((len(st), 2))
+    for c in range(2):
+        y = np.fft.irfft(np.fft.rfft(st[:, c], nf) * np.fft.rfft(ir[:, c], nf), nf)
+        out[:, c] = y[: len(st)]
+    return out

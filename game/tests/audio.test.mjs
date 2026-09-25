@@ -264,7 +264,7 @@ function fakeWebAudio() {
     close() { this.state = 'closed'; return Promise.resolve(); }
   }
   const fetchImpl = async url => {
-    const name = String(url).split('/').pop();
+    const name = String(url).split('/').pop().replace(/\?.*$/, '');
     if (name === 'manifest.json') return { ok: true, json: async () => manifest };
     return { ok: true, arrayBuffer: async () => new TextEncoder().encode(name).buffer };
   };

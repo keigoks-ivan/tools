@@ -106,3 +106,41 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
+def character(x, sr):
+    """Texture metrics used to compare renders against produced reference tracks:
+    flatness (0 tonal .. 1 noise, median over frames, 100 Hz–10 kHz), onset density (onsets / s from
+    spectral flux), peaks (median count of spectral peaks within 40 dB of the frame max, 80 Hz–5 kHz — a
+    rough 'how many things are sounding' proxy), LRA-like spread of 3 s loudness (10th–95th pct), stereo width
+    (side / mid energy ratio in dB)."""
+    from dsp import _kweight_sos
+    m = x.mean(axis=1)
+    f, t, S = signal.stft(m, sr, nperseg=2048, noverlap=1536)
+    P = np.abs(S) ** 2 + 1e-14
+    band = (f >= 100) & (f <= 10000)
+    flat = np.exp(np.mean(np.log(P[band]), axis=0)) / np.mean(P[band], axis=0)
+    mag = np.sqrt(P)
+    flux = np.maximum(0, np.diff(np.log(mag[(f > 60) & (f < 12000)] + 1e-7), axis=1)).sum(axis=0)
+    hop = (2048 - 1536) / sr
+    thr = np.convolve(flux, np.ones(15) / 15, mode='same') * 1.5 + np.median(flux) * 0.3
+    pk, _ = signal.find_peaks(flux, height=thr, distance=max(1, int(0.05 / hop)))
+    sel = (f >= 80) & (f <= 5000)
+    counts = []
+    for i in range(0, P.shape[1], 8):
+        col = 10 * np.log10(P[sel, i])
+        pks, _ = signal.find_peaks(col, height=col.max() - 40, prominence=10)
+        counts.append(len(pks))
+    y = signal.sosfilt(_kweight_sos(), x, axis=0)
+    blk, hp_ = 3 * sr, sr // 2
+    st = [-0.691 + 10 * np.log10(np.sum(np.mean(y[s:s + blk] ** 2, axis=0)) + 1e-12) for s in range(0, len(y) - blk, hp_)]
+    lra = float(np.percentile(st, 95) - np.percentile(st, 10)) if st else 0.0
+    width = 10 * np.log10(np.mean((x[:, 0] - x[:, -1]) ** 2) / (np.mean((x[:, 0] + x[:, -1]) ** 2) + 1e-12) + 1e-12) if x.shape[1] > 1 else -99
+    b = np.array(bands(x, sr, 4.0))
+    return dict(bands=[round(float(v), 1) for v in np.median(b, axis=0)], flatness=round(float(np.median(flat)), 3),
+                onsets_per_s=round(len(pk) / (len(m) / sr), 2), peaks=int(np.median(counts)), lra=round(lra, 1),
+                width_db=round(float(width), 1))
+
+
+if __name__ == '__main__' and os.environ.get('CHARACTER'):
+    pass

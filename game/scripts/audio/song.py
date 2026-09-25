@@ -10,7 +10,7 @@ import math
 
 import numpy as np
 
-from dsp import (SR, butter_hp, butter_lp, chorus, compress, db, limit, lufs, pan_st, peq, pingpong, reverb,
+from dsp import (SR, butter_hp, butter_lp, chorus, compress, convolve, db, limit, lufs, pan_st, peq, pingpong, reverb,
                  secs, shelf, short_term_max, true_peak_db)
 
 
@@ -111,8 +111,10 @@ class Song:
                 g[m] = np.maximum(g[m], shape)
         return 1.0 - depth * g
 
-    def mixdown(self, reverb_cfg=None, delay_s=None, delay_fb=0.3, master=None, stats=None):
+    def mixdown(self, reverb_cfg=None, delay_s=None, delay_fb=0.3, master=None, stats=None, ir=None):
+        """ir: stereo impulse response for a convolution hall (else the FDN reverb with reverb_cfg)."""
         reverb_cfg = reverb_cfg or dict(rt60=2.0, damp_hz=6000, size=1.0)
+        rev = (lambda z: convolve(z, ir)) if ir is not None else (lambda z: reverb(z, **reverb_cfg))
         L = self.length
         dry = np.zeros((L, 2))
         rsend = np.zeros((L, 2))
@@ -146,10 +148,10 @@ class Song:
             dry += x
             rsend += x * c['reverb_send']
             dsend += x * c['delay_send']
-        wet = self.circ(lambda z: reverb(z, **reverb_cfg), rsend) if np.any(rsend) else 0
+        wet = self.circ(rev, rsend) if np.any(rsend) else 0
         dl = self.circ(lambda z: pingpong(z, delay_s or self.spb * 0.75, delay_fb), dsend) if (np.any(dsend)) else 0
         if np.any(dsend):
-            wet = wet + self.circ(lambda z: reverb(z, **reverb_cfg), dl * 0.25) + dl
+            wet = wet + self.circ(rev, dl * 0.25) + dl
         mix = dry + wet
         return mix
 

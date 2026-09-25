@@ -1,32 +1,90 @@
-"""Sound effects for the march level, synthesised and packed into one mono sprite.
+"""Sound effects for the march level, built from recorded CC0 sources and packed into one mono sprite.
 
-Every effect is layered: a transient (click / crack), a body (pitched thump, modal ring,
-formant voice) and a tail (noise, debris, room), with seeded variants so repeated events do
-not sound identical. build_sprite() returns (audio, table, info):
-  table[id] = [[start_s, dur_s], ...]  positions relative to the calibration marker
-  info['marker'] = where the marker burst starts in the file (the runtime re-measures it after
-  decoding, so MP3 encoder delay / decoder trimming differences cancel out).
+Sources (see samplelib.py for the folder layout, CREDITS.md for licences): OpenGameArt StarNinjas sword swings
+and clashes, Kenney impact / RPG / interface / sci-fi packs, OpenGameArt "breaking and falling" and
+"80 CC0 creature SFX", VSCO 2 CE / VCSL orchestral percussion, MuseScore General choir. Each effect layers
+recordings (aligned on their loudest point, repitched, EQ'd) with at most a small synthesised support layer
+(low thump / air). Seeded variants avoid repetition. Sound ids are the ones audio.js maps game events to.
+
+build_sprite() returns (audio, table, info):
+  table[id] = [[start_s, dur_s], ...] relative to the calibration marker; info['marker'] = marker position.
 """
 import math
 
 import numpy as np
 
-from dsp import (SR, TAU, bp, butter_bp, butter_hp, butter_lp, db, hp, lp, lufs, midi_hz, modal, peq, reverb, rng,
-                 saturate, saw, secs, sine, svf)
-from instruments import fm_bell, choir_part, supersaw_chord, brass_stab, taiko, crash
+import library as lib
+import samplelib as L
+from dsp import SR, TAU, bp, butter_bp, butter_hp, butter_lp, db, hp, peq, reverb, rng, saturate, secs, sine
+from sampler import _play
 
-GAP = 0.12          # silence between sprite entries (s)
-MARKER_AT = 0.05    # marker burst position (s)
+GAP = 0.12
+MARKER_AT = 0.05
 MARKER_LEN = 0.012
 
 
-def _n(x, peak=1.0):
+# ------------------------------------------------------------------ recorded-source helpers
+
+def src(rel):
+    """Mono float64 of a sample under the samples root (glob allowed, first match)."""
+    p = L.find(rel)
+    if not p:
+        raise SystemExit(f'missing sample {rel}')
+    return L.read(p[0]).mean(axis=1).astype(float)
+
+
+def sfx(name):
+    return src('sfx/**/' + name) if '/' not in name else src('sfx/' + name)
+
+
+def env_of(x, win=0.01):
+    k = max(1, int(win * SR))
+    return np.convolve(np.abs(x), np.ones(k) / k, mode='same')
+
+
+def trim(x, db_=-45.0, pre=0.002):
+    e = np.abs(x)
+    thr = e.max() * 10 ** (db_ / 20)
+    i = int(np.argmax(e > thr))
+    j = len(x) - int(np.argmax(e[::-1] > thr * 0.3))
+    return x[max(0, i - int(pre * SR)):j].copy()
+
+
+def at_peak(x, lead=0.035, dur=None, fade_in=0.012):
+    """Start `lead` seconds before the loudest point (so a swing's whoosh peaks right after the event)."""
+    k = int(np.argmax(env_of(x, 0.02)))
+    a = max(0, k - int(lead * SR))
+    y = x[a:].copy() if dur is None else x[a:a + int(dur * SR)].copy()
+    f = min(len(y) // 4, int(fade_in * SR))
+    if f > 0 and a > 0:
+        y[:f] *= np.linspace(0, 1, f) ** 2
+    return fade_end(y, 0.04)
+
+
+def pitch(x, semis):
+    if not semis:
+        return x
+    r = 2 ** (semis / 12)
+    n = int(len(x) / r) - 4
+    st = np.ascontiguousarray(np.stack([x, x], 1), dtype=np.float32)
+    return _play(st, np.full(n, r), n, 0.0)[:, 0].astype(float)
+
+
+def fit(x, dur, fade=0.05):
+    y = x[:int(dur * SR)].copy()
+    return fade_end(y, fade)
+
+
+def fade_end(x, sec=0.03):
+    x = np.asarray(x, dtype=float).copy()
+    f = max(1, min(len(x) // 3, secs(sec)))
+    x[-f:] *= np.cos(np.linspace(0, math.pi / 2, f)) ** 2
+    return x
+
+
+def nrm(x, peak=1.0):
     m = np.max(np.abs(x))
     return x * (peak / m) if m > 0 else x
-
-
-def tl(n):
-    return np.arange(n) / SR
 
 
 def mix(n, *layers):
@@ -35,668 +93,444 @@ def mix(n, *layers):
         a = secs(at)
         if a >= n:
             continue
+        x = np.asarray(x, dtype=float)
         k = min(len(x), n - a)
-        out[a:a + k] += fade_end(np.asarray(x[:k], dtype=float), 0.02) * g
+        out[a:a + k] += fade_end(nrm(x[:k]), 0.02) * g
     return out
 
 
-def room(x, rt=0.6, wet=0.25, damp=5000, size=0.6, pre=0.008):
+def room(x, rt=0.6, wet=0.2, damp=5000, size=0.6, pre=0.008):
     st = np.stack([x, x], 1)
     w = reverb(st, rt60=rt, damp_hz=damp, size=size, predelay=pre, lo_cut=120, mod=2.0)
     return x + wet * (w[:, 0] + w[:, 1]) * 0.5 * 2.2
 
 
-def pad_tail(x, sec):
+def pad(x, sec):
     return np.concatenate([x, np.zeros(secs(sec))])
 
 
-def fade_end(x, sec=0.03):
-    f = max(1, min(len(x) // 3, secs(sec)))
-    x = x.copy()
-    x[-f:] *= np.cos(np.linspace(0, math.pi / 2, f)) ** 2
-    return x
-
-
-# ------------------------------------------------------------------ building blocks
-
-def whoosh(r, dur, f0, f1, f2=None, q=1.3, peak=0.45, air=0.35, sing=0.0, sing_f=2400.0, shimmer=0.0):
-    """Noise through a band-pass that sweeps f0 -> f1 (-> f2) with a bell envelope.
-    sing: thin blade whistle (doppler drop); shimmer: violet energy partials."""
+def thump(dur, f_start, f_end, decay, drive=1.4):
+    """Synth support: a short pitched low-end thud under recorded impacts (phones lose it, headphones feel it)."""
     n = secs(dur)
-    t = np.linspace(0, 1, n)
-    f2 = f2 or f0
-    up = np.clip(t / peak, 0, 1)
-    down = np.clip((t - peak) / (1 - peak), 0, 1)
-    fc = np.where(t < peak, f0 + (f1 - f0) * up ** 1.2, f1 + (f2 - f1) * down ** 0.8)
-    env = np.where(t < peak, up ** 2.2, np.exp(-down * 4.0))
-    nz = r.standard_normal(n)
-    body = bp(nz, fc, q)
-    body += 0.5 * bp(r.standard_normal(n), fc * 1.9, q * 1.4)
-    a = hp(r.standard_normal(n), 7000) * np.exp(-((t - peak) / 0.12) ** 2) * air
-    y = (body + a) * env
-    if sing:
-        f = sing_f * (1.06 - 0.12 * t)
-        y += sine(f) * env ** 1.5 * sing * (1 + 0.3 * np.sin(TAU * 37 * t * dur))
-    if shimmer:
-        f = 1320 * (1.0 + 0.25 * t)
-        sh = sine(f) * 0.5 + sine(f * 1.5) * 0.35 + sine(f * 2.01) * 0.25 + sine(f * 3.02) * 0.15
-        y += sh * env ** 1.3 * shimmer
-    return _n(fade_end(y), 1.0)
-
-
-def thump(r, dur, f_start, f_end, decay, drive=1.4):
-    n = secs(dur)
-    t = tl(n)
+    t = np.arange(n) / SR
     f = f_end + (f_start - f_end) * np.exp(-t / (decay * 0.35))
     y = sine(f) * np.exp(-t / decay) * np.clip(t / 0.0015, 0, 1)
     return fade_end(saturate(y * drive, 1.0), min(0.06, dur * 0.3))
 
 
-def click(r, dur=0.004, lo=2000.0, hi=12000.0):
+def air(dur, f0=2500, f1=9000, seed=0, peak=0.25):
+    """Synth support: a thin high 'air' swish (band-passed noise sweep)."""
+    r = rng(seed)
     n = secs(dur)
-    return butter_bp(r.standard_normal(n), lo, hi) * np.exp(-tl(n) / (dur / 3))
-
-
-def noise_burst(r, dur, lo, hi, decay, attack=0.001):
-    n = secs(dur)
-    t = tl(n)
-    return fade_end(butter_bp(r.standard_normal(n), lo, hi) * np.exp(-t / decay) * np.clip(t / attack, 0, 1), min(0.04, dur * 0.3))
-
-
-def metal(r, dur, f0, ratios, decays, amps, beat=2.5):
-    n = secs(dur)
-    t = tl(n)
-    y = np.zeros(n)
-    for rt, d, a in zip(ratios, decays, amps):
-        f = f0 * rt * (1 + 0.004 * r.uniform(-1, 1))
-        ph = r.uniform(0, TAU)
-        y += a * np.exp(-t / d) * (np.sin(TAU * f * t + ph) + 0.6 * np.sin(TAU * (f + beat * r.uniform(0.5, 1.5)) * t + ph))
-    return y
-
-
-def debris(r, dur, count, f_lo, f_hi, decay=(0.006, 0.03), density_decay=0.25, tonal=0.6):
-    n = secs(dur)
-    y = np.zeros(n)
-    for _ in range(count):
-        at = r.exponential(density_decay)
-        a = secs(at)
-        if a >= n - 10:
-            continue
-        d = r.uniform(*decay)
-        k = min(n - a, secs(d * 6))
-        tt = tl(k)
-        f = r.uniform(f_lo, f_hi)
-        g = r.uniform(0.3, 1.0) * math.exp(-at / (density_decay * 2))
-        grain = tonal * np.sin(TAU * f * tt + r.uniform(0, TAU)) + (1 - tonal) * butter_bp(r.standard_normal(k), f * 0.6, min(f * 1.6, 20000))
-        y[a:a + k] += grain * np.exp(-tt / d) * g
-    return y
-
-
-_VOWEL = {  # formants for a big throat (oni): F, bw, gain dB
-    'u': [(330, 70, 0), (800, 90, -10), (2200, 150, -22)],
-    'o': [(450, 80, 0), (820, 90, -6), (2500, 150, -18)],
-    'a': [(700, 100, 0), (1150, 110, -4), (2500, 160, -14)],
-    'e': [(520, 90, 0), (1750, 120, -8), (2550, 160, -14)],
-}
-
-
-def voice(r, dur, f0_curve, vowel_from='o', vowel_to=None, scale=0.8, growl=0.5, sub=0.4, breath=0.3, drive=2.5,
-          attack=0.02, release=0.12, am=28.0):
-    """Monster voice: jittery glottal saw + subharmonic growl through (moving) formants."""
-    n = secs(dur)
-    t = tl(n)
     x = np.linspace(0, 1, n)
-    jit = 1 + 0.03 * butter_lp(r.standard_normal(n), 40, 1) / 0.05
-    f0 = np.interp(x, np.linspace(0, 1, len(f0_curve)), f0_curve) * np.clip(jit, 0.9, 1.1)
-    src = saw(f0, r.random()) + sub * saw(f0 * 0.5, r.random())
-    src *= 1 + growl * np.sin(TAU * am * t + r.uniform(0, TAU)) * (0.6 + 0.4 * butter_lp(r.standard_normal(n), 10, 1) / 0.1)
-    nz = r.standard_normal(n) * breath * 2
-    src = src + nz
-    vf = _VOWEL[vowel_from]
-    vt = _VOWEL[vowel_to or vowel_from]
-    y = np.zeros(n)
-    for (fa, ba, ga), (fb, bb, gb) in zip(vf, vt):
-        fc = (fa + (fb - fa) * x) * scale
-        g = db(ga + (gb - ga) * x)
-        y += bp(src, fc, float(np.mean(fc)) / ((ba + bb) / 2)) * g
-    env = np.clip(t / attack, 0, 1) * np.clip((dur - t) / release, 0, 1) * (1 - 0.45 * x)
-    y = saturate(_n(y) * drive, 1.0) * env
-    y = butter_hp(y, 60)
-    return _n(y, 1.0)
+    fc = f0 * (f1 / f0) ** np.clip(x / peak, 0, 1)
+    env = np.where(x < peak, (x / peak) ** 2, np.exp(-(x - peak) / (1 - peak) * 4))
+    return fade_end(bp(r.standard_normal(n), fc, 1.2) * env, 0.03)
 
 
-def bell(midi, dur, r, bright=1.0, decay=0.9, ratio=3.5, index=2.5):
-    return fm_bell(midi, dur, ratio=ratio, index=index * bright, seed=int(r.integers(1 << 30)), decay=decay)
+def perc(group, vel=0.9, length=None, pitch_=0.0):
+    x = lib.perc().hit(group, vel, pitch=pitch_, length=length)
+    return x.mean(axis=1).astype(float)
 
 
-def glass(r, dur, f0, decay=0.5):
-    n = secs(dur)
-    t = tl(n)
-    y = np.zeros(n)
-    for rt, a, d in ((1.0, 1.0, 1.0), (2.76, 0.5, 0.6), (5.40, 0.3, 0.35), (8.93, 0.15, 0.2)):
-        y += a * np.sin(TAU * f0 * rt * t + r.uniform(0, TAU)) * np.exp(-t / (decay * d))
-    return y * np.clip(t / 0.001, 0, 1)
+def inst_note(inst, midi, dur, vel=0.8, **kw):
+    return inst.note(midi, dur, vel, **kw).mean(axis=1).astype(float)
 
 
-# ------------------------------------------------------------------ designs
+def chord_of(inst, midis, dur, vel=0.8, strum=0.0, **kw):
+    parts = [inst_note(inst, m, dur, vel, **kw) for m in midis]
+    n = max(len(p) for p in parts) + secs(strum * len(midis))
+    out = np.zeros(n)
+    for i, p in enumerate(parts):
+        a = secs(strum * i)
+        out[a:a + len(p)] += p
+    return out
+
+
+# ------------------------------------------------------------------ designs (sound ids used by audio.js)
 
 def s_swing_light(v):
-    r = rng(1000 + v)
-    dur = [0.2, 0.24, 0.18][v % 3]
-    f0, f1, f2 = [(500, 2600, 1100), (650, 3200, 1400), (420, 2200, 900)][v % 3]
-    y = whoosh(r, dur, f0, f1, f2, q=1.1, peak=0.2, air=0.45, sing=0.12, sing_f=[2600, 2900, 2300][v % 3], shimmer=0.07)
-    return y
+    x = sfx(['sword.1.ogg', 'sword.3.ogg', 'sword.7.ogg'][v])
+    y = at_peak(butter_hp(x, 250), 0.035, 0.32)
+    body = at_peak(pitch(sfx(['cloth4.ogg', 'cloth2.ogg', 'cloth4.ogg'][v]), 3 + v), 0.035, 0.3)
+    n = len(y)
+    return mix(n, (y, 1.0, 0), (butter_bp(body, 400, 3000), 0.45, 0), (air(0.2, seed=v), 0.15, 0.0))
 
 
 def s_swing_heavy(v):
-    r = rng(1100 + v)
-    dur = 0.42 + 0.05 * v
-    w = whoosh(r, dur, 250, 1500, 500, q=0.9, peak=0.2, air=0.3, sing=0.1, sing_f=1500, shimmer=0.12)
-    n = len(w)
-    sub = thump(r, dur, 90, 45, 0.25, 1.1) * np.exp(-((tl(n) - dur * 0.2) / 0.1) ** 2)
-    return _n(w + 0.35 * sub)
+    x = sfx(['sword.9.ogg', 'sword.5.ogg'][v])
+    y = at_peak(pitch(butter_hp(x, 120), -4), 0.05, 0.55)
+    body = at_peak(pitch(sfx('cloth1.ogg' if v == 0 else 'cloth3.ogg'), -5), 0.05, 0.5)
+    n = len(y)
+    low = thump(0.4, 110, 55, 0.12, 1.2)
+    return mix(n, (y, 1.0, 0), (butter_lp(body, 2500), 0.6, 0), (low, 0.35, 0.03), (air(0.3, 1500, 6000, v + 5), 0.15, 0))
 
 
 def s_swing_musou(v):
-    r = rng(1200 + v)
-    dur = 0.22 + 0.03 * (v % 2)
-    w = whoosh(r, dur, 700, 3800, 1500, q=1.2, peak=0.18, air=0.5, sing=0.1, sing_f=3000 + 300 * v, shimmer=0.25)
-    return w
+    x = sfx(['sword.2.ogg', 'sword.3.ogg', 'sword.10.ogg'][v])
+    y = at_peak(pitch(butter_hp(x, 400), 2), 0.03, 0.3)
+    body = at_peak(pitch(sfx('cloth4.ogg'), 5 + v), 0.03, 0.28)
+    tri = fit(perc('triangle', 0.35), 0.35)
+    return mix(len(y), (y, 1.0, 0), (butter_bp(body, 500, 4000), 0.4, 0), (butter_hp(tri, 3000), 0.08, 0.02),
+               (air(0.22, 3000, 12000, v + 9), 0.15, 0))
 
 
 def s_hit_light(v):
-    r = rng(1300 + v)
-    n = secs(0.34)
-    tear = noise_burst(r, 0.12, 1200, 5500, 0.035)
-    tear = saturate(tear * 2.0, 1.0)
-    body = thump(r, 0.2, 170 + 15 * v, 75, 0.06, 1.6)
-    punch = thump(r, 0.12, 420 + 30 * v, 190, 0.028, 1.8)
-    thwack = saturate(noise_burst(r, 0.1, 300, 1600, 0.03) * 2.0, 1.0)
-    spark = debris(r, 0.25, 8, 3500, 9000, (0.002, 0.008), 0.05, 0.3)
-    y = mix(n, (click(r, 0.004, 2500, 12000), 0.8, 0), (tear, 0.8, 0.002), (body, 0.4, 0), (punch, 0.55, 0), (thwack, 0.9, 0.001), (spark, 0.2, 0.015))
-    return _n(fade_end(room(y, 0.35, 0.12)))
+    punch = trim(sfx(f'impactPunch_medium_00{v}.ogg'))
+    cut = at_peak(sfx(['knifeSlice.ogg', 'knifeSlice2.ogg', 'chop.ogg', 'knifeSlice.ogg'][v]), 0.005, 0.25)
+    n = secs(0.36)
+    return fade_end(room(mix(n, (punch, 1.0, 0), (butter_hp(cut, 1500), 0.45, 0), (thump(0.2, 170, 80, 0.06, 1.6), 0.35, 0)),
+                         0.35, 0.1), 0.04)
 
 
 def s_hit_heavy(v):
-    r = rng(1400 + v)
-    n = secs(0.7)
-    crunch = saturate(noise_burst(r, 0.25, 150, 3500, 0.07) * 3.0, 1.0)
-    body = thump(r, 0.5, 130 + 10 * v, 48, 0.16, 2.0)
-    scrape = metal(r, 0.25, 1650 + 120 * v, [1, 1.52, 2.33], [0.05, 0.035, 0.02], [1, 0.6, 0.4]) * 0.5
-    spark = debris(r, 0.4, 14, 2500, 9000, (0.002, 0.01), 0.08, 0.35)
-    punch = thump(r, 0.2, 330 + 20 * v, 150, 0.05, 2.0)
-    y = mix(n, (click(r, 0.005, 1500, 10000), 1.0, 0), (crunch, 0.9, 0.002), (body, 0.6, 0), (punch, 0.55, 0), (scrape, 0.35, 0.004), (spark, 0.22, 0.02))
-    return _n(fade_end(room(y, 0.6, 0.18)))
+    punch = trim(sfx(f'impactPunch_heavy_00{v}.ogg'))
+    crunch = trim(sfx(['bfh1_hit_08.ogg', 'bfh1_hit_06.ogg', 'bfh1_hit_01.ogg'][v]))
+    n = secs(0.62)
+    mid = trim(sfx(f'impactPunch_medium_00{v}.ogg'))
+    cut = at_peak(sfx(['chop.ogg', 'knifeSlice2.ogg', 'chop.ogg'][v]), 0.005, 0.25)
+    return fade_end(room(mix(n, (punch, 0.8, 0), (butter_hp(mid, 250), 0.7, 0), (butter_hp(crunch, 600), 0.75, 0.0),
+                             (butter_hp(cut, 1200), 0.35, 0), (thump(0.45, 130, 48, 0.15, 2.0), 0.35, 0)), 0.6, 0.14), 0.06)
 
 
 def s_hit_finisher(v):
-    r = rng(1500 + v)
-    n = secs(1.3)
-    crack = saturate(noise_burst(r, 0.3, 400, 8000, 0.04) * 3, 1.0)
-    body = thump(r, 0.9, 110, 38, 0.3, 2.5)
-    crunch = saturate(noise_burst(r, 0.4, 120, 2500, 0.12) * 3, 1.0)
-    shatter = debris(r, 1.0, 40, 1800, 7500, (0.004, 0.03), 0.18, 0.7)
-    ring = metal(r, 1.0, 420, [1, 2.1, 3.6, 5.2], [0.4, 0.25, 0.15, 0.1], [1, 0.6, 0.4, 0.25]) * 0.25
-    punch = thump(r, 0.25, 300, 130, 0.06, 2.2)
-    y = mix(n, (click(r, 0.006, 1200, 12000), 1.0, 0), (crack, 0.7, 0.001), (body, 0.75, 0), (punch, 0.5, 0), (crunch, 0.75, 0.004),
-            (shatter, 0.35, 0.02), (ring, 0.35, 0.0))
-    return _n(fade_end(room(y, 1.1, 0.25)))
+    punch = trim(sfx(f'impactPunch_heavy_00{3 + v}.ogg'))
+    boom = trim(sfx(['explosionCrunch_000.ogg', 'explosionCrunch_002.ogg'][v]))
+    debris = trim(sfx(['bfh1_rock_breaking_03.ogg', 'bfh1_rock_falling_04.ogg'][v]))
+    n = secs(1.2)
+    crunch = trim(sfx(['bfh1_hit_08.ogg', 'bfh1_hit_01.ogg'][v]))
+    return fade_end(room(mix(n, (punch, 0.8, 0), (boom, 0.6, 0.0), (butter_hp(crunch, 500), 0.8, 0), (butter_hp(debris, 800), 0.6, 0.02),
+                             (thump(0.8, 110, 38, 0.28, 2.4), 0.4, 0)), 1.0, 0.18), 0.1)
 
 
-def s_hit_prop(v):  # crate / jar / barrel struck but not broken
-    r = rng(1600 + v)
-    n = secs(0.3)
-    wood = modal(n, [240 + 30 * v, 520, 910, 1480], [0.05, 0.03, 0.02, 0.012], [1, 0.7, 0.45, 0.3], r, 0.03)
-    y = mix(n, (click(r, 0.004, 1500, 8000), 0.6, 0), (wood, 1.0, 0), (noise_burst(r, 0.1, 400, 3000, 0.02), 0.4, 0))
-    return _n(fade_end(room(y, 0.3, 0.1)))
+def s_hit_prop(v):
+    a = trim(sfx(f'impactWood_medium_00{v}.ogg'))
+    b = trim(sfx(f'impactPlank_medium_00{v}.ogg'))
+    return fade_end(mix(secs(0.4), (a, 1.0, 0), (butter_hp(b, 150), 0.5, 0)), 0.05)
 
 
 def s_hit_lantern(v):
-    r = rng(1650 + v)
-    n = secs(0.35)
-    paper = debris(r, 0.25, 22, 1200, 5000, (0.002, 0.006), 0.04, 0.1)
-    frame = modal(n, [380, 720, 1300], [0.04, 0.03, 0.02], [1, 0.6, 0.4], r)
-    buzz = sine(np.full(n, 110.0)) * np.sign(sine(np.full(n, 55.0))) * np.exp(-tl(n) / 0.1) * 0.3
-    y = mix(n, (click(r, 0.004), 0.5, 0), (paper, 0.8, 0), (frame, 0.8, 0), (buzz, 0.6, 0))
-    return _n(fade_end(room(y, 0.4, 0.12)))
+    a = trim(sfx(f'impactWood_light_00{v}.ogg'))
+    paper = trim(sfx(['bookPlace1.ogg', 'bookPlace3.ogg'][v]))
+    glass = trim(sfx(f'impactGlass_light_00{v}.ogg'))
+    return fade_end(mix(secs(0.4), (a, 0.8, 0), (paper, 0.7, 0), (glass, 0.35, 0.005)), 0.05)
 
 
 def s_guard(v):
-    r = rng(1700 + v)
-    n = secs(1.3)
-    f0 = [760, 820, 700][v % 3]
-    ring = metal(r, 1.3, f0, [1, 2.32, 4.25, 6.63, 9.38], [0.45, 0.28, 0.16, 0.1, 0.06], [1, 0.7, 0.5, 0.3, 0.2])
-    y = mix(n, (click(r, 0.003, 3000, 14000), 1.2, 0), (noise_burst(r, 0.05, 3000, 10000, 0.01), 0.6, 0),
-            (ring, 0.45, 0), (thump(r, 0.08, 220, 150, 0.02), 0.5, 0))
-    return _n(fade_end(room(y, 0.8, 0.2)))
+    clash = trim(sfx(['sword_clash.2.ogg', 'sword_clash.3.ogg', 'sword_clash.5.ogg'][v]))
+    clank = trim(sfx(f'impactMetal_heavy_00{v + 1}.ogg'))
+    n = secs(1.0)
+    return fade_end(room(mix(n, (clash, 1.0, 0), (clank, 0.6, 0), (thump(0.1, 220, 150, 0.025), 0.3, 0)), 0.7, 0.14), 0.1)
 
 
 def s_guard_break(v):
-    r = rng(1800 + v)
+    clash = trim(sfx(['sword_clash.1.ogg', 'sword_clash.6.ogg'][v]))
+    shatter = trim(sfx(['bfh1_glass_breaking_01.ogg', 'bfh1_metal_falling_02.ogg'][v]))
+    anvil = fit(perc('anvil', 0.9), 0.8)
     n = secs(1.3)
-    ring = metal(r, 1.2, 560, [1, 2.32, 4.25, 6.63], [0.5, 0.3, 0.16, 0.1], [1, 0.7, 0.5, 0.3])
-    shatter = debris(r, 1.0, 55, 2000, 9000, (0.003, 0.025), 0.2, 0.75)
-    down = whoosh(r, 0.5, 3000, 900, 300, q=1.0, peak=0.15, air=0.2)
-    body = thump(r, 0.6, 120, 45, 0.18, 2.0)
-    y = mix(n, (click(r, 0.004, 2000, 14000), 1.2, 0), (ring, 0.4, 0), (shatter, 0.45, 0.01), (down, 0.35, 0.02), (body, 0.9, 0))
-    return _n(fade_end(room(y, 1.0, 0.25)))
+    return fade_end(room(mix(n, (clash, 1.0, 0), (anvil, 0.45, 0), (butter_hp(shatter, 1200), 0.5, 0.01),
+                             (thump(0.6, 120, 45, 0.18, 2.0), 0.5, 0)), 1.0, 0.18), 0.12)
+
+
+def _voice(name, semis, lp_=5000, dur=None):
+    x = trim(sfx(name), -24)
+    y = butter_lp(pitch(x, semis), lp_)
+    return y if dur is None else fit(y, dur)
 
 
 def s_oni(v):
-    r = rng(1900 + v)
-    if v == 0:   # attack shout "hah!"
-        y = voice(r, 0.36, [120, 135, 110, 90], 'a', 'o', scale=0.78, growl=0.4, sub=0.45, breath=0.14, drive=2.0, attack=0.015, release=0.12)
-    elif v == 1:   # growl "grrr"
-        y = voice(r, 0.55, [85, 92, 80, 75], 'o', 'u', scale=0.72, growl=0.75, sub=0.55, breath=0.18, drive=2.4, attack=0.04, release=0.18, am=24)
-    elif v == 2:   # hurt grunt "ugh"
-        y = voice(r, 0.3, [130, 110, 80], 'e', 'o', scale=0.8, growl=0.3, sub=0.35, breath=0.12, drive=1.8, attack=0.01, release=0.1)
-    else:
-        y = voice(r, 0.42, [100, 115, 95, 70], 'a', 'u', scale=0.75, growl=0.55, sub=0.5, breath=0.15, drive=2.2, attack=0.02, release=0.15)
-    return _n(fade_end(room(pad_tail(y, 0.15), 0.4, 0.12)))
+    name, semis = [('troll_02.ogg', -3), ('monster_06.ogg', -3), ('hurt_05.ogg', -4), ('grunt_03.ogg', -2)][v]
+    y = _voice(name, semis, 4500)
+    return fade_end(room(pad(y, 0.15), 0.4, 0.1), 0.05)
 
 
 def s_boss_roar(v):
-    r = rng(2000 + v)
-    dur = 1.9
-    y = voice(r, dur, [55, 70, 88, 84, 78, 62, 50], 'o', 'a', scale=0.62, growl=0.85, sub=0.8, breath=0.45, drive=3.5,
-              attack=0.12, release=0.5, am=31)
-    y2 = voice(rng(2050 + v), dur, [82, 104, 131, 125, 116, 93, 75], 'u', 'a', scale=0.7, growl=0.6, sub=0.3, breath=0.3,
-               drive=3.0, attack=0.15, release=0.5, am=27)
-    n = len(y)
-    rumble = butter_lp(r.standard_normal(n), 120) * np.sin(np.linspace(0, math.pi, n)) ** 1.5
-    out = y + 0.55 * y2 + 1.2 * _n(rumble)
-    return _n(fade_end(room(pad_tail(out, 0.8), 1.6, 0.3, damp=3500, size=1.0)))
+    a = _voice('roar_02.ogg', -6, 4000)
+    b = _voice('monster_04.ogg', -4, 3500)
+    c = _voice('monster_07.ogg', -5, 3500)
+    n = max(len(a), len(b), len(c)) + secs(0.2)
+    rum = butter_lp(rng(3).standard_normal(n), 110) * np.sin(np.linspace(0, math.pi, n)) ** 1.5
+    y = mix(n, (a, 1.0, 0), (b, 0.7, 0.08), (c, 0.55, 0.15), (rum, 0.4, 0))
+    return fade_end(room(pad(y, 0.9), 1.6, 0.26, damp=3500, size=1.0), 0.2)
 
 
 def s_boss_grunt(v):
-    r = rng(2100 + v)
-    y = voice(r, 0.6, [70, 84, 72, 58], 'o', 'a', scale=0.64, growl=0.7, sub=0.8, breath=0.35, drive=3.2, attack=0.03, release=0.2)
-    return _n(fade_end(room(pad_tail(y, 0.3), 0.8, 0.2, damp=3500)))
+    y = _voice(['monster_03.ogg', 'troll_01.ogg'][v], -6, 3500)
+    return fade_end(room(pad(y, 0.3), 0.8, 0.18, damp=3500), 0.08)
 
 
 def s_soul_burst(v):
-    r = rng(2200 + v)
-    n = secs(0.95)
-    poof = thump(r, 0.25, 110, 50, 0.07, 1.3)
-    puff = noise_burst(r, 0.3, 100, 900, 0.07, 0.004)
-    swirl = whoosh(r, 0.55, 700, 5200, 3000, q=1.6, peak=0.55, air=0.2, shimmer=0.25)
-    sets = [[88, 91, 93, 96], [86, 89, 93, 98], [88, 93, 95, 100]]
-    notes = np.zeros(n)
-    for k, m in enumerate(sets[v % 3]):
-        b = bell(m, 0.6, r, 0.8, 0.22, ratio=2.0 + 0.5 * (k % 2), index=1.4)
-        a = secs(0.03 + 0.045 * k)
-        notes[a:a + len(b)] += b[: n - a] * (0.9 - 0.12 * k)
-    y = mix(n, (poof, 0.45, 0), (puff, 0.35, 0), (swirl, 0.45, 0.02), (notes, 0.25, 0))
-    return _n(fade_end(room(y, 0.9, 0.3, damp=7000)))
+    poof = trim(sfx(f'impactSoft_medium_00{v}.ogg'))
+    sparkle = fit(lib.perc().hit('bell_tree', 0.6, pitch=[0, 2, -2][v]).mean(axis=1), 0.7, 0.3)
+    shards = trim(sfx(['bfh1_glass_breaking_02.ogg', 'bfh1_glass_breaking_05.ogg', 'bfh1_glass_falling_01.ogg'][v]))
+    n = secs(0.9)
+    return fade_end(room(mix(n, (poof, 0.7, 0), (butter_hp(sparkle, 2500), 0.45, 0.02), (butter_hp(shards, 3000), 0.18, 0.01),
+                             (air(0.5, 1500, 7000, v + 20, 0.4), 0.2, 0)), 0.9, 0.25, damp=7000), 0.1)
 
 
 def s_launch(v):
-    r = rng(2300 + v)
-    n = secs(0.45)
-    up = whoosh(r, 0.4, 350, 2400, 2000, q=1.0, peak=0.35, air=0.25)
-    y = mix(n, (thump(r, 0.15, 150, 80, 0.05), 0.7, 0), (up, 0.6, 0.0))
-    return _n(fade_end(y))
+    wh = at_peak(pitch(sfx(['cloth2.ogg', 'cloth4.ogg'][v]), 3), 0.06, 0.4)
+    hit = trim(sfx(f'impactPunch_medium_00{v + 2}.ogg'))
+    return fade_end(mix(secs(0.45), (hit, 0.6, 0), (wh, 0.9, 0)), 0.05)
 
 
 def s_land(v):
-    r = rng(2400 + v)
-    n = secs(0.45)
-    dust = noise_burst(r, 0.3, 200, 1800, 0.08, 0.003)
-    scuff = noise_burst(r, 0.12, 600, 3500, 0.03)
-    y = mix(n, (thump(r, 0.3, 100, 48, 0.09, 1.8), 0.5, 0), (thump(r, 0.12, 240, 120, 0.03, 1.5), 0.6, 0), (dust, 0.7, 0.002),
-            (scuff, 0.6, 0.001), (click(r, 0.003, 800, 5000), 0.4, 0))
-    return _n(fade_end(room(y, 0.4, 0.1)))
+    a = trim(sfx(f'impactSoft_heavy_00{v}.ogg'))
+    dust = trim(sfx(f'footstep_grass_00{v}.ogg'))
+    step = trim(sfx(f'footstep_concrete_00{v}.ogg'))
+    return fade_end(mix(secs(0.45), (a, 0.7, 0), (butter_hp(step, 200), 0.8, 0), (butter_hp(dust, 400), 0.6, 0.0)), 0.06)
 
 
 def s_jump(v):
-    r = rng(2500 + v)
-    n = secs(0.3)
-    up = whoosh(r, 0.24, 500, 2600, 1800, q=0.9, peak=0.3, air=0.3)
-    scuff = noise_burst(r, 0.06, 500, 4000, 0.015)
-    y = mix(n, (scuff, 0.5, 0), (up, 0.7, 0.01))
-    return _n(fade_end(y))
+    wh = at_peak(pitch(sfx(['cloth1.ogg', 'cloth2.ogg'][v]), 4), 0.05, 0.3)
+    scuff = trim(sfx(f'footstep0{v}.ogg'))
+    return fade_end(mix(secs(0.32), (scuff, 0.5, 0), (wh, 0.9, 0.0), (air(0.2, 2000, 8000, v + 30), 0.12, 0)), 0.05)
 
 
 def s_plunge(v):
-    r = rng(2600 + v)
+    a = trim(sfx('impactMining_000.ogg'))
+    b = trim(sfx('bfh1_rock_breaking_01.ogg'))
+    c = trim(sfx('lowFrequency_explosion_001.ogg'))
+    d = trim(sfx('impactPlate_heavy_001.ogg'))
     n = secs(1.5)
-    body = thump(r, 1.2, 120, 36, 0.35, 2.8)
-    crack = saturate(noise_burst(r, 0.2, 300, 7000, 0.04) * 3, 1.0)
-    rocks = debris(r, 1.2, 45, 250, 2500, (0.005, 0.04), 0.25, 0.35)
-    dust = whoosh(r, 0.9, 1500, 500, 200, q=0.8, peak=0.08, air=0.1)
-    ringf = 180 * np.exp(-tl(secs(0.8)) / 0.4) + 90
-    ring = sine(ringf) * np.exp(-tl(secs(0.8)) / 0.25)
-    y = mix(n, (click(r, 0.006, 1000, 12000), 1.0, 0), (body, 0.8, 0), (crack, 0.8, 0.002), (rocks, 0.5, 0.03), (dust, 0.45, 0.01), (ring, 0.3, 0))
-    return _n(fade_end(room(y, 1.2, 0.25, damp=4500)))
+    e = trim(sfx('bfh1_hit_01.ogg'))
+    return fade_end(room(mix(n, (a, 0.8, 0), (c, 0.6, 0), (d, 0.5, 0), (butter_hp(b, 500), 0.8, 0.02), (butter_hp(e, 400), 0.7, 0),
+                             (thump(1.0, 110, 36, 0.32, 2.6), 0.4, 0)), 1.2, 0.2, damp=4500), 0.15)
+
+
+def _glock(notes, step=0.07, vel=0.75, ring=1.2):
+    g = lib.glock()
+    parts = [inst_note(g, m, 0.3, vel, ring=ring) for m in notes]
+    n = max(len(p) for p in parts) + secs(step * len(notes)) + 10
+    out = np.zeros(n)
+    for i, p in enumerate(parts):
+        a = secs(step * i)
+        out[a:a + len(p)] += p
+    return out
 
 
 def s_pickup_charm(v):
-    r = rng(2700 + v)
-    n = secs(1.0)
-    a = bell(88, 0.9, r, 0.6, 0.35, ratio=2.0, index=1.2)
-    b = bell(95, 0.9, r, 0.6, 0.4, ratio=2.0, index=1.2)
-    sh = whoosh(r, 0.5, 2500, 7000, 5000, q=1.8, peak=0.6, air=0.1)
-    y = mix(n, (a, 0.8, 0), (b, 0.8, 0.075), (sh, 0.18, 0.02))
-    return _n(fade_end(room(y, 1.0, 0.3, damp=8000)))
+    g = _glock([88, 95], 0.075, 0.7, 0.9)
+    tri = fit(perc('triangle', 0.4), 0.8, 0.3)
+    return fade_end(room(mix(secs(1.1), (g, 1.0, 0), (tri, 0.2, 0.0)), 1.0, 0.25, damp=8000), 0.12)
 
 
 def s_pickup_lamp(v):
-    r = rng(2800 + v)
-    n = secs(1.6)
-    y = np.zeros(n)
-    for k, m in enumerate([81, 85, 88, 93]):
-        b = bell(m, 1.2, r, 0.7, 0.5, ratio=2.0, index=1.0)
-        a = secs(0.06 * k)
-        y[a:a + len(b)] += b[: n - a] * 0.7
-    pad = supersaw_chord([69, 73, 76, 81], 0.6, seed=v, voices=5, attack=0.12, release=0.35, cutoff=2200)
-    pad = pad.mean(axis=1)
-    warm = sine(np.full(secs(0.9), 220.0)) * np.sin(np.linspace(0, math.pi, secs(0.9))) ** 2
-    y = mix(n, (y, 1.0, 0), (pad, 0.6, 0.0), (warm, 0.25, 0))
-    return _n(fade_end(room(y, 1.4, 0.35, damp=8000)))
+    g = _glock([81, 85, 88, 93], 0.065, 0.75, 1.2)
+    h = chord_of(lib.harp(), [69, 73, 76, 81], 0.6, 0.6, strum=0.03, ring=1.0)
+    bt = fit(perc('bell_tree', 0.5), 1.0, 0.3)
+    return fade_end(room(mix(secs(1.6), (g, 0.8, 0), (h, 0.7, 0.0), (butter_hp(bt, 2500), 0.3, 0.05)), 1.4, 0.3, damp=8000), 0.15)
 
 
 def s_pickup_crystal(v):
-    r = rng(2900 + v)
-    n = secs(1.3)
-    y = np.zeros(n)
-    for k, f in enumerate([1318, 1760, 2093, 2637, 3136]):
-        g = glass(r, 0.7, f, 0.35)
-        a = secs(0.035 * k)
-        y[a:a + len(g)] += g[: n - a] * (0.6 - 0.05 * k)
-    rise = whoosh(r, 0.6, 600, 4500, 4000, q=1.8, peak=0.7, air=0.1, shimmer=0.4)
-    hum = sine(np.linspace(110, 165, secs(0.8))) * np.sin(np.linspace(0, math.pi, secs(0.8))) ** 2
-    hum = saturate(hum * 2, 1.0)
-    y = mix(n, (y, 0.8, 0), (rise, 0.35, 0), (hum, 0.25, 0.05))
-    return _n(fade_end(room(y, 1.2, 0.35, damp=9000)))
-
-
-def _choir_stab(midis, dur, vowel='a', seed=0):
-    parts = ['bass', 'tenor', 'alto', 'soprano']
-    n = secs(dur + 1.2)
-    y = np.zeros(n)
-    for p, m in zip(parts, midis):
-        y += choir_part([(0, dur, m, 1.0)], n, p, vowel, seed=seed + len(p), unison=5)
-    return _n(y)
+    gl = trim(sfx('glass_004.ogg'))
+    g = _glock([93, 97, 100, 105], 0.045, 0.7, 1.0)
+    ff = at_peak(pitch(sfx('forceField_002.ogg'), 7), 0.02, 0.8)
+    return fade_end(room(mix(secs(1.3), (gl, 0.6, 0), (g, 0.9, 0.01), (butter_hp(ff, 400), 0.35, 0)), 1.2, 0.3, damp=9000), 0.15)
 
 
 def s_musou_start(v):
     true = v == 1
-    r = rng(3000 + v)
-    dur = 2.6 if true else 2.1
-    n = secs(dur)
-    # unsheath: metal scrape rising + ringing edge
-    sc = whoosh(r, 0.45, 2500, 8000, 6000, q=2.0, peak=0.7, air=0.4)
-    edge = metal(r, 1.2, 1780, [1, 1.51, 2.39, 3.3], [0.5, 0.35, 0.2, 0.12], [1, 0.6, 0.4, 0.25]) * np.clip(tl(secs(1.2)) / 0.2, 0, 1)
-    tk = taiko(3000 + v, pitch=0.8 if true else 1.0, length=1.8)
-    boom = thump(r, 1.4, 90, 40 if true else 48, 0.45, 2.2)
-    ch = _choir_stab([45, 57, 64, 69] if not true else [38, 50, 57, 65], 0.9 if not true else 1.3, 'a', seed=v)
-    swell = whoosh(r, dur * 0.8, 200, 5000, 6000, q=0.9, peak=0.92, air=0.25, shimmer=0.35)
-    stab = brass_stab([57, 64, 69] if not true else [50, 57, 62, 65], 0.5, seed=v).mean(axis=1)
-    layers = [(sc, 0.35, 0), (edge, 0.12, 0.25), (tk, 0.8, 0), (boom, 0.7, 0), (ch, 0.35, 0.02), (swell, 0.35, 0.1), (stab, 0.3, 0)]
+    draw = trim(sfx('drawKnife1.ogg' if not true else 'drawKnife2.ogg'))
+    drum = fit(perc('bass_drum2', 1.0), 2.0, 0.4)
+    timp = fit(perc('timpani_lo', 0.9), 1.6, 0.4)
+    ch = chord_of(lib.choir('aah'), [45, 57, 64, 69] if not true else [38, 50, 57, 65], 1.0 if not true else 1.4, 0.9)
+    br = chord_of(lib.horns_stac(), [57, 64, 69] if not true else [50, 57, 62], 0.5, 1.0)
+    tb = chord_of(lib.trombones_stac(), [45, 52] if not true else [38, 45], 0.5, 1.0)
+    swell = fit(perc('cymbal_swell', 0.8), 1.6, 0.4)
+    n = secs(2.6 if true else 2.1)
+    layers = [(draw, 0.55, 0), (drum, 1.0, 0), (timp, 0.7, 0), (ch, 0.45, 0.0), (br, 0.6, 0), (tb, 0.5, 0), (swell, 0.35, 0.3)]
     if true:
-        crackle = debris(r, 2.0, 70, 3000, 10000, (0.001, 0.004), 0.7, 0.2)
-        low = _choir_stab([26, 38, 45, 50], 1.5, 'o', seed=9)
-        layers += [(crackle, 0.15, 0.2), (low, 0.25, 0.05)]
-    y = mix(n, *layers)
-    return _n(fade_end(room(y, 1.8, 0.3, damp=6000, size=1.1), 0.2))
+        layers += [(fit(perc('gong', 0.7), 2.4, 0.5), 0.45, 0), (chord_of(lib.choir('ooh'), [26 + 12, 38, 45], 1.6, 0.9), 0.35, 0.05)]
+    return fade_end(room(mix(n, *layers), 1.6, 0.22, damp=6000, size=1.1), 0.3)
 
 
 def s_musou_finish(v):
     true = v == 1
-    r = rng(3100 + v)
-    dur = 3.4 if true else 2.8
-    n = secs(dur)
-    boom = thump(r, dur, 95, 34, 0.65 if true else 0.5, 3.0)
-    crack = saturate(noise_burst(r, 0.25, 500, 10000, 0.05) * 3, 1.0)
-    m = secs(dur)
-    x = np.linspace(0, 1, m)
-    blast = lp(r.standard_normal(m), 9000 * (0.035 ** x), 0.8) * np.exp(-x * dur / 0.7)
-    blast = saturate(_n(blast) * 2.0, 1.0)
-    shards = debris(r, dur, 80 if true else 55, 1500, 8000, (0.004, 0.04), 0.5, 0.6)
-    ring = sum(bell(mm, dur, r, 0.8, 1.2, ratio=1.41, index=2.0) for mm in ([57, 64, 69, 76] if not true else [50, 57, 62, 65, 74]))
-    tk = taiko(3100 + v, pitch=0.75, length=2.2)
-    layers = [(click(r, 0.008, 800, 14000), 1.0, 0), (boom, 1.0, 0), (crack, 0.5, 0.001), (blast, 0.55, 0.004),
-              (shards, 0.25, 0.03), (ring, 0.06, 0.0), (tk, 0.6, 0)]
+    a = trim(sfx('lowFrequency_explosion_000.ogg'))
+    b = trim(sfx('explosionCrunch_001.ogg' if not true else 'explosionCrunch_003.ogg'))
+    drum = fit(perc('bass_drum2', 1.0), 2.5, 0.5)
+    crash = fit(perc('crash', 1.0), 2.8, 0.8)
+    gong = fit(perc('gong', 1.0), 3.0, 0.8)
+    debris = trim(sfx('bfh1_rock_breaking_02.ogg'))
+    n = secs(3.4 if true else 2.8)
+    layers = [(a, 1.0, 0), (b, 0.75, 0.0), (drum, 0.9, 0), (crash, 0.45, 0.0), (gong, 0.35, 0.02), (butter_hp(debris, 600), 0.35, 0.05),
+              (thump(1.6, 95, 34, 0.6, 3.0), 0.5, 0)]
     if true:
-        layers += [(thump(r, 1.5, 80, 30, 0.5, 2.5), 0.8, 0.14), (_choir_stab([38, 50, 57, 65], 1.2, 'a', seed=11), 0.3, 0.05)]
-    y = mix(n, *layers)
-    return _n(fade_end(room(y, 2.2, 0.3, damp=5000, size=1.2), 0.3))
+        layers += [(fit(perc('bass_drum2', 1.0), 2.0, 0.5), 0.8, 0.14), (chord_of(lib.choir('aah'), [38, 50, 57, 65], 1.4, 1.0), 0.35, 0.05)]
+    return fade_end(room(mix(n, *layers), 2.0, 0.22, damp=5000, size=1.2), 0.35)
 
 
 def s_officer_down(v):
-    r = rng(3200 + v)
+    drum = fit(perc('bass_drum2', 1.0), 2.2, 0.5)
+    gong = fit(perc('gong', 1.0), 2.4, 0.6)
+    br = chord_of(lib.horns(), [57, 60, 64], 0.6, 0.95)
+    tb = chord_of(lib.trombones(), [45, 52], 0.6, 0.95)
+    crash = fit(perc('crash', 0.9), 2.2, 0.6)
     n = secs(2.4)
-    tk = taiko(3200, pitch=0.9, length=2.2)
-    gong = metal(r, 2.4, 196, [1, 1.52, 2.03, 2.71, 3.4, 4.3], [1.4, 1.0, 0.7, 0.5, 0.35, 0.25], [1, 0.8, 0.6, 0.45, 0.3, 0.2], beat=1.2)
-    gong *= np.clip(tl(len(gong)) / 0.004, 0, 1)
-    stab = brass_stab([57, 60, 64, 69], 0.35, seed=4, vel=1.0).mean(axis=1)
-    cr = crash(3200, 2.4)
-    y = mix(n, (tk, 1.0, 0), (gong, 0.45, 0.0), (stab, 0.55, 0), (thump(r, 1.2, 80, 38, 0.4, 2.0), 0.5, 0), (cr, 0.3, 0))
-    return _n(fade_end(room(y, 1.8, 0.28, damp=5000, size=1.1), 0.2))
+    return fade_end(room(mix(n, (drum, 1.0, 0), (gong, 0.5, 0), (br, 0.55, 0), (tb, 0.45, 0), (crash, 0.35, 0)), 1.6, 0.2, damp=5000,
+                         size=1.1), 0.25)
 
 
 def s_officer_appear(v):
-    r = rng(3250 + v)
-    n = secs(1.4)
-    tk = taiko(3250, pitch=1.1, length=1.3)
-    glint = metal(r, 0.6, 2400, [1, 1.5, 2.2], [0.25, 0.15, 0.1], [1, 0.6, 0.4])
-    shout = voice(r, 0.4, [110, 128, 100], 'a', 'o', scale=0.76, growl=0.5, sub=0.5, drive=3.0)
-    y = mix(n, (tk, 1.0, 0), (glint, 0.15, 0.02), (shout, 0.5, 0.08), (thump(r, 0.6, 70, 40, 0.2), 0.5, 0))
-    return _n(fade_end(room(y, 1.2, 0.25)))
+    drum = fit(perc('bass_drum', 1.0), 1.2, 0.3)
+    timp = fit(perc('timpani_hi', 0.9), 1.2, 0.3)
+    draw = trim(sfx('drawKnife2.ogg'))
+    shout = _voice('troll_02.ogg', -4, 4000)
+    return fade_end(room(mix(secs(1.4), (drum, 1.0, 0), (timp, 0.6, 0), (draw, 0.4, 0.05), (shout, 0.6, 0.12)), 1.0, 0.2), 0.15)
 
 
 def s_gate_open(v):
-    r = rng(3300 + v)
+    g = _glock([100, 98, 96, 93, 91, 88, 86, 84], 0.055, 0.7, 1.2)
+    ff = at_peak(sfx('forceField_000.ogg'), 0.05, 1.0)
+    swell = fit(perc('cymbal_swell', 0.6), 1.2, 0.5)
+    tub = inst_note(lib.tubular(), 69, 0.5, 0.7, ring=2.0)
     n = secs(2.4)
-    y = np.zeros(n)
-    for k, m in enumerate([100, 98, 96, 93, 91, 88, 86, 84]):
-        b = glass(r, 0.9, float(midi_hz(m)), 0.4)
-        a = secs(0.05 * k)
-        y[a:a + len(b)] += b[: n - a] * (0.5 + 0.05 * k)
-    swell = whoosh(r, 1.6, 150, 1800, 3500, q=0.8, peak=0.35, air=0.2, shimmer=0.3)
-    dissolve = debris(r, 2.0, 60, 3000, 9000, (0.002, 0.01), 0.6, 0.8)
-    sub = sine(np.linspace(55, 82, secs(1.4))) * np.sin(np.linspace(0, math.pi, secs(1.4))) ** 2
-    y = mix(n, (y, 0.4, 0), (swell, 0.5, 0), (dissolve, 0.15, 0.1), (sub, 0.4, 0))
-    return _n(fade_end(room(y, 2.0, 0.35, damp=7000, size=1.1), 0.2))
+    return fade_end(room(mix(n, (g, 0.7, 0.05), (butter_hp(ff, 300), 0.55, 0), (swell, 0.3, 0), (tub, 0.4, 0.4)), 1.8, 0.3, damp=7000,
+                         size=1.1), 0.25)
 
 
 def s_gate_close(v):
-    r = rng(3350 + v)
-    n = secs(1.4)
-    hum = saturate(sine(np.full(secs(1.2), 73.0)) * np.exp(-tl(secs(1.2)) / 0.4) * 2, 1.0)
-    shim = whoosh(r, 0.5, 5000, 1800, 900, q=1.2, peak=0.1, air=0.1, shimmer=0.3)
-    clack = modal(secs(0.3), [420, 910, 1530], [0.06, 0.04, 0.025], [1, 0.7, 0.4], r)
-    y = mix(n, (thump(r, 0.8, 110, 42, 0.25, 2.0), 0.5, 0), (clack, 0.85, 0), (hum, 0.35, 0), (shim, 0.5, 0), (click(r, 0.004, 1000, 8000), 0.5, 0))
-    return _n(fade_end(room(y, 1.2, 0.25)))
+    a = trim(sfx('impactMetal_000.ogg'))
+    ff = at_peak(pitch(sfx('forceField_003.ogg'), -5), 0.02, 0.9)
+    door = trim(sfx('doorClose_4.ogg'))
+    clank = trim(sfx('metalPot1.ogg'))
+    return fade_end(room(mix(secs(1.3), (a, 0.8, 0), (ff, 0.5, 0), (door, 0.7, 0), (butter_hp(clank, 300), 0.35, 0)), 1.0, 0.2), 0.15)
 
 
 def s_lantern_break(v):
-    r = rng(3400 + v)
-    n = secs(1.5)
-    paper = debris(r, 0.8, 60, 900, 5000, (0.002, 0.008), 0.12, 0.05)
-    glassy = debris(r, 1.0, 35, 2500, 8000, (0.005, 0.03), 0.15, 0.85)
-    fire = whoosh(r, 0.9, 200, 1400, 400, q=0.7, peak=0.25, air=0.1)
-    hiss_f = np.linspace(330, 180, secs(1.0))
-    hiss = (saw(hiss_f) + saw(hiss_f * 1.06)) * np.exp(-tl(secs(1.0)) / 0.3)
-    hiss = butter_bp(hiss, 300, 3000)
-    y = mix(n, (click(r, 0.005, 1500, 10000), 0.8, 0), (thump(r, 0.4, 140, 60, 0.12, 1.8), 0.8, 0), (paper, 0.4, 0.0),
-            (glassy, 0.35, 0.01), (fire, 0.5, 0.02), (hiss, 0.12, 0.03))
-    return _n(fade_end(room(y, 1.0, 0.25)))
+    glass = trim(sfx(['bfh1_glass_breaking_01.ogg', 'bfh1_glass_breaking_04.ogg'][v]))
+    wood = trim(sfx(['bfh1_wood_breaking_03.ogg', 'bfh1_wood_breaking_01.ogg'][v]))
+    paper = trim(sfx('bookFlip3.ogg'))
+    fire = at_peak(sfx('thrusterFire_003.ogg'), 0.02, 0.7)
+    n = secs(1.2)
+    return fade_end(room(mix(n, (glass, 0.8, 0), (wood, 0.8, 0), (paper, 0.4, 0.02), (butter_lp(fire, 3000), 0.4, 0),
+                             (thump(0.35, 140, 60, 0.1, 1.8), 0.4, 0)), 0.9, 0.18), 0.12)
 
 
 def s_lamp_hit(v):
-    r = rng(3500 + v)
-    n = secs(0.8)
-    clonk = metal(r, 0.8, 330 + 20 * v, [1, 2.1, 2.9, 4.4], [0.25, 0.18, 0.1, 0.06], [1, 0.8, 0.5, 0.3], beat=6.0)
-    ping = metal(r, 0.6, 1480 + 60 * v, [1, 1.06], [0.18, 0.12], [1, 0.8], beat=11.0)
-    y = mix(n, (click(r, 0.004, 1000, 8000), 0.7, 0), (clonk, 0.5, 0), (ping, 0.14, 0), (thump(r, 0.2, 160, 90, 0.05), 0.45, 0),
-            (debris(r, 0.3, 10, 2000, 6000, (0.002, 0.006), 0.05, 0.4), 0.2, 0.01))
-    return _n(fade_end(room(y, 0.7, 0.2)))
+    bell = trim(sfx(['impactBell_heavy_004.ogg', 'impactBell_heavy_003.ogg'][v]))
+    clank = trim(sfx(f'impactMetal_medium_00{v}.ogg'))
+    return fade_end(room(mix(secs(0.8), (bell, 1.0, 0), (clank, 0.4, 0)), 0.6, 0.15), 0.1)
 
 
 def s_lamp_break(v):
-    r = rng(3600 + v)
+    bell = trim(sfx('impactBell_heavy_000.ogg'))
+    glass = trim(sfx('bfh1_glass_breaking_06.ogg'))
+    tub = pitch(inst_note(lib.tubular(), 62, 0.4, 0.8, ring=2.5), -1.0)
+    rock = trim(sfx('bfh1_rock_falling_01.ogg'))
     n = secs(2.2)
-    crack = metal(r, 1.5, 290, [1, 2.1, 2.9, 4.4, 6.1], [0.6, 0.4, 0.25, 0.15, 0.1], [1, 0.8, 0.6, 0.4, 0.3], beat=9.0)
-    shatter = debris(r, 1.2, 60, 1500, 8000, (0.004, 0.03), 0.25, 0.75)
-    drone_f = np.linspace(98, 92, secs(1.8))
-    drone = butter_lp(saw(drone_f) + saw(drone_f * 1.059) + saw(drone_f * 1.5), 900) * np.sin(np.linspace(0, math.pi, secs(1.8))) ** 1.2
-    y = mix(n, (click(r, 0.006, 1000, 12000), 1.0, 0), (thump(r, 0.7, 110, 45, 0.2, 2.0), 0.9, 0), (crack, 0.3, 0),
-            (shatter, 0.4, 0.01), (drone, 0.18, 0.05))
-    return _n(fade_end(room(y, 1.4, 0.3), 0.2))
+    return fade_end(room(mix(n, (bell, 1.0, 0), (glass, 0.7, 0.01), (tub, 0.4, 0), (butter_hp(rock, 400), 0.35, 0.1),
+                             (thump(0.7, 110, 45, 0.2, 2.0), 0.4, 0)), 1.3, 0.22), 0.2)
 
 
 def s_lamp_secured(v):
-    r = rng(3700 + v)
+    tub = chord_of(lib.tubular(), [69, 73, 76], 0.5, 0.7, strum=0.07, ring=2.2)
+    g = _glock([81, 85, 88, 93], 0.07, 0.6, 1.4)
+    ch = chord_of(lib.choir('aah'), [57, 64, 69, 73], 1.1, 0.6)
     n = secs(2.2)
-    y = np.zeros(n)
-    for k, m in enumerate([81, 85, 88, 93, 97]):
-        b = bell(m, 1.8, r, 0.7, 0.8, ratio=2.0, index=1.1)
-        a = secs(0.07 * k)
-        y[a:a + len(b)] += b[: n - a] * 0.6
-    pad = supersaw_chord([57, 64, 69, 73, 76], 1.1, seed=3, voices=5, attack=0.2, release=0.6, cutoff=2400).mean(axis=1)
-    y = mix(n, (y, 0.8, 0), (pad, 0.55, 0), (thump(r, 0.6, 90, 55, 0.2, 1.2), 0.35, 0))
-    return _n(fade_end(room(y, 1.6, 0.35, damp=8000), 0.2))
+    return fade_end(room(mix(n, (tub, 0.8, 0), (g, 0.5, 0.05), (ch, 0.35, 0.05)), 1.6, 0.25, damp=8000), 0.25)
 
 
 def s_ui_click(v):
-    r = rng(3800 + v)
-    n = secs(0.09)
-    wood = modal(n, [1850, 2930, 4400], [0.012, 0.008, 0.005], [1, 0.6, 0.3], r)
-    y = mix(n, (click(r, 0.002, 2000, 9000), 0.4, 0), (wood, 1.0, 0))
-    return _n(fade_end(y, 0.02))
+    return fade_end(trim(sfx(['select_002.ogg', 'click_001.ogg'][v])), 0.01)
 
 
 def s_hurt(v):
-    r = rng(3900 + v)
-    n = secs(0.45)
-    body = butter_lp(thump(r, 0.3, 120 - 10 * v, 55, 0.08, 2.0), 1500)
-    cloth = noise_burst(r, 0.12, 400, 2500, 0.03)
-    zap = debris(r, 0.3, 12, 1800, 5000, (0.002, 0.006), 0.06, 0.2)
-    punch = thump(r, 0.15, 280 - 20 * v, 140, 0.04, 2.0)
-    crunch = saturate(noise_burst(r, 0.12, 350, 2200, 0.035) * 2.5, 1.0)
-    y = mix(n, (click(r, 0.004, 600, 5000), 0.6, 0), (body, 0.4, 0), (punch, 0.9, 0), (cloth, 0.75, 0.002), (crunch, 0.7, 0.003), (zap, 0.3, 0.01))
-    return _n(fade_end(room(y, 0.4, 0.12)))
+    punch = trim(sfx(f'impactPunch_medium_00{v + 3}.ogg'))
+    cloth = trim(sfx(['cloth2.ogg', 'cloth4.ogg'][v]))
+    slap = trim(sfx(f'impactGeneric_light_00{v}.ogg'))
+    return fade_end(room(mix(secs(0.45), (punch, 0.9, 0), (butter_hp(slap, 400), 0.6, 0), (butter_hp(cloth, 300), 0.6, 0),
+                             (thump(0.25, 160, 70, 0.07, 1.8), 0.3, 0)), 0.4, 0.1), 0.06)
 
 
 def s_dodge(v):
-    r = rng(4000 + v)
-    n = secs(0.35)
-    w = whoosh(r, 0.3, 350, 1800, 700, q=0.8, peak=0.25, air=0.3)
-    y = mix(n, (noise_burst(r, 0.07, 800, 5000, 0.015), 0.4, 0), (w, 0.8, 0.0))
-    return _n(fade_end(y))
+    wh = at_peak(pitch(sfx(['cloth3.ogg', 'cloth1.ogg'][v]), 2), 0.05, 0.32)
+    scuff = fit(trim(sfx(f'footstep0{v + 4}.ogg')), 0.12, 0.04)
+    return fade_end(mix(secs(0.35), (scuff, 0.5, 0), (wh, 1.0, 0), (air(0.25, 1500, 6000, v + 40), 0.12, 0)), 0.05)
 
 
 def s_sidestep(v):
-    r = rng(4050 + v)
-    return whoosh(r, 0.22, 450, 2000, 800, q=0.8, peak=0.3, air=0.25)
+    return fade_end(at_peak(pitch(sfx('cloth4.ogg'), 3), 0.04, 0.24), 0.05)
 
 
 def s_boss_slam(v):
-    r = rng(4100 + v)
+    a = trim(sfx('impactMining_003.ogg'))
+    b = trim(sfx('bfh1_rock_breaking_02.ogg'))
+    c = trim(sfx('lowFrequency_explosion_001.ogg'))
+    drum = fit(perc('bass_drum2', 1.0), 1.8, 0.4)
     n = secs(1.9)
-    body = thump(r, 1.6, 90, 30, 0.5, 3.0)
-    rocks = debris(r, 1.5, 70, 150, 2200, (0.006, 0.05), 0.35, 0.3)
-    crack = saturate(noise_burst(r, 0.35, 200, 6000, 0.06) * 3, 1.0)
-    rumble = butter_lp(r.standard_normal(secs(1.8)), 140) * np.exp(-tl(secs(1.8)) / 0.5)
-    y = mix(n, (click(r, 0.008, 500, 9000), 1.0, 0), (body, 0.8, 0), (crack, 0.85, 0.002), (rocks, 0.55, 0.03), (_n(rumble), 0.45, 0.01))
-    return _n(fade_end(room(y, 1.4, 0.25, damp=3500, size=1.1), 0.2))
+    e = trim(sfx('bfh1_rock_breaking_01.ogg'))
+    return fade_end(room(mix(n, (a, 0.8, 0), (c, 0.6, 0), (drum, 0.7, 0), (butter_hp(b, 500), 0.85, 0.02), (butter_hp(e, 400), 0.6, 0.04),
+                             (thump(1.2, 90, 30, 0.45, 2.8), 0.35, 0)), 1.4, 0.22, damp=3500, size=1.1), 0.2)
 
 
 def s_boss_sweep(v):
-    r = rng(4200 + v)
-    n = secs(0.8)
-    w = whoosh(r, 0.7, 160, 1100, 350, q=0.8, peak=0.22, air=0.25)
-    sub = thump(r, 0.7, 70, 40, 0.3, 1.5) * np.sin(np.linspace(0, math.pi, secs(0.7)))
-    edge = whoosh(r, 0.6, 1200, 4200, 1500, q=2.2, peak=0.22, air=0.1)
-    y = mix(n, (w, 1.0, 0), (sub, 0.5, 0), (edge, 0.25, 0.04))
-    return _n(fade_end(room(y, 0.8, 0.2)))
+    wh = at_peak(pitch(butter_hp(sfx('sword.9.ogg'), 150), -8), 0.06, 0.7)
+    cl = at_peak(pitch(sfx('cloth1.ogg'), -6), 0.06, 0.7)
+    return fade_end(room(mix(secs(0.8), (wh, 1.0, 0), (butter_lp(cl, 2000), 0.6, 0), (thump(0.6, 70, 40, 0.25, 1.4), 0.3, 0.05)),
+                         0.8, 0.18), 0.08)
 
 
 def s_boss_jump(v):
-    r = rng(4250 + v)
-    n = secs(0.8)
-    up = whoosh(r, 0.7, 150, 1400, 900, q=0.8, peak=0.6, air=0.2)
-    y = mix(n, (thump(r, 0.3, 90, 50, 0.1, 2.0), 0.8, 0), (up, 0.8, 0.02))
-    return _n(fade_end(room(y, 0.8, 0.2)))
+    wh = at_peak(pitch(sfx('cloth2.ogg'), -4), 0.05, 0.7)
+    hit = trim(sfx('impactPunch_heavy_004.ogg'))
+    return fade_end(room(mix(secs(0.8), (hit, 0.6, 0), (wh, 1.0, 0.02)), 0.8, 0.18), 0.08)
 
 
 def s_boss_intro(v):
-    r = rng(4300 + v)
+    d1 = fit(perc('bass_drum2', 1.0), 2.5, 0.5)
+    d2 = fit(perc('bass_drum2', 0.95), 2.5, 0.5)
+    gong = fit(perc('gong', 1.0), 3.0, 0.8)
+    ch = chord_of(lib.choir('ooh'), [36, 48, 55, 61], 2.2, 0.9)
+    br = chord_of(lib.trombones(), [36, 43, 49], 2.0, 0.85) + 0
+    tuba = inst_note(lib.tuba(), 24 + 12, 2.0, 0.9)
     n = secs(3.2)
-    t1 = taiko(4300, pitch=0.7, length=2.4)
-    t2 = taiko(4301, pitch=0.75, length=2.4)
-    drone_f = np.full(secs(3.0), 65.4)
-    drone = butter_lp(saw(drone_f) + saw(drone_f * 1.059) + 0.7 * saw(drone_f * 1.498) + 0.5 * saw(drone_f * 2.12), 700)
-    drone *= np.clip(tl(len(drone)) / 1.2, 0, 1) ** 2 * np.clip((3.0 - tl(len(drone))) / 0.8, 0, 1)
-    ch = _choir_stab([36, 48, 55, 61], 2.0, 'o', seed=21)
-    cluster = brass_stab([48, 49, 55, 60], 1.6, seed=7, vel=0.8).mean(axis=1)
-    y = mix(n, (t1, 1.0, 0), (t2, 0.9, 0.43), (drone, 0.35, 0), (ch, 0.6, 0.1), (cluster, 0.5, 0.43), (thump(r, 1.5, 70, 32, 0.5, 2.0), 0.35, 0))
-    return _n(fade_end(room(y, 2.2, 0.3, damp=4000, size=1.2), 0.3))
+    return fade_end(room(mix(n, (d1, 1.0, 0), (d2, 0.9, 0.43), (gong, 0.45, 0), (ch, 0.45, 0.1), (br, 0.5, 0.43), (tuba, 0.4, 0.43)),
+                         2.0, 0.22, damp=4000, size=1.2), 0.3)
 
 
 def s_telegraph(v):
-    r = rng(4400 + v)
-    n = secs(0.35)
-    glint = metal(r, 0.35, 3100 + 200 * v, [1, 1.47, 2.09], [0.09, 0.06, 0.04], [1, 0.5, 0.3])
-    sw = whoosh(r, 0.2, 3000, 7000, 5000, q=2.5, peak=0.6, air=0.2)
-    y = mix(n, (sw, 0.4, 0), (glint, 0.5, 0.08))
-    return _n(fade_end(y))
+    tri = fit(perc('triangle', 0.5), 0.35, 0.15)
+    click = fit(trim(sfx(['metalClick.ogg', 'metalLatch.ogg'][v])), 0.12, 0.04)
+    return fade_end(mix(secs(0.35), (butter_hp(tri, 2000), 0.6, 0.0), (butter_hp(click, 1500), 0.5, 0)), 0.06)
 
 
 def s_summon(v):
-    r = rng(4500 + v)
+    x = perc('cymbal_swell', 0.7)
+    k = int(np.argmax(env_of(x, 0.05)))
+    swell = fade_end(x[max(0, k - secs(1.0)):k + secs(0.05)], 0.05)
+    ch = chord_of(lib.choir('ooh'), [36, 43, 49, 55], 1.1, 0.8)
+    ff = at_peak(pitch(sfx('forceField_001.ogg'), -3), 0.3, 0.9)
     n = secs(1.5)
-    rev = whoosh(r, 1.0, 200, 2000, 2200, q=0.9, peak=0.9, air=0.15)
-    ch = _choir_stab([36, 43, 49, 55], 1.0, 'o', seed=31)
-    y = mix(n, (rev, 0.6, 0), (ch, 0.35, 0.1), (thump(r, 0.6, 80, 45, 0.2, 1.5), 0.6, 0.95))
-    return _n(fade_end(room(y, 1.2, 0.3), 0.15))
+    return fade_end(room(mix(n, (swell, 0.5, 0), (ch, 0.5, 0.1), (butter_hp(ff, 200), 0.4, 0.2)), 1.2, 0.25), 0.15)
 
 
 def s_break_wood(v):
-    r = rng(4600 + v)
-    n = secs(0.8)
-    cracks = np.zeros(n)
-    for k in range(6):
-        a = secs(r.uniform(0, 0.08) + 0.012 * k)
-        m = modal(secs(0.12), [r.uniform(250, 420), r.uniform(600, 900), r.uniform(1200, 1800), r.uniform(2400, 3200)],
-                  [0.03, 0.02, 0.012, 0.008], [1, 0.7, 0.5, 0.3], r)
-        cracks[a:a + len(m)] += m[: n - a] * r.uniform(0.4, 1.0)
-    splinters = debris(r, 0.5, 30, 1500, 6000, (0.002, 0.008), 0.08, 0.1)
-    y = mix(n, (click(r, 0.005, 1000, 8000), 0.8, 0), (thump(r, 0.25, 140, 70, 0.06, 1.5), 0.8, 0), (cracks, 0.5, 0), (splinters, 0.35, 0.005))
-    return _n(fade_end(room(y, 0.6, 0.18)))
+    a = trim(sfx(['bfh1_wood_breaking_01.ogg', 'bfh1_wood_breaking_03.ogg'][v]))
+    b = trim(sfx(f'impactWood_heavy_00{v}.ogg'))
+    c = trim(sfx(f'impactPlank_medium_00{v + 2}.ogg'))
+    return fade_end(room(mix(secs(0.8), (a, 1.0, 0), (b, 0.8, 0), (c, 0.4, 0.01)), 0.6, 0.15), 0.08)
 
 
 def s_break_jar(v):
-    r = rng(4700 + v)
-    n = secs(0.9)
-    shards = debris(r, 0.8, 50, 1800, 7000, (0.004, 0.03), 0.12, 0.85)
-    y = mix(n, (click(r, 0.004, 1500, 12000), 0.9, 0), (thump(r, 0.2, 180, 90, 0.04), 0.6, 0), (shards, 0.6, 0.004),
-            (noise_burst(r, 0.2, 2000, 9000, 0.05), 0.25, 0))
-    return _n(fade_end(room(y, 0.6, 0.18)))
+    a = trim(sfx(['bfh1_breaking_02.ogg', 'bfh1_breaking_03.ogg'][v]))
+    b = trim(sfx(f'impactGlass_heavy_00{v}.ogg'))
+    return fade_end(room(mix(secs(0.9), (a, 1.0, 0), (b, 0.6, 0)), 0.6, 0.15), 0.08)
 
 
 def s_drop(v):
-    r = rng(4800 + v)
-    n = secs(0.35)
-    b = glass(r, 0.3, 2637 + 200 * v, 0.12)
-    y = mix(n, (b, 0.5, 0), (click(r, 0.003, 2000, 8000), 0.3, 0))
-    return _n(fade_end(y))
+    a = trim(sfx(['glass_002.ogg', 'glass_003.ogg'][v]))
+    return fade_end(mix(secs(0.3), (a, 1.0, 0)), 0.05)
 
 
 def s_heal(v):
-    r = rng(4900 + v)
-    n = secs(1.2)
-    rise = whoosh(r, 0.9, 900, 5000, 5500, q=1.5, peak=0.75, air=0.1, shimmer=0.3)
-    y = np.zeros(n)
-    for k, m in enumerate([81, 88, 93]):
-        b = bell(m, 0.8, r, 0.5, 0.4, ratio=2.0, index=0.8)
-        a = secs(0.25 + 0.08 * k)
-        y[a:a + len(b)] += b[: n - a] * 0.5
-    return _n(fade_end(room(mix(n, (rise, 0.5, 0), (y, 0.6, 0)), 1.0, 0.3, damp=8000)))
+    g = _glock([81, 88, 93, 100], 0.09, 0.55, 1.0)
+    bt = fit(perc('bell_tree', 0.5), 1.0, 0.3)
+    return fade_end(room(mix(secs(1.2), (g, 0.8, 0.05), (butter_hp(bt, 2500), 0.4, 0)), 1.0, 0.3, damp=8000), 0.15)
 
 
-# id -> (design fn, variants, target loudness LUFS-M-max, peak dBFS)
+# id -> (design fn, variants, target momentary-max loudness LUFS, peak dBFS)
 DESIGNS = {
     'swing_light': (s_swing_light, 3, -17, -3),
     'swing_heavy': (s_swing_heavy, 2, -15, -2),
@@ -759,6 +593,7 @@ def momentary_max(x):
 
 
 def render_all(only=None):
+    lib.reset_round_robins()
     out = {}
     for sid, (fn, nv, target, peak) in DESIGNS.items():
         if only and sid not in only:
@@ -767,13 +602,11 @@ def render_all(only=None):
         for v in range(nv):
             x = np.asarray(fn(v), dtype=float)
             x = butter_hp(x, 35)
-            # trim leading silence (keep the transient on sample 0) and trailing silence
             thr = np.max(np.abs(x)) * db(-60)
             nz = np.where(np.abs(x) > thr)[0]
             x = x[max(0, nz[0] - 16): nz[-1] + 1]
             x = fade_end(x, 0.02)
-            g = db(target - momentary_max(x))
-            x = x * g
+            x = x * db(target - momentary_max(x))
             # sample-peak cap leaves ≥ 2 dB for MP3 overshoot (the decoded sprite must stay below 0 dBTP)
             pk = np.max(np.abs(x))
             cap = db(min(peak, -2.0))
@@ -787,11 +620,11 @@ def render_all(only=None):
 def build_sprite():
     sounds = render_all()
     mk = secs(MARKER_LEN)
-    marker = np.sin(TAU * 2000 * tl(mk)) * np.hanning(mk) * 0.9
+    marker = np.sin(TAU * 2000 * np.arange(mk) / SR) * np.hanning(mk) * 0.9
     at = secs(MARKER_AT)
     gap = secs(GAP)
     parts = [np.zeros(at), marker, np.zeros(gap)]
-    pos = at + mk + gap          # in samples, exact
+    pos = at + mk + gap
     table = {}
     for sid, vs in sounds.items():
         table[sid] = []

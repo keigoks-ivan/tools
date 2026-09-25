@@ -416,7 +416,7 @@ export function createAudio({ baseUrl = '../assets/audio/march/', storage = glob
     if (!spritePromise) {
       spritePromise = loadManifest().then(m => {
         if (!m?.sfx || !ctx) return null;
-        return fetchImpl(base + m.sfx.file).then(r => { if (!r.ok) throw new Error('sfx ' + r.status); return r.arrayBuffer(); })
+        return fetchImpl(base + m.sfx.file + (m.sfx.hash ? `?v=${m.sfx.hash}` : '')).then(r => { if (!r.ok) throw new Error('sfx ' + r.status); return r.arrayBuffer(); })
           .then(decode)
           .then(buffer => {
             sprite = buffer;
@@ -434,7 +434,7 @@ export function createAudio({ baseUrl = '../assets/audio/march/', storage = glob
     const p = loadManifest().then(m => {
       const entry = m?.music?.[name];
       if (!entry || !ctx) return null;
-      return fetchImpl(base + entry.file).then(r => { if (!r.ok) throw new Error(name + ' ' + r.status); return r.arrayBuffer(); })
+      return fetchImpl(base + entry.file + (entry.hash ? `?v=${entry.hash}` : '')).then(r => { if (!r.ok) throw new Error(name + ' ' + r.status); return r.arrayBuffer(); })
         .then(decode)
         .then(buffer => {
           if (entry.loop) {

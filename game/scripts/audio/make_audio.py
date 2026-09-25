@@ -1,18 +1,22 @@
-"""Regenerate every march music cue and the SFX sprite from code.
+"""Regenerate every march music cue and the SFX sprite.
 
   python3 -m venv /tmp/audvenv && /tmp/audvenv/bin/pip install numpy scipy numba matplotlib
-  /tmp/audvenv/bin/python game/scripts/audio/make_audio.py            # everything
-  /tmp/audvenv/bin/python game/scripts/audio/make_audio.py music market
-  /tmp/audvenv/bin/python game/scripts/audio/make_audio.py sfx
+  /tmp/audvenv/bin/python game/scripts/audio/make_audio.py --samples ~/march-samples            # everything
+  /tmp/audvenv/bin/python game/scripts/audio/make_audio.py --samples ~/march-samples music market
+  /tmp/audvenv/bin/python game/scripts/audio/make_audio.py --samples ~/march-samples sfx
   ... --wav-dir DIR   also keep the mastered 16-bit WAVs (for analyze.py)
 
-Needs `lame` on PATH (Homebrew: brew install lame). Output goes to game/assets/audio/march/
-(<cue>.mp3, sfx.mp3, manifest.json). Nothing here downloads or samples anything: every sound
-is synthesised by dsp.py / instruments.py / sfx.py.
+The recorded sample packs (VSCO 2 CE, VCSL, MuseScore General SF3, Kenney / OpenGameArt CC0 SFX) are NOT in
+the repo; download them separately into the layout described in samplelib.py and pass --samples (or set
+MARCH_SAMPLES). Needs `lame` (brew install lame) and libsndfile (brew install libsndfile). Output goes to
+game/assets/audio/march/ (<cue>.mp3, sfx.mp3, manifest.json); credits in game/assets/audio/march/CREDITS.md.
+The compositions (score.py / music.py) and all processing are original; the kick and sub-bass layers are
+synthesised (instruments.py).
 
 (Not to be confused with the repo-root build.py, which must never be run.)
 """
 import argparse
+import hashlib
 import json
 import os
 import subprocess
@@ -40,6 +44,11 @@ def to_i16(x, seed=0):
     r = np.random.default_rng(seed)
     tpdf = (r.random(x.shape) - r.random(x.shape)) / 32768.0
     return np.clip(np.round((x + tpdf) * 32767), -32768, 32767).astype(np.int16)
+
+
+def file_hash(path):
+    with open(path, 'rb') as f:
+        return hashlib.sha1(f.read()).hexdigest()[:10]
 
 
 def encode(wav_i16, mp3_path, args):
@@ -71,9 +80,9 @@ def build_music(names, wav_dir=None):
         t0 = time.time()
         song, cfg = music.CUES[name]()
         stats = {}
-        mix = song.mixdown(reverb_cfg=cfg['reverb_cfg'], stats=stats)
+        mix = song.mixdown(reverb_cfg=cfg.get('reverb_cfg'), ir=cfg.get('ir'), stats=stats)
         target = -16.0 if song.loop else -15.0
-        y = master_chain(song, mix, target_lufs=target, ceiling_db=-1.5)
+        y = master_chain(song, mix, target_lufs=target, ceiling_db=-2.0)   # MP3 overshoot stays under -1 dBTP
         rep = report(name, y)
         if song.loop:
             pre = int(PREROLL * SR)
@@ -94,7 +103,7 @@ def build_music(names, wav_dir=None):
         if wav_dir:
             os.makedirs(wav_dir, exist_ok=True)
             wavfile.write(os.path.join(wav_dir, f'{name}.wav'), SR, i16)
-        entry.update(lufs=rep['lufs'], truePeak=rep['true_peak'], bytes=size)
+        entry.update(lufs=rep['lufs'], truePeak=rep['true_peak'], bytes=size, hash=file_hash(os.path.join(OUT, f'{name}.mp3')))
         man['music'][name] = entry
         print(json.dumps({**rep, 'bytes': size, 'secs_build': round(time.time() - t0, 1),
                           'buses': {k: round(v, 1) for k, v in stats.items()}}), flush=True)
@@ -110,7 +119,7 @@ def build_sfx(wav_dir=None):
     if wav_dir:
         os.makedirs(wav_dir, exist_ok=True)
         wavfile.write(os.path.join(wav_dir, 'sfx.wav'), SR, i16)
-    man['sfx'] = dict(file='sfx.mp3', bytes=size, marker=round(info['marker'], 6), markerLen=round(info['markerLen'], 6),
+    man['sfx'] = dict(file='sfx.mp3', bytes=size, hash=file_hash(os.path.join(OUT, 'sfx.mp3')), marker=round(info['marker'], 6), markerLen=round(info['markerLen'], 6),
                      markerHz=info['markerHz'], sounds=table)
     save_manifest(man)
     print(json.dumps(dict(sfx_bytes=size, seconds=round(len(audio) / SR, 2), sounds=len(table),
@@ -122,7 +131,10 @@ def main():
     ap.add_argument('what', nargs='?', default='all', choices=['all', 'music', 'sfx'])
     ap.add_argument('names', nargs='*')
     ap.add_argument('--wav-dir')
+    ap.add_argument('--samples', help='folder with the downloaded sample packs (else $MARCH_SAMPLES)')
     a = ap.parse_args()
+    if a.samples:
+        os.environ['MARCH_SAMPLES'] = os.path.abspath(os.path.expanduser(a.samples))
     os.makedirs(OUT, exist_ok=True)
     if a.what in ('all', 'music'):
         import music
