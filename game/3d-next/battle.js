@@ -929,6 +929,14 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
   stick.addEventListener('pointerdown', event => { if (!running || paused || isPortrait() || joystick.pointer !== null) return; event.preventDefault(); joystick.pointer = event.pointerId; stick.setPointerCapture(event.pointerId); moveStick(event); });
   stick.addEventListener('pointermove', moveStick);
   for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) stick.addEventListener(type, event => { if (event.pointerId === joystick.pointer) { joystick.pointer = null; joystick.x = joystick.y = 0; knob.style.transform = ''; } });
+  // 保險：iOS 偶爾吃掉搖桿的 pointerup（系統手勢、多指同時放開），手指都離開搖桿時一律歸零，避免角色卡在同一邊一直走
+  const releaseStickIfLifted = event => {
+    if (joystick.pointer === null) return;
+    for (const touch of event.touches || []) if (stick.contains(touch.target)) return;
+    joystick.pointer = null; joystick.x = joystick.y = 0; knob.style.transform = '';
+  };
+  window.addEventListener('touchend', releaseStickIfLifted, { passive: true });
+  window.addEventListener('touchcancel', releaseStickIfLifted, { passive: true });
   for (const button of document.querySelectorAll('[data-action]')) {
     button.addEventListener('pointerdown', event => {
       if (!running || paused || isPortrait()) return;
@@ -954,7 +962,7 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
   window.addEventListener('resize', resize);
   window.addEventListener('orientationchange', resize);
   window.visualViewport?.addEventListener('resize', resize);   // iOS 網址列收合、分割畫面時 window resize 不一定會觸發
-  window.addEventListener('blur', () => { if (running && !coop) pause(true); });   // [coop] 連線中切到別的視窗不暫停（隊友還在動）
+  window.addEventListener('blur', () => { if (!running) return; if (coop) clearInput(); else pause(true); });   // [coop] 連線中切到別的視窗不暫停（隊友還在動），但放掉按鍵與搖桿，免得回來時卡在同一邊
   // 鎖屏、切 App：回來時停在暫停畫面，不直接接著打
   document.addEventListener('visibilitychange', () => { if (document.hidden) { if (running) pause(true); stopFrames(); } else resumeFrames(); });
   canvas.addEventListener('webglcontextlost', event => { event.preventDefault(); stopFrames(); toast('3D 畫面暫停，請重新載入頁面。', 10); });
