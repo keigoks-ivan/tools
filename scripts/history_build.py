@@ -314,6 +314,8 @@ ENTRIES = [
          zh="瓜分、枷鎖與未竟的獨立：帝國主義與非洲的兩百年", en="Imperialism in Africa: From the Scramble to the New Scramble", lat=None, lng=None),
     dict(src="世界史/伊斯蘭世界_啟示商道與烏瑪.html", slug="islamic-world", cat="theme",
          zh="從麥加出發：啟示、商道與烏瑪的一千四百年", en="Out of Mecca: Revelation, Commerce & the Umma — 1,400 Years of Islam", lat=None, lng=None),
+    dict(src=None, slug="islamic-world-map", cat="theme",
+         zh="伊斯蘭世界動畫地圖 · 610 → 今天", en="The Islamic World: Animated Map", lat=None, lng=None),
     dict(src="世界史/基督教文明_十字架與兩把劍.html", slug="christian-world", cat="theme",
          zh="十字架與兩把劍：信仰、權力，與分裂的兩千年", en="The Cross & the Two Swords: Faith, Power & Schism — Two Thousand Years of Christendom", lat=None, lng=None),
     dict(src="世界史/猶太文明_書盟約與離散.html", slug="jewish-world", cat="theme",
