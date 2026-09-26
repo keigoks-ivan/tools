@@ -1,6 +1,6 @@
 // 紫刃夜行・三人連線入口（/game/trio/）。引擎模組全部沿用 game/3d-next/，這裡只負責：
 // 代號 → 大廳（開房／加入）→ 載入戰場 → 開始，並把 net/coop.js 交給 createBattle 讓隊友出現在同一個關卡。
-// 第一階段只同步角色位置與動作，敵人與戰鬥各自獨立（第二階段才同步）。
+// 第二階段：房主的裝置跑敵人（出兵、AI、血量、段落），大家打同一批敵人；隊友的命中申報給房主（net/enemy-sync.js）。
 import { installGameGestures } from '../2d/touch-gestures.js';
 import { CoopClient } from '../3d-next/net/client.js';
 import { createCoop } from '../3d-next/net/coop.js';
@@ -13,7 +13,7 @@ for (const type of ['gesturestart', 'gesturechange', 'gestureend']) {
 }
 
 // 引擎：版本字串與單人頁不同也沒關係（兩頁不會同時開），battle.js 內部的 import 網址相同
-const loadBattleModule = () => import('../3d-next/battle.js?v=trio1');
+const loadBattleModule = () => import('../3d-next/battle.js?v=trio2');
 const params = new URLSearchParams(location.search);
 
 const client = new CoopClient({ relay: relayUrl(location) });

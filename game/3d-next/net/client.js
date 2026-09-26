@@ -100,8 +100,13 @@ export class CoopClient {
     }
     if (msg.t === 'join') { this.members.set(msg.member.id, msg.member); this.host = msg.host; this.emit('join', msg.member, msg.rejoin); return; }
     if (msg.t === 'leave') { this.members.delete(msg.id); this.host = msg.host; this.emit('leave', msg.id); return; }
-    if (msg.t === 'host') { this.host = msg.id; this.emit('host', msg.id); }
+    if (msg.t === 'host') { this.host = msg.id; this.emit('host', msg.id); return; }
+    // 第二階段：房主送的戰場（只收現任房主的）、隊友送給房主的命中申報（relay 只轉給房主）
+    if (msg.t === 'e') { if (msg.p === this.host && msg.p !== this.you && msg.d && typeof msg.d === 'object') this.emit('world', msg.d, this.now(), msg.p); return; }
+    if (msg.t === 'h') { if (this.isHost && msg.p !== this.you && this.members.has(msg.p) && msg.d && typeof msg.d === 'object') this.emit('claim', msg.p, msg.d, this.now()); }
   }
+
+  get isHost() { return !!this.you && this.you === this.host; }
 
   closed(code, reason) {
     this.ws = null; this.ready = false;
@@ -127,6 +132,12 @@ export class CoopClient {
   sendState(state) {
     if (!this.ready || this.ws?.readyState !== 1) return false;
     try { this.ws.send(encodeState(state, this.now())); return true; } catch { return false; }
+  }
+
+  /** 第二階段的其他訊息（e＝戰場、h＝命中申報、y＝交出房主）；未連上時略過 */
+  send(t, d) {
+    if (!this.ready || this.ws?.readyState !== 1) return false;
+    try { this.ws.send(JSON.stringify({ t, d })); return true; } catch { return false; }
   }
 
   close() {

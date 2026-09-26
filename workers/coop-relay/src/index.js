@@ -13,7 +13,7 @@
  */
 import { DurableObject } from 'cloudflare:workers';
 import {
-  CLOSE, MAX_MESSAGE_BYTES, Membership, RateLimiter, cleanState, makeRoomCode, normalizeRoomCode,
+  CLOSE, MAX_MESSAGE_BYTES, MAX_WORLD_BYTES, Membership, RateLimiter, cleanClaim, cleanPayload, cleanState, makeRoomCode, normalizeRoomCode,
   originAllowed, parsePlayerCodes, throttleState,
 } from './logic.js';
 import { matchCode, signToken, verifyToken } from './token.js';
@@ -160,7 +160,9 @@ export class CoopRoom extends DurableObject {
   }
 
   async webSocketMessage(ws, message) {
-    if (typeof message !== 'string' || message.length > MAX_MESSAGE_BYTES) return;
+    // 只有戰場訊息（房主的 e）可以到 4096，其他一律 512；前綴檢查在 JSON.parse 之前，超長的不解析
+    if (typeof message !== 'string' || message.length > MAX_WORLD_BYTES) return;
+    if (message.length > MAX_MESSAGE_BYTES && !message.startsWith('{"t":"e"')) return;
     let limiter = this.limiters.get(ws);
     if (!limiter) this.limiters.set(ws, limiter = new RateLimiter());
     if (!limiter.allow(Date.now())) {
@@ -174,6 +176,29 @@ export class CoopRoom extends DurableObject {
     if (msg?.t === 's') {
       const d = cleanState(msg.d);
       if (d) this.broadcast({ t: 's', p: info.id, d }, ws);
+      return;
+    }
+    // 第二階段：房主權威的敵人同步。relay 只看「誰是房主」決定轉給誰，不解讀遊戲內容
+    const members = this.membership();
+    const isHost = members.host === info.id;
+    if (msg?.t === 'e') {
+      if (!isHost) return;   // 只有房主能發戰場
+      const d = cleanPayload(msg.d);
+      if (d && typeof d === 'object' && !Array.isArray(d)) this.broadcast({ t: 'e', p: info.id, d }, ws);
+    } else if (msg?.t === 'h') {
+      if (isHost) return;    // 命中申報只給房主
+      const d = cleanClaim(msg.d);
+      const host = d && this.live().find(s => s.deserializeAttachment().id === members.host);
+      if (host) this.send(host, { t: 'h', p: info.id, d });
+    } else if (msg?.t === 'y') {
+      if (!isHost || typeof msg.d?.to !== 'string') return;
+      const outcome = members.handOff(info.id, msg.d.to, Date.now());
+      if (!outcome.ok) return;
+      for (const s of this.live()) {
+        const a = s.deserializeAttachment();
+        if (outcome.joinedAt[a.id] !== undefined) s.serializeAttachment({ ...a, joinedAt: outcome.joinedAt[a.id] });
+      }
+      this.broadcast({ t: 'host', id: outcome.host });
     }
   }
 

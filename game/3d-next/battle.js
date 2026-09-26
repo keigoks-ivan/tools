@@ -295,6 +295,7 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
   // 紫刃（?hero=vroid）：跳躍與無雙亂舞；Rumi 預設單場維持原本的 Arena
   const arena = march ? march.arena : new Arena({ seed: 17, warriorMode: true, musou: heroChoice === 'vroid', ...(heroChoice === 'vroid' ? { jump: true, musouFlurry: true } : {}) });
   if (debug) window.__arena = arena;   // ?debug：無頭測試可讀英雄狀態（單場與行軍關）
+  coopView?.bindLevel({ march, arena, level: marchModules?.[0] || null });   // [coop] 第二階段：房主跑敵人、隊友打房主的敵人（net/enemy-sync.js）
   if (arena.jumpEnabled) for (const element of document.querySelectorAll('[data-action="jump"], [data-jump-help]')) element.hidden = false;
   const keys = new Set();
   const edges = {};

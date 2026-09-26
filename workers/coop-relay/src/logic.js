@@ -3,7 +3,8 @@
  *
  * - 房號：4 碼，字母表去掉易混淆的 0/O/1/I
  * - 成員與房主：房主＝最早加入的人；房主離開時由剩下最早加入者接手
- * - 每條連線的訊息速率限制（每秒最多 20 則，超過的直接丟掉）
+ * - 每條連線的訊息速率限制（每秒最多 40 則，超過的直接丟掉）
+ * - 第二階段：房主的戰場訊息（e）、隊友的命中申報（h）用通用淨化器 cleanPayload；房主可主動交棒（handOff）
  * - 代號設定（PLAYER_CODES）解析：最多 3 組
  * - Origin 白名單比對
  */
@@ -13,7 +14,17 @@ export const ROOM_CODE_LENGTH = 4;
 export const MAX_PLAYERS = 3;
 export const MAX_CODES = 3;
 export const MAX_MESSAGE_BYTES = 512;
-export const RATE_LIMIT_PER_SEC = 20;
+/**
+ * 房主的戰場訊息（t:'e'）上限。為什麼放寬：Workers 免費額度按「則數」計，不按位元組；
+ * 18 隻敵人的關鍵幀約 800 字、加上一段時間的事件（擊倒、紅圈、提示）常超過 512，
+ * 硬切成多則反而多花額度。其他類型（角色狀態、命中申報、交棒）仍是 512。
+ */
+export const MAX_WORLD_BYTES = 4096;
+/**
+ * 每條連線每秒上限。房主：角色狀態 12 ＋ 戰場 10 ＝ 22 則／秒；隊友：角色狀態 12 ＋ 命中申報最多 10。
+ * 40 留約 1.8 倍餘裕，持續超過兩倍（80）五秒才斷線。
+ */
+export const RATE_LIMIT_PER_SEC = 40;
 export const NAME_MAX = 12;
 
 /** 自訂關閉代碼（4000–4999 是應用程式可用範圍）；中文說明在 game/3d-next/net/protocol.js */
@@ -83,6 +94,18 @@ export class Membership {
     return { removed: true, hostChanged: before !== this.host, host: this.host };
   }
   list() { return this.members.map(m => ({ ...m })); }
+  /**
+   * 房主主動交棒（頁面停住、死亡、過關後由遊戲端要求）：from 排到最後、to 排到最前。
+   * @returns {{ ok: boolean, host: string|null, joinedAt?: Record<string,number> }}
+   */
+  handOff(from, to, now) {
+    if (from === to || this.host !== from || !this.has(to)) return { ok: false, host: this.host };
+    const first = Math.min(...this.members.map(m => m.joinedAt));
+    this.get(from).joinedAt = Math.max(now, ...this.members.map(m => m.joinedAt)) + 1;
+    this.get(to).joinedAt = first - 1;
+    this.members.sort((a, b) => a.joinedAt - b.joinedAt || (a.id < b.id ? -1 : 1));
+    return { ok: true, host: this.host, joinedAt: Object.fromEntries(this.members.map(m => [m.id, m.joinedAt])) };
+  }
 }
 
 /** 固定一秒視窗的計數器：每條連線一個。回傳 false 的訊息丟掉不轉發。 */
@@ -122,6 +145,42 @@ export function cleanState(d) {
   const ts = num(d.ts, 100); if (ts !== null) out.ts = ts;
   if (d.l === 0 || d.l === 1) out.l = d.l;
   return out;
+}
+
+/**
+ * 通用淨化：第二階段的 e／h 訊息內容由遊戲定義、relay 不解讀，只保證轉給別人的是「無害的小 JSON」：
+ * 有限數字、短字串（去控制字元與角括號）、布林、null、有限長度的陣列與物件（鍵名限英數底線），深度有限。
+ * 不合格的欄位直接丟掉（不是整則拒絕），避免單一壞欄位讓整個房間卡住。
+ */
+export const PAYLOAD_LIMITS = { number: 1e13, string: 80, array: 128, keys: 24, depth: 5 };
+export function cleanPayload(value, depth = 0, limits = PAYLOAD_LIMITS) {
+  if (value === null || typeof value === 'boolean') return value;
+  if (typeof value === 'number') return Number.isFinite(value) && Math.abs(value) <= limits.number ? value : undefined;
+  if (typeof value === 'string') return value.replace(/[\u0000-\u001f\u007f<>]/g, '').slice(0, limits.string);
+  if (depth >= limits.depth || typeof value !== 'object') return undefined;
+  if (Array.isArray(value)) return value.slice(0, limits.array).map(v => cleanPayload(v, depth + 1, limits)).map(v => (v === undefined ? null : v));
+  const out = {};
+  let count = 0;
+  for (const [key, v] of Object.entries(value)) {
+    if (count >= limits.keys) break;
+    if (!/^\w{1,16}$/.test(key)) continue;
+    const clean = cleanPayload(v, depth + 1, limits);
+    if (clean === undefined) continue;
+    out[key] = clean;
+    count++;
+  }
+  return out;
+}
+
+/** 命中申報：{ x, y, h: [[敵人 id, 數值, 來源碼, 招式編號], …], p?: 撿到的補給 id }，h 最多 32 筆 */
+export function cleanClaim(d) {
+  const out = cleanPayload(d);
+  if (!out || typeof out !== 'object' || Array.isArray(out)) return null;
+  const h = Array.isArray(out.h) ? out.h.filter(e => Array.isArray(e) && e.length >= 3 && e.length <= 4 && e.every(v => typeof v === 'number')).slice(0, 32) : [];
+  const claim = { h };
+  if (typeof out.x === 'number' && typeof out.y === 'number') { claim.x = out.x; claim.y = out.y; }
+  if (Number.isInteger(out.p)) claim.p = out.p;
+  return h.length || claim.p !== undefined ? claim : null;
 }
 
 /**

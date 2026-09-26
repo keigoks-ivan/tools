@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 /**
  * 端對端冒煙測試：本機啟動 `wrangler dev`（Durable Object 在本機跑，不需帳號、不部署），
- * 用 Node 內建 WebSocket 連三個玩家，驗證代號驗證、節流、開房、加入、轉發、房主轉移、第 4 人被拒、重連取代，最後關掉伺服器。
+ * 用 Node 內建 WebSocket 連三個玩家，驗證代號驗證、節流、開房、加入、轉發、房主轉移、第 4 人被拒、重連取代，
+ * 以及第二階段的戰場訊息（e 只收房主、4096 上限）、命中申報（h 只給房主）、交棒（y），最後關掉伺服器。
  *
  *   cd workers/coop-relay && npm install && node scripts/smoke.mjs
  *
@@ -116,18 +117,62 @@ try {
   await sleep(200);
   check(!a.messages.some(m => m.t === 's'), 'sender does not get its own state back');
 
-  // --- 速率限制：一口氣送 60 則，其他人最多收到 20 則 ---
+  // --- 速率限制：一口氣送 60 則，其他人最多收到 40 則 ---
   b.messages.length = 0;
   for (let i = 0; i < 60; i++) c.ws.send(JSON.stringify({ t: 's', d: { x: i, y: 0, z: 0, r: 0, c: i } }));
   await sleep(700);
   const burst = b.messages.filter(m => m.t === 's' && m.p === '丙').length;
-  check(burst > 0 && burst <= 20, `rate limit: ${burst}/60 burst messages relayed (≤20)`);
+  check(burst > 0 && burst <= 40, `rate limit: ${burst}/60 burst messages relayed (≤40)`);
   const big = JSON.stringify({ t: 's', d: { x: 0, y: 0, z: 0, r: 0, a: 'x'.repeat(600) } });
   await sleep(1100);
   b.messages.length = 0;
   c.ws.send(big);
   await sleep(300);
   check(!b.messages.some(m => m.t === 's'), 'oversized message dropped');
+
+  // --- 第二階段：房主權威的敵人同步 ---
+  await sleep(1100);
+  for (const p of [a, b, c]) p.messages.length = 0;
+  const enemies = Array.from({ length: 18 }, (_, i) => [100 + i, i % 3, 640 + i * 10, 500 - i * 7, -157, 1, 12.5, 13, 1, 0, 0]);
+  const world = { c: 123456, q: '甲:1', f: 1, n: enemies, lv: [0, 0, 0, 0, 3, 3, 9], v: [{ type: 'hint', text: '<b>小心</b>', seconds: 4 }, { type: 'kill', enemyId: 99, x: 1, y: 2, deep: { no: 1 } }], dm: [['乙', 9, 1, 101, 20]] };
+  const worldText = JSON.stringify({ t: 'e', d: world });
+  check(worldText.length > 512 && worldText.length <= 4096, `world message is ${worldText.length} bytes (over the old 512 cap, under 4096)`);
+  a.ws.send(worldText);
+  const gotB = await b.next(m => m.t === 'e');
+  check(gotB?.p === '甲' && gotB.d.n?.length === 18 && gotB.d.dm?.[0]?.[0] === '乙', 'host world message relayed to guests with sender id');
+  check(gotB?.d.v?.[0]?.text === 'b小心/b' && gotB?.d.v?.[1]?.deep?.no === 1, 'world payload sanitized (angle brackets stripped), structure kept');
+  check(!!(await c.next(m => m.t === 'e' && m.p === '甲')), 'world message reaches third player');
+  await sleep(200);
+  check(!a.messages.some(m => m.t === 'e'), 'host does not get its own world back');
+  b.ws.send(JSON.stringify({ t: 'e', d: world }));
+  await sleep(300);
+  check(!a.messages.some(m => m.t === 'e') && !c.messages.some(m => m.t === 'e'), 'world message from a non-host is dropped');
+  a.ws.send(JSON.stringify({ t: 'e', d: { ...world, pad: 'x'.repeat(4200) } }));
+  await sleep(300);
+  check(!b.messages.some(m => m.t === 'e'), 'world message over 4096 dropped');
+  b.ws.send(JSON.stringify({ t: 'h', d: { x: 700, y: 480, h: [[101, 12, 1, 7], ['bad', 1, 0]], p: 3 } }));
+  const claim = await a.next(m => m.t === 'h');
+  check(claim?.p === '乙' && claim.d.h.length === 1 && claim.d.h[0][0] === 101 && claim.d.p === 3, 'hit claim delivered to the host (malformed entries stripped)');
+  await sleep(200);
+  check(!c.messages.some(m => m.t === 'h'), 'hit claim not broadcast to other guests');
+  a.ws.send(JSON.stringify({ t: 'h', d: { h: [[101, 12, 1, 7]] } }));
+  await sleep(200);
+  check(!b.messages.some(m => m.t === 'h') && !c.messages.some(m => m.t === 'h'), 'host claims go nowhere');
+  b.ws.send(JSON.stringify({ t: 'y', d: { to: '丙' } }));
+  await sleep(300);
+  check(!a.messages.some(m => m.t === 'host'), 'a non-host cannot hand off');
+  a.ws.send(JSON.stringify({ t: 'y', d: { to: '丙' } }));
+  const handed = await b.next(m => m.t === 'host');
+  check(handed?.id === '丙', 'host hands off → everyone told the new host (丙)');
+  check(!!(await a.next(m => m.t === 'host' && m.id === '丙')), 'old host told too');
+  c.ws.send(JSON.stringify({ t: 'e', d: { c: 1, q: '丙:1', f: 1 } }));
+  check((await a.next(m => m.t === 'e'))?.p === '丙', 'new host world messages are relayed');
+  a.ws.send(JSON.stringify({ t: 'e', d: { c: 2, q: '甲:1', f: 1 } }));
+  await sleep(300);
+  check(!b.messages.some(m => m.t === 'e' && m.p === '甲'), 'old host world messages are now dropped');
+  c.ws.send(JSON.stringify({ t: 'y', d: { to: '甲' } }));   // 交回去，後面的房主轉移測試照原本順序
+  check((await b.next(m => m.t === 'host'))?.id === '甲', 'hand back to 甲');
+  await sleep(1100);
 
   // --- 同一個人重連（換裝置／網路切換）：取代舊連線，不算第 4 人 ---
   const cAgain = connect(room, tokens['丙']);

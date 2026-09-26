@@ -3,7 +3,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  ROOM_ALPHABET, MAX_PLAYERS, Membership, RateLimiter, cleanState, constantTimeEqual, makeRoomCode, normalizeRoomCode,
+  ROOM_ALPHABET, MAX_PLAYERS, MAX_MESSAGE_BYTES, MAX_WORLD_BYTES, RATE_LIMIT_PER_SEC, Membership, RateLimiter, cleanClaim, cleanPayload, cleanState, constantTimeEqual, makeRoomCode, normalizeRoomCode,
   originAllowed, parsePlayerCodes, sanitizeName, throttleState, AUTH_WINDOW_MS,
 } from '../../workers/coop-relay/src/logic.js';
 import { matchCode, signToken, verifyToken } from '../../workers/coop-relay/src/token.js';
@@ -63,11 +63,18 @@ test('room cap can only be lowered (smoke test uses 2), never raised above 3', (
   assert.equal(small.join('c', 'c', 3).ok, false);
 });
 
-test('rate limiter lets 20 messages per second through and flags sustained abuse', () => {
+test('rate limiter lets 40 messages per second through and flags sustained abuse', () => {
+  assert.equal(RATE_LIMIT_PER_SEC, 40);
   const limiter = new RateLimiter();
   let passed = 0;
   for (let i = 0; i < 60; i++) if (limiter.allow(i)) passed++;   // 60 messages inside one second
-  assert.equal(passed, 20);
+  assert.equal(passed, 40);
+  // phase 2 host: 12 Hz state + 10 Hz world = 22/s never drops
+  const host = new RateLimiter();
+  const sends = [];
+  for (let t = 0; t < 10000; t += 1000 / 12) sends.push(t);
+  for (let t = 5; t < 10000; t += 100) sends.push(t);
+  for (const t of sends.sort((a, b) => a - b)) assert.equal(host.allow(t), true);
   assert.equal(limiter.allow(1000), true, 'new window');
   // a well-behaved 12 Hz client never drops
   const normal = new RateLimiter();
@@ -150,4 +157,51 @@ test('auth throttle blocks the 6th attempt after 5 wrong codes within 10 minutes
   assert.equal(state.retryAfterMs, AUTH_WINDOW_MS - 5000);
   assert.equal(throttleState(five, t0 + AUTH_WINDOW_MS + 1).blocked, false, 'oldest attempt aged out');
   assert.equal(throttleState(undefined, t0).blocked, false);
+});
+
+test('phase 2 payload sanitizer keeps small finite JSON and drops the rest', () => {
+  assert.equal(MAX_MESSAGE_BYTES, 512);
+  assert.equal(MAX_WORLD_BYTES, 4096);
+  const d = cleanPayload({
+    c: 1234, q: 'A:1', f: 1, n: [[1, 0, 640, 500, 0, 0, 30, 30]], v: [{ type: 'hint', text: '<b>哈\u0007</b>'.repeat(20) }],
+    bad: Infinity, 'bad key': 1, nested: { a: { b: { c: { d: { e: 1 } } } } }, fn: () => 1,
+  });
+  assert.deepEqual(d.n, [[1, 0, 640, 500, 0, 0, 30, 30]]);
+  assert.equal(d.v[0].text.includes('<'), false);
+  assert.equal(d.v[0].text.includes('\u0007'), false);
+  assert.ok(d.v[0].text.length <= 80);
+  assert.equal('bad' in d, false);
+  assert.equal('bad key' in d, false);
+  assert.equal('fn' in d, false);
+  assert.deepEqual(d.nested, { a: { b: { c: {} } } }, 'depth capped at 5');
+  assert.equal(cleanPayload(new Array(500).fill(1)).length, 128);
+  assert.equal(Object.keys(cleanPayload(Object.fromEntries(Array.from({ length: 40 }, (_, i) => [`k${i}`, i])))).length, 24);
+  assert.equal(cleanPayload(1e14), undefined);
+});
+
+test('hit claims keep only numeric entries, at most 32, plus position and pickup', () => {
+  const claim = cleanClaim({ x: 700, y: 480, h: [[3, 12, 0, 7], ['x', 1, 0], [4, 5], ...Array.from({ length: 40 }, (_, i) => [i, 1, 0, 1])], p: 9, junk: 'zz' });
+  assert.equal(claim.x, 700);
+  assert.equal(claim.p, 9);
+  assert.deepEqual(claim.h[0], [3, 12, 0, 7]);
+  assert.equal(claim.h.length, 32);
+  assert.equal('junk' in claim, false);
+  assert.equal(cleanClaim({ h: [] }), null, 'empty claims are not forwarded');
+  assert.equal(cleanClaim('nope'), null);
+});
+
+test('host hand-off moves the old host to the back and the heir to the front', () => {
+  const m = new Membership([{ id: 'A', name: 'A', joinedAt: 10 }, { id: 'B', name: 'B', joinedAt: 20 }, { id: 'C', name: 'C', joinedAt: 30 }]);
+  assert.equal(m.handOff('B', 'C', 100).ok, false, 'only the host can hand off');
+  assert.equal(m.handOff('A', 'Z', 100).ok, false, 'heir must be in the room');
+  const out = m.handOff('A', 'C', 100);
+  assert.equal(out.ok, true);
+  assert.equal(out.host, 'C');
+  assert.deepEqual(m.list().map(x => x.id), ['C', 'B', 'A']);
+  // attachments rebuilt from joinedAt give the same order (the Durable Object rebuilds membership from them)
+  const rebuilt = new Membership(Object.entries(out.joinedAt).map(([id, joinedAt]) => ({ id, name: id, joinedAt })));
+  assert.equal(rebuilt.host, 'C');
+  // when C leaves, B (not the old host A) is next
+  rebuilt.leave('C');
+  assert.equal(rebuilt.host, 'B');
 });

@@ -5,6 +5,8 @@
  */
 import { SEND_HZ } from './protocol.js';
 import { createTeammates } from './teammates.js';
+import { createEnemySync } from './enemy-sync.js';
+import { WORLD_HZ } from './world.js';
 
 const IDLE_SEND_MS = 500;   // 站著不動時改成 2 Hz，省免費額度
 
@@ -20,8 +22,11 @@ export function sameState(a, b) {
  * @param {{ client: import('./client.js').CoopClient, now?: () => number }} options
  */
 export function createCoop({ client, now = () => performance.now() }) {
-  let view = null, active = false, timer = 0, lastSent = null, lastSentAt = -Infinity, local = null;
+  let view = null, active = false, timer = 0, worldTimer = 0, lastSent = null, lastSentAt = -Infinity, local = null;
   const slots = new Map();   // 隊友 id → 色調槽（先到先拿，離開後空出）
+  // 第二階段：隊友最新位置（世界座標）與是否還活著，給房主分配仇恨、判斷交棒對象
+  const peers = new Map();
+  const enemies = createEnemySync({ client, now, peers: () => peers });
 
   function slotFor(id) {
     if (!slots.has(id)) {
@@ -45,8 +50,11 @@ export function createCoop({ client, now = () => performance.now() }) {
 
   client.on('welcome', syncMembers);
   client.on('join', member => addPeer(member));
-  client.on('leave', removePeer);
-  client.on('state', (id, snap, at) => view?.push(id, snap, at));
+  client.on('leave', id => { removePeer(id); peers.delete(id); });
+  client.on('state', (id, snap, at) => {
+    view?.push(id, snap, at);
+    peers.set(id, { x: snap.x, z: snap.z, alive: snap.anim !== 'death', at });
+  });
 
   function tick() {
     if (!active || !local) return;
@@ -62,15 +70,22 @@ export function createCoop({ client, now = () => performance.now() }) {
       local = ctx.local;
       view = createTeammates({ THREE: ctx.THREE, scene: ctx.scene, template: ctx.heroModel, clips: ctx.clips, cloneSkinned: ctx.cloneSkinned });
       syncMembers();
-      return { update(dt) { view.update(dt, now()); } };
+      return {
+        update(dt) { view.update(dt, now()); },
+        /** battle.js 在行軍關建好後呼叫：{ march, arena, level }（level＝march.js 模組） */
+        bindLevel(level) { enemies.bind(level); },
+      };
     },
     /** 開戰後才開始送自己的狀態（載入畫面期間不浪費額度） */
     setActive(value) {
       active = value;
       if (active && !timer) timer = setInterval(tick, Math.round(1000 / SEND_HZ));
+      if (active && !worldTimer) worldTimer = setInterval(() => enemies.tick(), Math.round(1000 / WORLD_HZ));
       if (!active && timer) { clearInterval(timer); timer = 0; }
+      if (!active && worldTimer) { clearInterval(worldTimer); worldTimer = 0; }
     },
     dispose() { this.setActive(false); view?.dispose(); view = null; slots.clear(); },
     get teammates() { return view; },
+    get enemies() { return enemies; },
   };
 }
