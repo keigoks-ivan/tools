@@ -5,9 +5,11 @@ import { installGameGestures } from '../2d/touch-gestures.js';
 import { CoopClient } from '../3d-next/net/client.js';
 import { createCoop } from '../3d-next/net/coop.js';
 import { relayUrl } from '../3d-next/net/protocol.js';
+import { setupFullscreenUi } from './fullscreen.js?v=trio3';
 
 const $ = id => document.getElementById(id);
 installGameGestures($('game'));
+setupFullscreenUi();
 for (const type of ['gesturestart', 'gesturechange', 'gestureend']) {
   document.addEventListener(type, event => { if (event.cancelable) event.preventDefault(); }, { passive: false });
 }
