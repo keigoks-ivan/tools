@@ -318,6 +318,8 @@ ENTRIES = [
          zh="伊斯蘭世界動畫地圖 · 610 → 今天", en="The Islamic World: Animated Map", lat=None, lng=None),
     dict(src="世界史/基督教文明_十字架與兩把劍.html", slug="christian-world", cat="theme",
          zh="十字架與兩把劍：信仰、權力，與分裂的兩千年", en="The Cross & the Two Swords: Faith, Power & Schism — Two Thousand Years of Christendom", lat=None, lng=None),
+    dict(src=None, slug="christian-world-map", cat="theme",
+         zh="基督教世界動畫地圖 · 30 → 今天", en="The Christian World: Animated Map", lat=None, lng=None),
     dict(src="世界史/猶太文明_書盟約與離散.html", slug="jewish-world", cat="theme",
          zh="書、盟約與離散：猶太人的四千年", en="The Book, the Covenant & the Diaspora — Four Thousand Years of the Jews", lat=None, lng=None),
     dict(src="世界史/佛教世界_佛僧伽與空.html", slug="buddhist-world", cat="theme",
