@@ -624,6 +624,7 @@ export class World {
     const sc = sun.shadow.camera;
     sc.left = -260; sc.right = 260; sc.top = 260; sc.bottom = -260; sc.near = 10; sc.far = 2400;
     sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.9;
+    sun.shadow.autoUpdate = false;   // 影子圖每兩格重畫一次（followShadow 裡開關），省一半顯示卡工
     scene.add(sun, sun.target);
     this.sun = sun;
     const hemi = new THREE.HemisphereLight(0x7f98c0, 0x3a2e24, 0.12);
@@ -1102,11 +1103,11 @@ export class World {
     b.box.top = b.rh[0]; b.tr[0].top = b.rh[1]; b.tr[1].top = b.rh[2];
     this._mound(b, 1);
     this._pileRocks(b);
-    // 瓦礫堆餘煙：2～3 處，持續四五十秒
-    const nS = b.top > 60 ? 3 : 2;
+    // 瓦礫堆餘煙：1～2 處，十幾秒就散
+    const nS = b.top > 60 ? 2 : 1;
     for (let k = 0; k < nS; k++) {
       const x = b.x0 + b.w * (0.25 + 0.5 * Math.random()), z = b.z0 + b.d * (0.25 + 0.5 * Math.random());
-      this.smk.push({ x, y: b.gy + b.hM * 0.6, z, nx: 0, nz: 0, lv: 3, r: Math.min(1.8, 0.6 + Math.sqrt(b.w * b.d) / 60), acc: 0, accF: 0, t: 0, dur: 40 + Math.random() * 15, b, fire: Math.random() < 0.45 });
+      this.smk.push({ x, y: b.gy + b.hM * 0.6, z, nx: 0, nz: 0, lv: 3, r: Math.min(1.8, 0.6 + Math.sqrt(b.w * b.d) / 60), acc: 0, accF: 0, t: 0, dur: 14 + Math.random() * 6, b, fire: Math.random() < 0.45 });
     }
     this.smkT = 0;
     if (H.fx && H.fx.collapse) H.fx.collapse(b, 2, 1, 0, this.nFall);
@@ -1192,11 +1193,13 @@ export class World {
   }
 
   // 冒煙點：傷口（lv1 煙、lv2 火＋濃煙）、瓦礫堆（lv3）
+  // 傷口只冒一陣子（灰煙 14 秒、起火 22 秒，最後幾秒慢慢變淡），不會整場一直冒
   _smkOn(b, lv) {
     if (!b.wn.length) b.wn.push({ x: b.cx + b.w * 0.5 + 1, y: b.gy + b.top * 0.6, z: b.cz, nx: 1, nz: 0, s: null });
+    const dur = lv >= 2 ? 22 : 14;
     for (const w of b.wn) {
-      if (w.s) { w.s.lv = Math.max(w.s.lv, lv); continue; }
-      w.s = { x: w.x, y: w.y, z: w.z, nx: w.nx, nz: w.nz, lv, r: 1, acc: 0, accF: 0, t: 0, dur: 1e9, b };
+      if (w.s && w.s.t <= w.s.dur) { w.s.lv = Math.max(w.s.lv, lv); w.s.dur = Math.max(w.s.dur, w.s.t + dur); continue; }
+      w.s = { x: w.x, y: w.y, z: w.z, nx: w.nx, nz: w.nz, lv, r: 1, acc: 0, accF: 0, t: 0, dur, b };
       this.smk.push(w.s);
     }
     this.smkT = 0;
@@ -1205,13 +1208,13 @@ export class World {
     const L = this.smk, fx = this.hooks && this.hooks.fx;
     if (!L.length) return;
     for (let k = L.length - 1; k >= 0; k--) { const s = L[k]; s.t += dt; if (s.t > s.dur) L.splice(k, 1); }
-    // 每 0.4 秒挑最近的 8 個來冒煙（遠的省掉）
+    // 每 0.4 秒挑最近的 4 個來冒煙（遠的省掉）
     this.smkT -= dt;
     if (this.smkT <= 0) {
       this.smkT = 0.4;
       const vp = this.viewP || { x: 0, z: 0 };
       for (const s of L) s.dd = (s.x - vp.x) ** 2 + (s.z - vp.z) ** 2;
-      this.smkSel = L.filter((s) => s.dd < 900 * 900).sort((a, b) => a.dd - b.dd).slice(0, 8);
+      this.smkSel = L.filter((s) => s.dd < 900 * 900).sort((a, b) => a.dd - b.dd).slice(0, 4);
     }
     if (fx && fx.bldSmoke) for (const s of this.smkSel) if (s.t <= s.dur) fx.bldSmoke(s, dt);
   }
@@ -1511,6 +1514,9 @@ export class World {
   followShadow(p) {
     this.viewP = p;
     const s = this.sun;
+    // 每兩格重畫一次影子：不動的城市看不出差別，會動的機體影子晚 1/60 秒
+    this._shF = !this._shF;
+    if (this._shF) s.shadow.needsUpdate = true;
     const size = (s.shadow.camera.right - s.shadow.camera.left) / s.shadow.mapSize.x;
     const z = this.lightDir;
     const x = new THREE.Vector3(0, 1, 0).cross(z).normalize();

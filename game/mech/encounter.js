@@ -278,7 +278,7 @@ function markers(scene) {
     void main() {
       float y = vUv.y, f = 1.0 - abs(dot(normalize(vN), normalize(vV)));
       float band = 0.55 + 0.45 * smoothstep(0.7, 1.0, sin(y * 90.0 - t * 5.0));
-      float fade = pow(1.0 - y, 1.5) * smoothstep(0.0, 0.015, y);
+      float fade = pow(max(1.0 - y, 0.0), 1.5) * smoothstep(0.0, 0.015, y);
       gl_FragColor = vec4(vec3(0.3, 1.6, 2.1) * (0.15 + f * f * 0.9) * band * fade * a * k, 1.0);
     }`;
   const mat = new THREE.ShaderMaterial({ uniforms: { t: { value: 0 }, a: { value: 0 }, k: { value: 1 } }, vertexShader: vs, fragmentShader: fs, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide });

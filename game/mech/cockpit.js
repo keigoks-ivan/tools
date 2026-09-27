@@ -256,7 +256,7 @@ const COL = { bg: '#02070a', grid: 'rgba(111,240,255,0.13)', line: 'rgba(111,240
 
 // 瞄準莢艙（TGP）：鎖定目標時，右邊的武裝頁換成目標特寫——窄視角彩色攝影機追著目標，
 // 畫進 320×240 小畫面（每秒 30 張、只在有目標時畫、不做後製、沿用主畫面的影子）；面板放大 1.15 倍
-const TGP = { w: 320, h: 240, hz: 30, big: 1.15 };
+const TGP = { w: 320, h: 240, hz: 20, big: 1.15 };
 const TAN35 = Math.tan(35 * D);
 const tgFov = (z) => 2 * Math.atan(TAN35 / z) / D;   // 放大 z 倍（相對主視角 70°）的垂直視角
 const _tr = new THREE.Vector3(), _tu = new THREE.Vector3();

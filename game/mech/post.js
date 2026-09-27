@@ -1,15 +1,17 @@
-// 後製：HDR MSAA → 世界 → 駕駛艙 → Bloom → ACES → 鏡頭效果（暗角、色差、顆粒、中彈震盪、衝刺模糊）
+// 後製：HDR MSAA → 世界 → 駕駛艙 → Bloom → 最後一趟（光暈＋ACES＋鏡頭效果：暗角、色差、顆粒、中彈震盪、衝刺模糊）
 import * as THREE from 'three';
 import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
-import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { GTAOPass } from 'three/addons/postprocessing/GTAOPass.js';
 
 const MonitorShader = {
   uniforms: {
     tDiffuse: { value: null },
+    tBloom: { value: null },   // 光暈（在這裡直接加，不再另外疊一遍）
+    bloomK: { value: 1 },
+    toneMappingExposure: { value: 1 },
     time: { value: 0 },
     res: { value: new THREE.Vector2(1, 1) },
     vignette: { value: 0.32 },
@@ -24,8 +26,11 @@ const MonitorShader = {
   },
   vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
   fragmentShader: `
-    uniform sampler2D tDiffuse; uniform float time, vignette, aberration, grain, damage, boot, overdrive, danger, speed, flash;
+    uniform sampler2D tDiffuse, tBloom; uniform float time, vignette, aberration, grain, damage, boot, overdrive, danger, speed, flash, bloomK;
     uniform vec2 res; varying vec2 vUv;
+    #include <tonemapping_pars_fragment>
+    // 取一點：畫面＋光暈 → ACES 色調 → sRGB（原本各自整張重畫一遍，合在這裡做）
+    vec3 hdr(vec2 u){ vec4 b = texture2D(tBloom, u); return sRGBTransferOETF(vec4(ACESFilmicToneMapping(texture2D(tDiffuse, u).rgb + b.rgb * b.a * bloomK), 1.0)).rgb; }
     float h(vec2 p){ return fract(sin(dot(p, vec2(12.9898,78.233))) * 43758.5453); }
     void main(){
       vec2 uv = vUv;
@@ -38,15 +43,15 @@ const MonitorShader = {
         for (int i = 0; i < 6; i++) {
           float k = float(i) / 5.0;
           vec2 u = 0.5 + c * (1.0 - speed * 0.035 * k * (0.3 + r2 * 3.0));
-          col.r += texture2D(tDiffuse, 0.5 + (u - 0.5) * (1.0 + ab)).r;
-          col.g += texture2D(tDiffuse, u).g;
-          col.b += texture2D(tDiffuse, 0.5 + (u - 0.5) * (1.0 - ab)).b;
+          col.r += hdr(0.5 + (u - 0.5) * (1.0 + ab)).r;
+          col.g += hdr(u).g;
+          col.b += hdr(0.5 + (u - 0.5) * (1.0 - ab)).b;
         }
         col /= 6.0;
       } else {
-        col.r = texture2D(tDiffuse, 0.5 + c * (1.0 + ab * r2 * 4.0)).r;
-        col.g = texture2D(tDiffuse, uv).g;
-        col.b = texture2D(tDiffuse, 0.5 + c * (1.0 - ab * r2 * 4.0)).b;
+        col.r = hdr(0.5 + c * (1.0 + ab * r2 * 4.0)).r;
+        col.g = hdr(uv).g;
+        col.b = hdr(0.5 + c * (1.0 - ab * r2 * 4.0)).b;
       }
       // 調色：陰影偏青、亮部偏暖
       float l = dot(col, vec3(0.299, 0.587, 0.114));
@@ -91,12 +96,19 @@ export class Post {
       });
     };
     // 環境光遮蔽要重畫一次整座城（只要深度＋法線），這時太陽影子不必再算一遍——剛剛畫城市時已經算好了
+    // 算好的 AO 直接乘到畫面上；內建做法會先把整張畫面複製一遍再乘，白花一趟
+    this.gtao.output = GTAOPass.OUTPUT.Off;
+    this.gtao.needsSwap = false;
     const gr = this.gtao.render.bind(this.gtao);
     this.gtao.render = (r, wb, rb, dt, mask) => {
       const au = r.shadowMap.autoUpdate;
       r.shadowMap.autoUpdate = false;
       gr(r, wb, rb, dt, mask);
       r.shadowMap.autoUpdate = au;
+      const g = this.gtao, m = g.blendMaterial;
+      m.uniforms.intensity.value = g.blendIntensity;
+      m.uniforms.tDiffuse.value = g.pdRenderTarget.texture;
+      g.renderPass(r, m, rb);
     };
     const gs = this.gtao.setSize.bind(this.gtao);
     this.gtao.setSize = (w, h) => gs(Math.round(w / 2), Math.round(h / 2));
@@ -121,15 +133,21 @@ export class Post {
     this.cockpit.clear = false;
     this.cockpit.clearDepth = true;
     this.bloom = new UnrealBloomPass(new THREE.Vector2(size.x / 2, size.y / 2), 0.55, 0.55, 0.92);
-    this.output = new OutputPass();
+    // 保險：畫面上只要有一顆壞掉的像素（NaN），光暈會把它糊成一大塊黑；在光暈入口把壞值換成 0
+    const hp = this.bloom.materialHighPassFilter, hpA = 'vec4 texel = texture2D( tDiffuse, vUv );';
+    if (hp.fragmentShader.includes(hpA)) hp.fragmentShader = hp.fragmentShader.replace(hpA, hpA + ' if ( any( isnan( texel ) ) || !( dot( abs( texel ), vec4( 1.0 ) ) < 1e20 ) ) texel = vec4( 0.0 );');
+    // 光暈算好後不疊回畫面（那要整張重畫一遍），留給最後一趟直接加
+    const bq = this.bloom.fsQuad, bqr = bq.render.bind(bq);
+    bq.render = (r) => { if (bq.material !== this.bloom.blendMaterial) bqr(r); };
     this.monitor = new ShaderPass(MonitorShader);
+    this.monitor.material.toneMapped = false;   // 色調在 shader 裡自己做
     this.composer.addPass(this.world);
     this.composer.addPass(this.gtao);
     this.composer.addPass(this.cockpit);
     this.composer.addPass(this.bloom);
-    this.composer.addPass(this.output);
     this.composer.addPass(this.monitor);
     this.u = this.monitor.uniforms;
+    this.u.tBloom.value = this.bloom.renderTargetsHorizontal[0].texture;
   }
   setSize(w, h) {
     this.composer.setSize(w, h);
@@ -138,6 +156,8 @@ export class Post {
   }
   render(t) {
     this.u.time.value = t;
+    this.u.bloomK.value = this.bloom.enabled ? 1 : 0;
+    this.u.toneMappingExposure.value = this.renderer.toneMappingExposure;
     this.composer.render();
   }
 }
