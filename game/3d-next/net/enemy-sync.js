@@ -18,7 +18,7 @@
  * 單人頁從不載入這個檔案；三人頁只有自己一個人時，包裝一律直接呼叫原方法，行為與單人版相同。
  */
 import { SnapshotBuffer } from './interp.js';
-import { applyCountScale, scaledHp, snapshotCounts } from './scaling.js';
+import { applyCountScale, applySupplyScale, scaledHp, snapshotCounts, snapshotSupply } from './scaling.js';
 import { BITS, FORWARD_EVENTS, MAX_EVENTS_PER_MESSAGE, WorldDecoder, WorldEncoder, compactEvent, decodeLevel, enemyType, fitWorld, isEmptyWorld, levelStatus, recipeFor } from './world.js';
 import { CLAIM_LIMITS, ClaimMeter, SOURCES, TARGETING, assignTargets, validateClaimEntry } from './authority.js';
 import { ComboWindow, HANDOFF, HandoffPolicy, ReviveTracker, TEAM, comboProfile, grantPickup, teamWiped } from './team.js';
@@ -35,6 +35,7 @@ const NO_INPUT = Object.freeze({});
 
 // TUNING 原始值：以 TUNING 物件為鍵只記一次（同一頁重建戰場、或測試裡兩個實例共用模組時都不會越乘越大）
 const baselines = new WeakMap();
+const supplyBaselines = new WeakMap();   // 補給加成的原始值（同上，每個 TUNING 物件記一次）
 
 const enemyDamage = enemy => enemy.damage ?? (enemy.role === 'boss' ? 18 : enemy.role === 'elite' ? 12 : enemy.role === 'runner' ? 7 : 9);
 
@@ -80,6 +81,8 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
     if (!level?.TUNING) return;
     if (!baselines.has(level.TUNING)) baselines.set(level.TUNING, snapshotCounts(level.TUNING));
     applyCountScale(level.TUNING, baselines.get(level.TUNING), players());
+    if (!supplyBaselines.has(level.TUNING)) supplyBaselines.set(level.TUNING, snapshotSupply(level.TUNING));
+    applySupplyScale(level.TUNING, supplyBaselines.get(level.TUNING), players());
   }
 
   // ---------------------------------------------------------------- 房主：替身與仇恨
@@ -292,7 +295,7 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
     arena.inputBuffer = null;
     // Arena 發的「陣亡」事件改名，免得配樂當成輸了
     for (const event of arena.events) if (event.type === 'dead') event.type = 'downed';
-    march._say('你倒下了！隊友靠近站著不動 3 秒就能把你扶起來', 4);
+    march._say('你倒下了！隊友靠近站著不動 1.5 秒就能把你扶起來', 4);
   }
   function reviveLocal() {
     const hero = arena.hero;

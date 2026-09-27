@@ -19,17 +19,17 @@ test('revive: a teammate standing still next to a downed player revives them aft
   const tracker = new ReviveTracker();
   let downed = true;
   const players = () => [{ id: 'A', x: 0, y: 0, downed }, { id: 'B', x: 60, y: 0, downed: false }];
-  const half = run(tracker, 1.5, players);
+  const half = run(tracker, 0.75, players);
   assert.deepEqual(half.revived, []);
   const [[id, pct, by]] = half.progress;
   assert.equal(id, 'A'); assert.equal(by, 'B');
-  assert.ok(pct >= 35 && pct <= 45, `about 40 % after 1.5 s (settle ${TEAM.stillSettle} s first): ${pct}`);
+  assert.ok(pct >= 25 && pct <= 40, `about a third after 0.75 s (settle ${TEAM.stillSettle} s first): ${pct}`);
   let rest = { revived: [] };
   for (let t = 0; t < 2; t += 1 / 60) { const r = tracker.update(1 / 60, players()); rest = { progress: r.progress, revived: [...rest.revived, ...r.revived] }; if (r.revived.includes('A')) downed = false; }
   assert.deepEqual(rest.revived, ['A'], 'revived once');
   assert.deepEqual(rest.progress, []);
   assert.equal(tracker.progress.size, 0);
-  assert.ok(TEAM.reviveSeconds === 3 && TEAM.reviveHp === 0.5);
+  assert.ok(TEAM.reviveSeconds === 1.5 && TEAM.reviveHp === 0.5);
 });
 
 test('revive: walking past, standing too far, being downed yourself or not being present does not count', () => {
@@ -52,12 +52,12 @@ test('revive: walking past, standing too far, being downed yourself or not being
 test('revive: stepping away pauses and rewinds progress; the nearest still teammate is credited', () => {
   const tracker = new ReviveTracker();
   let bx = 40;
-  run(tracker, 2, () => [{ id: 'A', x: 0, y: 0, downed: true }, { id: 'B', x: bx, y: 0 }]);
+  run(tracker, 1.2, () => [{ id: 'A', x: 0, y: 0, downed: true }, { id: 'B', x: bx, y: 0 }]);
   const before = tracker.progress.get('A').seconds;
   bx = 400;   // B walks off to fight
-  run(tracker, 0.5, () => [{ id: 'A', x: 0, y: 0, downed: true }, { id: 'B', x: bx, y: 0 }]);
+  run(tracker, 0.25, () => [{ id: 'A', x: 0, y: 0, downed: true }, { id: 'B', x: bx, y: 0 }]);
   const after = tracker.progress.get('A').seconds;
-  assert.ok(Math.abs(before - after - 0.5 * TEAM.reviveDecay) < 0.05, `rewinds at ×${TEAM.reviveDecay} (${before.toFixed(2)} → ${after.toFixed(2)})`);
+  assert.ok(Math.abs(before - after - 0.25 * TEAM.reviveDecay) < 0.05, `rewinds at ×${TEAM.reviveDecay} (${before.toFixed(2)} → ${after.toFixed(2)})`);
   const three = tracker.update(1 / 60, [{ id: 'A', x: 0, y: 0, downed: true }, { id: 'B', x: 400, y: 0 }, { id: 'C', x: 20, y: 0 }]);
   assert.ok(three.progress.length === 1);
   run(tracker, 0.5, () => [{ id: 'A', x: 0, y: 0, downed: true }, { id: 'B', x: 70, y: 0 }, { id: 'C', x: 20, y: 0 }]);

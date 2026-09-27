@@ -36,9 +36,53 @@ export function scaledCounts(base, players) {
   };
 }
 
+/**
+ * 補給加成（兩人以上才生效；只剩自己時還原成單人數值）：
+ * - 木箱／酒甕／木桶打破必掉東西，而且偏向補血
+ * - 小兵被擊倒有機率掉護符（+15 血）
+ * - 補給放久一點才消失（隊友有時間走過來撿）
+ * - 過段落與擊破敵將的回血加多
+ */
+export const COOP_SUPPLY = {
+  tables: { crate: [['bun', 0.65], ['bigBun', 0.25], ['wine', 0.1]], jar: [['bun', 0.45], ['wine', 0.35], ['bigBun', 0.2]], barrel: [['bigBun', 0.6], ['bun', 0.4]] },
+  killDropChance: { 2: 0.06, 3: 0.08 },
+  pickupLife: 25,
+  segmentHeal: 25,
+  officerHeal: 35,
+};
+
 /** 記下 TUNING 原始值（只記一次），之後每次人數變動都從原始值重算，不會越乘越大 */
 export function snapshotCounts(tuning) {
   return scaledCounts(tuning, 1);
+}
+
+/** 記下補給相關的 TUNING 原始值（只記一次），人數回到 1 時照原樣還原 */
+export function snapshotSupply(tuning) {
+  return {
+    tables: structuredClone(tuning.breakables.tables),
+    killDrop: tuning.killDrop ?? null,
+    pickupLife: tuning.pickupLife,
+    segmentHeal: tuning.segmentHeal,
+    officerHeal: tuning.officerHeal,
+  };
+}
+
+/** 把補給加成寫進 TUNING（兩人以上）；一人時還原 snapshotSupply 的值 */
+export function applySupplyScale(tuning, base, players) {
+  const n = Math.max(1, Math.min(3, Math.floor(players) || 1));
+  if (n === 1) {
+    tuning.breakables.tables = structuredClone(base.tables);
+    tuning.killDrop = base.killDrop;
+    tuning.pickupLife = base.pickupLife;
+    tuning.segmentHeal = base.segmentHeal;
+    tuning.officerHeal = base.officerHeal;
+    return;
+  }
+  tuning.breakables.tables = structuredClone(COOP_SUPPLY.tables);
+  tuning.killDrop = { kind: 'bun', chance: COOP_SUPPLY.killDropChance[n] };
+  tuning.pickupLife = COOP_SUPPLY.pickupLife;
+  tuning.segmentHeal = COOP_SUPPLY.segmentHeal;
+  tuning.officerHeal = COOP_SUPPLY.officerHeal;
 }
 
 /**

@@ -137,6 +137,8 @@ export const TUNING = {
   // bun → 護符 (+15 hp), bigBun → 靈燈 (+30 hp), wine → 魂晶 (+25 musou). Kind ids stay as-is.
   drops: { bun: { heal: 15 }, bigBun: { heal: 30 }, wine: { energy: 25 } },
   pickupLife: 15,
+  // 小兵被擊倒時掉補給：{ kind, chance }。單人版＝null（不掉、也不多抽亂數）；三人版由 net/scaling.js 依人數設定
+  killDrop: null,
   staggerSeconds: 2,
   staggerRadius: 12,          // m
   comboWindow: 2.5,           // s between hits before the hit counter resets
@@ -561,6 +563,9 @@ export class MarchDirector {
         roll -= chance;
       }
       return;
+    }
+    if (TUNING.killDrop && unit.kind !== 'lantern' && unit.kind !== 'officer' && unit.kind !== 'boss' && this._rand() < TUNING.killDrop.chance) {
+      this._drop(TUNING.killDrop.kind, unit.x, unit.y);
     }
     if (unit.kind === 'lantern') {
       seg.broken++;

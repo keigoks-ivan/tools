@@ -4,7 +4,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { ENEMY_CAP, LEVEL, MarchDirector, TUNING, toPx, toWorld } from '../3d-next/march.js';
 import * as marchModule from '../3d-next/march.js';
-import { COOP_SCALE, applyCountScale, scaleFor, scaledCounts, scaledHp, snapshotCounts } from '../3d-next/net/scaling.js';
+import { COOP_SCALE, applyCountScale, scaleFor, scaledCounts, scaledHp, snapshotCounts, COOP_SUPPLY, applySupplyScale, snapshotSupply } from '../3d-next/net/scaling.js';
 import {
   ACTIONS, BITS, TYPES, WORLD_MAX_CHARS, WorldDecoder, WorldEncoder, compactEvent, decodeEnemy, decodeLevel, encodeEnemy, enemyType,
   fitWorld, isEmptyWorld, levelStatus, recipeFor,
@@ -114,6 +114,21 @@ test('level status encodes each segment and decodes back', () => {
 });
 
 // ---------------------------------------------------------------- 人數加成
+
+test('co-op supply: 2–3 players get guaranteed prop drops, kill drops and longer-lived pickups; 1p restores single-player numbers', () => {
+  const before = JSON.stringify(TUNING);
+  assert.equal(TUNING.killDrop, null, 'single player never rolls kill drops');
+  const base = snapshotSupply(TUNING);
+  applySupplyScale(TUNING, base, 3);
+  for (const table of Object.values(TUNING.breakables.tables)) assert.ok(Math.abs(table.reduce((sum, [, p]) => sum + p, 0) - 1) < 1e-9, 'every prop drops something');
+  assert.deepEqual(TUNING.killDrop, { kind: 'bun', chance: COOP_SUPPLY.killDropChance[3] });
+  assert.equal(TUNING.pickupLife, COOP_SUPPLY.pickupLife);
+  assert.ok(TUNING.segmentHeal > JSON.parse(before).segmentHeal && TUNING.officerHeal > JSON.parse(before).officerHeal);
+  applySupplyScale(TUNING, base, 2);
+  assert.equal(TUNING.killDrop.chance, COOP_SUPPLY.killDropChance[2]);
+  applySupplyScale(TUNING, base, 1);
+  assert.equal(JSON.stringify(TUNING), before);
+});
 
 test('co-op scaling: 1p is untouched, 2p ×1.3 count ×1.4 hp, 3p ×1.6 count ×1.8 hp', () => {
   assert.deepEqual(COOP_SCALE[1], { count: 1, hp: 1 });
