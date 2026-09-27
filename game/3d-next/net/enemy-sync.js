@@ -18,7 +18,7 @@
  * 單人頁從不載入這個檔案；三人頁只有自己一個人時，包裝一律直接呼叫原方法，行為與單人版相同。
  */
 import { SnapshotBuffer } from './interp.js';
-import { applyCountScale, applySupplyScale, scaledHp, snapshotCounts, snapshotSupply } from './scaling.js';
+import { applyCountScale, applySupplyScale, scaledDamage, scaledHp, snapshotCounts, snapshotSupply } from './scaling.js';
 import { BITS, FORWARD_EVENTS, MAX_EVENTS_PER_MESSAGE, WorldDecoder, WorldEncoder, compactEvent, decodeLevel, enemyType, fitWorld, isEmptyWorld, levelStatus, recipeFor } from './world.js';
 import { CLAIM_LIMITS, ClaimMeter, SOURCES, TARGETING, assignTargets, validateClaimEntry } from './authority.js';
 import { ComboWindow, HANDOFF, HandoffPolicy, ReviveTracker, TEAM, comboProfile, grantPickup, teamWiped } from './team.js';
@@ -786,7 +786,7 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
         return hud;
       };
       march._spawnUnit = (unitRole, wx, wz, options = {}) => {
-        if (role === 'host' && options.hp !== undefined && !options.prop) options = { ...options, hp: scaledHp(options.hp, players()) };
+        if (role === 'host' && options.hp !== undefined && !options.prop) options = { ...options, hp: scaledHp(options.hp, players()), damage: scaledDamage(options.damage, unitRole, players()) };
         return orig._spawnUnit.call(march, unitRole, wx, wz, options);
       };
       for (const name of ['_raider', '_lunger']) {

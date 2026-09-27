@@ -4,12 +4,13 @@
  * - count：整段關卡「總共」出多少敵人（市集擊倒目標、各段出兵間隔、守將召喚數），不是同時在場的數量；
  *   同時在場仍受 march.js ENEMY_CAP（桌機 16／手機 10）限制，人多只是打得更久、更密。
  * - hp：每隻敵人（含敵將與守將）生成當下的血量倍率；道具（木箱、妖燈）不加。
+ * - damage：敵人近戰打到玩家的傷害倍率（生成時寫進 enemy.damage；守將的震地／橫掃不加）。
  * 單人（或連線但只剩自己）＝ ×1，完全等於單人版數值。
  */
 export const COOP_SCALE = {
-  1: { count: 1.0, hp: 1.0 },
-  2: { count: 1.3, hp: 1.4 },
-  3: { count: 1.8, hp: 2.1 },   // 2026-09-27 由 1.6／1.8 上調：救援縮短與補給加多後三人偏簡單
+  1: { count: 1.0, hp: 1.0, damage: 1.0 },
+  2: { count: 1.3, hp: 1.4, damage: 1.0 },
+  3: { count: 2.0, hp: 2.4, damage: 1.35 },   // 2026-09-27 兩次上調（1.6／1.8 → 1.8／2.1 → 2.0／2.4＋傷害 ×1.35）：兄弟試玩太簡單
 };
 
 export function scaleFor(players) {
@@ -20,6 +21,12 @@ export function scaleFor(players) {
 /** 生成時的血量：無條件進位，最少 1 */
 export function scaledHp(hp, players) {
   return Math.max(1, Math.ceil(hp * scaleFor(players).hp));
+}
+
+/** 近戰傷害：沒寫 damage 的敵人依角色取 Arena 預設值（與 2d/combat.js _hurtHero 相同），四捨五入到 0.1 */
+export function scaledDamage(damage, role, players) {
+  const base = damage ?? (role === 'boss' ? 18 : role === 'elite' ? 12 : role === 'runner' ? 7 : 9);
+  return Math.round(base * scaleFor(players).damage * 10) / 10;
 }
 
 /**
