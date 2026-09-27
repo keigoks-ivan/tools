@@ -1,0 +1,276 @@
+// 機體動作：腳用 IK（反向運動學＝給腳掌目標點、反算髖膝角度）真的踩在地上不滑；
+// 重型機械的節奏：落腳時骨盆下沉＋機身震一下、重心左右移到支撐腳、加減速時上身慣性前傾後仰（會回彈）、
+// 軀幹扭轉像伺服馬達（快、略過頭再停）、頭部「掃描—停住—再掃描」的機器人式轉頭、單眼沿滑軌快速跳動。
+// 美術（外型）在 mechs.js；這個檔只管動。
+import * as THREE from 'three';
+
+const TAU = Math.PI * 2;
+const _v = new THREE.Vector3(), _inv = new THREE.Matrix4();
+const clamp = THREE.MathUtils.clamp, lerp = THREE.MathUtils.lerp;
+const smooth = (a, b, x) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
+
+export function wrap(a) { while (a > Math.PI) a -= TAU; while (a < -Math.PI) a += TAU; return a; }
+export function lerpAngle(a, b, t) { return a + wrap(b - a) * t; }
+export function damp(a, b, k, dt) { return a + (b - a) * (1 - Math.exp(-k * dt)); }
+
+// 彈簧（w＝快慢、z＝阻尼；z<1 會稍微過頭再回來，機械感的來源）
+class Spring {
+  constructor(w, z, x = 0) { this.w = w; this.z = z; this.x = x; this.v = 0; }
+  step(target, dt) {
+    const n = Math.max(1, Math.ceil(dt / 0.008)), h = dt / n;
+    for (let i = 0; i < n; i++) {
+      this.v += (this.w * this.w * (target - this.x) - 2 * this.z * this.w * this.v) * h;
+      this.x += this.v * h;
+    }
+    return this.x;
+  }
+}
+
+// 兩段腿 IK：在髖部座標求大腿、小腿角度（膝蓋往前彎）
+function legIK(out, Lt, Ls, a0, b0, dx, dy, dz) {
+  const roll = Math.atan2(dx, -dy);
+  const dv = Math.hypot(dx, dy);
+  const d = clamp(Math.hypot(dv, dz), 0.2, (Lt + Ls) * 0.999);
+  const phi = Math.atan2(dz, dv);
+  const al = Math.acos(clamp((Lt * Lt + d * d - Ls * Ls) / (2 * Lt * d), -1, 1));
+  const ga = Math.acos(clamp((Ls * Ls + d * d - Lt * Lt) / (2 * Ls * d), -1, 1));
+  const hip = a0 - (phi + al);
+  const knee = -hip + b0 - (phi - ga);
+  out.hip = hip; out.knee = knee; out.roll = roll;
+  return out;
+}
+
+export class MechMotion {
+  constructor(m) {
+    this.m = m;
+    const b = m.bones, L = m.L;
+    const th = b.kneeR.position, sh = b.ankleR.position;
+    this.Lt = Math.hypot(th.y, th.z); this.Ls = Math.hypot(sh.y, sh.z);
+    this.a0 = Math.atan2(th.z, -th.y); this.b0 = Math.atan2(sh.z, -sh.y);
+    this.legLen = this.Lt + this.Ls;
+    this.ankleY = L.pelvis + b.hipR.position.y + th.y + sh.y;   // 靜止時腳踝離地高度
+    this.ankleZ = b.hipR.position.z + th.z + sh.z;
+    this.toe = m.footToe || 2.3; this.heel = m.footHeel || 1.7;  // 腳踝到腳尖／腳跟距離（踮腳時抬高用）
+    this.cyc = 0; this.g = 0; this.dir = 1;
+    this.st = { R: true, L: true };
+    this.t = Math.random() * 10;
+    this.shock = 0;
+    this.fPrev = 0; this.sPrev = 0; this.accF = 0; this.accS = 0;
+    this.yawPrev = null;
+    this.dip = new Spring(11, 0.42);
+    this.lean = new Spring(6.5, 0.32); this.roll = new Spring(6.5, 0.34);
+    this.twist = new Spring(15, 0.5);
+    this.armLX = new Spring(8, 0.36); this.armLZ = new Spring(8, 0.4);
+    this.headY = new Spring(16, 0.6); this.headX = new Spring(16, 0.6);
+    this.eyeS = new Spring(26, 0.55);
+    this.rec = new Spring(34, 0.35);
+    this.look = { y: 0, x: 0, eye: 0, next: 0.5, eyeNext: 0.2 };
+    this.ik = { hip: 0, knee: 0, roll: 0 };
+    m.footfall = 0; m.stepCount = 0; m.servo = 0;
+  }
+
+  // 外部撞擊／著地（0..1+）
+  impact(s) { this.dip.v -= 5 * s; this.shock = Math.max(this.shock, Math.min(1.5, s)); }
+
+  update(dt, st) {
+    const m = this.m, b = m.bones, L = m.L, k = m.scale;
+    dt = Math.min(dt, 0.05);
+    this.t += dt;
+    m.footfall = 0; m.servo = 0;
+
+    // ---- 腳的朝向：往移動方向；往後退時朝軀幹方向倒退走
+    const sp = Math.hypot(st.vel.x, st.vel.z);
+    if (sp > 1.5 && st.grounded && st.boost < 0.5) {
+      let hd = Math.atan2(st.vel.x, st.vel.z);
+      let diff = wrap(hd - st.torsoYaw);
+      if (Math.abs(diff) > 1.9) hd = wrap(hd + Math.PI);
+      diff = wrap(hd - st.torsoYaw);
+      if (Math.abs(diff) > 1.2) hd = st.torsoYaw + Math.sign(diff) * 1.2;
+      m.legYaw = lerpAngle(m.legYaw, hd, 1 - Math.exp(-dt * 5));
+    } else {
+      m.legYaw = lerpAngle(m.legYaw, st.torsoYaw, 1 - Math.exp(-dt * (st.boost > 0.5 ? 6 : 2.2)));
+    }
+    const yawRate = this.yawPrev === null ? 0 : wrap(m.legYaw - this.yawPrev) / Math.max(dt, 1e-4);
+    this.yawPrev = m.legYaw;
+    m.root.rotation.y = m.legYaw;
+    const sL = Math.sin(m.legYaw), cL = Math.cos(m.legYaw);
+    const fwd = (st.vel.x * sL + st.vel.z * cL) / k;
+    const side = (st.vel.x * cL - st.vel.z * sL) / k;
+    this.accF = damp(this.accF, (fwd - this.fPrev) / Math.max(dt, 1e-4), 10, dt);
+    this.accS = damp(this.accS, (side - this.sPrev) / Math.max(dt, 1e-4), 10, dt);
+    this.fPrev = fwd; this.sPrev = side;
+
+    m.pose.boost = damp(m.pose.boost, st.grounded && st.boost > 0.5 ? 1 : 0, 8, dt);
+    m.pose.air = damp(m.pose.air, st.grounded ? 0 : 1, 6, dt);
+    const Bst = m.pose.boost, Air = m.pose.air;
+    const walkW = (1 - Bst) * (1 - Air);
+
+    // ---- 步態：週期 cyc（0..1），右腳 0 起步、左腳差半拍；支撐期 D＝60%（兩腳同時著地的片刻＝沉重感）
+    const af = Math.abs(fwd);
+    const vg = af + Math.abs(yawRate) * 3.2;                // 原地轉身也要踏步
+    const gT = walkW * smooth(0.6, 2.6, vg);
+    this.g = damp(this.g, gT, gT > this.g ? 5 : 3.5, dt);
+    const g = this.g;
+    const D = 0.6;
+    const S = clamp(2.4 + af * 0.3, 2.4, 6.6);             // 步幅
+    if (af > 0.4) this.dir = fwd < 0 ? -1 : 1;
+    else if (Math.abs(yawRate) > 0.1) this.dir = 1;
+    if (g > 0.02) this.cyc += this.dir * dt * Math.max(vg, 1.6) * D / S;
+    this.cyc -= Math.floor(this.cyc);
+    const crouch = 0.3 + g * Math.min(0.75, af * 0.045);    // 跑越快蹲越低
+    const H = (0.8 + Math.min(1.6, af * 0.09)) * g;          // 抬腳高度
+
+    // ---- 骨盆：落腳下沉、支撐期升起；重心移到支撐腳；隨步伐扭腰
+    const pc = this.cyc * TAU;
+    const bob = -0.2 * g * Math.cos(2 * (pc - 0.3));
+    const sway = -0.3 * g * Math.sin(pc - 0.25);
+    m.landV += (-m.land * 90 - m.landV * 14) * dt;
+    m.land = Math.max(-0.1, m.land + m.landV * dt);
+    const dip = this.dip.step(0, dt);
+    b.pelvis.position.set(sway, L.pelvis - crouch + bob + dip - Bst * 0.8 - m.land * 1.3, 0);
+    b.pelvis.rotation.set(0.05 * g * Math.min(1, af / 12), 0.07 * g * Math.sin(pc - 3.39) * this.dir, -sway * 0.06);
+    b.pelvis.updateMatrix();
+    _inv.copy(b.pelvis.matrix).invert();
+
+    // ---- 雙腳
+    const shake = Bst > 0.05 ? Math.sin(this.t * 61) * 0.015 * Bst : 0;
+    for (const [n, off, sx] of [['R', 0, -1], ['L', 0.5, 1]]) {
+      const u = (this.cyc + off) % 1;
+      let z, y = 0, pitch = 0;
+      const inSt = u < D;
+      if (inSt) {
+        const s = u / D;
+        z = S * (0.5 - s);
+        if (s > 0.8) { const h = (s - 0.8) / 0.2; pitch = -0.38 * h * h; }            // 腳跟離地、踮腳尖推出去
+      } else {
+        const w = (u - D) / (1 - D);
+        let e = w * w * (3 - 2 * w); e = e * e * (3 - 2 * e);                       // 前段慢、中段甩、後段急煞＝機械感
+        z = S * (-0.5 + e);
+        y = H * Math.pow(Math.sin(Math.PI * Math.min(1, w * 1.12)), 0.75);          // 提早到頂、踩下去比較重
+        pitch = w < 0.35 ? lerp(-0.38, 0.22, w / 0.35) : 0.22 * (1 - smooth(0.72, 1, w));
+      }
+      if (this.dir < 0) pitch *= 0.4;
+      z *= this.dir * g; y *= g; pitch *= g;
+      if (pitch < 0) y += this.toe * Math.sin(-pitch); else y += this.heel * Math.sin(pitch) * 0.6;
+      // 落腳事件
+      if (inSt !== this.st[n]) {
+        if (inSt && g > 0.35) {
+          m.footfall = n === 'R' ? 1 : -1; m.stepCount++;
+          const s = 0.45 + Math.min(1, af / 14) * 0.75;
+          this.dip.v -= 2.6 * s; this.shock = Math.max(this.shock, s);
+        }
+        this.st[n] = inSt;
+      }
+      // IK 目標（機體座標 → 骨盆座標）
+      const hp = b['hip' + n];
+      _v.set(hp.position.x * 1.04, this.ankleY + y, this.ankleZ + z).applyMatrix4(_inv);
+      legIK(this.ik, this.Lt, this.Ls, this.a0, this.b0, _v.x - hp.position.x, _v.y - hp.position.y, _v.z - hp.position.z);
+      let hipA = this.ik.hip, kneeA = this.ik.knee, roll = this.ik.roll;
+      let ank = -(b.pelvis.rotation.x + hipA + kneeA) - pitch;
+      // 衝刺滑行（一前一後、腳尖朝下）／空中（收腿）
+      const r = n === 'R';
+      const bh = r ? -0.38 : 0.28, bk = r ? 0.55 : 0.95, ba = r ? 0.05 : 0.35;
+      const ah = r ? -0.6 : -0.12, ak = r ? 1.1 : 0.55, aa = r ? 0.2 : 0.4;
+      const bw = Bst * (1 - Air), aw = Air;
+      hipA = lerp(lerp(hipA, bh, bw), ah, aw) + shake;
+      kneeA = lerp(lerp(kneeA, bk, bw), ak, aw) - shake;
+      ank = lerp(lerp(ank, ba, bw), aa, aw);
+      roll = lerp(roll, -sx * 0.05, bw) * (1 - aw) + (-sx * 0.1) * aw;
+      hipA -= m.land * 0.4; kneeA += m.land * 0.85; ank -= m.land * 0.45;
+      hp.rotation.set(hipA, 0, roll);
+      b['knee' + n].rotation.x = kneeA;
+      b['ankle' + n].rotation.set(ank, 0, -roll - b.pelvis.rotation.z);
+    }
+
+    // ---- 軀幹：伺服扭轉（略過頭）＋加減速慣性（會回彈）＋落腳震動
+    this.shock *= Math.exp(-dt * 8);
+    const tw = wrap(st.torsoYaw - m.legYaw) - b.pelvis.rotation.y;
+    const twist = this.twist.step(this.twist.x + wrap(tw - this.twist.x), dt);
+    if (Math.abs(this.twist.v) > 2.5) m.servo = Math.min(1, Math.abs(this.twist.v) / 6);
+    const leanT = clamp(this.accF * 0.02, -0.3, 0.3) + Bst * 0.2 + Air * 0.05 + 0.04 * g * Math.min(1, af / 12) + (st.lean || 0);
+    const rollT = clamp(-this.accS * 0.012, -0.2, 0.2) - (Bst > 0.3 ? side * 0.006 : 0) + sway * 0.05;
+    const quake = this.shock * 0.02;
+    b.torso.rotation.y = twist;
+    b.torso.rotation.x = this.lean.step(leanT, dt) + Math.sin(this.t * 47) * quake;
+    b.torso.rotation.z = this.roll.step(rollT, dt) - b.pelvis.rotation.z * 0.8 + Math.sin(this.t * 39) * quake * 0.7;
+
+    // ---- 推進器
+    m.thrust = damp(m.thrust, st.thrust || 0, 14, dt);
+    const fl = 0.85 + Math.random() * 0.3;
+    for (const f of m.flames) {
+      const len = f.len * m.thrust * fl;
+      f.g.visible = len > 0.05;
+      f.g.scale.y = Math.max(0.01, len);
+    }
+
+    m.root.updateMatrixWorld(true);
+
+    // ---- 頭：有目標就盯住；沒有就「轉—停—轉」掃描
+    const lk = this.look;
+    if (st.aim) {
+      const lp = b.torso.worldToLocal(_v.copy(st.aim)).sub(b.head.position);
+      lk.y = clamp(Math.atan2(lp.x, lp.z), -0.9, 0.9);
+      lk.x = clamp(-Math.atan2(lp.y, Math.hypot(lp.x, lp.z)), -0.35, 0.3);
+    } else if (this.t > lk.next) {
+      lk.y = (Math.random() * 2 - 1) * 0.65; lk.x = (Math.random() - 0.4) * 0.3;
+      lk.next = this.t + 0.8 + Math.random() * 2.4;
+      m.servo = Math.max(m.servo, 0.5);
+    }
+    b.head.rotation.y = this.headY.step(lk.y, dt);
+    b.head.rotation.x = this.headX.step(lk.x, dt);
+    if (m.eye) {
+      if (this.t > lk.eyeNext) { lk.eye = (Math.random() * 2 - 1) * 0.35; lk.eyeNext = this.t + 0.25 + Math.random() * 1.1; }
+      const ea = clamp(this.eyeS.step(st.aim ? 0 : lk.eye, dt), -1.1, 1.1);
+      const er = m.eyeRail || { r: 1.44, y: 1.05, sz: 1.08 };
+      m.eye.position.set(Math.sin(ea) * er.r, er.y, Math.cos(ea) * er.r * er.sz);
+    }
+
+    // ---- 手臂
+    m.recoil = Math.max(0, m.recoil - dt * 6);
+    const rc = this.rec.step(m.recoil, dt);
+    this.aimArm(st.aim, st.pitch || 0, rc, dt);
+    if (m.swing > 0) this.saberPose();
+    else this.freeArm(dt, g, pc, Bst, Air);
+  }
+
+  // 右手持槍：有目標就前臂指向目標；沒有就槍口朝下的警戒姿勢
+  aimArm(aim, pitch, rc, dt) {
+    const b = this.m.bones, sh = b.shoulderR, el = b.elbowR;
+    let yaw, px, ex;
+    if (aim) {
+      const lp = b.torso.worldToLocal(_v.copy(aim)).sub(sh.position);
+      yaw = clamp(Math.atan2(lp.x, lp.z) + 0.04, -1.0, 0.7);
+      const pit = clamp(Math.atan2(lp.y + 1.5, Math.hypot(lp.x, lp.z)), -0.9, 1.0);
+      px = -0.95 - pit; ex = -0.62;
+    } else {
+      yaw = 0.25; px = -0.45 - pitch * 0.5; ex = -0.95;
+    }
+    sh.rotation.y = damp(sh.rotation.y, yaw, 14, dt);
+    sh.rotation.x = damp(sh.rotation.x, px, 14, dt) + rc * 0.22;
+    sh.rotation.z = damp(sh.rotation.z, 0.08, 10, dt);
+    el.rotation.x = damp(el.rotation.x, ex, 14, dt) - rc * 0.35;
+  }
+  // 左手：跟著步伐反向擺，帶一點慣性延遲
+  freeArm(dt, g, pc, Bst, Air) {
+    const m = this.m, b = m.bones, sh = b.shoulderL, el = b.elbowL;
+    const swing = -Math.sin(pc) * 0.22 * g * this.dir;
+    sh.rotation.y = damp(sh.rotation.y, 0.1, 8, dt);
+    sh.rotation.x = this.armLX.step(-0.12 + swing - Bst * 0.35 - Air * 0.2, dt);
+    sh.rotation.z = this.armLZ.step(-0.1 - Air * 0.18 - Bst * 0.08, dt);
+    el.rotation.x = damp(el.rotation.x, -0.45 - g * 0.15 - Air * 0.4, 8, dt);
+    if (m.saber) m.saber.visible = false;
+  }
+  saberPose() {
+    const m = this.m, b = m.bones, sh = b.shoulderL, el = b.elbowL;
+    const t = 1 - m.swing;
+    const wind = t < 0.3 ? t / 0.3 : 1;
+    const cut = t < 0.3 ? 0 : Math.min(1, (t - 0.3) / 0.25);
+    const e = cut * cut * (3 - 2 * cut);
+    sh.rotation.y = lerp(-0.2 - wind * 0.7, 0.9, e);
+    sh.rotation.x = lerp(-0.4 - wind * 1.5, -1.3, e);
+    sh.rotation.z = lerp(-0.3, 0.2, e);
+    el.rotation.x = lerp(-1.1, -0.35, e);
+    this.armLX.x = sh.rotation.x; this.armLX.v = 0;
+    if (m.saber) m.saber.visible = true;
+  }
+}

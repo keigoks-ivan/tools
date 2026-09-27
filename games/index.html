@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a0b14">
+<title>遊戲機台 · Games | InvestMQuest</title>
+<meta name="description" content="自己做的網頁遊戲：紫刃夜行、鋼鐵黃昏。打開瀏覽器就能玩。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Noto+Sans+TC:wght@500;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0a0b14;--bg2:#10122a;--panel:#141729;--panel2:#1a1e36;
+  --line:rgba(255,255,255,.08);--line2:rgba(255,255,255,.14);
+  --ink:#eef0ff;--muted:#a3a9c7;--dim:#737a9c;
+  --radius:20px;
+}
+*{box-sizing:border-box}
+html{background:var(--bg);-webkit-text-size-adjust:100%}
+body{margin:0;min-height:100vh;color:var(--ink);overflow-x:hidden;
+  font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  background:
+    radial-gradient(900px 420px at 12% -8%,rgba(160,79,255,.20),transparent 60%),
+    radial-gradient(760px 380px at 92% 4%,rgba(127,243,255,.12),transparent 60%),
+    radial-gradient(700px 360px at 60% 108%,rgba(255,128,101,.12),transparent 60%),
+    linear-gradient(180deg,var(--bg) 0%,var(--bg2) 100%);
+  background-attachment:fixed}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.5;
+  background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+  background-size:44px 44px;
+  -webkit-mask-image:linear-gradient(180deg,#000 0%,transparent 70%);mask-image:linear-gradient(180deg,#000 0%,transparent 70%)}
+#nav-root{position:relative;z-index:100}
+a{color:inherit}
+.wrap{position:relative;z-index:1;width:min(1180px,100%);margin:0 auto;padding:0 clamp(16px,4vw,32px) 40px}
+
+/* ---------- hero ---------- */
+.hero{padding:clamp(34px,6vw,64px) 0 clamp(22px,4vw,36px);text-align:center}
+.kicker{display:inline-flex;align-items:center;gap:12px;font:700 13px/1 "Rajdhani",sans-serif;letter-spacing:.32em;color:#ffd84f;text-transform:uppercase}
+.kicker i{display:inline-block;width:34px;height:1px;background:currentColor;opacity:.6}
+.hero h1{margin:16px 0 10px;font-size:clamp(32px,6vw,54px);font-weight:900;letter-spacing:.02em;line-height:1.15;
+  text-shadow:0 0 28px rgba(160,79,255,.45)}
+.hero p{margin:0 auto;max-width:34em;color:var(--muted);font-size:clamp(15px,2vw,17px);line-height:1.7}
+
+/* ---------- shelf ---------- */
+.shelf{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:clamp(18px,2.4vw,26px);align-items:stretch}
+.card{--ac:#b06aff;--ac2:#ff4fa3;--btn-ink:#fff;
+  position:relative;display:flex;flex-direction:column;min-width:0;
+  background:linear-gradient(180deg,var(--panel2),var(--panel));
+  border:1px solid var(--line2);border-radius:var(--radius);overflow:hidden;
+  box-shadow:0 18px 40px rgba(0,0,0,.35);transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+.card::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;z-index:2;background:linear-gradient(90deg,var(--ac),var(--ac2))}
+.card:hover{transform:translateY(-4px);border-color:color-mix(in srgb,var(--ac) 55%,transparent);
+  box-shadow:0 22px 48px rgba(0,0,0,.45),0 0 0 1px color-mix(in srgb,var(--ac) 30%,transparent),0 0 34px color-mix(in srgb,var(--ac) 22%,transparent)}
+.card.violet{--ac:#b06aff;--ac2:#ff4fa3;--btn-ink:#fff}
+.card.mech{--ac:#7ff3ff;--ac2:#3aa6ff;--btn-ink:#06121a}
+.card.designer{--ac:#ff9a76;--ac2:#ff6f91;--btn-ink:#fff}
+
+.thumb{position:relative;display:block;aspect-ratio:16/10;overflow:hidden;background:#05060d;border-bottom:1px solid var(--line)}
+.thumb img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .35s ease}
+.card:hover .thumb img{transform:scale(1.035)}
+.thumb::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(180deg,transparent 55%,rgba(10,11,20,.55) 100%)}
+.tag{position:absolute;left:12px;bottom:12px;z-index:1;padding:5px 11px;border-radius:999px;
+  font-size:12.5px;font-weight:700;letter-spacing:.04em;color:#fff;
+  background:rgba(8,9,18,.72);border:1px solid color-mix(in srgb,var(--ac) 60%,transparent);
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+
+.body{display:flex;flex-direction:column;gap:12px;flex:1;padding:18px 20px 20px}
+.title{margin:0;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;font-size:24px;font-weight:900;letter-spacing:.03em;line-height:1.25}
+.title small{font:700 13px/1 "Rajdhani",sans-serif;letter-spacing:.24em;color:var(--ac);text-transform:uppercase}
+.pitch{margin:0;color:#d4d8ee;font-size:15.5px;line-height:1.75}
+.ctrl{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px}
+.ctrl li{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:9px;
+  font-size:13px;color:var(--muted);background:rgba(255,255,255,.04);border:1px solid var(--line)}
+.ctrl svg{width:15px;height:15px;flex:0 0 auto;color:var(--ac)}
+
+.actions{margin-top:auto;display:flex;flex-direction:column;gap:10px;padding-top:6px}
+.play{display:flex;align-items:center;justify-content:center;gap:10px;min-height:54px;padding:12px 18px;border-radius:14px;
+  font-size:19px;font-weight:900;letter-spacing:.12em;text-decoration:none;color:var(--btn-ink);
+  background:linear-gradient(90deg,var(--ac),var(--ac2));
+  box-shadow:0 8px 22px color-mix(in srgb,var(--ac) 32%,transparent),inset 0 1px 0 rgba(255,255,255,.28);
+  transition:filter .15s ease,transform .15s ease}
+.play:hover{filter:brightness(1.1)}
+.play:active{transform:translateY(1px)}
+.play .arrow{font-size:14px}
+.alt{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:13px;text-decoration:none;
+  background:rgba(255,255,255,.035);border:1px dashed color-mix(in srgb,var(--ac) 45%,transparent);transition:background .15s ease,border-color .15s ease}
+.alt:hover{background:rgba(255,255,255,.07);border-style:solid}
+.alt svg{width:26px;height:26px;flex:0 0 auto;color:var(--ac2)}
+.alt .alt-text{display:flex;flex-direction:column;gap:2px;min-width:0}
+.alt strong{font-size:15px;font-weight:800}
+.alt span.d{font-size:13px;color:var(--muted);line-height:1.5}
+.alt .go{margin-left:auto;color:var(--ac2);font-weight:900}
+
+.foot{margin-top:clamp(28px,5vw,44px);text-align:center;color:var(--dim);font-size:13.5px;line-height:1.7}
+
+a:focus-visible{outline:3px solid #ffd84f;outline-offset:3px}
+@media(max-width:600px){
+  .title{font-size:22px}
+  .body{padding:16px 16px 18px}
+  .pitch{font-size:15px}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div id="nav-root"></div>
+
+<main class="wrap">
+  <header class="hero">
+    <div class="kicker">Game Shelf<i></i>2 Games</div>
+    <h1><span class="lang-en">Pick a game.</span><span class="lang-zh" style="display:none">今天玩哪一台？</span></h1>
+    <p><span class="lang-en">Two home-made games on one shelf. Hit Play and you're in.</span><span class="lang-zh" style="display:none">兩個自己做的遊戲都放在這裡，按「開始玩」就直接進去。</span></p>
+  </header>
+
+  <section class="shelf" aria-label="Games">
+
+    <!-- 1. 紫刃夜行 -->
+    <article class="card violet">
+      <a class="thumb" href="/game/" tabindex="-1" aria-hidden="true">
+        <img src="/games/img/violet-edge.webp" width="800" height="500" alt="" loading="eager">
+        <span class="tag"><span class="lang-en">3D Action</span><span class="lang-zh" style="display:none">3D 動作</span></span>
+      </a>
+      <div class="body">
+        <h2 class="title">紫刃夜行 <small>Violet Edge</small></h2>
+        <p class="pitch"><span class="lang-en">Carve a path down a neon night market to the Ghost Gate, smashing haunted lanterns on the way. Chain five-hit combos, then duel the gate's guardian.</span><span class="lang-zh" style="display:none">沿著夜市大街一路殺到鬼門，打破妖燈、擊倒敵將。五連斬接跳劈，最後單挑鬼門守將。</span></p>
+        <ul class="ctrl">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></svg><span class="lang-en">Keyboard: WASD + J / K</span><span class="lang-zh" style="display:none">鍵盤：WASD 移動、J／K 攻擊</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2" width="10" height="20" rx="2"/><path d="M11 18h2"/></svg><span class="lang-en">Touch works on phones</span><span class="lang-zh" style="display:none">手機觸控也能玩</span></li>
+        </ul>
+        <div class="actions">
+          <a class="play" href="/game/"><span class="lang-en">Play</span><span class="lang-zh" style="display:none">開始玩</span><span class="arrow" aria-hidden="true">▶</span></a>
+          <a class="alt" href="/game/trio/">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3"/><path d="M3 20v-1a5 5 0 015-5h2a5 5 0 015 5v1"/><path d="M16 5a3 3 0 010 6M18 14a5 5 0 014 5v1"/></svg>
+            <span class="alt-text">
+              <strong>紫刃夜行｜三人連線</strong>
+              <span class="d"><span class="lang-en">Open a room, share the code, up to three players on the same street.</span><span class="lang-zh" style="display:none">開一間房，把房號給朋友，最多三人同場。</span></span>
+            </span>
+            <span class="go" aria-hidden="true">→</span>
+          </a>
+        </div>
+      </div>
+    </article>
+
+    <!-- 2. 鋼鐵黃昏 -->
+    <article class="card mech">
+      <a class="thumb" href="/game/mech/" tabindex="-1" aria-hidden="true">
+        <img src="/games/img/iron-dusk.webp" width="800" height="500" alt="" loading="eager">
+        <span class="tag"><span class="lang-en">Mech Combat</span><span class="lang-zh" style="display:none">機器人駕駛</span></span>
+      </a>
+      <div class="body">
+        <h2 class="title">鋼鐵黃昏 <small>Iron Dusk</small></h2>
+        <p class="pitch"><span class="lang-en">Climb into the cockpit and pilot a mech through a ruined city at dusk. Beam rifle, lock-on missile volleys and a saber rush, all in your hands.</span><span class="lang-zh" style="display:none">坐進駕駛艙，開著機器人在黃昏的廢墟城市裡開打。光束步槍、鎖定飛彈、光劍突擊，全部自己來。</span></p>
+        <ul class="ctrl">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="3" width="12" height="18" rx="6"/><path d="M12 7v4"/></svg><span class="lang-en">Desktop: keyboard + mouse</span><span class="lang-zh" style="display:none">用電腦玩：鍵盤＋滑鼠</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg><span class="lang-en">Needs a decent graphics card</span><span class="lang-zh" style="display:none">畫面較吃顯卡</span></li>
+        </ul>
+        <div class="actions">
+          <a class="play" href="/game/mech/"><span class="lang-en">Play</span><span class="lang-zh" style="display:none">開始玩</span><span class="arrow" aria-hidden="true">▶</span></a>
+        </div>
+      </div>
+    </article>
+
+    <!-- 3. 小小設計師（還沒上線，先藏起來；上線時拿掉 style="display:none"，標題文字改回「三個」） -->
+    <article class="card designer" style="display:none">
+      <a class="thumb" href="/education/designer/" tabindex="-1" aria-hidden="true">
+        <img src="/games/img/little-designer.webp" width="800" height="500" alt="" loading="eager">
+        <span class="tag"><span class="lang-en">Design &amp; Color</span><span class="lang-zh" style="display:none">設計・配色</span></span>
+      </a>
+      <div class="body">
+        <h2 class="title">小小設計師 <small>Little Designer</small></h2>
+        <p class="pitch"><span class="lang-en">Design a one-of-a-kind dress for every customer. Mix paints, pick patterns and add stickers, and learn color mixing and symmetry along the way.</span><span class="lang-zh" style="display:none">幫每一位客人設計獨一無二的洋裝。調顏色、選花紋、貼貼紙，玩著玩著就學會混色和對稱。</span></p>
+        <ul class="ctrl">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M11 18h2"/></svg><span class="lang-en">Tap to play, best on a tablet</span><span class="lang-zh" style="display:none">手指點一點，平板最順手</span></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="3" width="12" height="18" rx="6"/><path d="M12 7v4"/></svg><span class="lang-en">Mouse works too</span><span class="lang-zh" style="display:none">用滑鼠也可以</span></li>
+        </ul>
+        <div class="actions">
+          <a class="play" href="/education/designer/"><span class="lang-en">Play</span><span class="lang-zh" style="display:none">開始玩</span><span class="arrow" aria-hidden="true">▶</span></a>
+        </div>
+      </div>
+    </article>
+
+  </section>
+
+  <p class="foot"><span class="lang-en">Everything runs in the browser. Nothing to install.</span><span class="lang-zh" style="display:none">全部在瀏覽器裡跑，不用安裝。</span></p>
+</main>
+
+<script>
+/* Language: this page defaults to Chinese on a first visit (no saved choice yet).
+   Once the visitor clicks EN / 中文 in the navbar, the saved choice wins. */
+(function(){
+  function saved(){ try{ return localStorage.getItem('lang'); }catch(e){ return null; } }
+  window.setLang = function(lang){
+    if (!saved()) lang = 'zh';
+    var zh = lang === 'zh';
+    document.querySelectorAll('.lang-en').forEach(function(e){ e.style.display = zh ? 'none' : ''; });
+    document.querySelectorAll('.lang-zh').forEach(function(e){ e.style.display = zh ? '' : 'none'; });
+    document.documentElement.lang = zh ? 'zh-Hant' : 'en';
+    document.body.setAttribute('data-lang', zh ? 'zh' : 'en');
+    document.querySelectorAll('.imq-lbtn').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-lang') === (zh ? 'zh' : 'en')); });
+  };
+  window.setLang(saved() || 'zh');
+})();
+</script>
+<script src="/js/navbar.js" defer></script>
+</body>
+</html>

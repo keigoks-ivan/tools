@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IRON DUSK 音效測試台</title>
+<style>
+  :root { --bg:#0e1116; --panel:#171c24; --line:#2a3140; --fg:#d8dee9; --dim:#8a93a6; --acc:#e0a33a; --bad:#e05a4a; --ok:#6cc070; }
+  * { box-sizing: border-box; }
+  body { margin:0; padding:16px; background:var(--bg); color:var(--fg); font:14px/1.45 system-ui, -apple-system, "PingFang TC", sans-serif; }
+  h1 { font-size:18px; margin:0 0 4px; letter-spacing:.04em; }
+  .sub { color:var(--dim); margin-bottom:14px; font-size:13px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:12px; }
+  section { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:12px; }
+  section h2 { font-size:13px; margin:0 0 8px; color:var(--acc); letter-spacing:.06em; }
+  button { background:#222a36; color:var(--fg); border:1px solid var(--line); border-radius:6px; padding:6px 10px; margin:0 6px 6px 0; font:inherit; font-size:13px; cursor:pointer; }
+  button:hover { border-color:var(--acc); }
+  button.big { background:var(--acc); color:#111; font-weight:600; border:none; }
+  label { display:flex; align-items:center; gap:8px; margin:4px 0; font-size:13px; color:var(--dim); }
+  label input[type=range] { flex:1; }
+  label b { color:var(--fg); min-width:56px; text-align:right; font-variant-numeric:tabular-nums; }
+  #stat { font:12px/1.5 ui-monospace, Menlo, monospace; color:var(--dim); white-space:pre; overflow-x:auto; }
+  table { border-collapse:collapse; width:100%; font:12px ui-monospace, Menlo, monospace; }
+  td, th { border-bottom:1px solid var(--line); padding:3px 6px; text-align:right; }
+  td:first-child, th:first-child { text-align:left; }
+  .bad { color:var(--bad); } .ok { color:var(--ok); }
+  #meterWrap { overflow-x:auto; }
+</style>
+</head>
+<body>
+<h1>鋼鐵黃昏 IRON DUSK｜音效測試台</h1>
+<div class="sub">先按「啟動音訊」（瀏覽器規定要有使用者操作）。世界音效的位置由下方「距離／方位」決定（0° 正前方，90° 右方）。</div>
+
+<div class="grid">
+  <section>
+    <h2>全域</h2>
+    <button class="big" id="unlock">啟動音訊</button>
+    <label>主音量 <input type="range" id="vol" min="0" max="1" step="0.01" value="0.8"><b id="volV">0.80</b></label>
+    <label><input type="checkbox" id="pause"> 暫停（淡出並凍結）</label>
+    <label>力道 <input type="range" id="str" min="0.2" max="2" step="0.05" value="1"><b id="strV">1.00</b></label>
+    <div id="stat">尚未啟動</div>
+  </section>
+
+  <section>
+    <h2>自機：移動</h2>
+    <button data-c="footstep">腳步</button>
+    <button id="walk">連續走 8 步</button>
+    <button data-c="servo">伺服</button>
+    <button data-c="quickBoost">快速推進</button>
+    <button data-c="jump">跳躍</button>
+    <button data-c="land">落地</button>
+    <label>推進器 boost <input type="range" id="boost" min="0" max="1" step="0.01" value="0"><b id="boostV">0.00</b></label>
+  </section>
+
+  <section>
+    <h2>自機：武器</h2>
+    <button data-c="beam">光束步槍</button>
+    <button id="salvo">飛彈齊射 ×6</button>
+    <button data-c="reload">換彈</button>
+    <button data-c="saberOn">光劍開</button>
+    <button data-c="saberOff">光劍關</button>
+    <button data-c="saberSwing">揮劍</button>
+    <button data-c="overdrive">超載</button>
+  </section>
+
+  <section>
+    <h2>座艙：提示與警報</h2>
+    <button data-c="lockTick">鎖定</button>
+    <button id="multi">多重鎖定 1→6</button>
+    <button data-c="hitmarker">命中</button>
+    <button id="hurtL">受擊（左）</button>
+    <button id="hurtR">受擊（右）</button>
+    <button id="alLock">alert lock</button>
+    <button id="alMis">alert missile</button>
+    <button id="alDan">alert danger</button>
+    <label>被鎖定 setLockAlert <input type="range" id="lock" min="0" max="1" step="0.01" value="0"><b id="lockV">0.00</b></label>
+    <label><input type="checkbox" id="danger"> 低裝甲警報 setDanger</label>
+    <div>
+      <button data-ui="boot">開機</button>
+      <button data-ui="confirm">確認</button>
+      <button data-ui="wave">新一波</button>
+      <button data-ui="clear">任務完成</button>
+      <button data-ui="fail">任務失敗</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>外界（定位）</h2>
+    <label>距離 <input type="range" id="dist" min="3" max="1500" step="1" value="60"><b id="distV">60 m</b></label>
+    <label>方位 <input type="range" id="ang" min="-180" max="180" step="5" value="30"><b id="angV">30°</b></label>
+    <button data-w="enemyStep">敵機腳步</button>
+    <button data-w="enemyBeam">敵光束</button>
+    <button id="mgBurst">機槍連射 1 秒</button>
+    <button data-w="cannon">重砲</button>
+    <button data-w="missileLaunch3d">敵飛彈發射</button>
+    <button data-w="whiz">掠過彈</button>
+    <button data-w="debris">碎片</button>
+    <div>
+      <button data-imp="armor">彈著：裝甲</button>
+      <button data-imp="ground">彈著：地面</button>
+      <button data-imp="building">彈著：建築</button>
+      <button data-imp="beam">彈著：光束</button>
+    </div>
+    <div>
+      <button data-exp="1">爆炸 1</button>
+      <button data-exp="2">爆炸 2</button>
+      <button data-exp="3">爆炸 3（機體殉爆）</button>
+    </div>
+    <div>
+      <button data-tr="car">踩車</button>
+      <button data-tr="tree">踩樹</button>
+      <button data-tr="lamp">踩路燈</button>
+    </div>
+    <label>敵機推進器 <input type="range" id="eb" min="0" max="1" step="0.01" value="0"><b id="ebV">0.00</b></label>
+    <label><input type="checkbox" id="orbit"> 敵機推進器繞圈移動</label>
+  </section>
+
+  <section>
+    <h2>離線量測（不需聲音也能驗證）</h2>
+    <div class="sub">每個音效各自在 OfflineAudioContext 渲染，量混音前（raw）與最終輸出的峰值與 RMS，並檢查 NaN 與例外。</div>
+    <button class="big" id="meter">執行量測</button>
+    <div id="meterWrap"></div>
+  </section>
+</div>
+
+<script type="importmap">{"imports":{"three":"../../lib/three.module.js"}}</script>
+<script type="module">
+import { Audio as MechAudio } from '../audio.js';
+
+// 啟動前先把每個公開方法都打一次：必須安全、不丟例外
+const pre = new MechAudio();
+const P0 = { x: 10, y: 0, z: -20 };
+const allCalls = (a, pos) => {
+  a.setVolume(0.7); a.setPaused(false); a.setListener({ x: 0, y: 0, z: 0 }, { x: 0, y: 0, z: -1 });
+  a.footstep(1); a.servo(0.5); a.boost(0.5); a.boost(0); a.quickBoost(); a.jump(); a.land(1); a.beam();
+  a.missileLaunch(0); a.reload(); a.saberOn(); a.saberSwing(); a.saberOff(); a.lockTick(); a.lockMulti(3);
+  a.hitmarker(); a.hurt(1, -0.5); a.alert('lock'); a.alert('missile'); a.alert('danger'); a.setLockAlert(0.5);
+  a.setLockAlert(0); a.setDanger(true); a.setDanger(false); a.overdrive(); a.ui('boot'); a.ui('confirm');
+  a.ui('wave'); a.ui('clear'); a.ui('fail'); a.enemyStep(pos, 1); a.enemyBoost('x', pos, 0.6);
+  a.enemyBoost('x', pos, 0); a.enemyBeam(pos); a.mg(pos); a.cannon(pos); a.missileLaunch3d(pos); a.whiz(pos);
+  for (const k of ['armor', 'ground', 'building', 'beam']) a.impact(pos, k);
+  for (const s of [1, 2, 3]) a.explosion(pos, s);
+  a.debris(pos); for (const k of ['car', 'tree', 'lamp']) a.trample(pos, k);
+  // 壞參數
+  a.footstep(NaN); a.hurt(undefined, 'x'); a.explosion(null, 'big'); a.enemyBoost(undefined, undefined, NaN); a.mg({});
+};
+allCalls(pre, P0);
+window.preUnlockOK = pre.lastError === null && !pre.ready;
+console.log('[audio_test] 啟動前呼叫全部方法：', window.preUnlockOK ? 'OK' : pre.lastError);
+
+const au = new MechAudio();
+window.au = au;
+const $ = (id) => document.getElementById(id);
+const val = (id) => parseFloat($(id).value);
+const worldPos = () => {
+  const d = val('dist'), a = val('ang') * Math.PI / 180;
+  return { x: Math.sin(a) * d, y: 0, z: -Math.cos(a) * d };   // 聽者朝 -Z
+};
+
+$('unlock').onclick = () => { au.unlock(); $('unlock').textContent = '音訊已啟動'; };
+for (const [id, fmt] of [['vol', 2], ['str', 2], ['boost', 2], ['lock', 2], ['eb', 2]]) {
+  $(id).oninput = () => { $(id + 'V').textContent = val(id).toFixed(fmt); if (id === 'vol') au.setVolume(val('vol')); };
+}
+$('dist').oninput = () => { $('distV').textContent = val('dist') + ' m'; };
+$('ang').oninput = () => { $('angV').textContent = val('ang') + '°'; };
+$('pause').onchange = () => au.setPaused($('pause').checked);
+$('danger').onchange = () => au.setDanger($('danger').checked);
+
+document.querySelectorAll('[data-c]').forEach((b) => {
+  b.onclick = () => {
+    const k = b.dataset.c, s = val('str');
+    if (k === 'footstep') au.footstep(s);
+    else if (k === 'servo') au.servo(Math.min(1, s * 0.7));
+    else if (k === 'land') au.land(s);
+    else au[k]();
+  };
+});
+document.querySelectorAll('[data-ui]').forEach((b) => { b.onclick = () => au.ui(b.dataset.ui); });
+document.querySelectorAll('[data-w]').forEach((b) => {
+  b.onclick = () => { const k = b.dataset.w; if (k === 'enemyStep') au.enemyStep(worldPos(), val('str')); else au[k](worldPos()); };
+});
+document.querySelectorAll('[data-imp]').forEach((b) => { b.onclick = () => au.impact(worldPos(), b.dataset.imp); });
+document.querySelectorAll('[data-exp]').forEach((b) => { b.onclick = () => au.explosion(worldPos(), +b.dataset.exp); });
+document.querySelectorAll('[data-tr]').forEach((b) => { b.onclick = () => au.trample(worldPos(), b.dataset.tr); });
+
+$('walk').onclick = () => { for (let i = 0; i < 8; i++) setTimeout(() => { au.footstep(val('str') * (0.9 + Math.random() * 0.2)); if (i % 2) au.servo(0.3); }, i * 520); };
+$('salvo').onclick = () => { for (let i = 0; i < 6; i++) setTimeout(() => au.missileLaunch(i), i * 70); };
+$('multi').onclick = () => { for (let i = 1; i <= 6; i++) setTimeout(() => au.lockMulti(i), (i - 1) * 180); };
+$('hurtL').onclick = () => au.hurt(val('str'), -1);
+$('hurtR').onclick = () => au.hurt(val('str'), 1);
+$('alLock').onclick = () => au.alert('lock');
+$('alMis').onclick = () => au.alert('missile');
+$('alDan').onclick = () => au.alert('danger');
+$('mgBurst').onclick = () => { for (let i = 0; i < 12; i++) setTimeout(() => au.mg(worldPos()), i * 83); };
+
+// 每幀：聽者、推進器、鎖定警報、敵機推進器
+let orbitA = 0, last = performance.now();
+function frame(now) {
+  const dt = Math.min(0.1, (now - last) / 1000); last = now;
+  au.setListener({ x: 0, y: 0, z: 0 }, { x: 0, y: 0, z: -1 });
+  au.boost(val('boost'));
+  au.setLockAlert(val('lock'));
+  const ebl = val('eb');
+  if (ebl > 0) {
+    let p = worldPos();
+    if ($('orbit').checked) { orbitA += dt * 0.8; const d = val('dist'); p = { x: Math.sin(orbitA) * d, y: 0, z: -Math.cos(orbitA) * d }; }
+    au.enemyBoost('e1', p, ebl);
+  }
+  const c = au.ctx;
+  $('stat').textContent = c
+    ? `state ${c.state}   t ${c.currentTime.toFixed(2)} s   voices ${au.voices}   enemy loops ${au.eb.size}\nlastError ${au.lastError ? au.lastError.message : '—'}`
+    : '尚未啟動';
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+// ───── 離線量測 ─────
+const SR = 48000;
+const CASES = [
+  ['footstep 1', (a) => a.footstep(1)], ['footstep 1.5', (a) => a.footstep(1.5)], ['servo 1', (a) => a.servo(1)],
+  ['quickBoost', (a) => a.quickBoost()], ['jump', (a) => a.jump()], ['land 1', (a) => a.land(1)], ['land 2', (a) => a.land(2)],
+  ['beam', (a) => a.beam()], ['missileLaunch', (a) => a.missileLaunch(1)], ['reload', (a) => a.reload()],
+  ['saberOn', (a) => a.saberOn()], ['saberSwing', (a) => a.saberSwing()], ['lockTick', (a) => a.lockTick()],
+  ['lockMulti 6', (a) => a.lockMulti(6)], ['hitmarker', (a) => a.hitmarker()], ['hurt 1', (a) => a.hurt(1, 1)],
+  ['alert missile', (a) => a.alert('missile')], ['setLockAlert 1', (a) => a.setLockAlert(1)], ['setDanger', (a) => a.setDanger(true)],
+  ['overdrive', (a) => a.overdrive()], ['ui boot', (a) => a.ui('boot')], ['ui wave', (a) => a.ui('wave')],
+  ['ui clear', (a) => a.ui('clear')], ['ui fail', (a) => a.ui('fail')],
+  ['enemyStep 30m', (a) => a.enemyStep({ x: 10, y: 0, z: -28 }, 1)], ['enemyBeam 40m', (a) => a.enemyBeam({ x: -20, y: 0, z: -35 })],
+  ['mg 40m', (a) => a.mg({ x: 20, y: 0, z: -35 })], ['mg 5m', (a) => a.mg({ x: 3, y: 0, z: -4 })], ['cannon 80m', (a) => a.cannon({ x: 0, y: 0, z: -80 })],
+  ['missile3d 50m', (a) => a.missileLaunch3d({ x: 30, y: 0, z: -40 })], ['whiz', (a) => a.whiz({ x: 4, y: 0, z: -2 })],
+  ['impact armor', (a) => a.impact({ x: 5, y: 0, z: -20 }, 'armor')], ['impact ground', (a) => a.impact({ x: 5, y: 0, z: -20 }, 'ground')],
+  ['impact building', (a) => a.impact({ x: 5, y: 0, z: -20 }, 'building')], ['impact beam', (a) => a.impact({ x: 5, y: 0, z: -20 }, 'beam')],
+  ['explosion 1 @60m', (a) => a.explosion({ x: 0, y: 0, z: -60 }, 1)], ['explosion 2 @120m', (a) => a.explosion({ x: 0, y: 0, z: -120 }, 2)],
+  ['explosion 3 @30m', (a) => a.explosion({ x: 0, y: 0, z: -30 }, 3)], ['explosion 3 @600m', (a) => a.explosion({ x: 0, y: 0, z: -600 }, 3)],
+  ['debris', (a) => a.debris({ x: -8, y: 0, z: -15 })], ['trample car', (a) => a.trample({ x: 0, y: 0, z: -6 }, 'car')],
+  ['trample tree', (a) => a.trample({ x: 0, y: 0, z: -6 }, 'tree')], ['trample lamp', (a) => a.trample({ x: 0, y: 0, z: -6 }, 'lamp')],
+  ['boost 1 (loop)', (a) => a.boost(1)], ['enemyBoost 40m', (a) => a.enemyBoost('e', { x: 0, y: 0, z: -40 }, 1)],
+];
+
+async function renderOne(fn, raw, sec = 6) {
+  const ctx = new OfflineAudioContext(2, SR * sec, SR);
+  const a = new MechAudio();
+  a._attach(ctx, false);
+  if (raw) { a.mix.disconnect(); a.mix.gain.value = 1; a.mix.connect(ctx.destination); }
+  // 1 秒後才觸發：讓壓縮器脫離啟動狀態（實際遊戲中它早已在跑）
+  ctx.suspend(1).then(() => { fn(a); ctx.resume(); });
+  const buf = await ctx.startRendering();
+  let pk = 0, ss = 0, nan = 0, n = 0, lastLoud = 0;
+  const i0 = SR;
+  for (let ch = 0; ch < 2; ch++) {
+    const d = buf.getChannelData(ch);
+    for (let i = i0; i < d.length; i++) {
+      const x = d[i];
+      if (!Number.isFinite(x)) { nan++; continue; }
+      const ax = Math.abs(x);
+      if (ax > pk) pk = ax;
+      if (ax > 0.001 && i > lastLoud) lastLoud = i;
+      ss += x * x; n++;
+    }
+  }
+  // 以 50 ms 視窗算最大短時 RMS
+  let maxWin = 0;
+  const L = buf.getChannelData(0), R = buf.getChannelData(1), W = SR * 0.05;
+  for (let i = 0; i + W < L.length; i += W / 2) {
+    let s = 0; for (let j = i; j < i + W; j++) s += (L[j] * L[j] + R[j] * R[j]) / 2;
+    maxWin = Math.max(maxWin, Math.sqrt(s / W));
+  }
+  return { pk, rms: maxWin, nan, len: (lastLoud - i0) / SR, err: a.lastError ? String(a.lastError) : '', voices: a.voices };
+}
+
+const db = (x) => (x > 0 ? (20 * Math.log10(x)).toFixed(1) : '-inf');
+window.runMeter = async () => {
+  const rows = [];
+  for (const [name, fn] of CASES) {
+    const r = await renderOne(fn, true);
+    const f = await renderOne(fn, false);
+    rows.push({ name, rawPk: db(r.pk), rawRms: db(r.rms), outPk: db(f.pk), outRms: db(f.rms), len: r.len.toFixed(2), nan: r.nan + f.nan, err: r.err || f.err });
+  }
+  return rows;
+};
+$('meter').onclick = async () => {
+  $('meterWrap').textContent = '量測中……';
+  const rows = await window.runMeter();
+  const h = ['音效', 'raw 峰 dB', 'raw RMS dB', '輸出峰 dB', '輸出 RMS dB', '長度 s', 'NaN', '錯誤'];
+  $('meterWrap').innerHTML = '<table><tr>' + h.map((x) => `<th>${x}</th>`).join('') + '</tr>' + rows.map((r) =>
+    `<tr><td>${r.name}</td><td>${r.rawPk}</td><td>${r.rawRms}</td><td class="${parseFloat(r.outPk) > -0.1 ? 'bad' : ''}">${r.outPk}</td><td>${r.outRms}</td><td>${r.len}</td><td class="${r.nan ? 'bad' : 'ok'}">${r.nan}</td><td class="bad">${r.err}</td></tr>`).join('') + '</table>';
+};
+</script>
+</body>
+</html>
