@@ -151,9 +151,9 @@ export class HUD {
       X.beginPath(); X.arc(W / 2, H / 2, r, -Math.PI / 2 - a - 0.3, -Math.PI / 2 - a + 0.3); X.stroke();
     }
 
-    // ---- 窗戶上緣中央：波次、敵數、分數、時間
+    // ---- 窗戶上緣中央：第幾關、敵數、分數、時間
     const tY = this.tp(0, 0.43)[1];
-    this.text(C.wave ? `WAVE ${C.wave}/${g.waves}` : 'STANDBY', W / 2 - 14 * s, tY, 20, 'cy', 1, 'right', 700);
+    this.text(`STAGE ${C.stage}/${g.stages}`, W / 2 - 14 * s, tY, 20, 'cy', 1, 'right', 700);
     const alive = C.enemies.filter((e) => !e.dead).length + C.events.filter((ev) => ev.spawn).length;
     this.text(`HOSTILES ${alive}`, W / 2 + 14 * s, tY, 20, alive ? 'rd' : 'dim', 1, 'left', 700);
     const mm = Math.floor(C.stats.time / 60), ss = Math.floor(C.stats.time % 60);

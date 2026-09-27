@@ -1,5 +1,5 @@
 // 鋼鐵黃昏 IRON DUSK：主程式
-//   流程：標題（機體展示鏡頭）→ 開機（擋板升起）→ 戰鬥（四波）→ 暫停／結算
+//   流程：標題（機體展示鏡頭＋選關）→ 開機（擋板升起）→ 戰鬥（一關）→ 暫停／結算 → 下一關
 //   ?show=… 或 ?free 會改載入 preview.js（美術／動作預覽）
 import * as THREE from 'three';
 
@@ -14,7 +14,7 @@ async function game() {
   const { Cockpit } = await import('./cockpit.js');
   const { Input } = await import('./input.js');
   const { Player } = await import('./player.js');
-  const { Combat, WAVES } = await import('./combat.js');
+  const { Combat, STAGES } = await import('./combat.js');
   const { HUD } = await import('./hud.js');
   const { Audio: Sound } = await import('./audio.js');
   const clamp = THREE.MathUtils.clamp;
@@ -93,11 +93,12 @@ async function game() {
   }
 
   // ---------------------------------------------------------------- 戰鬥
-  let combat = null;
-  function newCombat(firstWave = 1) {
+  let combat = null, stageNo = 1;
+  function newCombat(n = stageNo) {
     if (combat) combat.dispose();
     fx.clear();
-    combat = new Combat({ scene, world, camera, player, hero, fx, audio, cockpit, post, onEnd: finish, firstWave });
+    stageNo = n;
+    combat = new Combat({ scene, world, camera, player, hero, fx, audio, cockpit, post, onEnd: finish, stage: n });
     window.__combat = combat;
   }
   newCombat();
@@ -127,23 +128,53 @@ async function game() {
     post.setSize(innerWidth, innerHeight);
   });
 
+  // ---------------------------------------------------------------- 進度（打過第幾關、每關最佳評價；?all 全開）
+  const RANKS = ['', 'C', 'B', 'A', 'S'];
+  const cleared = () => (q.has('all') ? STAGES.length : store.get('cleared', 0));
+  const nextStage = () => Math.min(STAGES.length, cleared() + 1);
+  function renderStages() {
+    const nx = nextStage();
+    $('stages').innerHTML = STAGES.map((D, i) => {
+      const n = i + 1, lock = n > nx, best = store.get('best' + n, 0);
+      return `<button class="stg${lock ? ' lock' : ''}${n === nx ? ' next' : ''}" data-s="${n}"${lock ? ' disabled' : ''}>`
+        + `<b>${n}</b><span>${lock ? 'LOCKED' : D.name}</span>${best ? `<i>${RANKS[best]}</i>` : ''}</button>`;
+    }).join('');
+  }
+
   // ---------------------------------------------------------------- 流程
   let state = 'title', boot = 0, bootLen = 3.4, titleT = 0;
   const touchUI = $('touch');
-  status.textContent = '準備完成';
-  $('start').style.display = 'inline-block';
-  $('start').addEventListener('click', launch);
+  status.textContent = '選擇關卡';
+  renderStages();
+  $('stages').style.display = 'grid';
+  $('stages').addEventListener('click', (ev) => { const b = ev.target.closest('.stg'); if (b && !b.disabled) launch(+b.dataset.s); });
   $('resume').addEventListener('click', resume);
-  $('again').addEventListener('click', () => { $('result').style.display = 'none'; resetPlayer(); newCombat(); startBoot(1.6); });
-  // 輸了：從倒下的那一波接著打（評價最高 B）
-  let contWave = 1;
-  $('cont').addEventListener('click', () => { $('result').style.display = 'none'; resetPlayer(); newCombat(contWave); combat.continued = true; startBoot(1.6); });
+  const replay = (n) => { $('result').style.display = 'none'; resetPlayer(); newCombat(n); startBoot(1.6); };
+  $('next').addEventListener('click', () => replay(stageNo + 1));
+  $('again').addEventListener('click', () => replay(stageNo));
+  $('menu').addEventListener('click', toTitle);
+  $('quit').addEventListener('click', toTitle);
   input.onLockChange = (locked) => { if (!locked && state === 'play' && !input.touch.on) pause(); };
 
-  function launch() {
+  function launch(n = nextStage()) {
     audio.unlock();
     $('title').classList.add('hide');
+    resetPlayer(); newCombat(n);
     startBoot(3.4);
+  }
+  // 回標題選關：清掉戰場、機體擺回展示鏡頭
+  function toTitle() {
+    $('result').style.display = 'none'; $('pause').style.display = 'none';
+    audio.setPaused(false); audio.setDanger(false); audio.setLockAlert(0); audio.boost(0);
+    input.unlock(); input.enabled = false;
+    touchUI.style.display = 'none';
+    resetPlayer(); newCombat(stageNo);
+    cockpitView(false); cockpit.root.visible = false;
+    for (const k of ['damage', 'overdrive', 'speed', 'danger', 'flash']) post.u[k].value = 0;
+    odV = speedV = flashV = dangerV = 0;
+    state = 'title'; titleT = 0;
+    renderStages();
+    $('title').classList.remove('hide');
   }
   function startBoot(len) {
     state = 'boot'; boot = 0; bootLen = len;
@@ -172,19 +203,25 @@ async function game() {
     input.unlock();
     touchUI.style.display = 'none';
     audio.setDanger(false); audio.setLockAlert(0);
-    const S = combat.stats;
+    const S = combat.stats, n = combat.stage, D = STAGES[n - 1], last = n === STAGES.length;
     const acc = S.shots ? Math.min(1, S.hits / S.shots) : 0;
-    const r = 0.4 * clamp((780 - S.time) / 540, 0, 1) + 0.4 * clamp(1 - S.dmgTaken / 20000, 0, 1) + 0.2 * acc;
-    let rank = !win ? (combat.wave >= 4 ? 'C' : 'D') : r >= 0.72 ? 'S' : r >= 0.56 ? 'A' : r >= 0.4 ? 'B' : 'C';
-    if (win && combat.continued && (rank === 'S' || rank === 'A')) rank = 'B';
-    contWave = combat.wave;
-    $('cont').style.display = !win && combat.wave >= 2 ? '' : 'none';
-    $('cont').textContent = `從第 ${combat.wave} 波繼續 CONTINUE`;
-    $('resTitle').textContent = win ? '任務完成' : '任務失敗';
+    // 評價：時間（依這關敵機多寡給標準時間）、承受傷害、命中率
+    let rank = '';
+    if (win) {
+      const w = D.groups.flat().reduce((a, k) => a + { grunt: 1, heavy: 1.5, ace: 2 }[k], 0);
+      const r = 0.4 * clamp((35 * w + 30 - S.time) / (25 * w + 15), 0, 1) + 0.4 * clamp(1 - S.dmgTaken / player.apMax, 0, 1) + 0.2 * acc;
+      rank = r >= 0.72 ? 'S' : r >= 0.56 ? 'A' : r >= 0.4 ? 'B' : 'C';
+      if (n > cleared()) store.set('cleared', n);
+      if (RANKS.indexOf(rank) > store.get('best' + n, 0)) store.set('best' + n, RANKS.indexOf(rank));
+    }
+    $('resTitle').textContent = win ? (last ? '全部過關' : `第 ${n} 關完成`) : `第 ${n} 關失敗`;
+    $('resSub').textContent = win ? (last ? 'ALL CLEAR' : 'STAGE CLEAR') : 'MISSION FAILED';
     $('resRank').textContent = rank;
-    $('resRank').style.color = win ? '' : '#ff4a4a';
+    $('resRank').style.display = win ? '' : 'none';
+    $('next').style.display = win && !last ? '' : 'none';
+    $('again').textContent = win ? '再打一次 RETRY' : '再試一次 RETRY';
     const mm = Math.floor(S.time / 60), ss = String(Math.floor(S.time % 60)).padStart(2, '0');
-    const rows = [['擊毀', S.kills], ['分數', S.score.toLocaleString()], ['時間', `${mm}:${ss}`], ['命中率', `${Math.round(acc * 100)}%`], ['最大連續擊破', S.maxChain], ['承受傷害', Math.round(S.dmgTaken)], ['到達波次', `${combat.wave} / ${WAVES.length}`]];
+    const rows = [['關卡', `${n}　${D.name}`], ['擊毀', S.kills], ['分數', S.score.toLocaleString()], ['時間', `${mm}:${ss}`], ['命中率', `${Math.round(acc * 100)}%`], ['最大連續擊破', S.maxChain], ['承受傷害', Math.round(S.dmgTaken)]];
     $('resTable').innerHTML = rows.map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join('');
     $('result').style.display = 'flex';
   }
@@ -198,7 +235,7 @@ async function game() {
   let t = 0, odV = 0, speedV = 0, flashV = 0, dangerV = 0;
   const fwd = new THREE.Vector3(), tmp = new THREE.Vector3(), foot = new THREE.Vector3();
   const idle = { mx: 0, my: 0, lookX: 0, lookY: 0 };
-  window.__game = { fake: null, launch: () => launch(), player, hero, world, post, cockpit, camera, get combat() { return combat; }, get state() { return state; }, fx, audio, input };
+  window.__game = { fake: null, launch: (n) => launch(n), toTitle: () => toTitle(), player, hero, world, post, cockpit, camera, get combat() { return combat; }, get state() { return state; }, fx, audio, input };
 
   // 每秒最多畫 60 張：120Hz 螢幕不會多畫一倍（?fps=0 不限、?fps=30 之類可改）
   const FPS = q.has('fps') ? +q.get('fps') : 60;
@@ -301,7 +338,7 @@ async function game() {
     post.u.flash.value = flashV;
     post.render(t);
 
-    hud.draw(rdt, { boot: state === 'boot' ? boot : 1, combat: C, player, waves: WAVES.length, groundY: world.height(player.pos.x, player.pos.z) });
+    hud.draw(rdt, { boot: state === 'boot' ? boot : 1, combat: C, player, stages: STAGES.length, groundY: world.height(player.pos.x, player.pos.z) });
     input.endFrame();
   }
   requestAnimationFrame(frame);

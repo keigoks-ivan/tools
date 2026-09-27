@@ -16,29 +16,28 @@ const KIND = {
   ace: { style: 'grunt', scheme: 'ace', ap: 5200, walk: 16, boost: 58, pref: [55, 150], stag: 170, range: 420, score: 400 },
   heavy: { style: 'heavy', scheme: 'heavy', ap: 6800, walk: 8, boost: 26, pref: [230, 420], stag: 240, range: 760, score: 300 },
 };
-// 由簡到難：每一波只多一件新東西（先學打雜兵 → 多一台 → 飛彈重裝 → 王牌 → 混編 → 最終波）
-export const WAVES = [
-  ['grunt', 'grunt'],
-  ['grunt', 'grunt', 'grunt'],
-  ['grunt', 'heavy', 'grunt'],
-  ['grunt', 'ace', 'grunt', 'grunt'],
-  ['ace', 'heavy', 'grunt', 'grunt', 'heavy'],
-  ['ace', 'heavy', 'grunt', 'ace', 'heavy', 'grunt'],
+// 關卡：由簡到難，每一關只多一件新東西（先學打雜兵 → 學飛彈 → 飛彈重裝 → 王牌 → 混編 → 決戰）
+//   每關都是滿血出發；groups＝敵機分批，打完一批才來下一批增援；tip＝開場字幕順便教一句
+export const STAGES = [
+  { name: '初陣', en: 'FIRST SORTIE', tip: '左鍵射擊，Tab 換目標', groups: [['grunt', 'grunt'], ['grunt']] },
+  { name: '包圍網', en: 'ENCIRCLED', tip: '右鍵按住鎖定多台，放開一次射飛彈', groups: [['grunt', 'grunt', 'grunt'], ['grunt', 'grunt']] },
+  { name: '重砲', en: 'HEAVY GUNS', tip: '新敵人：重裝機——響飛彈警報就點 SHIFT 閃', groups: [['grunt', 'heavy', 'grunt'], ['grunt']] },
+  { name: '王牌', en: 'THE ACE', tip: '新敵人：王牌機——槍口發光就閃，靠近會拔劍', groups: [['grunt', 'ace', 'grunt'], ['grunt', 'grunt']] },
+  { name: '鋼鐵洪流', en: 'IRON TIDE', tip: '混編部隊：邊跑邊打，別站著不動', groups: [['ace', 'heavy', 'grunt', 'grunt', 'heavy'], ['grunt', 'grunt']] },
+  { name: '黃昏決戰', en: 'LAST LIGHT', tip: '最終關：王牌、重裝全部出動', groups: [['ace', 'heavy', 'grunt', 'ace', 'heavy', 'grunt']] },
 ];
-// 每波的難度：
+// 每關的難度：
 //   atk＝同一時間最多幾台敵機出手（其他台只移動找位置）——前面一次只挨一台打，後面四面八方
 //   fire＝攻擊間隔倍率（大＝打得慢）、aim＝散布倍率（大＝打不準）、dmg＝打到你的傷害倍率
-//   ap＝敵機耐打倍率、alt＝雜兵開不開火箭砲、rep＝過關修理多少（最大 AP 的比例）
+//   ap＝敵機耐打倍率、alt＝雜兵開不開火箭砲
 const TIER = [
-  { atk: 1, fire: 1.7, aim: 1.7, dmg: 0.5, ap: 0.7, alt: false, rep: 0.6 },
-  { atk: 1, fire: 1.4, aim: 1.4, dmg: 0.65, ap: 0.85, alt: false, rep: 0.5 },
-  { atk: 2, fire: 1.2, aim: 1.2, dmg: 0.8, ap: 1, alt: true, rep: 0.45 },
-  { atk: 2, fire: 1.1, aim: 1.1, dmg: 0.9, ap: 1, alt: true, rep: 0.4 },
-  { atk: 3, fire: 1.0, aim: 1.0, dmg: 1.0, ap: 1, alt: true, rep: 0.35 },
-  { atk: 4, fire: 0.92, aim: 0.95, dmg: 1.05, ap: 1.1, alt: true, rep: 0 },
+  { atk: 1, fire: 1.7, aim: 1.7, dmg: 0.5, ap: 0.7, alt: false },
+  { atk: 1, fire: 1.4, aim: 1.4, dmg: 0.65, ap: 0.85, alt: false },
+  { atk: 2, fire: 1.2, aim: 1.2, dmg: 0.8, ap: 1, alt: true },
+  { atk: 2, fire: 1.1, aim: 1.1, dmg: 0.9, ap: 1, alt: true },
+  { atk: 3, fire: 1.0, aim: 1.0, dmg: 1.0, ap: 1, alt: true },
+  { atk: 4, fire: 0.92, aim: 0.95, dmg: 1.05, ap: 1.1, alt: true },
 ];
-// 新東西第一次出現時，開場字幕順便教一句
-const TIPS = ['暖身：左鍵射擊，Tab 換目標', '', '新敵人：重裝機——響飛彈警報就點 SHIFT 閃', '新敵人：王牌機——槍口發光就閃，靠近會拔劍', '', 'FINAL WAVE　最終波'];
 // 玩家武器
 const W = {
   rifle: { dmg: 430, stag: 24, mag: 12, rof: 0.27, reload: 2.0 },
@@ -103,8 +102,8 @@ export class Combat {
   constructor(o) {
     Object.assign(this, o);   // scene, world, camera, player, hero, fx, audio, cockpit, post
     this.enemies = []; this.missiles = []; this.debris = []; this.events = [];
-    this.wave = 0; this.phase = 'idle'; this.phaseT = 0; this.nextId = 1;
-    this.firstWave = clamp(o.firstWave || 1, 1, WAVES.length);   // 輸了可以從那一波接著打
+    this.stage = clamp(o.stage || 1, 1, STAGES.length);   // 第幾關
+    this.group = 0; this.phase = 'idle'; this.phaseT = 0; this.nextId = 1;   // group＝已出動幾批敵機
     this.stats = { shots: 0, hits: 0, kills: 0, dmgTaken: 0, time: 0, chain: 0, maxChain: 0, lastKill: -99, score: 0 };
     this.rifle = { ammo: W.rifle.mag, mag: W.rifle.mag, reload: -1, cd: 0 };
     this.msl = { cd: 1, locks: [], lockT: 0, locking: false, max: W.msl.n };
@@ -125,8 +124,9 @@ export class Combat {
 
   get alive() { return this.enemies.filter((e) => !e.dead); }
 
-  start() { this.phase = 'intro'; this.phaseT = 1.2; this.wave = 0; }
-  get tier() { return TIER[clamp(this.wave - 1, 0, TIER.length - 1)]; }
+  start() { this.phase = 'intro'; this.phaseT = 1.2; this.group = 0; }
+  get def() { return STAGES[this.stage - 1]; }
+  get tier() { return TIER[clamp(this.stage - 1, 0, TIER.length - 1)]; }
   // 同時出手的台數有上限：輪不到的先移動、晚一點再打
   canAttack(e) {
     let n = 0;
@@ -137,13 +137,14 @@ export class Combat {
   say(text, sub = '', t = 2.4, color = 'cy') { this.banner = { text, sub, t, T: t, color }; }
   note(text, color = 'cy') { this.notes.push({ text, t: 1.6, color }); if (this.notes.length > 4) this.notes.shift(); }
 
-  // ---------------------------------------------------------------- 波次
-  spawnWave() {
-    const list = WAVES[this.wave - 1];
-    const tip = TIPS[this.wave - 1];
-    this.say(`WAVE ${this.wave} / ${WAVES.length}`, tip || `HOSTILES ×${list.length}`, tip ? 4 : 2.8, this.wave === WAVES.length ? 'am' : 'cy');
+  // ---------------------------------------------------------------- 出動敵機（第一批＝開場，之後＝增援）
+  spawnGroup() {
+    const D = this.def, list = D.groups[this.group++], first = this.group === 1;
+    if (first) this.say(`STAGE ${this.stage}　${D.name}`, D.tip, 4, this.stage === STAGES.length ? 'am' : 'cy');
+    else this.say('REINFORCEMENTS', `敵方增援 ×${list.length}`, 2.6, 'am');
     this.audio.ui('wave');
-    list.forEach((k, i) => this.events.push({ spawn: true, t: 1.2 + i * 0.7, fn: () => this.spawn(k, i, list.length) }));
+    const t0 = first ? 1.2 : 2.2;
+    list.forEach((k, i) => this.events.push({ spawn: true, t: t0 + i * 0.7, fn: () => this.spawn(k, i, list.length) }));
   }
   spawn(kind, i, n) {
     const p = this.player.pos, w = this.world;
@@ -189,25 +190,19 @@ export class Combat {
     for (const d of this.dmgDirs) d.t -= rdt;
     this.dmgDirs = this.dmgDirs.filter((d) => d.t > 0);
 
-    // 波次流程
+    // 關卡流程：開場 → 一批批打完 → 過關
     this.phaseT -= dt;
-    if (this.phase === 'intro' && this.phaseT <= 0) { this.wave = this.firstWave; this.phase = 'fight'; this.spawnWave(); }
+    if (this.phase === 'intro' && this.phaseT <= 0) { this.phase = 'fight'; this.spawnGroup(); }
     else if (this.phase === 'fight' && this.enemies.length === 0 && this.events.length === 0) {
-      if (this.wave >= WAVES.length) {
+      if (this.group < this.def.groups.length) this.spawnGroup();
+      else {
+        const last = this.stage === STAGES.length;
         this.phase = 'done'; this.slowmo = 1.4;
-        this.say('MISSION COMPLETE', '任務完成', 4, 'am');
+        this.say(last ? 'ALL CLEAR' : 'STAGE CLEAR', last ? '全部過關' : `第 ${this.stage} 關完成`, 4, 'am');
         this.audio.ui('clear');
         this.events.push({ t: 1.2, fn: () => this.onEnd(true) });
-      } else {
-        this.phase = 'clear'; this.phaseT = 4.5;
-        const rep = Math.round(this.player.apMax * this.tier.rep);
-        this.player.ap = Math.min(this.player.apMax, this.player.ap + rep);
-        for (const k in this.parts) this.parts[k] = Math.min(1, this.parts[k] + 0.3);
-        this.say('WAVE CLEAR', `REPAIR +${rep}`, 3, 'gr');
-        this.audio.ui('clear');
-        this.rifle.ammo = this.rifle.mag; this.rifle.reload = -1;
       }
-    } else if (this.phase === 'clear' && this.phaseT <= 0) { this.wave++; this.phase = 'fight'; this.spawnWave(); }
+    }
 
     this.updateAim();
     if (!this.dead && this.phase !== 'done' && inp) this.playerWeapons(dt, inp);

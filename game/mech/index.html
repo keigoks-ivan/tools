@@ -23,8 +23,17 @@
   #bar { width: min(360px, 70vw); height: 3px; background: rgba(255,255,255,0.12); margin-top: 42px; position: relative; overflow: hidden; }
   #bar i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: var(--cy); box-shadow: 0 0 12px var(--cy); transition: width 0.2s; }
   #status { margin-top: 12px; font-size: 13px; letter-spacing: 0.3em; color: #8aa3ab; min-height: 18px; }
-  #start { margin-top: 30px; font: 600 18px 'Rajdhani', 'Noto Sans TC'; letter-spacing: 0.35em; padding: 14px 40px 14px 46px; color: #06090b; background: var(--cy); border: 0; cursor: pointer; clip-path: polygon(12px 0, 100% 0, calc(100% - 12px) 100%, 0 100%); display: none; pointer-events: auto; }
-  #start:hover { background: #fff; }
+  #stages { margin-top: 28px; display: none; grid-template-columns: repeat(6, 104px); gap: 10px; pointer-events: auto; }
+  .stg { position: relative; height: 74px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font: 600 14px 'Rajdhani', 'Noto Sans TC'; letter-spacing: 0.12em; color: #e6f4f7; background: rgba(5,15,20,0.6); border: 1px solid rgba(127,243,255,0.5); cursor: pointer; clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); }
+  .stg b { font-size: 28px; line-height: 1; letter-spacing: 0; }
+  .stg i { position: absolute; right: 14px; top: 6px; font-style: normal; font-weight: 700; font-size: 15px; color: var(--am); }
+  .stg.next { background: var(--cy); color: #06090b; border-color: var(--cy); }
+  .stg.next i { color: #7a3d00; }
+  .stg:not(.lock):hover { background: #fff; color: #06090b; }
+  .stg.lock { color: #5d7178; border-color: rgba(127,243,255,0.18); cursor: default; }
+  @media (max-width: 720px) { #stages { grid-template-columns: repeat(3, 96px); } }
+  #next { background: var(--cy); color: #06090b; border-color: var(--cy); } #next:hover { background: #fff; }
+  .row { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
   .keys { margin-top: 34px; display: grid; grid-template-columns: repeat(2, auto); gap: 6px 26px; font-size: 14px; color: #9fb4bb; text-align: left; letter-spacing: 0.06em; }
   .keys b { color: #e8f3f6; font-weight: 600; display: inline-block; min-width: 92px; }
   .note { margin-top: 26px; font-size: 12px; color: #5d7178; letter-spacing: 0.1em; }
@@ -61,7 +70,7 @@
   <div class="zh">鋼鐵黃昏</div>
   <div id="bar"><i></i></div>
   <div id="status">載入中</div>
-  <button id="start">出擊 LAUNCH</button>
+  <div id="stages"></div>
   <div class="keys" id="keys">
     <div><b>滑鼠</b>瞄準（機身會慢慢跟上）</div><div><b>W A S D</b>走路</div>
     <div><b>左鍵</b>光束步槍</div><div><b>右鍵按住</b>鎖定多目標 → 放開射飛彈</div>
@@ -85,15 +94,22 @@
     <span style="color:#8fa6ad;letter-spacing:0.2em">滑鼠靈敏度</span>
     <input id="sens" type="range" min="0.3" max="2.5" step="0.05" value="1">
   </div>
-  <button class="btn" id="resume">繼續 RESUME</button>
+  <div class="row">
+    <button class="btn" id="resume">繼續 RESUME</button>
+    <button class="btn" id="quit">回選關 QUIT</button>
+  </div>
 </div>
 <div id="result" class="screen">
-  <h2 id="resTitle">任務完成</h2>
+  <h2 id="resTitle">第 1 關完成</h2>
+  <div id="resSub" style="color:#8fa6ad;letter-spacing:0.3em">STAGE CLEAR</div>
   <div class="rank" id="resRank">S</div>
   <table id="resTable"></table>
-  <button class="btn" id="cont" style="display:none">從這一波繼續 CONTINUE</button>
-  <button class="btn" id="again">從頭再來 RETRY</button>
+  <div class="row">
+    <button class="btn" id="next" style="display:none">下一關 NEXT</button>
+    <button class="btn" id="again">再打一次 RETRY</button>
+    <button class="btn" id="menu">選關 STAGES</button>
+  </div>
 </div>
-<script type="module" src="./main.js?v=7"></script>
+<script type="module" src="./main.js?v=8"></script>
 </body>
 </html>
