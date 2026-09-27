@@ -662,6 +662,9 @@ export class Arena {
         // Super armour: a light hit from behind lands in full but does not interrupt a wind-up or strike.
         armored = !guarded && (enemy.action === 'telegraph' || enemy.action === 'attack');
       } else breaksGuard = true;
+    } else if (enemy.armor && source === 'attack') {
+      // armor（隊長）：輕攻擊照樣扣血，但打不斷它的起手與出招
+      armored = enemy.action === 'telegraph' || enemy.action === 'attack';
     }
     if (source === 'special' && enemy.specialScale !== undefined) damage = Math.ceil(damage * enemy.specialScale);
     if (guarded) damage *= GUARD.chip;

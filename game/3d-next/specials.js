@@ -32,6 +32,18 @@ export const SPECIAL_HINTS = {
   summoner: '召喚師！躲在後面叫小兵，先衝過去解決它',
 };
 
+// 隊長（魔王以外每段出幾個）：比小兵大一號、血多、出手重；輕攻擊打不斷它出招（要先閃，或用重擊）。
+// 每次帶 escorts 個小兵出場；被擊倒時震暈身邊 staggerRadius m 內的小兵，掉一個回 heal 血的護符
+export const CAPTAIN = { hp: 34, speed: 80, range: 90, damage: 13, telegraphTime: 0.7, recover: 1.3, escorts: 3, heal: 12, staggerRadius: 6 };
+export const CAPTAIN_NAMES = ['黑鬃', '裂齒', '鐵顎', '血斧', '石拳', '夜梟', '狂角', '赤眼'];
+export const CAPTAIN_HINT = '隊長！輕攻擊打不斷它出招，紅光亮起先閃開，再用重擊';
+
+/** 隊長的生成欄位（Arena 近戰 AI＋armor 霸體）；name 只給提示字用，隊友重建傀儡時不需要 */
+export function captainOptions(name = '') {
+  const c = CAPTAIN;
+  return { kind: 'captain', captain: true, name, hp: c.hp, speed: c.speed, range: c.range, damage: c.damage, telegraphTime: c.telegraphTime, recover: c.recover, armor: true, cooldown: 1 };
+}
+
 /** 生成欄位（不含位置）；march.js 生成與 world.js recipeFor 都用這個 */
 export function specialOptions(role) {
   const s = SPECIAL_UNITS[role];

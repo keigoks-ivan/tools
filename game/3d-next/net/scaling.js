@@ -68,6 +68,13 @@ export const COOP_SPECIALS = {
   maxAlive: { 2: 2, 3: 3 },
 };
 
+/** 隊長（兩人以上）：各段多一個、出得更快；單人數值在 march.js TUNING.captains */
+export const COOP_CAPTAINS = {
+  count: [3, 3, 3, 0],
+  first: 16,
+  every: { 2: 24, 3: 20 },
+};
+
 /** 記下 TUNING 原始值（只記一次），之後每次人數變動都從原始值重算，不會越乘越大 */
 export function snapshotCounts(tuning) {
   return scaledCounts(tuning, 1);
@@ -82,6 +89,7 @@ export function snapshotSupply(tuning) {
     segmentHeal: tuning.segmentHeal,
     officerHeal: tuning.officerHeal,
     specials: tuning.specials ? { ...tuning.specials } : null,
+    captains: tuning.captains ? { ...tuning.captains } : null,
   };
 }
 
@@ -95,6 +103,7 @@ export function applySupplyScale(tuning, base, players) {
     tuning.segmentHeal = base.segmentHeal;
     tuning.officerHeal = base.officerHeal;
     tuning.specials = base.specials ? { ...base.specials } : null;
+    tuning.captains = base.captains ? { ...base.captains } : null;
     return;
   }
   tuning.breakables.tables = structuredClone(COOP_SUPPLY.tables);
@@ -103,6 +112,7 @@ export function applySupplyScale(tuning, base, players) {
   tuning.segmentHeal = COOP_SUPPLY.segmentHeal;
   tuning.officerHeal = COOP_SUPPLY.officerHeal;
   tuning.specials = { first: COOP_SPECIALS.first, every: COOP_SPECIALS.every[n], maxAlive: COOP_SPECIALS.maxAlive[n], mix: base.specials?.mix ?? tuning.specials?.mix };
+  tuning.captains = base.captains === null ? null : { count: COOP_CAPTAINS.count, first: COOP_CAPTAINS.first, every: COOP_CAPTAINS.every[n] };
 }
 
 /**

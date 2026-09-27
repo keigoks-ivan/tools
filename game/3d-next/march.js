@@ -19,7 +19,7 @@
  * once `march.state !== 'play'`.
  */
 import { Arena } from '../2d/combat.js';
-import { SPECIAL_HINTS, SPECIAL_MIX, SPECIAL_UNITS, inLine, specialOptions } from './specials.js';
+import { CAPTAIN, CAPTAIN_HINT, CAPTAIN_NAMES, SPECIAL_HINTS, SPECIAL_MIX, SPECIAL_UNITS, captainOptions, inLine, specialOptions } from './specials.js';
 
 export const PX_PER_M = 60;
 /** On-screen enemy budget (props such as lanterns excluded). Tune after device measurement. */
@@ -143,6 +143,9 @@ export const TUNING = {
   // 特殊敵人（弓箭手／盾兵／自爆兵／召喚師，數值在 specials.js）的出場節奏：每段開始 first 秒後第一隻，
   // 之後每 every 秒補一隻，同時最多 maxAlive 隻。這裡是單人數值；連線時由 net/scaling.js 依人數加快（null＝關掉）
   specials: { first: 15, every: 12, maxAlive: 2, mix: SPECIAL_MIX },
+  // 隊長（數值在 specials.js CAPTAIN）：count＝各段（市集／廣場／階梯／鬼門頂）總共幾個，魔王那段 0；
+  // 每段開始 first 秒後第一個，之後每 every 秒一個，同時只有一個。單人數值；連線由 net/scaling.js 加快（null＝關掉）
+  captains: { count: [2, 2, 2, 0], first: 20, every: 30 },
   staggerSeconds: 2,
   staggerRadius: 12,          // m
   comboWindow: 2.5,           // s between hits before the hit counter resets
@@ -303,6 +306,7 @@ export class MarchDirector {
       this._constrain();
       this._tickSegment(step);
       if (TUNING.specials) this._tickSpecials();
+      if (TUNING.captains) this._tickCaptains();
       this._tickExternal(step);
       this.hazards = this.hazards.filter(hazard => hazard.until > this.time);
       this._tickPickups();
@@ -516,7 +520,7 @@ export class MarchDirector {
     const px = toPx(p.x, p.z);
     const enemy = this.arena.spawn(role, px.x, px.y, { segment: this.segmentIndex, ...options });
     this.units.set(enemy.id, enemy);
-    if (this.stats.spawned[role] !== undefined) this.stats.spawned[role]++;
+    if (this.stats.spawned[role] !== undefined && !options.escort) this.stats.spawned[role]++;
     return enemy;
   }
 
@@ -583,7 +587,9 @@ export class MarchDirector {
     } else if (unit.kind === 'boss') {
       this._emit('bossDown', { enemyId: unit.id, name: unit.name, x: unit.x, y: unit.y, slowMo: TUNING.killSlowMo, banner: `敵將 ${unit.name} 擊破！` });
       this._clear();
-    } else if (this.segmentIndex === 0 && unit.segment === 0 && !unit.special) {
+    } else if (unit.captain) {
+      this._captainDown(unit);
+    } else if (this.segmentIndex === 0 && unit.segment === 0 && !unit.special && !unit.escort) {
       seg.kills++;
       if (seg.kills === 8 && seg.hints === 0) { seg.hints = 1; this._say('重擊：K（重）一刀掃開身邊的敵人', 5); }
       if (seg.kills === 16 && seg.hints === 1) { seg.hints = 2; this._say('閃避：Shift（閃）看到紅圈就閃開', 5); }
@@ -955,21 +961,69 @@ export class MarchDirector {
     if (done || alive >= cfg.maxAlive || this.room() <= 0) { this.specialAt = this.time + 1; return; }
     const mix = cfg.mix[i] || cfg.mix[0];
     const role = mix[Math.floor(this._rand() * mix.length)];
-    const hero = toWorld(this.arena.hero.x, this.arena.hero.y);
-    let at;
-    if (i === 0) {
-      const segment = LEVEL.segments[0], side = this._rand() < 0.5 ? -1 : 1;
-      at = { x: side * 6.6, z: Math.max(segment.minZ + 1.5, Math.min(segment.maxZ - 1.5, hero.z - 6 - this._rand() * 5)) };
-    } else if (i === 2) {
-      const spots = LAYOUT.spawns.stairsTop;
-      at = spots[Math.floor(this._rand() * spots.length)];
-    } else {
-      const angle = this._rand() * Math.PI * 2;
-      at = { x: hero.x + Math.cos(angle) * 9, z: hero.z + Math.sin(angle) * 9 };
-    }
+    const at = this._flankSpot();
     this._spawnUnit(role, at.x, at.z, specialOptions(role));
     if (!this.specialSeen.has(role)) { this.specialSeen.add(role); this._say(SPECIAL_HINTS[role], 3); }
     this.specialAt = this.time + cfg.every;
+  }
+
+  // ---- 隊長（TUNING.captains 設 null 就不生成）-------------------------------------------
+
+  /** 每段開始 first 秒後出第一個，之後每 every 秒一個，同時只有一個；敵將或魔王出場後、過關後就不再出 */
+  _tickCaptains() {
+    const cfg = TUNING.captains, seg = this.seg, i = this.segmentIndex;
+    if (this._captainFor !== seg) {
+      this._captainFor = seg;
+      this.captainAt = this.time + cfg.first;
+      this.captainsLeft = cfg.count[i] ?? 0;
+      if (i === 0) this.captainSeen = false;
+    }
+    if (this.captainsLeft <= 0 || this.time < this.captainAt) return;
+    const done = this.gates[i]?.open || (i === 2 && seg?.secured) || seg?.foeId || (seg?.officerAt ?? null) !== null;
+    const alive = this.arena.enemies.some(e => e.captain && e.action !== 'dead');
+    if (done || alive || this.room() <= 0) { this.captainAt = this.time + 1; return; }
+    const at = this._flankSpot();
+    const name = CAPTAIN_NAMES[Math.floor(this._rand() * CAPTAIN_NAMES.length)];
+    this._spawnUnit('captain', at.x, at.z, captainOptions(name));
+    const share = i === 0 ? TUNING.market.runnerShare : i === 1 ? TUNING.plaza.runnerShare : TUNING.stairs.runnerShare;
+    for (let k = 0; k < CAPTAIN.escorts && this.room() > 0; k++) {
+      const a = (k / CAPTAIN.escorts) * Math.PI * 2;
+      this._grunt(at.x + Math.cos(a) * 1.4, at.z + Math.sin(a) * 1.4, share, { escort: true });   // 護衛：不算進市集擊倒目標
+    }
+    if (!this.captainSeen) { this.captainSeen = true; this._say(CAPTAIN_HINT, 3.5); }
+    else this._say(`隊長 ${name} 帶兵殺來！`, 2.5);
+    this.captainsLeft--;
+    this.captainAt = this.time + cfg.every;
+  }
+
+  /** 隊長倒下：震暈身邊的小兵、掉護符 */
+  _captainDown(unit) {
+    const radius = CAPTAIN.staggerRadius * PX_PER_M;
+    let count = 0;
+    for (const enemy of this.arena.enemies) {
+      if (enemy === unit || enemy.action === 'dead' || enemy.prop || enemy.kind === 'boss' || enemy.kind === 'officer' || enemy.captain) continue;
+      if (Math.hypot(enemy.x - unit.x, enemy.y - unit.y) > radius) continue;
+      if (enemy.ai === 'external' && !enemy.special) this._aggro(enemy);
+      if (this.arena.stagger(enemy, TUNING.staggerSeconds)) count++;
+    }
+    this._emit('stagger', { x: unit.x, y: unit.y, radius, duration: TUNING.staggerSeconds, count });
+    this._drop('bun', unit.x, unit.y, { heal: CAPTAIN.heal });
+    this._say(unit.name ? `隊長 ${unit.name} 擊破！` : '隊長擊破！', 2);
+  }
+
+  /** 特殊敵人與隊長的出場點：市集從兩側、階梯從上層、其他段在英雄周圍 9 m */
+  _flankSpot() {
+    const i = this.segmentIndex, hero = toWorld(this.arena.hero.x, this.arena.hero.y);
+    if (i === 0) {
+      const segment = LEVEL.segments[0], side = this._rand() < 0.5 ? -1 : 1;
+      return { x: side * 6.6, z: Math.max(segment.minZ + 1.5, Math.min(segment.maxZ - 1.5, hero.z - 6 - this._rand() * 5)) };
+    }
+    if (i === 2) {
+      const spots = LAYOUT.spawns.stairsTop;
+      return spots[Math.floor(this._rand() * spots.length)];
+    }
+    const angle = this._rand() * Math.PI * 2;
+    return { x: hero.x + Math.cos(angle) * 9, z: hero.z + Math.sin(angle) * 9 };
   }
 
   /** 弓箭手／召喚師被砍中：取消瞄準或念咒，愣一下 */
