@@ -42,6 +42,7 @@
  *   officer → officer_appear   officerDown / bossDown → officer_down (+ hit_finisher on boss) + duck
  *   bossIntro → boss_intro, boss_roar (+0.7 s), boss music    roar → boss_roar
  *   bossSlam / bossSweep / bossJump → boss_slam / boss_sweep / boss_jump
+ *   arrow → swing_light (+6 st)      bomberBlast → boss_slam (+4 st)   (三人頁的特殊敵人)
  *   gateOpen → gate_open   gateClose → gate_close
  *   lampHit → lamp_hit   lampBroken → lamp_break   lampSecured → lamp_secured   lampRestored → lamp_secured (soft)
  *   group → distant oni growl (50 %)
@@ -112,7 +113,7 @@ export const SOUNDS = {
 export const MUSIC_TRACKS = ['market', 'plaza', 'boss', 'victory', 'defeat'];
 const STINGS = new Set(['victory', 'defeat']);
 const SPATIAL = new Set(['hit', 'kill', 'guard', 'guardBreak', 'sidestep', 'enemyAttack', 'telegraph', 'breakableBroken',
-  'lanternBroken', 'lampHit', 'lampBroken', 'group', 'bossSlam', 'bossSweep', 'bossJump', 'knockback', 'summon', 'officer', 'drop']);
+  'lanternBroken', 'lampHit', 'lampBroken', 'group', 'bossSlam', 'bossSweep', 'bossJump', 'knockback', 'summon', 'officer', 'drop', 'arrow', 'bomberBlast']);
 
 /** Music cue for a march segment index (0 入口市集, 1 夜市廣場, 2 魂門階梯, 3 魂門頂端). */
 export function musicForSegment(index) {
@@ -224,6 +225,8 @@ export function mapEvent(event, state, rand = Math.random) {
       break;
     case 'roar': add('boss_roar'); break;
     case 'bossSlam': add('boss_slam'); break;
+    case 'arrow': add('swing_light', { rate: semis(6), gain: 0.8 }); break;
+    case 'bomberBlast': add('boss_slam', { rate: semis(4), gain: 0.85 }); break;
     case 'bossSweep': add('boss_sweep'); break;
     case 'bossJump': add('boss_jump'); break;
     case 'gateOpen': add('gate_open'); break;

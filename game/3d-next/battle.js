@@ -274,7 +274,54 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
   const effects = [];
   const enemies = new Map();
   const corpses = [];   // rigged oni finishing their death clip after the Arena removed them
+  // 特殊敵人（只在三人頁出現）：小兵模型換色、縮放，再掛上盾牌／弓／背上的火藥球／法杖。材質與形狀每種只建一次、大家共用
+  const SPECIAL_LOOK = { archer: { color: 0x9fe08a, scale: 0.95 }, shield: { color: 0xe6c36a, scale: 1.1 }, bomber: { color: 0xff9a4a, scale: 0.82 }, summoner: { color: 0xc08aff, scale: 1 } };
+  const specialKit = {};
+  const kit = () => {
+    if (specialKit.wood) return specialKit;
+    specialKit.wood = new THREE.MeshLambertMaterial({ color: 0x6b4a2a });
+    specialKit.steel = new THREE.MeshLambertMaterial({ color: 0x8a94a6, emissive: 0x1a2030 });
+    specialKit.fire = new THREE.MeshBasicMaterial({ color: 0xff7a2a });
+    specialKit.magic = new THREE.MeshBasicMaterial({ color: 0xd8a0ff });
+    specialKit.shield = new THREE.BoxGeometry(0.85, 1.05, 0.12);
+    specialKit.stud = new THREE.CylinderGeometry(0.16, 0.16, 0.05, 12);
+    specialKit.bow = new THREE.TorusGeometry(0.5, 0.035, 6, 18, Math.PI);
+    specialKit.bomb = new THREE.SphereGeometry(0.3, 14, 10);
+    specialKit.staff = new THREE.CylinderGeometry(0.035, 0.035, 1.8, 6);
+    specialKit.orb = new THREE.SphereGeometry(0.14, 12, 8);
+    specialKit.tints = new Map();
+    return specialKit;
+  };
+  function makeSpecial(role) {
+    const look = SPECIAL_LOOK[role], k = kit();
+    const actor = riggedOni ? createRiggedOni(THREE, riggedOni, 'grunt', cloneSkinned) : createOni(THREE, 'grunt');
+    actor.role = role;
+    actor.root.scale.setScalar(look.scale);
+    if (riggedOni) {
+      if (!k.tints.has(role)) { const m = riggedOni.toon.clone(); m.color.setHex(look.color); k.tints.set(role, m); }
+      actor.root.traverse(object => { if (object.isSkinnedMesh && object.material === riggedOni.toon) object.material = k.tints.get(role); });
+    }
+    const add = (geometry, material, x, y, z, rx = 0, ry = 0, rz = 0) => {
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.position.set(x, y, z); mesh.rotation.set(rx, ry, rz);
+      actor.root.add(mesh);
+      return mesh;
+    };
+    if (role === 'shield') { add(k.shield, k.wood, 0, 1.0, 0.5); add(k.stud, k.steel, 0, 1.0, 0.57, Math.PI / 2); }
+    else if (role === 'archer') add(k.bow, k.wood, 0.45, 1.1, 0.2, 0, 0, -Math.PI / 2);
+    else if (role === 'summoner') { add(k.staff, k.wood, 0.45, 0.9, 0.2); add(k.orb, k.magic, 0.45, 1.85, 0.2); }
+    else if (role === 'bomber') {
+      const bomb = add(k.bomb, k.fire, 0, 1.25, -0.38);
+      const update = actor.update;
+      actor.update = (state, time, dt, enemy) => {   // 點火時火藥球一脹一縮
+        update(state, time, dt, enemy);
+        bomb.scale.setScalar(state === 'telegraph' ? 1 + 0.4 * Math.abs(Math.sin(time * 16)) : 1);
+      };
+    }
+    return actor;
+  }
   const makeEnemy = (role, enemy) => {
+    if (SPECIAL_LOOK[role]) return makeSpecial(role);
     if (role !== 'officer') return riggedOni ? createRiggedOni(THREE, riggedOni, role, cloneSkinned) : createOni(THREE, role);
     // 敵將：守將模型縮小並換色（赤角偏紅、影爪偏藍）
     const actor = riggedOni ? createRiggedOni(THREE, riggedOni, 'boss', cloneSkinned) : createOni(THREE, 'boss');
@@ -343,6 +390,19 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
   function stopFrames() { if (raf) cancelAnimationFrame(raf); raf = 0; pacer.reset(); lastAt = 0; clearInput(); }
   function resumeFrames() { if (!raf && running && !paused && !isPortrait() && !document.hidden) { pacer.reset(); lastAt = 0; raf = requestAnimationFrame(frame); } }
   function toast(text, seconds = 1.7) { $('toast').textContent = text; toastUntil = arena.time + seconds; }
+  // 弓箭手的箭：一條很快淡掉的光線（只有三人頁會出現）
+  const streaks = [];
+  let streakGeometry = null;
+  function streak(x, z, facing, length, color = 0xfff0b0) {
+    streakGeometry ??= new THREE.BoxGeometry(1, 0.06, 0.06).translate(0.5, 0, 0);
+    const material = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false });
+    const mesh = new THREE.Mesh(streakGeometry, material);
+    mesh.position.set(x, groundAt(x, z) + 1.1, z);
+    mesh.rotation.y = -facing;
+    mesh.scale.x = length;
+    scene.add(mesh);
+    streaks.push({ mesh, age: 0, life: 0.28 });
+  }
   function flash(x, z, color = 0xc697ff, radius = 0.45, life = 0.24) {
     if (effects.length >= 20) {
       const old = effects.shift(); scene.remove(old.mesh); old.mesh.material.dispose();
@@ -615,6 +675,8 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
     else if (event.type === 'sidestep') flash(x, z, 0x9aa4b8, 0.6, 0.2);
     else if (event.type === 'bossSlam' && !combatFx) { flash(x, z, 0xff5a3c, (event.radius || 180) / 60, 0.5); burst(x, z, 0xffb080, 24, 0.2); shake = Math.max(shake, 0.65); }
     else if (event.type === 'bossSweep' && !combatFx) { flash(x, z, 0xff7050, (event.radius || 216) / 60, 0.4); for (let i = 0; i < 2; i++) crescent(x, z, i * Math.PI, { radius: (event.radius || 216) / 60 * 0.8, life: 0.35, spin: 2.4 }); shake = Math.max(shake, 0.4); }
+    else if (event.type === 'arrow') streak(x, z, event.facing || 0, (event.length || 720) / 60);
+    else if (event.type === 'bomberBlast') { flash(x, z, 0xff7a30, (event.radius || 144) / 60, 0.5); burst(x, z, 0xffa060, 26, 0.6); shake = Math.max(shake, 0.5); }
     else if (event.type === 'roar' && !combatFx) { flash(x, z, 0xff4060, 5, 0.8); shake = Math.max(shake, 0.6); }
     else if (event.type === 'stagger') { flash(x, z, 0xc697ff, (event.radius || 720) / 60 * 0.5, 0.7); toast('敵將倒下，小兵潰散！', 1.8); }
     else if (event.type === 'lanternBroken') { flash(x, z, 0xff3d5a, 2.2, 0.5); burst(x, z, 0xff6a80, 24, 2.2); shake = Math.max(shake, 0.35); }
@@ -831,6 +893,12 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
       shakeOffset.set((Math.random() - 0.5), (Math.random() - 0.5) * 0.7, (Math.random() - 0.5)).multiplyScalar(shake * 0.22);
       camera.position.add(shakeOffset);
     }
+    for (let i = streaks.length - 1; i >= 0; i--) {
+      const s = streaks[i];
+      s.age += dt;
+      if (s.age >= s.life) { scene.remove(s.mesh); s.mesh.material.dispose(); streaks.splice(i, 1); continue; }
+      s.mesh.material.opacity = 0.95 * (1 - s.age / s.life);
+    }
     for (let i = effects.length - 1; i >= 0; i--) {
       const effect = effects[i];
       effect.age += dt;
@@ -886,7 +954,8 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
   // 手機第一次畫到某種材質時才編譯 shader，會卡一下：開場先把鬼兵、守將、閃光圈、火花、浮字的材質一起編好。
   // 閃光圈等材質用完就 dispose，全部消失時 three 會連 shader 一起刪掉、下次出現再重編；各留一個隱形的在場上，shader 就一直在
   function prewarmShaders() {
-    const probes = riggedOni ? ['grunt', 'boss'].map(role => makeEnemy(role)) : [];
+    // 三人頁多編盾兵與自爆兵（道具的木頭／火藥材質），第一次出現時不卡
+    const probes = riggedOni ? ['grunt', 'boss', ...(coopView ? ['shield', 'bomber'] : [])].map(role => makeEnemy(role)) : [];
     for (const actor of probes) scene.add(actor.root);
     const effectCount = effects.length, sparkCount = sparks.length, popupCount = popups.length;
     flash(0, 0);

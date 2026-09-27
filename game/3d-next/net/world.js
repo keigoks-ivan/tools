@@ -12,6 +12,8 @@
  * 座標一律是 Arena 的 px（60 px＝1 m），取整數；只送變化的欄位（delta），一般一則 300–900 bytes。
  */
 
+import { SPECIAL_ROLES, specialOptions } from '../specials.js';
+
 export const WORLD_HZ = 10;
 export const KEYFRAME_EVERY = 10;          // 每 10 則（約 1 秒）一則關鍵幀
 export const WORLD_MAX_CHARS = 4096;       // 與 workers/coop-relay/src/logic.js MAX_WORLD_BYTES 一致
@@ -20,7 +22,8 @@ export const MAX_EVENTS_PER_MESSAGE = 48;
 export const ACTIONS = ['chase', 'telegraph', 'attack', 'hit', 'dead', 'idle'];
 /** 敵人種類碼：決定隊友那邊用什麼模型、什麼數值（recipeFor），也決定換房主時怎麼接手 AI */
 export const TYPES = ['grunt', 'runner', 'raider:grunt', 'raider:runner', 'officer:market', 'officer:red', 'officer:shadow', 'boss',
-  'breakable:crate', 'breakable:jar', 'breakable:barrel', 'lantern', 'elite'];
+  'breakable:crate', 'breakable:jar', 'breakable:barrel', 'lantern', 'elite',
+  ...SPECIAL_ROLES];   // 只能往後加：種類碼是陣列索引，插在中間會讓新舊版本對不上
 export const BITS = { intangible: 1, phase2: 2, broken: 4 };
 
 /** 隊友重播的關卡事件。英雄自己的事件（揮刀、受傷、補血、無雙…）各自在本機產生，不轉送 */
@@ -28,7 +31,7 @@ export const FORWARD_EVENTS = new Set([
   'telegraph', 'enemyAttack', 'kill', 'guardBreak', 'segment', 'gateOpen', 'gateClose', 'hint', 'officer', 'officerDown', 'bossDown',
   'bossIntro', 'bossPhase', 'roar', 'bossJump', 'bossSlam', 'bossSweep', 'summon', 'stagger', 'lanternBroken', 'lanternSpawn',
   'breakableBroken', 'lampHit', 'lampBroken', 'lampRestored', 'lampSecured', 'group', 'flee', 'despawn', 'drop', 'pickupLost',
-  'clear', 'groundTelegraph',
+  'clear', 'groundTelegraph', 'arrow', 'bomberBlast',
 ]);
 
 export function enemyType(enemy) {
@@ -72,6 +75,7 @@ export function recipeFor(type, T, index = 0) {
     const breakType = key.slice(10);
     return { role: 'breakable', options: { kind: 'breakable', breakType, breakIndex: index, hp: T.breakables.hp[breakType], ai: 'external', fixed: true, prop: true, action: 'idle', range: 0, cooldown: 0 } };
   }
+  if (SPECIAL_ROLES.includes(key)) return { role: key, options: specialOptions(key) };
   if (key === 'lantern') return { role: 'lantern', options: { hp: T.plaza.lanternHp, ai: 'external', fixed: true, prop: true, kind: 'lantern', lanternIndex: index, action: 'idle', range: 0, cooldown: 0 } };
   return { role: key, options: {} };
 }

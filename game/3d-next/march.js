@@ -19,6 +19,7 @@
  * once `march.state !== 'play'`.
  */
 import { Arena } from '../2d/combat.js';
+import { SPECIAL_HINTS, SPECIAL_UNITS, inLine, specialOptions } from './specials.js';
 
 export const PX_PER_M = 60;
 /** On-screen enemy budget (props such as lanterns excluded). Tune after device measurement. */
@@ -139,6 +140,9 @@ export const TUNING = {
   pickupLife: 15,
   // 小兵被擊倒時掉補給：{ kind, chance }。單人版＝null（不掉、也不多抽亂數）；三人版由 net/scaling.js 依人數設定
   killDrop: null,
+  // 特殊敵人（弓箭手／盾兵／自爆兵／召喚師，數值在 specials.js）的出場節奏。單人版＝null（從不生成）；
+  // 三人版由 net/scaling.js 依人數設定 { first, every, maxAlive, mix }
+  specials: null,
   staggerSeconds: 2,
   staggerRadius: 12,          // m
   comboWindow: 2.5,           // s between hits before the hit counter resets
@@ -298,6 +302,7 @@ export class MarchDirector {
       this.time += step;
       this._constrain();
       this._tickSegment(step);
+      if (TUNING.specials) this._tickSpecials();
       this._tickExternal(step);
       this.hazards = this.hazards.filter(hazard => hazard.until > this.time);
       this._tickPickups();
@@ -540,6 +545,7 @@ export class MarchDirector {
         this.maxCombo = Math.max(this.maxCombo, this.combo);
         const unit = this.units.get(event.enemyId);
         if (unit?.kind === 'raider' && unit.ai === 'external' && event.hp > 0) this._aggro(unit);
+        else if (unit?.special && unit.ai === 'external' && event.hp > 0) this._flinch(unit);
       } else if (event.type === 'hurt') {
         this.combo = 0;
       } else if (event.type === 'kill') {
@@ -577,7 +583,7 @@ export class MarchDirector {
     } else if (unit.kind === 'boss') {
       this._emit('bossDown', { enemyId: unit.id, name: unit.name, x: unit.x, y: unit.y, slowMo: TUNING.killSlowMo, banner: `敵將 ${unit.name} 擊破！` });
       this._clear();
-    } else if (this.segmentIndex === 0 && unit.segment === 0) {
+    } else if (this.segmentIndex === 0 && unit.segment === 0 && !unit.special) {
       seg.kills++;
       if (seg.kills === 8 && seg.hints === 0) { seg.hints = 1; this._say('重擊：K（重）一刀掃開身邊的敵人', 5); }
       if (seg.kills === 16 && seg.hints === 1) { seg.hints = 2; this._say('閃避：Shift（閃）看到紅圈就閃開', 5); }
@@ -595,7 +601,7 @@ export class MarchDirector {
     for (const enemy of this.arena.enemies) {
       if (enemy.action === 'dead' || enemy.prop || enemy.kind === 'boss' || enemy.kind === 'officer') continue;
       if (Math.hypot(enemy.x - unit.x, enemy.y - unit.y) > radius) continue;
-      if (enemy.ai === 'external') this._aggro(enemy);
+      if (enemy.ai === 'external' && !enemy.special) this._aggro(enemy);
       if (this.arena.stagger(enemy, TUNING.staggerSeconds)) count++;
     }
     this._emit('officerDown', { enemyId: unit.id, name: unit.name, x: unit.x, y: unit.y, slowMo: TUNING.killSlowMo, banner: `敵將 ${unit.name} 擊破！` });
@@ -808,7 +814,7 @@ export class MarchDirector {
   // ---- Scripted AI (ai: 'external') -----------------------------------------------
 
   _tickExternal(dt) {
-    for (const enemy of this.arena.enemies) {
+    for (const enemy of [...this.arena.enemies]) {   // 複本：自爆兵炸完會把自己移出陣列
       if (enemy.ai !== 'external' || enemy.action === 'dead') continue;
       enemy.actionTime += dt;
       enemy.cooldown = Math.max(0, (enemy.cooldown || 0) - dt);
@@ -816,6 +822,9 @@ export class MarchDirector {
       if (enemy.kind === 'raider') this._raider(enemy, dt);
       else if (enemy.kind === 'officer') this._lunger(enemy, dt);
       else if (enemy.kind === 'boss') this._boss(enemy, dt);
+      else if (enemy.kind === 'archer') this._archer(enemy, dt);
+      else if (enemy.kind === 'bomber') this._bomber(enemy, dt);
+      else if (enemy.kind === 'summoner') this._summoner(enemy, dt);
     }
   }
 
@@ -927,6 +936,145 @@ export class MarchDirector {
       }
     } else if (enemy.mode === 'recover') {
       if (enemy.actionTime >= 1.6) { enemy.mode = 'chase'; this._setAction(enemy, 'chase'); enemy.cooldown = 0.8; }
+    }
+  }
+
+  // ---- 特殊敵人（TUNING.specials 有值才會生成）--------------------------------------
+
+  /** 每段開始 first 秒後，每 every 秒補一隻，同時最多 maxAlive 隻；不算進市集擊倒目標 */
+  _tickSpecials() {
+    const cfg = TUNING.specials, seg = this.seg, i = this.segmentIndex;
+    if (this._specialFor !== seg) {
+      this._specialFor = seg;
+      this.specialAt = this.time + cfg.first;
+      if (i === 0 || !this.specialSeen) this.specialSeen = new Set();
+    }
+    if (this.time < this.specialAt) return;
+    const done = this.gates[i]?.open || (i === 2 && seg?.secured);
+    const alive = this.arena.enemies.reduce((n, e) => n + (e.special && e.action !== 'dead' ? 1 : 0), 0);
+    if (done || alive >= cfg.maxAlive || this.room() <= 0) { this.specialAt = this.time + 1; return; }
+    const mix = cfg.mix[i] || cfg.mix[0];
+    const role = mix[Math.floor(this._rand() * mix.length)];
+    const hero = toWorld(this.arena.hero.x, this.arena.hero.y);
+    let at;
+    if (i === 0) {
+      const segment = LEVEL.segments[0], side = this._rand() < 0.5 ? -1 : 1;
+      at = { x: side * 6.6, z: Math.max(segment.minZ + 1.5, Math.min(segment.maxZ - 1.5, hero.z - 6 - this._rand() * 5)) };
+    } else if (i === 2) {
+      const spots = LAYOUT.spawns.stairsTop;
+      at = spots[Math.floor(this._rand() * spots.length)];
+    } else {
+      const angle = this._rand() * Math.PI * 2;
+      at = { x: hero.x + Math.cos(angle) * 9, z: hero.z + Math.sin(angle) * 9 };
+    }
+    this._spawnUnit(role, at.x, at.z, specialOptions(role));
+    if (!this.specialSeen.has(role)) { this.specialSeen.add(role); this._say(SPECIAL_HINTS[role], 3); }
+    this.specialAt = this.time + cfg.every;
+  }
+
+  /** 弓箭手／召喚師被砍中：取消瞄準或念咒，愣一下 */
+  _flinch(enemy) {
+    if (enemy.kind === 'bomber') return;   // 點火後砍它不會熄，只有砍倒才不會炸
+    const s = SPECIAL_UNITS[enemy.kind];
+    if (!s?.flinch) return;
+    if (enemy.mode === 'aim' || enemy.mode === 'cast') {
+      enemy.telegraph = 0;
+      this.hazards = this.hazards.filter(hazard => hazard.ownerId !== enemy.id);
+      enemy.cooldown = Math.max(enemy.cooldown, 0.8);
+    }
+    enemy.mode = 'flinch';
+    this._setAction(enemy, 'hit');
+  }
+
+  /** 朝英雄走、或背對英雄退開（保持距離用） */
+  _keepDistance(enemy, speed, dt, near, far) {
+    const hero = this.arena.hero;
+    const dx = enemy.x - hero.x, dy = enemy.y - hero.y, d = Math.hypot(dx, dy) || 1;
+    if (d > far) this._moveToward(enemy, hero.x, hero.y, speed, dt, far);
+    else if (d < near) {
+      enemy.x += dx / d * speed * dt;
+      enemy.y += dy / d * speed * dt;
+      enemy.facing = Math.atan2(-dy, -dx);
+    } else enemy.facing = Math.atan2(-dy, -dx);
+    const moving = d > far || d < near;
+    if (moving !== (enemy.action === 'chase')) this._setAction(enemy, moving ? 'chase' : 'idle');
+    return d;
+  }
+
+  /** 弓箭手：保持距離，瞄準（地上紅線）後放箭，紅線上的人中箭 */
+  _archer(enemy, dt) {
+    const s = SPECIAL_UNITS.archer, hero = this.arena.hero;
+    if (enemy.mode === 'flinch') {
+      if (enemy.actionTime >= s.flinch) { enemy.mode = 'move'; this._setAction(enemy, 'chase'); }
+    } else if (enemy.mode === 'aim') {
+      enemy.telegraph = Math.max(0, enemy.telegraph - dt);
+      if (enemy.telegraph === 0) {
+        enemy.mode = 'loose';
+        this._setAction(enemy, 'attack');
+        const length = s.length * PX_PER_M, width = s.width * PX_PER_M;
+        this._emit('arrow', { x: enemy.x, y: enemy.y, enemyId: enemy.id, role: enemy.role, facing: enemy.facing, length, width, damage: enemy.damage ?? s.damage });
+        if (inLine(hero.x, hero.y, enemy, enemy.facing, length, width)) this.arena.hurtHero(enemy.damage ?? s.damage, { id: enemy.id, role: enemy.role, facing: enemy.facing });
+      }
+    } else if (enemy.mode === 'loose') {
+      if (enemy.actionTime >= 0.35) { enemy.mode = 'move'; this._setAction(enemy, 'chase'); enemy.cooldown = s.cooldown; }
+    } else {
+      const d = this._keepDistance(enemy, s.speed, dt, s.keep[0] * PX_PER_M, s.keep[1] * PX_PER_M);
+      if (enemy.cooldown <= 0 && d <= (s.length - 1) * PX_PER_M) {
+        enemy.facing = Math.atan2(hero.y - enemy.y, hero.x - enemy.x);
+        enemy.mode = 'aim';
+        enemy.telegraph = s.aim;
+        this._setAction(enemy, 'telegraph');
+        this._emit('telegraph', { x: enemy.x, y: enemy.y, enemyId: enemy.id, facing: enemy.facing, duration: s.aim, role: enemy.role });
+        this._hazard({ shape: 'line', x: enemy.x, y: enemy.y, facing: enemy.facing, length: s.length * PX_PER_M, width: s.width * PX_PER_M, until: this.time + s.aim, ownerId: enemy.id, attack: 'arrow' });
+      }
+    }
+  }
+
+  /** 自爆兵：衝向英雄，貼近後點火（地上紅圈），時間到炸開、自己消失 */
+  _bomber(enemy, dt) {
+    const s = SPECIAL_UNITS.bomber, hero = this.arena.hero;
+    if (enemy.mode === 'fuse') {
+      enemy.telegraph = Math.max(0, enemy.telegraph - dt);
+      if (enemy.telegraph > 0) return;
+      const radius = s.radius * PX_PER_M, damage = enemy.damage ?? s.damage;
+      this._emit('bomberBlast', { x: enemy.x, y: enemy.y, enemyId: enemy.id, role: enemy.role, radius, damage });
+      if (Math.hypot(hero.x - enemy.x, hero.y - enemy.y) <= radius + 20) this.arena.hurtHero(damage, { id: enemy.id, role: enemy.role, facing: enemy.facing });
+      this._removeUnit(enemy, 'despawn');
+      return;
+    }
+    const d = this._moveToward(enemy, hero.x, hero.y, s.speed, dt, 30);
+    if (enemy.action !== 'chase') this._setAction(enemy, 'chase');
+    if (d <= s.trigger * PX_PER_M && enemy.cooldown <= 0) {
+      enemy.mode = 'fuse';
+      enemy.telegraph = s.fuse;
+      this._setAction(enemy, 'telegraph');
+      this._emit('telegraph', { x: enemy.x, y: enemy.y, enemyId: enemy.id, facing: enemy.facing, duration: s.fuse, role: enemy.role });
+      this._hazard({ shape: 'circle', x: enemy.x, y: enemy.y, radius: s.radius * PX_PER_M, until: this.time + s.fuse, ownerId: enemy.id, attack: 'blast' });
+    }
+  }
+
+  /** 召喚師：躲在後面，每隔一段時間念咒叫出小兵 */
+  _summoner(enemy, dt) {
+    const s = SPECIAL_UNITS.summoner;
+    if (enemy.mode === 'flinch') {
+      if (enemy.actionTime >= s.flinch) { enemy.mode = 'move'; this._setAction(enemy, 'chase'); }
+    } else if (enemy.mode === 'cast') {
+      enemy.telegraph = Math.max(0, enemy.telegraph - dt);
+      if (enemy.telegraph === 0) {
+        this._setAction(enemy, 'attack');
+        this._summon(enemy, s.count);
+        enemy.mode = 'move';
+        enemy.cooldown = s.every;
+      }
+    } else {
+      const keep = s.keep * PX_PER_M;
+      this._keepDistance(enemy, s.speed, dt, keep - 2 * PX_PER_M, keep + 1.5 * PX_PER_M);
+      if (enemy.cooldown <= 0 && this.room() > 0) {
+        enemy.mode = 'cast';
+        enemy.telegraph = s.cast;
+        this._setAction(enemy, 'telegraph');
+        this._emit('telegraph', { x: enemy.x, y: enemy.y, enemyId: enemy.id, facing: enemy.facing, duration: s.cast, role: enemy.role });
+      }
     }
   }
 

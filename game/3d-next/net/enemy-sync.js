@@ -18,6 +18,7 @@
  * 單人頁從不載入這個檔案；三人頁只有自己一個人時，包裝一律直接呼叫原方法，行為與單人版相同。
  */
 import { SnapshotBuffer } from './interp.js';
+import { inLine } from '../specials.js';
 import { applyCountScale, applySupplyScale, scaledDamage, scaledHp, snapshotCounts, snapshotSupply } from './scaling.js';
 import { BITS, FORWARD_EVENTS, MAX_EVENTS_PER_MESSAGE, WorldDecoder, WorldEncoder, compactEvent, decodeLevel, enemyType, fitWorld, isEmptyWorld, levelStatus, recipeFor } from './world.js';
 import { CLAIM_LIMITS, ClaimMeter, SOURCES, TARGETING, assignTargets, validateClaimEntry } from './authority.js';
@@ -40,6 +41,7 @@ const supplyBaselines = new WeakMap();   // 補給加成的原始值（同上，
 const enemyDamage = enemy => enemy.damage ?? (enemy.role === 'boss' ? 18 : enemy.role === 'elite' ? 12 : enemy.role === 'runner' ? 7 : 9);
 
 /** 打破道具、燈籠不算擊倒 */
+const AOE_EVENTS = new Set(['bossSlam', 'bossSweep', 'arrow', 'bomberBlast']);
 const NO_CREDIT = new Set(['breakable', 'lantern']);
 
 /**
@@ -202,17 +204,21 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
     arena._separateEnemies();
   }
 
-  /** 守將的跳砸／橫掃是範圍攻擊：目標以外、站在紅圈裡的玩家也要吃到 */
-  function bossAoe(enemy, target, mark) {
+  /** 範圍攻擊（守將跳砸／橫掃、弓箭手的箭、自爆兵爆炸）：目標以外、站在範圍裡的玩家也要吃到 */
+  function teamAoe(enemy, target, mark) {
     const b = T().boss;
     for (let i = mark; i < march.events.length; i++) {
       const event = march.events[i];
-      if (event.enemyId !== enemy.id || (event.type !== 'bossSlam' && event.type !== 'bossSweep')) continue;
-      const damage = event.type === 'bossSlam' ? b.slamDamage : b.sweepDamage;
-      const source = { id: enemy.id, role: enemy.role, facing: enemy.facing, ground: true };
+      if (event.enemyId !== enemy.id || !AOE_EVENTS.has(event.type)) continue;
+      const boss = event.type === 'bossSlam' || event.type === 'bossSweep';
+      const damage = event.type === 'bossSlam' ? b.slamDamage : event.type === 'bossSweep' ? b.sweepDamage : event.damage;
+      const inside = event.type === 'arrow'
+        ? hero => inLine(hero.x, hero.y, event, event.facing, event.length, event.width)
+        : hero => Math.hypot(hero.x - event.x, hero.y - event.y) <= event.radius + (boss ? 0 : 20);
+      const source = { id: enemy.id, role: enemy.role, facing: enemy.facing, ground: boss };
       const heroes = [arena.hero, ...[...proxies.values()].filter(p => p.alive && !p.downed)];
       for (const hero of heroes) {
-        if (hero === target || Math.hypot(hero.x - event.x, hero.y - event.y) > event.radius) continue;
+        if (hero === target || !inside(hero)) continue;
         if (hero.remote) { if (hero.invulnerable <= 0) queueDamage(hero, damage, source, true); }
         else arena.hurtHero(damage, source);
       }
@@ -404,7 +410,7 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
     if (puppet.netType !== u.type) {
       const recipe = recipeFor(u.type, T(), u.index);
       puppet.role = recipe.role;
-      for (const key of ['kind', 'variant', 'name', 'guard', 'specialScale', 'breakType', 'breakIndex', 'lanternIndex', 'fixed', 'prop']) {
+      for (const key of ['kind', 'special', 'variant', 'name', 'guard', 'specialScale', 'breakType', 'breakIndex', 'lanternIndex', 'fixed', 'prop']) {
         if (key in recipe.options) puppet[key] = recipe.options[key]; else delete puppet[key];
       }
       puppet.netType = u.type;
@@ -666,6 +672,7 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
       e.cooldown = Math.max(e.cooldown || 0, 0.6);
       if (!e.prop) { e.action = 'chase'; e.actionTime = 0; }
       if (e.kind === 'officer' && e.variant === 'shadow') Object.assign(e, { mode: 'chase', modeTime: 0, lunges: 0 });
+      if (e.special && e.ai === 'external') Object.assign(e, { mode: 'move', modeTime: 0 });
       if (e.kind === 'boss') Object.assign(e, { mode: 'chase', modeTime: 0, move: null, lift: 0, intangible: false, slam: null, resummonAt: time + t.boss.resummon.every });
       march.units.set(e.id, e);
     }
@@ -759,7 +766,7 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
         withHero({ x: Infinity, y: Infinity, hp: 0, maxHp: 0, energy: 100 }, () => baseTickPickups.call(march));   // 倒地時只讓補給照常過期
       };
       const keep = (object, name) => { orig[name] = object[name]; };
-      for (const name of ['update', 'drainEvents', 'reset', '_spawnUnit', '_raider', '_lunger', '_boss', '_checkProgress']) keep(march, name);
+      for (const name of ['update', 'drainEvents', 'reset', '_spawnUnit', '_raider', '_lunger', '_boss', '_archer', '_bomber', '_summoner', '_checkProgress']) keep(march, name);
       for (const name of ['_advanceEnemies', '_hurtHero', 'hurtHero', '_damageEnemy', 'stagger']) keep(arena, name);
 
       march.update = (dt, input) => role === 'guest' ? guestUpdate(dt, input) : hostUpdate(dt, input);
@@ -796,8 +803,16 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
         if (!multi()) return orig._boss.call(march, enemy, dt);
         const target = heroFor(enemy, arena.hero), mark = march.events.length;
         withHero(target, () => orig._boss.call(march, enemy, dt));
-        bossAoe(enemy, target, mark);
+        teamAoe(enemy, target, mark);
       };
+      for (const name of ['_archer', '_bomber', '_summoner']) {
+        march[name] = (enemy, dt) => {
+          if (!multi()) return orig[name].call(march, enemy, dt);
+          const target = heroFor(enemy, arena.hero), mark = march.events.length;
+          withHero(target, () => orig[name].call(march, enemy, dt));
+          teamAoe(enemy, target, mark);
+        };
+      }
       march._checkProgress = () => multi() ? hostCheckProgress() : orig._checkProgress.call(march);
 
       arena._advanceEnemies = dt => {

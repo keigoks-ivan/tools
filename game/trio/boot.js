@@ -6,10 +6,10 @@ import { installGameGestures } from '../2d/touch-gestures.js';
 import { CoopClient } from '../3d-next/net/client.js';
 import { createCoop } from '../3d-next/net/coop.js';
 import { relayUrl } from '../3d-next/net/protocol.js';
-import { setupFullscreenUi } from './fullscreen.js?v=trio9';
-import { setupWipeTransitions } from './wipe.js?v=trio9';
-import { setupTeamOverlay } from './overlay.js?v=trio9';
-import { setupTeamResults } from './results.js?v=trio9';
+import { setupFullscreenUi } from './fullscreen.js?v=trio10';
+import { setupWipeTransitions } from './wipe.js?v=trio10';
+import { setupTeamOverlay } from './overlay.js?v=trio10';
+import { setupTeamResults } from './results.js?v=trio10';
 
 const $ = id => document.getElementById(id);
 installGameGestures($('game'));
@@ -19,7 +19,7 @@ for (const type of ['gesturestart', 'gesturechange', 'gestureend']) {
 }
 
 // 引擎：版本字串與單人頁不同也沒關係（兩頁不會同時開），battle.js 內部的 import 網址相同
-const loadBattleModule = () => import('../3d-next/battle.js?v=trio9');
+const loadBattleModule = () => import('../3d-next/battle.js?v=trio10');
 const params = new URLSearchParams(location.search);
 
 const client = new CoopClient({ relay: relayUrl(location) });
@@ -34,7 +34,7 @@ setupTeamResults({ coop });
 
 // ---- 音訊（與單人頁相同的 audio.js；M 鍵與 HUD 按鈕切換靜音） ----
 let audio = null, assets = null;
-const audioReady = import('../3d-next/audio.js?v=20260925d').then(({ createAudio }) => {
+const audioReady = import('../3d-next/audio.js?v=trio10').then(({ createAudio }) => {
   audio = createAudio({ baseUrl: '../assets/audio/march/', fetchImpl: (url, init) => assets ? assets.fetchAudio(url, init) : fetch(url, init) });
   const button = $('soundBtn');
   const render = s => { if (button) { button.hidden = false; button.textContent = s.muted ? '🔇' : '🔊'; button.setAttribute('aria-pressed', String(s.muted)); } };
