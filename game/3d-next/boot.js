@@ -73,11 +73,11 @@ const assets = createPreloader({
   plan: assetPlan({ hero: vroid ? 'vroid' : 'rumi', march: vroid && params.get('level') !== 'single' }),
   loadEngine: () => loadBattleModule().then(async module => { await module.loadLazyModules(); return module; }),
 });
-const loadBattleModule = () => import('./battle.js?v=20260925i');
+const loadBattleModule = () => import('./battle.js?v=20260927a');
 if (params.has('debug')) window.__assets = assets;   // ?debug：各項下載／步驟的開始與完成時間（__assets.progress.items）
 let audio = null;
 const audioReady = vroid
-  ? import('./audio.js?v=20260925d').then(({ createAudio }) => {
+  ? import('./audio.js?v=20260927a').then(({ createAudio }) => {
     // mp3 由預載器提供（開戰要用的檔案下載完才抓）；解碼仍在按下開始、解鎖音訊之後
     audio = createAudio({ baseUrl: '../assets/audio/march/', fetchImpl: (url, init) => assets.fetchAudio(url, init) });
     if (params.has('debug')) window.__audio = audio;

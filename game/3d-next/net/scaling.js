@@ -59,19 +59,13 @@ export const COOP_SUPPLY = {
 };
 
 /**
- * 特殊敵人出場節奏（兩人以上才有；數值在 ../specials.js）。
- * first：每段開始幾秒後第一隻；every：之後每幾秒補一隻；maxAlive：同時最多幾隻；mix：各段（市集／廣場／階梯／鬼門頂）會出哪些
+ * 特殊敵人出場節奏（兩人以上；單人數值在 march.js TUNING.specials，敵人數值在 ../specials.js）。
+ * first：每段開始幾秒後第一隻；every：之後每幾秒補一隻；maxAlive：同時最多幾隻；各段出哪幾種沿用單人的 mix
  */
 export const COOP_SPECIALS = {
   first: 12,
   every: { 2: 10, 3: 7 },
   maxAlive: { 2: 2, 3: 3 },
-  mix: [
-    ['archer', 'shield', 'bomber'],
-    ['archer', 'shield', 'bomber', 'summoner'],
-    ['archer', 'bomber', 'shield', 'summoner'],
-    ['archer', 'summoner', 'bomber'],
-  ],
 };
 
 /** 記下 TUNING 原始值（只記一次），之後每次人數變動都從原始值重算，不會越乘越大 */
@@ -87,7 +81,7 @@ export function snapshotSupply(tuning) {
     pickupLife: tuning.pickupLife,
     segmentHeal: tuning.segmentHeal,
     officerHeal: tuning.officerHeal,
-    specials: tuning.specials ?? null,
+    specials: tuning.specials ? { ...tuning.specials } : null,
   };
 }
 
@@ -100,7 +94,7 @@ export function applySupplyScale(tuning, base, players) {
     tuning.pickupLife = base.pickupLife;
     tuning.segmentHeal = base.segmentHeal;
     tuning.officerHeal = base.officerHeal;
-    tuning.specials = base.specials ?? null;
+    tuning.specials = base.specials ? { ...base.specials } : null;
     return;
   }
   tuning.breakables.tables = structuredClone(COOP_SUPPLY.tables);
@@ -108,7 +102,7 @@ export function applySupplyScale(tuning, base, players) {
   tuning.pickupLife = COOP_SUPPLY.pickupLife;
   tuning.segmentHeal = COOP_SUPPLY.segmentHeal;
   tuning.officerHeal = COOP_SUPPLY.officerHeal;
-  tuning.specials = { first: COOP_SPECIALS.first, every: COOP_SPECIALS.every[n], maxAlive: COOP_SPECIALS.maxAlive[n], mix: COOP_SPECIALS.mix.map(list => [...list]) };
+  tuning.specials = { first: COOP_SPECIALS.first, every: COOP_SPECIALS.every[n], maxAlive: COOP_SPECIALS.maxAlive[n], mix: base.specials?.mix ?? tuning.specials?.mix };
 }
 
 /**

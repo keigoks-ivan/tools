@@ -19,7 +19,7 @@
  * once `march.state !== 'play'`.
  */
 import { Arena } from '../2d/combat.js';
-import { SPECIAL_HINTS, SPECIAL_UNITS, inLine, specialOptions } from './specials.js';
+import { SPECIAL_HINTS, SPECIAL_MIX, SPECIAL_UNITS, inLine, specialOptions } from './specials.js';
 
 export const PX_PER_M = 60;
 /** On-screen enemy budget (props such as lanterns excluded). Tune after device measurement. */
@@ -140,9 +140,9 @@ export const TUNING = {
   pickupLife: 15,
   // 小兵被擊倒時掉補給：{ kind, chance }。單人版＝null（不掉、也不多抽亂數）；三人版由 net/scaling.js 依人數設定
   killDrop: null,
-  // 特殊敵人（弓箭手／盾兵／自爆兵／召喚師，數值在 specials.js）的出場節奏。單人版＝null（從不生成）；
-  // 三人版由 net/scaling.js 依人數設定 { first, every, maxAlive, mix }
-  specials: null,
+  // 特殊敵人（弓箭手／盾兵／自爆兵／召喚師，數值在 specials.js）的出場節奏：每段開始 first 秒後第一隻，
+  // 之後每 every 秒補一隻，同時最多 maxAlive 隻。這裡是單人數值；連線時由 net/scaling.js 依人數加快（null＝關掉）
+  specials: { first: 15, every: 12, maxAlive: 2, mix: SPECIAL_MIX },
   staggerSeconds: 2,
   staggerRadius: 12,          // m
   comboWindow: 2.5,           // s between hits before the hit counter resets
@@ -939,7 +939,7 @@ export class MarchDirector {
     }
   }
 
-  // ---- 特殊敵人（TUNING.specials 有值才會生成）--------------------------------------
+  // ---- 特殊敵人（TUNING.specials 設 null 就不生成）--------------------------------------
 
   /** 每段開始 first 秒後，每 every 秒補一隻，同時最多 maxAlive 隻；不算進市集擊倒目標 */
   _tickSpecials() {

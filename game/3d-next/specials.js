@@ -1,9 +1,17 @@
-// 特殊敵人（只在連線兩人以上出現；單人版 TUNING.specials＝null，從不生成）：
+// 特殊敵人（單人與連線都會出現；連線人多時出得更快、同時更多隻）：
 // 弓箭手 archer、盾兵 shield、自爆兵 bomber、召喚師 summoner。
 // march.js（生成與 AI）與 net/world.js（隊友重建傀儡、換房主接手）共用這裡的數值，確保兩邊一模一樣。
 // 距離單位：公尺（m），用到時乘上 PX_PER_M。血量與傷害是單人基準，生成時再依人數加成。
 
 export const SPECIAL_ROLES = ['archer', 'shield', 'bomber', 'summoner'];
+
+/** 各段（市集／廣場／階梯／鬼門頂）會出哪幾種 */
+export const SPECIAL_MIX = [
+  ['archer', 'shield', 'bomber'],
+  ['archer', 'shield', 'bomber', 'summoner'],
+  ['archer', 'bomber', 'shield', 'summoner'],
+  ['archer', 'summoner', 'bomber'],
+];
 
 export const SPECIAL_UNITS = {
   // 保持 6～9 m 距離；瞄準 1 秒（地上紅線），放箭瞬間紅線上的人中箭

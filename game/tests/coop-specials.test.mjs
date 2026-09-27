@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { MarchDirector, TUNING, toWorld } from '../3d-next/march.js';
 import { COOP_SPECIALS, applySupplyScale, snapshotSupply } from '../3d-next/net/scaling.js';
 import { TYPES, enemyType, recipeFor } from '../3d-next/net/world.js';
-import { SPECIAL_ROLES, SPECIAL_UNITS, inLine } from '../3d-next/specials.js';
+import { SPECIAL_MIX, SPECIAL_ROLES, SPECIAL_UNITS, inLine } from '../3d-next/specials.js';
 
 const STEP = 1 / 60;
 const specials = march => march.arena.enemies.filter(e => e.special && e.action !== 'dead');
@@ -29,11 +29,21 @@ function spawnNear(march, role, dx, dz) {
   return march._spawnUnit(role, hero.x + dx, hero.z + dz, recipeFor(TYPES.indexOf(role), TUNING).options);
 }
 
-test('single player never spawns special enemies', () => {
-  assert.equal(TUNING.specials, null);
+test('single player: specials come slower (first 15 s, every 12 s, at most 2 alive); null switches them off', () => {
+  assert.deepEqual({ ...TUNING.specials, mix: undefined }, { first: 15, every: 12, maxAlive: 2, mix: undefined });
   const march = new MarchDirector({ seed: 11 });
-  run(march, 40, { each: m => { m.arena.hero.invulnerable = 10; } });
-  assert.equal(specials(march).length, 0);
+  run(march, 14, { each: m => { m.arena.hero.invulnerable = 10; } });
+  assert.equal(specials(march).length, 0, 'nothing special before 15 s');
+  let peak = 0;
+  run(march, 40, { each: m => { m.arena.hero.invulnerable = 10; peak = Math.max(peak, specials(m).length); } });
+  assert.ok(peak >= 1 && peak <= 2, `peak ${peak}`);
+  const saved = TUNING.specials;
+  TUNING.specials = null;
+  try {
+    const off = new MarchDirector({ seed: 11 });
+    run(off, 40, { each: m => { m.arena.hero.invulnerable = 10; } });
+    assert.equal(specials(off).length, 0);
+  } finally { TUNING.specials = saved; }
 });
 
 test('co-op pacing: first special after `first` s, never more than maxAlive, not counted in the market quota', () => {
@@ -45,7 +55,7 @@ test('co-op pacing: first special after `first` s, never more than maxAlive, not
     let peak = 0;
     run(march, 40, { each: m => { m.arena.hero.invulnerable = 10; peak = Math.max(peak, specials(m).length); } });
     assert.ok(peak >= 1 && peak <= COOP_SPECIALS.maxAlive[3], `peak ${peak}`);
-    for (const e of specials(march)) assert.ok(COOP_SPECIALS.mix[0].includes(e.role));
+    for (const e of specials(march)) assert.ok(SPECIAL_MIX[0].includes(e.role));
     const kills = march.seg.kills;
     for (const e of specials(march)) march.arena._damageEnemy(e, 9999, 'heavy');
     run(march, STEP);

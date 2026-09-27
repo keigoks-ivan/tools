@@ -42,7 +42,7 @@
  *   officer → officer_appear   officerDown / bossDown → officer_down (+ hit_finisher on boss) + duck
  *   bossIntro → boss_intro, boss_roar (+0.7 s), boss music    roar → boss_roar
  *   bossSlam / bossSweep / bossJump → boss_slam / boss_sweep / boss_jump
- *   arrow → swing_light (+6 st)      bomberBlast → boss_slam (+4 st)   (三人頁的特殊敵人)
+ *   arrow → swing_light (+6 st)      bomberBlast → boss_slam (+4 st)   (特殊敵人)
  *   gateOpen → gate_open   gateClose → gate_close
  *   lampHit → lamp_hit   lampBroken → lamp_break   lampSecured → lamp_secured   lampRestored → lamp_secured (soft)
  *   group → distant oni growl (50 %)

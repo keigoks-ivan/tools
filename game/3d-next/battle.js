@@ -274,7 +274,7 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
   const effects = [];
   const enemies = new Map();
   const corpses = [];   // rigged oni finishing their death clip after the Arena removed them
-  // 特殊敵人（只在三人頁出現）：小兵模型換色、縮放，再掛上盾牌／弓／背上的火藥球／法杖。材質與形狀每種只建一次、大家共用
+  // 特殊敵人：小兵模型換色、縮放，再掛上盾牌／弓／背上的火藥球／法杖。材質與形狀每種只建一次、大家共用
   const SPECIAL_LOOK = { archer: { color: 0x9fe08a, scale: 0.95 }, shield: { color: 0xe6c36a, scale: 1.1 }, bomber: { color: 0xff9a4a, scale: 0.82 }, summoner: { color: 0xc08aff, scale: 1 } };
   const specialKit = {};
   const kit = () => {
@@ -390,7 +390,7 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
   function stopFrames() { if (raf) cancelAnimationFrame(raf); raf = 0; pacer.reset(); lastAt = 0; clearInput(); }
   function resumeFrames() { if (!raf && running && !paused && !isPortrait() && !document.hidden) { pacer.reset(); lastAt = 0; raf = requestAnimationFrame(frame); } }
   function toast(text, seconds = 1.7) { $('toast').textContent = text; toastUntil = arena.time + seconds; }
-  // 弓箭手的箭：一條很快淡掉的光線（只有三人頁會出現）
+  // 弓箭手的箭：一條很快淡掉的光線
   const streaks = [];
   let streakGeometry = null;
   function streak(x, z, facing, length, color = 0xfff0b0) {
@@ -954,8 +954,8 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
   // 手機第一次畫到某種材質時才編譯 shader，會卡一下：開場先把鬼兵、守將、閃光圈、火花、浮字的材質一起編好。
   // 閃光圈等材質用完就 dispose，全部消失時 three 會連 shader 一起刪掉、下次出現再重編；各留一個隱形的在場上，shader 就一直在
   function prewarmShaders() {
-    // 三人頁多編盾兵與自爆兵（道具的木頭／火藥材質），第一次出現時不卡
-    const probes = riggedOni ? ['grunt', 'boss', ...(coopView ? ['shield', 'bomber'] : [])].map(role => makeEnemy(role)) : [];
+    // 盾兵與自爆兵也先編（道具的木頭／火藥材質），第一次出現時不卡
+    const probes = riggedOni ? ['grunt', 'boss', 'shield', 'bomber'].map(role => makeEnemy(role)) : [];
     for (const actor of probes) scene.add(actor.root);
     const effectCount = effects.length, sparkCount = sparks.length, popupCount = popups.length;
     flash(0, 0);
