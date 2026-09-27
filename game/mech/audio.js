@@ -1377,6 +1377,84 @@ export class Audio {
     v.done();
   }
 
+  // 大樓倒塌（size 0.6～3；dur＝倒塌秒數，落地重擊對齊畫面）：
+  //  ① 斷裂：結構爆裂的裂擊串＋悶響，鋼筋呻吟（鋸齒過共振帶通、音高下滑）
+  //  ② 倒塌中：超低頻長隆隆（40 Hz 往下滑）＋左右兩條布朗雜訊主體越來越大＋一路碎裂的顆粒
+  //  ③ 落地：次低頻重擊＋過飽和悶響＋數秒碎石雨、鋼材碰撞；遠方回音；近距離座艙震動；配樂大幅閃避
+  collapse(pos, size, dur) {
+    if (!this._ok()) return;
+    const k = clamp(num(size, 1), 0.5, 3), D = clamp(num(dur, 3), 1.5, 6);
+    const S = this._spat(pos, { ref: 60 + 30 * k, rv: 0.5, delay: true, prio: 2, min: 0.001 }); if (!S) return;
+    const { v, o, t, d } = S, att = v.out.gain.value, T1 = t + D;
+    const near = 1 - clamp((d - 150) / 400, 0, 1);
+    const body = this._sat(v, o, 2.2, 0.5);
+    // ①
+    for (let i = 0; i < 4; i++) this._N(v, o, { t: t + i * rnd(0.06, 0.14), b: 'w', a: 0.0005, d: 0.07, g: 0.4 * (0.35 + 0.65 * near), ft: 'bandpass', f: rnd(1800, 3600), q: 1.2 });
+    this._thump(v, o, t, 95, 30, 0.5, 0.6, 2);
+    this._N(v, body, { t, b: 'p', a: 0.003, d: 0.5, g: 0.45, ft: 'lowpass', f: 900, f1: 250, q: 0.7 });
+    this._gran(v, o, { t, dur: 0.9, b: 'w', ft: 'bandpass', fr: [1500, 4500], q: 1.5, g: 0.2 * (0.35 + 0.65 * near), gd: [0.002, 0.01], gap: [0.004, 0.03], fade: true });
+    const gf = rnd(40, 55);
+    const gr = this._T(v, o, { t: t + 0.1, type: 'sawtooth', f: gf, a: 0.3, h: D * 0.45, d: 1.2, g: 0.1, ft: 'bandpass', ff: 540, ff1: 230, fgl: D, fq: 7 });
+    gr.frequency.linearRampToValueAtTime(gf * 0.6, t + D);
+    this._creak(v, o, t + 0.3, 1.2, 0.08);
+    this._creak(v, o, t + D * 0.55, 1.0, 0.07);
+    // ②
+    this._T(v, o, { t, f: 42, f1: 24, gl: D + 1.5, a: D * 0.6, h: 0.3, d: 2.5 + k, g: 0.24 + 0.08 * k });
+    for (const sd of [-0.55, 0.55]) {
+      this._N(v, this._pan(v, sd, body), { t: t + 0.1 + rnd(0, 0.1), b: 'b', a: D * 0.85, h: 0.3, d: 2.4 + 0.8 * k, g: 0.45 + 0.15 * k, ft: 'lowpass', f: 170, f1: 450, gl: D, q: 0.7 });
+    }
+    for (let i = 0, n = Math.ceil(D / 1.2); i < n; i++) {
+      const r = (i + 1) / n;
+      this._gran(v, o, { t: t + 0.3 + i * 1.2, dur: 1.3, b: 'p', ft: 'bandpass', fr: [350, 1600], q: 1.3, g: (0.08 + 0.14 * r) * (0.5 + 0.5 * near), gd: [0.006, 0.025], gap: [0.004, 0.03] });
+      this._gran(v, o, { t: t + 0.5 + i * 1.2, dur: 1.1, b: 'w', ft: 'bandpass', fr: [1600, 4200], q: 2, g: (0.04 + 0.07 * r) * near, gd: [0.002, 0.008], gap: [0.01, 0.06] });
+    }
+    // ③
+    this._thump(v, o, T1, 72, 21, 0.85, 1.6 + 0.3 * k, 2.6);
+    this._T(v, o, { t: T1, f: 38, f1: 18, gl: 2.5, a: 0.01, d: 2.5 + 0.5 * k, g: 0.3 + 0.08 * k });
+    this._N(v, body, { t: T1, b: 'b', a: 0.01, d: 2.6 + k, g: 1.0, ft: 'lowpass', f: 750, f1: 120, gl: 1.6, q: 0.8 });
+    this._N(v, o, { t: T1, b: 'p', a: 0.004, d: 0.7, g: 0.5, ft: 'bandpass', f: 1200, f1: 300, q: 0.7 });
+    this._N(v, o, { t: T1, b: 'w', a: 0.0008, d: 0.08, g: 0.45 * (0.3 + 0.7 * near), ft: 'highpass', f: 1000 });
+    for (let i = 0; i < 3; i++) {
+      this._gran(v, o, { t: T1 + 0.1 + i * 1.1, dur: 1.2, b: 'w', ft: 'bandpass', fr: [800, 3800], q: 3, g: 0.17 * (1 - i * 0.28) * (0.4 + 0.6 * near), gd: [0.006, 0.025], gap: [0.01, 0.07], fade: i === 2 });
+      this._gran(v, o, { t: T1 + 0.05 + i * 1.1, dur: 1.2, b: 'p', ft: 'bandpass', fr: [220, 800], q: 1.5, g: 0.22 * (1 - i * 0.28), gd: [0.01, 0.04], gap: [0.02, 0.1], fade: i === 2 });
+    }
+    for (let i = 0; i < 6; i++) this._clank(v, o, T1 + rnd(0.1, 3.2), rnd(260, 1300), rnd(0.03, 0.08) * (0.4 + 0.6 * near), rnd(0.2, 0.5));
+    // 遠方回音（城市建築間來回）
+    if (d > 150) {
+      const fr = clamp((d - 150) / 300, 0, 1);
+      for (const [dt, g] of [[0.35, 0.5], [0.8, 0.34]]) {
+        this._N(v, o, { t: T1 + dt * rnd(0.8, 1.25), b: 'b', a: 0.15, h: 0.3, d: 2.2 + 0.4 * k, g: g * (0.5 + 0.2 * k) * fr, ft: 'lowpass', f: 260, f1: 110, q: 0.8 });
+      }
+    }
+    // 近距離：座艙結構跟著震、儀表嘎嘎響
+    if (d < 260) {
+      const nr = 1 - d / 260;
+      this._thump(v, this.bus.hull, T1, 46, 22, 0.6 * nr, 1.4, 1.5);
+      this._N(v, this.bus.hull, { t, b: 'b', a: D * 0.7, h: 0.3, d: 1.5, g: 0.3 * nr, ft: 'lowpass', f: 90, q: 0.7 });
+      this._gran(v, this.bus.cab, { t: t + D * 0.3, dur: D * 0.7 + 1.2, b: 'w', ft: 'bandpass', fr: [1800, 4500], q: 5, g: 0.07 * nr, gd: [0.004, 0.015], gap: [0.006, 0.04], fade: true });
+    }
+    // 閃避：開頭壓一下，落地再壓深
+    const db = 10 * Math.sqrt(att) * Math.min(1, 0.5 + k / 3);
+    if (db > 1) { this._duck(db * 0.6, t, D * 0.5); this._duck(db, T1, 0.8 + 0.3 * k); }
+    v.done();
+  }
+
+  // 結構呻吟（快倒的樓）：鋼筋受力的低頻鋸齒（共振帶通、音高下滑）＋深沉悶響＋零星碎裂
+  groan(pos, k) {
+    if (!this._ok()) return;
+    const g = clamp(num(k, 1), 0.2, 1.5);
+    const S = this._spat(pos, { ref: 45, rv: 0.5, delay: true, prio: 1 }); if (!S) return;
+    const { v, o, t } = S, f = rnd(36, 52);
+    const os = this._T(v, o, { t, type: 'sawtooth', f, a: 0.3, h: 0.6, d: 0.9, g: 0.12 * g, ft: 'bandpass', ff: rnd(380, 520), ff1: rnd(200, 280), fgl: 1.7, fq: 8 });
+    os.frequency.linearRampToValueAtTime(f * 0.7, t + 1.8);
+    this._T(v, o, { t: t + 0.05, type: 'sawtooth', f: f * 1.49, f1: f * 1.1, gl: 1.6, a: 0.35, h: 0.4, d: 0.8, g: 0.045 * g, ft: 'bandpass', ff: 900, fq: 6 });
+    this._creak(v, o, t + 0.2, 1.1, 0.06 * g);
+    this._N(v, o, { t, b: 'b', a: 0.4, h: 0.4, d: 1.1, g: 0.35 * g, ft: 'lowpass', f: 160, q: 0.7 });
+    this._thump(v, o, t + rnd(0.5, 1), 70, 32, 0.32 * g, 0.45, 1.6);
+    this._gran(v, o, { t: t + 0.4, dur: 1.2, b: 'w', ft: 'bandpass', fr: [900, 3000], q: 2, g: 0.12 * g, gd: [0.004, 0.015], gap: [0.02, 0.1], fade: true });
+    v.done();
+  }
+
   trample(pos, kind) {
     if (!this._ok()) return;
     const S = this._spat(pos, { ref: 15, rv: 0.2, prio: 1 }); if (!S) return;

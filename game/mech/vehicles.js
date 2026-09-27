@@ -592,19 +592,25 @@ export class Vehicles {
   }
 
   // ---------------------------------------------------------------- 出場
-  spawn(kind, i, n) {
+  // at＝指定位置（遭遇戰）：戰車吸到最近的路上、朝 (at.tx, at.tz) 開；直升機從 at 低空升起
+  spawn(kind, i, n, at = null) {
     const v = new Vehicle(kind, this.C.nextId++);
-    if (kind === 'tank') this.placeTank(v, i, n);
-    else if (kind === 'heli') this.placeHeli(v, i, n);
+    if (kind === 'tank') this.placeTank(v, i, n, false, at);
+    else if (kind === 'heli') this.placeHeli(v, i, n, at);
     else this.placeJet(v, i, n);
     v.q.setFromEuler(_e.set(v.pitch, v.yaw, v.roll, 'YXZ'));
     this.list.push(v);
     return v;
   }
   // 戰車：在你前方 230~400 m 的道路上出現（格線座標用整數算），朝你開過來
-  placeTank(v, i, n, near = false) {
-    const C = this.C, p = C.player.pos;
+  placeTank(v, i, n, near = false, at = null) {
+    const C = this.C, p = C.player.pos, o = at ? { x: at.tx, z: at.tz } : p;
     let pick = null;
+    if (at) {
+      const gi = clamp(Math.round(at.x / NODE), -NMAX, NMAX), gj = clamp(Math.round(at.z / NODE), -NMAX, NMAX);
+      const alongZ = Math.abs(at.x - gi * NODE) <= Math.abs(at.z - gj * NODE);
+      pick = alongZ ? { x: gi * NODE, z: clamp(at.z, -NMAX * NODE, NMAX * NODE), alongZ, gi, gj } : { x: clamp(at.x, -NMAX * NODE, NMAX * NODE), z: gj * NODE, alongZ, gi, gj };
+    }
     for (let tries = 0; tries < 60 && !pick; tries++) {
       const spread = n > 1 ? (i / (n - 1) - 0.5) * 1.8 : 0;
       const a = C.player.yaw + spread + rand(-0.5, 0.5) + (tries > 30 ? rand(-2.6, 2.6) : 0);
@@ -623,11 +629,11 @@ export class Vehicles {
     if (pick.alongZ) {
       const j0 = clamp(Math.floor(pick.z / NODE), -NMAX, NMAX - 1);
       fi = ti = pick.gi;
-      if (p.z > pick.z) { fj = j0; tj = j0 + 1; } else { fj = j0 + 1; tj = j0; }
+      if (o.z > pick.z) { fj = j0; tj = j0 + 1; } else { fj = j0 + 1; tj = j0; }
     } else {
       const i0 = clamp(Math.floor(pick.x / NODE), -NMAX, NMAX - 1);
       fj = tj = pick.gj;
-      if (p.x > pick.x) { fi = i0; ti = i0 + 1; } else { fi = i0 + 1; ti = i0; }
+      if (o.x > pick.x) { fi = i0; ti = i0 + 1; } else { fi = i0 + 1; ti = i0; }
     }
     Object.assign(v, { fi, fj, ti, tj });
     this.pickNext(v);
@@ -644,11 +650,12 @@ export class Vehicles {
   }
   // 下一個路口：不回頭，挑「離你的距離最接近自己偏好距離」的方向（加一點亂數）
   pickNext(v) {
-    const p = this.C.player.pos;
+    const p = this.C.player.pos, bl = this.C.world.blocked;
     let best = null, bs = 1e9;
     for (const [di, dj] of DIRS) {
       const i = v.ti + di, j = v.tj + dj;
       if (Math.abs(i) > NMAX || Math.abs(j) > NMAX || (i === v.fi && j === v.fj)) continue;
+      if (bl && bl.has((v.ti + i + 20) * 100 + (v.tj + j + 20))) continue;   // 遭遇戰：路障封死的支路不走（同 encounter.js edgeKey）
       // 太久看不到你：改成往你那邊開（到街上讓你看得到），不然照自己喜歡的距離繞
       const pref = v.noLos > 6 ? 40 : v.pref || 180;
       const s = Math.abs(Math.hypot(i * NODE - p.x, j * NODE - p.z) - pref) + rand(0, v.noLos > 6 ? 25 : 70);
@@ -658,15 +665,15 @@ export class Vehicles {
     v.ni = best[0]; v.nj = best[1];
   }
   // 直升機：遠處低空飛進來，繞著你打
-  placeHeli(v, i, n) {
+  placeHeli(v, i, n, at = null) {
     const C = this.C, p = C.player.pos, w = C.world;
     const a = C.player.yaw + (n > 1 ? (i / (n - 1) - 0.5) * 1.6 : 0) + rand(-0.6, 0.6);
     const d = rand(420, 520);
-    const x = clamp(p.x + Math.sin(a) * d, -760, 760), z = clamp(p.z + Math.cos(a) * d, -760, 760);
+    const x = at ? at.x : clamp(p.x + Math.sin(a) * d, -760, 760), z = at ? at.z : clamp(p.z + Math.cos(a) * d, -760, 760);
     v.alt = rand(42, 80);
-    v.pos.set(x, Math.max(w.height(x, z) + v.alt + 15, Math.min(w.support(x, z, 9, 1e4) + 30, w.height(x, z) + 115)), z);
+    v.pos.set(x, at ? at.y : Math.max(w.height(x, z) + v.alt + 15, Math.min(w.support(x, z, 9, 1e4) + 30, w.height(x, z) + 115)), z);
     v.yaw = Math.atan2(p.x - x, p.z - z);
-    v.vel.set(Math.sin(v.yaw), 0, Math.cos(v.yaw)).multiplyScalar(20);
+    v.vel.set(Math.sin(v.yaw), 0, Math.cos(v.yaw)).multiplyScalar(at ? 3 : 20);
     Object.assign(v, {
       mode: 'orbit', modeT: rand(6, 10), orbitR: rand(170, 260), odir: Math.random() < 0.5 ? -1 : 1, vmax: rand(22, 28),
       ax: 0, az: 0, mgN: 0, mgT: 0, mgK: 0, mgCd: rand(3, 5), mgReal: false, rkN: 0, rkT: 0, rkCd: rand(6, 10),
@@ -802,7 +809,8 @@ export class Vehicles {
     // 引擎聲
     C.audio.vehicleLoop?.(v.id, v.pos, 'tank', clamp(0.25 + v.speed / 12, 0, 1));
     // 太久看不到你（卡在遠處繞圈）：換到你附近的路上
-    if (v.noLos > 30) { v.noLos = 0; this.placeTank(v, 0, 1, true); }
+    // 遭遇戰：支路都封了，繞出去就回不來——看不到你 12 秒就直接換到前方路線上
+    if (v.noLos > (C.enc ? 12 : 30)) { v.noLos = 0; this.placeTank(v, 0, 1, true, C.enc ? C.enc.tankSpot() : null); }
   }
   tankFire(v, pc, dist) {
     const C = this.C, pl = C.player, T = C.tier;
@@ -1071,6 +1079,7 @@ export class Vehicles {
             C.fx.explosion(hp, 0.7);
             C.fx.impact(hp, s.n || _n.set(0, 1, 0), s.n && s.n.y < 0.7 ? 'building' : 'ground');
             C.audio.explosion(hp, 0.8);
+            C.world.blast(hp, 8, 1);
             const d = hp.distanceTo(pc);
             if (s.real && d < 14) this.hitPlayer(DMG.shell * DMG.shellSplash * (1 - d / 14), s.src, 'tank');
             const ds = clamp(1 - d / 90, 0, 1);
@@ -1093,6 +1102,7 @@ export class Vehicles {
           C.fx.missileEnd(s.h);
           C.fx.explosion(hit, 0.8);
           C.audio.explosion(hit, 0.9);
+          if (!onP) w.blast(hit, 7, 0.8);
           const d = hit.distanceTo(pc);
           if (s.real) { if (onP) this.hitPlayer(DMG.rocket, s.src, 'heli'); else if (d < 12) this.hitPlayer(DMG.rocket * 0.5 * (1 - d / 12), s.src, 'heli'); }
           const ds = clamp(1 - d / 90, 0, 1);
@@ -1230,6 +1240,9 @@ export class Vehicles {
     const C = this.C, w = C.world;
     if (v.state === 'wreck') {
       v.deadT += dt;
+      // 墜在屋頂上、樓塌了：殘骸跟著掉下去
+      const gy = w.support(v.pos.x, v.pos.z, 3, v.pos.y);
+      if (v.pos.y > gy + 1.5) { v.dropV = (v.dropV || 0) + 30 * dt; v.pos.y = Math.max(gy + 0.95, v.pos.y - v.dropV * dt); } else v.dropV = 0;
       if (v.deadT > 17) v.pos.y -= dt * 0.4;
       if (v.deadT > 20) v.remove = true;
       return;
@@ -1260,6 +1273,7 @@ export class Vehicles {
       C.fx.smokeColumn(p, 10);
       C.audio.explosion(p, 2.2);
       C.audio.debris(p);
+      w.blast(p, 16, 3);
       C.audio.vehicleStop?.(v.id);
       const near = clamp(1 - p.distanceTo(C.player.pos) / 220, 0, 1);
       if (near > 0) { C.cockpit.kick('hit', near * 0.7, 0); if (near > 0.6) C.fx.dust(_b.set(p.x, gy, p.z), 2); }
@@ -1291,6 +1305,7 @@ export class Vehicles {
       C.fx.smokeColumn(_c.set(p.x, gy, p.z), 8);
       C.audio.explosion(p, 2.5);
       C.audio.debris(p);
+      w.blast(p, 18, 3.5);
       const near = clamp(1 - p.distanceTo(C.player.pos) / 260, 0, 1);
       if (near > 0) C.cockpit.kick('hit', near * 0.7, 0);
       v.remove = true;

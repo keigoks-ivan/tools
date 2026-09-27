@@ -2,6 +2,7 @@
 import * as THREE from 'three';
 import { Mech } from './mechs.js';
 import { Vehicles, VKIND } from './vehicles.js';
+import { ENC, encGroups, setRoute, Encounter } from './encounter.js';
 
 const clamp = THREE.MathUtils.clamp;
 const rand = (a, b) => a + Math.random() * (b - a);
@@ -20,11 +21,12 @@ const KIND = {
 // 關卡：由簡到難，每一關只多一件新東西（先學打雜兵 → 學飛彈 → 飛彈重裝 → 王牌 → 混編 → 決戰）
 //   每關都是滿血出發；groups＝敵機分批，打完一批才來下一批增援；tip＝開場字幕順便教一句
 //   tank／heli／jet＝戰鬥載具（一發就爆的砲灰，見 vehicles.js），和機體混編
+//   enc＝遭遇戰（第 1、2 關）：沿街推進、轉角伏兵，路線與伏兵見 encounter.js；groups 只拿來算評價份量
 export const STAGES = [
-  { name: '初陣', en: 'FIRST SORTIE', tip: '左鍵射擊，Tab 換目標——戰車一發就爆，也可以直接踩扁',
-    groups: [['tank', 'tank', 'tank'], ['grunt', 'grunt', 'tank', 'tank'], ['grunt', 'tank', 'tank', 'tank']] },
-  { name: '包圍網', en: 'ENCIRCLED', tip: '右鍵按住鎖定多台，放開一次射飛彈——車隊一次清光',
-    groups: [['tank', 'tank', 'tank', 'heli'], ['grunt', 'grunt', 'grunt', 'tank', 'tank'], ['heli', 'heli', 'tank', 'tank', 'tank', 'tank'], ['grunt', 'grunt', 'heli']] },
+  { name: '初陣', en: 'FIRST SORTIE', enc: ENC[0], tip: '跟著藍色光柱沿街推進——左鍵射擊，Tab 換目標，戰車一發就爆',
+    groups: encGroups(ENC[0]) },
+  { name: '包圍網', en: 'ENCIRCLED', enc: ENC[1], tip: '右鍵按住鎖定多台，放開一次射飛彈——車隊一次清光',
+    groups: encGroups(ENC[1]) },
   { name: '重砲', en: 'HEAVY GUNS', tip: '新敵人：重裝機——響飛彈警報就點 SHIFT 閃',
     groups: [['tank', 'tank', 'tank', 'tank', 'heli'], ['grunt', 'heavy', 'grunt', 'tank', 'tank'], ['heli', 'heli', 'tank', 'tank', 'tank'], ['grunt', 'tank', 'tank']] },
   { name: '王牌', en: 'THE ACE', tip: '新敵人：王牌機——槍口發光就閃，靠近會拔劍',
@@ -138,7 +140,13 @@ export class Combat {
     this.dead = false;
     this.onEnd = o.onEnd || (() => {});
     this.vehicles = new Vehicles(this);   // 戰車、直升機、戰機
+    // 遭遇戰：先收起所有路障（prep() 再依關卡擺上）；從檢查點繼續＝沿用當時的成績、從那一區開始
+    setRoute(this.world, null);
+    this.cp = o.cp || null;
+    if (this.cp) { this.cp.used++; Object.assign(this.stats, JSON.parse(JSON.stringify(this.cp.stats)), { cont: this.cp.used }); }
+    this.enc = this.def.enc ? new Encounter(this, this.def.enc, this.cp ? this.cp.sec : 0) : null;
   }
+  prep() { if (this.enc) this.enc.prep(); }
 
   get alive() { return this.enemies.filter((e) => !e.dead); }
 
@@ -164,14 +172,15 @@ export class Combat {
     const t0 = first ? 1.2 : 2.2;
     list.forEach((k, i) => this.events.push({ spawn: true, t: t0 + i * 0.7, fn: () => this.spawn(k, i, list.length) }));
   }
-  spawn(kind, i, n) {
-    if (VKIND[kind]) { this.enemies.push(this.vehicles.spawn(kind, i, n)); return; }
+  // at＝指定出現位置（遭遇戰）：ground＝從支路衝出來，其餘＝從 at.y 上方 150 m 降下（可降在樓頂）
+  spawn(kind, i, n, at = null) {
+    if (VKIND[kind]) { const v = this.vehicles.spawn(kind, i, n, at); this.enemies.push(v); return v; }
     const p = this.player.pos, w = this.world;
     const e = new Enemy(kind, this.nextId++);
     const T = this.tier;
     e.ap = e.apMax = Math.round(e.K.ap * T.ap);
     e.fireCd *= T.fire; e.altCd *= T.fire;
-    let x = 0, z = 0, fx = 0, fz = 0, found = false;
+    let x = at ? at.x : 0, z = at ? at.z : 0, fx = 0, fz = 0, found = !!at;
     const pc = _b.set(p.x, p.y + 12, p.z);
     for (let tries = 0; tries < 80 && !found; tries++) {
       const a = this.player.yaw + (i / Math.max(1, n - 1) - 0.5) * 1.6 + rand(-0.4, 0.4) + (tries > 40 ? rand(-2.2, 2.2) : 0);
@@ -186,12 +195,20 @@ export class Combat {
       if (w.raycast(_c.set(x, h + 12, z), pc, null) < 0) found = true;
     }
     if (!found && (fx || fz)) { x = fx; z = fz; }
-    e.pos.set(x, w.height(x, z) + 150 + i * 10, z);
-    e.vel.set(0, -80, 0);
+    if (at && at.ground) {
+      // 從轉角衝出來：落在街上、朝路口噴射衝刺，晚一點才開火
+      const a = Math.atan2(at.tx - x, at.tz - z);
+      e.pos.set(x, w.height(x, z), z); e.dropping = false; e.grounded = true;
+      e.vel.set(Math.sin(a) * 34, 0, Math.cos(a) * 34); e.boostT = 1.1; e.fireCd += 1.2;
+    } else {
+      e.pos.set(x, (at ? at.y : w.height(x, z)) + 150 + i * 10, z);
+      e.vel.set(0, -80, 0);
+    }
     e.face = Math.atan2(p.x - x, p.z - z);
     e.m.legYaw = e.face;
     this.scene.add(e.m.root);
     this.enemies.push(e);
+    return e;
   }
 
   // ---------------------------------------------------------------- 每幀
@@ -211,9 +228,9 @@ export class Combat {
 
     // 關卡流程：開場 → 一批批打完 → 過關
     this.phaseT -= dt;
-    if (this.phase === 'intro' && this.phaseT <= 0) { this.phase = 'fight'; this.spawnGroup(); }
-    else if (this.phase === 'fight' && this.enemies.length === 0 && this.events.length === 0) {
-      if (this.group < this.def.groups.length) this.spawnGroup();
+    if (this.phase === 'intro' && this.phaseT <= 0) { this.phase = 'fight'; if (this.enc) this.enc.begin(); else this.spawnGroup(); }
+    else if (this.phase === 'fight' && (this.enc ? this.enc.update(dt) : this.enemies.length === 0 && this.events.length === 0)) {
+      if (!this.enc && this.group < this.def.groups.length) this.spawnGroup();
       else {
         const last = this.stage === STAGES.length;
         this.phase = 'done'; this.slowmo = 1.4;
@@ -223,6 +240,7 @@ export class Combat {
       }
     }
 
+    if (this.enc) this.enc.fx(dt);
     this.updateAim();
     if (!this.dead && this.phase !== 'done' && inp) this.playerWeapons(dt, inp);
     this.updateEnemies(dt);
@@ -432,6 +450,7 @@ export class Combat {
     } else if (tw >= 0) {
       this.fx.impact(to, _n, kind);
       this.audio.impact(to, kind);
+      w.hitBuilding(to, this.od.active ? 1.25 : 1, _n);   // 打到建築：扣結構耐久
     }
     if (R.ammo === 0) this.startReload();
   }
@@ -528,10 +547,27 @@ export class Combat {
           this.cockpit.kick('hit', crit ? 0.9 : 0.6, 0);
           this.cockpit.flashAt(SABER, 7, -0.3, 0, -1.2);
           if (crit) { this.critMark = 1; this.note('CRITICAL', 'am'); }
-        }
+        } else this.saberWall();
       }
       if (hero.swing <= 0) { SB.phase = null; SB.cd = 0; hero.saber.visible = false; this.audio.saberOff(); }
     }
+  }
+
+  // 光劍砍牆：胸口高度往前 22 公尺內有建築就重擊
+  saberWall() {
+    const pl = this.player, w = this.world;
+    const from = _a.set(pl.pos.x, pl.pos.y + 8, pl.pos.z), fw = _b.set(Math.sin(pl.yaw), 0, Math.cos(pl.yaw));
+    const end = _c.copy(from).addScaledVector(fw, 22);
+    const t = w.raycast(from, end, _n);
+    if (t < 0) return;
+    const hp = V3().lerpVectors(from, end, t);
+    if (!w.hitBuilding(hp, this.od.active ? 6.5 : 5, _n)) return;
+    this.fx.impact(hp, _n, 'building');
+    this.fx.impact(hp, _n, 'beam');
+    this.audio.impact(hp, 'saber');
+    this.hitstop = Math.max(this.hitstop, 0.08);
+    this.cockpit.kick('land', 0.45);
+    this.cockpit.flashAt(SABER, 6, -0.3, 0, -1.2);
   }
 
   // ---------------------------------------------------------------- 傷害
@@ -575,6 +611,7 @@ export class Combat {
     const c = e.chest(V3()), w = this.world;
     this.fx.explosion(c, 3);
     this.audio.explosion(c, 3);
+    w.blast(c, 32, 5);
     this.fx.smokeColumn(_a.set(e.pos.x, w.height(e.pos.x, e.pos.z), e.pos.z), 45);
     const dist = c.distanceTo(this.player.pos);
     const s = clamp(1 - dist / 260, 0, 1);
@@ -843,7 +880,7 @@ export class Combat {
           this.fx.muzzle(from, _a.subVectors(to, from), 'beam');
           this.audio.enemyBeam(from);
           if (!miss) { this.hurt(520, from, 'beam'); this.fx.impact(to, _n.subVectors(from, to).normalize(), 'beam'); }
-          else { this.note(e.dodged ? 'DODGED' : 'MISS', 'gr'); if (tw >= 0) this.fx.impact(end, _n, 'building'); }
+          else { this.note(e.dodged ? 'DODGED' : 'MISS', 'gr'); if (tw >= 0) { this.fx.impact(end, _n, 'building'); this.world.hitBuilding(end, 1.5, _n); } }
           e.dodged = false;
         }
       } else if (e.fireCd <= 0 && canSee) {
@@ -955,6 +992,7 @@ export class Combat {
         this.fx.missileEnd(M.h);
         this.fx.explosion(hit, M.shell ? 1.4 : 1.1);
         this.audio.explosion(hit, M.shell ? 1.5 : 1);
+        w.blast(hit, M.shell ? 9 : 8, M.own === 'player' ? 1 : M.shell ? 1 : 0.6);   // 爆炸波及建築
         if (M.own === 'player') {
           if (hitE) this.damageEnemy(hitE, M.dmg * (this.od.active ? 1.25 : 1), W.msl.stag, hit, M.vel.clone().normalize());
           for (const e of this.enemies) if (e !== hitE && !e.dead && e.chest(_b).distanceTo(hit) < 14) this.damageEnemy(e, M.dmg * 0.4, 10, hit, M.vel.clone().normalize());
@@ -1020,6 +1058,7 @@ export class Combat {
 
   // 清場（重新開始用）
   dispose() {
+    if (this.enc) this.enc.dispose();
     for (const e of this.enemies) e.m.root.removeFromParent();
     for (const d of this.debris) d.mesh.removeFromParent();
     for (const M of this.missiles) this.fx.missileEnd(M.h);

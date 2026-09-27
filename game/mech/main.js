@@ -74,9 +74,14 @@ async function game() {
     enOut: () => combat && combat.note('EN OUT', 'rd'),
   });
   player.apMax = 9000;
-  function resetPlayer() {
-    player.pos.set(SPAWN.x, world.height(SPAWN.x, SPAWN.z), SPAWN.z);
-    player.vel.set(0, 0, 0); player.yaw = 0; player.pitch = 0; hero.legYaw = 0;
+  // n＝關卡（遭遇戰從路線起點、面向第一段出發）；cp＝檢查點
+  function resetPlayer(n = 0, cp = null) {
+    const E = n ? STAGES[n - 1].enc : null;
+    let x = SPAWN.x, z = SPAWN.z, yaw = 0;
+    if (cp) { x = cp.x; z = cp.z; yaw = cp.yaw; }
+    else if (E) { const [a, b] = E.pts; x = a.x; z = a.z; yaw = Math.atan2(b.x - a.x, b.z - a.z); }
+    player.pos.set(x, world.height(x, z), z);
+    player.vel.set(0, 0, 0); player.yaw = yaw; player.pitch = 0; hero.legYaw = yaw;
     player.grounded = true; player.en = 100; player.overheat = 0; player.odT = 0; player.dashT = 0; player.lockMove = 0;
     player.ap = player.apMax;
     hero.swing = 0; hero.saber.visible = false;
@@ -94,11 +99,14 @@ async function game() {
 
   // ---------------------------------------------------------------- 戰鬥
   let combat = null, stageNo = 1;
-  function newCombat(n = stageNo) {
+  // 可破壞建築：特效／音效／座艙震動／HUD 提示
+  world.hook({ fx, audio, cockpit, player, note: (t, c) => combat && combat.note(t, c) });
+  function newCombat(n = stageNo, cp = null) {
     if (combat) combat.dispose();
+    world.resetBuildings();   // 每次開關／重來／回標題：大樓全部復原
     fx.clear();
     stageNo = n;
-    combat = new Combat({ scene, world, camera, player, hero, fx, audio, cockpit, post, onEnd: finish, stage: n });
+    combat = new Combat({ scene, world, camera, player, hero, fx, audio, cockpit, post, onEnd: finish, stage: n, cp });
     window.__combat = combat;
   }
   newCombat();
@@ -148,7 +156,7 @@ async function game() {
     $('stages').innerHTML = STAGES.map((D, i) => {
       const n = i + 1, lock = n > nx, best = store.get('best' + n, 0);
       return `<button class="stg${lock ? ' lock' : ''}${n === nx ? ' next' : ''}" data-s="${n}"${lock ? ' disabled' : ''}>`
-        + `<b>${n}</b><span>${lock ? 'LOCKED' : D.name}</span>${best ? `<i>${RANKS[best]}</i>` : ''}</button>`;
+        + `${D.enc ? '<em>遭遇戰</em>' : ''}<b>${n}</b><span>${lock ? 'LOCKED' : D.name}</span>${best ? `<i>${RANKS[best]}</i>` : ''}</button>`;
     }).join('');
   }
 
@@ -166,9 +174,10 @@ async function game() {
   for (const k of ['pointerdown', 'keydown']) addEventListener(k, () => audio.unlock(), { once: true });
   audio.music('title');
   $('resume').addEventListener('click', resume);
-  const replay = (n) => { $('result').style.display = 'none'; resetPlayer(); newCombat(n); startBoot(1.6); };
+  const replay = (n, cp = null) => { $('result').style.display = 'none'; resetPlayer(n, cp); newCombat(n, cp); startBoot(1.6); };
   $('next').addEventListener('click', () => replay(stageNo + 1));
   $('again').addEventListener('click', () => replay(stageNo));
+  $('cont').addEventListener('click', () => replay(stageNo, combat.cp));   // 遭遇戰：從檢查點繼續
   $('menu').addEventListener('click', toTitle);
   $('quit').addEventListener('click', toTitle);
   input.onLockChange = (locked) => { if (!locked && state === 'play' && !input.touch.on) pause(); };
@@ -176,7 +185,7 @@ async function game() {
   function launch(n = nextStage()) {
     audio.unlock();
     $('title').classList.add('hide');
-    resetPlayer(); newCombat(n);
+    resetPlayer(n); newCombat(n);
     startBoot(3.4);
   }
   // 回標題選關：清掉戰場、機體擺回展示鏡頭
@@ -195,6 +204,7 @@ async function game() {
     $('title').classList.remove('hide');
   }
   function startBoot(len) {
+    combat.prep();   // 遭遇戰：擺路障、第一區的遠處目標
     state = 'boot'; boot = 0; bootLen = len;
     input.enabled = true;
     if (!input.touch.on) input.lock();
@@ -227,8 +237,11 @@ async function game() {
     // 評價：時間（依這關敵機多寡給標準時間）、承受傷害、命中率
     let rank = '';
     if (win) {
-      const w = stageWeight(D);
-      const r = 0.4 * clamp((35 * w + 30 - S.time) / (25 * w + 15), 0, 1) + 0.4 * clamp(1 - S.dmgTaken / player.apMax, 0, 1) + 0.2 * acc;
+      const w = stageWeight(D), E = D.enc;
+      // 遭遇戰：標準時間照路線長度＋敵人份量（E.par），中途有補給所以傷害分母放大；接關過的最高 A
+      let r = E ? 0.4 * clamp((E.par * 1.9 - S.time) / (E.par * 0.9), 0, 1) + 0.4 * clamp(1 - S.dmgTaken / (player.apMax * (1 + 0.1 * (E.secs.length - 1))), 0, 1) + 0.2 * acc
+        : 0.4 * clamp((35 * w + 30 - S.time) / (25 * w + 15), 0, 1) + 0.4 * clamp(1 - S.dmgTaken / player.apMax, 0, 1) + 0.2 * acc;
+      if (S.cont) r = Math.min(r, 0.71);
       rank = r >= 0.72 ? 'S' : r >= 0.56 ? 'A' : r >= 0.4 ? 'B' : 'C';
       if (n > cleared()) store.set('cleared', n);
       if (RANKS.indexOf(rank) > store.get('best' + n, 0)) store.set('best' + n, RANKS.indexOf(rank));
@@ -240,8 +253,11 @@ async function game() {
     $('resRank').style.display = win ? '' : 'none';
     $('next').style.display = win && !last ? '' : 'none';
     $('again').textContent = win ? '再打一次 RETRY' : '再試一次 RETRY';
+    $('cont').style.display = !win && combat.cp ? '' : 'none';
     const mm = Math.floor(S.time / 60), ss = String(Math.floor(S.time % 60)).padStart(2, '0');
     const rows = [['關卡', `${n}　${D.name}`], ['擊毀', S.kills], ['分數', S.score.toLocaleString()], ['時間', `${mm}:${ss}`], ['命中率', `${Math.round(acc * 100)}%`], ['最大連續擊破', S.maxChain], ['承受傷害', Math.round(S.dmgTaken)]];
+    if (D.enc) rows.splice(1, 0, ['區域', `${win ? D.enc.secs.length : combat.enc.sec}/${D.enc.secs.length}`]);
+    if (S.cont) rows.push(['續關', `${S.cont} 次（評價最高 A）`]);
     $('resTable').innerHTML = rows.map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join('');
     $('result').style.display = 'flex';
   }
@@ -331,7 +347,7 @@ async function game() {
       ap: player.ap, apMax: player.apMax, en: player.en / 100, parts: C.parts,
       rifle: C.rifle, msl: { ready: C.msl.cd >= 1 ? 6 : 0, max: 6, cd: C.msl.cd, locks: C.msl.locks.length },
       saber: C.saber.cd, od: C.od, lockAlert: C.lockAlert, danger: player.ap / player.apMax < 0.3 ? 1 : 0,
-      radar, px: player.pos.x, pz: player.pos.z,
+      radar, px: player.pos.x, pz: player.pos.z, route: C.enc && C.enc.ahead, wp: C.enc && C.enc.wp,
     });
 
     // ---- 戰鬥、特效、世界
@@ -360,6 +376,8 @@ async function game() {
     post.u.speed.value = speedV;
     post.u.danger.value = dangerV;
     post.u.flash.value = flashV;
+    // 瞄準鏡頭：鎖定時另拍一張小的放大畫面，貼在側邊面板
+    cockpit.targetView(renderer, scene, C.lockTarget);
     post.render(t);
 
     hud.draw(rdt, { boot: state === 'boot' ? boot : 1, combat: C, player, stages: STAGES.length, groundY: world.height(player.pos.x, player.pos.z) });

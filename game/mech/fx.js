@@ -928,6 +928,158 @@ export class FX {
     }
   }
 
+  // 牆面被打：碎塊沿牆往下掉＋一團往下滑的粉塵（k：1＝步槍、2～3＝飛彈／光劍）
+  crumble(pos, normal, k) {
+    const s = clamp(k === undefined ? 1 : k, 0.3, 3), V = this.V, qn = this.qn;
+    let nx = normal ? normal.x : 0, nz = normal ? normal.z : 0;
+    const up = normal && normal.y > 0.7;
+    if (up) { nx = 0; nz = 0; }
+    const x = pos.x + nx * 0.6, y = pos.y, z = pos.z + nz * 0.6;
+    const nP = Math.round((2 + 2 * s) * (0.5 + 0.5 * qn));
+    for (let i = 0; i < nP; i++) {
+      const br = rr(0.9, 1.1);
+      const j = this._smoke(x + rr(-1, 1), y + rr(-1, 0.5), z + rr(-1, 1), nx * rr(1, 3.5) + rr(-0.8, 0.8), rr(-4, -1) * (up ? 0 : 1), nz * rr(1, 3.5) + rr(-0.8, 0.8),
+        rr(2.5, 4.5), rr(1, 1.8), rr(4, 7) * Math.sqrt(s), 0.42, 0.44 * br, 0.41 * br, 0.37 * br);
+      if (j >= 0) { V.grav[j] = 1.5; V.drag[j] = 1.4; V.rise[j] = 0.2; V.cell[j] = i & 1 ? 6 : 7; V.erode[j] = 0.5; V.fout[j] = 0.4; }
+    }
+    const nD = Math.round((5 + 7 * s) * qn) + 2;
+    for (let i = 0; i < nD; i++) {
+      const sp = rr(1, 5);
+      this._debris(x + rr(-0.8, 0.8), y + rr(-0.5, 0.5), z + rr(-0.8, 0.8), nx * sp + rr(-2, 2), rr(-1, 4), nz * sp + rr(-2, 2), rr(2.5, 4), rr(0.12, 0.4) * (0.8 + 0.2 * s), 0.37, 0.35, 0.32, 0);
+    }
+  }
+
+  // 建築持續冒煙：s＝{x,y,z,nx,nz,lv,r,acc,accF,t,dur,fire}（由 world 每幀呼叫最近的幾個）
+  // lv1 傷口灰煙；lv2 傷口起火＋黑煙；lv3 倒塌後的瓦礫堆餘煙（慢慢變少）
+  bldSmoke(s, dt) {
+    const V = this.V, qn = this.qn, busy = this.vCount > VMAX * 0.75 ? 0.4 : 1;
+    const q = (0.55 + 0.45 * qn) * busy;
+    if (s.lv === 3) {
+      const k = Math.max(0, 1 - s.t / s.dur), R = s.r;
+      s.acc += (1.2 + 1.8 * R) * q * k * dt;
+      while (s.acc >= 1) {
+        s.acc -= 1;
+        const a = Math.random() * 6.2832, rd = Math.sqrt(Math.random()) * 6 * R, br = rr(0.85, 1.1);
+        const j = this._smoke(s.x + Math.cos(a) * rd, s.y + rr(-1, 1), s.z + Math.sin(a) * rd, rr(-1, 1), rr(1.5, 3), rr(-1, 1),
+          rr(10, 16), rr(3, 5) * R, rr(14, 22) * R, 0.4 + 0.25 * k, 0.26 * br, 0.24 * br, 0.21 * br);
+        if (j >= 0) { V.rise[j] = rr(2, 3.5); V.drag[j] = 0.5; V.sk[j] = 0.2; V.grow[j] = 0.4; V.wf[j] = 1; V.erode[j] = 0.55; V.fin[j] = 0.1; V.fout[j] = 0.5; V.flags[j] |= F_TURB; V.turb[j] = 0.6; V.cell[j] = (Math.random() * 4) | 0; }
+      }
+      if (s.fire && s.t < s.dur * 0.6) {
+        s.accF += 5 * qn * busy * dt;
+        while (s.accF >= 1) {
+          s.accF -= 1;
+          const a = Math.random() * 6.2832, rd = Math.sqrt(Math.random()) * 3 * R;
+          this._flame(s.x + Math.cos(a) * rd, s.y + rr(-0.5, 0.5), s.z + Math.sin(a) * rd, rr(-0.4, 0.4), rr(1.5, 3), rr(-0.4, 0.4), rr(1.4, 2.4), rr(0.7, 0.85), rr(0.5, 0.9));
+        }
+      }
+      return;
+    }
+    const fire = s.lv >= 2;
+    const x = s.x + s.nx * 1.2, z = s.z + s.nz * 1.2;
+    s.acc += (fire ? 3.2 : 2) * q * dt;
+    while (s.acc >= 1) {
+      s.acc -= 1;
+      const br = rr(0.85, 1.1), c = fire ? 0.06 : 0.2;
+      const j = this._smoke(x + rr(-0.8, 0.8), s.y + rr(-0.5, 0.8), z + rr(-0.8, 0.8), s.nx * rr(1, 3) + rr(-0.5, 0.5), rr(2, 4), s.nz * rr(1, 3) + rr(-0.5, 0.5),
+        rr(10, 15), rr(2, 3), fire ? rr(16, 26) : rr(11, 17), fire ? 0.8 : 0.55, c * br, c * 0.95 * br, c * 0.9 * br);
+      if (j >= 0) {
+        V.rise[j] = rr(4, 6); V.drag[j] = 0.35; V.sk[j] = 0.18; V.grow[j] = 0.35; V.erode[j] = 0.55; V.fout[j] = 0.5; V.flags[j] |= F_TURB; V.turb[j] = 0.5;
+        if (fire) { V.glow[j] = rr(1.5, 2.3); V.glowK[j] = 1; V.lit[j] = 1.2; }
+      }
+    }
+    if (fire) {
+      s.accF += 8 * qn * busy * dt;
+      while (s.accF >= 1) {
+        s.accF -= 1;
+        this._flame(x + rr(-1, 1), s.y + rr(-0.8, 0.5), z + rr(-1, 1), s.nx * rr(0.5, 2), rr(1.5, 3), s.nz * rr(0.5, 2), rr(1.5, 2.6), rr(0.75, 0.9), rr(0.5, 0.9));
+        if (Math.random() < 0.25) {
+          const i = this._spark(x, s.y + 1, z, rr(-1, 1) + s.nx, rr(3, 6), rr(-1, 1) + s.nz, rr(2, 4), rr(0.04, 0.07), rr(0.75, 0.95), 0.15);
+          if (i >= 0) { const S = this.S; S.flags[i] = S_HOT | S_EMBER | S_FLICK; S.grav[i] = -0.4; S.drag[i] = 0.8; S.st[i] = 0.1; }
+        }
+      }
+    }
+  }
+
+  // 大樓倒塌：b＝{x0,x1,z0,z1,w,d,top,gy,u}；ph 0＝開始（底層爆開）、1＝倒塌中（每幀）、2＝落地
+  // 底部往外湧的貼地塵雲會停留十幾秒；n＝同時倒塌的棟數（多棟時每棟少噴一點）
+  collapse(b, ph, u, dt, n) {
+    const V = this.V, S = this.S, qn = this.qn, gy = b.gy;
+    const K = (0.5 + 0.5 * qn) / Math.max(1, (n || 1) * 0.6) * (this.vCount > VMAX * 0.8 ? 0.35 : 1);
+    const size = Math.min(1.6, 0.75 + b.top / 200);
+    const per = (m, o) => {   // 牆腳上的隨機點 → o[0..3]＝x、z、外法線 nx、nz
+      const side = (Math.random() * 4) | 0, v = Math.random();
+      o[0] = side === 0 ? b.x0 - m : side === 1 ? b.x1 + m : b.x0 + (b.x1 - b.x0) * v;
+      o[1] = side === 2 ? b.z0 - m : side === 3 ? b.z1 + m : b.z0 + (b.z1 - b.z0) * v;
+      o[2] = side === 0 ? -1 : side === 1 ? 1 : 0; o[3] = side === 2 ? -1 : side === 3 ? 1 : 0;
+      return o;
+    };
+    const o = this._co || (this._co = [0, 0, 0, 0]);
+    const surge = (cnt, sp0, sp1, life0, life1, big) => {
+      for (let k = 0; k < cnt; k++) {
+        per(1, o);
+        const sp = rr(sp0, sp1), br = rr(0.85, 1.08), tg = rr(-4, 4);
+        const i = this._smoke(o[0], gy + rr(1, 5), o[1], o[2] * sp - o[3] * tg, rr(0.5, 3), o[3] * sp + o[2] * tg,
+          rr(life0, life1), rr(4, 7) * size, rr(16, 26) * size * big, rr(0.5, 0.62), 0.37 * br, 0.34 * br, 0.3 * br);
+        if (i >= 0) { V.drag[i] = rr(0.7, 1.1); V.rise[i] = 0.35; V.wf[i] = 0.5; V.sk[i] = 0.3; V.grow[i] = 0.45 * size; V.cell[i] = k & 1 ? 6 : 7; V.gy[i] = gy; V.flags[i] |= F_GROUND | F_TURB; V.turb[i] = 0.4; V.fin[i] = 0.04; V.fout[i] = 0.55; V.erode[i] = 0.4; }
+      }
+    };
+    if (ph === 0) {
+      // 底層爆開：一圈粉塵＋玻璃、混凝土碎片往外噴
+      surge(Math.round(22 * K), 6, 14, 5, 8, 0.6);
+      const nD = Math.round(40 * K) + 6;
+      for (let k = 0; k < nD; k++) {
+        per(0.5, o);
+        const sp = rr(4, 14), hy = gy + rr(2, Math.min(b.top * 0.5, 40));
+        this._debris(o[0], hy, o[1], o[2] * sp + rr(-2, 2), rr(-2, 5), o[3] * sp + rr(-2, 2), rr(3, 5), rr(0.15, 0.55), 0.36, 0.34, 0.31, 0);
+      }
+      for (let k = 0; k < 14; k++) {
+        per(0.5, o);
+        const sp = rr(12, 30);
+        this._spark(o[0], gy + rr(2, 10), o[1], o[2] * sp, rr(2, 10), o[3] * sp, rr(0.4, 0.9), 0.035, rr(0.9, 1.2), 2);
+      }
+      return;
+    }
+    if (ph === 2) {
+      // 落地：塵浪衝出去，中間冒起一大團
+      surge(Math.round(36 * K), 20, 34, 8, 13, 1);
+      const nB = Math.round(10 * K);
+      for (let k = 0; k < nB; k++) {
+        const x = b.x0 + b.w * rr(0.15, 0.85), z = b.z0 + b.d * rr(0.15, 0.85), br = rr(0.85, 1.05);
+        const i = this._smoke(x, gy + rr(3, 10), z, rr(-3, 3), rr(8, 16), rr(-3, 3), rr(9, 13), rr(8, 12) * size, rr(26, 38) * size, 0.55, 0.31 * br, 0.29 * br, 0.26 * br);
+        if (i >= 0) { V.rise[i] = rr(2.5, 4); V.drag[i] = 0.8; V.sk[i] = 0.3; V.grow[i] = 0.5; V.wf[i] = 0.7; V.flags[i] |= F_TURB; V.turb[i] = 0.7; V.erode[i] = 0.5; V.fout[i] = 0.5; V.cell[i] = (Math.random() * 4) | 0; }
+      }
+      return;
+    }
+    // 倒塌中
+    const roof = gy + Math.max(2, b.top * (1 - u * u));
+    const perim = 2 * (b.w + b.d);
+    const rate = Math.min(80, 16 + perim * 0.3) * (0.25 + 1.1 * u) * K;
+    b.accD = (b.accD || 0) + rate * dt;
+    const nS = Math.floor(b.accD); b.accD -= nS;
+    surge(nS, 10 * (0.6 + 0.4 * u), 24 * (0.6 + 0.4 * u), 9, 15, 1);
+    // 往上翻的塵團
+    b.accB = (b.accB || 0) + rate * 0.3 * dt;
+    while (b.accB >= 1) {
+      b.accB -= 1;
+      const x = b.x0 + b.w * rr(0, 1), z = b.z0 + b.d * rr(0, 1), br = rr(0.85, 1.05);
+      const i = this._smoke(x, gy + rr(2, Math.max(4, (roof - gy) * 0.5)), z, rr(-3, 3), rr(6, 14), rr(-3, 3), rr(7, 11), rr(5, 8) * size, rr(22, 34) * size, 0.5, 0.33 * br, 0.31 * br, 0.28 * br);
+      if (i >= 0) { V.rise[i] = rr(2, 3.5); V.drag[i] = 0.7; V.sk[i] = 0.3; V.grow[i] = 0.5; V.wf[i] = 0.7; V.flags[i] |= F_TURB; V.turb[i] = 0.7; V.erode[i] = 0.5; V.fout[i] = 0.5; V.cell[i] = (Math.random() * 4) | 0; }
+    }
+    // 屋頂邊緣往下灑的粉塵與碎片
+    b.accF = (b.accF || 0) + 36 * K * dt;
+    while (b.accF >= 1) {
+      b.accF -= 1;
+      per(0.3, o);
+      const sp = rr(1, 6);
+      this._debris(o[0], roof - rr(0, 6), o[1], o[2] * sp + rr(-1.5, 1.5), rr(-3, 2), o[3] * sp + rr(-1.5, 1.5), rr(3, 5), rr(0.2, 0.7), 0.35, 0.33, 0.3, 0);
+      if (Math.random() < 0.35) {
+        const br = rr(0.9, 1.05);
+        const i = this._smoke(o[0] + o[2] * 1.5, roof - rr(0, 4), o[1] + o[3] * 1.5, o[2] * rr(1, 3), rr(-7, -2), o[3] * rr(1, 3), rr(4, 7), rr(2, 3), rr(9, 14) * size, 0.45, 0.4 * br, 0.37 * br, 0.33 * br);
+        if (i >= 0) { V.grav[i] = 2; V.drag[i] = 1; V.rise[i] = 0.5; V.cell[i] = 6; V.erode[i] = 0.5; V.fout[i] = 0.45; }
+      }
+    }
+  }
+
   skid(pos, dir, amount) {
     const am = clamp(amount === undefined ? 1 : amount, 0, 1);
     if (am < 0.01) return;

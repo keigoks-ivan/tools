@@ -363,6 +363,31 @@ class GeoBucket {
   }
 }
 
+// 倒塌後的瓦礫丘：單位圓盤（半徑 1、頂高 1）上起伏的土堆，平面著色
+function moundGeometry() {
+  const R = 6, S = 14, pos = [], uv = [];
+  const hs = (a, b) => { const s = Math.sin(a * 12.9898 + b * 78.233) * 43758.5453; return s - Math.floor(s); };
+  const P = (ri, si) => {
+    si %= S;
+    if (ri === 0) return [0, 1, 0];
+    const rho = ri / R, a = si / S * Math.PI * 2 + (ri % 2) * Math.PI / S;
+    const rr = rho * (0.9 + 0.2 * hs(ri, si));
+    const y = ri === R ? -0.2 : Math.pow(1 - rho * rho, 1.2) * (0.75 + 0.5 * hs(si + 7, ri));
+    return [Math.cos(a) * rr, y, Math.sin(a) * rr];
+  };
+  const tri = (a, b, c) => { for (const p of [a, b, c]) { pos.push(p[0], p[1], p[2]); uv.push(p[0] * 2.5, p[2] * 2.5); } };
+  for (let s = 0; s < S; s++) tri(P(0, 0), P(1, s + 1), P(1, s));
+  for (let r = 1; r < R; r++) for (let s = 0; s < S; s++) {
+    const p00 = P(r, s), p01 = P(r, s + 1), p10 = P(r + 1, s), p11 = P(r + 1, s + 1);
+    tri(p00, p11, p10); tri(p00, p01, p11);
+  }
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+  g.computeVertexNormals();
+  return g;
+}
+
 // 四面牆（立面貼圖以公尺計）
 function addWalls(B, x0, x1, z0, z1, y0, y1, col, uo, vo, tops = null, F = FACADE_TILE) {
   const fw = F.w, fh = F.h;
@@ -497,7 +522,7 @@ function treeGeometry() {
   return m;
 }
 
-function carGeometry() {
+export function carGeometry() {
   // 轎車：側面輪廓擠出（車身）＋較窄的車艙（深色玻璃）＋車頂＋輪胎
   const ext = (pts, w, bev, col) => {
     const sh = new THREE.Shape(pts.map(([x, y]) => new THREE.Vector2(x, y)));
@@ -683,6 +708,7 @@ export class World {
       const t = s / steps;
       for (const bx of this.nearBoxes(a.x + dx * t, a.z + dz * t, 50, this._tmpC || (this._tmpC = []))) {
         if (seen.has(bx)) continue; seen.add(bx);
+        if (bx.top < 0) continue;   // 停用中的瓦礫台階
         // slab
         let t0 = 0, t1 = 1, nAxis = -1, nSign = 0;
         const L = [[a.x, dx, bx.x0, bx.x1], [a.y, dy, -50, bx.top], [a.z, dz, bx.z0, bx.z1]];
@@ -773,6 +799,9 @@ export class World {
         const uo = Math.floor(r() * 8) / 8, vo = Math.floor(r() * 8) / 8;
         const bk = chunkOf((x0 + x1) / 2, (z0 + z1) / 2);
         if (!ruin) {
+          // 可破壞：記下這棟在各合併網格裡的頂點區段（每棟連續寫入）
+          const rec = { fB: bk.f[style], rB: bk.roof, f0: bk.f[style].p.length / 3, r0: bk.roof.p.length / 3, lamp: -1, x0, x1, z0, z1 };
+          const nLamp = this.lampSites.length;
           addWalls(bk.f[style], x0, x1, z0, z1, 0, H, col, uo, 0, null, F);
           const rc = [0.75, 0.75, 0.75];
           addBox(bk.roof, x0, x1, H - 0.01, H, z0, z1, rc, 12);
@@ -795,7 +824,11 @@ export class World {
             if (r() < 0.5) this.lampSites.push(new THREE.Vector3((x0 + x1) / 2, H2 + 8, (z0 + z1) / 2)); // 屋頂紅燈
             addBox(bk.roof, (x0 + x1) / 2 - 0.3, (x0 + x1) / 2 + 0.3, H2, H2 + 8, (z0 + z1) / 2 - 0.3, (z0 + z1) / 2 + 0.3, [0.4, 0.4, 0.4]);
           }
-          this.addCollider({ x0, x1, z0, z1, top: H + 0.2 });
+          rec.box = { x0, x1, z0, z1, top: H + 0.2 };
+          this.addCollider(rec.box);
+          rec.f1 = rec.fB.p.length / 3; rec.r1 = rec.rB.p.length / 3; rec.H = H;
+          if (this.lampSites.length > nLamp) rec.lamp = nLamp;
+          (this._recs || (this._recs = [])).push(rec);
         } else {
           // 殘骸：牆頂參差、內部焦黑、樓板外露
           const Hr = Math.max(10, H * (0.35 + r() * 0.4));
@@ -832,14 +865,412 @@ export class World {
     }
     for (const bk of buckets) {
       for (let s = 0; s < NF; s++) {
-        const g = bk.f[s].geometry();
+        const g = bk.f[s].geo = bk.f[s].geometry();
         if (g) { const m = new THREE.Mesh(g, fmats[s]); m.castShadow = m.receiveShadow = true; this.scene.add(m); }
       }
-      const rg = bk.roof.geometry();
+      const rg = bk.roof.geo = bk.roof.geometry();
       if (rg) { const m = new THREE.Mesh(rg, roofMat); m.castShadow = m.receiveShadow = true; this.scene.add(m); }
       const ig = bk.inner.geometry();
       if (ig) { const m = new THREE.Mesh(ig, inner); m.castShadow = true; m.receiveShadow = true; this.scene.add(m); }
     }
+    this._initBlds();
+  }
+
+  // ---------------------------------------------------------------- 可破壞建築
+  // 每棟：合併網格裡的頂點區段（原始位置備份）、血量、碰撞盒、倒塌後的瓦礫台階
+  _initBlds() {
+    this.blds = [];
+    for (const R of this._recs || []) {
+      const pa = R.fB.geo.attributes.position, ba = R.fB.geo.attributes.burn, qa = R.rB.geo.attributes.position;
+      const seg = [[pa, R.f0, R.f1 - R.f0], [qa, R.r0, R.r1 - R.r0]].filter((s) => s[2] > 0)
+        .map(([a, s, n]) => ({ a, s, o: a.array.slice(s * 3, (s + n) * 3) }));
+      let top = R.H;
+      for (const g of seg) for (let i = 1; i < g.o.length; i += 3) top = Math.max(top, g.o[i]);
+      const w = R.x1 - R.x0, d = R.z1 - R.z0;
+      // 血量（步槍一發＝1）：中型樓約 9～10 發，150 m 高樓約 27 發
+      const hpMax = Math.min(30, Math.max(4, 3 + 0.16 * R.H + 0.06 * (Math.sqrt(w * d) - 35)));
+      const cx = (R.x0 + R.x1) / 2, cz = (R.z0 + R.z1) / 2, gy = this.height(cx, cz);
+      const hM = Math.min(8, Math.max(4, 3 + 0.05 * R.H));
+      const b = {
+        x0: R.x0, x1: R.x1, z0: R.z0, z1: R.z1, cx, cz, w, d, H: R.H, top, gy, hM,
+        box: R.box, top0: R.box.top, seg, burn: { a: ba, s: R.f0, o: ba.array.slice(R.f0, R.f1) }, lamp: R.lamp,
+        rh: [gy + 1.4, gy + 2.8, gy + Math.min(4.2, hM * 0.85)],
+        hp: hpMax, hpMax, st: 0, t: 0, u: 0, shk: 0, bl: 0, wn: [], dirty: false, anim: false, groanT: 0, slot: -1,
+      };
+      R.box.bld = b;
+      // 瓦礫台階（第一次倒塌才加進格網；重設後 top＜0 停用）：外圈沿用原碰撞盒，往內兩層，每層高 1.4 m 以內，機體走得上去
+      b.tr = [0.18, 0.34].map((f) => ({ x0: R.x0 + w * f, x1: R.x1 - w * f, z0: R.z0 + d * f, z1: R.z1 - d * f, top: -1e4, bld: b }));
+      this.blds.push(b);
+    }
+    delete this._recs;
+    this.bAnim = []; this.bLow = []; this.nFall = 0;
+    this.smk = []; this.smkSel = []; this.smkT = 0;
+    // 瓦礫丘＋丘上大塊碎石＋飛落碎塊（共用瓦礫材質）
+    const rubMat = new THREE.MeshStandardMaterial({ map: this.A.rubD, normalMap: this.A.rubN, roughness: 0.95, color: 0x8a8580 });
+    const NM = 48, dod = new THREE.DodecahedronGeometry(1, 0);
+    // 平時 count＝0 但保持 visible：開場就把各渲染通道（主畫面、陰影、AO）的 shader 編好，第一次倒塌才不會卡一下
+    const mk = (g, n) => { const m = new THREE.InstancedMesh(g, rubMat, n); m.castShadow = m.receiveShadow = true; m.count = 0; m.frustumCulled = false; this.scene.add(m); return m; };
+    this.mound = mk(moundGeometry(), NM);
+    this.pile = mk(dod, NM * 10);
+    this.chunkM = mk(dod, 96);
+    this.mSlots = new Array(NM).fill(null); this.mNext = 0;
+    this.ck = Array.from({ length: 96 }, () => ({ live: 0, x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, s: 1, t: 0, rest: 0, q: new THREE.Quaternion(), ax: new THREE.Vector3(1, 0, 0), av: 0 }));
+    this.ckN = 0; this.ckI = 0; this.ckSnd = 0;
+    this._m4 = new THREE.Matrix4(); this._qq = new THREE.Quaternion(); this._sv = new THREE.Vector3(); this._pv = new THREE.Vector3();
+    this._nv = new THREE.Vector3(); this._cv = new THREE.Vector3();
+  }
+
+  // main.js 接上特效／音效／座艙／HUD
+  hook(h) { this.hooks = h; }
+
+  // pos 附近 pad 公尺內、還立著的建築
+  bldAt(p, pad = 1.5) {
+    let best = null, bd = pad;
+    for (const bx of this.nearBoxes(p.x, p.z, pad + 1, this._tmpD || (this._tmpD = []))) {
+      const b = bx.bld;
+      if (!b || b.st !== 0 || bx !== b.box) continue;
+      const dx = Math.max(b.x0 - p.x, 0, p.x - b.x1), dz = Math.max(b.z0 - p.z, 0, p.z - b.z1), dy = Math.max(b.gy - p.y, 0, p.y - bx.top);
+      const dd = Math.hypot(dx, dy, dz);
+      if (dd <= bd) { bd = dd; best = b; }
+    }
+    return best;
+  }
+  // 單發命中（步槍、光劍）：dmg 以「步槍一發」為單位
+  hitBuilding(p, dmg, n) {
+    const b = this.bldAt(p, 1.5);
+    if (b) this._dmg(b, dmg, p, n, dmg >= 2);
+    return b;
+  }
+  // 爆炸：半徑 r 內的建築依距離扣血（貼牆爆炸＝全額）
+  blast(p, r, dmg) {
+    const n = this._nv, q = this._cv;
+    for (const bx of this.nearBoxes(p.x, p.z, r + 1, this._tmpD || (this._tmpD = []))) {
+      const b = bx.bld;
+      if (!b || b.st !== 0 || bx !== b.box) continue;
+      const qx = Math.min(b.x1, Math.max(b.x0, p.x)), qy = Math.min(bx.top, Math.max(b.gy, p.y)), qz = Math.min(b.z1, Math.max(b.z0, p.z));
+      const d = Math.hypot(p.x - qx, p.y - qy, p.z - qz);
+      if (d >= r) continue;
+      q.set(qx, qy, qz);
+      if (d > 0.01) n.set(p.x - qx, p.y - qy, p.z - qz).divideScalar(d);
+      else { // 爆心貼在表面上：取最近的牆面
+        const l = p.x - b.x0, rr = b.x1 - p.x, f = p.z - b.z0, bk = b.z1 - p.z, m = Math.min(l, rr, f, bk);
+        n.set(0, 0, 0);
+        if (m === l) n.x = -1; else if (m === rr) n.x = 1; else if (m === f) n.z = -1; else n.z = 1;
+      }
+      this._dmg(b, dmg * (1 - d / r), q, n, true);
+    }
+  }
+
+  _dmg(b, dmg, p, n, big) {
+    if (dmg <= 0.02 || b.st !== 0) return;
+    const H = this.hooks || {};
+    const f0 = b.hp / b.hpMax;
+    b.hp -= dmg; b.dirty = true;
+    const f = Math.max(0, b.hp / b.hpMax);
+    // 整棟晃一下：越殘越晃
+    b.shk = Math.min(1.4, b.shk + (0.08 + 0.2 * Math.min(dmg, 3)) * (0.5 + 1.8 * (1 - f)));
+    this._anim(b);
+    if (p) {
+      // 牆面剝落：碎塊往下掉＋粉塵
+      if (H.fx && H.fx.crumble) H.fx.crumble(p, n, Math.min(3, dmg));
+      if (dmg >= 0.7 || Math.random() < 0.3) this._chunk(p, n, dmg >= 0.7 ? 2 + ((Math.random() * 2) | 0) : 1, 0.7 + 0.35 * Math.min(2, dmg));
+      // 傷口：之後冒煙、起火的位置（每棟最多 3 個）
+      if (b.wn.length < 3 && (big || !b.wn.length || Math.random() < 0.15)) {
+        const up = n && n.y > 0.7;
+        b.wn.push({ x: p.x + (n ? n.x : 0) * 1.5, y: Math.min(b.top - 2, Math.max(b.gy + 4, p.y)) + (up ? 1 : 0), z: p.z + (n ? n.z : 0) * 1.5, nx: up || !n ? 0 : n.x, nz: up || !n ? 0 : n.z, s: null });
+      }
+    }
+    // 燒焦：窗戶熄燈、牆面燻黑；剩四分之一以下窗內起火
+    const bl = f > 0.25 ? 0.7 * (1 - f) : 0.85 + 0.6 * (0.25 - f);
+    if (bl - b.bl > 0.05) this._burn(b, Math.min(1, bl));
+    if (f0 > 0.5 && f <= 0.5 && f > 0) this._smkOn(b, 1);
+    if (f0 > 0.25 && f <= 0.25 && f > 0) {
+      this._smkOn(b, 2);
+      this.bLow.push(b); b.groanT = 2.5 + Math.random() * 3;
+      if (H.audio && H.audio.groan) H.audio.groan(this._pv.set(b.cx, b.gy + Math.min(b.top * 0.6, 60), b.cz), 1);
+    }
+    if (b.hp <= 0) this._fall(b);
+  }
+
+  _anim(b) { if (!b.anim) { b.anim = true; this.bAnim.push(b); } }
+
+  _burn(b, bl) {
+    b.bl = bl; b.dirty = true;
+    const B = b.burn, A = B.a.array, O = B.o;
+    for (let i = 0; i < O.length; i++) A[B.s + i] = Math.max(O[i], bl);
+    B.a.addUpdateRange(B.s, O.length); B.a.needsUpdate = true;
+  }
+
+  // 頂點擺位：繞底部中心、水平軸 (ax,0,az) 傾斜 th，再往下 dy、水平抖動 (jx,jz)
+  _pose(b, dy, th, jx, jz) {
+    const c = Math.cos(th), s = Math.sin(th), kx = b.ax || 0, kz = b.az || 0, cx = b.cx, cz = b.cz, gy = b.gy;
+    for (const g of b.seg) {
+      const A = g.a.array, O = g.o, o3 = g.s * 3;
+      for (let i = 0; i < O.length; i += 3) {
+        const vx = O[i] - cx, vy = O[i + 1] - gy, vz = O[i + 2] - cz;
+        const m = (kx * vx + kz * vz) * (1 - c);
+        A[o3 + i] = cx + vx * c - kz * vy * s + kx * m + jx;
+        A[o3 + i + 1] = gy + vy * c + (kz * vx - kx * vz) * s + dy;
+        A[o3 + i + 2] = cz + vz * c + kx * vy * s + kz * m + jz;
+      }
+      g.a.addUpdateRange(o3, O.length); g.a.needsUpdate = true;
+    }
+    b.dirty = true;
+  }
+
+  // 開始倒塌：先抖、微傾，再加速往下沉進自己的塵雲裡
+  _fall(b) {
+    const H = this.hooks || {};
+    b.st = 1; b.t = 0; b.u = 0; b.hp = 0;
+    b.dur = 2.4 + b.top / 70;
+    const a = Math.random() * Math.PI * 2;
+    b.ax = Math.cos(a); b.az = Math.sin(a); b.tilt = (0.05 + Math.random() * 0.09) * (Math.random() < 0.5 ? -1 : 1); b.ph = Math.random() * 10;
+    b.ckAcc = 0;
+    this._anim(b);
+    this.nFall++;
+    // 傷口煙改由倒塌塵雲接手
+    this.smk = this.smk.filter((s) => s.b !== b); this.smkT = 0;
+    const li = this.bLow.indexOf(b); if (li >= 0) this.bLow.splice(li, 1);
+    if (b.lamp >= 0 && this.beacon) { this.beacon.setMatrixAt(b.lamp, this._m4.makeScale(0, 0, 0)); this.beacon.instanceMatrix.needsUpdate = true; }
+    // 瓦礫丘佔一格（滿了就回收最舊的）
+    let k = this.mSlots.indexOf(null);
+    if (k < 0) { k = this.mNext; this.mNext = (this.mNext + 1) % this.mSlots.length; const o = this.mSlots[k]; if (o) o.slot = -1; }
+    this.mSlots[k] = b; b.slot = k;
+    this._mound(b, 0);
+    const size = Math.min(3, Math.max(0.6, b.top / 55));
+    const P = this._pv.set(b.cx, b.gy + Math.min(b.top * 0.35, 40), b.cz);
+    if (H.fx && H.fx.collapse) H.fx.collapse(b, 0, 0, 0, this.nFall);
+    if (H.audio && H.audio.collapse) H.audio.collapse(P, size, b.dur);
+    const vp = this.viewP;
+    if (vp) {
+      const dist = Math.hypot(vp.x - b.cx, vp.z - b.cz);
+      const near = Math.max(0, 1 - dist / (250 + b.top * 1.5));
+      if (near > 0 && H.cockpit) H.cockpit.kick('land', 0.5 * near);
+      if (dist < 350 + b.top && H.note) H.note('STRUCTURE COLLAPSE', 'am');
+    }
+  }
+
+  _fallStep(b, dt) {
+    const H = this.hooks || {};
+    b.t += dt;
+    const T0 = 0.55, t = b.t;
+    let dy, th, a;
+    if (t < T0) { const u = t / T0; dy = -0.5 * u * u; th = b.tilt * 0.05 * u; a = 0.12 + 0.4 * u; }
+    else {
+      const u = b.u = Math.min(1, (t - T0) / (b.dur - T0));
+      dy = -0.5 - (b.top + 8) * u * u;                 // 越掉越快
+      th = b.tilt * (0.05 + 0.95 * Math.pow(u, 1.3));
+      a = 0.45 * (1 - u) + 0.08;
+    }
+    this._pose(b, dy, th, a * Math.sin(t * 43 + b.ph), a * Math.sin(t * 39 + b.ph * 2));
+    // 屋頂跟著往下：站在上面的機體一起掉
+    b.box.top = Math.max(b.rh[0], b.top0 + dy);
+    this._mound(b, t < T0 ? 0 : b.u);
+    if (H.fx && H.fx.collapse) H.fx.collapse(b, 1, t < T0 ? 0 : b.u, dt, this.nFall);
+    // 外牆崩落的大塊碎塊（同時倒很多棟就少丟一點）
+    if (t > T0 * 0.6) {
+      b.ckAcc += dt * 14 / Math.max(1, this.nFall * 0.7);
+      const roof = b.gy + Math.max(3, b.top + dy);
+      while (b.ckAcc >= 1) {
+        b.ckAcc -= 1;
+        const side = (Math.random() * 4) | 0, v = Math.random();
+        const n = this._nv.set(side === 0 ? -1 : side === 1 ? 1 : 0, 0, side === 2 ? -1 : side === 3 ? 1 : 0);
+        const x = side === 0 ? b.x0 : side === 1 ? b.x1 : b.x0 + (b.x1 - b.x0) * v;
+        const z = side === 2 ? b.z0 : side === 3 ? b.z1 : b.z0 + (b.z1 - b.z0) * v;
+        this._chunk(this._cv.set(x, roof - Math.random() * Math.min(20, b.top * 0.3), z), n, 1, 1.2 + Math.random() * 1.6);
+      }
+    }
+    // 座艙隆隆震
+    const vp = this.viewP;
+    if (vp && H.cockpit) {
+      const near = Math.max(0, 1 - Math.hypot(vp.x - b.cx, vp.z - b.cz) / (220 + b.top * 1.5));
+      if (near > 0) H.cockpit.vib = Math.max(H.cockpit.vib || 0, near * (0.35 + 0.5 * b.u));
+    }
+    if (t >= b.dur) this._down(b);
+  }
+
+  // 倒完：頂點收成一點埋進地下、碰撞改成瓦礫台階、留下瓦礫丘與餘煙
+  _down(b) {
+    const H = this.hooks || {};
+    b.st = 2; this.nFall = Math.max(0, this.nFall - 1);
+    for (const g of b.seg) {
+      const A = g.a.array, o3 = g.s * 3, n = g.o.length;
+      for (let i = 0; i < n; i += 3) { A[o3 + i] = b.cx; A[o3 + i + 1] = b.gy - 40; A[o3 + i + 2] = b.cz; }
+      g.a.addUpdateRange(o3, n); g.a.needsUpdate = true;
+    }
+    if (!b.trIn) { b.trIn = true; for (const c of b.tr) this.addCollider(c); }
+    b.box.top = b.rh[0]; b.tr[0].top = b.rh[1]; b.tr[1].top = b.rh[2];
+    this._mound(b, 1);
+    this._pileRocks(b);
+    // 瓦礫堆餘煙：2～3 處，持續四五十秒
+    const nS = b.top > 60 ? 3 : 2;
+    for (let k = 0; k < nS; k++) {
+      const x = b.x0 + b.w * (0.25 + 0.5 * Math.random()), z = b.z0 + b.d * (0.25 + 0.5 * Math.random());
+      this.smk.push({ x, y: b.gy + b.hM * 0.6, z, nx: 0, nz: 0, lv: 3, r: Math.min(1.8, 0.6 + Math.sqrt(b.w * b.d) / 60), acc: 0, accF: 0, t: 0, dur: 40 + Math.random() * 15, b, fire: Math.random() < 0.45 });
+    }
+    this.smkT = 0;
+    if (H.fx && H.fx.collapse) H.fx.collapse(b, 2, 1, 0, this.nFall);
+    const vp = this.viewP;
+    if (vp && H.cockpit) {
+      const near = Math.max(0, 1 - Math.hypot(vp.x - b.cx, vp.z - b.cz) / (220 + b.top * 1.5));
+      if (near > 0) H.cockpit.kick('land', 0.9 * near);
+    }
+  }
+
+  // 瓦礫丘：隨倒塌進度長高（被塵雲蓋住）
+  _mound(b, u) {
+    if (b.slot < 0) return;
+    const m = this.mound, k = b.slot;
+    const e = u < 0.3 ? 0 : Math.min(1, (u - 0.3) / 0.7);
+    const hy = b.hM * (e * e * (3 - 2 * e)) + 0.001;
+    this._m4.compose(this._pv.set(b.cx, b.gy, b.cz), this._qq.identity(), this._sv.set(b.w * 0.62, hy, b.d * 0.62));
+    m.setMatrixAt(k, this._m4);
+    m.count = Math.max(m.count, k + 1); m.visible = true;
+    m.instanceMatrix.needsUpdate = true;
+  }
+  // 丘上的大塊混凝土、樓板
+  _pileRocks(b) {
+    if (b.slot < 0) return;
+    const P = this.pile, base = b.slot * 10, e = new THREE.Euler();
+    for (let k = 0; k < 10; k++) {
+      const a = Math.random() * Math.PI * 2, rho = Math.sqrt(Math.random()) * 0.85;
+      const x = b.cx + Math.cos(a) * rho * b.w * 0.55, z = b.cz + Math.sin(a) * rho * b.d * 0.55;
+      const hy = b.hM * Math.pow(Math.max(0, 1 - rho * rho / 1.1), 1.2);
+      const slab = k < 3, s = slab ? 4 + Math.random() * 4 : 1.5 + Math.random() * 2.5;
+      e.set((Math.random() - 0.5) * (slab ? 0.8 : 3), Math.random() * 6.28, (Math.random() - 0.5) * (slab ? 0.8 : 3));
+      this._m4.compose(this._pv.set(x, b.gy + hy * 0.85, z), this._qq.setFromEuler(e), slab ? this._sv.set(s, 0.35, s * 0.6) : this._sv.set(s, s * 0.6, s * 0.8));
+      P.setMatrixAt(base + k, this._m4);
+    }
+    P.count = Math.max(P.count, base + 10); P.visible = true;
+    P.instanceMatrix.needsUpdate = true;
+  }
+
+  // 飛落碎塊（實體石塊，有陰影）
+  _chunk(p, n, cnt, s) {
+    for (let k = 0; k < cnt; k++) {
+      const c = this.ck[this.ckI]; this.ckI = (this.ckI + 1) % this.ck.length;
+      if (!c.live) this.ckN++;
+      const nx = n ? n.x : 0, nz = n ? n.z : 0, out = 2 + Math.random() * 6;
+      c.live = 1; c.rest = 0; c.t = 0; c.s = s * (0.55 + Math.random() * 0.6);
+      c.x = p.x + nx * c.s; c.y = p.y; c.z = p.z + nz * c.s;
+      c.vx = nx * out + (Math.random() - 0.5) * 5; c.vy = (n && n.y > 0.7 ? 6 : 0) + Math.random() * 4 - 1; c.vz = nz * out + (Math.random() - 0.5) * 5;
+      c.q.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize();
+      c.ax.set(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize(); c.av = 2 + Math.random() * 5;
+    }
+  }
+  _updChunks(dt) {
+    if (!this.ckN) return;
+    const M = this.chunkM, H = this.hooks || {};
+    let n = 0, hi = 0;
+    this.ckSnd -= dt;
+    for (let i = 0; i < this.ck.length; i++) {
+      const c = this.ck[i];
+      if (!c.live) { if (M.count > i) { M.setMatrixAt(i, this._m4.makeScale(0, 0, 0)); } continue; }
+      c.t += dt;
+      if (c.t > 9) { c.live = 0; this.ckN--; M.setMatrixAt(i, this._m4.makeScale(0, 0, 0)); continue; }
+      if (!c.rest) {
+        c.vy -= 26 * dt;
+        c.x += c.vx * dt; c.y += c.vy * dt; c.z += c.vz * dt;
+        c.q.premultiply(this._qq.setFromAxisAngle(c.ax, c.av * dt));
+        const g = this.height(c.x, c.z) + c.s * 0.35;
+        if (c.y < g) {
+          c.y = g;
+          if (c.vy < -9) {
+            c.vy *= -0.28; c.vx *= 0.45; c.vz *= 0.45; c.av *= 0.5;
+            if (c.s > 1.3 && Math.random() < 0.4 && H.fx && H.fx.dust) H.fx.dust(this._pv.set(c.x, g - c.s * 0.35, c.z), 0.45 + c.s * 0.15);
+            if (this.ckSnd <= 0 && H.audio && H.audio.debris) { this.ckSnd = 0.18; H.audio.debris(this._pv.set(c.x, c.y, c.z)); }
+          } else { c.rest = 1; c.vx = c.vy = c.vz = 0; }
+        }
+      }
+      const sc = c.s * Math.min(1, (9 - c.t) / 1.2);
+      this._m4.compose(this._pv.set(c.x, c.y, c.z), c.q, this._sv.set(sc, sc * 0.7, sc * 0.85));
+      M.setMatrixAt(i, this._m4);
+      n++; hi = i + 1;
+    }
+    M.count = hi;
+    M.instanceMatrix.needsUpdate = true;
+  }
+
+  // 冒煙點：傷口（lv1 煙、lv2 火＋濃煙）、瓦礫堆（lv3）
+  _smkOn(b, lv) {
+    if (!b.wn.length) b.wn.push({ x: b.cx + b.w * 0.5 + 1, y: b.gy + b.top * 0.6, z: b.cz, nx: 1, nz: 0, s: null });
+    for (const w of b.wn) {
+      if (w.s) { w.s.lv = Math.max(w.s.lv, lv); continue; }
+      w.s = { x: w.x, y: w.y, z: w.z, nx: w.nx, nz: w.nz, lv, r: 1, acc: 0, accF: 0, t: 0, dur: 1e9, b };
+      this.smk.push(w.s);
+    }
+    this.smkT = 0;
+  }
+  _updSmoke(dt) {
+    const L = this.smk, fx = this.hooks && this.hooks.fx;
+    if (!L.length) return;
+    for (let k = L.length - 1; k >= 0; k--) { const s = L[k]; s.t += dt; if (s.t > s.dur) L.splice(k, 1); }
+    // 每 0.4 秒挑最近的 8 個來冒煙（遠的省掉）
+    this.smkT -= dt;
+    if (this.smkT <= 0) {
+      this.smkT = 0.4;
+      const vp = this.viewP || { x: 0, z: 0 };
+      for (const s of L) s.dd = (s.x - vp.x) ** 2 + (s.z - vp.z) ** 2;
+      this.smkSel = L.filter((s) => s.dd < 900 * 900).sort((a, b) => a.dd - b.dd).slice(0, 8);
+    }
+    if (fx && fx.bldSmoke) for (const s of this.smkSel) if (s.t <= s.dur) fx.bldSmoke(s, dt);
+  }
+
+  _updBlds(dt) {
+    if (!this.blds) return;
+    const L = this.bAnim;
+    for (let k = L.length - 1; k >= 0; k--) {
+      const b = L[k];
+      if (b.st === 1) this._fallStep(b, dt);
+      else if (b.st === 0) {
+        b.t += dt; b.shk *= Math.exp(-dt * 5);
+        if (b.shk < 0.01) { b.shk = 0; this._pose(b, 0, 0, 0, 0); b.anim = false; L.splice(k, 1); continue; }
+        const a = b.shk * 0.3;
+        this._pose(b, 0, 0, a * Math.sin(b.t * 41 + 1.3), a * Math.sin(b.t * 37));
+      }
+      if (b.st === 2) { b.anim = false; L.splice(k, 1); }
+    }
+    // 快倒的樓：偶爾呻吟、抖一下、掉點東西
+    const H = this.hooks || {};
+    for (const b of this.bLow) {
+      if (b.st !== 0) continue;
+      b.groanT -= dt;
+      if (b.groanT > 0) continue;
+      b.groanT = 4 + Math.random() * 4;
+      b.shk = Math.max(b.shk, 0.5); this._anim(b);
+      const vp = this.viewP;
+      if (vp && Math.hypot(vp.x - b.cx, vp.z - b.cz) > 600) continue;
+      const P = this._pv.set(b.cx, b.gy + b.top * (0.4 + Math.random() * 0.4), b.cz);
+      if (H.audio && H.audio.groan) H.audio.groan(P, 0.6);
+      const side = Math.random() < 0.5, n = this._nv.set(side ? (Math.random() < 0.5 ? -1 : 1) : 0, 0, side ? 0 : (Math.random() < 0.5 ? -1 : 1));
+      P.x += n.x * b.w * 0.5; P.z += n.z * b.d * 0.5;
+      if (H.fx && H.fx.crumble) H.fx.crumble(P, n, 1.5);
+      this._chunk(P, n, 2, 1.2);
+    }
+    this._updChunks(dt);
+    this._updSmoke(dt);
+  }
+
+  // 每次開局：全部建築復原（位置、碰撞、血量、燈、瓦礫、煙）
+  resetBuildings() {
+    if (!this.blds) return;
+    for (const b of this.blds) {
+      if (!b.dirty) continue;
+      for (const g of b.seg) { g.a.array.set(g.o, g.s * 3); g.a.addUpdateRange(g.s * 3, g.o.length); g.a.needsUpdate = true; }
+      if (b.bl) this._burn(b, 0);
+      if (b.lamp >= 0 && this.beacon && b.st !== 0) {
+        const p = this.lampSites[b.lamp];
+        this.beacon.setMatrixAt(b.lamp, this._m4.makeTranslation(p.x, p.y, p.z)); this.beacon.instanceMatrix.needsUpdate = true;
+      }
+      b.box.top = b.top0; b.tr[0].top = b.tr[1].top = -1e4;
+      b.hp = b.hpMax; b.st = 0; b.t = 0; b.u = 0; b.shk = 0; b.bl = 0; b.wn.length = 0; b.anim = false; b.slot = -1; b.dirty = false;
+    }
+    this.bAnim.length = 0; this.bLow.length = 0; this.nFall = 0;
+    this.smk.length = 0; this.smkSel.length = 0;
+    this.mSlots.fill(null); this.mNext = 0;
+    for (const m of [this.mound, this.pile, this.chunkM]) m.count = 0;
+    for (const c of this.ck) c.live = 0;
+    this.ckN = 0;
   }
 
   buildProps() {
@@ -1073,10 +1504,12 @@ export class World {
       }
     }
     if (this.beacon) this.beacon.visible = (performance.now() % 1500) < 700;
+    this._updBlds(dt);
   }
 
   // 陰影相機跟隨玩家（對齊貼圖像素避免閃爍）
   followShadow(p) {
+    this.viewP = p;
     const s = this.sun;
     const size = (s.shadow.camera.right - s.shadow.camera.left) / s.shadow.mapSize.x;
     const z = this.lightDir;
