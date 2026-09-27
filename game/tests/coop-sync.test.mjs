@@ -130,27 +130,27 @@ test('co-op supply: 2–3 players get guaranteed prop drops, kill drops and long
   assert.equal(JSON.stringify(TUNING), before);
 });
 
-test('co-op scaling: 1p is untouched, 2p ×1.3 count ×1.4 hp, 3p ×1.6 count ×1.8 hp', () => {
+test('co-op scaling: 1p is untouched, 2p ×1.3 count ×1.4 hp, 3p ×1.8 count ×2.1 hp', () => {
   assert.deepEqual(COOP_SCALE[1], { count: 1, hp: 1 });
   assert.deepEqual(scaleFor(2), { count: 1.3, hp: 1.4 });
-  assert.deepEqual(scaleFor(3), { count: 1.6, hp: 1.8 });
+  assert.deepEqual(scaleFor(3), { count: 1.8, hp: 2.1 });
   assert.deepEqual(scaleFor(7), scaleFor(3), 'clamped to 3 players');
   assert.deepEqual(scaleFor(0), scaleFor(1));
   assert.equal(scaledHp(5, 1), 5);
   assert.equal(scaledHp(5, 2), 7);      // 7.0
-  assert.equal(scaledHp(4, 3), 8);      // 7.2 → 8
+  assert.equal(scaledHp(4, 3), 9);      // 8.4 → 9
   assert.equal(scaledHp(0.2, 2), 1, 'never below 1');
   const base = snapshotCounts(TUNING);
   assert.deepEqual(scaledCounts(base, 1), base);
   const two = scaledCounts(base, 2);
   assert.equal(two.market.goal, Math.round(base.market.goal * 1.3));
   assert.ok(Math.abs(two.market.groupEvery - base.market.groupEvery / 1.3) < 1e-9);
-  assert.equal(scaledCounts(base, 3).boss.resummon.count, Math.round(base.boss.resummon.count * 1.6));
+  assert.equal(scaledCounts(base, 3).boss.resummon.count, Math.round(base.boss.resummon.count * 1.8));
   // applying repeatedly from the baseline never compounds, and 1p restores the original numbers
   const before = JSON.stringify(TUNING);
   applyCountScale(TUNING, base, 3);
   applyCountScale(TUNING, base, 3);
-  assert.equal(TUNING.market.goal, Math.round(base.market.goal * 1.6));
+  assert.equal(TUNING.market.goal, Math.round(base.market.goal * 1.8));
   applyCountScale(TUNING, base, 1);
   assert.equal(JSON.stringify(TUNING), before);
   // the on-screen cap is not part of the scaling

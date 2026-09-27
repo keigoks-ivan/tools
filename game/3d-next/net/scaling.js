@@ -9,7 +9,7 @@
 export const COOP_SCALE = {
   1: { count: 1.0, hp: 1.0 },
   2: { count: 1.3, hp: 1.4 },
-  3: { count: 1.6, hp: 1.8 },
+  3: { count: 1.8, hp: 2.1 },   // 2026-09-27 由 1.6／1.8 上調：救援縮短與補給加多後三人偏簡單
 };
 
 export function scaleFor(players) {
