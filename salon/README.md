@@ -44,7 +44,7 @@ stability-report.json 記錄 300 秒連續混合操作的數值結果。這是�
 
 ## 網站整合
 
-正式遊戲路徑為 /salon/，games/index.html 提供入口。由 Git 推送至 main 後觸發 Cloudflare Pages 部署。
+正式遊戲路徑為 /salon/，games/index.html 提供入口。由 Git 推送至 main 後觸發 GitHub Pages 部署。
 
 ## 美術來源
 
