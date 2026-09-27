@@ -177,7 +177,8 @@ test('an event storm stays inside the pools: no new GPU resources, bounded draws
     const stats = fx.stats();
     assert.ok(stats.particlesAlive <= stats.particleCap, 'particle cap exceeded');
     assert.ok(stats.stripSlotsUsed <= QUALITY.mobile.stripSlots, 'strip slots exceeded');
-    assert.ok(stats.drawCalls <= 3 + QUALITY.mobile.ghosts + 1, `draw calls ${stats.drawCalls}`);
+    // +2: every musou finisher shows the ground shockwave + blast wall for ~0.75 s
+    assert.ok(stats.drawCalls <= 3 + QUALITY.mobile.ghosts + 1 + 2, `draw calls ${stats.drawCalls}`);
   }
   const after = probe();
   assert.equal(after.material - before.material, 1, 'materials were allocated during the storm');

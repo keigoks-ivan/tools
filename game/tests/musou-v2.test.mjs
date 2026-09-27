@@ -223,8 +223,9 @@ for (const quality of ['desktop', 'mobile']) {
     const { fx, camera, target } = makeFx(quality);
     const base = 2 + 1 + QUALITY[quality].ghosts + 1;   // 2 particle pools + 1 strip batch + ghosts + aura
     const peak = runLongMusou(fx, camera, target, { isTrue: true });
-    assert.ok(peak.cinematicDraws <= 4, `cinematic draws ${peak.cinematicDraws} exceed the +4 budget`);
-    assert.ok(peak.drawCalls <= base + 4, `peak draws ${peak.drawCalls} exceed ${base + 4} (${quality})`);
+    // +5: spirit blade, flame shroud, split quad, ground shockwave, finisher blast wall
+    assert.ok(peak.cinematicDraws <= 5, `cinematic draws ${peak.cinematicDraws} exceed the +5 budget`);
+    assert.ok(peak.drawCalls <= base + 5, `peak draws ${peak.drawCalls} exceed ${base + 5} (${quality})`);
     fx.dispose();
   });
 }

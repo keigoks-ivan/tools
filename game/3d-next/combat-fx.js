@@ -469,6 +469,22 @@ void main() {
   gl_FragColor = vec4(max(col, 0.0), alpha);
 }`;
 
+// Musou finisher blast wall: open cylinder (uv.y = height), bright base band, fading upward, streaks sliding round.
+const BLAST_VERTEX = /* glsl */`
+varying vec2 vUv;
+void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }`;
+
+const BLAST_FRAGMENT = /* glsl */`
+uniform float uOpacity; uniform float uTime; uniform vec3 uColor;
+varying vec2 vUv;
+void main() {
+  float h = vUv.y;
+  float body = pow(1.0 - h, 2.2);
+  float rim = smoothstep(0.0, 0.03, h) * (1.0 - smoothstep(0.03, 0.14, h));
+  float streak = 0.7 + 0.3 * sin(vUv.x * 188.5 + h * 7.0 - uTime * 9.0);
+  gl_FragColor = vec4(uColor * (body * streak * 1.3 + rim * 2.6), uOpacity);
+}`;
+
 // ---------------------------------------------------------------------------------------------
 // GPU-simulated particle field: one InstancedBufferGeometry, one draw call. Positions integrate in the vertex
 // shader (drag + gravity), so the CPU only writes a slot when a particle is born.
@@ -998,7 +1014,7 @@ function createSplitOverlay(THREE) {
 }
 
 /** Flat ground ring, fake-distortion look (bright leading edge + dark trailing band), no refraction pass. */
-function createShockwave(THREE, half = 9) {
+function createShockwave(THREE, half = 16) {
   const geometry = new THREE.PlaneGeometry(half * 2, half * 2);
   const material = new THREE.ShaderMaterial({
     uniforms: { uRadius: { value: 0 }, uWidth: { value: 1 }, uOpacity: { value: 0 }, uColor: { value: new THREE.Color(1.6, 1.0, 2.2) } },
@@ -1011,6 +1027,24 @@ function createShockwave(THREE, half = 9) {
   mesh.visible = false;
   mesh.renderOrder = 8;
   mesh.name = 'combat-fx-shockwave';
+  return { mesh, material, dispose() { geometry.dispose(); material.dispose(); } };
+}
+
+/** Musou finisher blast wall: one open cylinder, base on the ground, scaled (radius, height, radius) per frame. */
+function createBlastWall(THREE) {
+  const geometry = new THREE.CylinderGeometry(1, 1, 1, 64, 1, true);
+  geometry.translate(0, 0.5, 0);
+  const material = new THREE.ShaderMaterial({
+    uniforms: { uOpacity: { value: 0 }, uTime: { value: 0 }, uColor: { value: new THREE.Color(1.3, 0.8, 2.0) } },
+    vertexShader: BLAST_VERTEX, fragmentShader: BLAST_FRAGMENT,
+    transparent: true, depthWrite: false, depthTest: true, toneMapped: false, fog: false, side: THREE.DoubleSide,
+    blending: THREE.AdditiveBlending,
+  });
+  const mesh = new THREE.Mesh(geometry, material);
+  mesh.frustumCulled = false;
+  mesh.visible = false;
+  mesh.renderOrder = 9;
+  mesh.name = 'combat-fx-blast-wall';
   return { mesh, material, dispose() { geometry.dispose(); material.dispose(); } };
 }
 
@@ -1214,7 +1248,8 @@ export function createCombatFx(o) {
   const flameShroud = createFlameShroud(THREE, q.fbmOctaves);
   const splitOverlay = createSplitOverlay(THREE);
   const shockwave = createShockwave(THREE);
-  scene.add(spiritBlade.mesh, flameShroud.mesh, splitOverlay.mesh, shockwave.mesh);
+  const blastWall = createBlastWall(THREE);
+  scene.add(spiritBlade.mesh, flameShroud.mesh, splitOverlay.mesh, shockwave.mesh, blastWall.mesh);
   const echoes = createEchoes(THREE, scene, o.heroModel, q);
   const blade = createBladeSampler(THREE, o.sword);
   const hud = o.hud ? createHud(o.hud, q, o.hudStyle) : null;
@@ -1267,6 +1302,7 @@ export function createCombatFx(o) {
   const heroBody = new THREE.Vector3();
   const splitState = { pending: false, active: false, t: 0, dur: 0.25 };
   const shockState = { active: false, t: 0, dur: 0.55, x: 0, y: 0, z: 0, maxR: 4 };
+  const blastState = { active: false, t: 0, dur: 0.75, x: 0, y: 0, z: 0, maxR: 12, height: 3.2 };
   const hudState = { comboShown: -1, tier: -1, pulse: 0, pulseAmp: 0, fade: 0, bannerT: 9, stampPulse: 0, titleT: 9, hue: 0 };
   // Shared canonical "true original" material per mesh (round 7 fix): hit-flash and enemy-occlusion both swap
   // mesh.material, and previously each cached whatever it first read as "the original" independently -- if a hit
@@ -1880,6 +1916,7 @@ export function createCombatFx(o) {
     spiritBlade.mesh.visible = false; flameShroud.mesh.visible = false;
     splitState.pending = false; splitState.active = false; splitOverlay.mesh.visible = false;
     shockState.active = false; shockwave.mesh.visible = false;
+    blastState.active = false; blastWall.mesh.visible = false;
     // activation: hard freeze (unless the game authors it and sends 'musouFreeze')
     if (!authored) slow.play([[0.08, 0]], { ramp: 0.04, force: true, tag: 'musou' });
     screenFlash(isTrue ? 0.4 : 0.3, 0.16);
@@ -2000,15 +2037,22 @@ export function createCombatFx(o) {
     speedLines(0.65, 1);
     // (f) short sharp flash instead of a whole-screen whiteout: high but brief, ≤ 0.08 s
     screenFlash(0.55, 0.07);
-    addTrauma(0.7);
-    haptic([40, 30, 90]);
+    addTrauma(0.9);
+    haptic([40, 30, 90, 40, 120]);
     musou.endAt = musou.t + (isTrue ? 1.0 : 0.75);
+    // 爆裂衝擊波 (every musou): a glowing wall races out to ~12-15 m on real time (the finisher's slow-mo would
+    // otherwise crawl it), riding a big ground ring with its dark distortion trail and two wide strip rings.
+    const blastR = THREE.MathUtils.clamp(radius * 2.2, 9, 15);
+    Object.assign(blastState, { active: true, t: 0, x, y, z, maxR: blastR, height: isTrue ? 3.8 : 3.2 });
+    blastWall.material.uniforms.uColor.value.setRGB(tint[0] * 1.1, tint[1] * 1.2, tint[2] * 1.1);
+    shockState.active = true; shockState.t = 0; shockState.x = x; shockState.y = y + 0.03; shockState.z = z;
+    shockState.dur = 0.75; shockState.maxR = blastR;
+    groundRing(x, y + 0.11, z, 1.0, blastR, { life: 0.75, width: 1.4, color: [tint[0] * 1.5, tint[1] * 1.6, tint[2] * 1.4], musou: true });
+    groundRing(x, y + 0.04, z, 0.8, blastR * 0.85, { life: 1.1, width: 2.4, row: STRIP_ROWS.dust, color: [0.55, 0.5, 0.66], alpha: 0.6, mode: 1, musou: true });
     if (musou.longForm) {
       // 天刃 CUT 3: the vertical cleave freeze -> one framebuffer capture (done in cameraPost) -> sliding screen
-      // split -> fade, plus a fake-distortion ground shockwave; both are pooled meshes, only toggled here.
+      // split -> fade; the pooled split quad is only toggled here (the ground shockwave above covers every musou).
       splitState.pending = true; splitState.t = 0;
-      shockState.active = true; shockState.t = 0; shockState.x = x; shockState.y = y + 0.03; shockState.z = z;
-      shockState.maxR = Math.max(3.5, radius * 1.2);
     }
   }
   function updateMusou(realDt, gameDt) {
@@ -2180,6 +2224,23 @@ export function createCombatFx(o) {
         shockwave.material.uniforms.uRadius.value = shockState.maxR * easeOut(p);
         shockwave.material.uniforms.uWidth.value = Math.max(0.4, shockState.maxR * 0.35 * (1 - p * 0.6));
         shockwave.material.uniforms.uOpacity.value = 1 - smooth01((p - 0.55) / 0.45);
+      }
+    }
+    if (blastState.active) {
+      blastState.t += realDt;
+      const p = blastState.t / blastState.dur;
+      if (p >= 1) { blastState.active = false; blastWall.mesh.visible = false; }
+      else {
+        const r = Math.max(0.3, blastState.maxR * easeOut(p));
+        blastWall.mesh.visible = true;
+        blastWall.mesh.position.set(blastState.x, blastState.y, blastState.z);
+        blastWall.mesh.scale.set(r, blastState.height * (1 - 0.65 * p), r);
+        // dim the wall while it sweeps past the camera, so it never washes the whole screen out
+        camera.getWorldPosition(tmp3);
+        const camD = Math.hypot(tmp3.x - blastState.x, tmp3.z - blastState.z);
+        const near = THREE.MathUtils.clamp(Math.abs(r - camD) / 2.5, 0.25, 1);
+        blastWall.material.uniforms.uOpacity.value = Math.min(1, p / 0.04) * Math.pow(1 - p, 1.4) * near;
+        blastWall.material.uniforms.uTime.value = realTime;
       }
     }
   }
@@ -2822,6 +2883,7 @@ export function createCombatFx(o) {
     spirit.phase = 'hidden'; spirit.reveal = 0; spiritBlade.mesh.visible = false; flameShroud.mesh.visible = false;
     splitState.pending = false; splitState.active = false; splitOverlay.mesh.visible = false;
     shockState.active = false; shockwave.mesh.visible = false;
+    blastState.active = false; blastWall.mesh.visible = false;
     endMusou();
     if (hud) { for (const d of hud.damage) d.age = d.life; for (const s of hud.stamps) s.age = s.life; updateHud(0); }
   }
@@ -2830,7 +2892,7 @@ export function createCombatFx(o) {
   function prewarm(sampleEnemy = null) {
     if (!renderer?.compile) return;
     const hidden = [];
-    for (const mesh of [...particles.meshes, strips.mesh, spiritBlade.mesh, flameShroud.mesh, splitOverlay.mesh, shockwave.mesh]) {
+    for (const mesh of [...particles.meshes, strips.mesh, spiritBlade.mesh, flameShroud.mesh, splitOverlay.mesh, shockwave.mesh, blastWall.mesh]) {
       if (!mesh.visible) { mesh.visible = true; hidden.push(mesh); }
     }
     for (const ghost of echoes.ghosts) { if (!ghost.mesh.visible) { ghost.mesh.visible = true; hidden.push(ghost.mesh); } }
@@ -2854,9 +2916,9 @@ export function createCombatFx(o) {
     if (renderer?.domElement?.style && hudState.gradeApplied) renderer.domElement.style.filter = '';
     releaseFlashes();
     releaseOcclusion();
-    scene.remove(...particles.meshes, strips.mesh, spiritBlade.mesh, flameShroud.mesh, splitOverlay.mesh, shockwave.mesh);
+    scene.remove(...particles.meshes, strips.mesh, spiritBlade.mesh, flameShroud.mesh, splitOverlay.mesh, shockwave.mesh, blastWall.mesh);
     particles.dispose(); strips.dispose(); echoes.dispose();
-    spiritBlade.dispose(); flameShroud.dispose(); splitOverlay.dispose(); shockwave.dispose();
+    spiritBlade.dispose(); flameShroud.dispose(); splitOverlay.dispose(); shockwave.dispose(); blastWall.dispose();
     for (const texture of owned) texture.dispose();
     for (const entry of flashCache.values()) { entry.hot.dispose(); entry.warm.dispose(); }
     flashCache.clear();
@@ -2868,7 +2930,7 @@ export function createCombatFx(o) {
   }
 
   function stats() {
-    const cinematicDraws = (spiritBlade.mesh.visible ? 1 : 0) + (flameShroud.mesh.visible ? 1 : 0) + (splitOverlay.mesh.visible ? 1 : 0) + (shockwave.mesh.visible ? 1 : 0);
+    const cinematicDraws = (spiritBlade.mesh.visible ? 1 : 0) + (flameShroud.mesh.visible ? 1 : 0) + (splitOverlay.mesh.visible ? 1 : 0) + (shockwave.mesh.visible ? 1 : 0) + (blastWall.mesh.visible ? 1 : 0);
     return {
       particlesAlive: particles.alive(), particleCap: particles.capacity,
       stripSlotsUsed: strips.used, stripSlots: q.stripSlots,
@@ -2918,9 +2980,9 @@ export function createCombatFx(o) {
       shockState: { ...shockState },
       musou: { active: musou.active, t: +musou.t.toFixed(3), endAt: Number.isFinite(musou.endAt) ? +musou.endAt.toFixed(3) : musou.endAt, longForm: musou.longForm, isTrue: musou.isTrue },
       drawCalls: (particles.draws + (strips.mesh.visible ? 1 : 0) + echoes.ghosts.filter(g => g.mesh.visible).length + (echoes.aura?.visible ? 1 : 0)
-        + (spiritBlade.mesh.visible ? 1 : 0) + (flameShroud.mesh.visible ? 1 : 0) + (splitOverlay.mesh.visible ? 1 : 0) + (shockwave.mesh.visible ? 1 : 0)),
+        + (spiritBlade.mesh.visible ? 1 : 0) + (flameShroud.mesh.visible ? 1 : 0) + (splitOverlay.mesh.visible ? 1 : 0) + (shockwave.mesh.visible ? 1 : 0) + (blastWall.mesh.visible ? 1 : 0)),
     }),
-    objects: [...particles.meshes, strips.mesh, ...echoes.ghosts.map(g => g.mesh), echoes.aura, spiritBlade.mesh, flameShroud.mesh, splitOverlay.mesh, shockwave.mesh].filter(Boolean),
+    objects: [...particles.meshes, strips.mesh, ...echoes.ghosts.map(g => g.mesh), echoes.aura, spiritBlade.mesh, flameShroud.mesh, splitOverlay.mesh, shockwave.mesh, blastWall.mesh].filter(Boolean),
     quality: q,
   };
 }
