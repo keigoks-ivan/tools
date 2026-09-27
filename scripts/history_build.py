@@ -391,8 +391,8 @@ ENTRIES = [
          zh="利率三千八百年 · 前 1754 → 今天", en="Interest Rates: 3,800 Years",
          blurb="借錢的價格，從漢摩拉比一路跌到負數", lat=None, lng=None),
     dict(src=None, slug="bubbles-chart", cat="maps",
-         zh="泡沫疊圖 · 1637 → 2017", en="Bubbles Overlaid · 1637–2017",
-         blurb="八個泡沫疊在一起，形狀幾乎一樣", lat=None, lng=None),
+         zh="泡沫疊圖 · 1637 → 今天", en="Bubbles Overlaid · 1637–Today",
+         blurb="八個泡沫疊在一起，再擺上今天的 AI", lat=None, lng=None),
 
     # ---------- 運動史 ----------
     dict(src="運動歷史/足球史_史詩敘事_深度長文版.html", slug="football-history", cat="sport",
