@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>泡沫疊圖：八個泡沫，一把尺</title>
+<meta name="description" content="鬱金香、密西西比、南海、1929、日經、那斯達克、上證、比特幣：八個泡沫的高峰對齊、拉成 100，疊在同一張動畫圖上。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;600;700;900&family=Cinzel:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0d10;--ink:#f1e8d6;--dim:#b3a386;--faint:#7c6f58;--line:#3a3124;
+  --gold:#cda551;--gold2:#ecd08a;--panel:#15120e;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{background:var(--bg)}
+body{font-family:'Noto Serif TC',serif;color:var(--ink);min-height:100vh;
+  background:radial-gradient(ellipse at 50% -10%,rgba(205,165,81,.10),transparent 60%),var(--bg)}
+.wrap{max-width:1180px;margin:0 auto;padding:22px 16px 40px}
+.head{text-align:center;margin:10px 0 18px}
+.kicker{font-family:'Cinzel',serif;letter-spacing:.34em;font-size:.7rem;color:var(--gold);text-transform:uppercase;display:block;margin-bottom:.6rem}
+.head h1{font-weight:900;font-size:clamp(1.55rem,4.4vw,2.5rem);line-height:1.2;
+  background:linear-gradient(180deg,#fff4d6,#d9b25e);-webkit-background-clip:text;background-clip:text;color:transparent}
+.head p{color:var(--dim);margin-top:.5rem;font-size:.98rem;line-height:1.7}
+.head p b{color:var(--gold2);font-weight:700}
+
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;
+  box-shadow:0 30px 80px -30px rgba(0,0,0,.8)}
+.chartbox{position:relative;width:100%;aspect-ratio:16/9;background:#0b0e12;overflow:hidden;touch-action:pan-y}
+#cv{position:absolute;inset:0;display:block;width:100%;height:100%}
+.hud{position:absolute;left:18px;top:12px;pointer-events:none;text-shadow:0 2px 12px rgba(0,0,0,.9)}
+.hud-year{font-family:'Cinzel',serif;font-weight:700;font-size:clamp(1.9rem,5.4vw,3.8rem);line-height:1;letter-spacing:.02em;white-space:nowrap;
+  background:linear-gradient(180deg,#fff6dc 10%,#d4a94f 95%);-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 2px 10px rgba(0,0,0,.7))}
+.hud-era{font-size:clamp(.8rem,1.9vw,1.05rem);color:var(--ink);font-weight:700;margin-top:4px;letter-spacing:.06em;white-space:nowrap}
+.hud-sub{font-size:clamp(.66rem,1.4vw,.8rem);color:var(--dim);margin-top:2px;white-space:nowrap}
+.legend{display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px;padding:10px 18px 0;border-top:1px solid var(--line);
+  font-size:.8rem;color:var(--ink);min-height:36px}
+.legend .row{display:flex;align-items:center;gap:7px;white-space:nowrap;animation:lgin .5s ease}
+.legend .row.off{opacity:.45}
+.legend .sw{width:18px;height:3px;border-radius:2px;flex:none;box-shadow:0 0 8px currentColor}
+.legend .sw.dot{width:9px;height:9px;border-radius:50%}
+.legend .sw.box{width:14px;height:10px;border-radius:2px;box-shadow:none}
+.legend .sw.dash{height:0;border-top:2px dashed;background:none!important;box-shadow:none}
+.legend .note{font-size:.72rem;color:var(--dim);white-space:normal}
+@keyframes lgin{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
+.bigplay{position:absolute;left:50%;top:54%;transform:translate(-50%,-50%);border:1px solid var(--gold);
+  background:rgba(12,10,8,.78);color:var(--gold2);font-family:'Noto Serif TC',serif;font-weight:700;font-size:1.15rem;letter-spacing:.12em;
+  padding:16px 34px;border-radius:40px;cursor:pointer;box-shadow:0 0 0 0 rgba(205,165,81,.5);animation:pulse 2.2s infinite;
+  backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
+.bigplay small{display:block;font-size:.72rem;color:var(--dim);letter-spacing:.05em;font-weight:400;margin-top:4px}
+.bigplay:hover{background:rgba(205,165,81,.18)}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(205,165,81,.45)}70%{box-shadow:0 0 0 22px rgba(205,165,81,0)}100%{box-shadow:0 0 0 0 rgba(205,165,81,0)}}
+.fsbtn{position:absolute;right:12px;top:12px;width:36px;height:36px;border-radius:8px;border:1px solid rgba(205,165,81,.35);
+  background:rgba(10,12,14,.6);color:var(--gold2);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.fsbtn:hover{background:rgba(205,165,81,.2)}
+.loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--dim);font-style:italic;letter-spacing:.1em}
+
+.bar{display:flex;align-items:center;gap:12px;padding:12px 16px 4px}
+.pbtn{flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--gold);background:transparent;color:var(--gold2);
+  font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s}
+.pbtn:hover,.pbtn.on{background:var(--gold);color:#16120d}
+.track{flex:1;position:relative;height:44px;display:flex;align-items:center}
+#slider{width:100%;-webkit-appearance:none;appearance:none;height:6px;border-radius:4px;outline:none;cursor:pointer;
+  background:linear-gradient(90deg,rgb(240,98,146) 0.3%,rgb(240,98,146) 9.8%,rgb(126,140,224) 10.9%,rgb(126,140,224) 20.0%,rgb(79,195,247) 21.1%,rgb(79,195,247) 30.2%,rgb(236,208,138) 31.3%,rgb(236,208,138) 43.1%,rgb(239,83,80) 44.1%,rgb(239,83,80) 55.9%,rgb(179,136,255) 57.0%,rgb(179,136,255) 68.8%,rgb(77,208,161) 69.9%,rgb(77,208,161) 81.7%,rgb(255,140,66) 82.8%,rgb(255,140,66) 94.6%,#ecd08a 100%)}
+#slider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;background:#16120d;border:3px solid var(--gold2);box-shadow:0 0 12px rgba(236,208,138,.6)}
+#slider::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#16120d;border:3px solid var(--gold2)}
+.ticks{position:absolute;left:0;right:0;top:31px;height:10px;pointer-events:none}
+.ticks i{position:absolute;top:0;width:1px;height:6px;background:rgba(236,208,138,.45)}
+.sbtn{flex:none;min-width:44px;height:30px;border-radius:15px;border:1px solid var(--line);background:transparent;color:var(--dim);
+  font-family:'Cinzel',serif;font-size:.78rem;cursor:pointer}
+.sbtn:hover{color:var(--gold2);border-color:var(--gold)}
+
+.chips{display:flex;gap:6px;padding:4px 16px 12px;overflow-x:auto;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:transparent;color:var(--dim);border-radius:18px;padding:6px 12px;
+  font-family:'Noto Serif TC',serif;font-size:.8rem;cursor:pointer;white-space:nowrap;transition:all .2s}
+.chip b{font-family:'Cinzel',serif;font-weight:600;color:var(--faint);margin-right:5px;font-size:.72rem}
+.chip:hover{border-color:var(--gold);color:var(--ink)}
+.chip.on{background:rgba(205,165,81,.16);border-color:var(--gold);color:var(--gold2)}
+.chip.on b{color:var(--gold)}
+
+.card{margin:0 16px 16px;padding:14px 18px 15px;border-left:3px solid var(--gold);background:rgba(255,255,255,.03);border-radius:0 8px 8px 0;min-height:118px}
+.card-top{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.c-year{font-family:'Cinzel',serif;font-weight:700;color:var(--gold2);font-size:1.05rem}
+.c-place{font-size:.8rem;color:var(--dim)}
+.c-title{font-size:1.12rem;font-weight:900;margin:3px 0 4px;color:#fff5de}
+.c-text{font-size:.95rem;line-height:1.75;color:#e4d9c2}
+.c-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:8px;flex-wrap:wrap}
+.c-era{font-size:.78rem;color:var(--faint)}
+.c-link{font-size:.82rem;color:var(--gold2);text-decoration:none;border-bottom:1px dashed rgba(236,208,138,.5)}
+.c-link:hover{color:#fff}
+.card.flash{animation:cardin .5s ease}
+@keyframes cardin{from{opacity:.25;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+.foot{margin-top:18px;font-size:.78rem;color:var(--faint);line-height:1.8}
+.foot p{margin-bottom:.5rem}
+.foot b{color:var(--dim)}
+.foot a{color:var(--gold)}
+
+/* fullscreen */
+.stage:fullscreen{display:flex;flex-direction:column;width:100vw;height:100vh;border-radius:0;border:0}
+.stage:-webkit-full-screen{display:flex;flex-direction:column;width:100vw;height:100vh}
+.stage:fullscreen .chartbox{flex:1;aspect-ratio:auto}
+.stage:-webkit-full-screen .chartbox{flex:1;aspect-ratio:auto}
+.stage.fake-fs{position:fixed;inset:0;z-index:20000;display:flex;flex-direction:column;border-radius:0;border:0;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+.stage.fake-fs .chartbox{flex:1;aspect-ratio:auto}
+.stage:fullscreen .card,.stage.fake-fs .card{min-height:0}
+
+@media (max-width:720px){
+  .chartbox{aspect-ratio:1/1}
+  .legend{padding:10px 12px 0;gap:6px 12px;font-size:.76rem}
+  .hud{left:12px;top:8px}
+  #hudSub{display:none}
+  .card{margin:0 12px 12px;padding:12px 14px}
+  .c-text{font-size:.9rem}
+  .bar{padding:10px 12px 2px}
+  .chips{padding:4px 12px 10px}
+  .bigplay{padding:13px 26px;font-size:1rem}
+  .stage.fake-fs .chartbox,.stage:fullscreen .chartbox{aspect-ratio:auto}
+}
+@media (prefers-reduced-motion:reduce){.bigplay{animation:none}}
+</style>
+</head>
+<body>
+
+<!-- imq-history-backbar -->
+<div id="imq-history-backbar" style="position:sticky;top:0;z-index:9999;background:#16140f;border-bottom:1px solid #a8842f;
+  font-family:system-ui,-apple-system,'Noto Serif TC',serif;display:flex;align-items:center;gap:16px;
+  padding:8px 18px;font-size:13px;letter-spacing:.02em;flex-wrap:wrap">
+  <a href="/history/" style="color:#cda551;text-decoration:none;font-weight:600;display:inline-flex;align-items:center;gap:6px">
+    <span style="font-size:15px">←</span><span>返回歷史總覽</span></a>
+  <span style="color:#665a45">·</span>
+  <a href="/history/stock-market.html" style="color:#cda551;text-decoration:none">讀史詩：貪婪與恐懼</a>
+  <span style="color:#665a45">·</span>
+  <a href="/home.html" style="color:#9a8f78;text-decoration:none">Property Monitor</a>
+</div>
+
+<main class="wrap">
+  <header class="head">
+    <span class="kicker">Bubbles Overlaid · 1637 → 2017</span>
+    <h1>泡沫疊圖</h1>
+    <p>八個泡沫，同一把尺。每條線的高峰月都拉成 100，橫軸是離高峰幾個月。<b>爬坡、高峰、崩落</b>，四百年來幾乎是同一個形狀。按播放，約 2 分 15 秒看完。</p>
+  </header>
+
+  <section class="stage" id="stage">
+    <div class="chartbox" id="chartbox">
+      <canvas id="cv" role="img" aria-label="八個歷史泡沫的價格走勢，高峰對齊為 100 的疊圖動畫"></canvas>
+      <div class="loading" id="loading">正在畫圖……</div>
+      <div class="hud" id="hud">
+        <div class="hud-year" id="hudYear">1637</div>
+        <div class="hud-era" id="hudEra"></div>
+        <div class="hud-sub" id="hudSub"></div>
+      </div>
+      <button class="fsbtn" id="fsBtn" title="全螢幕" aria-label="全螢幕">⛶</button>
+      <button class="bigplay" id="bigplay">▶ 播放<small>八個泡沫 · 約 2 分 15 秒</small></button>
+    </div>
+    <div class="legend" id="legend"></div>
+    <div class="bar">
+      <button class="pbtn" id="play" aria-label="播放">▶</button>
+      <div class="track"><input type="range" id="slider" min="0" max="1" step="0.01" value="0" aria-label="時間軸"><div class="ticks" id="ticks"></div></div>
+      <button class="sbtn" id="speed" title="速度">1×</button>
+    </div>
+    <div class="chips" id="chips"></div>
+    <div class="card" id="card">
+      <div class="card-top"><span class="c-year" id="cYear"></span><span class="c-place" id="cPlace"></span></div>
+      <div class="c-title" id="cTitle"></div>
+      <p class="c-text" id="cText"></p>
+      <div class="c-foot"><span class="c-era" id="cEra"></span><a class="c-link" id="cLink" href="/history/stock-market.html">讀史詩 →</a></div>
+    </div>
+  </section>
+
+  <div class="foot">
+<p><b>怎麼讀這張圖：</b>每條線各自除以自己「高峰那個月的月平均」，所以高峰都是 100；橫軸是離高峰幾個月。卡片上的單日收盤另外標明日期，所以會比月平均高一些。</p>
+<p><b>資料來源：</b>鬱金香：Thompson &amp; Treussard（2002，UCLA 工作論文，附錄 I）品質加權價格指數，11 筆有日期的成交；11 月初的值是 11 月 1–10 日四筆成交的平均。密西西比、南海：Frehen、Goetzmann、Rouwenhorst 的 Yale 1720 價格資料庫，日價取月平均。道瓊：NBER Macrohistory 11009（經 FRED，M1109BUSM293NNBR），1948 年以前每月值是當月最高與最低的平均；1929/9/3 收盤 381、1932/7/8 收盤 41 是道瓊官方歷史紀錄。日經 225（NIKKEI225）、那斯達克綜合（NASDAQCOM）、比特幣（CBBTCUSD，Coinbase）：FRED 日資料取月平均。上證綜合指數：Yahoo Finance（000001.SS）日收盤取月平均。牛頓的損失是流傳的軼事，沒有帳冊可查。</p>
+<p><b>近似與限制：</b>鬱金香只有零星成交，畫成點；天數換成月時用 1 個月 ≈ 30.44 天。當時很多是遠期合約，學者對價格的解讀仍有爭論。密西西比股價以里弗計，而里弗本身在 1720 年大量增印。南海公司 1720 年夏天停止過戶，這段報價是遠期交割價。兩條 1720 年的線，資料只到 1720 年底。比特幣線畫到 2020 年 10 月，因為 11 月的月平均已超過 2017 年高峰。</p>
+  </div>
+</main>
+
+<script>
+(function(){
+"use strict";
+/* ================= chart ================= */
+var LINES=[{"key":"tulip1637","name":"鬱金香狂熱 · 荷蘭","short":"鬱金香 1637","col":[240,98,146],"peak":"1637-02-03","pts":[[-2.96,4.4,"1636-11-05"],[-2.73,5.2,"1636-11-12"],[-2.3,48.0,"1636-11-25"],[-2.1,53.5,"1636-12-01"],[-1.74,87.1,"1636-12-12"],[-0.07,98.5,"1637-02-01"],[0.0,100.0,"1637-02-03"],[0.07,88.1,"1637-02-05"],[0.2,73.3,"1637-02-09"],[0.26,71.8,"1637-02-11"],[2.86,5.4,"1637-05-01"]],"xmin":-2.96,"xmax":2.86,"peakLab":"2 月 3 日（202）","sparse":true,"raw":[8.9,10.5,97,108,176,199,202,178,148,145,11],"t0":0.3,"ta":0.9,"tp":5.9,"te":10.9},{"key":"mississippi","name":"密西西比泡沫 · 法國","short":"密西西比 1720","col":[126,140,224],"peak":"1720-02","pts":[[-18,3.4],[-15,3.0],[-14,3.0],[-13,3.4],[-12,3.3],[-11,5.0],[-10,4.7],[-9,5.9],[-8,7.6],[-7,14.5],[-6,34.1],[-5,55.3],[-4,58.4],[-3,84.4],[-2,95.8],[-1,98.5],[0,100.0],[1,94.6],[2,95.9],[3,84.3],[4,57.0],[5,50.8],[6,48.3],[7,48.1],[8,45.3],[9,37.8]],"xmin":-18,"xmax":9,"peakLab":"1720 年 2 月（月均 9,409 里弗）","minX":9,"minY":37.8,"minLab":"1720 年 11 月，資料到此","t0":12.1,"ta":12.7,"tp":17.7,"te":22.2},{"key":"southsea","name":"南海泡沫 · 英國","short":"南海 1720","col":[79,195,247],"peak":"1720-07","pts":[[-11,13.0],[-10,13.3],[-9,13.3],[-8,13.4],[-7,14.1],[-6,15.0],[-5,17.4],[-4,20.8],[-3,34.9],[-2,39.8],[-1,74.5],[0,100.0],[1,94.0],[2,77.3],[3,31.1],[4,23.6],[5,22.4]],"xmin":-11,"xmax":5,"peakLab":"1720 年 7 月（月均 £877）","minX":5,"minY":22.4,"minLab":"1720 年 12 月，資料到此","t0":23.4,"ta":24.0,"tp":29.0,"te":33.5},{"key":"dow1929","name":"一九二九 · 美國道瓊","short":"道瓊 1929","col":[236,208,138],"peak":"1929-09","pts":[[-36,44.5],[-35,42.1],[-34,42.5],[-33,44.0],[-32,42.7],[-31,43.6],[-30,44.2],[-29,45.3],[-28,46.6],[-27,46.6],[-26,48.4],[-25,50.7],[-24,53.9],[-23,52.4],[-22,52.4],[-21,54.6],[-20,54.9],[-19,53.9],[-18,56.4],[-17,58.6],[-16,59.7],[-15,58.4],[-14,58.2],[-13,62.7],[-12,66.0],[-11,68.3],[-10,75.9],[-9,76.9],[-8,84.8],[-7,85.3],[-6,85.2],[-5,85.3],[-4,85.6],[-3,87.3],[-2,94.2],[-1,99.1],[0,100.0],[1,80.4],[2,63.0],[3,68.2],[4,70.6],[5,73.8],[6,76.8],[7,78.8],[8,73.6],[9,67.1],[10,63.4],[11,63.1],[12,62.1],[13,54.9],[14,49.9],[15,47.5],[16,46.2],[17,50.1],[18,49.7],[19,43.6],[20,39.0],[21,38.4],[22,40.1],[23,38.6],[24,32.7],[25,27.1],[26,28.5],[27,22.9],[28,21.7],[29,21.8],[30,22.4],[31,17.7],[32,14.3],[33,12.9],[34,13.2],[35,17.8],[36,19.6]],"xmin":-36,"xmax":36,"peakLab":"1929 年 9 月（月均 362）","minX":33,"minY":12.9,"minLab":"1932 年 6 月","t0":34.7,"ta":35.3,"tp":41.8,"te":47.8},{"key":"nikkei1989","name":"日本泡沫 · 日經 225","short":"日經 1989","col":[239,83,80],"peak":"1989-12","pts":[[-36,49.1],[-35,50.4],[-34,52.3],[-33,56.2],[-32,61.0],[-31,63.8],[-30,66.3],[-29,62.8],[-28,66.4],[-27,66.3],[-26,65.1],[-25,59.3],[-24,59.7],[-23,59.8],[-22,63.8],[-21,67.5],[-20,70.4],[-19,72.0],[-18,73.2],[-17,72.6],[-16,73.4],[-15,72.4],[-14,72.0],[-13,75.4],[-12,78.0],[-11,81.7],[-10,84.0],[-9,83.8],[-8,87.2],[-7,89.2],[-6,87.6],[-5,88.8],[-4,91.3],[-3,90.9],[-2,92.7],[-1,94.6],[0,100.0],[1,98.1],[2,95.8],[3,84.8],[4,76.7],[5,83.5],[6,84.9],[7,84.4],[8,70.6],[9,62.8],[10,62.5],[11,61.6],[12,62.3],[13,61.2],[14,66.2],[15,69.4],[16,69.4],[17,67.8],[18,64.4],[19,60.9],[20,59.6],[21,60.4],[22,64.6],[23,62.4],[24,58.5],[25,57.3],[26,56.2],[27,53.4],[28,46.2],[29,48.1],[30,44.5],[31,42.7],[32,41.4],[33,47.8],[34,45.1],[35,44.1],[36,45.6]],"xmin":-36,"xmax":36,"peakLab":"1989 年 12 月（月均 38,115）","minX":32,"minY":41.4,"minLab":"1992 年 8 月","t0":49.0,"ta":49.6,"tp":56.1,"te":62.1},{"key":"nasdaq2000","name":"網路泡沫 · 那斯達克","short":"那斯達克 2000","col":[179,136,255],"peak":"2000-03","pts":[[-36,26.7],[-35,25.5],[-34,28.2],[-33,29.6],[-32,31.9],[-31,33.2],[-30,34.6],[-29,35.0],[-28,33.3],[-27,32.6],[-26,32.7],[-25,35.7],[-24,37.1],[-23,38.6],[-22,38.2],[-21,37.4],[-20,40.4],[-19,37.2],[-18,34.6],[-17,33.6],[-16,39.3],[-15,43.1],[-14,49.1],[-13,49.1],[-12,49.8],[-11,52.8],[-10,52.3],[-9,52.5],[-8,57.1],[-7,55.0],[-6,58.5],[-5,58.6],[-4,67.3],[-3,77.9],[-2,83.6],[-1,91.8],[0,100.0],[1,80.4],[2,73.5],[3,80.5],[4,83.6],[5,81.4],[6,80.7],[7,69.4],[8,63.6],[9,55.3],[10,55.3],[11,51.0],[12,41.4],[13,40.3],[14,45.4],[15,44.0],[16,42.3],[17,40.2],[18,32.8],[19,34.5],[20,38.9],[21,41.2],[22,41.2],[23,37.5],[24,38.8],[25,36.6],[26,34.6],[27,31.3],[28,28.0],[29,27.6],[30,26.0],[31,25.9],[32,29.3],[33,28.9],[34,28.9],[35,27.3],[36,28.1]],"xmin":-36,"xmax":36,"peakLab":"2000 年 3 月（月均 4,803）","minX":31,"minY":25.9,"minLab":"2002 年 10 月","t0":63.3,"ta":63.9,"tp":70.4,"te":76.4},{"key":"shanghai2007","name":"中國股市 · 上證綜合","short":"上證 2007","col":[77,208,161],"peak":"2007-10","pts":[[-36,23.1],[-35,23.1],[-34,22.4],[-33,21.2],[-32,21.9],[-31,21.5],[-30,20.6],[-29,18.7],[-28,18.6],[-27,17.9],[-26,19.8],[-25,20.3],[-24,19.4],[-23,18.9],[-22,19.3],[-21,21.0],[-20,22.1],[-19,22.0],[-18,23.6],[-17,27.6],[-16,27.6],[-15,29.0],[-14,27.6],[-13,29.2],[-12,30.8],[-11,33.6],[-10,39.6],[-9,48.4],[-8,48.3],[-7,51.3],[-6,60.7],[-5,70.1],[-4,68.9],[-3,69.0],[-2,83.3],[-1,92.0],[0,100.0],[1,90.4],[2,87.0],[3,86.6],[4,76.5],[5,67.2],[6,58.3],[7,61.0],[8,51.4],[9,48.1],[10,42.9],[11,37.2],[12,33.2],[13,32.2],[14,33.5],[15,33.3],[16,37.9],[17,38.3],[18,42.3],[19,44.9],[20,48.6],[21,55.1],[22,52.8],[23,49.6],[24,51.7],[25,55.1],[26,55.3],[27,54.3],[28,51.3],[29,52.5],[30,52.4],[31,45.7],[32,43.6],[33,42.8],[34,45.3],[35,45.4],[36,50.5]],"xmin":-36,"xmax":36,"peakLab":"2007 年 10 月（月均 5,824）","minX":13,"minY":32.2,"minLab":"2008 年 11 月","t0":77.6,"ta":78.2,"tp":84.7,"te":90.7},{"key":"bitcoin2017","name":"比特幣 · Coinbase","short":"比特幣 2017","col":[255,140,66],"peak":"2017-12","pts":[[-36,2.4],[-35,1.5],[-34,1.5],[-33,1.8],[-32,1.5],[-31,1.6],[-30,1.6],[-29,1.8],[-28,1.6],[-27,1.5],[-26,1.7],[-25,2.3],[-24,2.8],[-23,2.7],[-22,2.6],[-21,2.7],[-20,2.9],[-19,3.0],[-18,4.2],[-17,4.3],[-16,3.8],[-15,4.0],[-14,4.2],[-13,4.8],[-12,5.4],[-11,6.0],[-10,7.0],[-9,7.4],[-8,8.0],[-7,12.5],[-6,17.1],[-5,16.4],[-4,25.4],[-3,26.9],[-2,35.0],[-1,51.0],[0,100.0],[1,84.6],[2,61.4],[3,58.8],[4,52.5],[5,55.1],[6,44.3],[7,46.6],[8,43.7],[9,43.1],[10,42.0],[11,35.0],[12,24.0],[13,24.0],[14,24.0],[15,25.7],[16,33.7],[17,47.7],[18,61.5],[19,69.8],[20,69.7],[21,64.1],[22,54.9],[23,54.6],[24,47.5],[25,54.8],[26,63.1],[27,45.1],[28,47.3],[29,60.6],[30,62.1],[31,62.9],[32,76.3],[33,69.8],[34,77.9]],"xmin":-36,"xmax":34,"peakLab":"2017 年 12 月（月均 $15,271）","minX":12,"minY":24.0,"minLab":"2018 年 12 月","t0":91.9,"ta":92.5,"tp":99.0,"te":105.0}];
+var TS=0,TE=111.0,STEP=0.05,SPD=[[1e9,1]];
+var EVENTS=[{"t":0.3,"y":"1636–1637","p":"荷蘭","ti":"鬱金香：只有 11 筆成交可畫","c":"鬱金香沒有交易所，也沒有每天的報價。這條用的是 Thompson 整理的價格指數，只有 11 個有日期的成交，所以畫成點，不連線。1636 年 11 月初，指數 8.9。","href":"/history/stock-market.html#ch-2","lk":"讀史詩：鬱金香狂熱 →"},{"t":5.9,"y":"1637 年 2 月 3 日","p":"荷蘭","ti":"三個月，漲到 22 倍","c":"2 月 3 日指數到 202，是 11 月初的 22 倍多。八條線裡，這是時間最短的一段。","k":1,"hold":3000},{"t":6.7,"y":"1637 年 2–5 月","p":"荷蘭","ti":"兩天後就開始跌","c":"2 月 5 日 178，2 月 11 日 145，5 月 1 日只剩 11，比高峰少 95%。不過這些價格很多是冬天簽的遠期合約，不是當場交貨；當時到底有多瘋，學者到今天還在吵。"},{"t":12.1,"y":"1718–1720","p":"法國","ti":"密西西比公司：約翰·勞的紙幣實驗","c":"約翰·勞在法國發紙幣，再讓人拿國債換密西西比公司的股票。1718 年 8 月，股價月平均約 320 里弗（livre，當時的法國貨幣單位）。","href":"/history/money-trust.html#ch-11","lk":"讀史詩：約翰·勞 →"},{"t":17.7,"y":"1720 年 1–2 月","p":"巴黎","ti":"八個月，漲到 20 倍","c":"1719 年 5 月股價約 500 里弗，1720 年 1 月 8 日衝到 10,100。月平均的高峰在 1720 年 2 月：9,409。","k":1,"hold":3000},{"t":18.5,"y":"1720 年 3–11 月","p":"巴黎","ti":"先撐住，再崩","c":"3、4 月，股價被釘在 9,000 里弗上下。5 月撐不住，當月最低跌到 4,000；10 月 21 日只剩 3,200。還要再打折：這時的里弗是一直在增印的紙幣。線畫到 1720 年 11 月，資料到此為止。","href":"/history/inflation.html#ch-4","lk":"讀史詩：約翰·勞與密西西比泡沫 →"},{"t":23.4,"y":"1719–1720","p":"英國","ti":"南海公司：拿國債換股票","c":"南海公司接下英國國債，讓債主換成公司股票。1720 年 1 月 1 日，股價約 126 英鎊。","href":"/history/stock-market.html#ch-3","lk":"讀史詩：南海與密西西比 →"},{"t":29.0,"y":"1720 年 6–7 月","p":"倫敦","ti":"半年，漲到 7.5 倍","c":"資料庫裡最高的一天是 7 月 10 日：950 英鎊，約是 1 月初的 7.5 倍。月平均的高峰在 7 月：877。夏天公司停止過戶，這段報價是約定之後才交割的價格。","k":1,"hold":3000},{"t":29.8,"y":"1720 年 8–12 月","p":"倫敦","ti":"秋天崩盤","c":"10 月最低 180，11 月 27 日 160，12 月的月平均只剩高峰的 22%。牛頓據說在這一波賠了約兩萬英鎊。線畫到 1720 年 12 月，資料到此為止。"},{"t":34.7,"y":"1926–1929","p":"紐約","ti":"咆哮的二〇年代","c":"道瓊工業指數。1926 年 9 月，月資料約 161，只有 1929 年高峰月的 45%。這條線用 NBER 的月資料：每個月最高和最低的平均。","href":"/history/stock-market.html#ch-8","lk":"讀史詩：一九二九 →"},{"t":41.8,"y":"1929 年 9 月","p":"紐約","ti":"三年，漲到 2.2 倍","c":"1929 年 9 月 3 日收盤 381，是這一輪的最高點。月資料的高峰也在 9 月：362，是三年前的 2.2 倍。","k":1,"hold":3000},{"t":42.6,"y":"1929–1932","p":"紐約","ti":"跌了將近三年","c":"10 月 28、29 日兩天各跌 13% 和 12%。這還不是底：1932 年 7 月 8 日收盤 41，比高峰少 89%。月資料最低在 1932 年 6 月，只剩高峰的 13%。道瓊要到 1954 年才回到 381。","href":"/history/the-investors.html#ch-11","lk":"讀史詩：李佛摩 →"},{"t":49.0,"y":"1986–1989","p":"東京","ti":"日經 225：日本泡沫","c":"1986 年 12 月，日經的月平均只有 1989 年高峰月的 49%。三年後翻了一倍。","href":"/history/stock-market.html#ch-16","lk":"讀史詩：日本的泡沫 →"},{"t":56.1,"y":"1989 年 12 月","p":"東京","ti":"38,915 點","c":"1989 年 12 月 29 日，那一年最後一個交易日，日經收在 38,915。月平均的高峰：38,115。","k":1,"hold":3000},{"t":56.9,"y":"1990–1992","p":"東京","ti":"跌掉快六成，然後等了 34 年","c":"1992 年 8 月，月平均只剩高峰的 41%。更低的還在後面：2009 年 3 月 10 日收盤 7,055。日經要到 2024 年 2 月 22 日，才收在 1989 年的高點之上。"},{"t":63.3,"y":"1997–2000","p":"紐約","ti":"那斯達克：網路狂熱","c":"1996 年 12 月 5 日，葛林斯潘說出「非理性繁榮」，那天那斯達克收 1,300。1997 年 3 月的月平均，只有高峰月的 27%。","href":"/history/stock-market.html#ch-18","lk":"讀史詩：網路狂熱 →"},{"t":70.4,"y":"2000 年 3 月","p":"紐約","ti":"5,048 點","c":"2000 年 3 月 10 日收盤 5,048，是葛林斯潘那天的 3.9 倍。月平均的高峰：4,803。","k":1,"hold":3000},{"t":71.2,"y":"2000–2002","p":"紐約","ti":"跌掉 78%","c":"2002 年 10 月 9 日收盤 1,114，比高峰少 78%。月平均最低也在 2002 年 10 月，只剩高峰的 26%。要到 2015 年 4 月，才收回 5,048 以上。","href":"/history/the-investors.html#ch-10","lk":"讀史詩：德魯肯米勒 →"},{"t":77.6,"y":"2005–2007","p":"上海","ti":"上證綜合指數","c":"2005 年 7 月 11 日，上證收 1,011，是那幾年的低點。2004 年 10 月的月平均，只有高峰月的 23%。"},{"t":84.7,"y":"2007 年 10 月","p":"上海","ti":"兩年多，漲到 6 倍","c":"2007 年 10 月 16 日收盤 6,092，是 2005 年低點的 6 倍。月平均的高峰：5,824。","k":1,"hold":3000},{"t":85.5,"y":"2007–2008","p":"上海","ti":"一年，跌掉 72%","c":"2008 年 11 月 4 日收盤 1,707，比高峰少 72%。月平均最低也在 2008 年 11 月，只剩高峰的 32%。2015 年，同樣的劇本又演了一次。","href":"/history/stock-market.html#ch-22","lk":"讀史詩：散戶的復仇 →"},{"t":91.9,"y":"2014–2017","p":"網路","ti":"比特幣","c":"Coinbase 的比特幣美元價格。2014 年 12 月的月平均，只有高峰月的 2.4%；2017 年 1 月 1 日，價格 993 美元。","href":"/history/money-trust.html#ch-24","lk":"讀史詩：中本聰的反叛 →"},{"t":99.0,"y":"2017 年 12 月","p":"網路","ti":"一年，漲到 20 倍","c":"2017 年 12 月 16 日 19,650 美元，是年初的約 20 倍。月平均的高峰：15,271。","k":1,"hold":3000},{"t":99.8,"y":"2018–2020","p":"網路","ti":"跌掉 84%，三年內收復","c":"2018 年 12 月 15 日只剩 3,183，比高峰少 84%。這條線畫到 2020 年 10 月就停：11 月 30 日它已回到 19,727，超過 2017 年的高點。","href":"/history/gambling.html#ch-18","lk":"讀史詩：賭場化的市場 →"},{"t":106.0,"y":"1637–2017","p":"八條線","ti":"八個泡沫，一個形狀","c":"每條線最左邊的起點，只有高峰的 2%（比特幣）到 49%（日經）。高峰之後，七條月線畫到的最低點，是高峰的 13%（道瓊）到 41%（日經）；鬱金香只剩 5%。三年內重回高點的，只有比特幣。","href":"/history/stock-market.html#ch-24","lk":"讀史詩：泡沫的解剖學 →"}];
+var ERAS=[{"t":0,"b":"1637","chip":"鬱金香","n":"鬱金香狂熱 · 荷蘭"},{"t":12.1,"b":"1720","chip":"密西西比","n":"密西西比泡沫 · 法國"},{"t":23.4,"b":"1720","chip":"南海","n":"南海泡沫 · 英國"},{"t":34.7,"b":"1929","chip":"道瓊","n":"一九二九 · 美國道瓊"},{"t":49.0,"b":"1989","chip":"日經","n":"日本泡沫 · 日經 225"},{"t":63.3,"b":"2000","chip":"那斯達克","n":"網路泡沫 · 那斯達克"},{"t":77.6,"b":"2007","chip":"上證","n":"中國股市 · 上證綜合"},{"t":91.9,"b":"2017","chip":"比特幣","n":"比特幣 · Coinbase"},{"t":106.0,"b":"全部","chip":"疊圖","n":"八個泡沫疊在一起"}];
+var INTRO=["八個泡沫，一把尺：每條線的最高月份都拉成 100，橫軸是離高峰幾個月。按播放，一條一條看它們怎麼爬上去、怎麼摔下來。","/history/stock-market.html#ch-24","讀史詩：泡沫的解剖學 →"];
+var CAMK=[[0,-3.6,3.6,-4,112],[11.1,-3.6,3.6,-4,112],[12.7,-21,12,-4,112],[33.7,-21,12,-4,112],[35.3,-38,38,-4,112]];
+var TFIN=106.0;
+function FX(x){return x;}
+var MON=["1","2","3","4","5","6","7","8","9","10","11","12"];
+function curSeg(t){var s=null;for(var i=0;i<LINES.length;i++)if(LINES[i].t0<=t+1e-9)s=LINES[i];return s;}
+function xAt(L,t){if(t<L.ta)return null;if(t<L.tp)return L.xmin+(t-L.ta)/(L.tp-L.ta)*(0-L.xmin);if(t<L.te)return (t-L.tp)/(L.te-L.tp)*L.xmax;return L.xmax;}
+function ymOf(L,x){var p=L.peak.split("-"),y=+p[0],m=+p[1]-1+Math.round(x);y+=Math.floor(m/12);m=((m%12)+12)%12;return [y,m+1];}
+function dayOf(L,x){var d=new Date(Date.UTC(1637,1,3)+Math.round(x*30.44)*864e5);return [d.getUTCFullYear(),d.getUTCMonth()+1,d.getUTCDate()];}
+function HUD(t){
+  if(t>=TFIN)return ["1637–2017","八個泡沫，疊在一起","每條線的高峰月都拉成 100"];
+  var L=curSeg(t);if(!L)return ["1637","泡沫疊圖","高峰對齊，高峰 = 100"];
+  var x=xAt(L,t);if(x===null)x=L.xmin;
+  if(L.sparse){var d=dayOf(L,x),dd=Math.round(x*30.44);
+    return [String(d[0]),L.name,d[0]+" 年 "+d[1]+" 月 "+d[2]+" 日 · "+(Math.abs(dd)<1?"高峰":(dd<0?"高峰前 "+(-dd)+" 天":"高峰後 "+dd+" 天"))];}
+  var xm=Math.round(x),ym=ymOf(L,xm);
+  return [String(ym[0]),L.name,ym[0]+" 年 "+ym[1]+" 月 · "+(xm===0?"高峰月":(xm<0?"高峰前 "+(-xm)+" 個月":"高峰後 "+xm+" 個月"))];
+}
+function YFMT(y){return y+"%";}
+function XTICKS(v){var out=[],span=v.u1-v.u0,a=Math.ceil(v.u0),b=Math.floor(v.u1);
+  for(var x=a;x<=b;x++){var lv=x%12===0?0:(x%6===0?1:(x%3===0?2:3));if(span>20&&lv===3)continue;
+    out.push([x,x===0?"高峰":(x>0?"+":"−")+Math.abs(x),x===0?-1:lv]);}
+  return out;}
+function col(L,a){return "rgba("+L.col[0]+","+L.col[1]+","+L.col[2]+","+a+")";}
+function DRAW(t,now){
+  var cur=t<TFIN?curSeg(t):null,fin=t>=TFIN?Math.min(1,(t-TFIN)/2.5):0,zoom=(V.u1-V.u0)<20;
+  /* reference lines */
+  ctx.save();ctx.setLineDash([5,6]);ctx.strokeStyle="rgba(236,208,138,.45)";ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(PL.l,Yp(100));ctx.lineTo(PL.r,Yp(100));ctx.stroke();
+  ctx.beginPath();ctx.moveTo(X(0),PL.t-6);ctx.lineTo(X(0),PL.b);ctx.stroke();ctx.restore();
+  q({pri:40,t:zoom?"高峰日":"高峰月",x:X(0),y:PL.t-12,sz:fs(11),wt:700,c:"rgba(236,208,138,A)",a:.85});
+  q({pri:41,t:"高峰 = 100",x:PL.r-2,y:Yp(100)-10,al:"right",sz:fs(11),wt:700,c:"rgba(236,208,138,A)",a:.85});
+  q({pri:42,t:zoom?"距高峰（月，1 月 ≈ 30 天）":"距高峰（月）",x:PL.r-8,y:PL.b-10,al:"right",sz:fs(10),wt:500,pill:1,pc:"rgba(14,11,8,A)",c:"rgba(179,163,134,A)",a:.9});
+  LINES.forEach(function(L,i){if(L.t0>t+1e-9)return;var x=xAt(L,t);if(x===null)return;
+    var isCur=L===cur,a=isCur?1:(0.34+0.56*fin),lw=isCur?2.6:(1.3+0.7*fin);
+    if(L.sparse){L.pts.forEach(function(p,j){if(p[0]>x+1e-6)return;var px=X(p[0]),py=Yp(p[1]);
+        if(isCur){ctx.fillStyle=col(L,.22);ctx.beginPath();ctx.arc(px,py,11,0,6.2832);ctx.fill();}
+        ctx.fillStyle=col(L,a);ctx.beginPath();ctx.arc(px,py,isCur?4.6:(zoom?3.4:2.6+fin),0,6.2832);ctx.fill();
+        if(isCur&&zoom){var dd=p[2].split("-");var pk=p[1]===100;
+          q({pri:pk?1:(j===L.pts.length-1||j===0?3:6),t:(+dd[1])+"/"+(+dd[2])+" · "+L.raw[j],x:px,y:py-16,alts:[py+16,py-30],sz:fs(11),wt:700,c:"rgba(255,244,214,A)",a:1,pill:pk?1:0,pc:pk?col(L,"A"):null});}});
+      return;}
+    var P=L.pts,pts=[],tv=null;for(var j=0;j<P.length;j++){if(P[j][0]<=x+1e-9){pts.push([X(P[j][0]),Yp(P[j][1])]);tv=P[j][1];}else{var p0=P[j-1];if(p0){var f=(x-p0[0])/(P[j][0]-p0[0]);tv=p0[1]+(P[j][1]-p0[1])*f;pts.push([X(x),Yp(tv)]);}break;}}
+    if(pts.length<1)return;
+    ctx.save();ctx.lineJoin="round";ctx.lineCap="round";
+    if(isCur){ctx.strokeStyle=col(L,.22);ctx.lineWidth=8;ctx.beginPath();pts.forEach(function(p,k){k?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]);});ctx.stroke();}
+    ctx.strokeStyle=col(L,a);ctx.lineWidth=lw;ctx.beginPath();pts.forEach(function(p,k){k?ctx.lineTo(p[0],p[1]):ctx.moveTo(p[0],p[1]);});ctx.stroke();ctx.restore();
+    var tip=pts[pts.length-1];
+    if(isCur){
+      ctx.fillStyle="#fff5de";ctx.beginPath();ctx.arc(tip[0],tip[1],4,0,6.2832);ctx.fill();ctx.strokeStyle=col(L,1);ctx.lineWidth=2;ctx.stroke();
+      q({pri:0,t:Math.round(tv)+"%",x:tip[0]+10,y:tip[1]-14,alts:[tip[1]+16],al:"left",sz:fs(12),wt:900,pill:1,pc:col(L,"A"),c:"rgba(255,244,214,A)",a:1});
+      if(x>=0){q({pri:1,t:"高峰 "+L.peakLab,x:X(0),y:Yp(100)-16,sz:fs(12),wt:900,pill:1,pc:col(L,"A"),c:"rgba(255,244,214,A)",a:1});}
+      if(x>=L.minX){var mx=X(L.minX),my=Yp(L.minY);ctx.fillStyle=col(L,1);ctx.beginPath();ctx.arc(mx,my,3.6,0,6.2832);ctx.fill();
+        q({pri:2,t:"最低 "+L.minY+"%（"+L.minLab+"）",x:mx,y:my+17,alts:[my-17],sz:fs(11),wt:700,c:col(L,"A"),a:1});}}
+    else if(fin>0.3){q({pri:10+i,t:L.short,x:tip[0]+6,y:tip[1],al:"left",sz:fs(11),wt:700,c:col(L,"A"),a:fin});}
+  });
+}
+function LEGEND(t){var cur=t<TFIN?curSeg(t):null,n=0,h="";
+  LINES.forEach(function(L){if(L.t0>t+1e-9)return;n++;var c="rgb("+L.col.join(",")+")";
+    h+='<div class="row'+(cur&&L!==cur?" off":"")+'"><span class="sw'+(L.sparse?" dot":"")+'" style="background:'+c+';color:'+c+'"></span><span>'+L.short+"</span></div>";});
+  if(!n)h='<span class="note">線會一條一條畫出來；高峰那個月 = 100，橫軸是離高峰幾個月。</span>';
+  return [n+"|"+(cur?cur.key:"fin"),h];}
+
+
+/* ================= engine ================= */
+var cv=document.getElementById("cv"),ctx=cv.getContext("2d"),box=document.getElementById("chartbox"),hudEl=document.getElementById("hud");
+var W=0,H=0,DPR=1,PL={l:0,r:0,t:0,b:0};
+function resize(){var r=box.getBoundingClientRect();W=Math.max(1,r.width);H=Math.max(1,r.height);DPR=Math.min(2,window.devicePixelRatio||1);
+  cv.width=Math.round(W*DPR);cv.height=Math.round(H*DPR);ctx.setTransform(DPR,0,0,DPR,0,0);MW={};
+  var hb=hudEl.getBoundingClientRect();var narrow=W<560;
+  PL={l:narrow?38:52,r:W-(narrow?12:22),t:Math.round(hb.bottom-r.top+(narrow?10:14)),b:H-(narrow?24:30)};}
+function smooth(x){return x*x*(3-2*x);}
+function clamp(x,a,b){return x<a?a:(x>b?b:x);}
+var CAMU=CAMK.map(function(k){return [k[0],FX(k[1]),FX(k[2]),k[3],k[4]];});
+function camAt(t){if(t<=CAMU[0][0])return CAMU[0].slice(1);var n=CAMU.length;if(t>=CAMU[n-1][0])return CAMU[n-1].slice(1);
+  for(var i=0;i<n-1;i++){var a=CAMU[i],b=CAMU[i+1];if(t>=a[0]&&t<=b[0]){var f=smooth(clamp((t-a[0])/((b[0]-a[0])||1),0,1));
+    return [a[1]+(b[1]-a[1])*f,a[2]+(b[2]-a[2])*f,a[3]+(b[3]-a[3])*f,a[4]+(b[4]-a[4])*f];}}return CAMU[n-1].slice(1);}
+var cam=null,V={u0:0,u1:1,y0:0,y1:1};
+function XU(u){return PL.l+(u-V.u0)/(V.u1-V.u0)*(PL.r-PL.l);}
+function X(x){return XU(FX(x));}
+function Yp(y){return PL.t+(V.y1-y)/(V.y1-V.y0)*(PL.b-PL.t);}
+function rgba(c,a){return "rgba("+c[0]+","+c[1]+","+c[2]+","+a+")";}
+function fs(px){return W<560?Math.round(px*0.86):px;}
+function speedAt(t){for(var i=0;i<SPD.length;i++)if(t<SPD[i][0])return SPD[i][1];return SPD[SPD.length-1][1];}
+/* slider runs on playback seconds (holds excluded), so fast eras take little room */
+function secAt(t){var s=0,a=TS;for(var i=0;i<SPD.length&&a<t;i++){var b=Math.min(t,SPD[i][0]);if(b>a){s+=(b-a)/SPD[i][1];a=b;}}return s;}
+function tAtSec(s){var a=TS;for(var i=0;i<SPD.length;i++){var b=SPD[i][0];if(b<=a)continue;var d=(b-a)/SPD[i][1];if(s<=d)return Math.min(TE,a+s*SPD[i][1]);s-=d;a=b;}return TE;}
+function ramp(t,t0,w){return t<t0?0:Math.min(1,(t-t0)/w);}
+
+/* labels: lower pri wins, collisions skipped */
+var LQ=[],MW={},BLOCK=[];
+function q(o){LQ.push(o);}
+function tw(font,txt){var k=font+"|"+txt,w=MW[k];if(w===undefined){ctx.font=font;w=MW[k]=ctx.measureText(txt).width;}return w;}
+function blockRects(){BLOCK=[];var mb=box.getBoundingClientRect();
+  [document.getElementById("hudYear"),document.getElementById("hudEra"),document.getElementById("hudSub"),fsBtn,started?null:bigplay].forEach(function(el){if(!el)return;var r=el.getBoundingClientRect();if(!r.width)return;
+    BLOCK.push([r.left-mb.left-4,r.top-mb.top-4,r.right-mb.left+4,r.bottom-mb.top+4]);});}
+function rrect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+function hitAny(r,L){for(var j=0;j<L.length;j++){var p=L[j];if(r[0]<p[2]&&r[2]>p[0]&&r[1]<p[3]&&r[3]>p[1])return true;}return false;}
+function flushLabels(){
+  LQ.sort(function(a,b){return a.pri-b.pri;});
+  var placed=BLOCK.slice(),pills=[];
+  for(var i=0;i<LQ.length;i++){var o=LQ[i];if(o.a<=0.02)continue;
+    var font=(o.it?"italic ":"")+(o.wt||600)+" "+o.sz+"px 'Noto Serif TC',serif";
+    var w=tw(font,o.t),h=o.sz*1.2,x=o.x,y=o.y,al=o.al||"center";
+    var tries=o.alts?[y].concat(o.alts):[y],ok=false,r=null;
+    for(var k=0;k<tries.length;k++){var yy=tries[k];var x0=al==="center"?x-w/2:(al==="right"?x-w:x);
+      var xx=x,pd=o.pill?12:4;if(x0<PL.l-30){xx+=PL.l-30-x0;x0=PL.l-30;}if(x0+w>W-pd){xx-=x0+w-(W-pd);x0=W-pd-w;}
+      r=o.pill?[x0-8,yy-h/2-3,x0+w+8,yy+h/2+3]:[x0-2,yy-h/2,x0+w+2,yy+h/2];
+      if(r[1]<0||r[3]>H)continue;
+      if(o.force||!hitAny(r,placed)){ok=true;y=yy;x=xx;break;}}
+    if(!ok)continue;
+    placed.push(r);o.px=x;o.py=y;o.pr=r;o.font=font;o.pal=al;
+    if(o.pill)pills.push(o);else paint(o);}
+  pills.forEach(paint);LQ.length=0;
+  function paint(o){ctx.font=o.font;ctx.textAlign=o.pal;ctx.textBaseline="middle";
+    if(o.pill){var r=o.pr;rrect(r[0],r[1],r[2]-r[0],r[3]-r[1],(r[3]-r[1])/2);ctx.fillStyle="rgba(14,11,8,"+(0.85*o.a)+")";ctx.fill();
+      ctx.strokeStyle=o.pc?o.pc.replace("A",0.8*o.a):"rgba(236,208,138,"+(0.75*o.a)+")";ctx.lineWidth=1;ctx.stroke();}
+    else{ctx.lineJoin="round";ctx.lineWidth=3.2;ctx.strokeStyle="rgba(8,9,11,"+(0.85*o.a)+")";ctx.strokeText(o.t,o.px,o.py);}
+    ctx.fillStyle=o.c.replace("A",o.a);ctx.fillText(o.t,o.px,o.py);}
+}
+
+function niceStep(span,n){var raw=span/n,p=Math.pow(10,Math.floor(Math.log10(raw))),m=raw/p;
+  return (m<1.5?1:(m<2.25?2:(m<3.5?2.5:(m<7.5?5:10))))*p;}
+function drawAxes(){
+  var g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,"#0e1319");g.addColorStop(1,"#090b0e");ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  ctx.save();ctx.font=fs(11)+"px 'Noto Serif TC',serif";ctx.textBaseline="middle";
+  /* y grid */
+  var st=niceStep(V.y1-V.y0,H<420?4:6),y;
+  for(y=Math.ceil(V.y0/st)*st;y<=V.y1+1e-9;y+=st){var py=Yp(y);if(py<PL.t-2||py>PL.b+2)continue;var zero=Math.abs(y)<1e-9;
+    ctx.strokeStyle=zero?"rgba(236,208,138,.42)":"rgba(205,165,81,.10)";ctx.lineWidth=zero?1.2:1;ctx.beginPath();ctx.moveTo(PL.l,py);ctx.lineTo(PL.r,py);ctx.stroke();
+    ctx.fillStyle=zero?"rgba(236,208,138,.85)":"rgba(179,163,134,.8)";ctx.textAlign="right";var yl=YFMT(Math.round(y*1000)/1000),yw=ctx.measureText(yl).width;if(!hitAny([PL.l-6-yw,py-8,PL.l-6,py+8],BLOCK))ctx.fillText(yl,PL.l-6,py);}
+  /* x ticks: greedy by level */
+  var C=XTICKS(V).sort(function(a,b){return a[2]-b[2]||a[0]-b[0];}),placed=[],gap=W<560?44:62;
+  C.forEach(function(c){var px=X(c[0]);if(px<PL.l-1||px>PL.r+1)return;for(var i=0;i<placed.length;i++)if(Math.abs(placed[i][0]-px)<gap)return;placed.push([px,c[1]]);});
+  placed.forEach(function(p){ctx.strokeStyle="rgba(205,165,81,.07)";ctx.beginPath();ctx.moveTo(p[0],PL.t);ctx.lineTo(p[0],PL.b);ctx.stroke();
+    ctx.strokeStyle="rgba(205,165,81,.45)";ctx.beginPath();ctx.moveTo(p[0],PL.b);ctx.lineTo(p[0],PL.b+5);ctx.stroke();
+    ctx.fillStyle="rgba(179,163,134,.85)";ctx.textAlign="center";ctx.fillText(p[1],p[0],PL.b+(W<560?13:16));});
+  ctx.strokeStyle="rgba(205,165,81,.35)";ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(PL.l,PL.b);ctx.lineTo(PL.r,PL.b);ctx.stroke();
+  ctx.restore();
+}
+function clipPlot(){ctx.save();ctx.beginPath();ctx.rect(PL.l,PL.t-40,PL.r-PL.l+8,PL.b-PL.t+40);ctx.clip();}
+
+var holding=false,hp=0,holdT=null,holdStart=0,holdDur=0;
+function draw(now){
+  holding=playing&&holdT!==null&&now<holdUntil;hp=holding?Math.min(1,(now-holdStart)/(holdDur*0.6)):0;
+  blockRects();drawAxes();clipPlot();DRAW(T,now);ctx.restore();flushLabels();updateLegend();
+}
+
+/* ================= UI ================= */
+var hudYear=document.getElementById("hudYear"),hudEra=document.getElementById("hudEra"),hudSub=document.getElementById("hudSub");
+var slider=document.getElementById("slider"),playBtn=document.getElementById("play"),bigplay=document.getElementById("bigplay");
+var legendEl=document.getElementById("legend"),chipsEl=document.getElementById("chips");
+var card=document.getElementById("card"),cYear=document.getElementById("cYear"),cPlace=document.getElementById("cPlace"),cTitle=document.getElementById("cTitle"),
+  cText=document.getElementById("cText"),cEra=document.getElementById("cEra"),cLink=document.getElementById("cLink");
+var SLMAX=secAt(TE);slider.min=0;slider.max=SLMAX;slider.step=0.01;
+function eraAt(t){var e=ERAS[0];for(var i=0;i<ERAS.length;i++)if(ERAS[i].t<=t+1e-9)e=ERAS[i];return e;}
+function evAt(t){var e=null;for(var i=0;i<EVENTS.length;i++){if(EVENTS[i].t<=t+1e-9)e=EVENTS[i];else break;}return e;}
+var lastEra=null,lastEv=undefined,lastHud="",lastLegendKey=null;
+function updateText(){var h=HUD(T),hk=h.join("|");if(hk!==lastHud){lastHud=hk;hudYear.textContent=h[0];hudEra.textContent=h[1];hudSub.textContent=h[2];}
+  slider.value=secAt(T);
+  var er=eraAt(T);if(er!==lastEra){lastEra=er;
+    Array.prototype.forEach.call(chipsEl.children,function(ch,i){ch.classList.toggle("on",ERAS[i]===er);});
+    var on=chipsEl.children[ERAS.indexOf(er)];if(on&&playing){var cl=chipsEl.getBoundingClientRect(),r=on.getBoundingClientRect();if(r.left<cl.left||r.right>cl.right)chipsEl.scrollLeft+=r.left-cl.left-20;}}
+  var ev=evAt(T);if(ev!==lastEv){lastEv=ev;
+    if(ev){cYear.textContent=ev.y;cPlace.textContent=ev.p||"";cTitle.textContent=ev.ti;cText.textContent=ev.c;
+      if(ev.href){cLink.href=ev.href;cLink.textContent=ev.lk||"讀史詩 →";cLink.style.display="";}else cLink.style.display="none";
+      cEra.textContent=er.n;card.classList.remove("flash");void card.offsetWidth;card.classList.add("flash");}
+    else{cYear.textContent="";cPlace.textContent="";cTitle.textContent="按下播放";cText.textContent=INTRO[0];cLink.href=INTRO[1];cLink.textContent=INTRO[2];cLink.style.display="";cEra.textContent="";}}
+}
+function updateLegend(){var L=LEGEND(T);if(L[0]===lastLegendKey)return;lastLegendKey=L[0];legendEl.innerHTML=L[1];}
+
+ERAS.forEach(function(e){var b=document.createElement("button");b.className="chip";b.innerHTML="<b>"+e.b+"</b>"+e.chip;
+  b.addEventListener("click",function(){jump(e.t);});chipsEl.appendChild(b);});
+(function(){var tk=document.getElementById("ticks");ERAS.forEach(function(e){var i=document.createElement("i");i.style.left=(secAt(e.t)/SLMAX*100)+"%";tk.appendChild(i);});})();
+
+var T=TS,playing=false,mult=1,holdUntil=0,lastT=0,started=false;
+function setPlaying(p){playing=p;playBtn.textContent=p?"❚❚":"▶";playBtn.classList.toggle("on",p);playBtn.setAttribute("aria-label",p?"暫停":"播放");
+  if(p){started=true;bigplay.style.display="none";}}
+/* lastKey: the stop already held, so float drift that leaves T a hair below a stop can neither skip it nor hold it twice */
+var lastKey=null;
+function jump(t){T=clamp(t,TS,TE);holdUntil=0;holdT=null;lastKey=null;updateText();}
+function nextKey(t){for(var i=0;i<EVENTS.length;i++){var e=EVENTS[i];if(e.k&&e!==lastKey&&e.t>=t-1e-6)return e;}return null;}
+playBtn.addEventListener("click",function(){if(!playing&&T>=TE)jump(TS);setPlaying(!playing);});
+bigplay.addEventListener("click",function(){if(T>=TE)jump(TS);setPlaying(true);});
+slider.addEventListener("input",function(){setPlaying(false);jump(tAtSec(+this.value));});
+document.getElementById("speed").addEventListener("click",function(){mult=mult===1?2:(mult===2?0.5:1);this.textContent=(mult===0.5?"½":mult)+"×";});
+document.addEventListener("keydown",function(e){if(e.target&&(e.target.tagName==="INPUT"&&e.key!==" "))return;
+  if(e.key===" "){e.preventDefault();playBtn.click();}
+  else if(e.key==="ArrowRight"||e.key==="ArrowLeft"){setPlaying(false);var i,d=e.key==="ArrowRight"?1:-1,cur=evAt(T),idx=cur?EVENTS.indexOf(cur):-1;
+    if(d>0){jump(idx+1<EVENTS.length?EVENTS[idx+1].t:TE);}else{jump(cur&&T-cur.t>1e-6?cur.t:(idx>0?EVENTS[idx-1].t:TS));}}});
+
+var stage=document.getElementById("stage"),fsBtn=document.getElementById("fsBtn");
+fsBtn.addEventListener("click",function(){
+  var fsEl=document.fullscreenElement||document.webkitFullscreenElement;
+  if(fsEl){(document.exitFullscreen||document.webkitExitFullscreen).call(document);return;}
+  if(stage.classList.contains("fake-fs")){stage.classList.remove("fake-fs");document.body.style.overflow="";setTimeout(resize,50);return;}
+  var req=stage.requestFullscreen||stage.webkitRequestFullscreen;
+  if(req){try{var r=req.call(stage);if(r&&r.catch)r.catch(function(){fake();});}catch(err){fake();}}else fake();
+  function fake(){stage.classList.add("fake-fs");document.body.style.overflow="hidden";setTimeout(resize,50);}
+});
+["fullscreenchange","webkitfullscreenchange"].forEach(function(n){document.addEventListener(n,function(){setTimeout(resize,60);});});
+window.addEventListener("resize",resize);
+if(window.ResizeObserver)new ResizeObserver(resize).observe(box);
+
+var simNoDraw=false;
+function tick(now){
+  var dt=lastT?Math.max(0,Math.min(0.1,(now-lastT)/1000)):0;lastT=now;
+  if(playing&&now>=holdUntil){
+    var nt=T+speedAt(T)*dt*mult;var ke=nextKey(T);
+    if(ke&&nt>=ke.t-1e-6){nt=ke.t;lastKey=ke;holdDur=(ke.hold||2400)/Math.max(1,mult);holdStart=now;holdUntil=now+holdDur;holdT=ke.t;}
+    if(nt>=TE){nt=TE;setPlaying(false);}
+    T=nt;updateText();
+  }
+  var target=camAt(T);
+  if(!cam)cam=target.slice();else{var f=1-Math.exp(-dt*3.2);for(var i=0;i<4;i++)cam[i]+=(target[i]-cam[i])*f;}
+  V={u0:cam[0],u1:cam[1],y0:cam[2],y1:cam[3]};if(!simNoDraw)draw(now);
+}
+function frame(now){tick(now);requestAnimationFrame(frame);}
+function renderAt(t){jump(t);cam=camAt(T);V={u0:cam[0],u1:cam[1],y0:cam[2],y1:cam[3]};draw(performance.now());}
+window.__iwm={
+  sim:function(sec,nd){simNoDraw=!!nd;if(!playing)setPlaying(true);var t=lastT||performance.now(),n=Math.round(sec*60);for(var i=0;i<n&&playing;i++){t+=1000/60;tick(t);}simNoDraw=false;draw(t);return {T:T,t:i/60,playing:playing};},
+  seek:renderAt,cam:camAt,g:function(n){return {D:typeof D!=="undefined"?D:null,FXI:typeof FXI!=="undefined"?FXI:null}[n];},state:function(){return {T:T,playing:playing,ev:lastEv?EVENTS.indexOf(lastEv):-1};},
+  pace:function(){jump(TS);setPlaying(true);simNoDraw=true;var t=performance.now(),sec=0,cur=-1,since=0,out=[];
+    for(var i=0;i<60*600&&playing;i++){t+=1000/60;tick(t);sec+=1/60;var e=lastEv?EVENTS.indexOf(lastEv):-1;if(e!==cur){if(cur>=0)out.push([cur,+(sec-since).toFixed(2)]);cur=e;since=sec;}}
+    out.push([cur,+(sec-since).toFixed(2)]);simNoDraw=false;var total=+sec.toFixed(1);jump(TS);setPlaying(false);renderAt(TS);return {total:total,cards:out};}
+};
+function start(){resize();document.getElementById("loading").style.display="none";updateText();renderAt(TS);requestAnimationFrame(frame);}
+var fontsReady=document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve();
+setTimeout(function(){fontsReady.then(start,start);},30);
+})();
+</script>
+</body>
+</html>

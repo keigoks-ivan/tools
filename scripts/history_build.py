@@ -33,7 +33,7 @@ CATS = [
     ("nation",   "國家／區域史詩", "Nations & Regions"),
     ("city",     "城市史詩",        "Cities"),
     ("theme",    "主題史詩",        "Themes"),
-    ("maps",     "動畫地圖",        "Animated Maps"),
+    ("maps",     "動畫地圖與圖表",  "Animated Maps & Charts"),
     ("sport",    "運動史",          "Sports"),
     ("politics", "政治結構稜鏡",    "Political Structure"),
 ]
@@ -386,6 +386,13 @@ ENTRIES = [
     dict(src=None, slug="colonial-map", cat="maps",
          zh="殖民帝國動畫地圖 · 1415 → 1999", en="Colonial Empires: Animated Map · 1415–1999",
          blurb="帝國怎麼塗滿世界，又怎麼退回去", lat=None, lng=None),
+    # 會動的圖表（同一區，排在地圖後面，依起始年份）
+    dict(src=None, slug="interest-rates-chart", cat="maps",
+         zh="利率三千八百年 · 前 1754 → 今天", en="Interest Rates: 3,800 Years",
+         blurb="借錢的價格，從漢摩拉比一路跌到負數", lat=None, lng=None),
+    dict(src=None, slug="bubbles-chart", cat="maps",
+         zh="泡沫疊圖 · 1637 → 2017", en="Bubbles Overlaid · 1637–2017",
+         blurb="八個泡沫疊在一起，形狀幾乎一樣", lat=None, lng=None),
 
     # ---------- 運動史 ----------
     dict(src="運動歷史/足球史_史詩敘事_深度長文版.html", slug="football-history", cat="sport",
