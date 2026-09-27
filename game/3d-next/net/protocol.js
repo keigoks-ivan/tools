@@ -4,7 +4,7 @@
  */
 
 /** 正式 relay 網址：部署後改成實際網址（見 workers/coop-relay/README.md）。頁面也可用 ?relay= 覆寫 */
-export const PRODUCTION_RELAY = 'https://tools.investmquest.com/coop-relay';
+export const PRODUCTION_RELAY = 'https://coop-relay.keigoks.workers.dev';
 /** 本機 `npx wrangler dev` 預設網址 */
 export const LOCAL_RELAY = 'http://localhost:8787';
 
