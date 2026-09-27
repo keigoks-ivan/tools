@@ -104,7 +104,7 @@ export function createCoop({ client, now = () => performance.now(), doc = global
   function sendStats() {
     if (!active || client.members.size < 2) return;
     const t = now();
-    if (t - lastStatsAt < STATS_EVERY_MS) return;
+    if (t - lastStatsAt < STATS_EVERY_MS && !enemies.ended) return;   // 結算時不等，最後成績馬上送
     const { kills, revives, maxCombo } = enemies.tally;
     const key = `${kills}/${revives}/${maxCombo}`;
     if (key === lastStats) return;
@@ -113,8 +113,9 @@ export function createCoop({ client, now = () => performance.now(), doc = global
   function scoreboard() {
     return playerIds().map(id => {
       const mine = id === client.you;
-      const row = mine ? enemies.tally : board.get(id) || { kills: 0, revives: 0, maxCombo: 0 };
-      return { id, name: client.members.get(id)?.name || '隊友', color: colorOf(id), you: mine, kills: row.kills | 0, revives: row.revives | 0, maxCombo: row.maxCombo | 0 };
+      const row = mine ? enemies.tally : board.get(id);
+      // missing＝從沒收到這位的成績（多半是他的頁面還是舊版，要重新整理）
+      return { id, name: client.members.get(id)?.name || '隊友', color: colorOf(id), you: mine, missing: !row, kills: row?.kills | 0, revives: row?.revives | 0, maxCombo: row?.maxCombo | 0 };
     });
   }
   // 切到背景／回來：立刻送一筆，房主馬上知道誰看得到畫面（背景分頁的計時器會被瀏覽器放慢）

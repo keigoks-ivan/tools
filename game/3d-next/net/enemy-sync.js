@@ -842,6 +842,8 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
     get localDowned() { return !!arena?.hero?.downed; },
     get reviveProgress() { return reviveProgress; },
     /** 三人頁結算：本機這一局的擊倒、救人、最高連擊 */
+    /** 這一局已結束（全滅或過關，結算畫面中） */
+    get ended() { return !!march && march.state !== 'play'; },
     get tally() { return { kills: tally.kills, revives: tally.revives, maxCombo: march?.maxCombo | 0 }; },
     get role() { return role; },
     get stats() { return { ...stats, proxies: proxies.size, targets: targets.size, puppets: arena ? arena.enemies.filter(e => e.remote).length : 0 }; },

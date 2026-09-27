@@ -6,10 +6,10 @@ import { installGameGestures } from '../2d/touch-gestures.js';
 import { CoopClient } from '../3d-next/net/client.js';
 import { createCoop } from '../3d-next/net/coop.js';
 import { relayUrl } from '../3d-next/net/protocol.js';
-import { setupFullscreenUi } from './fullscreen.js?v=trio8';
-import { setupWipeTransitions } from './wipe.js?v=trio8';
-import { setupTeamOverlay } from './overlay.js?v=trio8';
-import { setupTeamResults } from './results.js?v=trio8';
+import { setupFullscreenUi } from './fullscreen.js?v=trio9';
+import { setupWipeTransitions } from './wipe.js?v=trio9';
+import { setupTeamOverlay } from './overlay.js?v=trio9';
+import { setupTeamResults } from './results.js?v=trio9';
 
 const $ = id => document.getElementById(id);
 installGameGestures($('game'));
@@ -19,7 +19,7 @@ for (const type of ['gesturestart', 'gesturechange', 'gestureend']) {
 }
 
 // 引擎：版本字串與單人頁不同也沒關係（兩頁不會同時開），battle.js 內部的 import 網址相同
-const loadBattleModule = () => import('../3d-next/battle.js?v=trio8');
+const loadBattleModule = () => import('../3d-next/battle.js?v=trio9');
 const params = new URLSearchParams(location.search);
 
 const client = new CoopClient({ relay: relayUrl(location) });
