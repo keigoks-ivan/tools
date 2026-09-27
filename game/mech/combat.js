@@ -523,7 +523,7 @@ export class Combat {
           if (!hitE.dead) hitE.stagT = Math.max(hitE.stagT, 0.9);
           this.fx.impact(hp, _n.copy(dir).negate(), 'armor');
           this.fx.impact(hp, _n.copy(dir).negate(), 'beam');
-          this.audio.impact(hp, 'armor');
+          this.audio.impact(hp, 'saber');
           this.hitstop = Math.max(this.hitstop, crit ? 0.16 : 0.1);
           this.cockpit.kick('hit', crit ? 0.9 : 0.6, 0);
           this.cockpit.flashAt(SABER, 7, -0.3, 0, -1.2);

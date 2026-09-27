@@ -147,7 +147,13 @@ async function game() {
   status.textContent = '選擇關卡';
   renderStages();
   $('stages').style.display = 'grid';
-  $('stages').addEventListener('click', (ev) => { const b = ev.target.closest('.stg'); if (b && !b.disabled) launch(+b.dataset.s); });
+  $('stages').addEventListener('click', (ev) => { const b = ev.target.closest('.stg'); if (b && !b.disabled) { launch(+b.dataset.s); audio.ui('stage'); } });
+  // 選單音效：滑過按鈕、按下按鈕
+  document.addEventListener('mouseover', (ev) => { const b = ev.target.closest('.stg:not(.lock), .btn'); if (b && !b.contains(ev.relatedTarget)) audio.ui('hover'); });
+  document.addEventListener('click', (ev) => { if (ev.target.closest('.btn')) audio.ui('click'); });
+  // 瀏覽器要等玩家先點一下才准出聲：第一次點擊或按鍵就解鎖，標題曲才聽得到
+  for (const k of ['pointerdown', 'keydown']) addEventListener(k, () => audio.unlock(), { once: true });
+  audio.music('title');
   $('resume').addEventListener('click', resume);
   const replay = (n) => { $('result').style.display = 'none'; resetPlayer(); newCombat(n); startBoot(1.6); };
   $('next').addEventListener('click', () => replay(stageNo + 1));
@@ -174,6 +180,7 @@ async function game() {
     odV = speedV = flashV = dangerV = 0;
     state = 'title'; titleT = 0;
     renderStages();
+    audio.music('title');
     $('title').classList.remove('hide');
   }
   function startBoot(len) {
@@ -184,6 +191,7 @@ async function game() {
     cockpitView(true);
     cockpit.root.visible = true;
     audio.ui('boot');
+    audio.music('battle', { stage: stageNo });
   }
   function pause() {
     if (state !== 'play' && state !== 'boot') return;
@@ -214,6 +222,7 @@ async function game() {
       if (n > cleared()) store.set('cleared', n);
       if (RANKS.indexOf(rank) > store.get('best' + n, 0)) store.set('best' + n, RANKS.indexOf(rank));
     }
+    audio.music(win ? (last ? 'allclear' : 'clear') : 'fail');
     $('resTitle').textContent = win ? (last ? '全部過關' : `第 ${n} 關完成`) : `第 ${n} 關失敗`;
     $('resSub').textContent = win ? (last ? 'ALL CLEAR' : 'STAGE CLEAR') : 'MISSION FAILED';
     $('resRank').textContent = rank;
@@ -323,6 +332,10 @@ async function game() {
     audio.setListener(camera.position, fwd);
     const danger = player.ap / player.apMax < 0.3 && !C.dead && state !== 'result';
     audio.setDanger(danger);
+    // 配樂強度：附近敵人越多、被鎖定、挨打、血少、覺醒，音樂就疊越多層
+    let near = 0;
+    for (const e of C.enemies) if (!e.dead && e.pos.distanceToSquared(player.pos) < 400 * 400) near += e.vehicle ? 0.5 : e.kind === 'grunt' ? 1 : 1.6;
+    audio.setIntensity(state !== 'play' ? 0.15 : clamp(0.2 + near * 0.08 + C.lockAlert * 0.25 + C.damageFx * 0.3 + (danger ? 0.2 : 0) + odV * 0.35, 0, 1));
 
     // ---- 畫面後製
     odV += ((C.od.active ? 1 : 0) - odV) * (1 - Math.exp(-rdt * 4));

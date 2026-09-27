@@ -42,6 +42,25 @@
   </section>
 
   <section>
+    <h2>配樂（music）</h2>
+    <div>
+      <button data-mus="title">標題</button>
+      <button id="musBattle">戰鬥</button>
+      <label style="display:inline-flex">關卡 <select id="stage"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select></label>
+      <button data-mus="final">終章</button>
+    </div>
+    <div>
+      <button data-mus="clear">過關號角</button>
+      <button data-mus="allclear">全破號角</button>
+      <button data-mus="fail">失敗</button>
+      <button data-mus="off">停止（1 秒淡出）</button>
+    </div>
+    <label>強度 setIntensity <input type="range" id="inten" min="0" max="1" step="0.01" value="0.5"><b id="intenV">0.50</b></label>
+    <label>配樂音量 setMusicVolume <input type="range" id="mvol" min="0" max="1" step="0.01" value="0.7"><b id="mvolV">0.70</b></label>
+    <div class="sub">危急（setDanger）時配樂會變悶並加心跳；大爆炸、受擊、警報會短暫壓低配樂。</div>
+  </section>
+
+  <section>
     <h2>自機：移動</h2>
     <button data-c="footstep">腳步</button>
     <button id="walk">連續走 8 步</button>
@@ -81,6 +100,9 @@
       <button data-ui="wave">新一波</button>
       <button data-ui="clear">任務完成</button>
       <button data-ui="fail">任務失敗</button>
+      <button data-ui="hover">滑過</button>
+      <button data-ui="click">點擊</button>
+      <button data-ui="stage">選關</button>
     </div>
   </section>
 
@@ -100,6 +122,7 @@
       <button data-imp="ground">彈著：地面</button>
       <button data-imp="building">彈著：建築</button>
       <button data-imp="beam">彈著：光束</button>
+      <button data-imp="saber">彈著：光劍</button>
     </div>
     <div>
       <button data-exp="1">爆炸 1</button>
@@ -113,12 +136,19 @@
     </div>
     <label>敵機推進器 <input type="range" id="eb" min="0" max="1" step="0.01" value="0"><b id="ebV">0.00</b></label>
     <label><input type="checkbox" id="orbit"> 敵機推進器繞圈移動</label>
+    <div>
+      <label style="display:inline-flex">載具 <select id="vk"><option>tank</option><option>apc</option><option>heli</option><option>jet</option></select></label>
+      <button id="vstop">vehicleStop</button>
+    </div>
+    <label>載具油門 vehicleLoop <input type="range" id="vt" min="0" max="1" step="0.01" value="0"><b id="vtV">0.00</b></label>
+    <label><input type="checkbox" id="vfly"> 載具直線掠過（每 6 秒從左前方飛向右後方，測都卜勒）</label>
   </section>
 
   <section>
     <h2>離線量測（不需聲音也能驗證）</h2>
     <div class="sub">每個音效各自在 OfflineAudioContext 渲染，量混音前（raw）與最終輸出的峰值與 RMS，並檢查 NaN 與例外。</div>
     <button class="big" id="meter">執行量測</button>
+    <button class="big" id="mbench">配樂量測（各 20 秒）</button>
     <div id="meterWrap"></div>
   </section>
 </div>
@@ -138,11 +168,20 @@ const allCalls = (a, pos) => {
   a.setLockAlert(0); a.setDanger(true); a.setDanger(false); a.overdrive(); a.ui('boot'); a.ui('confirm');
   a.ui('wave'); a.ui('clear'); a.ui('fail'); a.enemyStep(pos, 1); a.enemyBoost('x', pos, 0.6);
   a.enemyBoost('x', pos, 0); a.enemyBeam(pos); a.mg(pos); a.cannon(pos); a.missileLaunch3d(pos); a.whiz(pos);
-  for (const k of ['armor', 'ground', 'building', 'beam']) a.impact(pos, k);
+  for (const k of ['armor', 'ground', 'building', 'beam', 'saber']) a.impact(pos, k);
   for (const s of [1, 2, 3]) a.explosion(pos, s);
   a.debris(pos); for (const k of ['car', 'tree', 'lamp']) a.trample(pos, k);
+  for (const k of ['hover', 'click', 'stage']) a.ui(k);
+  a.setIntensity(0.4); a.setMusicVolume(0.7);
+  for (const k of ['title', 'final', 'clear', 'allclear', 'fail', 'off']) a.music(k);
+  for (let st = 1; st <= 6; st++) a.music('battle', { stage: st });
+  a.music('off');
+  for (const k of ['tank', 'apc', 'heli', 'jet']) a.vehicleLoop('v' + k, pos, k, 0.7);
+  for (const k of ['tank', 'apc', 'heli', 'jet']) a.vehicleStop('v' + k);
   // 壞參數
   a.footstep(NaN); a.hurt(undefined, 'x'); a.explosion(null, 'big'); a.enemyBoost(undefined, undefined, NaN); a.mg({});
+  a.music(undefined); a.music('nope', null); a.music('battle', { stage: 'x' }); a.setIntensity(NaN); a.setMusicVolume('x');
+  a.vehicleLoop(undefined, undefined, 'boat', NaN); a.vehicleStop(undefined); a.music('off');
 };
 allCalls(pre, P0);
 window.preUnlockOK = pre.lastError === null && !pre.ready;
@@ -164,6 +203,12 @@ for (const [id, fmt] of [['vol', 2], ['str', 2], ['boost', 2], ['lock', 2], ['eb
 $('dist').oninput = () => { $('distV').textContent = val('dist') + ' m'; };
 $('ang').oninput = () => { $('angV').textContent = val('ang') + '°'; };
 $('pause').onchange = () => au.setPaused($('pause').checked);
+for (const [id, fmt] of [['inten', 2], ['mvol', 2], ['vt', 2]]) {
+  $(id).oninput = () => { $(id + 'V').textContent = val(id).toFixed(fmt); if (id === 'mvol') au.setMusicVolume(val('mvol')); };
+}
+document.querySelectorAll('[data-mus]').forEach((b) => { b.onclick = () => au.music(b.dataset.mus); });
+$('musBattle').onclick = () => au.music('battle', { stage: +$('stage').value });
+$('vstop').onclick = () => { au.vehicleStop('v1'); $('vt').value = 0; $('vtV').textContent = '0.00'; };
 $('danger').onchange = () => au.setDanger($('danger').checked);
 
 document.querySelectorAll('[data-c]').forEach((b) => {
@@ -206,9 +251,19 @@ function frame(now) {
     if ($('orbit').checked) { orbitA += dt * 0.8; const d = val('dist'); p = { x: Math.sin(orbitA) * d, y: 0, z: -Math.cos(orbitA) * d }; }
     au.enemyBoost('e1', p, ebl);
   }
+  au.setIntensity(val('inten'));
+  const vt = val('vt');
+  if (vt > 0) {
+    let p = worldPos();
+    if ($('vfly').checked) {   // 每 6 秒一趟：x 從 -300 到 +300，離聽者最近 40 m
+      const u = ((now / 1000) % 6) / 6;
+      p = { x: -300 + 600 * u, y: 60, z: -40 };
+    }
+    au.vehicleLoop('v1', p, $('vk').value, vt);
+  }
   const c = au.ctx;
   $('stat').textContent = c
-    ? `state ${c.state}   t ${c.currentTime.toFixed(2)} s   voices ${au.voices}   enemy loops ${au.eb.size}\nlastError ${au.lastError ? au.lastError.message : '—'}`
+    ? `state ${c.state}   t ${c.currentTime.toFixed(2)} s   voices ${au.voices}   music voices ${au.mv}   enemy loops ${au.eb.size}   vehicles ${au.vl.size}\nmusic ${au._musKey || '—'}   intensity ${au.musI == null ? '—' : au.musI.toFixed(2)}\nlastError ${au.lastError ? au.lastError.message : '—'}`
     : '尚未啟動';
   requestAnimationFrame(frame);
 }
@@ -230,6 +285,8 @@ const CASES = [
   ['missile3d 50m', (a) => a.missileLaunch3d({ x: 30, y: 0, z: -40 })], ['whiz', (a) => a.whiz({ x: 4, y: 0, z: -2 })],
   ['impact armor', (a) => a.impact({ x: 5, y: 0, z: -20 }, 'armor')], ['impact ground', (a) => a.impact({ x: 5, y: 0, z: -20 }, 'ground')],
   ['impact building', (a) => a.impact({ x: 5, y: 0, z: -20 }, 'building')], ['impact beam', (a) => a.impact({ x: 5, y: 0, z: -20 }, 'beam')],
+  ['impact saber', (a) => a.impact({ x: 2, y: 0, z: -8 }, 'saber')], ['ui hover', (a) => a.ui('hover')], ['ui click', (a) => a.ui('click')], ['ui stage', (a) => a.ui('stage')],
+  ['explosion 0.8 @100m', (a) => a.explosion({ x: 30, y: 0, z: -95 }, 0.8)], ['explosion 3 @300m', (a) => a.explosion({ x: 0, y: 0, z: -300 }, 3)],
   ['explosion 1 @60m', (a) => a.explosion({ x: 0, y: 0, z: -60 }, 1)], ['explosion 2 @120m', (a) => a.explosion({ x: 0, y: 0, z: -120 }, 2)],
   ['explosion 3 @30m', (a) => a.explosion({ x: 0, y: 0, z: -30 }, 3)], ['explosion 3 @600m', (a) => a.explosion({ x: 0, y: 0, z: -600 }, 3)],
   ['debris', (a) => a.debris({ x: -8, y: 0, z: -15 })], ['trample car', (a) => a.trample({ x: 0, y: 0, z: -6 }, 'car')],
@@ -284,6 +341,102 @@ $('meter').onclick = async () => {
   const h = ['音效', 'raw 峰 dB', 'raw RMS dB', '輸出峰 dB', '輸出 RMS dB', '長度 s', 'NaN', '錯誤'];
   $('meterWrap').innerHTML = '<table><tr>' + h.map((x) => `<th>${x}</th>`).join('') + '</tr>' + rows.map((r) =>
     `<tr><td>${r.name}</td><td>${r.rawPk}</td><td>${r.rawRms}</td><td class="${parseFloat(r.outPk) > -0.1 ? 'bad' : ''}">${r.outPk}</td><td>${r.outRms}</td><td>${r.len}</td><td class="${r.nan ? 'bad' : 'ok'}">${r.nan}</td><td class="bad">${r.err}</td></tr>`).join('') + '</table>';
+};
+
+// ───── 配樂離線量測：每 0.1 秒暫停一次讓排程器排下一段（等同遊戲裡的計時器） ─────
+// setup(a) 在 0 秒呼叫；ev = [[秒, fn], ...] 在指定時間呼叫；回傳峰值、整段 RMS、最大 400 ms RMS、長度、渲染時間
+async function renderMusic(setup, sec = 20, ev = []) {
+  const ctx = new OfflineAudioContext(2, SR * sec, SR);
+  const a = new MechAudio();
+  a._attach(ctx, false);
+  const t0 = performance.now();
+  setup(a);
+  let mvMax = 0;
+  const evs = ev.slice();
+  for (let i = 1; i < sec * 10; i++) {
+    const t = i / 10;
+    ctx.suspend(t).then(() => {
+      while (evs.length && evs[0][0] <= t + 1e-6) evs.shift()[1](a);
+      a._musTick(); a._tick();
+      mvMax = Math.max(mvMax, a.mv);
+      ctx.resume();
+    });
+  }
+  const buf = await ctx.startRendering();
+  const ms = performance.now() - t0;
+  const L = buf.getChannelData(0), R = buf.getChannelData(1);
+  let pk = 0, ss = 0, nan = 0, last = 0;
+  for (let i = 0; i < L.length; i++) {
+    const l = L[i], r = R[i];
+    if (!Number.isFinite(l) || !Number.isFinite(r)) { nan++; continue; }
+    const ax = Math.max(Math.abs(l), Math.abs(r));
+    if (ax > pk) pk = ax;
+    if (ax > 0.001) last = i;
+    ss += (l * l + r * r) / 2;
+  }
+  const W = SR * 0.4;
+  let win = 0;
+  for (let i = 0; i + W < L.length; i += W / 4) {
+    let s = 0; for (let j = i; j < i + W; j++) s += (L[j] * L[j] + R[j] * R[j]) / 2;
+    win = Math.max(win, Math.sqrt(s / W));
+  }
+  const active = Math.max(1, last);
+  // 近似 K 加權響度（BS.1770 的高架＋高通，未做閘控）：低頻比較不會灌水
+  const kc = new OfflineAudioContext(2, L.length, SR), ks = kc.createBufferSource();
+  const sh = kc.createBiquadFilter(); sh.type = 'highshelf'; sh.frequency.value = 1681; sh.gain.value = 4;
+  const hp = kc.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 38; hp.Q.value = 0.5;
+  ks.buffer = buf; ks.connect(sh); sh.connect(hp); hp.connect(kc.destination); ks.start();
+  const kb = await kc.startRendering(), KL = kb.getChannelData(0), KR = kb.getChannelData(1);
+  let ks2 = 0, kwin = 0;
+  for (let i = 0; i < active; i++) ks2 += (KL[i] * KL[i] + KR[i] * KR[i]) / 2;
+  for (let i = 0; i + W < KL.length; i += W / 4) {
+    let s = 0; for (let j = i; j < i + W; j++) s += (KL[j] * KL[j] + KR[j] * KR[j]) / 2;
+    kwin = Math.max(kwin, Math.sqrt(s / W));
+  }
+  return { pk, rms: Math.sqrt(ss / active), win, lk: Math.sqrt(ks2 / active), lkw: kwin, len: last / SR, nan, ms, mvMax, err: a.lastError ? String(a.lastError) : '' };
+}
+window.renderMusic = renderMusic;
+const MUS_CASES = [
+  ['title', (a) => a.music('title')],
+  ['battle st1 I=0.2', (a) => { a.setIntensity(0.2); a.music('battle', { stage: 1 }); }],
+  ['battle st1 I=1.0', (a) => { a.setIntensity(1); a.music('battle', { stage: 1 }); }],
+  ['battle st5 I=0.2', (a) => { a.setIntensity(0.2); a.music('battle', { stage: 5 }); }],
+  ['battle st5 I=1.0', (a) => { a.setIntensity(1); a.music('battle', { stage: 5 }); }],
+  ['final I=1.0', (a) => { a.setIntensity(1); a.music('final'); }],
+  ['clear', (a) => a.music('clear'), 8],
+  ['allclear', (a) => a.music('allclear'), 13],
+  ['fail', (a) => a.music('fail'), 8],
+];
+window.runMusicBench = async (which) => {
+  const rows = [];
+  const add = (name, r) => rows.push({ name, pk: db(r.pk), rms: db(r.rms), win: db(r.win), lk: db(r.lk), lkw: db(r.lkw), len: r.len.toFixed(1), ms: r.ms.toFixed(0), rt: (r.len > 0 ? (r.ms / 1000) / (r.len) : 0).toFixed(3), nan: r.nan, mv: r.mvMax, err: r.err });
+  // 參考：光束＋中型爆炸（60 m）＋小爆炸（30 m）的典型交火瞬間
+  const burst = [[1, (a) => a.beam()], [1.15, (a) => a.explosion({ x: 0, y: 0, z: -60 }, 2)], [1.4, (a) => a.explosion({ x: 10, y: 0, z: -30 }, 1)]];
+  if (!which || which === 'ref') add('REF beam+explosion burst', await renderMusic(() => {}, 5, burst));
+  for (const [name, fn, sec] of MUS_CASES) {
+    if (which && which !== 'ref' && !name.startsWith(which)) continue;
+    add(name, await renderMusic(fn, sec || 20));
+  }
+  if (!which || which === 'mix') {
+    add('battle st5 I=1 + burst (ducking)', await renderMusic((a) => { a.setIntensity(1); a.music('battle', { stage: 5 }); }, 6, burst.map(([t, f]) => [t + 3, f])));
+    add('title → battle crossfade', await renderMusic((a) => a.music('title'), 8, [[3, (a) => { a.setIntensity(0.6); a.music('battle', { stage: 2 }); }], [6, (a) => a.music('off')]]));
+    add('battle danger on', await renderMusic((a) => { a.setIntensity(0.8); a.music('battle', { stage: 1 }); a.setDanger(true); }, 8));
+    add('battle setVolume(0)', await renderMusic((a) => { a.setVolume(0); a.setIntensity(1); a.music('battle', { stage: 1 }); }, 6));
+    add('battle paused', await renderMusic((a) => { a.setIntensity(1); a.music('battle', { stage: 1 }); }, 6, [[2, (a) => { a.paused = true; a.pauseG.gain.value = 0; }]]));
+    // 載具：坦克 40 m、直升機 250 m、噴射機掠過（都卜勒）
+    const veh = (kind, posAt, sec) => renderMusic(() => {}, sec, Array.from({ length: sec * 10 - 2 }, (_, i) => [0.1 * (i + 1), (a) => a.vehicleLoop('v', posAt(0.1 * (i + 1)), kind, 0.8)]));
+    add('vehicle tank 40m', await veh('tank', () => ({ x: 20, y: 0, z: -35 }), 4));
+    add('vehicle heli 250m', await veh('heli', () => ({ x: -100, y: 80, z: -220 }), 4));
+    add('vehicle jet flyby', await veh('jet', (t) => ({ x: -400 + 200 * t, y: 60, z: -40 }), 4));
+  }
+  return rows;
+};
+$('mbench').onclick = async () => {
+  $('meterWrap').textContent = '配樂量測中……（約 10～30 秒）';
+  const rows = await window.runMusicBench();
+  const h = ['配樂', '峰 dB', 'RMS dB', '最大 400ms RMS', 'K 加權 RMS', 'K 加權 400ms', '長度 s', '渲染 ms', '渲染/實時', 'NaN', '配樂聲部峰', '錯誤'];
+  $('meterWrap').innerHTML = '<table><tr>' + h.map((x) => `<th>${x}</th>`).join('') + '</tr>' + rows.map((r) =>
+    `<tr><td>${r.name}</td><td class="${parseFloat(r.pk) > -0.1 ? 'bad' : ''}">${r.pk}</td><td>${r.rms}</td><td>${r.win}</td><td>${r.lk}</td><td>${r.lkw}</td><td>${r.len}</td><td>${r.ms}</td><td>${r.rt}</td><td class="${r.nan ? 'bad' : 'ok'}">${r.nan}</td><td>${r.mv}</td><td class="bad">${r.err}</td></tr>`).join('') + '</table>';
 };
 </script>
 </body>
