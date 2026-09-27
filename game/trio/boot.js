@@ -6,7 +6,8 @@ import { installGameGestures } from '../2d/touch-gestures.js';
 import { CoopClient } from '../3d-next/net/client.js';
 import { createCoop } from '../3d-next/net/coop.js';
 import { relayUrl } from '../3d-next/net/protocol.js';
-import { setupFullscreenUi } from './fullscreen.js?v=trio5';
+import { setupFullscreenUi } from './fullscreen.js?v=trio6';
+import { setupWipeTransitions } from './wipe.js?v=trio6';
 
 const $ = id => document.getElementById(id);
 installGameGestures($('game'));
@@ -16,12 +17,14 @@ for (const type of ['gesturestart', 'gesturechange', 'gestureend']) {
 }
 
 // 引擎：版本字串與單人頁不同也沒關係（兩頁不會同時開），battle.js 內部的 import 網址相同
-const loadBattleModule = () => import('../3d-next/battle.js?v=trio5');
+const loadBattleModule = () => import('../3d-next/battle.js?v=trio6');
 const params = new URLSearchParams(location.search);
 
 const client = new CoopClient({ relay: relayUrl(location) });
 const coop = createCoop({ client });
 if (params.has('debug')) Object.assign(window, { __coopClient: client, __coop: coop });
+const transitions = setupWipeTransitions({ coop, client });
+if (params.has('debug')) window.__transitions = transitions;
 
 // ---- 音訊（與單人頁相同的 audio.js；M 鍵與 HUD 按鈕切換靜音） ----
 let audio = null, assets = null;

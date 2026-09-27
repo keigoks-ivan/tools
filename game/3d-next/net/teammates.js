@@ -1,12 +1,14 @@
 /**
  * 隊友角色的 3D 呈現：沿用本機主角已經轉好卡通材質的模型（SkeletonUtils.clone，幾何與貼圖共用），
- * 每位隊友一組上色材質、一個 AnimationMixer 與頭上名牌。位置由 SnapshotBuffer 插值，永遠比實際晚約 100 ms；
+ * 每位隊友一組上色材質、一個 AnimationMixer、頭上名牌，以及個人色的刀光與殘影（peer-fx.js）。位置由 SnapshotBuffer 插值，永遠比實際晚約 100 ms；
  * 本機主角不經過這裡。
  */
 import { SnapshotBuffer } from './interp.js';
+import { SLOT_COLORS, playerColor } from './colors.js';
+import { GHOST_ANIMS, TRAIL_ANIM, makeGhosts, makePeerTrail } from './peer-fx.js';
 
-/** 三個隊友槽的色調（第一階段不同英雄也共用同一個模型，用顏色區分） */
-export const TEAM_TINTS = [0x7fd6ff, 0xffc36b, 0x8dff9e];
+/** 依座位輪用的色調（名單外的名字才用到；Matt／Myles／Mike 固定配色見 colors.js） */
+export const TEAM_TINTS = SLOT_COLORS;
 const STALE_MS = 10000;   // 10 秒沒收到封包就先藏起來，恢復後再出現
 
 function makeLabel(THREE, text, tint) {
@@ -30,16 +32,16 @@ function makeLabel(THREE, text, tint) {
 }
 
 /**
- * @param {{ THREE, scene, template: import('three').Object3D, clips: import('three').AnimationClip[], cloneSkinned: Function }} ctx
+ * @param {{ THREE, scene, template: import('three').Object3D, clips: import('three').AnimationClip[], cloneSkinned: Function, quality?: 'mobile'|'desktop' }} ctx
  */
-export function createTeammates({ THREE, scene, template, clips, cloneSkinned }) {
+export function createTeammates({ THREE, scene, template, clips, cloneSkinned, quality = 'desktop' }) {
   const baseY = template.position.y;
   const peers = new Map();
   const tintColor = new THREE.Color();
 
   function add(id, name, slot) {
     if (peers.has(id)) return peers.get(id);
-    const tint = TEAM_TINTS[slot % TEAM_TINTS.length];
+    const tint = playerColor(name, slot);
     const root = new THREE.Group();
     root.name = `teammate:${id}`;
     const model = cloneSkinned(template);
@@ -70,7 +72,12 @@ export function createTeammates({ THREE, scene, template, clips, cloneSkinned })
     scene.add(root);
     const mixer = new THREE.AnimationMixer(model);
     const actions = new Map(clips.map(clip => [clip.name, mixer.clipAction(clip)]));
-    const peer = { id, name, root, model, mixer, actions, label, owned, buffer: new SnapshotBuffer(), current: null, currentName: '', lastTime: 0 };
+    const sword = model.getObjectByName('Hero_sword') || model.getObjectByName('rumi_sword');
+    const trail = makePeerTrail({ THREE, scene, sword, color: tint, segments: quality === 'mobile' ? 9 : 12 });
+    const ghosts = quality === 'mobile' ? null : makeGhosts({ THREE, scene, template, cloneSkinned, color: tint });
+    const bones = [];
+    model.traverse(object => { if (object.isBone) bones.push(object); });
+    const peer = { id, name, tint, root, model, mixer, actions, label, owned, trail, ghosts, bones, buffer: new SnapshotBuffer(), current: null, currentName: '', lastTime: 0 };
     peers.set(id, peer);
     play(peer, 'idle', true, 1, 0);
     return peer;
@@ -100,6 +107,8 @@ export function createTeammates({ THREE, scene, template, clips, cloneSkinned })
     peer.mixer.uncacheRoot(peer.model);
     for (const material of peer.owned.values()) material.dispose();
     peer.label.dispose();
+    peer.trail.dispose();
+    peer.ghosts?.dispose();
     peers.delete(id);
   }
 
@@ -108,7 +117,7 @@ export function createTeammates({ THREE, scene, template, clips, cloneSkinned })
   function update(dt, now) {
     for (const peer of peers.values()) {
       const s = peer.buffer.sample(now);
-      if (!s || now - peer.buffer.receivedAt > STALE_MS) { peer.root.visible = false; continue; }
+      if (!s || now - peer.buffer.receivedAt > STALE_MS) { peer.root.visible = false; peer.trail.clear(); peer.ghosts?.clear(); continue; }
       peer.root.visible = true;
       peer.root.position.set(s.x, s.y, s.z);
       peer.root.rotation.y = s.yaw;
@@ -119,6 +128,10 @@ export function createTeammates({ THREE, scene, template, clips, cloneSkinned })
       else if (!s.loop && Math.abs(peer.current.time - s.time) > 0.25) peer.current.time = s.time;
       peer.lastTime = s.time;
       peer.mixer.update(dt);
+      const slashing = TRAIL_ANIM.test(anim);
+      if (slashing) peer.root.updateMatrixWorld(true);
+      peer.trail.update(slashing);
+      peer.ghosts?.update(dt, GHOST_ANIMS.has(anim), peer);
     }
   }
 

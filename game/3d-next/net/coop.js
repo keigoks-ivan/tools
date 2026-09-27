@@ -9,6 +9,7 @@ import { createEnemySync } from './enemy-sync.js';
 import { WORLD_HZ } from './world.js';
 import { readStatus, statusBits } from './team.js';
 import { createTeamFx } from './team-fx.js';
+import { playerColor } from './colors.js';
 
 const IDLE_SEND_MS = 500;   // 站著不動時改成 2 Hz，省免費額度
 
@@ -62,7 +63,22 @@ export function createCoop({ client, now = () => performance.now(), doc = global
     if (snap.anim === 'musouFlurry' && lastAnim.get(id) !== 'musouFlurry') enemies.notePeerMusou(id);
     lastAnim.set(id, snap.anim);
   });
-  enemies.onFx(event => fx?.onFx(event));
+  const teamListeners = new Set();
+  enemies.onFx(event => {
+    fx?.onFx(event);
+    for (const fn of teamListeners) { try { fn(event); } catch (error) { console.error(error); } }
+  });
+
+  /** 玩家代表色：依名字固定（colors.js），自己也有一個座位（排在隊友後面，不跟隊友搶色） */
+  function colorOf(id) {
+    const name = client.members?.get(id)?.name;
+    return playerColor(name, id === client.you ? 2 : slotFor(id));
+  }
+  function playerIds() {
+    const ids = client.members?.size ? [...client.members.keys()] : [];
+    if (client.you && !ids.includes(client.you)) ids.unshift(client.you);
+    return ids;
+  }
 
   function tick() {
     if (!active || !local) return;
@@ -93,14 +109,15 @@ export function createCoop({ client, now = () => performance.now(), doc = global
     /** battle.js 呼叫：ctx = { THREE, scene, heroModel, clips, cloneSkinned, local } */
     attach(ctx) {
       local = ctx.local;
-      view = createTeammates({ THREE: ctx.THREE, scene: ctx.scene, template: ctx.heroModel, clips: ctx.clips, cloneSkinned: ctx.cloneSkinned });
       const mobile = !!globalThis.matchMedia?.('(pointer: coarse)').matches;
-      fx = createTeamFx({ THREE: ctx.THREE, scene: ctx.scene, quality: mobile ? 'mobile' : 'desktop' });
+      const quality = mobile ? 'mobile' : 'desktop';
+      view = createTeammates({ THREE: ctx.THREE, scene: ctx.scene, template: ctx.heroModel, clips: ctx.clips, cloneSkinned: ctx.cloneSkinned, quality });
+      fx = createTeamFx({ THREE: ctx.THREE, scene: ctx.scene, quality, colorOf });
       syncMembers();
       return {
         update(dt) {
           view.update(dt, now());
-          if (client.members.size > 1 || enemies.localDowned) fx.update(dt, { positionOf, downed: downedIds(), progress: enemies.reviveProgress });
+          if (client.members.size > 1 || enemies.localDowned) fx.update(dt, { positionOf, players: playerIds(), downed: downedIds(), progress: enemies.reviveProgress });
         },
         /** battle.js 在行軍關建好後呼叫：{ march, arena, level }（level＝march.js 模組） */
         bindLevel(level) { enemies.bind(level); },
@@ -116,6 +133,10 @@ export function createCoop({ client, now = () => performance.now(), doc = global
     },
     /** boot.js：battle 物件（用它的 start）——全滅／過關後任何人按重來，大家一起重開 */
     setControls(controls) { enemies.setControls(controls); },
+    /** boot.js：隊伍事件（wipe＝全滅、regroup＝全滅後重新開局、revived、combo…），三人頁用來播轉場畫面 */
+    onTeamEvent(fn) { teamListeners.add(fn); return () => teamListeners.delete(fn); },
+    /** 某位玩家的代表色（0xRRGGBB） */
+    colorOf,
     dispose() { this.setActive(false); view?.dispose(); view = null; fx?.dispose(); fx = null; slots.clear(); },
     get teammates() { return view; },
     get enemies() { return enemies; },

@@ -62,7 +62,7 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
   const revivedAt = new Map();          // 房主：剛救起的人 → 時間（忽略還沒更新的倒地封包）
   const pendingPickups = new Map();     // 隊友：已申報、等房主回覆的補給 → 申報時間
   let reviveProgress = new Map();       // 倒地者 → { pct, by, at }（房主算、隊友收 tm）
-  let endEpoch = null, retryOut = false, controls = null;
+  let endEpoch = null, retryOut = false, controls = null, wiped = false;
   const fxListeners = new Set();
 
   const players = () => Math.max(1, client.members?.size || 1);
@@ -335,6 +335,8 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
     march.result = { rank: null, time: march.time, maxCombo: march.maxCombo, hp: 0, maxHp: hero.maxHp, kills: arena.kills, segment: march.segmentIndex };
     march._emit('fail', { segment: march.segmentIndex, wipe: true });
     reviveProgress = new Map();
+    wiped = true;
+    emitFx({ type: 'wipe' });
   }
   /** 重來：房主直接重開；battle.js 的 start() 由 boot.js 經 setControls 交給這裡（沒有時退回 march.reset） */
   function restart() {
@@ -755,6 +757,7 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
         const hud = orig.reset.call(march);
         applyScale();
         teamReset();
+        if (wiped) { wiped = false; emitFx({ type: 'regroup' }); }
         if (role === 'guest') {
           if (endEpoch !== null) retryOut = true;   // 結算後按重來：請房主一起重開
           clearWorld();
