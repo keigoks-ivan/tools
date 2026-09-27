@@ -371,6 +371,9 @@ ENTRIES = [
 
     # ---------- 動畫地圖 ----------
     # 會動的地圖（互動頁，非長文），repo 手工維護。依起始年份排列。
+    dict(src=None, slug="buddhist-world-map", cat="maps",
+         zh="佛教世界動畫地圖 · 前 5 世紀 → 今天", en="The Buddhist World: Animated Map",
+         blurb="從恆河邊出發，傳遍半個亞洲", lat=None, lng=None),
     dict(src=None, slug="christian-world-map", cat="maps",
          zh="基督教世界動畫地圖 · 30 → 今天", en="The Christian World: Animated Map",
          blurb="兩千年，從耶路撒冷走到全世界", lat=None, lng=None),
