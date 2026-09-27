@@ -99,6 +99,38 @@
     @keyframes ttChipFall{to{color:#777;border-color:#555;box-shadow:none;filter:grayscale(1);transform:translateY(3px)}}
     @keyframes ttStreak{0%{transform:translateX(-110%) skewX(-24deg)}100%{transform:translateX(110%) skewX(-24deg)}}
     @media (prefers-reduced-motion: reduce){.team-transition *{animation-duration:.01s!important;animation-delay:0s!important}}
+    /* 隊友箭頭、喊話、結算成績（overlay.js／results.js） */
+    .team-overlay{position:fixed;z-index:6;pointer-events:none;overflow:hidden}
+    .team-overlay[hidden]{display:none}
+    .tm-arrow{position:absolute;left:0;top:0;display:none;will-change:transform}
+    .tm-tip{position:absolute;left:-15px;top:-15px;width:30px;height:30px;display:block}
+    .tm-tip::before{content:"";position:absolute;inset:0;background:var(--c);clip-path:polygon(100% 50%,15% 8%,32% 50%,15% 92%);filter:drop-shadow(0 0 5px var(--c))}
+    .tm-label{position:absolute;left:0;top:18px;transform:translateX(-50%);padding:2px 7px;border-radius:4px;background:rgba(9,15,27,.72);border:1px solid var(--c);color:#fff;font-size:12px;font-weight:700;letter-spacing:.04em;white-space:nowrap}
+    .tm-arrow.down .tm-tip::before{background:#ff4a4a;filter:drop-shadow(0 0 7px #ff4a4a)}
+    .tm-arrow.down .tm-label{border-color:#ff4a4a;background:rgba(80,8,8,.8)}
+    .tm-arrow.down{animation:tmPulse .8s ease-in-out infinite}
+    .tm-arrow.pinged .tm-label{background:var(--c);color:#0b1020}
+    @keyframes tmPulse{50%{opacity:.45}}
+    .tm-bubble{position:absolute;left:0;top:0;display:none;will-change:transform;translate:-50% -100%;padding:4px 11px;border-radius:12px;background:var(--c);box-shadow:0 0 14px var(--c),0 2px 0 rgba(0,0,0,.35);color:#0b1020;font-size:16px;font-weight:900;letter-spacing:.06em;white-space:nowrap}
+    .tm-bubble.pop{animation:tmPop .28s cubic-bezier(.2,1.6,.4,1)}
+    @keyframes tmPop{from{scale:.3;opacity:0}to{scale:1;opacity:1}}
+    .ping-pad{position:fixed;right:calc(8px + var(--safe-right,0px));top:38%;z-index:7;display:flex;flex-direction:column;gap:6px}
+    .ping-pad[hidden]{display:none}
+    .ping-pad button{display:flex;align-items:center;gap:5px;padding:6px 10px;border:1px solid rgba(232,220,198,.35);border-radius:6px;background:rgba(9,15,27,.62);color:#e8dcc6;font:700 13px/1 inherit;letter-spacing:.06em;touch-action:none;cursor:pointer}
+    .ping-pad button:active{background:rgba(232,220,198,.25)}
+    .ping-pad kbd{font:600 10px/1 ui-monospace,monospace;padding:2px 4px;border-radius:3px;background:rgba(232,220,198,.18)}
+    @media (pointer:coarse){.ping-pad kbd{display:none}.ping-pad button{padding:9px 12px;font-size:14px}}
+    .team-board{margin:10px 0 16px;font-size:14px;text-align:left}
+    .team-board[hidden]{display:none}
+    .tb-head,.tb-row{display:grid;grid-template-columns:1.8fr 1fr 1fr 1.2fr;gap:6px;align-items:center;padding:6px 8px;text-align:center}
+    .tb-head{font-size:11px;letter-spacing:.12em;opacity:.65}
+    .tb-row{border-radius:6px;background:rgba(255,255,255,.05);margin-top:4px;font-weight:700;font-variant-numeric:tabular-nums}
+    .tb-row.mvp{background:rgba(255,205,96,.14);box-shadow:inset 0 0 0 1px rgba(255,205,96,.6)}
+    .tb-name{display:flex;align-items:center;gap:6px;text-align:left}
+    .tb-name i{width:10px;height:10px;border-radius:50%;background:var(--c);box-shadow:0 0 6px var(--c);flex:none}
+    .tb-name small{font-size:10px;opacity:.7}
+    .tb-mvp{margin-left:auto;padding:1px 6px;border-radius:3px;background:#ffcd60;color:#1a1204;font-size:10px;letter-spacing:.1em}
+    .tb-note{margin:8px 0 0;font-size:11px;opacity:.7;text-align:center}
   </style>
   <script type="importmap">{"imports":{"three":"../lib/three.module.js","three/addons/":"../lib/addons/"}}</script>
 </head>
@@ -152,9 +184,9 @@
     <section id="result" class="dialog-screen result-screen" hidden aria-labelledby="resultTitle"><div class="dialog-card"><div class="section-kicker">NIGHT MARKET　／　FIELD REPORT</div><h2 id="resultTitle">夜市暫告一段落</h2><p id="resultText"></p><button id="retry" class="primary-button" type="button"><span>再試一次</span><b aria-hidden="true">↗</b></button></div></section>
     <section id="pauseOverlay" class="dialog-screen" hidden aria-labelledby="pauseTitle"><div class="dialog-card pause-card"><div class="section-kicker">FIELD TEST　／　PAUSED</div><h2 id="pauseTitle">先歇一下</h2><p>準備好後繼續夜市突圍。</p><button id="resume" class="primary-button" type="button"><span>繼續戰鬥</span><b aria-hidden="true">↗</b></button></div></section>
     <section id="rotateOverlay" class="rotate-overlay" hidden role="status" aria-live="polite"><div class="rotate-card"><span class="rotate-icon" aria-hidden="true">↻</span><b>請轉橫向遊玩</b><span>畫面已暫停，轉回橫向即可繼續。</span></div></section>
-    <footer id="help" class="help-bar"><span class="desktop-help"><b>移動</b> WASD / ↑↓←→ <i></i> <b>攻擊</b> J <i></i> <b>重擊</b> K <i></i> <b>閃避</b> Shift <i></i> <b>絕招</b> E <i></i> <span data-jump-help hidden><b>跳躍</b> Space <i></i></span> <b>暫停</b> P<span data-fullscreen-help hidden> <i></i> <b>全螢幕</b> F</span></span><span class="touch-help">左側移動　·　右側攻擊</span><span class="silent-note" id="soundState">靜音試作</span></footer>
+    <footer id="help" class="help-bar"><span class="desktop-help"><b>移動</b> WASD / ↑↓←→ <i></i> <b>攻擊</b> J <i></i> <b>重擊</b> K <i></i> <b>閃避</b> Shift <i></i> <b>絕招</b> E <i></i> <span data-jump-help hidden><b>跳躍</b> Space <i></i></span> <b>喊話</b> 1 2 3 <i></i> <b>暫停</b> P<span data-fullscreen-help hidden> <i></i> <b>全螢幕</b> F</span></span><span class="touch-help">左側移動　·　右側攻擊</span><span class="silent-note" id="soundState">靜音試作</span></footer>
     <div id="diagnostics"></div>
   </main>
-  <script type="module" src="./boot.js?v=trio7"></script>
+  <script type="module" src="./boot.js?v=trio8"></script>
 </body>
 </html>

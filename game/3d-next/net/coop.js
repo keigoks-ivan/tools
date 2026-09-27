@@ -10,6 +10,7 @@ import { WORLD_HZ } from './world.js';
 import { readStatus, statusBits } from './team.js';
 import { createTeamFx } from './team-fx.js';
 import { playerColor } from './colors.js';
+import { PING_COOLDOWN_MS, STATS_EVERY_MS } from './scores.js';
 
 const IDLE_SEND_MS = 500;   // 站著不動時改成 2 Hz，省免費額度
 
@@ -33,6 +34,12 @@ export function createCoop({ client, now = () => performance.now(), doc = global
   const enemies = createEnemySync({ client, now, peers: () => peers, hidden });
   const lastAnim = new Map();   // 第三階段：隊友上一個動作（偵測剛放無雙 → 合體大招）
 
+  // 三人頁：隊友送來的本局成績與喊話
+  const board = new Map();   // id → { kills, revives, maxCombo }
+  const pingListeners = new Set(), scoreListeners = new Set();
+  let lastStats = '', lastStatsAt = -Infinity, lastPingAt = -Infinity;
+  const fire = (set, value) => { for (const fn of set) { try { fn(value); } catch (error) { console.error(error); } } };
+
   function slotFor(id) {
     if (!slots.has(id)) {
       const used = new Set(slots.values());
@@ -53,9 +60,14 @@ export function createCoop({ client, now = () => performance.now(), doc = global
     for (const member of client.members.values()) addPeer(member);
   }
 
-  client.on('welcome', syncMembers);
-  client.on('join', member => addPeer(member));
-  client.on('leave', id => { removePeer(id); peers.delete(id); lastAnim.delete(id); });
+  // 重連或有人加入 → 重送一次本局成績
+  client.on('welcome', () => { lastStats = ''; syncMembers(); });
+  client.on('join', member => { lastStats = ''; addPeer(member); });
+  client.on('leave', id => { removePeer(id); peers.delete(id); lastAnim.delete(id); if (board.delete(id)) fire(scoreListeners, null); });
+  client.on('signal', (id, d) => {
+    if (d.p) fire(pingListeners, { id, kind: d.p, at: now() });
+    if (Number.isInteger(d.k)) { board.set(id, { kills: d.k, revives: d.r | 0, maxCombo: d.c | 0 }); fire(scoreListeners, null); }
+  });
   client.on('state', (id, snap, at) => {
     view?.push(id, snap, at);
     const { hidden: away, downed } = readStatus(snap.st);
@@ -87,6 +99,23 @@ export function createCoop({ client, now = () => performance.now(), doc = global
     const t = now();
     if (sameState(state, lastSent) && t - lastSentAt < IDLE_SEND_MS) return;
     if (client.sendState(state)) { lastSent = state; lastSentAt = t; }
+  }
+  /** 本局成績有變就送（最多每秒一次）；只有自己一人時不送 */
+  function sendStats() {
+    if (!active || client.members.size < 2) return;
+    const t = now();
+    if (t - lastStatsAt < STATS_EVERY_MS) return;
+    const { kills, revives, maxCombo } = enemies.tally;
+    const key = `${kills}/${revives}/${maxCombo}`;
+    if (key === lastStats) return;
+    if (client.send('x', { k: kills, r: revives, c: maxCombo })) { lastStats = key; lastStatsAt = t; fire(scoreListeners, null); }
+  }
+  function scoreboard() {
+    return playerIds().map(id => {
+      const mine = id === client.you;
+      const row = mine ? enemies.tally : board.get(id) || { kills: 0, revives: 0, maxCombo: 0 };
+      return { id, name: client.members.get(id)?.name || '隊友', color: colorOf(id), you: mine, kills: row.kills | 0, revives: row.revives | 0, maxCombo: row.maxCombo | 0 };
+    });
   }
   // 切到背景／回來：立刻送一筆，房主馬上知道誰看得到畫面（背景分頁的計時器會被瀏覽器放慢）
   doc?.addEventListener?.('visibilitychange', () => { lastSent = null; tick(); });
@@ -126,7 +155,7 @@ export function createCoop({ client, now = () => performance.now(), doc = global
     /** 開戰後才開始送自己的狀態（載入畫面期間不浪費額度） */
     setActive(value) {
       active = value;
-      if (active && !timer) timer = setInterval(tick, Math.round(1000 / SEND_HZ));
+      if (active && !timer) timer = setInterval(() => { tick(); sendStats(); }, Math.round(1000 / SEND_HZ));
       if (active && !worldTimer) worldTimer = setInterval(() => enemies.tick(), Math.round(1000 / WORLD_HZ));
       if (!active && timer) { clearInterval(timer); timer = 0; }
       if (!active && worldTimer) { clearInterval(worldTimer); worldTimer = 0; }
@@ -137,6 +166,23 @@ export function createCoop({ client, now = () => performance.now(), doc = global
     onTeamEvent(fn) { teamListeners.add(fn); return () => teamListeners.delete(fn); },
     /** 某位玩家的代表色（0xRRGGBB） */
     colorOf,
+    /** 三人頁畫面用：玩家名單、世界座標、是否倒地 */
+    playerIds,
+    positionOf,
+    isDowned: id => downedIds().includes(id),
+    /** 快捷喊話：1＝救我、2＝這邊、3＝衝啊（太快連按會被擋下，回傳 false） */
+    ping(kind) {
+      const t = now();
+      if (!active || !(kind >= 1 && kind <= 3) || t - lastPingAt < PING_COOLDOWN_MS) return false;
+      lastPingAt = t;
+      if (client.members.size > 1) client.send('x', { p: kind });
+      fire(pingListeners, { id: client.you, kind, at: t });
+      return true;
+    },
+    onPing(fn) { pingListeners.add(fn); return () => pingListeners.delete(fn); },
+    /** 結算用：每人 { id, name, color, you, kills, revives, maxCombo } */
+    scoreboard,
+    onScores(fn) { scoreListeners.add(fn); return () => scoreListeners.delete(fn); },
     dispose() { this.setActive(false); view?.dispose(); view = null; fx?.dispose(); fx = null; slots.clear(); },
     get teammates() { return view; },
     get enemies() { return enemies; },

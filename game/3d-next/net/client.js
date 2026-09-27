@@ -103,6 +103,8 @@ export class CoopClient {
     if (msg.t === 'host') { this.host = msg.id; this.emit('host', msg.id); return; }
     // 第二階段：房主送的戰場（只收現任房主的）、隊友送給房主的命中申報（relay 只轉給房主）
     if (msg.t === 'e') { if (msg.p === this.host && msg.p !== this.you && msg.d && typeof msg.d === 'object') this.emit('world', msg.d, this.now(), msg.p); return; }
+    // 隊伍訊號（喊話、結算成績），任何隊友都能發
+    if (msg.t === 'x') { if (this.members.has(msg.p) && msg.p !== this.you && msg.d && typeof msg.d === 'object') this.emit('signal', msg.p, msg.d, this.now()); return; }
     if (msg.t === 'h') { if (this.isHost && msg.p !== this.you && this.members.has(msg.p) && msg.d && typeof msg.d === 'object') this.emit('claim', msg.p, msg.d, this.now()); }
   }
 

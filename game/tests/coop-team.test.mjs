@@ -7,6 +7,8 @@ import { COMBO, ComboWindow, HANDOFF, HandoffPolicy, PICKUP_REACH, ReviveTracker
 import { assignTargets } from '../3d-next/net/authority.js';
 import { cleanClaim, cleanState } from '../../workers/coop-relay/src/logic.js';
 import { decodeState, encodeState } from '../3d-next/net/protocol.js';
+import { mvpScore, pickMvp } from '../3d-next/net/scores.js';
+import { edgePoint } from '../trio/overlay.js';
 
 const run = (tracker, seconds, players, dt = 1 / 60) => {
   let last = { progress: [], revived: [] };
@@ -175,4 +177,29 @@ test('status bits travel through the state message and the relay sanitizer', () 
   // retry request passes the claim sanitizer on its own
   assert.deepEqual(cleanClaim({ r: 1 }), { h: [], r: 1 });
   assert.equal(cleanClaim({ r: 2 }), null);
+});
+
+test('revive tracker reports who picked the downed player up', () => {
+  const tracker = new ReviveTracker();
+  let saves = [];
+  for (let i = 0; i < 40 && !saves.length; i++) ({ saves } = tracker.update(0.1, [{ id: 'A', x: 0, y: 0, downed: true }, { id: 'B', x: 20, y: 0 }]));
+  assert.deepEqual(saves, [['A', 'B']]);
+});
+
+test('MVP weighs revives above kills and stays empty on ties or a solo run', () => {
+  const rows = [{ id: 'a', kills: 20, revives: 0, maxCombo: 30 }, { id: 'b', kills: 12, revives: 3, maxCombo: 12 }, { id: 'c', kills: 5, revives: 0, maxCombo: 9 }];
+  assert.equal(mvpScore(rows[0]), 23);
+  assert.equal(mvpScore(rows[1]), 28);
+  assert.equal(pickMvp(rows), 'b');
+  assert.equal(pickMvp([{ id: 'a', kills: 4 }, { id: 'b', kills: 4 }]), null);
+  assert.equal(pickMvp([{ id: 'a', kills: 0 }, { id: 'b', kills: 0 }]), null);
+  assert.equal(pickMvp([{ id: 'a', kills: 9 }]), null);
+});
+
+test('teammate arrows appear only for off-screen or behind-camera players and hug the edge', () => {
+  assert.equal(edgePoint({ x: 0.2, y: 0.1, behind: false }), null);
+  const right = edgePoint({ x: 3, y: 0, behind: false });
+  assert.ok(Math.abs(right.x - 0.9) < 1e-9 && right.y === 0 && right.angle === 0);
+  const behind = edgePoint({ x: 0, y: 0, behind: true });
+  assert.ok(Math.abs(behind.y + 0.82) < 1e-9);
 });

@@ -77,14 +77,14 @@ export class ReviveTracker {
   /**
    * @param {number} dt 秒
    * @param {Array<{id:string,x:number,y:number,downed:boolean,present?:boolean}>} players
-   * @returns {{ progress: Array<[string, number, string|null]>, revived: string[] }} progress：[倒地者, 0–100, 救援者]
+   * @returns {{ progress: Array<[string, number, string|null]>, revived: string[], saves: Array<[string, string|null]> }} progress：[倒地者, 0–100, 救援者]；saves：這一格救起的 [倒地者, 救援者]
    */
   update(dt, players) {
     this.clock += dt;
     const here = players.filter(p => p.present !== false && Number.isFinite(p.x) && Number.isFinite(p.y));
     const still = new Map(here.map(p => [p.id, this._still(p)]));
     for (const id of this.anchors.keys()) if (!still.has(id)) this.anchors.delete(id);
-    const revived = [];
+    const revived = [], saves = [];
     const downed = here.filter(p => p.downed);
     for (const id of this.progress.keys()) if (!downed.some(p => p.id === id)) this.progress.delete(id);
     for (const d of downed) {
@@ -98,12 +98,12 @@ export class ReviveTracker {
       const entry = this.progress.get(d.id) || { seconds: 0, by: null };
       if (by) { entry.seconds += dt; entry.by = by; }
       else { entry.seconds = Math.max(0, entry.seconds - dt * this.o.reviveDecay); entry.by = null; }
-      if (entry.seconds >= this.o.reviveSeconds) { revived.push(d.id); this.progress.delete(d.id); continue; }
+      if (entry.seconds >= this.o.reviveSeconds) { revived.push(d.id); saves.push([d.id, entry.by]); this.progress.delete(d.id); continue; }
       this.progress.set(d.id, entry);
     }
     const progress = [];
     for (const [id, entry] of this.progress) if (entry.seconds > 0) progress.push([id, Math.min(99, Math.round(entry.seconds / this.o.reviveSeconds * 100)), entry.by]);
-    return { progress, revived };
+    return { progress, revived, saves };
   }
 }
 

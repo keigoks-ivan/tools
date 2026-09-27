@@ -13,7 +13,7 @@
  */
 import { DurableObject } from 'cloudflare:workers';
 import {
-  CLOSE, MAX_MESSAGE_BYTES, MAX_WORLD_BYTES, Membership, RateLimiter, cleanClaim, cleanPayload, cleanState, makeRoomCode, normalizeRoomCode,
+  CLOSE, MAX_MESSAGE_BYTES, MAX_WORLD_BYTES, Membership, RateLimiter, cleanClaim, cleanPayload, cleanSignal, cleanState, makeRoomCode, normalizeRoomCode,
   originAllowed, parsePlayerCodes, throttleState,
 } from './logic.js';
 import { matchCode, signToken, verifyToken } from './token.js';
@@ -176,6 +176,12 @@ export class CoopRoom extends DurableObject {
     if (msg?.t === 's') {
       const d = cleanState(msg.d);
       if (d) this.broadcast({ t: 's', p: info.id, d }, ws);
+      return;
+    }
+    // 隊伍訊號（喊話、結算成績）：任何人都能發，轉給其他人
+    if (msg?.t === 'x') {
+      const d = cleanSignal(msg.d);
+      if (d) this.broadcast({ t: 'x', p: info.id, d }, ws);
       return;
     }
     // 第二階段：房主權威的敵人同步。relay 只看「誰是房主」決定轉給誰，不解讀遊戲內容

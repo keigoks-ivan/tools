@@ -186,6 +186,20 @@ export function cleanClaim(d) {
 }
 
 /**
+ * 隊伍訊號（任何人 → 房裡其他人，三人頁的快捷喊話與結算成績）：
+ * { p: 1–3 } 喊話（救我／這邊／衝啊），{ k, r, c } 本局成績（擊倒、救人、最高連擊）。只收小整數，其他欄位丟掉。
+ */
+export function cleanSignal(d) {
+  if (!d || typeof d !== 'object' || Array.isArray(d)) return null;
+  const int = (v, max) => (Number.isInteger(v) && v >= 0 && v <= max ? v : null);
+  const out = {};
+  const p = int(d.p, 3);
+  if (p) out.p = p;
+  for (const key of ['k', 'r', 'c']) { const v = int(d[key], 1e6); if (v !== null) out[key] = v; }
+  return Object.keys(out).length ? out : null;
+}
+
+/**
  * PLAYER_CODES（wrangler secret）＝ JSON {"代號": "顯示名稱", ...}，最多 3 組。
  * @returns {{ ok: true, entries: Array<[string,string]> } | { ok: false, error: string }}
  */

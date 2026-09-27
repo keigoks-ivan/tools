@@ -39,6 +39,9 @@ const supplyBaselines = new WeakMap();   // 補給加成的原始值（同上，
 
 const enemyDamage = enemy => enemy.damage ?? (enemy.role === 'boss' ? 18 : enemy.role === 'elite' ? 12 : enemy.role === 'runner' ? 7 : 9);
 
+/** 打破道具、燈籠不算擊倒 */
+const NO_CREDIT = new Set(['breakable', 'lantern']);
+
 /**
  * @param {{ client: import('./client.js').CoopClient, now?: () => number, peers: () => Map<string,{x:number,z:number,alive:boolean,at:number,downed?:boolean,hidden?:boolean}>, hidden?: () => boolean }} options
  *   peers() 回傳隊友最新的世界座標（公尺）、是否還站著、是否倒地／切到背景、收到時間（coop.js 從角色狀態封包整理）
@@ -62,6 +65,7 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
   const reviver = new ReviveTracker(), policy = new HandoffPolicy(), combo = new ComboWindow();
   const revivedAt = new Map();          // 房主：剛救起的人 → 時間（忽略還沒更新的倒地封包）
   const pendingPickups = new Map();     // 隊友：已申報、等房主回覆的補給 → 申報時間
+  const tally = { kills: 0, revives: 0 };   // 本機這一局的成績（march.reset 歸零）
   let reviveProgress = new Map();       // 倒地者 → { pct, by, at }（房主算、隊友收 tm）
   let endEpoch = null, retryOut = false, controls = null, wiped = false;
   const fxListeners = new Set();
@@ -150,6 +154,7 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
       if (Number.isFinite(d.x) && Number.isFinite(d.y)) { proxy.x = d.x; proxy.y = d.y; }
       if (!meters.has(from)) meters.set(from, new ClaimMeter());
       const meter = meters.get(from);
+      const firstEvent = arena.events.length;
       for (const entry of (Array.isArray(d.h) ? d.h : []).slice(0, CLAIM_LIMITS.maxEntries)) {
         const enemy = byId.get(entry?.[0]);
         const check = validateClaimEntry(entry, enemy, Number.isFinite(proxy.x) ? proxy : null);
@@ -165,6 +170,7 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
         enemy.evade = undefined;
         try { withHero(proxy, () => orig._damageEnemy.call(arena, enemy, check.amount, check.source)); } finally { if (evade !== undefined) enemy.evade = evade; }
       }
+      for (let i = firstEvent; i < arena.events.length; i++) if (arena.events[i].type === 'kill') arena.events[i].by = from;   // 三人頁結算：擊倒算誰的
       // 補給：房主裁定（先申報先得、距離合理、沒倒地），給了才由申報者自己回血
       if (Number.isInteger(d.p)) {
         const k = grantPickup(march.pickups, d.p, { x: proxy.x, y: proxy.y, downed: peerDowned(from, peers().get(from)) });
@@ -313,13 +319,14 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
     if (march.state !== 'play') return;
     const hero = arena.hero;
     const list = [{ id: localId(), x: hero.x, y: hero.y, downed: !!hero.downed, present: true }, ...presentPeers()];
-    const { progress, revived } = reviver.update(Math.min(dt, 0.1), list);
+    const { progress, saves } = reviver.update(Math.min(dt, 0.1), list);
     const t = now();
     reviveProgress = new Map(progress.map(([id, pct, by]) => [id, { pct, by, at: t }]));
-    for (const id of revived) {
+    for (const [id, by] of saves) {
       if (id === localId()) reviveLocal(); else revivedAt.set(id, t);
-      netEvent({ type: 'revive', id });
-      emitFx({ type: 'revived', id });
+      if (by && by === localId()) tally.revives++;
+      netEvent({ type: 'revive', id, by: by || '' });
+      emitFx({ type: 'revived', id, by });
     }
     // 全滅：房裡每一位都倒地（沒收到狀態的人算站著）
     const members = client.members?.size ? [...client.members.keys()] : [localId()];
@@ -350,6 +357,7 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
     hero.downed = false;
     reviver.reset(); revivedAt.clear(); pendingPickups.clear(); combo.reset();
     reviveProgress = new Map();
+    tally.kills = 0; tally.revives = 0;
   }
 
   // ---------------------------------------------------------------- 第三階段：合體大招
@@ -510,7 +518,12 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
     else if (type === 'hint') { march.hint = event.text; march.hintUntil = march.time + (event.seconds || 4); }
     else if (type === 'bossPhase') { const boss = march.units.get(event.enemyId); if (boss) boss.phase = 2; }
     else if (type === 'clear') { guestClear(); return; }
-    else if (type === 'revive') { if (event.id === client.you) reviveLocal(); reviveProgress.delete(event.id); emitFx({ type: 'revived', id: event.id }); }
+    else if (type === 'revive') {
+      if (event.id === client.you) reviveLocal();
+      if (event.by && event.by === client.you) tally.revives++;
+      reviveProgress.delete(event.id);
+      emitFx({ type: 'revived', id: event.id, by: event.by || null });
+    }
     else if (type === 'wipe') { endEpoch = worldEpoch; endRun(); }
     const { type: _, ...values } = event;
     march._emit(type, { ...values, remote: true });
@@ -753,7 +766,10 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
       march.drainEvents = () => {
         const list = orig.drainEvents.call(march);
         if (role === 'host') captureEvents(list);
-        for (const event of list) if (event.type === 'musouStart' && !event.remote) noteLocalMusou();
+        for (const event of list) {
+          if (event.type === 'musouStart' && !event.remote) noteLocalMusou();
+          else if (event.type === 'kill' && !NO_CREDIT.has(event.role) && (event.remote ? !!event.by && event.by === client.you : role !== 'guest')) tally.kills++;
+        }
         return list;
       };
       march.reset = () => {
@@ -825,6 +841,8 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
     /** 畫面用：本機是否倒地、各倒地者的救援進度（0–100） */
     get localDowned() { return !!arena?.hero?.downed; },
     get reviveProgress() { return reviveProgress; },
+    /** 三人頁結算：本機這一局的擊倒、救人、最高連擊 */
+    get tally() { return { kills: tally.kills, revives: tally.revives, maxCombo: march?.maxCombo | 0 }; },
     get role() { return role; },
     get stats() { return { ...stats, proxies: proxies.size, targets: targets.size, puppets: arena ? arena.enemies.filter(e => e.remote).length : 0 }; },
     /** 測試用：直接看到內部狀態 */

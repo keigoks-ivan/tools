@@ -6,8 +6,10 @@ import { installGameGestures } from '../2d/touch-gestures.js';
 import { CoopClient } from '../3d-next/net/client.js';
 import { createCoop } from '../3d-next/net/coop.js';
 import { relayUrl } from '../3d-next/net/protocol.js';
-import { setupFullscreenUi } from './fullscreen.js?v=trio7';
-import { setupWipeTransitions } from './wipe.js?v=trio7';
+import { setupFullscreenUi } from './fullscreen.js?v=trio8';
+import { setupWipeTransitions } from './wipe.js?v=trio8';
+import { setupTeamOverlay } from './overlay.js?v=trio8';
+import { setupTeamResults } from './results.js?v=trio8';
 
 const $ = id => document.getElementById(id);
 installGameGestures($('game'));
@@ -17,7 +19,7 @@ for (const type of ['gesturestart', 'gesturechange', 'gestureend']) {
 }
 
 // 引擎：版本字串與單人頁不同也沒關係（兩頁不會同時開），battle.js 內部的 import 網址相同
-const loadBattleModule = () => import('../3d-next/battle.js?v=trio7');
+const loadBattleModule = () => import('../3d-next/battle.js?v=trio8');
 const params = new URLSearchParams(location.search);
 
 const client = new CoopClient({ relay: relayUrl(location) });
@@ -25,6 +27,10 @@ const coop = createCoop({ client });
 if (params.has('debug')) Object.assign(window, { __coopClient: client, __coop: coop });
 const transitions = setupWipeTransitions({ coop, client });
 if (params.has('debug')) window.__transitions = transitions;
+// 隊友箭頭＋快捷喊話、結算卡隊伍成績（第四階段）
+let liveBattle = null;
+setupTeamOverlay({ coop, client, getCamera: () => liveBattle?.camera, canvas: $('battle') });
+setupTeamResults({ coop });
 
 // ---- 音訊（與單人頁相同的 audio.js；M 鍵與 HUD 按鈕切換靜音） ----
 let audio = null, assets = null;
@@ -159,6 +165,7 @@ $('start').addEventListener('click', async () => {
   }, 200);
   try {
     const battle = await prepare();
+    liveBattle = battle;
     audio?.unlock();
     await new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 0)));
     $('title').hidden = true;

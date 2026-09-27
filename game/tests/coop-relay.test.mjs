@@ -3,7 +3,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  ROOM_ALPHABET, MAX_PLAYERS, MAX_MESSAGE_BYTES, MAX_WORLD_BYTES, RATE_LIMIT_PER_SEC, Membership, RateLimiter, cleanClaim, cleanPayload, cleanState, constantTimeEqual, makeRoomCode, normalizeRoomCode,
+  ROOM_ALPHABET, MAX_PLAYERS, MAX_MESSAGE_BYTES, MAX_WORLD_BYTES, RATE_LIMIT_PER_SEC, Membership, RateLimiter, cleanClaim, cleanPayload, cleanSignal, cleanState, constantTimeEqual, makeRoomCode, normalizeRoomCode,
   originAllowed, parsePlayerCodes, sanitizeName, throttleState, AUTH_WINDOW_MS,
 } from '../../workers/coop-relay/src/logic.js';
 import { matchCode, signToken, verifyToken } from '../../workers/coop-relay/src/token.js';
@@ -204,4 +204,14 @@ test('host hand-off moves the old host to the back and the heir to the front', (
   // when C leaves, B (not the old host A) is next
   rebuilt.leave('C');
   assert.equal(rebuilt.host, 'B');
+});
+
+test('team signals only carry a ping kind 1-3 or small integer stats', () => {
+  assert.deepEqual(cleanSignal({ p: 2 }), { p: 2 });
+  assert.deepEqual(cleanSignal({ k: 12, r: 1, c: 40 }), { k: 12, r: 1, c: 40 });
+  assert.deepEqual(cleanSignal({ p: 9, k: 3, evil: '<script>' }), { k: 3 });
+  assert.equal(cleanSignal({ p: 0 }), null);
+  assert.equal(cleanSignal({ k: -1, r: 1.5 }), null);
+  assert.equal(cleanSignal([1, 2]), null);
+  assert.equal(cleanSignal(null), null);
 });
