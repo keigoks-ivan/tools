@@ -108,7 +108,7 @@ export class HUD {
       X.fillStyle = rgba(e.stagT > 0 ? 'am' : 'rd', 0.95); X.fillRect(p.x - bw / 2, by, bw * e.ap / e.apMax, 3 * s);
       if (e.stagT <= 0 && e.stag > 0) { X.fillStyle = rgba('am', 0.8); X.fillRect(p.x - bw / 2, by + 5 * s, bw * e.stag / e.K.stag, 2 * s); }
       this.text(`${Math.round(dist)}m`, p.x + hw + 6 * s, p.y - hh + 6 * s, 13, col, 0.9);
-      this.text(e.kind === 'ace' ? 'ACE' : e.kind === 'heavy' ? 'HVY' : 'GNT', p.x + hw + 6 * s, p.y - hh + 20 * s, 11, col, 0.7);
+      this.text(e.label || (e.kind === 'ace' ? 'ACE' : e.kind === 'heavy' ? 'HVY' : 'GNT'), p.x + hw + 6 * s, p.y - hh + 20 * s, 11, col, 0.7);
       if (e.stagT > 0) this.text('STAGGER', p.x, p.y - hh - 10 * s, 13, 'am', 0.6 + 0.4 * Math.sin(this.t * 14), 'center', 700);
       if (warn) this.text(e.kind === 'heavy' ? 'MISSILE' : e.lunge > 0 ? 'MELEE' : 'CHARGE', p.x, p.y + hh + 22 * s, 13, 'rd', 1, 'center', 700);
       // 飛彈鎖定數
@@ -270,7 +270,7 @@ export class HUD {
 
   drawBoot(g) {
     const X = this.x, W = this.w, H = this.h, b = g.boot;
-    const lines = ['XG-01 AZURE FLAME', 'OS  IRON DUSK  COMBAT SYSTEM  v7.2', 'REACTOR ........ ONLINE', 'FRAME ........... OK', 'FCS ............. OK', 'THRUSTERS ....... OK', 'VISOR SHUTTER ... OPEN'];
+    const lines = ['XG-01 AZURE FLAME', 'OS  IRON DUSK  COMBAT SYSTEM  v7.2', 'REACTOR ........ ONLINE', 'FRAME ........... OK', 'FCS ............. OK', 'THRUSTERS ....... OK', 'ALL-VIEW ........ ON'];
     const n = Math.floor(clamp(b / 0.7, 0, 1) * lines.length);
     for (let i = 0; i < n; i++) this.text(lines[i], W * 0.5 - 170 * this.s, H * 0.35 + i * 22 * this.s, 15, i === 0 ? 'am' : 'cy', 0.9);
   }

@@ -717,6 +717,27 @@ export class FX {
 
   tracer(from, to) { this._pa(from, to, 2, 900, 7); }
 
+  // 戰車砲彈：慢速粗曳光，回傳槽位（可用 projEnd 提前結束）
+  shellTracer(from, to, speed) { return this._pa(from, to, 4, speed || 260, 6); }
+
+  projEnd(j) { if (j >= 0 && j < PMAX) this.P.alive[j] = 0; }
+
+  // 履帶揚塵：往後方低低散開的小塵團，amount 0..1
+  trackDust(pos, dir, amount) {
+    const am = clamp(amount === undefined ? 1 : amount, 0, 1);
+    if (am < 0.02) return;
+    let dx = dir.x, dz = dir.z;
+    const L = Math.hypot(dx, dz) || 1; dx /= L; dz /= L;
+    const V = this.V, gy = pos.y;
+    const n = Math.random() < am * this.qn ? 1 : 0;
+    for (let k = 0; k < n; k++) {
+      const side = rr(-2, 2), sp = rr(2, 5) * am, br = rr(0.85, 1.1);
+      const i = this._smoke(pos.x - dx * 4 + dz * side, gy + 0.4, pos.z - dz * 4 - dx * side, -dx * sp + rr(-0.6, 0.6), rr(0.3, 1.1), -dz * sp + rr(-0.6, 0.6),
+        rr(1.6, 2.6), rr(0.7, 1.1), rr(3, 4.6), 0.1 + 0.14 * am, 0.32 * br, 0.27 * br, 0.22 * br);
+      if (i >= 0) { V.drag[i] = 1.6; V.rise[i] = 0.3; V.cell[i] = Math.random() < 0.5 ? 6 : 7; V.gy[i] = gy; V.flags[i] |= F_GROUND; V.fout[i] = 0.35; V.erode[i] = 0.4; }
+    }
+  }
+
   muzzle(pos, dir, kind) {
     const x = pos.x, y = pos.y, z = pos.z;
     let dx = dir.x, dy = dir.y, dz = dir.z;
@@ -1642,6 +1663,12 @@ export class FX {
       const hd = Math.min(trav, len), td = Math.max(0, Math.min(trav - bl, len));
       const hx = fx + dx * hd, hy = fy + dy * hd, hz = fz + dz * hd;
       const tx = fx + dx * td, ty = fy + dy * td, tz = fz + dz * td;
+      if (kind === 4) { // 戰車砲彈曳光（較粗、較亮、較慢）
+        if (!boltOn) { P.alive[j] = 0; continue; }
+        this._imm(hx, hy, hz, tx, ty, tz, 0.34, K_SPARK, 16, 8, 2.4, 0.25);
+        this._imm(hx, hy, hz, hx, hy, hz, 1.9, K_GLOW, 3, 1.5, 0.45, 0);
+        continue;
+      }
       if (kind === 2) {
         this._imm(hx, hy, hz, tx, ty, tz, 0.16, K_SPARK, 12, 7, 2.2, 0.25);
         this._imm(hx, hy, hz, hx, hy, hz, 0.7, K_GLOW, 2, 1.1, 0.35, 0);

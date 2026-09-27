@@ -14,7 +14,7 @@ async function game() {
   const { Cockpit } = await import('./cockpit.js');
   const { Input } = await import('./input.js');
   const { Player } = await import('./player.js');
-  const { Combat, STAGES } = await import('./combat.js');
+  const { Combat, STAGES, stageWeight } = await import('./combat.js');
   const { HUD } = await import('./hud.js');
   const { Audio: Sound } = await import('./audio.js');
   const clamp = THREE.MathUtils.clamp;
@@ -40,7 +40,7 @@ async function game() {
   const world = new World(renderer, scene, A);
   const post = new Post(renderer, scene, camera, cockScene, cockCam);
   const cockpit = new Cockpit(world, camera, cockScene, cockCam);
-  // 艙壁擋住的畫面，城市那層直接跳過不畫（?nomask 可關掉比對）
+  // 扶手台擋住的畫面，城市那層直接跳過不畫（?nomask 可關掉比對）
   const cockMask = cockpit.depthMask();
   cockMask.visible = false;
   if (!q.has('nomask')) scene.add(cockMask);
@@ -208,7 +208,7 @@ async function game() {
     // 評價：時間（依這關敵機多寡給標準時間）、承受傷害、命中率
     let rank = '';
     if (win) {
-      const w = D.groups.flat().reduce((a, k) => a + { grunt: 1, heavy: 1.5, ace: 2 }[k], 0);
+      const w = stageWeight(D);
       const r = 0.4 * clamp((35 * w + 30 - S.time) / (25 * w + 15), 0, 1) + 0.4 * clamp(1 - S.dmgTaken / player.apMax, 0, 1) + 0.2 * acc;
       rank = r >= 0.72 ? 'S' : r >= 0.56 ? 'A' : r >= 0.4 ? 'B' : 'C';
       if (n > cleared()) store.set('cleared', n);

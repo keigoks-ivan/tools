@@ -1,6 +1,7 @@
-// 駕駛艙：玩家坐在機體胸口的全景球形螢幕艙裡（四周整圈都是螢幕，映出外面的景色）。
-// 看得到：前方低矮儀表台（雷達、機體狀態、武裝三塊螢幕）、兩側立柱小螢幕、兩支操縱桿和戴手套的雙手、螢幕面板之間的接縫。
-// 艙內光線＝螢幕映出的外面（夕陽方向）＋儀表光＋警示燈＋開火閃光。
+// 駕駛艙：全景螢幕艙——玩家坐在機體胸口的一顆球裡，整面內壁都是螢幕，映出外面的景色。
+// 看得到：螢幕面板之間的細接縫、飄在周圍的半透明全像視窗（雷達、機體、武裝…）、兩側扶手台、兩支操縱桿和戴手套的雙手。
+// 開機：面板從正前方往外一片片亮起來；中彈時有幾片面板閃雜訊；覺醒時接縫發紅光。
+// 艙內光線＝螢幕映出的外面（天光＋太陽方向）＋扶手燈條＋警示燈＋開火閃光。
 // 鏡頭：跟著胸口走；飛行員的頭坐在「彈簧」上——落腳、落地、中彈時頭晚一拍，整個艙在眼前晃。
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
@@ -62,42 +63,6 @@ class Parts {
   }
 }
 
-// 沿水平弧線掃出剖面（prof＝[[離眼水平距離, 高度], ...]；a0..a1＝方位角）
-function sweep(prof, a0, a1, segs) {
-  const n = prof.length, pos = [], uv = [], idx = [];
-  const vl = [0];
-  for (let i = 1; i < n; i++) vl.push(vl[i - 1] + Math.hypot(prof[i][0] - prof[i - 1][0], prof[i][1] - prof[i - 1][1]));
-  for (let s = 0; s <= segs; s++) {
-    const a = a0 + (a1 - a0) * s / segs, sa = Math.sin(a), ca = Math.cos(a);
-    for (let i = 0; i < n; i++) { const [r, y] = prof[i]; pos.push(r * sa, y, -r * ca); uv.push(a * 2.5, vl[i] * 2.5); }
-  }
-  for (let s = 0; s < segs; s++) for (let i = 0; i < n - 1; i++) {
-    const a = s * n + i, b = a + n;
-    idx.push(a, b, a + 1, b, b + 1, a + 1);
-  }
-  const g = new THREE.BufferGeometry();
-  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-  g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
-  g.setIndex(idx);
-  g.computeVertexNormals();
-  return g;
-}
-
-// 球面上的細帶（螢幕面板接縫）
-function ribbon(points, dirs, w) {
-  const pos = [], idx = [];
-  points.forEach((c, i) => {
-    const t = dirs[i];
-    pos.push(c.x + t.x * w / 2, c.y + t.y * w / 2, c.z + t.z * w / 2, c.x - t.x * w / 2, c.y - t.y * w / 2, c.z - t.z * w / 2);
-    if (i) { const k = i * 2; idx.push(k - 2, k - 1, k, k - 1, k + 1, k); }
-  });
-  const g = new THREE.BufferGeometry();
-  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
-  g.setIndex(idx);
-  g.computeVertexNormals();
-  return g;
-}
-
 // ---------------------------------------------------------------- 程序貼圖
 function canvas(w, h) { const c = document.createElement('canvas'); c.width = w; c.height = h; return [c, c.getContext('2d')]; }
 function rng(seed) { let s = seed >>> 0; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -138,35 +103,6 @@ function fabricTex() {
   t.repeat.set(3, 3);
   return t;
 }
-// 窗玻璃上的污漬、雨痕、刮痕（黑底＝透明，加亮混合）
-function dirtTex() {
-  const S = 512, [c, x] = canvas(S, S), r = rng(29);
-  x.fillStyle = '#000'; x.fillRect(0, 0, S, S);
-  for (let k = 0; k < 60; k++) {
-    const g = x.createRadialGradient(0, 0, 0, 0, 0, 1);
-    const a = 0.05 + r() * 0.12;
-    g.addColorStop(0, `rgba(255,255,255,${a})`); g.addColorStop(1, 'rgba(255,255,255,0)');
-    x.save(); x.translate(r() * S, r() * S); x.rotate(r() * 3); x.scale(8 + r() * 50, 6 + r() * 30); x.fillStyle = g; x.fillRect(-1, -1, 2, 2); x.restore();
-  }
-  x.lineCap = 'round';
-  for (let k = 0; k < 140; k++) {   // 雨痕：往下流、會稍微歪
-    let px = r() * S, py = r() * S;
-    x.strokeStyle = `rgba(255,255,255,${0.06 + r() * 0.16})`; x.lineWidth = 0.8 + r() * 1.6;
-    x.beginPath(); x.moveTo(px, py);
-    const n = 3 + r() * 8;
-    for (let i = 0; i < n; i++) { px += (r() - 0.5) * 4; py += 4 + r() * 10; x.lineTo(px, py); }
-    x.stroke();
-  }
-  for (let k = 0; k < 40; k++) {    // 細刮痕
-    x.strokeStyle = `rgba(255,255,255,${0.12 + r() * 0.25})`; x.lineWidth = 0.6;
-    const x0 = r() * S, y0 = r() * S, a = r() * Math.PI, l = 10 + r() * 60;
-    x.beginPath(); x.moveTo(x0, y0); x.lineTo(x0 + Math.cos(a) * l, y0 + Math.sin(a) * l); x.stroke();
-  }
-  const t = new THREE.CanvasTexture(c);
-  t.wrapS = t.wrapT = THREE.RepeatWrapping;
-  t.repeat.set(0.9, 0.9);
-  return t;
-}
 // 小標示字（印在面板上）
 const LABELS = ['RADAR', 'RNG 600', 'STATUS', 'ARMS', 'FCS', 'SPD', 'ALT', 'EN CELL', 'BALANCER', 'CAUTION', 'XG-01', 'MSL ARM', 'SYS 1', 'SYS 2', 'IFF', 'COMM', 'HOT', 'VENT', 'GEN', 'LINK'];
 function labelTex() {
@@ -204,22 +140,58 @@ const SCR = {
   radar: [0, 0, 512, 512], status: [512, 0, 512, 384], arms: [512, 384, 512, 384], spd: [0, 512, 256, 256], alt: [256, 512, 256, 256],
   sys: [0, 768, 256, 256], gauge: [256, 768, 256, 256], bars: [512, 768, 512, 128], wave: [512, 896, 512, 128],
 };
-// 窗戶輪廓（z＝−1 平面上的座標，x 往右、y 往上）：上寬下窄，跟參考圖一樣
-const WIN = [[-0.64, 0.5], [0.64, 0.5], [0.82, 0.06], [0.46, -0.95], [-0.46, -0.95], [-0.82, 0.06]];
-const ZW = 1.1;   // 窗戶離眼睛的距離（公尺）
-const tp = (x, y, z = ZW) => new THREE.Vector3(x * z, y * z, -z);
-function offsetPoly(poly, d) {   // 凸多邊形往外擴 d
-  const n = poly.length, out = [];
-  for (let i = 0; i < n; i++) {
-    const p = poly[i], a = poly[(i + n - 1) % n], b = poly[(i + 1) % n];
-    const n1 = new THREE.Vector2(a[1] - p[1], p[0] - a[0]).normalize(), n2 = new THREE.Vector2(p[1] - b[1], b[0] - p[0]).normalize();
-    const m = n1.clone().add(n2).normalize(), k = d / Math.max(0.3, m.dot(n1));
-    out.push([p[0] + m.x * k, p[1] + m.y * k]);
-  }
-  return out;
-}
-const shapeOf = (poly, s = 1) => new THREE.Shape(poly.map(([x, y]) => new THREE.Vector2(x * s, y * s)));
-const COL = { bg: '#02070a', grid: '#0b2830', dim: '#1f6f7c', cy: '#6ff0ff', wh: '#e6f6f8', am: '#ffb347', rd: '#ff4a3a', pk: '#ff6fd0', gr: '#6dff9a' };
+const SOLID = new Set(['wave', 'bars']);   // 扶手前端的實體小螢幕；其他都是飄在空中的全像視窗
+// 全像視窗：k＝圖集區域、a/e/d＝方位／仰角（度）／距離、w/h＝大小（公尺）、at＝開機進度到多少時跳出來
+const HOLO = [
+  { k: 'sys', a: -44, e: 20, d: 1.05, w: 0.14, h: 0.14, at: 0.14 },
+  { k: 'gauge', a: 44, e: 20, d: 1.05, w: 0.14, h: 0.14, at: 0.17 },
+  { k: 'status', a: -40, e: 4, d: 1.0, w: 0.24, h: 0.18, at: 0.2 },
+  { k: 'arms', a: 40, e: 4, d: 1.0, w: 0.24, h: 0.18, at: 0.23 },
+  { k: 'radar', a: -33, e: -15, d: 0.95, w: 0.2, h: 0.2, at: 0.26 },
+  { k: 'spd', a: 29, e: -15, d: 0.95, w: 0.1, h: 0.1, at: 0.29 },
+  { k: 'alt', a: 35.5, e: -15, d: 0.95, w: 0.1, h: 0.1, at: 0.31 },
+];
+const COL = { bg: '#02070a', grid: 'rgba(111,240,255,0.13)', line: 'rgba(111,240,255,0.07)', dim: '#3f9fac', cy: '#6ff0ff', wh: '#e6f6f8', am: '#ffb347', rd: '#ff4a3a', pk: '#ff6fd0', gr: '#6dff9a' };
+
+// 全景螢幕的球面：只負責「面板接縫、開機、中彈雜訊、覺醒紅光」——外面的景色是城市那一層早就畫好的，這裡不必再畫一次。
+// 輸出＝預先乘好透明度的顏色：alpha＝把外面蓋暗多少，rgb＝額外加上去的光。
+const DOME_FRAG = `
+  uniform float boot, time, hurt, od, alert; varying vec3 vP;
+  float h1(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+  void main() {
+    vec3 d = normalize(vP);
+    float lat = degrees(asin(clamp(d.y, -1.0, 1.0)));
+    float lon = degrees(atan(d.x, -d.z));
+    // 面板：每排高 12°，每排片數依緯度調整（每片差不多大），上下排錯開半片；
+    // 正前方剛好是一片面板的正中央——準心附近不會有接縫
+    float rv = (lat + 6.0) / 12.0 + 8.0, row = floor(rv);
+    float n = max(6.0, floor(30.0 * cos(radians(row * 12.0 - 96.0)) + 0.5));
+    float cu = lon / 360.0 * n + 0.5 + 0.5 * mod(row, 2.0);
+    vec2 id = vec2(row, mod(floor(cu), n));
+    float hv = h1(id);
+    // 離最近的接縫幾個像素（線條永遠約 1 像素寬，不會鋸齒）
+    float fr = fwidth(rv), fu = min(fwidth(lon) / 360.0 * n, 0.25);
+    float px = min(min(fract(rv), 1.0 - fract(rv)) / max(fr, 1e-5), min(fract(cu), 1.0 - fract(cu)) / max(fu, 1e-5));
+    float seam = 1.0 - smoothstep(0.3, 1.2, px);
+    float edge = 1.0 - smoothstep(0.0, 6.0, px);
+    // 開機：從正前方往外，一片一片亮起來（亮起前邊緣會先閃）
+    float ang = degrees(acos(clamp(-d.z, -1.0, 1.0)));
+    float th = 0.5 + 0.24 * ang / 180.0 + 0.1 * hv;
+    float on = clamp((boot - th) / 0.025, 0.0, 1.0);
+    float pre = smoothstep(th - 0.12, th, boot) * (1.0 - on) * step(0.45, fract(time * 7.0 + hv * 5.0));
+    float post = on * exp(-max(boot - th, 0.0) * 40.0);
+    vec3 cy = vec3(0.3, 1.4, 2.0);
+    float occ = max(max(1.0 - on, seam * 0.34), 0.03 * hv);
+    vec3 emit = cy * (edge * (pre * 0.3 + post * 1.4) + post * 0.1);
+    // 中彈：幾片面板閃雜訊
+    float g = hurt > 0.001 ? step(h1(id + mod(floor(time * 20.0), 61.0) * 1.37), hurt * 0.55) : 0.0;
+    float ln = step(0.5, fract(gl_FragCoord.y * 0.2 + time * 37.0));
+    occ = max(occ, g * (0.4 + 0.35 * ln));
+    emit += g * ln * vec3(0.2, 0.45, 0.6) * 0.3;
+    // 覺醒：接縫發紅光；耐久低：接縫紅色脈動
+    emit += vec3(2.2, 0.16, 0.1) * (seam + edge * 0.1) * (od * 0.6 + alert);
+    gl_FragColor = vec4(emit, occ);
+  }`;
 
 // ---------------------------------------------------------------- 駕駛艙
 export class Cockpit {
@@ -240,7 +212,8 @@ export class Cockpit {
     this.flash = { c: new THREE.Color(), i: 0 };
     this.hurtT = 0;
     this.screenT = 0;
-    this.win = 1;
+    this.win = 1;      // 全景螢幕亮了多少（開機時 0→1）
+    this.odV = 0;
 
     this.makeMaterials();
     this.build();
@@ -252,11 +225,8 @@ export class Cockpit {
     const std = (c, m, r, o = {}) => new THREE.MeshStandardMaterial({ color: c, metalness: m, roughness: r, side: THREE.DoubleSide, ...o });
     this.M = {
       frame: std(0x3b4247, 0.85, 0.42, { roughnessMap: grunge, bumpMap: grunge, bumpScale: 0.4 }),
-      panel: std(0x273036, 0.55, 0.55, { roughnessMap: grunge, bumpMap: grunge, bumpScale: 0.35 }),
-      hull: std(0x1a1e21, 0.6, 0.62, { roughnessMap: grunge, bumpMap: grunge, bumpScale: 0.5 }),
-      strut: std(0x16191b, 0.7, 0.45),
-      orangeC: std(0xc8581a, 0.0, 0.45, { bumpMap: fab, bumpScale: 0.2 }),
-      hose: std(0x121314, 0.0, 0.7, { bumpMap: fab, bumpScale: 1.2 }),
+      panel: std(0x2a3136, 0.55, 0.55, { roughnessMap: grunge, bumpMap: grunge, bumpScale: 0.35 }),
+      shell: std(0xd3d8db, 0.08, 0.36, { roughnessMap: grunge, bumpMap: grunge, bumpScale: 0.15 }),
       matte: std(0x0f1113, 0.1, 0.82),
       white: std(0xc4c9cd, 0.05, 0.42, { roughnessMap: grunge }),
       orange: std(0xd4661c, 0.05, 0.5),
@@ -264,14 +234,12 @@ export class Cockpit {
       chrome: std(0xa0a6ac, 1.0, 0.2),
       glove: std(0x2b2e34, 0.0, 0.62, { bumpMap: fab, bumpScale: 0.6 }),
       sleeve: std(0x1b2740, 0.0, 0.78, { bumpMap: fab, bumpScale: 0.8 }),
-      seam: new THREE.MeshBasicMaterial({ color: 0x030405, side: THREE.DoubleSide }),
-      glass: new THREE.MeshStandardMaterial({ color: 0x000000, metalness: 0, roughness: 0.08, transparent: true, opacity: 0.18, depthWrite: false }),
-      dirt: new THREE.MeshBasicMaterial({ map: dirtTex(), color: 0x000000, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }),
+      glow: new THREE.MeshBasicMaterial({ color: 0x000000 }),   // 扶手燈條（顏色每幀依狀態變）
     };
     const L = labelTex();
     this.labels = L;
     this.M.label = new THREE.MeshStandardMaterial({ map: L.tex, transparent: true, alphaTest: 0.2, roughness: 0.6, metalness: 0, polygonOffset: true, polygonOffsetFactor: -2 });
-    // 儀表螢幕（畫在 canvas 上，每秒更新 15 次）
+    // 儀表畫面（畫在 canvas 上，每秒更新 15 次）：全像視窗的背景是半透明的
     const [sc, sx] = canvas(1024, 1024);
     this.sc = sc; this.sx = sx;
     this.screenTex = new THREE.CanvasTexture(sc);
@@ -281,150 +249,93 @@ export class Cockpit {
   }
 
   build() {
-    const M = this.M, P = new Parts(), S = new Parts(), G = new Parts(), Lb = new Parts();
+    const M = this.M, P = new Parts(), S = new Parts(), GL = new Parts(), Lb = new Parts();
     this.lampDefs = [];
-    const lamp = (base, pos, kind, big = false) => {
-      const m = new THREE.Matrix4().compose(_p.set(...pos), _q.identity(), _s.set(big ? 1.6 : 1, 1, 1));
+    this.maskBoxes = [];
+    const lamp = (base, pos, kind, rot = null) => {
+      const m = new THREE.Matrix4().compose(_p.set(...pos), rot ? _q.setFromEuler(_e.set(rot[0], rot[1], rot[2], 'YXZ')) : _q.identity(), _s.set(1, 1, 1));
       if (base) m.premultiply(base);
       this.lampDefs.push({ m, kind, ph: Math.random() * 10 });
     };
-    const label = (base, name, pos, h = 0.011) => {
+    const label = (base, name, pos, h = 0.011, rot = [0, 0, 0]) => {
       const r = this.labels.rect[name];
       const g = atlasPlane(h * r[2] / r[3], h, r, this.labels.W, this.labels.H);
-      Lb.base = base; Lb.add(M.label, g, pos); Lb.base = null;
+      Lb.base = base; Lb.add(M.label, g, pos, rot); Lb.base = null;
+    };
+    // 深度遮罩用的盒子（比實體小一圈，保證藏在實體裡面）
+    const mask = (base, w, h, d, pos) => {
+      const g = new THREE.BoxGeometry(w, h, d).translate(...pos);
+      if (base) g.applyMatrix4(base);
+      this.maskBoxes.push(g);
     };
 
-    // ---- 艙壁：一大片厚鐵板，中間挖出上寬下窄的窗
-    const wall = new THREE.Shape([new THREE.Vector2(-5, -5), new THREE.Vector2(5, -5), new THREE.Vector2(5, 5), new THREE.Vector2(-5, 5)]);
-    wall.holes.push(shapeOf(WIN, ZW));
-    P.add(M.hull, new THREE.ExtrudeGeometry(wall, { depth: 0.1, bevelEnabled: true, bevelThickness: 0.02, bevelSize: 0.02, bevelSegments: 2, curveSegments: 1 }), [0, 0, -ZW - 0.12]);
-    // ---- 窗框：一圈較亮的厚金屬框＋鉚釘
-    const rim = shapeOf(offsetPoly(WIN, 0.075), ZW);
-    rim.holes.push(shapeOf(WIN, ZW));
-    P.add(M.frame, new THREE.ExtrudeGeometry(rim, { depth: 0.045, bevelEnabled: true, bevelThickness: 0.012, bevelSize: 0.012, bevelSegments: 2, curveSegments: 1 }), [0, 0, -ZW - 0.015]);
-    const mid = offsetPoly(WIN, 0.04);
-    for (let i = 0; i < mid.length; i++) {
-      const a = mid[i], b = mid[(i + 1) % mid.length], L = Math.hypot(b[0] - a[0], b[1] - a[1]) * ZW, n = Math.floor(L / 0.11);
-      for (let k = 1; k < n; k++) {
-        const t = k / n;
-        P.add(M.chrome, cyl(0.0065, 0.008, 8), [(a[0] + (b[0] - a[0]) * t) * ZW, (a[1] + (b[1] - a[1]) * t) * ZW, -ZW + 0.043], [Math.PI / 2, 0, 0]);
-      }
-    }
-    // ---- 窗玻璃（髒污只在對著太陽時才看得到）＋玻璃上的細支架（Y 字形）
-    const gg = new THREE.ShapeGeometry(shapeOf(WIN, ZW));
-    this.dirt = new THREE.Mesh(gg, M.dirt);
-    this.dirt.position.z = -ZW + 0.004;
-    this.dirt.renderOrder = 2;
-    this.root.add(this.dirt);
-    const strut = (a, b, w = 0.009) => {
-      const A = tp(a[0], a[1], ZW - 0.012), B = tp(b[0], b[1], ZW - 0.012);
-      const d = new THREE.Vector3().subVectors(B, A), L = d.length();
-      const m = new THREE.Matrix4().compose(A.clone().add(B).multiplyScalar(0.5), new THREE.Quaternion().setFromUnitVectors(UP, d.normalize()), new THREE.Vector3(1, 1, 1));
-      P.addM(M.strut, rb(w, L + 0.006, 0.012, 0.003), m);
-    };
-    const clip = (x, y, s = 1) => P.add(M.strut, rb(0.02 * s, 0.03 * s, 0.022 * s, 0.005), tp(x, y, ZW - 0.014).toArray());
+    // ---- 全景螢幕：包住飛行員的一顆球
+    const dome = new THREE.Mesh(new THREE.SphereGeometry(1.6, 96, 48), new THREE.ShaderMaterial({
+      uniforms: { boot: { value: 1 }, time: { value: 0 }, hurt: { value: 0 }, od: { value: 0 }, alert: { value: 0 } },
+      vertexShader: 'varying vec3 vP; void main() { vP = position; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+      fragmentShader: DOME_FRAG,
+      transparent: true, premultipliedAlpha: true, depthWrite: false, side: THREE.BackSide,
+    }));
+    dome.renderOrder = -1;
+    dome.frustumCulled = false;
+    this.dome = dome;
+    this.root.add(dome);
+
+    // ---- 扶手台：後段讓手臂靠（白色外殼、深色底座、內緣藍色燈條），中間是操縱桿座，
+    //      前段往外斜、朝向飛行員的小控制台（小螢幕、按鍵、指示燈、全像投影鏡頭）
     for (const sx of [-1, 1]) {
-      strut([sx * 0.64, 0.5], [sx * 0.22, -0.04]);
-      strut([sx * 0.22, -0.04], [sx * 0.22, -0.98]);
-      clip(sx * 0.22, -0.04, 1.3);
-      clip(sx * 0.445, 0.25, 1.1);
-      for (const y of [-0.3, -0.48, -0.66]) clip(sx * 0.22, y);
-    }
-    strut([-0.445, 0.25], [0.445, 0.25], 0.011);
-
-    // ---- 儀表箱：o＝{ a, e, d（方位、仰角、距離）, w, h, dep, roll, tilt, turn, scr:[名, 寬, 高, x, y], keys:[x, y, 欄, 列], lamps:[x, y, 數, 種類], name:[字, x, y], handles, vent:[x, y] }
-    const box = (o) => {
-      const base = facing(o.a * D, o.e * D, o.d);
-      base.multiply(new THREE.Matrix4().makeRotationFromEuler(new THREE.Euler((o.tilt || 0) * D, (o.turn || 0) * D, (o.roll || 0) * D, 'YXZ')));
-      const { w, h, dep } = o;
-      P.base = S.base = G.base = base;
-      P.add(M.panel, rb(w, h, dep, 0.02), [0, 0, -dep / 2]);
-      P.add(M.frame, rb(w - 0.024, h - 0.024, 0.012, 0.005), [0, 0, 0.004]);
-      for (const [sx, sy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) P.add(M.chrome, cyl(0.0048, 0.005, 8), [sx * (w / 2 - 0.022), sy * (h / 2 - 0.022), 0.011], [Math.PI / 2, 0, 0]);
-      if (o.scr) for (const sc of Array.isArray(o.scr[0]) ? o.scr : [o.scr]) {
-        const [k, sw, sh, sx = 0, sy = 0] = sc;
-        P.add(M.matte, rb(sw + 0.022, sh + 0.022, 0.012, 0.005), [sx, sy, 0.009]);
-        S.add(M.screen, atlasPlane(sw, sh, SCR[k], 1024, 1024), [sx, sy, 0.0152]);
-        G.add(M.glass, new THREE.PlaneGeometry(sw, sh), [sx, sy, 0.016]);
-      }
-      if (o.keys) {
-        const [kx, ky, c, r] = o.keys;
-        for (let i = 0; i < c; i++) for (let j = 0; j < r; j++) P.add((i * 3 + j) % 7 === 5 ? M.orange : M.matte, rb(0.019, 0.015, 0.008, 0.003), [kx + i * 0.026, ky - j * 0.022, 0.013]);
-      }
-      if (o.lamps) { const [lx, ly, n, kind] = o.lamps; for (let i = 0; i < n; i++) lamp(base, [lx + i * 0.02, ly, 0.0115], Array.isArray(kind) ? kind[i % kind.length] : kind); }
-      if (o.name) label(base, o.name[0], [o.name[1], o.name[2], 0.0112], o.name[3] || 0.011);
-      if (o.handles) for (const sx of [-1, 1]) {
-        P.add(M.chrome, cyl(0.006, h * 0.62, 10), [sx * (w / 2 + 0.02), 0, 0.022]);
-        for (const sy of [-1, 1]) P.add(M.frame, rb(0.026, 0.016, 0.034, 0.004), [sx * (w / 2 + 0.01), sy * h * 0.31, 0.008]);
-      }
-      if (o.vent) for (let i = 0; i < 6; i++) P.add(M.matte, rb(o.vent[2] || w * 0.35, 0.006, 0.006, 0.002), [o.vent[0], o.vent[1] - i * 0.012, 0.011]);
-      P.base = S.base = G.base = null;
-      return base;
-    };
-    // 左側
-    box({ a: -30, e: 32, d: 0.8, w: 0.3, h: 0.15, dep: 0.2, roll: 2, tilt: -12, vent: [-0.04, 0.04, 0.16], lamps: [0.07, 0.04, 3, ['ok', 'idle', 'sys']] });
-    box({ a: -41, e: 21, d: 0.8, w: 0.32, h: 0.24, dep: 0.2, roll: 4, scr: ['sys', 0.13, 0.13, -0.065, 0.0], keys: [0.035, 0.07, 4, 5], name: ['SYS 1', -0.12, 0.093], lamps: [0.04, -0.095, 4, ['ok', 'sys', 'idle', 'ok']] });
-    box({ a: -44, e: 2, d: 0.72, w: 0.3, h: 0.21, dep: 0.16, roll: -2, scr: ['status', 0.2, 0.15, -0.025, 0.0], name: ['STATUS', -0.115, 0.088], lamps: [0.106, 0.05, 1, 'warn'], handles: true });
-    box({ a: -42, e: -19, d: 0.64, w: 0.26, h: 0.24, dep: 0.16, roll: 3, scr: ['radar', 0.17, 0.17, -0.02, 0.008], name: ['RADAR', -0.1, 0.105], lamps: [0.095, 0.06, 1, 'ok'], vent: [0.095, 0.02, 0.03] });
-    box({ a: -48, e: -36, d: 0.6, w: 0.24, h: 0.16, dep: 0.2, roll: -4, keys: [-0.08, 0.04, 6, 2], handles: true });
-    // 右側
-    box({ a: 29, e: 32, d: 0.8, w: 0.28, h: 0.15, dep: 0.2, roll: -2, tilt: -12, vent: [0.0, 0.04, 0.18], lamps: [-0.1, -0.04, 4, ['sys', 'ok', 'ok', 'idle']] });
-    box({ a: 38, e: 21, d: 0.78, w: 0.28, h: 0.26, dep: 0.2, roll: -8, scr: ['gauge', 0.15, 0.15, 0.02, 0.01], name: ['FCS', -0.12, 0.1], lamps: [-0.115, 0.05, 1, 'warn'], vent: [-0.1, 0.0, 0.03] });
-    box({ a: 44, e: 1, d: 0.72, w: 0.3, h: 0.21, dep: 0.16, roll: 2, scr: ['arms', 0.2, 0.15, 0.025, 0.0], name: ['ARMS', -0.12, 0.088], lamps: [-0.123, 0.05, 1, 'ok'], handles: true });
-    box({ a: 42, e: -20, d: 0.64, w: 0.3, h: 0.24, dep: 0.18, roll: -3, scr: [['spd', 0.09, 0.09, -0.06, 0.04], ['alt', 0.09, 0.09, 0.05, 0.04]], keys: [-0.1, -0.045, 8, 2], name: ['SPD', -0.1, 0.1] });
-    box({ a: 48, e: -36, d: 0.6, w: 0.24, h: 0.16, dep: 0.2, roll: 4, vent: [0, 0.05, 0.16], lamps: [-0.08, -0.04, 5, ['ok', 'idle', 'sys', 'ok', 'idle']] });
-    // 頭頂：兩塊橫條螢幕
-    box({ a: -13, e: 30.5, d: 0.72, w: 0.3, h: 0.1, dep: 0.14, roll: 1, tilt: -18, scr: ['wave', 0.2, 0.05, 0.035, 0.0], name: ['GEN', -0.13, 0.03], lamps: [-0.13, -0.02, 2, ['ok', 'sys']] });
-    box({ a: 11, e: 30.5, d: 0.72, w: 0.34, h: 0.1, dep: 0.14, roll: -1, tilt: -18, scr: ['bars', 0.24, 0.06, -0.03, 0.0], name: ['VENT', 0.1, 0.03], lamps: [0.11, -0.02, 2, ['boost', 'boost']] });
-    // 撥桿（帶護蓋）
-    for (const sx of [-1, 1]) {
-      const base = facing(sx * 33 * D, 26 * D, 0.74);
-      P.base = base;
-      P.add(M.panel, rb(0.08, 0.05, 0.04, 0.008), [0, 0, -0.02]);
-      for (let k = 0; k < 3; k++) {
-        const x = (k - 1) * 0.022;
-        P.add(M.chrome, cyl(0.0025, 0.02, 8), [x, -0.004, 0.012], [-0.9, 0, 0]);
-        P.add(M.orange, rb(0.014, 0.004, 0.024, 0.002), [x, -0.008, 0.012], [0.5, 0, 0]);
-      }
-      lamp(base, [0, 0.016, 0.002], 'warn', true);
-      P.base = null;
-    }
-    // ---- 管線：橘色電纜、黑色軟管（照參考圖掛在窗邊）
-    const tube = (mat, pts, r) => P.addM(mat, new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts.map(([a, e, d]) => sph(a * D, e * D, d))), 48, r, 8, false));
-    tube(M.orangeC, [[-31, 29, 0.74], [-33, 19, 0.66], [-35.5, 7, 0.63], [-35, -5, 0.61], [-38, -13, 0.62]], 0.0085);
-    tube(M.orangeC, [[-32, 28, 0.76], [-35, 14, 0.7], [-38, 11, 0.68], [-40, 12, 0.7]], 0.0065);
-    tube(M.hose, [[-38, 28.5, 0.76], [-22, 27, 0.71], [-4, 27.8, 0.69], [14, 27.2, 0.7], [32, 28.5, 0.76]], 0.016);
-    tube(M.hose, [[-36, 30.5, 0.77], [-18, 29.2, 0.72], [4, 29.6, 0.7], [20, 29.4, 0.72], [30, 30.5, 0.77]], 0.011);
-    tube(M.orangeC, [[31, 29, 0.74], [33, 17, 0.66], [35, 5, 0.63], [37, -8, 0.62]], 0.0075);
-    tube(M.hose, [[36, 12, 0.74], [33, 9, 0.66], [34, 0, 0.64], [37, -3, 0.68]], 0.012);
-    // 電纜接頭
-    for (const [a, e, d] of [[-38, -13, 0.62], [37, -8, 0.62], [-40, 12, 0.7]]) {
-      P.base = facing(a * D, e * D, d);
-      P.add(M.frame, cyl(0.016, 0.03, 12), [0, 0, 0], [Math.PI / 2, 0, 0]);
-      P.base = null;
+      const X = sx * 0.3;
+      P.add(M.panel, rb(0.14, 0.08, 0.5, 0.03), [X, -0.52, -0.36]);
+      mask(null, 0.11, 0.05, 0.44, [X, -0.52, -0.36]);
+      P.add(M.shell, rb(0.15, 0.018, 0.46, 0.008), [X, -0.475, -0.35]);
+      P.add(M.shell, rb(0.016, 0.06, 0.44, 0.007), [X + sx * 0.074, -0.515, -0.34]);
+      P.add(M.orange, rb(0.003, 0.01, 0.3, 0.0015), [X + sx * 0.0825, -0.5, -0.33]);
+      GL.add(M.glow, rb(0.005, 0.004, 0.4, 0.0018), [X - sx * 0.068, -0.4655, -0.34]);
+      // 操縱桿座
+      P.add(M.matte, cyl(0.046, 0.014, 28), [X, -0.461, -0.51]);
+      GL.add(M.glow, new THREE.TorusGeometry(0.048, 0.0022, 6, 48), [X, -0.4545, -0.51], [Math.PI / 2, 0, 0]);
+      // 前段小控制台（自己的座標：頂面＝+Y、前方＝−Z）
+      const base = new THREE.Matrix4().compose(new THREE.Vector3(sx * 0.38, -0.5, -0.74), new THREE.Quaternion().setFromEuler(new THREE.Euler(0.2, -sx * 0.45, 0, 'YXZ')), new THREE.Vector3(1, 1, 1));
+      P.base = S.base = GL.base = base;
+      P.add(M.panel, rb(0.16, 0.05, 0.25, 0.018), [0, -0.026, 0]);
+      mask(base, 0.13, 0.03, 0.21, [0, -0.026, 0]);
+      P.add(M.panel, rb(0.15, 0.012, 0.24, 0.006), [0, 0.0, 0.0]);
+      P.add(M.shell, rb(0.014, 0.034, 0.25, 0.006), [sx * 0.08, -0.008, 0.0]);
+      P.add(M.shell, rb(0.14, 0.03, 0.016, 0.006), [0, -0.01, -0.12]);
+      P.add(M.orange, rb(0.168, 0.004, 0.012, 0.0015), [0, 0.0045, 0.105]);
+      // 小螢幕（頂面、偏前）
+      P.add(M.matte, rb(0.136, 0.006, 0.048, 0.003), [0, 0.006, -0.06]);
+      S.add(M.screen, atlasPlane(0.12, 0.03, SCR[sx < 0 ? 'wave' : 'bars'], 1024, 1024), [0, 0.0095, -0.06], [-Math.PI / 2, 0, 0]);
+      // 按鍵 6×2（靠飛行員這邊）
+      for (let i = 0; i < 6; i++) for (let j = 0; j < 2; j++) P.add((i + j * 3) % 5 === 2 ? M.orange : M.matte, rb(0.017, 0.008, 0.014, 0.003), [-0.056 + i * 0.0224, 0.006, 0.02 + j * 0.022]);
+      // 指示燈一排
+      for (let i = 0; i < 5; i++) lamp(base, [-0.05 + i * 0.016, 0.0072, 0.078], ['ok', 'sys', 'idle', 'ok', 'warn'][(i + (sx > 0 ? 2 : 0)) % 5], [-Math.PI / 2, 0, 0]);
+      label(base, sx < 0 ? 'SYS 1' : 'FCS', [-0.052, 0.0068, -0.1], 0.012, [-Math.PI / 2, 0, 0]);
+      // 全像投影鏡頭（前端外側）
+      P.add(M.chrome, cyl(0.014, 0.012, 20), [sx * 0.045, 0.005, -0.105]);
+      GL.add(M.glow, cyl(0.009, 0.013, 20), [sx * 0.045, 0.006, -0.105]);
+      P.base = S.base = GL.base = null;
     }
 
-    // ---- 扶手台（操縱桿底座）
-    for (const sx of [-1, 1]) {
-      P.add(M.panel, rb(0.16, 0.1, 0.55, 0.025), [sx * 0.31, -0.54, -0.3]);
-      P.add(M.frame, rb(0.165, 0.016, 0.56, 0.007), [sx * 0.31, -0.49, -0.3]);
-      P.add(M.matte, rb(0.12, 0.012, 0.13, 0.006), [sx * 0.3, -0.478, -0.5]);
-    }
-
-    // ---- 開機前關著的裝甲擋板（開機時往上收）
-    const SP = new Parts();
-    SP.add(M.hull, new THREE.ExtrudeGeometry(shapeOf(offsetPoly(WIN, 0.06), ZW), { depth: 0.03, bevelEnabled: false }), [0, 0, -ZW - 0.23]);
-    for (let y = -0.95; y < 0.55; y += 0.13) SP.add(M.frame, rb(1.9, 0.05, 0.03, 0.008), [0, y * ZW, -ZW - 0.18]);
-    this.shutter = SP.build(new THREE.Group());
-    this.root.add(this.shutter);
-
-    P.build(this.root); S.build(this.root); G.build(this.root); Lb.build(this.root);
+    P.build(this.root); S.build(this.root); GL.build(this.root); Lb.build(this.root);
 
     // ---- 指示燈（同一個 InstancedMesh，每盞顏色各自變）
     const lg = rb(0.011, 0.0065, 0.004, 0.0015);
     this.lamps = new THREE.InstancedMesh(lg, new THREE.MeshBasicMaterial({ color: 0xffffff }), this.lampDefs.length);
     this.lampDefs.forEach((d, i) => { this.lamps.setMatrixAt(i, d.m); this.lamps.setColorAt(i, _c.setRGB(0, 0, 0)); });
     this.root.add(this.lamps);
+
+    // ---- 全像視窗：飄在周圍，面向飛行員；每片自己一個材質（才能各自閃、各自跳出來）
+    this.holos = HOLO.map((o) => {
+      const mat = new THREE.MeshBasicMaterial({ map: this.screenTex, color: new THREE.Color(1.5, 1.5, 1.5), transparent: true, depthWrite: false, side: THREE.DoubleSide });
+      const mesh = new THREE.Mesh(atlasPlane(o.w, o.h, SCR[o.k], 1024, 1024), mat);
+      const g = new THREE.Group();
+      facing(o.a * D, o.e * D, o.d).decompose(g.position, g.quaternion, g.scale);
+      g.add(mesh);
+      mesh.renderOrder = 1;
+      this.root.add(g);
+      return { ...o, mesh, gl: 0, ph: Math.random() * 10 };
+    });
 
     // ---- 兩支操縱桿＋手
     this.sticks = [this.buildStick(1), this.buildStick(-1)];
@@ -492,10 +403,10 @@ export class Cockpit {
 
   makeLights() {
     const s = this.scene;
-    this.hemi = new THREE.HemisphereLight(0xffffff, 0x050608, 0.6);   // 從窗戶進來的天光
+    this.hemi = new THREE.HemisphereLight(0xffffff, 0x050608, 0.6);   // 螢幕映出的天光
     this.key = new THREE.DirectionalLight(0xffffff, 0);             // 艙內反射回來的補光（從背後打）
     this.key.position.set(0.2, 0.5, 1);
-    this.sunL = new THREE.DirectionalLight(0xffc890, 0);            // 太陽：只有在前方時，光才會穿過窗戶照進來（有影子）
+    this.sunL = new THREE.DirectionalLight(0xffc890, 0);            // 太陽（螢幕上的太陽照進艙內，有影子）
     this.sunL.castShadow = true;
     this.sunL.shadow.mapSize.set(1024, 1024);
     const c = this.sunL.shadow.camera;
@@ -503,7 +414,7 @@ export class Cockpit {
     this.sunL.shadow.bias = -0.0004; this.sunL.shadow.normalBias = 0.003;
     this.sunL.target.position.set(0, -0.1, -0.4);
     this.conL = new THREE.PointLight(0x7fe8ff, 0, 1.4, 2);          // 儀表光
-    this.conL.position.set(0, -0.28, -0.55);
+    this.conL.position.set(0, -0.36, -0.7);
     this.warnL = new THREE.PointLight(0xff2412, 0, 2.5, 2);         // 警示紅燈
     this.warnL.position.set(0, 0.35, -0.2);
     this.flashL = new THREE.PointLight(0xffffff, 0, 3, 2);          // 開火／爆炸閃光
@@ -531,17 +442,14 @@ export class Cockpit {
 
   // 每幀：擺鏡頭、擺駕駛艙、更新燈光與儀表
   // ui：{ yaw, pitch（瞄準，機體朝向慣例）, boot, move:{x,y}, turn:{x,y}, boost, hover, speed, alt, vs, ap, apMax, en, parts, rifle, msl, saber, od, lockAlert, danger, radar, fire }
-  // 深度遮罩（放進城市那一層先畫）：艙壁擋住的畫面先填「最近」的深度，
+  // 深度遮罩（放進城市那一層先畫）：扶手台擋住的畫面先填「最近」的深度，
   // 後面的城市、天空、煙在那些像素直接被顯卡跳過——看不到的地方就不算，畫面完全不變。
-  // 形狀＝整片艙壁減掉比窗戶再大一圈的洞（寧可多算一點邊，也不能在窗緣缺一塊）。
+  // 形狀＝比扶手台實體小一圈的盒子（寧可少遮一點，也不能在邊緣露出一塊黑）。
   depthMask() {
-    const s = new THREE.Shape([new THREE.Vector2(-5, -5), new THREE.Vector2(5, -5), new THREE.Vector2(5, 5), new THREE.Vector2(-5, 5)]);
-    s.holes.push(shapeOf(offsetPoly(WIN, 0.05), ZW));
-    const g = new THREE.ShapeGeometry(s, 1);
-    g.translate(0, 0, -ZW);
+    const g = mergeGeometries(this.maskBoxes.map((b) => b.index ? b.toNonIndexed() : b));
     const m = new THREE.Mesh(g, new THREE.ShaderMaterial({
       uniforms: { pm: { value: this.cam.projectionMatrix }, mm: { value: this.root.matrixWorld } },
-      // 用駕駛艙鏡頭投影＋艙體晃動，跟艙壁在畫面上的位置一模一樣；深度壓在最前面
+      // 用駕駛艙鏡頭投影＋艙體晃動，跟扶手台在畫面上的位置一模一樣；深度壓在最前面
       vertexShader: 'uniform mat4 pm, mm; void main() { vec4 p = pm * mm * vec4(position, 1.0); gl_Position = vec4(p.xy, -0.99999 * p.w, p.w); }',
       fragmentShader: 'void main() { gl_FragColor = vec4(0.0); }',
       colorWrite: false, depthWrite: true, depthTest: true, depthFunc: THREE.AlwaysDepth,
@@ -602,17 +510,33 @@ export class Cockpit {
     this.root.position.copy(this.off).negate().applyQuaternion(_q);
     this.scene.environmentRotation.set(0, -vy, 0);
 
-    // 開機：擋板往上收
-    const bt = ui.boot ?? 1;
-    this.win = clamp((bt - 0.55) / 0.35, 0, 1);
-    const ease = this.win * this.win * (3 - 2 * this.win);
-    this.shutter.position.y = ease * 1.75;
-    this.shutter.visible = this.win < 1;
+    // 開機：全景螢幕從正前方往外一片片亮起來
+    const bt = ui.boot ?? 1, du = this.dome.material.uniforms;
+    this.win = clamp((bt - 0.5) / 0.36, 0, 1);
+    this.odV = damp(this.odV, ui.od && ui.od.active ? 1 : 0, 4, dt);
+    du.boot.value = bt; du.time.value = this.t; du.hurt.value = this.hurtT; du.od.value = this.odV;
+    du.alert.value = ui.danger ? 0.15 + 0.15 * Math.sin(this.t * 7) : 0;
+    this.updateHolos(dt, ui);
     this.updateSticks(dt, ui);
     this.updateLights(dt, ui, _q);
     this.updateLamps(ui);
     this.screenT -= dt;
     if (this.screenT <= 0) { this.screenT = 1 / 15; this.drawScreens(ui); }
+  }
+
+  // 全像視窗：開機時一條橫線往上下展開（稍微超過再彈回來）；偶爾閃一下，中彈時閃得更兇
+  updateHolos(dt, ui) {
+    const bt = ui.boot ?? 1, t = this.t;
+    for (const h of this.holos) {
+      const k = clamp((bt - h.at) / 0.05, 0, 1), u = k - 1;
+      h.mesh.visible = k > 0;
+      if (!h.mesh.visible) continue;
+      h.mesh.scale.y = k < 1 ? Math.max(0.03, 1 + 2.70158 * u * u * u + 1.70158 * u * u) : 1;
+      if (Math.random() < dt * (0.2 + this.hurtT * 40)) h.gl = 0.05 + Math.random() * 0.08;
+      h.gl = Math.max(0, h.gl - dt);
+      h.mesh.material.opacity = h.gl > 0 ? 0.3 + Math.random() * 0.35 : 0.9 + 0.06 * Math.sin(t * 11 + h.ph);
+      h.mesh.position.x = h.gl > 0 ? (Math.random() - 0.5) * 0.006 : 0;
+    }
   }
 
   updateSticks(dt, ui) {
@@ -631,25 +555,24 @@ export class Cockpit {
 
   updateLights(dt, ui, qInv) {
     const w = this.world, boot = ui.boot ?? 1;
-    const win = this.win;                                   // 擋板打開多少
+    const win = this.win;                                   // 全景螢幕亮了多少
     const ins = clamp((boot - 0.12) / 0.2, 0, 1);          // 儀表亮度
-    // 窗外天光
+    // 螢幕映出的天光
     this.hemi.color.copy(w.fogColor).multiplyScalar(1.3);
     this.hemi.groundColor.setRGB(0.015, 0.016, 0.018);
     this.hemi.intensity = 0.5 * win + 0.015;
     this.key.color.copy(w.fogColor).lerp(_c.setRGB(1, 0.85, 0.7), 0.4);
     this.key.intensity = 0.35 * win;
-    this.scene.environmentIntensity = 0.03 + 0.12 * win;
-    // 太陽方向（轉到艙內座標）：在前方才照得進來
+    this.scene.environmentIntensity = 0.04 + 0.16 * win;
+    // 太陽方向（轉到艙內座標）：整圈都是螢幕，從哪邊都照得進來
     const sd = _v.copy(w.lightDir).applyQuaternion(qInv);
     this.sunL.position.copy(this.sunL.target.position).addScaledVector(sd, 4);
     this.sunL.color.copy(w.sun.color);
-    const front = clamp(-sd.z * 2.2, 0, 1);
-    this.sunL.intensity = 3.2 * win * front;
-    // 玻璃污漬：正對太陽時亮起來
-    const glint = Math.pow(clamp(-sd.z, 0, 1), 6);
-    this.M.dirt.color.copy(w.sun.color).multiplyScalar((0.05 + glint * 0.55) * win);
-    this.conL.intensity = 0.045 * ins;
+    this.sunL.intensity = 2.6 * win;
+    this.conL.intensity = 0.06 * ins;
+    // 扶手燈條：平常藍色；耐久低時紅色閃；覺醒時變紅
+    const dgB = ui.danger ? 0.5 + 0.5 * Math.sin(this.t * 7) : 0;
+    this.M.glow.color.setRGB(0.25, 1.3, 2.0).lerp(_c.setRGB(2.4, 0.15, 0.1), Math.max(dgB, this.odV * 0.85)).multiplyScalar(ins);
     // 警示燈：被鎖定慢閃、危險快閃
     const la = ui.lockAlert || 0, dg = ui.danger ? 1 : 0;
     const blink = dg ? (Math.sin(this.t * 14) > 0 ? 1 : 0.1) : la > 0.01 ? (Math.sin(this.t * (la > 0.7 ? 22 : 9)) > 0 ? 1 : 0) : 0;
@@ -684,31 +607,57 @@ export class Cockpit {
   // ---------------------------------------------------------------- 儀表畫面
   drawScreens(ui) {
     const x = this.sx, boot = ui.boot ?? 1;
-    x.fillStyle = '#000'; x.fillRect(0, 0, 1024, 1024);
+    x.clearRect(0, 0, 1024, 1024);
     const on = (at) => clamp((boot - at) / 0.06, 0, 1);
-    const scr = [['radar', 0.2, this.drawRadar], ['status', 0.26, this.drawStatus], ['arms', 0.32, this.drawArms], ['spd', 0.16, this.drawSpd], ['alt', 0.18, this.drawAlt],
-      ['sys', 0.14, this.drawSys], ['gauge', 0.22, this.drawGauge], ['bars', 0.28, this.drawBars], ['wave', 0.24, this.drawWave]];
+    const scr = [['wave', 0.1, this.drawWave], ['bars', 0.12, this.drawBars], ...HOLO.map((o) => [o.k, o.at, this['draw' + o.k[0].toUpperCase() + o.k.slice(1)]])];
     for (const [k, at, fn] of scr) {
-      const r = SCR[k], o = on(at);
+      const r = SCR[k], o = on(at), W = r[2], H = r[3], solid = SOLID.has(k);
       if (o <= 0) continue;
       x.save();
-      x.beginPath(); x.rect(r[0], r[1], r[2], r[3]); x.clip();
       x.translate(r[0], r[1]);
-      x.fillStyle = COL.bg; x.fillRect(0, 0, r[2], r[3]);
-      if (o < 1) this.drawBoot(x, r[2], r[3], o, k);
-      else fn.call(this, x, r[2], r[3], ui);
+      x.save();
+      if (solid) { x.beginPath(); x.rect(0, 0, W, H); x.clip(); x.fillStyle = COL.bg; x.fillRect(0, 0, W, H); }
+      else {
+        this.panelPath(x, W, H); x.clip();
+        const g = x.createLinearGradient(0, 0, 0, H);
+        g.addColorStop(0, 'rgba(6,30,40,0.62)'); g.addColorStop(1, 'rgba(2,14,20,0.5)');
+        x.fillStyle = g; x.fillRect(0, 0, W, H);
+      }
+      if (o < 1) this.drawBoot(x, W, H, o, k);
+      else fn.call(this, x, W, H, ui);
       // 掃描線＋中彈雜訊
-      x.fillStyle = 'rgba(0,0,0,0.18)';
-      for (let y = 0; y < r[3]; y += 4) x.fillRect(0, y, r[2], 1);
+      x.fillStyle = solid ? 'rgba(0,0,0,0.18)' : 'rgba(120,240,255,0.05)';
+      for (let y = 0; y < H; y += 4) x.fillRect(0, y, W, 1);
       if (this.hurtT > 0.05) {
         for (let k2 = 0; k2 < 10; k2++) {
           x.fillStyle = `rgba(${150 + Math.random() * 100},${200 + Math.random() * 55},255,${Math.random() * 0.5 * this.hurtT * 3})`;
-          x.fillRect(0, Math.random() * r[3], r[2], 2 + Math.random() * 10);
+          x.fillRect(0, Math.random() * H, W, 2 + Math.random() * 10);
         }
       }
       x.restore();
+      if (!solid) this.panelFrame(x, W, H);
+      x.restore();
     }
     this.screenTex.needsUpdate = true;
+  }
+  // 全像視窗外形：左上、右下切角
+  panelPath(x, w, h) {
+    const c = Math.min(w, h) * 0.1, i = 3;
+    x.beginPath();
+    x.moveTo(i + c, i); x.lineTo(w - i, i); x.lineTo(w - i, h - i - c); x.lineTo(w - i - c, h - i); x.lineTo(i, h - i); x.lineTo(i, i + c); x.closePath();
+  }
+  // 細外框＋四個角的亮框線
+  panelFrame(x, w, h) {
+    const c = Math.min(w, h) * 0.1, L = Math.min(w, h) * 0.16, i = 4;
+    x.strokeStyle = 'rgba(111,240,255,0.45)'; x.lineWidth = 2;
+    this.panelPath(x, w, h); x.stroke();
+    x.strokeStyle = COL.cy; x.lineWidth = 5; x.lineJoin = 'miter';
+    x.beginPath();
+    x.moveTo(i, i + c + L); x.lineTo(i, i + c); x.lineTo(i + c, i); x.lineTo(i + c + L, i);
+    x.moveTo(w - i - L, i); x.lineTo(w - i, i); x.lineTo(w - i, i + L);
+    x.moveTo(w - i, h - i - c - L); x.lineTo(w - i, h - i - c); x.lineTo(w - i - c, h - i); x.lineTo(w - i - c - L, h - i);
+    x.moveTo(i + L, h - i); x.lineTo(i, h - i); x.lineTo(i, h - i - L);
+    x.stroke();
   }
 
   drawBoot(x, w, h, o, name) {
@@ -723,7 +672,7 @@ export class Cockpit {
   }
 
   grid(x, w, h, s) {
-    x.strokeStyle = COL.grid; x.lineWidth = 1;
+    x.strokeStyle = COL.line; x.lineWidth = 1;
     x.beginPath();
     for (let i = s; i < w; i += s) { x.moveTo(i, 0); x.lineTo(i, h); }
     for (let j = s; j < h; j += s) { x.moveTo(0, j); x.lineTo(w, j); }
@@ -770,7 +719,14 @@ export class Cockpit {
       x.globalAlpha = edge ? 0.6 : 1 - age / (Math.PI * 2) * 0.65;
       if (o.kind === 'missile') { x.fillStyle = COL.am; x.beginPath(); x.arc(px, py, 5, 0, Math.PI * 2); x.fill(); }
       else if (o.kind === 'wreck') { x.strokeStyle = '#5a6a70'; x.beginPath(); x.moveTo(px - 6, py - 6); x.lineTo(px + 6, py + 6); x.moveTo(px + 6, py - 6); x.lineTo(px - 6, py + 6); x.stroke(); }
-      else {
+      else if (o.kind === 'tank' || o.kind === 'apc' || o.kind === 'heli' || o.kind === 'jet') {
+        // 載具：小一號（戰車／裝甲車＝方塊、直升機＝圓點、戰鬥機＝三角形）
+        x.fillStyle = '#ff8a6a';
+        if (o.kind === 'heli') { x.beginPath(); x.arc(px, py, 5.5, 0, Math.PI * 2); x.fill(); }
+        else if (o.kind === 'jet') { x.beginPath(); x.moveTo(px, py - 8); x.lineTo(px + 6, py + 6); x.lineTo(px - 6, py + 6); x.closePath(); x.fill(); }
+        else x.fillRect(px - 5, py - 5, 10, 10);
+        if (o.locked) { x.strokeStyle = COL.wh; x.lineWidth = 2; x.strokeRect(px - 10, py - 10, 20, 20); }
+      } else {
         const s = o.kind === 'heavy' ? 13 : o.kind === 'ace' ? 12 : 10;
         x.fillStyle = o.kind === 'ace' ? '#ff7b3a' : COL.rd;
         x.beginPath(); x.moveTo(px, py - s); x.lineTo(px + s, py); x.lineTo(px, py + s); x.lineTo(px - s, py); x.closePath(); x.fill();
@@ -781,13 +737,13 @@ export class Cockpit {
     // 自機
     x.fillStyle = COL.cy; x.beginPath(); x.moveTo(cx, cy - 12); x.lineTo(cx + 8, cy + 8); x.lineTo(cx, cy + 4); x.lineTo(cx - 8, cy + 8); x.closePath(); x.fill();
     x.textAlign = 'left'; x.textBaseline = 'top'; x.fillStyle = COL.cy; x.font = '600 26px Rajdhani, sans-serif';
-    x.fillText('RNG 600', 14, 10);
+    x.fillText('RNG 600', 58, 14);
     x.textAlign = 'right';
     const hdg = Math.round(((yaw / D) % 360 + 360) % 360);
     x.fillText('HDG ' + String(hdg).padStart(3, '0'), w - 14, 10);
     const ne = (ui.radar || []).filter((o) => o.kind !== 'missile' && o.kind !== 'wreck').length;
     x.textBaseline = 'bottom'; x.fillStyle = ne ? COL.rd : COL.dim;
-    x.fillText('HOSTILE ' + ne, w - 14, h - 8);
+    x.fillText('HOSTILE ' + ne, w - 60, h - 12);
   }
 
   drawStatus(x, w, h, ui) {
@@ -805,7 +761,7 @@ export class Cockpit {
     part(pc.legL, [[24, 124], [4, 124], [8, 226], [40, 232], [36, 180]]);
     x.strokeStyle = COL.bg; x.lineWidth = 3;
     x.font = '700 30px Rajdhani, sans-serif'; x.textAlign = 'left'; x.textBaseline = 'top';
-    x.fillStyle = COL.wh; x.fillText('XG-01', 16, 10);
+    x.fillStyle = COL.wh; x.fillText('XG-01', 46, 12);
     // 右半：耐久、能量
     const ap = ui.ap ?? 1, apMax = ui.apMax ?? 1, en = ui.en ?? 1;
     const f = clamp(ap / apMax, 0, 1);
@@ -831,7 +787,7 @@ export class Cockpit {
     x.textAlign = 'left'; x.textBaseline = 'top';
     // 右手：光束步槍
     const rf = ui.rifle || { ammo: 12, mag: 12, reload: -1 };
-    x.fillStyle = COL.dim; x.font = '600 24px Rajdhani, sans-serif'; x.fillText('R  BEAM RIFLE', 16, 12);
+    x.fillStyle = COL.dim; x.font = '600 24px Rajdhani, sans-serif'; x.fillText('R  BEAM RIFLE', 46, 12);
     x.fillStyle = rf.ammo > 0 ? COL.wh : COL.rd; x.font = '700 54px Rajdhani, sans-serif';
     x.textAlign = 'right'; x.fillText(String(rf.ammo).padStart(2, '0'), w - 16, 4); x.textAlign = 'left';
     for (let i = 0; i < rf.mag; i++) { x.fillStyle = i < rf.ammo ? COL.pk : COL.grid; x.fillRect(16 + i * 24, 46, 18, 16); }
@@ -869,19 +825,19 @@ export class Cockpit {
     const t = this.t, rows = ['GEN', 'CELL', 'COOL', 'FCS', 'IFF', 'LINK', 'BAL'];
     x.font = '600 22px Rajdhani, sans-serif'; x.textBaseline = 'top';
     rows.forEach((n, i) => {
-      const y = 12 + i * 33;
-      x.textAlign = 'left'; x.fillStyle = COL.dim; x.fillText(n, 12, y);
+      const y = 20 + i * 32;
+      x.textAlign = 'left'; x.fillStyle = COL.dim; x.fillText(n, 20, y);
       const v = n === 'CELL' ? (ui.en ?? 1) : n === 'COOL' ? 1 - (ui.boost || 0) * 0.35 : 0.8 + 0.15 * Math.sin(t * (0.7 + i * 0.3) + i);
       x.fillStyle = COL.grid; x.fillRect(80, y + 6, 120, 10);
       x.fillStyle = v < 0.3 ? COL.am : COL.cy; x.fillRect(80, y + 6, 120 * clamp(v, 0, 1), 10);
-      x.textAlign = 'right'; x.fillStyle = COL.wh; x.fillText(String(Math.round(v * 100)), w - 10, y);
+      x.textAlign = 'right'; x.fillStyle = COL.wh; x.fillText(String(Math.round(v * 100)), w - 16, y);
     });
   }
   // 大數字＋兩個圓環（右上，參考圖那塊「03」）：剩下幾台敵機、能量、溫度
   drawGauge(x, w, h, ui) {
     const n = (ui.radar || []).filter((o) => o.kind !== 'missile' && o.kind !== 'wreck').length;
     x.textAlign = 'left'; x.textBaseline = 'top';
-    x.fillStyle = COL.dim; x.font = '600 22px Rajdhani, sans-serif'; x.fillText('HOSTILE', 12, 10);
+    x.fillStyle = COL.dim; x.font = '600 22px Rajdhani, sans-serif'; x.fillText('HOSTILE', 34, 10);
     x.fillStyle = n ? COL.am : COL.cy; x.font = '700 76px Rajdhani, sans-serif'; x.fillText(String(n).padStart(2, '0'), 12, 30);
     const ring = (cx, cy, r, v, c, name) => {
       x.lineWidth = 9; x.strokeStyle = COL.grid; x.beginPath(); x.arc(cx, cy, r, 0, Math.PI * 2); x.stroke();

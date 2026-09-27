@@ -1,6 +1,7 @@
 // 戰鬥：敵機 AI、玩家武器（光束步槍、多重鎖定飛彈、光劍、覺醒）、子彈與飛彈、傷害與失衡、擊毀碎片、波次
 import * as THREE from 'three';
 import { Mech } from './mechs.js';
+import { Vehicles, VKIND } from './vehicles.js';
 
 const clamp = THREE.MathUtils.clamp;
 const rand = (a, b) => a + Math.random() * (b - a);
@@ -18,14 +19,24 @@ const KIND = {
 };
 // 關卡：由簡到難，每一關只多一件新東西（先學打雜兵 → 學飛彈 → 飛彈重裝 → 王牌 → 混編 → 決戰）
 //   每關都是滿血出發；groups＝敵機分批，打完一批才來下一批增援；tip＝開場字幕順便教一句
+//   tank／heli／jet＝戰鬥載具（一發就爆的砲灰，見 vehicles.js），和機體混編
 export const STAGES = [
-  { name: '初陣', en: 'FIRST SORTIE', tip: '左鍵射擊，Tab 換目標', groups: [['grunt', 'grunt'], ['grunt']] },
-  { name: '包圍網', en: 'ENCIRCLED', tip: '右鍵按住鎖定多台，放開一次射飛彈', groups: [['grunt', 'grunt', 'grunt'], ['grunt', 'grunt']] },
-  { name: '重砲', en: 'HEAVY GUNS', tip: '新敵人：重裝機——響飛彈警報就點 SHIFT 閃', groups: [['grunt', 'heavy', 'grunt'], ['grunt']] },
-  { name: '王牌', en: 'THE ACE', tip: '新敵人：王牌機——槍口發光就閃，靠近會拔劍', groups: [['grunt', 'ace', 'grunt'], ['grunt', 'grunt']] },
-  { name: '鋼鐵洪流', en: 'IRON TIDE', tip: '混編部隊：邊跑邊打，別站著不動', groups: [['ace', 'heavy', 'grunt', 'grunt', 'heavy'], ['grunt', 'grunt']] },
-  { name: '黃昏決戰', en: 'LAST LIGHT', tip: '最終關：王牌、重裝全部出動', groups: [['ace', 'heavy', 'grunt', 'ace', 'heavy', 'grunt']] },
+  { name: '初陣', en: 'FIRST SORTIE', tip: '左鍵射擊，Tab 換目標——戰車一發就爆，也可以直接踩扁',
+    groups: [['tank', 'tank', 'tank'], ['grunt', 'grunt', 'tank', 'tank'], ['grunt', 'tank', 'tank', 'tank']] },
+  { name: '包圍網', en: 'ENCIRCLED', tip: '右鍵按住鎖定多台，放開一次射飛彈——車隊一次清光',
+    groups: [['tank', 'tank', 'tank', 'heli'], ['grunt', 'grunt', 'grunt', 'tank', 'tank'], ['heli', 'heli', 'tank', 'tank', 'tank', 'tank'], ['grunt', 'grunt', 'heli']] },
+  { name: '重砲', en: 'HEAVY GUNS', tip: '新敵人：重裝機——響飛彈警報就點 SHIFT 閃',
+    groups: [['tank', 'tank', 'tank', 'tank', 'heli'], ['grunt', 'heavy', 'grunt', 'tank', 'tank'], ['heli', 'heli', 'tank', 'tank', 'tank'], ['grunt', 'tank', 'tank']] },
+  { name: '王牌', en: 'THE ACE', tip: '新敵人：王牌機——槍口發光就閃，靠近會拔劍',
+    groups: [['heli', 'heli', 'tank', 'tank', 'tank'], ['grunt', 'ace', 'grunt', 'tank', 'tank'], ['jet', 'tank', 'tank', 'tank', 'heli'], ['grunt', 'grunt', 'heli', 'heli']] },
+  { name: '鋼鐵洪流', en: 'IRON TIDE', tip: '混編部隊：邊跑邊打，別站著不動',
+    groups: [['tank', 'tank', 'tank', 'tank', 'tank', 'tank', 'heli'], ['ace', 'heavy', 'grunt', 'grunt', 'heavy', 'tank', 'tank'], ['jet', 'jet', 'heli', 'heli', 'tank', 'tank', 'tank'], ['grunt', 'grunt', 'heli', 'tank', 'tank']] },
+  { name: '黃昏決戰', en: 'LAST LIGHT', tip: '最終關：王牌、重裝、戰車、直升機、戰機全部出動',
+    groups: [['tank', 'tank', 'tank', 'tank', 'heli', 'heli'], ['jet', 'jet', 'tank', 'tank', 'tank', 'tank', 'heli'], ['ace', 'heavy', 'grunt', 'ace', 'heavy', 'grunt', 'heli', 'tank', 'tank']] },
 ];
+// 評價用的「關卡份量」：雜兵機＝1、重裝 1.5、王牌 2；載具是砲灰，只算零頭
+const WEIGHT = { grunt: 1, heavy: 1.5, ace: 2 };
+export function stageWeight(D) { return D.groups.flat().reduce((a, k) => a + (WEIGHT[k] ?? VKIND[k]?.weight ?? 1), 0); }
 // 每關的難度：
 //   atk＝同一時間最多幾台敵機出手（其他台只移動找位置）——前面一次只挨一台打，後面四面八方
 //   fire＝攻擊間隔倍率（大＝打得慢）、aim＝散布倍率（大＝打不準）、dmg＝打到你的傷害倍率
@@ -67,6 +78,12 @@ function rayCapsule(o, d, cap, maxT) {
   if (y < cap.y0 - cap.r || y > cap.y1 + cap.r) return -1;
   const back = h2 > 1e-6 ? Math.sqrt(cap.r * cap.r - dh * dh) / Math.sqrt(h2) : 0;
   return Math.max(0, t - back);
+}
+// 點 c 到線段 a→b 的距離（飛彈一幀飛好幾公尺，小目標要用線段判定才不會穿過去）
+function segDist(a, b, c) {
+  const abx = b.x - a.x, aby = b.y - a.y, abz = b.z - a.z, L2 = abx * abx + aby * aby + abz * abz;
+  const t = L2 > 1e-9 ? clamp(((c.x - a.x) * abx + (c.y - a.y) * aby + (c.z - a.z) * abz) / L2, 0, 1) : 0;
+  return Math.hypot(a.x + abx * t - c.x, a.y + aby * t - c.y, a.z + abz * t - c.z);
 }
 
 // ---------------------------------------------------------------- 敵機
@@ -120,6 +137,7 @@ export class Combat {
     this.damageFx = 0;
     this.dead = false;
     this.onEnd = o.onEnd || (() => {});
+    this.vehicles = new Vehicles(this);   // 戰車、直升機、戰機
   }
 
   get alive() { return this.enemies.filter((e) => !e.dead); }
@@ -147,6 +165,7 @@ export class Combat {
     list.forEach((k, i) => this.events.push({ spawn: true, t: t0 + i * 0.7, fn: () => this.spawn(k, i, list.length) }));
   }
   spawn(kind, i, n) {
+    if (VKIND[kind]) { this.enemies.push(this.vehicles.spawn(kind, i, n)); return; }
     const p = this.player.pos, w = this.world;
     const e = new Enemy(kind, this.nextId++);
     const T = this.tier;
@@ -207,6 +226,7 @@ export class Combat {
     this.updateAim();
     if (!this.dead && this.phase !== 'done' && inp) this.playerWeapons(dt, inp);
     this.updateEnemies(dt);
+    this.vehicles.update(dt);
     this.updateMissiles(dt);
     this.updateDebris(dt);
     this.enemies = this.enemies.filter((e) => !e.gone);
@@ -370,7 +390,8 @@ export class Combat {
     const tgt = this.fireTarget();
     if (tgt) {
       tgt.chest(to);
-      to.x += rand(-1.2, 1.2); to.y += rand(-2.5, 2.5); to.z += rand(-1.2, 1.2);
+      const sc = Math.min(1, tgt.scale);   // 載具很矮，散布跟著縮（不然會打進地面）
+      to.x += rand(-1.2, 1.2) * sc; to.y += rand(-2.5, 2.5) * sc; to.z += rand(-1.2, 1.2) * sc;
       // 王牌機會閃
       if (tgt.kind === 'ace' && tgt.stagT <= 0 && tgt.qbCd <= 0 && Math.random() < 0.4 && !tgt.dropping) {
         this.enemyQB(tgt, 1);
@@ -488,6 +509,7 @@ export class Combat {
           const d = _a.subVectors(e.pos, pl.pos); d.y = 0;
           const dist = d.length();
           if (dist > 30 * (0.5 + 0.5 * e.scale)) continue;
+          if (e.vehicle && Math.abs(e.chest(_c).y - (pl.pos.y + 8)) > 22) continue;   // 天上的直升機砍不到
           if (d.normalize().dot(_b.set(Math.sin(pl.yaw), 0, Math.cos(pl.yaw))) < 0.2) continue;
           hitE = e; break;
         }
@@ -516,6 +538,7 @@ export class Combat {
   damageEnemy(e, dmg, stag, pos, dir, crit = false) {
     if (e.dead) return;
     if (e.stagT > 0 && !crit) dmg *= 1.4;
+    if (e.vehicle) dmg = Math.min(dmg, Math.max(1, e.ap));   // 載具：不多算溢出的分數
     e.ap -= dmg; e.lastHit = 0;
     this.stats.hits++;
     this.stats.score += Math.round(dmg / 10);
@@ -544,7 +567,8 @@ export class Combat {
     S.lastKill = S.time;
     S.score += e.K.score * S.chain;
     this.killMark = 1;
-    this.hitstop = Math.max(this.hitstop, 0.14);
+    this.hitstop = Math.max(this.hitstop, e.vehicle ? 0.05 : 0.14);
+    if (e.vehicle) this.vehicles.killed(e);
     this.note(S.chain > 1 ? `DESTROYED  ×${S.chain}` : 'DESTROYED', 'rd');
   }
   boom(e) {
@@ -611,7 +635,7 @@ export class Combat {
     const pc = this.hero.bones.torso.getWorldPosition(_d);
     const playerChest = V3().copy(pc);
     for (const e of this.enemies) {
-      if (e.gone) continue;
+      if (e.gone || e.vehicle) continue;   // 載具在 vehicles.js 裡動
       const m = e.m, K = e.K, k = e.scale;
       if (e.dead) {
         e.dying -= dt;
@@ -737,7 +761,7 @@ export class Combat {
       if (e.grounded && e.boostT > 0) this.fx.skid(e.pos, e.vel, 0.6);
     }
     // 互相推開（含玩家）
-    const all = this.enemies.filter((e) => !e.gone && !e.dropping);
+    const all = this.enemies.filter((e) => !e.gone && !e.dropping && !e.vehicle);
     for (let i = 0; i < all.length; i++) {
       const a = all[i];
       for (let j = i + 1; j <= all.length; j++) {
@@ -917,7 +941,7 @@ export class Combat {
         for (const e of this.enemies) {
           if (e.dead || e.gone) continue;
           const c = e.chest(_b);
-          if (c.distanceTo(M.pos) < 7 * e.scale) { hitE = e; hit = M.pos.clone(); break; }
+          if (e.vehicle ? segDist(prev, M.pos, c) < e.K.hitR : c.distanceTo(M.pos) < 7 * e.scale) { hitE = e; hit = M.pos.clone(); break; }
         }
       } else if (!this.dead) {
         const cap = this.hero.capsule();
@@ -999,6 +1023,7 @@ export class Combat {
     for (const e of this.enemies) e.m.root.removeFromParent();
     for (const d of this.debris) d.mesh.removeFromParent();
     for (const M of this.missiles) this.fx.missileEnd(M.h);
+    this.vehicles.dispose();
     this.enemies = []; this.debris = []; this.missiles = [];
   }
 }
