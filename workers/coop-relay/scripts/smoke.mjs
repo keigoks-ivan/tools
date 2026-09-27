@@ -174,6 +174,22 @@ try {
   check((await b.next(m => m.t === 'host'))?.id === '甲', 'hand back to 甲');
   await sleep(1100);
 
+  // --- 第三階段：倒地／切背景狀態位元（st）與重來申報（r） ---
+  for (const p of [a, b, c]) p.messages.length = 0;
+  b.ws.send(JSON.stringify({ t: 's', d: { x: 1, y: 0, z: 0, r: 0, a: 'death', c: 5, st: 2 } }));
+  check((await a.next(m => m.t === 's' && m.p === '乙'))?.d.st === 2, 'downed status bit (st) relayed');
+  b.ws.send(JSON.stringify({ t: 's', d: { x: 1, y: 0, z: 0, r: 0, c: 6, st: 99 } }));
+  const badSt = await a.next(m => m.t === 's' && m.p === '乙' && m.d.c === 6);
+  check(badSt && badSt.d.st === undefined, 'invalid st stripped');
+  b.ws.send(JSON.stringify({ t: 'h', d: { r: 1 } }));
+  check((await a.next(m => m.t === 'h' && m.p === '乙'))?.d.r === 1, 'retry-only claim {r:1} reaches the host');
+  c.ws.send(JSON.stringify({ t: 'h', d: { p: 4, r: 1 } }));
+  const pr = await a.next(m => m.t === 'h' && m.p === '丙');
+  check(pr?.d.p === 4 && pr.d.r === 1, 'claim with pickup + retry reaches the host');
+  await sleep(200);
+  check(!b.messages.some(m => m.t === 'h') && !c.messages.some(m => m.t === 'h'), 'retry claims not broadcast to guests');
+  await sleep(1100);
+
   // --- 同一個人重連（換裝置／網路切換）：取代舊連線，不算第 4 人 ---
   const cAgain = connect(room, tokens['丙']);
   check(!!(await cAgain.next(m => m.t === 'welcome' && m.members.length === 3)), 'same player reconnecting takes over (still 3 members)');

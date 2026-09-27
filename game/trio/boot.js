@@ -1,11 +1,12 @@
 // 紫刃夜行・三人連線入口（/game/trio/）。引擎模組全部沿用 game/3d-next/，這裡只負責：
 // 代號 → 大廳（開房／加入）→ 載入戰場 → 開始，並把 net/coop.js 交給 createBattle 讓隊友出現在同一個關卡。
 // 第二階段：房主的裝置跑敵人（出兵、AI、血量、段落），大家打同一批敵人；隊友的命中申報給房主（net/enemy-sync.js）。
+// 第三階段：倒地與救援、全滅才輸（任何人都能按重來）、合體大招、補給由房主裁定、交棒看誰看得到畫面（net/team.js）。
 import { installGameGestures } from '../2d/touch-gestures.js';
 import { CoopClient } from '../3d-next/net/client.js';
 import { createCoop } from '../3d-next/net/coop.js';
 import { relayUrl } from '../3d-next/net/protocol.js';
-import { setupFullscreenUi } from './fullscreen.js?v=trio3';
+import { setupFullscreenUi } from './fullscreen.js?v=trio4';
 
 const $ = id => document.getElementById(id);
 installGameGestures($('game'));
@@ -15,7 +16,7 @@ for (const type of ['gesturestart', 'gesturechange', 'gestureend']) {
 }
 
 // 引擎：版本字串與單人頁不同也沒關係（兩頁不會同時開），battle.js 內部的 import 網址相同
-const loadBattleModule = () => import('../3d-next/battle.js?v=trio3');
+const loadBattleModule = () => import('../3d-next/battle.js?v=trio4');
 const params = new URLSearchParams(location.search);
 
 const client = new CoopClient({ relay: relayUrl(location) });
@@ -159,6 +160,7 @@ $('start').addEventListener('click', async () => {
     await new Promise(resolve => requestAnimationFrame(() => setTimeout(resolve, 0)));
     $('title').hidden = true;
     document.body.dataset.mode = 'play';
+    coop.setControls(battle);   // 第三階段：全滅／過關後任何人按重來，房主重開、其他人跟著重來
     battle.start();
     coop.setActive(true);
     renderHud();

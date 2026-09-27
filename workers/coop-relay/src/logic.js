@@ -144,6 +144,7 @@ export function cleanState(d) {
   const at = num(d.at, 1e4); if (at !== null) out.at = at;
   const ts = num(d.ts, 100); if (ts !== null) out.ts = ts;
   if (d.l === 0 || d.l === 1) out.l = d.l;
+  if (Number.isInteger(d.st) && d.st > 0 && d.st < 64) out.st = d.st;   // 第三階段：狀態位元（1＝切到背景、2＝倒地）
   return out;
 }
 
@@ -172,7 +173,7 @@ export function cleanPayload(value, depth = 0, limits = PAYLOAD_LIMITS) {
   return out;
 }
 
-/** 命中申報：{ x, y, h: [[敵人 id, 數值, 來源碼, 招式編號], …], p?: 撿到的補給 id }，h 最多 32 筆 */
+/** 命中申報：{ x, y, h: [[敵人 id, 數值, 來源碼, 招式編號], …], p?: 想撿的補給 id, r?: 1＝結算後請房主重開 }，h 最多 32 筆 */
 export function cleanClaim(d) {
   const out = cleanPayload(d);
   if (!out || typeof out !== 'object' || Array.isArray(out)) return null;
@@ -180,7 +181,8 @@ export function cleanClaim(d) {
   const claim = { h };
   if (typeof out.x === 'number' && typeof out.y === 'number') { claim.x = out.x; claim.y = out.y; }
   if (Number.isInteger(out.p)) claim.p = out.p;
-  return h.length || claim.p !== undefined ? claim : null;
+  if (out.r === 1) claim.r = 1;
+  return h.length || claim.p !== undefined || claim.r ? claim : null;
 }
 
 /**

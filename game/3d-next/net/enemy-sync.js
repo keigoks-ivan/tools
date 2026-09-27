@@ -10,7 +10,9 @@
  * 隊友（guest）：march.update 換成 guestUpdate——不出兵、不跑敵人 AI；房主的敵人變成本機的「傀儡」
  *   （ai: 'puppet'、remote: true），位置用和隊友相同的快照插值。自己打中時火花、音效、定格立刻在本機發生，
  *   同時把命中申報給房主；血量與死亡以房主為準。
- * 換房主（房主離線、死亡、頁面停住）：新房主拿最後一份鏡像直接接手（promote），傀儡轉回真的敵人。
+ * 換房主（房主離線、頁面停住）：新房主拿最後一份鏡像直接接手（promote），傀儡轉回真的敵人。
+ * 第三階段（規則與常數在 team.js）：倒地與救援（房主計時裁定）、全滅才輸且任何人都能按重來、
+ *   合體大招、補給由房主裁定、交出房主只交給看得到畫面的人（帶遲滯）。
  *
  * 全部靠包裝 march／arena 這兩個實例的方法完成；battle.js 只多一行 coopView?.bindLevel(...)。
  * 單人頁從不載入這個檔案；三人頁只有自己一個人時，包裝一律直接呼叫原方法，行為與單人版相同。
@@ -19,15 +21,17 @@ import { SnapshotBuffer } from './interp.js';
 import { applyCountScale, scaledHp, snapshotCounts } from './scaling.js';
 import { BITS, FORWARD_EVENTS, MAX_EVENTS_PER_MESSAGE, WorldDecoder, WorldEncoder, compactEvent, decodeLevel, enemyType, fitWorld, isEmptyWorld, levelStatus, recipeFor } from './world.js';
 import { CLAIM_LIMITS, ClaimMeter, SOURCES, TARGETING, assignTargets, validateClaimEntry } from './authority.js';
+import { ComboWindow, HANDOFF, HandoffPolicy, ReviveTracker, TEAM, comboProfile, grantPickup, teamWiped } from './team.js';
 
 export const LOCAL_ID = '\u0000self';
-const STALL_MS = 1500;          // 房主的模擬停住這麼久（切到背景、暫停、手機鎖屏）→ 交給還活著的隊友
-const YIELD_COOLDOWN_MS = 3000;
 const FRESH_MS = 5000;          // 隊友狀態多久沒更新就不算在場（仇恨分配、交棒都略過他）
 const WAIT_HINT_MS = 2500;
 const LOCAL_HIT_HOLD = 0.3;     // 本機打中後保留受擊動作的秒數，不被下一則快照蓋掉
 const PREDICT_MS = 700;         // 本機預測的血量保留多久（等房主確認）
 const HURT_INVULNERABLE = 0.72; // 與 Arena._hurtHero 相同
+const PICKUP_RETRY_MS = 1000;   // 補給申報沒回音時多久再申報一次
+const PROGRESS_HOLD_MS = 400;   // 隊友端：救援進度多久沒更新就當作中斷
+const NO_INPUT = Object.freeze({});
 
 // TUNING 原始值：以 TUNING 物件為鍵只記一次（同一頁重建戰場、或測試裡兩個實例共用模組時都不會越乘越大）
 const baselines = new WeakMap();
@@ -35,10 +39,11 @@ const baselines = new WeakMap();
 const enemyDamage = enemy => enemy.damage ?? (enemy.role === 'boss' ? 18 : enemy.role === 'elite' ? 12 : enemy.role === 'runner' ? 7 : 9);
 
 /**
- * @param {{ client: import('./client.js').CoopClient, now?: () => number, peers: () => Map<string,{x:number,z:number,alive:boolean,at:number}> }} options
- *   peers() 回傳隊友最新的世界座標（公尺）、是否還活著、收到時間（coop.js 從角色狀態封包整理）
+ * @param {{ client: import('./client.js').CoopClient, now?: () => number, peers: () => Map<string,{x:number,z:number,alive:boolean,at:number,downed?:boolean,hidden?:boolean}>, hidden?: () => boolean }} options
+ *   peers() 回傳隊友最新的世界座標（公尺）、是否還站著、是否倒地／切到背景、收到時間（coop.js 從角色狀態封包整理）
+ *   hidden() 本機頁面是否在背景（交棒判斷用）
  */
-export function createEnemySync({ client, now = () => performance.now(), peers = () => new Map() }) {
+export function createEnemySync({ client, now = () => performance.now(), peers = () => new Map(), hidden = () => !!globalThis.document?.hidden }) {
   let march = null, arena = null, level = null;
   let role = null;
   const orig = {};
@@ -46,12 +51,19 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
   const encoder = new WorldEncoder();
   let outbox = [], dmBox = [], claimsIn = [];
   const proxies = new Map(), meters = new Map();
-  let targets = new Map(), retargetAt = -Infinity, epochCount = 0, lastSimTime = -1, lastSimAt = 0, lastYieldAt = -Infinity;
+  let targets = new Map(), retargetAt = -Infinity, epochCount = 0, lastSimTime = -1, lastSimAt = 0;
   const stats = { claimsApplied: 0, claimsRejected: 0, worldSent: 0, damageSent: 0 };
   // 隊友
   const decoder = new WorldDecoder();
   const buffers = new Map();
   let inbox = [], claimsOut = [], pickupsOut = [], worldFrom = null, worldEpoch = null, lastWorldAt = -Infinity, waitingSince = null;
+  // 第三階段：隊伍
+  const reviver = new ReviveTracker(), policy = new HandoffPolicy(), combo = new ComboWindow();
+  const revivedAt = new Map();          // 房主：剛救起的人 → 時間（忽略還沒更新的倒地封包）
+  const pendingPickups = new Map();     // 隊友：已申報、等房主回覆的補給 → 申報時間
+  let reviveProgress = new Map();       // 倒地者 → { pct, by, at }（房主算、隊友收 tm）
+  let endEpoch = null, retryOut = false, controls = null;
+  const fxListeners = new Set();
 
   const players = () => Math.max(1, client.members?.size || 1);
   const multi = () => role === 'host' && client.members?.size > 1;
@@ -71,24 +83,30 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
   }
 
   // ---------------------------------------------------------------- 房主：替身與仇恨
-  function alivePeers() {
+  /** 隊友是否倒地：狀態封包的倒地位元（剛被救起的人在新封包到之前不算） */
+  function peerDowned(id, p) { return !!p?.downed && !(now() - (revivedAt.get(id) ?? -Infinity) < TEAM.recentReviveMs); }
+  /** 在場的隊友（狀態新鮮、還在房裡）；倒地的人也在內（仇恨降權、救援計時要用） */
+  function presentPeers() {
     const t = now(), out = [];
     for (const [id, p] of peers()) {
-      if (id === client.you || !p.alive || t - p.at >= FRESH_MS || !client.members?.has(id)) continue;
+      if (id === client.you || t - p.at >= FRESH_MS || !client.members?.has(id)) continue;
+      const downed = peerDowned(id, p);
+      if (!downed && p.alive === false) continue;
       const px = level.toPx(p.x, p.z);   // 隊友狀態是世界座標（公尺）→ Arena px
-      out.push({ id, x: px.x, y: px.y });
+      out.push({ id, x: px.x, y: px.y, downed });
     }
     return out;
   }
   function refreshProxies(dt) {
     const live = new Set();
-    for (const p of alivePeers()) {
+    for (const p of presentPeers()) {
       live.add(p.id);
       let proxy = proxies.get(p.id);
       if (!proxy) proxies.set(p.id, proxy = { id: p.id, remote: true, x: p.x, y: p.y, hp: 100, maxHp: 100, energy: 0, invulnerable: 0, dodgeCooldown: 0, height: 0, facing: 0, action: 'idle', actionTime: 0, combo: 0 });
       proxy.x = p.x; proxy.y = p.y;
       proxy.invulnerable = Math.max(0, proxy.invulnerable - dt);
       proxy.alive = true;
+      proxy.downed = p.downed;
     }
     for (const [id, proxy] of proxies) if (!live.has(id)) proxy.alive = false;
   }
@@ -96,8 +114,10 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
     const fighters = arena.enemies.filter(e => e.action !== 'dead' && !e.prop);
     if (!force && march.time < retargetAt && fighters.every(e => targets.has(e.id))) return;
     retargetAt = march.time + TARGETING.retargetEvery;
-    const list = [{ id: LOCAL_ID, x: arena.hero.x, y: arena.hero.y, alive: arena.state === 'play' }];
-    for (const proxy of proxies.values()) if (proxy.alive) list.push({ id: proxy.id, x: proxy.x, y: proxy.y });
+    // 倒地的人仍可能被追，但要多算一段距離：敵人優先追站著的人
+    const penalty = downed => (downed ? TEAM.downedTargetPenalty : 0);
+    const list = [{ id: LOCAL_ID, x: arena.hero.x, y: arena.hero.y, alive: arena.state === 'play', penalty: penalty(arena.hero.downed) }];
+    for (const proxy of proxies.values()) if (proxy.alive) list.push({ id: proxy.id, x: proxy.x, y: proxy.y, penalty: penalty(proxy.downed) });
     targets = assignTargets(fighters, list, targets);
   }
   /** 這隻敵人要追的「英雄」：本機主角或某位隊友的替身 */
@@ -108,6 +128,7 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
     return proxy?.alive ? proxy : real;
   }
   function queueDamage(proxy, damage, source = {}, ground = false) {
+    if (proxy.downed) return;   // 倒地的人不再受傷
     dmBox.push([proxy.id, Math.round(damage * 10) / 10, ground ? 1 : 0, source.id | 0, Math.round((source.facing || 0) * 100)]);
     proxy.invulnerable = HURT_INVULNERABLE;
     stats.damageSent++;
@@ -141,9 +162,13 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
         enemy.evade = undefined;
         try { withHero(proxy, () => orig._damageEnemy.call(arena, enemy, check.amount, check.source)); } finally { if (evade !== undefined) enemy.evade = evade; }
       }
+      // 補給：房主裁定（先申報先得、距離合理、沒倒地），給了才由申報者自己回血
       if (Number.isInteger(d.p)) {
-        const k = march.pickups.findIndex(p => p.id === d.p);
-        if (k >= 0) { const [p] = march.pickups.splice(k, 1); march._emit('pickupLost', { pickupId: p.id, kind: p.kind, x: p.x, y: p.y, taken: true }); }
+        const k = grantPickup(march.pickups, d.p, { x: proxy.x, y: proxy.y, downed: peerDowned(from, peers().get(from)) });
+        if (k >= 0) {
+          const [p] = march.pickups.splice(k, 1);
+          march._emit('pickupLost', { pickupId: p.id, kind: p.kind, x: p.x, y: p.y, taken: true, to: from, amount: p.amount || 0, energy: p.energy || 0 });
+        }
       }
     }
     // 隊友的命中：房主畫面不定格、不跳連擊，只保留擊倒與破防（屍體與破防特效）
@@ -176,7 +201,7 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
       if (event.enemyId !== enemy.id || (event.type !== 'bossSlam' && event.type !== 'bossSweep')) continue;
       const damage = event.type === 'bossSlam' ? b.slamDamage : b.sweepDamage;
       const source = { id: enemy.id, role: enemy.role, facing: enemy.facing, ground: true };
-      const heroes = [arena.hero, ...[...proxies.values()].filter(p => p.alive)];
+      const heroes = [arena.hero, ...[...proxies.values()].filter(p => p.alive && !p.downed)];
       for (const hero of heroes) {
         if (hero === target || Math.hypot(hero.x - event.x, hero.y - event.y) > event.radius) continue;
         if (hero.remote) { if (hero.invulnerable <= 0) queueDamage(hero, damage, source, true); }
@@ -189,18 +214,25 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
     const i = march.segmentIndex, LEVEL = level.LEVEL;
     if (i >= LEVEL.segments.length - 1 || !march.gates[i].open) return;
     // 任何一位玩家穿過結界都算進入下一段；落後的人由 _constrain／guest 端拉進新段落
-    for (const hero of [arena.hero, ...[...proxies.values()].filter(p => p.alive)]) {
+    for (const hero of [arena.hero, ...[...proxies.values()].filter(p => p.alive && !p.downed)]) {
+      if (hero.downed) continue;
       if (level.toWorld(hero.x, hero.y).z < march.gates[i].z - LEVEL.enterDepth) { march._startSegment(i + 1); return; }
     }
   }
 
   function hostUpdate(dt, input) {
-    if (!multi()) { const r = orig.update.call(march, dt, input); noteSim(); return r; }
+    if (!multi()) {
+      const r = orig.update.call(march, dt, input);
+      noteSim();
+      if (arena.hero.downed) hostTeam(dt);   // 隊友都離開了、只剩倒地的自己 → 全滅
+      return r;
+    }
     refreshProxies(Math.min(dt, 0.1));
     applyClaims();
     retarget();
     const r = orig.update.call(march, dt, input);
     noteSim();
+    hostTeam(dt);
     return r;
   }
   function noteSim() { if (march.time !== lastSimTime) { lastSimTime = march.time; lastSimAt = now(); } }
@@ -221,16 +253,122 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
     const t = now();
     // 先把手上的東西送出去（擊倒、過關、剛剛打到隊友的傷害），再考慮交棒
     const events = outbox.splice(0, MAX_EVENTS_PER_MESSAGE);
+    if (march.state !== 'play') {
+      // 全滅或過關後：只送剩下的事件（全滅、過關通知），不再送凍住的敵人，等有人按重來
+      if (events.length && client.send('e', { c: Math.round(t), q: epoch(), v: events })) stats.worldSent++;
+      return;
+    }
     const raw = encoder.encode({ enemies: arena.enemies, clock: t, epoch: epoch(), time: arena.time, level: levelStatus(march), events, dm: dmBox.splice(0) });
+    const progress = [...reviveProgress].map(([id, p]) => [id, p.pct, p.by || '']);
+    if (progress.length) raw.tm = progress;
     const { d, rest } = fitWorld(raw);
     if (rest.length) outbox.unshift(...rest);
     if (!isEmptyWorld(d) && client.send('e', d)) stats.worldSent++;
-    // 自己倒下，或畫面停住（切到背景、鎖屏）：把房主交給還活著的隊友，由他從鏡像接手。過關後不交棒
-    const stalled = march.state === 'play' && t - lastSimAt > STALL_MS;
-    if ((march.state === 'dead' || stalled) && t - lastYieldAt > YIELD_COOLDOWN_MS) {
-      const heir = alivePeers().sort((a, b) => (a.id < b.id ? -1 : 1))[0];
-      if (heir && client.send('y', { to: heir.id })) lastYieldAt = t;
+    // 畫面停住（切到背景、鎖屏）持續一段時間：交給看得到畫面的隊友，由他從鏡像接手（team.js HandoffPolicy）。
+    // 沒有人看得到畫面就繼續當房主，等有人回來。倒地的房主照樣跑模擬，不交棒；過關或全滅後也不交棒
+    const candidates = [];
+    for (const id of client.members.keys()) {
+      if (id === client.you) continue;
+      const p = peers().get(id);
+      const fresh = !!p && t - p.at < FRESH_MS;
+      candidates.push({ id, present: fresh, visible: fresh && !p.hidden, downed: fresh && peerDowned(id, p) });
     }
+    const heir = policy.decide(t, { hidden: hidden(), stalled: t - lastSimAt > HANDOFF.stallMs }, candidates);
+    if (heir && client.send('y', { to: heir })) policy.yielded(t);
+  }
+
+  // ---------------------------------------------------------------- 第三階段：倒地、救援、全滅（每台裝置管自己的主角）
+  const teamActive = () => client.members?.size > 1;
+  function emitFx(event) { for (const fn of fxListeners) { try { fn(event); } catch (error) { console.error(error); } } }
+  function netEvent(event) { if (role === 'host' && teamActive()) outbox.push(compactEvent(event)); }
+
+  /** 本機主角血量歸零：連線中改成倒地（Arena 維持 play），不觸發單人版的陣亡 */
+  function downLocal() {
+    const hero = arena.hero;
+    arena.state = 'play';
+    Object.assign(hero, { hp: 0, downed: true, action: 'dead', actionTime: 0, invulnerable: 0, height: 0 });
+    arena.attack = null;
+    if (arena.air) arena.air = null;
+    arena.inputBuffer = null;
+    // Arena 發的「陣亡」事件改名，免得配樂當成輸了
+    for (const event of arena.events) if (event.type === 'dead') event.type = 'downed';
+    march._say('你倒下了！隊友靠近站著不動 3 秒就能把你扶起來', 4);
+  }
+  function reviveLocal() {
+    const hero = arena.hero;
+    if (!hero.downed) return;
+    const hp = Math.max(1, Math.round(hero.maxHp * TEAM.reviveHp));
+    Object.assign(hero, { downed: false, hp, action: 'idle', actionTime: 0, invulnerable: TEAM.reviveInvulnerable });
+    march._emit('heal', { x: hero.x, y: hero.y, amount: hp });
+    march._emit('revived', { x: hero.x, y: hero.y });
+    march._say('隊友把你扶起來了！', 2.5);
+  }
+  function localId() { return client.you || LOCAL_ID; }
+
+  /** 房主：救援計時與全滅判定（每一格） */
+  function hostTeam(dt) {
+    if (march.state !== 'play') return;
+    const hero = arena.hero;
+    const list = [{ id: localId(), x: hero.x, y: hero.y, downed: !!hero.downed, present: true }, ...presentPeers()];
+    const { progress, revived } = reviver.update(Math.min(dt, 0.1), list);
+    const t = now();
+    reviveProgress = new Map(progress.map(([id, pct, by]) => [id, { pct, by, at: t }]));
+    for (const id of revived) {
+      if (id === localId()) reviveLocal(); else revivedAt.set(id, t);
+      netEvent({ type: 'revive', id });
+      emitFx({ type: 'revived', id });
+    }
+    // 全滅：房裡每一位都倒地（沒收到狀態的人算站著）
+    const members = client.members?.size ? [...client.members.keys()] : [localId()];
+    const everyone = members.map(id => id === client.you || !client.you ? { downed: !!hero.downed } : { downed: peerDowned(id, peers().get(id)) && now() - (peers().get(id)?.at ?? -Infinity) < FRESH_MS });
+    if (hero.downed && teamWiped(everyone)) {
+      endRun();
+      netEvent({ type: 'wipe', segment: march.segmentIndex });
+    }
+  }
+  /** 全滅：大家一起看結算畫面（battle.js 看到 arena.state 不是 play 就顯示「重新集結」） */
+  function endRun() {
+    if (march.state !== 'play') return;
+    const hero = arena.hero;
+    march.state = 'dead';
+    arena.state = 'dead';
+    march.result = { rank: null, time: march.time, maxCombo: march.maxCombo, hp: 0, maxHp: hero.maxHp, kills: arena.kills, segment: march.segmentIndex };
+    march._emit('fail', { segment: march.segmentIndex, wipe: true });
+    reviveProgress = new Map();
+  }
+  /** 重來：房主直接重開；battle.js 的 start() 由 boot.js 經 setControls 交給這裡（沒有時退回 march.reset） */
+  function restart() {
+    if (controls?.start) controls.start(); else march.reset();
+  }
+  function teamReset() {
+    const hero = arena.hero;
+    hero.downed = false;
+    reviver.reset(); revivedAt.clear(); pendingPickups.clear(); combo.reset();
+    reviveProgress = new Map();
+  }
+
+  // ---------------------------------------------------------------- 第三階段：合體大招
+  function boostLocal(partners) {
+    const attack = arena.attack;
+    if (!attack?.flurry || attack.profile?.combo || arena.hero.action !== 'special' || arena.hero.actionTime >= attack.profile.impact) return false;
+    attack.profile = comboProfile(attack.profile);
+    march._emit('comboMusou', { x: arena.hero.x, y: arena.hero.y, partners: partners.length });
+    march._say('合體大招！', 2);
+    emitFx({ type: 'combo', ids: [localId(), ...partners] });
+    return true;
+  }
+  function noteLocalMusou() {
+    if (!teamActive()) return;
+    const partners = combo.note(localId(), now());
+    if (partners.length) boostLocal(partners);
+  }
+  /** coop.js：隊友的動作剛切到無雙亂舞 */
+  function notePeerMusou(id) {
+    const partners = combo.note(id, now());
+    emitFx({ type: 'peerMusou', id });
+    if (!partners.includes(localId())) { if (partners.length) emitFx({ type: 'combo', ids: [id, ...partners] }); return; }
+    // 自己先放、隊友在視窗內跟上：自己這一招還沒到終結就補上加成
+    if (!boostLocal([id])) emitFx({ type: 'combo', ids: [id, ...partners] });
   }
 
   // ---------------------------------------------------------------- 隊友：傀儡
@@ -357,6 +495,8 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
     } else if (type === 'drop') {
       march.pickups.push({ id: event.pickupId, kind: event.kind, x: event.x, y: event.y, amount: event.amount || 0, energy: event.energy || 0, until: march.time + T().pickupLife });
     } else if (type === 'pickupLost') {
+      if (event.to === client.you && !arena.hero.downed && march.state === 'play') guestGranted(event);
+      pendingPickups.delete(event.pickupId);
       march.pickups = march.pickups.filter(p => p.id !== event.pickupId);
     } else if (type === 'kill' || type === 'flee' || type === 'despawn') {
       removePuppet(event.enemyId);
@@ -365,11 +505,14 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
     else if (type === 'hint') { march.hint = event.text; march.hintUntil = march.time + (event.seconds || 4); }
     else if (type === 'bossPhase') { const boss = march.units.get(event.enemyId); if (boss) boss.phase = 2; }
     else if (type === 'clear') { guestClear(); return; }
+    else if (type === 'revive') { if (event.id === client.you) reviveLocal(); reviveProgress.delete(event.id); emitFx({ type: 'revived', id: event.id }); }
+    else if (type === 'wipe') { endEpoch = worldEpoch; endRun(); }
     const { type: _, ...values } = event;
     march._emit(type, { ...values, remote: true });
   }
   function guestClear() {
     if (march.state !== 'play') return;
+    endEpoch = worldEpoch;
     for (const enemy of [...arena.enemies]) removePuppet(enemy.id);
     march.hazards = [];
     march.stats.segmentTimes.push(march.time);
@@ -382,6 +525,13 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
     march._emit('clear', { ...march.result, x: hero.x, y: hero.y });
   }
   function processWorld(from, d) {
+    // 自己已經按了重來、房主還沒重開：舊局的訊息不理
+    if (endEpoch !== null && d.q === endEpoch && march.state === 'play') return;
+    if (endEpoch !== null && d.q !== undefined && d.q !== endEpoch) endEpoch = null;
+    if (Array.isArray(d.tm)) {
+      const t = now();
+      for (const entry of d.tm) if (Array.isArray(entry) && typeof entry[0] === 'string') reviveProgress.set(entry[0], { pct: +entry[1] || 0, by: entry[2] || null, at: t });
+    }
     if (worldFrom === from && worldEpoch !== null && d.q !== worldEpoch) clearWorld();   // 房主重開一局
     worldFrom = from; worldEpoch = d.q;
     const { upserts, removed } = decoder.apply(d);
@@ -398,30 +548,38 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
     if (Array.isArray(d.lv)) applyLevel(d.lv);
     for (const event of Array.isArray(d.v) ? d.v : []) if (event && typeof event.type === 'string') guestEvent(event);
     for (const hit of Array.isArray(d.dm) ? d.dm : []) {
-      if (!Array.isArray(hit) || hit[0] !== client.you) continue;
+      if (!Array.isArray(hit) || hit[0] !== client.you || arena.hero.downed) continue;
       arena.hurtHero(hit[1], { id: hit[3], role: 'scripted', facing: (hit[4] || 0) / 100, ground: !!hit[2] });
     }
   }
+  /** 走到補給上：先申報給房主，房主給了（pickupLost.to＝自己）才回血，兩個人不會同時拿到同一個 */
   function guestPickups() {
-    const hero = arena.hero;
+    const hero = arena.hero, t = now();
     for (let i = march.pickups.length - 1; i >= 0; i--) {
       const pickup = march.pickups[i];
-      if (march.time >= pickup.until) { march.pickups.splice(i, 1); continue; }
-      if (Math.hypot(pickup.x - hero.x, pickup.y - hero.y) > 80) continue;
-      const amount = Math.min(pickup.amount, hero.maxHp - hero.hp);
-      const energy = Math.min(pickup.energy, 100 - hero.energy);
-      hero.hp += amount; hero.energy += energy;
-      march.pickups.splice(i, 1);
-      pickupsOut.push(pickup.id);
-      march._emit('pickup', { pickupId: pickup.id, kind: pickup.kind, x: pickup.x, y: pickup.y, amount, energy });
-      if (amount > 0) march._emit('heal', { x: hero.x, y: hero.y, amount });
+      if (march.time >= pickup.until) { march.pickups.splice(i, 1); pendingPickups.delete(pickup.id); continue; }
+      if (hero.downed || Math.hypot(pickup.x - hero.x, pickup.y - hero.y) > 80) continue;
+      if (t - (pendingPickups.get(pickup.id) ?? -Infinity) < PICKUP_RETRY_MS) continue;
+      pendingPickups.set(pickup.id, t);
+      if (!pickupsOut.includes(pickup.id)) pickupsOut.push(pickup.id);
     }
+  }
+  function guestGranted(event) {
+    const hero = arena.hero;
+    const pickup = march.pickups.find(p => p.id === event.pickupId) || event;
+    const amount = Math.max(0, Math.min(pickup.amount || 0, hero.maxHp - hero.hp));
+    const energy = Math.max(0, Math.min(pickup.energy || 0, 100 - hero.energy));
+    hero.hp += amount; hero.energy += energy;
+    march._emit('pickup', { pickupId: event.pickupId, kind: pickup.kind, x: pickup.x, y: pickup.y, amount, energy });
+    if (amount > 0) march._emit('heal', { x: hero.x, y: hero.y, amount });
   }
   function guestUpdate(dt, input) {
     const queued = inbox; inbox = [];
     for (const { from, d } of queued) processWorld(from, d);
     if (march.state !== 'play') return march.hud();
     placePuppets(dt);
+    const t0 = now();
+    for (const [id, p] of reviveProgress) if (t0 - p.at > PROGRESS_HOLD_MS) reviveProgress.delete(id);
     const before = arena.time;
     arena.update(dt, input);
     const step = arena.time - before;
@@ -465,11 +623,12 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
     claimsOut.push([enemy.id, Math.round(damage * 100) / 100, SOURCES.indexOf(source) < 0 ? 0 : SOURCES.indexOf(source), arena.attackSerial | 0]);
   }
   function guestTick() {
-    if (!march || role !== 'guest') { claimsOut.length = 0; pickupsOut.length = 0; return; }
-    if (!claimsOut.length && !pickupsOut.length) return;
+    if (!march || role !== 'guest') { claimsOut.length = 0; pickupsOut.length = 0; retryOut = false; return; }
+    if (!claimsOut.length && !pickupsOut.length && !retryOut) return;
     const d = { x: Math.round(arena.hero.x), y: Math.round(arena.hero.y), h: claimsOut.slice(0, CLAIM_LIMITS.maxEntries) };
     if (pickupsOut.length) d.p = pickupsOut[0];
-    if (client.send('h', d)) { claimsOut.splice(0, d.h.length); if (d.p !== undefined) pickupsOut.shift(); }
+    if (retryOut) d.r = 1;   // 全滅／過關後按了重來：請房主重開
+    if (client.send('h', d)) { claimsOut.splice(0, d.h.length); if (d.p !== undefined) pickupsOut.shift(); retryOut = false; }
     else if (claimsOut.length > 200) claimsOut.splice(0, claimsOut.length - 200);
   }
 
@@ -511,7 +670,8 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
     buffers.clear(); decoder.reset();
     encoder.reset(); epochCount++;
     targets = new Map(); retargetAt = -Infinity; outbox = []; dmBox = [];
-    lastSimAt = now(); lastYieldAt = now();
+    lastSimAt = now(); policy.becameHost(now());
+    reviver.reset(); revivedAt.clear(); reviveProgress = new Map();
   }
   /** 房主 → 隊友：自己的敵人全部轉成傀儡，等新房主的關鍵幀對齊 */
   function demote() {
@@ -534,30 +694,69 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
     if (!march) return;
     if (next === 'host' && previous === 'guest') promote();
     else if (next === 'guest') demote();
+    else if (next === 'host') policy.becameHost(now());
   }
 
   client.on?.('welcome', syncRole);
   client.on?.('host', syncRole);
   client.on?.('join', syncRole);
   client.on?.('leave', id => { proxies.delete(id); meters.delete(id); syncRole(); });
-  client.on?.('world', (d, at, from) => { if (role === 'guest') { inbox.push({ from, d }); lastWorldAt = now(); } });
-  client.on?.('claim', (from, d) => { if (role === 'host' && d && typeof d === 'object') claimsIn.push({ from, d }); });
+  client.on?.('world', (d, at, from) => {
+    if (role !== 'guest') return;
+    lastWorldAt = now();
+    if (march && march.state !== 'play') {
+      // 結算畫面時畫面不跑（guestUpdate 不會被呼叫）：只看房主是不是已經重開（新的一局 epoch），是就跟著重來
+      if (endEpoch === null || d.q === undefined || d.q === endEpoch) return;
+      restart();
+    }
+    inbox.push({ from, d });
+  });
+  client.on?.('claim', (from, d) => {
+    if (role !== 'host' || !d || typeof d !== 'object') return;
+    // 隊友在結算畫面按了重來：房主重開（結算時畫面不跑，所以在這裡直接處理）
+    if (d.r && march && march.state !== 'play') restart();
+    claimsIn.push({ from, d });
+  });
 
   return {
     /** battle.js：{ march, arena, level }（level＝march.js 模組）。沒有行軍關（march 為 null）時不做任何事 */
     bind(ctx) {
       if (!ctx?.march || !ctx.level) return;
       ({ march, arena, level } = ctx);
+      // 第三階段：倒地（包在最裡層，下面 enemy-sync 的包裝呼叫到的「原方法」就是這些）
+      const baseHurt = arena._hurtHero, baseUpdate = arena.update, baseTickPickups = march._tickPickups;
+      arena._hurtHero = enemy => {
+        if (arena.hero.downed) return;   // 倒地的人不再受傷
+        baseHurt.call(arena, enemy);
+        if (arena.state === 'dead' && teamActive()) downLocal();
+      };
+      arena.update = (dt, input) => {
+        if (!arena.hero.downed) return baseUpdate.call(arena, dt, input);
+        const snap = baseUpdate.call(arena, dt, NO_INPUT);   // 倒地：不能動、不能出招
+        arena.hero.action = 'dead';
+        return snap;
+      };
+      march._tickPickups = () => {
+        if (!arena.hero.downed) return baseTickPickups.call(march);
+        withHero({ x: Infinity, y: Infinity, hp: 0, maxHp: 0, energy: 100 }, () => baseTickPickups.call(march));   // 倒地時只讓補給照常過期
+      };
       const keep = (object, name) => { orig[name] = object[name]; };
       for (const name of ['update', 'drainEvents', 'reset', '_spawnUnit', '_raider', '_lunger', '_boss', '_checkProgress']) keep(march, name);
       for (const name of ['_advanceEnemies', '_hurtHero', 'hurtHero', '_damageEnemy', 'stagger']) keep(arena, name);
 
       march.update = (dt, input) => role === 'guest' ? guestUpdate(dt, input) : hostUpdate(dt, input);
-      march.drainEvents = () => { const list = orig.drainEvents.call(march); if (role === 'host') captureEvents(list); return list; };
+      march.drainEvents = () => {
+        const list = orig.drainEvents.call(march);
+        if (role === 'host') captureEvents(list);
+        for (const event of list) if (event.type === 'musouStart' && !event.remote) noteLocalMusou();
+        return list;
+      };
       march.reset = () => {
         const hud = orig.reset.call(march);
         applyScale();
+        teamReset();
         if (role === 'guest') {
+          if (endEpoch !== null) retryOut = true;   // 結算後按重來：請房主一起重開
           clearWorld();
           worldFrom = null; worldEpoch = null; lastWorldAt = now();
           march.seg = freshSeg(0);
@@ -612,10 +811,18 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
     },
     /** coop.js 以 WORLD_HZ 呼叫 */
     tick() { if (role === 'host') hostTick(); else guestTick(); },
+    /** boot.js（經 coop.js）：{ start }＝battle.start，全滅／過關後同步重來用 */
+    setControls(value) { controls = value || null; },
+    notePeerMusou,
+    /** team-fx.js 訂閱：{ type: 'combo'|'peerMusou'|'revived', … } */
+    onFx(fn) { fxListeners.add(fn); return () => fxListeners.delete(fn); },
+    /** 畫面用：本機是否倒地、各倒地者的救援進度（0–100） */
+    get localDowned() { return !!arena?.hero?.downed; },
+    get reviveProgress() { return reviveProgress; },
     get role() { return role; },
     get stats() { return { ...stats, proxies: proxies.size, targets: targets.size, puppets: arena ? arena.enemies.filter(e => e.remote).length : 0 }; },
     /** 測試用：直接看到內部狀態 */
-    _debug: { proxies, get targets() { return targets; }, retarget: force => retarget(force), refreshProxies: dt => refreshProxies(dt), promote: () => promote(), demote: () => demote(), processWorld: (from, d) => processWorld(from, d), hostTick: () => hostTick() },
+    _debug: { proxies, policy, reviver, get endEpoch() { return endEpoch; }, restart: () => restart(), get targets() { return targets; }, retarget: force => retarget(force), refreshProxies: dt => refreshProxies(dt), promote: () => promote(), demote: () => demote(), processWorld: (from, d) => processWorld(from, d), hostTick: () => hostTick() },
   };
 }
 

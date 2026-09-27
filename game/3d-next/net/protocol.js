@@ -45,7 +45,7 @@ export function backoffDelay(attempt, random = Math.random) {
 const r3 = v => Math.round(v * 1000) / 1000;
 /**
  * 本機角色狀態 → 精簡 JSON（約 100 bytes）。
- * @param {{x,y,z,yaw,lift?,anim,time?,scale?,loop?}} s  @param {number} clock 本機毫秒時鐘（performance.now）
+ * @param {{x,y,z,yaw,lift?,anim,time?,scale?,loop?,st?}} s  @param {number} clock 本機毫秒時鐘（performance.now）
  */
 export function encodeState(s, clock) {
   const d = { x: r3(s.x), y: r3(s.y), z: r3(s.z), r: r3(s.yaw), c: Math.round(clock) };
@@ -54,10 +54,11 @@ export function encodeState(s, clock) {
   if (s.time !== undefined) d.at = r3(s.time);
   if (s.scale !== undefined && s.scale !== 1) d.ts = r3(s.scale);
   d.l = s.loop === false ? 0 : 1;
+  if (s.st) d.st = s.st | 0;   // 第三階段：狀態位元（net/team.js STATUS）
   return JSON.stringify({ t: 's', d });
 }
 
 /** relay 轉來的 d → 插值用快照 */
 export function decodeState(d) {
-  return { x: d.x, y: d.y, z: d.z, yaw: d.r, lift: d.h || 0, anim: d.a || 'idle', time: d.at || 0, scale: d.ts ?? 1, loop: d.l !== 0, t: d.c };
+  return { x: d.x, y: d.y, z: d.z, yaw: d.r, lift: d.h || 0, anim: d.a || 'idle', time: d.at || 0, scale: d.ts ?? 1, loop: d.l !== 0, t: d.c, st: d.st | 0 };
 }

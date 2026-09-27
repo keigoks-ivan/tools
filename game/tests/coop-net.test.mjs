@@ -87,7 +87,7 @@ test('state encoding is compact and round-trips', () => {
   assert.ok(text.length < 120, text);
   const { t, d } = JSON.parse(text);
   assert.equal(t, 's');
-  assert.deepEqual(decodeState(d), { x: 1.235, y: 0.5, z: -3, yaw: 2.5, lift: 0, anim: 'combo2', time: 0.123, scale: 1.5, loop: false, t: 12346 });
+  assert.deepEqual(decodeState(d), { x: 1.235, y: 0.5, z: -3, yaw: 2.5, lift: 0, anim: 'combo2', time: 0.123, scale: 1.5, loop: false, t: 12346, st: 0 });
 });
 
 test('relay URL: localhost uses wrangler dev, production otherwise, ?relay= overrides', () => {

@@ -256,9 +256,10 @@ function makeDevice(room, id, seed) {
   const client = room.clients.get(id);
   const peers = new Map();
   const march = new MarchDirector({ seed });
-  const sync = createEnemySync({ client, now: () => room.clock.t, peers: () => peers });
+  const device = { id, client, march, arena: march.arena, peers, events: [], hidden: false };
+  device.sync = createEnemySync({ client, now: () => room.clock.t, peers: () => peers, hidden: () => device.hidden });
   march.arena.hero.hp = march.arena.hero.maxHp = 100000;   // 測試要跑很久，不讓任何人倒下
-  return { id, client, march, arena: march.arena, sync, peers, events: [] };
+  return device;
 }
 
 /** 一格：兩台各自 update（房主先），每 100 ms 各送一次 */
@@ -267,9 +268,10 @@ function step(room, devices, input = {}) {
   for (const a of devices) for (const b of devices) {
     if (a === b || !a.client.online || !b.client.online) continue;
     const w = toWorld(b.arena.hero.x, b.arena.hero.y);
-    a.peers.set(b.id, { x: w.x, z: w.z, alive: b.arena.state === 'play', at: room.clock.t });
+    const downed = !!b.arena.hero.downed;
+    a.peers.set(b.id, { x: w.x, z: w.z, alive: b.arena.state === 'play' && !downed, downed, hidden: b.hidden, at: room.clock.t });
   }
-  for (const device of devices) if (device.client.online) {
+  for (const device of devices) if (device.client.online && !device.frozen) {
     device.march.update(STEP, device.id === 'A' ? input : {});
     device.events.push(...device.march.drainEvents());
   }
@@ -443,13 +445,15 @@ test('host migration: the guest promotes its mirror and the level keeps running'
   } finally { restore(); }
 });
 
-test('a dead or stalled host hands off to a living teammate, who takes over from the last snapshot', () => {
+test('a stalled host hands off to a visible teammate, who takes over from the last snapshot', () => {
   const { room, A, B, restore } = setup();
   try {
     for (let i = 0; i < 60 * 6; i++) step(room, [A, B]);
     const mirrored = liveIds(A.arena);
-    // host stops simulating (tab hidden): its ticks keep running, frames don't
-    for (let k = 0; k < 20; k++) { room.clock.t += 100; A.sync.tick(); }
+    // host stops simulating (tab hidden): its ticks keep running, frames don't. Stall 1.5 s + grace 2 s
+    for (let k = 0; k < 30; k++) { room.clock.t += 100; A.sync.tick(); }
+    assert.deepEqual(room.log.y, [], 'no hand-off during the grace period');
+    for (let k = 0; k < 10; k++) { room.clock.t += 100; A.sync.tick(); }
     assert.deepEqual(room.log.y, ['B'], 'host yielded to B');
     assert.equal(A.sync.role, 'guest');
     assert.equal(B.sync.role, 'host');
@@ -507,4 +511,209 @@ test('client accepts world messages only from the current host and claims only w
   assert.deepEqual(claims, ['C']);
   assert.deepEqual(worlds, ['A']);
   assert.equal(client.send('e', {}), false, 'not connected → not sent');
+});
+
+// ---------------------------------------------------------------- 第三階段：倒地、救援、全滅、合體、補給、交棒
+
+const runFor = (room, devices, seconds, before = () => {}, input = {}) => {
+  for (let i = 0; i < Math.round(seconds * 60); i++) { before(i); step(room, devices, input); }
+};
+
+test('co-op: a guest at 0 HP is downed, not dead; the host standing still next to them revives them at 50 %', () => {
+  const { room, A, B, restore } = setup();
+  try {
+    runFor(room, [A, B], 2);
+    const hero = B.arena.hero;
+    B.arena.hurtHero(1e9, {});
+    assert.equal(B.arena.state, 'play', 'the arena keeps running');
+    assert.equal(hero.downed, true);
+    assert.equal(hero.action, 'dead', 'lies down (battle.js plays the death clip)');
+    step(room, [A, B]);
+    assert.equal(B.march.state, 'play');
+    assert.ok(B.events.some(e => e.type === 'downed') && !B.events.some(e => e.type === 'dead' || e.type === 'fail'), 'no defeat music, no result screen');
+    // cannot act: movement and musou are ignored; enemy hits are ignored
+    const x = hero.x;
+    hero.energy = 100;
+    B.march.update(STEP, { x: 1, special: true });
+    assert.equal(hero.x, x);
+    assert.equal(hero.energy, 100);
+    assert.equal(B.arena.hurtHero(5, {}), true);
+    assert.equal(hero.hp, 0);
+    // the host sees the downed bit, keeps hosting, walks next to B and holds still
+    let mid = null;
+    runFor(room, [A, B], 3.6, i => {
+      A.arena.hero.x = hero.x - 40; A.arena.hero.y = hero.y;
+      if (i === 90) mid = { guest: B.sync.reviveProgress.get('B'), host: A.sync.reviveProgress.get('B') };
+    });
+    assert.ok(mid.host?.pct > 0 && mid.host.by === 'A', `host timed the revive (${JSON.stringify(mid.host)})`);
+    assert.ok(mid.guest?.pct > 0, 'the downed guest sees the progress ring too');
+    assert.equal(hero.downed, false, 'revived');
+    assert.equal(hero.hp, hero.maxHp * 0.5);
+    assert.ok(B.events.some(e => e.type === 'revived'));
+    assert.deepEqual(room.log.y, [], 'no host change');
+    assert.equal(A.march.state, 'play');
+  } finally { restore(); }
+});
+
+test('co-op: a downed host keeps hosting and is revived by the guest', () => {
+  const { room, A, B, restore } = setup();
+  try {
+    runFor(room, [A, B], 2);
+    A.arena.hurtHero(1e9, {});
+    assert.equal(A.arena.hero.downed, true);
+    assert.equal(A.march.state, 'play');
+    runFor(room, [A, B], 3.8, () => { B.arena.hero.x = A.arena.hero.x + 40; B.arena.hero.y = A.arena.hero.y; });
+    assert.equal(A.arena.hero.downed, false);
+    assert.equal(A.arena.hero.hp, A.arena.hero.maxHp * 0.5);
+    assert.equal(A.sync.role, 'host');
+    assert.deepEqual(room.log.y, []);
+    assert.ok(B.events.some(e => e.type === 'revive' && e.id === 'A'), 'guest learned about it (fx)');
+    // enemies went for the standing guest while the host was down
+  } finally { restore(); }
+});
+
+function wipe(room, A, B) {
+  A.arena.hurtHero(1e9, {}); B.arena.hurtHero(1e9, {});
+  runFor(room, [A, B], 0.5);
+}
+
+test('co-op: team wipe only when everyone is downed; any player can retry and the room restarts together', () => {
+  const { room, A, B, restore } = setup();
+  try {
+    runFor(room, [A, B], 3);
+    A.arena.hurtHero(1e9, {});
+    runFor(room, [A, B], 0.5);
+    assert.equal(A.march.state, 'play', 'one player down is not a wipe');
+    B.arena.hurtHero(1e9, {});
+    runFor(room, [A, B], 0.5);
+    for (const d of [A, B]) {
+      assert.equal(d.march.state, 'dead', `${d.id} sees the shared game over`);
+      assert.equal(d.arena.state, 'dead', 'battle.js finish() shows the result screen');
+    }
+    assert.ok(B.events.some(e => e.type === 'fail'));
+    assert.deepEqual(room.log.y, [], 'a wipe does not move the host');
+    // after the wipe the host stops streaming the frozen enemies
+    const sent = room.log.e.length;
+    runFor(room, [A, B], 1);
+    assert.ok(room.log.e.slice(sent).every(d => !d.n && !d.dm), 'no enemy snapshots while on the result screen');
+    // the GUEST presses retry (battle.js start() → march.reset())
+    const hostEpoch = room.log.e.at(-1)?.q;
+    B.march.reset();
+    for (let i = 0; i < 60 && A.march.state !== 'play'; i++) step(room, [A, B]);
+    assert.equal(A.march.state, 'play', 'the host restarted on the guest request');
+    for (const d of [A, B]) d.arena.hero.hp = d.arena.hero.maxHp = 100000;
+    runFor(room, [A, B], 3);
+    assert.notEqual(room.log.e.at(-1).q, hostEpoch, 'new run epoch');
+    assert.equal(B.march.state, 'play');
+    assert.equal(B.sync._debug.endEpoch, null);
+    assert.ok(liveIds(A.arena).length > 0);
+    assert.deepEqual(liveIds(B.arena), liveIds(A.arena), 'guest mirrors the new run');
+    assert.ok(!A.arena.hero.downed && !B.arena.hero.downed);
+  } finally { restore(); }
+});
+
+test('co-op: when the host presses retry, guests on the result screen follow automatically', () => {
+  const { room, A, B, restore } = setup();
+  try {
+    runFor(room, [A, B], 3);
+    wipe(room, A, B);
+    assert.equal(B.march.state, 'dead');
+    let followed = 0;
+    B.sync.setControls({ start: () => { followed++; B.march.reset(); } });   // battle.start in the browser
+    A.march.reset();                                                           // host clicks 重來
+    for (const d of [A, B]) d.arena.hero.hp = d.arena.hero.maxHp = 100000;
+    const mark = room.log.e.length;
+    runFor(room, [A, B], 3);
+    assert.equal(followed, 1, 'guest restarted once, by itself');
+    assert.equal(B.march.state, 'play');
+    assert.equal(new Set(room.log.e.slice(mark).map(d => d.q)).size, 1, 'the guest retry that follows does not restart the host again');
+    assert.deepEqual(liveIds(B.arena), liveIds(A.arena));
+  } finally { restore(); }
+});
+
+test('co-op: the host arbitrates pickups — nobody takes the same one twice', () => {
+  const { room, A, B, restore } = setup();
+  try {
+    runFor(room, [A, B], 2);
+    const hb = B.arena.hero, ha = A.arena.hero;
+    hb.hp = hb.maxHp - 5000; ha.hp = ha.maxHp - 5000;
+    // 1) a bun only the guest walks to: granted, healed exactly once, gone everywhere
+    const bun = A.march._drop('bun', hb.x, hb.y, { heal: 30 });
+    runFor(room, [A, B], 1, () => { hb.x = bun.x; hb.y = bun.y; });
+    assert.equal(hb.hp, hb.maxHp - 5000 + 30);
+    assert.equal(B.events.filter(e => e.type === 'pickup' && e.pickupId === bun.id).length, 1);
+    assert.ok(!A.march.pickups.some(p => p.id === bun.id) && !B.march.pickups.some(p => p.id === bun.id));
+    // 2) both step on the same bun in the same frame: the host (first) gets it, the guest's claim is refused
+    const spot = { x: (ha.x + hb.x) / 2, y: ha.y };
+    const contested = A.march._drop('bun', spot.x, spot.y, { heal: 40 });
+    runFor(room, [A, B], 0.5, () => { ha.x = contested.x - 200; hb.x = contested.x + 200; });
+    assert.ok(B.march.pickups.some(p => p.id === contested.id), 'guest sees the bun');
+    const hpA = ha.hp, hpB = hb.hp;
+    runFor(room, [A, B], 1, () => { ha.x = hb.x = contested.x; ha.y = hb.y = contested.y; });
+    assert.equal(ha.hp, hpA + 40, 'host took it');
+    assert.equal(hb.hp, hpB, 'guest did not heal');
+    assert.ok(room.log.h.some(c => c.p === contested.id), 'the guest did ask');
+    assert.equal(B.events.filter(e => e.type === 'pickup' && e.pickupId === contested.id).length, 0);
+    assert.ok(!B.march.pickups.some(p => p.id === contested.id));
+  } finally { restore(); }
+});
+
+test('co-op: combo musou — two musou starts within 1.5 s boost damage and radius on both sides', () => {
+  const { room, A, B, restore } = setup();
+  try {
+    runFor(room, [A, B], 1);
+    const fx = [];
+    A.sync.onFx(e => fx.push(e));
+    A.arena.hero.energy = 100;
+    step(room, [A, B], { special: true });
+    const attack = A.arena.attack;
+    assert.ok(attack?.flurry, 'host started the musou');
+    assert.ok(!attack.profile.combo, 'alone: no bonus yet');
+    room.clock.t += 700;
+    A.sync.notePeerMusou('B');                       // coop.js: B's animation switched to musouFlurry
+    assert.equal(attack.profile.combo, true);
+    assert.equal(attack.profile.damageScale, 1.25);
+    assert.equal(attack.profile.radius, 220 * 1.2);
+    assert.ok(fx.some(e => e.type === 'combo' && e.ids.includes('A') && e.ids.includes('B')), 'shared flourish');
+    assert.ok(fx.some(e => e.type === 'peerMusou' && e.id === 'B'), 'teammate musou pulse');
+    // guest side, peer first then local: boosted at its own start
+    B.sync.notePeerMusou('A');
+    B.arena.hero.energy = 100;
+    B.march.update(STEP, { special: true });
+    B.march.drainEvents();
+    assert.equal(B.arena.attack?.profile.combo, true);
+    // outside the window: no bonus
+    runFor(room, [A, B], 5.5);
+    A.arena.hero.energy = 100;
+    room.clock.t += 5000;
+    step(room, [A, B], { special: true });
+    room.clock.t += 1600;
+    A.sync.notePeerMusou('B');
+    assert.ok(A.arena.attack?.flurry && !A.arena.attack.profile.combo, 'too far apart');
+  } finally { restore(); }
+});
+
+test('co-op hand-off: only to a visible player; nobody visible keeps the host; no bouncing back', () => {
+  const { room, A, B, restore } = setup();
+  try {
+    runFor(room, [A, B], 6);
+    // host tab hidden and frozen, guest also in the background
+    A.hidden = true; A.frozen = true; B.hidden = true;
+    runFor(room, [A, B], 10);
+    assert.deepEqual(room.log.y, [], 'nobody can see the game: keep the current host');
+    assert.equal(A.sync.role, 'host');
+    // the guest comes back: after it has been visible for a moment, the role moves to it
+    B.hidden = false;
+    let waited = 0;
+    while (!room.log.y.length && waited < 600) { step(room, [A, B]); waited++; }
+    assert.deepEqual(room.log.y, ['B']);
+    assert.ok(waited / 60 >= 1.4, `waited ${(waited / 60).toFixed(2)} s for B to be stably visible`);
+    assert.equal(B.sync.role, 'host');
+    // A comes back, B immediately goes away: B keeps the role for its minimum tenure (no ping-pong)
+    A.hidden = false; A.frozen = false; B.hidden = true; B.frozen = true;
+    runFor(room, [A, B], 4);
+    assert.deepEqual(room.log.y, ['B'], 'no immediate hand-back');
+    runFor(room, [A, B], 6);
+    assert.deepEqual(room.log.y, ['B', 'A'], 'after the tenure and grace period it does move back');
+  } finally { restore(); }
 });

@@ -73,7 +73,8 @@ export function assignTargets(enemies, players, previous = new Map(), options = 
   for (const { e } of list) {
     let best = null, bestCost = Infinity;
     for (const p of alive) {
-      let cost = Math.hypot(p.x - e.x, p.y - e.y) + options.loadPenalty * load.get(p.id);
+      // penalty：倒地的玩家多算一段距離（第三階段），敵人優先追站著的人
+      let cost = Math.hypot(p.x - e.x, p.y - e.y) + options.loadPenalty * load.get(p.id) + (p.penalty || 0);
       if (previous.get(e.id) === p.id) cost -= options.sticky;
       if (cost < bestCost - 1e-9 || (Math.abs(cost - bestCost) <= 1e-9 && best && p.id < best.id)) { best = p; bestCost = cost; }
     }
