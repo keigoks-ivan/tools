@@ -121,6 +121,17 @@ async function game() {
   const sens = $('sens');
   input.sens = store.get('sens', 1); sens.value = input.sens;
   sens.addEventListener('input', () => { input.sens = +sens.value; store.set('sens', sens.value); });
+  // 全螢幕：標題右上角、暫停選單各一顆（手機不支援就藏起來）
+  const de = document.documentElement, fsBtns = document.querySelectorAll('.fs');
+  const fsOn = () => document.fullscreenElement || document.webkitFullscreenElement;
+  if (!(document.fullscreenEnabled || document.webkitFullscreenEnabled)) fsBtns.forEach((b) => { b.style.display = 'none'; });
+  fsBtns.forEach((b) => b.addEventListener('click', () => {
+    try {
+      const p = fsOn() ? (document.exitFullscreen || document.webkitExitFullscreen).call(document) : (de.requestFullscreen || de.webkitRequestFullscreen).call(de, { navigationUI: 'hide' });
+      if (p && p.catch) p.catch(() => {});
+    } catch (e) {}
+  }));
+  for (const k of ['fullscreenchange', 'webkitfullscreenchange']) document.addEventListener(k, () => fsBtns.forEach((b) => { b.textContent = fsOn() ? '離開全螢幕 EXIT' : '全螢幕 FULLSCREEN'; }));
   addEventListener('resize', () => {
     renderer.setSize(innerWidth, innerHeight);
     camera.aspect = cockCam.aspect = innerWidth / innerHeight;
