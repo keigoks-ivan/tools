@@ -162,7 +162,8 @@ function makeBladeTrail(scene, sword) {
 
 // options.audio：boot.js 在 ?hero=vroid 時傳入的 audio.js 實例（程式合成配樂＋音效）；Rumi 預設為 null＝靜音
 // options.assets：boot.js 的預載器（createBattleAssets()）；已下載的檔案直接從記憶體取用
-export async function createBattle(canvas, { audio = null, assets = null } = {}) {
+// options.coop：[coop] 只有三人版 game/trio/boot.js 傳入（net/coop.js）；單人頁為 null，所有 coop 掛鉤都不執行
+export async function createBattle(canvas, { audio = null, assets = null, coop = null } = {}) {
   assets ||= createBattleAssets().start();
   const heroLoad = assets.gltf('hero');
   heroLoad.catch(() => {});   // rejection is handled by the Promise.all below; avoid an early unhandled-rejection report
@@ -252,6 +253,8 @@ export async function createBattle(canvas, { audio = null, assets = null } = {})
     currentName = name;
   }
   play('idle');
+  // [coop] 三人連線：隊友沿用這個主角模型與片段；local() 是送給隊友的本機狀態。單人頁 coop 為 null
+  const coopView = coop?.attach({ THREE, scene, heroModel, clips, cloneSkinned, local: () => ({ x: hero.position.x, y: hero.position.y, z: hero.position.z, yaw: hero.rotation.y, lift: heroModel.position.y - heroBaseY, anim: currentName, time: currentAction?.time || 0, scale: currentAction?.getEffectiveTimeScale() || 1, loop: currentAction?.loop !== THREE.LoopOnce }) }) || null;
   const sword = heroModel.getObjectByName('Hero_sword') || heroModel.getObjectByName('rumi_sword');
   // combat-fx：刀光、打擊、無雙演出與時間倍率（頓格／慢動作／定格）；有它時下方舊特效與倍率都不作用
   let combatFx = null;
@@ -292,6 +295,7 @@ export async function createBattle(canvas, { audio = null, assets = null } = {})
   // 紫刃（?hero=vroid）：跳躍與無雙亂舞；Rumi 預設單場維持原本的 Arena
   const arena = march ? march.arena : new Arena({ seed: 17, warriorMode: true, musou: heroChoice === 'vroid', ...(heroChoice === 'vroid' ? { jump: true, musouFlurry: true } : {}) });
   if (debug) window.__arena = arena;   // ?debug：無頭測試可讀英雄狀態（單場與行軍關）
+  coopView?.bindLevel({ march, arena, level: marchModules?.[0] || null });   // [coop] 第二階段：房主跑敵人、隊友打房主的敵人（net/enemy-sync.js）
   if (arena.jumpEnabled) for (const element of document.querySelectorAll('[data-action="jump"], [data-jump-help]')) element.hidden = false;
   const keys = new Set();
   const edges = {};
@@ -814,6 +818,7 @@ export async function createBattle(canvas, { audio = null, assets = null } = {})
     syncEnemies(dt);
     world?.update(march.view(), dt, performance.now() / 1000);
     syncHero(dt);
+    coopView?.update(realDt);   // [coop] 隊友插值與動作
     syncCamera(realDt);
     updateImpact(combatFx ? dt : realDt);
     updatePopups(realDt);
@@ -924,6 +929,14 @@ export async function createBattle(canvas, { audio = null, assets = null } = {})
   stick.addEventListener('pointerdown', event => { if (!running || paused || isPortrait() || joystick.pointer !== null) return; event.preventDefault(); joystick.pointer = event.pointerId; stick.setPointerCapture(event.pointerId); moveStick(event); });
   stick.addEventListener('pointermove', moveStick);
   for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) stick.addEventListener(type, event => { if (event.pointerId === joystick.pointer) { joystick.pointer = null; joystick.x = joystick.y = 0; knob.style.transform = ''; } });
+  // 保險：iOS 偶爾吃掉搖桿的 pointerup（系統手勢、多指同時放開），手指都離開搖桿時一律歸零，避免角色卡在同一邊一直走
+  const releaseStickIfLifted = event => {
+    if (joystick.pointer === null) return;
+    for (const touch of event.touches || []) if (stick.contains(touch.target)) return;
+    joystick.pointer = null; joystick.x = joystick.y = 0; knob.style.transform = '';
+  };
+  window.addEventListener('touchend', releaseStickIfLifted, { passive: true });
+  window.addEventListener('touchcancel', releaseStickIfLifted, { passive: true });
   for (const button of document.querySelectorAll('[data-action]')) {
     button.addEventListener('pointerdown', event => {
       if (!running || paused || isPortrait()) return;
@@ -949,7 +962,7 @@ export async function createBattle(canvas, { audio = null, assets = null } = {})
   window.addEventListener('resize', resize);
   window.addEventListener('orientationchange', resize);
   window.visualViewport?.addEventListener('resize', resize);   // iOS 網址列收合、分割畫面時 window resize 不一定會觸發
-  window.addEventListener('blur', () => { if (running) pause(true); });
+  window.addEventListener('blur', () => { if (!running) return; if (coop) clearInput(); else pause(true); });   // [coop] 連線中切到別的視窗不暫停（隊友還在動），但放掉按鍵與搖桿，免得回來時卡在同一邊
   // 鎖屏、切 App：回來時停在暫停畫面，不直接接著打
   document.addEventListener('visibilitychange', () => { if (document.hidden) { if (running) pause(true); stopFrames(); } else resumeFrames(); });
   canvas.addEventListener('webglcontextlost', event => { event.preventDefault(); stopFrames(); toast('3D 畫面暫停，請重新載入頁面。', 10); });

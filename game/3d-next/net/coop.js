@@ -1,0 +1,123 @@
+/**
+ * 三人連線與戰場的接點。只有 game/trio/boot.js 會建立它並以 createBattle(canvas, { coop }) 傳入；
+ * battle.js 在主角模型與動作片段建好後呼叫 coop.attach(ctx)，每一格呼叫回傳物件的 update(realDt)。
+ * 單人頁不傳 coop，battle.js 的掛鉤全部是 `coop?.` / `coopView?.`，不會執行。
+ */
+import { SEND_HZ } from './protocol.js';
+import { createTeammates } from './teammates.js';
+import { createEnemySync } from './enemy-sync.js';
+import { WORLD_HZ } from './world.js';
+import { readStatus, statusBits } from './team.js';
+import { createTeamFx } from './team-fx.js';
+
+const IDLE_SEND_MS = 500;   // 站著不動時改成 2 Hz，省免費額度
+
+/** 本機狀態是否與上一筆「看起來一樣」（位置、朝向、動作名稱；單次動作播放中一律算有變化） */
+export function sameState(a, b) {
+  if (!a || !b) return false;
+  return a.anim === b.anim && a.loop !== false && b.loop !== false
+    && Math.abs(a.x - b.x) < 1e-3 && Math.abs(a.y - b.y) < 1e-3 && Math.abs(a.z - b.z) < 1e-3
+    && Math.abs(a.yaw - b.yaw) < 1e-3 && Math.abs((a.lift || 0) - (b.lift || 0)) < 1e-3 && (a.st || 0) === (b.st || 0);
+}
+
+/**
+ * @param {{ client: import('./client.js').CoopClient, now?: () => number, doc?: Document }} options
+ */
+export function createCoop({ client, now = () => performance.now(), doc = globalThis.document }) {
+  let view = null, fx = null, active = false, timer = 0, worldTimer = 0, lastSent = null, lastSentAt = -Infinity, local = null;
+  const slots = new Map();   // 隊友 id → 色調槽（先到先拿，離開後空出）
+  // 第二階段：隊友最新位置（世界座標）與是否還活著，給房主分配仇恨、判斷交棒對象
+  const peers = new Map();
+  const hidden = () => !!doc?.hidden;
+  const enemies = createEnemySync({ client, now, peers: () => peers, hidden });
+  const lastAnim = new Map();   // 第三階段：隊友上一個動作（偵測剛放無雙 → 合體大招）
+
+  function slotFor(id) {
+    if (!slots.has(id)) {
+      const used = new Set(slots.values());
+      let slot = 0;
+      while (used.has(slot)) slot++;
+      slots.set(id, slot);
+    }
+    return slots.get(id);
+  }
+  function addPeer(member) {
+    if (!view || member.id === client.you) return;
+    view.add(member.id, member.name, slotFor(member.id));
+  }
+  function removePeer(id) { view?.remove(id); slots.delete(id); }
+  function syncMembers() {
+    if (!view) return;
+    for (const id of [...view.peers.keys()]) if (!client.members.has(id)) removePeer(id);
+    for (const member of client.members.values()) addPeer(member);
+  }
+
+  client.on('welcome', syncMembers);
+  client.on('join', member => addPeer(member));
+  client.on('leave', id => { removePeer(id); peers.delete(id); lastAnim.delete(id); });
+  client.on('state', (id, snap, at) => {
+    view?.push(id, snap, at);
+    const { hidden: away, downed } = readStatus(snap.st);
+    peers.set(id, { x: snap.x, z: snap.z, alive: snap.anim !== 'death' && !downed, downed, hidden: away, at });
+    if (snap.anim === 'musouFlurry' && lastAnim.get(id) !== 'musouFlurry') enemies.notePeerMusou(id);
+    lastAnim.set(id, snap.anim);
+  });
+  enemies.onFx(event => fx?.onFx(event));
+
+  function tick() {
+    if (!active || !local) return;
+    // 第三階段：st＝切到背景／倒地（交棒與救援用）
+    const state = { ...local(), st: statusBits({ hidden: hidden(), downed: enemies.localDowned }) };
+    const t = now();
+    if (sameState(state, lastSent) && t - lastSentAt < IDLE_SEND_MS) return;
+    if (client.sendState(state)) { lastSent = state; lastSentAt = t; }
+  }
+  // 切到背景／回來：立刻送一筆，房主馬上知道誰看得到畫面（背景分頁的計時器會被瀏覽器放慢）
+  doc?.addEventListener?.('visibilitychange', () => { lastSent = null; tick(); });
+
+  /** 某位玩家（含自己）現在的世界座標；看不到就回 null */
+  function positionOf(id) {
+    if (id === client.you) { const s = local?.(); return s ? { x: s.x, y: s.y, z: s.z } : null; }
+    const peer = view?.peers.get(id);
+    return peer?.root.visible ? peer.root.position : null;
+  }
+  function downedIds() {
+    const out = [];
+    if (enemies.localDowned && client.you) out.push(client.you);
+    const t = now();
+    for (const [id, p] of peers) if (p.downed && t - p.at < 5000 && client.members.has(id)) out.push(id);
+    return out;
+  }
+
+  return {
+    /** battle.js 呼叫：ctx = { THREE, scene, heroModel, clips, cloneSkinned, local } */
+    attach(ctx) {
+      local = ctx.local;
+      view = createTeammates({ THREE: ctx.THREE, scene: ctx.scene, template: ctx.heroModel, clips: ctx.clips, cloneSkinned: ctx.cloneSkinned });
+      const mobile = !!globalThis.matchMedia?.('(pointer: coarse)').matches;
+      fx = createTeamFx({ THREE: ctx.THREE, scene: ctx.scene, quality: mobile ? 'mobile' : 'desktop' });
+      syncMembers();
+      return {
+        update(dt) {
+          view.update(dt, now());
+          if (client.members.size > 1 || enemies.localDowned) fx.update(dt, { positionOf, downed: downedIds(), progress: enemies.reviveProgress });
+        },
+        /** battle.js 在行軍關建好後呼叫：{ march, arena, level }（level＝march.js 模組） */
+        bindLevel(level) { enemies.bind(level); },
+      };
+    },
+    /** 開戰後才開始送自己的狀態（載入畫面期間不浪費額度） */
+    setActive(value) {
+      active = value;
+      if (active && !timer) timer = setInterval(tick, Math.round(1000 / SEND_HZ));
+      if (active && !worldTimer) worldTimer = setInterval(() => enemies.tick(), Math.round(1000 / WORLD_HZ));
+      if (!active && timer) { clearInterval(timer); timer = 0; }
+      if (!active && worldTimer) { clearInterval(worldTimer); worldTimer = 0; }
+    },
+    /** boot.js：battle 物件（用它的 start）——全滅／過關後任何人按重來，大家一起重開 */
+    setControls(controls) { enemies.setControls(controls); },
+    dispose() { this.setActive(false); view?.dispose(); view = null; fx?.dispose(); fx = null; slots.clear(); },
+    get teammates() { return view; },
+    get enemies() { return enemies; },
+  };
+}

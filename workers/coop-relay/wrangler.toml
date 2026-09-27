@@ -1,0 +1,32 @@
+# 紫刃夜行三人連線 relay — 上線步驟見 README.md。本機測試：npx wrangler dev（不需要帳號）
+name = "coop-relay"
+main = "src/index.js"
+compatibility_date = "2025-09-01"
+
+# 一個房號一個 CoopRoom；每個 IP 一個 AuthThrottle（代號輸入錯誤節流）
+[[durable_objects.bindings]]
+name = "ROOMS"
+class_name = "CoopRoom"
+
+[[durable_objects.bindings]]
+name = "AUTH_THROTTLE"
+class_name = "AuthThrottle"
+
+# Free plan 只支援 SQLite 儲存的 Durable Object
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["CoopRoom", "AuthThrottle"]
+
+[vars]
+# 三人版頁面（/game/trio/）所在的 Origin；Origin 只含網域不含路徑。
+# 若要允許 Pages 預覽網址，加上 https://*.<你的 Pages 專案名稱>.pages.dev（不要放寬成 *.pages.dev）
+ALLOWED_ORIGINS = "https://tools.investmquest.com,http://localhost:*,http://127.0.0.1:*"
+
+# 建議部署方式：掛在同一個網域底下，Cloudflare Access（選用）才能同時保護頁面與 relay。
+# 需要 investmquest.com 這個 zone 在同一個 Cloudflare 帳號；否則刪掉這段，改用 workers.dev 網址。
+# routes = [{ pattern = "tools.investmquest.com/coop-relay/*", zone_name = "investmquest.com" }]
+
+# Secrets（不要寫在這裡）：
+#   npx wrangler secret put PLAYER_CODES   # {"代號甲":"大哥","代號乙":"二哥","代號丙":"小弟"}，最多 3 組
+#   npx wrangler secret put TOKEN_SECRET   # 32 字以上的隨機字串
+# 本機 wrangler dev 用 .dev.vars（已列入 .gitignore，範本見 .dev.vars.example）
