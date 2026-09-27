@@ -33,6 +33,7 @@ CATS = [
     ("nation",   "國家／區域史詩", "Nations & Regions"),
     ("city",     "城市史詩",        "Cities"),
     ("theme",    "主題史詩",        "Themes"),
+    ("maps",     "動畫地圖",        "Animated Maps"),
     ("sport",    "運動史",          "Sports"),
     ("politics", "政治結構稜鏡",    "Political Structure"),
 ]
@@ -304,8 +305,6 @@ ENTRIES = [
     # ---------- 主題史詩 ----------
     dict(src="大航海時代/final 1大航海時代_史詩敘事_深度長文版.html", slug="age-of-sail", cat="theme",
          zh="海權、契約與資本：六百年特許公司興衰", en="The Age of Sail", lat=None, lng=None),
-    dict(src="大航海時代/殖民勢力交替_動畫地圖_真實底圖版.html", slug="colonial-map", cat="theme",
-         zh="殖民勢力交替動畫地圖 · 1500–1900", en="Colonial Powers: Animated Map", lat=None, lng=None),
     dict(src="經濟史/skyscraper-curse-v2.html", slug="skyscraper-curse", cat="theme",
          zh="摩天大樓詛咒：最高樓與經濟轉折", en="The Skyscraper Curse", lat=None, lng=None),
     dict(src="經濟史/工業革命與AI時代的回聲.html", slug="industrial-revolution", cat="theme",
@@ -314,12 +313,8 @@ ENTRIES = [
          zh="瓜分、枷鎖與未竟的獨立：帝國主義與非洲的兩百年", en="Imperialism in Africa: From the Scramble to the New Scramble", lat=None, lng=None),
     dict(src="世界史/伊斯蘭世界_啟示商道與烏瑪.html", slug="islamic-world", cat="theme",
          zh="從麥加出發：啟示、商道與烏瑪的一千四百年", en="Out of Mecca: Revelation, Commerce & the Umma — 1,400 Years of Islam", lat=None, lng=None),
-    dict(src=None, slug="islamic-world-map", cat="theme",
-         zh="伊斯蘭世界動畫地圖 · 610 → 今天", en="The Islamic World: Animated Map", lat=None, lng=None),
     dict(src="世界史/基督教文明_十字架與兩把劍.html", slug="christian-world", cat="theme",
          zh="十字架與兩把劍：信仰、權力，與分裂的兩千年", en="The Cross & the Two Swords: Faith, Power & Schism — Two Thousand Years of Christendom", lat=None, lng=None),
-    dict(src=None, slug="christian-world-map", cat="theme",
-         zh="基督教世界動畫地圖 · 30 → 今天", en="The Christian World: Animated Map", lat=None, lng=None),
     dict(src="世界史/猶太文明_書盟約與離散.html", slug="jewish-world", cat="theme",
          zh="書、盟約與離散：猶太人的四千年", en="The Book, the Covenant & the Diaspora — Four Thousand Years of the Jews", lat=None, lng=None),
     dict(src="世界史/佛教世界_佛僧伽與空.html", slug="buddhist-world", cat="theme",
@@ -373,6 +368,18 @@ ENTRIES = [
          zh="融化的尺：通膨與惡性通膨，與一部關於信任如何被偷走的歷史", en="The Melting Yardstick: Inflation, Hyperinflation & the Quiet Theft of Trust", lat=None, lng=None),
     dict(src="經濟史/不朽之金_黃金史詩.html", slug="gold-epic", cat="theme",
          zh="不朽之金：黃金，與一部關於永恆、枷鎖與避難所的文明史", en="The Imperishable Metal: Gold, Permanence, the Shackle & the Refuge", lat=None, lng=None),
+
+    # ---------- 動畫地圖 ----------
+    # 會動的地圖（互動頁，非長文），repo 手工維護。依起始年份排列。
+    dict(src=None, slug="christian-world-map", cat="maps",
+         zh="基督教世界動畫地圖 · 30 → 今天", en="The Christian World: Animated Map",
+         blurb="兩千年，從耶路撒冷走到全世界", lat=None, lng=None),
+    dict(src=None, slug="islamic-world-map", cat="maps",
+         zh="伊斯蘭世界動畫地圖 · 610 → 今天", en="The Islamic World: Animated Map",
+         blurb="從麥加出發的一千四百年", lat=None, lng=None),
+    dict(src=None, slug="colonial-map", cat="maps",
+         zh="殖民帝國動畫地圖 · 1415 → 1999", en="Colonial Empires: Animated Map · 1415–1999",
+         blurb="帝國怎麼塗滿世界，又怎麼退回去", lat=None, lng=None),
 
     # ---------- 運動史 ----------
     dict(src="運動歷史/足球史_史詩敘事_深度長文版.html", slug="football-history", cat="sport",
