@@ -1815,7 +1815,8 @@ export function createCombatFx(o) {
     lastSwing.at = gameTime;
     if (event.kind === 'special') { musouSwing(event, pos, radius); return; }
     const finisher = event.kind === 'attack' && event.last && comboStep >= 5;
-    const heavy = event.kind === 'heavy';
+    // 多段變招（疾風突／旋風斬）只有最後一下用重擊的大演出，前面幾下當輕擊
+    const heavy = event.kind === 'heavy' && (!event.charge || event.last);
     const big = heavy || finisher;
     const c = tmp.copy(chest).addScaledVector(f, 0.15);
     let sweep, startAngle, r;
@@ -1849,7 +1850,20 @@ export function createCombatFx(o) {
         tmp3.set(1, 0, 0), e1.set(0, 0, event.index % 2 ? -1 : 1), radius * 0.75, { width: 0.22, angle: rnd(0, 6.28), sweep: 4.4, life: 0.3, row: STRIP_ROWS.wind, color: [1.2, 1.0, 1.7], grow: 0.3 });
       ring.spin = event.index % 2 ? -5 : 5;
     }
-    if (big) {
+    if (event.charge === 3 && event.index === 0) speedLines(0.45, 1);   // 疾風突：衝刺速度線
+    if (event.charge === 4 || event.counter) {                          // 旋風斬／迴身斬：身邊一圈風刃
+      const ring = slashArc(tmp2.set(hero.position.x, hero.position.y + 0.6 + 0.25 * (event.index || 0), hero.position.z),
+        tmp3.set(1, 0, 0), e1.set(0, 0, 1), radius * (0.7 + 0.1 * (event.index || 0)), { width: 0.3, angle: rnd(0, 6.28), sweep: 5.6, life: 0.32, row: STRIP_ROWS.wind, color: [1.3, 1.05, 1.8], grow: 0.35 });
+      ring.spin = 6;
+    }
+    if (big && event.charge === 5) {                                    // 地裂斬：大裂地＋兩圈地面波
+      const x = hero.position.x + f.x * 0.8, z = hero.position.z + f.z * 0.8, y = groundAt(x, z);
+      slam(x, z, { radius: 4.2, debris: 20 });
+      groundRing(x, y + 0.09, z, 0.5, radius * 1.05, { life: 0.55, width: 1.0, color: [1.6, 1.0, 2.2] });
+      groundRing(x, y + 0.05, z, 0.4, radius * 0.9, { life: 0.8, width: 1.8, row: STRIP_ROWS.dust, color: [0.5, 0.45, 0.62], alpha: 0.7, mode: 1 });
+      slow.trigger(0.35, 0.2, { ease: 0.14 });
+      fovPunch(-9, 0.5); speedLines(0.5, 1); screenFlash(0.3, 0.12); addTrauma(0.65); haptic([30, 30, 70]);
+    } else if (big) {
       const x = hero.position.x + f.x * 1.3, z = hero.position.z + f.z * 1.3;
       slam(x, z, { radius: heavy ? 2.4 : 2.8, debris: heavy ? 8 : 12 });
       slow.trigger(finisher ? 0.3 : 0.22, finisher ? 0.2 : 0.3, { ease: 0.14 });

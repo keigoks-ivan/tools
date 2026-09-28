@@ -13,6 +13,20 @@ export const MUSOU_CHAIN = [
   { duration: 1.56, hits: [0.14, 0.31, 0.56, 1.47], cancel: Infinity, radius: 195, arc: Math.PI * 2, damage: 4, finisher: 9 },
 ];
 export const MUSOU_HEAVY = { duration: 0.96, hits: [0.63], cancel: Infinity, radius: 200, arc: Math.PI * 2, damage: 12, finisher: 12 };
+// 無雙模式的變招（輕攻擊按 N 下後接重擊＝第 N 招）。clip＝3D 主角播的動作；dash＝出招前 60% 往前衝的速度（px/s）；
+// 只有最後一下算重擊（finisher 傷害、能破防），前面幾下算輕擊
+export const MUSOU_CHARGE = [
+  // 輕→重「昇龍斬」：往前上挑，把前方的敵人挑飛
+  { name: '昇龍斬', clip: 'heavy', duration: 0.62, hits: [0.3], cancel: Infinity, radius: 175, arc: Math.PI * 0.9, damage: 9, finisher: 9, dash: 150 },
+  // 輕輕→重「疾風突」：往前衝約 4 公尺，一路砍穿
+  { name: '疾風突', clip: 'slash4', duration: 0.55, hits: [0.12, 0.24, 0.36], cancel: Infinity, radius: 150, arc: Math.PI * 0.8, damage: 5, finisher: 8, dash: 720 },
+  // 輕輕輕→重「旋風斬」：原地轉三圈，一圈比一圈大
+  { name: '旋風斬', clip: 'combo4', duration: 0.9, hits: [0.2, 0.42, 0.64], cancel: Infinity, radius: 195, arc: Math.PI * 2, damage: 5, finisher: 9, dash: 60 },
+  // 輕輕輕輕→重「地裂斬」：躍起重劈，地面裂開震飛一大圈
+  { name: '地裂斬', clip: 'heavyfin', duration: 0.95, hits: [0.55], cancel: Infinity, radius: 245, arc: Math.PI * 2, damage: 16, finisher: 16, dash: 90 },
+];
+// 閃避反擊「迴身斬」：閃避結束 window 秒內按輕攻擊，轉身一圈砍（取代連段第一下，之後照常接第二下）
+export const MUSOU_COUNTER = { name: '迴身斬', clip: 'slash2', window: 0.4, duration: 0.5, hits: [0.16], cancel: 0.3, radius: 180, arc: Math.PI * 2, damage: 7, dash: 120 };
 export const MUSOU_SPECIAL = { duration: 2.0, hits: [0.22, 0.97, 1.72], radius: 280, damage: 12 };
 // 無雙模式出招時的自動轉向：只吸附前方近距離的敵人
 export const MUSOU_AIM = { range: 170, arc: 0.6 };
@@ -137,6 +151,7 @@ export class Arena {
     this.bossQueued = false;
     this.attackerTokens = 0;
     this.lastLightAt = -Infinity;
+    this.dodgeEndAt = -Infinity;
     this.attackSerial = 0;
     this.moveInput = { x: 0, y: 0 };
     if (this.director) return this.snapshot();
@@ -317,16 +332,23 @@ export class Arena {
       if (nearest) hero.facing = Math.atan2(nearest.enemy.y - hero.y, nearest.enemy.x - hero.x);
     }
     if (this.musou) {
+      let move, charge = 0, counter = false;
       if (kind === 'attack') {
-        hero.combo = hero.action === 'attack' && hero.combo < MUSOU_CHAIN.length ? hero.combo + 1 : 1;
+        const chaining = hero.action === 'attack' && hero.combo < MUSOU_CHAIN.length;
+        hero.combo = chaining ? hero.combo + 1 : 1;
         this.lastLightAt = now;
-      }
-      const move = kind === 'attack' ? MUSOU_CHAIN[hero.combo - 1] : MUSOU_HEAVY;
+        counter = !chaining && now - (this.dodgeEndAt ?? -Infinity) <= MUSOU_COUNTER.window;
+        move = counter ? MUSOU_COUNTER : MUSOU_CHAIN[hero.combo - 1];
+      } else if (branch && MUSOU_CHARGE[hero.combo - 1]) {
+        charge = hero.combo + 1;   // 第幾招（輕 N 下＋重＝第 N+1 招，對應無雙系列的 C2～C5）
+        move = MUSOU_CHARGE[hero.combo - 1];
+      } else move = MUSOU_HEAVY;
+      if (counter) this.dodgeEndAt = -Infinity;
       hero.action = kind;
       hero.actionTime = 0;
       this.attackSerial++;
-      this.attack = { kind, ...move, hitIndex: 0, serial: this.attackSerial, branch, musou: true };
-      this._emit('slash', { x: hero.x, y: hero.y, facing: hero.facing, kind, combo: hero.combo, branch });
+      this.attack = { kind, ...move, hitIndex: 0, serial: this.attackSerial, branch, musou: true, charge, counter };
+      this._emit('slash', { x: hero.x, y: hero.y, facing: hero.facing, kind, combo: hero.combo, branch, ...(charge ? { charge, name: move.name } : null), ...(counter ? { counter: true, name: move.name } : null) });
       return;
     }
     if (kind === 'attack') {
@@ -538,6 +560,7 @@ export class Arena {
       hero.actionTime += dt;
       const duration = hero.action === 'dodge' ? 0.42 : hero.action === 'special' ? 0.68 : 0.26;
       if (hero.actionTime >= duration) {
+        if (hero.action === 'dodge') this.dodgeEndAt = this.time;
         hero.action = 'idle';
         hero.actionTime = 0;
       }
@@ -607,7 +630,7 @@ export class Arena {
     if (attack.kind !== 'special' && before < attack.duration * 0.6) {
       const moving = Math.hypot(this.moveInput.x, this.moveInput.y) > 0.1;
       if (moving) hero.facing = Math.atan2(this.moveInput.y, this.moveInput.x);
-      const speed = attack.kind === 'heavy' ? 210 : 150;
+      const speed = attack.dash ?? (attack.kind === 'heavy' ? 210 : 150);
       hero.x = clamp(hero.x + Math.cos(hero.facing) * speed * dt, this.bounds.minX, this.bounds.maxX);
       hero.y = clamp(hero.y + Math.sin(hero.facing) * speed * dt * 0.8, this.bounds.minY, this.bounds.maxY);
     }
@@ -616,7 +639,7 @@ export class Arena {
       const last = attack.hitIndex === attack.hits.length;
       const damage = last && attack.finisher ? attack.finisher : attack.damage;
       const source = attack.kind === 'special' ? 'special' : last && attack.finisher ? 'heavy' : attack.kind;
-      this._emit('swing', { x: hero.x, y: hero.y, facing: hero.facing, kind: attack.kind, combo: hero.combo, index, last, radius: attack.radius });
+      this._emit('swing', { x: hero.x, y: hero.y, facing: hero.facing, kind: attack.kind, combo: hero.combo, index, last, radius: attack.radius, ...(attack.charge ? { charge: attack.charge } : null), ...(attack.counter ? { counter: true } : null) });
       for (const enemy of this.enemies) {
         if (enemy.action === 'dead') continue;
         const d = distance(hero, enemy);

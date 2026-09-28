@@ -37,7 +37,7 @@ export function loadLazyModules() {
     lazyModules = Promise.all([
       marchLevel ? Promise.all([import('./march.js'), import('./march-art.js?v=20260925f')]) : null,
       // ?hero=vroid：打擊特效模組（combat-fx.js）；載入失敗時退回下方原本的特效與時間倍率
-      heroChoice === 'vroid' ? import('./combat-fx.js?v=20260927b').catch(error => { console.warn('combat-fx failed, using built-in effects', error); return null; }) : null,
+      heroChoice === 'vroid' ? import('./combat-fx.js?v=20260928a').catch(error => { console.warn('combat-fx failed, using built-in effects', error); return null; }) : null,
     ]).catch(error => { lazyModules = null; throw error; });
   }
   return lazyModules;
@@ -516,7 +516,9 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
       audio?.onEvent(event);
       if (march) marchEvent(event, x, z);
       if (event.type === 'slash' && arena.musou) {
-        play(event.kind === 'heavy' ? 'charge' : `combo${event.combo || 1}`, arena.attack?.duration || 0.5);
+        // 變招／閃避反擊各有自己的動作（arena.attack.clip）；一般連段與單按重擊照舊
+        play(arena.attack?.clip || (event.kind === 'heavy' ? 'charge' : `combo${event.combo || 1}`), arena.attack?.duration || 0.5);
+        if (event.name) toast(`${event.name}！`, 0.9);
         lastAnimSerial = arena.attackSerial;
       } else if (event.type === 'slash') {
         const clip = event.kind === 'heavy' ? 'heavy' : `slash${event.combo || 1}`;

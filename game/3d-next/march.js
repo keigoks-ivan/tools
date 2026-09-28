@@ -594,6 +594,8 @@ export class MarchDirector {
       if (seg.kills === 8 && seg.hints === 0) { seg.hints = 1; this._say('重擊：K（重）一刀掃開身邊的敵人', 5); }
       if (seg.kills === 16 && seg.hints === 1) { seg.hints = 2; this._say('閃避：Shift（閃）看到紅圈就閃開', 5); }
       if (seg.kills === 24 && seg.hints === 2) { seg.hints = 3; this._say('打破木箱、酒甕、木桶，裡面有護符、靈燈和魂晶', 5); }
+      if (seg.kills === 34 && seg.hints === 3) { seg.hints = 4; this._say('變招：輕攻擊按 1～4 下再接重擊，每種按法都是不同的招', 6); }
+      if (seg.kills === 46 && seg.hints === 4) { seg.hints = 5; this._say('閃避完馬上按輕攻擊：轉身反擊「迴身斬」', 5); }
       if (seg.kills >= TUNING.market.goal) {
         if (TUNING.officers.market) { if (seg.officerAt === null && !seg.foeId) seg.officerAt = this.time + 1; }
         else this._openGate(0);
