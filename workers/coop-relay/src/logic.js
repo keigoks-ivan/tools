@@ -5,14 +5,14 @@
  * - 成員與房主：房主＝最早加入的人；房主離開時由剩下最早加入者接手
  * - 每條連線的訊息速率限制（每秒最多 40 則，超過的直接丟掉）
  * - 第二階段：房主的戰場訊息（e）、隊友的命中申報（h）用通用淨化器 cleanPayload；房主可主動交棒（handOff）
- * - 代號設定（PLAYER_CODES）解析：最多 3 組
+ * - 代號設定（PLAYER_CODES）解析：最多 4 組
  * - Origin 白名單比對
  */
 
 export const ROOM_ALPHABET = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';   // 32 字：無 0/O/1/I
 export const ROOM_CODE_LENGTH = 4;
-export const MAX_PLAYERS = 3;
-export const MAX_CODES = 3;
+export const MAX_PLAYERS = 4;
+export const MAX_CODES = 4;
 export const MAX_MESSAGE_BYTES = 512;
 /**
  * 房主的戰場訊息（t:'e'）上限。為什麼放寬：Workers 免費額度按「則數」計，不按位元組；
@@ -30,11 +30,11 @@ export const NAME_MAX = 12;
 /** 自訂關閉代碼（4000–4999 是應用程式可用範圍）；中文說明在 game/3d-next/net/protocol.js */
 export const CLOSE = {
   badToken: 4001,     // 代號憑證無效或過期 → 重新輸入代號
-  roomFull: 4003,     // 房間已滿 3 人
+  roomFull: 4003,     // 房間已滿 4 人
   noRoom: 4004,       // 房號不存在
   replaced: 4005,     // 同一個人從另一個裝置／分頁加入，舊連線被取代
   abuse: 4008,        // 持續超量送訊息
-  config: 4010,       // 伺服器設定錯誤（PLAYER_CODES 超過 3 組等）
+  config: 4010,       // 伺服器設定錯誤（PLAYER_CODES 超過 4 組等）
 };
 
 /** randomBytes(n) → Uint8Array；預設用 WebCrypto（Workers 與 Node 20+ 都有） */
@@ -200,7 +200,7 @@ export function cleanSignal(d) {
 }
 
 /**
- * PLAYER_CODES（wrangler secret）＝ JSON {"代號": "顯示名稱", ...}，最多 3 組。
+ * PLAYER_CODES（wrangler secret）＝ JSON {"代號": "顯示名稱", ...}，最多 4 組。
  * @returns {{ ok: true, entries: Array<[string,string]> } | { ok: false, error: string }}
  */
 export function parsePlayerCodes(raw) {

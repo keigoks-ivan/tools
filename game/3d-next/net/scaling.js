@@ -11,10 +11,14 @@ export const COOP_SCALE = {
   1: { count: 1.0, hp: 1.0, damage: 1.0 },
   2: { count: 1.3, hp: 1.4, damage: 1.0 },
   3: { count: 2.0, hp: 2.4, damage: 1.35 },   // 2026-09-27 兩次上調（1.6／1.8 → 1.8／2.1 → 2.0／2.4＋傷害 ×1.35）：兄弟試玩太簡單
+  4: { count: 2.5, hp: 3.0, damage: 1.45 },   // 2026-09-28 第四人：沿著 3 人的斜率往上加一格
 };
 
+/** 加成表最多到幾人（跟 relay 的 MAX_PLAYERS 一致） */
+export const MAX_SCALED = 4;
+
 export function scaleFor(players) {
-  const n = Math.max(1, Math.min(3, Math.floor(players) || 1));
+  const n = Math.max(1, Math.min(MAX_SCALED, Math.floor(players) || 1));
   return COOP_SCALE[n];
 }
 
@@ -52,7 +56,7 @@ export function scaledCounts(base, players) {
  */
 export const COOP_SUPPLY = {
   tables: { crate: [['bun', 0.65], ['bigBun', 0.25], ['wine', 0.1]], jar: [['bun', 0.45], ['wine', 0.35], ['bigBun', 0.2]], barrel: [['bigBun', 0.6], ['bun', 0.4]] },
-  killDropChance: { 2: 0.06, 3: 0.08 },
+  killDropChance: { 2: 0.06, 3: 0.08, 4: 0.1 },
   pickupLife: 25,
   segmentHeal: 25,
   officerHeal: 35,
@@ -64,15 +68,15 @@ export const COOP_SUPPLY = {
  */
 export const COOP_SPECIALS = {
   first: 12,
-  every: { 2: 10, 3: 7 },
-  maxAlive: { 2: 2, 3: 3 },
+  every: { 2: 10, 3: 7, 4: 6 },
+  maxAlive: { 2: 2, 3: 3, 4: 4 },
 };
 
 /** 隊長（兩人以上）：各段多一個、出得更快；單人數值在 march.js TUNING.captains */
 export const COOP_CAPTAINS = {
   count: [3, 3, 3, 0],
   first: 16,
-  every: { 2: 24, 3: 20 },
+  every: { 2: 24, 3: 20, 4: 17 },
 };
 
 /** 記下 TUNING 原始值（只記一次），之後每次人數變動都從原始值重算，不會越乘越大 */
@@ -95,7 +99,7 @@ export function snapshotSupply(tuning) {
 
 /** 把補給加成寫進 TUNING（兩人以上）；一人時還原 snapshotSupply 的值 */
 export function applySupplyScale(tuning, base, players) {
-  const n = Math.max(1, Math.min(3, Math.floor(players) || 1));
+  const n = Math.max(1, Math.min(MAX_SCALED, Math.floor(players) || 1));
   if (n === 1) {
     tuning.breakables.tables = structuredClone(base.tables);
     tuning.killDrop = base.killDrop;

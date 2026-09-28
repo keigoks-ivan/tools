@@ -31,13 +31,14 @@ test('room code input is normalised and confusable characters are rejected, not 
   assert.equal(normalizeRoomCode(null), null);
 });
 
-test('membership: first joiner hosts, 4th distinct player is rejected, same id rejoins in place', () => {
+test('membership: first joiner hosts, 5th distinct player is rejected, same id rejoins in place', () => {
   const room = new Membership();
   assert.equal(room.join('甲', '甲', 100).ok, true);
   assert.equal(room.join('乙', '乙', 200).ok, true);
   assert.equal(room.join('丙', '丙', 300).ok, true);
+  assert.equal(room.join('丁', '丁', 350).ok, true, 'a 4th player fits');
   assert.equal(room.host, '甲');
-  assert.deepEqual(room.join('丁', '丁', 400), { ok: false, reason: 'full' });
+  assert.deepEqual(room.join('戊', '戊', 400), { ok: false, reason: 'full' });
   const again = room.join('乙', '乙二', 500);
   assert.equal(again.ok, true); assert.equal(again.rejoin, true);
   assert.equal(again.member.joinedAt, 200, 'reconnect keeps the original join order');
@@ -54,10 +55,10 @@ test('host migration: oldest remaining player takes over; non-host leaving keeps
   assert.equal(room.size, 0);
 });
 
-test('room cap can only be lowered (smoke test uses 2), never raised above 3', () => {
+test('room cap can only be lowered (smoke test uses 2), never raised above 4', () => {
   assert.equal(new Membership([], 2).cap, 2);
-  assert.equal(new Membership([], 9).cap, 3);
-  assert.equal(new Membership([], undefined).cap, 3);
+  assert.equal(new Membership([], 9).cap, 4);
+  assert.equal(new Membership([], undefined).cap, 4);
   const small = new Membership([], 2);
   small.join('a', 'a', 1); small.join('b', 'b', 2);
   assert.equal(small.join('c', 'c', 3).ok, false);
@@ -95,11 +96,12 @@ test('state messages keep only whitelisted, finite, bounded fields', () => {
   assert.equal(cleanState('nope'), null);
 });
 
-test('PLAYER_CODES: JSON object with at most 3 entries and unique display names', () => {
+test('PLAYER_CODES: JSON object with at most 4 entries and unique display names', () => {
   assert.deepEqual(parsePlayerCodes('{"alpha-1":"大哥","bravo-2":"二哥"}'), { ok: true, entries: [['alpha-1', '大哥'], ['bravo-2', '二哥']] });
   assert.equal(parsePlayerCodes('{"a111":"1","b222":"2","c333":"3"}').ok, true);
-  const four = parsePlayerCodes('{"a111":"1","b222":"2","c333":"3","d444":"4"}');
-  assert.equal(four.ok, false); assert.match(four.error, /at most 3/);
+  assert.equal(parsePlayerCodes('{"a111":"1","b222":"2","c333":"3","d444":"4"}').ok, true);
+  const five = parsePlayerCodes('{"a111":"1","b222":"2","c333":"3","d444":"4","e555":"5"}');
+  assert.equal(five.ok, false); assert.match(five.error, /at most 4/);
   assert.equal(parsePlayerCodes('').ok, false);
   assert.equal(parsePlayerCodes('[]').ok, false);
   assert.equal(parsePlayerCodes('{}').ok, false);

@@ -201,7 +201,7 @@ test('fatal closes reject the join with a Chinese message and do not retry; bad 
   const client = new CoopClient({ relay: 'http://r', storage, WebSocketImpl: FakeSocket, timers });
   const full = client.connect('AB3K');
   FakeSocket.all[0].drop(4003);
-  await assert.rejects(full, error => error.code === 4003 && error.message === '房間已滿（最多 3 人）。');
+  await assert.rejects(full, error => error.code === 4003 && error.message === '房間已滿（最多 4 人）。');
   assert.equal(timers.pending.length, 0);
   const bad = client.connect('AB3K');
   FakeSocket.all[1].drop(4001);

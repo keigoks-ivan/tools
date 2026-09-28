@@ -84,7 +84,7 @@ export function createCoop({ client, now = () => performance.now(), doc = global
   /** 玩家代表色：依名字固定（colors.js），自己也有一個座位（排在隊友後面，不跟隊友搶色） */
   function colorOf(id) {
     const name = client.members?.get(id)?.name;
-    return playerColor(name, id === client.you ? 2 : slotFor(id));
+    return playerColor(name, id === client.you ? 3 : slotFor(id));
   }
   function playerIds() {
     const ids = client.members?.size ? [...client.members.keys()] : [];

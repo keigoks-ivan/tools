@@ -130,11 +130,12 @@ test('co-op supply: 2–3 players get guaranteed prop drops, kill drops and long
   assert.equal(JSON.stringify(TUNING), before);
 });
 
-test('co-op scaling: 1p is untouched, 2p ×1.3 count ×1.4 hp, 3p ×2.0 count ×2.4 hp ×1.35 damage', () => {
+test('co-op scaling: 1p is untouched, 2p ×1.3 count ×1.4 hp, 3p ×2.0 count ×2.4 hp ×1.35 damage, 4p ×2.5 ×3.0 ×1.45', () => {
   assert.deepEqual(COOP_SCALE[1], { count: 1, hp: 1, damage: 1 });
   assert.deepEqual(scaleFor(2), { count: 1.3, hp: 1.4, damage: 1.0 });
   assert.deepEqual(scaleFor(3), { count: 2.0, hp: 2.4, damage: 1.35 });
-  assert.deepEqual(scaleFor(7), scaleFor(3), 'clamped to 3 players');
+  assert.deepEqual(scaleFor(4), { count: 2.5, hp: 3.0, damage: 1.45 });
+  assert.deepEqual(scaleFor(7), scaleFor(4), 'clamped to 4 players');
   assert.deepEqual(scaleFor(0), scaleFor(1));
   assert.equal(scaledHp(5, 1), 5);
   assert.equal(scaledHp(5, 2), 7);      // 7.0
@@ -739,4 +740,25 @@ test('3-player enemies hit harder; solo and duo damage is unchanged', () => {
   assert.equal(scaledDamage(12, 'officer', 3), 16.2);
   assert.equal(scaledDamage(undefined, 'grunt', 3), 12.2);   // 預設 9 × 1.35
   assert.equal(scaledDamage(undefined, 'runner', 1), 7);
+});
+
+test('4 players: supply, specials and captains all have a 4-player entry', async () => {
+  const { COOP_SPECIALS: sp, COOP_CAPTAINS: cap, COOP_SUPPLY: sup, applySupplyScale, snapshotSupply } = await import('../3d-next/net/scaling.js');
+  const base = snapshotSupply(TUNING);
+  try {
+    applySupplyScale(TUNING, base, 4);
+    assert.equal(TUNING.killDrop.chance, sup.killDropChance[4]);
+    assert.equal(TUNING.specials.every, sp.every[4]);
+    assert.equal(TUNING.specials.maxAlive, sp.maxAlive[4]);
+    assert.equal(TUNING.captains.every, cap.every[4]);
+    for (const v of [TUNING.killDrop.chance, TUNING.specials.every, TUNING.specials.maxAlive, TUNING.captains.every]) assert.ok(Number.isFinite(v));
+  } finally { applySupplyScale(TUNING, base, 1); }
+});
+
+test('player colors: the three named brothers keep theirs; an unknown 4th name gets the same distinct color on every screen', async () => {
+  const { playerColor, PLAYER_COLORS } = await import('../3d-next/net/colors.js');
+  assert.equal(playerColor('Matt', 0), PLAYER_COLORS.matt);
+  const fourth = playerColor('小弟', 0);
+  assert.equal(playerColor('小弟', 3), fourth, 'seat does not change a named color');
+  assert.ok(!Object.values(PLAYER_COLORS).includes(fourth));
 });

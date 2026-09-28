@@ -15,7 +15,7 @@ export const TOKEN_KEY = 'violet-trio-token';
 /** relay 用的關閉代碼（與 workers/coop-relay/src/logic.js 的 CLOSE 一致）→ 給玩家看的說明 */
 export const CLOSE_TEXT = {
   4001: '代號憑證已失效，請重新輸入代號。',
-  4003: '房間已滿（最多 3 人）。',
+  4003: '房間已滿（最多 4 人）。',
   4004: '找不到這個房號，請確認後再試。',
   4005: '你已在其他裝置或分頁加入這個房間。',
   4008: '傳送太頻繁，連線已中斷。',

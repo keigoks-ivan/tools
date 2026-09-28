@@ -7,7 +7,7 @@
  *   GET  /health                        → ok
  *
  * Secrets（wrangler secret put，不在 repo 裡）：
- *   PLAYER_CODES  JSON {"代號": "顯示名稱"}，最多 3 組；超過 3 組整個服務拒絕（設定錯誤）
+ *   PLAYER_CODES  JSON {"代號": "顯示名稱"}，最多 4 組；超過 4 組整個服務拒絕（設定錯誤）
  *   TOKEN_SECRET  HMAC 金鑰（≥16 字）；輪換它＝撤銷所有已發出的憑證
  * Vars（wrangler.toml）：ALLOWED_ORIGINS 逗號分隔的 Origin 白名單；ROOM_CAP（選填，只能小於等於 3，冒煙測試用）
  */
