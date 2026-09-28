@@ -196,6 +196,7 @@ test('keyboard readiness, loading and hidden-tab transitions clear all held inpu
 });
 
 test('touch layout keeps the rotate prompt play-only and controls reachable', () => {
+  assert.match(htmlSource, /name="viewport" content="[^"]*viewport-fit=cover/);
   assert.match(htmlSource, /<div id="rotate">/);
   for (const id of ['stickZone', 'btnA', 'btnB', 'btnJ', 'btnR', 'btnW', 'btnU', 'btnL']) {
     assert.match(htmlSource, new RegExp(`id="${id}"`), `${id} must exist in the touch layout`);
