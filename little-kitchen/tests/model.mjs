@@ -1,0 +1,8 @@
+import assert from 'node:assert/strict';
+import{fresh,restore,recipes,add,selectRecipe,loadFood,cook,serve,nextGuest,missing}from'../model.js';
+for(let n=0;n<recipes.length;n++){const s=fresh();selectRecipe(s,n);assert(!cook(s));assert.equal(missing(s).length,recipes[n].items.length);for(const id of recipes[n].items){assert(add(s,id));assert(loadFood(s,id));assert(!loadFood(s,id));}for(let j=0;j<9;j++)assert(cook(s));assert(s.ready);const saved=restore(JSON.stringify({...s,version:1}));assert(saved.ready);assert(serve(saved));assert(!serve(saved));assert.equal(saved.served,1);nextGuest(saved);assert(!saved.paid);assert.equal(saved.loaded.length,0);}
+const s=fresh();selectRecipe(s,-1);for(const id of ['banana','milk']){add(s,id);loadFood(s,id);}for(let j=0;j<4;j++)cook(s);const resumed=restore(JSON.stringify({...s,version:1}));assert.equal(resumed.step,1);assert.equal(resumed.taps,1);assert.deepEqual(resumed.loaded,s.loaded);for(let j=0;j<5;j++)cook(resumed);assert(resumed.ready);assert(serve(resumed));
+const cancel=fresh();add(cancel,'rice');loadFood(cancel,'rice');selectRecipe(cancel,1);assert.equal(cancel.pantry.rice,1);assert.equal(cancel.loaded.length,0);
+const poor=fresh();poor.coins=0;assert(add(poor,'apple'));assert.equal(poor.coins,0);for(let i=0;i<20;i++)add(poor,'apple');assert.equal(poor.pantry.apple,9);
+assert.deepEqual(restore('bad json'),fresh());assert.deepEqual(restore('{"version":2}'),fresh());assert.equal(restore('{"version":1,"coins":-3,"pantry":{"rice":999,"evil":5}}').pantry.rice,9);
+console.log('PASS: six recipes, creative dish, resume, no double reward, ingredient recovery, free shopping, stock bounds, corrupted save');
