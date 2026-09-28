@@ -1,8 +1,23 @@
 import assert from 'node:assert/strict';
-import{fresh,restore,recipes,add,selectRecipe,loadFood,cook,serve,nextGuest,missing}from'../model.js';
-for(let n=0;n<recipes.length;n++){const s=fresh();selectRecipe(s,n);assert(!cook(s));assert.equal(missing(s).length,recipes[n].items.length);for(const id of recipes[n].items){assert(add(s,id));assert(loadFood(s,id));assert(!loadFood(s,id));}for(let j=0;j<9;j++)assert(cook(s));assert(s.ready);const saved=restore(JSON.stringify({...s,version:1}));assert(saved.ready);assert(serve(saved));assert(!serve(saved));assert.equal(saved.served,1);nextGuest(saved);assert(!saved.paid);assert.equal(saved.loaded.length,0);}
-const s=fresh();selectRecipe(s,-1);for(const id of ['banana','milk']){add(s,id);loadFood(s,id);}for(let j=0;j<4;j++)cook(s);const resumed=restore(JSON.stringify({...s,version:1}));assert.equal(resumed.step,1);assert.equal(resumed.taps,1);assert.deepEqual(resumed.loaded,s.loaded);for(let j=0;j<5;j++)cook(resumed);assert(resumed.ready);assert(serve(resumed));
-const cancel=fresh();add(cancel,'rice');loadFood(cancel,'rice');selectRecipe(cancel,1);assert.equal(cancel.pantry.rice,1);assert.equal(cancel.loaded.length,0);
-const poor=fresh();poor.coins=0;assert(add(poor,'apple'));assert.equal(poor.coins,0);for(let i=0;i<20;i++)add(poor,'apple');assert.equal(poor.pantry.apple,9);
-assert.deepEqual(restore('bad json'),fresh());assert.deepEqual(restore('{"version":2}'),fresh());assert.equal(restore('{"version":1,"coins":-3,"pantry":{"rice":999,"evil":5}}').pantry.rice,9);
-console.log('PASS: six recipes, creative dish, resume, no double reward, ingredient recovery, free shopping, stock bounds, corrupted save');
+import {fresh,restore,recipes,current,nextAction,advance} from '../model.js';
+const s=fresh();
+for(let meal=0;meal<12;meal++){
+  assert.equal(s.phase,'order');assert.equal(s.recipe,meal%6);
+  const r=current(s);assert.equal(r.items.length,2);assert.equal(r.steps.length,2);
+  assert(!advance(s,'serve'));
+  let taps=0;
+  for(const action of ['accept','buy','buy','prepare','prepare','serve']){
+    assert.equal(action,nextAction(s));assert(advance(s,action));taps++;
+    assert.deepEqual(restore(JSON.stringify(s)),s,'every intermediate phase must resume');
+  }
+  assert.equal(taps,6);assert.equal(s.phase,'thanks');assert.equal(s.served,meal+1);
+  assert(!advance(s,'serve'),'repeated serving must not count twice');
+  assert(advance(s,'continue'));assert.equal(s.customer,(meal+1)%4);
+}
+assert.deepEqual(restore('bad'),fresh());
+assert.deepEqual(restore('{"version":99}'),fresh());
+const malformed=restore('{"version":2,"phase":"market","ingredient":9,"recipe":-1,"step":5}');
+assert.equal(malformed.ingredient,0);assert.equal(malformed.recipe,0);assert.equal(malformed.step,0);
+const legacy=restore(null,JSON.stringify({version:1,served:7,customer:3,recipe:4,sound:false}));
+assert.equal(legacy.phase,'order');assert.equal(legacy.served,7);assert.equal(legacy.customer,3);assert.equal(legacy.recipe,4);assert.equal(legacy.sound,false);
+console.log('PASS: all six meals require exactly six taps; 12 consecutive guests; resume every phase; reject out-of-order actions and duplicate rewards; corrupt-save recovery; v1 migration.');

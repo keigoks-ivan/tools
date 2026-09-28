@@ -1,33 +1,150 @@
-import{foods,stalls,recipes,steps,fresh,restore,current,missing,add,selectRecipe,loadFood,canCook,cook,serve,nextGuest}from'./model.js';
-const $=id=>document.getElementById(id);let state;try{state=restore(localStorage.getItem('little-bloom-v1'));}catch{state=fresh();}let started=false,feedbackTimer,audio,gesture=null,lastTap=0;
-const icons={market:'🧺',kitchen:'🍳',shop:'🍽️'};const names={market:['大大的市場','THE MORNING MARKET'],kitchen:['香香的小廚房','A LITTLE MAGIC'],shop:['小花食堂','MADE WITH LOVE']};
-function save(){try{localStorage.setItem('little-bloom-v1',JSON.stringify({...state,version:1}));}catch{}}
-function speak(text){if(!started||!state.sound||!('speechSynthesis'in window))return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='zh-TW';u.rate=.88;u.pitch=1.12;const v=speechSynthesis.getVoices().find(v=>v.lang==='zh-TW')||speechSynthesis.getVoices().find(v=>v.lang.startsWith('zh'));if(v)u.voice=v;speechSynthesis.speak(u);}catch{}}
-function chime(happy=false){if(!state.sound)return;try{audio??=new(window.AudioContext||window.webkitAudioContext)();if(audio.state==='suspended')audio.resume();[0,...(happy?[.11,.23]:[])].forEach((t,i)=>{const o=audio.createOscillator(),g=audio.createGain();o.type='sine';o.frequency.value=[523,659,784][i];g.gain.setValueAtTime(.0001,audio.currentTime+t);g.gain.exponentialRampToValueAtTime(.045,audio.currentTime+t+.02);g.gain.exponentialRampToValueAtTime(.0001,audio.currentTime+t+.22);o.connect(g);g.connect(audio.destination);o.start(audio.currentTime+t);o.stop(audio.currentTime+t+.24);});}catch{}}
-function btn(icon,label,action,cls='',extra=''){return`<button class="${cls}" data-action="${action}" aria-label="${label}" ${extra}>${icon}</button>`;}
-function foodBtn(id,action,cls=''){return btn(`${foods[id][0]}<small>${'<i></i>'.repeat(state.pantry[id]||0)}</small>`,foods[id][1],`${action}:${id}`,`food-btn ${cls}`);}
-function flash(emoji,text){$('feedback').textContent=emoji;$('feedback').classList.add('show');clearTimeout(feedbackTimer);feedbackTimer=setTimeout(()=>$('feedback').classList.remove('show'),1300);if(text)speak(text);}
-function particles(symbol='✨',x=50,y=65){for(let i=0;i<6;i++){const el=document.createElement('span');el.className='particle';el.textContent=symbol;el.style.left=`${x+(Math.random()-.5)*25}%`;el.style.top=`${y+(Math.random()-.5)*15}%`;$('particles').append(el);setTimeout(()=>el.remove(),1150);}}
-function recommended(){if(state.paid||state.ready)return'shop';if(missing(state).length||state.free&&!Object.values(state.pantry).some(n=>n>0))return'market';return'kitchen';}
-function navigate(scene){state.scene=scene;render();hint();save();}
-function ticket(){const r=current(state);$('ticket').innerHTML=`<span class="ticket-dish">${r.icon}</span><span class="ticket-items">${(state.free?state.loaded:r.items).map(id=>`<span class="need ${state.loaded.includes(id)||state.pantry[id]?'have':''}">${foods[id][0]}</span>`).join('')}${state.free&&state.loaded.length<2?'<span class="need">?</span>'.repeat(2-state.loaded.length):''}</span>`;}
-function render(){const s=state,r=current(s);$('world').className=s.scene;$('sceneTitle').innerHTML=`<i>${icons[s.scene]}</i><span>${names[s.scene][0]}<small>${names[s.scene][1]}</small></span>`;$('voice').textContent=s.sound?'🔊':'🔇';$('voice').setAttribute('aria-pressed',String(s.sound));ticket();$('nav').innerHTML=Object.entries(icons).map(([key,ic])=>btn(`<span class="nav-icon">${ic}</span><span>${{market:'去買菜',kitchen:'做料理',shop:'招待朋友'}[key]}</span>`,names[key][0],`nav:${key}`,`nav-btn ${s.scene===key?'active':''} ${recommended()===key&&s.scene!==key?'recommended':''}`,`aria-current="${s.scene===key?'page':'false'}"`)).join('');
-if(s.scene==='market')renderMarket();else if(s.scene==='kitchen')renderKitchen();else renderShop();}
-function renderMarket(){const s=state,stall=stalls[s.stall],need=missing(s);$('scene').innerHTML=`<div class="coins" aria-label="遊戲代幣">${'🪙'.repeat(Math.min(s.coins,3))||'🤝'}</div><div class="market-stall buy" style="--stall:${stall.color}">${stall.items.map(id=>foodBtn(id,'buy',need.includes(id)?'hint-ring':'')).join('')}</div><div class="shopping-basket" aria-label="購物籃"><span>🧺</span>${Object.entries(s.pantry).filter(([id,n])=>n>0).slice(-5).map(([id])=>`<span>${foods[id][0]}</span>`).join('')}</div>`;$('tray').innerHTML=`<div class="tray-content"><div class="tray-label">六個攤位，慢慢逛</div><div class="row">${stalls.map((x,i)=>btn(x.icon,x.name,`stall:${i}`,`tab-stall ${i===s.stall?'selected':''} ${x.items.some(id=>need.includes(id))?'hint-ring':''}`)).join('')}${btn('🍳 →','回小廚房','nav:kitchen','next', 'id="toKitchen"')}</div></div>`;}
-function renderKitchen(){const s=state,r=current(s),enough=canCook(s),step=r.steps[Math.min(s.step,2)],list=s.free?Object.keys(foods).filter(id=>s.pantry[id]||s.loaded.includes(id)):r.items;
-let inside=s.ready?r.icon:s.loaded.length?s.loaded.map(id=>`<span class="food">${foods[id][0]}</span>`).join(''):'＋';
-$('scene').innerHTML=`<button class="big-action ${s.step>0?step:''} ${enough&&!s.ready?'hint-ring':''}" data-action="cook" aria-label="${s.ready?'料理完成':enough?steps[step][1]:'把食材放進來'}" id="cookingArea"><span class="inside">${inside}</span>${enough&&!s.ready?`<span class="tool">${steps[step][0]}</span><span class="hint-hand">👆</span><span class="step-dots">${[0,1,2].map(i=>`<i class="${s.taps>i?'done':''}"></i>`).join('')}</span>`:''}${s.ready?'<span class="hint-hand">✨</span>':''}</button><span class="owner-pin">${['🌸','🎀','🌼'][s.apron]}</span>`;
-let controls=s.ready?btn(`${r.icon} → 🍽️`,'端給客人','nav:shop','next pink'):enough?`<div class="row">${r.steps.map((id,i)=>btn(`${steps[id][0]}${i<s.step?'<span style="font-size:14px">✓</span>':''}`,steps[id][1],i===s.step?'cook':'stepHint',`step-button ${i===s.step?'active':'completed'}`)).join('')}</div>`:`<div class="row">${list.map(id=>foodBtn(id,s.loaded.includes(id)?'loaded':s.pantry[id]?'load':'find',s.loaded.includes(id)?'picked':'')).join('')}${!s.free&&missing(s).length||s.free&&list.length<2?btn('🧺 →','到市場買食材','nav:market','next'):''}</div>`;
-$('tray').innerHTML=`<div class="tray-content"><div class="tray-label">${s.ready?'香香的料理，送給朋友':enough?'洗一洗，動動小手做料理':'點食材，放進料理盤'}</div>${controls}${s.free&&!enough?`<div class="row free-method">${btn('🥣','創意湯','method:mix',`step-button ${s.method==='mix'?'active':''}`)}${btn('🥤','創意飲料','method:blend',`step-button ${s.method==='blend'?'active':''}`)}</div>`:''}</div>`;}
-function renderShop(){const s=state,r=current(s);$('scene').innerHTML=`<div class="customer ${s.paid?'happy':''}" style="background-position:${s.customer*100/3}% center" aria-label="${['兔兔','小熊','小米','小海'][s.customer]}"></div><div class="bubble">${s.paid?'💕':r.icon}</div><div class="flowers">${['🌷','🌻','🌸','🌼'][s.decor]}</div><div class="decor">${btn('🌷','換店裡的花','decor')}${btn('🌸','換老闆娘的小胸花','apron')}</div>${s.ready?btn(r.icon,'把料理送給朋友','serve','big-action serving hint-ring'):s.paid?btn('🪙 🌼','收下謝謝，招待下一位朋友','next','big-action serving hint-ring'):btn('🧺 →','幫客人買菜做料理','begin','big-action serving')}<span class="owner-pin">${['🌸','🎀','🌼'][s.apron]}</span>`;
-$('tray').innerHTML=`<div class="tray-content"><div class="tray-label">${s.paid?'謝謝招待！再請一位朋友來坐坐':s.ready?'做好囉！點料理，請朋友吃':'今天想做什麼？也可以自己搭配'}</div><div class="row">${s.paid?btn('👋 →','招待下一位朋友','next','next'):s.ready?btn('🍽️ → 💕','端出料理','serve','next pink'):recipes.map((x,i)=>btn(x.icon,x.name,`recipe:${i}`,`food-btn recipe-btn ${!s.free&&s.recipe===i?'selected':''}`)).join('')+btn('🎨','自由搭配料理','recipe:-1',`food-btn recipe-btn ${s.free?'selected':''}`)}</div></div>`;}
-function hint(){const s=state,r=current(s);if(s.paid){speak('謝謝你，好好吃！點金幣，請下一位朋友。');return;}if(s.scene==='shop'){speak(s.ready?'料理做好了！點餐盤，請朋友吃。':`朋友想吃${r.name}。點籃子，我們去買菜。`);}else if(s.scene==='market'){const need=missing(s);if(need.length){const id=need[0];speak(`我們需要${foods[id][1]}。找找${stalls.find(x=>x.items.includes(id)).name}的圖案。`);}else speak('買好了！點平底鍋，回廚房。也可以繼續逛。');}else if(s.ready)speak('完成了！點餐盤，招待朋友。');else if(canCook(s))speak(`${steps[r.steps[s.step]][1]}。點三下，或在盤子上來回摸一摸。`);else speak(s.free?'選兩樣喜歡的食材，放進盤子。':`點食材，把${r.items.filter(id=>!s.loaded.includes(id)).map(id=>foods[id][1]).join('和')}放進盤子。`);}
-function cooking(){const before=state.step;if(state.ready){navigate('shop');return;}if(!cook(state)){hint();return;}chime();particles(state.step===0?'💧':state.ready?'✨':before===1?'💫':'🌸');render();if(state.ready){flash('✨ '+current(state).icon,'完成了！好香呀。點餐盤，請朋友吃。');chime(true);}else if(state.step!==before)hint();save();}
-function act(action){const [type,v]=action.split(':');switch(type){case'nav':navigate(v);break;case'stall':state.stall=Number(v);render();speak(stalls[state.stall].name);break;case'buy':if(add(state,v)){render();chime();particles(foods[v][0],50,70);flash(`${foods[v][0]} → 🧺`,`${foods[v][1]}放進籃子了。`);}else flash('🧺 💕','籃子裡已經有好多了，回廚房做料理吧。');break;case'find':state.stall=stalls.findIndex(s=>s.items.includes(v));navigate('market');break;case'load':if(loadFood(state,v)){render();chime();if(canCook(state))hint();}break;case'loaded':flash('✓','已經放好了。');break;case'recipe':selectRecipe(state,Number(v));render();speak(`來做${current(state).name}。點籃子去買菜。`);break;case'method':if(state.step===0&&!state.ready){state.method=v;render();}break;case'begin':{const need=missing(state);if(need.length)state.stall=stalls.findIndex(s=>s.items.includes(need[0]));navigate(recommended());break;}case'cook':cooking();break;case'stepHint':hint();break;case'serve':if(serve(state)){render();flash('💕 🌼','謝謝你，好好吃！這是送你的金幣和小花。');particles('💕',65,45);chime(true);}break;case'next':nextGuest(state);render();hint();break;case'decor':state.decor=(state.decor+1)%4;render();chime();break;case'apron':state.apron=(state.apron+1)%3;render();flash(['🌸','🎀','🌼'][state.apron],'換一個漂亮的小胸花。');break;}save();}
-$('game').addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(b&&started){if(b.dataset.action==='cook'&&Date.now()-lastTap<220)return;act(b.dataset.action);}});
-$('game').addEventListener('pointerdown',e=>{if(e.target.closest('#cookingArea')&&started){gesture={id:e.pointerId,x:e.clientX,y:e.clientY,distance:0};try{e.target.closest('#cookingArea').setPointerCapture(e.pointerId);}catch{}}});
-$('game').addEventListener('pointermove',e=>{if(!gesture||gesture.id!==e.pointerId||!e.buttons)return;gesture.distance+=Math.hypot(e.clientX-gesture.x,e.clientY-gesture.y);gesture.x=e.clientX;gesture.y=e.clientY;if(gesture.distance>65&&Date.now()-lastTap>250){gesture.distance=0;lastTap=Date.now();cooking();}});
-window.addEventListener('pointerup',()=>gesture=null);window.addEventListener('pointercancel',()=>gesture=null);
-$('start').onclick=()=>{started=true;$('welcome').classList.add('hidden');render();hint();chime();};$('voice').onclick=()=>{state.sound=!state.sound;if(!state.sound&&'speechSynthesis'in window)speechSynthesis.cancel();render();save();if(state.sound)hint();};$('help').onclick=()=>{hint();const b=document.querySelector('#scene .hint-ring')||document.querySelector('#scene .big-action')||document.querySelector('#tray .hint-ring');if(b){b.classList.add('hint-ring');particles('👆',50,65);}};$('parents').onclick=()=>$('guide').showModal();$('closeGuide').onclick=()=>$('guide').close();
-document.addEventListener('visibilitychange',()=>{if(document.hidden){if('speechSynthesis'in window)speechSynthesis.cancel();audio?.suspend();}else if(state.sound)audio?.resume();});
+import {foods,recipes,steps,guests,fresh,restore,current,nextAction,advance} from './model.js?v=2';
+import {createNarrator} from './voice.js?v=2';
+const $=id=>document.getElementById(id);
+let state=fresh();
+try {state=restore(localStorage.getItem('little-bloom-v2'),localStorage.getItem('little-bloom-v1'));} catch {}
+let started=false, busy=false, transitionTimer, celebrationTimer, audio;
+const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function save(){try{localStorage.setItem('little-bloom-v2',JSON.stringify(state));}catch{}}
+function getAudioContext(){
+  audio??=new(window.AudioContext||window.webkitAudioContext)();
+  return audio;
+}
+const narration=createNarrator({
+  allowed:()=>started&&state.sound&&!document.hidden&&!$('guide').open,
+  getAudioContext,
+  onStatus:mode=>{$('voice').dataset.playback=mode;}
+});
+function speak(key,text){narration.speak(key,text);}
+function chime(happy=false){
+  if(!state.sound)return;
+  try {
+    audio??=new(window.AudioContext||window.webkitAudioContext)();
+    if(audio.state==='suspended')audio.resume();
+    (happy?[0,.14,.28]:[0]).forEach((t,i)=>{
+      const o=audio.createOscillator(),g=audio.createGain();
+      o.type='sine'; o.frequency.value=[523,659,784][i];
+      g.gain.setValueAtTime(.0001,audio.currentTime+t);
+      g.gain.exponentialRampToValueAtTime(.012,audio.currentTime+t+.02);
+      g.gain.exponentialRampToValueAtTime(.0001,audio.currentTime+t+.24);
+      o.connect(g);g.connect(audio.destination);o.start(audio.currentTime+t);o.stop(audio.currentTime+t+.26);
+    });
+  }catch{}
+}
+function sceneName(){return state.phase==='market'?'market':state.phase==='cook'?'kitchen':'shop';}
+function hint(){
+  const r=current(state);
+  switch(state.phase){
+    case 'order': speak(`order-${state.recipe}`,`Let's make ${r.en}. Tap the basket.`);break;
+    case 'market': speak(`food-${r.items[state.ingredient]}`,`Tap the ${foods[r.items[state.ingredient]][2]}.`);break;
+    case 'cook': speak(`step-${r.steps[state.step]}`,steps[r.steps[state.step]][2]);break;
+    case 'serve': speak('ready','All done! Tap the food.');break;
+    case 'thanks': speak('thanks','Yummy! Thank you!');break;
+  }
+}
+function actionButton(content,label,cls=''){
+  return `<button id="mainAction" class="child-action ${cls}" data-action="${nextAction(state)}" aria-label="${label}" ${busy?'disabled':''}>${content}<span class="hint-hand" aria-hidden="true">👆</span></button>`;
+}
+function guest(){
+  return `<div class="customer ${state.phase==='thanks'?'happy':''}" style="background-position:${state.customer*100/3}% center" role="img" aria-label="${guests[state.customer]}"></div>`;
+}
+function render(focus=false){
+  const r=current(state),scene=sceneName();
+  $('world').className=`${scene} simple ${state.phase}`;
+  const title=state.phase==='order'?['🍽️','朋友來囉']:{market:['🧺','一起買菜'],kitchen:['🍳','一起做菜'],shop:['🍽️','請朋友吃']}[scene];
+  $('sceneTitle').innerHTML=`<i>${title[0]}</i><span>${title[1]}</span>`;
+  $('voice').textContent=state.sound?'🔊':'🔇';
+  $('voice').setAttribute('aria-pressed',String(state.sound));
+  $('ticket').innerHTML=state.phase==='market'?`<span class="ticket-dish">🧺</span><span class="ticket-items">${r.items.map((id,i)=>`<span class="need ${i<state.ingredient?'have':''}">${i<state.ingredient?foods[id][0]:'·'}</span>`).join('')}</span>`:'';
+  $('ticket').hidden=state.phase!=='market';
+  $('nav').innerHTML=['🧺','🍳','🍽️'].map((icon,i)=>`<span class="path-stop ${i===({order:0,market:0,cook:1,serve:2,thanks:2}[state.phase])?'active':''}" aria-label="${['買菜','料理','送餐'][i]}">${icon}</span>${i<2?'<span class="path-arrow" aria-hidden="true">›</span>':''}`).join('');
+  let instruction='',cue='';
+  if(state.phase==='order'){
+    $('scene').innerHTML=guest()+`<div class="bubble">${r.icon}</div>`+actionButton('🧺','去買菜','basket-action');
+    instruction='點籃子，一起去買菜';cue='👆 🧺';
+  }else if(state.phase==='market'){
+    const id=r.items[state.ingredient];
+    $('scene').innerHTML=`<div class="market-focus">${actionButton(foods[id][0],`拿${foods[id][1]}`,'ingredient-action')}<div class="stall-awning" aria-hidden="true"></div></div><div class="basket-target" aria-hidden="true">🧺</div>`;
+    instruction=`點${foods[id][1]}，放進籃子`;cue=`${foods[id][0]} <span>→</span> 🧺`;
+  }else if(state.phase==='cook'){
+    const step=r.steps[state.step];
+    $('scene').innerHTML=`<div class="prep-food" aria-hidden="true">${r.items.map(id=>`<span>${foods[id][0]}</span>`).join('')}</div>`+actionButton(`<span class="single-tool">${steps[step][0]}</span>`,steps[step][1],`cooking-action ${step}`);
+    instruction=`${steps[step][1]}，點一下就好`;cue=`👆 ${steps[step][0]}`;
+  }else if(state.phase==='serve'){
+    $('scene').innerHTML=guest()+`<div class="bubble">😋</div>`+actionButton(r.icon,'請朋友吃','dish-action');
+    instruction='點料理，請朋友吃';cue=`${r.icon} <span>→</span> 💕`;
+  }else{
+    $('scene').innerHTML=guest()+`<div class="bubble">💕</div><div class="thank-you" aria-hidden="true">🌼 ✨ 🌼</div>`;
+    instruction='謝謝你，好好吃！';cue='💕';
+  }
+  $('tray').innerHTML=`<div class="one-step-cue" aria-hidden="true">${cue}</div><p class="one-step-caption">${instruction}</p>`;
+  $('liveStatus').textContent=instruction;
+  if(focus)$('mainAction')?.focus({preventScroll:true});
+}
+function celebrate(){
+  if(reduced)return;
+  for(let i=0;i<7;i++){
+    const el=document.createElement('span');el.className='particle';el.textContent=i%2?'🌼':'💕';
+    el.style.left=`${35+Math.random()*40}%`;el.style.top=`${45+Math.random()*20}%`;
+    $('particles').append(el);setTimeout(()=>el.remove(),1150);
+  }
+}
+function scheduleNextGuest(){
+  clearTimeout(celebrationTimer);
+  if(!started||state.phase!=='thanks'||document.hidden||$('guide').open)return;
+  celebrationTimer=setTimeout(()=>{
+    if(document.hidden||$('guide').open)return;
+    if(advance(state,'continue')){save();render();hint();}
+  },2600);
+}
+function act(action){
+  if(!started||busy||$('guide').open||action==='continue')return;
+  const oldPhase=state.phase;
+  if(!advance(state,action))return;
+  // Persist immediately, while the old target animates and rejects repeat taps.
+  busy=true;save();
+  const target=$('mainAction');
+  if(target){target.disabled=true;target.classList.add('working');}
+  $('world').classList.add('doing-action');
+  chime(oldPhase==='serve');
+  if(oldPhase==='serve')celebrate();
+  transitionTimer=setTimeout(()=>{
+    busy=false;render(true);hint();
+    if(state.phase==='thanks'){celebrate();scheduleNextGuest();}
+  },reduced?450:900);
+}
+$('scene').addEventListener('click',e=>{
+  const button=e.target.closest('[data-action]');
+  if(button)act(button.dataset.action);
+});
+$('start').onclick=()=>{
+  started=true;$('welcome').classList.add('hidden');
+  render(true);hint();scheduleNextGuest();
+};
+$('voice').onclick=()=>{
+  state.sound=!state.sound;
+  if(!state.sound)narration.stop();
+  $('voice').textContent=state.sound?'🔊':'🔇';
+  $('voice').setAttribute('aria-pressed',String(state.sound));
+  save();if(state.sound&&!busy)hint();
+};
+$('help').onclick=()=>{
+  if(busy)return;hint();
+  $('mainAction')?.classList.remove('hint-replay');
+  requestAnimationFrame(()=>$('mainAction')?.classList.add('hint-replay'));
+};
+$('parents').onclick=()=>{
+  $('guide').showModal();clearTimeout(celebrationTimer);
+  narration.stop();
+};
+$('closeGuide').onclick=()=>$('guide').close();
+$('guide').addEventListener('close',()=>{scheduleNextGuest();if(started&&!busy)hint();});
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden){
+    narration.stop();
+    audio?.suspend();clearTimeout(celebrationTimer);
+  }else{if(state.sound)audio?.resume();scheduleNextGuest();}
+});
 render();
+
+$('start').disabled=false;
