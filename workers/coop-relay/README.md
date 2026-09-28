@@ -57,6 +57,7 @@ npx wrangler secret put TOKEN_SECRET
 
 - `PLAYER_CODES` 超過 4 筆、不是 JSON、代號短於 4 字元、名稱重複，Worker 一律拒絕服務（登入回 500，WebSocket 以 4010 關閉），不會默默放行。
 - 代號建議 12 字元以上、不要用生日或名字。
+- 不想手打 JSON：`node scripts/set-codes.mjs` 逐人問名字與代號（代號不顯示），自動組好、檢查、再上傳；格式錯就不上傳，不會把整個服務弄壞。
 
 ### 2. 決定伺服器網址
 
