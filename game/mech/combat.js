@@ -140,7 +140,7 @@ export class Combat {
     this.saber = { cd: 1, phase: null, t: 0, target: null, hit: false };
     this.cannon = { cd: 1, phase: null, t: 0, tick: 0, I: 0, dir: V3(0, 0, 1), from: V3(), to: V3(), n: V3(), stop: 'air', hit: new Set(),
       nb: 0, bld: [], bp: [V3(), V3(), V3()], bn: [V3(), V3(), V3()] };
-    this.od = { gauge: 0, active: false };
+    this.od = { gauge: 0, active: false, told: false };
     this.lockTarget = null; this.soft = null;
     this.hitstop = 0; this.slowmo = 0; this.timeScale = 1;
     this.parts = { head: 1, torso: 1, armL: 1, armR: 1, legL: 1, legR: 1 };
@@ -367,10 +367,15 @@ export class Combat {
       OD.gauge -= dt / 10;
       if (OD.gauge <= 0) { OD.gauge = 0; OD.active = false; pl.odT = 0; this.note('OVERDRIVE END', 'dim'); }
     } else if (inp.od && OD.gauge >= 1) {
-      OD.active = true; pl.odT = 10;
+      OD.active = true; OD.told = false; pl.odT = 10;
       this.audio.overdrive();
       this.say('OVERDRIVE', '覺醒', 1.6, 'rd');
       this.cockpit.kick('qb', 1);
+    } else if (OD.gauge >= 1 && !OD.told) {
+      // 槽剛滿：提醒一次（有別的大字正在顯示就改用小字，不蓋掉它）
+      OD.told = true;
+      if (!this.banner) this.say('OVERDRIVE READY', '覺醒可用　按 Q', 2.2, 'pk');
+      else this.note('OVERDRIVE READY  [Q]', 'pk');
     }
   }
 

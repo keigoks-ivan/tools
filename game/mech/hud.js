@@ -284,7 +284,7 @@ export class HUD {
     this.text('EN', x0 - 6 * s, y0 + 11 * s, 9, 'dim', 0.95, 'right');
     this.bar(x0, y0 + 10 * s, bw, 2 * s, P.en / 100, enC);
     if (P.overheat > 0) this.text('EN OVERHEAT', cx, y0 + 22 * s, 11, 'rd', 1, 'center', 700);
-    const M = C.msl, SB = C.saber, CN = C.cannon, OD = C.od, cb = 500 * s, cw = cb / 5, wy = y0 + 38 * s;
+    const M = C.msl, SB = C.saber, CN = C.cannon, OD = C.od, cb = 560 * s, cw = cb / 5, wy = y0 + 38 * s;
     const chip = (i, label, val, v, col, hot) => {   // 五格武器：比血條寬一點，字才不會擠在一起
       const x = cx - cb / 2 + i * cw + 4 * s, w = cw - 8 * s;
       this.text(label, x, wy, 10, hot ? col : 'dim', 0.95);

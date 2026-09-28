@@ -80,7 +80,7 @@ export class Input {
       saber: this.down.has('KeyF') || this.down.has('Tsaber'),
       cannon: this.down.has('KeyE') || this.down.has('Tcannon'),
       hardLock: this.down.has('Tab') || this.down.has('M1') || this.down.has('Tlock'),
-      od: this.down.has('KeyQ'),
+      od: this.down.has('KeyQ') || this.down.has('Tod'),
       reload: this.down.has('KeyR'),
       pause: this.down.has('Escape') || this.down.has('KeyP'),
     };
@@ -123,6 +123,6 @@ export class Input {
       const off = () => { if (this.keys.has(key)) this.up.add(key); this.keys.delete(key); };
       b.addEventListener('pointerup', off); b.addEventListener('pointercancel', off);
     };
-    btn('tFire', 'Tfire'); btn('tBoost', 'Tboost'); btn('tJump', 'Tjump'); btn('tMsl', 'Tmsl'); btn('tSaber', 'Tsaber'); btn('tCannon', 'Tcannon'); btn('tLock', 'Tlock');
+    btn('tFire', 'Tfire'); btn('tBoost', 'Tboost'); btn('tJump', 'Tjump'); btn('tMsl', 'Tmsl'); btn('tSaber', 'Tsaber'); btn('tCannon', 'Tcannon'); btn('tOd', 'Tod'); btn('tLock', 'Tlock');
   }
 }
