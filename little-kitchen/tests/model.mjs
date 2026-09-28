@@ -1,23 +1,24 @@
 import assert from 'node:assert/strict';
-import {fresh,restore,recipes,current,nextAction,advance} from '../model.js';
-const s=fresh();
-for(let meal=0;meal<12;meal++){
-  assert.equal(s.phase,'order');assert.equal(s.recipe,meal%6);
-  const r=current(s);assert.equal(r.items.length,2);assert.equal(r.steps.length,2);
-  assert(!advance(s,'serve'));
-  let taps=0;
-  for(const action of ['accept','buy','buy','prepare','prepare','serve']){
-    assert.equal(action,nextAction(s));assert(advance(s,action));taps++;
-    assert.deepEqual(restore(JSON.stringify(s)),s,'every intermediate phase must resume');
+import {foods,methods,fresh,toggleFood,cook,dish,serve,restore} from '../model.js';
+const ids=Object.keys(foods);let combinations=0;
+for(let mask=1;mask<2**ids.length;mask++){
+  const s=fresh();for(let i=0;i<ids.length;i++)if(mask&(1<<i))toggleFood(s,ids[i]);
+  const chosen=[...s.ingredients];
+  for(const tool of Object.keys(methods)){
+    assert(cook(s,tool));const meal=dish(s);assert.equal(meal.method,tool);
+    assert.deepEqual(meal.ingredients,chosen);assert.match(meal.color,/^#[0-9a-f]{6}$/);
+    assert.deepEqual(restore(JSON.stringify(s)),s);
+    assert(serve(s));assert.deepEqual(s.ingredients,chosen);assert.equal(serve(s),false);
+    combinations++;
   }
-  assert.equal(taps,6);assert.equal(s.phase,'thanks');assert.equal(s.served,meal+1);
-  assert(!advance(s,'serve'),'repeated serving must not count twice');
-  assert(advance(s,'continue'));assert.equal(s.customer,(meal+1)%4);
+  assert.equal(s.served,3);assert.equal(s.customer,3);
 }
-assert.deepEqual(restore('bad'),fresh());
-assert.deepEqual(restore('{"version":99}'),fresh());
-const malformed=restore('{"version":2,"phase":"market","ingredient":9,"recipe":-1,"step":5}');
-assert.equal(malformed.ingredient,0);assert.equal(malformed.recipe,0);assert.equal(malformed.step,0);
-const legacy=restore(null,JSON.stringify({version:1,served:7,customer:3,recipe:4,sound:false}));
-assert.equal(legacy.phase,'order');assert.equal(legacy.served,7);assert.equal(legacy.customer,3);assert.equal(legacy.recipe,4);assert.equal(legacy.sound,false);
-console.log('PASS: all six meals require exactly six taps; 12 consecutive guests; resume every phase; reject out-of-order actions and duplicate rewards; corrupt-save recovery; v1 migration.');
+const s=fresh();assert.equal(cook(s,'pan'),false);assert.equal(serve(s),false);
+assert.equal(toggleFood(s,'__proto__'),false);toggleFood(s,'fish');cook(s,'blender');toggleFood(s,'fish');
+assert.equal(s.ingredients.length,0);assert.equal(dish(s),null);
+toggleFood(s,'rice');assert.equal(cook(s,'invalid'),false);cook(s,'pan');s.scene='market';assert.equal(serve(s),false);
+const recovered=restore(JSON.stringify({version:3,scene:'bad',ingredients:['rice','rice','__proto__',{},'bad'],method:'pan',customer:9,served:-1,sound:false}));
+assert.deepEqual(recovered,{version:3,scene:'kitchen',ingredients:['rice'],method:'pan',customer:1,served:0,sound:false});
+assert.deepEqual(restore('{'),fresh());
+for(const version of [1,2])assert.deepEqual(restore(null,JSON.stringify({version,sound:false,served:7,customer:5})),{...fresh(),sound:false,served:7,customer:1});
+console.log(`PASS: ${combinations} ingredient/tool combinations; repeat play; state recovery; invalid inputs; legacy migration.`);

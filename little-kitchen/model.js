@@ -1,83 +1,67 @@
-// One order, two ingredients, two cooking actions, one happy customer.
+// A toy kitchen: every ingredient works with every tool. No orders or recipes.
 export const foods = {
-  carrot: ['🥕', '紅蘿蔔', 'carrot'], broccoli: ['🥦', '花椰菜', 'broccoli'],
-  rice: ['🍚', '白飯', 'rice'], seaweed: ['🌿', '海苔', 'seaweed'],
-  bread: ['🍞', '麵包', 'bread'], tomato: ['🍅', '番茄', 'tomato'],
-  flour: ['🌾', '麵粉', 'flour'], milk: ['🥛', '牛奶', 'milk'],
-  strawberry: ['🍓', '草莓', 'strawberry'], fish: ['🐟', '魚', 'fish']
+  carrot:['🥕','紅蘿蔔','carrot','#ef9b45'], broccoli:['🥦','花椰菜','broccoli','#88ad58'],
+  rice:['🍚','白飯','rice','#ede0bb'], seaweed:['🌿','海苔','seaweed','#79975d'],
+  bread:['🍞','麵包','bread','#d6a76b'], tomato:['🍅','番茄','tomato','#e77862'],
+  flour:['🌾','麵粉','flour','#e8d4a2'], milk:['🥛','牛奶','milk','#f3e5d1'],
+  strawberry:['🍓','草莓','strawberry','#e99aab'], fish:['🐟','魚','fish','#e6b59b']
 };
-export const recipes = [
-  {icon:'🍙', name:'小飯糰', en:'a rice ball', items:['rice','seaweed'], steps:['shape','plate']},
-  {icon:'🍲', name:'蔬菜湯', en:'some soup', items:['carrot','broccoli'], steps:['chop','mix']},
-  {icon:'🥪', name:'三明治', en:'a sandwich', items:['bread','tomato'], steps:['chop','plate']},
-  {icon:'🥞', name:'小鬆餅', en:'some pancakes', items:['flour','milk'], steps:['mix','heat']},
-  {icon:'🍹', name:'草莓牛奶', en:'strawberry milk', items:['strawberry','milk'], steps:['blend','plate']},
-  {icon:'🍱', name:'小魚便當', en:'a lunch box', items:['fish','rice'], steps:['heat','plate']}
-];
-export const steps = {
-  shape:['👐','捏一捏','Tap to make a rice ball.'],
-  chop:['🔪','切一切','Tap to chop.'],
-  mix:['🥄','攪一攪','Tap to stir.'],
-  heat:['🍳','煮一煮','Tap to cook.'],
-  blend:['🌀','打一打','Tap to blend.'],
-  plate:['🍽️','裝盤囉','Tap to put it on the plate.']
-};
-export const guests = ['Bunny', 'Bear', 'Mia', 'Leo'];
-export const phases = ['order','market','cook','serve','thanks'];
-export function fresh() {
-  return {version:2, phase:'order', recipe:0, ingredient:0, step:0, customer:0, served:0, sound:true};
+export const methods={pot:['🍲','煮湯'],pan:['🍳','平底鍋'],blender:['🥤','果汁機']};
+export const guests=['Bunny','Bear','Mia','Leo'];
+export function fresh(){return {version:3,scene:'kitchen',ingredients:[],method:null,customer:0,served:0,sound:true};}
+export function toggleFood(s,id){
+  if(!Object.hasOwn(foods,id))return false;
+  const at=s.ingredients.indexOf(id);
+  if(at<0)s.ingredients.push(id);else s.ingredients.splice(at,1);
+  s.method=null;return true;
 }
-export function current(s) { return recipes[s.recipe]; }
-export function nextAction(s) {
-  return {order:'accept',market:'buy',cook:'prepare',serve:'serve',thanks:'continue'}[s.phase];
+export function cook(s,method){
+  if(!s.ingredients.length||!Object.hasOwn(methods,method))return false;
+  s.method=method;return true;
 }
-export function advance(s, action) {
-  if (action !== nextAction(s)) return false;
-  switch (s.phase) {
-    case 'order': s.phase='market'; s.ingredient=0; break;
-    case 'market':
-      s.ingredient++;
-      if (s.ingredient===2) {s.phase='cook'; s.step=0;}
-      break;
-    case 'cook':
-      s.step++;
-      if (s.step===2) s.phase='serve';
-      break;
-    case 'serve': s.phase='thanks'; s.served++; break;
-    case 'thanks':
-      s.phase='order'; s.customer=(s.customer+1)%4;
-      s.recipe=(s.recipe+1)%recipes.length; s.ingredient=0; s.step=0;
-      break;
+export function dish(s){
+  if(!s.method||!s.ingredients.length)return null;
+  const has=id=>s.ingredients.includes(id);
+  let icon='🍲',name='我的湯';
+  if(s.method==='blender'){icon='🥤';name='我的飲料';}
+  if(s.method==='pan'){
+    if(has('flour')){icon='🥞';name='我的小鬆餅';}
+    else if(has('rice')){icon='🍚';name='我的炒飯';}
+    else if(has('bread')){icon='🥪';name='我的三明治';}
+    else if(has('fish')){icon='🍱';name='我的小便當';}
+    else{icon='🥘';name='我的香香料理';}
   }
-  return true;
+  const colors=s.ingredients.map(id=>foods[id][3].slice(1).match(/../g).map(x=>parseInt(x,16)));
+  const color='#'+[0,1,2].map(i=>Math.round(colors.reduce((sum,c)=>sum+c[i],0)/colors.length).toString(16).padStart(2,'0')).join('');
+  return {icon,name,color,method:s.method,ingredients:[...s.ingredients]};
 }
-export function restore(raw, legacy) {
+export function serve(s){
+  const result=dish(s);if(!result||s.scene!=='kitchen')return false;
+  s.served++;s.customer=(s.customer+1)%4;
+  // Keep the chosen foods on the counter so the child can try another tool.
+  s.method=null;return result;
+}
+export function restore(raw,legacy){
   const s=fresh();
-  try {
+  try{
     const x=JSON.parse(raw);
-    if (x?.version===2) {
-      const bounded=(v,max)=>Number.isInteger(v)&&v>=0&&v<=max;
-      if(bounded(x.recipe,5))s.recipe=x.recipe;
-      if(bounded(x.customer,3))s.customer=x.customer;
-      if(bounded(x.served,1000000))s.served=x.served;
+    if(x?.version===3){
+      s.scene=x.scene==='market'?'market':'kitchen';
+      if(Array.isArray(x.ingredients))s.ingredients=[...new Set(x.ingredients)].filter(id=>typeof id==='string'&&Object.hasOwn(foods,id));
+      if(Object.hasOwn(methods,x.method)&&s.ingredients.length)s.method=x.method;
+      if(Number.isInteger(x.customer)&&x.customer>=0)s.customer=x.customer%4;
+      if(Number.isInteger(x.served)&&x.served>=0)s.served=Math.min(x.served,1000000);
       if(typeof x.sound==='boolean')s.sound=x.sound;
-      if(phases.includes(x.phase))s.phase=x.phase;
-      if(s.phase==='market')s.ingredient=x.ingredient===1?1:0;
-      if(['cook','serve','thanks'].includes(s.phase))s.ingredient=2;
-      if(s.phase==='cook')s.step=x.step===1?1:0;
-      if(['serve','thanks'].includes(s.phase))s.step=2;
       return s;
     }
-  } catch {}
-  // Keep the old save intact; bring over preferences and completed meals.
-  try {
+  }catch{}
+  try{
     const x=JSON.parse(legacy);
-    if(x?.version===1){
+    if([1,2].includes(x?.version)){
       if(typeof x.sound==='boolean')s.sound=x.sound;
-      if(Number.isInteger(x.served)&&x.served>=0)s.served=Math.min(x.served,1000000);
       if(Number.isInteger(x.customer)&&x.customer>=0)s.customer=x.customer%4;
-      if(Number.isInteger(x.recipe)&&x.recipe>=0)s.recipe=x.recipe%6;
+      if(Number.isInteger(x.served)&&x.served>=0)s.served=Math.min(x.served,1000000);
     }
-  } catch {}
+  }catch{}
   return s;
 }

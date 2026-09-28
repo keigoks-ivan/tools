@@ -2,31 +2,34 @@ import assert from 'node:assert/strict';
 import vm from 'node:vm';
 import {readFileSync} from 'node:fs';
 import * as model from '../model.js';
-const elements=new Map();
-function element(id){
-  if(!elements.has(id))elements.set(id,{innerHTML:'',textContent:'',open:false,disabled:false,classList:{add(){},remove(){}},setAttribute(){},focus(){},addEventListener(){},append(){},showModal(){this.open=true;},close(){this.open=false;},style:{}});
-  return elements.get(id);
+function setup(search=''){
+  const elements=new Map(),timers=new Map(),said=[],storage=new Map();let tid=0,audioCreated=0,stops=0;
+  function element(id){
+    if(!elements.has(id))elements.set(id,{innerHTML:'',textContent:'',open:false,disabled:false,dataset:{},classList:{add(){},remove(){}},setAttribute(){},focus(){},addEventListener(){},append(){},remove(){},querySelector(){return null;},showModal(){this.open=true;},close(){this.open=false;},style:{}});
+    return elements.get(id);
+  }
+  const context={...model,console,URLSearchParams,location:{search},matchMedia:()=>({matches:false}),localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v)},document:{hidden:false,getElementById:element,addEventListener(){},createElement:()=>({style:{},remove(){}})},createNarrator:({allowed})=>({speak:(key,text)=>{if(allowed())said.push({key,text});},stop(){stops++;}}),window:{AudioContext:class{constructor(){audioCreated++;throw Error('No real audio in tests');}}},setTimeout:(fn,ms)=>{timers.set(++tid,{fn,ms});return tid;},clearTimeout:id=>timers.delete(id)};
+  let source=readFileSync(new URL('../game.js',import.meta.url),'utf8').replace(/^import .*?;\n/gm,'');
+  source+='\n;globalThis.testApi={act,hint,read:()=>JSON.parse(JSON.stringify(state))};';
+  vm.runInNewContext(source,context);
+  const flush=ms=>{const entry=[...timers].find(([,t])=>t.ms===ms);assert(entry,`missing ${ms}ms timer`);timers.delete(entry[0]);entry[1].fn();};
+  return {element,context,said,flush,api:context.testApi,audioCreated:()=>audioCreated,stops:()=>stops};
 }
-let timers=[],said=[],storage=new Map();
-const voice={lang:'en-US',localService:true,name:'English'};
-const context={...model,console,matchMedia:()=>({matches:false}),localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v)},document:{hidden:false,getElementById:element,addEventListener(){},createElement:()=>({style:{},remove(){}})},createNarrator:({allowed})=>({speak:(key,text)=>{if(allowed())said.push({key,text});},stop(){}}),window:{speechSynthesis:{}},speechSynthesis:{cancel(){},getVoices:()=>[{lang:'zh-TW'},voice],speak:u=>said.push(u)},SpeechSynthesisUtterance:class{constructor(text){this.text=text;}},setTimeout:(fn,ms)=>{timers.push({fn,ms});return timers.length;},clearTimeout(){},requestAnimationFrame:fn=>fn()};
-let source=readFileSync(new URL('../game.js',import.meta.url),'utf8').replace(/^import .*?;\n/gm,'');
-source+='\n;globalThis.testApi={act,hint,read:()=>({...state})};';
-vm.runInNewContext(source,context);
-element('start').onclick();
-const flush=ms=>{const entry=timers.findIndex(t=>t.ms===ms);assert(entry>=0);timers.splice(entry,1)[0].fn();};
-for(const action of ['accept','buy','buy','prepare','prepare','serve']){
-  context.testApi.act(action);const after=context.testApi.read();
-  context.testApi.act(action);assert.deepEqual(context.testApi.read(),after,'rapid second tap must not skip a step');
-  flush(900);
-}
-assert.equal(context.testApi.read().phase,'thanks');assert.equal(context.testApi.read().served,1);
-flush(2600);assert.equal(context.testApi.read().phase,'order');assert.equal(context.testApi.read().customer,1);
-assert(said.length>=7);
-for(const u of said){assert(/^[a-z0-9-]+$/.test(u.key));assert(!/[\u3400-\u9fff]/u.test(u.text));}
-assert(said.some(u=>u.text==='Tap the rice.'));
-assert(said.some(u=>u.text==='Yummy! Thank you!'));
-const count=said.length;element('voice').onclick();context.testApi.hint();assert.equal(said.length,count);
-element('voice').onclick();assert(said.length>count);
-context.document.hidden=true;const hiddenCount=said.length;context.testApi.hint();assert.equal(said.length,hiddenCount);
-console.log('PASS: real UI controller locks repeated taps, advances scenes, auto welcomes next guest, requests fixed English narration, and respects mute/background.');
+const q=setup('?muted=1');q.element('start').onclick();assert.equal(q.api.read().sound,false);
+q.api.act('cook:pot');assert.equal(q.api.read().scene,'kitchen');
+q.api.act('scene:market');for(const id of ['fish','strawberry','milk'])q.api.act(`food:${id}`);
+assert.equal(q.api.read().scene,'market','picking foods must not force a scene change');
+assert.equal(q.api.read().ingredients.join(','),'fish,strawberry,milk');
+q.api.act('scene:kitchen');q.api.act('cook:blender');q.api.act('serve');assert.equal(q.api.read().served,0,'animation prevents accidental serving');q.flush(750);
+q.api.act('cook:pot');q.flush(750);assert.equal(q.api.read().method,'pot','same foods work with another tool');
+q.api.act('serve');q.api.act('serve');assert.equal(q.api.read().served,1);q.flush(1600);
+assert.equal(q.api.read().customer,1);assert.equal(q.api.read().ingredients.length,3,'retain choices after sharing');
+for(const id of ['fish','strawberry','milk'])q.api.act(`food:${id}`);
+assert.equal(q.api.read().ingredients.length,0);assert.equal(q.said.length,0);assert.equal(q.audioCreated(),0,'muted play never creates audio hardware context');
+const v=setup();v.element('start').onclick();v.api.act('scene:market');v.api.act('food:carrot');
+assert(v.said.some(x=>x.key==='word-carrot'&&x.text==='carrot. carrot.'));
+for(const u of v.said){assert.match(u.key,/^[a-z0-9-]+$/);assert(!/[\u3400-\u9fff]/u.test(u.text));}
+const count=v.said.length;v.element('parents').onclick();v.api.hint();assert.equal(v.said.length,count);
+v.element('closeGuide').onclick();v.context.document.hidden=true;v.api.hint();assert.equal(v.said.length,count);
+v.context.document.hidden=false;v.element('voice').onclick();v.api.hint();assert.equal(v.said.length,count);assert(v.stops()>0);
+console.log('PASS: free scene/tool choices; retained foods; rapid taps; word requests; mute creates no audio; guide/background silence. All audio mocked.');

@@ -14,7 +14,7 @@ export function createNarrator({allowed, getAudioContext, onStatus=()=>{}, fetch
     const voice=synth?.getVoices().find(v=>/^en[-_]/i.test(v.lang)&&female.test(v.name));
     if(!voice){onStatus('unavailable');return;}
     const utterance=new SpeechSynthesisUtterance(text);
-    utterance.lang=voice.lang;utterance.voice=voice;utterance.rate=.86;utterance.pitch=1;
+    utterance.lang=voice.lang;utterance.voice=voice;utterance.rate=.78;utterance.pitch=1;
     synth.speak(utterance);onStatus('female-device-voice');
   }
   async function speak(key,text){

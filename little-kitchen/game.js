@@ -1,150 +1,105 @@
-import {foods,recipes,steps,guests,fresh,restore,current,nextAction,advance} from './model.js?v=2';
-import {createNarrator} from './voice.js?v=2';
+import {foods,methods,guests,fresh,restore,toggleFood,cook,dish,serve} from './model.js?v=3';
+import {createNarrator} from './voice.js?v=3';
 const $=id=>document.getElementById(id);
 let state=fresh();
-try {state=restore(localStorage.getItem('little-bloom-v2'),localStorage.getItem('little-bloom-v1'));} catch {}
-let started=false, busy=false, transitionTimer, celebrationTimer, audio;
+try{state=restore(localStorage.getItem('little-bloom-v3'),localStorage.getItem('little-bloom-v2')||localStorage.getItem('little-bloom-v1'));}catch{}
+if(new URLSearchParams(location.search).get('muted')==='1')state.sound=false;
+let started=false,busy=false,audio,timer,wordTimer,celebrating=false;
 const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
-function save(){try{localStorage.setItem('little-bloom-v2',JSON.stringify(state));}catch{}}
-function getAudioContext(){
-  audio??=new(window.AudioContext||window.webkitAudioContext)();
-  return audio;
-}
-const narration=createNarrator({
-  allowed:()=>started&&state.sound&&!document.hidden&&!$('guide').open,
-  getAudioContext,
-  onStatus:mode=>{$('voice').dataset.playback=mode;}
-});
+function save(){try{localStorage.setItem('little-bloom-v3',JSON.stringify(state));}catch{}}
+function getAudioContext(){audio??=new(window.AudioContext||window.webkitAudioContext)();return audio;}
+const narration=createNarrator({allowed:()=>started&&state.sound&&!document.hidden&&!$('guide').open,getAudioContext,onStatus:mode=>{$('voice').dataset.playback=mode;}});
 function speak(key,text){narration.speak(key,text);}
-function chime(happy=false){
-  if(!state.sound)return;
-  try {
-    audio??=new(window.AudioContext||window.webkitAudioContext)();
-    if(audio.state==='suspended')audio.resume();
-    (happy?[0,.14,.28]:[0]).forEach((t,i)=>{
-      const o=audio.createOscillator(),g=audio.createGain();
-      o.type='sine'; o.frequency.value=[523,659,784][i];
-      g.gain.setValueAtTime(.0001,audio.currentTime+t);
-      g.gain.exponentialRampToValueAtTime(.012,audio.currentTime+t+.02);
-      g.gain.exponentialRampToValueAtTime(.0001,audio.currentTime+t+.24);
-      o.connect(g);g.connect(audio.destination);o.start(audio.currentTime+t);o.stop(audio.currentTime+t+.26);
-    });
-  }catch{}
-}
-function sceneName(){return state.phase==='market'?'market':state.phase==='cook'?'kitchen':'shop';}
 function hint(){
-  const r=current(state);
-  switch(state.phase){
-    case 'order': speak(`order-${state.recipe}`,`Let's make ${r.en}. Tap the basket.`);break;
-    case 'market': speak(`food-${r.items[state.ingredient]}`,`Tap the ${foods[r.items[state.ingredient]][2]}.`);break;
-    case 'cook': speak(`step-${r.steps[state.step]}`,steps[r.steps[state.step]][2]);break;
-    case 'serve': speak('ready','All done! Tap the food.');break;
-    case 'thanks': speak('thanks','Yummy! Thank you!');break;
-  }
+  if(state.scene==='market')speak('free-choose','Choose any food you like.');
+  else if(!state.ingredients.length)speak('free-market','What would you like to make? Pick some food at the market.');
+  else if(state.method)speak('free-ready','You made it! Share with a friend, or try another tool.');
+  else speak('free-tools','You can make soup, cook in the pan, or use the blender.');
 }
-function actionButton(content,label,cls=''){
-  return `<button id="mainAction" class="child-action ${cls}" data-action="${nextAction(state)}" aria-label="${label}" ${busy?'disabled':''}>${content}<span class="hint-hand" aria-hidden="true">👆</span></button>`;
+function chime(){
+  if(!state.sound)return;
+  try{const c=getAudioContext();if(c.state==='suspended')c.resume();const o=c.createOscillator(),g=c.createGain();o.frequency.value=659;g.gain.setValueAtTime(.012,c.currentTime);g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+.16);o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+.17);}catch{}
 }
-function guest(){
-  return `<div class="customer ${state.phase==='thanks'?'happy':''}" style="background-position:${state.customer*100/3}% center" role="img" aria-label="${guests[state.customer]}"></div>`;
+function button(content,label,action,cls='',extra=''){
+  return `<button class="${cls}" data-action="${action}" aria-label="${label}" ${busy?'disabled':''} ${extra}>${content}</button>`;
 }
-function render(focus=false){
-  const r=current(state),scene=sceneName();
-  $('world').className=`${scene} simple ${state.phase}`;
-  const title=state.phase==='order'?['🍽️','朋友來囉']:{market:['🧺','一起買菜'],kitchen:['🍳','一起做菜'],shop:['🍽️','請朋友吃']}[scene];
-  $('sceneTitle').innerHTML=`<i>${title[0]}</i><span>${title[1]}</span>`;
-  $('voice').textContent=state.sound?'🔊':'🔇';
-  $('voice').setAttribute('aria-pressed',String(state.sound));
-  $('ticket').innerHTML=state.phase==='market'?`<span class="ticket-dish">🧺</span><span class="ticket-items">${r.items.map((id,i)=>`<span class="need ${i<state.ingredient?'have':''}">${i<state.ingredient?foods[id][0]:'·'}</span>`).join('')}</span>`:'';
-  $('ticket').hidden=state.phase!=='market';
-  $('nav').innerHTML=['🧺','🍳','🍽️'].map((icon,i)=>`<span class="path-stop ${i===({order:0,market:0,cook:1,serve:2,thanks:2}[state.phase])?'active':''}" aria-label="${['買菜','料理','送餐'][i]}">${icon}</span>${i<2?'<span class="path-arrow" aria-hidden="true">›</span>':''}`).join('');
-  let instruction='',cue='';
-  if(state.phase==='order'){
-    $('scene').innerHTML=guest()+`<div class="bubble">${r.icon}</div>`+actionButton('🧺','去買菜','basket-action');
-    instruction='點籃子，一起去買菜';cue='👆 🧺';
-  }else if(state.phase==='market'){
-    const id=r.items[state.ingredient];
-    $('scene').innerHTML=`<div class="market-focus">${actionButton(foods[id][0],`拿${foods[id][1]}`,'ingredient-action')}<div class="stall-awning" aria-hidden="true"></div></div><div class="basket-target" aria-hidden="true">🧺</div>`;
-    instruction=`點${foods[id][1]}，放進籃子`;cue=`${foods[id][0]} <span>→</span> 🧺`;
-  }else if(state.phase==='cook'){
-    const step=r.steps[state.step];
-    $('scene').innerHTML=`<div class="prep-food" aria-hidden="true">${r.items.map(id=>`<span>${foods[id][0]}</span>`).join('')}</div>`+actionButton(`<span class="single-tool">${steps[step][0]}</span>`,steps[step][1],`cooking-action ${step}`);
-    instruction=`${steps[step][1]}，點一下就好`;cue=`👆 ${steps[step][0]}`;
-  }else if(state.phase==='serve'){
-    $('scene').innerHTML=guest()+`<div class="bubble">😋</div>`+actionButton(r.icon,'請朋友吃','dish-action');
-    instruction='點料理，請朋友吃';cue=`${r.icon} <span>→</span> 💕`;
+function ingredientButtons(){return Object.entries(foods).map(([id,f])=>button(`${f[0]}<span class="food-word" lang="en">${f[2]}</span>${state.ingredients.includes(id)?'<span class="selected-check" aria-hidden="true">✓</span>':''}`,f[1],`food:${id}`,`play-food ${state.ingredients.includes(id)?'selected':''}`,`aria-pressed="${state.ingredients.includes(id)}"`)).join('');}
+function dishArt(result){
+  const bits=result.ingredients.map((id,i)=>`<text x="${28+(i%5)*30}" y="${72+Math.floor(i/5)*29}" font-size="23" text-anchor="middle">${foods[id][0]}</text>`).join('');
+  if(result.method==='blender')return `<svg viewBox="0 0 180 150" aria-hidden="true"><path d="M50 23h82l-12 111H62z" fill="#fffcf3" stroke="#b39676" stroke-width="4"/><path d="M57 56h68l-8 72H65z" fill="${result.color}"/><path d="M98 73l12-66h21" fill="none" stroke="#d48691" stroke-width="7" stroke-linecap="round"/><path d="M72 65l4 46" stroke="#ffffff88" stroke-width="5" stroke-linecap="round"/><text x="94" y="109" font-size="36" text-anchor="middle">${foods[result.ingredients[0]][0]}</text></svg>`;
+  if(result.method==='pan')return `<svg viewBox="0 0 180 150" aria-hidden="true"><ellipse cx="90" cy="104" rx="82" ry="34" fill="#fffaf0" stroke="#d9bd91" stroke-width="4"/><text x="90" y="105" font-size="91" text-anchor="middle">${result.icon}</text>${result.ingredients.slice(0,5).map((id,i)=>`<text x="${34+i*28}" y="139" font-size="20" text-anchor="middle">${foods[id][0]}</text>`).join('')}</svg>`;
+  return `<svg viewBox="0 0 180 150" aria-hidden="true"><ellipse cx="90" cy="107" rx="85" ry="29" fill="#dab98e"/><path d="M8 67h164c-8 63-36 73-82 73S16 130 8 67" fill="${result.method==='pot'?'#fff2db':'#fff9ec'}" stroke="#cba77d" stroke-width="3"/><ellipse cx="90" cy="69" rx="81" ry="32" fill="${result.color}" stroke="#fff6df" stroke-width="5"/>${bits}<path d="M60 21q-10-9 0-16m30 16q-10-9 0-16m30 16q-10-9 0-16" stroke="#ffffffbb" fill="none" stroke-width="4" stroke-linecap="round"/></svg>`;
+}
+function render(){
+  const result=dish(state),market=state.scene==='market';
+  $('wordBubble')?.remove();
+  $('world').className=`${market?'market':'kitchen'} free-play ${result?'has-dish':''}`;
+  $('sceneTitle').innerHTML=`<i>${market?'🧺':'🍳'}</i><span>${market?'挑自己喜歡的':'我的小廚房'}</span>`;
+  $('ticket').hidden=true;
+  $('voice').textContent=state.sound?'🔊':'🔇';$('voice').setAttribute('aria-pressed',String(state.sound));
+  $('nav').innerHTML=button('🧺','去市場挑食材','scene:market',`play-place ${market?'active':''}`,`aria-pressed="${market}"`)+button('🍳','回我的小廚房','scene:kitchen',`play-place ${!market?'active':''}`,`aria-pressed="${!market}"`);
+  if(market){
+    $('scene').innerHTML=`<div class="free-market-shelf">${ingredientButtons()}</div>`;
+    $('tray').innerHTML=`<div class="basket-label" aria-hidden="true">🧺</div><div class="chosen-foods">${state.ingredients.length?state.ingredients.map(id=>button(foods[id][0],`放回${foods[id][1]}`,`food:${id}`,'chosen-food')).join(''):'<span class="empty-basket" aria-hidden="true">♡</span>'}</div>${button('🍳 →','選好了，回廚房','scene:kitchen','kitchen-go')}`;
+    $('liveStatus').textContent='想拿什麼就點什麼，再點一次可以放回。';
   }else{
-    $('scene').innerHTML=guest()+`<div class="bubble">💕</div><div class="thank-you" aria-hidden="true">🌼 ✨ 🌼</div>`;
-    instruction='謝謝你，好好吃！';cue='💕';
+    const customer=`<div class="customer ${celebrating?'happy':''}" style="background-position:${state.customer*100/3}% center" role="img" aria-label="${guests[state.customer]}"></div><div class="bubble">${celebrating?'💕':'😊'}</div>`;
+    const counter=result?button(dishArt(result),`請朋友吃${result.name}`,'serve','made-food',`id="mainAction"`):`<div class="free-prep ${state.ingredients.length?'':'empty'}">${state.ingredients.length?state.ingredients.map(id=>`<span>${foods[id][0]}</span>`).join(''):'🍽️'}</div>`;
+    $('scene').innerHTML=customer+counter+(result?`<div class="dish-label">${result.icon} ${result.name}</div>`:'');
+    $('tray').innerHTML=`<div class="toy-tools">${Object.entries(methods).map(([id,m])=>button(`<span>${m[0]}</span>`,m[1],`cook:${id}`,`toy-tool ${state.method===id?'selected':''}`,`aria-pressed="${state.method===id}"`)).join('')}</div><div class="counter-foods">${state.ingredients.length?state.ingredients.map(id=>button(foods[id][0],`拿走${foods[id][1]}`,`food:${id}`,'counter-food')).join(''):button('🧺 ＋','去市場拿食材','scene:market','get-food')}${state.ingredients.length?button('＋ 🧺','再加別的食材','scene:market','add-food'):''}</div>`;
+    $('liveStatus').textContent=result?'可以請朋友吃，也可以換工具試試。':'選喜歡的工具來煮，想加食材就去市場。';
   }
-  $('tray').innerHTML=`<div class="one-step-cue" aria-hidden="true">${cue}</div><p class="one-step-caption">${instruction}</p>`;
-  $('liveStatus').textContent=instruction;
-  if(focus)$('mainAction')?.focus({preventScroll:true});
 }
-function celebrate(){
+function animate(symbol='✨'){
   if(reduced)return;
-  for(let i=0;i<7;i++){
-    const el=document.createElement('span');el.className='particle';el.textContent=i%2?'🌼':'💕';
-    el.style.left=`${35+Math.random()*40}%`;el.style.top=`${45+Math.random()*20}%`;
-    $('particles').append(el);setTimeout(()=>el.remove(),1150);
-  }
+  for(let i=0;i<5;i++){const el=document.createElement('span');el.className='particle';el.textContent=symbol;el.style.left=`${25+Math.random()*35}%`;el.style.top=`${55+Math.random()*15}%`;$('particles').append(el);setTimeout(()=>el.remove(),1150);}
 }
-function scheduleNextGuest(){
-  clearTimeout(celebrationTimer);
-  if(!started||state.phase!=='thanks'||document.hidden||$('guide').open)return;
-  celebrationTimer=setTimeout(()=>{
-    if(document.hidden||$('guide').open)return;
-    if(advance(state,'continue')){save();render();hint();}
-  },2600);
+function learnWord(id){
+  const f=foods[id];
+  speak(`word-${id}`,`${f[2]}. ${f[2]}.`);
+  clearTimeout(wordTimer);
+  $('wordBubble')?.remove();
+  const el=document.createElement('div');el.id='wordBubble';el.className='word-bubble';
+  el.innerHTML=`<span class="word-picture">${f[0]}</span><span lang="en">${f[2]}<small>${f[1]}</small></span>`;
+  $('world').append(el);
+  wordTimer=setTimeout(()=>el.remove(),2400);
 }
 function act(action){
-  if(!started||busy||$('guide').open||action==='continue')return;
-  const oldPhase=state.phase;
-  if(!advance(state,action))return;
-  // Persist immediately, while the old target animates and rejects repeat taps.
-  busy=true;save();
-  const target=$('mainAction');
-  if(target){target.disabled=true;target.classList.add('working');}
-  $('world').classList.add('doing-action');
-  chime(oldPhase==='serve');
-  if(oldPhase==='serve')celebrate();
-  transitionTimer=setTimeout(()=>{
-    busy=false;render(true);hint();
-    if(state.phase==='thanks'){celebrate();scheduleNextGuest();}
-  },reduced?450:900);
+  if(!started||busy||$('guide').open)return;
+  const [type,id]=action.split(':');
+  if(type==='scene'){
+    if(!['market','kitchen'].includes(id))return;
+    state.scene=id;celebrating=false;render();save();hint();return;
+  }
+  if(type==='food'){
+    if(toggleFood(state,id)){celebrating=false;render();save();learnWord(id);}
+    return;
+  }
+  if(type==='cook'){
+    if(!cook(state,id)){
+      speak('free-market','What would you like to make? Pick some food at the market.');
+      $('nav').querySelector('[data-action="scene:market"]')?.classList.add('hint-replay');return;
+    }
+    celebrating=false;busy=true;save();render();
+    $('world').classList.add('cooking-now');animate(id==='blender'?'🫧':'✨');chime();
+    timer=setTimeout(()=>{busy=false;render();speak('free-ready','You made it! Share with a friend, or try another tool.');},reduced?350:750);
+    return;
+  }
+  if(type==='serve'){
+    const previousGuest=state.customer;
+    if(!serve(state))return;
+    save();busy=true;celebrating=true;
+    // Briefly keep the friend who tasted the food, then welcome another friend.
+    const nextGuest=state.customer;state.customer=previousGuest;render();state.customer=nextGuest;
+    animate('💕');speak('thanks','Yummy! Thank you!');
+    timer=setTimeout(()=>{busy=false;celebrating=false;render();},1600);
+  }
 }
-$('scene').addEventListener('click',e=>{
-  const button=e.target.closest('[data-action]');
-  if(button)act(button.dataset.action);
-});
-$('start').onclick=()=>{
-  started=true;$('welcome').classList.add('hidden');
-  render(true);hint();scheduleNextGuest();
-};
-$('voice').onclick=()=>{
-  state.sound=!state.sound;
-  if(!state.sound)narration.stop();
-  $('voice').textContent=state.sound?'🔊':'🔇';
-  $('voice').setAttribute('aria-pressed',String(state.sound));
-  save();if(state.sound&&!busy)hint();
-};
-$('help').onclick=()=>{
-  if(busy)return;hint();
-  $('mainAction')?.classList.remove('hint-replay');
-  requestAnimationFrame(()=>$('mainAction')?.classList.add('hint-replay'));
-};
-$('parents').onclick=()=>{
-  $('guide').showModal();clearTimeout(celebrationTimer);
-  narration.stop();
-};
+$('game').addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(b)act(b.dataset.action);});
+$('start').onclick=()=>{started=true;$('welcome').classList.add('hidden');render();hint();};
+$('voice').onclick=()=>{state.sound=!state.sound;if(!state.sound)narration.stop();$('voice').textContent=state.sound?'🔊':'🔇';$('voice').setAttribute('aria-pressed',String(state.sound));save();if(state.sound&&!busy)hint();};
+$('help').onclick=()=>{if(!busy)hint();};
+$('parents').onclick=()=>{$('guide').showModal();narration.stop();};
 $('closeGuide').onclick=()=>$('guide').close();
-$('guide').addEventListener('close',()=>{scheduleNextGuest();if(started&&!busy)hint();});
-document.addEventListener('visibilitychange',()=>{
-  if(document.hidden){
-    narration.stop();
-    audio?.suspend();clearTimeout(celebrationTimer);
-  }else{if(state.sound)audio?.resume();scheduleNextGuest();}
-});
-render();
-
-$('start').disabled=false;
+document.addEventListener('visibilitychange',()=>{if(document.hidden){narration.stop();audio?.suspend();}else if(state.sound)audio?.resume();});
+render();$('start').disabled=false;
