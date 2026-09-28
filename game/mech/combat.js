@@ -56,10 +56,13 @@ const W = {
   rifle: { dmg: 430, stag: 24, mag: 12, rof: 0.27, reload: 2.0 },
   msl: { n: 6, dmg: 330, stag: 34, cd: 7, lockStep: 0.09, cone: 0.6, range: 900 },
   saber: { dmg: 1500, stag: 90, cd: 2.4, reach: 170 },
+  // 光波砲：充能 charge 秒 → 粗光束掃 dur 秒（每 tick 秒結算一次）→ 冷卻 cd 秒
+  //   r＝光束判定半徑、bld＝每次結算對建築的傷害（步槍一發＝1）、pierce＝最多穿過幾棟樓
+  cannon: { dmg: 420, stag: 26, cd: 20, charge: 0.9, dur: 1.6, tick: 0.1, r: 5.5, range: 1500, bld: 1.2, pierce: 2 },
 };
 // 鎖定輔助：自動鎖定的錐角、準心吸附的錐角與力道、Tab 換目標時鏡頭轉過去的速度
 const LOCK = { auto: 0.62, assistCone: 0.38, assist: 4.5, snap: 13, snapT: 0.4 };
-const PINK = new THREE.Color(1, 0.35, 0.8), ORANGE = new THREE.Color(1, 0.55, 0.2), SABER = new THREE.Color(3, 0.5, 1.8);
+const PINK = new THREE.Color(1, 0.35, 0.8), ORANGE = new THREE.Color(1, 0.55, 0.2), SABER = new THREE.Color(3, 0.5, 1.8), CANNON = new THREE.Color(0.8, 1.6, 3);
 
 const ENEMY_SABER = new THREE.Color(3, 0.6, 0.2);
 // 光劍刀身兩端（世界座標）；沒有光劍模型的機體用左手往前算
@@ -80,6 +83,14 @@ function rayCapsule(o, d, cap, maxT) {
   if (y < cap.y0 - cap.r || y > cap.y1 + cap.r) return -1;
   const back = h2 > 1e-6 ? Math.sqrt(cap.r * cap.r - dh * dh) / Math.sqrt(h2) : 0;
   return Math.max(0, t - back);
+}
+// 光束從樓的表面 p 往 d 方向穿出去要走多遠（樓＝x0..x1、z0..z1、gy..top 的盒子）
+function exitBox(p, d, b) {
+  let t = 400;
+  if (d.x > 1e-6) t = Math.min(t, (b.x1 - p.x) / d.x); else if (d.x < -1e-6) t = Math.min(t, (b.x0 - p.x) / d.x);
+  if (d.z > 1e-6) t = Math.min(t, (b.z1 - p.z) / d.z); else if (d.z < -1e-6) t = Math.min(t, (b.z0 - p.z) / d.z);
+  if (d.y > 1e-6) t = Math.min(t, (b.box.top - p.y) / d.y); else if (d.y < -1e-6) t = Math.min(t, (b.gy - p.y) / d.y);
+  return Math.max(0, t);
 }
 // 點 c 到線段 a→b 的距離（飛彈一幀飛好幾公尺，小目標要用線段判定才不會穿過去）
 function segDist(a, b, c) {
@@ -127,6 +138,8 @@ export class Combat {
     this.rifle = { ammo: W.rifle.mag, mag: W.rifle.mag, reload: -1, cd: 0 };
     this.msl = { cd: 1, locks: [], lockT: 0, locking: false, max: W.msl.n };
     this.saber = { cd: 1, phase: null, t: 0, target: null, hit: false };
+    this.cannon = { cd: 1, phase: null, t: 0, tick: 0, I: 0, dir: V3(0, 0, 1), from: V3(), to: V3(), n: V3(), stop: 'air', hit: new Set(),
+      nb: 0, bld: [], bp: [V3(), V3(), V3()], bn: [V3(), V3(), V3()] };
     this.od = { gauge: 0, active: false };
     this.lockTarget = null; this.soft = null;
     this.hitstop = 0; this.slowmo = 0; this.timeScale = 1;
@@ -290,7 +303,7 @@ export class Combat {
 
   // ---------------------------------------------------------------- 玩家武器
   playerWeapons(dt, inp) {
-    const R = this.rifle, M = this.msl, SB = this.saber, OD = this.od, pl = this.player;
+    const R = this.rifle, M = this.msl, SB = this.saber, CN = this.cannon, OD = this.od, pl = this.player;
     // 硬鎖定切換
     // Tab：換下一個目標（全方位，依離準心的角度排），鏡頭自動轉過去
     if (inp.hardLock) {
@@ -311,7 +324,7 @@ export class Combat {
       R.reload += dt / W.rifle.reload;
       if (R.reload >= 1) { R.reload = -1; R.ammo = R.mag; }
     } else if (inp.reload && R.ammo < R.mag) this.startReload();
-    if (inp.fire && SB.phase === null) this.fireRifle();
+    if (inp.fire && SB.phase === null && CN.phase === null) this.fireRifle();
     // 飛彈：按住右鍵掃過敵人上鎖，放開發射
     if (M.cd < 1) M.cd = Math.min(1, M.cd + dt / W.msl.cd);
     if (inp.lockHold && M.cd >= 1) {
@@ -343,8 +356,12 @@ export class Combat {
     }
     // 光劍
     if (SB.cd < 1 && SB.phase === null) SB.cd = Math.min(1, SB.cd + dt / W.saber.cd);
-    if (inp.saber && SB.cd >= 1 && SB.phase === null) this.startSaber();
+    if (inp.saber && SB.cd >= 1 && SB.phase === null && CN.phase === null) this.startSaber();
     this.updateSaber(dt);
+    // 光波砲（覺醒中冷卻快一倍）
+    if (CN.cd < 1 && CN.phase === null) CN.cd = Math.min(1, CN.cd + dt / W.cannon.cd * (OD.active ? 2 : 1));
+    if (inp.cannon && CN.cd >= 1 && CN.phase === null && SB.phase === null) this.startCannon();
+    this.updateCannon(dt);
     // 覺醒
     if (OD.active) {
       OD.gauge -= dt / 10;
@@ -553,6 +570,108 @@ export class Combat {
     }
   }
 
+  // ---------------------------------------------------------------- 光波砲
+  startCannon() {
+    const CN = this.cannon;
+    CN.phase = 'charge'; CN.t = 0; CN.cd = 0; CN.I = 0; CN.hit.clear();
+    CN.dir.copy(this.aimDir);
+    this.audio.cannonCharge(W.cannon.charge);
+    this.note('BEAM CANNON', 'cy');
+  }
+  updateCannon(dt) {
+    const CN = this.cannon, K = W.cannon, hero = this.hero, ck = this.cockpit;
+    if (CN.phase === null) return;
+    CN.t += dt;
+    hero.muzzle.updateWorldMatrix(true, false);
+    const from = hero.muzzle.getWorldPosition(CN.from);
+    // 光束朝準心的目標點；發射中慢慢跟過去（有重量感，可以拿來掃一整排）
+    const want = _a.subVectors(this.aimPoint, from).normalize();
+    if (CN.phase === 'charge') CN.dir.copy(want);
+    else CN.dir.lerp(want, 1 - Math.exp(-4 * dt)).normalize();
+    if (CN.phase === 'charge') {
+      const k = Math.min(1, CN.t / K.charge);
+      this.fx.cannon(from, CN.dir, null, k, 0);
+      ck.vib = Math.max(ck.vib, 0.12 + 0.3 * k);
+      ck.flashAt(CANNON, 2 + 4 * k, 0.45, -0.25, -1.1);
+      if (CN.t < K.charge) return;
+      // 發射
+      CN.phase = 'fire'; CN.t = 0; CN.tick = 0;
+      this.stats.shots++;
+      this.fx.cannonBurst(from, CN.dir);
+      this.audio.cannonFire(K.dur);
+      hero.recoil = 1;
+      ck.kick('fire', 3); ck.kick('qb', 1.3);
+      ck.flashAt(CANNON, 12, 0.45, -0.25, -1.1);
+    }
+    // 發射中：前 0.08 秒亮起、最後 0.3 秒收細
+    CN.I = Math.min(1, CN.t / 0.08) * Math.min(1, (K.dur - CN.t) / 0.3);
+    this.cannonPath(from, CN.dir);
+    this.fx.cannon(from, CN.dir, CN.to, 1, Math.max(0, CN.I), CN.stop !== 'air');
+    hero.recoil = Math.max(hero.recoil, 0.6 * CN.I);
+    ck.vib = Math.max(ck.vib, 0.6 * CN.I);
+    ck.flashAt(CANNON, 4 * CN.I, 0.45, -0.25, -1.1);
+    CN.tick -= dt;
+    if (CN.tick <= 0 && CN.t < K.dur) { CN.tick += K.tick; this.cannonHit(from, CN.to); }
+    if (CN.t >= K.dur) {
+      CN.phase = null; CN.cd = 0; CN.I = 0;
+      if (CN.stop !== 'air') {   // 收尾：終點炸一下
+        this.fx.explosion(CN.to, 1.4);
+        this.audio.explosion(CN.to, 1.4);
+        this.world.blast(CN.to, 18, 2);
+      }
+    }
+  }
+  // 光束路徑：穿過最多 pierce 棟樓（記下來結算傷害），碰到地面或下一棟樓就停
+  cannonPath(from, dir) {
+    const w = this.world, K = W.cannon, CN = this.cannon;
+    const o = _b.copy(from);
+    let left = K.range;
+    CN.nb = 0; CN.stop = 'air';
+    for (let k = 0; k <= K.pierce; k++) {
+      const end = _c.copy(o).addScaledVector(dir, left);
+      const t = w.raycast(o, end, _n);
+      if (t < 0) { CN.to.copy(end); return; }
+      const hp = _d.lerpVectors(o, end, t);
+      const b = w.bldAt(hp, 1.5);
+      if (b) { CN.bld[CN.nb] = b; CN.bp[CN.nb].copy(hp); CN.bn[CN.nb].copy(_n); CN.nb++; }
+      if (!b || k === K.pierce) { CN.to.copy(hp); CN.n.copy(_n); CN.stop = b ? 'building' : 'ground'; return; }
+      // 從這棟樓的另一面穿出去，繼續往前
+      const ex = exitBox(hp, dir, b) + 0.5;
+      left -= t * left + ex;
+      o.copy(hp).addScaledVector(dir, ex);
+      if (left <= 0) { CN.to.copy(o); return; }
+      if (o.y < w.height(o.x, o.z) + 0.3) { CN.to.copy(o); CN.n.set(0, 1, 0); CN.stop = 'ground'; return; }
+    }
+  }
+  // 一次結算：光束附近的敵人全部挨打，穿過的樓重擊
+  cannonHit(from, to) {
+    const CN = this.cannon, K = W.cannon, w = this.world, S = this.stats, OD = this.od;
+    const mult = OD.active ? 1.25 : 1, hits0 = S.hits, g0 = OD.gauge;
+    let any = false, fresh = 0;
+    this.quiet = true;
+    for (const e of this.enemies) {
+      if (e.dead) continue;
+      const cap = e.m.capsule();
+      let d = 1e9;
+      for (let k = 0; k < 3; k++) d = Math.min(d, segDist(from, to, _a.set(cap.x, cap.y0 + (cap.y1 - cap.y0) * k / 2, cap.z)));
+      if (d > K.r + cap.r) continue;
+      const hp = e.chest(V3());
+      this.damageEnemy(e, K.dmg * mult, K.stag, hp, CN.dir);
+      if (!CN.hit.has(e)) { CN.hit.add(e); fresh++; }
+      this.fx.impact(hp, _n.copy(CN.dir).negate(), 'beam');
+      any = true;
+    }
+    this.quiet = false;
+    S.hits = hits0 + fresh;   // 命中率：一台只算一次
+    if (!OD.active) OD.gauge = Math.min(1, g0 + (OD.gauge - g0) * 0.35);   // 覺醒槽不要一發就灌滿
+    if (any) this.audio.hitmarker();
+    for (let i = 0; i < CN.nb; i++) w.hitBuilding(CN.bp[i], K.bld * mult, CN.bn[i]);
+    if (CN.stop !== 'air') {
+      this.fx.impact(to, CN.n, CN.stop);
+      if (Math.random() < 0.4) this.audio.impact(to, CN.stop);
+    }
+  }
+
   // 光劍砍牆：胸口高度往前 22 公尺內有建築就重擊
   saberWall() {
     const pl = this.player, w = this.world;
@@ -580,7 +699,7 @@ export class Combat {
     this.stats.score += Math.round(dmg / 10);
     if (!this.od.active) this.od.gauge = Math.min(1, this.od.gauge + dmg / 9000);
     this.hitMark = 1;
-    this.audio.hitmarker();
+    if (!this.quiet) this.audio.hitmarker();
     e.m.impact(clamp(dmg / 900, 0.25, 1.2));
     if (e.stagT <= 0) {
       e.stag += stag;

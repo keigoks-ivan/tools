@@ -804,6 +804,46 @@ export class Audio {
     v.done();
   }
 
+  // 光波砲充能：低沉的嗡聲一路往上爬、濾波慢慢打開，電弧劈啪越來越密，最後一聲高頻尖鳴
+  cannonCharge(dur) {
+    if (!this._ok()) return;
+    const v = this._voice(this.bus.arm, 2); if (!v) return;
+    const t = this._now(), o = v.out;
+    for (const det of [-11, 0, 9]) {
+      this._T(v, o, { t, type: 'sawtooth', f: 48, f1: 330, gl: dur, det, a: dur * 0.85, h: dur * 0.15, d: 0.08, g: 0.07, ft: 'lowpass', ff: 180, ff1: 3200, fgl: dur, fq: 5 });
+    }
+    this._T(v, o, { t, f: 30, f1: 70, gl: dur, a: dur * 0.9, h: dur * 0.1, d: 0.1, g: 0.35 });
+    this._T(v, o, { t: t + dur * 0.3, f: 1800, f1: 5200, gl: dur * 0.7, a: dur * 0.7, d: 0.05, g: 0.02 });
+    this._N(v, o, { t, b: 'p', a: dur, d: 0.06, g: 0.16, ft: 'bandpass', f: 500, f1: 4000, gl: dur, q: 1.5 });
+    this._gran(v, this.bus.cab, { t: t + 0.1, dur: dur - 0.1, b: 'w', ft: 'highpass', f: 3500, q: 0.7, g: 0.06, gd: [0.002, 0.006], gap: [0.008, 0.05] });
+    v.done();
+  }
+
+  // 光波砲發射：重拳＋爆裂 → 持續的低頻轟鳴（走音鋸齒＋滋滋電流）撐 dur 秒 → 往下沉著收掉
+  cannonFire(dur) {
+    if (!this._ok()) return;
+    const v = this._voice(this.bus.arm, 2); if (!v) return;
+    const t = this._now(), o = v.out;
+    const tail = this._sub(v, o, this.echoIn, 0.7);
+    const body = this._sat(v, tail, 3, 0.35);
+    this._duck(6, t, dur);
+    // 開火重拳
+    this._thump(v, o, t, 130, 30, 0.8, 0.7, 2.2);
+    this._thump(v, this.bus.hull, t, 70, 28, 0.45, 0.9, 1.6);
+    this._N(v, o, { t, b: 'w', a: 0.001, d: 0.08, g: 0.45, ft: 'highpass', f: 1800 });
+    this._N(v, tail, { t, b: 'b', a: 0.004, d: 1.0, g: 0.8, ft: 'lowpass', f: 900, f1: 150, q: 0.8 });
+    // 持續轟鳴
+    for (const [m, det] of [[1, -14], [1, 12], [1.5, 4], [2, -6]]) {
+      this._T(v, body, { t, type: 'sawtooth', f: 58 * m, f1: 44 * m, gl: dur + 0.4, det, a: 0.03, h: dur - 0.2, d: 0.5, g: 0.1, ft: 'lowpass', ff: 2600, ff1: 500, fgl: dur + 0.4, fq: 2 });
+    }
+    this._N(v, o, { t, b: 'p', a: 0.02, h: dur - 0.2, d: 0.45, g: 0.3, ft: 'bandpass', f: 900, f1: 420, gl: dur + 0.3, q: 0.8, am: 38, amd: 0.35 });
+    this._N(v, o, { t, b: 'w', a: 0.01, h: dur - 0.3, d: 0.3, g: 0.07, ft: 'highpass', f: 5000, am: 90, amd: 0.6 });
+    this._T(v, this.bus.hull, { t, f: 34, a: 0.05, h: dur - 0.2, d: 0.5, g: 0.35 });
+    // 金屬餘振
+    for (const [f, g] of [[310, 0.03], [466, 0.022], [930, 0.012]]) this._T(v, tail, { t: t + dur - 0.2, f, a: 0.01, d: 1.1, g });
+    v.done();
+  }
+
   // 飛彈發射（肩部莢艙，左右交替）：管口「砰」（次低頻＋爆裂）→ 火箭嘶吼：由肩膀掃向前方中央、越飛越遠越悶，推進劑劈啪
   missileLaunch(i) {
     if (!this._ok()) return;

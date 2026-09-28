@@ -244,7 +244,7 @@ const HOLO = [
 const PAGE = {
   radar: { n: 'RDR', t: ['RDR', 'NAV', 'HSI'], b: ['TWS', 'DCLT', 'MENU'], l: ['RNG+', 'RNG-'], r: ['IFF', 'MRK'] },
   status: { n: 'SYS', t: ['SYS', 'DMG', 'BAL', 'COOL'], b: ['BIT', 'RST', 'LOG', 'MENU'] },
-  arms: { n: 'SMS', t: ['SMS', 'GUN', 'MSL', 'SBR'], b: ['ARM', 'SEL', 'JETT', 'MENU'] },
+  arms: { n: 'SMS', t: ['SMS', 'GUN', 'MSL', 'SBR', 'CAN'], b: ['ARM', 'SEL', 'JETT', 'MENU'] },
   sys: { n: 'ELEC', t: ['ELEC', 'HYD'], b: ['BIT', 'MENU'] },
   gauge: { n: 'ENG', t: ['ENG', 'RCTR'], b: ['TRND', 'MENU'] },
   spd: { n: 'SPD', t: ['SPD'] },
@@ -716,7 +716,7 @@ export class Cockpit {
   }
 
   // 每幀：擺鏡頭、擺駕駛艙、更新燈光與儀表
-  // ui：{ yaw, pitch（瞄準，機體朝向慣例）, boot, move:{x,y}, turn:{x,y}, boost, hover, speed, alt, vs, ap, apMax, en, parts, rifle, msl, saber, od, lockAlert, danger, radar, px, pz, route?, wp? }
+  // ui：{ yaw, pitch（瞄準，機體朝向慣例）, boot, move:{x,y}, turn:{x,y}, boost, hover, speed, alt, vs, ap, apMax, en, parts, rifle, msl, saber, cannon, od, lockAlert, danger, radar, px, pz, route?, wp? }
   update(dt, mech, ui) {
     this.t += dt;
     const cam = this.camera, b = mech.bones;
@@ -1392,16 +1392,22 @@ export class Cockpit {
     if (ms.cd < 1) this.hb(x, L, 208, w - 32, 5, ms.cd, COL.am);
     // 光劍
     const sb = ui.saber ?? 1;
-    this.tx(x, 'SBR', L, 236, COL.dim, 18); this.tx(x, 'BEAM SABER', L + 50, 236, COL.wh, 19);
-    this.tx(x, sb >= 1 ? 'READY' : `${Math.round(sb * 100)}%`, Rr, 236, sb >= 1 ? COL.gr : COL.am, 20, true, 'right');
+    this.tx(x, 'SBR', L, 230, COL.dim, 18); this.tx(x, 'BEAM SABER', L + 50, 230, COL.wh, 19);
+    this.tx(x, sb >= 1 ? 'READY' : `${Math.round(sb * 100)}%`, Rr, 230, sb >= 1 ? COL.gr : COL.am, 20, true, 'right');
+    // 光波砲：充能中閃、冷卻中顯示百分比
+    const cn = ui.cannon || { cd: 1, phase: null };
+    this.tx(x, 'CAN', L, 260, COL.dim, 18); this.tx(x, 'BEAM CANNON', L + 50, 260, COL.wh, 19);
+    const cs = cn.phase === 'charge' ? 'CHARGE' : cn.phase === 'fire' ? 'FIRE' : cn.cd >= 1 ? 'READY [E]' : `${Math.round(cn.cd * 100)}%`;
+    this.tx(x, cs, Rr, 260, cn.phase ? (Math.sin(t * 20) > 0 ? COL.cy : COL.wh) : cn.cd >= 1 ? COL.gr : COL.am, 20, true, 'right');
+    if (cn.cd < 1 && !cn.phase) this.hb(x, L, 274, w - 32, 5, cn.cd, COL.am);
     // 覺醒
     const od = ui.od || { gauge: 0, active: false }, full = od.gauge >= 1;
-    this.tx(x, 'OD', L, 268, COL.dim, 18); this.tx(x, 'OVERDRIVE', L + 50, 268, COL.wh, 19);
-    this.tx(x, od.active ? 'ACTIVE' : full ? 'READY [Q]' : `${Math.floor(od.gauge * 100)}%`, Rr, 268, od.active ? COL.rd : full ? COL.am : COL.dim, 20, true, 'right');
-    x.fillStyle = COL.grid; x.fillRect(L, 286, w - 32, 24);
+    this.tx(x, 'OD', L, 298, COL.dim, 18); this.tx(x, 'OVERDRIVE', L + 50, 298, COL.wh, 19);
+    this.tx(x, od.active ? 'ACTIVE' : full ? 'READY [Q]' : `${Math.floor(od.gauge * 100)}%`, Rr, 298, od.active ? COL.rd : full ? COL.am : COL.dim, 20, true, 'right');
+    x.fillStyle = COL.grid; x.fillRect(L, 312, w - 32, 20);
     x.fillStyle = od.active ? COL.rd : full ? (Math.sin(t * 8) > 0 ? COL.am : '#8a5a1a') : COL.am;
-    x.fillRect(L, 286, (w - 32) * clamp(od.gauge, 0, 1), 24);
-    x.fillStyle = COL.bg; for (let i = 1; i < 10; i++) x.fillRect(L + (w - 32) * i / 10 - 1, 286, 2, 24);
+    x.fillRect(L, 312, (w - 32) * clamp(od.gauge, 0, 1), 20);
+    x.fillStyle = COL.bg; for (let i = 1; i < 10; i++) x.fillRect(L + (w - 32) * i / 10 - 1, 312, 2, 20);
   }
 
   // 電力／液壓頁（左上）：匯流排電壓、電池、液壓、發電機負載

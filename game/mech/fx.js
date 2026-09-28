@@ -693,6 +693,9 @@ export class FX {
     this.fSel = new Int32Array(16); this.fSelN = 0;
     this.siteT = 0;
     this.skidAcc = 0; this.skidSpk = 0; this.washAcc = 0;
+    // 光波砲（每幀由 combat 設定，update 時畫出來）
+    this.cn = { fresh: false, x: 0, y: 0, z: 0, dx: 0, dy: 0, dz: 1, tx: 0, ty: 0, tz: 0, on: false, charge: 0, I: 0, hit: false, lt: 0 };
+    this._u = new Float32Array(3); this._v = new Float32Array(3);
   }
 
   // ---------------------------------------------------------------- 公開 API
@@ -1156,6 +1159,34 @@ export class FX {
     if (color) R.col.copy(color); else R.col.setRGB(2, 6, 12);
   }
 
+  // 光波砲：combat 每幀呼叫一次。charge＝充能 0..1；to＝光束終點（null＝還在充能）；I＝光束強度 0..1；hit＝終點打到東西
+  cannon(from, dir, to, charge, I, hit) {
+    const c = this.cn;
+    c.fresh = true; c.x = from.x; c.y = from.y; c.z = from.z;
+    c.dx = dir.x; c.dy = dir.y; c.dz = dir.z;
+    c.charge = charge; c.I = I; c.on = !!to; c.hit = !!hit;
+    if (to) { c.tx = to.x; c.ty = to.y; c.tz = to.z; }
+  }
+
+  // 光波砲開火的瞬間：槍口爆閃＋往前噴的光芒＋一圈往外散的震波
+  cannonBurst(from, dir) {
+    const x = from.x, y = from.y, z = from.z, dx = dir.x, dy = dir.y, dz = dir.z;
+    this._glow(x, y, z, 3, 0.35, 0.65, 1, 6, 0.3, 1.5);
+    this._glow(x, y, z, 0.9, 1, 1, 1, 20, 0.12, 1);
+    for (let k = 0; k < 10; k++) {
+      this._cone(dx, dy, dz, 0.5);
+      const l = rr(4, 10), d = this._d;
+      this._spike(x, y, z, d[0] * l, d[1] * l, d[2] * l, 0.3, 0.5, 0.8, 1, 14, 0.12);
+    }
+    this._perp(dx, dy, dz);
+    const U = this._u, Vv = this._v, n = 12 + Math.round(10 * this.qn);
+    for (let k = 0; k < n; k++) {
+      const a = (k / n) * Math.PI * 2, ca = Math.cos(a) * 42, sa = Math.sin(a) * 42;
+      this._mote(x + dx * 3, y + dy * 3, z + dz * 3, U[0] * ca + Vv[0] * sa + dx * 10, U[1] * ca + Vv[1] * sa + dy * 10, U[2] * ca + Vv[2] * sa + dz * 10, 0.35, 0.16, 0.4, 0.75, 1, 9);
+    }
+    this._flash(x + dx * 4, y + dy * 4, z + dz * 4, 0.8);
+  }
+
   clear() {
     const V = this.V, S = this.S;
     V.alive.fill(0); this.vFreeN = VMAX; for (let i = 0; i < VMAX; i++) this.vFree[i] = VMAX - 1 - i;
@@ -1167,6 +1198,7 @@ export class FX {
     this.mN = 0;
     for (const R of this.rib) { R.n = 0; R.last = -99; }
     for (const L of this.lights) { L.age = 99; L.cur = 0; L.l.intensity = 0; }
+    this.cn.fresh = false;
     this.ss.act.fill(0); this.fs.act.fill(0); this.sSelN = 0; this.fSelN = 0; this.siteT = 0;
     this.vMesh.visible = this.sMesh.visible = this.rMesh.visible = this.mMesh.visible = false;
   }
@@ -1195,6 +1227,7 @@ export class FX {
     this._simVolume(dt);
     this._simStreaks(dt);
     this._projectiles(dt);
+    this._cannon(dt);
     this._fireGlows();
     this._lights(dt);
     this._ribbons();
@@ -1301,6 +1334,26 @@ export class FX {
     S.life[i] = life; S.w[i] = w; S.r[i] = r * I; S.g[i] = g * I; S.b[i] = b * I; S.fp[i] = 1.5; S.a[i] = 0.05;
     S.kind[i] = K_SPARK; S.flags[i] = S_FIXED;
     return i;
+  }
+
+  // 會動的彩色光點（不受重力、不發熱，越飛越暗）
+  _mote(x, y, z, vx, vy, vz, life, w, r, g, b, I) {
+    const i = this._sa();
+    if (i < 0) return -1;
+    const S = this.S;
+    S.x[i] = x; S.y[i] = y; S.z[i] = z; S.vx[i] = vx; S.vy[i] = vy; S.vz[i] = vz; S.drag[i] = 2;
+    S.life[i] = life; S.w[i] = w; S.st[i] = 0.03; S.r[i] = r * I; S.g[i] = g * I; S.b[i] = b * I; S.fp[i] = 1.5; S.a[i] = 0.1;
+    return i;
+  }
+
+  // 和 (dx,dy,dz) 垂直的兩個單位向量 → this._u、this._v
+  _perp(dx, dy, dz) {
+    const U = this._u, Vv = this._v;
+    let ux, uy, uz;
+    if (Math.abs(dy) < 0.9) { ux = -dz; uy = 0; uz = dx; } else { ux = 0; uy = dz; uz = -dy; }
+    const L = Math.hypot(ux, uy, uz) || 1; ux /= L; uy /= L; uz /= L;
+    U[0] = ux; U[1] = uy; U[2] = uz;
+    Vv[0] = dy * uz - dz * uy; Vv[1] = dz * ux - dx * uz; Vv[2] = dx * uy - dy * ux;
   }
 
   // 隨機錐形方向 → this._d
@@ -1841,6 +1894,77 @@ export class FX {
         this._imm(tx, ty, tz, fx, fy, fz, 0.12, K_BEAM, gr * I, gg * I, gb * I, 0);
         this._imm(tx, ty, tz, fx, fy, fz, 0.6, K_BEAM, gr * I * 0.18, gg * I * 0.18, gb * I * 0.18, 0);
       }
+    }
+  }
+
+  // 光波砲：充能時槍口的光球＋往裡吸的光絲；發射時一條白熱核心、青藍外暈的粗光束，外面繞兩條螺旋
+  _cannon(dt) {
+    const c = this.cn;
+    if (!c.fresh) return;
+    c.fresh = false;
+    const x = c.x, y = c.y, z = c.z, t = this.time;
+    if (!c.on) {
+      const k = c.charge, fl = 0.85 + 0.15 * Math.sin(t * 70);
+      this._imm(x, y, z, x, y, z, 0.4 + 1.8 * k * k, K_GLOW, 0.8 * k * fl, 1.6 * k * fl, 3.2 * k * fl, 0);
+      this._imm(x, y, z, x, y, z, 0.15 + 0.6 * k, K_GLOW, 6 * k, 7 * k, 8 * k, 0);
+      this._perp(c.dx, c.dy, c.dz);
+      const U = this._u, Vv = this._v;
+      for (let j = 0; j < 8; j++) {
+        const ph = (t * 2.4 + j * 0.37) % 1, a = j * 2.39996 + t * 1.5, el = Math.sin(j * 1.7) * 0.9;
+        const ca = Math.cos(a), sa = Math.sin(a);
+        let ox = U[0] * ca + Vv[0] * sa + c.dx * el, oy = U[1] * ca + Vv[1] * sa + c.dy * el, oz = U[2] * ca + Vv[2] * sa + c.dz * el;
+        const L = Math.hypot(ox, oy, oz) || 1; ox /= L; oy /= L; oz /= L;
+        const r0 = 0.4 + 2.6 * (1 - ph), r1 = r0 + 0.5 + 1.1 * (1 - ph), I = 4 * k * ph;
+        this._imm(x + ox * r0, y + oy * r0, z + oz * r0, x + ox * r1, y + oy * r1, z + oz * r1, 0.045, K_SPARK, 0.6 * I, 1.2 * I, 2.4 * I, 0.2);
+      }
+      return;
+    }
+    const I = c.I;
+    if (I <= 0.001) return;
+    const tx = c.tx, ty = c.ty, tz = c.tz;
+    let dx = tx - x, dy = ty - y, dz = tz - z;
+    const L = Math.hypot(dx, dy, dz) || 1; dx /= L; dy /= L; dz /= L;
+    // 光束本體：近處切短段、而且槍口那一段比較細（離鏡頭才 9 公尺，太粗會整個畫面一片白），表面有往前跑的脈動
+    let px = x, py = y, pz = z, s0 = 0;
+    for (let i = 1; i <= 12; i++) {
+      const f = i / 12, s = L * f * f;
+      const hx = x + dx * s, hy = y + dy * s, hz = z + dz * s;
+      const w = I * (1 + 0.14 * Math.sin(t * 50 - s * 0.06)) * Math.min(1, 0.08 + s0 / 160);
+      s0 = s;
+      this._imm(hx, hy, hz, px, py, pz, 7 * w, K_BEAM, 0.2 * I, 0.5 * I, 1.3 * I, 0);
+      this._imm(hx, hy, hz, px, py, pz, 2.6 * w, K_BEAM, 1.4 * I, 4 * I, 9 * I, 0);
+      this._imm(hx, hy, hz, px, py, pz, 0.9 * w, K_BEAM, 15 * I, 18 * I, 23 * I, 0);
+      px = hx; py = hy; pz = hz;
+    }
+    // 兩條螺旋
+    this._perp(dx, dy, dz);
+    const U = this._u, Vv = this._v, HL = Math.min(L, 260);
+    if (HL > 30) for (let h = 0; h < 2; h++) {
+      let qx = 0, qy = 0, qz = 0;
+      for (let i = 0; i <= 20; i++) {
+        const s = 20 + (HL - 20) * Math.pow(i / 20, 1.5), a = s * 0.09 - t * 16 + h * Math.PI, R = Math.min(1, s / 70) * (2.6 + 0.8 * Math.sin(t * 9 + s * 0.05));
+        const ca = Math.cos(a) * R, sa = Math.sin(a) * R;
+        const hx = x + dx * s + U[0] * ca + Vv[0] * sa, hy = y + dy * s + U[1] * ca + Vv[1] * sa, hz = z + dz * s + U[2] * ca + Vv[2] * sa;
+        if (i > 0) this._imm(hx, hy, hz, qx, qy, qz, 0.2 * I, K_BEAM, 1.4 * I, 3.4 * I, 7 * I, 0);
+        qx = hx; qy = hy; qz = hz;
+      }
+    }
+    // 槍口
+    const fl = 0.85 + 0.15 * Math.sin(t * 90);
+    this._imm(x, y, z, x, y, z, 1.1 * I, K_GLOW, 0.6 * I * fl, 1.3 * I * fl, 2.8 * I * fl, 0);
+    this._imm(x, y, z, x, y, z, 0.35 * I, K_GLOW, 6 * I, 7 * I, 8 * I, 0);
+    // 終點：大光團＋往回噴的火花＋照亮四周
+    if (c.hit) {
+      this._imm(tx, ty, tz, tx, ty, tz, 14 * I * fl, K_GLOW, 1.2 * I, 1.6 * I, 2.6 * I, 0);
+      this._imm(tx, ty, tz, tx, ty, tz, 4.5 * I, K_GLOW, 10 * I, 10 * I, 10 * I, 0);
+      const n = Math.random() < this.qn ? 3 : 1;
+      for (let k = 0; k < n; k++) {
+        this._cone(-dx, -dy + 0.6, -dz, 0.9);
+        const sp = rr(20, 60), d = this._d;
+        this._spark(tx, ty, tz, d[0] * sp, d[1] * sp, d[2] * sp, rr(0.4, 0.9), rr(0.05, 0.1), 1.3, 1.6);
+      }
+      c.lt -= dt;
+      if (c.lt <= 0) { c.lt = 0.14; this._flash(tx - dx * 3, ty - dy * 3 + 2, tz - dz * 3, 0.9); }
     }
   }
 
