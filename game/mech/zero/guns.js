@@ -3,7 +3,6 @@
 //   userData：muzzle 槍口、gripR/gripL 雙手手腕位置、scopeEye 瞄準鏡後端、glow 能量發光材質、ammoBar 彈量燈
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { detailMaps } from '../textures.js';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 
 // ---------------------------------------------------------------- 幾何積木
@@ -61,41 +60,6 @@ function hazardTex() {
   return (tex.hz = t);
 }
 
-// 共用照片 PBR 的三面投影；零件座標固定，武器移動時紋理不會游移。
-function gunSurface(m) {
-  m.onBeforeCompile = (sh) => {
-    sh.uniforms.gunWear = { value: detailMaps().paint };
-    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 gunP, gunN;').replace('#include <begin_vertex>', '#include <begin_vertex>\ngunP = position; gunN = normal;');
-    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', `#include <common>
-      uniform sampler2D gunWear; varying vec3 gunP, gunN;
-      vec3 gunTri(vec3 p, vec3 n) {
-        vec3 w = pow(abs(n), vec3(4.0)); w /= max(w.x+w.y+w.z, 0.0001);
-        return texture2D(gunWear,p.yz*8.0).rgb*w.x + texture2D(gunWear,p.xz*8.0+0.31).rgb*w.y + texture2D(gunWear,p.xy*8.0+0.67).rgb*w.z;
-      }`).replace('#include <color_fragment>', `#include <color_fragment>
-      vec3 wear = gunTri(gunP, normalize(gunN));
-      diffuseColor.rgb *= 0.82 + 0.36 * wear.r;`)
-      .replace('#include <roughnessmap_fragment>', `#include <roughnessmap_fragment>
-      roughnessFactor = clamp(roughnessFactor + (wear.g - 0.5) * 0.24, 0.23, 0.98);`)
-      .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
-      vec3 dx = dFdx(-vViewPosition), dy = dFdy(-vViewPosition);
-      vec3 rx = cross(dy, normal), ry = cross(normal, dx);
-      float det = dot(dx, rx);
-      normal = normalize(abs(det)*normal - sign(det)*(dFdx(wear.r)*rx+dFdy(wear.r)*ry)*0.00016);`);
-  };
-  return m;
-}
-// 彈量格仍保留各格顏色介面，實際以一批實例繪製。
-function ammoLights(parent, count, geometry, material, position) {
-  const mesh = new THREE.InstancedMesh(geometry, material.clone(), count), matrix = new THREE.Matrix4();
-  mesh.material.color.set(0xffffff); mesh.castShadow = false;
-  const bars = [];
-  for (let i = 0; i < count; i++) {
-    matrix.makeTranslation(...position(i)); mesh.setMatrixAt(i, matrix); mesh.setColorAt(i, material.color);
-    bars.push({ material: { color: material.color.clone() } });
-  }
-  parent.add(mesh); return { bars, mesh };
-}
-
 const MATS = {};
 function mats(faction) {
   if (MATS[faction]) return MATS[faction];
@@ -110,7 +74,6 @@ function mats(faction) {
     glow: new THREE.MeshBasicMaterial({ color: gov ? new THREE.Color(0.35, 2.0, 3.2) : new THREE.Color(3.2, 0.35, 0.15) }),
     glass: new THREE.MeshPhysicalMaterial({ color: 0x06090d, roughness: 0.05, metalness: 0.3, clearcoat: 1, clearcoatRoughness: 0.02, envMapIntensity: 1.4, emissive: new THREE.Color(0.006, 0.01, 0.012) }),
   };
-  for (const k of ['shell', 'dark', 'accent', 'metal', 'red']) gunSurface(M[k]);
   M.glowBase = M.glow.color.clone();
   return (MATS[faction] = M);
 }
@@ -139,7 +102,7 @@ function decal(texture, w, h, x, y, z, side = 1, color = 0xffffff) {
 // ---------------------------------------------------------------- XLR-7「破城弩」雷射長槍（自己的）
 // 彈量燈：8 格，在彈匣左側
 export function makeRifle(o = {}) {
-  const base = mats('gov'), M = { ...base, glow: base.glow.clone() };
+  const M = mats('gov');
   const P = { shell: [], dark: [], accent: [], metal: [], red: [], glow: [], glass: [] };
   const W = 0.058;
   // 槍托：鏤空骨架托（拇指孔）
@@ -160,12 +123,6 @@ export function makeRifle(o = {}) {
   for (let i = 0; i < 6; i++) P.dark.push(box(0.004, 0.028, 0.008, W / 2 + 0.001, 0.028, 0.5 + i * 0.016));
   // 螺絲
   for (const [y, z] of [[0.05, 0.28], [0.05, 0.62], [-0.03, 0.28], [-0.03, 0.62], [0.05, 0.44]]) for (const s of [-1, 1]) P.metal.push(cylZ(0.004, 0.004, 0.003, 0, 8).rotateY(Math.PI / 2).translate(s * (W / 2 + 0.002), y, z));
-  // 拉柄、拋殼窗與保險撥片，沿機匣合併。
-  P.dark.push(rbox(0.004, 0.027, 0.082, 0.004, -0.032, 0.028, 0.415));
-  P.metal.push(rbox(0.008, 0.018, 0.063, 0.003, -0.034, 0.028, 0.42));
-  P.metal.push(cylZ(0.005, 0.005, 0.029, 0, 8).rotateY(Math.PI / 2).translate(0.029, 0.028, 0.55));
-  P.dark.push(rbox(0.016, 0.012, 0.032, 0.003, 0.054, 0.028, 0.55));
-  P.metal.push(rbox(0.007, 0.009, 0.027, 0.002, 0.034, -0.02, 0.31));
   // 上方導軌＋齒
   P.metal.push(box(0.024, 0.01, 0.4, 0, 0.074, 0.45));
   for (let i = 0; i < 20; i++) P.metal.push(box(0.028, 0.005, 0.009, 0, 0.081, 0.265 + i * 0.019));
@@ -184,7 +141,13 @@ export function makeRifle(o = {}) {
   Q.glow.push(box(0.03, 0.004, 0.066, 0, -0.1, 0));
   const mag = assemble(Q, M);
   mag.position.set(0, -0.05, 0.5); mag.rotation.x = 0.12;
-  const lights = ammoLights(mag, 8, new THREE.BoxGeometry(0.003, 0.0085, 0.03), M.glow, (i) => [0.0245, -0.018 - i * 0.011, 0.006]);
+  const bars = new THREE.Group();
+  for (let i = 0; i < 8; i++) {
+    const b = new THREE.Mesh(new THREE.BoxGeometry(0.003, 0.0085, 0.03), M.glow.clone());
+    b.position.set(0.0245, -0.018 - i * 0.011, 0.006);
+    bars.add(b);
+  }
+  mag.add(bars);
   // 護木：前端八角殼分段，縫隙看得到裡面的發光線圈
   P.dark.push(cylZ(0.03, 0.03, 0.4, 0.64, 8));
   P.glow.push(cylZ(0.021, 0.021, 0.36, 0.66, 12));
@@ -192,10 +155,7 @@ export function makeRifle(o = {}) {
     const z = 0.66 + i * 0.058;
     P.shell.push(rbox(0.072, 0.034, 0.05, 0.006, 0, 0.028, z + 0.025));
     P.shell.push(rbox(0.072, 0.03, 0.05, 0.006, 0, -0.03, z + 0.025));
-    for (const side of [-1, 1]) {
-      P.metal.push(rbox(0.003, 0.018, 0.008, 0.001, side * 0.034, 0, z + 0.005));
-      P.dark.push(rbox(0.004, 0.006, 0.041, 0.002, side * 0.035, -0.013, z + 0.025));
-    }
+    P.dark.push(box(0.074, 0.018, 0.05, 0, 0, z + 0.025));
     if (i % 2 === 0) P.red.push(box(0.074, 0.004, 0.02, 0, 0.046, z + 0.025));
   }
   P.accent.push(rbox(0.076, 0.016, 0.34, 0.004, 0, -0.05, 0.83));   // 下導軌蓋
@@ -244,8 +204,8 @@ export function makeRifle(o = {}) {
     mag, magHome: mag.position.clone(),
     kind: 'rifle', muzzle: new THREE.Vector3(0, 0, 1.25), scopeEye: new THREE.Vector3(0, SY, 0.2), scopeY: SY,
     // 手腕目標：右手在握把後上方，左手在護木下
-    gripR: new THREE.Vector3(-0.002, -0.028, 0.285), gripL: new THREE.Vector3(0.028, -0.064, 0.655),
-    glow: M.glow, glowBase: M.glowBase, ammoBar: lights.bars, ammoInstances: lights.mesh,
+    gripR: new THREE.Vector3(-0.002, -0.028, 0.285), gripL: new THREE.Vector3(0.012, -0.075, 0.8),
+    glow: M.glow, glowBase: M.glowBase, ammoBar: bars.children,
   };
   return g;
 }
@@ -253,7 +213,7 @@ export function makeRifle(o = {}) {
 // ---------------------------------------------------------------- XP-2 雷射手槍（自己的）
 // 原點＝握把中心（手的位置），+Z 槍口
 export function makePistol() {
-  const base = mats('gov'), M = { ...base, glow: base.glow.clone() };
+  const M = mats('gov');
   const P = { shell: [], dark: [], accent: [], metal: [], red: [], glow: [], glass: [] };
   // 滑套（白殼）
   P.shell.push(prism([[-0.05, 0.02], [-0.05, 0.052], [-0.04, 0.062], [0.14, 0.062], [0.16, 0.05], [0.16, 0.02]], 0.03, 0.003));
@@ -261,10 +221,6 @@ export function makePistol() {
   P.dark.push(box(0.031, 0.006, 0.12, 0, 0.034, 0.08));
   P.glow.push(box(0.0315, 0.003, 0.06, 0, 0.034, 0.08));                                           // 側面能量縫
   P.red.push(box(0.0315, 0.004, 0.012, 0, 0.056, 0.13));
-  // 滑套開窗、抽殼鉤、拆卸銷。
-  P.dark.push(rbox(0.018, 0.002, 0.037, 0.001, -0.004, 0.063, 0.059));
-  P.metal.push(rbox(0.013, 0.003, 0.031, 0.001, -0.004, 0.064, 0.059));
-  for (const z of [-0.015, 0.028]) P.metal.push(cylZ(0.0027, 0.0027, 0.032, 0, 8).rotateY(Math.PI / 2).translate(-0.016, 0.01, z));
   // 準星、照門
   P.dark.push(box(0.022, 0.008, 0.01, 0, 0.066, -0.04));
   P.dark.push(box(0.004, 0.008, 0.006, 0, 0.066, 0.14));
@@ -281,12 +237,14 @@ export function makePistol() {
   P.glow.push(cylZ(0.008, 0.008, 0.002, 0.18, 12, 0, 0.04));
   P.dark.push(box(0.03, 0.012, 0.05, 0, 0.012, 0.12));
   const g = assemble(P, M, [decal(decalTex([['XP-2', 60], ['FED. ARMORY', 30, 600]], 256, 128, '#1b2029'), 0.04, 0.02, 0.0155, 0.04, 0.03, 1)]);
-  const lights = ammoLights(g, 7, new THREE.BoxGeometry(0.002, 0.006, 0.006), M.glow, (i) => [-0.016, -0.03 - i * 0.009, -0.01 - i * 0.0018]);
+  const bars = new THREE.Group();
+  for (let i = 0; i < 7; i++) { const b = new THREE.Mesh(new THREE.BoxGeometry(0.002, 0.006, 0.006), M.glow.clone()); b.position.set(-0.016, -0.03 - i * 0.009, -0.01 - i * 0.0018); bars.add(b); }
+  g.add(bars);
   // 握把底的能量匣（換彈時抽出）
   const mag = assemble({ metal: [rbox(0.026, 0.07, 0.03, 0.003, 0, -0.035, 0)], glow: [box(0.027, 0.004, 0.02, 0, -0.012, 0)] }, M);
   mag.position.set(0, -0.08, -0.018); mag.rotation.x = -0.2;
   g.add(mag);
-  g.userData = { mag, magHome: mag.position.clone(), kind: 'pistol', muzzle: new THREE.Vector3(0, 0.04, 0.185), sightY: 0.068, gripR: new THREE.Vector3(0.0, -0.035, -0.055), gripL: new THREE.Vector3(0.018, -0.07, -0.045), glow: M.glow, glowBase: M.glowBase, ammoBar: lights.bars, ammoInstances: lights.mesh };
+  g.userData = { mag, magHome: mag.position.clone(), kind: 'pistol', muzzle: new THREE.Vector3(0, 0.04, 0.185), sightY: 0.068, gripR: new THREE.Vector3(0.0, -0.035, -0.055), gripL: new THREE.Vector3(0.018, -0.07, -0.045), glow: M.glow, glowBase: M.glowBase, ammoBar: bars.children };
   return g;
 }
 

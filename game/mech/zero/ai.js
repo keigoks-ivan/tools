@@ -23,7 +23,7 @@ export class Trooper {
     this.G = G; this.def = def;
     const T = (this.T = TYPES[def.type || 'trooper']);
     this.type = def.type || 'trooper';
-    this.s = new Soldier(G.kit, T.look, { weapon: makeEnemyRifle(T.gun), scale: T.scale, world: G.solid });
+    this.s = new Soldier(G.kit, T.look, { weapon: makeEnemyRifle(T.gun), scale: T.scale });
     G.scene.add(this.s.root); G.scene.add(this.s.weapon);
     this.pos = this.s.pos; this.pos.set(def.x, def.y || 0, def.z);
     this.pos.y = G.solid.floorAt(def.x, def.z, (def.y || 0) + 0.5);

@@ -24,9 +24,7 @@ export const LOOKS = {
 // ---------------------------------------------------------------- 資源
 export class HumanKit {
   static async load(url) {
-    const loader = new GLTFLoader();
-    const [gltf, motion] = await Promise.all([loader.loadAsync(url), loader.loadAsync(new URL('./assets/soldier-motion.glb', import.meta.url).href)]);
-    gltf.animations.push(...motion.animations);
+    const gltf = await new GLTFLoader().loadAsync(url);
     return new HumanKit(gltf);
   }
   constructor(gltf) {
@@ -157,7 +155,7 @@ export class HumanKit {
     };
     // 自然速度：支撐腳貼地時，腳相對身體往後滑的速度＝這個動作「應該」的前進速度
     cal.speed = {};
-    for (const name of ['Walk', 'Run', 'CrouchWalk']) {
+    for (const name of ['Walk', 'Run']) {
       mixer.stopAllAction();
       const act = mixer.clipAction(this.clips[name]); act.reset().play();
       const dur = this.clips[name].duration, N = 48, pts = [];
@@ -166,7 +164,7 @@ export class HumanKit {
       let sum = 0, cnt = 0;
       for (let i = 1; i <= N; i++) if (pts[i].y < minY + 0.035 && pts[i - 1].y < minY + 0.035) { sum += Math.abs(pts[i].z - pts[i - 1].z); cnt++; }
       cal.speed[name] = cnt ? (sum / cnt) / (dur / N) : (name === 'Walk' ? 1.4 : 4);
-      if (name === 'Walk') cal.footY = minY;
+      cal.footY = minY;
     }
     this.cal = cal;
   }
@@ -251,18 +249,8 @@ export class Soldier {
     // 動作
     this.mixer = new THREE.AnimationMixer(m);
     this.act = {};
-    for (const k of ['Idle', 'Walk', 'Run', 'CrouchIdle', 'CrouchWalk']) { const a = this.mixer.clipAction(kit.clips[k]); a.play(); a.setEffectiveWeight(0); this.act[k] = a; }
+    for (const k of ['Idle', 'Walk', 'Run']) { const a = this.mixer.clipAction(kit.clips[k]); a.play(); a.setEffectiveWeight(0); this.act[k] = a; }
     this.act.Idle.setEffectiveWeight(1);
-    this.hitAct = {};
-    for (const name of ['HitChest', 'HitHead']) {
-      const clip = kit.clips[name].clone();
-      clip.tracks = clip.tracks.filter((t) => /Spine|Neck|Head/.test(t.name));
-      THREE.AnimationUtils.makeClipAdditive(clip, 0, kit.clips[name]);
-      this.hitAct[name] = this.mixer.clipAction(clip).setLoop(THREE.LoopOnce, 1);
-      this.hitAct[name].clampWhenFinished = true;
-    }
-    this.world = o.world || null;
-    this.feet = Object.fromEntries(['Left', 'Right'].map((side) => [side, { lock: new THREE.Vector3(), planted: false, ground: 0 }]));
     this.phase = Math.random(); this.idleT = Math.random() * 2;
     // 狀態
     this.pos = this.root.position;
@@ -293,33 +281,18 @@ export class Soldier {
   impact(dir, k = 1, head = false) {
     this.hitV.addScaledVector(dir, (head ? 5 : 3.2) * k);
     this.headSnap = head ? 1 : 0.35;
-    for (const a of Object.values(this.hitAct)) a.stop();
-    this.hitAction = this.hitAct[head ? 'HitHead' : 'HitChest'];
-    this.hitAction.reset().setEffectiveWeight(0).play(); this.hitT = 0;
   }
 
   update(dt, far = false) {
     if (this.rag) { this.rag.step(dt); return; }
-    if (this.death) {
-      const d = this.death; d.t += dt;
-      const w = clamp(d.t / 0.16, 0, 1);
-      for (const [key, a] of Object.entries(this.act)) a.setEffectiveWeight(d.weights[key] * (1 - w));
-      d.action.setEffectiveWeight(w); this.mixer.update(dt); this.root.updateMatrixWorld(true);
-      if (d.t >= d.duration) {
-        this.rag = new Ragdoll(this, d.dir, d.k, d.part, d.world);
-        this.mixer.stopAllAction(); this.death = null;
-        if (this.weapon) this.weapon.userData.drop = true;
-      }
-      return;
-    }
     const cal = this.cal, sc = this.root.scale.x;
-    // ---- 腳：瞄準時維持朝向，步幅方向由腳部 IK 轉到移動方向
+    // ---- 腳：移動方向決定腳的面向；倒退走（背對移動）時播反向
     let sp = Math.hypot(this.vel.x, this.vel.z) / sc;
-    let legYaw = this.yaw;
+    let legYaw = this.yaw, back = false;
     if (sp > 0.3) {
       const mv = Math.atan2(this.vel.x, this.vel.z);
       const d = wrap(mv - this.aimYaw);
-      if (this.mode === 'aim' || Math.abs(d) > 1.95) { legYaw = this.aimYaw; }   // 退著走：身體面向敵人
+      if (Math.abs(d) > 1.95) { legYaw = mv + Math.PI; back = true; }   // 退著走：身體面向敵人
       else legYaw = mv;
     } else legYaw = this.aimYaw;
     // 身體轉向：站著時只有差超過 40° 才轉腳（像真人一樣先扭上身，再踏步轉過去）
@@ -336,35 +309,43 @@ export class Soldier {
     // ---- 走跑混合（相位同步：走和跑用同一個步伐相位）
     // 原地轉身：用慢步的腳步（轉得越快踏得越快）
     if (sp < 0.3 && this.turnSp > 0.4) sp = Math.min(cal.speed.Walk * 0.7, this.turnSp * 0.55);
-    this.crouch = damp(this.crouch, this.crouchT, 8, dt);
-    const vW = lerp(cal.speed.Walk, cal.speed.CrouchWalk, this.crouch), vR = cal.speed.Run;
+    const vW = cal.speed.Walk, vR = cal.speed.Run;
     const wIdle = 1 - clamp(sp / (vW * 0.6), 0, 1);
     const wRun = clamp((sp - vW) / (vR - vW), 0, 1);
     const wWalk = (1 - wIdle) * (1 - wRun), wR = (1 - wIdle) * wRun;
     const dW = this.act.Walk.getClip().duration, dR = this.act.Run.getClip().duration;
-    const stride = lerp(lerp(cal.speed.Walk * dW, cal.speed.CrouchWalk * this.act.CrouchWalk.getClip().duration, this.crouch), vR * dR, wRun);   // 一個循環走多遠
-    this.phase = (this.phase + dt * Math.max(sp, 0.001) / stride + 1) % 1;
+    const stride = lerp(vW * dW, vR * dR, wRun);   // 一個循環走多遠
+    this.phase = (this.phase + (back ? -1 : 1) * dt * Math.max(sp, 0.001) / stride + 1) % 1;
     this.idleT += dt;
     this.act.Idle.time = this.idleT % this.act.Idle.getClip().duration;
     this.act.Walk.time = this.phase * dW; this.act.Run.time = this.phase * dR;
-    this.act.Idle.setEffectiveWeight(wIdle * (1 - this.crouch));
-    this.act.Walk.setEffectiveWeight(wWalk * (1 - this.crouch)); this.act.Run.setEffectiveWeight(wR * (1 - this.crouch));
-    this.act.CrouchIdle.time = this.idleT % this.act.CrouchIdle.getClip().duration;
-    this.act.CrouchWalk.time = this.phase * this.act.CrouchWalk.getClip().duration;
-    this.act.CrouchIdle.setEffectiveWeight(wIdle * this.crouch);
-    this.act.CrouchWalk.setEffectiveWeight((1 - wIdle) * this.crouch);
-    if (this.hitAction) {
-      this.hitT += dt; const duration = this.hitAction.getClip().duration;
-      this.hitAction.time = Math.min(this.hitT, duration);
-      this.hitAction.setEffectiveWeight(Math.sin(Math.PI * clamp(this.hitT / duration, 0, 1)) * 0.8);
-      if (this.hitT >= duration) { this.hitAction.stop(); this.hitAction = null; }
-    }
+    this.act.Idle.setEffectiveWeight(Math.max(wIdle, 1e-3));
+    this.act.Walk.setEffectiveWeight(wWalk); this.act.Run.setEffectiveWeight(wR);
     this.mixer.update(0);
     this.root.updateMatrixWorld(true);
     if (far) { this._placeWeaponSimple(); return; }   // 遠處：只播動作，不做程序層
 
     const B = this.B;
-    this._feet(dt, sp);
+    // ---- 蹲：腰往下，兩腳 IK 踩回原位
+    this.crouch = damp(this.crouch, this.crouchT, 8, dt);
+    if (this.crouch > 0.01) {
+      const feet = [B.LeftFoot.getWorldPosition(new THREE.Vector3()), B.RightFoot.getWorldPosition(new THREE.Vector3())];
+      const hp = B.Hips.position;
+      const dy = this.crouch * 0.46 * sc;
+      // 腰的位移是在 Character（公分、轉過）座標下；世界 −Y 對到 hips 父座標
+      _a.set(0, -dy, 0).add(B.Hips.getWorldPosition(_b));
+      B.Hips.parent.worldToLocal(_a);
+      hp.copy(_a);
+      // 身體前傾一點
+      _q.setFromAxisAngle(_b.set(1, 0, 0).applyAxisAngle(UP, this.bodyYaw), this.crouch * 0.28);
+      rotW(B.Spine, _q);
+      B.Hips.updateMatrixWorld(true);
+      const fwd = _c.set(Math.sin(this.bodyYaw), 0, Math.cos(this.bodyYaw));
+      for (const [i, s] of [[0, 'Left'], [1, 'Right']]) {
+        const k = B[s + 'Leg'].getWorldPosition(new THREE.Vector3()).addScaledVector(fwd, 1.5 * sc);
+        ik2(B[s + 'UpLeg'], B[s + 'Leg'], B[s + 'Foot'], feet[i], k);
+      }
+    }
     // ---- 姿勢權重
     const wantAim = this.mode === 'aim' ? 1 : 0, wantRun = this.mode === 'run' || wRun > 0.5 ? 1 : 0;
     this.aimW = damp(this.aimW, wantAim, 7, dt);
@@ -427,39 +408,6 @@ export class Soldier {
     if (recoil > 0) { _q.setFromAxisAngle(_a.set(1, 0, 0), -0.12 * recoil); outQ.multiply(_q); }
   }
 
-  // 腳掌接地：保留捕捉的抬腳弧線，支撐期鎖在世界座標；坡面只修正接地腳。
-  _feet(dt, speed) {
-    const B = this.B, sc = this.root.scale.x, W = this.world;
-    const travel = speed > 0.3 ? wrap(Math.atan2(this.vel.x, this.vel.z) - this.bodyYaw) : 0;
-    for (const side of ['Left', 'Right']) {
-      const foot = B[side + 'Foot'], state = this.feet[side];
-      const p = foot.getWorldPosition(new THREE.Vector3()), fq = foot.getWorldQuaternion(new THREE.Quaternion());
-      const local = this.root.worldToLocal(p.clone());
-      const ankleX = side === 'Left' ? 0.1 : -0.1;
-      if (speed > 0.3 && Math.abs(travel) > 0.15) {
-        const stride = local.z; local.x = ankleX + Math.sin(travel) * stride; local.z = Math.cos(travel) * stride;
-        p.copy(this.root.localToWorld(local));
-      }
-      const lift = Math.max(0, p.y - this.pos.y - this.cal.footY * sc);
-      const ground = W ? W.floorAt(p.x, p.z, this.pos.y + 0.48 * sc) : this.pos.y;
-      state.ground = damp(state.ground, ground - this.pos.y, 20, dt);
-      const support = lift < 0.045 * sc;
-      if (support && state.planted && state.lock.distanceTo(p) < 0.28 * sc) {
-        p.x = state.lock.x; p.z = state.lock.z;
-      } else { state.lock.copy(p); state.planted = support; }
-      p.y = this.pos.y + state.ground + this.cal.footY * sc + lift;
-      const pole = B[side + 'Leg'].getWorldPosition(new THREE.Vector3()).add(new THREE.Vector3(Math.sin(this.bodyYaw), 0, Math.cos(this.bodyYaw)).multiplyScalar(sc));
-      ik2(B[side + 'UpLeg'], B[side + 'Leg'], foot, p, pole);
-      if (W && support) {
-        const d = 0.12 * sc, ref = this.pos.y + 0.48 * sc;
-        const dx = clamp((W.floorAt(p.x + d, p.z, ref) - W.floorAt(p.x - d, p.z, ref)) / (2 * d), -0.65, 0.65);
-        const dz = clamp((W.floorAt(p.x, p.z + d, ref) - W.floorAt(p.x, p.z - d, ref)) / (2 * d), -0.65, 0.65);
-        fq.premultiply(new THREE.Quaternion().setFromUnitVectors(UP, new THREE.Vector3(-dx, 1, -dz).normalize()));
-      }
-      setW(foot, fq);
-    }
-  }
-
   _placeWeaponSimple() {
     if (!this.weapon) return;
     this._weaponFrame(this._wp, this._wq);
@@ -509,11 +457,8 @@ export class Soldier {
   die(dir, k = 1, hitPart = 'chest', world = null) {
     if (this.dead) return;
     this.dead = true;
-    for (const a of Object.values(this.hitAct)) a.stop();
-    const action = this.mixer.clipAction(this.kit.clips.Death).reset().setLoop(THREE.LoopOnce, 1);
-    action.clampWhenFinished = true; action.setEffectiveWeight(0).play();
-    this.death = { action, weights: Object.fromEntries(Object.entries(this.act).map(([n, a]) => [n, a.getEffectiveWeight()])), t: 0,
-      duration: hitPart === 'head' ? 0.22 : hitPart === 'legs' ? 0.48 : 0.36, dir: dir.clone(), k, part: hitPart, world };
+    this.rag = new Ragdoll(this, dir, k, hitPart, world);
+    if (this.weapon) this.weapon.userData.drop = true;
   }
 }
 
@@ -628,17 +573,7 @@ class Ragdoll {
           o[j] = p[j] - (p[j] - o[j]) * 0.55; o[j + 2] = p[j + 2] - (p[j + 2] - o[j + 2]) * 0.55;
           if (o[j + 1] < p[j + 1] - 0.0001) o[j + 1] = p[j + 1] + (p[j + 1] - o[j + 1]) * 0.1;
         }
-        if (W) {
-          // 質點是球，不是 1.7 m 高的人；從盒內沿最近面推出，包含上下方向。
-          for (const box of W.near(p[j], p[j + 2], r + 0.1, this.near || (this.near = []))) {
-            if (box.noMove || box.ramp) continue;
-            const lo = [box.x0 - r, box.y0 - r, box.z0 - r], hi = [box.x1 + r, box.y1 + r, box.z1 + r];
-            if ([0, 1, 2].some((a) => p[j + a] <= lo[a] || p[j + a] >= hi[a])) continue;
-            let axis = 0, target = lo[0], dist = Infinity;
-            for (let a = 0; a < 3; a++) for (const face of [lo[a], hi[a]]) if (Math.abs(face - p[j + a]) < dist) { dist = Math.abs(face - p[j + a]); axis = a; target = face; }
-            p[j + axis] = o[j + axis] = target;
-          }
-        }
+        if (W) { _a.set(p[j], p[j + 1], p[j + 2]); if (W.pushOut(_a, r)) { p[j] = _a.x; p[j + 2] = _a.z; } }
       }
     }
     if (this.t > 1.2 && moved < 0.0006) { this.still = (this.still || 0) + h; if (this.still > 0.5) this.sleep = true; } else this.still = 0;
@@ -675,30 +610,6 @@ class Ragdoll {
     };
     fix('LeftUpLeg', 'LeftLeg', 'LeftFoot', 1); fix('RightUpLeg', 'RightLeg', 'RightFoot', 1);
     fix('LeftArm', 'LeftForeArm', 'LeftHand', -1); fix('RightArm', 'RightForeArm', 'RightHand', -1);
-    const down = new THREE.Vector3().setFromMatrixColumn(_m, 1).negate();
-    for (const side of ['Left', 'Right']) {
-      this._cone(side + 'UpLeg', side + 'Leg', down, 1.55);
-      this._cone(side + 'Arm', side + 'ForeArm', down, 2.55);
-      for (const limb of ['Hand', 'ForeArm', 'Leg']) {
-        const i = I[side + limb], a = this._pt('Hips', new THREE.Vector3()), b = this._pt('Spine2', new THREE.Vector3());
-        const v = this._pt(side + limb, new THREE.Vector3()), ab = b.sub(a), t = clamp(v.clone().sub(a).dot(ab) / Math.max(ab.lengthSq(), 1e-6), 0, 1);
-        const closest = a.addScaledVector(ab, t), delta = v.sub(closest), min = this.rad[i] + 0.12 * this.s.root.scale.x;
-        if (delta.lengthSq() < min * min && delta.lengthSq() > 1e-8) {
-          delta.setLength(min).add(closest); delta.toArray(this.p, i * 3);
-        }
-      }
-    }
-  }
-
-  _cone(a, b, axis, angle) {
-    const A = this._pt(a, new THREE.Vector3()), delta = this._pt(b, new THREE.Vector3()).sub(A), len = delta.length();
-    if (len < 1e-6) return;
-    delta.divideScalar(len); const dot = clamp(delta.dot(axis), -1, 1);
-    if (dot >= Math.cos(angle)) return;
-    const tangent = delta.addScaledVector(axis, -dot);
-    if (tangent.lengthSq() < 1e-8) tangent.set(1, 0, 0).addScaledVector(axis, -axis.x);
-    tangent.normalize().multiplyScalar(Math.sin(angle)).addScaledVector(axis, Math.cos(angle));
-    tangent.multiplyScalar(len).add(A).toArray(this.p, I[b] * 3);
   }
 
   // 骨頭對齊質點
@@ -708,8 +619,6 @@ class Ragdoll {
     const Mc = this._frame('Hips', 'LeftArm', 'RightArm', 'Spine2', new THREE.Matrix4());
     const Rh = new THREE.Quaternion().setFromRotationMatrix(Mh.clone().multiply(this.f0.hips.clone().invert()));
     const Rc = new THREE.Quaternion().setFromRotationMatrix(Mc.clone().multiply(this.f0.chest.clone().invert()));
-    // 脊椎旋轉不得超過髖部 28°。
-    const twist = Rh.angleTo(Rc); if (twist > 0.49) Rc.copy(Rh.clone().slerp(Rc, 0.49 / twist));
     // 腰：位置＋旋轉
     const hp = this._pt('Hips', new THREE.Vector3());
     B.Hips.parent.updateMatrixWorld(true);
