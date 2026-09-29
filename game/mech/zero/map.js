@@ -51,15 +51,17 @@ export function buildMap(scene, mats, solid, PL = null) {
       b.deco(mat, x0, x1, h, h + 0.9, z0, z0 + t); b.deco(mat, x0, x1, h, h + 0.9, z1 - t, z1);
       b.deco(mat, x0, x0 + t, h, h + 0.9, z0, z1); b.deco(mat, x1 - t, x1, h, h + 0.9, z0, z1);
     }
-    // 每層樓的水平線腳
+    // 每層樓的水平線腳（o.hide＝被隔壁房間貼住的那段不畫，不然會穿進室內）
     for (let y = H1; y < h - 1; y += H1) {
       const tm = o.trim || 'concrete';
-      if (win.includes('n')) b.deco(tm, x0, x1, y - 0.1, y + 0.06, z1, z1 + 0.08);
-      if (win.includes('s')) b.deco(tm, x0, x1, y - 0.1, y + 0.06, z0 - 0.08, z0);
-      if (win.includes('e')) b.deco(tm, x1, x1 + 0.08, y - 0.1, y + 0.06, z0, z1);
-      if (win.includes('w')) b.deco(tm, x0 - 0.08, x0, y - 0.1, y + 0.06, z0, z1);
+      if (win.includes('n')) for (const [p, q] of span(o, 'n', x0, x1)) b.deco(tm, p, q, y - 0.1, y + 0.06, z1, z1 + 0.08);
+      if (win.includes('s')) for (const [p, q] of span(o, 's', x0, x1)) b.deco(tm, p, q, y - 0.1, y + 0.06, z0 - 0.08, z0);
+      if (win.includes('e')) for (const [p, q] of span(o, 'e', z0, z1)) b.deco(tm, x1, x1 + 0.08, y - 0.1, y + 0.06, p, q);
+      if (win.includes('w')) for (const [p, q] of span(o, 'w', z0, z1)) b.deco(tm, x0 - 0.08, x0, y - 0.1, y + 0.06, p, q);
     }
   };
+  // 沿牆 a0～a1 扣掉 o.hide[side] 那段
+  const span = (o, s, a0, a1) => { const hd = o.hide && o.hide[s]; return !hd ? [[a0, a1]] : [[a0, Math.min(a1, hd[0])], [Math.max(a0, hd[1]), a1]].filter(([p, q]) => q - p > 0.01); };
   // 用掃描外牆模組的建築：下面幾層是真的模組（窗戶凹進去、窗框、門、鐵捲門、線腳），更高的樓層用貼圖＋簡單窗
   function kitMass(x0, x1, z0, z1, h, win, o) {
     const kit = o.kit, km = kit === 'factory' ? 'kbrick' : 'kplaster';
@@ -80,7 +82,7 @@ export function buildMap(scene, mats, solid, PL = null) {
     b.deco(km, x0, x1, h, h + 0.9, z0, z0 + t); b.deco(km, x0, x1, h, h + 0.9, z1 - t, z1); b.deco(km, x0, x0 + t, h, h + 0.9, z0, z1); b.deco(km, x1 - t, x1, h, h + 0.9, z0, z1);
     solid.add({ x0, x1, y0: 0, y1: h, z0, z1, mat: km });
     for (const sd of win) {
-      const r = facade(PL, kit, sd, x0, x1, z0, z1, kf, rnd, { shutters: o.shop, noGround: o.noGround });
+      const r = facade(PL, kit, sd, x0, x1, z0, z1, kf, rnd, { shutters: o.shop, noGround: o.noGround, hide: o.hide && o.hide[sd] });
       // 兩端不滿 3 m 的地方：補實牆
       const along = sd === 'n' || sd === 's', m = r.margin;
       if (m > 0.01) for (const [a, bb] of [[along ? x0 : z0, (along ? x0 : z0) + m], [(along ? x1 : z1) - m, along ? x1 : z1]]) {
@@ -107,6 +109,7 @@ export function buildMap(scene, mats, solid, PL = null) {
       for (let i = 0; i < n; i++) {
         const c = start + i * sp, lo = c - ww / 2, hi = c + ww / 2;
         const lit = rnd() < 0.05, broken = rnd() < 0.35;
+        if (o.hide && o.hide[side] && hi + 0.14 > o.hide[side][0] && lo - 0.14 < o.hide[side][1]) continue;   // 被隔壁房間貼住：照樣抽亂數（別處的樣子不變），只是不畫
         const face = (mat, d0, d1, yy0, yy1, l0 = lo, l1 = hi) => {
           const p0 = fix + out * d0, p1 = fix + out * d1;
           if (along) b.deco(mat, l0, l1, yy0, yy1, Math.min(p0, p1), Math.max(p0, p1));
@@ -161,6 +164,12 @@ export function buildMap(scene, mats, solid, PL = null) {
     if (!sk('n')) { wall(ext, 'x', z1 + t / 2, t, x0 - t, x1 + t, 0, h, ops('n'), { dim: 0.9 }); wall(wm, 'x', z1 - L / 2, L, x0, x1, 0, h, ops('n'), { dim: 0.85, solid: false }); }
     if (!sk('w')) { wall(ext, 'z', x0 - t / 2, t, z0, z1, 0, h, ops('w'), { dim: 0.9 }); wall(wm, 'z', x0 + L / 2, L, z0, z1, 0, h, ops('w'), { dim: 0.85, solid: false }); }
     if (!sk('e')) { wall(ext, 'z', x1 + t / 2, t, z0, z1, 0, h, ops('e'), { dim: 0.85 }); wall(wm, 'z', x1 - L / 2, L, z0, z1, 0, h, ops('e'), { dim: 0.85, solid: false }); }
+    // o.skin：不蓋牆的那面（靠鄰房），鄰房外牆的外層材質會露進來：補一層室內粉刷
+    const sn = (s) => sk(s) && o.skin && o.skin.includes(s);
+    if (sn('s')) wall(wm, 'x', z0 + L / 2, L, x0, x1, 0, h, ops('s'), { dim: 0.85, solid: false });
+    if (sn('n')) wall(wm, 'x', z1 - L / 2, L, x0, x1, 0, h, ops('n'), { dim: 0.85, solid: false });
+    if (sn('w')) wall(wm, 'z', x0 + L / 2, L, z0, z1, 0, h, ops('w'), { dim: 0.85, solid: false });
+    if (sn('e')) wall(wm, 'z', x1 - L / 2, L, z0, z1, 0, h, ops('e'), { dim: 0.85, solid: false });
     // 玻璃獨立記錄在合併網格中的範圍；破裂後移除射線碰撞。
     for (const side of ['s', 'n', 'w', 'e']) {
       if (sk(side)) continue;
@@ -173,7 +182,7 @@ export function buildMap(scene, mats, solid, PL = null) {
     }
     // 踢腳線、門楣和內側框，保持原來的通行洞口。
     for (const side of ['s', 'n', 'w', 'e']) {
-      if (sk(side)) continue;
+      if (sk(side) && !sn(side)) continue;
       const axis = side === 's' || side === 'n' ? 'x' : 'z';
       const fixed = side === 's' ? z0 + 0.04 : side === 'n' ? z1 - 0.04 : side === 'w' ? x0 + 0.04 : x1 - 0.04;
       wall('concrete', axis, fixed, 0.055, axis === 'x' ? x0 : z0, axis === 'x' ? x1 : z1, 0.03, 0.15, ops(side), { solid: false, dim: 0.65 });
@@ -188,7 +197,8 @@ export function buildMap(scene, mats, solid, PL = null) {
     if (axis === 'x') { b.deco('rust', c - w / 2 - 0.1, c - w / 2, 0, h + 0.1, fixed - 0.2, fixed + 0.2); b.deco('rust', c + w / 2, c + w / 2 + 0.1, 0, h + 0.1, fixed - 0.2, fixed + 0.2); b.deco('rust', c - w / 2 - 0.1, c + w / 2 + 0.1, h, h + 0.1, fixed - 0.2, fixed + 0.2); }
     else { b.deco('rust', fixed - 0.2, fixed + 0.2, 0, h + 0.1, c - w / 2 - 0.1, c - w / 2); b.deco('rust', fixed - 0.2, fixed + 0.2, 0, h + 0.1, c + w / 2, c + w / 2 + 0.1); b.deco('rust', fixed - 0.2, fixed + 0.2, h, h + 0.1, c - w / 2 - 0.1, c + w / 2 + 0.1); }
   };
-  const ground = (mat, x0, x1, z0, z1) => b.deco(mat, x0, x1, 0, 0.02, z0, z1, { skip: 'ny nx px nz pz' });
+  // 整片底圖是 floor（頂面 y 0.02）；換別的材質的地面要高 1 cm，不然兩層貼在同一平面上會閃（z-fighting）
+  const ground = (mat, x0, x1, z0, z1) => b.deco(mat, x0, x1, 0, mat === 'floor' ? 0.02 : 0.03, z0, z1, { skip: 'ny nx px nz pz' });
 
   // ============================================================ 道具
   const P = {
@@ -351,11 +361,29 @@ export function buildMap(scene, mats, solid, PL = null) {
       for (const dy of [0.3, 0.6, 0.85]) { if (axis === 'x') b.deco('metal', a0, a1, h + dy, h + dy + 0.02, fixed - 0.01, fixed + 0.01); else b.deco('metal', fixed - 0.01, fixed + 0.01, h + dy, h + dy + 0.02, a0, a1); }
     },
     stripe(x0, x1, z0, z1) { b.deco('hazard', x0, x1, 0.02, 0.035, z0, z1, { solid: false, skip: 'ny' }); },
+    // 貨架：鐵架（底座、層板、兩端立柱、中間背板）＋層板上的貨（原本是實心鐵塊，貨被包在裡面看不到）；碰撞仍是整塊
+    shelf(x0, x1, z0, z1, h, goods, ys) {
+      const ax = x1 - x0 > z1 - z0, cx = (x0 + x1) / 2, cz = (z0 + z1) / 2;
+      solid.add({ x0, x1, y0: 0, y1: h, z0, z1, mat: 'metal' });
+      b.deco('metal', x0, x1, 0, 0.1, z0, z1);
+      for (const y of [...ys, h]) b.deco('metal', x0, x1, y - 0.04, y, z0, z1);
+      if (ax) { b.deco('metal', x0, x0 + 0.05, 0, h, z0, z1); b.deco('metal', x1 - 0.05, x1, 0, h, z0, z1); b.deco('metal', x0, x1, 0, h, cz - 0.015, cz + 0.015); }
+      else { b.deco('metal', x0, x1, 0, h, z0, z0 + 0.05); b.deco('metal', x0, x1, 0, h, z1 - 0.05, z1); b.deco('metal', cx - 0.015, cx + 0.015, 0, h, z0, z1); }
+      // 貨沿長邊切成幾段、高低不一（用固定雜湊，不動到地圖 rnd 的順序）
+      const a0 = (ax ? x0 : z0) + 0.1, a1 = (ax ? x1 : z1) - 0.1, d0 = (ax ? z0 : x0) + 0.04, d1 = (ax ? z1 : x1) - 0.04;
+      for (const y of ys) for (let a = a0; a < a1 - 0.2;) {
+        const L = Math.min(a1 - a, 0.4 + hr() * 0.6), hh = 0.14 + hr() * 0.2, i0 = d0 + hr() * 0.06, i1 = d1 - hr() * 0.06;
+        if (hr() > 0.12) { if (ax) b.deco(goods, a, a + L - 0.05, y, y + hh, i0, i1); else b.deco(goods, i0, i1, y, y + hh, a, a + L - 0.05); }
+        a += L;
+      }
+    },
   };
+  let hk = 0;
+  const hr = () => { const v = Math.sin(++hk * 127.1 + 311.7) * 43758.5453; return v - Math.floor(v); };
   function rampBeam(x, z0, z1, y0, y1, dir) {
     const L = z1 - z0, dy = y1 - y0, len = Math.hypot(L, dy), ang = Math.atan2(dy, L) * (dir > 0 ? 1 : -1);
     const g = new THREE.BoxGeometry(0.08, 0.25, len);
-    b.mesh('metal', g.rotateX(-ang), x, (y0 + y1) / 2 - 0.1, (z0 + z1) / 2);
+    b.mesh('metal', g.rotateX(-ang), x, (y0 + y1) / 2 - 0.1, (z0 + z1) / 2, 0, { shade: 0.85 });   // 預設明暗以放置點為地面，樑下半段會變全黑
   }
   function aabb(x, y, z, hx, hy, hz, ry, mat) {
     const c = Math.abs(Math.cos(ry)), s = Math.abs(Math.sin(ry)), ex = hx * c + hz * s, ez = hx * s + hz * c;
@@ -372,7 +400,7 @@ export function buildMap(scene, mats, solid, PL = null) {
   // ============================================================ A 公寓（起點）
   // 兩個房間，北牆出門進窄巷；房間 2 天花板塌了一角，光從上面進來
   ground('floor', -114, 114, -114, 114);
-  room(-112, -99, -112, -93, { h: 3.2, doors: { e: [[-100.5, 1.2]] }, windows: { s: [[-108], [-103]], w: [[-102.5]] }, upper: 13, upperWin: 'sw', floor: 'tile', lightP: 0.3 });
+  room(-112, -99, -112, -93, { h: 3.2, doors: { e: [[-100.5, 1.2], [-107, 3.2]] }, windows: { s: [[-108], [-103]], w: [[-102.5]] }, upper: 13, upperWin: 'sw', floor: 'tile', lightP: 0.3 });
   room(-99, -82, -112, -93, { h: 3.2, doors: { n: [[-91.5, 1.4]], w: [[-100.5, 1.2], [-107, 3.2]] }, windows: { s: [[-95], [-87]], e: [[-104]] }, upper: 13, upperWin: 'se', open: true, lightP: 0 });
   // 兩房之間的牆被炸開一個大洞：洞口邊緣的碎塊、掉下來的磚
   P.rubble(-99, -107, 1.8, 18);
@@ -382,12 +410,17 @@ export function buildMap(scene, mats, solid, PL = null) {
   b.block('concrete', -99.3, -93, 3.2, 3.5, -104, -92.7, { dim: 0.7 });
   b.block('concrete', -88, -82, 3.2, 3.5, -98, -92.7, { dim: 0.7 });
   b.block('concrete', -93, -88, 3.2, 3.5, -104, -101, { dim: 0.7 });
+  // 洞往上看：樓上也一路塌穿到屋頂（洞口四周補內牆），不然會看穿整棟樓、看到外面的天空和窗框背面
+  for (const [x0, x1, z0, z1, y0] of [[-93.25, -93, -101.25, -92.75, 3.5], [-93.25, -88, -101.25, -101, 3.5], [-88.25, -88, -104.25, -101, 3.5], [-88.25, -81.75, -104.25, -104, 3.5],
+    [-82, -81.75, -104, -97.75, 3.2], [-88, -81.75, -98, -97.75, 3.5], [-88, -87.75, -98, -92.75, 3.5], [-93, -87.75, -93, -92.75, 3.2]]) b.deco('wall', x0, x1, y0, 13, z0, z1, { dim: 0.55, ground: y0 });
+  for (const y of [6.9, 10.3]) { b.deco('concrete', -93, -92.4, y - 0.3, y, -101, -93, { dim: 0.6 }); b.deco('concrete', -88, -82, y - 0.3, y, -104, -103.4, { dim: 0.6 }); }   // 各層斷掉的樓板
   P.rubble(-90.5, -99.5, 2.6, 26);
-  b.obox('concrete', -91, 1.3, -97.5, 2.6, 0.16, 1.4, 0.2, { solid: false });  // 塌下來斜靠的樓板
+  b.mesh('concrete', new THREE.BoxGeometry(5.2, 0.32, 2.8).rotateZ(0.6), -90.1, 1.5, -97.3, 0.2, { shade: 0.75 });  // 塌下來斜靠的樓板：一頭著地、一頭靠在洞口邊（原本是水平的，浮在半空）
+  solid.add({ x0: -92.4, x1: -89.3, y0: 0, y1: 1.8, z0: -98.9, z1: -95.8, mat: 'concrete' });
   doorFrame('x', -92.85, -91.5);
   // 家具：翻倒的桌子、倒下的鐵架、散落的東西（在 dress() 裡用掃描模型擺）
   if (!PL) { b.obox('olive', -106, 0.4, -108, 0.8, 0.4, 0.45, 0.3); b.obox('rust', -110.5, 1, -100, 0.3, 1, 1.2, 0); }
-  P.crate(-85, -109.5, 1.0, 0.4); P.crate(-84.5, -108.3, 0.7, 0.9, 1.0);
+  P.crate(-85, -109.5, 1.0, 0.4); P.crate(-84.5, -108.3, 0.7, 0.9);   // 原本 y＝1：掃描木箱比較扁，疊不到上面，浮在半空
   // 塌陷的洞灑下來的光（加法光錐）＋一盞暖色點光當反光
   M.marks.start = new THREE.Vector3(-91.6, 0, -91.6);   // 剛從公寓後門出來，站在巷口
   M.marks.startYaw = Math.PI / 2 * 0 + 0.9;
@@ -420,7 +453,7 @@ export function buildMap(scene, mats, solid, PL = null) {
   P.stall(-86, -48, 0.1); P.stall(-80, -50, -0.2); P.stall(-74, -46, 0.05); P.stall(-88, -39, 0.3); P.stall(-70, -38, -0.1);
   P.car(-79, -40, 1.2);
   P.sandbags(-66, -44, 4.5, Math.PI / 2); P.sandbags(-68, -48.2, 3, 0.3); P.sandbags(-68, -39.8, 3, -0.3);
-  P.jersey(-90, -54, 0.4); P.jersey(-84, -34, 0); P.crate(-62.5, -33, 1.1); P.crate(-62, -31.8, 0.8, 0.5, 1.1);
+  P.jersey(-90, -54, 0.4); P.jersey(-84, -34, 0); P.crate(-62.5, -33, 1.1); P.crate(-62, -31.8, 0.8, 0.5);   // 原本 y＝1.1，旁邊沒東西撐，浮在半空
   P.rubble(-92, -33, 2, 14);
   // 廣場中央枯死的噴水池
   b.block('concrete', -80, -76, 0, 0.6, -46, -42); b.deco('void', -79.6, -76.4, 0.3, 0.61, -45.6, -42.4);
@@ -431,10 +464,10 @@ export function buildMap(scene, mats, solid, PL = null) {
   room(-60, -44, -50, -34, { h: 3.4, floor: 'tile', ext: PL ? 'kplaster' : 'plaster', doors: { w: [[-42, 1.8]], e: [[-42, 1.8]] }, windows: { n: [[-56], [-48]], w: [[-47.5, 2], [-37, 2]] }, upper: 15, upperWin: 'nw', lightP: 0.8, trim: PL ? 'kplaster' : null });
   doorFrame('z', -60.15, -42, 1.8); doorFrame('z', -43.85, -42, 1.8);
   // 貨架
-  for (const z of [-47.5, -44.5, -39, -36.5]) { b.block('metal', -57, -50, 0, 1.8, z - 0.3, z + 0.3); for (const y of [0.6, 1.2]) b.deco('olive', -56.8, -50.2, y, y + 0.3, z - 0.28, z + 0.28, { solid: false }); }
+  for (const z of [-47.5, -44.5, -39, -36.5]) P.shelf(-57, -50, z - 0.3, z + 0.3, 1.8, 'olive', [0.6, 1.2]);
   b.block('olive', -49, -46, 0, 1.05, -38.5, -37.5);   // 櫃台
-  mass(-60, -36, -92, -50, 13, 'wall', 'nw', { kit: 'apt' });
-  mass(-60, -36, -34, -8, 15, 'brick', 's');
+  mass(-60, -36, -92, -50, 13, 'wall', 'nw', { kit: 'apt', hide: { n: [-60, -36] } });   // 北面整面被商店、D 街南側的樓擋住：窗框會穿進商店
+  mass(-60, -36, -34, -8, 15, 'brick', 's', { hide: { s: [-60, -43.7] } });
   M.marks.ch2 = new THREE.Vector3(-52, 0, -42); M.marks.ch2Yaw = Math.PI / 2 * -1 * -1;
 
   // ============================================================ D 檢查哨街道（x -44～36，z -48～-34）
@@ -442,7 +475,7 @@ export function buildMap(scene, mats, solid, PL = null) {
   mass(-36, -14.3, -34, -8, 20, 'wall', 'sn', { shop: true, kit: 'apt' });
   mass(-5.7, 6, -34, -8, 20, 'wall', 'sn', { shop: true, kit: 'apt' });
   room(-14, -6, -33.7, -8.3, { h: 3.6, floor: 'tile', ext: PL ? 'kplaster' : 'plaster', doors: { s: [[-10, 2.4]], n: [[-10, 2.4]] }, windows: { s: [[-12.6, 1.2], [-7.4, 1.2]] }, upper: 20, upperWin: 's', lightP: 0.6, trim: PL ? 'kplaster' : null });
-  for (const z of [-30, -25, -20, -15]) { b.block('metal', -13.7, -12.9, 0, 1.9, z - 1.5, z + 1.5); b.block('metal', -7.1, -6.3, 0, 1.9, z - 1.2, z + 1.2); for (const y of [0.6, 1.25]) { b.deco('olive', -13.6, -13, y, y + 0.3, z - 1.4, z + 1.4, { solid: false }); b.deco('paint2', -7, -6.4, y, y + 0.3, z - 1.1, z + 1.1, { solid: false }); } }
+  for (const z of [-30, -25, -20, -15]) { P.shelf(-13.7, -12.9, z - 1.5, z + 1.5, 1.9, 'olive', [0.6, 1.25]); P.shelf(-7.1, -6.3, z - 1.2, z + 1.2, 1.9, 'paint2', [0.6, 1.25]); }
   b.obox('olive', -9.2, 0.45, -18.5, 0.45, 0.45, 1.0, 0.9);   // 倒下的販賣機
   P.rubble(-10.5, -12, 1.4, 8); P.crate(-8, -27, 0.9, 0.4); P.crate(-11.8, -22, 0.6, 1.1);
   M.marks.ch3 = new THREE.Vector3(-10, 0, -30); M.marks.ch3Yaw = 0;
@@ -463,7 +496,7 @@ export function buildMap(scene, mats, solid, PL = null) {
   P.container(33, -44, Math.PI / 2); P.stairs(29.2, 30.4, -38, -34.4, 0, 2.6, 'z', -1); P.deck(30.4, 35.6, -47, -38.5, 2.62, 'metal');
   P.rail('z', 35.6, -47, -38.5, 2.62);
   P.puddle(-24, -42, 3.5, 2.2, 0.3); P.puddle(-6, -46, 2.4, 1.6, 1.2); P.puddle(16, -40, 3, 2, 0.6);
-  P.barrel(-10, -35.6); P.barrel(-9.4, -36.2, 'rust'); P.barrel(24, -47);
+  P.barrel(-12.4, -35.6); P.barrel(-11.8, -36.2, 'rust'); P.barrel(24, -47);   // 前兩個油桶原本擋在商場走道門口正中間，往西挪到窗前
   // 封鎖線：獵犬軍團用兩層貨櫃把貨櫃場入口整排堵死
   for (const x of [17.05, 23.15, 29.25, 35.35]) { P.container(x, -33.9, 0, 0, 'olive'); P.container(x, -33.9, 0.01, 2.6); }
   P.sandbags(15, -38.5, 3.5, 0.2); P.sandbags(24, -41.5, 3, -0.1);
@@ -506,15 +539,16 @@ export function buildMap(scene, mats, solid, PL = null) {
   M.marks.ch5 = new THREE.Vector3(28, 0, 14); M.marks.ch5Yaw = 0;
   ground('concrete', 14, 47, 22, 30);
   // 建築：入口大廳 → 中央走廊（北向）→ 兩側房間 → 機庫側門
-  mass(14, 20, 22, 52, 8, 'concrete', 'e');
-  mass(44, 48, 22, 52, 8, 'concrete', 'w');
+  mass(14, 20, 22, 52, 8, 'concrete', 'e', { hide: { e: [29.7, 52] } });   // z 30 以北貼著室內：窗框不畫
+  mass(44, 48, 22, 52, 8, 'concrete', 'w', { hide: { w: [29.7, 52] } });
   room(20, 44, 30, 36, { h: 3.6, wall: 'wall', ext: 'concrete', floor: 'floor', doors: { s: [[28, 3.2]], n: [[32, 2]] }, windows: { s: [[22], [38], [41]] }, upper: 8, lightP: 1 });
-  room(30, 34, 36, 52, { h: 3.4, wall: 'wall', floor: 'floor', doors: { s: [[32, 2]], n: [[32, 2]], w: [[40, 1.2], [47, 1.2]], e: [[43, 1.2]] }, noWall: 'n', upper: 8, lightP: 1 });
-  room(20, 29.7, 36.3, 43.5, { h: 3.4, wall: 'wall', floor: 'tile', doors: { e: [[40, 1.2]] }, noWall: 'es', upper: 8, lightP: 0.8 });
-  room(20, 29.7, 43.8, 52, { h: 3.4, wall: 'wall', floor: 'floor', doors: { e: [[47, 1.2]] }, noWall: 'esn', upper: 8, lightP: 0.8 });
-  room(34.3, 44, 36.3, 52, { h: 3.4, wall: 'wall', floor: 'metal', doors: { w: [[43, 1.2]] }, noWall: 'wsn', upper: 8, lightP: 1 });
+  // 北端到 51.75（機庫牆的外皮）：原本到 52，天花板和樓上量體會從機庫南牆凸出一片
+  room(30, 34, 36, 51.75, { h: 3.4, wall: 'wall', floor: 'floor', doors: { s: [[32, 2]], n: [[32, 2]], w: [[40, 1.2], [47, 1.2]], e: [[43, 1.2]] }, noWall: 'n', upper: 8, lightP: 1 });
+  room(20, 29.7, 36.3, 43.5, { h: 3.4, wall: 'wall', floor: 'tile', doors: { e: [[40, 1.2]] }, noWall: 'es', skin: 's', upper: 8, lightP: 0.8 });
+  room(20, 29.7, 43.8, 51.75, { h: 3.4, wall: 'wall', floor: 'floor', doors: { e: [[47, 1.2]] }, noWall: 'esn', upper: 8, lightP: 0.8 });
+  room(34.3, 44, 36.3, 51.75, { h: 3.4, wall: 'wall', floor: 'metal', doors: { w: [[43, 1.2]] }, noWall: 'wsn', skin: 's', upper: 8, lightP: 1 });
   // 營房床架、控制台
-  for (const z of [37.5, 40, 42.3]) { b.block('metal', 21, 23.5, 0, 0.55, z - 0.45, z + 0.45); b.block('metal', 21, 23.5, 1.2, 1.3, z - 0.45, z + 0.45, { solid: false }); }
+  for (const z of [37.5, 40, 42.3]) { b.block('metal', 21, 23.5, 0, 0.55, z - 0.45, z + 0.45); b.block('metal', 21, 23.5, 1.2, 1.3, z - 0.45, z + 0.45, { solid: false }); for (const [px, pz] of [[21, z - 0.45], [23.45, z - 0.45], [21, z + 0.4], [23.45, z + 0.4]]) b.deco('metal', px, px + 0.05, 0.55, 1.2, pz, pz + 0.05); }   // 上鋪加四根柱子（原本浮在半空）
   for (const z of [38, 42, 46, 50]) { b.block('dark' in mats ? 'dark' : 'olive', 42.3, 43.8, 0, 1.0, z - 1.2, z + 1.2); b.deco('lamp', 42.3, 42.35, 0.9, 1.3, z - 1, z + 1, { solid: false }); }
   P.crate(26, 47, 1.2); P.crate(24.5, 49, 1.0); P.crate(27.5, 50.5, 1.1, 0.4);
   doorFrame('x', 29.85, 28, 3.2);
@@ -644,8 +678,9 @@ export function buildMap(scene, mats, solid, PL = null) {
 
     // ---- I 市立醫院（x -60～-36，z 6～34）：南邊急診大門 → 大廳 → 北邊病房區 → 東門出後院
     room(-59.6, -44, 6.3, 18, { h: 4, floor: 'tile', wall: 'plaster', ext: 'concrete', doors: { s: [[-52, 3]], n: [[-48, 2]] }, windows: { s: [[-57.3, 2], [-46.7, 2]] }, upper: 16, upperWin: 's', lightP: 0.7 });
-    room(-59.6, -36.3, 18.3, 34, { h: 3.6, floor: 'tile', wall: 'plaster', ext: 'concrete', doors: { e: [[28, 2]] }, noWall: 's', windows: { e: [[22, 1.6], [32, 1.6]] }, upper: 16, lightP: 0.6 });
+    room(-59.6, -36.3, 18.3, 34, { h: 3.6, floor: 'tile', wall: 'plaster', ext: 'concrete', doors: { e: [[28, 2]], s: [[-48, 2]] }, noWall: 's', skin: 's', windows: { e: [[22, 1.6], [32, 1.6]] }, upper: 16, lightP: 0.6 });
     mass(-43.7, -36, 6, 18, 16, 'concrete', 's');
+    b.block('concrete', -43.7, -36, 0, 3.6, 18, 18.3);   // 病房南邊、大廳東邊之間 30 cm 的縫補起來
     // 急診雨遮＋紅十字
     b.block('concrete', -55.5, -48.5, 3.9, 4.2, 2.8, 6); P.column(-55, 3.3, 3.9, 0.2); P.column(-49, 3.3, 3.9, 0.2);
     b.deco('red', -52.4, -51.6, 5.2, 7.6, 5.9, 6.0, { solid: false }); b.deco('red', -53.2, -50.8, 6.0, 6.8, 5.9, 6.0, { solid: false });
@@ -658,6 +693,7 @@ export function buildMap(scene, mats, solid, PL = null) {
     for (const x of [-57, -52, -47, -42]) {
       b.block('metal', x - 0.5, x + 0.5, 0, 0.6, 31.6, 33.6); b.deco('paint2', x - 0.45, x + 0.45, 0.6, 0.75, 31.7, 33.5, { solid: false }); b.deco('metal', x - 0.5, x + 0.5, 0.6, 1.3, 33.5, 33.6, { solid: false });
       b.deco('canvas', x + 2.3, x + 2.34, 0.2, 2.5, 30, 33.8, { solid: false });
+      b.deco('metal', x + 2.29, x + 2.35, 2.5, 2.54, 29.95, 33.85); for (const rz of [30.4, 33.4]) b.deco('metal', x + 2.305, x + 2.335, 2.54, 3.6, rz, rz + 0.03);   // 隔簾的軌道和吊桿（原本簾子浮在半空）
     }
     for (const x of [-56, -45]) b.block('plaster', x - 1.8, x + 1.8, 0, 1.4, 25.8, 26.1);
     b.block('paint2', -51.5, -48.5, 0, 1.05, 21.5, 23);   // 護理站
@@ -703,9 +739,11 @@ export function buildMap(scene, mats, solid, PL = null) {
     // ---- 匝道（x -2～6，z 26～40，從橋面降到地面）＋底下的擋土塊（不讓人從下面鑽過去）
     const RA = Math.atan2(DY, 14), RL = Math.hypot(DY, 14);
     const rg = new THREE.BoxGeometry(8, 0.6, RL).rotateX(-RA);
-    b.mesh('concrete', rg, 2, 3 - 0.3 * Math.cos(RA), 33 + 0.3 * Math.sin(RA), 0);
+    b.mesh('concrete', rg, 2, 3 - 0.3 * Math.cos(RA), 33 + 0.3 * Math.sin(RA), 0, { shade: 0.9 });   // 給定明暗：預設以中心當地面，下半段會變成全黑
     solid.add({ x0: -2, x1: 6, z0: 26, z1: 40, y0: 0, y1: DY, ramp: { axis: 'z', dir: 1 }, mat: 'concrete' });
-    for (let z = 26; z < 40; z++) { const h = (DY * (z - 26)) / 14 - 0.35; if (h > 0.05) b.block('concrete', -2, 6, 0, h, z, z + 1); }
+    // 底下實心：碰撞照舊一公尺一格；外觀改成一整塊斜楔（原本一格格的台階從側面看是鋸齒、露縫）
+    for (let z = 26; z < 40; z++) { const h = (DY * (z - 26)) / 14 - 0.35; if (h > 0.05) solid.add({ x0: -2, x1: 6, y0: 0, y1: h, z0: z, z1: z + 1, mat: 'concrete' }); }
+    { const z0 = 26 + 0.3 * 14 / DY, wg = new THREE.ExtrudeGeometry(new THREE.Shape([new THREE.Vector2(z0, 0), new THREE.Vector2(40, 0), new THREE.Vector2(40, DY - 0.3)]), { depth: 8, bevelEnabled: false }).rotateY(-Math.PI / 2); b.mesh('concrete', wg, 6, 0, 0, 0, { shade: 0.8 }); }
     // ---- L 倉庫空地（x -2～6，z 14～26）
     ground('concrete', -2, 6, 14, 26);
     mass(6, 10, 22, 50, 14, 'concrete', '');
@@ -774,9 +812,9 @@ function dress(PL, P, rnd) {
   A('portable_generator', -64, 0, -35, 0.4, { solid: true });
   A('metal_jerrycan_green', -63.2, 0, -34.4, 1.2); A('metal_jerrycan_green', -63.5, 0, -34.1, 1.3);
   A('propane_tank', -93.5, 0, -52, 0); A('propane_tank', -93.1, 0, -51.6, 0);
-  for (const [x, z] of [[-90, -58.5], [-77, -58.5], [-68, -58.5]]) A('exterior_aircon_unit', x, 4.3, z, Math.PI, { scale: 0.6 });
+  for (const x of [-84.5, -78.5, -69.5]) A('exterior_aircon_unit', x, 4.3, -61.8, 0, { scale: 0.6 });   // 掛在廣場南側樓的外牆（z -62）兩窗之間；原本在 z -58.5 半空中（一台還在巷口正上方）
   // 檢查哨街道：電箱、人孔蓋、輪胎、軍用木箱、探照燈用的發電機
-  for (const [x, z] of [[-30, -34.4], [-10, -34.4], [8, -47.6]]) A('utility_box_02', x, 0, z, x > 0 ? 0 : Math.PI, { solid: true });
+  for (const [x, z] of [[-30, -34.4], [-3.5, -34.4], [8, -47.6]]) A('utility_box_02', x, 0, z, x > 0 ? 0 : Math.PI, { solid: true });   // 中間那個原本擋在商場走道門口，移到東邊牆邊
   for (const x of [-28, -2, 22]) A('water_manhole_cover', x, 0.01, -41, 0, { cast: false });
   A('old_military_crate', 9, 0, -40, 0.3, { solid: true }); A('old_military_crate', 9.1, 0.3, -40, 0.25, { solid: true });
   A('portable_generator', 14.6, 0, -48, 0.2, { solid: true });

@@ -36,7 +36,7 @@ export class Models {
       for (const t of ['map', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap']) if (mat[t]) mat[t].anisotropy = aniso;
       if (mat.transparent && !mat.alphaMap && mat.opacity >= 1) mat.transparent = false;
       mat.envMapIntensity = 1;
-      if (name === 'cement_bag') mat.color.set(0xa3906a);   // 水泥袋改成沙包色（麻布）
+      if (name === 'cement_bag') { mat.color.set(0x76674b); mat.map = null; }   // 水泥袋改成沙包色（麻布）：拿掉印著 CEMENT 字和紅條的貼圖，只留布紋凹凸
       // 壓縮過的頂點（int16 正規化）先轉回浮點數，不然套矩陣會被截在 ±1
       const g = new THREE.BufferGeometry();
       for (const [k, a] of Object.entries(o.geometry.attributes)) {
@@ -168,6 +168,7 @@ export function facade(P, kitName, side, x0, x1, z0, z1, floors, rnd, o = {}) {
   };
   // 模組的右下角（x=0）要落在 a＋3（沿 dirA 的正方向），所以依 dirA 決定起點
   const place = (name, a, y, extra = {}) => {
+    if (o.hide && a + 3 > o.hide[0] && a < o.hide[1]) return null;   // 這段牆被隔壁房間貼住：不放模組（亂數照抽）
     const alongSign = along ? Math.sign(dirA.x) : Math.sign(dirA.z);
     const aa = alongSign > 0 ? a + 3 : a;   // 模組 x=0 那端
     const p = at(aa, y);
