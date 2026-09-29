@@ -3,8 +3,15 @@
 //   除錯：?ch=1..3 直接開章、?x=&z=&yaw= 指定位置、?god 無敵、?mute 靜音、?final 直接到最後一幕
 import * as THREE from 'three';
 
-// 本篇的 env.js 用相對路徑 './assets/' 讀天空、HDR、立面：從這個資料夾要往上一層
-THREE.DefaultLoadingManager.setURLModifier((u) => (u.startsWith('./assets/') ? '../assets/' + u.slice(9) : u));
+// 本篇的 env.js 用相對路徑 './assets/' 讀天空、HDR、城市貼圖：
+//   前傳有縮小的 webp 版（assets/env/，遠景看不出差別、下載少 12 MB）；沒有的才去本篇資料夾拿
+const LITE = new Set(['grass_diff', 'grass_nor', 'grass_arm', 'asphalt_diff', 'asphalt_nor', 'asphalt_arm', 'rubble_diff', 'rubble_nor', 'rock_diff', 'rock_nor', 'rock_arm', 'sky',
+  'wear_mask', 'wear_nor', 'frame_mask', 'frame_nor', ...['glass', 'office', 'brick', 'concrete', 'brick2'].flatMap((f) => ['col', 'nor', 'arm'].map((k) => `fac_${f}_${k}`))]);
+THREE.DefaultLoadingManager.setURLModifier((u) => {
+  if (!u.startsWith('./assets/')) return u;
+  const name = u.slice(9), base = name.replace(/\.jpg$/, '');
+  return LITE.has(base) ? './assets/env/' + base + '.webp' : '../assets/' + name;
+});
 
 const q = new URLSearchParams(location.search);
 const $ = (id) => document.getElementById(id);

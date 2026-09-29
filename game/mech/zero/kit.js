@@ -30,7 +30,7 @@ export async function loadSurfaces(renderer, onStep = () => {}) {
   });
   const out = {};
   await Promise.all(Object.entries(SURF).map(async ([k, s]) => {
-    const [map, normalMap, arm] = await Promise.all([T(s.tex + '_col.jpg', true), T(s.tex + '_nor.jpg'), T(s.tex + '_arm.jpg')]);
+    const [map, normalMap, arm] = await Promise.all([T(s.tex + '_col.webp', true), T(s.tex + '_nor.webp'), T(s.tex + '_arm.webp')]);
     const m = new THREE.MeshStandardMaterial({ map, normalMap, roughnessMap: arm, aoMap: arm, metalnessMap: s.metal ? arm : null, metalness: s.metal ? 1 : 0, roughness: 1, color: s.color, vertexColors: true });
     // aoMap 預設吃第二組 UV：這裡直接用第一組（每個頂點都用同一套世界 UV）
     m.onBeforeCompile = (sh) => { sh.fragmentShader = sh.fragmentShader.replace('#include <aomap_fragment>', AO_CHUNK); };
