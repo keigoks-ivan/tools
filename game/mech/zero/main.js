@@ -191,7 +191,7 @@ function startEncounter(E) {
 function objective() { return S.ENCOUNTERS.find((E) => E.ch === chapter && !done.has(E.id)); }
 // 遭遇開打前的導引點
 function guideFor(E) {
-  const Z = { B: [-91.5, -88], C: [-91.5, -60], D: [-43, -42], E: [28, -30], F: [28, 24], G1: [32, 53], G2: [40, 70] };
+  const Z = { B: [-91.5, -80], C: [-91.5, -60], D: [-43, -42], E: [28, -30], F: [28, 24], G1: [32, 53], G2: [40, 70] };
   const z = Z[E.id] || [0, 0];
   return new THREE.Vector3(z[0], 1.5, z[1]);
 }

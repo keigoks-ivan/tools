@@ -14,7 +14,7 @@ export const INTRO = [
 ];
 
 export const CHAPTERS = [
-  { n: 1, name: '陷落', en: 'FALLEN CITY', start: 'start', yaw: 0.95, music: 1 },
+  { n: 1, name: '陷落', en: 'FALLEN CITY', start: 'start', yaw: 0, music: 1 },
   { n: 2, name: '封鎖線', en: 'THE CHECKPOINT', start: 'ch2', yaw: Math.PI / 2 * -1 + Math.PI, music: 3 },
   { n: 3, name: '第七機庫', en: 'HANGAR 7', start: 'ch3', yaw: 0, music: 5 },
 ];
@@ -24,7 +24,7 @@ export const ENCOUNTERS = [
   // ---------------- 第 1 章
   {
     id: 'B', ch: 1, obj: '穿過後巷', mark: V(-91.5, -62),
-    trigger: (p) => p.z > -90 && p.x > -96 && p.x < -87,
+    trigger: (p) => p.z > -86 && p.x > -96 && p.x < -87,
     enemies: [
       { type: 'trooper', x: -92, z: -64, yaw: Math.PI, patrol: [[-92.5, -64], [-90, -75], [-91, -66]] },
       { type: 'trooper', x: -89.6, z: -61, yaw: Math.PI + 0.3 },
@@ -127,7 +127,7 @@ export const ENCOUNTERS = [
 ];
 
 export const LINES = {
-  start: [[OP, '零號，聽得到嗎？這裡是白鷺。'], [OP, '首都防線昨晚全垮了。獵犬軍團在城裡到處搜人。'], [OP, '第七機庫還在我們手上，蒼焰在那裡。往東北走，出了公寓就是後巷。']],
+  start: [[OP, '零號，聽得到嗎？這裡是白鷺。'], [OP, '首都防線昨晚全垮了。獵犬軍團在城裡到處搜人。'], [OP, '第七機庫還在我們手上，蒼焰在那裡。沿著這條後巷往北走。']],
   ch2: [[OP, '零號，前面就是他們的封鎖線。'], [OP, '你只有一把長槍一把手槍，別跟他們硬拚。']],
   ch3: [[OP, '大門後面就是第七機庫。'], [OP, '他們已經打進去了……快，零號。']],
   mech: [[OP, '……停下。別動。'], [OP, '圍牆外面，那是獵犬機。它的感測器掃過來了。'], [OP, '……它往北走了。繼續前進。']],
