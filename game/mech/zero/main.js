@@ -140,7 +140,7 @@ function setQuality(qv) {
   renderer.setPixelRatio(Math.min(devicePixelRatio, [0.75, 1, 1.5][qv]));
   renderer.setSize(innerWidth, innerHeight);
   post.setSize(innerWidth, innerHeight);
-  post.gtao.enabled = qv > 0;
+  post.gtao.enabled = qv > 1;   // AO 要整個場景多畫一次：只在高畫質開
   world.sun.shadow.mapSize.setScalar(qv > 0 ? 4096 : 2048);
   if (world.sun.shadow.map) { world.sun.shadow.map.dispose(); world.sun.shadow.map = null; }
   renderer.shadowMap.type = qv > 0 ? THREE.PCFSoftShadowMap : THREE.PCFShadowMap;

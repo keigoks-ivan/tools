@@ -22,6 +22,8 @@ export function buildMap(scene, mats, solid, PL = null) {
   mats.paint2 = new THREE.MeshStandardMaterial({ color: 0x9a9384, roughness: 0.55, metalness: 0.3, vertexColors: true, map: mats.rust.map, roughnessMap: mats.rust.roughnessMap });
   mats.red = new THREE.MeshStandardMaterial({ color: 0x8a1f1a, roughness: 0.45, metalness: 0.4, vertexColors: true });
   for (const k of ['glass', 'void', 'lamp', 'warm', 'olive', 'canvas', 'sand', 'paint', 'paint2', 'red']) mats[k].userData.tile = 2;
+  // 貨櫃：真的波浪鐵皮貼圖，染三種常見顏色
+  for (const [k, c] of [['cGreen', 0x8a9a74], ['cRed', 0xc27358], ['cBlue', 0x7d93a6]]) { const m = mats.corr.clone(); m.color.set(c); m.metalnessMap = null; m.metalness = 0.15; m.userData.tile = 2.2; m.onBeforeCompile = mats.corr.onBeforeCompile; mats[k] = m; }   // 烤漆：不是裸金屬
   mats.hazard.userData.tile = 1.6;
   // 外牆模組的貼圖做成一般材質（量體上方、牆角補縫用，顏色才接得起來）
   if (PL) {
@@ -171,9 +173,12 @@ export function buildMap(scene, mats, solid, PL = null) {
   const P = {
     // 貨櫃 6.1 × 2.6 × 2.44，側面波浪板
     container(x, z, ry = 0, y = 0, mat = 'rust') {
-      b.obox(mat, x, y + 1.3, z, 3.05, 1.3, 1.22, ry);
+      mat = mat === 'olive' ? 'cGreen' : rnd() < 0.5 ? 'cRed' : 'cBlue';
+      b.obox(mat, x, y + 1.3, z, 3.05, 1.3, 1.22, ry, { hitMat: 'metal' });
       const c = Math.cos(ry), s = Math.sin(ry);
-      for (let i = -5; i <= 5; i++) { const dx = i * 0.55; b.obox(mat, x + dx * c, y + 1.3, z - dx * s, 0.1, 1.2, 1.25, ry, { solid: false }); }
+      // 上下框、四角柱
+      for (const yy of [0.06, 2.54]) b.obox('rust', x, y + yy, z, 3.08, 0.07, 1.24, ry, { solid: false });
+      for (const dx of [-3.02, 3.02]) for (const dz of [-1.19, 1.19]) b.obox('rust', x + dx * c + dz * s, y + 1.3, z - dx * s + dz * c, 0.07, 1.3, 0.07, ry, { solid: false });
       b.obox('metal', x + 3.07 * c, y + 1.3, z - 3.07 * s, 0.03, 1.28, 1.2, ry, { solid: false });
       b.obox('metal', x - 3.07 * c, y + 1.3, z + 3.07 * s, 0.03, 1.28, 1.2, ry, { solid: false });
     },
@@ -234,7 +239,7 @@ export function buildMap(scene, mats, solid, PL = null) {
       b.mesh('metal', g.metal, x, 0, z, ry);
     },
     barrel(x, z, mat = 'olive') { if (PL) { PL.add(mat === 'rust' ? 'barrel_03' : 'Barrel_01', x, 0, z, rnd() * 6, { solid: true, hit: 'metal' }); return; } const g = PR.barrel(); b.mesh(mat, g.body, x, 0, z, rnd() * 3, { solid: true, hitMat: 'metal' }); b.mesh('metal', g.metal, x, 0, z, 0); },
-    rack(x, z, ry = 0) { const g = PR.missileRack(); b.mesh('metal', g.metal, x, 0, z, ry); b.mesh('olive', g.body, x, 0, z, ry, { solid: true, hitMat: 'metal' }); b.mesh('void', g.dark, x, 0, z, ry); },
+    rack(x, z, ry = 0) { const g = PR.missileRack(); b.mesh('metal', g.metal, x, 0, z, ry); b.mesh('paint', g.body, x, 0, z, ry, { solid: true, hitMat: 'metal' }); b.mesh('void', g.dark, x, 0, z, ry); },
     cart(x, z, ry = 0) { const g = PR.toolCart(); b.mesh('red', g.red, x, 0, z, ry, { solid: true, hitMat: 'metal' }); b.mesh('metal', g.metal, x, 0, z, ry); b.mesh('void', g.dark, x, 0, z, ry); },
     puddle(x, z, w, d, ry = 0) { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, d).rotateX(-Math.PI / 2), PR.puddleMat()); m.position.set(x, 0.035, z); m.rotation.y = ry; m.receiveShadow = true; m.userData.noAO = true; scene.add(m); },
     dumpster(x, z, ry = 0) {
@@ -385,7 +390,7 @@ export function buildMap(scene, mats, solid, PL = null) {
   M.zones.C = { x0: -95, x1: -60, z0: -58, z1: -30 };
 
   // ============================================================ 商店穿堂（x -60～-44，z -50～-34）→ 第 2 章起點
-  room(-60, -44, -50, -34, { h: 3.4, floor: 'tile', doors: { w: [[-42, 1.8]], e: [[-42, 1.8]] }, windows: { n: [[-56], [-48]] }, upper: 15, upperWin: 'n', lightP: 0.8 });
+  room(-60, -44, -50, -34, { h: 3.4, floor: 'tile', ext: PL ? 'kplaster' : 'plaster', doors: { w: [[-42, 1.8]], e: [[-42, 1.8]] }, windows: { n: [[-56], [-48]], w: [[-47.5, 2], [-37, 2]] }, upper: 15, upperWin: 'nw', lightP: 0.8, trim: PL ? 'kplaster' : null });
   doorFrame('z', -60.15, -42, 1.8); doorFrame('z', -43.85, -42, 1.8);
   // 貨架
   for (const z of [-47.5, -44.5, -39, -36.5]) { b.block('metal', -57, -50, 0, 1.8, z - 0.3, z + 0.3); for (const y of [0.6, 1.2]) b.deco('olive', -56.8, -50.2, y, y + 0.3, z - 0.28, z + 0.28, { solid: false }); }

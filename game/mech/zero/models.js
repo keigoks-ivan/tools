@@ -73,7 +73,7 @@ export class Models {
 
 // ---------------------------------------------------------------- 擺放：累積每個模型的矩陣，最後按區塊建 InstancedMesh
 export class Placer {
-  constructor(models, solid, chunk = 64) { this.M = models; this.solid = solid; this.chunk = chunk; this.list = new Map(); this.reg = []; this.bagWalls = []; }
+  constructor(models, solid, chunk = 120) { this.M = models; this.solid = solid; this.chunk = chunk; this.list = new Map(); this.reg = []; this.bagWalls = []; }
   // o：scale（數字或 [x,y,z]）、solid（加碰撞盒）、hit（子彈材質）、cast（投影子）、tilt（繞 X 傾斜）、roll
   add(name, x, y, z, ry = 0, o = {}) {
     const m = this.M.get(name); if (!m) return null;
