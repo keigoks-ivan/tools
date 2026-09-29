@@ -1,14 +1,14 @@
-import {guests,wishes} from './looks.js?v=10';
-import {SalonMemory} from './memory.js?v=10';
-import {ReplayUI} from './replay-ui.js?v=10';
-import {ornament,createDecorate} from './ornaments.js?v=10';
-import {createLayout,toWorld,inStage} from './layout.js?v=10';
-import {HairSystem,setHairTexture,setHairPlate} from './hair.js?v=10';
-import {guest,palette} from './data.js?v=10';
-import {createCut} from './tools/cut.js?v=10';
-import {createGrow} from './tools/grow.js?v=10';
-import {createColor} from './tools/color.js?v=10';
-import {createComb} from './tools/comb.js?v=10';
+import {guests,wishes} from './looks.js?v=11';
+import {SalonMemory} from './memory.js?v=11';
+import {ReplayUI,selHeart} from './replay-ui.js?v=11';
+import {ornament,createDecorate} from './ornaments.js?v=11';
+import {createLayout,toWorld,inStage} from './layout.js?v=11';
+import {HairSystem,setHairTexture,setHairPlate} from './hair.js?v=11';
+import {guest,palette} from './data.js?v=11';
+import {createCut} from './tools/cut.js?v=11';
+import {createGrow} from './tools/grow.js?v=11';
+import {createColor} from './tools/color.js?v=11';
+import {createComb} from './tools/comb.js?v=11';
 const canvas=document.getElementById('scene'),box=document.getElementById('game'),ctx=canvas.getContext('2d',{alpha:false});
 canvas.width=box.clientWidth;canvas.height=box.clientHeight;ctx.fillStyle='#fff2db';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#efadc0';for(let i=0;i<5;i++){let a=i*Math.PI*2/5;ctx.beginPath();ctx.arc(canvas.width/2+Math.cos(a)*14,canvas.height/2+Math.sin(a)*14,11,0,Math.PI*2);ctx.fill()}ctx.fillStyle='#f9d37b';ctx.beginPath();ctx.arc(canvas.width/2,canvas.height/2,8,0,Math.PI*2);ctx.fill();
 let art={};const artSets=new Map();
@@ -181,12 +181,14 @@ function drawUI(now){
  for(let i=0;i<5;i++){
   const b=layout.buttons[i],active=names[i]===selected,age=(now-popAt)/360;
   const lift=active?1.03+(age>=0&&age<1?Math.sin(age*Math.PI)*.045:0):1;
+  if(active)selHeart(ctx,b.x,b.y-2,b.r*lift,now);
   ctx.save();ctx.shadowColor='#94674c44';ctx.shadowBlur=active?10:4;ctx.shadowOffsetY=active?4:2;
   drawTool(ctx,names[i],b.x,b.y-(active?2:0),b.r*2*lift);ctx.restore();
   if(active){ctx.beginPath();ctx.arc(b.x,b.y-2,b.r*lift+2,0,Math.PI*2);ctx.strokeStyle='#fffdf1';ctx.lineWidth=3;ctx.stroke()}
  }
  for(let i=0;i<6;i++){
   const {x,y,r}=layout.colors[i],c=palette[i],gradient=ctx.createLinearGradient(x-r,y-r,x+r,y+r);
+  if((selected==='color'||selected==='decorate')&&env.colorIndex===i)selHeart(ctx,x,y,r,now);
   gradient.addColorStop(0,`rgb(${c.map(v=>Math.round(v+(255-v)*.32)).join(',')})`);gradient.addColorStop(.45,`rgb(${c.join(',')})`);gradient.addColorStop(1,`rgb(${c.map(v=>Math.round(v*.79)).join(',')})`);
   ctx.save();ctx.shadowColor='#90654944';ctx.shadowBlur=4;ctx.shadowOffsetY=2;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle=gradient;ctx.fill();ctx.restore();
   ctx.strokeStyle='#fffaf0';ctx.lineWidth=3;ctx.stroke();ctx.save();ctx.translate(x-r*.32,y-r*.4);ctx.rotate(-.6);ctx.beginPath();ctx.ellipse(0,0,r*.34,r*.15,0,0,Math.PI*2);ctx.fillStyle='#ffffffaa';ctx.fill();ctx.restore();

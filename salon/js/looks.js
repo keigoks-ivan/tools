@@ -1,4 +1,4 @@
-import {guest,palette} from './data.js?v=10';
+import {guest,palette} from './data.js?v=11';
 export const guests=[
  {...guest,id:'cocoa',hair:{...guest.hair}},
  {...guest,id:'honey',atlas:'./assets/art/guest-honey.webp',hair:{length:275,part:.57,bangs:false,color:[77,46,38]}},

@@ -1,6 +1,6 @@
-import {accessories,wishes,rgb} from './looks.js?v=10';
-import {ornament} from './ornaments.js?v=10';
-import {TIE_MODES} from './hair.js?v=10';
+import {accessories,wishes,rgb} from './looks.js?v=11';
+import {ornament} from './ornaments.js?v=11';
+import {TIE_MODES} from './hair.js?v=11';
 const TAU=Math.PI*2;
 export function icon(c,kind,x,y,s=32){
  c.save();c.translate(x,y);c.scale(s/32,s/32);c.strokeStyle='#9c687b';c.fillStyle='#f5b7c7';c.lineWidth=2.6;c.lineCap='round';c.lineJoin='round';
@@ -16,6 +16,13 @@ export function icon(c,kind,x,y,s=32){
  if(kind==='trash'){c.strokeRect(-10,-9,20,26);path([[-15,-13],[15,-13]]);path([[-5,-13],[-5,-18],[5,-18],[5,-13]]);path([[-4,-4],[-4,11]]);path([[4,-4],[4,11]])}
  if(kind==='warning'){c.fillStyle='#f6c46e';c.beginPath();c.moveTo(0,-17);c.lineTo(19,16);c.lineTo(-19,16);c.closePath();c.fill();path([[0,-6],[0,4]]);c.beginPath();c.arc(0,10,1,0,TAU);c.stroke()}
  c.restore();
+}
+// 選到的功能後面的愛心：比按鈕大一圈，左右上角和下面的尖端從按鈕後面露出來，輕輕跳動
+export function selHeart(c,x,y,r,now=0){
+ const s=r*3.7/54*(1+.05*Math.sin(now*.006));c.save();c.translate(x,y-r*.02);c.scale(s,s);
+ c.beginPath();c.moveTo(0,22);c.bezierCurveTo(-37,-1,-16,-31,0,-12);c.bezierCurveTo(16,-31,37,-1,0,22);c.closePath();
+ const g=c.createLinearGradient(0,-26,0,22);g.addColorStop(0,'#ff9cc0');g.addColorStop(1,'#e24f86');
+ c.shadowColor='#a8335f55';c.shadowBlur=6;c.shadowOffsetY=2;c.fillStyle=g;c.fill();c.shadowBlur=0;c.lineWidth=2.4/s*r/30;c.strokeStyle='#fff7fb';c.stroke();c.restore();
 }
 export function circleButton(c,x,y,kind,{active=false,size=32,color='#fff4df'}={}){
  c.save();c.shadowColor='#68473430';c.shadowBlur=10;c.shadowOffsetY=3;const g=c.createLinearGradient(x,y-size,x,y+size);g.addColorStop(0,'#fffdf2');g.addColorStop(1,color);c.fillStyle=g;c.beginPath();c.arc(x,y,size,0,TAU);c.fill();c.shadowBlur=0;c.strokeStyle=active?'#d29b67':'#ffffffcc';c.lineWidth=active?3:2;c.stroke();icon(c,kind,x,y);c.restore();
@@ -57,7 +64,7 @@ export class ReplayUI {
    kinds.forEach((kind,i)=>{const x=l.stage.w/2+(i-2.5)*step;
     if(kind==='ties'){this.button(c,x,y,'',()=>this.open('ties'),{size,color:'#f6e1d3'});tieIcon(c,a.tieMode()==='loose'?'double':a.tieMode(),x,y,size*1.45);return}
     if(kind==='wish'){this.button(c,x,y,'',()=>this.open('wishes'),{size});wishIcon(c,wishes[a.wish()],x,y,size*1.5)}
-    else if(kind==='decorate'){this.button(c,x,y,'',()=>this.open('accessories'),{active:a.selected()==='decorate',color:'#e6dafa',size});ornament(c,a.ornament(),x,y,size*1.15,a.color())}
+    else if(kind==='decorate'){if(a.selected()==='decorate')selHeart(c,x,y,size,now);this.button(c,x,y,'',()=>this.open('accessories'),{active:a.selected()==='decorate',color:'#e6dafa',size});ornament(c,a.ornament(),x,y,size*1.15,a.color())}
     else this.button(c,x,y,kind,()=>kind==='camera'?this.snap():this.open(kind),{color:kind==='camera'?'#f8d8e4':'#e9e6d9',size});
    });
    if(a.canUndo())this.button(c,38,l.stage.h-40,'undo',()=>a.undo(),{size:28});
