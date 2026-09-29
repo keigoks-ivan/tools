@@ -452,7 +452,7 @@ async function game() {
     seeThrough(C);
     post.render(t);
 
-    hud.draw(rdt, { boot: state === 'boot' ? boot : 1, combat: C, player, stages: STAGES.length, groundY: world.height(player.pos.x, player.pos.z) });
+    hud.draw(rdt, { boot: state === 'boot' ? boot : 1, combat: C, player, stages: STAGES.length, groundY: world.height(player.pos.x, player.pos.z), tp: tpView });
     input.endFrame();
   }
   requestAnimationFrame(frame);

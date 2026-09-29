@@ -19,7 +19,16 @@ export class HUD {
     this.resize(); addEventListener('resize', () => this.resize());
   }
   resize() { const d = Math.min(devicePixelRatio, 2); this.c.width = innerWidth * d; this.c.height = innerHeight * d; this.d = d; }
-  say(who, text, t = 3.5) { this.subQ.push({ who, text, t, T: t }); }
+  // now＝戰鬥喊話（發現敵人、狙擊手、重裝兵）：插隊馬上播，不排在一長串劇情對白後面；
+  //   被打斷的劇情句還沒看完七成就放回隊伍最前面，喊話播完從頭再播一次
+  say(who, text, t = 3.5, now = false) {
+    const it = { who, text, t, T: t, now };
+    if (!now) { this.subQ.push(it); return; }
+    const cur = this.sub;
+    if (cur && !cur.now) { if (cur.T - cur.t < cur.T * 0.7) { cur.t = cur.T; this.subQ.unshift(cur); } this.sub = null; }
+    let i = 0; while (i < this.subQ.length && this.subQ[i].now) i++;
+    this.subQ.splice(i, 0, it);
+  }
   title(big, small, t = 4) { this.banner = { big, small, t, T: t }; }
   note(text, color = CY) { this.notes.push({ text, t: 2, color }); if (this.notes.length > 4) this.notes.shift(); }
   hurt(angle) { this.dmg.push({ a: angle, t: 1.2 }); }

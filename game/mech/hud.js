@@ -260,12 +260,13 @@ export class HUD {
     this.master(this.tp(0.42, 0.4), 'WARNING', 'rd', wrn, Math.sin(this.t * 10) > -0.2);
 
     // ---- 左：對地速度帶（km/h）；右：離地高度帶（m）＋升降率
-    const [sx0, sy0] = this.tp(-0.4, 0.03), [lx0] = this.tp(0.4, 0.03), th = 78 * s;
+    //   機體後方視角：機體在畫面左半邊，速度帶改放到高度帶右邊，不壓在機體上
+    const sd = g.tp ? 1 : -1, [sx0, sy0] = this.tp(g.tp ? 0.58 : -0.4, 0.03), [lx0] = this.tp(0.4, 0.03), th = 78 * s;
     const kmh = (P.speed || 0) * 3.6;
-    this.vtape(sx0, sy0, kmh, 1.2 * s, 10, 20, -1, 'cy');
-    this.text('GS  KM/H', sx0 - 22 * s, sy0 - th - 11 * s, 10, 'dim', 0.9, 'center');
+    this.vtape(sx0, sy0, kmh, 1.2 * s, 10, 20, sd, 'cy');
+    this.text('GS  KM/H', sx0 + sd * 22 * s, sy0 - th - 11 * s, 10, 'dim', 0.9, 'center');
     const mode = P.boosting ? 'BOOST' : P.hovering ? 'HOVER' : P.grounded === false ? 'AIR' : 'GND';
-    this.text(mode, sx0 - 22 * s, sy0 + th + 12 * s, 11, P.boosting || P.hovering ? 'cy' : 'dim', 1, 'center', 700);
+    this.text(mode, sx0 + sd * 22 * s, sy0 + th + 12 * s, 11, P.boosting || P.hovering ? 'cy' : 'dim', 1, 'center', 700);
     const agl = Math.max(0, P.pos.y - (g.groundY ?? 0)), vs = P.vel ? P.vel.y : 0;
     this.vtape(lx0, sy0, agl, 3 * s, 5, 10, 1, 'cy');
     const vy = sy0 - clamp(vs, -th / (3 * s), th / (3 * s)) * 3 * s;   // 升降率指標：一秒後的高度

@@ -271,7 +271,7 @@ function markDone(id, old = false) { done.add(id); doneT[id] = old ? -1e9 : perf
 function startEncounter(E) {
   const list = E.enemies.map(spawn);
   active.push({ E, list, picked: false, t0: G.t, n: list.length });
-  for (const [who, text] of E.lines) hud.say(who, text, 3.6);
+  for (const [who, text, now] of E.lines) hud.say(who, text, 3.6, now);
   if (E.lines.length) audio.radio('in');
   G.objText = list.length ? E.fight || '擊倒所有敵人' : E.obj;   // 開打後改成「要打誰」，不要還寫著「爬上高架道路」
   hud.obj = E.pickup ? guideObj(E) : null;
@@ -392,7 +392,7 @@ function updateEncounters() {
     if (!a.list.every((e) => e.dead) || (a.E.pickup && !a.picked)) continue;
     active.splice(active.indexOf(a), 1);
     markDone(a.E.id);
-    for (const [w, t] of a.E.done) hud.say(w, t, 3.6);
+    for (const [w, t, now] of a.E.done) hud.say(w, t, 3.6, now);
     if (a.E.done.length) audio.radio('in');
     hud.note(a.E.pickup ? '取得啟動金鑰  KEY ACQUIRED' : '區域清除  AREA CLEAR', '#ffb347');
     checkpoint = { p: player.pos.clone(), yaw: player.yaw, done: [...done], ch: chapter };
@@ -411,7 +411,8 @@ function updateEncounters() {
   const MW = S.MECH_WALK;
   if (chapter === MW.ch && !mechWalk && !G.mechDone && done.has(MW.after) && MW.at(p)) {
     G.mechDone = true; mechWalk = { t: 0, i: 0, stepT: 0 }; hound.root.visible = true; hound.root.position.copy(map.marks.mechPath[0]);
-    for (const [w, t] of S.LINES.mech) hud.say(w, t, 3.4); audio.radio('in');
+    // 最後一句（「它往北走了」）等獵犬機真的走完才講
+    for (const [w, t, now] of S.LINES.mech.slice(0, -1)) hud.say(w, t, 3.4, now); audio.radio('in');
   }
 }
 // 打仗時：左上角多一行「還剩幾個敵人」；剩 3 個以內又 6 秒沒打中人、或 20 秒都沒打中人時，畫面上標出剩下的敵人在哪（不會打完一半找不到人）
@@ -700,7 +701,7 @@ function updateMechWalk(dt) {
   _v.subVectors(to, p); _v.y = 0;
   const L = _v.length();
   if (L < 1 && M.i < path.length - 2) M.i++;
-  else if (L < 1) { hound.root.visible = false; mechWalk = null; return; }
+  else if (L < 1) { hound.root.visible = false; mechWalk = null; const [w, t, now] = S.LINES.mech.at(-1); hud.say(w, t, 3.4, now); audio.radio('in'); return; }
   _v.normalize();
   const vel = _v.clone().multiplyScalar(sp);
   p.addScaledVector(vel, dt);

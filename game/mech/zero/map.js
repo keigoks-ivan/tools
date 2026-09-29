@@ -800,8 +800,8 @@ export function buildMap(scene, mats, solid, PL = null) {
       const c = Math.cos(ry), s = Math.sin(ry);   // 跟地面上一樣用掃描的紐澤西護欄，兩節一組（不抽 rnd，別處的樣子不變）
       for (const d of [-0.79, 0.79]) PL.add('concrete_road_barrier_02', x + d * c, DY, z - d * s, ry + (ph(x + d, z) - 0.5) * 0.08, { solid: true, hit: 'concrete', noBreak: true });   // 跟原本一樣打不爛（玩法不變）
     };
-    hulk(-24, 43, 0.4); hulk(-12, 47.5, 2.6); hulk(1, 42.5, 1.3);
-    P.container(-16, 44, 0.3, DY, 'olive'); P.container(-5, 47, -0.2, DY);
+    hulk(-24, 43, 0.4); hulk(-12.2, 47, 1.62); hulk(1, 42.5, 1.3);   // 第二台原本斜放在 (-12, 47.5)、頂到北側護欄，北側車道走到這裡是死路；改順著車道停，北邊留 1.5 m 過得去
+    P.container(-16, 44, 0.3, DY, 'olive'); P.container(-5, 46.6, 0, DY);   // 第二個貨櫃原本 (-5, 47) 斜放，北邊只剩 0.5 m 看起來能走其實卡住；擺正、往南一點，北側護欄邊留 1.8 m
     barrier(-20, 46, 1.4); barrier(-8, 43, 0.1); barrier(-1, 46.5, 1.6); barrier(3.5, 44.5, 0.2);
     P.crate(-27, 47.5, 1.1, 0.2, DY); P.crate(-34.4, 48.6, 0.9, 0.9, DY);   // 第二個木箱原本在 (-3, 41.5)，擋住南側車道往匝道的路，移到橋的西端
     M.zones.J = { x0: -36, x1: 6, z0: 40, z1: 50 };
