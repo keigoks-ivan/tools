@@ -4,6 +4,7 @@
 // 對 combat.js 來說，Vehicle 長得像 Enemy（pos、chest()、scale、ap、los、locks…），所以鎖定、HUD、雷達、分數、連殺都直接沿用。
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { stencilAtlas, stencilUV } from './textures.js';
 
 const clamp = THREE.MathUtils.clamp;
 const rand = (a, b) => a + Math.random() * (b - a);
@@ -124,30 +125,96 @@ const T = (x = 0, y = 0, z = 0, rx = 0, ry = 0, rz = 0, sx = 1, sy = sx, sz = sx
   new THREE.Matrix4().compose(new THREE.Vector3(x, y, z), new THREE.Quaternion().setFromEuler(new THREE.Euler(rx, ry, rz, 'YXZ')), new THREE.Vector3(sx, sy, sz));
 
 const P = (hex, m = 0, r = 0.6) => ({ c: new THREE.Color(hex), m, r });
-const E = (r, g, b) => ({ c: new THREE.Color(r, g, b), m: 0, r: 1 });   // 發光（HDR 顏色）
+const E = (r, g, b) => ({ c: new THREE.Color(r, g, b), m: 0, r: 1, glow: true });   // 發光（HDR 顏色）
+function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
 class Kit {
-  constructor() { this.g = []; }
+  constructor(seed = 1) { this.g = []; this.rnd = rng(seed); this.soot = []; }
   add(g, p, m) {
     if (m) g.applyMatrix4(m);
-    const n = g.attributes.position.count, col = new Float32Array(n * 3), pbr = new Float32Array(n * 4), e = g.userData.edge;
+    const n = g.attributes.position.count, col = new Float32Array(n * 3), pbr = new Float32Array(n * 4), dcl = new Float32Array(n * 4);
+    const e = g.userData.edge, ds = g.userData.dcl;
+    // 每片零件的漆色有一點批次差（金屬、發光、標示不動）
+    const k = p.m < 0.5 && !p.glow && !ds ? 1 + (this.rnd() - 0.5) * 0.08 : 1;
     for (let i = 0; i < n; i++) {
-      col[i * 3] = p.c.r; col[i * 3 + 1] = p.c.g; col[i * 3 + 2] = p.c.b;
+      col[i * 3] = p.c.r * k; col[i * 3 + 1] = p.c.g * k; col[i * 3 + 2] = p.c.b * k;
       pbr[i * 4] = p.m; pbr[i * 4 + 1] = p.r; pbr[i * 4 + 2] = e ? e[i] : 0;
+      dcl[i * 4 + 3] = 1;
     }
+    if (ds) dcl.set(ds);
     g.setAttribute('color', new THREE.BufferAttribute(col, 3));
     g.setAttribute('pbr', new THREE.BufferAttribute(pbr, 4));
+    g.setAttribute('dcl', new THREE.BufferAttribute(dcl, 4));
     this.g.push(g);
     return this;
   }
-  // pbr.w＝離地高度（下半部沾灰塵用）；yOff＝這個零件原點離地多高，dust=false 就不沾
+  // 燻黑來源：零件座標 (x,y,z)、半徑 R（排氣口、砲口）
+  sootAt(x, y, z, R) { this.soot.push([x, y, z, R]); return this; }
+  // pbr.w＝離地高度（下半部沾灰塵用）；yOff＝這個零件原點離地多高，dust=false 就不沾；dcl.w＝1−燻黑量
   build(yOff = 0, dust = true) {
     const g = mergeGeometries(this.g);
-    const p = g.attributes.position, pbr = g.attributes.pbr;
-    for (let i = 0; i < p.count; i++) pbr.setW(i, dust ? p.getY(i) + yOff : 99);
+    const p = g.attributes.position, pbr = g.attributes.pbr, dcl = g.attributes.dcl;
+    for (let i = 0; i < p.count; i++) {
+      pbr.setW(i, dust ? p.getY(i) + yOff : 99);
+      let s = 0;
+      for (const [x, y, z, R] of this.soot) {
+        const d = Math.hypot(p.getX(i) - x, p.getY(i) - y, p.getZ(i) - z);
+        if (d < R) s = Math.max(s, THREE.MathUtils.smoothstep(R - d, 0, R * 0.7));
+      }
+      if (s > 0) dcl.setW(i, 1 - s);
+    }
     g.computeBoundingSphere();
     return g;
   }
 }
+// 噴漆標示片（同 mechs.js）：面朝 face（'z'、'-z'、'x'、'-x'、'y'、'-y'），tint：1 米白 2 黑 3 黃 4 紅 5 圖集原色 6 灰
+function sten(cell, w, h, { tint = 1, digit = 0, face = 'z', ox = 0 } = {}) {
+  const g = new THREE.PlaneGeometry(w, h).toNonIndexed();
+  const uv = g.attributes.uv, n = uv.count, d = new Float32Array(n * 4);
+  const [u0, v0, u1, v1] = stencilUV(cell, digit);
+  for (let i = 0; i < n; i++) {
+    d[i * 4] = u0 + (u1 - u0) * uv.getX(i); d[i * 4 + 1] = v0 + (v1 - v0) * uv.getY(i);
+    d[i * 4 + 2] = tint; d[i * 4 + 3] = 1;
+  }
+  g.deleteAttribute('uv');
+  g.translate(ox, 0, 0);
+  if (face === 'x') g.rotateY(Math.PI / 2); else if (face === '-x') g.rotateY(-Math.PI / 2);
+  else if (face === '-z') g.rotateY(Math.PI); else if (face === 'y') g.rotateX(-Math.PI / 2); else if (face === '-y') g.rotateX(Math.PI / 2);
+  g.userData.edge = new Float32Array(n);
+  g.userData.dcl = d;
+  return g;
+}
+function digits(str, h, opt = {}) {
+  const w = h * 0.5, list = [];
+  for (let k = 0; k < str.length; k++) list.push(sten('d0', w, h, { ...opt, digit: +str[k], ox: (k - (str.length - 1) / 2) * w * 0.95 }));
+  const g = mergeGeometries(list), d = new Float32Array(g.attributes.position.count * 4);
+  let o = 0;
+  for (const s of list) { d.set(s.userData.dcl, o); o += s.userData.dcl.length; }
+  g.userData.edge = new Float32Array(g.attributes.position.count);
+  g.userData.dcl = d;
+  return g;
+}
+// 合併（保留倒角邊）
+function merge(list) {
+  const g = mergeGeometries(list), e = new Float32Array(g.attributes.position.count);
+  let o = 0;
+  for (const s of list) { if (s.userData.edge) e.set(s.userData.edge, o); o += s.attributes.position.count; }
+  g.userData.edge = e;
+  return g;
+}
+const _up = new THREE.Vector3(0, 1, 0);
+// 兩點之間的圓柱（管線、支柱、天線、面板縫）
+function rod(a, b, r0, r1 = r0, seg = 8) {
+  const A = new THREE.Vector3(...a), B = new THREE.Vector3(...b), d = B.clone().sub(A), len = d.length();
+  const g = cyl(r1, r0, len, seg);
+  g.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(_up, d.divideScalar(len)));
+  g.translate((A.x + B.x) / 2, (A.y + B.y) / 2, (A.z + B.z) / 2);
+  return g;
+}
+function pipe(points, r, seg = 12, radial = 6) {
+  const curve = new THREE.CatmullRomCurve3(points.map((p) => new THREE.Vector3(...p)));
+  return prep(new THREE.TubeGeometry(curve, seg, r, radial, false));
+}
+function ring(r, t, seg = 16) { return prep(new THREE.TorusGeometry(r, t, 5, seg)); }   // 圓環（軸朝 z）
 
 // ================================================================ 材質
 // 同機體的塗裝 shader（掉漆、刮痕、雨痕、下半部沙塵用真實磨損貼圖三面投影），尺度改成載具大小；
@@ -157,11 +224,12 @@ function paintMaterial(A) {
   m.onBeforeCompile = (sh) => {
     sh.uniforms.wearMap = { value: A.wearM };
     sh.uniforms.frameMap = { value: A.frameM };
+    sh.uniforms.dclMap = { value: stencilAtlas() };
     sh.vertexShader = sh.vertexShader
       .replace('#include <common>', `#include <common>
-        attribute vec4 pbr; varying vec4 vPbr; varying vec3 vOP; varying vec3 vON; varying vec3 vTint;`)
+        attribute vec4 pbr; attribute vec4 dcl; varying vec4 vPbr; varying vec4 vDcl; varying vec3 vOP; varying vec3 vON; varying vec3 vTint;`)
       .replace('#include <begin_vertex>', `#include <begin_vertex>
-        vPbr = pbr; vOP = position; vON = normal;
+        vPbr = pbr; vDcl = dcl; vOP = position; vON = normal;
         #ifdef USE_INSTANCING_COLOR
           vTint = instanceColor.rgb;
         #else
@@ -169,8 +237,8 @@ function paintMaterial(A) {
         #endif`);
     sh.fragmentShader = sh.fragmentShader
       .replace('#include <common>', `#include <common>
-        uniform sampler2D wearMap, frameMap;
-        varying vec4 vPbr; varying vec3 vOP; varying vec3 vON; varying vec3 vTint;
+        uniform sampler2D wearMap, frameMap, dclMap;
+        varying vec4 vPbr; varying vec4 vDcl; varying vec3 vOP; varying vec3 vON; varying vec3 vTint;
         vec4 vh_tri(sampler2D t, vec3 p, vec3 n, float s){
           vec3 a = pow(abs(n), vec3(4.0)); a /= (a.x + a.y + a.z + 1e-5);
           return texture2D(t, p.zy * s) * a.x + texture2D(t, p.xz * s + 0.31) * a.y + texture2D(t, p.xy * s + 0.67) * a.z;
@@ -183,6 +251,11 @@ function paintMaterial(A) {
         }`)
       .replace('#include <color_fragment>', `#include <color_fragment>
         vec3 vh_nO = normalize(vON);
+        // 噴漆標示（燒焦時跟著變黑）
+        vec4 vh_dc = texture2D(dclMap, vDcl.xy);
+        float vh_dA = vDcl.z > 0.5 ? vh_dc.a * 0.9 : 0.0;
+        vec3 vh_tc = vDcl.z < 1.5 ? vec3(0.58, 0.56, 0.48) : vDcl.z < 2.5 ? vec3(0.018) : vDcl.z < 3.5 ? vec3(0.55, 0.36, 0.05) : vDcl.z < 4.5 ? vec3(0.42, 0.03, 0.025) : vDcl.z < 5.5 ? vh_dc.rgb : vec3(0.045, 0.05, 0.055);
+        diffuseColor.rgb = mix(diffuseColor.rgb, vh_tc * vTint, vh_dA);
         vec4 vh_W = vh_tri(wearMap, vOP, vh_nO, 0.42);
         vec4 vh_F = vh_tri(frameMap, vOP, vh_nO, 0.9);
         float vh_S = vh_tri(wearMap, vOP * vec3(1.0, 0.12, 1.0), vh_nO, 0.6).b;
@@ -203,10 +276,13 @@ function paintMaterial(A) {
         vh_base = mix(vh_base, vec3(0.3, 0.26, 0.21) * vTint, vh_dust * 0.5);
         vh_base *= 1.0 - vh_halo * 0.45;
         diffuseColor.rgb = mix(vh_base, vec3(0.42, 0.42, 0.43) * (0.8 + vh_W.g) * vTint, vh_chip);
+        // 排氣口、砲口燻黑
+        float vh_soot = clamp((1.0 - vDcl.w) * (0.55 + 0.45 * vh_nz2), 0.0, 0.92);
+        diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.03, 0.027, 0.024) * vTint, vh_soot);
         float vh_bump = vh_W.b * 0.45 - vh_chip * 0.5 + (1.0 - vh_paint) * vh_F.b * 0.5;`)
-      .replace('#include <roughnessmap_fragment>', `float roughnessFactor = clamp(vPbr.y + (vh_W.g - 0.15) * 0.4 * vh_paint + (vh_F.g - 0.65) * 0.6 * (1.0 - vh_paint) + vh_dust * 0.35 + vh_streak * 0.12 + vh_burnt * 0.4, 0.04, 1.0);
+      .replace('#include <roughnessmap_fragment>', `float roughnessFactor = clamp(vPbr.y + (vh_W.g - 0.15) * 0.4 * vh_paint + (vh_F.g - 0.65) * 0.6 * (1.0 - vh_paint) + vh_dust * 0.35 + vh_streak * 0.12 + vh_burnt * 0.4 + vh_soot * 0.3 - vh_dA * 0.06, 0.04, 1.0);
         roughnessFactor = mix(roughnessFactor, 0.3 + vh_W.g * 0.3, vh_chip);`)
-      .replace('#include <metalnessmap_fragment>', `float metalnessFactor = max(vPbr.x, vh_chip * 0.95) * (1.0 - vh_burnt * 0.85);`)
+      .replace('#include <metalnessmap_fragment>', `float metalnessFactor = max(vPbr.x * (1.0 - vh_dA) * (1.0 - vh_soot * 0.6), vh_chip * 0.95) * (1.0 - vh_burnt * 0.85);`)
       .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
         {
           vec3 dpx = dFdx(-vViewPosition), dpy = dFdy(-vViewPosition);
@@ -217,7 +293,7 @@ function paintMaterial(A) {
           normal = normalize(abs(det) * normal - grad * 0.03);
         }`);
   };
-  m.customProgramCacheKey = () => 'vehicle-paint-1';
+  m.customProgramCacheKey = () => 'vehicle-paint-2';
   return m;
 }
 // 旋翼動態模糊盤：半透明徑向貼圖（細環紋＋翼尖亮環）
@@ -257,8 +333,24 @@ const JC = {
 
 // ================================================================ 戰車（原點在地面、+z 朝前；全長約 10 m、寬 3.7 m、高 2.6 m）
 function buildTank() {
-  const H = new Kit(), Tu = new Kit(), B = new Kit(), L = new Kit();
+  const H = new Kit(11), Tu = new Kit(12), B = new Kit(13), L = new Kit(14);
   const c = TK;
+  // 履帶外圈取樣（每 0.2 m 一片履帶板；上段被側裙擋住的不做）
+  const loopPts = [[-3.3, 0.02], [2.95, 0.02], [3.3, 0.18], [3.72, 0.45], [3.82, 0.66], [3.74, 0.86], [3.5, 0.97], [-3.55, 1.0], [-3.8, 0.9], [-3.9, 0.66], [-3.8, 0.42], [-3.4, 0.14], [-3.3, 0.02]];
+  const shoeAt = [];
+  {
+    const seg = [];
+    let total = 0;
+    for (let i = 0; i < loopPts.length - 1; i++) { const l = Math.hypot(loopPts[i + 1][0] - loopPts[i][0], loopPts[i + 1][1] - loopPts[i][1]); seg.push(l); total += l; }
+    for (let d = 0.1; d < total; d += 0.2) {
+      let i = 0, a = d;
+      while (a > seg[i]) { a -= seg[i]; i++; }
+      const [z0, y0] = loopPts[i], [z1, y1] = loopPts[i + 1], tz = (z1 - z0) / seg[i], ty = (y1 - y0) / seg[i];
+      const z = z0 + tz * a, y = y0 + ty * a;
+      if (y > 0.85 && z > -3.5 && z < 3.35) continue;
+      shoeAt.push([z + ty * 0.03, y - tz * 0.03, Math.atan2(-ty, tz), ty, -tz]);
+    }
+  }
   // 車體：下車體夾在兩條履帶之間，上車體蓋過履帶；長斜的前裝甲
   H.add(prof([[-3.55, 0.42], [3.1, 0.42], [3.72, 0.98], [-3.8, 0.98]], 2.3, 0.05), c.main);
   H.add(prof([[-3.82, 0.96], [3.35, 0.96], [3.9, 1.12], [2.15, 1.5], [-3.65, 1.52], [-3.86, 1.34]], 3.56, 0.05), c.main);
@@ -270,16 +362,16 @@ function buildTank() {
   for (const s of [-1, 1]) {
     const g = prep(extrude(tshape, 0.6, 0.02), EXT_EDGE); g.rotateY(-Math.PI / 2);
     H.add(g, c.track, T(s * 1.48, 0, 0));
-    // 履帶板的橫紋（看得到的前後兩段斜坡）
-    for (let k = 0; k < 7; k++) {
-      H.add(blk(0.62, 0.05, 0.07, 0.01), c.track, T(s * 1.48, 0.0 + 0.02, -3.0 + k * 0.95));
-    }
+    // 履帶板（每片沿外圈切線擺好，中間一道防滑齒）
+    H.add(merge(shoeAt.map(([z, y, a]) => blk(0.64, 0.05, 0.15, 0.012, 0).applyMatrix4(T(s * 1.48, y, z, a)))), c.track);
+    H.add(merge(shoeAt.map(([z, y, a, nz, ny]) => blk(0.5, 0.035, 0.04, 0.008, 0).applyMatrix4(T(s * 1.48, y + ny * 0.035, z + nz * 0.035, a)))), c.steel);
     // 負重輪 ×7、主動輪（後）、導輪（前）
     for (let k = 0; k < 7; k++) {
       const z = -2.58 + k * 0.86;
       H.add(cylX(0.36, 0.36, 0.5, 18), c.rubber, T(s * 1.48, 0.48, z));
       H.add(cylX(0.27, 0.27, 0.54, 16), c.dark, T(s * 1.48, 0.48, z));
-      H.add(cylX(0.08, 0.1, 0.6, 8), c.steel, T(s * 1.48, 0.48, z));
+      H.add(cylX(0.13, 0.13, 0.6, 10), c.steel, T(s * 1.48, 0.48, z));
+      H.add(cylX(0.2, 0.2, 0.56, 12), c.dark, T(s * 1.48, 0.48, z));
     }
     H.add(cylX(0.32, 0.32, 0.52, 16), c.dark, T(s * 1.48, 0.66, -3.55));
     for (let k = 0; k < 10; k++) {
@@ -293,6 +385,16 @@ function buildTank() {
     H.add(prof([[-3.45, 0.56], [3.0, 0.56], [3.42, 0.86], [3.42, 1.2], [-3.45, 1.2]], 0.07, 0.015), c.main, T(s * 1.84, 0, 0));
     for (const z of [-2.1, -0.8, 0.5, 1.8]) H.add(blk(0.085, 0.64, 0.035, 0.005), c.dark, T(s * 1.84, 0.88, z));
     H.add(blk(0.03, 0.12, 6.3, 0.005), c.rubber, T(s * 1.845, 0.5, -0.2));
+    // 側裙上緣螺栓、國籍標誌、前擋泥板
+    const bl = [];
+    for (let k = 0; k <= 16; k++) bl.push(cylX(0.035, 0.035, 0.05, 6).applyMatrix4(T(s * 1.885, 1.12, -3.2 + k * 0.4)));
+    H.add(merge(bl), c.steel);
+    H.add(sten('star', 0.52, 0.52, { face: s > 0 ? 'x' : '-x', tint: 1 }), c.main, T(s * 1.877, 0.87, 1.15));
+    H.add(prof([[3.35, 1.13], [3.92, 1.01], [3.96, 0.93], [3.35, 1.05]], 0.64, 0.01), c.main, T(s * 1.48, 0, 0));
+    // 工具：十字鎬、鏟子
+    H.add(rod([s * 1.62, 1.555, -3.45], [s * 1.62, 1.555, -2.4], 0.025, 0.025, 6), c.dark);
+    H.add(rod([s * 1.32, 1.555, -3.5], [s * 1.32, 1.555, -2.62], 0.022, 0.022, 6), c.canvas);
+    H.add(blk(0.22, 0.02, 0.32, 0.005), c.steel, T(s * 1.32, 1.55, -2.45));
     // 車體兩側的置物箱
     H.add(blk(0.42, 0.3, 1.6, 0.03), c.main, T(s * 1.5, 1.66, -1.5));
     H.add(blk(0.42, 0.26, 0.9, 0.03), c.main, T(s * 1.5, 1.64, 0.85));
@@ -310,6 +412,10 @@ function buildTank() {
   H.add(blk(2.4, 0.04, 1.5, 0.01), c.dark, T(0, 1.52, -2.75));
   for (let k = 0; k < 7; k++) H.add(blk(2.3, 0.05, 0.08, 0.01), c.main, T(0, 1.55, -3.4 + k * 0.21));
   H.add(blk(1.7, 0.32, 0.06, 0.01), c.dark, T(0, 1.18, -3.86));
+  // 後方排氣百葉＋燻黑、拖車標示
+  H.add(merge(Array.from({ length: 9 }, (_, k) => blk(0.05, 0.3, 0.08, 0.008).applyMatrix4(T(-0.76 + k * 0.19, 1.18, -3.9)))), c.steel);
+  H.sootAt(0, 1.2, -3.95, 1.6);
+  H.add(sten('tow', 0.8, 0.1, { face: '-z', tint: 1 }), c.main, T(0, 0.795, -3.731, -0.42));
   // 駕駛艙蓋＋潛望鏡
   H.add(cyl(0.32, 0.34, 0.07, 14), c.main, T(0.55, 1.54, 2.0));
   for (const x of [0.3, 0.55, 0.8]) H.add(blk(0.16, 0.08, 0.05, 0.005), c.glass, T(x, 1.55, 2.32));
@@ -338,6 +444,16 @@ function buildTank() {
     Tu.add(cyl(0.06, 0.07, 0.12, 8), c.dark, T(s * 1.15, 0.86, -2.2));
     Tu.add(cyl(0.012, 0.02, 2.5, 5), c.dark, T(s * 1.15, 2.1, -2.36, -0.12));
   }
+  // 砲塔側面車號、頂部雷射告警器、吊耳、風速感測器、側面扶手
+  for (const s of [-1, 1]) {
+    Tu.add(digits('312', 0.3, { face: s > 0 ? 'x' : '-x', tint: 1 }), c.main, T(s * 1.588, 0.42, 0.28, 0, 0, s * 0.2));
+    for (const z of [0.95, -2.05]) Tu.add(blk(0.16, 0.1, 0.16, 0.02), c.dark, T(s * 1.25, 0.84, z));
+    for (const z of [0.4, -1.9]) Tu.add(ring(0.06, 0.018, 8), c.steel, T(s * 1.3, 0.86, z, 0, Math.PI / 2));
+    Tu.add(rod([s * 1.72, 0.66, -1.65], [s * 1.72, 0.66, -0.35], 0.02, 0.02, 5), c.steel);
+    for (const z of [-1.65, -0.35]) Tu.add(rod([s * 1.64, 0.6, z], [s * 1.72, 0.66, z], 0.018, 0.018, 5), c.steel);
+  }
+  Tu.add(cyl(0.02, 0.025, 0.6, 5), c.dark, T(0.3, 1.1, -2.2));
+  Tu.add(cyl(0.06, 0.06, 0.08, 8), c.dark, T(0.3, 1.42, -2.2));
   // 車長塔＋觀測窗、艙蓋
   Tu.add(cyl(0.36, 0.4, 0.24, 16), c.main, T(-0.72, 0.9, -0.5));
   for (let k = 0; k < 6; k++) { const a = (k / 6) * Math.PI * 2; Tu.add(blk(0.14, 0.08, 0.05, 0.005), c.glass, T(-0.72 + Math.sin(a) * 0.37, 0.92, -0.5 + Math.cos(a) * 0.37, 0, a)); }
@@ -379,13 +495,18 @@ function buildTank() {
   B.add(blk(0.37, 0.07, 0.08, 0.005), c.dark, T(0, 0, 5.54));
   B.add(cylZ(0.075, 0.075, 0.02, 12), P(0x050505, 0, 0.9), T(0, 0, 5.66));
   B.add(blk(0.08, 0.06, 0.1, 0.005), c.dark, T(0, 0.13, 5.2));
+  // 砲盾防塵套（帆布、兩道褶）、同軸機槍管、砲口燻黑
+  B.add(cylZ(0.24, 0.21, 0.38, 14), c.canvas, T(0, 0, 0.64));
+  for (const z of [0.54, 0.72]) B.add(cylZ(0.25, 0.25, 0.04, 14), c.canvas, T(0, 0, z));
+  B.add(cylZ(0.03, 0.03, 0.34, 6), c.dark, T(0.3, 0.06, 0.62));
+  B.sootAt(0, 0, 5.7, 0.9);
 
   return { hull: H.build(0), tur: Tu.build(1.5), bar: B.build(1.92), lit: L.build(0, false) };
 }
 
 // ================================================================ 攻擊直升機（原點在重心、+z 朝前；機身約 15 m、主旋翼直徑 14.6 m）
 function buildHeli() {
-  const Bd = new Kit(), R = new Kit(), Tr = new Kit(), L = new Kit(), Bc = new Kit();
+  const Bd = new Kit(21), R = new Kit(22), Tr = new Kit(23), L = new Kit(24), Bc = new Kit(25);
   const c = HC;
   // 機身
   Bd.add(loft([
@@ -395,13 +516,23 @@ function buildHeli() {
   // 縱列雙座座艙罩（前座低、後座高）＋框
   const can = [[6.3, 0.18, 0.32, 0.2], [5.9, 0.48, 0.92, 0.2], [4.9, 0.56, 1.18, 0.35], [4.0, 0.56, 1.24, 0.45], [3.75, 0.58, 1.52, 0.5], [2.4, 0.6, 1.72, 0.6], [1.45, 0.55, 1.55, 0.78], [1.05, 0.3, 1.1, 0.84]];
   Bd.add(loft(can, 20, 2.2), c.glass);
-  for (const i of [2, 4, 6]) { const s = can[i]; Bd.add(loft([[s[0] + 0.05, s[1] + 0.025, s[2] + 0.025, s[3]], [s[0] - 0.05, s[1] + 0.025, s[2] + 0.025, s[3]]], 20, 2.2), c.dark); }
+  for (const i of [1, 2, 3, 4, 5, 6]) { const s = can[i]; Bd.add(loft([[s[0] + 0.05, s[1] + 0.025, s[2] + 0.025, s[3]], [s[0] - 0.05, s[1] + 0.025, s[2] + 0.025, s[3]]], 20, 2.2), c.dark); }
+  // 座艙罩頂部縱樑、上下剪線器
+  Bd.add(pipe(can.slice(1, 7).map((s) => [0, s[2] + 0.012, s[0]]), 0.03, 14, 5), c.dark);
+  Bd.add(prof([[3.45, 1.52], [3.12, 1.92], [2.98, 1.92], [3.25, 1.52]], 0.05, 0.01), c.dark);
+  Bd.add(prof([[6.3, -0.92], [6.72, -1.22], [6.56, -1.24], [6.1, -0.96]], 0.05, 0.01), c.dark);
   // 引擎整流罩、左右引擎、排氣口
   Bd.add(loft([[1.5, 0.45, 0.95, 0.6], [1.0, 0.72, 1.36, 0.6], [-1.6, 0.72, 1.36, 0.6], [-2.7, 0.38, 1.0, 0.55]], 18, 3), c.body);
   for (const s of [-1, 1]) {
     Bd.add(cylZ(0.4, 0.42, 3.0, 16), c.body, T(s * 0.98, 0.98, -0.6));
     Bd.add(cylZ(0.3, 0.3, 0.05, 14), c.dark, T(s * 0.98, 0.98, 0.92));
+    // 進氣口唇環＋防異物網條、發動機艙束帶與檢修蓋鉸鏈
+    Bd.add(ring(0.39, 0.05, 16), c.steel, T(s * 0.98, 0.98, 0.93));
+    Bd.add(merge([0, Math.PI / 3, -Math.PI / 3].map((a) => blk(0.58, 0.03, 0.03, 0.005, 0).applyMatrix4(T(s * 0.98, 0.98, 0.955, 0, 0, a)))), c.steel);
+    for (const z of [-0.1, -1.35]) Bd.add(cylZ(0.43, 0.43, 0.05, 16), c.dark, T(s * 0.98, 0.98, z));
+    Bd.add(rod([s * 1.36, 1.1, 0.6], [s * 1.36, 1.1, -1.9], 0.025, 0.025, 5), c.steel);
     Bd.add(cylZ(0.27, 0.34, 0.9, 12), c.dark, T(s * 1.12, 1.05, -2.25, -0.25, s * 0.35));
+    Bd.sootAt(s * 1.3, 1.15, -2.7, 1.5);
     // 短翼＋掛架＋火箭莢艙＋飛彈
     Bd.add(blk(2.2, 0.14, 1.3, 0.05), c.body, T(s * 1.85, -0.25, 0.1, 0, 0, s * -0.07));
     Bd.add(blk(0.08, 0.34, 1.0, 0.02), c.dark, T(s * 2.95, -0.33, 0.1));
@@ -409,13 +540,33 @@ function buildHeli() {
     Bd.add(cylZ(0.26, 0.26, 1.6, 14), c.pod, T(s * 1.45, -0.74, 0.2));
     Bd.add(cylZ(0.23, 0.23, 0.03, 12), P(0x0b0b0b, 0, 0.9), T(s * 1.45, -0.74, 1.01));
     Bd.add(cylZ(0.12, 0.26, 0.3, 12), c.pod, T(s * 1.45, -0.74, -0.75));
+    // 火箭莢艙：七個發射管口、兩道束帶；短翼上 NO STEP
+    Bd.add(merge([[0, 0], ...Array.from({ length: 6 }, (_, k) => [Math.cos(k * Math.PI / 3) * 0.14, Math.sin(k * Math.PI / 3) * 0.14])].map(([x, y]) => cylZ(0.045, 0.045, 0.02, 8).applyMatrix4(T(s * 1.45 + x, -0.74 + y, 1.03)))), P(0x050505, 0, 0.9));
+    for (const z of [0.7, -0.3]) Bd.add(cylZ(0.275, 0.275, 0.05, 14), c.dark, T(s * 1.45, -0.74, z));
+    Bd.add(sten('nostep', 0.7, 0.17, { face: 'y', tint: 1 }), c.body, T(s * 1.95, -0.172, 0.3, 0, 0, s * -0.07));
     for (const x of [2.3, 2.6]) {
       Bd.add(cylZ(0.09, 0.09, 1.5, 8), P(0x5a5f55, 0, 0.55), T(s * x, -0.7, 0.2));
       Bd.add(sph(0.09, 8, 6), P(0x5a5f55, 0, 0.55), T(s * x, -0.7, 0.95));
+      Bd.add(sph(0.075, 8, 6), c.glass, T(s * x, -0.7, 0.99));
+      Bd.add(merge([0, 1].map((k) => blk(0.02, 0.34, 0.2, 0.004).applyMatrix4(T(s * x, -0.7, -0.45, 0, 0, Math.PI / 4 + k * Math.PI / 2)))), c.dark);
     }
     // 主起落架
     Bd.add(blk(0.1, 0.8, 0.14, 0.02), c.dark, T(s * 1.0, -1.45, 2.3, 0, 0, s * 0.25));
     Bd.add(cylX(0.3, 0.3, 0.2, 12), c.rubber, T(s * 1.12, -1.9, 2.3));
+    // 機身兩側航電艙（凸出的艙體＋檢修蓋縫＋散熱百葉＋登機踏階）
+    Bd.add(prof([[3.2, -0.32], [2.3, -0.24], [-0.8, -0.24], [-1.05, -0.45], [-0.85, -0.86], [2.6, -0.86], [3.25, -0.58]], 0.32, 0.05), c.body, T(s * 0.78, 0, 0));
+    Bd.add(merge([rod([s * 0.945, -0.3, 1.9], [s * 0.945, -0.8, 1.9], 0.012, 0.012, 4), rod([s * 0.945, -0.3, 0.6], [s * 0.945, -0.8, 0.6], 0.012, 0.012, 4), rod([s * 0.945, -0.3, 1.9], [s * 0.945, -0.3, 0.6], 0.012, 0.012, 4)]), c.dark);
+    Bd.add(merge(Array.from({ length: 5 }, (_, k) => blk(0.03, 0.04, 0.5, 0.005).applyMatrix4(T(s * 0.945, -0.45 - k * 0.07, -0.25)))), c.dark);
+    Bd.add(sten('ground', 0.9, 0.08, { face: s > 0 ? 'x' : '-x', tint: 1 }), c.body, T(s * 0.945, -0.72, 1.25));
+    Bd.add(blk(0.22, 0.03, 0.14, 0.005), c.steel, T(s * 0.98, -0.95, 2.9));
+    // 起落架油壓緩衝柱、輪轂
+    Bd.add(rod([s * 0.9, -1.15, 2.3], [s * 1.06, -1.75, 2.3], 0.045, 0.045, 6), c.steel);
+    Bd.add(cylX(0.12, 0.12, 0.24, 10), c.steel, T(s * 1.12, -1.9, 2.3));
+    // 機身標示：救援箭頭、加油口、國籍標誌
+    Bd.add(sten('rescue', 0.5, 0.25, { face: s > 0 ? 'x' : '-x', tint: 3 }), c.body, T(s * 0.668, -0.2, 3.6));
+    Bd.add(sten('fuel', 0.9, 0.08, { face: s > 0 ? 'x' : '-x', tint: 1 }), c.body, T(s * 0.81, -0.4, -0.8));
+    Bd.add(sten('star', 0.42, 0.42, { face: s > 0 ? 'x' : '-x', tint: 1 }), c.body, T(s * 0.748, 0.0, -1.5, 0, s * 0.137));
+    Bd.add(sten('rotor', 1.4, 0.12, { face: s > 0 ? 'x' : '-x', tint: 4 }), c.body, T(s * 0.257, 0.265, -6.5, 0, s * 0.04));
   }
   // 機鼻感測器轉塔、機砲塔
   Bd.add(sph(0.36, 14, 10), c.dark, T(0, -0.42, 7.05));
@@ -424,6 +575,12 @@ function buildHeli() {
   Bd.add(blk(0.4, 0.2, 0.5, 0.04), c.dark, T(0, -1.12, 5.3));
   Bd.add(sph(0.28, 12, 8), c.dark, T(0, -1.3, 5.3));
   Bd.add(cylZ(0.05, 0.055, 1.5, 8), c.steel, T(0, -1.33, 6.1));
+  Bd.add(cylZ(0.075, 0.075, 0.5, 8), c.dark, T(0, -1.33, 5.75));
+  Bd.add(pipe([[0, -1.08, 5.05], [0, -1.02, 4.6], [0, -0.98, 4.0]], 0.06, 8, 5), c.dark);
+  Bd.add(ring(0.37, 0.04, 16), c.dark, T(0, -0.42, 6.98));
+  // 天線：尾桁上、機腹
+  Bd.add(prof([[-4.8, 0.45], [-5.2, 0.8], [-5.35, 0.8], [-5.1, 0.45]], 0.04, 0.008), c.dark);
+  Bd.add(prof([[-1.2, -1.0], [-1.55, -1.32], [-1.7, -1.32], [-1.5, -1.0]], 0.04, 0.008), c.dark);
   // 旋翼軸
   Bd.add(cyl(0.16, 0.2, 0.8, 12), c.steel, T(0, 1.72, 0.1));
   // 尾部：垂直尾翼、水平安定面、尾輪
@@ -431,6 +588,11 @@ function buildHeli() {
   Bd.add(blk(2.9, 0.08, 0.62, 0.02), c.body, T(0, 0.46, -7.45));
   Bd.add(blk(0.08, 0.5, 0.1, 0.02), c.dark, T(0, -0.1, -7.2));
   Bd.add(cylX(0.14, 0.14, 0.1, 10), c.rubber, T(0, -0.36, -7.2));
+  // 垂尾：尾旋翼齒輪箱整流罩、機號、國籍標誌、紅白警示
+  Bd.add(blk(0.2, 0.4, 0.55, 0.05), c.body, T(-0.17, 1.75, -8.35));
+  Bd.add(digits('07', 0.42, { face: 'x', tint: 1 }), c.body, T(0.09, 1.0, -8.2));
+  Bd.add(sten('star', 0.4, 0.4, { face: '-x', tint: 1 }), c.body, T(-0.09, 1.0, -8.15));
+  Bd.add(sten('redwhite', 0.6, 0.14, { face: 'x', tint: 5 }), c.body, T(0.09, 2.18, -8.17, 0.2));
   // 航行燈：左紅右綠尾白；防撞閃燈（紅）
   L.add(sph(0.1, 8, 6), E(7, 0.3, 0.2), T(3.0, -0.22, 0.1));
   L.add(sph(0.1, 8, 6), E(0.3, 6, 1.2), T(-3.0, -0.22, 0.1));
@@ -448,9 +610,22 @@ function buildHeli() {
     g.applyMatrix4(T(0, 0, 0, 0, 0, -0.025));      // 下垂
     R.add(g, c.blade, T(0, 0, 0, 0, a));
     R.add(blk(0.72, 0.14, 0.26, 0.03), c.steel, T(Math.cos(a) * 0.55, 0, -Math.sin(a) * 0.55, 0, a));
+    // 槳根護套、翼尖蓋、彈性軸承、變距拉桿
+    for (const [x, w, pp] of [[1.05, 0.5, c.dark], [7.12, 0.28, c.steel]]) {
+      const cuff = blk(w, 0.1, 0.56, 0.02);
+      cuff.applyMatrix4(T(x, 0, 0, 0.07)); cuff.applyMatrix4(T(0, 0, 0, 0, 0, -0.025));
+      R.add(cuff, pp, T(0, 0, 0, 0, a));
+    }
+    R.add(sph(0.1, 8, 6), c.dark, T(Math.cos(a) * 0.28, 0, -Math.sin(a) * 0.28));
+    const b2 = a + 0.35;
+    R.add(rod([Math.cos(b2) * 0.3, -0.4, -Math.sin(b2) * 0.3], [Math.cos(b2) * 0.52, -0.05, -Math.sin(b2) * 0.52], 0.022, 0.022, 5), c.steel);
   }
+  R.add(cyl(0.42, 0.42, 0.05, 16), c.steel, T(0, 0.17, 0));
+  R.add(cyl(0.42, 0.42, 0.05, 16), c.steel, T(0, -0.17, 0));
+  R.add(cyl(0.36, 0.36, 0.06, 16), c.dark, T(0, -0.42, 0));
   // ---- 尾旋翼（原點在尾旋翼軸，軸朝 x）
   Tr.add(cylX(0.13, 0.13, 0.26, 10), c.steel);
+  Tr.add(cylX(0.22, 0.22, 0.04, 12), c.dark, T(-0.12, 0, 0));
   for (let k = 0; k < 4; k++) {
     const g = blk(0.05, 1.3, 0.22, 0.01); g.applyMatrix4(T(0, 0.72, 0, 0, 0.1));
     Tr.add(g, c.blade, T(0, 0, 0, (k / 4) * Math.PI * 2));
@@ -462,33 +637,78 @@ function buildHeli() {
 
 // ================================================================ 戰鬥機（原點在重心、+z 朝前；全長 16.5 m、翼展 10 m、雙垂尾）
 function buildJet() {
-  const Bd = new Kit(), L = new Kit();
-  const c = JC;
+  const Bd = new Kit(31), L = new Kit(32);
+  const c = JC, black = P(0x080808, 0, 0.9);
   Bd.add(loft([
     [8.4, 0.04, 0.02, -0.06], [7.5, 0.34, 0.26, -0.3], [5.9, 0.6, 0.52, -0.5], [3.9, 0.8, 0.66, -0.6], [1.5, 1.3, 0.6, -0.7],
     [-1.5, 1.42, 0.55, -0.6], [-5.0, 1.28, 0.5, -0.45], [-7.2, 1.08, 0.4, -0.36], [-7.9, 1.0, 0.36, -0.32],
-  ], 22, 2.6), c.body);
-  Bd.add(loft([[5.5, 0.1, 0.54, 0.44], [4.9, 0.4, 1.02, 0.46], [3.7, 0.47, 1.18, 0.5], [2.4, 0.38, 1.0, 0.54], [1.6, 0.14, 0.72, 0.56]], 18, 2.2), c.glass);
+  ], 30, 2.6), c.body);
+  // 座艙罩＋風擋框、後框、IRST 球
+  const can = [[5.5, 0.1, 0.54, 0.44], [4.9, 0.4, 1.02, 0.46], [3.7, 0.47, 1.18, 0.5], [2.4, 0.38, 1.0, 0.54], [1.6, 0.14, 0.72, 0.56]];
+  Bd.add(loft(can, 18, 2.2), c.glass);
+  for (const i of [1, 3]) { const s = can[i]; Bd.add(loft([[s[0] + 0.05, s[1] + 0.02, s[2] + 0.02, s[3]], [s[0] - 0.05, s[1] + 0.02, s[2] + 0.02, s[3]]], 18, 2.2), c.dark); }
+  Bd.add(sph(0.11, 10, 8), c.glass, T(0.24, 0.56, 5.75));
+  // 邊條翼（機鼻兩側一路接到主翼）
+  Bd.add(top([[0.4, 6.2], [1.25, 3.4], [1.45, 1.4], [-1.45, 1.4], [-1.25, 3.4], [-0.4, 6.2]], 0.06, 0.02), c.body, T(0, 0.02, 0));
   // 主翼、水平尾翼
   Bd.add(top([[1.2, 2.3], [5.1, -3.0], [5.1, -4.4], [1.4, -5.0], [-1.4, -5.0], [-5.1, -4.4], [-5.1, -3.0], [-1.2, 2.3]], 0.16, 0.04), c.body, T(0, -0.08, 0));
   Bd.add(top([[1.0, -5.3], [3.4, -7.4], [3.4, -8.3], [0.9, -8.0], [-0.9, -8.0], [-3.4, -8.3], [-3.4, -7.4], [-1.0, -5.3]], 0.12, 0.03), c.body, T(0, -0.05, 0));
+  const seam = (a, b) => rod(a, b, 0.013, 0.013, 4);
   for (const s of [-1, 1]) {
-    // 外傾雙垂尾
-    Bd.add(prof([[-5.2, 0.3], [-7.8, 0.3], [-8.4, 3.2], [-7.35, 3.3]], 0.12, 0.03), c.body, T(s * 1.0, 0.1, 0, 0, 0, -s * 0.38));
-    // 進氣口
-    Bd.add(blk(0.7, 0.8, 1.6, 0.06), c.body, T(s * 1.2, -0.28, 1.9));
-    Bd.add(blk(0.56, 0.64, 0.04, 0.01), P(0x080808, 0, 0.9), T(s * 1.2, -0.28, 2.71));
-    // 尾噴管
-    Bd.add(cylZ(0.46, 0.52, 0.9, 16), c.nozzle, T(s * 0.56, -0.02, -8.2));
-    Bd.add(cylZ(0.38, 0.38, 0.03, 14), P(0x101010, 0, 0.9), T(s * 0.56, -0.02, -8.64));
-    L.add(cylZ(0.34, 0.34, 0.03, 14), E(7, 2.6, 0.8), T(s * 0.56, -0.02, -8.62));
-    // 翼下飛彈
-    Bd.add(cylZ(0.1, 0.1, 2.2, 8), c.msl, T(s * 3.3, -0.36, -2.2));
+    // 襟副翼、前緣襟翼、升降舵的鉸鏈縫與分段
+    Bd.add(merge([
+      seam([s * 1.5, 0.0, -4.47], [s * 4.95, 0.0, -3.92]), seam([s * 1.5, 0.0, 1.62], [s * 5.0, 0.0, -3.15]),
+      seam([s * 3.2, 0.0, -4.2], [s * 3.2, 0.0, -4.7]), seam([s * 1.5, 0.0, -4.47], [s * 1.5, 0.0, -4.95]),
+      seam([s * 1.05, 0.01, -7.1], [s * 3.3, 0.01, -7.95]),
+    ]), c.dark);
+    // 外傾雙垂尾＋方向舵縫＋機號、國籍標誌
+    const tail = T(s * 1.0, 0.1, 0, 0, 0, -s * 0.38);
+    Bd.add(prof([[-5.2, 0.3], [-7.8, 0.3], [-8.4, 3.2], [-7.35, 3.3]], 0.12, 0.03), c.body, tail);
+    Bd.add(merge([-1, 1].map((f) => seam([f * 0.062, 0.45, -7.72], [f * 0.062, 2.95, -8.22]))), c.dark, tail);
+    Bd.add(digits('07', 0.5, { face: s > 0 ? 'x' : '-x', tint: 6 }), c.body, new THREE.Matrix4().multiplyMatrices(tail, T(s * 0.072, 1.45, -7.0)));
+    Bd.add(sten('roundel', 0.42, 0.42, { face: s > 0 ? '-x' : 'x', tint: 6 }), c.body, new THREE.Matrix4().multiplyMatrices(tail, T(-s * 0.072, 1.6, -6.9)));
+    // 進氣道：斜切唇口、黑色開口、側面警示與國籍標誌
+    Bd.add(prof([[2.95, 0.12], [2.6, -0.68], [0.2, -0.62], [0.2, 0.12]], 0.72, 0.03), c.body, T(s * 1.22, 0, 0));
+    Bd.add(blk(0.6, 0.72, 0.03, 0.01), black, T(s * 1.22, -0.28, 2.775, 0.41));
+    Bd.add(blk(0.04, 0.78, 0.5, 0.008), c.dark, T(s * 0.84, -0.28, 2.55));
+    Bd.add(sten('intake', 1.1, 0.1, { face: s > 0 ? 'x' : '-x', tint: 4 }), c.body, T(s * 1.592, 0.0, 1.75));
+    Bd.add(sten('roundel', 0.5, 0.5, { face: s > 0 ? 'x' : '-x', tint: 6 }), c.body, T(s * 1.592, -0.3, 0.85));
+    // 尾噴管：收斂擴散段＋調節片＋內部火焰穩定器
+    const noz = lathe([[0.5, 0.45], [0.53, 0.2], [0.5, -0.25], [0.44, -0.45], [0.4, -0.44], [0.45, -0.2], [0.46, 0.3], [0.4, 0.45]].reverse(), 18);
+    noz.rotateX(Math.PI / 2);
+    Bd.add(noz, c.nozzle, T(s * 0.56, -0.02, -8.2));
+    const pet = [];
+    for (let k = 0; k < 12; k++) { const a = (k / 12) * Math.PI * 2; pet.push(blk(0.03, 0.03, 0.62, 0.006, 0).applyMatrix4(T(s * 0.56 + Math.cos(a) * 0.52, -0.02 + Math.sin(a) * 0.52, -8.4, -0.14 * Math.sin(a), 0.14 * Math.cos(a)))); }
+    Bd.add(merge(pet), c.steel);
+    Bd.add(cylZ(0.12, 0.32, 0.4, 12), black, T(s * 0.56, -0.02, -8.05));
+    L.add(cylZ(0.37, 0.37, 0.03, 14), E(7, 2.6, 0.8), T(s * 0.56, -0.02, -8.3));
+    Bd.sootAt(s * 0.56, 0, -8.75, 1.2);
+    // 翼下飛彈：彈體、導引頭、前後翼；掛架
+    Bd.add(cylZ(0.1, 0.1, 2.2, 10), c.msl, T(s * 3.3, -0.36, -2.2));
+    Bd.add(sph(0.1, 10, 6), c.glass, T(s * 3.3, -0.36, -1.1));
+    Bd.add(merge([0, 1].flatMap((k) => [-3.0, -1.55].map((z) => blk(0.02, z < -2 ? 0.44 : 0.3, z < -2 ? 0.26 : 0.16, 0.004).applyMatrix4(T(s * 3.3, -0.36, z, 0, 0, Math.PI / 4 + k * Math.PI / 2))))), c.dark);
     Bd.add(blk(0.06, 0.16, 1.2, 0.01), c.dark, T(s * 3.3, -0.2, -2.2));
+    // 翼尖發射軌＋短程飛彈
+    Bd.add(blk(0.08, 0.1, 2.6, 0.01), c.dark, T(s * 5.18, -0.1, -3.7));
+    Bd.add(cylZ(0.065, 0.065, 2.7, 10), c.msl, T(s * 5.18, -0.2, -3.6));
+    Bd.add(sph(0.065, 8, 6), c.glass, T(s * 5.18, -0.2, -2.25));
+    Bd.add(merge([0, 1].flatMap((k) => [-4.8, -2.55].map((z) => blk(0.015, 0.28, 0.18, 0.003).applyMatrix4(T(s * 5.18, -0.2, z, 0, 0, Math.PI / 4 + k * Math.PI / 2))))), c.dark);
+    // 機腹穩定鰭
+    Bd.add(prof([[-5.5, -0.3], [-6.8, -0.3], [-7.05, -0.85], [-6.45, -0.85]], 0.06, 0.01), c.body, T(s * 0.85, 0, 0, 0, 0, s * 0.3));
+    // 標示：機翼 NO STEP、國籍標誌；座艙旁救援箭頭
+    Bd.add(sten('nostep', 0.8, 0.2, { face: 'y', tint: 6 }), c.body, T(s * 2.1, 0.008, -1.9));
+    Bd.add(sten('roundel', 0.9, 0.9, { face: 'y', tint: 6 }), c.body, T(s * 3.6, 0.008, -2.9));
+    Bd.add(sten('rescue', 0.46, 0.23, { face: s > 0 ? 'x' : '-x', tint: 3 }), c.body, T(s * 0.945, 0.2, 3.2, 0, -s * 0.21));
     // 翼尖燈
-    L.add(sph(0.09, 8, 6), s > 0 ? E(7, 0.3, 0.2) : E(0.3, 6, 1.2), T(s * 5.12, -0.08, -3.7));
+    L.add(sph(0.09, 8, 6), s > 0 ? E(7, 0.3, 0.2) : E(0.3, 6, 1.2), T(s * 5.12, -0.02, -2.4));
   }
+  // 空速管、機砲口（左側，旁邊燻黑）、背部與機腹刀型天線、減速板縫
   Bd.add(cylZ(0.05, 0.05, 0.6, 6), c.steel, T(0.5, 0.3, 6.4));
+  Bd.add(blk(0.06, 0.12, 0.34, 0.01), black, T(0.71, 0.38, 4.25, 0, 0.12));
+  Bd.sootAt(0.75, 0.38, 4.0, 1.1);
+  Bd.add(prof([[-2.3, 0.6], [-2.65, 0.95], [-2.8, 0.95], [-2.55, 0.6]], 0.04, 0.008), c.dark);
+  Bd.add(prof([[0.8, -0.62], [0.5, -0.92], [0.35, -0.92], [0.6, -0.62]], 0.04, 0.008), c.dark);
+  Bd.add(merge([seam([-0.45, 0.555, -3.4], [0.45, 0.555, -3.4]), seam([-0.45, 0.545, -4.8], [0.45, 0.545, -4.8]), seam([-0.45, 0.555, -3.4], [-0.45, 0.545, -4.8]), seam([0.45, 0.555, -3.4], [0.45, 0.545, -4.8])]), c.dark);
   return { body: Bd.build(0, false), lit: L.build(0, false) };
 }
 
@@ -517,13 +737,15 @@ class Pool {
     this.n = 0;
   }
 }
-let RD = null;
+let RD = null, GEO = null;
+// 幾何與旋翼貼圖整個模組只建一次（換場景只重建 InstancedMesh 池）
+function vehicleGeometry() { return GEO || (GEO = { tk: buildTank(), he: buildHeli(), jt: buildJet(), discTex: discTexture() }); }
 function renderer(scene, A) {
   if (RD && RD.scene === scene) return RD;
   const paint = paintMaterial(A);
   const glow = new THREE.MeshBasicMaterial({ vertexColors: true });
-  const disc = new THREE.MeshBasicMaterial({ map: discTexture(), transparent: true, depthWrite: false, side: THREE.DoubleSide });
-  const tk = buildTank(), he = buildHeli(), jt = buildJet();
+  const { tk, he, jt, discTex } = vehicleGeometry();
+  const disc = new THREE.MeshBasicMaterial({ map: discTex, transparent: true, depthWrite: false, side: THREE.DoubleSide });
   const pools = [];
   const P_ = (g, m, cap, o) => { const p = new Pool(g, m, cap, o); scene.add(p.mesh); pools.push(p); return p; };
   RD = {
