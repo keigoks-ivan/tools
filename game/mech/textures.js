@@ -430,3 +430,21 @@ export function stencilUV(cell, digit = 0) {
   const [cx, cy, cw, ch] = STENCIL.cells[cell], S = STENCIL.size, ox = digit * 96;
   return [(cx + ox) / S, 1 - (cy + ch) / S, (cx + ox + cw) / S, 1 - cy / S];
 }
+
+// ---------- 真實照片細節貼圖（CC0，Poly Haven；來源見 assets/CREDITS.md），給機體與載具的三面投影用 ----------
+//   mech_paint：R 漆面明暗細節、G 粗糙度、B 鏽斑遮罩
+//   路徑相對於本模組，別的頁面匯入 mechs.js 也找得到。
+let _det = null;
+export function detailMaps() {
+  if (_det) return _det;
+  const L = new THREE.TextureLoader();
+  const ld = (n) => {
+    const t = L.load(new URL('./assets/' + n, import.meta.url).href);
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    t.colorSpace = THREE.NoColorSpace;
+    t.anisotropy = 4;
+    return t;
+  };
+  _det = { paint: ld('mech_paint.jpg') };
+  return _det;
+}

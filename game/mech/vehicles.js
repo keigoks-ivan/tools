@@ -4,7 +4,7 @@
 // 對 combat.js 來說，Vehicle 長得像 Enemy（pos、chest()、scale、ap、los、locks…），所以鎖定、HUD、雷達、分數、連殺都直接沿用。
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { stencilAtlas, stencilUV } from './textures.js';
+import { stencilAtlas, stencilUV, detailMaps } from './textures.js';
 
 const clamp = THREE.MathUtils.clamp;
 const rand = (a, b) => a + Math.random() * (b - a);
@@ -225,6 +225,7 @@ function paintMaterial(A) {
     sh.uniforms.wearMap = { value: A.wearM };
     sh.uniforms.frameMap = { value: A.frameM };
     sh.uniforms.dclMap = { value: stencilAtlas() };
+    sh.uniforms.paintMap = { value: detailMaps().paint };
     sh.vertexShader = sh.vertexShader
       .replace('#include <common>', `#include <common>
         attribute vec4 pbr; attribute vec4 dcl; varying vec4 vPbr; varying vec4 vDcl; varying vec3 vOP; varying vec3 vON; varying vec3 vTint;`)
@@ -237,7 +238,7 @@ function paintMaterial(A) {
         #endif`);
     sh.fragmentShader = sh.fragmentShader
       .replace('#include <common>', `#include <common>
-        uniform sampler2D wearMap, frameMap, dclMap;
+        uniform sampler2D wearMap, frameMap, dclMap, paintMap;
         varying vec4 vPbr; varying vec4 vDcl; varying vec3 vOP; varying vec3 vON; varying vec3 vTint;
         vec4 vh_tri(sampler2D t, vec3 p, vec3 n, float s){
           vec3 a = pow(abs(n), vec3(4.0)); a /= (a.x + a.y + a.z + 1e-5);
@@ -268,7 +269,10 @@ function paintMaterial(A) {
         float vh_th = 0.86;
         float vh_chip = vh_paint * smoothstep(vh_th, vh_th + 0.04, vh_chipN);
         float vh_halo = vh_paint * smoothstep(vh_th - 0.1, vh_th, vh_chipN) * (1.0 - vh_chip);
+        vec4 vh_P = vh_tri(paintMap, vOP, vh_nO, 0.7);   // 漆面照片細節（刮痕、雨痕、鏽點）
         vec3 vh_base = diffuseColor.rgb * (0.86 + vh_nz * 0.18 + (vh_nz2 - 0.5) * 0.08);
+        vh_base *= mix(1.0, 0.64 + 0.72 * vh_P.r, vh_paint);
+        vh_base = mix(vh_base, vec3(0.17, 0.075, 0.03) * vTint, vh_P.b * vh_paint * 0.6);
         vh_base = mix(vh_base, vh_base * 1.3 + 0.012, vh_edge * mix(0.3, 0.6, vh_paint));
         float vh_streak = smoothstep(0.3, 0.9, 1.0 - vh_S) * vh_paint * 0.6;
         vh_base *= 1.0 - vh_streak * 0.35;
@@ -279,8 +283,8 @@ function paintMaterial(A) {
         // 排氣口、砲口燻黑
         float vh_soot = clamp((1.0 - vDcl.w) * (0.55 + 0.45 * vh_nz2), 0.0, 0.92);
         diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.03, 0.027, 0.024) * vTint, vh_soot);
-        float vh_bump = vh_W.b * 0.45 - vh_chip * 0.5 + (1.0 - vh_paint) * vh_F.b * 0.5;`)
-      .replace('#include <roughnessmap_fragment>', `float roughnessFactor = clamp(vPbr.y + (vh_W.g - 0.15) * 0.4 * vh_paint + (vh_F.g - 0.65) * 0.6 * (1.0 - vh_paint) + vh_dust * 0.35 + vh_streak * 0.12 + vh_burnt * 0.4 + vh_soot * 0.3 - vh_dA * 0.06, 0.04, 1.0);
+        float vh_bump = vh_W.b * 0.35 - vh_chip * 0.5 + (1.0 - vh_paint) * vh_F.b * 0.5 + vh_paint * vh_P.r * 0.3;`)
+      .replace('#include <roughnessmap_fragment>', `float roughnessFactor = clamp(mix(vPbr.y, vh_P.g, 0.4 * vh_paint) + (vh_W.g - 0.15) * 0.3 * vh_paint + (vh_F.g - 0.65) * 0.6 * (1.0 - vh_paint) + vh_dust * 0.35 + vh_streak * 0.12 + vh_burnt * 0.4 + vh_soot * 0.3 - vh_dA * 0.06, 0.04, 1.0);
         roughnessFactor = mix(roughnessFactor, 0.3 + vh_W.g * 0.3, vh_chip);`)
       .replace('#include <metalnessmap_fragment>', `float metalnessFactor = max(vPbr.x * (1.0 - vh_dA) * (1.0 - vh_soot * 0.6), vh_chip * 0.95) * (1.0 - vh_burnt * 0.85);`)
       .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
@@ -293,7 +297,7 @@ function paintMaterial(A) {
           normal = normalize(abs(det) * normal - grad * 0.03);
         }`);
   };
-  m.customProgramCacheKey = () => 'vehicle-paint-2';
+  m.customProgramCacheKey = () => 'vehicle-paint-3';
   return m;
 }
 // 旋翼動態模糊盤：半透明徑向貼圖（細環紋＋翼尖亮環）
@@ -319,15 +323,15 @@ function discTexture() {
 
 // ================================================================ 塗裝
 const TK = {
-  main: P(0x4a5235, 0, 0.62), dark: P(0x252822, 0.1, 0.7), rubber: P(0x141414, 0, 0.92), steel: P(0x46494b, 0.8, 0.45),
+  main: P(0x4a5040, 0, 0.72), dark: P(0x252822, 0.1, 0.72), rubber: P(0x141414, 0, 0.92), steel: P(0x46494b, 0.8, 0.45),
   track: P(0x2a2a28, 0.65, 0.62), glass: P(0x070b0e, 0, 0.05), canvas: P(0x5d5441, 0, 0.95), lamp: P(0x8d8a80, 0.2, 0.25),
 };
 const HC = {
-  body: P(0x3f4538, 0, 0.6), dark: P(0x1e201e, 0.15, 0.66), steel: P(0x45484a, 0.8, 0.42), glass: P(0x0a1116, 0, 0.04),
+  body: P(0x42463d, 0, 0.7), dark: P(0x1e201e, 0.15, 0.68), steel: P(0x45484a, 0.8, 0.42), glass: P(0x0a1116, 0, 0.04),
   blade: P(0x1f2120, 0, 0.55), rubber: P(0x141414, 0, 0.9), pod: P(0x33382e, 0, 0.62),
 };
 const JC = {
-  body: P(0x6b7278, 0, 0.5), dark: P(0x2b2e31, 0.3, 0.55), steel: P(0x4a4d50, 0.85, 0.35), glass: P(0x1a1810, 0.35, 0.04),
+  body: P(0x646a6f, 0, 0.58), dark: P(0x2b2e31, 0.3, 0.58), steel: P(0x4a4d50, 0.85, 0.35), glass: P(0x1a1810, 0.35, 0.04),
   nozzle: P(0x3a3632, 0.9, 0.45), msl: P(0xb8b8b2, 0, 0.5),
 };
 

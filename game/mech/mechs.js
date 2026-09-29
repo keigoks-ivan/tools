@@ -5,7 +5,7 @@
 // 每種（style, scheme）的幾何只建一次當樣板，之後 new Mech 只複製場景樹、共用幾何與材質（出場不卡頓、不漏顯示記憶體）。
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { stencilAtlas, stencilUV } from './textures.js';
+import { stencilAtlas, stencilUV, detailMaps } from './textures.js';
 import { MechMotion, wrap, lerpAngle, damp } from './anim.js';
 
 // ================================================================ 材質
@@ -23,6 +23,7 @@ function paintMaterial(A, wear, mil, soot, bumpK) {
   const m = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1, metalness: 1 });
   m.onBeforeCompile = (sh) => {
     sh.uniforms.wearMap = { value: A.wearM };
+    sh.uniforms.paintMap = { value: detailMaps().paint };
     sh.uniforms.frameMap = { value: A.frameM };
     sh.uniforms.wearAmt = { value: wear };
     sh.uniforms.dclMap = { value: stencilAtlas() };
@@ -36,7 +37,7 @@ function paintMaterial(A, wear, mil, soot, bumpK) {
         vPbr = pbr; vDcl = dcl; vOP = position; vON = normal;`);
     sh.fragmentShader = sh.fragmentShader
       .replace('#include <common>', `#include <common>
-        uniform sampler2D wearMap, frameMap, dclMap; uniform float wearAmt, milK, sootK, bumpK;
+        uniform sampler2D wearMap, frameMap, paintMap, dclMap; uniform float wearAmt, milK, sootK, bumpK;
         varying vec4 vPbr; varying vec4 vDcl; varying vec3 vOP; varying vec3 vON;
         vec4 wv_tri(sampler2D t, vec3 p, vec3 n, float s){
           vec3 a = pow(abs(n), vec3(4.0)); a /= (a.x + a.y + a.z + 1e-5);
@@ -57,35 +58,38 @@ function paintMaterial(A, wear, mil, soot, bumpK) {
         vec3 wv_tc = wv_ti < 1.5 ? vec3(0.58, 0.56, 0.48) : wv_ti < 2.5 ? vec3(0.018) : wv_ti < 3.5 ? vec3(0.55, 0.36, 0.05) : wv_ti < 4.5 ? vec3(0.42, 0.03, 0.025) : wv_ti < 5.5 ? wv_dc.rgb : vec3(0.045, 0.05, 0.055);
         diffuseColor.rgb = mix(diffuseColor.rgb, wv_tc, wv_dA);
         vec4 wv_W = wv_tri(wearMap, vOP, wv_nO, 0.22);
-        vec4 wv_W2 = wv_tri(wearMap, vOP, wv_nO, 1.35);
-        vec4 wv_F = wv_tri(frameMap, vOP, wv_nO, 0.45);
+        vec4 wv_W2 = wv_tri(paintMap, vOP, wv_nO, 0.5);    // 漆面照片細節（約 2 m 一張）
+        vec4 wv_F = wv_tri(frameMap, vOP, wv_nO, 0.45);     // 骨架金屬細節
         float wv_S = wv_tri(wearMap, vOP * vec3(1.0, 0.1, 1.0), wv_nO, 0.32).b;
         float wv_nz = wv_n(vOP * 0.45);
         float wv_nz2 = wv_n(vOP * 1.9 + 7.0);
         float wv_paint = 1.0 - step(0.5, vPbr.x);
         float wv_edge = vPbr.z;
-        float wv_chipN = (1.0 - wv_W.b) * 0.95 + wv_edge * (0.2 + 0.55 * wv_nz) + (wv_nz - 0.5) * 0.35 + milK * ((wv_edge - 0.7) * 0.22 - (1.0 - wv_W2.b) * 0.05);
+        float wv_chipN = (1.0 - wv_W.b) * 0.95 + wv_edge * (0.2 + 0.55 * wv_nz) + (wv_nz - 0.5) * 0.35 + milK * (wv_edge - 0.7) * 0.22 + (0.5 - wv_W2.r) * 0.12;
         float wv_th = 1.0 - wearAmt * 0.26;
         float wv_chip = wv_paint * smoothstep(wv_th, wv_th + 0.04, wv_chipN);
         float wv_halo = wv_paint * smoothstep(wv_th - 0.1, wv_th, wv_chipN) * (1.0 - wv_chip);
         vec3 wv_base = diffuseColor.rgb * (0.9 + wv_nz * 0.14 + (wv_nz2 - 0.5) * 0.06);
+        // 照片細節：漆面的斑駁、刮痕、雨痕、鏽點；金屬件用磨損鋼板
+        wv_base *= mix(0.85 + 0.3 * wv_F.b, 0.66 + 0.68 * wv_W2.r, wv_paint);
+        wv_base = mix(wv_base, vec3(0.17, 0.075, 0.03), wv_W2.b * wv_paint * mix(0.12, 0.75, milK));
         wv_base = mix(wv_base, wv_base * 1.2 + 0.015, wv_edge * mix(0.3, 0.6, wv_paint));
         float wv_streak = smoothstep(0.3, 0.9, 1.0 - wv_S) * wv_paint * wearAmt;
         wv_base *= 1.0 - wv_streak * 0.35;
         float wv_dust = smoothstep(4.8, 0.0, vPbr.w) * (0.35 + 0.65 * wv_nz) * wearAmt;
         wv_base = mix(wv_base, vec3(0.32, 0.28, 0.23), wv_dust * 0.42);
         // 敵機：腳邊再多一層泥巴（斑駁、貼地最濃）
-        float wv_mud = milK * smoothstep(1.6, 0.0, vPbr.w) * smoothstep(0.35, 0.75, wv_nz2 + wv_W2.g * 0.4);
+        float wv_mud = mix(0.35, 1.0, milK) * smoothstep(1.9, 0.0, vPbr.w) * smoothstep(0.35, 0.75, wv_nz2 + (1.0 - wv_W2.r) * 0.4);
         wv_base = mix(wv_base, vec3(0.16, 0.13, 0.1), wv_mud * 0.55);
         wv_base *= 1.0 - wv_halo * 0.45;
         // 掉漆：主角機露出亮金屬；敵機多半只掉到暗色底漆，只有最裡面才見金屬
         vec3 wv_chipC = mix(vec3(0.5, 0.5, 0.52) * (0.8 + wv_W.g), mix(vec3(0.13, 0.12, 0.11), vec3(0.3, 0.3, 0.31), smoothstep(0.03, 0.1, wv_chipN - wv_th)) * (0.75 + wv_W.g), milK);
         diffuseColor.rgb = mix(wv_base, wv_chipC, wv_chip);
         // 噴口燻黑
-        float wv_soot = clamp((1.0 - vDcl.w) * sootK * (0.55 + 0.45 * wv_nz2 + 0.25 * (wv_W2.g - 0.5)), 0.0, 0.93);
+        float wv_soot = clamp((1.0 - vDcl.w) * sootK * (0.55 + 0.45 * wv_nz2 + 0.3 * (0.5 - wv_W2.r)), 0.0, 0.93);
         diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.028, 0.025, 0.022), wv_soot);
-        float wv_bump = wv_W.b * 0.45 - wv_chip * 0.5 + (1.0 - wv_paint) * wv_F.b * 0.5 + wv_W2.b * 0.12;`)
-      .replace('#include <roughnessmap_fragment>', `float roughnessFactor = clamp(vPbr.y + (wv_W.g - 0.15) * 0.4 * wv_paint + (wv_W2.g - 0.5) * 0.12 + (wv_F.g - 0.65) * 0.6 * (1.0 - wv_paint) + wv_dust * 0.4 + wv_mud * 0.3 + wv_streak * 0.12 + wv_soot * 0.3 - wv_dA * 0.06, 0.06, 1.0);
+        float wv_bump = wv_W.b * 0.3 - wv_chip * 0.5 + (1.0 - wv_paint) * wv_F.b * 0.5 + wv_paint * wv_W2.r * 0.35;`)
+      .replace('#include <roughnessmap_fragment>', `float roughnessFactor = clamp(mix(vPbr.y, wv_W2.g, 0.45 * wv_paint) + (wv_F.g - 0.65) * 0.6 * (1.0 - wv_paint) + (wv_W.g - 0.15) * 0.25 * wv_paint + wv_dust * 0.4 + wv_mud * 0.3 + wv_streak * 0.12 + wv_soot * 0.3 - wv_dA * 0.06, 0.06, 1.0);
         roughnessFactor = mix(roughnessFactor, mix(0.3, 0.5, milK) + wv_W.g * 0.3, wv_chip);`)
       .replace('#include <metalnessmap_fragment>', `float metalnessFactor = max(vPbr.x * (1.0 - wv_dA) * (1.0 - wv_soot * 0.6), wv_chip * mix(0.95, 0.6, milK));`)
       .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
@@ -426,23 +430,23 @@ const UNITS = ['12', '17', '23', '28', '34', '41', '46', '52', '58', '63', '67',
 // ================================================================ 塗裝（m＝金屬度，r＝粗糙度）
 const SCHEMES = {
   hero: {
-    main: P(0xaeb2af, 0.08, 0.44), second: P(0x22335c, 0.08, 0.44), accent: P(0xa8262c, 0.06, 0.42), yellow: P(0xc9a13a, 0.35, 0.36),
-    frame: P(0x626a72, 0.85, 0.4), dark: P(0x161a20, 0.5, 0.6), weapon: P(0x303943, 0.55, 0.47), sole: P(0x17191a, 0.1, 0.85),
+    main: P(0x9fa29e, 0.05, 0.52), second: P(0x30353d, 0.1, 0.5), accent: P(0x8a3030, 0.04, 0.5), yellow: P(0xa88b45, 0.3, 0.42),
+    frame: P(0x3b3f45, 0.85, 0.42), dark: P(0x14171b, 0.5, 0.62), weapon: P(0x303943, 0.55, 0.47), sole: P(0x17191a, 0.1, 0.85),
     eye: [0.12, 2.1, 0.95], wear: 'clean',
   },
   grunt: {
-    main: P(0x566041, 0, 0.62), second: P(0x3a432f, 0, 0.64), accent: P(0x6b7153, 0, 0.6), yellow: P(0xb08422, 0, 0.55),
-    frame: P(0x51555a, 0.75, 0.5), dark: P(0x1a1b1c, 0.2, 0.68), weapon: P(0x36393c, 0.45, 0.5), sole: P(0x131415, 0, 0.9),
+    main: P(0x4b5243, 0, 0.72), second: P(0x383d33, 0, 0.74), accent: P(0x5c6152, 0, 0.7), yellow: P(0x8f7433, 0, 0.62),
+    frame: P(0x3c3f42, 0.75, 0.52), dark: P(0x18191a, 0.2, 0.7), weapon: P(0x2e3134, 0.45, 0.55), sole: P(0x131415, 0, 0.9),
     eye: [12, 0.6, 3], wear: 'dirty',
   },
   ace: {
-    main: P(0x851c22, 0, 0.5), second: P(0x4a1015, 0, 0.52), accent: P(0x2a2a2e, 0, 0.5), yellow: P(0xc2952c, 0, 0.45),
-    frame: P(0x4a4d52, 0.8, 0.45), dark: P(0x171718, 0.2, 0.62), weapon: P(0x2b2c2f, 0.45, 0.45), sole: P(0x131415, 0, 0.9),
+    main: P(0x6c2a2a, 0, 0.66), second: P(0x3d1c1e, 0, 0.68), accent: P(0x2a2a2d, 0, 0.62), yellow: P(0x9a7a3a, 0, 0.55),
+    frame: P(0x3c3e42, 0.8, 0.5), dark: P(0x171718, 0.2, 0.66), weapon: P(0x2b2c2f, 0.45, 0.5), sole: P(0x131415, 0, 0.9),
     eye: [12, 0.6, 3], wear: 'dirty',
   },
   heavy: {
-    main: P(0x4a4e53, 0, 0.58), second: P(0x2c2f33, 0, 0.6), accent: P(0xb85c18, 0, 0.5), yellow: P(0xb85c18, 0, 0.5),
-    frame: P(0x46494d, 0.8, 0.46), dark: P(0x161617, 0.2, 0.68), weapon: P(0x2c2e32, 0.5, 0.45), sole: P(0x121314, 0, 0.9),
+    main: P(0x4a4d51, 0, 0.7), second: P(0x2d3034, 0, 0.72), accent: P(0x8c5428, 0, 0.62), yellow: P(0x8c5428, 0, 0.62),
+    frame: P(0x3a3d41, 0.8, 0.5), dark: P(0x161617, 0.2, 0.7), weapon: P(0x2c2e32, 0.5, 0.5), sole: P(0x121314, 0, 0.9),
     eye: [12, 3, 0.5], wear: 'dirty',
   },
 };
@@ -484,7 +488,7 @@ export class Mech {
     const hero = style === 'hero';
     const L = (this.L = hero
       ? { pelvis: 9.9, hip: [1.45, -0.5, 0], knee: [0, -4.25, 0.1], ankle: [0, -4.0, -0.1], torso: [0, 0.85, 0], head: [0, 4.95, 0.35], shoulder: [3.05, 3.95, -0.05], elbow: -2.85, hand: -3.05 }
-      : { pelvis: 9.4, hip: [1.55, -0.55, 0], knee: [0, -3.95, 0.15], ankle: [0, -3.6, -0.1], torso: [0, 0.7, 0], head: [0, 5.35, 0.3], shoulder: [3.4, 3.95, -0.1], elbow: -2.9, hand: -3.0 });
+      : { pelvis: 9.75, hip: [1.55, -0.55, 0], knee: [0, -4.15, 0.15], ankle: [0, -3.75, -0.1], torso: [0, 0.7, 0], head: [0, 5.15, 0.55], shoulder: [3.4, 3.95, 0.05], elbow: -2.9, hand: -3.0 });
     const b = this.bones;
     const bone = (name, parent, x, y, z) => { const o = new THREE.Group(); o.name = name; o.position.set(x, y, z); parent.add(o); b[name] = o; return o; };
     bone('pelvis', this.root, 0, L.pelvis, 0);
@@ -1088,7 +1092,7 @@ export class Mech {
       const ank = b['ankle' + n], kn = b['knee' + n], hp = b['hip' + n];
       const fx = sx > 0 ? 'x' : '-x';
       // ---- 腳掌
-      const fz = 0.88;
+      const fz = 0.95;
       A(ank, prof([[-1.95, -0.95], [2.6, -0.95], [2.7, -0.58], [1.8, -0.12], [0.8, 0.42], [-0.95, 0.5], [-2.0, -0.15]].map(([z, y]) => [z * fz, y]), 2.45, 0.16), S.main);
       A(ank, prof([[1.5, -0.95], [2.8, -0.95], [2.82, -0.62], [1.72, -0.2]].map(([z, y]) => [z * fz, y]), 2.6, 0.1), S.second);
       for (const side of [-1, 1]) {
@@ -1115,15 +1119,15 @@ export class Mech {
       this.label(ank, sten('hazard', 1.5, 0.26, { tint: 5 }), S.second, [0, -0.785, 2.495]);
       // ---- 小腿（下寬）
       A(kn, cyl(0.55, 0.62, 3.6), S.frame, [0, -1.8, 0]);
-      A(kn, taper(prof([[0.95, 0.12], [1.2, -1.2], [1.5, -2.9], [1.56, -3.78], [-1.62, -3.78], [-1.56, -2.5], [-1.2, -0.9], [-0.85, 0.18]], 2.15, 0.18), 0.82, 1, 1.3, 1), S.main);
+      A(kn, taper(prof([[0.95, 0.12], [1.2, -1.2], [1.5, -2.9], [1.56, -3.9], [-1.62, -3.9], [-1.56, -2.5], [-1.2, -0.9], [-0.85, 0.18]], 1.9, 0.16), 0.84, 1, 1.15, 1), S.main);
       const PL = this.pl.bind(this);
       // 前脛甲：包覆的曲面板（往前下方傾）
       const sg = PL(kn, 'z', [[-0.75, -1.42], [0.75, -1.42], [0.85, -0.6], [0.66, 1.4], [-0.66, 1.4], [-0.85, -0.6]], 0.3, { bev: 0.07, nx: 5, ny: 6, bx: 1.3 }, S.second, [0, -2.2, 1.42], [-0.24, 0, 0]);
       sg.put(sten('caution', 0.8, 0.2, { tint: 3, seg: 3 }), 0, 0.85);
-      A(kn, blk(0.13, 1.6, 1.5, 0.04), S.second, [sx * 1.33, -2.45, -0.15], [0, 0, sx * 0.13]);
-      A(kn, merge([[-0.55, -1.85], [0.4, -1.85], [-0.55, -3.05], [0.4, -3.05]].map(([z, y]) => at(nut(0.055), [sx * (1.33 + 0.075) + sx * (-2.45 - y) * 0.13, y, z - 0.15], [0, 0, Math.PI / 2 + sx * 0.13]))), S.frame);
-      this.label(kn, sten('hyd', 1.2, 0.13, { face: fx, tint: 1 }), S.second, [sx * (1.33 + 0.075), -2.45, -0.15], [0, 0, sx * 0.13]);
-      A(kn, blk(1.9, 1.3, 0.5, 0.1), S.frame, [0, -3.05, -1.62]);
+      A(kn, blk(0.13, 1.6, 1.5, 0.04), S.second, [sx * 1.08, -2.45, -0.15], [0, 0, sx * 0.09]);
+      A(kn, merge([[-0.55, -1.85], [0.4, -1.85], [-0.55, -3.05], [0.4, -3.05]].map(([z, y]) => at(nut(0.055), [sx * (1.08 + 0.075) + sx * (-2.45 - y) * 0.09, y, z - 0.15], [0, 0, Math.PI / 2 + sx * 0.09]))), S.frame);
+      this.label(kn, sten('hyd', 1.2, 0.13, { face: fx, tint: 1 }), S.second, [sx * (1.08 + 0.075), -2.45, -0.15], [0, 0, sx * 0.09]);
+      A(kn, blk(1.75, 1.3, 0.5, 0.1), S.frame, [0, -3.05, -1.62]);
       for (let k = 0; k < 3; k++) A(kn, blk(1.7, 0.1, 0.16, 0.02), S.dark, [0, -2.85 - k * 0.24, -1.9]);
       this.label(kn, sten('hazard', 1.6, 0.14, { face: '-z', tint: 5 }), S.frame, [0, -2.62, -1.885]);
       for (const dx of [-0.45, 0.45]) {
@@ -1134,14 +1138,14 @@ export class Mech {
       // 小腿背後兩根油壓缸
       for (const x of [-0.55, 0.55]) this.piston(kn, [x, -0.45, -1.22], [x, -2.28, -1.7], 0.12, S);
       // 內側散熱口
-      this.vent(kn, 0.9, 0.7, 4, S, [-sx * 1.22, -2.2, -0.2], [0, sx > 0 ? -Math.PI / 2 : Math.PI / 2, 0]);
+      this.vent(kn, 0.9, 0.7, 4, S, [-sx * 1.02, -2.2, -0.2], [0, sx > 0 ? -Math.PI / 2 : Math.PI / 2, 0]);
       // 膝蓋外側到小腿推進器的管線
       A(kn, hose([[sx * 0.95, -0.35, -0.75], [sx * 1.15, -1.3, -1.2], [sx * 1.0, -2.35, -1.55]], 0.13, 5), S.dark);
       A(kn, prof([[0.55, 0.95], [1.45, 0.45], [1.45, -0.75], [0.95, -1.15], [0.45, -0.3]], 1.75, 0.14), S.second);
       A(kn, blade([[-0.72, 0.26], [0.72, 0.26], [0.88, -0.44], [0.54, -0.95], [-0.54, -0.95], [-0.88, -0.44]], 0.18, 0.05), S.main, [0, 0, 1.5]);
       A(kn, merge([-0.45, 0.45].map((x) => at(nut(0.06), [x, 0.0, 1.62], [Math.PI / 2, 0, 0]))), S.frame);
       for (const side of [-1, 1]) {
-        for (const yy of [-1.4, -2.1, -2.8]) A(kn, bolt(0.085), S.frame, [side * 1.3, yy, 1.13], [Math.PI / 2, 0, 0]);
+        for (const yy of [-1.4, -2.1, -2.8]) A(kn, bolt(0.085), S.frame, [side * (0.92 + (-yy - 1.4) * 0.07), yy, 1.14 + (-yy - 1.4) * 0.12], [Math.PI / 2, 0, 0]);
         A(kn, cyl(0.46, 0.48, 0.12, 16), S.frame, [side * 1.1, 0, 0], [0, 0, Math.PI / 2]);
         this.nutRing(kn, [side * 1.17, 0, 0], 0.33, 6, S, 'x', 0.055, 0.5);
       }
@@ -1153,17 +1157,23 @@ export class Mech {
       }
       A(kn, cyl(0.78, 0.78, 2.0), S.frame, [0, 0, 0], [0, 0, Math.PI / 2]);
       A(kn, cyl(0.16, 0.16, 2.2), S.frame, [-sx * 0.72, -1.25, -1.0], [0.15, 0, 0]);
+      // 膝關節外露骨架：左右連桿板＋前方小油壓缸
+      for (const side of [-1, 1]) A(kn, prof([[0.55, 0.55], [0.7, -0.2], [0.3, -1.1], [-0.6, -1.0], [-0.75, -0.1], [-0.4, 0.6]], 0.14, 0.03), S.frame, [side * 0.98, 0, 0]);
+      this.piston(kn, [sx * 0.62, 0.55, 0.75], [sx * 0.55, -0.9, 1.05], 0.08, S);
       // ---- 大腿：蛇腹護套＋前裝甲
       A(hp, cyl(0.62, 0.58, 3.8), S.frame, [0, -2.0, 0]);
-      A(hp, ribs(-0.7, -3.3, 7, 0.92, 0.2, 12), S.dark);
-      PL(hp, 'z', [[-0.8, -1.55], [0.8, -1.55], [0.9, 1.1], [0.62, 1.45], [-0.62, 1.45], [-0.9, 1.1]], 0.4, { bev: 0.08, nx: 5, ny: 6, bx: 1.1, by: 12 }, S.main, [0, -1.85, 1.0]);
-      PL(hp, 'z', [[-0.55, -1.0], [0.55, -1.0], [0.62, 0.8], [-0.62, 0.8]], 0.14, { bev: 0.04, nx: 4, ny: 3, bx: 1.1, by: 12, cv: 0.1 }, S.second, [0, -1.95, 1.0 + 0.27]);
-      A(hp, merge([[-0.42, -1.4], [0.42, -1.4], [-0.42, -2.6], [0.42, -2.6]].map(([x, y]) => at(nut(0.055), [x, y, 1.35 - (x * x) / 2.2], [Math.PI / 2, Math.atan(x / 1.1), 0]))), S.frame);
-      this.piston(hp, [sx * 1.02, -0.85, -0.62], [sx * 1.02, -3.25, -0.8], 0.14, S);
-      A(hp, blk(0.2, 1.7, 1.1, 0.05, 0.2), S.main, [sx * 1.24, -1.95, 0.35]);
-      A(hp, merge([[-0.05, -1.3], [0.75, -1.3], [-0.05, -2.6], [0.75, -2.6]].map(([z, y]) => at(nut(0.05), [sx * 1.35, y, z], [0, 0, Math.PI / 2]))), S.frame);
-      this.label(hp, digits('00', 0.5, { face: fx, tint: 1, variable: true }), S.main, [sx * 1.352, -1.95, 0.35]);
-      A(hp, prof([[-0.95, -0.4], [-1.3, -0.8], [-1.32, -2.5], [-1.05, -2.75], [-0.95, -2.6]], 1.5, 0.08), S.second);
+      A(hp, ribs(-0.7, -3.3, 7, 0.8, 0.17, 12), S.dark);
+      for (const side of [-1, 1]) A(hp, blk(0.16, 3.4, 0.36, 0.04), S.frame, [side * 0.62, -2.3, -0.55]);
+      PL(hp, 'z', [[-0.72, -1.55], [0.72, -1.55], [0.85, 1.1], [0.6, 1.45], [-0.6, 1.45], [-0.85, 1.1]], 0.32, { bev: 0.07, nx: 5, ny: 6, bx: 1.1, by: 12 }, S.main, [0, -1.85, 0.95]);
+      PL(hp, 'z', [[-0.5, -1.0], [0.5, -1.0], [0.58, 0.8], [-0.58, 0.8]], 0.12, { bev: 0.035, nx: 4, ny: 3, bx: 1.1, by: 12, cv: 0.1 }, S.second, [0, -1.95, 0.95 + 0.22]);
+      A(hp, merge([[-0.42, -1.4], [0.42, -1.4], [-0.42, -2.6], [0.42, -2.6]].map(([x, y]) => at(nut(0.055), [x, y, 1.24 - (x * x) / 2.2], [Math.PI / 2, Math.atan(x / 1.1), 0]))), S.frame);
+      this.piston(hp, [sx * 0.92, -0.85, -0.62], [sx * 0.92, -3.25, -0.8], 0.14, S);
+      A(hp, blk(0.2, 1.7, 1.1, 0.05, 0.2), S.main, [sx * 1.1, -1.95, 0.35]);
+      A(hp, merge([[-0.05, -1.3], [0.75, -1.3], [-0.05, -2.6], [0.75, -2.6]].map(([z, y]) => at(nut(0.05), [sx * 1.21, y, z], [0, 0, Math.PI / 2]))), S.frame);
+      this.label(hp, digits('00', 0.5, { face: fx, tint: 1, variable: true }), S.main, [sx * 1.212, -1.95, 0.35]);
+      // 大腿背面維修踏階（人的尺度：一格 0.45 m）
+      A(hp, merge([0, 1, 2, 3].map((k) => at(handle(0.5, 0.16, 0.035), [0, -1.0 - k * 0.45, -1.36], [0, Math.PI, 0]))), S.frame);
+      A(hp, prof([[-0.9, -0.4], [-1.2, -0.8], [-1.22, -2.5], [-0.98, -2.75], [-0.9, -2.6]], 1.3, 0.07), S.second);
       A(hp, sph(0.9, 14, 10), S.frame);
     }
     // ---- 腰
@@ -1267,7 +1277,7 @@ export class Mech {
     }
     // ---- 頭：圓頂＋單眼滑軌
     const h = b.head;
-    h.scale.setScalar(0.84);
+    h.scale.setScalar(0.72);
     this.eyeRail = { r: 1.44, y: 1.05, sz: 1.08 };
     const hz = [1, 1, 1.08];
     A(h, cyl(0.55, 0.65, 0.8), S.frame, [0, 0.25, 0]);
