@@ -123,7 +123,12 @@ export class ViewModel {
     // 彈量燈、線圈發光
     const M = this.model, ud = M.userData;
     const n = this.ammo[this.cur];
-    ud.ammoBar.forEach((b, i) => { const on = i < Math.round(n / W.mag * ud.ammoBar.length); b.material.color.copy(ud.glowBase).multiplyScalar(on ? 1 : 0.05); });
+    ud.ammoBar.forEach((b, i) => {
+      const on = i < Math.round(n / W.mag * ud.ammoBar.length);
+      b.material.color.copy(ud.glowBase).multiplyScalar(on ? 1 : 0.05);
+      ud.ammoInstances.setColorAt(i, b.material.color);
+    });
+    ud.ammoInstances.instanceColor.needsUpdate = true;
     ud.glow.color.copy(ud.glowBase).multiplyScalar(0.55 + this.heat * 1.2 + (this.flashT > 0 ? 2 : 0));
     return shot;
   }
@@ -141,7 +146,7 @@ export class ViewModel {
   _pose(dt, sp, adsK) {
     const M = this.model, ud = M.userData, rifle = this.cur === 'rifle';
     // 腰射位置、舉槍位置
-    const hip = rifle ? new THREE.Vector3(0.22, -0.27, -0.03) : new THREE.Vector3(0.17, -0.19, -0.4);
+    const hip = rifle ? new THREE.Vector3(0.17, -0.205, 0.15) : new THREE.Vector3(0.17, -0.19, -0.4);
     const ads = rifle ? new THREE.Vector3(0, -ud.scopeY, 0.08) : new THREE.Vector3(0, -ud.sightY, -0.36);
     const pos = hip.clone().lerp(ads, ease(this.ads));
     const rot = new THREE.Euler(0, Math.PI, 0, 'YXZ');
@@ -165,7 +170,7 @@ export class ViewModel {
       pos.x += Math.sin(b) * 0.03 * sk; pos.y += -Math.abs(Math.cos(b)) * 0.03 * sk;
     }
     // 落地
-    pos.y -= this.landK * 0.06;
+    pos.y -= this.landK * 0.045; rot.x -= this.landK * 0.07; pos.z += this.landK * 0.018;
     // 後座
     pos.z += this.kick.z * 0.04 * (1 - this.ads * 0.5); pos.y += this.kick.y * 0.01;
     rot.x += this.rot.x * 0.02; rot.z += this.rot.z * 0.02; rot.y += this.rot.y * 0.02;
@@ -176,13 +181,13 @@ export class ViewModel {
     if (this.reloadT >= 0) {
       const u = this.reloadT / this.W.reload;
       const tilt = u < 0.12 ? ease(u / 0.12) : u < 0.8 ? 1 : 1 - ease((u - 0.8) / 0.2);
-      pos.x -= 0.05 * tilt; pos.y -= 0.03 * tilt; pos.z -= 0.02 * tilt;
-      rot.z += (rifle ? 0.45 : 0.35) * tilt; rot.x += 0.18 * tilt; rot.y += 0.12 * tilt;
-      // 彈匣：拔出 → 消失 → 新的從下面來 → 插入
+      pos.x -= 0.04 * tilt; pos.y += 0.085 * tilt; pos.z -= 0.12 * tilt;
+      rot.z += (rifle ? 0.45 : 0.35) * tilt; rot.x -= 0.12 * tilt; rot.y += 0.12 * tilt;
+      // 拔出與插入使用同一條軌跡，左手直接跟隨彈匣，避免重複位移。
       if (u < 0.12) magOff = 0;
-      else if (u < 0.24) magOff = ease((u - 0.12) / 0.12) * 0.12;
-      else if (u < 0.28) magOff = 0.4;
-      else if (u < 0.42) magOff = 0.12 * (1 - ease((u - 0.28) / 0.14));
+      else if (u < 0.27) magOff = ease((u - 0.12) / 0.15) * 0.32;
+      else if (u < 0.32) magOff = 0.32;
+      else if (u < 0.42) magOff = 0.32 * (1 - ease((u - 0.32) / 0.1));
       else magOff = 0;
       // 左手路線（槍座標）：去彈匣 → 往下離開 → 拿新的回來 → 插入後拍一下 → 回護木
       lh = u;
@@ -194,7 +199,8 @@ export class ViewModel {
     H.position.lerp(pos, 1); H.rotation.copy(rot);
     for (const k in this.g) { this.g[k].position.set(0, 0, 0); this.g[k].rotation.set(0, 0, 0); }
     ud.mag.position.copy(ud.magHome); ud.mag.visible = true;
-    if (magOff > 0) { if (magOff >= 0.39) ud.mag.visible = false; else ud.mag.position.y -= magOff; }
+    ud.mag.position.y -= magOff;
+    if (lh !== null) ud.mag.visible = !(lh > 0.27 && lh < 0.32);
     H.updateMatrixWorld(true);
     this._hands(lh, magOff);
     // 狙擊鏡裡：手和槍都不畫
@@ -215,19 +221,18 @@ export class ViewModel {
     const R = L.clone().negate();
     let LD = rifle ? R.clone().addScaledVector(F, 0.45).addScaledVector(U, 0.2) : R.clone().multiplyScalar(0.6).addScaledVector(F, 0.2).addScaledVector(U, -0.6);
     let LS = rifle ? F.clone().negate() : F.clone().negate().addScaledVector(U, -0.3);
-    let curlL = rifle ? 0.75 : 0.9;
+    let curlL = rifle ? 0.92 : 0.85;
     if (lh !== null) {
       const u = lh;
-      const magP = ud.mag.position.clone().add(new THREE.Vector3(0.03, -0.09, 0));   // 彈匣側邊
-      const away = magP.clone().add(new THREE.Vector3(0.12, -0.35, -0.1));
-      let k, target;
-      if (u < 0.12) { k = ease(u / 0.12); target = lp.clone().lerp(magP, k); }
-      else if (u < 0.24) { target = magP.clone(); target.y -= ((u - 0.12) / 0.12) * 0.12; }
-      else if (u < 0.3) { k = ease((u - 0.24) / 0.06); target = magP.clone().add(new THREE.Vector3(0, -0.12, 0)).lerp(away, k); }
-      else if (u < 0.36) { k = ease((u - 0.3) / 0.06); target = away.clone().lerp(magP.clone().add(new THREE.Vector3(0, -0.12, 0)), k); }
-      else if (u < 0.44) { target = magP.clone(); target.y -= magOff; }
-      else if (u < 0.58) { k = ease((u - 0.44) / 0.14); target = magP.clone().lerp(rifle ? new THREE.Vector3(0.045, 0.02, 0.62) : lp, k); }   // 拍一下能量艙
-      else { k = ease(Math.min(1, (u - 0.58) / 0.22)); target = (rifle ? new THREE.Vector3(0.045, 0.02, 0.62) : lp).clone().lerp(lp, k); }
+      const magP = ud.mag.position.clone().add(new THREE.Vector3(0.052, -0.07, -0.012));
+      const charge = rifle ? new THREE.Vector3(0.05, 0.045, 0.56) : new THREE.Vector3(0.026, 0.035, -0.015);
+      const home = ud.magHome.clone().add(new THREE.Vector3(0.052, -0.07, -0.012));
+      let target;
+      if (u < 0.12) target = lp.clone().lerp(home, ease(u / 0.12));
+      else if (u < 0.44) target = magP;
+      else if (u < 0.58) target = home.clone().lerp(charge, ease((u - 0.44) / 0.14));
+      else if (u < 0.66) { target = charge.clone(); target.z -= Math.sin((u - 0.58) / 0.08 * Math.PI) * 0.035; }
+      else target = charge.clone().lerp(lp, ease(clamp((u - 0.66) / 0.2, 0, 1)));
       lp = target;
       if (u > 0.08 && u < 0.5) { LD = U.clone().multiplyScalar(0.4).addScaledVector(F, 0.6).addScaledVector(L, 0.2); LS = L.clone().negate(); curlL = 0.85; }
     }

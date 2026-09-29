@@ -16,6 +16,7 @@ const SURF = {
   tile: { tex: 'floor_tiles_02', tile: 1.8, color: 0xb8b2a6 },
   metal: { tex: 'metal_plate', tile: 2.0, color: 0x9ca1a6, metal: true },
   rust: { tex: 'rusty_metal_02', tile: 2.5, color: 0xb0a090, metal: true },
+  fabric: { tex: 'fabric_pattern_07', tile: 0.9, color: 0xb5aa92 },
   corr: { tex: 'corrugated_iron_02', tile: 2.2, color: 0xa7aca8, metal: true },
 };
 export const SURFACES = Object.keys(SURF);

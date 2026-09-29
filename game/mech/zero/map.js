@@ -10,13 +10,13 @@ const H1 = 3.4;   // 一層樓高
 
 export function buildMap(scene, mats, solid, PL = null) {
   // 額外的純色材質：玻璃、窗洞深處、燈、警示漆
-  mats.glass = new THREE.MeshStandardMaterial({ color: 0x1a2026, roughness: 0.08, metalness: 0.9, envMapIntensity: 1.4, vertexColors: true });
+  mats.glass = new THREE.MeshStandardMaterial({ color: 0x273b3e, roughness: 0.24, roughnessMap: mats.metal.roughnessMap, metalness: 0.15, envMapIntensity: 1.15, vertexColors: true });
   mats.void = new THREE.MeshStandardMaterial({ color: 0x0b0b0c, roughness: 1, vertexColors: true });
   mats.lamp = new THREE.MeshBasicMaterial({ color: new THREE.Color(2.6, 2.4, 2.0), vertexColors: true });
   mats.warm = new THREE.MeshBasicMaterial({ color: new THREE.Color(2.2, 1.2, 0.5), vertexColors: true });
   mats.hazard = hazardMat();
   mats.olive = new THREE.MeshStandardMaterial({ color: 0x4d5538, roughness: 0.7, metalness: 0.2, vertexColors: true });
-  mats.canvas = new THREE.MeshStandardMaterial({ color: 0x6b5f48, roughness: 0.95, vertexColors: true, side: THREE.DoubleSide });
+  mats.canvas = mats.fabric.clone(); mats.canvas.color.set(0x857558); mats.canvas.side = THREE.DoubleSide; mats.canvas.onBeforeCompile = mats.fabric.onBeforeCompile;
   mats.sand = new THREE.MeshStandardMaterial({ color: 0x7d6f55, roughness: 1, vertexColors: true, map: mats.floor.map, normalMap: mats.floor.normalMap });
   mats.paint = new THREE.MeshStandardMaterial({ color: 0x55655f, roughness: 0.55, metalness: 0.35, vertexColors: true, map: mats.rust.map, roughnessMap: mats.rust.roughnessMap });
   mats.paint2 = new THREE.MeshStandardMaterial({ color: 0x9a9384, roughness: 0.55, metalness: 0.3, vertexColors: true, map: mats.rust.map, roughnessMap: mats.rust.roughnessMap });
@@ -24,7 +24,7 @@ export function buildMap(scene, mats, solid, PL = null) {
   for (const k of ['glass', 'void', 'lamp', 'warm', 'olive', 'canvas', 'sand', 'paint', 'paint2', 'red']) mats[k].userData.tile = 2;
   // 貨櫃：真的波浪鐵皮貼圖，染三種常見顏色
   for (const [k, c] of [['cGreen', 0x8a9a74], ['cRed', 0xc27358], ['cBlue', 0x7d93a6]]) { const m = mats.corr.clone(); m.color.set(c); m.metalnessMap = null; m.metalness = 0.15; m.userData.tile = 2.2; m.onBeforeCompile = mats.corr.onBeforeCompile; mats[k] = m; }   // 烤漆：不是裸金屬
-  mats.hazard.userData.tile = 1.6;
+  mats.hazard.userData.tile = 1.6; mats.canvas.userData.tile = 0.9;
   // 外牆模組的貼圖做成一般材質（量體上方、牆角補縫用，顏色才接得起來）
   if (PL) {
     const km = (node) => { const p = PL.M.nodes[node]; return p && p[0].mat; };
@@ -158,6 +158,14 @@ export function buildMap(scene, mats, solid, PL = null) {
     if (!sk('n')) { wall(ext, 'x', z1 + t / 2, t, x0 - t, x1 + t, 0, h, ops('n'), { dim: 0.9 }); wall(wm, 'x', z1 - L / 2, L, x0, x1, 0, h, ops('n'), { dim: 0.85, solid: false }); }
     if (!sk('w')) { wall(ext, 'z', x0 - t / 2, t, z0, z1, 0, h, ops('w'), { dim: 0.9 }); wall(wm, 'z', x0 + L / 2, L, z0, z1, 0, h, ops('w'), { dim: 0.85, solid: false }); }
     if (!sk('e')) { wall(ext, 'z', x1 + t / 2, t, z0, z1, 0, h, ops('e'), { dim: 0.85 }); wall(wm, 'z', x1 - L / 2, L, z0, z1, 0, h, ops('e'), { dim: 0.85, solid: false }); }
+    // 踢腳線、門楣和內側框，保持原來的通行洞口。
+    for (const side of ['s', 'n', 'w', 'e']) {
+      if (sk(side)) continue;
+      const axis = side === 's' || side === 'n' ? 'x' : 'z';
+      const fixed = side === 's' ? z0 + 0.04 : side === 'n' ? z1 - 0.04 : side === 'w' ? x0 + 0.04 : x1 - 0.04;
+      wall('concrete', axis, fixed, 0.055, axis === 'x' ? x0 : z0, axis === 'x' ? x1 : z1, 0.03, 0.15, ops(side), { solid: false, dim: 0.65 });
+      for (const [c, w = 1.4] of D[side] || []) doorFrame(axis, fixed, c, w);
+    }
     if (o.upper) mass(x0 - t, x1 + t, z0 - t, z1 + t, o.upper, ext, o.upperWin || '', { y0: h + 0.3, trim: o.trim });
     // 日光燈
     if (o.lights !== false) for (let x = x0 + 3; x < x1 - 1; x += 6) for (let z = z0 + 3; z < z1 - 1; z += 6) if (rnd() < (o.lightP ?? 0.5)) b.deco('lamp', x - 0.6, x + 0.6, h - 0.05, h, z - 0.08, z + 0.08, { solid: false });
@@ -179,8 +187,17 @@ export function buildMap(scene, mats, solid, PL = null) {
       // 上下框、四角柱
       for (const yy of [0.06, 2.54]) b.obox('rust', x, y + yy, z, 3.08, 0.07, 1.24, ry, { solid: false });
       for (const dx of [-3.02, 3.02]) for (const dz of [-1.19, 1.19]) b.obox('rust', x + dx * c + dz * s, y + 1.3, z - dx * s + dz * c, 0.07, 1.3, 0.07, ry, { solid: false });
-      b.obox('metal', x + 3.07 * c, y + 1.3, z - 3.07 * s, 0.03, 1.28, 1.2, ry, { solid: false });
-      b.obox('metal', x - 3.07 * c, y + 1.3, z + 3.07 * s, 0.03, 1.28, 1.2, ry, { solid: false });
+      for (const end of [-1, 1]) {
+        const px = x + end * 3.075 * c, pz = z - end * 3.075 * s;
+        b.obox(mat, px, y + 1.3, pz, 0.03, 1.23, 1.14, ry, { solid: false });
+        // 雙扇門縫、四根鎖桿和鉸鏈。
+        b.obox('void', px + end * 0.035 * c, y + 1.3, pz - end * 0.035 * s, 0.012, 1.2, 0.012, ry, { solid: false });
+        for (const dz of [-0.85, -0.3, 0.3, 0.85]) {
+          const rod = PR.pipeGeo(2.3, 0.023);
+          b.mesh('metal', rod, px + end * 0.055 * c + dz * s, y + 1.3, pz - end * 0.055 * s + dz * c);
+          for (const yy of [0.22, 1.15, 2.36]) b.obox('metal', px + end * 0.06 * c + dz * s, y + yy, pz - end * 0.06 * s + dz * c, 0.032, 0.035, 0.1, ry, { solid: false });
+        }
+      }
     },
     // 紐澤西護欄（混凝土）
     jersey(x, z, ry = 0) {
@@ -271,7 +288,7 @@ export function buildMap(scene, mats, solid, PL = null) {
       b.solid.add(aabb(x, 0.45, z, 1.2, 0.45, 0.6, ry, 'metal'));
       const c = Math.cos(ry), s = Math.sin(ry);
       for (const [px, pz] of [[1.15, 0.55], [-1.15, 0.55], [1.15, -0.55], [-1.15, -0.55]]) b.obox('metal', x + px * c + pz * s, 1.2, z - px * s + pz * c, 0.03, 1.2, 0.03, ry, { solid: false });
-      b.obox('canvas', x, 2.4, z, 1.35, 0.02, 0.8, ry, { solid: false });
+      b.mesh('canvas', PR.canopy(), x, 2.4, z, ry, { solid: false, shade: 0.9 });
       for (let i = 0; i < 4; i++) P.crate(x + (rnd() - 0.5) * 1.6 * c, z + (rnd() - 0.5) * 1.6 * s, 0.35 + rnd() * 0.2, rnd() * 2, 0.9);
     },
     // 管線沿牆
@@ -298,8 +315,17 @@ export function buildMap(scene, mats, solid, PL = null) {
     },
     // 欄杆（視覺＋擋人）
     rail(axis, fixed, a0, a1, y) {
-      if (axis === 'x') { b.deco('metal', a0, a1, y + 1.0, y + 1.06, fixed - 0.03, fixed + 0.03); b.deco('metal', a0, a1, y + 0.5, y + 0.54, fixed - 0.02, fixed + 0.02); for (let a = a0; a <= a1; a += 1.5) b.deco('metal', a - 0.03, a + 0.03, y, y + 1.06, fixed - 0.03, fixed + 0.03); solid.add({ x0: a0, x1: a1, z0: fixed - 0.05, z1: fixed + 0.05, y0: y, y1: y + 1.06, mat: 'metal', noRay: true }); }
-      else { b.deco('metal', fixed - 0.03, fixed + 0.03, y + 1.0, y + 1.06, a0, a1); b.deco('metal', fixed - 0.02, fixed + 0.02, y + 0.5, y + 0.54, a0, a1); for (let a = a0; a <= a1; a += 1.5) b.deco('metal', fixed - 0.03, fixed + 0.03, y, y + 1.06, a - 0.03, a + 0.03); solid.add({ x0: fixed - 0.05, x1: fixed + 0.05, z0: a0, z1: a1, y0: y, y1: y + 1.06, mat: 'metal', noRay: true }); }
+      for (const [height, radius] of [[1.03, 0.03], [0.52, 0.022]]) {
+        const g = PR.pipeGeo(a1 - a0, radius);
+        if (axis === 'x') b.mesh('metal', g.rotateZ(Math.PI / 2), (a0 + a1) / 2, y + height, fixed);
+        else b.mesh('metal', g.rotateX(Math.PI / 2), fixed, y + height, (a0 + a1) / 2);
+      }
+      for (let a = a0; a <= a1; a += 1.5) {
+        const x = axis === 'x' ? a : fixed, z = axis === 'x' ? fixed : a;
+        b.mesh('metal', PR.pipeGeo(1.06, 0.028), x, y + 0.53, z);
+        b.deco('metal', x - 0.07, x + 0.07, y, y + 0.025, z - 0.07, z + 0.07);
+      }
+      solid.add(axis === 'x' ? { x0: a0, x1: a1, z0: fixed - 0.05, z1: fixed + 0.05, y0: y, y1: y + 1.06, mat: 'metal', noRay: true } : { x0: fixed - 0.05, x1: fixed + 0.05, z0: a0, z1: a1, y0: y, y1: y + 1.06, mat: 'metal', noRay: true });
     },
     // 平台（走道／格柵）
     deck(x0, x1, z0, z1, y, mat = 'metal') { b.block(mat, x0, x1, y - 0.15, y, z0, z1); },
@@ -316,9 +342,7 @@ export function buildMap(scene, mats, solid, PL = null) {
   function rampBeam(x, z0, z1, y0, y1, dir) {
     const L = z1 - z0, dy = y1 - y0, len = Math.hypot(L, dy), ang = Math.atan2(dy, L) * (dir > 0 ? 1 : -1);
     const g = new THREE.BoxGeometry(0.08, 0.25, len);
-    const m = new THREE.Mesh(g, mats.metal);
-    m.position.set(x, (y0 + y1) / 2 - 0.1, (z0 + z1) / 2); m.rotation.x = -ang;
-    m.castShadow = m.receiveShadow = true; scene.add(m);
+    b.mesh('metal', g.rotateX(-ang), x, (y0 + y1) / 2 - 0.1, (z0 + z1) / 2);
   }
   function aabb(x, y, z, hx, hy, hz, ry, mat) {
     const c = Math.abs(Math.cos(ry)), s = Math.abs(Math.sin(ry)), ex = hx * c + hz * s, ez = hx * s + hz * c;

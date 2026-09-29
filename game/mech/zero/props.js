@@ -26,7 +26,19 @@ export function car(variant = 0) {
   const arch = (cz, r = 0.42, n = 10) => { const pts = []; for (let i = 0; i <= n; i++) { const a = Math.PI - (i / n) * Math.PI; pts.push([cz + Math.cos(a) * r, 0.28 + Math.sin(a) * r * 0.95]); } return pts; };
   const low = [[-2.3, 0.3], ...arch(-1.4), [-0.9, 0.28], [0.9, 0.28], ...arch(1.4), [2.3, 0.3], [2.33, 0.62], [2.22, 0.9], [1.25, 0.98], [-1.35, 1.0], [-2.2, 0.93], [-2.34, 0.72]];
   const body = prism(low.map(([z, y]) => [z, y]).reverse(), 1.78, 0.06);
-  const greenhouse = prism([[1.2, 0.97], [0.62, 1.4], [-0.72, 1.42], [-1.3, 0.99]], 1.56, 0.04);
+  // 燒空車窗，保留車室、儀表台和座椅剪影。
+  const interior = [new THREE.BoxGeometry(1.5, 0.12, 2.5).translate(0, 0.68, 0), new THREE.BoxGeometry(1.46, 0.18, 0.34).translate(0, 0.88, 0.85)];
+  for (const x of [-0.4, 0.4]) for (const z of [-0.65, 0.2]) {
+    interior.push(new THREE.BoxGeometry(0.52, 0.12, 0.48).translate(x, 0.75, z));
+    interior.push(new THREE.BoxGeometry(0.5, 0.43, 0.12).rotateX(-0.15).translate(x, 0.93, z - 0.22));
+  }
+  const vertices = body.attributes.position;
+  for (let i = 0; i < vertices.count; i++) {
+    const x = vertices.getX(i), y = vertices.getY(i), z = vertices.getZ(i);
+    const dent = Math.exp(-Math.pow((z - 1.5) / 0.55, 2)) * Math.max(0, y - 0.5);
+    vertices.setXYZ(i, x * (1 - dent * 0.15), y - dent * (0.2 + 0.08 * Math.sin(x * 9)), z);
+  }
+  body.computeVertexNormals();
   const roof = prism([[0.58, 1.38], [0.62, 1.44], [-0.74, 1.46], [-0.72, 1.4]], 1.62, 0.02);
   const pillars = [];
   for (const s of [-1, 1]) {
@@ -36,14 +48,16 @@ export function car(variant = 0) {
   }
   const wheels = [], rims = [];
   for (const [x, z] of [[0.78, 1.4], [-0.78, 1.4], [0.78, -1.4], [-0.78, -1.4]]) {
-    wheels.push(cyl(0.34, 0.22, 18).rotateZ(Math.PI / 2).translate(x, 0.34, z));
-    rims.push(cyl(0.2, 0.235, 12).rotateZ(Math.PI / 2).translate(x, 0.34, z));
+    wheels.push(new THREE.TorusGeometry(0.265, 0.085, 4, 12).rotateY(Math.PI / 2).translate(x, 0.34, z));
+    rims.push(new THREE.TorusGeometry(0.185, 0.024, 3, 12).rotateY(Math.PI / 2).translate(x, 0.34, z));
+    rims.push(cyl(0.065, 0.24, 10).rotateZ(Math.PI / 2).translate(x, 0.34, z));
+    for (let k = 0; k < 5; k++) rims.push(new THREE.BoxGeometry(0.2, 0.028, 0.33).rotateX(k * Math.PI / 5).translate(x, 0.34, z));
   }
   const under = new THREE.BoxGeometry(1.6, 0.18, 4.2).translate(0, 0.25, 0);
   const bumpers = [new THREE.BoxGeometry(1.82, 0.16, 0.14).translate(0, 0.45, 2.3), new THREE.BoxGeometry(1.82, 0.16, 0.14).translate(0, 0.45, -2.32)];
   const out = {
     body: merge([body, roof, ...pillars]),
-    dark: merge([greenhouse, ...wheels, under, ...bumpers]),
+    dark: merge([...interior, ...wheels, under, ...bumpers]),
     metal: merge(rims),
   };
   return (cache[key] = out);
@@ -69,17 +83,39 @@ export function missileRack() {
     tips.push(new THREE.ConeGeometry(0.2, 0.55, 16).rotateX(Math.PI / 2).translate(x, y, 1.87));
     for (let k = 0; k < 4; k++) tips.push(new THREE.BoxGeometry(0.02, 0.22, 0.3).translate(0, 0.2, 0).rotateZ(k * Math.PI / 2).translate(x, y, -1.45));
   }
+  for (const z of [-1.3, 1.3]) for (const y of [0.72, 1.32]) for (const x of [-0.6, 0.6]) {
+    frame.push(new THREE.TorusGeometry(0.215, 0.025, 5, 12, Math.PI).rotateZ(Math.PI).translate(x, y, z));
+    mis.push(cyl(0.205, 0.018, 16).rotateX(Math.PI / 2).translate(x, y, z));
+  }
   return (cache.rack = { metal: merge(frame), body: merge(mis), dark: merge(tips) });
 }
 
 // ---------------------------------------------------------------- 機庫天車（橫跨寬度的兩根大樑＋吊車）
 export function crane(span) {
-  const beams = [new THREE.BoxGeometry(span, 0.9, 0.5).translate(0, 0, -1), new THREE.BoxGeometry(span, 0.9, 0.5).translate(0, 0, 1)];
+  // 工字樑的腹板、翼緣和加勁肋，避免實心方樑。
+  const beams = [];
+  for (const z of [-1, 1]) {
+    beams.push(new THREE.BoxGeometry(span, 0.82, 0.065).translate(0, 0, z));
+    for (const y of [-0.45, 0.45]) beams.push(new THREE.BoxGeometry(span, 0.08, 0.55).translate(0, y, z));
+    for (let x = -span / 2 + 0.5; x < span / 2; x += 3) beams.push(new THREE.BoxGeometry(0.045, 0.82, 0.48).translate(x, 0, z));
+  }
   const ties = []; for (let x = -span / 2 + 1; x < span / 2; x += 2.5) ties.push(new THREE.BoxGeometry(0.12, 0.12, 2).translate(x, -0.4, 0));
-  const trolley = new THREE.BoxGeometry(2.4, 1.2, 2.6).translate(4, -0.9, 0);
+  const trolley = [new THREE.BoxGeometry(2.4, 0.22, 2.6).translate(4, -0.58, 0), cyl(0.38, 1.8, 16).rotateZ(Math.PI / 2).translate(4, -1.0, 0)];
+  for (const z of [-1, 1]) for (const x of [3.15, 4.85]) trolley.push(cyl(0.22, 0.22, 12).rotateX(Math.PI / 2).translate(x, -0.58, z));
   const cables = [-0.3, 0.3].map((z) => cyl(0.025, 9, 6).translate(4, -6, z));
   const hook = [new THREE.BoxGeometry(0.9, 0.5, 0.6).translate(4, -10.6, 0), new THREE.TorusGeometry(0.25, 0.07, 6, 12, Math.PI * 1.4).translate(4, -11.1, 0)];
-  return { hazard: merge(beams), metal: merge([...ties, ...cables, ...hook]), dark: merge([trolley]) };
+  return { hazard: merge(beams), metal: merge([...ties, ...cables, ...hook]), dark: merge(trolley) };
+}
+
+// 張力帆布：中央下垂、邊緣皺褶；靜態幾何合併到場景。
+export function canopy() {
+  if (cache.canopy) return cache.canopy;
+  const g = new THREE.PlaneGeometry(2.7, 1.6, 18, 10).rotateX(-Math.PI / 2), p = g.attributes.position;
+  for (let i = 0; i < p.count; i++) {
+    const x = p.getX(i), z = p.getZ(i), edge = Math.abs(z) / 0.8;
+    p.setY(i, 0.12 - 0.18 * (1 - x * x / (1.35 * 1.35)) + Math.sin(x * 17 + z * 3) * 0.025 * edge);
+  }
+  g.computeVertexNormals(); return (cache.canopy = g);
 }
 
 // ---------------------------------------------------------------- 工具車（紅色抽屜櫃）

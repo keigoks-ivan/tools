@@ -158,7 +158,7 @@ function lathe(pts, seg = 20) {
   if (pts[0][1] > pts[pts.length - 1][1]) pts = pts.slice().reverse();
   return prep(new THREE.LatheGeometry(pts.map(([r, y]) => new THREE.Vector2(r, y)), seg));
 }
-function cyl(rt, rb, h, seg = 18, open = false) { return prep(new THREE.CylinderGeometry(rt, rb, h, seg, 1, open)); }
+function cyl(rt, rb, h, seg = 16, open = false) { return prep(new THREE.CylinderGeometry(rt, rb, h, seg, 1, open)); }
 function sph(r, ws = 18, hs = 12) { return prep(new THREE.SphereGeometry(r, ws, hs)); }
 // 嵌入式螺栓：與所屬骨頭一起合併，毋須多一個 draw call。
 function bolt(r = 0.1) { return cyl(r, r * 1.08, r * 0.42, 8); }
@@ -430,24 +430,24 @@ const UNITS = ['12', '17', '23', '28', '34', '41', '46', '52', '58', '63', '67',
 // ================================================================ 塗裝（m＝金屬度，r＝粗糙度）
 const SCHEMES = {
   hero: {
-    main: P(0x9fa29e, 0.05, 0.52), second: P(0x30353d, 0.1, 0.5), accent: P(0x8a3030, 0.04, 0.5), yellow: P(0xa88b45, 0.3, 0.42),
+    main: P(0x858d87, 0.08, 0.62), second: P(0x333c41, 0.15, 0.58), accent: P(0x65564a, 0.08, 0.64), yellow: P(0x9b875b, 0.3, 0.52),
     frame: P(0x3b3f45, 0.85, 0.42), dark: P(0x14171b, 0.5, 0.62), weapon: P(0x303943, 0.55, 0.47), sole: P(0x17191a, 0.1, 0.85),
     eye: [0.12, 2.1, 0.95], wear: 'clean',
   },
   grunt: {
     main: P(0x4b5243, 0, 0.72), second: P(0x383d33, 0, 0.74), accent: P(0x5c6152, 0, 0.7), yellow: P(0x8f7433, 0, 0.62),
     frame: P(0x3c3f42, 0.75, 0.52), dark: P(0x18191a, 0.2, 0.7), weapon: P(0x2e3134, 0.45, 0.55), sole: P(0x131415, 0, 0.9),
-    eye: [12, 0.6, 3], wear: 'dirty',
+    eye: [3.5, 0.35, 0.55], wear: 'dirty',
   },
   ace: {
     main: P(0x6c2a2a, 0, 0.66), second: P(0x3d1c1e, 0, 0.68), accent: P(0x2a2a2d, 0, 0.62), yellow: P(0x9a7a3a, 0, 0.55),
     frame: P(0x3c3e42, 0.8, 0.5), dark: P(0x171718, 0.2, 0.66), weapon: P(0x2b2c2f, 0.45, 0.5), sole: P(0x131415, 0, 0.9),
-    eye: [12, 0.6, 3], wear: 'dirty',
+    eye: [3.5, 0.35, 0.55], wear: 'dirty',
   },
   heavy: {
     main: P(0x4a4d51, 0, 0.7), second: P(0x2d3034, 0, 0.72), accent: P(0x8c5428, 0, 0.62), yellow: P(0x8c5428, 0, 0.62),
     frame: P(0x3a3d41, 0.8, 0.5), dark: P(0x161617, 0.2, 0.7), weapon: P(0x2c2e32, 0.5, 0.5), sole: P(0x121314, 0, 0.9),
-    eye: [12, 3, 0.5], wear: 'dirty',
+    eye: [4, 1.4, 0.3], wear: 'dirty',
   },
 };
 
@@ -620,6 +620,11 @@ export class Mech {
     this.unitMeshes = [];
     for (const [bone, list] of this.parts) {
       const g = mergeGeometries(list);
+      // 足掌收窄、脛甲收束；不改關節長度、鞋底高度或胸口登機座標。
+      if (this.style === 'hero') {
+        if (bone === this.bones.ankleR || bone === this.bones.ankleL) g.scale(0.88, 1, 0.91);
+        if (bone === this.bones.kneeR || bone === this.bones.kneeL) g.scale(0.94, 1, 1);
+      }
       const p = g.attributes.position, pbr = g.attributes.pbr, dcl = g.attributes.dcl;
       const w = new THREE.Vector3();
       let unit = false;
@@ -648,6 +653,7 @@ export class Mech {
   // 寫實重構：現役重型戰術機——曲面倒角裝甲層層相疊、外露油壓缸與骨架、胸口裝甲艙門（駕駛艙）。
   // 淺灰白主裝甲＋深藍次裝甲＋少量紅色識別線；頭部感測冠＋後掠雙刀型天線（金色）。
   buildHero(S) {
+    this.footToe = 2.44; this.footHeel = 1.82;
     const b = this.bones, A = this.add.bind(this);
     // 曲面板：做好就放上去，回傳 panel（p.lab 產生貼在同一片板上的標示）
     const PL = (bone, dir, outline, t, o, paint, pos = [0, 0, 0], rot = [0, 0, 0]) => {
@@ -666,8 +672,12 @@ export class Mech {
       const lugs = [];
       for (const side of [-1, 1]) for (let k = 0; k < 6; k++) lugs.push(at(blk(0.1, 0.12, 0.3, 0.025), [side * 1.05, -1.05, -1.3 + k * 0.52]));
       A(ank, merge(lugs), S.sole);
-      // 鞋身（深藍）
-      A(ank, prof([[-1.55, -0.82], [2.3, -0.82], [2.5, -0.58], [2.2, -0.32], [1.4, 0.0], [0.55, 0.35], [-0.65, 0.42], [-1.45, 0.12], [-1.72, -0.35]], 1.9, 0.12), S.second);
+      // 承重足架：降低鞋身，露出踝軸與前足連桿。
+      A(ank, prof([[-1.55, -0.82], [2.3, -0.82], [2.45, -0.64], [1.5, -0.48], [0.5, -0.22], [-0.65, -0.18], [-1.55, -0.4]], 1.68, 0.09), S.frame);
+      for (const side of [-1, 1]) {
+        this.piston(ank, [side * 0.64, 0.08, 0.25], [side * 0.64, -0.38, 1.82], 0.1, S);
+        A(ank, cyl(0.15, 0.15, 0.28, 12), S.frame, [side * 0.7, -0.38, 1.82], [0, 0, Math.PI / 2]);
+      }
       A(ank, cyl(0.55, 0.55, 1.75, 16), S.frame, [0, 0, 0], [0, 0, Math.PI / 2]);
       // 腳尖護甲（雙向彎曲）＋ NO STEP
       const toe = PL(ank, 'y', [[-0.9, -0.82], [0.9, -0.82], [0.98, -0.02], [0.78, 0.58], [0.32, 0.83], [-0.32, 0.83], [-0.78, 0.58], [-0.98, -0.02]], 0.2, { bev: 0.05, nx: 6, ny: 6, bx: 1.3, by: 2.4 }, S.main, [0, -0.02, 1.77], [0.39, 0, 0]);
@@ -699,9 +709,14 @@ export class Mech {
       A(kn, taper(blk(1.4, 3.0, 1.5, 0.3, 0.4), 1.0, 1.0, 1.15, 1.1), S.dark, [0, -2.2, -0.5]);
       A(kn, cyl(0.68, 0.68, 1.8), S.frame, [0, 0, 0], [0, 0, Math.PI / 2]);
       // 前脛甲：一整片包覆的曲面板＋上段深藍疊板
-      const shin = PL(kn, 'z', [[-0.9, -1.7], [0.9, -1.7], [1.08, -1.15], [1.05, 0.7], [0.82, 1.45], [-0.82, 1.45], [-1.05, 0.7], [-1.08, -1.15]], 0.32, { bev: 0.07, nx: 8, ny: 8, bx: 1.35, by: 9 }, S.main, [0, -2.25, 0.96]);
-      shin.put(sten('caution', 0.8, 0.2, { tint: 4, seg: 4 }), 0, -0.2);
-      shin.put(digits('01', 0.48, { tint: 2 }), 0, -0.95);
+      // 三片可拆脛甲，各片留出真實厚度與內部檢修縫。
+      for (let j = 0; j < 3; j++) {
+        const width = 0.83 - j * 0.07, y = -1.15 - j * 0.94;
+        const shin = PL(kn, 'z', [[-width, -0.41], [width, -0.41], [width + 0.1, -0.18], [width, 0.4], [-width, 0.4], [-width - 0.1, -0.18]], 0.19,
+          { bev: 0.045, nx: 6, ny: 3, bx: 1.4, by: 8 }, j === 1 ? S.second : S.main, [0, y, 0.94 - j * 0.035]);
+        if (j === 1) shin.put(sten('caution', 0.66, 0.16, { tint: 1, seg: 3 }), 0, 0);
+        for (const side of [-1, 1]) A(kn, at(nut(0.045), [side * (width - 0.12), y + 0.22, 1.04], [Math.PI / 2, 0, 0]), S.frame);
+      }
       PL(kn, 'z', [[-0.55, -0.6], [0.55, -0.6], [0.68, 0.05], [0.48, 0.35], [-0.48, 0.35], [-0.68, 0.05]], 0.12, { bev: 0.035, nx: 5, ny: 4, bx: 1.35, by: 9, cv: -1.05 }, S.second, [0, -1.2 + 0.0, 0.96 + 0.22]);
       // 膝蓋：圓頂護甲＋紅色識別條
       PL(kn, 'z', [[-0.7, -0.6], [0.7, -0.6], [0.82, 0.05], [0.55, 0.62], [-0.55, 0.62], [-0.82, 0.05]], 0.34, { bev: 0.07, nx: 6, ny: 6, bx: 0.95, by: 1.1 }, S.second, [0, -0.1, 1.2]);
@@ -941,8 +956,9 @@ export class Mech {
       // 太陽穴火神砲
       A(h, cyl(0.075, 0.075, 0.34, 10), S.frame, [sx * 0.62, 1.25, 0.75], [Math.PI / 2, 0, 0]);
       A(h, cyl(0.045, 0.045, 0.04, 8), S.dark, [sx * 0.62, 1.25, 0.93], [Math.PI / 2, 0, 0]);
-      // 後掠雙刀型天線（金色）
-      A(h, blade([[0, 0], [0.12, 0.14], [1.5, 1.1], [1.62, 1.04], [0.3, -0.04]].map(([x, y]) => [x * sx, y]), 0.1, 0.02), S.yellow, [0, 1.42, 0.78], [-0.55, 0, 0]);
+      // 短型通訊天線與護罩，以工業感測器取代冠飾。
+      A(h, blk(0.18, 0.28, 0.28, 0.04), S.second, [sx * 0.63, 1.48, -0.24]);
+      A(h, rod([sx * 0.63, 1.56, -0.24], [sx * 0.72, 2.04, -0.44], 0.035, 0.016, 6), S.frame);
       A(h, blk(0.24, 0.14, 0.16, 0.03), S.yellow, [sx * 0.16, 1.44, 0.78]);
       for (let k = 0; k < 3; k++) A(h, blk(0.04, 0.025, 0.45, 0.006), S.dark, [sx * (0.3 + k * 0.09), 1.67, -0.25]);
     }
