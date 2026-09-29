@@ -8,8 +8,16 @@
 
 ## 部署
 - Repo: github.com/keigoks-ivan/tools
-- 網站: tools.investmquest.com（Cloudflare Pages 自動 deploy）
+- 網站: tools.investmquest.com（GitHub Pages 自動 deploy；DNS 在 a2hosting，A 記錄指向 GitHub）
 - Push 到 main 後約 1-2 分鐘生效
+- **GitHub Pages 不讀 `_headers`**：裡面的 noindex、CSP 等 header 都不會送出
+
+## 全站 noindex（每頁都要有）
+- 網站不給 Google 收錄，靠每頁 `<head>` 裡這行（放在 `<meta charset>` 後面）：
+  `<meta name="robots" content="noindex">`
+- **新增任何 HTML 頁面都要加這行**（新市場頁、工具頁、docs/dd 報告…）
+- /history/ 新篇由 `scripts/history_build.py` 匯入時自動加
+- `robots.txt` 必須維持 `Allow: /`（Google 要爬得到才看得到 noindex），只擋 `/templates/`
 
 ## 目錄結構
 ```
@@ -23,7 +31,7 @@
 /docs/dd/            ← 深度研究報告（獨立 HTML）
 /css/style.css       ← 主樣式（所有頁面共用）
 /tw/tw.css           ← 補丁 CSS（所有子目錄頁面都引用）
-/_headers            ← Cloudflare Pages security headers
+/_headers            ← Cloudflare Pages 格式的 header（網站在 GitHub Pages，目前不生效）
 ```
 
 ## 每個市場的標準頁面

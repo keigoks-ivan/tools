@@ -58,10 +58,14 @@ Disallow: /
 
 # =============================================================================
 # SEARCH ENGINES (Google, Bing, etc.): ALLOW crawl — required so they can READ
-# the `noindex` directive (X-Robots-Tag header, set in _headers) and DROP every
-# page from search results. Pages stay reachable by direct link / user-initiated
+# the `noindex` directive (<meta name="robots"> in each page — the site is on
+# GitHub Pages, which ignores _headers) and DROP every page from search results.
+# Pages stay reachable by direct link / user-initiated
 # AI; they just won't be searchable. (A bare `Disallow: /` would BLOCK crawling,
 # so Google never sees `noindex` and may keep listing URLs — the opposite goal.)
+# /templates/ holds build.py sources (not real pages, can't carry the meta tag),
+# so it is simply kept out of the crawl.
 # =============================================================================
 User-agent: *
 Allow: /
+Disallow: /templates/

@@ -590,6 +590,19 @@ def inject_after_body(html, snippet):
     i = m.end()
     return html[:i] + "\n" + snippet + html[i:]
 
+# 全站 noindex：網站在 GitHub Pages，_headers 不生效，每頁要自己帶 meta
+NOINDEX_TAG = '<meta name="robots" content="noindex">'
+
+def inject_noindex(html):
+    if re.search(r'<meta[^>]*name=["\']?robots', html, re.IGNORECASE):
+        return html
+    m = (re.search(r'<meta[^>]*charset[^>]*>', html, re.IGNORECASE)
+         or re.search(r'<head[^>]*>', html, re.IGNORECASE))
+    if not m:
+        return html
+    i = m.end()
+    return html[:i] + "\n" + NOINDEX_TAG + html[i:]
+
 def build():
     os.makedirs(HISTORY_DIR, exist_ok=True)
 
@@ -622,6 +635,7 @@ def build():
             continue
         with open(sp, encoding="utf-8", errors="replace") as f:
             html = f.read()
+        html = inject_noindex(html)
         if BACKBAR_MARK not in html:
             html = inject_after_body(html, BACKBAR_HTML.format(mark=BACKBAR_MARK))
         if not has_native_toc(html) and TOC_MARK not in html:
