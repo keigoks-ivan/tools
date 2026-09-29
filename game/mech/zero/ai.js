@@ -1,6 +1,8 @@
 // 敵人：獵犬軍團步兵（步兵／指揮官／重裝兵／狙擊兵）＋偵察無人機
 //   步兵：巡邏 → 察覺（警戒條）→ 找掩護 → 蹲著 → 探頭瞄準（紅色瞄準光）→ 點放 → 換位置；太近就邊退邊打
-//   狙擊兵：守在高處，瞄準時拉出一條紅色雷射線（玩家看得到），充能 1.4 秒後開槍
+//   狙擊兵：守在高處，瞄準時拉出一條紅色雷射線（玩家看得到），充能 1.1 秒後開槍
+//   聰明的地方：掩護點會避開同伴的方向（分散包抄）、偏好在玩家準心外側；被玩家用瞄準鏡對準會提早縮回；
+//   玩家躲太久就有人摸過去找（往最後看到的位置），步兵／指揮官會丟手榴彈把人逼出來
 import * as THREE from 'three';
 import { Soldier, wrap, lerpAngle, damp } from './human.js';
 import { makeEnemyRifle } from './guns.js';
@@ -10,10 +12,10 @@ const _v = new THREE.Vector3(), _w = new THREE.Vector3(), _u = new THREE.Vector3
 
 // hp、移動速度、點放幾發、每發間隔、傷害、光彈速度、準度（越小越準）、體型
 export const TYPES = {
-  trooper: { hp: 110, walk: 1.5, run: 4.2, burst: [2, 4], gap: 0.22, dmg: 9, speed: 55, acc: 0.05, scale: 1, look: 'trooper', gun: 'carbine', score: 100 },
-  officer: { hp: 190, walk: 1.5, run: 4.5, burst: [3, 5], gap: 0.17, dmg: 10, speed: 60, acc: 0.04, scale: 1.02, look: 'officer', gun: 'carbine', score: 250 },
-  heavy: { hp: 520, walk: 1.1, run: 2.6, burst: [6, 10], gap: 0.11, dmg: 7, speed: 50, acc: 0.07, scale: 1.12, look: 'heavy', gun: 'heavy', armor: 0.6, score: 400 },
-  sniper: { hp: 90, walk: 1.3, run: 3.8, burst: [1, 1], gap: 1, dmg: 45, speed: 140, acc: 0.006, scale: 1, look: 'sniper', gun: 'sniper', score: 300 },
+  trooper: { hp: 150, walk: 1.6, run: 4.6, burst: [3, 5], gap: 0.2, dmg: 9, speed: 60, acc: 0.045, scale: 1, look: 'trooper', gun: 'carbine', score: 100, nades: 0.4 },
+  officer: { hp: 250, walk: 1.6, run: 4.8, burst: [3, 6], gap: 0.15, dmg: 10, speed: 66, acc: 0.036, scale: 1.02, look: 'officer', gun: 'carbine', score: 250, nades: 2 },
+  heavy: { hp: 650, walk: 1.2, run: 2.8, burst: [7, 12], gap: 0.1, dmg: 8, speed: 55, acc: 0.06, scale: 1.12, look: 'heavy', gun: 'heavy', armor: 0.6, score: 400 },
+  sniper: { hp: 110, walk: 1.3, run: 3.8, burst: [1, 1], gap: 1, dmg: 50, speed: 150, acc: 0.005, scale: 1, look: 'sniper', gun: 'sniper', score: 300 },
 };
 
 const MAG = { trooper: 18, officer: 24, heavy: 40, sniper: 4 };
@@ -43,6 +45,9 @@ export class Trooper {
     this.hitFlash = 0;
     if (this.type === 'sniper') { this.laser = new THREE.Mesh(LASER_GEO, laserMat()); this.laser.visible = false; G.scene.add(this.laser); }
     this.lastSpeak = -99;
+    // 手榴彈（nades 小於 1＝有這個機率帶一顆）、多久沒看到玩家、被瞄準多久
+    this.nades = T.nades ? (T.nades >= 1 ? T.nades : (Math.random() < T.nades ? 1 : 0)) : 0;
+    this.notSeen = 0; this.hunt = false; this.aimedT = 0; this.duckAt = rr(0.3, 0.7);
   }
   get alive() { return !this.dead; }
   // 命中判定用：頭、身體兩顆球
@@ -92,7 +97,7 @@ export class Trooper {
       this.state = 'combat'; this.phase = 'move'; this.cover = null; this.coverT = 0;
       if (this.G.t - this.lastSpeak > 3) { this.lastSpeak = this.G.t; this.G.audio.radio('enemy', this.pos); }
       // 叫醒附近的同伴
-      for (const e of this.G.enemies) if (e !== this && !e.dead && e.pos.distanceTo(this.pos) < 18) e.alert(p, 0.6);
+      for (const e of this.G.enemies) if (e !== this && !e.dead && e.pos.distanceTo(this.pos) < 28) e.alert(p, 0.8);
     }
   }
 
@@ -109,15 +114,15 @@ export class Trooper {
       const head = s.headPos(new THREE.Vector3());
       const fwd = new THREE.Vector3(Math.sin(s.aimYaw), 0, Math.cos(s.aimYaw));
       const to = _v.subVectors(eye, head); const L = to.length(); to.divideScalar(L);
-      const cone = this.state === 'combat' ? -1 : 0.25;
-      const range = this.state === 'combat' ? 90 : 45;
+      const cone = this.state === 'combat' ? -1 : 0.05;
+      const range = this.state === 'combat' ? 110 : 60;
       this.sees = L < range && to.dot(fwd) > cone && G.solid.sees(head, eye) && !P.dead;
       if (this.sees) { this.lastSeen.copy(P.pos); this.seeT += 0.2; } else this.seeT = 0;
     }
     // ---- 察覺：看得到就累積（越近越快；蹲著、在暗處慢一點）
     if (this.state !== 'combat') {
-      if (this.sees) this.aware += dt * (1.6 / Math.max(1, dist / 7)) * (P.crouchK > 0.5 ? 0.5 : 1) * (P.sprint ? 1.5 : 1);
-      else this.aware = Math.max(0, this.aware - dt * 0.1);
+      if (this.sees) this.aware += dt * (2.3 / Math.max(1, dist / 7)) * (P.crouchK > 0.5 ? 0.55 : 1) * (P.sprint ? 1.5 : 1);
+      else this.aware = Math.max(0, this.aware - dt * 0.06);
       if (this.aware >= 1) this.alert(P.pos, 1);
     }
     const mv = new THREE.Vector3();
@@ -141,14 +146,21 @@ export class Trooper {
       const toP = Math.atan2(P.pos.x - this.pos.x, P.pos.z - this.pos.z);
       this.coverT -= dt; this.phaseT -= dt;
       const sniper = this.type === 'sniper';
+      // 多久沒看到玩家：躲太久就派人摸過去（往最後看到的位置找掩護）、丟手榴彈
+      if (this.sees) { this.notSeen = 0; this.hunt = false; } else this.notSeen += dt;
+      if (!this.post && !sniper && !this.hunt && this.notSeen > 5 && this.type !== 'heavy') { this.hunt = true; this.cover = null; this.coverT = 0; }
+      if (this.nades > 0 && !this.sees && this.notSeen > 3 && G.throwGrenade && G.t - (G.lastNade ?? -99) > 8) {
+        const dL = this.pos.distanceTo(this.lastSeen);
+        if (dL > 7 && dL < 24) { this.nades--; G.lastNade = G.t; G.throwGrenade(s.headPos(new THREE.Vector3()).add(_w.set(0, 0.3, 0)), this.lastSeen.clone(), this); this.phase = 'hide'; this.phaseT = rr(0.8, 1.4); }
+      }
       if (!this.post && (!this.cover || this.coverT <= 0 || (this.phase !== 'move' && dist < 5))) {
-        this.cover = this.findCover(); this.coverT = rr(6, 11); this.phase = 'move';
+        this.cover = this.findCover(this.hunt); this.coverT = this.hunt ? rr(4, 7) : rr(6, 11); this.phase = 'move';
       }
       if (this.post && !this.cover) { this.cover = this.pos.clone(); this.phase = 'hide'; this.phaseT = rr(0.5, 1.5); }
       if (this.phase === 'move') {
         _v.set(this.cover.x - this.pos.x, 0, this.cover.z - this.pos.z);
         const L = _v.length();
-        if (L < 0.5) { this.phase = 'hide'; this.phaseT = rr(0.4, 1.2); }
+        if (L < 0.5) { this.phase = 'hide'; this.phaseT = rr(0.3, 0.9); }
         else {
           mv.copy(_v).divideScalar(L);
           speed = L > 3 ? T.run : T.walk * 1.4;
@@ -161,12 +173,18 @@ export class Trooper {
         mode = 'patrol';
         face = toP;
         if (this.cover && this.cover.side) { mv.copy(this.cover.side).multiplyScalar(-1); }   // 靠牆那側
-        if (this.phaseT <= 0) { this.phase = 'peek'; this.phaseT = rr(2.2, 4); this.burst = 0; this.aimT = 0; }
+        if (this.phaseT <= 0) { this.phase = 'peek'; this.phaseT = rr(2.6, 4.4); this.burst = 0; this.aimT = 0; this.aimedT = 0; this.duckAt = rr(0.3, 0.7); }
       } else if (this.phase === 'peek') {
         s.crouchT = this.cover && this.cover.crouch && this.cover.peekCrouch ? 1 : 0;
         mode = 'aim'; face = toP;
         if (this.cover && this.cover.peek) { _v.set(this.cover.peek.x - this.pos.x, 0, this.cover.peek.z - this.pos.z); if (_v.length() > 0.2) { mv.copy(_v).normalize(); speed = 1.6; } }
-        if (this.phaseT <= 0 || (this.burst <= 0 && this.aimT > 3)) { this.phase = 'hide'; this.phaseT = rr(1, 2.5); if (Math.random() < 0.3) this.coverT = 0; }
+        if (this.phaseT <= 0 || (this.burst <= 0 && this.aimT > 3)) { this.phase = 'hide'; this.phaseT = rr(0.7, 1.8); if (Math.random() < 0.3) this.coverT = 0; }
+        // 被玩家用瞄準鏡對準（準心 3 度以內）一下子就縮回去，有時直接換位置
+        if (this.sees && G.ads > 0.6 && G.aimDir && !this.post) {
+          const to = s.chestPos(_u).sub(G.playerEye).normalize();
+          if (to.dot(G.aimDir) > 0.9986) this.aimedT += dt; else this.aimedT = Math.max(0, this.aimedT - dt);
+          if (this.aimedT > this.duckAt && this.burst <= 0) { this.phase = 'hide'; this.phaseT = rr(0.7, 1.3); this.aimedT = 0; if (Math.random() < 0.35) this.coverT = 0; }
+        }
       }
       // 太近：退後＋側移，邊打
       if (dist < 4.5 && !this.post) {
@@ -177,12 +195,12 @@ export class Trooper {
       const aimTgt = this.sees ? eye.clone().add(_w.set(0, -0.35, 0)) : this.lastSeen.clone().add(_w.set(0, 1.2, 0));
       const mz = s.chestPos(new THREE.Vector3());
       const dy = aimTgt.y - mz.y, dh = Math.hypot(aimTgt.x - mz.x, aimTgt.z - mz.z);
-      s.aimYaw = lerpAngle(s.aimYaw, Math.atan2(aimTgt.x - mz.x, aimTgt.z - mz.z), 1 - Math.exp(-dt * (mode === 'aim' ? 7 : 4)));
+      s.aimYaw = lerpAngle(s.aimYaw, Math.atan2(aimTgt.x - mz.x, aimTgt.z - mz.z), 1 - Math.exp(-dt * (mode === 'aim' ? 10 : 5)));
       s.aimPitch = damp(s.aimPitch, Math.atan2(dy, dh), 6, dt);
       // 開槍
       if (mode === 'aim' && this.sees) {
         this.aimT += dt;
-        const ready = sniper ? 1.4 : rr(0.35, 0.55);
+        const ready = sniper ? 1.1 : rr(0.22, 0.4);
         if (this.burst <= 0 && this.aimT > ready && G.canShoot(this) && s.reloadT < 0 && this.stagger <= 0) { this.burst = Math.min(this.ammo, Math.round(rr(T.burst[0], T.burst[1] + 0.99))); this.shotT = 0; }
         if (this.burst > 0) {
           this.shotT -= dt;
@@ -231,7 +249,7 @@ export class Trooper {
     let spread = T.acc * (1 + P.moveK * 0.6) * (P.crouchK > 0.5 ? 0.85 : 1) * G.diff.acc;
     if (this.type !== 'sniper') spread *= clamp(dist / 12, 0.6, 1.6);
     // 預判：稍微領先玩家移動
-    const lead = dist / T.speed * 0.5;
+    const lead = dist / T.speed * 0.85;
     const t = tgt.clone().addScaledVector(P.vel, lead);
     const d = t.sub(m).normalize();
     d.x += (Math.random() - 0.5) * spread * 2; d.y += (Math.random() - 0.5) * spread * 1.4; d.z += (Math.random() - 0.5) * spread * 2;
@@ -259,15 +277,21 @@ export class Trooper {
   }
 
   // 找掩護：附近矮牆／貨櫃／車子背對玩家那一側；看不到（蹲著）又能探頭
-  findCover() {
-    const G = this.G, S = G.solid, P = G.player, eye = G.playerEye;
+  // hunt＝去找躲起來的玩家：以最後看到的位置為準、要近一點、要能看到那裡（不偷看玩家真正的位置）
+  findCover(hunt = false) {
+    const G = this.G, S = G.solid, P = G.player, eye = hunt ? this.lastSeen.clone().add(new THREE.Vector3(0, 1.5, 0)) : G.playerEye;
+    const PP = hunt ? this.lastSeen : P.pos;
+    // 同伴在玩家哪個方向（包抄：不要擠在同一邊）
+    const mates = [];
+    for (const e of G.enemies) if (e !== this && !e.dead && e.state === 'combat' && e.pos) mates.push(Math.atan2(e.pos.x - PP.x, e.pos.z - PP.z));
+    const aimA = G.aimDir ? Math.atan2(G.aimDir.x, G.aimDir.z) : null;
     const R = 16, cands = [];
     const boxes = S.near(this.pos.x, this.pos.z, R, []);
     for (const b of boxes) {
       const h = b.y1 - b.y0, fx = b.x1 - b.x0, fz = b.z1 - b.z0;
       if (b.ramp || b.y0 > this.pos.y + 0.3 || h < 0.75 || fx > 14 || fz > 14 || b.y1 < this.pos.y + 0.7) continue;
       const cx = (b.x0 + b.x1) / 2, cz = (b.z0 + b.z1) / 2;
-      const away = _v.set(cx - P.pos.x, 0, cz - P.pos.z).normalize();
+      const away = _v.set(cx - PP.x, 0, cz - PP.z).normalize();
       // 四個面中背對玩家的點
       for (const [nx, nz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
         if (nx * away.x + nz * away.z < 0.3) continue;
@@ -290,9 +314,12 @@ export class Trooper {
             if (S.sees(eye, _w.set(q.x, q.y + 1.5, q.z))) { peek = q; peekOK = true; break; }
           }
         }
-        const dp = p.distanceTo(P.pos), dm = p.distanceTo(this.pos);
+        const dp = p.distanceTo(PP), dm = p.distanceTo(this.pos);
         if (dp < 5) continue;
-        let sc = (hidden ? 3 : 0) + (peekOK ? 2 : 0) - dm * 0.12 - Math.abs(dp - (this.type === 'sniper' ? 30 : 14)) * 0.05 + Math.random() * 0.6;
+        let sc = (hidden ? 3 : 0) + (peekOK ? 2 : 0) - dm * 0.12 - Math.abs(dp - (this.type === 'sniper' ? 30 : hunt ? 8 : 14)) * (hunt ? 0.12 : 0.05) + Math.random() * 0.6;
+        const ang = Math.atan2(p.x - PP.x, p.z - PP.z);
+        for (const m of mates) { const d = Math.abs(wrap(ang - m)); if (d < 0.6) sc -= (0.6 - d) * 2.5; }
+        if (aimA !== null && Math.abs(wrap(ang - aimA)) > 1.0) sc += 0.8;   // 不在玩家準心前面
         for (const e of G.enemies) if (e !== this && !e.dead && e.cover && e.cover.distanceTo(p) < 1.6) sc -= 4;
         cands.push({ p, sc, crouch: low, peekCrouch: false, peek, side: null });
       }
@@ -367,7 +394,7 @@ export class Drone {
     G.scene.add(root);
     this.pos = root.position; this.pos.set(def.x, def.y || 4, def.z);
     this.vel = new THREE.Vector3();
-    this.hp = 70; this.dead = false; this.id = G.nextId++;
+    this.hp = 90; this.dead = false; this.id = G.nextId++;
     this.yaw = def.yaw ?? 0; this.tilt = 0; this.t = rr(0, 10);
     this.state = def.alert ? 'combat' : 'patrol'; this.aware = def.alert ? 1 : 0; this.sees = false; this.losT = 0;
     this.shotT = rr(1, 2); this.burst = 0; this.home = this.pos.clone(); this.goal = this.pos.clone(); this.goalT = 0;
@@ -440,7 +467,7 @@ export class Drone {
         G.bolt(m, d, 45, 6 * G.diff.dmg, this);
         G.audio.enemyShot(m, 'drone'); G.fx.muzzle(m, d, [3.2, 0.5, 0.25]);
         this.burst++;
-        this.shotT = this.burst % 3 === 0 ? rr(1.4, 2.4) : 0.16;
+        this.shotT = this.burst % 3 === 0 ? rr(1.1, 2) : 0.14;
       }
     }
   }

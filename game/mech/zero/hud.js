@@ -119,20 +119,36 @@ export class HUD {
     x.fillStyle = col; x.fillRect(x0, y0, w * clamp(k, 0, 1), h);
   }
 
+  // 目標標記：實心菱形（會輕輕閃）＋剩下幾公尺；跑到畫面外或背後時，貼在畫面邊緣、用箭頭指出方向
   _objective(W, H, G) {
     const x = this.x, p = this.obj.p.clone();
     const v = p.clone().project(this.cam);
     const behind = v.z > 1;
     let sx = (v.x * 0.5 + 0.5) * W, sy = (-v.y * 0.5 + 0.5) * H;
-    if (behind) { sx = W - sx; sy = H - 40; }
-    const m = 40; const off = sx < m || sx > W - m || sy < m || sy > H - m || behind;
-    sx = clamp(sx, m, W - m); sy = clamp(sy, m, H - m);
-    const dist = G.player.pos.distanceTo(p);
+    if (behind) { sx = W - sx; sy = H - sy; }
+    const m = 56, cx = W / 2, cy = H / 2;
+    const off = behind || sx < m || sx > W - m || sy < m || sy > H - m;
+    if (off) {
+      // 從畫面中心往目標方向，貼到邊框上
+      let dx = sx - cx, dy = sy - cy; if (behind && Math.abs(dy) < 1) dy = 1;
+      const k = Math.min((W / 2 - m) / Math.max(1e-3, Math.abs(dx)), (H / 2 - m) / Math.max(1e-3, Math.abs(dy)));
+      sx = cx + dx * k; sy = cy + dy * k;
+    }
+    const dist = this.obj.left ?? G.player.pos.distanceTo(p);
+    const pulse = 0.5 + 0.5 * Math.sin(performance.now() * 0.006);
     x.save(); x.translate(sx, sy);
-    x.strokeStyle = AM; x.lineWidth = 2; x.globalAlpha = off ? 0.7 : 0.95;
-    x.beginPath(); x.moveTo(0, -9); x.lineTo(9, 0); x.lineTo(0, 9); x.lineTo(-9, 0); x.closePath(); x.stroke();
-    x.font = '600 12px Rajdhani, sans-serif'; x.fillStyle = AM; x.textAlign = 'center';
-    x.fillText(`${dist.toFixed(0)} m`, 0, 24);
+    x.shadowColor = 'rgba(0,0,0,0.6)'; x.shadowBlur = 6;
+    if (off) {
+      const a = Math.atan2(sy - cy, sx - cx);
+      x.save(); x.rotate(a); x.fillStyle = AM; x.globalAlpha = 0.85 + 0.15 * pulse;
+      x.beginPath(); x.moveTo(30, 0); x.lineTo(14, -13); x.lineTo(14, 13); x.closePath(); x.fill(); x.restore();
+    }
+    const r = 12 + pulse * 2;
+    x.globalAlpha = 0.95; x.fillStyle = 'rgba(255,179,71,0.9)'; x.strokeStyle = '#1b1206'; x.lineWidth = 2;
+    x.beginPath(); x.moveTo(0, -r); x.lineTo(r, 0); x.lineTo(0, r); x.lineTo(-r, 0); x.closePath(); x.fill(); x.stroke();
+    x.fillStyle = '#1b1206'; x.beginPath(); x.arc(0, 0, 3.2, 0, Math.PI * 2); x.fill();
+    x.shadowBlur = 4; x.font = '700 15px Rajdhani, sans-serif'; x.fillStyle = AM; x.textAlign = 'center';
+    x.fillText(`${dist.toFixed(0)} m`, 0, r + 18);
     x.restore(); x.globalAlpha = 1;
   }
 

@@ -120,10 +120,20 @@ window.__renderer = renderer; window.__scene = scene; window.__solid = solid; wi
 // ---------------------------------------------------------------- 遊戲狀態（AI 也讀這個）
 const G = {
   scene, solid, kit, audio, fx, player, vm, hud, t: 0, nextId: 1, enemies: [], playing: false,
-  playerEye: new THREE.Vector3(), diff: { acc: 1, dmg: 1 }, bolts: [],
+  playerEye: new THREE.Vector3(), aimDir: new THREE.Vector3(0, 0, 1), ads: 0, diff: { acc: 1, dmg: 1 }, bolts: [], grenades: [],
   chapterTag: '', objText: '', scopeRange: 0, stats: { shots: 0, hits: 0, kills: 0, heads: 0, taken: 0, time: 0 },
   // 同時開火的敵人上限（避免四面八方同時打）
   canShoot(e) { let n = 0; for (const o of G.enemies) if (o !== e && !o.dead && (o.burst > 0)) n++; return n < 3; },
+  // 敵人丟手榴彈：拋物線丟到目標附近（落點有一點誤差），撞牆撞地會彈，2.6 秒後爆炸
+  throwGrenade(from, to, owner) {
+    to.x += (Math.random() - 0.5) * 2.4; to.z += (Math.random() - 0.5) * 2.4; to.y = solid.floorAt(to.x, to.z, to.y + 1) + 0.1;
+    const d = to.clone().sub(from), T = clamp(Math.hypot(d.x, d.z) / 11, 0.9, 1.6);
+    const vel = d.divideScalar(T).add(new THREE.Vector3(0, 0.5 * 9.8 * T, 0));
+    const m = new THREE.Group(); m.add(new THREE.Mesh(NADE.body, NADE.metal)); const lamp = new THREE.Mesh(NADE.lamp, NADE.red); lamp.position.y = 0.06; lamp.userData.noAO = true; m.add(lamp);
+    m.children[0].castShadow = true; m.position.copy(from); scene.add(m);
+    G.grenades.push({ p: m.position, vel, t: 0, fuse: 2.6, m, lamp, landed: false, warned: false, owner });
+    audio.radio('enemy', owner ? owner.pos : from);
+  },
   bolt(p, d, speed, dmg, owner) {
     G.bolts.push({ p: p.clone(), dir: d.clone(), speed, dmg, owner, len: Math.min(2.2, speed * 0.028), w: owner && owner.type === 'sniper' ? 0.05 : 0.035, c: [4, 0.45, 0.25], life: 3, whiz: false });
   },
@@ -194,9 +204,39 @@ let chapter = 1, checkpoint = null, stage = 'play';
 let mechWalk = null, finale = null, hatchOpen = 0, alarmOn = false;
 const progress = () => store.get('ch', 1);
 
+// 手榴彈的樣子：墨綠色小圓柱＋一顆閃爍的紅燈（越接近爆炸閃越快）
+const NADE = { body: new THREE.CylinderGeometry(0.045, 0.05, 0.12, 10), lamp: new THREE.SphereGeometry(0.018, 8, 6),
+  metal: new THREE.MeshStandardMaterial({ color: 0x3b4430, roughness: 0.6, metalness: 0.5 }), red: new THREE.MeshBasicMaterial({ color: new THREE.Color(6, 0.4, 0.25) }) };
+function updateGrenades(dt) {
+  for (let i = G.grenades.length - 1; i >= 0; i--) {
+    const g = G.grenades[i]; g.t += dt;
+    g.lamp.visible = Math.sin(g.t * (8 + g.t * 10)) > 0;
+    if (!g.rest) {
+      g.vel.y -= 9.8 * dt;
+      const step = g.vel.length() * dt, dir = g.vel.clone().normalize(), hit = step > 1e-4 ? solid.ray(g.p, dir, step + 0.06) : null;
+      if (hit && hit.n && Math.abs(hit.n.y) < 0.6) { const n = hit.n; const vn = g.vel.dot(n); g.vel.addScaledVector(n, -1.6 * vn).multiplyScalar(0.45); }
+      else g.p.addScaledVector(g.vel, dt);
+      const fl = solid.floorAt(g.p.x, g.p.z, g.p.y + 0.3);
+      if (g.p.y < fl + 0.06) {
+        g.p.y = fl + 0.06;
+        if (!g.landed) { g.landed = true; audio.grenade(g.p.clone()); }
+        g.vel.y = Math.abs(g.vel.y) * 0.25; g.vel.x *= 0.55; g.vel.z *= 0.55;
+        if (g.vel.length() < 0.6) { g.rest = true; g.vel.set(0, 0, 0); }
+      }
+      g.m.rotation.x += dt * 9; g.m.rotation.z += dt * 5;
+    }
+    if (g.landed && !g.warned && g.p.distanceTo(player.pos) < 8 && !player.dead) { g.warned = true; hud.note('手榴彈！快離開', '#ff5b4d'); }
+    if (g.t >= g.fuse) {
+      const p = g.p.clone().add(new THREE.Vector3(0, 0.3, 0));
+      if (G.destruct) G.destruct.explode(p, 0.8); else { fx.explode(p, 0.8); audio.explosion(p, 0.6); G.splash(p, 3.6, 88); }
+      scene.remove(g.m); G.grenades.splice(i, 1);
+    }
+  }
+}
 function clearEnemies() {
   for (const e of G.enemies) e.dispose();
-  G.enemies.length = 0; G.bolts.length = 0; fx.bolts.length = 0;
+  for (const g of G.grenades) scene.remove(g.m);
+  G.enemies.length = 0; G.bolts.length = 0; fx.bolts.length = 0; G.grenades.length = 0;
 }
 function spawn(def) {
   const e = def.type === 'drone' ? new Drone(G, def) : new Trooper(G, def);
@@ -210,7 +250,7 @@ function startEncounter(E) {
   for (const [who, text] of E.lines) hud.say(who, text, 3.6);
   if (E.lines.length) audio.radio('in');
   G.objText = E.obj;
-  hud.obj = E.pickup ? { p: guideFor(E) } : null;
+  hud.obj = E.pickup ? guideObj(E) : null;
   if (E.alarm && !alarmOn) { alarmOn = true; audio.alarm(true); }
 }
 // 下一段還沒清的遭遇
@@ -219,6 +259,52 @@ function objective() { return S.ENCOUNTERS.find((E) => E.ch === chapter && !done
 function guideFor(E) {
   const z = E.guide || [0, 0];
   return new THREE.Vector3(z[0], 1.5, z[1]);
+}
+// 帶路：一串轉彎點 [x, z, 高度?]，畫面上的指示和光柱一次只指下一個點，走到了就換下一個（不會直接指穿牆）
+// 轉彎點如果剛好落在車子、沙包、護欄裡，推到旁邊最近的空地（地圖改了也不會指到東西裡面）
+const pt3 = (w) => { const y = w[2] ?? 0, q = new THREE.Vector3(w[0], y, w[1]); for (let k = 0; k < 6; k++) if (!solid.pushOut(q, 0.55, y, y + 1.7, 0.45)) break; return new THREE.Vector3(q.x, y + 1.2, q.z); };
+function routeObj(pts) { const route = pts.map(pt3); return { route, i: 0, p: route[0].clone() }; }
+const guideObj = (E) => routeObj([...(E.route || []), [E.guide[0], E.guide[1], E.guide[2]]]);
+const markObj = (E) => routeObj([...(E.nextRoute || []), [E.mark.x, E.mark.z, E.mark.y]]);
+function updateGuide(dt) {
+  const o = hud.obj; beacon.visible = false;
+  if (!o || !o.route) return;
+  // 距離把高度算進去（樓梯上下層不會搞混）：走到這一點、或已經比這一點更接近下一點（走過頭）才換下一點
+  const P = player.pos, R = o.route, d3 = (w, x, y, z) => Math.hypot(w.x - x, (w.y - 1.2 - y) * 1.5, w.z - z), near = (w, r) => d3(w, P.x, P.y, P.z) < r;
+  for (let j = R.length - 1; j > o.i; j--) if (near(R[j], 2)) { o.i = j; break; }
+  // 掉到下層（比現在這一點低 2.5 m 以上超過 1 秒）：改指最近、同一層的點，重新走一次
+  //（爬樓梯時會比目標低，所以要比上一個點也低才算掉下去）
+  const lo = Math.min(R[o.i].y, R[Math.max(0, o.i - 1)].y) - 1.2;
+  o.fallT = lo - P.y > 2.5 ? (o.fallT || 0) + dt : 0;
+  if (o.fallT > 1) { let best = -1, bd = 1e9; for (let j = 0; j < R.length; j++) { const d = d3(R[j], P.x, P.y, P.z); if (Math.abs(R[j].y - 1.2 - P.y) < 1.5 && d < bd) { bd = d; best = j; } } if (best >= 0) o.i = best; o.fallT = 0; }
+  while (o.i < R.length - 1) {
+    const a = R[o.i], b = R[o.i + 1];
+    // 走過頭：人在「這一點→下一點」那條線上（離線 2.2 m 內、同一層）、而且已經往下一點走了一段
+    const ax = b.x - a.x, az = b.z - a.z, L2 = ax * ax + az * az || 1, t = ((P.x - a.x) * ax + (P.z - a.z) * az) / L2;
+    const side = Math.hypot(P.x - (a.x + ax * t), P.z - (a.z + az * t)), sameY = Math.abs(a.y + (b.y - a.y) * Math.min(1, Math.max(0, t)) - 1.2 - P.y) < 1.5;
+    if (near(a, 1.8) || (t > 0.15 && side < 2.2 && sameY)) o.i++; else break;
+  }
+  o.p.copy(R[o.i]);
+  // 剩下的路（給畫面上的距離）
+  let d = Math.hypot(o.p.x - P.x, o.p.z - P.z);
+  for (let j = o.i; j < R.length - 1; j++) d += R[j].distanceTo(R[j + 1]);
+  o.left = d;
+  // 光柱：立在下一個點，從建築後面也看得到；快到最後一點時淡掉
+  const last = o.i === R.length - 1, dd = Math.hypot(o.p.x - P.x, o.p.z - P.z);
+  beacon.visible = !(last && dd < 3);
+  beacon.position.set(o.p.x, o.p.y - 1.2, o.p.z);
+  beaconT += dt; beacon.children[0].material.opacity = 0.16 + 0.07 * Math.sin(beaconT * 3); beacon.children[1].rotation.z += dt * 0.8;
+}
+let beaconT = 0;
+const beacon = new THREE.Group();
+{
+  const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.45, 34, 14, 1, true).translate(0, 17, 0),
+    new THREE.MeshBasicMaterial({ color: new THREE.Color(2.2, 1.1, 0.25), transparent: true, opacity: 0.2, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }));
+  const ring = new THREE.Mesh(new THREE.RingGeometry(0.55, 0.75, 32, 1, 0, Math.PI * 1.6).rotateX(-Math.PI / 2).translate(0, 0.05, 0),
+    new THREE.MeshBasicMaterial({ color: new THREE.Color(2.4, 1.3, 0.3), transparent: true, opacity: 0.8, blending: THREE.AdditiveBlending, depthWrite: false }));
+  ring.rotation.order = 'XZY';
+  for (const m of [beam, ring]) { m.userData.noAO = true; m.frustumCulled = false; }
+  beacon.add(beam, ring); beacon.visible = false; scene.add(beacon);
 }
 // 撿東西的段落（啟動金鑰）：走近按 E
 function updatePickup() {
@@ -231,7 +317,7 @@ function updatePickup() {
   hud.prompt = a.E.pickup.text;
   if (input.pressed('KeyE') || input.pressed('Tlock')) { a.picked = true; hud.prompt = null; audio.radio('in'); }
 }
-const toCockpit = () => { G.objText = '爬上維修架，進入駕駛艙'; hud.obj = { p: map.marks.hatch.clone().add(new THREE.Vector3(0, 1, -1)) }; };
+const toCockpit = () => { G.objText = '爬上維修架，進入駕駛艙'; hud.obj = routeObj(S.HATCH_ROUTE); };
 
 function startChapter(n) {
   clearEnemies(); fx.clear(); D.clear(); active = [];
@@ -246,7 +332,7 @@ function startChapter(n) {
   G.chapterTag = `CHAPTER ${n}　${C.en}`;
   const first = objective();
   G.objText = first ? first.obj : '';
-  hud.obj = first ? { p: guideFor(first) } : null;
+  hud.obj = first ? guideObj(first) : null;
   hud.title(`第 ${n} 章　${C.name}`, C.en, 4);
   const L = S.LINES[n === 1 ? 'start' : 'ch' + n];
   if (L) { setTimeout(() => audio.radio('in'), 1500); for (const [w, t] of L) hud.say(w, t, 3.8); }
@@ -278,8 +364,8 @@ function updateEncounters() {
     checkpoint = { p: player.pos.clone(), yaw: player.yaw, done: [...done], ch: chapter };
     const nx = objective();
     if (a.E.id === 'G2') { toCockpit(); if (alarmOn) { alarmOn = false; audio.alarm(false); } }
-    else if (nx && nx.ch === chapter) { G.objText = nx.obj; hud.obj = { p: guideFor(nx) }; }
-    else if (a.E.mark) { G.objText = a.E.next || a.E.obj; hud.obj = { p: a.E.mark.clone().setY(1.5) }; }
+    else if (nx && nx.ch === chapter) { G.objText = nx.obj; hud.obj = guideObj(nx); }
+    else if (a.E.mark) { G.objText = a.E.next || a.E.obj; hud.obj = markObj(a.E); }
     // 屍體多了就清掉最舊的
     const dead = G.enemies.filter((e) => e.dead);
     if (dead.length > 14) for (const e of dead.slice(0, dead.length - 14)) { e.dispose(); G.enemies.splice(G.enemies.indexOf(e), 1); }
@@ -301,7 +387,7 @@ function nextChapter(n) {
   G.chapterTag = `CHAPTER ${n}　${C.en}`;
   const L = S.LINES['ch' + n]; if (L) { audio.radio('in'); for (const [w, t] of L) hud.say(w, t, 3.8); }
   const first = objective();
-  G.objText = first ? first.obj : ''; hud.obj = first ? { p: guideFor(first) } : null;
+  G.objText = first ? first.obj : ''; hud.obj = first ? guideObj(first) : null;
   checkpoint = { p: player.pos.clone(), yaw: player.yaw, done: [...done], ch: n };
   audio.music('battle', { stage: C.music });
   if (n > progress()) store.set('ch', n);
@@ -434,7 +520,7 @@ function respawn() {
   chapter = cp.ch;
   player.reset(cp.p, cp.yaw); vm.refill();
   const nx = objective();
-  if (done.has('G2')) toCockpit(); else if (nx) { G.objText = nx.obj; hud.obj = { p: guideFor(nx) }; }
+  if (done.has('G2')) toCockpit(); else if (nx) { G.objText = nx.obj; hud.obj = guideObj(nx); }
   if (alarmOn) { alarmOn = false; audio.alarm(false); }
   stage = 'play'; input.lock();
 }
@@ -599,7 +685,8 @@ function frame() {
   const run = K.has('ShiftLeft') || K.has('ShiftRight') || K.has('Tboost');
   if (run && c.my > 0.3) crouchToggle = false;
   const lookK = vm.scoped ? WEAPONS.rifle.fov / FOV * 1.1 : 1 - vm.ads * 0.3;
-  const ctl = { mx: c.mx, my: c.my, lookX: c.lookX * lookK, lookY: c.lookY * lookK, jump: c.jump, sprint: run && !vm.scoped, crouch: crouchToggle || K.has('ControlLeft'), ads: K.has('M2') || K.has('Tmsl') };
+  let ctl = { mx: c.mx, my: c.my, lookX: c.lookX * lookK, lookY: c.lookY * lookK, jump: c.jump, sprint: run && !vm.scoped, crouch: crouchToggle || K.has('ControlLeft'), ads: K.has('M2') || K.has('Tmsl') };
+  if (window.__botCtl) ctl = { mx: 0, my: 0, lookX: 0, lookY: 0, jump: false, sprint: false, crouch: false, ads: false, ...window.__botCtl };   // 測試腳本用：自動走路
   if (stage === 'play' && !finale) {
     G.stats.time += dt;
     player.update(dt, ctl);
@@ -635,11 +722,14 @@ function frame() {
   const inShade = !!solid.ray(G.playerEye, world.lightDir, 80);
   vm.light(camera, world.lightDir, null, inShade, dt);
   if (vm.scoped) { const d = camera.getWorldDirection(new THREE.Vector3()); const h = solid.ray(G.playerEye, d, 400); G.scopeRange = h ? h.t : 0; }
-  // 敵人、光彈、遭遇戰
+  // 敵人、光彈、手榴彈、遭遇戰（敵人會讀玩家準心方向、是不是正在用瞄準鏡）
+  camera.getWorldDirection(G.aimDir); G.ads = vm.ads;
   for (const e of G.enemies) e.update(dt);
   updateBolts(dt);
+  updateGrenades(dt);
   D.update(dt);
   if (stage === 'play' && !finale) { updateEncounters(); updateHatch(dt); updatePickup(); }
+  updateGuide(dt);
   updateMechWalk(dt);
   // 後製：受傷、低血量
   dmgFlash *= Math.exp(-dt * 4);

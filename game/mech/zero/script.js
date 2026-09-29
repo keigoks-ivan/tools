@@ -3,6 +3,8 @@
 //   trigger(p)＝玩家進到這裡就開打；after＋wait＝前一段清完幾秒後自動開打；guide＝開打前的導引點 [x, z]
 //   mark＋next＝這一章最後一段清完後的目標點和文字；pickup＝不是打仗，是走到 map.marks[at] 按 E 撿東西
 //   CHAPTERS[n].end＝這一章的終點（after 那段清完、玩家走到 at 裡面就進下一章）
+//   guide／mark 一定要放在觸發範圍裡面（照著指示走到就會觸發，不會差一步）
+//   route＝走到 guide 之前依序經過的轉彎點 [x, z, 高度?]（畫面上的指示會一段一段帶路，不會直接指穿牆）；nextRoute＝清完後走到 mark 的轉彎點
 import * as THREE from 'three';
 
 const V = (x, z, y = 0) => new THREE.Vector3(x, y, z);
@@ -39,7 +41,7 @@ export const ENCOUNTERS = [
     done: [[OP, '乾淨俐落。穿過前面的市場廣場。']],
   },
   {
-    id: 'C', ch: 1, obj: '清除市場廣場', mark: V(-52, -42), next: '穿過東邊的商店', guide: [-91.5, -60],
+    id: 'C', ch: 1, obj: '清除市場廣場', mark: V(-52, -42), next: '穿過東邊的商店', guide: [-91.5, -56], nextRoute: [[-78, -40], [-71, -37], [-64, -37.5], [-61, -42]],
     trigger: (p) => p.z > -60 && p.x < -58,
     enemies: [
       { type: 'trooper', x: -84, z: -45, yaw: Math.PI },
@@ -69,7 +71,7 @@ export const ENCOUNTERS = [
     done: [[OP, '檢查哨解決了。貨櫃場入口在街尾，基地大門就在貨櫃場後面。']],
   },
   {
-    id: 'D2', ch: 2, obj: '前往貨櫃場入口', mark: V(-10, -30), next: '從北邊的商場繞過去', guide: [14, -40],
+    id: 'D2', ch: 2, obj: '前往貨櫃場入口', mark: V(-10, -27), next: '從北邊的商場繞過去', guide: [14, -40], nextRoute: [[8, -40.5], [0, -41], [-4, -38.5], [-10, -37.5]],
     trigger: (p) => p.x > 8 && p.z > -46,
     enemies: [
       { type: 'trooper', x: 20, z: -33.9, y: 5.2, yaw: Math.PI, post: true },
@@ -85,7 +87,7 @@ export const ENCOUNTERS = [
   },
   // ---------------- 第 3 章：北區（找隼、拿金鑰）
   {
-    id: 'H1', ch: 3, obj: '沿著住宅街往西走', guide: [-10, -6],
+    id: 'H1', ch: 3, obj: '沿著住宅街往西走', route: [[-10, -27], [-11.3, -21], [-11.3, -16], [-10, -11]], guide: [-10, -6],
     trigger: (p) => p.z > -8.5 && p.x > -16 && p.x < -2,
     enemies: [
       { type: 'trooper', x: -19, z: -5.5, yaw: Math.PI / 2 },
@@ -100,7 +102,7 @@ export const ENCOUNTERS = [
     done: [[OP, '街道清了。醫院在西邊街底，門口有紅十字那棟。']],
   },
   {
-    id: 'H2', ch: 3, obj: '進入醫院', guide: [-52, 3],
+    id: 'H2', ch: 3, obj: '進入醫院', route: [[-30, -3], [-47, -1]], guide: [-52, 3],
     trigger: (p) => p.x < -46 && p.z > 1.5,
     enemies: [
       { type: 'trooper', x: -50.5, z: 16.4, yaw: Math.PI, post: true },
@@ -112,7 +114,7 @@ export const ENCOUNTERS = [
     done: [[OP, '病房區在大廳北邊。隼應該在裡面。']],
   },
   {
-    id: 'I1', ch: 3, obj: '找到隼的病床', guide: [-48, 17],
+    id: 'I1', ch: 3, obj: '找到隼的病床', route: [[-52, 8], [-49, 13]], guide: [-48, 20.5],
     trigger: (p) => p.z > 18.6 && p.x < -36,
     enemies: [
       { type: 'trooper', x: -44, z: 27, yaw: Math.PI },
@@ -125,7 +127,7 @@ export const ENCOUNTERS = [
     done: [[OP, '……隼在最東邊那張床。']],
   },
   {
-    id: 'KEY', ch: 3, obj: '拿起床邊的啟動金鑰', guide: [-38.6, 32.4], pickup: { at: 'key', text: '按 E　拿起啟動金鑰' },
+    id: 'KEY', ch: 3, obj: '拿起床邊的啟動金鑰', route: [[-47, 21], [-42, 23.5], [-41.8, 28.5]], guide: [-38.5, 31], pickup: { at: 'key', text: '按 E　拿起啟動金鑰' },
     trigger: () => true,
     enemies: [],
     lines: [[ME, '……床是空的。'], [OP, '……床邊桌上，有沒有一張金屬卡？']],
@@ -133,7 +135,7 @@ export const ENCOUNTERS = [
       [HAYA, '金鑰插在右手邊，轉到底。然後……別回頭。'], [ME, '……謝了，隼。']],
   },
   {
-    id: 'I2', ch: 3, obj: '擊退追兵', mark: V(-33, 28), next: '從病房東門出去，到後院', guide: [-48, 20],
+    id: 'I2', ch: 3, obj: '擊退追兵', mark: V(-33, 28), next: '從病房東門出去，到後院', guide: [-48, 20], nextRoute: [[-42, 22.5], [-41.8, 28], [-37.5, 28]],
     after: 'KEY', wait: 17,
     enemies: [
       { type: 'trooper', x: -48, z: 12, yaw: 0, alert: true },
@@ -147,7 +149,7 @@ export const ENCOUNTERS = [
   },
   // ---------------- 第 4 章：高架道路（指揮所失聯）
   {
-    id: 'J1', ch: 4, obj: '穿過高架道路', guide: [-30, 38],
+    id: 'J1', ch: 4, obj: '爬上高架道路', route: [[-30.75, 30]], guide: [-30.75, 41, 6],
     trigger: (p) => p.y > 4 && p.z > 39,
     enemies: [
       { type: 'trooper', x: -14, z: 47.5, y: 6, yaw: -Math.PI / 2 },
@@ -164,7 +166,7 @@ export const ENCOUNTERS = [
     done: [[ME, '……匝道下去，就是基地西側。']],
   },
   {
-    id: 'J2', ch: 4, obj: '走匝道下去', mark: V(10, 16.5), next: '穿過倉庫，進貨櫃場', guide: [2, 34],
+    id: 'J2', ch: 4, obj: '走匝道下去', mark: V(10, 16.5), next: '穿過倉庫，進貨櫃場', route: [[-27, 47.5, 6], [-20, 48.5, 6], [-9, 45, 6], [-2, 45, 6], [2, 39, 6]], guide: [2, 25], nextRoute: [[2, 18], [6, 16.5]],
     trigger: (p) => p.z < 27 && p.x > -2.5 && p.y < 2.5,
     enemies: [
       { type: 'trooper', x: 1, z: 16, yaw: 0, alert: true },
@@ -178,7 +180,7 @@ export const ENCOUNTERS = [
       [OP, '……我知道。走吧，穿過倉庫就是貨櫃場。']],
   },
   {
-    id: 'E', ch: 4, obj: '穿過貨櫃場，到基地大門', mark: V(28, 19), next: '進入基地大門', guide: [12, 16.5],
+    id: 'E', ch: 4, obj: '穿過貨櫃場，到基地大門', mark: V(28, 23), next: '進入基地大門', guide: [16, 16.5], nextRoute: [[21, 18.5], [28, 18.5]],
     trigger: (p) => p.z > -24 && p.x > 13,
     enemies: [
       { type: 'trooper', x: 24, z: -10, yaw: Math.PI },
@@ -195,7 +197,7 @@ export const ENCOUNTERS = [
   },
   // ---------------- 第 5 章：第七機庫
   {
-    id: 'F', ch: 5, guide: [28, 24], obj: '穿過地面設施', mark: V(32, 53.5),
+    id: 'F', ch: 5, route: [[28, 19]], guide: [28, 28.5], obj: '穿過地面設施', mark: V(32, 53.5),
     trigger: (p) => p.z > 26,
     enemies: [
       { type: 'trooper', x: 23, z: 33, yaw: Math.PI },
@@ -209,7 +211,7 @@ export const ENCOUNTERS = [
     done: [[OP, '機庫門就在走廊盡頭。']],
   },
   {
-    id: 'G1', ch: 5, guide: [32, 53], obj: '奪回第七機庫', mark: null,
+    id: 'G1', ch: 5, route: [[28, 29], [28, 33], [32, 37], [32, 47]], guide: [32, 56], obj: '奪回第七機庫', mark: null,
     trigger: (p) => p.z > 53.5,
     alarm: true,
     enemies: [
@@ -240,6 +242,9 @@ export const ENCOUNTERS = [
     done: [[OP, '做得好，零號……機庫是你的了。'], [OP, '爬上維修架——駕駛艙在胸口。插上金鑰，蒼焰就是你的。']],
   },
 ];
+
+// 最後一段：從機庫地面爬到胸口平台（兩段樓梯＋走道），終點是駕駛艙前面
+export const HATCH_ROUTE = [[14, 68], [14.1, 55.2, 7], [11.3, 54.6, 7], [11.4, 94.6, 7], [14.1, 97, 7.2], [14.1, 107.5, 12.4], [14.2, 110.4, 12.4], [20, 110.5, 12.4], [31.5, 110.5, 12.4], [31.5, 98.3, 12.4], [38, 98.3, 12.4]];
 
 export const LINES = {
   start: [[OP, '零號，聽得到嗎？這裡是白鷺。'], [OP, '首都防線昨晚全垮了。獵犬軍團在城裡到處搜人。'], [OP, '第七機庫還在我們手上，蒼焰在那裡。沿著這條後巷往北走。']],

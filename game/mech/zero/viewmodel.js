@@ -10,8 +10,8 @@ const _v = new THREE.Vector3(), _q = new THREE.Quaternion(), _e = new THREE.Eule
 
 // 武器數值：dmg＝軀幹、head＝頭、limb＝四肢；rof＝最短射擊間隔；spread＝腰射散布（弧度）
 export const WEAPONS = {
-  rifle: { name: 'XLR-7 長槍', mag: 8, rof: 0.42, reload: 2.2, dmg: 125, head: 400, limb: 80, spread: 0.022, adsSpread: 0.0, fov: 20, kick: 0.05, auto: false, range: 300 },
-  pistol: { name: 'XP-2 手槍', mag: 14, rof: 0.13, reload: 1.35, dmg: 38, head: 95, limb: 28, spread: 0.02, adsSpread: 0.004, fov: 54, kick: 0.018, auto: true, autoRof: 0.19, range: 120 },
+  rifle: { name: 'XLR-7 長槍', mag: 20, rof: 0.42, reload: 2.2, dmg: 125, head: 400, limb: 80, spread: 0.022, adsSpread: 0.0, fov: 20, kick: 0.05, auto: false, range: 300 },
+  pistol: { name: 'XP-2 手槍', mag: 30, rof: 0.13, reload: 1.35, dmg: 38, head: 95, limb: 28, spread: 0.02, adsSpread: 0.004, fov: 54, kick: 0.018, auto: true, autoRof: 0.19, range: 120 },
 };
 
 export class ViewModel {
