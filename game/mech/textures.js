@@ -289,3 +289,162 @@ export function makeRoadLineTexture() {
   t.wrapS = t.wrapT = THREE.RepeatWrapping;
   return t;
 }
+
+// ---------- 軍用噴漆標示圖集（敵機、載具共用；一張 1024² 只畫一次）----------
+// 白字（顏色在 shader 裡依 tint 決定）＋少數預先上色的條紋／警告三角。cells：[x, y, w, h]（像素，原點左上）。
+export const STENCIL = {
+  size: 1024,
+  cells: {
+    agx9: [0, 0, 512, 128], hound: [512, 0, 512, 128], caution: [0, 128, 512, 128], nostep: [512, 128, 512, 128],
+    danger: [0, 256, 512, 128], hyd: [512, 256, 512, 64], fuel: [512, 320, 512, 64],
+    d0: [0, 384, 96, 192],   // 數字 0–9 橫排，每格 96 寬
+    hazard: [0, 576, 512, 64], redwhite: [0, 640, 512, 64], warn: [512, 576, 128, 128], lift: [640, 576, 128, 128], rescue: [768, 576, 256, 128],
+    star: [0, 704, 128, 128], chev: [128, 704, 128, 128], emblem: [256, 704, 128, 128], roundel: [384, 704, 128, 128],
+    ammo: [512, 704, 512, 64], intake: [512, 768, 512, 64], rotor: [0, 832, 512, 64], ground: [512, 832, 512, 64],
+    xg01: [0, 896, 512, 64], tow: [512, 896, 512, 64], agx9c: [0, 960, 512, 64], agx9h: [512, 960, 512, 64],
+  },
+};
+let _stencil = null;
+export function stencilAtlas() {
+  if (_stencil) return _stencil;
+  const S = STENCIL.size, C = STENCIL.cells;
+  const r = rng(909);
+  const [c, x] = canvas(S, S);
+  x.clearRect(0, 0, S, S);
+  const FONT = '"Arial Narrow","Roboto Condensed","Helvetica Neue",Arial,sans-serif';
+  // 置中單行字：量寬度後水平壓縮塞進格子
+  const text = (cell, str, px, y = 0.5, pad = 0.06) => {
+    const [cx, cy, cw, ch] = C[cell];
+    x.save();
+    x.font = `700 ${px}px ${FONT}`;
+    x.textBaseline = 'middle'; x.textAlign = 'center';
+    const w = x.measureText(str).width, k = Math.min(1, (cw * (1 - pad * 2)) / w);
+    x.translate(cx + cw / 2, cy + ch * y);
+    x.scale(k, 1);
+    x.fillStyle = '#fff';
+    x.fillText(str, 0, 0);
+    x.restore();
+  };
+  text('agx9', 'AGX-9', 118);
+  text('hound', 'HOUND', 112);
+  text('caution', 'CAUTION', 92, 0.42);
+  { const [cx, cy, cw] = C.caution; x.fillStyle = '#fff'; x.fillRect(cx + 40, cy + 100, cw - 80, 10); }
+  { const [cx, cy, cw, ch] = C.nostep; x.strokeStyle = '#fff'; x.lineWidth = 7; x.strokeRect(cx + 10, cy + 10, cw - 20, ch - 20); }
+  text('nostep', 'NO STEP', 86, 0.52, 0.12);
+  text('danger', 'DANGER', 80, 0.36); text('danger', 'EXHAUST BLAST AREA', 34, 0.8);
+  text('hyd', 'HYD 21 MPa  -  INSPECT BEFORE SORTIE', 40);
+  text('fuel', 'FUEL  JP-8  -  NO SMOKING', 40);
+  for (let i = 0; i < 10; i++) {
+    const [, cy] = C.d0;
+    x.save();
+    x.font = `700 176px ${FONT}`; x.textBaseline = 'middle'; x.textAlign = 'center';
+    const k = Math.min(1, 84 / x.measureText(String(i)).width);
+    x.translate(i * 96 + 48, cy + 100); x.scale(k, 1);
+    x.fillStyle = '#fff'; x.fillText(String(i), 0, 0);
+    x.restore();
+  }
+  // 預先上色：黃黑警示條紋、紅白條紋
+  const stripes = (cell, a, b, n) => {
+    const [cx, cy, cw, ch] = C[cell];
+    x.save(); x.beginPath(); x.rect(cx, cy, cw, ch); x.clip();
+    x.fillStyle = a; x.fillRect(cx, cy, cw, ch);
+    x.fillStyle = b;
+    const step = cw / n;
+    for (let i = -2; i < n + 2; i++) { x.beginPath(); x.moveTo(cx + i * step, cy + ch); x.lineTo(cx + i * step + step / 2, cy + ch); x.lineTo(cx + i * step + step / 2 + ch, cy); x.lineTo(cx + i * step + ch, cy); x.fill(); }
+    x.restore();
+  };
+  stripes('hazard', '#c99a1c', '#141414', 9);
+  stripes('redwhite', '#d8d4c8', '#9a1c18', 9);
+  { // 警告三角（黃底黑框驚嘆號）
+    const [cx, cy] = C.warn;
+    x.fillStyle = '#c99a1c'; x.strokeStyle = '#141414'; x.lineWidth = 9;
+    x.beginPath(); x.moveTo(cx + 64, cy + 12); x.lineTo(cx + 118, cy + 112); x.lineTo(cx + 10, cy + 112); x.closePath(); x.fill(); x.stroke();
+    x.fillStyle = '#141414'; x.fillRect(cx + 58, cy + 44, 12, 38); x.fillRect(cx + 58, cy + 90, 12, 12);
+  }
+  { // 吊掛點：圓環＋箭頭
+    const [cx, cy] = C.lift;
+    x.strokeStyle = '#fff'; x.lineWidth = 10; x.beginPath(); x.arc(cx + 64, cy + 48, 26, 0, 7); x.stroke();
+    x.fillStyle = '#fff'; x.beginPath(); x.moveTo(cx + 40, cy + 84); x.lineTo(cx + 88, cy + 84); x.lineTo(cx + 64, cy + 120); x.fill();
+  }
+  { // RESCUE 箭頭（字挖空）
+    const [cx, cy, cw, ch] = C.rescue;
+    x.fillStyle = '#fff'; x.beginPath(); x.moveTo(cx + 20, cy + 64); x.lineTo(cx + 70, cy + 20); x.lineTo(cx + 70, cy + 40); x.lineTo(cx + 240, cy + 40); x.lineTo(cx + 240, cy + 88); x.lineTo(cx + 70, cy + 88); x.lineTo(cx + 70, cy + 108); x.fill();
+    x.globalCompositeOperation = 'destination-out';
+    x.save(); x.font = `700 38px ${FONT}`; x.textBaseline = 'middle'; x.textAlign = 'center'; x.fillText('RESCUE', cx + cw * 0.6, cy + ch / 2 + 1); x.restore();
+    x.globalCompositeOperation = 'source-over';
+  }
+  { // 星徽（圓環內五角星）
+    const [cx, cy] = C.star;
+    x.strokeStyle = '#fff'; x.lineWidth = 8; x.beginPath(); x.arc(cx + 64, cy + 64, 54, 0, 7); x.stroke();
+    x.fillStyle = '#fff'; x.beginPath();
+    for (let k = 0; k < 10; k++) { const a = -Math.PI / 2 + k * Math.PI / 5, rr = k % 2 ? 18 : 44; x.lineTo(cx + 64 + Math.cos(a) * rr, cy + 64 + Math.sin(a) * rr); }
+    x.fill();
+  }
+  { // 雙 V 階級章
+    const [cx, cy] = C.chev;
+    x.fillStyle = '#fff';
+    for (const dy of [18, 60]) { x.beginPath(); x.moveTo(cx + 10, cy + dy); x.lineTo(cx + 64, cy + dy + 32); x.lineTo(cx + 118, cy + dy); x.lineTo(cx + 118, cy + dy + 20); x.lineTo(cx + 64, cy + dy + 52); x.lineTo(cx + 10, cy + dy + 20); x.fill(); }
+  }
+  { // 部隊徽：盾形外框＋獵犬牙 V
+    const [cx, cy] = C.emblem;
+    const shield = (i) => { x.beginPath(); x.moveTo(cx + 14 + i, cy + 10 + i); x.lineTo(cx + 114 - i, cy + 10 + i); x.lineTo(cx + 114 - i, cy + 70); x.quadraticCurveTo(cx + 110 - i, cy + 106 - i * 0.5, cx + 64, cy + 122 - i); x.quadraticCurveTo(cx + 18 + i, cy + 106 - i * 0.5, cx + 14 + i, cy + 70); x.closePath(); x.fill(); };
+    x.fillStyle = '#fff'; shield(0);
+    x.globalCompositeOperation = 'destination-out'; shield(10);
+    x.globalCompositeOperation = 'source-over';
+    x.beginPath(); x.moveTo(cx + 30, cy + 32); x.lineTo(cx + 64, cy + 92); x.lineTo(cx + 98, cy + 32); x.lineTo(cx + 83, cy + 32); x.lineTo(cx + 64, cy + 66); x.lineTo(cx + 45, cy + 32); x.fill();
+  }
+  { // 圓形國籍標誌（外環＋實心圓心）
+    const [cx, cy] = C.roundel;
+    x.strokeStyle = '#fff'; x.lineWidth = 14; x.beginPath(); x.arc(cx + 64, cy + 64, 50, 0, 7); x.stroke();
+    x.fillStyle = '#fff'; x.beginPath(); x.arc(cx + 64, cy + 64, 20, 0, 7); x.fill();
+  }
+  text('ammo', 'AMMO  20 MM  HE-I  -  HANDLE WITH CARE', 38);
+  text('intake', 'DANGER  -  INTAKE  -  KEEP CLEAR', 44);
+  text('rotor', 'DANGER  -  KEEP CLEAR OF ROTOR', 42);
+  text('ground', 'GROUND HERE  -  STATIC', 40);
+  text('xg01', 'XG-01  AZURE FLAME', 44);
+  text('tow', 'TOW  -  MAX 60 t', 42);
+  text('agx9c', 'AGX-9C  COMMAND  UNIT', 42);
+  text('agx9h', 'AGX-9H  HEAVY  ASSAULT', 42);
+  // 噴漆磨損：隨機小孔只降 alpha，字與條紋一起斑駁
+  const img = x.getImageData(0, 0, S, S), d = img.data;
+  for (let k = 0; k < 9000; k++) {
+    const px = (r() * S) | 0, py = (r() * S) | 0, rad = 1 + ((r() * r() * 5) | 0);
+    for (let j = -rad; j <= rad; j++) for (let i = -rad; i <= rad; i++) {
+      if (i * i + j * j > rad * rad) continue;
+      const X = px + i, Y = py + j;
+      if (X < 0 || Y < 0 || X >= S || Y >= S) continue;
+      const p = (Y * S + X) * 4 + 3;
+      d[p] = d[p] * (0.15 + r() * 0.5);
+    }
+  }
+  x.putImageData(img, 0, 0);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 8;
+  _stencil = t;
+  return t;
+}
+// 圖集格子 → UV 矩形 [u0, v0, u1, v1]（CanvasTexture 預設 flipY，所以 v 從下往上）；digit＝數字格往右第幾格
+export function stencilUV(cell, digit = 0) {
+  const [cx, cy, cw, ch] = STENCIL.cells[cell], S = STENCIL.size, ox = digit * 96;
+  return [(cx + ox) / S, 1 - (cy + ch) / S, (cx + ox + cw) / S, 1 - cy / S];
+}
+
+// ---------- 真實照片細節貼圖（CC0，Poly Haven；來源見 assets/CREDITS.md），給機體與載具的三面投影用 ----------
+//   mech_paint：R 漆面明暗細節、G 粗糙度、B 鏽斑遮罩
+//   路徑相對於本模組，別的頁面匯入 mechs.js 也找得到。
+let _det = null;
+export function detailMaps() {
+  if (_det) return _det;
+  const L = new THREE.TextureLoader();
+  const ld = (n) => {
+    const t = L.load(new URL('./assets/' + n, import.meta.url).href);
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    t.colorSpace = THREE.NoColorSpace;
+    t.anisotropy = 4;
+    return t;
+  };
+  _det = { paint: ld('mech_paint.jpg') };
+  return _det;
+}
