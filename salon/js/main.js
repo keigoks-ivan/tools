@@ -1,14 +1,14 @@
-import {guests,wishes} from './looks.js?v=7';
-import {SalonMemory} from './memory.js?v=7';
-import {ReplayUI} from './replay-ui.js?v=7';
-import {ornament,createDecorate} from './ornaments.js?v=7';
-import {createLayout,toWorld,inStage} from './layout.js?v=7';
-import {HairSystem,setHairTexture,setHairPlate} from './hair.js?v=7';
-import {guest,palette} from './data.js?v=7';
-import {createCut} from './tools/cut.js?v=7';
-import {createGrow} from './tools/grow.js?v=7';
-import {createColor} from './tools/color.js?v=7';
-import {createComb} from './tools/comb.js?v=7';
+import {guests,wishes} from './looks.js?v=10';
+import {SalonMemory} from './memory.js?v=10';
+import {ReplayUI} from './replay-ui.js?v=10';
+import {ornament,createDecorate} from './ornaments.js?v=10';
+import {createLayout,toWorld,inStage} from './layout.js?v=10';
+import {HairSystem,setHairTexture,setHairPlate} from './hair.js?v=10';
+import {guest,palette} from './data.js?v=10';
+import {createCut} from './tools/cut.js?v=10';
+import {createGrow} from './tools/grow.js?v=10';
+import {createColor} from './tools/color.js?v=10';
+import {createComb} from './tools/comb.js?v=10';
 const canvas=document.getElementById('scene'),box=document.getElementById('game'),ctx=canvas.getContext('2d',{alpha:false});
 canvas.width=box.clientWidth;canvas.height=box.clientHeight;ctx.fillStyle='#fff2db';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#efadc0';for(let i=0;i<5;i++){let a=i*Math.PI*2/5;ctx.beginPath();ctx.arc(canvas.width/2+Math.cos(a)*14,canvas.height/2+Math.sin(a)*14,11,0,Math.PI*2);ctx.fill()}ctx.fillStyle='#f9d37b';ctx.beginPath();ctx.arc(canvas.width/2,canvas.height/2,8,0,Math.PI*2);ctx.fill();
 let art={};const artSets=new Map();
@@ -32,7 +32,7 @@ function restore(snapshot){
  const profile=guests.find(g=>g.id===snapshot?.guest);if(!profile)return false;
  stop();currentGuest=profile;art=artSets.get(profile.id)||artSets.get('cocoa');env.hair.reset(profile);
  if(!env.hair.restore(snapshot.hair))env.hair.reset(profile);
- ornaments.splice(0,ornaments.length,...(Array.isArray(snapshot.ornaments)?snapshot.ornaments.filter(a=>Number.isFinite(a.x)&&Number.isFinite(a.y)).slice(0,12):[]));wishIndex=Number.isInteger(snapshot.wish)?Math.max(0,Math.min(wishes.length-1,snapshot.wish)):0;save();return true;
+ ornaments.splice(0,ornaments.length,...(Array.isArray(snapshot.ornaments)?snapshot.ornaments.filter(a=>Number.isFinite(a.x)&&Number.isFinite(a.y)):[]));wishIndex=Number.isInteger(snapshot.wish)?Math.max(0,Math.min(wishes.length-1,snapshot.wish)):0;save();return true;
 }
 function chooseGuest(id){
  stop();drafts[currentGuest.id]=state();history.length=0;
@@ -44,10 +44,21 @@ function photoCanvas(hair=env.hair,set=art,items=ornaments,expression='happy'){
 }
 function capture(){const image=photoCanvas().toDataURL('image/jpeg',.88);return {id:globalThis.crypto?.randomUUID?.()||Date.now().toString(36),created:Date.now(),image,state:state()}}
 const previews=new Map();
+// 綁髮選單的預覽：拿目前這位客人現在的頭髮（長度、顏色都一樣）套上每一種綁法，拍一張頭部特寫。每格最多做一張，選單打開時重做。
+const tieShots=new Map();let tieBudget=0;
+function tiePreview(mode){
+ if(tieShots.has(mode))return tieShots.get(mode);if(tieBudget<=0)return null;tieBudget--;
+ const h=new HairSystem(currentGuest);if(!h.restore(env.hair.snapshot()))h.reset(currentGuest);
+ if(mode==='loose')h.untie();else h.tie(mode,env.colorIndex);
+ for(let i=0;i<30;i++)h.step(1/60,844,0);
+ const c=document.createElement('canvas');c.width=560;c.height=860;const p=c.getContext('2d');p.scale(2,2);p.translate(-55,-92);
+ paintGuest(p,h,art,'happy',[],0);tieShots.set(mode,c);return c;
+}
 const replay=new ReplayUI({memory,guests:guests.filter(g=>artSets.has(g.id)),stop,react,save,capture,restore:s=>{bookmark();restore(s)},
  guestId:()=>currentGuest.id,wish:()=>wishIndex,selected:()=>selected,ornament:()=>env.ornament,color:()=>env.colorIndex,
  chooseGuest,chooseWish:i=>{wishIndex=i;save()},chooseOrnament:kind=>{env.ornament=kind;selected='decorate'},
- tie:mode=>{bookmark();const count=env.hair.tie(mode,env.colorIndex);if(!count&&mode!=='loose'){selected='grow';popAt=performance.now()}react('happy');save()},
+ tiePreview,clearTiePreviews:()=>tieShots.clear(),tieMode:()=>env.hair.tieMode(),
+ tie:mode=>{bookmark();const count=mode==='loose'?(env.hair.untie(),0):env.hair.tie(mode,env.colorIndex);if(!count&&mode!=='loose'){selected='grow';popAt=performance.now()}react('happy');save()},
  canUndo:()=>history.length>0,undo:()=>{const previous=history.pop();if(previous)restore(previous)},
  preview:id=>{if(!previews.has(id)){const profile=guests.find(g=>g.id===id);previews.set(id,photoCanvas(new HairSystem(profile),artSets.get(id),[],'normal'))}return previews.get(id)}
 });
@@ -93,10 +104,62 @@ canvas.addEventListener('pointermove',e=>{
 function end(e){if(!pointer||pointer.id!==e.pointerId)return;if(!pointer.ui){tools[selected].onUp();save()}pointer=null}
 canvas.addEventListener('pointerup',end);canvas.addEventListener('pointercancel',end);canvas.addEventListener('lostpointercapture',end);
 function plate(target,img,dy=0){if(img)target.drawImage(img,0,0,img.width,img.height*611/844,0,dy,390,611)}
-function head(target,img,dx=0,dy=0){target.save();target.translate(dx,0);target.beginPath();target.moveTo(194,176);target.bezierCurveTo(145,174,117,218,121,280);target.bezierCurveTo(109,275,111,319,141,330);target.quadraticCurveTo(157,348,180,355);target.lineTo(178,376);target.quadraticCurveTo(202,390,225,377);target.lineTo(224,350);target.quadraticCurveTo(249,339,260,314);target.bezierCurveTo(280,312,280,267,266,270);target.bezierCurveTo(269,221,242,175,194,176);target.closePath();target.clip();plate(target,img,dy);target.restore()}
-function paintGuest(target,hair,set,show='normal',items=[],dx=0){plate(target,set.normal);hair.draw(target,false);head(target,set[show]||set.normal,dx,set.offsets?.[show]||0);hair.draw(target,true);
- for(const band of hair.activeTies())ornament(target,'bow',band.x+dx,band.y,29,band.color??0);
- for(const a of items)ornament(target,a.kind,a.x+dx,a.y,45,a.color,a.angle);
+// 髮飾：每種樣子＋顏色只畫一次（陰影、漸層很花時間），之後直接貼上。髮飾數量不限，放幾百個也不會卡。
+const ornamentSprites=new Map();
+function ornamentSprite(target,kind,x,y,size,color,angle=0){
+ const key=kind+':'+color;let c=ornamentSprites.get(key);
+ if(!c){c=document.createElement('canvas');c.width=c.height=192;const x2=c.getContext('2d');ornament(x2,kind,96,96,120,color,0);ornamentSprites.set(key,c)}
+ const S=size*192/120;target.save();target.translate(x,y);target.rotate(angle);target.drawImage(c,-S/2,-S/2,S,S);target.restore();
+}
+function headPath(target){target.beginPath();target.moveTo(194,176);target.bezierCurveTo(145,174,117,218,121,280);target.bezierCurveTo(109,275,111,319,141,330);target.quadraticCurveTo(157,348,180,355);target.lineTo(178,376);target.quadraticCurveTo(202,390,225,377);target.lineTo(224,350);target.quadraticCurveTo(249,339,260,314);target.bezierCurveTo(280,312,280,267,266,270);target.bezierCurveTo(269,221,242,175,194,176);target.closePath()}
+function head(target,img,dx=0,dy=0){const sprite=headSprite(img,dy);if(sprite)target.drawImage(sprite,dx,0,390,611)}
+// 頭像剪裁：headPath 只是大概的形狀，比耳朵、下巴大一圈，原圖在那裡畫的是粉紅椅背，會在頭髮前面露出一圈粉紅邊。
+// 第一次用到某張圖時，照圖上耳朵、下巴的棕色輪廓線把那一圈修掉，做成一張剪好的頭像存起來；之後每格直接貼。
+const HK=2,headSprites=new WeakMap();
+function headSprite(img,dy){
+ if(!img)return null;let byDy=headSprites.get(img);if(!byDy)headSprites.set(img,byDy=new Map());if(byDy.has(dy))return byDy.get(dy);
+ const c=document.createElement('canvas');c.width=390*HK;c.height=611*HK;const x=c.getContext('2d',{willReadFrequently:true});
+ x.save();x.scale(HK,HK);headPath(x);x.clip();plate(x,img,dy);x.restore();
+ try{trimEars(x)}catch(e){console.warn('[salon] 耳朵修邊失敗，用原本的剪法',e)}
+ byDy.set(dy,c);return c;
+}
+function trimEars(x){
+ // 只看耳朵到脖子那一段（世界座標 x 95–295、y 226–380）
+ const X0=95*HK,Y0=226*HK,w=200*HK,h=154*HK,d=x.getImageData(X0,Y0,w,h),p=d.data,max=30*HK;
+ const at=(cx,cy)=>(cy*w+cx)*4,inside=i=>p[i+3]>160;
+ const lum=i=>p[i]*.299+p[i+1]*.587+p[i+2]*.114,line=i=>lum(i)<150&&p[i+1]-p[i+2]>18&&p[i]>p[i+1];   // 深棕色輪廓線（粉紅椅背比較亮、也不夠棕）
+ for(const side of [1,-1]){
+  const start=[],dist=[];
+  for(let cy=0;cy<h;cy++){
+   let cx=side>0?0:w-1;while(cx>=0&&cx<w&&!inside(at(cx,cy)))cx+=side;
+   start.push(cx);if(cx<0||cx>=w){dist.push(-1);continue}
+   // 往臉的方向走：碰到「突然變暗」的棕色線就是輪廓線；如果突然變亮（已經走進皮膚、線太淡沒抓到），這一排不剪
+   let n=0,xx=cx,avg=lum(at(cx,cy)),hit=-1;const stop=side>0?(185-95)*HK:(205-95)*HK;
+   while(n<max&&xx>=0&&xx<w&&(side>0?xx<stop:xx>stop)&&inside(at(xx,cy))){
+    const i=at(xx,cy),L=lum(i);
+    if(line(i)||(L<avg-22&&p[i+1]-p[i+2]>8&&p[i]>p[i+1])){hit=n;break}
+    if(L>avg+25)break;
+    avg=avg*.7+L*.3;xx+=side;n++}
+   dist.push(hit);
+  }
+  // 找到輪廓線的排就剪到線為止；沒找到的排用上下找得到的排內插（太遠就不動）
+  const fill=dist.slice();
+  for(let cy=0;cy<h;cy++)if(fill[cy]<0){let a=cy-1,b=cy+1;while(a>=0&&dist[a]<0)a--;while(b<h&&dist[b]<0)b++;
+   fill[cy]=a>=0&&b<h&&b-a<=14*HK?Math.round(dist[a]+(dist[b]-dist[a])*(cy-a)/(b-a)):0}
+  for(let cy=0;cy<h;cy++){
+   const n=Math.min(fill[cy],max),s0=start[cy];if(s0<0||s0>=w)continue;
+   for(let k=0;k<n;k++){const i=at(s0+side*k,cy);p[i+3]=0}
+   // 剪裁邊緣外那幾格半透明的像素也是椅背，一起清掉（不然會留一條淡淡的點線）
+   if(n>0)for(let k=1;k<=3;k++){const q=s0-side*k;if(q<0||q>=w)break;const i=at(q,cy);if(p[i+3]>160)break;p[i+3]=0}
+   if(n>0){const i=at(s0+side*n,cy);if(!line(i))p[i+3]=p[i+3]>>1}}
+ }
+ x.putImageData(d,X0,Y0);
+}
+function paintGuest(target,hair,set,show='normal',items=[],dx=0){plate(target,set.normal);hair.draw(target,false);head(target,set[show]||set.normal,dx,set.offsets?.[show]||0);hair.drawShadow(target,()=>{target.save();target.translate(dx,0);headPath(target);target.restore();target.clip()},dx);hair.drawCap(target,dx);hair.draw(target,true);hair.drawCrown(target,dx);
+ for(const band of hair.activeTies()){
+  if(band.ring){const c=palette[band.color??0];target.save();target.translate(band.x+dx,band.y);target.lineWidth=3.2;target.strokeStyle=`rgb(${c.map(v=>Math.round(v*.8)).join(',')})`;target.beginPath();target.ellipse(0,0,band.size*.55,band.size*.26,0,0,Math.PI*2);target.stroke();target.lineWidth=1.2;target.strokeStyle='#ffffffaa';target.beginPath();target.ellipse(0,-.6,band.size*.5,band.size*.2,0,Math.PI*1.1,Math.PI*1.9);target.stroke();target.restore()}
+  else ornament(target,'bow',band.x+dx,band.y,band.size||29,band.color??0)}
+ for(const a of items)ornamentSprite(target,a.kind,a.x+dx,a.y,45,a.color,a.angle);
 }
 function drawTool(context,type,x,y,size=44){const b=atlasButtons[names.indexOf(type)]||atlasButtons[0],r=36;context.save();context.beginPath();context.arc(x,y,size/2,0,Math.PI*2);context.clip();const im=artSets.get('cocoa').normal;if(im)context.drawImage(im,(b.x-r)/390*im.width,(b.y-r)/844*im.height,r*2/390*im.width,r*2/844*im.height,x-size/2,y-size/2,size,size);context.restore()}
 function drawBackdrop(){
@@ -136,7 +199,7 @@ function render(now){const rawDt=(now-last)/1000,dt=Math.min(.034,rawDt);last=no
  if(now>reactionUntil){if(nextExpression){expression=nextExpression;nextExpression=null;reactionUntil=now+1100}else expression='normal'}
  if(now>blinkAt&&expression==='normal'){blinkUntil=now+150;blinkAt=now+3000+Math.random()*3000}
  const show=now<blinkUntil?'blink':expression;headDx=Math.sin(now*.0008)*.24;
- if(!replay.mode){tools[selected].update?.(dt);env.hair.step(dt,844,headDx);}
+ tieBudget=1;if(!replay.mode){tools[selected].update?.(dt);env.hair.step(dt,844,headDx);}
  ctx.setTransform(canvas.width/layout.width,0,0,canvas.height/layout.height,0,0);drawBackdrop();
  ctx.save();ctx.beginPath();ctx.rect(layout.stage.x,layout.stage.y,layout.stage.w,layout.stage.h);ctx.clip();
  ctx.translate(layout.world.x,layout.world.y);ctx.scale(layout.world.scale,layout.world.scale);
@@ -145,4 +208,4 @@ function render(now){const rawDt=(now-last)/1000,dt=Math.min(.034,rawDt);last=no
 }
 requestAnimationFrame(render);
 // Diagnostics are only exposed to local developer inspection; no text is drawn in the game.
-window.__salon={hair:env.hair,stats:()=>env.hair.stats(),get selected(){return selected},artReady:Object.keys(art).length};
+window.__salon={get hair(){return env.hair},stats:()=>env.hair.stats(),get selected(){return selected},artReady:Object.keys(art).length,choose:id=>chooseGuest(id),sprite:(name='normal')=>headSprite(art[name],art.offsets?.[name]||0)};

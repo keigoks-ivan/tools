@@ -1,4 +1,4 @@
-import {rgb} from './looks.js?v=7';
+import {rgb} from './looks.js?v=10';
 function ellipse(c,x,y,rx,ry,color,a=0){c.fillStyle=color;c.beginPath();c.ellipse(x,y,rx,ry,a,0,Math.PI*2);c.fill()}
 function star(c,n,outer,inner){c.beginPath();for(let i=0;i<n*2;i++){const a=i*Math.PI/n-Math.PI/2,r=i%2?inner:outer;const x=Math.cos(a)*r,y=Math.sin(a)*r;i?c.lineTo(x,y):c.moveTo(x,y)}c.closePath();c.fill()}
 export function ornament(c,kind,x,y,size=44,color=0,angle=0){
@@ -15,5 +15,5 @@ export function ornament(c,kind,x,y,size=44,color=0,angle=0){
  c.restore();
 }
 export function createDecorate(env,items,changed){let active=null;
- return {onDown(p){active=[...items].reverse().find(a=>Math.hypot(a.x-p.x,a.y-p.y)<30);if(!active&&p.y>=115&&p.y<=570&&p.x>35&&p.x<355){if(items.length>=12)return;active={kind:env.ornament||'bow',x:p.x,y:p.y,color:env.colorIndex,angle:0};items.push(active)}},onMove(p){if(active){active.x=Math.max(20,Math.min(370,p.x));active.y=Math.max(110,Math.min(598,p.y));active.angle=Math.max(-.5,Math.min(.5,(p.x-195)*.002))}},onUp(){if(active){if(active.y>575)items.splice(items.indexOf(active),1);changed();env.react('happy')}active=null},drawOverlay(c){if(active){c.save();c.strokeStyle='#fff9df';c.lineWidth=2;c.setLineDash([4,4]);c.beginPath();c.arc(active.x,active.y,30,0,Math.PI*2);c.stroke();c.restore();c.save();c.fillStyle='#fff3e4df';c.beginPath();c.roundRect(145,572,100,35,15);c.fill();c.strokeStyle='#a66b7c';c.lineWidth=3;c.strokeRect(187,582,16,17);c.beginPath();c.moveTo(183,578);c.lineTo(207,578);c.stroke();c.restore()}}};
+ return {onDown(p){active=[...items].reverse().find(a=>Math.hypot(a.x-p.x,a.y-p.y)<30);if(!active&&p.y>=115&&p.y<=570&&p.x>35&&p.x<355){active={kind:env.ornament||'bow',x:p.x,y:p.y,color:env.colorIndex,angle:0};items.push(active)}},onMove(p){if(active){active.x=Math.max(20,Math.min(370,p.x));active.y=Math.max(110,Math.min(598,p.y));active.angle=Math.max(-.5,Math.min(.5,(p.x-195)*.002))}},onUp(){if(active){if(active.y>575)items.splice(items.indexOf(active),1);changed();env.react('happy')}active=null},drawOverlay(c){if(active){c.save();c.strokeStyle='#fff9df';c.lineWidth=2;c.setLineDash([4,4]);c.beginPath();c.arc(active.x,active.y,30,0,Math.PI*2);c.stroke();c.restore();c.save();c.fillStyle='#fff3e4df';c.beginPath();c.roundRect(145,572,100,35,15);c.fill();c.strokeStyle='#a66b7c';c.lineWidth=3;c.strokeRect(187,582,16,17);c.beginPath();c.moveTo(183,578);c.lineTo(207,578);c.stroke();c.restore()}}};
 }
