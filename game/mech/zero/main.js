@@ -165,6 +165,17 @@ document.querySelectorAll('[data-q]').forEach((b) => b.addEventListener('click',
 const sens = $('sens');
 input.sens = store.get('sens', 1); sens.value = input.sens;
 sens.addEventListener('input', () => { input.sens = +sens.value; store.set('sens', sens.value); });
+// 音量（全部聲音／配樂），記在這台瀏覽器；?mute 測試時維持靜音
+const vol = $('vol'), mvol = $('mvol');
+vol.value = store.get('vol', 0.8); mvol.value = store.get('mvol', 0.7);
+const applyVol = () => {
+  if (!q.has('mute')) audio.setVolume(+vol.value);
+  audio.setMusicVolume(+mvol.value);
+  $('volN').textContent = Math.round(vol.value * 100) + '%'; $('mvolN').textContent = Math.round(mvol.value * 100) + '%';
+};
+vol.addEventListener('input', () => { store.set('vol', vol.value); applyVol(); });
+mvol.addEventListener('input', () => { store.set('mvol', mvol.value); applyVol(); });
+applyVol();
 const de = document.documentElement, fsBtns = document.querySelectorAll('.fs');
 const fsOn = () => document.fullscreenElement || document.webkitFullscreenElement;
 if (!(document.fullscreenEnabled || document.webkitFullscreenEnabled)) fsBtns.forEach((b) => { b.style.display = 'none'; });
