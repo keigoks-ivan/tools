@@ -50,37 +50,44 @@ export class Trooper {
     this.notSeen = 0; this.hunt = false; this.aimedT = 0; this.duckAt = rr(0.3, 0.7);
   }
   get alive() { return !this.dead; }
-  // 命中判定用：頭、身體兩顆球
+  // 命中判定：跟著骨架的 16 段膠囊（頭、軀幹、肩、手臂、手、腿、腳），粗細照模型頂點量過，蓋住畫面上看得到的身體
+  //   （原本只有頭、胸、腰三顆球＋大腿小腿中段，手臂、肩膀、膝蓋、腳打到都不算，看起來打中的只有七成算數）
+  //   子彈先擦過手臂、後面 0.45 m 內接著打進軀幹或頭：算打到後面最先碰到的那個（瞄胸口不會因為舉槍的手擋在前面就只算打手）
   hitTest(o, d, maxT) {
     if (this.dead) return null;
-    const sc = this.s.root.scale.x;
-    const head = this.s.headPos(_v), chest = this.s.chestPos(_w);
-    const hips = this.s.B.Hips.getWorldPosition(_u);
-    let best = null;
-    const test = (c, r, part) => { const t = raySphere(o, d, c, r); if (t >= 0 && t < maxT && (!best || t < best.t)) best = { t, part }; };
-    test(head, 0.14 * sc, 'head');
-    test(chest, 0.26 * sc, 'body');
-    test(hips, 0.22 * sc, 'body');
-    // 腿：髖到腳兩段
-    for (const side of ['Left', 'Right']) {
-      const a = this.s.B[side + 'UpLeg'].getWorldPosition(new THREE.Vector3()), k = this.s.B[side + 'Leg'].getWorldPosition(new THREE.Vector3()), f = this.s.B[side + 'Foot'].getWorldPosition(new THREE.Vector3());
-      test(a.lerp(k, 0.5), 0.13 * sc, 'limb'); test(k.lerp(f, 0.5), 0.11 * sc, 'limb');
+    const s = this.s, sc = s.root.scale.x, B = s.B;
+    _u.copy(this.pos); _u.y += 0.9 * sc;
+    const tb = raySphere(o, d, _u, 1.35 * sc); if (tb < 0 || tb >= maxT) return null;   // 先用整個人的外接球篩：大部分敵人不在這條線上
+    s.root.updateMatrixWorld(true);
+    let first = null; const hs = [];
+    for (const [a, b, ka, kb, r, part] of HITCAPS) {
+      const A = B[a], Bb = B[b]; if (!A || !Bb) continue;
+      const p = _v.setFromMatrixPosition(A.matrixWorld), q = _w.setFromMatrixPosition(Bb.matrixWorld);
+      if (ka !== 0 || kb !== 1) { const qx = q.x - p.x, qy = q.y - p.y, qz = q.z - p.z; q.set(p.x + qx * kb, p.y + qy * kb, p.z + qz * kb); p.x += qx * ka; p.y += qy * ka; p.z += qz * ka; }
+      const t = rayCapsule(o, d, p, q, r * sc);
+      if (t < 0 || t >= maxT) continue;
+      hs.push(t, part);
+      if (!first || t < first.t) { first = { t, part }; this.legHit = /Leg|Foot/.test(a); }   // 打腿倒下的動作不同
     }
-    return best;
+    if (first && first.part === 'limb') { let bt = 0.45 * sc; for (let i = 0; i < hs.length; i += 2) if (hs[i + 1] !== 'limb' && hs[i] - first.t < bt) { bt = hs[i] - first.t; first.part = hs[i + 1]; } }
+    return first;
   }
   damage(dmg, dir, part, from) {
     if (this.dead) return false;
-    const T = this.T;
-    if (T.armor && part !== 'head') dmg *= T.armor;
+    const T = this.T, armored = !!(T.armor && part !== 'head');
+    if (armored) dmg *= T.armor;
     this.hp -= dmg;
     this.s.impact(dir, clamp(dmg / 80, 0.3, 1.4), part === 'head');
+    // 中彈：整個人亮一下（重裝兵裝甲擋下時是冷白色），頭上的血條亮 2.6 秒（hud.js）
+    if (this.s.flash) this.s.flash(armored);
+    this.hp0 = this.hp0 || T.hp; this.barT = 2.6;
     // 被打到會踉蹌退半步（重裝兵比較穩）
     if (dmg > 25) { this.stagger = this.type === 'heavy' ? 0.15 : 0.35; this.stagV = dir.clone().setY(0).normalize().multiplyScalar(this.type === 'heavy' ? 1 : 2.4); }
     this.hitFlash = 0.15;
     this.alert(from, 1);
     if (this.hp <= 0) {
       this.dead = true;
-      this.s.die(dir, clamp(dmg / 120, 0.7, 1.6), part === 'head' ? 'head' : part === 'limb' ? 'legs' : 'chest', this.G.solid);
+      this.s.die(dir, clamp(dmg / 120, 0.7, 1.6), part === 'head' ? 'head' : part === 'limb' && this.legHit ? 'legs' : 'chest', this.G.solid);
       if (this.laser) this.laser.visible = false;
       this.G.audio.bodyFall(this.pos);
       return true;
@@ -186,6 +193,8 @@ export class Trooper {
           if (this.aimedT > this.duckAt && this.burst <= 0) { this.phase = 'hide'; this.phaseT = rr(0.7, 1.3); this.aimedT = 0; if (Math.random() < 0.35) this.coverT = 0; }
         }
       }
+      // 守點的（樓頂狙擊手、貨櫃牆上的兵）被打得踉蹌後走回原位：不然一路被推到樓頂裡面，看不到也打不到，這段就清不完
+      if (this.post && this.stagger <= 0) { _v.set(this.def.x - this.pos.x, 0, this.def.z - this.pos.z); if (_v.length() > 0.3) { mv.copy(_v).normalize(); speed = T.walk; } }
       // 太近：退後＋側移，邊打
       if (dist < 4.5 && !this.post) {
         mv.set(this.pos.x - P.pos.x, 0, this.pos.z - P.pos.z).normalize().add(_v.set(Math.cos(G.t + this.id), 0, Math.sin(G.t + this.id)).multiplyScalar(0.6)).normalize();
@@ -353,6 +362,30 @@ export function raySphere(o, d, c, r) {
   const t = -b - Math.sqrt(h);
   return t >= 0 ? t : (cc < 0 ? 0 : -1);
 }
+// 射線打膠囊（線段 a→b、半徑 r，d 是單位向量）：回傳進入的距離，沒打到 −1
+export function rayCapsule(o, d, a, b, r) {
+  const bx = b.x - a.x, by = b.y - a.y, bz = b.z - a.z, ox = o.x - a.x, oy = o.y - a.y, oz = o.z - a.z;
+  const bb = bx * bx + by * by + bz * bz, bd = bx * d.x + by * d.y + bz * d.z, bo = bx * ox + by * oy + bz * oz;
+  const A = bb - bd * bd;
+  if (A > 1e-9) {
+    const B = bb * (d.x * ox + d.y * oy + d.z * oz) - bo * bd, C = bb * (ox * ox + oy * oy + oz * oz) - bo * bo - r * r * bb, h = B * B - A * C;
+    if (h < 0) return -1;
+    const t = (-B - Math.sqrt(h)) / A, y = bo + t * bd;
+    if (y > 0 && y < bb) return t >= 0 ? t : -1;   // 打在圓柱段
+  }
+  // 兩端的球
+  const t0 = raySphere(o, d, a, r), t1 = raySphere(o, d, b, r);
+  return t0 < 0 ? t1 : t1 < 0 ? t0 : Math.min(t0, t1);
+}
+// 士兵的命中膠囊：[骨頭 a, 骨頭 b, 從 a 往 b 的起點比例, 終點比例, 半徑（公尺，×體型）, 部位]
+const HITCAPS = [
+  ['Head', 'HeadTop_End', 0.3, 0.6, 0.125, 'head'],
+  ['Hips', 'Spine2', 0, 1, 0.18, 'body'], ['LeftArm', 'RightArm', 0, 1, 0.1, 'body'],
+  ...['Left', 'Right'].flatMap((s) => [
+    [s + 'Arm', s + 'ForeArm', 0, 1, 0.09, 'limb'], [s + 'ForeArm', s + 'Hand', 0, 1, 0.075, 'limb'], [s + 'Hand', s + 'HandMiddle1', 0, 1.6, 0.065, 'limb'],
+    [s + 'UpLeg', s + 'Leg', 0, 1, 0.135, 'limb'], [s + 'Leg', s + 'Foot', 0, 1, 0.095, 'limb'], [s + 'Foot', s + 'Toe_End', 0, 1, 0.065, 'limb'],
+  ]),
+];
 
 // ---------------------------------------------------------------- 無人機
 let DRONE = null;
@@ -405,6 +438,7 @@ export class Drone {
   damage(dmg, dir) {
     if (this.dead) return false;
     this.hp -= dmg; this.vel.addScaledVector(dir, 3); this.alert(this.G.player.pos, 1);
+    this.hp0 = this.hp0 || 90; this.barT = 2.6;   // 血條（hud.js）
     this.G.fx.spray(this.pos, dir.clone().negate(), 8);
     if (this.hp <= 0) { this.dead = true; this.fallV = 1; this.spin = rr(-6, 6); this.G.audio.droneStop(this.id); return true; }
     return false;

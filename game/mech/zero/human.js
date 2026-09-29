@@ -108,6 +108,14 @@ export class HumanKit {
     const eye = new THREE.MeshBasicMaterial({ color: new THREE.Color(P.eye[0], P.eye[1], P.eye[2]), toneMapped: true, fog: true });
     return (this.mats[look] = { body, visor, eye });
   }
+  // 中彈閃光用：同一套塗裝的亮版（貼圖共用、只多一個自發光色，不多編譯 shader）；armor＝重裝兵裝甲擋下，偏冷白
+  flashMat(look, armor = false) {
+    const k = look + (armor ? ':armor' : ':hit'), F = (this.flashMats ||= {});
+    if (F[k]) return F[k];
+    const m = this.material(look).body.clone();
+    m.emissive = armor ? new THREE.Color(0.5, 0.68, 1) : new THREE.Color(1, 0.4, 0.16); m.emissiveIntensity = armor ? 0.38 : 0.3;
+    return (F[k] = m);
+  }
 
   // 用 T 姿勢量測：手的指向／指節方向（算握槍手型）、手指彎曲軸、頭的前方、各段骨長、自然走跑速度
   _calibrate() {
@@ -309,7 +317,15 @@ export class Soldier {
     this.hitAction.reset().setEffectiveWeight(0).play(); this.hitT = 0;
   }
 
+  // 中彈閃一下：身體換成亮版材質 0.08 秒（面罩不換）
+  flash(armor = false) {
+    const m = this.kit.flashMat(this.look, armor), V = this.kit.material(this.look).visor;
+    for (const x of this.meshes) if (x.material !== V) x.material = m;
+    this.flashT = 0.08;
+  }
+
   update(dt, far = false) {
+    if (this.flashT > 0 && (this.flashT -= dt) <= 0) { const M = this.kit.material(this.look); for (const x of this.meshes) if (x.material !== M.visor) x.material = M.body; }
     if (this.rag) { this.rag.step(dt); return; }
     if (this.death) {
       const d = this.death; d.t += dt;

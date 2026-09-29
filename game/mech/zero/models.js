@@ -8,12 +8,15 @@ const _m = new THREE.Matrix4(), _q = new THREE.Quaternion(), _p = new THREE.Vect
 const UP = new THREE.Vector3(0, 1, 0);
 const ZERO = new THREE.Matrix4().makeScale(0, 0, 0);
 import { BRK } from './destruct.js';
+import { grimeShader } from './kit.js';
 
 export const PROPS = ['Barrel_01', 'barrel_03', 'cardboard_box_01', 'cement_bag', 'concrete_road_barrier_02', 'covered_car', 'exterior_aircon_unit', 'hand_truck',
   'metal_jerrycan_green', 'metal_office_desk', 'metal_trash_can', 'modular_airduct_circular_01', 'modular_chainlink_fence', 'modular_fire_escape',
   'mounted_fluorescent_lights', 'old_military_crate', 'old_tyre', 'plastic_crate_02', 'portable_generator',
   'propane_tank', 'rollershutter_door', 'security_light', 'sofa_03', 'steel_frame_shelves_01',
   'tool_cart', 'trashbag', 'utility_box_02', 'water_manhole_cover', 'wooden_military_crate', 'facade_apartments', 'facade_factory'];
+
+const SOLID1 = new Set(['Barrel_01', 'barrel_03', 'cement_bag', 'concrete_road_barrier_02', 'covered_car', 'metal_jerrycan_green', 'old_military_crate', 'old_tyre', 'portable_generator', 'propane_tank', 'trashbag', 'utility_box_02', 'water_manhole_cover', 'wooden_military_crate']);
 
 export class Models {
   static async load(onStep = () => {}, aniso = 4) {
@@ -35,8 +38,14 @@ export class Models {
       const mat = o.material;
       for (const t of ['map', 'normalMap', 'roughnessMap', 'metalnessMap', 'aoMap']) if (mat[t]) mat[t].anisotropy = aniso;
       if (mat.transparent && !mat.alphaMap && mat.opacity >= 1) mat.transparent = false;
+      // 折射玻璃（發電機油表窗）：只要畫面上有一個，整座城就要多畫一遍給它折射；改成深色亮面玻璃，看起來一樣
+      if (mat.transmission > 0) { mat.transmission = 0; mat.color.multiplyScalar(0.2); mat.roughness = 0.08; mat.metalness = 0; }
       mat.envMapIntensity = 1;
-      if (name === 'cement_bag') { mat.color.set(0x76674b); mat.map = null; }   // 水泥袋改成沙包色（麻布）：拿掉印著 CEMENT 字和紅條的貼圖，只留布紋凹凸
+      // 外牆模組：套上風化髒污（水痕、大範圍明暗）；灰泥的橘色壓暗、褪色一點
+      if (kit && !mat.userData.grime && !/glass/i.test(mat.name)) { mat.userData.grime = 0.85; mat.side = THREE.FrontSide; if (/plaster/i.test(mat.name)) mat.color.setRGB(0.8, 0.8, 0.86); mat.onBeforeCompile = (sh) => grimeShader(sh, mat); }   // 外牆只從外面看：背面不畫
+      if (name === 'rollershutter_door' && !mat.userData.grime) { mat.color.multiplyScalar(0.62); mat.userData.grime = 0.9; mat.onBeforeCompile = (sh) => grimeShader(sh, mat); }   // 鐵捲門原本白得發亮：壓暗、加髒污
+      if (SOLID1.has(name)) mat.side = THREE.FrontSide;   // 封閉的實心道具：背面看不到，不畫（省一半三角形的點陣化）
+      if (name === 'cement_bag') { mat.color.set(0x5f5443); mat.map = null; mat.userData.grime = 0.8; mat.onBeforeCompile = (sh) => grimeShader(sh, mat); }   // 水泥袋改成沙包色（麻布）：拿掉印著 CEMENT 字和紅條的貼圖，只留布紋凹凸
       // 壓縮過的頂點（int16 正規化）先轉回浮點數，不然套矩陣會被截在 ±1
       const g = new THREE.BufferGeometry();
       for (const [k, a] of Object.entries(o.geometry.attributes)) {
@@ -81,8 +90,10 @@ export class Placer {
     _q.setFromEuler(new THREE.Euler(o.tilt || 0, ry, o.roll || 0, 'YXZ'));
     const mat = new THREE.Matrix4().compose(new THREE.Vector3(x, y, z), _q, S);
     const C = name.startsWith('facade_') ? 48 : this.chunk;
-    const key = name + '|' + Math.floor(x / C) + ',' + Math.floor(z / C) + (o.cast === false ? '|n' : '');
-    let e = this.list.get(key); if (!e) this.list.set(key, (e = { name, key, mats: [], cast: o.cast !== false }));
+    // 同一區塊同一模型只建一個 InstancedMesh（原本投不投影子分成兩個，多一個 draw call）：有一個要投就全部投
+    const key = name + '|' + Math.floor(x / C) + ',' + Math.floor(z / C);
+    let e = this.list.get(key); if (!e) this.list.set(key, (e = { name, key, mats: [], cast: false }));
+    if (o.cast !== false) e.cast = true;
     const i = e.mats.length;
     e.mats.push(mat);
     const h = { mat, hide() { for (const im of e.ims || []) { im.setMatrixAt(i, ZERO); im.instanceMatrix.needsUpdate = true; } } };

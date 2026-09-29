@@ -55,3 +55,15 @@
 - 處理：用 T-Pose 校正骨軸、朝向與腿長，30 Hz 重取樣到 Mixamo 骨架，只保留動畫；再用 `../dev/merge_motion.py` 與上一輪 Quaternius 片段合併。
 - 重建：`retarget_motion.py source.glb soldier.glb output.glb`；`merge_motion.py original-motion.glb directions.glb deaths.glb merged.glb`。
 - 本輪機體裝甲分件、步態與玻璃／薄牆破壞程式為專案原創，重用現有材質。
+
+## 第三輪：場景美術（2026-09-29）
+
+### concrete_grey_col.webp（257,742 bytes）
+- 來源：Poly Haven「Painted Concrete」（https://polyhaven.com/a/painted_concrete ），CC0。同一組貼圖的法線、ARM 照舊使用 `painted_concrete_nor/arm.webp`。
+- 處理：原本的綠漆色彩圖看起來像迷彩。轉成灰階，減掉 48 px 高斯模糊（去掉大塊漆斑、保留裂痕和刮痕），亮處壓低，再染一點暖灰，1024 px、WebP quality 82。遊戲不再下載 `painted_concrete_col.webp`。
+
+### 沒有新增下載的部分
+- 燒毀的轎車（三種車型）、公車、救護車：程式產生的車殼（props.js），用現有的鏽鐵照片貼圖，煙燻、灰燼、鏽色寫在頂點色。
+- 牆面髒污、水痕、大範圍明暗：程式畫的 256² 雜訊圖（kit.js），不用下載。
+- 地上的燒焦、油漬，牆上的煙燻、水痕：程式畫的 512² 圖集（map.js）。
+- 遠方煙柱：同一張雜訊圖做的 shader（props.js）。

@@ -14,6 +14,7 @@ export class HUD {
     this.banner = null;     // 章節標題
     this.prompt = null;
     this.obj = null;        // 目標 {p: Vector3, text}
+    this.foes = [];         // 要標出來的敵人 {p: 腳底位置, h: 標在多高}（打仗打到找不到人時）
     this.notes = [];
     this.resize(); addEventListener('resize', () => this.resize());
   }
@@ -22,7 +23,8 @@ export class HUD {
   title(big, small, t = 4) { this.banner = { big, small, t, T: t }; }
   note(text, color = CY) { this.notes.push({ text, t: 2, color }); if (this.notes.length > 4) this.notes.shift(); }
   hurt(angle) { this.dmg.push({ a: angle, t: 1.2 }); }
-  marker(kind) { if (kind === 'kill') this.kill = 0.5; else if (kind === 'head') this.head = 0.35; this.hit = 0.25; }
+  // 命中標記：kind＝hit（白）｜armor（冷藍：重裝兵的裝甲擋掉一部分）｜head（琥珀）｜kill（紅、大）；還亮著時不會被比較輕的蓋掉
+  marker(kind) { const R = { hit: 0, armor: 1, head: 2, kill: 3 }; if (this.hit > 0.12 && R[this.mk] > R[kind]) return; this.mk = kind; this.hit = kind === 'kill' ? 0.5 : 0.32; }
 
   draw(dt, G) {
     const x = this.x, d = this.d, W = this.c.width / d, H = this.c.height / d;
@@ -34,7 +36,7 @@ export class HUD {
     if (vm.scoped) this._scope(W, H, G);
     // ---- 準心（依散布張開）
     else if (!P.dead) {
-      const W0 = vm.W, spread = THREE.MathUtils.lerp(W0.spread * (1 + P.moveK * 0.8 + (P.grounded ? 0 : 1.5)), W0.adsSpread, vm.ads);
+      const W0 = vm.W, spread = vm.spreadNow ?? THREE.MathUtils.lerp(W0.spread * (1 + P.moveK * 0.8 + (P.grounded ? 0 : 1.5)), W0.adsSpread, vm.ads);   // 跟子彈用同一個散布（連射會張開）
       const px = spread / Math.tan(THREE.MathUtils.degToRad(this.cam.fov / 2)) * (H / 2) + 4 + vm.kick.z * 2;
       const a = 1 - vm.ads * 0.85 - P.sprintK;
       if (a > 0.05) {
@@ -49,14 +51,19 @@ export class HUD {
       // 手槍舉槍時：小點
       if (vm.cur === 'pistol' && vm.ads > 0.5) { x.fillStyle = 'rgba(127,243,255,0.9)'; x.fillRect(cx - 1.5, cy - 1.5, 3, 3); }
     }
-    // ---- 命中標記
+    // ---- 被打到的敵人頭上的血條
+    if (G.enemies) this._bars(dt, W, H, G);
+    // ---- 命中標記：斜的四短線從準心往外彈開，外圈一層深色描邊（亮的背景也看得清楚）
     if (this.hit > 0) {
-      const k = this.hit / 0.25, r = 10 + (1 - k) * 4;
-      x.strokeStyle = this.kill > 0 ? RD : this.head > 0 ? AM : '#fff'; x.lineWidth = this.kill > 0 ? 3 : 2; x.globalAlpha = k;
+      const K = this.mk || 'hit', k = clamp(this.hit / (K === 'kill' ? 0.5 : 0.32), 0, 1), pop = 1 - k;
+      const r = (K === 'kill' ? 11 : K === 'head' ? 10 : 8) + pop * 6, len = K === 'kill' ? 12 : K === 'armor' ? 6 : 9, lw = K === 'kill' ? 3.5 : 2.6;
+      x.globalAlpha = Math.min(1, k * 1.8); x.lineCap = 'round';
       x.beginPath();
-      for (const [sx, sy] of [[1, 1], [-1, 1], [1, -1], [-1, -1]]) { x.moveTo(cx + sx * r, cy + sy * r); x.lineTo(cx + sx * (r + 7), cy + sy * (r + 7)); }
-      x.stroke(); x.globalAlpha = 1;
-      this.hit -= dt; this.head -= dt; this.kill -= dt;
+      for (const [sx, sy] of [[1, 1], [-1, 1], [1, -1], [-1, -1]]) { x.moveTo(cx + sx * r, cy + sy * r); x.lineTo(cx + sx * (r + len), cy + sy * (r + len)); }
+      x.strokeStyle = 'rgba(0,0,0,0.55)'; x.lineWidth = lw + 2.5; x.stroke();
+      x.strokeStyle = K === 'kill' ? RD : K === 'head' ? AM : K === 'armor' ? '#9ec3dc' : '#fff'; x.lineWidth = lw; x.stroke();
+      x.lineCap = 'butt'; x.globalAlpha = 1;
+      this.hit -= dt;
     }
     // ---- 受擊方向（螢幕中央周圍的紅弧）
     for (let i = this.dmg.length - 1; i >= 0; i--) {
@@ -67,6 +74,8 @@ export class HUD {
     }
     // ---- 目標標記
     if (this.obj && !vm.scoped) this._objective(W, H, G);
+    // ---- 剩下的敵人（紅色小菱形，在畫面外就貼邊用箭頭指方向）
+    if (!vm.scoped) for (const f of this.foes) { const p = f.p.clone(); p.y += f.h; this._pin(W, H, p, P.pos.distanceTo(f.p), RD, 7, false); }
     // ---- 左下：生命＋護盾
     const bx = 34, by = H - 60, bw = Math.min(260, W * 0.3);
     x.font = '600 12px Rajdhani, sans-serif'; x.fillStyle = '#9fb4bb'; x.textBaseline = 'alphabetic';
@@ -108,6 +117,7 @@ export class HUD {
     if (G.objText) {
       x.font = '600 12px Rajdhani, sans-serif'; x.fillStyle = AM; x.fillText(G.chapterTag || '', 34, 40);
       x.font = '500 15px "Noto Sans TC", sans-serif'; x.fillStyle = '#e8f3f6'; x.fillText(G.objText, 34, 62);
+      if (G.objSub) { x.font = '500 13px "Noto Sans TC", sans-serif'; x.fillStyle = '#ff9a8a'; x.fillText(G.objSub, 34, 82); }
     }
     this._subs(dt, W, H);
     this._banner(dt, W, H);
@@ -119,9 +129,32 @@ export class HUD {
     x.fillStyle = col; x.fillRect(x0, y0, w * clamp(k, 0, 1), h);
   }
 
+  // 敵人頭上的血條：剛被打到的才顯示（ai.js 的 barT，2.6 秒）；白＝剩下的血（剩一半以下變紅）、淡黃＝這幾發打掉的（慢慢退掉）；
+  //   外框冷藍＝重裝兵（有裝甲，打身體只吃六成，打頭才痛）；倒下時血條空掉再消失
+  _bars(dt, W, H, G) {
+    const x = this.x, v = this._bv || (this._bv = new THREE.Vector3()), R = Math.min(W, H) * 0.46;
+    for (const e of G.enemies) {
+      if (!(e.barT > 0) || !e.hp0) continue;
+      e.barT = e.dead ? Math.min(e.barT, 0.4) - dt : e.barT - dt;
+      const f = clamp(e.hp / e.hp0, 0, 1); e.barG = Math.max(f, (e.barG ?? 1) - dt * 0.7);
+      if (e.s) e.s.headPos(v).y += 0.34 * e.s.root.scale.y; else v.copy(e.pos).y += 0.6;
+      v.project(this.cam); if (v.z > 1) continue;
+      const sx = (v.x * 0.5 + 0.5) * W, sy = (-v.y * 0.5 + 0.5) * H, bw = 46, bh = 5;
+      if (G.vm.scoped && Math.hypot(sx - W / 2, sy - H / 2) > R) continue;
+      x.globalAlpha = clamp(e.barT / 0.4, 0, 1);
+      x.fillStyle = 'rgba(0,0,0,0.55)'; x.fillRect(sx - bw / 2 - 1.5, sy - 1.5, bw + 3, bh + 3);
+      x.fillStyle = 'rgba(255,214,130,0.95)'; x.fillRect(sx - bw / 2, sy, bw * e.barG, bh);
+      x.fillStyle = f > 0.5 ? '#eef6f8' : RD; x.fillRect(sx - bw / 2, sy, bw * f, bh);
+      if (e.T && e.T.armor) { x.strokeStyle = '#9ec3dc'; x.lineWidth = 1.5; x.strokeRect(sx - bw / 2 - 3, sy - 3, bw + 6, bh + 6); }
+      x.globalAlpha = 1;
+    }
+  }
+
   // 目標標記：實心菱形（會輕輕閃）＋剩下幾公尺；跑到畫面外或背後時，貼在畫面邊緣、用箭頭指出方向
-  _objective(W, H, G) {
-    const x = this.x, p = this.obj.p.clone();
+  _objective(W, H, G) { this._pin(W, H, this.obj.p, this.obj.left ?? G.player.pos.distanceTo(this.obj.p), AM, 12, true); }
+  // 畫一個菱形標記（目標用琥珀色大的、敵人用紅色小的）；pulse＝會不會一閃一閃
+  _pin(W, H, p0, dist, col, r0, pulseOn) {
+    const x = this.x, p = p0.clone();
     const v = p.clone().project(this.cam);
     const behind = v.z > 1;
     let sx = (v.x * 0.5 + 0.5) * W, sy = (-v.y * 0.5 + 0.5) * H;
@@ -134,21 +167,21 @@ export class HUD {
       const k = Math.min((W / 2 - m) / Math.max(1e-3, Math.abs(dx)), (H / 2 - m) / Math.max(1e-3, Math.abs(dy)));
       sx = cx + dx * k; sy = cy + dy * k;
     }
-    const dist = this.obj.left ?? G.player.pos.distanceTo(p);
-    const pulse = 0.5 + 0.5 * Math.sin(performance.now() * 0.006);
+    const pulse = pulseOn ? 0.5 + 0.5 * Math.sin(performance.now() * 0.006) : 0.5;
     x.save(); x.translate(sx, sy);
     x.shadowColor = 'rgba(0,0,0,0.6)'; x.shadowBlur = 6;
     if (off) {
       const a = Math.atan2(sy - cy, sx - cx);
-      x.save(); x.rotate(a); x.fillStyle = AM; x.globalAlpha = 0.85 + 0.15 * pulse;
-      x.beginPath(); x.moveTo(30, 0); x.lineTo(14, -13); x.lineTo(14, 13); x.closePath(); x.fill(); x.restore();
+      const k = r0 / 12;
+      x.save(); x.rotate(a); x.fillStyle = col; x.globalAlpha = 0.85 + 0.15 * pulse;
+      x.beginPath(); x.moveTo(30 * k, 0); x.lineTo(14 * k, -13 * k); x.lineTo(14 * k, 13 * k); x.closePath(); x.fill(); x.restore();
     }
-    const r = 12 + pulse * 2;
-    x.globalAlpha = 0.95; x.fillStyle = 'rgba(255,179,71,0.9)'; x.strokeStyle = '#1b1206'; x.lineWidth = 2;
-    x.beginPath(); x.moveTo(0, -r); x.lineTo(r, 0); x.lineTo(0, r); x.lineTo(-r, 0); x.closePath(); x.fill(); x.stroke();
-    x.fillStyle = '#1b1206'; x.beginPath(); x.arc(0, 0, 3.2, 0, Math.PI * 2); x.fill();
-    x.shadowBlur = 4; x.font = '700 15px Rajdhani, sans-serif'; x.fillStyle = AM; x.textAlign = 'center';
-    x.fillText(`${dist.toFixed(0)} m`, 0, r + 18);
+    const r = r0 + pulse * 2;
+    x.globalAlpha = 0.86; x.fillStyle = col; x.strokeStyle = '#1b1206'; x.lineWidth = 2;
+    x.beginPath(); x.moveTo(0, -r); x.lineTo(r, 0); x.lineTo(0, r); x.lineTo(-r, 0); x.closePath(); x.fill(); x.globalAlpha = 0.95; x.stroke();
+    x.fillStyle = '#1b1206'; x.beginPath(); x.arc(0, 0, r0 * 0.27, 0, Math.PI * 2); x.fill();
+    x.shadowBlur = 4; x.font = `700 ${r0 > 10 ? 15 : 12}px Rajdhani, sans-serif`; x.fillStyle = col; x.textAlign = 'center';
+    x.fillText(`${dist.toFixed(0)} m`, 0, r + (r0 > 10 ? 18 : 14));
     x.restore(); x.globalAlpha = 1;
   }
 

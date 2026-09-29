@@ -8,7 +8,7 @@ export const clamp = THREE.MathUtils.clamp;
 // ---------------------------------------------------------------- 材質
 // tile＝一張貼圖代表幾公尺
 const SURF = {
-  concrete: { tex: 'painted_concrete', tile: 3.2, color: 0xb9b4aa },
+  concrete: { tex: 'painted_concrete', col: 'concrete_grey', tile: 3.2, color: 0xb4b0a8 },   // 原本的綠漆混凝土像迷彩：換成同一張的灰階版（col）
   wall: { tex: 'concrete_wall_008', tile: 3.0, color: 0xc4beb2 },
   brick: { tex: 'red_brick_03', tile: 2.4, color: 0xc9b5a5 },
   plaster: { tex: 'damaged_plaster', tile: 2.6, color: 0xd2cbc0 },
@@ -31,11 +31,13 @@ export async function loadSurfaces(renderer, onStep = () => {}) {
   });
   const out = {};
   await Promise.all(Object.entries(SURF).map(async ([k, s]) => {
-    const [map, normalMap, arm] = await Promise.all([T(s.tex + '_col.webp', true), T(s.tex + '_nor.webp'), T(s.tex + '_arm.webp')]);
+    // s.col 的新貼圖萬一抓不到（CDN 還是舊版本），退回原本那張，遊戲照樣能進
+    const col = s.col ? T(s.col + '_col.webp', true).catch(() => T(s.tex + '_col.webp', true)) : T(s.tex + '_col.webp', true);
+    const [map, normalMap, arm] = await Promise.all([col, T(s.tex + '_nor.webp'), T(s.tex + '_arm.webp')]);
     const m = new THREE.MeshStandardMaterial({ map, normalMap, roughnessMap: arm, aoMap: arm, metalnessMap: s.metal ? arm : null, metalness: s.metal ? 1 : 0, roughness: 1, color: s.color, vertexColors: true });
     // aoMap 預設吃第二組 UV：這裡直接用第一組（每個頂點都用同一套世界 UV）
-    m.onBeforeCompile = (sh) => { sh.fragmentShader = sh.fragmentShader.replace('#include <aomap_fragment>', AO_CHUNK); };
-    m.userData.tile = s.tile;
+    m.onBeforeCompile = (sh) => { sh.fragmentShader = sh.fragmentShader.replace('#include <aomap_fragment>', AO_CHUNK); grimeShader(sh, m); };
+    m.userData.tile = s.tile; m.userData.grime = s.metal ? 0.6 : 1;
     out[k] = m;
   }));
   return out;
@@ -53,30 +55,75 @@ const AO_CHUNK = `
   #endif
 #endif`;
 
+// ---------------------------------------------------------------- 風化：大範圍明暗（打破貼圖重複）、牆上往下流的水痕、成片的污漬
+//   一張程式畫的 256² 雜訊圖（不用下載）；依世界座標取樣，所以合併網格、實例化模型都接得起來
+let GRIME = null;
+export function grimeTex() {
+  if (GRIME) return GRIME;
+  const N = 256, px = new Uint8Array(N * N * 4);
+  const hash = (x, y, s) => { let h = (x * 374761393 + y * 668265263 + s * 982451653) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
+  // 可循環的值雜訊：橫向 cx 格、縱向 cy 格
+  const vn = (u, v, cx, cy, s) => {
+    const x = u * cx, y = v * cy, x0 = Math.floor(x), y0 = Math.floor(y), fx = x - x0, fy = y - y0, sx = fx * fx * (3 - 2 * fx), sy = fy * fy * (3 - 2 * fy);
+    const h = (i, j) => hash((x0 + i) % cx, (y0 + j) % cy, s);
+    return (h(0, 0) * (1 - sx) + h(1, 0) * sx) * (1 - sy) + (h(0, 1) * (1 - sx) + h(1, 1) * sx) * sy;
+  };
+  for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
+    const u = i / N, v = j / N, k = (j * N + i) * 4;
+    px[k] = 255 * (0.45 * vn(u, v, 4, 4, 1) + 0.28 * vn(u, v, 8, 8, 2) + 0.17 * vn(u, v, 16, 16, 3) + 0.1 * vn(u, v, 32, 32, 4));   // 大範圍明暗
+    px[k + 1] = 255 * (0.55 * vn(u, v, 48, 3, 5) + 0.3 * vn(u, v, 96, 5, 6) + 0.15 * vn(u, v, 24, 2, 7));                           // 直向拉長：水痕
+    px[k + 2] = 255 * (0.5 * vn(u, v, 24, 24, 8) + 0.3 * vn(u, v, 48, 48, 9) + 0.2 * vn(u, v, 96, 96, 10));                         // 污漬（跟大範圍明暗同一次取樣，頻率高一點）
+    px[k + 3] = 255;
+  }
+  const t = new THREE.DataTexture(px, N, N); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.magFilter = THREE.LinearFilter; t.minFilter = THREE.LinearMipmapLinearFilter; t.generateMipmaps = true; t.needsUpdate = true;
+  return (GRIME = t);
+}
+// 插進任何 MeshStandardMaterial 的 shader（onBeforeCompile 裡呼叫）；m.userData.grime＝強度（0 關掉）
+export function grimeShader(sh, m) {
+  const k = m.userData.grime ?? 1; if (!k) return;
+  sh.uniforms.grimeMap = { value: grimeTex() }; sh.uniforms.grimeK = { value: k };
+  sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vGW; varying vec3 vGN;').replace('#include <begin_vertex>', `#include <begin_vertex>
+    vec4 gw = vec4( transformed, 1.0 ); vec3 gn = objectNormal;
+    #ifdef USE_INSTANCING
+      gw = instanceMatrix * gw; gn = mat3( instanceMatrix ) * gn;
+    #endif
+    vGW = ( modelMatrix * gw ).xyz; vGN = mat3( modelMatrix ) * gn;`);
+  sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nuniform sampler2D grimeMap; uniform float grimeK; varying vec3 vGW; varying vec3 vGN;').replace('#include <map_fragment>', `#include <map_fragment>
+    {
+      vec3 gn = normalize( vGN ); float wallK = 1.0 - abs( gn.y );
+      float al = abs( gn.x ) > abs( gn.z ) ? vGW.z : vGW.x;
+      vec2 gu = vGW.xz + vec2( al * wallK, vGW.y );
+      vec4 gm = texture2D( grimeMap, gu * 0.011 ); float mac = gm.r, bl = gm.b;
+      float st = texture2D( grimeMap, vec2( al * 0.035, vGW.y * 0.06 ) ).g;
+      float d = ( 0.52 - mac ) * 0.55 + wallK * smoothstep( 0.52, 0.8, st ) * 0.42 + smoothstep( 0.56, 0.8, bl ) * 0.3;
+      diffuseColor.rgb *= clamp( 1.0 - grimeK * d * vec3( 0.88, 1.0, 1.14 ), 0.25, 1.3 );
+    }`);
+}
+
 // ---------------------------------------------------------------- 合併幾何
 class Bucket {
   constructor(tile) { this.tile = tile; this.p = []; this.n = []; this.u = []; this.c = []; }
   // 四邊形 a b c d（逆時針朝外），n＝法線，shade＝頂點亮度（暗角／室內）
-  quad(a, b, c, d, n, shade = [1, 1, 1, 1], uvs = null) {
-    const T = this.tile;
+  quad(a, b, c, d, n, shade = [1, 1, 1, 1], uvs = null, tint = null) {
+    const T = this.tile, t = tint || ONE;
     const P = [a, b, c, d];
     const ax = Math.abs(n[0]) > 0.5 ? [2, 1] : Math.abs(n[1]) > 0.5 ? [0, 2] : [0, 1];
     const uv = uvs || P.map((p) => [p[ax[0]] / T * (n[0] < -0.5 || n[2] > 0.5 ? 1 : n[1] > 0.5 ? 1 : -1), p[ax[1]] / T]);
     for (const i of [0, 1, 2, 0, 2, 3]) {
       this.p.push(P[i][0], P[i][1], P[i][2]); this.n.push(n[0], n[1], n[2]);
-      this.u.push(uv[i][0], uv[i][1]); const s = shade[i]; this.c.push(s, s, s);
+      this.u.push(uv[i][0], uv[i][1]); const s = shade[i]; this.c.push(s * t[0], s * t[1], s * t[2]);
     }
   }
   // 方塊；skip＝不畫的面 'px nx py ny pz nz'；shade(y)＝依高度的亮度（牆腳髒一點）
   box(x0, x1, y0, y1, z0, z1, o = {}) {
     const sk = o.skip || '', S = o.shade || shadeY;
-    const sh = (ys) => ys.map((y) => S(y, o));
-    if (!sk.includes('px')) this.quad([x1, y0, z1], [x1, y0, z0], [x1, y1, z0], [x1, y1, z1], [1, 0, 0], sh([y0, y0, y1, y1]));
-    if (!sk.includes('nx')) this.quad([x0, y0, z0], [x0, y0, z1], [x0, y1, z1], [x0, y1, z0], [-1, 0, 0], sh([y0, y0, y1, y1]));
-    if (!sk.includes('pz')) this.quad([x0, y0, z1], [x1, y0, z1], [x1, y1, z1], [x0, y1, z1], [0, 0, 1], sh([y0, y0, y1, y1]));
-    if (!sk.includes('nz')) this.quad([x1, y0, z0], [x0, y0, z0], [x0, y1, z0], [x1, y1, z0], [0, 0, -1], sh([y0, y0, y1, y1]));
-    if (!sk.includes('py')) this.quad([x0, y1, z1], [x1, y1, z1], [x1, y1, z0], [x0, y1, z0], [0, 1, 0], sh([y1, y1, y1, y1]));
-    if (!sk.includes('ny')) this.quad([x0, y0, z0], [x1, y0, z0], [x1, y0, z1], [x0, y0, z1], [0, -1, 0], sh([y0, y0, y0, y0]));
+    const sh = (ys) => ys.map((y) => S(y, o)), t = o.tint;
+    if (!sk.includes('px')) this.quad([x1, y0, z1], [x1, y0, z0], [x1, y1, z0], [x1, y1, z1], [1, 0, 0], sh([y0, y0, y1, y1]), null, t);
+    if (!sk.includes('nx')) this.quad([x0, y0, z0], [x0, y0, z1], [x0, y1, z1], [x0, y1, z0], [-1, 0, 0], sh([y0, y0, y1, y1]), null, t);
+    if (!sk.includes('pz')) this.quad([x0, y0, z1], [x1, y0, z1], [x1, y1, z1], [x0, y1, z1], [0, 0, 1], sh([y0, y0, y1, y1]), null, t);
+    if (!sk.includes('nz')) this.quad([x1, y0, z0], [x0, y0, z0], [x0, y1, z0], [x1, y1, z0], [0, 0, -1], sh([y0, y0, y1, y1]), null, t);
+    if (!sk.includes('py')) this.quad([x0, y1, z1], [x1, y1, z1], [x1, y1, z0], [x0, y1, z0], [0, 1, 0], sh([y1, y1, y1, y1]), null, t);
+    if (!sk.includes('ny')) this.quad([x0, y0, z0], [x1, y0, z0], [x1, y0, z1], [x0, y0, z1], [0, -1, 0], sh([y0, y0, y0, y0]), null, t);
   }
   // 任意朝向的方塊（中心、半尺寸、繞 Y 轉）：道具用
   obox(cx, cy, cz, hx, hy, hz, ry = 0, o = {}) {
@@ -84,7 +131,7 @@ class Bucket {
     const P = (x, y, z) => [cx + x * c + z * s, cy + y, cz - x * s + z * c];
     const N = (x, y, z) => [x * c + z * s, y, -x * s + z * c];
     const S = o.shade || shadeY;
-    const f = (a, b, cc, d, n) => { const pts = [a, b, cc, d].map((q) => P(...q)); this.quad(pts[0], pts[1], pts[2], pts[3], N(...n), pts.map((q) => S(q[1], o))); };
+    const f = (a, b, cc, d, n) => { const pts = [a, b, cc, d].map((q) => P(...q)); this.quad(pts[0], pts[1], pts[2], pts[3], N(...n), pts.map((q) => S(q[1], o)), null, o.tint); };
     f([hx, -hy, hz], [hx, -hy, -hz], [hx, hy, -hz], [hx, hy, hz], [1, 0, 0]);
     f([-hx, -hy, -hz], [-hx, -hy, hz], [-hx, hy, hz], [-hx, hy, -hz], [-1, 0, 0]);
     f([-hx, -hy, hz], [hx, -hy, hz], [hx, hy, hz], [-hx, hy, hz], [0, 0, 1]);
@@ -93,9 +140,9 @@ class Bucket {
     if (!o.noBottom) f([-hx, -hy, -hz], [hx, -hy, -hz], [hx, -hy, hz], [-hx, -hy, hz], [0, -1, 0]);
   }
   // 任意幾何（已套好世界矩陣）：依法線方向重新算世界 UV
-  geo(g, M, shade = 1) {
+  geo(g, M, shade = 1, tint = null) {
     const G = g.index ? g.toNonIndexed() : g;
-    const P = G.attributes.position, N = G.attributes.normal, T = this.tile;
+    const P = G.attributes.position, N = G.attributes.normal, T = this.tile, C = G.attributes.color, t = tint || ONE;   // C：幾何自帶的頂點色（煙燻、鏽）
     const nm = new THREE.Matrix3().getNormalMatrix(M);
     const v = new THREE.Vector3(), n = new THREE.Vector3();
     for (let i = 0; i < P.count; i++) {
@@ -103,7 +150,7 @@ class Bucket {
       this.p.push(v.x, v.y, v.z); this.n.push(n.x, n.y, n.z);
       const ax = Math.abs(n.x), ay = Math.abs(n.y), az = Math.abs(n.z);
       if (ax >= ay && ax >= az) this.u.push(v.z / T, v.y / T); else if (ay >= az) this.u.push(v.x / T, v.z / T); else this.u.push(v.x / T, v.y / T);
-      const s = typeof shade === 'function' ? shade(v.y) : shade; this.c.push(s, s, s);
+      const s = typeof shade === 'function' ? shade(v.y) : shade; if (C) this.c.push(s * t[0] * C.getX(i), s * t[1] * C.getY(i), s * t[2] * C.getZ(i)); else this.c.push(s * t[0], s * t[1], s * t[2]);
     }
   }
   geometry() {
@@ -117,6 +164,7 @@ class Bucket {
     return g;
   }
 }
+const ONE = [1, 1, 1];
 // 牆腳 0.6 m 內變暗（髒污＋接地陰影），室內（o.dim）整體暗一點
 function shadeY(y, o) { const base = o.dim ?? 1; const g = y - (o.ground ?? 0); return base * (g < 0.8 ? 0.62 + 0.38 * (g / 0.8) : 1); }
 
@@ -237,13 +285,18 @@ const _v = new THREE.Vector3();
 export class Builder {
   constructor(mats, solid) {
     this.mats = mats; this.solid = solid;
-    this.B = {};
-    for (const k of Object.keys(mats)) this.B[k] = new Bucket(mats[k].userData.tile || 3);
+    this.B = {}; this.T = {};
+    for (const k of Object.keys(mats)) if (!mats[k].userData.alias) this.B[k] = new Bucket(mats[k].userData.tile || 3);
+    // 別名：只差顏色的材質共用同一個桶（同一個 draw call），顏色改寫進頂點色（aliasTint）
+    for (const k of Object.keys(mats)) { const u = mats[k].userData; if (u.alias) { this.B[k] = this.B[u.alias]; this.T[k] = u.aliasTint; } }
     this.breakables = [];
     this.extra = [];   // 其他網格（窗戶玻璃、燈）
   }
   // 實心方塊＋碰撞
+  // 別名材質的顏色乘進 tint
+  _t(mat, o) { const a = this.T[mat]; if (!a) return o; const t = o.tint || ONE; return { ...o, tint: [a[0] * t[0], a[1] * t[1], a[2] * t[2]] }; }
   block(mat, x0, x1, y0, y1, z0, z1, o = {}) {
+    o = this._t(mat, o);
     if (x1 < x0) [x0, x1] = [x1, x0];
     if (z1 < z0) [z0, z1] = [z1, z0];
     const bucket = this.B[mat], start = bucket.p.length;
@@ -259,26 +312,28 @@ export class Builder {
   // 只有外觀
   deco(mat, x0, x1, y0, y1, z0, z1, o = {}) { this.block(mat, x0, x1, y0, y1, z0, z1, { ...o, solid: false }); }
   obox(mat, cx, cy, cz, hx, hy, hz, ry = 0, o = {}) {
-    this.B[mat].obox(cx, cy, cz, hx, hy, hz, ry, o);
+    this.B[mat].obox(cx, cy, cz, hx, hy, hz, ry, this._t(mat, o));
     if (o.solid !== false) {
       // 碰撞用外接 AABB
       const c = Math.abs(Math.cos(ry)), s = Math.abs(Math.sin(ry));
       const ex = hx * c + hz * s, ez = hx * s + hz * c;
-      this.solid.add({ x0: cx - ex, x1: cx + ex, y0: cy - hy, y1: cy + hy, z0: cz - ez, z1: cz + ez, mat: o.hitMat || mat });
+      // 斜放的另外記下真正的斜方塊（obb）：玩家的子彈用它判斷，外接盒多出來的四角不會擋子彈
+      this.solid.add({ x0: cx - ex, x1: cx + ex, y0: cy - hy, y1: cy + hy, z0: cz - ez, z1: cz + ez, mat: o.hitMat || mat, obb: Math.abs(Math.sin(2 * ry)) > 0.01 ? { cx, cz, hx, hz, ry } : undefined });
     }
   }
   // 任意幾何放到 (x,y,z)、繞 Y 轉 ry；solid＝要不要加外接碰撞盒
   mesh(mat, g, x, y, z, ry = 0, o = {}) {
     const M = new THREE.Matrix4().compose(new THREE.Vector3(x, y, z), new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), ry), new THREE.Vector3(1, 1, 1).multiplyScalar(o.scale || 1));
-    this.B[mat].geo(g, M, o.shade ?? ((yy) => (yy - y < 0.5 ? 0.7 + 0.6 * (yy - y) : 1)));
+    this.B[mat].geo(g, M, o.shade ?? ((yy) => (yy - y < 0.5 ? 0.7 + 0.6 * (yy - y) : 1)), this._t(mat, o).tint);
     if (o.solid) { g.computeBoundingBox(); const bb = g.boundingBox.clone().applyMatrix4(M); this.solid.add({ x0: bb.min.x, x1: bb.max.x, y0: bb.min.y, y1: o.top ?? bb.max.y, z0: bb.min.z, z1: bb.max.z, mat: o.hitMat || mat }); }
   }
   build(scene) {
     const out = [];
     for (const [k, b] of Object.entries(this.B)) {
+      if (this.T[k]) continue;   // 別名：跟本尊同一個桶，不要畫兩次
       const g = b.geometry(); if (!g) continue;
       const m = new THREE.Mesh(g, this.mats[k]);
-      m.castShadow = true; m.receiveShadow = true;
+      m.castShadow = !this.mats[k].userData.noCast; m.receiveShadow = true;   // noCast：燈片、玻璃、地上的警示線投影子沒意義，省影子那一趟
       m.name = 'lvl-' + k; b.mesh = m;
       scene.add(m); out.push(m);
     }

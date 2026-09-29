@@ -180,9 +180,9 @@ export class FXL {
     this.sparks = [];   // {p, v, life, t, w, c:[r,g,b], grav}
     this.beams = [];    // {a, b, t, life, w, c}
     this.bolts = [];    // 由遊戲邏輯管理的光彈（這裡只畫）
-    // 閃光用的點光源（三盞輪流）
+    // 閃光用的點光源（兩盞輪流）：場景裡每多一盞點光，每個像素都要多算一次（沒在閃也算）；閃光只有 0.07～0.25 秒，兩盞就夠
     this.lights = [];
-    for (let i = 0; i < 3; i++) { const l = new THREE.PointLight(0xffffff, 0, 12, 2); l.castShadow = false; scene.add(l); this.lights.push({ l, t: 0, life: 1, I: 0 }); }
+    for (let i = 0; i < 2; i++) { const l = new THREE.PointLight(0xffffff, 0, 12, 2); l.castShadow = false; scene.add(l); this.lights.push({ l, t: 0, life: 1, I: 0 }); }
     this.li = 0;
     this.quality = 1;
   }

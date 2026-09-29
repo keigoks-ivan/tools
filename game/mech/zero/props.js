@@ -1,6 +1,7 @@
 // 道具的形狀（回傳 {材質名: 幾何}，由 Builder.mesh 合併進地圖）：燒毀轎車、油桶、飛彈架、機庫吊車、工具車、體積光錐
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { grimeTex } from './kit.js';
 
 const cache = {};
 function prism(pts, w, bev = 0.04, holes = []) {
@@ -18,49 +19,198 @@ function merge(list) {
 }
 const cyl = (r, h, seg = 16) => new THREE.CylinderGeometry(r, r, h, seg);
 
-// ---------------------------------------------------------------- 燒毀的轎車（長 4.6 m，面向 +Z）
-// 車身輪廓帶輪拱；車窗燒空（深色）；輪框、底盤
-export function car(variant = 0) {
-  const key = 'car' + variant;
-  if (cache[key]) return cache[key];
-  const arch = (cz, r = 0.42, n = 10) => { const pts = []; for (let i = 0; i <= n; i++) { const a = Math.PI - (i / n) * Math.PI; pts.push([cz + Math.cos(a) * r, 0.28 + Math.sin(a) * r * 0.95]); } return pts; };
-  const low = [[-2.3, 0.3], ...arch(-1.4), [-0.9, 0.28], [0.9, 0.28], ...arch(1.4), [2.3, 0.3], [2.33, 0.62], [2.22, 0.9], [1.25, 0.98], [-1.35, 1.0], [-2.2, 0.93], [-2.34, 0.72]];
-  const body = prism(low.map(([z, y]) => [z, y]).reverse(), 1.78, 0.06);
-  // 燒空車窗，保留車室、儀表台和座椅剪影。
-  const interior = [new THREE.BoxGeometry(1.5, 0.12, 2.5).translate(0, 0.68, 0), new THREE.BoxGeometry(1.46, 0.18, 0.34).translate(0, 0.88, 0.85)];
-  for (const x of [-0.4, 0.4]) for (const z of [-0.65, 0.2]) {
-    interior.push(new THREE.BoxGeometry(0.52, 0.12, 0.48).translate(x, 0.75, z));
-    interior.push(new THREE.BoxGeometry(0.5, 0.43, 0.12).rotateX(-0.15).translate(x, 0.93, z - 0.22));
+// ---------------------------------------------------------------- 車殼：沿車長（z）排一圈圈斷面，接成一張光滑曲面
+//   ring(z)＝右半邊斷面（由下往上到車頂中線）的點 [[x,y],...]，左半邊自動鏡射；每個斷面點數要一樣
+//   skip(z0,z1,k)＝這格不畫（燒掉的窗）；glass＝這格畫成玻璃；inner＝這格背面也畫（從窗洞看進去的車門、車頂內側）
+//   col(x,y,z,k)＝頂點色（煙燻、灰燼、鏽、烤漆色帶）；warp(p)＝整體變形（凹陷、塌陷）
+function loft(S) {
+  const Z = S.z, rings = Z.map((z) => S.ring(z)), n = rings[0].length, R = 2 * n - 1;
+  const P = [], C = [];
+  for (let i = 0; i < Z.length; i++) for (let m = 0; m < R; m++) {
+    const k = m < n ? m : 2 * n - 2 - m, [hx, y] = rings[i][k], x = m < n ? hx : -hx;
+    const v = new THREE.Vector3(x, y, Z[i]); if (S.warp) S.warp(v, k);
+    P.push(v.x, v.y, v.z); C.push(...S.col(x, y, Z[i], k));
   }
-  const vertices = body.attributes.position;
-  for (let i = 0; i < vertices.count; i++) {
-    const x = vertices.getX(i), y = vertices.getY(i), z = vertices.getZ(i);
-    const dent = Math.exp(-Math.pow((z - 1.5) / 0.55, 2)) * Math.max(0, y - 0.5);
-    vertices.setXYZ(i, x * (1 - dent * 0.15), y - dent * (0.2 + 0.08 * Math.sin(x * 9)), z);
+  const id = (i, m) => i * R + m, out = [], gl = [], inn = [];
+  for (let i = 0; i < Z.length - 1; i++) for (let m = 0; m < R - 1; m++) {
+    const k = m < n - 1 ? m : 2 * n - 3 - m, z0 = Z[i], z1 = Z[i + 1];
+    if (S.skip && S.skip(z0, z1, k)) continue;
+    const q = [id(i, m), id(i, m + 1), id(i + 1, m + 1), id(i, m), id(i + 1, m + 1), id(i + 1, m)];
+    (S.glass && S.glass(z0, z1, k) ? gl : out).push(...q);
+    if (S.inner && S.inner(z0, z1, k)) inn.push(q[0], q[2], q[1], q[3], q[5], q[4]);
   }
-  body.computeVertexNormals();
-  const roof = prism([[0.58, 1.38], [0.62, 1.44], [-0.74, 1.46], [-0.72, 1.4]], 1.62, 0.02);
-  const pillars = [];
-  for (const s of [-1, 1]) {
-    pillars.push(new THREE.BoxGeometry(0.07, 0.5, 0.08).rotateX(-0.62).translate(s * 0.76, 1.19, 0.92));
-    pillars.push(new THREE.BoxGeometry(0.07, 0.46, 0.1).translate(s * 0.78, 1.2, -0.05));
-    pillars.push(new THREE.BoxGeometry(0.07, 0.5, 0.1).rotateX(0.7).translate(s * 0.77, 1.2, -1.02));
-  }
-  const wheels = [], rims = [];
-  for (const [x, z] of [[0.78, 1.4], [-0.78, 1.4], [0.78, -1.4], [-0.78, -1.4]]) {
-    wheels.push(new THREE.TorusGeometry(0.265, 0.085, 4, 12).rotateY(Math.PI / 2).translate(x, 0.34, z));
-    rims.push(new THREE.TorusGeometry(0.185, 0.024, 3, 12).rotateY(Math.PI / 2).translate(x, 0.34, z));
-    rims.push(cyl(0.065, 0.24, 10).rotateZ(Math.PI / 2).translate(x, 0.34, z));
-    for (let k = 0; k < 5; k++) rims.push(new THREE.BoxGeometry(0.2, 0.028, 0.33).rotateX(k * Math.PI / 5).translate(x, 0.34, z));
-  }
-  const under = new THREE.BoxGeometry(1.6, 0.18, 4.2).translate(0, 0.25, 0);
-  const bumpers = [new THREE.BoxGeometry(1.82, 0.16, 0.14).translate(0, 0.45, 2.3), new THREE.BoxGeometry(1.82, 0.16, 0.14).translate(0, 0.45, -2.32)];
-  const out = {
-    body: merge([body, roof, ...pillars]),
-    dark: merge([...interior, ...wheels, under, ...bumpers]),
-    metal: merge(rims),
+  // 頭尾封口（扇形）
+  const cap = (i, dir) => {
+    const r = rings[i], yc = (r[0][1] + r[n - 1][1]) * 0.5, c = P.length / 3;
+    const v = new THREE.Vector3(0, yc, Z[i]); if (S.warp) S.warp(v, -1);
+    P.push(v.x, v.y, v.z); C.push(...S.col(0, yc, Z[i], -1));
+    for (let m = 0; m < R; m++) { const a = id(i, m), b = id(i, (m + 1) % R); if (dir > 0) out.push(c, a, b); else out.push(c, b, a); }
   };
-  return (cache[key] = out);
+  if (S.caps !== false) { cap(0, -1); cap(Z.length - 1, 1); }
+  const mk = (idx) => { const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); g.setAttribute('color', new THREE.Float32BufferAttribute(C, 3)); g.setIndex(idx); g.computeVertexNormals(); return g; };
+  const body = mk(out), res = { body, glass: gl.length ? mk(gl) : null, inner: null };
+  if (inn.length) {
+    // 內側：沿外殼法線往內縮 3 cm，反面、深色
+    const ip = [], np = body.attributes.normal;
+    for (let j = 0; j < P.length / 3; j++) ip.push(P[j * 3] - np.getX(j) * 0.03, P[j * 3 + 1] - np.getY(j) * 0.03, P[j * 3 + 2] - np.getZ(j) * 0.03);
+    const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(ip, 3)); g.setIndex(inn); g.computeVertexNormals();
+    res.inner = g;
+  }
+  return res;
+}
+const sstep = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+const lerp = (a, b, t) => a + (b - a) * t;
+// 固定的小雜訊（同一個 seed 每次一樣）
+const hn = (x, y, z, s) => { const v = Math.sin(x * 12.9898 + y * 78.233 + z * 37.719 + s * 17.17) * 43758.5453; return v - Math.floor(v); };
+const soot = (x, y, z, s) => 0.5 + 0.5 * Math.sin(x * 3.1 + z * 1.7 + s) * Math.sin(y * 5.3 + z * 2.3 + s * 2.1);
+// 只保留位置、法線、顏色，合併
+function mergeC(list, col = null) {
+  const gs = list.filter(Boolean).map((g) => {
+    const n = g.index ? g.toNonIndexed() : g.clone();
+    for (const k of Object.keys(n.attributes)) if (!['position', 'normal', 'color'].includes(k)) n.deleteAttribute(k);
+    if (!n.attributes.normal) n.computeVertexNormals();
+    if (!n.attributes.color) { const c = col || [1, 1, 1], a = new Float32Array(n.attributes.position.count * 3); for (let i = 0; i < a.length; i += 3) a.set(c, i); n.setAttribute('color', new THREE.BufferAttribute(a, 3)); }
+    return n;
+  });
+  return mergeGeometries(gs, false);
+}
+const tint = (g, c) => { const n = g.index ? g.toNonIndexed() : g; const a = new Float32Array(n.attributes.position.count * 3); for (let i = 0; i < a.length; i += 3) a.set(c, i); n.setAttribute('color', new THREE.BufferAttribute(a, 3)); return n; };
+const box = (w, h, d, x, y, z, c) => tint(new THREE.BoxGeometry(w, h, d).translate(x, y, z), c || [1, 1, 1]);
+
+// 輪子：燒掉的車只剩鋼圈壓在地上（輪胎殘骸很薄）；沒燒的是扁掉的輪胎
+function wheel(x, z, burned, r = 0.19, side = 1) {
+  const rim = [], dark = [];
+  const cy = burned ? r + 0.02 : 0.3;
+  rim.push(tint(new THREE.CylinderGeometry(r, r, 0.17, 14, 1, true).rotateZ(Math.PI / 2).translate(x, cy, z), [0.55, 0.5, 0.46]));
+  rim.push(tint(new THREE.CylinderGeometry(r * 0.72, r * 0.72, 0.02, 14).rotateZ(Math.PI / 2).translate(x + side * 0.05, cy, z), [0.5, 0.46, 0.42]));
+  rim.push(tint(new THREE.TorusGeometry(r, 0.02, 4, 14).rotateY(Math.PI / 2).translate(x + side * 0.08, cy, z), [0.6, 0.55, 0.5]));
+  if (burned) dark.push(tint(new THREE.TorusGeometry(r + 0.03, 0.04, 5, 14).rotateY(Math.PI / 2).scale(1, 0.8, 1).translate(x - side * 0.03, cy - 0.03, z), [0.35, 0.33, 0.32]));
+  else dark.push(tint(new THREE.TorusGeometry(0.24, 0.085, 6, 16).rotateY(Math.PI / 2).scale(1, 0.92, 1).translate(x, 0.29, z), [0.5, 0.5, 0.5]));
+  return { rim, dark };
+}
+// 輪拱內側的深色擋泥板（不然從輪拱看得到車殼裡面是空的）
+const flip = (g) => { const ix = g.index.array; for (let i = 0; i < ix.length; i += 3) { const t = ix[i + 1]; ix[i + 1] = ix[i + 2]; ix[i + 2] = t; } const n = g.attributes.normal; for (let i = 0; i < n.count; i++) n.setXYZ(i, -n.getX(i), -n.getY(i), -n.getZ(i)); return g; };
+const liner = (x, z, r, w, y = 0.3) => tint(flip(new THREE.CylinderGeometry(r, r, w, 12, 1, true, 0, Math.PI).rotateZ(Math.PI / 2).translate(x, y, z)), [0.25, 0.24, 0.23]);
+
+// ---------------------------------------------------------------- 轎車（長 4.6 m，面向 +Z）
+//   variant：0 三廂、1 兩廂（掀背）、2 車頭撞爛；burned＝燒毀（沒玻璃、只剩鋼圈、煙燻）
+export function car(variant = 0, burned = true) {
+  const key = 'car' + variant + (burned ? 'b' : 'p');
+  if (cache[key]) return cache[key];
+  const hatch = variant === 1, crash = variant === 2, sd = variant * 3.7 + (burned ? 0 : 11);
+  const L = 2.3, AX = [1.38, -1.4], AR = 0.43;
+  const zs = [-2.3, -2.26, -2.18, -2.05, -1.9, -1.72, -1.55, -1.4, -1.25, -1.05, -0.95, -0.8, -0.62, -0.36, -0.3, -0.24, -0.05, 0.12, 0.35, 0.5, 0.7, 0.88, 1.05, 1.2, 1.38, 1.56, 1.75, 1.95, 2.12, 2.22, 2.28, 2.3];
+  const rf = hatch ? -1.72 : -0.95, rb = hatch ? -2.05 : -1.55;   // 車頂後緣、後窗下緣
+  const gh = (z) => sstep(rb, rf, z) * (1 - sstep(0.35, 1.05, z));
+  const sill = (z) => { let y = burned ? 0.2 : 0.3; for (const a of AX) { const d = Math.abs(z - a); if (d < AR) y = Math.max(y, 0.3 + Math.sqrt(AR * AR - d * d)); } return y; };
+  const ring = (z) => {
+    const e = Math.abs(z), end = sstep(1.9, 2.3, e), g = gh(z);
+    const wb = 0.9 - end * 0.1 - (z > 0 ? end * 0.06 : 0), ws = wb - 0.05, ys = sill(z) + end * 0.12;
+    const hood = z > 0 ? lerp(0.95, 0.84, sstep(1.0, 2.25, z)) : lerp(0.98, hatch ? 0.95 : 0.93, sstep(-1.6, -2.28, z));
+    const yb = hood - end * 0.1, yr = 1.43 - (burned ? 0.07 * Math.sin(Math.PI * sstep(-1, 0.4, z)) : 0), wr = 0.68;
+    const deck = [[wb - 0.12, yb + 0.02], [wb - 0.22, yb + 0.035], [wb * 0.6, yb + 0.05], [wb * 0.3, yb + 0.058], [0, yb + 0.06]];
+    const cab = [[wr + 0.1, yb + 0.05], [wr, yr - 0.07], [wr - 0.1, yr], [wr * 0.5, yr + 0.03], [0, yr + 0.035]];
+    return [[ws, ys], [wb + 0.02, ys + (yb - ys) * 0.38], [wb + 0.01, yb - 0.08], [wb - 0.04, yb], ...deck.map((d, i) => [lerp(d[0], cab[i][0], g), lerp(d[1], cab[i][1], g)])];
+  };
+  const inCab = (z0, z1) => z0 >= rb - 0.01 && z1 <= 1.06;
+  // 側窗（B 柱 -0.36～-0.24、C 柱在後面）、前後擋風玻璃
+  const side = (z0, z1) => (z0 >= (hatch ? -1.72 : -0.8) && z1 <= -0.36) || (z0 >= -0.24 && z1 <= 0.88 && z0 >= -0.24);
+  const shield = (z0, z1, k) => (z0 >= 0.35 && z1 <= 1.05 && k >= 6) || (z0 >= rb && z1 <= rf && k >= 7);   // 後窗兩側留寬一點的 C 柱
+  const win = (z0, z1, k) => (k === 4 && side(z0, z1)) || shield(z0, z1, k);
+  const col = (x, y, z, k) => {
+    if (!burned) { const d = 0.82 + hn(x, y, z, sd) * 0.18; return [d, d, d]; }
+    // 燒過：整體鏽褐，窗框一圈燻黑，上面零星灰白的灰燼
+    const up = sstep(0.7, 1.2, y), s = soot(x, y, z, sd), w = k >= 3 && k <= 6 && inCab(z, z) ? 0.5 : 1, ash = up * sstep(0.62, 0.9, hn(Math.round(x * 4), 1, Math.round(z * 5), sd));
+    let v = lerp(0.5, 0.7, up) * lerp(0.55, 1, s) * w * (0.85 + hn(x, y, z, sd) * 0.2);
+    for (const seam of [0.88, -0.3, -1.05]) if (Math.abs(z - seam) < 0.02 && k < 4) v *= 0.35;   // 門縫
+    return [lerp(v * 1.08, 0.78, ash), lerp(v * 0.86, 0.75, ash), lerp(v * 0.72, 0.72, ash)];
+  };
+  const warp = (p) => {
+    if (crash && p.z > 1.3) { const t = sstep(1.3, 2.3, p.z); p.z -= t * 0.45; p.y -= t * 0.12 * sstep(0.5, 1, p.y); p.x *= 1 - t * 0.06; }
+    if (burned) { p.y += (hn(Math.round(p.x * 3), 0, Math.round(p.z * 4), sd) - 0.5) * 0.02 * sstep(0.6, 1.0, p.y) * (1 - sstep(1.2, 1.35, p.y)); }
+  };
+  const L0 = loft({ z: zs, ring, skip: burned ? win : null, glass: burned ? null : win, inner: (z0, z1, k) => inCab(z0, z1) && !win(z0, z1, k), col, warp });
+  // 車頭：保險桿、水箱罩、大燈洞；車尾：保險桿、尾燈
+  const zf = crash ? 1.88 : 2.3, dk = [0.2, 0.19, 0.18];
+  const dark = [L0.inner && tint(L0.inner, [0.16, 0.15, 0.14]), box(1.62, 0.16, 4.1, 0, 0.22, 0, dk), box(1.5, 0.1, 2.3, 0, 0.4, -0.35, [0.22, 0.21, 0.2]),
+    box(1.5, 0.22, 0.35, 0, 0.78, 0.95, [0.18, 0.17, 0.16]), box(0.9, 0.14, 0.05, 0, 0.62, zf + 0.005, [0.1, 0.1, 0.1])];
+  for (const x of [-0.6, 0.6]) { dark.push(box(0.28, 0.11, 0.03, x, 0.72, zf - 0.005, [0.08, 0.08, 0.08])); dark.push(box(0.26, 0.1, 0.03, x, 0.8, -2.29, [burned ? 0.12 : 0.5, 0.06, 0.05])); }
+  // 座椅：燒掉只剩鐵架
+  const metal = [];
+  for (const [x, z, w] of [[-0.4, 0.2, 0.52], [0.4, 0.2, 0.52], [0, -0.75, 1.3]]) {
+    (burned ? metal : dark).push(box(w, 0.08, 0.5, x, 0.58, z, burned ? [0.35, 0.3, 0.27] : [0.3, 0.28, 0.26]));
+    (burned ? metal : dark).push(tint(new THREE.BoxGeometry(w, 0.5, 0.07).rotateX(-0.2).translate(x, 0.85, z - 0.27), burned ? [0.35, 0.3, 0.27] : [0.3, 0.28, 0.26]));
+  }
+  metal.push(tint(new THREE.TorusGeometry(0.17, 0.018, 4, 12).rotateX(-1.1).translate(-0.4, 0.95, 0.62), [0.4, 0.4, 0.4]));
+  for (const a of AX) for (const s of [-1, 1]) { const w = wheel(s * 0.74, a, burned, 0.19, s); metal.push(...w.rim); dark.push(...w.dark); dark.push(liner(s * 0.66, a, AR - 0.02, 0.36)); }
+  // 保險桿（跟車身同材質；燒掉的車後保險桿掉一邊）
+  const bc = burned ? [0.32, 0.27, 0.23] : [0.3, 0.3, 0.3], bump = (rz, y, z) => tint(new THREE.CylinderGeometry(0.08, 0.08, 1.78, 8).rotateZ(Math.PI / 2).scale(1, 1, 0.8).rotateZ(rz).translate(0, y, z), bc);
+  const body = mergeC([L0.body, bump(0, 0.46, zf + 0.02), bump(burned ? 0.12 : 0, burned ? 0.37 : 0.46, -2.31)]);
+  return (cache[key] = { body, dark: mergeC(dark), metal: mergeC(metal), glass: L0.glass });
+}
+
+// ---------------------------------------------------------------- 燒毀的公車（長 10.4、寬 2.5、高 3 m，面向 +Z）：一整排窗洞看得到燒黑的車廂和座椅鐵架
+export function bus() {
+  if (cache.bus) return cache.bus;
+  const H = 5.2, AX = [3.3, -2.9], AR = 0.62;
+  const zs = [-5.2, -5.15, -5.05]; for (let z = -4.9; z < 4.9; z += 0.3) zs.push(+z.toFixed(2)); zs.push(4.95, 5.08, 5.15, 5.2);
+  const pil = (z) => { const u = (z + 4.6) / 1.15; return Math.abs(u - Math.round(u)) * 1.15 < 0.13 || z < -4.7; };   // 每 1.15 m 一根窗柱
+  const ring = (z) => {
+    const e = Math.abs(z), end = sstep(4.85, 5.2, e), wb = 1.25 - end * 0.05;
+    let ys = 0.28; for (const a of AX) { const d = Math.abs(z - a); if (d < AR) ys = Math.max(ys, 0.42 + Math.sqrt(AR * AR - d * d)); }
+    const sag = 0.16 * Math.sin(Math.PI * sstep(-4.5, 4.5, z)), yr = 3.0 - end * 0.12 - sag;
+    return [[wb - 0.03, ys], [wb, Math.min(ys + 0.3, 1.12)], [wb + 0.01, 1.2], [wb, 1.3], [wb - 0.02, 1.36], [wb - 0.05, yr - 0.32], [wb - 0.1, yr - 0.08], [wb - 0.35, yr], [wb * 0.5, yr + 0.05], [0, yr + 0.06]];
+  };
+  const door = (z0, z1) => z0 >= 3.95 && z1 <= 4.95;   // 前門（右側）
+  const win = (z0, z1, k) => (k === 4 && z0 >= -4.75 && z1 <= 4.95 && !pil((z0 + z1) / 2)) || (k === 3 && door(z0, z1));
+  const col = (x, y, z, k) => {
+    const up = sstep(1.2, 2.8, y), s = soot(x, y, z * 0.7, 3), w = k >= 3 && k <= 5 ? 0.5 : 1;
+    const v = lerp(0.5, 0.72, up) * lerp(0.5, 1, s) * w * (0.85 + hn(x, y, z, 5) * 0.2);
+    return [v * 1.08, v * 0.86, v * 0.72];
+  };
+  const warp = (p) => { p.y += (hn(Math.round(p.x * 2), 0, Math.round(p.z * 2), 9) - 0.5) * 0.05 * sstep(1.5, 2.6, p.y); };
+  const L0 = loft({ z: zs, ring, skip: win, inner: (z0, z1, k) => k !== 4 && k < 9, col, warp });
+  // 前後擋風玻璃燒掉：在頭尾封口前面挖不了洞，改成深色面板＋框
+  const dk = [0.16, 0.15, 0.14], dark = [tint(L0.inner, [0.14, 0.13, 0.12]), box(2.3, 0.2, 10, 0, 0.3, 0, dk), box(2.3, 0.08, 9.6, 0, 0.62, 0, [0.2, 0.19, 0.18]),
+    box(2.1, 1.25, 0.04, 0, 1.95, 5.215, [0.06, 0.06, 0.06]), box(2.1, 0.9, 0.04, 0, 2.1, -5.215, [0.06, 0.06, 0.06]), box(1.6, 0.3, 0.04, 0, 2.72, 5.2, [0.1, 0.1, 0.1])];
+  const metal = [];
+  // 座椅鐵架兩排
+  for (let z = -4.3; z < 3.4; z += 0.85) for (const x of [-0.7, 0.7]) {
+    metal.push(box(0.85, 0.05, 0.42, x, 1.05, z, [0.32, 0.28, 0.25]), tint(new THREE.BoxGeometry(0.85, 0.5, 0.05).rotateX(-0.15).translate(x, 1.32, z - 0.2), [0.32, 0.28, 0.25]));
+    metal.push(box(0.04, 0.45, 0.04, x, 0.84, z, [0.3, 0.27, 0.25]));
+  }
+  for (const a of AX) for (const s of [-1, 1]) { const w = wheel(s * 1.02, a, true, 0.3, s); metal.push(...w.rim); dark.push(...w.dark); dark.push(liner(s * 0.95, a, AR - 0.02, 0.5, 0.42)); }
+  const body = mergeC([L0.body, box(2.4, 0.22, 0.14, 0, 0.5, 5.25, [0.32, 0.27, 0.23]), tint(new THREE.BoxGeometry(2.4, 0.22, 0.14).rotateZ(0.08).translate(0, 0.45, -5.25), [0.32, 0.27, 0.23])]);
+  return (cache.bus = { body, dark: mergeC(dark), metal: mergeC(metal) });
+}
+
+// ---------------------------------------------------------------- 救護車（廂型：長 6、寬 2.4、高 2.6 m，面向 +Z）：白漆、紅色腰帶、車頭玻璃
+export function van() {
+  if (cache.van) return cache.van;
+  const AX = [2.0, -1.9], AR = 0.45;
+  const zs = [-3, -2.96, -2.88, -2.7, -2.4, -2.1, -1.9, -1.7, -1.4, -1, -0.5, 0, 0.5, 0.9, 1.15, 1.25, 1.45, 1.65, 1.8, 2.0, 2.2, 2.4, 2.6, 2.78, 2.9, 2.96, 3];
+  const ring = (z) => {
+    const e = Math.abs(z), end = sstep(2.7, 3, e), wb = 1.2 - end * 0.07;
+    let ys = 0.36; for (const a of AX) { const d = Math.abs(z - a); if (d < AR) ys = Math.max(ys, 0.36 + Math.sqrt(AR * AR - d * d)); }
+    // 車頂：後面車廂 2.6、駕駛座 2.15、引擎蓋 1.15
+    const hood = lerp(1.2, 1.08, sstep(2.4, 3, z)), cab = z > 1.2 ? 2.15 : 2.6, g = 1 - sstep(1.75, 2.45, z);
+    const yr = lerp(hood, cab, g) - end * 0.06, yb = Math.min(yr - 0.02, 1.2);
+    const top = (f) => lerp(yb + 0.03, yr, f), c = (y, i) => Math.min(y, yb - 0.012 * (7 - i));   // 引擎蓋那段：側面的點壓到蓋子下面
+    return [[wb - 0.04, ys], [wb, c(Math.min(ys + 0.25, 0.95), 1)], [wb, c(1.0, 2)], [wb, c(1.14, 3)], [wb, c(1.18, 4)], [wb, c(1.42, 5)], [wb, c(1.46, 6)], [wb - 0.01, top(0.72)], [wb - 0.08, yr - 0.02], [wb * 0.5, yr + 0.02], [0, yr + 0.025]];
+  };
+  const glass = (z0, z1, k) => (k === 6 && z0 >= 1.25 && z1 <= 2.2) || (k >= 8 && z0 >= 1.8 && z1 <= 2.45);
+  const col = (x, y, z, k) => {
+    const d = 1.45 * (0.86 + hn(x, y, z, 2) * 0.1) * lerp(0.7, 1, sstep(0.3, 1.0, y)) * lerp(0.85, 1, soot(x, y, z, 4));   // 白漆：頂點色大於 1 把鏽鐵貼圖提亮
+    if (k >= 4 && k <= 5 && z < 1.3) return [0.62 * d, 0.07 * d, 0.06 * d];   // 紅色腰帶
+    return [d, d * 0.98, d * 0.95];
+  };
+  const L0 = loft({ z: zs, ring, glass, col });
+  const dk = [0.16, 0.15, 0.14], dark = [box(2.2, 0.2, 5.4, 0, 0.3, 0, dk), box(0.35, 0.18, 0.05, -0.8, 0.95, 3.0, [0.1, 0.1, 0.1]), box(0.35, 0.18, 0.05, 0.8, 0.95, 3.0, [0.1, 0.1, 0.1]), box(1, 0.3, 0.04, 0, 0.8, 3.01, [0.08, 0.08, 0.08])];
+  // 後門門縫、把手、車頂警示燈
+  dark.push(box(0.03, 1.9, 0.02, 0, 1.35, -3.005, [0.1, 0.1, 0.1]), box(0.03, 1.8, 0.02, 1.215, 1.3, 1.0, [0.1, 0.1, 0.1]), box(0.03, 1.8, 0.02, -1.215, 1.3, 1.0, [0.1, 0.1, 0.1]));
+  const metal = [box(1.3, 0.12, 0.22, 0, 2.66, 1.0, [0.9, 0.2, 0.15]), box(2.3, 0.16, 0.14, 0, 0.5, 3.04, [0.55, 0.55, 0.55]), box(2.3, 0.16, 0.14, 0, 0.5, -3.04, [0.55, 0.55, 0.55])];
+  for (const a of AX) for (const s of [-1, 1]) { const w = wheel(s * 0.98, a, false, 0.2, s); metal.push(...w.rim); dark.push(...w.dark); dark.push(liner(s * 0.9, a, AR - 0.02, 0.4, 0.36)); }
+  return (cache.van = { body: L0.body, dark: mergeC(dark), metal: mergeC(metal), glass: L0.glass });
 }
 
 // ---------------------------------------------------------------- 油桶（200 L，帶箍）
@@ -107,6 +257,14 @@ export function crane(span) {
   return { hazard: merge(beams), metal: merge([...ties, ...cables, ...hook]), dark: merge(trolley) };
 }
 
+// 病床隔簾：沿 z 方向的一片布，有一道道直的皺褶（y 從 0 到 h）
+export function curtain(len, h) {
+  const key = 'cur' + len + h; if (cache[key]) return cache[key];
+  const g = new THREE.PlaneGeometry(len, h, 48, 1).rotateY(Math.PI / 2).translate(0, h / 2, 0), p = g.attributes.position;
+  for (let i = 0; i < p.count; i++) { const z = p.getZ(i), y = p.getY(i); p.setX(i, Math.sin(z * 9.5) * 0.045 + Math.sin(z * 3.1 + 1) * 0.02 + (1 - y / h) * Math.sin(z * 5) * 0.015); }
+  g.computeVertexNormals(); return (cache[key] = g);
+}
+
 // 張力帆布：中央下垂、邊緣皺褶；靜態幾何合併到場景。
 export function canopy() {
   if (cache.canopy) return cache.canopy;
@@ -141,6 +299,48 @@ export function lightCone(len, r0, r1, color, opacity = 0.12) {
   return mesh;
 }
 
+// ---------------------------------------------------------------- 遠方的濃煙柱（城裡其他地方在燒）：一片片面向鏡頭的長條，雜訊往上捲；全部一個網格、一次畫完
+//   list：[[x, 底部 y, z, 寬, 高], ...]；霧照一般材質算（離越遠越淡）
+export function smokePlumes(list) {
+  const P = [], B = [], S = [], I = [];
+  list.forEach(([x, y, z, w, h], i) => {
+    const k = P.length / 3;
+    for (const [u, v] of [[-0.5, 0], [0.5, 0], [0.5, 1], [-0.5, 1]]) { P.push(u, v, 0); B.push(x, y, z); S.push(w, h, i * 0.137); }
+    I.push(k, k + 1, k + 2, k, k + 2, k + 3);
+  });
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); g.setAttribute('base', new THREE.Float32BufferAttribute(B, 3)); g.setAttribute('prm', new THREE.Float32BufferAttribute(S, 3)); g.setIndex(I);
+  g.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 1e5);
+  const m = new THREE.ShaderMaterial({
+    transparent: true, depthWrite: false, fog: true,
+    uniforms: THREE.UniformsUtils.merge([THREE.UniformsLib.fog, { noise: { value: null }, time: { value: 0 } }]),
+    vertexShader: `attribute vec3 base, prm; varying vec2 vUv; varying float vSeed, vDist;
+      void main() {
+        vec3 to = cameraPosition - base; to.y = 0.0; vec3 rt = normalize(vec3(to.z, 0.0, -to.x));
+        float v = position.y, wid = prm.x * (0.55 + 0.9 * v * v);
+        vec3 transformed = base + rt * position.x * wid + vec3(0.0, v * prm.y, 0.0) + vec3(0.26, 0.0, 0.1) * v * v * prm.y;   // 往上散開、被風吹斜
+        vec4 mvPosition = viewMatrix * vec4(transformed, 1.0);
+        vUv = vec2(position.x, v); vSeed = prm.z; vDist = length(transformed - cameraPosition);
+        gl_Position = projectionMatrix * mvPosition;
+      }`,
+    fragmentShader: `uniform sampler2D noise; uniform float time; uniform vec3 fogColor; uniform float fogDensity; varying vec2 vUv; varying float vSeed, vDist;
+      void main() {
+        float t = time * 0.012, v = vUv.y;
+        float n = texture2D(noise, vec2(vUv.x * 0.45 + vSeed, v * 0.6 - t)).r * 0.6 + texture2D(noise, vec2(vUv.x * 0.28 - vSeed * 3.0, v * 0.38 - t * 0.5)).b * 0.4;
+        float edge = 1.0 - smoothstep(0.08, 0.5, abs(vUv.x) + (n - 0.5) * 0.4);
+        float a = edge * smoothstep(0.0, 0.05, v) * (1.0 - smoothstep(0.45, 1.0, v)) * smoothstep(0.18, 0.42, n + (1.0 - v) * 0.22);
+        vec3 c = mix(vec3(0.04, 0.036, 0.032), vec3(0.17, 0.155, 0.14), v) * (0.75 + n * 0.5);
+        c = mix(c, fogColor, (1.0 - exp(-vDist * fogDensity * 0.35)) * 0.8);   // 霧只算一部分：煙柱在高空，不然整柱被霧洗白
+        gl_FragColor = vec4(c, min(1.0, a * 1.15));
+      }`,
+  });
+  m.uniforms.noise.value = grimeTex();
+  const mesh = new THREE.Mesh(g, m);
+  mesh.frustumCulled = false; mesh.renderOrder = -1; mesh.userData.noAO = true; mesh.name = 'plumes';
+  mesh.onBeforeRender = () => { m.uniforms.time.value = performance.now() / 1000; };
+  return mesh;
+}
+
 // ---------------------------------------------------------------- 積水（深色、光滑，反射天空）
 export function puddleMat() {
   if (cache.pm) return cache.pm;
@@ -150,7 +350,7 @@ export function puddleMat() {
   g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(0.7, 'rgba(255,255,255,0.8)'); g.addColorStop(1, 'rgba(255,255,255,0)');
   x.fillStyle = g; x.fillRect(0, 0, 128, 128);
   const t = new THREE.CanvasTexture(c);
-  return (cache.pm = new THREE.MeshStandardMaterial({ color: 0x0c0d0e, roughness: 0.03, metalness: 0.0, alphaMap: t, transparent: true, depthWrite: false, envMapIntensity: 1.6, polygonOffset: true, polygonOffsetFactor: -2 }));
+  return (cache.pm = new THREE.MeshStandardMaterial({ color: 0x0c0d0e, roughness: 0.05, metalness: 0.0, alphaMap: t, transparent: true, depthWrite: false, envMapIntensity: 0.75, polygonOffset: true, polygonOffsetFactor: -2 }));   // 反光壓低：黃昏的積水不該像一面白鏡子
 }
 
 // ---------------------------------------------------------------- 水泥碎塊：扭曲的多面體（不是方塊），幾種形狀輪流用

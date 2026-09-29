@@ -83,19 +83,43 @@ const world = new World(renderer, scene, A);
   sc.left = -48; sc.right = 48; sc.top = 48; sc.bottom = -48; sc.updateProjectionMatrix();
   world.sun.shadow.bias = -0.00025; world.sun.shadow.normalBias = 0.035;
 }
-scene.fog.density = 0.0016;
+// 黃昏的戰場：遠處被煙塵蓋成暖灰色（霧濃一點、偏褐）；太陽更橘、陰影偏冷藍；天空地平線一層霾（全部只改參數，不多畫東西）
+scene.fog.color.setRGB(0.38, 0.325, 0.28); scene.fog.density = 0.003;
+world.sun.color.setRGB(1.0, 0.6, 0.34); world.sun.intensity = 5.4;
+scene.environmentIntensity = 0.42;
+scene.traverse((o) => {
+  if (o.isHemisphereLight) { o.color.setRGB(0.3, 0.4, 0.58); o.groundColor.setRGB(0.09, 0.07, 0.05); o.intensity = 0.3; }
+  const u = o.material && o.material.uniforms;
+  if (u && u.fogCol && u.sunFog && !o.material.userData.haze) {
+    o.material.userData.haze = true; u.fogCol.value.copy(scene.fog.color); u.gain.value *= 0.9;
+    o.material.fragmentShader = o.material.fragmentShader.replace('gl_FragColor = vec4(c, 1.0);', `
+        float hz = 1.0 - smoothstep(-1.0, 30.0, el);
+        c = mix(vec3(dot(c, vec3(0.3, 0.55, 0.15))), c, 0.62) * vec3(1.06, 0.9, 0.74);   // 褪色、偏暖：下午的藍天變成煙塵裡的黃昏
+        c = mix(c, fogCol * (1.0 + s * 1.6), hz * 0.8);
+        gl_FragColor = vec4(c, 1.0);`);
+    o.material.needsUpdate = true;
+  }
+});
 const solid = new Solid();
 const placer = new Placer(MODELS, solid);
 const map = buildMap(scene, SURF, solid, placer);
 const placed = placer.build(scene);
 console.log('[zero] 掃描模型', placed);
-for (const L of map.lights) { const l = new THREE.PointLight(L.c, L.i, L.d, 2); l.position.copy(L.p); scene.add(l); }
+// 點光源：每個像素都要把場景裡的每一盞點光算一遍（離多遠都算），地圖六盞很貴。
+//   改成固定三盞，每次畫之前搬到離鏡頭最近的三個燈位（機庫三盞同時亮，其他地方最多兩盞）：畫面一樣，shader 少算三盞
+const mapLights = map.lights.slice(0, 3).map((L) => { const l = new THREE.PointLight(L.c, 0, L.d, 2); scene.add(l); return l; });
+const lightOrder = map.lights.map((L, i) => [0, i]);
+scene.onBeforeRender = (r, s, cam) => {
+  for (const o of lightOrder) { const L = map.lights[o[1]]; o[0] = cam.position.distanceTo(L.p) - L.d; }
+  lightOrder.sort((a, b) => a[0] - b[0]);
+  mapLights.forEach((l, k) => { const L = map.lights[lightOrder[k][1]]; l.color.set(L.c); l.intensity = L.i; l.distance = L.d; l.position.copy(L.p); l.updateMatrixWorld(); });
+};
 vScene.environment = world.envMap;
 
 const post = new Post(renderer, scene, camera, vScene, vCam);
 post.gtao.updateGtaoMaterial({ radius: 0.9, distanceExponent: 1.5, thickness: 0.8, scale: 1.1, distanceFallOff: 1 });
 post.gtao.updatePdMaterial({ radius: 4, rings: 2, samples: 12 });
-post.u.vignette.value = 0.38;
+post.u.vignette.value = 0.44; post.u.grain.value = 0.02;
 
 const fx = new FXL(scene);
 fx.setFog(scene.fog.color, scene.fog.density);
@@ -121,7 +145,7 @@ window.__renderer = renderer; window.__scene = scene; window.__solid = solid; wi
 const G = {
   scene, solid, kit, audio, fx, player, vm, hud, t: 0, nextId: 1, enemies: [], playing: false,
   playerEye: new THREE.Vector3(), aimDir: new THREE.Vector3(0, 0, 1), ads: 0, diff: { acc: 1, dmg: 1 }, bolts: [], grenades: [],
-  chapterTag: '', objText: '', scopeRange: 0, stats: { shots: 0, hits: 0, kills: 0, heads: 0, taken: 0, time: 0 },
+  chapterTag: '', objText: '', objSub: '', lastHit: -99, scopeRange: 0, stats: { shots: 0, hits: 0, kills: 0, heads: 0, taken: 0, time: 0 },
   // 同時開火的敵人上限（避免四面八方同時打）
   canShoot(e) { let n = 0; for (const o of G.enemies) if (o !== e && !o.dead && (o.burst > 0)) n++; return n < 3; },
   // 敵人丟手榴彈：拋物線丟到目標附近（落點有一點誤差），撞牆撞地會彈，2.6 秒後爆炸
@@ -246,10 +270,10 @@ const doneT = {};   // 每段清完的時間（after＋wait 用）
 function markDone(id, old = false) { done.add(id); doneT[id] = old ? -1e9 : performance.now() / 1000; }   // old＝讀檔／選關還原的，不必再等 wait
 function startEncounter(E) {
   const list = E.enemies.map(spawn);
-  active.push({ E, list, picked: false });
+  active.push({ E, list, picked: false, t0: G.t, n: list.length });
   for (const [who, text] of E.lines) hud.say(who, text, 3.6);
   if (E.lines.length) audio.radio('in');
-  G.objText = E.obj;
+  G.objText = list.length ? E.fight || '擊倒所有敵人' : E.obj;   // 開打後改成「要打誰」，不要還寫著「爬上高架道路」
   hud.obj = E.pickup ? guideObj(E) : null;
   if (E.alarm && !alarmOn) { alarmOn = true; audio.alarm(true); }
 }
@@ -263,7 +287,17 @@ function guideFor(E) {
 // 帶路：一串轉彎點 [x, z, 高度?]，畫面上的指示和光柱一次只指下一個點，走到了就換下一個（不會直接指穿牆）
 // 轉彎點如果剛好落在車子、沙包、護欄裡，推到旁邊最近的空地（地圖改了也不會指到東西裡面）
 const pt3 = (w) => { const y = w[2] ?? 0, q = new THREE.Vector3(w[0], y, w[1]); for (let k = 0; k < 6; k++) if (!solid.pushOut(q, 0.55, y, y + 1.7, 0.45)) break; return new THREE.Vector3(q.x, y + 1.2, q.z); };
-function routeObj(pts) { const route = pts.map(pt3); return { route, i: 0, p: route[0].clone() }; }
+function routeObj(pts) { const route = pts.map(pt3), o = { route, i: 0, p: route[0].clone() }; startAt(o); return o; }
+// 從哪一點開始帶：最近、同一層、看得到的那個轉彎點（打完仗人常常已經走過前面幾個點，不要叫他走回頭路）
+function startAt(o) {
+  const P = player.pos, eye = new THREE.Vector3(P.x, P.y + player.eyeH, P.z), R = o.route;
+  let best = 0, bd = 1e9;
+  for (let j = 0; j < R.length; j++) {
+    const w = R[j], d = Math.hypot(w.x - P.x, w.z - P.z);
+    if (Math.abs(w.y - 1.2 - P.y) < 1.5 && d < bd && solid.sees(eye, w)) { bd = d; best = j; }
+  }
+  o.i = best; o.p.copy(R[best]);
+}
 const guideObj = (E) => routeObj([...(E.route || []), [E.guide[0], E.guide[1], E.guide[2]]]);
 const markObj = (E) => routeObj([...(E.nextRoute || []), [E.mark.x, E.mark.z, E.mark.y]]);
 function updateGuide(dt) {
@@ -380,6 +414,17 @@ function updateEncounters() {
     for (const [w, t] of S.LINES.mech) hud.say(w, t, 3.4); audio.radio('in');
   }
 }
+// 打仗時：左上角多一行「還剩幾個敵人」；剩 3 個以內又 6 秒沒打中人、或 20 秒都沒打中人時，畫面上標出剩下的敵人在哪（不會打完一半找不到人）
+function updateFoes() {
+  hud.foes.length = 0; G.objSub = '';
+  const a = active.find((x) => x.list.length); if (!a) return;
+  const left = a.list.filter((e) => !e.dead);
+  if (left.length < a.n) { a.n = left.length; a.t0 = G.t; }   // 有人倒下也算「剛打到」
+  if (!left.length) return;
+  G.objSub = `還剩 ${left.length} 個敵人`;
+  const quiet = G.t - Math.max(a.t0, G.lastHit);
+  if ((left.length <= 3 && quiet > 6) || quiet > 20) for (const e of left) hud.foes.push({ p: e.pos, h: e.type === 'drone' ? 0.7 : 2.2 });
+}
 function nextChapter(n) {
   const C = S.CHAPTERS[n - 1];
   hud.title(`第 ${n} 章　${C.name}`, C.en, 4);
@@ -394,6 +439,75 @@ function nextChapter(n) {
 }
 
 // ---------------------------------------------------------------- 開槍
+// 子彈用的射線：碰撞盒是外接方塊，斜放的車和箱子四角、護欄頂上鋼筋環之間、手推車框架中間、沙包牆被打掉的缺口、樓梯斜坡上方其實是空的，
+//   看得到人卻打不到（準心明明在頭上，子彈停在看不見的盒子）。打到這幾種盒子時，再對真正的形狀驗一次（掃描模型的網格、每一袋沙包、斜坡面），
+//   是空的就穿過去。只給玩家的子彈用：走路碰撞、敵人視線照舊
+const _rc = new THREE.Raycaster(), _pm = new THREE.Mesh(undefined, new THREE.MeshBasicMaterial({ side: THREE.DoubleSide })), _hole = [];
+_pm.matrixAutoUpdate = false;
+// 模型 name 擺在 mat：射線打到網格的距離＋法線（沒打到＝null）
+function meshHit(name, mat, o, d, far) {
+  const M = MODELS.get(name); if (!M) return null;
+  _rc.set(o, d); _rc.far = far; _pm.matrixWorld.copy(mat);
+  let best = null;
+  for (const p of M.parts) { _pm.geometry = p.geo; const h = _rc.intersectObject(_pm, false)[0]; if (h && (!best || h.distance < best.distance)) best = h; }
+  if (!best) return null;
+  const n = best.face ? best.face.normal.clone().transformDirection(mat) : d.clone().negate();
+  if (n.dot(d) > 0) n.negate();
+  return { t: best.distance, n };
+}
+// 盒子在射線上真正擋到的地方 {t, n}；是空的＝null；不用驗的（牆、地板、一般方塊）＝undefined
+function realHit(b, o, d, far) {
+  const ob = b.obj;
+  if (b.ramp) {
+    // 斜坡：頂面沿軸線從 y0 升到 y1（碰撞盒的射線把它當成半高的方塊），找射線第一次走到頂面以下的點
+    let lo = 0, hi = far;
+    for (const [oo, dd, mn, mx] of [[o.x, d.x, b.x0, b.x1], [o.y, d.y, b.y0, b.y1], [o.z, d.z, b.z0, b.z1]]) {
+      if (Math.abs(dd) < 1e-9) { if (oo < mn || oo > mx) return null; continue; }
+      let ta = (mn - oo) / dd, tb = (mx - oo) / dd; if (ta > tb) [ta, tb] = [tb, ta];
+      lo = Math.max(lo, ta); hi = Math.min(hi, tb); if (lo > hi) return null;
+    }
+    const f = (t) => o.y + d.y * t - solid.top(b, o.x + d.x * t, o.z + d.z * t), f0 = f(lo), f1 = f(hi);
+    const cross = () => lo + (hi - lo) * f0 / (f0 - f1);
+    if (f0 <= 0) {
+      // 鐵樓梯（map.js 的 P.stairs）底下是空的，只有踏板和兩側的樑：從底下穿過去不算，往上穿過踏板才算；水泥匝道底下是實心的
+      if (b.mat !== 'metal' || f0 > -0.3) return { t: lo, n: d.clone().negate() };
+      return f1 > 0 ? { t: cross(), n: d.clone().negate() } : null;
+    }
+    if (f1 > 0) return null;
+    const s = (b.y1 - b.y0) / (b.ramp.axis === 'x' ? b.x1 - b.x0 : b.z1 - b.z0) * (b.ramp.dir > 0 ? 1 : -1);
+    return { t: cross(), n: (b.ramp.axis === 'x' ? new THREE.Vector3(-s, 1, 0) : new THREE.Vector3(0, 1, -s)).normalize() };
+  }
+  if (ob && ob.kind === 'bagwall') { let best = null; for (const g of ob.bags) if (g.alive) { const h = meshHit('cement_bag', g.h.mat, o, d, far); if (h && (!best || h.t < best.t)) best = h; } return best; }
+  if (b.obb) {
+    // 斜放的方塊：盒子上有 obb＝{cx, cz, hx, hz, ry}（中心、半長寬、繞 Y 轉角，跟 kit.js 的 obox 同一套）就用斜方塊算，外接盒多出來的四角是空的
+    const { cx, cz, hx, hz, ry } = b.obb, c = Math.cos(ry), s = Math.sin(ry), ox = o.x - cx, oz = o.z - cz;
+    let lo = 0, hi = far, ax = 0;
+    for (const [k, oo, dd, h] of [[0, ox * c - oz * s, d.x * c - d.z * s, hx + 0.04], [1, o.y, d.y, 0], [2, ox * s + oz * c, d.x * s + d.z * c, hz + 0.04]]) {   // 多 4 cm：邊框、門把凸出一點
+      const mn = k === 1 ? b.y0 : -h, mx = k === 1 ? b.y1 : h;
+      if (Math.abs(dd) < 1e-9) { if (oo < mn || oo > mx) return null; continue; }
+      let ta = (mn - oo) / dd, tb = (mx - oo) / dd; if (ta > tb) [ta, tb] = [tb, ta];
+      if (ta > lo) { lo = ta; ax = k; } hi = Math.min(hi, tb); if (lo > hi) return null;
+    }
+    return { t: lo, n: ax === 1 ? new THREE.Vector3(0, d.y > 0 ? -1 : 1, 0) : d.clone().negate() };
+  }
+  if (ob && ob.handle && ob.name && MODELS.has(ob.name)) return meshHit(ob.name, ob.handle.mat, o, d, far);
+  return undefined;
+}
+function shotRay(o, d, maxT) {
+  let best = null, far = maxT;
+  for (let k = 0; k < 10; k++) {
+    const h = solid.ray(o, d, far);
+    if (!h) break;
+    const r = h.b ? realHit(h.b, o, d, far) : undefined;
+    if (r === undefined) { best = h; break; }                 // 實心的：就是它
+    if (r) { h.t = r.t; h.n = r.n; best = h; far = r.t; }     // 真的打到了，但點在盒子裡面：記下來，再找有沒有更近的
+    _hole.push([h.b, h.b.noRay]); h.b.noRay = true;           // 驗過的盒子這次先不算
+  }
+  for (const [b, v] of _hole) b.noRay = v;
+  _hole.length = 0;
+  return best;
+}
+G.shotRay = shotRay;
 let recoilV = 0, recoil = 0;
 function playerShoot(shot) {
   const eye = G.playerEye, W = shot.W;
@@ -403,7 +517,7 @@ function playerShoot(shot) {
     const U = new THREE.Vector3(0, 1, 0).applyQuaternion(camera.quaternion), R = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
     d.addScaledVector(U, Math.sin(a) * r).addScaledVector(R, Math.cos(a) * r).normalize();
   }
-  const wh = solid.ray(eye, d, W.range);
+  const wh = shotRay(eye, d, W.range);
   let maxT = wh ? wh.t : W.range, target = null, part = null;
   for (const e of G.enemies) { const h = e.hitTest(eye, d, maxT); if (h) { maxT = h.t; target = e; part = h.part; } }
   const end = eye.clone().addScaledVector(d, maxT);
@@ -413,12 +527,19 @@ function playerShoot(shot) {
   G.stats.shots++;
   if (target) {
     const dmg = part === 'head' ? W.head : part === 'limb' ? W.limb : W.dmg;
+    const armored = !!(target.T && target.T.armor && part !== 'head');   // 重裝兵打身體：裝甲擋掉四成
     const killed = target.damage(dmg, d.clone(), part, player.pos);
-    G.stats.hits++;
-    fx.impact(end, d.clone().negate(), 'armor', shot.weapon === 'rifle' ? [0.8, 2.4, 4] : [0.7, 2, 3.5], shot.weapon === 'rifle' ? 1.1 : 0.7);
-    audio.hit(end, part === 'head' ? 'head' : target.type === 'drone' ? 'metal' : 'armor');
+    G.stats.hits++; G.lastHit = G.t;
+    // 打中人的火花和打牆分得出來：牆是青色，打中人是橘色（爆頭大一點、偏黃），重裝兵裝甲是冷白的金屬火花
+    const n = d.clone().negate(), big = shot.weapon === 'rifle' ? 1.25 : 0.85;
+    if (target.type === 'drone') fx.impact(end, n, 'metal', [3, 1.6, 0.6], big);
+    else if (armored) fx.impact(end, n, 'armor', [2.4, 2.8, 3.4], big * 1.2);
+    else fx.impact(end, n, 'body', part === 'head' ? [4, 2.4, 0.9] : [3.4, 1.3, 0.45], part === 'head' ? big * 1.4 : big);
+    // 命中聲：放在往敵人方向 3 m 的地方（遠的敵人也聽得清楚、分得出方向）；打身體是悶的肉聲、裝甲是鏗、爆頭清脆
+    audio.hit(eye.clone().addScaledVector(d, Math.min(maxT, 3)), part === 'head' ? 'head' : target.type === 'drone' ? 'metal' : armored ? 'armor' : 'body');
     audio.hitmark(killed ? 'kill' : part === 'head' ? 'head' : 'hit');
-    hud.marker(killed ? 'kill' : part === 'head' ? 'head' : 'hit');
+    hud.marker(killed ? 'kill' : part === 'head' ? 'head' : armored ? 'armor' : 'hit');
+    if (armored && !killed && !G.armorTip) { G.armorTip = true; hud.note('重裝兵有裝甲　打頭  AIM FOR THE HEAD', '#9ec3dc'); }
     if (killed) { G.stats.kills++; if (part === 'head') G.stats.heads++; if (target.type !== 'drone') hud.note(part === 'head' ? '爆頭  HEADSHOT' : '擊倒  DOWN', part === 'head' ? '#ffb347' : '#7ff3ff'); }
   } else if (wh) {
     const kind = /metal|rust|corr|olive/.test(wh.mat) ? 'metal' : wh.mat === 'glass' ? 'glass' : wh.mat === 'wood' ? 'concrete' : 'concrete';
@@ -721,7 +842,7 @@ function frame() {
   // 視角場景的光：在陰影裡嗎（往太陽方向打一條線）
   const inShade = !!solid.ray(G.playerEye, world.lightDir, 80);
   vm.light(camera, world.lightDir, null, inShade, dt);
-  if (vm.scoped) { const d = camera.getWorldDirection(new THREE.Vector3()); const h = solid.ray(G.playerEye, d, 400); G.scopeRange = h ? h.t : 0; }
+  if (vm.scoped) { const d = camera.getWorldDirection(new THREE.Vector3()); const h = shotRay(G.playerEye, d, 400); G.scopeRange = h ? h.t : 0; }   // 測距跟子彈用同一條射線
   // 敵人、光彈、手榴彈、遭遇戰（敵人會讀玩家準心方向、是不是正在用瞄準鏡）
   camera.getWorldDirection(G.aimDir); G.ads = vm.ads;
   for (const e of G.enemies) e.update(dt);
@@ -729,6 +850,7 @@ function frame() {
   updateGrenades(dt);
   D.update(dt);
   if (stage === 'play' && !finale) { updateEncounters(); updateHatch(dt); updatePickup(); }
+  updateFoes();
   updateGuide(dt);
   updateMechWalk(dt);
   // 後製：受傷、低血量

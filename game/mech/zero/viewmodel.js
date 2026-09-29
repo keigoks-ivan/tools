@@ -8,10 +8,12 @@ const clamp = THREE.MathUtils.clamp, lerp = THREE.MathUtils.lerp;
 const ease = (t) => t * t * (3 - 2 * t);
 const _v = new THREE.Vector3(), _q = new THREE.Quaternion(), _e = new THREE.Euler();
 
-// 武器數值：dmg＝軀幹、head＝頭、limb＝四肢；rof＝最短射擊間隔；spread＝腰射散布（弧度）
+// 武器數值：dmg＝軀幹、head＝頭、limb＝四肢；rof＝最短射擊間隔；spread＝站著不動、第一發的腰射散布（弧度）
+//   bloom＝連射時每發再散開多少、bloomMax＝上限、bloomDecay＝每秒收回多少（停一下就回到第一發的準度）；adsBloom＝舉槍時連射散開打幾折
+//   （原本腰射固定 0.022：25 m 外散成半徑 55 cm 的圓，比人還寬，準心壓在身上也常打不到）
 export const WEAPONS = {
-  rifle: { name: 'XLR-7 長槍', mag: 20, rof: 0.42, reload: 2.2, dmg: 125, head: 400, limb: 80, spread: 0.022, adsSpread: 0.0, fov: 20, kick: 0.05, auto: false, range: 300 },
-  pistol: { name: 'XP-2 手槍', mag: 30, rof: 0.13, reload: 1.35, dmg: 38, head: 95, limb: 28, spread: 0.02, adsSpread: 0.004, fov: 54, kick: 0.018, auto: true, autoRof: 0.19, range: 120 },
+  rifle: { name: 'XLR-7 長槍', mag: 20, rof: 0.42, reload: 2.2, dmg: 125, head: 400, limb: 80, spread: 0.009, bloom: 0.008, bloomMax: 0.013, bloomDecay: 0.016, adsSpread: 0.0, adsBloom: 0, fov: 20, kick: 0.05, auto: false, range: 300 },
+  pistol: { name: 'XP-2 手槍', mag: 30, rof: 0.13, reload: 1.35, dmg: 38, head: 95, limb: 28, spread: 0.008, bloom: 0.005, bloomMax: 0.012, bloomDecay: 0.02, adsSpread: 0.004, adsBloom: 0.3, fov: 54, kick: 0.018, auto: true, autoRof: 0.19, range: 120 },
 };
 
 export class ViewModel {
@@ -25,6 +27,7 @@ export class ViewModel {
     this.cur = 'rifle';
     this.ammo = { rifle: WEAPONS.rifle.mag, pistol: WEAPONS.pistol.mag };
     this.cd = 0; this.reloadT = -1; this.swapT = -1; this.swapTo = null;
+    this.bloom = { rifle: 0, pistol: 0 }; this.spreadNow = 0;   // 連射散開、目前的散布（準心也照這個畫）
     this.ads = 0; this.adsWant = false; this.scoped = false;
     this.heat = 0;           // 長槍線圈發熱（發光）
     this.kick = new THREE.Vector3(); this.kickV = new THREE.Vector3();   // 後座（位置）
@@ -81,6 +84,10 @@ export class ViewModel {
     this.holding = this.scoped && c.hold && this.breath > 0;
     if (this.holding) { if (!this._held) { this._held = true; this.audio.holdBreath(); } this.breath = Math.max(0, this.breath - dt / 3); }
     else { this._held = false; this.breath = Math.min(1, this.breath + dt / (this.breath <= 0 ? 5 : 2.5)); }
+    // ---- 散布：站著不動的第一發最準；走動、跳起來、連射會散開，停一下就收回來
+    const bl = this.bloom;
+    for (const k in bl) bl[k] = Math.max(0, bl[k] - dt * WEAPONS[k].bloomDecay);
+    this.spreadNow = lerp((W.spread + bl[this.cur]) * (1 + p.moveK * 1.5 + (p.grounded ? 0 : 2.5)) * (1 - p.crouchK * 0.3), W.adsSpread + bl[this.cur] * W.adsBloom, this.ads);
     // ---- 開槍
     this.cd -= dt;
     const trig = c.fire, press = trig && !this.lastTrigger;
@@ -90,7 +97,8 @@ export class ViewModel {
       if (this.ammo[this.cur] <= 0) { if (press) { this.audio.dry(); this.reload(); } }
       else {
         this.ammo[this.cur]--; this.cd = W.rof;
-        const spread = lerp(W.spread * (1 + p.moveK * 0.8 + (p.grounded ? 0 : 1.5)) * (1 - p.crouchK * 0.3), W.adsSpread, this.ads);
+        const spread = this.spreadNow;
+        bl[this.cur] = Math.min(W.bloomMax, bl[this.cur] + W.bloom);
         shot = { weapon: this.cur, spread, W };
         if (this.cur === 'rifle') {
           this.audio.rifle(this.ads > 0.5);
