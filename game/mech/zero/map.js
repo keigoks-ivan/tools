@@ -1,5 +1,7 @@
 // 地圖：城市中央廣場上的封閉街區（四周仍是鋼鐵黃昏的高樓天際線）
-//   路線：A 公寓（起點）→ B 窄巷 → C 市場廣場 → 商店穿堂 → D 檢查哨街道 → E 貨櫃場 → F 基地走廊 → G 第七機庫（鋼彈）
+//   路線：A 公寓（起點）→ B 窄巷 → C 市場廣場 → 商店穿堂 → D 檢查哨街道（街尾被貨櫃牆堵死）→ 北側商場走道
+//         → H 北區住宅街 → I 市立醫院（大廳、病房）→ K 醫院後院 → J 高架道路 → 匝道 → L 倉庫空地 → 倉庫穿堂
+//         → E 貨櫃場 → F 基地走廊 → G 第七機庫（鋼彈）
 //   座標：公尺；x 東、z 北；地面 y＝0
 import * as THREE from 'three';
 import { Builder } from './kit.js';
@@ -436,7 +438,15 @@ export function buildMap(scene, mats, solid, PL = null) {
   M.marks.ch2 = new THREE.Vector3(-52, 0, -42); M.marks.ch2Yaw = Math.PI / 2 * -1 * -1;
 
   // ============================================================ D 檢查哨街道（x -44～36，z -48～-34）
-  mass(-36, 6, -34, -8, 20, 'wall', 's', { shop: true, kit: 'apt' });
+  // 北側店面中間有一條穿過街區的商場走道（第 2 章被貨櫃牆擋住後往北繞）
+  mass(-36, -14.3, -34, -8, 20, 'wall', 'sn', { shop: true, kit: 'apt' });
+  mass(-5.7, 6, -34, -8, 20, 'wall', 'sn', { shop: true, kit: 'apt' });
+  room(-14, -6, -33.7, -8.3, { h: 3.6, floor: 'tile', ext: PL ? 'kplaster' : 'plaster', doors: { s: [[-10, 2.4]], n: [[-10, 2.4]] }, windows: { s: [[-12.6, 1.2], [-7.4, 1.2]] }, upper: 20, upperWin: 's', lightP: 0.6, trim: PL ? 'kplaster' : null });
+  for (const z of [-30, -25, -20, -15]) { b.block('metal', -13.7, -12.9, 0, 1.9, z - 1.5, z + 1.5); b.block('metal', -7.1, -6.3, 0, 1.9, z - 1.2, z + 1.2); for (const y of [0.6, 1.25]) { b.deco('olive', -13.6, -13, y, y + 0.3, z - 1.4, z + 1.4, { solid: false }); b.deco('paint2', -7, -6.4, y, y + 0.3, z - 1.1, z + 1.1, { solid: false }); } }
+  b.obox('olive', -9.2, 0.45, -18.5, 0.45, 0.45, 1.0, 0.9);   // 倒下的販賣機
+  P.rubble(-10.5, -12, 1.4, 8); P.crate(-8, -27, 0.9, 0.4); P.crate(-11.8, -22, 0.6, 1.1);
+  M.marks.ch3 = new THREE.Vector3(-10, 0, -30); M.marks.ch3Yaw = 0;
+  M.lights.push({ p: new THREE.Vector3(-10, 3, -20), c: 0xe8ecff, i: 30, d: 16 });
   mass(-44, 48, -70, -48, 16, 'concrete', 'n', { shop: true, kit: 'factory' });
   ground('floor', -44, 48, -48, -34);
   // 人行道邊石
@@ -454,10 +464,17 @@ export function buildMap(scene, mats, solid, PL = null) {
   P.rail('z', 35.6, -47, -38.5, 2.62);
   P.puddle(-24, -42, 3.5, 2.2, 0.3); P.puddle(-6, -46, 2.4, 1.6, 1.2); P.puddle(16, -40, 3, 2, 0.6);
   P.barrel(-10, -35.6); P.barrel(-9.4, -36.2, 'rust'); P.barrel(24, -47);
+  // 封鎖線：獵犬軍團用兩層貨櫃把貨櫃場入口整排堵死
+  for (const x of [17.05, 23.15, 29.25, 35.35]) { P.container(x, -33.9, 0, 0, 'olive'); P.container(x, -33.9, 0.01, 2.6); }
+  P.sandbags(15, -38.5, 3.5, 0.2); P.sandbags(24, -41.5, 3, -0.1);
   M.zones.D = { x0: -44, x1: 36, z0: -48, z1: -34 };
 
   // ============================================================ E 貨櫃場（x 14～46，z -34～20）→ 第 3 章前
-  mass(6, 14, -34, 22, 12, 'corr', 'e', { kit: 'factory' });
+  // 西側倉庫：北段有一條穿堂（第 4 章從高架道路匝道下來，由這裡進貨櫃場）
+  mass(6, 14, -34, 14, 12, 'corr', 'e', { kit: 'factory' });
+  mass(6, 14, 19, 22, 12, 'corr', 'e');
+  room(6.3, 13.7, 14.3, 18.7, { h: 3.4, wall: 'metal', ext: 'corr', floor: 'metal', doors: { w: [[16.5, 2.4]], e: [[16.5, 2.4]] }, upper: 12, lightP: 1 });
+  P.crate(12.6, 15.2, 1.1, 0.2); P.barrel(7.2, 18, 'rust');
   // 圍牆外的空地（獵犬機會從這裡走過去）：低矮的破倉庫、廢車
   ground('floor', 48, 114, -114, 80);
   mass(58, 70, 0, 14, 5, 'corr', 'w', { noParapet: true }); mass(88, 104, -30, -14, 6, 'corr', 'nw', { noParapet: true });
@@ -486,7 +503,7 @@ export function buildMap(scene, mats, solid, PL = null) {
   P.fence('x', 21.5, 14, 25); P.fence('x', 21.5, 31, 47);
   b.block('concrete', 23.5, 25, 0, 4.2, 20.8, 22.2); b.block('concrete', 31, 32.5, 0, 4.2, 20.8, 22.2);
   b.deco('hazard', 25, 31, 3.8, 4.2, 21.3, 21.7, { solid: false });
-  M.marks.ch3 = new THREE.Vector3(28, 0, 14); M.marks.ch3Yaw = 0;
+  M.marks.ch5 = new THREE.Vector3(28, 0, 14); M.marks.ch5Yaw = 0;
   ground('concrete', 14, 47, 22, 30);
   // 建築：入口大廳 → 中央走廊（北向）→ 兩側房間 → 機庫側門
   mass(14, 20, 22, 52, 8, 'concrete', 'e');
@@ -606,10 +623,102 @@ export function buildMap(scene, mats, solid, PL = null) {
   M.zones.G = { x0: HX0, x1: HX1, z0: HZ0, z1: HZ1 };
   M.marks.hatch = new THREE.Vector3(MX, GY, MZ - 3.2);
 
+  // ============================================================ 北區（第 3、4 章）：H 住宅街、I 市立醫院、K 後院、J 高架道路、L 倉庫空地
+  function northDistrict() {
+    // ---- H 北區住宅街（x -60～-2，z -8～6）：商場走道北門出來，往西走到街底的醫院
+    ground('floor', -60, -2, -8, 6);
+    b.deco('concrete', -60, -2, 0, 0.15, 4.8, 6);
+    mass(-36, -2, 6, 20, 16, 'brick', 's', { shop: true, kit: 'apt' });
+    mass(-2, 6, -8, 14, 18, 'wall', 'w', { kit: 'apt' });
+    P.deck(-26, -20, 4.6, 6, 3.6, 'concrete'); P.rail('x', 4.7, -26, -20, 3.6);   // 二樓陽台
+    P.car(-44, -3, 0.3); P.car(-30, 2, 2.9); P.car(-16, -5, 1.4); P.car(-57, -4, 0.2);
+    // 街底燒毀的公車（擋住東邊）
+    b.obox('rust', -4.5, 1.5, -1.5, 1.25, 1.5, 5.2, 0.15, { hitMat: 'metal' });
+    for (const s of [-1, 1]) b.obox('void', -4.5 + s * 1.27 * Math.cos(0.15), 2.1, -1.5 - s * 1.27 * Math.sin(0.15), 0.02, 0.45, 4.6, 0.15, { solid: false });
+    P.jersey(-38, -1, 1.2); P.jersey(-24, -4, 0.2); P.sandbags(-47, 1.5, 4, 0.1);
+    P.dumpster(-9, 4.2, 0); P.rubble(-34, 3, 2.4, 16); P.rubble(-13, -6.2, 1.6, 10);
+    P.crate(-20, -6.5, 1.1, 0.3); P.crate(-19, -6.9, 0.9, 1); P.barrel(-41, 4.5); P.barrel(-40.4, 4.1, 'rust');
+    P.puddle(-28, -3, 3, 2, 0.4); P.puddle(-49, -5, 2.5, 1.6, 1);
+    for (const x of [-30, -14]) P.ac(x, 4.5, 5.75, Math.PI);
+    M.zones.H = { x0: -60, x1: -2, z0: -8, z1: 6 };
+
+    // ---- I 市立醫院（x -60～-36，z 6～34）：南邊急診大門 → 大廳 → 北邊病房區 → 東門出後院
+    room(-59.6, -44, 6.3, 18, { h: 4, floor: 'tile', wall: 'plaster', ext: 'concrete', doors: { s: [[-52, 3]], n: [[-48, 2]] }, windows: { s: [[-57.3, 2], [-46.7, 2]] }, upper: 16, upperWin: 's', lightP: 0.7 });
+    room(-59.6, -36.3, 18.3, 34, { h: 3.6, floor: 'tile', wall: 'plaster', ext: 'concrete', doors: { e: [[28, 2]] }, noWall: 's', windows: { e: [[22, 1.6], [32, 1.6]] }, upper: 16, lightP: 0.6 });
+    mass(-43.7, -36, 6, 18, 16, 'concrete', 's');
+    // 急診雨遮＋紅十字
+    b.block('concrete', -55.5, -48.5, 3.9, 4.2, 2.8, 6); P.column(-55, 3.3, 3.9, 0.2); P.column(-49, 3.3, 3.9, 0.2);
+    b.deco('red', -52.4, -51.6, 5.2, 7.6, 5.9, 6.0, { solid: false }); b.deco('red', -53.2, -50.8, 6.0, 6.8, 5.9, 6.0, { solid: false });
+    // 大廳：掛號櫃台、候診椅、推床、敵人的沙包
+    b.block('paint2', -50, -45.5, 0, 1.1, 11.6, 12.6); b.deco('olive', -50.1, -45.4, 1.1, 1.16, 11.5, 12.7, { solid: false });
+    for (const z of [8.5, 10.5]) b.block('metal', -58.5, -54, 0, 0.5, z, z + 0.6);
+    b.block('metal', -46.5, -45, 0.6, 0.8, 7.5, 9.6); for (const [x, z] of [[-46.3, 7.7], [-45.2, 7.7], [-46.3, 9.4], [-45.2, 9.4]]) b.deco('metal', x - 0.03, x + 0.03, 0, 0.6, z - 0.03, z + 0.03, { solid: false });
+    P.sandbags(-51, 15, 3, 0); P.crate(-57.5, 16.5, 1.0, 0.3);
+    // 病房區：床、隔簾、半高隔牆（掩護）、護理站
+    for (const x of [-57, -52, -47, -42]) {
+      b.block('metal', x - 0.5, x + 0.5, 0, 0.6, 31.6, 33.6); b.deco('paint2', x - 0.45, x + 0.45, 0.6, 0.75, 31.7, 33.5, { solid: false }); b.deco('metal', x - 0.5, x + 0.5, 0.6, 1.3, 33.5, 33.6, { solid: false });
+      b.deco('canvas', x + 2.3, x + 2.34, 0.2, 2.5, 30, 33.8, { solid: false });
+    }
+    for (const x of [-56, -45]) b.block('plaster', x - 1.8, x + 1.8, 0, 1.4, 25.8, 26.1);
+    b.block('paint2', -51.5, -48.5, 0, 1.05, 21.5, 23);   // 護理站
+    b.block('plaster', -41, -40.7, 0, 1.4, 19, 23);
+    // 隼的病床（最東邊）：空的床、床單上的血、床邊桌上的啟動金鑰
+    const kx = -38.6, kz = 32.4;
+    b.block('metal', kx - 1.7, kx - 0.7, 0, 0.6, 31.6, 33.6); b.deco('paint2', kx - 1.65, kx - 0.75, 0.6, 0.75, 31.7, 33.5, { solid: false });
+    b.deco('red', kx - 1.5, kx - 0.95, 0.751, 0.76, 32.2, 33.1, { solid: false }); b.deco('red', kx - 2.2, kx - 1.2, 0.035, 0.04, 30.8, 31.6, { solid: false });
+    b.block('metal', kx - 0.4, kx + 0.4, 0, 0.8, kz - 0.4, kz + 0.4);
+    const key = new THREE.Group();
+    key.add(new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.035, 0.24), new THREE.MeshStandardMaterial({ color: 0x1e2227, roughness: 0.4, metalness: 0.8 })));
+    const kl = new THREE.Mesh(new THREE.BoxGeometry(0.05, 0.037, 0.2), new THREE.MeshBasicMaterial({ color: new THREE.Color(0.3, 1.6, 2.6) })); kl.userData.noAO = true; key.add(kl);
+    key.position.set(kx, 0.82, kz); key.rotation.y = 0.5; scene.add(key);
+    M.keyMesh = key; M.marks.key = new THREE.Vector3(kx, 0, kz);
+    M.lights.push({ p: new THREE.Vector3(-52, 3.4, 12), c: 0xe4ecff, i: 50, d: 20 }, { p: new THREE.Vector3(-46, 3, 28), c: 0xdfe6ff, i: 45, d: 22 });
+    M.zones.I = { x0: -60, x1: -36, z0: 6, z1: 34 };
+
+    // ---- K 醫院後院（x -36～-2，z 20～50）：逃生梯上高架道路
+    ground('concrete', -36, -2, 20, 50);
+    mass(-60, -36, 34.3, 50, 16, 'concrete', 'e');
+    b.block('concrete', -2.3, -2, 0, 3, 20, 40); b.block('concrete', -2.3, -2, 0, 5.4, 40, 50);   // 東側擋土牆（匝道在牆後）
+    P.stairs(-32, -29.5, 32, 40, 0, 6, 'z', 1);
+    b.obox('paint2', -14, 1.3, 30, 1.2, 1.3, 3, 0.4, { hitMat: 'metal' }); b.obox('red', -14, 1.6, 30, 1.21, 0.12, 3.01, 0.4, { solid: false });   // 救護車
+    P.car(-24, 24, 1.0); P.dumpster(-34.6, 22, Math.PI / 2); P.crate(-6, 36, 1.1); P.crate(-7.2, 35.3, 0.8, 0.6); P.barrel(-4, 23); P.barrel(-4.6, 22.5, 'rust');
+    P.rubble(-20, 37, 2, 12); P.puddle(-26, 30, 3, 2, 0.3);
+    M.marks.ch4 = new THREE.Vector3(-33, 0, 27); M.marks.ch4Yaw = 0.4;
+
+    // ---- J 高架道路（橋面 y＝6，x -36～6，z 40～50）：路障、燒毀的車、翻倒的貨櫃
+    const DY = 6;
+    b.block('concrete', -36, 6, DY - 0.6, DY, 40, 50);
+    for (const x of [-30, -18, -6]) for (const z of [41.5, 48.5]) P.column(x, z, DY - 0.6, 0.6);
+    b.block('concrete', -36, -32.2, DY, DY + 1, 40, 40.4); b.block('concrete', -29.3, -2, DY, DY + 1, 40, 40.4);
+    b.block('concrete', -36, 6, DY, DY + 1, 49.6, 50);
+    b.deco('concrete', -36, 6, DY, DY + 0.02, 44.9, 45.1, { solid: false, skip: 'ny' });   // 中線
+    const hulk = (x, z, ry) => { const g = PR.car(), paint = rnd() < 0.3 ? 'paint' : 'rust'; b.mesh(paint, g.body, x, DY, z, ry, { solid: true, top: DY + 1.2, hitMat: 'metal' }); b.mesh('void', g.dark, x, DY, z, ry); b.mesh('metal', g.metal, x, DY, z, ry); };
+    const barrier = (x, z, ry) => b.obox('concrete', x, DY + 0.45, z, 1.5, 0.45, 0.3, ry, { hitMat: 'concrete' });
+    hulk(-24, 43, 0.4); hulk(-12, 47.5, 2.6); hulk(1, 42.5, 1.3);
+    P.container(-16, 44, 0.3, DY, 'olive'); P.container(-5, 47, -0.2, DY);
+    barrier(-20, 46, 1.4); barrier(-8, 43, 0.1); barrier(-1, 46.5, 1.6); barrier(3.5, 44.5, 0.2);
+    P.crate(-27, 47.5, 1.1, 0.2, DY); P.crate(-3, 41.5, 0.9, 0.9, DY);
+    M.zones.J = { x0: -36, x1: 6, z0: 40, z1: 50 };
+
+    // ---- 匝道（x -2～6，z 26～40，從橋面降到地面）＋底下的擋土塊（不讓人從下面鑽過去）
+    const RA = Math.atan2(DY, 14), RL = Math.hypot(DY, 14);
+    const rg = new THREE.BoxGeometry(8, 0.6, RL).rotateX(-RA);
+    b.mesh('concrete', rg, 2, 3 - 0.3 * Math.cos(RA), 33 + 0.3 * Math.sin(RA), 0);
+    solid.add({ x0: -2, x1: 6, z0: 26, z1: 40, y0: 0, y1: DY, ramp: { axis: 'z', dir: 1 }, mat: 'concrete' });
+    for (let z = 26; z < 40; z++) { const h = (DY * (z - 26)) / 14 - 0.35; if (h > 0.05) b.block('concrete', -2, 6, 0, h, z, z + 1); }
+    // ---- L 倉庫空地（x -2～6，z 14～26）
+    ground('concrete', -2, 6, 14, 26);
+    mass(6, 10, 22, 50, 14, 'concrete', '');
+    P.car(1.5, 18.5, 0.2); P.crate(4.6, 24.5, 1.1, 0.4); P.barrel(-1, 15); P.barrel(-0.4, 15.6, 'olive');
+    M.zones.L = { x0: -2, x1: 6, z0: 14, z1: 26 };
+
+    // ---- 北邊填空（橋面北側的樓，樓頂有狙擊手）
+    mass(-60, 10, 50, 114, 16, 'concrete', 's');
+  }
+
   // ============================================================ 其他填空的建築量體（圍住路線以外的空地）
-  mass(-60, 6, -8, 20, 14, 'wall', '');
   mass(-114, -60, -8, 114, 18, 'brick', 'e');
-  mass(-60, 10, 20, 114, 16, 'concrete', 'e');
+  northDistrict();
   mass(-36, 6, -92, -70, 12, 'wall', '');
   mass(6, 48, -114, -70, 12, 'concrete', '');
   mass(-82, -36, -114, -92, 10, 'wall', '');

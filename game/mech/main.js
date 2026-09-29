@@ -99,6 +99,24 @@ async function game() {
     for (const gl of hero.glows) { let o = gl, keep = false; while (o) { if (o === hero.saber) keep = true; o = o.parent; } gl.visible = keep; }
   }
 
+  function applyView() { cockpitView(!tpView); cockpit.root.visible = !tpView; }
+  addEventListener('wheel', (e) => { if (!tpView) return; chaseD = clamp(chaseD * Math.exp(e.deltaY * 0.001), 9, 40); store.set('camd', chaseD.toFixed(1)); }, { passive: true });
+  // 機體後方視角：看得到機體背面；鏡頭在右肩後方略高，跟著瞄準方向轉；中間被建築擋住就往機體拉近
+  const chasePivot = new THREE.Vector3(), chaseOff = new THREE.Vector3(), chaseN = new THREE.Vector3(), chaseE = new THREE.Euler();
+  function chaseCam() {
+    const k = hero.scale;
+    camera.quaternion.setFromEuler(chaseE.set(player.pitch, player.yaw + Math.PI, 0, 'YXZ'));
+    hero.bones.torso.getWorldPosition(chasePivot);
+    chasePivot.y += 3.5 * k;
+    chaseOff.set((3.5 + chaseD * 0.06) * k, 1.0 * k, chaseD * k).applyQuaternion(camera.quaternion);
+    const want = chaseOff.add(chasePivot);
+    const hit = world.raycast(chasePivot, want, chaseN);
+    if (hit >= 0 && hit <= 1) want.lerpVectors(chasePivot, want, Math.max(0.12, hit - 0.04));
+    const gy = world.height(want.x, want.z) + 2;
+    if (want.y < gy) want.y = gy;
+    camera.position.copy(want);
+  }
+
   // ---------------------------------------------------------------- 戰鬥
   let combat = null, stageNo = 1;
   // 可破壞建築：特效／音效／座艙震動／HUD 提示
@@ -114,6 +132,10 @@ async function game() {
   newCombat();
 
   // ---------------------------------------------------------------- 設定
+  // 視角：false＝駕駛艙（第一人稱）、true＝機體後方（看得到整台機體）；記住上次的選擇
+  const store0 = (k, d) => { try { const v = localStorage.getItem('mech.' + k); return v === null ? d : +v; } catch (e) { return d; } };
+  let tpView = store0('view', 0) === 1;
+  let chaseD = store0('camd', 15);   // 後方視角距離（公尺），滑鼠滾輪調整
   const store = { get: (k, d) => { try { const v = localStorage.getItem('mech.' + k); return v === null ? d : +v; } catch (e) { return d; } }, set: (k, v) => { try { localStorage.setItem('mech.' + k, v); } catch (e) {} } };
   let quality = store.get('q', 1);
   function setQuality(qv) {
@@ -211,8 +233,7 @@ async function game() {
     input.enabled = true;
     if (!input.touch.on) input.lock();
     touchUI.style.display = input.touch.on ? 'block' : 'none';
-    cockpitView(true);
-    cockpit.root.visible = true;
+    applyView();
     audio.ui('boot');
     audio.music('battle', { stage: stageNo });
   }
@@ -319,6 +340,7 @@ async function game() {
     let inp = input.state(rdt);
     if (window.__game.fake) Object.assign(inp, window.__game.fake);
     if (inp.pause && live) { input.unlock(); pause(); input.endFrame(); return; }
+    if (inp.view && live) { tpView = !tpView; store.set('view', tpView ? 1 : 0); applyView(); }
     const canMove = (state === 'play' || boot > 0.85) && !combat.dead && state !== 'result';
     if (!canMove) inp = Object.assign({}, inp, idle, { fire: false, lockHold: false, qb: false, boost: false, jump: false, hover: false, saber: false, cannon: false, hardLock: false, od: false, reload: false, lookX: state === 'result' ? 0 : inp.lookX, lookY: state === 'result' ? 0 : inp.lookY });
 
@@ -354,6 +376,7 @@ async function game() {
       saber: C.saber.cd, cannon: C.cannon, od: C.od, lockAlert: C.lockAlert, danger: player.ap / player.apMax < 0.3 ? 1 : 0,
       radar, px: player.pos.x, pz: player.pos.z, route: C.enc && C.enc.ahead, wp: C.enc && C.enc.wp,
     });
+    if (tpView) chaseCam();
 
     // ---- 戰鬥、特效、世界
     C.update(dt, state === 'result' ? null : inp, rdt);

@@ -136,6 +136,8 @@ const G = {
   },
 };
 window.__G = G;
+// 測試用：看目前章節、已清的段落
+window.__flow = { get chapter() { return chapter; }, get done() { return [...done]; }, get active() { return active.map((a) => a.E.id); }, get mech() { return !!mechWalk; } };
 // 可破壞的道具：地圖建好時登記的全部接上
 const D = (G.destruct = new Destruct(G));
 for (const r of placer.reg) D.register(r.name, r.h, r.box);
@@ -189,22 +191,34 @@ function spawn(def) {
   const e = def.type === 'drone' ? new Drone(G, def) : new Trooper(G, def);
   G.enemies.push(e); return e;
 }
+const doneT = {};   // 每段清完的時間（after＋wait 用）
+function markDone(id, old = false) { done.add(id); doneT[id] = old ? -1e9 : performance.now() / 1000; }   // old＝讀檔／選關還原的，不必再等 wait
 function startEncounter(E) {
   const list = E.enemies.map(spawn);
-  active.push({ E, list });
+  active.push({ E, list, picked: false });
   for (const [who, text] of E.lines) hud.say(who, text, 3.6);
   if (E.lines.length) audio.radio('in');
   G.objText = E.obj;
-  hud.obj = null;
+  hud.obj = E.pickup ? { p: guideFor(E) } : null;
   if (E.alarm && !alarmOn) { alarmOn = true; audio.alarm(true); }
 }
 // 下一段還沒清的遭遇
 function objective() { return S.ENCOUNTERS.find((E) => E.ch === chapter && !done.has(E.id)); }
 // 遭遇開打前的導引點
 function guideFor(E) {
-  const Z = { B: [-91.5, -80], C: [-91.5, -60], D: [-43, -42], E: [28, -30], F: [28, 24], G1: [32, 53], G2: [40, 70] };
-  const z = Z[E.id] || [0, 0];
+  const z = E.guide || [0, 0];
   return new THREE.Vector3(z[0], 1.5, z[1]);
+}
+// 撿東西的段落（啟動金鑰）：走近按 E
+function updatePickup() {
+  const a = active.find((x) => x.E.pickup && !x.picked);
+  if (map.keyMesh) map.keyMesh.visible = !done.has('KEY') && !(a && a.picked);
+  if (!a) return;
+  const at = map.marks[a.E.pickup.at];
+  const near = Math.hypot(player.pos.x - at.x, player.pos.z - at.z) < 2.3 && Math.abs(player.pos.y - at.y) < 1.5;
+  if (!near) return;
+  hud.prompt = a.E.pickup.text;
+  if (input.pressed('KeyE') || input.pressed('Tlock')) { a.picked = true; hud.prompt = null; audio.radio('in'); }
 }
 const toCockpit = () => { G.objText = '爬上維修架，進入駕駛艙'; hud.obj = { p: map.marks.hatch.clone().add(new THREE.Vector3(0, 1, -1)) }; };
 
@@ -213,7 +227,7 @@ function startChapter(n) {
   chapter = n;
   const C = S.CHAPTERS[n - 1];
   done.clear();
-  for (const E of S.ENCOUNTERS) if (E.ch < n) done.add(E.id);
+  for (const E of S.ENCOUNTERS) if (E.ch < n) markDone(E.id, true);
   player.reset(map.marks[C.start].clone(), C.yaw);
   if (q.has('x')) player.reset(new THREE.Vector3(+q.get('x'), +(q.get('y') || 0), +q.get('z')), +(q.get('yaw') || 0));
   vm.refill();
@@ -240,30 +254,31 @@ function updateEncounters() {
     if (E.ch !== chapter || done.has(E.id) || active.some((a) => a.E === E)) continue;
     const idx = S.ENCOUNTERS.indexOf(E), prev = S.ENCOUNTERS.slice(0, idx).filter((x) => x.ch === chapter);
     if (!prev.every((x) => done.has(x.id))) continue;
-    if (E.after ? done.has(E.after) : E.trigger(p)) startEncounter(E);
+    if (E.after ? done.has(E.after) && performance.now() / 1000 - (doneT[E.after] || 0) > (E.wait || 0) : E.trigger(p)) startEncounter(E);
   }
   // 清完
   for (const a of [...active]) {
-    if (!a.list.every((e) => e.dead)) continue;
+    if (!a.list.every((e) => e.dead) || (a.E.pickup && !a.picked)) continue;
     active.splice(active.indexOf(a), 1);
-    done.add(a.E.id);
+    markDone(a.E.id);
     for (const [w, t] of a.E.done) hud.say(w, t, 3.6);
     if (a.E.done.length) audio.radio('in');
-    hud.note('區域清除  AREA CLEAR', '#ffb347');
+    hud.note(a.E.pickup ? '取得啟動金鑰  KEY ACQUIRED' : '區域清除  AREA CLEAR', '#ffb347');
     checkpoint = { p: player.pos.clone(), yaw: player.yaw, done: [...done], ch: chapter };
     const nx = objective();
     if (a.E.id === 'G2') { toCockpit(); if (alarmOn) { alarmOn = false; audio.alarm(false); } }
     else if (nx && nx.ch === chapter) { G.objText = nx.obj; hud.obj = { p: guideFor(nx) }; }
-    else if (a.E.mark) { G.objText = a.E.id === 'C' ? '穿過東邊的商店' : a.E.id === 'E' ? '進入基地大門' : a.E.obj; hud.obj = { p: a.E.mark.clone().setY(1.5) }; }
+    else if (a.E.mark) { G.objText = a.E.next || a.E.obj; hud.obj = { p: a.E.mark.clone().setY(1.5) }; }
     // 屍體多了就清掉最舊的
     const dead = G.enemies.filter((e) => e.dead);
     if (dead.length > 14) for (const e of dead.slice(0, dead.length - 14)) { e.dispose(); G.enemies.splice(G.enemies.indexOf(e), 1); }
   }
-  // 章節終點
-  if (chapter === 1 && done.has('C') && p.x > -58 && p.z > -48 && p.z < -36) nextChapter(2);
-  if (chapter === 2 && done.has('E') && p.z > 20.5 && p.x > 24 && p.x < 32) nextChapter(3);
-  // 獵犬機走過圍牆外（第 2 章，走進貨櫃場時）
-  if (chapter === 2 && !mechWalk && !G.mechDone && done.has('D') && p.x > 14 && p.z > -34) {
+  // 章節終點（script.js 的 CHAPTERS[n].end）
+  const end = S.CHAPTERS[chapter - 1].end;
+  if (end && done.has(end.after) && end.at(p)) nextChapter(chapter + 1);
+  // 獵犬機走過圍牆外（script.js 的 MECH_WALK）
+  const MW = S.MECH_WALK;
+  if (chapter === MW.ch && !mechWalk && !G.mechDone && done.has(MW.after) && MW.at(p)) {
     G.mechDone = true; mechWalk = { t: 0, i: 0, stepT: 0 }; hound.root.visible = true; hound.root.position.copy(map.marks.mechPath[0]);
     for (const [w, t] of S.LINES.mech) hud.say(w, t, 3.4); audio.radio('in');
   }
@@ -404,7 +419,7 @@ function respawn() {
   // 從檢查點：已清的保留，進行中的整段重來
   const cp = checkpoint;
   clearEnemies(); active = [];
-  done.clear(); for (const id of cp.done) done.add(id);
+  done.clear(); for (const id of cp.done) markDone(id, true);
   chapter = cp.ch;
   player.reset(cp.p, cp.yaw); vm.refill();
   const nx = objective();
@@ -436,7 +451,7 @@ function startFinale() {
   player.frozen = true; hud.prompt = null; hud.obj = null; G.objText = ''; G.playing = false;
   audio.music('off');
   audio.mechBoot(finale.to);
-  store.set('ch', 3); store.set('clear', 1);
+  store.set('ch', S.CHAPTERS.length); store.set('clear', 1);
 }
 function updateFinale(dt) {
   const F = finale; F.t += dt;
@@ -613,7 +628,7 @@ function frame() {
   for (const e of G.enemies) e.update(dt);
   updateBolts(dt);
   D.update(dt);
-  if (stage === 'play' && !finale) { updateEncounters(); updateHatch(dt); }
+  if (stage === 'play' && !finale) { updateEncounters(); updateHatch(dt); updatePickup(); }
   updateMechWalk(dt);
   // 後製：受傷、低血量
   dmgFlash *= Math.exp(-dt * 4);

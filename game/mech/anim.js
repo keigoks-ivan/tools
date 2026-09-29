@@ -107,17 +107,22 @@ export class MechMotion {
     m.pose.air = damp(m.pose.air, st.grounded ? 0 : 1, 6, dt);
     const Bst = m.pose.boost, Air = m.pose.air;
     const walkW = (1 - Bst) * (1 - Air);
+    const HR = !!m.stance;   // 主角機：衝刺／飛行用英雄機的誇張姿勢（前傾、雙腳往後拖、盾在前）
 
     // ---- 步態：週期 cyc（0..1），右腳 0 起步、左腳差半拍；支撐期 D＝64%（兩腳同時著地的片刻＝沉重感）
     const af = Math.hypot(fwd, side);
     const vg = af + Math.abs(yawRate) * 3.2;                // 原地轉身也要踏步
     let settle = false, reachCrouch = 0;
+    // 站姿：主角機靜止時兩腳張開、左腳在前、膝蓋微彎朝外（走起來收回一般步態）；toe＝腳尖外八
+    const Sn = m.stance, idle = 1 - this.g;
+    const sw = Sn ? lerp(Sn.w, 1.1, this.g) : 1.04, toe = Sn ? Sn.toe * idle : 0, fw = Sn ? Sn.fwd * idle : 0;
+    const fz = (n) => (n === 'L' ? fw : -fw * 0.5);
     for (const n of ['R', 'L']) {
       const foot = this.feet[n]; if (!foot.ready) continue;
       const dx = (foot.anchor.x - m.root.position.x) / k, dz = (foot.anchor.z - m.root.position.z) / k;
       const x = dx * cL - dz * sL - b['hip' + n].position.x, z = dx * sL + dz * cL - this.ankleZ;
-      const d2 = x * x + z * z;
-      if (af < 0.6 && Math.abs(yawRate) < 0.2 && d2 > 0.18) settle = true;
+      const d2 = x * x + z * z, xs = x + b['hip' + n].position.x * (1 - sw), zs = z - fz(n);
+      if (af < 0.6 && Math.abs(yawRate) < 0.2 && xs * xs + zs * zs > 0.18) settle = true;
       if (foot.stance) reachCrouch = Math.max(reachCrouch, this.legLen - Math.sqrt(Math.max(4, this.legLen * this.legLen - d2)) + 0.35);
     }
     const gT = walkW * Math.max(smooth(0.6, 2.6, vg), settle ? 0.45 : 0);
@@ -138,7 +143,7 @@ export class MechMotion {
       }
     }
     this.supportDrop = Math.max(Math.min(1.8, reachCrouch), damp(this.supportDrop || 0, Math.min(1.8, reachCrouch), 8, dt));
-    const crouch = Math.max(0.3 + g * Math.min(0.75, af * 0.045), this.supportDrop * walkW);    // 跑越快蹲越低
+    const crouch = Math.max(0.3 + (Sn ? Sn.bend * idle : 0) + g * Math.min(0.75, af * 0.045), this.supportDrop * walkW);    // 跑越快蹲越低
     const H = (0.55 + Math.min(1.2, af * 0.075)) * g;          // 抬腳高度
 
     // ---- 骨盆：落腳下沉、支撐期升起；重心移到支撐腳；隨步伐扭腰
@@ -148,8 +153,8 @@ export class MechMotion {
     m.landV += (-m.land * 90 - m.landV * 14) * dt;
     m.land = Math.max(-0.1, m.land + m.landV * dt);
     const dip = this.dip.step(0, dt);
-    b.pelvis.position.set(sway, L.pelvis - crouch + bob + dip - Bst * 0.8 - m.land * 1.3, 0);
-    b.pelvis.rotation.set(0.05 * g * Math.min(1, af / 12), 0.045 * g * Math.sin(pc - 3.39) * this.dir, -sway * 0.06);
+    b.pelvis.position.set(sway, L.pelvis - crouch + bob + dip - Bst * (HR ? -0.9 : 0.8) - m.land * 1.3, 0);
+    b.pelvis.rotation.set(0.05 * g * Math.min(1, af / 12) + (HR ? Bst * 0.3 + Air * 0.12 : 0), 0.045 * g * Math.sin(pc - 3.39) * this.dir, -sway * 0.06);
     b.pelvis.updateMatrix();
     _inv.copy(b.pelvis.matrix).invert();
 
@@ -161,12 +166,12 @@ export class MechMotion {
     const shake = Bst > 0.05 ? Math.sin(this.t * 61) * 0.015 * Bst : 0;
     for (const [n, off, sx] of [['R', 0, -1], ['L', 0.5, 1]]) {
       const hp = b['hip' + n], foot = this.feet[n], u = (this.cyc + off) % 1;
-      const neutral = new THREE.Vector3(hp.position.x * 1.04, this.ankleY, this.ankleZ);
+      const neutral = new THREE.Vector3(hp.position.x * sw, this.ankleY, this.ankleZ + fz(n));
       const neutralW = m.root.localToWorld(neutral.clone());
       const reset = !foot.ready || teleported || walkW < 0.25;
       if (reset) {
         foot.anchor.copy(neutralW); foot.from.copy(neutralW); foot.to.copy(neutralW);
-        foot.yaw = foot.fromYaw = foot.toYaw = m.legYaw;
+        foot.yaw = foot.fromYaw = foot.toYaw = m.legYaw + sx * toe;
         foot.stance = true; foot.ready = true;
       }
       const inSt = u < D || (g < 0.015 && foot.stance);
@@ -177,7 +182,7 @@ export class MechMotion {
         foot.to.copy(neutral).applyAxisAngle(UP, turn); m.root.localToWorld(foot.to);
         foot.to.addScaledVector(st.vel, lead * walkW);
         foot.to.y = neutralW.y;
-        foot.toYaw = m.legYaw + turn;
+        foot.toYaw = m.legYaw + turn + sx * toe;
       }
       if (inSt && !foot.stance) {
         foot.anchor.copy(foot.to); foot.yaw = foot.toYaw;
@@ -206,15 +211,16 @@ export class MechMotion {
       let ank = -(b.pelvis.rotation.x + hipA + kneeA) - pitch;
       // 衝刺滑行（一前一後、腳尖朝下）／空中（收腿）
       const r = n === 'R';
-      const bh = r ? -0.38 : 0.28, bk = r ? 0.55 : 0.95, ba = r ? 0.05 : 0.35;
-      const ah = r ? -0.6 : -0.12, ak = r ? 1.1 : 0.55, aa = r ? 0.2 : 0.4;
+      // 主角機衝刺：身體往前壓、兩腳往後拖、腳尖朝下（貼地飛行）；空中：一腳收、一腳往後，像在飛
+      const bh = HR ? (r ? 0.15 : 0.5) : r ? -0.38 : 0.28, bk = HR ? (r ? 0.75 : 1.25) : r ? 0.55 : 0.95, ba = HR ? (r ? 0.45 : 0.6) : r ? 0.05 : 0.35;
+      const ah = HR ? (r ? -0.45 : 0.2) : r ? -0.6 : -0.12, ak = HR ? (r ? 1.0 : 1.1) : r ? 1.1 : 0.55, aa = HR ? (r ? 0.35 : 0.5) : r ? 0.2 : 0.4;
       const bw = Bst * (1 - Air), aw = Air;
       hipA = lerp(lerp(hipA, bh, bw), ah, aw) + shake;
       kneeA = lerp(lerp(kneeA, bk, bw), ak, aw) - shake;
       ank = lerp(lerp(ank, ba, bw), aa, aw);
-      roll = lerp(roll, -sx * 0.05, bw) * (1 - aw) + (-sx * 0.1) * aw;
+      roll = lerp(roll, -sx * (HR ? 0.08 : 0.05), bw) * (1 - aw) + (-sx * (HR ? 0.16 : 0.1)) * aw;
       hipA -= m.land * 0.4; kneeA += m.land * 0.85; ank -= m.land * 0.45;
-      hp.rotation.set(hipA, 0, roll, 'ZXY');
+      hp.rotation.set(hipA, Sn ? sx * Sn.knee * idle * walkW : 0, roll, 'ZXY');
       b['knee' + n].rotation.x = kneeA;
       const ankle = b['ankle' + n];
       ankle.rotation.set(ank, 0, -roll - b.pelvis.rotation.z);
@@ -232,12 +238,23 @@ export class MechMotion {
     const tw = wrap(st.torsoYaw - m.legYaw) - b.pelvis.rotation.y;
     const twist = this.twist.step(this.twist.x + wrap(tw - this.twist.x), dt);
     if (Math.abs(this.twist.v) > 2.5) m.servo = Math.min(1, Math.abs(this.twist.v) / 6);
-    const leanT = clamp(this.accF * 0.02, -0.3, 0.3) + Bst * 0.2 + Air * 0.05 + 0.04 * g * Math.min(1, af / 12) + (st.lean || 0);
+    const leanT = clamp(this.accF * 0.02, -0.3, 0.3) + Bst * (HR ? 0.45 : 0.2) + Air * (HR ? 0.15 : 0.05) + 0.04 * g * Math.min(1, af / 12) + (st.lean || 0) + (m.stance ? m.stance.chest * (1 - g) : 0);
     const rollT = clamp(-this.accS * 0.012, -0.2, 0.2) - (Bst > 0.3 ? side * 0.006 : 0) + sway * 0.05;
     const quake = this.shock * 0.02;
     b.torso.rotation.y = twist;
     b.torso.rotation.x = this.lean.step(leanT, dt) + Math.sin(this.t * 47) * quake;
     b.torso.rotation.z = this.roll.step(rollT, dt) - b.pelvis.rotation.z * 0.8 + Math.sin(this.t * 39) * quake * 0.7;
+    if (HR) {
+      // 走路時上身跟著步伐反向扭一點；站著時慢慢呼吸（機體不會完全僵住）
+      b.torso.rotation.y += -0.07 * g * Math.sin(pc) * this.dir;
+      b.torso.rotation.x += 0.012 * Math.sin(this.t * 1.7) * (1 - g) * walkW;
+    }
+    // 翼板：衝刺、飛行、推進時展開（往外放平、翼尖往前），平常收合
+    if (m.wings) {
+      this.wingO = damp(this.wingO || 0, Math.max(Bst, Air, m.thrust > 0.3 ? 1 : 0), 5, dt);
+      const wo = this.wingO;
+      for (const w of m.wings) { w.g.rotation.z = -w.sx * 0.5 * wo; w.g.rotation.y = -w.sx * 0.22 * wo; w.g.rotation.x = 0.15 * wo; }
+    }
 
     // ---- 推進器
     m.thrust = damp(m.thrust, st.thrust || 0, 14, dt);
@@ -273,13 +290,13 @@ export class MechMotion {
     // ---- 手臂
     m.recoil = Math.max(0, m.recoil - dt * 6);
     const rc = this.rec.step(m.recoil, dt);
-    this.aimArm(st.aim, st.pitch || 0, rc, dt);
+    this.aimArm(st.aim, st.pitch || 0, rc, dt, g);
     if (m.swing > 0) this.saberPose();
     else this.freeArm(dt, g, pc, Bst, Air);
   }
 
   // 右手持槍：有目標就前臂指向目標；沒有就槍口朝下的警戒姿勢
-  aimArm(aim, pitch, rc, dt) {
+  aimArm(aim, pitch, rc, dt, g = 0) {
     const b = this.m.bones, sh = b.shoulderR, el = b.elbowR;
     let yaw, px, ex;
     if (aim) {
@@ -292,7 +309,7 @@ export class MechMotion {
     }
     sh.rotation.y = damp(sh.rotation.y, yaw, 14, dt);
     sh.rotation.x = damp(sh.rotation.x, px, 14, dt) + rc * 0.22;
-    sh.rotation.z = damp(sh.rotation.z, 0.08, 10, dt);
+    sh.rotation.z = damp(sh.rotation.z, !aim && this.m.stance ? lerp(this.m.stance.armR, 0.08, g) : 0.08, 10, dt);
     el.rotation.x = damp(el.rotation.x, ex, 14, dt) - rc * 0.35;
   }
   // 左手：跟著步伐反向擺，帶一點慣性延遲
@@ -300,9 +317,10 @@ export class MechMotion {
     const m = this.m, b = m.bones, sh = b.shoulderL, el = b.elbowL;
     const swing = -Math.sin(pc) * 0.22 * g * this.dir;
     sh.rotation.y = damp(sh.rotation.y, 0.1, 8, dt);
-    sh.rotation.x = this.armLX.step(-0.12 + swing - Bst * 0.35 - Air * 0.2, dt);
-    sh.rotation.z = this.armLZ.step(-0.1 - Air * 0.18 - Bst * 0.08, dt);
-    el.rotation.x = damp(el.rotation.x, -0.45 - g * 0.15 - Air * 0.4, 8, dt);
+    const HR = !!m.stance;   // 主角機：衝刺時盾舉在身前；空中雙臂稍微張開保持平衡
+    sh.rotation.x = this.armLX.step(-0.12 + swing - Bst * (HR ? 1.0 : 0.35) - Air * (HR ? 0.45 : 0.2), dt);
+    sh.rotation.z = this.armLZ.step((HR ? m.stance.armL : -0.1) + (HR ? Air * 0.3 - Bst * 0.15 : -Air * 0.18 - Bst * 0.08), dt);
+    el.rotation.x = damp(el.rotation.x, -0.45 - g * 0.15 - Air * 0.4 - (HR ? Bst * 0.55 : 0), 8, dt);
     if (m.saber) m.saber.visible = false;
   }
   saberPose() {
@@ -315,6 +333,8 @@ export class MechMotion {
     sh.rotation.x = lerp(-0.4 - wind * 1.5, -1.3, e);
     sh.rotation.z = lerp(-0.3, 0.2, e);
     el.rotation.x = lerp(-1.1, -0.35, e);
+    // 主角機：整個上身參與揮砍——蓄力時左肩往前、往右扭，砍下去時往左扭、往前壓
+    if (m.stance) { b.torso.rotation.y += lerp(-0.45 * wind, 0.55, e); b.torso.rotation.x += 0.08 * wind + 0.18 * e; }
     this.armLX.x = sh.rotation.x; this.armLX.v = 0;
     if (m.saber) m.saber.visible = true;
   }

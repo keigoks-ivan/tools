@@ -12,14 +12,15 @@ import { MechMotion, wrap, lerpAngle, damp } from './anim.js';
 const MATS = {};
 const TPL = new Map();      // 'style|scheme' → 樣板（只建一次）
 export function initMechMaterials(A) {
-  MATS.clean = paintMaterial(A, 0.18, 0, 0.55, 0.24);
+  MATS.clean = paintMaterial(A, 0.62, 0.5, 1.0, 0.48, 1);
   MATS.dirty = paintMaterial(A, 0.42, 1, 0.85, 0.5);
   MATS.shadowOnly = new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: false });
   TPL.clear();   // 材質換了，樣板要重建
 }
 // mil＝1：敵機軍用霧面漆（掉漆露出暗色底漆、多集中在邊角）；soot＝噴口燻黑強度。
 // dcl.xy＝噴漆標示在圖集的 UV、dcl.z＝顏色編號（0＝沒有標示）、dcl.w＝1−燻黑量。
-function paintMaterial(A, wear, mil, soot, bumpK) {
+// age＝滄桑感（主角機用）：大片燒灼、彈痕、朝上的面積灰、整體污垢；0＝沒有（敵機維持原樣）。
+function paintMaterial(A, wear, mil, soot, bumpK, age = 0) {
   const m = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1, metalness: 1 });
   m.onBeforeCompile = (sh) => {
     sh.uniforms.wearMap = { value: A.wearM };
@@ -30,6 +31,7 @@ function paintMaterial(A, wear, mil, soot, bumpK) {
     sh.uniforms.milK = { value: mil };
     sh.uniforms.sootK = { value: soot };
     sh.uniforms.bumpK = { value: bumpK };
+    sh.uniforms.ageK = { value: age };
     sh.vertexShader = sh.vertexShader
       .replace('#include <common>', `#include <common>
         attribute vec4 pbr; attribute vec4 dcl; varying vec4 vPbr; varying vec4 vDcl; varying vec3 vOP; varying vec3 vON;`)
@@ -37,7 +39,7 @@ function paintMaterial(A, wear, mil, soot, bumpK) {
         vPbr = pbr; vDcl = dcl; vOP = position; vON = normal;`);
     sh.fragmentShader = sh.fragmentShader
       .replace('#include <common>', `#include <common>
-        uniform sampler2D wearMap, frameMap, paintMap, dclMap; uniform float wearAmt, milK, sootK, bumpK;
+        uniform sampler2D wearMap, frameMap, paintMap, dclMap; uniform float wearAmt, milK, sootK, bumpK, ageK;
         varying vec4 vPbr; varying vec4 vDcl; varying vec3 vOP; varying vec3 vON;
         vec4 wv_tri(sampler2D t, vec3 p, vec3 n, float s){
           vec3 a = pow(abs(n), vec3(4.0)); a /= (a.x + a.y + a.z + 1e-5);
@@ -75,7 +77,7 @@ function paintMaterial(A, wear, mil, soot, bumpK) {
         wv_base = mix(wv_base, vec3(0.17, 0.075, 0.03), wv_W2.b * wv_paint * mix(0.08, 0.38, milK));
         wv_base = mix(wv_base, wv_base * 1.2 + 0.015, wv_edge * mix(0.16, 0.25, wv_paint));
         float wv_streak = smoothstep(0.3, 0.9, 1.0 - wv_S) * wv_paint * wearAmt;
-        wv_base *= 1.0 - wv_streak * 0.35;
+        wv_base *= 1.0 - wv_streak * (0.35 + ageK * 0.3);
         float wv_dust = smoothstep(4.8, 0.0, vPbr.w) * (0.35 + 0.65 * wv_nz) * wearAmt;
         wv_base = mix(wv_base, vec3(0.32, 0.28, 0.23), wv_dust * 0.42);
         // 敵機：腳邊再多一層泥巴（斑駁、貼地最濃）
@@ -88,10 +90,33 @@ function paintMaterial(A, wear, mil, soot, bumpK) {
         // 噴口燻黑
         float wv_soot = clamp((1.0 - vDcl.w) * sootK * (0.55 + 0.45 * wv_nz2 + 0.3 * (0.5 - wv_W2.r)), 0.0, 0.93);
         diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.028, 0.025, 0.022), wv_soot);
-        float wv_bump = wv_W.b * 0.3 - wv_chip * 0.5 + (1.0 - wv_paint) * wv_F.b * 0.5 + wv_paint * wv_W2.r * 0.35;`)
+        // 滄桑：大片燒灼痕、整體污垢（大塊斑駁變暗）、朝上的面積灰
+        float wv_burn = ageK * smoothstep(0.58, 0.76, wv_n(vOP * 0.21 + 11.0)) * (0.55 + 0.45 * wv_nz2);
+        // 下半身：泥水一路濺到膝蓋以上（貼地最濃、斑駁）
+        float wv_splash = ageK * smoothstep(7.5, 0.5, vPbr.w) * smoothstep(0.3, 0.7, wv_nz2 * 0.7 + wv_n(vOP * 2.3) * 0.5);
+        diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.2, 0.17, 0.13), wv_splash * 0.55);
+        diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.04, 0.032, 0.026), wv_burn * 0.8);
+        diffuseColor.rgb *= 1.0 - ageK * 0.28 * smoothstep(0.35, 0.8, wv_n(vOP * 0.7 + 3.0));
+        float wv_top = ageK * smoothstep(0.55, 0.95, wv_nO.y) * (0.3 + 0.4 * wv_nz) * wv_paint;
+        diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.33, 0.29, 0.23), wv_top * 0.6);
+        // 彈痕：每格隨機一個彈著點；中心暗色凹洞、外圈露出暗色金屬、再外面一圈不規則掉漆（露底漆）、最外一圈燻黑
+        vec3 wv_sc = vOP * 1.3, wv_ci = floor(wv_sc), wv_cf = fract(wv_sc);
+        vec3 wv_cp = vec3(wv_h(wv_ci + 1.7), wv_h(wv_ci + 5.3), wv_h(wv_ci + 9.1)) * 0.5 + 0.25;
+        float wv_cd = length(wv_cf - wv_cp) / 1.3, wv_cr = 0.07 + 0.09 * wv_h(wv_ci + 7.7);
+        float wv_on = ageK * step(0.68, wv_h(wv_ci + 3.1)) * wv_paint * (1.0 - wv_dA);
+        float wv_jag = wv_cd * (0.8 + 0.45 * wv_n(vOP * 9.0 + wv_ci));
+        float wv_hole = wv_on * (1.0 - smoothstep(wv_cr * 0.3, wv_cr * 0.42, wv_cd));
+        float wv_rim = wv_on * (1.0 - smoothstep(wv_cr * 0.55, wv_cr * 0.7, wv_jag)) * (1.0 - wv_hole);
+        float wv_flake = wv_on * (1.0 - smoothstep(wv_cr * 1.0, wv_cr * 1.15, wv_jag)) * (1.0 - wv_rim) * (1.0 - wv_hole);
+        diffuseColor.rgb *= 1.0 - wv_on * 0.6 * (1.0 - smoothstep(wv_cr, wv_cr * 3.2, wv_cd));
+        diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.11, 0.1, 0.09), wv_flake);
+        diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.2, 0.2, 0.21), wv_rim);
+        diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.012), wv_hole);
+        float wv_bump = wv_W.b * 0.3 - wv_chip * 0.5 + (1.0 - wv_paint) * wv_F.b * 0.5 + wv_paint * wv_W2.r * 0.35 - wv_hole * 1.2 + wv_rim * 0.4 - wv_flake * 0.2;`)
       .replace('#include <roughnessmap_fragment>', `float roughnessFactor = clamp(mix(vPbr.y, wv_W2.g, 0.45 * wv_paint) + (wv_F.g - 0.65) * 0.6 * (1.0 - wv_paint) + (wv_W.g - 0.15) * 0.25 * wv_paint + wv_dust * 0.4 + wv_mud * 0.3 + wv_streak * 0.12 + wv_soot * 0.3 - wv_dA * 0.06, 0.06, 1.0);
-        roughnessFactor = mix(roughnessFactor, mix(0.3, 0.5, milK) + wv_W.g * 0.3, wv_chip);`)
-      .replace('#include <metalnessmap_fragment>', `float metalnessFactor = max(vPbr.x * (1.0 - wv_dA) * (1.0 - wv_soot * 0.6), wv_chip * mix(0.95, 0.6, milK));`)
+        roughnessFactor = mix(roughnessFactor, mix(0.3, 0.5, milK) + wv_W.g * 0.3, wv_chip);
+        roughnessFactor = clamp(roughnessFactor + wv_burn * 0.3 + wv_splash * 0.3 + wv_top * 0.3 + wv_hole * 0.5 + wv_flake * 0.2 - wv_rim * 0.15, 0.06, 1.0);`)
+      .replace('#include <metalnessmap_fragment>', `float metalnessFactor = max(max(vPbr.x * (1.0 - wv_dA) * (1.0 - wv_soot * 0.6) * (1.0 - wv_burn * 0.5), wv_chip * mix(0.95, 0.6, milK)), wv_rim * 0.7);`)
       .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
         {
           vec3 dpx = dFdx(-vViewPosition), dpy = dFdy(-vViewPosition);
@@ -313,10 +338,51 @@ const toLocal = (dir, [u, v]) => (dir === 'y' ? [u, -v] : dir === 'x' ? [-u, v] 
 function panel(dir, outline, t, o = {}) {
   const lo = { ...o };
   if (o.cu !== undefined || o.cv !== undefined) { const [cx, cy] = toLocal(dir, [o.cu || 0, o.cv || 0]); lo.cx = cx; lo.cy = cy; }
-  const g = plate(outline.map((p) => toLocal(dir, p)), t, lo);
-  return { g: orient(g, dir), lab: (g2, u, v, off) => { const [x, y] = toLocal(dir, [u, v]); return orient(onPlate(g2, g, x, y, off), dir); } };
+  const loc = outline.map((p) => toLocal(dir, p));
+  const g = plate(loc, t, lo);
+  return { g: orient(g, dir), loc, lab: (g2, u, v, off) => { const [x, y] = toLocal(dir, [u, v]); return orient(onPlate(g2, g, x, y, off), dir); } };
 }
 function noEdge(g) { g.userData.edge = new Float32Array(g.attributes.position.count); return g; }
+// 刻線（分件縫）：沿板子外框往內縮一圈，長板再加一道橫切；做成貼在板面上的細條（z＝0、朝 +Z，交給 onPlate 跟著曲面彎）
+// 真實尺寸的機械看起來「大」，靠的就是這種跟著外型走的細縫；太小的板子不畫
+function grooveGeom(P, lw = 0.035) {
+  let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity, a2 = 0;
+  for (let i = 0; i < P.length; i++) {
+    const [x, y] = P[i], [u, v] = P[(i + 1) % P.length];
+    x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); a2 += x * v - u * y;
+  }
+  const W = x1 - x0, H = y1 - y0;
+  if (Math.min(W, H) < 0.7) return null;
+  const Q = a2 < 0 ? P.slice().reverse() : P.slice();
+  const d = THREE.MathUtils.clamp(Math.min(W, H) * 0.14, 0.09, 0.24);
+  const R = insetPoly(Q, d), segs = [];
+  for (let i = 0; i < R.length; i++) {
+    const a = R[i], b = R[(i + 1) % R.length], qa = Q[i], qb = Q[(i + 1) % Q.length];
+    // 內縮後方向反了（短的切角邊）就不畫
+    if ((b[0] - a[0]) * (qb[0] - qa[0]) + (b[1] - a[1]) * (qb[1] - qa[1]) > 0 && Math.hypot(b[0] - a[0], b[1] - a[1]) > 0.06) segs.push([a, b]);
+  }
+  if (H >= W && H > 2.3) { const y = (y0 + y1) / 2 + H * 0.08, [l, r] = span(R, y); if (r > l) segs.push([[l, y], [r, y]]); }
+  else if (W > H && W > 2.3) {
+    const x = (x0 + x1) / 2 - W * 0.08, Rs = R.map(([u, v]) => [v, u]), [l, r] = span(Rs, x);
+    if (r > l) segs.push([[x, l], [x, r]]);
+  }
+  const pos = [];
+  for (const [a, b] of segs) {
+    const len = Math.hypot(b[0] - a[0], b[1] - a[1]), dx = (b[0] - a[0]) / len, dy = (b[1] - a[1]) / len, nx = -dy * lw / 2, ny = dx * lw / 2;
+    const n = Math.max(1, Math.ceil(len / 0.35));
+    for (let k = 0; k < n; k++) {
+      const s0 = (len * k) / n, s1 = (len * (k + 1)) / n;
+      const p0 = [a[0] + dx * s0, a[1] + dy * s0], p1 = [a[0] + dx * s1, a[1] + dy * s1];
+      pos.push(p0[0] - nx, p0[1] - ny, 0, p1[0] - nx, p1[1] - ny, 0, p1[0] + nx, p1[1] + ny, 0, p0[0] - nx, p0[1] - ny, 0, p1[0] + nx, p1[1] + ny, 0, p0[0] + nx, p0[1] + ny, 0);
+    }
+  }
+  if (!pos.length) return null;
+  const g = new THREE.BufferGeometry();
+  g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  g.computeVertexNormals();
+  g.userData.edge = new Float32Array(pos.length / 3);
+  return g;
+}
 // 把零件正面（z>0 那一半）沿 X 往後彎，讓核心箱體跟外面的曲面裝甲貼合
 function bendFront(g, R) {
   const p = g.attributes.position;
@@ -422,6 +488,7 @@ function digits(str, h, { tint = 1, face = 'z', variable = false } = {}) {
 const P = (hex, m = 0, r = 0.5) => ({ c: new THREE.Color(hex), m, r });
 const CHROME = P(0xb4b9be, 0.95, 0.2);
 const GLASS = P(0x0a0f13, 0.6, 0.06);
+const GROOVE = P(0x16181b, 0.2, 0.8);
 const _m4 = new THREE.Matrix4(), _q = new THREE.Quaternion(), _e = new THREE.Euler(), _v = new THREE.Vector3(), _s = new THREE.Vector3();
 // 可重現的亂數（每片零件漆色微差、敵機編號）
 function rng(seed) { let s = seed >>> 0 || 1; return () => ((s = (s * 1664525 + 1013904223) >>> 0) / 4294967296); }
@@ -430,9 +497,10 @@ const UNITS = ['12', '17', '23', '28', '34', '41', '46', '52', '58', '63', '67',
 // ================================================================ 塗裝（m＝金屬度，r＝粗糙度）
 const SCHEMES = {
   hero: {
-    main: P(0x8d958e, 0.08, 0.5), second: P(0x30393d, 0.15, 0.54), accent: P(0x65564a, 0.08, 0.64), yellow: P(0x9b875b, 0.3, 0.52),
-    frame: P(0x3b3f45, 0.85, 0.42), dark: P(0x14171b, 0.5, 0.62), weapon: P(0x303943, 0.55, 0.47), sole: P(0x17191a, 0.1, 0.85),
-    eye: [0.12, 2.1, 0.95], wear: 'clean',
+    main: P(0xa8aaa2, 0.04, 0.6), second: P(0x34425a, 0.05, 0.62), accent: P(0x873029, 0.04, 0.62), yellow: P(0xa3843c, 0.4, 0.52),
+    frame: P(0x3a3d41, 0.8, 0.5), dark: P(0x15181c, 0.45, 0.66), weapon: P(0x3b4046, 0.45, 0.55), sole: P(0x1a1b1d, 0.1, 0.88),
+    primer: P(0x4e5348, 0.03, 0.78),
+    eye: [0.22, 1.5, 0.85], wear: 'clean',
   },
   grunt: {
     main: P(0x4b5243, 0, 0.72), second: P(0x383d33, 0, 0.74), accent: P(0x5c6152, 0, 0.7), yellow: P(0x8f7433, 0, 0.62),
@@ -487,7 +555,7 @@ export class Mech {
     this.rnd = rng(style.length * 131 + schemeKey.length * 17 + 7);
     const hero = style === 'hero';
     const L = (this.L = hero
-      ? { pelvis: 9.9, hip: [1.45, -0.5, 0], knee: [0, -4.25, 0.1], ankle: [0, -4.0, -0.1], torso: [0, 0.85, 0], head: [0, 4.95, 0.35], shoulder: [3.05, 3.95, -0.05], elbow: -2.85, hand: -3.05 }
+      ? { pelvis: 10.6, hip: [1.35, -0.5, 0], knee: [0, -4.5, 0.12], ankle: [0, -4.3, -0.12], torso: [0, 0.7, 0], head: [0, 5.05, 0.4], shoulder: [3.15, 3.95, -0.05], elbow: -2.9, hand: -3.0 }
       : { pelvis: 9.75, hip: [1.55, -0.55, 0], knee: [0, -4.15, 0.15], ankle: [0, -3.75, -0.1], torso: [0, 0.7, 0], head: [0, 5.15, 0.55], shoulder: [3.4, 3.95, 0.05], elbow: -2.9, hand: -3.0 });
     const b = this.bones;
     const bone = (name, parent, x, y, z) => { const o = new THREE.Group(); o.name = name; o.position.set(x, y, z); parent.add(o); b[name] = o; return o; };
@@ -526,8 +594,10 @@ export class Mech {
     this.eye = M(T.eye); this.eyeRail = T.eyeRail;
     this.weapon = M(T.weapon); this.muzzleLocal = T.muzzleLocal.clone();
     this.saber = M(T.saber);
+    this.wings = T.wings ? T.wings.map((w) => ({ g: M(w.g), sx: w.sx })) : null;
     this.height = T.height;
     if (T.footToe) { this.footToe = T.footToe; this.footHeel = T.footHeel; }
+    this.stance = T.stance;
     if (T.hatch) {
       this.hatch = M(T.hatch); this.cockpitGlow = M(T.cockpitGlow);
       this.cockpitLocal = T.cockpitLocal.clone(); this.hatchAxis = T.hatchAxis;
@@ -551,9 +621,12 @@ export class Mech {
     const n = g.attributes.position.count, e = g.userData.edge, dsrc = g.userData.dcl;
     const col = new Float32Array(n * 3), pbr = new Float32Array(n * 4), dcl = new Float32Array(n * 4);
     // 每片零件的漆色有一點批次差（金屬件不變），整台看起來不是同一桶漆刷出來的
-    const k = paint.m < 0.5 && !dsrc ? 1 + (this.rnd() - 0.5) * (this.style === 'hero' ? 0.035 : 0.09) : 1;
+    const k = paint.m < 0.5 && !dsrc ? 1 + (this.rnd() - 0.5) * (this.style === 'hero' ? 0.16 : 0.09) : 1;
+    // 主角機：每片漆褪色程度不同（有的泛黃、有的偏灰），看得出是修修補補用了很久的機體
+    const yel = this.style === 'hero' && paint.m < 0.5 && !dsrc ? this.rnd() * 0.12 : 0;
+    const kr = k * (1 + yel * 0.2), kg = k * (1 + yel * 0.08), kb = k * (1 - yel * 0.35);
     for (let i = 0; i < n; i++) {
-      col[i * 3] = paint.c.r * k; col[i * 3 + 1] = paint.c.g * k; col[i * 3 + 2] = paint.c.b * k;
+      col[i * 3] = paint.c.r * kr; col[i * 3 + 1] = paint.c.g * kg; col[i * 3 + 2] = paint.c.b * kb;
       pbr[i * 4] = paint.m; pbr[i * 4 + 1] = paint.r; pbr[i * 4 + 2] = e ? e[i] : 0;
       dcl[i * 4 + 3] = 1;
     }
@@ -620,11 +693,6 @@ export class Mech {
     this.unitMeshes = [];
     for (const [bone, list] of this.parts) {
       const g = mergeGeometries(list);
-      // 足掌收窄、脛甲收束；不改關節長度、鞋底高度或胸口登機座標。
-      if (this.style === 'hero') {
-        if (bone === this.bones.ankleR || bone === this.bones.ankleL) g.scale(0.88, 1, 0.91);
-        if (bone === this.bones.kneeR || bone === this.bones.kneeL) g.scale(0.94, 1, 1);
-      }
       const p = g.attributes.position, pbr = g.attributes.pbr, dcl = g.attributes.dcl;
       const w = new THREE.Vector3();
       let unit = false;
@@ -650,205 +718,188 @@ export class Mech {
   }
 
   // ======================= 主角機 XG-01「蒼焰」 =======================
-  // 寫實重構：現役重型戰術機——曲面倒角裝甲層層相疊、外露油壓缸與骨架、胸口裝甲艙門（駕駛艙）。
-  // 淺灰白主裝甲＋深藍次裝甲＋少量紅色識別線；頭部感測冠＋後掠雙刀型天線（金色）。
+  // 英雄機比例（2026-09 依用戶給的參考圖重做）：小頭＋金色 V 字天線＋雙眼＋面罩、寬胸（深藍、黃色進氣口）、細腰、
+  // 大而有稜角的肩甲、長腿、往下外擴的小腿、大腳、背包雙推進器＋光劍柄＋一對翼板、紅框白底星徽盾。
+  // 質感照真實比例立像：米白半光澤漆、清楚的分件與板厚、少量磨損。
   buildHero(S) {
-    this.footToe = 2.44; this.footHeel = 1.82;
-    const b = this.bones, A = this.add.bind(this);
-    // 曲面板：做好就放上去，回傳 panel（p.lab 產生貼在同一片板上的標示）
+    this.footToe = 2.7; this.footHeel = 1.9;
+    const b = this.bones, A = this.add.bind(this), PI = Math.PI;
     const PL = (bone, dir, outline, t, o, paint, pos = [0, 0, 0], rot = [0, 0, 0]) => {
       const p = panel(dir, outline, t, o);
       A(bone, p.g, paint, pos, rot);
       p.put = (g, u, v, pt = paint, off) => this.label(bone, p.lab(g, u, v, off), pt, pos, rot);
+      // 塗裝裝甲板自動加刻線
+      if (paint === S.main || paint === S.second || paint === S.accent || paint === S.primer) { const gr = grooveGeom(p.loc); if (gr) p.put(gr, 0, 0, GROOVE, 0.012); }
       return p;
     };
+    // 旋轉過的板子上某點（板子自己的 u, v、離板心 d）換成骨頭座標
+    const onP = (c, r, u, v, d) => new THREE.Vector3(u, v, d).applyEuler(new THREE.Euler(r[0], r[1], r[2], 'XYZ')).add(new THREE.Vector3(...c)).toArray();
+    const nuts = (bone, pts, r = 0.045, rot = [PI / 2, 0, 0]) => A(bone, merge(pts.map((p) => at(nut(r), p, rot))), S.frame);
+    // 中央稜線板：把 'z'／'-z' 板沿中線切成左右兩半、外側各往後折 a，做出有稜角的裝甲（不是平的一大片）；回傳 [左半, 右半]
+    const half = (P, sg) => {
+      const out = [];
+      for (let i = 0; i < P.length; i++) {
+        const a = P[i], c = P[(i + 1) % P.length], da = a[0] * sg, dc = c[0] * sg;
+        if (da >= 0) out.push(a);
+        if ((da >= 0) !== (dc >= 0) && da !== dc) { const k = da / (da - dc); out.push([0, a[1] + (c[1] - a[1]) * k]); }
+      }
+      return out;
+    };
+    const RPL = (bone, dir, outline, t, o, paint, pos, rot = [0, 0, 0], a = 0.13) => [-1, 1].map((sg) =>
+      PL(bone, dir, half(outline, sg), t, { ...o, nx: Math.max(2, Math.ceil((o.nx || 6) / 2)) }, paint, pos, [rot[0], rot[1] + (dir === '-z' ? -1 : 1) * sg * a, rot[2]]));
+    // 小型姿態推進器（噴口朝 rot 方向的 -Y）
+    const thr = (bone, pos, rot, r = 0.16) => { A(bone, bell(r, r * 1.8), S.dark, pos, rot); A(bone, cyl(r * 0.9, r * 0.9, r * 0.5, 12), S.frame, pos, rot); };
+
     for (const [n, sx] of [['R', -1], ['L', 1]]) {
       const ank = b['ankle' + n], kn = b['knee' + n], hp = b['hip' + n];
       const fx = sx > 0 ? 'x' : '-x';
-      // ================= 腳（腳踝在 y＝0、鞋底 y＝-1.15）
-      const foot = [[-0.8, -1.72], [0.8, -1.72], [1.02, -1.2], [1.08, 1.3], [0.9, 2.4], [0.42, 2.68], [-0.42, 2.68], [-0.9, 2.4], [-1.08, 1.3], [-1.02, -1.2]];
-      PL(ank, 'y', foot, 0.24, { bev: 0.05, nx: 4, ny: 8 }, S.sole, [0, -1.03, 0]);
-      PL(ank, 'y', foot.map(([x, z]) => [x * 0.95, z * 0.97 + 0.03]), 0.1, { bev: 0.03, nx: 3, ny: 6 }, S.frame, [0, -0.86, 0]);
-      const lugs = [];
-      for (const side of [-1, 1]) for (let k = 0; k < 6; k++) lugs.push(at(blk(0.1, 0.12, 0.3, 0.025), [side * 1.05, -1.05, -1.3 + k * 0.52]));
-      A(ank, merge(lugs), S.sole);
-      // 承重足架：降低鞋身，露出踝軸與前足連桿。
-      A(ank, prof([[-1.55, -0.82], [2.3, -0.82], [2.45, -0.64], [1.5, -0.48], [0.5, -0.22], [-0.65, -0.18], [-1.55, -0.4]], 1.68, 0.09), S.frame);
+      // ================= 腳（腳踝 y＝0、鞋底 y＝-1.3）：紅色鞋底塊、大腳尖護甲、腳背、兩側與腳跟
+      const sole = [[-0.95, -1.9], [0.95, -1.9], [1.1, -1.35], [1.14, 1.25], [0.92, 2.35], [0.4, 2.72], [-0.4, 2.72], [-0.92, 2.35], [-1.14, 1.25], [-1.1, -1.35]];
+      PL(ank, 'y', sole, 0.2, { bev: 0.04, nx: 3, ny: 6 }, S.sole, [0, -1.2, 0]);
+      PL(ank, 'y', sole.map(([x, z]) => [x * 0.98, z * 0.98]), 0.22, { bev: 0.05, nx: 3, ny: 6 }, S.accent, [0, -1.0, 0]);
+      A(ank, prof([[-1.8, -0.9], [2.45, -0.9], [2.55, -0.78], [1.6, -0.6], [0.4, -0.38], [-0.8, -0.34], [-1.8, -0.52]], 1.8, 0.08), S.frame);
+      A(ank, cyl(0.5, 0.5, 1.7, 16), S.frame, [0, 0, 0], [0, 0, PI / 2]);
+      for (const side of [-1, 1]) this.piston(ank, [side * 0.55, 0.05, 0.25], [side * 0.55, -0.4, 1.5], 0.09, S);
+      PL(ank, 'y', [[-1.0, -0.95], [1.0, -0.95], [1.06, 0.25], [0.78, 0.82], [0.32, 1.0], [-0.32, 1.0], [-0.78, 0.82], [-1.06, 0.25]], 0.32, { bev: 0.06, nx: 6, ny: 6, bx: 1.6, by: 3 }, S.main, [0, -0.5, 1.72], [0.3, 0, 0]);
+      PL(ank, 'y', [[-0.78, -0.6], [0.78, -0.6], [0.84, 0.4], [0.52, 0.7], [-0.52, 0.7], [-0.84, 0.4]], 0.26, { bev: 0.05, nx: 4, ny: 4, bx: 1.4 }, S.main, [0, 0.12, 0.55], [0.55, 0, 0]);
       for (const side of [-1, 1]) {
-        this.piston(ank, [side * 0.64, 0.08, 0.25], [side * 0.64, -0.38, 1.82], 0.1, S);
-        A(ank, cyl(0.15, 0.15, 0.28, 12), S.frame, [side * 0.7, -0.38, 1.82], [0, 0, Math.PI / 2]);
+        const fs = PL(ank, side > 0 ? 'x' : '-x', [[-1.8, -0.95], [2.35, -0.95], [2.1, -0.55], [0.95, 0.05], [-0.7, 0.35], [-1.8, 0.05]], 0.2, { bev: 0.04, nx: 5, ny: 3, bx: 4 }, S.main, [side * 1.02, 0, 0]);
+        if (side === sx) fs.put(sten('warn', 0.26, 0.26, { tint: 5 }), -1.1, -0.45);
+        A(ank, cyl(0.34, 0.36, 0.1, 18), S.frame, [side * 1.14, 0.0, 0], [0, 0, PI / 2]);
+        this.nutRing(ank, [side * 1.2, 0, 0], 0.24, 6, S, 'x', 0.045);
+        A(ank, cyl(0.13, 0.15, 0.08, 12), S.second, [side * 1.22, 0, 0], [0, 0, PI / 2]);
       }
-      A(ank, cyl(0.55, 0.55, 1.75, 16), S.frame, [0, 0, 0], [0, 0, Math.PI / 2]);
-      // 腳尖護甲（雙向彎曲）＋ NO STEP
-      const toe = PL(ank, 'y', [[-0.9, -0.82], [0.9, -0.82], [0.98, -0.02], [0.78, 0.58], [0.32, 0.83], [-0.32, 0.83], [-0.78, 0.58], [-0.98, -0.02]], 0.2, { bev: 0.05, nx: 6, ny: 6, bx: 1.3, by: 2.4 }, S.main, [0, -0.02, 1.77], [0.39, 0, 0]);
-      toe.put(sten('nostep', 0.62, 0.16, { tint: 2, seg: 4 }), 0, 0.2);
-      A(ank, merge([-0.6, 0.6].map((x) => at(nut(0.05), [x, 0.08, 1.3], [0.39, 0, 0]))), S.frame);
-      // 腳尖防撞條＋警示條紋
-      const bump = PL(ank, 'z', [[-0.82, -0.2], [0.82, -0.2], [0.92, 0.05], [0.72, 0.22], [-0.72, 0.22], [-0.92, 0.05]], 0.2, { bev: 0.04, nx: 6, ny: 2, bx: 1.1 }, S.second, [0, -0.62, 2.46], [-0.35, 0, 0]);
-      bump.put(sten('hazard', 1.36, 0.22, { tint: 5, seg: 6 }), 0, 0);
-      // 腳背護甲
-      PL(ank, 'y', [[-0.62, -0.45], [0.62, -0.45], [0.68, 0.4], [0.5, 0.55], [-0.5, 0.55], [-0.68, 0.4]], 0.16, { bev: 0.04, nx: 4, ny: 4, bx: 1.1 }, S.main, [0, 0.43, 0.72], [0.3, 0, 0]);
-      // 腳踝兩側護甲＋軸蓋；腳跟油壓緩衝
-      for (const side of [-1, 1]) {
-        const gd = PL(ank, side > 0 ? 'x' : '-x', [[-1.1, -0.7], [0.7, -0.7], [0.95, -0.1], [0.65, 0.55], [-0.75, 0.62], [-1.2, 0.0]], 0.22, { bev: 0.05, nx: 6, ny: 5, bx: 2.4, by: 3, cu: -0.1 }, S.main, [side * 1.08, 0, 0]);
-        A(ank, cyl(0.38, 0.4, 0.1, 18), S.frame, [side * 1.23, 0, 0], [0, 0, Math.PI / 2]);
-        this.nutRing(ank, [side * 1.29, 0, 0], 0.28, 6, S, 'x', 0.05);
-        A(ank, cyl(0.15, 0.17, 0.1, 12), S.accent, [side * 1.31, 0, 0], [0, 0, Math.PI / 2]);
-        if (side === sx) gd.put(sten('warn', 0.28, 0.28, { tint: 5 }), 0.55, -0.4);
-        A(ank, blk(0.22, 0.3, 0.34, 0.05), S.frame, [side * 1.12, -0.6, -1.4]);
-        this.piston(ank, [side * 1.25, 0.1, -0.9], [side * 1.25, -0.5, -1.45], 0.085, S);
-      }
-      // 腳跟護甲＋鞋跟刺
-      const heel = PL(ank, '-z', [[-0.78, -0.42], [0.78, -0.42], [0.88, 0.2], [0.6, 0.62], [-0.6, 0.62], [-0.88, 0.2]], 0.24, { bev: 0.05, nx: 5, ny: 4, bx: 1.2 }, S.main, [0, -0.35, -1.7]);
-      heel.put(sten('caution', 0.8, 0.2, { tint: 2, seg: 4 }), 0, -0.1);
-      A(ank, prof([[-1.55, -0.95], [-2.0, -0.95], [-1.92, -0.72], [-1.6, -0.64]], 0.9, 0.05), S.frame);
+      PL(ank, '-z', [[-0.88, -0.5], [0.88, -0.5], [0.92, 0.2], [0.6, 0.55], [-0.6, 0.55], [-0.92, 0.2]], 0.26, { bev: 0.05, nx: 5, ny: 4, bx: 1.3 }, S.main, [0, -0.45, -1.82]);
 
-      // ================= 小腿（膝關節 y＝0）
-      A(kn, cyl(0.5, 0.55, 3.9), S.frame, [0, -2.0, 0]);
-      for (const side of [-1, 1]) A(kn, cyl(0.13, 0.13, 3.3, 8), S.frame, [side * 0.45, -2.1, -0.3]);
-      A(kn, taper(blk(1.4, 3.0, 1.5, 0.3, 0.4), 1.0, 1.0, 1.15, 1.1), S.dark, [0, -2.2, -0.5]);
-      A(kn, cyl(0.68, 0.68, 1.8), S.frame, [0, 0, 0], [0, 0, Math.PI / 2]);
-      // 前脛甲：一整片包覆的曲面板＋上段深藍疊板
-      // 三片可拆脛甲，各片留出真實厚度與內部檢修縫。
-      for (let j = 0; j < 3; j++) {
-        const width = 0.83 - j * 0.07, y = -1.15 - j * 0.94;
-        const shin = PL(kn, 'z', [[-width, -0.41], [width, -0.41], [width + 0.1, -0.18], [width, 0.4], [-width, 0.4], [-width - 0.1, -0.18]], 0.19,
-          { bev: 0.045, nx: 6, ny: 3, bx: 1.4, by: 8 }, j === 1 ? S.second : S.main, [0, y, 0.94 - j * 0.035]);
-        if (j === 1) shin.put(sten('caution', 0.66, 0.16, { tint: 1, seg: 3 }), 0, 0);
-        for (const side of [-1, 1]) A(kn, at(nut(0.045), [side * (width - 0.12), y + 0.22, 1.04], [Math.PI / 2, 0, 0]), S.frame);
-      }
-      PL(kn, 'z', [[-0.55, -0.6], [0.55, -0.6], [0.68, 0.05], [0.48, 0.35], [-0.48, 0.35], [-0.68, 0.05]], 0.12, { bev: 0.035, nx: 5, ny: 4, bx: 1.35, by: 9, cv: -1.05 }, S.second, [0, -1.2 + 0.0, 0.96 + 0.22]);
-      // 膝蓋：圓頂護甲＋紅色識別條
-      PL(kn, 'z', [[-0.7, -0.6], [0.7, -0.6], [0.82, 0.05], [0.55, 0.62], [-0.55, 0.62], [-0.82, 0.05]], 0.34, { bev: 0.07, nx: 6, ny: 6, bx: 0.95, by: 1.1 }, S.second, [0, -0.1, 1.2]);
-      PL(kn, 'z', [[-0.34, -0.1], [0.34, -0.1], [0.38, 0.1], [-0.38, 0.1]], 0.08, { bev: 0.02, nx: 4, ny: 1, bx: 0.95, by: 1.1, cv: -0.25 }, S.accent, [0, 0.15, 1.2 + 0.21]);
-      A(kn, merge([-0.45, 0.45].map((x) => at(nut(0.05), [x, -0.5, 1.3], [Math.PI / 2 - 0.3, 0, 0]))), S.frame);
+      // ================= 小腿（膝關節 y＝0、腳踝在 y＝-4.3）：往下外擴的白色脛甲、尖形護膝、側面深藍嵌板、小腿後推進器
+      A(kn, cyl(0.5, 0.55, 4.1), S.frame, [0, -2.1, 0]);
+      A(kn, taper(blk(1.4, 3.2, 1.5, 0.3, 0.4), 1.0, 1.0, 1.15, 1.1), S.dark, [0, -2.3, -0.45]);
+      A(kn, cyl(0.65, 0.65, 1.75), S.frame, [0, 0, 0], [0, 0, PI / 2]);
+      const snC = [0, -2.3, 0.98], snR = [-0.07, 0, 0];
+      const [snL, snRt] = RPL(kn, 'z', [[-1.08, -1.72], [1.08, -1.72], [0.9, 1.35], [0.55, 1.72], [-0.55, 1.72], [-0.9, 1.35]], 0.3, { bev: 0.06, nx: 8, ny: 8, bx: 3, by: 14 }, S.main, snC, snR, 0.15);
+      snRt.put(sten('caution', 0.5, 0.12, { tint: 2, seg: 2 }), 0.5, -1.45);
+      if (sx > 0) snRt.put(digits('01', 0.3, { tint: 2 }), 0.5, 0.95);
+      // 脛甲下段深藍嵌板（同樣有中央稜線）＋上段加疊一片護板
+      RPL(kn, 'z', [[-0.62, -0.42], [0.62, -0.42], [0.7, 0.38], [-0.7, 0.38]], 0.1, { bev: 0.03, nx: 5, ny: 3, bx: 3, by: 14, cv: 0.95 }, S.second, onP(snC, snR, 0, -0.95, 0.2), snR, 0.15);
+      RPL(kn, 'z', [[-0.7, -0.35], [0.7, -0.35], [0.62, 0.3], [0.4, 0.42], [-0.4, 0.42], [-0.62, 0.3]], 0.14, { bev: 0.035, nx: 4, ny: 2, bx: 3, by: 14, cv: -0.9 }, S.main, onP(snC, snR, 0, 0.9, 0.22), snR, 0.15);
+      // 護膝：尖形、往前突出
+      const kC = [0, 0.0, 1.12], kR = [-0.25, 0, 0];
+      RPL(kn, 'z', [[-0.72, -0.8], [0.72, -0.8], [0.88, 0.05], [0.5, 0.78], [-0.5, 0.78], [-0.88, 0.05]], 0.5, { bev: 0.08, nx: 6, ny: 6, by: 1.4 }, S.main, kC, kR, 0.3);
+      RPL(kn, 'z', [[-0.22, -0.55], [0.22, -0.55], [0.3, 0.3], [0, 0.55], [-0.3, 0.3]], 0.12, { bev: 0.03, nx: 3, ny: 3, by: 1.4 }, S.second, onP(kC, kR, 0, 0, 0.3), kR, 0.3);
+      for (const side of [-1, 1]) this.piston(kn, [side * 0.62, -0.25, 0.55], [side * 0.62, -1.3, 0.72], 0.09, S);
       for (const side of [-1, 1]) {
-        // 小腿側板
-        const cs = PL(kn, side > 0 ? 'x' : '-x', [[-1.35, -3.55], [0.55, -3.6], [0.8, -2.2], [0.6, -0.7], [-0.85, -0.55], [-1.5, -1.9]], 0.24, { bev: 0.05, nx: 6, ny: 7, bx: 3.5, by: 6, cu: -0.4, cv: -2.1 }, S.main, [side * 1.06, 0, 0]);
-        if (side === sx) {
-          cs.put(sten('hyd', 1.1, 0.12, { tint: 2, seg: 3 }), -0.35, -3.05);
-          PL(kn, fx, [[-0.9, -1.45], [0.4, -1.45], [0.45, -1.3], [-0.95, -1.3]], 0.08, { bev: 0.02, nx: 4, ny: 1, bx: 3.5, by: 6, cu: -0.4, cv: -2.1 }, S.accent, [side * (1.06 + 0.16), 0, 0]);
-        }
-        // 膝關節軸蓋
-        A(kn, cyl(0.46, 0.48, 0.12, 18), S.frame, [side * 1.14, 0, 0], [0, 0, Math.PI / 2]);
-        this.nutRing(kn, [side * 1.21, 0, 0], 0.33, 6, S, 'x', 0.055, 0.5);
-        A(kn, cyl(0.15, 0.17, 0.1, 12), S.accent, [side * 1.22, 0, 0], [0, 0, Math.PI / 2]);
-        // 膝後油壓缸＋管線
-        this.piston(kn, [side * 0.5, -0.35, -0.85], [side * 0.55, -2.45, -1.22], 0.12, S);
-        A(kn, hose([[side * 0.2, -0.3, -0.75], [side * 0.15, -1.3, -1.25], [side * 0.3, -2.4, -1.35]], 0.09, 7), S.dark);
+        const sd = side > 0 ? 'x' : '-x', fr = [0, 0, side * 0.06];
+        PL(kn, sd, [[-1.25, -4.0], [1.2, -4.0], [1.0, -1.6], [0.72, -0.6], [-0.9, -0.5], [-1.35, -1.7]], 0.26, { bev: 0.05, nx: 6, ny: 7, bx: 3.5, by: 9, cv: -2.2 }, S.main, [side * 1.02, 0, 0], fr);
+        PL(kn, sd, [[-0.95, -3.45], [0.25, -3.45], [0.42, -1.75], [-0.85, -1.55]], 0.1, { bev: 0.025, nx: 4, ny: 4, bx: 3.5, by: 9, cv: -2.2 }, S.second, [side * 1.2, 0, 0], fr);
+        this.vent(kn, 0.5, 0.9, 4, S, [side * 1.26, -2.55, -0.35], [0, side > 0 ? PI / 2 : -PI / 2, side * 0.06]);
+        PL(kn, sd, [[-0.55, -1.25], [0.6, -1.3], [0.7, -0.75], [-0.45, -0.7]], 0.12, { bev: 0.03, nx: 3, ny: 2, bx: 3.5 }, S.main, [side * 1.24, 0, 0], fr);
+        thr(kn, [side * 1.18, -3.9, -0.95], [0.3, 0, side * 0.25], 0.13);
+        A(kn, cyl(0.44, 0.46, 0.12, 18), S.frame, [side * 1.1, 0, 0], [0, 0, PI / 2]);
+        this.nutRing(kn, [side * 1.17, 0, 0], 0.31, 6, S, 'x', 0.05, 0.5);
+        A(kn, cyl(0.15, 0.17, 0.1, 12), S.accent, [side * 1.19, 0, 0], [0, 0, PI / 2]);
+        this.piston(kn, [side * 0.5, -0.35, -0.85], [side * 0.55, -2.45, -1.2], 0.11, S);
       }
-      // 小腿背後：上段護甲、推進器座、隔熱葉片、警告字、噴口
-      PL(kn, '-z', [[-0.72, -0.62], [0.72, -0.62], [0.8, 0.5], [0.5, 0.78], [-0.5, 0.78], [-0.8, 0.5]], 0.22, { bev: 0.05, nx: 5, ny: 5, bx: 1.2 }, S.main, [0, -1.72, -1.36]);
-      A(kn, blk(1.45, 1.7, 0.5, 0.1, 0.25), S.frame, [0, -3.15, -1.5]);
-      this.label(kn, sten('danger', 1.05, 0.28, { face: '-z', tint: 3 }), S.frame, [0, -2.72, -1.765]);
+      PL(kn, '-z', [[-0.78, -0.7], [0.78, -0.7], [0.86, 0.55], [0.55, 0.8], [-0.55, 0.8], [-0.86, 0.55]], 0.24, { bev: 0.05, nx: 5, ny: 5, bx: 1.3 }, S.main, [0, -1.75, -1.3]);
+      A(kn, blk(1.5, 1.7, 0.5, 0.1, 0.25), S.frame, [0, -3.25, -1.45]);
+      this.label(kn, sten('danger', 1.0, 0.26, { face: '-z', tint: 3 }), S.frame, [0, -2.85, -1.705]);
       for (const dx of [-0.42, 0.42]) {
-        A(kn, bell(0.36, 0.7), S.dark, [dx, -3.85, -1.55], [0.45, 0, 0]);
-        A(kn, cyl(0.3, 0.3, 0.14, 14), S.frame, [dx, -3.82, -1.55], [0.45, 0, 0]);
-        this.nozzles.push({ bone: kn, pos: [dx, -4.5, -1.85], rot: [0.45, 0, 0], r: 0.34, len: 3.2 });
+        A(kn, bell(0.36, 0.7), S.dark, [dx, -3.95, -1.5], [0.45, 0, 0]);
+        A(kn, cyl(0.3, 0.3, 0.14, 14), S.frame, [dx, -3.92, -1.5], [0.45, 0, 0]);
+        this.nozzles.push({ bone: kn, pos: [dx, -4.6, -1.8], rot: [0.45, 0, 0], r: 0.34, len: 3.2 });
       }
 
-      // ================= 大腿（髖關節 y＝0）
-      A(hp, cyl(0.62, 0.58, 4.2), S.frame, [0, -2.1, 0]);
-      A(hp, taper(blk(1.5, 3.2, 1.6, 0.25, 0.4), 1.05, 1.05, 0.9, 0.9), S.frame, [0, -2.2, 0]);
-      A(hp, ribs(-3.55, -3.85, 2, 0.66, 0.08, 16), S.dark);
-      // 分段大腿護甲：薄邊、檢修縫與內骨架在抬腿時仍可辨識。
-      for (let j = 0; j < 3; j++) {
-        const y = -1.0 - j * 1.08, w = 0.91 - j * 0.065;
-        const th = PL(hp, 'z', [[-w, -0.48], [w, -0.48], [w + 0.04, 0.32], [w - 0.14, 0.49], [-w + 0.14, 0.49], [-w - 0.04, 0.32]],
-          0.24, { bev: 0.04, nx: 6, ny: 3, bx: 1.6, by: 8 }, S.main, [0, y, 1.02]);
-        if (j === 2) th.put(sten('lift', 0.25, 0.25, { tint: 2 }), 0.4, -0.18);
-        for (const side of [-1, 1]) A(hp, blk(0.1, 0.23, 0.08, 0.015), S.frame, [side * (w - 0.08), y, 1.15]);
-      }
-      PL(hp, 'z', [[-0.45, -0.35], [0.45, -0.35], [0.52, 0.35], [-0.52, 0.35]], 0.1, { bev: 0.03, nx: 4, ny: 3, bx: 1.25, by: 10, cv: -0.7 }, S.second, [0, -1.4, 0.97 + 0.22]);
-      A(hp, merge([[-0.6, -1.3], [0.6, -1.3], [-0.55, -3.3], [0.55, -3.3]].map(([x, y]) => at(nut(0.05), [x, y, 1.18 - (x * x) / 2.5], [Math.PI / 2, Math.atan(x / 1.25), 0]))), S.frame);
+      // ================= 大腿（髖關節 y＝0、膝在 y＝-4.5）：白色大腿甲、外側深藍嵌板
+      A(hp, cyl(0.62, 0.56, 4.4), S.frame, [0, -2.2, 0]);
+      A(hp, taper(blk(1.45, 3.3, 1.5, 0.25, 0.4), 1.05, 1.05, 0.9, 0.9), S.frame, [0, -2.3, 0]);
+      A(hp, ribs(-3.8, -4.1, 2, 0.64, 0.08, 16), S.dark);
+      // 左大腿正面是戰場換上的備品板，只上了底漆
+      RPL(hp, 'z', [[-0.82, -1.75], [0.82, -1.75], [0.9, 1.35], [0.68, 1.72], [-0.68, 1.72], [-0.9, 1.35]], 0.3, { bev: 0.06, nx: 6, ny: 6, bx: 2.5, by: 12 }, sx > 0 ? S.primer : S.main, [0, -2.1, 0.86], [0, 0, 0], 0.12);
+      RPL(hp, 'z', [[-0.66, -0.4], [0.66, -0.4], [0.72, 0.3], [0.5, 0.45], [-0.5, 0.45], [-0.72, 0.3]], 0.12, { bev: 0.03, nx: 4, ny: 2, bx: 2.5 }, S.main, [0, -3.5, 1.08], [0.05, 0, 0], 0.12);
       for (const side of [-1, 1]) {
-        const ts = PL(hp, side > 0 ? 'x' : '-x', [[-0.85, -1.55], [0.9, -1.55], [1.0, 0.9], [0.7, 1.45], [-0.8, 1.45], [-0.95, 0.9]], 0.26, { bev: 0.06, nx: 6, ny: 7, bx: 2.5, by: 10, cu: 0.05 }, S.main, [side * 0.95, -2.1, 0]);
+        const ts = PL(hp, side > 0 ? 'x' : '-x', [[-0.85, -1.85], [0.85, -1.85], [0.95, 1.35], [0.7, 1.72], [-0.75, 1.72], [-0.92, 1.35]], 0.28, { bev: 0.06, nx: 5, ny: 6, bx: 2.2, by: 12 }, S.main, [side * 0.88, -2.15, 0]);
         if (side === sx) {
-          ts.put(sten('xg01', 1.3, 0.16, { tint: 2, seg: 4 }), 0.05, -1.05);
-          PL(hp, fx, [[-0.8, 1.0], [0.9, 1.0], [0.95, 1.12], [-0.85, 1.12]], 0.07, { bev: 0.02, nx: 4, ny: 1, bx: 2.5, by: 10, cu: 0.05 }, S.accent, [side * (0.95 + 0.165), -2.1, 0]);
+          PL(hp, fx, [[-0.55, -0.62], [0.55, -0.62], [0.6, 0.62], [-0.6, 0.62]], 0.08, { bev: 0.02, nx: 3, ny: 3, bx: 2.2, by: 12, cv: 0.55 }, S.second, [side * 1.05, -2.7, 0]);
+          PL(hp, fx, [[-0.7, -0.5], [0.72, -0.5], [0.8, 0.4], [-0.6, 0.55]], 0.14, { bev: 0.035, nx: 3, ny: 2, bx: 2.2 }, S.main, [side * 1.1, -1.05, 0]);
+          this.vent(hp, 0.6, 0.35, 3, S, [side * 1.08, -3.5, -0.35], [0, side > 0 ? PI / 2 : -PI / 2, 0]);
+          ts.put(sten('xg01', 1.2, 0.15, { tint: 2, seg: 4 }), 0.0, 0.95);
         }
       }
-      PL(hp, '-z', [[-0.75, -1.3], [0.75, -1.3], [0.82, 0.9], [-0.82, 0.9]], 0.24, { bev: 0.05, nx: 5, ny: 6, bx: 1.3 }, S.second, [0, -2.3, -0.95]);
-      this.piston(hp, [sx * 1.2, -0.95, -0.7], [sx * 1.2, -3.55, -0.55], 0.12, S);
-      A(hp, sph(0.85), S.frame);
+      PL(hp, '-z', [[-0.72, -1.6], [0.72, -1.6], [0.8, 1.2], [-0.8, 1.2]], 0.26, { bev: 0.05, nx: 5, ny: 5, bx: 1.3 }, S.main, [0, -2.2, -0.85]);
+      this.piston(hp, [sx * 1.15, -0.95, -0.62], [sx * 1.15, -3.7, -0.5], 0.11, S);
+      A(hp, sph(0.8), S.frame);
     }
-    // ================= 腰
-    const pv = b.pelvis;
-    A(pv, blk(3.0, 1.2, 2.3, 0.1), S.frame, [0, -0.1, 0]);
-    A(pv, taper(blk(3.9, 0.9, 2.5, 0.2, 0.35), 1.02, 1.02, 0.95, 0.96), S.frame, [0, 0.35, 0]);
-    A(pv, prof([[1.25, 0.1], [1.42, -0.55], [0.8, -1.45], [-0.6, -1.3], [-0.9, 0.1]], 1.35, 0.12), S.second);
-    PL(pv, 'z', [[-0.35, -0.55], [0.35, -0.55], [0.42, 0.15], [-0.42, 0.15]], 0.16, { bev: 0.04, nx: 3, ny: 3, bx: 1.5 }, S.accent, [0, -0.45, 1.52], [-0.3, 0, 0]);
-    // 腰帶：一片包覆的曲面板＋金色中央扣
-    const belt = PL(pv, 'z', [[-2.0, -0.42], [2.0, -0.42], [2.1, 0.42], [-2.1, 0.42]], 0.3, { bev: 0.07, nx: 10, ny: 3, bx: 2.2 }, S.main, [0, 0.38, 1.5]);
-    belt.put(sten('xg01', 1.5, 0.18, { tint: 2, seg: 6 }), -0.95, 0.05);
-    PL(pv, 'z', [[-0.45, -0.28], [0.45, -0.28], [0.5, 0.28], [-0.5, 0.28]], 0.12, { bev: 0.03, nx: 4, ny: 2, bx: 2.2 }, S.yellow, [0, 0.38, 1.5 + 0.21]);
-    A(pv, merge([-1.6, -1.05, 1.05, 1.6].map((x) => at(nut(0.055), [x, 0.6, 1.65 - (x * x) / 4.4 + 0.01], [Math.PI / 2, Math.atan(x / 2.2), 0]))), S.frame);
-    for (const sx of [-1, 1]) {
-      // 前裙甲（外層白、內層深藍）＋鉸鏈
-      const fo = [[-0.8, -2.2], [0.7, -2.05], [0.88, 0.35], [-0.84, 0.42]].map(([x, y]) => [x * sx, y]);
-      PL(pv, 'z', fo.map(([x, y]) => [x * 1.06, y - 0.04]), 0.18, { bev: 0.04, nx: 5, ny: 6, bx: 3.0, cu: -sx * 0.95 }, S.second, [sx * 0.95, -0.35, 1.5], [-0.1, 0, 0]);
-      const fs = PL(pv, 'z', fo, 0.24, { bev: 0.06, nx: 5, ny: 6, bx: 3.0, cu: -sx * 0.95 }, S.main, [sx * 0.95, -0.35, 1.68], [-0.1, 0, 0]);
-      fs.put(sten('hazard', 1.2, 0.14, { tint: 5, seg: 4 }), sx * -0.02, -1.95);
-      A(pv, cyl(0.19, 0.19, 1.5, 12), S.frame, [sx * 0.95, 0.06, 1.55], [0, 0, Math.PI / 2]);
-      // 側裙甲＋姿態噴嘴
-      PL(pv, sx > 0 ? 'x' : '-x', [[-1.05, -1.95], [1.0, -1.95], [1.12, 0.35], [-1.15, 0.35]], 0.3, { bev: 0.07, nx: 6, ny: 6, bx: 4 }, S.main, [sx * 2.2, -0.15, 0], [0, 0, sx * 0.12]);
-      A(pv, blk(1.2, 1.0, 1.2, 0.1), S.frame, [sx * 1.7, -0.1, 0]);
-      for (const z of [-0.45, 0.45]) {
-        A(pv, bell(0.17, 0.32), S.dark, [sx * 2.5, -2.0, z], [0, 0, sx * 0.12]);
-        A(pv, cyl(0.14, 0.14, 0.12, 10), S.frame, [sx * 2.5, -1.96, z], [0, 0, sx * 0.12]);
-      }
-      A(pv, cyl(0.24, 0.24, 1.3, 12), S.frame, [sx * 2.2, 0.45, 0], [Math.PI / 2, 0, 0]);
-    }
-    const rs = PL(pv, '-z', [[-1.3, -1.8], [1.3, -1.8], [1.42, 0.4], [-1.42, 0.4]], 0.3, { bev: 0.07, nx: 6, ny: 6, bx: 3 }, S.main, [0, -0.05, -1.45]);
-    rs.put(sten('caution', 1.0, 0.25, { tint: 2, seg: 4 }), 0, -1.35);
-    this.vent(pv, 1.4, 0.45, 3, S, [0, -0.7, -1.66], [0, Math.PI, 0]);
 
-    // ================= 胸：駕駛艙艙門在胸口正中（上緣鉸鏈往外上掀）
+    // ================= 腰：白色腰帶＋金色 V 扣、紅色胯甲、前裙甲（深藍嵌板）、外擴的側裙甲、後裙甲
+    const pv = b.pelvis;
+    A(pv, blk(2.6, 1.2, 2.1, 0.1), S.frame, [0, -0.1, 0]);
+    A(pv, taper(blk(3.2, 0.8, 2.2, 0.2, 0.3), 1.02, 1.02, 0.95, 0.96), S.frame, [0, 0.4, 0]);
+    A(pv, prof([[1.3, 0.15], [1.42, -0.45], [0.85, -1.45], [-0.55, -1.3], [-0.85, 0.15]], 1.15, 0.1), S.accent);
+    const belt = PL(pv, 'z', [[-1.75, -0.36], [1.75, -0.36], [1.85, 0.36], [-1.85, 0.36]], 0.28, { bev: 0.06, nx: 8, ny: 2, bx: 2.0 }, S.main, [0, 0.42, 1.25]);
+    belt.put(sten('xg01', 1.0, 0.13, { tint: 2, seg: 4 }), 1.05, 0.02);
+    A(pv, blade([[-0.44, 0.2], [-0.26, 0.2], [0, -0.1], [0.26, 0.2], [0.44, 0.2], [0, -0.3]], 0.1, 0.02), S.yellow, [0, 0.45, 1.44]);
+    for (const sx of [-1, 1]) {
+      const fo = [[-0.72, -1.7], [0.66, -1.55], [0.78, 0.32], [-0.74, 0.38]].map(([x, y]) => [x * sx, y]);
+      const fC = [sx * 0.95, -0.35, 1.42], fR = [-0.18, sx * 0.15, 0];
+      const fs = PL(pv, 'z', fo, 0.26, { bev: 0.06, nx: 5, ny: 6, bx: 2.6 }, S.main, fC, fR);
+      fs.put(sten('hazard', 0.9, 0.1, { tint: 5, seg: 3 }), sx * -0.02, 0.18);
+      PL(pv, 'z', [[-0.4, -0.42], [0.4, -0.42], [0.42, 0.38], [-0.42, 0.38]], 0.08, { bev: 0.02, nx: 3, ny: 3, bx: 2.6 }, S.second, onP(fC, fR, sx * 0.0, -0.6, 0.16), fR);
+      this.vent(pv, 0.6, 0.5, 4, S, onP(fC, fR, 0, -0.6, 0.21), fR);
+      // 前裙甲下段再疊一層＋裙甲底下的姿態推進器
+      PL(pv, 'z', [[-0.66, -0.3], [0.6, -0.26], [0.66, 0.25], [-0.68, 0.28]].map(([x, y]) => [x * sx, y]), 0.14, { bev: 0.035, nx: 3, ny: 2, bx: 2.6 }, S.main, onP(fC, fR, sx * -0.03, -1.32, 0.2), fR);
+      thr(pv, [sx * 0.95, -2.05, 1.2], [0, 0, 0], 0.14);
+      A(pv, cyl(0.17, 0.17, 1.3, 12), S.frame, [sx * 0.95, 0.1, 1.3], [0, 0, PI / 2]);
+      const sd = sx > 0 ? 'x' : '-x', sR = [0, 0, sx * 0.12], sC = [sx * 2.6, -0.2, 0];
+      PL(pv, sd, [[-1.05, -1.95], [1.05, -1.95], [1.15, 0.35], [-1.15, 0.35]], 0.28, { bev: 0.06, nx: 6, ny: 6, bx: 4, by: 8 }, S.main, sC, sR);
+      PL(pv, sd, [[-0.72, -1.55], [0.72, -1.55], [0.78, -0.95], [-0.78, -0.95]], 0.08, { bev: 0.02, nx: 4, ny: 2, bx: 4, by: 8 }, S.second, [sx * 2.78, -0.2, 0], sR);
+      PL(pv, sd, [[-0.8, -0.8], [0.75, -0.75], [0.85, 0.1], [-0.85, 0.15]], 0.14, { bev: 0.035, nx: 3, ny: 2, bx: 4 }, S.main, [sx * 2.8, -0.2, 0], sR);
+      thr(pv, [sx * 2.85, -2.2, -0.5], [0, 0, sx * 0.12], 0.14);
+      A(pv, blk(1.2, 0.9, 1.1, 0.1), S.frame, [sx * 2.0, -0.05, 0]);
+      A(pv, cyl(0.22, 0.22, 1.2, 12), S.frame, [sx * 2.4, 0.4, 0], [PI / 2, 0, 0]);
+    }
+    const [, rs] = RPL(pv, '-z', [[-1.25, -1.8], [1.25, -1.8], [1.35, 0.35], [-1.35, 0.35]], 0.28, { bev: 0.06, nx: 6, ny: 6, bx: 6 }, S.main, [0, -0.1, -1.3], [0.12, 0, 0], 0.14);
+    rs.put(sten('caution', 0.6, 0.16, { tint: 2, seg: 3 }), -0.6, -1.3);
+    for (const x of [-0.6, 0.6]) thr(pv, [x, -2.0, -1.45], [-0.25, 0, 0], 0.15);
+
+    // ================= 胸：深藍胸甲（往兩側後掠）＋黃色進氣口、紅色腹甲、深藍領口與肩頸甲、白色側胴；駕駛艙艙門在胸口正中
     const t = b.torso;
-    const chestZ = (x, y) => 2.236 - (x * x) / 7 - ((y - 3.3) ** 2) / 12;   // 胸甲正面
-    const onChest = (x, y, d = 0) => ({ pos: [x, y, chestZ(x, y) + d], rot: [(3.3 - y) / 6, Math.atan(x / 3.5), 0] });
-    A(t, blk(2.6, 1.5, 2.3, 0.15), S.frame, [0, 0.6, 0]);
-    A(t, ribs(0.25, 0.95, 3, 1.25, 0.12), S.dark);
-    A(t, taper(blk(3.0, 1.3, 2.6, 0.2, 0.4), 1.08, 1.05), S.frame, [0, 1.35, 0.1]);
-    // 胴體（深藍）：左右兩塊正面跟著胸甲彎，中間挖出駕駛艙凹槽（y 2.1～4.2、深到 z 0.45）
+    A(t, blk(2.4, 1.4, 2.1, 0.15), S.frame, [0, 0.6, 0]);
+    A(t, ribs(0.2, 0.95, 3, 1.15, 0.12), S.dark);
+    A(t, taper(blk(2.8, 1.3, 2.5, 0.2, 0.4), 1.12, 1.05), S.frame, [0, 1.35, 0.05]);
+    // 胴體內殼：中間挖出駕駛艙凹槽（y 2.1～4.2、深到 z 0.45）
     const torsoOut = [[1.5, 0.35], [1.85, 2.4], [1.6, 3.25], [-1.3, 3.4], [-1.75, 1.9], [-1.5, 0.35]];
     for (const side of [-1, 1]) A(t, bendFront(taper(prof(torsoOut, 1.6, 0.22).translate(side * 1.6, 0, 0), 1.1, 1, 0.82, 1), 3.5), S.frame, [0, 1.5, 0]);
     A(t, taper(prof([[1.5, 0.35], [1.543, 0.6], [0.45, 0.6], [0.45, 2.7], [1.76, 2.7], [1.6, 3.25], [-1.3, 3.4], [-1.75, 1.9], [-1.5, 0.35]], 1.6, 0.12), 1.1, 1, 0.82, 1), S.frame, [0, 1.5, 0]);
-    // 腹部分段裝甲（三片上下交疊）
-    for (const [y, z] of [[1.86, 1.62], [1.42, 1.53], [0.98, 1.44]]) PL(t, 'z', [[-1.45, -0.24], [1.45, -0.24], [1.58, 0.24], [-1.58, 0.24]], 0.22, { bev: 0.05, nx: 8, ny: 2, bx: 2.4 }, S.second, [0, y, z], [-0.14, 0, 0]);
-    // 左右胸甲＋上層深藍疊板＋紅色識別線
+    // 腰部外露的骨架油壓缸（胸與裙甲之間看得到的機械）
+    for (const side of [-1, 1]) this.piston(t, [side * 1.15, 0.05, 0.95], [side * 1.2, 1.75, 1.05], 0.1, S);
+    // 紅色腹甲（兩段）
+    for (const [y, z, w] of [[1.05, 1.3, 0.85], [1.62, 1.45, 1.0]]) PL(t, 'z', [[-w, -0.3], [w, -0.3], [w + 0.1, 0.3], [-w - 0.1, 0.3]], 0.26, { bev: 0.05, nx: 6, ny: 2, bx: 2.2 }, S.accent, [0, y, z], [-0.12, 0, 0]);
     for (const side of [-1, 1]) {
       const M = (pts) => pts.map(([x, y]) => [x * side, y]);
-      const cp = PL(t, 'z', M([[0.9, 2.05], [1.9, 2.0], [2.45, 2.75], [2.52, 3.9], [2.2, 4.72], [0.95, 4.78]]), 0.34, { bev: 0.08, nx: 8, ny: 10, bx: 3.5, by: 6, cv: 3.3 }, S.main, [0, 0, 2.066]);
-      PL(t, 'z', M([[1.08, 3.66], [2.12, 3.7], [2.32, 4.12], [2.05, 4.6], [1.08, 4.62]]), 0.14, { bev: 0.04, nx: 6, ny: 4, bx: 3.5, by: 6, cv: 3.3 }, S.main, [0, 0, 2.306]);
-      PL(t, 'z', M([[1.08, 4.62], [2.05, 4.6], [2.02, 4.66], [1.08, 4.68]]), 0.14, { bev: 0.02, nx: 6, ny: 1, bx: 3.5, by: 6, cv: 3.3 }, S.second, [0, 0, 2.306]);
-      PL(t, 'z', M([[1.1, 3.48], [2.2, 3.5], [2.24, 3.58], [1.1, 3.58]]), 0.07, { bev: 0.02, nx: 6, ny: 1, bx: 3.5, by: 6, cv: 3.3 }, S.accent, [0, 0, 2.271]);
-      if (side < 0) {
-        cp.put(sten('rescue', 0.5, 0.25, { tint: 4, seg: 3 }), -1.18, 2.25);
-        // 緊急開艙拉桿：黃黑框凹槽＋T 字把手
-        const e = onChest(-1.7, 2.25, 0.0);
-        this.label(t, sten('hazard', 0.5, 0.38, { tint: 5 }), S.main, [e.pos[0], e.pos[1], e.pos[2] + 0.012], e.rot);
-        A(t, blk(0.36, 0.26, 0.08, 0.02), S.dark, [e.pos[0], e.pos[1], e.pos[2] + 0.02], e.rot);
-        A(t, at(handle(0.24, 0.1, 0.03), [0, 0, 0], [0, 0, 0]), S.yellow, [e.pos[0], e.pos[1], e.pos[2] + 0.04], e.rot);
-      } else {
-        cp.put(sten('caution', 0.7, 0.17, { tint: 2, seg: 3 }), 1.55, 2.35);
-      }
-      // 胸口進氣口（金色外框、暗底、葉片）
-      const v = onChest(side * 1.62, 2.95, 0.08);
-      A(t, merge([at(blk(1.0, 0.13, 0.26, 0.04), [0, 0.37, 0]), at(blk(1.0, 0.13, 0.26, 0.04), [0, -0.37, 0]), at(blk(0.13, 0.62, 0.26, 0.04), [0.44, 0, 0]), at(blk(0.13, 0.62, 0.26, 0.04), [-0.44, 0, 0])]), S.yellow, v.pos, v.rot);
-      A(t, blk(0.78, 0.64, 0.1, 0.02), S.dark, v.pos, v.rot);
-      A(t, merge(Array.from({ length: 5 }, (_, k) => at(blk(0.76, 0.05, 0.14, 0.01), [0, -0.26 + k * 0.13, 0.06], [-0.5, 0, 0]))), S.frame, v.pos, v.rot);
-      // 螺帽、艙門旁的扶手
-      A(t, merge([[1.25, 3.92, 0.15], [1.95, 3.95, 0.15], [1.25, 4.4, 0.15], [1.95, 4.38, 0.15], [2.36, 2.9, 0.01]].map(([x, y, d]) => { const q = onChest(side * x, y, d); return at(nut(0.055), q.pos, [q.rot[0] + Math.PI / 2, q.rot[1], 0]); })), S.frame);
-      const hd = onChest(side * 1.0, 3.2, 0.0);
-      A(t, at(handle(1.0, 0.14, 0.04), [0, 0, 0], [0, 0, Math.PI / 2]), S.frame, hd.pos, hd.rot);
-      // 側胴裝甲＋散熱百葉；肩關節座
-      const sp = PL(t, side > 0 ? 'x' : '-x', [[-1.25, 2.1], [1.05, 2.15], [1.25, 3.2], [1.0, 4.3], [-1.1, 4.35], [-1.4, 3.2]], 0.3, { bev: 0.07, nx: 7, ny: 7, bx: 3, by: 6, cu: -0.1, cv: 3.2 }, S.main, [side * 2.38, 0, 0]);
-      sp.put(sten('lift', 0.4, 0.4, { tint: 2 }), 0.55, 3.75);
-      this.vent(t, 1.2, 0.7, 5, S, [side * 2.53, 2.7, -0.35], [0, side > 0 ? Math.PI / 2 : -Math.PI / 2, 0]);
-      A(t, cyl(0.72, 0.78, 0.5, 18), S.frame, [side * 2.55, 3.95, -0.05], [0, 0, Math.PI / 2]);
+      const cc = [side * 1.62, 3.25, 1.98], cr = [-0.06, side * 0.28, 0];
+      const cp = PL(t, 'z', M([[-0.72, -1.2], [-0.1, -1.25], [0.84, -0.15], [0.86, 0.95], [0.52, 1.3], [-0.72, 1.3]]), 0.4, { bev: 0.07, nx: 7, ny: 8, bx: 7, by: 12 }, S.second, cc, cr);
+      // 黃色進氣口（外框＋暗底＋葉片）
+      const vc = onP(cc, cr, side * 0.1, 0.3, 0.22);
+      A(t, merge([at(blk(1.0, 0.13, 0.24, 0.04), [0, 0.38, 0]), at(blk(1.0, 0.13, 0.24, 0.04), [0, -0.38, 0]), at(blk(0.13, 0.64, 0.24, 0.04), [0.44, 0, 0]), at(blk(0.13, 0.64, 0.24, 0.04), [-0.44, 0, 0])]), S.yellow, vc, cr);
+      A(t, blk(0.78, 0.66, 0.1, 0.02), S.dark, vc, cr);
+      A(t, merge(Array.from({ length: 5 }, (_, k) => at(blk(0.76, 0.05, 0.14, 0.01), [0, -0.26 + k * 0.13, 0.06], [-0.5, 0, 0]))), S.frame, vc, cr);
+      // 胸甲疊層：下段加一片深藍護板、外上角一片白色護板
+      PL(t, 'z', M([[-0.5, -0.32], [0.1, -0.35], [0.55, 0.0], [0.5, 0.3], [-0.5, 0.3]]), 0.12, { bev: 0.03, nx: 3, ny: 2 }, S.second, onP(cc, cr, side * 0.15, -0.72, 0.26), cr);
+      PL(t, 'z', M([[-0.45, -0.2], [0.35, -0.2], [0.42, 0.18], [-0.45, 0.22]]), 0.12, { bev: 0.03, nx: 3, ny: 2 }, S.main, onP(cc, cr, side * 0.4, 1.02, 0.25), cr);
+      if (side < 0) cp.put(sten('rescue', 0.46, 0.23, { tint: 4, seg: 3 }), -0.2, -0.85);
+      else cp.put(sten('caution', 0.6, 0.15, { tint: 1, seg: 3 }), 0.15, -0.85);
+      // 白色側胴（手臂下方）
+      PL(t, side > 0 ? 'x' : '-x', [[-1.2, 2.55], [1.1, 2.55], [1.3, 3.1], [-1.35, 3.1]], 0.26, { bev: 0.05, nx: 5, ny: 2, bx: 3 }, S.second, [side * 2.28, 0, 0]);
+      this.vent(t, 1.1, 0.7, 5, S, [side * 2.15, 1.9, -0.3], [0, side > 0 ? PI / 2 : -PI / 2, 0]);
+      A(t, cyl(0.7, 0.76, 0.5, 18), S.frame, [side * 2.6, 3.95, -0.05], [0, 0, PI / 2]);
+      // 肩頸甲（深藍）
+      PL(t, 'y', M([[-0.85, -1.35], [0.7, -1.4], [0.85, 1.1], [-0.8, 1.4]]), 0.3, { bev: 0.07, nx: 6, ny: 6, bx: 2.5, by: 4 }, S.second, [side * 1.62, 4.95, 0.0], [0, 0, -side * 0.2]);
     }
-    // 艙內：暗色內襯、座椅（坐墊、椅背、頭枕、側翼）、操縱桿、側控台、踏板、骨架
+    // 領口前板（深藍、往後傾）＋頸圈
+    PL(t, 'z', [[-2.2, -0.38], [2.2, -0.38], [1.9, 0.38], [-1.9, 0.38]], 0.3, { bev: 0.07, nx: 8, ny: 2, bx: 2.6 }, S.second, [0, 4.72, 1.72], [-0.7, 0, 0]);
+    A(t, lathe([[0.62, 4.9], [0.86, 4.95], [0.93, 5.1], [0.8, 5.26], [0.6, 5.28]], 8), S.second, [0, 0, 0.3], [0, PI / 8, 0]);
+    A(t, cyl(0.5, 0.6, 0.5), S.frame, [0, 5.0, 0.35]);
+    PL(t, 'y', [[-1.0, -0.6], [1.0, -0.6], [1.0, 0.6], [-1.0, 0.6]], 0.22, { bev: 0.05, nx: 2, ny: 2 }, S.second, [0, 5.0, -0.95]);
+    // 艙內：暗色內襯、座椅、操縱桿、側控台、踏板、骨架
     A(t, blk(1.5, 2.0, 0.08, 0.02), S.dark, [0, 3.15, 0.5]);
     A(t, blk(1.3, 0.1, 1.3, 0.03), S.frame, [0, 2.17, 1.15]);
     A(t, blk(1.45, 0.1, 1.3, 0.03), S.dark, [0, 4.12, 1.15]);
@@ -864,178 +915,177 @@ export class Mech {
       A(t, blk(0.06, 1.9, 0.1, 0.02), S.frame, [side * 0.72, 3.15, 0.55]);
       A(t, blk(0.2, 0.06, 0.34, 0.02), S.frame, [side * 0.22, 2.24, 1.5], [0.35, 0, 0]);
     }
-    // 登艙踏板（防滑條）
     A(t, blk(1.2, 0.08, 0.38, 0.02), S.frame, [0, 2.04, 1.95]);
     this.label(t, sten('hazard', 1.1, 0.07, { tint: 5 }), S.frame, [0, 2.04, 2.145]);
     this.cockpitLocal = new THREE.Vector3(0, 3.15, 1.75);
-    // 艙內螢幕光（艙門關著時隱藏）
     const scr = mergeGeometries([at(new THREE.PlaneGeometry(1.05, 0.32), [0, 3.72, 0.55]), at(new THREE.PlaneGeometry(0.22, 0.55), [-0.62, 3.25, 0.9], [0, 0.9, 0]), at(new THREE.PlaneGeometry(0.22, 0.55), [0.62, 3.25, 0.9], [0, -0.9, 0])]);
     this.cockpitGlow = new THREE.Mesh(scr, glow(0.22, 0.95, 1.35));
     this.cockpitGlow.userData.noAO = true;
     this.cockpitGlow.visible = false;
     t.add(this.cockpitGlow);
-    // 艙門：pivot 在上緣鉸鏈 (0, 4.2, 1.95)；rotation.x 往負的方向＝往外上掀（-1.5 約水平）
+    // 艙門（深藍）：pivot 在上緣鉸鏈 (0, 4.2, 1.95)；rotation.x 往負的方向＝往外上掀（-1.5 約水平）
     const H = new THREE.Group();
     H.name = 'hatch';
     H.position.set(0, 4.2, 1.95);
     t.add(H);
     this.hatch = H; this.hatchAxis = -1.5;
-    const hc = { bx: 3.5, by: 6, cv: -0.9 };
-    const hp0 = PL(H, 'z', [[-0.8, -2.1], [0.8, -2.1], [0.84, -0.3], [0.66, -0.02], [-0.66, -0.02], [-0.84, -0.3]], 0.3, { bev: 0.07, nx: 7, ny: 8, ...hc }, S.second, [0, 0, 0.1]);
-    hp0.put(sten('xg01', 1.1, 0.13, { tint: 1, seg: 4 }), 0, -0.3);
-    hp0.put(sten('caution', 0.5, 0.12, { tint: 3, seg: 2 }), -0.48, -1.72);
-    hp0.put(sten('rescue', 0.44, 0.22, { tint: 4, seg: 2 }), 0.5, -1.7);
-    PL(H, 'z', [[-0.28, -1.85], [0.28, -1.85], [0.36, -0.95], [0.16, -0.42], [-0.16, -0.42], [-0.36, -0.95]], 0.12, { bev: 0.03, nx: 3, ny: 5, ...hc }, S.accent, [0, 0, 0.1 + 0.21]);
+    const door = PL(H, 'z', [[-0.82, -2.08], [0.82, -2.08], [0.86, -0.3], [0.7, -0.02], [-0.7, -0.02], [-0.86, -0.3]], 0.34, { bev: 0.07, nx: 7, ny: 8, bx: 3.2, by: 6, cv: -0.9 }, S.second, [0, 0, 0.18]);
+    door.put(sten('xg01', 1.0, 0.12, { tint: 1, seg: 4 }), 0, -0.35);
+    door.put(sten('rescue', 0.42, 0.21, { tint: 4, seg: 2 }), 0.45, -1.7);
+    PL(H, 'z', [[-0.26, -1.75], [0.26, -1.75], [0.34, -0.95], [0.14, -0.5], [-0.14, -0.5], [-0.34, -0.95]], 0.1, { bev: 0.03, nx: 3, ny: 5, bx: 3.2, by: 6, cv: -0.9 }, S.accent, [0, 0, 0.18 + 0.2]);
     A(H, blk(1.5, 1.9, 0.06, 0.02), S.frame, [0, -1.06, -0.09]);
-    A(H, at(handle(0.36, 0.12, 0.035), [0, -1.3, -0.12], [0, Math.PI, 0]), S.frame);
+    A(H, at(handle(0.36, 0.12, 0.035), [0, -1.3, -0.12], [0, PI, 0]), S.frame);
     for (const side of [-1, 1]) {
-      A(H, cyl(0.12, 0.12, 0.34, 12), S.frame, [side * 0.55, 0.0, 0.0], [0, 0, Math.PI / 2]);
-      // 鉸鏈臂：從鉸鏈沿艙門兩側往下的補強條
-      A(H, blk(0.12, 1.2, 0.1, 0.03), S.frame, [side * 0.7, -0.55, 0.29 - 0.08], [0.1, 0, 0]);
-      A(H, blk(0.26, 0.18, 0.12, 0.03), S.yellow, [side * 0.6, -1.95, 0.27]);
-      A(H, merge([-0.35, -1.25].map((y) => at(nut(0.045), [side * 0.72, y, 0.26 - 0.1 * 0], [Math.PI / 2, 0, 0]))), S.frame);
+      A(H, cyl(0.12, 0.12, 0.34, 12), S.frame, [side * 0.55, 0.0, 0.0], [0, 0, PI / 2]);
+      A(H, blk(0.12, 1.2, 0.1, 0.03), S.frame, [side * 0.7, -0.55, 0.3], [0.1, 0, 0]);
     }
-    A(H, cyl(0.12, 0.12, 0.4, 12), S.frame, [0, 0.0, 0.0], [0, 0, Math.PI / 2]);
-    A(H, at(handle(0.34, 0.1, 0.03), [0, -1.98, 0.27]), S.frame);
-    // 領口裝甲（深藍、往後傾）＋探照燈
-    A(t, lathe([[0.72, 4.62], [1.02, 4.68], [1.14, 4.92], [1.02, 5.22], [0.74, 5.28]], 20), S.second, [0, 0, 0.2]);
-    // 肩頸護甲（左右兩片往肩膀斜下的曲面板＋深藍疊板）
-    for (const side of [-1, 1]) {
-      const yk = PL(t, 'y', [[-0.82, -1.42], [0.68, -1.47], [0.83, 1.13], [-0.77, 1.48]].map(([x, z]) => [x * side, z]), 0.3, { bev: 0.07, nx: 7, ny: 7, bx: 2.5, by: 4 }, S.main, [side * 1.62, 5.1, 0.07], [0, 0, -side * 0.22]);
-      yk.put(sten('lift', 0.36, 0.36, { tint: 2 }), side * 0.2, -0.9);
-      PL(t, 'y', [[-0.5, -0.9], [0.4, -0.95], [0.5, 0.75], [-0.46, 0.95]].map(([x, z]) => [x * side, z]), 0.1, { bev: 0.03, nx: 4, ny: 4, bx: 2.5, by: 4 }, S.second, [side * 1.62, 5.1 + 0.19, 0.07], [0, 0, -side * 0.22]);
-    }
-    PL(t, 'z', [[-1.55, -0.3], [1.55, -0.3], [1.8, 0.3], [-1.8, 0.3]], 0.36, { bev: 0.08, nx: 8, ny: 2, bx: 2.3 }, S.second, [0, 4.78, 1.52], [-0.45, 0, 0]);
-    for (const side of [-1, 1]) {
-      A(t, cyl(0.17, 0.2, 0.22, 12), S.frame, [side * 1.1, 4.62, 1.8], [Math.PI / 2 - 0.45, 0, 0]);
-      A(t, cyl(0.14, 0.14, 0.03, 12), GLASS, [side * 1.1, 4.67, 1.9], [Math.PI / 2 - 0.45, 0, 0]);
-      this.vent(t, 0.9, 0.22, 3, S, [side * 1.5, 5.21, -0.3], [-Math.PI / 2, 0, 0]);
-    }
-    A(t, merge([-1.2, -0.6, 0.6, 1.2].map((x) => at(nut(0.05), [x, 4.9, 1.6], [Math.PI / 2 - 0.45, 0, 0]))), S.frame);
-    A(t, cyl(0.6, 0.7, 0.6), S.frame, [0, 5.0, 0.3]);
-    A(t, ribs(5.12, 5.3, 2, 0.7, 0.06), S.dark, [0, 0, 0.3]);
-    for (const side of [-1, 1]) A(t, hose([[side * 0.5, 5.25, -0.25], [side * 0.62, 5.05, -0.7], [side * 0.9, 4.95, -1.3]], 0.1, 6), S.dark);
+    A(H, at(handle(0.34, 0.1, 0.03), [0, -1.98, 0.33]), S.frame);
 
-    // ================= 背包
+    // ================= 背包：白色本體、深藍後板、雙主推進器、光劍柄、一對深藍翼板（白色前緣）
     const bk = b.back;
-    A(bk, prof([[-1.5, 1.2], [-2.95, 1.35], [-3.12, 2.4], [-3.05, 4.05], [-2.75, 4.55], [-1.5, 4.62]], 3.0, 0.22), S.main);
-    const rc = PL(bk, '-z', [[-1.3, -1.1], [1.3, -1.1], [1.4, 0.85], [1.1, 1.25], [-1.1, 1.25], [-1.4, 0.85]], 0.2, { bev: 0.05, nx: 7, ny: 6, bx: 3, by: 5 }, S.second, [0, 2.95, -3.2]);
-    rc.put(sten('danger', 1.3, 0.34, { tint: 4, seg: 4 }), 0, 0.55);
-    rc.put(sten('fuel', 1.3, 0.1, { tint: 1, seg: 4 }), 0, 0.15);
-    A(bk, merge([[-1.15, 2.1], [1.15, 2.1], [-1.1, 3.95], [1.1, 3.95]].map(([x, y]) => at(nut(0.06), [x, y, -3.31 + (x * x) / 6], [Math.PI / 2, 0, 0]))), S.frame);
-    A(bk, blk(2.3, 1.1, 0.6, 0.1, 0.2), S.frame, [0, 1.5, -2.95]);
-    const glowG = [];
+    A(bk, prof([[-1.5, 1.4], [-2.6, 1.5], [-2.85, 2.4], [-2.8, 4.2], [-2.5, 4.75], [-1.5, 4.85]], 2.6, 0.18), S.main);
+    const [rcA, rcB] = RPL(bk, '-z', [[-1.1, -1.0], [1.1, -1.0], [1.2, 0.8], [0.95, 1.15], [-0.95, 1.15], [-1.2, 0.8]], 0.2, { bev: 0.05, nx: 6, ny: 6, by: 5 }, S.second, [0, 3.15, -2.9], [0, 0, 0], 0.16);
+    rcA.put(sten('danger', 0.8, 0.22, { tint: 3, seg: 3 }), -0.55, 0.55);
+    rcB.put(sten('fuel', 0.8, 0.08, { tint: 1, seg: 3 }), 0.55, 0.55);
+    A(bk, blk(2.1, 1.0, 0.6, 0.1, 0.2), S.frame, [0, 1.6, -2.7]);
     for (const sx of [-1, 1]) {
-      A(bk, bell(0.95, 1.5), S.dark, [sx * 0.85, 1.55, -3.0], [0.35, 0, 0]);
-      A(bk, cyl(0.62, 0.62, 0.25), S.frame, [sx * 0.85, 1.6, -2.98], [0.35, 0, 0]);
-      glowG.push(at(new THREE.CylinderGeometry(0.48, 0.48, 0.06, 16), [sx * 0.85, 0.25, -3.43], [0.35, 0, 0]));
-      this.nozzles.push({ bone: bk, pos: [sx * 0.85, 0.1, -3.55], rot: [0.35, 0, 0], r: 0.9, len: 7 });
-      A(bk, cyl(0.2, 0.2, 1.9), S.main, [sx * 1.0, 4.6, -2.4], [-0.5, 0, -sx * 0.35]);
-      A(bk, cyl(0.24, 0.24, 0.35), S.accent, [sx * 1.33, 5.35, -2.0], [-0.5, 0, -sx * 0.35]);
-      // 側面散熱鰭片
-      A(bk, merge(Array.from({ length: 6 }, (_, k) => at(blk(0.3, 1.3, 0.06, 0.012), [0, 0, -0.3 + k * 0.12]))), S.frame, [sx * 1.62, 2.8, -2.3]);
-      A(bk, blk(0.12, 1.45, 0.8, 0.03), S.second, [sx * 1.5, 2.8, -2.3]);
-      A(bk, pipe([[sx * 1.55, 1.9, -2.9], [sx * 1.4, 1.55, -3.1], [sx * 1.05, 1.6, -3.1]], 0.08), S.frame);
+      A(bk, bell(0.8, 1.4), S.dark, [sx * 0.75, 1.7, -2.75], [0.35, 0, 0]);
+      A(bk, cyl(0.55, 0.55, 0.25), S.frame, [sx * 0.75, 1.75, -2.73], [0.35, 0, 0]);
+      this.nozzles.push({ bone: bk, pos: [sx * 0.75, 0.4, -3.25], rot: [0.35, 0, 0], r: 0.8, len: 7 });
+      // 光劍柄（肩後斜插）
+      A(bk, cyl(0.2, 0.2, 1.5, 12), S.main, [sx * 0.85, 5.2, -2.2], [-0.45, 0, -sx * 0.25]);
+      A(bk, cyl(0.23, 0.23, 0.3, 12), S.frame, [sx * 1.01, 5.84, -1.9], [-0.45, 0, -sx * 0.25]);
+      // 翼板（收合狀態）：每邊三片羽板由內到外、由高到低扇形排開；深藍板面＋白色前緣
+      // 整組掛在翼根的 Group 上（anim.js 衝刺／飛行時把它展開）
+      const WG = new THREE.Group();
+      WG.name = 'wing' + (sx > 0 ? 'L' : 'R');
+      WG.position.set(sx * 1.15, 3.05, -2.95);
+      bk.add(WG);
+      (this.wings || (this.wings = [])).push({ g: WG, sx });
+      const wp = WG.position, wR = [0, sx * 0.25, 0];
+      for (const [k, q] of [[[0.95, 2.7], [2.0, 2.95], [3.55, 7.35], [2.9, 7.5]], [[1.7, 2.35], [2.65, 2.55], [4.2, 6.35], [3.62, 6.6]], [[2.35, 1.85], [3.15, 2.0], [4.72, 5.05], [4.2, 5.3]]].entries()) {
+        const z = -2.95 - k * 0.16;
+        PL(WG, '-z', q.map(([x, y]) => [x * sx, y]), 0.16, { bev: 0.04, nx: 2, ny: 6 }, S.second, [-wp.x, -wp.y, z - wp.z], wR);
+        const [a, , , d] = q, ex = (d[0] - a[0]), ey = (d[1] - a[1]), l = Math.hypot(ex, ey), nx = -ey / l * 0.16, ny = ex / l * 0.16;
+        PL(WG, '-z', [[a[0] - nx, a[1] - ny], a, d, [d[0] - nx, d[1] - ny]].map(([x, y]) => [x * sx, y]), 0.2, { bev: 0.03, nx: 1, ny: 4 }, S.main, [-wp.x, -wp.y, z - wp.z], wR);
+      }
+      A(bk, cyl(0.28, 0.28, 0.6, 12), S.frame, [sx * 1.15, 3.05, -2.95], [PI / 2, 0, 0]);
+      A(bk, pipe([[sx * 1.35, 1.9, -2.6], [sx * 1.2, 1.55, -2.85], [sx * 0.95, 1.6, -2.85]], 0.08), S.frame);
     }
-    A(bk, cyl(0.06, 0.08, 0.2, 8), S.frame, [-1.2, 4.66, -2.0]);
-    A(bk, rod([-1.2, 4.75, -2.0], [-1.35, 7.2, -2.6], 0.03, 0.012, 5), S.dark);
-    this.addGlow(bk, mergeGeometries(glowG), [0.12, 1.6, 3.0]);
 
-    // ================= 頭：圓頂頭盔＋護目鏡＋感測冠＋後掠雙刀型天線
+    // ================= 頭：稜角頭盔＋中央稜線、V 形眉簷壓住上揚的雙眼、包住臉的頰甲、窄面罩＋尖紅下巴、細長 V 字天線（主翼＋副翼）
     const h = b.head;
-    A(h, cyl(0.45, 0.55, 0.7, 16), S.frame, [0, 0.25, 0]);
-    A(h, ribs(-0.02, 0.3, 3, 0.6, 0.06, 16), S.dark);
-    A(h, lathe([[0.001, 1.72], [0.35, 1.7], [0.6, 1.58], [0.76, 1.35], [0.82, 1.0], [0.78, 0.62], [0.6, 0.36], [0.001, 0.3]], 22), S.main, [0, 0, -0.05], [0, 0, 0], [1, 1, 1.15]);
-    // 護目鏡：暗色玻璃帶＋上方眉甲
-    A(h, prep(new THREE.CylinderGeometry(0.835, 0.83, 0.22, 24, 1, true, -1.15, 2.3)), GLASS, [0, 1.02, -0.05], [0, 0, 0], [1, 1, 1.15]);
-    PL(h, 'z', [[-0.74, -0.13], [0.74, -0.13], [0.62, 0.18], [-0.62, 0.18]], 0.16, { bev: 0.04, nx: 6, ny: 2, bx: 0.95 }, S.main, [0, 1.24, 0.82], [-0.35, 0, 0]);
-    // 面罩（下巴）＋散熱縫＋紅色下巴
-    PL(h, 'z', [[-0.5, -0.42], [0.5, -0.42], [0.66, 0.05], [0.55, 0.2], [-0.55, 0.2], [-0.66, 0.05]], 0.2, { bev: 0.05, nx: 6, ny: 4, bx: 0.8 }, S.main, [0, 0.72, 0.84], [0.18, 0, 0]);
-    for (const x of [-0.24, -0.12, 0.12, 0.24]) A(h, blk(0.05, 0.26, 0.05, 0.01), S.dark, [x, 0.68, 0.94], [0.18, 0, 0]);
-    A(h, blk(0.4, 0.14, 0.2, 0.04), S.accent, [0, 0.36, 0.86], [0.3, 0, 0]);
+    h.scale.setScalar(1.15);
+    A(h, cyl(0.4, 0.46, 0.6, 12), S.frame, [0, 0.25, 0]);
+    A(h, ribs(0.05, 0.3, 2, 0.44, 0.03, 12), S.dark);
+    A(h, blk(0.98, 0.9, 1.05, 0.08), S.dark, [0, 0.95, 0.0]);
+    // 頭盔（前額往前突、後腦往下收）＋頭頂中央稜線
+    A(h, taper(prof([[-0.8, 0.6], [-0.9, 1.05], [-0.62, 1.5], [-0.05, 1.68], [0.45, 1.6], [0.76, 1.34], [0.78, 1.2], [0.4, 1.14], [0.25, 0.6]], 1.24, 0.06), 0.72, 1, 1, 1), S.main);
+    A(h, prof([[0.66, 1.42], [0.32, 1.72], [-0.3, 1.76], [-0.82, 1.52], [-0.84, 1.42], [-0.3, 1.64], [0.3, 1.62], [0.6, 1.36]], 0.16, 0.03), S.main);
+    // V 形眉簷：中間往前尖，把眼睛壓在陰影裡
+    PL(h, 'y', [[-0.56, -0.16], [0.56, -0.16], [0.52, 0.1], [0.1, 0.26], [-0.1, 0.26], [-0.52, 0.1]], 0.09, { bev: 0.025, nx: 4, ny: 2 }, S.main, [0, 1.21, 0.72], [0.28, 0, 0]);
+    // 臉：暗色面框、上揚的雙眼（外側往上挑）
+    A(h, blk(0.8, 0.24, 0.2, 0.03), S.dark, [0, 1.05, 0.55]);
+    A(h, blk(0.6, 0.45, 0.2, 0.04), S.dark, [0, 0.74, 0.45]);
+    A(h, merge([-1, 1].map((sx) => blade([[0.05, -0.07], [0.37, -0.01], [0.4, 0.07], [0.05, 0.03]].map(([x, y]) => [x * sx, y]), 0.03, 0.008))), GLASS, [0, 1.05, 0.63]);
+    const eyeG = [-1, 1].map((sx) => blade([[0.07, -0.05], [0.35, 0.0], [0.37, 0.055], [0.07, 0.02]].map(([x, y]) => [x * sx, y]), 0.02, 0.006));
+    this.addGlow(h, mergeGeometries(eyeG), S.eye, [0, 1.05, 0.655]);
+    // 面罩：上寬下窄的 V 形、中央稜線、兩道縫；尖形紅下巴
+    PL(h, 'z', [[-0.1, -0.34], [0.1, -0.34], [0.36, -0.02], [0.38, 0.12], [-0.38, 0.12], [-0.36, -0.02]], 0.16, { bev: 0.035, nx: 4, ny: 3, bx: 0.7 }, S.main, [0, 0.84, 0.6], [0.1, 0, 0]);
+    A(h, blk(0.035, 0.38, 0.05, 0.01), S.main, [0, 0.8, 0.69], [0.1, 0, 0]);
+    for (const sx of [-1, 1]) A(h, blk(0.035, 0.18, 0.04, 0.008), S.dark, [sx * 0.11, 0.84, 0.685], [0.1, 0, sx * 0.12]);
+    A(h, blade([[-0.14, 0.05], [0.14, 0.05], [0.06, -0.08], [-0.06, -0.08]], 0.22, 0.02), S.accent, [0, 0.52, 0.6], [0.2, 0, 0]);
+    // 頰甲：從兩側往前包住臉
     for (const sx of [-1, 1]) {
-      // 頰甲（深藍）＋耳部感測器
-      PL(h, sx > 0 ? 'x' : '-x', [[-0.5, 0.4], [0.55, 0.45], [0.7, 1.02], [0.2, 1.25], [-0.55, 1.2]], 0.14, { bev: 0.035, nx: 5, ny: 4, bx: 1.0 }, S.second, [sx * 0.8, 0, 0]);
-      A(h, cyl(0.25, 0.27, 0.12, 16), S.frame, [sx * 0.92, 0.85, -0.05], [0, 0, Math.PI / 2]);
-      A(h, cyl(0.14, 0.14, 0.06, 14), GLASS, [sx * 0.99, 0.85, -0.05], [0, 0, Math.PI / 2]);
-      this.nutRing(h, [sx * 0.98, 0.85, -0.05], 0.2, 4, S, 'x', 0.03, Math.PI / 4);
-      // 太陽穴火神砲
-      A(h, cyl(0.075, 0.075, 0.34, 10), S.frame, [sx * 0.62, 1.25, 0.75], [Math.PI / 2, 0, 0]);
-      A(h, cyl(0.045, 0.045, 0.04, 8), S.dark, [sx * 0.62, 1.25, 0.93], [Math.PI / 2, 0, 0]);
-      // 短型通訊天線與護罩，以工業感測器取代冠飾。
-      A(h, blk(0.18, 0.28, 0.28, 0.04), S.second, [sx * 0.63, 1.48, -0.24]);
-      A(h, rod([sx * 0.63, 1.56, -0.24], [sx * 0.72, 2.04, -0.44], 0.035, 0.016, 6), S.frame);
-      A(h, blk(0.24, 0.14, 0.16, 0.03), S.yellow, [sx * 0.16, 1.44, 0.78]);
-      for (let k = 0; k < 3; k++) A(h, blk(0.04, 0.025, 0.45, 0.006), S.dark, [sx * (0.3 + k * 0.09), 1.67, -0.25]);
+      PL(h, sx > 0 ? 'x' : '-x', [[-0.45, 0.45], [0.2, 0.45], [0.7, 0.78], [0.68, 1.18], [0.2, 1.3], [-0.5, 1.2]], 0.1, { bev: 0.025, nx: 4, ny: 3 }, S.main, [sx * 0.6, 0, 0.05], [0, -sx * 0.25, 0]);
+      // 耳罩（深藍、有稜角）＋耳部感測器、火神砲、頭盔側散熱口
+      PL(h, sx > 0 ? 'x' : '-x', [[-0.5, 0.7], [0.05, 0.7], [0.2, 0.95], [0.05, 1.16], [-0.5, 1.12], [-0.6, 0.92]], 0.08, { bev: 0.02, nx: 3, ny: 2 }, S.second, [sx * 0.69, 0, -0.1]);
+      A(h, cyl(0.15, 0.17, 0.1, 12), S.frame, [sx * 0.76, 0.92, -0.25], [0, 0, PI / 2]);
+      A(h, cyl(0.08, 0.08, 0.05, 12), GLASS, [sx * 0.82, 0.92, -0.25], [0, 0, PI / 2]);
+      A(h, merge([0, 1, 2].map((k) => at(blk(0.03, 0.2, 0.05, 0.008), [0, 0, 0.08 * k]))), S.dark, [sx * 0.74, 0.92, -0.02]);
+      A(h, cyl(0.055, 0.055, 0.28, 10), S.frame, [sx * 0.42, 1.32, 0.66], [PI / 2, 0, 0]);
+      A(h, cyl(0.035, 0.035, 0.03, 8), S.dark, [sx * 0.42, 1.32, 0.81], [PI / 2, 0, 0]);
+      this.vent(h, 0.34, 0.22, 3, S, [sx * 0.56, 1.33, -0.35], [0, sx > 0 ? PI / 2 : -PI / 2, 0]);
     }
-    // 感測冠（紅）＋主攝影機鏡頭；眼睛＋主鏡頭發光（同一個網格）
-    A(h, prof([[0.2, 1.52], [0.95, 1.4], [1.02, 1.52], [0.6, 1.8], [0.0, 1.86]], 0.14, 0.03), S.accent);
-    A(h, cyl(0.07, 0.07, 0.08, 12), S.frame, [0, 1.47, 0.98], [Math.PI / 2 - 0.2, 0, 0]);
-    const eyeG = [-1, 1].map((sx) => blade([[0.05, -0.04], [0.36, -0.02], [0.33, 0.05], [0.04, 0.04]].map(([x, y]) => [x * sx, y]), 0.03, 0.01));
-    eyeG.push(at(prep(new THREE.CylinderGeometry(0.05, 0.05, 0.02, 12)), [0, 0.45, 0.065], [Math.PI / 2 - 0.2, 0, 0]));
-    this.addGlow(h, mergeGeometries(eyeG), S.eye, [0, 1.02, 0.965]);
-    A(h, blk(0.5, 0.34, 0.3, 0.06), S.second, [0, 1.2, -0.98]);
-    A(h, cyl(0.07, 0.07, 0.05, 10), GLASS, [0, 1.2, -1.14], [Math.PI / 2, 0, 0]);
-    for (const sx of [-1, 1]) A(h, rod([sx * 0.2, 1.35, -0.95], [sx * 0.32, 2.05, -1.35], 0.03, 0.012, 5), S.frame);
+    // V 字天線：細長主翼（後掠）＋下方外張的副翼；中央紅色冠飾＋綠色感測寶石
+    const fin = [-1, 1].map((sx) => blade([[0.03, 0.0], [0.19, 0.02], [1.34, 1.1], [1.36, 1.19], [1.24, 1.16], [0.0, 0.13]].map(([x, y]) => [x * sx, y]), 0.04, 0.01));
+    const fin2 = [-1, 1].map((sx) => blade([[0.12, -0.02], [0.24, 0.0], [0.86, 0.33], [0.85, 0.39], [0.12, 0.09]].map(([x, y]) => [x * sx, y]), 0.035, 0.01));
+    A(h, merge(fin), S.yellow, [0, 1.42, 0.8], [-0.42, 0, 0]);
+    A(h, merge(fin2), S.yellow, [0, 1.36, 0.76], [-0.25, 0, 0]);
+    A(h, blade([[-0.14, -0.12], [0.14, -0.12], [0.18, 0.06], [0, 0.24], [-0.18, 0.06]], 0.12, 0.02), S.accent, [0, 1.42, 0.82], [-0.35, 0, 0]);
+    A(h, sph(0.05, 10, 6), GLASS, [0, 1.43, 0.9]);
+    this.addGlow(h, sph(0.03, 8, 5), S.eye, [0, 1.43, 0.93]);
+    // 後腦：感測器＋短天線
+    A(h, blk(0.44, 0.28, 0.26, 0.05), S.second, [0, 1.1, -0.88]);
+    A(h, cyl(0.055, 0.055, 0.05, 10), GLASS, [0, 1.1, -1.02], [PI / 2, 0, 0]);
+    A(h, prof([[-0.62, 1.5], [-1.08, 1.98], [-1.13, 1.94], [-0.78, 1.46]], 0.05, 0.01), S.frame);
 
-    // ================= 手臂
+    // ================= 手臂：大而有稜角的白色肩甲（上緣往外翹、下緣深藍帶）、白色上臂、大前臂
     for (const [n, sx] of [['R', -1], ['L', 1]]) {
       const sh = b['shoulder' + n], el = b['elbow' + n];
-      const dx = sx > 0 ? 'x' : '-x';
-      A(sh, sph(0.9), S.frame);
-      // 肩甲：外側主殼（前後、上下雙向彎）＋頂蓋往肩頸斜下＋下方兩片深藍疊片（lames）＋紅線
-      const po = PL(sh, dx, [[-1.3, -0.55], [1.25, -0.55], [1.4, 0.55], [1.0, 1.3], [-1.0, 1.35], [-1.4, 0.55]], 0.34, { bev: 0.08, nx: 8, ny: 6, bx: 1.6, by: 2.0, cv: 0.35 }, S.main, [sx * 1.35, 0.25, 0]);
-      po.put(digits('01', 0.46, { tint: 2 }), 0.4, 0.5);
-      po.put(sten('xg01', 1.1, 0.14, { tint: 2, seg: 5 }), 0.1, 0.05);
-      PL(sh, dx, [[-1.3, -0.52], [1.25, -0.52], [1.3, -0.38], [-1.32, -0.38]], 0.07, { bev: 0.02, nx: 8, ny: 1, bx: 1.6, by: 2.0, cv: 0.35 }, S.accent, [sx * (1.35 + 0.19), 0.25, 0]);
-      PL(sh, 'y', [[-0.8, -1.25], [0.8, -1.3], [0.9, 1.25], [-0.85, 1.3]].map(([x, z]) => [x * sx, z]), 0.3, { bev: 0.07, nx: 6, ny: 6, bx: 2.0, by: 3 }, S.main, [sx * 0.62, 1.45, 0], [0, 0, -sx * 0.28]);
-      PL(sh, 'y', [[-0.45, -0.9], [0.45, -0.95], [0.5, 0.9], [-0.47, 0.92]].map(([x, z]) => [x * sx, z]), 0.1, { bev: 0.03, nx: 4, ny: 4, bx: 2.0, by: 3 }, S.second, [sx * 0.62, 1.45 + 0.19, 0], [0, 0, -sx * 0.28]);
-      for (const [y, x, w] of [[-0.62, 1.25, 1.15], [-1.12, 1.12, 1.05]]) PL(sh, dx, [[-w, -0.28], [w - 0.05, -0.28], [w + 0.05, 0.28], [-w - 0.05, 0.28]], 0.24, { bev: 0.06, nx: 6, ny: 2, bx: 1.3 }, S.second, [sx * x, y, 0], [0, 0, sx * 0.1]);
-      A(sh, merge([[0.95, 1.0], [-0.95, 1.0], [0.95, -0.3], [-0.95, -0.3]].map(([z, y]) => at(nut(0.055), [sx * (1.52 + 0.01 - ((z * z) / 3.2 + ((y - 0.6) ** 2) / 4)), y, z], [0, 0, Math.PI / 2]))), S.frame);
-      // 上臂：致動器核心＋外側包覆護甲＋前側油壓缸
-      A(sh, cyl(0.55, 0.5, 2.2), S.frame, [0, -1.6, 0]);
-      PL(sh, dx, [[-0.78, -2.55], [0.78, -2.55], [0.84, -1.0], [-0.84, -1.0]], 0.24, { bev: 0.06, nx: 6, ny: 4, bx: 0.95, cv: -1.8 }, S.main, [sx * 0.6, 0, 0]);
-      this.piston(sh, [-sx * 0.25, -0.95, 0.62], [-sx * 0.25, -2.55, 0.6], 0.1, S);
-      A(sh, ribs(-2.6, -2.75, 2, 0.58, 0.07, 16), S.dark);
+      const dx = sx > 0 ? 'x' : '-x', ix = sx > 0 ? '-x' : 'x';
+      const M = (pts) => pts.map(([x, y]) => [x * sx, y]);
+      A(sh, sph(0.85), S.frame);
+      const oR = [0, 0, sx * 0.05];
+      const po = PL(sh, dx, [[-1.35, -0.85], [1.35, -0.85], [1.5, 0.25], [1.15, 1.15], [-1.15, 1.15], [-1.5, 0.25]], 0.36, { bev: 0.08, nx: 8, ny: 6, bx: 2.6, by: 3, cv: 0.1 }, S.main, [sx * 1.3, 0.3, 0], oR);
+      po.put(digits('01', 0.42, { tint: 2 }), 0.45, 0.45);
+      PL(sh, dx, [[-1.3, -0.85], [1.3, -0.85], [1.38, -0.45], [-1.38, -0.45]], 0.1, { bev: 0.02, nx: 8, ny: 1, bx: 2.6, by: 3, cv: 0.1 }, S.second, [sx * 1.52, 0.3, 0], oR);
+      PL(sh, dx, [[-1.36, -0.43], [1.36, -0.43], [1.38, -0.35], [-1.38, -0.35]], 0.06, { bev: 0.015, nx: 8, ny: 1, bx: 2.6, by: 3, cv: 0.1 }, S.accent, [sx * 1.5, 0.3, 0], oR);
+      PL(sh, 'y', M([[-0.75, -1.35], [0.8, -1.4], [0.85, 1.4], [-0.75, 1.35]]), 0.3, { bev: 0.07, nx: 6, ny: 6, bx: 3, by: 4 }, S.main, [sx * 0.62, 1.48, 0], [0, 0, sx * 0.12]);
+      for (const zs of [1, -1]) PL(sh, zs > 0 ? 'z' : '-z', M([[-0.7, -0.75], [0.72, -0.8], [0.72, 0.95], [-0.55, 1.05]]), 0.26, { bev: 0.06, nx: 4, ny: 4, bx: 3 }, S.main, [sx * 0.72, 0.4, zs * 1.36]);
+      nuts(sh, [[-1.0, 0.9], [1.0, 0.9]].map(([z, y]) => [sx * 1.49, y, z]), 0.05, [0, 0, PI / 2]);
+      // 肩甲疊層：外殼上加一片檢修蓋、頂上再疊一片往外翹的護板、後下方兩個姿態推進器
+      PL(sh, dx, [[-0.85, -0.3], [0.7, -0.3], [0.82, 0.55], [-0.7, 0.72]], 0.12, { bev: 0.03, nx: 3, ny: 2, bx: 2.6 }, S.main, [sx * 1.54, 0.35, -0.2], oR);
+      PL(sh, 'y', M([[-0.45, -1.0], [0.62, -1.05], [0.68, 0.9], [-0.45, 1.0]]), 0.14, { bev: 0.035, nx: 3, ny: 3, bx: 3 }, S.main, [sx * 0.78, 1.68, -0.05], [0, 0, sx * 0.2]);
+      for (const z of [-0.95, -0.45]) thr(sh, [sx * 1.15, -0.72, z], [0, 0, sx * 0.3], 0.14);
+      // 上臂
+      A(sh, cyl(0.52, 0.48, 2.2), S.frame, [0, -1.7, 0]);
+      PL(sh, dx, [[-0.62, -2.55], [0.62, -2.55], [0.68, -1.0], [-0.68, -1.0]], 0.22, { bev: 0.05, nx: 5, ny: 4, bx: 0.9 }, S.main, [sx * 0.56, 0, 0]);
+      PL(sh, ix, [[-0.55, -2.5], [0.55, -2.5], [0.6, -1.05], [-0.6, -1.05]], 0.16, { bev: 0.04, nx: 4, ny: 3, bx: 0.9 }, S.main, [-sx * 0.54, 0, 0]);
+      for (const zs of [1, -1]) PL(sh, zs > 0 ? 'z' : '-z', [[-0.5, -2.5], [0.5, -2.5], [0.55, -1.05], [-0.55, -1.05]], 0.2, { bev: 0.05, nx: 4, ny: 3, bx: 0.9 }, S.main, [0, 0, zs * 0.58]);
+      A(sh, ribs(-2.62, -2.78, 2, 0.56, 0.07, 16), S.dark);
+      this.piston(sh, [0, -1.0, -0.62], [0, -2.5, -0.7], 0.09, S);
       // 手肘＋前臂
-      A(el, cyl(0.6, 0.6, 1.3), S.frame, [0, 0, 0], [0, 0, Math.PI / 2]);
-      for (const side of [-1, 1]) { A(el, cyl(0.38, 0.4, 0.1, 14), S.frame, [side * 0.7, 0, 0], [0, 0, Math.PI / 2]); this.nutRing(el, [side * 0.76, 0, 0], 0.27, 6, S, 'x', 0.045); }
-      A(el, taper(cyl(0.55, 0.62, 2.6, 16), 0.9, 0.9, 1, 1), S.frame, [0, -1.6, 0]);
-      PL(el, dx, [[-0.85, -2.75], [0.85, -2.75], [0.95, -1.2], [0.7, -0.35], [-0.7, -0.35], [-0.95, -1.2]], 0.3, { bev: 0.07, nx: 7, ny: 6, bx: 1.0, cv: -1.5 }, S.main, [sx * 0.62, 0, 0]);
-      const fa = PL(el, 'z', [[-0.62, -2.75], [0.62, -2.75], [0.66, -0.55], [-0.66, -0.55]], 0.22, { bev: 0.05, nx: 5, ny: 5, bx: 1.1 }, S.main, [0, 0, 0.68]);
-      fa.put(sten('hazard', 0.9, 0.12, { tint: 5, seg: 3 }), 0, -2.55);
-      PL(el, 'z', [[-0.42, -1.2], [0.42, -1.2], [0.46, -0.7], [-0.46, -0.7]], 0.08, { bev: 0.02, nx: 4, ny: 2, bx: 1.1 }, S.accent, [0, 0, 0.68 + 0.15]);
-      PL(el, '-z', [[-0.55, -2.6], [0.55, -2.6], [0.6, -0.6], [-0.6, -0.6]], 0.2, { bev: 0.05, nx: 5, ny: 5, bx: 1.1 }, S.second, [0, 0, -0.66]);
-      this.piston(el, [-sx * 0.42, -0.35, -0.82], [-sx * 0.42, -2.45, -0.86], 0.1, S);
-      A(el, cyl(0.62, 0.64, 0.24, 18), S.frame, [0, -2.9, 0]);
-      A(el, blk(1.5, 0.36, 1.6, 0.12, 0.3), S.second, [0, -2.68, 0]);
-      this.buildHand(b['hand' + n], S, sx);
+      A(el, cyl(0.58, 0.58, 1.25), S.frame, [0, 0, 0], [0, 0, PI / 2]);
+      for (const side of [-1, 1]) { A(el, cyl(0.36, 0.38, 0.1, 14), S.frame, [side * 0.68, 0, 0], [0, 0, PI / 2]); this.nutRing(el, [side * 0.74, 0, 0], 0.26, 6, S, 'x', 0.042); }
+      PL(el, '-z', [[-0.55, -0.5], [0.55, -0.5], [0.6, 0.3], [0, 0.6], [-0.6, 0.3]], 0.3, { bev: 0.06, nx: 4, ny: 4, bx: 1.0, by: 1.2 }, S.main, [0, -0.1, -0.62]);
+      A(el, taper(cyl(0.52, 0.6, 2.6, 16), 0.9, 0.9, 1, 1), S.frame, [0, -1.6, 0]);
+      PL(el, dx, [[-0.85, -2.8], [0.85, -2.8], [0.95, -1.2], [0.68, -0.4], [-0.68, -0.4], [-0.95, -1.2]], 0.3, { bev: 0.07, nx: 7, ny: 6, bx: 1.2 }, S.main, [sx * 0.66, 0, 0]);
+      PL(el, ix, [[-0.7, -2.7], [0.7, -2.7], [0.75, -0.6], [-0.75, -0.6]], 0.2, { bev: 0.05, nx: 4, ny: 4, bx: 1.2 }, S.main, [-sx * 0.6, 0, 0]);
+      const [, fa] = RPL(el, 'z', [[-0.6, -2.8], [0.6, -2.8], [0.62, -0.5], [-0.62, -0.5]], 0.24, { bev: 0.05, nx: 5, ny: 5 }, sx < 0 ? S.primer : S.main, [0, 0, 0.7], [0, 0, 0], 0.2);   // 右前臂正面：底漆備品板
+      fa.put(sten('hazard', 0.42, 0.1, { tint: 5, seg: 2 }), 0.3, -2.6);
+      PL(el, dx, [[-0.62, -2.2], [0.55, -2.2], [0.62, -1.1], [-0.55, -1.0]], 0.12, { bev: 0.03, nx: 3, ny: 3, bx: 1.2 }, S.main, [sx * 0.84, 0, 0]);
+      this.vent(el, 0.5, 0.3, 3, S, [sx * 0.9, -2.45, -0.3], [0, sx > 0 ? PI / 2 : -PI / 2, 0]);
+      PL(el, 'z', [[-0.38, -0.5], [0.38, -0.5], [0.42, 0.3], [-0.42, 0.3]], 0.08, { bev: 0.02, nx: 3, ny: 2, bx: 1.2 }, S.second, [0, -1.3, 0.86]);
+      PL(el, '-z', [[-0.6, -2.8], [0.6, -2.8], [0.62, -0.7], [-0.62, -0.7]], 0.22, { bev: 0.05, nx: 5, ny: 5, bx: 1.2 }, S.main, [0, 0, -0.68]);
+      A(el, blk(1.5, 0.34, 1.55, 0.1, 0.25), S.second, [0, -2.72, 0]);
+      A(el, cyl(0.6, 0.62, 0.24, 18), S.frame, [0, -2.95, 0]);
+      this.buildHeroHand(b['hand' + n], S, sx);
     }
     // 步槍：主體、槍管護套（散熱孔）、瞄準鏡、彈匣、前握把、制退器
     const W = new THREE.Group();
     A(W, prof([[-0.3, 0.46], [3.0, 0.46], [3.2, 0.2], [3.1, -0.46], [-0.4, -0.46], [-0.55, 0.0]], 0.62, 0.1), S.weapon, [0, 0, 0]);
     A(W, blk(0.5, 0.5, 2.1, 0.1, 0.12), S.weapon, [0, 0.55, 0.9]);
-    A(W, cyl(0.16, 0.19, 2.0, 16), S.frame, [0, 0.05, 4.1], [Math.PI / 2, 0, 0]);
-    // 鏤空護套：散熱孔有實際深度，內部槍管仍可見。
+    A(W, cyl(0.16, 0.19, 2.0, 16), S.frame, [0, 0.05, 4.1], [PI / 2, 0, 0]);
     for (let j = 0; j < 5; j++) {
       const z = 3.25 + j * 0.39;
-      A(W, prep(new THREE.CylinderGeometry(0.3, 0.3, 0.14, 16, 1, true)), S.weapon, [0, 0.05, z], [Math.PI / 2, 0, 0]);
+      A(W, prep(new THREE.CylinderGeometry(0.3, 0.3, 0.14, 16, 1, true)), S.weapon, [0, 0.05, z], [PI / 2, 0, 0]);
       for (const side of [-1, 1]) A(W, blk(0.07, 0.13, 0.25, 0.02), S.weapon, [side * 0.26, -0.08, z + 0.19]);
     }
     for (const side of [-1, 1]) {
       A(W, blk(0.05, 0.32, 1.35, 0.025), S.dark, [side * 0.325, 0.02, 1.35]);
       A(W, blk(0.06, 0.24, 1.22, 0.025), S.weapon, [side * 0.35, 0.02, 1.35]);
-      for (const z of [0.82, 1.87]) A(W, cyl(0.05, 0.05, 0.07, 8), S.frame, [side * 0.39, 0.03, z], [0, 0, Math.PI / 2]);
+      for (const z of [0.82, 1.87]) A(W, cyl(0.05, 0.05, 0.07, 8), S.frame, [side * 0.39, 0.03, z], [0, 0, PI / 2]);
       this.label(W, sten('caution', 0.72, 0.15, { face: side > 0 ? 'x' : '-x', tint: 1 }), S.weapon, [side * 0.388, 0.02, 1.36]);
     }
     for (let j = 0; j < 10; j++) A(W, blk(0.36, 0.06, 0.07, 0.01), S.frame, [0, 0.85, 0.0 + j * 0.2]);
     for (let k = 0; k < 5; k++) A(W, blk(0.1, 0.05, 0.2, 0.01), S.dark, [0, 0.33, 3.35 + k * 0.33]);
-    A(W, cyl(0.18, 0.2, 1.2), S.frame, [0, 0.05, 5.2], [Math.PI / 2, 0, 0]);
+    A(W, cyl(0.18, 0.2, 1.2), S.frame, [0, 0.05, 5.2], [PI / 2, 0, 0]);
     A(W, blk(0.5, 0.5, 0.6, 0.08), S.weapon, [0, 0.05, 5.5]);
     for (const s of [-1, 1]) A(W, blk(0.04, 0.26, 0.1, 0.005), S.dark, [s * 0.255, 0.05, 5.5]);
-    A(W, cyl(0.12, 0.12, 0.04, 12), S.dark, [0, 0.05, 5.81], [Math.PI / 2, 0, 0]);
-    A(W, cyl(0.2, 0.2, 1.4, 14), S.frame, [0, 0.98, 1.4], [Math.PI / 2, 0, 0]);
-    A(W, cyl(0.16, 0.16, 0.04, 12), GLASS, [0, 0.98, 2.11], [Math.PI / 2, 0, 0]);
+    A(W, cyl(0.12, 0.12, 0.04, 12), S.dark, [0, 0.05, 5.81], [PI / 2, 0, 0]);
+    A(W, cyl(0.2, 0.2, 1.4, 14), S.frame, [0, 0.98, 1.4], [PI / 2, 0, 0]);
+    A(W, cyl(0.16, 0.16, 0.04, 12), GLASS, [0, 0.98, 2.11], [PI / 2, 0, 0]);
     A(W, merge([at(blk(0.14, 0.24, 0.18, 0.02), [0, 0.78, 0.95]), at(blk(0.14, 0.24, 0.18, 0.02), [0, 0.78, 1.85])]), S.frame);
     A(W, blk(0.4, 1.3, 0.5, 0.06), S.frame, [0, -0.9, 0], [0.25, 0, 0]);
     A(W, blk(0.46, 1.0, 0.7, 0.08), S.weapon, [0, -0.85, 1.5], [0.12, 0, 0]);
@@ -1043,24 +1093,17 @@ export class Mech {
     A(W, prof([[0, 0.35], [-2.0, 0.2], [-2.2, -0.5], [-0.4, -0.45]], 0.5, 0.06), S.weapon, [0, 0, -1.6]);
     A(W, blk(0.08, 0.2, 1.6, 0.02), S.accent, [0.32, 0.18, 1.2]);
     this.label(W, sten('ammo', 0.9, 0.08, { face: 'x', tint: 1 }), S.weapon, [0.24, -0.85, 1.5], [0.12, 0, 0]);
-    this.addGlow(W, cyl(0.12, 0.12, 0.06), [0.3, 4, 1.6], [0, 0.55, 1.97], [Math.PI / 2, 0, 0]);
+    this.addGlow(W, cyl(0.12, 0.12, 0.06), [0.3, 4, 1.6], [0, 0.55, 1.97], [PI / 2, 0, 0]);
     this.attachWeapon(W, new THREE.Vector3(0, 0.05, 5.7));
-    // 盾（左前臂外側）：細分彎曲的主板＋深藍內層＋紅色識別＋螺帽
+    // 盾（左前臂外側）：上寬下尖的風箏形、紅色外框、白色盾面、金色星徽
     const SH = new THREE.Group();
-    // 盾牌分成三片可替換的陶瓷裝甲，外框承受撞擊。
-    A(SH, bendPlate(gridPlate(0.22, 6.6, 3.0, 0.65, 8, 5), 5), S.frame);
-    for (const y of [-2.18, 0, 2.18]) {
-      A(SH, bendPlate(gridPlate(0.19, 2.04, 2.78, 0.24, 4, 5), 5), S.main, [0.17, y, 0]);
-      for (const z of [-1.18, 1.18]) A(SH, blk(0.1, 0.32, 0.14, 0.025), S.frame, [0.27, y, z]);
-    }
-    A(SH, bendPlate(gridPlate(0.12, 1.64, 2.34, 0.24, 4, 5), 5), S.second, [0.31, 0, 0]);
-    A(SH, bendPlate(gridPlate(0.1, 0.35, 2.4, 0.08, 1, 5), 5), S.accent, [0.26, 1.9, 0]);
-    const lb = sten('xg01', 2.2, 0.26, { face: 'x', tint: 1, seg: 6 });
-    lb.translate(0.3, -1.2, 0);
-    this.label(SH, bendPlate(lb, 5), S.second);
-    const sn = [];
-    for (const y of [-2.9, 2.9]) for (const z of [-0.9, 0, 0.9]) { const th = z / 5, r = 0.15 + 5; sn.push(at(nut(0.07), [r * Math.cos(th) - 5, y, r * Math.sin(th)], [0, -th, Math.PI / 2])); }
-    A(SH, merge(sn), S.frame);
+    const kite = [[-1.35, 2.95], [1.35, 2.95], [1.5, 2.55], [1.3, -1.4], [0.35, -3.25], [-0.35, -3.25], [-1.3, -1.4], [-1.5, 2.55]];
+    PL(SH, 'x', kite.map(([z, y]) => [z * 1.08, y * 1.05 + 0.02]), 0.2, { bev: 0.05, nx: 6, ny: 8, bx: 4 }, S.accent, [0.02, 0, 0]);
+    const sf = PL(SH, 'x', kite, 0.28, { bev: 0.07, nx: 6, ny: 8, bx: 4 }, S.main, [0.2, 0, 0]);
+    sf.put(sten('star', 1.3, 1.3, { tint: 3 }), 0, 0.9);
+    PL(SH, 'x', [[-0.12, -3.0], [0.12, -3.0], [0.14, 2.85], [-0.14, 2.85]], 0.14, { bev: 0.04, nx: 1, ny: 6, bx: 4 }, S.main, [0.42, 0, 0]);
+    nuts(SH, [[-1.2, 2.7], [1.2, 2.7], [-1.15, -1.3], [1.15, -1.3], [0, -2.95]].map(([z, y]) => [0.36, y, z]), 0.06, [0, 0, PI / 2]);
+    sf.put(sten('xg01', 1.6, 0.18, { tint: 2, seg: 4 }), 0, -1.2);
     A(SH, blk(0.5, 1.2, 0.8, 0.08), S.frame, [-0.35, 0, 0]);
     SH.position.set(1.05, -1.5, 0.3);
     b.elbowL.add(SH);
@@ -1073,10 +1116,12 @@ export class Mech {
     core.userData.noAO = halo.userData.noAO = true;
     this.saber.add(core, halo);
     this.saber.position.set(0, -0.9, 0.35);
-    this.saber.rotation.x = Math.PI / 2;
+    this.saber.rotation.x = PI / 2;
     this.saber.visible = false;
     b.handL.add(this.saber);
-    this.height = 19;
+    // 站姿（anim.js 讀）：w 兩腳張開倍數、toe 腳尖外八、fwd 左腳往前、bend 膝蓋彎、knee 膝蓋朝外、chest 挺胸、arm 雙臂離開身體
+    this.stance = { w: 2.25, toe: 0.22, fwd: 1.2, bend: 0.55, knee: 0.18, chest: -0.06, armR: -0.14, armL: 0.2 };
+    this.height = 19.5;
   }
 
   // 手：掌心骨架＋手背護甲＋三節手指（指節圓軸）＋拇指（握持姿勢）
@@ -1095,6 +1140,40 @@ export class Mech {
     }
     A(hd, blk(0.28, 0.55, 0.36, 0.08, 0.1), S.dark, [-sx * 0.55, -0.75, 0.4], [0.5, 0, sx * 0.3]);
     A(hd, blk(0.24, 0.36, 0.3, 0.07, 0.08), S.dark, [-sx * 0.5, -1.08, 0.66], [1.2, 0, sx * 0.2]);
+  }
+
+  // 主角機的手：掌骨架＋白色手背護甲＋指節護板；四指三節（每節有關節軸）、拇指兩節，握持姿勢
+  buildHeroHand(hd, S, sx) {
+    const A = this.add.bind(this);
+    A(hd, blk(0.92, 0.95, 0.72, 0.12, 0.16), S.frame, [0, -0.52, 0.05]);
+    A(hd, blk(1.0, 0.8, 0.14, 0.05, 0.12), S.main, [0, -0.5, -0.36]);
+    A(hd, blk(0.12, 0.72, 0.72, 0.04, 0.1), S.main, [sx * 0.5, -0.55, 0.02]);
+    A(hd, blk(0.98, 0.16, 0.3, 0.04, 0.06), S.main, [0, -0.98, -0.22]);
+    A(hd, cyl(0.07, 0.07, 0.92, 10), S.frame, [0, -1.02, 0.12], [0, 0, Math.PI / 2]);
+    const segs = [], caps = [], pins = [];
+    const dir = (a) => [0, -Math.cos(a), Math.sin(a)];
+    for (let k = 0; k < 4; k++) {
+      const x = -0.33 + k * 0.22;
+      let j = [x, -1.02, 0.12];
+      for (const [L, a, w] of [[0.36, 0.5, 0.17], [0.28, 1.35, 0.16], [0.22, 2.15, 0.15]]) {
+        const d = dir(a), nj = [j[0], j[1] + d[1] * L, j[2] + d[2] * L], c = [x, (j[1] + nj[1]) / 2, (j[2] + nj[2]) / 2];
+        segs.push(at(blk(w, L * 0.95, 0.17, 0.04, 0.05), c, [-a, 0, 0]));
+        caps.push(at(blk(w * 0.9, L * 0.7, 0.05, 0.015, 0.02), [x, c[1] - d[2] * 0.1, c[2] + d[1] * 0.1 * -1 * -1], [-a, 0, 0]));
+        pins.push(at(cyl(0.065, 0.065, w + 0.02, 8), nj, [0, 0, Math.PI / 2]));
+        j = nj;
+      }
+    }
+    // 拇指（從掌心內側往前、往內彎）
+    let j = [-sx * 0.46, -0.62, 0.3];
+    for (const [L, a] of [[0.32, 0.9], [0.26, 1.7]]) {
+      const d = [sx * 0.25, -Math.cos(a) * 0.95, Math.sin(a) * 0.95], nj = [j[0] + d[0] * L, j[1] + d[1] * L, j[2] + d[2] * L];
+      segs.push(at(blk(0.19, L, 0.19, 0.05, 0.05), [(j[0] + nj[0]) / 2, (j[1] + nj[1]) / 2, (j[2] + nj[2]) / 2], [-a, 0, sx * 0.3]));
+      pins.push(at(cyl(0.07, 0.07, 0.22, 8), nj, [0, 0, Math.PI / 2]));
+      j = nj;
+    }
+    A(hd, merge(segs), S.dark);
+    A(hd, merge(caps), S.frame);
+    A(hd, merge(pins), S.frame);
   }
 
   // 武器在自身座標沿 +Z 建模、握把在 (0,-0.8,0)；轉到手上沿手臂方向
