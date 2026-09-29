@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>鋼鐵黃昏 零 IRON DUSK ZERO</title>
+<meta name="description" content="《鋼鐵黃昏》前傳：第一人稱射擊。駕駛員穿過被占領的城市，找到聯邦最後一台機動裝甲。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root { --cy: #7ff3ff; --am: #ffb347; --rd: #ff4a4a; --bg: #05080b; }
+  html, body { margin: 0; height: 100%; background: var(--bg); overflow: hidden; color: #dfe9ee; font-family: 'Rajdhani', 'Noto Sans TC', sans-serif; user-select: none; -webkit-user-select: none; }
+  canvas { display: block; }
+  #gl { position: fixed; inset: 0; width: 100%; height: 100%; }
+  #hud { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 6; }
+  .screen { z-index: 7; position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+  #title { background: radial-gradient(ellipse at 50% 60%, rgba(10,20,26,0.1), rgba(3,5,7,0.82) 75%); transition: opacity 0.8s; }
+  #title.hide { opacity: 0; pointer-events: none; }
+  .logo { font-weight: 700; letter-spacing: 0.18em; font-size: clamp(38px, 8vw, 96px); line-height: 1; color: #eef6f8; text-shadow: 0 0 30px rgba(127,243,255,0.35); }
+  .logo small { display: block; font-size: 0.24em; letter-spacing: 0.9em; margin-top: 14px; color: var(--am); padding-left: 0.9em; }
+  .zh { font-family: 'Noto Sans TC', sans-serif; font-weight: 700; letter-spacing: 0.4em; font-size: clamp(16px, 2.4vw, 26px); margin-top: 18px; color: #c9d6db; padding-left: 0.4em; }
+  #bar { width: min(360px, 70vw); height: 3px; background: rgba(255,255,255,0.12); margin-top: 42px; position: relative; overflow: hidden; }
+  #bar i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: var(--cy); box-shadow: 0 0 12px var(--cy); transition: width 0.2s; }
+  #status { margin-top: 12px; font-size: 13px; letter-spacing: 0.3em; color: #8aa3ab; min-height: 18px; }
+  #chapters { margin-top: 26px; display: none; gap: 10px; pointer-events: auto; }
+  .chp { position: relative; width: 150px; height: 78px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; font: 600 14px 'Rajdhani', 'Noto Sans TC'; letter-spacing: 0.12em; color: #e6f4f7; background: rgba(5,15,20,0.6); border: 1px solid rgba(127,243,255,0.5); cursor: pointer; clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%); }
+  .chp b { font-size: 12px; letter-spacing: 0.3em; color: var(--am); }
+  .chp.next { background: var(--cy); color: #06090b; border-color: var(--cy); } .chp.next b { color: #7a3d00; }
+  .chp:not(.lock):hover { background: #fff; color: #06090b; }
+  .chp.lock { color: #5d7178; border-color: rgba(127,243,255,0.18); cursor: default; } .chp.lock b { color: #5d7178; }
+  @media (max-width: 560px) { #chapters { flex-direction: column; } }
+  .keys { margin-top: 30px; display: grid; grid-template-columns: repeat(2, auto); gap: 6px 26px; font-size: 14px; color: #9fb4bb; text-align: left; letter-spacing: 0.06em; }
+  .keys b { color: #e8f3f6; font-weight: 600; display: inline-block; min-width: 92px; }
+  .note { margin-top: 22px; font-size: 12px; color: #5d7178; letter-spacing: 0.1em; }
+  .note a { color: #8aa3ab; }
+  #pause, #result { display: none; background: rgba(3,6,8,0.72); backdrop-filter: blur(4px); }
+  #pause h2, #result h2 { font-size: 40px; letter-spacing: 0.4em; margin: 0 0 8px; padding-left: 0.4em; }
+  .btn { margin-top: 18px; font: 600 16px 'Rajdhani', 'Noto Sans TC'; letter-spacing: 0.3em; padding: 12px 32px; color: #e6f4f7; background: transparent; border: 1px solid rgba(127,243,255,0.6); cursor: pointer; pointer-events: auto; }
+  .btn:hover { background: rgba(127,243,255,0.15); }
+  .row { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+  #fsTop { position: absolute; right: 18px; top: 16px; margin: 0; padding: 8px 16px; font-size: 13px; letter-spacing: 0.2em; }
+  #intro { display: none; background: #000; font-family: 'Noto Sans TC', sans-serif; }
+  #intro p { max-width: 640px; padding: 0 24px; font-size: clamp(15px, 2vw, 19px); line-height: 2.1; color: #c8d3d7; letter-spacing: 0.12em; opacity: 0; transition: opacity 1.2s; margin: 6px 0; }
+  #intro p.on { opacity: 1; }
+  #intro .skip { position: absolute; bottom: 28px; font-size: 12px; letter-spacing: 0.3em; color: #5d7178; }
+  #fade { position: fixed; inset: 0; background: #000; opacity: 0; pointer-events: none; transition: opacity 0.6s; z-index: 5; }
+  #touch { position: fixed; inset: 0; display: none; pointer-events: none; }
+  #touch .pad { position: absolute; left: 24px; bottom: 24px; width: 150px; height: 150px; border-radius: 50%; border: 1px solid rgba(127,243,255,0.35); pointer-events: auto; }
+  #touch .pad i { position: absolute; left: 50%; top: 50%; width: 56px; height: 56px; margin: -28px; border-radius: 50%; background: rgba(127,243,255,0.25); }
+  #touch .tb { position: absolute; width: 64px; height: 64px; border-radius: 50%; border: 1px solid rgba(127,243,255,0.5); background: rgba(5,15,20,0.35); color: #cfeff5; font: 600 13px 'Rajdhani', 'Noto Sans TC'; display: flex; align-items: center; justify-content: center; pointer-events: auto; }
+  #touch .look { position: absolute; right: 0; top: 0; width: 55%; height: 100%; pointer-events: auto; }
+</style>
+<script type="importmap">{"imports":{"three":"../../lib/three.module.js","three/addons/":"../../lib/addons/"}}</script>
+</head>
+<body>
+<canvas id="gl"></canvas>
+<canvas id="hud"></canvas>
+<div id="touch">
+  <div class="look" id="tLook"></div>
+  <div class="pad" id="tPad"><i></i></div>
+  <div class="tb" id="tFire" style="right:30px;bottom:120px;width:84px;height:84px">射擊</div>
+  <div class="tb" id="tMsl" style="right:130px;bottom:130px">瞄準</div>
+  <div class="tb" id="tJump" style="right:30px;bottom:30px">跳</div>
+  <div class="tb" id="tBoost" style="right:130px;bottom:40px">跑</div>
+  <div class="tb" id="tSaber" style="right:210px;bottom:70px">換彈</div>
+  <div class="tb" id="tCannon" style="right:210px;bottom:160px">換槍</div>
+  <div class="tb" id="tOd" style="right:30px;bottom:220px">蹲</div>
+  <div class="tb" id="tLock" style="right:130px;bottom:220px">互動</div>
+</div>
+<div id="title" class="screen">
+  <button class="btn fs" id="fsTop">全螢幕 FULLSCREEN</button>
+  <div class="logo">IRON DUSK<small>ZERO · THE LAST FRAME</small></div>
+  <div class="zh">鋼鐵黃昏　零</div>
+  <div id="bar"><i></i></div>
+  <div id="status">載入中</div>
+  <div id="chapters"></div>
+  <div class="keys">
+    <div><b>滑鼠</b>瞄準</div><div><b>W A S D</b>移動</div>
+    <div><b>左鍵</b>開槍</div><div><b>右鍵</b>舉槍瞄準（長槍＝狙擊鏡）</div>
+    <div><b>Shift</b>跑步／狙擊時屏息</div><div><b>C 或 Ctrl</b>蹲下</div>
+    <div><b>空白鍵</b>跳</div><div><b>R</b>換彈匣</div>
+    <div><b>1 / 2 或 Q</b>換長槍／手槍</div><div><b>E</b>互動</div>
+    <div><b>Esc</b>暫停</div>
+  </div>
+  <div class="note">《鋼鐵黃昏》前傳。建議用電腦＋滑鼠。卡頓的話按 Esc 調低畫質。　<a href="../" style="pointer-events:auto">→ 鋼鐵黃昏本篇</a></div>
+</div>
+<div id="intro" class="screen"><div id="introText"></div><div class="skip">點一下或按任意鍵繼續</div></div>
+<div id="pause" class="screen">
+  <h2>暫停</h2>
+  <div style="color:#8fa6ad;letter-spacing:0.2em">PAUSED</div>
+  <div style="margin-top:22px;display:flex;gap:10px;align-items:center;pointer-events:auto">
+    <span style="color:#8fa6ad;letter-spacing:0.2em">畫質</span>
+    <button class="btn" style="margin:0" data-q="0">低</button>
+    <button class="btn" style="margin:0" data-q="1">中</button>
+    <button class="btn" style="margin:0" data-q="2">高</button>
+  </div>
+  <div style="margin-top:14px;display:flex;gap:10px;align-items:center;pointer-events:auto">
+    <span style="color:#8fa6ad;letter-spacing:0.2em">滑鼠靈敏度</span>
+    <input id="sens" type="range" min="0.3" max="2.5" step="0.05" value="1">
+  </div>
+  <div class="row">
+    <button class="btn" id="resume">繼續 RESUME</button>
+    <button class="btn fs">全螢幕 FULLSCREEN</button>
+    <button class="btn" id="quit">回標題 QUIT</button>
+  </div>
+</div>
+<div id="result" class="screen">
+  <h2 id="resTitle">陣亡</h2>
+  <div id="resSub" style="color:#8fa6ad;letter-spacing:0.3em">KIA</div>
+  <div class="row">
+    <button class="btn" id="cont">從檢查點繼續 CONTINUE</button>
+    <button class="btn" id="menu">回標題 TITLE</button>
+  </div>
+</div>
+<div id="fade"></div>
+<script type="module" src="./main.js?v=1"></script>
+</body>
+</html>

@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IRON DUSK ZERO 音效測試台</title>
+<style>
+  :root { --bg:#0e1116; --panel:#171c24; --line:#2a3140; --fg:#d8dee9; --dim:#8a93a6; --acc:#e0a33a; --bad:#e05a4a; --ok:#6cc070; }
+  * { box-sizing: border-box; }
+  body { margin:0; padding:16px; background:var(--bg); color:var(--fg); font:14px/1.45 system-ui, -apple-system, "PingFang TC", sans-serif; }
+  h1 { font-size:18px; margin:0 0 4px; letter-spacing:.04em; }
+  .sub { color:var(--dim); margin-bottom:14px; font-size:13px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:12px; }
+  section { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:12px; }
+  section h2 { font-size:13px; margin:0 0 8px; color:var(--acc); letter-spacing:.06em; }
+  section.wide { grid-column:1 / -1; }
+  button { background:#222a36; color:var(--fg); border:1px solid var(--line); border-radius:6px; padding:6px 10px; margin:0 6px 6px 0; font:inherit; font-size:13px; cursor:pointer; }
+  button:hover { border-color:var(--acc); }
+  button.big { background:var(--acc); color:#111; font-weight:600; border:none; }
+  .row { margin-bottom:4px; }
+  .row > span { display:inline-block; min-width:110px; color:var(--dim); font-size:12px; }
+  label { display:flex; align-items:center; gap:8px; margin:4px 0; font-size:13px; color:var(--dim); }
+  label input[type=range] { flex:1; }
+  label b { color:var(--fg); min-width:48px; text-align:right; font-variant-numeric:tabular-nums; }
+  #stat { font:12px/1.5 ui-monospace, Menlo, monospace; color:var(--dim); white-space:pre; overflow-x:auto; }
+  table { border-collapse:collapse; width:100%; font:12px ui-monospace, Menlo, monospace; }
+  td, th { border-bottom:1px solid var(--line); padding:3px 6px; text-align:right; }
+  td:first-child, th:first-child { text-align:left; }
+  .bad { color:var(--bad); } .ok { color:var(--ok); }
+  #meterWrap { overflow-x:auto; }
+</style>
+</head>
+<body>
+<h1>鋼鐵黃昏 零 IRON DUSK ZERO｜音效測試台</h1>
+<div class="sub">第一次點任何按鈕會自動啟動音訊。定位音效有三個位置：左近 8 m／正前 30 m／右遠 120 m（聽者朝 -Z）。</div>
+
+<div class="grid">
+  <section>
+    <h2>全域／配樂</h2>
+    <button class="big" id="unlock">啟動音訊</button>
+    <label>主音量 <input type="range" id="vol" min="0" max="1" step="0.01" value="0.8"><b id="volV">0.80</b></label>
+    <div>
+      <button data-mus="title">title</button>
+      <button data-mus="battle1">battle 1</button>
+      <button data-mus="battle4">battle 4</button>
+      <button data-mus="clear">clear</button>
+      <button data-mus="fail">fail</button>
+      <button data-mus="off">music off</button>
+    </div>
+    <label><input type="checkbox" id="danger"> setDanger</label>
+    <div id="stat">尚未啟動</div>
+  </section>
+
+  <section>
+    <h2>自己：武器</h2>
+    <div id="gWeapon"></div>
+  </section>
+
+  <section>
+    <h2>自己：身體</h2>
+    <div id="gBody"></div>
+    <label>地面 <select id="surf"><option>concrete</option><option>metal</option><option>gravel</option><option>glass</option></select></label>
+    <label>速度 <input type="range" id="spd" min="0" max="1" step="0.01" value="0.5"><b id="spdV">0.50</b></label>
+    <button id="walk">連續走 10 步</button>
+    <label>疲勞 breath（每幀） <input type="range" id="br" min="0" max="1" step="0.01" value="0"><b id="brV">0.00</b></label>
+    <label><input type="checkbox" id="lowhp"> lowHealth 心跳</label>
+  </section>
+
+  <section>
+    <h2>HUD／無線電</h2>
+    <div id="gHud"></div>
+  </section>
+
+  <section class="wide">
+    <h2>外界（定位：左近 8 m／正前 30 m／右遠 120 m）</h2>
+    <div id="gWorld"></div>
+    <label><input type="checkbox" id="drone"> droneLoop ×2（繞圈，每幀更新；取消後 0.5 秒自動收掉）</label>
+    <label><input type="checkbox" id="alarm"> alarm 基地警報</label>
+  </section>
+
+  <section class="wide">
+    <h2>離線量測</h2>
+    <div class="sub">每個音效各自在 OfflineAudioContext 渲染（1 秒暖機後觸發），量 mix 前（raw）與最終輸出的峰值、最大 50 ms RMS、長度，並檢查 NaN 與例外。</div>
+    <button class="big" id="meter">執行量測</button>
+    <div id="meterWrap"></div>
+  </section>
+</div>
+
+<script type="importmap">{"imports":{"three":"../../../lib/three.module.js"}}</script>
+<script type="module">
+import { ZeroAudio } from '../sfx.js';
+
+const $ = (id) => document.getElementById(id);
+const val = (id) => parseFloat($(id).value);
+const POS = { 'L8': { x: -7, y: 0, z: -4 }, 'F30': { x: 0, y: 0, z: -30 }, 'R120': { x: 110, y: 0, z: -50 } };
+
+// [群組, 名稱, fn(a, pos)?, spatial]
+const SFX = [
+  ['gWeapon', 'rifle', (a) => a.rifle(false)],
+  ['gWeapon', 'rifle ADS', (a) => a.rifle(true)],
+  ['gWeapon', 'pistol', (a) => a.pistol()],
+  ['gWeapon', 'dry', (a) => a.dry()],
+  ['gWeapon', 'reload rifle out', (a) => a.reload('rifle', 'out')],
+  ['gWeapon', 'reload rifle in', (a) => a.reload('rifle', 'in')],
+  ['gWeapon', 'reload rifle charge', (a) => a.reload('rifle', 'charge')],
+  ['gWeapon', 'reload rifle ready', (a) => a.reload('rifle', 'ready')],
+  ['gWeapon', 'reload pistol out', (a) => a.reload('pistol', 'out')],
+  ['gWeapon', 'reload pistol in', (a) => a.reload('pistol', 'in')],
+  ['gWeapon', 'reload pistol charge', (a) => a.reload('pistol', 'charge')],
+  ['gWeapon', 'reload pistol ready', (a) => a.reload('pistol', 'ready')],
+  ['gWeapon', 'swap', (a) => a.swap()],
+  ['gWeapon', 'scope on', (a) => a.scope(true)],
+  ['gWeapon', 'scope off', (a) => a.scope(false)],
+  ['gBody', 'step concrete walk', (a) => a.step('concrete', 0.2)],
+  ['gBody', 'step concrete sprint', (a) => a.step('concrete', 1)],
+  ['gBody', 'step metal', (a) => a.step('metal', 0.6)],
+  ['gBody', 'step gravel', (a) => a.step('gravel', 0.6)],
+  ['gBody', 'step glass', (a) => a.step('glass', 0.6)],
+  ['gBody', 'jump', (a) => a.jump()],
+  ['gBody', 'land 0.5', (a) => a.land(0.5)],
+  ['gBody', 'land 1.5', (a) => a.land(1.5)],
+  ['gBody', 'breath 1', (a) => a.breath(1)],
+  ['gBody', 'holdBreath', (a) => a.holdBreath()],
+  ['gBody', 'hurt 0.4 L', (a) => a.hurt(0.4, -1)],
+  ['gBody', 'hurt 1 R', (a) => a.hurt(1, 1)],
+  ['gBody', 'shieldBreak', (a) => a.shieldBreak()],
+  ['gBody', 'shieldRecharge', (a) => a.shieldRecharge()],
+  ['gHud', 'hitmark hit', (a) => a.hitmark('hit')],
+  ['gHud', 'hitmark head', (a) => a.hitmark('head')],
+  ['gHud', 'hitmark kill', (a) => a.hitmark('kill')],
+  ['gHud', 'radio in', (a) => a.radio('in')],
+  ['gHud', 'radio out', (a) => a.radio('out')],
+  ['gHud', 'radio enemy', (a) => a.radio('enemy')],
+  ['gHud', 'ui confirm (parent)', (a) => a.ui('confirm')],
+  ['gHud', 'mechBoot', (a) => a.mechBoot(), false, 9],
+  ['gWorld', 'enemyShot rifle', (a, p) => a.enemyShot(p, 'rifle'), true],
+  ['gWorld', 'enemyShot sniper', (a, p) => a.enemyShot(p, 'sniper'), true],
+  ['gWorld', 'enemyShot heavy', (a, p) => a.enemyShot(p, 'heavy'), true],
+  ['gWorld', 'enemyShot drone', (a, p) => a.enemyShot(p, 'drone'), true],
+  ['gWorld', 'sniperGlint', (a, p) => a.sniperGlint(p), true],
+  ['gWorld', 'whiz', (a, p) => a.whiz(p), true],
+  ['gWorld', 'hit armor', (a, p) => a.hit(p, 'armor'), true],
+  ['gWorld', 'hit body', (a, p) => a.hit(p, 'body'), true],
+  ['gWorld', 'hit head', (a, p) => a.hit(p, 'head'), true],
+  ['gWorld', 'hit concrete', (a, p) => a.hit(p, 'concrete'), true],
+  ['gWorld', 'hit metal', (a, p) => a.hit(p, 'metal'), true],
+  ['gWorld', 'hit glass', (a, p) => a.hit(p, 'glass'), true],
+  ['gWorld', 'bodyFall', (a, p) => a.bodyFall(p), true],
+  ['gWorld', 'trooperStep', (a, p) => a.trooperStep(p), true],
+  ['gWorld', 'radio enemy (pos)', (a, p) => a.radio('enemy', p), true],
+  ['gWorld', 'grenade', (a, p) => a.grenade(p), true],
+  ['gWorld', 'explosion 1 (parent)', (a, p) => a.explosion(p, 1), true],
+  ['gWorld', 'impact building (parent)', (a, p) => a.impact(p, 'building'), true],
+  ['gWorld', 'debris (parent)', (a, p) => a.debris(p), true],
+  ['gWorld', 'enemyStep mech (parent)', (a, p) => a.enemyStep(p, 1), true],
+  ['gWorld', 'door', (a, p) => a.door(p), true],
+];
+
+// 啟動前先把每個方法都打一次：必須安全、不丟例外
+const pre = new ZeroAudio();
+for (const [, , fn] of SFX) fn(pre, POS.F30);
+pre.lowHealth(true); pre.lowHealth(false); pre.alarm(true); pre.alarm(false);
+pre.droneLoop('d', POS.F30, 1); pre.droneStop('d');
+pre.rifle('x'); pre.step(null, NaN); pre.hit(undefined, 'zzz'); pre.enemyShot({}, 'laser'); pre.reload(); pre.radio(); pre.droneLoop();
+window.preUnlockOK = pre.lastError === null && !pre.ready;
+console.log('[sfx_test] 啟動前呼叫全部方法：', window.preUnlockOK ? 'OK' : pre.lastError);
+
+const au = new ZeroAudio();
+window.au = au;
+const unlock = () => { if (!au.ready) { au.unlock(); $('unlock').textContent = '音訊已啟動'; } };
+document.addEventListener('pointerdown', unlock, { capture: true });
+$('unlock').onclick = unlock;
+
+for (const [grp, name, fn, spatial] of SFX) {
+  const row = document.createElement('div'); row.className = 'row';
+  if (spatial) {
+    const lab = document.createElement('span'); lab.textContent = name; row.appendChild(lab);
+    for (const k of Object.keys(POS)) {
+      const b = document.createElement('button'); b.textContent = k; b.dataset.sfx = name + ' @' + k;
+      b.onclick = () => { unlock(); fn(au, POS[k]); };
+      row.appendChild(b);
+    }
+    $(grp).appendChild(row);
+  } else {
+    const b = document.createElement('button'); b.textContent = name; b.dataset.sfx = name;
+    b.onclick = () => { unlock(); fn(au); };
+    $(grp).appendChild(b);
+  }
+}
+
+$('vol').oninput = () => { $('volV').textContent = val('vol').toFixed(2); au.setVolume(val('vol')); };
+$('spd').oninput = () => { $('spdV').textContent = val('spd').toFixed(2); };
+$('br').oninput = () => { $('brV').textContent = val('br').toFixed(2); };
+document.querySelectorAll('[data-mus]').forEach((b) => {
+  b.onclick = () => {
+    unlock();
+    const m = b.dataset.mus;
+    if (m.startsWith('battle')) au.music('battle', { stage: +m.slice(6) }); else au.music(m);
+  };
+});
+$('danger').onchange = () => au.setDanger($('danger').checked);
+$('lowhp').onchange = () => au.lowHealth($('lowhp').checked);
+$('alarm').onchange = () => au.alarm($('alarm').checked);
+$('walk').onclick = () => {
+  const s = val('spd'), iv = 560 - 260 * s;
+  for (let i = 0; i < 10; i++) setTimeout(() => au.step($('surf').value, s), i * iv);
+};
+
+let ang = 0, last = performance.now();
+function frame(now) {
+  const dt = Math.min(0.1, (now - last) / 1000); last = now;
+  au.setListener({ x: 0, y: 0, z: 0 }, { x: 0, y: 0, z: -1 });
+  au.breath(val('br'));
+  if ($('drone').checked) {
+    ang += dt * 0.7;
+    au.droneLoop('d1', { x: Math.sin(ang) * 12, y: 4, z: -Math.cos(ang) * 12 }, 0.6 + 0.4 * Math.sin(ang * 3));
+    au.droneLoop('d2', { x: -Math.sin(ang * 0.6) * 30, y: 8, z: -20 }, 0.5);
+  }
+  const c = au.ctx;
+  $('stat').textContent = c
+    ? `state ${c.state}   t ${c.currentTime.toFixed(2)} s\nvoices ${au.voices}   music voices ${au.mv}   drones ${au.dn.size}\nlastError ${au.lastError ? au.lastError.message : '—'}`
+    : '尚未啟動';
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+// ───── 離線量測 ─────
+const SR = 48000;
+const CASES = [];
+for (const [, name, fn, spatial, sec] of SFX) {
+  if (spatial) { CASES.push([name + ' @L8', (a) => fn(a, POS.L8), sec]); CASES.push([name + ' @F30', (a) => fn(a, POS.F30), sec]); CASES.push([name + ' @R120', (a) => fn(a, POS.R120), sec]); }
+  else CASES.push([name, fn, sec]);
+}
+CASES.push(['lowHealth (loop 3 s)', (a) => a.lowHealth(true), 4]);
+CASES.push(['alarm (loop 3 s)', (a) => a.alarm(true), 4]);
+CASES.push(['droneLoop @10m (loop)', (a) => a.droneLoop('d', { x: 5, y: 3, z: -8 }, 0.8), 3]);
+CASES.push(['REF parent beam()', (a) => a.beam()]);
+
+async function renderOne(fn, raw, sec = 6) {
+  const ctx = new OfflineAudioContext(2, SR * sec, SR);
+  const a = new ZeroAudio();
+  a._attach(ctx, false);
+  if (raw) { a.mix.disconnect(); a.mix.gain.value = 1; a.mix.connect(ctx.destination); }
+  ctx.suspend(1).then(() => { fn(a); ctx.resume(); });
+  const buf = await ctx.startRendering();
+  let pk = 0, nan = 0, lastLoud = 0;
+  const i0 = SR;
+  for (let ch = 0; ch < 2; ch++) {
+    const d = buf.getChannelData(ch);
+    for (let i = i0; i < d.length; i++) {
+      const x = d[i];
+      if (!Number.isFinite(x)) { nan++; continue; }
+      const ax = Math.abs(x);
+      if (ax > pk) pk = ax;
+      if (ax > 0.001 && i > lastLoud) lastLoud = i;
+    }
+  }
+  let maxWin = 0;
+  const L = buf.getChannelData(0), R = buf.getChannelData(1), W = SR * 0.05;
+  for (let i = i0; i + W < L.length; i += W / 2) {
+    let s = 0; for (let j = i; j < i + W; j++) s += (L[j] * L[j] + R[j] * R[j]) / 2;
+    maxWin = Math.max(maxWin, Math.sqrt(s / W));
+  }
+  return { pk, rms: maxWin, nan, len: Math.max(0, lastLoud - i0) / SR, err: a.lastError ? String(a.lastError) : '' };
+}
+
+window.runMeter = async () => {
+  const rows = [];
+  for (const [name, fn, sec] of CASES) {
+    const r = await renderOne(fn, true, sec || 6);
+    const f = await renderOne(fn, false, sec || 6);
+    rows.push({ name, rawPk: r.pk, outPk: f.pk, outRms: f.rms, len: f.len, nan: r.nan + f.nan, err: r.err || f.err });
+  }
+  return rows;
+};
+$('meter').onclick = async () => {
+  $('meterWrap').textContent = '量測中……';
+  const rows = await window.runMeter();
+  const h = ['音效', 'raw 峰', '輸出峰', '輸出 RMS(50ms)', '長度 s', 'NaN', '錯誤'];
+  $('meterWrap').innerHTML = '<table><tr>' + h.map((x) => `<th>${x}</th>`).join('') + '</tr>' + rows.map((r) =>
+    `<tr><td>${r.name}</td><td>${r.rawPk.toFixed(3)}</td><td class="${r.outPk > 0.99 || r.outPk < 0.05 ? 'bad' : 'ok'}">${r.outPk.toFixed(3)}</td><td>${r.outRms.toFixed(3)}</td><td>${r.len.toFixed(2)}</td><td class="${r.nan ? 'bad' : 'ok'}">${r.nan}</td><td class="bad">${r.err}</td></tr>`).join('') + '</table>';
+};
+</script>
+</body>
+</html>

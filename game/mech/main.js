@@ -387,4 +387,21 @@ async function game() {
     input.endFrame();
   }
   requestAnimationFrame(frame);
+
+  // 從前傳《鋼鐵黃昏 零》接過來（?zero）：跳過標題，黑畫面待命；瀏覽器要先有一次操作才能鎖滑鼠、出聲，按一下就直接第 1 關開機
+  if (q.has('zero')) {
+    const tl = $('title'), kids = [...tl.children];
+    tl.style.background = '#000';
+    for (const el of kids) el.style.display = 'none';
+    const msg = document.createElement('div');
+    msg.innerHTML = '<div class="logo" style="font-size:clamp(28px,5vw,56px)">XG-01<small>SYSTEM STANDBY</small></div><div class="zh">蒼焰　待命</div>'
+      + '<div style="margin-top:40px;font-size:13px;letter-spacing:0.3em;color:#8aa3ab">按任意鍵或點一下，啟動機體</div>';
+    tl.appendChild(msg);
+    const go = () => {
+      removeEventListener('keydown', go); removeEventListener('pointerdown', go);
+      msg.remove(); for (const el of kids) el.style.display = ''; tl.style.background = '';
+      launch(1);
+    };
+    addEventListener('keydown', go); addEventListener('pointerdown', go);
+  }
 }

@@ -1,0 +1,10 @@
+<!doctype html><script type="importmap">{"imports":{"three":"../../../lib/three.module.js","three/addons/":"../../../lib/addons/"}}</script>
+<script type="module">
+import { Models } from '../models.js';
+const M = await Models.load();
+const out = {};
+for (const k of Object.keys(M.lib)) { const s = M.lib[k].size; out[k] = [s.x, s.y, s.z].map((v) => +v.toFixed(2)); }
+const kit = {};
+for (const k of Object.keys(M.nodes)) { const m = M.get(k); kit[k.split(':')[1] + (k.includes('factory') ? '@F' : '@A')] = [m.box.min.x, m.box.min.y, m.box.min.z, m.box.max.x, m.box.max.y, m.box.max.z].map((v) => +v.toFixed(2)).join(','); }
+window.__out = JSON.stringify(out) + '\n' + JSON.stringify(kit);
+</script>
