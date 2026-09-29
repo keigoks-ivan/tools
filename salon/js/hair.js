@@ -1,4 +1,4 @@
-import {guest} from './data.js?v=6';
+import {guest} from './data.js?v=7';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const mix=(a,b,t)=>a.map((v,i)=>v+(b[i]-v)*t);
 const css=(c,m=1)=>`rgb(${c.map(v=>Math.round(clamp(v*m,0,255))).join(',')})`;

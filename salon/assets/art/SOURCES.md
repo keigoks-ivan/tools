@@ -13,3 +13,7 @@ Same production specification, with this character replacement: light peach skin
 ## Existing assets
 
 `scene.png`, `blink.png`, `happy.png`, `surprise.png`: approved salon scene edited to remove hair and change facial expressions. `hair-texture.png`: full-frame vertical chestnut hair texture. `hair-plate.png`: transparent polished hair illustration sampled along actual strand coordinates. `cover.png`: existing catalog cover. These assets were generated with the same built-in ImageGen in the previous release.
+
+## 2026-09-29 檔案格式
+
+為了加快開啟速度，上面的 PNG 全部轉成 WebP（同名 `.webp`，總量 13.3 MB → 1.3 MB）；`cover.png` 維持 PNG（遊戲入口頁在用）。

@@ -1,5 +1,5 @@
-import {accessories,wishes,rgb} from './looks.js?v=6';
-import {ornament} from './ornaments.js?v=6';
+import {accessories,wishes,rgb} from './looks.js?v=7';
+import {ornament} from './ornaments.js?v=7';
 const TAU=Math.PI*2;
 export function icon(c,kind,x,y,s=32){
  c.save();c.translate(x,y);c.scale(s/32,s/32);c.strokeStyle='#9c687b';c.fillStyle='#f5b7c7';c.lineWidth=2.6;c.lineCap='round';c.lineJoin='round';
