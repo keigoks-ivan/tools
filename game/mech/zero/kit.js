@@ -239,14 +239,22 @@ export class Builder {
     this.mats = mats; this.solid = solid;
     this.B = {};
     for (const k of Object.keys(mats)) this.B[k] = new Bucket(mats[k].userData.tile || 3);
+    this.breakables = [];
     this.extra = [];   // 其他網格（窗戶玻璃、燈）
   }
   // 實心方塊＋碰撞
   block(mat, x0, x1, y0, y1, z0, z1, o = {}) {
     if (x1 < x0) [x0, x1] = [x1, x0];
     if (z1 < z0) [z0, z1] = [z1, z0];
-    this.B[mat].box(x0, x1, y0, y1, z0, z1, o);
-    if (o.solid !== false) this.solid.add({ x0, x1, y0, y1, z0, z1, mat: o.hitMat || mat, noFloor: o.noFloor, ramp: o.ramp });
+    const bucket = this.B[mat], start = bucket.p.length;
+    bucket.box(x0, x1, y0, y1, z0, z1, o);
+    const bounds = { x0, x1, y0, y1, z0, z1, mat: o.hitMat || mat, noFloor: o.noFloor, noMove: o.noMove, ramp: o.ramp };
+    const box = o.solid !== false ? this.solid.add(bounds) : null;
+    if (o.breakable) {
+      const count = bucket.p.length - start;
+      this.breakables.push({ bounds, box, mat: this.mats[mat], tile: bucket.tile, kind: o.breakable, options: o,
+        hide() { const a = bucket.mesh.geometry.attributes.position; a.array.fill(0, start, start + count); a.needsUpdate = true; } });
+    }
   }
   // 只有外觀
   deco(mat, x0, x1, y0, y1, z0, z1, o = {}) { this.block(mat, x0, x1, y0, y1, z0, z1, { ...o, solid: false }); }
@@ -271,9 +279,16 @@ export class Builder {
       const g = b.geometry(); if (!g) continue;
       const m = new THREE.Mesh(g, this.mats[k]);
       m.castShadow = true; m.receiveShadow = true;
-      m.name = 'lvl-' + k;
+      m.name = 'lvl-' + k; b.mesh = m;
       scene.add(m); out.push(m);
     }
     return out;
   }
+}
+
+// 崩落後的牆段沿用原材質與世界 UV，同材質一次合併。
+export function surfaceGeometry(parts, tile) {
+  const b = new Bucket(tile);
+  for (const p of parts) b.box(p.x0, p.x1, p.y0, p.y1, p.z0, p.z1, p.options || {});
+  return b.geometry();
 }

@@ -2,6 +2,7 @@
 //   碎片有簡單物理（重力、彈跳、翻滾、落地停住）；牆被打會噴碎屑、爆炸會噴大塊
 import * as THREE from 'three';
 import * as PR from './props.js';
+import { surfaceGeometry } from './kit.js';
 
 const rr = (a, b) => a + Math.random() * (b - a);
 const ZERO = new THREE.Matrix4().makeScale(0, 0, 0);
@@ -25,11 +26,11 @@ class Debris {
   constructor(scene, max = 320) {
     this.max = max; this.list = [];
     const mk = (color, rough, metal = 0) => new THREE.MeshStandardMaterial({ color, roughness: rough, metalness: metal });
-    this.mats = { concrete: mk(0x8f8a82, 0.95), wood: mk(0x6e5536, 0.85), metal: mk(0x5c6066, 0.45, 0.8), card: mk(0x8c7552, 0.95), plastic: mk(0x2f5d86, 0.6), dark: mk(0x201e1c, 0.9), brick: mk(0x7c4634, 0.95) };
+    this.mats = { concrete: mk(0x8f8a82, 0.95), wood: mk(0x6e5536, 0.85), metal: mk(0x5c6066, 0.45, 0.8), card: mk(0x8c7552, 0.95), plastic: mk(0x2f5d86, 0.6), dark: mk(0x201e1c, 0.9), brick: mk(0x7c4634, 0.95), glass: mk(0x83a4a8, 0.16, 0.25) };
     this.geo = { chunk: PR.chunk(0).clone().scale(0.5, 0.5, 0.5), plank: new THREE.BoxGeometry(0.06, 0.02, 0.4), plate: new THREE.BoxGeometry(0.18, 0.012, 0.14), shard: new THREE.TetrahedronGeometry(0.06) };
     this.im = {};
     for (const [k, m] of Object.entries(this.mats)) {
-      const g = k === 'wood' ? this.geo.plank : k === 'metal' || k === 'plastic' || k === 'card' ? this.geo.plate : this.geo.chunk;
+      const g = k === 'glass' ? this.geo.shard : k === 'wood' ? this.geo.plank : k === 'metal' || k === 'plastic' || k === 'card' ? this.geo.plate : this.geo.chunk;
       const im = new THREE.InstancedMesh(g, m, max); im.count = 0; im.castShadow = true; im.receiveShadow = true; im.frustumCulled = false;
       im.userData.noAO = true;
       scene.add(im); this.im[k] = im;
@@ -70,7 +71,7 @@ export class Destruct {
   constructor(G) {
     this.G = G; this.objs = []; this.burning = []; this.queue = [];
     this.debris = new Debris(G.scene);
-    this.wrecks = [];
+    this.wrecks = []; this.surfaces = []; this.surfaceBatches = new Map(); this.breaches = 0;
   }
   // Placer.add 之後呼叫：登記一個可破壞的道具（handle＝Placer 回傳的實例把手）
   register(name, handle, box) {
@@ -80,6 +81,59 @@ export class Destruct {
     this.objs.push(o);
     return o;
   }
+  // 牆皮與玻璃共用原本的合併網格，不為每扇窗增加 draw call。
+  surface(s) {
+    const b = s.bounds, o = { kind: 'surface', surface: s, hp: s.kind === 'glass' ? 8 : 130, alive: true,
+      pos: new THREE.Vector3((b.x0 + b.x1) / 2, (b.y0 + b.y1) / 2, (b.z0 + b.z1) / 2), box: s.box, boxes: s.box ? [s.box] : [], parts: [{ ...b, options: s.options }] };
+    if (s.box) s.box.obj = o;
+    this.surfaces.push(o); this.objs.push(o); return o;
+  }
+  _surfaceHit(o, dmg, p, dir) {
+    o.hp -= dmg;
+    if (o.surface.kind === 'glass') {
+      if (o.hp > 0) return;
+      o.alive = false; o.surface.hide(); this._unbox(o);
+      const b = o.surface.bounds;
+      for (let i = 0; i < 22; i++) this.debris.spawn(new THREE.Vector3(rr(b.x0, b.x1), rr(b.y0, b.y1), rr(b.z0, b.z1)), new THREE.Vector3(rr(-1, 1), rr(0.4, 2.5), rr(-1, 1)).addScaledVector(dir, rr(1.5, 4)), 'glass', rr(0.5, 1.7), rr(3, 6));
+      this.G.audio.hit && this.G.audio.hit(p, 'glass'); return;
+    }
+    this.wall(p, dir.clone().negate(), o.surface.bounds.mat, dmg);
+    if ((dmg < 90 && o.hp > 0) || this.breaches >= 16) return;
+    o.hp = 130; this.breaches++;
+    const bounds = o.surface.bounds, axis = bounds.x1 - bounds.x0 > bounds.z1 - bounds.z0 ? 'x' : 'z';
+    const normal = axis === 'x' ? 'z' : 'x', mid = (bounds[normal + '0'] + bounds[normal + '1']) / 2;
+    const lo = p[axis] - 0.54, hi = p[axis] + 0.54, bottom = Math.max(0.12, p.y - 0.5), top = p.y + 0.5;
+    const materials = new Set();
+    // 同時切穿外牆與內側粉刷，碰撞也切成剩下的四段。
+    for (const s of this.surfaces) {
+      const b = s.surface.bounds;
+      if (s.surface.kind !== 'wall' || Math.abs((b[normal + '0'] + b[normal + '1']) / 2 - mid) > 0.4) continue;
+      if (b[axis + '1'] <= lo || b[axis + '0'] >= hi || b.y1 <= bottom || b.y0 >= top) continue;
+      const pieces = [];
+      for (const q of s.parts) {
+        const a = Math.max(lo, q[axis + '0']), z = Math.min(hi, q[axis + '1']), y0 = Math.max(bottom, q.y0), y1 = Math.min(top, q.y1);
+        if (a >= z || y0 >= y1) { pieces.push(q); continue; }
+        const put = (a0, a1, v0, v1) => { if (a1 - a0 > 0.015 && v1 - v0 > 0.015) pieces.push({ ...q, [axis + '0']: a0, [axis + '1']: a1, y0: v0, y1: v1 }); };
+        put(q[axis + '0'], a, q.y0, q.y1); put(z, q[axis + '1'], q.y0, q.y1);
+        put(a, z, q.y0, y0); put(a, z, y1, q.y1);
+      }
+      s.surface.hide(); s.changed = true; s.parts = pieces;
+      for (const box of s.boxes) box.dead = true;
+      s.boxes = s.box ? pieces.map((q) => this.G.solid.add({ ...q, obj: s })) : [];
+      materials.add(s.surface.mat);
+    }
+    for (const mat of materials) {
+      const list = this.surfaces.filter((s) => s.changed && s.surface.mat === mat);
+      const g = surfaceGeometry(list.flatMap((s) => s.parts), list[0].surface.tile);
+      let mesh = this.surfaceBatches.get(mat);
+      if (!mesh) { mesh = new THREE.Mesh(g || new THREE.BufferGeometry(), mat); mesh.castShadow = mesh.receiveShadow = true; this.G.scene.add(mesh); this.surfaceBatches.set(mat, mesh); }
+      else { mesh.geometry.dispose(); mesh.geometry = g || new THREE.BufferGeometry(); }
+      mesh.visible = !!g;
+    }
+    this.G.fx.puff(p, [0.55, 0.53, 0.5], 0.8);
+    for (let i = 0; i < 16; i++) this.debris.spawn(p, new THREE.Vector3(rr(-2, 2), rr(1, 4), rr(-2, 2)).addScaledVector(dir, 2), 'concrete', rr(0.2, 0.65), 8);
+  }
+
   // 沙包牆：一整面牆共用一個碰撞盒，打到哪裡掉哪幾袋
   bagWall(box, bags) {
     const w = { kind: 'bagwall', box, bags: bags.map((h) => ({ h, alive: true, pos: new THREE.Vector3().setFromMatrixPosition(h.mat) })), alive: true, hp: 1e9 };
@@ -90,6 +144,7 @@ export class Destruct {
   hit(obj, dmg, p, dir, from = 'player') {
     const G = this.G;
     if (!obj || !obj.alive) return;
+    if (obj.kind === 'surface') { this._surfaceHit(obj, dmg, p, dir); return; }
     if (obj.kind === 'bagwall') {
       // 離命中點最近的 1～2 袋破掉
       let n = dmg > 80 ? 3 : dmg > 30 ? 2 : 1;

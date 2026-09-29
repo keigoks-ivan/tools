@@ -26,7 +26,7 @@
 
 ## 本次美術與動作補充（2026-09-29）
 
-### soldier-motion.glb（337,188 bytes）
+### soldier-motion.glb（上一輪 337,188 bytes）
 - 作者：Quaternius，Universal Animation Library Standard；CC0 1.0。
 - 原始發佈：https://quaternius.itch.io/universal-animation-library
 - glTF 鏡像：https://github.com/J-Ponzo/gltf-universal-animation-library
@@ -34,11 +34,24 @@
 - 取用：Crouch_Idle_Loop、Crouch_Fwd_Loop、Hit_Chest、Hit_Head、Death01、Pistol_Reload。
 - 處理：以 A_TPose / TPose 的世界旋轉消除骨軸與朝向差，按腿長縮放髖部高度，30 Hz 重取樣；去除水平 root motion、模型、貼圖，輸出 Mixamo 骨名的動畫專用 GLB。
 - 重建腳本：`../dev/retarget_motion.py`（離線需要 Python、NumPy、SciPy；遊戲沒有新增 npm 或 CDN 相依）。
-- 免費庫只有一個 Death01，遊戲依中彈部位使用不同過渡時間後接布娃娃；側移、倒退、轉身是步幅方向補正，沒有宣稱來源提供這些獨立片段。
+- 上一輪包含一個 Death01；本輪另補上方向移動與兩種死亡片段，見下方。
 
 ### fabric_pattern_07_{col,nor,arm}.webp（271,592 bytes）
 - 作者：Rob Tuytel；Poly Haven「Fabric Pattern 07」，CC0。
 - 來源：https://polyhaven.com/a/fabric_pattern_07
 - 下載資訊：https://api.polyhaven.com/files/fabric_pattern_07
 - 原始 1K `col_1`、`nor_gl`、`arm`，LANCZOS 縮成 512 × 512、WebP quality 85；用於市場攤位的帆布照片 PBR。
-- 槍械三面投影重用 `../assets/mech_paint.webp`，來源與授權見本篇 `assets/CREDITS.md`；沒有新增槍械貼圖或外部依賴。
+- 槍械三面投影重用 `../assets/mech_paint.jpg`，來源與授權見本篇 `assets/CREDITS.md`；沒有新增槍械貼圖或外部依賴。
+
+## 第二輪：方向移動與死亡片段（2026-09-29）
+
+- 合併後 `soldier-motion.glb` 為 422,012 bytes，比上一輪增加 84,824 bytes；沒有新增貼圖。
+- 作者：Kay Lousberg，KayKit Character Animations；CC0。
+- 原始發佈：https://kaylousberg.itch.io/kaykit-character-animations
+- GLB 鏡像：https://github.com/sketchpunklabs/kaykit_char/tree/main/res/anim
+- 授權：https://github.com/sketchpunklabs/kaykit_char/blob/main/LICENSE
+- `Med_MovementAdvanced.glb`：Walking_Backwards、Running_Strafe_Left、Running_Strafe_Right。
+- `Med_General.glb`：Death_A、Death_B。
+- 處理：用 T-Pose 校正骨軸、朝向與腿長，30 Hz 重取樣到 Mixamo 骨架，只保留動畫；再用 `../dev/merge_motion.py` 與上一輪 Quaternius 片段合併。
+- 重建：`retarget_motion.py source.glb soldier.glb output.glb`；`merge_motion.py original-motion.glb directions.glb deaths.glb merged.glb`。
+- 本輪機體裝甲分件、步態與玻璃／薄牆破壞程式為專案原創，重用現有材質。

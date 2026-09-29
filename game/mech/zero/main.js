@@ -140,6 +140,7 @@ window.__G = G;
 const D = (G.destruct = new Destruct(G));
 for (const r of placer.reg) D.register(r.name, r.h, r.box);
 for (const w of placer.bagWalls) D.bagWall(w.box, w.bags);
+for (const s of map.b.breakables) D.surface(s);
 const _v = new THREE.Vector3(), _w = new THREE.Vector3();
 
 // ---------------------------------------------------------------- 設定

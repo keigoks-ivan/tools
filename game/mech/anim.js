@@ -6,6 +6,7 @@ import * as THREE from 'three';
 
 const TAU = Math.PI * 2;
 const _v = new THREE.Vector3(), _inv = new THREE.Matrix4();
+const UP = new THREE.Vector3(0, 1, 0), _footQ = new THREE.Quaternion(), _parentQ = new THREE.Quaternion();
 const clamp = THREE.MathUtils.clamp, lerp = THREE.MathUtils.lerp;
 const smooth = (a, b, x) => { const t = clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
 
@@ -53,6 +54,8 @@ export class MechMotion {
     this.toe = m.footToe || 2.3; this.heel = m.footHeel || 1.7;  // 腳踝到腳尖／腳跟距離（踮腳時抬高用）
     this.cyc = 0; this.g = 0; this.dir = 1;
     this.st = { R: true, L: true };
+    this.feet = Object.fromEntries(['R', 'L'].map((n) => [n, { anchor: new THREE.Vector3(), from: new THREE.Vector3(), to: new THREE.Vector3(), yaw: 0, fromYaw: 0, toYaw: 0, ready: false, stance: true }]));
+    this.rootPrev = null;
     this.t = Math.random() * 10;
     this.shock = 0;
     this.fPrev = 0; this.sPrev = 0; this.accF = 0; this.accS = 0;
@@ -105,65 +108,99 @@ export class MechMotion {
     const Bst = m.pose.boost, Air = m.pose.air;
     const walkW = (1 - Bst) * (1 - Air);
 
-    // ---- 步態：週期 cyc（0..1），右腳 0 起步、左腳差半拍；支撐期 D＝60%（兩腳同時著地的片刻＝沉重感）
-    const af = Math.abs(fwd);
+    // ---- 步態：週期 cyc（0..1），右腳 0 起步、左腳差半拍；支撐期 D＝64%（兩腳同時著地的片刻＝沉重感）
+    const af = Math.hypot(fwd, side);
     const vg = af + Math.abs(yawRate) * 3.2;                // 原地轉身也要踏步
-    const gT = walkW * smooth(0.6, 2.6, vg);
+    let settle = false, reachCrouch = 0;
+    for (const n of ['R', 'L']) {
+      const foot = this.feet[n]; if (!foot.ready) continue;
+      const dx = (foot.anchor.x - m.root.position.x) / k, dz = (foot.anchor.z - m.root.position.z) / k;
+      const x = dx * cL - dz * sL - b['hip' + n].position.x, z = dx * sL + dz * cL - this.ankleZ;
+      const d2 = x * x + z * z;
+      if (af < 0.6 && Math.abs(yawRate) < 0.2 && d2 > 0.18) settle = true;
+      if (foot.stance) reachCrouch = Math.max(reachCrouch, this.legLen - Math.sqrt(Math.max(4, this.legLen * this.legLen - d2)) + 0.35);
+    }
+    const gT = walkW * Math.max(smooth(0.6, 2.6, vg), settle ? 0.45 : 0);
     this.g = damp(this.g, gT, gT > this.g ? 5 : 3.5, dt);
     const g = this.g;
-    const D = 0.6;
+    const D = 0.64;
     const S = clamp(2.4 + af * 0.3, 2.4, 6.6);             // 步幅
     if (af > 0.4) this.dir = fwd < 0 ? -1 : 1;
     else if (Math.abs(yawRate) > 0.1) this.dir = 1;
-    if (g > 0.02) this.cyc += this.dir * dt * Math.max(vg, 1.6) * D / S;
+    if (g > 0.02 || Object.values(this.feet).some((f) => !f.stance)) this.cyc += dt * Math.max(vg, 2.4) * D / S;
     this.cyc -= Math.floor(this.cyc);
-    const crouch = 0.3 + g * Math.min(0.75, af * 0.045);    // 跑越快蹲越低
-    const H = (0.8 + Math.min(1.6, af * 0.09)) * g;          // 抬腳高度
+    for (const [n, off] of [['R', 0], ['L', 0.5]]) {
+      const f = this.feet[n];
+      if (f.ready && !f.stance && (this.cyc + off) % 1 < D) {
+        const dx = (f.to.x - m.root.position.x) / k, dz = (f.to.z - m.root.position.z) / k;
+        const x = dx * cL - dz * sL - b['hip' + n].position.x, z = dx * sL + dz * cL - this.ankleZ;
+        reachCrouch = Math.max(reachCrouch, this.legLen - Math.sqrt(Math.max(4, this.legLen * this.legLen - x * x - z * z)) + 0.35);
+      }
+    }
+    this.supportDrop = Math.max(Math.min(1.8, reachCrouch), damp(this.supportDrop || 0, Math.min(1.8, reachCrouch), 8, dt));
+    const crouch = Math.max(0.3 + g * Math.min(0.75, af * 0.045), this.supportDrop * walkW);    // 跑越快蹲越低
+    const H = (0.55 + Math.min(1.2, af * 0.075)) * g;          // 抬腳高度
 
     // ---- 骨盆：落腳下沉、支撐期升起；重心移到支撐腳；隨步伐扭腰
     const pc = this.cyc * TAU;
-    const bob = -0.2 * g * Math.cos(2 * (pc - 0.3));
-    const sway = -0.3 * g * Math.sin(pc - 0.25);
+    const bob = -0.13 * g * Math.cos(2 * (pc - 0.15));
+    const sway = -0.34 * g * Math.sin(pc - 0.45);
     m.landV += (-m.land * 90 - m.landV * 14) * dt;
     m.land = Math.max(-0.1, m.land + m.landV * dt);
     const dip = this.dip.step(0, dt);
     b.pelvis.position.set(sway, L.pelvis - crouch + bob + dip - Bst * 0.8 - m.land * 1.3, 0);
-    b.pelvis.rotation.set(0.05 * g * Math.min(1, af / 12), 0.07 * g * Math.sin(pc - 3.39) * this.dir, -sway * 0.06);
+    b.pelvis.rotation.set(0.05 * g * Math.min(1, af / 12), 0.045 * g * Math.sin(pc - 3.39) * this.dir, -sway * 0.06);
     b.pelvis.updateMatrix();
     _inv.copy(b.pelvis.matrix).invert();
 
-    // ---- 雙腳
+    // ---- 雙腳：支撐腳固定世界位置，擺動腳預測半個支撐期後的落點。
+    m.root.updateMatrixWorld(true);
+    const teleported = this.rootPrev && this.rootPrev.distanceTo(m.root.position) > Math.max(8 * k, sp * dt * 3);
+    if (!this.rootPrev) this.rootPrev = new THREE.Vector3();
+    this.rootPrev.copy(m.root.position);
     const shake = Bst > 0.05 ? Math.sin(this.t * 61) * 0.015 * Bst : 0;
     for (const [n, off, sx] of [['R', 0, -1], ['L', 0.5, 1]]) {
-      const u = (this.cyc + off) % 1;
-      let z, y = 0, pitch = 0;
-      const inSt = u < D;
-      if (inSt) {
-        const s = u / D;
-        z = S * (0.5 - s);
-        if (s > 0.8) { const h = (s - 0.8) / 0.2; pitch = -0.38 * h * h; }            // 腳跟離地、踮腳尖推出去
-      } else {
-        const w = (u - D) / (1 - D);
-        let e = w * w * (3 - 2 * w); e = e * e * (3 - 2 * e);                       // 前段慢、中段甩、後段急煞＝機械感
-        z = S * (-0.5 + e);
-        y = H * Math.pow(Math.sin(Math.PI * Math.min(1, w * 1.12)), 0.75);          // 提早到頂、踩下去比較重
-        pitch = w < 0.35 ? lerp(-0.38, 0.22, w / 0.35) : 0.22 * (1 - smooth(0.72, 1, w));
+      const hp = b['hip' + n], foot = this.feet[n], u = (this.cyc + off) % 1;
+      const neutral = new THREE.Vector3(hp.position.x * 1.04, this.ankleY, this.ankleZ);
+      const neutralW = m.root.localToWorld(neutral.clone());
+      const reset = !foot.ready || teleported || walkW < 0.25;
+      if (reset) {
+        foot.anchor.copy(neutralW); foot.from.copy(neutralW); foot.to.copy(neutralW);
+        foot.yaw = foot.fromYaw = foot.toYaw = m.legYaw;
+        foot.stance = true; foot.ready = true;
       }
-      if (this.dir < 0) pitch *= 0.4;
-      z *= this.dir * g; y *= g; pitch *= g;
-      if (pitch < 0) y += this.toe * Math.sin(-pitch); else y += this.heel * Math.sin(pitch) * 0.6;
-      // 落腳事件
-      if (inSt !== this.st[n]) {
-        if (inSt && g > 0.35) {
+      const inSt = u < D || (g < 0.015 && foot.stance);
+      if (!inSt && foot.stance) {
+        foot.from.copy(foot.anchor); foot.fromYaw = foot.yaw;
+        const lead = Math.min(1.1, S / Math.max(vg, 2.4) * ((1 - D) / D + 0.5));
+        const turn = clamp(yawRate * lead, -0.35, 0.35);
+        foot.to.copy(neutral).applyAxisAngle(UP, turn); m.root.localToWorld(foot.to);
+        foot.to.addScaledVector(st.vel, lead * walkW);
+        foot.to.y = neutralW.y;
+        foot.toYaw = m.legYaw + turn;
+      }
+      if (inSt && !foot.stance) {
+        foot.anchor.copy(foot.to); foot.yaw = foot.toYaw;
+        if (g > 0.25 && walkW > 0.6) {
           m.footfall = n === 'R' ? 1 : -1; m.stepCount++;
-          const s = 0.45 + Math.min(1, af / 14) * 0.75;
-          this.dip.v -= 2.6 * s; this.shock = Math.max(this.shock, s);
+          const weight = 0.35 + Math.min(1, af / 16) * 0.55;
+          this.dip.v -= 1.65 * weight; this.shock = Math.max(this.shock, weight);
         }
-        this.st[n] = inSt;
       }
-      // IK 目標（機體座標 → 骨盆座標）
-      const hp = b['hip' + n];
-      _v.set(hp.position.x * 1.04, this.ankleY + y, this.ankleZ + z).applyMatrix4(_inv);
+      foot.stance = inSt; this.st[n] = inSt;
+      let pitch = 0, footYaw = foot.yaw;
+      if (inSt) _v.copy(foot.anchor);
+      else {
+        const w = (u - D) / (1 - D), e = w * w * w * (w * (w * 6 - 15) + 10);
+        if (af < 0.6 && w < 0.85) foot.to.lerp(neutralW, 1 - Math.exp(-dt * 10));
+        _v.lerpVectors(foot.from, foot.to, e);
+        _v.y += H * k * Math.pow(Math.sin(Math.PI * w), 2);
+        pitch = Math.sin(TAU * w) * 0.18 * g * this.dir;
+        _v.y += k * ((pitch < 0 ? this.toe : this.heel) * Math.abs(Math.sin(pitch)) + this.ankleY * (Math.cos(pitch) - 1));
+        footYaw = lerpAngle(foot.fromYaw, foot.toYaw, e);
+      }
+      // 腿長限制只處理急停或強制位移，正常支撐期不把腳拖回身體。
+      m.root.worldToLocal(_v); _v.applyMatrix4(_inv);
       legIK(this.ik, this.Lt, this.Ls, this.a0, this.b0, _v.x - hp.position.x, _v.y - hp.position.y, _v.z - hp.position.z);
       let hipA = this.ik.hip, kneeA = this.ik.knee, roll = this.ik.roll;
       let ank = -(b.pelvis.rotation.x + hipA + kneeA) - pitch;
@@ -177,9 +214,17 @@ export class MechMotion {
       ank = lerp(lerp(ank, ba, bw), aa, aw);
       roll = lerp(roll, -sx * 0.05, bw) * (1 - aw) + (-sx * 0.1) * aw;
       hipA -= m.land * 0.4; kneeA += m.land * 0.85; ank -= m.land * 0.45;
-      hp.rotation.set(hipA, 0, roll);
+      hp.rotation.set(hipA, 0, roll, 'ZXY');
       b['knee' + n].rotation.x = kneeA;
-      b['ankle' + n].rotation.set(ank, 0, -roll - b.pelvis.rotation.z);
+      const ankle = b['ankle' + n];
+      ankle.rotation.set(ank, 0, -roll - b.pelvis.rotation.z);
+      if (walkW > 0.001) {
+        hp.updateMatrixWorld(true);
+        _footQ.setFromEuler(new THREE.Euler(-pitch, footYaw, 0, 'YXZ'));
+        ankle.parent.getWorldQuaternion(_parentQ).invert();
+        _footQ.premultiply(_parentQ);
+        ankle.quaternion.slerp(_footQ, walkW);
+      }
     }
 
     // ---- 軀幹：伺服扭轉（略過頭）＋加減速慣性（會回彈）＋落腳震動

@@ -130,8 +130,9 @@ export function buildMap(scene, mats, solid, PL = null) {
     const ops = openings.slice().sort((p, q) => p.a0 - q.a0);
     const put = (s0, s1, yy0, yy1) => {
       if (s1 - s0 < 0.01 || yy1 - yy0 < 0.01) return;
-      if (axis === 'x') b.block(mat, s0, s1, yy0, yy1, fixed - t / 2, fixed + t / 2, o);
-      else b.block(mat, fixed - t / 2, fixed + t / 2, yy0, yy1, s0, s1, o);
+      const opts = { ...o, breakable: yy1 - yy0 > 0.5 && /plaster|brick|concrete|wall/.test(mat) ? 'wall' : null };
+      if (axis === 'x') b.block(mat, s0, s1, yy0, yy1, fixed - t / 2, fixed + t / 2, opts);
+      else b.block(mat, fixed - t / 2, fixed + t / 2, yy0, yy1, s0, s1, opts);
     };
     let cur = a0;
     for (const op of ops) {
@@ -158,6 +159,16 @@ export function buildMap(scene, mats, solid, PL = null) {
     if (!sk('n')) { wall(ext, 'x', z1 + t / 2, t, x0 - t, x1 + t, 0, h, ops('n'), { dim: 0.9 }); wall(wm, 'x', z1 - L / 2, L, x0, x1, 0, h, ops('n'), { dim: 0.85, solid: false }); }
     if (!sk('w')) { wall(ext, 'z', x0 - t / 2, t, z0, z1, 0, h, ops('w'), { dim: 0.9 }); wall(wm, 'z', x0 + L / 2, L, z0, z1, 0, h, ops('w'), { dim: 0.85, solid: false }); }
     if (!sk('e')) { wall(ext, 'z', x1 + t / 2, t, z0, z1, 0, h, ops('e'), { dim: 0.85 }); wall(wm, 'z', x1 - L / 2, L, z0, z1, 0, h, ops('e'), { dim: 0.85, solid: false }); }
+    // 玻璃獨立記錄在合併網格中的範圍；破裂後移除射線碰撞。
+    for (const side of ['s', 'n', 'w', 'e']) {
+      if (sk(side)) continue;
+      const along = side === 's' || side === 'n', fixed = side === 's' ? z0 - t / 2 : side === 'n' ? z1 + t / 2 : side === 'w' ? x0 - t / 2 : x1 + t / 2;
+      for (const [c, w = 1.4] of Wn[side] || []) {
+        const o = { breakable: 'glass', noMove: true, noFloor: true };
+        if (along) b.block('glass', c - w / 2, c + w / 2, 0.97, 2.28, fixed - 0.012, fixed + 0.012, o);
+        else b.block('glass', fixed - 0.012, fixed + 0.012, 0.97, 2.28, c - w / 2, c + w / 2, o);
+      }
+    }
     // 踢腳線、門楣和內側框，保持原來的通行洞口。
     for (const side of ['s', 'n', 'w', 'e']) {
       if (sk(side)) continue;

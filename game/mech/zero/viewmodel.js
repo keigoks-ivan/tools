@@ -215,18 +215,18 @@ export class ViewModel {
     M.localToWorld(G.R.copy(ud.gripR));
     G.RD.copy(F).addScaledVector(U, rifle ? -0.45 : -0.55).normalize();
     G.RS.copy(U).negate().addScaledVector(F, 0.35).normalize();
-    G.curlR = 1;
+    G.curlR = rifle ? 0.78 : 0.74;
     // 左手
     let lp = ud.gripL.clone();
     const R = L.clone().negate();
     let LD = rifle ? R.clone().addScaledVector(F, 0.45).addScaledVector(U, 0.2) : R.clone().multiplyScalar(0.6).addScaledVector(F, 0.2).addScaledVector(U, -0.6);
     let LS = rifle ? F.clone().negate() : F.clone().negate().addScaledVector(U, -0.3);
-    let curlL = rifle ? 0.92 : 0.85;
+    let curlL = rifle ? 0.78 : 0.82;
     if (lh !== null) {
       const u = lh;
-      const magP = ud.mag.position.clone().add(new THREE.Vector3(0.052, -0.07, -0.012));
+      const magP = ud.mag.position.clone().add(new THREE.Vector3(0.14, -0.055, 0.04));
       const charge = rifle ? new THREE.Vector3(0.05, 0.045, 0.56) : new THREE.Vector3(0.026, 0.035, -0.015);
-      const home = ud.magHome.clone().add(new THREE.Vector3(0.052, -0.07, -0.012));
+      const home = ud.magHome.clone().add(new THREE.Vector3(0.14, -0.055, 0.04));
       let target;
       if (u < 0.12) target = lp.clone().lerp(home, ease(u / 0.12));
       else if (u < 0.44) target = magP;
@@ -234,7 +234,8 @@ export class ViewModel {
       else if (u < 0.66) { target = charge.clone(); target.z -= Math.sin((u - 0.58) / 0.08 * Math.PI) * 0.035; }
       else target = charge.clone().lerp(lp, ease(clamp((u - 0.66) / 0.2, 0, 1)));
       lp = target;
-      if (u > 0.08 && u < 0.5) { LD = U.clone().multiplyScalar(0.4).addScaledVector(F, 0.6).addScaledVector(L, 0.2); LS = L.clone().negate(); curlL = 0.85; }
+      const hold = ease(clamp(u / 0.12, 0, 1)) * (1 - ease(clamp((u - 0.44) / 0.14, 0, 1)));
+      LD.lerp(R, hold); LS.lerp(U.clone().negate(), hold); curlL = lerp(curlL, 0.76, hold);
     }
     M.localToWorld(G.L.copy(lp));
     G.LD.copy(LD).normalize(); G.LS.copy(LS).normalize(); G.curlL = curlL;

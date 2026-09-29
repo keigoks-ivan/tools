@@ -140,7 +140,7 @@ export class HumanKit {
           if (f === 'Thumb') {
             const t0 = wp(B[side + 'Hand' + 'Thumb' + k]), t1 = wp(B[side + 'Hand' + 'Thumb' + (k + 1)]);
             const td = t1.sub(t0).normalize();
-            axis = _b.crossVectors(td, P).normalize().multiplyScalar(-1).clone();
+            axis = _b.crossVectors(td, P).normalize().clone();
           } else axis = S.clone().multiplyScalar(sign);
           const inv = wq(fb).invert();
           cal.finger[side + f + k] = axis.applyQuaternion(inv).normalize();
@@ -157,20 +157,20 @@ export class HumanKit {
     };
     // 自然速度：支撐腳貼地時，腳相對身體往後滑的速度＝這個動作「應該」的前進速度
     cal.speed = {};
-    for (const name of ['Walk', 'Run', 'CrouchWalk']) {
+    for (const name of ['Walk', 'Run', 'CrouchWalk', 'WalkBack', 'StrafeLeft', 'StrafeRight']) {
       mixer.stopAllAction();
       const act = mixer.clipAction(this.clips[name]); act.reset().play();
       const dur = this.clips[name].duration, N = 48, pts = [];
       for (let i = 0; i <= N; i++) { act.time = (i / N) * dur; mixer.update(0); g.updateMatrixWorld(true); pts.push(wp(B.LeftFoot).clone()); }
       const minY = Math.min(...pts.map((p) => p.y));
       let sum = 0, cnt = 0;
-      for (let i = 1; i <= N; i++) if (pts[i].y < minY + 0.035 && pts[i - 1].y < minY + 0.035) { sum += Math.abs(pts[i].z - pts[i - 1].z); cnt++; }
+      for (let i = 1; i <= N; i++) if (pts[i].y < minY + 0.035 && pts[i - 1].y < minY + 0.035) { sum += Math.abs(pts[i][name.startsWith('Strafe') ? 'x' : 'z'] - pts[i - 1][name.startsWith('Strafe') ? 'x' : 'z']); cnt++; }
       cal.speed[name] = cnt ? (sum / cnt) / (dur / N) : (name === 'Walk' ? 1.4 : 4);
       if (name === 'Walk') cal.footY = minY;
     }
     // 各片段、左右腳各自標定最低點，消除重定向後的腳掌高度差。
     cal.contact = {};
-    for (const name of ['Idle', 'Walk', 'Run', 'CrouchIdle', 'CrouchWalk']) {
+    for (const name of ['Idle', 'Walk', 'Run', 'CrouchIdle', 'CrouchWalk', 'WalkBack', 'StrafeLeft', 'StrafeRight']) {
       mixer.stopAllAction(); const act = mixer.clipAction(this.clips[name]); act.reset().play();
       const feet = { Left: Infinity, Right: Infinity };
       for (let i = 0; i <= 32; i++) {
@@ -262,7 +262,7 @@ export class Soldier {
     // 動作
     this.mixer = new THREE.AnimationMixer(m);
     this.act = {};
-    for (const k of ['Idle', 'Walk', 'Run', 'CrouchIdle', 'CrouchWalk']) { const a = this.mixer.clipAction(kit.clips[k]); a.play(); a.setEffectiveWeight(0); this.act[k] = a; }
+    for (const k of ['Idle', 'Walk', 'Run', 'CrouchIdle', 'CrouchWalk', 'WalkBack', 'StrafeLeft', 'StrafeRight']) { const a = this.mixer.clipAction(kit.clips[k]); a.play(); a.setEffectiveWeight(0); this.act[k] = a; }
     this.act.Idle.setEffectiveWeight(1);
     this.hitAct = {};
     for (const name of ['HitChest', 'HitHead', 'Reload']) {
@@ -352,19 +352,29 @@ export class Soldier {
     // 原地轉身：用慢步的腳步（轉得越快踏得越快）
     if (sp < 0.3 && this.turnSp > 0.4) sp = Math.min(cal.speed.Walk * 0.7, this.turnSp * 0.55);
     this.crouch = damp(this.crouch, this.crouchT, 8, dt);
-    const vW = lerp(cal.speed.Walk, cal.speed.CrouchWalk, this.crouch), vR = cal.speed.Run;
+    const angle = sp > 0.3 ? wrap(Math.atan2(this.vel.x, this.vel.z) - this.bodyYaw) : 0;
+    const direction = { Walk: Math.max(0, Math.cos(angle)), WalkBack: Math.max(0, -Math.cos(angle)), StrafeLeft: Math.max(0, Math.sin(angle)), StrafeRight: Math.max(0, -Math.sin(angle)) };
+    const total = Object.values(direction).reduce((a, v) => a + v, 0);
+    for (const n in direction) direction[n] /= total;
+    const natural = Object.entries(direction).reduce((v, [n, w]) => v + cal.speed[n] * w, 0);
+    const vW = lerp(natural, cal.speed.CrouchWalk, this.crouch), vR = cal.speed.Run;
     const wIdle = 1 - clamp(sp / (vW * 0.6), 0, 1);
     const wRun = clamp((sp - vW) / (vR - vW), 0, 1);
     const wWalk = (1 - wIdle) * (1 - wRun), wR = (1 - wIdle) * wRun;
     const dW = this.act.Walk.getClip().duration, dR = this.act.Run.getClip().duration;
-    let stride = lerp(lerp(cal.speed.Walk * dW, cal.speed.CrouchWalk * this.act.CrouchWalk.getClip().duration, this.crouch), vR * dR, wRun);   // 一個循環走多遠
-    if (sp > 0.3) stride *= 1 - Math.abs(Math.sin(Math.atan2(this.vel.x, this.vel.z) - this.bodyYaw)) * 0.45;
+    const directionalStride = Object.entries(direction).reduce((v, [n, w]) => v + w * cal.speed[n] * this.act[n].getClip().duration, 0);
+    let stride = lerp(lerp(directionalStride, cal.speed.CrouchWalk * this.act.CrouchWalk.getClip().duration, this.crouch), vR * dR, wRun * direction.Walk);   // 一個循環走多遠
+    if (sp > 0.3 && this.crouch > 0.5) stride *= 1 - Math.abs(Math.sin(Math.atan2(this.vel.x, this.vel.z) - this.bodyYaw)) * 0.45;
     this.phase = (this.phase + dt * Math.max(sp, 0.001) / stride + 1) % 1;
     this.idleT += dt;
     this.act.Idle.time = this.idleT % this.act.Idle.getClip().duration;
     this.act.Walk.time = this.phase * dW; this.act.Run.time = this.phase * dR;
     this.act.Idle.setEffectiveWeight(wIdle * (1 - this.crouch));
-    this.act.Walk.setEffectiveWeight(wWalk * (1 - this.crouch)); this.act.Run.setEffectiveWeight(wR * (1 - this.crouch));
+    this.act.Walk.setEffectiveWeight(wWalk * (1 - this.crouch) * direction.Walk); this.act.Run.setEffectiveWeight(wR * (1 - this.crouch) * direction.Walk);
+    for (const n of ['WalkBack', 'StrafeLeft', 'StrafeRight']) {
+      this.act[n].time = this.phase * this.act[n].getClip().duration;
+      this.act[n].setEffectiveWeight((1 - wIdle) * (1 - this.crouch) * direction[n]);
+    }
     this.act.CrouchIdle.time = this.idleT % this.act.CrouchIdle.getClip().duration;
     this.act.CrouchWalk.time = this.phase * this.act.CrouchWalk.getClip().duration;
     this.act.CrouchIdle.setEffectiveWeight(wIdle * this.crouch);
@@ -457,7 +467,7 @@ export class Soldier {
       const p = foot.getWorldPosition(new THREE.Vector3()), fq = foot.getWorldQuaternion(new THREE.Quaternion());
       const local = this.root.worldToLocal(p.clone());
       const ankleX = side === 'Left' ? 0.1 : -0.1;
-      if (speed > 0.3 && Math.abs(travel) > 0.15) {
+      if (speed > 0.3 && this.crouch > 0.5 && Math.abs(travel) > 0.15) {
         const stride = local.z, lateral = Math.sin(travel);
         const stance = Math.sign(ankleX) * (0.1 + Math.abs(lateral) * 0.1);
         local.x = stance + lateral * stride * 0.55; local.z = Math.cos(travel) * stride;
@@ -536,12 +546,14 @@ export class Soldier {
     if (this.dead) return;
     this.dead = true;
     for (const a of Object.values(this.hitAct)) a.stop();
-    const action = this.mixer.clipAction(this.kit.clips.Death).reset().setLoop(THREE.LoopOnce, 1);
+    const facingHit = dir.x * Math.sin(this.bodyYaw) + dir.z * Math.cos(this.bodyYaw);
+    const deathClip = hitPart === 'head' ? 'DeathA' : facingHit > 0.25 ? 'DeathB' : 'Death';
+    const action = this.mixer.clipAction(this.kit.clips[deathClip]).reset().setLoop(THREE.LoopOnce, 1);
     action.clampWhenFinished = true; action.setEffectiveWeight(0).play();
     this.root.updateMatrixWorld(true);
     const grip = this.weapon ? { p: this.B.RightHand.worldToLocal(this.weapon.position.clone()),
       q: this.B.RightHand.getWorldQuaternion(new THREE.Quaternion()).invert().multiply(this.weapon.quaternion) } : null;
-    this.death = { action, grip, weights: Object.fromEntries(Object.entries(this.act).map(([n, a]) => [n, a.getEffectiveWeight()])), t: 0,
+    this.death = { action, clip: deathClip, grip, weights: Object.fromEntries(Object.entries(this.act).map(([n, a]) => [n, a.getEffectiveWeight()])), t: 0,
       duration: hitPart === 'head' ? 0.22 : hitPart === 'legs' ? 0.48 : 0.36, dir: dir.clone(), k, part: hitPart, world };
   }
 }

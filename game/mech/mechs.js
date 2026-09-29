@@ -12,8 +12,8 @@ import { MechMotion, wrap, lerpAngle, damp } from './anim.js';
 const MATS = {};
 const TPL = new Map();      // 'style|scheme' → 樣板（只建一次）
 export function initMechMaterials(A) {
-  MATS.clean = paintMaterial(A, 0.24, 0, 0.55, 0.4);
-  MATS.dirty = paintMaterial(A, 0.58, 1, 1.0, 1.0);
+  MATS.clean = paintMaterial(A, 0.18, 0, 0.55, 0.24);
+  MATS.dirty = paintMaterial(A, 0.42, 1, 0.85, 0.5);
   MATS.shadowOnly = new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: false });
   TPL.clear();   // 材質換了，樣板要重建
 }
@@ -71,9 +71,9 @@ function paintMaterial(A, wear, mil, soot, bumpK) {
         float wv_halo = wv_paint * smoothstep(wv_th - 0.1, wv_th, wv_chipN) * (1.0 - wv_chip);
         vec3 wv_base = diffuseColor.rgb * (0.9 + wv_nz * 0.14 + (wv_nz2 - 0.5) * 0.06);
         // 照片細節：漆面的斑駁、刮痕、雨痕、鏽點；金屬件用磨損鋼板
-        wv_base *= mix(0.85 + 0.3 * wv_F.b, 0.66 + 0.68 * wv_W2.r, wv_paint);
-        wv_base = mix(wv_base, vec3(0.17, 0.075, 0.03), wv_W2.b * wv_paint * mix(0.12, 0.75, milK));
-        wv_base = mix(wv_base, wv_base * 1.2 + 0.015, wv_edge * mix(0.3, 0.6, wv_paint));
+        wv_base *= mix(0.85 + 0.3 * wv_F.b, 0.86 + 0.26 * wv_W2.r, wv_paint);
+        wv_base = mix(wv_base, vec3(0.17, 0.075, 0.03), wv_W2.b * wv_paint * mix(0.08, 0.38, milK));
+        wv_base = mix(wv_base, wv_base * 1.2 + 0.015, wv_edge * mix(0.16, 0.25, wv_paint));
         float wv_streak = smoothstep(0.3, 0.9, 1.0 - wv_S) * wv_paint * wearAmt;
         wv_base *= 1.0 - wv_streak * 0.35;
         float wv_dust = smoothstep(4.8, 0.0, vPbr.w) * (0.35 + 0.65 * wv_nz) * wearAmt;
@@ -430,7 +430,7 @@ const UNITS = ['12', '17', '23', '28', '34', '41', '46', '52', '58', '63', '67',
 // ================================================================ 塗裝（m＝金屬度，r＝粗糙度）
 const SCHEMES = {
   hero: {
-    main: P(0x858d87, 0.08, 0.62), second: P(0x333c41, 0.15, 0.58), accent: P(0x65564a, 0.08, 0.64), yellow: P(0x9b875b, 0.3, 0.52),
+    main: P(0x8d958e, 0.08, 0.5), second: P(0x30393d, 0.15, 0.54), accent: P(0x65564a, 0.08, 0.64), yellow: P(0x9b875b, 0.3, 0.52),
     frame: P(0x3b3f45, 0.85, 0.42), dark: P(0x14171b, 0.5, 0.62), weapon: P(0x303943, 0.55, 0.47), sole: P(0x17191a, 0.1, 0.85),
     eye: [0.12, 2.1, 0.95], wear: 'clean',
   },
@@ -751,8 +751,14 @@ export class Mech {
       A(hp, cyl(0.62, 0.58, 4.2), S.frame, [0, -2.1, 0]);
       A(hp, taper(blk(1.5, 3.2, 1.6, 0.25, 0.4), 1.05, 1.05, 0.9, 0.9), S.frame, [0, -2.2, 0]);
       A(hp, ribs(-3.55, -3.85, 2, 0.66, 0.08, 16), S.dark);
-      const th = PL(hp, 'z', [[-0.7, -1.6], [0.7, -1.6], [0.94, -0.7], [0.98, 1.0], [0.75, 1.55], [-0.75, 1.55], [-0.98, 1.0], [-0.94, -0.7]], 0.34, { bev: 0.07, nx: 7, ny: 8, bx: 1.25, by: 10 }, S.main, [0, -2.1, 0.97]);
-      th.put(sten('lift', 0.34, 0.34, { tint: 2 }), 0.52, -1.2);
+      // 分段大腿護甲：薄邊、檢修縫與內骨架在抬腿時仍可辨識。
+      for (let j = 0; j < 3; j++) {
+        const y = -1.0 - j * 1.08, w = 0.91 - j * 0.065;
+        const th = PL(hp, 'z', [[-w, -0.48], [w, -0.48], [w + 0.04, 0.32], [w - 0.14, 0.49], [-w + 0.14, 0.49], [-w - 0.04, 0.32]],
+          0.24, { bev: 0.04, nx: 6, ny: 3, bx: 1.6, by: 8 }, S.main, [0, y, 1.02]);
+        if (j === 2) th.put(sten('lift', 0.25, 0.25, { tint: 2 }), 0.4, -0.18);
+        for (const side of [-1, 1]) A(hp, blk(0.1, 0.23, 0.08, 0.015), S.frame, [side * (w - 0.08), y, 1.15]);
+      }
       PL(hp, 'z', [[-0.45, -0.35], [0.45, -0.35], [0.52, 0.35], [-0.52, 0.35]], 0.1, { bev: 0.03, nx: 4, ny: 3, bx: 1.25, by: 10, cv: -0.7 }, S.second, [0, -1.4, 0.97 + 0.22]);
       A(hp, merge([[-0.6, -1.3], [0.6, -1.3], [-0.55, -3.3], [0.55, -3.3]].map(([x, y]) => at(nut(0.05), [x, y, 1.18 - (x * x) / 2.5], [Math.PI / 2, Math.atan(x / 1.25), 0]))), S.frame);
       for (const side of [-1, 1]) {
@@ -1009,7 +1015,20 @@ export class Mech {
     const W = new THREE.Group();
     A(W, prof([[-0.3, 0.46], [3.0, 0.46], [3.2, 0.2], [3.1, -0.46], [-0.4, -0.46], [-0.55, 0.0]], 0.62, 0.1), S.weapon, [0, 0, 0]);
     A(W, blk(0.5, 0.5, 2.1, 0.1, 0.12), S.weapon, [0, 0.55, 0.9]);
-    A(W, cyl(0.28, 0.3, 2.0, 16), S.weapon, [0, 0.05, 4.1], [Math.PI / 2, 0, 0]);
+    A(W, cyl(0.16, 0.19, 2.0, 16), S.frame, [0, 0.05, 4.1], [Math.PI / 2, 0, 0]);
+    // 鏤空護套：散熱孔有實際深度，內部槍管仍可見。
+    for (let j = 0; j < 5; j++) {
+      const z = 3.25 + j * 0.39;
+      A(W, prep(new THREE.CylinderGeometry(0.3, 0.3, 0.14, 16, 1, true)), S.weapon, [0, 0.05, z], [Math.PI / 2, 0, 0]);
+      for (const side of [-1, 1]) A(W, blk(0.07, 0.13, 0.25, 0.02), S.weapon, [side * 0.26, -0.08, z + 0.19]);
+    }
+    for (const side of [-1, 1]) {
+      A(W, blk(0.05, 0.32, 1.35, 0.025), S.dark, [side * 0.325, 0.02, 1.35]);
+      A(W, blk(0.06, 0.24, 1.22, 0.025), S.weapon, [side * 0.35, 0.02, 1.35]);
+      for (const z of [0.82, 1.87]) A(W, cyl(0.05, 0.05, 0.07, 8), S.frame, [side * 0.39, 0.03, z], [0, 0, Math.PI / 2]);
+      this.label(W, sten('caution', 0.72, 0.15, { face: side > 0 ? 'x' : '-x', tint: 1 }), S.weapon, [side * 0.388, 0.02, 1.36]);
+    }
+    for (let j = 0; j < 10; j++) A(W, blk(0.36, 0.06, 0.07, 0.01), S.frame, [0, 0.85, 0.0 + j * 0.2]);
     for (let k = 0; k < 5; k++) A(W, blk(0.1, 0.05, 0.2, 0.01), S.dark, [0, 0.33, 3.35 + k * 0.33]);
     A(W, cyl(0.18, 0.2, 1.2), S.frame, [0, 0.05, 5.2], [Math.PI / 2, 0, 0]);
     A(W, blk(0.5, 0.5, 0.6, 0.08), S.weapon, [0, 0.05, 5.5]);
@@ -1028,8 +1047,13 @@ export class Mech {
     this.attachWeapon(W, new THREE.Vector3(0, 0.05, 5.7));
     // 盾（左前臂外側）：細分彎曲的主板＋深藍內層＋紅色識別＋螺帽
     const SH = new THREE.Group();
-    A(SH, bendPlate(gridPlate(0.3, 6.6, 3.0, 0.9, 10, 6), 5), S.main);
-    A(SH, bendPlate(gridPlate(0.2, 5.4, 2.4, 0.7, 8, 5), 5), S.second, [0.18, 0, 0]);
+    // 盾牌分成三片可替換的陶瓷裝甲，外框承受撞擊。
+    A(SH, bendPlate(gridPlate(0.22, 6.6, 3.0, 0.65, 8, 5), 5), S.frame);
+    for (const y of [-2.18, 0, 2.18]) {
+      A(SH, bendPlate(gridPlate(0.19, 2.04, 2.78, 0.24, 4, 5), 5), S.main, [0.17, y, 0]);
+      for (const z of [-1.18, 1.18]) A(SH, blk(0.1, 0.32, 0.14, 0.025), S.frame, [0.27, y, z]);
+    }
+    A(SH, bendPlate(gridPlate(0.12, 1.64, 2.34, 0.24, 4, 5), 5), S.second, [0.31, 0, 0]);
     A(SH, bendPlate(gridPlate(0.1, 0.35, 2.4, 0.08, 1, 5), 5), S.accent, [0.26, 1.9, 0]);
     const lb = sten('xg01', 2.2, 0.26, { face: 'x', tint: 1, seg: 6 });
     lb.translate(0.3, -1.2, 0);

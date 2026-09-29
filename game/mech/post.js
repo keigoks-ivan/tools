@@ -15,8 +15,8 @@ const MonitorShader = {
     time: { value: 0 },
     res: { value: new THREE.Vector2(1, 1) },
     vignette: { value: 0.32 },
-    aberration: { value: 0.0018 },
-    grain: { value: 0.045 },
+    aberration: { value: 0.00045 },
+    grain: { value: 0.014 },
     damage: { value: 0 },      // 受擊雜訊 0..1
     boot: { value: 1 },        // 開機 0..1
     overdrive: { value: 0 },   // 覺醒色調

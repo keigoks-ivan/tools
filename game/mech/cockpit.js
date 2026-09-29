@@ -381,20 +381,20 @@ export class Cockpit {
     const grunge = grungeTex(), fab = fabricTex(), knurl = knurlTex();
     const std = (c, m, r, o = {}) => new THREE.MeshStandardMaterial({ color: c, metalness: m, roughness: r, side: THREE.DoubleSide, ...o });
     this.M = {
-      frame: wear(std(0x3b4247, 0.8, 0.42, { roughnessMap: grunge, bumpMap: grunge, bumpScale: 0.4 }), 0.8, 0xa9aeb2),
-      panel: wear(std(0x272d32, 0.45, 0.6, { roughnessMap: grunge, bumpMap: grunge, bumpScale: 0.35 }), 1.0, 0x9ca2a7),   // 深灰烤漆
-      shell: wear(std(0xcfd4d7, 0.06, 0.38, { roughnessMap: grunge, bumpMap: grunge, bumpScale: 0.15 }), 1.1, 0x878e93),  // 白色烤漆外殼
+      frame: wear(std(0x3b4247, 0.8, 0.42, { roughnessMap: grunge, bumpMap: grunge, bumpScale: 0.0018 }), 0.8, 0xa9aeb2),
+      panel: wear(std(0x272d32, 0.45, 0.6, { roughnessMap: grunge, bumpMap: grunge, bumpScale: 0.0012 }), 1.0, 0x9ca2a7),   // 深灰烤漆
+      shell: wear(std(0xa6afa8, 0.06, 0.48, { roughnessMap: grunge, bumpMap: grunge, bumpScale: 0.0007 }), 1.1, 0x878e93),  // 白色烤漆外殼
       matte: std(0x0f1113, 0.1, 0.82),
       white: wear(std(0xb4babe, 0.05, 0.45, { roughnessMap: grunge }), 0.9, 0x5f666b),
       orange: wear(std(0xd4661c, 0.05, 0.5), 1.0, 0x8e959a),
-      rubber: std(0x0d0d0e, 0.0, 0.88, { bumpMap: knurl, bumpScale: 0.9 }),   // 防滑橡膠
+      rubber: std(0x0d0d0e, 0.0, 0.88, { bumpMap: knurl, bumpScale: 0.0014 }),   // 防滑橡膠
       chrome: std(0xa0a6ac, 1.0, 0.22),
       anod: std(0x1b1f24, 0.85, 0.36, { roughnessMap: grunge }),              // 黑色陽極處理（旋鈕、握把頭、按鍵框）
       anodB: std(0x2f5474, 0.9, 0.32),                                         // 藍色陽極（螺絲）
       guard: wear(std(0xb3261a, 0.25, 0.42, { roughnessMap: grunge }), 1.3, 0xd2d2d2),   // 紅色護蓋
       stripe: std(0xffffff, 0.1, 0.55, { map: stripeTex() }),                 // 黃黑條紋
-      glove: std(0x2d2a27, 0.0, 0.6, { bumpMap: fab, bumpScale: 0.6 }),       // 皮革手套
-      sleeve: std(0x1b2740, 0.0, 0.78, { bumpMap: fab, bumpScale: 0.8 }),
+      glove: std(0x393b36, 0.0, 0.72, { bumpMap: fab, bumpScale: 0.001 }),       // 皮革手套
+      sleeve: std(0x303b34, 0.0, 0.84, { bumpMap: fab, bumpScale: 0.0007 }),
       glow: new THREE.MeshBasicMaterial({ color: 0x000000 }),   // 扶手燈條（顏色每幀依狀態變）
     };
     const L = labelTex();

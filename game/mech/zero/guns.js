@@ -244,7 +244,7 @@ export function makeRifle(o = {}) {
     mag, magHome: mag.position.clone(),
     kind: 'rifle', muzzle: new THREE.Vector3(0, 0, 1.25), scopeEye: new THREE.Vector3(0, SY, 0.2), scopeY: SY,
     // 手腕目標：右手在握把後上方，左手在護木下
-    gripR: new THREE.Vector3(-0.002, -0.028, 0.285), gripL: new THREE.Vector3(0.13, -0.065, 0.62),
+    gripR: new THREE.Vector3(-0.031, -0.028, 0.238), gripL: new THREE.Vector3(0.098, -0.078, 0.62),
     glow: M.glow, glowBase: M.glowBase, ammoBar: lights.bars, ammoInstances: lights.mesh,
   };
   return g;
@@ -286,7 +286,7 @@ export function makePistol() {
   const mag = assemble({ metal: [rbox(0.026, 0.07, 0.03, 0.003, 0, -0.035, 0)], glow: [box(0.027, 0.004, 0.02, 0, -0.012, 0)] }, M);
   mag.position.set(0, -0.08, -0.018); mag.rotation.x = -0.2;
   g.add(mag);
-  g.userData = { mag, magHome: mag.position.clone(), kind: 'pistol', muzzle: new THREE.Vector3(0, 0.04, 0.185), sightY: 0.068, gripR: new THREE.Vector3(0.0, -0.035, -0.055), gripL: new THREE.Vector3(0.018, -0.07, -0.045), glow: M.glow, glowBase: M.glowBase, ammoBar: lights.bars, ammoInstances: lights.mesh };
+  g.userData = { mag, magHome: mag.position.clone(), kind: 'pistol', muzzle: new THREE.Vector3(0, 0.04, 0.185), sightY: 0.068, gripR: new THREE.Vector3(-0.026, 0.016, -0.105), gripL: new THREE.Vector3(0.018, -0.07, -0.045), glow: M.glow, glowBase: M.glowBase, ammoBar: lights.bars, ammoInstances: lights.mesh };
   return g;
 }
 

@@ -36,20 +36,29 @@ class Rig:
   return p,q,s,gw,gp,gs
 src=Rig(*read(sys.argv[1]));dst=Rig(*read(sys.argv[2]))
 clips={a['name']:a for a in src.d['animations']};tp=next(a for a in dst.d['animations'] if a['name']=='TPose')
-sp,sq,ss,sw,spos,sscale=src.sample(clips['A_TPose'],0);dp,dq,ds,dw,dpos,dscale=dst.sample(tp,0)
+kay = 'hips' in src.names
+rest = next(a for n,a in clips.items() if 'T-Pose' in n) if kay else clips['A_TPose']
+sp,sq,ss,sw,spos,sscale=src.sample(rest,0);dp,dq,ds,dw,dpos,dscale=dst.sample(tp,0)
 mapping={'Hips':'hips','Spine':'spine.001','Spine1':'spine.002','Spine2':'spine.003','Neck':'neck','Head':'head'}
 for side,short in [('Left','L'),('Right','R')]:
  for target,source in [('Shoulder','shoulder'),('Arm','upper_arm'),('ForeArm','forearm'),('Hand','hand'),('UpLeg','thigh'),('Leg','shin'),('Foot','foot'),('ToeBase','toe')]:mapping[side+target]=source+'.'+short
  for f,sf in [('Index','f_index'),('Middle','f_middle'),('Ring','f_ring'),('Pinky','f_pinky'),('Thumb','thumb')]:
   for k in range(1,4):mapping[side+'Hand'+f+str(k)]=sf+'.0'+str(k)+'.'+short
-pairs={dst.names['mixamorig:'+t]:src.names['DEF-'+s] for t,s in mapping.items()}
+if kay:
+ mapping={'Hips':'hips','Spine':'spine','Spine1':'spine','Spine2':'chest','Head':'head'}
+ for side,short in [('Left','l'),('Right','r')]:
+  for target,source in [('Arm','upperarm'),('ForeArm','lowerarm'),('Hand','wrist'),('UpLeg','upperleg'),('Leg','lowerleg'),('Foot','foot'),('ToeBase','toes')]:mapping[side+target]=source+'.'+short
+pairs={dst.names['mixamorig:'+t]:src.names[('' if kay else 'DEF-')+s] for t,s in mapping.items()}
 # 左右肩與上下方向定義同一個世界基底，消除角色朝向差。
 def basis(pos,names,l,r,hips,head):
  x=pos[names[l]]-pos[names[r]];x/=np.linalg.norm(x);y=pos[names[head]]-pos[names[hips]];y-=x*np.dot(x,y);y/=np.linalg.norm(y);return R.from_matrix(np.column_stack([x,y,np.cross(x,y)]))
-align=basis(dpos,dst.names,'mixamorig:LeftArm','mixamorig:RightArm','mixamorig:Hips','mixamorig:Head')*basis(spos,src.names,'DEF-upper_arm.L','DEF-upper_arm.R','DEF-hips','DEF-head').inv()
+align=basis(dpos,dst.names,'mixamorig:LeftArm','mixamorig:RightArm','mixamorig:Hips','mixamorig:Head')*basis(spos,src.names,*(['upperarm.l','upperarm.r','hips','head'] if kay else ['DEF-upper_arm.L','DEF-upper_arm.R','DEF-hips','DEF-head'])).inv()
 hi=dst.names['mixamorig:Hips'];hs=pairs[hi]
-scale=np.linalg.norm(dpos[hi]-dpos[dst.names['mixamorig:LeftFoot']])/np.linalg.norm(spos[hs]-spos[src.names['DEF-foot.L']])
+scale=np.linalg.norm(dpos[hi]-dpos[dst.names['mixamorig:LeftFoot']])/np.linalg.norm(spos[hs]-spos[src.names['foot.l' if kay else 'DEF-foot.L']])
 selected={'CrouchIdle':'Crouch_Idle_Loop','CrouchWalk':'Crouch_Fwd_Loop','HitChest':'Hit_Chest','HitHead':'Hit_Head','Death':'Death01','Reload':'Pistol_Reload'}
+if kay:
+ selected = {'WalkBack':'Walking_Backwards','StrafeLeft':'Running_Strafe_Left','StrafeRight':'Running_Strafe_Right'} if any('Walking_Backwards' in n for n in clips) else {'DeathA':'Death_A','DeathB':'Death_B'}
+ selected = {k:next(n for n in clips if n.split('|')[-1]==v) for k,v in selected.items()}
 # 輸出不含網格、材質與貼圖；骨架只供 loader 命名軌道。
 out={'asset':{'version':'2.0','generator':'IRON DUSK CC0 rest-space retarget'},'scene':0,'scenes':[{'nodes':dst.d['scenes'][0]['nodes']}],'nodes':[{k:v for k,v in n.items() if k in ['name','children','translation','rotation','scale']} for n in dst.nodes],'buffers':[{'byteLength':0}],'bufferViews':[],'accessors':[],'animations':[]};data=bytearray()
 def put(a,kind):
