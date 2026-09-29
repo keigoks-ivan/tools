@@ -4,6 +4,8 @@
 import * as THREE from 'three';
 
 const q = new URLSearchParams(location.search);
+// 大檔案（貼圖、HDR、模型）改從 jsDelivr 下載，網站主機給大檔很慢；不能用時照舊從本站（見 cdn.js）
+try { const f = await (await import('./cdn.js')).useCDN(); if (f) THREE.DefaultLoadingManager.setURLModifier(f); } catch (e) {}
 if (q.has('show') || q.has('free')) await import('./preview.js');
 else await game();
 

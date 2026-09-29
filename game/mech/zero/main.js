@@ -7,11 +7,14 @@ import * as THREE from 'three';
 //   前傳有縮小的 webp 版（assets/env/，遠景看不出差別、下載少 12 MB）；沒有的才去本篇資料夾拿
 const LITE = new Set(['grass_diff', 'grass_nor', 'grass_arm', 'asphalt_diff', 'asphalt_nor', 'asphalt_arm', 'rubble_diff', 'rubble_nor', 'rock_diff', 'rock_nor', 'rock_arm', 'sky',
   'wear_mask', 'wear_nor', 'frame_mask', 'frame_nor', ...['glass', 'office', 'brick', 'concrete', 'brick2'].flatMap((f) => ['col', 'nor', 'arm'].map((k) => `fac_${f}_${k}`))]);
-THREE.DefaultLoadingManager.setURLModifier((u) => {
+const lite = (u) => {
   if (!u.startsWith('./assets/')) return u;
   const name = u.slice(9), base = name.replace(/\.jpg$/, '');
   return LITE.has(base) ? './assets/env/' + base + '.webp' : '../assets/' + name;
-});
+};
+// 大檔案改從 jsDelivr 下載（見 ../cdn.js；不能用時照舊從本站）
+const cdn = await import('../cdn.js').then((m) => m.useCDN()).catch(() => null);
+THREE.DefaultLoadingManager.setURLModifier((u) => { const v = lite(u); return cdn ? cdn(v) : v; });
 
 const q = new URLSearchParams(location.search);
 const $ = (id) => document.getElementById(id);
