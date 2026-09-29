@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#0a0b14">
 <title>遊戲機台 · Games | InvestMQuest</title>
-<meta name="description" content="自己做的網頁遊戲：紫刃夜行、鋼鐵黃昏、小小美髮師、小花食堂。打開瀏覽器就能玩。">
+<meta name="description" content="自己做的網頁遊戲：紫刃夜行、鋼鐵黃昏 零（前傳）、鋼鐵黃昏、小小美髮師、小花食堂。打開瀏覽器就能玩。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Noto+Sans+TC:wght@500;700;900&display=swap" rel="stylesheet">
@@ -94,6 +94,38 @@ a{color:inherit}
 .alt span.d{font-size:13px;color:var(--muted);line-height:1.5}
 .alt .go{margin-left:auto;color:var(--ac2);font-weight:900}
 
+/* ---------- 系列（兩款並排、標出順序） ---------- */
+.series{--ac:#ffb347;--ac2:#7ff3ff;grid-column:1/-1;position:relative;min-width:0;
+  background:linear-gradient(180deg,var(--panel2),var(--panel));border:1px solid var(--line2);border-radius:var(--radius);overflow:hidden;
+  box-shadow:0 18px 40px rgba(0,0,0,.35);padding:clamp(16px,2.4vw,24px)}
+.series::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;background:linear-gradient(90deg,var(--ac),var(--ac2))}
+.series-head{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px 24px;margin-bottom:clamp(14px,2vw,20px)}
+.series-kicker{font:700 12.5px/1 "Rajdhani",sans-serif;letter-spacing:.3em;color:var(--ac);text-transform:uppercase}
+.series-title{margin:8px 0 6px;display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;font-size:clamp(24px,3.4vw,32px);font-weight:900;letter-spacing:.03em;line-height:1.2}
+.series-title small{font:700 14px/1 "Rajdhani",sans-serif;letter-spacing:.24em;color:var(--ac2);text-transform:uppercase}
+.series-sub{margin:0;max-width:36em;color:#d4d8ee;font-size:15.5px;line-height:1.7}
+.order{list-style:none;margin:0;padding:0;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.order li{display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:var(--ink)}
+.order b{display:inline-grid;place-items:center;width:26px;height:26px;border-radius:50%;font:700 14px/1 "Rajdhani",sans-serif;color:#0a0b14}
+.order li:nth-child(1) b{background:var(--ac)} .order li:nth-child(3) b{background:var(--ac2)}
+.order .to{color:var(--dim);font-weight:900}
+.eps{display:grid;grid-template-columns:1fr;gap:clamp(14px,2vw,20px)}
+@media(min-width:780px){.eps{grid-template-columns:1fr 1fr}}
+.ep{--c:var(--ac);--btn-ink:#1a1206;position:relative;display:flex;flex-direction:column;min-width:0;border-radius:16px;overflow:hidden;
+  background:rgba(5,6,13,.45);border:1px solid var(--line2);transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease}
+.ep.main{--c:var(--ac2);--btn-ink:#06121a}
+.ep:hover{transform:translateY(-3px);border-color:color-mix(in srgb,var(--c) 55%,transparent);box-shadow:0 0 30px color-mix(in srgb,var(--c) 18%,transparent)}
+.ep .thumb{border-bottom:1px solid var(--line)}
+.ep:hover .thumb img{transform:scale(1.035)}
+.ep .tag{border-color:color-mix(in srgb,var(--c) 60%,transparent)}
+.step{position:absolute;left:12px;top:12px;z-index:1;display:inline-flex;align-items:center;gap:8px;padding:5px 12px 5px 5px;border-radius:999px;
+  font:700 13px/1 "Rajdhani",sans-serif;letter-spacing:.16em;color:#fff;background:rgba(8,9,18,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.step b{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--c);color:#0a0b14;letter-spacing:0}
+.ep .title small{color:var(--c)}
+.ep .ctrl svg{color:var(--c)}
+.ep .play{color:var(--btn-ink);background:linear-gradient(90deg,var(--c),color-mix(in srgb,var(--c) 70%,#fff));box-shadow:0 8px 22px color-mix(in srgb,var(--c) 30%,transparent),inset 0 1px 0 rgba(255,255,255,.28)}
+.link{display:block;font-size:13.5px;color:var(--muted);text-align:center;margin:clamp(12px,1.8vw,16px) 0 0}
+
 .foot{margin-top:clamp(28px,5vw,44px);text-align:center;color:var(--dim);font-size:13.5px;line-height:1.7}
 
 a:focus-visible{outline:3px solid #ffd84f;outline-offset:3px}
@@ -110,14 +142,68 @@ a:focus-visible{outline:3px solid #ffd84f;outline-offset:3px}
 
 <main class="wrap">
   <header class="hero">
-    <div class="kicker">Game Shelf<i></i>4 Games</div>
+    <div class="kicker">Game Shelf<i></i>5 Games</div>
     <h1><span class="lang-en">Pick a game.</span><span class="lang-zh" style="display:none">今天玩哪一台？</span></h1>
-    <p><span class="lang-en">Four home-made games on one shelf. Hit Play and you're in.</span><span class="lang-zh" style="display:none">四個自己做的遊戲都放在這裡，按「開始玩」就直接進去。</span></p>
+    <p><span class="lang-en">Five home-made games on one shelf. Hit Play and you're in.</span><span class="lang-zh" style="display:none">五個自己做的遊戲都放在這裡，按下按鈕就直接進去。</span></p>
   </header>
 
   <section class="shelf" aria-label="Games">
 
-    <!-- 1. 紫刃夜行 -->
+    <!-- 1. 鋼鐵黃昏系列：前傳＋本篇並排，標出建議順序 -->
+    <article class="series" aria-labelledby="dusk-title">
+      <header class="series-head">
+        <div>
+          <div class="series-kicker">Series<span class="lang-en"> · 2 games, one story</span><span class="lang-zh" style="display:none">・兩款遊戲、同一個故事</span></div>
+          <h2 id="dusk-title" class="series-title">鋼鐵黃昏 <small>Iron Dusk</small></h2>
+          <p class="series-sub"><span class="lang-en">Start with the prequel. It ends with you climbing into the cockpit, and that moment drops you straight into stage 1 of Iron Dusk.</span><span class="lang-zh" style="display:none">建議先玩前傳。前傳最後一幕是你爬進駕駛艙，接著就直接進入本篇第 1 關。</span></p>
+        </div>
+        <ol class="order" aria-label="Play order">
+          <li><b>1</b><span class="lang-en">Prequel, on foot</span><span class="lang-zh" style="display:none">前傳：徒步</span></li>
+          <li class="to" aria-hidden="true">→</li>
+          <li><b>2</b><span class="lang-en">Iron Dusk, in the mech</span><span class="lang-zh" style="display:none">本篇：駕駛機器人</span></li>
+        </ol>
+      </header>
+      <div class="eps">
+        <section class="ep zero">
+          <a class="thumb" href="/game/mech/zero/" tabindex="-1" aria-hidden="true">
+            <img src="/games/img/iron-dusk-zero.webp" width="800" height="500" alt="" loading="eager">
+            <span class="step"><b>1</b>PREQUEL</span>
+            <span class="tag"><span class="lang-en">First-person shooter</span><span class="lang-zh" style="display:none">第一人稱射擊</span></span>
+          </a>
+          <div class="body">
+            <h3 class="title">鋼鐵黃昏 零 <small>Zero · Prequel</small></h3>
+            <p class="pitch"><span class="lang-en">The capital fell three nights ago. With one rifle and one pistol, fight on foot through the occupied city, recover the start key from the hospital, retake Hangar 7 and climb into the last mech.</span><span class="lang-zh" style="display:none">首都淪陷的第三個晚上，你是代號零號的士兵，手上只有一把長槍和一把手槍。你要穿過被占領的城市，到醫院拿回啟動金鑰，奪回第七機庫，坐進最後一台機體。</span></p>
+            <ul class="ctrl">
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></svg><span class="lang-en">5 chapters · 13 fights</span><span class="lang-zh" style="display:none">5 章・13 場戰鬥</span></li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="3" width="12" height="18" rx="6"/><path d="M12 7v4"/></svg><span class="lang-en">Desktop: keyboard + mouse</span><span class="lang-zh" style="display:none">用電腦玩：鍵盤＋滑鼠</span></li>
+            </ul>
+            <div class="actions">
+              <a class="play" href="/game/mech/zero/"><span class="lang-en">Play the prequel</span><span class="lang-zh" style="display:none">先玩前傳</span><span class="arrow" aria-hidden="true">▶</span></a>
+            </div>
+          </div>
+        </section>
+        <section class="ep main">
+          <a class="thumb" href="/game/mech/" tabindex="-1" aria-hidden="true">
+            <img src="/games/img/iron-dusk-2.webp" width="800" height="500" alt="" loading="eager">
+            <span class="step"><b>2</b>MAIN GAME</span>
+            <span class="tag"><span class="lang-en">Mech combat</span><span class="lang-zh" style="display:none">機器人駕駛</span></span>
+          </a>
+          <div class="body">
+            <h3 class="title">鋼鐵黃昏 <small>Iron Dusk</small></h3>
+            <p class="pitch"><span class="lang-en">Pilot XG-01 Azure Flame through a ruined city at dusk. Beam rifle, lock-on missiles and a saber rush are all yours. Press V to watch the whole mech from behind.</span><span class="lang-zh" style="display:none">坐進 XG-01 蒼焰，在黃昏的廢墟城市裡作戰。光束步槍、鎖定飛彈、光劍突擊都由你操作。按 V 可以切到機體後方，看整台機器人。</span></p>
+            <ul class="ctrl">
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="3" width="12" height="18" rx="6"/><path d="M12 7v4"/></svg><span class="lang-en">Desktop: keyboard + mouse</span><span class="lang-zh" style="display:none">用電腦玩：鍵盤＋滑鼠</span></li>
+              <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg><span class="lang-en">Needs a decent graphics card</span><span class="lang-zh" style="display:none">畫面較吃顯卡</span></li>
+            </ul>
+            <div class="actions">
+              <a class="play" href="/game/mech/"><span class="lang-en">Play Iron Dusk</span><span class="lang-zh" style="display:none">玩本篇</span><span class="arrow" aria-hidden="true">▶</span></a>
+            </div>
+          </div>
+        </section>
+      </div>
+    </article>
+
+    <!-- 2. 紫刃夜行 -->
     <article class="card violet">
       <a class="thumb" href="/game/" tabindex="-1" aria-hidden="true">
         <img src="/games/img/violet-edge.webp" width="800" height="500" alt="" loading="eager">
@@ -137,33 +223,6 @@ a:focus-visible{outline:3px solid #ffd84f;outline-offset:3px}
             <span class="alt-text">
               <strong>紫刃夜行｜三人連線</strong>
               <span class="d"><span class="lang-en">Open a room, share the code, up to three players on the same street.</span><span class="lang-zh" style="display:none">開一間房，把房號給朋友，最多三人同場。</span></span>
-            </span>
-            <span class="go" aria-hidden="true">→</span>
-          </a>
-        </div>
-      </div>
-    </article>
-
-    <!-- 2. 鋼鐵黃昏 -->
-    <article class="card mech">
-      <a class="thumb" href="/game/mech/" tabindex="-1" aria-hidden="true">
-        <img src="/games/img/iron-dusk.webp" width="800" height="500" alt="" loading="eager">
-        <span class="tag"><span class="lang-en">Mech Combat</span><span class="lang-zh" style="display:none">機器人駕駛</span></span>
-      </a>
-      <div class="body">
-        <h2 class="title">鋼鐵黃昏 <small>Iron Dusk</small></h2>
-        <p class="pitch"><span class="lang-en">Climb into the cockpit and pilot a mech through a ruined city at dusk. Beam rifle, lock-on missile volleys and a saber rush, all in your hands.</span><span class="lang-zh" style="display:none">坐進駕駛艙，開著機器人在黃昏的廢墟城市裡開打。光束步槍、鎖定飛彈、光劍突擊，全部自己來。</span></p>
-        <ul class="ctrl">
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="3" width="12" height="18" rx="6"/><path d="M12 7v4"/></svg><span class="lang-en">Desktop: keyboard + mouse</span><span class="lang-zh" style="display:none">用電腦玩：鍵盤＋滑鼠</span></li>
-          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg><span class="lang-en">Needs a decent graphics card</span><span class="lang-zh" style="display:none">畫面較吃顯卡</span></li>
-        </ul>
-        <div class="actions">
-          <a class="play" href="/game/mech/"><span class="lang-en">Play</span><span class="lang-zh" style="display:none">開始玩</span><span class="arrow" aria-hidden="true">▶</span></a>
-          <a class="alt" href="/game/mech/zero/">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4v4M12 16v4M4 12h4M16 12h4"/></svg>
-            <span class="alt-text">
-              <strong>前傳｜鋼鐵黃昏 零</strong>
-              <span class="d"><span class="lang-en">On foot, first person: fight through the occupied city to reach the last mech.</span><span class="lang-zh" style="display:none">第一人稱徒步作戰：穿過被占領的城市，找到最後一台機體。</span></span>
             </span>
             <span class="go" aria-hidden="true">→</span>
           </a>
