@@ -149,6 +149,7 @@ export class Combat {
     this.banner = null; this.notes = [];
     this.incoming = 0; this.lockAlert = 0;
     this.aimPoint = V3(); this.aimDir = V3(0, 0, 1); this.eye = V3();
+    this.aimSkip = 0;   // 後方視角：鏡頭到自機這一段（公尺）不算瞄準線（main.js 每幀設；駕駛艙＝0）
     this.damageFx = 0;
     this.dead = false;
     this.onEnd = o.onEnd || (() => {});
@@ -286,9 +287,10 @@ export class Combat {
     const t = this.fireTarget();
     if (t) t.chest(this.aimPoint);
     else {
-      const far = _b.copy(this.eye).addScaledVector(this.aimDir, 1400);
-      const tt = this.world.raycast(this.eye, far, _n);
-      this.aimPoint.copy(this.eye).addScaledVector(this.aimDir, tt >= 0 ? Math.max(40, tt * 1400) : 1400);
+      // 準心那條線（從鏡頭出發）打到的第一個東西；後方視角時鏡頭在機體後面，機體背後那段跳過
+      const k = this.aimSkip, far = _b.copy(this.eye).addScaledVector(this.aimDir, 1400);
+      const tt = this.world.raycast(k ? _c.copy(this.eye).addScaledVector(this.aimDir, k) : this.eye, far, _n);
+      this.aimPoint.copy(this.eye).addScaledVector(this.aimDir, tt >= 0 ? Math.max(40 + k, k + tt * (1400 - k)) : 1400);
     }
   }
   // 步槍瞄誰：硬鎖定（在前方 60° 內）優先，其次軟鎖定
@@ -441,11 +443,14 @@ export class Combat {
       } else hitE = tgt;
     } else {
       // 沒鎖定：照準心直射
+      // 後方視角：鏡頭離槍口十幾公尺，要打「準心那條線上第一個碰到的東西」（建築／地面也算），不然會跟準心差好幾公尺
+      const k = this.aimSkip;
       let best = 1600;
+      if (k) { const t0 = w.raycast(_c.copy(this.eye).addScaledVector(this.aimDir, k), _b.copy(this.eye).addScaledVector(this.aimDir, 1600), null); if (t0 >= 0) best = k + t0 * (1600 - k); }
       for (const e of this.enemies) {
         if (e.dead) continue;
         const t = rayCapsule(this.eye, this.aimDir, e.m.capsule(), 1600);
-        if (t >= 0 && t < best) { best = t; hitE = e; }
+        if (t >= k && t < best) { best = t; hitE = e; }
       }
       to.copy(this.eye).addScaledVector(this.aimDir, best);
     }

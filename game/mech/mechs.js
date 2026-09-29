@@ -11,8 +11,11 @@ import { MechMotion, wrap, lerpAngle, damp } from './anim.js';
 // ================================================================ 材質
 const MATS = {};
 const TPL = new Map();      // 'style|scheme' → 樣板（只建一次）
+// 後方視角透視（只接到主角機的漆）：被機體擋住的地方用網點挖空，看得到後面的敵人。main.js 每幀設定；全部 0＝不挖
+//   c＝準心、t＝鎖定目標：xy＝畫面位置（畫面高＝1、左下角為原點）、z＝半徑、w＝挖掉幾成；a＝整台淡掉幾成；res＝畫面像素
+export const SEE = { c: { value: new THREE.Vector4() }, t: { value: new THREE.Vector4() }, a: { value: 0 }, res: { value: new THREE.Vector2(1, 1) } };
 export function initMechMaterials(A) {
-  MATS.clean = paintMaterial(A, 0.62, 0.5, 1.0, 0.48, 1);
+  MATS.clean = paintMaterial(A, 0.62, 0.5, 1.0, 0.48, 1, SEE);
   MATS.dirty = paintMaterial(A, 0.42, 1, 0.85, 0.5);
   MATS.shadowOnly = new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: false });
   TPL.clear();   // 材質換了，樣板要重建
@@ -20,9 +23,12 @@ export function initMechMaterials(A) {
 // mil＝1：敵機軍用霧面漆（掉漆露出暗色底漆、多集中在邊角）；soot＝噴口燻黑強度。
 // dcl.xy＝噴漆標示在圖集的 UV、dcl.z＝顏色編號（0＝沒有標示）、dcl.w＝1−燻黑量。
 // age＝滄桑感（主角機用）：大片燒灼、彈痕、朝上的面積灰、整體污垢；0＝沒有（敵機維持原樣）。
-function paintMaterial(A, wear, mil, soot, bumpK, age = 0) {
+// see＝後方視角透視的共用參數（見 SEE）；沒給就接一組永遠是 0 的（敵機），兩種漆的 shader 一模一樣、共用同一個程式
+function paintMaterial(A, wear, mil, soot, bumpK, age = 0, see = null) {
   const m = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 1, metalness: 1 });
+  const S = see || { c: { value: new THREE.Vector4() }, t: { value: new THREE.Vector4() }, a: { value: 0 }, res: { value: new THREE.Vector2(1, 1) } };
   m.onBeforeCompile = (sh) => {
+    sh.uniforms.seeC = S.c; sh.uniforms.seeT = S.t; sh.uniforms.seeA = S.a; sh.uniforms.seeRes = S.res;
     sh.uniforms.wearMap = { value: A.wearM };
     sh.uniforms.paintMap = { value: detailMaps().paint };
     sh.uniforms.frameMap = { value: A.frameM };
@@ -40,6 +46,7 @@ function paintMaterial(A, wear, mil, soot, bumpK, age = 0) {
     sh.fragmentShader = sh.fragmentShader
       .replace('#include <common>', `#include <common>
         uniform sampler2D wearMap, frameMap, paintMap, dclMap; uniform float wearAmt, milK, sootK, bumpK, ageK;
+        uniform vec4 seeC, seeT; uniform vec2 seeRes; uniform float seeA;
         varying vec4 vPbr; varying vec4 vDcl; varying vec3 vOP; varying vec3 vON;
         vec4 wv_tri(sampler2D t, vec3 p, vec3 n, float s){
           vec3 a = pow(abs(n), vec3(4.0)); a /= (a.x + a.y + a.z + 1e-5);
@@ -125,6 +132,18 @@ function paintMaterial(A, wear, mil, soot, bumpK, age = 0) {
           float det = dot(dpx, r1);
           vec3 grad = sign(det) * (hx * r1 + hy * r2);
           normal = normalize(abs(det) * normal - grad * 0.03 * bumpK);
+        }`)
+      // 後方視角透視：圓心附近挖最多、往外漸少；4×4 網點決定哪些像素挖掉（放在最後，前面算法線要用到隔壁像素）
+      .replace('#include <dithering_fragment>', `#include <dithering_fragment>
+        {
+          vec2 see_q = gl_FragCoord.xy / seeRes.y;
+          float see_k = max(seeA, max(seeC.w * (1.0 - smoothstep(0.45, 1.0, length(see_q - seeC.xy) / max(seeC.z, 1e-4))),
+                                      seeT.w * (1.0 - smoothstep(0.45, 1.0, length(see_q - seeT.xy) / max(seeT.z, 1e-4)))));
+          if (see_k > 0.0) {
+            vec2 see_p = mod(floor(gl_FragCoord.xy), 4.0), see_a = mod(see_p, 2.0), see_b = floor(see_p * 0.5);
+            float see_d = (4.0 * (2.0 * see_a.x + 3.0 * see_a.y - 4.0 * see_a.x * see_a.y) + 2.0 * see_b.x + 3.0 * see_b.y - 4.0 * see_b.x * see_b.y + 0.5) / 16.0;
+            if (see_d < see_k) discard;
+          }
         }`);
   };
   return m;
