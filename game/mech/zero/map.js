@@ -537,6 +537,37 @@ export function buildMap(scene, mats, solid, PL = null) {
   M.lights.push({ p: new THREE.Vector3(MX, 20, MZ - 8), c: 0xbfd6ff, i: 260, d: 50 });
   M.lights.push({ p: new THREE.Vector3(24, 16, 70), c: 0xffd9a8, i: 160, d: 40 });
   M.lights.push({ p: new THREE.Vector3(56, 16, 70), c: 0xffd9a8, i: 160, d: 40 });
+  // 屋頂鋼桁架（上下弦＋斜撐），每 6 m 一榀
+  for (let z = HZ0 + 3; z < HZ1; z += 6) {
+    const yt = HH - 0.3, yb = HH - 3.2;
+    b.deco('metal', HX0, HX1, yt - 0.25, yt, z - 0.12, z + 0.12, { dim: 0.7, ground: -99 });
+    b.deco('metal', HX0, HX1, yb, yb + 0.25, z - 0.12, z + 0.12, { dim: 0.7, ground: -99 });
+    for (let x = HX0 + 1.5; x < HX1 - 1; x += 3) {
+      const g = new THREE.BoxGeometry(0.1, Math.hypot(3, 2.9), 0.1).rotateZ(((x - HX0) / 3) % 2 < 1 ? 0.8 : -0.8);
+      b.mesh('metal', g, x, (yt + yb) / 2, z, 0, { shade: 0.7 });
+      b.deco('metal', x - 0.05, x + 0.05, yb, yt, z - 0.05, z + 0.05, { dim: 0.7, ground: -99 });
+    }
+  }
+  // 從天花板垂到機體背後的粗電纜
+  for (const [dx, dz, r] of [[-2.5, 3, 0.09], [0, 3.5, 0.12], [2.5, 3, 0.09], [-1.2, 4, 0.07], [1.4, 4.2, 0.07]]) {
+    const a0 = new THREE.Vector3(MX + dx * 2.2, HH - 3.3, MZ + dz + 3), a1 = new THREE.Vector3(MX + dx, 14, MZ + dz);
+    const mid = a0.clone().lerp(a1, 0.5).add(new THREE.Vector3(0, -2.5, 1));
+    const tube = new THREE.TubeGeometry(new THREE.QuadraticBezierCurve3(a0, mid, a1), 20, r, 8);
+    b.mesh('void', tube, 0, 0, 0, 0, { shade: 0.6 });
+  }
+  // 地面：黃色走道線、油漬、機位編號
+  for (const x of [HX0 + 6, HX1 - 6]) P.stripe(x - 0.08, x + 0.08, HZ0 + 2, HZ1 - 4);
+  P.stripe(HX0 + 6, HX1 - 6, HZ0 + 8, HZ0 + 8.16);
+  {
+    const cv = document.createElement('canvas'); cv.width = 512; cv.height = 256; const x = cv.getContext('2d');
+    x.fillStyle = 'rgba(210,170,40,0.85)'; x.font = '900 230px Rajdhani, Arial Black, sans-serif'; x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillText('07', 256, 138);
+    const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace;
+    const mk = (w, h, px, py, pz, ry, rx = 0) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshStandardMaterial({ map: t, transparent: true, roughness: 0.8, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 })); m.position.set(px, py, pz); m.rotation.set(rx, ry, 0); m.receiveShadow = true; m.userData.noAO = true; scene.add(m); };
+    mk(12, 6, MX, 0.04, MZ - 16, 0, -Math.PI / 2);          // 地上
+    mk(16, 8, MX, 20, HZ1 - 0.3, Math.PI);                    // 後牆
+    const oil = new THREE.MeshStandardMaterial({ color: 0x0a0a0a, transparent: true, opacity: 0.55, roughness: 0.15, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -1 });
+    for (const [ox, oz, r] of [[36, 90, 1.6], [45, 84, 1.1], [27, 70, 2], [55, 66, 1.4], [40, 76, 0.9]]) { const m = new THREE.Mesh(new THREE.CircleGeometry(r, 20).rotateX(-Math.PI / 2), oil); m.scale.set(1, 1, 0.6 + rnd() * 0.5); m.position.set(ox, 0.03, oz); m.receiveShadow = true; m.userData.noAO = true; scene.add(m); }
+  }
   M.zones.G = { x0: HX0, x1: HX1, z0: HZ0, z1: HZ1 };
   M.marks.hatch = new THREE.Vector3(MX, GY, MZ - 3.2);
 
