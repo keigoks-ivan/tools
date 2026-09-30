@@ -254,7 +254,7 @@ function renderTopConclusion() {
 
   if (DEMAND && DEMAND.crosswalk) {
     var cw = DEMAND.crosswalk;
-    lines.push('未來4季青埔預估新增待售約 ' + fmtInt(Math.round(cw.future_4q_new_supply_total)) + ' 戶；照近4季中古成交速度（季均 ' + fmtInt(Math.round(cw.trailing_4q_absorption_total / 4)) + ' 戶），同期約可去化 ' + fmtInt(Math.round(cw.trailing_4q_absorption_total)) + ' 戶。');
+    lines.push('青埔 591 現在在售約 ' + fmtInt(cw.current_onsale_stock) + ' 戶（去重），未來4季預估再新增待售約 ' + fmtInt(Math.round(cw.future_4q_new_supply_total)) + ' 戶，合計約 ' + fmtInt(Math.round(cw.current_onsale_stock + cw.future_4q_new_supply_total)) + ' 戶；照近4季中古成交速度（季均 ' + fmtInt(Math.round(cw.trailing_4q_absorption_total / 4)) + ' 戶），一年約可去化 ' + fmtInt(Math.round(cw.trailing_4q_absorption_total)) + ' 戶。');
   }
 
   if (SUPPLY && SUPPLY.supply && SUPPLY.supply.unsold) {
@@ -1119,7 +1119,7 @@ function renderCrosswalkSection() {
       { label: '差距', cell: function (r) { return (r.gap >= 0 ? '+' : '') + fmt(r.gap, 1); } },
     ], cw.rows || []);
   var hg = cw.household_growth_implied_demand || {};
-  document.getElementById('crosswalk-conclusion').textContent = '未來4季新增待售合計約 ' + fmtInt(Math.round(cw.future_4q_new_supply_total)) + ' 戶，照近4季中古成交速度同期約可去化 ' + fmtInt(Math.round(cw.trailing_4q_absorption_total)) + ' 戶；家戶成長推算新增自住需求約 ' + (hg.implied_new_ownership_demand != null ? fmtInt(hg.implied_new_ownership_demand) + ' 戶（假設轉化比例' + fmtPct(hg.ownership_share_assumption, 0) + '）' : '--') + '。';
+  document.getElementById('crosswalk-conclusion').textContent = '現在在售約 ' + fmtInt(cw.current_onsale_stock) + ' 戶＋未來4季新增待售約 ' + fmtInt(Math.round(cw.future_4q_new_supply_total)) + ' 戶＝約 ' + fmtInt(Math.round(cw.current_onsale_stock + cw.future_4q_new_supply_total)) + ' 戶，照近4季中古成交速度同期約可去化 ' + fmtInt(Math.round(cw.trailing_4q_absorption_total)) + ' 戶；家戶成長推算新增自住需求約 ' + (hg.implied_new_ownership_demand != null ? fmtInt(hg.implied_new_ownership_demand) + ' 戶（假設轉化比例' + fmtPct(hg.ownership_share_assumption, 0) + '）' : '--') + '。';
   document.getElementById('crosswalk-method').innerHTML = '<ul><li>「未來4季新增待售」是壓力測試過供給結構、釋出率算好的新增待售，不是新增交屋戶數本身；「近4季去化」只用真中古成交（不含預售）。</li><li>差距>0代表未來供給快於近期去化速度，差距<0反過來；這是速度比較，不是存量比較。</li><li>家戶成長推算需求＝新增家戶數(YoY) × 假設的自住購屋轉化比例（明確標註的假設值，不是實測），且沒有拆坪數帶，只能跟總量對照。</li></ul>';
 }
 
