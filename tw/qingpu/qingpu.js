@@ -254,12 +254,12 @@ function renderTopConclusion() {
 
   if (DEMAND && DEMAND.crosswalk) {
     var cw = DEMAND.crosswalk;
-    lines.push('未來4季青埔預估新增待售約 ' + fmtInt(cw.future_4q_new_supply_total) + ' 戶，同期近4季中古去化季均 ×4 約 ' + fmtInt(cw.trailing_4q_absorption_total) + ' 戶。');
+    lines.push('未來4季青埔預估新增待售約 ' + fmtInt(Math.round(cw.future_4q_new_supply_total)) + ' 戶；照近4季中古成交速度（季均 ' + fmtInt(Math.round(cw.trailing_4q_absorption_total / 4)) + ' 戶），同期約可去化 ' + fmtInt(Math.round(cw.trailing_4q_absorption_total)) + ' 戶。');
   }
 
   if (SUPPLY && SUPPLY.supply && SUPPLY.supply.unsold) {
     var un = SUPPLY.supply.unsold;
-    lines.push('青埔預售建商餘屋合計約 ' + fmtInt(un.total_unsold) + ' 戶，' + un.n_selling + ' 個建案近' + (un.still_selling_window_months || 6) + '個月內仍有新簽約、' + un.n_stalled + ' 個建案停售/觀望。');
+    lines.push('青埔未完工建案的建商未售戶合計約 ' + fmtInt(un.total_unsold) + ' 戶，' + un.n_selling + ' 個建案近' + (un.still_selling_window_months || 6) + '個月內仍有新簽約、' + un.n_stalled + ' 個建案停售/觀望。');
   }
 
   if (DEMAND && DEMAND.population && DEMAND.population.household_growth_yoy) {
@@ -273,7 +273,8 @@ function renderTopConclusion() {
   }
 
   if (OUTLOOK && OUTLOOK.current_moi) {
-    lines.push('同類型（屋齡0-3年、24-35坪）現況存貨月數 ' + (OUTLOOK.current_moi.moi != null ? fmt(OUTLOOK.current_moi.moi, 1) + ' 個月' : '--') + '（在售 ' + fmtInt(OUTLOOK.current_moi.n_listings) + ' 戶 ÷ 月均去化 ' + fmt(OUTLOOK.current_moi.monthly_absorption, 2) + ' 件）。');
+    var pf = OUTLOOK.premium_index_facts || {}, pl4 = pf.last4_complete || {}, plo = pf.lowest_n_ge_min || {}, ppk = pf.peak || {};
+    lines.push('青埔同建案轉手價約為自己預售價的 ' + fmt(pl4.median, 2) + ' 倍（近4完整季中位數）；n≥' + (plo.min_n_required || 5) + ' 的季度最低 ' + fmt(plo.value, 2) + ' 倍（' + esc(plo.quarter || '--') + '），2024 高點 ' + fmt(ppk.median, 2) + ' 倍。');
   }
 
   document.getElementById('top-conclusion').innerHTML = lines.map(function (l) { return '<li>' + l + '</li>'; }).join('');
@@ -307,15 +308,17 @@ function renderTiles() {
   var newN = yxAll.filter(function (l) { return withinDays(l.first_seen, refDate, WIN); }).length;
   var dropN = yxAll.filter(function (l) { return hadRecentDrop(l, refDate, WIN); }).length;
   var removedN = yxAll.filter(function (l) { return l.removed_at && withinDays(l.removed_at, refDate, WIN); }).length;
-  var lejuRef = (META.config && META.config.leju_reference) || null;
+  // 第一次抓取時每筆都是「新上架」，要有上個月的快照才有意義
+  var firstSeenDates = yxAll.map(function (l) { return l.first_seen; }).filter(Boolean).sort();
+  var hasHistory = firstSeenDates.length && !withinDays(firstSeenDates[0], refDate, WIN);
 
   var tiles = [
-    tileHTML('在售筆數', '約 ' + fmtInt(yxUnits.length) + ' 戶', '591刊登 ' + fmtInt(yxActive.length) + ' 則（同戶重複刊登已合併）' + (lejuRef ? '<br>' + esc(lejuRef.note) : '')),
+    tileHTML('在售筆數', '約 ' + fmtInt(yxUnits.length) + ' 戶', '591刊登 ' + fmtInt(yxActive.length) + ' 則（同戶重複刊登已合併）'),
     tileHTML('開價中位數', medAll != null ? fmt(medAll, 1) + ' 萬/坪' : '--', bySize.map(function (b) { return SIZE_LABELS[b.key] + '：' + (b.med != null ? fmt(b.med, 1) + '萬/坪' : '--') + '（n=' + b.n + '）'; }).join('<br>')),
     tileHTML('最近一筆成交', lastDeal ? fmt(lastDeal.unit_price_wan_ping, 1) + ' 萬/坪' : '--', lastDeal ? lastDeal.date + '・' + esc(lastDeal.floor_label || '') + (lastDeal.deal_kind === 'resale' ? '（交屋後轉手）' : lastDeal.deal_kind === 'presale_transfer' ? '（預售過戶登記）' : '') : '尚無資料'),
-    tileHTML('近一個月新上架', fmtInt(newN), ''),
-    tileHTML('近一個月降價', fmtInt(dropN), ''),
-    tileHTML('近一個月下架', fmtInt(removedN), ''),
+    tileHTML('近一個月新上架', hasHistory ? fmtInt(newN) : '--', hasHistory ? '' : '首次抓取，下個月起才有比較基準'),
+    tileHTML('近一個月降價', hasHistory ? fmtInt(dropN) : '--', ''),
+    tileHTML('近一個月下架', hasHistory ? fmtInt(removedN) : '--', ''),
   ];
   document.getElementById('tiles-grid').innerHTML = tiles.join('');
 
@@ -324,7 +327,7 @@ function renderTiles() {
   document.getElementById('status-method').innerHTML =
     '<ul><li>「在售筆數」「開價中位數」用 591 同戶重複刊登去重後的「戶」（見資料說明的591去重規則），不是原始刊登筆數。</li>' +
     '<li>「近一個月」用約31天窗口，配合每月排程頻率；591下架判定門檻目前是 1（排程改成每月一次後，只要這一輪關鍵字完整抓完就直接採信，不用等第二輪確認，partial crawl 保護仍保留）。</li>' +
-    '<li>樂居數字是人工比對值，非本站自動抓取，僅供交叉參考。</li></ul>';
+    '</ul>';
 }
 
 /* ===========================================================================
@@ -808,7 +811,7 @@ function renderSalesGrid() {
    青埔未來供給（a-e）
    =========================================================================== */
 var HANDOVER_STATUS_LABEL = { actual: '實際', actual_probable: '實際(推)', estimated: '推估', estimated_overdue: '逾期（平均攤入未來4季）', unknown: '不明' };
-var SELL_STATUS_LABEL = { selling: '銷售中', stalled: '停售/觀望', sold_out: '已售完' };
+var SELL_STATUS_LABEL = { selling: '銷售中', stalled: '停售/觀望', sold_out: '已售完', unknown: '不明（2021-07前開賣）' };
 
 function renderProjectsTable() {
   if (!SUPPLY) return;
@@ -900,8 +903,8 @@ function renderUnsoldTable() {
       { label: '最近一筆簽約', cell: function (r) { return esc(r.last_contract || '--'); } },
       { label: '道路', cell: function (r) { return esc(r.road || '--'); } },
     ], un.rows || []);
-  document.getElementById('unsold-conclusion').textContent = '青埔預售建商餘屋合計約 ' + fmtInt(un.total_unsold) + ' 戶，分布在 ' + ((un.rows || []).length) + ' 個建案；' + (un.n_selling || 0) + ' 個仍銷售中、' + (un.n_stalled || 0) + ' 個停售/觀望。';
-  document.getElementById('unsold-method').innerHTML = '<ul><li>未售戶(估)＝官方登記總戶數－實價登錄已賣出戶數，是估計值不是官方公布的餘屋數字。</li><li>「銷售中」＝近' + (un.still_selling_window_months || 6) + '個月內該建案仍有新的預售簽約；「停售/觀望」＝未售戶>0但近期無新簽約。</li></ul>';
+  document.getElementById('unsold-conclusion').textContent = '青埔未完工建案的建商未售戶合計約 ' + fmtInt(un.total_unsold) + ' 戶，分布在 ' + ((un.rows || []).length) + ' 個建案；' + (un.n_selling || 0) + ' 個仍銷售中、' + (un.n_stalled || 0) + ' 個停售/觀望。';
+  document.getElementById('unsold-method').innerHTML = '<ul><li>未售戶(估)＝官方登記總戶數－實價登錄已賣出戶數，是估計值不是官方公布的餘屋數字。</li><li>只算還沒完工的建案：完工後建商改賣成屋，登記在買賣檔、不在預售檔，已完工建案用這個減法會高估。</li><li>2021年7月以前就開賣的建案，預售檔還沒上線，已售戶數會少算，未售戶數標「不明」、不列入合計。</li><li>「銷售中」＝近' + (un.still_selling_window_months || 6) + '個月內該建案仍有新的預售簽約；「停售/觀望」＝未售戶>0但近期無新簽約。</li></ul>';
 }
 
 function renderInventoryTables() {
@@ -1116,7 +1119,7 @@ function renderCrosswalkSection() {
       { label: '差距', cell: function (r) { return (r.gap >= 0 ? '+' : '') + fmt(r.gap, 1); } },
     ], cw.rows || []);
   var hg = cw.household_growth_implied_demand || {};
-  document.getElementById('crosswalk-conclusion').textContent = '未來4季新增待售合計約 ' + fmtInt(cw.future_4q_new_supply_total) + ' 戶，近4季中古去化季均×4約 ' + fmtInt(cw.trailing_4q_absorption_total) + ' 戶；家戶成長推算新增自住需求約 ' + (hg.implied_new_ownership_demand != null ? fmtInt(hg.implied_new_ownership_demand) + ' 戶（假設轉化比例' + fmtPct(hg.ownership_share_assumption, 0) + '）' : '--') + '。';
+  document.getElementById('crosswalk-conclusion').textContent = '未來4季新增待售合計約 ' + fmtInt(Math.round(cw.future_4q_new_supply_total)) + ' 戶，照近4季中古成交速度同期約可去化 ' + fmtInt(Math.round(cw.trailing_4q_absorption_total)) + ' 戶；家戶成長推算新增自住需求約 ' + (hg.implied_new_ownership_demand != null ? fmtInt(hg.implied_new_ownership_demand) + ' 戶（假設轉化比例' + fmtPct(hg.ownership_share_assumption, 0) + '）' : '--') + '。';
   document.getElementById('crosswalk-method').innerHTML = '<ul><li>「未來4季新增待售」是壓力測試過供給結構、釋出率算好的新增待售，不是新增交屋戶數本身；「近4季去化」只用真中古成交（不含預售）。</li><li>差距>0代表未來供給快於近期去化速度，差距<0反過來；這是速度比較，不是存量比較。</li><li>家戶成長推算需求＝新增家戶數(YoY) × 假設的自住購屋轉化比例（明確標註的假設值，不是實測），且沒有拆坪數帶，只能跟總量對照。</li></ul>';
 }
 
@@ -1210,7 +1213,7 @@ function renderPriceOutlook() {
   document.getElementById('outlook-supply-context-note').innerHTML = '未來4季預估新增待售約 ' + fmt(sc.future_4q_new_supply, 1) + ' 戶，同期預估去化約 ' + fmt(sc.future_4q_absorption, 1) + ' 戶。<br>觀察（不是預測）：預售簽約量從' + esc(pv.baseline_year) + '年季均' + fmt(pv.baseline_avg_per_quarter, 1) + '件，到' + esc(pv.since_quarter) + '起季均降到' + fmt(pv.recent_avg_per_quarter, 1) + '件，變化' + (pv.change_pct != null ? fmtPct(pv.change_pct) : '--') + '；同一段期間季價指數從' + fmt(sc.premium_index_at_shrink_start, 4) + '到' + fmt(sc.premium_index_latest_complete_value, 4) + '（' + esc(sc.premium_index_latest_complete_quarter) + '）。' + esc(sc.observation_note || '');
   document.getElementById('outlook-recalc-note').textContent = OUTLOOK.recalc_note;
 
-  document.getElementById('outlook-conclusion').textContent = '現況存貨月數 ' + (moi.moi != null ? fmt(moi.moi, 1) + ' 個月' : '--') + '；季價指數近4完整季中位數 ' + fmt(last4.median, 4) + '，三個情境乘數見下表。';
+  document.getElementById('outlook-conclusion').textContent = '青埔同建案轉手價近4完整季中位數為預售價的 ' + fmt(last4.median, 2) + ' 倍；供給壓力和後續價格在過去資料裡沒有穩定關係（R²=' + (calib.r2 != null ? fmt(calib.r2, 2) : '--') + '），所以只列三個情境、不給漲跌幅。';
   document.getElementById('outlook-method').innerHTML = '<ul><li>季價指數＝每筆中古成交單價 ÷ 該建案預售單價中位數，取季中位數，跨建案中性化，不受新舊產品混雜影響，自2021Q3起。</li><li>三個情境（維持/收斂/回升）只輸出指數乘數本身，不綁定任何特定戶別；套用到哪一戶由上面「戶別試算」決定。</li><li>歷史校準回歸n或R²沒過門檻時，只是記錄「查過供給壓力對未來價格變化的解釋力，沒查到關係」，不拿來配價格路徑。</li></ul>';
 }
 

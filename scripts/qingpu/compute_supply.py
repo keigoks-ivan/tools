@@ -77,6 +77,16 @@ def roc_to_iso(s):
         return None
 
 
+def earliest_roc_date(text):
+    """從備查「銷售期間」文字抓最早的民國日期（1100419、110.08.13、110年10月13日、110/07/01 等寫法），回傳 7 碼整數。"""
+    if not text:
+        return None
+    found = [int(m) for m in re.findall(r"(?<!\d)(1\d{6})(?!\d)", text)]
+    for y, mth, d in re.findall(r"(?<!\d)(1\d{2})\s*[年./-]\s*(\d{1,2})\s*[月./-]\s*(\d{1,2})", text):
+        found.append(int(y) * 10000 + int(mth) * 100 + int(d))
+    return min(found) if found else None
+
+
 def median_date(date_strs):
     if not date_strs:
         return None
@@ -255,6 +265,12 @@ def main():
         sold = len(b_rows)
         households = c["households"] if c["households"] is not None else (sold or None)
         unsold = max(households - sold, 0) if households is not None else None
+        # 實價登錄預售檔（B）2021-07 才開始，更早開賣的建案「已售」會少算、「未售」會高估，
+        # 這種建案未售戶數標為不明（None），不進餘屋合計與未售釋出。
+        sales_start_roc = earliest_roc_date(c.get("selling_period"))
+        presale_before_b = sales_start_roc is not None and sales_start_roc < 1100701
+        if presale_before_b:
+            unsold = None
 
         handover_sig_dates = sorted(
             sig["completion_date"] for r in b_rows for sig in (r.get("handover_signals") or []) if sig.get("completion_date")
@@ -306,7 +322,9 @@ def main():
         first_contract = min((r["date"] for r in b_rows), default=None)
         last_contract = max((r["date"] for r in b_rows), default=None)
 
-        if unsold is None or unsold <= 0:
+        if unsold is None:
+            sell_status = "unknown"
+        elif unsold <= 0:
             sell_status = "sold_out"
         elif last_contract is not None and last_contract >= still_selling_cutoff:
             sell_status = "selling"
@@ -500,11 +518,14 @@ def main():
     # -----------------------------------------------------------------
     # (c) 建商餘屋：未售戶數合計、依專案分列、銷售中(selling) vs 停售(stalled)。
     # -----------------------------------------------------------------
-    unsold_total = sum(p["units_unsold"] or 0 for p in projects.values())
+    # 只算還沒完工的建案：已完工建案完工後建商改用成屋賣（進買賣檔、不進預售檔），
+    # 用「總戶數－預售已售」會把完工後賣掉的也算成餘屋。
+    pending = [p for p in projects.values() if p["handover_status"] not in ("actual", "actual_probable")]
+    unsold_total = sum(p["units_unsold"] or 0 for p in pending)
     unsold_by_project = sorted(
         (
             {"project_name": p["project_name"], "units_unsold": p["units_unsold"], "sell_status": p["sell_status"], "last_contract": p["last_contract"], "road": p["road"]}
-            for p in projects.values()
+            for p in pending
             if (p["units_unsold"] or 0) > 0
         ),
         key=lambda x: -(x["units_unsold"] or 0),
