@@ -282,7 +282,9 @@ function startEncounter(E) {
   const list = E.enemies.map(spawn);
   // hold＝守住幾秒（期間一波波增援）；stealth＝別被發現（被發現就叫增援）；targets＝要炸掉的東西；pickups＝要撿的東西（全部都要做完、敵人全倒才算清完）
   const tg = E.targets ? E.targets.map((id) => map.targets[id] && map.targets[id].obj).filter(Boolean) : null;
-  active.push({ E, list, picked: false, t0: G.t, n: list.length, holdT: 0, wave: 0, spotted: false, tg, got: new Set() });
+  // 已經撿過的東西（死掉重來時）算數，不用再撿一次（模型也已經收起來了）
+  const got = new Set((E.pickups || []).map((P, i) => (pickedItems.has(P.id) ? i : -1)).filter((i) => i >= 0));
+  active.push({ E, list, picked: false, t0: G.t, n: list.length, holdT: 0, wave: 0, spotted: false, tg, got });
   for (const [who, text, now] of E.lines) hud.say(who, text, 3.6, now);
   if (E.lines.length) audio.radio('in');
   G.objText = list.length ? E.fight || '擊倒所有敵人' : E.obj;   // 開打後改成「要打誰」，不要還寫著「爬上高架道路」
@@ -300,6 +302,7 @@ function encDone(a) {
 }
 // 任務進行中：守點的計時與增援、潛行被發現、炸掉目標、撿東西（按 E）
 const mm = (t) => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`;
+const pickedItems = new Set();   // 這一章撿過的東西（map.items 的 id）
 function updateMissions(dt) {
   hud.pins.length = 0;
   for (const a of active) {
@@ -335,7 +338,7 @@ function updateMissions(dt) {
         if (!near || player.dead) return;
         hud.prompt = P.text || '按 E　拿取';
         if (input.pressed('KeyE') || input.pressed('Tlock')) {
-          a.got.add(i); hud.prompt = null; if (it.h) it.h.hide();
+          a.got.add(i); pickedItems.add(P.id); hud.prompt = null; if (it.h) it.h.hide();
           hud.note(`${E.itemName || '情報'} ${a.got.size}/${E.pickups.length}`, '#ffb347');
           if (P.lines) for (const [w, t, now] of P.lines) hud.say(w, t, 3.4, now);
         }
@@ -420,6 +423,7 @@ function updatePickup() {
 const toCockpit = () => { G.objText = '爬上維修架，進入駕駛艙'; hud.obj = routeObj(S.HATCH_ROUTE); };
 
 function startChapter(n) {
+  pickedItems.clear();
   clearEnemies(); fx.clear(); D.clear(); active = [];
   chapter = n;
   const C = S.CHAPTERS[n - 1];

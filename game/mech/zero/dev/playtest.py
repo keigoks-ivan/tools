@@ -49,6 +49,9 @@ BOT = r'''(frames) => {
     // 要去哪：光柱路線的下一點；打仗中沒有路線時，去最近的任務標記（要炸的、要撿的）
     let goal = G.hud.obj && G.hud.obj.p ? G.hud.obj.p : null, pin = null;
     if (!goal && G.hud.pins.length) { pin = G.hud.pins.slice().sort((a, c) => a.p.distanceTo(P.pos) - c.p.distanceTo(P.pos))[0]; goal = pin.p; }
+    // 換了新的目標點：重新計算「有沒有在動」（不然剛出現的指示會被當成卡住）
+    const gk = goal ? goal.x.toFixed(1) + ',' + goal.z.toFixed(1) : '';
+    if (gk !== b.gk) { b.gk = gk; b.last.copy(P.pos); b.lastF = b.f; }
     let c = {};
     if (goal) {
       const dx = goal.x - P.pos.x, dz = goal.z - P.pos.z;
@@ -70,7 +73,8 @@ BOT = r'''(frames) => {
       const tgt = goal ? Math.hypot(goal.x - P.pos.x, goal.z - P.pos.z) : null;
       const info = { f: b.f, ch: __flow.chapter, obj: G.objText, sub: G.objSub, pos: P.pos.toArray().map((v) => +v.toFixed(1)), active: __flow.active };
       if (goal && moved < 0.6 && tgt > 1.5 && !alive.length) return { ev: 'stuck', tgt: goal.toArray().map((v) => +v.toFixed(1)), ...info };
-      if (!goal && !alive.length) { b.idle++; if (b.idle >= 4) return { ev: 'noguide', ...info }; } else b.idle = 0;
+      // 守點計時中、敵人還沒到：本來就沒有指示，不算
+      if (!goal && !alive.length && !__flow.active.length) { b.idle++; if (b.idle >= 4) return { ev: 'noguide', ...info }; } else b.idle = 0;
       if (goal && tgt <= 1.5 && !alive.length) { b.wait = (b.wait || 0) + 1; if (b.wait >= 4) return { ev: 'arrived-nothing', ...info }; } else b.wait = 0;
     }
   }
