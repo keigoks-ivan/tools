@@ -547,5 +547,5 @@ export async function startMech(X) {
   applyView();
   window.__m6 = { fake: null, get combat() { return C; }, player, hero, get wave() { return wave; }, get ending() { return ending; }, fight, tick,
     get gate() { return gate; }, get boss() { return boss; }, get fled() { return fled; }, get cp() { return cp; }, flyers, pods };
-  return { tick };
+  return { tick, setQuality: (q) => fx.setQuality(q) };
 }

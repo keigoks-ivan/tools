@@ -2,6 +2,7 @@
 //   流程：標題（機體展示鏡頭＋選關）→ 開機（擋板升起）→ 戰鬥（一關）→ 暫停／結算 → 下一關
 //   ?show=… 或 ?free 會改載入 preview.js（美術／動作預覽）
 import * as THREE from 'three';
+import { qualityLevel, pixelRatio, FrameGate } from './runtime.js';
 
 const q = new URLSearchParams(location.search);
 // 大檔案（貼圖、HDR、模型）改從 jsDelivr 下載，網站主機給大檔很慢；不能用時照舊從本站（見 cdn.js）
@@ -164,17 +165,25 @@ async function game() {
 
   // ---------------------------------------------------------------- 設定
   // 視角：false＝駕駛艙（第一人稱）、true＝機體後方（看得到整台機體）；記住上次的選擇
-  const store0 = (k, d) => { try { const v = localStorage.getItem('mech.' + k); return v === null ? d : +v; } catch (e) { return d; } };
+  const store0 = (k, d) => { try { const v = localStorage.getItem('mech.' + k); const n = v === null ? d : +v; return Number.isFinite(n) ? n : d; } catch (e) { return d; } };
   let tpView = store0('view', 0) === 1;
-  let chaseD = store0('camd', 15);   // 後方視角距離（公尺），滑鼠滾輪調整
-  const store = { get: (k, d) => { try { const v = localStorage.getItem('mech.' + k); return v === null ? d : +v; } catch (e) { return d; } }, set: (k, v) => { try { localStorage.setItem('mech.' + k, v); } catch (e) {} } };
+  let chaseD = store0('camd', 15);
+  chaseD = Number.isFinite(chaseD) ? clamp(chaseD, 9, 40) : 15;   // 後方視角距離（公尺），滑鼠滾輪調整
+  const store = { get: (k, d) => { try { const v = localStorage.getItem('mech.' + k); const n = v === null ? d : +v; return Number.isFinite(n) ? n : d; } catch (e) { return d; } }, set: (k, v) => { try { localStorage.setItem('mech.' + k, v); } catch (e) {} } };
   let quality = store.get('q', 1);
   function setQuality(qv) {
-    quality = qv; store.set('q', qv);
-    renderer.setPixelRatio(Math.min(devicePixelRatio, [0.7, 1, 1.5][qv]));
+    qv = qualityLevel(qv); quality = qv; store.set('q', qv);
+    renderer.setPixelRatio(pixelRatio(innerWidth, innerHeight, devicePixelRatio, qv));
     renderer.setSize(innerWidth, innerHeight);
     post.setSize(innerWidth, innerHeight);
-    post.gtao.enabled = qv > 0;
+    post.setQuality(qv);
+    post.gtao.enabled = qv > 1;
+    const shadowSize = [1024, 2048, 4096][qv];
+    if (world.sun.shadow.mapSize.x !== shadowSize) {
+      world.sun.shadow.mapSize.setScalar(shadowSize);
+      if (world.sun.shadow.map) { world.sun.shadow.map.dispose(); world.sun.shadow.map = null; }
+      world.sun.shadow.needsUpdate = true;
+    }
     renderer.shadowMap.type = qv > 0 ? THREE.PCFSoftShadowMap : THREE.PCFShadowMap;
     fx.setQuality(qv);
     document.querySelectorAll('[data-q]').forEach((b) => { b.style.background = +b.dataset.q === qv ? 'rgba(127,243,255,0.25)' : ''; });
@@ -206,7 +215,10 @@ async function game() {
     } catch (e) {}
   }));
   for (const k of ['fullscreenchange', 'webkitfullscreenchange']) document.addEventListener(k, () => fsBtns.forEach((b) => { b.textContent = fsOn() ? '離開全螢幕 EXIT' : '全螢幕 FULLSCREEN'; }));
+  document.addEventListener('visibilitychange', () => { if (document.hidden) pause(); });
+  addEventListener('blur', () => pause());
   addEventListener('resize', () => {
+    renderer.setPixelRatio(pixelRatio(innerWidth, innerHeight, devicePixelRatio, quality));
     renderer.setSize(innerWidth, innerHeight);
     camera.aspect = cockCam.aspect = innerWidth / innerHeight;
     camera.updateProjectionMatrix(); cockCam.updateProjectionMatrix();
@@ -246,7 +258,7 @@ async function game() {
   $('cont').addEventListener('click', () => replay(stageNo, combat.cp));   // 遭遇戰：從檢查點繼續
   $('menu').addEventListener('click', toTitle);
   $('quit').addEventListener('click', toTitle);
-  input.onLockChange = (locked) => { if (!locked && state === 'play' && !input.touch.on) pause(); };
+  input.onLockChange = (locked) => { if (!locked && (state === 'play' || state === 'boot') && !input.touch.on) pause(); };
 
   function launch(n = nextStage()) {
     audio.unlock();
@@ -306,7 +318,7 @@ async function game() {
     if (state !== 'play' && state !== 'boot') return;
     state = 'paused';
     $('pause').style.display = 'flex';
-    audio.setPaused(true);
+    audio.setPaused(true); input.reset();
   }
   function resume() {
     $('pause').style.display = 'none';
@@ -363,13 +375,11 @@ async function game() {
 
   // 每秒最多畫 60 張：120Hz 螢幕不會多畫一倍（?fps=0 不限、?fps=30 之類可改）
   const FPS = q.has('fps') ? +q.get('fps') : 60;
-  let nextT = 0;
+  const frameGate = new FrameGate();
   function frame(now) {
     requestAnimationFrame(frame);
-    if (FPS > 0) {
-      if (now < nextT - 2) return;
-      nextT = Math.max(nextT + 1000 / FPS, now);
-    }
+    if (document.hidden || state === 'paused') { clock.getDelta(); input.endFrame(); return; }
+    if (!frameGate.ready(now, state === 'title' ? 30 : FPS)) return;
     tick(Math.min(0.05, clock.getDelta()));
   }
   // 測試用：__game.fake 可覆蓋操作；__game.run(秒) 在背景分頁也能推進

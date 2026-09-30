@@ -7,6 +7,7 @@ import * as THREE from 'three';
 import { Builder, grimeShader } from './kit.js';
 import * as PR from './props.js';
 import { facade, FLOOR } from './models.js';
+import { shopMaterial, shopUV } from '../urban.js';
 
 const H1 = 3.4;   // 一層樓高
 
@@ -23,6 +24,7 @@ export function buildMap(scene, mats, solid, PL = null) {
   mats.sand = new THREE.MeshStandardMaterial({ color: 0x7d6f55, roughness: 1, vertexColors: true, map: mats.floor.map, normalMap: mats.floor.normalMap });
   mats.paint = new THREE.MeshStandardMaterial({ color: 0x55655f, roughness: 0.55, metalness: 0.35, vertexColors: true, map: mats.rust.map, roughnessMap: mats.rust.roughnessMap });
   mats.paint2 = new THREE.MeshStandardMaterial({ color: 0x9a9384, roughness: 0.55, metalness: 0.3, vertexColors: true, map: mats.rust.map, roughnessMap: mats.rust.roughnessMap });
+  mats.sign = shopMaterial();
   mats.red = new THREE.MeshStandardMaterial({ color: 0x8a1f1a, roughness: 0.45, metalness: 0.4, vertexColors: true });
   // 燒過的鐵皮（車、公車）：鏽鐵照片貼圖，不太反光；煙燻、灰燼用頂點色
   mats.burnt = new THREE.MeshStandardMaterial({ color: 0x9a938c, roughness: 0.9, metalness: 0.2, vertexColors: true, map: mats.rust.map, normalMap: mats.rust.normalMap, roughnessMap: mats.rust.roughnessMap });
@@ -77,9 +79,15 @@ export function buildMap(scene, mats, solid, PL = null) {
   const mass = (x0, x1, z0, z1, h, mat = 'wall', win = 'nsew', o = {}) => {
     if (o.kit && PL && win) return kitMass(x0, x1, z0, z1, h, win, o);
     const y0 = o.y0 || 0;
-    b.block(mat, x0, x1, y0, h, z0, z1, { skip: 'ny', ground: y0 });
     const f0 = Math.max(o.shop ? 1 : 0, Math.ceil(y0 / H1));
-    for (const s of win) windowsOn(s, x0, x1, z0, z1, h, f0, o);
+    if (!win) b.block(mat, x0, x1, y0, h, z0, z1, { skip: 'ny', ground: y0 });
+    else {
+      // 碰撞仍是一整棟；外觀改成有厚度、真正開洞的外牆，玻璃退到牆裡。
+      solid.add({ x0, x1, y0, y1: h, z0, z1, mat });
+      b.deco(mat, x0, x1, h - 0.2, h, z0, z1, { skip: 'ny', ground: y0 });
+      for (const sd of 'nsew') skin(sd, x0, x1, z0, z1, y0, h, mat, win.includes(sd), f0, o);
+      for (const s of win) windowsOn(s, x0, x1, z0, z1, h, f0, { ...o, recess: true });
+    }
     // 屋頂女兒牆
     if (!o.noParapet) {
       const t = 0.35;
@@ -94,7 +102,52 @@ export function buildMap(scene, mats, solid, PL = null) {
       if (win.includes('e')) for (const [p, q] of span(o, 'e', z0, z1)) b.deco(tm, x1, x1 + 0.08, y - 0.1, y + 0.06, p, q);
       if (win.includes('w')) for (const [p, q] of span(o, 'w', z0, z1)) b.deco(tm, x0 - 0.08, x0, y - 0.1, y + 0.06, p, q);
     }
+    streetDetails(x0, x1, z0, z1, h, win, o);
   };
+  function skin(side, x0, x1, z0, z1, y0, h, mat, windows, f0, o) {
+    const along = side === 'n' || side === 's', out = side === 'n' || side === 'e' ? 1 : -1;
+    const a0 = along ? x0 : z0, a1 = along ? x1 : z1, fix = side === 'n' ? z1 : side === 's' ? z0 : side === 'e' ? x1 : x0;
+    const put = (lo, hi, bot, top) => {
+      if (hi - lo < 0.01 || top - bot < 0.01) return;
+      const p = fix - out * 0.28, q = fix, opt = { ground: y0 };
+      if (along) b.deco(mat, lo, hi, bot, top, Math.min(p, q), Math.max(p, q), opt);
+      else b.deco(mat, Math.min(p, q), Math.max(p, q), bot, top, lo, hi, opt);
+    };
+    const sp = o.spacing || 3.2, ww = o.ww || 1.4, wh = o.wh || 1.7, n = Math.floor((a1 - a0 - 1) / sp), start = a0 + (a1 - a0 - n * sp) / 2 + sp / 2;
+    if (!windows || n <= 0) { put(a0, a1, y0, h); return; }
+    let prev = y0;
+    for (let f = f0; f * H1 + 2.6 < h; f++) {
+      const bot = f * H1 + 0.95, top = Math.min(h, bot + wh);
+      put(a0, a1, prev, bot); let cur = a0;
+      for (let i = 0; i < n; i++) {
+        const c = start + i * sp, lo = c - ww / 2, hi = c + ww / 2;
+        if (o.hide && o.hide[side] && hi + 0.14 > o.hide[side][0] && lo - 0.14 < o.hide[side][1]) continue;
+        put(cur, lo, bot, top); cur = hi;
+      }
+      put(cur, a1, bot, top); prev = top;
+    }
+    put(a0, a1, prev, h);
+  }
+  function streetDetails(x0, x1, z0, z1, h, win, o) {
+    if (!win || o.y0 || h < 8 || Math.max(x1 - x0, z1 - z0) > 90) return;
+    const asian = x0 > -36 && z0 < 35;
+    const sd = [...win].find(s => !o.hide || !o.hide[s]); if (!sd) return;
+    const along = sd === 'n' || sd === 's', out = sd === 'n' || sd === 'e' ? 1 : -1;
+    const a0 = along ? x0 : z0, a1 = along ? x1 : z1, fix = sd === 'n' ? z1 : sd === 's' ? z0 : sd === 'e' ? x1 : x0;
+    const at = (a, y, d) => along ? [a, y, fix + out * d] : [fix + out * d, y, a];
+    const ry = sd === 'n' ? 0 : sd === 's' ? Math.PI : sd === 'e' ? Math.PI / 2 : -Math.PI / 2;
+    // 已載入的掃描冷氣機，共用原有 instancing；不改路線和碰撞。
+    if (PL && PL.M.has('exterior_aircon_unit')) for (let a = a0 + 3; a < a1 - 2; a += 12) {
+      const p = at(a, 4.1, 0.18); PL.add('exterior_aircon_unit', ...p, ry, { cast: true });
+    }
+    const pipe = at(a0 + 0.35, 0, 0.12); b.mesh('rust', PR.pipeGeo(Math.min(h, 11), 0.055).translate(0, Math.min(h, 11) / 2, 0), ...pipe, 0, { solid: false });
+    if (!o.shop && ph(x0, z0) < 0.4) return;
+    const c = (a0 + a1) / 2, lo = asian ? c : c - 2.2, hi = asian ? c + 0.8 : c + 2.2, bot = asian ? 3.4 : 2.9, top = asian ? 6.4 : 3.8, d = asian ? 0.45 : 0.17;
+    const pts = [at(lo, bot, d), at(hi, bot, d), at(hi, top, d), at(lo, top, d)];
+    const uv = shopUV(asian ? 4 + Math.floor(ph(x0, z0) * 2) : Math.floor(ph(x0, z0) * 4));
+    if (along ? out < 0 : out > 0) { pts.reverse(); uv.reverse(); }
+    b.B.sign.quad(...pts, along ? [0, 0, out] : [out, 0, 0], [0.9, 0.9, 0.9, 0.9], uv);
+  }
   // 沿牆 a0～a1 扣掉 o.hide[side] 那段
   const span = (o, s, a0, a1) => { const hd = o.hide && o.hide[s]; return !hd ? [[a0, a1]] : [[a0, Math.min(a1, hd[0])], [Math.max(a0, hd[1]), a1]].filter(([p, q]) => q - p > 0.01); };
   // 用掃描外牆模組的建築：下面幾層是真的模組（窗戶凹進去、窗框、門、鐵捲門、線腳），更高的樓層用貼圖＋簡單窗
@@ -110,8 +163,10 @@ export function buildMap(scene, mats, solid, PL = null) {
       if (sd === 'e') b.deco('void', ix1, ix1 + 0.01, 0, kTop, iz0, iz1); if (sd === 'w') b.deco('void', ix0 - 0.01, ix0, 0, kTop, iz0, iz1);
     }
     if (h > kTop + 0.2) {
-      b.block(km, x0, x1, kTop, h, z0, z1, { skip: 'ny', solid: false, ground: kTop });
-      for (const sd of win) windowsOn(sd, x0, x1, z0, z1, h, Math.ceil((kTop + 0.3) / H1), { ...o, trim: km });
+      const f0 = Math.ceil((kTop + 0.3) / H1);
+      b.deco(km, x0, x1, h - 0.2, h, z0, z1, { skip: 'ny', ground: kTop });
+      for (const sd of 'nsew') skin(sd, x0, x1, z0, z1, kTop, h, km, win.includes(sd), f0, o);
+      for (const sd of win) windowsOn(sd, x0, x1, z0, z1, h, f0, { ...o, trim: km, recess: true });
     }
     const t = 0.35;
     b.deco(km, x0, x1, h, h + 0.9, z0, z0 + t); b.deco(km, x0, x1, h, h + 0.9, z1 - t, z1); b.deco(km, x0, x0 + t, h, h + 0.9, z0, z1); b.deco(km, x1 - t, x1, h, h + 0.9, z0, z1);
@@ -127,6 +182,7 @@ export function buildMap(scene, mats, solid, PL = null) {
     }
     // 沒有模組的面，下半部也要補到原本的邊界
     for (const sd of 'nsew') if (!win.includes(sd)) continue;
+    streetDetails(x0, x1, z0, z1, h, win, o);
   }
   // 立面上的窗：凹進去的深色洞＋玻璃（部分破掉）＋窗台＋偶爾亮燈
   const IN = { n: 'nz', s: 'pz', e: 'nx', w: 'px' }, GL = { n: 'nz px nx py ny', s: 'pz px nx py ny', e: 'nx pz nz py ny', w: 'px pz nz py ny' };
@@ -152,8 +208,9 @@ export function buildMap(scene, mats, solid, PL = null) {
           if (along) b.deco(mat, l0, l1, yy0, yy1, Math.min(p0, p1), Math.max(p0, p1), { skip: sk });
           else b.deco(mat, Math.min(p0, p1), Math.max(p0, p1), yy0, yy1, l0, l1, { skip: sk });
         };
-        // 牆是實心的：玻璃貼在牆面外 1 cm，四周窗框凸出 10 cm，看起來像凹進去的窗（玻璃只畫朝外那一面）
-        face(lit ? 'warm' : broken ? 'void' : 'glass', 0.0, 0.015, y0, y1, lo, hi, GL[side]);
+        // 有開洞的外牆：玻璃退入 16 cm，後方暗面表現室內深度。
+        if (o.recess) face('void', -0.25, -0.24, y0, y1, lo, hi, GL[side]);
+        face(lit ? 'warm' : broken ? 'void' : 'glass', o.recess ? -0.17 : 0.0, o.recess ? -0.16 : 0.015, y0, y1, lo, hi, GL[side]);
         const tm = o.trim || 'concrete';
         face(tm, 0, 0.14, y0 - 0.14, y0, lo - 0.14, hi + 0.14);   // 窗台
         { const hh = ph(c + f * 7.1, fix); if (broken && hh < 0.22) wallDecal(2, side, fix, c, y1 + 1.3, ww * 2.1, 2.8); else if (hh > 0.8) wallDecal(3, side, fix, c, y0 - 1.05, ww * 1.25, 1.9); }   // 燒過的窗上面一片黑；窗台下的水痕

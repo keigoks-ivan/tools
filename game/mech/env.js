@@ -4,8 +4,10 @@ import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { makeFacade, FACADE_TILE } from './textures.js';
+import { shopMaterial, shopUV } from './urban.js';
 
 const ASSET = './assets/';
+const COMPACT = new URL('./zero/assets/env/', import.meta.url).href;
 export const CITY = { block: 120, road: 14, walk: 18, half: 740 };
 const SKY_ELEV_MIN = -10; // 天空圖裁到 -10°
 
@@ -16,11 +18,11 @@ function rng(seed) {
 const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
 
 // ---------------------------------------------------------------- 資源載入
-export async function loadAssets(renderer, onProgress = () => {}) {
+export async function loadAssets(renderer, onProgress = () => {}, compact = true) {
   const tl = new THREE.TextureLoader();
   let done = 0; const total = 13 + FACADES.length * 3 + 4;
   const step = (x) => { done++; onProgress(done / total); return x; };
-  const T = (name, srgb = false, rep = 1) => tl.loadAsync(ASSET + name).then((t) => {
+  const T = (name, srgb = false, rep = 1) => (compact ? tl.loadAsync(COMPACT + name.replace(/\.jpg$/, '.webp')).catch(() => tl.loadAsync(ASSET + name)) : tl.loadAsync(ASSET + name)).then((t) => {
     if (srgb) t.colorSpace = THREE.SRGBColorSpace;
     t.wrapS = t.wrapT = THREE.RepeatWrapping;
     t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
@@ -315,7 +317,12 @@ function terrainMaterial(A) {
         vec3 lot = mix(rub * 0.9, grass * 0.8, smoothstep(0.35, 0.65, tfbm(vTW.xz / 30.0)));
         base = mix(base, lot, inCity * (1.0 - G.x) * (1.0 - G.y));
         base = mix(base, walkC, G.y);
-        vec3 roadC = asph;
+        vec2 lane = mod(vTW.xz + 60.0, 120.0) - 60.0;
+        float wheel = (1.0 - smoothstep(0.35, 1.1, abs(abs(lane.x) - 4.2))) + (1.0 - smoothstep(0.35, 1.1, abs(abs(lane.y) - 4.2)));
+        float roadWear = smoothstep(0.3, 0.7, dry);
+        float paintWear = 0.55 + 0.45 * smoothstep(0.2, 0.7, tn(vTW.xz * 2.0));
+        G.zw *= paintWear;
+        vec3 roadC = asph * (1.0 - min(wheel, 1.0) * 0.12);
         roadC = mix(roadC, vec3(0.62), G.z * 0.85 * (0.75 + 0.25 * tn(vTW.xz * 3.0)));
         roadC = mix(roadC, vec3(0.62, 0.45, 0.10), G.w * 0.8);
         base = mix(base, roadC, G.x);
@@ -327,6 +334,7 @@ function terrainMaterial(A) {
         float rG = texture2D(roughnessMap, vRoughnessMapUv).g;
         float rA = texture2D(asphA, vTW.xz / 7.0).g;
         roughnessFactor = mix(0.72 + rA * 0.28, rG, isGrass);
+        roughnessFactor = mix(roughnessFactor, 0.46 + roadWear * 0.18, G.x * min(wheel, 1.0) * 0.7);
         roughnessFactor = mix(roughnessFactor, 0.55, G.z * 0.6);
       `)
       .replace('vec3 mapN = texture2D( normalMap, vNormalMapUv ).xyz * 2.0 - 1.0;', `
@@ -432,6 +440,86 @@ function addBox(B, x0, x1, y0, y1, z0, z1, col, uvScale = 8) {
   }
 }
 
+// 立面細節仍寫進同一棟的合併區段：沒有額外材質／draw call，倒塌時跟著樓體一起消失。
+function architecture(B, signs, x0, x1, z0, z1, H, style, F) {
+  const stone = style < 2 ? [0.48, 0.5, 0.52] : [0.72, 0.69, 0.63], steel = [0.19, 0.21, 0.22];
+  const floor = F.h / F.rows, bay = F.w / F.cols;
+  const sides = [['x', z1, 1, x0, x1], ['x', z0, -1, x0, x1], ['z', x1, 1, z0, z1], ['z', x0, -1, z0, z1]];
+  const asian = style >= 2 && x0 > 120 && z0 < 240;
+  for (const [axis, fix, out, a0, a1] of sides) {
+    const box = (lo, hi, y0, y1, d0, d1, c) => {
+      const p = fix + out * d0, q = fix + out * d1;
+      if (axis === 'x') addBox(B, lo, hi, y0, y1, Math.min(p, q), Math.max(p, q), c, 4);
+      else addBox(B, Math.min(p, q), Math.max(p, q), y0, y1, lo, hi, c, 4);
+    };
+    // 樓板邊、窗台與垂直分格產生真實的側光和遮蔭，不再只靠照片上的陰影。
+    for (let y = floor; y < H - 0.3; y += floor * (style === 0 ? 2 : 1)) {
+      box(a0, a1, y - 0.12, y + 0.08, 0, style < 2 ? 0.18 : 0.32, stone);
+    }
+    const step = style < 2 ? bay * 3 : bay * 2;
+    for (let a = a0 + step; a < a1 - 1; a += step) box(a - 0.12, a + 0.12, 0.3, H, 0, 0.24, stone);
+    box(a0, a1, 0.05, 0.65, 0, 0.22, [0.38, 0.36, 0.33]);
+    box(a0 - 0.2, a1 + 0.2, H - 0.35, H, 0, 0.4, stone);
+    if (style < 2) {
+      // 街層雨棚；突出量保持在人行道內。
+      const mid = (a0 + a1) / 2, w = Math.min(8, (a1 - a0) * 0.32);
+      box(mid - w, mid + w, 3.15, 3.38, 0, 1.8, steel);
+      for (const a of [mid - w + 0.3, mid + w - 0.3]) box(a - 0.12, a + 0.12, 0, 3.2, 1.5, 1.74, steel);
+    } else {
+      // 住宅陽台：只做近地面的三層，遠處沿用原立面，幾何量不隨樓高暴增。
+      for (let y = floor * 2; y < Math.min(H - 1, floor * 5); y += floor) {
+        for (let a = a0 + 5; a < a1 - 3; a += 12) {
+          const lo = a - 1.8, hi = Math.min(a1 - 0.5, a + 1.8);
+          box(lo, hi, y - 0.18, y, 0, 1.05, stone);
+          for (const h of [0.42, 0.95]) box(lo, hi, y + h, y + h + 0.06, 0.99, 1.05, steel);
+          for (let p = lo; p <= hi; p += 0.6) box(p, p + 0.045, y, y + 1, 0.99, 1.05, steel);
+          for (const p of [lo, hi - 0.05]) box(p, p + 0.05, y + 0.95, y + 1.01, 0.02, 1.05, steel);
+        }
+      }
+      if (asian) {
+        // 住宅街的外掛冷氣與窗上遮陽板；公尺尺度，沒有放大的裝飾。
+        for (let y = floor + 0.4; y < Math.min(H - 1, floor * 4); y += floor) for (let a = a0 + 4; a < a1 - 2; a += 9) {
+          box(a - 0.45, a + 0.45, y, y + 0.6, 0, 0.45, [0.62, 0.64, 0.62]);
+          for (let k = 0; k < 4; k++) box(a - 0.3, a + 0.3, y + 0.12 + k * 0.09, y + 0.15 + k * 0.09, 0.45, 0.46, steel);
+        }
+      }
+    }
+    if (style >= 2) {
+      const mid = (a0 + a1) / 2, idx = asian ? 4 + (Math.abs(Math.round(a0)) % 2) : Math.abs(Math.round(a0 + fix)) % 4;
+      const lo = asian ? mid + 2 : mid - 2.8, hi = asian ? mid + 3.2 : mid + 2.8, y0 = asian ? 3.6 : 2.9, y1 = asian ? 7.2 : 4.1;
+      const d = asian ? 0.6 : 0.18;
+      box(lo - 0.08, hi + 0.08, y0 - 0.08, y1 + 0.08, 0, d, steel);
+      const p = (a, y) => axis === 'x' ? [a, y, fix + out * (d + 0.012)] : [fix + out * (d + 0.012), y, a];
+      const uv = shopUV(idx), pts = [p(lo, y0), p(hi, y0), p(hi, y1), p(lo, y1)];
+      // 正面頂點朝向 +Z／-X，其餘面反轉繞序。
+      if (axis === 'x' ? out < 0 : out > 0) { pts.reverse(); uv.reverse(); }
+      signs.quad(...pts, axis === 'x' ? [0, 0, out] : [out, 0, 0], uv, [0.85, 0.85, 0.85]);
+    }
+  }
+  // 一部分矮樓用斜屋頂，打破全城等高的平頂盒子；不改城市生成亂數序列。
+  const key = Math.abs(Math.round(x0 * 3 + z0 * 7));
+  if (style >= 2 && H < 40 && key % 3 === 0) {
+    const y = H + 0.15, peak = y + Math.min(5, (x1 - x0) * 0.16), xm = (x0 + x1) / 2;
+    const face = (a, b, c, d) => {
+      const n = new THREE.Vector3().subVectors(new THREE.Vector3(...b), new THREE.Vector3(...a)).cross(new THREE.Vector3().subVectors(new THREE.Vector3(...c), new THREE.Vector3(...a))).normalize();
+      B.quad(a, b, c, d, n.toArray(), [[0, 0], [0, (z1 - z0) / 4], [(x1 - x0) / 8, (z1 - z0) / 4], [(x1 - x0) / 8, 0]], [0.36, 0.29, 0.24]);
+    };
+    face([x0, y, z0], [x0, y, z1], [xm, peak, z1], [xm, peak, z0]);
+    face([xm, peak, z0], [xm, peak, z1], [x1, y, z1], [x1, y, z0]);
+    face([x0, y, z1], [x1, y, z1], [xm, peak, z1], [xm, peak, z1]);
+    face([x1, y, z0], [x0, y, z0], [xm, peak, z0], [xm, peak, z0]);
+  }
+}
+function roofTank(B, x, z, y, radius, h) {
+  const col = [0.56, 0.58, 0.56], N = 12;
+  for (let i = 0; i < N; i++) {
+    const a = i / N * Math.PI * 2, b = (i + 1) / N * Math.PI * 2;
+    const p = [x + Math.cos(a) * radius, z + Math.sin(a) * radius], q = [x + Math.cos(b) * radius, z + Math.sin(b) * radius];
+    B.quad([q[0], y, q[1]], [p[0], y, p[1]], [p[0], y + h, p[1]], [q[0], y + h, q[1]], [Math.cos((a + b) / 2), 0, Math.sin((a + b) / 2)], [[b, 0], [a, 0], [a, h / 3], [b, h / 3]], col);
+    B.quad([x, y + h, z], [q[0], y + h, q[1]], [p[0], y + h, p[1]], [p[0], y + h, p[1]], [0, 1, 0], [[0.5, 0.5], [1, 0], [0, 0], [0, 0]], col);
+  }
+}
+
 // 照片立面＋隨機亮燈窗＋煙燻／雨痕／燒焦
 function buildingMaterial(A, fi) {
   const F = FACADES[fi], [col, nor, arm] = A.fac[fi];
@@ -462,7 +550,10 @@ function buildingMaterial(A, fi) {
         float bfac = soot;`)
       .replace('#include <roughnessmap_fragment>', `#include <roughnessmap_fragment>
         float winMask = 1.0 - smoothstep(0.25, 0.55, texelRoughness.g);
+        roughnessFactor = mix(roughnessFactor, 0.16 + 0.1 * bh(floor(vMapUv * vec2(16.0, 10.0))), winMask * (1.0 - bfac));
         roughnessFactor = mix(roughnessFactor, 0.95, bfac);`)
+      .replace('#include <metalnessmap_fragment>', `#include <metalnessmap_fragment>
+        metalnessFactor = winMask * (1.0 - bfac) * 0.28;`)
       .replace('#include <emissivemap_fragment>', `
         vec2 cell = floor(vMapUv * vec2(${F.cols.toFixed(1)}, ${F.rows.toFixed(1)}));
         float hsh = bh(cell * 1.37 + floor(vBW.xz / 6.0) * 0.013);
@@ -586,7 +677,7 @@ function pylonGeometry() {
 
 // ---------------------------------------------------------------- 世界
 export class World {
-  constructor(renderer, scene, A) {
+  constructor(renderer, scene, A, { terrainSegments = 160 } = {}) {
     this.scene = scene;
     this.A = A;
     this.boxes = [];          // {x0,x1,z0,z1,top}
@@ -623,7 +714,7 @@ export class World {
     sun.shadow.mapSize.set(4096, 4096);
     const sc = sun.shadow.camera;
     sc.left = -260; sc.right = 260; sc.top = 260; sc.bottom = -260; sc.near = 10; sc.far = 2400;
-    sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.9;
+    sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.28;
     sun.shadow.autoUpdate = false;   // 影子圖每兩格重畫一次（followShadow 裡開關），省一半顯示卡工
     scene.add(sun, sun.target);
     this.sun = sun;
@@ -631,7 +722,7 @@ export class World {
     scene.add(hemi);
 
     // 地形
-    this.terrain = new Terrain();
+    this.terrain = new Terrain(10000, terrainSegments);
     const tmesh = new THREE.Mesh(this.terrain.geometry(), terrainMaterial(A));
     tmesh.receiveShadow = true;
     scene.add(tmesh);
@@ -756,7 +847,8 @@ export class World {
     const inner = new THREE.MeshStandardMaterial({ color: 0x16130f, roughness: 1, vertexColors: true });
     const CH = 3; // 3×3 區塊
     const buckets = [];
-    for (let i = 0; i < CH * CH; i++) buckets.push({ f: FACADES.map(() => new GeoBucket()), roof: new GeoBucket(), inner: new GeoBucket() });
+    const signMat = shopMaterial();
+    for (let i = 0; i < CH * CH; i++) buckets.push({ f: FACADES.map(() => new GeoBucket()), roof: new GeoBucket(), inner: new GeoBucket(), signs: new GeoBucket() });
     const chunkOf = (x, z) => {
       const cx = Math.min(CH - 1, Math.max(0, Math.floor((x + CITY.half) / (2 * CITY.half) * CH)));
       const cz = Math.min(CH - 1, Math.max(0, Math.floor((z + CITY.half) / (2 * CITY.half) * CH)));
@@ -789,11 +881,14 @@ export class World {
         if (r() < 0.12) continue;
         const sh = 0.04 * (a1 - a0);
         const x0 = a0 + r() * sh * 2, x1 = a1 - r() * sh * 2, z0 = c0 + r() * sh * 2, z1 = c1 - r() * sh * 2;
-        const floors = Math.max(3, Math.round((8 + r() * r() * 42) * hScale * (kind === 'ruin' ? 0.8 : 1)));
+        const district = dist < 230 ? 'core' : bx < -120 && bz < 480 ? 'old' : bx > 120 && bz < 240 ? 'east' : 'mixed';
+        const rawFloors = Math.max(3, Math.round((8 + r() * r() * 42) * hScale * (kind === 'ruin' ? 0.8 : 1)));
+        const floors = district === 'old' ? Math.min(8, rawFloors) : district === 'east' ? Math.min(14, rawFloors) : rawFloors;
         const H = floors * 3.6;
         const ruin = kind === 'ruin' ? true : r() < 0.08;
         // 0 玻璃帷幕 1 辦公 2 紅磚 3 混凝土 4 磚柱
-        const style = ruin ? 2 + ((r() * 3) | 0) : (H > 75 ? (r() < 0.6 ? 0 : 1) : H > 45 ? [1, 3, 4, 0][(r() * 4) | 0] : 2 + ((r() * 3) | 0));
+        const rawStyle = ruin ? 2 + ((r() * 3) | 0) : (H > 75 ? (r() < 0.6 ? 0 : 1) : H > 45 ? [1, 3, 4, 0][(r() * 4) | 0] : 2 + ((r() * 3) | 0));
+        const style = !ruin && district === 'old' ? (bi % 2 ? 2 : 4) : !ruin && district === 'east' ? (bj % 2 ? 3 : 4) : rawStyle;
         const F = FACADES[style];
         const tint = 0.8 + r() * 0.3;
         const col = [tint, tint * (0.97 + r() * 0.05), tint * (0.93 + r() * 0.07), ruin ? 0.75 + r() * 0.25 : (r() < 0.15 ? 0.35 : 0)];
@@ -801,7 +896,7 @@ export class World {
         const bk = chunkOf((x0 + x1) / 2, (z0 + z1) / 2);
         if (!ruin) {
           // 可破壞：記下這棟在各合併網格裡的頂點區段（每棟連續寫入）
-          const rec = { fB: bk.f[style], rB: bk.roof, f0: bk.f[style].p.length / 3, r0: bk.roof.p.length / 3, lamp: -1, x0, x1, z0, z1 };
+          const rec = { fB: bk.f[style], rB: bk.roof, sB: bk.signs, f0: bk.f[style].p.length / 3, r0: bk.roof.p.length / 3, s0: bk.signs.p.length / 3, lamp: -1, x0, x1, z0, z1 };
           const nLamp = this.lampSites.length;
           addWalls(bk.f[style], x0, x1, z0, z1, 0, H, col, uo, 0, null, F);
           const rc = [0.75, 0.75, 0.75];
@@ -815,7 +910,8 @@ export class World {
           for (let k = 0; k < nEq; k++) {
             const ew = 3 + r() * 8, ed = 3 + r() * 8, eh = 2 + r() * 4;
             const ex = THREE.MathUtils.lerp(x0 + 2, x1 - 2 - ew, r()), ez = THREE.MathUtils.lerp(z0 + 2, z1 - 2 - ed, r());
-            addBox(bk.roof, ex, ex + ew, H, H + eh, ez, ez + ed, [0.6, 0.6, 0.62]);
+            if (k === 0 && style >= 2) roofTank(bk.roof, ex + ew / 2, ez + ed / 2, H, Math.min(ew, ed) * 0.4, eh);
+            else addBox(bk.roof, ex, ex + ew, H, H + eh, ez, ez + ed, [0.6, 0.6, 0.62]);
           }
           // 塔樓頂層退縮
           if (H > 60 && r() < 0.6) {
@@ -825,9 +921,11 @@ export class World {
             if (r() < 0.5) this.lampSites.push(new THREE.Vector3((x0 + x1) / 2, H2 + 8, (z0 + z1) / 2)); // 屋頂紅燈
             addBox(bk.roof, (x0 + x1) / 2 - 0.3, (x0 + x1) / 2 + 0.3, H2, H2 + 8, (z0 + z1) / 2 - 0.3, (z0 + z1) / 2 + 0.3, [0.4, 0.4, 0.4]);
           }
+          architecture(bk.roof, bk.signs, x0, x1, z0, z1, H, style, F);
           rec.box = { x0, x1, z0, z1, top: H + 0.2 };
           this.addCollider(rec.box);
           rec.f1 = rec.fB.p.length / 3; rec.r1 = rec.rB.p.length / 3; rec.H = H;
+          rec.s1 = bk.signs.p.length / 3;
           if (this.lampSites.length > nLamp) rec.lamp = nLamp;
           (this._recs || (this._recs = [])).push(rec);
         } else {
@@ -873,6 +971,8 @@ export class World {
       if (rg) { const m = new THREE.Mesh(rg, roofMat); m.castShadow = m.receiveShadow = true; this.scene.add(m); }
       const ig = bk.inner.geometry();
       if (ig) { const m = new THREE.Mesh(ig, inner); m.castShadow = true; m.receiveShadow = true; this.scene.add(m); }
+      const sg = bk.signs.geo = bk.signs.geometry();
+      if (sg) { const m = new THREE.Mesh(sg, signMat); m.receiveShadow = true; this.scene.add(m); }
     }
     this._initBlds();
   }
@@ -883,7 +983,7 @@ export class World {
     this.blds = [];
     for (const R of this._recs || []) {
       const pa = R.fB.geo.attributes.position, ba = R.fB.geo.attributes.burn, qa = R.rB.geo.attributes.position;
-      const seg = [[pa, R.f0, R.f1 - R.f0], [qa, R.r0, R.r1 - R.r0]].filter((s) => s[2] > 0)
+      const seg = [[pa, R.f0, R.f1 - R.f0], [qa, R.r0, R.r1 - R.r0], [R.sB.geo?.attributes.position, R.s0, R.s1 - R.s0]].filter((s) => s[2] > 0)
         .map(([a, s, n]) => ({ a, s, o: a.array.slice(s * 3, (s + n) * 3) }));
       let top = R.H;
       for (const g of seg) for (let i = 1; i < g.o.length; i += 3) top = Math.max(top, g.o[i]);
@@ -1286,6 +1386,17 @@ export class World {
       return cx < CITY.road || cz < CITY.road;
     };
     const blocked = (x, z, pad = 1) => this.nearBoxes(x, z, pad + 2, []).some((b) => x > b.x0 - pad && x < b.x1 + pad && z > b.z0 - pad && z < b.z1 + pad);
+
+    // 街道尺度參照：真正有厚度的路緣石，整座城市合成一個網格。
+    const curb = new GeoBucket();
+    for (const bl of this.blocks) {
+      const x0 = bl.x - CITY.block / 2 + CITY.road, x1 = bl.x + CITY.block / 2 - CITY.road;
+      const z0 = bl.z - CITY.block / 2 + CITY.road, z1 = bl.z + CITY.block / 2 - CITY.road, c = [0.62, 0.6, 0.55];
+      for (const x of [x0, x1]) addBox(curb, x - 0.14, x + 0.14, 0, 0.16, z0, z1, c, 1.4);
+      for (const z of [z0, z1]) addBox(curb, x0, x1, 0, 0.16, z - 0.14, z + 0.14, c, 1.4);
+    }
+    const curbMesh = new THREE.Mesh(curb.geometry(), new THREE.MeshStandardMaterial({ map: this.A.rockD, normalMap: this.A.rockN, roughness: 0.92, vertexColors: true }));
+    curbMesh.receiveShadow = true; scene.add(curbMesh);
 
     // --- 路燈 ---
     const lamps = [];

@@ -370,7 +370,7 @@ export function chunk(i) {
         v.multiplyScalar(n); v.x *= sx; v.y *= sy; v.z *= sz;
         P.setXYZ(j, v.x, v.y, v.z);
       }
-      const ng = g.toNonIndexed(); ng.computeVertexNormals();   // 平面著色：斷面清楚
+      const ng = g.index ? g.toNonIndexed() : g.clone(); ng.computeVertexNormals();   // 平面著色：斷面清楚
       ng.translate(0, sy * 0.6, 0);
       CHUNKS.push(ng);
     }

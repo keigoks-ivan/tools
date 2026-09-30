@@ -82,6 +82,7 @@ export class Post {
     const size = renderer.getDrawingBufferSize(new THREE.Vector2());
     const rt = new THREE.WebGLRenderTarget(size.x, size.y, { type: THREE.HalfFloatType, samples: 4 });
     this.composer = new EffectComposer(renderer, rt);
+    this.composer.setPixelRatio(1);
     this.world = new RenderPass(worldScene, camera);
     // 環境光遮蔽（半解析度）：透明的煙、只投影不顯示的機身不算
     this.gtao = new GTAOPass(worldScene, camera, size.x / 2, size.y / 2, undefined,
@@ -103,8 +104,7 @@ export class Post {
     this.gtao.render = (r, wb, rb, dt, mask) => {
       const au = r.shadowMap.autoUpdate;
       r.shadowMap.autoUpdate = false;
-      gr(r, wb, rb, dt, mask);
-      r.shadowMap.autoUpdate = au;
+      try { gr(r, wb, rb, dt, mask); } finally { r.shadowMap.autoUpdate = au; }
       const g = this.gtao, m = g.blendMaterial;
       m.uniforms.intensity.value = g.blendIntensity;
       m.uniforms.tDiffuse.value = g.pdRenderTarget.texture;
@@ -150,11 +150,19 @@ export class Post {
     this.u.tBloom.value = this.bloom.renderTargetsHorizontal[0].texture;
   }
   setSize(w, h) {
-    this.composer.setSize(w, h);
     const s = this.renderer.getDrawingBufferSize(new THREE.Vector2());
+    this.composer.setSize(s.x, s.y);
     this.u.res.value.set(s.x, s.y);
   }
+  setQuality(q) {
+    const samples = [0, 2, 4][q];
+    for (const rt of [this.composer.renderTarget1, this.composer.renderTarget2]) {
+      if (rt.samples !== samples) { rt.samples = samples; rt.dispose(); }
+    }
+  }
   render(t) {
+    this.gtao.blendMaterial.uniforms.cNear.value = this.world.camera.near;
+    this.gtao.blendMaterial.uniforms.cFar.value = this.world.camera.far;
     this.u.time.value = t;
     this.u.bloomK.value = this.bloom.enabled ? 1 : 0;
     this.u.toneMappingExposure.value = this.renderer.toneMappingExposure;

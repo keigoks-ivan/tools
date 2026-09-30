@@ -22,7 +22,7 @@ export class Input {
       this.keys.add(k);
     });
     addEventListener('keyup', (e) => { const k = e.code; if (this.keys.has(k)) this.up.add(k); this.keys.delete(k); });
-    addEventListener('blur', () => { for (const k of this.keys) this.up.add(k); this.keys.clear(); });
+    addEventListener('blur', () => this.reset());
     canvas.addEventListener('mousedown', (e) => {
       if (!this.enabled) return;
       const k = 'M' + e.button;
@@ -39,10 +39,18 @@ export class Input {
     });
     document.addEventListener('pointerlockchange', () => {
       this.locked = document.pointerLockElement === canvas;
-      if (!this.locked) { for (const k of this.keys) this.up.add(k); this.keys.clear(); }
+      if (!this.locked) this.reset();
       if (this.onLockChange) this.onLockChange(this.locked);
     });
     this.initTouch();
+  }
+
+  reset() {
+    this.keys.clear(); this.down.clear(); this.up.clear();
+    this.mdx = this.mdy = this.shiftT = 0;
+    this.touch.mx = this.touch.my = 0; this.touch.pad = this.touch.look = null;
+    const knob = document.querySelector('#tPad i');
+    if (knob) knob.style.transform = '';
   }
 
   lock() {

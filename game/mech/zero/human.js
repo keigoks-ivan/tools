@@ -21,6 +21,22 @@ export const LOOKS = {
   pilot: { armor: 0xdfe2de, cloth: 0x1c2f63, accent: 0xb6262e, under: 0x14161b, eye: [0.3, 2.2, 3] },
 };
 
+// 共用布料微表面，沿模型 UV 固定，不增加材質數或下載。
+function fabricSurface(sh) {
+  sh.fragmentShader = sh.fragmentShader
+    .replace('#include <roughnessmap_fragment>', `#include <roughnessmap_fragment>
+      float fabricK = smoothstep(0.78, 0.93, roughnessFactor);
+      vec2 weaveUV = vMapUv * 900.0;
+      float weaveFade = 1.0 - smoothstep(0.25, 0.8, max(fwidth(weaveUV.x), fwidth(weaveUV.y)));
+      float weave = sin(weaveUV.x * 6.283185) * sin(weaveUV.y * 6.283185) * weaveFade * fabricK;
+      roughnessFactor = clamp(roughnessFactor + weave * 0.035, 0.18, 1.0);`)
+    .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
+      vec3 wx = dFdx(-vViewPosition), wy = dFdy(-vViewPosition);
+      vec3 wrx = cross(wy, normal), wry = cross(normal, wx);
+      float wd = dot(wx, wrx);
+      if (abs(wd) > 1e-10) normal = normalize(abs(wd) * normal - sign(wd) * (dFdx(weave) * wrx + dFdy(weave) * wry) * 0.000035);`);
+}
+
 // ---------------------------------------------------------------- 資源
 export class HumanKit {
   static async load(url) {
@@ -67,8 +83,8 @@ export class HumanKit {
       const metal = s(4, 16, b - r) * s(50, 90, L) * (1 - tan) * (1 - green);
       const dark = (1 - s(35, 70, L)) * (1 - red) * (1 - tan) * (1 - green) * (1 - metal);
       M[i * 5] = tan; M[i * 5 + 1] = green; M[i * 5 + 2] = red; M[i * 5 + 3] = metal; M[i * 5 + 4] = dark;
-      // 粗糙度：甲 0.5、布 0.92、金屬 0.35、內襯 0.8；掉漆處（甲上暗點）更粗
-      const rough = 0.5 * tan + 0.92 * green + 0.48 * red + 0.35 * metal + 0.8 * dark + 0.75 * (1 - tan - green - red - metal - dark);
+      // 粗糙度：甲 0.4、布 0.94、金屬 0.3、內襯 0.86；掉漆處（甲上暗點）更粗
+      const rough = 0.4 * tan + 0.94 * green + 0.44 * red + 0.3 * metal + 0.86 * dark + 0.75 * (1 - tan - green - red - metal - dark) + (1 - L / 255) * tan * 0.16;
       orm[i * 4] = 255; orm[i * 4 + 1] = clamp(rough, 0.05, 1) * 255; orm[i * 4 + 2] = clamp(metal * 0.85 + tan * 0.05, 0, 1) * 255; orm[i * 4 + 3] = 255;
     }
     this.src = src; this.masks = M; this.W = W; this.H = H;
@@ -84,7 +100,7 @@ export class HumanKit {
     const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
     const cx = cv.getContext('2d');
     const id = cx.createImageData(W, H), o = id.data;
-    const col = (hex) => { const c = new THREE.Color(hex); return [c.r * 255, c.g * 255, c.b * 255]; };
+    const col = (hex) => { const c = new THREE.Color(hex).convertLinearToSRGB(); return [c.r * 255, c.g * 255, c.b * 255]; };
     // 新顏色 × (像素亮度 ÷ 該區平均亮度)：保留刮痕、掉漆、髒污
     const A = col(P.armor), C = col(P.cloth), R = col(P.accent), U = col(P.under);
     for (let i = 0; i < n; i++) {
@@ -103,7 +119,8 @@ export class HumanKit {
     const map = new THREE.CanvasTexture(cv);
     map.colorSpace = THREE.SRGBColorSpace; map.flipY = this.baseMap.flipY; map.anisotropy = 4;
     map.wrapS = map.wrapT = THREE.RepeatWrapping;
-    const body = new THREE.MeshStandardMaterial({ map, normalMap: this.normalMap, roughnessMap: this.orm, metalnessMap: this.orm, roughness: 1, metalness: 1, envMapIntensity: 1.0 });
+    const body = new THREE.MeshStandardMaterial({ map, normalMap: this.normalMap, roughnessMap: this.orm, metalnessMap: this.orm, roughness: 1, metalness: 1, envMapIntensity: 1.0, normalScale: new THREE.Vector2(0.75, 0.75) });
+    body.onBeforeCompile = fabricSurface;
     const visor = new THREE.MeshStandardMaterial({ color: 0x0b0c0e, roughness: 0.12, metalness: 0.9, emissive: new THREE.Color(P.eye[0], P.eye[1], P.eye[2]).multiplyScalar(0.012), envMapIntensity: 1.6 });
     const eye = new THREE.MeshBasicMaterial({ color: new THREE.Color(P.eye[0], P.eye[1], P.eye[2]), toneMapped: true, fog: true });
     return (this.mats[look] = { body, visor, eye });
@@ -113,6 +130,7 @@ export class HumanKit {
     const k = look + (armor ? ':armor' : ':hit'), F = (this.flashMats ||= {});
     if (F[k]) return F[k];
     const m = this.material(look).body.clone();
+    m.onBeforeCompile = fabricSurface;
     m.emissive = armor ? new THREE.Color(0.5, 0.68, 1) : new THREE.Color(1, 0.4, 0.16); m.emissiveIntensity = armor ? 0.38 : 0.3;
     return (F[k] = m);
   }

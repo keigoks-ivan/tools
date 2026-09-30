@@ -2,6 +2,7 @@
 //   流程：標題（選章節）→ 開場字卡 → 第一人稱戰鬥（章節／遭遇戰／檢查點）→ 機庫爬上鋼彈 → 跳進駕駛艙 → 接到《鋼鐵黃昏》的駕駛艙
 //   除錯：?ch=1..3 直接開章、?x=&z=&yaw= 指定位置、?god 無敵、?mute 靜音、?final 直接到最後一幕
 import * as THREE from 'three';
+import { qualityLevel, pixelRatio, FrameGate } from '../runtime.js';
 
 // 本篇的 env.js 用相對路徑 './assets/' 讀天空、HDR、城市貼圖：
 //   前傳有縮小的 webp 版（assets/env/，遠景看不出差別、下載少 12 MB）；沒有的才去本篇資料夾拿
@@ -52,7 +53,7 @@ const [A, SURF, MODELS, kit] = await Promise.all([
 status.textContent = '建立街區';
 await new Promise((r) => setTimeout(r, 0));
 initMechMaterials(A);
-const world = new World(renderer, scene, A);
+const world = new World(renderer, scene, A, { terrainSegments: 72 });
 // 街區內原本的路燈、車、樹拿掉（地圖自己擺道具）
 {
   const zero = new THREE.Matrix4().makeScale(0, 0, 0);
@@ -187,18 +188,21 @@ for (const id in map.targets) { const T = map.targets[id]; T.obj = D.objs.find((
 const _v = new THREE.Vector3(), _w = new THREE.Vector3();
 
 // ---------------------------------------------------------------- 設定
-const store = { get: (k, d) => { try { const v = localStorage.getItem('zero.' + k); return v === null ? d : +v; } catch (e) { return d; } }, set: (k, v) => { try { localStorage.setItem('zero.' + k, v); } catch (e) {} } };
-let quality = store.get('q', 1);
+const store = { get: (k, d) => { try { const v = localStorage.getItem('zero.' + k); const n = v === null ? d : +v; return Number.isFinite(n) ? n : d; } catch (e) { return d; } }, set: (k, v) => { try { localStorage.setItem('zero.' + k, v); } catch (e) {} } };
+let quality = store.get('q', 1), M6 = null;
 function setQuality(qv) {
-  quality = qv; store.set('q', qv);
-  renderer.setPixelRatio(Math.min(devicePixelRatio, [0.75, 1, 1.5][qv]));
+  qv = qualityLevel(qv); quality = qv; store.set('q', qv);
+  renderer.setPixelRatio(pixelRatio(innerWidth, innerHeight, devicePixelRatio, qv));
   renderer.setSize(innerWidth, innerHeight);
   post.setSize(innerWidth, innerHeight);
+  post.setQuality(qv);
   post.gtao.enabled = qv > 1;   // AO 要整個場景多畫一次：只在高畫質開
-  world.sun.shadow.mapSize.setScalar(qv > 0 ? 4096 : 2048);
+  world.sun.shadow.mapSize.setScalar([1024, 2048, 4096][qv]);
+  world.sun.shadow.needsUpdate = true;
   if (world.sun.shadow.map) { world.sun.shadow.map.dispose(); world.sun.shadow.map = null; }
   renderer.shadowMap.type = qv > 0 ? THREE.PCFSoftShadowMap : THREE.PCFShadowMap;
   fx.quality = qv;
+  if (M6) M6.setQuality(qv);
   document.querySelectorAll('[data-q]').forEach((b) => { b.style.background = +b.dataset.q === qv ? 'rgba(127,243,255,0.25)' : ''; });
 }
 setQuality(quality);
@@ -221,7 +225,10 @@ const de = document.documentElement, fsBtns = document.querySelectorAll('.fs');
 const fsOn = () => document.fullscreenElement || document.webkitFullscreenElement;
 if (!(document.fullscreenEnabled || document.webkitFullscreenEnabled)) fsBtns.forEach((b) => { b.style.display = 'none'; });
 fsBtns.forEach((b) => b.addEventListener('click', () => { try { const p = fsOn() ? (document.exitFullscreen || document.webkitExitFullscreen).call(document) : (de.requestFullscreen || de.webkitRequestFullscreen).call(de, { navigationUI: 'hide' }); if (p && p.catch) p.catch(() => {}); } catch (e) {} }));
+document.addEventListener('visibilitychange', () => { if (document.hidden) pause(); });
+addEventListener('blur', () => pause());
 addEventListener('resize', () => {
+  renderer.setPixelRatio(pixelRatio(innerWidth, innerHeight, devicePixelRatio, quality));
   renderer.setSize(innerWidth, innerHeight);
   camera.aspect = vCam.aspect = innerWidth / innerHeight;
   camera.updateProjectionMatrix(); vCam.updateProjectionMatrix();
@@ -232,7 +239,7 @@ addEventListener('resize', () => {
 const done = new Set();         // 已清完的遭遇
 let active = [];                // 進行中 {E, list}
 let chapter = 1, checkpoint = null, stage = 'play';
-let mechWalk = null, finale = null, hatchOpen = 0, alarmOn = false, M6 = null;   // M6＝第 6 章（mech6.js）進行中
+let mechWalk = null, finale = null, hatchOpen = 0, alarmOn = false;   // M6＝第 6 章（mech6.js）進行中
 const progress = () => store.get('ch', 1);
 
 // 手榴彈的樣子：墨綠色小圓柱＋一顆閃爍的紅燈（越接近爆炸閃越快）
@@ -776,6 +783,7 @@ async function startMech() {
   try {
     const { startMech: go } = await import('./mech6.js');
     M6 = await go({ renderer, scene, camera, vScene, vCam, post, world, hero, audio, input, zhud: hud, solid, D, fxl: fx, G, S, $, pause, exit: (u) => { location.href = u; } });
+    M6.setQuality(quality);
   } catch (e) { console.error('[zero] 第 6 章載入失敗', e); location.href = '../?zero=1'; }
 }
 const ease = (t) => t * t * (3 - 2 * t);
@@ -850,7 +858,7 @@ function updateMechWalk(dt) {
 // ---------------------------------------------------------------- 流程
 let state = 'title';
 function renderChapters() {
-  const nx = q.has('all') ? 3 : progress();
+  const nx = q.has('all') ? S.CHAPTERS.length : progress();
   $('chapters').innerHTML = S.CHAPTERS.map((C) => `<button class="chp${C.n > nx ? ' lock' : ''}${C.n === nx ? ' next' : ''}" data-c="${C.n}"${C.n > nx ? ' disabled' : ''}><b>CHAPTER ${C.n}</b><span>${C.n > nx ? 'LOCKED' : C.name}</span></button>`).join('');
 }
 status.textContent = '選擇章節';
@@ -904,7 +912,7 @@ function begin(n) {
 }
 function pause() {
   if (state !== 'play') return;
-  state = 'paused'; $('pause').style.display = 'flex'; audio.setPaused(true);
+  state = 'paused'; $('pause').style.display = 'flex'; audio.setPaused(true); input.reset();
 }
 function resume() {
   $('pause').style.display = 'none'; audio.setPaused(false);
@@ -924,8 +932,12 @@ function toTitle() {
 // ---------------------------------------------------------------- 主迴圈
 const clock = new THREE.Clock();
 let titleT = 0, crouchToggle = false;
-function frame() {
+const frameGate = new FrameGate();
+const FPS = q.has('fps') ? +q.get('fps') : 60;
+function frame(now = performance.now()) {
   requestAnimationFrame(frame);
+  if (document.hidden || state === 'paused') { clock.getDelta(); input.endFrame(); return; }
+  if (!frameGate.ready(now, state === 'title' ? 30 : FPS)) return;
   const dt = Math.min(0.05, clock.getDelta());
   if (state === 'paused') { input.endFrame(); return; }
   G.t += dt;
