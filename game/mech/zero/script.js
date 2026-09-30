@@ -216,12 +216,31 @@ export const ENCOUNTERS = [
       { type: 'trooper', x: 24, z: 48, yaw: Math.PI / 2 },
     ],
     lines: [[OP, '他們已經攻進設施了。走廊很窄——手槍比較好用（按 2）。', NOW]],
-    done: [[OP, '機庫門就在走廊盡頭。']],
+    done: [[OP, '設施清掉了。……等等，維修架沒電。'], [OP, '他們把配電箱的保險絲拔了。沒電，艙門打不開。'], [ME, '控制室有備用的。我去拿。']],
   },
   {
-    id: 'G1', ch: 5, fight: '清除機庫裡的敵人', route: [[28, 29], [28, 33], [32, 37], [32, 47]], guide: [32, 56], obj: '奪回第七機庫', mark: null,
+    // 潛行：機庫派三個人過來查看（從機庫南門進走廊，巡控制室、倉庫、營房）；被看到就叫增援。保險絲在控制室桌上
+    id: 'F2', ch: 5, obj: '去控制室拿保險絲', fight: '拿保險絲，別被發現', route: [[28, 29], [28, 33], [32, 35], [32, 43]], guide: [36, 43],
+    trigger: (p) => p.x > 34.6 && p.x < 44 && p.z > 36.5 && p.z < 51.6,
+    enemies: [
+      { type: 'trooper', x: 32, z: 55.5, yaw: Math.PI, patrol: [[32, 50.5], [32, 37.5]] },
+      { type: 'officer', x: 31.2, z: 57.2, yaw: Math.PI, patrol: [[32, 44], [36, 43], [40.5, 41.5], [40.5, 49.5], [40.5, 41.5], [36, 43], [32, 44], [32, 50.5]] },
+      { type: 'trooper', x: 32.8, z: 56.8, yaw: Math.PI, patrol: [[32, 47], [28.2, 47], [28.2, 45], [22.5, 45], [28.2, 45], [28.2, 47], [32, 47], [32, 40], [26.5, 40], [32, 40], [32, 50.5]] },
+    ],
+    stealth: {
+      // 增援直接出在走廊北端（出在機庫裡的話，隔著牆走不進設施）
+      reinforce: [{ type: 'trooper', x: 32, z: 50.8, yaw: Math.PI }, { type: 'trooper', x: 31.1, z: 49.4, yaw: Math.PI }, { type: 'trooper', x: 32.9, z: 49.4, yaw: Math.PI }],
+      lines: [[EN, '設施裡有人！全員過來！'], [OP, '被發現了……打吧，零號！']],
+    },
+    pickups: [{ id: 'fuse', text: '按 E　拿保險絲', lines: [[ME, '拿到了。']] }], itemName: '保險絲',
+    lines: [[EN, '第二小隊，去設施看一下。剛才有槍聲。', NOW], [OP, '機庫那邊有人過來了。躲好，別讓他們叫人。', NOW]],
+    done: [[OP, '好。機庫門在走廊盡頭。']],
+  },
+  {
+    id: 'G1', ch: 5, fight: '阻止他們拖走蒼焰', route: [[32, 43], [32, 50]], guide: [32, 56], obj: '奪回第七機庫', mark: null,
     trigger: (p) => p.z > 53.5,
     alarm: true,
+    targets: ['tow1', 'tow2'], tgName: '發電機',
     enemies: [
       { type: 'trooper', x: 26, z: 70, yaw: Math.PI },
       { type: 'trooper', x: 40, z: 72, yaw: Math.PI },
@@ -232,12 +251,56 @@ export const ENCOUNTERS = [
       { type: 'drone', x: 30, z: 80, y: 9 },
       { type: 'drone', x: 50, z: 80, y: 10 },
     ],
-    lines: [[OP, '那就是蒼焰……他們想把它拖走！', NOW], [OP, '把機庫裡的敵人清乾淨，然後上維修架。', NOW]],
-    done: [[EN, '所有單位，第七機庫，東門突入！', NOW], [OP, '東邊大門還有增援——撐住！', NOW]],
+    lines: [[OP, '那就是蒼焰……他們想把它拖走！', NOW], [OP, '拖吊機靠東門那兩台發電機。打爆它們！', NOW]],
+    done: [[OP, '拖吊機停了。'], [OP, '配電箱在西側走道，保險絲裝回去就有電。']],
+  },
+  {
+    // 走道：西側走道（y 7）上的兩個配電箱裝回保險絲；對面東側走道有狙擊手，北側走道和上層平台有人守
+    id: 'G3', ch: 5, obj: '上西側走道', fight: '裝回保險絲', route: [[14, 68], [14.1, 55.2, 7]], guide: [11.3, 54.6, 7],
+    trigger: (p) => p.y > 6 && p.x < 13,
+    enemies: [
+      { type: 'sniper', x: 68.5, z: 99, y: 7, yaw: -Math.PI / 2, post: true },
+      { type: 'officer', x: 27, z: 110.5, y: 12.4, yaw: -Math.PI * 0.75, post: true },
+      { type: 'trooper', x: 25, z: 110.4, y: 7, yaw: -Math.PI / 2, post: true },
+      { type: 'trooper', x: 21, z: 110.6, y: 12.4, yaw: -Math.PI * 0.8, post: true },
+      { type: 'drone', x: 34, z: 86, y: 10 },
+    ],
+    pickups: [{ id: 'panel1', text: '按 E　裝上保險絲', lines: [[ME, '南邊這個裝好了。']] }, { id: 'panel2', text: '按 E　裝上保險絲', lines: [[ME, '北邊這個裝好了。']] }], itemName: '配電箱',
+    lines: [[EN, '走道上有人！', NOW], [OP, '對面走道有狙擊手。看到紅線就蹲低。', NOW]],
+    done: [[OP, '電來了……維修架有反應了。'], [OP, '我開始跑開機檢查。']],
+  },
+  {
+    // 守點：開機檢查 40 秒，每 4 秒一波：東門進來的步兵，無人機，還有爬上對面走道（東南角平台、東側、北側走道、維修架東側）守著打的
+    //   地面的步兵找不到人會躲到西側走道底下（從上面打不到）、從南門進來的會退回設施走廊，所以一半的增援放在對面的走道上、地面的都從東門進來
+    id: 'G4', ch: 5, obj: '守住機庫', fight: '撐到開機檢查完成', guide: [11.8, 90, 7],
+    after: 'G3', wait: 3,
+    enemies: [
+      { type: 'trooper', x: 73, z: 66, yaw: -Math.PI / 2, alert: true },
+      { type: 'trooper', x: 73, z: 71, yaw: -Math.PI / 2, alert: true },
+      { type: 'drone', x: 72, z: 68, y: 9, alert: true },
+    ],
+    hold: {
+      t: 40, gap: 4,
+      waves: [
+        [{ type: 'trooper', x: 73, z: 63, yaw: -Math.PI / 2 }],
+        [{ type: 'sniper', x: 68.6, z: 54.5, y: 7, yaw: -Math.PI / 2, post: true }],
+        [{ type: 'drone', x: 74, z: 70, y: 9 }],
+        [{ type: 'trooper', x: 73, z: 73, yaw: -Math.PI / 2 }],
+        [{ type: 'trooper', x: 60, z: 110.5, y: 7, yaw: -Math.PI * 0.75, post: true }, { type: 'trooper', x: 64, z: 110.6, y: 7, yaw: -Math.PI * 0.75, post: true }],
+        [{ type: 'drone', x: 74, z: 62, y: 10 }],
+        [{ type: 'officer', x: 74, z: 66, yaw: -Math.PI / 2 }],
+        [{ type: 'trooper', x: 48.6, z: 107, y: 12.4, yaw: -Math.PI / 2, post: true }, { type: 'trooper', x: 68.5, z: 93, y: 7, yaw: -Math.PI / 2, post: true }],
+        [{ type: 'drone', x: 73, z: 72, y: 9 }],
+      ],
+      lines: [[], [[OP, '東南角的平台上有狙擊手！', NOW]], [], [[EN, '第二隊，從東門進去！', NOW]], [[EN, '北側走道就位！', NOW]], [], [], [[OP, '快好了……再撐一下！', NOW]], []],
+      done: [[OP, '檢查完成，艙門解鎖了！', NOW]],
+    },
+    lines: [[EN, '機庫的電恢復了！他們要啟動那台機體！', NOW], [DOG, '別讓它開機。全員進機庫。', NOW], [OP, '檢查要四十秒。撐住，零號！', NOW]],
+    done: [[EN, '重裝部隊，東門突入！', NOW], [OP, '重裝兵……最後一波了，撐住！', NOW]],
   },
   {
     id: 'G2', ch: 5, guide: [40, 70], obj: '擊退增援', fight: '擊退東門的增援', mark: null,
-    after: 'G1',
+    after: 'G4', wait: 2,
     enemies: [
       { type: 'heavy', x: 80, z: 64, yaw: -Math.PI / 2, alert: true },
       { type: 'heavy', x: 82, z: 72, yaw: -Math.PI / 2, alert: true },

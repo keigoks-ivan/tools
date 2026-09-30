@@ -616,6 +616,16 @@ export function buildMap(scene, mats, solid, PL = null) {
   for (const z of [38, 42, 46, 50]) { b.block('dark' in mats ? 'dark' : 'olive', 42.3, 43.8, 0, 1.0, z - 1.2, z + 1.2); b.deco('lamp', 42.3, 42.35, 0.9, 1.3, z - 1, z + 1, { solid: false }); }
   P.crate(26, 47, 1.2); P.crate(24.5, 49, 1.0); P.crate(27.5, 50.5, 1.1, 0.4);
   doorFrame('x', 29.85, 28, 3.2);
+  // 第 5 章 F2（潛行拿保險絲）：大廳原本空的，加櫃台、木箱、油桶當掩護；備用保險絲（紙箱）放在控制室的桌上
+  //   這裡用到的亂數用完還原，後面整張地圖的樣子不變
+  {
+    const s0 = seed;
+    if (PL) PL.add('metal_office_desk', 37, 0, 34.9, 0, { solid: true });   // 櫃台（大廳北牆邊）
+    P.crate(42.6, 31.2, 1.1, 0.15); P.crate(21.3, 35.1, 1.0, 1.5);
+    P.barrel(25.6, 35.3, 'rust'); P.barrel(26.3, 35.45, 'rust');
+    item('fuse', 'cardboard_box_01', 38.3, 0.79, 45, 0.4, { noBreak: true });   // 控制室桌面 y 0.79
+    seed = s0;
+  }
   M.zones.F = { x0: 20, x1: 44, z0: 30, z1: 52 };
 
   // ============================================================ G 第七機庫（x 10～70，z 52～112）
@@ -717,6 +727,38 @@ export function buildMap(scene, mats, solid, PL = null) {
     mk(16, 8, MX, 20, HZ1 - 0.3, Math.PI);                    // 後牆
     const oil = new THREE.MeshStandardMaterial({ color: 0x0a0a0a, transparent: true, opacity: 0.55, roughness: 0.15, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -1 });
     for (const [ox, oz, r] of [[36, 90, 1.6], [45, 84, 1.1], [27, 70, 2], [55, 66, 1.4], [40, 76, 0.9]]) { const m = new THREE.Mesh(new THREE.CircleGeometry(r, 20).rotateX(-Math.PI / 2), oil); m.scale.set(1, 1, 0.6 + rnd() * 0.5); m.position.set(ox, 0.03, oz); m.receiveShadow = true; m.userData.noAO = true; scene.add(m); }
+  }
+  // 第 5 章多出來的段落（script.js 的 G1 目標、G3 配電箱、G4 守點）；亂數用完還原，後面的樣子不變
+  {
+    const s0 = seed;
+    // G1：獵犬軍團的拖吊機（東門內側）：絞盤＋兩台發電機（任務目標），兩條鋼纜拖在地上接到蒼焰腳邊
+    target('tow1', 'portable_generator', 64.2, 65.3, 0.3);
+    target('tow2', 'portable_generator', 64.6, 71.7, -0.25);
+    if (PL) { PL.add('metal_jerrycan_green', 63.5, 0, 64.7, 0.5); PL.add('metal_jerrycan_green', 63.9, 0, 72.4, 2.1); }
+    b.block('metal', 65.7, 67.1, 0, 0.12, 67.5, 69.5, { solid: false });
+    b.block('paint', 65.8, 67.0, 0.12, 1.25, 67.55, 67.7, { solid: false }); b.block('paint', 65.8, 67.0, 0.12, 1.25, 69.3, 69.45, { solid: false });
+    b.mesh('olive', new THREE.CylinderGeometry(0.42, 0.42, 1.56, 16).rotateX(Math.PI / 2), 66.4, 0.72, 68.5, 0, { shade: 0.85 });
+    b.mesh('metal', new THREE.CylinderGeometry(0.47, 0.47, 1.2, 16).rotateX(Math.PI / 2), 66.4, 0.72, 68.5, 0, { shade: 0.75 });   // 捲在上面的鋼纜
+    b.block('olive', 66.95, 67.55, 0.12, 0.85, 68.1, 68.9, { solid: false });   // 馬達箱
+    solid.add({ x0: 65.7, x1: 67.6, y0: 0, y1: 1.25, z0: 67.5, z1: 69.5, mat: 'metal' });
+    const cable = (x0, y0, z0, x1, y1, z1) => {
+      const dx = x1 - x0, dz = z1 - z0, dh = Math.hypot(dx, dz), L = Math.hypot(dh, y1 - y0);
+      b.mesh('metal', PR.pipeGeo(L, 0.035).rotateX(Math.PI / 2).rotateX(-Math.atan2(y1 - y0, dh)), (x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2, Math.atan2(dx, dz), { shade: 0.8 });
+    };
+    // 右腳踝 (42.5, 103.6)、左腳踝 (37.4, 101.8)；左邊那條繞過地上的發電機 (48, 88)
+    cable(65.95, 0.3, 68.9, 42.6, 0.05, 101.2); cable(42.6, 0.05, 101.2, 42.55, 0.9, 103.1);
+    cable(65.95, 0.3, 68.1, 50, 0.05, 89.5); cable(50, 0.05, 89.5, 37.6, 0.05, 99.5); cable(37.6, 0.05, 99.5, 37.45, 0.9, 101.4);
+    // G3：維修架的兩個配電箱在西側走道（y 7）上，靠牆；走道內側加三片防彈鋼板當掩護（對面走道有狙擊手）
+    //   配電箱本身只是擺設（item 不放模型：按 E 裝保險絲時配電箱不會跟著消失）；按 E 的點在箱子前面的走道上，沿走道直走就到（不會卡在柱子）
+    for (const z of [76, 100.5]) if (PL) PL.add('utility_box_02', HX0 + 0.47, CW, z, Math.PI / 2, { solid: true, hit: 'metal', noBreak: true });
+    item('panel1', null, HX0 + 1.3, CW, 76); item('panel2', null, HX0 + 1.3, CW, 100.5);
+    for (const [z0, z1] of [[63, 64.6], [73.6, 75.2], [88, 89.6]]) {
+      b.block('paint', HX0 + 2.5, HX0 + 2.68, CW, CW + 1.15, z0, z1);
+      b.deco('metal', HX0 + 2.3, HX0 + 2.88, CW, CW + 0.05, z0 + 0.1, z0 + 0.3); b.deco('metal', HX0 + 2.3, HX0 + 2.88, CW, CW + 0.05, z1 - 0.3, z1 - 0.1);   // 兩隻腳
+    }
+    // 北側走道（y 7）和上層平台（y 12.4）的木箱：守在上面的敵人有東西躲
+    P.crate(23, HZ1 - 1.3, 1.0, 0.1, CW); P.crate(18.3, HZ1 - 1.2, 0.8, 0.3, GY);
+    seed = s0;
   }
   M.zones.G = { x0: HX0, x1: HX1, z0: HZ0, z1: HZ1 };
   M.marks.hatch = new THREE.Vector3(MX, GY, MZ - 3.2);
