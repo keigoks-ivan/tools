@@ -308,6 +308,37 @@ function staticTable(tableEl, columns, rows) {
 function tileHTML(label, value, sub, cls) {
   return '<div class="kpi-card' + (cls ? ' ' + cls : '') + '"><div class="kpi-label">' + esc(label) + '</div><div class="kpi-value">' + value + '</div>' + (sub ? '<div class="kpi-source">' + sub + '</div>' : '') + '</div>';
 }
+// 591樓層欄位格式固定是「11F/24F」，取分子當樓層數。
+function parseFloorNum(floorStr) {
+  if (!floorStr) return null;
+  var m = String(floorStr).match(/^(\d+)F/);
+  return m ? parseInt(m[1], 10) : null;
+}
+var statusFloorAskChart;
+function renderFloorAskChart() {
+  var yxUnits = UNITS.filter(function (u) { return u.is_yuanxiong && u.adj_unitprice != null; });
+  var bySize = { small: [], mid: [], large: [] };
+  yxUnits.forEach(function (u) {
+    var fl = parseFloorNum(u.floor);
+    if (fl == null || !bySize[u.adj_size_bucket]) return;
+    bySize[u.adj_size_bucket].push([fl, u.adj_unitprice]);
+  });
+  if (!statusFloorAskChart) statusFloorAskChart = newChart('chart-status-floor-ask');
+  if (!statusFloorAskChart) return;
+  var sizeColors = { small: C.blue, mid: C.orange, large: C.red };
+  statusFloorAskChart.setOption({
+    tooltip: { trigger: 'item', backgroundColor: '#fff', borderColor: '#ccd9e8', borderWidth: 1, textStyle: baseTooltip.textStyle, formatter: function (p) { return p.value[0] + 'F：' + fmt(p.value[1], 1) + ' 萬/坪'; } },
+    legend: baseLegend, grid: baseGrid,
+    xAxis: mkAxis({ type: 'value', name: '樓層', minInterval: 1, axisLabel: Object.assign({}, baseText, { formatter: function (v) { return v + 'F'; } }) }),
+    yAxis: mkAxis({ type: 'value', name: '開價(扣車位,萬/坪)' }),
+    series: ['small', 'mid', 'large'].map(function (k) {
+      return { name: SIZE_LABELS[k].split(' ')[0], type: 'scatter', symbolSize: 9, data: bySize[k], itemStyle: { color: sizeColors[k] } };
+    }),
+  }, true);
+  var n = yxUnits.filter(function (u) { return parseFloorNum(u.floor) != null; }).length;
+  var noteEl = document.getElementById('status-floor-ask-note');
+  if (noteEl) noteEl.textContent = '仰森591去重後在售戶（n=' + n + '）開價（已扣車位）依樓層分布，依坪數分類上色；同一樓層常見多戶、開價受坪數/朝向影響，不是純樓層溢價。資料來源：units.json。';
+}
 function hadRecentDrop(listing, refDate, days) {
   var p = listing.prices || [];
   if (p.length < 2) return false;
@@ -351,6 +382,7 @@ function renderTiles() {
     '<li>「近一個月」用約31天窗口，配合每月排程頻率；591下架判定門檻目前是 1（排程改成每月一次後，只要這一輪關鍵字完整抓完就直接採信，不用等第二輪確認，partial crawl 保護仍保留）。</li>' +
     '</ul>';
   renderStatusSummary();
+  renderFloorAskChart();
 }
 
 // 同建案轉手/預售倍數（見「戶別試算」情境三倍數，來自 outlook.json），套到仰森

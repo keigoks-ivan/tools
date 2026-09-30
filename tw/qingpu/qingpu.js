@@ -22,7 +22,7 @@ var PRICE_BAND_LABELS = { lt1500: '<1500萬', '1500_2000': '1500-2000萬', '2000
 var PAGE_SIZE = 50;
 
 var DEALS = [], UNITS = [];
-var SUPPLY = null, DEMAND = null, OUTLOOK = null, LISTING_HISTORY = [], META = {}, DOOR_PROJECT = null, SUMMARY = null, COMPARE = null;
+var SUPPLY = null, DEMAND = null, OUTLOOK = null, ESTIMATE = null, LISTING_HISTORY = [], META = {}, DOOR_PROJECT = null, SUMMARY = null, COMPARE = null;
 var DEALS_LOADED = false, DEALS_PROMISE = null;
 
 var FILTERS = {
@@ -183,7 +183,8 @@ async function loadSummary() {
 }
 
 // 「結論」以外的分頁要的其他 JSON：都不大（合計不到3MB），並行抓，不等 deals.json。
-// listings.json/estimate.json 只有仰森個案頁（yangsen/）需要，這裡不抓。
+// listings.json/rental.json 只有仰森個案頁（yangsen/）需要，這裡不抓；estimate.json
+// 這裡也要抓，「結論」S4（同案漲幅小圖）跟「價格」章節都用得到。
 async function loadData() {
   var unitsJson = await fetchJsonSafe('data/units.json', { units: [] });
   META = await fetchJsonSafe('data/meta.json', {});
@@ -192,6 +193,7 @@ async function loadData() {
   SUPPLY = await fetchJsonSafe('data/supply_demand.json', null);
   DEMAND = await fetchJsonSafe('data/demand.json', null);
   OUTLOOK = await fetchJsonSafe('data/outlook.json', null);
+  ESTIMATE = await fetchJsonSafe('data/estimate.json', null);
   LISTING_HISTORY = await fetchJsonlSafe('data/listing_history.jsonl');
   DOOR_PROJECT = await fetchJsonSafe('data/door_project.json', null);
 }
@@ -315,8 +317,10 @@ function overviewCard(label, value, sub) {
 function showOverviewError(err) {
   var el = document.getElementById('overview-error');
   if (el) { el.style.display = 'block'; el.textContent = '總覽資料載入失敗：' + err.message + '，請重新整理頁面再試一次。'; }
-  var sEl = document.getElementById('overview-sentences');
-  if (sEl) sEl.innerHTML = '';
+  for (var i = 1; i <= 5; i++) {
+    var sEl = document.getElementById('overview-sentence-' + i);
+    if (sEl) sEl.textContent = '';
+  }
 }
 function chapterConclusion(k) {
   return (SUMMARY && SUMMARY.chapter_conclusions && SUMMARY.chapter_conclusions[k]) || '';
@@ -329,8 +333,11 @@ function renderOverview() {
   var sv = SUMMARY.supply_vs_sales || {};
   var sc = SUMMARY.scenarios || {};
 
-  document.getElementById('overview-sentences').innerHTML =
-    (SUMMARY.sentences || []).map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('') || '<li>目前沒有可顯示的結論。</li>';
+  var sentences = SUMMARY.sentences || [];
+  for (var i = 1; i <= 5; i++) {
+    var sEl = document.getElementById('overview-sentence-' + i);
+    if (sEl) sEl.textContent = sentences[i - 1] || '';
+  }
 
   var mid = sc['維持'] || {}, conv = sc['收斂'] || {}, rise = sc['回升'] || {};
   var qzone = COMPARE && (COMPARE.zones || []).filter(function (z) { return z.id === 'qingpu'; })[0];
@@ -359,6 +366,155 @@ function renderOverview() {
   }
   document.getElementById('overview-chart-note').textContent =
     '長條＝每季要賣的戶數（上季留下沒賣掉＋本季新增），線＝每季賣掉的戶數。' + (kc.scope_note || '') + '。';
+}
+
+/* ===========================================================================
+   結論章節：每句話底下的小圖（S1-S4；S5 沿用上面的關鍵圖）。各自只依賴自己
+   要的 JSON，資料到了才畫，跟其他章節的主圖分開一份 chart 實例（id 不同），
+   不搶「青埔在哪個位置/供給/需求/價格」章節裡對應的完整圖表。
+   =========================================================================== */
+// S1：近一年完工÷一年轉手、換手率——桃園市13個行政區＋青埔＋桃園全市（不含
+// 其他重劃區，跟「青埔在哪個位置」章節21根的那張長條圖範圍不同）。
+var s1RatioChart, s1TurnoverChart;
+function renderOverviewS1() {
+  if (!COMPARE) return;
+  var rows = (COMPARE.districts || [])
+    .concat(COMPARE.qingpu_district_row ? [COMPARE.qingpu_district_row] : [])
+    .concat(COMPARE.city ? [Object.assign({}, COMPARE.city, { id: 'city' })] : [])
+    .filter(function (r) { return r.ratio_completed_to_resale != null; })
+    .sort(function (a, b) { return a.ratio_completed_to_resale - b.ratio_completed_to_resale; });
+  function barColor(r) { return r.id === 'qingpu' ? C.orange : (r.id === 'city' ? C.muted : C.blue); }
+  if (!s1RatioChart) s1RatioChart = newChart('chart-s1-ratio');
+  if (s1RatioChart) {
+    s1RatioChart.setOption({
+      tooltip: baseTooltip,
+      grid: Object.assign({}, baseGrid, { left: 84, top: 8, bottom: 8 }),
+      xAxis: mkAxis({ type: 'value', name: '完工÷轉手(倍)' }),
+      yAxis: mkAxis({ type: 'category', data: rows.map(function (r) { return r.name; }), axisLabel: Object.assign({}, baseText, { fontSize: 10 }) }),
+      series: [{ type: 'bar', barMaxWidth: 11, data: rows.map(function (r) { return { value: r.ratio_completed_to_resale, itemStyle: { color: barColor(r) } }; }) }],
+    }, true);
+  }
+  if (!s1TurnoverChart) s1TurnoverChart = newChart('chart-s1-turnover');
+  if (s1TurnoverChart) {
+    s1TurnoverChart.setOption({
+      tooltip: baseTooltip,
+      grid: Object.assign({}, baseGrid, { left: 84, top: 8, bottom: 8 }),
+      xAxis: mkAxis({ type: 'value', name: '換手率(%)' }),
+      yAxis: mkAxis({ type: 'category', data: rows.map(function (r) { return r.name; }), axisLabel: Object.assign({}, baseText, { fontSize: 10 }) }),
+      series: [{ type: 'bar', barMaxWidth: 11, data: rows.map(function (r) { return { value: r.turnover_pct, itemStyle: { color: barColor(r) } }; }) }],
+    }, true);
+  }
+  var noteEl = document.getElementById('s1-chart-note');
+  if (noteEl) noteEl.textContent = '左：近一年完工戶數÷一年轉手量（倍），桃園市13個行政區＋青埔＋桃園全市，依數值排序，橙色＝青埔、灰色＝全市。右：同一組區域的換手率（一年轉手÷總戶數）。資料來源：compare.json；完整表格見「青埔在哪個位置」章節。';
+}
+// S2：還沒蓋好÷一年轉手——青埔 vs 其他重劃區（樣本過小的排除、註明），虛線＝桃園全市。
+var s2ZonesChart;
+function renderOverviewS2() {
+  if (!COMPARE) return;
+  var allZones = COMPARE.zones || [];
+  var zones = allZones.filter(function (z) { return !z.small_sample && z.ratio_unfinished_to_resale != null; });
+  var excluded = allZones.filter(function (z) { return z.small_sample; });
+  var cityVal = COMPARE.city ? COMPARE.city.ratio_unfinished_to_resale : null;
+  if (!s2ZonesChart) s2ZonesChart = newChart('chart-s2-zones');
+  if (s2ZonesChart) {
+    var opt = {
+      tooltip: baseTooltip,
+      grid: Object.assign({}, baseGrid, { top: 12, bottom: 24 }),
+      xAxis: mkAxis({ type: 'category', data: zones.map(function (z) { return z.name; }) }),
+      yAxis: mkAxis({ type: 'value', name: '未完工÷轉手(倍)' }),
+      series: [{
+        type: 'bar', barMaxWidth: 36,
+        data: zones.map(function (z) { return { value: z.ratio_unfinished_to_resale, itemStyle: { color: z.id === 'qingpu' ? C.orange : C.blue } }; }),
+      }],
+    };
+    if (cityVal != null) {
+      opt.series[0].markLine = {
+        symbol: 'none',
+        label: { formatter: '全市 ' + fmt(cityVal, 1) + ' 倍', color: C.muted, fontSize: 11 },
+        lineStyle: { color: C.muted, type: 'dashed' },
+        data: [{ yAxis: cityVal }],
+      };
+    }
+    s2ZonesChart.setOption(opt, true);
+  }
+  var noteEl = document.getElementById('s2-chart-note');
+  if (noteEl) noteEl.textContent = '還沒蓋好的戶數÷一年轉手量（倍），青埔 vs 其他重劃區（只比2010年後完工的房子），虛線＝桃園全市' + fmt(cityVal, 1) + '倍。' +
+    (excluded.length ? excluded.map(function (z) { return z.name; }).join('、') + '一年轉手量不到50戶，比值會被分母放大，不列入比較。' : '');
+}
+// S3：需求——青埔村里戶數（月）＋青埔季成交件數（最後一季資料未公布齊全，灰色）。
+var s3HouseholdChart, s3VolumeChart;
+function renderOverviewS3() {
+  if (!DEMAND) return;
+  var pop = DEMAND.population;
+  if (pop && pop.status === 'ok') {
+    var agg = pop.aggregate_monthly || [];
+    if (!s3HouseholdChart) s3HouseholdChart = newChart('chart-s3-households');
+    if (s3HouseholdChart) {
+      s3HouseholdChart.setOption({
+        tooltip: baseTooltip, grid: Object.assign({}, baseGrid, { top: 10 }),
+        xAxis: mkAxis({ type: 'category', data: agg.map(function (m) { return m.month; }), axisLabel: Object.assign({}, baseText, { interval: 8 }) }),
+        yAxis: mkAxis({ type: 'value', name: '戶' }),
+        series: [{ name: '青埔村里戶數', type: 'line', data: agg.map(function (m) { return m.household; }), itemStyle: { color: C.blue }, lineStyle: { color: C.blue, width: 2 }, showSymbol: false }],
+      }, true);
+    }
+  }
+  var tv = DEMAND.transaction_volume;
+  if (tv && tv.quarterly && tv.quarterly.length) {
+    var qs = tv.quarterly;
+    var lastIdx = qs.length - 1;
+    if (!s3VolumeChart) s3VolumeChart = newChart('chart-s3-volume');
+    if (s3VolumeChart) {
+      s3VolumeChart.setOption({
+        tooltip: baseTooltip, grid: Object.assign({}, baseGrid, { top: 10 }),
+        xAxis: mkAxis({ type: 'category', data: qs.map(function (q) { return q.quarter; }), axisLabel: Object.assign({}, baseText, { rotate: 45, interval: Math.ceil(qs.length / 8) }) }),
+        yAxis: mkAxis({ type: 'value', name: '件' }),
+        series: [{ name: '成交件數', type: 'bar', barMaxWidth: 12, data: qs.map(function (q, i) { return { value: q.total, itemStyle: { color: i === lastIdx ? '#cbd5e1' : C.blue } }; }) }],
+      }, true);
+    }
+  }
+  var noteEl = document.getElementById('s3-chart-note');
+  if (noteEl) noteEl.textContent = '左：青埔納入村里戶政戶數（月）。右：青埔季成交件數（預售簽約＋預售交屋登記＋中古/新成屋轉手），最後一季（灰色）實價登錄還在陸續公布，件數會偏低，不是真的量縮。資料來源：demand.json。';
+}
+// S4：價格——同建案轉手/預售倍數（季），虛線＝三個情境；17個建案的同案漲幅。
+var s4IndexChart, s4UpliftChart;
+function renderOverviewS4() {
+  if (!SUMMARY || !SUMMARY.scenarios) return;
+  var sc = SUMMARY.scenarios;
+  if (OUTLOOK && OUTLOOK.calibration && OUTLOOK.calibration.index_series) {
+    var rows = OUTLOOK.calibration.index_series;
+    var minN = ((OUTLOOK.premium_index_facts || {}).lowest_n_ge_min || {}).min_n_required;
+    if (!s4IndexChart) s4IndexChart = newChart('chart-s4-index');
+    if (s4IndexChart) {
+      var mlData = ['收斂', '維持', '回升'].filter(function (n) { return sc[n] && sc[n].multiplier != null; })
+        .map(function (n) { return { yAxis: sc[n].multiplier, name: n + ' ' + fmt(sc[n].multiplier, 2) + '倍' }; });
+      s4IndexChart.setOption({
+        tooltip: baseTooltip, grid: Object.assign({}, baseGrid, { top: 10, bottom: 40 }),
+        xAxis: mkAxis({ type: 'category', data: rows.map(function (r) { return r.quarter; }), axisLabel: Object.assign({}, baseText, { rotate: 60, fontSize: 9 }) }),
+        yAxis: mkAxis({ type: 'value', name: '轉手/預售倍數' }),
+        series: [{
+          name: '轉手/預售倍數', type: 'line', data: rows.map(function (r) { return r.index; }),
+          lineStyle: { color: C.blue }, itemStyle: { color: C.blue },
+          symbolSize: function (v, p) { return (minN && rows[p.dataIndex].n >= minN) ? 6 : 3; },
+          markLine: { symbol: 'none', lineStyle: { color: C.muted, type: 'dashed' }, label: { color: C.muted, fontSize: 9 }, data: mlData },
+        }],
+      }, true);
+    }
+  }
+  if (ESTIMATE && ESTIMATE.same_project_uplift && ESTIMATE.same_project_uplift.rows) {
+    var uRows = ESTIMATE.same_project_uplift.rows.slice().sort(function (a, b) { return a.uplift - b.uplift; });
+    if (!s4UpliftChart) s4UpliftChart = newChart('chart-s4-uplift');
+    if (s4UpliftChart) {
+      s4UpliftChart.setOption({
+        tooltip: { trigger: 'item', backgroundColor: '#fff', borderColor: '#ccd9e8', borderWidth: 1, textStyle: baseTooltip.textStyle, formatter: function (p) { return p.name + '：' + fmtPct(p.value); } },
+        grid: Object.assign({}, baseGrid, { top: 10, bottom: 56 }),
+        xAxis: mkAxis({ type: 'category', data: uRows.map(function (r) { return r.project_name; }), axisLabel: Object.assign({}, baseText, { rotate: 60, fontSize: 9, interval: 0 }) }),
+        yAxis: mkAxis({ type: 'value', name: '漲幅', axisLabel: Object.assign({}, baseText, { formatter: function (v) { return (v * 100).toFixed(0) + '%'; } }) }),
+        series: [{ type: 'bar', barMaxWidth: 14, data: uRows.map(function (r) { return { value: r.uplift, itemStyle: { color: r.uplift >= 0 ? C.blue : C.red } }; }) }],
+      }, true);
+    }
+  }
+  var noteEl = document.getElementById('s4-chart-note');
+  if (noteEl) noteEl.textContent = '左：同建案轉手/預售倍數（季中位數），虛線＝三個情境（收斂/維持/回升）目前的倍數。右：17個建案的同案轉手漲幅（中古單價中位÷預售單價中位-1），由低到高排列。資料來源：outlook.json、estimate.json。';
 }
 
 /* ===========================================================================
@@ -733,6 +889,41 @@ function renderNewLaunchesAndNewhouse() {
     nh);
 }
 
+// 供給章節總結論（supply-conclusion）自己的小圖：未來4季預計交屋（推估）、
+// 建商未售戶前8名建案，對應結論句裡「未來4季預計交屋約X戶」「建商手上還沒
+// 賣掉約Y戶」兩個數字。
+var supplyNext4qChart, supplyUnsoldTopChart;
+function renderSupplyConclusionCharts() {
+  if (!SUPPLY) return;
+  var h = SUPPLY.supply.handover || {};
+  var cq = h.chart_quarters || [];
+  var startIdx = -1;
+  for (var i = 0; i < cq.length; i++) { if ((cq[i].actual || 0) === 0 && (cq[i].estimated || 0) > 0) { startIdx = i; break; } }
+  var next4 = startIdx === -1 ? [] : cq.slice(startIdx, startIdx + 4);
+  if (!supplyNext4qChart) supplyNext4qChart = newChart('chart-supply-next4q');
+  if (supplyNext4qChart) {
+    supplyNext4qChart.setOption({
+      tooltip: baseTooltip, grid: Object.assign({}, baseGrid, { top: 10 }),
+      xAxis: mkAxis({ type: 'category', data: next4.map(function (r) { return r.quarter; }) }),
+      yAxis: mkAxis({ type: 'value', name: '戶' }),
+      series: [{ name: '推估交屋(戶)', type: 'bar', barMaxWidth: 36, data: next4.map(function (r) { return Math.round(r.estimated || r.actual || 0); }), itemStyle: { color: '#fbbf24' } }],
+    }, true);
+  }
+  var un = SUPPLY.supply.unsold || {};
+  var topRows = (un.rows || []).slice().sort(function (a, b) { return (b.units_unsold || 0) - (a.units_unsold || 0); }).slice(0, 8);
+  if (!supplyUnsoldTopChart) supplyUnsoldTopChart = newChart('chart-supply-unsold-top');
+  if (supplyUnsoldTopChart) {
+    supplyUnsoldTopChart.setOption({
+      tooltip: baseTooltip, grid: Object.assign({}, baseGrid, { left: 96, top: 10 }),
+      xAxis: mkAxis({ type: 'value', name: '未售戶(估)' }),
+      yAxis: mkAxis({ type: 'category', data: topRows.map(function (r) { return r.project_name; }), axisLabel: Object.assign({}, baseText, { fontSize: 10 }) }),
+      series: [{ type: 'bar', barMaxWidth: 14, data: topRows.map(function (r) { return r.units_unsold; }), itemStyle: { color: C.blue } }],
+    }, true);
+  }
+  var noteEl = document.getElementById('supply-conclusion-chart-note');
+  if (noteEl) noteEl.textContent = '左：未來4季預計交屋戶數（逾期未完工的案子平均攤入），合計約 ' + fmtInt(Math.round(next4.reduce(function (s, r) { return s + (r.estimated || r.actual || 0); }, 0))) + ' 戶。右：建商未售戶前' + topRows.length + '名（全部' + (un.rows || []).length + '案合計約 ' + fmtInt(un.total_unsold) + ' 戶）。資料來源：supply_demand.json。';
+}
+
 function renderSupplySection() {
   if (!SUPPLY) {
     document.getElementById('supply-conclusion').textContent = '尚未算出，執行 compute_supply.py 之後才有這個區塊。';
@@ -745,6 +936,7 @@ function renderSupplySection() {
   renderInventoryTables();
   renderReleaseRateAll();
   renderNewLaunchesAndNewhouse();
+  renderSupplyConclusionCharts();
   var h = SUPPLY.supply.handover || {};
   document.getElementById('supply-conclusion').textContent = chapterConclusion('supply') || ('共 ' + (h.total_projects || 0) + ' 個青埔預售建案對到官方備查資料。');
   document.getElementById('projects-status-filter').addEventListener('change', renderProjectsTable);
@@ -898,6 +1090,40 @@ function renderCrosswalkSection() {
   document.getElementById('crosswalk-method').innerHTML = '<ul><li>這張表的「近4季成交」按坪數拆、只算有坪數資料的轉手，而且排除親友、員工、含裝潢、瑕疵屋等特殊交易，所以比結論章的一年轉手量少。</li><li>「未來4季新增待售」是壓力測試過供給結構、交屋後拿出來賣的比例算好的新增待售，不是新增交屋戶數本身；「近4季成交」只用轉手成交（不含預售）。</li><li>差距>0代表未來供給快於近期成交速度，差距<0反過來；這是速度比較，不是存量比較。</li><li>家戶成長推算需求＝新增家戶數(YoY) × 假設的自住購屋轉化比例（明確標註的假設值，不是實測），且沒有拆坪數帶，只能跟總量對照。</li></ul>';
 }
 
+// 需求章節總結論（demand-conclusion）自己的小圖：戶數（月）＋房價所得比，
+// 對應結論句裡「戶數一年+11.2%」「是...12.8倍」兩個數字。
+var demandHhChart, demandAffordChart;
+function renderDemandConclusionCharts() {
+  if (!DEMAND) return;
+  var pop = DEMAND.population;
+  if (pop && pop.status === 'ok') {
+    var agg = pop.aggregate_monthly || [];
+    if (!demandHhChart) demandHhChart = newChart('chart-demand-households');
+    if (demandHhChart) {
+      demandHhChart.setOption({
+        tooltip: baseTooltip, grid: Object.assign({}, baseGrid, { top: 10 }),
+        xAxis: mkAxis({ type: 'category', data: agg.map(function (m) { return m.month; }), axisLabel: Object.assign({}, baseText, { interval: 8 }) }),
+        yAxis: mkAxis({ type: 'value', name: '戶' }),
+        series: [{ name: '青埔村里戶數', type: 'line', data: agg.map(function (m) { return m.household; }), itemStyle: { color: C.blue }, lineStyle: { color: C.blue, width: 2 }, showSymbol: false }],
+      }, true);
+    }
+  }
+  var af = DEMAND.affordability;
+  if (af && af.rows && af.rows.length) {
+    if (!demandAffordChart) demandAffordChart = newChart('chart-demand-affordability');
+    if (demandAffordChart) {
+      demandAffordChart.setOption({
+        tooltip: baseTooltip, grid: Object.assign({}, baseGrid, { top: 10 }),
+        xAxis: mkAxis({ type: 'category', data: af.rows.map(function (r) { return r.label; }) }),
+        yAxis: mkAxis({ type: 'value', name: '房價所得比(倍)' }),
+        series: [{ name: 'PIR', type: 'bar', barMaxWidth: 50, data: af.rows.map(function (r) { return r.pir; }), itemStyle: { color: C.orange } }],
+      }, true);
+    }
+  }
+  var noteEl = document.getElementById('demand-conclusion-chart-note');
+  if (noteEl) noteEl.textContent = '左：青埔納入村里戶政戶數（月）。右：典型房型的房價所得比（總價中位數÷桃園市家戶可支配所得），數字越高代表越買不起。資料來源：demand.json。';
+}
+
 function renderDemandSection() {
   if (!DEMAND) {
     document.getElementById('demand-conclusion').textContent = '尚未算出，執行 compute_demand.py 之後才有這個區塊。';
@@ -908,6 +1134,8 @@ function renderDemandSection() {
   renderPopulationSection();
   renderAffordabilitySection();
   renderCrosswalkSection();
+  renderDemandConclusionCharts();
+  renderOverviewS3();
   document.getElementById('demand-conclusion').textContent = chapterConclusion('demand') || '成交量、租賃需求、人口家戶、購屋負擔、供需對照見以下各小節。';
 }
 
@@ -1197,7 +1425,7 @@ async function init() {
     console.error(err);
     showOverviewError(err);
   });
-  var comparePromise = loadCompare().then(renderPosition).then(renderFalsifiers).catch(function (err) {
+  var comparePromise = loadCompare().then(function () { renderPosition(); renderOverviewS1(); renderOverviewS2(); }).then(renderFalsifiers).catch(function (err) {
     console.error(err);
     showPositionError(err);
   });
@@ -1211,6 +1439,7 @@ async function init() {
   renderFalsifiers(); // 重畫一次：這時 OUTLOOK 已經到齊，falsifiers 才會補上價格面那一條
 
   await Promise.all([summaryPromise, comparePromise]);
+  renderOverviewS4(); // 要等 SUMMARY(情境倍數)＋OUTLOOK/ESTIMATE(dataPromise已載入) 都到齊
 
   document.getElementById('updated-line').textContent = '實價登錄：' + fmtDateTime(META.lvr && META.lvr.last_run) + '　591售價：' + fmtDateTime(META.house591 && META.house591.last_run) + '　591租金：' + fmtDateTime(META.house591_rent && META.house591_rent.last_run);
 
