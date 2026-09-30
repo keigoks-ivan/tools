@@ -63,7 +63,7 @@ const world = new World(renderer, scene, A);
   // 省效能：街區外的樹／路燈／車／瓦礫（實例化）全部被外圍高樓擋住，直接不畫；遠方城市與地形不投影子、不算 AO
   scene.traverse((o) => {
     if (!o.isMesh) return;
-    if (o.isInstancedMesh && !(o.material && o.material.isMeshBasicMaterial)) { o.visible = false; return; }
+    if (o.isInstancedMesh && !(o.material && o.material.isMeshBasicMaterial)) { o.visible = false; (world.cityInst ||= []).push(o); return; }   // 第 6 章開機體會再打開
     o.castShadow = false; o.userData.noAO = true;
   });
   // 地形換成粗網格（城市範圍內本來就是平的，遠方山丘只是背景）
@@ -230,7 +230,7 @@ addEventListener('resize', () => {
 const done = new Set();         // 已清完的遭遇
 let active = [];                // 進行中 {E, list}
 let chapter = 1, checkpoint = null, stage = 'play';
-let mechWalk = null, finale = null, hatchOpen = 0, alarmOn = false;
+let mechWalk = null, finale = null, hatchOpen = 0, alarmOn = false, M6 = null;   // M6＝第 6 章（mech6.js）進行中
 const progress = () => store.get('ch', 1);
 
 // 手榴彈的樣子：墨綠色小圓柱＋一顆閃爍的紅燈（越接近爆炸閃越快）
@@ -617,7 +617,7 @@ function closestTo(o, d, L, p) {
 let dmgFlash = 0, shakeK = 0;
 function shake(k) { shakeK = Math.min(1.5, shakeK + k); }
 function hurtPlayer(dmg, from) {
-  if (q.has('god') || player.dead || finale) return;
+  if (q.has('god') || player.dead || finale || M6) return;
   const hpDmg = player.damage(dmg);
   G.stats.taken += dmg;
   const a = -wrap(Math.atan2(from.x - player.pos.x, from.z - player.pos.z) - player.yaw);
@@ -698,7 +698,18 @@ function updateFinale(dt) {
   const fade = clamp((F.t - 1.7) / 0.6, 0, 1);
   $('fade').style.transition = 'none'; $('fade').style.opacity = fade;
   if (F.t > 2.4 && !F.card) { F.card = true; hud.title('XG-01　蒼焰', '系統啟動中……　SYSTEM BOOT', 3.5); }
-  if (F.t > 6.2 && !F.go) { F.go = true; location.href = '../?zero=1'; }
+  if (F.t > 6.2 && !F.go) { F.go = true; startMech(); }
+}
+// 第 6 章：開蒼焰，每一幀交給 mech6.js；載入失敗就照舊直接接本篇
+async function startMech() {
+  finale = null; stage = 'mech'; chapter = 6; G.playing = false; player.frozen = true;
+  hud.prompt = null; hud.obj = null; G.objText = ''; clearEnemies(); active = [];
+  vm.holder.visible = false; vm.arms.root.visible = false;
+  if (progress() < 6) store.set('ch', 6);
+  try {
+    const { startMech: go } = await import('./mech6.js');
+    M6 = await go({ renderer, scene, camera, vScene, vCam, post, world, hero, audio, input, zhud: hud, solid, D, fxl: fx, G, S, $, pause, exit: (u) => { location.href = u; } });
+  } catch (e) { console.error('[zero] 第 6 章載入失敗', e); location.href = '../?zero=1'; }
 }
 const ease = (t) => t * t * (3 - 2 * t);
 const lerpA = (a, b, t) => a + wrap(b - a) * t;
@@ -785,7 +796,7 @@ $('resume').addEventListener('click', resume);
 $('quit').addEventListener('click', toTitle);
 $('menu').addEventListener('click', toTitle);
 $('cont').addEventListener('click', respawn);
-input.onLockChange = (locked) => { if (!locked && state === 'play' && stage === 'play' && !input.touch.on && !finale) pause(); };
+input.onLockChange = (locked) => { if (!locked && state === 'play' && (stage === 'play' || M6) && !input.touch.on && !finale) pause(); };
 const touchUI = $('touch');
 
 function launch(n) {
@@ -808,6 +819,11 @@ function intro(then) {
   tm = setTimeout(next, 500);
 }
 function begin(n) {
+  if (S.CHAPTERS[n - 1].mech) {
+    state = 'play'; input.enabled = true; if (!input.touch.on) input.lock();
+    touchUI.style.display = input.touch.on ? 'block' : 'none';
+    startMech(); return;
+  }
   startChapter(n);
   if (q.has('final')) { for (const E of S.ENCOUNTERS) done.add(E.id); player.reset(new THREE.Vector3(14, 0, 90), 0); toCockpit(); }
   state = 'play'; stage = 'play'; G.playing = true;
@@ -826,6 +842,7 @@ function resume() {
   state = 'play'; clock.getDelta();
 }
 function toTitle() {
+  if (M6 || stage === 'mech') { location.href = location.pathname; return; }   // 第 6 章換了整套機體系統：直接重新載入回標題
   $('pause').style.display = 'none'; $('result').style.display = 'none';
   audio.setPaused(false); audio.lowHealth(false); if (alarmOn) { alarmOn = false; audio.alarm(false); }
   input.unlock(); input.enabled = false; touchUI.style.display = 'none';
@@ -854,6 +871,7 @@ function frame() {
     post.render(clock.elapsedTime); hud.draw(dt, null);
     input.endFrame(); return;
   }
+  if (stage === 'mech') { if (M6) M6.tick(dt); input.endFrame(); return; }   // 第 6 章（載入中先停在黑畫面）
   const c = input.state(dt), K = input.keys;
   if (c.pause && !finale) { pause(); input.endFrame(); return; }
   if (input.pressed('KeyC') || input.pressed('Tod')) crouchToggle = !crouchToggle;

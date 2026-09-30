@@ -209,7 +209,7 @@ export class HUD {
 
     // ---- 上方：第幾關／區域、敵數、分數、時間
     const EN = C.enc, tY = this.tp(0, 0.5)[1];
-    this.text(EN ? `STAGE ${C.stage}  AREA ${Math.min(EN.sec + 1, EN.N)}/${EN.N}` : `STAGE ${C.stage}/${g.stages}`, W / 2 - 12 * s, tY, 14, 'cy', 1, 'right', 700);
+    this.text(g.label || (EN ? `STAGE ${C.stage}  AREA ${Math.min(EN.sec + 1, EN.N)}/${EN.N}` : `STAGE ${C.stage}/${g.stages}`), W / 2 - 12 * s, tY, 14, 'cy', 1, 'right', 700);
     const alive = C.enemies.filter((e) => !e.dead).length + C.events.filter((ev) => ev.spawn).length + (EN && EN.queue ? EN.queue.length : 0);
     this.text(`HOSTILES ${alive}`, W / 2 + 12 * s, tY, 14, alive ? 'rd' : 'dim', 1, 'left', 700);
     const mm = Math.floor(C.stats.time / 60), ss = Math.floor(C.stats.time % 60);

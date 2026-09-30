@@ -248,9 +248,10 @@ export class HUD {
     x.font = '500 17px "Noto Sans TC", sans-serif';
     const line = s.text, who = s.who;
     const tw = x.measureText(line).width;
-    x.fillStyle = 'rgba(0,0,0,0.45)'; x.fillRect(W / 2 - tw / 2 - 16, H - 150, tw + 32, 50);
-    x.font = '600 12px Rajdhani, "Noto Sans TC", sans-serif'; x.fillStyle = who.startsWith('獵犬') ? RD : AM; x.fillText(who, W / 2, H - 132);
-    x.font = '500 17px "Noto Sans TC", sans-serif'; x.fillStyle = '#eef6f8'; x.fillText(line, W / 2, H - 110);
+    const L = this.lift || 0;   // 第 6 章（機體 HUD 在下面）往上移
+    x.fillStyle = 'rgba(0,0,0,0.45)'; x.fillRect(W / 2 - tw / 2 - 16, H - 150 - L, tw + 32, 50);
+    x.font = '600 12px Rajdhani, "Noto Sans TC", sans-serif'; x.fillStyle = who.startsWith('獵犬') || who.startsWith('黑犬') ? RD : AM; x.fillText(who, W / 2, H - 132 - L);
+    x.font = '500 17px "Noto Sans TC", sans-serif'; x.fillStyle = '#eef6f8'; x.fillText(line, W / 2, H - 110 - L);
     x.globalAlpha = 1; x.textAlign = 'left';
   }
 
