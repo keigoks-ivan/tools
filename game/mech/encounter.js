@@ -380,7 +380,7 @@ export class Encounter {
       const q = this.queue[i];
       q.t -= dt;
       if (!q.at) {
-        if (q.t <= 1.1 && live + armed < CAP) { q.at = this.place(q); q.t = 1.1; armed++; this.flare(q.at, 1.1); }
+        if (q.t <= 1.1 && live + armed < CAP) { q.at = this.place(q); q.t = 1.1; armed++; if (q.kind !== 'jet') this.flare(q.at, 1.1); }   // 戰機從遠方掠過，不在街上亮警示
         continue;
       }
       if (q.t > 0) continue;
