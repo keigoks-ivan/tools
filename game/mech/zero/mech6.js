@@ -253,7 +253,7 @@ export async function startMech(X) {
     for (const f of flyers) f.e.m.root.removeFromParent();
     for (const p of pods) scene.remove(p.m);
     flyers.length = 0; pods.length = 0;
-    C = new Combat({ scene, world, camera, player, hero, fx, audio: au, cockpit, post, onEnd, stage: 3 });
+    C = new Combat({ scene, world, camera, player, hero, fx, audio: au, cockpit, post, onEnd, stage: 3, stageDef: DEF });
     Object.defineProperty(C, 'tier', { value: TIER });
     Object.defineProperty(C, 'def', { value: DEF });
     world.blocked = BLOCK;   // Combat 開場會把路障清掉（setRoute），這裡再封一次

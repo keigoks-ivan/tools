@@ -2,7 +2,8 @@
 import * as THREE from 'three';
 import { Mech } from './mechs.js';
 import { Vehicles, VKIND } from './vehicles.js';
-import { ENC, encGroups, setRoute, Encounter } from './encounter.js';
+import { parse, encGroups, setRoute, Encounter } from './encounter.js';
+import { STAGE_DATA } from './stages.js';
 
 const clamp = THREE.MathUtils.clamp;
 const rand = (a, b) => a + Math.random() * (b - a);
@@ -18,24 +19,11 @@ const KIND = {
   ace: { style: 'grunt', scheme: 'ace', ap: 5200, walk: 16, boost: 58, pref: [55, 150], stag: 170, range: 420, score: 400 },
   heavy: { style: 'heavy', scheme: 'heavy', ap: 6800, walk: 8, boost: 26, pref: [230, 420], stag: 240, range: 760, score: 300 },
 };
-// 關卡：由簡到難，每一關只多一件新東西（先學打雜兵 → 學飛彈 → 飛彈重裝 → 王牌 → 混編 → 決戰）
-//   每關都是滿血出發；groups＝敵機分批，打完一批才來下一批增援；tip＝開場字幕順便教一句
-//   tank／heli／jet＝戰鬥載具（一發就爆的砲灰，見 vehicles.js），和機體混編
-//   enc＝遭遇戰（第 1、2 關）：沿街推進、轉角伏兵，路線與伏兵見 encounter.js；groups 只拿來算評價份量
-export const STAGES = [
-  { name: '初陣', en: 'FIRST SORTIE', enc: ENC[0], tip: '跟著藍色光柱沿街推進——左鍵射擊，Tab 換目標，戰車一發就爆',
-    groups: encGroups(ENC[0]) },
-  { name: '包圍網', en: 'ENCIRCLED', enc: ENC[1], tip: '右鍵按住鎖定多台，放開一次射飛彈——車隊一次清光',
-    groups: encGroups(ENC[1]) },
-  { name: '重砲', en: 'HEAVY GUNS', tip: '新敵人：重裝機——響飛彈警報就點 SHIFT 閃',
-    groups: [['tank', 'tank', 'tank', 'tank', 'heli'], ['grunt', 'heavy', 'grunt', 'tank', 'tank'], ['heli', 'heli', 'tank', 'tank', 'tank'], ['grunt', 'tank', 'tank']] },
-  { name: '王牌', en: 'THE ACE', tip: '新敵人：王牌機——槍口發光就閃，靠近會拔劍',
-    groups: [['heli', 'heli', 'tank', 'tank', 'tank'], ['grunt', 'ace', 'grunt', 'tank', 'tank'], ['jet', 'tank', 'tank', 'tank', 'heli'], ['grunt', 'grunt', 'heli', 'heli']] },
-  { name: '鋼鐵洪流', en: 'IRON TIDE', tip: '混編部隊：邊跑邊打，別站著不動',
-    groups: [['tank', 'tank', 'tank', 'tank', 'tank', 'tank', 'heli'], ['ace', 'heavy', 'grunt', 'grunt', 'heavy', 'tank', 'tank'], ['jet', 'jet', 'heli', 'heli', 'tank', 'tank', 'tank'], ['grunt', 'grunt', 'heli', 'tank', 'tank']] },
-  { name: '黃昏決戰', en: 'LAST LIGHT', tip: '最終關：王牌、重裝、戰車、直升機、戰機全部出動',
-    groups: [['tank', 'tank', 'tank', 'tank', 'heli', 'heli'], ['jet', 'jet', 'tank', 'tank', 'tank', 'tank', 'heli'], ['ace', 'heavy', 'grunt', 'ace', 'heavy', 'grunt', 'heli', 'tank', 'tank']] },
-];
+// 關卡：資料在 stages.js（劇情、路線、任務）；有 route 的關解析成遭遇戰（enc），groups 只拿來算評價份量
+export const STAGES = STAGE_DATA.map((D, i) => {
+  const enc = D.route ? parse(D.route, i + 1) : null;
+  return { ...D, enc, groups: enc ? encGroups(enc) : D.groups };
+});
 // 評價用的「關卡份量」：雜兵機＝1、重裝 1.5、王牌 2；載具是砲灰，只算零頭
 const WEIGHT = { grunt: 1, heavy: 1.5, ace: 2 };
 export function stageWeight(D) { return D.groups.flat().reduce((a, k) => a + (WEIGHT[k] ?? VKIND[k]?.weight ?? 1), 0); }
@@ -131,6 +119,10 @@ class Enemy {
 export class Combat {
   constructor(o) {
     Object.assign(this, o);   // scene, world, camera, player, hero, fx, audio, cockpit, post
+    // stageDef＝不在 STAGES 裡的關（前傳第 6 章）：遭遇戰、評價都照它
+    if (o.stageDef) Object.defineProperty(this, 'def', { value: o.stageDef, configurable: true, writable: true });
+    this.sub = null; this.subQ = [];   // 無線電對白（正在播的一句、排隊的）
+    this.boss = null;                  // 畫面上方顯示血條的頭目
     this.enemies = []; this.missiles = []; this.debris = []; this.events = [];
     this.stage = clamp(o.stage || 1, 1, STAGES.length);   // 第幾關
     this.group = 0; this.phase = 'idle'; this.phaseT = 0; this.nextId = 1;   // group＝已出動幾批敵機
@@ -164,9 +156,35 @@ export class Combat {
 
   get alive() { return this.enemies.filter((e) => !e.dead); }
 
-  start() { this.phase = 'intro'; this.phaseT = 1.2; this.group = 0; }
+  start() { this.phase = 'intro'; this.phaseT = 1.2; this.group = 0; this.lines(this.def.start); }
   get def() { return STAGES[this.stage - 1]; }
-  get tier() { return TIER[clamp(this.stage - 1, 0, TIER.length - 1)]; }
+  get tier() { return TIER[clamp((this.def.tier ?? this.stage) - 1, 0, TIER.length - 1)]; }
+  // 無線電對白：一句一句排隊播；now＝戰鬥喊話，插隊馬上播，被打斷的劇情句還沒看完七成就放回最前面重播
+  radio(who, text, t = 3.6, now = false) {
+    const it = { who, text, t, T: t, now };
+    if (!now) { this.subQ.push(it); return; }
+    const cur = this.sub;
+    if (cur && !cur.now) { if (cur.T - cur.t < cur.T * 0.7) { cur.t = cur.T; this.subQ.unshift(cur); } this.sub = null; }
+    let i = 0; while (i < this.subQ.length && this.subQ[i].now) i++;
+    this.subQ.splice(i, 0, it);
+  }
+  lines(L, now0 = false, t = 3.6) { for (const [w, x, now] of L || []) this.radio(w, x, t, now ?? now0); }   // now0＝這一批沒寫 NOW 的要不要也插隊
+  get talkLeft() { return (this.sub ? this.sub.t : 0) + this.subQ.reduce((a, s) => a + s.t, 0); }   // 還要講幾秒
+  updRadio(rdt) {
+    if (!this.sub && this.subQ.length) { this.sub = this.subQ.shift(); this.audio.ui('hover'); }
+    if (this.sub && (this.sub.t -= rdt) <= 0) this.sub = null;
+  }
+  // 頭目剩 fleeAt 以下就撤退（不會被打死）：往遠離你的方向噴射升空，幾秒後消失；算這一區打完
+  flee(e) {
+    e.dead = true; e.fled = true; e.fleeT = 0; e.dying = 99;
+    if (this.lockTarget === e) this.lockTarget = null;
+    if (this.boss === e) this.boss = null;
+    const a = Math.atan2(e.pos.x - this.player.pos.x, e.pos.z - this.player.pos.z);
+    e.vel.set(Math.sin(a) * 45, 30, Math.cos(a) * 45);
+    this.fx.explosion(e.chest(V3()), 1.2); this.audio.explosion(e.chest(V3()), 1.2);
+    this.note('ENEMY RETREATING', 'am');
+    if (e.onFlee) e.onFlee();
+  }
   // 同時出手的台數有上限：輪不到的先移動、晚一點再打
   canAttack(e) {
     let n = 0;
@@ -233,6 +251,7 @@ export class Combat {
     this.timeScale = this.hitstop > 0 ? 0.08 : this.slowmo > 0 ? 0.3 : 1;
     for (let i = this.events.length - 1; i >= 0; i--) { const ev = this.events[i]; ev.t -= dt; if (ev.t <= 0) { this.events.splice(i, 1); ev.fn(); } }
     if (this.banner) { this.banner.t -= rdt; if (this.banner.t <= 0) this.banner = null; }
+    this.updRadio(rdt);
     for (const nt of this.notes) nt.t -= rdt;
     this.notes = this.notes.filter((nt) => nt.t > 0);
     this.hitMark = Math.max(0, this.hitMark - rdt * 5); this.critMark = Math.max(0, this.critMark - rdt * 2.5); this.killMark = Math.max(0, this.killMark - rdt * 1.6);
@@ -250,7 +269,9 @@ export class Combat {
         this.phase = 'done'; this.slowmo = 1.4;
         this.say(last ? 'ALL CLEAR' : 'STAGE CLEAR', last ? '全部過關' : `第 ${this.stage} 關完成`, 4, 'am');
         this.audio.ui('clear');
-        this.events.push({ t: 1.2, fn: () => this.onEnd(true) });
+        // 過關對白講完才出結算
+        this.lines(this.def.end);
+        this.events.push({ t: Math.max(1.2, this.talkLeft + 0.6), fn: () => this.onEnd(true) });
       }
     }
 
@@ -702,6 +723,7 @@ export class Combat {
   // ---------------------------------------------------------------- 傷害
   damageEnemy(e, dmg, stag, pos, dir, crit = false) {
     if (e.dead) return;
+    if (e.fleeAt && e.ap - dmg <= e.apMax * e.fleeAt) { e.ap = e.apMax * e.fleeAt; this.flee(e); return; }
     if (e.stagT > 0 && !crit) dmg *= 1.4;
     if (e.vehicle) dmg = Math.min(dmg, Math.max(1, e.ap));   // 載具：不多算溢出的分數
     e.ap -= dmg; e.lastHit = 0;
@@ -803,6 +825,12 @@ export class Combat {
     for (const e of this.enemies) {
       if (e.gone || e.vehicle) continue;   // 載具在 vehicles.js 裡動
       const m = e.m, K = e.K, k = e.scale;
+      if (e.fled) {   // 撤退中：噴射升空飛遠，3.5 秒後消失
+        e.fleeT += dt; e.vel.y = Math.min(70, e.vel.y + 30 * dt); e.pos.addScaledVector(e.vel, dt); e.thrust = 1;
+        m.animate(dt, { vel: e.vel, grounded: false, boost: 1, torsoYaw: Math.atan2(e.vel.x, e.vel.z), pitch: 0, thrust: 1, aim: null, lean: 0.3 });
+        if (e.fleeT > 3.5) { e.gone = true; m.root.removeFromParent(); }
+        continue;
+      }
       if (e.dead) {
         e.dying -= dt;
         if (Math.random() < dt * 14) {

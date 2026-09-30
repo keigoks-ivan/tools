@@ -7,7 +7,7 @@ import * as THREE from 'three';
 const clamp = THREE.MathUtils.clamp;
 const damp = (a, b, k, dt) => a + (b - a) * (1 - Math.exp(-k * dt));
 const _v = new THREE.Vector3(), _w = new THREE.Vector3(), _o = new THREE.Vector3(), _a = new THREE.Vector3(), _c = new THREE.Vector3(), _L = new THREE.Vector3();
-const COL = { cy: '127,243,255', am: '255,184,80', rd: '255,74,74', gr: '130,255,170', dim: '150,175,185', pk: '255,120,210', ink: '4,14,18' };
+const COL = { cy: '127,243,255', am: '255,184,80', rd: '255,74,74', gr: '130,255,170', dim: '150,175,185', pk: '255,120,210', ink: '4,14,18', ink2: '238,246,248' };
 const rgba = (c, a) => `rgba(${COL[c] || c},${a})`;
 const HALO = (a) => `rgba(0,10,14,${a})`;
 const MONO = '"B612 Mono", "Roboto Mono", Menlo, Consolas, "Noto Sans TC", monospace';
@@ -298,6 +298,24 @@ export class HUD {
     chip(3, 'CANNON E', CN.phase ? (CN.phase === 'charge' ? 'CHARGE' : 'FIRE') : CN.cd >= 1 ? 'READY' : `${Math.ceil((1 - CN.cd) * 20)}s`, CN.phase ? 1 : CN.cd, CN.phase || CN.cd >= 1 ? 'cy' : 'dim', CN.cd >= 1 || !!CN.phase);
     chip(4, 'OD Q', OD.active ? 'ACTIVE' : OD.gauge >= 1 ? 'READY' : `${Math.floor(OD.gauge * 100)}%`, OD.gauge, 'pk', OD.gauge >= 1 || OD.active);
 
+    // ---- 頭目：畫面最上方名字＋血條
+    const BS = C.boss;
+    if (BS && !BS.dead) {
+      const by = this.tp(0, 0.5)[1] - 34 * s, bw = 360 * s, r = Math.max(0, BS.ap / BS.apMax);
+      this.text(BS.bossName || 'ACE', W / 2, by - 8 * s, 15, 'am', 1, 'center', 700, SANS);
+      this.bar(W / 2 - bw / 2, by, bw, 5 * s, r, r < 0.3 ? 'rd' : 'am', true);
+    }
+    // ---- 無線電對白（下方、AP 列上面）
+    if (C.sub) {
+      const S = C.sub, a = clamp(Math.min(S.t, S.T - S.t) * 4, 0, 1), sy = H - 98 * s - 62 * s;
+      X.globalAlpha = a * on;
+      X.font = `500 ${17 * s}px ${SANS}`;
+      const tw = X.measureText(S.text).width;
+      X.fillStyle = HALO(0.55); X.fillRect(W / 2 - tw / 2 - 16 * s, sy - 30 * s, tw + 32 * s, 48 * s);
+      this.text(S.who, W / 2, sy - 16 * s, 12, /獵犬|黑犬|灰狼/.test(S.who) ? 'rd' : S.who === '零號' ? 'cy' : 'am', 1, 'center', 700, SANS);
+      this.text(S.text, W / 2, sy + 4 * s, 17, 'ink2', 1, 'center', 500, SANS);
+      X.globalAlpha = on;
+    }
     // ---- 警報
     const ay0 = this.tp(0, 0.27)[1];
     if (C.incoming > 0) {
@@ -456,6 +474,21 @@ export class HUD {
   // 遭遇戰：前進距離、目標點（菱形／畫面外箭頭）、伏兵警示（紅色 !）
   objective(EN, y, W, H) {
     const X = this.x, s = this.s;
+    // 要打爛的大樓：琥珀色框＋名字（還立著的才畫）
+    for (const t of EN.tg || []) {
+      if (t.b.st !== 0) continue;
+      const p = this.proj(_o.set(t.b.cx, Math.min(t.b.box.top, t.b.gy + 60), t.b.cz), {});
+      if (!(p.front && p.x > 30 && p.x < W - 30 && p.y > 30 && p.y < H - 30)) { this.edgeMark(p, 'am', t.name || '目標', W, H, 0.85); continue; }
+      const r = 14 * s;
+      X.beginPath(); X.rect(p.x - r, p.y - r, r * 2, r * 2); this.sk('am', 0.95, 1.8);
+      X.beginPath(); X.moveTo(p.x - r * 0.5, p.y); X.lineTo(p.x + r * 0.5, p.y); X.moveTo(p.x, p.y - r * 0.5); X.lineTo(p.x, p.y + r * 0.5); this.sk('am', 0.8, 1.2);
+      this.text(t.name || '目標', p.x, p.y - r - 8 * s, 12, 'am', 0.95, 'center', 700, SANS);
+    }
+    const hl = EN.holdLeft;
+    if (hl !== null && hl !== undefined) {
+      const tl = EN.tg && EN.tg.length ? `　目標 ${EN.tg.filter((t) => t.b.st !== 0).length}/${EN.tg.length}` : '';
+      this.text(hl > 0 ? `守住 ${Math.floor(hl / 60)}:${String(Math.floor(hl % 60)).padStart(2, '0')}${tl}` : `清掉剩下的敵人${tl}`, W / 2, y, 15, 'am', 0.85 + 0.15 * Math.sin(this.t * 4), 'center', 700, SANS);
+    } else if (EN.tg && EN.tg.length && EN.state === 'fight') this.text(`摧毀目標 ${EN.tg.filter((t) => t.b.st !== 0).length}/${EN.tg.length}`, W / 2, y, 15, 'am', 0.9, 'center', 700, SANS);
     for (const o of EN.warn || []) {
       const p = this.proj(_o.set(o.x, o.y, o.z), {}), a = 0.55 + 0.45 * Math.sin(this.t * 18);
       if (!(p.front && p.x > 30 && p.x < W - 30 && p.y > 30 && p.y < H - 30)) { this.edgeMark(p, 'rd', '!', W, H, a); continue; }
@@ -465,7 +498,7 @@ export class HUD {
       this.text('!', p.x, p.y + 2 * s, 13, 'rd', a, 'center', 700);
     }
     if (!EN.wp) return;
-    this.text(`前進 ▶ ${Math.round(EN.dist)}m`, W / 2, y, 15, 'cy', 0.8 + 0.2 * Math.sin(this.t * 4), 'center', 700, SANS);
+    if (!(hl !== null && hl !== undefined) && !(EN.tg && EN.tg.length && EN.state === 'fight')) this.text(`前進 ▶ ${Math.round(EN.dist)}m`, W / 2, y, 15, 'cy', 0.8 + 0.2 * Math.sin(this.t * 4), 'center', 700, SANS);
     const p = this.proj(_o.set(EN.wp.x, EN.wp.y, EN.wp.z), {});
     if (!(p.front && p.x > 30 && p.x < W - 30 && p.y > 30 && p.y < H - 30)) { this.edgeMark(p, 'cy', `${Math.round(EN.dist)}m`, W, H, 0.9); return; }
     const r = 11 * s, b = 1 + 0.12 * Math.sin(this.t * 5);

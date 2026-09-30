@@ -14,39 +14,9 @@ const _t = new THREE.Vector3(), _u = new THREE.Vector3();
 // 路口 (i,j)—(i2,j2) 之間那段路的編號（vehicles.js 用同一條公式判斷支路封了沒）
 export const edgeKey = (i, j, i2, j2) => (i + i2 + 20) * 100 + (j + j2 + 20);
 
-// 伏兵寫法：'種類@出現方式*數量'，用空白隔開
-//   far＝一開始就停在遠處（狙擊目標）、out＝從前方街上開過來、side＝從封死的支路衝出來、drop＝從天而降到前方街上、
-//   roof＝降落在前方樓頂、rise＝直升機從樓後面升起、ring＝（終點區）從四周的街上包過來
-//   at＝這一區的錨點（路線第幾個頂點）；pre＝走過來就看得到的遠處目標；amb＝伏擊；amb2、amb3＝打到剩一兩台時的增援（第二、三波）
-//   cp＝打到第幾區記一個檢查點；arena＝終點周圍多少公尺不封路；fin＝終點區提早多少公尺觸發；par＝評價用標準時間（秒）；over＝上一波還剩幾台就叫下一波
-const RAW = [
-  { cp: 3, arena: 175, fin: 60, par: 330, over: 1,
-    pts: [[-600, -660], [-600, -480], [-360, -480], [-360, -360], [-240, -360], [-120, -360], [-120, -240], [0, -240], [120, -240], [180, -300]],
-    secs: [
-      { at: 1, pre: 'tank@far*2', amb: 'tank@out*2 tank@side', amb2: 'tank@out*2', tip: '轉角後面有戰車——先開火的贏' },
-      { at: 2, amb: 'tank@side tank@out grunt@drop tank@side', amb2: 'tank@out*2 grunt@drop', tip: '敵機從天而降——落地前就先鎖定' },
-      { at: 3, amb: 'grunt@side tank@out*2 tank@side', amb2: 'grunt@roof tank@out*2', tip: '樓頂也會有敵機——記得往上看' },
-      { at: 5, pre: 'tank@far*2', amb: 'grunt@drop tank@side grunt@roof tank@out', amb2: 'tank@out*3 grunt@drop', tip: '遠處停著的戰車，先遠距離打掉' },
-      { at: 6, amb: 'tank@out grunt@side tank@out tank@side*2', amb2: 'grunt@drop tank@out*2', amb3: 'grunt@roof tank@side*2' },
-      { at: 7, amb: 'tank@side grunt@drop tank@side grunt@roof tank@out', amb2: 'tank@out*3 grunt@drop', tip: '支路衝出來的最近——先打牠' },
-      { at: 9, amb: 'tank@ring*4 grunt@drop*2', amb2: 'grunt@roof tank@ring*3 grunt@drop', amb3: 'grunt@drop*2 tank@ring*3', tip: '最後一區：四面八方都有，清光就過關' },
-    ] },
-  { cp: 4, arena: 175, fin: 140, par: 450, over: 2,
-    pts: [[660, 600], [480, 600], [360, 600], [360, 480], [240, 480], [120, 480], [120, 360], [0, 360], [-120, 360], [-120, 240], [-240, 240], [-240, 120], [-120, 120], [0, 0]],
-    secs: [
-      { at: 1, pre: 'tank@far*3', amb: 'heli@rise tank@side tank@out', amb2: 'tank@out*3', tip: '前面三台排成一列——右鍵按住一次鎖光' },
-      { at: 2, amb: 'tank@out*2 tank@side grunt@drop', amb2: 'grunt@drop tank@side tank@out*2' },
-      { at: 3, amb: 'grunt@side heli@rise tank@out*2', amb2: 'heli@rise tank@out*2 grunt@roof', tip: '直升機從樓後面升起來' },
-      { at: 4, amb: 'tank@side*2 grunt@drop grunt@roof', amb2: 'heli@rise tank@out*2', amb3: 'grunt@drop*2 tank@side' },
-      { at: 6, pre: 'tank@far*2', amb: 'grunt@side grunt@roof tank@out*2', amb2: 'tank@out*3 heli@rise', tip: '遠處有戰車守著轉角' },
-      { at: 8, pre: 'tank@far', amb: 'heli@rise*2 tank@side*2 grunt@drop', amb2: 'grunt@roof tank@out*3' },
-      { at: 9, amb: 'tank@out*4 grunt@roof grunt@drop', amb2: 'tank@side*2 grunt@drop heli@rise', tip: '車隊從前面衝過來——用飛彈' },
-      { at: 11, amb: 'grunt@side grunt@drop tank@side heli@rise', amb2: 'tank@out*3 grunt@roof', amb3: 'heli@rise*2 grunt@drop tank@out' },
-      { at: 13, amb: 'tank@ring*4 grunt@drop*2 heli@rise', amb2: 'grunt@drop*2 heli@rise*2 tank@ring*2', amb3: 'grunt@roof grunt@drop*2 heli@rise tank@ring*3', tip: '廣場決戰——全部擊毀就過關' },
-    ] },
-];
+// 關卡路線、伏兵寫法都搬到 stages.js
 
-function parse(R, n) {
+export function parse(R, n) {
   const P = R.pts.map(([x, z]) => ({ x, z, s: 0 }));
   for (let i = 1; i < P.length; i++) P[i].s = P[i - 1].s + Math.hypot(P[i].x - P[i - 1].x, P[i].z - P[i - 1].z);
   const end = P[P.length - 1], N = R.secs.length;
@@ -57,7 +27,8 @@ function parse(R, n) {
   const secs = R.secs.map((c, i) => {
     const a = P[c.at - 1], b = P[c.at], d = P[c.at + 1];
     const turn = !!d && Math.abs((b.x - a.x) * (d.z - b.z) - (b.z - a.z) * (d.x - b.x)) > 1;
-    return { i, at: c.at, s: b.s, turn, tip: c.tip, last: i === N - 1, trig: i === N - 1 ? R.fin : 58, pre: L(c.pre), waves: [c.amb, c.amb2, c.amb3].filter(Boolean).map(L) };
+    return { i, at: c.at, s: b.s, turn, tip: c.tip, last: i === N - 1, trig: i === N - 1 ? R.fin : 58, pre: L(c.pre), waves: [c.amb, c.amb2, c.amb3].filter(Boolean).map(L),
+      go: c.go, lines: c.lines, talkClear: c.clear, hold: c.hold, gap: c.gap, boss: c.boss, targets: c.targets };
   });
   // 路線走過的路段、路口（斜線＝走進空地，不算街道）
   const edges = new Set(), nodes = new Map();
@@ -80,7 +51,6 @@ function parse(R, n) {
   }
   return { n, pts: P, len: end.s, secs, cp: R.cp, par: R.par, over: R.over || 1, edges, bars, blocked: new Set(bars.map((b) => b.k)) };
 }
-export const ENC = RAW.map((R, i) => parse(R, i + 1));
 // 給 stageWeight 用的「敵機清單」（每區一批）
 export const encGroups = (E) => E.secs.map((c) => [...c.pre, ...c.waves.flat()].map((o) => o.kind));
 
@@ -316,6 +286,7 @@ export class Encounter {
     this.prog = this.sec ? E.secs[this.sec - 1].s : 0;   // 沿路線推進了幾公尺（只增不減）
     this.queue = []; this.warn = []; this.mine = []; this.used = new Set();
     this.wp = null; this.ahead = []; this.dist = 0; this.peak = 0;
+    this.holdT = 0; this.tg = []; this.bossE = null; this.bossTalk = 0;
     C.stats.healed = C.stats.healed || 0;
   }
   get cur() { return this.E.secs[this.sec]; }
@@ -333,7 +304,11 @@ export class Encounter {
     C.say(`STAGE ${C.stage}　${D.name}`, this.sec ? `從檢查點繼續——區域 ${this.sec + 1}/${this.N}` : D.tip, 4, 'cy');
     C.audio.ui('wave');
     this.state = 'move';
+    C.lines(this.cur.go);
   }
+  // 守點剩幾秒（HUD 用；不是守點區＝null）
+  get holdLeft() { const c = this.cur; return c && c.hold && this.state === 'fight' ? Math.max(0, c.hold - this.holdT) : null; }
+  tgDone() { return this.tg.every((t) => t.b.st !== 0); }
   alive() { let n = 0; for (const e of this.C.enemies) if (!e.dead) n++; return n; }
 
   // 每幀（戰鬥階段）：回傳 true＝最後一區也清完了
@@ -351,10 +326,23 @@ export class Encounter {
       if (this.prog >= c.s - c.trig || Math.hypot(p.x - V.x, p.z - V.z) < c.trig * 0.8) this.ambush(1);
     } else if (this.state === 'fight') {
       let mine = 0; for (const e of this.mine) if (!e.dead) mine++;
-      if (this.beat < c.waves.length) { if (!this.queue.length && (mine <= E.over || this.beatT > 28)) this.ambush(this.beat + 1); }
-      else if (!this.queue.length && this.cleared(c)) { this.clrT += dt; if (this.clrT > 0.7) return this.clear(c); }
+      // 守點：時間內 amb、amb2、amb3 輪流來；時間到才停
+      const holding = c.hold && this.holdT < c.hold;
+      if (c.hold) { const was = this.holdT < c.hold; this.holdT += dt; if (was && this.holdT >= c.hold) C.note('守住了　清掉剩下的', 'gr'); }
+      if (holding) { if (!this.queue.length && (mine <= E.over || this.beatT > (c.gap || 18))) this.ambush(this.beat % c.waves.length + 1, true); }
+      else if (!c.hold && this.beat < c.waves.length) { if (!this.queue.length && (mine <= E.over || this.beatT > 28)) this.ambush(this.beat + 1); }
+      else if (!this.queue.length && this.cleared(c) && this.tgDone()) { this.clrT += dt; if (this.clrT > 0.7) return this.clear(c); }
       else this.clrT = 0;
     }
+    // 頭目：剩一半、剩兩成半各講一次
+    const B = this.bossE, bd = c && c.boss;
+    if (B && bd && !B.dead) {
+      const r = B.ap / B.apMax;
+      if (this.bossTalk < 1 && r < 0.5) { this.bossTalk = 1; C.lines(bd.half, true); }
+      if (this.bossTalk < 2 && r < 0.25) { this.bossTalk = 2; C.lines(bd.low, true); }
+    }
+    // 目標大樓倒了：提示一次
+    for (const t of this.tg) if (!t.told && t.b.st !== 0) { t.told = true; C.note(`${t.name || '目標'} 摧毀　${this.tg.filter((o) => o.b.st !== 0).length}/${this.tg.length}`, 'am'); C.audio.ui('confirm'); }
     return false;
   }
   cleared(c) {
@@ -364,12 +352,15 @@ export class Encounter {
     return c.last ? C.enemies.length === 0 && !C.events.some((ev) => ev.spawn) : mech === 0 && veh <= 1;
   }
   // 伏擊：先亮警示、1 秒後才出現；同時在場有上限，多的排隊
-  ambush(b) {
+  ambush(b, again = false) {   // again＝守點時輪回第一波（不重新開場）
     const C = this.C, c = this.cur, L = c.waves[b - 1];
     this.state = 'fight'; this.beat = b; this.beatT = 0; this.clrT = 0;
-    if (b === 1) {
+    if (b === 1 && !again) {
       for (const v of this.mine) if (v.pre && !v.dead) v.hold = rand(0.2, 1.2);   // 停著的戰車開始動
-      C.say(c.last ? 'FINAL AREA' : 'CONTACT', c.tip || `伏兵 ×${L.length}`, 2.6, c.last ? 'am' : 'rd');
+      C.say(c.boss ? c.boss.name : c.hold ? 'HOLD THE LINE' : c.last ? 'FINAL AREA' : 'CONTACT', c.tip || (c.hold ? `守住 ${c.hold} 秒` : `伏兵 ×${L.length}`), 2.6, c.boss || c.last ? 'am' : 'rd');
+      C.lines(c.lines, true);   // 開打的喊話：插隊
+      this.holdT = 0; this.bossTalk = 0;
+      if (c.boss) this.queue.push({ kind: c.boss.kind || 'ace', where: c.boss.where || 'drop', k: 0, t: 1.1, at: null, boss: true });
     } else C.say('REINFORCEMENTS', `敵方增援 ×${L.length}`, 2.4, 'am');
     C.audio.ui('wave');
     const cnt = {};
@@ -389,6 +380,12 @@ export class Encounter {
       if (q.t > 0) continue;
       this.queue.splice(i--, 1); armed--; live++;
       const e = C.spawn(q.kind, 0, 1, q.at);
+      if (q.boss) {   // 頭目：血量加倍、上方顯示名字與血條；可以設定剩幾成撤退
+        const bd = this.cur.boss;
+        e.ap = e.apMax = Math.round(e.apMax * (bd.ap || 2)); e.bossName = bd.name; e.fleeAt = bd.flee || 0;
+        e.onFlee = () => C.lines(bd.fled, true);
+        this.bossE = C.boss = e;
+      }
       if (e.kind === 'tank') e.pref = rand(70, 130);   // 伏兵戰車要逼近到轉角看得到你，不在 200 m 外繞圈
       this.mine.push(e);
       if (q.at.ground || e.vehicle) C.fx.dust(_t.set(q.at.x, C.world.height(q.at.x, q.at.z), q.at.z), e.vehicle ? 1.6 : 2.4);
@@ -398,6 +395,8 @@ export class Encounter {
   stock() {
     const c = this.cur;
     if (!c) return;
+    // 這一區要打爛的大樓：找 (x,z) 附近 40 m 內、還立著的最近一棟
+    this.tg = (c.targets || []).map((t) => ({ ...t, b: this.findBld(t.x, t.z) })).filter((t) => t.b);
     const cnt = {};
     for (const o of c.pre) {
       cnt[o.where] = (cnt[o.where] ?? -1) + 1;
@@ -406,9 +405,21 @@ export class Encounter {
       this.mine.push(v);
     }
   }
+  findBld(x, z) {
+    let best = null, bd = 40;
+    for (const bx of this.C.world.nearBoxes(x, z, 60, [])) {
+      const b = bx.bld;
+      if (!b || b.st !== 0 || bx !== b.box) continue;
+      const d = Math.hypot(b.cx - x, b.cz - z);
+      if (d < bd) { bd = d; best = b; }
+    }
+    return best;
+  }
   clear(c) {
     const C = this.C, pl = C.player, E = this.E;
     this.mine = []; this.used.clear(); this.warn.length = 0;
+    this.bossE = null; if (C.boss && C.boss.dead) C.boss = null;
+    C.lines(c.talkClear);
     if (c.last) { this.state = 'done'; return true; }
     C.say('AREA CLEAR', `區域 ${c.i + 1}/${this.N} 壓制完成`, 2.4, 'gr');
     C.audio.ui('confirm');
@@ -419,13 +430,14 @@ export class Encounter {
     C.rifle.ammo = C.rifle.mag; C.rifle.reload = -1;
     C.note(add > 0 ? `補給　AP +${add}` : '補給完成', 'gr');
     this.sec++; this.state = 'move'; this.beat = 0;
-    if (this.sec === E.cp) {
+    if ([].concat(E.cp).includes(this.sec)) {
       const q = pointAt(E, c.s + 5);
       C.cp = { sec: this.sec, x: q.x, z: q.z, yaw: Math.atan2(q.dx, q.dz), stats: JSON.parse(JSON.stringify(C.stats)), used: 0 };
       C.events.push({ t: 0.9, fn: () => C.note('CHECKPOINT　檢查點', 'am') });
     }
     C.events.push({ t: 1.8, fn: () => C.note('前進 ▶', 'cy') });
     this.stock();
+    C.lines(this.cur.go);
     return false;
   }
 

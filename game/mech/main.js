@@ -241,7 +241,7 @@ async function game() {
   audio.music('title');
   $('resume').addEventListener('click', resume);
   const replay = (n, cp = null) => { $('result').style.display = 'none'; resetPlayer(n, cp); newCombat(n, cp); startBoot(1.6); };
-  $('next').addEventListener('click', () => replay(stageNo + 1));
+  $('next').addEventListener('click', () => { const n = stageNo + 1; $('result').style.display = 'none'; resetPlayer(n); newCombat(n); brief(n, () => startBoot(1.6)); });
   $('again').addEventListener('click', () => replay(stageNo));
   $('cont').addEventListener('click', () => replay(stageNo, combat.cp));   // 遭遇戰：從檢查點繼續
   $('menu').addEventListener('click', toTitle);
@@ -252,7 +252,30 @@ async function game() {
     audio.unlock();
     $('title').classList.add('hide');
     resetPlayer(n); newCombat(n);
-    startBoot(3.4);
+    brief(n, () => startBoot(3.4));
+  }
+  // 出擊前的簡報卡（stages.js 的 brief）：點一下或按任意鍵出擊；重來（同一關）不再顯示
+  function brief(n, go) {
+    const D = STAGES[n - 1];
+    if (!D.brief || !D.brief.length || q.has('nobrief')) { go(); return; }
+    let el = $('brief');
+    if (!el) {
+      el = document.createElement('div'); el.id = 'brief';
+      el.style.cssText = 'position:fixed;inset:0;z-index:30;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(3,7,10,0.92);color:#dcecf0;font-family:Rajdhani,"Noto Sans TC",sans-serif;text-align:center;padding:24px;cursor:pointer';
+      document.body.appendChild(el);
+    }
+    el.innerHTML = `<div style="font-size:13px;letter-spacing:0.4em;color:#7ff3ff">BRIEFING　STAGE ${n}</div>`
+      + `<div style="font-size:clamp(30px,5vw,52px);font-weight:700;margin:10px 0 2px">${D.name}</div><div style="font-size:14px;letter-spacing:0.3em;color:#ffb850;margin-bottom:28px">${D.en}</div>`
+      + D.brief.map((t) => `<p style="max-width:640px;margin:6px 0;font:500 17px/1.7 'Noto Sans TC',sans-serif">${t}</p>`).join('')
+      + '<div style="margin-top:34px;font-size:13px;letter-spacing:0.3em;color:#8aa3ab">點一下或按任意鍵出擊</div>';
+    el.style.display = 'flex';
+    const t0 = performance.now();
+    const done = () => {
+      if (performance.now() - t0 < 400) return;   // 剛出現時的那一下不算
+      removeEventListener('keydown', done); el.removeEventListener('pointerdown', done);
+      el.style.display = 'none'; go();
+    };
+    addEventListener('keydown', done); el.addEventListener('pointerdown', done);
   }
   // 回標題選關：清掉戰場、機體擺回展示鏡頭
   function toTitle() {
@@ -277,7 +300,7 @@ async function game() {
     touchUI.style.display = input.touch.on ? 'block' : 'none';
     applyView();
     audio.ui('boot');
-    audio.music('battle', { stage: stageNo });
+    audio.music('battle', { stage: STAGES[stageNo - 1].music || stageNo });
   }
   function pause() {
     if (state !== 'play' && state !== 'boot') return;
