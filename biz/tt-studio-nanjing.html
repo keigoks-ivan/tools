@@ -145,6 +145,7 @@ fieldset input:focus,fieldset select:focus{outline:2px solid var(--rust-soft);bo
       <fieldset><legend>資金與租約</legend>
         <label>租約年數<input type="number" id="leaseYrs" step="1" min="1"></label>
         <label>投資人要求的年報酬（%）<input type="number" id="invReturn" step="1"></label>
+        <label>家庭每月生活費<input type="number" id="livingCost" step="5000" min="0"></label>
       </fieldset>
     </div>
     <button id="reset" type="button">恢復預設值</button>
@@ -157,7 +158,7 @@ fieldset input:focus,fieldset select:focus{outline:2px solid var(--rust-soft);bo
     <div class="section-head"><div class="section-num">03</div><div><div class="section-title">結果摘要</div><div class="section-sub">以第 3 年（成熟期）與 5 年累計比較</div></div></div>
     <div id="verdict"></div>
     <div class="tbl-wrap"><table class="tbl" id="t-summary"></table></div>
-    <p class="note">哪些數字最能改變結論，見第 05 章。時間拉長來看、不開館的做法，見第 06 章。開館要準備多少錢、要不要找投資人，見第 07 章。</p>
+    <p class="note">哪些數字最能改變結論，見第 05 章。時間拉長來看、不開館的做法，見第 06 章。開館要準備多少錢、要不要找投資人，見第 07 章。要多少錢和客源才有本錢開館，見第 08 章。</p>
     <h3>5 年累計所得</h3>
     <div id="bars" class="bars"></div>
   </div>
@@ -171,7 +172,7 @@ fieldset input:focus,fieldset select:focus{outline:2px solid var(--rust-soft);bo
       <tr><th>條件</th><th>在模型裡怎麼驗證</th></tr>
       <tr><td><strong>學生多到教不完，交給徒弟</strong></td><td>情境三的「徒弟每週教外溢學生時數」調高。前提是主教練真的有候補名單。</td></tr>
       <tr><td><strong>當二房東，把空桌租給其他教練</strong></td><td>情境三的桌數、出租時數、每坪月租。出租率與房租是成敗關鍵。</td></tr>
-      <tr><td><strong>能大幅漲價</strong></td><td>「開館後每小時實收」與第 09 章的打平時薪比較。</td></tr>
+      <tr><td><strong>能大幅漲價</strong></td><td>「開館後每小時實收」與第 10 章的打平時薪比較。</td></tr>
       <tr><td><strong>租桌模式失靈</strong></td><td>把「每小時桌租」調高，或把「每週授課時數」調低（排不到尖峰時段）。</td></tr>
     </table></div>
   </div>
@@ -232,33 +233,49 @@ fieldset input:focus,fieldset select:focus{outline:2px solid var(--rust-soft);bo
   </div>
 </section>
 
-<section id="pnl">
+<section id="threshold">
   <div class="wrap">
-    <div class="section-head"><div class="section-num">08</div><div><div class="section-title">五年損益</div><div class="section-sub">營業淨利即主教練所得（稅前）</div></div></div>
+    <div class="section-head"><div class="section-num">08</div><div><div class="section-title">開館門檻</div><div class="section-sub">要準備多少錢、要有多少客源，開館才不會比租桌差</div></div></div>
+    <p class="lede">錢決定開不開得起來，客源決定開了以後會不會比租桌好。主教練自己的學生只是基本盤，開館要追上租桌，通常得有他教不完的課，或有別的教練來租桌。</p>
+    <h3>要準備多少錢</h3>
+    <div class="tbl-wrap"><table class="tbl" id="t-money"></table></div>
+    <div id="money-note"></div>
+    <h3>要有多少客源</h3>
+    <div class="tbl-wrap"><table class="tbl" id="t-clients"></table></div>
+    <p class="note">每次只調一個條件，其他維持第 02 章的設定。綠色代表目前假設已經達到。幾個條件各做到一部分也可以。</p>
+    <div id="clients-plain"></div>
+    <h3>有本錢開館的標準（情境三）</h3>
+    <div id="ready"></div>
+  </div>
+</section>
+
+<section id="pnl" class="alt">
+  <div class="wrap">
+    <div class="section-head"><div class="section-num">09</div><div><div class="section-title">五年損益</div><div class="section-sub">營業淨利即主教練所得（稅前）</div></div></div>
     <h3>情境一：1 教練 × 1 桌</h3><div class="tbl-wrap"><table class="tbl" id="t-s1"></table></div>
     <h3>情境二：2 教練 × 2 桌</h3><div class="tbl-wrap"><table class="tbl" id="t-s2"></table></div>
     <h3>情境三：多桌經營</h3><div class="tbl-wrap"><table class="tbl" id="t-s3"></table></div>
   </div>
 </section>
 
-<section id="compare" class="alt">
+<section id="compare">
   <div class="wrap">
-    <div class="section-head"><div class="section-num">09</div><div><div class="section-title">同樣的課量，一年拿多少</div><div class="section-sub">情境一與租桌、獅子王的比較（成熟期）</div></div></div>
+    <div class="section-head"><div class="section-num">10</div><div><div class="section-title">同樣的課量，一年拿多少</div><div class="section-sub">情境一與租桌、獅子王的比較（成熟期）</div></div></div>
     <div class="tbl-wrap"><table class="tbl" id="t-hours"></table></div>
     <p class="note">「打平時薪」＝開館後每小時至少要實收多少，年所得才等於繼續租桌。</p>
   </div>
 </section>
 
-<section id="sens">
+<section id="sens" class="alt">
   <div class="wrap">
-    <div class="section-head"><div class="section-num">10</div><div><div class="section-title">敏感度：情境一</div><div class="section-sub">課量 × 每小時實收，綠色代表勝過同課量的租桌所得</div></div></div>
+    <div class="section-head"><div class="section-num">11</div><div><div class="section-title">敏感度：情境一</div><div class="section-sub">課量 × 每小時實收，綠色代表勝過同課量的租桌所得</div></div></div>
     <div class="tbl-wrap"><table class="tbl" id="t-grid"></table></div>
   </div>
 </section>
 
-<section id="lab" class="alt">
+<section id="lab">
   <div class="wrap">
-    <div class="section-head"><div class="section-num">11</div><div><div class="section-title">乒乓實驗室獲利推估</div><div class="section-sub">主教練目前租桌的場館：南京東路四段、商辦 6 樓、4 張球桌、無櫃台</div></div></div>
+    <div class="section-head"><div class="section-num">12</div><div><div class="section-title">乒乓實驗室獲利推估</div><div class="section-sub">主教練目前租桌的場館：南京東路四段、商辦 6 樓、4 張球桌、無櫃台</div></div></div>
     <p>乒乓實驗室的收入有外部教練租桌、散客租桌、自家教練的一對一與團體課，另有小型積分賽。它的租金、課程價格與拆帳比例都無公開資料，以下為可調整的推估。主教練的課量與桌租直接沿用第 02 章「現況」的參數。</p>
     <div class="inputs">
       <fieldset><legend>場地與成本</legend>
@@ -293,10 +310,10 @@ fieldset input:focus,fieldset select:focus{outline:2px solid var(--rust-soft);bo
   </div>
 </section>
 
-<section id="context">
+<section id="context" class="alt">
   <div class="wrap">
-    <div class="section-head"><div class="section-num">12</div><div><div class="section-title">區位與選址</div><div class="section-sub">不隨參數變動的背景</div></div></div>
-    <p>主教練目前授課的乒乓實驗室位於南京東路四段、小巨蛋站旁的商辦 6 樓，有 4 張球桌。在南京東路另開教室，學生換地點的不便很小，第 1 年的學生流失可能比一般搬遷低；但這也代表新教室會直接和他目前的租桌場館、以及獅子王南京館競爭同一群學員。第 11 章的推估顯示，主教練本身就是乒乓實驗室很大一部分的利潤來源——這是談包月或更深合作的籌碼，也是在旁邊另開一間的關係風險。</p>
+    <div class="section-head"><div class="section-num">13</div><div><div class="section-title">區位與選址</div><div class="section-sub">不隨參數變動的背景</div></div></div>
+    <p>主教練目前授課的乒乓實驗室位於南京東路四段、小巨蛋站旁的商辦 6 樓，有 4 張球桌。在南京東路另開教室，學生換地點的不便很小，第 1 年的學生流失可能比一般搬遷低；但這也代表新教室會直接和他目前的租桌場館、以及獅子王南京館競爭同一群學員。第 12 章的推估顯示，主教練本身就是乒乓實驗室很大一部分的利潤來源——這是談包月或更深合作的籌碼，也是在旁邊另開一間的關係風險。</p>
     <div class="two">
       <div class="box blue"><div class="label">客群</div>上班族成人集中在午休與下班後，民生社區、松山、中山的兒童集中在平日傍晚與週末白天。只做個人課時，兩群人剛好錯開尖峰。</div>
       <div class="box blue"><div class="label">租金參考</div>南京東路五段一間 60 坪、5 樓的辦公室刊登月租 7.5 萬（每坪約 1,250 元未稅）；獅子王南京館月租 18 萬（館長口述）。預設每坪 1,400 元含管理費，偏保守。</div>
@@ -313,9 +330,9 @@ fieldset input:focus,fieldset select:focus{outline:2px solid var(--rust-soft);bo
   </div>
 </section>
 
-<section id="risk" class="alt">
+<section id="risk">
   <div class="wrap">
-    <div class="section-head"><div class="section-num">13</div><div><div class="section-title">風險</div><div class="section-sub"></div></div></div>
+    <div class="section-head"><div class="section-num">14</div><div><div class="section-title">風險</div><div class="section-sub"></div></div></div>
     <div class="tbl-wrap"><table class="tbl">
       <tr><th>風險</th><th>對策</th></tr>
       <tr><td><strong>與目前的場館和獅子王南京館在同一條路上競爭</strong></td><td>確認與原場館的約定；不主動招攬對方學員；先把包月條件、駐館拆帳或入股等合作方式談清楚再決定</td></tr>
@@ -337,7 +354,7 @@ fieldset input:focus,fieldset select:focus{outline:2px solid var(--rust-soft);bo
 <script>const D={labPrice:900,labFee:200,weeklyHrs:40,weeks:48,lkTake:450,studioPrice:1000,follow1:90,priceUp:3,otherInc:80000,ppp:1400,
 s1Ping:25,s1Other:27000,s1Capex:450000,s2Ping:40,s2Other:39500,s2Capex:665000,bWeekly:24,bPrice:910,bMode:'split',bShare:50,bFee:200,
 s3Tables:4,s3Ping:55,s3Other:44500,s3Capex:1050000,rentHrs:30,rentRate:200,jrWeekly:0,jrPrice:900,jrShare:50,
-Ltables:4,Lping:55,Lppp:1400,Lother:58000,Lcapex:2500000,Lweeks:50,Lpeak:45,Loff:39,LpeakU:70,LoffU:20,Lmisc:150000,LmixC:45,LmixW:20,LpW:300,LmixP:25,LpP:450,LmixG:10,LpG:500,leaseYrs:3,invReturn:8};
+Ltables:4,Lping:55,Lppp:1400,Lother:58000,Lcapex:2500000,Lweeks:50,Lpeak:45,Loff:39,LpeakU:70,LoffU:20,Lmisc:150000,LmixC:45,LmixW:20,LpW:300,LmixP:25,LpP:450,LmixG:10,LpG:500,leaseYrs:3,invReturn:8,livingCost:0};
 const $=id=>document.getElementById(id);
 function load(){for(const k in D){$(k).value=D[k];}}
 function g(k){const e=$(k); if(k==='bMode') return e.value; const n=parseFloat(e.value); return isNaN(n)?0:n;}
@@ -488,7 +505,7 @@ function calc(){
   let ao='<div class="box green"><div class="label">不開館的做法</div><ul>';
   ao+=raise?`<li><strong>漲價</strong>：開館試算假設學生每小時付 ${f0(p.studioPrice)} 元。學生願意付這個價錢的話，在現在的場館也收得到，第 3 年所得 ${w(rY3)}${beatsAll?'，比三種開館方式都高':''}。可以先從新學生試。</li>`
           :`<li><strong>漲價</strong>：學費每小時多 100 元，租桌一年多 ${w(H*100)}。可以先從新學生試。</li>`;
-  ao+=`<li><strong>談桌租</strong>：${Lb.op>0?`推估主教練一年付的桌租 ${w(coachRent)}，約是乒乓實驗室年獲利的 ${(share*100).toFixed(0)}%（第 11 章）。`:'推估乒乓實驗室本身不賺錢，主教練的桌租對它更重要（第 11 章）。'}桌租每小時降 ${f0(cut)} 元，他一年多 ${w(H*cut)}，不用出錢。也可以談包月、固定尖峰時段或入股。</li>`;
+  ao+=`<li><strong>談桌租</strong>：${Lb.op>0?`推估主教練一年付的桌租 ${w(coachRent)}，約是乒乓實驗室年獲利的 ${(share*100).toFixed(0)}%（第 12 章）。`:'推估乒乓實驗室本身不賺錢，主教練的桌租對它更重要（第 12 章）。'}桌租每小時降 ${f0(cut)} 元，他一年多 ${w(H*cut)}，不用出錢。也可以談包月、固定尖峰時段或入股。</li>`;
   ao+='<li><strong>先帶徒弟，不開館</strong>：讓徒弟在同一間場館租桌，教主教練排不下的學生，由主教練抽成。開館最關鍵的假設是「學生多到教不完」，這樣可以用很低的成本先確認。</li>';
   ao+='<li><strong>小團體課或兒童班</strong>：一小時同時教 2 到 4 人，每小時收入提高，授課時數不變。本模型沒有計算這一項。</li></ul></div>';
   $('alt-note').innerHTML=ao;
@@ -540,7 +557,7 @@ function calc(){
     ['場地','看過哪些物件？坪數多大，每坪月租（含管理費）多少？商辦能不能做運動教室？',['ppp','s1Ping']],
     ['場地','裝修、球桌、減震地板、冷氣的預算多少？每月水電、清潔、保險等費用估多少？',['s1Capex','s1Other']],
     ['場地','租約能簽幾年？有沒有裝修免租期？提前解約要付多少？',['leaseYrs']],
-    ['資金','自己能拿出多少錢開館？最多能接受虧掉多少？',[]],
+    ['資金','自己能拿出多少錢開館？家裡每月生活開銷多少？最多能接受虧掉多少？',['livingCost']],
     ['資金','有沒有教練願意一起出錢合夥，並答應固定來教課或租桌？',['rentHrs']],
     ['其他收入','營隊、比賽、賣球具，一年大概多少？',['otherInc']],
     ['原場館','跟乒乓實驗室有沒有約定，例如不能在附近開館、不能帶走學生？',[]],
@@ -579,6 +596,56 @@ function calc(){
   $('t-invest').innerHTML=iv;
   $('inv-terms').innerHTML=`<div class="box blue"><div class="label">真的要找投資人，合約先寫清楚</div><ul><li><strong>主教練的薪水先算</strong>：例如每教 1 小時先拿 ${f0(labNet)} 元，跟現在租桌實拿一樣。扣完以後剩下的才是場館利潤，才拿來分。</li><li>用借款，或「從營收抽成，拿回 1.5 倍就停」，會比直接給股份單純。</li><li>主教練受傷、想退出、場館收掉的時候，錢怎麼算。</li><li>出多少錢、占幾成、誰做決定。</li></ul></div>`;
   $('inv-verdict').innerHTML=`<div class="callout"><div class="label">建議</div><div class="text">${allNeg?'現在先不要找投資人。先在原場館確認有幾位教練真的會來租桌、徒弟能排到多少課。確認以後，如果要開情境三，用自己的錢、創業貸款，加上一位合夥教練。':`以目前參數，${names[best]} 5 年比租桌多 ${w(gaps5[best])}。要找投資人，先把主教練的薪水算清楚，再用借款或營收分成，不要一開始就給股份。`}</div></div>`;
+
+  // ===== 開館門檻 =====
+  const fh=v=>Number.isInteger(v)?f0(v):v.toFixed(1);
+  // 二分法找最小門檻（條件隨參數單調）；lo 已達到回傳 lo，hi 仍達不到回傳 null
+  const bis=(key,lo,hi,prec,test)=>{const t=v=>test(model({...p,[key]:v}));
+    if(t(lo))return lo; if(!t(hi))return null;
+    while(hi-lo>prec){const m=(lo+hi)/2; if(t(m))hi=m; else lo=m;}
+    let c=Math.ceil(lo/prec-1e-9)*prec; while(!t(c))c+=prec; return c;};
+  const Y3=i=>r=>[r.S1,r.S2,r.S3][i][2].inc>=r.lab[2], Y5=i=>r=>r.T[i]>=r.L5;
+  const LV=[[0,'每小時學費','studioPrice',0,5000,1,' 元'],[0,'主教練每週自己教','weeklyHrs',0,112,.5,' 小時'],
+    [1,'第二位教練每週教','bWeekly',0,112,.5,' 小時'],[1,'每小時學費','studioPrice',0,5000,1,' 元'],
+    [2,'每張出租桌每週租出','rentHrs',0,84,.5,' 小時'],[2,'徒弟每週教','jrWeekly',0,112,.5,' 小時'],[2,'每小時學費','studioPrice',0,5000,1,' 元']];
+  const TH=LV.map(([i,n,key,lo,hi,prec,u])=>({i,n,key,u,cur:p[key],y3:bis(key,lo,hi,prec,Y3(i)),y5:bis(key,lo,hi,prec,Y5(i))}));
+  const th=(i,key)=>TH.find(t=>t.i===i&&t.key===key);
+  const tH=th(0,'weeklyHrs'), tP=th(0,'studioPrice'), tB=th(1,'bWeekly'), tR=th(2,'rentHrs'), tJ=th(2,'jrWeekly');
+  const nT=Math.max(p.s3Tables-1,0), hv=v=>v===null?'做不到':fh(v), tot=v=>v===null?'做不到':`約 ${f0(nT*v)} 小時`;
+
+  const mo=Math.max(p.livingCost,0)*3;
+  const worst=x=>{let t=x.cap+x.dep;for(let y=1;y<ly;y++)t+=x.mr*12*(y<3?1:1.03);return t;};
+  let mt='<tr><th>方案</th><th class="num">開館當下要拿出來</th><th class="num">家裡預備金（3 個月生活費）</th><th class="num">合計要準備</th><th class="num">最壞情況：開一年就收</th></tr>';
+  stp.forEach((x,i)=>{mt+=`<tr><td>${names[i]}</td><td class="num">${f0(st[i])}</td><td class="num">${mo?f0(mo):'未填'}</td><td class="num"><strong>${f0(st[i]+mo)}</strong></td><td class="num">${f0(worst(x))}</td></tr>`;});
+  $('t-money').innerHTML=mt;
+  $('money-note').innerHTML=`<p class="note">最壞情況：簽 ${f0(ly)} 年約、開一年就收掉。裝修拿不回來、押金被扣，${ly>1?`還要付剩下 ${f0(ly-1)} 年的房租`:'租約剛好到期'}。租約有提前解約條款或可以轉租，會少很多。${mo?'':'家庭每月生活費還沒填（第 02 章），預備金先以 0 計算。'}這筆預備金是給主教練受傷、收入歸零時用的。</p>`;
+
+  const cv=(v,t)=>v===null?'做不到':`<span class="${t.cur>=v?'pos':''}">${fh(v)}${t.u}</span>`;
+  let cl='<tr><th>方案</th><th>要做到什麼</th><th class="num">目前假設</th><th class="num">第 3 年追平租桌</th><th class="num">5 年累計追平</th></tr>';
+  TH.forEach(t=>{cl+=`<tr><td>${sn[t.i]}</td><td>${t.n}</td><td class="num">${fh(t.cur)}${t.u}</td><td class="num">${cv(t.y3,t)}</td><td class="num">${cv(t.y5,t)}</td></tr>`;});
+  $('t-clients').innerHTML=cl;
+
+  const s1ok=S1[2].inc>=lab[2];
+  let pl='<div class="box blue"><div class="label">換成比較好想像的說法</div><ul>';
+  pl+=tR.y3===0?'<li>情境三不出租桌也追得上租桌。</li>'
+    :`<li>情境三要在第 3 年追平，${f0(nT)} 張出租桌每週加起來要租出${tot(tR.y3)}${tR.y3!==null?`，例如 ${f0(Math.ceil(nT*tR.y3/10))} 位教練，每人每週租 10 小時`:''}。要 5 年累計追平，每週要${tot(tR.y5)}。</li>`;
+  pl+=tJ.y3===0?'<li>以目前的出租時數，情境三不需要徒弟也追得上租桌。</li>'
+    :`<li>或者徒弟每週教 ${hv(tJ.y3)} 小時。以每位學生每週上 1 小時估，大約要有 ${tJ.y3===null?'—':f0(Math.ceil(tJ.y3))} 位主教練排不下的候補學生。要 5 年累計追平，大約要 ${tJ.y5===null?'—':f0(Math.ceil(tJ.y5))} 位。</li>`;
+  pl+=tB.y3===0?'<li>情境二不需要第二位教練也追得上租桌。</li>'
+    :`<li>情境二的第二位教練，要能帶進每週 ${hv(tB.y3)} 小時的課，以每位學生每週 1 小時估，大約 ${tB.y3===null?'—':f0(Math.ceil(tB.y3))} 位學生。</li>`;
+  pl+=s1ok?'<li>情境一以目前參數已經追平租桌。</li>'
+    :`<li>情境一只能靠漲價。自己多教的話，每週要教 ${hv(tH.y3)} 小時，目前是 ${fh(p.weeklyHrs)} 小時。學生如果願意付 ${tP.y3===null?'—':f0(tP.y3)} 元，在現在的場館也能收這個價錢，租桌第 3 年所得會變成 ${tP.y3===null?'—':w(model({...p,labPrice:tP.y3}).lab[2])}。</li>`;
+  pl+='</ul></div>';
+  $('clients-plain').innerHTML=pl;
+
+  const ok=b=>b?'<span class="pos">目前假設已達到</span>':'<span class="neg">目前假設未達到</span>';
+  const any3=[0,1,2].filter(i=>SS[i][2].inc>=lab[2]);
+  $('ready').innerHTML=`<div class="box warn"><div class="label">開館前這幾件事都要成立</div><ol>`+
+    `<li>${mo?`${f0(st[2]+mo)} 元拿得出來（開館 ${f0(st[2])}，加家裡預備金 ${f0(mo)}）`:`開館的 ${f0(st[2])} 元拿得出來`}，而且賠掉也不影響家裡。訪談確認。</li>`+
+    `<li>租約有提前解約條款，或可以轉租。最壞情況要能承受 ${f0(worst(stp[2]))} 元。訪談確認。</li>`+
+    `<li>開館前就有客源：${tJ.y3===0||tR.y3===0?'目前假設的出租時數和徒弟課量，已經夠追上租桌':`徒弟每週約 ${hv(tJ.y3)} 小時的候補學生，或出租桌每週合計${tot(tR.y3)}`}。${ok(S3[2].inc>=lab[2])}</li>`+
+    `<li>想要 5 年加起來也不輸租桌：${tJ.y5===0||tR.y5===0?'目前假設的出租時數和徒弟課量，已經夠':`徒弟每週約 ${hv(tJ.y5)} 小時，或每張出租桌每週 ${hv(tR.y5)} 小時`}。${ok(T[2]>=L5)}</li></ol></div>`+
+    `<div class="callout"><div class="label">以目前參數</div><div class="text">${any3.length?`${any3.map(i=>names[i]).join('、')}已經達到第 3 年追平租桌的客源門檻。錢和租約條件確認後，就有本錢開館。`:'三種方式都還沒達到客源門檻。先在原場館把客源確認好：有幾位候補學生、有幾位教練真的會來租桌，再決定要不要開。'}</div></div>`;
 }
 document.addEventListener('DOMContentLoaded',()=>{load();calc();
   document.querySelectorAll('input,select').forEach(e=>e.addEventListener('input',calc));
