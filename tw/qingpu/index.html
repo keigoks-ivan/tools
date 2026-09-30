@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>青埔特區房市追蹤 | Taiwan Property Monitor</title>
+<link rel="stylesheet" href="../../css/style.css">
+<link rel="stylesheet" href="../tw.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<style>
+  /* 這頁是資料驅動頁（讀 data/*.json 現場算現場畫），不是靜態報告頁，
+     以下只補站內樣式沒有的元件：篩選 chip、銷控表格熱力表、戶別試算面板、
+     結論條列、可排序表頭、載入更多按鈕。配色沿用 css/style.css 的變數。 */
+  .container { max-width: 1160px; }
+  .toc-box{background:#fff;border:0.5px solid #ccd9e8;border-left:3px solid #1e3a5f;border-radius:6px;margin:14px 0 20px;overflow:hidden}
+  .toc-header{padding:10px 16px;font-size:12px;font-weight:600;color:#1e3a5f;background:#f4f7fc}
+  .toc-list{padding:8px 16px 12px;display:flex;flex-wrap:wrap;gap:4px 14px}
+  .toc-list a{font-size:12px;color:#2c3e50;text-decoration:none}
+  .toc-list a:hover{color:#1e3a5f;text-decoration:underline}
+
+  .conclusion-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+  .conclusion-list li{font-size:13px;line-height:1.7;color:#1e3a5f;padding-left:14px;border-left:2px solid #ccd9e8}
+
+  .section-conclusion{font-weight:600;color:#1e3a5f;font-size:13px;line-height:1.8;margin:2px 0 12px;padding:8px 12px;background:#f4f7fc;border-left:3px solid #1e3a5f;border-radius:0 6px 6px 0}
+
+  details.method-note{margin-top:10px;border:0.5px solid #dde8f2;border-radius:6px;background:#fafcfe}
+  details.method-note summary{cursor:pointer;padding:8px 12px;font-size:12px;color:#5a7a9a;font-weight:600;list-style:none}
+  details.method-note summary::-webkit-details-marker{display:none}
+  details.method-note summary::before{content:'▸ ';color:#94a3b8}
+  details.method-note[open] summary::before{content:'▾ '}
+  details.method-note .method-body{padding:0 14px 12px;font-size:12px;color:#4a6080;line-height:1.8}
+  details.method-note .method-body ul{margin:4px 0 4px 18px}
+
+  #filter-bar{position:sticky;top:52px;z-index:50;background:#eef3f9;padding:8px 0;margin-bottom:6px;border-bottom:1px solid #ccd9e8}
+  #filter-bar .filter-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:3px 0}
+  #filter-bar .filter-label{font-size:11px;color:#5a7a9a;min-width:3.4em}
+  .chip{border:1px solid #ccd9e8;background:#fff;color:#1e3a5f;border-radius:999px;padding:3px 11px;font-size:12px;cursor:pointer;white-space:nowrap}
+  .chip.active{background:#1e3a5f;color:#fff;border-color:#1e3a5f}
+  .chip-reset{font-size:11px;color:#5a7a9a;background:none;border:none;text-decoration:underline;cursor:pointer}
+
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:10px 0}
+  .local-filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;font-size:12px;align-items:center}
+  .local-filters select{font-size:12px;padding:3px 6px;border-radius:6px;border:1px solid #ccd9e8;background:#fff;color:#1e3a5f}
+
+  .grid-scroll{overflow:auto;max-height:560px;border:1px solid #ccd9e8;border-radius:8px;margin-bottom:10px}
+  table.sales-grid{border-collapse:separate;border-spacing:0;font-size:11px;width:100%}
+  table.sales-grid th, table.sales-grid td{text-align:center;padding:5px 6px;white-space:nowrap;border-bottom:1px solid #e8f0f9;border-right:1px solid #e8f0f9;min-width:56px}
+  table.sales-grid thead th{position:sticky;top:0;z-index:2;background:#f4f7fc;color:#1e3a5f;font-weight:600}
+  table.sales-grid th.floor-col, table.sales-grid td.floor-col{position:sticky;left:0;z-index:1;background:#f4f7fc;font-weight:600;color:#1e3a5f}
+  table.sales-grid thead th.floor-col{z-index:3}
+  .grid-cell-date{display:block;font-size:9.5px;color:#94a3b8}
+  .grid-cell-value{font-weight:600;font-variant-numeric:tabular-nums}
+  td.grid-cell.empty{color:#c3d0e0}
+  td.grid-cell{cursor:pointer}
+  td.grid-cell:hover{outline:2px solid #2563eb;outline-offset:-2px}
+  td.grid-cell.picked{outline:2px solid #16a34a;outline-offset:-2px;background:#f0fdf4!important}
+  .dot-special{display:inline-block;width:5px;height:5px;border-radius:50%;background:#94a3b8;margin-left:2px}
+  .low-n{color:#94a3b8;font-style:italic}
+  .load-more{display:block;margin:10px auto 2px;padding:5px 16px;border-radius:8px;border:1px solid #ccd9e8;background:#f4f7fc;color:#1e3a5f;cursor:pointer;font-size:12px}
+  .badge-flag{background:#fef2f2;color:#dc2626;font-size:10px;padding:1px 5px;border-radius:4px;font-weight:600}
+  .badge-est{background:#f4f7fc;color:#5a7a9a;font-size:10px;padding:1px 5px;border-radius:4px;font-weight:600}
+  .badge-multi{background:#eff6ff;color:#2563eb;font-size:10px;padding:1px 5px;border-radius:4px;font-weight:600}
+
+  #estimator-box{border:1px solid #ccd9e8;border-radius:8px;background:#fff;padding:14px 16px}
+  #estimator-picker{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:10px;font-size:12px}
+  #estimator-picker select{font-size:12px;padding:4px 8px;border-radius:6px;border:1px solid #ccd9e8}
+  #estimator-basis{font-size:12px;color:#5a7a9a;margin-bottom:10px}
+  #estimator-empty{color:#5a7a9a;font-size:13px;padding:20px 0;text-align:center}
+  .est-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+  .est-card{border:0.5px solid #ccd9e8;border-left:3px solid #1e3a5f;border-radius:6px;padding:10px 12px;background:#fafcfe}
+  .est-card .est-label{font-size:10px;color:#5a7a9a;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
+  .est-card .est-value{font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:600;color:#1e3a5f}
+  .est-card .est-sub{font-size:11px;color:#4a6080;margin-top:4px;line-height:1.5}
+
+  .road-list{font-size:12px;color:#4a6080;line-height:1.9}
+  code{background:#f4f7fc;padding:1px 5px;border-radius:4px;font-size:0.92em}
+  .stack-legend{display:flex;gap:12px;font-size:11px;color:#5a7a9a;margin:4px 0 8px;flex-wrap:wrap}
+  .stack-legend span{display:inline-flex;align-items:center;gap:4px}
+  .stack-legend i{width:9px;height:9px;border-radius:2px;display:inline-block}
+</style>
+</head>
+<body>
+<div id="nav-root"></div>
+<script src="../../js/navbar.js"></script>
+
+<div class="container">
+
+  <div class="page-header">
+    <span class="updated" id="updated-line">資料載入中…</span>
+    <h1>青埔特區房市追蹤</h1>
+    <div class="subtitle">桃園青埔特區（含遠雄仰森週邊）的開價（591）與成交（實價登錄）自動追蹤，每月更新一次。</div>
+  </div>
+
+  <div class="toc-box" id="tocBox">
+    <div class="toc-header">本頁目錄</div>
+    <div class="toc-list">
+      <a href="#sec-status">仰森現況</a>
+      <a href="#sec-estimator">戶別試算</a>
+      <a href="#sec-salesgrid">仰森銷控表</a>
+      <a href="#sec-listing">仰森開價列表</a>
+      <a href="#sec-deals">仰森成交</a>
+      <a href="#sec-compare">青埔各社區比價</a>
+      <a href="#sec-trend">青埔成交走勢</a>
+      <a href="#sec-supply">青埔未來供給</a>
+      <a href="#sec-demand">青埔需求</a>
+      <a href="#sec-outlook">價格走向</a>
+      <a href="#sec-latest">青埔最新成交</a>
+      <a href="#sec-methodology">資料說明與方法論</a>
+    </div>
+  </div>
+
+  <section id="sec-summary">
+    <div class="section-label">結論</div>
+    <ul class="conclusion-list" id="top-conclusion"><li>資料載入中…</li></ul>
+  </section>
+
+  <div id="filter-bar">
+    <div class="filter-row">
+      <span class="filter-label">坪數</span>
+      <button class="chip" data-group="size" data-value="small">小 &lt;30坪</button>
+      <button class="chip" data-group="size" data-value="mid">中 30-45坪</button>
+      <button class="chip" data-group="size" data-value="large">大 &gt;45坪</button>
+    </div>
+    <div class="filter-row">
+      <span class="filter-label">屋齡</span>
+      <button class="chip" data-group="age" data-value="presale">預售</button>
+      <button class="chip" data-group="age" data-value="new">新成屋 0-2年</button>
+      <button class="chip" data-group="age" data-value="mid_age">3-10年</button>
+      <button class="chip" data-group="age" data-value="old">10年以上</button>
+      <button class="chip" data-group="age" data-value="unknown">未知</button>
+      <button class="chip-reset" id="filter-reset">全部重設</button>
+    </div>
+  </div>
+
+  <section id="sec-status">
+    <h2 class="section-heading" id="sec-status-h">仰森現況</h2>
+    <div class="section-conclusion" id="status-conclusion">載入中…</div>
+    <div class="tiles" id="tiles-grid"></div>
+    <details class="method-note"><summary>怎麼算的</summary><div class="method-body" id="status-method"></div></details>
+  </section>
+
+  <section id="sec-estimator">
+    <h2 class="section-heading">戶別試算</h2>
+    <div class="section-conclusion" id="estimator-conclusion">到下面「仰森銷控表」點任一格，或用下拉選單挑棟別／戶別／樓層，即可試算該戶的現在市價、三種情境、對照開價與排隊時間。</div>
+    <div id="estimator-box">
+      <div id="estimator-picker">
+        <label>棟別 <select id="est-building"><option value="">請選擇</option></select></label>
+        <label>戶別 <select id="est-unit"><option value="">請選擇</option></select></label>
+        <label>樓層 <select id="est-floor"><option value="">請選擇</option></select></label>
+        <button class="chip" id="est-clear">清除選擇</button>
+      </div>
+      <div id="estimator-basis"></div>
+      <div id="estimator-empty">尚未選定戶別。點下方銷控表任一格，或用上面選單挑棟別/戶別/樓層。</div>
+      <div class="est-grid" id="estimator-result" style="display:none"></div>
+    </div>
+    <details class="method-note"><summary>怎麼算的</summary><div class="method-body" id="estimator-method"></div></details>
+  </section>
+
+  <section id="sec-salesgrid">
+    <h2 class="section-heading">仰森銷控表</h2>
+    <div class="section-conclusion" id="salesgrid-conclusion">載入中…</div>
+    <p class="chart-subtitle">預售簽約資料，依戶別代碼、樓層整理，顏色深淺對應單價高低；點任一格套用到上面「戶別試算」。不受坪數/屋齡篩選影響。格子上排是簽約年月（民國年），下排是單價或總價；灰點代表特殊交易或車位灌入總價，滑鼠移上去看明細。</p>
+    <div class="local-filters">
+      <label>顯示
+        <select id="grid-mode">
+          <option value="unit">單價(萬/坪)</option>
+          <option value="total">總價(萬)</option>
+        </select>
+      </label>
+    </div>
+    <div class="grid-scroll" id="sales-grid-main"></div>
+
+    <h3 class="chart-card h3" style="font-size:13px;font-weight:600;color:#1e3a5f;margin:16px 0 6px">過戶登記（依門牌）</h3>
+    <p class="chart-subtitle">交屋前過戶、跟預售資料配對不到的買賣紀錄，依門牌號、樓層整理；買賣資料沒有戶別代碼，沒辦法對應到上面的戶別，也不能用來試算。</p>
+    <div class="grid-scroll" id="sales-grid-transfer"></div>
+    <details class="method-note"><summary>怎麼算的</summary><div class="method-body" id="salesgrid-method"></div></details>
+  </section>
+
+  <section id="sec-listing">
+    <h2 class="section-heading">仰森開價列表</h2>
+    <div class="section-conclusion" id="listing-conclusion">載入中…</div>
+    <p class="chart-subtitle">一列一戶，591 常見同一戶被多個仲介重複刊登、已合併，總價取刊登中最低的一筆；點「刊登」看全部刊登連結。點欄名可排序；「開價(扣車位)」是主要單價欄。</p>
+    <div class="table-scroll">
+      <table class="data-table" id="table-listing">
+        <thead><tr></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <button class="load-more" id="listing-more" style="display:none">載入更多</button>
+    <details class="method-note"><summary>怎麼算的</summary><div class="method-body" id="listing-method"></div></details>
+  </section>
+
+  <section id="sec-deals">
+    <h2 class="section-heading">仰森成交</h2>
+    <div class="section-conclusion" id="deals-conclusion">載入中…</div>
+    <p class="chart-subtitle">實價登錄預售（含過戶登記）與交屋後轉手（用地址門牌比對，非官方認證，已去除預售重複登記）。</p>
+    <div class="chart-card"><div id="chart-yx-deals" style="height:280px"></div></div>
+    <div class="table-scroll">
+      <table class="data-table" id="table-yx-deals">
+        <thead><tr></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <button class="load-more" id="yxdeals-more" style="display:none">載入更多</button>
+    <details class="method-note"><summary>怎麼算的</summary><div class="method-body" id="deals-method"></div></details>
+  </section>
+
+  <section id="sec-compare">
+    <h2 class="section-heading">青埔各社區比價</h2>
+    <div class="section-conclusion" id="compare-conclusion">載入中…</div>
+    <p class="chart-subtitle">在售戶數／開價中位數來自591去重後的戶；預售成交用建案名稱直接歸戶，中古成交用門牌對照回建案名稱；兩欄都只算近12個月。同一列可比，不同列（不同建案）不要比，屋齡組成不一樣。樣本數小於3筆的中位數用灰字顯示。</p>
+    <div class="table-scroll">
+      <table class="data-table" id="table-compare">
+        <thead><tr></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <details class="method-note"><summary>怎麼算的</summary><div class="method-body" id="compare-method"></div></details>
+  </section>
+
+  <section id="sec-trend">
+    <h2 class="section-heading">青埔成交走勢</h2>
+    <div class="section-conclusion" id="trend-conclusion">載入中…</div>
+    <p class="chart-subtitle">2023年以來，青埔特區成交單價中位數，依預售／新成屋／3-10年／10年以上分四條線；坪數篩選會套用，屋齡篩選用來決定要不要畫出該條線。</p>
+    <div class="chart-card"><div id="chart-trend" style="height:300px"></div></div>
+    <details class="mini-table" style="margin-top:8px"><summary style="cursor:pointer;font-size:12px;color:#5a7a9a">看各月數字（表格）</summary>
+      <div class="table-scroll">
+        <table class="data-table" id="table-trend">
+          <thead><tr></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </details>
+    <details class="method-note"><summary>怎麼算的</summary><div class="method-body" id="trend-method"></div></details>
+  </section>
+
+  <section id="sec-supply">
+    <h2 class="section-heading">青埔未來供給</h2>
+    <div class="section-conclusion" id="supply-conclusion">載入中…</div>
+    <p class="chart-subtitle">青埔特區預售建案的官方登記資料（層棟戶數、建照/登記日期）、交屋時間表、建商餘屋、591在售存量、交屋後釋出率整理。每個數字都附樣本數（n）和來源。</p>
+
+    <h3 class="section-heading" style="font-size:13px;margin-top:20px">a. 建案總表</h3>
+    <div class="section-conclusion" id="projects-conclusion"></div>
+    <div class="local-filters">
+      <label>狀態 <select id="projects-status-filter">
+        <option value="all">全部</option>
+        <option value="selling">銷售中</option>
+        <option value="stalled">停售/觀望</option>
+        <option value="sold_out">已售完</option>
+      </select></label>
+    </div>
+    <div class="table-scroll">
+      <table class="data-table" id="table-projects"><thead><tr></tr></thead><tbody></tbody></table>
+    </div>
+    <details class="method-note"><summary>怎麼算的</summary><div class="method-body" id="projects-method"></div></details>
+
+    <h3 class="section-heading" style="font-size:13px;margin-top:20px">b. 未來供給按季 × 坪數帶</h3>
+    <div class="section-conclusion" id="supply-size-conclusion"></div>
+    <div class="stack-legend" id="supply-size-legend"></div>
+    <div class="chart-card"><div id="chart-supply-by-size" style="height:300px"></div></div>
+    <details class="method-note"><summary>怎麼算的</summary><div class="method-body" id="supply-size-method"></div></details>
+
+    <h3 class="section-heading" style="font-size:13px;margin-top:20px">c. 建商餘屋</h3>
+    <div class="section-conclusion" id="unsold-conclusion"></div>
+    <div class="table-scroll">
+      <table class="data-table" id="table-unsold"><thead><tr></tr></thead><tbody></tbody></table>
+    </div>
+    <details class="method-note"><summary>怎麼算的</summary><div class="method-body" id="unsold-method"></div></details>
+
+    <h3 class="section-heading" style="font-size:13px;margin-top:20px">d. 591在售存量</h3>
+    <div class="section-conclusion" id="inventory-conclusion"></div>
+    <div class="chart-grid two-col">
+      <div>
+        <div class="chart-subtitle">依社區（591去重後戶數，前12名）</div>
+        <div class="table-scroll"><table class="data-table" id="table-inventory-community"><thead><tr></tr></thead><tbody></tbody></table></div>
+      </div>
+      <div>
+        <div class="chart-subtitle">依屋齡 × 坪數矩陣（開價中位數，扣車位）</div>
+        <div class="table-scroll"><table class="data-table" id="table-inventory-matrix"><thead><tr></tr></thead><tbody></tbody></table></div>
+      </div>
+    </div>
+    <details class="method-note"><summary>怎麼算的</summary><div class="method-body" id="inventory-method"></div></details>
+
+    <h3 class="section-heading" style="font-size:13px;margin-top:20px">e. 交屋後釋出率</h3>
+    <div class="section-conclusion" id="release-conclusion"></div>
+    <div class="table-scroll">
+      <table class="data-table" id="table-release-rate-all"><thead><tr></tr></thead><tbody></tbody></table>
+    </div>
+    <details class="method-note"><summary>怎麼算的</summary><div class="method-body" id="release-method"></div></details>
+
+    <h3 class="section-heading" style="font-size:13px;margin-top:20px">交屋時間表（戶數，實際/推估）</h3>
+    <div class="chart-card"><div id="chart-handover" style="height:280px"></div></div>
+
+    <h3 class="section-heading" style="font-size:13px;margin-top:20px">新推案（近12個月首次簽約）</h3>
+    <div class="table-scroll">
+      <table class="data-table" id="table-new-launches"><thead><tr></tr></thead><tbody></tbody></table>
+    </div>
+
+    <details class="mini-table" style="margin-top:8px"><summary style="cursor:pointer;font-size:12px;color:#5a7a9a">591新案清單對照（僅列出，未深度比對）</summary>
+      <div class="table-scroll">
+        <table class="data-table" id="table-newhouse"><thead><tr></tr></thead><tbody></tbody></table>
+      </div>
+    </details>
+  </section>
+
+  <section id="sec-demand">
+    <h2 class="section-heading">青埔需求</h2>
+    <div class="section-conclusion" id="demand-conclusion">載入中…</div>
+
+    <h3 class="section-heading" style="font-size:13px;margin-top:20px">f. 成交量</h3>
+    <div class="section-conclusion" id="volume-conclusion"></div>
+    <div class="chart-card"><div id="chart-volume" style="height:280px"></div></div>
+    <div class="chart-grid two-col">
+      <div class="chart-card"><h3>依坪數帶（季）</h3><div id="chart-volume-size" style="height:240px"></div></div>
+      <div class="chart-card"><h3>依總價帶（季）</h3><div id="chart-volume-band" style="height:240px"></div></div>
+    </div>
+    <details class="method-note"><summary>怎麼算的</summary><div class="method-body" id="volume-method"></div></details>
+
+    <h3 class="section-heading" style="font-size:13px;margin-top:20px">g. 租賃需求</h3>
+    <div class="section-conclusion" id="rental-conclusion"></div>
+    <div class="chart-card"><div id="chart-rental-count" style="height:220px"></div></div>
+    <div class="table-scroll">
+      <table class="data-table" id="table-rental-yield"><thead><tr></tr></thead><tbody></tbody></table>
+    </div>
+    <details class="method-note"><summary>怎麼算的</summary><div class="method-body" id="rental-method"></div></details>
+
+    <h3 class="section-heading" style="font-size:13px;margin-top:20px">h. 人口與家戶</h3>
+    <div class="section-conclusion" id="pop-conclusion"></div>
+    <div class="chart-grid two-col">
+      <div class="chart-card"><h3>戶數 / 人口</h3><div id="chart-pop-household" style="height:240px"></div></div>
+      <div class="chart-card"><h3>年齡結構佔比 / 戶量</h3><div id="chart-pop-age" style="height:240px"></div></div>
+    </div>
+    <details class="method-note"><summary>怎麼算的</summary><div class="method-body" id="pop-method"></div></details>
+
+    <h3 class="section-heading" style="font-size:13px;margin-top:20px">i. 購屋負擔</h3>
+    <div class="section-conclusion" id="afford-conclusion"></div>
+    <div class="table-scroll">
+      <table class="data-table" id="table-affordability"><thead><tr></tr></thead><tbody></tbody></table>
+    </div>
+    <details class="method-note"><summary>怎麼算的</summary><div class="method-body" id="afford-method"></div></details>
+
+    <h3 class="section-heading" style="font-size:13px;margin-top:20px">j. 供需對照</h3>
+    <div class="section-conclusion" id="crosswalk-conclusion"></div>
+    <div class="table-scroll">
+      <table class="data-table" id="table-crosswalk"><thead><tr></tr></thead><tbody></tbody></table>
+    </div>
+    <details class="method-note"><summary>怎麼算的</summary><div class="method-body" id="crosswalk-method"></div></details>
+  </section>
+
+  <section id="sec-outlook">
+    <h2 class="section-heading">價格走向</h2>
+    <div class="section-conclusion" id="outlook-conclusion">載入中…</div>
+    <p class="chart-subtitle" id="outlook-scope-note"></p>
+
+    <h3 class="section-heading" style="font-size:13px;margin-top:20px">現況存貨月數（MOI）</h3>
+    <div class="chart-card"><div id="chart-outlook-history" style="height:260px"></div></div>
+    <p class="chart-subtitle" id="outlook-moi-note"></p>
+
+    <h3 class="section-heading" style="font-size:13px;margin-top:20px">未來8季存貨/去化推算</h3>
+    <p class="chart-subtitle" id="outlook-projection-note"></p>
+    <div class="table-scroll">
+      <table class="data-table" id="table-outlook-projection"><thead><tr></tr></thead><tbody></tbody></table>
+    </div>
+
+    <h3 class="section-heading" style="font-size:13px;margin-top:20px">歷史校準</h3>
+    <p class="chart-subtitle" id="outlook-calib-note"></p>
+    <div class="chart-card"><div id="chart-outlook-calib" style="height:260px"></div></div>
+
+    <h3 class="section-heading" style="font-size:13px;margin-top:20px">季價指數（跨建案中性化）</h3>
+    <p class="chart-subtitle" id="outlook-index-note"></p>
+    <div class="chart-card"><div id="chart-outlook-premium-index" style="height:260px"></div></div>
+    <p class="chart-subtitle" id="outlook-facts-note"></p>
+
+    <h3 class="section-heading" style="font-size:13px;margin-top:20px">情境乘數（套用在「戶別試算」選定戶的預售單價上）</h3>
+    <div class="table-scroll">
+      <table class="data-table" id="table-outlook-scenarios"><thead><tr></tr></thead><tbody></tbody></table>
+    </div>
+
+    <h3 class="section-heading" style="font-size:13px;margin-top:20px">供給對照</h3>
+    <p class="chart-subtitle" id="outlook-supply-context-note"></p>
+    <p class="chart-subtitle" id="outlook-recalc-note" style="font-weight:600"></p>
+    <details class="method-note"><summary>怎麼算的</summary><div class="method-body" id="outlook-method"></div></details>
+  </section>
+
+  <section id="sec-latest">
+    <h2 class="section-heading">青埔最新成交</h2>
+    <div class="section-conclusion" id="latest-conclusion">載入中…</div>
+    <div class="local-filters">
+      <label>類型 <select id="latest-type-filter">
+        <option value="all">全部</option>
+        <option value="presale">預售</option>
+        <option value="resale">中古／新成屋</option>
+      </select></label>
+      <label>道路 <select id="latest-road-filter"><option value="all">全部</option></select></label>
+    </div>
+    <div class="table-scroll">
+      <table class="data-table" id="table-latest"><thead><tr></tr></thead><tbody></tbody></table>
+    </div>
+    <button class="load-more" id="latest-more" style="display:none">載入更多</button>
+  </section>
+
+  <section id="sec-methodology">
+    <h2 class="section-heading">資料說明與方法論</h2>
+    <div id="methodology-body">載入中…</div>
+  </section>
+
+  <div class="source-footer">
+    資料每月自動更新一次（GitHub Actions，每月2號）。本頁純前端讀取 <code>data/*.json</code>，沒有伺服器；所有計算在 Python 端算好寫成 JSON，網頁只負責顯示。內容為資料整理與方法論說明，不構成投資建議。
+  </div>
+</div>
+
+<footer class="footer">A project by <span>InvestMQuest</span></footer>
+
+<script src="qingpu.js"></script>
+</body>
+</html>

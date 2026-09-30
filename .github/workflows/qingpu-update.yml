@@ -1,0 +1,61 @@
+name: qingpu-update
+
+# 青埔特區看房追蹤：每月抓一次實價登錄（買賣/預售/租賃）+ 591（開價/租屋）+
+# 戶政人口，重新算供給/需求/戶別試算係數/價格走向，只 commit tw/qingpu/data/
+# 有變動的部分。內政部實價登錄每月 1 號公布最新一批，這裡排在 2 號跑，
+# 讓最新一批資料先公布完。591 抓取若失敗，pipeline 不會整支掛掉（沿用上次
+# 591 資料、在 meta.json 標記狀態），實價登錄/戶政等其他來源同理。
+on:
+  schedule:
+    - cron: "30 2 2 * *"  # 每月 2 號 02:30 UTC（台北時間 10:30）
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: qingpu-update
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run qingpu pipeline
+        working-directory: scripts/qingpu
+        run: |
+          chmod +x run.sh
+          ./run.sh
+        continue-on-error: true
+
+      - name: Show data dir status
+        run: git status --short tw/qingpu/data/ || true
+
+      - name: Commit and push data changes
+        run: |
+          set -uo pipefail
+          git config user.name "qingpu-bot"
+          git config user.email "actions@users.noreply.github.com"
+          if git diff --quiet -- tw/qingpu/data/ && git diff --cached --quiet -- tw/qingpu/data/; then
+            echo "no changes under tw/qingpu/data/, nothing to commit"
+            exit 0
+          fi
+          git add tw/qingpu/data/
+          git commit -m "chore(qingpu): monthly data refresh $(date -u +%Y-%m-%d)"
+          for attempt in 1 2 3; do
+            git pull --rebase origin main && break
+            echo "pull --rebase failed, retry $attempt/3"
+            sleep $((attempt * 10))
+          done
+          git push origin HEAD:main
