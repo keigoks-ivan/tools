@@ -54,10 +54,11 @@ BOT = r'''(frames) => {
     G.tick(1 / 60);
     if (E && E.sec !== b.sec) { b.sec = E.sec; b.secT[E.sec] = b.f; }
     if (G.state === 'result') return { ev: 'result', f: b.f, win: !C.dead, secT: b.secT };
+    if (!E || E.state !== 'move') { b.last.copy(P.pos); b.lastF = b.f; }   // 打仗、守點時本來就站著，不算卡住
     if (b.f - b.lastF >= 600) {
       const moved = P.pos.distanceTo(b.last); b.last.copy(P.pos); b.lastF = b.f;
       const alive = C.enemies.filter((e) => !e.dead).length;
-      if (E && E.state === 'move' && moved < 5 && !alive) return { ev: 'stuck', f: b.f, sec: E.sec, pos: P.pos.toArray().map((v) => Math.round(v)), wp: goal && goal.toArray().map((v) => Math.round(v)) };
+      if (E && E.state === 'move' && moved < 5 && !alive) return { ev: 'stuck', f: b.f, sec: E.sec, pos: P.pos.toArray().map((v) => Math.round(v)), wp: goal && [goal.x, goal.y, goal.z].map((v) => Math.round(v)) };
     }
   }
   const E = C.enc;
@@ -85,7 +86,7 @@ with sync_playwright() as p:
         print(f'==== 第 {n} 關 {name}　檢查：', '全部 OK' if not bad else f'{len(bad)} 個問題'); [print('  !!', x) for x in bad]
         pg.evaluate(f'()=>{{window.__B=null; __game.launch({n}); __game.run(4)}}')
         t0, shot, res = time.time(), 0, None
-        while time.time() - t0 < 1500:
+        while time.time() - t0 < 5000:
             r = pg.evaluate(BOT, 300)
             if r['ev'] == 'result': res = r; break
             if r['ev'] == 'stuck':
