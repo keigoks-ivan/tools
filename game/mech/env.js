@@ -350,11 +350,11 @@ function terrainMaterial(A) {
 
 // ---------------------------------------------------------------- 建築幾何
 class GeoBucket {
-  constructor() { this.p = []; this.n = []; this.uv = []; this.c = []; this.i = []; this.b = []; }
+  constructor() { this.p = []; this.n = []; this.uv = []; this.c = []; this.i = []; this.b = []; this.s = []; }
   quad(a, b, c, d, n, uvs, col) {
     const base = this.p.length / 3;
     for (const v of [a, b, c, d]) this.p.push(v[0], v[1], v[2]);
-    for (let k = 0; k < 4; k++) { this.n.push(n[0], n[1], n[2]); this.c.push(col[0], col[1], col[2]); this.b.push(col[3] || 0); }
+    for (let k = 0; k < 4; k++) { this.n.push(n[0], n[1], n[2]); this.c.push(col[0], col[1], col[2]); this.b.push(col[3] || 0); this.s.push(col[4] || 0); }
     for (const t of uvs) this.uv.push(t[0], t[1]);
     this.i.push(base, base + 1, base + 2, base, base + 2, base + 3);
   }
@@ -366,6 +366,7 @@ class GeoBucket {
     g.setAttribute('uv', new THREE.Float32BufferAttribute(this.uv, 2));
     g.setAttribute('color', new THREE.Float32BufferAttribute(this.c, 3));
     g.setAttribute('burn', new THREE.Float32BufferAttribute(this.b, 1));
+    g.setAttribute('surface', new THREE.Float32BufferAttribute(this.s, 1));
     g.setIndex(this.i);
     return g;
   }
@@ -442,7 +443,8 @@ function addBox(B, x0, x1, y0, y1, z0, z1, col, uvScale = 8) {
 
 // 立面細節仍寫進同一棟的合併區段：沒有額外材質／draw call，倒塌時跟著樓體一起消失。
 function architecture(B, signs, x0, x1, z0, z1, H, style, F) {
-  const stone = style < 2 ? [0.48, 0.5, 0.52] : [0.72, 0.69, 0.63], steel = [0.19, 0.21, 0.22];
+  const stone = style < 2 ? [0.48, 0.5, 0.52, 0, 1] : [0.72, 0.69, 0.63, 0, 1], steel = [0.12, 0.15, 0.17, 0, 2];
+  const glass = [0.055, 0.095, 0.11, 0, 4];
   const floor = F.h / F.rows, bay = F.w / F.cols;
   const sides = [['x', z1, 1, x0, x1], ['x', z0, -1, x0, x1], ['z', x1, 1, z0, z1], ['z', x0, -1, z0, z1]];
   const asian = style >= 2 && x0 > 120 && z0 < 240;
@@ -458,8 +460,38 @@ function architecture(B, signs, x0, x1, z0, z1, H, style, F) {
     }
     const step = style < 2 ? bay * 3 : bay * 2;
     for (let a = a0 + step; a < a1 - 1; a += step) box(a - 0.12, a + 0.12, 0.3, H, 0, 0.24, stone);
-    box(a0, a1, 0.05, 0.65, 0, 0.22, [0.38, 0.36, 0.33]);
+    box(a0, a1, 0.05, 0.65, 0, 0.22, [0.38, 0.36, 0.33, 0, 1]);
     box(a0 - 0.2, a1 + 0.2, H - 0.35, H, 0, 0.4, stone);
+    const point = (a, y, d) => axis === 'x' ? [a, y, fix + out * d] : [fix + out * d, y, a];
+    const face = (pts, c) => {
+      const n = new THREE.Vector3().subVectors(new THREE.Vector3(...pts[1]), new THREE.Vector3(...pts[0])).cross(new THREE.Vector3().subVectors(new THREE.Vector3(...pts[2]), new THREE.Vector3(...pts[0]))).normalize();
+      if ((Math.abs(n.y) > 0.5 ? n.y : (axis === 'x' ? n.z : n.x) * out) < 0) { pts.reverse(); n.negate(); }
+      B.quad(...pts, n.toArray(), [[0, 0], [1, 0], [1, 1], [0, 1]], c);
+    };
+    // 每面最多三個店面：真正的拱圈、玻璃、門框與遮陽棚，併在既有屋頂桶。
+    const shops = Math.min(3, Math.floor((a1 - a0 - 2) / 7));
+    for (let i = 0; i < shops; i++) {
+      const a = a0 + (a1 - a0) * (i + 0.5) / shops, rad = 1.35;
+      const arch = style === 2 || style === 4;
+      const y = arch ? 1.75 : 2.8;
+      face([point(a - rad, 0.7, 0.035), point(a + rad, 0.7, 0.035), point(a + rad, y, 0.035), point(a - rad, y, 0.035)], glass);
+      box(a - rad - 0.14, a - rad, 0.65, y, 0.03, 0.23, stone);
+      box(a + rad, a + rad + 0.14, 0.65, y, 0.03, 0.23, stone);
+      box(a - 0.03, a + 0.03, 0.7, y, 0.04, 0.13, steel);
+      if (arch) {
+        for (let k = 0; k < 8; k++) {
+          const t0 = k * Math.PI / 8, t1 = (k + 1) * Math.PI / 8;
+          const p = (r, t, d) => point(a + Math.cos(t) * r, y + Math.sin(t) * r, d);
+          face([point(a, y, 0.035), p(rad, t0, 0.035), p(rad, t1, 0.035), point(a, y, 0.035)], glass);
+          face([p(rad, t0, 0.24), p(rad + 0.18, t0, 0.24), p(rad + 0.18, t1, 0.24), p(rad, t1, 0.24)], stone);
+        }
+        if (i === 1) {
+          const cloth = [0.16, 0.25, 0.22, 0, 5];
+          face([point(a - 1.7, 3.35, 0.1), point(a + 1.7, 3.35, 0.1), point(a + 1.7, 3.0, 1.35), point(a - 1.7, 3.0, 1.35)], cloth);
+          box(a - 1.7, a + 1.7, 2.8, 3.0, 1.3, 1.35, cloth);
+        }
+      } else box(a - rad, a + rad, y, y + 0.12, 0.03, 0.23, steel);
+    }
     if (style < 2) {
       // 街層雨棚；突出量保持在人行道內。
       const mid = (a0 + a1) / 2, w = Math.min(8, (a1 - a0) * 0.32);
@@ -479,7 +511,7 @@ function architecture(B, signs, x0, x1, z0, z1, H, style, F) {
       if (asian) {
         // 住宅街的外掛冷氣與窗上遮陽板；公尺尺度，沒有放大的裝飾。
         for (let y = floor + 0.4; y < Math.min(H - 1, floor * 4); y += floor) for (let a = a0 + 4; a < a1 - 2; a += 9) {
-          box(a - 0.45, a + 0.45, y, y + 0.6, 0, 0.45, [0.62, 0.64, 0.62]);
+          box(a - 0.45, a + 0.45, y, y + 0.6, 0, 0.45, [0.62, 0.64, 0.62, 0, 2]);
           for (let k = 0; k < 4; k++) box(a - 0.3, a + 0.3, y + 0.12 + k * 0.09, y + 0.15 + k * 0.09, 0.45, 0.46, steel);
         }
       }
@@ -502,7 +534,7 @@ function architecture(B, signs, x0, x1, z0, z1, H, style, F) {
     const y = H + 0.15, peak = y + Math.min(5, (x1 - x0) * 0.16), xm = (x0 + x1) / 2;
     const face = (a, b, c, d) => {
       const n = new THREE.Vector3().subVectors(new THREE.Vector3(...b), new THREE.Vector3(...a)).cross(new THREE.Vector3().subVectors(new THREE.Vector3(...c), new THREE.Vector3(...a))).normalize();
-      B.quad(a, b, c, d, n.toArray(), [[0, 0], [0, (z1 - z0) / 4], [(x1 - x0) / 8, (z1 - z0) / 4], [(x1 - x0) / 8, 0]], [0.36, 0.29, 0.24]);
+      B.quad(a, b, c, d, n.toArray(), [[0, 0], [0, (z1 - z0) / 4], [(x1 - x0) / 8, (z1 - z0) / 4], [(x1 - x0) / 8, 0]], [0.45, 0.22, 0.12, 0, 3]);
     };
     face([x0, y, z0], [x0, y, z1], [xm, peak, z1], [xm, peak, z0]);
     face([xm, peak, z0], [xm, peak, z1], [x1, y, z1], [x1, y, z0]);
@@ -511,7 +543,7 @@ function architecture(B, signs, x0, x1, z0, z1, H, style, F) {
   }
 }
 function roofTank(B, x, z, y, radius, h) {
-  const col = [0.56, 0.58, 0.56], N = 12;
+  const col = [0.56, 0.58, 0.56, 0, 2], N = 12;
   for (let i = 0; i < N; i++) {
     const a = i / N * Math.PI * 2, b = (i + 1) / N * Math.PI * 2;
     const p = [x + Math.cos(a) * radius, z + Math.sin(a) * radius], q = [x + Math.cos(b) * radius, z + Math.sin(b) * radius];
@@ -550,18 +582,60 @@ function buildingMaterial(A, fi) {
         float bfac = soot;`)
       .replace('#include <roughnessmap_fragment>', `#include <roughnessmap_fragment>
         float winMask = 1.0 - smoothstep(0.25, 0.55, texelRoughness.g);
-        roughnessFactor = mix(roughnessFactor, 0.16 + 0.1 * bh(floor(vMapUv * vec2(16.0, 10.0))), winMask * (1.0 - bfac));
+        vec2 paneCell = floor(vMapUv * vec2(${F.cols.toFixed(1)}, ${F.rows.toFixed(1)}));
+        vec2 paneUV = fract(vMapUv * vec2(${F.cols.toFixed(1)}, ${F.rows.toFixed(1)}));
+        float blind = step(0.58, bh(paneCell + 4.3)) * (1.0 - smoothstep(0.28, 0.75, paneUV.y));
+        float room = 0.75 + 0.25 * bh(paneCell + 1.7);
+        diffuseColor.rgb = mix(diffuseColor.rgb, diffuseColor.rgb * room + vec3(0.035, 0.032, 0.024) * blind, winMask * (1.0 - bfac));
+        roughnessFactor = mix(roughnessFactor, 0.12 + 0.16 * bh(paneCell), winMask * (1.0 - bfac));
         roughnessFactor = mix(roughnessFactor, 0.95, bfac);`)
       .replace('#include <metalnessmap_fragment>', `#include <metalnessmap_fragment>
         metalnessFactor = winMask * (1.0 - bfac) * 0.28;`)
       .replace('#include <emissivemap_fragment>', `
         vec2 cell = floor(vMapUv * vec2(${F.cols.toFixed(1)}, ${F.rows.toFixed(1)}));
-        float hsh = bh(cell * 1.37 + floor(vBW.xz / 6.0) * 0.013);
+        float hsh = bh(cell * 1.37);
         float lit = step(hsh, ${F.lit.toFixed(3)}) * (1.0 - vBurn);
         float fire = step(0.93, hsh) * vBurn * (0.7 + 0.3 * bn(vec2(cell.x * 3.0, cell.y * 3.0)));
         vec3 wc = mix(vec3(1.0, 0.62, 0.3), vec3(0.95, 0.85, 0.7), step(0.7, bh(cell + 3.1)));
-        totalEmissiveRadiance = (wc * lit * 0.55 + vec3(3.0, 0.9, 0.2) * fire) * winMask * (0.4 + 0.6 * bh(cell + 9.7));`);
+        totalEmissiveRadiance = (wc * lit * 0.25 + vec3(3.0, 0.9, 0.2) * fire) * winMask * (0.4 + 0.6 * bh(cell + 9.7));`);
   };
+  m.customProgramCacheKey = () => 'facade-' + fi + '-v2';
+  patchGroundAO(m);
+  return m;
+}
+// 線腳、設備、店窗共用原屋頂材質與柏油細節；surface 頂點欄位區分材質，沒有新增貼圖或 draw call。
+function architecturalMaterial(A) {
+  const m = new THREE.MeshStandardMaterial({ map: A.asphD, normalMap: A.asphN, roughness: 0.95, vertexColors: true, color: 0xa8a49c });
+  m.onBeforeCompile = sh => {
+    sh.vertexShader = sh.vertexShader
+      .replace('#include <common>', '#include <common>\nattribute float surface; varying float vSurface; varying vec3 vAW; varying vec3 vAN;')
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvSurface = surface; vAW = (modelMatrix * vec4(transformed,1.0)).xyz; vAN = normal;');
+    sh.fragmentShader = sh.fragmentShader
+      .replace('#include <common>', '#include <common>\nvarying float vSurface; varying vec3 vAW; varying vec3 vAN;')
+      .replace('#include <map_fragment>', `#include <map_fragment>
+        if (vSurface > 0.5) {
+          float grain = dot(sampledDiffuseColor.rgb, vec3(0.2126, 0.7152, 0.0722));
+          diffuseColor.rgb /= max(sampledDiffuseColor.rgb, vec3(0.005));
+          diffuseColor.rgb *= 0.88 + grain * 0.3;
+          if (vSurface > 2.5 && vSurface < 3.5) {
+            float tile = max(step(0.94, fract(vAW.z / 0.38)), step(0.92, fract(vAW.x / 0.24)));
+            diffuseColor.rgb *= 1.0 - tile * 0.24;
+          }
+          if (vSurface > 3.5 && vSurface < 4.5) {
+            float along = abs(vAN.x) > 0.5 ? vAW.z : vAW.x;
+            float shelf = step(0.92, fract(vAW.y / 0.6)) * step(0.4, fract(along / 1.1));
+            diffuseColor.rgb += vec3(0.025, 0.018, 0.009) * shelf;
+          }
+          diffuseColor.rgb *= mix(0.76, 1.0, smoothstep(0.1, 1.3, vAW.y));
+        }`)
+      .replace('#include <roughnessmap_fragment>', `#include <roughnessmap_fragment>
+        if (vSurface > 0.5) roughnessFactor = vSurface < 1.5 ? 0.78 : vSurface < 2.5 ? 0.4 : vSurface < 3.5 ? 0.86 : vSurface < 4.5 ? 0.18 : 0.94;`)
+      .replace('#include <metalnessmap_fragment>', `#include <metalnessmap_fragment>
+        metalnessFactor = vSurface > 1.5 && vSurface < 2.5 ? 0.68 : vSurface > 3.5 && vSurface < 4.5 ? 0.15 : 0.0;`)
+      .replace('vec3 mapN = texture2D( normalMap, vNormalMapUv ).xyz * 2.0 - 1.0;', `vec3 mapN = texture2D( normalMap, vNormalMapUv ).xyz * 2.0 - 1.0;
+        if (vSurface > 0.5) mapN.xy *= vSurface > 3.5 && vSurface < 4.5 ? 0.03 : 0.2;`);
+  };
+  m.customProgramCacheKey = () => 'architecture-v1';
   patchGroundAO(m);
   return m;
 }
@@ -706,10 +780,10 @@ export class World {
     this.envMap = pm.fromEquirectangular(A.hdr).texture;
     pm.dispose();
     scene.environment = this.envMap;
-    scene.environmentIntensity = 0.55;
+    scene.environmentIntensity = 0.65;
     scene.add(makeSkyDome(A.sky, this.sunDir, fog, sunFog, this.skyGain));
 
-    const sun = new THREE.DirectionalLight(new THREE.Color(1.0, 0.7, 0.45), 6.0);
+    const sun = new THREE.DirectionalLight(new THREE.Color(1.0, 0.83, 0.64), 4.2);
     sun.castShadow = true;
     sun.shadow.mapSize.set(4096, 4096);
     const sc = sun.shadow.camera;
@@ -718,7 +792,7 @@ export class World {
     sun.shadow.autoUpdate = false;   // 影子圖每兩格重畫一次（followShadow 裡開關），省一半顯示卡工
     scene.add(sun, sun.target);
     this.sun = sun;
-    const hemi = new THREE.HemisphereLight(0x7f98c0, 0x3a2e24, 0.12);
+    const hemi = new THREE.HemisphereLight(0x7f98c0, 0x3a2e24, 0.28);
     scene.add(hemi);
 
     // 地形
@@ -842,8 +916,7 @@ export class World {
     const r = rng(2026);
     const NF = FACADES.length;
     const fmats = FACADES.map((f, i) => buildingMaterial(this.A, i));
-    const roofMat = new THREE.MeshStandardMaterial({ map: this.A.asphD, normalMap: this.A.asphN, roughness: 0.95, vertexColors: true, color: 0x9a9690 });
-    patchGroundAO(roofMat);
+    const roofMat = architecturalMaterial(this.A);
     const inner = new THREE.MeshStandardMaterial({ color: 0x16130f, roughness: 1, vertexColors: true });
     const CH = 3; // 3×3 區塊
     const buckets = [];
@@ -892,7 +965,7 @@ export class World {
         const F = FACADES[style];
         const tint = 0.8 + r() * 0.3;
         const col = [tint, tint * (0.97 + r() * 0.05), tint * (0.93 + r() * 0.07), ruin ? 0.75 + r() * 0.25 : (r() < 0.15 ? 0.35 : 0)];
-        const uo = Math.floor(r() * 8) / 8, vo = Math.floor(r() * 8) / 8;
+        const uo = Math.floor(r() * F.cols) / F.cols, vo = Math.floor(r() * 8) / 8;
         const bk = chunkOf((x0 + x1) / 2, (z0 + z1) / 2);
         if (!ruin) {
           // 可破壞：記下這棟在各合併網格裡的頂點區段（每棟連續寫入）
@@ -911,7 +984,7 @@ export class World {
             const ew = 3 + r() * 8, ed = 3 + r() * 8, eh = 2 + r() * 4;
             const ex = THREE.MathUtils.lerp(x0 + 2, x1 - 2 - ew, r()), ez = THREE.MathUtils.lerp(z0 + 2, z1 - 2 - ed, r());
             if (k === 0 && style >= 2) roofTank(bk.roof, ex + ew / 2, ez + ed / 2, H, Math.min(ew, ed) * 0.4, eh);
-            else addBox(bk.roof, ex, ex + ew, H, H + eh, ez, ez + ed, [0.6, 0.6, 0.62]);
+            else addBox(bk.roof, ex, ex + ew, H, H + eh, ez, ez + ed, [0.6, 0.6, 0.62, 0, 2]);
           }
           // 塔樓頂層退縮
           if (H > 60 && r() < 0.6) {

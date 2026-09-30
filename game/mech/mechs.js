@@ -15,7 +15,7 @@ const TPL = new Map();      // 'style|scheme' → 樣板（只建一次）
 //   c＝準心、t＝鎖定目標：xy＝畫面位置（畫面高＝1、左下角為原點）、z＝半徑、w＝挖掉幾成；a＝整台淡掉幾成；res＝畫面像素
 export const SEE = { c: { value: new THREE.Vector4() }, t: { value: new THREE.Vector4() }, a: { value: 0 }, res: { value: new THREE.Vector2(1, 1) } };
 export function initMechMaterials(A) {
-  MATS.clean = paintMaterial(A, 0.5, 0.15, 1.0, 0.48, 0.32, SEE);
+  MATS.clean = paintMaterial(A, 0.32, 0.15, 1.0, 0.48, 0.18, SEE);
   MATS.dirty = paintMaterial(A, 0.42, 1, 0.85, 0.5);
   MATS.shadowOnly = new THREE.MeshBasicMaterial({ colorWrite: false, depthWrite: false });
   TPL.clear();   // 材質換了，樣板要重建
@@ -67,8 +67,8 @@ function paintMaterial(A, wear, mil, soot, bumpK, age = 0, see = null) {
         vec3 wv_tc = wv_ti < 1.5 ? vec3(0.58, 0.56, 0.48) : wv_ti < 2.5 ? vec3(0.018) : wv_ti < 3.5 ? vec3(0.55, 0.36, 0.05) : wv_ti < 4.5 ? vec3(0.42, 0.03, 0.025) : wv_ti < 5.5 ? wv_dc.rgb : vec3(0.045, 0.05, 0.055);
         diffuseColor.rgb = mix(diffuseColor.rgb, wv_tc, wv_dA);
         vec4 wv_W = wv_tri(wearMap, vOP, wv_nO, 0.22);
-        vec4 wv_W2 = wv_tri(paintMap, vOP, wv_nO, 0.5);    // 漆面照片細節（約 2 m 一張）
-        vec4 wv_F = wv_tri(frameMap, vOP, wv_nO, 0.45);     // 骨架金屬細節
+        vec4 wv_W2 = wv_tri(paintMap, vOP, wv_nO, 1.25);   // 漆面細節約 0.8 m 一張，避免整片裝甲像大塊迷彩
+        vec4 wv_F = wv_tri(frameMap, vOP, wv_nO, 0.9);     // 骨架金屬細節
         float wv_S = wv_tri(wearMap, vOP * vec3(1.0, 0.1, 1.0), wv_nO, 0.32).b;
         float wv_nz = wv_n(vOP * 0.45);
         float wv_nz2 = wv_n(vOP * 1.9 + 7.0);
@@ -1095,7 +1095,9 @@ export class Mech {
       A(W, blk(0.05, 0.32, 1.35, 0.025), S.dark, [side * 0.325, 0.02, 1.35]);
       A(W, blk(0.06, 0.24, 1.22, 0.025), S.weapon, [side * 0.35, 0.02, 1.35]);
       for (const z of [0.82, 1.87]) A(W, cyl(0.05, 0.05, 0.07, 8), S.frame, [side * 0.39, 0.03, z], [0, 0, PI / 2]);
-      this.label(W, sten('caution', 0.72, 0.15, { face: side > 0 ? 'x' : '-x', tint: 1 }), S.weapon, [side * 0.388, 0.02, 1.36]);
+      PL(W, side > 0 ? 'x' : '-x', [[0.3, -0.35], [2.3, -0.35], [2.65, -0.12], [2.35, 0.12], [0.55, 0.12], [0.3, -0.02]], 0.08, { bev: 0.015, nx: 4, ny: 2 }, S.second, [side * 0.36, 0, 0]);
+      this.label(W, sten('caution', 0.72, 0.15, { face: side > 0 ? 'x' : '-x', tint: 1 }), S.weapon, [side * 0.415, 0.02, 1.36]);
+      for (let j = 0; j < 5; j++) A(W, blk(0.05, 0.25, 0.12, 0.012), S.frame, [side * 0.3, 0.15, 3.3 + j * 0.3], [0.15, 0, 0]);
     }
     for (let j = 0; j < 10; j++) A(W, blk(0.36, 0.06, 0.07, 0.01), S.frame, [0, 0.85, 0.0 + j * 0.2]);
     for (let k = 0; k < 5; k++) A(W, blk(0.1, 0.05, 0.2, 0.01), S.dark, [0, 0.33, 3.35 + k * 0.33]);
@@ -1108,6 +1110,10 @@ export class Mech {
     A(W, merge([at(blk(0.14, 0.24, 0.18, 0.02), [0, 0.78, 0.95]), at(blk(0.14, 0.24, 0.18, 0.02), [0, 0.78, 1.85])]), S.frame);
     A(W, blk(0.4, 1.3, 0.5, 0.06), S.frame, [0, -0.9, 0], [0.25, 0, 0]);
     A(W, blk(0.46, 1.0, 0.7, 0.08), S.weapon, [0, -0.85, 1.5], [0.12, 0, 0]);
+    for (const side of [-1, 1]) {
+      PL(W, side > 0 ? 'x' : '-x', [[1.22, -1.3], [1.72, -1.3], [1.8, -0.57], [1.65, -0.4], [1.25, -0.4]], 0.06, { bev: 0.012, nx: 2, ny: 3 }, S.second, [side * 0.25, 0, 0]);
+      A(W, cyl(0.13, 0.13, 0.08, 12), S.frame, [side * 0.29, -0.62, 1.5], [0, 0, PI / 2]);
+    }
     A(W, blk(0.3, 0.8, 0.3, 0.06), S.frame, [0, -0.7, 2.7], [-0.1, 0, 0]);
     A(W, prof([[0, 0.35], [-2.0, 0.2], [-2.2, -0.5], [-0.4, -0.45]], 0.5, 0.06), S.weapon, [0, 0, -1.6]);
     A(W, blk(0.08, 0.2, 1.6, 0.02), S.accent, [0.32, 0.18, 1.2]);

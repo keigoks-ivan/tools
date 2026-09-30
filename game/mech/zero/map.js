@@ -136,6 +136,39 @@ export function buildMap(scene, mats, solid, PL = null) {
     const a0 = along ? x0 : z0, a1 = along ? x1 : z1, fix = sd === 'n' ? z1 : sd === 's' ? z0 : sd === 'e' ? x1 : x0;
     const at = (a, y, d) => along ? [a, y, fix + out * d] : [fix + out * d, y, a];
     const ry = sd === 'n' ? 0 : sd === 's' ? Math.PI : sd === 'e' ? Math.PI / 2 : -Math.PI / 2;
+    const trim = (mat, lo, hi, y0, y1, d0, d1) => {
+      const p = fix + out * d0, q = fix + out * d1;
+      if (along) b.deco(mat, lo, hi, y0, y1, Math.min(p, q), Math.max(p, q));
+      else b.deco(mat, Math.min(p, q), Math.max(p, q), y0, y1, lo, hi);
+    };
+    if (!asian && o.kit !== 'factory' && h < 24) {
+      // 舊街的石材簷口、托座與三角山牆：只加在可見街面，共用原混凝土桶。
+      for (const [y, d, t] of [[h - 0.2, 0.22, 0.14], [h + 0.02, 0.38, 0.16], [h + 0.25, 0.52, 0.18]]) trim('concrete', a0, a1, y, y + t, 0, d);
+      for (let a = a0 + 1.2; a < a1 - 1; a += 3.2) trim('concrete', a - 0.13, a + 0.13, h - 0.5, h, 0, 0.3);
+      if (ph(x0, z0) > 0.45) {
+        const c = (a0 + a1) / 2, w = Math.min(3.4, (a1 - a0) / 4);
+        const pts = [at(c - w, h + 0.45, 0.1), at(c + w, h + 0.45, 0.1), at(c, h + 1.9, 0.1), at(c, h + 1.9, 0.1)];
+        if (along ? out < 0 : out > 0) pts.reverse();
+        b.B.concrete.quad(...pts, along ? [0, 0, out] : [out, 0, 0], [0.85, 0.85, 1, 1]);
+      }
+    }
+    if (o.shop) {
+      // 少量有弧度的布棚；紋理、材質及幾何桶都已載入，沒有額外燈光。
+      const count = Math.min(2, Math.floor((a1 - a0) / 8));
+      for (let i = 0; i < count; i++) {
+        const c = a0 + (a1 - a0) * (i + 0.5) / count, w = 3.2;
+        for (let j = 0; j < 8; j++) for (let k = 0; k < 3; k++) {
+          const lo = c - w / 2 + w * j / 8, hi = lo + w / 8;
+          const curve = t => [3.12 - 0.4 * t * t, 0.1 + t * 1.05];
+          const [y0, d0] = curve(k / 3), [y1, d1] = curve((k + 1) / 3);
+          const pts = [at(lo, y0, d0), at(hi, y0, d0), at(hi, y1, d1), at(lo, y1, d1)];
+          const n = new THREE.Vector3().subVectors(new THREE.Vector3(...pts[1]), new THREE.Vector3(...pts[0])).cross(new THREE.Vector3().subVectors(new THREE.Vector3(...pts[2]), new THREE.Vector3(...pts[0]))).normalize();
+          if (n.y < 0) { pts.reverse(); n.negate(); }
+          b.B.fabric.quad(...pts, n.toArray(), [0.92, 0.92, 1, 1], null, j % 2 ? [0.9, 0.87, 0.78] : asian ? [0.5, 0.25, 0.2] : [0.22, 0.38, 0.3]);
+        }
+        trim('metal', c - w / 2, c + w / 2, 3.02, 3.08, 0.12, 0.17);
+      }
+    }
     // 已載入的掃描冷氣機，共用原有 instancing；不改路線和碰撞。
     if (PL && PL.M.has('exterior_aircon_unit')) for (let a = a0 + 3; a < a1 - 2; a += 12) {
       const p = at(a, 4.1, 0.18); PL.add('exterior_aircon_unit', ...p, ry, { cast: true });

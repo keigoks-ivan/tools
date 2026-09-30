@@ -151,6 +151,17 @@ export class ZeroAudio extends Audio {
     v.done();
   }
 
+  // 衝鋒槍用短脈衝與機械循環聲；每發只用三層，連射不堆手槍的長尾。
+  smg() {
+    if (!this._ok()) return;
+    const v = this._voice(this.bus.gun, 2); if (!v) return;
+    const t = this._now(), o = v.out, p = rnd(0.96, 1.04);
+    this._N(v, o, { t, b: 'w', a: 0.0005, d: 0.045, g: 0.35, ft: 'bandpass', f: 2100 * p, f1: 800, q: 0.8 });
+    this._T(v, o, { t, type: 'sawtooth', f: 1500 * p, f1: 320, gl: 0.055, a: 0.001, d: 0.065, g: 0.12, ft: 'lowpass', ff: 5000, ff1: 900, fgl: 0.06, fq: 0.7 });
+    this._thump(v, o, t, 160 * p, 85, 0.23, 0.07, 1.2);
+    v.done();
+  }
+
   // 空扳機：機械「喀」＋能量不足的下行小嗶
   dry() {
     if (!this._ok()) return;
@@ -162,7 +173,7 @@ export class ZeroAudio extends Audio {
     v.done();
   }
 
-  // 換彈：weapon＝'rifle'|'pistol'；phase＝'out'｜'in'｜'charge'｜'ready'
+  // 換彈：weapon＝'rifle'|'pistol'|'smg'；phase＝'out'｜'in'｜'charge'｜'ready'
   reload(weapon, phase) {
     if (!this._ok()) return;
     const q = weapon === 'pistol', pm = (q ? 1.35 : 1) * rnd(0.97, 1.03), gm = q ? 0.8 : 1;

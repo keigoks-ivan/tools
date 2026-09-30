@@ -70,7 +70,7 @@ function gunSurface(m) {
       uniform sampler2D gunWear; varying vec3 gunP, gunN;
       vec3 gunTri(vec3 p, vec3 n) {
         vec3 w = pow(abs(n), vec3(4.0)); w /= max(w.x+w.y+w.z, 0.0001);
-        return texture2D(gunWear,p.yz*8.0).rgb*w.x + texture2D(gunWear,p.xz*8.0+0.31).rgb*w.y + texture2D(gunWear,p.xy*8.0+0.67).rgb*w.z;
+        return texture2D(gunWear,p.yz*12.0).rgb*w.x + texture2D(gunWear,p.xz*12.0+0.31).rgb*w.y + texture2D(gunWear,p.xy*12.0+0.67).rgb*w.z;
       }`).replace('#include <color_fragment>', `#include <color_fragment>
       vec3 wear = gunTri(gunP, normalize(gunN));
       diffuseColor.rgb *= 0.82 + 0.36 * wear.r;`)
@@ -102,9 +102,9 @@ function mats(faction) {
   const gov = faction === 'gov';
   const M = {
     // 真槍的配色：霧面石墨灰聚合物＋槍管鋼＋一點聯邦深藍
-    shell: new THREE.MeshPhysicalMaterial({ color: gov ? 0x4a4f54 : 0x3d4432, roughness: gov ? 0.55 : 0.68, metalness: 0.15, clearcoat: gov ? 0.12 : 0, clearcoatRoughness: 0.6 }),
+    shell: new THREE.MeshPhysicalMaterial({ color: gov ? 0x909ba1 : 0x3d4432, roughness: gov ? 0.46 : 0.68, metalness: 0.15, clearcoat: gov ? 0.12 : 0, clearcoatRoughness: 0.6 }),
     dark: new THREE.MeshStandardMaterial({ color: gov ? 0x191b1e : 0x1b1c1a, roughness: 0.72, metalness: 0.25 }),
-    accent: new THREE.MeshStandardMaterial({ color: gov ? 0x26324a : 0x2c3122, roughness: 0.6, metalness: 0.2 }),
+    accent: new THREE.MeshStandardMaterial({ color: gov ? 0x284869 : 0x2c3122, roughness: 0.5, metalness: 0.2 }),
     metal: new THREE.MeshStandardMaterial({ color: gov ? 0x5f646a : 0x55595c, roughness: 0.38, metalness: 1 }),
     red: new THREE.MeshStandardMaterial({ color: gov ? 0x7e2328 : 0x86601c, roughness: 0.55, metalness: 0.05 }),
     glow: new THREE.MeshBasicMaterial({ color: gov ? new THREE.Color(0.35, 2.0, 3.2) : new THREE.Color(3.2, 0.35, 0.15) }),
@@ -154,6 +154,12 @@ export function makeRifle(o = {}) {
   P.dark.push(box(W + 0.004, 0.012, 0.4, 0, 0.006, 0.45));
   P.dark.push(box(W + 0.003, 0.004, 0.36, 0, 0.042, 0.45));
   P.accent.push(rbox(W + 0.006, 0.026, 0.12, 0.004, 0, -0.022, 0.56));            // 能量艙蓋（深藍）
+  // 能源模組的斜切護板、檢修接頭：沿用同材質合併，手腕與彈匣軌跡不變。
+  for (const side of [-1, 1]) {
+    P.accent.push(prism([[0.36, -0.032], [0.4, -0.045], [0.59, -0.045], [0.625, -0.02], [0.59, 0.007], [0.4, 0.007]], 0.006, 0.001, [], side * 0.034));
+    P.metal.push(cylZ(0.008, 0.008, 0.005, 0, 12).rotateY(Math.PI / 2).translate(side * 0.039, -0.018, 0.585));
+    for (let i = 0; i < 4; i++) P.dark.push(box(0.002, 0.006, 0.015, side * 0.038, -0.029, 0.42 + i * 0.025));
+  }
   P.red.push(box(W + 0.007, 0.006, 0.05, 0, 0.03, 0.3));                          // 紅色識別條
   // 退殼口位置：散熱格柵
   for (let i = 0; i < 6; i++) P.dark.push(box(0.004, 0.028, 0.008, -W / 2 - 0.001, 0.028, 0.5 + i * 0.016));
@@ -200,6 +206,7 @@ export function makeRifle(o = {}) {
   }
   P.accent.push(rbox(0.076, 0.016, 0.34, 0.004, 0, -0.05, 0.83));   // 下導軌蓋
   P.metal.push(box(0.022, 0.008, 0.34, 0, 0.049, 0.83));             // 上導軌延伸
+  for (const side of [-1, 1]) P.accent.push(prism([[0.65, -0.04], [0.99, -0.04], [1.02, -0.024], [1.0, -0.018], [0.7, -0.018]], 0.008, 0.002, [], side * 0.04));
   // 摺疊腳架
   for (const s of [-1, 1]) { P.metal.push(cylZ(0.005, 0.005, 0.24, 0.72, 8, s * 0.014, -0.064)); P.dark.push(rbox(0.014, 0.016, 0.02, 0.004, s * 0.014, -0.064, 0.97)); }
   P.metal.push(rbox(0.05, 0.016, 0.03, 0.004, 0, -0.062, 0.7));
@@ -223,6 +230,7 @@ export function makeRifle(o = {}) {
   P.shell.push(cylZ(0.034, 0.034, 0.03, 0.655, 24, 0, SY));
   P.metal.push(cylZ(0.0345, 0.0345, 0.004, 0.66, 24, 0, SY));
   P.glass.push(cylZ(0.029, 0.029, 0.002, 0.684, 24, 0, SY));
+  P.dark.push(cylZ(0.034, 0.034, 0.045, 0.681, 24, 0, SY, true)); // 物鏡遮光罩，鏡片退在內側
   P.glass.push(cylZ(0.021, 0.021, 0.002, 0.287, 20, 0, SY));
   P.metal.push(new THREE.CylinderGeometry(0.013, 0.013, 0.022, 16).translate(0, SY + 0.03, 0.47));
   P.metal.push(new THREE.CylinderGeometry(0.013, 0.013, 0.022, 16).rotateZ(Math.PI / 2).translate(0.031, SY, 0.47));
@@ -280,6 +288,12 @@ export function makePistol() {
   P.metal.push(cylZ(0.012, 0.012, 0.03, 0.15, 16, 0, 0.04));
   P.glow.push(cylZ(0.008, 0.008, 0.002, 0.18, 12, 0, 0.04));
   P.dark.push(box(0.03, 0.012, 0.05, 0, 0.012, 0.12));
+  // 下導軌能源模組與分層滑套，保留原準星、槍口和換彈介面。
+  P.accent.push(prism([[0.065, 0.006], [0.153, 0.006], [0.168, -0.008], [0.15, -0.021], [0.08, -0.021], [0.064, -0.011]], 0.032, 0.002));
+  for (const side of [-1, 1]) {
+    P.metal.push(cylZ(0.0028, 0.0028, 0.003, 0, 8).rotateY(Math.PI / 2).translate(side * 0.017, -0.007, 0.09));
+    for (let i = 0; i < 3; i++) P.dark.push(box(0.001, 0.013, 0.003, side * 0.0166, 0.045, 0.112 + i * 0.009));
+  }
   const g = assemble(P, M, [decal(decalTex([['XP-2', 60], ['FED. ARMORY', 30, 600]], 256, 128, '#1b2029'), 0.04, 0.02, 0.0155, 0.04, 0.03, 1)]);
   const lights = ammoLights(g, 7, new THREE.BoxGeometry(0.002, 0.006, 0.006), M.glow, (i) => [-0.016, -0.03 - i * 0.009, -0.01 - i * 0.0018]);
   // 握把底的能量匣（換彈時抽出）
@@ -287,6 +301,54 @@ export function makePistol() {
   mag.position.set(0, -0.08, -0.018); mag.rotation.x = -0.2;
   g.add(mag);
   g.userData = { mag, magHome: mag.position.clone(), kind: 'pistol', muzzle: new THREE.Vector3(0, 0.04, 0.185), sightY: 0.068, gripR: new THREE.Vector3(-0.026, 0.016, -0.105), gripL: new THREE.Vector3(0.018, -0.07, -0.045), glow: M.glow, glowBase: M.glowBase, ammoBar: lights.bars, ammoInstances: lights.mesh };
+  return g;
+}
+
+// ---------------------------------------------------------------- XSM-9：短槍管、骨架托、垂直彈匣，近中距離連射
+export function makeSMG() {
+  const base = mats('gov'), M = { ...base, glow: base.glow.clone() };
+  const P = { shell: [], dark: [], accent: [], metal: [], red: [], glow: [], glass: [] };
+  P.dark.push(rbox(0.041, 0.12, 0.021, 0.005, 0, -0.015, 0.01));
+  for (const s of [-1, 1]) P.metal.push(box(0.006, 0.018, 0.15, s * 0.017, 0.018, 0.09));
+  P.accent.push(prism([[0.025, 0.04], [0.15, 0.05], [0.19, 0.025], [0.04, 0.015]], 0.028, 0.003));
+  P.shell.push(prism([[0.15, -0.025], [0.15, 0.052], [0.18, 0.066], [0.44, 0.066], [0.47, 0.035], [0.46, -0.027], [0.31, -0.036]], 0.059, 0.004));
+  P.dark.push(box(0.062, 0.011, 0.27, 0, 0.015, 0.31));
+  for (const s of [-1, 1]) {
+    P.accent.push(prism([[0.27, -0.025], [0.41, -0.025], [0.44, -0.01], [0.41, 0.008], [0.28, 0.008]], 0.006, 0.001, [], s * 0.033));
+    for (const z of [0.18, 0.42]) P.metal.push(cylZ(0.004, 0.004, 0.004, 0, 8).rotateY(Math.PI / 2).translate(s * 0.032, 0.041, z));
+    for (let i = 0; i < 4; i++) P.dark.push(box(0.003, 0.014, 0.008, s * 0.031, 0.04, 0.33 + i * 0.025));
+  }
+  P.dark.push(prism([[0.19, -0.025], [0.25, -0.025], [0.24, -0.13], [0.2, -0.14], [0.18, -0.12]], 0.032, 0.005));
+  for (let i = 0; i < 5; i++) P.accent.push(box(0.034, 0.004, 0.034, 0, -0.055 - i * 0.015, 0.215));
+  P.metal.push(prism([[0.25, -0.026], [0.32, -0.026], [0.32, -0.071], [0.25, -0.071]], 0.013, 0.001, [[[0.258, -0.034], [0.312, -0.034], [0.312, -0.064], [0.258, -0.064]]]));
+  P.dark.push(box(0.008, 0.025, 0.006, 0, -0.047, 0.275));
+  P.dark.push(cylZ(0.028, 0.028, 0.14, 0.46, 8));
+  P.glow.push(cylZ(0.019, 0.019, 0.12, 0.46, 12));
+  for (let i = 0; i < 3; i++) {
+    P.shell.push(rbox(0.066, 0.022, 0.036, 0.004, 0, 0.028, 0.48 + i * 0.047));
+    P.accent.push(rbox(0.064, 0.022, 0.036, 0.004, 0, -0.029, 0.48 + i * 0.047));
+  }
+  P.dark.push(rbox(0.036, 0.08, 0.035, 0.005, 0, -0.079, 0.48)); // 前握把
+  P.metal.push(cylZ(0.014, 0.014, 0.055, 0.595, 16));
+  P.dark.push(cylZ(0.021, 0.019, 0.03, 0.634, 16));
+  P.glow.push(cylZ(0.01, 0.01, 0.002, 0.664, 12));
+  P.metal.push(box(0.023, 0.008, 0.27, 0, 0.072, 0.31));
+  for (let i = 0; i < 13; i++) P.metal.push(box(0.027, 0.004, 0.008, 0, 0.078, 0.188 + i * 0.019));
+  // 開放照門不遮住瞄準線；前後綠色準星沿同一高度。
+  for (const s of [-1, 1]) {
+    P.dark.push(box(0.006, 0.022, 0.012, s * 0.009, 0.087, 0.195));
+    P.glow.push(box(0.003, 0.003, 0.002, s * 0.009, 0.092, 0.188));
+  }
+  P.dark.push(box(0.004, 0.015, 0.008, 0, 0.086, 0.58));
+  P.glow.push(box(0.003, 0.003, 0.002, 0, 0.092, 0.576));
+  P.red.push(box(0.064, 0.005, 0.025, 0, 0.057, 0.18));
+  P.metal.push(cylZ(0.004, 0.004, 0.022, 0, 8).rotateY(Math.PI / 2).translate(0.028, 0.035, 0.31));
+  P.dark.push(rbox(0.012, 0.011, 0.025, 0.002, 0.047, 0.035, 0.31));
+  const mag = assemble({ accent: [prism([[-0.026, 0], [0.026, 0], [0.039, -0.15], [0.018, -0.176], [-0.026, -0.176]], 0.04, 0.003)], metal: [rbox(0.045, 0.009, 0.065, 0.002, 0, -0.174, 0.007)], dark: [box(0.042, 0.13, 0.01, 0, -0.08, -0.022)] }, M);
+  mag.position.set(0, -0.035, 0.35);
+  const lights = ammoLights(mag, 8, new THREE.BoxGeometry(0.003, 0.009, 0.018), M.glow, i => [0.0215, -0.025 - i * 0.016, 0.003]);
+  const g = assemble(P, M); g.add(mag);
+  g.userData = { mag, magHome: mag.position.clone(), kind: 'smg', muzzle: new THREE.Vector3(0, 0, 0.667), sightY: 0.092, gripR: new THREE.Vector3(-0.03, -0.016, 0.135), gripL: new THREE.Vector3(0.079, -0.076, 0.43), glow: M.glow, glowBase: M.glowBase, ammoBar: lights.bars, ammoInstances: lights.mesh };
   return g;
 }
 

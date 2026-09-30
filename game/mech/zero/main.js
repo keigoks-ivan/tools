@@ -998,7 +998,7 @@ function frame(now = performance.now()) {
   // 武器
   if (stage === 'play' && !finale && !player.dead) {
     if (input.pressed('KeyG') || input.pressed('Tnade')) { if (G.nadeN <= 0) hud.note('沒有手榴彈了', '#8aa3ab'); else if (vm.throwNade()) audio.throw(); }
-    const shot = vm.update(dt, { fire: K.has('M0') || K.has('Tfire'), ads: ctl.ads, reload: c.reload || input.pressed('Tsaber'), swap: input.pressed('KeyQ') || input.pressed('Tcannon'), swapTo: input.pressed('Digit1') ? 'rifle' : input.pressed('Digit2') ? 'pistol' : null, hold: run }, player, { x: c.lookX, y: c.lookY });
+    const shot = vm.update(dt, { fire: K.has('M0') || K.has('Tfire'), ads: ctl.ads, reload: c.reload || input.pressed('Tsaber'), swap: input.pressed('KeyQ') || input.pressed('Tcannon'), swapTo: input.pressed('Digit1') ? 'rifle' : input.pressed('Digit2') ? 'pistol' : input.pressed('Digit3') ? 'smg' : null, hold: run }, player, { x: c.lookX, y: c.lookY });
     if (shot) playerShoot(shot);
     if (vm.nadeGo) playerNade();
   } else if (player.dead) { vm.holder.visible = false; vm.arms.root.visible = false; }

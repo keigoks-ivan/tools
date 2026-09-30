@@ -58,8 +58,8 @@ export class HUD {
         x.fillStyle = 'rgba(230,250,255,0.9)'; x.fillRect(cx - 1, cy - 1, 2, 2);
         x.shadowBlur = 0; x.globalAlpha = 1;
       }
-      // 手槍舉槍時：小點
-      if (vm.cur === 'pistol' && vm.ads > 0.5) { x.fillStyle = 'rgba(127,243,255,0.9)'; x.fillRect(cx - 1.5, cy - 1.5, 3, 3); }
+      // 手槍與衝鋒槍舉槍時：小點
+      if (vm.cur !== 'rifle' && vm.ads > 0.5) { x.fillStyle = 'rgba(127,243,255,0.9)'; x.fillRect(cx - 1.5, cy - 1.5, 3, 3); }
     }
     // ---- 被打到的敵人頭上的血條
     if (G.enemies) this._bars(dt, W, H, G);
@@ -107,9 +107,9 @@ export class HUD {
     // 彈匣格
     for (let i = 0; i < mag; i++) { x.fillStyle = i < n ? 'rgba(127,243,255,0.9)' : 'rgba(127,243,255,0.15)'; const w = Math.min(10, 180 / mag - 2); x.fillRect(rx - (mag - i) * (w + 2), H - 30, w, 5); }
     if (vm.reloadT >= 0) { const k = vm.reloadT / vm.W.reload; x.fillStyle = 'rgba(255,179,71,0.9)'; x.fillRect(rx - 180, H - 22, 180 * k, 2); }
-    // 另一把
+    // 武器切換
     x.font = '600 11px Rajdhani, "Noto Sans TC", sans-serif'; x.fillStyle = '#5d7178';
-    x.fillText((vm.cur === 'rifle' ? '[2] XP-2 手槍' : '[1] XLR-7 長槍'), rx, H - 106);
+    x.fillText('[1] 長槍  [2] 手槍  [3] 衝鋒槍 · Q', rx, H - 106);
     // 手榴彈
     x.font = '600 13px Rajdhani, "Noto Sans TC", sans-serif'; x.fillStyle = G.nadeN ? '#b8e07a' : '#5d7178';
     x.fillText(`[G] 手榴彈 ×${G.nadeN}`, rx, H - 124);

@@ -1373,12 +1373,12 @@ export class Cockpit {
     const t = this.t, L = 16, Rr = w - 16;
     this.tx(x, 'MSTR ARM', L, 56, COL.dim, 17); this.tx(x, 'ARM', L + 104, 56, COL.gr, 18, true);
     // 右手：光束步槍
-    const rf = ui.rifle || { ammo: 12, mag: 12, reload: -1 };
+    const rf = ui.rifle || { ammo: 40, mag: 40, reload: -1 };
     this.tx(x, 'GUN', L, 88, COL.dim, 18); this.tx(x, 'BEAM RIFLE', L + 50, 88, COL.wh, 19);
     this.tx(x, pad(rf.ammo, 2), Rr - 46, 82, rf.ammo > 0 ? COL.wh : COL.rd, 42, true, 'right');
     this.tx(x, `/${rf.mag}`, Rr, 88, COL.dim, 18, false, 'right');
-    const cw = (w - 32 + 6) / rf.mag;
-    for (let i = 0; i < rf.mag; i++) { x.fillStyle = i < rf.ammo ? COL.pk : COL.grid; x.fillRect(L + i * cw, 110, cw - 6, 14); }
+    const gap = Math.min(6, (w - 32) / rf.mag * 0.35), cw = (w - 32 + gap) / rf.mag;
+    for (let i = 0; i < rf.mag; i++) { x.fillStyle = i < rf.ammo ? COL.pk : COL.grid; x.fillRect(L + i * cw, 110, cw - gap, 14); }
     if (rf.reload >= 0) { this.hb(x, L, 130, w - 32 - 60, 6, rf.reload, COL.am); this.tx(x, 'RLD', Rr, 133, COL.am, 16, true, 'right'); }
     // 左肩：飛彈莢艙
     const ms = ui.msl || { ready: 6, max: 6, cd: 1, locks: 0 };

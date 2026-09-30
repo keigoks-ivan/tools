@@ -42,7 +42,7 @@ const TIER = [
 ];
 // 玩家武器
 const W = {
-  rifle: { dmg: 430, stag: 24, mag: 12, rof: 0.27, reload: 2.0 },
+  rifle: { dmg: 430, stag: 24, mag: 40, rof: 0.27, reload: 2.0 },
   msl: { n: 6, dmg: 330, stag: 34, cd: 7, lockStep: 0.09, cone: 0.6, range: 900 },
   saber: { dmg: 1500, stag: 90, cd: 2.4, reach: 170 },
   // 光波砲：充能 charge 秒 → 粗光束掃 dur 秒（每 tick 秒結算一次）→ 冷卻 cd 秒

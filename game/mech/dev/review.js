@@ -6,7 +6,16 @@ const wait = async (f) => { for (let i = 0; i < 600; i++) { if (f()) return; awa
 async function load(path, query = '') {
   result = []; errors = []; state.textContent = '載入中';
   document.querySelector('#captures').replaceChildren();
-  const html = await (await fetch(path)).text();
+  let html = await (await fetch(path, { cache: 'no-store' })).text();
+  // 每次檢查使用同一組新版本模組，避免 iframe 重載仍沿用已驗收的舊美術。
+  const revision = Date.now();
+  html = html.replace(/(<script type="importmap">)([\s\S]*?)(<\/script>)/, (_, a, json, b) => {
+    const map = JSON.parse(json);
+    for (const file of ['env.js', 'post.js', 'mechs.js', 'combat.js', 'cockpit.js', 'zero/map.js', 'zero/guns.js', 'zero/viewmodel.js', 'zero/main.js', 'zero/hud.js', 'zero/sfx.js']) {
+      const url = new URL('/game/mech/' + file, location.href).href; map.imports[url] = url + '?qa=' + revision;
+    }
+    return a + JSON.stringify(map) + b;
+  });
   const control = `<base href="${path}"><script>window.__qaErrors=[];addEventListener('error',e=>__qaErrors.push(e.message));window.__raf=[];window.requestAnimationFrame=fn=>(__raf.push(fn),__raf.length);window.__step=(n=1)=>{for(let i=0;i<n;i++){const q=__raf.splice(0);for(const f of q)f(performance.now())}};<\/script>`;
   // srcdoc has its own queryless URL, so replace the main module with an explicit wrapper setting the desired query via parent-provided URLSearchParams.
   const setup = `<script>const NativeParams=URLSearchParams;window.URLSearchParams=class extends NativeParams{constructor(v){super(v===location.search?'${query}':v)}};<\/script>`;
@@ -18,6 +27,7 @@ async function load(path, query = '') {
   const script = win.document.createElement('script'); script.type = 'module';
   script.textContent = `import * as T from 'three'; T.Clock.prototype.getDelta=()=>1/60; window.__T=T;`;
   win.document.head.append(script); await wait(() => win.__T);
+  if (win.__G) await wait(() => win.__flow && win.__flow.chapter > 0);
   win.__step(2); frame.focus();
   errors = win.__qaErrors;
 }
@@ -37,7 +47,7 @@ async function mech() {
   await load('/game/mech/index.html', '?mute&nobrief&fps=0');
   const G = win.__game; post = G.post; renderer = post.renderer;
   for (let n = 1; n <= 10; n++) {
-    G.launch(n); G.run(4); G.fake = { my: 1, mx: 0.3, fire: true, boost: false }; G.run(0.5); G.fake = null;
+    G.launch(n); assert(G.combat.rifle.mag === 40 && G.combat.rifle.ammo === 40, `第 ${n} 關機槍裝填 40 發`); G.run(4); G.fake = { my: 1, mx: 0.3, fire: true, boost: false }; G.run(0.5); G.fake = null;
     assert(G.combat.stage === n && !G.player.pos.toArray().some(v => !Number.isFinite(v)), `本篇第 ${n} 關啟動、移動與射擊`);
     assert(G.combat.enemies.every(e => e.pos.toArray().every(Number.isFinite)), `第 ${n} 關敵人座標正常`);
     G.toTitle();
@@ -51,7 +61,14 @@ async function mech() {
     sizes.push({ q, width: rt.width, height: rt.height, samples: rt.samples });
     G.tick(1 / 60);
   }
-  G.launch(1); G.run(3.5); G.input.keys.add('KeyW');
+  G.launch(1); G.run(3.5);
+  const C = G.combat;
+  let continuous = true;
+  for (let i = 0; i < 39; i++) { C.rifle.cd = 0; C.fireRifle(); continuous &&= C.rifle.reload < 0; }
+  assert(continuous && C.rifle.ammo === 1, '連射 39 發仍未換彈');
+  C.rifle.cd = 0; C.fireRifle(); assert(C.rifle.ammo === 0 && C.rifle.reload >= 0, '第 40 發後才自動換彈');
+  G.run(2.1); assert(C.rifle.ammo === 40 && C.rifle.reload < 0, '換彈恢復 40 發');
+  G.input.keys.add('KeyW');
   win.dispatchEvent(new win.Event('blur'));
   assert(G.state === 'paused' && G.input.keys.size === 0, '失焦自動暫停、清除持續移動');
   win.document.querySelector('#resume').click(); G.tick(1 / 60);
@@ -127,7 +144,10 @@ async function city() {
   // 同一座城市的兩種尺度，保留實際遊戲光線。
   win.__step(2); await save('city-street');
   win.__cam.set(0, 90, 250, 0, -0.14); win.__step(2); await save('city-skyline');
-  const W = win.__world, b = W.blds.find(b => b.seg.length === 3);
+  const W = win.__world;
+  assert(W.scene.children.some(o => o.geometry?.attributes.surface?.array.some(v => v === 4)), '新版玻璃、石材與金屬頂點材質已載入');
+  win.__cam.set(-120, 3, -145, Math.PI / 2, 0); win.__step(2); await save('city-oldtown');
+  const b = W.blds.find(b => b.seg.length === 3);
   assert(!!b, '店面招牌納入可破壞建築');
   const sign = b.seg[2], original = sign.a.array.slice(sign.s * 3, sign.s * 3 + sign.o.length);
   const hit = W.hitBuilding(new win.__T.Vector3(b.x0, b.H / 2, b.cz), 100, new win.__T.Vector3(-1, 0, 0));
@@ -135,6 +155,11 @@ async function city() {
   for (let i = 0; i < Math.ceil((b.dur + 1) * 60); i++) W.update(1 / 60);
   assert(sign.a.array[sign.s * 3 + 1] < -20, '建築倒塌時招牌一同移除');
   W.resetBuildings(); assert(original.every((v,i) => sign.a.array[sign.s * 3 + i] === v), '重開關卡完整復原招牌');
+  const geometries = new Set(); W.scene.traverse(o => { if (o.geometry) geometries.add(o.geometry); });
+  const triangles = [...geometries].reduce((n,g) => n + (g.index ? g.index.count : g.attributes.position.count) / 3, 0);
+  let meshes = 0; W.scene.traverse(o => { if (o.isMesh) meshes++; });
+  assert(triangles < 1400000, '城市幾何維持 140 萬三角形以下');
+  report.textContent = JSON.stringify({ checks: result, triangles, meshes, memory: renderer.info.memory, errors }, null, 2);
   state.textContent = '街景通過';
 }
 async function tactics() {
@@ -189,4 +214,28 @@ async function infantry() {
   win.__step(1);
   report.textContent = JSON.stringify({ checks: result, errors }, null, 2); state.textContent = errors.length ? '有錯誤' : '步兵戰術通過';
 }
-for (const [id, fn] of [['mech', mech], ['zero', zero], ['tactics', tactics], ['infantry', infantry], ['art', art], ['hero', hero], ['city', city], ['save', save]]) document.querySelector('#' + id).onclick = () => fn().catch(e => { state.textContent = '失敗'; report.textContent += '\n' + e.stack; });
+async function weapons() {
+  await load('/game/mech/zero/index.html', '?mute&god&ch=1&all&fps=0');
+  const G = win.__G; renderer = win.__renderer; post = { render: () => win.__step(1) };
+  const metrics = [];
+  for (const kind of ['rifle', 'pistol', 'smg']) {
+    let triangles = 0, meshes = 0;
+    G.vm.g[kind].traverse(o => { if (o.isMesh) { meshes++; triangles += (o.geometry.index ? o.geometry.index.count : o.geometry.attributes.position.count) / 3 * (o.isInstancedMesh ? o.count : 1); } });
+    metrics.push({ kind, triangles, meshes });
+    assert(triangles < 20000 && meshes <= 18, `${kind}：${triangles} 三角形、${meshes} 網格`);
+    const code = { rifle: 'Digit1', pistol: 'Digit2', smg: 'Digit3' }[kind];
+    win.dispatchEvent(new win.KeyboardEvent('keydown', { code })); win.__step(50); win.dispatchEvent(new win.KeyboardEvent('keyup', { code }));
+    assert(G.vm.cur === kind, `${kind} 切換成功`);
+    const before = G.vm.ammo[kind];
+    win.__botCtl = { ads: true }; win.dispatchEvent(new win.KeyboardEvent('keydown', { code: 'Tfire' })); win.__step(30); win.dispatchEvent(new win.KeyboardEvent('keyup', { code: 'Tfire' })); win.__botCtl = {}; win.__step(1);
+    assert(G.vm.ammo[kind] < before, `${kind} 實際射擊消耗彈藥`);
+    assert(G.vm.holder.position.toArray().every(Number.isFinite), `${kind} 舉槍與後座座標正常`);
+    G.vm.reload(); win.__step(160);
+    assert(G.vm.ammo[kind] === G.vm.W.mag && G.vm.reloadT < 0, `${kind} 換彈完成`);
+    await save('zero-' + kind);
+  }
+  const geometries = new Set(); win.__scene.traverse(o => { if (o.geometry) geometries.add(o.geometry); });
+  report.textContent = JSON.stringify({ checks: result, metrics, geometries: geometries.size, memory: renderer.info.memory, errors }, null, 2);
+  state.textContent = errors.length ? '有錯誤' : '前傳武器通過';
+}
+for (const [id, fn] of [['mech', mech], ['zero', zero], ['tactics', tactics], ['infantry', infantry], ['art', art], ['hero', hero], ['city', city], ['weapons', weapons], ['save', save]]) document.querySelector('#' + id).onclick = () => fn().catch(e => { state.textContent = '失敗'; report.textContent += '\n' + e.stack; });

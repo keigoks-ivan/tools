@@ -1,8 +1,8 @@
-// 第一人稱武器：駕駛員的手臂（真人模型）＋長槍／手槍。舉槍、狙擊鏡、後座、晃動、換彈、跑步姿勢、換槍
+// 第一人稱武器：駕駛員的手臂（真人模型）＋長槍／手槍／衝鋒槍。舉槍、狙擊鏡、後座、晃動、換彈、跑步姿勢、換槍
 //   視角場景（vScene）是鏡頭座標：鏡頭在原點看 −Z，右＝+X
 import * as THREE from 'three';
 import { Arms } from './human.js';
-import { makeRifle, makePistol } from './guns.js';
+import { makeRifle, makePistol, makeSMG } from './guns.js';
 
 const clamp = THREE.MathUtils.clamp, lerp = THREE.MathUtils.lerp;
 const ease = (t) => t * t * (3 - 2 * t);
@@ -14,6 +14,7 @@ const _v = new THREE.Vector3(), _q = new THREE.Quaternion(), _e = new THREE.Eule
 export const WEAPONS = {
   rifle: { name: 'XLR-7 長槍', mag: 20, rof: 0.42, reload: 2.2, dmg: 125, head: 400, limb: 80, spread: 0.009, bloom: 0.008, bloomMax: 0.013, bloomDecay: 0.016, adsSpread: 0.0, adsBloom: 0, fov: 20, kick: 0.05, auto: false, range: 300 },
   pistol: { name: 'XP-2 手槍', mag: 30, rof: 0.13, reload: 1.35, dmg: 38, head: 95, limb: 28, spread: 0.008, bloom: 0.005, bloomMax: 0.012, bloomDecay: 0.02, adsSpread: 0.004, adsBloom: 0.3, fov: 54, kick: 0.018, auto: true, autoRof: 0.19, range: 120 },
+  smg: { name: 'XSM-9 衝鋒槍', mag: 32, rof: 0.09, reload: 1.75, dmg: 26, head: 65, limb: 20, spread: 0.01, bloom: 0.0032, bloomMax: 0.019, bloomDecay: 0.024, adsSpread: 0.0035, adsBloom: 0.4, fov: 48, kick: 0.012, auto: true, autoRof: 0.09, range: 90 },
 };
 
 export class ViewModel {
@@ -21,13 +22,13 @@ export class ViewModel {
     this.vScene = vScene; this.audio = audio; this.fx = fx;
     this.arms = new Arms(kit);
     vScene.add(this.arms.root);
-    this.g = { rifle: makeRifle(), pistol: makePistol() };
+    this.g = { rifle: makeRifle(), pistol: makePistol(), smg: makeSMG() };
     this.holder = new THREE.Group(); vScene.add(this.holder);
     for (const k in this.g) { const m = this.g[k]; m.visible = k === 'rifle'; this.holder.add(m); m.traverse((o) => { if (o.isMesh) { o.castShadow = false; o.receiveShadow = false; } }); }
     this.cur = 'rifle';
-    this.ammo = { rifle: WEAPONS.rifle.mag, pistol: WEAPONS.pistol.mag };
+    this.ammo = Object.fromEntries(Object.entries(WEAPONS).map(([k, w]) => [k, w.mag]));
     this.cd = 0; this.reloadT = -1; this.swapT = -1; this.swapTo = null; this.nadeT = -1; this.nadeGo = false;
-    this.bloom = { rifle: 0, pistol: 0 }; this.spreadNow = 0;   // 連射散開、目前的散布（準心也照這個畫）
+    this.bloom = Object.fromEntries(Object.keys(WEAPONS).map(k => [k, 0])); this.spreadNow = 0;   // 連射散開、目前的散布（準心也照這個畫）
     this.ads = 0; this.adsWant = false; this.scoped = false;
     this.heat = 0;           // 長槍線圈發熱（發光）
     this.kick = new THREE.Vector3(); this.kickV = new THREE.Vector3();   // 後座（位置）
@@ -48,8 +49,8 @@ export class ViewModel {
   get busy() { return this.reloadT >= 0 || this.swapT >= 0 || this.nadeT >= 0; }
 
   swap(to) {
-    if (!to) to = this.cur === 'rifle' ? 'pistol' : 'rifle';
-    if (to === this.cur || this.swapT >= 0) return;
+    if (!to) { const order = Object.keys(WEAPONS); to = order[(order.indexOf(this.cur) + 1) % order.length]; }
+    if (!this.g[to] || to === this.cur || this.swapT >= 0) return;
     this.reloadT = -1; this.swapT = 0; this.swapTo = to;
     this.audio.swap();
   }
@@ -68,7 +69,6 @@ export class ViewModel {
   // c：{fire, ads, reload, swap, swapTo, hold}；p：玩家；回傳這幀開的槍（或 null）
   update(dt, c, p, look) {
     this.t += dt;
-    const W = this.W;
     let shot = null;
     // ---- 換槍
     if (c.swapTo) this.swap(c.swapTo); else if (c.swap) this.swap();
@@ -77,6 +77,7 @@ export class ViewModel {
       if (this.swapT >= 0.24 && this.swapTo) { this.g[this.cur].visible = false; this.cur = this.swapTo; this.swapTo = null; this.g[this.cur].visible = true; this.audio.swap(); }
       if (this.swapT >= 0.58) this.swapT = -1;
     }
+    const W = this.W;
     // ---- 丟手榴彈
     this.nadeGo = false;
     if (this.nadeT >= 0) { const t0 = this.nadeT; this.nadeT += dt; if (t0 < 0.2 && this.nadeT >= 0.2) this.nadeGo = true; if (this.nadeT >= 0.62) this.nadeT = -1; }
@@ -114,12 +115,13 @@ export class ViewModel {
           this.kickV.z += 2.4; this.kickV.y += 0.4; this.rotV.x += 4.5 + Math.random(); this.rotV.z += (Math.random() - 0.5) * 3; this.rotV.y += (Math.random() - 0.5) * 1.5;
           this.heat = Math.min(1.6, this.heat + 0.75);
         } else {
-          this.audio.pistol();
-          this.kickV.z += 1.1; this.kickV.y += 0.25; this.rotV.x += 3.2 + Math.random(); this.rotV.z += (Math.random() - 0.5) * 2;
-          this.heat = Math.min(1.2, this.heat + 0.25);
+          if (this.cur === 'smg') this.audio.smg(); else this.audio.pistol();
+          const k = this.cur === 'smg' ? 0.55 : 1;
+          this.kickV.z += 1.1 * k; this.kickV.y += 0.25 * k; this.rotV.x += (3.2 + Math.random()) * k; this.rotV.z += (Math.random() - 0.5) * 2 * k;
+          this.heat = Math.min(1.2, this.heat + 0.25 * k);
         }
         this.flashT = 0.05;
-        if (this.ammo[this.cur] === 0) setTimeout(() => this.ammo[this.cur] === 0 && this.reloadT < 0 && this.reload(), 250);
+        if (this.ammo[this.cur] === 0) { const fired = this.cur; setTimeout(() => this.cur === fired && this.ammo[fired] === 0 && !this.busy && this.reload(), 250); }
       }
     }
     this.heat = Math.max(0, this.heat - dt * (this.cur === 'rifle' ? 0.9 : 1.6));
@@ -163,8 +165,8 @@ export class ViewModel {
   _pose(dt, sp, adsK) {
     const M = this.model, ud = M.userData, rifle = this.cur === 'rifle';
     // 腰射位置、舉槍位置
-    const hip = rifle ? new THREE.Vector3(0.17, -0.205, 0.15) : new THREE.Vector3(0.17, -0.19, -0.4);
-    const ads = rifle ? new THREE.Vector3(0, -ud.scopeY, 0.08) : new THREE.Vector3(0, -ud.sightY, -0.36);
+    const hip = rifle ? new THREE.Vector3(0.17, -0.205, 0.15) : this.cur === 'smg' ? new THREE.Vector3(0.17, -0.205, -0.1) : new THREE.Vector3(0.17, -0.19, -0.4);
+    const ads = rifle ? new THREE.Vector3(0, -ud.scopeY, 0.08) : new THREE.Vector3(0, -ud.sightY, this.cur === 'smg' ? -0.16 : -0.36);
     const pos = hip.clone().lerp(ads, ease(this.ads));
     const rot = new THREE.Euler(0, Math.PI, 0, 'YXZ');
     // 腰射時槍口稍微往內
@@ -228,7 +230,7 @@ export class ViewModel {
   }
 
   _hands(lh, magOff) {
-    const M = this.model, ud = M.userData, G = this.arms.grip, rifle = this.cur === 'rifle';
+    const M = this.model, ud = M.userData, G = this.arms.grip, rifle = this.cur !== 'pistol';
     const wq = M.getWorldQuaternion(_q);
     const F = new THREE.Vector3(0, 0, 1).applyQuaternion(wq), U = new THREE.Vector3(0, 1, 0).applyQuaternion(wq), L = new THREE.Vector3(1, 0, 0).applyQuaternion(wq);
     M.localToWorld(G.R.copy(ud.gripR));
@@ -244,7 +246,7 @@ export class ViewModel {
     if (lh !== null) {
       const u = lh;
       const magP = ud.mag.position.clone().add(new THREE.Vector3(0.14, -0.055, 0.04));
-      const charge = rifle ? new THREE.Vector3(0.05, 0.045, 0.56) : new THREE.Vector3(0.026, 0.035, -0.015);
+      const charge = this.cur === 'smg' ? new THREE.Vector3(0.045, 0.035, 0.31) : rifle ? new THREE.Vector3(0.05, 0.045, 0.56) : new THREE.Vector3(0.026, 0.035, -0.015);
       const home = ud.magHome.clone().add(new THREE.Vector3(0.14, -0.055, 0.04));
       let target;
       if (u < 0.12) target = lp.clone().lerp(home, ease(u / 0.12));
@@ -280,5 +282,5 @@ export class ViewModel {
     if (this.vScene.environmentRotation) { _e.setFromQuaternion(_q); this.vScene.environmentRotation.copy(_e); }
   }
   land(k) { this.landK = Math.min(1.2, this.landK + k); }
-  refill() { this.ammo.rifle = WEAPONS.rifle.mag; this.ammo.pistol = WEAPONS.pistol.mag; this.reloadT = -1; this.swapT = -1; }
+  refill() { for (const k in WEAPONS) this.ammo[k] = WEAPONS[k].mag; this.reloadT = -1; this.swapT = -1; }
 }
