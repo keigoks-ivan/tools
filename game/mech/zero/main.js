@@ -806,8 +806,11 @@ function updateLoot() {
     if (!e.dead || !(e.nades > 0) || e.dropped) continue;
     e.dropped = true;
     const p = e.pos.clone(); p.y = solid.floorAt(p.x, p.z, p.y + 1) + 0.05;
-    const m = new THREE.Group();
-    for (let i = 0; i < e.nades; i++) { const b = new THREE.Mesh(NADE.body, NADE.metal); b.rotation.set(0, i * 1.3, Math.PI / 2); b.position.set(i * 0.09, 0.05, i * 0.06); b.castShadow = true; m.add(b); }
+    // 旁邊 2.5 m 內已經有一堆：併成一堆（標籤才不會疊在一起）
+    const L0 = G.loot.find((L) => L.p.distanceTo(p) < 2.5);
+    const m = L0 ? L0.m : new THREE.Group();
+    for (let i = 0; i < e.nades; i++) { const k = m.children.length, b = new THREE.Mesh(NADE.body, NADE.metal); b.rotation.set(0, k * 1.3, Math.PI / 2); b.position.set(k * 0.09, 0.05, k * 0.06); b.castShadow = true; m.add(b); }
+    if (L0) { L0.n += e.nades; continue; }
     m.position.copy(p); scene.add(m);
     G.loot.push({ p, n: e.nades, m });
     if (G.loot.length > 12) scene.remove(G.loot.shift().m);
