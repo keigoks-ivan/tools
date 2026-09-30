@@ -19,6 +19,7 @@ import csv
 import datetime
 import io
 import json
+import os
 import statistics
 import sys
 import time
@@ -277,14 +278,27 @@ def fetch_population_series(today):
     end_yyymm = f"{today.year - 1911}{today.month:02d}"
     yyymms = roc_month_range("11007", end_yyymm)
 
+    # 已公布月份的數字不會再變，存在 data/population_cache.json，每次只抓新月份
+    # （整份全國村里資料一個月約 4 頁、每頁數 MB，從 GitHub 重抓 5 年要半小時）。
+    cache_path = os.path.join(config.DATA_DIR, "population_cache.json")
+    try:
+        with open(cache_path, encoding="utf-8") as f:
+            cache = json.load(f)
+    except (OSError, json.JSONDecodeError):
+        cache = {}
+
     series = {}  # month_iso -> {label: {...}}
     fetched_months = []
     for yyymm in yyymms:
-        rows = fetch_population_month(yyymm)
+        month_iso = roc_yyymm_to_iso_month(yyymm)
+        if month_iso in cache:
+            series[month_iso] = cache[month_iso]
+            fetched_months.append(yyymm)
+            continue
+        rows = fetch_population_month(yyymm) or fetch_population_month(yyymm)  # 大檔偶爾斷線，重試一次
         if not rows:
             continue
         fetched_months.append(yyymm)
-        month_iso = roc_yyymm_to_iso_month(yyymm)
         month_data = {}
 
         hh, ppl, a2544, a014, a65up, n = 0, 0, 0, 0, 0, 0
@@ -310,7 +324,13 @@ def fetch_population_series(today):
                     }
                     break
         series[month_iso] = month_data
+        cache[month_iso] = month_data
         log(f"population {yyymm} ({month_iso}) 抓到 {len(rows)} 個村里資料")
+    try:
+        with open(cache_path, "w", encoding="utf-8") as f:
+            json.dump(cache, f, ensure_ascii=False, separators=(",", ":"))
+    except OSError as e:
+        log(f"population cache 寫入失敗：{e}")
     return series, fetched_months
 
 

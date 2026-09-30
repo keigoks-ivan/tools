@@ -582,6 +582,25 @@ def build_door_project_map() -> dict:
     return result
 
 
+def load_door_project_map() -> dict:
+    try:
+        with open(config.DOOR_PROJECT_JSON, encoding="utf-8") as f:
+            return json.load(f).get("doors", {}) or {}
+    except (OSError, json.JSONDecodeError):
+        return {}
+
+
+def merge_door_project_maps(old: dict, new: dict) -> dict:
+    merged = dict(old)
+    for door, v in new.items():
+        prev = merged.get(door)
+        if prev is None or prev["project"] == v["project"] or v["votes"] >= prev["votes"]:
+            if prev is not None and prev["project"] == v["project"]:
+                v = {**v, "votes": max(v["votes"], prev["votes"]), "total": max(v["total"], prev["total"])}
+            merged[door] = v
+    return merged
+
+
 def save_door_project_map(door_project: dict):
     os.makedirs(config.DATA_DIR, exist_ok=True)
     payload = {
@@ -838,7 +857,9 @@ def main():
     dropped = dedupe_presale_transfers(deals_by_id)
     log(f"dedupe_presale_transfers: dropped {dropped} A-file rows that duplicate a B-file presale row")
 
-    door_project = build_door_project_map()
+    # 每月排程沒有 .cache（zip 快取不進版控），只看得到這次下載的批次，配出來的門牌很少。
+    # 所以要跟上次存的對照表合併，不能直接覆蓋；同一門牌兩邊建案不同時取票數多的。
+    door_project = merge_door_project_maps(load_door_project_map(), build_door_project_map())
     save_door_project_map(door_project)
     tag_project_name_inferred(deals_by_id, door_project)
     tag_rental_project(rentals_by_id, door_project)
