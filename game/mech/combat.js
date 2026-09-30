@@ -4,12 +4,13 @@ import { Mech } from './mechs.js';
 import { Vehicles, VKIND } from './vehicles.js';
 import { parse, encGroups, setRoute, Encounter } from './encounter.js';
 import { STAGE_DATA } from './stages.js';
+import { steer, flankPoint, allyInLane } from './tactics.js';
 
 const clamp = THREE.MathUtils.clamp;
 const rand = (a, b) => a + Math.random() * (b - a);
 const damp = (a, b, k, dt) => a + (b - a) * (1 - Math.exp(-k * dt));
 const wrap = (a) => { while (a > Math.PI) a -= Math.PI * 2; while (a < -Math.PI) a += Math.PI * 2; return a; };
-const V3 = () => new THREE.Vector3();
+const V3 = (x = 0, y = 0, z = 0) => new THREE.Vector3(x, y, z);
 const _a = V3(), _b = V3(), _c = V3(), _d = V3(), _n = V3(), _q = new THREE.Quaternion();
 const UP = new THREE.Vector3(0, 1, 0);
 
@@ -109,6 +110,9 @@ class Enemy {
     this.warn = 0;            // 準備開火的警示（HUD 用）0..1
     this.aim = V3();
     this.jumpCd = rand(3, 8);
+    this.lastSeen = V3(); this.nav = V3(); this.navT = 0;
+    this.cover = null; this.coverCd = 0; this.coverT = 0; this.lockReact = 0;
+    this.role = kind === 'heavy' ? 'support' : kind === 'ace' || id % 3 === 0 ? 'flank' : 'line';
   }
   get scale() { return this.m.scale; }
   chest(out) { return out.set(this.pos.x, this.pos.y + 10.5 * this.scale, this.pos.z); }
@@ -188,7 +192,7 @@ export class Combat {
   // 同時出手的台數有上限：輪不到的先移動、晚一點再打
   canAttack(e) {
     let n = 0;
-    for (const o of this.enemies) if (o !== e && !o.dead && (o.burst > 0 || o.charge > 0 || o.volley > 0 || o.lunge > 0)) n++;
+    for (const o of this.enemies) if (o !== e && !o.dead && o.stagT <= 0 && (o.burst > 0 && o.los || o.charge > 0 || o.volley > 0 || o.lunge > 0)) n++;
     return n < this.tier.atk;
   }
 
@@ -237,6 +241,7 @@ export class Combat {
       e.vel.set(0, -80, 0);
     }
     e.face = Math.atan2(p.x - x, p.z - z);
+    e.lastSeen.copy(p);
     e.m.legYaw = e.face;
     this.scene.add(e.m.root);
     this.enemies.push(e);
@@ -845,16 +850,18 @@ export class Combat {
         continue;
       }
       e.lastHit += dt; e.losT -= dt; e.qbCd -= dt; e.qbT -= dt; e.boostT -= dt; e.jumpCd -= dt;
+      e.coverCd -= dt; e.coverT -= dt; e.navT -= dt;
       if (e.lastHit > 1.3 && e.stagT <= 0) e.stag = Math.max(0, e.stag - K.stag * 0.12 * dt);
-      const toP = _a.subVectors(pl.pos, e.pos); toP.y = 0;
-      const dist = toP.length();
-      const dirP = toP.divideScalar(Math.max(1, dist));
       // 看得到玩家嗎
       if (e.losT <= 0) {
         e.losT = 0.3;
         const ec = e.chest(_b);
         e.los = w.raycast(ec, playerChest, null) < 0 || w.raycast(_c.set(ec.x, ec.y + 5 * k, ec.z), _n.copy(playerChest).setY(playerChest.y + 4), null) < 0;
+        if (e.los) e.lastSeen.copy(pl.pos);
       }
+      const toP = _a.subVectors(e.los ? pl.pos : e.lastSeen, e.pos); toP.y = 0;
+      const dist = toP.length();
+      const dirP = toP.divideScalar(Math.max(1, dist));
       e.noLos = e.los ? 0 : (e.noLos || 0) + dt;
       e.face = e.face + wrap(Math.atan2(dirP.x, dirP.z) - e.face) * (1 - Math.exp(-dt * (e.stagT > 0 ? 0.5 : 4)));
 
@@ -885,10 +892,11 @@ export class Combat {
         e.stagT -= dt;
       } else {
         const [lo, hi] = K.pref;
-        const hunt = e.noLos > 1.2;   // 看不到玩家：往前逼近、翻過大樓
-        const radial = hunt ? 1 : dist > hi ? 1 : dist < lo ? -0.9 : 0.15 * Math.sin(this.stats.time * 0.7 + e.id);
+        const hunt = e.noLos > 1.2;
+        const rush = e.los && this.rifle.reload >= 0 && e.role === 'flank';
+        const radial = hunt || rush ? 1 : dist > hi ? 1 : dist < lo ? -0.9 : 0.15 * Math.sin(this.stats.time * 0.7 + e.id);
         if (hunt && e.boostT <= 0 && Math.random() < dt * 0.8) e.boostT = rand(0.8, 1.6);
-        if (hunt && e.grounded && (e.bumped || e.noLos > 3.5) && e.jumpCd > -1) {
+        if (hunt && e.grounded && e.bumped && e.jumpCd <= 0) {
           e.vel.y = 24; e.grounded = false; e.hover = rand(1.2, 2.2); e.jumpCd = rand(2, 4); e.noLos = 1.3;
         }
         e.strafeT -= dt;
@@ -899,7 +907,33 @@ export class Combat {
         }
         const perp = _b.set(dirP.z, 0, -dirP.x).multiplyScalar(e.strafe);
         wish.copy(dirP).multiplyScalar(radial).addScaledVector(perp, hunt ? 0.35 : 0.85);
+        // 側翼繞到另一個射角；失去視線只追最後看見的位置。
+        if (hunt || e.role === 'flank' && dist > lo && !rush) {
+          const goal = hunt ? e.lastSeen : flankPoint(e.pos, e.lastSeen, e.strafe, (lo + hi) * 0.5);
+          wish.set(goal.x - e.pos.x, 0, goal.z - e.pos.z).normalize();
+        }
+        if (rush) e.boostT = Math.max(e.boostT, 0.5);
+        if (e.coverCd <= 0 && e.lastHit < 1.2 && (e.role === 'support' || e.ap < e.apMax * 0.4)) {
+          e.coverCd = 4; e.cover = this.enemyCover(e, playerChest); e.coverT = e.cover ? 3 : 0;
+        }
+        if (e.cover && e.coverT > 0) {
+          wish.set(e.cover.x - e.pos.x, 0, e.cover.z - e.pos.z);
+          if (wish.lengthSq() < 16) wish.set(0, 0, 0); else wish.normalize();
+        }
         if (wish.lengthSq() > 1) wish.normalize();
+        // 避障每四分之一秒重算一次；同一側持續繞牆，避免每幀左右翻轉。
+        if (e.navT <= 0) {
+          e.navT = 0.25;
+          const probe = V3();
+          const nav = steer(wish.x, wish.z, (x, z) => {
+            probe.set(e.pos.x + x * 10, e.pos.y, e.pos.z + z * 10);
+            return w.collide(probe, 3.8 * k, e.pos.y) || e.grounded && w.support(probe.x, probe.z, 3.4 * k, e.pos.y) < e.pos.y - 4;
+          }, e.strafe);
+          e.nav.set(nav.x, 0, nav.z);
+        }
+        wish.copy(e.nav);
+        e.lockReact = e.locks > 0 ? e.lockReact + dt : 0;
+        if (e.lockReact > 0.5 && e.kind !== 'heavy' && e.qbCd <= 0) { this.enemyQB(e, 1); e.lockReact = 0; }
         // 王牌近身：光劍突擊
         if (e.kind === 'ace' && dist < 90 && e.fireCd < 0.8 && e.lunge <= 0 && e.los && Math.random() < dt * 1.2 && this.canAttack(e)) {
           e.lunge = 0.9; this.note('WARNING  MELEE', 'rd'); this.audio.alert('lock');
@@ -1003,6 +1037,24 @@ export class Combat {
     if (e.grounded) this.fx.skid(e.pos, perp, 1);
   }
 
+  enemyCover(e, pc) {
+    const w = this.world, r = 5 * e.scale;
+    let best = null, score = 80;
+    // 只檢查附近八個樓體；用已有碰撞盒，沒有全城尋路或每幀搜尋。
+    for (const b of w.nearBoxes(e.pos.x, e.pos.z, 65, []).slice(0, 8)) {
+      if (b.top < e.pos.y + 14 * e.scale) continue;
+      const cx = (b.x0 + b.x1) / 2, cz = (b.z0 + b.z1) / 2;
+      const p = V3(cx, e.pos.y, cz);
+      if (Math.abs(pc.x - cx) > Math.abs(pc.z - cz)) { p.x = pc.x < cx ? b.x1 + r : b.x0 - r; p.z = clamp(e.pos.z, b.z0 - r, b.z1 + r); }
+      else { p.z = pc.z < cz ? b.z1 + r : b.z0 - r; p.x = clamp(e.pos.x, b.x0 - r, b.x1 + r); }
+      const d = p.distanceTo(e.pos);
+      if (d > score || w.collide(p.clone(), 3.4 * e.scale, p.y) || Math.abs(w.support(p.x, p.z, 3.4 * e.scale, p.y) - p.y) > 3) continue;
+      if (w.raycast(pc, p.clone().add(V3(0, 10.5 * e.scale, 0)), null) < 0) continue;
+      best = p; score = d;
+    }
+    return best;
+  }
+
   enemyFire(e, dt, dist, pc) {
     const K = e.K, T = this.tier;
     e.fireCd -= dt; e.altCd -= dt; e.warn = Math.max(0, e.warn - dt * 2);
@@ -1010,6 +1062,7 @@ export class Combat {
     const muz = () => { e.m.muzzle.updateWorldMatrix(true, false); return e.m.muzzle.getWorldPosition(V3()); };
     if (e.kind === 'grunt') {
       // 機槍連射
+      if (!canSee) e.burst = 0;
       if (e.burst > 0) {
         e.burstT -= dt;
         if (e.burstT <= 0) { e.burst--; e.burstT = 0.085; this.bullet(e, muz(), pc, dist); }
@@ -1033,10 +1086,11 @@ export class Combat {
           const ext = V3().subVectors(to, from).normalize().multiplyScalar(miss ? 400 : 0).add(to);
           const tw = this.world.raycast(from, ext, _n);
           const end = tw >= 0 ? V3().lerpVectors(from, ext, tw) : ext;
-          this.fx.beam(from, miss ? end : to, 'enemy');
+          const blocked = tw >= 0 || allyInLane(from, to, this.enemies, e, 5, 19);
+          this.fx.beam(from, end, 'enemy');
           this.fx.muzzle(from, _a.subVectors(to, from), 'beam');
           this.audio.enemyBeam(from);
-          if (!miss) { this.hurt(520, from, 'beam'); this.fx.impact(to, _n.subVectors(from, to).normalize(), 'beam'); }
+          if (!miss && !blocked) { this.hurt(520, from, 'beam'); this.fx.impact(to, _n.subVectors(from, to).normalize(), 'beam'); }
           else { this.note(e.dodged ? 'DODGED' : 'MISS', 'gr'); if (tw >= 0) { this.fx.impact(end, _n, 'building'); this.world.hitBuilding(end, 1.5, _n); } }
           e.dodged = false;
         }
@@ -1062,6 +1116,7 @@ export class Combat {
   }
   // 機槍子彈：瞬間判定，有散布，玩家跑得快就比較打不中
   bullet(e, from, pc, dist) {
+    if (allyInLane(from, pc, this.enemies, e, 5, 19)) return;
     const pl = this.player;
     const lead = dist / 900 * rand(0.3, 1.1);
     const to = V3().copy(pc).addScaledVector(pl.vel, lead);
@@ -1072,15 +1127,15 @@ export class Combat {
     const t = rayCapsule(from, dir, cap, dist + 60);
     this.fx.muzzle(from, dir, 'mg');
     this.audio.mg(from);
-    if (t >= 0) {
+    const end = V3().copy(from).addScaledVector(dir, dist + 300);
+    const tw = this.world.raycast(from, end, _n);
+    if (t >= 0 && (tw < 0 || tw * (dist + 300) > t)) {
       const hp = V3().copy(from).addScaledVector(dir, t);
       if (Math.random() < 0.5) this.fx.tracer(from, hp);
       this.hurt(40, from, 'bullet');
       this.fx.impact(hp, _n.copy(dir).negate(), 'armor');
       this.audio.impact(hp, 'armor');
     } else {
-      const end = V3().copy(from).addScaledVector(dir, dist + 300);
-      const tw = this.world.raycast(from, end, _n);
       const hp = tw >= 0 ? V3().lerpVectors(from, end, tw) : end;
       if (Math.random() < 0.6) this.fx.tracer(from, hp);
       if (tw >= 0) this.fx.impact(hp, _n, _n.y > 0.7 ? 'ground' : 'building');

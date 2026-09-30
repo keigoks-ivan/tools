@@ -6,6 +6,7 @@
 import * as THREE from 'three';
 import { Soldier, wrap, lerpAngle, damp } from './human.js';
 import { makeEnemyRifle } from './guns.js';
+import { steer, flankPoint, allyInLane } from '../tactics.js';
 
 const clamp = THREE.MathUtils.clamp, rr = (a, b) => a + Math.random() * (b - a);
 const _v = new THREE.Vector3(), _w = new THREE.Vector3(), _u = new THREE.Vector3();
@@ -37,7 +38,7 @@ export class Trooper {
     this.goal = null; this.cover = null; this.coverT = 0; this.phase = 'move'; this.phaseT = 0;
     this.burst = 0; this.shotT = 0; this.aimT = 0; this.aimK = 0;
     this.mag = MAG[this.type] || 20; this.ammo = this.mag; this.stagger = 0;
-    this.lastSeen = new THREE.Vector3(); this.seeT = 0; this.sees = false; this.losT = rr(0, 0.2);
+    this.lastSeen = def.alert ? G.player.pos.clone() : this.pos.clone(); this.seeT = 0; this.sees = false; this.losT = rr(0, 0.2);
     this.stuckT = 0; this.last = this.pos.clone();
     this.post = !!def.post;          // 守點：不離開
     this.id = G.nextId++;
@@ -48,6 +49,8 @@ export class Trooper {
     // 手榴彈（nades 小於 1＝有這個機率帶一顆）、多久沒看到玩家、被瞄準多久
     this.nades = T.nades ? (T.nades >= 1 ? T.nades : (Math.random() < T.nades ? 1 : 0)) : 0;
     this.notSeen = 0; this.hunt = false; this.aimedT = 0; this.duckAt = rr(0.3, 0.7);
+    this.side = this.id % 2 ? 1 : -1; this.navT = 0; this.nav = new THREE.Vector3(); this.reportT = 0; this.pushCd = 0;
+    this.role = this.type === 'heavy' || this.type === 'sniper' ? 'support' : this.id % 3 === 0 || this.type === 'officer' ? 'flank' : 'line';
   }
   get alive() { return !this.dead; }
   // 命中判定：跟著骨架的 16 段膠囊（頭、軀幹、肩、手臂、手、腿、腳），粗細照模型頂點量過，蓋住畫面上看得到的身體
@@ -93,7 +96,7 @@ export class Trooper {
       return true;
     }
     // 被打中：蹲回掩護或換位置
-    if (this.phase === 'peek' && Math.random() < 0.5) { this.phase = 'hide'; this.phaseT = rr(0.8, 1.6); }
+    if (this.phase === 'peek' && Math.random() < 0.5) { this.phase = 'hide'; this.phaseT = rr(0.8, 1.6); this.burst = 0; }
     return false;
   }
   alert(p, k = 1) {
@@ -114,17 +117,23 @@ export class Trooper {
     if (this.dead) { s.update(dt); return; }
     const eye = G.playerEye;
     const dist = this.pos.distanceTo(P.pos);
+    this.reportT -= dt; this.pushCd -= dt; this.navT -= dt;
     // ---- 看得到玩家嗎（每 0.2 秒測一次視線）
     this.losT -= dt;
     if (this.losT <= 0) {
       this.losT = 0.2;
       const head = s.headPos(new THREE.Vector3());
       const fwd = new THREE.Vector3(Math.sin(s.aimYaw), 0, Math.cos(s.aimYaw));
-      const to = _v.subVectors(eye, head); const L = to.length(); to.divideScalar(L);
+      const to = _v.subVectors(eye, head); const L = to.length(); to.divideScalar(Math.max(L, 1e-6));
       const cone = this.state === 'combat' ? -1 : 0.05;
       const range = this.state === 'combat' ? 110 : 60;
       this.sees = L < range && to.dot(fwd) > cone && G.solid.sees(head, eye) && !P.dead;
       if (this.sees) { this.lastSeen.copy(P.pos); this.seeT += 0.2; } else this.seeT = 0;
+    }
+    // 無線電報位：同伴追的是上次回報的位置，沒有隔牆讀取玩家的新位置。
+    if (this.state === 'combat' && this.sees && this.reportT <= 0) {
+      this.reportT = this.type === 'officer' ? 0.8 : 1.4;
+      for (const e of G.enemies) if (e !== this && !e.dead && e.lastSeen && e.pos.distanceTo(this.pos) < 28) e.alert(this.lastSeen, 0.65);
     }
     // ---- 察覺：看得到就累積（越近越快；蹲著、在暗處慢一點）
     if (this.state !== 'combat') {
@@ -150,12 +159,19 @@ export class Trooper {
       mode = 'patrol';
     } else {
       // ---- 戰鬥
-      const toP = Math.atan2(P.pos.x - this.pos.x, P.pos.z - this.pos.z);
+      const target = this.sees ? P.pos : this.lastSeen;
+      const toP = Math.atan2(target.x - this.pos.x, target.z - this.pos.z);
       this.coverT -= dt; this.phaseT -= dt;
       const sniper = this.type === 'sniper';
       // 多久沒看到玩家：躲太久就派人摸過去（往最後看到的位置找掩護）、丟手榴彈
       if (this.sees) { this.notSeen = 0; this.hunt = false; } else this.notSeen += dt;
-      if (!this.post && !sniper && !this.hunt && this.notSeen > 5 && this.type !== 'heavy') { this.hunt = true; this.cover = null; this.coverT = 0; }
+      if (!this.post && !sniper && !this.hunt && this.notSeen > (this.role === 'flank' ? 2.8 : 5) && this.type !== 'heavy') { this.hunt = true; this.cover = null; this.coverT = 0; }
+      // 有視線才看得出換彈；一名側翼兵趁這段空檔推進，其餘維持壓制。
+      if (!this.post && this.role === 'flank' && this.sees && G.vm.reloadT >= 0 && this.pushCd <= 0 && dist > 7 && dist < 28) {
+        const goal = flankPoint(this.pos, target, this.side, Math.max(7, dist - 5), 0.45);
+        this.cover = new THREE.Vector3(goal.x, this.pos.y, goal.z); this.coverT = 2;
+        this.phase = 'move'; this.pushCd = 5;
+      }
       if (this.nades > 0 && !this.sees && this.notSeen > 3 && G.throwGrenade && G.t - (G.lastNade ?? -99) > 8) {
         const dL = this.pos.distanceTo(this.lastSeen);
         if (dL > 7 && dL < 24) { this.nades--; G.lastNade = G.t; G.throwGrenade(s.headPos(new THREE.Vector3()).add(_w.set(0, 0.3, 0)), this.lastSeen.clone(), this); this.phase = 'hide'; this.phaseT = rr(0.8, 1.4); }
@@ -186,10 +202,15 @@ export class Trooper {
         }
         face = toP;
       } else if (this.phase === 'hide') {
+        this.burst = 0;
         s.crouchT = this.cover && this.cover.crouch ? 1 : 0;
         mode = 'patrol';
         face = toP;
-        if (this.cover && this.cover.side) { mv.copy(this.cover.side).multiplyScalar(-1); }   // 靠牆那側
+        // 從探頭點真正退回掩體；走到遮蔽處才開始等下一次探頭。
+        if (this.cover) {
+          _v.set(this.cover.x - this.pos.x, 0, this.cover.z - this.pos.z);
+          if (_v.length() > 0.2) { mv.copy(_v).normalize(); speed = T.walk * 1.5; this.phaseT = Math.max(this.phaseT, 0.3); }
+        }
         if (this.phaseT <= 0) { this.phase = 'peek'; this.phaseT = rr(2.6, 4.4); this.burst = 0; this.aimT = 0; this.aimedT = 0; this.duckAt = rr(0.3, 0.7); }
       } else if (this.phase === 'peek') {
         s.crouchT = this.cover && this.cover.crouch && this.cover.peekCrouch ? 1 : 0;
@@ -224,13 +245,13 @@ export class Trooper {
         if (this.burst > 0) {
           this.shotT -= dt;
           if (this.shotT <= 0) {
-            this.fire(aimTgt); this.burst--; this.ammo--; this.shotT = T.gap * rr(0.8, 1.3);
+            const fired = this.fire(aimTgt); this.burst--; if (fired) this.ammo--; this.shotT = T.gap * rr(0.8, 1.3);
             if (this.burst <= 0) { this.aimT = sniper ? -0.6 : rr(-0.8, -0.2); }
             // 彈匣打空：蹲回掩護換彈
             if (this.ammo <= 0) { this.burst = 0; s.reloadT = 0; this.ammo = this.mag; if (this.phase === 'peek') { this.phase = 'hide'; this.phaseT = 1.8; } G.audio.reload && Math.random() < 0.5 && this.pos.distanceTo(P.pos) < 18 && G.audio.radio('enemy', this.pos); }
           }
         }
-      } else if (!this.sees) this.aimT = Math.max(0, this.aimT - dt * 2);
+      } else { this.burst = 0; this.aimT = Math.max(0, this.aimT - dt * 2); }
       if (sniper) this._laser(mode === 'aim' && this.sees && this.burst <= 0, aimTgt);
     }
     if (mode !== 'aim' && this.phase !== 'hide') s.crouchT = 0;
@@ -239,6 +260,18 @@ export class Trooper {
       if (e === this || e.dead || !e.pos) continue;
       const dx = this.pos.x - e.pos.x, dz = this.pos.z - e.pos.z, d2 = dx * dx + dz * dz;
       if (d2 < 0.8 && d2 > 1e-6) { const d = Math.sqrt(d2); mv.x += dx / d * 0.8; mv.z += dz / d * 0.8; }
+    }
+    if (speed > 0 && !this.post && this.stagger <= 0) {
+      if (this.navT <= 0) {
+        this.navT = 0.2;
+        const foot = this.pos.clone().add(new THREE.Vector3(0, 0.6, 0)), probe = new THREE.Vector3();
+        const nav = steer(mv.x, mv.z, (x, z) => {
+          probe.set(this.pos.x + x * 1.1, this.pos.y, this.pos.z + z * 1.1);
+          return G.solid.pushOut(probe.clone(), 0.34, probe.y, probe.y + 1.7, 0.45) || !G.solid.sees(foot, probe.clone().add(new THREE.Vector3(0, 0.6, 0))) || Math.abs(G.solid.floorAt(probe.x, probe.z, probe.y + 0.5) - probe.y) > 0.6;
+        }, this.side);
+        this.nav.set(nav.x, 0, nav.z);
+      }
+      mv.copy(this.nav);
     }
     const want = mv.multiplyScalar(speed);
     if (this.stagger > 0) { this.stagger -= dt; want.copy(this.stagV); }
@@ -262,6 +295,7 @@ export class Trooper {
   fire(tgt) {
     const G = this.G, s = this.s, T = this.T;
     const m = s.muzzle(new THREE.Vector3());
+    if (!G.solid.sees(m, tgt) || allyInLane(m, tgt, G.enemies, this, 0.3, 1.8)) { this.burst = 1; this.coverT = Math.min(this.coverT, 0.8); return false; }
     const dist = m.distanceTo(tgt);
     // 準度：距離、玩家移動、蹲、難度
     const P = G.player;
@@ -278,6 +312,7 @@ export class Trooper {
     const kind = this.type === 'sniper' ? 'sniper' : this.type === 'heavy' ? 'heavy' : 'rifle';
     G.audio.enemyShot(m, kind);
     G.fx.muzzle(m, d, [3.2, 0.5, 0.25], this.type === 'sniper');
+    return true;
   }
 
   _laser(on, tgt) {
@@ -298,12 +333,12 @@ export class Trooper {
   // 找掩護：附近矮牆／貨櫃／車子背對玩家那一側；看不到（蹲著）又能探頭
   // hunt＝去找躲起來的玩家：以最後看到的位置為準、要近一點、要能看到那裡（不偷看玩家真正的位置）
   findCover(hunt = false) {
-    const G = this.G, S = G.solid, P = G.player, eye = hunt ? this.lastSeen.clone().add(new THREE.Vector3(0, 1.5, 0)) : G.playerEye;
-    const PP = hunt ? this.lastSeen : P.pos;
+    const G = this.G, S = G.solid, P = G.player, eye = this.sees ? G.playerEye : this.lastSeen.clone().add(new THREE.Vector3(0, 1.5, 0));
+    const PP = this.sees ? P.pos : this.lastSeen;
     // 同伴在玩家哪個方向（包抄：不要擠在同一邊）
     const mates = [];
     for (const e of G.enemies) if (e !== this && !e.dead && e.state === 'combat' && e.pos) mates.push(Math.atan2(e.pos.x - PP.x, e.pos.z - PP.z));
-    const aimA = G.aimDir ? Math.atan2(G.aimDir.x, G.aimDir.z) : null;
+    const aimA = this.sees && G.aimDir ? Math.atan2(G.aimDir.x, G.aimDir.z) : null;
     const R = 16, cands = [];
     const boxes = S.near(this.pos.x, this.pos.z, R, []);
     for (const b of boxes) {
@@ -335,8 +370,10 @@ export class Trooper {
         }
         const dp = p.distanceTo(PP), dm = p.distanceTo(this.pos);
         if (dp < 5) continue;
+        if (!hidden || !peekOK) continue;
         let sc = (hidden ? 3 : 0) + (peekOK ? 2 : 0) - dm * 0.12 - Math.abs(dp - (this.type === 'sniper' ? 30 : hunt ? 8 : 14)) * (hunt ? 0.12 : 0.05) + Math.random() * 0.6;
         const ang = Math.atan2(p.x - PP.x, p.z - PP.z);
+        if (this.role === 'flank' && Math.sign(wrap(ang - Math.atan2(this.pos.x - PP.x, this.pos.z - PP.z))) === this.side) sc += 1.1;
         for (const m of mates) { const d = Math.abs(wrap(ang - m)); if (d < 0.6) sc -= (0.6 - d) * 2.5; }
         if (aimA !== null && Math.abs(wrap(ang - aimA)) > 1.0) sc += 0.8;   // 不在玩家準心前面
         for (const e of G.enemies) if (e !== this && !e.dead && e.cover && e.cover.distanceTo(p) < 1.6) sc -= 4;
@@ -346,9 +383,8 @@ export class Trooper {
     cands.sort((a, b) => b.sc - a.sc);
     if (cands.length && cands[0].sc > 1) { const c = cands[0]; const v = c.p; v.crouch = c.crouch; v.peek = c.peek; v.peekCrouch = c.peekCrouch; return v; }
     // 沒掩護：往側邊找個位置
-    const a = Math.atan2(this.pos.x - P.pos.x, this.pos.z - P.pos.z) + rr(-1, 1);
-    const d = clamp(this.pos.distanceTo(P.pos), 8, 18);
-    const v = new THREE.Vector3(P.pos.x + Math.sin(a) * d, this.pos.y, P.pos.z + Math.cos(a) * d);
+    const goal = flankPoint(this.pos, PP, this.side, hunt ? 7 : clamp(this.pos.distanceTo(PP), 8, 18), this.role === 'flank' ? 0.8 : 0.3);
+    const v = new THREE.Vector3(goal.x, this.pos.y, goal.z);
     S.pushOut(v, 0.4, v.y, v.y + 1.7, 0.45);
     v.crouch = false;
     return v;

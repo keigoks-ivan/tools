@@ -18,6 +18,7 @@
 // ---- 每一區（secs）另外可以加：
 //   go：這一區變成下一個目標時講的話；lines：開打（伏兵出現）時講的話；clear：這一區清完時講的話
 //   hold：守住幾秒（期間 amb、amb2、amb3 輪流來，gap 秒或剩 over 台就叫下一波；時間到、敵人清光才算過）
+//   beats：[{t: 開戰秒數, lines: 插播對白, spawn: 額外增援字串}]；boss.halfWave／lowWave 在血量轉折時叫增援，沿用在場上限與出場預警
 //   boss：{ kind: 'ace'|'heavy'|'grunt', name: '黑犬', ap: 血量倍率, where: 'drop'|'roof'|…, flee: 0.3（剩三成就撤退，不會被打死）,
 //           half: [...]（剩一半時的對白）, low: [...]（剩兩成半）, fled: [...]（撤退時）, down: [...]（被打倒的那一刻） }
 //           ——跟第一波一起出現，畫面上方有血條；頭目倒下或撤退後，還沒出來的後續波次取消；low 在 max(兩成半, flee＋一成) 時講
@@ -37,7 +38,7 @@ export const STAGE_DATA = [
       '首都東區，第三裝甲連困在大街盡頭的公園，彈藥只剩兩成。',
       '獵犬在沿路的大樓架了中繼站，替砲兵報他們的位置。',
       '沿大街往東推進，拆掉中繼站，和裝甲連會合。'],
-    start: [[OP, '零號，聽得到嗎？這是你第一次在城裡開蒼焰。'], [OP, '裝甲連在東區大街盡頭。跟著光柱走。'], [ME, '收到。出發。']],
+    start: [[ALLY, '三號車中彈！路口封死了，誰能聽見就回答！', NOW], [OP, '零號，裝甲連只剩兩成彈藥。跟著光柱，打開東區的路。'], [ME, '位置收到。我來了。']],
     end: [[ALLY, '原來蒼焰是一台機體……我們得救了。'], [ALLY, '第三裝甲連連長。駕駛員，報上名字。'], [ME, '零號。'], [OP, '裝甲連，跟著蒼焰撤出東區。']],
     route:
     { cp: [4, 8], arena: 130, fin: 60, par: 520, over: 1,
@@ -70,6 +71,7 @@ export const STAGE_DATA = [
         { at: 12, amb: 'heli@rise tank@out*2 grunt@drop tank@side', amb2: 'grunt@roof tank@out*2 heli@rise', amb3: 'grunt@drop tank@side*2', tip: 'OD 槽滿了按 Q 覺醒——十秒內全面變強',
           go: [[OP, '公園就在前面。獵犬的兵力全往那裡去了。']], lines: [[ALLY, '他們又衝上來了！撐不了多久！']], clear: [[ME, '快到了。再撐一下。']] },
         { at: 14, amb: 'tank@ring*4 grunt@drop*2', amb2: 'grunt@roof tank@ring*3 grunt@drop heli@rise', amb3: 'grunt@drop*2 tank@ring*3', tip: '最後一區：四面八方都有，清光就過關',
+          beats: [{ t: 18, lines: [[ALLY, '他們繞到後面了！'], [OP, '側翼有降落訊號。別只盯著正面。']], spawn: 'grunt@side' }],
           lines: [[ALLY, '看到你了！全車開火，跟著那台機體打！']] },
       ] } },
   // ================================================================ 第 2 關
@@ -113,6 +115,8 @@ export const STAGE_DATA = [
         { at: 15, amb: 'grunt@drop*2 heli@rise tank@out', amb2: 'tank@out*2 grunt@roof heli@rise',
           lines: [[EN, '全軍往中央廣場集合！']], clear: [[ALLY, '車隊進廣場了！市民在下車！']] },
         { at: 16, hold: 75, gap: 18, amb: 'tank@ring*4 grunt@drop*2 heli@rise', amb2: 'grunt@drop*2 heli@rise*2 tank@ring*2', amb3: 'grunt@roof grunt@drop*2 heli@rise tank@ring*3', tip: '守住廣場——直升機載完市民才會撤',
+          beats: [{ t: 25, lines: [[OP, '第二架進場了。最後一批人還在跑向降落點。'], [EN, '從側街切進去，別跟蒼焰正面打！']], spawn: 'grunt@side' },
+            { t: 58, lines: [[ALLY, '最後一架正在裝人！零號，別讓他們靠近！'], [ME, '我還在。繼續上人。']] }],
           go: [[OP, '直升機到了。守住廣場，直到最後一架起飛。']], lines: [[OP, '第一架降落。別讓獵犬靠近廣場。']] },
       ] } },
   // ================================================================ 第 3 關
@@ -149,6 +153,8 @@ export const STAGE_DATA = [
           go: [[ALLY, '車隊裝好了。蒼焰，公園交給你守。']],
           clear: [[OP, '車隊一出發，敵人就會圍過來。']] },
         { at: 12, hold: 75, gap: 15, amb: 'tank@ring*3 grunt@drop*2', amb2: 'heli@rise*2 tank@ring*2 grunt@drop', amb3: 'grunt@drop*2 tank@ring*2 heli@rise', tip: '守住醫院：計時結束前，敵人會從四面八方來',
+          beats: [{ t: 24, lines: [[ALLY, '救護車還沒出醫院！有傷員不能自己走！'], [EN, '重裝機上前。把藍色的逼離橋口。']], spawn: 'heavy@drop' },
+            { t: 57, lines: [[ALLY, '最後一輛救護車上橋了。再給我們十八秒！']] }],
           lines: [[ALLY, '車隊出發！一分多鐘才過得了橋。'], [EN, '難民車隊在移動。全部隊，追！']] },
       ] } },
   // ================================================================ 第 4 關
@@ -188,6 +194,7 @@ export const STAGE_DATA = [
         { at: 11, pre: 'tank@far*2', amb: 'heavy@roof grunt@drop tank@side', amb2: 'heavy@drop tank@out*2', amb3: 'grunt@drop*2 tank@out',
           go: [[EN, '指揮所前方佈防！重裝機全部上前！']] },
         { at: 12, targets: [{ x: -37, z: 539, name: '砲兵指揮所' }, { x: 39, z: 421, name: '通訊塔' }], amb: 'tank@ring*3 heavy@drop grunt@drop', amb2: 'heavy@drop tank@ring*2 heli@rise', amb3: 'grunt@drop*2 tank@ring*2 heli@rise', tip: '最後一區：打倒指揮所和通訊塔，敵人清光就過關',
+          beats: [{ t: 24, lines: [[EN, '指揮所準備撤離，重裝隊掩護！'], [OP, '他們在拖時間。抓住重裝機換射角的空檔，打指揮所。']], spawn: 'grunt@side' }],
           go: [[OP, '指揮所就在前面。連通訊塔一起打倒。']], lines: [[EN, '指揮所遭到攻擊！全員回防！']] },
       ] } },
   // ================================================================ 第 5 關
@@ -209,7 +216,7 @@ export const STAGE_DATA = [
         { at: 4, amb: 'heavy@roof grunt@drop tank@side*2', amb2: 'tank@out*2 heli@rise*2', amb3: 'grunt@drop*2' },
         { at: 5, amb: 'grunt@drop*2', amb2: 'tank@out*2 heli@rise', tip: '黑犬會貼近拔劍：看到近戰警告就點 SHIFT 閃',
           boss: { kind: 'ace', name: '黑犬', ap: 1.5, where: 'roof', flee: 0.3,
-            half: [[DOG, '反應變快了。在機庫時可沒這麼靈活。']],
+            halfWave: 'grunt@side', half: [[DOG, '你換彈的時候就是破綻。小隊，從側面進。']],
             fled: [[DOG, '……嘖，新機還沒調好。公園見，蒼焰。'], [OP, '黑犬脫離了。別追，先去公園。']] },
           lines: [[DOG, '又見面了。讓我看看你長進了多少。'], [OP, '是黑犬！他比二號機快得多。']] },
         { at: 6, amb: 'tank@side*2 grunt@drop heavy@drop', amb2: 'grunt@roof tank@out*2 heli@rise', amb3: 'tank@out*2 grunt@drop',
@@ -286,9 +293,12 @@ export const STAGE_DATA = [
         { at: 4, amb: 'grunt@drop*2 tank@side*2 heli@rise', amb2: 'tank@out*3 grunt@roof',
           lines: [[EN, '聯邦部隊在撤退。咬住牠們！']] },
         { at: 5, hold: 60, gap: 15, amb: 'tank@out*4 grunt@drop', amb2: 'tank@out*3 heavy@drop heli@rise', amb3: 'tank@side*2 tank@out*2 grunt@drop jet@out', tip: '守住 60 秒——大道上的戰車會一直衝過來',
+          beats: [{ t: 22, lines: [[ALLY, '北側防線破了！他們繞到我們背後！'], [OP, '零號，接住側翼。大道交給裝甲連。']], spawn: 'grunt@side' },
+            { t: 46, lines: [[WOLF, '讓鐵獒上去。我要那台機體的殘骸。']] }],
           go: [[OP, '大道路口是最後一道防線。再退就是市中心。']], lines: [[ALLY, '全連就位。一步都不准退！'], [WOLF, '推平它。']], clear: [[OP, '防線守住了……等等，有大型重裝機接近。']] },
         { at: 6, amb: 'tank@out*2 grunt@drop', amb2: 'grunt@drop tank@out*2 heli@rise', tip: '敵方指揮官：重裝機火力很強——拿大樓擋飛彈',
           boss: { kind: 'heavy', name: '鐵獒', ap: 3, where: 'drop',
+            halfWave: 'grunt@side',
             half: [['鐵獒（獵犬軍團）', '有兩下子。全隊，火力集中！']], low: [[OP, '牠的裝甲快撐不住了，壓上去！']] },
           lines: [['鐵獒（獵犬軍團）', '就是你趕跑了黑犬？讓我看看。']], clear: [[ALLY, '鐵獒倒了！全連，反攻！']] },
         { at: 7, pre: 'tank@far*3', amb: 'tank@out*2 grunt@side heli@rise', amb2: 'grunt@roof tank@out*3',
@@ -327,6 +337,7 @@ export const STAGE_DATA = [
         { at: 7, amb: 'grunt@side*2 tank@out*2 heli@rise', amb2: 'heavy@drop tank@out*2 jet@out', amb3: 'heli@rise*2 tank@side*2' },
         { at: 8, amb: 'heli@rise*3 grunt@drop', amb2: 'jet@out*2 heli@rise tank@out*2', amb3: 'heli@rise*2 grunt@roof tank@side', tip: '雷達站又高又硬——用光波砲一口氣打垮',
           targets: [{ x: 82, z: -324, name: '雷達站' }],
+          beats: [{ t: 20, lines: [['聯邦空軍', '鷹群被雷達鎖住了，進不去！'], [OP, '蒼焰，先拆雷達。別被直升機帶離目標。']], spawn: 'grunt@side' }],
           go: [[OP, '那棟最高的塔樓是雷達站，防空網靠它指揮。']], lines: [[EN, '雷達站告急！所有單位回防！']], clear: [[OP, '雷達站倒了。防空網瞎了一半。']] },
         { at: 9, amb: 'jet@out*2 heli@rise*2', amb2: 'heli@rise*2 tank@side*2 grunt@drop', amb3: 'jet@out*2 grunt@roof',
           lines: [[EN, '剩下的戰機全部起飛！擊落那台藍色的！']] },
@@ -376,7 +387,8 @@ export const STAGE_DATA = [
           clear: [[OP, '他在等你。……機體撐得住嗎？'], [ME, '撐得住。']] },
         { at: 12, amb: 'grunt@drop*2', tip: '最後一戰：槍口發光就閃，靠近會拔劍',
           boss: { kind: 'ace', name: '黑犬', ap: 3, where: 'drop',
-            half: [[DOG, '哈！上次你連站都站不穩。']], low: [[DOG, '……好。這才像話。再來！']],
+            halfWave: 'grunt@side',
+            half: [[DOG, '小隊，從側面進！我壓住他。'], [OP, '他在配合護衛包抄。先切斷他們的射線。']], low: [[DOG, '護衛別管我。蒼焰……這一下你躲得開嗎？']],
             down: [[DOG, '……隼選對人了。'], [DOG, '零號。上次我說記住你了……這次換你記住我。']] },
           lines: [[DOG, '這次我不走了。你也別想走。', NOW], [ME, '我沒打算走。', NOW]] },
       ] } },
@@ -384,7 +396,7 @@ export const STAGE_DATA = [
   // 黃昏：從東北角沿 x=600、480、360、240 一路往西南打，從東邊進國會廣場（市中心空地）；中途兩次守點，最後跟灰狼的超重型機決戰
   { name: '黃昏決戰', en: 'LAST LIGHT', tip: '最終關：王牌、重裝、戰車、直升機、戰機全部出動', music: 6, tier: 6,
     brief: ['司令部失守，灰狼帶著剩下的部隊退進首都中心的國會廣場。', '他本人坐進一台超重型機體，親自守在廣場上。', '聯邦主力正從東邊渡河。在他們趕到之前，蒼焰要先打開通往廣場的路。', '黃昏出擊。這是最後一仗。'],
-    start: [[OP, '零號，太陽快下山了。'], [OP, '天黑以前拿下廣場，這場仗就結束了。']],
+    start: [[ALLY, '渡河部隊遭到砲擊，先頭車堵在橋上！', NOW], [OP, '灰狼把最後的兵力全壓過來了。零號，先替他們打開橋口。'], [ME, '收到。這次一起回去。']],
     end: [[OP, '各地回報，獵犬軍團放下武器了。'], [ALLY, '聽到了嗎！首都拿回來了！'], [OP, '（隔天清晨）零號，醒了嗎？看東邊。'], [ME, '……天亮了。'],
       [ME, '隼，你說得對。蒼焰很聽話。'], [OP, '蒼焰的駕駛員，今天的任務只有一個：好好睡一覺。']],
     route:
@@ -412,12 +424,15 @@ export const STAGE_DATA = [
         { at: 9, amb: 'ace@drop*2 grunt@side tank@out', amb2: 'heavy@roof grunt@drop tank@out*2',
           go: [[WOLF, '（公開頻道）蒼焰。黑犬是我帶出來的。'], [WOLF, '他輸給了你。我不會。']] },
         { at: 10, hold: 50, gap: 16, amb: 'grunt@drop*2 tank@ring*2 heli@rise', amb2: 'ace@drop tank@ring*2 jet@rise', amb3: 'heavy@drop grunt@drop tank@ring*2', tip: '守住 50 秒——聯邦主力正在進城',
+          beats: [{ t: 18, lines: [[OP, '側街有高速機體！他們想截斷主力的入口！']], spawn: 'ace@side' },
+            { t: 39, lines: [[ALLY, '先頭車進城！零號，還有十一秒！'], [WOLF, '全員留在廣場。誰都不許退。']] }],
           go: [[OP, '聯邦主力還要五十秒才到廣場。'], [OP, '零號，撐住。這是最後一次守點。']],
           lines: [[EN, '全軍反擊！別讓它進廣場！', NOW]],
           clear: [[OP, '主力部隊進城了！廣場四周都是我們的人。']] },
         { at: 11, amb: 'tank@ring*3', amb2: 'ace@drop grunt@drop heli@rise', amb3: 'grunt@drop jet@rise*2', tip: '灰狼：超重型機——閃開砲擊，貼近再打',
           boss: { kind: 'heavy', name: '灰狼', ap: 4.5, where: 'drop',
-            half: [[WOLF, '裝甲剩一半。還在計算之內。']], low: [[WOLF, '……原來如此。黑犬，我懂了。']],
+            halfWave: 'ace@side', lowWave: 'grunt@side',
+            half: [[WOLF, '親衛隊，從左側切入。我來封他的退路。'], [OP, '王牌機進場！別讓兩種火力把你夾住！']], low: [[WOLF, '最後一隊，掩護我。廣場一步都不能讓。']],
             down: [[WOLF, '……獵犬軍團全軍，停止抵抗。'], [WOLF, '這是我最後一道命令。']] },
           lines: [[WOLF, '這座廣場是獵犬軍團最後的陣地。', NOW], [WOLF, '到此為止，蒼焰。', NOW]] },
       ] } },

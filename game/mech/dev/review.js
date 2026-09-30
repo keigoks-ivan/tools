@@ -24,7 +24,10 @@ async function load(path, query = '') {
 async function save(name = 'capture') {
   if (!post) return;
   post.render(1);
-  const data = renderer.domElement.toDataURL('image/png');
+  const cv = win.document.createElement('canvas'); cv.width = renderer.domElement.width; cv.height = renderer.domElement.height;
+  const cx = cv.getContext('2d'); cx.drawImage(renderer.domElement, 0, 0);
+  for (const c of win.document.querySelectorAll('canvas[id^="hud"]')) cx.drawImage(c, 0, 0, cv.width, cv.height);
+  const data = cv.toDataURL('image/png');
   const a = document.createElement('a'); a.href = data; a.download = name + '.png'; a.textContent = '下載 ' + name;
   document.querySelector('#captures').append(a);
   // Preview PNG includes only the game canvas, captured immediately after rendering.
@@ -134,4 +137,56 @@ async function city() {
   W.resetBuildings(); assert(original.every((v,i) => sign.a.array[sign.s * 3 + i] === v), '重開關卡完整復原招牌');
   state.textContent = '街景通過';
 }
-for (const [id, fn] of [['mech', mech], ['zero', zero], ['art', art], ['hero', hero], ['city', city], ['save', save]]) document.querySelector('#' + id).onclick = () => fn().catch(e => { state.textContent = '失敗'; report.textContent += '\n' + e.stack; });
+async function tactics() {
+  await load('/game/mech/index.html', '?mute&nobrief&fps=0');
+  const G = win.__game, T = win.__T; G.launch(5); G.run(3.5); G.player.pos.set(0, 0, 600); G.tick(1 / 60);
+  const C = G.combat; post = C.post; renderer = post.renderer;
+  const ace = C.spawn('ace', 0, 1, { x: 0, z: 480, ground: true, tx: 0, tz: 600 });
+  const grunt = C.spawn('grunt', 0, 1, { x: -120, z: 600, ground: true, tx: 0, tz: 600 });
+  const heavy = C.spawn('heavy', 0, 1, { x: 120, z: 600, ground: true, tx: 0, tz: 600 });
+  ace.qbCd = 0; C.enemyQB(ace, 1);
+  assert(Math.hypot(ace.vel.x, ace.vel.z) > 59, '王牌側閃有實際速度');
+  for (let i = 0; i < 120; i++) { C.stats.time += 0.1; C.updateEnemies(0.1); G.fx.update(0.1); G.world.update(0.1); }
+  assert([ace, grunt, heavy].every(e => e.pos.toArray().every(Number.isFinite)), '三種敵機的避障、包抄與射擊座標正常');
+  assert(Math.abs(ace.pos.x) > 5, '側翼機離開原本正面射線');
+  assert(ace.role === 'flank' && heavy.role === 'support', '側翼與支援機體各有分工');
+  await save('tactical-battle');
+  // 直接進入實際守點段，驗證時間事件、預警隊列與在場上限。
+  G.toTitle(); G.launch(2); G.run(3.5);
+  const D = G.combat, E = D.enc;
+  for (const e of D.enemies) e.m.root.removeFromParent(); D.enemies.length = 0;
+  E.sec = E.N - 1; E.mine = []; E.prog = E.cur.s; E.state = 'move'; E.queue.length = 0;
+  const p = E.E.pts[E.cur.at]; G.player.pos.set(p.x, 0, p.z); G.tick(1 / 60);
+  for (let i = 0; i < 260; i++) { D.stats.time += 0.1; E.update(0.1); D.updateEnemies(0.1); G.fx.update(0.1); }
+  assert(E.beatSeen.has(0), '撤離中途的側翼突破事件觸發');
+  assert(D.alive.length <= 9, '劇情增援沿用九個單位上限');
+  assert(D.subQ.some(s => s.text.includes('側街')), '側翼事件實際進入通訊字幕');
+  post = D.post; renderer = post.renderer;
+  G.tick(1 / 60); await save('evacuation-pressure');
+  report.textContent = JSON.stringify({ checks: result, enemies: D.alive.length, errors }, null, 2); state.textContent = errors.length ? '有錯誤' : '戰術與劇情通過';
+}
+async function infantry() {
+  await load('/game/mech/zero/index.html', '?mute&god&ch=1&all&fps=0');
+  const G = win.__G, T = win.__T, script = win.document.createElement('script'); script.type = 'module';
+  script.textContent = `import {Trooper} from './ai.js'; window.__Trooper=Trooper;`; win.document.head.append(script); await wait(() => win.__Trooper);
+  const e = new win.__Trooper(G, { type: 'officer', x: -92, z: -74, alert: true }); G.enemies.push(e);
+  e.phase = 'hide'; e.phaseT = 2; e.cover = e.pos.clone().add(new T.Vector3(0, 0, -1)); e.coverT = 10; e.burst = 4;
+  const start = e.pos.clone();
+  for (let i = 0; i < 8; i++) { G.t += 0.1; e.update(0.1); }
+  assert(e.pos.distanceTo(start) > 0.15 && e.burst === 0, '步兵退回掩體並釋放射擊名額');
+  G.player.pos.set(-92, 0, -84); G.playerEye.set(-92, 1.6, -84);
+  e.sees = true; e.losT = 1; e.lastSeen.copy(G.player.pos); e.pushCd = 0; G.vm.reloadT = 0;
+  e.update(0.1);
+  assert(e.pushCd > 0 && e.phase === 'move', '指揮官看見玩家換彈時推進'); G.vm.reloadT = -1;
+  for (let i = 0; i < 200; i++) { G.t += 0.05; for (const o of G.enemies) o.update(0.05); G.fx.update(0.05); }
+  assert(G.enemies.every(o => o.pos.toArray().every(Number.isFinite)), '步兵持續戰鬥與局部避障沒有無效座標');
+  // 在短遭遇中重用正式守點對白，驗證任務插播時鐘與去重。
+  const B = win.__S.ENCOUNTERS.find(o => o.id === 'B'), beat = win.__S.ENCOUNTERS.find(o => o.id === 'C3').beats[0];
+  B.beats = [{ ...beat, t: 0.1 }];
+  const said = [], say = G.hud.say.bind(G.hud); G.hud.say = (...args) => { said.push(args[1]); say(...args); };
+  win.__step(30);
+  assert(win.__flow.active.includes('B') && said.filter(t => t === beat.lines[0][1]).length === 1, '前傳任務的戰鬥插播確實觸發一次');
+  win.__step(1);
+  report.textContent = JSON.stringify({ checks: result, errors }, null, 2); state.textContent = errors.length ? '有錯誤' : '步兵戰術通過';
+}
+for (const [id, fn] of [['mech', mech], ['zero', zero], ['tactics', tactics], ['infantry', infantry], ['art', art], ['hero', hero], ['city', city], ['save', save]]) document.querySelector('#' + id).onclick = () => fn().catch(e => { state.textContent = '失敗'; report.textContent += '\n' + e.stack; });

@@ -149,7 +149,7 @@ const G = {
   playerEye: new THREE.Vector3(), aimDir: new THREE.Vector3(0, 0, 1), ads: 0, diff: { acc: 1, dmg: 1 }, bolts: [], grenades: [], nadeN: 3, loot: [],
   chapterTag: '', objText: '', objSub: '', lastHit: -99, scopeRange: 0, stats: { shots: 0, hits: 0, kills: 0, heads: 0, taken: 0, time: 0 },
   // 同時開火的敵人上限（避免四面八方同時打）
-  canShoot(e) { let n = 0; for (const o of G.enemies) if (o !== e && !o.dead && (o.burst > 0)) n++; return n < 3; },
+  canShoot(e) { let n = 0; for (const o of G.enemies) if (o !== e && !o.dead && o.burst > 0 && o.sees && (!o.s || o.s.mode === 'aim')) n++; return n < 3; },
   // 敵人丟手榴彈：拋物線丟到目標附近（落點有一點誤差），撞牆撞地會彈，2.6 秒後爆炸
   throwGrenade(from, to, owner) {
     to.x += (Math.random() - 0.5) * 2.4; to.z += (Math.random() - 0.5) * 2.4; to.y = solid.floorAt(to.x, to.z, to.y + 1) + 0.1;
@@ -291,7 +291,7 @@ function startEncounter(E) {
   const tg = E.targets ? E.targets.map((id) => map.targets[id] && map.targets[id].obj).filter(Boolean) : null;
   // 已經撿過的東西（死掉重來時）算數，不用再撿一次（模型也已經收起來了）
   const got = new Set((E.pickups || []).map((P, i) => (pickedItems.has(P.id) ? i : -1)).filter((i) => i >= 0));
-  active.push({ E, list, picked: false, t0: G.t, n: list.length, holdT: 0, wave: 0, spotted: false, tg, got });
+  active.push({ E, list, picked: false, t0: G.t, n: list.length, holdT: 0, wave: 0, spotted: false, tg, got, beats: new Set() });
   for (const [who, text, now] of E.lines) hud.say(who, text, 3.6, now);
   if (E.lines.length) audio.radio('in');
   G.objText = list.length ? E.fight || '擊倒所有敵人' : E.obj;   // 開打後改成「要打誰」，不要還寫著「爬上高架道路」
@@ -314,6 +314,13 @@ function updateMissions(dt) {
   hud.pins.length = 0;
   for (const a of active) {
     const E = a.E;
+    for (let i = 0; i < (E.beats || []).length; i++) {
+      const b = E.beats[i];
+      if (a.beats.has(i) || G.t - a.t0 < b.t) continue;
+      a.beats.add(i);
+      for (const [w, t, now] of b.lines) hud.say(w, t, 3.4, now ?? true);
+      audio.radio('in');
+    }
     if (E.hold && a.holdT < E.hold.t) {
       a.holdT += dt;
       const H = E.hold, due = H.waves ? Math.min(H.waves.length, Math.floor(a.holdT / (H.gap || 15))) : 0;

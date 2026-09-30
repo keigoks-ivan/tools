@@ -28,7 +28,9 @@ export function parse(R, n) {
     const a = P[c.at - 1], b = P[c.at], d = P[c.at + 1];
     const turn = !!d && Math.abs((b.x - a.x) * (d.z - b.z) - (b.z - a.z) * (d.x - b.x)) > 1;
     return { i, at: c.at, s: b.s, turn, tip: c.tip, last: i === N - 1, trig: i === N - 1 ? R.fin : 58, pre: L(c.pre), waves: [c.amb, c.amb2, c.amb3].filter(Boolean).map(L),
-      go: c.go, lines: c.lines, talkClear: c.clear, hold: c.hold, gap: c.gap, boss: c.boss, targets: c.targets };
+      go: c.go, lines: c.lines, talkClear: c.clear, hold: c.hold, gap: c.gap,
+      boss: c.boss ? { ...c.boss, halfWave: L(c.boss.halfWave), lowWave: L(c.boss.lowWave) } : null,
+      beats: (c.beats || []).map(b => ({ ...b, spawn: L(b.spawn) })), targets: c.targets };
   });
   // 路線走過的路段、路口（斜線＝走進空地，不算街道）
   const edges = new Set(), nodes = new Map();
@@ -287,6 +289,7 @@ export class Encounter {
     this.queue = []; this.warn = []; this.mine = []; this.used = new Set();
     this.wp = null; this.ahead = []; this.dist = 0; this.peak = 0;
     this.holdT = 0; this.tg = []; this.bossE = null; this.bossTalk = 0;
+    this.fightT = 0; this.beatSeen = new Set();
     C.stats.healed = C.stats.healed || 0;
   }
   get cur() { return this.E.secs[this.sec]; }
@@ -325,6 +328,13 @@ export class Encounter {
       const V = E.pts[c.at];
       if (this.prog >= c.s - c.trig || Math.hypot(p.x - V.x, p.z - V.z) < c.trig * 0.8) this.ambush(1);
     } else if (this.state === 'fight') {
+      this.fightT += dt;
+      for (let i = 0; i < c.beats.length; i++) {
+        const b = c.beats[i];
+        if (this.beatSeen.has(i) || this.fightT < b.t) continue;
+        this.beatSeen.add(i); C.lines(b.lines, true);
+        if (b.spawn.length) this.reinforce(b.spawn);
+      }
       let mine = 0; for (const e of this.mine) if (!e.dead) mine++;
       // 守點：時間內 amb、amb2、amb3 輪流來；時間到才停
       const holding = c.hold && this.holdT < c.hold;
@@ -344,8 +354,8 @@ export class Encounter {
     }
     if (B && bd && !B.dead) {
       const r = B.ap / B.apMax;
-      if (this.bossTalk < 1 && r < 0.5) { this.bossTalk = 1; C.lines(bd.half, true); }
-      if (this.bossTalk < 2 && r < Math.max(0.25, (bd.flee || 0) + 0.1)) { this.bossTalk = 2; C.lines(bd.low, true); }   // 會撤退的頭目：撤退前一點就講
+      if (this.bossTalk < 1 && r < 0.5) { this.bossTalk = 1; C.lines(bd.half, true); this.reinforce(bd.halfWave); }
+      if (this.bossTalk < 2 && r < Math.max(0.25, (bd.flee || 0) + 0.1)) { this.bossTalk = 2; C.lines(bd.low, true); this.reinforce(bd.lowWave); }   // 會撤退的頭目：撤退前一點就講
     }
     // 目標大樓倒了：提示一次
     for (const t of this.tg) if (!t.told && t.b.st !== 0) { t.told = true; C.note(`${t.name || '目標'} 摧毀　${this.tg.filter((o) => o.b.st !== 0).length}/${this.tg.length}`, 'am'); C.audio.ui('confirm'); }
@@ -366,11 +376,18 @@ export class Encounter {
       C.say(c.boss ? c.boss.name : c.hold ? 'HOLD THE LINE' : c.last ? 'FINAL AREA' : 'CONTACT', c.tip || (c.hold ? `守住 ${c.hold} 秒` : `伏兵 ×${L.length}`), 2.6, c.boss || c.last ? 'am' : 'rd');
       C.lines(c.lines, true);   // 開打的喊話：插隊
       this.holdT = 0; this.bossTalk = 0; this.bossOver = false;
+      this.fightT = 0; this.beatSeen.clear();
       if (c.boss) this.queue.push({ kind: c.boss.kind || 'ace', where: c.boss.where || 'drop', k: 0, t: 1.1, at: null, boss: true });
     } else C.say('REINFORCEMENTS', `敵方增援 ×${L.length}`, 2.4, 'am');
     C.audio.ui('wave');
     const cnt = {};
     L.forEach((o, i) => { cnt[o.where] = (cnt[o.where] ?? -1) + 1; this.queue.push({ kind: o.kind, where: o.where, k: cnt[o.where], t: 1.1 + i * 0.35, at: null }); });
+  }
+  reinforce(list = []) {
+    if (!list.length) return;
+    const cnt = {};
+    list.forEach((o, i) => { cnt[o.where] = (cnt[o.where] ?? -1) + 1; this.queue.push({ ...o, k: cnt[o.where], t: 2 + i * 0.4, at: null }); });
+    this.C.note('增援接近　注意側翼', 'am'); this.C.audio.ui('wave');
   }
   updQueue(dt) {
     const C = this.C;
