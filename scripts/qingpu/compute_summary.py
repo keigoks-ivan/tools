@@ -60,6 +60,7 @@ def main():
     outlook = load_json(config.OUTLOOK_JSON, {})
     meta = load_json(config.META_JSON, {})
     supply_demand = load_json(config.SUPPLY_DEMAND_JSON, {})
+    compare = load_json(config.COMPARE_JSON, None)
 
     # -- 仰森現在開價：每坪中位數（扣車位）+ 約N戶在賣 -----------------------
     yx_units = [u for u in units if u.get("is_yuanxiong")]
@@ -166,6 +167,11 @@ def main():
             f"青埔現在在售加上未來一年新增，要賣的約 {total_to_sell} 戶；"
             f"近一年轉手成交約 {one_year_sold} 戶{left_clause}。"
         )
+    # 青埔在桃園各區/重劃區裡的位置：讀 compare.json（compute_compare.py 產出），
+    # 沒有這個檔案（例如剛換版本、還沒跑過一次）就不加這句，不擋其他結論。
+    compare_bullets = ((compare or {}).get("report") or {}).get("conclusion_bullets") or []
+    if compare_bullets:
+        sentences.append(compare_bullets[0] + "詳見「青埔在哪個位置」。")
 
     result = {
         "generated_at": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),

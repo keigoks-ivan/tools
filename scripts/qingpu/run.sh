@@ -35,4 +35,7 @@ echo "== compute_price_outlook.py（價格走向，依賴前面幾支的輸出�
 echo "== compute_summary.py（總覽分頁用的小檔，依賴前面所有輸出）=="
 "$PYTHON" compute_summary.py || echo "compute_summary.py 失敗，繼續往下跑"
 
+echo "== compute_compare.py（桃園各區／重劃區比較，跟前面互相獨立，失敗不擋其他輸出）=="
+"$PYTHON" compute_compare.py || echo "compute_compare.py 失敗，繼續往下跑"
+
 echo "== 完成 =="

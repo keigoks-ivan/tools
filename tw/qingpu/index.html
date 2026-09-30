@@ -10,8 +10,8 @@
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 <style>
   /* 這頁是資料驅動頁（讀 data/*.json 現場算現場畫），不是靜態報告頁，
-     以下只補站內樣式沒有的元件：分頁籤、篩選 chip、銷控表格熱力表、戶別試算面板、
-     結論條列、可排序表頭、載入更多按鈕。配色沿用 css/style.css 的變數。 */
+     以下只補站內樣式沒有的元件：分頁籤（章節）、篩選 chip、可排序表頭、
+     結論條列、下一章連結。配色沿用 css/style.css 的變數。 */
   .container { max-width: 1160px; }
 
   /* 分頁籤：手機用橫向滑動、鍵盤可切換（方向鍵） */
@@ -24,7 +24,7 @@
   .tab-panel{display:none}
   .tab-panel.active{display:block}
 
-  /* 總覽分頁：4張大數字卡＋3句結論＋1張關鍵圖 */
+  /* 結論章節：4張大數字卡＋結論句＋1張關鍵圖 */
   .kpi-grid-overview{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:10px 0 18px}
   .kpi-grid-overview .kpi-card{min-height:112px}
   .overview-sentences{list-style:none;margin:0 0 20px;padding:0;display:flex;flex-direction:column;gap:8px}
@@ -66,35 +66,9 @@
   .local-filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;font-size:12px;align-items:center}
   .local-filters select{font-size:12px;padding:3px 6px;border-radius:6px;border:1px solid #ccd9e8;background:#fff;color:#1e3a5f}
 
-  .grid-scroll{overflow:auto;max-height:560px;border:1px solid #ccd9e8;border-radius:8px;margin-bottom:10px}
-  table.sales-grid{border-collapse:separate;border-spacing:0;font-size:11px;width:100%}
-  table.sales-grid th, table.sales-grid td{text-align:center;padding:5px 6px;white-space:nowrap;border-bottom:1px solid #e8f0f9;border-right:1px solid #e8f0f9;min-width:56px}
-  table.sales-grid thead th{position:sticky;top:0;z-index:2;background:#f4f7fc;color:#1e3a5f;font-weight:600}
-  table.sales-grid th.floor-col, table.sales-grid td.floor-col{position:sticky;left:0;z-index:1;background:#f4f7fc;font-weight:600;color:#1e3a5f}
-  table.sales-grid thead th.floor-col{z-index:3}
-  .grid-cell-date{display:block;font-size:9.5px;color:#94a3b8}
-  .grid-cell-value{font-weight:600;font-variant-numeric:tabular-nums}
-  td.grid-cell.empty{color:#c3d0e0}
-  td.grid-cell{cursor:pointer}
-  td.grid-cell:hover{outline:2px solid #2563eb;outline-offset:-2px}
-  td.grid-cell.picked{outline:2px solid #16a34a;outline-offset:-2px;background:#f0fdf4!important}
-  .dot-special{display:inline-block;width:5px;height:5px;border-radius:50%;background:#94a3b8;margin-left:2px}
   .low-n{color:#94a3b8;font-style:italic}
   .load-more{display:block;margin:10px auto 2px;padding:5px 16px;border-radius:8px;border:1px solid #ccd9e8;background:#f4f7fc;color:#1e3a5f;cursor:pointer;font-size:12px}
   .badge-flag{background:#fef2f2;color:#dc2626;font-size:10px;padding:1px 5px;border-radius:4px;font-weight:600}
-  .badge-est{background:#f4f7fc;color:#5a7a9a;font-size:10px;padding:1px 5px;border-radius:4px;font-weight:600}
-  .badge-multi{background:#eff6ff;color:#2563eb;font-size:10px;padding:1px 5px;border-radius:4px;font-weight:600}
-
-  #estimator-box{border:1px solid #ccd9e8;border-radius:8px;background:#fff;padding:14px 16px}
-  #estimator-picker{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:10px;font-size:12px}
-  #estimator-picker select{font-size:12px;padding:4px 8px;border-radius:6px;border:1px solid #ccd9e8}
-  #estimator-basis{font-size:12px;color:#5a7a9a;margin-bottom:10px}
-  #estimator-empty{color:#5a7a9a;font-size:13px;padding:20px 0;text-align:center}
-  .est-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
-  .est-card{border:0.5px solid #ccd9e8;border-left:3px solid #1e3a5f;border-radius:6px;padding:10px 12px;background:#fafcfe}
-  .est-card .est-label{font-size:10px;color:#5a7a9a;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px}
-  .est-card .est-value{font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:600;color:#1e3a5f}
-  .est-card .est-sub{font-size:11px;color:#4a6080;margin-top:4px;line-height:1.5}
 
   .road-list{font-size:12px;color:#4a6080;line-height:1.9}
   code{background:#f4f7fc;padding:1px 5px;border-radius:4px;font-size:0.92em}
@@ -104,6 +78,16 @@
 
   .lazy-note{font-size:12px;color:#5a7a9a;padding:18px 0;text-align:center}
   .error-line{font-size:12px;color:#dc2626;padding:8px 0}
+
+  /* 青埔在哪個位置：論證小節、各區逐一說明 */
+  .position-argument{border-top:1px dashed #dde8f2;padding-top:10px;margin-top:10px}
+  .position-argument:first-child{border-top:none;padding-top:0;margin-top:0}
+  .position-zone-note{border-left:2px solid #ccd9e8;padding-left:12px;margin-bottom:10px;font-size:13px;color:#4a6080;line-height:1.7}
+
+  /* 章節底部「下一章」連結 */
+  .next-chapter{margin:28px 0 8px;text-align:right}
+  .next-chapter-link{display:inline-block;font-size:13px;font-weight:600;color:#fff;background:#1e3a5f;padding:8px 16px;border-radius:8px;text-decoration:none;cursor:pointer}
+  .next-chapter-link:hover{background:#2563eb}
 </style>
 </head>
 <body>
@@ -115,140 +99,82 @@
   <div class="page-header">
     <span class="updated" id="updated-line">資料載入中…</span>
     <h1>青埔特區房市追蹤</h1>
-    <div class="subtitle">桃園青埔特區（含遠雄仰森週邊）的開價（591）與成交（實價登錄）自動追蹤，每月更新一次。</div>
+    <div class="subtitle">桃園青埔特區的開價（591去重後）與成交（實價登錄）自動追蹤，每月更新一次；仰森個案深度追蹤另開一頁。</div>
   </div>
 
-  <div class="tab-bar" role="tablist" aria-label="頁面分頁" id="tabBar">
-    <button class="tab-btn" role="tab" id="tab-btn-overview" aria-controls="panel-overview" data-tab="overview">總覽</button>
-    <button class="tab-btn" role="tab" id="tab-btn-yuanxiong" aria-controls="panel-yuanxiong" data-tab="yuanxiong">仰森</button>
-    <button class="tab-btn" role="tab" id="tab-btn-estimator" aria-controls="panel-estimator" data-tab="estimator">戶別試算</button>
-    <button class="tab-btn" role="tab" id="tab-btn-supply" aria-controls="panel-supply" data-tab="supply">青埔供給</button>
-    <button class="tab-btn" role="tab" id="tab-btn-demand" aria-controls="panel-demand" data-tab="demand">青埔需求</button>
-    <button class="tab-btn" role="tab" id="tab-btn-outlook" aria-controls="panel-outlook" data-tab="outlook">價格走向</button>
+  <div class="tab-bar" role="tablist" aria-label="頁面章節" id="tabBar">
+    <button class="tab-btn" role="tab" id="tab-btn-conclusion" aria-controls="panel-conclusion" data-tab="conclusion">結論</button>
+    <button class="tab-btn" role="tab" id="tab-btn-position" aria-controls="panel-position" data-tab="position">青埔在哪個位置</button>
+    <button class="tab-btn" role="tab" id="tab-btn-supply" aria-controls="panel-supply" data-tab="supply">供給</button>
+    <button class="tab-btn" role="tab" id="tab-btn-demand" aria-controls="panel-demand" data-tab="demand">需求</button>
+    <button class="tab-btn" role="tab" id="tab-btn-price" aria-controls="panel-price" data-tab="price">價格</button>
+    <button class="tab-btn" role="tab" id="tab-btn-falsifiers" aria-controls="panel-falsifiers" data-tab="falsifiers">什麼情況下結論會錯</button>
     <button class="tab-btn" role="tab" id="tab-btn-methodology" aria-controls="panel-methodology" data-tab="methodology">怎麼算的</button>
   </div>
 
   <!-- =====================================================================
-       總覽：一頁看懂——4張大數字卡＋3句結論＋1張關鍵圖，資料來自 data/summary.json
+       1. 結論：一頁看懂——4張大數字卡＋結論句＋1張關鍵圖，資料來自 data/summary.json
        ===================================================================== -->
-  <section class="tab-panel" id="panel-overview" role="tabpanel" aria-labelledby="tab-btn-overview">
+  <section class="tab-panel" id="panel-conclusion" role="tabpanel" aria-labelledby="tab-btn-conclusion">
     <div id="overview-error" class="error-line" style="display:none"></div>
     <ul class="overview-sentences" id="overview-sentences"><li>資料載入中…</li></ul>
     <div class="kpi-grid-overview" id="overview-cards"></div>
     <div class="chart-card"><div id="chart-overview-key" style="height:280px"></div></div>
     <p class="chart-subtitle" id="overview-chart-note"></p>
     <div class="overview-links">
-      <a href="#yuanxiong">看仰森現況 →</a><a href="#supply">看青埔供給 →</a><a href="#demand">看青埔需求 →</a><a href="#outlook">看價格走向 →</a><a href="#methodology">資料怎麼來的 →</a>
+      <a href="yangsen/">看遠雄仰森個案追蹤 →</a><a href="#position">看青埔在哪個位置 →</a><a href="#supply">看供給 →</a><a href="#demand">看需求 →</a><a href="#price">看價格 →</a><a href="#methodology">資料怎麼來的 →</a>
     </div>
+    <div class="next-chapter"><a class="next-chapter-link" href="#position" data-next="position">下一章：青埔在哪個位置 →</a></div>
   </section>
 
   <!-- =====================================================================
-       仰森：現況、銷控表、開價列表、成交
+       2. 青埔在哪個位置：跟其他重劃區、跟桃園市13個行政區比同一組供給/流動性
+          指標，全部官方資料，不用591；資料來自 data/compare.json
        ===================================================================== -->
-  <section class="tab-panel" id="panel-yuanxiong" role="tabpanel" aria-labelledby="tab-btn-yuanxiong">
-    <div class="section-conclusion" id="status-conclusion">載入中…</div>
-    <div class="tiles" id="tiles-grid"></div>
+  <section class="tab-panel" id="panel-position" role="tabpanel" aria-labelledby="tab-btn-position">
+    <div id="position-error" class="error-line" style="display:none"></div>
 
-    <h3 class="section-heading" style="font-size:13px;margin-top:18px">仰森成交（預售與交屋後轉手）</h3>
-    <div class="chart-card"><div id="chart-yx-deals" style="height:280px"></div></div>
-    <div id="yx-deals-loading" class="lazy-note">成交明細下載中…（實價登錄全量約 11MB，第一次載入請稍候）</div>
+    <h3 class="section-heading" style="font-size:13px">結論</h3>
+    <ul class="conclusion-list" id="position-conclusion-list"><li>資料載入中…</li></ul>
 
-    <div class="local-filter-bar">
-      <div class="filter-scope-note">篩選（只影響本頁下列「開價列表」與「成交明細」表格，不影響上面的現況數字）</div>
-      <div class="filter-row">
-        <span class="filter-label">坪數</span>
-        <button class="chip" data-group="size" data-value="small">小 &lt;30坪</button>
-        <button class="chip" data-group="size" data-value="mid">中 30-45坪</button>
-        <button class="chip" data-group="size" data-value="large">大 &gt;45坪</button>
-      </div>
-      <div class="filter-row">
-        <span class="filter-label">屋齡</span>
-        <button class="chip" data-group="age" data-value="presale">預售</button>
-        <button class="chip" data-group="age" data-value="new">新成屋 0-2年</button>
-        <button class="chip" data-group="age" data-value="mid_age">3-10年</button>
-        <button class="chip" data-group="age" data-value="old">10年以上</button>
-        <button class="chip" data-group="age" data-value="unknown">未知</button>
-        <button class="chip-reset" id="filter-reset">全部重設</button>
-      </div>
+    <h3 class="section-heading" style="font-size:13px;margin-top:18px">重劃區比較：青埔 vs 林口／A7／小檜溪／中路／經國／藝文特區</h3>
+    <p class="chart-subtitle">一年轉手＝實價登錄買賣近4個完整季、排除預售交屋登記與親友／特殊關係／員工交易；未完工戶／近一年完工戶＝預售屋備查官方登記；總戶數＝內政部戶政司村里資料。只用官方資料，不用591開價或在售筆數。</p>
+    <div class="chart-card"><div id="chart-position-bar" style="height:440px"></div></div>
+    <p class="chart-subtitle" id="position-bar-note"></p>
+    <div class="table-scroll">
+      <table class="data-table" id="table-position-zones"><thead><tr></tr></thead><tbody></tbody></table>
     </div>
 
-    <details class="collapse-box">
-      <summary>看銷控表（依戶別／樓層整理，點格子可套用到「戶別試算」）</summary>
-      <div class="collapse-body">
-        <div class="section-conclusion" id="salesgrid-conclusion">載入中…</div>
-        <p class="chart-subtitle">預售簽約資料，依戶別代碼、樓層整理，顏色深淺對應單價高低；點任一格套用到「戶別試算」分頁。不受坪數/屋齡篩選影響。格子上排是簽約年月（民國年），下排是單價或總價；灰點代表特殊交易或車位灌入總價，滑鼠移上去看明細。</p>
-        <div class="local-filters">
-          <label>顯示
-            <select id="grid-mode">
-              <option value="unit">單價(萬/坪)</option>
-              <option value="total">總價(萬)</option>
-            </select>
-          </label>
-        </div>
-        <div class="grid-scroll" id="sales-grid-main"></div>
+    <h3 class="section-heading" style="font-size:13px;margin-top:18px">論證</h3>
+    <div id="position-arguments"></div>
 
-        <h3 class="chart-card h3" style="font-size:13px;font-weight:600;color:#1e3a5f;margin:16px 0 6px">過戶登記（依門牌）</h3>
-        <p class="chart-subtitle">交屋前過戶、跟預售資料配對不到的買賣紀錄，依門牌號、樓層整理；買賣資料沒有戶別代碼，沒辦法對應到上面的戶別，也不能用來試算。</p>
-        <div class="grid-scroll" id="sales-grid-transfer"></div>
-      </div>
-    </details>
+    <h3 class="section-heading" style="font-size:13px;margin-top:18px">各區逐一說明</h3>
+    <div id="position-zone-notes"></div>
 
     <details class="collapse-box">
-      <summary>看開價列表（591，同一戶重複刊登已合併）</summary>
+      <summary>看桃園各區比較（13個行政區＋桃園全市）</summary>
       <div class="collapse-body">
-        <div class="section-conclusion" id="listing-conclusion">載入中…</div>
-        <p class="chart-subtitle">一列一戶，591 常見同一戶被多個仲介重複刊登、已合併，總價取刊登中最低的一筆；點「刊登」看全部刊登連結。點欄名可排序；「開價(扣車位)」是主要單價欄。</p>
+        <p class="chart-subtitle" style="margin-top:10px">同一組指標，換成跟桃園市13個行政區比（青埔不是行政區，這裡不重複列，見上面的重劃區比較）。</p>
         <div class="table-scroll">
-          <table class="data-table" id="table-listing">
-            <thead><tr></tr></thead>
-            <tbody></tbody>
-          </table>
+          <table class="data-table" id="table-position-districts"><thead><tr></tr></thead><tbody></tbody></table>
         </div>
-        <button class="load-more" id="listing-more" style="display:none">載入更多</button>
       </div>
     </details>
 
-    <details class="collapse-box">
-      <summary>看成交明細（表格）</summary>
-      <div class="collapse-body">
-        <div class="section-conclusion" id="deals-conclusion">載入中…</div>
-        <p class="chart-subtitle">實價登錄預售（含過戶登記）與交屋後轉手（用地址門牌比對，非官方認證，已去除預售重複登記）。</p>
-        <div class="table-scroll">
-          <table class="data-table" id="table-yx-deals">
-            <thead><tr></tr></thead>
-            <tbody></tbody>
-          </table>
-        </div>
-        <button class="load-more" id="yxdeals-more" style="display:none">載入更多</button>
-      </div>
-    </details>
+    <h3 class="section-heading" style="font-size:13px;margin-top:18px">限制（簡版，完整定義見「怎麼算的」）</h3>
+    <ul class="conclusion-list" id="position-limits"></ul>
+
+    <details class="method-note"><summary>重劃區怎麼定義的（道路／村里範圍）</summary><div class="method-body" id="position-method"></div></details>
+
+    <div class="next-chapter"><a class="next-chapter-link" href="#supply" data-next="supply">下一章：供給 →</a></div>
   </section>
 
   <!-- =====================================================================
-       戶別試算
-       ===================================================================== -->
-  <section class="tab-panel" id="panel-estimator" role="tabpanel" aria-labelledby="tab-btn-estimator">
-    <div class="section-conclusion" id="estimator-conclusion">到「仰森」分頁的銷控表點任一格，或用下拉選單挑棟別／戶別／樓層，即可試算該戶的現在市價、三種情況、對照開價與排隊時間。</div>
-    <div id="estimator-loading" class="lazy-note">試算需要的成交資料下載中…（約 11MB，第一次載入請稍候）</div>
-    <div id="estimator-box" style="display:none">
-      <div id="estimator-picker">
-        <label>棟別 <select id="est-building"><option value="">請選擇</option></select></label>
-        <label>戶別 <select id="est-unit"><option value="">請選擇</option></select></label>
-        <label>樓層 <select id="est-floor"><option value="">請選擇</option></select></label>
-        <button class="chip" id="est-clear">清除選擇</button>
-      </div>
-      <div id="estimator-basis"></div>
-      <div id="estimator-empty">尚未選定戶別。點「仰森」分頁的銷控表任一格，或用上面選單挑棟別/戶別/樓層。</div>
-      <div class="est-grid" id="estimator-result" style="display:none"></div>
-    </div>
-  </section>
-
-  <!-- =====================================================================
-       青埔供給
+       3. 供給
        ===================================================================== -->
   <section class="tab-panel" id="panel-supply" role="tabpanel" aria-labelledby="tab-btn-supply">
     <div class="section-conclusion" id="supply-conclusion">載入中…</div>
-    <p class="chart-subtitle">青埔特區預售建案的官方登記資料（層棟戶數、建照/登記日期）、交屋時間表、建商餘屋、591在售存量、交屋後拿出來賣的比例整理。每個數字都附樣本數（n）和來源。</p>
+    <p class="chart-subtitle">青埔特區預售建案的官方登記資料（層棟戶數、建照/登記日期）、交屋時間表、建商餘屋、591去重後在售存量、交屋後拿出來賣的比例整理。每個數字都附樣本數（n）和來源。</p>
 
     <div class="section-conclusion" id="supply-size-conclusion"></div>
     <div class="stack-legend" id="supply-size-legend"></div>
@@ -286,7 +212,7 @@
     </details>
 
     <details class="collapse-box">
-      <summary>看591在售存量明細（依社區、依屋齡×坪數）</summary>
+      <summary>看591去重後在售存量明細（依社區、依屋齡×坪數）</summary>
       <div class="collapse-body">
         <div class="section-conclusion" id="inventory-conclusion"></div>
         <div class="chart-grid two-col">
@@ -324,10 +250,12 @@
         </div>
       </div>
     </details>
+
+    <div class="next-chapter"><a class="next-chapter-link" href="#demand" data-next="demand">下一章：需求 →</a></div>
   </section>
 
   <!-- =====================================================================
-       青埔需求
+       4. 需求
        ===================================================================== -->
   <section class="tab-panel" id="panel-demand" role="tabpanel" aria-labelledby="tab-btn-demand">
     <div class="section-conclusion" id="demand-conclusion">載入中…</div>
@@ -385,6 +313,60 @@
         <div class="table-scroll">
           <table class="data-table" id="table-crosswalk"><thead><tr></tr></thead><tbody></tbody></table>
         </div>
+      </div>
+    </details>
+
+    <div class="next-chapter"><a class="next-chapter-link" href="#price" data-next="price">下一章：價格 →</a></div>
+  </section>
+
+  <!-- =====================================================================
+       5. 價格：轉手/預售倍數＋三情境、各社區比價、成交走勢、最新成交
+       ===================================================================== -->
+  <section class="tab-panel" id="panel-price" role="tabpanel" aria-labelledby="tab-btn-price">
+    <div class="section-conclusion" id="outlook-conclusion">載入中…</div>
+    <p class="chart-subtitle" id="outlook-scope-note"></p>
+
+    <h3 class="section-heading" style="font-size:13px">轉手價是預售價的幾倍</h3>
+    <p class="chart-subtitle" id="outlook-index-note"></p>
+    <div class="chart-card"><div id="chart-outlook-premium-index" style="height:260px"></div></div>
+    <p class="chart-subtitle" id="outlook-facts-note"></p>
+
+    <h3 class="section-heading" style="font-size:13px;margin-top:18px">現況：在售量與開價走勢</h3>
+    <div class="chart-card"><div id="chart-outlook-history" style="height:260px"></div></div>
+    <p class="chart-subtitle" id="outlook-moi-note"></p>
+
+    <details class="collapse-box">
+      <summary>看未來8季推算表</summary>
+      <div class="collapse-body">
+        <p class="chart-subtitle" id="outlook-projection-note"></p>
+        <div class="table-scroll">
+          <table class="data-table" id="table-outlook-projection"><thead><tr></tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+    </details>
+
+    <details class="collapse-box">
+      <summary>看歷史校準（供給壓力跟後續價格有沒有關係）</summary>
+      <div class="collapse-body">
+        <p class="chart-subtitle" id="outlook-calib-note"></p>
+        <div class="chart-card"><div id="chart-outlook-calib" style="height:260px"></div></div>
+      </div>
+    </details>
+
+    <details class="collapse-box">
+      <summary>看三個倍數（收斂／維持／回升）</summary>
+      <div class="collapse-body">
+        <div class="table-scroll">
+          <table class="data-table" id="table-outlook-scenarios"><thead><tr></tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+    </details>
+
+    <details class="collapse-box">
+      <summary>看供給對照</summary>
+      <div class="collapse-body">
+        <p class="chart-subtitle" id="outlook-supply-context-note"></p>
+        <p class="chart-subtitle" id="outlook-recalc-note" style="font-weight:600"></p>
       </div>
     </details>
 
@@ -451,79 +433,34 @@
         <button class="load-more" id="latest-more" style="display:none">載入更多</button>
       </div>
     </details>
+
+    <div class="next-chapter"><a class="next-chapter-link" href="#falsifiers" data-next="falsifiers">下一章：什麼情況下結論會錯 →</a></div>
   </section>
 
   <!-- =====================================================================
-       價格走向
+       6. 什麼情況下結論會錯：供給面（compare.json）＋價格面（outlook.json）
+          的 falsifiers 合併列出，都帶具體門檻數字
        ===================================================================== -->
-  <section class="tab-panel" id="panel-outlook" role="tabpanel" aria-labelledby="tab-btn-outlook">
-    <div class="section-conclusion" id="outlook-conclusion">載入中…</div>
-    <p class="chart-subtitle" id="outlook-scope-note"></p>
-
-    <h3 class="section-heading" style="font-size:13px">轉手價是預售價的幾倍</h3>
-    <p class="chart-subtitle" id="outlook-index-note"></p>
-    <div class="chart-card"><div id="chart-outlook-premium-index" style="height:260px"></div></div>
-    <p class="chart-subtitle" id="outlook-facts-note"></p>
-
-    <h3 class="section-heading" style="font-size:13px;margin-top:18px">現況：在售量與開價走勢</h3>
-    <div class="chart-card"><div id="chart-outlook-history" style="height:260px"></div></div>
-    <p class="chart-subtitle" id="outlook-moi-note"></p>
-
-    <details class="collapse-box">
-      <summary>看未來8季推算表</summary>
-      <div class="collapse-body">
-        <p class="chart-subtitle" id="outlook-projection-note"></p>
-        <div class="table-scroll">
-          <table class="data-table" id="table-outlook-projection"><thead><tr></tr></thead><tbody></tbody></table>
-        </div>
-      </div>
-    </details>
-
-    <details class="collapse-box">
-      <summary>看歷史校準（供給壓力跟後續價格有沒有關係）</summary>
-      <div class="collapse-body">
-        <p class="chart-subtitle" id="outlook-calib-note"></p>
-        <div class="chart-card"><div id="chart-outlook-calib" style="height:260px"></div></div>
-      </div>
-    </details>
-
-    <details class="collapse-box">
-      <summary>看三個倍數（收斂／維持／回升）</summary>
-      <div class="collapse-body">
-        <div class="table-scroll">
-          <table class="data-table" id="table-outlook-scenarios"><thead><tr></tr></thead><tbody></tbody></table>
-        </div>
-      </div>
-    </details>
-
-    <details class="collapse-box">
-      <summary>看供給對照</summary>
-      <div class="collapse-body">
-        <p class="chart-subtitle" id="outlook-supply-context-note"></p>
-        <p class="chart-subtitle" id="outlook-recalc-note" style="font-weight:600"></p>
-      </div>
-    </details>
+  <section class="tab-panel" id="panel-falsifiers" role="tabpanel" aria-labelledby="tab-btn-falsifiers">
+    <p class="chart-subtitle">下面每一條都是「如果數字變成這樣，前面章節的結論就站不住」的具體條件，不是空泛的免責聲明。</p>
+    <ul class="conclusion-list" id="falsifiers-list"><li>資料載入中…</li></ul>
+    <div class="next-chapter"><a class="next-chapter-link" href="#methodology" data-next="methodology">下一章：怎麼算的 →</a></div>
   </section>
 
   <!-- =====================================================================
-       怎麼算的：資料來源、各分頁計算方式、限制，全部集中在這裡
+       7. 怎麼算的：資料來源、各分頁計算方式、限制，全部集中在這裡
        ===================================================================== -->
   <section class="tab-panel" id="panel-methodology" role="tabpanel" aria-labelledby="tab-btn-methodology">
     <div id="methodology-body">載入中…</div>
 
-    <h3 class="section-heading" style="font-size:13px;margin-top:18px">各分頁怎麼算的</h3>
+    <h3 class="section-heading" style="font-size:13px;margin-top:18px">各章節怎麼算的</h3>
 
-    <details class="method-note"><summary>仰森現況</summary><div class="method-body" id="status-method"></div></details>
-    <details class="method-note"><summary>戶別試算</summary><div class="method-body" id="estimator-method"></div></details>
-    <details class="method-note"><summary>銷控表</summary><div class="method-body" id="salesgrid-method"></div></details>
-    <details class="method-note"><summary>開價列表</summary><div class="method-body" id="listing-method"></div></details>
-    <details class="method-note"><summary>仰森成交</summary><div class="method-body" id="deals-method"></div></details>
     <details class="method-note"><summary>各社區比價</summary><div class="method-body" id="compare-method"></div></details>
     <details class="method-note"><summary>成交走勢</summary><div class="method-body" id="trend-method"></div></details>
     <details class="method-note"><summary>建案總表</summary><div class="method-body" id="projects-method"></div></details>
     <details class="method-note"><summary>未來供給按季×坪數帶</summary><div class="method-body" id="supply-size-method"></div></details>
     <details class="method-note"><summary>建商餘屋</summary><div class="method-body" id="unsold-method"></div></details>
-    <details class="method-note"><summary>591在售存量</summary><div class="method-body" id="inventory-method"></div></details>
+    <details class="method-note"><summary>591去重後在售存量</summary><div class="method-body" id="inventory-method"></div></details>
     <details class="method-note"><summary>交屋後拿出來賣的比例</summary><div class="method-body" id="release-method"></div></details>
     <details class="method-note"><summary>成交量</summary><div class="method-body" id="volume-method"></div></details>
     <details class="method-note"><summary>租賃需求</summary><div class="method-body" id="rental-method"></div></details>
@@ -531,6 +468,8 @@
     <details class="method-note"><summary>購屋負擔</summary><div class="method-body" id="afford-method"></div></details>
     <details class="method-note"><summary>供需對照</summary><div class="method-body" id="crosswalk-method"></div></details>
     <details class="method-note"><summary>價格走向</summary><div class="method-body" id="outlook-method"></div></details>
+
+    <p style="font-size:13px;color:#4a6080;margin-top:16px"><a href="yangsen/#methodology">遠雄仰森個案（現況／銷控表／開價列表／成交／戶別試算）的方法說明，見仰森個案追蹤頁「怎麼算的」→</a></p>
   </section>
 
   <div class="source-footer">
@@ -540,6 +479,6 @@
 
 <footer class="footer">A project by <span>InvestMQuest</span></footer>
 
-<script src="qingpu.js?v=20260930b"></script>
+<script src="qingpu.js?v=20261001a"></script>
 </body>
 </html>
