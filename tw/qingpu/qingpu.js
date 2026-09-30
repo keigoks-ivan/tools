@@ -351,14 +351,14 @@ function renderOverview() {
       xAxis: mkAxis({ type: 'category', data: kc.quarters || [] }),
       yAxis: mkAxis({ type: 'value', name: '戶' }),
       series: [
-        { name: '現有存量', type: 'bar', stack: 's', data: kc.opening_stock || [], itemStyle: { color: C.blue } },
-        { name: '新增供給', type: 'bar', stack: 's', data: kc.new_supply || [], itemStyle: { color: '#93c5fd' } },
-        { name: '預估賣出', type: 'line', data: kc.absorption || [], itemStyle: { color: C.orange }, lineStyle: { color: C.orange } },
+        { name: '上季留下沒賣掉', type: 'bar', stack: 's', data: kc.carry_over || [], itemStyle: { color: C.blue } },
+        { name: '本季新增要賣', type: 'bar', stack: 's', data: kc.new_supply || [], itemStyle: { color: '#93c5fd' } },
+        { name: '本季賣掉', type: 'line', data: kc.sold || [], symbolSize: 7, itemStyle: { color: C.orange }, lineStyle: { color: C.orange, width: 3 } },
       ],
     }, true);
   }
   document.getElementById('overview-chart-note').textContent =
-    '未來8季「要賣的」（現有存量＋新增供給，長條）vs「賣得掉」（預估賣出，線）。範圍限定：' + (kc.scope_note || '') + '，跟上面卡片用的青埔全區數字口徑不同，兩邊不能對著看。';
+    '長條＝每季要賣的戶數（上季留下沒賣掉＋本季新增），線＝每季賣掉的戶數。' + (kc.scope_note || '') + '。';
 }
 
 /* ===========================================================================

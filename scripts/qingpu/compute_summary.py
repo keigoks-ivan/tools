@@ -59,6 +59,7 @@ def main():
     demand = load_json(config.DEMAND_JSON, {})
     outlook = load_json(config.OUTLOOK_JSON, {})
     meta = load_json(config.META_JSON, {})
+    supply_demand = load_json(config.SUPPLY_DEMAND_JSON, {})
 
     # -- 仰森現在開價：每坪中位數（扣車位）+ 約N戶在賣 -----------------------
     yx_units = [u for u in units if u.get("is_yuanxiong")]
@@ -121,14 +122,31 @@ def main():
         mult = s.get("multiplier", s.get("index"))
         scenarios[name] = {"multiplier": mult, "basis": s.get("basis")}
 
-    # -- 首屏關鍵圖：未來8季「要賣的」（現有存量+新增供給）vs「賣得掉」(預估成交) --
-    proj_rows = (outlook.get("projection", {}) or {}).get("rows", []) or []
+    # -- 首屏關鍵圖：青埔全區（跟卡片同一個範圍），未來8季每季「上季留下沒賣掉的＋本季新增」
+    #    vs「本季賣掉」。賣掉速度＝近4季轉手成交季均，新增＝交屋後拿出來賣＋建商未售。
+    fq = ((supply_demand.get("supply") or {}).get("release_rate") or {}).get("future_quarters") or []
+    per_q_sold = (trailing_absorb / 4) if trailing_absorb is not None else None
+    kc_quarters, kc_carry, kc_new, kc_sold, kc_left = [], [], [], [], []
+    stock = float(current_stock) if current_stock is not None else None
+    for r in fq[:8]:
+        if stock is None or per_q_sold is None:
+            break
+        new_q = float(r.get("new_listings_mid") or 0)
+        available = stock + new_q
+        sold = min(available, per_q_sold)
+        kc_quarters.append(r.get("quarter"))
+        kc_carry.append(round(stock))
+        kc_new.append(round(new_q))
+        kc_sold.append(round(sold))
+        stock = available - sold
+        kc_left.append(round(stock))
     key_chart = {
-        "quarters": [r.get("quarter") for r in proj_rows],
-        "opening_stock": [r.get("opening_stock") for r in proj_rows],
-        "new_supply": [r.get("new_supply") for r in proj_rows],
-        "absorption": [r.get("absorption") for r in proj_rows],
-        "scope_note": outlook.get("scope_note", ""),
+        "quarters": kc_quarters,
+        "carry_over": kc_carry,
+        "new_supply": kc_new,
+        "sold": kc_sold,
+        "left_after": kc_left,
+        "scope_note": "青埔全區、所有屋齡坪數；賣掉速度用近4季轉手成交季均，未來各季不變",
     }
 
     # -- 三句話結論（白話、結論先行，跟其他 compute 腳本一樣文字寫在這裡） ----
@@ -143,10 +161,10 @@ def main():
             f"樣本是 {uplift_out['n_projects']} 個建案。"
         )
     if total_to_sell is not None and one_year_sold is not None:
-        gap_clause = f"，缺口約 {gap} 戶" if gap is not None and gap > 0 else ""
+        left_clause = f"，照這個速度一年後約有 {gap} 戶還沒賣掉" if gap is not None and gap > 0 else ""
         sentences.append(
-            f"青埔現在在售加上未來一年新增供給約 {total_to_sell} 戶，"
-            f"近一年只賣掉約 {one_year_sold} 戶{gap_clause}。"
+            f"青埔現在在售加上未來一年新增，要賣的約 {total_to_sell} 戶；"
+            f"近一年轉手成交約 {one_year_sold} 戶{left_clause}。"
         )
 
     result = {
