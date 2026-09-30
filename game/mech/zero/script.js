@@ -22,8 +22,8 @@ export const INTRO = [
 ];
 
 export const CHAPTERS = [
-  { n: 1, name: '陷落', en: 'FALLEN CITY', start: 'start', yaw: 0, music: 1, end: { after: 'C', at: (p) => p.x > -58 && p.z > -48 && p.z < -36 } },
-  { n: 2, name: '封鎖線', en: 'THE CHECKPOINT', start: 'ch2', yaw: Math.PI / 2 * -1 + Math.PI, music: 3, end: { after: 'D2', at: (p) => p.z > -30 && p.x > -14 && p.x < -6 } },
+  { n: 1, name: '陷落', en: 'FALLEN CITY', start: 'start', yaw: 0, music: 1, end: { after: 'C3', at: (p) => p.x > -58 && p.z > -48 && p.z < -36 } },
+  { n: 2, name: '封鎖線', en: 'THE CHECKPOINT', start: 'ch2', yaw: Math.PI / 2 * -1 + Math.PI, music: 3, end: { after: 'D3', at: (p) => p.z > -30 && p.x > -14 && p.x < -6 } },
   { n: 3, name: '北區', en: 'NORTH DISTRICT', start: 'ch3', yaw: 0, music: 2, end: { after: 'I2', at: (p) => p.x > -35.8 && p.z > 20 && p.z < 40 } },
   { n: 4, name: '高架道路', en: 'THE OVERPASS', start: 'ch4', yaw: 0.4, music: 4, end: { after: 'E', at: (p) => p.z > 20.5 && p.x > 24 && p.x < 32 } },
   { n: 5, name: '第七機庫', en: 'HANGAR 7', start: 'ch5', yaw: 0, music: 5 },
@@ -43,10 +43,24 @@ export const ENCOUNTERS = [
       { type: 'trooper', x: -89.6, z: -61, yaw: Math.PI + 0.3 },
     ],
     lines: [[OP, '前面有兩個巡邏兵。長槍打頭一發就倒，打身體要兩發——右鍵瞄準。'], [OP, '蹲下（C）他們比較不容易發現你。']],
-    done: [[OP, '乾淨俐落。穿過前面的市場廣場。']],
+    done: [[OP, '乾淨俐落。穿過前面的市場廣場。'], [OP, '巷口鐵門鎖死了。從修車行的後門繞過去。']],
   },
   {
-    id: 'C', ch: 1, obj: '清除市場廣場', fight: '清除市場廣場', mark: V(-52, -42), next: '穿過東邊的商店', guide: [-91.5, -56], nextRoute: [[-78, -40], [-71, -37], [-64, -37.5], [-61, -42]],
+    // 潛行：巷子東側的修車行（map.js），三個人擠在北門口搬東西、背對西門；被發現就從廣場叫兩個人進來
+    id: 'B2', ch: 1, obj: '穿過修車行', fight: '解決修車行裡的人', route: [[-90.3, -74.4]], guide: [-85.8, -74.4],
+    trigger: (p) => p.x > -87.7 && p.x < -72 && p.z > -76 && p.z < -62.3,
+    enemies: [
+      { type: 'trooper', x: -81, z: -64.1, yaw: 0.25 },
+      { type: 'trooper', x: -79.3, z: -63.9, yaw: 0 },
+      { type: 'trooper', x: -77.7, z: -64.4, yaw: -0.2 },
+    ],
+    // 開槍打倒一個，其他兩個會被槍聲驚動（叫增援）；一顆手榴彈丟進三人中間才不會被發現
+    stealth: { reinforce: [{ type: 'trooper', x: -77.8, z: -60.4, yaw: Math.PI }, { type: 'trooper', x: -76, z: -60.6, yaw: Math.PI }], lines: [[EN, '修車行有人！'], [OP, '被發現了。廣場那邊有人過來！']] },
+    lines: [[OP, '裡面三個人，擠在鐵捲門口搬東西。'], [OP, '還沒發現你。別讓他們叫人。']],
+    done: [[OP, '好。北邊的鐵捲門出去，就是廣場。']],
+  },
+  {
+    id: 'C', ch: 1, obj: '清除市場廣場', fight: '清除市場廣場', route: [[-77, -64]], guide: [-77, -58.6],
     trigger: (p) => p.z > -60 && p.x < -58,
     enemies: [
       { type: 'trooper', x: -84, z: -45, yaw: Math.PI },
@@ -57,12 +71,64 @@ export const ENCOUNTERS = [
       { type: 'drone', x: -76, z: -40, y: 6 },
     ],
     lines: [[EN, '……第三小隊，廣場清查完畢，沒有發現……'], [OP, '廣場上有一整班人，還有一台無人機。利用攤位當掩護。'], [OP, '他們擠在一起的時候，丟手榴彈（G）。']],
-    done: [[OP, '廣場清空了。從東邊那間商店穿過去。'], [ME, '收到。']],
+    done: [[OP, '廣場清空了。從東邊那間商店穿過去。'], [ME, '收到。'], [OP, '……等等。角落那間倉庫，是他們的據點。']],
+  },
+  {
+    // 撿東西：廣場東南角的倉庫（map.js 的據點），桌上無線電、密碼本，牆上搜索地圖
+    id: 'C2', ch: 1, obj: '搜查他們的據點', route: [[-68, -50], [-63, -49.5]], guide: [-63, -53.6],
+    trigger: (p) => p.x > -65.7 && p.x < -60.3 && p.z > -61.7 && p.z < -52.3,
+    enemies: [],
+    pickups: [
+      { id: 'radio', text: '按 E　拿無線電', lines: [[ME, '無線電還開著。']] },
+      { id: 'codes', text: '按 E　拿密碼本', lines: [[OP, '那是他們的密碼本，收好。']] },
+      { id: 'smap', text: '按 E　拍下地圖', lines: [[ME, '搜索地圖。北區整片都圈起來了。']] },
+    ], itemName: '情報',
+    lines: [[OP, '無線電、文件，能拿的都拿走。']],
+    done: [[OP, '都拿到了。無線電先別關。']],
+  },
+  {
+    // 守點：白鷺用密碼本對頻率，撐 40 秒；增援從東邊商店、修車行、北邊店面進廣場
+    id: 'C3', ch: 1, obj: '守住據點', fight: '守住據點', mark: V(-52, -42), next: '穿過東邊的商店', guide: [-63, -53.6], nextRoute: [[-63, -49.3], [-61, -47], [-61, -42.5]],
+    after: 'C2', wait: 2,
+    enemies: [],
+    // 每 4.5 秒一波（自動試玩每 3 秒檢查一次有沒有敵人或目標：間隔 5 秒會連續四次都剛好沒人，被當成「沒有指示」）
+    hold: {
+      t: 40, gap: 4.5,
+      waves: [
+        [{ type: 'trooper', x: -58.8, z: -42.6, yaw: -Math.PI / 2 }, { type: 'trooper', x: -58.6, z: -41.2, yaw: -Math.PI / 2 }],
+        [{ type: 'drone', x: -82, z: -36, y: 9 }],
+        [{ type: 'trooper', x: -77.8, z: -60.4, yaw: Math.PI / 2 }, { type: 'trooper', x: -80.5, z: -60.5, yaw: Math.PI / 2 }],
+        [{ type: 'officer', x: -58.7, z: -41.6, yaw: -Math.PI / 2 }, { type: 'trooper', x: -58.3, z: -43.4, yaw: -Math.PI / 2 }],
+        [{ type: 'trooper', x: -86, z: -32.5, yaw: Math.PI }],
+        [{ type: 'drone', x: -84, z: -60, y: 9 }],   // 修車行北邊那條窄空地的上空（別生在樓裡：無人機出不來）
+        [{ type: 'trooper', x: -58.8, z: -42, yaw: -Math.PI / 2 }],
+        [{ type: 'trooper', x: -79, z: -60.5, yaw: Math.PI / 2 }],
+      ],
+      lines: [[[OP, '東邊商店，兩個。', NOW]], [[OP, '無人機。', NOW]], [[OP, '修車行那邊也有。', NOW]], [[EN, '據點裡有人！包圍！', NOW]], [[OP, '北邊店面，一個。', NOW]], [[OP, '又一台無人機。', NOW]], [], [[OP, '快好了，再撐一下。', NOW]]],
+      done: [[OP, '頻率對上了。把剩下的清掉。']],
+    },
+    lines: [[OP, '我用密碼本對他們的頻率，要四十秒。'], [EN, '第三小隊，回報。……第三小隊？'], [EN, '廣場失聯。第五小隊，過去看看。'], [OP, '他們要過來了。守住這裡。']],
+    done: [[OP, '從現在起，他們的無線電我們也聽得到。'], [OP, '好了，走吧。穿過東邊那間商店。']],
   },
   // ---------------- 第 2 章
   {
-    id: 'D', ch: 2, obj: '突破街道檢查哨', fight: '突破檢查哨', guide: [-43, -42],
-    trigger: (p) => p.x > -46 && p.z < -33,
+    // 對面工廠（map.js 的廠房）：從西門進、東門出，繞到檢查哨側面；裡面是他們休息的地方
+    id: 'D0', ch: 2, obj: '穿過對面的工廠', fight: '清除工廠裡的敵人', route: [[-45.5, -42], [-42.3, -42], [-33.3, -46.3]], guide: [-33.3, -50.5],
+    trigger: (p) => p.z < -48.6 && p.z > -60 && p.x > -35.7 && p.x < -6,
+    enemies: [
+      { type: 'trooper', x: -29.8, z: -50.3, yaw: Math.PI / 2 },
+      { type: 'trooper', x: -24, z: -55.3, yaw: Math.PI / 2 + 0.3 },
+      { type: 'trooper', x: -21.9, z: -55.1, yaw: -Math.PI / 2 - 0.3 },
+      { type: 'officer', x: -15.5, z: -58.4, yaw: Math.PI },
+      { type: 'trooper', x: -13.5, z: -50, yaw: -Math.PI / 2, patrol: [[-13.5, -50], [-21.5, -50]] },
+    ],
+    lines: [[EN, '……換班還要多久？'], [OP, '裡面五個人在休息。機台後面可以躲。']],
+    done: [[OP, '東邊那扇門出去，就是檢查哨的側面。']],
+  },
+  {
+    // 觸發改成走到街上才開打（從工廠東門或西門出來都算）
+    id: 'D', ch: 2, obj: '突破街道檢查哨', fight: '突破檢查哨', route: [[-28, -49.8], [-8.5, -49.8]], guide: [-8.5, -46.3],
+    trigger: (p) => p.x > -46 && p.z < -33 && p.z > -48,
     enemies: [
       { type: 'trooper', x: -28, z: -40, yaw: -Math.PI / 2 },
       { type: 'trooper', x: -18, z: -45, yaw: -Math.PI / 2, patrol: [[-18, -45], [-24, -36], [-12, -40]] },
@@ -76,7 +142,21 @@ export const ENCOUNTERS = [
     done: [[OP, '檢查哨解決了。貨櫃場入口在街尾，基地大門就在貨櫃場後面。']],
   },
   {
-    id: 'D2', ch: 2, obj: '前往貨櫃場入口', fight: '擊退封鎖線的敵人', mark: V(-10, -27), next: '從北邊的商場繞過去', guide: [14, -40], nextRoute: [[8, -40.5], [0, -41], [-4, -38.5], [-10, -37.5]],
+    // 炸目標：檢查哨的三台干擾器（map.js 的 jam1～3），東邊有人過來守
+    id: 'D1', ch: 2, obj: '炸掉干擾器', fight: '炸掉干擾器', guide: [-4, -40],
+    after: 'D', wait: 2,
+    targets: ['jam1', 'jam2', 'jam3'], tgName: '干擾器',
+    enemies: [
+      { type: 'drone', x: 16, z: -41, y: 8, alert: true },
+      { type: 'trooper', x: 21, z: -39.5, yaw: -Math.PI / 2, alert: true },
+      { type: 'trooper', x: 25, z: -45, yaw: -Math.PI / 2, alert: true },
+    ],
+    lines: [[OP, '零號，我這邊的畫面全是雜訊。'], [OP, '檢查哨架了三台干擾器，找到就打爛。']],
+    done: [[OP, '畫面回來了。……貨櫃場入口前面，好像堆了東西。']],
+  },
+  {
+    // route：炸完干擾器人常在兩排護欄中間，照 S 形穿過去（西排護欄北端、東排護欄南端）
+    id: 'D2', ch: 2, obj: '前往貨櫃場入口', fight: '擊退封鎖線的敵人', route: [[-1, -39.6], [0.5, -42.3], [4.5, -42.3], [7, -40.8]], guide: [14, -40],
     trigger: (p) => p.x > 8 && p.z > -46,
     enemies: [
       { type: 'trooper', x: 20, z: -33.9, y: 5.2, yaw: Math.PI, post: true },
@@ -89,6 +169,20 @@ export const ENCOUNTERS = [
     lines: [[EN, '有人突破檢查哨！封鎖線上面的，開火！', NOW], [OP, '貨櫃牆上面有人——找掩護！', NOW]],
     done: [[OP, '……入口被貨櫃牆堵死了，過不去。'], [OP, '零號，有件事我一直沒說。'], [OP, '蒼焰的啟動金鑰不在機庫，在隼身上——它原本的駕駛員。'],
       [OP, '他昨天重傷，被送到北區的市立醫院。沒有金鑰，你進了駕駛艙也發動不了。'], [ME, '……醫院怎麼走？'], [OP, '從北邊那間商場穿過去。醫院在住宅街的街底。']],
+  },
+  {
+    // 回頭走到商場門口：追兵從街口、工廠東門包過來
+    id: 'D3', ch: 2, obj: '從北邊的商場繞過去', fight: '擊退追兵', mark: V(-10, -27), next: '進商場，往北走', route: [[8, -40.5], [0, -41], [-4, -38.5]], guide: [-10, -37.5], nextRoute: [[-10, -37.5]],
+    trigger: (p) => p.x > -17 && p.x < -3 && p.z > -41,
+    enemies: [
+      { type: 'trooper', x: -40, z: -44.5, yaw: Math.PI / 2, alert: true },
+      { type: 'trooper', x: -38.5, z: -38.5, yaw: Math.PI / 2, alert: true },
+      { type: 'officer', x: -33, z: -41, yaw: Math.PI / 2, alert: true },
+      { type: 'trooper', x: -9, z: -51, yaw: 0, alert: true },
+      { type: 'drone', x: -28, z: -41, y: 8, alert: true },
+    ],
+    lines: [[EN, '檢查哨那邊有人！第四小隊，包過去！', NOW], [OP, '後面有追兵，先解決他們！', NOW]],
+    done: [[OP, '甩掉了。快進商場。']],
   },
   // ---------------- 第 3 章：北區（找隼、拿金鑰）
   {
@@ -285,7 +379,7 @@ export const MECH6 = {
 
 export const LINES = {
   start: [[OP, '零號，聽得到嗎？這裡是白鷺。'], [OP, '首都防線昨晚全垮了。獵犬軍團在城裡到處搜人。'], [OP, '第七機庫還在我們手上，蒼焰在那裡。沿著這條後巷往北走。']],
-  ch2: [[OP, '零號，前面就是他們的封鎖線。'], [OP, '你只有一把長槍一把手槍，別跟他們硬拚。']],
+  ch2: [[OP, '零號，前面就是他們的封鎖線。'], [OP, '你只有一把長槍一把手槍，別跟他們硬拚。'], [OP, '走對面那間工廠，從裡面繞到檢查哨旁邊。']],
   ch3: [[OP, '這裡是北區住宅，昨晚被炸得最慘。'], [EN, '……各小隊注意，目標是聯邦試驗機的駕駛員，人在北區。'], [EN, '找到他。上面要活的。'], [OP, '……他們也在找隼。快，零號。']],
   ch4: [[OP, '逃生梯上去就是高架道路，一路通到基地西側。'], [OP, '上面很空曠，他們看得到你，你也看得到——'], [OP, '……等等，指揮所外面有——'], [NOISE, '（雜訊）……訊號中斷……'], [ME, '白鷺？……白鷺！']],
   ch5: [[OP, '大門後面就是第七機庫。'], [OP, '他們已經打進去了……快，零號。'], [OP, '金鑰收好。那是隼交給你的。']],
