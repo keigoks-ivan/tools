@@ -345,7 +345,7 @@ export class Encounter {
     if (B && bd && !B.dead) {
       const r = B.ap / B.apMax;
       if (this.bossTalk < 1 && r < 0.5) { this.bossTalk = 1; C.lines(bd.half, true); }
-      if (this.bossTalk < 2 && r < 0.25) { this.bossTalk = 2; C.lines(bd.low, true); }
+      if (this.bossTalk < 2 && r < Math.max(0.25, (bd.flee || 0) + 0.1)) { this.bossTalk = 2; C.lines(bd.low, true); }   // 會撤退的頭目：撤退前一點就講
     }
     // 目標大樓倒了：提示一次
     for (const t of this.tg) if (!t.told && t.b.st !== 0) { t.told = true; C.note(`${t.name || '目標'} 摧毀　${this.tg.filter((o) => o.b.st !== 0).length}/${this.tg.length}`, 'am'); C.audio.ui('confirm'); }
