@@ -29,6 +29,7 @@ BUILDCASE_JSON = os.path.join(DATA_DIR, "buildcase.json")
 OUTLOOK_JSON = os.path.join(DATA_DIR, "outlook.json")
 RENTAL_JSON = os.path.join(DATA_DIR, "rental.json")
 DEMAND_JSON = os.path.join(DATA_DIR, "demand.json")
+SUMMARY_JSON = os.path.join(DATA_DIR, "summary.json")
 LISTING_HISTORY_JSONL = os.path.join(DATA_DIR, "listing_history.jsonl")
 INVENTORY_HISTORY_JSONL = os.path.join(DATA_DIR, "inventory_history.jsonl")
 LVR_CACHE_DIR = CACHE_DIR  # 相容舊名稱
