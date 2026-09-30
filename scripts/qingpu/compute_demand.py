@@ -20,6 +20,7 @@ import datetime
 import io
 import json
 import os
+import re
 import statistics
 import sys
 import time
@@ -214,6 +215,31 @@ def roc_month_range(start_yyymm, end_yyymm):
     return out
 
 
+_ZH_KEY_MAP = {"統計年月": "statistic_yyymm", "區域別代碼": "district_code", "區域別": "site_id", "村里": "village",
+               "戶數": "household_no", "人口數": "people_total", "人口數-男": "people_total_m", "人口數-女": "people_total_f"}
+
+
+def _normalize_pop_row(row):
+    """ODRP014 有些月份的欄位是中文（區域別、村里、戶數、0歲-男…），有些是英文
+    （site_id、village、household_no、people_age_000_m…），統一轉成英文欄位。"""
+    if "site_id" in row:
+        return row
+    out = {}
+    for k, v in row.items():
+        if k in _ZH_KEY_MAP:
+            out[_ZH_KEY_MAP[k]] = v
+            continue
+        m = re.match(r"^(\d+)歲(以上)?-(男|女)$", k)
+        if m:
+            age = int(m.group(1))
+            sex = "m" if m.group(3) == "男" else "f"
+            key = f"people_age_100up_{sex}" if (age >= 100 or m.group(2)) else f"people_age_{age:03d}_{sex}"
+            out[key] = v
+            continue
+        out[k] = v
+    return out
+
+
 def fetch_population_month(yyymm, timeout=30):
     rows = []
     page = 1
@@ -229,7 +255,7 @@ def fetch_population_month(yyymm, timeout=30):
         page_rows = data.get("responseData") or []
         if not page_rows:
             break
-        rows.extend(page_rows)
+        rows.extend(_normalize_pop_row(r) for r in page_rows)
         try:
             total_page = int(data.get("totalPage") or 1)
         except (TypeError, ValueError):
@@ -294,8 +320,9 @@ def fetch_population_series(today):
     fetched_months = []
     for yyymm in yyymms:
         month_iso = roc_yyymm_to_iso_month(yyymm)
-        if month_iso in cache:
-            series[month_iso] = cache[month_iso]
+        cached = cache.get(month_iso)
+        if cached and all((cached.get(k) or {}).get("household", 0) > 0 for k in ("青埔里(含分割)", "青山里", "青峰里")):
+            series[month_iso] = cached
             fetched_months.append(yyymm)
             continue
         rows = fetch_population_month(yyymm) or fetch_population_month(yyymm)  # 大檔偶爾斷線，重試一次
@@ -327,7 +354,9 @@ def fetch_population_series(today):
                     }
                     break
         series[month_iso] = month_data
-        cache[month_iso] = month_data
+        # 三組村里都有戶數才算這個月完整；抓一半斷線的月份不存快取，下次重抓
+        if all((month_data.get(k) or {}).get("household", 0) > 0 for k in ("青埔里(含分割)", "青山里", "青峰里")):
+            cache[month_iso] = month_data
         log(f"population {yyymm} ({month_iso}) 抓到 {len(rows)} 個村里資料")
     try:
         with open(cache_path, "w", encoding="utf-8") as f:
@@ -347,7 +376,10 @@ def compute_population_section(today):
     if not series:
         return {"status": "fail", "message": "沒有任何月份抓到資料", "series": {}, "months_fetched": []}, None
 
-    months_sorted = sorted(series.keys())
+    # 只用三組村里都有資料的月份：大園區青山里、青峰里 2022 年 3 月才出現在戶政資料，
+    # 更早的月份只有中壢區青埔里，加總會少一大截；個別月份抓取失敗也排除。
+    months_sorted = sorted(m for m in series.keys()
+                           if all((series[m].get(k) or {}).get("household", 0) > 0 for k in ("青埔里(含分割)", "青山里", "青峰里")))
     agg = {}
     for m in months_sorted:
         hh = sum(v.get("household", 0) for v in series[m].values())

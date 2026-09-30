@@ -156,13 +156,13 @@ function initFilterBar() {
    --------------------------------------------------------------------------- */
 async function fetchJsonSafe(path, fallback) {
   try {
-    var res = await fetch(path);
+    var res = await fetch(path, { cache: 'no-cache' });
     return res.ok ? await res.json() : fallback;
   } catch (e) { return fallback; }
 }
 async function fetchJsonlSafe(path) {
   try {
-    var res = await fetch(path);
+    var res = await fetch(path, { cache: 'no-cache' });
     if (!res.ok) return [];
     var text = await res.text();
     return text.split('\n').map(function (l) { return l.trim(); }).filter(Boolean).map(function (l) {
@@ -172,7 +172,7 @@ async function fetchJsonlSafe(path) {
 }
 
 async function loadSummary() {
-  var res = await fetch('../data/summary.json');
+  var res = await fetch('../data/summary.json', { cache: 'no-cache' });
   if (!res.ok) throw new Error('HTTP ' + res.status);
   SUMMARY = await res.json();
   return SUMMARY;
@@ -196,7 +196,7 @@ async function loadData() {
 // 第一次打開其中一個才抓；抓過就快取在 DEALS，不重複抓。
 function ensureDealsLoaded() {
   if (DEALS_PROMISE) return DEALS_PROMISE;
-  DEALS_PROMISE = fetch('../data/deals.json').then(function (res) {
+  DEALS_PROMISE = fetch('../data/deals.json', { cache: 'no-cache' }).then(function (res) {
     if (!res.ok) throw new Error('HTTP ' + res.status);
     return res.json();
   }).then(function (json) {

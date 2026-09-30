@@ -160,13 +160,13 @@ function initFilterBar() {
    --------------------------------------------------------------------------- */
 async function fetchJsonSafe(path, fallback) {
   try {
-    var res = await fetch(path);
+    var res = await fetch(path, { cache: 'no-cache' });
     return res.ok ? await res.json() : fallback;
   } catch (e) { return fallback; }
 }
 async function fetchJsonlSafe(path) {
   try {
-    var res = await fetch(path);
+    var res = await fetch(path, { cache: 'no-cache' });
     if (!res.ok) return [];
     var text = await res.text();
     return text.split('\n').map(function (l) { return l.trim(); }).filter(Boolean).map(function (l) {
@@ -176,7 +176,7 @@ async function fetchJsonlSafe(path) {
 }
 
 async function loadSummary() {
-  var res = await fetch('data/summary.json');
+  var res = await fetch('data/summary.json', { cache: 'no-cache' });
   if (!res.ok) throw new Error('HTTP ' + res.status);
   SUMMARY = await res.json();
   return SUMMARY;
@@ -207,7 +207,7 @@ async function loadCompare() {
 // 成交」收合區塊需要，第一次打開才抓；抓過就快取在 DEALS，不重複抓。
 function ensureDealsLoaded() {
   if (DEALS_PROMISE) return DEALS_PROMISE;
-  DEALS_PROMISE = fetch('data/deals.json').then(function (res) {
+  DEALS_PROMISE = fetch('data/deals.json', { cache: 'no-cache' }).then(function (res) {
     if (!res.ok) throw new Error('HTTP ' + res.status);
     return res.json();
   }).then(function (json) {
@@ -390,7 +390,7 @@ function renderOverviewS1() {
       tooltip: baseTooltip,
       grid: Object.assign({}, baseGrid, { left: 84, top: 8, bottom: 8 }),
       xAxis: mkAxis({ type: 'value', name: '完工÷轉手(倍)' }),
-      yAxis: mkAxis({ type: 'category', data: rows.map(function (r) { return r.name; }), axisLabel: Object.assign({}, baseText, { fontSize: 10 }) }),
+      yAxis: mkAxis({ type: 'category', data: rows.map(function (r) { return r.name; }), axisLabel: Object.assign({}, baseText, { fontSize: 10, interval: 0 }) }),
       series: [{ type: 'bar', barMaxWidth: 11, data: rows.map(function (r) { return { value: r.ratio_completed_to_resale, itemStyle: { color: barColor(r) } }; }) }],
     }, true);
   }
@@ -400,7 +400,7 @@ function renderOverviewS1() {
       tooltip: baseTooltip,
       grid: Object.assign({}, baseGrid, { left: 84, top: 8, bottom: 8 }),
       xAxis: mkAxis({ type: 'value', name: '換手率(%)' }),
-      yAxis: mkAxis({ type: 'category', data: rows.map(function (r) { return r.name; }), axisLabel: Object.assign({}, baseText, { fontSize: 10 }) }),
+      yAxis: mkAxis({ type: 'category', data: rows.map(function (r) { return r.name; }), axisLabel: Object.assign({}, baseText, { fontSize: 10, interval: 0 }) }),
       series: [{ type: 'bar', barMaxWidth: 11, data: rows.map(function (r) { return { value: r.turnover_pct, itemStyle: { color: barColor(r) } }; }) }],
     }, true);
   }
@@ -420,7 +420,7 @@ function renderOverviewS2() {
     var opt = {
       tooltip: baseTooltip,
       grid: Object.assign({}, baseGrid, { top: 12, bottom: 24 }),
-      xAxis: mkAxis({ type: 'category', data: zones.map(function (z) { return z.name; }) }),
+      xAxis: mkAxis({ type: 'category', data: zones.map(function (z) { return z.name; }), axisLabel: Object.assign({}, baseText, { interval: 0 }) }),
       yAxis: mkAxis({ type: 'value', name: '未完工÷轉手(倍)' }),
       series: [{
         type: 'bar', barMaxWidth: 36,
@@ -579,7 +579,7 @@ function renderPosition() {
       tooltip: baseTooltip,
       grid: Object.assign({}, baseGrid, { left: 90 }),
       xAxis: mkAxis({ type: 'value', name: '完工÷轉手(倍)' }),
-      yAxis: mkAxis({ type: 'category', data: allBars.map(function (r) { return r.name; }) }),
+      yAxis: mkAxis({ type: 'category', data: allBars.map(function (r) { return r.name; }), axisLabel: Object.assign({}, baseText, { interval: 0 }) }),
       series: [{
         type: 'bar', data: allBars.map(function (r) {
           return { value: r.ratio_completed_to_resale, itemStyle: { color: r.name === '青埔' ? C.orange : (r.name === '桃園全市' ? C.muted : C.blue) } };
@@ -916,7 +916,7 @@ function renderSupplyConclusionCharts() {
     supplyUnsoldTopChart.setOption({
       tooltip: baseTooltip, grid: Object.assign({}, baseGrid, { left: 96, top: 10 }),
       xAxis: mkAxis({ type: 'value', name: '未售戶(估)' }),
-      yAxis: mkAxis({ type: 'category', data: topRows.map(function (r) { return r.project_name; }), axisLabel: Object.assign({}, baseText, { fontSize: 10 }) }),
+      yAxis: mkAxis({ type: 'category', data: topRows.map(function (r) { return r.project_name; }), axisLabel: Object.assign({}, baseText, { fontSize: 10, interval: 0 }) }),
       series: [{ type: 'bar', barMaxWidth: 14, data: topRows.map(function (r) { return r.units_unsold; }), itemStyle: { color: C.blue } }],
     }, true);
   }
