@@ -26,7 +26,7 @@ export class ViewModel {
     for (const k in this.g) { const m = this.g[k]; m.visible = k === 'rifle'; this.holder.add(m); m.traverse((o) => { if (o.isMesh) { o.castShadow = false; o.receiveShadow = false; } }); }
     this.cur = 'rifle';
     this.ammo = { rifle: WEAPONS.rifle.mag, pistol: WEAPONS.pistol.mag };
-    this.cd = 0; this.reloadT = -1; this.swapT = -1; this.swapTo = null;
+    this.cd = 0; this.reloadT = -1; this.swapT = -1; this.swapTo = null; this.nadeT = -1; this.nadeGo = false;
     this.bloom = { rifle: 0, pistol: 0 }; this.spreadNow = 0;   // 連射散開、目前的散布（準心也照這個畫）
     this.ads = 0; this.adsWant = false; this.scoped = false;
     this.heat = 0;           // 長槍線圈發熱（發光）
@@ -45,13 +45,19 @@ export class ViewModel {
   }
   get W() { return WEAPONS[this.cur]; }
   get model() { return this.g[this.cur]; }
-  get busy() { return this.reloadT >= 0 || this.swapT >= 0; }
+  get busy() { return this.reloadT >= 0 || this.swapT >= 0 || this.nadeT >= 0; }
 
   swap(to) {
     if (!to) to = this.cur === 'rifle' ? 'pistol' : 'rifle';
     if (to === this.cur || this.swapT >= 0) return;
     this.reloadT = -1; this.swapT = 0; this.swapTo = to;
     this.audio.swap();
+  }
+  // 丟手榴彈：槍往右下放、0.2 秒時出手（nadeGo 那一幀由 main.js 丟出去），換彈到一半會被打斷
+  throwNade() {
+    if (this.swapT >= 0 || this.nadeT >= 0) return false;
+    this.reloadT = -1; this.nadeT = 0;
+    return true;
   }
   reload() {
     if (this.reloadT >= 0 || this.swapT >= 0 || this.ammo[this.cur] >= this.W.mag) return;
@@ -71,6 +77,9 @@ export class ViewModel {
       if (this.swapT >= 0.24 && this.swapTo) { this.g[this.cur].visible = false; this.cur = this.swapTo; this.swapTo = null; this.g[this.cur].visible = true; this.audio.swap(); }
       if (this.swapT >= 0.58) this.swapT = -1;
     }
+    // ---- 丟手榴彈
+    this.nadeGo = false;
+    if (this.nadeT >= 0) { const t0 = this.nadeT; this.nadeT += dt; if (t0 < 0.2 && this.nadeT >= 0.2) this.nadeGo = true; if (this.nadeT >= 0.62) this.nadeT = -1; }
     // ---- 換彈
     if (c.reload) this.reload();
     if (this.reloadT >= 0) this._reloadStep(dt);
@@ -184,6 +193,8 @@ export class ViewModel {
     rot.x += this.rot.x * 0.02; rot.z += this.rot.z * 0.02; rot.y += this.rot.y * 0.02;
     // 換槍：放下再舉起
     if (this.swapT >= 0) { const u = this.swapT < 0.24 ? ease(this.swapT / 0.24) : 1 - ease((this.swapT - 0.24) / 0.34); pos.y -= 0.35 * u; rot.x -= 0.9 * u; }
+    // 丟手榴彈：槍往右下壓開，出手後舉回來
+    if (this.nadeT >= 0) { const u = this.nadeT < 0.2 ? ease(this.nadeT / 0.2) : 1 - ease((this.nadeT - 0.2) / 0.42); pos.y -= 0.28 * u; pos.x += 0.06 * u; rot.x -= 0.55 * u; rot.z -= 0.35 * u; }
     // 換彈：槍往左下翻轉
     let magOff = 0, lh = null;
     if (this.reloadT >= 0) {

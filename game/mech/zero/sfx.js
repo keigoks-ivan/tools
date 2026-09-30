@@ -206,6 +206,16 @@ export class ZeroAudio extends Audio {
     v.done();
   }
 
+  // 丟手榴彈：拔插銷的「叮」＋手臂揮出去的風聲
+  throw() {
+    if (!this._ok()) return;
+    const v = this._voice(this.bus.body, 2); if (!v) return;
+    const t = this._now(), o = v.out;
+    this._clank(v, o, t, rnd(2600, 3000), 0.03, 0.08, BAR);
+    this._N(v, o, { t: t + 0.13, b: 'p', a: 0.05, h: 0.02, d: 0.16, g: 0.1, ft: 'bandpass', f: 500, f1: 1500, gl: 0.18, q: 0.9 });
+    v.done();
+  }
+
   // 切換武器：衣物摩擦＋裝備碰撞＋握把拍進手掌
   swap() {
     if (!this._ok()) return;

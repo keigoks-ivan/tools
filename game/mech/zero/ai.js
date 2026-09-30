@@ -160,6 +160,16 @@ export class Trooper {
         const dL = this.pos.distanceTo(this.lastSeen);
         if (dL > 7 && dL < 24) { this.nades--; G.lastNade = G.t; G.throwGrenade(s.headPos(new THREE.Vector3()).add(_w.set(0, 0.3, 0)), this.lastSeen.clone(), this); this.phase = 'hide'; this.phaseT = rr(0.8, 1.4); }
       }
+      // 玩家的手榴彈落在 6 m 內：愣一下（0.3～0.8 秒）就往反方向跑；重裝兵、守點的不跑
+      if (!this.post && this.type !== 'heavy') {
+        this.nadeReact ??= rr(0.3, 0.8);
+        for (const g of G.grenades) {
+          if (!g.mine || !g.landed || g.t - g.landT < this.nadeReact || g.t >= g.fuse) continue;
+          _v.set(this.pos.x - g.p.x, 0, this.pos.z - g.p.z); const L = _v.length(); if (L > 6) continue;
+          if (L < 0.05) _v.set(1, 0, 0);
+          this.cover = this.pos.clone().addScaledVector(_v.normalize(), 7); this.coverT = 2.5; this.phase = 'move'; this.hunt = false; break;
+        }
+      }
       if (!this.post && (!this.cover || this.coverT <= 0 || (this.phase !== 'move' && dist < 5))) {
         this.cover = this.findCover(this.hunt); this.coverT = this.hunt ? rr(4, 7) : rr(6, 11); this.phase = 'move';
       }

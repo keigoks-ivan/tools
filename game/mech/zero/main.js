@@ -142,9 +142,10 @@ hound.root.visible = false; scene.add(hound.root);
 window.__renderer = renderer; window.__scene = scene; window.__solid = solid; window.__map = map; window.__hero = hero;
 
 // ---------------------------------------------------------------- 遊戲狀態（AI 也讀這個）
+const NADE_START = 3, NADE_MAX = 5;   // 玩家手榴彈：每章開頭至少幾顆、最多帶幾顆
 const G = {
   scene, solid, kit, audio, fx, player, vm, hud, t: 0, nextId: 1, enemies: [], playing: false,
-  playerEye: new THREE.Vector3(), aimDir: new THREE.Vector3(0, 0, 1), ads: 0, diff: { acc: 1, dmg: 1 }, bolts: [], grenades: [],
+  playerEye: new THREE.Vector3(), aimDir: new THREE.Vector3(0, 0, 1), ads: 0, diff: { acc: 1, dmg: 1 }, bolts: [], grenades: [], nadeN: 3, loot: [],
   chapterTag: '', objText: '', objSub: '', lastHit: -99, scopeRange: 0, stats: { shots: 0, hits: 0, kills: 0, heads: 0, taken: 0, time: 0 },
   // 同時開火的敵人上限（避免四面八方同時打）
   canShoot(e) { let n = 0; for (const o of G.enemies) if (o !== e && !o.dead && (o.burst > 0)) n++; return n < 3; },
@@ -153,10 +154,14 @@ const G = {
     to.x += (Math.random() - 0.5) * 2.4; to.z += (Math.random() - 0.5) * 2.4; to.y = solid.floorAt(to.x, to.z, to.y + 1) + 0.1;
     const d = to.clone().sub(from), T = clamp(Math.hypot(d.x, d.z) / 11, 0.9, 1.6);
     const vel = d.divideScalar(T).add(new THREE.Vector3(0, 0.5 * 9.8 * T, 0));
+    G.spawnNade(from, vel, 2.6, owner);
+    audio.radio('enemy', owner ? owner.pos : from);
+  },
+  // mine＝玩家丟的：爆炸比較大；落地離玩家很近（彈回來）才警告；敵人看到會跑開（ai.js）
+  spawnNade(from, vel, fuse, owner, mine = false) {
     const m = new THREE.Group(); m.add(new THREE.Mesh(NADE.body, NADE.metal)); const lamp = new THREE.Mesh(NADE.lamp, NADE.red); lamp.position.y = 0.06; lamp.userData.noAO = true; m.add(lamp);
     m.children[0].castShadow = true; m.position.copy(from); scene.add(m);
-    G.grenades.push({ p: m.position, vel, t: 0, fuse: 2.6, m, lamp, landed: false, warned: false, owner });
-    audio.radio('enemy', owner ? owner.pos : from);
+    G.grenades.push({ p: m.position, vel, t: 0, fuse, m, lamp, landed: false, landT: 0, warned: false, owner, mine });
   },
   bolt(p, d, speed, dmg, owner) {
     G.bolts.push({ p: p.clone(), dir: d.clone(), speed, dmg, owner, len: Math.min(2.2, speed * 0.028), w: owner && owner.type === 'sniper' ? 0.05 : 0.035, c: [4, 0.45, 0.25], life: 3, whiz: false });
@@ -243,16 +248,18 @@ function updateGrenades(dt) {
       const fl = solid.floorAt(g.p.x, g.p.z, g.p.y + 0.3);
       if (g.p.y < fl + 0.06) {
         g.p.y = fl + 0.06;
-        if (!g.landed) { g.landed = true; audio.grenade(g.p.clone()); }
+        if (!g.landed) { g.landed = true; g.landT = g.t; audio.grenade(g.p.clone()); }
         g.vel.y = Math.abs(g.vel.y) * 0.25; g.vel.x *= 0.55; g.vel.z *= 0.55;
         if (g.vel.length() < 0.6) { g.rest = true; g.vel.set(0, 0, 0); }
       }
       g.m.rotation.x += dt * 9; g.m.rotation.z += dt * 5;
     }
-    if (g.landed && !g.warned && g.p.distanceTo(player.pos) < 8 && !player.dead) { g.warned = true; hud.note('手榴彈！快離開', '#ff5b4d'); }
+    if (g.landed && !g.warned && g.p.distanceTo(player.pos) < (g.mine ? 4.5 : 8) && !player.dead) { g.warned = true; hud.note('手榴彈！快離開', '#ff5b4d'); }
     if (g.t >= g.fuse) {
-      const p = g.p.clone().add(new THREE.Vector3(0, 0.3, 0));
-      if (G.destruct) G.destruct.explode(p, 0.8); else { fx.explode(p, 0.8); audio.explosion(p, 0.6); G.splash(p, 3.6, 88); }
+      const p = g.p.clone().add(new THREE.Vector3(0, 0.3, 0)), s = g.mine ? 1 : 0.8;
+      const hp0 = g.mine ? new Map(G.enemies.filter((e) => !e.dead).map((e) => [e, e.hp])) : null;
+      if (G.destruct) G.destruct.explode(p, s); else { fx.explode(p, s); audio.explosion(p, 0.6); G.splash(p, 4.5 * s, 110 * s); }
+      if (hp0) nadeHits(hp0);
       scene.remove(g.m); G.grenades.splice(i, 1);
     }
   }
@@ -260,6 +267,7 @@ function updateGrenades(dt) {
 function clearEnemies() {
   for (const e of G.enemies) e.dispose();
   for (const g of G.grenades) scene.remove(g.m);
+  for (const L of G.loot) scene.remove(L.m); G.loot.length = 0;
   G.enemies.length = 0; G.bolts.length = 0; fx.bolts.length = 0; G.grenades.length = 0;
 }
 function spawn(def) {
@@ -360,9 +368,10 @@ function startChapter(n) {
   done.clear();
   for (const E of S.ENCOUNTERS) if (E.ch < n) markDone(E.id, true);
   player.reset(map.marks[C.start].clone(), C.yaw);
+  G.nadeN = NADE_START;
   if (q.has('x')) player.reset(new THREE.Vector3(+q.get('x'), +(q.get('y') || 0), +q.get('z')), +(q.get('yaw') || 0));
   vm.refill();
-  checkpoint = { p: player.pos.clone(), yaw: player.yaw, done: [...done], ch: n };
+  checkpoint = { p: player.pos.clone(), yaw: player.yaw, done: [...done], ch: n, nades: G.nadeN };
   G.chapterTag = `CHAPTER ${n}　${C.en}`;
   const first = objective();
   G.objText = first ? first.obj : '';
@@ -395,7 +404,7 @@ function updateEncounters() {
     for (const [w, t, now] of a.E.done) hud.say(w, t, 3.6, now);
     if (a.E.done.length) audio.radio('in');
     hud.note(a.E.pickup ? '取得啟動金鑰  KEY ACQUIRED' : '區域清除  AREA CLEAR', '#ffb347');
-    checkpoint = { p: player.pos.clone(), yaw: player.yaw, done: [...done], ch: chapter };
+    checkpoint = { p: player.pos.clone(), yaw: player.yaw, done: [...done], ch: chapter, nades: G.nadeN };
     const nx = objective();
     if (a.E.id === 'G2') { toCockpit(); if (alarmOn) { alarmOn = false; audio.alarm(false); } }
     else if (nx && nx.ch === chapter) { G.objText = nx.obj; hud.obj = guideObj(nx); }
@@ -427,6 +436,7 @@ function updateFoes() {
   if ((left.length <= 3 && quiet > 6) || quiet > 20) for (const e of left) hud.foes.push({ p: e.pos, h: e.type === 'drone' ? 0.7 : 2.2 });
 }
 function nextChapter(n) {
+  G.nadeN = Math.max(G.nadeN, NADE_START);   // 每章開頭至少補到 3 顆
   const C = S.CHAPTERS[n - 1];
   hud.title(`第 ${n} 章　${C.name}`, C.en, 4);
   chapter = n;
@@ -434,7 +444,7 @@ function nextChapter(n) {
   const L = S.LINES['ch' + n]; if (L) { audio.radio('in'); for (const [w, t] of L) hud.say(w, t, 3.8); }
   const first = objective();
   G.objText = first ? first.obj : ''; hud.obj = first ? guideObj(first) : null;
-  checkpoint = { p: player.pos.clone(), yaw: player.yaw, done: [...done], ch: n };
+  checkpoint = { p: player.pos.clone(), yaw: player.yaw, done: [...done], ch: n, nades: G.nadeN };
   audio.music('battle', { stage: C.music });
   if (n > progress()) store.set('ch', n);
 }
@@ -640,7 +650,7 @@ function respawn() {
   clearEnemies(); active = [];
   done.clear(); for (const id of cp.done) markDone(id, true);
   chapter = cp.ch;
-  player.reset(cp.p, cp.yaw); vm.refill();
+  player.reset(cp.p, cp.yaw); vm.refill(); G.nadeN = cp.nades ?? NADE_START;
   const nx = objective();
   if (done.has('G2')) toCockpit(); else if (nx) { G.objText = nx.obj; hud.obj = guideObj(nx); }
   if (alarmOn) { alarmOn = false; audio.alarm(false); }
@@ -692,6 +702,49 @@ function updateFinale(dt) {
 }
 const ease = (t) => t * t * (3 - 2 * t);
 const lerpA = (a, b, t) => a + wrap(b - a) * t;
+
+// ---------------------------------------------------------------- 玩家的手榴彈
+// G 丟：每章開頭至少 3 顆、最多帶 5 顆（NADE_START／NADE_MAX 在遊戲狀態上面）；敵人身上沒丟完的，倒下時掉在旁邊，走過去自動撿
+function playerNade() {
+  const d = G.aimDir, eye = G.playerEye;
+  const from = eye.clone().addScaledVector(d, 0.45).addScaledVector(_w.set(-d.z, 0, d.x).normalize(), 0.18); from.y -= 0.12;   // 右手出手
+  const dir = from.clone().sub(eye), L = dir.length();
+  if (solid.ray(eye, dir.divideScalar(L), L + 0.1)) from.copy(eye).addScaledVector(d, 0.05);   // 貼著牆丟：從眼前出手，不穿牆
+  const vel = d.clone().multiplyScalar(15).add(_v.set(0, 3.2, 0)).addScaledVector(player.vel, 0.5);
+  G.nadeN--;
+  G.spawnNade(from, vel, 2.2, null, true);
+}
+// 炸到人：跟開槍一樣有命中標記、擊倒數
+function nadeHits(hp0) {
+  let hit = 0, kill = 0;
+  for (const [e, h] of hp0) { if (e.hp < h || e.dead) hit++; if (e.dead) kill++; }
+  if (!hit) return;
+  G.lastHit = G.t; G.stats.hits += hit; G.stats.kills += kill;
+  audio.hitmark(kill ? 'kill' : 'hit'); hud.marker(kill ? 'kill' : 'hit');
+  if (kill) hud.note(kill > 1 ? `手榴彈　擊倒 ${kill} 個  MULTI KILL` : '擊倒  DOWN', '#7ff3ff');
+}
+function updateLoot() {
+  for (const e of G.enemies) {
+    if (!e.dead || !(e.nades > 0) || e.dropped) continue;
+    e.dropped = true;
+    const p = e.pos.clone(); p.y = solid.floorAt(p.x, p.z, p.y + 1) + 0.05;
+    const m = new THREE.Group();
+    for (let i = 0; i < e.nades; i++) { const b = new THREE.Mesh(NADE.body, NADE.metal); b.rotation.set(0, i * 1.3, Math.PI / 2); b.position.set(i * 0.09, 0.05, i * 0.06); b.castShadow = true; m.add(b); }
+    m.position.copy(p); scene.add(m);
+    G.loot.push({ p, n: e.nades, m });
+    if (G.loot.length > 12) scene.remove(G.loot.shift().m);
+  }
+  if (player.dead) return;
+  for (let i = G.loot.length - 1; i >= 0; i--) {
+    const L = G.loot[i];
+    if (G.nadeN >= NADE_MAX || Math.hypot(L.p.x - player.pos.x, L.p.z - player.pos.z) > 1.6 || Math.abs(L.p.y - player.pos.y) > 1.2) continue;
+    const k = Math.min(L.n, NADE_MAX - G.nadeN);
+    G.nadeN += k; L.n -= k;
+    hud.note(`撿到手榴彈 +${k}`, '#b8e07a'); audio.swap();
+    while (L.m.children.length > L.n) L.m.remove(L.m.children[L.m.children.length - 1]);
+    if (L.n <= 0) { scene.remove(L.m); G.loot.splice(i, 1); }
+  }
+}
 
 // ---------------------------------------------------------------- 獵犬機走過
 function updateMechWalk(dt) {
@@ -837,8 +890,10 @@ function frame() {
   camera.updateMatrixWorld();
   // 武器
   if (stage === 'play' && !finale && !player.dead) {
+    if (input.pressed('KeyG') || input.pressed('Tnade')) { if (G.nadeN <= 0) hud.note('沒有手榴彈了', '#8aa3ab'); else if (vm.throwNade()) audio.throw(); }
     const shot = vm.update(dt, { fire: K.has('M0') || K.has('Tfire'), ads: ctl.ads, reload: c.reload || input.pressed('Tsaber'), swap: input.pressed('KeyQ') || input.pressed('Tcannon'), swapTo: input.pressed('Digit1') ? 'rifle' : input.pressed('Digit2') ? 'pistol' : null, hold: run }, player, { x: c.lookX, y: c.lookY });
     if (shot) playerShoot(shot);
+    if (vm.nadeGo) playerNade();
   } else if (player.dead) { vm.holder.visible = false; vm.arms.root.visible = false; }
   // 視角場景的光：在陰影裡嗎（往太陽方向打一條線）
   const inShade = !!solid.ray(G.playerEye, world.lightDir, 80);
@@ -850,7 +905,7 @@ function frame() {
   updateBolts(dt);
   updateGrenades(dt);
   D.update(dt);
-  if (stage === 'play' && !finale) { updateEncounters(); updateHatch(dt); updatePickup(); }
+  if (stage === 'play' && !finale) { updateEncounters(); updateHatch(dt); updatePickup(); updateLoot(); }
   updateFoes();
   updateGuide(dt);
   updateMechWalk(dt);

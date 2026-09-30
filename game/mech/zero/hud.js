@@ -85,6 +85,8 @@ export class HUD {
     if (this.obj && !vm.scoped) this._objective(W, H, G);
     // ---- 剩下的敵人（紅色小菱形，在畫面外就貼邊用箭頭指方向）
     if (!vm.scoped) for (const f of this.foes) { const p = f.p.clone(); p.y += f.h; this._pin(W, H, p, P.pos.distanceTo(f.p), RD, 7, false); }
+    // ---- 地上的手榴彈（敵人掉的）：15 m 內、還帶得下才標
+    if (!vm.scoped && G.nadeN < 5) for (const L of G.loot) { const dd = P.pos.distanceTo(L.p); if (dd < 15) this._lootTag(W, H, L.p, dd, L.n); }
     // ---- 左下：生命＋護盾
     const bx = 34, by = H - 60, bw = Math.min(260, W * 0.3);
     x.font = '600 12px Rajdhani, sans-serif'; x.fillStyle = '#9fb4bb'; x.textBaseline = 'alphabetic';
@@ -106,6 +108,9 @@ export class HUD {
     // 另一把
     x.font = '600 11px Rajdhani, "Noto Sans TC", sans-serif'; x.fillStyle = '#5d7178';
     x.fillText((vm.cur === 'rifle' ? '[2] XP-2 手槍' : '[1] XLR-7 長槍'), rx, H - 106);
+    // 手榴彈
+    x.font = '600 13px Rajdhani, "Noto Sans TC", sans-serif'; x.fillStyle = G.nadeN ? '#b8e07a' : '#5d7178';
+    x.fillText(`[G] 手榴彈 ×${G.nadeN}`, rx, H - 124);
     x.textAlign = 'left';
     // ---- 互動提示
     if (this.prompt) {
@@ -160,6 +165,17 @@ export class HUD {
   }
 
   // 目標標記：實心菱形（會輕輕閃）＋剩下幾公尺；跑到畫面外或背後時，貼在畫面邊緣、用箭頭指出方向
+  // 地上撿得到的手榴彈：綠色小字，只在畫面內才畫
+  _lootTag(W, H, p0, dist, n) {
+    const v = p0.clone(); v.y += 0.3; v.project(this.cam);
+    if (v.z > 1 || Math.abs(v.x) > 0.95 || Math.abs(v.y) > 0.95) return;
+    const x = this.x, sx = (v.x * 0.5 + 0.5) * W, sy = (-v.y * 0.5 + 0.5) * H;
+    x.save(); x.globalAlpha = clamp(1.4 - dist / 15, 0.35, 1); x.textAlign = 'center';
+    x.shadowColor = 'rgba(0,0,0,0.7)'; x.shadowBlur = 4;
+    x.fillStyle = '#b8e07a'; x.beginPath(); x.arc(sx, sy, 3.5, 0, Math.PI * 2); x.fill();
+    x.font = '600 12px Rajdhani, "Noto Sans TC", sans-serif'; x.fillText(`手榴彈 ×${n}`, sx, sy - 9);
+    x.restore();
+  }
   _objective(W, H, G) { this._pin(W, H, this.obj.p, this.obj.left ?? G.player.pos.distanceTo(this.obj.p), AM, 12, true); }
   // 畫一個菱形標記（目標用琥珀色大的、敵人用紅色小的）；pulse＝會不會一閃一閃
   _pin(W, H, p0, dist, col, r0, pulseOn) {
