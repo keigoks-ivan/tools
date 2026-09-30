@@ -487,9 +487,47 @@ export function buildMap(scene, mats, solid, PL = null) {
   M.marks.start = new THREE.Vector3(-91.6, 0, -91.6);   // 剛從公寓後門出來，站在巷口
   M.marks.startYaw = Math.PI / 2 * 0 + 0.9;
 
+  // ---- 打開原本的建築（第 1、2 章的修車行、據點、工廠）：一棟量體拆成房間＋剩下的量體。
+  //   地圖的 rnd 是一條共用的亂數：拆完以後，照「原本那一棟」會抽的次數把亂數抽掉，下游（別處的窗、車、貨櫃）長得跟原本一模一樣；
+  //   新蓋的東西在 keepRnd 裡面自己抽，抽完還原
+  const DRY = { add: () => null, M: PL ? PL.M : null };
+  function burnMass(x0, x1, z0, z1, h, win, o = {}) {
+    const wins = (f0) => { for (const s of win) { const n = Math.floor(((s === 'n' || s === 's' ? x1 - x0 : z1 - z0) - 1) / (o.spacing || 3.2)); for (let f = f0; f * H1 + 2.6 < h; f++) for (let i = 0; i < n; i++) { rnd(); rnd(); } } };
+    if (o.kit && PL && win) {
+      const kf = Math.max(1, Math.min(Math.floor(h / FLOOR), o.kitFloors ?? 3)), kTop = kf * FLOOR;
+      if (h > kTop + 0.2) wins(Math.ceil((kTop + 0.3) / H1));   // 跟 kitMass 一樣：先上層窗、再外牆模組
+      for (const s of win) facade(DRY, o.kit, s, x0, x1, z0, z1, kf, rnd, {});
+    } else wins(Math.max(o.shop ? 1 : 0, Math.ceil((o.y0 || 0) / H1)));
+  }
+  const keepRnd = (fn, was) => { const s0 = seed, h0 = hk; fn(); seed = s0; hk = h0; if (was) burnMass(...was); };
+
   // ============================================================ B 窄巷（x -95～-88，z -92～-58）
   mass(-114, -95, -92, -40, 14, 'brick', 'e', { trim: 'wall', kit: 'apt' });
-  mass(-88, -66, -92, -62, 11, 'wall', 'wn', { kit: 'apt' });
+  // 巷子東側那棟：北段一樓打通成修車行（第 1 章 B2：巷口鐵門鎖死，從修車行西門進、北邊鐵捲門出去到廣場）
+  keepRnd(() => {
+    mass(-88, -66, -92, -76.3, 11, 'wall', 'w', { kit: 'apt' });
+    mass(-71.7, -66, -76.3, -62, 11, 'wall', 'n', { kit: 'apt' });
+    room(-87.7, -72, -76, -62.3, { h: 3.8, floor: 'floor', wall: 'concrete', ext: PL ? 'kplaster' : 'plaster', doors: { w: [[-74.4, 1.6]], n: [[-77, 3.4]] }, windows: { n: [[-84, 1.6]] }, upper: 11, upperWin: 'wn', trim: PL ? 'kplaster' : null, lightP: 0.7 });
+    b.deco('rust', -78.9, -75.1, 2.32, 2.75, -62.05, -61.7);   // 捲上去的鐵捲門外殼
+    // 待修的車（沒燒過）、工作台、鐵架、輪胎、油桶
+    { const g = PR.car(1, false); b.mesh('paint', g.body, -81.8, 0, -69.6, Math.PI / 2 + 0.06, { shade: 1 }); carBoxes(g.body, -81.8, 0, -69.6, Math.PI / 2 + 0.06, 1.2); b.mesh('void', g.dark, -81.8, 0, -69.6, Math.PI / 2 + 0.06, { shade: 1 }); b.mesh('metal', g.metal, -81.8, 0, -69.6, Math.PI / 2 + 0.06, { shade: 1 }); if (g.glass) b.mesh('glass', g.glass, -81.8, 0, -69.6, Math.PI / 2 + 0.06, { shade: 0.8 }); }
+    P.crate(-73.3, -72.2, 1.1, 0.1); P.crate(-73, -74.6, 0.8, 0.4); P.barrel(-72.9, -64.3); P.barrel(-73.6, -65.1, 'rust');
+    b.block('paint', -86.9, -84.4, 0, 0.9, -69.4, -68.6); b.deco('metal', -86.95, -84.35, 0.9, 0.95, -69.45, -68.55);   // 零件櫃（矮，當掩護）
+    if (PL) {
+      PL.add('metal_office_desk', -84.4, 0, -75.3, 0, { solid: true });
+      for (const x of [-80.2, -77.2]) PL.add('steel_frame_shelves_01', x, 0, -75.45, 0, { scale: 0.1, solid: true });
+      for (const [y, r] of [[0.08, 0], [0.3, 0.5], [0.52, 1.1]]) PL.add('old_tyre', -86.6, y, -64.3, r, { tilt: Math.PI / 2 });
+      PL.add('old_tyre', -85.7, 0.08, -65.2, 0.4, { tilt: Math.PI / 2 });
+      for (const [x, z] of [[-79.1, -71.3], [-78.8, -71.6]]) PL.add('metal_jerrycan_green', x, 0, z, x * 3);
+      PL.add('hand_truck', -76.2, 0, -73.2, 0.3, { solid: true });
+      // 北門口搬出來的東西（三個人擠在這裡）
+      for (const [x, z, s] of [[-80.4, -62.95, 1.3], [-79.5, -63, 1.2], [-79.9, -62.95, 1.2]]) PL.add('cardboard_box_01', x, 0, z, x * 5, { scale: s });
+      PL.add('cardboard_box_01', -80, 0.42, -62.95, 0.3, { scale: 1.1 });
+      for (const x of [-78.5, -78.1]) PL.add('plastic_crate_02', x, 0, -63, x * 2);
+      for (const [x, z] of [[-83, -66], [-78, -71]]) PL.add('mounted_fluorescent_lights', x, 3.78, z, 0, { cast: false, tilt: Math.PI });
+    }
+    M.lights.push({ p: new THREE.Vector3(-80, 3.3, -69), c: 0xe6ebff, i: 32, d: 16 });
+  }, [-88, -66, -92, -62, 11, 'wn', { kit: 'apt' }]);
   mass(-82, -60, -112, -92, 9, 'concrete', 'n');
   ground('floor', -95, -88, -92, -58);
   // 巷子兩側：管線、冷氣、垃圾子母車、木箱、電線
@@ -502,13 +540,47 @@ export function buildMap(scene, mats, solid, PL = null) {
   P.car(-91.2, -65, 0.12);
   // 巷口鐵門半開
   for (const [x0, x1] of [[-95, -93.6], [-89.2, -88]]) b.block('cont', x0, x1, 0, 3, -60.3, -60.1, { tint: [1.5, 1.65, 1.4] });   // 淺綠烤漆鐵門（原本裸金屬，逆光時整片全黑）
+  // 中間那扇拉上、鐵鍊鎖死（第 1 章從修車行繞進廣場）
+  b.block('cont', -93.65, -89.15, 0, 2.95, -60.5, -60.34, { tint: [1.35, 1.5, 1.28] });
+  b.deco('metal', -91.55, -91.45, 0.7, 1.5, -60.56, -60.5); b.deco('rust', -91.7, -91.3, 0.95, 1.2, -60.62, -60.56);
   P.puddle(-91, -77, 2.5, 1.4, 0.2); P.puddle(-92.5, -68, 1.8, 1.2, 1);
   M.zones.B = { x0: -95, x1: -82, z0: -92, z1: -58 };
 
   // ============================================================ C 市場廣場（x -95～-60，z -58～-30）
   mass(-114, -95, -40, -8, 17, 'wall', 'e', { kit: 'apt' });
   mass(-95, -64, -30, -10, 12, 'brick', 's', { shop: true, kit: 'apt' });
-  mass(-66, -60, -62, -52, 10, 'concrete', 'nw', { kit: 'factory' });
+  // 東南角的小倉庫：打通成獵犬軍團的據點（第 1 章 C2 搜東西、C3 守點）；北門對廣場，西牆兩扇窗看得到修車行門口
+  keepRnd(() => {
+    room(-65.7, -60.3, -61.7, -52.3, { h: 3.4, floor: 'floor', wall: 'plaster', ext: PL ? 'kbrick' : 'brick', doors: { n: [[-63, 1.6]] }, windows: { w: [[-59.8, 1.4], [-55.4, 1.4]] }, upper: 10, upperWin: 'nw', trim: PL ? 'kbrick' : null, lights: false });
+    b.deco('lamp', -63.6, -62.4, 3.35, 3.4, -57.2, -57.04, { solid: false });
+    // 牆上的搜索地圖（紙＋紅筆圈）：拍下來就好，不拿走
+    b.deco('canvas', -64.35, -61.65, 1.05, 2.15, -61.69, -61.67, { tint: [0.86, 0.82, 0.68] });
+    for (const [x0, x1, y0, y1] of [[-63.4, -62.5, 1.75, 1.8], [-63.4, -62.5, 1.4, 1.45], [-63.45, -63.4, 1.4, 1.8], [-62.5, -62.45, 1.4, 1.8], [-64.1, -63.7, 1.3, 1.33]]) b.deco('red', x0, x1, y0, y1, -61.668, -61.66);
+    b.deco('canvas', -65.6, -64.7, 1.2, 1.8, -61.69, -61.67, { tint: [0.72, 0.74, 0.7] });
+    // 窗下的沙包、牆邊的木箱、行軍床
+    P.sandbags(-65.15, -55.5, 1.7, Math.PI / 2, 2); P.crate(-65, -53.3, 1.0, 0.2); P.crate(-61.2, -60.7, 0.8, 1.2);
+    b.block('olive', -65.4, -64.6, 0, 0.42, -61.4, -59.7); b.deco('canvas', -65.35, -64.65, 0.42, 0.5, -61.35, -59.75, { tint: [0.4, 0.44, 0.34] });
+    if (PL) {
+      PL.add('metal_office_desk', -61.05, 0, -57, Math.PI / 2, { solid: true });
+      for (const [x, z] of [[-60.8, -59], [-60.9, -59.4]]) PL.add('metal_jerrycan_green', x, 0, z, z);
+      PL.add('mounted_fluorescent_lights', -63, 3.38, -57.1, 0, { cast: false, tilt: Math.PI });
+    }
+    M.lights.push({ p: new THREE.Vector3(-63, 2.9, -57), c: 0xffe2c0, i: 22, d: 12 });
+  }, [-66, -60, -62, -52, 10, 'nw', { kit: 'factory' }]);
+  // 據點裡撿得起來的東西：桌上的無線電、密碼本（小網格，撿走就藏起來）；牆上的地圖只標位置
+  {
+    const put = (id, x, y, z, ry, parts) => {
+      const g = new THREE.Group();
+      for (const [w, h, d, px, py, pz, mat] of parts) { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); m.position.set(px, py + h / 2, pz); m.userData.noAO = true; g.add(m); }
+      g.position.set(x, y, z); g.rotation.y = ry; scene.add(g);
+      M.items[id] = { h: { hide() { g.visible = false; } }, p: new THREE.Vector3(x, y, z) };
+    };
+    const olive = new THREE.MeshStandardMaterial({ color: 0x3f4632, roughness: 0.7, metalness: 0.3 }), led = new THREE.MeshBasicMaterial({ color: new THREE.Color(0.4, 2.4, 0.6) });
+    const book = new THREE.MeshStandardMaterial({ color: 0x5a1f1a, roughness: 0.8 });
+    put('radio', -61.05, 0.76, -57.45, 0.2, [[0.34, 0.2, 0.22, 0, 0, 0, olive], [0.02, 0.36, 0.02, 0.12, 0.2, -0.06, olive], [0.05, 0.03, 0.012, -0.08, 0.14, 0.111, led]]);
+    put('codes', -60.95, 0.76, -56.45, -0.35, [[0.22, 0.045, 0.3, 0, 0, 0, book]]);
+    item('smap', null, -63, 1.1, -61.1);
+  }
   ground('floor', -95, -60, -58, -30);
   // 店面鐵捲門（北側）
   for (const x of [-90, -83, -76, -69]) { b.deco('corr', x - 2.2, x + 2.2, 0, 2.8, -30.12, -30.02); b.deco('rust', x - 2.4, x + 2.4, 2.8, 3.3, -30.3, -30); }
@@ -544,7 +616,31 @@ export function buildMap(scene, mats, solid, PL = null) {
   P.rubble(-10.5, -12, 1.4, 8); P.crate(-8, -27, 0.9, 0.4); P.crate(-11.8, -22, 0.6, 1.1);
   M.marks.ch3 = new THREE.Vector3(-10, 0, -30); M.marks.ch3Yaw = 0;
   M.lights.push({ p: new THREE.Vector3(-10, 3, -20), c: 0xe8ecff, i: 30, d: 16 });
-  mass(-44, 48, -70, -48, 16, 'concrete', 'n', { shop: true, kit: 'factory' });
+  // 街南側那排廠房：西段一樓打通成工廠（第 2 章 D0：西門進、東門出，繞到檢查哨側面）
+  //   西端從 x -36 開始：再往西是商店南邊那棟（x -60～-36、z -92～-50）的量體，會凸進來
+  keepRnd(() => {
+    mass(-44, -36, -70, -48, 16, 'concrete', 'n', { shop: true, kit: 'factory' });
+    mass(-5.7, 48, -70, -48, 16, 'concrete', 'n', { shop: true, kit: 'factory' });
+    mass(-36, -5.7, -70, -60.3, 16, 'concrete', '');
+    room(-35.7, -6, -60, -48.3, { h: 5.2, floor: 'floor', wall: 'concrete', ext: PL ? 'kbrick' : 'concrete', doors: { n: [[-33.3, 2.2], [-8.5, 2.2]] }, windows: { n: [[-28, 1.8], [-21.5, 1.8], [-15, 1.8]] }, upper: 16, upperWin: 'n', trim: PL ? 'kbrick' : null, lightP: 0.55 });
+    // 柱子、機台（半人高，當掩護）
+    for (const x of [-29, -21, -13]) P.column(x, -54.2, 5.2, 0.25);
+    for (const [x0, x1, z0, z1, h] of [[-33.2, -31, -57.6, -55.6, 1.45], [-26.6, -24.2, -52.6, -50.9, 1.3], [-19.8, -17.4, -57.8, -55.8, 1.55], [-12.2, -10.2, -53.4, -51.6, 1.35]]) {
+      b.block('paint', x0, x1, 0, h, z0, z1); b.deco('metal', x0 - 0.04, x1 + 0.04, h, h + 0.05, z0 - 0.04, z1 + 0.04);
+      b.deco('void', x0 + 0.2, x0 + 0.7, h - 0.55, h - 0.15, z1, z1 + 0.02); b.deco('olive', x1 - 0.5, x1 - 0.1, h, h + 0.45, z0 + 0.2, z0 + 0.6);
+    }
+    P.shelf(-35.4, -32.4, -59.8, -59.2, 2.2, 'olive', [0.7, 1.45]); P.shelf(-14, -10.5, -59.8, -59.2, 2.2, 'paint2', [0.7, 1.45]);
+    P.crate(-34.6, -52.8, 1.1, 0.2); P.crate(-9.3, -56.4, 1.1, 0.3); P.crate(-28.8, -58.9, 0.8, 1.1);
+    P.barrel(-7.1, -58.9); P.barrel(-7.8, -59.4, 'rust');
+    if (PL) {
+      PL.add('metal_office_desk', -23, 0, -56.4, 0, { solid: true });
+      PL.add('sofa_03', -26.4, 0, -59.25, 0, { solid: true, hit: 'wood' });
+      for (const [x, z] of [[-21.5, -57.5], [-21.8, -58]]) PL.add('plastic_crate_02', x, 0, z, x);
+      PL.add('hand_truck', -33.9, 0, -58.4, 1.1, { solid: true });
+      for (const x of [-30, -21, -12]) PL.add('mounted_fluorescent_lights', x, 5.18, -54.2, Math.PI / 2, { cast: false, tilt: Math.PI });
+    }
+    M.lights.push({ p: new THREE.Vector3(-21, 4.6, -54), c: 0xe6ecff, i: 55, d: 22 });
+  }, [-44, 48, -70, -48, 16, 'n', { shop: true, kit: 'factory' }]);
   ground('floor', -44, 48, -48, -34);
   // 人行道邊石
   b.deco('concrete', -44, 14, 0, 0.15, -48, -46.8); b.deco('concrete', -44, 6, 0, 0.15, -35.2, -34);
@@ -564,6 +660,12 @@ export function buildMap(scene, mats, solid, PL = null) {
   // 封鎖線：獵犬軍團用兩層貨櫃把貨櫃場入口整排堵死
   for (const x of [17.05, 23.15, 29.25, 35.35]) { P.container(x, -33.9, 0, 0, 'olive'); P.container(x, -33.9, 0.01, 2.6); }
   P.sandbags(15, -38.5, 3.5, 0.2); P.sandbags(24, -41.5, 3, -0.1);
+  // 第 2 章 D1：檢查哨的三台干擾器（發電機＋旁邊一支天線）：碎石堆旁、兩排護欄中間、東側護欄後面
+  for (const [id, x, z, ry, mx, mz] of [['jam1', -5.2, -36.8, 0.4, -4.4, -36.2], ['jam2', 0.2, -45.3, 1.3, 0.9, -45.9], ['jam3', 4.6, -36.3, -0.3, 5.3, -35.6]]) {
+    target(id, 'portable_generator', x, z, ry);
+    b.deco('metal', mx - 0.025, mx + 0.025, 0, 2.6, mz - 0.025, mz + 0.025); b.deco('metal', mx - 0.35, mx + 0.35, 2.3, 2.33, mz - 0.015, mz + 0.015);
+    b.deco('metal', mx - 0.25, mx + 0.25, 2.0, 2.03, mz - 0.015, mz + 0.015); b.deco('red', mx - 0.04, mx + 0.04, 2.6, 2.66, mz - 0.04, mz + 0.04);
+  }
   M.zones.D = { x0: -44, x1: 36, z0: -48, z1: -34 };
 
   // ============================================================ E 貨櫃場（x 14～46，z -34～20）→ 第 3 章前
@@ -1001,7 +1103,7 @@ function dress(PL, P, rnd) {
   A('modular_fire_escape', -88.6, 3.4, -70, -Math.PI / 2, { scale: 0.95 });
   A('utility_box_02', -94.75, 0.6, -86, Math.PI / 2, { scale: 0.9 });
   A('security_light', -94.7, 3.2, -64, Math.PI / 2);
-  for (const [x, z] of [[-93.9, -84], [-89, -74.5], [-93.6, -66.2]]) A('old_tyre', x, 0.28, z, rnd() * 6, { tilt: 1.4 + rnd() * 0.3 });
+  for (const [x, z] of [[-93.9, -84], [-89.3, -77.8], [-93.6, -66.2]]) A('old_tyre', x, 0.28, z, rnd() * 6, { tilt: 1.4 + rnd() * 0.3 });   // 第二個原本在 (-89, -74.5)，擋在修車行西門口
   A('water_manhole_cover', -91.5, 0.01, -78, 0, { cast: false });
   for (let i = 0; i < 6; i++) A('trashbag', -93.8 + rnd() * 0.6, 0, -88 + rnd() * 3, rnd() * 6, { scale: 0.9 + rnd() * 0.4 });
   // 市場廣場：塑膠箱、油桶、推車、發電機
