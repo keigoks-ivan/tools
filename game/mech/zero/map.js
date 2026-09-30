@@ -783,13 +783,40 @@ export function buildMap(scene, mats, solid, PL = null) {
     M.zones.H = { x0: -60, x1: -2, z0: -8, z1: 6 };
 
     // ---- I 市立醫院（x -60～-36，z 6～34）：南邊急診大門 → 大廳 → 北邊病房區 → 東門出後院
-    room(-59.6, -44, 6.3, 18, { h: 4, floor: 'tile', wall: 'plaster', ext: 'concrete', doors: { s: [[-52, 3]], n: [[-48, 2]] }, windows: { s: [[-57.3, 2], [-46.7, 2]] }, upper: 16, upperWin: 's', lightP: 0.7 });
+    // 大廳東牆開一個 7 m 寬的口，通到櫃台後面的病歷室（第 3 章 I0：找隼的病歷）
+    room(-59.6, -44, 6.3, 18, { h: 4, floor: 'tile', wall: 'plaster', ext: 'concrete', doors: { s: [[-52, 3]], n: [[-48, 2]], e: [[12, 7]] }, windows: { s: [[-57.3, 2], [-46.7, 2]] }, upper: 16, upperWin: 's', lightP: 0.7 });
     room(-59.6, -36.3, 18.3, 34, { h: 3.6, floor: 'tile', wall: 'plaster', ext: 'concrete', doors: { e: [[28, 2]], s: [[-48, 2]] }, noWall: 's', skin: 's', windows: { e: [[22, 1.6], [32, 1.6]] }, upper: 16, lightP: 0.6 });
-    mass(-43.7, -36, 6, 18, 16, 'concrete', 's');
+    // 病歷室（x -43.7～-36.3，z 6.3～17.7）：原本這裡是實心的樓（mass），外框跟原本一樣；西邊靠大廳的東牆（上面開的口），不另外蓋牆
+    //   原本的 mass 抽了 16 次 rnd（窗戶亮不亮、破不破）：這裡蓋完把 rnd 接回原本的位置，後面的車、木箱、窗戶長相都不變
+    {
+      const s0 = seed, k0 = hk;
+      room(-43.7, -36.3, 6.3, 17.7, { h: 3.6, floor: 'tile', wall: 'plaster', ext: 'concrete', doors: { w: [[12, 7]] }, noWall: 'w', skin: 'w', windows: { s: [[-41.45, 1.6], [-38.25, 1.6]] }, lightP: 1 });
+      mass(-43.7, -36, 6, 18, 16, 'concrete', 's', { y0: 3.9 });
+      // 病歷櫃兩排（東西向）、東牆的辦公桌、東南角的檔案櫃、東北角的矮櫃、一個倒下的櫃子、地上散落的病歷
+      P.shelf(-43.3, -39.8, 7.5, 8.1, 2.1, 'paint', [0.45, 1.0, 1.55]); P.shelf(-43.3, -39.8, 9.3, 9.9, 2.1, 'paint', [0.45, 1.0, 1.55]);
+      b.block('paint2', -37.25, -36.3, 0, 0.74, 10.3, 12.1); b.deco('metal', -37.3, -36.3, 0.74, 0.78, 10.25, 12.15, { solid: false });
+      b.block('paint', -36.95, -36.3, 0, 1.3, 6.5, 9.6); for (const z of [7.53, 8.57]) b.deco('void', -36.97, -36.95, 0.05, 1.28, z - 0.01, z + 0.01, { solid: false });
+      for (const y of [0.45, 0.88]) b.deco('void', -36.97, -36.95, y - 0.01, y + 0.01, 6.5, 9.6, { solid: false });
+      b.block('paint', -38.6, -36.3, 0, 1.25, 17.05, 17.7); b.deco('metal', -38.62, -36.3, 1.25, 1.28, 17.03, 17.7, { solid: false });
+      b.block('paint', -41.2, -39.6, 0, 0.55, 14.1, 14.7);   // 倒下的檔案櫃（矮掩體）
+      for (const [x, z, ry] of [[-42.2, 12.4, 0.3], [-41.6, 11.2, 1.2], [-39.3, 13.1, 2.1], [-40.4, 15.8, 0.7], [-38.1, 10.4, 2.6], [-42.8, 14.9, 1.9], [-45.2, 13.3, 0.9], [-39.2, 7.0, 0.4]])
+        b.obox('canvas', x, 0.034, z, 0.15, 0.004, 0.21, ry, { solid: false, tint: [0.86, 0.85, 0.8] });
+      M.lights.push({ p: new THREE.Vector3(-40, 3.1, 12), c: 0xe4ecff, i: 28, d: 14 });
+      // 三份病歷（走近按 E）：掛號櫃台上、東牆辦公桌上、東北角矮櫃上
+      item('rec_a', 'cardboard_box_01', -46.2, 1.16, 12.1, 0.4, { scale: 0.75, noBreak: true });
+      item('rec_b', 'cardboard_box_01', -36.8, 0.78, 11.2, 0.2, { scale: 0.7, noBreak: true });
+      item('rec_c', 'cardboard_box_01', -37.4, 1.28, 17.35, -0.3, { scale: 0.7, noBreak: true });
+      seed = s0; for (let i = 0; i < 16; i++) rnd();
+      hk = k0;
+    }
     b.block('concrete', -43.7, -36, 0, 3.6, 18, 18.3);   // 病房南邊、大廳東邊之間 30 cm 的縫補起來
     // 急診雨遮＋紅十字
     b.block('concrete', -55.5, -48.5, 3.9, 4.2, 2.8, 6); P.column(-55, 3.3, 3.9, 0.2); P.column(-49, 3.3, 3.9, 0.2);
     b.deco('red', -52.4, -51.6, 5.2, 7.6, 5.9, 6.0, { solid: false }); b.deco('red', -53.2, -50.8, 6.0, 6.8, 5.9, 6.0, { solid: false });
+    // 急診門口的油桶陷阱（第 3 章 H3）：三堆，每堆一桶是任務目標、旁邊再放一桶（打爆會連鎖）；彼此隔 4.5 m 以上，不會一發全炸
+    target('trapW', 'Barrel_01', -55.9, 5.3, 0.4); target('trapE', 'Barrel_01', -49.6, 5.3, 2.2); target('trapS', 'Barrel_01', -52.6, 1.6, 1.1);
+    if (PL) for (const [x, z, ry] of [[-56.75, 5.4, 1.3], [-48.8, 5.5, 0.2], [-51.8, 1.3, 2.9]]) PL.add('Barrel_01', x, 0, z, ry, { solid: true, hit: 'metal' });
+    for (const [x, z] of [[-55.9, 5.3], [-49.6, 5.3], [-52.6, 1.6]]) b.deco('void', x - 0.012, x + 0.012, 0.03, 0.045, z - 1.1, z - 0.36, { solid: false });   // 桶子接出來的引線
     // 大廳：掛號櫃台、候診椅、推床、敵人的沙包
     b.block('paint2', -50, -45.5, 0, 1.1, 11.6, 12.6); b.deco('metal', -50.1, -45.4, 1.1, 1.16, 11.5, 12.7, { solid: false });
     // 候診椅：一排五張（碰撞仍是一整條）
@@ -851,6 +878,16 @@ export function buildMap(scene, mats, solid, PL = null) {
     P.container(-16, 44, 0.3, DY, 'olive'); P.container(-5, 46.6, 0, DY);   // 第二個貨櫃原本 (-5, 47) 斜放，北邊只剩 0.5 m 看起來能走其實卡住；擺正、往南一點，北側護欄邊留 1.8 m
     barrier(-20, 46, 1.4); barrier(-8, 43, 0.1); barrier(-1, 46.5, 1.6); barrier(3.5, 44.5, 0.2);
     P.crate(-27, 47.5, 1.1, 0.2, DY); P.crate(-34.4, 48.6, 0.9, 0.9, DY);   // 第二個木箱原本在 (-3, 41.5)，擋住南側車道往匝道的路，移到橋的西端
+    // 干擾器（第 4 章 J3，指揮所斷訊的原因）：發電機＋旁邊一根天線桿。一台在護欄 (-8, 43) 南邊（不擋南側車道），
+    //   一台在那道護欄和第二個貨櫃之間的凹處（從南側車道往北看得到），一台架在翻倒的貨櫃頂上；都不在匝道口（J4 守點）附近
+    //   天線桿是固定的外觀，發電機炸掉後桿子留著
+    for (const [id, x, y, z, ry] of [['jamA', -8.0, DY, 42.2, 0.05], ['jamB', -5.2, DY, 44.2, 0.05], ['jamC', -14.0, DY + 2.6, 44.0, 0.3]]) {
+      target(id, 'portable_generator', x, z, ry, y);
+      const ax = x + 0.62 * Math.cos(ry), az = z - 0.62 * Math.sin(ry);
+      b.deco('metal', ax - 0.025, ax + 0.025, y, y + 2.1, az - 0.025, az + 0.025, { solid: false });
+      for (const [h, w] of [[1.55, 0.32], [1.85, 0.22], [2.05, 0.14]]) b.deco('metal', ax - w, ax + w, y + h, y + h + 0.025, az - 0.012, az + 0.012, { solid: false });
+      b.deco('rust', ax - 0.035, ax + 0.035, y + 2.1, y + 2.16, az - 0.035, az + 0.035, { solid: false });   // 桿頂（不放亮燈：炸掉後還亮著會像沒炸掉）
+    }
     M.zones.J = { x0: -36, x1: 6, z0: 40, z1: 50 };
 
     // ---- 匝道（x -2～6，z 26～40，從橋面降到地面）＋底下的擋土塊（不讓人從下面鑽過去）
