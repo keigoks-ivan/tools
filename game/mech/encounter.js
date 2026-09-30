@@ -334,8 +334,14 @@ export class Encounter {
       else if (!this.queue.length && this.cleared(c) && this.tgDone()) { this.clrT += dt; if (this.clrT > 0.7) return this.clear(c); }
       else this.clrT = 0;
     }
-    // 頭目：剩一半、剩兩成半各講一次
+    // 頭目：剩一半、剩兩成半各講一次；倒下（或撤退）時講 down，還沒出來的護衛不再來
     const B = this.bossE, bd = c && c.boss;
+    if (B && bd && B.dead && !this.bossOver) {
+      this.bossOver = true;
+      if (!B.fled) C.lines(bd.down, true);
+      this.queue = this.queue.filter((q) => q.at);   // 已經亮警示的照樣出來，其他取消
+      this.beat = Math.max(this.beat, c.waves.length);
+    }
     if (B && bd && !B.dead) {
       const r = B.ap / B.apMax;
       if (this.bossTalk < 1 && r < 0.5) { this.bossTalk = 1; C.lines(bd.half, true); }
@@ -359,7 +365,7 @@ export class Encounter {
       for (const v of this.mine) if (v.pre && !v.dead) v.hold = rand(0.2, 1.2);   // 停著的戰車開始動
       C.say(c.boss ? c.boss.name : c.hold ? 'HOLD THE LINE' : c.last ? 'FINAL AREA' : 'CONTACT', c.tip || (c.hold ? `守住 ${c.hold} 秒` : `伏兵 ×${L.length}`), 2.6, c.boss || c.last ? 'am' : 'rd');
       C.lines(c.lines, true);   // 開打的喊話：插隊
-      this.holdT = 0; this.bossTalk = 0;
+      this.holdT = 0; this.bossTalk = 0; this.bossOver = false;
       if (c.boss) this.queue.push({ kind: c.boss.kind || 'ace', where: c.boss.where || 'drop', k: 0, t: 1.1, at: null, boss: true });
     } else C.say('REINFORCEMENTS', `敵方增援 ×${L.length}`, 2.4, 'am');
     C.audio.ui('wave');

@@ -233,7 +233,7 @@ export class Combat {
       e.pos.set(x, w.height(x, z), z); e.dropping = false; e.grounded = true;
       e.vel.set(Math.sin(a) * 34, 0, Math.cos(a) * 34); e.boostT = 1.1; e.fireCd += 1.2;
     } else {
-      e.pos.set(x, (at ? at.y : w.height(x, z)) + 150 + i * 10, z);
+      e.pos.set(x, (at && at.y != null ? at.y : w.height(x, z)) + 150 + i * 10, z);   // 從前方街上（out）出現的沒有高度：照地面算
       e.vel.set(0, -80, 0);
     }
     e.face = Math.atan2(p.x - x, p.z - z);
