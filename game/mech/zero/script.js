@@ -107,6 +107,21 @@ export const ENCOUNTERS = [
     done: [[OP, '街道清了。醫院在西邊街底，門口有紅十字那棟。']],
   },
   {
+    // 醫院門口的油桶陷阱（map.js 的 trapW／trapE／trapS）：三個守門的站在桶子旁邊，打爆桶子連人一起炸掉；雨遮上的軍官和一台無人機要另外打
+    id: 'H3', ch: 3, obj: '往醫院走', fight: '引爆門口的陷阱', route: [[-30, -3]], guide: [-36.5, 0.8],
+    trigger: (p) => p.x < -34,
+    targets: ['trapW', 'trapE', 'trapS'], tgName: '油桶陷阱',
+    enemies: [
+      { type: 'trooper', x: -55.1, z: 4.9, yaw: Math.PI, post: true },
+      { type: 'trooper', x: -50.3, z: 4.6, yaw: Math.PI, post: true },
+      { type: 'trooper', x: -52.4, z: 2.6, yaw: Math.PI, post: true },
+      { type: 'officer', x: -52, z: 5.2, y: 4.2, yaw: Math.PI, post: true },
+      { type: 'drone', x: -47, z: 0, y: 7 },
+    ],
+    lines: [[OP, '等等，先別靠近醫院大門。'], [OP, '門口那幾桶油接了引線。他們在等人來救隼。'], [OP, '從遠處打爆，連守門的一起。']],
+    done: [[OP, '陷阱沒了。從正門進去。']],
+  },
+  {
     id: 'H2', ch: 3, obj: '進入醫院', fight: '清除醫院大廳', route: [[-30, -3], [-47, -1]], guide: [-52, 3],
     trigger: (p) => p.x < -46 && p.z > 1.5,
     enemies: [
@@ -117,6 +132,24 @@ export const ENCOUNTERS = [
     ],
     lines: [[EN, '醫院大廳，有動靜！', NOW], [OP, '他們把大廳當成據點了。', NOW]],
     done: [[OP, '病房區在大廳北邊。隼應該在裡面。']],
+  },
+  {
+    // 掛號櫃台後面的病歷室（大廳東牆的大開口進去）：三份病歷走近按 E（map.js 的 rec_a／rec_b／rec_c），裡面三個人也在翻
+    id: 'I0', ch: 3, obj: '查隼的病歷', fight: '查隼的病歷', route: [[-52, 3], [-52, 8.5]], guide: [-49, 10.5],
+    trigger: (p) => p.x > -59.6 && p.x < -44 && p.z > 7.2 && p.z < 18,
+    pickups: [
+      { id: 'rec_a', text: '按 E　翻住院名單', lines: [[ME, '昨晚的住院名單……沒有隼的名字。']] },
+      { id: 'rec_b', text: '按 E　拿病歷', lines: [[ME, '無名氏，穿著駕駛服，全身燒傷。'], [OP, '是他。']] },
+      { id: 'rec_c', text: '按 E　看交班本', lines: [[ME, '交班本寫著：北棟病房，最東邊那床。'], [ME, '這頁被人翻過。他們也在找。']] },
+    ],
+    itemName: '病歷',
+    enemies: [
+      { type: 'trooper', x: -41, z: 12.8, yaw: 0 },
+      { type: 'trooper', x: -38.4, z: 8.8, yaw: Math.PI / 2 },
+      { type: 'trooper', x: -39.8, z: 16.2, yaw: 0.3 },
+    ],
+    lines: [[OP, '等等。病房區有三十幾張床。'], [OP, '他不會用本名住院。櫃台跟後面的病歷室找找。'], [ME, '……病歷室裡有人在翻東西。']],
+    done: [[OP, '床位對上了。從大廳北門進病房區。']],
   },
   {
     id: 'I1', ch: 3, obj: '找到隼的病床', fight: '清除病房區', route: [[-52, 8], [-49, 13]], guide: [-48, 20.5],
@@ -171,6 +204,48 @@ export const ENCOUNTERS = [
     done: [[ME, '……匝道下去，就是基地西側。']],
   },
   {
+    // 橋面上的干擾器（map.js 的 jamA／jamB／jamC；指揮所斷訊就是它們）：零號是修機體的，一看就認得。打掉三台＋兩台守著的無人機
+    //   繞過第一台燒毀的車、到南側車道（跟 J2 同一條路）才開始；三台都在這裡往東 15 m 內，一台架在翻倒的貨櫃頂上，一台躲在護欄和第二個貨櫃中間
+    id: 'J3', ch: 4, obj: '往匝道走', fight: '炸掉干擾器',
+    route: [[-30.75, 30], [-30.75, 41, 6], [-27, 46.1, 6], [-21.35, 46.2, 6], [-21.3, 43.2, 6]], guide: [-19.5, 41.3, 6],
+    trigger: (p) => p.y > 4 && p.x > -22.1 && p.z < 43.3,
+    targets: ['jamA', 'jamB', 'jamC'], tgName: '干擾器',
+    enemies: [
+      { type: 'drone', x: -6, z: 45, y: 10 },
+      { type: 'drone', x: -11, z: 47.5, y: 11 },
+    ],
+    lines: [[ME, '……等等。這幾台箱子在發訊號。'], [ME, '是干擾器。難怪頻道全是雜訊。'], [ME, '打掉它們，也許接得回白鷺。']],
+    done: [[NOISE, '（雜訊）……零……號……聽……', NOW], [ME, '白鷺？……訊號太弱了。', NOW]],
+  },
+  {
+    // 干擾器一斷，他們就知道橋上有人：從匝道下面一波波上來，守住匝道口 38 秒（每 4 秒一波，從空地、倉庫穿堂出來）
+    //   守點＝匝道頂端往下看（路線跟 J2 同一段：從第三台燒毀的車西邊繞到匝道）
+    id: 'J4', ch: 4, obj: '守住匝道口', fight: '守住匝道口', route: [[-4.4, 41.3, 6], [-2.9, 42.7, 6], [-1.95, 41.2, 6]], guide: [1, 38.6, 5.4],
+    after: 'J3', wait: 2,
+    enemies: [
+      { type: 'trooper', x: 4.5, z: 15.2, yaw: 0, alert: true },
+      { type: 'trooper', x: -1.2, z: 18.5, yaw: 0, alert: true },
+    ],
+    hold: {
+      t: 38, gap: 4,
+      waves: [
+        [{ type: 'trooper', x: 4.6, z: 20.2 }],
+        [{ type: 'trooper', x: 9.5, z: 16.5 }],
+        [{ type: 'drone', x: 2, z: 22, y: 9 }],
+        [{ type: 'trooper', x: 3.5, z: 22.5 }],
+        [{ type: 'officer', x: 11, z: 17.2 }],
+        [{ type: 'trooper', x: -1.2, z: 18.5 }],
+        [{ type: 'drone', x: 5, z: 18, y: 10 }],
+        [{ type: 'heavy', x: 9.5, z: 16.5 }],
+        [{ type: 'trooper', x: 4.5, z: 15.2 }, { type: 'trooper', x: 3.5, z: 22.5 }],
+      ],
+      lines: [null, null, [[EN, '無人機，從上面包過去！', NOW]], null, null, null, null, [[EN, '重裝兵上去，把他壓在橋上！', NOW]]],
+      done: [[ME, '後面沒人再上來了。', NOW]],
+    },
+    lines: [[EN, '干擾器全斷了！橋上有人！', NOW], [EN, '匝道下面的，上去堵他！', NOW], [ME, '……從匝道上來了。守住這裡。', NOW]],
+    done: [[ME, '……清掉了。下去。']],
+  },
+  {
     // 橋面的路：樓梯口往北繞過第一台燒毀的車 → 從車和貨櫃中間的縫往南 → 沿南側護欄往東 → 繞過木箱北邊 → 匝道正中間往下
     //（北側車道也走得通：沿北側護欄過第二台車，再從車和貨櫃中間往南）；開頭多一個樓梯下的點：人在後院時先帶回樓梯
     id: 'J2', ch: 4, obj: '走匝道下去', fight: '清除匝道下的敵人', mark: V(10, 16.5), next: '穿過倉庫，進貨櫃場',
@@ -186,6 +261,23 @@ export const ENCOUNTERS = [
     lines: [[EN, '西側匝道，目標出現！', NOW]],
     done: [[OP, '……零號？零號，聽得到嗎？'], [ME, '白鷺！'], [OP, '指揮所沒了。我換到機庫的備用線路……受了點傷，死不了。'], [OP, '金鑰拿到了？'], [ME, '拿到了。隼他……'],
       [OP, '……我知道。走吧，穿過倉庫就是貨櫃場。']],
+  },
+  {
+    // 貨櫃場的三個哨兵（還沒發現你）：獵犬機正從圍牆外走過（MECH_WALK，x > 14 就開始走，這段 x > 15.2 才開始，對白排在它後面）
+    //   三個人彼此隔 28 m 以上：一次打一個、離其他人 32 m 外開槍就不會驚動別人（巡邏的走到南邊時再打東北角那個）；被發現就叫增援
+    id: 'E0', ch: 4, obj: '穿過倉庫，進貨櫃場', fight: '摸掉哨兵', route: [[2, 18], [4, 16.5], [10, 16.5]], guide: [16.5, 16.5],
+    trigger: (p) => p.x > 15.2 && p.z > -34,
+    enemies: [
+      { type: 'trooper', x: 40, z: 15.4, yaw: Math.PI / 2 },
+      { type: 'trooper', x: 15.6, z: -4, yaw: Math.PI, patrol: [[15.6, -4], [15.6, -20]] },
+      { type: 'trooper', x: 44, z: -22, yaw: Math.PI / 2 },
+    ],
+    stealth: {
+      reinforce: [{ type: 'trooper', x: 26, z: -31 }, { type: 'trooper', x: 33, z: -31 }, { type: 'officer', x: 36, z: 1 }],
+      lines: [[EN, '貨櫃場有入侵者！全員過來！', NOW], [OP, '被發現了！先收拾趕過來的人。', NOW]],
+    },
+    lines: [[OP, '貨櫃場裡還有三個哨兵，都還沒發現你。', NOW], [OP, '他們一叫，增援就會過來。一個一個摸掉。', NOW]],
+    done: [[OP, '三個都倒了。', NOW], [OP, '……他們的回報斷了，會有人來查。', NOW]],
   },
   {
     id: 'E', ch: 4, obj: '穿過倉庫，進貨櫃場', fight: '清除貨櫃場', mark: V(28, 23), next: '進入基地大門', route: [[4, 16.5], [10, 16.5]], guide: [16, 16.5], nextRoute: [[21, 18.5], [28, 18.5]],
