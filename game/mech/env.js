@@ -177,6 +177,12 @@ function makeSkyDome(sky, sunDir, fog, sunFog, gain) {
 
 // ---------------------------------------------------------------- 地形高度
 const noise = new ImprovedNoise();
+const MOUNTAIN_PEAKS = [
+  [-3700, -2200, 1120, 1200, 950], [-1000, -4200, 800, 1100, 1050],
+  [1700, -3400, 1250, 1250, 900], [4100, -800, 950, 900, 1400],
+  [3500, 2900, 1120, 1200, 1000], [200, 4100, 780, 1000, 900],
+  [-2800, 3600, 900, 1100, 900], [-4200, 900, 680, 950, 1150],
+];
 function fbm(x, z, oct, seed = 0) {
   let s = 0, a = 1, f = 1, n = 0;
   for (let i = 0; i < oct; i++) { s += a * noise.noise(x * f, seed + i * 17.1, z * f); n += a; a *= 0.5; f *= 2.03; }
@@ -187,11 +193,23 @@ function rawHeight(x, z) {
   let h = fbm(x / 900, z / 900, 3) * 60 + fbm(x / 260, z / 260, 2, 5) * 10;
   h *= smooth(820, 1250, r);
   const m = smooth(1500, 3300, r);
-  const ridge = 1 - Math.abs(noise.noise(x / 800, 7.3, z / 800));
-  h += m * (ridge * ridge * 520 + fbm(x / 380, z / 380, 4, 9) * 160 + 80);
+  // 彎曲主稜線與支稜，讓山谷接到山麓，避免等高的一圈尖丘。
+  if (m > 0) {
+    const wx = x + fbm(x / 1800, z / 1800, 2, 31) * 420;
+    const wz = z + fbm(x / 1800, z / 1800, 2, 43) * 420;
+    let mass = 0;
+    for (const [px, pz, summit, rx, rz] of MOUNTAIN_PEAKS) {
+      const dx = (wx - px) / rx, dz = (wz - pz) / rz;
+      mass += summit * Math.exp(-(dx * dx + dz * dz));
+    }
+    const n = noise.noise(wx / 1050, 7.3, wz / 1050);
+    const ridge = Math.max(0, (0.95 - Math.sqrt(n * n + 0.04)) / 0.75);
+    const spur = fbm(wx / 420, wz / 420, 3, 21);
+    h += m * (mass * (0.62 + ridge * ridge * 0.38) + ridge * ridge * 110 + spur * 85 * (1 - ridge * 0.7) + 45);
+  }
   // 主幹道兩條往外延伸：路面整平
   const onRoad = Math.max(1 - smooth(20, 70, Math.abs(x)), 1 - smooth(20, 70, Math.abs(z)));
-  if (onRoad > 0 && r > 700) h = THREE.MathUtils.lerp(h, h * 0.35, onRoad * (1 - m * 0.7));
+  if (onRoad > 0 && r > 700) h = THREE.MathUtils.lerp(h, h * 0.35, onRoad * (1 - m));
   return h;
 }
 
@@ -236,6 +254,32 @@ class Terrain {
     g.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
     g.setIndex(new THREE.BufferAttribute(idx, 1));
     g.computeVertexNormals();
+    return g;
+  }
+  backdropGeometry() {
+    // 與原地形邊界逐點接合；遠山只用 12 圈網格，不增加碰撞或逐幀更新。
+    const { size, seg } = this, count = seg * 4, rings = 12;
+    const pos = new Float32Array((rings + 1) * (count + 1) * 3), uv = new Float32Array((rings + 1) * (count + 1) * 2);
+    for (let j = 0; j <= rings; j++) for (let i = 0; i <= count; i++) {
+      const side = Math.floor((i % count) / seg), t = (i % seg) / seg * 2 - 1;
+      const bx = [t, 1, -t, -1][side], bz = [-1, t, 1, -t][side];
+      const half = size / 2 + j / rings * 4000, x = bx * half, z = bz * half;
+      const edge = this.height(bx * size / 2, bz * size / 2);
+      const n = noise.noise(x / 1550, 36.7, z / 1550);
+      const ridge = Math.max(0, (0.95 - Math.sqrt(n * n + 0.025)) / 0.8);
+      const far = 380 + ridge * ridge * 1450 + fbm(x / 550, z / 550, 3, 57) * 180;
+      const h = THREE.MathUtils.lerp(edge, far, smooth(0, 1800, half - size / 2));
+      const k = j * (count + 1) + i;
+      pos.set([x, h, z], k * 3); uv.set([x / 15, z / 15], k * 2);
+    }
+    const idx = new Uint32Array(rings * count * 6); let p = 0;
+    for (let j = 0; j < rings; j++) for (let i = 0; i < count; i++) {
+      const a = j * (count + 1) + i, b = a + count + 1;
+      idx.set([a, a + 1, b, a + 1, b + 1, b], p); p += 6;
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.BufferAttribute(pos, 3)); g.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+    g.setIndex(new THREE.BufferAttribute(idx, 1)); g.computeVertexNormals();
     return g;
   }
 }
@@ -296,6 +340,7 @@ function terrainMaterial(A) {
         }`)
       .replace('#include <map_fragment>', `
         vec4 G = ground(vTW.xz);
+        G *= 1.0 - smoothstep(1400.0, 2100.0, length(vTW.xz));
         vec3 grass = texture2D(map, vMapUv).rgb;
         vec3 grass2 = texture2D(map, vMapUv * 0.21 + 0.37).rgb;
         grass = mix(grass, grass2, 0.4);
@@ -303,9 +348,28 @@ function terrainMaterial(A) {
         float dry = tfbm(vTW.xz / 90.0 + 7.0);
         grass *= mix(0.72, 1.18, macro);
         grass = mix(grass, grass * vec3(1.18, 1.05, 0.72), smoothstep(0.45, 0.75, dry) * 0.6);
-        vec3 rock = texture2D(rockD, vTW.xz / 45.0).rgb * vec3(0.95, 0.92, 0.88);
-        float slope = 1.0 - normalize(vTN).y;
-        float rk = smoothstep(0.16, 0.32, slope + (macro - 0.5) * 0.25);
+        vec3 terrainN = normalize(vTN);
+        float slope = 1.0 - terrainN.y;
+        float mountain = smoothstep(1350.0, 1950.0, length(vTW.xz));
+        // 森林覆蓋由坡度與海拔決定，以貼圖表現樹冠，不建立數萬棵遠樹。
+        float treeline = 0.0;
+        if (mountain > 0.001) {
+          float canopy = tn(vTW.xz / 8.0);
+          vec3 forest = mix(vec3(0.038,0.072,0.028), vec3(0.10,0.145,0.048), macro);
+          forest *= mix(0.78, 1.22, canopy);
+          float meadow = smoothstep(0.50, 0.72, dry) * (1.0 - smoothstep(0.08, 0.25, slope));
+          forest = mix(forest, grass * vec3(0.62,0.72,0.42), meadow * 0.65);
+          treeline = smoothstep(1050.0, 1580.0, vTW.y + (macro - 0.5) * 180.0);
+          grass = mix(grass, mix(forest, grass * vec3(0.65,0.70,0.54), treeline), mountain);
+        }
+        vec3 rockW = pow(abs(terrainN), vec3(4.0)); rockW /= max(dot(rockW, vec3(1.0)), 0.001);
+        vec3 rock = texture2D(rockD, vTW.xz / 38.0).rgb;
+        if (mountain > 0.001 && slope > 0.08) rock = texture2D(rockD, vTW.zy / 38.0).rgb * rockW.x
+          + rock * rockW.y + texture2D(rockD, vTW.xy / 38.0).rgb * rockW.z;
+        // 冷灰岩壁、斜向岩層、雨水侵蝕紋；三面投影避免陡坡拉伸。
+        float strata = sin(vTW.y * 0.095 + vTW.x * 0.018 + vTW.z * 0.012 + macro * 9.0) * 0.5 + 0.5;
+        rock *= vec3(0.42,0.46,0.49) * mix(0.82, 1.06, strata) * mix(0.80, 1.12, dry);
+        float rk = smoothstep(0.20, 0.48, slope + (macro - 0.5) * 0.14 + treeline * 0.14);
         vec3 base = mix(grass, rock, rk);
         vec3 asph = texture2D(asphD, vTW.xz / 7.0).rgb;
         asph *= mix(0.85, 1.12, tfbm(vTW.xz / 23.0));
@@ -333,17 +397,36 @@ function terrainMaterial(A) {
         float roughnessFactor = roughness;
         float rG = texture2D(roughnessMap, vRoughnessMapUv).g;
         float rA = texture2D(asphA, vTW.xz / 7.0).g;
-        roughnessFactor = mix(0.72 + rA * 0.28, rG, isGrass);
+        roughnessFactor = mix(0.72 + rA * 0.28, mix(rG, 0.82 + strata * 0.12, rk), isGrass);
         roughnessFactor = mix(roughnessFactor, 0.46 + roadWear * 0.18, G.x * min(wheel, 1.0) * 0.7);
         roughnessFactor = mix(roughnessFactor, 0.55, G.z * 0.6);
       `)
       .replace('vec3 mapN = texture2D( normalMap, vNormalMapUv ).xyz * 2.0 - 1.0;', `
         vec3 nG = texture2D( normalMap, vNormalMapUv ).xyz * 2.0 - 1.0;
         vec3 nA = texture2D( asphN, vTW.xz / 7.0 ).xyz * 2.0 - 1.0;
-        vec3 nR = texture2D( rockN, vTW.xz / 45.0 ).xyz * 2.0 - 1.0;
+        vec3 nR = texture2D( rockN, vTW.xz / 38.0 ).xyz * 2.0 - 1.0;
         vec3 mapN = mix( mix(nG, nR, rk), nA * vec3(0.8,0.8,1.0), 1.0 - isGrass );
         mapN = mix( mapN, vec3(0.0,0.0,1.0), (G.z + G.w) * 0.8 );
-      `);
+      `)
+      .replace('normal = normalize( tbn * mapN );', `
+        normal = normalize( tbn * mapN );
+        if (rk * mountain > 0.001) {
+          vec3 nRX = texture2D(rockN, vTW.zy / 38.0).xyz * 2.0 - 1.0;
+          vec3 nRZ = texture2D(rockN, vTW.xy / 38.0).xyz * 2.0 - 1.0;
+          vec3 rockDetail = vec3(0.0, nRX.y, nRX.x) * rockW.x
+            + vec3(nR.x, 0.0, nR.y) * rockW.y + vec3(nRZ.x, nRZ.y, 0.0) * rockW.z;
+          vec3 rockNormal = normalize(terrainN + rockDetail * 0.30);
+          vec3 rockView = normalize((viewMatrix * vec4(rockNormal, 0.0)).xyz);
+          normal = normalize(mix(normal, rockView, rk * mountain * (1.0 - G.x)));
+        }
+      `)
+      .replace('#include <fog_fragment>', `#include <fog_fragment>
+        #ifdef USE_FOG
+          // 高處仍有空氣散射：補足高度霧在山頂過薄、遠近山黏在一起的問題。
+          float mountainAir = (1.0 - exp(-length(vTW - cameraPosition) * 0.000095)) * mountain;
+          vec3 air = mix(vec3(0.43,0.51,0.59), FOG_SUN_COL, pow(max(dot(normalize(vTW - cameraPosition), FOG_SUN_DIR),0.0),7.0) * 0.55);
+          gl_FragColor.rgb = mix(gl_FragColor.rgb, air, mountainAir);
+        #endif`);
   };
   return mat;
 }
@@ -801,6 +884,9 @@ export class World {
     tmesh.receiveShadow = true;
     scene.add(tmesh);
     this.terrainMesh = tmesh;
+    const mountains = new THREE.Mesh(this.terrain.backdropGeometry(), tmesh.material);
+    mountains.userData.noAO = true;
+    scene.add(mountains); this.mountainMesh = mountains;
 
     this.buildCity();
     this.buildProps();

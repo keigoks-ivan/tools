@@ -12,7 +12,9 @@ async function load(path, query = '') {
   html = html.replace(/(<script type="importmap">)([\s\S]*?)(<\/script>)/, (_, a, json, b) => {
     const map = JSON.parse(json);
     for (const file of ['env.js', 'post.js', 'mechs.js', 'combat.js', 'cockpit.js', 'zero/map.js', 'zero/guns.js', 'zero/viewmodel.js', 'zero/main.js', 'zero/hud.js', 'zero/sfx.js']) {
-      const url = new URL('/game/mech/' + file, location.href).href; map.imports[url] = url + '?qa=' + revision;
+      const url = new URL('/game/mech/' + file, location.href).href;
+      for (const key of Object.keys(map.imports)) if (new URL(key, new URL(path, location.href)).href === url) delete map.imports[key];
+      map.imports[url] = url + '?qa=' + revision;
     }
     return a + JSON.stringify(map) + b;
   });
@@ -162,6 +164,45 @@ async function city() {
   report.textContent = JSON.stringify({ checks: result, triangles, meshes, memory: renderer.info.memory, errors }, null, 2);
   state.textContent = '街景通過';
 }
+async function mountains() {
+  await load('/game/mech/index.html', '?mute&free&x=0&y=140&z=650&yaw=0&pitch=-0.025&fps=0');
+  post = win.__post; renderer = win.__renderer;
+  const W = win.__world;
+  for (const [name, view] of [
+    ['mountains-city', [0, 140, 650, 0, -0.025]],
+    ['mountains-east', [600, 90, 120, -Math.PI / 2, -0.035]],
+    ['mountains-slopes', [-1350, 110, 1200, Math.PI / 4, -0.03]],
+  ]) { win.__cam.set(...view); win.__step(2); await save(name); }
+  const terrain = W.terrainMesh.geometry, T = win.__T;
+  const ray = new T.Raycaster(), down = new T.Vector3(0, -1, 0);
+  for (const seg of [160, 72]) {
+    const field = new W.terrain.constructor(10000, seg), g = field.geometry(), far = field.backdropGeometry();
+    const mesh = new T.Mesh(g, new T.MeshBasicMaterial()); mesh.updateMatrixWorld();
+    for (const [x, z] of [[0,0], [700,700], [-700,-700], [350,-610], [-2800,3150], [1731,-3267]]) {
+      ray.set(new T.Vector3(x, 3000, z), down);
+      const hit = ray.intersectObject(mesh)[0];
+      assert(hit && Math.abs(hit.point.y - field.height(x,z)) < 0.001, `${seg} 格地形：${x},${z} 實際網格與碰撞高度一致`);
+    }
+    const fp = far.attributes.position;
+    let seam = true, winding = true;
+    for (let i = 0; i <= seg * 4; i++) seam &&= Math.abs(fp.getY(i) - field.height(fp.getX(i), fp.getZ(i))) < 0.001;
+    const a = new T.Vector3(), b = new T.Vector3(), c = new T.Vector3();
+    for (let i = 0; i < far.index.count; i += 3) {
+      a.fromBufferAttribute(fp, far.index.getX(i)); b.fromBufferAttribute(fp, far.index.getX(i+1)); c.fromBufferAttribute(fp, far.index.getX(i+2));
+      winding &&= b.sub(a).cross(c.sub(a)).y > 0;
+    }
+    assert(seam && winding && fp.array.every(Number.isFinite), `${seg} 格遠山接縫、三角形方向與頂點正常`);
+    assert(far.index.count / 3 === seg * 96, `${seg} 格遠山維持固定三角形預算`);
+    g.dispose(); far.dispose(); mesh.material.dispose();
+  }
+  assert(W.mountainMesh.material === W.terrainMesh.material && !W.mountainMesh.castShadow && W.mountainMesh.userData.noAO, '遠山共用材質，不投影子、不計 AO');
+  assert(terrain.attributes.position.array.every(Number.isFinite) && terrain.attributes.normal.array.every(Number.isFinite), '山景頂點與法線沒有無效數值');
+  const geometries = new Set(); W.scene.traverse(o => { if (o.geometry) geometries.add(o.geometry); });
+  const triangles = [...geometries].reduce((n,g) => n + (g.index ? g.index.count : g.attributes.position.count) / 3, 0);
+  assert(triangles < 1400000, '山景與城市合計低於 140 萬三角形');
+  report.textContent = JSON.stringify({ checks: result, triangles, memory: renderer.info.memory, errors }, null, 2);
+  state.textContent = errors.length ? '有錯誤' : '山景通過';
+}
 async function tactics() {
   await load('/game/mech/index.html', '?mute&nobrief&fps=0');
   const G = win.__game, T = win.__T; G.launch(5); G.run(3.5); G.player.pos.set(0, 0, 600); G.tick(1 / 60);
@@ -238,4 +279,4 @@ async function weapons() {
   report.textContent = JSON.stringify({ checks: result, metrics, geometries: geometries.size, memory: renderer.info.memory, errors }, null, 2);
   state.textContent = errors.length ? '有錯誤' : '前傳武器通過';
 }
-for (const [id, fn] of [['mech', mech], ['zero', zero], ['tactics', tactics], ['infantry', infantry], ['art', art], ['hero', hero], ['city', city], ['weapons', weapons], ['save', save]]) document.querySelector('#' + id).onclick = () => fn().catch(e => { state.textContent = '失敗'; report.textContent += '\n' + e.stack; });
+for (const [id, fn] of [['mech', mech], ['zero', zero], ['tactics', tactics], ['infantry', infantry], ['art', art], ['hero', hero], ['city', city], ['mountains', mountains], ['weapons', weapons], ['save', save]]) document.querySelector('#' + id).onclick = () => fn().catch(e => { state.textContent = '失敗'; report.textContent += '\n' + e.stack; });
