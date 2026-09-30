@@ -15,6 +15,7 @@ export class HUD {
     this.prompt = null;
     this.obj = null;        // 目標 {p: Vector3, text}
     this.foes = [];         // 要標出來的敵人 {p: 腳底位置, h: 標在多高}（打仗打到找不到人時）
+    this.pins = [];         // 任務標記：要炸的目標、要撿的東西 {p, h}
     this.notes = [];
     this.resize(); addEventListener('resize', () => this.resize());
   }
@@ -85,6 +86,7 @@ export class HUD {
     if (this.obj && !vm.scoped) this._objective(W, H, G);
     // ---- 剩下的敵人（紅色小菱形，在畫面外就貼邊用箭頭指方向）
     if (!vm.scoped) for (const f of this.foes) { const p = f.p.clone(); p.y += f.h; this._pin(W, H, p, P.pos.distanceTo(f.p), RD, 7, false); }
+    if (!vm.scoped) for (const f of this.pins) { const p = f.p.clone(); p.y += f.h; this._pin(W, H, p, P.pos.distanceTo(f.p), AM, 8, true); }
     // ---- 地上的手榴彈（敵人掉的）：15 m 內、還帶得下才標
     if (!vm.scoped && G.nadeN < 5) for (const L of G.loot) { const dd = P.pos.distanceTo(L.p); if (dd < 15) this._lootTag(W, H, L.p, dd, L.n); }
     // ---- 左下：生命＋護盾

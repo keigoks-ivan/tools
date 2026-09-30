@@ -174,7 +174,7 @@ const G = {
     shake(0.4 * (1 - Math.min(1, d / 20)));
   },
 };
-window.__G = G;
+window.__G = G; window.__S = S;   // 測試用
 // 測試用：看目前章節、已清的段落
 window.__flow = { get chapter() { return chapter; }, get done() { return [...done]; }, get active() { return active.map((a) => a.E.id); }, get mech() { return !!mechWalk; } };
 // 可破壞的道具：地圖建好時登記的全部接上
@@ -182,6 +182,8 @@ const D = (G.destruct = new Destruct(G));
 for (const r of placer.reg) D.register(r.name, r.h, r.box);
 for (const w of placer.bagWalls) D.bagWall(w.box, w.bags);
 for (const s of map.b.breakables) D.surface(s);
+// 任務目標（map.targets）接上對應的可破壞物件
+for (const id in map.targets) { const T = map.targets[id]; T.obj = D.objs.find((o) => o.handle === T.h) || null; }
 const _v = new THREE.Vector3(), _w = new THREE.Vector3();
 
 // ---------------------------------------------------------------- 設定
@@ -278,12 +280,68 @@ const doneT = {};   // 每段清完的時間（after＋wait 用）
 function markDone(id, old = false) { done.add(id); doneT[id] = old ? -1e9 : performance.now() / 1000; }   // old＝讀檔／選關還原的，不必再等 wait
 function startEncounter(E) {
   const list = E.enemies.map(spawn);
-  active.push({ E, list, picked: false, t0: G.t, n: list.length });
+  // hold＝守住幾秒（期間一波波增援）；stealth＝別被發現（被發現就叫增援）；targets＝要炸掉的東西；pickups＝要撿的東西（全部都要做完、敵人全倒才算清完）
+  const tg = E.targets ? E.targets.map((id) => map.targets[id] && map.targets[id].obj).filter(Boolean) : null;
+  active.push({ E, list, picked: false, t0: G.t, n: list.length, holdT: 0, wave: 0, spotted: false, tg, got: new Set() });
   for (const [who, text, now] of E.lines) hud.say(who, text, 3.6, now);
   if (E.lines.length) audio.radio('in');
   G.objText = list.length ? E.fight || '擊倒所有敵人' : E.obj;   // 開打後改成「要打誰」，不要還寫著「爬上高架道路」
   hud.obj = E.pickup ? guideObj(E) : null;
   if (E.alarm && !alarmOn) { alarmOn = true; audio.alarm(true); }
+}
+// 這一段做完了沒：守的時間到、目標都炸掉、東西都撿了、敵人全倒
+function encDone(a) {
+  const E = a.E;
+  if (E.hold && a.holdT < E.hold.t) return false;
+  if (E.pickup && !a.picked) return false;
+  if (E.pickups && a.got.size < E.pickups.length) return false;
+  if (a.tg && a.tg.some((o) => o.alive)) return false;
+  return a.list.every((e) => e.dead);
+}
+// 任務進行中：守點的計時與增援、潛行被發現、炸掉目標、撿東西（按 E）
+const mm = (t) => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`;
+function updateMissions(dt) {
+  hud.pins.length = 0;
+  for (const a of active) {
+    const E = a.E;
+    if (E.hold && a.holdT < E.hold.t) {
+      a.holdT += dt;
+      const H = E.hold, due = H.waves ? Math.min(H.waves.length, Math.floor(a.holdT / (H.gap || 15))) : 0;
+      while (a.wave < due) {
+        for (const d of H.waves[a.wave]) a.list.push(spawn({ alert: true, ...d }));
+        if (H.lines && H.lines[a.wave]) for (const [w, t, now] of H.lines[a.wave]) hud.say(w, t, 3.4, now);
+        a.wave++; hud.note('敵方增援', '#ff6a55');
+      }
+      if (a.holdT >= H.t) { hud.note('撐過去了', '#ffb347'); if (H.done) for (const [w, t, now] of H.done) hud.say(w, t, 3.4, now); }
+    }
+    if (E.stealth && !a.spotted && a.list.some((e) => !e.dead && e.state === 'combat')) {
+      a.spotted = true;
+      for (const d of E.stealth.reinforce || []) a.list.push(spawn({ alert: true, ...d }));
+      for (const [w, t, now] of E.stealth.lines || []) hud.say(w, t, 3.4, now ?? true);
+      hud.note('被發現了！', '#ff5b4d');
+      if (E.stealth.alarm && !alarmOn) { alarmOn = true; audio.alarm(true); }
+    }
+    if (a.tg) {
+      const left = a.tg.filter((o) => o.alive);
+      if (left.length !== a.tgLeft) { if (a.tgLeft !== undefined) hud.note(`${E.tgName || '目標'} ${a.tg.length - left.length}/${a.tg.length}`, '#ffb347'); a.tgLeft = left.length; }
+      for (const o of left) hud.pins.push({ p: o.pos, h: 1.2 });
+    }
+    if (E.pickups) {
+      E.pickups.forEach((P, i) => {
+        if (a.got.has(i)) return;
+        const it = map.items[P.id]; if (!it) { a.got.add(i); return; }
+        hud.pins.push({ p: it.p, h: 0.6 });
+        const near = Math.hypot(player.pos.x - it.p.x, player.pos.z - it.p.z) < 2 && Math.abs(player.pos.y - it.p.y) < 1.6;
+        if (!near || player.dead) return;
+        hud.prompt = P.text || '按 E　拿取';
+        if (input.pressed('KeyE') || input.pressed('Tlock')) {
+          a.got.add(i); hud.prompt = null; if (it.h) it.h.hide();
+          hud.note(`${E.itemName || '情報'} ${a.got.size}/${E.pickups.length}`, '#ffb347');
+          if (P.lines) for (const [w, t, now] of P.lines) hud.say(w, t, 3.4, now);
+        }
+      });
+    }
+  }
 }
 // 下一段還沒清的遭遇
 function objective() { return S.ENCOUNTERS.find((E) => E.ch === chapter && !done.has(E.id)); }
@@ -398,7 +456,7 @@ function updateEncounters() {
   }
   // 清完
   for (const a of [...active]) {
-    if (!a.list.every((e) => e.dead) || (a.E.pickup && !a.picked)) continue;
+    if (!encDone(a)) continue;
     active.splice(active.indexOf(a), 1);
     markDone(a.E.id);
     for (const [w, t, now] of a.E.done) hud.say(w, t, 3.6, now);
@@ -427,11 +485,16 @@ function updateEncounters() {
 // 打仗時：左上角多一行「還剩幾個敵人」；剩 3 個以內又 6 秒沒打中人、或 20 秒都沒打中人時，畫面上標出剩下的敵人在哪（不會打完一半找不到人）
 function updateFoes() {
   hud.foes.length = 0; G.objSub = '';
-  const a = active.find((x) => x.list.length); if (!a) return;
-  const left = a.list.filter((e) => !e.dead);
+  const a = active[0]; if (!a) return;
+  const E = a.E, left = a.list.filter((e) => !e.dead), sub = [];
+  if (E.hold) sub.push(a.holdT < E.hold.t ? `撐住 ${mm(E.hold.t - a.holdT)}` : '時間到　清掉剩下的');
+  if (E.stealth && !a.spotted) sub.push('別被發現');
+  if (a.tg) sub.push(`${E.tgName || '目標'} ${a.tg.filter((o) => !o.alive).length}/${a.tg.length}`);
+  if (E.pickups) sub.push(`${E.itemName || '情報'} ${a.got.size}/${E.pickups.length}`);
+  if (left.length) sub.push(`還剩 ${left.length} 個敵人`);
+  G.objSub = sub.join('　');
   if (left.length < a.n) { a.n = left.length; a.t0 = G.t; }   // 有人倒下也算「剛打到」
   if (!left.length) return;
-  G.objSub = `還剩 ${left.length} 個敵人`;
   const quiet = G.t - Math.max(a.t0, G.lastHit);
   if ((left.length <= 3 && quiet > 6) || quiet > 20) for (const e of left) hud.foes.push({ p: e.pos, h: e.type === 'drone' ? 0.7 : 2.2 });
 }
@@ -923,7 +986,7 @@ function frame() {
   updateBolts(dt);
   updateGrenades(dt);
   D.update(dt);
-  if (stage === 'play' && !finale) { updateEncounters(); updateHatch(dt); updatePickup(); updateLoot(); }
+  if (stage === 'play' && !finale) { updateEncounters(); updateHatch(dt); updateMissions(dt); updatePickup(); updateLoot(); }   // updateHatch 每幀先清提示，任務的「按 E」要排在它後面
   updateFoes();
   updateGuide(dt);
   updateMechWalk(dt);

@@ -50,7 +50,12 @@ export function buildMap(scene, mats, solid, PL = null) {
     for (const k of ['kplaster', 'kbrick']) if (mats[k]) { const m = mats[k]; m.onBeforeCompile = (sh) => grimeShader(sh, m); }
   }
   const b = new Builder(mats, solid);
-  const M = { b, lights: [], zones: {}, marks: {} };
+  const M = { b, lights: [], zones: {}, marks: {}, targets: {}, items: {} };
+  // ---- 任務用（script.js 的 targets／pickups 用 id 找）
+  // 要炸掉的目標：可破壞的道具（destruct.js 的 BRK 裡有的模型，例如 portable_generator、utility_box_02）；沒有模型就不放，那一段的「炸掉目標」自動算完成
+  const target = (id, name, x, z, ry = 0, y = 0, o = {}) => { const h = PL && PL.M.has(name) ? PL.add(name, x, y, z, ry, { solid: true, hit: 'metal', ...o }) : null; if (h) M.targets[id] = { h, p: new THREE.Vector3(x, y + 0.9, z) }; };
+  // 要撿的東西（情報、零件）：走近按 E；name＝擺在那裡的模型（可以是 null，只標位置）
+  const item = (id, name, x, y, z, ry = 0, o = {}) => { const h = name && PL && PL.M.has(name) ? PL.add(name, x, y, z, ry, { cast: false, ...o }) : null; M.items[id] = { h, p: new THREE.Vector3(x, y, z) }; };
   // 固定雜湊（不動到地圖 rnd 的順序）、攤位帆布的幾種褪色
   const ph = (x, z) => { const v = Math.sin(x * 12.9898 + z * 78.233) * 43758.5453; return v - Math.floor(v); };
   const TARP = [[0.36, 0.46, 0.6], [0.62, 0.3, 0.24], [0.44, 0.47, 0.34], [0.76, 0.72, 0.64], [0.72, 0.46, 0.24]];
