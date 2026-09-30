@@ -96,6 +96,11 @@ def main():
     current_stock = cw.get("current_onsale_stock")
     future_new = cw.get("future_4q_new_supply_total")
     trailing_absorb = cw.get("trailing_4q_absorption_total")
+    # 首頁（結論、卡片、關鍵圖）的一年轉手量統一用「桃園各區比較」的官方口徑（所有屋齡、
+    # 只排除預售交屋登記與親友/員工交易），跟行政區比較同一個數字，避免同一頁出現兩個轉手量。
+    _qd_resale = ((compare or {}).get("qingpu_district_row") or {}).get("resale_1y")
+    if _qd_resale:
+        trailing_absorb = float(_qd_resale)
     total_to_sell = (
         round(current_stock + future_new)
         if current_stock is not None and future_new is not None
@@ -150,28 +155,141 @@ def main():
         "scope_note": "青埔全區、所有屋齡坪數；賣掉速度用近4季轉手成交季均，未來各季不變",
     }
 
-    # -- 三句話結論（白話、結論先行，跟其他 compute 腳本一樣文字寫在這裡） ----
+    # -- 結論與各章一句話結論：規則式，先下判斷、再用數字撐；每月跟著資料重寫 --------
+    def fi(x):
+        return f"{int(round(x)):,}" if x is not None else "--"
+
+    def f1(x):
+        return f"{x:.1f}" if x is not None else "--"
+
+    cmp_ = compare or {}
+    zones = cmp_.get("zones") or []
+    qz = next((z for z in zones if z.get("id") == "qingpu"), {})
+    qvd = cmp_.get("qingpu_vs_taoyuan_districts") or {}
+    city = cmp_.get("city") or {}
+    dist_rows = cmp_.get("districts") or []
+    # 青埔在行政區口徑下的轉手/換手率（所有屋齡）
+    q_turn = None
+    for b in ((cmp_.get("report") or {}).get("arguments") or []):
+        if b.get("key") == "liquidity":
+            for r in b.get("table") or []:
+                if r.get("is_qingpu"):
+                    q_turn = r.get("turnover_pct")
+    city_turn = city.get("turnover_pct")
+    def zn(z):
+        return (z.get("name") or "").replace("（龜山）", "")
+
+    ranked_zones = [z for z in zones if not z.get("small_sample") and z.get("id") != "qingpu"]
+
+    pop = demand.get("population") or {}
+    hg = pop.get("household_growth_yoy") or {}
+    latest_pop = pop.get("latest") or {}
+    tv = demand.get("transaction_volume") or {}
+    yoy = tv.get("yoy") or {}
+    aff = demand.get("affordability") or {}
+    aff_rows = {r.get("size_bucket"): r for r in (aff.get("rows") or [])}
+
+    sup = supply_demand.get("supply") or {}
+    unsold = sup.get("unsold") or {}
+    rel = sup.get("release_rate") or {}
+    fq4 = (rel.get("future_quarters") or [])[:4]
+    handover_4q = sum((q.get("units_handover") or 0) for q in fq4)
+
+    facts = outlook.get("premium_index_facts") or {}
+    last4 = facts.get("last4_complete") or {}
+    low = facts.get("lowest_n_ge_min") or {}
+    peak = facts.get("peak") or {}
+
     sentences = []
-    if yx_median_ask is not None:
-        sentences.append(
-            f"仰森591去重後在售約 {n_onsale} 戶，開價中位數 {fmt1(yx_median_ask)} 萬/坪（已扣車位）。"
+    # 1. 現在的問題：供給多，不是沒人買
+    qd = cmp_.get("qingpu_district_row") or {}
+    qc, cc = qz.get("ratio_completed_to_resale"), city.get("ratio_completed_to_resale")
+    qdc = qd.get("ratio_completed_to_resale")
+    if qdc is not None and cc is not None:
+        lead = (
+            "青埔現在的問題是要賣的房子太多，不是沒人買"
+            if (qvd.get("rank_completed") == 1 and q_turn is not None and city_turn is not None and q_turn >= city_turn)
+            else ("青埔的供給壓力高於全市，成交量能也偏弱" if (q_turn is not None and city_turn is not None and q_turn < city_turn)
+                  else "青埔的供給壓力高於全市")
         )
-    if uplift_out["median"] is not None:
-        sentences.append(
-            f"同建案轉手成交比預售價中位數貴 {fmt_pct0(uplift_out['median'])}，"
-            f"樣本是 {uplift_out['n_projects']} 個建案。"
-        )
+        s1 = (f"{lead}：近一年蓋好 {fi(qd.get('completed_1y_units'))} 戶，是一年轉手 {fi(qd.get('resale_1y'))} 戶的 {f1(qdc)} 倍"
+              f"（全市 {f1(cc)} 倍，全桃園最高）" if qvd.get("rank_completed") == 1 else f"（全市 {f1(cc)} 倍）")
+        if q_turn is not None and city_turn is not None:
+            s1 += f"；但換手率 {q_turn:.2f}% 也高於全市 {city_turn:.2f}%"
+        sentences.append(s1 + "。")
+    # 2. 未來：還有一波，但不是重劃區裡最重的
+    qu = qz.get("ratio_unfinished_to_resale")
+    qdu = qd.get("ratio_unfinished_to_resale")
+    if qu is not None and qdu is not None:
+        heavier = sorted([z for z in ranked_zones if (z.get("ratio_unfinished_to_resale") or 0) > qu],
+                         key=lambda z: -z["ratio_unfinished_to_resale"])
+        lighter = sorted([z for z in ranked_zones if z.get("ratio_unfinished_to_resale") is not None and z["ratio_unfinished_to_resale"] < qu],
+                         key=lambda z: z["ratio_unfinished_to_resale"])
+        s2 = (f"未來兩三年還有一波：還沒蓋好的 {fi(qd.get('unfinished_units'))} 戶是一年轉手的 {f1(qdu)} 倍，"
+              f"在全桃園排第 {qvd.get('rank_unfinished')}（全市 {f1(city.get('ratio_unfinished_to_resale'))} 倍）")
+        if heavier:
+            s2 += "；但只比新房子的話，重劃區裡 " + "、".join(f"{zn(z)} {f1(z['ratio_unfinished_to_resale'])} 倍" for z in heavier[:2]) + f"比青埔（{f1(qu)} 倍）更重"
+        if lighter:
+            s2 += f"，{zn(lighter[0])}（{f1(lighter[0]['ratio_unfinished_to_resale'])} 倍）較輕"
+        sentences.append(s2 + "。")
+    # 3. 需求：人在進來
+    if hg.get("growth_rate") is not None:
+        s3 = f"需求在長：青埔村里戶數一年增加 {fi(hg.get('new_households'))} 戶（+{hg['growth_rate']*100:.1f}%）"
+        if yoy.get("change_pct") is not None:
+            s3 += f"，{yoy.get('latest_quarter')} 成交 {fi(yoy.get('latest_total'))} 件、比去年同季{'多' if yoy['change_pct']>=0 else '少'} {abs(yoy['change_pct'])*100:.0f}%"
+        sentences.append(s3 + "。")
+    # 4. 價格：撐住，但上檔被壓
+    if uplift_out["median"] is not None and last4.get("median") is not None:
+        s4 = (f"價格撐住但往上的空間被供給壓著：同建案轉手比預售貴 {fmt_pct0(uplift_out['median'])}（{uplift_out['n_projects']} 案）；"
+              f"轉手價是預售價的 {last4['median']:.2f} 倍（近四季），")
+        if peak.get("median") is not None:
+            s4 += f"低於 2024 高點的 {peak['median']:.2f} 倍"
+        sentences.append(s4 + "。")
+    # 5. 對賣方
     if total_to_sell is not None and one_year_sold is not None:
-        left_clause = f"，照這個速度一年後約有 {gap} 戶還沒賣掉" if gap is not None and gap > 0 else ""
         sentences.append(
-            f"青埔現在在售加上未來一年新增，要賣的約 {total_to_sell} 戶；"
-            f"近一年轉手成交約 {one_year_sold} 戶{left_clause}。"
+            f"對賣方來說，開價決定要排多久：現在在售（591 去重後）加上未來一年新增約 {fi(total_to_sell)} 戶，"
+            f"近一年轉手約 {fi(one_year_sold)} 戶，照這個速度一年後約 {fi(gap)} 戶還沒賣掉。"
         )
-    # 青埔在桃園各區/重劃區裡的位置：讀 compare.json（compute_compare.py 產出），
-    # 沒有這個檔案（例如剛換版本、還沒跑過一次）就不加這句，不擋其他結論。
-    compare_bullets = ((compare or {}).get("report") or {}).get("conclusion_bullets") or []
-    if compare_bullets:
-        sentences.append(compare_bullets[0] + "詳見「青埔在哪個位置」。")
+
+    chapter = {}
+    s_sup = f"未來一年供給集中：未來 4 季預計交屋約 {fi(handover_4q)} 戶（逾期未完工的案子平均攤入）"
+    if unsold.get("total_unsold") is not None:
+        s_sup += f"；還沒完工的案子裡，建商手上還沒賣掉約 {fi(unsold['total_unsold'])} 戶（{unsold.get('n_selling', 0)} 個案子近 6 個月仍在簽約）"
+    if rel.get("median") is not None:
+        s_sup += f"；已賣掉的交屋後約 {rel['median']*100:.1f}% 會拿出來賣"
+    if cw.get("future_4q_new_supply_total") is not None:
+        s_sup += f"，合計推估未來 4 季新增待售約 {fi(cw['future_4q_new_supply_total'])} 戶"
+    chapter["supply"] = s_sup + "。"
+
+    s_dem = ""
+    if hg.get("growth_rate") is not None:
+        s_dem = f"需求在長，但買得起的門檻高：戶數一年 +{hg['growth_rate']*100:.1f}%（{fi(hg.get('new_households'))} 戶）"
+        if latest_pop.get("age_25_44_share") is not None:
+            s_dem += f"，25–44 歲占 {latest_pop['age_25_44_share']*100:.0f}%"
+    small = aff_rows.get("small") or {}
+    if small.get("median_total_price_wan") is not None and small.get("pir") is not None:
+        s_dem += (f"；小坪（2 房）總價中位 {fi(small['median_total_price_wan'])} 萬，是桃園家庭一年可支配所得的 {small['pir']:.1f} 倍"
+                  f"，房貸月付約 {small.get('mortgage_monthly', 0)/10000:.1f} 萬")
+    chapter["demand"] = (s_dem or "需求資料不足") + "。"
+
+    if last4.get("median") is not None:
+        chapter["price"] = (
+            f"同建案轉手價近四季是預售價的 {last4['median']:.2f} 倍"
+            + (f"（2024 高點 {peak['median']:.2f} 倍、{low.get('quarter')} 低點 {low['value']:.2f} 倍）" if peak.get("median") and low.get("value") else "")
+            + "；過去資料裡供給多寡和後續價格沒有穩定關係，所以只給三種情況、不給漲跌幅。"
+        )
+    zone_card = None
+    if qdc is not None:
+        zone_card = {
+            "ratio_completed": qdc,  # 行政區口徑（所有屋齡），跟全市數字可以直接比
+            "ratio_completed_new_only": qc,
+            "rank_completed_taoyuan": qvd.get("rank_completed"),
+            "n_taoyuan": qvd.get("n"),
+            "rank_completed_zones": qz.get("rank_completed"),
+            "n_zones": cmp_.get("n_zones"),
+            "city_ratio_completed": cc,
+        }
 
     result = {
         "generated_at": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
@@ -190,6 +308,8 @@ def main():
         "scenarios": scenarios,
         "key_chart": key_chart,
         "sentences": sentences,
+        "chapter_conclusions": chapter,
+        "zone_card": zone_card,
     }
 
     with open(config.SUMMARY_JSON, "w", encoding="utf-8") as f:

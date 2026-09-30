@@ -318,6 +318,10 @@ function showOverviewError(err) {
   var sEl = document.getElementById('overview-sentences');
   if (sEl) sEl.innerHTML = '';
 }
+function chapterConclusion(k) {
+  return (SUMMARY && SUMMARY.chapter_conclusions && SUMMARY.chapter_conclusions[k]) || '';
+}
+
 function renderOverview() {
   if (!SUMMARY) return;
   var yx = SUMMARY.yx_current || {};
@@ -334,8 +338,8 @@ function renderOverview() {
     overviewCard('一年要賣 vs 賣得掉', fmtInt(sv.total_to_sell) + ' 戶　vs　' + fmtInt(sv.one_year_sold) + ' 戶', '現在在售＋未來4季新增　vs　近4季轉手成交×1年'),
     overviewCard('轉手比預售貴多少', up.median != null ? fmtPct(up.median, 0) : '--', '同建案中位漲幅，n=' + fmtInt(up.n_projects) + ' 個建案'),
     overviewCard('轉手價是預售價的幾倍', mid.multiplier != null ? fmt(mid.multiplier, 2) + ' 倍' : '--', '收斂 ' + (conv.multiplier != null ? fmt(conv.multiplier, 2) : '--') + ' 倍・回升 ' + (rise.multiplier != null ? fmt(rise.multiplier, 2) : '--') + ' 倍'),
-    overviewCard('青埔跟其他重劃區比', qzone && qzone.rank_completed != null ? fmt(qzone.ratio_completed_to_resale, 1) + ' 倍完工壓力' : '--',
-      qzone && qzone.rank_completed != null ? (COMPARE.n_zones || 0) + '個重劃區（含青埔）裡第' + qzone.rank_completed + '高；換手率 ' + fmt(qzone.turnover_pct, 2) + '%（詳見「青埔在哪個位置」）' : '詳見「青埔在哪個位置」章節'),
+    overviewCard('近一年蓋好的是一年轉手的幾倍', SUMMARY.zone_card ? fmt(SUMMARY.zone_card.ratio_completed, 1) + ' 倍' : '--',
+      SUMMARY.zone_card ? '全桃園第 ' + (SUMMARY.zone_card.rank_completed_taoyuan || '--') + ' 高（全市 ' + fmt(SUMMARY.zone_card.city_ratio_completed, 1) + ' 倍）；只比新房子的話，重劃區 ' + (SUMMARY.zone_card.n_zones || '--') + ' 個裡第 ' + (SUMMARY.zone_card.rank_completed_zones || '--') + ' 高' : '詳見「青埔在哪個位置」'),
   ];
   document.getElementById('overview-cards').innerHTML = cards.join('');
 
@@ -742,7 +746,7 @@ function renderSupplySection() {
   renderReleaseRateAll();
   renderNewLaunchesAndNewhouse();
   var h = SUPPLY.supply.handover || {};
-  document.getElementById('supply-conclusion').textContent = '共 ' + (h.total_projects || 0) + ' 個青埔預售建案對到官方備查資料；建照核發到第1次登記中位落後 ' + fmtInt(h.lag_median_days) + ' 天（n=' + (h.lag_n || 0) + '）。';
+  document.getElementById('supply-conclusion').textContent = chapterConclusion('supply') || ('共 ' + (h.total_projects || 0) + ' 個青埔預售建案對到官方備查資料。');
   document.getElementById('projects-status-filter').addEventListener('change', renderProjectsTable);
 }
 
@@ -891,7 +895,7 @@ function renderCrosswalkSection() {
     ], cw.rows || []);
   var hg = cw.household_growth_implied_demand || {};
   document.getElementById('crosswalk-conclusion').textContent = '現在在售約 ' + fmtInt(cw.current_onsale_stock) + ' 戶＋未來4季新增待售約 ' + fmtInt(Math.round(cw.future_4q_new_supply_total)) + ' 戶＝約 ' + fmtInt(Math.round(cw.current_onsale_stock + cw.future_4q_new_supply_total)) + ' 戶，照近4季中古成交速度同期約可賣掉 ' + fmtInt(Math.round(cw.trailing_4q_absorption_total)) + ' 戶；家戶成長推算新增自住需求約 ' + (hg.implied_new_ownership_demand != null ? fmtInt(hg.implied_new_ownership_demand) + ' 戶（假設轉化比例' + fmtPct(hg.ownership_share_assumption, 0) + '）' : '--') + '。';
-  document.getElementById('crosswalk-method').innerHTML = '<ul><li>「未來4季新增待售」是壓力測試過供給結構、交屋後拿出來賣的比例算好的新增待售，不是新增交屋戶數本身；「近4季成交」只用轉手成交（不含預售）。</li><li>差距>0代表未來供給快於近期成交速度，差距<0反過來；這是速度比較，不是存量比較。</li><li>家戶成長推算需求＝新增家戶數(YoY) × 假設的自住購屋轉化比例（明確標註的假設值，不是實測），且沒有拆坪數帶，只能跟總量對照。</li></ul>';
+  document.getElementById('crosswalk-method').innerHTML = '<ul><li>這張表的「近4季成交」按坪數拆、只算有坪數資料的轉手，而且排除親友、員工、含裝潢、瑕疵屋等特殊交易，所以比結論章的一年轉手量少。</li><li>「未來4季新增待售」是壓力測試過供給結構、交屋後拿出來賣的比例算好的新增待售，不是新增交屋戶數本身；「近4季成交」只用轉手成交（不含預售）。</li><li>差距>0代表未來供給快於近期成交速度，差距<0反過來；這是速度比較，不是存量比較。</li><li>家戶成長推算需求＝新增家戶數(YoY) × 假設的自住購屋轉化比例（明確標註的假設值，不是實測），且沒有拆坪數帶，只能跟總量對照。</li></ul>';
 }
 
 function renderDemandSection() {
@@ -904,7 +908,7 @@ function renderDemandSection() {
   renderPopulationSection();
   renderAffordabilitySection();
   renderCrosswalkSection();
-  document.getElementById('demand-conclusion').textContent = '成交量、租賃需求、人口家戶、購屋負擔、供需對照見以下各小節。';
+  document.getElementById('demand-conclusion').textContent = chapterConclusion('demand') || '成交量、租賃需求、人口家戶、購屋負擔、供需對照見以下各小節。';
 }
 
 /* ===========================================================================
@@ -955,7 +959,7 @@ function renderPriceOutlook() {
   }
   document.getElementById('outlook-scope-note').textContent = OUTLOOK.scope_note;
   var moi = OUTLOOK.current_moi;
-  document.getElementById('outlook-moi-note').innerHTML = '591去重後同類型在售 ' + fmtInt(moi.n_listings) + ' 戶，開價中位數 ' + fmt(moi.median_ask, 2) + ' 萬/坪；同類型轉手月均成交 ' + fmt(moi.monthly_absorption, 2) + ' 戶/月（近' + moi.window_months + '個月，扣最後' + moi.lag_months + '個月落後月）。<strong>照這個速度，現在這批存貨大約還要 ' + (moi.moi != null ? fmt(moi.moi, 1) + ' 個月賣完' : '--') + '</strong>。<br>' + esc(deJargon(moi.caveat) || '');
+  document.getElementById('outlook-moi-note').innerHTML = '591去重後同類型在售 ' + fmtInt(moi.n_listings) + ' 戶，開價中位數 ' + fmt(moi.median_ask, 2) + ' 萬/坪；同類型轉手月均成交 ' + fmt(moi.monthly_absorption, 2) + ' 戶/月（近' + moi.window_months + '個月，扣最後' + moi.lag_months + '個月落後月）。這組在售數來自 591（同一戶多則刊登已合併，仍含不會成交的試探開價），只拿來看每月的變化方向，不拿來算幾個月賣完。<br>' + esc(deJargon(moi.caveat) || '');
   renderOutlookHistoryChart();
 
   var proj = OUTLOOK.projection;
@@ -984,7 +988,7 @@ function renderPriceOutlook() {
   document.getElementById('outlook-supply-context-note').innerHTML = '未來4季預估新增待售約 ' + fmt(sc.future_4q_new_supply, 1) + ' 戶，同期預估賣出約 ' + fmt(sc.future_4q_absorption, 1) + ' 戶。<br>觀察（不是預測）：預售簽約量從' + esc(pv.baseline_year) + '年季均' + fmt(pv.baseline_avg_per_quarter, 1) + '件，到' + esc(pv.since_quarter) + '起季均降到' + fmt(pv.recent_avg_per_quarter, 1) + '件，變化' + (pv.change_pct != null ? fmtPct(pv.change_pct) : '--') + '；同一段期間轉手/預售倍數從' + fmt(sc.premium_index_at_shrink_start, 4) + '到' + fmt(sc.premium_index_latest_complete_value, 4) + '（' + esc(sc.premium_index_latest_complete_quarter) + '）。' + esc(deJargon(sc.observation_note) || '');
   document.getElementById('outlook-recalc-note').textContent = OUTLOOK.recalc_note;
 
-  document.getElementById('outlook-conclusion').textContent = '青埔同建案轉手價近4完整季中位數為預售價的 ' + fmt(last4.median, 2) + ' 倍；供給壓力和後續價格在過去資料裡沒有穩定關係（R²=' + (calib.r2 != null ? fmt(calib.r2, 2) : '--') + '），所以只列三個情境、不給漲跌幅。';
+  document.getElementById('outlook-conclusion').textContent = chapterConclusion('price') || '同建案轉手價與三種情況見下方。';
   document.getElementById('outlook-method').innerHTML = '<ul><li>轉手/預售倍數＝每筆中古成交單價 ÷ 該建案預售單價中位數，取季中位數；這樣不同建案放在一起比，才不會被新舊產品世代混雜的假趨勢誤導，自2021Q3起。</li><li>三個情境（維持/收斂/回升）只輸出倍數本身，不綁定任何特定戶別；套用到哪一戶由「戶別試算」分頁決定。</li><li>歷史校準回歸n或R²沒過門檻時，只是記錄「查過供給壓力對未來價格變化的解釋力，沒查到關係」，不拿來配價格路徑。</li></ul>';
 }
 

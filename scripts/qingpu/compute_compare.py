@@ -110,12 +110,8 @@ def load_resale_rows(seasons):
     橫跨 seasons 全部季別。季別檔抓不到（還沒公布）就退回歷史批次(1/11/21)＋最新
     一批補該季，跟 fetch_lvr.py 抓最新資料用同一組端點/快取。
 
-    實測發現：最新一季的「季別檔」（DownloadSeason）即使下載成功，內容也可能還在
-    持續更新、比對照組（本站逐月累積的 deals.json）明顯少了不少筆——政府季別檔
-    看起來要再過一段時間才會定案。所以最後一季無論季別檔有沒有抓到，都再疊上
-    歷史批次＋最新一批補（去重後只會補到季別檔漏掉的，不會重複算）；較舊三季
-    實測跟逐月累積的結果差在一成以內，不用額外補。這是本頁「一年轉手量」在最新
-    一季可能偏低的已知限制，寫進「怎麼算的」。"""
+    seasons 是「公布季別」，要涵蓋到今天（見 main 的說明）；最後一季（今天所在季）
+    還沒有季別檔，改用歷史批次＋最新一批。"""
     h_by_id, f_by_id = {}, {}
     for i, season in enumerate(seasons):
         season_ok = False
@@ -148,8 +144,14 @@ def load_resale_rows(seasons):
     return h_by_id, f_by_id
 
 
+RESIDENTIAL_TYPES = ("住宅大樓", "華廈", "公寓", "透天厝")
+
+
 def resale_qualifies(row, period_start, period_end):
     if "建物" not in (row.get("交易標的") or ""):
+        return False
+    # 只算住宅（跟本站其他章節一致），店面、辦公、廠辦不算
+    if "住" not in (row.get("主要用途") or "") and not any(t in (row.get("建物型態") or "") for t in RESIDENTIAL_TYPES):
         return False
     note = (row.get("備註") or "").strip()
     if EXCLUDE_NOTE_RE.search(note):
@@ -165,6 +167,18 @@ def resale_qualifies(row, period_start, period_end):
     return True
 
 
+def _is_new_building(row, min_year):
+    if not min_year:
+        return True
+    c = fetch_lvr._roc_to_date(row.get("建築完成年月"))
+    if c is None:
+        raw = (row.get("建築完成年月") or "").strip()
+        if len(raw) >= 3 and raw[:3].isdigit():
+            return int(raw[:3]) + 1911 >= min_year
+        return False
+    return c.year >= min_year
+
+
 def count_resale_by_district(h_by_id, period_start, period_end):
     counts = Counter()
     for row in h_by_id.values():
@@ -176,10 +190,12 @@ def count_resale_by_district(h_by_id, period_start, period_end):
     return counts
 
 
-def count_resale_qingpu(h_by_id, period_start, period_end):
+def count_resale_qingpu(h_by_id, period_start, period_end, min_year=None):
     n = 0
     for row in h_by_id.values():
         if not resale_qualifies(row, period_start, period_end):
+            continue
+        if not _is_new_building(row, min_year):
             continue
         d = (row.get("鄉鎮市區") or "").strip()
         addr = (row.get("土地位置建物門牌") or "").strip()
@@ -188,12 +204,14 @@ def count_resale_qingpu(h_by_id, period_start, period_end):
     return n
 
 
-def count_resale_zone(rows_by_id, zone, period_start, period_end):
+def count_resale_zone(rows_by_id, zone, period_start, period_end, min_year=None):
     district = zone["district"]
     roads = zone.get("roads")
     n = 0
     for row in rows_by_id.values():
         if not resale_qualifies(row, period_start, period_end):
+            continue
+        if not _is_new_building(row, min_year):
             continue
         d = (row.get("鄉鎮市區") or "").strip()
         if d != district:
@@ -370,7 +388,7 @@ def safe_div(a, b):
 def rank_desc(rows, key):
     """rows 是 list[dict]，依 key 由大到小排名（1=最高），None 值排最後、不給名次。
     回傳 {row_index: rank}。"""
-    valid = [(i, r[key]) for i, r in enumerate(rows) if r.get(key) is not None]
+    valid = [(i, r[key]) for i, r in enumerate(rows) if r.get(key) is not None and not r.get("small_sample")]
     valid.sort(key=lambda t: t[1], reverse=True)
     ranks = {}
     for pos, (i, _v) in enumerate(valid, start=1):
@@ -392,6 +410,8 @@ def build_row(name, resale_1y, unfinished, completed_1y, households, extra=None)
         "ratio_completed_to_resale": round(ratio_completed, 2) if ratio_completed is not None else None,
         "turnover_pct": round(turnover_pct, 2) if turnover_pct is not None else None,
     }
+    # 一年轉手太少，比值會被分母放大，列出數字但不參加排名
+    row["small_sample"] = resale_1y is not None and resale_1y < config.COMPARE_MIN_RESALE_FOR_RANK
     if extra:
         row.update(extra)
     return row
@@ -409,8 +429,16 @@ def main():
     status = "ok"
     message = ""
 
+    # 實價登錄是「依公布時間」分檔，不是依成交日：成交後 30 天內申報、再過約一個月公布，
+    # 期間最後一季的成交大多落在下一季（甚至下下季）才公布。所以要從期間第一季一路讀到
+    # 今天所在的公布季，只讀到期間最後一季會把最後一季少算一大截。
+    pub_seasons = list(seasons)
+    today_season = _season_of_date(today)
+    while pub_seasons[-1] != today_season:
+        pub_seasons.append(_next_season(pub_seasons[-1]))
+    log(f"讀取公布季別：{pub_seasons}")
     try:
-        h_by_id, f_by_id = load_resale_rows(seasons)
+        h_by_id, f_by_id = load_resale_rows(pub_seasons)
         log(f"買賣(A檔)：桃園市原始 {len(h_by_id)} 筆、新北市 {len(f_by_id)} 筆（去重後，未套用期間/條件篩選）")
     except Exception as e:  # noqa: BLE001
         status, message = "fail", f"load_resale_rows: {e}"
@@ -459,6 +487,7 @@ def main():
     city_row = build_row("桃園全市", resale_city_total, city_unfinished, city_completed_1y, hh_city_total)
 
     # -- 青埔＋重劃區 -----------------------------------------------------------
+    MIN_YEAR = config.ZONE_RESALE_MIN_COMPLETION_YEAR
     zone_rows = []
     sanity_top_projects = {}
     for zone in config.ZONES:
@@ -477,8 +506,8 @@ def main():
                         reg_date = fetch_lvr._roc_to_date(reg_roc)
                         if reg_date is not None and (today - datetime.timedelta(days=365)) <= reg_date <= today:
                             completed_1y += hh
-            resale_1y = resale_qingpu
-            households = hh_qingpu
+            resale_1y = count_resale_qingpu(h_by_id, period_start, period_end, min_year=MIN_YEAR)
+            households = None  # 重劃區表不算換手率：里界跟路名框出來的範圍對不齊
             top5 = sorted(
                 [r for r in buildcase_h if config.is_qingpu_address(r["district"], r["road"]) and r["households"]],
                 key=lambda r: r["households"], reverse=True,
@@ -486,11 +515,11 @@ def main():
         else:
             city_prefix = zone.get("file_prefix", "h")
             rows_by_id = f_by_id if city_prefix == "f" else h_by_id
-            resale_1y = count_resale_zone(rows_by_id, zone, period_start, period_end)
+            resale_1y = count_resale_zone(rows_by_id, zone, period_start, period_end, min_year=MIN_YEAR)
             bc_rows = buildcase_f if city_prefix == "f" else buildcase_h
             roads = zone.get("roads")
             unfinished, completed_1y = buildcase_supply(bc_rows, today, district=zone["district"], roads=roads)
-            households = households_zone(pop_rows, zone)
+            households = None  # 同上
             top5 = top_projects_by_households(bc_rows, district=zone["district"], roads=roads, n=5)
 
         row = build_row(zone["name"], resale_1y, unfinished, completed_1y, households, extra={"id": zid})
@@ -504,11 +533,13 @@ def main():
         row["rank_unfinished"] = rzu.get(i)
         row["rank_completed"] = rzc.get(i)
         row["rank_turnover"] = rzt.get(i)
-    n_zones = len(zone_rows)
+    n_zones = len([r for r in zone_rows if not r.get("small_sample")])  # 參加排名的重劃區數
 
-    # 青埔插入13個行政區排名裡的位置（「全桃園第N高」用）
     qingpu_row = next(r for r in zone_rows if r["id"] == "qingpu")
-    combined_for_rank = district_rows + [qingpu_row]
+    # 跟13個行政區比時，青埔要用跟行政區一樣的口徑（所有屋齡的轉手、村里總戶數）
+    qingpu_dist_row = build_row("青埔", resale_qingpu, qingpu_row["unfinished_units"], qingpu_row["completed_1y_units"],
+                                hh_qingpu, extra={"id": "qingpu"})
+    combined_for_rank = district_rows + [qingpu_dist_row]
     cru = rank_desc(combined_for_rank, "ratio_unfinished_to_resale")
     crc = rank_desc(combined_for_rank, "ratio_completed_to_resale")
     crt = rank_desc(combined_for_rank, "turnover_pct")
@@ -530,11 +561,12 @@ def main():
         for z in config.ZONES
     }
 
-    report = build_report(qingpu_row, zone_rows, district_rows, city_row, qingpu_vs_districts,
+    report = build_report(qingpu_row, qingpu_dist_row, zone_rows, district_rows, city_row, qingpu_vs_districts,
                            n_districts, n_zones, sanity_top_projects, period_start, period_end)
 
     payload = {
         "generated_at": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
+        "qingpu_district_row": qingpu_dist_row,
         "status": status,
         "message": message,
         "period": {
@@ -581,11 +613,13 @@ def _rank_phrase(rank, total, unit_label):
         return f"{total}個{unit_label}裡最高"
     if rank == total:
         return f"{total}個{unit_label}裡最低"
+    if rank > (total + 1) / 2:
+        return f"{total}個{unit_label}裡第{total - rank + 1}低"
     return f"{total}個{unit_label}裡第{rank}高"
 
 
 def _closest_peer(qingpu_row, zone_rows, key):
-    others = [r for r in zone_rows if r["id"] != "qingpu" and r.get(key) is not None]
+    others = [r for r in zone_rows if r["id"] != "qingpu" and not r.get("small_sample") and r.get(key) is not None]
     if not others or qingpu_row.get(key) is None:
         return None
     others.sort(key=lambda r: abs(r[key] - qingpu_row[key]))
@@ -597,54 +631,59 @@ def _higher_than_qingpu(zone_rows, qingpu_row, key):
     q = qingpu_row.get(key)
     if q is None:
         return []
-    out = [r for r in zone_rows if r["id"] != "qingpu" and r.get(key) is not None and r[key] > q]
+    out = [r for r in zone_rows if r["id"] != "qingpu" and not r.get("small_sample") and r.get(key) is not None and r[key] > q]
     out.sort(key=lambda r: r[key], reverse=True)
     return out
 
 
-def build_report(qingpu_row, zone_rows, district_rows, city_row, qvd, n_districts, n_zones,
+def build_report(qingpu_row, qingpu_dist_row, zone_rows, district_rows, city_row, qvd, n_districts, n_zones,
                   sanity_top_projects, period_start, period_end):
     period_label = f"{period_start.isoformat()}~{period_end.isoformat()}"
     qc = qingpu_row.get("ratio_completed_to_resale")
     qu = qingpu_row.get("ratio_unfinished_to_resale")
-    qt = qingpu_row.get("turnover_pct")
+    qt = qingpu_dist_row.get("turnover_pct")
     cc = city_row.get("ratio_completed_to_resale")
     ct = city_row.get("turnover_pct")
 
     # -- 結論（3-5句，每句一個數字）------------------------------------------
     bullets = []
+    qdc = qingpu_dist_row.get("ratio_completed_to_resale")
+    qdu = qingpu_dist_row.get("ratio_unfinished_to_resale")
+    cu = city_row.get("ratio_unfinished_to_resale")
+    if qdc is not None:
+        bullets.append(
+            f"跟桃園各行政區比（所有屋齡）：青埔近一年完工戶數是一年轉手量的 {qdc:.1f} 倍，"
+            f"{_rank_phrase(qvd.get('rank_completed'), qvd.get('n'), '候選（13個行政區＋青埔）')}，全市 {cc:.1f} 倍；"
+            f"還沒蓋好的是 {qdu:.1f} 倍，{_rank_phrase(qvd.get('rank_unfinished'), qvd.get('n'), '候選')}，全市 {cu:.1f} 倍。"
+        )
     if qc is not None:
         bullets.append(
-            f"青埔近一年完工戶數是一年轉手量的 {qc:.1f} 倍，"
-            f"{_rank_phrase(qingpu_row.get('rank_completed'), n_zones, '重劃區（含青埔本身）')}"
-            f"，桃園全市平均是 {cc:.1f} 倍。"
-        )
-    if qu is not None:
-        bullets.append(
-            f"青埔還沒蓋好的戶數是一年轉手量的 {qu:.1f} 倍，"
-            f"{_rank_phrase(qingpu_row.get('rank_unfinished'), n_zones, '重劃區（含青埔本身）')}"
-            f"，插入全桃園13個行政區一起比，"
-            f"{_rank_phrase(qvd.get('rank_unfinished'), qvd.get('n'), '候選（13個行政區＋青埔）')}。"
+            f"跟其他重劃區比（只算 {config.ZONE_RESALE_MIN_COMPLETION_YEAR} 年後完工的房子）：青埔近一年完工是一年轉手的 {qc:.1f} 倍，"
+            f"{_rank_phrase(qingpu_row.get('rank_completed'), n_zones, '重劃區（含青埔本身）')}；"
+            f"還沒蓋好的是 {qu:.1f} 倍，{_rank_phrase(qingpu_row.get('rank_unfinished'), n_zones, '重劃區')}。"
         )
     if qt is not None:
         turnover_bullet = (
             f"青埔換手率 {qt:.2f}%（一年轉手量÷總戶數），"
-            f"{_rank_phrase(qingpu_row.get('rank_turnover'), n_zones, '重劃區（含青埔本身）')}"
+            f"放進桃園13個行政區一起比，{_rank_phrase(qvd.get('rank_turnover'), qvd.get('n'), '候選（13個行政區＋青埔）')}"
         )
         turnover_bullet += f"，高於桃園全市平均 {ct:.2f}%。" if (ct is not None and qt >= ct) else (
             f"，低於桃園全市平均 {ct:.2f}%。" if ct is not None else "。"
         )
         bullets.append(turnover_bullet)
-    pressure_desc = "壓力最大" if qingpu_row.get("rank_completed") == 1 else "壓力數一數二大"
+    pressure_desc = (
+        f"在全桃園（13個行政區＋青埔）{_rank_phrase(qvd.get('rank_completed'), qvd.get('n'), '候選')}"
+        f"、重劃區裡{_rank_phrase(qingpu_row.get('rank_completed'), n_zones, '重劃區').split('裡', 1)[-1]}"
+    )
     if qc is not None and qt is not None and ct is not None:
         if qt >= ct:
             bullets.append(
-                f"青埔完工{pressure_desc}，但換手率（{qt:.2f}%）不比桃園全市平均（{ct:.2f}%）差，"
+                f"青埔完工壓力{pressure_desc}，但換手率（{qt:.2f}%）不比桃園全市平均（{ct:.2f}%）差，"
                 f"目前的量沒有明顯萎縮；壓力先反映在「賣多久」，還沒反映在「有沒有人買」。"
             )
         else:
             bullets.append(
-                f"青埔完工{pressure_desc}、換手率（{qt:.2f}%）又低於桃園全市平均（{ct:.2f}%），"
+                f"青埔完工壓力{pressure_desc}、換手率（{qt:.2f}%）又低於桃園全市平均（{ct:.2f}%），"
                 f"供給壓力跟成交量能同時偏弱。"
             )
 
@@ -667,7 +706,7 @@ def build_report(qingpu_row, zone_rows, district_rows, city_row, qvd, n_district
         reasoning += f"比青埔更高的只有{names}，其他重劃區都低於青埔。"
     elif peer_c is not None:
         reasoning += (
-            f"六個重劃區裡沒有更高的，跟青埔最接近的是{peer_c['name']}"
+            f"其他重劃區裡沒有更高的，跟青埔最接近的是{peer_c['name']}"
             f"（{peer_c['ratio_completed_to_resale']:.1f}倍），代表青埔目前在「蓋好的速度」上"
             f"是同類重劃區裡壓力最集中的一個。"
         )
@@ -699,22 +738,21 @@ def build_report(qingpu_row, zone_rows, district_rows, city_row, qvd, n_district
     })
 
     turnover_table = [
-        {"name": r["name"], "turnover_pct": r.get("turnover_pct"), "is_qingpu": r["id"] == "qingpu"}
-        for r in zone_rows
-    ] + [{"name": "桃園全市", "turnover_pct": city_row.get("turnover_pct"), "is_qingpu": False}]
-    peer_t = _closest_peer(qingpu_row, zone_rows, "turnover_pct")
+        {"name": r["name"], "turnover_pct": r.get("turnover_pct"), "is_qingpu": False}
+        for r in district_rows
+    ] + [{"name": "青埔", "turnover_pct": qt, "is_qingpu": True},
+         {"name": "桃園全市", "turnover_pct": city_row.get("turnover_pct"), "is_qingpu": False}]
     turnover_reasoning = f"青埔換手率 {qt:.2f}%" if qt is not None else "青埔換手率資料不足"
-    if peer_t is not None:
-        turnover_reasoning += f"，跟{peer_t['name']}（{peer_t['turnover_pct']:.2f}%）最接近。"
     if qt is not None and ct is not None:
-        turnover_reasoning += (
+        turnover_reasoning += f"，桃園全市 {ct:.2f}%。" + (
             "換手率沒有跟著完工壓力一起惡化，代表目前供給壓力還沒壓到成交量，是「賣得比較久」而不是「賣不掉」。"
             if qt >= ct else
             "換手率也低於全市平均，供給壓力跟成交量能同時走弱，比單純「賣得比較久」更值得留意。"
         )
+    turnover_reasoning += "換手率只跟行政區比：重劃區的邊界用路名框、村里戶數對不齊，算出來的換手率不可信，所以重劃區表不列。"
     arguments.append({
         "key": "liquidity",
-        "claim": f"青埔的換手率（一年轉手÷總戶數）在{_rank_phrase(qingpu_row.get('rank_turnover'), n_zones, '重劃區（含青埔本身）')}。",
+        "claim": f"青埔的換手率（一年轉手÷總戶數）在{_rank_phrase(qvd.get('rank_turnover'), qvd.get('n'), '候選（13個行政區＋青埔）')}。",
         "table": turnover_table,
         "reasoning": turnover_reasoning,
     })
@@ -726,13 +764,11 @@ def build_report(qingpu_row, zone_rows, district_rows, city_row, qvd, n_district
             continue
         top5 = sanity_top_projects.get(r["id"], [])
         names = "、".join(p["project_name"] for p in top5[:3] if p.get("project_name"))
-        parts = [f"{r['name']}一年轉手 {r.get('resale_1y', 0)} 戶、未完工 {r.get('unfinished_units', 0)} 戶、近一年完工 {r.get('completed_1y_units', 0)} 戶。"]
+        parts = [f"{r['name']}一年轉手 {r.get('resale_1y', 0)} 戶（{config.ZONE_RESALE_MIN_COMPLETION_YEAR}年後完工的房子）、未完工 {r.get('unfinished_units', 0)} 戶、近一年完工 {r.get('completed_1y_units', 0)} 戶。"]
+        if r.get("small_sample"):
+            parts.append(f"一年轉手不到 {config.COMPARE_MIN_RESALE_FOR_RANK} 戶，比值會被分母放大，不參加排名。")
         if r.get("ratio_completed_to_resale") is not None:
             parts.append(f"完工÷轉手 {r['ratio_completed_to_resale']:.1f} 倍" + (f"，高於青埔（{qc:.1f}倍）。" if qc is not None and r["ratio_completed_to_resale"] > qc else f"，低於青埔（{qc:.1f}倍）。" if qc is not None else "。"))
-        if r.get("turnover_pct") is not None:
-            parts.append(f"換手率 {r['turnover_pct']:.2f}%。")
-        elif r["id"] == "jingguo":
-            parts.append("村里邊界對不齊重劃區範圍，總戶數/換手率沒有算。")
         if names:
             parts.append(f"未完工/近一年完工戶數裡，戶數較大的建案包含{names}。")
         zone_notes[r["id"]] = " ".join(parts)
@@ -743,7 +779,7 @@ def build_report(qingpu_row, zone_rows, district_rows, city_row, qvd, n_district
         resale_needed = round(qingpu_row["completed_1y_units"] / 3)
         falsifiers.append(
             f"若青埔近一年轉手量從 {qingpu_row.get('resale_1y')} 戶回升到 {resale_needed} 戶以上"
-            f"（近一年完工戶數的三分之一），完工÷轉手的倍數會降到3倍以下，「完工壓力最大」的結論就站不住。"
+            f"（近一年完工戶數的三分之一），完工÷轉手的倍數會降到3倍以下，「青埔完工壓力偏高」的結論就站不住。"
         )
     falsifiers.append(
         "未完工戶數只看官方「第1次登記日期」是否空白，不是實際完工進度；"
@@ -753,7 +789,7 @@ def build_report(qingpu_row, zone_rows, district_rows, city_row, qvd, n_district
         "近一年完工戶數如果有很大比例是建商餘屋（已完工但一直沒賣），不會真的變成轉手市場的供給；"
         "近一年完工÷轉手的倍數會高估「即將進入市場搶買方」的壓力。"
     )
-    if qingpu_row.get("households"):
+    if qingpu_dist_row.get("households"):
         falsifiers.append(
             "青埔總戶數用「中壢區青埔/青航/青園里＋大園區青山/青峰里」加總，跟特區實際邊界不是100%對齊；"
             "若村里戶數的成長主要來自特區外緣、不算青埔核心區的樓盤，換手率會被低估。"
@@ -763,8 +799,9 @@ def build_report(qingpu_row, zone_rows, district_rows, city_row, qvd, n_district
     limits = [
         "所有數字只看官方資料（實價登錄、預售屋備查、戶政司村里），不用591開價或在售筆數。",
         f"一年轉手量的期間是 {period_label}（近4個完整季，配合資料公告落後至少2個月）。",
-        "最新一季的政府「季別檔」抓下來當天可能還沒定案，一年轉手量因此可能偏低（較舊三季偏差通常在一成以內）；因為每個區/重劃區用同一個方法算，相對排名受到的影響比絕對數字小。",
-        "重劃區（林口/A7/小檜溪/中路/經國/藝文特區）的道路/村里範圍是交叉核對新聞報導跟實價登錄地址聚類出來的，不是官方地籍圖，邊界有誤收/漏收風險，細節見「怎麼算的」。",
+        "實價登錄依公布時間分檔，一年轉手量讀到今天為止公布的全部資料；期間最後一季的成交仍可能有少數尚未公布，每個區/重劃區用同一方法，相對排名不受影響。",
+        "重劃區（林口/A7/小檜溪/中路/經國/藝文特區）的範圍用路名框，是交叉核對新聞報導跟實價登錄地址聚類出來的，不是官方地籍圖，邊界有誤收/漏收風險，細節見「怎麼算的」。",
+        f"重劃區表的一年轉手只算 {config.ZONE_RESALE_MIN_COMPLETION_YEAR} 年以後完工的房子（青埔、林口也一樣），避免長馬路上的舊公寓被算進重劃區；行政區表則是所有屋齡。",
     ]
 
     return {

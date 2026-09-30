@@ -80,7 +80,8 @@ def compute_transaction_volume(deals, today):
         sb = d.get("size_bucket")
         if sb in SIZE_KEYS:
             quarterly_by_size[qidx][sb] += 1
-            if kind == "resale":
+            # 去化（賣掉速度）不算親友、員工等特殊關係交易，跟「桃園各區比較」同一口徑
+            if kind == "resale" and not d.get("special"):
                 quarterly_resale_by_size[qidx][sb] += 1
         pb = d.get("price_band")
         if pb in BAND_KEYS:
@@ -98,7 +99,9 @@ def compute_transaction_volume(deals, today):
         for q in all_qidx
     ]
 
-    current_qidx = quarter_index(today.isoformat())
+    # 「完整季」要扣掉實價登錄的公布落後（成交後約 1–2 個月才公布）：季末要早於今天
+    # 兩個月以上才算完整，不然剛結束的那一季只公布了一小部分，會把量算少。
+    current_qidx = quarter_index((today - datetime.timedelta(days=62)).isoformat())
     complete_qidx = [q for q in all_qidx if q < current_qidx]
     yoy = None
     if complete_qidx:

@@ -290,17 +290,16 @@ def main():
     lag = params["absorption_lag_months"]
     months_window = params["similar_product_months"]
 
+    # 數件數：車位灌進總價的成交也算（單價不準，但成交是真的）
     similar_deal_young = [
         d
         for d in deals
         if d.get("deal_kind") == "resale"
         and not d.get("special")
-        and not d.get("car_lumped")
         and d.get("age_years") is not None
         and 0 <= d["age_years"] < 3
         and d.get("area_ping") is not None
         and area_lo <= d["area_ping"] <= area_hi
-        and d.get("unit_price_wan_ping_precise") is not None
     ]
 
     current_month_start = today.replace(day=1)

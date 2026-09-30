@@ -80,15 +80,15 @@ def linreg_r2(xs, ys):
 
 
 def in_scope_deal(d, area_lo, area_hi, age_max):
+    # 只用來「數成交件數」：車位灌進總價的成交單價算不準，但仍是一筆真實成交，
+    # 數件數時要算進來（之前排除掉會把去化速度少算好幾倍）。
     return (
         d.get("deal_kind") == "resale"
         and not d.get("special")
-        and not d.get("car_lumped")
         and d.get("age_years") is not None
         and 0 <= d["age_years"] < age_max
         and d.get("area_ping") is not None
         and area_lo <= d["area_ping"] <= area_hi
-        and d.get("unit_price_wan_ping_precise") is not None
     )
 
 
@@ -220,6 +220,8 @@ def main():
         return qingpu_area_share, "qingpu_fallback"
 
     current_qidx = quarter_index(today.isoformat())
+    # 「完整季」要扣實價登錄公布落後：季末早於今天兩個月以上才算完整
+    complete_before_qidx = quarter_index((today - datetime.timedelta(days=62)).isoformat())
     n_proj_quarters = params["projection_quarters"]
 
     quarter_new_supply_scoped = defaultdict(float)
@@ -257,7 +259,7 @@ def main():
     quarterly_scoped_deals = defaultdict(int)
     for d in in_scope_deals:
         quarterly_scoped_deals[quarter_index(d["date"])] += 1
-    complete_q_idx = sorted(q for q in quarterly_scoped_deals if q < current_qidx)
+    complete_q_idx = sorted(q for q in quarterly_scoped_deals if q < complete_before_qidx)
     last4_idx = complete_q_idx[-4:] if len(complete_q_idx) >= 4 else complete_q_idx
     base_absorption_q = statistics.mean([quarterly_scoped_deals[q] for q in last4_idx]) if last4_idx else None
 
@@ -269,7 +271,7 @@ def main():
     tv_quarterly = (demand.get("transaction_volume", {}) or {}).get("quarterly", [])
     all_resale_by_label = {row["quarter"]: row["resale"] for row in tv_quarterly}
     all_resale_idx = sorted(all_resale_by_label)
-    all_resale_complete_idx = [label_to_qidx(lb) for lb in all_resale_idx if label_to_qidx(lb) < current_qidx]
+    all_resale_complete_idx = [label_to_qidx(lb) for lb in all_resale_idx if label_to_qidx(lb) < complete_before_qidx]
     all_resale_complete_idx.sort()
     last4_all_idx = all_resale_complete_idx[-4:] if len(all_resale_complete_idx) >= 4 else all_resale_complete_idx
     base_all_resale_q = (
@@ -386,7 +388,7 @@ def main():
     #    依據，不套用到任何特定戶別；「戶別試算」頁面選哪一戶，就在前端把這三個
     #    乘數乘上該戶的預售單價。
     # -----------------------------------------------------------------
-    complete_index_qidx = sorted(q for q in index_series if q < current_qidx)
+    complete_index_qidx = sorted(q for q in index_series if q < complete_before_qidx)
     last4_complete_qidx = complete_index_qidx[-4:] if len(complete_index_qidx) >= 4 else complete_index_qidx
     last4_values = [index_series[q] for q in last4_complete_qidx]
     last4_median = statistics.median(last4_values) if last4_values else None
@@ -462,12 +464,12 @@ def main():
     baseline_avg = statistics.mean(baseline_vals) if baseline_vals else None
 
     shrink_since_qidx = label_to_qidx(params["premium_index_shrink_since_quarter"])
-    recent_vals = [v for lb, v in presale_by_label.items() if shrink_since_qidx <= label_to_qidx(lb) < current_qidx]
+    recent_vals = [v for lb, v in presale_by_label.items() if shrink_since_qidx <= label_to_qidx(lb) < complete_before_qidx]
     recent_avg = statistics.mean(recent_vals) if recent_vals else None
     presale_volume_change = (recent_avg / baseline_avg - 1) if (baseline_avg and recent_avg is not None) else None
 
     index_at_shrink_start = index_series.get(shrink_since_qidx)
-    last_complete_qidx_overall = max((q for q in index_series if q < current_qidx), default=None)
+    last_complete_qidx_overall = max((q for q in index_series if q < complete_before_qidx), default=None)
     index_latest_complete = index_series.get(last_complete_qidx_overall) if last_complete_qidx_overall is not None else None
 
     supply_context = {
