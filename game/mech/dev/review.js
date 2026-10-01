@@ -14,7 +14,7 @@ async function load(path, query = '') {
   html = html.replace(/<base href="[^"]+">/, '');
   html = html.replace(/(<script type="importmap">)([\s\S]*?)(<\/script>)/, (_, a, json, b) => {
     const map = JSON.parse(json);
-    for (const file of ['env.js', 'post.js', 'mechs.js', 'combat.js', 'cockpit.js', 'zero/map.js', 'zero/guns.js', 'zero/viewmodel.js', 'zero/main.js', 'zero/hud.js', 'zero/sfx.js', 'zero/mech6.js', 'lastline/script.js', 'lastline/mission.js', 'lastline/convoy.js', 'lastline/escort.mjs']) {
+    for (const file of ['env.js', 'stages.js', 'battlefields.js', 'post.js', 'mechs.js', 'combat.js', 'cockpit.js', 'zero/map.js', 'zero/guns.js', 'zero/viewmodel.js', 'zero/main.js', 'zero/hud.js', 'zero/sfx.js', 'zero/mech6.js', 'lastline/script.js', 'lastline/mission.js', 'lastline/convoy.js', 'lastline/escort.mjs']) {
       const url = new URL('/game/mech/' + file, location.href).href;
       for (const key of Object.keys(map.imports)) if (new URL(key, entryBase).href === url) delete map.imports[key];
       map.imports[url] = url + '?qa=' + revision;
@@ -82,6 +82,59 @@ async function mech() {
   report.textContent = JSON.stringify({ checks: result, sizes, memory: renderer.info.memory, errors }, null, 2);
   state.textContent = errors.length ? '有錯誤' : '本篇通過';
 }
+async function battlefields() {
+  localStorage.setItem('mech.view','1');
+  await load('/game/mech/index.html', '?mute&nobrief&all&fps=0');
+  const G = win.__game, T = win.__T, W = G.world; post = G.post; renderer = post.renderer;
+  const budgets = [];
+  for (const n of [4,5,6,7,8,9]) {
+    G.launch(n); if(G.state==='paused') win.document.querySelector('#resume').click(); G.run(4); const C = G.combat, E = C.enc;
+    W.fieldGroup.traverse(o=>{ if(o.isMesh) for(const [key,a] of Object.entries(o.geometry.attributes)) assertSilent(a.count===o.geometry.attributes.position.count,'場地頂點屬性不足：'+key); });
+    assert(W.battlefield === C.def.battlefield && W.cityObjects.every(o=>!o.visible), `第 ${n} 關切換到 ${C.def.fieldLabel}，城市完整隱藏`);
+    for (const sec of C.def.route.secs) for (const target of sec.targets || []) {
+      assert(W.blds.some(b=>Math.hypot(b.cx-target.x,b.cz-target.z)<1), `第 ${n} 關任務目標 ${target.name} 已建立`);
+    }
+    for (const p of C.def.route.pts) {
+      const v = new T.Vector3(p[0], W.height(...p), p[1]), before = v.clone(); W.collide(v,3.4,v.y);
+      assertSilent(v.distanceTo(before)<0.01, '起點或路線碰撞封死：'+n+' / '+p);
+    }
+    G.cockpit.root.visible = false; G.hero.root.visible = false; post.cockpit.enabled = false;
+    const p = E.E.pts[Math.floor(E.E.pts.length/2)];
+    G.camera.position.set(p.x+170,44,p.z+220); G.camera.lookAt(p.x,12,p.z); G.camera.updateMatrixWorld();
+    if(W.battlefield==='airfield') { G.camera.position.set(-160,65,320); G.camera.lookAt(-420,0,-450); G.camera.updateMatrixWorld(); }
+    await save('field-'+W.battlefield);
+    let triangles = 0, meshes = 0; W.scene.traverseVisible(o=>{ if(o.isMesh){ meshes++; triangles += (o.geometry.index?.count || o.geometry.attributes.position.count)/3*(o.isInstancedMesh?o.count:1); } });
+    assert(triangles < 1400000, `第 ${n} 關 ${Math.round(triangles)} 三角形，低於城市預算`);
+    budgets.push({n,profile:W.battlefield,triangles:Math.round(triangles),meshes,textures:renderer.info.memory.textures});
+    G.hero.root.visible = true; post.cockpit.enabled = true;
+    let steps = 0;
+    while (G.state !== 'result' && steps++ < 6000) {
+      if(G.state==='paused') win.document.querySelector('#resume').click();
+      const sec = E.cur;
+      if(sec) { const p=E.E.pts[sec.at]; G.player.pos.set(p.x,W.height(p.x,p.z),p.z); G.player.vel.set(0,0,0); }
+      G.player.ap = G.player.apMax;
+      for(const e of C.enemies) if(!e.dead) C.damageEnemy(e,100000,1000,e.pos.clone(),new T.Vector3(0,1,0),true);
+      for(const t of E.tg) if(t.b.st===0) W._dmg(t.b,1000,new T.Vector3(t.b.cx,3,t.b.z1),new T.Vector3(0,0,1),true);
+      G.tick(.2);
+      if(steps%120===0) await new Promise(r=>setTimeout(r,0));
+    }
+    assert(E.state === 'done' && G.state === 'result', `第 ${n} 關實際清除全部伏兵、守點與目標，自然完成 ` + JSON.stringify({state:G.state,phase:C.phase,sec:E.sec,enc:E.state,prog:E.prog,s:E.cur?.s,enemies:C.enemies.length,queue:E.queue.length,events:C.events.length,dead:C.dead}));
+    const retry = win.document.querySelector('#again'); retry.click(); G.run(2);
+    assert(W.blds.every(b=>b.st===0 && b.hp===b.hpMax), `第 ${n} 關重玩復原建築`);
+    const R=C.enc.R;
+    assert(R.boxes.every(b=>W.nearBoxes((b.x0+b.x1)/2,(b.z0+b.z1)/2,2,[]).includes(b)), `第 ${n} 關重玩路障碰撞仍登記`);
+    G.toTitle();
+    assert(W.battlefield==='city' && W.cityObjects.every(o=>o.visible || o===W.beacon), '回標題恢復原城市與碰撞');
+    await new Promise(r=>setTimeout(r,0));
+  }
+  const counts=[], residentTextures=renderer.info.memory.textures;
+  for(const n of [4,5,6,7,8,9,4,5,6,7,8,9]) { G.launch(n); G.run(4); post.render(1); counts.push(renderer.info.memory.geometries); G.toTitle(); await new Promise(r=>setTimeout(r,0)); }
+  assert(counts.slice(6).every((v,i)=>v===counts[i]), '第二輪切換六種場地沒有累積 GPU 幾何');
+  assert(renderer.info.memory.textures===residentTextures, '第二輪換場未累積貼圖');
+  assert(errors.length===0, '場地切換與完整通關沒有執行錯誤');
+  report.textContent=JSON.stringify({checks:result,budgets,counts,errors},null,2); state.textContent='六種場地通過';
+}
+
 async function zero() {
   await load('/game/mech/zero/index.html', '?mute&god&ch=1&all&fps=0');
   const G = win.__G; renderer = win.__renderer;
@@ -416,4 +469,4 @@ async function campaignEdges() {
 }
 const assertSilent = (ok, text) => { if (!ok) throw Error(text); };
 
-for (const [id, fn] of [['campaignFoot', campaignFoot], ['campaign4', () => campaignMech(4)], ['campaign5', () => campaignMech(5)], ['campaignArtillery', async () => { localStorage.setItem('lastline.choice', JSON.stringify('artillery')); await campaignMech(5, 'artillery'); }], ['campaignEdges', campaignEdges], ['mech', mech], ['zero', zero], ['tactics', tactics], ['infantry', infantry], ['art', art], ['hero', hero], ['city', city], ['mountains', mountains], ['weapons', weapons], ['save', save]]) document.querySelector('#' + id).onclick = () => fn().catch(e => { state.textContent = '失敗'; report.textContent += '\n' + e.stack; });
+for (const [id, fn] of [['campaignFoot', campaignFoot], ['campaign4', () => campaignMech(4)], ['campaign5', () => campaignMech(5)], ['campaignArtillery', async () => { localStorage.setItem('lastline.choice', JSON.stringify('artillery')); await campaignMech(5, 'artillery'); }], ['campaignEdges', campaignEdges], ['mech', mech], ['fields', battlefields], ['zero', zero], ['tactics', tactics], ['infantry', infantry], ['art', art], ['hero', hero], ['city', city], ['mountains', mountains], ['weapons', weapons], ['save', save]]) document.querySelector('#' + id).onclick = () => fn().catch(e => { state.textContent = '失敗'; report.textContent += '\n' + e.stack; });

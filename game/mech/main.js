@@ -79,6 +79,8 @@ async function game() {
   player.apMax = 9000;
   // n＝關卡（遭遇戰從路線起點、面向第一段出發）；cp＝檢查點
   function resetPlayer(n = 0, cp = null) {
+    const D = n ? STAGES[n - 1] : null;
+    world.setBattlefield(D?.battlefield, D?.route);
     const E = n ? STAGES[n - 1].enc : null;
     let x = SPAWN.x, z = SPAWN.z, yaw = 0;
     if (cp) { x = cp.x; z = cp.z; yaw = cp.yaw; }
@@ -238,7 +240,7 @@ async function game() {
     $('stages').innerHTML = STAGES.map((D, i) => {
       const n = i + 1, lock = n > nx, best = store.get('best' + n, 0);
       return `<button class="stg${lock ? ' lock' : ''}${n === nx ? ' next' : ''}" data-s="${n}"${lock ? ' disabled' : ''}>`
-        + `${D.enc ? '<em>遭遇戰</em>' : ''}<b>${n}</b><span>${lock ? 'LOCKED' : D.name}</span>${best ? `<i>${RANKS[best]}</i>` : ''}</button>`;
+        + `${D.enc ? `<em>${D.fieldLabel || '遭遇戰'}</em>` : ''}<b>${n}</b><span>${lock ? 'LOCKED' : D.name}</span>${best ? `<i>${RANKS[best]}</i>` : ''}</button>`;
     }).join('');
   }
 
