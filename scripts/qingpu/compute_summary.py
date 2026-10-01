@@ -220,7 +220,7 @@ def main():
         resale2y = qd.get("resale_2y")
         resale4y = resale2y * 2 if resale2y is not None else None
         s1 = (f"{lead}：近兩年完工 {fi(qd.get('completed_2y_units'))} 戶加上未來兩年預計完工 {fi(qd.get('expected_next_2y_units_total'))} 戶，"
-              f"是兩年轉手量4年份（{fi(resale4y)} 戶）的 {f1(qdw)} 倍（全市 {f1(city_w4y)} 倍{rank_note}）")
+              f"是照近兩年速度推算的 4 年轉手量（{fi(resale4y)} 戶）的 {f1(qdw)} 倍（全市 {f1(city_w4y)} 倍{rank_note}）")
         if q_turn is not None and city_turn is not None:
             s1 += f"；但換手率 {q_turn:.2f}% 也高於全市 {city_turn:.2f}%"
         sentences.append(s1 + "。")

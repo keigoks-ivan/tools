@@ -1337,7 +1337,7 @@ def build_report(qingpu_row, qingpu_dist_row, zone_rows, district_rows, city_row
     cu = city_row.get("ratio_unfinished_to_resale")
     if qdw is not None:
         bullets.append(
-            f"跟桃園各行政區比（所有屋齡）：青埔前後兩年完工壓力（近兩年已完工＋未來兩年預計完工，除以兩年轉手量的4年份）"
+            f"跟桃園各行政區比（所有屋齡）：青埔前後兩年完工壓力（近兩年已完工＋未來兩年預計完工，除以照近兩年速度推算的4年轉手量）"
             f"{qdw:.1f} 倍，{_rank_phrase(qvd.get('rank_window4y'), qvd.get('n'), '候選（13個行政區＋青埔）')}，全市 {cw:.1f} 倍"
             f"（次要欄位：近兩年完工÷兩年轉手 {qdc:.1f} 倍、未完工消化 {qdu:.1f} 年，全市分別 {cc:.1f} 倍、{cu:.1f} 年）。"
         )
@@ -1398,7 +1398,7 @@ def build_report(qingpu_row, qingpu_dist_row, zone_rows, district_rows, city_row
         )
     arguments.append({
         "key": "supply_pressure",
-        "claim": f"青埔的前後兩年完工壓力（近兩年已完工＋未來兩年預計完工，除以兩年轉手量的4年份）在{_rank_phrase(qingpu_row.get('rank_window4y'), n_zones, '重劃區（含青埔本身）')}。",
+        "claim": f"青埔的前後兩年完工壓力（近兩年已完工＋未來兩年預計完工，除以照近兩年速度推算的4年轉手量）在{_rank_phrase(qingpu_row.get('rank_window4y'), n_zones, '重劃區（含青埔本身）')}。",
         "table": supply_table,
         "reasoning": reasoning,
     })
