@@ -28,9 +28,10 @@ test('新地形接回原本遠山，不產生非有限值或邊界裂縫', () =>
     for(let x=-2500;x<=2500;x+=125) for(let z=-2500;z<=2500;z+=125) {
       const h=fieldHeight(x,z,D.battlefield,D.route,123);
       assert.ok(Number.isFinite(h)); high=Math.max(high,h);
-      if(Math.hypot(x,z)>2400) assert.equal(h,123);
+      if(Math.max(Math.abs(x),Math.abs(z))>=5000) assert.equal(h,123);
     }
     assert.ok(high>=BATTLEFIELDS[D.battlefield].relief*0.35);
+    for(const edge of [-5000,5000])for(let t=-5000;t<=5000;t+=500){assert.equal(fieldHeight(edge,t,D.battlefield,D.route,123),123);assert.equal(fieldHeight(t,edge,D.battlefield,D.route,123),123);}
   }
   assert.equal(fieldHeight(0,0,'city',{},17),17);
 });

@@ -1,3 +1,5 @@
+import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
+const noise = new ImprovedNoise();
 // 關卡場地：沿用既有任務路線，路線周圍整平，地形與掩體只在換關時建立。
 export const BATTLEFIELDS = {
   city: { mode: 0, label: '首都街區', relief: 0, trees: 0, rocks: 0 },
@@ -22,14 +24,19 @@ export function fieldHeight(x, z, profile, route, base = 0) {
   const F = BATTLEFIELDS[profile];
   if (!F || !F.mode) return base;
   const r = Math.hypot(x, z);
-  if (r > 2400) return base;
+  if (r > 2400) {
+    const strength=smooth(2400,3400,r)*(1-smooth(4400,5000,Math.max(Math.abs(x),Math.abs(z))));
+    const ridge=1-Math.abs(noise.noise(x/480,13,z/480));
+    return base+strength*(ridge*ridge*180+noise.noise(x/190,29,z/190)*95);
+  }
   // 近處為可作戰的緩坡，山稜從戰場邊緣抬起；路線與目標旁保留安全走廊。
   let clear = routeDistance(x, z, route.pts);
   if (profile === 'airfield') clear = Math.min(clear, Math.hypot(Math.max(0,Math.abs(x+420)-48),Math.max(0,Math.abs(z)-900)));
   for (const sec of route.secs) for (const t of sec.targets || []) clear = Math.min(clear, Math.hypot(x - t.x, z - t.z));
   for (const t of route.pads || []) clear = Math.min(clear, Math.hypot(x - t.x, z - t.z));
-  const ridge = (0.55 + 0.24 * Math.sin(x / 240 + Math.sin(z / 180)) + 0.21 * Math.cos(z / 310 - x / 450));
-  const outer = smooth(650, 1250, r), inner = smooth(100, 220, clear);
+  const wx=x+noise.noise(x/600,7,z/600)*180,wz=z+noise.noise(x/600,19,z/600)*180;
+  const ridge = .24+Math.pow(1-Math.abs(noise.noise(wx/350,11,wz/350)),2)*.65+noise.noise(wx/130,23,wz/130)*.18;
+  const outer = smooth(650, 1250, r), inner = smooth(70, 170, clear);
   const h = F.relief * ridge * (outer + (1 - outer) * 0.24) * inner;
   return h * (1 - smooth(1650, 2400, r)) + base * smooth(1650, 2400, r);
 }

@@ -8,6 +8,7 @@ test('mixed trees and weathered rocks have complete finite geometry within the i
     const n=g.attributes.position.count;
     for(const a of Object.values(g.attributes)){assert.equal(a.count,n);assert([...a.array].every(Number.isFinite));}
     assert([...g.attributes.normal.array].some(v=>Math.abs(v)>.5));
+    if(g.attributes.leaf)for(let i=0;i<n;i++)if(g.attributes.leaf.getX(i))assert(g.attributes.normal.getY(i)>.5,'葉片法線保持樹冠朝向，不能用平面背面法線變成黑片');
     g.computeBoundingBox();assert(g.boundingBox.min.y>=-.01);assert(g.boundingBox.max.y>.8);
     const tris=(g.index?.count||n)/3;assert(tris<=1100);counts.push(tris);g.dispose();
   }

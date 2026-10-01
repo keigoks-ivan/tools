@@ -156,6 +156,13 @@ async function battlefields() {
       const x=(pos.getX(a)+pos.getX(b)+pos.getX(d))/3,z=(pos.getZ(a)+pos.getZ(b)+pos.getZ(d))/3;
       assertSilent(Math.abs(W.height(x,z)-(pos.getY(a)+pos.getY(b)+pos.getY(d))/3)<.002,'地形三角形內插與碰撞不一致');
     }
+    const mask=W.fieldGroundTexture.image,md=mask.getContext('2d').getImageData(0,0,512,512).data;
+    const maskAt=(x,z,c)=>md[(Math.min(511,Math.max(0,Math.floor((1400-z)/2800*512)))*512+Math.min(511,Math.max(0,Math.floor((x+1400)/2800*512))))*4+c];
+    const origin=C.def.route.pts[0];
+    assertSilent(maskAt(...origin,0)>100 && maskAt(W.blds[0].cx,W.blds[0].cz,1)>100 && md.some((v,i)=>i%4===2&&v>50),'道路、整地與接地遮蔽未寫入場地貼圖');
+    assertSilent(W.fieldEnvMap.image.width<=384 && W.fieldEnvMap.image.height<=512,'反射圖超過低解析共用預算');
+    assertSilent(W.skyDome.material.uniforms.sunDir.value.distanceTo(W.lightDir)<.001 && W.scene.environment===W.fieldEnvMap,'戶外日照、天空与反射不同步');
+    assertSilent(W.fieldGroundTexture.image.width===512 && W.scene.environmentIntensity===.43,'戶外接地貼圖或光照配置未啟用');
     assert(W.battlefield === C.def.battlefield && W.cityObjects.every(o=>!o.visible), `第 ${n} 關切換到 ${C.def.fieldLabel}，城市完整隱藏`);
     for (const sec of C.def.route.secs) for (const target of sec.targets || []) {
       assert(W.blds.some(b=>Math.hypot(b.cx-target.x,b.cz-target.z)<1), `第 ${n} 關任務目標 ${target.name} 已建立`);
@@ -168,10 +175,12 @@ async function battlefields() {
     const p = E.E.pts[Math.floor(E.E.pts.length/2)];
     G.camera.position.set(p.x+170,44,p.z+220); G.camera.lookAt(p.x,12,p.z); G.camera.updateMatrixWorld();
     if(W.battlefield==='airfield') { G.camera.position.set(-160,65,320); G.camera.lookAt(-420,0,-450); G.camera.updateMatrixWorld(); }
+    W.followShadow(G.camera.position);W.sun.shadow.needsUpdate=true;
     await save('field-'+W.battlefield);
     if(W.battlefield==='airfield'||W.battlefield==='depot'||W.battlefield==='forest') {
       const S=W.blds.find(b=>W.battlefield==='forest'||b.w>40)||W.blds[0];
       G.camera.position.set(S.cx+70,S.gy+26,S.cz+95);G.camera.lookAt(S.cx,S.gy+10,S.cz);G.camera.updateMatrixWorld();
+      W.followShadow(G.camera.position);W.sun.shadow.needsUpdate=true;
       await save('field-'+W.battlefield+'-detail');
     }
     let triangles = 0, meshes = 0; W.scene.traverseVisible(o=>{ if(o.isMesh){ meshes++; triangles += (o.geometry.index?.count || o.geometry.attributes.position.count)/3*(o.isInstancedMesh?o.count:1); } });
@@ -195,6 +204,7 @@ async function battlefields() {
     const R=C.enc.R;
     assert(R.boxes.every(b=>W.nearBoxes((b.x0+b.x1)/2,(b.z0+b.z1)/2,2,[]).includes(b)), `第 ${n} 關重玩路障碰撞仍登記`);
     G.toTitle();
+    assertSilent(W.scene.environment===W.envMap && W.lightDir.distanceTo(W.cityLightDir)<.001 && W.scene.environmentIntensity===.65 && W.sun.shadow.camera.right===260 && !W.terrainMesh.castShadow,'城市光影配置未復原');
     assertSilent(!W.terrain.detailed && W.terrainMesh.geometry.attributes.position.getX(1)===-5000+W.terrain.cell,'城市地形座標沒有復原');
     assert(W.battlefield==='city' && W.cityObjects.every(o=>o.visible || o===W.beacon), '回標題恢復原城市與碰撞');
     await new Promise(r=>setTimeout(r,0));

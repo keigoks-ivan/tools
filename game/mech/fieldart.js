@@ -25,15 +25,16 @@ export function fieldTreeGeometry(pine = true) {
     const g=new THREE.BufferGeometry(),pos=[],uv=[],corners=[[0,0],[1,0],[1,1],[0,1]],x=(variant%2)*.5,y=variant<2?.5:0;
     for(const i of [0,1,2,0,2,3]){pos.push(...pts[i]);uv.push(x+.003+corners[i][0]*.494,y+.003+corners[i][1]*.494);}
     g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.computeVertexNormals();
-    parts.push(colored(g,[.72,.78,.66],true));
+    for(let i=0;i<g.attributes.normal.count;i++){const n=new THREE.Vector3(pos[i*3]*.12,.85,pos[i*3+2]*.12).normalize();g.attributes.normal.setXYZ(i,n.x,n.y,n.z);}
+    parts.push(colored(g,[.78,.83,.70],true));
   };
   if(pine) {
     for(let level=0;level<8;level++) {
       const y=3.2+level*.95,reach=3.7-level*.39;
       for(let b=0;b<9;b++) {
-        const a=b/9*Math.PI*2+level*.71,cs=Math.cos(a),sn=Math.sin(a);
+        const a=b/9*Math.PI*2+level*.71+Math.sin(b*7.3+level)*.16,cs=Math.cos(a),sn=Math.sin(a),spread=reach*(.86+.18*Math.sin(b*4.1+level*2.7));
         const pt=(d,side,h)=>[cs*d-sn*side,y+h,sn*d+cs*side];
-        card([pt(.1,-reach*.4,.65),pt(reach,-reach*.4,-.7),pt(reach,reach*.4,-.7),pt(.1,reach*.4,.65)],(b+level)%2);
+        card([pt(.1,-reach*.4,.65),pt(spread,-reach*.4,-.7),pt(spread,reach*.4,-.7),pt(.1,reach*.4,.65)],(b+level)%2);
       }
     }
   } else {
@@ -47,7 +48,7 @@ export function fieldTreeGeometry(pine = true) {
     }
   }
   // 枝幹與剪影葉片合在同一個網格，沿用實例繪製。
-  const g=mergeVertices(mergeGeometries(parts));g.computeVertexNormals();g.computeBoundingSphere();return g;
+  const g=mergeVertices(mergeGeometries(parts));g.computeBoundingSphere();return g;
 }
 export function fieldRockGeometry() {
   const g=new THREE.IcosahedronGeometry(1,2),p=g.attributes.position;
@@ -113,6 +114,21 @@ export function fieldArchitecture(S, profile, H, box, face, tank) {
       tank(cx+w*.26,cz,H,2.2,3.8);
     }
   }
+  // 卸貨月台、護欄、管線與配電櫃提供尺度，同樓體一起破壞。
+  if(profile==='depot'||profile==='airfield') {
+    const wall=profile==='airfield'?H*.55:H-3;
+    box(cx-w*.28,cx+w*.28,0,.75,z1+.3,z1+4,stone);
+    for(let step=0;step<3;step++)box(cx+w*.28,cx+w*.28+1.4,0,.75-step*.2,z1+step*.6,z1+4,stone);
+    for(const side of [-1,1]) {
+      const x=cx+side*w*.38;
+      box(x-1.1,x+1.1,0,2.8,z1+.7,z1+2.2,metal);
+      box(x-1.25,x+1.25,2.8,3.05,z1+.5,z1+2.4,rib);
+      for(let y=.5;y<2.5;y+=.3)box(x-.8,x+.8,y,y+.08,z1+2.21,z1+2.31,dark);
+    }
+    box(x0+2,x0+2.4,wall+.5,wall+1,z0+2,z1-2,metal);
+    for(let z=z0+3;z<z1-1;z+=6)box(x0+1.7,x0+2.7,wall,wall+.6,z-.15,z+.15,rib);
+    for(let x=cx-w*.26;x<cx+w*.26;x+=4) {box(x-.1,x+.1,.75,2.4,z1+3.7,z1+3.9,metal);box(x,x+3.8,2.2,2.32,z1+3.7,z1+3.9,metal);}
+  }
   // 固定散熱百葉、排水管及檢修梯都寫入樓體區段，摧毀時一起消失。
   for(let y=H*.25;y<H*.55;y+=.45)box(x1+.03,x1+.14,y,y+.11,cz-2.5,cz+2.5,metal);
   for(let y=1;y<H-.8;y+=.65)box(x0+.7,x0+1.8,y,y+.09,z0-.32,z0-.16,metal);
@@ -125,8 +141,9 @@ export function fieldLeafMaterial(texture, depth = false) {
   mat.onBeforeCompile=sh=>{
     sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nattribute float leaf; varying float vFieldLeaf;').replace('#include <begin_vertex>','#include <begin_vertex>\nvFieldLeaf=leaf;');
     sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nvarying float vFieldLeaf;').replace('#include <map_fragment>','if(vFieldLeaf>.5){\n#include <map_fragment>\n}');
+    if(!depth) sh.fragmentShader=sh.fragmentShader.replace('#include <normal_fragment_begin>','#include <normal_fragment_begin>\nif(vFieldLeaf>.5) normal*=faceDirection;');
   };
-  mat.customProgramCacheKey=()=> 'field-leaves-v1'; return mat;
+  mat.customProgramCacheKey=()=> 'field-leaves-v2'; return mat;
 }
 
 export function fieldRadar(x,z,h,face,box,communications=false) {
@@ -156,4 +173,41 @@ export function fieldRadar(x,z,h,face,box,communications=false) {
     for(const a of [0,Math.PI*2/3,Math.PI*4/3])beam(pt(4.8,a),[x,h+9,z+5],.08);
     box(x-.35,x+.35,h+8.7,h+9.3,z+4.9,z+5.6,metal);
   }
+}
+
+// 換場時畫一次：R 道路、G 設施整地、B 靜態接地遮蔽。共用單張貼圖，不增加逐幀通道。
+export function fieldGroundMask(route, structures, contacts, createCanvas = () => document.createElement('canvas'), profile = 'forest') {
+  const size=512,span=2800,scale=size/span,canvases=[];
+  const point=(x,z)=>[(x+span/2)*scale,(span/2-z)*scale];
+  for(let channel=0;channel<3;channel++) {
+    const c=createCanvas();c.width=c.height=size;const ctx=c.getContext('2d');ctx.fillStyle='black';ctx.fillRect(0,0,size,size);canvases.push(c);
+    if(channel===0) {
+      ctx.lineCap=ctx.lineJoin='round';
+      for(const [width,gray] of [[38,45],[27,110],[18,225]]) {
+        ctx.strokeStyle=`rgb(${gray},${gray},${gray})`;ctx.lineWidth=width*scale;ctx.beginPath();
+        route.pts.forEach(([x,z],i)=>{const p=point(x,z);i?ctx.lineTo(...p):ctx.moveTo(...p);});ctx.stroke();
+      }
+    } else if(channel===1) {
+      for(const s of structures) {
+        const [x,y]=point(s.x,s.z),w=s.target?30:48;
+        const industrial=profile==='depot'||profile==='airfield',padding=industrial?56:24;
+        for(let pad=padding;pad>=0;pad-=4){const gray=Math.round((industrial?255:180)*(1-pad/(padding+4)));ctx.fillStyle=`rgb(${gray},${gray},${gray})`;ctx.fillRect(x-(w/2+pad)*scale,y-(17+pad)*scale,(w+pad*2)*scale,(34+pad*2)*scale);}
+      }
+    } else {
+      ctx.globalCompositeOperation='lighter';
+      for(const o of contacts) {
+        const [x,y]=point(o.x,o.z),rad=Math.max(5,o.r)*scale;
+        const g=ctx.createRadialGradient(x,y,0,x,y,rad);g.addColorStop(0,`rgba(255,255,255,${o.tree?.5:.7})`);g.addColorStop(.35,'rgba(255,255,255,.32)');g.addColorStop(1,'rgba(255,255,255,0)');
+        ctx.fillStyle=g;ctx.fillRect(x-rad,y-rad,rad*2,rad*2);
+      }
+      for(const s of structures) {
+        const [x,y]=point(s.x,s.z),w=s.target?30:48;
+        for(const [pad,alpha] of [[10,.10],[5,.18],[1,.25]]) {ctx.fillStyle=`rgba(255,255,255,${alpha})`;ctx.fillRect(x-(w/2+pad)*scale,y-(17+pad)*scale,(w+pad*2)*scale,(34+pad*2)*scale);}
+      }
+    }
+  }
+  const out=createCanvas();out.width=out.height=size;const ctx=out.getContext('2d'),data=ctx.createImageData(size,size);
+  const channels=canvases.map(c=>c.getContext('2d').getImageData(0,0,size,size).data);
+  for(let i=0;i<data.data.length;i+=4){for(let c=0;c<3;c++)data.data[i+c]=channels[c][i];data.data[i+3]=255;}
+  ctx.putImageData(data,0,0);return out;
 }

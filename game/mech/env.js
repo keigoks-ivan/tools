@@ -8,7 +8,7 @@ import { shopMaterial, shopUV } from './urban.js';
 import { roofline } from './roofline.js';
 import { BATTLEFIELDS, fieldHeight, fieldLayout, routeDistance, fieldGridCoordinate, fieldGridIndex } from './battlefields.js';
 
-import { fieldTreeGeometry, fieldRockGeometry, fieldArchitecture, fieldLeafMaterial, fieldRadar } from './fieldart.js';
+import { fieldTreeGeometry, fieldRockGeometry, fieldArchitecture, fieldLeafMaterial, fieldRadar, fieldGroundMask } from './fieldart.js';
 
 const ASSET = './assets/';
 const COMPACT = new URL('./zero/assets/env/', import.meta.url).href;
@@ -148,11 +148,11 @@ function makeSkyDome(sky, sunDir, fog, sunFog, gain) {
   const mat = new THREE.ShaderMaterial({
     uniforms: {
       map: { value: sky }, gain: { value: gain }, sunDir: { value: sunDir.clone() },
-      fogCol: { value: fog.clone() }, sunFog: { value: sunFog.clone() },
+      fogCol: { value: fog.clone() }, sunFog: { value: sunFog.clone() }, environmentCapture: { value: 0 },
     },
     vertexShader: `varying vec3 vDir;
       void main(){ vDir = position; vec4 p = projectionMatrix * modelViewMatrix * vec4(position,1.0); gl_Position = p.xyww; }`,
-    fragmentShader: `uniform sampler2D map; uniform float gain; uniform vec3 sunDir, fogCol, sunFog; varying vec3 vDir;
+    fragmentShader: `uniform sampler2D map; uniform float gain, environmentCapture; uniform vec3 sunDir, fogCol, sunFog; varying vec3 vDir;
       #define PI 3.14159265
       void main(){
         vec3 d = normalize(vDir);
@@ -165,6 +165,7 @@ function makeSkyDome(sky, sunDir, fog, sunFog, gain) {
         float s = pow(sd, 7.0);
         vec3 fc = mix(fogCol, sunFog, s);
         c = mix(c, fc, smoothstep(4.0, -2.0, el) * 0.9);
+        c=mix(c,vec3(.045,.038,.027),environmentCapture*smoothstep(0.0,.35,-d.y));
         gl_FragColor = vec4(c, 1.0);
         #include <tonemapping_fragment>
         #include <colorspace_fragment>
@@ -295,9 +296,10 @@ function terrainMaterial(A) {
     normalScale: new THREE.Vector2(1.1, 1.1), roughness: 1, metalness: 0,
   });
   mat.userData.battlefield = { value: 0 };
+  mat.userData.fieldMask = { value: null };
   mat.onBeforeCompile = (sh) => {
     Object.assign(sh.uniforms, {
-      battlefield: mat.userData.battlefield,
+      battlefield: mat.userData.battlefield, fieldMask: mat.userData.fieldMask,
       asphD: { value: A.asphD }, asphN: { value: A.asphN }, asphA: { value: A.asphA },
       rubD: { value: A.rubD }, rubN: { value: A.rubN }, rockD: { value: A.rockD }, rockN: { value: A.rockN },
     });
@@ -307,7 +309,7 @@ function terrainMaterial(A) {
     sh.fragmentShader = sh.fragmentShader
       .replace('#include <common>', `#include <common>
         uniform sampler2D asphD, asphN, asphA, rubD, rubN, rockD, rockN;
-        uniform float battlefield;
+        uniform float battlefield; uniform sampler2D fieldMask;
         varying vec3 vTW; varying vec3 vTN;
         float th(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7))) * 43758.5453); }
         float tn(vec2 p){ vec2 i=floor(p), f=fract(p); f=f*f*(3.0-2.0*f);
@@ -397,6 +399,16 @@ function terrainMaterial(A) {
           } else grass=mix(grass,soil*vec3(0.67,0.60,0.44),bare*0.48);
         }
         vec3 base = mix(grass, rock, rk);
+        vec3 fieldGround = vec3(0.0);
+        if(battlefield > 0.5) {
+          vec2 maskUV=vTW.xz/2800.0+0.5;
+          fieldGround=texture2D(fieldMask,maskUV).rgb*step(0.0,min(maskUV.x,maskUV.y))*step(max(maskUV.x,maskUV.y),1.0);
+          float path=fieldGround.r*(.75+.25*tn(vTW.xz/3.0));
+          vec3 dirt=texture2D(rubD,vTW.xz/7.0).rgb*vec3(.43,.40,.32);
+          base=mix(base,dirt,max(path,fieldGround.g*.8));
+          float mountainDetail=(.72+.28*tn(vTW.xz/110.0))*mix(.75,1.1,tn(vec2(vTW.y*.025,vTW.x*.007+vTW.z*.008)));
+          base*=mix(1.0,mountainDetail,mountain);
+        }
         vec3 asph = texture2D(asphD, vTW.xz / 7.0).rgb;
         asph *= mix(0.85, 1.12, tfbm(vTW.xz / 23.0));
         vec3 rub = texture2D(rubD, vTW.xz / 6.0).rgb;
@@ -406,7 +418,8 @@ function terrainMaterial(A) {
         float inCity = 1.0 - smoothstep(${(CITY.half - 10).toFixed(1)}, ${(CITY.half + 40).toFixed(1)}, max(abs(vTW.x), abs(vTW.z)));
         vec3 lot = mix(rub * 0.9, grass * 0.8, smoothstep(0.35, 0.65, tfbm(vTW.xz / 30.0)));
         base = mix(base, lot, inCity * (1.0 - G.x) * (1.0 - G.y) * (1.0 - step(0.5, battlefield)));
-        if (battlefield > 2.5 && battlefield < 3.5) base = mix(base, asph * 1.25, (1.0 - smoothstep(750.0, 900.0, length(vTW.xz))) * 0.88);
+        float paved=(battlefield > 2.5 && battlefield < 3.5)||(battlefield > 4.5 && battlefield < 5.5)?max(fieldGround.r,fieldGround.g):0.0;
+        base=mix(base,asph*.82,paved*.9);
         base = mix(base, walkC, G.y);
         vec2 lane = mod(vTW.xz + 60.0, 120.0) - 60.0;
         float wheel = (1.0 - smoothstep(0.35, 1.1, abs(abs(lane.x) - 4.2))) + (1.0 - smoothstep(0.35, 1.1, abs(abs(lane.y) - 4.2)));
@@ -418,8 +431,13 @@ function terrainMaterial(A) {
         roadC = mix(roadC, vec3(0.62, 0.45, 0.10), G.w * 0.8);
         base = mix(base, roadC, G.x);
         diffuseColor.rgb *= base;
-        float isGrass = (1.0 - G.x) * (1.0 - G.y) * (1.0 - inCity * 0.6 * (1.0 - step(0.5, battlefield)));
+        float isGrass = (1.0-paved) * (1.0 - G.x) * (1.0 - G.y) * (1.0 - inCity * 0.6 * (1.0 - step(0.5, battlefield)));
       `)
+      .replace('#include <aomap_fragment>', `#include <aomap_fragment>
+        if(battlefield > 0.5) {
+          reflectedLight.indirectDiffuse*=1.0-fieldGround.b*.7;
+          reflectedLight.indirectSpecular*=1.0-fieldGround.b*.5;
+        }`)
       .replace('#include <roughnessmap_fragment>', `
         float roughnessFactor = roughness;
         float rG = texture2D(roughnessMap, vRoughnessMapUv).g;
@@ -433,6 +451,11 @@ function terrainMaterial(A) {
         vec3 nA = texture2D( asphN, vTW.xz / 7.0 ).xyz * 2.0 - 1.0;
         vec3 nR = texture2D( rockN, vTW.xz / 38.0 ).xyz * 2.0 - 1.0;
         vec3 mapN = mix( mix(nG, nR, rk), nA * vec3(0.8,0.8,1.0), 1.0 - isGrass );
+        if(battlefield > 0.5) {
+          vec3 nSoil=texture2D(rubN,vTW.xz/7.0).xyz*2.0-1.0;
+          mapN=mix(mapN,nSoil,max(fieldGround.r,fieldGround.g)*.75*(1.0-G.x)*(1.0-paved));
+          mapN.xy*=.6;
+        }
         mapN = mix( mapN, vec3(0.0,0.0,1.0), (G.z + G.w) * 0.8 );
       `)
       .replace('normal = normalize( tbn * mapN );', `
@@ -450,7 +473,7 @@ function terrainMaterial(A) {
       .replace('#include <fog_fragment>', `#include <fog_fragment>
         #ifdef USE_FOG
           // 高處仍有空氣散射：補足高度霧在山頂過薄、遠近山黏在一起的問題。
-          float mountainAir = (1.0 - exp(-length(vTW - cameraPosition) * 0.000095)) * mountain;
+          float mountainAir = (1.0 - exp(-length(vTW - cameraPosition) * (battlefield > .5 ? .000045 : .000095))) * mountain;
           vec3 air = mix(vec3(0.43,0.51,0.59), FOG_SUN_COL, pow(max(dot(normalize(vTW - cameraPosition), FOG_SUN_DIR),0.0),7.0) * 0.55);
           gl_FragColor.rgb = mix(gl_FragColor.rgb, air, mountainAir);
         #endif`);
@@ -857,6 +880,7 @@ function pylonGeometry() {
 export class World {
   constructor(renderer, scene, A, { terrainSegments = 160 } = {}) {
     this.scene = scene;
+    this.renderer = renderer;
     this.A = A;
     this.boxes = [];          // {x0,x1,z0,z1,top}
     this.grid = new Map();    // 空間格
@@ -885,7 +909,8 @@ export class World {
     pm.dispose();
     scene.environment = this.envMap;
     scene.environmentIntensity = 0.65;
-    scene.add(makeSkyDome(A.sky, this.sunDir, fog, sunFog, this.skyGain));
+    this.skyDome=makeSkyDome(A.sky, this.sunDir, fog, sunFog, this.skyGain);
+    scene.add(this.skyDome);this.cityLightDir=this.lightDir.clone();
 
     const sun = new THREE.DirectionalLight(new THREE.Color(1.0, 0.83, 0.64), 4.2);
     sun.castShadow = true;
@@ -897,7 +922,7 @@ export class World {
     scene.add(sun, sun.target);
     this.sun = sun;
     const hemi = new THREE.HemisphereLight(0x7f98c0, 0x3a2e24, 0.28);
-    scene.add(hemi);
+    scene.add(hemi); this.hemi=hemi;
 
     // 地形
     this.terrain = new Terrain(10000, terrainSegments);
@@ -938,7 +963,29 @@ export class World {
     }
     p.needsUpdate = uv.needsUpdate = true; this.terrainMesh.geometry.computeVertexNormals(); this.terrainMesh.geometry.computeBoundingSphere();
     this.terrainMesh.material.userData.battlefield.value = F.mode;
-    this.scene.fog.density = profile === 'forest' ? 0.00062 : profile === 'badlands' ? 0.00032 : 0.00042;
+    this.scene.fog.density = F.mode ? profile === 'forest' ? .00018 : .00012 : .00042;
+    this.scene.environmentIntensity=F.mode?.43:.65;
+    if(F.mode) {
+      const az=Math.atan2(this.sunDir.z,this.sunDir.x),el=Math.max(Math.asin(this.sunDir.y),THREE.MathUtils.degToRad(32));
+      this.lightDir.set(Math.cos(az)*Math.cos(el),Math.sin(el),Math.sin(az)*Math.cos(el));
+    } else this.lightDir.copy(this.cityLightDir);
+    this.skyDome.material.uniforms.sunDir.value.copy(F.mode?this.lightDir:this.sunDir);
+    // 戶外反射與補光由同一個可見天空烘焙，首次進場一次；之後所有場地共用。
+    if(F.mode && !this.fieldEnvMap) {
+      const skyScene=new THREE.Scene(),pm=new THREE.PMREMGenerator(this.renderer);
+      const capture=new THREE.WebGLCubeRenderTarget(128,{type:THREE.HalfFloatType,minFilter:THREE.LinearFilter,generateMipmaps:false});
+      skyScene.add(this.skyDome);this.skyDome.material.uniforms.environmentCapture.value=1;
+      try {new THREE.CubeCamera(.1,10000,capture).update(this.renderer,skyScene);this.fieldEnvMap=pm.fromCubemap(capture.texture).texture;}
+      finally {this.scene.add(this.skyDome);this.skyDome.material.uniforms.environmentCapture.value=0;capture.dispose();pm.dispose();}
+    }
+    this.scene.environment=F.mode?this.fieldEnvMap:this.envMap;
+    this.sun.intensity=F.mode?3.5:4.2;
+    this.sun.color.setRGB(1,F.mode?.91:.83,F.mode?.79:.64);
+    this.hemi.intensity=F.mode?.32:.28;
+    const sc=this.sun.shadow.camera,extent=F.mode?190:260;
+    sc.left=sc.bottom=-extent;sc.right=sc.top=extent;sc.updateProjectionMatrix();
+    this.sun.shadow.bias=F.mode?-.00008:-.0004;this.sun.shadow.normalBias=F.mode?.08:.28;
+    this.terrainMesh.castShadow=!!F.mode;
     for (const o of this.cityObjects) o.visible = !F.mode;
     for (const k of ['blds', 'trample', 'smokeSites', 'fireSites', 'lampSites']) this[k] = F.mode ? [] : this.cityState[k];
     this.falling.length = 0;
@@ -954,7 +1001,7 @@ export class World {
 
   buildBattlefield(profile, layout) {
     const group = this.fieldGroup = new THREE.Group(); this.scene.add(group);
-    const r = rng(601 + layout.mode * 91), walls = new GeoBucket(), roofs = new GeoBucket(), records = [];
+    const r = rng(601 + layout.mode * 91), walls = new GeoBucket(), roofs = new GeoBucket(), records = [], contacts = [];
     const put = (bucket, mat, shadow = true) => {
       const geo = bucket.geo = bucket.geometry();
       if (!geo) return;
@@ -983,15 +1030,6 @@ export class World {
       const collider = rec.box = { x0, x1, z0, z1, top: oil ? 22.5 : H + 0.3 };
       this.addCollider(collider); records.push(rec);
     }
-    const roads=new GeoBucket();
-    for(let i=1;i<this.fieldRoute.pts.length;i++) {
-      const a=this.fieldRoute.pts[i-1],b=this.fieldRoute.pts[i],dx=b[0]-a[0],dz=b[1]-a[1],len=Math.hypot(dx,dz);if(len<1)continue;
-      const width=profile==='airfield'||profile==='depot'?10:6,nx=-dz/len*width,nz=dx/len*width;
-      const pts=[[a[0]+nx,.045,a[1]+nz],[b[0]+nx,.045,b[1]+nz],[b[0]-nx,.045,b[1]-nz],[a[0]-nx,.045,a[1]-nz]];
-      roads.quad(...pts,[0,1,0],pts.map(p=>[p[0]/7,p[2]/7]),[.62,.59,.50]);
-    }
-    if(!this.fieldRoadMaterial)this.fieldRoadMaterial=new THREE.MeshStandardMaterial({map:this.A.rubD,normalMap:this.A.rubN,roughness:1,vertexColors:true});
-    put(roads,this.fieldRoadMaterial,false);
     // 兩個合併網格容納全部可破壞基地建築，沿用既有建材、焦痕與倒塌池。
     put(walls, this.fieldRoofMaterial); put(roofs, this.fieldRoofMaterial); this._registerBlds(records);
     const place = (geo, material, count, type) => {
@@ -1001,7 +1039,8 @@ export class World {
       const d = new THREE.Object3D(); let n = 0;
       for (let i = 0; i < count * 12 && n < count; i++) {
         let x = (r() - 0.5) * 2400, z = (r() - 0.5) * 2400;
-        const size = type === 'tree' ? 1.3 + r() * 1.5 : 6 + r() * 17;
+        const size = type === 'tree' ? 1.3 + r() * 1.5 : 2.5 + r() * 9;
+        if(type==='rock' && n%4 && contacts.length) {const c=contacts[contacts.length-1];x=c.x+(r()-.5)*55;z=c.z+(r()-.5)*55;}
         if(type==='tree' && r() < (profile==='forest'?.78:.4)) {
           const p=this.fieldRoute.pts[Math.floor(r()*this.fieldRoute.pts.length)];
           x=p[0]+(r()-.5)*520; z=p[1]+(r()-.5)*520;
@@ -1009,6 +1048,7 @@ export class World {
         if (routeDistance(x,z,this.fieldRoute.pts) < size + 32 || layout.structures.some(t => Math.hypot(t.x-x,t.z-z) < size + 42)) continue;
         if (profile === 'airfield' && Math.abs(x + 420) < 65 && Math.abs(z) < 930) continue;
         const y = this.height(x,z);
+        contacts.push({x,z,r:size*(type==='tree'?3:1.2),tree:type==='tree'});
         d.position.set(x,y,z); d.rotation.set(type === 'tree' ? 0 : r() * 0.25, r() * 6.28, 0);
         d.scale.set(size, type === 'tree' ? size * (0.9 + r() * 0.25) : size * (0.7 + r() * 0.6), size * (0.65 + r() * 0.65)); d.updateMatrix();
         m.setMatrixAt(n,d.matrix); m.setColorAt(n,type==='tree' ? new THREE.Color().setRGB(.7+r()*.22,.8+r()*.2,.65+r()*.25) : profile==='badlands' ? new THREE.Color(.72+r()*.18,.54+r()*.12,.36+r()*.09) : new THREE.Color(.72+r()*.2,.75+r()*.18,.68+r()*.18));
@@ -1049,6 +1089,10 @@ export class World {
       place(this.fieldTrees[0],this.fieldTreeMaterial,layout.trees-broad,'tree');
       place(this.fieldTrees[1],this.fieldTreeMaterial,broad,'tree');
     }
+    const mask=fieldGroundMask(this.fieldRoute,layout.structures,contacts,undefined,profile);
+    if(!this.fieldGroundTexture) {this.fieldGroundTexture=new THREE.CanvasTexture(mask);this.fieldGroundTexture.generateMipmaps=false;this.fieldGroundTexture.minFilter=THREE.LinearFilter;}
+    else {this.fieldGroundTexture.image=mask;this.fieldGroundTexture.needsUpdate=true;}
+    this.terrainMesh.material.userData.fieldMask.value=this.fieldGroundTexture;
     if (profile === 'depot' || profile === 'airfield') {
       const tanks = new GeoBucket();
       for (const S of layout.structures) if (!S.target) {
@@ -1175,14 +1219,24 @@ export class World {
     const fieldMat = this.fieldRoofMaterial, prepareField = fieldMat.onBeforeCompile;
     fieldMat.onBeforeCompile = (sh,renderer) => {
       prepareField(sh,renderer);
+      sh.uniforms.fieldWear={value:this.A.wearM};
       sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nattribute float burn; varying float vFieldBurn;').replace('#include <begin_vertex>','#include <begin_vertex>\nvFieldBurn=burn;');
-      sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nvarying float vFieldBurn;').replace('#include <map_fragment>',`#include <map_fragment>
+      sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nvarying float vFieldBurn; uniform sampler2D fieldWear;').replace('#include <map_fragment>',`#include <map_fragment>
         float streak=fract(sin(dot(floor(vAW.xz*2.0),vec2(127.1,311.7)))*43758.5453);
         float grime=(1.0-smoothstep(0.0,4.0,vAW.y))*0.16+step(0.88,streak)*(0.04+0.1*abs(sin(vAW.y*0.25)));
-        diffuseColor.rgb*=1.0-grime;
+        float wear=texture2D(fieldWear,vAW.xz/9.0+vAW.y*.031).r;
+        float along=abs(vAN.x)>.5?vAW.z:vAW.x;
+        float joint=1.0-smoothstep(.01,.035,abs(fract(along/3.0)-.5));
+        float rib=sin(along*15.0)*.5+.5;
+        float metal=step(1.5,vSurface)*(1.0-step(2.5,vSurface));
+        diffuseColor.rgb*=1.0-grime-wear*.07-joint*.12;
+        diffuseColor.rgb*=mix(1.0,.85+rib*.15,metal);
+        diffuseColor.rgb=mix(diffuseColor.rgb,diffuseColor.rgb*vec3(.58,.38,.23),wear*metal*.25);
+
         diffuseColor.rgb=mix(diffuseColor.rgb,diffuseColor.rgb*vec3(0.25,0.22,0.20),clamp(vFieldBurn,0.0,1.0));`);
+      sh.fragmentShader=sh.fragmentShader.replace('vSurface < 2.5 ? 0.4','vSurface < 2.5 ? 0.75').replace('normal = normalize( tbn * mapN );','mapN.x+=cos(along*15.0)*.16*metal; normal = normalize( tbn * mapN );');
     };
-    fieldMat.customProgramCacheKey=()=> 'field-architecture-v1';
+    fieldMat.customProgramCacheKey=()=> 'field-architecture-v2';
     const inner = new THREE.MeshStandardMaterial({ color: 0x16130f, roughness: 1, vertexColors: true });
     const CH = 3; // 3×3 區塊
     const buckets = [];
