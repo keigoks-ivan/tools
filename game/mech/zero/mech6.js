@@ -40,7 +40,8 @@ const BEAM_FS = `uniform float t, a, k; varying vec2 vUv; varying vec3 vN, vV;
 
 export async function startMech(X) {
   const { renderer, scene, camera, vScene, vCam, post, world, hero, audio, input, zhud, solid, D, fxl, G, S, $, pause, exit } = X;
-  const M6 = S.MECH6;
+  const M6 = { ...S.MECH6 };
+  let mission = null;
   let FX = null;
   try { ({ FX } = await import('../fx.js')); } catch (e) { console.warn('[zero] fx.js 載入失敗，改用空殼', e); }
 
@@ -211,10 +212,11 @@ export async function startMech(X) {
     const W = M6.waves[this.group]; if (!W) return;   // 已經沒有下一波（Combat 下一幀就判過關）
     const k = this.group;
     // 市區的波次：先出現目標點，走到了才開打（Combat 每一幀都會叫這裡，沒到就先不動）
-    if (W.go && !reached(W)) { arm(k); return; }
+    if (W.go && !(mission ? mission.ready(k, W) : reached(W))) { arm(k); return; }
     this.group++;
     wave = k; gate = null;
     if (W.go) cp = cpOf(W);
+    mission?.onWave(k);
     this.say(W.title, W.sub, 3.6, W.boss ? 'am' : 'cy');
     this.audio.ui('wave');
     const noDog = W.boss && W.boss.flee && fled;   // 黑犬已經逃了：從這一波重來時只剩掩護他的那幾台
@@ -258,6 +260,7 @@ export async function startMech(X) {
     Object.defineProperty(C, 'def', { value: DEF });
     world.blocked = BLOCK;   // Combat 開場會把路障清掉（setRoute），這裡再封一次
     C.spawnGroup = spawnGroup;
+    C.missionRetry = restart;
     const say = C.say.bind(C);
     C.say = (text, sub, t, color) => (text === 'STAGE CLEAR' || text === 'ALL CLEAR' ? say(M6.clear[0], M6.clear[1], 4, 'am') : say(text, sub, t, color));
     // 基地的黑犬：怎麼打都不會在這裡倒（留一點血，下一幀 tick() 讓他撤退）；撤退中完全打不到
@@ -270,17 +273,24 @@ export async function startMech(X) {
     boss = null; bossTold = false; gate = null;
   }
   newCombat();
+  if (M6.mission) {
+    const { createMission } = await import(M6.mission);
+    mission = createMission({ scene, world, player, fx, config: M6, combat: () => C, zhud, input, G, fail: onEnd, resumeSave: X.resumeSave, saveChapter: X.saveChapter });
+    if (mission.startWave) { wave = mission.startWave; cp = cpOf(M6.waves[wave]); place(cp); }
+  }
   world.hook({ fx, audio: au, cockpit, player, note: (t, c) => C && C.note(t, c) });   // 城市大樓打得爛
   function fight(from) { C.start(); C.group = from; started = true; }
   // 大破：從這一波重來（基地裡擺在機庫大門外；市區擺在最後一個走到的目標點）
   function restart() {
+    if (mission) wave = mission.restart();
     newCombat(); place(cp); fight(wave); boot = 0.7;
     for (const [w, t] of M6.down) zhud.say(w, t, 3.4, true);
     audio.music('battle', { stage: M6.waves[wave].music || 4 });
   }
   let ending = null;
   function onEnd(ok) {
-    if (!ok) { setTimeout(restart, 3400); return; }   // 大破畫面由本篇 HUD 顯示（AP ZERO）
+    if (mission) mission.onEnd(ok);
+    if (!ok) { if (!mission) setTimeout(restart, 3400); return; }   // 大破畫面由本篇 HUD 顯示（AP ZERO）
     ending = { t: 0 };
     gate = null;
     flushTalk();
@@ -419,13 +429,15 @@ export async function startMech(X) {
   // ---------------------------------------------------------------- 開場
   let T = 0, boot = 0, odV = 0, speedV = 0, flashV = 0, dangerV = 0;
   zhud.sub = null; zhud.subQ.length = 0;   // 上一章（駕駛艙）還沒播完的字幕不帶過來
-  zhud.title(`第 6 章　${M6.name}`, M6.en, 4.5);
+  zhud.title(`第 ${M6.chapter || 6} 章　${M6.name}`, M6.en, 4.5);
   for (const [w, t] of M6.start.lines) zhud.say(w, t, 3.6);
   audio.music('battle', { stage: 4 });
   $('fade').style.transition = 'opacity 1.2s'; $('fade').style.opacity = 0;
   const fwd = new THREE.Vector3(), foot = new THREE.Vector3(), tmp = new THREE.Vector3();
 
   function tick(rdt) {
+    if (mission && ending?.go) return;
+    if (mission?.blocked && !ending) { if (input.state(rdt).pause) { input.unlock(); pause(); } return; }
     T += rdt;
     const dt = rdt * C.timeScale;
     boot = Math.min(1, boot + rdt / 2.6);
@@ -433,7 +445,7 @@ export async function startMech(X) {
     if (window.__m6.fake) Object.assign(inp, window.__m6.fake);
     if (inp.pause && !ending) { input.unlock(); pause(); return; }
     if (inp.view && !ending) { tpView = !tpView; applyView(); }
-    if (!(boot > 0.85 && !C.dead && !ending)) inp = Object.assign({}, inp, IDLE);
+    if (!(boot > 0.85 && !C.dead && !ending && !mission?.blocked)) inp = Object.assign({}, inp, IDLE);
     if (C.cannon.phase) inp = Object.assign({}, inp, { lookX: inp.lookX * 0.45, lookY: inp.lookY * 0.45, mx: inp.mx * 0.35, my: inp.my * 0.35, boost: false });
 
     // ---- 自機
@@ -469,7 +481,7 @@ export async function startMech(X) {
     C.aimSkip = tpView ? chaseSkip : 0;
 
     // ---- 流程：走出機庫大門（或開場 30 秒）才開打
-    if (!started && (player.pos.x > HANGAR.x1 + 2 || T > 30)) fight(0);
+    if (!started && (player.pos.x > HANGAR.x1 + 2 || T > 30)) fight(mission?.startWave || 0);
     if (!started && T > 5 && T - rdt <= 5) C.say(M6.goal[0], M6.goal[1], 5, 'cy');
     // 基地的黑犬打到剩四成：撤退（僚機留下來掩護）
     if (boss && boss.flee && !boss.fleeing && !boss.dead && !boss.dropping && boss.ap <= boss.apMax * boss.flee) {
@@ -491,7 +503,9 @@ export async function startMech(X) {
     if (gate) gate.t += rdt;
 
     // ---- 戰鬥、特效、世界
-    C.update(dt, ending ? null : inp, rdt);
+    mission?.tick(dt);
+    if (ending) mission?.cinematic(rdt);
+    if (!mission?.blocked || ending) C.update(dt, ending ? null : inp, rdt);
     updFlyers(dt); updPods(dt); tankGuard();
     beaconFx(rdt);
     fx.update(dt); fxl.update(dt, true); D.update(dt);
@@ -523,6 +537,7 @@ export async function startMech(X) {
     post.render(T);
     mhud.draw(rdt, { boot, combat: C, player, stages: 1, groundY: world.height(player.pos.x, player.pos.z), tp: tpView, label: M6.label });
     drawGoal();
+    mission?.draw(mhud);
     zhud.draw(rdt, G);
 
     // ---- 結尾：對白 → 黑畫面 → 字卡 → 接本篇（最後一句對白講完才接，最晚 26 秒）
@@ -530,7 +545,7 @@ export async function startMech(X) {
       ending.t += rdt;
       if (ending.t > 12 && !ending.fade) { ending.fade = true; $('fade').style.transition = 'opacity 2s'; $('fade').style.opacity = 1; }
       if (ending.t > 14.2 && !ending.card) { ending.card = true; zhud.title(M6.fin[0], M6.fin[1], 5); }
-      if (ending.t > 19 && (!(zhud.sub || zhud.subQ.length) || ending.t > 26) && !ending.go) { ending.go = true; exit('../?zero=1'); }
+      if (ending.t > 19 && (!(zhud.sub || zhud.subQ.length) || ending.t > 26) && !ending.go) { ending.go = true; if (mission) mission.finish(); else exit('../?zero=1'); }
     }
   }
   // 蒼焰走過去：腳邊的車、油桶、木箱直接踩爛
@@ -546,6 +561,6 @@ export async function startMech(X) {
 
   applyView();
   window.__m6 = { fake: null, get combat() { return C; }, player, hero, get wave() { return wave; }, get ending() { return ending; }, fight, tick,
-    get gate() { return gate; }, get boss() { return boss; }, get fled() { return fled; }, get cp() { return cp; }, flyers, pods };
-  return { tick, setQuality: (q) => fx.setQuality(q) };
+    get gate() { return gate; }, get boss() { return boss; }, get fled() { return fled; }, get cp() { return cp; }, mission, restart, flyers, pods };
+  return { tick, get holdsInput() { return !!mission?.blocked; }, setPaused: (on) => { if (mission) mission.panel.style.visibility = on ? 'hidden' : ''; }, setQuality: (q) => fx.setQuality(q) };
 }

@@ -18,6 +18,10 @@ const cdn = await import('../cdn.js').then((m) => m.useCDN()).catch(() => null);
 THREE.DefaultLoadingManager.setURLModifier((u) => { const v = lite(u); return cdn ? cdn(v) : v; });
 
 const q = new URLSearchParams(location.search);
+const campaign = document.body.dataset.campaign === 'lastline';
+let resumeSave = false;
+const readSave = (key) => { try { return JSON.parse(localStorage.getItem('lastline.' + key)); } catch { return null; } };
+const writeSave = (key, value) => { try { localStorage.setItem('lastline.' + key, JSON.stringify(value)); } catch {} };
 const $ = (id) => document.getElementById(id);
 const clamp = THREE.MathUtils.clamp, lerp = THREE.MathUtils.lerp;
 const bar = document.querySelector('#bar i'), status = $('status');
@@ -25,7 +29,7 @@ let prog = 0; const step = (k) => { prog = Math.min(1, prog + k); bar.style.widt
 
 const [{ loadAssets, World }, { Post }, { Mech, initMechMaterials }, { loadSurfaces, Solid }, { buildMap }, { HumanKit, wrap }, { ViewModel, WEAPONS }, { FXL }, { HUD }, { Pilot }, { Trooper, Drone }, { Input }, S, { Models, Placer }] = await Promise.all([
   import('../env.js'), import('../post.js'), import('../mechs.js'), import('./kit.js'), import('./map.js'), import('./human.js'), import('./viewmodel.js'),
-  import('./fxl.js'), import('./hud.js'), import('./player.js'), import('./ai.js'), import('../input.js'), import('./script.js'), import('./models.js'),
+  import('./fxl.js'), import('./hud.js'), import('./player.js'), import('./ai.js'), import('../input.js'), import(campaign ? '../lastline/script.js' : './script.js'), import('./models.js'),
 ]);
 const { Destruct } = await import('./destruct.js');
 let Audio;
@@ -188,7 +192,7 @@ for (const id in map.targets) { const T = map.targets[id]; T.obj = D.objs.find((
 const _v = new THREE.Vector3(), _w = new THREE.Vector3();
 
 // ---------------------------------------------------------------- 設定
-const store = { get: (k, d) => { try { const v = localStorage.getItem('zero.' + k); const n = v === null ? d : +v; return Number.isFinite(n) ? n : d; } catch (e) { return d; } }, set: (k, v) => { try { localStorage.setItem('zero.' + k, v); } catch (e) {} } };
+const store = { get: (k, d) => { try { const v = localStorage.getItem((S.SAVE_KEY || 'zero') + '.' + k); const n = v === null ? d : +v; return Number.isFinite(n) ? n : d; } catch (e) { return d; } }, set: (k, v) => { try { localStorage.setItem((S.SAVE_KEY || 'zero') + '.' + k, v); } catch (e) {} } };
 let quality = store.get('q', 1), M6 = null;
 function setQuality(qv) {
   qv = qualityLevel(qv); quality = qv; store.set('q', qv);
@@ -240,7 +244,11 @@ const done = new Set();         // 已清完的遭遇
 let active = [];                // 進行中 {E, list}
 let chapter = 1, checkpoint = null, stage = 'play';
 let mechWalk = null, finale = null, hatchOpen = 0, alarmOn = false;   // M6＝第 6 章（mech6.js）進行中
-const progress = () => store.get('ch', 1);
+const progress = () => clamp(store.get('ch', 1), 1, S.CHAPTERS.length);
+function saveFoot() {
+  if (!campaign || !checkpoint) return;
+  writeSave('checkpoint', { chapter, foot: { p: checkpoint.p.toArray(), yaw: checkpoint.yaw, done: checkpoint.done, nades: checkpoint.nades, picked: [...pickedItems] }, stats: G.stats });
+}
 
 // 手榴彈的樣子：墨綠色小圓柱＋一顆閃爍的紅燈（越接近爆炸閃越快）
 const NADE = { body: new THREE.CylinderGeometry(0.045, 0.05, 0.12, 10), lamp: new THREE.SphereGeometry(0.018, 8, 6),
@@ -284,7 +292,7 @@ function spawn(def) {
   G.enemies.push(e); return e;
 }
 const doneT = {};   // 每段清完的時間（after＋wait 用）
-function markDone(id, old = false) { done.add(id); doneT[id] = old ? -1e9 : performance.now() / 1000; }   // old＝讀檔／選關還原的，不必再等 wait
+function markDone(id, old = false) { done.add(id); doneT[id] = old ? -1e9 : campaign ? G.t : performance.now() / 1000; }   // old＝讀檔／選關還原的，不必再等 wait
 function startEncounter(E) {
   const list = E.enemies.map(spawn);
   // hold＝守住幾秒（期間一波波增援）；stealth＝別被發現（被發現就叫增援）；targets＝要炸掉的東西；pickups＝要撿的東西（全部都要做完、敵人全倒才算清完）
@@ -470,7 +478,7 @@ function updateEncounters() {
     if (E.ch !== chapter || done.has(E.id) || active.some((a) => a.E === E)) continue;
     const idx = S.ENCOUNTERS.indexOf(E), prev = S.ENCOUNTERS.slice(0, idx).filter((x) => x.ch === chapter);
     if (!prev.every((x) => done.has(x.id))) continue;
-    if (E.after ? done.has(E.after) && performance.now() / 1000 - (doneT[E.after] || 0) > (E.wait || 0) : E.trigger(p)) startEncounter(E);
+    if (E.after ? done.has(E.after) && (campaign ? G.t : performance.now() / 1000) - (doneT[E.after] ?? 0) > (E.wait || 0) : E.trigger(p)) startEncounter(E);
   }
   // 清完
   for (const a of [...active]) {
@@ -481,6 +489,7 @@ function updateEncounters() {
     if (a.E.done.length) audio.radio('in');
     hud.note(a.E.pickup ? '取得啟動金鑰  KEY ACQUIRED' : '區域清除  AREA CLEAR', '#ffb347');
     checkpoint = { p: player.pos.clone(), yaw: player.yaw, done: [...done], ch: chapter, nades: G.nadeN };
+    saveFoot();
     const nx = objective();
     if (a.E.id === 'G2') { toCockpit(); if (alarmOn) { alarmOn = false; audio.alarm(false); } }
     else if (nx && nx.ch === chapter) { G.objText = nx.obj; hud.obj = guideObj(nx); }
@@ -761,7 +770,8 @@ function startFinale() {
   player.frozen = true; hud.prompt = null; hud.obj = null; G.objText = ''; G.playing = false;
   audio.music('off');
   audio.mechBoot(finale.to);
-  store.set('ch', S.CHAPTERS.length); store.set('clear', 1);
+  if (campaign) { store.set('ch', Math.max(S.FIRST_MECH, progress())); writeSave('checkpoint', null); }
+  else { store.set('ch', S.CHAPTERS.length); store.set('clear', 1); }
 }
 function updateFinale(dt) {
   const F = finale; F.t += dt;
@@ -783,15 +793,19 @@ function updateFinale(dt) {
 }
 // 第 6 章：開蒼焰，每一幀交給 mech6.js；載入失敗就照舊直接接本篇
 async function startMech() {
-  finale = null; stage = 'mech'; chapter = 6; G.playing = false; player.frozen = true;
+  finale = null; stage = 'mech'; chapter = S.CHAPTERS[chapter - 1].mech ? chapter : (S.FIRST_MECH || 6); G.playing = false; player.frozen = true;
   hud.prompt = null; hud.obj = null; G.objText = ''; clearEnemies(); active = [];
   vm.holder.visible = false; vm.arms.root.visible = false;
-  if (progress() < 6) store.set('ch', 6);
+  if (progress() < chapter) store.set('ch', chapter);
   try {
     const { startMech: go } = await import('./mech6.js');
-    M6 = await go({ renderer, scene, camera, vScene, vCam, post, world, hero, audio, input, zhud: hud, solid, D, fxl: fx, G, S, $, pause, exit: (u) => { location.href = u; } });
+    M6 = await go({ renderer, scene, camera, vScene, vCam, post, world, hero, audio, input, zhud: hud, solid, D, fxl: fx, G, S: S.MECH_CONFIGS ? { ...S, MECH6: S.MECH_CONFIGS[chapter] } : S, $, pause, resumeSave, saveChapter: (n) => store.set('ch', Math.max(n, progress())), exit: (u) => { location.href = u; } });
     M6.setQuality(quality);
-  } catch (e) { console.error('[zero] 第 6 章載入失敗', e); location.href = '../?zero=1'; }
+  } catch (e) {
+    console.error('[zero] 機體章節載入失敗', e);
+    if (!campaign) location.href = '../?zero=1';
+    else { $('result').style.display = 'flex'; $('resTitle').textContent = '載入中斷'; $('resSub').textContent = '回標題重試；已解鎖的章節仍保留'; $('cont').style.display = 'none'; }
+  }
 }
 const ease = (t) => t * t * (3 - 2 * t);
 const lerpA = (a, b, t) => a + wrap(b - a) * t;
@@ -867,12 +881,17 @@ let state = 'title';
 function renderChapters() {
   const nx = q.has('all') ? S.CHAPTERS.length : progress();
   $('chapters').innerHTML = S.CHAPTERS.map((C) => `<button class="chp${C.n > nx ? ' lock' : ''}${C.n === nx ? ' next' : ''}" data-c="${C.n}"${C.n > nx ? ' disabled' : ''}><b>CHAPTER ${C.n}</b><span>${C.n > nx ? 'LOCKED' : C.name}</span></button>`).join('');
+  if (campaign && $('campaignResume')) {
+    const saved = readSave('checkpoint');
+    $('campaignResume').hidden = !saved || !S.CHAPTERS[saved.chapter - 1];
+    $('campaignResume').onclick = () => { const cp = readSave('checkpoint'); if (cp && S.CHAPTERS[cp.chapter - 1]) { resumeSave = true; launch(cp.chapter); } };
+  }
 }
 status.textContent = '選擇章節';
 bar.style.width = '100%';
 renderChapters();
 $('chapters').style.display = 'flex';
-$('chapters').addEventListener('click', (ev) => { const b = ev.target.closest('.chp'); if (b && !b.disabled) launch(+b.dataset.c); });
+$('chapters').addEventListener('click', (ev) => { const b = ev.target.closest('.chp'); if (b && !b.disabled) { resumeSave = false; if (campaign) writeSave('checkpoint', null); launch(+b.dataset.c); } });
 document.addEventListener('mouseover', (ev) => { const b = ev.target.closest('.chp:not(.lock), .btn'); if (b && !b.contains(ev.relatedTarget)) audio.ui('hover'); });
 document.addEventListener('click', (ev) => { if (ev.target.closest('.btn, .chp')) audio.ui('click'); });
 for (const k of ['pointerdown', 'keydown']) addEventListener(k, () => audio.unlock(), { once: true });
@@ -881,14 +900,14 @@ $('resume').addEventListener('click', resume);
 $('quit').addEventListener('click', toTitle);
 $('menu').addEventListener('click', toTitle);
 $('cont').addEventListener('click', respawn);
-input.onLockChange = (locked) => { if (!locked && state === 'play' && (stage === 'play' || M6) && !input.touch.on && !finale) pause(); };
+input.onLockChange = (locked) => { if (!locked && state === 'play' && (stage === 'play' || M6) && !input.touch.on && !finale && !M6?.holdsInput) pause(); };
 const touchUI = $('touch');
 
 function launch(n) {
   audio.unlock();
   $('title').classList.add('hide');
   G.stats = { shots: 0, hits: 0, kills: 0, heads: 0, taken: 0, time: 0 };
-  if (n === 1 && !q.has('x') && !q.has('ch')) intro(() => begin(n)); else begin(n);
+  if (n === 1 && !resumeSave && !q.has('x') && !q.has('ch')) intro(() => begin(n)); else begin(n);
 }
 function intro(then) {
   const el = $('intro'), box = $('introText');
@@ -904,12 +923,25 @@ function intro(then) {
   tm = setTimeout(next, 500);
 }
 function begin(n) {
+  n = clamp(Math.floor(n) || 1, 1, S.CHAPTERS.length);
+  chapter = n;
   if (S.CHAPTERS[n - 1].mech) {
     state = 'play'; input.enabled = true; if (!input.touch.on) input.lock();
     touchUI.style.display = input.touch.on ? 'block' : 'none';
     startMech(); return;
   }
   startChapter(n);
+  if (campaign) {
+    const saved = resumeSave ? readSave('checkpoint') : null, foot = saved?.chapter === n ? saved.foot : null;
+    const ids = new Set(S.ENCOUNTERS.filter(e => e.ch <= n).map(e => e.id));
+    if (foot && Array.isArray(foot.p) && foot.p.length === 3 && foot.p.every(Number.isFinite) && Math.max(Math.abs(foot.p[0]), Math.abs(foot.p[2])) < 140 && foot.p[1] >= 0 && foot.p[1] < 40 && Number.isFinite(foot.yaw) && Array.isArray(foot.done) && foot.done.every(id => ids.has(id))) {
+      checkpoint = { p: new THREE.Vector3(...foot.p), yaw: foot.yaw, done: foot.done, ch: n, nades: clamp(foot.nades || 0, 0, NADE_MAX) };
+      pickedItems.clear(); for (const id of Array.isArray(foot.picked) ? foot.picked : []) if (map.items[id]) { pickedItems.add(id); map.items[id].h?.hide(); }
+      respawn();
+      for (const k of Object.keys(G.stats)) if (Number.isFinite(saved.stats?.[k])) G.stats[k] = Math.max(0, saved.stats[k]);
+    }
+    vm.swap('smg'); saveFoot();
+  }
   if (q.has('final')) { for (const E of S.ENCOUNTERS) done.add(E.id); player.reset(new THREE.Vector3(14, 0, 90), 0); toCockpit(); }
   state = 'play'; stage = 'play'; G.playing = true;
   input.enabled = true;
@@ -919,11 +951,11 @@ function begin(n) {
 }
 function pause() {
   if (state !== 'play') return;
-  state = 'paused'; $('pause').style.display = 'flex'; audio.setPaused(true); input.reset();
+  state = 'paused'; M6?.setPaused?.(true); $('pause').style.display = 'flex'; audio.setPaused(true); input.reset();
 }
 function resume() {
-  $('pause').style.display = 'none'; audio.setPaused(false);
-  if (!input.touch.on) input.lock();
+  $('pause').style.display = 'none'; M6?.setPaused?.(false); audio.setPaused(false);
+  if (!input.touch.on && !M6?.holdsInput) input.lock();
   state = 'play'; clock.getDelta();
 }
 function toTitle() {

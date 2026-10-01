@@ -1,11 +1,12 @@
 <!doctype html>
 <html lang="zh-Hant">
 <head>
+<base href="../zero/">
 <meta charset="utf-8">
 <meta name="robots" content="noindex">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-<title>鋼鐵黃昏 零 IRON DUSK ZERO</title>
-<meta name="description" content="《鋼鐵黃昏》前傳：第一人稱射擊。駕駛員穿過被占領的城市，找到聯邦最後一台機動裝甲。">
+<title>鋼鐵黃昏：失落防線 IRON DUSK LAST LINE</title>
+<meta name="description" content="五章完整戰役：步兵潛入、奪回蒼焰、護送最後兩輛撤離車。救援選擇、車隊耐久與不同結局。">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
@@ -30,7 +31,8 @@
   .chp.next { background: var(--cy); color: #06090b; border-color: var(--cy); } .chp.next b { color: #7a3d00; }
   .chp:not(.lock):hover { background: #fff; color: #06090b; }
   .chp.lock { color: #5d7178; border-color: rgba(127,243,255,0.18); cursor: default; } .chp.lock b { color: #5d7178; }
-  @media (max-width: 560px) { #chapters { flex-direction: column; } }
+  #chapters { flex-wrap:wrap; justify-content:center; max-width:880px; }
+  @media (max-width: 560px) { .chp { width:135px; height:57px; } .keys { font-size:11px; gap:5px 10px; margin-top:15px; } .logo {font-size:38px} .logo small{letter-spacing:.25em;padding-left:0} .zh{font-size:17px;letter-spacing:.15em} .note{line-height:1.9;margin-top:12px} #bar{margin-top:20px} }
   .keys { margin-top: 30px; display: grid; grid-template-columns: repeat(2, auto); gap: 6px 26px; font-size: 14px; color: #9fb4bb; text-align: left; letter-spacing: 0.06em; }
   .keys b { color: #e8f3f6; font-weight: 600; display: inline-block; min-width: 92px; }
   .note { margin-top: 22px; font-size: 12px; color: #5d7178; letter-spacing: 0.1em; }
@@ -51,10 +53,21 @@
   #touch .pad i { position: absolute; left: 50%; top: 50%; width: 56px; height: 56px; margin: -28px; border-radius: 50%; background: rgba(127,243,255,0.25); }
   #touch .tb { position: absolute; width: 64px; height: 64px; border-radius: 50%; border: 1px solid rgba(127,243,255,0.5); background: rgba(5,15,20,0.35); color: #cfeff5; font: 600 13px 'Rajdhani', 'Noto Sans TC'; display: flex; align-items: center; justify-content: center; pointer-events: auto; }
   #touch .look { position: absolute; right: 0; top: 0; width: 55%; height: 100%; pointer-events: auto; }
+  .campaign-tagline {font:14px/1.7 'Noto Sans TC',sans-serif;color:#aab7b8;letter-spacing:.12em; margin:18px 20px 0}
+  [hidden] {display:none!important}
+  .campaign-panel {position:fixed;inset:0;z-index:8;background:rgba(4,10,14,.88);display:flex;align-items:center;justify-content:center;padding:24px;box-sizing:border-box;overflow:auto}
+  .campaign-card {max-width:740px;width:100%;border-left:3px solid #e6ae68;padding:28px;background:linear-gradient(130deg,#14252b,#090f14);text-align:left;box-sizing:border-box}
+  .campaign-card small {letter-spacing:.2em;color:#e6ae68} .campaign-card h2 {font:700 clamp(24px,4vw,40px)/1.5 'Noto Sans TC',sans-serif;margin:16px 0}
+  .campaign-card p {line-height:1.9;color:#bbc9ca;font-family:'Noto Sans TC',sans-serif} .campaign-card .row {justify-content:flex-start}
+  .campaign-card .btn {font-size:14px;letter-spacing:.08em;text-decoration:none;padding:12px 20px} .campaign-card .campaign-fine {font-size:12px;color:#8a9c9e}
+  .campaign-stats {padding:16px 0;color:#e6ae68;line-height:1.9;border-block:1px solid #34474d}
+  #title {overflow-y:auto;justify-content:safe center;padding:56px 16px 24px;box-sizing:border-box}
+  @media (max-height:720px) { .logo{font-size:clamp(38px,7vw,72px)} #bar{margin-top:20px} .keys{margin-top:18px} .note{margin-top:14px} }
+  @media (max-width:560px) { .keys{font-size:11px;gap:5px 10px;margin-top:15px} .campaign-panel{padding:12px} .campaign-card{padding:20px} }
 </style>
 <script type="importmap">{"imports":{"three":"../../lib/three.module.js","three/addons/":"../../lib/addons/","../env.js":"../env.js?v=2","./mech6.js":"./mech6.js?v=2"}}</script>
 </head>
-<body>
+<body data-campaign="lastline">
 <canvas id="gl"></canvas>
 <canvas id="hud"></canvas>
 <div id="touch">
@@ -72,11 +85,13 @@
 </div>
 <div id="title" class="screen">
   <button class="btn fs" id="fsTop">全螢幕 FULLSCREEN</button>
-  <div class="logo">IRON DUSK<small>ZERO · THE LAST FRAME</small></div>
-  <div class="zh">鋼鐵黃昏　零</div>
+  <div class="logo">IRON DUSK<small>LAST LINE · NO ONE LEFT BEHIND</small></div>
+  <div class="zh">鋼鐵黃昏：失落防線</div>
   <div id="bar"><i></i></div>
   <div id="status">載入中</div>
   <div id="chapters"></div>
+  <button class="btn" id="campaignResume" hidden>繼續上次檢查點</button>
+  <p class="campaign-tagline">六十四個名字，兩輛車。一道不該服從的命令。</p>
   <div class="keys">
     <div><b>滑鼠</b>瞄準</div><div><b>W A S D</b>移動</div>
     <div><b>左鍵</b>開槍</div><div><b>右鍵</b>舉槍瞄準（長槍＝狙擊鏡）</div>
@@ -86,7 +101,7 @@
     <div><b>G</b>丟手榴彈</div>
     <div><b>Esc</b>暫停</div>
   </div>
-  <div class="note">《鋼鐵黃昏》前傳。建議用電腦＋滑鼠。卡頓的話按 Esc 調低畫質。　<a href="../" style="pointer-events:auto">→ 鋼鐵黃昏本篇</a>　<a href="/game/mech/lastline/" style="color:#d4a476;pointer-events:auto">續作：失落防線 →</a></div>
+  <div class="note">完整五章・步兵 → 機甲護送・自動存檢查點<br>建議用電腦＋滑鼠。Esc 可調低畫質。　<a href="./" style="pointer-events:auto">步兵前傳</a>　<a href="../" style="pointer-events:auto">機甲戰鬥</a>　<a href="/games/" style="pointer-events:auto">遊戲大廳</a></div>
 </div>
 <div id="intro" class="screen"><div id="introText"></div><div class="skip">點一下或按任意鍵繼續</div></div>
 <div id="pause" class="screen">

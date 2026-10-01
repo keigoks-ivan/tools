@@ -9,16 +9,19 @@ async function load(path, query = '') {
   let html = await (await fetch(path, { cache: 'no-store' })).text();
   // 每次檢查使用同一組新版本模組，避免 iframe 重載仍沿用已驗收的舊美術。
   const revision = Date.now();
+  const baseMatch = html.match(/<base href="([^"]+)">/);
+  const entryBase = new URL(baseMatch ? baseMatch[1] : path, new URL(path, location.href)).href;
+  html = html.replace(/<base href="[^"]+">/, '');
   html = html.replace(/(<script type="importmap">)([\s\S]*?)(<\/script>)/, (_, a, json, b) => {
     const map = JSON.parse(json);
-    for (const file of ['env.js', 'post.js', 'mechs.js', 'combat.js', 'cockpit.js', 'zero/map.js', 'zero/guns.js', 'zero/viewmodel.js', 'zero/main.js', 'zero/hud.js', 'zero/sfx.js']) {
+    for (const file of ['env.js', 'post.js', 'mechs.js', 'combat.js', 'cockpit.js', 'zero/map.js', 'zero/guns.js', 'zero/viewmodel.js', 'zero/main.js', 'zero/hud.js', 'zero/sfx.js', 'zero/mech6.js', 'lastline/script.js', 'lastline/mission.js', 'lastline/convoy.js', 'lastline/escort.mjs']) {
       const url = new URL('/game/mech/' + file, location.href).href;
-      for (const key of Object.keys(map.imports)) if (new URL(key, new URL(path, location.href)).href === url) delete map.imports[key];
+      for (const key of Object.keys(map.imports)) if (new URL(key, entryBase).href === url) delete map.imports[key];
       map.imports[url] = url + '?qa=' + revision;
     }
     return a + JSON.stringify(map) + b;
   });
-  const control = `<base href="${path}"><script>window.__qaErrors=[];addEventListener('error',e=>__qaErrors.push(e.message));window.__raf=[];window.requestAnimationFrame=fn=>(__raf.push(fn),__raf.length);window.__step=(n=1)=>{for(let i=0;i<n;i++){const q=__raf.splice(0);for(const f of q)f(performance.now())}};<\/script>`;
+  const control = `<base href="${entryBase}"><script>window.__qaErrors=[];addEventListener('error',e=>__qaErrors.push(e.message));window.__raf=[];window.requestAnimationFrame=fn=>(__raf.push(fn),__raf.length);window.__step=(n=1)=>{for(let i=0;i<n;i++){const q=__raf.splice(0);for(const f of q)f(performance.now())}};<\/script>`;
   // srcdoc has its own queryless URL, so replace the main module with an explicit wrapper setting the desired query via parent-provided URLSearchParams.
   const setup = `<script>const NativeParams=URLSearchParams;window.URLSearchParams=class extends NativeParams{constructor(v){super(v===location.search?'${query}':v)}};<\/script>`;
   frame.srcdoc = html.replace('<head>', '<head>' + control + setup);
@@ -279,4 +282,138 @@ async function weapons() {
   report.textContent = JSON.stringify({ checks: result, metrics, geometries: geometries.size, memory: renderer.info.memory, errors }, null, 2);
   state.textContent = errors.length ? '有錯誤' : '前傳武器通過';
 }
-for (const [id, fn] of [['mech', mech], ['zero', zero], ['tactics', tactics], ['infantry', infantry], ['art', art], ['hero', hero], ['city', city], ['mountains', mountains], ['weapons', weapons], ['save', save]]) document.querySelector('#' + id).onclick = () => fn().catch(e => { state.textContent = '失敗'; report.textContent += '\n' + e.stack; });
+
+async function campaignFoot() {
+  await load('/game/mech/lastline/index.html', '?mute&god&ch=1&all&fps=0');
+  let G = win.__G, T = win.__T, map = win.__map, S = win.__S;
+  renderer = win.__renderer; post = { render: () => win.__step(1) };
+  assert(S.CHAPTERS.length === 5 && S.FIRST_MECH === 4, '獨立五章，三章步兵／兩章機甲');
+  assert(S.ENCOUNTERS.every(e => e.ch <= 3), '步兵路線全部屬於前三章');
+  win.__step(60); assert(G.vm.cur === 'smg', '續作預設衝鋒槍、三武器可切換');
+  await save('lastline-infantry');
+  let render = renderer.render.bind(renderer); renderer.render = () => {};
+  T.Clock.prototype.getDelta = () => .05;
+  const step = n => { win.__scene.updateMatrixWorld(true); win.__step(n); };
+  const key = code => { win.dispatchEvent(new win.KeyboardEvent('keydown', { code })); step(1); win.dispatchEvent(new win.KeyboardEvent('keyup', { code })); step(1); };
+  const kill = () => { for (const e of G.enemies) if (!e.dead) e.damage(10000, new T.Vector3(0, 0, -1), 'head', G.player.pos); };
+  for (const E of S.ENCOUNTERS) {
+    assert(win.__flow.chapter === E.ch, `${E.id} 進入正確章節 ${E.ch}`);
+    if (!E.after && !win.__flow.active.includes(E.id)) {
+      const p = G.hud.obj?.route?.at(-1); assert(!!p, `${E.id} 有實際路徑指示`);
+      G.player.reset(new T.Vector3(p.x, p.y - 1.2, p.z), 0); step(4);
+    } else step(Math.ceil(((E.wait || 0) + .2) / .05));
+    assert(win.__flow.active.includes(E.id), `${E.id} 實際觸發區啟動`);
+    kill();
+    if (E.targets) for (const id of E.targets) { const obj = map.targets[id]?.obj; assert(!!obj, `${id} 可破壞目標存在`); G.destruct.hit(obj, 10000, obj.pos, new T.Vector3(0, 1, 0)); }
+    for (const pickup of E.pickups || []) {
+      const it = map.items[pickup.id]; assert(!!it, `${pickup.id} 情報／互動道具存在`);
+      G.player.reset(it.p.clone(), 0); step(1); key('KeyE');
+    }
+    if (E.pickup) { const at = map.marks[E.pickup.at]; G.player.reset(at.clone(), 0); step(1); key('KeyE'); }
+    if (E.hold) for (let i = 0; i < Math.ceil((E.hold.t + 1) / .05); i++) { kill(); step(1); }
+    kill(); step(4);
+    assert(win.__flow.done.includes(E.id), `${E.id} 擊倒／目標／互動／守點完成`);
+    if (E.id === 'C3' || E.id === 'D3') {
+      const p = E.mark; G.player.reset(new T.Vector3(p.x, 0, p.z), 0); step(4);
+      assert(win.__flow.chapter === E.ch + 1, `自然銜接第 ${E.ch + 1} 章`);
+    }
+  }
+  assert(G.hud.obj?.route?.length === S.HATCH_ROUTE.length, '機庫完成後出現完整登機路線');
+  const saved = JSON.parse(win.localStorage.getItem('lastline.checkpoint'));
+  assert(saved.foot.done.includes('G2') && saved.chapter === 3, '步兵檢查點保存完成遭遇與章節');
+  const footChecks = result;
+  await load('/game/mech/lastline/index.html', '?mute&god&all&fps=0'); result = footChecks;
+  win.document.querySelector('#campaignResume').click(); win.__step(2);
+  assert(win.__flow.chapter === 3 && win.__flow.done.includes('G2'), '重新載入後保留步兵進度，不必重打一整章');
+  G = win.__G; T = win.__T; map = win.__map; S = win.__S; renderer = win.__renderer;
+  render = renderer.render.bind(renderer); renderer.render = () => {}; T.Clock.prototype.getDelta = () => .05;
+  assert(G.hud.obj?.route?.length === S.HATCH_ROUTE.length, '續玩恢復登機路線與互動');
+  // 沿實際胸前平台觸發艙門，再用正式互動進入機甲。
+  const hp = win.__hero.bones.torso.localToWorld(win.__hero.cockpitLocal.clone());
+  G.player.reset(new T.Vector3(hp.x, map.marks.hatch.y, map.marks.hatch.z), 0); step(58);
+  assert(G.hud.prompt?.includes('駕駛艙'), '艙門開啟與胸前平台互動'); key('KeyE'); step(130);
+  renderer.render = render; await wait(() => win.__m6); win.__step(3);
+  assert(win.__flow.chapter === 4 && win.__m6.mission, '步兵結尾實際交接續作車隊章');
+  assert(errors.length === 0, '完整步兵遭遇到機甲交接沒有執行錯誤');
+  report.textContent = JSON.stringify({ checks: result, errors }, null, 2); state.textContent = '步兵全流程通過';
+}
+async function campaignMech(chapter = 4, choice = 'rescue') {
+  await load('/game/mech/lastline/index.html', `?mute&ch=${chapter}&all&fps=0`);
+  await wait(() => win.__m6); win.__step(200);
+  const M = win.__m6, T = win.__T, mission = M.mission;
+  renderer = win.__renderer; post = { render: () => win.__step(1) };
+  assert(!!mission && mission.truck.triangles < 4000, `兩輛車共享 ${mission.truck.triangles} 三角形／6 個網格，無新貼圖光源`);
+  assert(M.combat.rifle.mag === 40, '機甲沿用 40 發彈匣');
+  assert(M.combat.enemies.length <= 5, '車隊章同時單位預算受限');
+  for (const q of [0, 2, 1]) { win.document.querySelector(`[data-q="${q}"]`).click(); win.__step(2); assert(errors.length === 0, `第 ${chapter} 章畫質 ${q} 渲染正常`); }
+  await save(`lastline-convoy-${chapter}`);
+  const memory = { ...renderer.info.memory }, render = renderer.render.bind(renderer); renderer.render = () => {};
+  // 戰鬥傷害命中、敵機退場與正式波次控制皆執行；自動檢查隔離玩家受傷。
+  M.combat.hurt = () => {};
+  const step = n => { win.__scene.updateMatrixWorld(true); for (let i = 0; i < n; i++) M.tick(.05); };
+  const kill = () => { for (const e of M.combat.enemies) if (!e.dead) M.combat.damageEnemy(e, 100000, 1000, e.pos.clone(), new T.Vector3(0, 1, 0), true); };
+  let chosen = false;
+  for (let i = 0; i < 2500 && !M.ending; i++) {
+    M.player.ap = M.player.apMax;
+    if (!mission.panel.hidden && mission.panel.querySelector('[data-choice]')) { mission.panel.querySelector(`[data-choice="${choice}"]`).click(); chosen = true; }
+    const p = mission.convoy.pos; M.player.pos.set(p[0] - 18, 0, p[1]); M.player.vel.set(0, 0, 0);
+    kill(); step(1);
+    assertSilent(M.player.pos.toArray().every(Number.isFinite) && mission.truck.trucks.every(r => r.position.toArray().every(Number.isFinite)), '車隊與護衛位置');
+    if (!mission.panel.hidden && mission.panel.querySelector('[data-retry]')) throw Error('自動流程意外失敗：' + mission.panel.textContent);
+  }
+  assert(!!M.ending, `第 ${chapter} 章所有戰鬥與車隊路段通關`);
+  assert(mission.convoy.index === mission.convoy.route.length - 1, '車隊實際抵達終點，無跳過運送');
+  if (chapter === 4) {
+    assert(chosen && mission.convoy.choice === choice, `分支選擇 ${choice} 正確保存`);
+    step(550);
+    await wait(() => win.__m6 && win.__flow.chapter === 5);
+    assert(win.__m6.mission.convoy.choice === choice, '車隊章自然銜接最後防線，保留分支與車隊耐久');
+  }
+  renderer.render = render; M.tick(.05);
+  if (chapter === 5) {
+    step(170); renderer.render = render; M.tick(.05);
+    assert(mission.evacGate.beam.rotation.z > 1.5 && mission.truck.trucks[1].position.z < -405, '閘門打開，兩輛車實際通過救援站');
+    await save('lastline-evacuation');
+    renderer.render = () => {}; step(380); renderer.render = render;
+    assert(!mission.panel.hidden && mission.panel.textContent.includes('全篇完'), '自然進入完整結局、統計、重玩與大廳入口');
+    assert(mission.panel.textContent.includes(choice === 'rescue' ? '誰也沒有被留下' : '沉默的砲台'), '結局對應已保存的救援選擇');
+  }
+  report.textContent = JSON.stringify({ checks: result, memory, choice: mission.convoy.choice, hp: mission.convoy.hp, errors }, null, 2);
+  state.textContent = '機甲全流程通過';
+}
+async function campaignEdges() {
+  await load('/game/mech/lastline/index.html', '?mute&ch=4&all&fps=0'); await wait(() => win.__m6); win.__step(200);
+  let M = win.__m6, mission = M.mission;
+  const saved = JSON.parse(win.localStorage.getItem('lastline.checkpoint'));
+  const enemy = M.combat.enemies.find(e => !e.vehicle); enemy.pos.set(mission.convoy.pos[0] + 60, 0, mission.convoy.pos[1]);
+  const hp = mission.convoy.hp;
+  for (let i = 0; i < 220; i++) mission.tick(.05);
+  assert(mission.convoy.hp < hp, '遠程標定後的實際射線命中車隊');
+  const damaged = mission.convoy.hp;
+  enemy.dead = true;
+  for (const e of M.combat.enemies) e.dead = true;
+  for (let i = 0; i < 220; i++) mission.tick(.05);
+  assert(mission.convoy.hp === damaged, '預警期間擊倒標定敵人，取消射擊');
+  const before = mission.convoy.snapshot(); win.dispatchEvent(new win.Event('blur')); win.__step(100);
+  assert(JSON.stringify(mission.convoy.snapshot()) === JSON.stringify(before), '失焦暫停不推進車隊與計時');
+  win.document.querySelector('#resume').click();
+  mission.convoy.damage(1000); mission.tick(.05);
+  assert(!mission.panel.hidden && mission.panel.textContent.includes('失去行動能力'), '車隊耗盡耐久顯示失敗與重試');
+  mission.panel.querySelector('[data-retry]').click(); win.__step(4);
+  assert(mission.convoy.hp === saved.convoy.hp && M.wave === saved.wave, '重試恢復安全路口、耐久與波次');
+  M.player.qbT = 0; M.combat.hurt(100000, M.player.pos.clone());
+  for (let i = 0; i < 70; i++) M.tick(.05);
+  assert(!mission.panel.hidden && mission.panel.textContent.includes('蒼焰失去戰力'), '玩家戰敗也使用相同檢查點重試');
+  mission.panel.querySelector('[data-retry]').click(); win.__step(4);
+  const edgeChecks = result;
+  await load('/game/mech/lastline/index.html', '?mute&all&fps=0'); result = edgeChecks;
+  assert(!win.document.querySelector('#campaignResume').hidden, '重載標題保留檢查點入口');
+  win.document.querySelector('#campaignResume').click(); await wait(() => win.__m6); win.__step(200);
+  M = win.__m6; mission = M.mission;
+  assert(win.__flow.chapter === 4 && M.wave === saved.wave && mission.convoy.hp === saved.convoy.hp, '重載後從檢查點啟動正確章節');
+  assert(errors.length === 0, '存檔／暫停／兩種戰敗沒有執行錯誤');
+  report.textContent = JSON.stringify({ checks: result, errors }, null, 2); state.textContent = '續作邊界檢查通過';
+}
+const assertSilent = (ok, text) => { if (!ok) throw Error(text); };
+
+for (const [id, fn] of [['campaignFoot', campaignFoot], ['campaign4', () => campaignMech(4)], ['campaign5', () => campaignMech(5)], ['campaignArtillery', async () => { localStorage.setItem('lastline.choice', JSON.stringify('artillery')); await campaignMech(5, 'artillery'); }], ['campaignEdges', campaignEdges], ['mech', mech], ['zero', zero], ['tactics', tactics], ['infantry', infantry], ['art', art], ['hero', hero], ['city', city], ['mountains', mountains], ['weapons', weapons], ['save', save]]) document.querySelector('#' + id).onclick = () => fn().catch(e => { state.textContent = '失敗'; report.textContent += '\n' + e.stack; });
