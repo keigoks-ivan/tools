@@ -101,21 +101,22 @@ async function game() {
   }
 
   function applyView() { cockpitView(!tpView); cockpit.root.visible = !tpView; if (!tpView) seeOff(); }
-  addEventListener('wheel', (e) => { if (!tpView) return; chaseD = clamp(chaseD * Math.exp(e.deltaY * 0.001), 9, 40); store.set('camd', chaseD.toFixed(1)); }, { passive: true });
+  addEventListener('wheel', (e) => { if (!tpView) return; chaseD = clamp(chaseD * Math.exp(e.deltaY * 0.001), 6, 40); store.set('camd2', chaseD.toFixed(1)); }, { passive: true });
   // 機體後方視角（越肩）：鏡頭在右肩外側、略高，機體偏畫面左邊，準心前方空出來；跟著瞄準方向轉。
   //   鏡頭正前方＝瞄準方向，所以畫面中央（準心）就是子彈會去的地方。
   //   撞到建築：先縮側移、再縮後退距離（縮短立刻、恢復慢慢來，轉角不會一直跳）
   const chasePivot = new THREE.Vector3(), chaseSide = new THREE.Vector3(), chaseOff = new THREE.Vector3(), chaseN = new THREE.Vector3(), chaseE = new THREE.Euler();
-  let chaseK = 1, chaseBack = 15, chaseSkip = 0;   // 後退距離被擠短的比例、實際離機體多遠、鏡頭到機體中心沿瞄準線多遠（公尺）
+  let chaseK = 1, chaseBack = 9, chaseSkip = 0, chaseSideK = 1;   // 後退距離被擠短的比例、實際離機體多遠、鏡頭到機體中心沿瞄準線多遠（公尺）
   function chaseCam(dt) {
     const k = hero.scale;
     camera.quaternion.setFromEuler(chaseE.set(player.pitch, player.yaw + Math.PI, 0, 'YXZ'));
     hero.bones.torso.getWorldPosition(chasePivot);
-    chasePivot.y += 3.5 * k;
+    chasePivot.y += 5 * k;
     // 機體半寬約 4.8 m：側移要超過肩寬，準心才不會壓在肩甲、背後翼板上
-    chaseSide.set((5.4 + chaseD * 0.1) * k, 2.4 * k, 0).applyQuaternion(camera.quaternion).add(chasePivot);
+    chaseSide.set((5.4 + chaseD * 0.06) * k, 3 * k, 0).applyQuaternion(camera.quaternion).add(chasePivot);
     let hit = world.raycast(chasePivot, chaseSide, chaseN);
-    if (hit >= 0 && hit <= 1) chaseSide.lerpVectors(chasePivot, chaseSide, Math.max(0, hit - 0.08));
+    chaseSideK = hit >= 0 && hit <= 1 ? Math.max(0, hit - 0.08) : 1;
+    chaseSide.lerpVectors(chasePivot, chaseSide, chaseSideK);
     chaseOff.set(0, 0, chaseD * k).applyQuaternion(camera.quaternion).add(chaseSide);
     hit = world.raycast(chaseSide, chaseOff, chaseN);
     const want = hit >= 0 && hit <= 1 ? Math.max(0.03, hit - 0.04) : 1;
@@ -127,7 +128,7 @@ async function game() {
     // 瞄準線從機體這裡才開始算（鏡頭和機體之間的東西打不到，不能拿來當準心目標）
     chaseSkip = Math.max(0, chaseN.set(0, 0, -1).applyQuaternion(camera.quaternion).dot(chaseOff.subVectors(chasePivot, camera.position)));
   }
-  // 透視：準心、鎖定目標（沒有就用準心吸住的目標）被自機擋住的地方挖網點；鏡頭被建築擠到機體背後太近時整台淡掉
+  // 透視：準心、鎖定目標（沒有就用準心吸住的目標）被自機擋住的地方挖網點；鏡頭被建築擠近或側移受限時整台淡掉
   const seeP = new THREE.Vector3(), seeQ = new THREE.Vector3();
   function seeOff() { SEE.c.value.w = 0; SEE.t.value.w = 0; SEE.a.value = 0; }
   function seeThrough(C) {
@@ -135,7 +136,7 @@ async function game() {
     const asp = camera.aspect;
     renderer.getDrawingBufferSize(SEE.res.value);
     SEE.c.value.set(asp / 2, 0.5, 0.13, 1);
-    SEE.a.value = clamp((7 - chaseBack) / 4, 0, 0.8);
+    SEE.a.value = Math.max(clamp((7 - chaseBack) / 4, 0, 0.8), (1 - chaseSideK) * 0.65);
     // 整台淡掉時，眼睛、槍口的發光小燈也先關（不然會浮在半透明的機體上）
     for (const gl of hero.glows) gl.visible = SEE.a.value < 0.25;
     const L = C.lockTarget && !C.lockTarget.dead ? C.lockTarget : C.soft;
@@ -167,8 +168,8 @@ async function game() {
   // 視角：false＝駕駛艙（第一人稱）、true＝機體後方（看得到整台機體）；記住上次的選擇
   const store0 = (k, d) => { try { const v = localStorage.getItem('mech.' + k); const n = v === null ? d : +v; return Number.isFinite(n) ? n : d; } catch (e) { return d; } };
   let tpView = store0('view', 0) === 1;
-  let chaseD = store0('camd', 15);
-  chaseD = Number.isFinite(chaseD) ? clamp(chaseD, 9, 40) : 15;   // 後方視角距離（公尺），滑鼠滾輪調整
+  let chaseD = store0('camd2', 9);
+  chaseD = Number.isFinite(chaseD) ? clamp(chaseD, 6, 40) : 9;   // 近背視角距離（公尺），滑鼠滾輪調整；舊版遠鏡頭設定不套用
   const store = { get: (k, d) => { try { const v = localStorage.getItem('mech.' + k); const n = v === null ? d : +v; return Number.isFinite(n) ? n : d; } catch (e) { return d; } }, set: (k, v) => { try { localStorage.setItem('mech.' + k, v); } catch (e) {} } };
   let quality = store.get('q', 1);
   function setQuality(qv) {
