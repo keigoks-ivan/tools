@@ -7,13 +7,15 @@
    + resize handler（分頁切換時也會呼叫一次 resize，隱藏分頁裡的圖表才會量對尺寸）。
 
    分頁架構（章節，讀起來由上到下）：結論/青埔在哪個位置/供給/需求/價格/
-   什麼情況下結論會錯/怎麼算的，用 URL hash（ascii id 或對應中文）連結、
+   長期展望/什麼情況下結論會錯/怎麼算的，用 URL hash（ascii id 或對應中文）連結、
    方向鍵可切換，每章底部有「下一章 →」連結。仰森個案（現況/銷控表/開價列表/
    成交/戶別試算）已搬到 yangsen/index.html 獨立頁面，跟這裡共用 data/*.json。
-   第一次載入只抓 data/summary.json＋data/compare.json（小檔，結論/青埔在哪個
-   位置用）+ 除 deals.json、listings.json、estimate.json、rental.json 以外的
-   其他 JSON（並行）；data/deals.json（11MB）延遲到「價格」章節（各社區比價/
-   成交走勢/最新成交需要）才抓（見 ensureDealsLoaded()）。
+   第一次載入只抓 data/summary.json＋data/compare.json＋data/longterm.json（小檔，
+   結論/青埔在哪個位置/長期展望用）+ 除 deals.json、listings.json、estimate.json、
+   rental.json 以外的其他 JSON（並行）；data/deals.json（11MB）延遲到「價格」章節
+   （各社區比價/成交走勢/最新成交需要）才抓（見 ensureDealsLoaded()）。長期展望
+   是一次性靜態快照（基準日2026-10-01），不是每月pipeline算出來的，data/longterm.json
+   不會被 compute_*.py 覆寫，更新需要手動改。
    =========================================================================== */
 
 var SIZE_LABELS = { small: '小 (<30坪)', mid: '中 (30-45坪)', large: '大 (>45坪)' };
@@ -22,7 +24,7 @@ var PRICE_BAND_LABELS = { lt1500: '<1500萬', '1500_2000': '1500-2000萬', '2000
 var PAGE_SIZE = 50;
 
 var DEALS = [], UNITS = [];
-var SUPPLY = null, DEMAND = null, OUTLOOK = null, ESTIMATE = null, LISTING_HISTORY = [], META = {}, DOOR_PROJECT = null, SUMMARY = null, COMPARE = null;
+var SUPPLY = null, DEMAND = null, OUTLOOK = null, ESTIMATE = null, LISTING_HISTORY = [], META = {}, DOOR_PROJECT = null, SUMMARY = null, COMPARE = null, LONGTERM = null;
 var DEALS_LOADED = false, DEALS_PROMISE = null;
 
 var FILTERS = {
@@ -201,6 +203,13 @@ async function loadData() {
 async function loadCompare() {
   COMPARE = await fetchJsonSafe('data/compare.json', null);
   return COMPARE;
+}
+
+// data/longterm.json：「長期展望」章節專用，一次性靜態快照（基準日2026-10-01），
+// 不是每月pipeline算出來的，跟其他JSON分開抓，小檔，不影響其他分頁載入速度。
+async function loadLongterm() {
+  LONGTERM = await fetchJsonSafe('data/longterm.json', null);
+  return LONGTERM;
 }
 
 // deals.json 約11MB，只有「仰森」「戶別試算」分頁、跟「青埔需求」分頁裡「青埔
@@ -822,6 +831,159 @@ function renderFalsifiers() {
   document.getElementById('falsifiers-list').innerHTML = items.length
     ? items.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('')
     : '<li>資料還沒算出來，執行 compute_compare.py／compute_price_outlook.py 之後才有這個章節。</li>';
+}
+
+/* ===========================================================================
+   長期展望：一次性靜態快照（基準日2026-10-01，不隨每月pipeline更新），資料來自
+   data/longterm.json。兩個圖表：①發展時間表（驅動力逐項，gantt風格長條，顏色＝
+   官方/新聞來源，不是完成/未來——完成/未來用現在這條虛線的左右位置分）；②歷史
+   前例（五區二手中位價指數化比較＋年度成交筆數，後者取對數尺度）。
+   =========================================================================== */
+var LT_BASE_YEAR = 2006;
+var LT_NOW_X = 2026.75 - LT_BASE_YEAR; // 2026年10月，虛線位置
+function ltFlagLabel(flag) { return flag === 'official' ? '官方' : '新聞報導'; }
+function ltFlagBadge(flag) { return '<span class="flag-' + (flag === 'official' ? 'official' : 'news') + '">' + ltFlagLabel(flag) + '</span>'; }
+
+var longtermTimelineChart;
+function renderLongtermTimeline() {
+  if (!LONGTERM) return;
+  var drivers = (LONGTERM.drivers || []).slice().sort(function (a, b) { return a.start - b.start; });
+  var cats = drivers.slice().reverse(); // ECharts類別軸預設第一筆畫在最下面，反轉後最早的項目會畫在最上面
+  var offsetData = cats.map(function (d) { return d.start - LT_BASE_YEAR; });
+  var durData = cats.map(function (d) {
+    var dur = Math.max(d.end - d.start, 0.4);
+    return { value: dur, itemStyle: { color: d.flag === 'official' ? C.blue : C.orange, borderRadius: 3 } };
+  });
+
+  document.getElementById('longterm-timeline-legend').innerHTML =
+    '<span><i style="background:' + C.blue + '"></i>官方來源</span>' +
+    '<span><i style="background:' + C.orange + '"></i>新聞報導（非官方）</span>' +
+    '<span style="color:#94a3b8">虛線＝現在（2026-10），虛線左邊＝已完成、右邊（或跨越虛線）＝未來</span>';
+
+  if (!longtermTimelineChart) longtermTimelineChart = newChart('chart-longterm-timeline');
+  if (!longtermTimelineChart) return;
+  longtermTimelineChart.setOption({
+    tooltip: {
+      trigger: 'item', backgroundColor: '#fff', borderColor: '#ccd9e8', borderWidth: 1,
+      textStyle: { color: C.navy, fontSize: 11, fontFamily: 'Inter' },
+      formatter: function (params) {
+        if (params.seriesIndex !== 1) return '';
+        var d = cats[params.dataIndex];
+        return '<strong>' + esc(d.name) + '</strong><br>' + esc(d.date) + '　' + ltFlagLabel(d.flag) +
+          '<br>' + esc(d.effect) + '<br><span style="color:#5a7a9a">來源：' + esc(d.source_label) + '</span>';
+      },
+    },
+    grid: { left: 200, right: 20, top: 10, bottom: 26, containLabel: false },
+    xAxis: mkAxis({
+      type: 'value', min: 0, max: 2035 - LT_BASE_YEAR,
+      axisLabel: Object.assign({}, baseText, { formatter: function (v) { return Math.round(v + LT_BASE_YEAR); } }),
+    }),
+    yAxis: {
+      type: 'category', data: cats.map(function (d) { return d.name; }),
+      axisLine: { lineStyle: { color: C.grid } }, axisTick: { show: false },
+      axisLabel: Object.assign({}, baseText, { fontSize: 10, width: 185, overflow: 'truncate' }),
+      splitLine: { show: false },
+    },
+    series: [
+      { type: 'bar', stack: 't', barWidth: 13, silent: true, data: offsetData, itemStyle: { color: 'transparent' } },
+      {
+        type: 'bar', stack: 't', barWidth: 13, data: durData,
+        markLine: {
+          symbol: 'none', silent: true, lineStyle: { color: '#94a3b8', type: 'dashed' },
+          label: { formatter: '現在\n2026-10', color: '#5a7a9a', fontSize: 10 },
+          data: [{ xAxis: LT_NOW_X }],
+        },
+      },
+    ],
+  }, true);
+}
+
+function renderLongtermDriverTable() {
+  if (!LONGTERM) return;
+  var rows = (LONGTERM.drivers || []).slice().sort(function (a, b) { return a.start - b.start; });
+  staticTable(document.getElementById('table-longterm-drivers'), [
+    { label: '名稱', cell: function (r) { return esc(r.name); } },
+    { label: '類別', cell: function (r) { return esc(r.category); } },
+    { label: '狀態', cell: function (r) { return r.status === 'completed' ? '已完成' : '未來'; } },
+    { label: '日期', cell: function (r) { return esc(r.date); } },
+    { label: '對青埔的影響', cell: function (r) { return esc(r.effect); } },
+    { label: '來源', cell: function (r) { return '<a href="' + esc(r.source_url) + '" target="_blank" rel="noopener">' + esc(r.source_label) + '</a>　' + ltFlagBadge(r.flag); } },
+  ], rows);
+}
+
+var ltAreaColors = { 青埔: C.orange, 林口: C.blue, 桃園市全市: C.muted, 竹北高鐵特區: C.green, 台中市: '#7c3aed' };
+var longtermIndexChart, longtermVolumeChart;
+function renderLongtermAnalogues() {
+  if (!LONGTERM || !LONGTERM.analogues) return;
+  var ag = LONGTERM.analogues;
+  var years = (ag.series[ag.areas[0]] || []).map(function (r) { return r.year; });
+  var rawByArea = {}, idxByArea = {};
+  ag.areas.forEach(function (area) {
+    var rows = ag.series[area] || [];
+    rawByArea[area] = rows;
+    var baseMedian = rows.length ? rows[0].median : null;
+    idxByArea[area] = rows.map(function (r) { return baseMedian ? (r.median / baseMedian * 100) : null; });
+  });
+
+  if (!longtermIndexChart) longtermIndexChart = newChart('chart-longterm-index');
+  if (longtermIndexChart) {
+    longtermIndexChart.setOption({
+      tooltip: Object.assign({}, baseTooltip, {
+        formatter: function (params) {
+          if (!params || !params.length) return '';
+          var lines = params.map(function (p) {
+            var raw = rawByArea[p.seriesName][p.dataIndex];
+            var lowN = raw && raw.n < 30 ? '　<span style="color:#94a3b8">(n=' + fmtInt(raw.n) + '，樣本少)</span>' : '　(n=' + fmtInt(raw ? raw.n : null) + ')';
+            return p.marker + esc(p.seriesName) + '：' + fmt(p.value, 1) + lowN;
+          });
+          return params[0].axisValueLabel + ' 年<br>' + lines.join('<br>');
+        },
+      }),
+      legend: baseLegend, grid: baseGrid,
+      xAxis: mkAxis({ type: 'category', data: years }),
+      yAxis: mkAxis({ type: 'value', name: '指數（2013=100）' }),
+      series: ag.areas.map(function (area) {
+        return {
+          name: area, type: 'line', symbolSize: 6,
+          lineStyle: { width: 2, color: ltAreaColors[area] }, itemStyle: { color: ltAreaColors[area] },
+          data: idxByArea[area].map(function (v, i) {
+            return rawByArea[area][i].n < 30 ? { value: v, itemStyle: { color: EARLY_POINT_COLOR } } : v;
+          }),
+        };
+      }),
+    }, true);
+  }
+
+  if (!longtermVolumeChart) longtermVolumeChart = newChart('chart-longterm-volume');
+  if (longtermVolumeChart) {
+    longtermVolumeChart.setOption({
+      tooltip: baseTooltip, legend: baseLegend, grid: baseGrid,
+      xAxis: mkAxis({ type: 'category', data: years }),
+      yAxis: mkAxis({ type: 'log', name: '年成交筆數（對數尺度）' }),
+      series: ag.areas.map(function (area) {
+        return {
+          name: area, type: 'line', symbolSize: 5,
+          lineStyle: { width: 2, color: ltAreaColors[area] }, itemStyle: { color: ltAreaColors[area] },
+          data: rawByArea[area].map(function (r) { return r.n; }),
+        };
+      }),
+    }, true);
+  }
+
+  var methodEl = document.getElementById('longterm-analogue-method');
+  if (methodEl) {
+    methodEl.innerHTML =
+      '<p>資料來源：內政部實價登錄 A 檔（買賣），分析區間2013–2026（2026年只到年中）。區域定義：青埔＝中壢區／大園區指定道路白名單；竹北高鐵特區＝新竹縣竹北市高鐵／嘉豐／文興路系列；林口＝新北市林口區全區；桃園市全市／台中市＝整個縣市不分區。</p>' +
+      '<p>篩選條件：排除純土地／車位交易、排除備註含預售／親友／特殊關係／員工／瑕疵等字樣的列、排除車位價格灌入房價的列。單價（萬/坪）＝（總價－車位總價）÷（建物移轉總面積×0.3025）。</p>' +
+      '<p>最大限制：A 檔買賣資料無法區分「真正二手換手」跟「預售案交屋後第一次過戶登記」，本研究沒有逐案比對建案完工日排除交屋潮，2013–2020年（尤其青埔、竹北高鐵特區）的筆數與中位數可能含一定比例的新屋首次登記，不是純二手市場數字。</p>' +
+      '<p>完整逐年數字見 <code>data/longterm.json</code>（原始資料為同目錄 analogues.csv），本章不是每月自動更新 pipeline 的一部分。</p>';
+  }
+}
+
+function renderLongterm() {
+  renderLongtermTimeline();
+  renderLongtermDriverTable();
+  renderLongtermAnalogues();
 }
 
 /* ===========================================================================
@@ -1539,6 +1701,7 @@ var TABS = [
   { id: 'supply', zh: '供給' },
   { id: 'demand', zh: '需求' },
   { id: 'price', zh: '價格' },
+  { id: 'longterm', zh: '長期展望' },
   { id: 'falsifiers', zh: '什麼情況下結論會錯' },
   { id: 'methodology', zh: '怎麼算的' },
 ];
@@ -1624,6 +1787,7 @@ async function init() {
     showPositionError(err);
   });
   var dataPromise = loadData().catch(function (err) { console.error(err); });
+  var longtermPromise = loadLongterm().then(renderLongterm).catch(function (err) { console.error(err); });
 
   await dataPromise;
   renderSupplySection();
@@ -1632,7 +1796,7 @@ async function init() {
   renderMethodology();
   renderFalsifiers(); // 重畫一次：這時 OUTLOOK 已經到齊，falsifiers 才會補上價格面那一條
 
-  await Promise.all([summaryPromise, comparePromise]);
+  await Promise.all([summaryPromise, comparePromise, longtermPromise]);
   renderOverviewS4(); // 要等 SUMMARY(情境倍數)＋OUTLOOK/ESTIMATE(dataPromise已載入) 都到齊
 
   document.getElementById('updated-line').textContent = '實價登錄：' + fmtDateTime(META.lvr && META.lvr.last_run) + '　591售價：' + fmtDateTime(META.house591 && META.house591.last_run) + '　591租金：' + fmtDateTime(META.house591_rent && META.house591_rent.last_run);
