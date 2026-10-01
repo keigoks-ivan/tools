@@ -14,7 +14,7 @@ const timer=setInterval(async()=>{
  if(phase===3)dyes+=hair.dye(x,y,[240,100,210],.1);
  if(phase===4&&ticks%120===0)hair.reset();
  hair.step(1/60);
- for(const s of hair.strands){maxNodes=Math.max(maxNodes,s.nodes.length);for(let j=1;j<s.nodes.length;j++){let a=s.nodes[j-1],b=s.nodes[j],d=Math.hypot(b.x-a.x,b.y-a.y);maxStretch=Math.max(maxStretch,d/Math.max(.5,s.rest[j-1]));maxVelocity=Math.max(maxVelocity,Math.hypot(b.x-b.px,b.y-b.py));if(!Number.isFinite(b.x+b.y))invalid++;if(b.y<a.y-.01)up++;}}
+ for(const s of hair.strands){maxNodes=Math.max(maxNodes,s.nodes.length);for(let j=1;j<s.nodes.length;j++){let a=s.nodes[j-1],b=s.nodes[j],d=Math.hypot(b.x-a.x,b.y-a.y);maxStretch=Math.max(maxStretch,d/Math.max(.5,s.rest[j-1]));maxVelocity=Math.max(maxVelocity,Math.hypot(b.x-b.px,b.y-b.py));if(!Number.isFinite(b.x+b.y))invalid++;if(b.y<a.y-.01&&b.bx===undefined)up++;}}
  ticks++;
  if(time>=duration){clearInterval(timer);const report={elapsedSeconds:time,ticks,strands:hair.strands.length,maxNodes,maxStretch,maxVelocity,invalid,upwardSegments:up,cuts,ties,growthNodes:grows,dyedNodes:dyes,final:hair.stats()};await writeFile(new URL('./stability-report.json',import.meta.url),JSON.stringify(report,null,2));console.log(JSON.stringify(report,null,2));if(invalid||up||maxNodes>16)process.exitCode=1;}
 },1000/60);

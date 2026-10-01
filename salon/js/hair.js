@@ -1,5 +1,5 @@
-import {guest} from './data.js?v=13';
-import {HairGL,domeTris} from './hair-gl.js?v=13';
+import {guest} from './data.js?v=14';
+import {HairGL,domeTris} from './hair-gl.js?v=14';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const mix=(a,b,t)=>a.map((v,i)=>v+(b[i]-v)*t);
 const css=(c,m=1)=>`rgb(${c.map(v=>Math.round(clamp(v*m,0,255))).join(',')})`;
@@ -12,18 +12,18 @@ export function setHairPlate(image){hairPlate=image}
 export function setHairTexture(image){hairTexture=image;const c=document.createElement('canvas');c.width=64;c.height=128;const cx=c.getContext('2d',{willReadFrequently:true});cx.drawImage(image,0,0,64,128);const data=cx.getImageData(0,0,64,128).data;textureLight=Array.from({length:8192},(_,i)=>(data[i*4]*.299+data[i*4+1]*.587+data[i*4+2]*.114)/96);}
 const pt=(x,y,c)=>({x,y,px:x,py:y,homeX:x,homeY:y,paintX:x,paintY:y,c:[...c]});
 function crossing(a,b,c,d){let ux=b.x-a.x,uy=b.y-a.y,vx=d.x-c.x,vy=d.y-c.y,z=ux*vy-uy*vx;if(Math.abs(z)<1e-6)return null;let wx=c.x-a.x,wy=c.y-a.y,t=(wx*vy-wy*vx)/z,u=(wx*uy-wy*ux)/z;return t>=0&&t<=1&&u>=0&&u<=1?{x:a.x+ux*t,y:a.y+uy*t,t}:null}
-function sample(nodes){const out=[];for(let j=0;j<nodes.length-1;j++){const a=nodes[Math.max(0,j-1)],b=nodes[j],c=nodes[j+1],d=nodes[Math.min(nodes.length-1,j+2)];for(let k=0;k<4;k++){const t=k/4,t2=t*t,t3=t2*t;out.push({x:.5*((2*b.x)+(-a.x+c.x)*t+(2*a.x-5*b.x+4*c.x-d.x)*t2+(-a.x+3*b.x-3*c.x+d.x)*t3),y:b.y+(c.y-b.y)*t})}}out.push(nodes[nodes.length-1]);return out}
+function sample(nodes){const out=[];for(let j=0;j<nodes.length-1;j++){const a=nodes[Math.max(0,j-1)],b=nodes[j],c=nodes[j+1],d=nodes[Math.min(nodes.length-1,j+2)];for(let k=0;k<4;k++){const t=k/4,t2=t*t,t3=t2*t;out.push({x:.5*((2*b.x)+(-a.x+c.x)*t+(2*a.x-5*b.x+4*c.x-d.x)*t2+(-a.x+3*b.x-3*c.x+d.x)*t3),y:.5*((2*b.y)+(-a.y+c.y)*t+(2*a.y-5*b.y+4*c.y-d.y)*t2+(-a.y+3*b.y-3*c.y+d.y)*t3)})}}out.push(nodes[nodes.length-1]);return out}
 function textureStrip(s,nodes){
  if(s.texture&&!s.textureDirty)return s.texture;
  s.textureDirty=false;
- const signature=nodes.map(p=>p.c.map(v=>Math.round(v/3)).join(',')+':'+Math.round(p.homeY)).join(';')+'|'+nodes.length;
+ const signature=nodes.map(p=>p.c.map(v=>Math.round(v/3)).join(',')+':'+Math.round(p.homeY)).join(';')+'|'+nodes.length+'|'+!!s.styled;
  if(s.texture&&s.textureKey===signature)return s.texture;
  const tile=s.texture||document.createElement('canvas');tile.width=24;tile.height=512;
  const c=tile.getContext('2d'),g=c.createLinearGradient(0,0,0,512);
  const first=nodes[0],span=Math.max(.01,nodes.at(-1).y-first.y);
- for(const n of nodes){const light=.9+.2*Math.pow(.5+.5*Math.sin(n.homeY*.043+(s.group||0)*.24),4);g.addColorStop(clamp((n.y-first.y)/span,0,1),css(n.c,s.shade*light));}
+ for(const [i,n] of nodes.entries()){const light=s.styled?1:.9+.2*Math.pow(.5+.5*Math.sin(n.homeY*.043+(s.group||0)*.24),4);g.addColorStop(s.styled?i/(nodes.length-1):clamp((n.y-first.y)/span,0,1),css(n.c,s.shade*light));}
  c.fillStyle=g;c.fillRect(0,0,24,512);
- if(hairPlate){
+ if(hairPlate&&!s.styled){
   if(hairTexture){c.globalCompositeOperation='soft-light';c.globalAlpha=.55;c.drawImage(hairTexture,0,0,hairTexture.width,hairTexture.height,0,0,24,512);c.globalAlpha=1;c.globalCompositeOperation='source-over';}
   const syScale=s.bang?1.12:1.23,sw=hairPlate.width/390,sh=hairPlate.height/844;
   // Sample painted detail in the strand's original coordinates; each ribbon remains independently deformable and cuttable.
@@ -41,28 +41,36 @@ function textureStrip(s,nodes){
  c.globalCompositeOperation='source-over';s.texture=tile;s.textureKey=signature;return tile;
 }
 // 綁髮的固定點：髮圈那一節、泡泡辮的每一道小髮圈、丸子頭整圈盤起來的髮尾。回傳每一節是不是固定的。
-function pinFlags(s){const n=s.nodes,T=s.tie,f=new Uint8Array(n.length);f[0]=1;if(!T)return f;
+function pinFlags(s){const n=s.nodes,T=s.tie,f=new Uint8Array(n.length);f[0]=1;if(!T){if(s.groomed)for(let j=1;j<=3&&j<n.length-1;j++)f[j]=1;return f;}
  if(T.index<n.length)f[T.index]=1;
+ if(T.guided)for(let j=1;j<=T.index&&j<n.length;j++)f[j]=1;
  if(T.extra)for(const e of T.extra)if(e.i<n.length)f[e.i]=1;
  if(T.fixed)for(let j=T.index+1;j<n.length;j++)if(n[j].bx!==undefined)f[j]=1;
  return f}
-function applyPins(s,dx=0){const n=s.nodes,T=s.tie;if(!T)return;
+function applyPins(s,dx=0){const n=s.nodes,T=s.tie;
  const set=(p,x,y)=>{p.x=x+dx;p.y=y;p.px=p.x;p.py=p.y};
+ if(!T){if(s.groomed)for(let j=1;j<=3&&j<n.length-1;j++)set(n[j],n[j].homeX,n[j].homeY);return;}
+ if(T.guided)for(let j=1;j<=T.index&&j<n.length;j++)if(n[j].bx!==undefined)set(n[j],n[j].bx,n[j].by);
  if(T.index<n.length)set(n[T.index],T.x,T.y);
  if(T.extra)for(const e of T.extra)if(e.i<n.length)set(n[e.i],e.x,e.y);
  if(T.fixed)for(let j=T.index+1;j<n.length;j++){const p=n[j];if(p.bx!==undefined)set(p,p.bx,p.by)}}
-// 綁法：band＝髮圈位置、via＝髮束先經過的點、front＝綁好後畫在臉前面、fan＝髮尾散開程度、sweep／out＝髮尾往側邊甩、
-// pick＝哪些髮束要綁、bun＝盤成丸子、pinch＝泡泡辮每隔多長綁一道小髮圈、bow＝髮圈上的蝴蝶結大小
+// Gather around the scalp first; free tails retain their material length and color.
 const TIE_STYLES={
- double:{band:side=>[195+side*96,357],via:side=>[[195+side*91,300],[195+side*86,341]],front:true,bow:29},
- high:{band:side=>[195+side*88,204],via:side=>[[195+side*74,172]],front:true,fan:.75,out:6,bow:27},
- braids:{band:side=>[195+side*90,286],via:side=>[[195+side*82,248]],front:true,fan:.35,pinch:40,bow:24},
- buns:{band:side=>[195+side*54,170],front:true,bun:{c:side=>[195+side*68,146],R:27},bow:22},
- single:{band:()=>[284,348],via:side=>side<0?[[150,232],[206,282]]:[[195+side*91,300]],front:false,bow:29},
- sideHigh:{band:()=>[272,184],via:side=>side<0?[[195,152]]:[[244,166]],front:true,out:14,fan:.85,bow:27},
- pony:{band:()=>[236,162],front:false,sweep:58,fan:.7,bow:30},
- half:{band:()=>[195,152],front:false,pick:s=>s.front&&!s.bang,bun:{c:()=>[195,176],R:17},bow:34},   // 公主頭：綁到後腦的那撮盤成小髻藏在頭後面
+ double:{band:side=>[195+side*96,350],front:true,bow:29,fan:1},
+ high:{band:side=>[195+side*88,204],front:true,fan:.85,out:8,bow:27},
+ braids:{band:side=>[195+side*90,286],front:true,fan:.55,pinch:76,bow:24},
+ buns:{band:side=>[195+side*54,170],front:true,bun:{c:side=>[195+side*68,146],R:29},bow:22},
+ single:{band:()=>[284,348],front:false,fan:1,out:8,bow:29},
+ sideHigh:{band:()=>[272,184],front:true,out:15,fan:.95,bow:27},
+ pony:{band:()=>[236,162],front:false,sweep:36,fan:.9,bow:30},
+ half:{band:()=>[195,152],front:false,pick:s=>s.front&&!s.bang,bun:{c:()=>[195,176],R:21},bow:34},
 };
+function curve(a,b,c,d){const points=[a];for(let i=1;i<=120;i++){const t=i/120,u=1-t;points.push({x:u*u*u*a.x+3*u*u*t*b.x+3*u*t*t*c.x+t*t*t*d.x,y:u*u*u*a.y+3*u*u*t*b.y+3*u*t*t*c.y+t*t*t*d.y})}return arcPath(points)}
+function arcPath(points){let length=0;const distances=[0];for(let i=1;i<points.length;i++){length+=Math.hypot(points[i].x-points[i-1].x,points[i].y-points[i-1].y);distances.push(length)}return {length,at(distance){const goal=clamp(distance,0,length);let i=1;while(i<distances.length-1&&distances[i]<goal)i++;const a=points[i-1],b=points[i],t=(goal-distances[i-1])/Math.max(.001,distances[i]-distances[i-1]);return {x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t}}}}
+function smoothBends(s,strength=.18){const n=s.nodes,pin=pinFlags(s),moves=[];
+ for(let j=3;j<n.length-1;j++){if(pin[j]||(s.tie&&j<=s.tie.index))continue;const a=n[j-1],b=n[j+1],t=s.rest[j-1]/Math.max(.001,s.rest[j-1]+s.rest[j]);moves.push({j,x:(a.x+(b.x-a.x)*t-n[j].x)*strength,y:(a.y+(b.y-a.y)*t-n[j].y)*strength})}
+ for(const m of moves){n[m.j].x+=m.x;n[m.j].y+=m.y}
+}
 export const TIE_MODES=['double','high','braids','buns','single','sideHigh','pony','half','loose'];
 let shadowLayer=null,capLayer=null,capKey='';
 // 髮根底色用的貼圖：從畫好的頭髮圖左右兩側各切一塊側髮（有真的髮絲），拼成頭頂到太陽穴那一片，再換成目前髮色。顏色沒變就沿用。
@@ -87,15 +95,15 @@ function capTexture(cl,cr){
  x.globalCompositeOperation='source-over';return c;
 }
 // 一條髮束的外框（跟 ribbon 畫出來的形狀一樣：沿曲線、尾端收尖）
-function outline(s,nodes){const pts=sample(nodes),left=[],right=[],len=pts.length;for(let i=0;i<len;i++){const a=pts[Math.max(0,i-1)],b=pts[Math.min(len-1,i+1)],dx=b.x-a.x,dy=b.y-a.y,l=Math.hypot(dx,dy)||1,t=i/(len-1),r=s.width*.5*(.96-.93*Math.pow(t,5));left.push({x:pts[i].x-dy/l*r,y:pts[i].y+dx/l*r});right.push({x:pts[i].x+dy/l*r,y:pts[i].y-dx/l*r})}return left.concat(right.reverse())}
-function ribbon(ctx,s,nodes=s.nodes,alpha=1){if(nodes.length<2)return;const pts=sample(nodes),left=[],right=[],len=pts.length;for(let i=0;i<len;i++){const a=pts[Math.max(0,i-1)],b=pts[Math.min(len-1,i+1)],dx=b.x-a.x,dy=b.y-a.y,l=Math.hypot(dx,dy)||1,t=i/(len-1),r=s.width*.5*(.96-.93*Math.pow(t,5));left.push({x:pts[i].x-dy/l*r,y:pts[i].y+dx/l*r});right.push({x:pts[i].x+dy/l*r,y:pts[i].y-dx/l*r})}
+function outline(s,nodes){const pts=sample(nodes),left=[],right=[],len=pts.length;for(let i=0;i<len;i++){const a=pts[Math.max(0,i-1)],b=pts[Math.min(len-1,i+1)],dx=b.x-a.x,dy=b.y-a.y,l=Math.hypot(dx,dy)||1,t=i/(len-1),r=s.width*.5*Math.max(s.tie?.fixed ? 1.35 : 0,.96-.93*Math.pow(t,5));left.push({x:pts[i].x-dy/l*r,y:pts[i].y+dx/l*r});right.push({x:pts[i].x+dy/l*r,y:pts[i].y-dx/l*r})}return left.concat(right.reverse())}
+function ribbon(ctx,s,nodes=s.nodes,alpha=1){if(nodes.length<2)return;const pts=sample(nodes),left=[],right=[],len=pts.length;for(let i=0;i<len;i++){const a=pts[Math.max(0,i-1)],b=pts[Math.min(len-1,i+1)],dx=b.x-a.x,dy=b.y-a.y,l=Math.hypot(dx,dy)||1,t=i/(len-1),r=s.width*.5*Math.max(s.tie?.fixed ? 1.35 : 0,.96-.93*Math.pow(t,5));left.push({x:pts[i].x-dy/l*r,y:pts[i].y+dx/l*r});right.push({x:pts[i].x+dy/l*r,y:pts[i].y-dx/l*r})}
  const first=nodes[0],last=nodes[nodes.length-1],span=Math.max(.01,last.y-first.y),grad=ctx.createLinearGradient(0,first.y,0,last.y+.01),shade=s.shade??1;
  for(let i=0;i<nodes.length;i++){const u=clamp((nodes[i].y-first.y)/span,0,1),tx=clamp(Math.round(((s.lane??0)+1)*27),0,63),ty=clamp(Math.round(u*127),0,127),light=textureLight?textureLight[ty*64+tx]:1;grad.addColorStop(u,css(nodes[i].c,shade*(.65+light*.35)));}
  ctx.globalAlpha=alpha;ctx.beginPath();ctx.moveTo(left[0].x,left[0].y);for(let p of left)ctx.lineTo(p.x,p.y);for(let i=len-1;i>=0;i--)ctx.lineTo(right[i].x,right[i].y);ctx.closePath();ctx.fillStyle=grad;ctx.fill();ctx.strokeStyle=css(first.c,.48);ctx.lineWidth=s.outline>.5?.65:.3;ctx.globalAlpha=alpha*(s.outline??.2);ctx.stroke();
  if(hairTexture&&s.age===undefined){
   const tile=textureStrip(s,nodes);ctx.save();ctx.clip();ctx.globalAlpha=alpha;
   for(let i=0;i<len-1;i+=2){
-   const count=Math.min(2,len-1-i),a=pts[i],b=pts[i+count],dx=b.x-a.x,dy=b.y-a.y,length=Math.hypot(dx,dy),t=i/(len-1),width=s.width*(.96-.93*Math.pow(t,5))+1;
+   const count=Math.min(2,len-1-i),a=pts[i],b=pts[i+count],dx=b.x-a.x,dy=b.y-a.y,length=Math.hypot(dx,dy),t=i/(len-1),width=s.width*Math.max(s.tie?.fixed ? 1.35 : 0,.96-.93*Math.pow(t,5))+1;
    ctx.save();ctx.translate(a.x,a.y);ctx.rotate(Math.atan2(dy,dx)-Math.PI/2);
    ctx.drawImage(tile,0,t*510,24,Math.max(1,512*count/(len-1)), -width/2,-.6,width,length+1.2);ctx.restore();
   }ctx.restore();
@@ -118,11 +126,11 @@ export class HairSystem{
  step(dt,H=844,headDx=0){dt=Math.min(dt,.034);this.elapsed+=dt;const h=dt/2;
   for(let sub=0;sub<2;sub++)for(const s of this.strands){let n=s.nodes;if(n.length<2)continue;n[0].x=s.rootX+headDx;n[0].y=s.rootY;n[0].px=n[0].x;n[0].py=n[0].y;
    for(let j=1;j<n.length;j++){let p=n[j],vx=clamp((p.x-p.px)*.84,-2.1,2.1),vy=clamp((p.y-p.py)*.84,-2.1,2.1);p.px=p.x;p.py=p.y;p.x+=vx+(p.homeX+headDx-p.x)*.065;p.y+=vy+155*h*h+(p.homeY-p.y)*.052}
-   const pin=pinFlags(s);if(s.tie)applyPins(s,headDx);
+   const pin=pinFlags(s);if(s.tie||s.groomed)applyPins(s,headDx);
    for(let k=0;k<(s.tie?10:5);k++){for(let j=1;j<n.length;j++){if(pin[j-1]&&pin[j])continue;let a=n[j-1],b=n[j],dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy)||1,diff=(len-s.rest[j-1])/len;const pinA=pin[j-1],pinB=pin[j];if(!pinA){a.x+=dx*diff*(pinB?1:.38);a.y+=dy*diff*(pinB?1:.38)}if(!pinB){b.x-=dx*diff*(pinA?1:.62);b.y-=dy*diff*(pinA?1:.62)}}
     // Downward ordering prevents flipping even after a large finger gesture.（盤起來的丸子頭例外）
-    for(let j=1;j<n.length;j++){let a=n[j-1],b=n[j];if(pin[j]&&s.tie?.fixed&&j>s.tie.index)continue;b.y=Math.max(b.y,a.y+Math.min(1.5,s.rest[j-1]*.15));if(s.front&&!s.bang&&b.y>268&&b.y<355){const sd=s.tie?(Math.sign(s.tie.x-195)||s.side):s.side;let inner=195+sd*(66*Math.sqrt(Math.max(0,1-Math.pow((b.y-286)/80,2)))+6);if(sd<0)b.x=Math.min(b.x,inner);else b.x=Math.max(b.x,inner)}b.x=clamp(b.x,27,363);b.y=Math.min(b.y,603)}
-    if(s.tie&&s.tie.index<n.length){applyPins(s,headDx);for(let j=s.tie.index-1;j>0;j--)n[j].y=Math.min(n[j].y,n[j+1].y-Math.min(.3,s.rest[j]*.15));}
+    for(let j=1;j<n.length;j++){let a=n[j-1],b=n[j];if(pin[j])continue;b.y=Math.max(b.y,a.y+Math.min(1.5,s.rest[j-1]*.15));if(s.front&&!s.bang&&b.y>268&&b.y<355){const sd=s.tie?(Math.sign(s.tie.x-195)||s.side):s.side;let inner=195+sd*(66*Math.sqrt(Math.max(0,1-Math.pow((b.y-286)/80,2)))+6);if(sd<0)b.x=Math.min(b.x,inner);else b.x=Math.max(b.x,inner)}b.x=clamp(b.x,27,363);b.y=Math.min(b.y,s.bang?270:603)}
+    if(s.tie&&s.tie.index<n.length){applyPins(s,headDx);for(let j=s.tie.guided?0:s.tie.index-1;j>0;j--)n[j].y=Math.min(n[j].y,n[j+1].y-Math.min(.3,s.rest[j]*.15));}
    }
   }
   for(const f of this.fallen){f.age+=dt;for(const p of f.nodes){let vx=clamp((p.x-p.px)*.96,-4,4),vy=clamp((p.y-p.py)*.98,-4,7);p.px=p.x;p.py=p.y;p.x+=vx;p.y+=vy+360*dt*dt;}
@@ -132,8 +140,8 @@ export class HairSystem{
  cut(a,b){let total=0;for(const s of this.strands){const n=s.nodes;if(n.length<2)continue;let hit=null,idx=-1;for(let j=1;j<n.length;j++){let q=crossing(n[j-1],n[j],a,b);if(q){hit=q;idx=j;break}}if(!hit)continue;let prev=n[idx-1],next=n[idx],color=mix(prev.c,next.c,hit.t),paint=q=>({x:q.paintX??q.homeX,y:q.paintY??q.homeY}),pa=paint(prev),pb=paint(next),cutPaint={x:pa.x+(pb.x-pa.x)*hit.t,y:pa.y+(pb.y-pa.y)*hit.t};
    // 剪下來的那段和留下的髮尾都記住自己在頭髮圖上的位置，花紋才接得上
    const keep=(q,src)=>{q.paintX=src.x;q.paintY=src.y;return q},tail=[keep(pt(hit.x,hit.y,color),cutPaint),...n.slice(idx).map(p=>keep(pt(p.x,p.y,p.c),paint(p)))];
-   for(const p of tail){p.px=p.x-(Math.random()-.5)*.6;p.py=p.y-.3}this.fallen.push({age:0,nodes:tail,rest:tail.slice(1).map((p,i)=>Math.hypot(p.x-tail[i].x,p.y-tail[i].y)),width:s.width,shade:s.shade,shine:s.shine,lane:s.lane,group:s.group,bang:s.bang});
-   const tip=keep(pt(hit.x,hit.y,color),cutPaint);tip.homeX=prev.homeX+(next.homeX-prev.homeX)*hit.t;tip.homeY=prev.homeY+(next.homeY-prev.homeY)*hit.t;n.splice(idx);n.push(tip);s.rest.splice(idx-1);s.rest.push(Math.max(.5,Math.hypot(tip.x-prev.x,tip.y-prev.y)));s.growCredit=0;s.extending=null;s.textureDirty=true;if(s.tie&&idx<=s.tie.index)s.tie=null;total++;
+   for(const p of tail){p.px=p.x-(Math.random()-.5)*.6;p.py=p.y-.3}this.fallen.push({age:0,nodes:tail,rest:tail.slice(1).map((p,i)=>Math.hypot(p.x-tail[i].x,p.y-tail[i].y)),width:s.width,shade:s.shade,shine:s.shine,lane:s.lane,group:s.group,bang:s.bang,styled:s.styled});
+   const tip=keep(pt(hit.x,hit.y,color),cutPaint);tip.homeX=prev.homeX+(next.homeX-prev.homeX)*hit.t;tip.homeY=prev.homeY+(next.homeY-prev.homeY)*hit.t;n.splice(idx);n.push(tip);s.rest.splice(idx-1);s.rest.push(Math.max(.5,Math.hypot(tip.x-prev.x,tip.y-prev.y)));s.growCredit=0;s.extending=null;s.textureDirty=true;if(s.tie&&idx<=s.tie.index){s.tie=null;s.groomed=false;s.front=s.wasFront;delete s.loose;delete s.wasFront;delete s.wasStyled;for(const p of n){delete p.bx;delete p.by}this.relaxShape(s)}total++;
    if(total%3===0)for(let k=0;k<3;k++)this.particles.push({x:hit.x,y:hit.y,vx:(Math.random()-.5)*70,vy:-45-Math.random()*30,life:.5+Math.random()*.3,color:css(color),size:1.4,kind:'hair'})
   }this.cutCount+=total;return total}
  grow(x,y,dt){let amount=0;for(const s of this.strands){let n=s.nodes,last=n.at(-1);if(last.y>=(s.bang?266:580))continue;if(!n.some(p=>Math.hypot(p.x-x,p.y-y)<48))continue;
@@ -144,80 +152,65 @@ export class HairSystem{
  }return amount}
  dye(x,y,rgb,dt){let changed=0;for(let s of this.strands)for(let p of s.nodes){let d=Math.hypot(p.x-x,p.y-y);if(d<37){let alpha=1-Math.exp(-dt*5*(1-d/37));p.c=mix(p.c,rgb,alpha);s.textureDirty=true;changed++}}return changed}
  comb(a,b){
-  const distance=Math.hypot(b.x-a.x,b.y-a.y),steps=Math.max(1,Math.ceil(distance/8));let changed=0;
-  for(let st=1;st<=steps;st++){const x=a.x+(b.x-a.x)*st/steps,y=a.y+(b.y-a.y)*st/steps,dx=(b.x-a.x)/steps,dy=(b.y-a.y)/steps;
-   for(const s of this.strands){let touched=false;
-    const pin=s.tie?pinFlags(s):null;for(let j=1;j<s.nodes.length;j++){const p=s.nodes[j],d=Math.hypot(p.x-x,p.y-y);if(d>=38||(s.tie&&(j<=s.tie.index||pin[j])))continue;
-     const f=(1-d/38)*.65,moveX=clamp(dx*f+(x-p.x)*f*.16,-5,5),moveY=clamp(dy*f,-2,5);
-     p.x+=moveX;p.y+=moveY;p.homeX=p.x;p.homeY=p.y;p.px=p.x;p.py=p.y;touched=true;changed++;
-    }
-    // Record the groomed strand shape. Gravity and constraints settle it without resetting the style.
-    if(touched){this.relaxShape(s,8);s.textureDirty=true;}
+  const dx=b.x-a.x,dy=b.y-a.y,distance=Math.hypot(dx,dy);if(distance<.01)return 0;let changed=0;
+  for(const s of this.strands){const n=s.nodes,pin=pinFlags(s),start=4,delta=n.map(()=>({x:0,y:0}));let touched=false;
+   // One swept brush moves a neighborhood together instead of yanking individual vertices.
+   for(let j=start;j<n.length;j++){if(pin[j]||(s.tie&&j<=s.tie.index))continue;const p=n[j],t=clamp(((p.x-a.x)*dx+(p.y-a.y)*dy)/(distance*distance),0,1),x=a.x+dx*t,y=a.y+dy*t,d=Math.hypot(p.x-x,p.y-y);if(d>=52)continue;
+    const weight=(1-d/52)**2*(s.bang?.45:1);delta[j]={x:(clamp(dx,-16,16)*.45+clamp(x-p.x,-8,8)*.12)*weight,y:clamp(dy,-9,14)*.3*weight};touched=true;changed++;
    }
+   if(!touched)continue;
+   // Keep the scalp silhouette round even when the rest of a lock is brushed straight.
+   if(!s.tie&&!s.groomed)for(let j=1;j<=3&&j<n.length-1;j++){n[j].homeX=n[j].paintX??n[j].homeX;n[j].homeY=n[j].paintY??n[j].homeY;}
+   s.groomed=true;s.styled=true;
+   for(let pass=0;pass<2;pass++){const old=delta.map(p=>({...p}));for(let j=start;j<n.length;j++){if(pin[j]||(s.tie&&j<=s.tie.index))continue;const a=old[Math.max(start,j-1)],b=old[j],c=old[Math.min(n.length-1,j+1)];delta[j]={x:a.x*.2+b.x*.6+c.x*.2,y:a.y*.2+b.y*.6+c.y*.2}}}
+   for(let j=start;j<n.length;j++){if(pin[j]||(s.tie&&j<=s.tie.index))continue;n[j].x+=delta[j].x;n[j].y+=delta[j].y;}
+   smoothBends(s,.16);this.relaxShape(s,20);s.styled=true;s.textureDirty=true;
   }return changed;
  }
  relaxShape(s,iterations=20){
   const n=s.nodes;
   for(let k=0;k<iterations;k++){
    n[0].x=s.rootX;n[0].y=s.rootY;
-   const pin=pinFlags(s);if(s.tie)applyPins(s);
+   const pin=pinFlags(s);if(s.tie||s.groomed)applyPins(s);
    for(let j=1;j<n.length;j++){if(pin[j-1]&&pin[j])continue;const a=n[j-1],b=n[j],dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy)||1,d=(len-s.rest[j-1])/len;
     const pinA=pin[j-1],pinB=pin[j];
     if(!pinA){a.x+=dx*d*(pinB?1:.4);a.y+=dy*d*(pinB?1:.4)}if(!pinB){b.x-=dx*d*(pinA?1:.6);b.y-=dy*d*(pinA?1:.6)}
    }
-   for(let j=1;j<n.length;j++){const a=n[j-1],b=n[j];if(pin[j]&&s.tie?.fixed&&j>s.tie.index)continue;b.y=clamp(b.y,a.y+Math.min(.3,s.rest[j-1]*.15),603);b.x=clamp(b.x,27,363);if(s.front&&!s.bang&&b.y>260&&b.y<355){const sd=s.tie?(Math.sign(s.tie.x-195)||s.side):s.side,inner=195+sd*(66*Math.sqrt(Math.max(0,1-((b.y-286)/80)**2))+7);b.x=sd<0?Math.min(b.x,inner):Math.max(b.x,inner)}}
-   if(s.tie&&s.tie.index<n.length){applyPins(s);for(let j=s.tie.index-1;j>0;j--)n[j].y=Math.min(n[j].y,n[j+1].y-Math.min(.3,s.rest[j]*.15));}
+   for(let j=1;j<n.length;j++){const a=n[j-1],b=n[j];if(pin[j])continue;b.y=clamp(b.y,a.y+Math.min(.3,s.rest[j-1]*.15),603);b.x=clamp(b.x,27,363);if(s.front&&!s.bang&&b.y>260&&b.y<355){const sd=s.tie?(Math.sign(s.tie.x-195)||s.side):s.side,inner=195+sd*(66*Math.sqrt(Math.max(0,1-((b.y-286)/80)**2))+7);b.x=sd<0?Math.min(b.x,inner):Math.max(b.x,inner)}}
+   if(s.tie&&s.tie.index<n.length){applyPins(s);for(let j=s.tie.guided?0:s.tie.index-1;j>0;j--)n[j].y=Math.min(n[j].y,n[j+1].y-Math.min(.3,s.rest[j]*.15));}
   }
   for(const p of n){p.homeX=p.px=p.x;p.homeY=p.py=p.y;}
  }
  tie(mode='double',color=0){
-  this.untie();let count=0;const bands=[],bandAt=(b)=>{let i=bands.findIndex(q=>Math.abs(q.x-b.x)<1&&Math.abs(q.y-b.y)<1);if(i<0){bands.push(b);i=bands.length-1}return i};
-  const S=TIE_STYLES[mode];if(!S)return 0;
-  const perSide={'-1':0,'1':0};
+  this.untie();const S=TIE_STYLES[mode];if(!S)return 0;let count=0;const bands=[];
+  const bandAt=b=>{let index=bands.findIndex(q=>Math.abs(q.x-b.x)<1&&Math.abs(q.y-b.y)<1);if(index<0){index=bands.length;bands.push(b)}return index};
   for(const s of this.strands){if(s.bang||s.nodes.length<6||(S.pick&&!S.pick(s)))continue;
-   const n=s.nodes,side=s.side,[x,y]=S.band(side),via=S.via?S.via(side).map(([x,y])=>({x,y})):[];
-   const f0=via.length?via[0]:{x,y},limit=Math.min(267,f0.y-6),reach=Math.abs(f0.x-195)-3;
-   // 路線：髮根往下、還沒到第一個經過點以前、也還沒往外超過它的那一段照原樣，再經過 via 到髮圈（不會先往外再折回來）
-   const pre=[];for(const p of n){if(p.y>=limit||(pre.length&&Math.abs(p.x-195)>reach))break;pre.push({x:p.x,y:p.y})}
-   const route=[...pre,...via,{x,y}];if(route.length<2)continue;
-   const lengths=route.slice(1).map((p,i)=>Math.hypot(p.x-route[i].x,p.y-route[i].y)),needed=lengths.reduce((a,b)=>a+b,0);
-   let travel=0,k=-1;for(let j=1;j<n.length-1;j++){travel+=s.rest[j-1];if(travel>=needed+2){k=j;break}}
-   if(k<0)continue;
-   // Put the band at its actual arc-length along the hair, splitting a segment rather than shortening the strand.
-   const oldLength=s.rest[k-1],firstLen=oldLength-(travel-needed-2),canSplit=n.length<16&&firstLen>=2&&oldLength-firstLen>=2;
-   // 切不開（剛好落在交界、或已經 16 節）又多出一大截：改在前一節綁，不然多出來的長度會擠成一個尖角
-   if(!canSplit&&k>1&&travel-needed>6&&travel-oldLength>=needed-6){travel-=oldLength;k--}
-   if(canSplit){const t=firstLen/oldLength,a=n[k-1],b=n[k],p=pt(a.x+(b.x-a.x)*t,a.y+(b.y-a.y)*t,mix(a.c,b.c,t));p.paintX=(a.paintX??a.homeX)+((b.paintX??b.homeX)-(a.paintX??a.homeX))*t;p.paintY=(a.paintY??a.homeY)+((b.paintY??b.homeY)-(a.paintY??a.homeY))*t;n.splice(k,0,p);s.rest.splice(k-1,1,firstLen,oldLength-firstLen);travel=needed+2;}
-
-   s.loose=n.map(p=>({x:p.homeX,y:p.homeY}));s.wasFront=s.front;s.front=S.front;
-   // The root and band are both fixed; only strands with enough actual length can reach the band.
-   const bx=x+s.lane*3,by=y+s.lane*.3;
-   s.tie={index:k,x:bx,y:by,mode,band:bandAt({x,y,mode,color,size:S.bow})};let arc=0;
-   for(let j=1;j<=k;j++){arc+=s.rest[j-1];let target=arc/travel*needed,segment=0;while(segment<lengths.length-1&&target>lengths[segment]){target-=lengths[segment];segment++}const t=target/lengths[segment];n[j].x=route[segment].x+(route[segment+1].x-route[segment].x)*t;n[j].y=route[segment].y+(route[segment+1].y-route[segment].y)*t;}
-   const tailLen=s.rest.slice(k).reduce((a,b)=>a+b,0);
-   if(S.bun){
-    // 丸子頭：髮尾繞著中心一圈一圈往內盤，每一撮起點錯開，盤滿一整顆
-    const [cx,cy]=S.bun.c(side),R=S.bun.R,q=perSide[side]++;let ang=Math.atan2(by-cy,bx-cx)+q*2.39996,cum=0;
-    for(let j=k+1;j<n.length;j++){cum+=s.rest[j-1];const r=R*(1-.78*Math.min(1,cum/Math.max(40,tailLen)))+1.5;ang+=side*s.rest[j-1]/r;const p=n[j];p.x=cx+Math.cos(ang)*r;p.y=cy+Math.sin(ang)*r*.92;p.bx=p.x;p.by=p.y}
-    s.tie.fixed=true;
-   }else{
-    let cum=0;const fan=S.fan??1,pinch=S.pinch;
-    for(let j=k+1;j<n.length;j++){cum+=s.rest[j-1];const t=(j-k)/(n.length-1-k);
-     const bulge=pinch?Math.abs(Math.sin(Math.PI*((cum%pinch)/pinch))):Math.sin(t*Math.PI*.75);
-     const spread=(s.lane*19+side*(s.group-2.5)*3)*bulge*fan+(pinch?0:side*Math.sin(t*Math.PI)*12*fan);
-     n[j].x=bx+spread+(S.sweep||0)*Math.sin(Math.min(1,t*1.5)*Math.PI/2)+(S.out||0)*(x>195?1:-1)*Math.sin(Math.min(1,t*2)*Math.PI/2);
-     const dx=clamp(n[j].x-n[j-1].x,-s.rest[j-1]*.7,s.rest[j-1]*.7);n[j].x=n[j-1].x+dx;n[j].y=n[j-1].y+Math.sqrt(Math.max(0,s.rest[j-1]**2-dx**2));}
-    if(pinch){
-     // 泡泡辮：沿著髮尾每隔 pinch 長綁一道小髮圈，把髮束收回中線
-     s.tie.extra=[];let at=0,m=1;cum=0;
-     for(let j=k+1;j<n.length-1&&m<=4;j++){cum+=s.rest[j-1];if(cum>=m*pinch){const py=y+m*pinch*.92;n[j].x=bx+s.lane*1.5;n[j].y=py;
-       s.tie.extra.push({i:j,x:n[j].x,y:py,band:bandAt({x,y:py,mode,color,ring:true,size:14})});m++}}
-    }
+   const n=s.nodes,side=s.side,[x,y]=S.band(side),bx=x+s.lane*2,by=y+s.lane*.25,a={x:s.rootX,y:s.rootY};let c1,c2;
+   if(mode==='double'||mode==='braids'){c1={x:a.x+side*64,y:a.y+4};c2={x:bx+side*18,y:by-80}}
+   else if(mode==='single'){c1={x:a.x+(284-a.x)*.6,y:a.y+6};c2={x:bx+14,y:by-95}}
+   else if(mode==='buns'||mode==='high'){c1={x:a.x+side*44,y:112};c2={x:bx+side*15,y:by-29}}
+   else{c1={x:a.x+(bx-a.x)*.6,y:Math.min(a.y,by)-12};c2={x:bx,y:by-16}}
+   const route=curve(a,c1,c2,{x:bx,y:by}),needed=route.length,total=s.rest.reduce((a,b)=>a+b,0);if(total<needed+26)continue;
+   let travel=0,k=-1;for(let j=1;j<n.length-1;j++){travel+=s.rest[j-1];if(travel>=needed){k=j;break}}if(k<0)continue;
+   const old=s.rest[k-1],first=old-(travel-needed);
+   if(n.length<16&&first>=2&&old-first>=2){const t=first/old,a=n[k-1],b=n[k],p=pt(a.x+(b.x-a.x)*t,a.y+(b.y-a.y)*t,mix(a.c,b.c,t));p.paintX=(a.paintX??a.homeX)+((b.paintX??b.homeX)-(a.paintX??a.homeX))*t;p.paintY=(a.paintY??a.homeY)+((b.paintY??b.homeY)-(a.paintY??a.homeY))*t;n.splice(k,0,p);s.rest.splice(k-1,1,first,old-first);travel=needed;}
+   s.loose=n.map(p=>({x:p.homeX,y:p.homeY}));s.wasFront=s.front;s.wasStyled=!!s.styled;s.front=S.front;s.styled=true;
+   s.tie={index:k,x:bx,y:by,mode,guided:true,band:bandAt({x,y,mode,color,size:S.bow})};let arc=0;
+   // Scalp anchors preserve a rounded gathering curve; free tips remain deformable.
+   for(let j=1;j<=k;j++){arc+=s.rest[j-1];const q=route.at(arc/travel*needed);n[j].x=n[j].bx=q.x;n[j].y=n[j].by=q.y}
+   const tailLength=s.rest.slice(k).reduce((a,b)=>a+b,0);let tail;
+   if(S.bun){const [cx,cy]=S.bun.c(side),radius=Math.hypot(bx-cx,(by-cy)/.94),inner=(s.lane+1)*.5*S.bun.R*.78,angle=Math.atan2((by-cy)/.94,bx-cx),turns=Math.min(tailLength/Math.max(14,(radius+inner)/2),Math.PI*2.7),points=[{x:bx,y:by}];
+    for(let i=1;i<=180;i++){const t=i/180,r=radius+(inner-radius)*t*t*(3-2*t),turn=side*turns*t;points.push({x:cx+Math.cos(angle+turn)*r,y:cy+Math.sin(angle+turn)*r*.94})}tail=arcPath(points);s.tie.fixed=true;
+   }else{const bandSide=Math.sign(x-195)||side,spread=Math.min(1,tailLength/140),fan=(s.lane*17+side*(s.group-2.5)*2)*(S.fan??1)*spread,points=[];
+    const make=span=>{points.length=0;for(let i=0;i<=180;i++){const t=i/180,arc=tailLength*t,bulge=S.pinch?Math.sin(Math.PI*arc/S.pinch)**2:Math.sin(Math.PI*t*.85);points.push({x:bx+fan*bulge+bandSide*9*spread*Math.sin(t*Math.PI*1.4)+(S.sweep||0)*spread*Math.sin(t*Math.PI*.5)+bandSide*(S.out||0)*spread*Math.sin(t*Math.PI*.5),y:by+span*t})}return arcPath(points)};
+    let low=0,high=tailLength;for(let i=0;i<12;i++){const mid=(low+high)/2;if(make(mid).length<tailLength)low=mid;else high=mid}tail=make(Math.min((low+high)/2,595-by));
    }
-   this.relaxShape(s,80);s.textureDirty=true;count++;
+   arc=0;for(let j=k+1;j<n.length;j++){arc+=s.rest[j-1];const q=tail.at(arc/tailLength*tail.length);n[j].x=q.x;n[j].y=q.y;if(S.bun){n[j].bx=q.x;n[j].by=q.y}}
+   if(S.pinch){s.tie.extra=[];let length=0,ring=1;for(let j=k+1;j<n.length-1&&ring<=4;j++){length+=s.rest[j-1];if(length>=ring*S.pinch){const p=n[j];s.tie.extra.push({i:j,x:p.x,y:p.y,band:bandAt({x,y:p.y,mode,color,ring:true,size:14})});ring++}}}
+   for(const p of n){p.homeX=p.px=p.x;p.homeY=p.py=p.y}this.relaxShape(s,24);s.textureDirty=true;count++;
   }this.ties=bands;return count;
  }
- untie(){for(const s of this.strands){for(const p of s.nodes){delete p.bx;delete p.by}if(!s.loose)continue;for(let j=0;j<s.nodes.length;j++){const p=s.nodes[j],q=s.loose[j];if(q){p.x=q.x;p.y=q.y;p.px=p.homeX=p.x;p.py=p.homeY=p.y}}s.tie=null;s.front=s.wasFront;delete s.loose;delete s.wasFront;this.relaxShape(s);s.textureDirty=true;}this.ties=[];}
+ untie(){for(const s of this.strands){for(const p of s.nodes){delete p.bx;delete p.by}if(!s.loose)continue;for(let j=0;j<s.nodes.length;j++){const p=s.nodes[j],q=s.loose[j];if(q){p.x=q.x;p.y=q.y;p.px=p.homeX=p.x;p.py=p.homeY=p.y}}s.tie=null;s.front=s.wasFront;s.styled=!!s.wasStyled;delete s.loose;delete s.wasFront;delete s.wasStyled;this.relaxShape(s);s.textureDirty=true;}this.ties=[];}
  activeTies(){
   // 還有頭髮綁著的髮圈才畫（剪到髮圈上面，那撮就鬆開了）；舊存檔沒有 band 編號，照位置對
   const alive=new Set();for(const s of this.strands){const T=s.tie;if(!T||T.index>=s.nodes.length)continue;
@@ -305,7 +298,7 @@ export class HairSystem{
   const valid=saved.strands.every(s=>s&&Number.isFinite(s.width)&&s.width>0&&s.width<=30&&[-1,1].includes(s.side)&&typeof s.front==='boolean'&&(!s.loose||(Array.isArray(s.loose)&&s.loose.every(finitePoint)))&&(!s.tie||(Number.isInteger(s.tie.index)&&s.tie.index>=1&&s.tie.index<s.nodes?.length&&finitePoint(s.tie)&&TIE_MODES.includes(s.tie.mode)&&(!s.tie.extra||(Array.isArray(s.tie.extra)&&s.tie.extra.every(e=>finitePoint(e)&&Number.isInteger(e.i)&&e.i>=1&&e.i<16)))))&&Array.isArray(s.nodes)&&s.nodes.length>=2&&s.nodes.length<=16&&Array.isArray(s.rest)&&s.rest.length===s.nodes.length-1&&s.rest.every(v=>Number.isFinite(v)&&v>=0)&&s.nodes.every(p=>p&&['x','y','px','py','homeX','homeY'].every(k=>Number.isFinite(p[k])&&Math.abs(p[k])<2000)&&(p.bx===undefined||(Number.isFinite(p.bx)&&Number.isFinite(p.by)))&&Array.isArray(p.c)&&p.c.length===3&&p.c.every(v=>Number.isFinite(v)&&v>=0&&v<=255))&&Number.isFinite(s.rootX)&&Number.isFinite(s.rootY));
   if(!valid||!Array.isArray(saved.ties||[])||!(saved.ties||[]).every(b=>finitePoint(b)&&TIE_MODES.includes(b.mode)&&Number.isFinite(b.size)&&b.size>0&&b.size<100))return false;
   this.strands=structuredClone(saved.strands);for(const s of this.strands){s.textureDirty=true;for(const p of s.nodes){p.px=p.x;p.py=p.y}}
-  this.ties=structuredClone(saved.ties||[]);this.cutCount=saved.cutCount||0;this.fallen=[];this.particles=[];return true;
+  this.ties=structuredClone(saved.ties||[]);this.cutCount=saved.cutCount||0;this.fallen=[];this.particles=[];const legacy=this.strands.find(s=>s.tie&&!s.tie.guided);if(legacy)this.tie(legacy.tie.mode,this.ties[legacy.tie.band]?.color??0);return true;
  }
  stats(){let max=0,up=0,finite=true,nodes=0;for(let s of this.strands){nodes+=s.nodes.length;for(let j=1;j<s.nodes.length;j++){let a=s.nodes[j-1],b=s.nodes[j];max=Math.max(max,Math.hypot(b.x-a.x,b.y-a.y));if(b.y<a.y-.01&&b.bx===undefined)up++;finite&&=Number.isFinite(b.x)&&Number.isFinite(b.y)}}return{strands:this.strands.length,nodes,maxSegment:max,upwardSegments:up,finite,fallen:this.fallen.length,cutCount:this.cutCount}}
 }

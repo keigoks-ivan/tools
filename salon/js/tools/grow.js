@@ -1,3 +1,3 @@
-import {bottle} from './visual.js?v=13';
-import {playSfx} from '../sfx.js?v=13';
+import {bottle} from './visual.js?v=14';
+import {playSfx} from '../sfx.js?v=14';
 export function createGrow(env){let p=null,time=0;return {onDown(q){p=q;env.hair.grow(q.x,q.y,.12,env.H);playSfx('grow')},onMove(q){if(p){let dx=q.x-p.x,dy=q.y-p.y,n=Math.max(1,Math.ceil(Math.hypot(dx,dy)/14));for(let i=1;i<=n;i++)env.hair.grow(p.x+dx*i/n,p.y+dy*i/n,.025,env.H)}p=q},onUp(){p=null},update(dt){if(!p)return;time+=dt;env.hair.grow(p.x,p.y,dt,env.H);if(time>.035){time=0;for(let i=0;i<3;i++){let a=Math.random()*Math.PI*2,r=Math.random()*48;env.hair.particles.push({x:p.x+Math.cos(a)*r,y:p.y+Math.sin(a)*r,vx:(Math.random()-.5)*24,vy:-35-Math.random()*20,life:.5+Math.random()*.4,color:'#fff4ab',size:2+Math.random()*2})}}},drawOverlay(ctx){if(p)bottle(ctx,p,'#a7dba1',true)}}}

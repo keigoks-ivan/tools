@@ -1,9 +1,9 @@
-import {palette} from './data.js?v=13';
-import {checkWish,wishNames,colorNames} from './goals.js?v=13';
-import {wishes} from './looks.js?v=13';
-import {iconMarkup as svg} from './icons.js?v=13';
-import {wishIcon} from './replay-ui.js?v=13';
-import {ornament} from './ornaments.js?v=13';
+import {palette} from './data.js?v=14';
+import {checkWish,wishNames,colorNames} from './goals.js?v=14';
+import {wishes} from './looks.js?v=14';
+import {iconMarkup as svg} from './icons.js?v=14';
+import {wishIcon} from './replay-ui.js?v=14';
+import {ornament} from './ornaments.js?v=14';
 const toolLabels={cut:'剪頭髮',grow:'長頭髮',color:'染髮',comb:'梳頭髮',decorate:'髮飾'};
 const hints={cut:'點一下剪短，拖過髮絲剪出形狀',grow:'按住髮尾，讓頭髮慢慢長回來',color:'選顏色，再塗在想染的髮絲上',comb:'順著髮絲拖動，梳出喜歡的形狀',decorate:'點一下放髮飾，拖曳移動或轉動'};
 export class StudioUI{

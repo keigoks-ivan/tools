@@ -1,6 +1,6 @@
-import {accessories,wishes,rgb} from './looks.js?v=13';
-import {ornament} from './ornaments.js?v=13';
-import {TIE_MODES} from './hair.js?v=13';
+import {accessories,wishes,rgb} from './looks.js?v=14';
+import {ornament} from './ornaments.js?v=14';
+import {TIE_MODES} from './hair.js?v=14';
 const TAU=Math.PI*2;
 const labels={camera:'拍照',album:'作品集',guests:'選客人',close:'關閉',next:'下一頁',back:'上一頁',undo:'撤銷',edit:'繼續編輯',download:'下載照片',trash:'刪除照片'};
 const tieNames={double:'雙馬尾',high:'高雙馬尾',braids:'泡泡辮',buns:'丸子頭',single:'低側馬尾',sideHigh:'側邊高馬尾',pony:'高馬尾',half:'公主頭',loose:'放下頭髮'};

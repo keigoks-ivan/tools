@@ -1,18 +1,21 @@
 // 用 WebGL 畫頭髮：每一撮頭髮是一條細長網格，貼上畫好的頭髮圖（照這撮頭髮原本在圖上的位置取樣），再換成目前的髮色。
-// 梳、剪、長、染的時候網格跟著變形，畫好的髮絲也跟著走；相鄰髮束取樣的位置是連續的，拼起來就是原本那張圖，不會一條一條的。
+// 初始造型使用原插畫的位置；梳、綁之後改按髮束弧長取連續細髮絲，避免插畫亮暗紋路被拉成折痕。剪染仍沿同一條可變形網格。
 // 畫在一張離屏畫布上，再用 drawImage 貼回 2D 畫面（跟著 2D 的座標轉換，遊戲畫面、拍照、縮圖都能用）。
-const VS = `attribute vec2 p;attribute vec2 uv;attribute vec3 c;attribute vec2 e;
-uniform vec4 view;varying vec2 vUv;varying vec3 vC;varying vec2 vE;
+const VS = `attribute vec2 p;attribute vec2 uv;attribute vec3 c;attribute vec3 e;
+uniform vec4 view;varying vec2 vUv;varying vec3 vC;varying vec3 vE;
 void main(){vUv=uv;vC=c;vE=e;vec2 q=(p-view.xy)/view.zw;gl_Position=vec4(q.x*2.-1.,1.-q.y*2.,0.,1.);}`;
-// e.x＝橫向位置（-1 左緣、1 右緣）；e.y＝透明度。頭髮圖的亮度對上「平均亮度」換算成倍數，乘上目前髮色。
+// e.x＝橫向位置（-1 左緣、1 右緣）；e.y＝透明度；e.z＝連續髮絲材質。頭髮圖的亮度對上「平均亮度」換算成倍數，乘上目前髮色。
 // 頭髮圖沒畫到的地方（透明）改用細髮絲貼圖，頭髮長到圖外面也不會變成一片平色。
-const FS = `precision mediump float;uniform sampler2D plate,detail;uniform float mean,dmean;varying vec2 vUv;varying vec3 vC;varying vec2 vE;
+const FS = `precision mediump float;uniform sampler2D plate,detail;uniform float mean,dmean;varying vec2 vUv;varying vec3 vC;varying vec3 vE;
 void main(){
  vec4 t=texture2D(plate,vUv);
  float lp=dot(t.rgb/max(t.a,.001),vec3(.299,.587,.114))/mean;
  float ld=dot(texture2D(detail,vec2(fract(vUv.x*5.3),fract(vUv.y*1.7))).rgb,vec3(.299,.587,.114))/dmean;
  float k=mix(ld,lp,smoothstep(.2,.75,t.a));
  k=k<1.?pow(k,1.12):1.+(k-1.)*.55;
+ // Groomed ribbons use continuous strand grain instead of the original painting's baked waves.
+ float grain=dot(texture2D(detail,vUv).rgb,vec3(.299,.587,.114))/dmean;
+ k=mix(k,.78+.25*clamp(grain,.35,1.8),vE.z);
  // 反光是髮色本身變亮（棕髮反出暖色的光），只有很亮的地方才稍微偏白
  vec3 col=vC*k*.97+(1.-vC)*max(k-1.35,0.)*.3;
  col*=.94+.06*(1.-vE.x*vE.x);
@@ -20,7 +23,7 @@ void main(){
  gl_FragColor=vec4(col*a,a);
 }`;
 const VIEW = { x: 0, y: 60, w: 390, h: 610 };
-const FLOATS = 9, MAXV = 60000;
+const FLOATS = 10, MAXV = 60000;
 const lum = (d, i) => (d[i] * .299 + d[i + 1] * .587 + d[i + 2] * .114) / 255;
 
 export class HairGL {
@@ -75,7 +78,7 @@ export class HairGL {
     gl.uniform1f(this.u.mean, P.mean); gl.uniform1f(this.u.dmean, D.mean);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.buf);
     const st = FLOATS * 4;
-    for (const [k, n, o] of [['p', 2, 0], ['uv', 2, 2], ['c', 3, 4], ['e', 2, 7]]) { gl.enableVertexAttribArray(this.loc[k]); gl.vertexAttribPointer(this.loc[k], n, gl.FLOAT, false, st, o * 4); }
+    for (const [k, n, o] of [['p', 2, 0], ['uv', 2, 2], ['c', 3, 4], ['e', 3, 7]]) { gl.enableVertexAttribArray(this.loc[k]); gl.vertexAttribPointer(this.loc[k], n, gl.FLOAT, false, st, o * 4); }
     let v = 0;
     const flush = () => { if (!v) return; gl.bufferData(gl.ARRAY_BUFFER, this.data.subarray(0, v * FLOATS), gl.STREAM_DRAW); gl.drawArrays(gl.TRIANGLES, 0, v); v = 0; };
     for (const it of items) {
@@ -110,6 +113,7 @@ function writeStrand(out, v, s, n, alpha) {
       const a = n[j - 1], seg = Math.hypot(q.x - a.x, q.y - a.y), prev = pp[j - 1];
       if (py - prev.py < seg * .5) { px = prev.px + (q.x - a.x); py = prev.py + Math.max(q.y - a.y, seg * .7); }
     }
+    if(s.styled){px=((s.lane??0)+1)*.34+((s.group??0)%3)*.025;py=j?(pp[j-1].py+(s.rest?.[j-1]??Math.hypot(q.x-n[j-1].x,q.y-n[j-1].y))/600):0;}
     pp.push({ px, py });
   }
   const pts = _pts; pts.length = 0;
@@ -132,14 +136,15 @@ function writeStrand(out, v, s, n, alpha) {
     const A = pts[Math.max(0, i - 1)], B = pts[Math.min(len - 1, i + 1)], P = pts[i];
     let dx = B.x - A.x, dy = B.y - A.y, l = Math.hypot(dx, dy) || 1; dx /= l; dy /= l;
     let du = B.u - A.u, dw = B.w - A.w, m = Math.hypot(du, dw) || 1; du /= m; dw /= m;
-    const t = i / (len - 1), r = s.width * .5 * 1.25 * (.97 - .92 * Math.pow(t, 4)), fa = alpha * Math.min(1, .15 + t * 16);   // 髮根淡入：頂端不會一格一格
+    const t = i / (len - 1), r = s.width * .5 * 1.25 * Math.max(s.tie?.fixed ? 1.1 : 0,.97 - .92 * Math.pow(t, 4)), fa = alpha * Math.min(1, .15 + t * 16);   // 髮根淡入：頂端不會一格一格
     const sx = 195 + (P.u - 195) * 1.17, sy = 123 + (P.w - 123) * syScale, ru = r * 1.17;
     const col = [0, 1, 2].map((k) => (P.c0[k] + (P.c1[k] - P.c0[k]) * P.f) / 255);
     // 左、右兩個點：位置沿法線、頭髮圖上的位置也沿圖上的法線
-    V.push([P.x - dy * r, P.y + dx * r, (sx - dw * ru) / 390, (sy + du * ru) / 844, col, -1, fa],
-      [P.x + dy * r, P.y - dx * r, (sx + dw * ru) / 390, (sy - du * ru) / 844, col, 1, fa]);
+    if(s.styled){const u=P.u,span=.055*r/(s.width*.5*1.25);V.push([P.x-dy*r,P.y+dx*r,u-span,P.w,col,-1,fa,1],[P.x+dy*r,P.y-dx*r,u+span,P.w,col,1,fa,1]);continue;}
+    V.push([P.x - dy * r, P.y + dx * r, (sx - dw * ru) / 390, (sy + du * ru) / 844, col, -1, fa, 0],
+      [P.x + dy * r, P.y - dx * r, (sx + dw * ru) / 390, (sy - du * ru) / 844, col, 1, fa, 0]);
   }
-  const put = (q) => { const o = v * FLOATS; out[o] = q[0]; out[o + 1] = q[1]; out[o + 2] = q[2]; out[o + 3] = q[3]; out[o + 4] = q[4][0]; out[o + 5] = q[4][1]; out[o + 6] = q[4][2]; out[o + 7] = q[5]; out[o + 8] = q[6]; v++; };
+  const put = (q) => { const o = v * FLOATS; out[o] = q[0]; out[o + 1] = q[1]; out[o + 2] = q[2]; out[o + 3] = q[3]; out[o + 4] = q[4][0]; out[o + 5] = q[4][1]; out[o + 6] = q[4][2]; out[o + 7] = q[5]; out[o + 8] = q[6]; out[o + 9] = q[7]; v++; };
   for (let i = 0; i < len - 1; i++) {
     const a = V[i * 2], b = V[i * 2 + 1], c = V[i * 2 + 2], d = V[i * 2 + 3];
     put(a); put(b); put(c); put(b); put(d); put(c);
@@ -152,7 +157,7 @@ function writeStrand(out, v, s, n, alpha) {
 export function domeTris(top, bottom, cl, cr) {
   const out = [], cx = 195, cy = 196;
   const vtx = (x, y, e) => { const f = Math.min(1, Math.max(0, (x - 104) / 182)), sx = 195 + (x - 195) * 1.17, sy = 123 + (y - 123) * 1.12;
-    return [x, y, sx / 390, sy / 844, ...[0, 1, 2].map((k) => (cl[k] + (cr[k] - cl[k]) * f) / 255), e, 1]; };
+    return [x, y, sx / 390, sy / 844, ...[0, 1, 2].map((k) => (cl[k] + (cr[k] - cl[k]) * f) / 255), e, 1, 0]; };
   const rim = top.concat(bottom.slice().reverse());
   for (let i = 0; i < rim.length; i++) {
     const a = rim[i], b = rim[(i + 1) % rim.length];
