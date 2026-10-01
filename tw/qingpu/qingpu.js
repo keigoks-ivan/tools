@@ -354,8 +354,8 @@ function renderOverview() {
     overviewCard('一年要賣 vs 賣得掉', fmtInt(sv.total_to_sell) + ' 戶　vs　' + fmtInt(sv.one_year_sold) + ' 戶', '現在在售＋未來4季新增　vs　近4季轉手成交×1年'),
     overviewCard('轉手比預售貴多少', up.median != null ? fmtPct(up.median, 0) : '--', '同建案中位漲幅，n=' + fmtInt(up.n_projects) + ' 個建案'),
     overviewCard('轉手價是預售價的幾倍', mid.multiplier != null ? fmt(mid.multiplier, 2) + ' 倍' : '--', '收斂 ' + (conv.multiplier != null ? fmt(conv.multiplier, 2) : '--') + ' 倍・回升 ' + (rise.multiplier != null ? fmt(rise.multiplier, 2) : '--') + ' 倍'),
-    overviewCard('近兩年蓋好的是兩年轉手的幾倍', SUMMARY.zone_card ? fmt(SUMMARY.zone_card.ratio_completed, 1) + ' 倍' : '--',
-      SUMMARY.zone_card ? '全桃園第 ' + (SUMMARY.zone_card.rank_completed_taoyuan || '--') + ' 高（全市 ' + fmt(SUMMARY.zone_card.city_ratio_completed, 1) + ' 倍）；只比新房子的話，重劃區 ' + (SUMMARY.zone_card.n_zones || '--') + ' 個裡第 ' + (SUMMARY.zone_card.rank_completed_zones || '--') + ' 高' : '詳見「青埔在哪個位置」'),
+    overviewCard('前後兩年完工壓力(倍)', SUMMARY.zone_card ? fmt(SUMMARY.zone_card.ratio_window4y, 1) + ' 倍' : '--',
+      SUMMARY.zone_card ? '全桃園第 ' + (SUMMARY.zone_card.rank_window4y_taoyuan || '--') + ' 高（全市 ' + fmt(SUMMARY.zone_card.city_ratio_window4y, 1) + ' 倍）；只比新房子的話，重劃區 ' + (SUMMARY.zone_card.n_zones || '--') + ' 個裡第 ' + (SUMMARY.zone_card.rank_window4y_zones || '--') + ' 高' : '詳見「青埔在哪個位置」'),
   ];
   document.getElementById('overview-cards').innerHTML = cards.join('');
 
@@ -405,17 +405,16 @@ function renderOverviewS1() {
   var rows = (COMPARE.districts || [])
     .concat(COMPARE.qingpu_district_row ? [COMPARE.qingpu_district_row] : [])
     .concat(COMPARE.city ? [Object.assign({}, COMPARE.city, { id: 'city' })] : [])
-    .filter(function (r) { return r.ratio_completed_to_resale != null; })
-    .sort(function (a, b) { return a.ratio_completed_to_resale - b.ratio_completed_to_resale; });
-  function barColor(r) { return r.id === 'qingpu' ? C.orange : (r.id === 'city' ? C.muted : C.blue); }
+    .filter(function (r) { return r.ratio_window4y != null; })
+    .sort(function (a, b) { return a.ratio_window4y - b.ratio_window4y; });
   if (!s1RatioChart) s1RatioChart = newChart('chart-s1-ratio');
   if (s1RatioChart) {
     s1RatioChart.setOption({
-      tooltip: baseTooltip,
-      grid: Object.assign({}, baseGrid, { left: 84, top: 8, bottom: 8 }),
-      xAxis: mkAxis({ type: 'value', name: '完工÷轉手(倍)' }),
+      tooltip: baseTooltip, legend: baseLegend,
+      grid: Object.assign({}, baseGrid, { left: 84, top: 28, bottom: 8 }),
+      xAxis: mkAxis({ type: 'value', name: '前後兩年完工壓力(倍)' }),
       yAxis: mkAxis({ type: 'category', data: rows.map(function (r) { return r.name; }), axisLabel: Object.assign({}, baseText, { fontSize: 10, interval: 0 }) }),
-      series: [{ type: 'bar', barMaxWidth: 11, data: rows.map(function (r) { return { value: r.ratio_completed_to_resale, itemStyle: { color: barColor(r) } }; }) }],
+      series: stackedWindow4ySeries(rows, 11),
     }, true);
   }
   if (!s1TurnoverChart) s1TurnoverChart = newChart('chart-s1-turnover');
@@ -425,11 +424,11 @@ function renderOverviewS1() {
       grid: Object.assign({}, baseGrid, { left: 84, top: 8, bottom: 8 }),
       xAxis: mkAxis({ type: 'value', name: '換手率(%)' }),
       yAxis: mkAxis({ type: 'category', data: rows.map(function (r) { return r.name; }), axisLabel: Object.assign({}, baseText, { fontSize: 10, interval: 0 }) }),
-      series: [{ type: 'bar', barMaxWidth: 11, data: rows.map(function (r) { return { value: r.turnover_pct, itemStyle: { color: barColor(r) } }; }) }],
+      series: [{ type: 'bar', barMaxWidth: 11, data: rows.map(function (r) { return { value: r.turnover_pct, itemStyle: { color: barColorForKind(entityKind(r)) } }; }) }],
     }, true);
   }
   var noteEl = document.getElementById('s1-chart-note');
-  if (noteEl) noteEl.textContent = '左：近兩年完工戶數÷兩年轉手量（倍，主要欄位），桃園市13個行政區＋青埔＋桃園全市，依數值排序，橙色＝青埔、灰色＝全市。右：同一組區域的換手率（年均轉手÷總戶數，轉手量取兩年平均）。資料來源：compare.json；完整表格見「青埔在哪個位置」章節。';
+  if (noteEl) noteEl.textContent = '左：前後兩年完工壓力＝（近兩年已完工＋未來兩年預計完工）÷（兩年轉手量×2），深色＝近兩年已完工、淺色＝未來兩年預計完工，桃園市13個行政區＋青埔＋桃園全市，依數值排序，橙色＝青埔、灰色＝全市。右：同一組區域的換手率（年均轉手÷總戶數，轉手量取兩年平均）。資料來源：compare.json；完整表格見「青埔在哪個位置」章節。';
 }
 // S1逐季走勢小圖：青埔近12季的完工÷轉手倍數，兩年窗口（主要）實線＋一年窗口
 // （次要）虛線疊在一起看，示範一年窗口波動有多大；桃園全市（兩年窗口）當參考虛線。
@@ -474,25 +473,22 @@ var s2ZonesChart;
 function renderOverviewS2() {
   if (!COMPARE) return;
   var allZones = COMPARE.zones || [];
-  var zones = allZones.filter(function (z) { return !z.small_sample && z.ratio_unfinished_to_resale != null; });
+  var zones = allZones.filter(function (z) { return !z.small_sample && z.ratio_window4y != null; });
   var excluded = allZones.filter(function (z) { return z.small_sample; });
-  var cityVal = COMPARE.city ? COMPARE.city.ratio_unfinished_to_resale : null;
+  var cityVal = COMPARE.city ? COMPARE.city.ratio_window4y : null;
   if (!s2ZonesChart) s2ZonesChart = newChart('chart-s2-zones');
   if (s2ZonesChart) {
     var opt = {
-      tooltip: baseTooltip,
-      grid: Object.assign({}, baseGrid, { top: 12, bottom: 24 }),
+      tooltip: baseTooltip, legend: baseLegend,
+      grid: Object.assign({}, baseGrid, { top: 30, bottom: 24 }),
       xAxis: mkAxis({ type: 'category', data: zones.map(function (z) { return z.name; }), axisLabel: Object.assign({}, baseText, { interval: 0 }) }),
-      yAxis: mkAxis({ type: 'value', name: '消化年數(年)' }),
-      series: [{
-        type: 'bar', barMaxWidth: 36,
-        data: zones.map(function (z) { return { value: z.ratio_unfinished_to_resale, itemStyle: { color: z.id === 'qingpu' ? C.orange : C.blue } }; }),
-      }],
+      yAxis: mkAxis({ type: 'value', name: '前後兩年完工壓力(倍)' }),
+      series: stackedWindow4ySeries(zones, 36),
     };
     if (cityVal != null) {
       opt.series[0].markLine = {
         symbol: 'none',
-        label: { formatter: '全市 ' + fmt(cityVal, 1) + ' 年', color: C.muted, fontSize: 11 },
+        label: { formatter: '全市 ' + fmt(cityVal, 1) + ' 倍', color: C.muted, fontSize: 11 },
         lineStyle: { color: C.muted, type: 'dashed' },
         data: [{ yAxis: cityVal }],
       };
@@ -500,7 +496,7 @@ function renderOverviewS2() {
     s2ZonesChart.setOption(opt, true);
   }
   var noteEl = document.getElementById('s2-chart-note');
-  if (noteEl) noteEl.textContent = '還沒蓋好的戶數，要用現在的轉手速度（兩年平均年化）消化幾年，青埔 vs 其他重劃區（只比2010年後完工的房子），虛線＝桃園全市要' + fmt(cityVal, 1) + '年。' +
+  if (noteEl) noteEl.textContent = '前後兩年完工壓力：青埔 vs 其他重劃區（只比2010年後完工的房子），深色＝近兩年已完工、淺色＝未來兩年預計完工，虛線＝桃園全市 ' + fmt(cityVal, 1) + ' 倍。' +
     (excluded.length ? excluded.map(function (z) { return z.name; }).join('、') + '兩年轉手量不到100戶，比值會被分母放大，不列入比較。' : '');
 }
 // S3：需求——青埔村里戶數（月）＋青埔季成交件數（最後一季資料未公布齊全，灰色）。
@@ -592,6 +588,67 @@ function showPositionError(err) {
 function positionCell(r, text) {
   return r.highlight ? '<strong style="color:#1e3a5f">' + text + '</strong>' : text;
 }
+// 前後兩年完工壓力（主要指標）：橫向疊加長條圖＋表格共用的小工具。色彩代表「這是誰」
+// （橙＝青埔、灰＝桃園全市／全市參考、藍＝其他），不是代表排名；兩段堆疊（近兩年已
+// 完工／未來兩年預計完工）用同一個身分色的深淺區分，深＝已完工、淺＝預計完工，
+// 跟「結論」章節關鍵圖（上季留下沒賣掉/本季新增）同一個手法。
+var LIGHT_COLOR = {};
+LIGHT_COLOR[C.blue] = '#93c5fd';
+LIGHT_COLOR[C.orange] = '#f3c895';
+LIGHT_COLOR[C.muted] = '#b8c7d8';
+function lightOf(hex) { return LIGHT_COLOR[hex] || hex; }
+function entityKind(r) {
+  if (r.id === 'qingpu' || r.name === '青埔') return 'qingpu';
+  if (r.id === 'city' || r.id === 'taoyuan' || r.name === '桃園全市' || r.name === '桃園全市（參考）') return 'city';
+  return 'other';
+}
+function barColorForKind(k) { return k === 'qingpu' ? C.orange : (k === 'city' ? C.muted : C.blue); }
+// 分子（近兩年已完工＋未來兩年預計完工）除以分母（兩年轉手量的4年份），拆成兩段
+// 各自的比例，疊起來的總高度就是 ratio_window4y。resale_4y_equivalent 是0或缺值
+// （兩年轉手樣本太少／資料不足）時回傳 null，呼叫端畫成空白。
+function window4ySegments(r) {
+  var denom = r.resale_4y_equivalent;
+  if (!denom) return null;
+  return {
+    completed: (r.completed_2y_units || 0) / denom,
+    expected: (r.expected_next_2y_units_total || 0) / denom,
+  };
+}
+function stackedWindow4ySeries(rows, barMaxWidth) {
+  return [
+    {
+      name: '近兩年已完工', type: 'bar', stack: 'w4y', barMaxWidth: barMaxWidth,
+      data: rows.map(function (r) { var seg = window4ySegments(r); return { value: seg ? seg.completed : null, itemStyle: { color: barColorForKind(entityKind(r)) } }; }),
+    },
+    {
+      name: '未來兩年預計完工', type: 'bar', stack: 'w4y', barMaxWidth: barMaxWidth,
+      data: rows.map(function (r) { var seg = window4ySegments(r); return { value: seg ? seg.expected : null, itemStyle: { color: lightOf(barColorForKind(entityKind(r))) } }; }),
+    },
+  ];
+}
+// 前後兩年完工壓力：5欄主表（區域／近兩年完工／未來兩年預計完工／兩年轉手／
+// 倍數＋排名），重劃區表、行政區表、六都比較表共用同一組欄位定義。
+function positionPrimaryColumns() {
+  return [
+    { key: 'name', label: '區域', type: 'str', value: function (r) { return r.name; }, cell: function (r) { return positionCell(r, esc(r.name)); } },
+    { key: 'completed_2y_units', label: '近兩年完工(戶)', type: 'num', value: function (r) { return r.completed_2y_units; }, cell: function (r) { return positionCell(r, fmtInt(r.completed_2y_units)); } },
+    { key: 'expected_next_2y_units_total', label: '未來兩年預計完工（推估）(戶)', type: 'num', value: function (r) { return r.expected_next_2y_units_total; }, cell: function (r) { return positionCell(r, r.expected_next_2y_units_total != null ? fmtInt(r.expected_next_2y_units_total) : '--'); } },
+    { key: 'resale_2y', label: '兩年轉手(戶)', type: 'num', value: function (r) { return r.resale_2y; }, cell: function (r) { return positionCell(r, fmtInt(r.resale_2y)); } },
+    { key: 'ratio_window4y', label: '前後兩年完工壓力(倍)', type: 'num', value: function (r) { return r.ratio_window4y; }, cell: function (r) { return positionCell(r, r.ratio_window4y != null ? fmt(r.ratio_window4y, 1) + ' 倍' : '--'); } },
+    { key: 'rank_window4y', label: '排名', type: 'num', value: function (r) { return r.rank_window4y; }, cell: function (r) { return positionCell(r, r.rank_window4y != null ? fmtInt(r.rank_window4y) : '--'); } },
+  ];
+}
+// 行政區比較本身已經收在「看桃園各區比較」收合區塊裡，直接把舊指標併在主表後面
+// （未完工戶／總戶數／舊兩個比值／換手率），不用再收合第二層。
+function positionLegacyExtraColumns() {
+  return [
+    { key: 'unfinished_units', label: '未完工戶(舊)', type: 'num', value: function (r) { return r.unfinished_units; }, cell: function (r) { return positionCell(r, fmtInt(r.unfinished_units)); } },
+    { key: 'households', label: '總戶數', type: 'num', value: function (r) { return r.households; }, cell: function (r) { return positionCell(r, r.households != null ? fmtInt(r.households) : '--'); } },
+    { key: 'ratio_unfinished_to_resale', label: '未完工消化年數(舊)', type: 'num', value: function (r) { return r.ratio_unfinished_to_resale; }, cell: function (r) { return positionCell(r, r.ratio_unfinished_to_resale != null ? fmt(r.ratio_unfinished_to_resale, 1) + ' 年' : '--'); } },
+    { key: 'ratio_completed_to_resale', label: '完工÷轉手(舊)', type: 'num', value: function (r) { return r.ratio_completed_to_resale; }, cell: function (r) { return positionCell(r, r.ratio_completed_to_resale != null ? fmt(r.ratio_completed_to_resale, 1) + ' 倍' : '--'); } },
+    { key: 'turnover_pct', label: '換手率(%)', type: 'num', value: function (r) { return r.turnover_pct; }, cell: function (r) { return positionCell(r, r.turnover_pct != null ? fmt(r.turnover_pct, 2) + '%' : '--'); } },
+  ];
+}
 var positionColumns = [
   { key: 'name', label: '區域', type: 'str', value: function (r) { return r.name; }, cell: function (r) { return positionCell(r, esc(r.name)); } },
   { key: 'resale_2y', label: '兩年轉手(戶)', type: 'num', value: function (r) { return r.resale_2y; }, cell: function (r) { return positionCell(r, fmtInt(r.resale_2y)); } },
@@ -602,7 +659,7 @@ var positionColumns = [
   { key: 'ratio_completed_to_resale', label: '近兩年蓋好的是兩年轉手的幾倍', type: 'num', value: function (r) { return r.ratio_completed_to_resale; }, cell: function (r) { return positionCell(r, r.ratio_completed_to_resale != null ? fmt(r.ratio_completed_to_resale, 1) + ' 倍' : '--'); } },
   { key: 'turnover_pct', label: '換手率（年均轉手÷總戶數）', type: 'num', value: function (r) { return r.turnover_pct; }, cell: function (r) { return positionCell(r, r.turnover_pct != null ? fmt(r.turnover_pct, 2) + '%' : '--'); } },
 ];
-var positionZoneTable, positionDistrictTable, positionBarChart;
+var positionZoneTable, positionZoneTableNew, positionDistrictTable, positionBarChart;
 
 function argumentBlockHTML(a) {
   var tbl = (a.table || []).map(function (r) {
@@ -612,7 +669,7 @@ function argumentBlockHTML(a) {
       '</tr>';
   }).join('');
   var headKeys = (a.table && a.table[0]) ? Object.keys(a.table[0]).filter(function (k) { return k !== 'is_qingpu' && k !== 'name'; }) : [];
-  var headLabels = { ratio_unfinished: '未完工÷轉手(年)', ratio_completed: '完工÷轉手(倍)', resale_2y: '兩年轉手', households: '總戶數', turnover_pct: '換手率(%)' };
+  var headLabels = { ratio_window4y: '前後兩年完工壓力(倍)', ratio_unfinished: '未完工÷轉手(年，舊)', ratio_completed: '完工÷轉手(倍，舊)', resale_2y: '兩年轉手', households: '總戶數', turnover_pct: '換手率(%)' };
   return '<div class="position-argument">' +
     '<p style="font-weight:600;color:#1e3a5f;margin:14px 0 6px">' + esc(a.claim) + '</p>' +
     '<div class="table-scroll"><table class="data-table"><thead><tr><th>區域</th>' + headKeys.map(function (k) { return '<th>' + (headLabels[k] || k) + '</th>'; }).join('') + '</tr></thead><tbody>' + tbl + '</tbody></table></div>' +
@@ -631,36 +688,37 @@ function renderPosition() {
   document.getElementById('position-conclusion-list').innerHTML =
     (rep.conclusion_bullets || []).map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('') || '<li>目前沒有可顯示的結論。</li>';
 
-  // 橫向長條圖：重劃區(7)+行政區(13)+桃園全市，共21根，依「完工÷轉手」由高到低排，青埔特別上色
+  // 橫向疊加長條圖：重劃區(7)+行政區(13)+桃園全市，共21根，依「前後兩年完工壓力」
+  // 由高到低排，深色＝近兩年已完工、淺色＝未來兩年預計完工，青埔／桃園全市特別上色
   var allBars = zones.concat(districts).concat([Object.assign({}, COMPARE.city || {}, { name: '桃園全市' })])
-    .filter(function (r) { return r.ratio_completed_to_resale != null; })
-    .sort(function (a, b) { return a.ratio_completed_to_resale - b.ratio_completed_to_resale; });
+    .filter(function (r) { return r.ratio_window4y != null; })
+    .sort(function (a, b) { return a.ratio_window4y - b.ratio_window4y; });
   if (!positionBarChart) positionBarChart = newChart('chart-position-bar');
   if (positionBarChart) {
     positionBarChart.setOption({
-      tooltip: baseTooltip,
-      grid: Object.assign({}, baseGrid, { left: 90 }),
-      xAxis: mkAxis({ type: 'value', name: '完工÷轉手(倍)' }),
+      tooltip: baseTooltip, legend: baseLegend,
+      grid: Object.assign({}, baseGrid, { left: 90, top: 30 }),
+      xAxis: mkAxis({ type: 'value', name: '前後兩年完工壓力(倍)' }),
       yAxis: mkAxis({ type: 'category', data: allBars.map(function (r) { return r.name; }), axisLabel: Object.assign({}, baseText, { interval: 0 }) }),
-      series: [{
-        type: 'bar', data: allBars.map(function (r) {
-          return { value: r.ratio_completed_to_resale, itemStyle: { color: r.name === '青埔' ? C.orange : (r.name === '桃園全市' ? C.muted : C.blue) } };
-        }), barMaxWidth: 12,
-      }],
+      series: stackedWindow4ySeries(allBars, 12),
     }, true);
   }
   document.getElementById('position-bar-note').textContent =
-    '橫軸＝近兩年完工戶數÷兩年轉手量（倍，主要欄位），涵蓋桃園市13個行政區、6個重劃區＋青埔、桃園全市共21個候選；橙色＝青埔，灰色＝桃園全市。';
+    '橫軸＝前後兩年完工壓力（近兩年已完工＋未來兩年預計完工，除以兩年轉手量的4年份），涵蓋桃園市13個行政區、6個重劃區＋青埔、桃園全市共21個候選；橙色＝青埔，灰色＝桃園全市，深淺區分已完工／預計完工。';
 
   renderPositionTrend();
 
   document.getElementById('position-arguments').innerHTML = (rep.arguments || []).map(argumentBlockHTML).join('');
 
+  if (!positionZoneTableNew) positionZoneTableNew = makeTable(document.getElementById('table-position-zones-new'), positionPrimaryColumns(), { key: 'ratio_window4y', dir: 'desc' });
+  positionZoneTableNew.setRows(zones.concat([cityRow]));
+  positionZoneTableNew.render();
+
   if (!positionZoneTable) positionZoneTable = makeTable(document.getElementById('table-position-zones'), positionColumns, { key: 'ratio_completed_to_resale', dir: 'desc' });
   positionZoneTable.setRows(zones.concat([cityRow]));
   positionZoneTable.render();
 
-  if (!positionDistrictTable) positionDistrictTable = makeTable(document.getElementById('table-position-districts'), positionColumns, { key: 'ratio_completed_to_resale', dir: 'desc' });
+  if (!positionDistrictTable) positionDistrictTable = makeTable(document.getElementById('table-position-districts'), positionPrimaryColumns().concat(positionLegacyExtraColumns()), { key: 'ratio_window4y', dir: 'desc' });
   positionDistrictTable.setRows(districts.concat([districtCityRow]));
   positionDistrictTable.render();
 
@@ -687,6 +745,26 @@ function renderPosition() {
       '<p>完工戶數到貨很不均勻：青埔或A7這種還在開發中的新市鎮，單一建案一次登記就有1,000戶以上，哪一季剛好有大案登記、哪一季沒有，會讓「近一年完工÷一年轉手」這個比值在短短幾季內大幅擺動——不是市場真的忽好忽壞，是分子（完工戶數）本身就很跳。改成兩年窗口（近兩年完工÷兩年轉手）之後，單季的大案登記被攤進8個季度裡，波動明顯變小，排名也更穩定。</p>' +
       (trendFalsifier ? '<p>' + esc(trendFalsifier) + '</p>' : '') +
       '<p>一年窗口沒有拿掉，留做次要欄位（表格、逐季走勢圖都有），讓讀者自己比對兩個窗口差多少；「還沒蓋好÷轉手」這個指標同時把分母從「一年轉手」換成「兩年轉手量的年均」，單位也從「倍」改成「年」（還沒蓋好的戶數，要用現在的轉手速度幾年才能消化完），意思更直覺。</p>';
+  }
+
+  var w4yEl = document.getElementById('position-why-window4y-method');
+  if (w4yEl) {
+    var qingpuZoneRow = zones.filter(function (z) { return z.id === 'qingpu'; })[0];
+    var qingpuLag = qingpuZoneRow ? qingpuZoneRow.permit_to_registration_lag_median_days : null;
+    var qingpuLagN = qingpuZoneRow ? qingpuZoneRow.permit_to_registration_lag_n : null;
+    var linkouZone = zones.filter(function (z) { return z.id === 'linkou'; })[0];
+    var excludedFalsifier = (rep.falsifiers || []).filter(function (s) { return s.indexOf('建照核發日期') !== -1; })[0];
+    var legacyFalsifier = (rep.limits || []).filter(function (s) { return s.indexOf('逐季走勢') !== -1; })[0];
+    var coverageLimit = (rep.limits || []).filter(function (s) { return s.indexOf('2021年7月') !== -1; })[0];
+    w4yEl.innerHTML =
+      '<p>「近兩年完工÷兩年轉手」只看回顧，看不到已經申請建照、但還沒蓋好的案子裡有多少會在最近兩年交屋；「未完工消化年數」雖然看未來，但把5年、10年後才會交屋的案子也算進同一個分母，跟現在的賣方搶的其實是未來兩年內要交屋的那一批，不是全部未完工戶。「前後兩年完工壓力」改成以今天為中心、前後兩年共4年的窗口：分子＝近兩年已完工＋未來兩年預計完工，分母＝兩年轉手量的4年份（×2），兩邊時間長度對齊，分子也只算真正會在這段時間內跟賣方搶買方的供給。</p>' +
+      '<p>未來兩年預計完工是推估值：還沒登記（官方「第1次登記日期」空白）的建案，用「建照核發日期＋同城市建照→登記的中位落後天數」推算交屋日；推算出來的日期如果已經過去（官方還沒登記、但推算應該早就交屋了），戶數視為「逾期」，全額算進未來兩年預計完工（因為逾期案件理論上攤到的未來4季最多1年，一定落在這裡24個月的窗口內）。桃園市（13個行政區＋青埔／A7／小檜溪／中路／經國／藝文特區都用這個天數）' + (qingpuLag != null ? '中位落後天數 ' + fmt(qingpuLag, 0) + ' 天（n=' + fmtInt(qingpuLagN) + '）' : '天數資料不足') +
+      (linkouZone && linkouZone.permit_to_registration_lag_median_days != null ? '；新北市（林口用）' + fmt(linkouZone.permit_to_registration_lag_median_days, 0) + ' 天（n=' + fmtInt(linkouZone.permit_to_registration_lag_n) + '）' : '') +
+      '，新北市案件規模普遍較大、工期較長，天數本來就會比桃園市長；每個城市用自己的全市中位數，不分行政區/重劃區。</p>' +
+      (excludedFalsifier ? '<p>' + esc(excludedFalsifier) + '</p>' : '') +
+      (coverageLimit ? '<p>' + esc(coverageLimit) + '</p>' : '') +
+      (legacyFalsifier ? '<p>' + esc(legacyFalsifier) + '</p>' : '') +
+      '<p>跟「供給」章節的對照：「供給」章節未來8季交屋推估（見該章節「怎麼算的」）只用青埔自己案例的建照→登記中位落後天數（基期更長，因為青埔新市鎮整批大案偏多），這裡為了能跟13個行政區／六都比，改用城市全市的中位數；兩邊算出來的「未來交屋戶數」量級接近，差異來自落後天數的計算基期不同。</p>';
   }
 }
 
@@ -747,7 +825,15 @@ function renderPositionTrend() {
    青埔，同一組兩年窗口指標＋轉手中位單價（全部屋齡/屋齡5年內），資料來自
    data/compare.json 的 cities/qingpu_price。
    =========================================================================== */
-var cityCompareTable, cityRatioChart, cityPriceChart;
+var cityCompareTable, cityCompareTableNew, cityRatioChart, cityPriceChart;
+var cityCompareColumnsNew = positionPrimaryColumns().concat([
+  { key: 'turnover_pct', label: '換手率(%)', type: 'num', value: function (r) { return r.turnover_pct; },
+    cell: function (r) { return r.turnover_pct != null ? fmt(r.turnover_pct, 2) + '%' : '--'; } },
+  { key: 'price_all_wan_ping', label: '轉手中位價-全部屋齡(萬/坪)', type: 'num', value: function (r) { return r.price_all_wan_ping; },
+    cell: function (r) { return r.price_all_wan_ping != null ? fmt(r.price_all_wan_ping, 1) : '--'; } },
+  { key: 'presale_wan_ping', label: '預售中位價(萬/坪，僅青埔)', type: 'num', value: function (r) { return r.presale_wan_ping; },
+    cell: function (r) { return r.presale_wan_ping != null ? fmt(r.presale_wan_ping, 1) : '--'; } },
+]);
 var cityCompareColumns = [
   { key: 'name', label: '區域', type: 'str', value: function (r) { return r.name; },
     cell: function (r) { return r.id === 'qingpu' ? '<strong style="color:#1e3a5f">' + esc(r.name) + '</strong>' : esc(r.name); } },
@@ -769,22 +855,21 @@ var cityCompareColumns = [
 
 function renderCityCompare() {
   if (!COMPARE) return;
-  var rows = COMPARE.cities || [];
+  var rows = (COMPARE.cities || []).map(function (r) { return Object.assign({}, r, { highlight: r.id === 'qingpu' }); });
   var rep = COMPARE.report || {};
   var qp = COMPARE.qingpu_price || {};
   document.getElementById('city-compare-conclusion').textContent = rep.city_compare_conclusion || '資料不足。';
 
-  function barColor(r) { return r.id === 'qingpu' ? C.orange : (r.id === 'taoyuan' ? C.muted : C.blue); }
-  var ratioRows = rows.filter(function (r) { return r.ratio_completed_to_resale != null; })
-    .sort(function (a, b) { return a.ratio_completed_to_resale - b.ratio_completed_to_resale; });
+  var ratioRows = rows.filter(function (r) { return r.ratio_window4y != null; })
+    .sort(function (a, b) { return a.ratio_window4y - b.ratio_window4y; });
   if (!cityRatioChart) cityRatioChart = newChart('chart-city-ratio');
   if (cityRatioChart) {
     cityRatioChart.setOption({
-      tooltip: baseTooltip,
-      grid: Object.assign({}, baseGrid, { left: 70, top: 8 }),
-      xAxis: mkAxis({ type: 'value', name: '完工÷轉手(倍)' }),
+      tooltip: baseTooltip, legend: baseLegend,
+      grid: Object.assign({}, baseGrid, { left: 70, top: 30 }),
+      xAxis: mkAxis({ type: 'value', name: '前後兩年完工壓力(倍)' }),
       yAxis: mkAxis({ type: 'category', data: ratioRows.map(function (r) { return r.name; }), axisLabel: Object.assign({}, baseText, { interval: 0 }) }),
-      series: [{ type: 'bar', barMaxWidth: 20, data: ratioRows.map(function (r) { return { value: r.ratio_completed_to_resale, itemStyle: { color: barColor(r) } }; }) }],
+      series: stackedWindow4ySeries(ratioRows, 20),
     }, true);
   }
 
@@ -803,7 +888,11 @@ function renderCityCompare() {
     }, true);
   }
   document.getElementById('city-compare-chart-note').textContent =
-    '左：近兩年完工÷兩年轉手（倍），橙色＝青埔、灰色＝桃園全市、藍色＝其他城市。右：轉手中位單價（萬/坪，扣車位，排除車位疑似灌入總價的列），藍＝全部屋齡、橙＝屋齡' + (qp.age_max_years || 5) + '年內；青埔另有預售中位價' + (qp.presale_wan_ping != null ? '（' + fmt(qp.presale_wan_ping, 1) + ' 萬/坪，n=' + fmtInt(qp.n_presale) + '）' : '') + '，見下表最後一欄。';
+    '左：前後兩年完工壓力（倍），深色＝近兩年已完工、淺色＝未來兩年預計完工，橙色＝青埔、灰色＝桃園全市、藍色＝其他城市。右：轉手中位單價（萬/坪，扣車位，排除車位疑似灌入總價的列），藍＝全部屋齡、橙＝屋齡' + (qp.age_max_years || 5) + '年內；青埔另有預售中位價' + (qp.presale_wan_ping != null ? '（' + fmt(qp.presale_wan_ping, 1) + ' 萬/坪，n=' + fmtInt(qp.n_presale) + '）' : '') + '，見下表最後一欄。';
+
+  if (!cityCompareTableNew) cityCompareTableNew = makeTable(document.getElementById('table-city-compare-new'), cityCompareColumnsNew, { key: 'ratio_window4y', dir: 'desc' });
+  cityCompareTableNew.setRows(rows);
+  cityCompareTableNew.render();
 
   if (!cityCompareTable) cityCompareTable = makeTable(document.getElementById('table-city-compare'), cityCompareColumns, { key: 'ratio_completed_to_resale', dir: 'desc' });
   cityCompareTable.setRows(rows);
@@ -813,7 +902,7 @@ function renderCityCompare() {
   if (methodEl) {
     methodEl.innerHTML =
       '<p>城市範圍：台北市/台中市/高雄市/新北市整個行政區（不分區），實價登錄買賣(A檔)檔名字首對照全國zip manifest.csv驗證過：台北=a、台中=b、高雄=e、新北=f、桃園=h。新北市不限林口、整個行政區重新算一次；桃園全市沿用「跟13個行政區比」章節算好的數字。</p>' +
-      '<p>完工/未完工/轉手的定義跟上面「重劃區比較」「跟13個行政區比」完全一樣（兩年窗口為主、一年窗口次要），只是改成整個城市不分行政區。總戶數用戶政司村里資料整個城市加總（ODRP014 的 site_id 實測一律用「臺」，臺北市/臺中市，程式兩種字型都比對一次，避免未來改字型查不到）。</p>' +
+      '<p>完工/未完工/轉手/未來兩年預計完工的定義跟上面「重劃區比較」「跟13個行政區比」完全一樣，只是改成整個城市不分行政區；每個城市用自己的建照→登記中位落後天數（見「為什麼改成前後兩年完工壓力」），不是沿用桃園市的天數。總戶數用戶政司村里資料整個城市加總（ODRP014 的 site_id 實測一律用「臺」，臺北市/臺中市，程式兩種字型都比對一次，避免未來改字型查不到）。</p>' +
       '<p>轉手中位單價：萬/坪 =（總價－車位總價）÷（（建物移轉總面積－車位移轉總面積）×0.3025），排除有車位但車位總價=0（疑似把車位價格灌進總價，單價會失真）的列；拆「全部屋齡」「屋齡' + (qp.age_max_years || 5) + '年內」兩組，避免青埔這種新市鎮的新成屋被拿去跟其他城市摻雜老屋的全市中位價直接比。</p>' +
       '<p>青埔預售中位價：用桃園市預售買賣(B檔)、同一個青埔道路白名單篩選，近兩年成交（n=' + fmtInt(qp.n_presale) + '）算中位數，其他城市沒有對應的「單一新市鎮」範圍可比，所以只給青埔一個數字。</p>' +
       '<p>六都比較不納入「跟13個行政區比」「跟其他重劃區比」的正式排名系統，只給原始數字＋一句資料生成的結論。</p>';

@@ -201,37 +201,45 @@ def main():
     peak = facts.get("peak") or {}
 
     sentences = []
-    # 1. 現在的問題：供給多，不是沒人買（兩年窗口：近兩年完工÷兩年轉手，見「怎麼算的」）
+    # 1. 現在的問題：供給多，不是沒人買（主要指標：前後兩年完工壓力＝（近兩年已完工＋
+    #    未來兩年預計完工）÷兩年轉手量的4年份，見「怎麼算的」；近兩年完工÷兩年轉手、
+    #    未完工消化年數兩個舊指標降為次要欄位，留在 zone_card 給收合區塊用）
     qd = cmp_.get("qingpu_district_row") or {}
     qc, cc = qz.get("ratio_completed_to_resale"), city.get("ratio_completed_to_resale")
     qdc = qd.get("ratio_completed_to_resale")
-    if qdc is not None and cc is not None:
+    qw, city_w4y = qz.get("ratio_window4y"), city.get("ratio_window4y")
+    qdw = qd.get("ratio_window4y")
+    if qdw is not None and city_w4y is not None:
         lead = (
             "青埔現在的問題是要賣的房子太多，不是沒人買"
-            if (qvd.get("rank_completed") == 1 and q_turn is not None and city_turn is not None and q_turn >= city_turn)
+            if (qvd.get("rank_window4y") == 1 and q_turn is not None and city_turn is not None and q_turn >= city_turn)
             else ("青埔的供給壓力高於全市，成交量能也偏弱" if (q_turn is not None and city_turn is not None and q_turn < city_turn)
                   else "青埔的供給壓力高於全市")
         )
-        rank_note = "，全桃園最高" if qvd.get("rank_completed") == 1 else ""
-        s1 = (f"{lead}：近兩年蓋好 {fi(qd.get('completed_2y_units'))} 戶，是兩年轉手 {fi(qd.get('resale_2y'))} 戶的 {f1(qdc)} 倍"
-              f"（全市 {f1(cc)} 倍{rank_note}）")
+        rank_note = "，全桃園最高" if qvd.get("rank_window4y") == 1 else ""
+        resale2y = qd.get("resale_2y")
+        resale4y = resale2y * 2 if resale2y is not None else None
+        s1 = (f"{lead}：近兩年完工 {fi(qd.get('completed_2y_units'))} 戶加上未來兩年預計完工 {fi(qd.get('expected_next_2y_units_total'))} 戶，"
+              f"是兩年轉手量4年份（{fi(resale4y)} 戶）的 {f1(qdw)} 倍（全市 {f1(city_w4y)} 倍{rank_note}）")
         if q_turn is not None and city_turn is not None:
             s1 += f"；但換手率 {q_turn:.2f}% 也高於全市 {city_turn:.2f}%"
         sentences.append(s1 + "。")
-    # 2. 未來：還有一波，但不是重劃區裡最重的（未完工÷年均轉手，單位＝年，見「怎麼算的」）
-    qu = qz.get("ratio_unfinished_to_resale")
-    qdu = qd.get("ratio_unfinished_to_resale")
-    if qu is not None and qdu is not None:
-        heavier = sorted([z for z in ranked_zones if (z.get("ratio_unfinished_to_resale") or 0) > qu],
-                         key=lambda z: -z["ratio_unfinished_to_resale"])
-        lighter = sorted([z for z in ranked_zones if z.get("ratio_unfinished_to_resale") is not None and z["ratio_unfinished_to_resale"] < qu],
-                         key=lambda z: z["ratio_unfinished_to_resale"])
-        s2 = (f"未來兩三年還有一波：還沒蓋好的 {fi(qd.get('unfinished_units'))} 戶，要用現在的轉手速度消化 {f1(qdu)} 年，"
-              f"在全桃園排第 {qvd.get('rank_unfinished')}（全市要 {f1(city.get('ratio_unfinished_to_resale'))} 年）")
+    # 2. 未來：預計完工還有一波，但不是重劃區裡壓力最大的（同一個前後兩年完工壓力指標，
+    #    改用重劃區口徑比）
+    qzw = qz.get("ratio_window4y")
+    if qzw is not None and qdw is not None:
+        heavier = sorted([z for z in ranked_zones if (z.get("ratio_window4y") or 0) > qzw],
+                         key=lambda z: -z["ratio_window4y"])
+        lighter = sorted([z for z in ranked_zones if z.get("ratio_window4y") is not None and z["ratio_window4y"] < qzw],
+                         key=lambda z: z["ratio_window4y"])
+        overdue = qd.get("expected_next_2y_overdue_units") or 0
+        s2 = (f"未來兩年預計完工 {fi(qd.get('expected_next_2y_units_total'))} 戶"
+              + (f"（含官方還沒登記、推算已逾期的 {fi(overdue)} 戶）" if overdue else "")
+              + f"，前後兩年完工壓力在全桃園排第 {qvd.get('rank_window4y')}（全市 {f1(city_w4y)} 倍）")
         if heavier:
-            s2 += "；但只比新房子的話，重劃區裡 " + "、".join(f"{zn(z)} {f1(z['ratio_unfinished_to_resale'])} 年" for z in heavier[:2]) + f"比青埔（{f1(qu)} 年）更久"
+            s2 += "；重劃區裡 " + "、".join(f"{zn(z)} {f1(z['ratio_window4y'])} 倍" for z in heavier[:2]) + f"比青埔（{f1(qzw)} 倍）壓力更高"
         if lighter:
-            s2 += f"，{zn(lighter[0])}（{f1(lighter[0]['ratio_unfinished_to_resale'])} 年）較快"
+            s2 += f"，{zn(lighter[0])}（{f1(lighter[0]['ratio_window4y'])} 倍）較低"
         sentences.append(s2 + "。")
     # 3. 需求：人在進來
     if hg.get("growth_rate") is not None:
@@ -281,14 +289,27 @@ def main():
             + "；過去資料裡供給多寡和後續價格沒有穩定關係，所以只給三種情況、不給漲跌幅。"
         )
     zone_card = None
-    if qdc is not None:
+    if qdw is not None:
         zone_card = {
-            "ratio_completed": qdc,  # 行政區口徑（所有屋齡，兩年窗口），跟全市數字可以直接比
+            # 主要指標：前後兩年完工壓力（行政區口徑，所有屋齡，跟全市數字可以直接比）
+            "ratio_window4y": qdw,
+            "ratio_window4y_zone": qzw,  # 重劃區口徑（只算2010年後完工的房子）
+            "completed_2y": qd.get("completed_2y_units"),
+            "expected_next_2y": qd.get("expected_next_2y_units"),
+            "expected_next_2y_overdue": qd.get("expected_next_2y_overdue_units"),
+            "expected_next_2y_total": qd.get("expected_next_2y_units_total"),
+            "resale_2y": qd.get("resale_2y"),
+            "resale_4y_equivalent": qd.get("resale_4y_equivalent"),
+            "rank_window4y_taoyuan": qvd.get("rank_window4y"),
+            "n_taoyuan": qvd.get("n"),
+            "rank_window4y_zones": qz.get("rank_window4y"),
+            "n_zones": cmp_.get("n_zones"),
+            "city_ratio_window4y": city_w4y,
+            # 次要欄位（舊指標，兩年窗口）
+            "ratio_completed": qdc,
             "ratio_completed_new_only": qc,
             "rank_completed_taoyuan": qvd.get("rank_completed"),
-            "n_taoyuan": qvd.get("n"),
             "rank_completed_zones": qz.get("rank_completed"),
-            "n_zones": cmp_.get("n_zones"),
             "city_ratio_completed": cc,
         }
 

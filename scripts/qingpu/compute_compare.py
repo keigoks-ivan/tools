@@ -139,6 +139,11 @@ def months_before(d, n):
     return datetime.date(y, m, day)
 
 
+def months_after(d, n):
+    """回傳 d 往後推 n 個月的日期，給「前後兩年完工壓力」的未來兩年窗口終點用。"""
+    return months_before(d, -n)
+
+
 # ---------------------------------------------------------------------------
 # 實價登錄A檔（買賣）：轉手量＋逐季走勢。桃園市(h_)、新北市(f_)、台北市(a_)、
 # 台中市(b_)、高雄市(e_) 同一個季別zip裡都有，一季一個zip只下載一次，同時讀出
@@ -412,6 +417,10 @@ def window_sum(sorted_items, start, end):
 #   0鄉鎮市區 1建案名稱 2坐落街道 4層棟戶數 13第1次登記日期
 # 五個城市（a台北/b台中/e高雄/f新北/h桃園）的備查CSV是同一套schema，欄位位置
 # 相同（實測a_lvr_buildcase.csv表頭跟h_一致）。
+#   0鄉鎮市區 1建案名稱 2坐落街道 4層棟戶數 11建照核發日期 13第1次登記日期
+# 11建照核發日期給「前後兩年完工壓力」的未來兩年預計完工推估用（compute_supply.py
+# 另外讀整份備查CSV＋建照CSV合併取最早核發日，這裡只用備查CSV自己的欄位，兩邊
+# 算出來的建照日期可能有少數案件不同，但只影響推估交屋日、不影響已完工戶數）。
 # ---------------------------------------------------------------------------
 def parse_buildcase_csv(raw_bytes):
     import csv
@@ -436,6 +445,7 @@ def parse_buildcase_csv(raw_bytes):
             "project_name": cols[1].strip(),
             "road": cols[2].strip(),
             "households": households,
+            "permit_date_roc": cols[11].strip() or None,
             "first_registration_roc": cols[13].strip() or None,
         })
     return rows
@@ -513,6 +523,59 @@ def _sorted_completions(rows, match_fn):
             out.append((d, hh))
     out.sort(key=lambda t: t[0])
     return out
+
+
+# ---------------------------------------------------------------------------
+# 「前後兩年完工壓力」的未來兩年預計完工：還沒登記（第1次登記日期空白）的建案，
+# 用「建照核發日期＋同城市的建照→登記中位落後天數」推估交屋日。同一個城市
+# （prefix，例如桃園市h全部13個行政區混在一起）只算一個中位數，不分行政區/
+# 重劃區——這跟 compute_supply.py 自己算的落後天數（只用青埔範圍內的備查案例）
+# 口徑不同，是城市基準 vs 青埔基準的差異，見「怎麼算的」。
+# ---------------------------------------------------------------------------
+def city_permit_to_registration_lag(rows):
+    lags = []
+    for r in rows:
+        if not r["first_registration_roc"] or not r.get("permit_date_roc"):
+            continue
+        reg = fetch_lvr._roc_to_date(r["first_registration_roc"])
+        permit = fetch_lvr._roc_to_date(r["permit_date_roc"])
+        if reg is None or permit is None:
+            continue
+        lags.append((reg - permit).days)
+    return median(lags), len(lags)
+
+
+def buildcase_expected_next_2y(rows, match_fn, lag_median_days, today, window_end):
+    """推估交屋日已經過去（逾期：官方還沒登記，推算交屋時間已過）的案子，攤到
+    未來4季（跟 compute_supply.py 的 OVERDUE_SPREAD_QUARTERS 一致）——4季＝1年，
+    一定落在這裡的24個月窗口內，所以逾期案全額算進未來兩年預計完工，另外用
+    overdue 存起來，讓頁面能拆「正常推估」跟「逾期推估」兩段。沒有建照核發日期
+    （或城市沒有可用的中位落後天數）的建案，無法推估交屋日，整批排除、回報
+    排除的件數與戶數。"""
+    expected = 0
+    overdue = 0
+    excluded_n = 0
+    excluded_hh = 0
+    for r in rows:
+        if not match_fn(r):
+            continue
+        if r["first_registration_roc"]:
+            continue  # 已完工，不算未來
+        hh = r["households"]
+        if hh is None:
+            continue
+        permit_roc = r.get("permit_date_roc")
+        permit_date = fetch_lvr._roc_to_date(permit_roc) if permit_roc else None
+        if permit_date is None or lag_median_days is None:
+            excluded_n += 1
+            excluded_hh += hh
+            continue
+        est_date = permit_date + datetime.timedelta(days=lag_median_days)
+        if est_date <= today:
+            overdue += hh
+        elif est_date <= window_end:
+            expected += hh
+    return {"expected": expected, "overdue": overdue, "excluded_n": excluded_n, "excluded_hh": excluded_hh}
 
 
 def top_projects_by_households(rows, district=None, roads=None, n=5, only_unfinished=False):
@@ -650,13 +713,30 @@ def rank_desc(rows, key):
     return ranks
 
 
-def build_row(name, resale_1y, resale_2y, unfinished, completed_1y, completed_2y, households, extra=None):
+def build_row(name, resale_1y, resale_2y, unfinished, completed_1y, completed_2y, households,
+              expected_next_2y=None, expected_next_2y_overdue=None,
+              expected_next_2y_excluded_n=None, expected_next_2y_excluded_hh=None,
+              lag_median_days=None, lag_n=None, extra=None):
     avg_annual_resale_2y = safe_div(resale_2y, 2)
     ratio_unfinished_1y = safe_div(unfinished, resale_1y)  # 舊定義（倍），次要欄位
-    ratio_unfinished_2y = safe_div(unfinished, avg_annual_resale_2y)  # 新定義（年）
+    ratio_unfinished_2y = safe_div(unfinished, avg_annual_resale_2y)  # 舊定義（年），次要欄位
     ratio_completed_1y = safe_div(completed_1y, resale_1y)  # 次要欄位
-    ratio_completed_2y = safe_div(completed_2y, resale_2y)  # 主要欄位
+    ratio_completed_2y = safe_div(completed_2y, resale_2y)  # 舊定義（倍），次要欄位
     turnover_pct = safe_div(avg_annual_resale_2y, households) * 100 if households else None
+
+    # 前後兩年完工壓力（主要欄位）＝（近兩年已完工＋未來兩年預計完工）÷（兩年轉手×2）：
+    # 分子是以「今天」為中心、前後兩年共4年窗口裡新進入市場的供給戶數；分母把兩年
+    # 轉手量換算成同一個4年窗口的轉手量（×2），兩邊時間長度對齊才能比。
+    expected_next_2y_total = (
+        expected_next_2y + (expected_next_2y_overdue or 0) if expected_next_2y is not None else None
+    )
+    resale_4y_equivalent = resale_2y * 2 if resale_2y is not None else None
+    numerator_4y = (
+        completed_2y + expected_next_2y_total
+        if completed_2y is not None and expected_next_2y_total is not None else None
+    )
+    ratio_window4y = safe_div(numerator_4y, resale_4y_equivalent)
+
     row = {
         "name": name,
         "resale_1y": resale_1y,
@@ -665,13 +745,22 @@ def build_row(name, resale_1y, resale_2y, unfinished, completed_1y, completed_2y
         "completed_1y_units": completed_1y,
         "completed_2y_units": completed_2y,
         "households": households,
+        "expected_next_2y_units": expected_next_2y,
+        "expected_next_2y_overdue_units": expected_next_2y_overdue,
+        "expected_next_2y_units_total": expected_next_2y_total,
+        "expected_next_2y_excluded_n": expected_next_2y_excluded_n,
+        "expected_next_2y_excluded_households": expected_next_2y_excluded_hh,
+        "permit_to_registration_lag_median_days": lag_median_days,
+        "permit_to_registration_lag_n": lag_n,
+        "resale_4y_equivalent": resale_4y_equivalent,
+        "ratio_window4y": round(ratio_window4y, 2) if ratio_window4y is not None else None,
         "ratio_unfinished_to_resale": round(ratio_unfinished_2y, 2) if ratio_unfinished_2y is not None else None,
         "ratio_unfinished_to_resale_1y": round(ratio_unfinished_1y, 2) if ratio_unfinished_1y is not None else None,
         "ratio_completed_to_resale": round(ratio_completed_2y, 2) if ratio_completed_2y is not None else None,
         "ratio_completed_to_resale_1y": round(ratio_completed_1y, 2) if ratio_completed_1y is not None else None,
         "turnover_pct": round(turnover_pct, 2) if turnover_pct is not None else None,
     }
-    # 兩年轉手太少，比值會被分母放大，列出數字但不參加排名
+    # 兩年轉手太少，比值會被分母放大，列出數字但不參加排名（新舊指標共用同一個門檻）
     row["small_sample"] = resale_2y is not None and resale_2y < config.COMPARE_MIN_RESALE_FOR_RANK_2Y
     if extra:
         row.update(extra)
@@ -801,18 +890,18 @@ def presale_price_stats(rows_by_id, period_start, period_end):
 
 def build_city_compare_conclusion(qingpu_row, city_rows, qingpu_price):
     """六都比較的一句話結論，資料生成，不是手寫文案。"""
-    qc = qingpu_row.get("ratio_completed_to_resale")
-    others = [r for r in city_rows if r.get("id") != "qingpu" and r.get("ratio_completed_to_resale") is not None]
+    qw = qingpu_row.get("ratio_window4y")
+    others = [r for r in city_rows if r.get("id") != "qingpu" and r.get("ratio_window4y") is not None]
     price_all = qingpu_price.get("resale_all_wan_ping")
     parts = []
-    if qc is not None and others:
-        higher = sorted([r for r in others if r["ratio_completed_to_resale"] > qc],
-                         key=lambda r: -r["ratio_completed_to_resale"])
+    if qw is not None and others:
+        higher = sorted([r for r in others if r["ratio_window4y"] > qw],
+                         key=lambda r: -r["ratio_window4y"])
         if higher:
-            names = "、".join(f"{r['name']}（{r['ratio_completed_to_resale']:.1f}倍）" for r in higher)
-            parts.append(f"青埔近兩年完工÷兩年轉手 {qc:.1f} 倍，比較對象裡只有{names}更高")
+            names = "、".join(f"{r['name']}（{r['ratio_window4y']:.1f}倍）" for r in higher)
+            parts.append(f"青埔前後兩年完工壓力 {qw:.1f} 倍，比較對象裡只有{names}更高")
         else:
-            parts.append(f"青埔近兩年完工÷兩年轉手 {qc:.1f} 倍，是這幾個比較對象裡最高")
+            parts.append(f"青埔前後兩年完工壓力 {qw:.1f} 倍，是這幾個比較對象裡最高")
     if price_all is not None:
         cheaper_than = [r for r in others if r.get("price_all_wan_ping") is not None and r["price_all_wan_ping"] > price_all]
         if cheaper_than:
@@ -903,6 +992,14 @@ def main():
             buildcase_by_prefix[p] = []
             log(f"預售屋備查（{ccfg['name']}）抓取失敗：{e}")
 
+    # 建照核發→第1次登記的中位落後天數，每個城市（prefix）各算一個，給「未來兩年
+    # 預計完工」推估用（同城市全部行政區混在一起算，不分行政區/重劃區）。
+    lag_by_prefix = {}
+    for prefix, rows in buildcase_by_prefix.items():
+        lag_med, lag_n = city_permit_to_registration_lag(rows)
+        lag_by_prefix[prefix] = {"median_days": lag_med, "n": lag_n}
+        log(f"建照→登記中位落後天數（{prefix}）：{lag_med} 天（n={lag_n}）")
+
     pop_month, pop_rows = pick_population_month(today)
     log(f"戶政人口月份：{pop_month}（{len(pop_rows)} 筆村里資料）")
     hh_district = households_by_district(pop_rows)
@@ -911,16 +1008,22 @@ def main():
 
     cutoff_1y_start, cutoff_1y_end = today - datetime.timedelta(days=365), today
     cutoff_2y_start, cutoff_2y_end = months_before(today, 24), today
+    forward_window_end_2y = months_after(today, 24)  # 「前後兩年完工壓力」未來兩年窗口終點
 
     # -- 13個行政區 -----------------------------------------------------------
     district_rows = []
+    lag_h = lag_by_prefix["h"]
     for d in config.TAOYUAN_DISTRICTS:
         mfn = _district_match(d)
         unfinished = buildcase_unfinished(buildcase_h, mfn)
         completed_1y = buildcase_completed_window(buildcase_h, mfn, cutoff_1y_start, cutoff_1y_end)
         completed_2y = buildcase_completed_window(buildcase_h, mfn, cutoff_2y_start, cutoff_2y_end)
+        fwd = buildcase_expected_next_2y(buildcase_h, mfn, lag_h["median_days"], today, forward_window_end_2y)
         row = build_row(d, resale_district_1y.get(d, 0), resale_district_2y.get(d, 0),
-                         unfinished, completed_1y, completed_2y, hh_district.get(d))
+                         unfinished, completed_1y, completed_2y, hh_district.get(d),
+                         expected_next_2y=fwd["expected"], expected_next_2y_overdue=fwd["overdue"],
+                         expected_next_2y_excluded_n=fwd["excluded_n"], expected_next_2y_excluded_hh=fwd["excluded_hh"],
+                         lag_median_days=lag_h["median_days"], lag_n=lag_h["n"])
         resale_dates = _sorted_dates_district(h_by_id, d)
         completions_sorted = _sorted_completions(buildcase_h, mfn)
         row["ratio_series"] = build_ratio_series(resale_dates, completions_sorted, end_season)
@@ -928,17 +1031,26 @@ def main():
     ru = rank_desc(district_rows, "ratio_unfinished_to_resale")
     rc = rank_desc(district_rows, "ratio_completed_to_resale")
     rt = rank_desc(district_rows, "turnover_pct")
+    rw = rank_desc(district_rows, "ratio_window4y")
     for i, row in enumerate(district_rows):
         row["rank_unfinished"] = ru.get(i)
         row["rank_completed"] = rc.get(i)
         row["rank_turnover"] = rt.get(i)
+        row["rank_window4y"] = rw.get(i)
     n_districts = len(district_rows)
 
     city_unfinished = sum(r["unfinished_units"] for r in district_rows)
     city_completed_1y = sum(r["completed_1y_units"] for r in district_rows)
     city_completed_2y = sum(r["completed_2y_units"] for r in district_rows)
+    city_expected_next_2y = sum(r["expected_next_2y_units"] for r in district_rows)
+    city_expected_next_2y_overdue = sum(r["expected_next_2y_overdue_units"] for r in district_rows)
+    city_excluded_n = sum(r["expected_next_2y_excluded_n"] for r in district_rows)
+    city_excluded_hh = sum(r["expected_next_2y_excluded_households"] for r in district_rows)
     city_row = build_row("桃園全市", resale_city_total_1y, resale_city_total_2y,
-                          city_unfinished, city_completed_1y, city_completed_2y, hh_city_total)
+                          city_unfinished, city_completed_1y, city_completed_2y, hh_city_total,
+                          expected_next_2y=city_expected_next_2y, expected_next_2y_overdue=city_expected_next_2y_overdue,
+                          expected_next_2y_excluded_n=city_excluded_n, expected_next_2y_excluded_hh=city_excluded_hh,
+                          lag_median_days=lag_h["median_days"], lag_n=lag_h["n"])
     city_row["ratio_series"] = _sum_series([r["ratio_series"] for r in district_rows])
 
     # -- 青埔＋重劃區 -----------------------------------------------------------
@@ -953,6 +1065,8 @@ def main():
             unfinished = buildcase_unfinished(buildcase_h, qingpu_bc_match)
             completed_1y = buildcase_completed_window(buildcase_h, qingpu_bc_match, cutoff_1y_start, cutoff_1y_end)
             completed_2y = buildcase_completed_window(buildcase_h, qingpu_bc_match, cutoff_2y_start, cutoff_2y_end)
+            fwd = buildcase_expected_next_2y(buildcase_h, qingpu_bc_match, lag_h["median_days"], today, forward_window_end_2y)
+            lag_this = lag_h
             resale_1y = count_resale_qingpu(h_by_id, period_start_1y, period_end, min_year=MIN_YEAR)
             resale_2y = count_resale_qingpu(h_by_id, period_start_2y, period_end, min_year=MIN_YEAR)
             households = None  # 重劃區表不算換手率：里界跟路名框出來的範圍對不齊
@@ -973,12 +1087,17 @@ def main():
             unfinished = buildcase_unfinished(bc_rows, mfn)
             completed_1y = buildcase_completed_window(bc_rows, mfn, cutoff_1y_start, cutoff_1y_end)
             completed_2y = buildcase_completed_window(bc_rows, mfn, cutoff_2y_start, cutoff_2y_end)
+            lag_this = lag_by_prefix[city_prefix]
+            fwd = buildcase_expected_next_2y(bc_rows, mfn, lag_this["median_days"], today, forward_window_end_2y)
             households = None  # 同上
             top5 = top_projects_by_households(bc_rows, district=zone["district"], roads=roads, n=5)
             resale_dates = _sorted_dates_zone(rows_by_id, zone, min_year=MIN_YEAR)
             completions_sorted = _sorted_completions(bc_rows, mfn)
 
         row = build_row(zone["name"], resale_1y, resale_2y, unfinished, completed_1y, completed_2y, households,
+                         expected_next_2y=fwd["expected"], expected_next_2y_overdue=fwd["overdue"],
+                         expected_next_2y_excluded_n=fwd["excluded_n"], expected_next_2y_excluded_hh=fwd["excluded_hh"],
+                         lag_median_days=lag_this["median_days"], lag_n=lag_this["n"],
                          extra={"id": zid})
         row["ratio_series"] = build_ratio_series(resale_dates, completions_sorted, end_season)
         zone_rows.append(row)
@@ -987,10 +1106,12 @@ def main():
     rzu = rank_desc(zone_rows, "ratio_unfinished_to_resale")
     rzc = rank_desc(zone_rows, "ratio_completed_to_resale")
     rzt = rank_desc(zone_rows, "turnover_pct")
+    rzw = rank_desc(zone_rows, "ratio_window4y")
     for i, row in enumerate(zone_rows):
         row["rank_unfinished"] = rzu.get(i)
         row["rank_completed"] = rzc.get(i)
         row["rank_turnover"] = rzt.get(i)
+        row["rank_window4y"] = rzw.get(i)
     n_zones = len([r for r in zone_rows if not r.get("small_sample")])  # 參加排名的重劃區數
 
     qingpu_row = next(r for r in zone_rows if r["id"] == "qingpu")
@@ -998,16 +1119,24 @@ def main():
     qingpu_dist_resale_dates = _sorted_dates_qingpu(h_by_id, min_year=None)
     qingpu_dist_row = build_row("青埔", resale_qingpu_1y, resale_qingpu_2y, qingpu_row["unfinished_units"],
                                  qingpu_row["completed_1y_units"], qingpu_row["completed_2y_units"], hh_qingpu,
+                                 expected_next_2y=qingpu_row["expected_next_2y_units"],
+                                 expected_next_2y_overdue=qingpu_row["expected_next_2y_overdue_units"],
+                                 expected_next_2y_excluded_n=qingpu_row["expected_next_2y_excluded_n"],
+                                 expected_next_2y_excluded_hh=qingpu_row["expected_next_2y_excluded_households"],
+                                 lag_median_days=qingpu_row["permit_to_registration_lag_median_days"],
+                                 lag_n=qingpu_row["permit_to_registration_lag_n"],
                                  extra={"id": "qingpu"})
     qingpu_dist_row["ratio_series"] = build_ratio_series(qingpu_dist_resale_dates, qingpu_completions_sorted, end_season)
     combined_for_rank = district_rows + [qingpu_dist_row]
     cru = rank_desc(combined_for_rank, "ratio_unfinished_to_resale")
     crc = rank_desc(combined_for_rank, "ratio_completed_to_resale")
     crt = rank_desc(combined_for_rank, "turnover_pct")
+    crw = rank_desc(combined_for_rank, "ratio_window4y")
     qingpu_vs_districts = {
         "rank_unfinished": cru.get(len(district_rows)),
         "rank_completed": crc.get(len(district_rows)),
         "rank_turnover": crt.get(len(district_rows)),
+        "rank_window4y": crw.get(len(district_rows)),
         "n": len(combined_for_rank),
     }
 
@@ -1038,8 +1167,13 @@ def main():
         unfinished = buildcase_unfinished(bc_rows, all_mfn)
         completed_1y = buildcase_completed_window(bc_rows, all_mfn, cutoff_1y_start, cutoff_1y_end)
         completed_2y = buildcase_completed_window(bc_rows, all_mfn, cutoff_2y_start, cutoff_2y_end)
+        lag_city = lag_by_prefix[prefix]
+        fwd = buildcase_expected_next_2y(bc_rows, all_mfn, lag_city["median_days"], today, forward_window_end_2y)
         households = households_city_total(pop_rows, ccfg["pop_site_id"])
         row = build_row(ccfg["name"], resale_1y, resale_2y, unfinished, completed_1y, completed_2y, households,
+                         expected_next_2y=fwd["expected"], expected_next_2y_overdue=fwd["overdue"],
+                         expected_next_2y_excluded_n=fwd["excluded_n"], expected_next_2y_excluded_hh=fwd["excluded_hh"],
+                         lag_median_days=lag_city["median_days"], lag_n=lag_city["n"],
                          extra={"id": ccfg["id"]})
         price_all, price_new, n_all, n_new = resale_price_stats(rows_by_id, period_start_2y, period_end)
         row["price_all_wan_ping"] = round(price_all, 1) if price_all is not None else None
@@ -1048,7 +1182,8 @@ def main():
         row["n_price_new"] = n_new
         cities_out.append(row)
         log(f"六都比較－{ccfg['name']}：resale_2y={resale_2y} unfinished={unfinished} completed_2y={completed_2y} "
-            f"households={households} price_all={row['price_all_wan_ping']}(n={n_all}) price_new={row['price_new_wan_ping']}(n={n_new})")
+            f"expected_next_2y={fwd['expected']}(+逾期{fwd['overdue']}) households={households} "
+            f"price_all={row['price_all_wan_ping']}(n={n_all}) price_new={row['price_new_wan_ping']}(n={n_new})")
 
     tao_price_all, tao_price_new, tao_n_all, tao_n_new = resale_price_stats(h_by_id, period_start_2y, period_end)
     tao_entry = dict(city_row)
@@ -1085,6 +1220,9 @@ def main():
     qingpu_entry["n_presale"] = len(qp_presale_prices)
 
     city_compare = cities_out + [tao_entry, qingpu_entry]
+    rcw_city = rank_desc(city_compare, "ratio_window4y")
+    for i, row in enumerate(city_compare):
+        row["rank_window4y"] = rcw_city.get(i)
     qingpu_price = {
         "resale_all_wan_ping": qingpu_entry["price_all_wan_ping"],
         "resale_new_wan_ping": qingpu_entry["price_new_wan_ping"],
@@ -1182,26 +1320,32 @@ def build_report(qingpu_row, qingpu_dist_row, zone_rows, district_rows, city_row
     period_label_1y = f"{period_start_1y.isoformat()}~{period_end.isoformat()}"
     qc = qingpu_row.get("ratio_completed_to_resale")
     qu = qingpu_row.get("ratio_unfinished_to_resale")
+    qw = qingpu_row.get("ratio_window4y")
     qt = qingpu_dist_row.get("turnover_pct")
     cc = city_row.get("ratio_completed_to_resale")
+    cw = city_row.get("ratio_window4y")
     ct = city_row.get("turnover_pct")
 
     # -- 結論（3-5句，每句一個數字）------------------------------------------
+    # 主要指標＝前後兩年完工壓力（ratio_window4y）：以今天為中心、前後兩年共4年
+    # 窗口，新供給（近兩年已完工＋未來兩年預計完工）是轉手量（4年份）的幾倍；
+    # 近兩年完工÷兩年轉手、未完工消化年數兩個舊指標降級為次要欄位，只在句尾帶一次。
     bullets = []
     qdc = qingpu_dist_row.get("ratio_completed_to_resale")
     qdu = qingpu_dist_row.get("ratio_unfinished_to_resale")
+    qdw = qingpu_dist_row.get("ratio_window4y")
     cu = city_row.get("ratio_unfinished_to_resale")
-    if qdc is not None:
+    if qdw is not None:
         bullets.append(
-            f"跟桃園各行政區比（所有屋齡）：青埔近兩年完工戶數是兩年轉手量的 {qdc:.1f} 倍，"
-            f"{_rank_phrase(qvd.get('rank_completed'), qvd.get('n'), '候選（13個行政區＋青埔）')}，全市 {cc:.1f} 倍；"
-            f"還沒蓋好的要用現在的轉手速度消化 {qdu:.1f} 年，{_rank_phrase(qvd.get('rank_unfinished'), qvd.get('n'), '候選')}，全市 {cu:.1f} 年。"
+            f"跟桃園各行政區比（所有屋齡）：青埔前後兩年完工壓力（近兩年已完工＋未來兩年預計完工，除以兩年轉手量的4年份）"
+            f"{qdw:.1f} 倍，{_rank_phrase(qvd.get('rank_window4y'), qvd.get('n'), '候選（13個行政區＋青埔）')}，全市 {cw:.1f} 倍"
+            f"（次要欄位：近兩年完工÷兩年轉手 {qdc:.1f} 倍、未完工消化 {qdu:.1f} 年，全市分別 {cc:.1f} 倍、{cu:.1f} 年）。"
         )
-    if qc is not None:
+    if qw is not None:
         bullets.append(
-            f"跟其他重劃區比（只算 {config.ZONE_RESALE_MIN_COMPLETION_YEAR} 年後完工的房子）：青埔近兩年完工是兩年轉手的 {qc:.1f} 倍，"
-            f"{_rank_phrase(qingpu_row.get('rank_completed'), n_zones, '重劃區（含青埔本身）')}；"
-            f"還沒蓋好的要用現在的轉手速度消化 {qu:.1f} 年，{_rank_phrase(qingpu_row.get('rank_unfinished'), n_zones, '重劃區')}。"
+            f"跟其他重劃區比（只算 {config.ZONE_RESALE_MIN_COMPLETION_YEAR} 年後完工的房子）：青埔前後兩年完工壓力 {qw:.1f} 倍，"
+            f"{_rank_phrase(qingpu_row.get('rank_window4y'), n_zones, '重劃區（含青埔本身）')}"
+            f"（次要欄位：近兩年完工÷兩年轉手 {qc:.1f} 倍、未完工消化 {qu:.1f} 年）。"
         )
     if qt is not None:
         turnover_bullet = (
@@ -1213,10 +1357,10 @@ def build_report(qingpu_row, qingpu_dist_row, zone_rows, district_rows, city_row
         )
         bullets.append(turnover_bullet)
     pressure_desc = (
-        f"在全桃園（13個行政區＋青埔）{_rank_phrase(qvd.get('rank_completed'), qvd.get('n'), '候選')}"
-        f"、重劃區裡{_rank_phrase(qingpu_row.get('rank_completed'), n_zones, '重劃區').split('裡', 1)[-1]}"
+        f"在全桃園（13個行政區＋青埔）{_rank_phrase(qvd.get('rank_window4y'), qvd.get('n'), '候選')}"
+        f"、重劃區裡{_rank_phrase(qingpu_row.get('rank_window4y'), n_zones, '重劃區').split('裡', 1)[-1]}"
     )
-    if qc is not None and qt is not None and ct is not None:
+    if qw is not None and qt is not None and ct is not None:
         if qt >= ct:
             bullets.append(
                 f"青埔完工壓力{pressure_desc}，但換手率（{qt:.2f}%）不比桃園全市平均（{ct:.2f}%）差，"
@@ -1231,29 +1375,30 @@ def build_report(qingpu_row, qingpu_dist_row, zone_rows, district_rows, city_row
     # -- 論證：三個小節 --------------------------------------------------------
     arguments = []
 
-    peer_c = _closest_peer(qingpu_row, zone_rows, "ratio_completed_to_resale")
-    higher_c = _higher_than_qingpu(zone_rows, qingpu_row, "ratio_completed_to_resale")
+    peer_w = _closest_peer(qingpu_row, zone_rows, "ratio_window4y")
+    higher_w = _higher_than_qingpu(zone_rows, qingpu_row, "ratio_window4y")
     supply_table = [
-        {"name": r["name"], "ratio_unfinished": r.get("ratio_unfinished_to_resale"),
+        {"name": r["name"], "ratio_window4y": r.get("ratio_window4y"),
+         "ratio_unfinished": r.get("ratio_unfinished_to_resale"),
          "ratio_completed": r.get("ratio_completed_to_resale"), "resale_2y": r.get("resale_2y"),
          "is_qingpu": r["id"] == "qingpu"}
         for r in zone_rows
     ]
     reasoning = (
-        f"青埔近兩年完工÷轉手＝{qc:.1f}倍，" if qc is not None else "青埔近兩年完工÷轉手資料不足，"
+        f"青埔前後兩年完工壓力＝{qw:.1f}倍，" if qw is not None else "青埔前後兩年完工壓力資料不足，"
     )
-    if higher_c:
-        names = "、".join(f"{r['name']}（{r['ratio_completed_to_resale']:.1f}倍）" for r in higher_c)
+    if higher_w:
+        names = "、".join(f"{r['name']}（{r['ratio_window4y']:.1f}倍）" for r in higher_w)
         reasoning += f"比青埔更高的只有{names}，其他重劃區都低於青埔。"
-    elif peer_c is not None:
+    elif peer_w is not None:
         reasoning += (
-            f"其他重劃區裡沒有更高的，跟青埔最接近的是{peer_c['name']}"
-            f"（{peer_c['ratio_completed_to_resale']:.1f}倍），代表青埔目前在「蓋好的速度」上"
+            f"其他重劃區裡沒有更高的，跟青埔最接近的是{peer_w['name']}"
+            f"（{peer_w['ratio_window4y']:.1f}倍），代表青埔目前在「蓋好加上即將蓋好的速度」上"
             f"是同類重劃區裡壓力最集中的一個。"
         )
     arguments.append({
         "key": "supply_pressure",
-        "claim": f"青埔的完工壓力（近兩年完工÷兩年轉手）在{_rank_phrase(qingpu_row.get('rank_completed'), n_zones, '重劃區（含青埔本身）')}。",
+        "claim": f"青埔的前後兩年完工壓力（近兩年已完工＋未來兩年預計完工，除以兩年轉手量的4年份）在{_rank_phrase(qingpu_row.get('rank_window4y'), n_zones, '重劃區（含青埔本身）')}。",
         "table": supply_table,
         "reasoning": reasoning,
     })
@@ -1268,12 +1413,12 @@ def build_report(qingpu_row, qingpu_dist_row, zone_rows, district_rows, city_row
     if other_volumes:
         med_other = sorted(other_volumes)[len(other_volumes) // 2]
         if qingpu_row.get("resale_2y") is not None and qingpu_row["resale_2y"] < med_other:
-            vol_reasoning += f"，低於其他重劃區的中位數（約 {med_other} 戶），完工÷轉手的高倍數有一部分是分母（轉手量）本身偏薄，不是分子（完工戶）特別誇張。"
+            vol_reasoning += f"，低於其他重劃區的中位數（約 {med_other} 戶），完工壓力的高倍數有一部分是分母（轉手量）本身偏薄，不是分子（完工＋預計完工戶）特別誇張。"
         else:
-            vol_reasoning += f"，不低於其他重劃區的中位數（約 {med_other} 戶），完工÷轉手偏高不是分母偏薄造成的假象。"
+            vol_reasoning += f"，不低於其他重劃區的中位數（約 {med_other} 戶），完工壓力偏高不是分母偏薄造成的假象。"
     arguments.append({
         "key": "volume_context",
-        "claim": "完工÷轉手的倍數要對照轉手量本身的大小才看得出是分子（完工戶多）還是分母（轉手量薄）驅動的。",
+        "claim": "完工壓力的倍數要對照轉手量本身的大小才看得出是分子（完工／預計完工戶多）還是分母（轉手量薄）驅動的。",
         "table": volume_table,
         "reasoning": vol_reasoning,
     })
@@ -1305,23 +1450,30 @@ def build_report(qingpu_row, qingpu_dist_row, zone_rows, district_rows, city_row
             continue
         top5 = sanity_top_projects.get(r["id"], [])
         names = "、".join(p["project_name"] for p in top5[:3] if p.get("project_name"))
-        parts = [f"{r['name']}兩年轉手 {r.get('resale_2y', 0)} 戶（{config.ZONE_RESALE_MIN_COMPLETION_YEAR}年後完工的房子）、未完工 {r.get('unfinished_units', 0)} 戶、近兩年完工 {r.get('completed_2y_units', 0)} 戶。"]
+        parts = [f"{r['name']}兩年轉手 {r.get('resale_2y', 0)} 戶（{config.ZONE_RESALE_MIN_COMPLETION_YEAR}年後完工的房子）、未完工 {r.get('unfinished_units', 0)} 戶、近兩年完工 {r.get('completed_2y_units', 0)} 戶、未來兩年預計完工 {r.get('expected_next_2y_units_total', 0)} 戶。"]
         if r.get("small_sample"):
             parts.append(f"兩年轉手不到 {config.COMPARE_MIN_RESALE_FOR_RANK_2Y} 戶，比值會被分母放大，不參加排名。")
-        if r.get("ratio_completed_to_resale") is not None:
-            parts.append(f"完工÷轉手 {r['ratio_completed_to_resale']:.1f} 倍" + (f"，高於青埔（{qc:.1f}倍）。" if qc is not None and r["ratio_completed_to_resale"] > qc else f"，低於青埔（{qc:.1f}倍）。" if qc is not None else "。"))
+        if r.get("ratio_window4y") is not None:
+            parts.append(f"前後兩年完工壓力 {r['ratio_window4y']:.1f} 倍" + (f"，高於青埔（{qw:.1f}倍）。" if qw is not None and r["ratio_window4y"] > qw else f"，低於青埔（{qw:.1f}倍）。" if qw is not None else "。"))
         if names:
             parts.append(f"未完工/近兩年完工戶數裡，戶數較大的建案包含{names}。")
         zone_notes[r["id"]] = " ".join(parts)
 
     # -- 什麼情況下結論會錯（falsifiers，都帶門檻數字）--------------------------
     falsifiers = []
-    if qingpu_row.get("completed_2y_units") and qc is not None and qc > 3:
-        resale_needed = round(qingpu_row["completed_2y_units"] / 3)
+    numerator_4y = qingpu_row.get("completed_2y_units") and qingpu_row.get("expected_next_2y_units_total") is not None and (
+        qingpu_row["completed_2y_units"] + qingpu_row["expected_next_2y_units_total"]
+    )
+    if numerator_4y and qw is not None and qw > 3:
+        resale_needed = round(numerator_4y / 6)  # 要讓 ratio_window4y 降到3倍：resale_2y ≥ 分子/(3×2)
         falsifiers.append(
-            f"若青埔兩年轉手量從 {qingpu_row.get('resale_2y')} 戶回升到 {resale_needed} 戶以上"
-            f"（近兩年完工戶數的三分之一），完工÷轉手的倍數會降到3倍以下，「青埔完工壓力偏高」的結論就站不住。"
+            f"若青埔兩年轉手量從 {qingpu_row.get('resale_2y')} 戶回升到 {resale_needed} 戶以上，"
+            f"前後兩年完工壓力會降到3倍以下，「青埔完工壓力偏高」的結論就站不住。"
         )
+    falsifiers.append(
+        "「未來兩年預計完工」是用建照核發日期加上同城市建照→登記的中位落後天數推估，不是官方公布的交屋日期；"
+        "少數建案缺建照核發日期，無法推估，整批排除在外（戶數見「怎麼算的」），會讓未來兩年預計完工的戶數略為低估。"
+    )
     falsifiers.append(
         "未完工戶數只看官方「第1次登記日期」是否空白，不是實際完工進度；"
         "若有建案已經實際交屋但還沒完成官方登記，未完工戶數會被高估、完工÷轉手的倍數也會被低估。"
@@ -1353,6 +1505,8 @@ def build_report(qingpu_row, qingpu_dist_row, zone_rows, district_rows, city_row
         "實價登錄依公布時間分檔，轉手量讀到今天為止公布的全部資料；期間最後一季的成交仍可能有少數尚未公布，每個區/重劃區用同一方法，相對排名不受影響。",
         "重劃區（林口/A7/小檜溪/中路/經國/藝文特區）的範圍用路名框，是交叉核對新聞報導跟實價登錄地址聚類出來的，不是官方地籍圖，邊界有誤收/漏收風險，細節見「怎麼算的」。",
         f"重劃區表的轉手只算 {config.ZONE_RESALE_MIN_COMPLETION_YEAR} 年以後完工的房子（青埔、林口也一樣），避免長馬路上的舊公寓被算進重劃區；行政區表則是所有屋齡。",
+        "預售屋備查資料從2021年7月（110年第3季）才開始收錄申報備查的建案，更早申報的建案不在這份資料裡，「未來兩年預計完工」跟兩個舊指標一樣都只看得到2021年7月後申報備查的建案。",
+        "「前後兩年完工壓力」的「未來兩年預計完工」是用建照核發日期＋歷史落後中位數反推，無法回測（過去的「未來」本身也是用當時的中位數推算，不是已實現的結果），所以這個指標不提供逐季走勢圖；近兩年完工÷兩年轉手、未完工消化年數兩個次要欄位仍有逐季走勢（見收合區塊）。",
     ]
 
     city_compare_conclusion = build_city_compare_conclusion(qingpu_dist_row, city_compare, qingpu_price)
