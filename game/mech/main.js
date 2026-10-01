@@ -100,35 +100,38 @@ async function game() {
     for (const gl of hero.glows) { let o = gl, keep = false; while (o) { if (o === hero.saber) keep = true; o = o.parent; } gl.visible = keep; }
   }
 
-  function applyView() { cockpitView(!tpView); cockpit.root.visible = !tpView; if (!tpView) seeOff(); }
+  function applyView() {
+    if (tpView && Math.abs(player.pitch) < 0.02) player.pitch = -0.12;
+    cockpitView(!tpView); cockpit.root.visible = !tpView; if (!tpView) seeOff();
+  }
   addEventListener('wheel', (e) => { if (!tpView) return; chaseD = clamp(chaseD * Math.exp(e.deltaY * 0.001), 6, 40); store.set('camd2', chaseD.toFixed(1)); }, { passive: true });
-  // 機體後方視角（越肩）：鏡頭在右肩外側、略高，機體偏畫面左邊，準心前方空出來；跟著瞄準方向轉。
+  // 機體正後上方視角：機體置中、鏡頭高過頭部，略微俯看；跟著瞄準方向轉。
   //   鏡頭正前方＝瞄準方向，所以畫面中央（準心）就是子彈會去的地方。
-  //   撞到建築：先縮側移、再縮後退距離（縮短立刻、恢復慢慢來，轉角不會一直跳）
-  const chasePivot = new THREE.Vector3(), chaseSide = new THREE.Vector3(), chaseOff = new THREE.Vector3(), chaseN = new THREE.Vector3(), chaseE = new THREE.Euler();
-  let chaseK = 1, chaseBack = 9, chaseSkip = 0, chaseSideK = 1;   // 後退距離被擠短的比例、實際離機體多遠、鏡頭到機體中心沿瞄準線多遠（公尺）
+  //   撞到建築：先縮抬高量、再縮後退距離（縮短立刻、恢復慢慢來，轉角不會一直跳）
+  const chasePivot = new THREE.Vector3(), chaseLift = new THREE.Vector3(), chaseOff = new THREE.Vector3(), chaseN = new THREE.Vector3(), chaseE = new THREE.Euler();
+  let chaseK = 1, chaseBack = 9, chaseSkip = 0, chaseLiftK = 1;   // 後退距離被擠短的比例、實際離機體多遠、鏡頭到機體中心沿瞄準線多遠（公尺）
   function chaseCam(dt) {
     const k = hero.scale;
     camera.quaternion.setFromEuler(chaseE.set(player.pitch, player.yaw + Math.PI, 0, 'YXZ'));
     hero.bones.torso.getWorldPosition(chasePivot);
     chasePivot.y += 5 * k;
-    // 機體半寬約 4.8 m：側移要超過肩寬，準心才不會壓在肩甲、背後翼板上
-    chaseSide.set((5.4 + chaseD * 0.06) * k, 3 * k, 0).applyQuaternion(camera.quaternion).add(chasePivot);
-    let hit = world.raycast(chasePivot, chaseSide, chaseN);
-    chaseSideK = hit >= 0 && hit <= 1 ? Math.max(0, hit - 0.08) : 1;
-    chaseSide.lerpVectors(chasePivot, chaseSide, chaseSideK);
-    chaseOff.set(0, 0, chaseD * k).applyQuaternion(camera.quaternion).add(chaseSide);
-    hit = world.raycast(chaseSide, chaseOff, chaseN);
+    // 保持正後方，抬高鏡頭讓頭部與背包留在準心下方
+    chaseLift.set(0, 5 * k, 0).applyQuaternion(camera.quaternion).add(chasePivot);
+    let hit = world.raycast(chasePivot, chaseLift, chaseN);
+    chaseLiftK = hit >= 0 && hit <= 1 ? Math.max(0, hit - 0.08) : 1;
+    chaseLift.lerpVectors(chasePivot, chaseLift, chaseLiftK);
+    chaseOff.set(0, 0, chaseD * k).applyQuaternion(camera.quaternion).add(chaseLift);
+    hit = world.raycast(chaseLift, chaseOff, chaseN);
     const want = hit >= 0 && hit <= 1 ? Math.max(0.03, hit - 0.04) : 1;
     chaseK = want < chaseK ? want : Math.min(want, chaseK + dt * 1.5);
-    camera.position.lerpVectors(chaseSide, chaseOff, chaseK);
+    camera.position.lerpVectors(chaseLift, chaseOff, chaseK);
     chaseBack = chaseD * k * chaseK;
     const gy = world.height(camera.position.x, camera.position.z) + 2;
     if (camera.position.y < gy) camera.position.y = gy;
     // 瞄準線從機體這裡才開始算（鏡頭和機體之間的東西打不到，不能拿來當準心目標）
     chaseSkip = Math.max(0, chaseN.set(0, 0, -1).applyQuaternion(camera.quaternion).dot(chaseOff.subVectors(chasePivot, camera.position)));
   }
-  // 透視：準心、鎖定目標（沒有就用準心吸住的目標）被自機擋住的地方挖網點；鏡頭被建築擠近或側移受限時整台淡掉
+  // 透視：準心、鎖定目標（沒有就用準心吸住的目標）被自機擋住的地方挖網點；鏡頭被建築擠近或抬高受限時整台淡掉
   const seeP = new THREE.Vector3(), seeQ = new THREE.Vector3();
   function seeOff() { SEE.c.value.w = 0; SEE.t.value.w = 0; SEE.a.value = 0; }
   function seeThrough(C) {
@@ -136,7 +139,7 @@ async function game() {
     const asp = camera.aspect;
     renderer.getDrawingBufferSize(SEE.res.value);
     SEE.c.value.set(asp / 2, 0.5, 0.13, 1);
-    SEE.a.value = Math.max(clamp((7 - chaseBack) / 4, 0, 0.8), (1 - chaseSideK) * 0.65);
+    SEE.a.value = Math.max(clamp((7 - chaseBack) / 4, 0, 0.8), (1 - chaseLiftK) * 0.65);
     // 整台淡掉時，眼睛、槍口的發光小燈也先關（不然會浮在半透明的機體上）
     for (const gl of hero.glows) gl.visible = SEE.a.value < 0.25;
     const L = C.lockTarget && !C.lockTarget.dead ? C.lockTarget : C.soft;

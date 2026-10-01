@@ -137,26 +137,29 @@ export async function startMech(X) {
     for (const m of hero.meshes) if (m.parent !== hero.saber && shadowMat) m.material = shadowMat;
     for (const gl of hero.glows) { let o = gl, keep = false; while (o) { if (o === hero.saber) keep = true; o = o.parent; } gl.visible = keep; }
   }
-  function applyView() { cockpitView(!tpView); cockpit.root.visible = !tpView; if (!tpView) seeOff(); }
+  function applyView() {
+    if (tpView && Math.abs(player.pitch) < 0.02) player.pitch = -0.12;
+    cockpitView(!tpView); cockpit.root.visible = !tpView; if (!tpView) seeOff();
+  }
   const onWheel = (e) => { if (tpView) chaseD = clamp(chaseD * Math.exp(e.deltaY * 0.001), 6, 40); };
   addEventListener('wheel', onWheel, { passive: true });
-  // 越肩鏡頭（同本篇 main.js 的 chaseCam）：鏡頭在右肩外側，撞到建築先縮側移再縮距離
-  const chasePivot = new THREE.Vector3(), chaseSide = new THREE.Vector3(), chaseOff = new THREE.Vector3(), chaseN = new THREE.Vector3(), chaseE = new THREE.Euler();
-  let chaseK = 1, chaseBack = 9, chaseSkip = 0, chaseSideK = 1;
+  // 正後上方鏡頭（同本篇 main.js 的 chaseCam）：機體置中，撞到建築先縮抬高量再縮距離
+  const chasePivot = new THREE.Vector3(), chaseLift = new THREE.Vector3(), chaseOff = new THREE.Vector3(), chaseN = new THREE.Vector3(), chaseE = new THREE.Euler();
+  let chaseK = 1, chaseBack = 9, chaseSkip = 0, chaseLiftK = 1;
   function chaseCam(dt) {
     const k = hero.scale;
     camera.quaternion.setFromEuler(chaseE.set(player.pitch, player.yaw + Math.PI, 0, 'YXZ'));
     hero.bones.torso.getWorldPosition(chasePivot);
     chasePivot.y += 5 * k;
-    chaseSide.set((5.4 + chaseD * 0.06) * k, 3 * k, 0).applyQuaternion(camera.quaternion).add(chasePivot);
-    let hit = world.raycast(chasePivot, chaseSide, chaseN);
-    chaseSideK = hit >= 0 && hit <= 1 ? Math.max(0, hit - 0.08) : 1;
-    chaseSide.lerpVectors(chasePivot, chaseSide, chaseSideK);
-    chaseOff.set(0, 0, chaseD * k).applyQuaternion(camera.quaternion).add(chaseSide);
-    hit = world.raycast(chaseSide, chaseOff, chaseN);
+    chaseLift.set(0, 5 * k, 0).applyQuaternion(camera.quaternion).add(chasePivot);
+    let hit = world.raycast(chasePivot, chaseLift, chaseN);
+    chaseLiftK = hit >= 0 && hit <= 1 ? Math.max(0, hit - 0.08) : 1;
+    chaseLift.lerpVectors(chasePivot, chaseLift, chaseLiftK);
+    chaseOff.set(0, 0, chaseD * k).applyQuaternion(camera.quaternion).add(chaseLift);
+    hit = world.raycast(chaseLift, chaseOff, chaseN);
     const want = hit >= 0 && hit <= 1 ? Math.max(0.03, hit - 0.04) : 1;
     chaseK = want < chaseK ? want : Math.min(want, chaseK + dt * 1.5);
-    camera.position.lerpVectors(chaseSide, chaseOff, chaseK);
+    camera.position.lerpVectors(chaseLift, chaseOff, chaseK);
     chaseBack = chaseD * k * chaseK;
     const gy = world.height(camera.position.x, camera.position.z) + 2;
     if (camera.position.y < gy) camera.position.y = gy;
@@ -170,7 +173,7 @@ export async function startMech(X) {
     if (!tpView) { seeOff(); return; }
     renderer.getDrawingBufferSize(SEE.res.value);
     SEE.c.value.set(camera.aspect / 2, 0.5, 0.13, 1);
-    SEE.a.value = Math.max(clamp((7 - chaseBack) / 4, 0, 0.8), (1 - chaseSideK) * 0.65);
+    SEE.a.value = Math.max(clamp((7 - chaseBack) / 4, 0, 0.8), (1 - chaseLiftK) * 0.65);
     for (const gl of hero.glows) gl.visible = SEE.a.value < 0.25;
     const L = C.lockTarget && !C.lockTarget.dead ? C.lockTarget : C.soft;
     SEE.t.value.w = 0;
