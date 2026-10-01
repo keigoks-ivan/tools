@@ -88,9 +88,9 @@ const world = new World(renderer, scene, A, { terrainSegments: 72 });
   sc.left = -48; sc.right = 48; sc.top = 48; sc.bottom = -48; sc.updateProjectionMatrix();
   world.sun.shadow.bias = -0.00025; world.sun.shadow.normalBias = 0.035;
 }
-// 黃昏的戰場：遠處被煙塵蓋成暖灰色（霧濃一點、偏褐）；太陽更橘、陰影偏冷藍；天空地平線一層霾（全部只改參數，不多畫東西）
+// 黃昏的戰場：遠處被煙塵蓋成暖灰色（霧濃一點、偏褐）；太陽偏暖、陰影保留天空的冷色；天空地平線一層霾（全部只改參數，不多畫東西）
 scene.fog.color.setRGB(0.38, 0.325, 0.28); scene.fog.density = 0.003;
-world.sun.color.setRGB(1.0, 0.6, 0.34); world.sun.intensity = 5.4;
+world.sun.color.setRGB(1.0, 0.81, 0.62); world.sun.intensity = 4.2;
 scene.environmentIntensity = 0.42;
 scene.traverse((o) => {
   if (o.isHemisphereLight) { o.color.setRGB(0.3, 0.4, 0.58); o.groundColor.setRGB(0.09, 0.07, 0.05); o.intensity = 0.3; }
@@ -99,7 +99,7 @@ scene.traverse((o) => {
     o.material.userData.haze = true; u.fogCol.value.copy(scene.fog.color); u.gain.value *= 0.9;
     o.material.fragmentShader = o.material.fragmentShader.replace('gl_FragColor = vec4(c, 1.0);', `
         float hz = 1.0 - smoothstep(-1.0, 30.0, el);
-        c = mix(vec3(dot(c, vec3(0.3, 0.55, 0.15))), c, 0.62) * vec3(1.06, 0.9, 0.74);   // 褪色、偏暖：下午的藍天變成煙塵裡的黃昏
+        c = mix(vec3(dot(c, vec3(0.3, 0.55, 0.15))), c, 0.8) * vec3(1.02, 0.97, 0.9);   // 褪色、偏暖：下午的藍天變成煙塵裡的黃昏
         c = mix(c, fogCol * (1.0 + s * 1.6), hz * 0.8);
         gl_FragColor = vec4(c, 1.0);`);
     o.material.needsUpdate = true;

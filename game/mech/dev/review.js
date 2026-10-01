@@ -14,7 +14,7 @@ async function load(path, query = '') {
   html = html.replace(/<base href="[^"]+">/, '');
   html = html.replace(/(<script type="importmap">)([\s\S]*?)(<\/script>)/, (_, a, json, b) => {
     const map = JSON.parse(json);
-    for (const file of ['anim.js', 'env.js', 'stages.js', 'battlefields.js', 'fieldart.js', 'encounter.js', 'post.js', 'mechs.js', 'combat.js', 'cockpit.js', 'zero/map.js', 'zero/guns.js', 'zero/viewmodel.js', 'zero/main.js', 'zero/hud.js', 'zero/sfx.js', 'zero/mech6.js', 'lastline/script.js', 'lastline/mission.js', 'lastline/convoy.js', 'lastline/escort.mjs']) {
+    for (const file of ['anim.js', 'env.js', 'stages.js', 'battlefields.js', 'fieldart.js', 'encounter.js', 'post.js', 'roofline.js', 'mechs.js', 'combat.js', 'cockpit.js', 'zero/map.js', 'zero/guns.js', 'zero/viewmodel.js', 'zero/main.js', 'zero/hud.js', 'zero/sfx.js', 'zero/mech6.js', 'lastline/script.js', 'lastline/mission.js', 'lastline/convoy.js', 'lastline/escort.mjs']) {
       const url = new URL('/game/mech/' + file, location.href).href;
       for (const key of Object.keys(map.imports)) if (new URL(key, entryBase).href === url) delete map.imports[key];
       map.imports[url] = url + '?qa=' + revision;
@@ -210,7 +210,7 @@ async function battlefields() {
     const R=C.enc.R;
     assert(R.boxes.every(b=>W.nearBoxes((b.x0+b.x1)/2,(b.z0+b.z1)/2,2,[]).includes(b)), `第 ${n} 關重玩路障碰撞仍登記`);
     G.toTitle();
-    assertSilent(W.scene.environment===W.envMap && W.lightDir.distanceTo(W.cityLightDir)<.001 && W.scene.environmentIntensity===.65 && W.sun.shadow.camera.right===260 && !W.terrainMesh.castShadow,'城市光影配置未復原');
+    assertSilent(W.scene.environment===W.envMap && W.lightDir.distanceTo(W.cityLightDir)<.001 && W.scene.environmentIntensity===.55 && W.sun.shadow.camera.right===260 && !W.terrainMesh.castShadow,'城市光影配置未復原');
     assertSilent(!W.terrain.detailed && W.terrainMesh.geometry.attributes.position.getX(1)===-5000+W.terrain.cell,'城市地形座標沒有復原');
     assert(W.battlefield==='city' && W.cityObjects.every(o=>o.visible || o===W.beacon), '回標題恢復原城市與碰撞');
     await new Promise(r=>setTimeout(r,0));
@@ -293,8 +293,14 @@ async function city() {
   win.__cam.set(0, 90, 250, 0, -0.14); win.__step(2); await save('city-skyline');
   const W = win.__world;
   assert(W.cityTreeMeshes.length===3 && W.cityTreeMeshes.every(m=>m.customDepthMaterial===W.fieldTreeDepth),'城市三種枝葉剪影共用材質與陰影剪影');
+  const street = W.blds.filter(b=>b.cx < -120 && b.cz < 480 && b.H < 45);
+  assert(street.length > 30 && street.filter(b=>Math.min(b.w,b.d)<25).length > street.length*.7, '舊城多數街屋短邊小於 25 公尺，避免寬扁巨型住宅');
+  assert(new Set(street.map(b=>b.H)).size >= 4, '連棟街屋具備至少四種實際樓高');
   assert(W.scene.children.some(o => o.geometry?.attributes.surface?.array.some(v => v === 4)), '新版玻璃、石材與金屬頂點材質已載入');
   win.__cam.set(-120, 3, -145, Math.PI / 2, 0); win.__step(2); await save('city-oldtown');
+  const house = street.find(b=>b.w<25 && b.d<50 && b.cx < -240);
+  assert(!!house, '舊城街屋深度控制在 50 公尺內');
+  win.__cam.set(house.cx+12, 4, house.z1+26, Math.atan2(12,26), .12); win.__step(2); await save('city-rowhouses');
   const b = W.blds.find(b => b.seg.length === 3);
   assert(!!b, '店面招牌納入可破壞建築');
   const sign = b.seg[2], original = sign.a.array.slice(sign.s * 3, sign.s * 3 + sign.o.length);

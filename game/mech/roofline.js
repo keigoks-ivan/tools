@@ -7,7 +7,7 @@ export function roofline(x0, x1, z0, z1, h, kind, face, box) {
   if (kind === 'old') {
     const count = Math.max(1, Math.min(4, Math.round(w / 16))), span = w / count;
     for (let i = 0; i < count; i++) {
-      const lo = x0 + i * span, hi = lo + span, rise = Math.min(6, span * 0.3), y = h + 0.8;
+      const lo = x0 + i * span, hi = lo + span, rise = Math.min(6, span * 0.3), y = h + 0.15;
       const profile = (key + i) % 2 ? [[lo, y], [lo + span * 0.16, y + rise * 0.78], [hi - span * 0.16, y + rise * 0.78], [hi, y]]
         : [[lo, y], [(lo + hi) / 2, y + rise], [hi, y]];
       const paint = (key + i) % 3 ? metal : tile;
@@ -40,6 +40,19 @@ export function roofline(x0, x1, z0, z1, h, kind, face, box) {
         if (x === x1) [pts[1], pts[2], pts[3]] = [pts[2], pts[1], pts[1]]; panel(...pts, stone);
       }
     }
+  } else if (kind === 'tower' && key % 3 !== 0) {
+    // 現代商辦的機電屋頂：低矮設備房、百葉和排風罩，避免每棟都頂著同一個尖冠。
+    const ax = x0 + w * 0.24, bx = x1 - w * 0.24, az = z0 + d * 0.28, bz = z1 - d * 0.28;
+    const y = h + 0.05, top = y + (key % 3 === 1 ? 3.2 : 5.4);
+    box(ax, bx, y, top, az, bz, metal);
+    box(ax - 0.3, bx + 0.3, top, top + 0.18, az - 0.3, bz + 0.3, metal);
+    for (const z of [az - 0.015, bz + 0.015]) for (let i = 0; i < 6; i++) {
+      const bot = y + 0.35 + i * (top - y - 0.7) / 6;
+      const pts = [[ax + 0.5, bot, z], [bx - 0.5, bot, z], [bx - 0.5, bot + 0.14, z], [ax + 0.5, bot + 0.14, z]];
+      if (z < az) pts.reverse(); panel(...pts, stone);
+    }
+    const cx = (ax + bx) / 2, cz = (az + bz) / 2;
+    box(cx - 1.2, cx + 1.2, top, top + 1.3, cz - 0.9, cz + 0.9, metal);
   } else {
     const tower = kind === 'tower', rise = tower ? Math.min(14, h * 0.16) : 3.2;
     const y = h + 0.03, ix = w * (tower ? 0.27 : 0.17), iz = d * (tower ? 0.27 : 0.17);
