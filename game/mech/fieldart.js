@@ -19,8 +19,9 @@ function branch(a,b,radius) {
   g.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0),d.normalize()));
   return colored(g.translate(...start.add(end).multiplyScalar(.5).toArray()),[.075,.052,.033]);
 }
-export function fieldTreeGeometry(pine = true) {
-  const parts=[branch([0,0,0],[.2,pine?10.4:9.7,0],pine?.32:.42)];
+export function fieldTreeGeometry(pine = true, variant = 0) {
+  const lean=(variant-1)*.35, tall=variant===2?1.18:variant===1?.9:1;
+  const parts=[branch([0,0,0],[lean,(pine?10.4:6.6)*tall,.15],pine?.32:.42)];
   const card=(pts,variant)=>{
     const g=new THREE.BufferGeometry(),pos=[],uv=[],corners=[[0,0],[1,0],[1,1],[0,1]],x=(variant%2)*.5,y=variant<2?.5:0;
     for(const i of [0,1,2,0,2,3]){pos.push(...pts[i]);uv.push(x+.003+corners[i][0]*.494,y+.003+corners[i][1]*.494);}
@@ -30,16 +31,16 @@ export function fieldTreeGeometry(pine = true) {
   };
   if(pine) {
     for(let level=0;level<8;level++) {
-      const y=3.2+level*.95,reach=3.7-level*.39;
+      const y=(2.3+level*1.08)*tall,reach=(3.7-level*.39)*(variant===1?1.17:variant===2?.82:1);
       for(let b=0;b<9;b++) {
-        const a=b/9*Math.PI*2+level*.71+Math.sin(b*7.3+level)*.16,cs=Math.cos(a),sn=Math.sin(a),spread=reach*(.86+.18*Math.sin(b*4.1+level*2.7));
-        const pt=(d,side,h)=>[cs*d-sn*side,y+h,sn*d+cs*side];
+        const a=b/9*Math.PI*2+level*.71+variant+.2*Math.sin(b*7.3+level),cs=Math.cos(a),sn=Math.sin(a),spread=reach*(.72+.3*Math.sin(b*4.1+level*2.7+variant));
+        const pt=(d,side,h)=>[cs*d-sn*side+lean*y/11,y+h,sn*d+cs*side];
         card([pt(.1,-reach*.4,.65),pt(spread,-reach*.4,-.7),pt(spread,reach*.4,-.7),pt(.1,reach*.4,.65)],(b+level)%2);
       }
     }
   } else {
     for(let i=0;i<10;i++) {
-      const a=i*2.399,dist=i<7?2.0:1.0,y=6.1+(i%4)*1.25,x=Math.cos(a)*dist,z=Math.sin(a)*dist,size=1.9+(i%3)*.2;
+      const a=i*2.399+variant,dist=(i<7?2.0:1.0)*(variant===1?1.4:.9),y=(4.9+(i%4)*1.25+Math.sin(i*3.1+variant)*.55)*tall,x=Math.cos(a)*dist+lean,z=Math.sin(a)*dist,size=1.6+(i%3)*.35;
       parts.push(branch([.1,3.4+(i%3),0],[x,y,z],.13));
       for(let axis=0;axis<3;axis++) {
         const t=a+axis*Math.PI/3,dx=Math.cos(t)*size,dz=Math.sin(t)*size;
@@ -48,7 +49,9 @@ export function fieldTreeGeometry(pine = true) {
     }
   }
   // 枝幹與剪影葉片合在同一個網格，沿用實例繪製。
-  const g=mergeVertices(mergeGeometries(parts));g.computeBoundingSphere();return g;
+  const g=mergeVertices(mergeGeometries(parts)),p=g.attributes.position;
+  for(let i=0;i<p.count;i++)p.setY(i,Math.max(0,p.getY(i)));
+  g.computeBoundingSphere();return g;
 }
 export function fieldRockGeometry() {
   const g=new THREE.IcosahedronGeometry(1,2),p=g.attributes.position;
@@ -58,13 +61,36 @@ export function fieldRockGeometry() {
   }
   const out=mergeVertices(g);out.computeVertexNormals();out.computeBoundingSphere();return out;
 }
+export function fieldShrubGeometry() {
+  const tree=fieldTreeGeometry(false,1),source=tree.toNonIndexed(),out=new THREE.BufferGeometry();
+  // 保留枝葉卡片、去掉高樹幹，壓成貼地的灌木叢。
+  for(const [key,a] of Object.entries(source.attributes)) {
+    const values=[];
+    for(let i=0;i<a.count;i++)if(source.attributes.leaf.getX(i)>.5)for(let k=0;k<a.itemSize;k++) {
+      const v=a.array[i*a.itemSize+k];values.push(key==='position'&&k===1?Math.max(.05,(v-3.2)*.35):v);
+    }
+    out.setAttribute(key,new THREE.Float32BufferAttribute(values,a.itemSize));
+  }
+  tree.dispose();source.dispose();out.computeBoundingSphere();return out;
+}
 
 export function fieldArchitecture(S, profile, H, box, face, tank) {
   const {x0,x1,z0,z1}=S,w=x1-x0,d=z1-z0,cx=(x0+x1)/2,cz=(z0+z1)/2;
   const stone=profile==='badlands'?[.56,.49,.38,0,1]:[.48,.51,.49,0,1],metal=[.23,.28,.29,0,2],dark=[.065,.09,.10,0,4];
   const panel=[.53,.57,.55,0,2],rib=[.32,.36,.36,0,2];
   box(x0,x1,0,.9,z0,z1,stone);
-  if(profile==='airfield' && !S.target) {
+  if(S.kind==='tower') {
+    box(x0,x1,.9,5,z0,z1,stone);
+    box(cx-4,cx+4,5,H-5,cz-4,cz+4,stone);
+    box(cx-7,cx+7,H-5.4,H-4.8,cz-7,cz+7,metal);
+    box(cx-6.5,cx+6.5,H-4.8,H-.9,cz-6.5,cz+6.5,dark);
+    for(const side of [-1,1])for(let a=-6;a<=6;a+=3) {
+      box(cx+a-.08,cx+a+.08,H-4.8,H-.9,cz+side*6.5-.1,cz+side*6.5+.1,metal);
+      box(cx+side*6.5-.1,cx+side*6.5+.1,H-4.8,H-.9,cz+a-.08,cz+a+.08,metal);
+    }
+    box(cx-7.6,cx+7.6,H-.9,H,cz-7.6,cz+7.6,stone);
+    box(cx-2,cx+2,.9,4.2,z1+.05,z1+.15,metal);
+  } else if(profile==='airfield' && !S.target && !S.kind) {
     const wall=H*.55,rise=H-wall;
     box(x0,x1,.9,wall,z0,z1,panel);
     // 拱頂機庫：沿跨度分成十二條鋼板，端面封閉、滑門仍保留碰撞。
@@ -78,7 +104,7 @@ export function fieldArchitecture(S, profile, H, box, face, tank) {
     }
     box(cx-w*.34,cx+w*.34,.2,wall*.94,z1+.04,z1+.1,dark);
     for(let x=cx-w*.34;x<=cx+w*.34;x+=w*.17)box(x-.1,x+.1,.2,wall*.94,z1+.11,z1+.24,metal);
-  } else if(profile==='fortress') {
+  } else if(profile==='fortress'||S.kind==='bunker') {
     // 斜收的混凝土掩體與厚屋簷，避免要塞仍像倉庫。
     box(x0+1.4,x1-1.4,.9,H-1.1,z0+1.2,z1-1.2,stone);
     face([x0,.9,z1],[x1,.9,z1],[x1-1.4,H-1.1,z1-1.2],[x0+1.4,H-1.1,z1-1.2],stone);
@@ -87,8 +113,8 @@ export function fieldArchitecture(S, profile, H, box, face, tank) {
     for(let x=x0+3;x<x1-2;x+=6)box(x,x+3.5,H*.57,H*.69,z1-1.13,z1-1.05,dark);
     box(cx-2.8,cx+2.8,0,H*.52,z1-1.04,z1-.94,metal);
   } else {
-    const industrial=profile==='depot',wall=industrial?H-3:H-2.5;
-    box(x0,x1,.9,wall,z0,z1,panel);
+    const industrial=profile==='depot'&&S.kind!=='office',wall=industrial?H-3:H-2.5;
+    box(x0,x1,.9,wall,z0,z1,S.kind==='office'?stone:panel);
     if(industrial) {
       for(let i=0;i<3;i++) {
         const a=z0+i*d/3,b=a+d/3;
@@ -189,9 +215,9 @@ export function fieldGroundMask(route, structures, contacts, createCanvas = () =
       }
     } else if(channel===1) {
       for(const s of structures) {
-        const [x,y]=point(s.x,s.z),w=s.target?30:48;
+        const [x,y]=point(s.x,s.z),w=s.width||(s.target?30:48),d=s.depth||34;
         const industrial=profile==='depot'||profile==='airfield',padding=industrial?56:24;
-        for(let pad=padding;pad>=0;pad-=4){const gray=Math.round((industrial?255:180)*(1-pad/(padding+4)));ctx.fillStyle=`rgb(${gray},${gray},${gray})`;ctx.fillRect(x-(w/2+pad)*scale,y-(17+pad)*scale,(w+pad*2)*scale,(34+pad*2)*scale);}
+        for(let pad=padding;pad>=0;pad-=4){const gray=Math.round((industrial?255:180)*(1-pad/(padding+4)));ctx.fillStyle=`rgb(${gray},${gray},${gray})`;ctx.fillRect(x-(w/2+pad)*scale,y-(d/2+pad)*scale,(w+pad*2)*scale,(d+pad*2)*scale);}
       }
     } else {
       ctx.globalCompositeOperation='lighter';
@@ -201,8 +227,8 @@ export function fieldGroundMask(route, structures, contacts, createCanvas = () =
         ctx.fillStyle=g;ctx.fillRect(x-rad,y-rad,rad*2,rad*2);
       }
       for(const s of structures) {
-        const [x,y]=point(s.x,s.z),w=s.target?30:48;
-        for(const [pad,alpha] of [[10,.10],[5,.18],[1,.25]]) {ctx.fillStyle=`rgba(255,255,255,${alpha})`;ctx.fillRect(x-(w/2+pad)*scale,y-(17+pad)*scale,(w+pad*2)*scale,(34+pad*2)*scale);}
+        const [x,y]=point(s.x,s.z),w=s.width||(s.target?30:48),d=s.depth||34;
+        for(const [pad,alpha] of [[10,.10],[5,.18],[1,.25]]) {ctx.fillStyle=`rgba(255,255,255,${alpha})`;ctx.fillRect(x-(w/2+pad)*scale,y-(d/2+pad)*scale,(w+pad*2)*scale,(d+pad*2)*scale);}
       }
     }
   }

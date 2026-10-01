@@ -49,6 +49,20 @@ export function fieldLayout(profile, route) {
     if (routeDistance(sx, sz, route.pts) < 42 || structures.some(t => Math.hypot(t.x - sx, t.z - sz) < 55)) continue;
     structures.push({ x: sx, z: sz, target: false });
   }
+  if(profile==='airfield'||profile==='depot') {
+    // 服務建物集中在既有設施旁，保留任務走廊與跑道。
+    const anchors=structures.filter(s=>!s.target);
+    for(const [i,a] of anchors.entries())for(const side of [-1,1]) {
+      const x=a.x+side*95,z=a.z+(i%2?90:-90);
+      if(routeDistance(x,z,route.pts)<65||structures.some(s=>Math.hypot(s.x-x,s.z-z)<72))continue;
+      if(profile==='airfield'&&Math.abs(x+420)<95&&Math.abs(z)<980)continue;
+      structures.push({x,z,target:false,kind:(i+side)%2?'workshop':'office',width:26,depth:24});
+    }
+  }
+  for(const s of structures) {
+    if(profile==='airfield'&&s.target&&/指揮|主雷達/.test(s.name))s.kind='tower';
+    else if(s.target&&/防空|彈藥/.test(s.name))s.kind='bunker';
+  }
   return { ...BATTLEFIELDS[profile], structures };
 }
 

@@ -12,9 +12,19 @@ import { roofline } from '../roofline.js';
 
 const H1 = 3.4;   // 一層樓高
 
-export function buildMap(scene, mats, solid, PL = null) {
+export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
   // 額外的純色材質：玻璃、窗洞深處、燈、警示漆
-  mats.glass = new THREE.MeshStandardMaterial({ color: 0x273b3e, roughness: 0.24, roughnessMap: mats.metal.roughnessMap, metalness: 0.15, envMapIntensity: 1.15, vertexColors: true });
+  mats.glass = new THREE.MeshStandardMaterial({ color: 0x334650, roughness: 0.18, metalness: 0.05, envMapIntensity: 1.35, vertexColors: true });
+  mats.glass.onBeforeCompile=sh=>{
+    sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nvarying vec3 vWindowWorld;').replace('#include <begin_vertex>','#include <begin_vertex>\nvWindowWorld=(modelMatrix*vec4(transformed,1.0)).xyz;');
+    sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nvarying vec3 vWindowWorld;').replace('#include <map_fragment>',`#include <map_fragment>
+      float pane=fract(sin(dot(floor(vWindowWorld.xz/2.2)+floor(vWindowWorld.y/3.4),vec2(127.1,311.7)))*43758.5453);
+      float curtain=step(.62,pane)*(1.0-smoothstep(.25,.8,fract(vWindowWorld.y/3.4)));
+      diffuseColor.rgb*=.68+.32*pane;
+      diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.065,.06,.05)*(.8+.2*sin((vWindowWorld.x+vWindowWorld.z)*36.0)),curtain*.4);`)
+      .replace('#include <roughnessmap_fragment>','#include <roughnessmap_fragment>\nroughnessFactor+=pane*.12;');
+  };
+  mats.glass.customProgramCacheKey=()=> 'street-glazing-v1';
   mats.void = new THREE.MeshStandardMaterial({ color: 0x0b0b0c, roughness: 1, vertexColors: true });
   mats.lamp = new THREE.MeshBasicMaterial({ color: new THREE.Color(2.6, 2.4, 2.0), vertexColors: true });
   mats.warm = new THREE.MeshBasicMaterial({ color: new THREE.Color(2.2, 1.2, 0.5), vertexColors: true });
@@ -51,6 +61,19 @@ export function buildMap(scene, mats, solid, PL = null) {
     const ap = km('facade_apartments:wall_standard_standard_01'), fb = km('facade_factory:wall_standard_standard_01');
     if (ap) mats.kplaster = mk(ap, 3); if (fb) mats.kbrick = mk(fb, 3);
     for (const k of ['kplaster', 'kbrick']) if (mats[k]) { const m = mats[k]; m.onBeforeCompile = (sh) => grimeShader(sh, m); }
+  }
+  if(surfaces)for(const key of ['concrete','wall','floor','corr','cont']) {
+    const m=mats[key],prepare=m.onBeforeCompile;
+    m.onBeforeCompile=(sh,renderer)=>{
+      prepare(sh,renderer);Object.assign(sh.uniforms,{surfaceAtlas:surfaces.surfaceAtlas,surfaceReady:surfaces.surfaceReady});
+      sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nvarying vec3 vSurfaceWorld,vSurfaceNormal;').replace('#include <begin_vertex>','#include <begin_vertex>\nvSurfaceWorld=(modelMatrix*vec4(transformed,1.0)).xyz;vSurfaceNormal=normal;');
+      sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nuniform sampler2D surfaceAtlas;uniform float surfaceReady;varying vec3 vSurfaceWorld,vSurfaceNormal;')
+        .replace('#include <map_fragment>',`#include <map_fragment>
+          if(surfaceReady>.5){vec2 uv=abs(vSurfaceNormal.y)>.5?vSurfaceWorld.xz:vec2(abs(vSurfaceNormal.x)>.5?vSurfaceWorld.z:vSurfaceWorld.x,vSurfaceWorld.y);
+            vec3 scan=texture2D(surfaceAtlas,vec2(${key==='corr'||key==='cont'?'0.0,.5':'.5,.5'})+vec2(.008)+fract(uv/4.0)*.484).rgb;
+            diffuseColor.rgb*=mix(vec3(1.0),scan*1.8,.45);}`);
+    };
+    m.customProgramCacheKey=()=> 'street-surface-'+key+'-v1';
   }
   const b = new Builder(mats, solid);
   const M = { b, lights: [], zones: {}, marks: {}, targets: {}, items: {} };

@@ -35,6 +35,17 @@ test('新地形接回原本遠山，不產生非有限值或邊界裂縫', () =>
   }
   assert.equal(fieldHeight(0,0,'city',{},17),17);
 });
+test('clustered service buildings keep the runway and mission corridor clear',()=>{
+  for(const D of STAGE_DATA.filter(d=>['airfield','depot'].includes(d.battlefield))) {
+    const L=fieldLayout(D.battlefield,D.route),support=L.structures.filter(s=>!s.target&&s.kind);
+    assert(support.length>0);assert(L.structures.length<=30);
+    for(const S of support) {
+      assert(routeDistance(S.x,S.z,D.route.pts)>=65);
+      for(const x of [S.x-S.width/2,S.x+S.width/2])for(const z of [S.z-S.depth/2,S.z+S.depth/2])assert(routeDistance(x,z,D.route.pts)>35);
+      if(D.battlefield==='airfield')assert(Math.abs(S.x+420)>=95||Math.abs(S.z)>=980);
+    }
+  }
+});
 
 test('中央加密地形的座標與碰撞索引互為反函數，外圈仍接合原網格', async () => {
   const {fieldGridCoordinate:point,fieldGridIndex:index}=await import('../battlefields.js');

@@ -33,6 +33,12 @@ async function load(path, query = '') {
   script.textContent = `import * as T from 'three'; T.Clock.prototype.getDelta=()=>1/60; window.__T=T;`;
   win.document.head.append(script); await wait(() => win.__T);
   if (win.__G) await wait(() => win.__flow && win.__flow.chapter > 0);
+  const world=win.__game?.world||win.__world||win.__G?.world;
+  if(world) {
+    await wait(()=>world.A.surfaceReady.value===1 && world.fieldFoliageReady && world.cityFacadeReady);
+    assert(world.A.surfaceAtlas.value.image.width===1024 && [2,3,4].every(i=>world.A.fac[i][0].image.width===512 && world.A.fac[i][0].name.startsWith('city-')),'共用建材 1024、三種住宅立面與枝葉 512，三款沿用相同資源上限');
+    if(win.__G && win.__flow.chapter < (win.__S.FIRST_MECH||6)) assert(world.cityTreeMeshes.every(m=>!m.visible),'步兵模式不因枝葉延遲載入而打開遠處樹林');
+  }
   win.__step(2); frame.focus();
   errors = win.__qaErrors;
 }
@@ -222,6 +228,7 @@ async function zero() {
   const G = win.__G; renderer = win.__renderer;
   // Wrapper around the real render call allows in-memory captures without preserving every frame's framebuffer.
   post = null;
+  post={render:()=>win.__step(1)};await save('zero-street');post=null;
   for (let n = 1; n <= 6; n++) {
     if (n > 1) { win.document.querySelector('#quit').click(); win.document.querySelector(`[data-c="${n}"]`).click(); }
     if (n === 6) {
@@ -285,6 +292,7 @@ async function city() {
   win.__step(2); await save('city-street');
   win.__cam.set(0, 90, 250, 0, -0.14); win.__step(2); await save('city-skyline');
   const W = win.__world;
+  assert(W.cityTreeMeshes.length===3 && W.cityTreeMeshes.every(m=>m.customDepthMaterial===W.fieldTreeDepth),'城市三種枝葉剪影共用材質與陰影剪影');
   assert(W.scene.children.some(o => o.geometry?.attributes.surface?.array.some(v => v === 4)), '新版玻璃、石材與金屬頂點材質已載入');
   win.__cam.set(-120, 3, -145, Math.PI / 2, 0); win.__step(2); await save('city-oldtown');
   const b = W.blds.find(b => b.seg.length === 3);

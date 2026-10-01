@@ -68,7 +68,7 @@ const world = new World(renderer, scene, A, { terrainSegments: 72 });
   // 省效能：街區外的樹／路燈／車／瓦礫（實例化）全部被外圍高樓擋住，直接不畫；遠方城市與地形不投影子、不算 AO
   scene.traverse((o) => {
     if (!o.isMesh) return;
-    if (o.isInstancedMesh && !(o.material && o.material.isMeshBasicMaterial)) { o.visible = false; (world.cityInst ||= []).push(o); return; }   // 第 6 章開機體會再打開
+    if (o.isInstancedMesh && !(o.material && o.material.isMeshBasicMaterial)) { o.visible = false; o.userData.suppressFoliage=true; (world.cityInst ||= []).push(o); return; }   // 第 6 章開機體會再打開
     o.castShadow = false; o.userData.noAO = true;
   });
   // 地形換成粗網格（城市範圍內本來就是平的，遠方山丘只是背景）
@@ -107,7 +107,7 @@ scene.traverse((o) => {
 });
 const solid = new Solid();
 const placer = new Placer(MODELS, solid);
-const map = buildMap(scene, SURF, solid, placer);
+const map = buildMap(scene, SURF, solid, placer, A);
 const placed = placer.build(scene);
 console.log('[zero] 掃描模型', placed);
 // 點光源：每個像素都要把場景裡的每一盞點光算一遍（離多遠都算），地圖六盞很貴。
@@ -144,7 +144,7 @@ const idleSt = { vel: new THREE.Vector3(), grounded: true, boost: 0, torsoYaw: M
 for (let i = 0; i < 30; i++) hero.animate(1 / 30, idleSt);
 const hound = new Mech('grunt', 'grunt');
 hound.root.visible = false; scene.add(hound.root);
-window.__renderer = renderer; window.__scene = scene; window.__solid = solid; window.__map = map; window.__hero = hero;
+window.__renderer = renderer; window.__scene = scene; window.__solid = solid; window.__map = map; window.__hero = hero; window.__world = world;
 
 // ---------------------------------------------------------------- 遊戲狀態（AI 也讀這個）
 const NADE_START = 3, NADE_MAX = 5;   // 玩家手榴彈：每章開頭至少幾顆、最多帶幾顆
