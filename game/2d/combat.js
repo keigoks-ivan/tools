@@ -107,11 +107,14 @@ export class Arena {
    *   counted as a kill, ignored by separation), intangible (cannot be hit, e.g. airborne), guard (see GUARD),
    *   evade (sidestep chance vs light hits, see SIDESTEP), turnRate (rad/s facing turn),
    *   guardRearm (seconds, overrides GUARD.rearm).
+   * - heroProfile: optional maxHp, speed, chain, charges, heavy, counter and flurry tables.
+   *   Defaults retain the original hero; reset preserves the selected profile.
    * - jump: input.jump starts a jump (see JUMP); hero.height (m) is added to the hero.
    * - musouFlurry (with musou): special becomes the long 無雙亂舞 (see MUSOU_FLURRY) and taking
    *   damage fills the gauge.
    */
-  constructor({ seed = 1, warriorMode = false, musou = false, director = false, bounds = null, maxAttackers = null, jump = false, musouFlurry = false } = {}) {
+  constructor({ seed = 1, warriorMode = false, musou = false, director = false, bounds = null, maxAttackers = null, jump = false, musouFlurry = false, heroProfile = null } = {}) {
+    this.heroProfile = heroProfile;
     this.seed = seed >>> 0;
     this.warriorMode = warriorMode;
     this.musou = musou;
@@ -135,7 +138,7 @@ export class Arena {
     this.enemies = [];
     this.events = [];
     this.hero = {
-      x: WIDTH * 0.5, y: 500, hp: 100, maxHp: 100, energy: 0,
+      x: WIDTH * 0.5, y: 500, hp: this.heroProfile?.maxHp ?? 100, maxHp: this.heroProfile?.maxHp ?? 100, energy: 0,
       combo: 0, action: 'idle', actionTime: 0, facing: -Math.PI / 2,
       invulnerable: 0, dodgeCooldown: 0,
     };
@@ -297,8 +300,8 @@ export class Arena {
     if (hero.action === 'idle' || hero.action === 'run') {
       hero.action = length > 0.01 ? 'run' : 'idle';
       if (length > 0.01) {
-        hero.x = clamp(hero.x + moveX * 295 * this._stepDt, this.bounds.minX, this.bounds.maxX);
-        hero.y = clamp(hero.y + moveY * 235 * this._stepDt, this.bounds.minY, this.bounds.maxY);
+        hero.x = clamp(hero.x + moveX * 295 * (this.heroProfile?.speed ?? 1) * this._stepDt, this.bounds.minX, this.bounds.maxX);
+        hero.y = clamp(hero.y + moveY * 235 * (this.heroProfile?.speed ?? 1) * this._stepDt, this.bounds.minY, this.bounds.maxY);
       }
     }
   }
@@ -332,17 +335,20 @@ export class Arena {
       if (nearest) hero.facing = Math.atan2(nearest.enemy.y - hero.y, nearest.enemy.x - hero.x);
     }
     if (this.musou) {
+      const chain = this.heroProfile?.chain ?? MUSOU_CHAIN;
+      const charges = this.heroProfile?.charges ?? MUSOU_CHARGE;
+      const counterMove = this.heroProfile?.counter ?? MUSOU_COUNTER;
       let move, charge = 0, counter = false;
       if (kind === 'attack') {
-        const chaining = hero.action === 'attack' && hero.combo < MUSOU_CHAIN.length;
+        const chaining = hero.action === 'attack' && hero.combo < chain.length;
         hero.combo = chaining ? hero.combo + 1 : 1;
         this.lastLightAt = now;
-        counter = !chaining && now - (this.dodgeEndAt ?? -Infinity) <= MUSOU_COUNTER.window;
-        move = counter ? MUSOU_COUNTER : MUSOU_CHAIN[hero.combo - 1];
-      } else if (branch && MUSOU_CHARGE[hero.combo - 1]) {
+        counter = !chaining && now - (this.dodgeEndAt ?? -Infinity) <= counterMove.window;
+        move = counter ? counterMove : chain[hero.combo - 1];
+      } else if (branch && charges[hero.combo - 1]) {
         charge = hero.combo + 1;   // 第幾招（輕 N 下＋重＝第 N+1 招，對應無雙系列的 C2～C5）
-        move = MUSOU_CHARGE[hero.combo - 1];
-      } else move = MUSOU_HEAVY;
+        move = charges[hero.combo - 1];
+      } else move = this.heroProfile?.heavy ?? MUSOU_HEAVY;
       if (counter) this.dodgeEndAt = -Infinity;
       hero.action = kind;
       hero.actionTime = 0;
@@ -405,8 +411,8 @@ export class Arena {
   _readAirInput(input, moveX, moveY) {
     const hero = this.hero, dt = this._stepDt;
     if (hero.action === 'plunge') return;   // straight down, no steering
-    hero.x = clamp(hero.x + moveX * 295 * JUMP.steer * dt, this.bounds.minX, this.bounds.maxX);
-    hero.y = clamp(hero.y + moveY * 235 * JUMP.steer * dt, this.bounds.minY, this.bounds.maxY);
+    hero.x = clamp(hero.x + moveX * 295 * (this.heroProfile?.speed ?? 1) * JUMP.steer * dt, this.bounds.minX, this.bounds.maxX);
+    hero.y = clamp(hero.y + moveY * 235 * (this.heroProfile?.speed ?? 1) * JUMP.steer * dt, this.bounds.minY, this.bounds.maxY);
     // No dodge or musou in the air; heavy dives, light slashes (limited per jump).
     if (pressed(input.heavy)) {
       hero.action = 'plunge';
@@ -485,7 +491,8 @@ export class Arena {
     hero.actionTime = 0;
     if (this.musouFlurry) {
       const isTrue = hero.hp <= hero.maxHp * MUSOU_FLURRY.trueHp;
-      const F = isTrue ? MUSOU_FLURRY.true : MUSOU_FLURRY.standard;
+      const profiles = this.heroProfile?.flurry ?? MUSOU_FLURRY;
+      const F = isTrue ? profiles.true : profiles.standard;
       const every = F.swings > 1 ? (F.swingEnd - F.swingStart) / (F.swings - 1) : 0;
       const swingTimes = Array.from({ length: F.swings }, (_, i) => F.swingStart + i * every);
       hero.invulnerable = F.duration + 0.1;
@@ -645,7 +652,9 @@ export class Arena {
         const d = distance(hero, enemy);
         const angle = Math.atan2(enemy.y - hero.y, enemy.x - hero.x);
         const arc = attack.arc ?? Math.PI * 2;
-        if (d > attack.radius || (arc < Math.PI * 2 && Math.abs(angleDifference(hero.facing, angle)) > arc * 0.5)) continue;
+        // A custom dash can pin both actors to the map edge; overlap has no facing vector.
+        const overlapping = this.heroProfile && d < 1;
+        if (d > attack.radius || (!overlapping && arc < Math.PI * 2 && Math.abs(angleDifference(hero.facing, angle)) > arc * 0.5)) continue;
         this._damageEnemy(enemy, damage, source);
       }
     }

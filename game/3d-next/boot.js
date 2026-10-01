@@ -20,9 +20,9 @@ if (new URLSearchParams(location.search).get('hero') !== 'rumi') {
   const subtitle = document.querySelector('.title-subtitle');
   const copy = document.querySelector('.title-copy');
   const note = document.querySelector('.prototype-note');
-  if (subtitle) subtitle.textContent = '紫刃・夜市突圍';
-  if (copy) copy.textContent = '沿著夜市大街一路殺到鬼門，擊倒敵將，最後單挑鬼門守將。';
-  if (note?.firstChild) note.firstChild.textContent = '3D 試作　·　紫刃　·　';
+  if (subtitle) subtitle.textContent = '三位刀客・三關戰役';
+  if (copy) copy.textContent = '從夜市突圍、赤月圍城到虛空封魂。選擇長刀、大劍或雙刃，以不同招式封住鬼門。';
+  if (note?.firstChild) note.firstChild.textContent = '三位刀客　·　三關戰役　·　';
 }
 
 // 全螢幕（電腦版）：標題與 HUD 各一顆按鈕＋F 鍵；Esc 由瀏覽器處理。觸控裝置與不支援的瀏覽器不顯示。
@@ -73,13 +73,14 @@ const assets = createPreloader({
   plan: assetPlan({ hero: vroid ? 'vroid' : 'rumi', march: vroid && params.get('level') !== 'single' }),
   loadEngine: () => loadBattleModule().then(async module => { await module.loadLazyModules(); return module; }),
 });
-const loadBattleModule = () => import('./battle.js?v=20260928a');
+const loadBattleModule = () => import('./battle.js?v=20261001a');
 if (params.has('debug')) window.__assets = assets;   // ?debug：各項下載／步驟的開始與完成時間（__assets.progress.items）
 let audio = null;
 const audioReady = vroid
   ? import('./audio.js?v=20260927a').then(({ createAudio }) => {
     // mp3 由預載器提供（開戰要用的檔案下載完才抓）；解碼仍在按下開始、解鎖音訊之後
     audio = createAudio({ baseUrl: '../assets/audio/march/', fetchImpl: (url, init) => assets.fetchAudio(url, init) });
+    if (params.get('mute') === '1') audio.setMuted(true);
     if (params.has('debug')) window.__audio = audio;
     setupSoundUi();
     return audio;
@@ -112,8 +113,8 @@ function setupSoundUi() {
 let battlePromise = null, battleReady = false, prefetching = false;
 // battle.js 的 import 圖：一次全部送出請求，不用等 battle.js 下載完才發現要抓 three.js（版本字串與 battle.js 相同，測試會比對）
 const ENGINE_MODULES = ['../lib/three.module.js', '../lib/addons/loaders/GLTFLoader.js', '../lib/addons/utils/SkeletonUtils.js',
-  '../2d/combat.js', '../frame-pacing.js', './world.js', './oni.js', './touch-input.js',
-  ...(vroid ? ['./combat-fx.js?v=20260928a'] : []), ...(vroid && params.get('level') !== 'single' ? ['./march.js', './march-art.js?v=20260925f'] : [])];
+  '../2d/combat.js?v=20261001a', '../frame-pacing.js', './world.js', './oni.js', './touch-input.js',
+  ...(vroid ? ['./combat-fx.js?v=20260928a'] : []), ...(vroid && params.get('level') !== 'single' ? ['./march.js?v=20261001a', './march-art.js?v=20260925f'] : [])];
 function preloadModules() {
   for (const href of ENGINE_MODULES) {
     const link = document.createElement('link');
@@ -193,6 +194,7 @@ async function start() {
     await nextPaint();
     document.getElementById('title').hidden = true;
     document.body.dataset.mode = 'play';
+    battle.configure?.({ character: selectedCharacter, chapter: selectedChapter });
     battle.start();
     assets.progress.complete('start');
   } catch (error) {
@@ -205,7 +207,37 @@ async function start() {
   }
 }
 
-startButton.addEventListener('click', start);
+let selectedCharacter = params.get('character') || 'violet';
+let selectedChapter = Number(params.get('chapter')) || 0;
+const loadout = document.getElementById('loadout');
+function selectCharacter(id) {
+  const buttons = [...document.querySelectorAll('[data-character]')];
+  selectedCharacter = buttons.some(button => button.dataset.character === id) ? id : 'violet';
+  for (const button of buttons) button.setAttribute('aria-pressed', String(button.dataset.character === selectedCharacter));
+}
+selectCharacter(selectedCharacter);
+const chapterSelect = document.getElementById('chapterSelect');
+selectedChapter = Math.max(0, Math.min(2, Math.floor(selectedChapter)));
+chapterSelect.value = String(selectedChapter);
+chapterSelect.addEventListener('change', () => { selectedChapter = Number(chapterSelect.value); });
+for (const button of document.querySelectorAll('[data-character]')) button.addEventListener('click', () => { selectCharacter(button.dataset.character); audio?.ui(); });
+startButton.addEventListener('click', () => { if (vroid && params.get('level') !== 'single') { loadout.hidden = false; document.getElementById('deploy').focus(); } else start(); });
+document.getElementById('loadoutBack').addEventListener('click', () => { loadout.hidden = true; startButton.focus(); });
+document.getElementById('chooseLoadout').addEventListener('click', () => {
+  loading = false; startButton.disabled = false;
+  document.getElementById('result').hidden = true;
+  document.getElementById('title').hidden = false;
+  document.body.dataset.mode = 'title'; loadout.hidden = false;
+  renderProgress();
+  document.getElementById('deploy').focus();
+});
+document.getElementById('deploy').addEventListener('click', () => { loadout.hidden = true; start(); });
+window.addEventListener('keydown', event => {
+  if (loadout.hidden || event.repeat || event.target.closest?.('select')) return;
+  const choice = { Digit1: 'violet', Digit2: 'azure', Digit3: 'amber' }[event.code];
+  if (choice) selectCharacter(choice);
+  if (event.code === 'Escape') { loadout.hidden = true; startButton.focus(); }
+});
 // 按開始時音訊模組若還沒下載完，改在下一次觸碰（仍是使用者手勢）時解鎖
 audioReady.then(a => {
   if (!a || a.state().unlocked) return;

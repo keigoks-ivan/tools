@@ -1,7 +1,10 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone as cloneSkinned } from 'three/addons/utils/SkeletonUtils.js';
-import { Arena } from '../2d/combat.js';
+import { Arena } from '../2d/combat.js?v=20261001a';
+import { heroFor } from './heroes.js?v=20261001a';
+import { Campaign, chapterTuning } from './campaign.js?v=20261001a';
+import { createHeroEquipment } from './hero-equipment.js?v=20261001a';
 import { FramePacer } from '../frame-pacing.js';
 import { createNightMarket } from './world.js';
 import { createOni, prepareRiggedOni, createRiggedOni } from './oni.js';
@@ -35,7 +38,7 @@ let lazyModules = null;
 export function loadLazyModules() {
   if (!lazyModules) {
     lazyModules = Promise.all([
-      marchLevel ? Promise.all([import('./march.js'), import('./march-art.js?v=20260925f')]) : null,
+      marchLevel ? Promise.all([import('./march.js?v=20261001a'), import('./march-art.js?v=20260925f')]) : null,
       // ?hero=vroid：打擊特效模組（combat-fx.js）；載入失敗時退回下方原本的特效與時間倍率
       heroChoice === 'vroid' ? import('./combat-fx.js?v=20260928a').catch(error => { console.warn('combat-fx failed, using built-in effects', error); return null; }) : null,
     ]).catch(error => { lazyModules = null; throw error; });
@@ -256,6 +259,13 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
   // [coop] 三人連線：隊友沿用這個主角模型與片段；local() 是送給隊友的本機狀態。單人頁 coop 為 null
   const coopView = coop?.attach({ THREE, scene, heroModel, clips, cloneSkinned, local: () => ({ x: hero.position.x, y: hero.position.y, z: hero.position.z, yaw: hero.rotation.y, lift: heroModel.position.y - heroBaseY, anim: currentName, time: currentAction?.time || 0, scale: currentAction?.getEffectiveTimeScale() || 1, loop: currentAction?.loop !== THREE.LoopOnce }) }) || null;
   const sword = heroModel.getObjectByName('Hero_sword') || heroModel.getObjectByName('rumi_sword');
+  const equipment = heroChoice === 'vroid' && !coop ? createHeroEquipment(THREE, heroModel, sword) : null;
+  let heroProfile = heroFor(pageParams.get('character'));
+  const campaign = marchLevel && !coop ? new Campaign(pageParams.get('chapter')) : null;
+  const nextChapterButton = document.getElementById('nextChapter');
+  const restartCampaignButton = document.getElementById('restartCampaign');
+  const worldColors = new Map();
+  world?.group?.traverse(object => { for (const material of [].concat(object.material || [])) { if (material.color && !worldColors.has(material)) worldColors.set(material, material.color.clone()); } });
   // combat-fx：刀光、打擊、無雙演出與時間倍率（頓格／慢動作／定格）；有它時下方舊特效與倍率都不作用
   let combatFx = null;
   try {
@@ -346,10 +356,10 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
     actor.dispose = () => { dispose(); for (const material of tinted) material.dispose(); };
     return actor;
   };
-  const march = marchModules ? new marchModules[0].MarchDirector({ seed: 17, mobile: isMobile() }) : null;
+  const march = marchModules ? new marchModules[0].MarchDirector({ seed: 17, mobile: isMobile(), ...(campaign ? { tuning: chapterTuning(campaign.index), heroProfile } : {}) }) : null;
   if (march && debug) window.__march = march;   // ?debug：主控台可用 __march.skipTo(0-3) 跳段
   // 紫刃（?hero=vroid）：跳躍與無雙亂舞；Rumi 預設單場維持原本的 Arena
-  const arena = march ? march.arena : new Arena({ seed: 17, warriorMode: true, musou: heroChoice === 'vroid', ...(heroChoice === 'vroid' ? { jump: true, musouFlurry: true } : {}) });
+  const arena = march ? march.arena : new Arena({ ...(heroChoice === 'vroid' && !coop ? { heroProfile } : {}), seed: 17, warriorMode: true, musou: heroChoice === 'vroid', ...(heroChoice === 'vroid' ? { jump: true, musouFlurry: true } : {}) });
   if (debug) window.__arena = arena;   // ?debug：無頭測試可讀英雄狀態（單場與行軍關）
   coopView?.bindLevel({ march, arena, level: marchModules?.[0] || null });   // [coop] 第二階段：房主跑敵人、隊友打房主的敵人（net/enemy-sync.js）
   if (arena.jumpEnabled) for (const element of document.querySelectorAll('[data-action="jump"], [data-jump-help]')) element.hidden = false;
@@ -515,6 +525,7 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
       combatFx?.onEvent(event, fxPos.set(x, groundAt(x, z), z), enemies.get(event.enemyId)?.root);
       audio?.onEvent(event);
       if (march) marchEvent(event, x, z);
+      if (event.type === 'special' && equipment) toast(`${heroProfile.special}！`, 1.8);
       if (event.type === 'slash' && arena.musou) {
         // 變招／閃避反擊各有自己的動作（arena.attack.clip）；一般連段與單按重擊照舊
         play(arena.attack?.clip || (event.kind === 'heavy' ? 'charge' : `combo${event.combo || 1}`), arena.attack?.duration || 0.5);
@@ -732,7 +743,7 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
       marchHud = { bar, label: bar.querySelector('span'), fill: bar.querySelector('i b'), roundLabel: document.querySelector('.round-card span') };
     }
     $('waveText').textContent = hud.objective;
-    marchHud.roundLabel.textContent = hud.segmentName;
+    marchHud.roundLabel.textContent = campaign ? `${campaign.index + 1}/3 ${campaign.chapter.name} · ${hud.segmentName}` : hud.segmentName;
     const show = hud.foe || hud.lamp;
     marchHud.bar.hidden = !show;
     marchHud.bar.classList.toggle('lamp', !hud.foe && !!hud.lamp);
@@ -850,10 +861,22 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
     if (arena.time > toastUntil) $('toast').textContent = '';
   }
   function finish() {
+    updateHud();
     running = false;
     stopFrames();
-    $('resultTitle').textContent = arena.state === 'win' ? '夜市重歸寧靜' : '重新集結';
+    if (campaign && arena.state === 'win') campaign.complete(march.result);
+    $('resultTitle').textContent = arena.state === 'win' ? (campaign ? `${campaign.chapter.name}・完成` : '夜市重歸寧靜') : '重新集結';
+    if (nextChapterButton) {
+      nextChapterButton.hidden = !(campaign && arena.state === 'win' && campaign.hasNext);
+      if (!nextChapterButton.hidden) nextChapterButton.querySelector('span').textContent = '前往下一關';
+    }
+    if (restartCampaignButton) restartCampaignButton.hidden = !(campaign && arena.state === 'win' && !campaign.hasNext);
     $('resultText').textContent = march ? marchResultText(march) : `擊倒 ${arena.kills} 名敵人。${arena.state === 'win' ? '你已完成這次 3D 單場試作。' : '看到攻擊警示先閃避；普攻接重擊可以打退一群敵人。'}`;
+    if (campaign && arena.state === 'win' && !campaign.hasNext) {
+      const completed = campaign.results.filter(Boolean);
+      const kills = completed.reduce((sum, result) => sum + result.kills, 0);
+      $('resultText').textContent += `。已完成 ${completed.length} 關，共擊倒 ${kills} 名敵人。`;
+    }
     $('result').hidden = false;
     document.body.dataset.mode = 'result';
   }
@@ -932,8 +955,17 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
     if (arena.state !== 'play') finish();
   }
   function start() {
+    if (campaign) {
+      march.tuning = chapterTuning(campaign.index);
+      scene.background.setHex(campaign.chapter.background);
+      scene.fog.color.setHex(campaign.chapter.fog);
+      moon.color.setHex(campaign.chapter.moon); rim.color.setHex(campaign.chapter.rim);
+      const tint = new THREE.Color(campaign.chapter.tint);
+      for (const [material, color] of worldColors) material.color.copy(color).multiply(tint);
+    }
     if (march) march.reset(); else arena.reset();
-    if (riggedOni) {
+    world?.breakables.reset();
+    {
       for (const actor of enemies.values()) actor.dispose();
       enemies.clear();
       for (const corpse of corpses) corpse.dispose();
@@ -953,6 +985,7 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
     syncCamera(1);
     if (combatFx && !fxWarm) { fxWarm = true; prewarmShaders(); }
     updateHud();
+    if (campaign) toast(`第 ${campaign.index + 1} 關・${campaign.chapter.name}：${campaign.chapter.intro}`, 5);
     $('result').hidden = true;
     $('pauseOverlay').hidden = true;
     document.body.dataset.mode = 'play';
@@ -1039,6 +1072,8 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
   $('pauseBtn').addEventListener('click', () => pause(true));
   $('resume').addEventListener('click', () => pause(false));
   $('retry').addEventListener('click', start);
+  nextChapterButton?.addEventListener('click', () => { if (campaign && arena.state === 'win' && campaign.next()) start(); });
+  restartCampaignButton?.addEventListener('click', () => { campaign?.restart(); start(); });
   window.addEventListener('resize', resize);
   window.addEventListener('orientationchange', resize);
   window.visualViewport?.addEventListener('resize', resize);   // iOS 網址列收合、分割畫面時 window resize 不一定會觸發
@@ -1050,5 +1085,19 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
   resize();
   assets.progress.complete('battle');
   assets.release();
-  return { start, warm, pause, arena, scene, camera, renderer };
+  function configure({ character, chapter } = {}) {
+    if (running || coop || heroChoice !== 'vroid') return;
+    heroProfile = heroFor(character);
+    arena.heroProfile = heroProfile; equipment?.apply(heroProfile);
+    document.querySelector('[data-action="special"]')?.setAttribute('aria-label', heroProfile.special);
+    const branchHelp = document.querySelector('[data-branch-help]');
+    if (branchHelp) branchHelp.textContent = `變招 J×1～${heroProfile.charges.length}→K`;
+    const footer = document.querySelector('.hud-footer span');
+    if (footer) footer.textContent = `${heroProfile.name} ／ ${heroProfile.weapon}`;
+    if (campaign) { campaign.index = new Campaign(chapter).index; campaign.results = []; }
+    const heading = document.querySelector('.vital-heading');
+    if (heading) { heading.querySelector('b').textContent = heroProfile.name; heading.querySelector('small').textContent = heroProfile.weapon; heading.querySelector('.hero-mark').textContent = heroProfile.mark; }
+  }
+  configure({ character: heroProfile.id, chapter: campaign?.index });
+  return { start, warm, pause, configure, campaign, arena, scene, camera, renderer };
 }

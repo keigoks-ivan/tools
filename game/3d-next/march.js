@@ -18,7 +18,7 @@
  * for the HUD, `march.view()` for world props (march-world.js update), and `march.result`
  * once `march.state !== 'play'`.
  */
-import { Arena } from '../2d/combat.js';
+import { Arena } from '../2d/combat.js?v=20261001a';
 import { CAPTAIN, CAPTAIN_HINT, CAPTAIN_NAMES, SPECIAL_HINTS, SPECIAL_MIX, SPECIAL_UNITS, captainOptions, inLine, specialOptions } from './specials.js';
 
 export const PX_PER_M = 60;
@@ -255,14 +255,16 @@ const MAX_EVENTS = 256;
  *   skipTo(i)             debug: jump to segment i (0-3) with the hero at its entry
  */
 export class MarchDirector {
-  constructor({ seed = 17, mobile = false, cap } = {}) {
+  constructor({ seed = 17, mobile = false, cap, tuning = TUNING, heroProfile = null } = {}) {
+    this.tuning = tuning;
     this.seed = seed >>> 0;
     this.cap = cap ?? (mobile ? ENEMY_CAP.mobile : ENEMY_CAP.desktop);
-    this.arena = new Arena({ seed: this.seed, warriorMode: true, musou: true, director: true, maxAttackers: TUNING.attackers, jump: true, musouFlurry: true, bounds: segmentBoundsPx([LEVEL.segments[0]]) });
+    this.arena = new Arena({ heroProfile, seed: this.seed, warriorMode: true, musou: true, director: true, maxAttackers: this.tuning.attackers, jump: true, musouFlurry: true, bounds: segmentBoundsPx([LEVEL.segments[0]]) });
     this.reset();
   }
 
   reset() {
+    this.arena.maxAttackersOverride = this.tuning.attackers;
     this.arena.reset();
     this.randomState = (this.seed ^ 0x9e3779b9) >>> 0;
     this.time = 0;
@@ -305,12 +307,12 @@ export class MarchDirector {
       this.time += step;
       this._constrain();
       this._tickSegment(step);
-      if (TUNING.specials) this._tickSpecials();
-      if (TUNING.captains) this._tickCaptains();
+      if (this.tuning.specials) this._tickSpecials();
+      if (this.tuning.captains) this._tickCaptains();
       this._tickExternal(step);
       this.hazards = this.hazards.filter(hazard => hazard.until > this.time);
       this._tickPickups();
-      if (this.combo > 0 && this.time - this.lastHitAt > TUNING.comboWindow) this.combo = 0;
+      if (this.combo > 0 && this.time - this.lastHitAt > this.tuning.comboWindow) this.combo = 0;
       this._checkProgress();
       this.stats.peakAlive = Math.max(this.stats.peakAlive, this.alive());
     }
@@ -366,12 +368,12 @@ export class MarchDirector {
       lanterns: this.segmentIndex >= 1 ? LEVEL.lanterns.map((lantern, index) => {
         const unit = this.segmentIndex === 1 ? this.units.get(seg.lanternIds[index]) : null;
         const hp = unit ? unit.hp : 0;
-        return { index, ...toPx(lantern.x, lantern.z), hp, maxHp: TUNING.plaza.lanternHp, broken: hp <= 0, enemyId: unit?.id ?? null };
-      }) : LEVEL.lanterns.map((lantern, index) => ({ index, ...toPx(lantern.x, lantern.z), hp: TUNING.plaza.lanternHp, maxHp: TUNING.plaza.lanternHp, broken: false, enemyId: null })),
+        return { index, ...toPx(lantern.x, lantern.z), hp, maxHp: this.tuning.plaza.lanternHp, broken: hp <= 0, enemyId: unit?.id ?? null };
+      }) : LEVEL.lanterns.map((lantern, index) => ({ index, ...toPx(lantern.x, lantern.z), hp: this.tuning.plaza.lanternHp, maxHp: this.tuning.plaza.lanternHp, broken: false, enemyId: null })),
       lamp: { ...toPx(LEVEL.lamp.x, LEVEL.lamp.z), ...(this.segmentIndex === 2 ? { hp: seg.lamp.hp, maxHp: seg.lamp.maxHp, down: seg.lamp.down > 0, secured: seg.secured } : { hp: 1, maxHp: 1, down: false, secured: this.segmentIndex > 2 }) },
       breakables: LAYOUT.breakables.map((spot, index) => {
         const unit = this.arena.enemies.find(enemy => enemy.breakIndex === index && enemy.kind === 'breakable');
-        return { index, type: spot.type, ...toPx(spot.x, spot.z), broken: this.brokenProps.has(index), hp: unit ? unit.hp : TUNING.breakables.hp[spot.type], maxHp: TUNING.breakables.hp[spot.type], enemyId: unit?.id ?? null };
+        return { index, type: spot.type, ...toPx(spot.x, spot.z), broken: this.brokenProps.has(index), hp: unit ? unit.hp : this.tuning.breakables.hp[spot.type], maxHp: this.tuning.breakables.hp[spot.type], enemyId: unit?.id ?? null };
       }),
       pickups: this.pickups.map(pickup => ({ ...pickup })),
       hazards: this.hazards.map(hazard => ({ ...hazard, progress: Math.min(1, (this.time - hazard.start) / Math.max(0.01, hazard.until - hazard.start)) })),
@@ -430,10 +432,10 @@ export class MarchDirector {
     if (this.state === 'clear') return '夜市重歸寧靜';
     if (this.state === 'dead') return '重新集結';
     if (this.gates[i]?.open) return `前進：${LEVEL.segments[i + 1].name}`;
-    if (i === 0) return seg.kills >= TUNING.market.goal && TUNING.officers.market ? `擊倒敵將 ${TUNING.officers.market.name}` : `擊倒妖兵 ${Math.min(seg.kills, TUNING.market.goal)}／${TUNING.market.goal}`;
-    if (i === 1) return seg.broken < 3 ? `打破妖燈 ${seg.broken}／3` : `擊倒敵將 ${TUNING.officers.red.name}`;
-    if (i === 2) return seg.secured ? `擊倒敵將 ${TUNING.officers.shadow.name}` : seg.lamp.down > 0 ? '魂燈重燃中…' : `守住魂燈 ${formatClock(seg.timer)}`;
-    return `擊倒 ${TUNING.boss.name}`;
+    if (i === 0) return seg.kills >= this.tuning.market.goal && this.tuning.officers.market ? `擊倒敵將 ${this.tuning.officers.market.name}` : `擊倒妖兵 ${Math.min(seg.kills, this.tuning.market.goal)}／${this.tuning.market.goal}`;
+    if (i === 1) return seg.broken < 3 ? `打破妖燈 ${seg.broken}／3` : `擊倒敵將 ${this.tuning.officers.red.name}`;
+    if (i === 2) return seg.secured ? `擊倒敵將 ${this.tuning.officers.shadow.name}` : seg.lamp.down > 0 ? '魂燈重燃中…' : `守住魂燈 ${formatClock(seg.timer)}`;
+    return `擊倒 ${this.tuning.boss.name}`;
   }
 
   _startSegment(index) {
@@ -457,7 +459,7 @@ export class MarchDirector {
       this._emit('pickupLost', { pickupId: pickup.id, x: pickup.x, y: pickup.y });
       return false;
     });
-    const heal = Math.min(TUNING.segmentHeal, hero.maxHp - hero.hp);
+    const heal = Math.min(this.tuning.segmentHeal, hero.maxHp - hero.hp);
     if (heal > 0) {
       hero.hp += heal;
       this._emit('heal', { x: hero.x, y: hero.y, amount: heal });
@@ -466,7 +468,7 @@ export class MarchDirector {
     LAYOUT.breakables.forEach((spot, breakIndex) => {
       if (spot.segment !== index || this.brokenProps.has(breakIndex)) return;
       this._spawnUnit('breakable', spot.x, spot.z, {
-        kind: 'breakable', breakType: spot.type, breakIndex, hp: TUNING.breakables.hp[spot.type],
+        kind: 'breakable', breakType: spot.type, breakIndex, hp: this.tuning.breakables.hp[spot.type],
         ai: 'external', fixed: true, prop: true, action: 'idle', range: 0, cooldown: 0,
       });
     });
@@ -477,19 +479,19 @@ export class MarchDirector {
       this.seg = { broken: 0, lanternIds: [], nextSpawnAt: [], officerAt: null, foeId: null };
       LEVEL.lanterns.forEach((lantern, i) => {
         const unit = this._spawnUnit('lantern', lantern.x, lantern.z, {
-          hp: TUNING.plaza.lanternHp, ai: 'external', fixed: true, prop: true, kind: 'lantern', lanternIndex: i, action: 'idle', range: 0, cooldown: 0,
+          hp: this.tuning.plaza.lanternHp, ai: 'external', fixed: true, prop: true, kind: 'lantern', lanternIndex: i, action: 'idle', range: 0, cooldown: 0,
         });
         this.seg.lanternIds.push(unit.id);
         this.seg.nextSpawnAt.push(this.time + 1.5 + i * 2);
       });
       this._say('打破三盞妖燈，燈不滅，妖兵不停', 4);
     } else if (index === 2) {
-      const t = TUNING.stairs;
+      const t = this.tuning.stairs;
       this.seg = { lamp: { hp: t.lampHp, maxHp: t.lampHp, down: 0 }, timer: t.holdSeconds, secured: false, nextWaveAt: this.time + 1.5, nextTopAt: this.time + t.topGroupEvery, side: this._rand() < 0.5 ? 'left' : 'right', officerAt: null, foeId: null, breaks: 0 };
       this._say('守住中央魂燈，妖兵會從兩側階梯衝上來', 4);
     } else {
       this.seg = { foeId: null };
-      const p = LEVEL.bossStart, b = TUNING.boss;
+      const p = LEVEL.bossStart, b = this.tuning.boss;
       const boss = this._spawnUnit('boss', p.x, p.z, {
         hp: b.hp, ai: 'external', fixed: true, kind: 'boss', name: b.name, specialScale: b.specialScale, guard: b.guard, facing: Math.PI / 2,
         action: 'idle', range: 110, phase: 1, mode: 'intro', modeTime: 0, cooldown: 1, lift: 0,
@@ -534,7 +536,7 @@ export class MarchDirector {
 
   _grunt(wx, wz, share, extra = {}) {
     const role = this._rand() < share ? 'runner' : 'grunt';
-    const u = TUNING.units;
+    const u = this.tuning.units;
     const stats = role === 'runner' ? { hp: u.runnerHp, evade: u.runnerEvade, recover: u.recover.runner } : { hp: u.gruntHp, recover: u.recover.grunt };
     return this._spawnUnit(role, wx, wz, { kind: role, ...stats, ...extra });
   }
@@ -544,7 +546,7 @@ export class MarchDirector {
       if (this.events.length >= MAX_EVENTS) this.events.shift();
       this.events.push(event);
       if (event.type === 'hit') {
-        this.combo = this.time - this.lastHitAt <= TUNING.comboWindow ? this.combo + 1 : 1;
+        this.combo = this.time - this.lastHitAt <= this.tuning.comboWindow ? this.combo + 1 : 1;
         this.lastHitAt = this.time;
         this.maxCombo = Math.max(this.maxCombo, this.combo);
         const unit = this.units.get(event.enemyId);
@@ -568,14 +570,14 @@ export class MarchDirector {
       this.brokenProps.add(unit.breakIndex);
       this._emit('breakableBroken', { index: unit.breakIndex, breakType: unit.breakType, enemyId: unit.id, x: unit.x, y: unit.y });
       let roll = this._rand();
-      for (const [kind, chance] of TUNING.breakables.tables[unit.breakType]) {
+      for (const [kind, chance] of this.tuning.breakables.tables[unit.breakType]) {
         if (roll < chance) { this._drop(kind, unit.x, unit.y); break; }
         roll -= chance;
       }
       return;
     }
-    if (TUNING.killDrop && unit.kind !== 'lantern' && unit.kind !== 'officer' && unit.kind !== 'boss' && this._rand() < TUNING.killDrop.chance) {
-      this._drop(TUNING.killDrop.kind, unit.x, unit.y);
+    if (this.tuning.killDrop && unit.kind !== 'lantern' && unit.kind !== 'officer' && unit.kind !== 'boss' && this._rand() < this.tuning.killDrop.chance) {
+      this._drop(this.tuning.killDrop.kind, unit.x, unit.y);
     }
     if (unit.kind === 'lantern') {
       seg.broken++;
@@ -585,7 +587,7 @@ export class MarchDirector {
       this._officerDown(unit);
       this._openGate(this.segmentIndex);
     } else if (unit.kind === 'boss') {
-      this._emit('bossDown', { enemyId: unit.id, name: unit.name, x: unit.x, y: unit.y, slowMo: TUNING.killSlowMo, banner: `敵將 ${unit.name} 擊破！` });
+      this._emit('bossDown', { enemyId: unit.id, name: unit.name, x: unit.x, y: unit.y, slowMo: this.tuning.killSlowMo, banner: `敵將 ${unit.name} 擊破！` });
       this._clear();
     } else if (unit.captain) {
       this._captainDown(unit);
@@ -596,32 +598,32 @@ export class MarchDirector {
       if (seg.kills === 24 && seg.hints === 2) { seg.hints = 3; this._say('打破木箱、酒甕、木桶，裡面有護符、靈燈和魂晶', 5); }
       if (seg.kills === 34 && seg.hints === 3) { seg.hints = 4; this._say('變招：輕攻擊按 1～4 下再接重擊，每種按法都是不同的招', 6); }
       if (seg.kills === 46 && seg.hints === 4) { seg.hints = 5; this._say('閃避完馬上按輕攻擊：轉身反擊「迴身斬」', 5); }
-      if (seg.kills >= TUNING.market.goal) {
-        if (TUNING.officers.market) { if (seg.officerAt === null && !seg.foeId) seg.officerAt = this.time + 1; }
+      if (seg.kills >= this.tuning.market.goal) {
+        if (this.tuning.officers.market) { if (seg.officerAt === null && !seg.foeId) seg.officerAt = this.time + 1; }
         else this._openGate(0);
       }
     }
   }
 
   _officerDown(unit) {
-    const radius = TUNING.staggerRadius * PX_PER_M;
+    const radius = this.tuning.staggerRadius * PX_PER_M;
     let count = 0;
     for (const enemy of this.arena.enemies) {
       if (enemy.action === 'dead' || enemy.prop || enemy.kind === 'boss' || enemy.kind === 'officer') continue;
       if (Math.hypot(enemy.x - unit.x, enemy.y - unit.y) > radius) continue;
       if (enemy.ai === 'external' && !enemy.special) this._aggro(enemy);
-      if (this.arena.stagger(enemy, TUNING.staggerSeconds)) count++;
+      if (this.arena.stagger(enemy, this.tuning.staggerSeconds)) count++;
     }
-    this._emit('officerDown', { enemyId: unit.id, name: unit.name, x: unit.x, y: unit.y, slowMo: TUNING.killSlowMo, banner: `敵將 ${unit.name} 擊破！` });
-    this._emit('stagger', { x: unit.x, y: unit.y, radius, duration: TUNING.staggerSeconds, count });
-    this._drop('bun', unit.x, unit.y, { heal: TUNING.officerHeal });
+    this._emit('officerDown', { enemyId: unit.id, name: unit.name, x: unit.x, y: unit.y, slowMo: this.tuning.killSlowMo, banner: `敵將 ${unit.name} 擊破！` });
+    this._emit('stagger', { x: unit.x, y: unit.y, radius, duration: this.tuning.staggerSeconds, count });
+    this._drop('bun', unit.x, unit.y, { heal: this.tuning.officerHeal });
   }
 
-  /** Drops a pickup: kind 'bun' | 'bigBun' | 'wine' (see TUNING.drops). */
+  /** Drops a pickup: kind 'bun' | 'bigBun' | 'wine' (see this.tuning.drops). */
   _drop(kind, x, y, override = null) {
     const p = clampToRegion(this._region(), toWorld(x, y));
-    const stats = override || TUNING.drops[kind];
-    const drop = { id: this.nextPickupId++, kind, ...toPx(p.x, p.z), amount: stats.heal || 0, energy: stats.energy || 0, until: this.time + TUNING.pickupLife };
+    const stats = override || this.tuning.drops[kind];
+    const drop = { id: this.nextPickupId++, kind, ...toPx(p.x, p.z), amount: stats.heal || 0, energy: stats.energy || 0, until: this.time + this.tuning.pickupLife };
     this.pickups.push(drop);
     this._emit('drop', { pickupId: drop.id, kind, x: drop.x, y: drop.y, amount: drop.amount, energy: drop.energy });
     return drop;
@@ -694,7 +696,7 @@ export class MarchDirector {
     const i = this.segmentIndex, seg = this.seg;
     const heroW = toWorld(this.arena.hero.x, this.arena.hero.y);
     if (i === 0 && !this.gates[0].open) {
-      const t = TUNING.market, segment = LEVEL.segments[0];
+      const t = this.tuning.market, segment = LEVEL.segments[0];
       if (seg.officerAt !== null && this.time >= seg.officerAt) {
         seg.officerAt = null;
         this._spawnOfficer('market', LAYOUT.spawns.officers.market);
@@ -715,7 +717,7 @@ export class MarchDirector {
         } else seg.nextGroupAt = this.time + 1;
       }
     } else if (i === 1) {
-      const t = TUNING.plaza;
+      const t = this.tuning.plaza;
       seg.lanternIds.forEach((id, index) => {
         const lantern = this.units.get(id);
         if (!lantern || lantern.hp <= 0 || this.time < seg.nextSpawnAt[index]) return;
@@ -740,7 +742,7 @@ export class MarchDirector {
   }
 
   _tickLamp(dt, seg) {
-    const t = TUNING.stairs;
+    const t = this.tuning.stairs;
     if (!seg.secured) {
       if (seg.lamp.down > 0) {
         seg.lamp.down = Math.max(0, seg.lamp.down - dt);
@@ -786,7 +788,7 @@ export class MarchDirector {
     }
     if (seg.officerAt !== null && this.time >= seg.officerAt) {
       seg.officerAt = null;
-      const o = TUNING.officers.shadow;
+      const o = this.tuning.officers.shadow;
       const unit = this._spawnUnit('officer', 0, -79, { kind: 'officer', name: o.name, hp: o.hp, ai: 'external', fixed: true, specialScale: o.specialScale, guard: o.guard, guardRearm: o.guardRearm, variant: 'shadow', action: 'chase', mode: 'chase', modeTime: 0, cooldown: 1.2, range: 80 });
       seg.foeId = unit.id;
       this._emit('officer', { enemyId: unit.id, name: o.name, variant: 'shadow', x: unit.x, y: unit.y });
@@ -796,7 +798,7 @@ export class MarchDirector {
 
   /** Arena-driven officer (赤角 style): guard, slow turn, heavier hits. */
   _spawnOfficer(variant, at) {
-    const o = TUNING.officers[variant];
+    const o = this.tuning.officers[variant];
     const unit = this._spawnUnit('officer', at.x, at.z, { kind: 'officer', name: o.name, hp: o.hp, speed: o.speed, range: o.range, damage: o.damage, telegraphTime: o.telegraphTime, recover: o.recover, specialScale: o.specialScale, cooldown: o.cooldown, guard: o.guard, guardRearm: o.guardRearm, turnRate: o.turnRate, facing: Math.PI / 2, variant });
     this.seg.foeId = unit.id;
     this._emit('officer', { enemyId: unit.id, name: o.name, variant, x: unit.x, y: unit.y });
@@ -813,8 +815,8 @@ export class MarchDirector {
     if (seg.lamp.hp > 0) return;
     seg.breaks++;
     seg.lamp.hp = seg.lamp.maxHp;
-    seg.lamp.down = TUNING.stairs.relight;
-    seg.timer = TUNING.stairs.holdSeconds;
+    seg.lamp.down = this.tuning.stairs.relight;
+    seg.timer = this.tuning.stairs.holdSeconds;
     this._emit('lampBroken', { ...at, breaks: seg.breaks });
     this._say('魂燈被打爆了，計時重來！', 2.5);
   }
@@ -874,7 +876,7 @@ export class MarchDirector {
 
   _raider(enemy, dt) {
     const hero = this.arena.hero;
-    if (Math.hypot(hero.x - enemy.x, hero.y - enemy.y) < TUNING.stairs.raiderAggro) { this._aggro(enemy); return; }
+    if (Math.hypot(hero.x - enemy.x, hero.y - enemy.y) < this.tuning.stairs.raiderAggro) { this._aggro(enemy); return; }
     const lamp = toPx(LEVEL.lamp.x, LEVEL.lamp.z);
     if (enemy.action === 'telegraph') {
       enemy.telegraph = Math.max(0, enemy.telegraph - dt);
@@ -886,7 +888,7 @@ export class MarchDirector {
     } else if (enemy.action === 'attack') {
       if (enemy.actionTime >= 0.3) { this._setAction(enemy, 'chase'); enemy.cooldown = 1.4; }
     } else {
-      const speed = enemy.role === 'runner' ? TUNING.stairs.raiderSpeed[1] : TUNING.stairs.raiderSpeed[0];
+      const speed = enemy.role === 'runner' ? this.tuning.stairs.raiderSpeed[1] : this.tuning.stairs.raiderSpeed[0];
       const d = this._moveToward(enemy, lamp.x, lamp.y, speed, dt, 85);
       if (d <= 90 && enemy.cooldown <= 0 && !(this.seg.lamp.down > 0)) {
         this._setAction(enemy, 'telegraph');
@@ -905,7 +907,7 @@ export class MarchDirector {
 
   /** 影爪: fast chase, then a volley of telegraphed straight lunges, then a punishable recovery. */
   _lunger(enemy, dt) {
-    const o = TUNING.officers.shadow, hero = this.arena.hero;
+    const o = this.tuning.officers.shadow, hero = this.arena.hero;
     const aim = first => {
       enemy.facing = Math.atan2(hero.y - enemy.y, hero.x - enemy.x);
       enemy.mode = 'aim';
@@ -947,11 +949,11 @@ export class MarchDirector {
     }
   }
 
-  // ---- 特殊敵人（TUNING.specials 設 null 就不生成）--------------------------------------
+  // ---- 特殊敵人（this.tuning.specials 設 null 就不生成）--------------------------------------
 
   /** 每段開始 first 秒後，每 every 秒補一隻，同時最多 maxAlive 隻；不算進市集擊倒目標 */
   _tickSpecials() {
-    const cfg = TUNING.specials, seg = this.seg, i = this.segmentIndex;
+    const cfg = this.tuning.specials, seg = this.seg, i = this.segmentIndex;
     if (this._specialFor !== seg) {
       this._specialFor = seg;
       this.specialAt = this.time + cfg.first;
@@ -969,11 +971,11 @@ export class MarchDirector {
     this.specialAt = this.time + cfg.every;
   }
 
-  // ---- 隊長（TUNING.captains 設 null 就不生成）-------------------------------------------
+  // ---- 隊長（this.tuning.captains 設 null 就不生成）-------------------------------------------
 
   /** 每段開始 first 秒後出第一個，之後每 every 秒一個，同時只有一個；敵將或魔王出場後、過關後就不再出 */
   _tickCaptains() {
-    const cfg = TUNING.captains, seg = this.seg, i = this.segmentIndex;
+    const cfg = this.tuning.captains, seg = this.seg, i = this.segmentIndex;
     if (this._captainFor !== seg) {
       this._captainFor = seg;
       this.captainAt = this.time + cfg.first;
@@ -987,7 +989,7 @@ export class MarchDirector {
     const at = this._flankSpot();
     const name = CAPTAIN_NAMES[Math.floor(this._rand() * CAPTAIN_NAMES.length)];
     this._spawnUnit('captain', at.x, at.z, captainOptions(name));
-    const share = i === 0 ? TUNING.market.runnerShare : i === 1 ? TUNING.plaza.runnerShare : TUNING.stairs.runnerShare;
+    const share = i === 0 ? this.tuning.market.runnerShare : i === 1 ? this.tuning.plaza.runnerShare : this.tuning.stairs.runnerShare;
     for (let k = 0; k < CAPTAIN.escorts && this.room() > 0; k++) {
       const a = (k / CAPTAIN.escorts) * Math.PI * 2;
       this._grunt(at.x + Math.cos(a) * 1.4, at.z + Math.sin(a) * 1.4, share, { escort: true });   // 護衛：不算進市集擊倒目標
@@ -1006,9 +1008,9 @@ export class MarchDirector {
       if (enemy === unit || enemy.action === 'dead' || enemy.prop || enemy.kind === 'boss' || enemy.kind === 'officer' || enemy.captain) continue;
       if (Math.hypot(enemy.x - unit.x, enemy.y - unit.y) > radius) continue;
       if (enemy.ai === 'external' && !enemy.special) this._aggro(enemy);
-      if (this.arena.stagger(enemy, TUNING.staggerSeconds)) count++;
+      if (this.arena.stagger(enemy, this.tuning.staggerSeconds)) count++;
     }
-    this._emit('stagger', { x: unit.x, y: unit.y, radius, duration: TUNING.staggerSeconds, count });
+    this._emit('stagger', { x: unit.x, y: unit.y, radius, duration: this.tuning.staggerSeconds, count });
     this._drop('bun', unit.x, unit.y, { heal: CAPTAIN.heal });
     this._say(unit.name ? `隊長 ${unit.name} 擊破！` : '隊長擊破！', 2);
   }
@@ -1140,14 +1142,14 @@ export class MarchDirector {
     const radius = LAYOUT.spawns.bossSummonRadius;
     for (let k = 0; k < size; k++) {
       const angle = k / size * Math.PI * 2;
-      this._spawnUnit('grunt', center.x + Math.cos(angle) * radius, center.z + Math.sin(angle) * radius, { kind: 'grunt', hp: TUNING.units.gruntHp, recover: TUNING.units.recover.grunt, cooldown: 1 + k * 0.1 });
+      this._spawnUnit('grunt', center.x + Math.cos(angle) * radius, center.z + Math.sin(angle) * radius, { kind: 'grunt', hp: this.tuning.units.gruntHp, recover: this.tuning.units.recover.grunt, cooldown: 1 + k * 0.1 });
     }
     this._emit('summon', { enemyId: enemy.id, count: size, x: enemy.x, y: enemy.y });
   }
 
   /** 鬼門守將: jump slam + sweep with ground telegraphs; at half hp roar, summon, double slam. */
   _boss(enemy, dt) {
-    const b = TUNING.boss, hero = this.arena.hero;
+    const b = this.tuning.boss, hero = this.arena.hero;
     const phase2 = enemy.phase === 2;
     enemy.modeTime += dt;
     const setMode = (mode, action) => { enemy.mode = mode; enemy.modeTime = 0; this._setAction(enemy, action); };
