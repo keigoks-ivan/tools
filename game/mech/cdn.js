@@ -8,7 +8,7 @@
 //   ★ 新增或更換這兩個資料夾裡的圖片、模型、HDR 之後，把 ASSET_SHA 改成那次 commit（或更新的）的 SHA。
 import * as THREE from 'three';
 const REPO = 'keigoks-ivan/tools';
-const ASSET_SHA = 'ef0f5b019c27d83cbaa390563ab065842495c4b5';   // 2026-09-30：最後一次改素材（新增 concrete_grey_col.webp）
+const ASSET_SHA = 'b3e500d281997c7ece03be4296854603f417364c';   // 2026-10-01：共用城市立面、建材與壓縮枝葉
 const EXT = /\.(jpe?g|png|webp|hdr|glb|gltf|bin)$/i;
 
 function timed(url, opt, ms) {
