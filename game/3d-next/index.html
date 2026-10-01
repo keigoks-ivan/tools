@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#090f1b">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
-  <title>紫刃夜行｜三關戰役</title>
+  <title>紫刃夜行｜五關戰役</title>
   <link rel="stylesheet" href="../2d/style.css?v=20260924h">
   <style>
     html,body,#game,#game *{touch-action:none;overscroll-behavior:none}
@@ -49,6 +49,9 @@
     .loadout-card{width:min(690px,calc(100vw - 48px));max-height:calc(100dvh - 48px);overflow:auto;box-sizing:border-box;touch-action:pan-y!important}
     .loadout-card *{touch-action:pan-y!important}
     .loadout-card h2{margin-top:12px}
+    .combo-route{position:absolute;left:calc(24px + var(--safe-left,0px));bottom:94px;padding:10px 14px;border-left:2px solid var(--hero-color);background:linear-gradient(90deg,rgba(9,12,22,.88),rgba(9,12,22,.15));pointer-events:none}
+    .combo-route[hidden]{display:none}.combo-route b{display:block;color:var(--hero-color);font-size:18px}.combo-route span{display:block;font-size:11px;color:#f2e7db;margin:4px 0}.combo-route i{display:inline-block;width:13px;height:3px;margin-right:4px;background:#4b4a57}.combo-route i.lit{background:var(--hero-color);box-shadow:0 0 7px var(--hero-color)}
+    @media(pointer:coarse){.combo-route{bottom:190px}}@media(max-height:500px){.combo-route{left:calc(14px + var(--safe-left,0px));bottom:74px;padding:6px 10px}.combo-route b{font-size:14px}.combo-route span{font-size:10px}}
     .hero-options{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:20px 0;text-align:left}
     .hero-option{padding:15px 10px;border:1px solid #494451;border-radius:6px;background:#131b2a;color:#e9e1ef;font:inherit;cursor:pointer}
     .hero-option[aria-pressed="true"]{border-color:var(--hero-color);background:linear-gradient(145deg,#2a3045,#161c2b);box-shadow:inset 0 0 0 1px var(--hero-color)}
@@ -78,11 +81,11 @@
       <div class="title-content">
         <div class="edition"><span class="edition-mark"></span> VIOLET EDGE　／　3D FIELD TEST</div>
         <h1 id="gameTitle">紫刃夜行<br><em>VIOLET EDGE</em></h1>
-        <p class="title-subtitle">三位刀客・三關戰役</p>
-        <p class="title-copy">從夜市突圍、赤月圍城到虛空封魂。選擇長刀、大劍或雙刃，以不同招式封住鬼門。</p>
-        <p class="prototype-note">三位刀客　·　三關戰役　·　<span id="soundNote">靜音測試</span></p>
+        <p class="title-subtitle">三位武者・五關戰役</p>
+        <p class="title-copy">從夜市突圍一路闖到霜橋與天闕。選擇長刀、偃月刀或雙刃，以不同招式封住鬼門。</p>
+        <p class="prototype-note">三位武者　·　五關戰役　·　<span id="soundNote">靜音測試</span></p>
         <button id="soundToggle" class="sound-toggle" type="button" aria-pressed="false" hidden>🔊 聲音：開</button> <button id="fullscreenToggle" class="sound-toggle fullscreen-toggle" type="button" aria-pressed="false" hidden>⛶ 全螢幕（F）</button>
-        <button id="start" class="primary-button" type="button"><span>選擇刀客與關卡</span><b aria-hidden="true">↗</b></button>
+        <button id="start" class="primary-button" type="button"><span>選擇角色與關卡</span><b aria-hidden="true">↗</b></button>
         <div id="loadPanel" class="load-panel" hidden><div class="load-head"><span class="load-stage">角色模型</span><b class="load-pct">0%</b></div><div class="load-progress" role="progressbar" aria-label="載入進度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i></i></div></div>
         <p id="loadstatus" role="status" aria-live="polite">按開始後才載入 3D 場景</p>
         <a class="version-link" href="../">返回遊戲首頁 ↗</a>
@@ -92,16 +95,16 @@
     <section id="loadout" class="dialog-screen" hidden aria-labelledby="loadoutTitle">
       <div class="dialog-card loadout-card">
         <div class="section-kicker">VIOLET EDGE ／ 出擊準備</div>
-        <h2 id="loadoutTitle">選擇刀客</h2>
+        <h2 id="loadoutTitle">選擇角色</h2>
         <p>三種武器、三種戰鬥節奏。通關後可接續下一關。</p>
         <div class="hero-options" aria-label="角色選擇">
-          <button type="button" class="hero-option" data-character="violet" aria-pressed="true" style="--hero-color:#b994ff"><span class="hero-symbol">刀</span><b>紫刃</b><small>靈力長刀 · 體力 100</small><span>五段均衡連斬<br>昇龍斬／地裂斬</span><em>天刃亂舞</em></button>
-          <button type="button" class="hero-option" data-character="azure" aria-pressed="false" style="--hero-color:#82cfff"><span class="hero-symbol">劍</span><b>蒼鋒</b><small>破魔大劍 · 體力 125</small><span>三段重斬破防<br>破陣斬／崩山震</span><em>崩山鎮魂</em></button>
-          <button type="button" class="hero-option" data-character="amber" aria-pressed="false" style="--hero-color:#ffd37a"><span class="hero-symbol">雙</span><b>金燕</b><small>疾風雙刃 · 體力 85</small><span>六段高速快斬<br>燕返斬／穿風突</span><em>燕返千刃</em></button>
+          <button type="button" class="hero-option" data-character="violet" aria-pressed="true" style="--hero-color:#b994ff"><span class="hero-symbol">刀</span><b>紫刃</b><small>靈力長刀 · 體力 100</small><span>五段均衡連斬<br>昇龍斬／地裂斬</span><em>月影一閃</em></button>
+          <button type="button" class="hero-option" data-character="azure" aria-pressed="false" style="--hero-color:#82cfff"><span class="hero-symbol">戟</span><b>蒼鋒</b><small>蒼龍偃月刀 · 體力 125</small><span>橫掃・挑斬・重劈破防<br>破陣斬／崩山震</span><em>蒼龍裂陣</em></button>
+          <button type="button" class="hero-option" data-character="amber" aria-pressed="false" style="--hero-color:#ffd37a"><span class="hero-symbol">雙</span><b>金燕</b><small>疾風雙刃 · 體力 85</small><span>六段高速快斬<br>燕返斬／穿風突</span><em>金燕八閃</em></button>
         </div>
         <label class="chapter-label" for="chapterSelect">起始關卡</label>
-        <select id="chapterSelect"><option value="0">01 夜市突圍 · 妖燈與魂燈</option><option value="1">02 赤月圍城 · 盾兵與弓手</option><option value="2">03 虛空封魂 · 召喚師與疾行妖兵</option></select>
-        <p class="loadout-note">J 連斬 · 連斬途中 K 變招 · Shift 閃避後 J 反擊 · E 大絕<br>可按 1 / 2 / 3 選角。角色沿用共用動畫骨架。</p>
+        <select id="chapterSelect"><option value="0">01 夜市突圍 · 妖燈與魂燈</option><option value="1">02 赤月圍城 · 盾兵與弓手</option><option value="2">03 虛空封魂 · 召喚師與疾行妖兵</option><option value="3">04 霜橋追魂 · 雪橋與冰燈</option><option value="4">05 天闕決戰 · 長廊與祭燈</option></select>
+        <p class="loadout-note">J 連斬 · 連斬途中 K 變招 · Shift 閃避後 J 反擊 · E 大絕<br>可按 1 / 2 / 3 選角。可長按 J 接續連斬。</p>
         <div class="loadout-actions"><button id="loadoutBack" class="sound-toggle" type="button">返回</button><button id="deploy" class="primary-button" type="button"><span>出擊</span><b aria-hidden="true">↗</b></button></div>
       </div>
     </section>
@@ -114,15 +117,16 @@
       </div>
       <div id="comboText" class="combo-text" aria-live="polite"></div>
       <div id="toast" class="battle-toast" role="status" aria-live="polite"></div>
-      <div class="hud-footer"><span>紫刃　／　NIGHT MARKET INCIDENT</span><span>THREE CHAPTER CAMPAIGN</span></div>
+      <div id="comboRoute" class="combo-route" hidden><b></b><span></span><div></div></div>
+      <div class="hud-footer"><span>紫刃　／　NIGHT MARKET INCIDENT</span><span>FIVE CHAPTER CAMPAIGN</span></div>
     </section>
     <section id="touchControls" class="touch-controls" aria-label="觸控操作"><div id="stick" class="stick" role="application" aria-label="方向控制"><span class="stick-ring"></span><span id="knob" class="stick-knob"></span></div><div class="touch-actions"><button type="button" data-action="special" aria-label="絕招">絕</button><button type="button" data-action="dodge" aria-label="閃避">閃</button><button type="button" data-action="heavy" aria-label="重擊">重</button><button type="button" data-action="attack" aria-label="攻擊">攻</button><button type="button" data-action="jump" aria-label="跳躍" hidden>跳</button></div></section>
     <section id="result" class="dialog-screen result-screen" hidden aria-labelledby="resultTitle"><div class="dialog-card"><div class="section-kicker">NIGHT MARKET　／　FIELD REPORT</div><h2 id="resultTitle">夜市暫告一段落</h2><p id="resultText"></p><button id="retry" class="primary-button" type="button"><span>再試一次</span><b aria-hidden="true">↗</b></button><button id="chooseLoadout" class="sound-toggle" type="button">重新選角／選關</button><button id="nextChapter" class="primary-button" type="button" hidden><span>前往下一關</span><b aria-hidden="true">↗</b></button><button id="restartCampaign" class="primary-button" type="button" hidden><span>重新開始戰役</span><b aria-hidden="true">↗</b></button></div></section>
-    <section id="pauseOverlay" class="dialog-screen" hidden aria-labelledby="pauseTitle"><div class="dialog-card pause-card"><div class="section-kicker">FIELD TEST　／　PAUSED</div><h2 id="pauseTitle">先歇一下</h2><p>準備好後繼續夜市突圍。</p><button id="resume" class="primary-button" type="button"><span>繼續戰鬥</span><b aria-hidden="true">↗</b></button></div></section>
+    <section id="pauseOverlay" class="dialog-screen" hidden aria-labelledby="pauseTitle"><div class="dialog-card pause-card"><div class="section-kicker">FIELD TEST　／　PAUSED</div><h2 id="pauseTitle">先歇一下</h2><p>準備好後繼續戰鬥。</p><button id="resume" class="primary-button" type="button"><span>繼續戰鬥</span><b aria-hidden="true">↗</b></button></div></section>
     <section id="rotateOverlay" class="rotate-overlay" hidden role="status" aria-live="polite"><div class="rotate-card"><span class="rotate-icon" aria-hidden="true">↻</span><b>請轉橫向遊玩</b><span>畫面已暫停，轉回橫向即可繼續。</span></div></section>
-    <footer id="help" class="help-bar"><span class="desktop-help"><b>移動</b> WASD / ↑↓←→ <i></i> <b>攻擊</b> J <i></i> <b>重擊</b> K <i></i> <span data-branch-help><b>變招</b> J×1～4→K</span> <i></i> <b>閃避</b> Shift <i></i> <b>絕招</b> E <i></i> <span data-jump-help hidden><b>跳躍</b> Space <i></i></span> <b>暫停</b> P<span data-fullscreen-help hidden> <i></i> <b>全螢幕</b> F</span></span><span class="touch-help">左側移動　·　右側攻擊</span><span class="silent-note" id="soundState">靜音試作</span></footer>
+    <footer id="help" class="help-bar"><span class="desktop-help"><b>移動</b> WASD / ↑↓←→ <i></i> <b>連斬</b> J 連按／長按 <i></i> <b>重擊</b> K <i></i> <span data-branch-help><b>變招</b> J×1～4→K</span> <i></i> <b>閃避</b> Shift <i></i> <b>絕招</b> E <i></i> <span data-jump-help hidden><b>跳躍</b> Space <i></i></span> <b>暫停</b> P<span data-fullscreen-help hidden> <i></i> <b>全螢幕</b> F</span></span><span class="touch-help">左側移動　·　右側攻擊</span><span class="silent-note" id="soundState">靜音試作</span></footer>
     <div id="diagnostics"></div>
   </main>
-  <script type="module" src="./boot.js?v=20261001a"></script>
+  <script type="module" src="./boot.js?v=20261002b"></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-import { MUSOU_CHAIN, MUSOU_CHARGE, MUSOU_HEAVY, MUSOU_COUNTER, MUSOU_FLURRY } from '../2d/combat.js?v=20261001a';
+import { MUSOU_CHAIN, MUSOU_CHARGE, MUSOU_HEAVY, MUSOU_COUNTER, MUSOU_FLURRY } from '../2d/combat.js?v=20261002b';
 
 const full = Math.PI * 2;
 const flurry = changes => ({
@@ -6,22 +6,24 @@ const flurry = changes => ({
   true: { ...MUSOU_FLURRY.true, ...changes, damageScale: 1.5 },
 });
 
-// Profiles are opt-in: the 2.5D and co-op entries retain the original Arena defaults.
+// Profiles are opt-in: legacy entries retain the original Arena defaults.
 export const HEROES = {
   violet: {
     id: 'violet', name: '紫刃', mark: '紫', weapon: '靈力長刀', color: '#b994ff', tint: 0xc4a3ff,
-    style: '均衡連斬', description: '五段連斬，重擊接昇龍、疾風突與地裂斬。', special: '天刃亂舞',
+    style: '均衡連斬', description: '五段連斬，重擊接昇龍、疾風突與地裂斬。', special: '月影一閃',
     maxHp: 100, speed: 1, chain: MUSOU_CHAIN, charges: MUSOU_CHARGE, heavy: MUSOU_HEAVY, counter: MUSOU_COUNTER,
-    flurry: MUSOU_FLURRY,
+    flurry: flurry({ duration: 3.15, swingStart: 0.55, swingEnd: 1.65, swings: 3, radius: 220, damage: 7, steer: 30,
+      impact: 2.65, finishRadius: 360, finishDamage: 34, leapAt: null, sweeps: [],
+      timeScale: [[0, 1], [2.48, 1], [2.48, 0.25], [2.78, 0.25], [3.15, 1]], freezes: [{ at: 0, real: 0.08 }, { at: 2.65, real: 0.09 }] }),
   },
   azure: {
-    id: 'azure', name: '蒼鋒', mark: '蒼', weapon: '破魔大劍', color: '#82cfff', tint: 0x82cfff,
-    style: '重斬破防', description: '三段重斬，攻速較慢、範圍較大；重擊震退敵群。', special: '崩山鎮魂',
+    id: 'azure', name: '蒼鋒', mark: '蒼', weapon: '蒼龍偃月刀', color: '#82cfff', tint: 0x82cfff,
+    style: '長兵橫掃', description: '橫掃、挑斬、重劈三連段；長柄偃月刀壓制敵群。', special: '蒼龍裂陣',
     maxHp: 125, speed: 0.86,
     chain: [
-      { clip: 'combo1', duration: 0.7, hits: [0.28], cancel: 0.43, radius: 195, arc: Math.PI, damage: 9, dash: 80 },
-      { clip: 'combo2', duration: 0.76, hits: [0.3], cancel: 0.49, radius: 210, arc: Math.PI * 1.3, damage: 10, dash: 80 },
-      { clip: 'heavyfin', duration: 1.12, hits: [0.68], cancel: Infinity, radius: 260, arc: full, damage: 16, finisher: 16, dash: 55 },
+      { clip: 'slash4', duration: 0.7, hits: [0.28], cancel: 0.43, radius: 235, arc: Math.PI * 1.3, damage: 12, dash: 80 },
+      { clip: 'heavy', duration: 0.76, hits: [0.3], cancel: 0.49, radius: 250, arc: Math.PI * 1.3, damage: 14, dash: 80 },
+      { clip: 'heavyfin', duration: 1.12, hits: [0.68], cancel: Infinity, radius: 290, arc: full, damage: 22, finisher: 22, dash: 55 },
     ],
     charges: [
       { name: '破陣斬', clip: 'heavy', duration: 0.86, hits: [0.43], cancel: Infinity, radius: 230, arc: Math.PI, damage: 15, finisher: 15, dash: 190 },
@@ -29,11 +31,13 @@ export const HEROES = {
     ],
     heavy: { name: '裂地重斬', clip: 'heavyfin', duration: 1.15, hits: [0.67], cancel: Infinity, radius: 265, arc: full, damage: 18, finisher: 18, dash: 60 },
     counter: { ...MUSOU_COUNTER, name: '鐵壁回斬', duration: 0.68, hits: [0.24], cancel: 0.4, radius: 220, damage: 11, dash: 80 },
-    flurry: flurry({ swings: 5, radius: 285, damage: 9, steer: 45, finishRadius: 390, finishDamage: 28, sweeps: [2, 4, 5] }),
+    flurry: flurry({ duration: 3.6, swingStart: 0.9, swingEnd: 2.4, swings: 3, radius: 420, damage: 10, steer: 0,
+      swingRadii: [230, 320, 420], swingDamage: [9, 12, 15], impact: 3.05, finishRadius: 450, finishDamage: 27, leapAt: null, sweeps: [],
+      timeScale: [[0, 1], [2.92, 1], [2.92, 0.35], [3.22, 0.35], [3.6, 1]], freezes: [{ at: 0, real: 0.08 }, { at: 3.05, real: 0.09 }] }),
   },
   amber: {
     id: 'amber', name: '金燕', mark: '燕', weapon: '疾風雙刃', color: '#ffd37a', tint: 0xffd37a,
-    style: '疾速突進', description: '六段快斬，單擊較輕、移動較快；重擊穿過敵陣。', special: '燕返千刃',
+    style: '疾速突進', description: '六段快斬，單擊較輕、移動較快；重擊穿過敵陣。', special: '金燕八閃',
     maxHp: 85, speed: 1.18,
     chain: Array.from({ length: 6 }, (_, i) => ({
       clip: ['combo1', 'combo2', 'slash3', 'slash4', 'combo2', 'combo4'][i],
@@ -47,7 +51,9 @@ export const HEROES = {
     })),
     heavy: { name: '穿風雙突', clip: 'slash4', duration: 0.52, hits: [0.13, 0.33], cancel: Infinity, radius: 140, arc: Math.PI * 0.65, damage: 6, finisher: 8, dash: 660 },
     counter: { ...MUSOU_COUNTER, name: '閃身燕返', duration: 0.34, hits: [0.1], cancel: 0.22, radius: 155, damage: 6, dash: 300 },
-    flurry: flurry({ swings: 16, radius: 180, damage: 3, steer: 180, finishRadius: 290, finishDamage: 17, sweeps: [4, 8, 12, 16] }),
+    flurry: flurry({ duration: 2.8, swingStart: 0.38, swingEnd: 2.05, swings: 8, radius: 180, damage: 5, steer: 0,
+      dashDistance: 65, impact: 2.35, finishRadius: 330, finishDamage: 22, leapAt: null, sweeps: [],
+      timeScale: [[0, 1], [2.25, 1], [2.25, 0.3], [2.48, 0.3], [2.8, 1]], freezes: [{ at: 0, real: 0.06 }, { at: 2.35, real: 0.07 }] }),
   },
 };
 

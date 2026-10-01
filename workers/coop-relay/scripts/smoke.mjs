@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * 端對端冒煙測試：本機啟動 `wrangler dev`（Durable Object 在本機跑，不需帳號、不部署），
- * 用 Node 內建 WebSocket 連三個玩家，驗證代號驗證、節流、開房、加入、轉發、房主轉移、第 4 人被拒、重連取代，
+ * 用 Node 內建 WebSocket 連三個玩家，驗證代號驗證、節流、開房、加入、轉發、房主轉移、滿房後被拒、重連取代，
  * 以及第二階段的戰場訊息（e 只收房主、4096 上限）、命中申報（h 只給房主）、交棒（y），最後關掉伺服器。
  *
  *   cd workers/coop-relay && npm install && node scripts/smoke.mjs
@@ -19,7 +19,7 @@ const root = join(here, '..');
 const PORT = Number(process.env.SMOKE_PORT || 8799);
 const BASE = `http://127.0.0.1:${PORT}`;
 const ORIGIN = 'http://localhost:8931';
-const CODES = { 'smoke-alpha': '甲', 'smoke-bravo': '乙', 'smoke-charlie': '丙' };
+const CODES = { 'smoke-alpha': '甲', 'smoke-bravo': '乙', 'smoke-charlie': '丙', 'smoke-delta': '丁' };
 
 const temp = mkdtempSync(join(tmpdir(), 'coop-smoke-'));
 const envFile = join(temp, 'smoke.env');
@@ -108,14 +108,26 @@ try {
   check(!!(await a.next(m => m.t === 'join' && m.member.id === '乙')), 'host told about join');
   const c = connect(room, tokens['丙']);
   check(!!(await c.next(m => m.t === 'welcome' && m.members.length === 3)), 'third player joins');
+  const fourth = connect(room, tokens['丁']);
+  check(!!(await fourth.next(m => m.t === 'welcome' && m.members.length === 4)), 'fourth player joins under the production cap');
+  fourth.ws.close();
+  check(!!(await a.next(m => m.t === 'leave' && m.id === '丁')), 'fourth player leaves cleanly');
 
   // --- 狀態轉發（只轉白名單欄位、不回送給自己） ---
-  a.ws.send(JSON.stringify({ t: 's', d: { x: 1.5, y: 0, z: -2, r: 0.3, a: 'run', at: 0.2, ts: 1, l: 1, c: 1234, evil: 'x'.repeat(10) } }));
+  a.ws.send(JSON.stringify({ t: 's', d: { x: 1.5, y: 0, z: -2, r: 0.3, a: 'azure_run_myb', at: 0.2, ts: 1, l: 1, c: 1234, evil: 'x'.repeat(10) } }));
   const relayed = await b.next(m => m.t === 's');
-  check(relayed?.p === '甲' && relayed.d.x === 1.5 && relayed.d.a === 'run' && relayed.d.evil === undefined, 'state relayed to others with sender id, extra fields stripped');
+  check(relayed?.p === '甲' && relayed.d.x === 1.5 && relayed.d.a === 'azure_run_myb' && relayed.d.evil === undefined, 'state relayed to others with sender id, extra fields stripped');
   check(!!(await c.next(m => m.t === 's' && m.p === '甲')), 'state reaches third player');
   await sleep(200);
   check(!a.messages.some(m => m.t === 's'), 'sender does not get its own state back');
+
+  a.ws.send(JSON.stringify({ t: 's', d: { x: 0, y: 0, z: 0, r: 0, a: 'loadout_azure_1', c: 12345 } }));
+  const choice = await b.next(m => m.t === 's');
+  check(choice?.d.a === 'loadout_azure_1' && choice.d.c === 12345, 'selected character, readiness and revision pass the deployed state allowlist');
+  a.ws.send(JSON.stringify({ t: 'e', d: { loadout: { ch: 'azure', lv: 4, ready: 1, rv: 12345, go: 12345 } } }));
+  const loadout = await b.next(m => m.t === 'e');
+  check(loadout?.d.loadout.ch === 'azure' && loadout.d.loadout.lv === 4 && loadout.d.loadout.rv === 12345 && loadout.d.loadout.go === 12345, 'current host chapter and run reach guests through the existing authoritative envelope');
+  for (const p of [a, b, c]) p.messages.length = 0;
 
   // --- 速率限制：一口氣送 60 則，其他人最多收到 40 則 ---
   b.messages.length = 0;
@@ -254,7 +266,7 @@ const connectAt = (base, room, token) => {
   return client;
 };
 
-// --- 滿房：房間上限調成 2（ROOM_CAP 只能調小），第 3 個不同的人被拒 → 驗證「第 4 人被拒」的同一條程式路徑 ---
+// --- 滿房：房間上限調成 2（ROOM_CAP 只能調小），第 3 個不同的人被拒 → 驗證「滿房後被拒」的同一條程式路徑 ---
 await withServer(PORT + 1, { PLAYER_CODES: JSON.stringify(CODES), TOKEN_SECRET: 'smoke-secret-0123456789abcdef', ROOM_CAP: '2' }, async base => {
   const t = {};
   for (const [code, name] of Object.entries(CODES)) t[name] = (await authAt(base, code)).body.token;
@@ -268,12 +280,12 @@ await withServer(PORT + 1, { PLAYER_CODES: JSON.stringify(CODES), TOKEN_SECRET: 
   p1.ws.close(); p2.ws.close();
 });
 
-// --- PLAYER_CODES 放 4 組 → 設定錯誤，Worker 拒絕發憑證也拒絕連線 ---
-await withServer(PORT + 2, { PLAYER_CODES: JSON.stringify({ ...CODES, 'smoke-delta': '丁' }), TOKEN_SECRET: 'smoke-secret-0123456789abcdef' }, async base => {
+// --- PLAYER_CODES 放 5 組 → 設定錯誤，Worker 拒絕發憑證也拒絕連線 ---
+await withServer(PORT + 2, { PLAYER_CODES: JSON.stringify({ ...CODES, 'smoke-delta': '丁', 'smoke-echo': '戊' }), TOKEN_SECRET: 'smoke-secret-0123456789abcdef' }, async base => {
   const response = await authAt(base, 'smoke-alpha');
-  check(response.status === 500, `PLAYER_CODES with 4 entries → auth refused (${response.status})`);
+  check(response.status === 500, `PLAYER_CODES with 5 entries → auth refused (${response.status})`);
   const closed = await connectAt(base, 'NEW', 'x.y').closed;
-  check(closed.code === 4010, `PLAYER_CODES with 4 entries → websocket closed 4010 (${closed.code})`);
+  check(closed.code === 4010, `PLAYER_CODES with 5 entries → websocket closed 4010 (${closed.code})`);
 });
 
 console.log(failures ? `\n${failures} check(s) failed` : '\nall smoke checks passed');

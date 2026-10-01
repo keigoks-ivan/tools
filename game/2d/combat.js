@@ -135,6 +135,7 @@ export class Arena {
     this.stepDt = 0;
     this.attack = null;
     this.inputBuffer = null;
+    this.comboUntil = -Infinity;
     this.enemies = [];
     this.events = [];
     this.hero = {
@@ -274,26 +275,36 @@ export class Arena {
 
     if (pressed(input.special)) {
       this.inputBuffer = null;
+      this.comboUntil = -Infinity;
       if (hero.energy >= 100) this._startSpecial();
       return;
     }
     if (pressed(input.dodge)) {
       this.inputBuffer = null;
+      this.comboUntil = -Infinity;
       if (hero.action !== 'dead' && hero.action !== 'win' && hero.dodgeCooldown <= 0) this._startDodge(moveX, moveY);
       return;
     }
     if (this.jumpEnabled && pressed(input.jump) && (hero.action === 'idle' || hero.action === 'run')) {
       this.inputBuffer = null;
+      this.comboUntil = -Infinity;
       this._startJump();
       return;
     }
     if (pressed(input.heavy) || pressed(input.attack)) {
-      this.inputBuffer = { kind: pressed(input.heavy) ? 'heavy' : 'attack', remaining: 0.18 };
+      const kind = pressed(input.heavy) ? 'heavy' : 'attack';
+      // Character profiles keep an early tap until this move can link. A held
+      // light attack must not overwrite the player's explicitly queued heavy branch.
+      if (!this.heroProfile || kind === 'heavy' || this.inputBuffer?.kind !== 'heavy') {
+        const link = Number.isFinite(this.attack?.cancel) ? this.attack.cancel : this.attack?.duration;
+        const remaining = this.heroProfile ? Math.max(0.3, (link || 0) - hero.actionTime + 0.12) : 0.18;
+        this.inputBuffer = { kind, remaining };
+      }
     }
     if (this.inputBuffer && this._canConsumeAttack(this.inputBuffer.kind)) {
       const kind = this.inputBuffer.kind;
       this.inputBuffer = null;
-      const branch = kind === 'heavy' && hero.action === 'attack';
+      const branch = kind === 'heavy' && (hero.action === 'attack' || this.heroProfile && this.time <= (this.comboUntil ?? -Infinity));
       this._startAttack(kind, branch);
       return;
     }
@@ -340,7 +351,7 @@ export class Arena {
       const counterMove = this.heroProfile?.counter ?? MUSOU_COUNTER;
       let move, charge = 0, counter = false;
       if (kind === 'attack') {
-        const chaining = hero.action === 'attack' && hero.combo < chain.length;
+        const chaining = (hero.action === 'attack' || this.heroProfile && now <= (this.comboUntil ?? -Infinity)) && hero.combo < chain.length;
         hero.combo = chaining ? hero.combo + 1 : 1;
         this.lastLightAt = now;
         counter = !chaining && now - (this.dodgeEndAt ?? -Infinity) <= counterMove.window;
@@ -349,6 +360,7 @@ export class Arena {
         charge = hero.combo + 1;   // 第幾招（輕 N 下＋重＝第 N+1 招，對應無雙系列的 C2～C5）
         move = charges[hero.combo - 1];
       } else move = this.heroProfile?.heavy ?? MUSOU_HEAVY;
+      this.comboUntil = -Infinity;
       if (counter) this.dodgeEndAt = -Infinity;
       hero.action = kind;
       hero.actionTime = 0;
@@ -496,7 +508,7 @@ export class Arena {
       const every = F.swings > 1 ? (F.swingEnd - F.swingStart) / (F.swings - 1) : 0;
       const swingTimes = Array.from({ length: F.swings }, (_, i) => F.swingStart + i * every);
       hero.invulnerable = F.duration + 0.1;
-      this.attack = { kind: 'special', flurry: true, true: isTrue, profile: F, swingTimes, swingIndex: 0, finished: false, musou: true };
+      this.attack = { kind: 'special', flurry: true, true: isTrue, profile: F, swingTimes, swingIndex: 0, finished: false, musou: true, origin: { x: hero.x, y: hero.y } };
       // Activation: everything inside the musou radius is held in hit stun for the whole move.
       // Arena-driven enemies are staggered; director-driven ones get stunUntil (the director honours it).
       const stunned = [];
@@ -601,14 +613,27 @@ export class Arena {
     }
     while (attack.swingIndex < attack.swingTimes.length && hero.actionTime >= attack.swingTimes[attack.swingIndex]) {
       const index = attack.swingIndex++;
+      const radius = F.swingRadii?.[index] ?? F.radius;
+      const damage = F.swingDamage?.[index] ?? F.damage;
+      const from = { x: hero.x, y: hero.y };
+      if (F.dashDistance) {
+        const targets = this.enemies.filter(e => !e.prop && e.action !== 'dead' && distance(attack.origin, e) <= F.finishRadius);
+        const target = targets.sort((a, b) => distance(hero, a) - distance(hero, b))[0];
+        if (target) {
+          const angle = Math.atan2(target.y - hero.y, target.x - hero.x);
+          hero.facing = angle;
+          hero.x = clamp(target.x + Math.cos(angle) * F.dashDistance, this.bounds.minX, this.bounds.maxX);
+          hero.y = clamp(target.y + Math.sin(angle) * F.dashDistance, this.bounds.minY, this.bounds.maxY);
+        }
+      }
       let hits = 0;
       for (const enemy of this.enemies) {
-        if (enemy.action === 'dead' || distance(hero, enemy) > F.radius) continue;
-        this._damageEnemy(enemy, F.damage * F.damageScale, 'special', MUSOU_FLURRY.swingPush);
+        if (enemy.action === 'dead' || distance(hero, enemy) > radius) continue;
+        this._damageEnemy(enemy, damage * F.damageScale, 'special', MUSOU_FLURRY.swingPush);
         hits++;
       }
       const sweep = Array.isArray(F.sweeps) && F.sweeps.includes(index + 1);
-      this._emit('swing', { x: hero.x, y: hero.y, facing: hero.facing, kind: 'special', combo: hero.combo, index, last: index === attack.swingTimes.length - 1, radius: F.radius, flurry: true, true: attack.true, hits, sweep });
+      this._emit('swing', { x: hero.x, y: hero.y, facing: hero.facing, kind: 'special', combo: hero.combo, index, last: index === attack.swingTimes.length - 1, radius, flurry: true, true: attack.true, hits, sweep, ...(F.dashDistance ? { from } : {}) });
     }
     if (!attack.finished && hero.actionTime >= F.impact) {
       attack.finished = true;
@@ -659,6 +684,7 @@ export class Arena {
       }
     }
     if (hero.actionTime >= attack.duration) {
+      if (this.heroProfile) this.comboUntil = attack.kind === 'attack' && hero.combo < this.heroProfile.chain.length ? this.time + 0.32 : -Infinity;
       hero.action = 'idle';
       hero.actionTime = 0;
       this.attack = null;
@@ -859,6 +885,7 @@ export class Arena {
 
   _hurtHero(enemy) {
     const hero = this.hero;
+    if (this.heroProfile) this.comboUntil = -Infinity;
     const damage = enemy.damage ?? (enemy.role === 'boss' ? 18 : enemy.role === 'elite' ? 12 : enemy.role === 'runner' ? 7 : 9);
     hero.hp = Math.max(0, hero.hp - damage);
     if (this.musouFlurry) this._gainEnergy(MUSOU_FLURRY.energyOnHurt);

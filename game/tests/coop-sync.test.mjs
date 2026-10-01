@@ -762,3 +762,53 @@ test('player colors: the three named brothers keep theirs; an unknown 4th name g
   assert.equal(playerColor('小弟', 3), fourth, 'seat does not change a named color');
   assert.ok(!Object.values(PLAYER_COLORS).includes(fourth));
 });
+
+
+test('campaign chapter changes and retries reset guests; host migration preserves chapter tuning', async () => {
+  const { Campaign, chapterTuning } = await import('../3d-next/campaign.js');
+  const { HEROES } = await import('../3d-next/heroes.js');
+  const baseline = structuredClone(TUNING), room = makeRoom(['A', 'B']);
+  function device(id, chapter, profile) {
+    const campaign = new Campaign(chapter), march = new MarchDirector({ seed: 17, tuning: chapterTuning(chapter), heroProfile: profile });
+    const d = { id, client: room.clients.get(id), march, campaign, arena: march.arena, peers: new Map(), events: [] };
+    d.sync = createEnemySync({ client: d.client, now: () => room.clock.t, peers: () => d.peers, hidden: () => false });
+    d.sync.setControls({ start: () => { march.tuning = chapterTuning(campaign.index); march.reset(); }, syncChapter: index => { const changed = campaign.index !== index; campaign.index = index; return changed; } });
+    return d;
+  }
+  const A = device('A', 3, HEROES.azure), B = device('B', 0, HEROES.amber);
+  room.welcome();
+  for (const d of [A, B]) { d.sync.bind({ march: d.march, arena: d.arena, level: marchModule, campaign: d.campaign }); d.march.reset(); }
+  try {
+    for (let i = 0; i < 30; i++) step(room, [A, B]);
+    assert.equal(B.campaign.index, 3); assert.equal(B.march.tuning.boss.name, '霜橋鎮魂使');
+    assert.equal(A.march.tuning.market.goal, Math.round(chapterTuning(3).market.goal * 1.3));
+    assert.equal(B.march.tuning.market.goal, A.march.tuning.market.goal);
+    B.arena.hero.hp = 1; B.arena.hero.energy = 90;
+    A.campaign.next(); A.march.tuning = chapterTuning(4); A.march.reset();
+    for (let i = 0; i < 30; i++) step(room, [A, B]);
+    assert.equal(B.campaign.index, 4); assert.equal(B.march.tuning.boss.name, '天闕魔君');
+    assert.equal(B.arena.hero.hp, HEROES.amber.maxHp); assert.equal(B.arena.hero.energy, 0);
+    B.arena.hero.hp = 1;
+    A.march.reset();
+    for (let i = 0; i < 30; i++) step(room, [A, B]);
+    assert.equal(B.arena.hero.hp, HEROES.amber.maxHp, 'same-chapter host retry resets a guest still playing');
+    for (let i = 0; i < 180; i++) step(room, [A, B]);
+    const mirrored = liveIds(B.arena); room.leave('A');
+    assert.equal(B.sync.role, 'host'); assert.equal(B.campaign.index, 4);
+    assert.deepEqual(liveIds(B.arena), mirrored); assert.equal(B.march.tuning.boss.name, '天闕魔君');
+    assert.deepEqual(TUNING, baseline, 'per-chapter co-op scaling never changes global defaults');
+  } finally { room.clients.clear(); }
+});
+
+test('all character ultimate damage remains valid through the multiplayer claim boundary', async () => {
+  const { HEROES } = await import('../3d-next/heroes.js');
+  const { comboProfile } = await import('../3d-next/net/team.js');
+  const enemy = { hp: 1000, action: 'idle', x: 450, y: 0 };
+  for (const profile of Object.values(HEROES)) for (const variant of ['standard', 'true']) {
+    const p = comboProfile(profile.flurry[variant]);
+    for (const amount of [p.damage * p.damageScale, p.finishDamage * p.damageScale]) {
+      assert.equal(validateClaimEntry([1, amount, SOURCES.indexOf('special'), 1], enemy, { x: 0, y: 0 }).ok, true, `${profile.id}/${variant}: ${amount}`);
+    }
+  }
+  assert.equal(validateClaimEntry([1, 1000, SOURCES.indexOf('special'), 1], enemy, { x: 0, y: 0 }).ok, false);
+});

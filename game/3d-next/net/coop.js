@@ -3,9 +3,9 @@
  * battle.js 在主角模型與動作片段建好後呼叫 coop.attach(ctx)，每一格呼叫回傳物件的 update(realDt)。
  * 單人頁不傳 coop，battle.js 的掛鉤全部是 `coop?.` / `coopView?.`，不會執行。
  */
-import { SEND_HZ } from './protocol.js';
-import { createTeammates } from './teammates.js';
-import { createEnemySync } from './enemy-sync.js';
+import { SEND_HZ } from './protocol.js?v=20261002b';
+import { createTeammates } from './teammates.js?v=20261002b';
+import { createEnemySync } from './enemy-sync.js?v=20261002b';
 import { WORLD_HZ } from './world.js';
 import { readStatus, statusBits } from './team.js';
 import { createTeamFx } from './team-fx.js';
@@ -19,7 +19,7 @@ export function sameState(a, b) {
   if (!a || !b) return false;
   return a.anim === b.anim && a.loop !== false && b.loop !== false
     && Math.abs(a.x - b.x) < 1e-3 && Math.abs(a.y - b.y) < 1e-3 && Math.abs(a.z - b.z) < 1e-3
-    && Math.abs(a.yaw - b.yaw) < 1e-3 && Math.abs((a.lift || 0) - (b.lift || 0)) < 1e-3 && (a.st || 0) === (b.st || 0);
+    && Math.abs(a.yaw - b.yaw) < 1e-3 && Math.abs((a.lift || 0) - (b.lift || 0)) < 1e-3 && (a.st || 0) === (b.st || 0) && a.character === b.character;
 }
 
 /**
@@ -71,9 +71,10 @@ export function createCoop({ client, now = () => performance.now(), doc = global
   client.on('state', (id, snap, at) => {
     view?.push(id, snap, at);
     const { hidden: away, downed } = readStatus(snap.st);
-    peers.set(id, { x: snap.x, z: snap.z, alive: snap.anim !== 'death' && !downed, downed, hidden: away, at });
-    if (snap.anim === 'musouFlurry' && lastAnim.get(id) !== 'musouFlurry') enemies.notePeerMusou(id);
-    lastAnim.set(id, snap.anim);
+    peers.set(id, { x: snap.x, z: snap.z, alive: snap.anim !== 'death' && !downed, downed, hidden: away, at, character: snap.character });
+    const anim = snap.musou >= 0 ? 'musouFlurry' : snap.anim;
+    if (anim === 'musouFlurry' && lastAnim.get(id) !== 'musouFlurry') enemies.notePeerMusou(id);
+    lastAnim.set(id, anim);
   });
   const teamListeners = new Set();
   enemies.onFx(event => {
@@ -141,7 +142,7 @@ export function createCoop({ client, now = () => performance.now(), doc = global
       local = ctx.local;
       const mobile = !!globalThis.matchMedia?.('(pointer: coarse)').matches;
       const quality = mobile ? 'mobile' : 'desktop';
-      view = createTeammates({ THREE: ctx.THREE, scene: ctx.scene, template: ctx.heroModel, clips: ctx.clips, cloneSkinned: ctx.cloneSkinned, quality });
+      view = createTeammates({ THREE: ctx.THREE, scene: ctx.scene, template: ctx.heroModel, clips: ctx.clips, cloneSkinned: ctx.cloneSkinned, quality, createEquipment: ctx.createEquipment, groundAt: ctx.groundAt });
       fx = createTeamFx({ THREE: ctx.THREE, scene: ctx.scene, quality, colorOf });
       syncMembers();
       return {
@@ -187,5 +188,6 @@ export function createCoop({ client, now = () => performance.now(), doc = global
     dispose() { this.setActive(false); view?.dispose(); view = null; fx?.dispose(); fx = null; slots.clear(); },
     get teammates() { return view; },
     get enemies() { return enemies; },
+    isHost: () => !client.host || client.host === client.you,
   };
 }

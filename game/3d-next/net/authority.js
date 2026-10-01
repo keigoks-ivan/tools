@@ -9,11 +9,11 @@ export const SOURCES = ['attack', 'heavy', 'special', 'stun'];
 
 /**
  * 寬鬆上限：只擋明顯不可能的申報，不追求精確（三位熟人對戰，重點是別讓壞封包把關卡弄壞）。
- * - maxDamage：遊戲裡單下原始傷害最高是真・天刃終結 20×1.5＝30
- * - range：最大招式半徑 400 px（真・天刃終結），加上約 0.3 秒延遲期間雙方移動的餘裕
+ * - maxDamage：真・月影終結 34×1.5，加上合體倍率仍低於 80
+ * - range：最大招式半徑 450 px（蒼龍終結），加上約 0.3 秒延遲期間雙方移動的餘裕
  * - perSecond：無雙亂舞 12 刀 × 16 隻 ÷ 3.5 秒 ≈ 55 下／秒，留兩倍多
  */
-export const CLAIM_LIMITS = { maxDamage: 40, maxStun: 6, range: 640, perSecond: 150, maxEntries: 32 };
+export const CLAIM_LIMITS = { maxDamage: 80, maxStun: 6, range: 700, perSecond: 150, maxEntries: 32 };
 
 /**
  * @param {Array} entry  [enemyId, amount, sourceCode, attackSerial]

@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { Arena, MUSOU_CHAIN } from '../2d/combat.js?v=20261001a';
-import { HEROES, heroFor } from '../3d-next/heroes.js?v=20261001a';
-import { Campaign, CHAPTERS, chapterTuning } from '../3d-next/campaign.js?v=20261001a';
-import { MarchDirector, TUNING } from '../3d-next/march.js?v=20261001a';
+import { Arena, MUSOU_CHAIN } from '../2d/combat.js?v=20261002b';
+import { HEROES, heroFor } from '../3d-next/heroes.js?v=20261002b';
+import { Campaign, CHAPTERS, chapterTuning } from '../3d-next/campaign.js?v=20261002b';
+import { MarchDirector, TUNING } from '../3d-next/march.js?v=20261002b';
 
 const advance = (arena, seconds, input = {}) => {
   for (let t = 0; t < seconds; t += 1 / 60) arena.update(1 / 60, input);
@@ -21,7 +21,7 @@ test('character choice changes real health, movement, attack reach and damage; r
     const target = arena.spawn('grunt', arena.hero.x + 190, arena.hero.y, { hp: 100, fixed: true, ai: 'external' });
     arena._startAttack('attack');
     advance(arena, hero.chain[0].hits[0] + 0.02);
-    assert.equal(target.hp, hero.id === 'azure' ? 91 : 100, `${hero.id}: expected reach / damage`);
+    assert.equal(target.hp, hero.id === 'azure' ? 88 : 100, `${hero.id}: expected reach / damage`);
     arena.hero.hp = 1; arena.reset(); assert.equal(arena.hero.hp, hero.maxHp);
   }
   assert.ok(travel.azure < travel.violet && travel.violet < travel.amber);
@@ -54,7 +54,7 @@ test('every combo and heavy branch is playable and uses a real animation clip', 
   }
 });
 
-test('each character special completes once, with a distinct hit count and radius, including low HP', () => {
+test('each character special completes once, with distinct choreography, including low HP', () => {
   const counts = new Set();
   for (const hero of Object.values(HEROES)) for (const low of [false, true]) {
     const arena = makeArena(hero);
@@ -70,7 +70,7 @@ test('each character special completes once, with a distinct hit count and radiu
     assert.equal(events.filter(e => e.type === 'musouEnd').length, 1);
     assert.equal(arena.hero.energy, 0);
     assert.equal(arena.hero.action, 'idle');
-    if (!low) counts.add(profile.swings);
+    if (!low) counts.add(`${profile.swings}:${profile.duration}:${profile.radius}`);
   }
   assert.equal(counts.size, 3);
 });
@@ -94,17 +94,17 @@ test('chapter settings are independent, preserve co-op defaults, and each boss c
   }
   assert.equal(JSON.stringify(TUNING), before);
   const campaign = new Campaign();
-  for (let i = 0; i < 3; i++) {
+  for (let i = 0; i < CHAPTERS.length; i++) {
     assert.equal(campaign.index, i); campaign.complete({ kills: i + 1 });
-    assert.equal(campaign.next(), i < 2);
+    assert.equal(campaign.next(), i < CHAPTERS.length - 1);
   }
-  assert.equal(campaign.results.length, 3); assert.equal(campaign.hasNext, false);
+  assert.equal(campaign.results.length, CHAPTERS.length); assert.equal(campaign.hasNext, false);
   campaign.restart(); assert.equal(campaign.index, 0); assert.equal(campaign.results.length, 0);
 });
 
-test('all nine character / chapter combinations finish through every segment without exceeding the enemy budget', async () => {
+test('all character / chapter combinations finish through every segment without exceeding the enemy budget', async () => {
   const { runMarchBot } = await import('../3d-next/march-bot.js');
-  for (const hero of Object.values(HEROES)) for (let index = 0; index < 3; index++) {
+  for (const hero of Object.values(HEROES)) for (let index = 0; index < CHAPTERS.length; index++) {
     const march = new MarchDirector({ seed: 17, tuning: chapterTuning(index), heroProfile: hero });
     let peak = 0;
     const result = runMarchBot(march, { onFrame: m => { peak = Math.max(peak, m.alive()); } });
@@ -117,7 +117,7 @@ test('all nine character / chapter combinations finish through every segment wit
 
 test('mobile enemy budget still permits each new chapter to finish', async () => {
   const { runMarchBot } = await import('../3d-next/march-bot.js');
-  for (const [index, hero] of Object.values(HEROES).entries()) {
+  for (const hero of Object.values(HEROES)) for (let index = 0; index < CHAPTERS.length; index++) {
     const march = new MarchDirector({ seed: 17, mobile: true, tuning: chapterTuning(index), heroProfile: hero });
     const result = runMarchBot(march, { onFrame: m => assert.ok(m.alive() <= m.cap) });
     assert.equal(result.state, 'clear', `${hero.id} mobile chapter ${index + 1}`);
@@ -148,20 +148,22 @@ test('weapon variants keep the authored skeleton and restore the original geomet
   const originals = source.attributes.position.array.slice();
   const equipment = createHeroEquipment(THREE, gltf.scene, sword);
   const skeleton = sword.skeleton;
-  const leftBlade = gltf.scene.getObjectByName('J_Bip_L_Hand').children.find(child => child.isMesh);
+
   const mixer = new THREE.AnimationMixer(gltf.scene);
   for (const hero of Object.values(HEROES)) {
     equipment.apply(hero);
     assert.equal(sword.skeleton, skeleton);
     assert.deepEqual(sword.geometry.attributes.skinIndex.array, source.attributes.skinIndex.array);
     assert.deepEqual(sword.geometry.attributes.skinWeight.array, source.attributes.skinWeight.array);
-    assert.equal(leftBlade.visible, hero.id === 'amber');
+    const leftBlade = gltf.scene.getObjectByName('amber_J_Bip_L_Hand_weapon');
+    assert.equal(!!leftBlade?.visible, hero.id === 'amber');
     for (const move of [...hero.chain, ...hero.charges, hero.heavy, hero.counter]) {
       const clip = move.clip || (move === hero.heavy ? 'charge' : `combo${hero.chain.indexOf(move) + 1}`);
       assert.ok(gltf.animations.some(animation => animation.name === clip), `${hero.id}: missing ${clip}`);
     }
     for (const clip of gltf.animations) {
       mixer.stopAllAction(); mixer.clipAction(clip).reset().play(); mixer.update(clip.duration * 0.5);
+      equipment.update();
       gltf.scene.updateMatrixWorld(true); skeleton.update();
       const point = new THREE.Vector3();
       for (let vertex = 0; vertex < sword.geometry.attributes.position.count; vertex++) {
@@ -171,8 +173,24 @@ test('weapon variants keep the authored skeleton and restore the original geomet
         const hand = gltf.scene.getObjectByName('J_Bip_R_Hand').getWorldPosition(new THREE.Vector3());
         assert.ok(point.distanceTo(hand) < 2.5, `${hero.id}/${clip.name}: weapon escaped its rig`);
       }
+      const head = gltf.scene.getObjectByName('J_Bip_C_Head').getWorldPosition(new THREE.Vector3());
+      gltf.scene.getObjectByName(`${hero.id}_atelier_hair`).traverse(mesh => {
+        if (!mesh.isSkinnedMesh) return;
+        for (let vertex = 0; vertex < mesh.geometry.attributes.position.count; vertex += 257) {
+          mesh.getVertexPosition(vertex, point); mesh.localToWorld(point);
+          assert.ok(point.toArray().every(Number.isFinite), `${hero.id}/${clip.name}: invalid animated hair`);
+          assert.ok(point.distanceTo(head) < 1, `${hero.id}/${clip.name}: hair escaped the head`);
+        }
+      });
+      const weapon = gltf.scene.getObjectByName(`${hero.id}_J_Bip_R_Hand_weapon`);
+      assert.ok(new THREE.Box3().setFromObject(weapon).getSize(new THREE.Vector3()).length() < 3, `${hero.id}/${clip.name}: invalid weapon bounds`);
     }
   }
+  equipment.apply(HEROES.violet);
+  // Battle FX replaces the invisible sampling sword's material after equipment
+  // setup. Reselecting a hero must tolerate that externally owned material.
+  sword.material = sword.material.clone();
+  assert.doesNotThrow(() => equipment.apply(HEROES.azure));
   equipment.apply(HEROES.violet);
   const restored = sword.geometry.attributes.position.array;
   for (let i = 0; i < originals.length; i++) assert.ok(Math.abs(restored[i] - originals[i]) < 1e-6);

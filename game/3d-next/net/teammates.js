@@ -6,6 +6,8 @@
 import { SnapshotBuffer } from './interp.js';
 import { SLOT_COLORS, playerColor } from './colors.js';
 import { GHOST_ANIMS, TRAIL_ANIM, makeGhosts, makePeerTrail } from './peer-fx.js';
+import { heroFor } from '../heroes.js?v=20261002b';
+import { createHeroSpecialFx } from '../hero-special-fx.js?v=20261002b';
 
 /** 依座位輪用的色調（名單外的名字才用到；Matt／Myles／Mike 固定配色見 colors.js） */
 export const TEAM_TINTS = SLOT_COLORS;
@@ -34,7 +36,12 @@ function makeLabel(THREE, text, tint) {
 /**
  * @param {{ THREE, scene, template: import('three').Object3D, clips: import('three').AnimationClip[], cloneSkinned: Function, quality?: 'mobile'|'desktop' }} ctx
  */
-export function createTeammates({ THREE, scene, template, clips, cloneSkinned, quality = 'desktop' }) {
+export function createTeammates({ THREE, scene, template, clips, cloneSkinned, quality = 'desktop', createEquipment = null, groundAt = () => 0 }) {
+  // Capture the unmodified body before local equipment changes its geometry,
+  // head scale or materials. Each peer then owns an independent character kit.
+  if (createEquipment) template = cloneSkinned(template);
+  const templateMaterials = new Map();
+  if (createEquipment) template.traverse(mesh => { if (!mesh.isMesh) return; const copy = m => { if (!templateMaterials.has(m)) { const c = m.clone(); c.onBeforeCompile = m.onBeforeCompile; c.customProgramCacheKey = m.customProgramCacheKey; templateMaterials.set(m, c); } return templateMaterials.get(m); }; mesh.material = Array.isArray(mesh.material) ? mesh.material.map(copy) : copy(mesh.material); });
   const baseY = template.position.y;
   const peers = new Map();
   const tintColor = new THREE.Color();
@@ -52,11 +59,12 @@ export function createTeammates({ THREE, scene, template, clips, cloneSkinned, q
     model.traverse(object => {
       if (!object.isMesh) return;
       const swap = material => {
-        if (!material?.isMeshToonMaterial) return material;
+        if (!material) return material;
+        if (!createEquipment && !material.isMeshToonMaterial) return material;
         if (!owned.has(material)) {
           const copy = material.clone();
-          copy.color.lerp(tintColor, 0.35);
-          copy.emissive?.copy(tintColor).multiplyScalar(0.08);
+          copy.onBeforeCompile = material.onBeforeCompile; copy.customProgramCacheKey = material.customProgramCacheKey;
+          if (!createEquipment && copy.isMeshToonMaterial) { copy.color.lerp(tintColor, 0.35); copy.emissive?.copy(tintColor).multiplyScalar(0.08); }
           owned.set(material, copy);
         }
         return owned.get(material);
@@ -73,11 +81,14 @@ export function createTeammates({ THREE, scene, template, clips, cloneSkinned, q
     const mixer = new THREE.AnimationMixer(model);
     const actions = new Map(clips.map(clip => [clip.name, mixer.clipAction(clip)]));
     const sword = model.getObjectByName('Hero_sword') || model.getObjectByName('rumi_sword');
+    const equipment = createEquipment?.(model);
     const trail = makePeerTrail({ THREE, scene, sword, color: tint, segments: quality === 'mobile' ? 9 : 12 });
-    const ghosts = quality === 'mobile' ? null : makeGhosts({ THREE, scene, template, cloneSkinned, color: tint });
+    const ghosts = !equipment && quality !== 'mobile' ? makeGhosts({ THREE, scene, template, cloneSkinned, color: tint }) : null;
+    const specialFx = equipment ? createHeroSpecialFx(THREE, scene, groundAt, { capacity: 32 }) : null;
     const bones = [];
     model.traverse(object => { if (object.isBone) bones.push(object); });
-    const peer = { id, name, tint, root, model, mixer, actions, label, owned, trail, ghosts, bones, buffer: new SnapshotBuffer(), current: null, currentName: '', lastTime: 0 };
+    const peer = { id, name, tint, root, model, mixer, actions, label, owned, trail, ghosts, specialFx, equipment, ready: !equipment, character: null, musouAt: -1, swing: 0, finished: false, previous: new THREE.Vector3(), bones, buffer: new SnapshotBuffer(), current: null, currentName: '', lastTime: 0 };
+    equipment?.ready?.then(() => { peer.ready = true; }).catch(error => console.error('teammate art failed', error));
     peers.set(id, peer);
     play(peer, 'idle', true, 1, 0);
     return peer;
@@ -109,6 +120,7 @@ export function createTeammates({ THREE, scene, template, clips, cloneSkinned, q
     peer.label.dispose();
     peer.trail.dispose();
     peer.ghosts?.dispose();
+    peer.specialFx?.dispose(); peer.equipment?.dispose();
     peers.delete(id);
   }
 
@@ -117,7 +129,13 @@ export function createTeammates({ THREE, scene, template, clips, cloneSkinned, q
   function update(dt, now) {
     for (const peer of peers.values()) {
       const s = peer.buffer.sample(now);
-      if (!s || now - peer.buffer.receivedAt > STALE_MS) { peer.root.visible = false; peer.trail.clear(); peer.ghosts?.clear(); continue; }
+      peer.specialFx?.update(dt);
+      if (!s || !peer.ready || now - peer.buffer.receivedAt > STALE_MS) { peer.root.visible = false; peer.trail.clear(); peer.ghosts?.clear(); continue; }
+      const profile = heroFor(s.character);
+      if (peer.equipment && peer.character !== profile.id) {
+        peer.equipment.apply(profile); peer.character = profile.id; peer.specialFx.setStyle(profile.id);
+        peer.ghosts?.dispose(); peer.ghosts = quality === 'mobile' ? null : makeGhosts({ THREE, scene, template: peer.model, cloneSkinned, color: profile.tint, count: 2 });
+      }
       peer.root.visible = true;
       peer.root.position.set(s.x, s.y, s.z);
       peer.root.rotation.y = s.yaw;
@@ -128,14 +146,30 @@ export function createTeammates({ THREE, scene, template, clips, cloneSkinned, q
       else if (!s.loop && Math.abs(peer.current.time - s.time) > 0.25) peer.current.time = s.time;
       peer.lastTime = s.time;
       peer.mixer.update(dt);
+      peer.equipment?.update();
       const slashing = TRAIL_ANIM.test(anim);
       if (slashing) peer.root.updateMatrixWorld(true);
       peer.trail.update(slashing);
-      peer.ghosts?.update(dt, GHOST_ANIMS.has(anim), peer);
+      peer.ghosts?.update(dt, GHOST_ANIMS.has(anim) || s.musou >= 0, peer);
+      if (peer.specialFx) {
+        const at = s.musou ?? -1, p = profile.flurry.standard;
+        const pos = new THREE.Vector3(s.x, groundAt(s.x, s.z), s.z);
+        if (at >= 0 && (peer.musouAt < 0 || at < peer.musouAt - 0.1)) {
+          peer.swing = 0; peer.finished = false;
+          peer.specialFx.onEvent({ type: 'musouStart', finishRadius: p.finishRadius }, pos);
+        }
+        const swingAt = index => p.swingStart + (p.swingEnd - p.swingStart) * index / Math.max(1, p.swings - 1);
+        while (at >= 0 && peer.swing < p.swings && at >= swingAt(peer.swing)) {
+          const index = peer.swing++;
+          peer.specialFx.onEvent({ type: 'swing', flurry: true, index, facing: Math.PI / 2 - s.yaw, radius: p.swingRadii?.[index] || p.radius, from: { x: 640 + peer.previous.x * 60, y: 500 + peer.previous.z * 60 } }, pos);
+        }
+        if (!peer.finished && (at >= p.impact || at < 0 && peer.musouAt >= 0)) { peer.finished = true; peer.specialFx.onEvent({ type: 'musouFinish', radius: p.finishRadius }, pos); }
+        peer.musouAt = at; peer.previous.copy(pos);
+      }
     }
   }
 
-  function dispose() { for (const id of [...peers.keys()]) remove(id); }
+  function dispose() { for (const id of [...peers.keys()]) remove(id); for (const m of templateMaterials.values()) m.dispose(); }
 
   return { add, remove, push, update, dispose, peers };
 }

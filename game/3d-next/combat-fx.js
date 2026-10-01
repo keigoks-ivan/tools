@@ -690,6 +690,7 @@ function mergeHeroGeometry(THREE, heroModel, { hair = true } = {}) {
   heroModel.updateMatrixWorld(true);
   heroModel.traverse(object => {
     if (!object.isSkinnedMesh || !object.skeleton) return;
+    for (let parent = object; parent && parent !== heroModel.parent; parent = parent.parent) if (!parent.visible) return;
     const material = Array.isArray(object.material) ? object.material[0] : object.material;
     if (!material || material.side === THREE.BackSide) return;       // ink outline shells
     if (material.transparent && material.alphaTest === 0) return;     // blended eye layers

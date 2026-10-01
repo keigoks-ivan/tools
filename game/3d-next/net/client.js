@@ -2,7 +2,7 @@
  * 三人連線客戶端：代號登入（換憑證）、開房／加入、斷線重連、送出與接收角色狀態。
  * 不依賴 Three.js，瀏覽器以外的環境可注入 WebSocket／fetch／storage（game/tests/coop-net.test.mjs）。
  */
-import { CLOSE_TEXT, FATAL_CLOSE, PING_MS, TOKEN_KEY, backoffDelay, decodeState, encodeState, wsUrl } from './protocol.js';
+import { CLOSE_TEXT, FATAL_CLOSE, PING_MS, TOKEN_KEY, backoffDelay, decodeLobbyState, decodeState, encodeState, wsUrl } from './protocol.js?v=20261002b';
 
 /** localStorage 包一層 try/catch：私密模式或封鎖網站資料時仍能玩，只是每次要重新輸入代號 */
 export function safeStorage(backing = globalThis.localStorage) {
@@ -84,7 +84,14 @@ export class CoopClient {
     if (data === 'pong') return;
     let msg;
     try { msg = JSON.parse(data); } catch { return; }
-    if (msg.t === 's') { if (this.members.has(msg.p) && msg.p !== this.you) this.emit('state', msg.p, decodeState(msg.d), this.now()); return; }
+    if (msg.t === 's') {
+      if (this.members.has(msg.p) && msg.p !== this.you) {
+        const choice = decodeLobbyState(msg.d);
+        if (choice) this.emit('signal', msg.p, choice, this.now());
+        else this.emit('state', msg.p, decodeState(msg.d), this.now());
+      }
+      return;
+    }
     if (msg.t === 'welcome') {
       this.ready = true; this.attempt = 0;
       this.room = msg.room; this.you = msg.you; this.host = msg.host;
@@ -102,7 +109,13 @@ export class CoopClient {
     if (msg.t === 'leave') { this.members.delete(msg.id); this.host = msg.host; this.emit('leave', msg.id); return; }
     if (msg.t === 'host') { this.host = msg.id; this.emit('host', msg.id); return; }
     // 第二階段：房主送的戰場（只收現任房主的）、隊友送給房主的命中申報（relay 只轉給房主）
-    if (msg.t === 'e') { if (msg.p === this.host && msg.p !== this.you && msg.d && typeof msg.d === 'object') this.emit('world', msg.d, this.now(), msg.p); return; }
+    if (msg.t === 'e') {
+      if (msg.p === this.host && msg.p !== this.you && msg.d && typeof msg.d === 'object') {
+        if (msg.d.loadout && typeof msg.d.loadout === 'object') this.emit('signal', msg.p, msg.d.loadout, this.now());
+        else this.emit('world', msg.d, this.now(), msg.p);
+      }
+      return;
+    }
     // 隊伍訊號（喊話、結算成績），任何隊友都能發
     if (msg.t === 'x') { if (this.members.has(msg.p) && msg.p !== this.you && msg.d && typeof msg.d === 'object') this.emit('signal', msg.p, msg.d, this.now()); return; }
     if (msg.t === 'h') { if (this.isHost && msg.p !== this.you && this.members.has(msg.p) && msg.d && typeof msg.d === 'object') this.emit('claim', msg.p, msg.d, this.now()); }

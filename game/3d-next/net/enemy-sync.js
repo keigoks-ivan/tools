@@ -21,7 +21,7 @@ import { SnapshotBuffer } from './interp.js';
 import { inLine } from '../specials.js';
 import { applyCountScale, applySupplyScale, scaledDamage, scaledHp, snapshotCounts, snapshotSupply } from './scaling.js';
 import { BITS, FORWARD_EVENTS, MAX_EVENTS_PER_MESSAGE, WorldDecoder, WorldEncoder, compactEvent, decodeLevel, enemyType, fitWorld, isEmptyWorld, levelStatus, recipeFor } from './world.js';
-import { CLAIM_LIMITS, ClaimMeter, SOURCES, TARGETING, assignTargets, validateClaimEntry } from './authority.js';
+import { CLAIM_LIMITS, ClaimMeter, SOURCES, TARGETING, assignTargets, validateClaimEntry } from './authority.js?v=20261002b';
 import { ComboWindow, HANDOFF, HandoffPolicy, ReviveTracker, TEAM, comboProfile, grantPickup, teamWiped } from './team.js';
 
 export const LOCAL_ID = '\u0000self';
@@ -50,7 +50,7 @@ const NO_CREDIT = new Set(['breakable', 'lantern']);
  *   hidden() 本機頁面是否在背景（交棒判斷用）
  */
 export function createEnemySync({ client, now = () => performance.now(), peers = () => new Map(), hidden = () => !!globalThis.document?.hidden }) {
-  let march = null, arena = null, level = null;
+  let march = null, arena = null, level = null, campaign = null, remoteReset = false;
   let role = null;
   const orig = {};
   // 房主
@@ -74,7 +74,7 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
 
   const players = () => Math.max(1, client.members?.size || 1);
   const multi = () => role === 'host' && client.members?.size > 1;
-  const T = () => level.TUNING;
+  const T = () => march?.tuning || level.TUNING;
 
   function withHero(hero, fn) {
     const saved = arena.hero;
@@ -85,10 +85,11 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
   // ---------------------------------------------------------------- 人數加成
   function applyScale() {
     if (!level?.TUNING) return;
-    if (!baselines.has(level.TUNING)) baselines.set(level.TUNING, snapshotCounts(level.TUNING));
-    applyCountScale(level.TUNING, baselines.get(level.TUNING), players());
-    if (!supplyBaselines.has(level.TUNING)) supplyBaselines.set(level.TUNING, snapshotSupply(level.TUNING));
-    applySupplyScale(level.TUNING, supplyBaselines.get(level.TUNING), players());
+    const tuning = T();
+    if (!baselines.has(tuning)) baselines.set(tuning, snapshotCounts(tuning));
+    applyCountScale(tuning, baselines.get(tuning), players());
+    if (!supplyBaselines.has(tuning)) supplyBaselines.set(tuning, snapshotSupply(tuning));
+    applySupplyScale(tuning, supplyBaselines.get(tuning), players());
   }
 
   // ---------------------------------------------------------------- 房主：替身與仇恨
@@ -270,10 +271,11 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
     const events = outbox.splice(0, MAX_EVENTS_PER_MESSAGE);
     if (march.state !== 'play') {
       // 全滅或過關後：只送剩下的事件（全滅、過關通知），不再送凍住的敵人，等有人按重來
-      if (events.length && client.send('e', { c: Math.round(t), q: epoch(), v: events })) stats.worldSent++;
+      if (events.length && client.send('e', { c: Math.round(t), q: epoch(), v: events, ...(campaign ? { cp: campaign.index } : {}) })) stats.worldSent++;
       return;
     }
     const raw = encoder.encode({ enemies: arena.enemies, clock: t, epoch: epoch(), time: arena.time, level: levelStatus(march), events, dm: dmBox.splice(0) });
+    if (campaign) raw.cp = campaign.index;
     const progress = [...reviveProgress].map(([id, p]) => [id, p.pct, p.by || '']);
     if (progress.length) raw.tm = progress;
     const { d, rest } = fitWorld(raw);
@@ -355,8 +357,9 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
     emitFx({ type: 'wipe' });
   }
   /** 重來：房主直接重開；battle.js 的 start() 由 boot.js 經 setControls 交給這裡（沒有時退回 march.reset） */
-  function restart() {
-    if (controls?.start) controls.start(); else march.reset();
+  function restart(remote = false) {
+    remoteReset = remote;
+    try { if (controls?.start) controls.start(); else march.reset(); } finally { remoteReset = false; }
   }
   function teamReset() {
     const hero = arena.hero;
@@ -728,11 +731,15 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
   client.on?.('leave', id => { proxies.delete(id); meters.delete(id); syncRole(); });
   client.on?.('world', (d, at, from) => {
     if (role !== 'guest') return;
+    if (from && from !== client.host) return;
     lastWorldAt = now();
+    const changed = Number.isInteger(d.cp) && d.cp >= 0 && d.cp <= 4 && controls?.syncChapter?.(d.cp);
+    const resetRun = worldFrom === from && worldEpoch !== null && d.q !== undefined && d.q !== worldEpoch;
+    if (changed || resetRun) restart(true);
     if (march && march.state !== 'play') {
       // 結算畫面時畫面不跑（guestUpdate 不會被呼叫）：只看房主是不是已經重開（新的一局 epoch），是就跟著重來
       if (endEpoch === null || d.q === undefined || d.q === endEpoch) return;
-      restart();
+      restart(true);
     }
     inbox.push({ from, d });
   });
@@ -747,7 +754,7 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
     /** battle.js：{ march, arena, level }（level＝march.js 模組）。沒有行軍關（march 為 null）時不做任何事 */
     bind(ctx) {
       if (!ctx?.march || !ctx.level) return;
-      ({ march, arena, level } = ctx);
+      ({ march, arena, level, campaign = null } = ctx);
       // 第三階段：倒地（包在最裡層，下面 enemy-sync 的包裝呼叫到的「原方法」就是這些）
       const baseHurt = arena._hurtHero, baseUpdate = arena.update, baseTickPickups = march._tickPickups;
       arena._hurtHero = enemy => {
@@ -785,7 +792,7 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
         teamReset();
         if (wiped) { wiped = false; emitFx({ type: 'regroup' }); }
         if (role === 'guest') {
-          if (endEpoch !== null) retryOut = true;   // 結算後按重來：請房主一起重開
+          if (endEpoch !== null && !remoteReset) retryOut = true;   // 本機按重來才申請
           clearWorld();
           worldFrom = null; worldEpoch = null; lastWorldAt = now();
           march.seg = freshSeg(0);
@@ -866,4 +873,3 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
     _debug: { proxies, policy, reviver, get endEpoch() { return endEpoch; }, restart: () => restart(), get targets() { return targets; }, retarget: force => retarget(force), refreshProxies: dt => refreshProxies(dt), promote: () => promote(), demote: () => demote(), processWorld: (from, d) => processWorld(from, d), hostTick: () => hostTick() },
   };
 }
-

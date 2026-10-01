@@ -18,7 +18,7 @@
  * for the HUD, `march.view()` for world props (march-world.js update), and `march.result`
  * once `march.state !== 'play'`.
  */
-import { Arena } from '../2d/combat.js?v=20261001a';
+import { Arena } from '../2d/combat.js?v=20261002b';
 import { CAPTAIN, CAPTAIN_HINT, CAPTAIN_NAMES, SPECIAL_HINTS, SPECIAL_MIX, SPECIAL_UNITS, captainOptions, inLine, specialOptions } from './specials.js';
 
 export const PX_PER_M = 60;
@@ -343,7 +343,7 @@ export class MarchDirector {
     const foe = foeUnit && foeUnit.hp > 0 ? { name: foeUnit.name, hp: foeUnit.hp, maxHp: foeUnit.maxHp, role: foeUnit.role, phase: foeUnit.phase || 1 } : null;
     return {
       segment: this.segmentIndex + 1,
-      segmentName: this.segment?.name || '',
+      segmentName: this.tuning.segmentNames?.[this.segmentIndex] || this.segment?.name || '',
       objective: this._objective(),
       timer: this.segmentIndex === 2 && seg && !seg.secured ? seg.timer : null,
       hint: this.time < this.hintUntil ? this.hint : '',
@@ -431,7 +431,7 @@ export class MarchDirector {
     const i = this.segmentIndex, seg = this.seg;
     if (this.state === 'clear') return '夜市重歸寧靜';
     if (this.state === 'dead') return '重新集結';
-    if (this.gates[i]?.open) return `前進：${LEVEL.segments[i + 1].name}`;
+    if (this.gates[i]?.open) return `前進：${this.tuning.segmentNames?.[i + 1] || LEVEL.segments[i + 1].name}`;
     if (i === 0) return seg.kills >= this.tuning.market.goal && this.tuning.officers.market ? `擊倒敵將 ${this.tuning.officers.market.name}` : `擊倒妖兵 ${Math.min(seg.kills, this.tuning.market.goal)}／${this.tuning.market.goal}`;
     if (i === 1) return seg.broken < 3 ? `打破妖燈 ${seg.broken}／3` : `擊倒敵將 ${this.tuning.officers.red.name}`;
     if (i === 2) return seg.secured ? `擊倒敵將 ${this.tuning.officers.shadow.name}` : seg.lamp.down > 0 ? '魂燈重燃中…' : `守住魂燈 ${formatClock(seg.timer)}`;
@@ -507,7 +507,7 @@ export class MarchDirector {
     this.gates[index].open = true;
     this._applyRegion();
     this._emit('gateOpen', { index, ...toPx(0, this.gates[index].z) });
-    this._say(`結界破了，前往${LEVEL.segments[index + 1].name}`, 3);
+    this._say(`結界破了，前往${this.tuning.segmentNames?.[index + 1] || LEVEL.segments[index + 1].name}`, 3);
   }
 
   _checkProgress() {
@@ -697,7 +697,7 @@ export class MarchDirector {
     const heroW = toWorld(this.arena.hero.x, this.arena.hero.y);
     if (i === 0 && !this.gates[0].open) {
       const t = this.tuning.market, segment = LEVEL.segments[0];
-      if (seg.officerAt !== null && this.time >= seg.officerAt) {
+      if (seg.officerAt !== null && this.time >= seg.officerAt && (!this.arena.heroProfile || this.room() > 0)) {
         seg.officerAt = null;
         this._spawnOfficer('market', LAYOUT.spawns.officers.market);
       }
@@ -732,7 +732,7 @@ export class MarchDirector {
         this._emit('lanternSpawn', { index, enemyId: id, size, x: lantern.x, y: lantern.y });
         seg.nextSpawnAt[index] = this.time + t.groupEvery;
       });
-      if (seg.officerAt !== null && this.time >= seg.officerAt) {
+      if (seg.officerAt !== null && this.time >= seg.officerAt && (!this.arena.heroProfile || this.room() > 0)) {
         seg.officerAt = null;
         this._spawnOfficer('red', LAYOUT.spawns.officers.red);
       }
@@ -786,7 +786,7 @@ export class MarchDirector {
         seg.nextTopAt = this.time + (size > 0 ? t.topGroupEvery : 1);
       }
     }
-    if (seg.officerAt !== null && this.time >= seg.officerAt) {
+    if (seg.officerAt !== null && this.time >= seg.officerAt && (!this.arena.heroProfile || this.room() > 0)) {
       seg.officerAt = null;
       const o = this.tuning.officers.shadow;
       const unit = this._spawnUnit('officer', 0, -79, { kind: 'officer', name: o.name, hp: o.hp, ai: 'external', fixed: true, specialScale: o.specialScale, guard: o.guard, guardRearm: o.guardRearm, variant: 'shadow', action: 'chase', mode: 'chase', modeTime: 0, cooldown: 1.2, range: 80 });

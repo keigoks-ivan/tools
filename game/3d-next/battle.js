@@ -1,10 +1,13 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone as cloneSkinned } from 'three/addons/utils/SkeletonUtils.js';
-import { Arena } from '../2d/combat.js?v=20261001a';
-import { heroFor } from './heroes.js?v=20261001a';
-import { Campaign, chapterTuning } from './campaign.js?v=20261001a';
-import { createHeroEquipment } from './hero-equipment.js?v=20261001a';
+import { Arena } from '../2d/combat.js?v=20261002b';
+import { heroFor } from './heroes.js?v=20261002b';
+import { Campaign, CHAPTERS, chapterTuning } from './campaign.js?v=20261002b';
+import { createHeroEquipment } from './hero-equipment.js?v=20261002b';
+import { createHeroSpecialFx } from './hero-special-fx.js?v=20261002b';
+import { createHeroEnvironment } from './hero-hair.js?v=20261002b';
+import { createChapterWorld } from './chapter-world.js?v=20261002b';
 import { FramePacer } from '../frame-pacing.js';
 import { createNightMarket } from './world.js';
 import { createOni, prepareRiggedOni, createRiggedOni } from './oni.js';
@@ -38,9 +41,9 @@ let lazyModules = null;
 export function loadLazyModules() {
   if (!lazyModules) {
     lazyModules = Promise.all([
-      marchLevel ? Promise.all([import('./march.js?v=20261001a'), import('./march-art.js?v=20260925f')]) : null,
+      marchLevel ? Promise.all([import('./march.js?v=20261002b'), import('./march-art.js?v=20260925f')]) : null,
       // ?hero=vroid：打擊特效模組（combat-fx.js）；載入失敗時退回下方原本的特效與時間倍率
-      heroChoice === 'vroid' ? import('./combat-fx.js?v=20260928a').catch(error => { console.warn('combat-fx failed, using built-in effects', error); return null; }) : null,
+      heroChoice === 'vroid' ? import('./combat-fx.js?v=20261002b').catch(error => { console.warn('combat-fx failed, using built-in effects', error); return null; }) : null,
     ]).catch(error => { lazyModules = null; throw error; });
   }
   return lazyModules;
@@ -56,7 +59,7 @@ export function createBattleAssets(options = {}) {
 const MARCH_FILES = { 'atlas.json': 'march-atlas', 'march-props.webp': 'march-props', 'march-stone.webp': 'march-stone', 'march-sky.webp': 'march-sky' };
 
 // VRoid 模型：四階卡通明暗＋背面外擴描邊，保留眼睛、眉毛、頭髮貼圖的透明設定
-function toonVroidHero(root) {
+export function toonVroidHero(root) {
   const gradient = new THREE.DataTexture(new Uint8Array([96, 160, 220, 255]), 4, 1, THREE.RedFormat);
   gradient.minFilter = gradient.magFilter = THREE.NearestFilter;
   gradient.needsUpdate = true;
@@ -257,11 +260,18 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
   }
   play('idle');
   // [coop] 三人連線：隊友沿用這個主角模型與片段；local() 是送給隊友的本機狀態。單人頁 coop 為 null
-  const coopView = coop?.attach({ THREE, scene, heroModel, clips, cloneSkinned, local: () => ({ x: hero.position.x, y: hero.position.y, z: hero.position.z, yaw: hero.rotation.y, lift: heroModel.position.y - heroBaseY, anim: currentName, time: currentAction?.time || 0, scale: currentAction?.getEffectiveTimeScale() || 1, loop: currentAction?.loop !== THREE.LoopOnce }) }) || null;
-  const sword = heroModel.getObjectByName('Hero_sword') || heroModel.getObjectByName('rumi_sword');
-  const equipment = heroChoice === 'vroid' && !coop ? createHeroEquipment(THREE, heroModel, sword) : null;
   let heroProfile = heroFor(pageParams.get('character'));
-  const campaign = marchLevel && !coop ? new Campaign(pageParams.get('chapter')) : null;
+  const coopView = coop?.attach({ THREE, scene, heroModel, clips, cloneSkinned, groundAt,
+    createEquipment: model => createHeroEquipment(THREE, model, model.getObjectByName('Hero_sword')),
+    local: () => ({ x: hero.position.x, y: hero.position.y, z: hero.position.z, yaw: hero.rotation.y, lift: heroModel.position.y - heroBaseY, anim: currentName, time: currentAction?.time || 0, scale: currentAction?.getEffectiveTimeScale() || 1, loop: currentAction?.loop !== THREE.LoopOnce, character: heroProfile.id, musou: arena.attack?.flurry ? arena.hero.actionTime : -1 }) }) || null;
+  const sword = heroModel.getObjectByName('Hero_sword') || heroModel.getObjectByName('rumi_sword');
+  const equipment = heroChoice === 'vroid' ? createHeroEquipment(THREE, heroModel, sword) : null;
+  await equipment?.ready;
+  if (equipment) scene.environment = createHeroEnvironment(THREE, renderer).texture;
+  equipment?.apply(heroProfile);
+  const heroSpecialFx = equipment ? createHeroSpecialFx(THREE, scene, groundAt) : null;
+  const campaign = marchLevel ? new Campaign(pageParams.get('chapter')) : null;
+  const chapterWorld = campaign && world?.group ? createChapterWorld(THREE, scene, world) : null;
   const nextChapterButton = document.getElementById('nextChapter');
   const restartCampaignButton = document.getElementById('restartCampaign');
   const worldColors = new Map();
@@ -361,7 +371,7 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
   // 紫刃（?hero=vroid）：跳躍與無雙亂舞；Rumi 預設單場維持原本的 Arena
   const arena = march ? march.arena : new Arena({ ...(heroChoice === 'vroid' && !coop ? { heroProfile } : {}), seed: 17, warriorMode: true, musou: heroChoice === 'vroid', ...(heroChoice === 'vroid' ? { jump: true, musouFlurry: true } : {}) });
   if (debug) window.__arena = arena;   // ?debug：無頭測試可讀英雄狀態（單場與行軍關）
-  coopView?.bindLevel({ march, arena, level: marchModules?.[0] || null });   // [coop] 第二階段：房主跑敵人、隊友打房主的敵人（net/enemy-sync.js）
+  coopView?.bindLevel({ march, arena, level: marchModules?.[0] || null, campaign });   // 房主同步章節與敵人
   if (arena.jumpEnabled) for (const element of document.querySelectorAll('[data-action="jump"], [data-jump-help]')) element.hidden = false;
   const keys = new Set();
   const edges = {};
@@ -522,7 +532,10 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
   function onEvents() {
     for (const event of (march || arena).drainEvents()) {
       const x = toWorldX(event.x ?? arena.hero.x), z = toWorldZ(event.y ?? arena.hero.y);
-      combatFx?.onEvent(event, fxPos.set(x, groundAt(x, z), z), enemies.get(event.enemyId)?.root);
+      fxPos.set(x, groundAt(x, z), z);
+      const customSpecial = equipment && heroProfile.id !== 'violet' && (['special', 'musouStart', 'musouFinish'].includes(event.type) || event.type === 'swing' && event.flurry);
+      if (!customSpecial) combatFx?.onEvent(event, fxPos, enemies.get(event.enemyId)?.root);
+      heroSpecialFx?.onEvent(event, fxPos);
       audio?.onEvent(event);
       if (march) marchEvent(event, x, z);
       if (event.type === 'special' && equipment) toast(`${heroProfile.special}！`, 1.8);
@@ -578,7 +591,8 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
         }
       }
       if (event.type === 'special' && event.flurry) {
-        play('musouFlurry', event.finishAt || 3.6); toast(event.true ? '真・天刃亂舞！' : '天刃亂舞！');
+        play(equipment ? heroProfile.id === 'azure' ? 'heavy' : heroProfile.id === 'amber' ? 'slash4' : 'charge' : 'musouFlurry', equipment ? 0.8 : event.finishAt || 3.6);
+        toast(`${event.true ? '真・' : ''}${equipment ? heroProfile.special : '天刃亂舞'}！`);
         if (event.true) flash(x, z, 0xa040ff, 2.4, 0.8);
       } else if (event.type === 'special' && arena.musou) {
         play('musou', 2.0); if (!combatFx) toast('天刃亂舞！');
@@ -619,12 +633,16 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
         shake = Math.max(shake, 0.5);
       }
       if (event.type === 'musouFinish') {
-        play('musouFinish', 0.6);
+        play(equipment && heroProfile.id === 'azure' ? 'heavyfin' : equipment && heroProfile.id === 'amber' ? 'combo4' : 'musouFinish', 0.6);
         if (!combatFx) {
           flash(x, z, event.true ? 0xb050ff : 0xf2e2ff, (event.radius || 320) / 60, 0.6);
           burst(x, z, event.true ? 0xc070ff : 0xffe8c0, 36, 0.4);
           shake = Math.max(shake, 0.7);
         }
+      }
+      if (equipment && event.type === 'swing' && event.flurry) {
+        play(heroProfile.id === 'azure' ? 'heavyfin' : heroProfile.id === 'amber' ? event.index % 2 ? 'slash4' : 'slash3' : 'slash2', heroProfile.id === 'azure' ? 0.68 : heroProfile.id === 'amber' ? 0.22 : 0.38);
+        if (heroProfile.id === 'azure') shake = Math.max(shake, 0.3);
       }
       if (event.type === 'telegraph') {
         flash(x, z, 0xff665e, event.role === 'boss' ? 1.4 : 0.84, event.duration || 0.7);
@@ -691,7 +709,10 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
   }
   function marchEvent(event, x, z) {
     const y = groundAt(x, z);   // flash / burst / crescent add the floor height themselves
-    if (event.type === 'hint') toast(touchScreen() ? touchHint(event.text) : event.text, event.seconds || 3);
+    if (event.type === 'hint') {
+      const text = equipment ? event.text.replace(/打出(?:五|\d+)連斬/, `打出${heroProfile.chain.length}連斬`).replace(/按 1～\d+ 下/, `按 1～${heroProfile.chain.length - 1} 下`) : event.text;
+      toast(touchScreen() ? touchHint(text) : text, event.seconds || 3);
+    }
     else if (event.type === 'guard') { if (!combatFx) burst(x, z, 0xbfe4ff, 6, 1.1); popText('擋', x, y + 2.1, z, '#cfe8ff'); }
     else if (event.type === 'guardBreak' && !combatFx) { flash(x, z, 0xffd24a, 1.6, 0.4); burst(x, z, 0xffe07a, 20, 1.1); popText('破', x, y + 2.3, z, '#ffd24a'); shake = Math.max(shake, 0.45); }
     else if (event.type === 'sidestep') flash(x, z, 0x9aa4b8, 0.6, 0.2);
@@ -742,8 +763,8 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
       document.querySelector('.hud').append(bar);
       marchHud = { bar, label: bar.querySelector('span'), fill: bar.querySelector('i b'), roundLabel: document.querySelector('.round-card span') };
     }
-    $('waveText').textContent = hud.objective;
-    marchHud.roundLabel.textContent = campaign ? `${campaign.index + 1}/3 ${campaign.chapter.name} · ${hud.segmentName}` : hud.segmentName;
+    $('waveText').textContent = campaign && march.state === 'clear' ? '封魂完成' : hud.objective;
+    marchHud.roundLabel.textContent = campaign ? `${campaign.index + 1}/${CHAPTERS.length} ${campaign.chapter.name} · ${campaign.chapter.segments?.[march.segmentIndex] || hud.segmentName}` : hud.segmentName;
     const show = hud.foe || hud.lamp;
     marchHud.bar.hidden = !show;
     marchHud.bar.classList.toggle('lamp', !hud.foe && !!hud.lamp);
@@ -828,6 +849,7 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
     }
     heroModel.position.y = heroBaseY + lift;
     mixer.update(dt);
+    equipment?.update();
     heroLook.update(performance.now() / 1000);
     hero.updateMatrixWorld(true);
     if (!combatFx) trail.update(h.action === 'attack' || h.action === 'heavy' || h.action === 'special' || h.action === 'airSlash' || h.action === 'plunge');
@@ -857,6 +879,15 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
     else $('waveText').textContent = arena.bossQueued || arena.enemies.some(enemy => enemy.role === 'boss') ? '鬼門守將' : arena.wave === 1 ? '第一波' : '第二波';
     $('killText').textContent = String(arena.kills).padStart(2, '0');
     if (!combatFx) $('comboText').textContent = march ? (march.combo >= 3 ? `${march.combo} 連擊` : '') : h.combo > 1 && h.action === 'attack' ? `${h.combo} 連斬` : '';
+    const route = document.getElementById('comboRoute');
+    if (route && equipment) {
+      const active = h.action === 'attack' || arena.time <= arena.comboUntil;
+      route.hidden = !active && h.action !== 'heavy';
+      route.style.setProperty('--hero-color', heroProfile.color);
+      route.querySelector('b').textContent = h.action === 'heavy' ? arena.attack?.name || '重擊' : `${h.combo} / ${heroProfile.chain.length} 連斬`;
+      route.querySelector('span').textContent = h.action === 'heavy' ? '變招完成' : arena.inputBuffer?.kind === 'heavy' ? '重擊已接招' : isMobile() ? '攻 接下一刀 · 重 變招' : 'J 接下一刀 · K 變招';
+      for (const [i, dot] of [...route.querySelectorAll('i')].entries()) dot.classList.toggle('lit', i < h.combo);
+    }
     document.querySelector('[data-action="special"]')?.classList.toggle('ready', h.energy >= 100);
     if (arena.time > toastUntil) $('toast').textContent = '';
   }
@@ -867,10 +898,10 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
     if (campaign && arena.state === 'win') campaign.complete(march.result);
     $('resultTitle').textContent = arena.state === 'win' ? (campaign ? `${campaign.chapter.name}・完成` : '夜市重歸寧靜') : '重新集結';
     if (nextChapterButton) {
-      nextChapterButton.hidden = !(campaign && arena.state === 'win' && campaign.hasNext);
+      nextChapterButton.hidden = !(campaign && arena.state === 'win' && campaign.hasNext && (coop?.isHost() ?? true));
       if (!nextChapterButton.hidden) nextChapterButton.querySelector('span').textContent = '前往下一關';
     }
-    if (restartCampaignButton) restartCampaignButton.hidden = !(campaign && arena.state === 'win' && !campaign.hasNext);
+    if (restartCampaignButton) restartCampaignButton.hidden = !(campaign && arena.state === 'win' && !campaign.hasNext && (coop?.isHost() ?? true));
     $('resultText').textContent = march ? marchResultText(march) : `擊倒 ${arena.kills} 名敵人。${arena.state === 'win' ? '你已完成這次 3D 單場試作。' : '看到攻擊警示先閃避；普攻接重擊可以打退一群敵人。'}`;
     if (campaign && arena.state === 'win' && !campaign.hasNext) {
       const completed = campaign.results.filter(Boolean);
@@ -897,6 +928,7 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
       if (now < slowUntil) dt *= slowScale;
       if (now < freezeUntil) dt = 0;
     }
+    if (equipment && heroProfile.id !== 'violet' && arena.attack?.flurry) dt *= arena.timeScale();
     for (const action of holds.tick(realDt)) edges[action] = true;
     const inputX = joystick.x + Number(keys.has('d') || keys.has('arrowright')) - Number(keys.has('a') || keys.has('arrowleft'));
     const inputY = joystick.y + Number(keys.has('s') || keys.has('arrowdown')) - Number(keys.has('w') || keys.has('arrowup'));
@@ -913,6 +945,7 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
     onEvents();
     syncEnemies(dt);
     world?.update(march.view(), dt, performance.now() / 1000);
+    chapterWorld?.update(realDt);
     syncHero(dt);
     coopView?.update(realDt);   // [coop] 隊友插值與動作
     syncCamera(realDt);
@@ -922,6 +955,7 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
       if (march) combatFx.setCombo(march.combo);
       combatFx.update(realDt, dt, { heroAction: arena.hero.action, energy: arena.hero.energy, enemies });
     }
+    heroSpecialFx?.update(dt);
     audio?.update(realDt, realDt > 0 ? dt / realDt : 1, arena.hero);   // 慢動作：音樂低通＋音效降調；hitstop 短定格不觸發
     if (shake > 0) {
       shakeOffset.set((Math.random() - 0.5), (Math.random() - 0.5) * 0.7, (Math.random() - 0.5)).multiplyScalar(shake * 0.22);
@@ -955,6 +989,7 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
     if (arena.state !== 'play') finish();
   }
   function start() {
+    heroSpecialFx?.reset();
     if (campaign) {
       march.tuning = chapterTuning(campaign.index);
       scene.background.setHex(campaign.chapter.background);
@@ -962,6 +997,7 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
       moon.color.setHex(campaign.chapter.moon); rim.color.setHex(campaign.chapter.rim);
       const tint = new THREE.Color(campaign.chapter.tint);
       for (const [material, color] of worldColors) material.color.copy(color).multiply(tint);
+      chapterWorld?.apply(campaign.chapter);
     }
     if (march) march.reset(); else arena.reset();
     world?.breakables.reset();
@@ -1067,13 +1103,17 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
     keys.add(key);
     const action = { j: 'attack', k: 'heavy', shift: 'dodge', e: 'special', ...(arena.jumpEnabled ? { ' ': 'jump' } : {}) }[key];
     if (action && !event.repeat) edges[action] = true;
+    if (equipment && action === 'attack' && !event.repeat) holds.press('attack', 'keyboard-j');
   });
-  window.addEventListener('keyup', event => keys.delete(event.key.toLowerCase()));
+  window.addEventListener('keyup', event => {
+    keys.delete(event.key.toLowerCase());
+    if (event.key.toLowerCase() === 'j') holds.release('keyboard-j');
+  });
   $('pauseBtn').addEventListener('click', () => pause(true));
   $('resume').addEventListener('click', () => pause(false));
   $('retry').addEventListener('click', start);
-  nextChapterButton?.addEventListener('click', () => { if (campaign && arena.state === 'win' && campaign.next()) start(); });
-  restartCampaignButton?.addEventListener('click', () => { campaign?.restart(); start(); });
+  nextChapterButton?.addEventListener('click', () => { if ((coop?.isHost() ?? true) && campaign && arena.state === 'win' && campaign.next()) start(); });
+  restartCampaignButton?.addEventListener('click', () => { if (coop?.isHost() === false) return; campaign?.restart(); start(); });
   window.addEventListener('resize', resize);
   window.addEventListener('orientationchange', resize);
   window.visualViewport?.addEventListener('resize', resize);   // iOS 網址列收合、分割畫面時 window resize 不一定會觸發
@@ -1086,9 +1126,12 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
   assets.progress.complete('battle');
   assets.release();
   function configure({ character, chapter } = {}) {
-    if (running || coop || heroChoice !== 'vroid') return;
+    if (running || heroChoice !== 'vroid') return;
     heroProfile = heroFor(character);
     arena.heroProfile = heroProfile; equipment?.apply(heroProfile);
+    heroSpecialFx?.setStyle(heroProfile.id);
+    const routeDots = document.querySelector("#comboRoute div");
+    if (routeDots) routeDots.innerHTML = "<i></i>".repeat(heroProfile.chain.length);
     document.querySelector('[data-action="special"]')?.setAttribute('aria-label', heroProfile.special);
     const branchHelp = document.querySelector('[data-branch-help]');
     if (branchHelp) branchHelp.textContent = `變招 J×1～${heroProfile.charges.length}→K`;
@@ -1099,5 +1142,12 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
     if (heading) { heading.querySelector('b').textContent = heroProfile.name; heading.querySelector('small').textContent = heroProfile.weapon; heading.querySelector('.hero-mark').textContent = heroProfile.mark; }
   }
   configure({ character: heroProfile.id, chapter: campaign?.index });
-  return { start, warm, pause, configure, campaign, arena, scene, camera, renderer };
+  function syncChapter(index) {
+    if (!campaign) return false;
+    const next = new Campaign(index).index;
+    if (next === campaign.index) return false;
+    campaign.index = next; march.tuning = chapterTuning(next);
+    return true;
+  }
+  return { start, warm, pause, configure, syncChapter, campaign, arena, scene, camera, renderer };
 }

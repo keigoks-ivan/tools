@@ -1,5 +1,6 @@
 import { installGameGestures } from '../2d/touch-gestures.js';
 import { assetPlan, createPreloader } from './preload.js?v=20260925c';
+import { CHAPTERS } from './campaign.js?v=20261002b';
 
 // 手機防誤觸縮放：連點放大、雙指縮放（iOS gesture*）一律擋下；萬一仍被放大，重設 viewport 讓畫面縮回原比例
 installGameGestures(document.getElementById('game'));
@@ -20,9 +21,9 @@ if (new URLSearchParams(location.search).get('hero') !== 'rumi') {
   const subtitle = document.querySelector('.title-subtitle');
   const copy = document.querySelector('.title-copy');
   const note = document.querySelector('.prototype-note');
-  if (subtitle) subtitle.textContent = '三位刀客・三關戰役';
-  if (copy) copy.textContent = '從夜市突圍、赤月圍城到虛空封魂。選擇長刀、大劍或雙刃，以不同招式封住鬼門。';
-  if (note?.firstChild) note.firstChild.textContent = '三位刀客　·　三關戰役　·　';
+  if (subtitle) subtitle.textContent = '三位武者・五關戰役';
+  if (copy) copy.textContent = '從夜市突圍一路闖到霜橋與天闕。選擇長刀、偃月刀或雙刃，以不同招式封住鬼門。';
+  if (note?.firstChild) note.firstChild.textContent = '三位武者　·　五關戰役　·　';
 }
 
 // 全螢幕（電腦版）：標題與 HUD 各一顆按鈕＋F 鍵；Esc 由瀏覽器處理。觸控裝置與不支援的瀏覽器不顯示。
@@ -73,7 +74,7 @@ const assets = createPreloader({
   plan: assetPlan({ hero: vroid ? 'vroid' : 'rumi', march: vroid && params.get('level') !== 'single' }),
   loadEngine: () => loadBattleModule().then(async module => { await module.loadLazyModules(); return module; }),
 });
-const loadBattleModule = () => import('./battle.js?v=20261001a');
+const loadBattleModule = () => import('./battle.js?v=20261002b');
 if (params.has('debug')) window.__assets = assets;   // ?debug：各項下載／步驟的開始與完成時間（__assets.progress.items）
 let audio = null;
 const audioReady = vroid
@@ -113,8 +114,8 @@ function setupSoundUi() {
 let battlePromise = null, battleReady = false, prefetching = false;
 // battle.js 的 import 圖：一次全部送出請求，不用等 battle.js 下載完才發現要抓 three.js（版本字串與 battle.js 相同，測試會比對）
 const ENGINE_MODULES = ['../lib/three.module.js', '../lib/addons/loaders/GLTFLoader.js', '../lib/addons/utils/SkeletonUtils.js',
-  '../2d/combat.js?v=20261001a', '../frame-pacing.js', './world.js', './oni.js', './touch-input.js',
-  ...(vroid ? ['./combat-fx.js?v=20260928a'] : []), ...(vroid && params.get('level') !== 'single' ? ['./march.js?v=20261001a', './march-art.js?v=20260925f'] : [])];
+  '../2d/combat.js?v=20261002b', '../frame-pacing.js', './world.js', './oni.js', './touch-input.js',
+  ...(vroid ? ['./combat-fx.js?v=20261002b'] : []), ...(vroid && params.get('level') !== 'single' ? ['./march.js?v=20261002b', './march-art.js?v=20260925f'] : [])];
 function preloadModules() {
   for (const href of ENGINE_MODULES) {
     const link = document.createElement('link');
@@ -217,7 +218,7 @@ function selectCharacter(id) {
 }
 selectCharacter(selectedCharacter);
 const chapterSelect = document.getElementById('chapterSelect');
-selectedChapter = Math.max(0, Math.min(2, Math.floor(selectedChapter)));
+selectedChapter = Math.max(0, Math.min(CHAPTERS.length - 1, Math.floor(selectedChapter)));
 chapterSelect.value = String(selectedChapter);
 chapterSelect.addEventListener('change', () => { selectedChapter = Number(chapterSelect.value); });
 for (const button of document.querySelectorAll('[data-character]')) button.addEventListener('click', () => { selectCharacter(button.dataset.character); audio?.ui(); });
