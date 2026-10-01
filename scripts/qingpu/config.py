@@ -146,8 +146,28 @@ PRESALE_HANDOVER_GRACE_DAYS = 150
 
 # 重劃區比較只算這一年（含）以後完工的房子轉手，避免長馬路上的舊公寓被算進重劃區
 ZONE_RESALE_MIN_COMPLETION_YEAR = 2010
-# 一年轉手少於這個數，比值不參加排名（頁面標「樣本少」）
+# 一年轉手少於這個數，比值不參加排名（舊版門檻，兩年窗口上線後只給次要欄位參考用）
 COMPARE_MIN_RESALE_FOR_RANK = 50
+# 兩年轉手少於這個數，比值不參加排名（頁面標「樣本少」）——主要排名門檻，見
+# compute_compare.py 兩年窗口改版（2026-10）。
+COMPARE_MIN_RESALE_FOR_RANK_2Y = 100
+
+# ---------------------------------------------------------------------------
+# 跟六都比較用城市定義（compute_compare.py「跟台北、台中、高雄比」區塊用）。
+# file_prefix 對照實價登錄全國zip manifest.csv驗證過：a=臺北市 b=臺中市 e=高雄市
+# f=新北市 h=桃園市（跟現有 ZONES 的 file_prefix 用法一致）。pop_site_id 是戶政司
+# ODRP014 的 site_id 前綴，實測該API一律用「臺」不用「台」（臺北市/臺中市），這裡
+# 仍兩種都試，避免未來API改字型就查不到。
+# ---------------------------------------------------------------------------
+CITIES = [
+    {"id": "taipei", "name": "台北市", "file_prefix": "a", "pop_site_id": "臺北市"},
+    {"id": "taichung", "name": "台中市", "file_prefix": "b", "pop_site_id": "臺中市"},
+    {"id": "kaohsiung", "name": "高雄市", "file_prefix": "e", "pop_site_id": "高雄市"},
+    {"id": "newtaipei", "name": "新北市", "file_prefix": "f", "pop_site_id": "新北市"},
+]
+# 跟六都比較的價格，拆「全部屋齡」跟「屋齡5年內」兩組，避免青埔這種新市鎮的新成屋
+# 被拿去跟其他城市摻雜老屋的全市中位價直接比。
+CITY_PRICE_AGE_MAX_YEARS = 5
 
 # ---------------------------------------------------------------------------
 # 591 售屋（開價）抓取設定

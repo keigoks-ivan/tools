@@ -201,7 +201,7 @@ def main():
     peak = facts.get("peak") or {}
 
     sentences = []
-    # 1. 現在的問題：供給多，不是沒人買
+    # 1. 現在的問題：供給多，不是沒人買（兩年窗口：近兩年完工÷兩年轉手，見「怎麼算的」）
     qd = cmp_.get("qingpu_district_row") or {}
     qc, cc = qz.get("ratio_completed_to_resale"), city.get("ratio_completed_to_resale")
     qdc = qd.get("ratio_completed_to_resale")
@@ -212,12 +212,13 @@ def main():
             else ("青埔的供給壓力高於全市，成交量能也偏弱" if (q_turn is not None and city_turn is not None and q_turn < city_turn)
                   else "青埔的供給壓力高於全市")
         )
-        s1 = (f"{lead}：近一年蓋好 {fi(qd.get('completed_1y_units'))} 戶，是一年轉手 {fi(qd.get('resale_1y'))} 戶的 {f1(qdc)} 倍"
-              f"（全市 {f1(cc)} 倍，全桃園最高）" if qvd.get("rank_completed") == 1 else f"（全市 {f1(cc)} 倍）")
+        rank_note = "，全桃園最高" if qvd.get("rank_completed") == 1 else ""
+        s1 = (f"{lead}：近兩年蓋好 {fi(qd.get('completed_2y_units'))} 戶，是兩年轉手 {fi(qd.get('resale_2y'))} 戶的 {f1(qdc)} 倍"
+              f"（全市 {f1(cc)} 倍{rank_note}）")
         if q_turn is not None and city_turn is not None:
             s1 += f"；但換手率 {q_turn:.2f}% 也高於全市 {city_turn:.2f}%"
         sentences.append(s1 + "。")
-    # 2. 未來：還有一波，但不是重劃區裡最重的
+    # 2. 未來：還有一波，但不是重劃區裡最重的（未完工÷年均轉手，單位＝年，見「怎麼算的」）
     qu = qz.get("ratio_unfinished_to_resale")
     qdu = qd.get("ratio_unfinished_to_resale")
     if qu is not None and qdu is not None:
@@ -225,12 +226,12 @@ def main():
                          key=lambda z: -z["ratio_unfinished_to_resale"])
         lighter = sorted([z for z in ranked_zones if z.get("ratio_unfinished_to_resale") is not None and z["ratio_unfinished_to_resale"] < qu],
                          key=lambda z: z["ratio_unfinished_to_resale"])
-        s2 = (f"未來兩三年還有一波：還沒蓋好的 {fi(qd.get('unfinished_units'))} 戶是一年轉手的 {f1(qdu)} 倍，"
-              f"在全桃園排第 {qvd.get('rank_unfinished')}（全市 {f1(city.get('ratio_unfinished_to_resale'))} 倍）")
+        s2 = (f"未來兩三年還有一波：還沒蓋好的 {fi(qd.get('unfinished_units'))} 戶，要用現在的轉手速度消化 {f1(qdu)} 年，"
+              f"在全桃園排第 {qvd.get('rank_unfinished')}（全市要 {f1(city.get('ratio_unfinished_to_resale'))} 年）")
         if heavier:
-            s2 += "；但只比新房子的話，重劃區裡 " + "、".join(f"{zn(z)} {f1(z['ratio_unfinished_to_resale'])} 倍" for z in heavier[:2]) + f"比青埔（{f1(qu)} 倍）更重"
+            s2 += "；但只比新房子的話，重劃區裡 " + "、".join(f"{zn(z)} {f1(z['ratio_unfinished_to_resale'])} 年" for z in heavier[:2]) + f"比青埔（{f1(qu)} 年）更久"
         if lighter:
-            s2 += f"，{zn(lighter[0])}（{f1(lighter[0]['ratio_unfinished_to_resale'])} 倍）較輕"
+            s2 += f"，{zn(lighter[0])}（{f1(lighter[0]['ratio_unfinished_to_resale'])} 年）較快"
         sentences.append(s2 + "。")
     # 3. 需求：人在進來
     if hg.get("growth_rate") is not None:
@@ -282,7 +283,7 @@ def main():
     zone_card = None
     if qdc is not None:
         zone_card = {
-            "ratio_completed": qdc,  # 行政區口徑（所有屋齡），跟全市數字可以直接比
+            "ratio_completed": qdc,  # 行政區口徑（所有屋齡，兩年窗口），跟全市數字可以直接比
             "ratio_completed_new_only": qc,
             "rank_completed_taoyuan": qvd.get("rank_completed"),
             "n_taoyuan": qvd.get("n"),
