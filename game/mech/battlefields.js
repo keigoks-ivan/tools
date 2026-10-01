@@ -44,3 +44,17 @@ export function fieldLayout(profile, route) {
   }
   return { ...BATTLEFIELDS[profile], structures };
 }
+
+// 同一張網格將 65% 的頂點集中在中央 3 公里；反函數供碰撞取樣使用。
+export function fieldGridCoordinate(i, segments, size, detailed = false) {
+  const t = i / segments * 2 - 1;
+  if (!detailed) return t * size / 2;
+  const a = Math.abs(t), core = Math.min(1500, size * 0.3);
+  return Math.sign(t) * (a <= 0.65 ? a / 0.65 * core : core + (a - 0.65) / 0.35 * (size / 2 - core));
+}
+export function fieldGridIndex(x, segments, size, detailed = false) {
+  if (!detailed) return (x + size / 2) / size * segments;
+  const a = Math.abs(x), core = Math.min(1500, size * 0.3);
+  const t = a <= core ? a / core * 0.65 : 0.65 + (a - core) / (size / 2 - core) * 0.35;
+  return (Math.sign(x) * t + 1) * segments / 2;
+}

@@ -131,6 +131,7 @@ function stripeTexture() {
 const CTN = [0x8a3b24, 0x2d4f7c, 0x3f6a3a, 0xb9b8ae, 0xc0621e, 0x6b2430, 0x2f6f6d, 0xc79a1d, 0x4a4f55];
 function buildRoute(world, E) {
   const A = world.A, g = new THREE.Group(), boxes = [];
+  const palette = world.battlefield && world.battlefield !== 'city' ? [0x394235,0x444a4a,0x67635a,0x714c3b,0x263845,0x585546] : CTN;
   const L = { ctn: [], jer: [], hog: [], car: [], rub: [], brd: [], la: [], lb: [], tth: [] };
   const o = new THREE.Object3D();
   const put = (list, x, y, z, ry, sx = 1, sy = 1, sz = 1, rx = 0, rz = 0, c = null) => {
@@ -156,7 +157,7 @@ function buildRoute(world, E) {
       const h = edge ? 3 + (Math.random() < 0.35 ? 1 : 0) : 2 + (Math.random() < 0.5 ? 1 : 0);
       for (let l = 0; l < h; l++) {
         const [x, z] = at(u + rand(-0.4, 0.4), 1.4 + rand(-0.15, 0.15));
-        put(L.ctn, x, gy + 1.3 + l * 2.6, z, ry + rand(-0.05, 0.05), 1, 1, 1, 0, 0, new THREE.Color(CTN[(Math.random() * CTN.length) | 0]));
+        put(L.ctn, x, gy + 1.3 + l * 2.6, z, ry + rand(-0.05, 0.05), 1, 1, 1, 0, 0, new THREE.Color(palette[(Math.random() * palette.length) | 0]));
       }
       box(u - 6.2, u + 6.2, 0.1, 2.7, h * 2.6);
       if (h * 2.6 > tall) tall = h * 2.6;
@@ -167,7 +168,7 @@ function buildRoute(world, E) {
       const [fx, fz] = at(u + rand(-2, 2), -1.3);
       if (Math.random() < 0.55) {
         const r = ry + rand(-0.12, 0.12);
-        put(L.ctn, fx, gy + 1.3, fz, r, 1, 1, 1, 0, 0, new THREE.Color(CTN[(Math.random() * CTN.length) | 0]));
+        put(L.ctn, fx, gy + 1.3, fz, r, 1, 1, 1, 0, 0, new THREE.Color(palette[(Math.random() * palette.length) | 0]));
         board(fx, fz, r);
       } else {
         for (let q = 0; q < 2; q++) {

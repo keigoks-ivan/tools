@@ -34,3 +34,16 @@ test('新地形接回原本遠山，不產生非有限值或邊界裂縫', () =>
   }
   assert.equal(fieldHeight(0,0,'city',{},17),17);
 });
+
+test('中央加密地形的座標與碰撞索引互為反函數，外圈仍接合原網格', async () => {
+  const {fieldGridCoordinate:point,fieldGridIndex:index}=await import('../battlefields.js');
+  for(const detail of [false,true])for(const seg of [80,160,320]) {
+    let prev=-Infinity;
+    for(let i=0;i<=seg;i++) {
+      const x=point(i,seg,10000,detail);assert(x>prev);prev=x;
+      assert(Math.abs(index(x,seg,10000,detail)-i)<1e-10);
+    }
+    assert.equal(point(0,seg,10000,detail),-5000);assert.equal(point(seg,seg,10000,detail),5000);
+  }
+  assert(point(81,160,10000,true)-point(80,160,10000,true)<30);
+});

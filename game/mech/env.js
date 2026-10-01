@@ -6,7 +6,9 @@ import { mergeGeometries, mergeVertices } from 'three/addons/utils/BufferGeometr
 import { makeFacade, FACADE_TILE } from './textures.js';
 import { shopMaterial, shopUV } from './urban.js';
 import { roofline } from './roofline.js';
-import { BATTLEFIELDS, fieldHeight, fieldLayout, routeDistance } from './battlefields.js';
+import { BATTLEFIELDS, fieldHeight, fieldLayout, routeDistance, fieldGridCoordinate, fieldGridIndex } from './battlefields.js';
+
+import { fieldTreeGeometry, fieldRockGeometry, fieldArchitecture, fieldLeafMaterial, fieldRadar } from './fieldart.js';
 
 const ASSET = './assets/';
 const COMPACT = new URL('./zero/assets/env/', import.meta.url).href;
@@ -228,7 +230,7 @@ class Terrain {
   height(x, z) {
     const { size, seg, cell, h } = this;
     const n = seg + 1;
-    const fx = (x + size / 2) / cell, fz = (z + size / 2) / cell;
+    const fx = fieldGridIndex(x, seg, size, this.detailed), fz = fieldGridIndex(z, seg, size, this.detailed);
     const i = Math.min(seg - 1, Math.max(0, Math.floor(fx))), j = Math.min(seg - 1, Math.max(0, Math.floor(fz)));
     const u = Math.min(1, Math.max(0, fx - i)), v = Math.min(1, Math.max(0, fz - j));
     const ha = h[j * n + i], hb = h[(j + 1) * n + i], hc = h[(j + 1) * n + i + 1], hd = h[j * n + i + 1];
@@ -384,6 +386,16 @@ function terrainMaterial(A) {
         float rk = smoothstep(0.20, 0.48, slope + (macro - 0.5) * 0.14 + treeline * 0.14);
         if (battlefield > 3.5 && battlefield < 4.5) grass = mix(grass, texture2D(rubD, vTW.xz / 14.0).rgb * vec3(0.85,0.63,0.40), 0.85);
         if (battlefield > 1.5 && battlefield < 2.5) grass *= vec3(0.65,0.83,0.64);
+        if (battlefield > 0.5) {
+          vec3 soil=texture2D(rubD,vTW.xz/9.0).rgb;
+          float bare=smoothstep(0.42,0.68,dry+tn(vTW.xz/18.0)*0.12);
+          if (battlefield > 1.5 && battlefield < 2.5) grass=mix(grass,soil*vec3(0.46,0.41,0.29),bare*0.65);
+          else if (battlefield > 3.5 && battlefield < 4.5) {
+            grass=mix(soil*vec3(0.70,0.49,0.29),rock*vec3(1.35,0.97,0.63),bare);
+            rock*=vec3(1.38,1.05,0.73);
+            rk=max(rk,smoothstep(0.04,0.24,slope)*0.7);
+          } else grass=mix(grass,soil*vec3(0.67,0.60,0.44),bare*0.48);
+        }
         vec3 base = mix(grass, rock, rk);
         vec3 asph = texture2D(asphD, vTW.xz / 7.0).rgb;
         asph *= mix(0.85, 1.12, tfbm(vTW.xz / 23.0));
@@ -917,12 +929,14 @@ export class World {
     this.battlefield = profile; this.fieldRoute = route;
     const F = BATTLEFIELDS[profile], layout = F.mode ? fieldLayout(profile, route) : null;
     const terrainRoute = layout ? { ...route, pads: layout.structures } : null;
-    const T = this.terrain, p = this.terrainMesh.geometry.attributes.position;
+    const T = this.terrain, p = this.terrainMesh.geometry.attributes.position, uv = this.terrainMesh.geometry.attributes.uv;
+    T.detailed = !!F.mode;
     for (let i = 0; i < T.h.length; i++) {
-      T.h[i] = F.mode ? fieldHeight(p.getX(i), p.getZ(i), profile, terrainRoute, this.cityHeights[i]) : this.cityHeights[i];
-      p.setY(i, T.h[i]);
+      const x = fieldGridCoordinate(i % (T.seg + 1), T.seg, T.size, T.detailed), z = fieldGridCoordinate(Math.floor(i / (T.seg + 1)), T.seg, T.size, T.detailed);
+      T.h[i] = F.mode ? fieldHeight(x, z, profile, terrainRoute, rawHeight(x,z)) : this.cityHeights[i];
+      p.setXYZ(i, x, T.h[i], z); uv.setXY(i, x / 15, z / 15);
     }
-    p.needsUpdate = true; this.terrainMesh.geometry.computeVertexNormals(); this.terrainMesh.geometry.computeBoundingSphere();
+    p.needsUpdate = uv.needsUpdate = true; this.terrainMesh.geometry.computeVertexNormals(); this.terrainMesh.geometry.computeBoundingSphere();
     this.terrainMesh.material.userData.battlefield.value = F.mode;
     this.scene.fog.density = profile === 'forest' ? 0.00062 : profile === 'badlands' ? 0.00032 : 0.00042;
     for (const o of this.cityObjects) o.visible = !F.mode;
@@ -941,54 +955,63 @@ export class World {
   buildBattlefield(profile, layout) {
     const group = this.fieldGroup = new THREE.Group(); this.scene.add(group);
     const r = rng(601 + layout.mode * 91), walls = new GeoBucket(), roofs = new GeoBucket(), records = [];
-    const put = (bucket, mat) => {
+    const put = (bucket, mat, shadow = true) => {
       const geo = bucket.geo = bucket.geometry();
       if (!geo) return;
-      const m = new THREE.Mesh(geo, mat); m.castShadow = m.receiveShadow = true; m.userData.fieldGeometry = true; group.add(m);
+      const m = new THREE.Mesh(geo, mat); m.castShadow = shadow; m.receiveShadow = true; m.userData.fieldGeometry = true; group.add(m);
     };
     for (const S of layout.structures) {
       const width = S.target ? 30 : profile === 'airfield' || profile === 'depot' ? 48 : 28;
       const oil = S.name?.includes('油庫');
-      const depth = S.target ? 32 : 34, H = oil ? 5 : profile === 'fortress' ? 18 : 15 + r() * 8;
+      const depth = S.target ? 32 : 34, H = oil ? 5 : profile === 'fortress' ? 11 : profile === 'airfield' ? 16 : profile === 'depot' ? 14 + r() * 4 : 9 + r() * 4;
       const x0 = S.x - width / 2, x1 = S.x + width / 2, z0 = S.z - depth / 2, z1 = S.z + depth / 2;
       const rec = { fB: walls, rB: roofs, sB: {}, f0: walls.p.length / 3, r0: roofs.p.length / 3, s0: 0, s1: 0, lamp: -1, x0, x1, z0, z1, H };
-      const c = profile === 'badlands' ? [0.67,0.57,0.43,0,1] : [0.61,0.64,0.61,0,1];
-      // 厚混凝土基座、分層牆板、鋼門與屋頂設備；沒有市區的密集窗格。
-      addBox(walls, x0, x1, 0, H, z0, z1, c, 10);
-      addBox(roofs, x0 - 1, x1 + 1, H - 1.2, H + 0.3, z0 - 1, z1 + 1, [0.5,0.53,0.54,0,2]);
-      for (let x = x0 + 5; x < x1; x += 7) addBox(roofs, x - 0.25, x + 0.25, 1, H - 1.2, z1, z1 + 0.3, [0.38,0.41,0.4,0,2]);
-      addBox(roofs, S.x - width * 0.27, S.x + width * 0.27, 0.2, H * 0.62, z1 + 0.1, z1 + 0.4, [0.21,0.25,0.27,0,2]);
-      const top = profile === 'fortress' ? 'east' : 'industrial';
-      if (oil) roofTank(roofs,S.x,S.z,H+0.3,12,21);
-      else roofline(x0, x1, z0, z1, H + 0.3, top,
-        (a,b,c,d,color) => {
-          const pts=[a,b,c,d], normal=new THREE.Vector3().subVectors(new THREE.Vector3(...b),new THREE.Vector3(...a)).cross(new THREE.Vector3().subVectors(new THREE.Vector3(...c),new THREE.Vector3(...a))).normalize();
-          const axes=Math.abs(normal.y)>0.5?[0,2]:Math.abs(normal.x)>0.5?[2,1]:[0,1];
-          roofs.quad(...pts,normal.toArray(),pts.map(v=>[v[axes[0]]/8,v[axes[1]]/8]),color);
-        },
-        (a,b,c,d,e,f,col) => addBox(roofs,a,b,c,d,e,f,col));
+      const face = (a,b,c,d,color) => {
+        const pts=[a,b,c,d], normal=new THREE.Vector3().subVectors(new THREE.Vector3(...b),new THREE.Vector3(...a)).cross(new THREE.Vector3().subVectors(new THREE.Vector3(...c),new THREE.Vector3(...a))).normalize();
+        const axes=Math.abs(normal.y)>0.5?[0,2]:Math.abs(normal.x)>0.5?[2,1]:[0,1];
+        roofs.quad(...pts,normal.toArray(),pts.map(v=>[v[axes[0]]/6,v[axes[1]]/6]),color);
+      };
+      const box = (a,b,c,d,e,f,col) => addBox(walls,a,b,c,d,e,f,col,6);
+      if(oil) {
+        addBox(walls,x0,x1,0,1.5,z0,z1,[.45,.46,.42,0,1]);
+        roofTank(roofs,S.x,S.z,1.5,12,21);
+      } else fieldArchitecture({...S,x0,x1,z0,z1},profile,H,box,face,(x,z,h,rad,tall)=>roofTank(roofs,x,z,h,rad,tall));
       if (S.target && /雷達|通訊|指揮|觀測/.test(S.name)) {
-        // 任務用天線／雷達設施與主樓同一頂點區段，摧毀時一同倒塌。
-        addBox(roofs, S.x - 0.4, S.x + 0.4, H + 2, H + 18, S.z - 0.4, S.z + 0.4, [0.5,0.55,0.59,0,2]);
-        addBox(roofs, S.x - 7, S.x + 7, H + 12, H + 15, S.z - 0.6, S.z + 0.6, [0.63,0.67,0.68,0,2]);
+        fieldRadar(S.x,S.z,H,face,(a,b,c,d,e,f,col)=>addBox(roofs,a,b,c,d,e,f,col),/通訊/.test(S.name));
       }
       rec.f1 = walls.p.length / 3; rec.r1 = roofs.p.length / 3;
-      const box = rec.box = { x0, x1, z0, z1, top: oil ? H + 21.3 : H + 0.3 };
-      this.addCollider(box); records.push(rec);
+      const collider = rec.box = { x0, x1, z0, z1, top: oil ? 22.5 : H + 0.3 };
+      this.addCollider(collider); records.push(rec);
     }
+    const roads=new GeoBucket();
+    for(let i=1;i<this.fieldRoute.pts.length;i++) {
+      const a=this.fieldRoute.pts[i-1],b=this.fieldRoute.pts[i],dx=b[0]-a[0],dz=b[1]-a[1],len=Math.hypot(dx,dz);if(len<1)continue;
+      const width=profile==='airfield'||profile==='depot'?10:6,nx=-dz/len*width,nz=dx/len*width;
+      const pts=[[a[0]+nx,.045,a[1]+nz],[b[0]+nx,.045,b[1]+nz],[b[0]-nx,.045,b[1]-nz],[a[0]-nx,.045,a[1]-nz]];
+      roads.quad(...pts,[0,1,0],pts.map(p=>[p[0]/7,p[2]/7]),[.62,.59,.50]);
+    }
+    if(!this.fieldRoadMaterial)this.fieldRoadMaterial=new THREE.MeshStandardMaterial({map:this.A.rubD,normalMap:this.A.rubN,roughness:1,vertexColors:true});
+    put(roads,this.fieldRoadMaterial,false);
     // 兩個合併網格容納全部可破壞基地建築，沿用既有建材、焦痕與倒塌池。
     put(walls, this.fieldRoofMaterial); put(roofs, this.fieldRoofMaterial); this._registerBlds(records);
     const place = (geo, material, count, type) => {
-      const m = new THREE.InstancedMesh(geo, material, count); m.castShadow = m.receiveShadow = true; group.add(m);
+      const m = new THREE.InstancedMesh(geo, material, count); m.castShadow = m.receiveShadow = true;
+      if(type==='tree'){m.userData.fieldTree=true;m.userData.noAO=true;m.customDepthMaterial=this.fieldTreeDepth;m.visible=!!this.fieldFoliageReady;}
+      group.add(m);
       const d = new THREE.Object3D(); let n = 0;
       for (let i = 0; i < count * 12 && n < count; i++) {
-        const x = (r() - 0.5) * 2400, z = (r() - 0.5) * 2400, size = type === 'tree' ? 1.5 + r() * 1.8 : 6 + r() * 17;
+        let x = (r() - 0.5) * 2400, z = (r() - 0.5) * 2400;
+        const size = type === 'tree' ? 1.3 + r() * 1.5 : 6 + r() * 17;
+        if(type==='tree' && r() < (profile==='forest'?.78:.4)) {
+          const p=this.fieldRoute.pts[Math.floor(r()*this.fieldRoute.pts.length)];
+          x=p[0]+(r()-.5)*520; z=p[1]+(r()-.5)*520;
+        }
         if (routeDistance(x,z,this.fieldRoute.pts) < size + 32 || layout.structures.some(t => Math.hypot(t.x-x,t.z-z) < size + 42)) continue;
         if (profile === 'airfield' && Math.abs(x + 420) < 65 && Math.abs(z) < 930) continue;
         const y = this.height(x,z);
         d.position.set(x,y,z); d.rotation.set(type === 'tree' ? 0 : r() * 0.25, r() * 6.28, 0);
         d.scale.set(size, type === 'tree' ? size * (0.9 + r() * 0.25) : size * (0.7 + r() * 0.6), size * (0.65 + r() * 0.65)); d.updateMatrix();
-        m.setMatrixAt(n,d.matrix); m.setColorAt(n,type==='tree' ? new THREE.Color().setRGB(0.45+r()*0.15,0.55+r()*0.15,0.4+r()*0.15) : new THREE.Color().setRGB(0.7+r()*0.25,0.72+r()*0.2,0.65+r()*0.2));
+        m.setMatrixAt(n,d.matrix); m.setColorAt(n,type==='tree' ? new THREE.Color().setRGB(.7+r()*.22,.8+r()*.2,.65+r()*.25) : profile==='badlands' ? new THREE.Color(.72+r()*.18,.54+r()*.12,.36+r()*.09) : new THREE.Color(.72+r()*.2,.75+r()*.18,.68+r()*.18));
         if (type === 'tree') this.trample.push({ mesh:[m], i:n, x,z,y,ry:d.rotation.y,r:size*0.7,s:size,sy:d.scale.y,kind:'tree',down:0 });
         else this.addCollider({ x0:x-size*0.75,x1:x+size*0.75,z0:z-size*0.75,z1:z+size*0.75,top:y+d.scale.y*0.9 });
         n++;
@@ -996,13 +1019,36 @@ export class World {
       m.count = n; m.instanceMatrix.needsUpdate = true;
     };
     if (!this.fieldRock) {
-      const geo = new THREE.DodecahedronGeometry(1,1), p = geo.attributes.position;
-      for (let i=0;i<p.count;i++) { const v=Math.sin(p.getX(i)*12.1+p.getY(i)*31.7+p.getZ(i)*18.9)*43758.5, s=0.82+(v-Math.floor(v))*0.28; p.setXYZ(i,p.getX(i)*s,(p.getY(i)+1)*s*0.5,p.getZ(i)*s); }
-      geo.computeVertexNormals(); this.fieldRock = { geo, mat:new THREE.MeshStandardMaterial({map:this.A.rockD,normalMap:this.A.rockN,roughness:1,color:0x79766c}) };
+      this.fieldRock = { geo:fieldRockGeometry(), mat:new THREE.MeshStandardMaterial({map:this.A.rockD,normalMap:this.A.rockN,roughness:1,color:0xaca89c}) };
+      const mat=this.fieldRock.mat;
+      mat.onBeforeCompile=sh=>{
+        sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nvarying vec3 vFieldRock;').replace('#include <project_vertex>','#include <project_vertex>\nvec4 rp=vec4(transformed,1.0);\n#ifdef USE_INSTANCING\nrp=instanceMatrix*rp;\n#endif\nvFieldRock=(modelMatrix*rp).xyz;');
+        sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nvarying vec3 vFieldRock;').replace('#include <map_fragment>','diffuseColor.rgb *= texture2D(map,vFieldRock.xz/12.0).rgb * (0.86+0.14*sin(vFieldRock.y*1.4+vFieldRock.x*0.06));');
+      };
+      this.fieldTrees=[fieldTreeGeometry(true),fieldTreeGeometry(false)];
+      const ready=(texture)=>{
+        if(texture?.image){
+          const c=document.createElement('canvas');c.width=c.height=512;c.getContext('2d').drawImage(texture.image,0,0,512,512);
+          texture.image=c;texture.needsUpdate=true;
+        }
+        this.fieldFoliageReady=true;
+        this.fieldGroup?.traverse(o=>{if(o.userData.fieldTree)o.visible=true;});
+        this.sun.shadow.needsUpdate=true;
+      };
+      const failed=()=>{
+        this.fieldTreeMaterial.map=null;this.fieldTreeMaterial.alphaTest=0;this.fieldTreeMaterial.color.setHex(0x385132);this.fieldTreeMaterial.needsUpdate=true;
+        this.fieldTreeDepth.map=null;this.fieldTreeDepth.alphaTest=0;this.fieldTreeDepth.needsUpdate=true;ready();
+      };
+      const tex=new THREE.TextureLoader().load(new URL('./assets/field-foliage-v1.png',import.meta.url).href,ready,undefined,failed);
+      tex.colorSpace=THREE.SRGBColorSpace;tex.anisotropy=4;
+      this.fieldTreeMaterial=fieldLeafMaterial(tex);this.fieldTreeDepth=fieldLeafMaterial(tex,true);
     }
     place(this.fieldRock.geo,this.fieldRock.mat,layout.rocks,'rock');
-    const tree = this.cityState.trample.find(t => t.kind === 'tree')?.mesh[0];
-    if (tree && layout.trees) place(tree.geometry,tree.material,layout.trees,'tree');
+    if(layout.trees) {
+      const broad=Math.round(layout.trees*(profile==='forest'?.3:.15));
+      place(this.fieldTrees[0],this.fieldTreeMaterial,layout.trees-broad,'tree');
+      place(this.fieldTrees[1],this.fieldTreeMaterial,broad,'tree');
+    }
     if (profile === 'depot' || profile === 'airfield') {
       const tanks = new GeoBucket();
       for (const S of layout.structures) if (!S.target) {
@@ -1125,7 +1171,18 @@ export class World {
     const NF = FACADES.length;
     const fmats = FACADES.map((f, i) => buildingMaterial(this.A, i));
     const roofMat = architecturalMaterial(this.A);
-    this.fieldRoofMaterial = roofMat;
+    this.fieldRoofMaterial = architecturalMaterial(this.A);
+    const fieldMat = this.fieldRoofMaterial, prepareField = fieldMat.onBeforeCompile;
+    fieldMat.onBeforeCompile = (sh,renderer) => {
+      prepareField(sh,renderer);
+      sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nattribute float burn; varying float vFieldBurn;').replace('#include <begin_vertex>','#include <begin_vertex>\nvFieldBurn=burn;');
+      sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nvarying float vFieldBurn;').replace('#include <map_fragment>',`#include <map_fragment>
+        float streak=fract(sin(dot(floor(vAW.xz*2.0),vec2(127.1,311.7)))*43758.5453);
+        float grime=(1.0-smoothstep(0.0,4.0,vAW.y))*0.16+step(0.88,streak)*(0.04+0.1*abs(sin(vAW.y*0.25)));
+        diffuseColor.rgb*=1.0-grime;
+        diffuseColor.rgb=mix(diffuseColor.rgb,diffuseColor.rgb*vec3(0.25,0.22,0.20),clamp(vFieldBurn,0.0,1.0));`);
+    };
+    fieldMat.customProgramCacheKey=()=> 'field-architecture-v1';
     const inner = new THREE.MeshStandardMaterial({ color: 0x16130f, roughness: 1, vertexColors: true });
     const CH = 3; // 3×3 區塊
     const buckets = [];

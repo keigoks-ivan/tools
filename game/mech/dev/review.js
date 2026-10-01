@@ -14,7 +14,7 @@ async function load(path, query = '') {
   html = html.replace(/<base href="[^"]+">/, '');
   html = html.replace(/(<script type="importmap">)([\s\S]*?)(<\/script>)/, (_, a, json, b) => {
     const map = JSON.parse(json);
-    for (const file of ['anim.js', 'env.js', 'stages.js', 'battlefields.js', 'post.js', 'mechs.js', 'combat.js', 'cockpit.js', 'zero/map.js', 'zero/guns.js', 'zero/viewmodel.js', 'zero/main.js', 'zero/hud.js', 'zero/sfx.js', 'zero/mech6.js', 'lastline/script.js', 'lastline/mission.js', 'lastline/convoy.js', 'lastline/escort.mjs']) {
+    for (const file of ['anim.js', 'env.js', 'stages.js', 'battlefields.js', 'fieldart.js', 'encounter.js', 'post.js', 'mechs.js', 'combat.js', 'cockpit.js', 'zero/map.js', 'zero/guns.js', 'zero/viewmodel.js', 'zero/main.js', 'zero/hud.js', 'zero/sfx.js', 'zero/mech6.js', 'lastline/script.js', 'lastline/mission.js', 'lastline/convoy.js', 'lastline/escort.mjs']) {
       const url = new URL('/game/mech/' + file, location.href).href;
       for (const key of Object.keys(map.imports)) if (new URL(key, entryBase).href === url) delete map.imports[key];
       map.imports[url] = url + '?qa=' + revision;
@@ -145,8 +145,17 @@ async function battlefields() {
   const G = win.__game, T = win.__T, W = G.world; post = G.post; renderer = post.renderer;
   const budgets = [];
   for (const n of [4,5,6,7,8,9]) {
-    G.launch(n); if(G.state==='paused') win.document.querySelector('#resume').click(); G.run(4); const C = G.combat, E = C.enc;
+    G.launch(n); if(G.state==='paused') win.document.querySelector('#resume').click(); G.run(4); if(W.fieldTrees)await wait(()=>W.fieldFoliageReady); const C = G.combat, E = C.enc;
+    assertSilent(W.fieldTreeMaterial.map?.image.width===512,'枝葉贴圖未載入或超過 512 像素 GPU 預算');
     W.fieldGroup.traverse(o=>{ if(o.isMesh) for(const [key,a] of Object.entries(o.geometry.attributes)) assertSilent(a.count===o.geometry.attributes.position.count,'場地頂點屬性不足：'+key); });
+    const terrain=W.terrainMesh.geometry, pos=terrain.attributes.position, grid=W.terrain;
+    assertSilent(pos.count===(grid.seg+1)**2,'地形頂點數被增加');
+    for(let i=0;i<pos.count;i+=71)assertSilent(Math.abs(W.height(pos.getX(i),pos.getZ(i))-pos.getY(i))<.002,'地形碰撞與渲染高度不一致');
+    for(let i=0;i<80;i++) {
+      const gx=35+(i*17)%80,gz=30+(i*29)%90,a=gz*(grid.seg+1)+gx,b=a+grid.seg+1,d=a+1;
+      const x=(pos.getX(a)+pos.getX(b)+pos.getX(d))/3,z=(pos.getZ(a)+pos.getZ(b)+pos.getZ(d))/3;
+      assertSilent(Math.abs(W.height(x,z)-(pos.getY(a)+pos.getY(b)+pos.getY(d))/3)<.002,'地形三角形內插與碰撞不一致');
+    }
     assert(W.battlefield === C.def.battlefield && W.cityObjects.every(o=>!o.visible), `第 ${n} 關切換到 ${C.def.fieldLabel}，城市完整隱藏`);
     for (const sec of C.def.route.secs) for (const target of sec.targets || []) {
       assert(W.blds.some(b=>Math.hypot(b.cx-target.x,b.cz-target.z)<1), `第 ${n} 關任務目標 ${target.name} 已建立`);
@@ -160,6 +169,11 @@ async function battlefields() {
     G.camera.position.set(p.x+170,44,p.z+220); G.camera.lookAt(p.x,12,p.z); G.camera.updateMatrixWorld();
     if(W.battlefield==='airfield') { G.camera.position.set(-160,65,320); G.camera.lookAt(-420,0,-450); G.camera.updateMatrixWorld(); }
     await save('field-'+W.battlefield);
+    if(W.battlefield==='airfield'||W.battlefield==='depot'||W.battlefield==='forest') {
+      const S=W.blds.find(b=>W.battlefield==='forest'||b.w>40)||W.blds[0];
+      G.camera.position.set(S.cx+70,S.gy+26,S.cz+95);G.camera.lookAt(S.cx,S.gy+10,S.cz);G.camera.updateMatrixWorld();
+      await save('field-'+W.battlefield+'-detail');
+    }
     let triangles = 0, meshes = 0; W.scene.traverseVisible(o=>{ if(o.isMesh){ meshes++; triangles += (o.geometry.index?.count || o.geometry.attributes.position.count)/3*(o.isInstancedMesh?o.count:1); } });
     assert(triangles < 1400000, `第 ${n} 關 ${Math.round(triangles)} 三角形，低於城市預算`);
     budgets.push({n,profile:W.battlefield,triangles:Math.round(triangles),meshes,textures:renderer.info.memory.textures});
@@ -181,6 +195,7 @@ async function battlefields() {
     const R=C.enc.R;
     assert(R.boxes.every(b=>W.nearBoxes((b.x0+b.x1)/2,(b.z0+b.z1)/2,2,[]).includes(b)), `第 ${n} 關重玩路障碰撞仍登記`);
     G.toTitle();
+    assertSilent(!W.terrain.detailed && W.terrainMesh.geometry.attributes.position.getX(1)===-5000+W.terrain.cell,'城市地形座標沒有復原');
     assert(W.battlefield==='city' && W.cityObjects.every(o=>o.visible || o===W.beacon), '回標題恢復原城市與碰撞');
     await new Promise(r=>setTimeout(r,0));
   }
