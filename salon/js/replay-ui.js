@@ -1,7 +1,14 @@
-import {accessories,wishes,rgb} from './looks.js?v=11';
-import {ornament} from './ornaments.js?v=11';
-import {TIE_MODES} from './hair.js?v=11';
+import {accessories,wishes,rgb} from './looks.js?v=12';
+import {ornament} from './ornaments.js?v=12';
+import {TIE_MODES} from './hair.js?v=12';
 const TAU=Math.PI*2;
+const labels={camera:'拍照',album:'作品集',guests:'選客人',close:'關閉',next:'下一頁',back:'上一頁',undo:'撤銷',edit:'繼續編輯',download:'下載照片',trash:'刪除照片'};
+const tieNames={double:'雙馬尾',high:'高雙馬尾',braids:'泡泡辮',buns:'丸子頭',single:'低側馬尾',sideHigh:'側邊高馬尾',pony:'高馬尾',half:'公主頭',loose:'放下頭髮'};
+const accessoryNames={bow:'蝴蝶結',flower:'花朵',star:'星星',butterfly:'蝴蝶',heart:'愛心',moon:'月亮',crown:'皇冠',pearls:'珍珠'};
+const guestNames={cocoa:'可可',honey:'蜜糖',peach:'蜜桃'};
+const wishNames=['玫瑰派對','海洋精靈','陽光花園','彩虹夢想','月光仙子','蜜桃蝴蝶'];
+function caption(c,text,x,y,size=14){c.save();c.font=`600 ${size}px system-ui, sans-serif`;c.fillStyle='#715971';c.textAlign='center';c.textBaseline='middle';c.fillText(text,x,y);c.restore()}
+
 export function icon(c,kind,x,y,s=32){
  c.save();c.translate(x,y);c.scale(s/32,s/32);c.strokeStyle='#9c687b';c.fillStyle='#f5b7c7';c.lineWidth=2.6;c.lineCap='round';c.lineJoin='round';
  const path=(pts)=>{c.beginPath();pts.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.stroke()};
@@ -54,35 +61,31 @@ export class ReplayUI {
  constructor(api){this.api=api;this.mode=null;this.hits=[];this.page=0;this.photo=null;this.confirmDelete=false;this.images=new Map();this.flash=0;this.busy=false;}
  open(mode){this.mode=mode;this.page=0;this.confirmDelete=false;this.api.stop();if(mode==='ties')this.api.clearTiePreviews?.();}
  hit(p){for(const h of [...this.hits].reverse()){if(p.x>=h.x&&p.x<=h.x+h.w&&p.y>=h.y&&p.y<=h.y+h.h){if(!this.busy)h.run();return true}}return !!this.mode}
- region(x,y,w,h,run){this.hits.push({x,y,w,h,run})}
- button(c,x,y,kind,run,opts){circleButton(c,x,y,kind,opts);const r=opts?.size||32;this.region(x-r,y-r,r*2,r*2,run)}
+ region(x,y,w,h,run,label='選擇'){this.hits.push({x,y,w,h,run,label})}
+ button(c,x,y,kind,run,opts){circleButton(c,x,y,kind,opts);const r=opts?.size||32;this.region(x-r,y-r,r*2,r*2,run,opts?.label||(kind==='next'&&this.mode==='photo'?'換客人':labels[kind]||'選擇'))}
  image(url){if(!this.images.has(url)){const im=new Image();im.src=url;this.images.set(url,im)}return this.images.get(url)}
- async snap(){if(this.busy)return;this.busy=true;this.api.stop();this.api.react('happy');const photo=this.api.capture();const ok=await this.api.memory.add(photo);this.busy=false;if(!ok){this.open('album');return}this.photo=photo;this.mode='photo';this.flash=performance.now();this.api.save();}
+ async snap(){if(this.busy)return;this.busy=true;this.api.stop();try{this.api.react('happy');const photo=this.api.capture();const ok=await this.api.memory.add(photo);if(!ok){this.open('album');return}this.photo=photo;this.mode='photo';this.flash=performance.now();this.api.save()}catch{this.api.memory.problem=true}finally{this.busy=false}}
  draw(c,l,now){this.hits=[];const a=this.api;
-  if(!this.mode){
-   const kinds=['guests','wish','camera','album','ties','decorate'],step=Math.min(76,(l.stage.w-12)/6),size=Math.min(32,step/2-1),y=42;
-   kinds.forEach((kind,i)=>{const x=l.stage.w/2+(i-2.5)*step;
-    if(kind==='ties'){this.button(c,x,y,'',()=>this.open('ties'),{size,color:'#f6e1d3'});tieIcon(c,a.tieMode()==='loose'?'double':a.tieMode(),x,y,size*1.45);return}
-    if(kind==='wish'){this.button(c,x,y,'',()=>this.open('wishes'),{size});wishIcon(c,wishes[a.wish()],x,y,size*1.5)}
-    else if(kind==='decorate'){if(a.selected()==='decorate')selHeart(c,x,y,size,now);this.button(c,x,y,'',()=>this.open('accessories'),{active:a.selected()==='decorate',color:'#e6dafa',size});ornament(c,a.ornament(),x,y,size*1.15,a.color())}
-    else this.button(c,x,y,kind,()=>kind==='camera'?this.snap():this.open(kind),{color:kind==='camera'?'#f8d8e4':'#e9e6d9',size});
-   });
-   if(a.canUndo())this.button(c,38,l.stage.h-40,'undo',()=>a.undo(),{size:28});
-   if(a.memory.problem){icon(c,'warning',l.stage.w-21,86,18)}return;
-  }
-  c.save();c.fillStyle='#527969ac';c.fillRect(0,0,l.width,l.height);
+  if(!this.mode)return;
+  c.save();c.fillStyle='#65526ca8';c.fillRect(0,0,l.width,l.height);
   const w=Math.min(l.width-16,900),h=Math.min(l.height-16,1000),x=(l.width-w)/2,y=(l.height-h)/2;
   const g=c.createLinearGradient(x,y,x+w,y+h);g.addColorStop(0,'#fff8e9');g.addColorStop(1,'#f5e3d3');c.fillStyle=g;c.beginPath();c.roundRect(x,y,w,h,26);c.fill();
   c.strokeStyle='#ffffffc9';c.lineWidth=3;c.stroke();
   const title={guests:'guests',wishes:'',accessories:'',album:'album',photo:'camera',ties:''}[this.mode];icon(c,title,x+w/2,y+40,37);
   if(this.mode==='wishes')wishIcon(c,wishes[a.wish()],x+w/2,y+40,52);
   if(this.mode==='ties')tieIcon(c,'double',x+w/2,y+40,51);
-  if(this.mode==='accessories'||this.mode==='ties'){this.button(c,x+40,y+40,'',()=>this.open(this.mode==='ties'?'accessories':'ties'));if(this.mode==='accessories')tieIcon(c,'double',x+40,y+40,47);else ornament(c,'bow',x+40,y+40,35,a.color())}
+  if(this.mode==='accessories'||this.mode==='ties'){this.button(c,x+40,y+40,'',()=>this.open(this.mode==='ties'?'accessories':'ties'),{label:this.mode==='ties'?'切換到髮飾':'切換到綁髮'});if(this.mode==='accessories')tieIcon(c,'double',x+40,y+40,47);else ornament(c,'bow',x+40,y+40,35,a.color())}
   if(this.mode==='accessories')ornament(c,'bow',x+w/2,y+40,44,a.color());
   this.button(c,x+w-40,y+40,'close',()=>{this.mode=null;this.confirmDelete=false});
-  const body={x:x+16,y:y+84,w:w-32,h:h-108};
-  if(this.mode==='photo'&&this.photo){
-   const controlsY=y+h-43,areaH=Math.max(65,h-175),ratio=320/430,ph=Math.min(areaH,(w-50)/ratio),pw=ph*ratio;
+  const panelTitles={guests:'今天幫誰換造型？',wishes:'挑一個造型靈感',ties:'把頭髮綁起來',accessories:'加一點可愛',album:'我的作品集',photo:'新造型完成！',reset:'重新開始？'};
+  caption(c,panelTitles[this.mode]||'',x+w/2,y+72,14);
+  if(this.mode==='album')caption(c,`${a.memory.photos.length} / 48 張・只保存在這台裝置`,x+w/2,y+h-42,11);
+  const body={x:x+16,y:y+96,w:w-32,h:h-120};
+  if(this.mode==='reset'){
+   caption(c,'目前的造型會重設，可以用撤銷找回。',x+w/2,y+h*.44,13);
+   const bw=Math.min(210,w-48),by=y+h*.58;c.fillStyle='#896995';c.beginPath();c.roundRect(x+(w-bw)/2,by,bw,50,15);c.fill();c.save();c.font='600 16px system-ui';c.fillStyle='#fff';c.textAlign='center';c.fillText('重新開始',x+w/2,by+31);c.restore();this.region(x+(w-bw)/2,by,bw,50,()=>{a.reset();this.mode=null},'確認重新開始');
+  }else if(this.mode==='photo'&&this.photo){
+   const controlsY=y+h-52,areaH=Math.max(65,h-199),ratio=320/430,ph=Math.min(areaH,(w-50)/ratio),pw=ph*ratio;
    const px=x+(w-pw)/2,py=body.y+(areaH-ph)/2;this.polaroid(c,this.photo.image,px,py,pw,ph);
    const icons=['edit','download','trash','next'],step=Math.min(88,(w-20)/4);
    icons.forEach((kind,i)=>this.button(c,x+w/2+(i-1.5)*step,controlsY,kind,async()=>{
@@ -91,6 +94,7 @@ export class ReplayUI {
     if(kind==='next')this.open('guests');
     if(kind==='trash'){if(!this.confirmDelete){this.confirmDelete=true;return}if(await a.memory.remove(this.photo.id)){this.photo=null;this.open('album')}}
    },{color:kind==='trash'&&this.confirmDelete?'#f0a1a1':'#f7e7d7',active:kind==='trash'&&this.confirmDelete}));
+   icons.forEach((kind,i)=>caption(c,kind==='trash'&&this.confirmDelete?'再按一次刪除':kind==='next'?'換客人':labels[kind],x+w/2+(i-1.5)*step,controlsY+39,10));
   }else{
    let entries,columns,rows;
    if(this.mode==='guests'){entries=a.guests;columns=w>600?3:2;rows=Math.ceil(entries.length/columns)}
@@ -106,16 +110,17 @@ export class ReplayUI {
    const gap=12,cw=(body.w-gap*(columns-1))/columns,ch=(body.h-gap*(rows-1))/rows;
    entries?.forEach((entry,i)=>{const bx=body.x+(i%columns)*(cw+gap),by=body.y+Math.floor(i/columns)*(ch+gap);
     c.save();c.fillStyle='#fffdf3';c.shadowColor='#966a5930';c.shadowBlur=8;c.shadowOffsetY=3;c.beginPath();c.roundRect(bx,by,cw,ch,17);c.fill();c.restore();
-    if(this.mode==='guests'){const im=a.preview(entry.id);if(im){const scale=Math.min((cw-12)/im.width,(ch-12)/im.height);c.drawImage(im,bx+(cw-im.width*scale)/2,by+(ch-im.height*scale)/2,im.width*scale,im.height*scale)}if(a.guestId()===entry.id){c.strokeStyle='#dbb071';c.lineWidth=3;c.beginPath();c.roundRect(bx+2,by+2,cw-4,ch-4,15);c.stroke()}this.region(bx,by,cw,ch,()=>{a.chooseGuest(entry.id);this.mode=null})}
+    if(this.mode==='guests'){const im=a.preview(entry.id);if(im){const scale=Math.min((cw-12)/im.width,(ch-35)/im.height);c.drawImage(im,bx+(cw-im.width*scale)/2,by+(ch-25-im.height*scale)/2,im.width*scale,im.height*scale)}caption(c,guestNames[entry.id],bx+cw/2,by+ch-15,12);if(a.guestId()===entry.id){c.strokeStyle='#dbb071';c.lineWidth=3;c.beginPath();c.roundRect(bx+2,by+2,cw-4,ch-4,15);c.stroke()}this.region(bx,by,cw,ch,()=>{a.chooseGuest(entry.id);this.mode=null},guestNames[entry.id])}
     if(this.mode==='ties'){const im=a.tiePreview(entry);
-     if(im){const sc=Math.min((cw-10)/im.width,(ch-10)/im.height),iw=im.width*sc,ih=im.height*sc;c.save();c.beginPath();c.roundRect(bx+(cw-iw)/2,by+(ch-ih)/2,iw,ih,12);c.clip();c.drawImage(im,bx+(cw-iw)/2,by+(ch-ih)/2,iw,ih);c.restore()}
-     else tieIcon(c,entry,bx+cw/2,by+ch/2,Math.min(cw-20,ch-20,110));
+     if(im){const sc=Math.min((cw-10)/im.width,(ch-34)/im.height),iw=im.width*sc,ih=im.height*sc;c.save();c.beginPath();c.roundRect(bx+(cw-iw)/2,by+(ch-24-ih)/2,iw,ih,12);c.clip();c.drawImage(im,bx+(cw-iw)/2,by+(ch-24-ih)/2,iw,ih);c.restore()}
+     else tieIcon(c,entry,bx+cw/2,by+(ch-24)/2,Math.min(cw-20,ch-34,110));
+     caption(c,tieNames[entry],bx+cw/2,by+ch-13,11);
      if(entry==='loose'){c.save();c.strokeStyle='#cc728dcc';c.lineWidth=4;c.lineCap='round';const r=Math.min(cw,ch)*.13;c.beginPath();c.arc(bx+cw-r-10,by+r+10,r,0,TAU);c.moveTo(bx+cw-r-10-r*.7,by+r+10+r*.7);c.lineTo(bx+cw-r-10+r*.7,by+r+10-r*.7);c.stroke();c.restore()}
      if(a.tieMode()===entry){c.strokeStyle='#dbb071';c.lineWidth=3;c.beginPath();c.roundRect(bx+2,by+2,cw-4,ch-4,15);c.stroke()}
-     this.region(bx,by,cw,ch,()=>{a.tie(entry);this.mode=null})}
-    if(this.mode==='wishes'){wishIcon(c,entry,bx+cw/2,by+ch/2,Math.min(cw-15,ch-15,160));this.region(bx,by,cw,ch,()=>{a.chooseWish(wishes.indexOf(entry));this.mode=null})}
-    if(this.mode==='accessories'){ornament(c,entry,bx+cw/2,by+ch/2,Math.min(80,cw*.5,ch*.64),a.color());this.region(bx,by,cw,ch,()=>{a.chooseOrnament(entry);this.mode=null})}
-    if(this.mode==='album'){const ph=Math.min(ch-12,(cw-12)*430/320),pw=ph*320/430;this.polaroid(c,entry.image,bx+(cw-pw)/2,by+(ch-ph)/2,pw,ph);this.region(bx,by,cw,ch,()=>{this.photo=entry;this.confirmDelete=false;this.mode='photo'})}
+     this.region(bx,by,cw,ch,()=>{a.tie(entry);this.mode=null},tieNames[entry])}
+    if(this.mode==='wishes'){wishIcon(c,entry,bx+cw/2,by+(ch-24)/2,Math.min(cw-15,ch-34,160));caption(c,wishNames[wishes.indexOf(entry)],bx+cw/2,by+ch-14,12);this.region(bx,by,cw,ch,()=>{a.chooseWish(wishes.indexOf(entry));this.mode=null},wishNames[wishes.indexOf(entry)])}
+    if(this.mode==='accessories'){ornament(c,entry,bx+cw/2,by+(ch-24)/2,Math.min(80,cw*.5,(ch-34)*.64),a.color());caption(c,accessoryNames[entry],bx+cw/2,by+ch-13,12);this.region(bx,by,cw,ch,()=>{a.chooseOrnament(entry);this.mode=null},accessoryNames[entry])}
+    if(this.mode==='album'){const ph=Math.min(ch-12,(cw-12)*430/320),pw=ph*320/430;this.polaroid(c,entry.image,bx+(cw-pw)/2,by+(ch-ph)/2,pw,ph);this.region(bx,by,cw,ch,()=>{this.photo=entry;this.confirmDelete=false;this.mode='photo'},'開啟作品照片')}
    });
   }
   c.restore();if(now-this.flash<400){c.fillStyle=`rgba(255,250,230,${.7*(1-(now-this.flash)/400)})`;c.fillRect(0,0,l.width,l.height)}

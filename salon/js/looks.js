@@ -1,8 +1,8 @@
-import {guest,palette} from './data.js?v=11';
+import {guest,palette} from './data.js?v=12';
 export const guests=[
  {...guest,id:'cocoa',hair:{...guest.hair}},
- {...guest,id:'honey',atlas:'./assets/art/guest-honey.webp',hair:{length:275,part:.57,bangs:false,color:[77,46,38]}},
- {...guest,id:'peach',artOffsets:{blink:5,happy:36,surprise:36},atlas:'./assets/art/guest-peach.webp',hair:{length:335,part:.42,bangs:true,color:[216,155,81]}}
+ {...guest,id:'honey',skin:'#c68b68',atlas:'./assets/art/guest-honey.webp',hair:{length:275,part:.57,bangs:false,color:[77,46,38]}},
+ {...guest,id:'peach',skin:'#ffccb3',artOffsets:{blink:5,happy:36,surprise:36},atlas:'./assets/art/guest-peach.webp',hair:{length:335,part:.42,bangs:true,color:[216,155,81]}}
 ];
 export const accessories=['bow','flower','star','butterfly','heart','moon','crown','pearls'];
 export const wishes=[

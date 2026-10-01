@@ -28,6 +28,7 @@ export class HairGL {
     this.canvas = document.createElement('canvas');
     const gl = this.gl = this.canvas.getContext('webgl', { premultipliedAlpha: true, preserveDrawingBuffer: true, antialias: true, alpha: true });
     this.ok = !!gl;
+    this.canvas.addEventListener('webglcontextlost', event => { event.preventDefault(); this.ok = false; });
     if (!gl) return;
     const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; };
     const pr = this.prog = gl.createProgram();

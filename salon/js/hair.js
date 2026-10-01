@@ -1,12 +1,13 @@
-import {guest} from './data.js?v=11';
-import {HairGL,domeTris} from './hair-gl.js?v=11';
+import {guest} from './data.js?v=12';
+import {HairGL,domeTris} from './hair-gl.js?v=12';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const mix=(a,b,t)=>a.map((v,i)=>v+(b[i]-v)*t);
 const css=(c,m=1)=>`rgb(${c.map(v=>Math.round(clamp(v*m,0,255))).join(',')})`;
 let textureLight=null,hairTexture=null,hairPlate=null;
 // 顯示卡畫法（沒有 WebGL 或出錯就用下面的 2D 畫法）
 let glHair;
-function gpu(){if(glHair===undefined){try{glHair=typeof document!=='undefined'?new HairGL():null;if(glHair&&!glHair.ok)glHair=null}catch(e){console.warn('[hair] WebGL 失敗，改用 2D：',e);glHair=null}}return glHair}
+function gpu(){if(glHair===undefined){try{glHair=typeof document!=='undefined'?new HairGL():null;if(glHair&&!glHair.ok)glHair=null}catch(e){console.warn('[hair] WebGL 失敗，改用 2D：',e);glHair=null}}return glHair&&(!glHair.ok||glHair.gl.isContextLost())?null:glHair}
+function drawGpu(ctx,items){const g=hairPlate&&gpu();if(!g)return false;try{return g.draw(ctx,items,hairPlate,hairTexture)}catch(error){console.warn('[hair] Drawing failed; using 2D',error);glHair=null;return false}}
 export function setHairPlate(image){hairPlate=image}
 export function setHairTexture(image){hairTexture=image;const c=document.createElement('canvas');c.width=64;c.height=128;const cx=c.getContext('2d',{willReadFrequently:true});cx.drawImage(image,0,0,64,128);const data=cx.getImageData(0,0,64,128).data;textureLight=Array.from({length:8192},(_,i)=>(data[i*4]*.299+data[i*4+1]*.587+data[i*4+2]*.114)/96);}
 const pt=(x,y,c)=>({x,y,px:x,py:y,homeX:x,homeY:y,paintX:x,paintY:y,c:[...c]});
@@ -126,7 +127,7 @@ export class HairSystem{
   }
   for(const f of this.fallen){f.age+=dt;for(const p of f.nodes){let vx=clamp((p.x-p.px)*.96,-4,4),vy=clamp((p.y-p.py)*.98,-4,7);p.px=p.x;p.py=p.y;p.x+=vx;p.y+=vy+360*dt*dt;}
    for(let k=0;k<3;k++){for(let j=1;j<f.nodes.length;j++){let a=f.nodes[j-1],b=f.nodes[j],dx=b.x-a.x,dy=b.y-a.y,l=Math.hypot(dx,dy)||1,d=(l-f.rest[j-1])/l*.5;a.x+=dx*d;a.y+=dy*d;b.x-=dx*d;b.y-=dy*d;}for(const p of f.nodes){p.x=clamp(p.x,18,372);if(p.y>603){p.y=603;p.px=p.x+(p.px-p.x)*.65;p.py=p.y}}}}
-  for(let p of this.particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=90*dt;p.life-=dt}this.particles=this.particles.filter(p=>p.life>0).slice(-500);if(this.fallen.length>120)for(const f of this.fallen.slice(0,this.fallen.length-120))f.age=Math.max(f.age,32.8);this.fallen=this.fallen.filter(f=>f.age<34).slice(-240);
+  for(let p of this.particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=90*dt;p.life-=dt}this.particles=this.particles.filter(p=>p.life>0).slice(-500);if(this.fallen.length>120)for(const f of this.fallen.slice(0,this.fallen.length-120))f.age=Math.max(f.age,2.8);this.fallen=this.fallen.filter(f=>f.age<3.2).slice(-240);
  }
  cut(a,b){let total=0;for(const s of this.strands){const n=s.nodes;if(n.length<2)continue;let hit=null,idx=-1;for(let j=1;j<n.length;j++){let q=crossing(n[j-1],n[j],a,b);if(q){hit=q;idx=j;break}}if(!hit)continue;let prev=n[idx-1],next=n[idx],color=mix(prev.c,next.c,hit.t),paint=q=>({x:q.paintX??q.homeX,y:q.paintY??q.homeY}),pa=paint(prev),pb=paint(next),cutPaint={x:pa.x+(pb.x-pa.x)*hit.t,y:pa.y+(pb.y-pa.y)*hit.t};
    // 剪下來的那段和留下的髮尾都記住自己在頭髮圖上的位置，花紋才接得上
@@ -227,8 +228,8 @@ export class HairSystem{
  tieMode(){return this.strands.find(s=>s.tie)?.tie.mode||'loose'}
 
  draw(ctx,front){
-  const g=hairPlate&&gpu(),list=this.strands.filter(s=>s.front===front).map(s=>({s,nodes:s.nodes}));
-  if(g&&g.draw(ctx,front?this.capStrands().concat(list):list,hairPlate,hairTexture))return;
+  const list=this.strands.filter(s=>s.front===front).map(s=>({s,nodes:s.nodes}));
+  if(drawGpu(ctx,front?this.capStrands().concat(list):list))return;
   ctx.lineJoin='round';ctx.lineCap='round';for(let s of this.strands)if(s.front===front)ribbon(ctx,s)}
  // 頭頂的短髮（顯示卡畫法用）：從頭頂往下、往外梳到髮際線，一整圈蓋住頭皮；畫在前層頭髮底下，太陽穴、髮縫、綁起來後的兩側都不會露出頭皮。
  // 顏色取左右兩側髮根的平均（染色也會跟著變）。髮尾收尖，自然形成細碎的髮際線。
@@ -294,14 +295,15 @@ export class HairSystem{
   ctx.globalCompositeOperation='multiply';ctx.fillStyle=sh;ctx.fillRect(CAP.x,CAP.y,CAP.w,CAP.h);ctx.globalCompositeOperation='source-over';
   ctx.restore();
  }
- drawFallen(ctx){const g=hairPlate&&gpu(),fade=f=>f.age>26?(34-f.age)/8:1;
-  if(!(g&&this.fallen.length&&g.draw(ctx,this.fallen.map(f=>({s:f,nodes:f.nodes,alpha:fade(f)})),hairPlate,hairTexture)))for(let f of this.fallen)ribbon(ctx,f,f.nodes,fade(f));ctx.globalAlpha=1;
+ drawFallen(ctx){const fade=f=>f.age>1.4?(3.2-f.age)/1.8:1;
+  if(!(this.fallen.length&&drawGpu(ctx,this.fallen.map(f=>({s:f,nodes:f.nodes,alpha:fade(f)})))))for(let f of this.fallen)ribbon(ctx,f,f.nodes,fade(f));ctx.globalAlpha=1;
  for(let p of this.particles){ctx.globalAlpha=clamp(p.life*1.5,0,1);ctx.fillStyle=p.color;ctx.beginPath();if(p.color==='#fff4ab'){for(let j=0;j<8;j++){let r=j%2?p.size*.3:p.size,a=j*Math.PI/4;let x=p.x+Math.cos(a)*r,y=p.y+Math.sin(a)*r;if(j)ctx.lineTo(x,y);else ctx.moveTo(x,y)}}else ctx.ellipse(p.x,p.y,p.size,p.size*(p.kind==='hair'?.3:1),.4,0,Math.PI*2);ctx.fill()}ctx.globalAlpha=1}
  snapshot(){return {version:1,strands:this.strands.map(({texture,textureKey,textureDirty,...s})=>structuredClone(s)),cutCount:this.cutCount,ties:structuredClone(this.ties)};}
  restore(saved){
   if(saved?.version!==1||!Array.isArray(saved.strands)||saved.strands.length<150||saved.strands.length>250)return false;
-  const valid=saved.strands.every(s=>Array.isArray(s.nodes)&&s.nodes.length>=2&&s.nodes.length<=16&&Array.isArray(s.rest)&&s.rest.length===s.nodes.length-1&&s.rest.every(v=>Number.isFinite(v)&&v>=0)&&s.nodes.every(p=>['x','y','px','py','homeX','homeY'].every(k=>Number.isFinite(p[k])&&Math.abs(p[k])<2000)&&Array.isArray(p.c)&&p.c.length===3&&p.c.every(v=>Number.isFinite(v)&&v>=0&&v<=255))&&Number.isFinite(s.rootX)&&Number.isFinite(s.rootY));
-  if(!valid)return false;
+  const finitePoint=p=>p&&Number.isFinite(p.x)&&Number.isFinite(p.y)&&Math.abs(p.x)<2000&&Math.abs(p.y)<2000;
+  const valid=saved.strands.every(s=>s&&Number.isFinite(s.width)&&s.width>0&&s.width<=30&&[-1,1].includes(s.side)&&typeof s.front==='boolean'&&(!s.loose||(Array.isArray(s.loose)&&s.loose.every(finitePoint)))&&(!s.tie||(Number.isInteger(s.tie.index)&&s.tie.index>=1&&s.tie.index<s.nodes?.length&&finitePoint(s.tie)&&TIE_MODES.includes(s.tie.mode)&&(!s.tie.extra||(Array.isArray(s.tie.extra)&&s.tie.extra.every(e=>finitePoint(e)&&Number.isInteger(e.i)&&e.i>=1&&e.i<16)))))&&Array.isArray(s.nodes)&&s.nodes.length>=2&&s.nodes.length<=16&&Array.isArray(s.rest)&&s.rest.length===s.nodes.length-1&&s.rest.every(v=>Number.isFinite(v)&&v>=0)&&s.nodes.every(p=>p&&['x','y','px','py','homeX','homeY'].every(k=>Number.isFinite(p[k])&&Math.abs(p[k])<2000)&&(p.bx===undefined||(Number.isFinite(p.bx)&&Number.isFinite(p.by)))&&Array.isArray(p.c)&&p.c.length===3&&p.c.every(v=>Number.isFinite(v)&&v>=0&&v<=255))&&Number.isFinite(s.rootX)&&Number.isFinite(s.rootY));
+  if(!valid||!Array.isArray(saved.ties||[])||!(saved.ties||[]).every(b=>finitePoint(b)&&TIE_MODES.includes(b.mode)&&Number.isFinite(b.size)&&b.size>0&&b.size<100))return false;
   this.strands=structuredClone(saved.strands);for(const s of this.strands){s.textureDirty=true;for(const p of s.nodes){p.px=p.x;p.py=p.y}}
   this.ties=structuredClone(saved.ties||[]);this.cutCount=saved.cutCount||0;this.fallen=[];this.particles=[];return true;
  }

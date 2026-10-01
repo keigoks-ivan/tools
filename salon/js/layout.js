@@ -39,7 +39,7 @@ export function createLayout(width, height, coarse = false) {
     colors = Array.from({ length: 6 }, (_, i) => ({ x: width / 2 + (i - 2.5) * colorStep, y: height - 20 - r, r }));
   }
   // Keep every hair tip above the tray and the crown below the top edge.
-  const scale = Math.min(stage.w / 390, (stage.h - 82) / 490);
+  const scale = Math.min(stage.w / 390, (stage.h - (height < 450 && landscape ? 148 : 196)) / 490);
   const world = { scale, x: stage.x + (stage.w - 390 * scale) / 2, y: stage.y + stage.h - 611 * scale };
   return { width, height, landscape, coarse, stage, dock, buttons, colors, world };
 }
