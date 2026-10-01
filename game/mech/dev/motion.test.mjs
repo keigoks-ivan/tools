@@ -95,9 +95,10 @@ test('enemy melee winds the torso before the cut',()=>{
   foe.swing=.45;tick(foe,state()); assert(wind<-.05 && foe.bones.torso.rotation.y>.25);
 });
 test('actual enemy bullet and cannon firing trigger recoil without changing their damage',()=>{
-  const silent=new Proxy({}, {get:()=>()=>{}});
-  const C=Object.assign(Object.create(Combat.prototype),{enemies:[],player:{vel:V()},hero:{capsule:()=>({a:V(50,0,0),b:V(50,20,0),r:1,y0:0,y1:20})},world:{raycast:()=>-1},fx:silent,audio:silent,missiles:[]});
+  const silent=new Proxy({}, {get:()=>()=>{}}); let damage=0;
+  const C=Object.assign(Object.create(Combat.prototype),{enemies:[],player:{vel:V()},hero:{capsule:()=>({x:0,z:100,r:3.2,y0:1,y1:17})},world:{raycast:()=>-1},fx:silent,audio:silent,missiles:[]});
   Object.defineProperty(C,'tier',{value:{aim:1}});
-  const e={m:{recoil:0},pos:V()};C.bullet(e,V(),V(0,10,100),100);assert.equal(e.m.recoil,.5);
+  C.hurt=n=>{damage+=n;};
+  const e={m:{recoil:0},pos:V()};C.bullet(e,V(),V(0,10,100),100);assert.equal(e.m.recoil,.5);assert.equal(damage,40);
   C.shell(e,V(),V(0,10,100),210,800);assert.equal(e.m.recoil,1.2);assert.equal(C.missiles[0].dmg,800);
 });
