@@ -233,10 +233,20 @@ def main():
         mix["source"] = "project"
         return mix
 
-    b_project_names = set(by_project.keys())
+    # 同一建案在實價登錄可能有好幾種寫法（例如「禾林 RICH ONE 3」「禾林RICH ONE3」只差空格），
+    # 正規化後相同的合併成一個建案、成交筆數加總；代表名稱取筆數最多的寫法（同數取字典序），
+    # 結果不受集合走訪順序影響。
+    variants = defaultdict(list)
+    for name in by_project:
+        variants[_normalize_for_match(name)].append(name)
+    merged = {}
     b_name_by_norm = {}
-    for name in b_project_names:
-        b_name_by_norm[_normalize_for_match(name)] = name
+    for norm, names in variants.items():
+        canonical = sorted(names, key=lambda n: (-len(by_project[n]), n))[0]
+        merged[canonical] = [d for n in sorted(names) for d in by_project[n]]
+        b_name_by_norm[norm] = canonical
+    by_project = merged
+    b_project_names = set(by_project.keys())
 
     # 官方登記日期→建照核發日期的中位落後天數，只用「已完成」的備查案例算，
     # 用來推估還沒登記的建案何時會交屋。
