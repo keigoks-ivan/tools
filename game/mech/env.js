@@ -5,6 +5,7 @@ import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { makeFacade, FACADE_TILE } from './textures.js';
 import { shopMaterial, shopUV } from './urban.js';
+import { roofline } from './roofline.js';
 
 const ASSET = './assets/';
 const COMPACT = new URL('./zero/assets/env/', import.meta.url).href;
@@ -525,7 +526,7 @@ function addBox(B, x0, x1, y0, y1, z0, z1, col, uvScale = 8) {
 }
 
 // 立面細節仍寫進同一棟的合併區段：沒有額外材質／draw call，倒塌時跟著樓體一起消失。
-function architecture(B, signs, x0, x1, z0, z1, H, style, F) {
+function architecture(B, signs, x0, x1, z0, z1, H, style, F, district, roofTop) {
   const stone = style < 2 ? [0.48, 0.5, 0.52, 0, 1] : [0.72, 0.69, 0.63, 0, 1], steel = [0.12, 0.15, 0.17, 0, 2];
   const glass = [0.055, 0.095, 0.11, 0, 4];
   const floor = F.h / F.rows, bay = F.w / F.cols;
@@ -611,19 +612,13 @@ function architecture(B, signs, x0, x1, z0, z1, H, style, F) {
       signs.quad(...pts, axis === 'x' ? [0, 0, out] : [out, 0, 0], uv, [0.85, 0.85, 0.85]);
     }
   }
-  // 一部分矮樓用斜屋頂，打破全城等高的平頂盒子；不改城市生成亂數序列。
-  const key = Math.abs(Math.round(x0 * 3 + z0 * 7));
-  if (style >= 2 && H < 40 && key % 3 === 0) {
-    const y = H + 0.15, peak = y + Math.min(5, (x1 - x0) * 0.16), xm = (x0 + x1) / 2;
-    const face = (a, b, c, d) => {
-      const n = new THREE.Vector3().subVectors(new THREE.Vector3(...b), new THREE.Vector3(...a)).cross(new THREE.Vector3().subVectors(new THREE.Vector3(...c), new THREE.Vector3(...a))).normalize();
-      B.quad(a, b, c, d, n.toArray(), [[0, 0], [0, (z1 - z0) / 4], [(x1 - x0) / 8, (z1 - z0) / 4], [(x1 - x0) / 8, 0]], [0.45, 0.22, 0.12, 0, 3]);
-    };
-    face([x0, y, z0], [x0, y, z1], [xm, peak, z1], [xm, peak, z0]);
-    face([xm, peak, z0], [xm, peak, z1], [x1, y, z1], [x1, y, z0]);
-    face([x0, y, z1], [x1, y, z1], [xm, peak, z1], [xm, peak, z1]);
-    face([x1, y, z0], [x0, y, z0], [xm, peak, z0], [xm, peak, z0]);
-  }
+  // 街屋的山牆、工廠鋸齒屋頂與退縮冠頂皆併入原本可破壞的屋頂區段。
+  const kind = H >= 45 ? 'tower' : district === 'old' || district === 'mixed' && style !== 3 ? 'old' : district === 'east' ? 'east' : 'industrial';
+  roofline(x0, x1, z0, z1, roofTop, kind, (a, b, c, d, col) => {
+    const n = new THREE.Vector3().subVectors(new THREE.Vector3(...b), new THREE.Vector3(...a)).cross(new THREE.Vector3().subVectors(new THREE.Vector3(...c), new THREE.Vector3(...a))).normalize();
+    const axes = Math.abs(n.y) > 0.5 ? [0, 2] : Math.abs(n.x) > 0.5 ? [2, 1] : [0, 1];
+    B.quad(a, b, c, d, n.toArray(), [a, b, c, d].map(p => [p[axes[0]] / 4, p[axes[1]] / 4]), col);
+  }, (a, b, c, d, e, f, col) => addBox(B, a, b, c, d, e, f, col, 4));
 }
 function roofTank(B, x, z, y, radius, h) {
   const col = [0.56, 0.58, 0.56, 0, 2], N = 12;
@@ -1072,15 +1067,17 @@ export class World {
             if (k === 0 && style >= 2) roofTank(bk.roof, ex + ew / 2, ez + ed / 2, H, Math.min(ew, ed) * 0.4, eh);
             else addBox(bk.roof, ex, ex + ew, H, H + eh, ez, ez + ed, [0.6, 0.6, 0.62, 0, 2]);
           }
+          let roofTop = H;
           // 塔樓頂層退縮
           if (H > 60 && r() < 0.6) {
             const ix = (x1 - x0) * 0.2, iz = (z1 - z0) * 0.2, H2 = H + 3.6 * (2 + ((r() * 6) | 0));
+            roofTop = H2;
             addWalls(bk.f[style], x0 + ix, x1 - ix, z0 + iz, z1 - iz, H, H2, col, uo, 0, null, F);
             addBox(bk.roof, x0 + ix, x1 - ix, H2 - 0.01, H2, z0 + iz, z1 - iz, rc, 12);
             if (r() < 0.5) this.lampSites.push(new THREE.Vector3((x0 + x1) / 2, H2 + 8, (z0 + z1) / 2)); // 屋頂紅燈
             addBox(bk.roof, (x0 + x1) / 2 - 0.3, (x0 + x1) / 2 + 0.3, H2, H2 + 8, (z0 + z1) / 2 - 0.3, (z0 + z1) / 2 + 0.3, [0.4, 0.4, 0.4]);
           }
-          architecture(bk.roof, bk.signs, x0, x1, z0, z1, H, style, F);
+          architecture(bk.roof, bk.signs, x0, x1, z0, z1, H, style, F, district, roofTop);
           rec.box = { x0, x1, z0, z1, top: H + 0.2 };
           this.addCollider(rec.box);
           rec.f1 = rec.fB.p.length / 3; rec.r1 = rec.rB.p.length / 3; rec.H = H;

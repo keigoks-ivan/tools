@@ -6,7 +6,7 @@
 import * as THREE from 'three';
 import { Soldier, wrap, lerpAngle, damp } from './human.js';
 import { makeEnemyRifle } from './guns.js';
-import { steer, flankPoint, allyInLane } from '../tactics.js';
+import { steer, squadFlank, coveringFire, segmentBox, routeDirection, allyInLane } from '../tactics.js';
 
 const clamp = THREE.MathUtils.clamp, rr = (a, b) => a + Math.random() * (b - a);
 const _v = new THREE.Vector3(), _w = new THREE.Vector3(), _u = new THREE.Vector3();
@@ -51,6 +51,7 @@ export class Trooper {
     this.notSeen = 0; this.hunt = false; this.aimedT = 0; this.duckAt = rr(0.3, 0.7);
     this.side = this.id % 2 ? 1 : -1; this.navT = 0; this.nav = new THREE.Vector3(); this.reportT = 0; this.pushCd = 0;
     this.role = this.type === 'heavy' || this.type === 'sniper' ? 'support' : this.id % 3 === 0 || this.type === 'officer' ? 'flank' : 'line';
+    this.path = {};
   }
   get alive() { return !this.dead; }
   // 命中判定：跟著骨架的 16 段膠囊（頭、軀幹、肩、手臂、手、腿、腳），粗細照模型頂點量過，蓋住畫面上看得到的身體
@@ -167,8 +168,9 @@ export class Trooper {
       if (this.sees) { this.notSeen = 0; this.hunt = false; } else this.notSeen += dt;
       if (!this.post && !sniper && !this.hunt && this.notSeen > (this.role === 'flank' ? 2.8 : 5) && this.type !== 'heavy') { this.hunt = true; this.cover = null; this.coverT = 0; }
       // 有視線才看得出換彈；一名側翼兵趁這段空檔推進，其餘維持壓制。
-      if (!this.post && this.role === 'flank' && this.sees && G.vm.reloadT >= 0 && this.pushCd <= 0 && dist > 7 && dist < 28) {
-        const goal = flankPoint(this.pos, target, this.side, Math.max(7, dist - 5), 0.45);
+      if (!this.post && this.role === 'flank' && this.sees && (G.vm.reloadT >= 0 || coveringFire(G.enemies, this)) && this.pushCd <= 0 && dist > 7 && dist < 28
+        && !G.enemies.some(e => e !== this && !e.dead && e.role === 'flank' && e.phase === 'move' && e.pushCd > 3)) {
+        const goal = squadFlank(this.pos, target, G.enemies, this, this.side, Math.max(7, dist - 5), 0.45);
         this.cover = new THREE.Vector3(goal.x, this.pos.y, goal.z); this.coverT = 2;
         this.phase = 'move'; this.pushCd = 5;
       }
@@ -265,7 +267,18 @@ export class Trooper {
       if (this.navT <= 0) {
         this.navT = 0.2;
         const foot = this.pos.clone().add(new THREE.Vector3(0, 0.6, 0)), probe = new THREE.Vector3();
-        const nav = steer(mv.x, mv.z, (x, z) => {
+        const boxes = [], clear = (ax, az, bx, bz) => {
+          const mx = (ax + bx) / 2, mz = (az + bz) / 2;
+          for (const box of G.solid.near(mx, mz, Math.hypot(bx - ax, bz - az) / 2 + 0.34, boxes)) {
+            if (!box.noMove && !box.ramp && box.y1 > this.pos.y + 0.45 && box.y0 < this.pos.y + 1.7 && segmentBox(ax, az, bx, bz, box, 0.34)) return false;
+          }
+          for (const [x, z] of [[mx, mz], [bx, bz]]) if (Math.abs(G.solid.floorAt(x, z, this.pos.y + 0.5) - this.pos.y) > 0.6) return false;
+          return true;
+        };
+        const goal = dist >= 4.5 && this.cover && (this.phase === 'move' || this.phase === 'hide') ? this.cover : { x: this.pos.x + mv.x * 6, z: this.pos.z + mv.z * 6 };
+        const path = routeDirection(this.path || (this.path = {}), this.pos, goal, clear, G.t, 1.5);
+        const routed = path && this.path.points.length;
+        const nav = steer(routed ? path.x : mv.x, routed ? path.z : mv.z, (x, z) => {
           probe.set(this.pos.x + x * 1.1, this.pos.y, this.pos.z + z * 1.1);
           return G.solid.pushOut(probe.clone(), 0.34, probe.y, probe.y + 1.7, 0.45) || !G.solid.sees(foot, probe.clone().add(new THREE.Vector3(0, 0.6, 0))) || Math.abs(G.solid.floorAt(probe.x, probe.z, probe.y + 0.5) - probe.y) > 0.6;
         }, this.side);
@@ -383,7 +396,7 @@ export class Trooper {
     cands.sort((a, b) => b.sc - a.sc);
     if (cands.length && cands[0].sc > 1) { const c = cands[0]; const v = c.p; v.crouch = c.crouch; v.peek = c.peek; v.peekCrouch = c.peekCrouch; return v; }
     // 沒掩護：往側邊找個位置
-    const goal = flankPoint(this.pos, PP, this.side, hunt ? 7 : clamp(this.pos.distanceTo(PP), 8, 18), this.role === 'flank' ? 0.8 : 0.3);
+    const goal = squadFlank(this.pos, PP, G.enemies, this, this.side, hunt ? 7 : clamp(this.pos.distanceTo(PP), 8, 18), this.role === 'flank' ? 0.8 : 0.3);
     const v = new THREE.Vector3(goal.x, this.pos.y, goal.z);
     S.pushOut(v, 0.4, v.y, v.y + 1.7, 0.45);
     v.crouch = false;

@@ -72,7 +72,11 @@ export function createConvoy(scene) {
     scene.add(root); return root;
   });
   return { trucks, triangles: geometries.reduce((n, g) => n + g.attributes.position.count / 3, 0), geometries,
-    update(pos, yaw, terrain) { trucks.forEach((r, i) => { const z = pos[1] - Math.cos(yaw) * i * 16, x = pos[0] - Math.sin(yaw) * i * 16; r.position.set(x, terrain(x, z) + 0.02, z); r.rotation.y = yaw; }); },
+    update(pos, yaw, terrain, trail = null) { trucks.forEach((r, i) => {
+      const pose = trail && trail(i);
+      const z = pose ? pose.pos[1] : pos[1] - Math.cos(yaw) * i * 16, x = pose ? pose.pos[0] : pos[0] - Math.sin(yaw) * i * 16;
+      r.position.set(x, terrain(x, z) + 0.02, z); r.rotation.y = pose ? pose.yaw : yaw;
+    }); },
     dispose() { trucks.forEach(r => r.removeFromParent()); geometries.forEach(g => g.dispose()); materials.forEach(m => m.dispose()); },
   };
 }

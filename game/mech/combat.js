@@ -4,7 +4,7 @@ import { Mech } from './mechs.js';
 import { Vehicles, VKIND } from './vehicles.js';
 import { parse, encGroups, setRoute, Encounter } from './encounter.js';
 import { STAGE_DATA } from './stages.js';
-import { steer, flankPoint, allyInLane } from './tactics.js';
+import { steer, squadFlank, coveringFire, segmentBox, routeDirection, allyInLane } from './tactics.js';
 
 const clamp = THREE.MathUtils.clamp;
 const rand = (a, b) => a + Math.random() * (b - a);
@@ -113,6 +113,7 @@ class Enemy {
     this.lastSeen = V3(); this.nav = V3(); this.navT = 0;
     this.cover = null; this.coverCd = 0; this.coverT = 0; this.lockReact = 0;
     this.role = kind === 'heavy' ? 'support' : kind === 'ace' || id % 3 === 0 ? 'flank' : 'line';
+    this.flankSide = id % 2 ? 1 : -1; this.path = {}; this.navGoal = V3();
   }
   get scale() { return this.m.scale; }
   chest(out) { return out.set(this.pos.x, this.pos.y + 10.5 * this.scale, this.pos.z); }
@@ -893,7 +894,7 @@ export class Combat {
       } else {
         const [lo, hi] = K.pref;
         const hunt = e.noLos > 1.2;
-        const rush = e.los && this.rifle.reload >= 0 && e.role === 'flank';
+        const rush = e.los && e.role === 'flank' && (this.rifle.reload >= 0 || coveringFire(this.enemies, e));
         const radial = hunt || rush ? 1 : dist > hi ? 1 : dist < lo ? -0.9 : 0.15 * Math.sin(this.stats.time * 0.7 + e.id);
         if (hunt && e.boostT <= 0 && Math.random() < dt * 0.8) e.boostT = rand(0.8, 1.6);
         if (hunt && e.grounded && e.bumped && e.jumpCd <= 0) {
@@ -907,9 +908,11 @@ export class Combat {
         }
         const perp = _b.set(dirP.z, 0, -dirP.x).multiplyScalar(e.strafe);
         wish.copy(dirP).multiplyScalar(radial).addScaledVector(perp, hunt ? 0.35 : 0.85);
+        e.navGoal.copy(e.pos).addScaledVector(wish, 70);
         // 側翼繞到另一個射角；失去視線只追最後看見的位置。
-        if (hunt || e.role === 'flank' && dist > lo && !rush) {
-          const goal = hunt ? e.lastSeen : flankPoint(e.pos, e.lastSeen, e.strafe, (lo + hi) * 0.5);
+        if (hunt || e.role === 'flank' && dist > lo) {
+          const goal = hunt ? e.lastSeen : squadFlank(e.pos, e.lastSeen, this.enemies, e, e.flankSide, rush ? Math.max(lo, dist - 60) : (lo + hi) * 0.5);
+          e.navGoal.set(goal.x, e.pos.y, goal.z);
           wish.set(goal.x - e.pos.x, 0, goal.z - e.pos.z).normalize();
         }
         if (rush) e.boostT = Math.max(e.boostT, 0.5);
@@ -917,6 +920,7 @@ export class Combat {
           e.coverCd = 4; e.cover = this.enemyCover(e, playerChest); e.coverT = e.cover ? 3 : 0;
         }
         if (e.cover && e.coverT > 0) {
+          e.navGoal.copy(e.cover);
           wish.set(e.cover.x - e.pos.x, 0, e.cover.z - e.pos.z);
           if (wish.lengthSq() < 16) wish.set(0, 0, 0); else wish.normalize();
         }
@@ -925,7 +929,17 @@ export class Combat {
         if (e.navT <= 0) {
           e.navT = 0.25;
           const probe = V3();
-          const nav = steer(wish.x, wish.z, (x, z) => {
+          const boxes = [], clear = (ax, az, bx, bz) => {
+            const radius = 3.8 * k, mx = (ax + bx) / 2, mz = (az + bz) / 2;
+            for (const box of w.nearBoxes(mx, mz, Math.hypot(bx - ax, bz - az) / 2 + radius, boxes)) {
+              if (box.top > e.pos.y + 1.5 && segmentBox(ax, az, bx, bz, box, radius)) return false;
+            }
+            for (const [x, z] of [[mx, mz], [bx, bz]]) if (Math.abs(w.support(x, z, 3.4 * k, e.pos.y) - e.pos.y) > 4) return false;
+            return true;
+          };
+          const path = e.grounded && wish.lengthSq() > 0.01 ? routeDirection(e.path, e.pos, e.navGoal, clear, this.stats.time, 18 * k) : null;
+          const routed = path && e.path.points.length;
+          const nav = steer(routed ? path.x : wish.x, routed ? path.z : wish.z, (x, z) => {
             probe.set(e.pos.x + x * 10, e.pos.y, e.pos.z + z * 10);
             return w.collide(probe, 3.8 * k, e.pos.y) || e.grounded && w.support(probe.x, probe.z, 3.4 * k, e.pos.y) < e.pos.y - 4;
           }, e.strafe);

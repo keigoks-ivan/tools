@@ -10,13 +10,14 @@ export function createMission({ scene, world, player, fx, config, combat, zhud, 
   const evacGate = config.chapter === 5 ? createEvacGate(scene, 600, -405, world.height(600, -405)) : null;
   let exitTime = 0;
   let checkpoint = null, pending = null, cooldown = 3, finished = false, choosing = false, stopped = false, kills = 0, time = 0;
-  truck.update(convoy.pos, config.chapter === 4 ? Math.PI / 2 : Math.PI, (x, z) => world.height(x, z));
   if (config.chapter === 5) convoy.choice = ['rescue', 'artillery'].includes(read('choice')) ? read('choice') : 'artillery';
   const saved = resumeSave ? read('checkpoint') : null;
   let startWave = 0;
   if (saved?.chapter === config.chapter && Number.isInteger(saved.wave) && saved.wave >= 0 && saved.wave < config.waves.length && convoy.restore(saved.convoy)) {
     startWave = saved.wave; kills = Number.isFinite(saved.kills) ? Math.max(0, saved.kills) : 0; time = Number.isFinite(saved.time) ? Math.max(0, saved.time) : 0; checkpoint = { ...saved, kills, time };
   }
+  const terrain = (x, z) => world.height(x, z), trail = i => convoy.pose(i * 16);
+  truck.update(convoy.pos, 0, terrain, trail);
   const panel = document.createElement('section'); panel.className = 'campaign-panel'; panel.hidden = true; document.body.append(panel);
   function close() { panel.hidden = true; choosing = false; stopped = false; input.reset(); if (!input.touch.on) input.lock(); }
   function choose(choice) {
@@ -85,16 +86,15 @@ export function createMission({ scene, world, player, fx, config, combat, zhud, 
       time += dt;
       const clear = C.phase === 'fight' && !C.enemies.some(e => !e.gone) && !C.events.some(e => e.spawn);
       convoy.step(dt, clear, [player.pos.x, player.pos.z]);
-      const target = config.route[Math.min(convoy.index + 1, config.route.length - 1)];
-      const yaw = Math.atan2(target[0] - convoy.pos[0], target[1] - convoy.pos[1]);
-      truck.update(convoy.pos, yaw || (config.chapter === 4 ? Math.PI / 2 : Math.PI), (x, z) => world.height(x, z));
+      truck.update(convoy.pos, 0, terrain, trail);
       if (!clear) fireAtConvoy(dt, C);
       if (convoy.hp <= 0) { C.dead = true; C.phase = 'done'; fail(false); }
     },
     cinematic(dt) {
       if (!finished || !evacGate) return;
       exitTime += dt; evacGate.open(Math.min(1, exitTime / 2));
-      truck.update([convoy.pos[0], convoy.pos[1] - Math.min(85, Math.max(0, exitTime - 2) * 12)], Math.PI, (x, z) => world.height(x, z));
+      const distance = Math.min(85, Math.max(0, exitTime - 2) * 12);
+      truck.update(convoy.pos, Math.PI, terrain, i => convoy.pose(i * 16, distance));
     },
     draw(h) {
       const X = h.x, w = h.w, s = h.s;

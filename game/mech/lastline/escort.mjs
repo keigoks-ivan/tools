@@ -3,6 +3,12 @@ export class Escort {
   constructor(route, hp = 100) {
     if (!Array.isArray(route) || route.length < 2 || route.some(p => p.length !== 2 || !p.every(Number.isFinite))) throw Error('Invalid evacuation route');
     this.route = route.map(p => [...p]); this.pos = [...route[0]]; this.index = 0;
+    this.lengths = [0];
+    for (let i = 1; i < route.length; i++) {
+      const d = Math.hypot(route[i][0] - route[i - 1][0], route[i][1] - route[i - 1][1]);
+      if (d < 0.01) throw Error('Invalid evacuation segment');
+      this.lengths.push(this.lengths[i - 1] + d);
+    }
     this.hp = Math.min(100, Math.max(1, Number.isFinite(hp) ? hp : 100)); this.choice = null; this.time = 0;
   }
   step(dt, clear, player, blocked = false) {
@@ -13,6 +19,18 @@ export class Escort {
     if (d <= move) { this.pos = [...next]; this.index++; } else { this.pos[0] += dx / d * move; this.pos[1] += dz / d * move; }
   }
   damage(n) { if (Number.isFinite(n) && n > 0) this.hp = Math.max(0, this.hp - n); return this.hp === 0; }
+  // 用路線里程定位後車；路口前後六公尺逐漸轉向，讀檔也能還原正確隊形。
+  pose(behind = 0, extension = 0) {
+    const p = this.route[this.index], distance = this.lengths[this.index] + Math.hypot(this.pos[0] - p[0], this.pos[1] - p[1]) + extension - behind;
+    const sample = d => {
+      let i = 0;
+      while (i < this.route.length - 2 && d > this.lengths[i + 1]) i++;
+      const a = this.route[i], b = this.route[i + 1], t = (d - this.lengths[i]) / (this.lengths[i + 1] - this.lengths[i]);
+      return [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+    };
+    const pos = sample(distance), a = sample(distance - 6), b = sample(distance + 6);
+    return { pos, yaw: Math.atan2(b[0] - a[0], b[1] - a[1]) };
+  }
   choose(choice) { if (this.choice || !['rescue', 'artillery'].includes(choice)) return false; this.choice = choice; if (choice === 'rescue') this.hp = Math.min(100, this.hp + 18); return true; }
   ready(wave, player, radius = 90) { const p = this.route[wave]; return !!p && this.hp > 0 && this.index >= wave && Math.hypot(player[0] - p[0], player[1] - p[1]) < radius; }
   snapshot() { return { pos: [...this.pos], index: this.index, hp: this.hp, choice: this.choice, time: this.time }; }

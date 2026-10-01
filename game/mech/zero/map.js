@@ -8,6 +8,7 @@ import { Builder, grimeShader } from './kit.js';
 import * as PR from './props.js';
 import { facade, FLOOR } from './models.js';
 import { shopMaterial, shopUV } from '../urban.js';
+import { roofline } from '../roofline.js';
 
 const H1 = 3.4;   // 一層樓高
 
@@ -151,6 +152,15 @@ export function buildMap(scene, mats, solid, PL = null) {
         if (along ? out < 0 : out > 0) pts.reverse();
         b.B.concrete.quad(...pts, along ? [0, 0, out] : [out, 0, 0], [0.85, 0.85, 1, 1]);
       }
+    }
+    // 不占用可行走的平台：外圍街屋用同一套城市冠頂，細節併入既有材質桶。
+    if (h >= 12 && h <= 28 && !o.noParapet && !o.hide) {
+      const kind = o.kit === 'factory' ? 'industrial' : asian ? 'east' : 'old';
+      const material = col => col[4] === 4 ? 'glass' : col[4] === 2 ? 'rust' : 'concrete';
+      roofline(x0, x1, z0, z1, h, kind, (a, c, d, e, col) => {
+        const n = new THREE.Vector3().subVectors(new THREE.Vector3(...c), new THREE.Vector3(...a)).cross(new THREE.Vector3().subVectors(new THREE.Vector3(...d), new THREE.Vector3(...a))).normalize();
+        b.B[material(col)].quad(a, c, d, e, n.toArray(), [1, 1, 1, 1], null, col.slice(0, 3));
+      }, (a, c, d, e, f, g, col) => b.deco(material(col), a, c, d, e, f, g, { shade: () => 1, tint: col.slice(0, 3) }));
     }
     if (o.shop) {
       // 少量有弧度的布棚；紋理、材質及幾何桶都已載入，沒有額外燈光。

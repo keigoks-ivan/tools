@@ -33,3 +33,20 @@ test('檢查點恢復路線、損傷、選擇；損壞存檔不傳入遊戲', ()
 test('大時間跳躍被限制，不會穿過下一個戰鬥路口', () => {
  const e = new Escort(route);e.step(100,true,e.pos);assert.equal(e.pos[0],193);assert.equal(e.index,0);
 });
+test('正北零度朝向保留，後車沿原道路轉彎而非橫移', () => {
+ const e = new Escort(route); e.index = 1; e.pos = [360, -112];
+ assert.equal(e.pose().yaw, 0);
+ assert.deepEqual(e.pose(16).pos, [352, -120]);
+ const before = e.pose(16); e.pos[1] += 1; const after = e.pose(16);
+ assert(Math.hypot(after.pos[0] - before.pos[0], after.pos[1] - before.pos[1]) <= 1.001);
+ assert(Math.abs(after.yaw - before.yaw) < 0.2);
+ const restored = new Escort(route); assert(restored.restore(e.snapshot()));
+ assert.deepEqual(restored.pose(16), e.pose(16));
+});
+test('車隊停在終點保持末段朝向，閘門動畫兩車沿末段駛出', () => {
+ const e = new Escort([[600,120],[600,-120],[600,-360]]); e.index = 2; e.pos = [600,-360];
+ assert.equal(Math.abs(e.pose().yaw), Math.PI);
+ assert.deepEqual(e.pose(0,85).pos, [600,-445]);
+ assert.deepEqual(e.pose(16,85).pos, [600,-429]);
+ assert.throws(() => new Escort([[0,0],[0,0]]));
+});

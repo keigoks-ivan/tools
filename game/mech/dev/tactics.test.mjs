@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
-import { steer, flankPoint, allyInLane } from '../tactics.js';
+import { steer, flankPoint, squadFlank, coveringFire, segmentBox, planRoute, routeDirection, allyInLane } from '../tactics.js';
 import { Combat } from '../combat.js';
 import { Encounter, parse } from '../encounter.js';
 import { STAGE_DATA } from '../stages.js';
@@ -31,6 +31,37 @@ test('friendly fire lanes exclude dead units and units beyond or below the shot'
   assert.equal(allyInLane(V(0, 1, 0), V(0, 1, 10), [mate], null, 0.4, 1.8), false);
   mate.pos.z = 5; mate.dead = true;
   assert.equal(allyInLane(V(0, 1, 0), V(0, 1, 10), [mate], null, 0.4, 1.8), false);
+});
+test('bounded search routes around a long wall without cutting through it', () => {
+  const wall = { x0: -30, x1: 30, z0: 10, z1: 30 }, pos = V(), goal = V(0, 0, 60);
+  const clear = (ax, az, bx, bz) => !segmentBox(ax, az, bx, bz, wall, 1);
+  const route = planRoute(pos, goal, clear, 10);
+  assert(route.visited <= 160); assert(route.points.length > 2);
+  let prev = pos;
+  for (const p of route.points) { assert(clear(prev.x, prev.z, p.x, p.z)); prev = p; }
+  assert(Math.hypot(prev.x - goal.x, prev.z - goal.z) < 0.01);
+  const state = {};
+  for (let i = 0; i < 400 && pos.distanceTo(goal) > 1; i++) {
+    const nav = routeDirection(state, pos, goal, clear, i * 0.25, 10); assert(nav);
+    const next = pos.clone().add(V(nav.x * 1.5, 0, nav.z * 1.5)); assert(clear(pos.x, pos.z, next.x, next.z)); pos.copy(next);
+  }
+  assert(pos.distanceTo(goal) < 2);
+});
+test('thin walls block diagonal cuts; enclosure and failed searches remain bounded', () => {
+  const box = { x0: 0.9, x1: 1.1, z0: -10, z1: 10 };
+  assert(segmentBox(0, 0, 2, 1, box, 0.34)); assert(!segmentBox(-4, 0, -2, 1, box, 0.34));
+  const state = {}, blocked = () => false;
+  assert.equal(routeDirection(state, V(), V(0,0,10), blocked, 0, 1.5), null);
+  assert(state.visited <= 160); const first = state.nextPlan;
+  assert.equal(routeDirection(state, V(), V(0,0,10), blocked, 0.5, 1.5), null); assert.equal(state.nextPlan, first);
+});
+test('flank units choose the open firing angle while a live support unit covers them', () => {
+  const self = { pos: V(0,0,20), role: 'flank' }, target = V(), a = flankPoint(self.pos, target, 1, 15);
+  const support = { pos: V(a.x,0,a.z), role: 'support', los: true, burst: 3 };
+  const goal = squadFlank(self.pos, target, [self,support], self, 1, 15);
+  assert(goal.x < 0); assert(coveringFire([self,support], self));
+  support.dead = true; assert(!coveringFire([self,support], self));
+  assert(squadFlank(self.pos, target, [self,support], self, 1, 15).x > 0);
 });
 test('ace quick boost produces real sideways velocity instead of a zero vector', () => {
   const C = Object.assign(Object.create(Combat.prototype), { player: { pos: V(0, 0, 100) }, audio: silent, fx: silent });
@@ -128,4 +159,22 @@ test('every new scripted beat and boss reinforcement references a supported unit
       }
     }
   }
+});
+
+test('support fire lets one visible flank trooper advance without revealing a hidden player', () => {
+  const e = soldierFixture(); e.role = 'flank'; e.pushCd = 0;
+  const mate = { pos: V(12,0,3), role: 'support', sees: true, burst: 4, state: 'combat' }; e.G.enemies.push(mate);
+  e.update(0.1); assert(e.pushCd > 0); assert.equal(e.phase, 'move');
+  const hidden = soldierFixture(); hidden.role='flank'; hidden.pushCd=0; hidden.sees=false; hidden.G.enemies.push(mate);
+  hidden.update(0.1); assert(hidden.pushCd<=0); assert.equal(hidden.phase,'hide');
+});
+test('a close player still makes infantry retreat instead of following its old cover goal', () => {
+  const e = soldierFixture(); e.G.player.pos.set(8,0,0); e.G.playerEye.set(8,1.6,0);
+  e.update(0.1); assert(e.pos.x > 10);
+});
+
+test('a changed retreat goal drops the old path without bypassing the search cooldown', () => {
+  const state = { points: [{x:2,z:0}], gx:6, gz:0, nextPlan:2, expires:5 };
+  const nav = routeDirection(state,V(),V(-6,0,0),()=>false,1,1.5);
+  assert.equal(nav,null); assert.equal(state.points.length,0); assert.equal(state.nextPlan,2);
 });
