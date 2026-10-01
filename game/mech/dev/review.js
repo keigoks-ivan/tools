@@ -14,7 +14,7 @@ async function load(path, query = '') {
   html = html.replace(/<base href="[^"]+">/, '');
   html = html.replace(/(<script type="importmap">)([\s\S]*?)(<\/script>)/, (_, a, json, b) => {
     const map = JSON.parse(json);
-    for (const file of ['env.js', 'stages.js', 'battlefields.js', 'post.js', 'mechs.js', 'combat.js', 'cockpit.js', 'zero/map.js', 'zero/guns.js', 'zero/viewmodel.js', 'zero/main.js', 'zero/hud.js', 'zero/sfx.js', 'zero/mech6.js', 'lastline/script.js', 'lastline/mission.js', 'lastline/convoy.js', 'lastline/escort.mjs']) {
+    for (const file of ['anim.js', 'env.js', 'stages.js', 'battlefields.js', 'post.js', 'mechs.js', 'combat.js', 'cockpit.js', 'zero/map.js', 'zero/guns.js', 'zero/viewmodel.js', 'zero/main.js', 'zero/hud.js', 'zero/sfx.js', 'zero/mech6.js', 'lastline/script.js', 'lastline/mission.js', 'lastline/convoy.js', 'lastline/escort.mjs']) {
       const url = new URL('/game/mech/' + file, location.href).href;
       for (const key of Object.keys(map.imports)) if (new URL(key, entryBase).href === url) delete map.imports[key];
       map.imports[url] = url + '?qa=' + revision;
@@ -82,6 +82,63 @@ async function mech() {
   report.textContent = JSON.stringify({ checks: result, sizes, memory: renderer.info.memory, errors }, null, 2);
   state.textContent = errors.length ? '有錯誤' : '本篇通過';
 }
+
+async function enemyMotion() {
+  await load('/game/mech/index.html', '?mute&nobrief&all&fps=0');
+  const G=win.__game,T=win.__T; post=G.post; renderer=post.renderer;
+  G.launch(8); if(G.state==='paused')win.document.querySelector('#resume').click();
+  const C=G.combat,W=G.world, foes=[];
+  const base=C.enc.E.pts[0];
+  for(const [i,kind] of ['grunt','ace','heavy'].entries()) {
+    const x=base.x+(i-1)*24,z=base.z+55;
+    const e=C.spawn(kind,i,3,{x,z,tx:x,tz:z+30,ground:true});
+    e.vel.set(0,0,0);e.boostT=0;e.face=e.m.legYaw=0;e.dropping=false;e.grounded=true;
+    foes.push(e);
+  }
+  C.hurt=()=>{};
+  for(let i=0;i<900;i++)C.updateEnemies(1/60);
+  for(const e of foes) {
+    assert(e.m.stepCount>2, `${e.kind} 實際 AI 移動並觸發腳步`);
+    assert(e.pos.toArray().every(Number.isFinite), `${e.kind} AI 位置正常`);
+  }
+  G.cockpit.root.visible=false; G.hero.root.visible=false; post.cockpit.enabled=false;
+  const steps=[];
+  for(const [i,e] of foes.entries()) {
+    e.pos.set(base.x+(i-1)*24,W.height(base.x+(i-1)*24,base.z+55),base.z+55);e.m.legYaw=0;
+    const st={vel:new T.Vector3(0,0,8),grounded:true,boost:0,torsoYaw:0,aim:new T.Vector3(e.pos.x,12,e.pos.z+200),groundAt:e.groundAt,brace:0};
+    const before=e.m.stepCount;
+    for(let n=0;n<240;n++) {e.pos.addScaledVector(st.vel,1/60);e.m.animate(1/60,st);}
+    steps.push({kind:e.kind,steps:e.m.stepCount-before});
+    assert(e.m.motion.g>.9, `${e.kind} 步態完整進入行走`);
+    for(const b of Object.values(e.m.bones)) if(b?.quaternion)assertSilent(b.quaternion.toArray().every(Number.isFinite),'骨架旋轉無效');
+  }
+  const center=foes[1].pos;
+  G.camera.position.set(center.x+25,center.y+16,center.z+33);G.camera.lookAt(center.x+10,center.y+11,center.z);G.camera.updateMatrixWorld();
+  await save('enemy-weighted-walk');
+  const heavy=foes[2],grunt=foes[0],ace=foes[1];
+  const muzzle=e=>{e.m.muzzle.updateWorldMatrix(true,false);return e.m.muzzle.getWorldPosition(new T.Vector3());};
+  C.bullet(grunt,muzzle(grunt),G.player.pos.clone().add(new T.Vector3(0,10,0)),200);
+  assert(grunt.m.recoil===.5,'一般機開槍觸發後座力');
+  C.shell(heavy,muzzle(heavy),G.player.pos.clone().add(new T.Vector3(0,10,0)),210,800);
+  assert(heavy.m.recoil===1.2,'重裝砲擊觸發較強後座力');
+  for(const e of foes) {
+    const st={vel:new T.Vector3(),grounded:true,boost:0,torsoYaw:0,aim:new T.Vector3(e.pos.x,12,e.pos.z+200),groundAt:e.groundAt,brace:1};
+    for(let n=0;n<30;n++){if(n%6===0)e.m.recoil=e.kind==='heavy'?1.2:.5;e.m.animate(1/60,st);}
+    assert(e.m.motion.brace>.9,`${e.kind} 射擊支撐姿態`);
+  }
+  ace.m.swing=.88;ace.m.animate(1/60,{vel:new T.Vector3(),grounded:true,boost:0,torsoYaw:0,aim:null,groundAt:ace.groundAt});
+  assert(ace.m.bones.torso.rotation.y<-.05,'王牌機揮砍先扭腰蓄力');
+  await save('enemy-combat-brace');
+  ace.m.swing=.45;ace.m.animate(1/60,{vel:new T.Vector3(),grounded:true,boost:0,torsoYaw:0,aim:null,groundAt:ace.groundAt});
+  assert(ace.m.bones.torso.rotation.y>.25,'王牌機揮砍帶動軀幹');
+  // 骨架更新本身不增加渲染資源，射擊特效另由既有粒子池管理。
+  const settle=()=>{for(let i=0;i<600;i++)for(const e of foes)e.m.animate(1/60,{vel:new T.Vector3(),grounded:true,boost:0,torsoYaw:0,aim:null,groundAt:e.groundAt}); post.render(1);};
+  settle(); const before={...renderer.info.memory}; settle();
+  assert(renderer.info.memory.geometries===before.geometries && renderer.info.memory.textures===before.textures,'重複骨架動作沒有新增 GPU 幾何或貼圖');
+  assert(errors.length===0,'敵機靜音戰鬥與動畫沒有執行錯誤');
+  report.textContent=JSON.stringify({checks:result,steps,steadyBefore:before,steadyAfter:renderer.info.memory,errors},null,2);state.textContent='敵機動作通過';
+}
+
 async function battlefields() {
   localStorage.setItem('mech.view','1');
   await load('/game/mech/index.html', '?mute&nobrief&all&fps=0');
@@ -469,4 +526,4 @@ async function campaignEdges() {
 }
 const assertSilent = (ok, text) => { if (!ok) throw Error(text); };
 
-for (const [id, fn] of [['campaignFoot', campaignFoot], ['campaign4', () => campaignMech(4)], ['campaign5', () => campaignMech(5)], ['campaignArtillery', async () => { localStorage.setItem('lastline.choice', JSON.stringify('artillery')); await campaignMech(5, 'artillery'); }], ['campaignEdges', campaignEdges], ['mech', mech], ['fields', battlefields], ['zero', zero], ['tactics', tactics], ['infantry', infantry], ['art', art], ['hero', hero], ['city', city], ['mountains', mountains], ['weapons', weapons], ['save', save]]) document.querySelector('#' + id).onclick = () => fn().catch(e => { state.textContent = '失敗'; report.textContent += '\n' + e.stack; });
+for (const [id, fn] of [['campaignFoot', campaignFoot], ['campaign4', () => campaignMech(4)], ['campaign5', () => campaignMech(5)], ['campaignArtillery', async () => { localStorage.setItem('lastline.choice', JSON.stringify('artillery')); await campaignMech(5, 'artillery'); }], ['campaignEdges', campaignEdges], ['mech', mech], ['fields', battlefields], ['enemyMotion', enemyMotion], ['zero', zero], ['tactics', tactics], ['infantry', infantry], ['art', art], ['hero', hero], ['city', city], ['mountains', mountains], ['weapons', weapons], ['save', save]]) document.querySelector('#' + id).onclick = () => fn().catch(e => { state.textContent = '失敗'; report.textContent += '\n' + e.stack; });

@@ -214,6 +214,7 @@ export class Combat {
     if (VKIND[kind]) { const v = this.vehicles.spawn(kind, i, n, at); this.enemies.push(v); return v; }
     const p = this.player.pos, w = this.world;
     const e = new Enemy(kind, this.nextId++);
+    e.groundAt = (x, z) => w.support(x, z, 0.45 * e.scale, e.pos.y);
     const T = this.tier;
     e.ap = e.apMax = Math.round(e.K.ap * T.ap);
     e.fireCd *= T.fire; e.altCd *= T.fire;
@@ -846,7 +847,7 @@ export class Combat {
         }
         e.vel.x = damp(e.vel.x, 0, 3, dt); e.vel.z = damp(e.vel.z, 0, 3, dt);
         this.moveEnemy(e, dt, true);
-        m.animate(dt, { vel: e.vel, grounded: e.grounded, boost: 0, torsoYaw: e.face + Math.sin(e.dying * 20) * 0.1, pitch: 0, thrust: 0, aim: null, lean: 0.2 });
+        m.animate(dt, { vel: e.vel, grounded: e.grounded, boost: 0, torsoYaw: e.face, pitch: 0, thrust: 0, aim: null, lean: 0.2 + (1 - e.dying / (e.kind === 'grunt' ? 0.45 : 0.9)) * 0.45, groundAt: e.groundAt });
         if (e.dying <= 0) this.boom(e);
         continue;
       }
@@ -883,7 +884,7 @@ export class Combat {
           if (ds > 0) this.cockpit.kick('step', ds * 1.5, 0);
         }
         this.audio.enemyBoost(e.id, e.pos, e.thrust);
-        m.animate(dt, { vel: e.vel, grounded: false, boost: 0, torsoYaw: e.face, pitch: 0, thrust: e.thrust, aim: null, lean: 0 });
+        m.animate(dt, { vel: e.vel, grounded: e.grounded, boost: 0, torsoYaw: e.face, pitch: 0, thrust: e.thrust, aim: null, lean: 0, groundAt: e.groundAt });
         continue;
       }
 
@@ -992,9 +993,9 @@ export class Combat {
       // ---- 開火
       const aim = e.los && dist < K.range + 150 && e.stagT <= 0 ? playerChest : null;
       if (e.stagT <= 0 && e.lunge <= 0) this.enemyFire(e, dt, dist, playerChest);
-      m.animate(dt, { vel: e.vel, grounded: e.grounded, boost: e.grounded && (e.boostT > 0 || e.qbT > 0) ? 1 : 0, torsoYaw: e.face, pitch: 0, thrust: e.thrust, aim, lean: e.stagT > 0 ? 0.35 : 0 });
+      m.animate(dt, { vel: e.vel, grounded: e.grounded, boost: e.grounded && (e.boostT > 0 || e.qbT > 0) ? 1 : 0, torsoYaw: e.face, pitch: 0, thrust: e.thrust, aim, lean: e.stagT > 0 ? 0.35 : 0, groundAt: e.groundAt, brace: e.burst > 0 || e.charge > 0 || e.volley > 0 ? 1 : 0 });
       if (m.footfall) {
-        const fp = _b.copy(e.pos);
+        const fp = m.bones[m.footfall > 0 ? 'ankleR' : 'ankleL'].getWorldPosition(_b); fp.y -= m.motion.ankleY * k;
         this.audio.enemyStep(fp, e.kind === 'heavy' ? 1.3 : 0.9);
         if (e.vel.lengthSq() > 30) this.fx.dust(fp, 0.6 * k);
         const ds = clamp(1 - dist / 90, 0, 1);
@@ -1101,6 +1102,7 @@ export class Combat {
           const tw = this.world.raycast(from, ext, _n);
           const end = tw >= 0 ? V3().lerpVectors(from, ext, tw) : ext;
           const blocked = tw >= 0 || allyInLane(from, to, this.enemies, e, 5, 19);
+          e.m.recoil = 0.85;
           this.fx.beam(from, end, 'enemy');
           this.fx.muzzle(from, _a.subVectors(to, from), 'beam');
           this.audio.enemyBeam(from);
@@ -1116,7 +1118,7 @@ export class Combat {
       if (e.volley > 0) {
         e.volleyT -= dt; e.warn = 1;
         if (e.volleyT <= 0) {
-          e.volley--; e.volleyT = 0.12;
+          e.volley--; e.volleyT = 0.12; e.m.recoil = 0.25;
           const p = e.m.bones.torso.localToWorld(V3((e.volley % 2 ? 1 : -1) * 3.2, 6.5, -1));
           const v = V3(rand(-8, 8), rand(26, 34), 0).add(_a.set(Math.sin(e.face), 0, Math.cos(e.face)).multiplyScalar(14));
           this.missiles.push({ own: 'enemy', pos: p, vel: v, target: 'player', t: 0, speed: v.length(), vmax: 115, acc: 90, turn: 1.45, dmg: 300, h: this.fx.missile('enemy'), life: 7.5, from: e.pos.clone() });
@@ -1131,6 +1133,7 @@ export class Combat {
   // 機槍子彈：瞬間判定，有散布，玩家跑得快就比較打不中
   bullet(e, from, pc, dist) {
     if (allyInLane(from, pc, this.enemies, e, 5, 19)) return;
+    e.m.recoil = 0.5;
     const pl = this.player;
     const lead = dist / 900 * rand(0.3, 1.1);
     const to = V3().copy(pc).addScaledVector(pl.vel, lead);
@@ -1158,6 +1161,7 @@ export class Combat {
   }
   // 砲彈（直線飛、有提前量，看得到、閃得掉）
   shell(e, from, pc, speed, dmg) {
+    e.m.recoil = 1.2;
     const pl = this.player, dist = from.distanceTo(pc);
     const to = V3().copy(pc).addScaledVector(pl.vel, dist / speed * rand(0.6, 1.0));
     const v = to.sub(from).normalize().multiplyScalar(speed);
