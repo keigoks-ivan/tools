@@ -1,16 +1,16 @@
-import {StudioUI} from './studio.js?v=12';
-import {drawRoom,drawBody,drawFallbackFace} from './studio-art.js?v=12';
-import {guests,wishes} from './looks.js?v=12';
-import {SalonMemory} from './memory.js?v=12';
-import {ReplayUI} from './replay-ui.js?v=12';
-import {ornament,createDecorate} from './ornaments.js?v=12';
-import {createLayout,toWorld,inStage} from './layout.js?v=12';
-import {HairSystem,setHairTexture,setHairPlate} from './hair.js?v=12';
-import {guest,palette} from './data.js?v=12';
-import {createCut} from './tools/cut.js?v=12';
-import {createGrow} from './tools/grow.js?v=12';
-import {createColor} from './tools/color.js?v=12';
-import {createComb} from './tools/comb.js?v=12';
+import {StudioUI} from './studio.js?v=13';
+import {drawRoom,drawBody,drawFallbackFace} from './studio-art.js?v=13';
+import {guests,wishes} from './looks.js?v=13';
+import {SalonMemory} from './memory.js?v=13';
+import {ReplayUI} from './replay-ui.js?v=13';
+import {ornament,createDecorate} from './ornaments.js?v=13';
+import {createLayout,toWorld,inStage} from './layout.js?v=13';
+import {HairSystem,setHairTexture,setHairPlate} from './hair.js?v=13';
+import {guest,palette} from './data.js?v=13';
+import {createCut} from './tools/cut.js?v=13';
+import {createGrow} from './tools/grow.js?v=13';
+import {createColor} from './tools/color.js?v=13';
+import {createComb} from './tools/comb.js?v=13';
 const canvas=document.getElementById('scene'),box=document.getElementById('game'),ctx=canvas.getContext('2d',{alpha:false});
 canvas.width=box.clientWidth;canvas.height=box.clientHeight;ctx.fillStyle='#fff2db';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#efadc0';for(let i=0;i<5;i++){let a=i*Math.PI*2/5;ctx.beginPath();ctx.arc(canvas.width/2+Math.cos(a)*14,canvas.height/2+Math.sin(a)*14,11,0,Math.PI*2);ctx.fill()}ctx.fillStyle='#f9d37b';ctx.beginPath();ctx.arc(canvas.width/2,canvas.height/2,8,0,Math.PI*2);ctx.fill();
 // Artwork never blocks play. Missing or slow files use the vector portrait.
@@ -182,7 +182,7 @@ function render(now){const rawDt=(now-last)/1000,dt=Math.min(.034,rawDt);last=no
  ctx.save();ctx.beginPath();ctx.rect(layout.stage.x,layout.stage.y,layout.stage.w,layout.stage.h);ctx.clip();
  ctx.translate(layout.world.x,layout.world.y);ctx.scale(layout.world.scale,layout.world.scale);
  paintGuest(ctx,env.hair,art,show,ornaments,headDx);
- if(!studio.free&&!replay.mode&&selected==='cut'&&!env.hair.activeTies().length){const y=128+440*wishes[wishIndex].length*.92;ctx.save();ctx.strokeStyle='#fff9e9bb';ctx.lineWidth=1.5;ctx.setLineDash([5,5]);ctx.beginPath();ctx.moveTo(49,y);ctx.lineTo(341,y);ctx.stroke();ctx.fillStyle='#796483';ctx.font='9px system-ui';ctx.textAlign='center';ctx.fillText('參考長度',195,y-5);ctx.restore()}
+ if(!studio.free&&!replay.mode&&selected==='cut'&&!env.hair.activeTies().length){const y=128+440*wishes[wishIndex].length*.92;ctx.save();ctx.strokeStyle='#fff9e9bb';ctx.lineWidth=1.5;ctx.setLineDash([5,5]);ctx.beginPath();ctx.moveTo(49,y);ctx.lineTo(341,y);ctx.stroke();ctx.fillStyle='#796483';ctx.font='9px system-ui';ctx.textAlign='center';ctx.fillText('✂',329,y-5);ctx.restore()}
  env.hair.drawFallen(ctx);if(!replay.mode)tools[selected].drawOverlay(ctx);ctx.restore();
  replay.draw(ctx,layout,now);studio.draw(now);requestAnimationFrame(render)
 }

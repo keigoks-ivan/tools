@@ -1,6 +1,6 @@
-import {accessories,wishes,rgb} from './looks.js?v=12';
-import {ornament} from './ornaments.js?v=12';
-import {TIE_MODES} from './hair.js?v=12';
+import {accessories,wishes,rgb} from './looks.js?v=13';
+import {ornament} from './ornaments.js?v=13';
+import {TIE_MODES} from './hair.js?v=13';
 const TAU=Math.PI*2;
 const labels={camera:'拍照',album:'作品集',guests:'選客人',close:'關閉',next:'下一頁',back:'上一頁',undo:'撤銷',edit:'繼續編輯',download:'下載照片',trash:'刪除照片'};
 const tieNames={double:'雙馬尾',high:'高雙馬尾',braids:'泡泡辮',buns:'丸子頭',single:'低側馬尾',sideHigh:'側邊高馬尾',pony:'高馬尾',half:'公主頭',loose:'放下頭髮'};
@@ -32,7 +32,7 @@ export function selHeart(c,x,y,r,now=0){
  c.shadowColor='#a8335f55';c.shadowBlur=6;c.shadowOffsetY=2;c.fillStyle=g;c.fill();c.shadowBlur=0;c.lineWidth=2.4/s*r/30;c.strokeStyle='#fff7fb';c.stroke();c.restore();
 }
 export function circleButton(c,x,y,kind,{active=false,size=32,color='#fff4df'}={}){
- c.save();c.shadowColor='#68473430';c.shadowBlur=10;c.shadowOffsetY=3;const g=c.createLinearGradient(x,y-size,x,y+size);g.addColorStop(0,'#fffdf2');g.addColorStop(1,color);c.fillStyle=g;c.beginPath();c.arc(x,y,size,0,TAU);c.fill();c.shadowBlur=0;c.strokeStyle=active?'#d29b67':'#ffffffcc';c.lineWidth=active?3:2;c.stroke();icon(c,kind,x,y);c.restore();
+ c.save();c.shadowColor='#68473430';c.shadowBlur=10;c.shadowOffsetY=3;const g=c.createLinearGradient(x,y-size,x,y+size);g.addColorStop(0,'#fffdf2');g.addColorStop(1,color);c.fillStyle=g;c.beginPath();c.arc(x,y,size,0,TAU);c.fill();c.shadowBlur=0;c.strokeStyle=active?'#d29b67':'#ffffffcc';c.lineWidth=active?3:2;c.stroke();icon(c,kind,x,y,size*1.5);c.restore();
 }
 export function wishIcon(c,w,x,y,size){
  c.save();c.translate(x,y);c.scale(size/70,size/70);c.fillStyle=w.paper;c.beginPath();c.roundRect(-32,-32,64,64,19);c.fill();
@@ -83,7 +83,7 @@ export class ReplayUI {
   const body={x:x+16,y:y+96,w:w-32,h:h-120};
   if(this.mode==='reset'){
    caption(c,'目前的造型會重設，可以用撤銷找回。',x+w/2,y+h*.44,13);
-   const bw=Math.min(210,w-48),by=y+h*.58;c.fillStyle='#896995';c.beginPath();c.roundRect(x+(w-bw)/2,by,bw,50,15);c.fill();c.save();c.font='600 16px system-ui';c.fillStyle='#fff';c.textAlign='center';c.fillText('重新開始',x+w/2,by+31);c.restore();this.region(x+(w-bw)/2,by,bw,50,()=>{a.reset();this.mode=null},'確認重新開始');
+   const bw=Math.min(210,w-48),by=y+h*.58;c.fillStyle='#896995';c.beginPath();c.roundRect(x+(w-bw)/2,by,bw,50,15);c.fill();c.save();c.font='600 16px system-ui';c.fillStyle='#fff';c.textAlign='center';c.fillText('↻',x+w/2-58,by+34);c.fillText('重新開始',x+w/2+9,by+31);c.restore();this.region(x+(w-bw)/2,by,bw,50,()=>{a.reset();this.mode=null},'確認重新開始');
   }else if(this.mode==='photo'&&this.photo){
    const controlsY=y+h-52,areaH=Math.max(65,h-199),ratio=320/430,ph=Math.min(areaH,(w-50)/ratio),pw=ph*ratio;
    const px=x+(w-pw)/2,py=body.y+(areaH-ph)/2;this.polaroid(c,this.photo.image,px,py,pw,ph);
@@ -119,7 +119,7 @@ export class ReplayUI {
      if(a.tieMode()===entry){c.strokeStyle='#dbb071';c.lineWidth=3;c.beginPath();c.roundRect(bx+2,by+2,cw-4,ch-4,15);c.stroke()}
      this.region(bx,by,cw,ch,()=>{a.tie(entry);this.mode=null},tieNames[entry])}
     if(this.mode==='wishes'){wishIcon(c,entry,bx+cw/2,by+(ch-24)/2,Math.min(cw-15,ch-34,160));caption(c,wishNames[wishes.indexOf(entry)],bx+cw/2,by+ch-14,12);this.region(bx,by,cw,ch,()=>{a.chooseWish(wishes.indexOf(entry));this.mode=null},wishNames[wishes.indexOf(entry)])}
-    if(this.mode==='accessories'){ornament(c,entry,bx+cw/2,by+(ch-24)/2,Math.min(80,cw*.5,(ch-34)*.64),a.color());caption(c,accessoryNames[entry],bx+cw/2,by+ch-13,12);this.region(bx,by,cw,ch,()=>{a.chooseOrnament(entry);this.mode=null},accessoryNames[entry])}
+    if(this.mode==='accessories'){ornament(c,entry,bx+cw/2,by+(ch-24)/2,Math.min(120,cw*.62,(ch-34)*.75),a.color());caption(c,accessoryNames[entry],bx+cw/2,by+ch-13,12);this.region(bx,by,cw,ch,()=>{a.chooseOrnament(entry);this.mode=null},accessoryNames[entry])}
     if(this.mode==='album'){const ph=Math.min(ch-12,(cw-12)*430/320),pw=ph*320/430;this.polaroid(c,entry.image,bx+(cw-pw)/2,by+(ch-ph)/2,pw,ph);this.region(bx,by,cw,ch,()=>{this.photo=entry;this.confirmDelete=false;this.mode='photo'},'開啟作品照片')}
    });
   }
