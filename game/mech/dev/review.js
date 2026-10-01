@@ -301,6 +301,25 @@ async function city() {
   const house = street.find(b=>b.w<25 && b.d<50 && b.cx < -240);
   assert(!!house, '舊城街屋深度控制在 50 公尺內');
   win.__cam.set(house.cx+12, 4, house.z1+26, Math.atan2(12,26), .12); win.__step(2); await save('city-rowhouses');
+  let alleys = 0;
+  for (const a of W.blds) for (const b of W.blds) {
+    if (a === b) continue;
+    for (const axis of ['x','z']) {
+      const cross = axis === 'x' ? 'z' : 'x', wall = a[axis+'1'], gap = b[axis+'0'] - wall;
+      const lo = Math.max(a[cross+'0'],b[cross+'0']), hi = Math.min(a[cross+'1'],b[cross+'1']);
+      if (gap <= 0 || gap >= 4 || hi - lo < 3) continue;
+      alleys++;
+      const ax = axis === 'x' ? 0 : 2, other = cross === 'x' ? 0 : 2;
+      for (const [building,edge,sign] of [[a,wall,1],[b,b[axis+'0'],-1]]) {
+        const roof = building.seg[1].o;
+        for (let i = 0; i < roof.length; i += 3) {
+          if (roof[i+1] < .7 || roof[i+1] >= Math.min(a.H,b.H)-.4 || roof[i+other] < lo || roof[i+other] > hi) continue;
+          assertSilent((roof[i+ax]-edge)*sign <= .45, '窄樓縫出現超過貼牆線腳的陽台／梯架');
+        }
+      }
+    }
+  }
+  assert(alleys > 20, `檢查 ${alleys} 處窄樓縫，沒有相向伸出的陽台、梯架或店棚`);
   const b = W.blds.find(b => b.seg.length === 3);
   assert(!!b, '店面招牌納入可破壞建築');
   const sign = b.seg[2], original = sign.a.array.slice(sign.s * 3, sign.s * 3 + sign.o.length);

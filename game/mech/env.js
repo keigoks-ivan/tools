@@ -586,13 +586,13 @@ function addBox(B, x0, x1, y0, y1, z0, z1, col, uvScale = 8) {
 }
 
 // 立面細節仍寫進同一棟的合併區段：沒有額外材質／draw call，倒塌時跟著樓體一起消失。
-function architecture(B, signs, x0, x1, z0, z1, H, style, F, district, roofTop, crown = [x0, x1, z0, z1]) {
+function architecture(B, signs, x0, x1, z0, z1, H, style, F, district, roofTop, crown = [x0, x1, z0, z1], exposed = [true, true, true, true]) {
   const stone = style < 2 ? [0.48, 0.5, 0.52, 0, 1] : [0.72, 0.69, 0.63, 0, 1], steel = [0.12, 0.15, 0.17, 0, 2];
   const glass = [0.055, 0.095, 0.11, 0, 4];
   const floor = F.h / F.rows, bay = F.w / F.cols;
   const sides = [['x', z1, 1, x0, x1], ['x', z0, -1, x0, x1], ['z', x1, 1, z0, z1], ['z', x0, -1, z0, z1]];
   const asian = style >= 2 && x0 > 120 && z0 < 240;
-  for (const [axis, fix, out, a0, a1] of sides) {
+  for (const [si, [axis, fix, out, a0, a1]] of sides.entries()) {
     const box = (lo, hi, y0, y1, d0, d1, c) => {
       const p = fix + out * d0, q = fix + out * d1;
       if (axis === 'x') addBox(B, lo, hi, y0, y1, Math.min(p, q), Math.max(p, q), c, 4);
@@ -606,6 +606,8 @@ function architecture(B, signs, x0, x1, z0, z1, H, style, F, district, roofTop, 
     for (let a = a0 + step; a < a1 - 1; a += step) box(a - 0.12, a + 0.12, 0.3, H, 0, 0.24, stone);
     box(a0, a1, 0.05, 0.65, 0, 0.22, [0.38, 0.36, 0.33, 0, 1]);
     box(a0 - 0.2, a1 + 0.2, H - 0.35, H, 0, 0.4, stone);
+    // 相鄰地塊的窄樓縫只留貼牆線腳，不放相向的陽台、梯架、店棚與招牌。
+    if (!exposed[si]) continue;
     const point = (a, y, d) => axis === 'x' ? [a, y, fix + out * d] : [fix + out * d, y, a];
     const face = (pts, c) => {
       const n = new THREE.Vector3().subVectors(new THREE.Vector3(...pts[1]), new THREE.Vector3(...pts[0])).cross(new THREE.Vector3().subVectors(new THREE.Vector3(...pts[2]), new THREE.Vector3(...pts[0]))).normalize();
@@ -1387,7 +1389,9 @@ export class World {
             if (r() < 0.5) this.lampSites.push(new THREE.Vector3((x0 + x1) / 2, H2 + 8, (z0 + z1) / 2)); // 屋頂紅燈
             addBox(bk.roof, (x0 + x1) / 2 - 0.3, (x0 + x1) / 2 + 0.3, H2, H2 + 8, (z0 + z1) / 2 - 0.3, (z0 + z1) / 2 + 0.3, [0.4, 0.4, 0.4]);
           }
-          architecture(bk.roof, bk.signs, x0, x1, z0, z1, H, style, F, district, roofTop, crown);
+          const exposed = [c1 >= lz1 || c1 - z1 >= 1.5, c0 <= lz0 || z0 - c0 >= 1.5,
+            a1 >= lx1 || a1 - x1 >= 1.5, a0 <= lx0 || x0 - a0 >= 1.5];
+          architecture(bk.roof, bk.signs, x0, x1, z0, z1, H, style, F, district, roofTop, crown, exposed);
           rec.box = { x0, x1, z0, z1, top: H + 0.2 };
           this.addCollider(rec.box);
           rec.f1 = rec.fB.p.length / 3; rec.r1 = rec.rB.p.length / 3; rec.H = H;
