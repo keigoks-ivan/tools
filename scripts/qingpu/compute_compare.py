@@ -816,7 +816,9 @@ def build_city_compare_conclusion(qingpu_row, city_rows, qingpu_price):
     if price_all is not None:
         cheaper_than = [r for r in others if r.get("price_all_wan_ping") is not None and r["price_all_wan_ping"] > price_all]
         if cheaper_than:
-            parts.append(f"轉手中位價 {price_all:.1f} 萬/坪，比{len(cheaper_than)}個比較城市便宜")
+            names = "、".join(r["name"] for r in sorted(cheaper_than, key=lambda r: -r["price_all_wan_ping"]))
+            parts.append(f"轉手中位價 {price_all:.1f} 萬/坪，只比{names}便宜" if len(cheaper_than) <= 2
+                         else f"轉手中位價 {price_all:.1f} 萬/坪，比{names}便宜")
         else:
             parts.append(f"轉手中位價 {price_all:.1f} 萬/坪，是這幾個比較對象裡最貴")
     return "；".join(parts) + "。" if parts else ""
@@ -1072,7 +1074,9 @@ def main():
     qp_presale_prices = presale_price_stats(qingpu_presale_by_id, period_start_2y, period_end)
     qp_presale_median = median(qp_presale_prices)
 
-    qingpu_entry = {k: v for k, v in qingpu_row.items() if k != "ratio_series"}
+    # 跟六都比：六都是全部屋齡，青埔也要用全部屋齡的行政區口徑（不是只算 2010 年後的重劃區口徑）
+    qingpu_entry = {k: v for k, v in qingpu_dist_row.items() if k != "ratio_series"}
+    qingpu_entry["id"] = "qingpu"
     qingpu_entry["price_all_wan_ping"] = round(qp_all, 1) if qp_all is not None else None
     qingpu_entry["price_new_wan_ping"] = round(qp_new, 1) if qp_new is not None else None
     qingpu_entry["n_price_all"] = qp_n_all
@@ -1351,7 +1355,7 @@ def build_report(qingpu_row, qingpu_dist_row, zone_rows, district_rows, city_row
         f"重劃區表的轉手只算 {config.ZONE_RESALE_MIN_COMPLETION_YEAR} 年以後完工的房子（青埔、林口也一樣），避免長馬路上的舊公寓被算進重劃區；行政區表則是所有屋齡。",
     ]
 
-    city_compare_conclusion = build_city_compare_conclusion(qingpu_row, city_compare, qingpu_price)
+    city_compare_conclusion = build_city_compare_conclusion(qingpu_dist_row, city_compare, qingpu_price)
 
     return {
         "conclusion_bullets": bullets,
