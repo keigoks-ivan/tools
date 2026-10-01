@@ -1,3 +1,4 @@
+import { SHOP_LABELS, SHOP_SUBTITLES, PORT_LABELS, JAPANESE_FONT } from '../urban.js?v=4';
 // 開發用：透過真實遊戲模組與既有除錯介面做固定步進，所有載入均帶 mute。
 const frame = document.querySelector('#game'), report = document.querySelector('#report'), state = document.querySelector('#state');
 let win, result = [], errors = [], post, renderer;
@@ -14,7 +15,7 @@ async function load(path, query = '') {
   html = html.replace(/<base href="[^"]+">/, '');
   html = html.replace(/(<script type="importmap">)([\s\S]*?)(<\/script>)/, (_, a, json, b) => {
     const map = JSON.parse(json);
-    for (const file of ['anim.js', 'env.js', 'stages.js', 'battlefields.js', 'fieldart.js', 'encounter.js', 'post.js', 'roofline.js', 'mechs.js', 'combat.js', 'cockpit.js', 'zero/map.js', 'zero/guns.js', 'zero/viewmodel.js', 'zero/main.js', 'zero/hud.js', 'zero/sfx.js', 'zero/mech6.js', 'lastline/script.js', 'lastline/mission.js', 'lastline/convoy.js', 'lastline/escort.mjs']) {
+    for (const file of ['urban.js', 'anim.js', 'env.js', 'stages.js', 'battlefields.js', 'fieldart.js', 'encounter.js', 'post.js', 'roofline.js', 'mechs.js', 'combat.js', 'cockpit.js', 'zero/map.js', 'zero/guns.js', 'zero/viewmodel.js', 'zero/main.js', 'zero/hud.js', 'zero/sfx.js', 'zero/mech6.js', 'lastline/map.js', 'lastline/script.js', 'lastline/mission.js', 'lastline/convoy.js', 'lastline/escort.mjs']) {
       const url = new URL('/game/mech/' + file, location.href).href;
       for (const key of Object.keys(map.imports)) if (new URL(key, entryBase).href === url) delete map.imports[key];
       map.imports[url] = url + '?qa=' + revision;
@@ -30,24 +31,24 @@ async function load(path, query = '') {
   await wait(() => win.__game || win.__G || win.__mechs);
   // Each iframe gets its own module instance; use the iframe's module graph.
   const script = win.document.createElement('script'); script.type = 'module';
-  script.textContent = `import * as T from 'three'; T.Clock.prototype.getDelta=()=>1/60; window.__T=T;`;
+  script.textContent = `import * as T from 'three'; import {SEE} from '/game/mech/mechs.js'; T.Clock.prototype.getDelta=()=>1/60; window.__T=T; window.__see=SEE;`;
   win.document.head.append(script); await wait(() => win.__T);
   if (win.__G) await wait(() => win.__flow && win.__flow.chapter > 0);
   const world=win.__game?.world||win.__world||win.__G?.world;
   if(world) {
     await wait(()=>world.A.surfaceReady.value===1 && world.fieldFoliageReady && world.cityFacadeReady);
-    assert(world.A.surfaceAtlas.value.image.width===1024 && [2,3,4].every(i=>world.A.fac[i][0].image.width===512 && world.A.fac[i][0].name.startsWith('city-')),'共用建材 1024、三種住宅立面與枝葉 512，三款沿用相同資源上限');
+    assert(world.A.surfaceAtlas.value.image.width===1024 && (world.cityEnabled === false || [2,3,4].every(i=>world.A.fac[i][0].image.width===512 && world.A.fac[i][0].name.startsWith('city-'))),'共用建材 1024；城市立面 512，港區不建立住宅城市');
     if(win.__G && win.__flow.chapter < (win.__S.FIRST_MECH||6)) assert(world.cityTreeMeshes.every(m=>!m.visible),'步兵模式不因枝葉延遲載入而打開遠處樹林');
   }
   win.__step(2); frame.focus();
   errors = win.__qaErrors;
 }
-async function save(name = 'capture') {
+async function save(name = 'capture', clean = false) {
   if (!post) return;
   post.render(1);
   const cv = win.document.createElement('canvas'); cv.width = renderer.domElement.width; cv.height = renderer.domElement.height;
   const cx = cv.getContext('2d'); cx.drawImage(renderer.domElement, 0, 0);
-  for (const c of win.document.querySelectorAll('canvas[id^="hud"]')) cx.drawImage(c, 0, 0, cv.width, cv.height);
+  if (!clean) for (const c of win.document.querySelectorAll('canvas[id^="hud"]')) cx.drawImage(c, 0, 0, cv.width, cv.height);
   const data = cv.toDataURL('image/png');
   const a = document.createElement('a'); a.href = data; a.download = name + '.png'; a.textContent = '下載 ' + name;
   document.querySelector('#captures').append(a);
@@ -298,6 +299,9 @@ async function city() {
   assert(new Set(street.map(b=>b.H)).size >= 4, '連棟街屋具備至少四種實際樓高');
   assert(W.scene.children.some(o => o.geometry?.attributes.surface?.array.some(v => v === 4)), '新版玻璃、石材與金屬頂點材質已載入');
   win.__cam.set(-120, 3, -145, Math.PI / 2, 0); win.__step(2); await save('city-oldtown');
+  const japanese = W.blds.find(b => b.x0 > 120 && b.z0 > -240 && b.z0 < 120 && b.H < 30 && b.seg.length === 3);
+  assert(!!japanese, '日式街區保留在混合城市中的指定區域');
+  win.__cam.set(japanese.cx + 4, 2.8, japanese.z1 + 12, Math.atan2(4, 12), .08); win.__step(2); await save('city-japanese');
   const house = street.find(b=>b.w<25 && b.d<50 && b.cx < -240);
   assert(!!house, '舊城街屋深度控制在 50 公尺內');
   win.__cam.set(house.cx+12, 4, house.z1+26, Math.atan2(12,26), .12); win.__step(2); await save('city-rowhouses');
@@ -457,6 +461,8 @@ async function campaignFoot() {
   renderer = win.__renderer; post = { render: () => win.__step(1) };
   assert(S.CHAPTERS.length === 5 && S.FIRST_MECH === 4, '獨立五章，三章步兵／兩章機甲');
   assert(S.ENCOUNTERS.every(e => e.ch <= 3), '步兵路線全部屬於前三章');
+  assert(S.LAYOUT === map.layout && !win.__world.cityEnabled && !win.__world.blds.length, '港區獨立地圖，沒有背後的舊住宅城市');
+  assert(map.triangles < 120000 && map.meshes.length <= 12, `港區靜態結構 ${map.triangles} 三角形／${map.meshes.length} 合併網格`);
   win.__step(60); assert(G.vm.cur === 'smg', '續作預設衝鋒槍、三武器可切換');
   await save('lastline-infantry');
   let render = renderer.render.bind(renderer); renderer.render = () => {};
@@ -487,6 +493,16 @@ async function campaignFoot() {
     }
   }
   assert(G.hud.obj?.route?.length === S.HATCH_ROUTE.length, '機庫完成後出現完整登機路線');
+  // 用正式人物移動爬樓梯，不能只把玩家傳送到登機平台。
+  G.player.reset(new T.Vector3(S.HATCH_ROUTE[0][0], 0, S.HATCH_ROUTE[0][1]), 0);
+  for (const [x, z, y = 0] of S.HATCH_ROUTE.slice(1)) {
+    let n = 0;
+    while (Math.hypot(G.player.pos.x - x, G.player.pos.z - z) > .16 && n++ < 1600) {
+      G.player.yaw = Math.atan2(x - G.player.pos.x, z - G.player.pos.z);
+      G.player.update(1 / 60, { mx: 0, my: 1, lookX: 0, lookY: 0 });
+    }
+    assert(n < 1600 && Math.abs(G.player.pos.y - y) < .2, `實際步行登機路線 ${x},${z},${y}`);
+  }
   const saved = JSON.parse(win.localStorage.getItem('lastline.checkpoint'));
   assert(saved.foot.done.includes('G2') && saved.chapter === 3, '步兵檢查點保存完成遭遇與章節');
   const footChecks = result;
@@ -584,4 +600,51 @@ async function campaignEdges() {
 }
 const assertSilent = (ok, text) => { if (!ok) throw Error(text); };
 
-for (const [id, fn] of [['campaignFoot', campaignFoot], ['campaign4', () => campaignMech(4)], ['campaign5', () => campaignMech(5)], ['campaignArtillery', async () => { localStorage.setItem('lastline.choice', JSON.stringify('artillery')); await campaignMech(5, 'artillery'); }], ['campaignEdges', campaignEdges], ['mech', mech], ['fields', battlefields], ['enemyMotion', enemyMotion], ['zero', zero], ['tactics', tactics], ['infantry', infantry], ['art', art], ['hero', hero], ['city', city], ['mountains', mountains], ['weapons', weapons], ['save', save]]) document.querySelector('#' + id).onclick = () => fn().catch(e => { state.textContent = '失敗'; report.textContent += '\n' + e.stack; });
+for (const [id, fn] of [['japaneseSigns', japaneseSigns], ['harborArt', harborArt], ['campaignFoot', campaignFoot], ['campaign4', () => campaignMech(4)], ['campaign5', () => campaignMech(5)], ['campaignArtillery', async () => { localStorage.setItem('lastline.choice', JSON.stringify('artillery')); await campaignMech(5, 'artillery'); }], ['campaignEdges', campaignEdges], ['mech', mech], ['fields', battlefields], ['enemyMotion', enemyMotion], ['zero', zero], ['tactics', tactics], ['infantry', infantry], ['art', art], ['hero', hero], ['city', city], ['mountains', mountains], ['weapons', weapons], ['save', save]]) document.querySelector('#' + id).onclick = () => fn().catch(e => { state.textContent = '失敗'; report.textContent += '\n' + e.stack; });
+
+async function harborArt() {
+  await load('/game/mech/lastline/index.html', '?mute&god&ch=1&all&fps=0');
+  renderer = win.__renderer; post = { render: () => win.__step(1) };
+  win.__G.player.reset(new win.__T.Vector3(-180, 0, -193), 0); win.__step(3);
+  await save('lastline-customs', true);
+  await load('/game/mech/lastline/index.html', '?mute&ch=4&all&fps=0'); await wait(() => win.__m6); win.__step(200);
+  const M = win.__m6, C = M.combat, camera = C.camera, world = win.__world;
+  renderer = win.__renderer; post = { render: () => C.post.render(1) };
+  M.player.pos.set(610, 0, 90); M.player.yaw = -.6; M.player.vel.set(0, 0, 0); M.hero.legYaw = M.player.yaw; M.hero.motion.yawPrev = null; M.tick(.016);
+  win.__see.a.value = 0; win.__see.c.value.w = win.__see.t.value.w = 0;
+  win.__scene.updateMatrixWorld(true);
+  camera.position.set(601, 12, 111); camera.lookAt(615, 10, 86); world.followShadow(camera.position);
+  await save('lastline-harbor', true);
+  camera.position.set(550, 36, -300); camera.lookAt(650, 14, -450); world.followShadow(camera.position);
+  await save('lastline-breakwater', true);
+  assert(errors.length === 0, '海關、港區與防波堤實際畫面沒有渲染錯誤');
+  report.textContent = JSON.stringify({ checks: result, memory: renderer.info.memory, errors }, null, 2); state.textContent = '北濱港美術通過';
+}
+
+async function japaneseSigns() {
+  const checks = [];
+  for (const [name, path, query, size] of [
+    ['main', '/game/mech/index.html', '?mute&nobrief&fps=0', [1024, 512]],
+    ['prequel', '/game/mech/zero/index.html', '?mute&god&ch=1&all&fps=0', [1024, 512]],
+    ['harbor', '/game/mech/lastline/index.html', '?mute&god&ch=1&all&fps=0', [512, 256]],
+  ]) {
+    await load(path, query); result = checks;
+    const labels = name === 'harbor' ? PORT_LABELS : SHOP_LABELS.slice(4).concat(SHOP_SUBTITLES.slice(4));
+    const faces = await win.document.fonts.load('700 45px "Noto Sans JP"', labels.join(''));
+    assert(faces.length > 0 && win.document.fonts.check('700 45px "Noto Sans JP"', labels.join('')), name + ' 正確日文字型載入，沒有缺字替代');
+    let cv;
+    (win.__game?.world.scene || win.__scene).traverse(o => {
+      const c = o.material?.map?.image;
+      if (c?.tagName === 'CANVAS' && c.width === size[0] && c.height === size[1]) cv = c;
+    });
+    assert(!!cv, name + ' 真實場景共用招牌貼圖存在');
+    const cx = cv.getContext('2d'); cx.font = 'bold 45px ' + JAPANESE_FONT;
+    assert(labels.every((t, i) => { cx.font = (name === 'harbor' ? [48, 32, 24][i] : i < 4 ? 45 : 20) + 'px ' + JAPANESE_FONT; return cx.measureText(t).width <= (name === 'harbor' ? 496 : 236); }), name + ' 招牌文字留在版面內');
+    const data = cv.toDataURL('image/png');
+    const a = document.createElement('a'); a.href = data; a.download = 'japanese-' + name + '-signs.png'; a.textContent = '招牌圖集 ' + name;
+    const img = document.createElement('img'); img.src = data; img.style.width = '512px'; a.append(img); document.querySelector('#captures').append(a);
+    assert(errors.length === 0, name + ' 招牌顯示沒有執行錯誤');
+  }
+  report.textContent = JSON.stringify({ checks, shops: SHOP_LABELS, subtitles: SHOP_SUBTITLES, port: PORT_LABELS }, null, 2);
+  state.textContent = '三款招牌通過';
+}

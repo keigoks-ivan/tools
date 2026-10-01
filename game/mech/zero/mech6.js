@@ -46,7 +46,7 @@ export async function startMech(X) {
   try { ({ FX } = await import('../fx.js')); } catch (e) { console.warn('[zero] fx.js 載入失敗，改用空殼', e); }
 
   // ---------------------------------------------------------------- 場景換成機體的尺度
-  scene.fog.density = 0.0011;
+  scene.fog.density = S.LAYOUT === 'harbor-v1' ? 0.00065 : 0.0011;
   camera.fov = 70; camera.near = 0.5; camera.far = 6000; camera.updateProjectionMatrix();
   vCam.fov = 70; vCam.near = 0.05; vCam.far = 20; vCam.updateProjectionMatrix();
   const sc = world.sun.shadow.camera;
@@ -66,7 +66,7 @@ export async function startMech(X) {
     const bb = new THREE.Box3();
     scene.updateMatrixWorld(true);
     scene.traverse((o) => {
-      if (!o.isMesh || !o.frustumCulled) return;
+      if (!o.isMesh || !o.frustumCulled || S.LAYOUT === 'harbor-v1') return;
       for (let h = o; h; h = h.parent) if (h === hero.root) return;
       if (o.isInstancedMesh) { o.computeBoundingBox(); bb.copy(o.boundingBox); } else { if (!o.geometry.boundingBox) o.geometry.computeBoundingBox(); bb.copy(o.geometry.boundingBox); }
       bb.applyMatrix4(o.matrixWorld);
@@ -188,6 +188,7 @@ export async function startMech(X) {
   // 基地裡面的東西畫不畫（圖層見開頭）：鏡頭在牆裡＝全畫（跟原本一樣）；在牆外、低於牆頂＝全不畫；在牆外、高過牆頂＝小東西只畫 150 m 以內的
   let baseOut = false;
   function baseLayers() {
+    if (S.LAYOUT === 'harbor-v1') return;
     const c = camera.position, out = Math.max(Math.abs(c.x), Math.abs(c.z)) >= 130, high = c.y >= 26;
     for (const cam of [camera, cockpit.tg && cockpit.tg.cam]) {
       if (!cam) continue;

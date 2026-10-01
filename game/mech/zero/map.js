@@ -185,6 +185,20 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
         b.B[material(col)].quad(a, c, d, e, n.toArray(), [1, 1, 1, 1], null, col.slice(0, 3));
       }, (a, c, d, e, f, g, col) => b.deco(material(col), a, c, d, e, f, g, { shade: () => 1, tint: col.slice(0, 3) }));
     }
+    if (asian && o.shop) {
+      // 日式木格子與三片暖簾；貼牆擺放，不改步兵路線或碰撞。
+      const c = (a0 + a1) / 2;
+      for (const side of [-1, 1]) for (let k = 0; k < 4; k++) {
+        const lo = c + side * (1.65 + k * .18);
+        trim('rust', lo - .025, lo + .025, .6, 2.55, .04, .09);
+      }
+      trim('rust', c - 2.25, c + 2.25, 2.58, 2.68, .04, .17);
+      for (let k = 0; k < 3; k++) {
+        const lo = c - 1.35 + k * .9, pts = [at(lo, 2.03, .19), at(lo + .85, 2.03, .19), at(lo + .85, 2.58, .19), at(lo, 2.58, .19)];
+        if (along ? out < 0 : out > 0) pts.reverse();
+        b.B.fabric.quad(...pts, along ? [0, 0, out] : [out, 0, 0], [1, 1, 1, 1], null, [.25, .31, .37]);
+      }
+    }
     if (o.shop) {
       // 少量有弧度的布棚；紋理、材質及幾何桶都已載入，沒有額外燈光。
       const count = Math.min(2, Math.floor((a1 - a0) / 8));

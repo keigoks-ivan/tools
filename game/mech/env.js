@@ -618,7 +618,7 @@ function architecture(B, signs, x0, x1, z0, z1, H, style, F, district, roofTop, 
     const shops = Math.min(3, Math.floor((a1 - a0 - 2) / 7));
     for (let i = 0; i < shops; i++) {
       const a = a0 + (a1 - a0) * (i + 0.5) / shops, rad = 1.35;
-      const arch = style === 2 || style === 4;
+      const arch = !asian && (style === 2 || style === 4);
       const y = arch ? 1.75 : 2.8;
       face([point(a - rad, 0.7, 0.035), point(a + rad, 0.7, 0.035), point(a + rad, y, 0.035), point(a - rad, y, 0.035)], glass);
       box(a - rad - 0.14, a - rad, 0.65, y, 0.03, 0.23, stone);
@@ -637,6 +637,19 @@ function architecture(B, signs, x0, x1, z0, z1, H, style, F, district, roofTop, 
           box(a - 1.7, a + 1.7, 2.8, 3.0, 1.3, 1.35, cloth);
         }
       } else box(a - rad, a + rad, y, y + 0.12, 0.03, 0.23, steel);
+      if (asian) {
+        // 日式店面：木格子與分片暖簾保留門口的尺度，細節只在面向街道的立面。
+        const wood = [0.26, 0.19, 0.14, 0, 1], cloth = [0.22, 0.29, 0.34, 0, 5];
+        for (const side of [-1, 1]) for (let k = 0; k < 4; k++) {
+          const lo = a + side * (rad + .25 + k * .18);
+          box(lo - .025, lo + .025, .7, 2.65, .04, .09, wood);
+        }
+        box(a - 2.3, a + 2.3, 2.68, 2.78, 0, .18, wood);
+        for (let k = 0; k < 3; k++) {
+          const lo = a - rad + k * .9;
+          face([point(lo, 2.08, .2), point(lo + .85, 2.08, .2), point(lo + .85, 2.68, .2), point(lo, 2.68, .2)], cloth);
+        }
+      }
     }
     if (style < 2) {
       // 街層雨棚；突出量保持在人行道內。
@@ -908,7 +921,8 @@ function pylonGeometry() {
 
 // ---------------------------------------------------------------- 世界
 export class World {
-  constructor(renderer, scene, A, { terrainSegments = 160 } = {}) {
+  constructor(renderer, scene, A, { terrainSegments = 160, city = true } = {}) {
+    this.cityEnabled = city;
     this.scene = scene;
     this.renderer = renderer;
     this.A = A;
@@ -972,16 +986,22 @@ export class World {
     scene.add(mountains); this.mountainMesh = mountains;
 
     const before = new Set(scene.children);
-    this.buildCity();
-    let facadePending=3;
-    const facadeDone=()=>{this.cityFacadeReady=--facadePending===0;};
-    for(const [i,name] of [[2,'city-brick-v2'],[3,'city-stone-v2'],[4,'city-piers-v2']])new THREE.TextureLoader().load(new URL('./assets/'+name+'.webp',import.meta.url).href,texture=>{
-      const c=document.createElement('canvas');c.width=c.height=512;c.getContext('2d').drawImage(texture.image,0,0,512,512);
-      texture.image=c;texture.name=name;texture.colorSpace=THREE.SRGBColorSpace;texture.wrapS=texture.wrapT=THREE.RepeatWrapping;
-      texture.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());texture.needsUpdate=true;
-      const old=A.fac[i][0];A.fac[i][0]=texture;this.cityFacadeMaterials[i].map=texture;old.dispose();facadeDone();
-    },undefined,facadeDone);
-    this.buildProps();
+    if (city) {
+      this.buildCity();
+      let facadePending=3;
+      const facadeDone=()=>{this.cityFacadeReady=--facadePending===0;};
+      for(const [i,name] of [[2,'city-brick-v2'],[3,'city-stone-v2'],[4,'city-piers-v2']])new THREE.TextureLoader().load(new URL('./assets/'+name+'.webp',import.meta.url).href,texture=>{
+        const c=document.createElement('canvas');c.width=c.height=512;c.getContext('2d').drawImage(texture.image,0,0,512,512);
+        texture.image=c;texture.name=name;texture.colorSpace=THREE.SRGBColorSpace;texture.wrapS=texture.wrapT=THREE.RepeatWrapping;
+        texture.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());texture.needsUpdate=true;
+        const old=A.fac[i][0];A.fac[i][0]=texture;this.cityFacadeMaterials[i].map=texture;old.dispose();facadeDone();
+      },undefined,facadeDone);
+      this.buildProps();
+    } else {
+      this._initBlds(); this._indexTrample();
+      this.dummy = new THREE.Object3D(); this.falling = [];
+      this.cityTreeMeshes = []; this.fieldFoliageReady = this.cityFacadeReady = true;
+    }
     this.cityObjects = scene.children.filter(o => !before.has(o) && ![this.mound, this.pile, this.chunkM].includes(o));
     this.cityState = { boxes: [...this.boxes], blds: this.blds, trample: this.trample, smokeSites: this.smokeSites, fireSites: this.fireSites, lampSites: this.lampSites };
     this.cityHeights = this.terrain.h.slice();

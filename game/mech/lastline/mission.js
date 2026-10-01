@@ -130,7 +130,7 @@ export function createMission({ scene, world, player, fx, config, combat, zhud, 
       if (config.chapter === 4) { saveChapter(5); write('checkpoint', null); location.href = new URL('?ch=5' + (new URLSearchParams(location.search).has('mute') ? '&mute' : ''), page).href; return; }
       write('clear', 1); write('checkpoint', null); saveChapter(5);
       const E = ending(convoy.choice, convoy.hp); panel.hidden = false; input.reset(); input.unlock();
-      panel.innerHTML = `<div class="campaign-card"><small>IRON DUSK · LAST LINE / 全篇完</small><h2>${E.title}</h2><p>${E.text}</p><div class="campaign-stats">六十四人撤離　車隊耐久 ${Math.ceil(convoy.hp)}%<br>最後防線擊倒 ${kills}　作戰 ${Math.floor(time / 60)} 分 ${Math.floor(time % 60)} 秒</div><p class="campaign-fine">製作：InvestMQuest · 城市、機體與角色沿用鋼鐵黃昏系列素材。<br>感謝你走完這道防線。</p><div class="row"><a class="btn" href="${new URL('?ch=1', page).href}">重新開始</a><a class="btn" href="${page.href}">章節選擇</a><a class="btn" href="/games/">遊戲大廳</a></div></div>`;
+      panel.innerHTML = `<div class="campaign-card"><small>IRON DUSK · LAST LINE / 全篇完</small><h2>${E.title}</h2><p>${E.text}</p><div class="campaign-stats">六十四人撤離　車隊耐久 ${Math.ceil(convoy.hp)}%<br>最後防線擊倒 ${kills}　作戰 ${Math.floor(time / 60)} 分 ${Math.floor(time % 60)} 秒</div><p class="campaign-fine">製作：InvestMQuest · 北濱港場景獨立設計；機體、角色與掃描材質沿用系列素材。<br>感謝你走完這道防線。</p><div class="row"><a class="btn" href="${new URL('?ch=1', page).href}">重新開始</a><a class="btn" href="${page.href}">章節選擇</a><a class="btn" href="/games/">遊戲大廳</a></div></div>`;
     },
   };
 }

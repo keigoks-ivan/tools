@@ -28,7 +28,7 @@ const bar = document.querySelector('#bar i'), status = $('status');
 let prog = 0; const step = (k) => { prog = Math.min(1, prog + k); bar.style.width = (prog * 100).toFixed(0) + '%'; };
 
 const [{ loadAssets, World }, { Post }, { Mech, initMechMaterials }, { loadSurfaces, Solid }, { buildMap }, { HumanKit, wrap }, { ViewModel, WEAPONS }, { FXL }, { HUD }, { Pilot }, { Trooper, Drone }, { Input }, S, { Models, Placer }] = await Promise.all([
-  import('../env.js'), import('../post.js'), import('../mechs.js'), import('./kit.js'), import('./map.js'), import('./human.js'), import('./viewmodel.js'),
+  import('../env.js'), import('../post.js'), import('../mechs.js'), import('./kit.js'), import(campaign ? '../lastline/map.js' : './map.js'), import('./human.js'), import('./viewmodel.js'),
   import('./fxl.js'), import('./hud.js'), import('./player.js'), import('./ai.js'), import('../input.js'), import(campaign ? '../lastline/script.js' : './script.js'), import('./models.js'),
 ]);
 const { Destruct } = await import('./destruct.js');
@@ -54,10 +54,10 @@ const [A, SURF, MODELS, kit] = await Promise.all([
   loadAssets(renderer, () => step(0.008)), loadSurfaces(renderer, () => step(0.008)), Models.load(() => step(0.008), Math.min(8, renderer.capabilities.getMaxAnisotropy())),
   HumanKit.load(new URL('./assets/soldier.glb', import.meta.url).href).then((k) => { step(0.1); return k; }),
 ]);
-status.textContent = '建立街區';
+status.textContent = campaign ? '建立港區' : '建立街區';
 await new Promise((r) => setTimeout(r, 0));
 initMechMaterials(A);
-const world = new World(renderer, scene, A, { terrainSegments: 72 });
+const world = new World(renderer, scene, A, { terrainSegments: 72, city: !campaign });
 // 街區內原本的路燈、車、樹拿掉（地圖自己擺道具）
 {
   const zero = new THREE.Matrix4().makeScale(0, 0, 0);
@@ -95,7 +95,7 @@ scene.environmentIntensity = 0.42;
 scene.traverse((o) => {
   if (o.isHemisphereLight) { o.color.setRGB(0.3, 0.4, 0.58); o.groundColor.setRGB(0.09, 0.07, 0.05); o.intensity = 0.3; }
   const u = o.material && o.material.uniforms;
-  if (u && u.fogCol && u.sunFog && !o.material.userData.haze) {
+  if (!campaign && u && u.fogCol && u.sunFog && !o.material.userData.haze) {
     o.material.userData.haze = true; u.fogCol.value.copy(scene.fog.color); u.gain.value *= 0.9;
     o.material.fragmentShader = o.material.fragmentShader.replace('gl_FragColor = vec4(c, 1.0);', `
         float hz = 1.0 - smoothstep(-1.0, 30.0, el);
@@ -107,7 +107,7 @@ scene.traverse((o) => {
 });
 const solid = new Solid();
 const placer = new Placer(MODELS, solid);
-const map = buildMap(scene, SURF, solid, placer, A);
+const map = buildMap(scene, SURF, solid, placer, A, world);
 const placed = placer.build(scene);
 console.log('[zero] 掃描模型', placed);
 // 點光源：每個像素都要把場景裡的每一盞點光算一遍（離多遠都算），地圖六盞很貴。
@@ -247,7 +247,7 @@ let mechWalk = null, finale = null, hatchOpen = 0, alarmOn = false;   // M6＝�
 const progress = () => clamp(store.get('ch', 1), 1, S.CHAPTERS.length);
 function saveFoot() {
   if (!campaign || !checkpoint) return;
-  writeSave('checkpoint', { chapter, foot: { p: checkpoint.p.toArray(), yaw: checkpoint.yaw, done: checkpoint.done, nades: checkpoint.nades, picked: [...pickedItems] }, stats: G.stats });
+  writeSave('checkpoint', { chapter, foot: { layout: S.LAYOUT, p: checkpoint.p.toArray(), yaw: checkpoint.yaw, done: checkpoint.done, nades: checkpoint.nades, picked: [...pickedItems] }, stats: G.stats });
 }
 
 // 手榴彈的樣子：墨綠色小圓柱＋一顆閃爍的紅燈（越接近爆炸閃越快）
@@ -934,7 +934,7 @@ function begin(n) {
   if (campaign) {
     const saved = resumeSave ? readSave('checkpoint') : null, foot = saved?.chapter === n ? saved.foot : null;
     const ids = new Set(S.ENCOUNTERS.filter(e => e.ch <= n).map(e => e.id));
-    if (foot && Array.isArray(foot.p) && foot.p.length === 3 && foot.p.every(Number.isFinite) && Math.max(Math.abs(foot.p[0]), Math.abs(foot.p[2])) < 140 && foot.p[1] >= 0 && foot.p[1] < 40 && Number.isFinite(foot.yaw) && Array.isArray(foot.done) && foot.done.every(id => ids.has(id))) {
+    if (foot && foot.layout === S.LAYOUT && Array.isArray(foot.p) && foot.p.length === 3 && foot.p.every(Number.isFinite) && Math.max(Math.abs(foot.p[0]), Math.abs(foot.p[2])) < (S.FOOT_EXTENT || 140) && foot.p[1] >= 0 && foot.p[1] < 40 && Number.isFinite(foot.yaw) && Array.isArray(foot.done) && foot.done.every(id => ids.has(id))) {
       checkpoint = { p: new THREE.Vector3(...foot.p), yaw: foot.yaw, done: foot.done, ch: n, nades: clamp(foot.nades || 0, 0, NADE_MAX) };
       pickedItems.clear(); for (const id of Array.isArray(foot.picked) ? foot.picked : []) if (map.items[id]) { pickedItems.add(id); map.items[id].h?.hide(); }
       respawn();
