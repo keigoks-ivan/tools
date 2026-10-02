@@ -26,12 +26,12 @@ const soldier = (x, z, type = 'trooper', more = {}) => ({ type, x, z, yaw: Math.
 const drone = (x, z, y = 7) => ({ type: 'drone', x, z, y });
 const encounter = (id, ch, obj, guide, enemies, more = {}) => ({ id, ch, obj, fight: obj, guide, enemies, trigger: p => Math.hypot(p.x - guide[0], p.z - guide[1]) < 4, lines: [], done: [], ...more });
 export const ENCOUNTERS = [
-  encounter('B', 1, '穿過貨運鐵道入口', [-180, -215], [soldier(-183, -207), soldier(-174, -210, 'trooper', { patrol: [[-174, -210], [-166, -219]] })], {
-    lines: [[OP, '海關倉庫南門有兩個哨兵。貨運車和混凝土護欄能擋子彈。'], [OP, '衝鋒槍按 3，先避開探照方向。']], done: [[CIV, '名單留在海關通訊室。孩子們還在車上等。']] }),
-  encounter('B2', 1, '潛入海關倉庫', [-180, -196], [soldier(-183, -181), soldier(-175, -168), soldier(-187, -155, 'officer')], {
+  encounter('B', 1, '穿過貨運鐵道入口', [-180, -215], [soldier(-183, -207), soldier(-174, -210, 'trooper', { patrol: [[-174, -210], [-166, -219]] }), soldier(-187, -214)], {
+    lines: [[OP, '海關倉庫南門有三個哨兵。貨運車和混凝土護欄能擋子彈。'], [OP, '衝鋒槍按 3，先避開探照方向。']], done: [[CIV, '名單留在海關通訊室。孩子們還在車上等。']] }),
+  encounter('B2', 1, '潛入海關倉庫', [-180, -196], [soldier(-183, -181), soldier(-175, -168), soldier(-187, -155, 'officer'), soldier(-186, -168)], {
     stealth: { reinforce: [soldier(-180, -139), soldier(-174, -143)], lines: [[EN, '海關倉庫有人！北門包過去！', true]] },
     lines: [[OP, '倉庫內有貨架，左側可以繞。軍官在最裡面。']], done: [[OP, '西翼拘留室裡有救援人員。先從鐵道側道找警報電源，之後再去東面的通訊室。']] }),
-  encounter('C', 1, '清除海關裝卸坪', [-180, -125], [soldier(-169, -112), soldier(-157, -103, 'officer'), soldier(-184, -105), drone(-165, -112)], {
+  encounter('C', 1, '清除海關裝卸坪', [-180, -125], [soldier(-169, -112), soldier(-157, -103, 'officer'), soldier(-184, -105), drone(-165, -112), soldier(-176, -115), soldier(-160, -117, 'trooper', { patrol: [[-160, -117], [-166, -117]] })], {
     response:{delay:7,enemies:[soldier(-169,-112), soldier(-184,-105)]},
     route: [[-180, -146]], lines: [[EN, '裝卸坪失聯。無人機低空搜索！', true]], done: [[OP, '往東走到通訊室，門口朝向裝卸坪。']] }),
   encounter('C2', 1, '取得撤離名單與命令', [-135, -100], [], {
@@ -45,16 +45,16 @@ export const ENCOUNTERS = [
     beats: [{ t: 22, lines: [[HQ, '北濱港已清空。停止救援。'], [CIV, '我們就在這裡！', true]] }],
     mark: V(-105, -100), next: '穿過東門，前往冷藏貨運站', nextRoute: [[-115, -100]],
     lines: [[OP, '守住兩端入口三十五秒。不要追進裝卸坪。']], done: [[OP, '原始簽章完整了。先把醫療隊與物資送上車，再破貨運站的封鎖。']] }),
-  encounter('D0', 2, '穿過冷藏貨運站', [-85, -100], [soldier(-78, -107), soldier(-61, -98, 'officer'), soldier(-51, -108)], {
+  encounter('D0', 2, '穿過冷藏貨運站', [-85, -100], [soldier(-78, -107), soldier(-61, -98, 'officer'), soldier(-51, -108), soldier(-69, -105)], {
     lines: [[OP, '不要走正面的貨櫃巷。從冷藏站兩側的裝卸門穿過去。']], done: [[OP, '沿東門出去，再往南繞到干擾器後面。']] }),
-  encounter('D', 2, '突破貨櫃檢查哨', [-31, -100], [soldier(-22, -96), soldier(-26, -86, 'heavy'), soldier(-12, -98), drone(-24, -89)], {
+  encounter('D', 2, '突破貨櫃檢查哨', [-31, -100], [soldier(-22, -96), soldier(-26, -86, 'heavy'), soldier(-12, -98), drone(-24, -89), soldier(-19, -91)], {
     response:{delay:7,enemies:[soldier(-22,-96), soldier(-12,-98)]},
     route: [[-44, -100]], lines: [[EN, '冷藏區突破！重裝隊守住出口！', true]], done: [[OP, '回到貨櫃南側。三台干擾器沿岸排開了。']] }),
-  encounter('D1', 2, '摧毀封鎖鏈路', [-34, -65], [soldier(-56, -65), soldier(-17, -62), drone(-45, -60)], {
+  encounter('D1', 2, '摧毀封鎖鏈路', [-34, -65], [soldier(-56, -65), soldier(-17, -62), drone(-45, -60), soldier(-39, -66)], {
     response:{delay:7,enemies:[soldier(-56,-65), soldier(-17,-62)]},
     route: [[-31, -78]], targets: ['jam1', 'jam2', 'jam3'], tgName: '干擾器',
     lines: [[OP, '砲陣靠這三台干擾器遮蔽命令。先用貨櫃當掩護，再逐台打掉。']], done: [[CIV, '頻道回來了！我們往貨運站南出口移動。']] }),
-  encounter('H2', 2, '進入港務醫療站', [23, -47], [soldier(18, -40), soldier(29, -35, 'officer')], {
+  encounter('H2', 2, '進入港務醫療站', [23, -47], [soldier(18, -40), soldier(29, -35, 'officer'), soldier(24, -42)], {
     route: [[0, -64], [23, -57]], lines: [[OP, '隼的離線授權被送到港務醫療站。低屋頂，南門進。']], done: [[OP, '桌上有轉送名單和交班資料。']] }),
   encounter('I0', 2, '查找離線授權', [23, -37], [], {
     pickups: [{ id: 'rec_a', text: '按 E　翻轉送名單', lines: [[ME, '隼的物品被送到北濱港。']] }, { id: 'rec_b', text: '按 E　拿授權說明', lines: [[OP, '離線金鑰可以切斷指揮部的停機權限。']] }, { id: 'rec_c', text: '按 E　看交班記錄', lines: [[ME, '他最後留下的話：把人送出去。']] }], itemName: '授權資料' }),
@@ -65,17 +65,17 @@ export const ENCOUNTERS = [
     response:{delay:7,enemies:[soldier(28,-59), soldier(22,-53)]},
     after: 'KEY', wait: 3, mark: V(0, 5), next: '從北門出去，前往修船棚', nextRoute: [[23, -21], [0, -15]],
     lines: [[EN, '金鑰在醫療站！封住南門！', true]], done: [[OP, '追兵被切斷。修船棚就在北邊，蒼焰還在裡面。']] }),
-  encounter('F', 3, '清除修船裝卸場', [0, 24], [soldier(9, 36), soldier(18, 46, 'officer'), soldier(-9, 34), drone(15, 28)], {
+  encounter('F', 3, '清除修船裝卸場', [0, 24], [soldier(9, 36), soldier(18, 46, 'officer'), soldier(-9, 34), drone(15, 28), soldier(-6, 42)], {
     response:{delay:7,enemies:[soldier(9,36), soldier(-9,34)]},
     lines: [[OP, '他們把修船場當成機體回收站。起重架下有低掩體。']], done: [[OP, '工具箱裡有備用保險絲。先取回來。']] }),
   encounter('F2', 3, '拿回維修架保險絲', [19, 40], [soldier(30, 43), soldier(29, 49)], {
     pickups: [{ id: 'fuse', text: '按 E　拿保險絲', lines: [[ME, '拿到了。']] }], itemName: '保險絲',
     done: [[OP, '保險絲拿到了。先解除吊架制動，外側也有敵機巡邏，留意出口。']] }),
-  encounter('G1', 3, '阻止拖走蒼焰', [40, 57], [soldier(28, 70), soldier(54, 73, 'officer'), soldier(46, 84), drone(35, 83, 10)], {
+  encounter('G1', 3, '阻止拖走蒼焰', [40, 57], [soldier(28, 70), soldier(54, 73, 'officer'), soldier(46, 84), drone(35, 83, 10), soldier(22, 78)], {
     response:{delay:7,enemies:[soldier(28,70), soldier(46,84)]},
     route: [[40, 45]], targets: ['tow1', 'tow2'], tgName: '拖吊發電機', alarm: true,
     lines: [[OP, '蒼焰在圓拱修船棚裡！兩台拖吊發電機先打掉。', true]], done: [[OP, '拖吊架停了。南側兩個配電箱接回去。']] }),
-  encounter('G3', 3, '恢復修船棚電源', [18, 62], [soldier(58, 68, 'sniper', { post: true }), drone(52, 75, 9)], {
+  encounter('G3', 3, '恢復修船棚電源', [18, 62], [soldier(58, 68, 'sniper', { post: true }), drone(52, 75, 9), soldier(57, 82)], {
     pickups: [{ id: 'panel1', text: '按 E　裝回西側保險絲', lines: [[ME, '西側供電恢復。']] }, { id: 'panel2', text: '按 E　裝回東側保險絲', lines: [[ME, '東側供電恢復。']] }], itemName: '配電箱',
     lines: [[OP, '配電箱都在地面。東側有狙擊手，先清掉再過去。']], done: [[OP, '我開始切斷遠端權限。']] }),
   encounter('G4', 3, '守住修船棚，完成離線啟動', [40, 65], [], {
@@ -132,7 +132,7 @@ insertAfter('B2',
   encounter('B4',1,'潛入拘留室，取得轉運授權',[-214,-165],[soldier(-220,-156,'trooper',{patrol:[[-220,-156],[-213,-146]]})],{
     operation:consoleOp([node(-214,-164,'解除拘留室門鎖',4)],'permit',true),stealth:{reinforce:[soldier(-216,-190),soldier(-219,-141,'officer')],lines:[[EN,'西翼拘留室失聯，封鎖鐵道出口！',true]]},
     lines:[['救援工程兵・楠','我們是港務救援隊。指揮部把我們登記成敵軍，連救護車也不准走。'],[OP,'能不開槍就不開。拿到授權，從北側離開，不必把巡邏隊全部打倒。']],done:[['楠','我帶著配電站的離線圖。讓我跟你走。']]}),
-  encounter('B5',1,'護送救援工程兵穿過鐵道側道',[-214,-164],[soldier(-214,-136),soldier(-220,-119)],{
+  encounter('B5',1,'護送救援工程兵穿過鐵道側道',[-214,-164],[soldier(-214,-136),soldier(-220,-119), soldier(-217, -145)],{
     response:{delay:7,enemies:[soldier(-214,-136), soldier(-220,-119)]},
     operation:escortOp([[-214,-164],[-214,-146],[-214,-125],[-180,-125]],'engineer'),
     lines:[[OP,'跟緊工程兵。他們遇到近處敵人會停下，離你太遠也不會往前走。']],done:[['楠','一號車的醫療艙缺氧氣。冷藏站旁邊還有物資，我們得拿到。']]}));
@@ -140,11 +140,11 @@ insertAfter('C2',encounter('C4',1,'核對清除命令的原始紀錄',[-135,-100
   operation:consoleOp([node(-132,-112,'比對名單時間戳',3),node(-120,-110,'還原被刪除的簽章',4)],'evidence'),
   lines:[[ME,'命令說港區已清空，可這份名單是十分鐘前才更新的。'],[OP,'把原始簽章留下。單一張照片，他們可以說是偽造。']],done:[[HQ,'立即停止資料存取。零號，你沒有這個權限。'],[ME,'那就別再用我的名字簽命令。']]}));
 insertAfter('C3',
-  encounter('C5',1,'護送醫療工程兵到臨時救護站',[-135,-100],[soldier(-153,-68),drone(-149,-57)],{
+  encounter('C5',1,'護送醫療工程兵到臨時救護站',[-135,-100],[soldier(-153,-68),drone(-149,-57), soldier(-147, -72)],{
     response:{delay:7,enemies:[soldier(-153,-68)]},
     operation:escortOp([[-135,-100],[-151,-100],[-151,-65],[-128,-65],[-128,-46]],'medics'),
     lines:[['楠','兩個醫療工程兵在這裡。我們帶的是氧氣，不是槍。'],[OP,'先從西門繞開封鎖，再進救護站。']],done:[[CIV,'一號車上的孩子開始喘不過氣。我不能再等一份批准。']]}),
-  encounter('C6',1,'搶救救護車的氧氣與藥品',[-128,-46],[soldier(-119,-64,'officer'),soldier(-148,-35)],{
+  encounter('C6',1,'搶救救護車的氧氣與藥品',[-128,-46],[soldier(-119,-64,'officer'),soldier(-148,-35), soldier(-125, -57)],{
     operation:consoleOp([node(-135,-42,'接通氧氣供應',4),node(-122,-42,'整理止血與鎮痛物資',3)],'medicine'),
     lines:[['楠','保險封條都是新的。他們明明知道這裡有傷員，還把供應關掉。']],done:[[CIV,'氧氣回來了。謝謝，現在我能把他們送到港外。']]}),
   encounter('C7',1,'把醫療資料送到撤離車隊',[-128,-46],[],{
@@ -152,7 +152,7 @@ insertAfter('C3',
     lines:[[OP,'不用再聽他們說港口沒有人。把每一輛車的名單都寫進離線授權。']],done:[[CIV,'六十四個名字，我都記住了。零號，接下來換我們相信你。']]}));
 CHAPTERS[0].end.after='C7';
 insertAfter('D1',
-  encounter('D2',2,'拆除冷藏站的封鎖電源',[-10,-43],[soldier(-16,-39),soldier(-4,-34,'officer')],{
+  encounter('D2',2,'拆除冷藏站的封鎖電源',[-10,-43],[soldier(-16,-39),soldier(-4,-34,'officer'), soldier(-8, -39)],{
     route:[[-31,-78],[-34,-45]],operation:consoleOp([node(-12,-43,'旁路冷藏站斷路器',3),node(-3,-40,'釋放貨運閘鎖',4)],'power'),
     lines:[['楠','正門已鎖死。我能旁路，前提是你把這兩個配電箱打開。']],done:[[OP,'追蹤鏈路少了一段。後面的車隊不會再每個路口都被標定。']]}),
   encounter('D2B',2,'把工程兵送到港務中繼站',[-34,-65],[soldier(-28,-48),drone(-19,-40)],{
@@ -177,7 +177,7 @@ bootDefense.enemies=[soldier(36,48),soldier(37,116),drone(43,108,12)];
 bootDefense.pressure={gap:8,list:[soldier(36,48),soldier(37,116),drone(43,108,12),soldier(43,48),soldier(40,116)]};
 bootDefense.beats=[{t:12,lines:[['楠','西側已穩定，東側還在過載。別讓他們靠近配電箱！',true]]}];
 bootDefense.stealth={reinforce:[soldier(43,48,'officer'),soldier(40,116,'heavy')],lines:[[EN,'啟動信號確認，前後門突入！',true]]};
-insertAfter('G4',encounter('G4B',3,'護送工程兵離開修船棚',[61,66],[soldier(67,48)],{
+insertAfter('G4',encounter('G4B',3,'護送工程兵離開修船棚',[61,66],[soldier(67,48), soldier(64, 54)],{
     response:{delay:7,enemies:[soldier(67,48)]},
   operation:escortOp([[61,66],[40,66],[40,57],[40,45]],'crew'),lines:[['楠','我不進駕駛艙。有人得在地面替車隊開門。把我送出棚，再上機。']],done:[[OP,'地面隊會替你接通中繼。蒼焰不再是一個人在打。']]}));
 
@@ -217,3 +217,19 @@ const supportColumns = {
   7: [[['grunt',550,-145],['grunt',650,-40]], [['grunt',550,-275]], [['grunt',500,-440],['grunt',642,-410]]],
 };
 for (const [chapter, lists] of Object.entries(supportColumns)) MECH_CONFIGS[chapter].waves.forEach((w, i) => { w.reinforce = lists[i]; });
+
+export const FIELD_BOUNDS = [-236, 142, -244, 128];
+export const OUTPOSTS = [
+  { id: 'FREE_H1', name: '鐵道轉運哨站', supply: [-216, -220], enemies: [
+    soldier(-220, -224), soldier(-214, -211), soldier(-216, -202, 'officer'),
+    soldier(-220, -205, 'trooper', { patrol: [[-220, -205], [-220, -215]] }),
+  ] },
+  { id: 'FREE_H2', name: '岸邊封鎖哨站', supply: [78, -62], enemies: [
+    soldier(76, -71), soldier(88, -66, 'officer'), soldier(87, -55),
+    soldier(76, -52, 'trooper', { patrol: [[76, -52], [76, -58]] }),
+  ] },
+  { id: 'FREE_H3', name: '北側貨運哨站', supply: [96, 70], enemies: [
+    soldier(94, 68), soldier(104, 64, 'trooper', { patrol: [[104, 64], [104, 72]] }),
+    soldier(105, 72, 'officer'), soldier(92, 72),
+  ] },
+];

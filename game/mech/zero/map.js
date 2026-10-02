@@ -823,13 +823,19 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
   mass(60, 72, -80, -64, 7, 'concrete', 'nw');
   P.container(56, -20, 0.3); P.container(66, 30, 1.2, 0, 'olive'); P.car(54, 8, 0.8); P.rubble(95, 10, 3, 18); P.rubble(70, -40, 3, 16);
   M.marks.mechPath = [new THREE.Vector3(84, 0, -105), new THREE.Vector3(80, 0, -20), new THREE.Vector3(84, 0, 60)];
-  mass(36, 48, -48, -34, 9, 'concrete', 'nw', { kit: 'factory' });
-  if (PL && PL.M.has('modular_chainlink_fence')) {
-    // 鐵絲網：看得到圍牆外（獵犬機會從外面走過）；擋人不擋子彈
-    const L = PL.size('modular_chainlink_fence').x;
-    for (let z = -34 + L / 2; z < 20; z += L) PL.add('modular_chainlink_fence', 47, 0, z, Math.PI / 2, { scale: [1, 1.3, 1] });
-    solid.add({ x0: 46.8, x1: 47.2, y0: 0, y1: 3.3, z0: -34, z1: 20, mat: 'metal', noRay: true });
-  } else P.fence('z', 47, -34, 20, 3.2);
+  keepRnd(() => {
+    mass(36, 48, -48, -42, 9, 'concrete', 'nw', { kit: 'factory' });
+    mass(36, 48, -38, -34, 9, 'concrete', 'nw', { kit: 'factory' });
+    ground('floor', 36, 52, -42, -38);   // 檢查哨側巷直接接外圍作業坪
+  }, [36, 48, -48, -34, 9, 'nw', { kit: 'factory' }]);
+  // 東側維修通道留六公尺缺口，可從貨櫃區繞入外圍哨站。
+  for (const [z0, z1] of [[-34, -12], [-6, 20]]) {
+    if (PL && PL.M.has('modular_chainlink_fence')) {
+      const L = PL.size('modular_chainlink_fence').x, count = Math.ceil((z1 - z0) / L), span = (z1 - z0) / count;
+      for (let i = 0; i < count; i++) PL.add('modular_chainlink_fence', 47, 0, z0 + (i + .5) * span, Math.PI / 2, { scale: [span / L, 1.3, 1] });
+      solid.add({ x0: 46.8, x1: 47.2, y0: 0, y1: 3.3, z0, z1, mat: 'metal', noRay: true });
+    } else P.fence('z', 47, z0, z1, 3.2);
+  }
   ground('floor', 14, 47, -34, 22);
   // 貨櫃迷宮（堆 1～2 層）
   const C = [[20, -28, 0], [26, -28, 0, 1], [36, -25, Math.PI / 2], [42, -30, 0], [18, -18, Math.PI / 2], [24, -16, 0], [30, -16, 0, 1], [41, -16, Math.PI / 2],

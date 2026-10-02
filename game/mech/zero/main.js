@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import { Reinforcements } from '../reinforcements.mjs';
 import { Patrols, arrivalPoint, updateInfantry, MAX_ACTORS } from './patrol.js';
 import { Contacts, Scout } from './recon.js';
+import { FieldOps, FieldMap } from './field.js';
 import { qualityLevel, pixelRatio, FrameGate } from '../runtime.js';
 
 // 本篇的 env.js 用相對路徑 './assets/' 讀天空、HDR、城市貼圖：
@@ -111,6 +112,12 @@ scene.traverse((o) => {
 const solid = new Solid();
 const placer = new Placer(MODELS, solid);
 const map = buildMap(scene, SURF, solid, placer, A, world);
+const fieldItems = {};
+for (const o of S.OUTPOSTS || []) {
+  const [x, z] = o.supply, y = solid.floorAt(x, z, 1);
+  placer.add('metal_jerrycan_green', x, y, z, 0, { noBreak: true });
+  fieldItems[o.id] = new THREE.Vector3(x, y + .4, z);
+}
 const placed = placer.build(scene);
 console.log('[zero] 掃描模型', placed);
 // 點光源：每個像素都要把場景裡的每一盞點光算一遍（離多遠都算），地圖六盞很貴。
@@ -152,7 +159,7 @@ window.__renderer = renderer; window.__scene = scene; window.__solid = solid; wi
 // ---------------------------------------------------------------- 遊戲狀態（AI 也讀這個）
 const NADE_START = 3, NADE_MAX = 5;   // 玩家手榴彈：每章開頭至少幾顆、最多帶幾顆
 const G = {
-  scene, solid, kit, audio, fx, player, vm, hud, t: 0, nextId: 1, enemies: [], playing: false,
+  scene, solid, kit, audio, fx, player, vm, hud, fieldItems, t: 0, nextId: 1, enemies: [], playing: false,
   // 偵察與玩家射擊共用實際形狀判定，避免車框、護欄缺口被外接盒誤擋。
   reconSees(a, b) { const d = b.clone().sub(a), L = d.length(); return L < .05 || !shotRay(a, d.divideScalar(L), L - .05); },
   playerEye: new THREE.Vector3(), aimDir: new THREE.Vector3(0, 0, 1), ads: 0, diff: { acc: 1, dmg: 1 }, bolts: [], grenades: [], nadeN: 3, loot: [],
@@ -255,7 +262,7 @@ let mechWalk = null, finale = null, hatchOpen = 0, alarmOn = false;   // M6＝�
 const progress = () => clamp(store.get('ch', 1), 1, S.CHAPTERS.length);
 function saveFoot() {
   if (!campaign || !checkpoint) return;
-  writeSave('checkpoint', { chapter, foot: { layout: S.LAYOUT, p: checkpoint.p.toArray(), yaw: checkpoint.yaw, done: checkpoint.done, nades: checkpoint.nades, picked: [...pickedItems], patrols: checkpoint.patrols }, stats: G.stats });
+  writeSave('checkpoint', { chapter, foot: { layout: S.LAYOUT, p: checkpoint.p.toArray(), yaw: checkpoint.yaw, done: checkpoint.done, nades: checkpoint.nades, picked: [...pickedItems], patrols: checkpoint.patrols, field: checkpoint.field }, stats: G.stats });
 }
 
 // 手榴彈的樣子：墨綠色小圓柱＋一顆閃爍的紅燈（越接近爆炸閃越快）
@@ -302,9 +309,17 @@ function spawn(def) {
   const e = def.type === 'drone' ? new Drone(G, def) : new Trooper(G, def);
   G.enemies.push(e); return e;
 }
-const patrols = new Patrols(G, S.ENCOUNTERS, spawn);
+const patrols = new Patrols(G, [...S.ENCOUNTERS, ...(S.OUTPOSTS || [])], spawn);
 G.contacts = new Contacts(); G.scout = new Scout(G); G.onScoutLost = bodyCamera;
 G.patrols = patrols; G.footExtent = S.FOOT_EXTENT || 140;
+G.field = new FieldOps(G, S.OUTPOSTS || []);
+G.onFieldClaim = () => {
+  checkpoint = { p: player.pos.clone(), yaw: player.yaw, done: [...done], ch: chapter, nades: G.nadeN, patrols: patrols.snapshot(), field: G.field.snapshot() };
+  saveFoot();
+};
+const fieldMap = new FieldMap(G, S.FIELD_BOUNDS, () => { fieldMap.close(); input.reset(); resume(); });
+function showFieldMap() { if (stage !== 'play' || finale || player.dead) return; pause(); input.unlock(); fieldMap.open(); }
+$('fieldOpen').onclick = showFieldMap;
 function arrive(def) { if (G.enemies.filter(e => !e.dead).length >= MAX_ACTORS) return null; const at = arrivalPoint(G, def); return at ? spawn(at) : null; }
 function reinforce(a, defs, delay = 0) {
   const source = a.list.find(e => !e.dead && e.sees && e.lastSeen) || a.list.find(e => e.state === 'combat' && e.lastSeen);
@@ -494,8 +509,9 @@ function startChapter(n) {
   G.nadeN = NADE_START;
   if (q.has('x')) player.reset(new THREE.Vector3(+q.get('x'), +(q.get('y') || 0), +q.get('z')), +(q.get('yaw') || 0));
   vm.refill();
+  G.field.reset(); $('fieldOpen').hidden = false;
   patrols.reset(done); patrols.update(0, true);
-  checkpoint = { p: player.pos.clone(), yaw: player.yaw, done: [...done], ch: n, nades: G.nadeN, patrols: patrols.snapshot() };
+  checkpoint = { p: player.pos.clone(), yaw: player.yaw, done: [...done], ch: n, nades: G.nadeN, patrols: patrols.snapshot(), field: G.field.snapshot() };
   G.chapterTag = `CHAPTER ${n}　${C.en}`;
   const first = objective();
   G.objText = first ? first.obj : '';
@@ -530,7 +546,7 @@ function updateEncounters() {
     for (const [w, t, now] of a.E.done) hud.say(w, t, 3.6, now);
     if (a.E.done.length) audio.radio('in');
     hud.note(a.E.pickup ? '取得啟動金鑰' : a.E.operation?.bypass ? '任務完成・巡邏隊仍在附近' : '區域清除', '#ffb347');
-    checkpoint = { p: player.pos.clone(), yaw: player.yaw, done: [...done], ch: chapter, nades: G.nadeN, patrols: patrols.snapshot() };
+    checkpoint = { p: player.pos.clone(), yaw: player.yaw, done: [...done], ch: chapter, nades: G.nadeN, patrols: patrols.snapshot(), field: G.field.snapshot() };
     saveFoot();
     const nx = objective();
     if (a.E.id === 'G2') { toCockpit(); if (alarmOn) { alarmOn = false; audio.alarm(false); } }
@@ -582,7 +598,7 @@ function nextChapter(n) {
   const L = S.LINES['ch' + n]; if (L) { audio.radio('in'); for (const [w, t] of L) hud.say(w, t, 3.8); }
   const first = objective();
   G.objText = first ? first.obj : ''; hud.obj = first ? guideObj(first) : null;
-  checkpoint = { p: player.pos.clone(), yaw: player.yaw, done: [...done], ch: n, nades: G.nadeN, patrols: patrols.snapshot() };
+  checkpoint = { p: player.pos.clone(), yaw: player.yaw, done: [...done], ch: n, nades: G.nadeN, patrols: patrols.snapshot(), field: G.field.snapshot() };
   audio.music('battle', { stage: C.music });
   if (n > progress()) store.set('ch', n);
 }
@@ -823,6 +839,7 @@ function respawn() {
   done.clear(); for (const id of cp.done) markDone(id, true);
   chapter = cp.ch;
   player.reset(cp.p, cp.yaw); vm.refill(); G.nadeN = cp.nades ?? NADE_START;
+  G.field.reset(cp.field);
   patrols.reset(done, cp.patrols); patrols.update(0, true);
   const nx = objective();
   if (done.has('G2')) toCockpit(); else if (nx) { G.objText = nx.obj; hud.obj = guideObj(nx); }
@@ -879,7 +896,7 @@ function updateFinale(dt) {
 // 第 6 章：開蒼焰，每一幀交給 mech6.js；載入失敗就照舊直接接本篇
 async function startMech() {
   if ($('tScout')) $('tScout').style.display = 'none';
-  finale = null; stage = 'mech'; chapter = S.CHAPTERS[chapter - 1].mech ? chapter : (S.FIRST_MECH || 6); G.playing = false; player.frozen = true;
+  finale = null; stage = 'mech'; $('fieldOpen').hidden = true; chapter = S.CHAPTERS[chapter - 1].mech ? chapter : (S.FIRST_MECH || 6); G.playing = false; player.frozen = true;
   hud.prompt = null; hud.obj = null; G.objText = ''; clearEnemies(); active = [];
   vm.holder.visible = false; vm.arms.root.visible = false;
   if (progress() < chapter) store.set('ch', chapter);
@@ -1022,7 +1039,7 @@ function begin(n) {
     const saved = resumeSave ? readSave('checkpoint') : null, foot = saved?.chapter === n ? saved.foot : null;
     const ids = new Set(S.ENCOUNTERS.filter(e => e.ch <= n).map(e => e.id));
     if (foot && foot.layout === S.LAYOUT && Array.isArray(foot.p) && foot.p.length === 3 && foot.p.every(Number.isFinite) && Math.max(Math.abs(foot.p[0]), Math.abs(foot.p[2])) < (S.FOOT_EXTENT || 140) && foot.p[1] >= 0 && foot.p[1] < 40 && Number.isFinite(foot.yaw) && Array.isArray(foot.done) && foot.done.every(id => ids.has(id))) {
-      checkpoint = { p: new THREE.Vector3(...foot.p), yaw: foot.yaw, done: foot.done, ch: n, nades: clamp(foot.nades || 0, 0, NADE_MAX), patrols: foot.patrols };
+      checkpoint = { p: new THREE.Vector3(...foot.p), yaw: foot.yaw, done: foot.done, ch: n, nades: clamp(foot.nades || 0, 0, NADE_MAX), patrols: foot.patrols, field: foot.field };
       pickedItems.clear(); for (const id of Array.isArray(foot.picked) ? foot.picked : []) if (map.items[id]) { pickedItems.add(id); map.items[id].h?.hide(); }
       respawn();
       for (const k of Object.keys(G.stats)) if (Number.isFinite(saved.stats?.[k])) G.stats[k] = Math.max(0, saved.stats[k]);
@@ -1046,6 +1063,7 @@ function resume() {
   state = 'play'; clock.getDelta();
 }
 function toTitle() {
+  fieldMap.close();
   if (M6 || stage === 'mech') { location.href = location.pathname; return; }   // 第 6 章換了整套機體系統：直接重新載入回標題
   $('pause').style.display = 'none'; $('result').style.display = 'none';
   audio.setPaused(false); audio.lowHealth(false); if (alarmOn) { alarmOn = false; audio.alarm(false); }
@@ -1081,6 +1099,7 @@ function frame(now = performance.now()) {
   }
   if (stage === 'mech') { if (M6) M6.tick(dt); input.endFrame(); return; }   // 第 6 章（載入中先停在黑畫面）
   const c = input.state(dt), K = input.keys;
+  if (stage === 'play' && !finale && input.pressed('KeyM')) { showFieldMap(); input.endFrame(); return; }
   if (c.pause && !finale) { pause(); input.endFrame(); return; }
   if (!G.scout.active && (input.pressed('KeyC') || input.pressed('Tod'))) crouchToggle = !crouchToggle;
   if (stage === 'play' && !finale && (input.pressed('KeyN') || input.pressed('Tscout'))) G.scout.toggle();
@@ -1137,7 +1156,7 @@ function frame(now = performance.now()) {
   updateBolts(dt);
   updateGrenades(dt);
   D.update(dt);
-  if (stage === 'play' && !finale) { updateEncounters(); updateHatch(dt); updateMissions(dt); updatePickup(); updateLoot(); }   // updateHatch 每幀先清提示，任務的「按 E」要排在它後面
+  if (stage === 'play' && !finale) { updateEncounters(); updateHatch(dt); updateMissions(dt); updatePickup(); updateLoot(); G.field.update(input); }   // updateHatch 每幀先清提示，任務的「按 E」要排在它後面
   updateFoes();
   updateGuide(dt);
   updateMechWalk(dt);

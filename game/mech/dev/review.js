@@ -15,7 +15,7 @@ async function load(path, query = '') {
   html = html.replace(/<base href="[^"]+">/, '');
   html = html.replace(/(<script type="importmap">)([\s\S]*?)(<\/script>)/, (_, a, json, b) => {
     const map = JSON.parse(json);
-    for (const file of ['urban.js', 'anim.js', 'env.js', 'streetfront.js', 'stages.js', 'battlefields.js', 'fieldart.js', 'encounter.js', 'post.js', 'roofline.js', 'mechs.js', 'combat.js', 'cockpit.js', 'zero/kit.js', 'zero/map.js', 'zero/guns.js', 'zero/viewmodel.js', 'zero/main.js', 'zero/hud.js', 'zero/sfx.js', 'zero/mech6.js', 'lastline/map.js', 'lastline/script.js', 'lastline/mission.js', 'lastline/convoy.js', 'lastline/escort.mjs', 'lastline/operations.mjs', 'lastline/foot-ops.js', 'input.js', 'tactics.js', 'reinforcements.mjs', 'zero/ai.js', 'zero/script.js', 'zero/patrol.js', 'zero/recon.js']) {
+    for (const file of ['urban.js', 'anim.js', 'env.js', 'streetfront.js', 'stages.js', 'battlefields.js', 'fieldart.js', 'encounter.js', 'post.js', 'roofline.js', 'mechs.js', 'combat.js', 'cockpit.js', 'zero/kit.js', 'zero/map.js', 'zero/guns.js', 'zero/viewmodel.js', 'zero/main.js', 'zero/hud.js', 'zero/sfx.js', 'zero/mech6.js', 'lastline/map.js', 'lastline/script.js', 'lastline/mission.js', 'lastline/convoy.js', 'lastline/escort.mjs', 'lastline/operations.mjs', 'lastline/foot-ops.js', 'input.js', 'tactics.js', 'reinforcements.mjs', 'zero/ai.js', 'zero/script.js', 'zero/patrol.js', 'zero/recon.js', 'zero/field.js']) {
       const url = new URL('/game/mech/' + file, location.href).href;
       for (const key of Object.keys(map.imports)) if (new URL(key, entryBase).href === url) delete map.imports[key];
       map.imports[url] = url + '?qa=' + revision;
@@ -461,7 +461,7 @@ async function enemyPressure() {
   assert(!win.__flow.done.includes('B'),'場外增援尚未進場時不會提早過關');
   let defeated=0;
   for(let n=0;n<1500&&!win.__flow.done.includes('B');n++){for(const e of G.enemies)if(!e.dead){e.damage(10000,new T.Vector3(0,0,-1),'head',G.player.pos);if(!e.resident||e.resident.E===B)defeated++;}step(1);}
-  assert(defeated===14&&win.__flow.done.includes('B'),'兩名駐軍與十二名增援逐批進場、擊倒後正常清關');
+  assert(defeated===15&&win.__flow.done.includes('B'),'三名駐軍與十二名增援逐批進場、擊倒後正常清關');
   assert(G.enemies.filter(e=>e.dead).length<=16,'長戰鬥會清除舊屍體與骨架資源');
   renderer.render=render;
   await load('/game/mech/index.html','?mute&nobrief&all&fps=0');
@@ -887,7 +887,91 @@ async function campaignEdges() {
 }
 const assertSilent = (ok, text) => { if (!ok) throw Error(text); };
 
-for (const [id, fn] of [['scoutCombat', scoutCombat], ['reconControls', reconControls], ['prequelFoot', prequelFoot], ['patrolWorld', patrolWorld], ['japaneseSigns', japaneseSigns], ['harborArt', harborArt], ['campaignFoot', campaignFoot], ['campaign4', () => campaignMech(4)], ['campaign5', () => campaignMech(5)], ['campaign6', () => campaignMech(6)], ['campaign7', () => campaignMech(7)], ['campaign6Artillery', async()=>{localStorage.setItem('lastline.choice',JSON.stringify('artillery'));await campaignMech(6,'artillery');}], ['campaignArtillery', async () => { localStorage.setItem('lastline.choice', JSON.stringify('artillery')); await campaignMech(7, 'artillery'); }], ['campaignEdges', campaignEdges], ['mech', mech], ['fields', battlefields], ['enemyMotion', enemyMotion], ['zero', zero], ['tactics', tactics], ['prequelMechCampaign', prequelMechCampaign], ['campaignMain', campaignMain], ['enemyPressure', enemyPressure], ['infantry', infantry], ['art', art], ['hero', hero], ['city', city], ['mountains', mountains], ['weapons', weapons], ['save', save]]) document.querySelector('#' + id).onclick = () => fn().catch(e => { state.textContent = '失敗'; report.textContent += '\n' + e.stack; });
+const FIELD_BASE = {
+  zero: {B:2,B2:3,C:6,C2:0,C3:0,D0:5,D:7,D1:3,D2:6,D3:5,H1:7,H3:5,H2:4,I0:3,I1:5,KEY:0,I2:5,J1:9,J3:2,J4:2,J2:5,E0:3,E:8,F:6,F2:3,G1:8,G3:5,G4:3,G2:6},
+  lastline: {B:2,B2:3,B3:2,B4:1,B5:2,C:4,C2:0,C4:0,C3:0,C5:2,C6:2,C7:0,D0:3,D:4,D1:3,D2:2,D2B:2,D2C:1,H2:2,I0:0,KEY:0,KEY2:1,D3:3,F:4,F2:2,F3:2,G1:4,G3:2,G3B:2,G4:3,G4B:1,G2:4}
+};
+async function fieldAudit() {
+  const audits=[];
+  for(const path of ['zero','lastline']) {
+    await load('/game/mech/'+path+'/index.html','?mute&god&ch=1&all&fps=0');
+    const G=win.__G,S=win.__S,T=win.__T,solid=G.solid,bad=[],routes=[];
+    const clear=(x,z,y=0)=>{const p=new T.Vector3(x,y,z);const f=solid.floorAt(x,z,y+.5);p.y=f;return Math.abs(f-y)<.6&&!solid.pushOut(p,.36,f,f+1.8,.45);};
+    let checked=0;
+    for(const E of [...S.ENCOUNTERS,...S.OUTPOSTS]) for(const [i,d] of E.enemies.entries()) {
+      if(i<(FIELD_BASE[path][E.id]??0)||d.type==='drone')continue;
+      checked++; const y=d.y||0;
+      if(!clear(d.x,d.z,y)) {
+        const near=[];
+        for(let r=1;r<=6&&near.length<6;r++)for(let a=0;a<16;a++){const x=+(d.x+r*Math.cos(a*Math.PI/8)).toFixed(1),z=+(d.z+r*Math.sin(a*Math.PI/8)).toFixed(1);if(clear(x,z,y))near.push([x,z,y]);}
+        bad.push({id:E.id,index:i,at:[d.x,d.z,y],near:near.slice(0,6)});
+      }
+      if(d.patrol) for(let n=0;n<d.patrol.length;n++) {
+        const a=d.patrol[n],b=d.patrol[(n+1)%d.patrol.length],len=Math.hypot(a[0]-b[0],a[1]-b[1]);
+        for(let j=0;j<=Math.ceil(len/.4);j++){const t=j/Math.max(1,Math.ceil(len/.4));if(!clear(a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t,y)){routes.push({id:E.id,index:i,segment:[a,b]});break;}}
+      }
+    }
+    // Ground routes from the actual start; diagonals cannot cut wall corners.
+    const [x0,x1,z0,z1]=S.FIELD_BOUNDS,h=.5,cols=Math.floor((x1-x0)/h)+1,rows=Math.floor((z1-z0)/h)+1,walk=new Uint8Array(cols*rows),seen=new Uint8Array(cols*rows);
+    for(let z=0;z<rows;z++)for(let x=0;x<cols;x++)walk[z*cols+x]=+clear(x0+x*h,z0+z*h);
+    const st=win.__map.marks.start,sx=Math.round((st.x-x0)/h),sz=Math.round((st.z-z0)/h),queue=[sz*cols+sx];seen[queue[0]]=1;
+    for(let q=0;q<queue.length;q++){const id=queue[q],x=id%cols,z=Math.floor(id/cols);for(const [dx,dz]of [[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,nz=z+dz,ni=nz*cols+nx;if(nx<0||nx>=cols||nz<0||nz>=rows||seen[ni]||!walk[ni])continue;seen[ni]=1;queue.push(ni);}}
+    const supplies=S.OUTPOSTS.map(o=>{const p=G.field.position(o);let approach=null;for(const id of queue){const x=x0+id%cols*h,z=z0+Math.floor(id/cols)*h;if(Math.hypot(p.x-x,p.z-z)<2.1&&solid.sees(new T.Vector3(x,1.6,z),p)){approach=[x,z];break;}}return {id:o.id,at:p.toArray(),approach};});
+    audits.push({path,checked,bad,routes,supplies,reachable:queue.length,start:st.toArray(),resident:G.patrols.records.length,humans:G.patrols.records.filter(r=>r.type!=='drone').length,models:G.enemies.filter(e=>!e.dead).length});
+  }
+  report.textContent=JSON.stringify({audits,errors},null,2);state.textContent=audits.every(a=>!a.bad.length&&!a.routes.length&&a.supplies.every(s=>s.approach))?'配置通過':'配置需要修正';
+}
+async function fieldOps() {
+  const checks=[],metrics=[];
+  for(const path of ['zero','lastline']) {
+    await load('/game/mech/'+path+'/index.html','?mute&god&ch=1&all&fps=0');result=checks;
+    const G=win.__G,T=win.__T,F=G.field;renderer=win.__renderer;post={render:()=>win.__step(1)};
+    win.document.querySelector('#resume').click();
+    const key=(code)=>{win.dispatchEvent(new win.KeyboardEvent('keydown',{code}));win.__step(1);win.dispatchEvent(new win.KeyboardEvent('keyup',{code}));win.__step(1);};
+    const flow=JSON.stringify(win.__flow.done),obj=G.objText,t=G.t;
+    key('KeyM');assert(!win.document.querySelector('#fieldMap').hidden,path+' M 打開戰術地圖');
+    win.__step(60);assert(G.t===t+.05||G.t===t+1/60,path+' 戰術地圖暫停世界更新');
+    assert(win.document.querySelectorAll('#fieldMap [data-site]').length===4,path+' 主線與三個獨立哨站');
+    win.document.querySelector('#fieldMap [data-site="'+F.outposts[0].id+'"]').click();
+    assert(F.selected===F.outposts[0].id&&G.objText===obj&&JSON.stringify(win.__flow.done)===flow,path+' 選支線保留主線進度與劇情');
+    // Save the actual paused 2D tactical map through the normal capture path.
+    const cv=win.document.querySelector('#fieldMap canvas'),data=cv.toDataURL('image/png'),name=path+'-field-map';
+    const a=document.createElement('a');a.href=data;a.download=name+'.png';a.textContent=name;document.querySelector('#captures').append(a);
+    key('Escape');assert(win.document.querySelector('#fieldMap').hidden,path+' Esc 關閉地圖');
+    const live=G.t;win.__step(2);assert(G.t>live,path+' 關閉地圖繼續遊戲');
+    const o=F.outposts[0],group=G.patrols.group(o);assert(group.length===4&&!F.secured(o),path+' 支線守軍在攻略前已存在');
+    const p=F.position(o);G.player.reset(p.clone().add(new T.Vector3(1, -.4, 0)),Math.PI);G.patrols.update(0,true);win.__step(3);
+    const loaded=group.filter(r=>r.actor);assert(loaded.length>0,path+' 靠近哨站才建立守軍模型');
+    const guard=loaded[0].actor;guard.alert(G.player.pos.clone(),1);win.__step(2);assert(guard.state==='combat',path+' 守軍接敵進入既有包抄戰術');
+    for(const r of group){if(r.actor)r.actor.damage(10000,new T.Vector3(0,0,1),'body',G.player.pos);else r.data.dead=true;}
+    assert(F.secured(o),path+' 已載入與遠處守軍共同判斷清場');
+    G.player.hp=40;G.nadeN=1;G.scout.destroyed=true;G.scout.cooldown=30;key('KeyE');
+    assert(F.claimed.has(o.id)&&G.player.hp===75&&G.nadeN===3,path+' 親自按 E 領哨站補給');
+    assert(G.scout.destroyed&&G.scout.cooldown>29,path+' 補給不跳過無人機擊落整備');
+    assert(JSON.stringify(win.__flow.done)===flow,path+' 清支線不完成主線任務');
+    key('KeyE');assert(G.player.hp===75&&G.nadeN===3,path+' 不可重複領取');
+    win.document.querySelector('#cont').click();win.__step(1);
+    assert(F.claimed.has(o.id)&&F.secured(o),path+' 死亡重試保留支線清除與補給記錄');
+    let peak=0;const render=renderer.render.bind(renderer);renderer.render=()=>{};
+    for(const site of F.outposts){G.player.reset(F.position(site).clone().add(new T.Vector3(1,-.4,0)),0);win.__step(90);peak=Math.max(peak,G.enemies.filter(e=>!e.dead).length);}
+    renderer.render=render;assert(peak<=24,path+' 增加守軍後同時啟用模型仍不超過 24');
+    metrics.push({path,resident:G.patrols.records.length,humans:G.patrols.records.filter(r=>r.type!=='drone').length,peak});assert(errors.length===0,path+' 開放戰區沒有執行錯誤');
+    if(path==='lastline') {
+      const saved=JSON.parse(win.localStorage.getItem('lastline.checkpoint'));
+      assert(saved.foot.field.claimed.includes(o.id),'失落防線存檔包含已領取哨站');
+      await load('/game/mech/lastline/index.html','?mute&god&all&fps=0');result=checks;
+      win.document.querySelector('#campaignResume').click();win.__step(2);
+      const restored=win.__G.field,site=restored.outposts.find(s=>s.id===o.id);
+      assert(restored.claimed.has(o.id)&&restored.secured(site),'關閉重載並續玩後，哨站與駐軍死亡狀態仍保留');
+      assert(errors.length===0,'失落防線支線續玩沒有執行錯誤');
+      win.document.querySelector('#resume').click();
+      win.dispatchEvent(new win.KeyboardEvent('keydown',{code:'KeyM'}));win.__step(1);win.dispatchEvent(new win.KeyboardEvent('keyup',{code:'KeyM'}));
+    }
+  }
+  report.textContent=JSON.stringify({checks,metrics,errors},null,2);state.textContent='開放戰區通過';
+}
+
+for (const [id, fn] of [['fieldAudit', fieldAudit], ['fieldOps', fieldOps], ['scoutCombat', scoutCombat], ['reconControls', reconControls], ['prequelFoot', prequelFoot], ['patrolWorld', patrolWorld], ['japaneseSigns', japaneseSigns], ['harborArt', harborArt], ['campaignFoot', campaignFoot], ['campaign4', () => campaignMech(4)], ['campaign5', () => campaignMech(5)], ['campaign6', () => campaignMech(6)], ['campaign7', () => campaignMech(7)], ['campaign6Artillery', async()=>{localStorage.setItem('lastline.choice',JSON.stringify('artillery'));await campaignMech(6,'artillery');}], ['campaignArtillery', async () => { localStorage.setItem('lastline.choice', JSON.stringify('artillery')); await campaignMech(7, 'artillery'); }], ['campaignEdges', campaignEdges], ['mech', mech], ['fields', battlefields], ['enemyMotion', enemyMotion], ['zero', zero], ['tactics', tactics], ['prequelMechCampaign', prequelMechCampaign], ['campaignMain', campaignMain], ['enemyPressure', enemyPressure], ['infantry', infantry], ['art', art], ['hero', hero], ['city', city], ['mountains', mountains], ['weapons', weapons], ['save', save]]) document.querySelector('#' + id).onclick = () => fn().catch(e => { state.textContent = '失敗'; report.textContent += '\n' + e.stack; });
 
 async function harborArt() {
   await load('/game/mech/lastline/index.html', '?mute&god&ch=1&all&fps=0');
