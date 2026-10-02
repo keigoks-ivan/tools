@@ -15,7 +15,7 @@ async function load(path, query = '') {
   html = html.replace(/<base href="[^"]+">/, '');
   html = html.replace(/(<script type="importmap">)([\s\S]*?)(<\/script>)/, (_, a, json, b) => {
     const map = JSON.parse(json);
-    for (const file of ['urban.js', 'anim.js', 'env.js', 'streetfront.js', 'stages.js', 'battlefields.js', 'fieldart.js', 'encounter.js', 'post.js', 'roofline.js', 'mechs.js', 'combat.js', 'cockpit.js', 'zero/kit.js', 'zero/map.js', 'zero/guns.js', 'zero/viewmodel.js', 'zero/main.js', 'zero/hud.js', 'zero/sfx.js', 'zero/mech6.js', 'lastline/map.js', 'lastline/script.js', 'lastline/mission.js', 'lastline/convoy.js', 'lastline/escort.mjs', 'lastline/operations.mjs', 'lastline/foot-ops.js', 'input.js']) {
+    for (const file of ['urban.js', 'anim.js', 'env.js', 'streetfront.js', 'stages.js', 'battlefields.js', 'fieldart.js', 'encounter.js', 'post.js', 'roofline.js', 'mechs.js', 'combat.js', 'cockpit.js', 'zero/kit.js', 'zero/map.js', 'zero/guns.js', 'zero/viewmodel.js', 'zero/main.js', 'zero/hud.js', 'zero/sfx.js', 'zero/mech6.js', 'lastline/map.js', 'lastline/script.js', 'lastline/mission.js', 'lastline/convoy.js', 'lastline/escort.mjs', 'lastline/operations.mjs', 'lastline/foot-ops.js', 'input.js', 'tactics.js', 'reinforcements.mjs', 'zero/ai.js', 'zero/script.js']) {
       const url = new URL('/game/mech/' + file, location.href).href;
       for (const key of Object.keys(map.imports)) if (new URL(key, entryBase).href === url) delete map.imports[key];
       map.imports[url] = url + '?qa=' + revision;
@@ -383,7 +383,8 @@ async function tactics() {
   const G = win.__game, T = win.__T; G.launch(5); G.run(3.5); G.player.pos.set(0, 0, 600); G.tick(1 / 60);
   const C = G.combat; post = C.post; renderer = post.renderer;
   const ace = C.spawn('ace', 0, 1, { x: 0, z: 480, ground: true, tx: 0, tz: 600 });
-  const grunt = C.spawn('grunt', 0, 1, { x: -120, z: 600, ground: true, tx: 0, tz: 600 });
+  const grunt = C.spawn('grunt', 0, 1, { x: -120, z: 600, ground: true });
+  assert(grunt.pos.toArray().every(Number.isFinite)&&grunt.vel.toArray().every(Number.isFinite),'未指定方向的地面增援保持有效速度與座標');
   const heavy = C.spawn('heavy', 0, 1, { x: 120, z: 600, ground: true, tx: 0, tz: 600 });
   ace.qbCd = 0; C.enemyQB(ace, 1);
   assert(Math.hypot(ace.vel.x, ace.vel.z) > 59, '王牌側閃有實際速度');
@@ -405,6 +406,80 @@ async function tactics() {
   post = D.post; renderer = post.renderer;
   G.tick(1 / 60); await save('evacuation-pressure');
   report.textContent = JSON.stringify({ checks: result, enemies: D.alive.length, errors }, null, 2); state.textContent = errors.length ? '有錯誤' : '戰術與劇情通過';
+}
+async function prequelMechCampaign() {
+  await load('/game/mech/zero/index.html','?mute&ch=6&all&fps=0');await wait(()=>win.__m6);
+  const M=win.__m6,T=win.__T,W=win.__world,S=win.__S;renderer=win.__renderer;
+  const render=renderer.render.bind(renderer);renderer.render=()=>{};M.combat.hurt=()=>{};M.fight(0);
+  let i=0,peak=0;
+  while(!M.ending&&i++<6000) {
+    const C=M.combat,w=S.MECH6.waves[Math.min(C.group,S.MECH6.waves.length-1)],p=M.gate?.W.go||w.go||[82,66];
+    M.player.pos.set(p[0],W.height(p[0],p[1]),p[1]);M.player.vel.set(0,0,0);
+    for(const e of C.enemies)if(!e.dead)C.damageEnemy(e,100000,1000,e.pos.clone(),new T.Vector3(0,1,0),true);
+    M.tick(.05);peak=Math.max(peak,C.alive.length);
+    assertSilent(peak<=9&&C.enemies.every(e=>e.pos.toArray().every(Number.isFinite)),'前傳機甲座標與在場上限');
+    if(i%120===0)await new Promise(r=>setTimeout(r,0));
+  }
+  renderer.render=render;
+  assert(M.combat.group===8&&!!M.ending,'前傳機甲八波增援與黑犬撤退、追擊、決戰完整通關');
+  assert(M.fled&&M.flyers.length===0,'黑犬實際撤退，追擊戰結束後退場');
+  assert(errors.length===0,'前傳機甲增援沒有執行錯誤');
+  report.textContent=JSON.stringify({checks:result,peak,steps:i,errors},null,2);state.textContent='前傳機甲全流程通過';
+}
+async function campaignMain() {
+  await load('/game/mech/index.html','?mute&nobrief&all&fps=0');
+  const G=win.__game,T=win.__T,W=G.world,steps=[];renderer=G.post.renderer;
+  const render=renderer.render.bind(renderer);renderer.render=()=>{};
+  for(let n=1;n<=10;n++) {
+    G.launch(n);const C=G.combat,E=C.enc;C.hurt=()=>{};
+    let i=0,peak=0;
+    while(G.state!=='result'&&i++<6000) {
+      if(G.state==='paused')win.document.querySelector('#resume').click();
+      if(E.cur){const p=E.E.pts[E.cur.at];G.player.pos.set(p.x,W.height(p.x,p.z),p.z);G.player.vel.set(0,0,0);}
+      for(const e of C.enemies)if(!e.dead)C.damageEnemy(e,100000,1000,e.pos.clone(),new T.Vector3(0,1,0),true);
+      for(const t of E.tg)if(t.b.st===0)W._dmg(t.b,1000,new T.Vector3(t.b.cx,3,t.b.z1),new T.Vector3(0,0,1),true);
+      G.tick(.2);peak=Math.max(peak,C.alive.length);
+      assertSilent(peak<=9&&C.enemies.every(e=>e.pos.toArray().every(Number.isFinite)),'本篇增援上限與座標');
+      if(i%120===0)await new Promise(r=>setTimeout(r,0));
+    }
+    assert(E.state==='done'&&G.state==='result',`第 ${n} 關全部伏兵、增援、守點、目標與頭目自然通關`);steps.push({stage:n,steps:i,peak});G.toTitle();
+  }
+  renderer.render=render;G.tick(1/60);assert(errors.length===0,'本篇十關全流程沒有執行錯誤');
+  report.textContent=JSON.stringify({checks:result,steps,errors},null,2);state.textContent='本篇全流程通過';
+}
+async function enemyPressure() {
+  await load('/game/mech/zero/index.html', '?mute&god&ch=1&all&fps=0');
+  const G=win.__G,T=win.__T,B=win.__S.ENCOUNTERS.find(e=>e.id==='B');
+  const base=B.enemies[0]; B.enemies=Array.from({length:12},(_,i)=>({...base,x:base.x+(i%2)*.5,alert:true}));
+  B.response={delay:.3,enemies:Array.from({length:12},()=>({...base,alert:true}))};
+  G.player.reset(new T.Vector3(-92,0,-84),0);T.Clock.prototype.getDelta=()=>.05;
+  renderer=win.__renderer;post={render:()=>win.__step(1)};
+  const render=renderer.render.bind(renderer);renderer.render=()=>{};
+  let peak=0;
+  const step=n=>{for(let i=0;i<n;i++){win.__scene.updateMatrixWorld(true);win.__step(1);peak=Math.max(peak,G.enemies.filter(e=>!e.dead).length);assertSilent(peak<=8,'步兵隊列滿員時仍增加敵人');assertSilent(G.enemies.every(e=>e.pos.toArray().every(Number.isFinite)),'步兵座標');}};
+  step(400); assert(peak===8&&G.enemies.filter(e=>!e.dead).length===8,'二十四名步兵增援壓力下，同時最多八名');
+  assert(!win.__flow.done.includes('B'),'場外增援尚未進場時不會提早過關');
+  let defeated=0;
+  for(let n=0;n<1500&&!win.__flow.done.includes('B');n++){for(const e of G.enemies)if(!e.dead){e.damage(10000,new T.Vector3(0,0,-1),'head',G.player.pos);defeated++;}step(1);}
+  assert(defeated===24&&win.__flow.done.includes('B'),'二十四名敵人逐批進場、擊倒後正常清關');
+  assert(G.enemies.filter(e=>e.dead).length<=16,'長戰鬥會清除舊屍體與骨架資源');
+  renderer.render=render;
+  await load('/game/mech/index.html','?mute&nobrief&all&fps=0');
+  const M=win.__game;M.launch(5);M.run(3.5);const C=M.combat;C.hurt=()=>{};
+  C.enc=null;C.enemies.forEach(e=>e.m.root.removeFromParent());C.enemies.length=0;C.events.length=0;
+  M.player.pos.set(0,0,600);M.player.vel.set(0,0,0);
+  for(let i=0;i<18;i++)C.events.push({spawn:true,t:0,fn:()=>C.spawn(i%4===0?'heavy':i%3===0?'ace':'grunt',0,1,{x:(i%3-1)*120,z:480,ground:true})});
+  let mechPeak=0,push=false;
+  const r=M.post.renderer.render.bind(M.post.renderer);M.post.renderer.render=()=>{};
+  const before=performance.now();
+  for(let i=0;i<900;i++){C.stats.time+=.05;C.updateEvents(.05);C.updateEnemies(.05);M.world.update(.05);M.fx.update(.05);mechPeak=Math.max(mechPeak,C.alive.length);push ||= C.enemies.some(e=>e.pushT>0);assertSilent(C.alive.length<=9&&C.enemies.every(e=>e.pos.toArray().every(Number.isFinite)&&e.vel.toArray().every(Number.isFinite)),'機甲壓力測試位置與上限');}
+  assert(mechPeak===9&&C.events.length===9,'十八台增援滿員後，九台在場、九台等待');assert(push,'支援壓制確實觸發機甲側翼推進');
+  let count=0;
+  for(let i=0;i<500&&C.events.length;i++){for(const e of C.enemies)if(!e.dead){e.dead=true;e.gone=true;e.m.root.removeFromParent();count++;}C.updateEvents(.05);}
+  count+=C.alive.length;assert(count===18&&C.events.length===0,'機甲空出名額後，全部十八台進場且沒有丟失增援');
+  M.post.renderer.render=r;M.tick(1/60);
+  assert(errors.length===0,'增援壓力測試沒有執行錯誤');
+  report.textContent=JSON.stringify({checks:result,peak,mechPeak,cpuMsPerStep:(performance.now()-before)/900,errors},null,2);state.textContent='敵人增援壓力通過';
 }
 async function infantry() {
   await load('/game/mech/zero/index.html', '?mute&god&ch=1&all&fps=0');
@@ -514,7 +589,10 @@ async function campaignFoot() {
       if(task.kind==='escort')assert(op.crew.every(s=>Math.hypot(s.pos.x-task.pos[0],s.pos.z-task.pos[1])<1.2),E.id+' 人物抵達護送終點');
 
     }
-    if(!E.operation?.bypass)kill(); step(4);
+    if(!E.operation?.bypass) {
+      for(let n=0;n<1200&&!win.__flow.done.includes(E.id);n++){kill();step(1);assertSilent(G.enemies.filter(e=>!e.dead).length<=8,'步兵同時最多八名');}
+    }
+    step(4);
     if(E.operation?.bypass)assert(bypassFoes.some(e=>!e.dead)&&bypassFoes.every(e=>!G.enemies.includes(e)),E.id+' 不必清光巡邏隊也能離開');
     assert(win.__flow.done.includes(E.id), `${E.id} 擊倒／目標／互動／守點完成`);
     if(E.id==='B5'){G.player.reset(new T.Vector3(-180,0,-134),0);step(3);renderer.render=render;await save('lastline-rescue');renderer.render=()=>{};frame.focus();}
@@ -559,7 +637,7 @@ async function campaignMech(chapter = 4, choice = 'rescue') {
   renderer = win.__renderer; post = { render: () => win.__step(1) };
   assert(!!mission && mission.truck.triangles < 4000, `兩輛車共享 ${mission.truck.triangles} 三角形／6 個網格，無新貼圖光源`);
   assert(M.combat.rifle.mag === 40, '機甲沿用 40 發彈匣');
-  assert(M.combat.enemies.length <= 5, '車隊章同時單位預算受限');
+  assert(M.combat.enemies.filter(e=>!e.dead).length <= 7, '車隊章同時單位預算受限');
   for (const q of [0, 2, 1]) { win.document.querySelector(`[data-q="${q}"]`).click(); win.__step(2); assert(errors.length === 0, `第 ${chapter} 章畫質 ${q} 渲染正常`); }
   await save(`lastline-convoy-${chapter}`);
   if(chapter===6){
@@ -590,7 +668,7 @@ async function campaignMech(chapter = 4, choice = 'rescue') {
     if(task&&!task.done) {win.dispatchEvent(new win.KeyboardEvent('keydown',{code:'KeyB'}));ops++;}
     else win.dispatchEvent(new win.KeyboardEvent('keyup',{code:'KeyB'}));
     kill(); step(1);
-    assertSilent(M.combat.enemies.filter(e=>!e.dead&&!e.gone).length<=5,'機甲同時活動敵人最多五個');
+    assertSilent(M.combat.enemies.filter(e=>!e.dead&&!e.gone).length<=7,'機甲同時活動敵人最多七個');
     assertSilent(M.player.pos.toArray().every(Number.isFinite) && mission.truck.trucks.every(r => r.position.toArray().every(Number.isFinite)), '車隊與護衛位置');
     if (!mission.panel.hidden && mission.panel.querySelector('[data-retry]')) throw Error('自動流程意外失敗：' + mission.panel.textContent);
   }
@@ -627,7 +705,7 @@ async function campaignEdges() {
   const damaged = mission.convoy.hp;
   enemy.dead = true;
   for (const e of M.combat.enemies) e.dead = true;
-  for (let i = 0; i < 220; i++) mission.tick(.05);
+  for (let i = 0; i < 220; i++) { for (const e of M.combat.enemies) e.dead = true; mission.tick(.05); }
   assert(mission.convoy.hp === damaged, '預警期間擊倒標定敵人，取消射擊');
   const op=mission.operation,at=op.point;M.player.pos.set(at[0],0,at[1]);
   win.dispatchEvent(new win.KeyboardEvent('keydown',{code:'KeyB'}));for(let i=0;i<90;i++)mission.tick(.05);
@@ -658,7 +736,7 @@ async function campaignEdges() {
 }
 const assertSilent = (ok, text) => { if (!ok) throw Error(text); };
 
-for (const [id, fn] of [['japaneseSigns', japaneseSigns], ['harborArt', harborArt], ['campaignFoot', campaignFoot], ['campaign4', () => campaignMech(4)], ['campaign5', () => campaignMech(5)], ['campaign6', () => campaignMech(6)], ['campaign7', () => campaignMech(7)], ['campaign6Artillery', async()=>{localStorage.setItem('lastline.choice',JSON.stringify('artillery'));await campaignMech(6,'artillery');}], ['campaignArtillery', async () => { localStorage.setItem('lastline.choice', JSON.stringify('artillery')); await campaignMech(7, 'artillery'); }], ['campaignEdges', campaignEdges], ['mech', mech], ['fields', battlefields], ['enemyMotion', enemyMotion], ['zero', zero], ['tactics', tactics], ['infantry', infantry], ['art', art], ['hero', hero], ['city', city], ['mountains', mountains], ['weapons', weapons], ['save', save]]) document.querySelector('#' + id).onclick = () => fn().catch(e => { state.textContent = '失敗'; report.textContent += '\n' + e.stack; });
+for (const [id, fn] of [['japaneseSigns', japaneseSigns], ['harborArt', harborArt], ['campaignFoot', campaignFoot], ['campaign4', () => campaignMech(4)], ['campaign5', () => campaignMech(5)], ['campaign6', () => campaignMech(6)], ['campaign7', () => campaignMech(7)], ['campaign6Artillery', async()=>{localStorage.setItem('lastline.choice',JSON.stringify('artillery'));await campaignMech(6,'artillery');}], ['campaignArtillery', async () => { localStorage.setItem('lastline.choice', JSON.stringify('artillery')); await campaignMech(7, 'artillery'); }], ['campaignEdges', campaignEdges], ['mech', mech], ['fields', battlefields], ['enemyMotion', enemyMotion], ['zero', zero], ['tactics', tactics], ['prequelMechCampaign', prequelMechCampaign], ['campaignMain', campaignMain], ['enemyPressure', enemyPressure], ['infantry', infantry], ['art', art], ['hero', hero], ['city', city], ['mountains', mountains], ['weapons', weapons], ['save', save]]) document.querySelector('#' + id).onclick = () => fn().catch(e => { state.textContent = '失敗'; report.textContent += '\n' + e.stack; });
 
 async function harborArt() {
   await load('/game/mech/lastline/index.html', '?mute&god&ch=1&all&fps=0');

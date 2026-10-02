@@ -2,6 +2,7 @@
 //   流程：標題（選章節）→ 開場字卡 → 第一人稱戰鬥（章節／遭遇戰／檢查點）→ 機庫爬上鋼彈 → 跳進駕駛艙 → 接到《鋼鐵黃昏》的駕駛艙
 //   除錯：?ch=1..3 直接開章、?x=&z=&yaw= 指定位置、?god 無敵、?mute 靜音、?final 直接到最後一幕
 import * as THREE from 'three';
+import { Reinforcements } from '../reinforcements.mjs';
 import { qualityLevel, pixelRatio, FrameGate } from '../runtime.js';
 
 // 本篇的 env.js 用相對路徑 './assets/' 讀天空、HDR、城市貼圖：
@@ -152,8 +153,8 @@ const G = {
   scene, solid, kit, audio, fx, player, vm, hud, t: 0, nextId: 1, enemies: [], playing: false,
   playerEye: new THREE.Vector3(), aimDir: new THREE.Vector3(0, 0, 1), ads: 0, diff: { acc: 1, dmg: 1 }, bolts: [], grenades: [], nadeN: 3, loot: [],
   chapterTag: '', objText: '', objSub: '', lastHit: -99, scopeRange: 0, stats: { shots: 0, hits: 0, kills: 0, heads: 0, taken: 0, time: 0 },
-  // 同時開火的敵人上限（避免四面八方同時打）
-  canShoot(e) { let n = 0; for (const o of G.enemies) if (o !== e && !o.dead && o.burst > 0 && o.sees && (!o.s || o.s.mode === 'aim')) n++; return n < 3; },
+  // 同時最多四名開火；其餘包抄、換位或等待射界。
+  canShoot(e) { let n = 0; for (const o of G.enemies) if (o !== e && !o.dead && o.burst > 0 && o.sees && (!o.s || o.s.mode === 'aim')) n++; return n < 4; },
   // 敵人丟手榴彈：拋物線丟到目標附近（落點有一點誤差），撞牆撞地會彈，2.6 秒後爆炸
   throwGrenade(from, to, owner) {
     to.x += (Math.random() - 0.5) * 2.4; to.z += (Math.random() - 0.5) * 2.4; to.y = solid.floorAt(to.x, to.z, to.y + 1) + 0.1;
@@ -295,16 +296,25 @@ function spawn(def) {
   const e = def.type === 'drone' ? new Drone(G, def) : new Trooper(G, def);
   G.enemies.push(e); return e;
 }
+function reinforce(a, defs, delay = 0) {
+  const source = a.list.find(e => !e.dead && e.sees && e.lastSeen) || a.list.find(e => e.state === 'combat' && e.lastSeen);
+  const at = source?.lastSeen || new THREE.Vector3(a.E.guide[0], 0, a.E.guide[1]);
+  a.reinforcements.add(defs.map(d => ({ ...d, alert: true, lastSeen: at.clone() })), G.t, delay);
+}
 const doneT = {};   // 每段清完的時間（after＋wait 用）
 function markDone(id, old = false) { done.add(id); doneT[id] = old ? -1e9 : campaign ? G.t : performance.now() / 1000; }   // old＝讀檔／選關還原的，不必再等 wait
 function startEncounter(E) {
   if(E.operation?.kind==='escort'){for(const o of rescuedCrew)o.dispose();rescuedCrew.length=0;}
-  const list = E.enemies.map(spawn);
+  const reinforcements = new Reinforcements();
+  const list = E.enemies.slice(0, reinforcements.cap).map(spawn);
+  reinforcements.add(E.enemies.slice(reinforcements.cap).map(d => d.alert ? { ...d, lastSeen: player.pos.clone() } : d), G.t);
   // hold＝守住幾秒（期間一波波增援）；stealth＝別被發現（被發現就叫增援）；targets＝要炸掉的東西；pickups＝要撿的東西（全部都要做完、敵人全倒才算清完）
   const tg = E.targets ? E.targets.map((id) => map.targets[id] && map.targets[id].obj).filter(Boolean) : null;
   // 已經撿過的東西（死掉重來時）算數，不用再撿一次（模型也已經收起來了）
   const got = new Set((E.pickups || []).map((P, i) => (pickedItems.has(P.id) ? i : -1)).filter((i) => i >= 0));
-  active.push({ E, list, operation:E.operation&&footOps?footOps.createFootOperation(E,G,input):null, picked: false, t0: G.t, n: list.length, holdT: 0, wave: 0, pressure:0, spotted: false, tg, got, beats: new Set() });
+  const a = { E, list, reinforcements, operation:E.operation&&footOps?footOps.createFootOperation(E,G,input):null, picked: false, t0: G.t, n: list.length, holdT: 0, wave: 0, pressure:0, spotted: false, tg, got, beats: new Set() };
+  active.push(a);
+  if (E.response) reinforce(a, E.response.enemies, E.response.delay);
   for (const [who, text, now] of E.lines) hud.say(who, text, 3.6, now);
   if (E.lines.length) audio.radio('in');
   G.objText = list.length ? E.fight || '擊倒所有敵人' : E.obj;   // 開打後改成「要打誰」，不要還寫著「爬上高架道路」
@@ -319,7 +329,7 @@ function encDone(a) {
   if (E.pickup && !a.picked) return false;
   if (E.pickups && a.got.size < E.pickups.length) return false;
   if (a.tg && a.tg.some((o) => o.alive)) return false;
-  return E.operation?.bypass || a.list.every((e) => e.dead);
+  return E.operation?.bypass || !a.reinforcements.pending.length && a.list.every((e) => e.dead);
 }
 // 任務進行中：守點的計時與增援、潛行被發現、炸掉目標、撿東西（按 E）
 const mm = (t) => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`;
@@ -340,7 +350,7 @@ function updateMissions(dt) {
       a.holdT += dt;
       const H = E.hold, due = H.waves ? Math.min(H.waves.length, Math.floor(a.holdT / (H.gap || 15))) : 0;
       while (a.wave < due) {
-        for (const d of H.waves[a.wave]) a.list.push(spawn({ alert: true, ...d }));
+        reinforce(a, H.waves[a.wave]);
         if (H.lines && H.lines[a.wave]) for (const [w, t, now] of H.lines[a.wave]) hud.say(w, t, 3.4, now);
         a.wave++; hud.note('敵方增援', '#ff6a55');
       }
@@ -348,7 +358,7 @@ function updateMissions(dt) {
     }
     if (E.stealth && !a.spotted && a.list.some((e) => !e.dead && e.state === 'combat')) {
       a.spotted = true;
-      for (const d of E.stealth.reinforce || []) a.list.push(spawn({ alert: true, ...d }));
+      reinforce(a, E.stealth.reinforce || [], 1.5);
       for (const [w, t, now] of E.stealth.lines || []) hud.say(w, t, 3.4, now ?? true);
       hud.note('被發現了！', '#ff5b4d');
       if (E.stealth.alarm && !alarmOn) { alarmOn = true; audio.alarm(true); }
@@ -376,9 +386,14 @@ function updateMissions(dt) {
     a.operation?.update(dt);
     if(E.pressure&&a.operation&&!a.operation.done){
       const due=Math.min(E.pressure.list.length,Math.floor(a.operation.task.time/E.pressure.gap));
-      if(a.pressure<due&&G.enemies.filter(e=>!e.dead).length<5){a.list.push(spawn({alert:true,...E.pressure.list[a.pressure++]}));hud.note('裝卸門增援・守住配電箱','#ff6a55');}
+      if(a.pressure<due){reinforce(a,[E.pressure.list[a.pressure++]]);hud.note('裝卸門增援・守住配電箱','#ff6a55');}
     }
+    const arrived = a.reinforcements.tick(G.t, G.enemies.filter(e => !e.dead).length, spawn);
+    if (arrived) { a.list.push(arrived); hud.note('增援到場・注意側翼', '#ff6a55'); }
   }
+  const bodies = G.enemies.filter(e => e.dead);
+  for (const e of bodies) e.retireAt ??= G.t;
+  for (const e of bodies.slice(0, Math.max(0, bodies.length - 12))) if (G.t - e.retireAt > 4) { e.dispose(); G.enemies.splice(G.enemies.indexOf(e), 1); }
 }
 // 下一段還沒清的遭遇
 function objective() { return S.ENCOUNTERS.find((E) => E.ch === chapter && !done.has(E.id)); }
@@ -535,6 +550,7 @@ function updateFoes() {
   if (a.tg) sub.push(`${E.tgName || '目標'} ${a.tg.filter((o) => !o.alive).length}/${a.tg.length}`);
   if (E.pickups) sub.push(`${E.itemName || '情報'} ${a.got.size}/${E.pickups.length}`);
   if (left.length) sub.push(`還剩 ${left.length} 個敵人`);
+  if (a.reinforcements.pending.length) sub.push(`增援接近 ${a.reinforcements.pending.length} 人`);
   G.objSub = sub.join('　');
   if (left.length < a.n) { a.n = left.length; a.t0 = G.t; }   // 有人倒下也算「剛打到」
   if (!left.length) return;

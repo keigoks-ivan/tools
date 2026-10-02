@@ -62,6 +62,7 @@ export const ENCOUNTERS = [
   {
     id: 'C', ch: 1, obj: '清除市場廣場', fight: '清除市場廣場', route: [[-77, -64]], guide: [-77, -58.6],
     trigger: (p) => p.z > -60 && p.x < -58,
+    response: { delay: 7, enemies: [{ type: 'trooper', x: -84, z: -45, yaw: Math.PI }, { type: 'officer', x: -88, z: -36, yaw: Math.PI }] },
     enemies: [
       { type: 'trooper', x: -84, z: -45, yaw: Math.PI },
       { type: 'trooper', x: -72, z: -50, yaw: Math.PI, patrol: [[-72, -50], [-78, -54], [-70, -40]] },
@@ -131,6 +132,7 @@ export const ENCOUNTERS = [
     // 觸發改成走到街上才開打（從工廠東門或西門出來都算）
     id: 'D', ch: 2, obj: '突破街道檢查哨', fight: '突破檢查哨', route: [[-28, -49.8], [-8.5, -49.8]], guide: [-8.5, -46.3],
     trigger: (p) => p.x > -46 && p.z < -33 && p.z > -48,
+    response: { delay: 7, enemies: [{ type: 'trooper', x: -28, z: -40, yaw: Math.PI }, { type: 'officer', x: 5, z: -40, yaw: Math.PI }] },
     enemies: [
       { type: 'trooper', x: -28, z: -40, yaw: -Math.PI / 2 },
       { type: 'trooper', x: -18, z: -45, yaw: -Math.PI / 2, patrol: [[-18, -45], [-24, -36], [-12, -40]] },
@@ -220,6 +222,7 @@ export const ENCOUNTERS = [
   {
     id: 'H2', ch: 3, obj: '進入醫院', fight: '清除醫院大廳', route: [[-30, -3], [-47, -1]], guide: [-52, 3],
     trigger: (p) => p.x < -46 && p.z > 1.5,
+    response: { delay: 7, enemies: [{ type: 'trooper', x: -56, z: 10, yaw: Math.PI }, { type: 'trooper', x: -57.5, z: 15, yaw: Math.PI }] },
     enemies: [
       { type: 'trooper', x: -50.5, z: 16.4, yaw: Math.PI, post: true },
       { type: 'trooper', x: -56, z: 10, yaw: Math.PI },
@@ -348,6 +351,7 @@ export const ENCOUNTERS = [
     id: 'J2', ch: 4, obj: '走匝道下去', fight: '清除匝道下的敵人', mark: V(10, 16.5), next: '穿過倉庫，進貨櫃場',
     route: [[-30.75, 30], [-30.75, 41, 6], [-27, 46.1, 6], [-21.35, 46.2, 6], [-21.3, 43.2, 6], [-19.5, 41.3, 6], [-4.4, 41.3, 6], [-2.9, 42.7, 6], [-1.95, 41.2, 6], [1, 38, 5.1]], guide: [2, 25], nextRoute: [[2, 18], [6, 16.5]],
     trigger: (p) => p.z < 27 && p.x > -2.5 && p.y < 2.5,
+    response: { delay: 7, enemies: [{ type: 'trooper', x: 1, z: 16, yaw: Math.PI }, { type: 'officer', x: 10, z: 16.5, yaw: Math.PI }] },
     enemies: [
       { type: 'trooper', x: 1, z: 16, yaw: 0, alert: true },
       { type: 'trooper', x: 4.5, z: 20.5, yaw: 0, alert: true },
@@ -431,6 +435,7 @@ export const ENCOUNTERS = [
     alarm: true,
     beats: [{ t: 14, lines: [[EN, '修理工進機庫了！守住發電機，別讓他碰機體！'], [OP, '他們知道你要做什麼。先斷拖吊機的電，再清守衛。']] }],
     targets: ['tow1', 'tow2'], tgName: '發電機',
+    response: { delay: 7, enemies: [{ type: 'trooper', x: 26, z: 70, yaw: Math.PI }, { type: 'trooper', x: 54, z: 76, yaw: Math.PI }] },
     enemies: [
       { type: 'trooper', x: 26, z: 70, yaw: Math.PI },
       { type: 'trooper', x: 40, z: 72, yaw: Math.PI },
@@ -491,6 +496,7 @@ export const ENCOUNTERS = [
   {
     id: 'G2', ch: 5, guide: [40, 70], obj: '擊退增援', fight: '擊退東門的增援', mark: null,
     after: 'G4', wait: 2,
+    response: { delay: 7, enemies: [{ type: 'trooper', x: 78, z: 60, yaw: Math.PI }, { type: 'trooper', x: 78, z: 76, yaw: Math.PI }] },
     enemies: [
       { type: 'heavy', x: 80, z: 64, yaw: -Math.PI / 2, alert: true },
       { type: 'heavy', x: 82, z: 72, yaw: -Math.PI / 2, alert: true },
@@ -526,34 +532,41 @@ export const MECH6 = {
   restart: { x: 82, z: 66, yaw: Math.PI / 2 },
   goal: ['走出機庫', '東邊大門　LEAVE THE HANGAR'],
   waves: [
-    { title: '獵犬先遣隊', sub: '敵機 ×3　直升機 ×3', music: 4, lines: [[EN, '機庫東門有動靜……那是聯邦的試驗機！', NOW], [DOG, '慌什麼。獵犬隊，把它圍起來。']],
+    { title: '獵犬先遣隊', sub: '敵機 ×4　直升機 ×3', music: 4, lines: [[EN, '機庫東門有動靜……那是聯邦的試驗機！', NOW], [DOG, '慌什麼。獵犬隊，把它圍起來。']],
+      reinforce: [['grunt', 96, 28]],
       list: [['grunt', 96, 28], ['grunt', 100, -40], ['grunt', 121, 10, 28], ['heli', 105, -90, 45], ['heli', 30, -70, 45], ['heli', 90, 100, 55]] },
-    { title: '空中增援', sub: '敵機 ×3　直升機 ×2　戰機 ×2', music: 5, lines: [[DOG, '一台而已。直升機、戰機，一起上。', NOW], [OP, '天上也有。右鍵按住掃過去，一次鎖好幾台。']],
+    { title: '空中增援', sub: '敵機 ×4　直升機 ×2　戰機 ×2', music: 5, lines: [[DOG, '一台而已。直升機、戰機，一起上。', NOW], [OP, '天上也有。右鍵按住掃過去，一次鎖好幾台。']],
+      reinforce: [['grunt', 80, -5]],
       list: [['grunt', 121, -70, 28], ['grunt', 80, -5], ['grunt', 70, -100], ['heli', 110, 60, 50], ['heli', 40, -100, 45], ['jet'], ['jet']] },
-    { title: '重裝部隊', sub: '重裝機 ×1　敵機 ×3　直升機 ×2', music: 5, lines: [[EN, '重裝機到位，從南邊樓頂壓制！', NOW], [OP, '重裝機很硬。貼近，用光劍（F）。']],
+    { title: '重裝部隊', sub: '重裝機 ×1　敵機 ×4　直升機 ×2', music: 5, lines: [[EN, '重裝機到位，從南邊樓頂壓制！', NOW], [OP, '重裝機很硬。貼近，用光劍（F）。']],
+      reinforce: [['grunt', 86, -62]],
       list: [['heavy', 60, -121, 34], ['grunt', 96, 50], ['grunt', 86, -62], ['grunt', 121, 50, 28], ['heli', 70, -105, 45], ['heli', 115, 95, 60]] },
     { title: '黑犬', sub: 'BLACK DOG　王牌機', music: 6, boss: { ap: 1.8, flee: 0.4 }, lines: [[DOG, '……夠了。我親自來。', NOW], [DOG, '零號，是吧。隼把金鑰交給了一個修理工。'], [ME, '他交給了我。這就夠了。']],
+      reinforce: [['grunt', 121, 60, 28]],
       list: [['ace', 92, 10], ['grunt', 121, 60, 28], ['grunt', 121, -60, 28], ['heli', 60, -100, 45], ['heli', 110, 90, 55]] },
     // ---- 市區：飛過東牆 → 牆外的空地（戰車隊）→ 東南的空地（空襲）→ 東邊的公園（伏擊）→ 南邊的公園（黑犬）
     { go: [175, -55, 55], cp: [168, -52, Math.PI / 2], repair: 0.6, obj: '追擊黑犬', hint: '按住空白鍵往上飛，越過東側外牆',
       clear: ['基地奪回', 'HANGAR 7 SECURED'],
       talk: [[OP, '基地清空了。零號，黑犬往東邊逃了。'], [OP, '城裡還有他的部隊，放他回去就會再來。'], [ME, '我去追。'], [OP, '東牆二十八公尺。按住空白鍵，飛過去。']],
-      title: '裝甲車隊', sub: '戰車 ×6　敵機 ×2　直升機 ×1', music: 5,
+      title: '裝甲車隊', sub: '戰車 ×6　敵機 ×3　直升機 ×1', music: 5,
       lines: [[EN, '聯邦機越過外牆了！戰車隊，攔住它！', NOW], [OP, '大道上一整排戰車。別站在路中間。', NOW]],
+      reinforce: [['grunt', 200, 60, 40]],
       list: [['tank', 310, 0], ['tank', 345, 0], ['tank', 380, 0], ['tank', 415, 0], ['tank', 240, -190], ['tank', 240, -225],
         ['grunt', 200, 60, 40], ['grunt', 161, -158, 61], ['heli', 330, -150, 60]] },
     { go: [300, -180, 48], cp: [274, -154, Math.PI * 0.75], repair: 0.35, obj: '追擊黑犬',
       clear: ['車隊擊破', 'ARMOR COLUMN DOWN'],
       talk: [[OP, '車隊解決了。黑犬的訊號往東南走。'], [OP, '前面是一大片空地，小心頭頂。']],
-      title: '空襲', sub: '直升機 ×4　戰機 ×3　敵機 ×2', music: 5,
+      title: '空襲', sub: '直升機 ×4　戰機 ×3　敵機 ×3', music: 5,
       lines: [[EN, '目標進入空地。空中部隊，開火！', NOW], [OP, '直升機先打，戰機繞回來再打。', NOW]],
+      reinforce: [['grunt', 240, -255, 0]],
       list: [['heli', 480, -60, 70], ['heli', 480, -300, 65], ['heli', 180, -300, 72], ['heli', 300, -360, 75], ['jet'], ['jet'], ['jet'],
         ['grunt', 398, -41, 47], ['grunt', 240, -255, 0]] },
     { go: [415, -175, 48], cp: [380, -176, Math.PI / 2], repair: 0.35, obj: '前往東邊的公園',
       clear: ['制空權奪回', 'AIRSPACE CLEAR'],
       talk: [[OP, '天上清乾淨了。訊號停在東邊的公園。'], [ME, '他停下來了？'], [OP, '……不太對勁。靠近的時候小心。']],
-      title: '伏擊', sub: '敵機 ×3　重裝機 ×1　戰車 ×2　直升機 ×1', music: 6,
+      title: '伏擊', sub: '敵機 ×4　重裝機 ×1　戰車 ×2　直升機 ×1', music: 6,
       lines: [[EN, '目標進了公園。各機，現在出來！', NOW], [OP, '是埋伏！四面都有敵機！', NOW]],
+      reinforce: [['grunt', 360, -210, 0]],
       list: [['grunt', 360, -210, 0], ['grunt', 470, -150, 0], ['grunt', 430, -238, 0], ['heavy', 515, -180, 33],
         ['tank', 480, -290], ['tank', 560, -240], ['heli', 300, -250, 60]] },
     { go: [420, -290, 42], cp: [420, -258, Math.PI], repair: 0.5, obj: '與黑犬決戰',
@@ -561,6 +574,7 @@ export const MECH6 = {
       talk: [[DOG, '（公開頻道）零號，到南邊的公園來。'], [DOG, '這筆帳，就在那裡算清楚。'], [OP, '他在等你。……機體撐得住嗎？'], [ME, '撐得住。']],
       title: '黑犬', sub: 'BLACK DOG　最後一戰', music: 6, boss: { ap: 2.6 },
       lines: [[DOG, '隼的機體、隼的金鑰。你憑什麼坐在裡面？', NOW], [ME, '隼說過，它比我想的還聽話。'], [DOG, '……那就讓我看看。']],
+      reinforce: [['grunt', 362, -330, 0]],
       list: [['ace', 420, -335, 0], ['grunt', 362, -330, 0], ['grunt', 478, -330, 0]] },
   ],
   // 黑犬撤退（第四波打到剩四成）：路線＝[x, z, 離地高度]，飛過東牆、往東南的公園去

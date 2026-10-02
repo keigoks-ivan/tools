@@ -21,7 +21,23 @@ export function squadFlank(pos, target, allies, self, side, distance, angle = 0.
   return crowd(b) + 0.25 < crowd(a) ? b : a;
 }
 export function coveringFire(allies, self) {
-  return allies.some(e => e !== self && !e.dead && !e.gone && e.role === 'support' && (e.los || e.sees) && (e.burst > 0 || e.charge > 0 || e.warn > 0.5));
+  return allies.some(e => e !== self && !e.dead && !e.gone && !e.vehicle && e.role !== 'flank' && (e.los || e.sees) && (e.s?.reloadT ?? -1) < 0 && (e.burst > 0 || e.charge > 0 || e.volley > 0 || e.warn > 0.5));
+}
+export function shareContact(allies, self, range, notify) {
+  if (self.dead || self.gone || !(self.los || self.sees)) return;
+  for (const e of allies) {
+    if (e === self || e.dead || e.gone || e.vehicle || !e.lastSeen || Math.hypot(e.pos.x - self.pos.x, e.pos.z - self.pos.z) > range) continue;
+    if (notify) notify(e, self.lastSeen); else e.lastSeen.copy(self.lastSeen);
+  }
+}
+// 同時最多兩名側翼，每側一名；其餘留在射擊線上。
+export function flankAvailable(allies, self, side) {
+  let n = 0;
+  for (const e of allies) if (e !== self && !e.dead && !e.gone && e.pushT > 0) {
+    if (e.pushSide === side) return false;
+    n++;
+  }
+  return n < 2;
 }
 // 移動線段與擴張後的碰撞盒，避免尋路在兩個採樣點之間穿過薄牆。
 export function segmentBox(ax, az, bx, bz, box, pad = 0) {

@@ -5,7 +5,7 @@ import { steer, flankPoint, squadFlank, coveringFire, segmentBox, planRoute, rou
 import { Combat } from '../combat.js';
 import { Encounter, parse } from '../encounter.js';
 import { STAGE_DATA } from '../stages.js';
-import { Trooper, TYPES } from '../zero/ai.js';
+import { Trooper, Drone, TYPES } from '../zero/ai.js';
 import { Solid } from '../zero/kit.js';
 
 const V = (x = 0, y = 0, z = 0) => new THREE.Vector3(x, y, z);
@@ -177,4 +177,59 @@ test('a changed retreat goal drops the old path without bypassing the search coo
   const state = { points: [{x:2,z:0}], gx:6, gz:0, nextPlan:2, expires:5 };
   const nav = routeDirection(state,V(),V(-6,0,0),()=>false,1,1.5);
   assert.equal(nav,null); assert.equal(state.points.length,0); assert.equal(state.nextPlan,2);
+});
+
+test('line infantry provides suppression but reloading and flanking allies do not', () => {
+  const self = { role: 'flank' }, mate = { role: 'line', sees: true, burst: 4, s: { reloadT: -1 } };
+  assert(coveringFire([self, mate], self));
+  mate.s.reloadT = 0; assert(!coveringFire([mate], self));
+  mate.s.reloadT = -1; mate.role = 'flank'; assert(!coveringFire([mate], self));
+  mate.role = 'support'; mate.burst = 0; mate.volley = 3; assert(coveringFire([mate], self));
+});
+test('contact sharing needs an observed source and respects radio range and living allies', async () => {
+  const { shareContact } = await import('../tactics.js');
+  const source = { pos: V(), lastSeen: V(8, 0, 12), sees: true };
+  const near = { pos: V(10), lastSeen: V() }, far = { pos: V(100), lastSeen: V() }, dead = { pos: V(5), lastSeen: V(), dead: true };
+  shareContact([source, near, far, dead], source, 32);
+  assert.deepEqual(near.lastSeen.toArray(), [8, 0, 12]); assert.equal(far.lastSeen.length(), 0); assert.equal(dead.lastSeen.length(), 0);
+  source.sees = false; source.lastSeen.set(99, 0, 99); shareContact([near], source, 32);
+  assert.deepEqual(near.lastSeen.toArray(), [8, 0, 12]);
+  source.los = true; let alerts = 0;
+  shareContact([near], source, 32, (e, p) => { assert.equal(e, near); assert.equal(p, source.lastSeen); alerts++; });
+  assert.equal(alerts, 1);
+});
+test('flank reservations keep one active push on each side and release dead units', async () => {
+  const { flankAvailable } = await import('../tactics.js');
+  const a = { pushT: 2, pushSide: 1 }, b = { pushT: 2, pushSide: -1 }, self = {};
+  assert(!flankAvailable([a], self, 1)); assert(flankAvailable([a], self, -1));
+  assert(!flankAvailable([a, b], self, -1)); b.dead = true; assert(flankAvailable([a, b], self, -1));
+  a.pushT = 0; assert(flankAvailable([a, b], self, 1));
+});
+test('quick boost reverses away from a wall and cancels when both lanes are blocked', () => {
+  const wall = { x0: 6, x1: 8, z0: -20, z1: 20, top: 30 };
+  const C = Object.assign(Object.create(Combat.prototype), { player: { pos: V(100, 0, 0) }, audio: silent, fx: silent,
+    world: { nearBoxes: () => [wall], collide: () => false, support: () => 0 } });
+  const e = { pos: V(), vel: V(), qbCd: 0, strafe: 1, grounded: true, scale: 1, los: false, lastSeen: V(0, 0, 100) };
+  C.enemyQB(e, 1); assert.equal(e.vel.x, -60); assert.equal(e.vel.z, 0);
+  e.qbCd = 0; e.vel.set(0, 0, 0); C.world.nearBoxes = () => [wall, { ...wall, x0: -8, x1: -6 }];
+  C.enemyQB(e, 1); assert.equal(e.vel.length(), 0); assert.equal(e.qbCd, 0.5);
+});
+
+function droneFixture() {
+  const G = { scene: new THREE.Scene(), nextId: 1, solid: new Solid(), audio: silent, fx: silent, t: 0,
+    player: { pos: V(), vel: V(), dead: false }, playerEye: V(0, 1.6, 0), enemies: [], canShoot: () => true, diff: { acc: 1, dmg: 1 }, bolt: noop };
+  const e = new Drone(G, { x: 0, y: 4, z: 10, alert: true }); G.enemies.push(e); return e;
+}
+test('a drone searches the reported location and releases its firing slot after losing sight', () => {
+  const e = droneFixture(); e.lastSeen.set(0, 0, 20); e.G.player.pos.set(100, 0, 100); e.G.playerEye.set(100, 1.6, 100);
+  e.losT = 1; e.sees = false; e.burst = 2; e.update(.1);
+  assert(e.goal.distanceTo(e.lastSeen) < 16); assert(e.goal.distanceTo(e.G.player.pos) > 100); assert.equal(e.burst, 0);
+});
+test('drone three-shot bursts release the slot during cooldown and cannot shoot through a blocked muzzle', () => {
+  const e = droneFixture(); let shots = 0; e.G.bolt = () => shots++;
+  e.sees = true; e.losT = 1; e.shotT = 0;
+  for (const dt of [.01, .15, .15]) e.update(dt);
+  assert.equal(shots, 3); assert.equal(e.burst, 0); assert(e.shotT >= .9);
+  e.shotT = 0; e.sees = true; e.losT = 1; e.G.solid.sees = () => false; e.update(.01);
+  assert.equal(shots, 3); assert.equal(e.burst, 0);
 });

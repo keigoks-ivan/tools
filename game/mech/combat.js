@@ -4,7 +4,7 @@ import { Mech } from './mechs.js';
 import { Vehicles, VKIND } from './vehicles.js';
 import { parse, encGroups, setRoute, Encounter } from './encounter.js';
 import { STAGE_DATA } from './stages.js';
-import { steer, squadFlank, coveringFire, segmentBox, routeDirection, allyInLane } from './tactics.js';
+import { steer, squadFlank, coveringFire, shareContact, flankAvailable, segmentBox, routeDirection, allyInLane } from './tactics.js';
 
 const clamp = THREE.MathUtils.clamp;
 const rand = (a, b) => a + Math.random() * (b - a);
@@ -29,15 +29,15 @@ export const STAGES = STAGE_DATA.map((D, i) => {
 const WEIGHT = { grunt: 1, heavy: 1.5, ace: 2 };
 export function stageWeight(D) { return D.groups.flat().reduce((a, k) => a + (WEIGHT[k] ?? VKIND[k]?.weight ?? 1), 0); }
 // 每關的難度：
-//   atk＝同一時間最多幾台敵機出手（其他台只移動找位置）——前面一次只挨一台打，後面四面八方
+//   atk＝同一時間最多幾台敵機出手（其他台包抄找射角）——前段兩台、後段四台
 //   fire＝攻擊間隔倍率（大＝打得慢）、aim＝散布倍率（大＝打不準）、dmg＝打到你的傷害倍率
 //   ap＝敵機耐打倍率、alt＝雜兵開不開火箭砲
 const TIER = [
-  { atk: 1, fire: 1.7, aim: 1.7, dmg: 0.5, ap: 0.7, alt: false },
-  { atk: 1, fire: 1.4, aim: 1.4, dmg: 0.65, ap: 0.85, alt: false },
-  { atk: 2, fire: 1.2, aim: 1.2, dmg: 0.8, ap: 1, alt: true },
-  { atk: 2, fire: 1.1, aim: 1.1, dmg: 0.9, ap: 1, alt: true },
-  { atk: 3, fire: 1.0, aim: 1.0, dmg: 1.0, ap: 1, alt: true },
+  { atk: 2, fire: 1.45, aim: 1.45, dmg: 0.5, ap: 0.7, alt: false },
+  { atk: 2, fire: 1.25, aim: 1.25, dmg: 0.65, ap: 0.85, alt: false },
+  { atk: 3, fire: 1.1, aim: 1.1, dmg: 0.8, ap: 1, alt: true },
+  { atk: 3, fire: 1, aim: 1.05, dmg: 0.9, ap: 1, alt: true },
+  { atk: 4, fire: 0.95, aim: 1.0, dmg: 1.0, ap: 1, alt: true },
   { atk: 4, fire: 0.92, aim: 0.95, dmg: 1.05, ap: 1.1, alt: true },
 ];
 // 玩家武器
@@ -114,6 +114,7 @@ class Enemy {
     this.cover = null; this.coverCd = 0; this.coverT = 0; this.lockReact = 0;
     this.role = kind === 'heavy' ? 'support' : kind === 'ace' || id % 3 === 0 ? 'flank' : 'line';
     this.flankSide = id % 2 ? 1 : -1; this.path = {}; this.navGoal = V3();
+    this.reportT = rand(0, 1); this.pushT = 0; this.pushCd = 0; this.pushSide = this.flankSide; this.pushGoal = V3();
   }
   get scale() { return this.m.scale; }
   chest(out) { return out.set(this.pos.x, this.pos.y + 10.5 * this.scale, this.pos.z); }
@@ -235,7 +236,7 @@ export class Combat {
     if (!found && (fx || fz)) { x = fx; z = fz; }
     if (at && at.ground) {
       // 從轉角衝出來：落在街上、朝路口噴射衝刺，晚一點才開火
-      const a = Math.atan2(at.tx - x, at.tz - z);
+      const a = Math.atan2((at.tx ?? p.x) - x, (at.tz ?? p.z) - z);
       e.pos.set(x, w.height(x, z), z); e.dropping = false; e.grounded = true;
       e.vel.set(Math.sin(a) * 34, 0, Math.cos(a) * 34); e.boostT = 1.1; e.fireCd += 1.2;
     } else {
@@ -250,13 +251,25 @@ export class Combat {
     return e;
   }
 
+  updateEvents(dt) {
+    this.spawnCd = Math.max(0, (this.spawnCd || 0) - dt);
+    for (const ev of this.events) ev.t -= dt;
+    let first = null;
+    for (const ev of this.events) if (ev.spawn && ev.t <= 0 && (!first || ev.t < first.t)) first = ev;
+    for (let i = this.events.length - 1; i >= 0; i--) {
+      const ev = this.events[i]; if (ev.t > 0) continue;
+      if (ev.spawn && (ev !== first || this.spawnCd > 0 || this.enemies.filter(e => !e.dead && !e.gone).length >= (this.enemyCap || 9))) continue;
+      this.events.splice(i, 1); ev.fn(); if (ev.spawn) this.spawnCd = 0.7;
+    }
+  }
+
   // ---------------------------------------------------------------- 每幀
   update(dt, inp, rdt) {
     const S = this.stats;
     if (this.phase !== 'done') S.time += dt;
     this.hitstop -= rdt; this.slowmo -= rdt;
     this.timeScale = this.hitstop > 0 ? 0.08 : this.slowmo > 0 ? 0.3 : 1;
-    for (let i = this.events.length - 1; i >= 0; i--) { const ev = this.events[i]; ev.t -= dt; if (ev.t <= 0) { this.events.splice(i, 1); ev.fn(); } }
+    this.updateEvents(dt);
     if (this.banner) { this.banner.t -= rdt; if (this.banner.t <= 0) this.banner = null; }
     this.updRadio(rdt);
     for (const nt of this.notes) nt.t -= rdt;
@@ -852,7 +865,7 @@ export class Combat {
         continue;
       }
       e.lastHit += dt; e.losT -= dt; e.qbCd -= dt; e.qbT -= dt; e.boostT -= dt; e.jumpCd -= dt;
-      e.coverCd -= dt; e.coverT -= dt; e.navT -= dt;
+      e.coverCd -= dt; e.coverT -= dt; e.navT -= dt; e.reportT -= dt; e.pushCd -= dt; e.pushT = Math.max(0, e.pushT - dt);
       if (e.lastHit > 1.3 && e.stagT <= 0) e.stag = Math.max(0, e.stag - K.stag * 0.12 * dt);
       // 看得到玩家嗎
       if (e.losT <= 0) {
@@ -861,6 +874,7 @@ export class Combat {
         e.los = w.raycast(ec, playerChest, null) < 0 || w.raycast(_c.set(ec.x, ec.y + 5 * k, ec.z), _n.copy(playerChest).setY(playerChest.y + 4), null) < 0;
         if (e.los) e.lastSeen.copy(pl.pos);
       }
+      if (e.los && e.reportT <= 0 && !e.dropping) { e.reportT = e.kind === 'ace' ? 0.7 : 1.1; shareContact(this.enemies, e, 320); }
       const toP = _a.subVectors(e.los ? pl.pos : e.lastSeen, e.pos); toP.y = 0;
       const dist = toP.length();
       const dirP = toP.divideScalar(Math.max(1, dist));
@@ -895,7 +909,12 @@ export class Combat {
       } else {
         const [lo, hi] = K.pref;
         const hunt = e.noLos > 1.2;
-        const rush = e.los && e.role === 'flank' && (this.rifle.reload >= 0 || coveringFire(this.enemies, e));
+        if (e.los && e.role === 'flank' && e.pushCd <= 0 && dist > lo && dist < K.range && (this.rifle.reload >= 0 || coveringFire(this.enemies, e))) {
+          const goal = squadFlank(e.pos, e.lastSeen, this.enemies, e, e.flankSide, Math.max(lo, dist - 70));
+          const side = Math.sign((e.pos.z - e.lastSeen.z) * (goal.x - e.lastSeen.x) - (e.pos.x - e.lastSeen.x) * (goal.z - e.lastSeen.z)) || e.flankSide;
+          if (flankAvailable(this.enemies, e, side)) { e.pushGoal.set(goal.x, e.pos.y, goal.z); e.pushT = 2.5; e.pushCd = 5; e.pushSide = side; e.navT = 0; }
+        }
+        const rush = e.pushT > 0;
         const radial = hunt || rush ? 1 : dist > hi ? 1 : dist < lo ? -0.9 : 0.15 * Math.sin(this.stats.time * 0.7 + e.id);
         if (hunt && e.boostT <= 0 && Math.random() < dt * 0.8) e.boostT = rand(0.8, 1.6);
         if (hunt && e.grounded && e.bumped && e.jumpCd <= 0) {
@@ -912,13 +931,13 @@ export class Combat {
         e.navGoal.copy(e.pos).addScaledVector(wish, 70);
         // 側翼繞到另一個射角；失去視線只追最後看見的位置。
         if (hunt || e.role === 'flank' && dist > lo) {
-          const goal = hunt ? e.lastSeen : squadFlank(e.pos, e.lastSeen, this.enemies, e, e.flankSide, rush ? Math.max(lo, dist - 60) : (lo + hi) * 0.5);
+          const goal = rush ? e.pushGoal : hunt ? e.lastSeen : squadFlank(e.pos, e.lastSeen, this.enemies, e, e.flankSide, rush ? Math.max(lo, dist - 60) : (lo + hi) * 0.5);
           e.navGoal.set(goal.x, e.pos.y, goal.z);
           wish.set(goal.x - e.pos.x, 0, goal.z - e.pos.z).normalize();
         }
         if (rush) e.boostT = Math.max(e.boostT, 0.5);
         if (e.coverCd <= 0 && e.lastHit < 1.2 && (e.role === 'support' || e.ap < e.apMax * 0.4)) {
-          e.coverCd = 4; e.cover = this.enemyCover(e, playerChest); e.coverT = e.cover ? 3 : 0;
+          e.coverCd = 4; e.cover = this.enemyCover(e, e.los ? playerChest : e.lastSeen.clone().add(V3(0, 12, 0))); e.coverT = e.cover ? 3 : 0;
         }
         if (e.cover && e.coverT > 0) {
           e.navGoal.copy(e.cover);
@@ -1044,8 +1063,16 @@ export class Combat {
   }
   enemyQB(e, side) {
     if (e.qbCd > 0) return;
-    const toP = _c.subVectors(this.player.pos, e.pos).setY(0).normalize();
-    const perp = V3(toP.z, 0, -toP.x).multiplyScalar(e.strafe * side);
+    const toP = _c.subVectors(e.los || !e.lastSeen ? this.player.pos : e.lastSeen, e.pos).setY(0).normalize();
+    let perp = V3(toP.z, 0, -toP.x).multiplyScalar(e.strafe * side);
+    if (this.world) {
+      const k = e.scale, w = this.world, boxes = w.nearBoxes(e.pos.x, e.pos.z, 24 * k, []);
+      const safe = d => {
+        const p = e.pos.clone().addScaledVector(d, 16);
+        return !boxes.some(b => b.top > e.pos.y + 1.5 && segmentBox(e.pos.x, e.pos.z, p.x, p.z, b, 3.8 * k)) && !w.collide(p, 3.8 * k, e.pos.y) && (!e.grounded || Math.abs(w.support(p.x, p.z, 3.4 * k, e.pos.y) - e.pos.y) <= 4);
+      };
+      if (!safe(perp)) { perp.negate(); if (!safe(perp)) { e.qbCd = 0.5; return; } }
+    }
     e.vel.x = perp.x * 60; e.vel.z = perp.z * 60;
     e.qbT = 0.22; e.qbCd = rand(1.4, 2.6);
     this.audio.enemyBoost(e.id, e.pos, 1);
@@ -1062,7 +1089,7 @@ export class Combat {
       const p = V3(cx, e.pos.y, cz);
       if (Math.abs(pc.x - cx) > Math.abs(pc.z - cz)) { p.x = pc.x < cx ? b.x1 + r : b.x0 - r; p.z = clamp(e.pos.z, b.z0 - r, b.z1 + r); }
       else { p.z = pc.z < cz ? b.z1 + r : b.z0 - r; p.x = clamp(e.pos.x, b.x0 - r, b.x1 + r); }
-      const d = p.distanceTo(e.pos);
+      const d = p.distanceTo(e.pos) + this.enemies.filter(o => o !== e && !o.dead && o.coverT > 0 && o.cover && o.cover.distanceTo(p) < 12 * e.scale).length * 35;
       if (d > score || w.collide(p.clone(), 3.4 * e.scale, p.y) || Math.abs(w.support(p.x, p.z, 3.4 * e.scale, p.y) - p.y) > 3) continue;
       if (w.raycast(pc, p.clone().add(V3(0, 10.5 * e.scale, 0)), null) < 0) continue;
       best = p; score = d;

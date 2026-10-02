@@ -15,8 +15,8 @@ import { SEE } from '../mechs.js';
 
 const clamp = THREE.MathUtils.clamp;
 const HANGAR = { x0: 10.5, x1: 69.5, z0: 52.5, z1: 111.5, h: 28 };
-// 這章的難度：敵機出手、準度跟本篇第 2 關差不多，耐打度打七折（多打幾台、打得爽）
-const TIER = { atk: 2, fire: 1.3, aim: 1.25, dmg: 0.6, ap: 0.7, alt: false };
+// 每段最多三台輪流出手，耐打度維持七折；靠射擊頻率與包抄增加壓力。
+const TIER = { atk: 3, fire: 1.15, aim: 1.1, dmg: 0.6, ap: 0.7, alt: false };
 const IDLE = { mx: 0, my: 0, lookX: 0, lookY: 0, fire: false, lockHold: false, qb: false, boost: false, jump: false, hover: false, saber: false, cannon: false, hardLock: false, od: false, reload: false };
 // 前傳改成人聲版的幾個音效（受傷、跳、落地、換彈、子彈呼嘯），這章換回本篇機體版
 const MECH_SFX = new Set(['hurt', 'jump', 'land', 'reload', 'whiz']);
@@ -204,7 +204,7 @@ export async function startMech(X) {
   }
 
   // ---------------------------------------------------------------- 戰鬥：本篇的 Combat，波次換成 MECH6.waves
-  const DEF = { name: M6.name, en: M6.en, tip: '', groups: M6.waves.map((w) => w.list.map((a) => a[0])) };
+  const DEF = { name: M6.name, en: M6.en, tip: '', groups: M6.waves.map((w) => [...w.list, ...w.reinforce || []].map((a) => a[0])) };
   let boss = null, bossTold = false, started = false, wave = 0;
   // 市區：gate＝目前的目標點（上一波打完、這一波還沒開打）；cp＝大破時從哪裡重來；fled＝基地那台黑犬已經逃了
   let gate = null, cp = M6.restart, fled = false;
@@ -228,10 +228,11 @@ export async function startMech(X) {
     if (!noDog) for (const [w, t, now] of W.lines) zhud.say(w, t, 3.6, now);
     if (W.music) audio.music('battle', { stage: W.music });
     const A = W.go ? { x: W.go[0], z: W.go[1] } : { x: player.pos.x, z: player.pos.z };
-    W.list.forEach(([kind, x, z, y], i) => {
+    const list = [...W.list, ...W.reinforce || []];
+    list.forEach(([kind, x, z, y], i) => {
       if (kind === 'ace' && noDog) return;
-      this.events.push({ spawn: true, t: 1.4 + i * 0.6, fn: () => {
-        const e = this.spawn(kind, i, W.list.length, x === undefined ? null : { x, z, y: y ?? 0, tx: A.x, tz: A.z });
+      this.events.push({ spawn: true, t: i < W.list.length ? 1.4 + i * 0.7 : 7 + (i - W.list.length) * 1.2, fn: () => {
+        const e = this.spawn(kind, i, list.length, x === undefined ? null : { x, z, y: y ?? 0, tx: A.x, tz: A.z });
         if (kind === 'ace' && W.boss) { boss = e; e.ap = e.apMax = Math.round(e.apMax * W.boss.ap); e.flee = W.boss.flee || 0; e.label = 'BLACK DOG'; }
       } });
     });
@@ -262,6 +263,7 @@ export async function startMech(X) {
     flyers.length = 0; pods.length = 0;
     C = new Combat({ scene, world, camera, player, hero, fx, audio: au, cockpit, post, onEnd, stage: 3, stageDef: DEF });
     Object.defineProperty(C, 'tier', { value: TIER });
+    C.enemyCap = S.FIRST_MECH === 4 ? 7 : 9;
     Object.defineProperty(C, 'def', { value: DEF });
     world.blocked = BLOCK;   // Combat 開場會把路障清掉（setRoute），這裡再封一次
     C.spawnGroup = spawnGroup;
