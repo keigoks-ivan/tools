@@ -23,6 +23,13 @@ export class Patrols {
           if (point(old.lastSeen)) data.lastSeen = old.lastSeen;
           if (Array.isArray(old.seenBodies)) data.seenBodies = old.seenBodies.filter(Number.isFinite).slice(0, 160);
         }
+        if (def.type !== 'drone') {
+          // 舊檢查點可能保存了與車框、沙包重疊的位置；只在同層移到鄰近空位。
+          const safe = pos.clone(), S = this.G.solid;
+          for (let n = 0; n < 4 && S.pushOut(safe, .36, safe.y, safe.y + 1.8, .45); n++) {}
+          const y = S.floorAt(safe.x, safe.z, safe.y + .5);
+          if (Math.abs(y - pos.y) <= .6 && !S.pushOut(safe.clone(), .34, y, y + 1.8, .45)) { pos.copy(safe); pos.y = y; }
+        }
         if (def.patrol?.length) data.pi = Math.max(0, Math.floor(data.pi || 0)) % def.patrol.length;
         const r = { key, E, def, data, p: pos, actor: null, type: def.type || 'trooper' };
         for (const k of ['dead', 'state', 'sees']) Object.defineProperty(r, k, { get: () => r.actor ? r.actor[k] : r.data[k] });

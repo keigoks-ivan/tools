@@ -153,6 +153,8 @@ window.__renderer = renderer; window.__scene = scene; window.__solid = solid; wi
 const NADE_START = 3, NADE_MAX = 5;   // 玩家手榴彈：每章開頭至少幾顆、最多帶幾顆
 const G = {
   scene, solid, kit, audio, fx, player, vm, hud, t: 0, nextId: 1, enemies: [], playing: false,
+  // 偵察與玩家射擊共用實際形狀判定，避免車框、護欄缺口被外接盒誤擋。
+  reconSees(a, b) { const d = b.clone().sub(a), L = d.length(); return L < .05 || !shotRay(a, d.divideScalar(L), L - .05); },
   playerEye: new THREE.Vector3(), aimDir: new THREE.Vector3(0, 0, 1), ads: 0, diff: { acc: 1, dmg: 1 }, bolts: [], grenades: [], nadeN: 3, loot: [],
   chapterTag: '', objText: '', objSub: '', lastHit: -99, scopeRange: 0, stats: { shots: 0, hits: 0, kills: 0, heads: 0, taken: 0, time: 0 },
   // 同時最多四名開火；其餘包抄、換位或等待射界。
@@ -548,9 +550,9 @@ function updateEncounters() {
     for (const [w, t, now] of S.LINES.mech.slice(0, -1)) hud.say(w, t, 3.4, now); audio.radio('in');
   }
 }
-// 打仗時：左上角多一行「還剩幾個敵人」；剩 3 個以內又 6 秒沒打中人、或 20 秒都沒打中人時，畫面上標出剩下的敵人在哪（不會打完一半找不到人）
+// 久未交火時提供粗略搜索區域；目擊記錄仍只更新看得到的敵人。
 function updateFoes() {
-  hud.foes.length = 0; G.objSub = '';
+  hud.foes.length = 0; G.contacts.search.length = 0; G.objSub = '';
   const a = active[0]; if (!a) return;
   const E = a.E, left = a.list.filter((e) => !e.dead), sub = [];
   if(a.operation)sub.push(a.operation.status);
@@ -564,7 +566,11 @@ function updateFoes() {
   if (left.length < a.n) { a.n = left.length; a.t0 = G.t; }   // 有人倒下也算「剛打到」
   if (!left.length) return;
   const quiet = G.t - Math.max(a.t0, G.lastHit);
-  if ((left.length <= 3 && quiet > 6) || quiet > 20) for (const e of left) hud.foes.push({ p: e.pos, h: e.type === 'drone' ? 0.7 : 2.2 });
+  if (!E.operation?.bypass && ((left.length <= 3 && quiet > 6) || quiet > 20)) {
+    G.contacts.searchAreas(left);
+    for (const area of G.contacts.search) hud.foes.push({ p: area.p, h: 2.2, search: true });
+    G.objSub += '　搜索黃圈區域';
+  }
 }
 function nextChapter(n) {
   G.nadeN = Math.max(G.nadeN, NADE_START);   // 每章開頭至少補到 3 顆

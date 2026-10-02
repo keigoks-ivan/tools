@@ -14,7 +14,7 @@ export class HUD {
     this.banner = null;     // 章節標題
     this.prompt = null;
     this.obj = null;        // 目標 {p: Vector3, text}
-    this.foes = [];         // 要標出來的敵人 {p: 腳底位置, h: 標在多高}（打仗打到找不到人時）
+    this.foes = [];         // 尋敵提示 {p: 搜索區域中心, h: 標在多高, search}
     this.pins = [];         // 任務標記：要炸的目標、要撿的東西 {p, h}
     this.notes = [];
     this.resize(); addEventListener('resize', () => this.resize());
@@ -90,8 +90,8 @@ export class HUD {
     }
     // ---- 目標標記
     if (this.obj && !vm.scoped) this._objective(W, H, G);
-    // ---- 剩下的敵人（紅色小菱形，在畫面外就貼邊用箭頭指方向）
-    if (!vm.scoped) for (const f of this.foes) { const p = f.p.clone(); p.y += f.h; this._pin(W, H, p, P.pos.distanceTo(f.p), RD, 7, false); }
+    // ---- 搜索區域（畫面外貼邊用箭頭指方向）
+    if (!vm.scoped) for (const f of this.foes) { const p = f.p.clone(); p.y += f.h; this._pin(W, H, p, P.pos.distanceTo(f.p), f.search ? AM : RD, 7, false, f.search ? '搜索區域' : ''); }
     if (!vm.scoped) for (const f of this.pins) { const p = f.p.clone(); p.y += f.h; this._pin(W, H, p, P.pos.distanceTo(f.p), AM, 8, true); }
     // ---- 地上的手榴彈（敵人掉的）：15 m 內、還帶得下才標
     if (!vm.scoped && G.nadeN < 5) for (const L of G.loot) { const dd = P.pos.distanceTo(L.p); if (dd < 15) this._lootTag(W, H, L.p, dd, L.n); }
@@ -153,12 +153,13 @@ export class HUD {
     x.beginPath();x.arc(0,0,r,0,Math.PI*2);x.fill();x.stroke();
     x.strokeStyle='rgba(127,243,255,.15)';x.beginPath();x.arc(0,0,r*.5,0,Math.PI*2);x.moveTo(-r,0);x.lineTo(r,0);x.moveTo(0,-r);x.lineTo(0,r);x.stroke();
     x.save();x.beginPath();x.arc(0,0,r-2,0,Math.PI*2);x.clip();
-    const plot=(p,col,hollow=false)=>{const dx=p.x-origin.x,dz=p.z-origin.z;let px=(-dx*Math.cos(yaw)+dz*Math.sin(yaw))*r/90,py=-(dx*Math.sin(yaw)+dz*Math.cos(yaw))*r/90;const L=Math.hypot(px,py);if(L>r-6){px*=(r-6)/L;py*=(r-6)/L;}x.beginPath();x.arc(px,py,3,0,Math.PI*2);x.fillStyle=x.strokeStyle=col;hollow?x.stroke():x.fill();};
-    for(const c of G.contacts.items.values()){x.globalAlpha=Math.max(.25,1-(G.contacts.now-c.t)/14);plot(c.p,c.type==='drone'?'#f8c76a':RD,!c.fresh);}
+    const plot=(p,col,hollow=false,size=3)=>{const dx=p.x-origin.x,dz=p.z-origin.z;let px=(-dx*Math.cos(yaw)+dz*Math.sin(yaw))*r/90,py=-(dx*Math.sin(yaw)+dz*Math.cos(yaw))*r/90;const L=Math.hypot(px,py),edge=r-size-3;if(L>edge){px*=edge/L;py*=edge/L;}x.beginPath();x.arc(px,py,size,0,Math.PI*2);x.fillStyle=x.strokeStyle=col;hollow?x.stroke():x.fill();};
+    for(const area of G.contacts.search||[]){x.globalAlpha=.55;plot(area.p,AM,true,Math.max(6,area.radius*r/90));}
+    for(const c of G.contacts.items.values()){x.globalAlpha=c.fresh?1:.8;plot(c.p,c.fresh?RD:AM,!c.fresh);}
     x.globalAlpha=1;if(G.scout.active)plot(G.player.pos,CY);x.restore();
     x.fillStyle=CY;x.beginPath();x.moveTo(0,-5);x.lineTo(4,4);x.lineTo(0,2);x.lineTo(-4,4);x.closePath();x.fill();
-    x.shadowColor='rgba(0,0,0,.9)';x.shadowBlur=4;x.textAlign='center';x.font='500 11px "Noto Sans TC",sans-serif';x.fillStyle=CY;x.fillText(`已發現 ${G.contacts.items.size} 名 · 90 m`,0,-r-9);x.fillStyle='#9fb4bb';x.fillText('空心：最後目擊位置',0,r+15);
-    x.textAlign='left';x.fillText(`[N] 偵察無人機 ${Math.ceil(G.scout.battery/45*100)}%`,-r,r+34);x.restore();
+    x.shadowColor='rgba(0,0,0,.9)';x.shadowBlur=4;x.textAlign='center';x.font='500 11px "Noto Sans TC",sans-serif';x.fillStyle=CY;x.fillText(`已發現 ${G.contacts.items.size} 名 · 90 m`,0,-r-9);x.fillStyle='#c3b99f';x.fillText('黃點：最後目擊',0,r+15);x.fillText('黃圈：搜索區域',0,r+30);
+    x.textAlign='left';x.fillText(`[N] 偵察無人機 ${Math.ceil(G.scout.battery/45*100)}%`,-r,r+49);x.restore();
   }
   _scout(W, H, G) {
     const x=this.x,S=G.scout,cx=W/2,cy=H/2;
@@ -211,7 +212,7 @@ export class HUD {
   }
   _objective(W, H, G) { this._pin(W, H, this.obj.p, this.obj.left ?? G.player.pos.distanceTo(this.obj.p), AM, 12, true); }
   // 畫一個菱形標記（目標用琥珀色大的、敵人用紅色小的）；pulse＝會不會一閃一閃
-  _pin(W, H, p0, dist, col, r0, pulseOn) {
+  _pin(W, H, p0, dist, col, r0, pulseOn, label = '') {
     const x = this.x, p = p0.clone();
     const v = p.clone().project(this.cam);
     const behind = v.z > 1;
@@ -241,6 +242,7 @@ export class HUD {
     x.fillStyle = '#1b1206'; x.beginPath(); x.arc(0, 0, r0 * 0.27, 0, Math.PI * 2); x.fill();
     x.shadowBlur = 4; x.font = `700 ${r0 > 10 ? 15 : 12}px Rajdhani, sans-serif`; x.fillStyle = col; x.textAlign = 'center';
     x.fillText(`${dist.toFixed(0)} m`, 0, r + (r0 > 10 ? 18 : 14));
+    if (label) { x.font = '500 11px "Noto Sans TC",sans-serif'; x.fillText(label, 0, r + 29); }
     x.restore(); x.globalAlpha = 1;
   }
 

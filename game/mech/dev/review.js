@@ -550,7 +550,7 @@ async function reconControls() {
     const G=win.__G,T=win.__T,S=G.scout;renderer=win.__renderer;post={render:()=>win.__step(1)};
     T.Clock.prototype.getDelta=()=>.05;const step=n=>{win.__scene.updateMatrixWorld(true);win.__step(n);};
     const key=(code,n=1)=>{win.dispatchEvent(new win.KeyboardEvent('keydown',{code}));step(n);win.dispatchEvent(new win.KeyboardEvent('keyup',{code}));step(1);};
-    step(30);const shoot=G.bolt;G.bolt=()=>{};G.bolts.length=0;const body=G.player.pos.clone(),ammo=G.vm.ammo[G.vm.cur];key('KeyN');assert(S.active,path+' N 透過正式控制放飛 '+JSON.stringify({p:G.player.pos.toArray(),busy:G.vm.busy,notes:G.hud.notes,pause:win.document.querySelector('#pause').style.display}));
+    step(30);const shoot=G.bolt,nade=G.throwGrenade;G.bolt=()=>{};G.throwGrenade=()=>{};G.bolts.length=0;const body=G.player.pos.clone(),ammo=G.vm.ammo[G.vm.cur];key('KeyN');assert(S.active,path+' N 透過正式控制放飛 '+JSON.stringify({p:G.player.pos.toArray(),busy:G.vm.busy,notes:G.hud.notes,pause:win.document.querySelector('#pause').style.display}));
     assert(!G.vm.holder.visible&&!G.vm.arms.root.visible,path+' 無人機畫面不被主角武器擋住');
     key('Space',10);const before=S.pos.clone();key('KeyW',12);
     assert(S.pos.distanceTo(before)>1&&G.player.pos.distanceTo(body)<.01,path+' 飛行控制與原地主角分離');
@@ -566,6 +566,11 @@ async function reconControls() {
     });
     assert(visible.length>0,path+' 畫面內有實際看得到的敵人');
     assert(visible.every(e=>G.contacts.items.has(e.id)),path+' 每名可見敵人都已登記雷達 '+JSON.stringify(visible.map(e=>e.id)));
+    const id=visible[0].id,last=G.contacts.items.get(id).p.clone(),sight=G.reconSees;
+    G.reconSees=()=>false;const render=renderer.render.bind(renderer);renderer.render=()=>{};step(360);renderer.render=render;
+    assert(G.contacts.items.has(id)&&!G.contacts.items.get(id).fresh,path+' 遮蔽超過 14 秒仍保留最後目擊');
+    assert(G.contacts.items.get(id).p.distanceTo(last)<.001,path+' 遮蔽時不追蹤敵人的隱藏新位置');
+    await save(path+'-radar-memory');G.reconSees=sight;step(10);
     assert(S.active,path+' 截圖前仍在實際操控');G.hud.banner=null;G.hud.sub=null;G.hud.subQ.length=0;
     await save(path+'-scout-radar');G.bolt=shoot;
     const eye=G.playerEye.clone();G.bolt(eye.clone().add(new T.Vector3(0,0,.7)),new T.Vector3(0,0,-1),60,9,null);step(1);
@@ -575,7 +580,11 @@ async function reconControls() {
     assert(S.cooldown>0,path+' 遭攻擊後有短暫重新放飛間隔');
     G.bolt=()=>{};G.bolts.length=0;step(60);key('KeyN');assert(S.active,path+' 冷卻後能重新放飛');key('KeyN');assert(!S.active,path+' N 手動返回');
     key('KeyN');assert(!S.active,path+' 返回後不會立刻連續放飛');
-    G.bolt=shoot;assert(errors.length===0,path+' 雷達、操控、受擊切回沒有執行錯誤');checks.push(...result);
+    const first=win.__S.ENCOUNTERS.find(e=>e.ch===1),at=first.guide;G.player.reset(new T.Vector3(at[0],0,at[1]),0);renderer.render=()=>{};step(450);renderer.render=render;
+    assert(win.__flow.active.includes(first.id)&&G.contacts.search.length>0,path+' 任務剩餘敵人久未交火時雷達顯示搜索區域');
+    assert(G.hud.foes.every(f=>f.search),path+' 搜索提示使用粗略區域而非敵人隱藏實際座標');
+    G.hud.banner=null;G.hud.sub=null;G.hud.subQ.length=0;await save(path+'-radar-search');
+    const blocked=G.patrols.records.filter(r=>!r.dead&&r.type!=='drone'&&G.solid.pushOut(r.pos.clone(),.34,r.pos.y,r.pos.y+1.7,.45));assert(blocked.length===0,path+' 駐軍位置均未埋在障礙物內 '+JSON.stringify(blocked.map(r=>r.key)));G.bolt=shoot;G.throwGrenade=nade;assert(errors.length===0,path+' 雷達、操控、受擊切回沒有執行錯誤');checks.push(...result);
   }
   report.textContent=JSON.stringify({checks,errors},null,2);state.textContent='雷達與無人機通過';
 }

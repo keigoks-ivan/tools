@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import * as THREE from 'three';
 import { Patrols, arrivalPoint, updateInfantry, MAX_ACTORS } from '../zero/patrol.js';
 import { Reinforcements } from '../reinforcements.mjs';
+import { Solid } from '../zero/kit.js';
 const v = (x = 0, z = 0) => new THREE.Vector3(x, 0, z);
 function fixture() {
   const G = { enemies: [], nextId: 1, player: { pos: v() }, playerEye: v(), solid: { floorAt: () => 0, sees: () => false, pushOut: () => false } };
@@ -59,4 +60,9 @@ test('crowded visible garrisons stay within the render actor budget and stream g
   A.enemies=Array.from({length:60},(_,i)=>({x:5+i*.1,z:0}));P.reset(new Set());P.update(0,true);
   assert.equal(G.enemies.length,MAX_ACTORS);assert.equal(P.records.filter(r=>r.E===A).length,60);
   P.update(1);assert.equal(G.enemies.length,MAX_ACTORS);
+});
+test('old checkpoint overlap is repaired on the same floor without losing the soldier state', () => {
+  const {G,P,A}=fixture();G.solid=new Solid();G.solid.add({x0:9.5,x1:10.5,y0:0,y1:1.3,z0:-1,z1:1});
+  P.reset(new Set(),[{key:'A:0',p:[10,0,0],hp:70,ammo:4,pi:1,dead:false}]);const r=P.group(A)[0];
+  assert(!G.solid.pushOut(r.pos.clone(),.34,r.pos.y,r.pos.y+1.7,.45));assert(r.pos.distanceTo(v(10,0))<1);assert.equal(r.pos.y,0);assert.equal(r.data.hp,70);assert.equal(r.data.ammo,4);assert.equal(r.data.pi,1);assert(!r.dead);
 });

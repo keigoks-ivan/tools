@@ -1,23 +1,32 @@
 import * as THREE from 'three';
 const clamp = THREE.MathUtils.clamp;
 export class Contacts {
-  constructor() { this.items = new Map(); this.clock = 0; this.now = 0; }
-  reset() { this.items.clear(); this.clock = 0; this.now = 0; }
+  constructor() { this.items = new Map(); this.search = []; this.clock = 0; this.now = 0; }
+  reset() { this.items.clear(); this.search.length = 0; this.clock = 0; this.now = 0; }
   reveal(e, now) { if (!e.dead) this.items.set(e.id, { id: e.id, p: e.pos.clone(), t: now, type: e.type, fresh: true }); }
+  searchAreas(enemies) {
+    const areas = new Map();
+    for (const e of enemies) {
+      if (e.dead) continue;
+      const x = Math.floor(e.pos.x / 20) * 20 + 10, z = Math.floor(e.pos.z / 20) * 20 + 10, y = Math.floor(e.pos.y / 3) * 3;
+      areas.set(`${x}:${y}:${z}`, { p: new THREE.Vector3(x, y, z), radius: 15 });
+    }
+    this.search = [...areas.values()];
+  }
   update(dt, G, camera) {
     this.now += dt; this.clock += dt;
     // 屍體與已清除的駐軍移除；暫時卸載的活人保留最後目擊位置。
     for (const [id, c] of this.items) {
       const e = G.enemies.find(e => e.id === id), r = !e && G.patrols?.records.find(r => r.data.id === id);
-      if (e?.dead || r?.dead || this.now - c.t > 14) this.items.delete(id);
-      else c.fresh = this.now - c.t < .6;
+      if (e?.dead || r?.dead || !e && !r) this.items.delete(id);
+      else c.fresh = this.now - c.t < 1;
     }
     if (this.clock < .25) return; this.clock = 0;
     camera.updateMatrixWorld();
     const origin = camera.position, point = new THREE.Vector3(), screen = new THREE.Vector3();
     const visible = p => {
       screen.copy(p).project(camera);
-      return screen.z >= -1 && screen.z <= 1 && Math.abs(screen.x) <= 1 && Math.abs(screen.y) <= 1 && G.solid.sees(origin, p);
+      return screen.z >= -1 && screen.z <= 1 && Math.abs(screen.x) <= 1 && Math.abs(screen.y) <= 1 && (G.reconSees ? G.reconSees(origin, p) : G.solid.sees(origin, p));
     };
     for (const e of G.enemies) {
       if (e.dead || e.pos.distanceTo(origin) > 95) continue;

@@ -14,7 +14,8 @@ test('radar only acquires in-frame visible enemies and keeps an unmoving last kn
   const front={id:1,pos:V(0,0,20),type:'trooper'},behind={id:2,pos:V(0,0,-10)},outside={id:3,pos:V(20,0,8)};G.enemies.push(front,behind,outside);
   const C=new Contacts();C.update(.25,G,camera);assert.deepEqual([...C.items.keys()],[1]);
   G.solid.sees=()=>false;front.pos.x=8;C.update(1,G,camera);assert.equal(C.items.get(1).p.x,0);assert(!C.items.get(1).fresh);
-  C.update(15,G,camera);assert.equal(C.items.size,0);
+  C.update(60,G,camera);assert.equal(C.items.size,1);assert.equal(C.items.get(1).p.x,0);assert(!C.items.get(1).fresh);
+  front.dead=true;C.update(.01,G,camera);assert.equal(C.items.size,0);
 });
 test('radar removes defeated actors but does not reveal previously unseen reinforcements', () => {
   const C=new Contacts(),G=fixture(),e={id:1,pos:V()};C.reveal(e,0);G.enemies=[{...e,dead:true},{id:2,pos:V(5,0,5)}];C.update(.01,G,{});assert.equal(C.items.size,0);
@@ -58,4 +59,23 @@ test('radar blips match screen side and remain visible at acquisition range', ()
     const G=fixture();G.scout={active:true,pos:V(),yaw,battery:45};G.contacts={now:0,items:new Map([[1,{p:right.clone().multiplyScalar(20).addScaledVector(forward,10),t:0,fresh:true}],[2,{p:forward.clone().multiplyScalar(95),t:0,fresh:true}]])};
     HUD.prototype._radar.call({x},800,700,G);const blips=arcs.filter(a=>a[2]===3);assert(blips[0][0]>0,'enemy on screen right plots right');assert(blips[0][1]<0,'enemy in front plots above');assert(Math.hypot(blips[1][0],blips[1][1])<52,'95 m contact not clipped by radar rim');
   }
+});
+test('last known contacts survive streamed model removal, then clear on confirmed death or reset', () => {
+  const G=fixture(),C=new Contacts(),camera=new T.PerspectiveCamera(72,1,.05,400),e={id:7,pos:V(12,0,20)};G.enemies=[e];C.reveal(e,0);
+  G.enemies=[];const record={data:{id:7},dead:false,pos:V(70,0,20)};G.patrols={records:[record]};C.update(60,G,camera);
+  assert(C.items.has(7));assert.equal(C.items.get(7).p.x,12);assert(!C.items.get(7).fresh);
+  record.dead=true;C.update(.01,G,camera);assert.equal(C.items.size,0);
+  G.enemies=[e];C.reveal(e,C.now);C.reset();assert.equal(C.items.size,0);assert.equal(C.search.length,0);
+});
+test('recon uses the detailed visible shape rather than a prop bounding box', () => {
+  const G=fixture(),C=new Contacts(),camera=new T.PerspectiveCamera(72,1,.05,400);camera.position.set(0,1.6,0);camera.lookAt(0,1.6,10);camera.updateMatrixWorld();
+  G.enemies=[{id:1,pos:V(0,0,20)}];G.solid.sees=()=>false;G.reconSees=()=>true;C.update(.25,G,camera);assert(C.items.has(1));
+  C.reset();G.reconSees=()=>false;C.update(.25,G,camera);assert.equal(C.items.size,0);
+});
+test('mission search hints group broad areas without registering unseen enemy contacts', () => {
+  const C=new Contacts(),enemies=[{pos:V(-1,4,-1)},{pos:V(-16,4,-8)},{pos:V(31,0,5)},{pos:V(80,0,80),dead:true}];C.searchAreas(enemies);
+  assert.equal(C.items.size,0);assert.equal(C.search.length,2);
+  assert.deepEqual(C.search.map(a=>a.p.toArray()),[[-10,3,-10],[30,0,10]]);
+  for(const e of enemies.filter(e=>!e.dead))assert(C.search.some(a=>Math.hypot(a.p.x-e.pos.x,a.p.z-e.pos.z)<=a.radius));
+  C.searchAreas([]);assert.equal(C.search.length,0);
 });
