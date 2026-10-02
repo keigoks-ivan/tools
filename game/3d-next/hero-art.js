@@ -1,6 +1,7 @@
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { createHairKit } from './hero-hair.js?v=20261002b';
+import { createHairKit } from './hero-hair.js?v=20261002c';
 import { forgedBlade } from './hero-weapons.js?v=20261002b';
+import { indexGeometry } from './index-geometry.js?v=20261002c';
 
 // One GPU texture per asset across the local character and all teammates.
 const textureCache = new Map();
@@ -127,6 +128,14 @@ export function createHeroArt(T, root, sword) {
   }
   const headBone = root.getObjectByName('J_Bip_C_Head');
   if (headBone) headBone.scale.multiplyScalar(0.86);
+  const rightHand = root.getObjectByName('J_Bip_R_Hand'), wrist = root.getObjectByName('J_Bip_L_Hand');
+  const joints = [root.getObjectByName('J_Bip_L_LowerArm'), root.getObjectByName('J_Bip_L_UpperArm')];
+  const center = new T.Vector3(), from = new T.Vector3(), to = new T.Vector3(), target = new T.Vector3(), offset = new T.Vector3();
+  const gripRotation = new T.Quaternion(), delta = new T.Quaternion(), jointRotation = new T.Quaternion(), parentRotation = new T.Quaternion();
+  const position = new T.Vector3(), scale = new T.Vector3();
+  let gripWeapon = null;
+  const worldRotation = (bone, quaternion) => { bone.matrixWorld.decompose(position, quaternion, scale); return quaternion; };
+  const compact = geometry => { const indexed = indexGeometry(geometry); if (indexed !== geometry) geometry.dispose(); return indexed; };
 
   const shape = points => {
     const s = new T.Shape(); s.moveTo(...points[0]);
@@ -284,13 +293,13 @@ export function createHeroArt(T, root, sword) {
       const cord = Array.from({ length: 100 }, (_, i) => { const t = i / 99, a = t * Math.PI * 20; return new T.Vector3(Math.cos(a) * 0.016, -0.107 + t * 0.19, Math.sin(a) * 0.016); });
       put(new T.TubeGeometry(new T.CatmullRomCurve3(cord), 100, 0.0024, 4, false), leatherGrip);
       for (const part of forgedBlade(T, kind)) put(part.geometry, part.edge ? edge : forgedSteel);
-      for (const [mat, geometries] of wm) { const mesh = new T.Mesh(mergeGeometries(geometries), mat); mesh.frustumCulled = false; weapon.add(mesh); geometries.forEach(g => g.dispose()); }
+      for (const [mat, geometries] of wm) { const mesh = new T.Mesh(compact(mergeGeometries(geometries)), mat); mesh.frustumCulled = false; weapon.add(mesh); geometries.forEach(g => g.dispose()); }
       groups.set(hand + '_weapon', weapon);
     }
     weapon('J_Bip_R_Hand', id === 'azure' ? 'glaive' : id === 'amber' ? 'dagger' : 'katana');
     if (id === 'amber') weapon('J_Bip_L_Hand', 'dagger');
     for (const { bone, material, geometries } of batches.values()) {
-      const mesh = new T.Mesh(mergeGeometries(geometries), material); mesh.frustumCulled = false; group(bone).add(mesh);
+      const mesh = new T.Mesh(compact(mergeGeometries(geometries)), material); mesh.frustumCulled = false; group(bone).add(mesh);
       geometries.forEach(g => g.dispose());
     }
     return [...groups.values()];
@@ -302,26 +311,24 @@ export function createHeroArt(T, root, sword) {
     update() {
       for (const group of kits.get(activeId) || []) group.userData.updateHair?.(performance.now() / 1000);
       if (activeId !== 'azure') return;
-      const weapon = root.getObjectByName('azure_J_Bip_R_Hand_weapon');
-      const wrist = root.getObjectByName('J_Bip_L_Hand');
-      const elbow = root.getObjectByName('J_Bip_L_LowerArm'), shoulder = root.getObjectByName('J_Bip_L_UpperArm');
       root.updateMatrixWorld(true);
-      const gripRotation = root.getObjectByName('J_Bip_R_Hand').getWorldQuaternion(new T.Quaternion());
-      const target = weapon.localToWorld(new T.Vector3(0, 0.4, 0)).sub(new T.Vector3(-0.045, -0.012, 0.025).applyQuaternion(gripRotation));
-      for (let i = 0; i < 12; i++) for (const joint of [elbow, shoulder]) {
-        const center = joint.getWorldPosition(new T.Vector3());
-        const from = wrist.getWorldPosition(new T.Vector3()).sub(center).normalize(), to = target.clone().sub(center).normalize();
-        const delta = new T.Quaternion().setFromUnitVectors(from, to);
-        const world = joint.getWorldQuaternion(new T.Quaternion()).premultiply(delta);
-        const local = joint.parent.getWorldQuaternion(new T.Quaternion()).invert().multiply(world);
-        joint.quaternion.copy(local); root.updateMatrixWorld(true);
+      worldRotation(rightHand, gripRotation);
+      target.set(0, 0.4, 0).applyMatrix4(gripWeapon.matrixWorld).sub(offset.set(-0.045, -0.012, 0.025).applyQuaternion(gripRotation));
+      for (let i = 0; i < 12; i++) for (const joint of joints) {
+        center.setFromMatrixPosition(joint.matrixWorld);
+        from.setFromMatrixPosition(wrist.matrixWorld).sub(center).normalize(); to.copy(target).sub(center).normalize();
+        delta.setFromUnitVectors(from, to);
+        worldRotation(joint, jointRotation).premultiply(delta);
+        worldRotation(joint.parent, parentRotation).invert().multiply(jointRotation);
+        joint.quaternion.copy(parentRotation); joint.updateMatrixWorld(true);
       }
-      wrist.quaternion.copy(wrist.parent.getWorldQuaternion(new T.Quaternion()).invert().multiply(gripRotation));
+      wrist.quaternion.copy(worldRotation(wrist.parent, parentRotation).invert().multiply(gripRotation));
     },
     apply(profile) {
       activeId = profile.id;
       const p = palette[profile.id] || palette.violet;
       if (!kits.has(profile.id)) kits.set(profile.id, build(profile.id));
+      if (profile.id === 'azure') gripWeapon = root.getObjectByName('azure_J_Bip_R_Hand_weapon');
       for (const [id, groups] of kits) for (const group of groups) group.visible = id === profile.id;
       for (const mesh of baseMeshes) {
         if (mesh.userData.fullCostumeGeometry) mesh.geometry = profile.id === 'amber' ? shortened.get(mesh.userData.fullCostumeGeometry) : mesh.userData.fullCostumeGeometry;

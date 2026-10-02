@@ -1,4 +1,5 @@
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { indexGeometry } from './index-geometry.js?v=20261002c';
 
 // New sets use the director's exact height field; scenery stays outside combat
 // bounds. Static pieces merge by material, with one bounded weather draw.
@@ -113,7 +114,7 @@ export function createChapterWorld(T, scene, world) {
       const x = side * 21, y = 5 + tier * 3, w = 11 - tier * 1.4;
       box(red, x, y, -105, w - 1, 2.7, w - 1); box(roof, x, y + 1.5, -105, w + 1, 0.5, w + 1); box(metal, x, y + 1.15, -99.5 - tier * 0.7, w, 0.07, 0.06);
     }
-    for (const [mat, pieces] of batches) { const geometry = mergeGeometries(pieces); const mesh = new T.Mesh(geometry, mat); mesh.name = `${kind}-set`; group.add(mesh); pieces.forEach(g => g.dispose()); }
+    for (const [mat, pieces] of batches) { const merged = mergeGeometries(pieces), geometry = indexGeometry(merged); if (geometry !== merged) merged.dispose(); const mesh = new T.Mesh(geometry, mat); mesh.name = `${kind}-set`; mesh.matrixAutoUpdate = false; group.add(mesh); pieces.forEach(g => g.dispose()); }
     const weather = new Float32Array(256 * 3);
     for (let i = 0; i < 256; i++) { weather[i * 3] = Math.sin(i * 17.3) * 25; weather[i * 3 + 1] = (i * 7.37) % 15; weather[i * 3 + 2] = 15 - (i * 11.17) % 130; }
     const particleGeometry = new T.BufferGeometry(); particleGeometry.setAttribute('position', new T.BufferAttribute(weather, 3));

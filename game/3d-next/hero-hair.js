@@ -1,4 +1,5 @@
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { indexGeometry } from './index-geometry.js?v=20261002c';
 
 // Rounded, tapered locks follow the head; a small shader sway moves loose tips.
 export function createHairKit(T, source, id, strandTexture = null) {
@@ -89,11 +90,13 @@ export function createHairKit(T, source, id, strandTexture = null) {
   const group = new T.Group(); group.name = `${id}_atelier_hair`;
   group.userData.updateHair = seconds => { clock.value = seconds; };
   for (let i = 0; i < 3; i++) {
-    const geometry = mergeGeometries(geometries[i]); const mesh = new T.SkinnedMesh(geometry, materials[i]); mesh.name = `${id}_hair_locks_${i}`;
+    const merged = mergeGeometries(geometries[i]), geometry = indexGeometry(merged); if (geometry !== merged) merged.dispose();
+    const mesh = new T.SkinnedMesh(geometry, materials[i]); mesh.name = `${id}_hair_locks_${i}`;
     mesh.applyMatrix4(source.matrix); mesh.bind(source.skeleton, source.bindMatrix.clone()); mesh.frustumCulled = false; group.add(mesh);
     geometries[i].forEach(g => g.dispose());
   }
-  const base = new T.SkinnedMesh(foundation, new T.MeshStandardMaterial({ color: colors[0], roughness: 0.91 }));
+  const indexedFoundation = indexGeometry(foundation); if (indexedFoundation !== foundation) foundation.dispose();
+  const base = new T.SkinnedMesh(indexedFoundation, new T.MeshStandardMaterial({ color: colors[0], roughness: 0.91 }));
   base.name = `${id}_hair_foundation`; base.applyMatrix4(source.matrix); base.bind(source.skeleton, source.bindMatrix.clone()); base.frustumCulled = false; group.add(base);
   return group;
 }

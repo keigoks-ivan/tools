@@ -1,10 +1,10 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone } from 'three/addons/utils/SkeletonUtils.js';
-import { toonVroidHero } from './battle.js?v=20261002b';
-import { createHeroEquipment } from './hero-equipment.js?v=20261002b';
+import { toonVroidHero } from './battle.js?v=20261002c';
+import { createHeroEquipment } from './hero-equipment.js?v=20261002c';
 import { HEROES } from './heroes.js?v=20261002b';
-import { createHeroEnvironment } from './hero-hair.js?v=20261002b';
+import { createHeroEnvironment } from './hero-hair.js?v=20261002c';
 
 const canvas = document.getElementById('view');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
