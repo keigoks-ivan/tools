@@ -89,7 +89,7 @@ export function grimeShader(sh, m) {
     #endif
     vGW = ( modelMatrix * gw ).xyz; vGN = mat3( modelMatrix ) * gn;`);
   sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nuniform sampler2D grimeMap; uniform float grimeK; varying vec3 vGW; varying vec3 vGN;').replace('#include <map_fragment>', `#include <map_fragment>
-    float surfaceDirt = 0.0;
+    float surfaceDirt = 0.0, surfaceWet = 0.0;
     {
       vec3 gn = normalize( vGN ); float wallK = 1.0 - abs( gn.y );
       float al = abs( gn.x ) > abs( gn.z ) ? vGW.z : vGW.x;
@@ -98,9 +98,12 @@ export function grimeShader(sh, m) {
       float st = texture2D( grimeMap, vec2( al * 0.035, vGW.y * 0.06 ) ).g;
       float d = ( 0.52 - mac ) * 0.55 + wallK * smoothstep( 0.52, 0.8, st ) * 0.42 + smoothstep( 0.56, 0.8, bl ) * 0.3;
       surfaceDirt = clamp(d * grimeK, 0.0, 0.65);
+      // 掃描材質上的薄水膜與灰塵交錯，不將整片地面變成鏡子。
+      surfaceWet = (1.0-wallK) * smoothstep(.54,.68,mac) * (1.0-smoothstep(.48,.62,bl));
       diffuseColor.rgb *= clamp( 1.0 - grimeK * d * vec3( 0.88, 1.0, 1.14 ), 0.25, 1.3 );
     }`).replace('#include <roughnessmap_fragment>', `#include <roughnessmap_fragment>
-      roughnessFactor = clamp(roughnessFactor + surfaceDirt * 0.2, 0.08, 1.0);`);
+      roughnessFactor = clamp(roughnessFactor + surfaceDirt * 0.2, 0.08, 1.0);
+      roughnessFactor = mix(roughnessFactor, max(.32,roughnessFactor*.55),surfaceWet*.55);`);
 }
 
 // ---------------------------------------------------------------- 合併幾何

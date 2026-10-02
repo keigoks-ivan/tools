@@ -15,7 +15,7 @@ async function load(path, query = '') {
   html = html.replace(/<base href="[^"]+">/, '');
   html = html.replace(/(<script type="importmap">)([\s\S]*?)(<\/script>)/, (_, a, json, b) => {
     const map = JSON.parse(json);
-    for (const file of ['urban.js', 'anim.js', 'env.js', 'stages.js', 'battlefields.js', 'fieldart.js', 'encounter.js', 'post.js', 'roofline.js', 'mechs.js', 'combat.js', 'cockpit.js', 'zero/map.js', 'zero/guns.js', 'zero/viewmodel.js', 'zero/main.js', 'zero/hud.js', 'zero/sfx.js', 'zero/mech6.js', 'lastline/map.js', 'lastline/script.js', 'lastline/mission.js', 'lastline/convoy.js', 'lastline/escort.mjs']) {
+    for (const file of ['urban.js', 'anim.js', 'env.js', 'stages.js', 'battlefields.js', 'fieldart.js', 'encounter.js', 'post.js', 'roofline.js', 'mechs.js', 'combat.js', 'cockpit.js', 'zero/kit.js', 'zero/map.js', 'zero/guns.js', 'zero/viewmodel.js', 'zero/main.js', 'zero/hud.js', 'zero/sfx.js', 'zero/mech6.js', 'lastline/map.js', 'lastline/script.js', 'lastline/mission.js', 'lastline/convoy.js', 'lastline/escort.mjs']) {
       const url = new URL('/game/mech/' + file, location.href).href;
       for (const key of Object.keys(map.imports)) if (new URL(key, entryBase).href === url) delete map.imports[key];
       map.imports[url] = url + '?qa=' + revision;
@@ -606,8 +606,13 @@ async function harborArt() {
   await load('/game/mech/lastline/index.html', '?mute&god&ch=1&all&fps=0');
   renderer = win.__renderer; post = { render: () => win.__step(1) };
   win.__G.player.reset(new win.__T.Vector3(-180, 0, -193), 0); win.__step(3);
+  const map=win.__map, shelves=win.__solid.list.filter(b=>b.x0<-130 && b.y1>2.8 && b.y1<3.2 && b.x1-b.x0<2 && b.z1-b.z0<1);
+  assert(shelves.length===8,'八座港區貨架為三公尺高，貨箱落在承板上');
+  assert(map.triangles<120000 && map.meshes.length<=9,'港區合併幾何維持十二萬三角形，至多九個材質網格');
   await save('lastline-customs', true);
+  const footChecks=[...result];
   await load('/game/mech/lastline/index.html', '?mute&ch=4&all&fps=0'); await wait(() => win.__m6); win.__step(200);
+  result.unshift(...footChecks);
   const M = win.__m6, C = M.combat, camera = C.camera, world = win.__world;
   renderer = win.__renderer; post = { render: () => C.post.render(1) };
   M.player.pos.set(610, 0, 90); M.player.yaw = -.6; M.player.vel.set(0, 0, 0); M.hero.legYaw = M.player.yaw; M.hero.motion.yawPrev = null; M.tick(.016);
@@ -618,7 +623,7 @@ async function harborArt() {
   camera.position.set(550, 36, -300); camera.lookAt(650, 14, -450); world.followShadow(camera.position);
   await save('lastline-breakwater', true);
   assert(errors.length === 0, '海關、港區與防波堤實際畫面沒有渲染錯誤');
-  report.textContent = JSON.stringify({ checks: result, memory: renderer.info.memory, errors }, null, 2); state.textContent = '北濱港美術通過';
+  report.textContent = JSON.stringify({ checks: result, staticTriangles:map.triangles, staticMeshes:map.meshes.length, memory: renderer.info.memory, errors }, null, 2); state.textContent = '北濱港美術通過';
 }
 
 async function japaneseSigns() {

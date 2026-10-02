@@ -376,8 +376,10 @@ function terrainMaterial(A) {
         float treeline = 0.0;
         if (mountain > 0.001) {
           float canopy = tn(vTW.xz / 8.0);
+          float facing = dot(terrainN.xz, normalize(vec2(-.6,.8))) * .5 + .5;
           vec3 forest = mix(vec3(0.038,0.072,0.028), vec3(0.10,0.145,0.048), macro);
-          forest *= mix(0.78, 1.22, canopy);
+          forest *= mix(0.72, 1.28, canopy) * mix(.78,1.12,facing);
+          forest = mix(forest,forest*vec3(1.2,1.08,.77),smoothstep(.52,.72,dry)*.35);
           float meadow = smoothstep(0.50, 0.72, dry) * (1.0 - smoothstep(0.08, 0.25, slope));
           forest = mix(forest, grass * vec3(0.62,0.72,0.42), meadow * 0.65);
           treeline = smoothstep(1050.0, 1580.0, vTW.y + (macro - 0.5) * 180.0);
@@ -394,6 +396,7 @@ function terrainMaterial(A) {
         // 冷灰岩壁、斜向岩層、雨水侵蝕紋；三面投影避免陡坡拉伸。
         float strata = sin(vTW.y * 0.095 + vTW.x * 0.018 + vTW.z * 0.012 + macro * 9.0) * 0.5 + 0.5;
         rock *= mix(vec3(0.42,0.46,0.49),vec3(.78,.81,.80),surfaceReady) * mix(0.90, 1.04, strata) * mix(0.86, 1.10, dry);
+        rock *= 1.0 - smoothstep(.48,.70,dry) * smoothstep(.12,.42,slope) * .15;
         float rk = smoothstep(0.20, 0.48, slope + (macro - 0.5) * 0.14 + treeline * 0.14);
         if (battlefield > 3.5 && battlefield < 4.5) grass = mix(grass, texture2D(rubD, vTW.xz / 14.0).rgb * vec3(0.85,0.63,0.40), 0.85);
         if (battlefield > 1.5 && battlefield < 2.5) grass *= vec3(0.65,0.83,0.64);
@@ -437,7 +440,8 @@ function terrainMaterial(A) {
         float roadWear = smoothstep(0.3, 0.7, dry);
         float paintWear = 0.55 + 0.45 * smoothstep(0.2, 0.7, tn(vTW.xz * 2.0));
         G.zw *= paintWear;
-        vec3 roadC = asph * (1.0 - min(wheel, 1.0) * 0.12);
+        float roadDamp = smoothstep(.48,.63,dry) * (1.0-smoothstep(.42,.62,macro));
+        vec3 roadC = asph * (1.0 - min(wheel, 1.0) * 0.12) * (1.0-roadDamp*.14);
         roadC = mix(roadC, vec3(0.62), G.z * 0.85 * (0.75 + 0.25 * tn(vTW.xz * 3.0)));
         roadC = mix(roadC, vec3(0.62, 0.45, 0.10), G.w * 0.8);
         base = mix(base, roadC, G.x);
@@ -456,6 +460,7 @@ function terrainMaterial(A) {
         roughnessFactor = mix(0.72 + rA * 0.28, mix(rG, 0.82 + strata * 0.12, rk), isGrass);
         roughnessFactor = mix(roughnessFactor, 0.46 + roadWear * 0.18, G.x * min(wheel, 1.0) * 0.7);
         roughnessFactor = mix(roughnessFactor, 0.55, G.z * 0.6);
+        roughnessFactor = mix(roughnessFactor,.32,roadDamp*G.x*.65);
       `)
       .replace('vec3 mapN = texture2D( normalMap, vNormalMapUv ).xyz * 2.0 - 1.0;', `
         vec3 nG = texture2D( normalMap, vNormalMapUv ).xyz * 2.0 - 1.0;
@@ -484,7 +489,7 @@ function terrainMaterial(A) {
       .replace('#include <fog_fragment>', `#include <fog_fragment>
         #ifdef USE_FOG
           // 高處仍有空氣散射：補足高度霧在山頂過薄、遠近山黏在一起的問題。
-          float mountainAir = (1.0 - exp(-length(vTW - cameraPosition) * (battlefield > .5 ? .000045 : .000095))) * mountain;
+          float mountainAir = (1.0 - exp(-max(0.0,length(vTW - cameraPosition)-1800.0) * .00007)) * mountain;
           vec3 air = mix(vec3(0.43,0.51,0.59), FOG_SUN_COL, pow(max(dot(normalize(vTW - cameraPosition), FOG_SUN_DIR),0.0),7.0) * 0.55);
           gl_FragColor.rgb = mix(gl_FragColor.rgb, air, mountainAir);
         #endif`);

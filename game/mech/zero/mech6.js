@@ -46,7 +46,7 @@ export async function startMech(X) {
   try { ({ FX } = await import('../fx.js')); } catch (e) { console.warn('[zero] fx.js 載入失敗，改用空殼', e); }
 
   // ---------------------------------------------------------------- 場景換成機體的尺度
-  scene.fog.density = S.LAYOUT === 'harbor-v1' ? 0.00065 : 0.0011;
+  scene.fog.density = S.LAYOUT === 'harbor-v1' ? 0.00035 : 0.0011;
   camera.fov = 70; camera.near = 0.5; camera.far = 6000; camera.updateProjectionMatrix();
   vCam.fov = 70; vCam.near = 0.05; vCam.far = 20; vCam.updateProjectionMatrix();
   const sc = world.sun.shadow.camera;

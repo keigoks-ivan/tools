@@ -6,7 +6,49 @@ import { JAPANESE_FONT, PORT_LABELS } from '../urban.js';
 
 export const SHORE = 680;
 export function buildMap(scene, mats, solid, PL, A, world) {
-  mats = { ...mats, portGlass: new THREE.MeshStandardMaterial({ color: 0x263c43, roughness: .26, metalness: .18, vertexColors: true }) };
+  // 港區地坪共用既有掃描圖；道路、排水與標線在同一個材質內，沒有反射攝影機。
+  const ground = mats.floor.clone(), compileFloor = mats.floor.onBeforeCompile;
+  ground.name = 'harbor-ground'; ground.userData.tile = mats.floor.userData.tile || 4;
+  ground.onBeforeCompile = sh => {
+    compileFloor(sh);
+    Object.assign(sh.uniforms, { portAsphalt: { value: A.asphD }, portAsphaltN: { value: A.asphN } });
+    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec2 vPort;')
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvPort=(modelMatrix*vec4(transformed,1.0)).xz;');
+    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', `#include <common>
+      varying vec2 vPort; uniform sampler2D portAsphalt, portAsphaltN;
+      float portLine(float d, float width) { float aa=max(fwidth(d),.001); return 1.0-smoothstep(width-aa,width+aa,d); }
+      float portRange(float x, float a, float b) { return smoothstep(a-.3,a+.3,x)*(1.0-smoothstep(b-.3,b+.3,x)); }`)
+      .replace('#include <map_fragment>', `#include <map_fragment>
+        float roadH=portLine(abs(vPort.y+120.0),12.0)*portRange(vPort.x,174.0,612.0);
+        float roadV=portLine(abs(vPort.x-360.0),12.0)*portRange(vPort.y,-120.0,120.0);
+        float roadExit=portLine(abs(vPort.x-600.0),12.0)*portRange(vPort.y,-580.0,290.0);
+        float roadCross=portLine(abs(vPort.y-120.0),12.0)*portRange(vPort.x,348.0,612.0);
+        float portRoad=max(max(roadH,roadV),max(roadExit,roadCross));
+        vec2 panel=mod(vPort+vec2(2.0,3.0),vec2(6.0,8.0));
+        float joint=max(portLine(min(panel.x,6.0-panel.x),.018),portLine(min(panel.y,8.0-panel.y),.018))*(1.0-portRoad);
+        vec3 pavement=mix(sampledDiffuseColor.rgb,texture2D(portAsphalt,vPort/7.0).rgb*vec3(.62,.65,.68),portRoad);
+        diffuseColor.rgb/=max(sampledDiffuseColor.rgb,vec3(.005));
+        diffuseColor.rgb*=pavement*(1.0-joint*.38);
+        float tyre=max(roadH*portLine(abs(abs(vPort.y+120.0)-3.2),.55),roadV*portLine(abs(abs(vPort.x-360.0)-3.2),.55));
+        tyre=max(tyre,max(roadExit*portLine(abs(abs(vPort.x-600.0)-3.2),.55),roadCross*portLine(abs(abs(vPort.y-120.0)-3.2),.55)));
+        diffuseColor.rgb*=1.0-tyre*.16;
+        // 岸邊長排水溝與鋼格柵；以實際尺寸繪製，遠處由導數抗鋸齒。
+        float drain=portLine(abs(vPort.x-623.0),.22);
+        float grate=portLine(abs(mod(vPort.y,.32)-.16),.025);
+        diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.025,.032,.034),drain*(1.0-grate*.65));
+        float edge=max(roadExit*portLine(abs(abs(vPort.x-600.0)-10.8),.09),roadH*portLine(abs(abs(vPort.y+120.0)-10.8),.09));
+        vec2 bay=mod(vPort-vec2(215.0,-66.0),vec2(20.0,26.0));
+        float loading=portRange(vPort.x,215.0,525.0)*portRange(vPort.y,-66.0,64.0)*(1.0-portRoad);
+        float paint=max(edge,loading*max(portLine(min(bay.x,20.0-bay.x),.07),portLine(min(bay.y,26.0-bay.y),.07)));
+        diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.43,.30,.07),paint*.75);`)
+      .replace('#include <roughnessmap_fragment>', `#include <roughnessmap_fragment>
+        roughnessFactor=mix(roughnessFactor,.91,portRoad);
+        roughnessFactor=mix(roughnessFactor,.82,paint);`)
+      .replace('vec3 mapN = texture2D( normalMap, vNormalMapUv ).xyz * 2.0 - 1.0;', `vec3 mapN = texture2D( normalMap, vNormalMapUv ).xyz * 2.0 - 1.0;
+        mapN=mix(mapN,texture2D(portAsphaltN,vPort/7.0).xyz*2.0-1.0,portRoad);`);
+  };
+  ground.customProgramCacheKey = () => 'harbor-ground-v1';
+  mats = { ...mats, portGround: ground, portGlass: new THREE.MeshStandardMaterial({ color: 0x263c43, roughness: .26, metalness: .18, vertexColors: true }) };
   const b = new Builder(mats, solid);
   const M = { b, lights: [], zones: {}, marks: {}, targets: {}, items: {}, layout: 'harbor-v1' };
   const V = (x, z, y = 0) => new THREE.Vector3(x, y, z);
@@ -124,12 +166,17 @@ export function buildMap(scene, mats, solid, PL, A, world) {
   // 港區地面取代住宅道路網；海側地形裁掉，露出同一片海面。
   if (world) {
     world.battlefield = 'harbor'; world.terrainMesh.material.userData.battlefield.value = 6;
-    const coast = x => { const t = THREE.MathUtils.clamp((x - 180) / (SHORE - 180), 0, 1); return 1 - t * t * (3 - 2 * t); };
+    const coast = (x, z) => {
+      // 遠方山麓逐步伸向海岸；不能把數公里外的整座山壓在 500 m 內，形成直立切面。
+      const start = 180 - 1800 * THREE.MathUtils.smoothstep(Math.abs(z), 650, 2100);
+      const t = THREE.MathUtils.clamp((x - start) / (SHORE - start), 0, 1);
+      return 1 - t * t * (3 - 2 * t);
+    };
     const height = world.height.bind(world);
-    world.height = (x, z) => x > SHORE ? -10 : height(x, z) * coast(x);
+    world.height = (x, z) => x > SHORE ? -10 : height(x, z) * coast(x, z) * .68;
     for (const mesh of [world.terrainMesh, world.mountainMesh]) {
       const p = mesh.geometry.attributes.position;
-      for (let i = 0; i < p.count; i++) p.setY(i, p.getY(i) * coast(p.getX(i)));
+      for (let i = 0; i < p.count; i++) p.setY(i, p.getY(i) * coast(p.getX(i), p.getZ(i)) * .68);
       p.needsUpdate = true; mesh.geometry.computeVertexNormals(); mesh.geometry.computeBoundingSphere();
     }
     const floor = solid.floorAt.bind(solid);
@@ -146,7 +193,7 @@ export function buildMap(scene, mats, solid, PL, A, world) {
     scene.environmentIntensity = .48;
     world.skyDome.material.uniforms.fogCol.value.copy(scene.fog.color);
   }
-  box('floor', -250, SHORE, -.18, .025, -590, 320, { solid: false });
+  b.B.portGround.quad([-250,.025,320], [SHORE,.025,320], [SHORE,.025,-590], [-250,.025,-590], [0,1,0]);
   // 海堤有厚度與潮痕，沒有穿越海面的隱形地板。
   box('concrete', SHORE - 1.2, SHORE, -4, .85, -590, 320, { tint: [.48, .53, .54] });
   const water = new THREE.MeshStandardMaterial({ color: 0x274a59, roughness: .32, metalness: .28,
@@ -187,10 +234,21 @@ export function buildMap(scene, mats, solid, PL, A, world) {
   }
   shed(-208, -152, -205, -130, 8, 'z', 3);
   shed(-149, -113, -122, -78, 6.2, 'x', 1.8);
-  for (const [x, z] of [[-197, -182], [-163, -170], [-195, -149], [-140, -89]]) {
-    prop('steel_frame_shelves_01', x, z);
-    for (const dx of [-1.4, 0, 1.4]) for (const y of [1, 2.1]) prop('cardboard_box_01', x + dx, z, y, .1 * dx, { solid: false });
+  for (const [x, z] of [[-197, -182], [-163, -170], [-195, -149], [-140, -89], [-197, -176], [-197, -170], [-162, -158], [-162, -149]]) {
+    // 掃描貨架原始高度 21.4 m，縮成 3 m；箱底對齊四層承板，避免穿屋頂與懸空。
+    prop('steel_frame_shelves_01', x, z, 0, 0, { scale: .14 });
+    for (const dx of [-.47, 0, .47]) for (const y of [.16, .87, 1.58, 2.29])
+      prop('cardboard_box_01', x + dx, z, y, .1 * dx, { solid: false, scale: .92 + ((y * 100 + x) % 3 + 3) % 3 * .06 });
     prop('wooden_military_crate', x + 2, z + 3); prop('hand_truck', x + 3, z - 1);
+  }
+  for (const z of [-191, -179, -167, -155, -143]) {
+    beam([-207,7.7,z],[-153,7.7,z],.11);
+    beam([-207,7.7,z],[-180,10.7,z],.07); beam([-180,10.7,z],[-153,7.7,z],.07);
+    for (const x of [-194,-166]) {
+      beam([x,7.7,z],[x,6.9,z],.018);
+      b.deco('metal',x-.65,x+.65,6.79,6.93,z-.11,z+.11,{tint:[.65,.67,.63]});
+      b.B.portGlass.quad([x-.6,6.78,z-.08],[x+.6,6.78,z-.08],[x+.6,6.78,z+.08],[x-.6,6.78,z+.08],[0,-1,0],[1,1,1,1],null,[1.8,1.9,1.7]);
+    }
   }
   prop('concrete_road_barrier_02', -177, -216); prop('covered_car', -158, -225, 0, .2);
   for (const [x, z] of [[-203, -192], [-156, -182], [-204, -143], [-90, -122], [-46, -92], [65, 56]]) {
@@ -268,8 +326,8 @@ export function buildMap(scene, mats, solid, PL, A, world) {
     b.deco('floor', x, x + 2 + i % 7, .031, .034, z, z + 1 + i % 4, { tint: [.65, .68, .69] });
   }
   for (const z of [-148, -92, 96, 144]) for (let x = 180; x < 580; x += 35) {
-    b.deco('metal', x, x + 22, .033, .036, z, z + .12, { tint: [.71, .58, .32] });
-    b.deco('metal', x, x + .12, .033, .036, z, z + 8, { tint: [.71, .58, .32] });
+    b.deco('floor', x, x + 22, .033, .036, z, z + .12, { tint: [.71, .58, .32] });
+    b.deco('floor', x, x + .12, .033, .036, z, z + 8, { tint: [.71, .58, .32] });
   }
   for (const z of [-240, -60, 210]) {
     // 兩腿落在道路外側，橫樑與斜拉桁架跨過岸邊。
@@ -318,8 +376,8 @@ export function buildMap(scene, mats, solid, PL, A, world) {
   }
 
   // 疏散路保留寬度給兩輛車；標線、岸邊護柱與防波堤消波塊都是共用材質。
-  for (let x = 190; x < 585; x += 14) b.deco('metal', x, x + 7, .03, .035, -120.06, -119.94, { tint: [.7, .72, .65] });
-  for (let z = -570; z < 280; z += 14) b.deco('metal', 599.94, 600.06, .03, .035, z, z + 7, { tint: [.7, .72, .65] });
+  for (let x = 190; x < 585; x += 14) b.deco('floor', x, x + 7, .03, .035, -120.06, -119.94, { tint: [.7, .72, .65] });
+  for (let z = -570; z < 280; z += 14) b.deco('floor', 599.94, 600.06, .03, .035, z, z + 7, { tint: [.7, .72, .65] });
   for (let z = -570; z < 280; z += 18) {
     pipe(676, 0, z, .3, .8, 'rust');
     const g = new THREE.CylinderGeometry(.6, 1.3, 5, 5).rotateZ(.8);
