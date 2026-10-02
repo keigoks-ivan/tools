@@ -8,10 +8,10 @@ const target=(a,d,dy=0)=>a.spawn('grunt',a.hero.x+d,a.hero.y+dy,{hp:100,fixed:tr
 
 test('bow attacks wait for release and flight, pierce two targets, and continue after an interrupt',()=>{
   const a=arenaFor(),near=target(a,260),far=target(a,400),behind=target(a,500);a.hero.facing=0;a._startAttack('attack');
-  advance(a,.34);assert.equal(near.hp,100);assert.equal(far.hp,100);assert.equal(a.projectiles.length,1);
+  advance(a,HEROES.jade.chain[0].hits[0]);assert.equal(near.hp,100);assert.equal(far.hp,100);assert.equal(a.projectiles.length,1);
   a._startDodge(0,1);advance(a,.3);
   assert.equal(near.hp,88);assert.equal(far.hp,88);assert.equal(behind.hp,100);assert.equal(a.projectiles.length,0);
-  const b=arenaFor();target(b,250);b._startAttack('attack');advance(b,.34);b.reset();assert.equal(b.projectiles.length,0);
+  const b=arenaFor();target(b,250);b._startAttack('attack');advance(b,HEROES.jade.chain[0].hits[0]);b.reset();assert.equal(b.projectiles.length,0);
 });
 
 test('draw direction stays on its selected target when retreat input is held',()=>{
@@ -50,4 +50,38 @@ test('a non-piercing arrow stops at the nearest target even when enemies are sto
   const a=arenaFor(),far=target(a,350),near=target(a,180);
   a._fireArrows(HEROES.jade.chain[1],8,'attack');a._advanceProjectiles(.3);
   assert.equal(near.hp,92);assert.equal(far.hp,100);
+});
+
+test('movement cancels released shot recovery and preserves the next combo step',()=>{
+  const a=arenaFor(),x=a.hero.x;target(a,350);a._startAttack('attack');
+  advance(a,.33,{x:-1});assert.equal(a.hero.action,'attack');assert.equal(a.hero.x,x);
+  advance(a,.03,{x:-1});assert.equal(a.hero.action,'run');assert.ok(a.hero.x<x);
+  a.update(1/120,{attack:true});assert.equal(a.hero.combo,2);assert.equal(a.attack.clip,'jadeDouble');
+});
+
+test('double shot keeps both releases before movement cancels recovery',()=>{
+  const a=arenaFor();a.hero.combo=1;a.comboUntil=a.time+1;a._startAttack('attack');
+  advance(a,.42,{x:1});assert.equal(a.hero.action,'attack');assert.equal(a.drainEvents().filter(e=>e.type==='arrow').length,1);
+  advance(a,.12,{x:1});assert.equal(a.drainEvents().filter(e=>e.type==='arrow').length,1);assert.equal(a.hero.action,'run');
+});
+
+test('a queued heavy branch has priority over movement recovery cancellation',()=>{
+  const a=arenaFor();a._startAttack('attack');advance(a,.36,{x:-1,heavy:true});
+  assert.equal(a.attack.clip,'jadePierce');assert.equal(a.hero.action,'heavy');assert.equal(a.attack.charge,2);
+});
+
+test('evasive step travels smoothly, finishes promptly and leaves other characters unchanged',()=>{
+  const a=arenaFor(),x=a.hero.x;a._startDodge(1,0);assert.equal(a.hero.x,x);
+  advance(a,.05);assert.equal(a.hero.x,x);advance(a,.10);assert.ok(a.hero.x>x+20&&a.hero.x<x+76);
+  advance(a,.15);assert.ok(Math.abs(a.hero.x-x-76)<1e-6);assert.equal(a.hero.action,'idle');assert.ok(a.hero.dodgeCooldown>0);
+  advance(a,.18);assert.ok(a.hero.dodgeCooldown<=1e-6);
+  for(const id of ['violet','azure','amber']) {
+    const b=new Arena({heroProfile:HEROES[id]});const start=b.hero.x;b._startDodge(1,0);
+    assert.equal(b.hero.x,start+76);advance(b,.3);assert.equal(b.hero.action,'dodge');advance(b,.12);assert.equal(b.hero.action,'idle');
+  }
+});
+
+test('evasive step remains inside map bounds at every integration step',()=>{
+  const a=arenaFor();a.hero.x=a.bounds.maxX-5;a.hero.y=a.bounds.maxY-5;a._startDodge(1,1);
+  for(let i=0;i<40;i++){a.update(1/120,{});assert.ok(a.hero.x<=a.bounds.maxX);assert.ok(a.hero.y<=a.bounds.maxY);}
 });

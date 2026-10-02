@@ -6,7 +6,7 @@
 import { SnapshotBuffer } from './interp.js';
 import { SLOT_COLORS, playerColor } from './colors.js';
 import { GHOST_ANIMS, TRAIL_ANIM, makeGhosts, makePeerTrail } from './peer-fx.js?v=20261002d';
-import { heroFor } from '../heroes.js?v=20261002h';
+import { heroFor } from '../heroes.js?v=20261002i';
 import { createHeroSpecialFx } from '../hero-special-fx.js?v=20261002h';
 import { createArrowFx } from '../hero-bow.js?v=20261002h';
 

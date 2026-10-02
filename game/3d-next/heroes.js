@@ -1,4 +1,4 @@
-import { MUSOU_CHAIN, MUSOU_CHARGE, MUSOU_HEAVY, MUSOU_COUNTER, MUSOU_FLURRY } from '../2d/combat.js?v=20261002h';
+import { MUSOU_CHAIN, MUSOU_CHARGE, MUSOU_HEAVY, MUSOU_COUNTER, MUSOU_FLURRY } from '../2d/combat.js?v=20261002i';
 
 const full = Math.PI * 2;
 const flurry = changes => ({
@@ -58,19 +58,20 @@ export const HEROES = {
   jade: {
     id: 'jade', name: '翠翎', mark: '翎', weapon: '翡翠長弓', color: '#91e5b6', tint: 0x91e5b6,
     style: '遠距連射', description: '快射、雙連射、扇形三箭；重擊穿透直線敵群。', special: '翠羽天雨',
-    maxHp: 90, speed: 1.06, aimRange: 560, aimArc: Math.PI + .01,
+    maxHp: 90, speed: 1.16, aimRange: 560, aimArc: Math.PI + .01,
+    dodge: { clip: 'jadeStep', duration: .30, cooldown: .48, invulnerable: .30, moveStart: .05, moveEnd: .24 },
     air: { clip: 'jadeAir', duration: .5, hit: .22, hits: [.22], radius: 480, damage: 8, projectile: { speed: 1100, width: 10 } },
     chain: [
-      { clip: 'jadeShot', duration: .68, hits: [.34], cancel: .45, radius: 520, damage: 12, dash: 0, projectile: { speed: 1500, width: 12, pierce: 2 } },
-      { clip: 'jadeDouble', duration: .84, hits: [.30,.52], cancel: .65, radius: 520, damage: 8, dash: 0, projectile: { speed: 1500, width: 12 } },
-      { clip: 'jadeFan', duration: .90, hits: [.48], cancel: Infinity, radius: 480, damage: 12, finisher: 14, dash: 0, projectile: { speed: 1400, width: 12, arrows: 3, spread: .22, pierce: 2 } },
+      { clip: 'jadeShot', duration: .50, hits: [.24], cancel: .34, moveCancel: .34, radius: 520, damage: 12, dash: 0, projectile: { speed: 1500, width: 12, pierce: 2 } },
+      { clip: 'jadeDouble', duration: .66, hits: [.23,.43], cancel: .53, moveCancel: .53, radius: 520, damage: 8, dash: 0, projectile: { speed: 1500, width: 12 } },
+      { clip: 'jadeFan', duration: .72, hits: [.36], cancel: Infinity, moveCancel: .47, radius: 480, damage: 12, finisher: 14, dash: 0, projectile: { speed: 1400, width: 12, arrows: 3, spread: .22, pierce: 2 } },
     ],
     charges: [
-      { name: '破甲貫矢', clip: 'jadePierce', duration: 1.1, hits: [.64], cancel: Infinity, radius: 560, damage: 24, finisher: 24, dash: 0, projectile: { speed: 1800, width: 14, pierce: 3 } },
-      { name: '翠羽散射', clip: 'jadeSpread', duration: .90, hits: [.48], cancel: Infinity, radius: 480, damage: 12, finisher: 12, dash: 0, projectile: { speed: 1100, width: 12, arrows: 5, spread: .15 } },
+      { name: '破甲貫矢', clip: 'jadePierce', duration: 1.1, hits: [.64], cancel: Infinity, moveCancel: .75, radius: 560, damage: 24, finisher: 24, dash: 0, projectile: { speed: 1800, width: 14, pierce: 3 } },
+      { name: '翠羽散射', clip: 'jadeSpread', duration: .72, hits: [.36], cancel: Infinity, moveCancel: .47, radius: 480, damage: 12, finisher: 12, dash: 0, projectile: { speed: 1100, width: 12, arrows: 5, spread: .15 } },
     ],
-    heavy: { name: '破甲貫矢', clip: 'jadePierce', duration: 1.1, hits: [.64], cancel: Infinity, radius: 560, damage: 24, finisher: 24, dash: 0, projectile: { speed: 1800, width: 14, pierce: 3 } },
-    counter: { ...MUSOU_COUNTER, name: '退步返矢', clip: 'jadeGuard', duration: .60, hits: [.26], cancel: .42, radius: 500, damage: 11, dash: -110, projectile: { speed: 1200, width: 12 } },
+    heavy: { name: '破甲貫矢', clip: 'jadePierce', duration: 1.1, hits: [.64], cancel: Infinity, moveCancel: .75, radius: 560, damage: 24, finisher: 24, dash: 0, projectile: { speed: 1800, width: 14, pierce: 3 } },
+    counter: { ...MUSOU_COUNTER, name: '退步返矢', clip: 'jadeGuard', duration: .48, hits: [.22], cancel: .33, moveCancel: .33, radius: 500, damage: 11, dash: -110, projectile: { speed: 1200, width: 12 } },
     flurry: flurry({ duration: 3.6, swingStart: .95, swingEnd: 2.2, swings: 6, radius: 420, damage: 5, steer: 0,
       impact: 2.9, finishRadius: 460, finishDamage: 24, leapAt: null, sweeps: [],
       timeScale: [[0,1],[2.8,1],[2.8,.4],[3.05,.4],[3.6,1]], freezes: [{ at:0, real:.07 },{ at:2.9, real:.08 }] }),

@@ -1,11 +1,11 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone as cloneSkinned } from 'three/addons/utils/SkeletonUtils.js';
-import { Arena } from '../2d/combat.js?v=20261002h';
-import { heroFor } from './heroes.js?v=20261002h';
-import { Campaign, CHAPTERS, chapterTuning } from './campaign.js?v=20261002h';
+import { Arena } from '../2d/combat.js?v=20261002i';
+import { heroFor } from './heroes.js?v=20261002i';
+import { Campaign, CHAPTERS, chapterTuning } from './campaign.js?v=20261002i';
 import { createHeroEquipment } from './hero-equipment.js?v=20261002h';
-import { createPolearmClips, createDualBladeUltimate, createArcherClips } from './hero-motion.js?v=20261002h';
+import { createPolearmClips, createDualBladeUltimate, createArcherClips } from './hero-motion.js?v=20261002i';
 import { createArrowFx } from './hero-bow.js?v=20261002h';
 import { createHeroSpecialFx } from './hero-special-fx.js?v=20261002h';
 import { createHeroEnvironment } from './hero-hair.js?v=20261002h';
@@ -43,7 +43,7 @@ let lazyModules = null;
 export function loadLazyModules() {
   if (!lazyModules) {
     lazyModules = Promise.all([
-      marchLevel ? Promise.all([import('./march.js?v=20261002h'), import('./march-art.js?v=20260925f')]) : null,
+      marchLevel ? Promise.all([import('./march.js?v=20261002i'), import('./march-art.js?v=20260925f')]) : null,
       // ?hero=vroid：打擊特效模組（combat-fx.js）；載入失敗時退回下方原本的特效與時間倍率
       heroChoice === 'vroid' ? import('./combat-fx.js?v=20261002d').catch(error => { console.warn('combat-fx failed, using built-in effects', error); return null; }) : null,
     ]).catch(error => { lazyModules = null; throw error; });
@@ -561,7 +561,7 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
         if (event.kind === 'heavy') crescent(x, z, event.facing, { radius: 2.5, vertical: true, life: 0.32, spin: 0.5 });
         else crescent(x, z, event.facing, { radius: 2.2 + combo * 0.25, tilt: [0, -0.38, 0.42, 0.05][combo] || 0, life: 0.26, spin: combo % 2 ? 1 : -1 });
       }
-      if (event.type === 'dodge') play('roll', 0.42);
+      if (event.type === 'dodge') play(heroProfile.dodge?.clip || 'roll', heroProfile.dodge?.duration || 0.42);
       if (event.type === 'swing' && !combatFx && !bowSwing) {
         // 無雙模式：每一下打擊各自一道刀光；迴旋段用前後兩道組成整圈
         const radius = (event.radius || 180) / 60;

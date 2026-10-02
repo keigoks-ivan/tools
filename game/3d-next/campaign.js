@@ -1,4 +1,4 @@
-import { TUNING } from './march.js?v=20261002h';
+import { TUNING } from './march.js?v=20261002i';
 
 // Chapters share collision and objective rules; the final two have separate sets.
 export const CHAPTERS = [

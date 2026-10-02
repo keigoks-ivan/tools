@@ -1,10 +1,10 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone } from 'three/addons/utils/SkeletonUtils.js';
-import { toonVroidHero } from './battle.js?v=20261002h';
+import { toonVroidHero } from './battle.js?v=20261002i';
 import { createHeroEquipment } from './hero-equipment.js?v=20261002h';
-import { createPolearmClips, createArcherClips } from './hero-motion.js?v=20261002h';
-import { HEROES } from './heroes.js?v=20261002h';
+import { createPolearmClips, createArcherClips } from './hero-motion.js?v=20261002i';
+import { HEROES } from './heroes.js?v=20261002i';
 import { createHeroEnvironment } from './hero-hair.js?v=20261002h';
 
 const canvas = document.getElementById('view');
@@ -82,7 +82,7 @@ try {
   }
   function selectMotionActor() {
     const jade = subject === '3', id = jade ? 'jade' : 'azure';
-    const choices = jade ? [['Idle','持弓待機'],['Run','持弓跑步'],['Shot','一段・快射'],['Double','二段・雙連射'],['Fan','三段・扇形三箭'],['Spread','扇形五箭'],['Pierce','蓄力穿透箭'],['Guard','退步返矢'],['Ult','翠羽天雨']] : [['Idle','持刀待機'],['Run','持刀跑步'],['Sweep','一段・橫掃'],['Rise','二段・挑斬'],['Slam','三段・重劈'],['Guard','回斬'],['Ult','蒼龍裂陣']];
+    const choices = jade ? [['Idle','持弓待機'],['Run','持弓跑步'],['Step','輕巧躍步'],['Shot','一段・快射'],['Double','二段・雙連射'],['Fan','三段・扇形三箭'],['Spread','扇形五箭'],['Pierce','蓄力穿透箭'],['Guard','退步返矢'],['Ult','翠羽天雨']] : [['Idle','持刀待機'],['Run','持刀跑步'],['Sweep','一段・橫掃'],['Rise','二段・挑斬'],['Slam','三段・重劈'],['Guard','回斬'],['Ult','蒼龍裂陣']];
     const select = document.getElementById('motion'); select.replaceChildren(...choices.map(([suffix,label]) => new Option(label,id+suffix)));
     const label = jade ? '翠翎動作' : '蒼鋒動作'; document.getElementById('motion-label').textContent = label; select.setAttribute('aria-label',label);
     setMotion(id+'Idle');

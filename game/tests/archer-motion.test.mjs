@@ -26,35 +26,51 @@ test('bow draw and release retain stable joints and do not modify the source rig
   const original=bones.map(b=>b.quaternion.toArray()), tracks=gltf.animations.map(c=>c.tracks.map(t=>Array.from(t.values)));
   const clips=createArcherClips(T,root,gltf.animations), mixer=new T.AnimationMixer(root);
   assert.deepEqual(bones.map(b=>b.quaternion.toArray()),original);assert.deepEqual(gltf.animations.map(c=>c.tracks.map(t=>Array.from(t.values))),tracks);
-  assert.equal(clips.length,10);
+  assert.equal(clips.length,11);
   const equipment=createHeroEquipment(T,root,root.getObjectByName('Hero_sword'));equipment.apply(HEROES.jade);
   const bow=root.getObjectByName('jade_J_Bip_L_Hand_weapon');
   const string=root.getObjectByName('jade_bow_string'), arrow=root.getObjectByName('jade_nocked_arrow'), stringGeometry=string.geometry;
   for(const clip of clips) {
     mixer.stopAllAction();const action=mixer.clipAction(clip).reset().setLoop(T.LoopOnce,1).play();action.clampWhenFinished=true;
     const previous=new Map(), planted=new Map();
+    let stepHeight=0;
     for(let frame=0;frame<=Math.ceil(clip.duration*120);frame++) {
       mixer.setTime(Math.min(clip.duration,frame/120));root.updateMatrixWorld(true);equipment.update();
+      if(['jadeIdle','jadeRun','jadeStep'].includes(clip.name)) {
+        assert.ok(!arrow.visible,`${clip.name}: carrying the bow accidentally nocks an arrow`);
+        assert.ok(Math.abs(string.geometry.attributes.position.getZ(1)+.04)<.005,`${clip.name}: carrying the bow pulls the string`);
+      }
       for(const side of ['L','R']) {
         const upper=root.getObjectByName(`J_Bip_${side}_UpperArm`),hand=root.getObjectByName(`J_Bip_${side}_Hand`);
         assert.ok(hand.getWorldPosition(new T.Vector3()).toArray().every(Number.isFinite));
         if(previous.has(side))assert.ok(previous.get(side).angleTo(upper.quaternion)<.4,`${clip.name}/${frame}/${side}: elbow flip`);
         previous.set(side,upper.quaternion.clone());
-        if(clip.name!=='jadeRun') {
+        if(clip.name==='jadeStep') {
+          const foot=root.getObjectByName(`J_Bip_${side}_Foot`).getWorldPosition(new T.Vector3());
+          stepHeight=Math.max(stepHeight,foot.y);
+          if(frame===0)planted.set(side,foot.clone());
+          if(frame===Math.ceil(clip.duration*120))assert.ok(foot.distanceTo(planted.get(side))<.003,'step does not return to its landing stance');
+          const time=Math.min(clip.duration,frame/120),dodge=HEROES.jade.dodge;
+          if(time>dodge.moveStart && time<dodge.moveEnd)assert.ok(foot.y>.095,'dodge travels while its foot is planted');
+        }
+        if(!['jadeRun','jadeStep'].includes(clip.name)) {
           const foot=root.getObjectByName(`J_Bip_${side}_Foot`).getWorldPosition(new T.Vector3());
           if(planted.has(side))assert.ok(foot.distanceTo(planted.get(side))<.003,`${clip.name}/${side}: planted foot moved`);else planted.set(side,foot);
         }
       }
     }
+    if(clip.name==='jadeStep')assert.ok(stepHeight>.22,'evasive step never leaves the ground');
+    const move=[...HEROES.jade.chain,...HEROES.jade.charges,HEROES.jade.counter,HEROES.jade.air].find(move=>move.clip===clip.name);
+    if(move)assert.equal(clip.duration,move.duration,'animation and release clock disagree');
     if(clip.name==='jadeShot'){
-      action.reset().setLoop(T.LoopOnce,1).play();mixer.setTime(.32); root.updateMatrixWorld(true);equipment.update();
+      action.reset().setLoop(T.LoopOnce,1).play();mixer.setTime(HEROES.jade.chain[0].hits[0]-.02); root.updateMatrixWorld(true);equipment.update();
       assert.ok(arrow.visible);const position=string.geometry.attributes.position;
       const drawn=new T.Vector3().fromBufferAttribute(position,1);assert.ok(drawn.z<-.30);
       assert.ok(drawn.distanceTo(arrow.position)<.01,'arrow nock leaves the string');
       const hand=root.getObjectByName('J_Bip_R_Hand'),head=root.getObjectByName('J_Bip_C_Head'),elbow=root.getObjectByName('J_Bip_R_LowerArm');
       assert.ok(hand.getWorldPosition(new T.Vector3()).distanceTo(head.getWorldPosition(new T.Vector3()))<.12,'drawing hand misses the cheek anchor');
       assert.ok(elbow.getWorldPosition(new T.Vector3()).y<head.getWorldPosition(new T.Vector3()).y+.07,'drawing elbow rises above the head');
-      mixer.setTime(.38);root.updateMatrixWorld(true);equipment.update();assert.ok(!arrow.visible);
+      mixer.setTime(HEROES.jade.chain[0].hits[0]+.04);root.updateMatrixWorld(true);equipment.update();assert.ok(!arrow.visible);
       assert.ok(Math.abs(string.geometry.attributes.position.getZ(1)+.04)<.005,'released string does not snap back');
       assert.equal(string.geometry,stringGeometry,'string geometry allocated during animation');
     }

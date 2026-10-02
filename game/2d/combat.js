@@ -402,11 +402,15 @@ export class Arena {
     hero.facing = direction;
     hero.action = 'dodge';
     hero.actionTime = 0;
-    hero.invulnerable = 0.42;
-    hero.dodgeCooldown = 0.58;
+    const dodge = this.heroProfile?.dodge;
+    hero.invulnerable = dodge?.invulnerable ?? 0.42;
+    hero.dodgeCooldown = dodge?.cooldown ?? 0.58;
     this.attack = null;
-    hero.x = clamp(hero.x + Math.cos(direction) * 76, this.bounds.minX, this.bounds.maxX);
-    hero.y = clamp(hero.y + Math.sin(direction) * 56, this.bounds.minY, this.bounds.maxY);
+    this.dodgeDirection = direction;
+    if (!dodge) {
+      hero.x = clamp(hero.x + Math.cos(direction) * 76, this.bounds.minX, this.bounds.maxX);
+      hero.y = clamp(hero.y + Math.sin(direction) * 56, this.bounds.minY, this.bounds.maxY);
+    }
     this._emit('dodge', { x: hero.x, y: hero.y, facing: direction });
   }
 
@@ -582,8 +586,20 @@ export class Arena {
       return;
     }
     if (hero.action === 'dodge' || hero.action === 'special' || hero.action === 'hurt') {
+      const before = hero.actionTime;
       hero.actionTime += dt;
-      const duration = hero.action === 'dodge' ? 0.42 : hero.action === 'special' ? 0.68 : 0.26;
+      const dodge = hero.action === 'dodge' ? this.heroProfile?.dodge : null;
+      if (dodge) {
+        hero.facing = this.dodgeDirection;
+        const progress = t => {
+          const p = clamp((t - dodge.moveStart) / (dodge.moveEnd - dodge.moveStart), 0, 1);
+          return p * p * (3 - 2 * p);
+        };
+        const travel = progress(hero.actionTime) - progress(before);
+        hero.x = clamp(hero.x + Math.cos(this.dodgeDirection) * 76 * travel, this.bounds.minX, this.bounds.maxX);
+        hero.y = clamp(hero.y + Math.sin(this.dodgeDirection) * 56 * travel, this.bounds.minY, this.bounds.maxY);
+      }
+      const duration = hero.action === 'dodge' ? dodge?.duration ?? 0.42 : hero.action === 'special' ? 0.68 : 0.26;
       if (hero.actionTime >= duration) {
         if (hero.action === 'dodge') this.dodgeEndAt = this.time;
         hero.action = 'idle';
@@ -695,9 +711,11 @@ export class Arena {
         this._damageEnemy(enemy, damage, source);
       }
     }
-    if (hero.actionTime >= attack.duration) {
+    const moveCancel = attack.moveCancel !== undefined && hero.actionTime >= attack.moveCancel
+      && attack.hitIndex === attack.hits.length && Math.hypot(this.moveInput.x, this.moveInput.y) > 0.1 && !this.inputBuffer;
+    if (hero.actionTime >= attack.duration || moveCancel) {
       if (this.heroProfile) this.comboUntil = attack.kind === 'attack' && hero.combo < this.heroProfile.chain.length ? this.time + 0.32 : -Infinity;
-      hero.action = 'idle';
+      hero.action = moveCancel ? 'run' : 'idle';
       hero.actionTime = 0;
       this.attack = null;
     }

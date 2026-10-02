@@ -1,5 +1,7 @@
 // Character poses are baked once into normal animation tracks. Local players,
 // turntables and interpolated teammates therefore use the same choreography.
+import { HEROES } from './heroes.js?v=20261002i';
+
 function createArmSolver(T, root, side, limb = 'Arm') {
   const upper = root.getObjectByName(`J_Bip_${side}_Upper${limb}`), lower = root.getObjectByName(`J_Bip_${side}_Lower${limb}`), hand = root.getObjectByName(`J_Bip_${side}_${limb === 'Arm' ? 'Hand' : 'Foot'}`);
   const shoulder = new T.Vector3(), elbow = new T.Vector3(), wrist = new T.Vector3(), axis = new T.Vector3(), bend = new T.Vector3(), desired = new T.Vector3(), end = new T.Vector3(), from = new T.Vector3(), to = new T.Vector3();
@@ -222,6 +224,7 @@ export function createArcherClips(T, source, animations) {
   const root=source.clone(true); root.position.set(0,0,0); root.quaternion.identity(); root.scale.set(1,1,1);
   const bones=[];root.traverse(b=>{if(b.isBone)bones.push(b);});
   const rest=bones.map(b=>({position:b.position.clone(),rotation:b.quaternion.clone()}));
+  const restRotations=new Map(bones.map((bone,i)=>[bone,rest[i].rotation]));
   root.updateMatrixWorld(true);
   const feet=['R','L'].map(side=>({ solve:createArmSolver(T,root,side,'Leg'), rotation:root.getObjectByName(`J_Bip_${side}_Foot`).getWorldQuaternion(new T.Quaternion()) }));
   for(const track of idle.tracks) { const [name,property]=track.name.split('.'); root.getObjectByName(name)?.[property]?.fromArray(track.createInterpolant().evaluate(.1)); }
@@ -231,7 +234,8 @@ export function createArcherClips(T, source, animations) {
   const target=new T.Vector3(), pole=new T.Vector3(), offset=new T.Vector3(), centre=new T.Vector3(), direction=new T.Vector3();
   const rotation=new T.Quaternion(), handRotation=new T.Quaternion();
   const mountInverse=new T.Quaternion().setFromRotationMatrix(new T.Matrix4().makeBasis(new T.Vector3(0,1,0),new T.Vector3(0,0,1),new T.Vector3(1,0,0))).invert();
-  const definitions=[['jadeIdle',idle.duration,[],idle],['jadeRun',run.duration,[],run],['jadeShot',.68,[.34],idle],['jadeDouble',.84,[.30,.52],idle],['jadeFan',.9,[.48],idle],['jadeSpread',.9,[.48],idle],['jadePierce',1.1,[.64],idle],['jadeGuard',.6,[.26],idle],['jadeAir',.5,[.22],idle],['jadeUlt',3.6,[.65,2.75],idle]];
+  const profile=HEROES.jade, moves=[...profile.chain,...profile.charges,profile.counter,profile.air];
+  const definitions=[['jadeIdle',idle.duration,[],idle],['jadeRun',run.duration,[],run],['jadeStep',profile.dodge.duration,[],idle],...moves.map(move=>[move.clip,move.duration,move.hits,idle]),['jadeUlt',3.6,[.65,2.75],idle]];
   return definitions.map(([name,duration,shots,base])=>{
     const times=[],values=bones.map(()=>[]),positions=[],count=Math.ceil(duration*90);
     const samplers=base===run ? run.tracks.map(track=>{const[name,property]=track.name.split('.');return {bone:root.getObjectByName(name),property,sample:track.createInterpolant()};}) : [];
@@ -242,32 +246,37 @@ export function createArcherClips(T, source, animations) {
       let draw=0,tension=0;
       for(const at of shots) {
         const loaded=T.MathUtils.smoothstep(seconds,Math.max(0,at-.23),at-.055);
-        draw=Math.max(draw,loaded*(1-T.MathUtils.smoothstep(seconds,at+.075,at+.21)));
+        draw=Math.max(draw,loaded*(1-T.MathUtils.smoothstep(seconds,at+.055,at+.16)));
         tension=Math.max(tension,loaded*(1-T.MathUtils.smoothstep(seconds,at,at+.035)));
       }
-      const striking=shots.length>0, lift=name==='jadeUlt' ? .62*T.MathUtils.smoothstep(seconds,.12,.40)*(1-T.MathUtils.smoothstep(seconds,.75,1.0)) : 0;
+      const stepping=name==='jadeStep', phase=seconds/duration;
+      const spring=stepping ? T.MathUtils.smoothstep(seconds,0,.10)*(1-T.MathUtils.smoothstep(seconds,.20,.30)) : 0;
+      const lift=name==='jadeUlt' ? .62*T.MathUtils.smoothstep(seconds,.12,.40)*(1-T.MathUtils.smoothstep(seconds,.75,1.0)) : 0;
+      const bob=base===run ? Math.sin(phase*Math.PI*4)*.012 : Math.sin(phase*Math.PI*2)*.003;
       if(base!==run) {
-        hips.position.set(0,.91-draw*.025,0);
-        hips.quaternion.setFromEuler(new T.Euler(.015,-.45-(striking?.35:0)-draw*.10,0));
+        hips.position.set(draw*.018,.95-draw*.025+spring*.10+bob,0);
+        hips.quaternion.setFromEuler(new T.Euler(.015-spring*.12,-.45-draw*.45,spring*.045));
       } else { hips.position.x=0;hips.position.z=0; }
-      chest.rotation.y-=draw*.12; neck.rotation.y+=striking?.55:.35;
+      chest.rotation.y-=draw*.12; neck.rotation.y+=.35+draw*.20;
       for(const side of ['R','L']) for(const finger of ['Index','Middle','Ring','Little']) for(let joint=1;joint<=3;joint++) {
         const bone=root.getObjectByName(`J_Bip_${side}_${finger}${joint}`);
         const curl=side==='L' ? [0,.85,1.2,.65][joint] : [0,.6,1.2,.65][joint]*tension;
-        bone.quaternion.multiply(new T.Quaternion().setFromAxisAngle(new T.Vector3(0,0,1),(side==='R'?1:-1)*curl));
+        bone.quaternion.copy(restRotations.get(bone)).multiply(new T.Quaternion().setFromAxisAngle(new T.Vector3(0,0,1),(side==='R'?1:-1)*curl));
       }
       root.updateMatrixWorld(true);
       if(base!==run) {
-        feet[0].solve(target.set(-.20,.09,-.19),pole.set(-.1,0,1),feet[0].rotation);
-        feet[1].solve(target.set(.20,.09,.20),pole.set(.1,0,1),feet[1].rotation);
+        feet[0].solve(target.set(-.16,.09+spring*.30,-.16-spring*.12),pole.set(-.1,0,1),feet[0].rotation);
+        feet[1].solve(target.set(.16,.09+spring*.16,.16+spring*.08),pole.set(.1,0,1),feet[1].rotation);
       }
-      rotation.setFromEuler(new T.Euler(-lift,0,-.08*(1-draw),'YXZ'));
+      rotation.setFromEuler(new T.Euler(-lift,0,-.30*(1-draw)-spring*.12,'YXZ'));
       handRotation.copy(rotation).multiply(mountInverse);
-      centre.set(.08,1.28+draw*.07+lift*.18,.41);
+      centre.set(.08+spring*.04,1.18+draw*.205+lift*.18+spring*.10+bob,.30+draw*.11);
       direction.set(0,0,1).applyQuaternion(rotation);
       target.copy(centre).sub(offset.set(.045,-.012,.025).applyQuaternion(handRotation));
       left(target,pole.set(.6,-.6,-.2),handRotation);
       target.copy(centre).addScaledVector(direction,-.08-draw*.38).sub(offset.set(-.045,-.012,.025).applyQuaternion(handRotation));
+      if(base===run)target.set(-.18,1.04+Math.sin(phase*Math.PI*2)*.06,.18+Math.cos(phase*Math.PI*2)*.10);
+      if(stepping)target.lerp(offset.set(-.18,1.10+spring*.10,.16),spring);
       right(target,pole.set(-1,-.4,0),handRotation);
       times.push(seconds);bones.forEach((b,i)=>values[i].push(...b.quaternion.toArray()));positions.push(...hips.position.toArray());
     }
