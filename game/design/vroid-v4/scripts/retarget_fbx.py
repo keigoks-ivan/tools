@@ -2,7 +2,8 @@
 
 Same calibrated world-rotation-delta transfer as animate_v4.py, but the source rig is read in world space
 because Mixamo FBX armatures import with an axis-conversion rotation and a 0.01 object scale.
-Usage: blender -b --python retarget_fbx.py -- project.blend out.blend name=path.fbx [name=path.fbx ...]
+Usage: blender -b --python retarget_fbx.py -- project.blend out.blend name=path.fbx [name=path.fbx ...] [--free=name,name]
+--free lists clips whose right-hand fingers keep the source motion (bow draw) instead of the sword grip.
 """
 import sys, os, math, bpy
 from mathutils import Matrix, Quaternion, Vector
@@ -15,6 +16,7 @@ import swordlib as SW
 args = sys.argv[sys.argv.index('--') + 1:]
 SRC_BLEND, OUT_BLEND = args[0], args[1]
 JOBS = [a.split('=', 1) for a in args[2:] if '=' in a and not a.startswith('--')]
+FREE = {n for a in args if a.startswith('--free=') for n in a[7:].split(',')}
 FPS = 30
 
 bpy.ops.wm.open_mainfile(filepath=SRC_BLEND)
@@ -102,7 +104,7 @@ def retarget(name, path):
             par = target_rest[tn]['parent']
             wp = Quaternion() if par is None else world.get(par, target_rest[par]['rot'])
             mb = (rest_local[tn].inverted() @ wp.inverted() @ tw).normalized()
-            if tn in GRIP:
+            if tn in GRIP and name not in FREE:
                 mb = GRIP[tn].copy()
             if tn in prev and prev[tn].dot(mb) < 0:
                 mb = -mb

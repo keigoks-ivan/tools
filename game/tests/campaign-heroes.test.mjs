@@ -143,8 +143,8 @@ test('weapon variants keep the authored skeleton and restore the original geomet
   json.images = []; json.textures = [];
   json.buffers[0].uri = `data:application/octet-stream;base64,${bytes.subarray(28 + size).toString('base64')}`;
   const gltf = await new GLTFLoader().parseAsync(JSON.stringify(json), '');
-  const { createPolearmClips, createArcherClips } = await import('../3d-next/hero-motion.js');
-  gltf.animations.push(...createPolearmClips(THREE, gltf.scene, gltf.animations), ...createArcherClips(THREE, gltf.scene, gltf.animations));
+  const { createGreatswordClips, createArcherClips } = await import('../3d-next/hero-motion.js');
+  gltf.animations.push(...createGreatswordClips(THREE, gltf.scene, gltf.animations), ...createArcherClips(THREE, gltf.scene, gltf.animations));
   const sword = gltf.scene.getObjectByName('Hero_sword');
   const source = sword.geometry;
   const originals = source.attributes.position.array.slice();

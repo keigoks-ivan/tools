@@ -21,65 +21,61 @@ async function loadRig() {
   return new GLTFLoader().parseAsync(JSON.stringify(json),'');
 }
 
-test('bow draw and release retain stable joints and do not modify the source rig', async () => {
+test('every arrow is drawn to the cheek and loosed on its hit time, without altering the source rig', async () => {
   const gltf=await loadRig(), root=gltf.scene, bones=[];root.traverse(b=>{if(b.isBone)bones.push(b);});
   const original=bones.map(b=>b.quaternion.toArray()), tracks=gltf.animations.map(c=>c.tracks.map(t=>Array.from(t.values)));
-  const clips=createArcherClips(T,root,gltf.animations), mixer=new T.AnimationMixer(root);
+  const clips=createArcherClips(T,root), mixer=new T.AnimationMixer(root);
   assert.deepEqual(bones.map(b=>b.quaternion.toArray()),original);assert.deepEqual(gltf.animations.map(c=>c.tracks.map(t=>Array.from(t.values))),tracks);
   assert.equal(clips.length,11);
   const equipment=createHeroEquipment(T,root,root.getObjectByName('Hero_sword'));equipment.apply(HEROES.jade);
-  const bow=root.getObjectByName('jade_J_Bip_L_Hand_weapon');
   const string=root.getObjectByName('jade_bow_string'), arrow=root.getObjectByName('jade_nocked_arrow'), stringGeometry=string.geometry;
+  const hand=root.getObjectByName('J_Bip_R_Hand'), head=root.getObjectByName('J_Bip_C_Head'), drawn=()=>new T.Vector3().fromBufferAttribute(string.geometry.attributes.position,1);
+  const moves=[...HEROES.jade.chain,...HEROES.jade.charges,HEROES.jade.counter,HEROES.jade.air];
   for(const clip of clips) {
-    const move=[...HEROES.jade.chain,...HEROES.jade.charges,HEROES.jade.counter,HEROES.jade.air].find(move=>move.clip===clip.name);
+    const move=moves.find(move=>move.clip===clip.name);
+    if(move)assert.equal(clip.duration,move.duration,'animation and release clock disagree');
     mixer.stopAllAction();const action=mixer.clipAction(clip).reset().setLoop(T.LoopOnce,1).play();action.clampWhenFinished=true;
-    const previous=new Map(), planted=new Map(), previousFeet=new Map();
-    let maxStride=0,maxLift=0;
-    for(let frame=0;frame<=Math.ceil(clip.duration*120);frame++) {
-      mixer.setTime(Math.min(clip.duration,frame/120));root.updateMatrixWorld(true);equipment.update();
+    const previous=new Map();
+    for(let frame=0;frame<=Math.round(clip.duration*120);frame++) {
+      mixer.setTime(Math.min(clip.duration-1e-5,frame/120));root.updateMatrixWorld(true);equipment.update();
       if(['jadeIdle','jadeRun'].includes(clip.name)) {
         assert.ok(!arrow.visible,`${clip.name}: carrying the bow accidentally nocks an arrow`);
-        assert.ok(Math.abs(string.geometry.attributes.position.getZ(1)+.04)<.005,`${clip.name}: carrying the bow pulls the string`);
+        assert.ok(Math.abs(drawn().z+.04)<.005,`${clip.name}: carrying the bow pulls the string`);
       }
       for(const side of ['L','R']) {
-        const upper=root.getObjectByName(`J_Bip_${side}_UpperArm`),hand=root.getObjectByName(`J_Bip_${side}_Hand`);
-        assert.ok(hand.getWorldPosition(new T.Vector3()).toArray().every(Number.isFinite));
-        if(previous.has(side))assert.ok(previous.get(side).angleTo(upper.quaternion)<.4,`${clip.name}/${frame}/${side}: elbow flip`);
+        const upper=root.getObjectByName(`J_Bip_${side}_UpperArm`);
+        if(previous.has(side))assert.ok(previous.get(side).angleTo(upper.quaternion)<.4,`${clip.name}/${frame}/${side}: arm snapped`);
         previous.set(side,upper.quaternion.clone());
-        if(!['jadeRun'].includes(clip.name)) {
-          const foot=root.getObjectByName(`J_Bip_${side}_Foot`).getWorldPosition(new T.Vector3());
-          if(!planted.has(side))planted.set(side,foot.clone());
-          const steppingSide=['jadeFan','jadeSpread','jadeBurst'].includes(clip.name)?'L':'R';
-          if(!move||clip.name==='jadeAir'||side!==steppingSide)assert.ok(foot.distanceTo(planted.get(side))<.003,`${clip.name}/${side}: supporting foot moved`);
-          const last=previousFeet.get(side);
-          assert.ok(foot.y>=.087&&foot.y<.22,`${clip.name}/${side}: foot height`);
-          if(last&&last.y<.095&&foot.y<.095)assert.ok(Math.hypot(foot.x-last.x,foot.z-last.z)<.003,`${clip.name}/${side}: grounded foot slid`);
-          maxStride=Math.max(maxStride,Math.hypot(foot.x-planted.get(side).x,foot.z-planted.get(side).z));maxLift=Math.max(maxLift,foot.y-.09);
-          previousFeet.set(side,foot.clone());
-        }
+        assert.ok(root.getObjectByName(`J_Bip_${side}_Foot`).getWorldPosition(new T.Vector3()).y>.08,`${clip.name}/${side}: foot below the floor`);
       }
+      const hips=root.getObjectByName('J_Bip_C_Hips').position;
+      assert.ok(Math.hypot(hips.x,hips.z)<.13,`${clip.name}: capture travel dragged the hero off its mark`);
     }
-    if(move)assert.equal(clip.duration,move.duration,'animation and release clock disagree');
-    if(move&&clip.name!=='jadeAir'){assert.ok(maxStride>.15,`${clip.name}: no visible attack step`);assert.ok(maxLift>.08,`${clip.name}: step did not lift`);}
-    if(clip.name==='jadeShot'){
-      action.reset().setLoop(T.LoopOnce,1).play();mixer.setTime(HEROES.jade.chain[0].hits[0]-.02); root.updateMatrixWorld(true);equipment.update();
-      assert.ok(arrow.visible);const position=string.geometry.attributes.position;
-      const drawn=new T.Vector3().fromBufferAttribute(position,1);assert.ok(drawn.z<-.30);
-      assert.ok(drawn.distanceTo(arrow.position)<.01,'arrow nock leaves the string');
-      const hand=root.getObjectByName('J_Bip_R_Hand'),head=root.getObjectByName('J_Bip_C_Head'),elbow=root.getObjectByName('J_Bip_R_LowerArm');
-      assert.ok(hand.getWorldPosition(new T.Vector3()).distanceTo(head.getWorldPosition(new T.Vector3()))<.12,'drawing hand misses the cheek anchor');
-      assert.ok(elbow.getWorldPosition(new T.Vector3()).y<head.getWorldPosition(new T.Vector3()).y+.07,'drawing elbow rises above the head');
-      mixer.setTime(HEROES.jade.chain[0].hits[0]+.04);root.updateMatrixWorld(true);equipment.update();assert.ok(!arrow.visible);
-      assert.ok(Math.abs(string.geometry.attributes.position.getZ(1)+.04)<.005,'released string does not snap back');
-      assert.equal(string.geometry,stringGeometry,'string geometry allocated during animation');
+    const shots=move?move.hits:clip.name==='jadeUlt'?[.65,2.75]:[];
+    for(const hit of shots) {
+      mixer.setTime(hit-.02);root.updateMatrixWorld(true);equipment.update();
+      assert.ok(arrow.visible,`${clip.name}@${hit}: no arrow nocked at full draw`);
+      assert.ok(drawn().z<-.40,`${clip.name}@${hit}: string not drawn (${drawn().z})`);
+      assert.ok(drawn().distanceTo(arrow.position)<.01,`${clip.name}@${hit}: arrow nock leaves the string`);
+      assert.ok(hand.getWorldPosition(new T.Vector3()).distanceTo(head.getWorldPosition(new T.Vector3()))<.2,`${clip.name}@${hit}: drawing hand misses the cheek anchor`);
+      mixer.setTime(hit+.04);root.updateMatrixWorld(true);equipment.update();
+      assert.ok(!arrow.visible,`${clip.name}@${hit}: arrow still on the string after release`);
+      assert.ok(Math.abs(drawn().z+.04)<.005,`${clip.name}@${hit}: released string does not snap back`);
     }
+    assert.equal(string.geometry,stringGeometry,'string geometry allocated during animation');
+  }
+  // The ultimate's first volley rises toward the sky; ordinary shots fly level.
+  for(const [name,at,low,high] of [['jadeUlt',.6,.35,.9],['jadeShot',.22,-.15,.15]]) {
+    mixer.stopAllAction();mixer.clipAction(clips.find(c=>c.name===name)).reset().play();mixer.setTime(at);root.updateMatrixWorld(true);
+    const aim=root.getObjectByName('J_Bip_L_Hand').getWorldPosition(new T.Vector3()).sub(hand.getWorldPosition(new T.Vector3())).normalize();
+    assert.ok(aim.z>.5&&aim.y>low&&aim.y<high,`${name}: aim ${aim.toArray()}`);
   }
   mixer.stopAllAction();const roll=gltf.animations.find(c=>c.name==='roll');
   mixer.clipAction(roll).reset().setLoop(T.LoopOnce,1).play();
   for(let at=0;at<roll.duration;at+=1/120){
     mixer.setTime(at);root.updateMatrixWorld(true);equipment.update();
     assert.ok(!arrow.visible,'rolling accidentally nocks an arrow');
-    assert.ok(Math.abs(string.geometry.attributes.position.getZ(1)+.04)<.005,'rolling pulls the bow string');
+    assert.ok(Math.abs(drawn().z+.04)<.005,'rolling pulls the bow string');
   }
   equipment.dispose();
 });

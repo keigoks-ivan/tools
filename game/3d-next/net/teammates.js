@@ -6,9 +6,9 @@
 import { SnapshotBuffer } from './interp.js';
 import { SLOT_COLORS, playerColor } from './colors.js';
 import { GHOST_ANIMS, TRAIL_ANIM, makeGhosts, makePeerTrail } from './peer-fx.js?v=20261002d';
-import { heroFor } from '../heroes.js?v=20261002k';
-import { createHeroSpecialFx } from '../hero-special-fx.js?v=20261002k';
-import { createArrowFx } from '../hero-bow.js?v=20261002k';
+import { heroFor } from '../heroes.js?v=20261002m';
+import { createHeroSpecialFx } from '../hero-special-fx.js?v=20261002m';
+import { createArrowFx } from '../hero-bow.js?v=20261002m';
 
 /** 依座位輪用的色調（名單外的名字才用到；Matt／Myles／Mike 固定配色見 colors.js） */
 export const TEAM_TINTS = SLOT_COLORS;

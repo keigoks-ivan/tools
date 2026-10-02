@@ -1,12 +1,12 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone } from 'three/addons/utils/SkeletonUtils.js';
-import { toonVroidHero } from './battle.js?v=20261002k';
-import { createHeroEquipment } from './hero-equipment.js?v=20261002k';
-import { createPolearmClips, createArcherClips, createComboPreview } from './hero-motion.js?v=20261002k';
-import { HEROES } from './heroes.js?v=20261002k';
-import { createArrowFx } from './hero-bow.js?v=20261002k';
-import { createHeroSpecialFx } from './hero-special-fx.js?v=20261002k';
+import { toonVroidHero } from './battle.js?v=20261002m';
+import { createHeroEquipment } from './hero-equipment.js?v=20261002m';
+import { createGreatswordClips, createArcherClips, createComboPreview } from './hero-motion.js?v=20261002m';
+import { HEROES } from './heroes.js?v=20261002m';
+import { createArrowFx } from './hero-bow.js?v=20261002m';
+import { createHeroSpecialFx } from './hero-special-fx.js?v=20261002m';
 import { createHeroEnvironment } from './hero-hair.js?v=20261002h';
 
 const canvas = document.getElementById('view');
@@ -42,7 +42,7 @@ function resize() {
 resize(); window.addEventListener('resize', resize);
 try {
   const source = await new GLTFLoader().loadAsync('../assets/heroes/swordswoman-v4.glb?v=20260925d');
-  const clips = [...source.animations, ...createPolearmClips(THREE, source.scene, source.animations), ...createArcherClips(THREE, source.scene, source.animations)];
+  const clips = [...source.animations, ...createGreatswordClips(THREE, source.scene, source.animations), ...createArcherClips(THREE, source.scene, source.animations)];
   // Play the shared roll at the same 0.42-second combat duration.
   const roll=clips.find(c=>c.name==='roll'),previewRoll=roll.clone();
   previewRoll.tracks.forEach(track=>track.scale(.42/roll.duration));previewRoll.duration=.42;
@@ -98,7 +98,7 @@ try {
   }
   function selectMotionActor() {
     const jade = subject === '3', id = jade ? 'jade' : 'azure';
-    const choices = jade ? [['Idle','持弓待機'],['Run','持弓跑步'],['Roll','翻滾閃避'],['Shot','一段・快射'],['Double','二段・雙連射'],['Fan','三段・扇形三箭'],['Burst','四段・三連貫矢'],['Combo','完整四段連技'],['Spread','扇形五箭'],['Pierce','蓄力穿透箭'],['Guard','退步返矢'],['Ult','翠羽天雨']] : [['Idle','持刀待機'],['Run','持刀跑步'],['Sweep','一段・橫掃'],['Rise','二段・挑斬'],['Slam','三段・重劈'],['Combo','完整三段連技'],['Guard','回斬'],['Ult','蒼龍裂陣']];
+    const choices = jade ? [['Idle','持弓待機'],['Run','持弓跑步'],['Roll','翻滾閃避'],['Shot','一段・快射'],['Double','二段・雙連射'],['Fan','三段・扇形三箭'],['Burst','四段・三連貫矢'],['Combo','完整四段連技'],['Spread','扇形五箭'],['Pierce','蓄力穿透箭'],['Guard','退步返矢'],['Ult','翠羽天雨']] : [['Idle','持劍待機'],['Run','持劍跑步'],['Sweep','一段・橫掃'],['Rise','二段・挑斬'],['Slam','三段・重劈'],['Combo','完整三段連技'],['Guard','回斬'],['Ult','蒼龍裂陣']];
     const select = document.getElementById('motion'); select.replaceChildren(...choices.map(([suffix,label]) => new Option(label,suffix==='Roll'?'roll':id+suffix)));
     const label = jade ? '翠翎動作' : '蒼鋒動作'; document.getElementById('motion-label').textContent = label; select.setAttribute('aria-label',label);
     select.value=id+'Combo';setMotion(select.value);

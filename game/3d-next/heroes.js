@@ -17,8 +17,8 @@ export const HEROES = {
       timeScale: [[0, 1], [2.48, 1], [2.48, 0.25], [2.78, 0.25], [3.15, 1]], freezes: [{ at: 0, real: 0.08 }, { at: 2.65, real: 0.09 }] }),
   },
   azure: {
-    id: 'azure', name: '蒼鋒', mark: '蒼', weapon: '蒼龍偃月刀', color: '#82cfff', tint: 0x82cfff,
-    style: '長兵橫掃', description: '橫掃、挑斬、重劈三連段；長柄偃月刀壓制敵群。', special: '蒼龍裂陣',
+    id: 'azure', name: '蒼鋒', mark: '蒼', weapon: '蒼龍大劍', color: '#82cfff', tint: 0x82cfff,
+    style: '大劍橫掃', description: '橫掃、挑斬、重劈三連段，雙手大劍壓制敵群。', special: '蒼龍裂陣',
     maxHp: 125, speed: 0.86,
     chain: [
       { clip: 'azureSweep', duration: 0.7, hits: [0.28], cancel: 0.43, radius: 235, arc: Math.PI * 1.3, damage: 12, dash: 80 },

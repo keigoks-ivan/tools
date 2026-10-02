@@ -22,7 +22,7 @@ if (new URLSearchParams(location.search).get('hero') !== 'rumi') {
   const copy = document.querySelector('.title-copy');
   const note = document.querySelector('.prototype-note');
   if (subtitle) subtitle.textContent = '四位武者・五關戰役';
-  if (copy) copy.textContent = '從夜市突圍一路闖到霜橋與天闕。選擇長刀、偃月刀、雙刃或弓箭，以不同招式封住鬼門。';
+  if (copy) copy.textContent = '從夜市突圍一路闖到霜橋與天闕。選擇長刀、大劍、雙刃或弓箭，以不同招式封住鬼門。';
   if (note?.firstChild) note.firstChild.textContent = '四位武者　·　五關戰役　·　';
 }
 
@@ -74,7 +74,7 @@ const assets = createPreloader({
   plan: assetPlan({ hero: vroid ? 'vroid' : 'rumi', march: vroid && params.get('level') !== 'single' }),
   loadEngine: () => loadBattleModule().then(async module => { await module.loadLazyModules(); return module; }),
 });
-const loadBattleModule = () => import('./battle.js?v=20261002k');
+const loadBattleModule = () => import('./battle.js?v=20261002m');
 if (params.has('debug')) window.__assets = assets;   // ?debug：各項下載／步驟的開始與完成時間（__assets.progress.items）
 let audio = null;
 const audioReady = vroid

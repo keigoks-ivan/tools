@@ -1,8 +1,8 @@
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { createHairKit } from './hero-hair.js?v=20261002h';
-import { forgedBlade } from './hero-weapons.js?v=20261002b';
+import { forgedBlade } from './hero-weapons.js?v=20261002m';
 import { indexGeometry } from './index-geometry.js?v=20261002c';
-import { createBowKit } from './hero-bow.js?v=20261002k';
+import { createBowKit } from './hero-bow.js?v=20261002m';
 
 // One GPU texture per asset across the local character and all teammates.
 const textureCache = new Map();
@@ -41,7 +41,6 @@ export function createHeroArt(T, root, sword) {
   if (hairStrands) { hairStrands.colorSpace = T.SRGBColorSpace; hairStrands.flipY = true; hairStrands.anisotropy = 4; }
   const ready = Promise.all(loading);
   let activeId = 'violet';
-  const bowFingerRest = root.getObjectByName('J_Bip_R_Index2').quaternion.clone();
   const styledHair = new Map();
   function textured(material, row, col, repeat = 1, strength = 0.45) {
     if (!atlas) return material;
@@ -283,17 +282,13 @@ export function createHeroArt(T, root, sword) {
         g.applyMatrix4(new T.Matrix4().compose(new T.Vector3(...pos), new T.Quaternion().setFromEuler(new T.Euler(...rot)), new T.Vector3(1, 1, 1)));
         if (!wm.has(mat)) wm.set(mat, []); wm.get(mat).push(g.index ? g.toNonIndexed() : g);
       };
-      if (kind === 'glaive') {
-        put(new T.CylinderGeometry(0.018, 0.022, 1.66, 16), wood, [0, 0.075, 0]);
-        for (const y of [-0.68, -0.27, 0.11, 0.69]) put(new T.CylinderGeometry(0.023, 0.023, 0.035, 16), forgedSteel, [0, y, 0]);
-        put(new T.CylinderGeometry(0.031, 0.022, 0.12, 16), trim, [0, 0.78, 0]);
-        put(new T.TorusGeometry(0.038, 0.005, 6, 24), forgedSteel, [-0.01, 0.74, 0], [0, Math.PI / 2, 0]);
-        put(new T.ConeGeometry(0.032, 0.16, 8), edge, [0, -0.83, 0], [0, 0, Math.PI]);
-        for (let i = 0; i < 3; i++) {
-          const ribbon = new T.PlaneGeometry(0.016, 0.23, 2, 10), positions = ribbon.attributes.position;
-          for (let v = 0; v < positions.count; v++) { const fall = (0.115 - positions.getY(v)) / 0.23; positions.setX(v, positions.getX(v) + 0.025 * Math.sin(fall * 3 + i)); positions.setZ(v, 0.013 * Math.sin(fall * 5 + i) * fall); }
-          ribbon.computeVertexNormals(); put(ribbon, cloth, [0.035 + i * 0.016, 0.635, 0]);
-        }
+      if (kind === 'greatsword') {
+        // A 34 cm two-hand grip: the right hand sits under the guard, the left hand about 10 cm lower.
+        put(new T.CylinderGeometry(0.016, 0.018, 0.34, 12), leatherGrip, [0, -0.07, 0]);
+        put(new T.SphereGeometry(0.03, 12, 8), trim, [0, -0.255, 0]);
+        put(new T.CylinderGeometry(0.022, 0.018, 0.03, 12), trim, [0, 0.115, 0]);
+        put(bevel([[-0.15, -0.012], [-0.13, 0.016], [0.13, 0.016], [0.15, -0.012], [0.05, -0.02], [-0.05, -0.02]], 0.026, 0.004), forgedSteel, [0, 0.13, 0]);
+        for (const y of [-0.21, -0.07, 0.07]) put(new T.CylinderGeometry(0.02, 0.02, 0.012, 12), trim, [0, y, 0]);
       } else {
         put(new T.CylinderGeometry(0.013, 0.016, 0.19, 12), leatherGrip, [0, -0.018, 0]);
         put(new T.CylinderGeometry(0.017, 0.017, 0.009, 16), trim, [0, -0.122, 0]);
@@ -302,14 +297,16 @@ export function createHeroArt(T, root, sword) {
           const guard = new T.CylinderGeometry(0.038, 0.038, 0.006, 24); guard.scale(1, 1, 0.82); put(guard, forgedSteel, [0, 0.094, 0]);
         } else put(bevel([[-0.055, -0.006], [-0.048, 0.006], [0.043, 0.01], [0.055, -0.012], [0.027, -0.016], [-0.028, -0.012]], 0.012, 0.003), forgedSteel, [0, 0.1, 0]);
       }
-      const cord = Array.from({ length: 100 }, (_, i) => { const t = i / 99, a = t * Math.PI * 20; return new T.Vector3(Math.cos(a) * 0.016, -0.107 + t * 0.19, Math.sin(a) * 0.016); });
-      put(new T.TubeGeometry(new T.CatmullRomCurve3(cord), 100, 0.0024, 4, false), leatherGrip);
+      if (kind !== 'greatsword') {
+        const cord = Array.from({ length: 100 }, (_, i) => { const t = i / 99, a = t * Math.PI * 20; return new T.Vector3(Math.cos(a) * 0.016, -0.107 + t * 0.19, Math.sin(a) * 0.016); });
+        put(new T.TubeGeometry(new T.CatmullRomCurve3(cord), 100, 0.0024, 4, false), leatherGrip);
+      }
       for (const part of forgedBlade(T, kind)) put(part.geometry, part.edge ? edge : forgedSteel);
       for (const [mat, geometries] of wm) { const mesh = new T.Mesh(compact(mergeGeometries(geometries)), mat); mesh.frustumCulled = false; weapon.add(mesh); geometries.forEach(g => g.dispose()); }
       groups.set(hand + '_weapon', weapon);
     }
-    if (id === 'jade') groups.set('bow',createBowKit(T,root,bowFingerRest));
-    else weapon('J_Bip_R_Hand', id === 'azure' ? 'glaive' : id === 'amber' ? 'dagger' : 'katana');
+    if (id === 'jade') groups.set('bow',createBowKit(T,root));
+    else weapon('J_Bip_R_Hand', id === 'azure' ? 'greatsword' : id === 'amber' ? 'dagger' : 'katana');
     if (id === 'amber') weapon('J_Bip_L_Hand', 'dagger');
     for (const { bone, material, geometries } of batches.values()) {
       const mesh = new T.Mesh(compact(mergeGeometries(geometries)), material); mesh.frustumCulled = false; group(bone).add(mesh);
