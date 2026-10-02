@@ -42,7 +42,7 @@ export class Contacts {
   }
 }
 export class Scout {
-  constructor(G) { this.G = G; this.active = false; this.pos = new THREE.Vector3(); this.yaw = 0; this.pitch = 0; this.battery = 45; this.range = 85; this.cooldown = 0; this.reason = '';
+  constructor(G) { this.G = G; this.active = false; this.pos = new THREE.Vector3(); this.vel = new THREE.Vector3(); this.yaw = 0; this.pitch = 0; this.battery = 45; this.range = 85; this.cooldown = 0; this.reason = ''; this.hp = 45; this.ammo = 30; this.fireCd = 0; this.exposed = 0; this.spotted = 0; this.hurtT = 0; this.destroyed = false; this.crashT = 0; this.crashVel = new THREE.Vector3();
     this.root = new THREE.Group(); this.root.visible = false; G.scene?.add(this.root);
     const metal = new THREE.MeshStandardMaterial({ color: 0x405560, roughness: .43, metalness: .65 });
     const dark = new THREE.MeshStandardMaterial({ color: 0x151e24, roughness: .7, metalness: .3 });
@@ -56,19 +56,28 @@ export class Scout {
     for (let i = 0; i < 4; i++) { const a = Math.PI / 4 + i * Math.PI / 2, p = new THREE.Vector3(Math.cos(a) * .21, 0, Math.sin(a) * .21); q.setFromAxisAngle(new THREE.Vector3(0, 1, 0), -a); arms.setMatrixAt(i, m.compose(p, q, scale)); p.multiplyScalar(1.8); hubs.setMatrixAt(i, m.compose(p, q, scale)); p.y = .055; this.rotorPoints.push(p.clone()); blades.setMatrixAt(i, m.compose(p, q, scale)); }
     this.root.add(arms, hubs, blades); this.root.traverse(o => { if (o.isMesh) o.castShadow = true; });
   }
-  reset() { this.active = false; this.root.visible = false; this.battery = 45; this.cooldown = 0; this.reason = ''; }
+  reset() { this.active = false; this.root.visible = false; this.battery = 45; this.cooldown = 0; this.reason = ''; this.hp = 45; this.ammo = 30; this.fireCd = 0; this.exposed = 0; this.spotted = 0; this.hurtT = 0; this.destroyed = false; this.crashT = 0; this.vel.set(0, 0, 0); }
   return(reason = '') { if (!this.active) return; this.active = false; this.root.visible = false; this.reason = reason; this.cooldown = 2; if (reason) this.G.hud.note(reason); }
   toggle() {
     if (this.active) { this.return('切回主角'); return false; }
-    if (this.G.player.dead || this.battery < 8 || this.cooldown > 0 || this.G.vm?.busy) { this.G.hud.note('無人機整備中，請稍候'); return false; }
+    if (this.G.player.dead || this.battery < 8 || this.cooldown > 0 || this.G.vm?.busy) { this.G.hud.note(this.destroyed ? `無人機遭擊落・整備剩餘 ${Math.ceil(this.cooldown)} 秒` : '無人機整備中，請稍候'); return false; }
     const P = this.G.player, p = P.pos.clone(); p.y += P.eyeH + .35;
     if (this.G.solid.pushOut(p.clone(), .4, p.y - .2, p.y + .2, 0)) { this.G.hud.note('上方空間不足，無法放飛'); return false; }
-    this.pos.copy(p); this.yaw = P.yaw; this.pitch = -.15; this.active = true; this.reason = ''; P.vel.set(0, 0, 0); this.root.visible = true; this.root.position.copy(p); if (this.G.vm) { this.G.vm.ads = 0; this.G.vm.scoped = false; }
+    this.pos.copy(p); this.vel.set(0, 0, 0); this.yaw = P.yaw; this.pitch = -.15; this.active = true; this.reason = ''; P.vel.set(0, 0, 0); this.root.visible = true; this.root.position.copy(p); this.root.rotation.set(0, this.yaw, 0); if (this.G.vm) { this.G.vm.ads = 0; this.G.vm.scoped = false; }
     this.G.hud.note('偵察無人機上線・主角留在原地'); return true;
   }
   update(dt, ctl = {}) {
     this.cooldown = Math.max(0, this.cooldown - dt);
-    if (!this.active) { this.battery = Math.min(45, this.battery + dt * .6); return; }
+    this.fireCd = Math.max(0, this.fireCd - dt); this.exposed = Math.max(0, this.exposed - dt); this.spotted = Math.max(0, this.spotted - dt); this.hurtT = Math.max(0, this.hurtT - dt);
+    if (!this.active) {
+      this.battery = Math.min(45, this.battery + dt * .6);
+      if (this.destroyed) {
+        this.fall(dt);
+        if (!this.cooldown) { this.destroyed = false; this.hp = 45; this.ammo = 30; this.battery = 45; this.root.visible = false; this.crashT = 0; }
+      } else { this.hp = Math.min(45, this.hp + dt * 4); this.ammo = Math.min(30, this.ammo + dt * 3); }
+      return;
+    }
+    this.vel.set(0, 0, 0);
     this.battery = Math.max(0, this.battery - dt * (ctl.sprint ? 1.4 : 1));
     if (this.G.player.dead || this.battery <= 0) { this.return('電量不足・切回主角'); return; }
     this.rotorT += dt * 55;
@@ -83,7 +92,36 @@ export class Scout {
     const p = this.pos.clone().add(move), from = this.G.player.pos;
     const floor = this.G.solid.floorAt(p.x, p.z, p.y + .2);
     if (p.y < floor + .5 || p.y > from.y + 24 || p.distanceTo(from) > this.range || this.G.solid.pushOut(p.clone(), .4, p.y - .2, p.y + .2, 0)) return;
-    this.pos.copy(p); this.root.position.copy(p); this.root.rotation.y = this.yaw;
+    this.vel.copy(p).sub(this.pos).multiplyScalar(1 / Math.max(dt, .001)); this.pos.copy(p); this.root.position.copy(p); this.root.rotation.y = this.yaw;
+  }
+  fire(camera) {
+    if (!this.active || this.fireCd > 1e-6 || this.ammo < 1 || this.battery < .35) return null;
+    this.ammo--; this.battery -= .35; this.fireCd = .25; this.exposed = 6;
+    return { from: camera.position.clone(), dir: camera.getWorldDirection(new THREE.Vector3()), range: 65, dmg: 34, head: 68, limb: 25 };
+  }
+  hitTest(o, d, maxT) {
+    if (!this.active) return -1;
+    const to = this.pos.clone().sub(o), b = to.dot(d), disc = b * b - to.lengthSq() + .43 * .43;
+    if (disc < 0) return -1;
+    const t = Math.max(0, b - Math.sqrt(disc));
+    return b + Math.sqrt(disc) >= 0 && t <= maxT ? t : -1;
+  }
+  damage(dmg) {
+    if (!this.active || !(dmg > 0)) return false;
+    this.hp = Math.max(0, this.hp - dmg);
+    if (this.hp > 0) { if (!this.hurtT) this.G.hud.note('無人機受擊！', '#ff5b4d'); this.hurtT = .8; return false; }
+    this.crashVel.copy(this.vel); this.return('無人機遭擊落・整備 30 秒'); this.cooldown = 30; this.destroyed = true; this.battery = 0; this.crashT = 3; this.root.visible = true;
+    this.G.onScoutLost?.(); return true;
+  }
+  fall(dt) {
+    if (this.crashT <= 0) return;
+    this.crashT -= dt; this.crashVel.y -= 9.8 * dt;
+    const move = this.crashVel.clone().multiplyScalar(dt), L = move.length(), hit = L > 0 && this.G.solid.ray(this.pos, move.clone().normalize(), L + .2);
+    if (!hit) this.pos.add(move); this.root.position.copy(this.pos); this.root.rotation.x += dt * 4; this.root.rotation.z += dt * 3;
+    this.G.fx?.puff(this.pos, [.18, .2, .21], .25);
+    if (hit || this.pos.y < this.G.solid.floorAt(this.pos.x, this.pos.z, this.pos.y + .2) + .25 || this.crashT <= 0) {
+      this.G.fx?.explode(this.pos.clone(), .35); this.G.audio?.explosion(this.pos, .25); this.crashT = 0; this.root.visible = false;
+    }
   }
   camera(camera) { this.root.visible = false; camera.position.copy(this.pos).add(new THREE.Vector3(Math.sin(this.yaw) * .28, .02, Math.cos(this.yaw) * .28)); camera.rotation.set(this.pitch, this.yaw + Math.PI, 0); camera.fov = 72; camera.updateProjectionMatrix(); camera.updateMatrixWorld(); }
   attacked() { this.return('主角遭到攻擊・已切回主角'); }

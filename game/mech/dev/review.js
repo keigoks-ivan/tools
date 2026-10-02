@@ -543,6 +543,50 @@ async function weapons() {
   state.textContent = errors.length ? '有錯誤' : '前傳武器通過';
 }
 
+async function scoutCombat() {
+  const checks=[],metrics=[];
+  for(const path of ['zero','lastline']) {
+    await load('/game/mech/'+path+'/index.html','?mute&god&ch=1&all&fps=0');
+    const G=win.__G,T=win.__T,S=G.scout;renderer=win.__renderer;post={render:()=>win.__step(1)};
+    T.Clock.prototype.getDelta=()=>.05;const step=n=>{win.__scene.updateMatrixWorld(true);win.__step(n);};
+    const key=(code,n=1)=>{win.dispatchEvent(new win.KeyboardEvent('keydown',{code}));step(n);win.dispatchEvent(new win.KeyboardEvent('keyup',{code}));step(1);};
+    const patrol=G.patrols.update;G.patrols.update=()=>{};step(30);
+    const e=G.enemies.find(e=>!e.dead&&e.s&&e.pos.distanceTo(G.player.pos)>18&&e.pos.distanceTo(G.player.pos)<65);
+    assert(!!e,path+' 真實駐軍可用於作戰測試');
+    const updates=new Map(G.enemies.map(e=>[e,e.update]));for(const a of G.enemies)a.update=()=>{};
+    key('KeyN');assert(S.active,path+' N 放飛武裝無人機 '+JSON.stringify({busy:G.vm.busy,reason:S.reason,notes:G.hud.notes}));
+    const head=e.s.headPos(new T.Vector3()),offsets=[[0,-12],[12,0],[0,12],[-12,0]];
+    const offset=offsets.find(([x,z])=>{const p=head.clone().add(new T.Vector3(x,2,z));return p.distanceTo(G.player.pos)<80&&!G.solid.pushOut(p.clone(),.4,p.y-.2,p.y+.2,0)&&G.reconSees(p,head);});
+    assert(!!offset,path+' 無人機有實際清楚射界');
+    S.pos.copy(head).add(new T.Vector3(offset[0],2,offset[1]));S.root.position.copy(S.pos);
+    const aim=head.clone().sub(S.pos);S.yaw=Math.atan2(aim.x,aim.z);S.pitch=Math.atan2(aim.y,Math.hypot(aim.x,aim.z));step(1);
+    const hp=e.hp,ammo=G.vm.ammo[G.vm.cur],shots=G.stats.shots;key('M0');
+    assert(e.hp<hp,path+' 左鍵透過正式射擊判定打傷人物');assert(S.ammo===29&&G.vm.ammo[G.vm.cur]===ammo,path+' 無人機與主角彈藥分開');assert(G.stats.shots===shots+1&&S.exposed>0,path+' 射擊計入統計並暴露無人機');
+    assert(e.lastSeen.distanceTo(S.pos)<.01,path+' 中彈敵人追無人機位置，不讀取主角位置');
+    const middle=S.pos.clone().lerp(head,.5),wall=G.solid.add({x0:middle.x-.8,x1:middle.x+.8,y0:middle.y-2,y1:middle.y+2,z0:middle.z-.8,z1:middle.z+.8,mat:'concrete'});wall.noMove=true;
+    const hpWall=e.hp;step(6);key('M0');assert(e.hp===hpWall,path+' 實際掩體擋住無人機射擊');wall.dead=true;wall.noRay=true;
+    e.update=updates.get(e);e.post=true;e.def.x=e.pos.x;e.def.z=e.pos.z;e.cover=e.pos.clone();e.coverT=99;e.phase='peek';e.phaseT=99;e.stagger=0;e.aimT=1;e.s.reloadT=-1;e.scoutLock=0;e.scoutScan=0;
+    const bolt=G.bolt;let replies=0;G.bolt=(p,d,speed,dmg,owner)=>{if(owner===e&&d.dot(S.pos.clone().sub(p).normalize())>.9)replies++;bolt(p,d,speed,1,owner);};
+    step(24);assert(e.scoutSeen&&replies>0,path+' 真實步兵 AI 發現無人機並瞄準反擊');assert(S.spotted>0,path+' 畫面顯示敵人已發現警告');
+    G.hud.banner=null;G.hud.sub=null;G.hud.subQ.length=0;await save(path+'-scout-combat');
+    e.update=()=>{};G.bolt=bolt;G.bolts.length=0;
+    const before=S.hp,from=S.pos.clone().add(new T.Vector3(0,0,1));bolt(from,new T.Vector3(0,0,-1),60,9,e);step(1);
+    assert(S.active&&S.hp===before-9,path+' 敵彈命中無人機耐久，仍可操控');
+    const block=G.solid.add({x0:S.pos.x-.7,x1:S.pos.x+.7,y0:S.pos.y-.7,y1:S.pos.y+.7,z0:S.pos.z+.5,z1:S.pos.z+.7,mat:'metal'});block.noMove=true;
+    const protectedHP=S.hp;bolt(S.pos.clone().add(new T.Vector3(0,0,1)),new T.Vector3(0,0,-1),60,50,e);step(1);assert(S.hp===protectedHP&&S.active,path+' 掩體優先擋住敵彈，不穿牆擊落');block.dead=true;block.noRay=true;
+    const root=S.root;bolt(S.pos.clone().add(new T.Vector3(0,0,1)),new T.Vector3(0,0,-1),60,100,e);step(1);
+    assert(!S.active&&S.destroyed&&S.cooldown===30,path+' 實際敵彈擊落並啟動 30 秒整備');assert(G.hud.cam.position.distanceTo(G.playerEye)<.01&&G.vm.holder.visible&&G.vm.arms.root.visible,path+' 擊落同一幀恢復主角鏡頭與武器');
+    key('KeyN');assert(!S.active,path+' 整備時 N 無法放飛');await save(path+'-scout-repair');
+    const render=renderer.render.bind(renderer);renderer.render=()=>{};step(570);assert(S.destroyed,path+' 接近 30 秒前仍不可用');step(35);renderer.render=render;
+    assert(!S.destroyed&&S.hp===45&&S.ammo===30&&S.battery===45,path+' 整備完成恢復耐久、彈藥和電量');key('KeyN');assert(S.active&&S.root===root,path+' 整備後可重新放飛且重用模型');
+    let meshes=0,triangles=0;root.traverse(o=>{if(o.isMesh){meshes++;triangles+=(o.geometry.index?o.geometry.index.count:o.geometry.attributes.position.count)/3*(o.isInstancedMesh?o.count:1);}});assert(meshes<=5&&triangles<1500,path+' 無人機模型維持原資源預算');
+    G.bolts.length=0;bolt(G.playerEye.clone().add(new T.Vector3(0,-.55,.7)),new T.Vector3(0,0,-1),60,9,e);step(1);assert(!S.active&&!S.destroyed&&S.reason.includes('主角遭到攻擊'),path+' 主角中彈仍立即切回，不誤判無人機擊落');
+    assert(errors.length===0,path+' 作戰與整備無執行錯誤');metrics.push({game:path,replies,meshes,triangles});checks.push(...result);
+    for(const [a,update]of updates)a.update=update;G.patrols.update=patrol;
+  }
+  report.textContent=JSON.stringify({checks,metrics,errors},null,2);state.textContent='無人機作戰通過';
+}
+
 async function reconControls() {
   const checks=[];
   for(const path of ['zero','lastline']) {
@@ -573,7 +617,7 @@ async function reconControls() {
     await save(path+'-radar-memory');G.reconSees=sight;step(10);
     assert(S.active,path+' 截圖前仍在實際操控');G.hud.banner=null;G.hud.sub=null;G.hud.subQ.length=0;
     await save(path+'-scout-radar');G.bolt=shoot;
-    const eye=G.playerEye.clone();G.bolt(eye.clone().add(new T.Vector3(0,0,.7)),new T.Vector3(0,0,-1),60,9,null);step(1);
+    const eye=G.playerEye.clone();G.bolt(eye.clone().add(new T.Vector3(0,-.55,.7)),new T.Vector3(0,0,-1),60,9,null);step(1);
     assert(!S.active&&S.reason.includes('主角遭到攻擊'),path+' 主角中彈的同一幀終止操控');
     assert(G.vm.holder.visible&&G.vm.arms.root.visible,path+' 同一幀恢復主角武器');
     assert(G.hud.cam.position.distanceTo(G.playerEye)<.01,path+' 同一幀鏡頭已回到主角眼睛');
@@ -843,7 +887,7 @@ async function campaignEdges() {
 }
 const assertSilent = (ok, text) => { if (!ok) throw Error(text); };
 
-for (const [id, fn] of [['reconControls', reconControls], ['prequelFoot', prequelFoot], ['patrolWorld', patrolWorld], ['japaneseSigns', japaneseSigns], ['harborArt', harborArt], ['campaignFoot', campaignFoot], ['campaign4', () => campaignMech(4)], ['campaign5', () => campaignMech(5)], ['campaign6', () => campaignMech(6)], ['campaign7', () => campaignMech(7)], ['campaign6Artillery', async()=>{localStorage.setItem('lastline.choice',JSON.stringify('artillery'));await campaignMech(6,'artillery');}], ['campaignArtillery', async () => { localStorage.setItem('lastline.choice', JSON.stringify('artillery')); await campaignMech(7, 'artillery'); }], ['campaignEdges', campaignEdges], ['mech', mech], ['fields', battlefields], ['enemyMotion', enemyMotion], ['zero', zero], ['tactics', tactics], ['prequelMechCampaign', prequelMechCampaign], ['campaignMain', campaignMain], ['enemyPressure', enemyPressure], ['infantry', infantry], ['art', art], ['hero', hero], ['city', city], ['mountains', mountains], ['weapons', weapons], ['save', save]]) document.querySelector('#' + id).onclick = () => fn().catch(e => { state.textContent = '失敗'; report.textContent += '\n' + e.stack; });
+for (const [id, fn] of [['scoutCombat', scoutCombat], ['reconControls', reconControls], ['prequelFoot', prequelFoot], ['patrolWorld', patrolWorld], ['japaneseSigns', japaneseSigns], ['harborArt', harborArt], ['campaignFoot', campaignFoot], ['campaign4', () => campaignMech(4)], ['campaign5', () => campaignMech(5)], ['campaign6', () => campaignMech(6)], ['campaign7', () => campaignMech(7)], ['campaign6Artillery', async()=>{localStorage.setItem('lastline.choice',JSON.stringify('artillery'));await campaignMech(6,'artillery');}], ['campaignArtillery', async () => { localStorage.setItem('lastline.choice', JSON.stringify('artillery')); await campaignMech(7, 'artillery'); }], ['campaignEdges', campaignEdges], ['mech', mech], ['fields', battlefields], ['enemyMotion', enemyMotion], ['zero', zero], ['tactics', tactics], ['prequelMechCampaign', prequelMechCampaign], ['campaignMain', campaignMain], ['enemyPressure', enemyPressure], ['infantry', infantry], ['art', art], ['hero', hero], ['city', city], ['mountains', mountains], ['weapons', weapons], ['save', save]]) document.querySelector('#' + id).onclick = () => fn().catch(e => { state.textContent = '失敗'; report.textContent += '\n' + e.stack; });
 
 async function harborArt() {
   await load('/game/mech/lastline/index.html', '?mute&god&ch=1&all&fps=0');

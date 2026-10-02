@@ -79,3 +79,23 @@ test('mission search hints group broad areas without registering unseen enemy co
   for(const e of enemies.filter(e=>!e.dead))assert(C.search.some(a=>Math.hypot(a.p.x-e.pos.x,a.p.z-e.pos.z)<=a.radius));
   C.searchAreas([]);assert.equal(C.search.length,0);
 });
+test('armed scout uses its own ammunition and battery with a four shot per second limit', () => {
+  const G=fixture(),S=new Scout(G),cam=new T.PerspectiveCamera();assert.equal(S.fire(cam),null);S.toggle();S.camera(cam);
+  const first=S.fire(cam);assert(first);assert(first.dir.z>0);assert.equal(S.ammo,29);assert.equal(S.exposed,6);assert(S.battery<45);assert.equal(S.fire(cam),null);
+  for(let i=0;i<5;i++)S.update(.05);assert(S.fire(cam),'ready after exactly .25 seconds');
+  S.ammo=0;S.update(.25);assert.equal(S.fire(cam),null);S.ammo=2;S.battery=.3;assert.equal(S.fire(cam),null);
+  S.return();const ammo=S.ammo;S.update(1);assert(S.ammo>ammo);assert.equal(S.fire(cam),null);
+});
+test('scout projectile hit sphere obeys the nearest scenery distance and ignores inactive aircraft', () => {
+  const S=new Scout(fixture());S.toggle();S.pos.set(0,3,10);const o=V(0,3,0),d=V(0,0,1);
+  assert(Math.abs(S.hitTest(o,d,12)-9.57)<1e-6);assert.equal(S.hitTest(o,d,8),-1);assert.equal(S.hitTest(o,V(0,0,-1),12),-1);assert.equal(S.hitTest(V(1,3,0),d,12),-1);
+  S.return();assert.equal(S.hitTest(o,d,12),-1);
+});
+test('shootdown returns control synchronously and blocks redeployment until thirty seconds of repair', () => {
+  const G=fixture(),S=new Scout(G),root=S.root;let returned=0;G.onScoutLost=()=>{assert(!S.active);assert(S.destroyed);returned++;};S.toggle();S.pos.y=8;
+  assert(!S.damage(9));assert.equal(S.hp,36);assert(S.active);assert(S.damage(40));assert.equal(returned,1);assert.equal(S.hp,0);assert.equal(S.cooldown,30);assert(!S.toggle());
+  S.attacked();S.return();assert.equal(S.cooldown,30);assert(!S.damage(50));
+  S.update(2);assert(S.pos.y<8);assert.equal(S.cooldown,28);S.update(27);assert(!S.toggle());assert(S.destroyed);S.update(1);
+  assert(!S.destroyed);assert.equal(S.hp,45);assert.equal(S.ammo,30);assert.equal(S.battery,45);assert(S.toggle());assert.equal(S.root,root);assert.equal(G.scene.children.length,1);
+  S.damage(50);S.reset();assert(!S.destroyed);assert.equal(S.cooldown,0);assert.equal(S.hp,45);assert.equal(returned,2);
+});

@@ -42,7 +42,7 @@ export class HUD {
     x.clearRect(0, 0, W, H);
     if (!G || !G.playing) { this._subs(dt, W, H); this._banner(dt, W, H); return; }
     const vm = G.vm, P = G.player, cx = W / 2, cy = H / 2;
-    if (G.scout?.active) { this._scout(W, H, G); this._radar(W, H, G); this._subs(dt, W, H); this._banner(dt, W, H); return; }
+    if (G.scout?.active) { this._scout(W, H, G); this.hit = Math.max(0, this.hit - dt); this._radar(W, H, G); this._subs(dt, W, H); this._banner(dt, W, H); return; }
     this.clearAim = vm.cur === 'smg' && vm.ads > .5 ? Math.min(W,H)*.09 : 0;
     // ---- 狙擊鏡
     if (vm.scoped) this._scope(W, H, G);
@@ -159,15 +159,19 @@ export class HUD {
     x.globalAlpha=1;if(G.scout.active)plot(G.player.pos,CY);x.restore();
     x.fillStyle=CY;x.beginPath();x.moveTo(0,-5);x.lineTo(4,4);x.lineTo(0,2);x.lineTo(-4,4);x.closePath();x.fill();
     x.shadowColor='rgba(0,0,0,.9)';x.shadowBlur=4;x.textAlign='center';x.font='500 11px "Noto Sans TC",sans-serif';x.fillStyle=CY;x.fillText(`已發現 ${G.contacts.items.size} 名 · 90 m`,0,-r-9);x.fillStyle='#c3b99f';x.fillText('黃點：最後目擊',0,r+15);x.fillText('黃圈：搜索區域',0,r+30);
-    x.textAlign='left';x.fillText(`[N] 偵察無人機 ${Math.ceil(G.scout.battery/45*100)}%`,-r,r+49);x.restore();
+    x.textAlign='left';x.fillText(G.scout.destroyed ? `無人機整備 ${Math.ceil(G.scout.cooldown)} 秒` : `[N] 偵察無人機 ${Math.ceil(G.scout.battery/45*100)}%`,-r,r+49);x.restore();
   }
   _scout(W, H, G) {
     const x=this.x,S=G.scout,cx=W/2,cy=H/2;
-    x.save();x.shadowColor='rgba(0,0,0,.9)';x.shadowBlur=4;x.strokeStyle='rgba(127,243,255,.8)';x.lineWidth=1.5;
+    x.save();x.shadowColor='rgba(0,0,0,.9)';x.shadowBlur=4;x.strokeStyle=S.hurtT>0?RD:'rgba(127,243,255,.8)';x.lineWidth=1.5;
     for(const [sx,sy] of [[-1,-1],[1,-1],[-1,1],[1,1]]){x.beginPath();x.moveTo(cx+sx*42,cy+sy*25);x.lineTo(cx+sx*42,cy+sy*38);x.lineTo(cx+sx*28,cy+sy*38);x.stroke();}
-    x.textAlign='center';x.font='600 16px "Noto Sans TC",sans-serif';x.fillStyle=CY;x.fillText('偵察無人機',cx,38);
+    x.textAlign='center';x.font='600 16px "Noto Sans TC",sans-serif';x.fillStyle=CY;x.fillText('偵察戰鬥無人機',cx,38);
     x.font='500 12px "Noto Sans TC",sans-serif';x.fillStyle='#edf6f8';x.fillText(`電量 ${Math.ceil(S.battery/45*100)}% · 航程 ${S.pos.distanceTo(G.player.pos).toFixed(0)} / 85 m`,cx,60);
-    x.fillText('WASD 飛行 · 空白鍵上升 · C 下降 · N 返回',cx,H-52);x.fillStyle=AM;x.fillText('主角留在原地，遭到攻擊會立即切回',cx,H-30);
+    x.fillText(`耐久 ${Math.ceil(S.hp)} / 45 · 彈藥 ${Math.floor(S.ammo)} / 30`,cx,80);
+    x.fillStyle=S.spotted>0?RD:AM;
+    if(S.spotted>0||S.exposed>0)x.fillText(S.spotted>0?'敵人已發現・正在反擊':'開火已暴露位置',cx,102);
+    if(this.hit>0){x.strokeStyle=this.mk==='kill'?RD:CY;x.beginPath();for(const [sx,sy] of [[-1,-1],[1,-1],[-1,1],[1,1]]){x.moveTo(cx+sx*5,cy+sy*5);x.lineTo(cx+sx*12,cy+sy*12);}x.stroke();}
+    x.fillStyle='#edf6f8';x.fillText('左鍵開火 · WASD 飛行 · 空白鍵上升 · C 下降 · N 返回',cx,H-52);x.fillStyle=AM;x.fillText('主角留在原地，遭到攻擊會立即切回',cx,H-30);
     x.textAlign='left';x.fillStyle='#edf6f8';x.fillText(`主角生命 ${Math.ceil(G.player.hp)} · 護盾 ${Math.ceil(G.player.shield)}`,34,40);x.restore();
   }
 

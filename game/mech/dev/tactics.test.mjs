@@ -5,7 +5,7 @@ import { steer, flankPoint, squadFlank, coveringFire, segmentBox, planRoute, rou
 import { Combat } from '../combat.js';
 import { Encounter, parse } from '../encounter.js';
 import { STAGE_DATA } from '../stages.js';
-import { Trooper, Drone, TYPES, hearNoise } from '../zero/ai.js';
+import { Trooper, Drone, TYPES, hearNoise, spotScout } from '../zero/ai.js';
 import { Solid } from '../zero/kit.js';
 
 const V = (x = 0, y = 0, z = 0) => new THREE.Vector3(x, y, z);
@@ -251,4 +251,32 @@ test('a discovered body prompts one investigation and warns nearby guards withou
   const body={dead:true,id:20,pos:V(10,0,5)},mate={dead:false,state:'idle',pos:V(12,0,0),seenBodies:new Set(),reports:[],alert(p,k){this.reports.push([p.clone(),k]);}};
   e.G.enemies.push(body,mate);e.inspectBodies(.1);assert.equal(e.aware,.65);assert(e.searchT>0);assert.deepEqual(e.lastSeen.toArray(),body.pos.toArray());assert.equal(mate.reports.length,1);
   for(let i=0;i<5;i++)e.inspectBodies(1);assert.equal(e.aware,.65);assert.equal(mate.reports.length,1);
+});
+test('quiet scouts need close frontal observation; gunfire exposes the aircraft with reaction time', () => {
+  const e=soldierFixture();e.G.player.pos.set(-90,0,-90);e.sees=false;
+  const S=e.G.scout={active:true,pos:V(10,4,15),vel:V(),exposed:0,spotted:0};
+  assert.equal(spotScout(e,.2),null);for(let i=0;i<6;i++)spotScout(e,.2);assert(e.scoutSeen);assert(S.spotted>0);assert.deepEqual(e.lastSeen.toArray(),S.pos.toArray());
+  S.active=false;assert.equal(spotScout(e,.2),null);assert(!e.scoutSeen);S.active=true;S.pos.set(10,4,-35);
+  for(let i=0;i<8;i++)assert.equal(spotScout(e,.2),null);
+  S.exposed=6;assert.equal(spotScout(e,.2),null);assert.equal(spotScout(e,.2),S);
+  S.pos.z=-65;e.scoutScan=0;assert.equal(spotScout(e,.2),S,'guards can retaliate at the scout weapon maximum range');
+  S.active=false;spotScout(e,.2);S.active=true;S.pos.z=-85;for(let i=0;i<8;i++)assert.equal(spotScout(e,.2),null);
+});
+test('scout detection is occluded, bounded to five ray checks per second and never reveals the pilot', () => {
+  const e=soldierFixture();e.sees=false;e.G.player.pos.set(-90,0,-90);let rays=0;
+  const S=e.G.scout={active:true,pos:V(10,4,35),vel:V(),exposed:6};e.G.reconSees=()=>{rays++;return false;};
+  for(let i=0;i<100;i++)assert.equal(spotScout(e,.01),null);assert(rays<=5);assert(!e.scoutSeen);assert(e.lastSeen.distanceTo(e.G.player.pos)>100);
+  e.G.reconSees=()=>true;for(let i=0;i<40;i++)spotScout(e,.01);assert(e.scoutSeen);assert.deepEqual(e.lastSeen.toArray(),S.pos.toArray());
+  e.G.reconSees=()=>false;for(let i=0;i<40;i++)spotScout(e,.01);assert(!e.scoutSeen);
+});
+test('infantry leads the moving scout rather than the hidden pilot and keeps muzzle obstruction checks', () => {
+  const e=soldierFixture(),G=e.G;e.s.muzzle=out=>out.copy(e.pos).add(V(0,1.2,0));G.fx=silent;G.diff={acc:1,dmg:1};G.player.vel.set(-20,0,0);
+  const S={pos:V(10,4,20),vel:V(7,0,0)};let dir;G.bolt=(p,d)=>dir=d.clone();const random=Math.random;Math.random=()=>.5;
+  try{assert(e.fire(S.pos,S));assert(dir.x>0);assert(dir.y>0);G.solid.sees=()=>false;dir=null;assert(!e.fire(S.pos,S));assert.equal(dir,null);}finally{Math.random=random;}
+});
+test('enemy drones fire at a confirmed scout and remember the aircraft as damage source', () => {
+  const e=droneFixture(),G=e.G;G.player.pos.set(100,0,100);G.playerEye.set(100,1.6,100);e.sees=false;e.losT=2;e.shotT=0;
+  const S=G.scout={active:true,pos:V(0,7,30),vel:V(),exposed:6};let shots=0;G.bolt=()=>shots++;
+  for(let i=0;i<8;i++)e.update(.05);assert(e.scoutSeen);assert(shots>0);assert.deepEqual(e.lastSeen.toArray(),S.pos.toArray());
+  S.pos.set(8,7,30);e.damage(1,V(1,0,0),'body',S.pos);assert.deepEqual(e.lastSeen.toArray(),S.pos.toArray());
 });

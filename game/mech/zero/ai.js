@@ -31,6 +31,25 @@ export function hearNoise(G, p, radius, strength) {
   }
 }
 
+// 無人機偵測獨立於主角視線；最多每秒五次遮蔽測試，開火才擴大搜索範圍。
+export function spotScout(e, dt) {
+  const G = e.G, S = G.scout;
+  if (!S?.active) { e.scoutSeen = false; e.scoutLock = 0; e.scoutLOS = false; e.scoutScan = 0; return null; }
+  e.scoutScan = (e.scoutScan || 0) - dt;
+  if (e.scoutScan <= 0) {
+    e.scoutScan = .2;
+    const eye = e.s ? e.s.headPos(new THREE.Vector3()) : e.pos;
+    const to = S.pos.clone().sub(eye), L = to.length(), yaw = e.s ? e.s.aimYaw : e.yaw;
+    const facing = (to.x * Math.sin(yaw) + to.z * Math.cos(yaw)) / Math.max(L, .001);
+    const exposed = S.exposed > 0;
+    e.scoutLOS = L < (exposed ? 75 : 22) && (exposed || facing > .2) && (G.reconSees ? G.reconSees(eye, S.pos) : G.solid.sees(eye, S.pos));
+  }
+  e.scoutLock = clamp((e.scoutLock || 0) + dt * (e.scoutLOS ? S.exposed > 0 ? 4 : .8 : -3), 0, 1);
+  e.scoutSeen = e.scoutLOS && e.scoutLock >= 1 && !(e.sees && e.pos.distanceTo(G.player.pos) < 12);
+  if (!e.scoutSeen) return null;
+  S.spotted = 1.5; e.alert(S.pos, 1); return S;
+}
+
 const MAG = { trooper: 18, officer: 24, heavy: 40, sniper: 4 };
 
 export class Trooper {
@@ -143,8 +162,9 @@ export class Trooper {
       this.sees = L < range && to.dot(fwd) > cone && G.solid.sees(head, eye) && !P.dead;
       if (this.sees) { this.lastSeen.copy(P.pos); this.seeT += 0.2; } else this.seeT = 0;
     }
+    const scout = spotScout(this, dt), attack = scout || P, targetSeen = !!scout || this.sees;
     // 無線電報位：同伴追的是上次回報的位置，沒有隔牆讀取玩家的新位置。
-    if (this.state === 'combat' && this.sees && this.reportT <= 0) {
+    if (this.state === 'combat' && this.sees && !scout && this.reportT <= 0) {
       this.reportT = this.type === 'officer' ? 0.65 : 1;
       shareContact(G.enemies, this, this.type === 'officer' ? 42 : 32, (e, p) => e.alert(p, 0.8));
     }
@@ -179,15 +199,15 @@ export class Trooper {
       mode = 'patrol';
     } else {
       // ---- 戰鬥
-      const target = this.sees ? P.pos : this.lastSeen;
+      const dist = this.pos.distanceTo(attack.pos), target = targetSeen ? attack.pos : this.lastSeen;
       const toP = Math.atan2(target.x - this.pos.x, target.z - this.pos.z);
       this.coverT -= dt; this.phaseT -= dt;
       const sniper = this.type === 'sniper';
       // 多久沒看到玩家：躲太久就派人摸過去（往最後看到的位置找掩護）、丟手榴彈
-      if (this.sees) { this.notSeen = 0; this.hunt = false; } else this.notSeen += dt;
+      if (targetSeen) { this.notSeen = 0; this.hunt = false; } else this.notSeen += dt;
       if (!this.post && !sniper && !this.hunt && this.notSeen > (this.role === 'flank' ? 2 : 3.8) && this.type !== 'heavy') { this.hunt = true; this.cover = null; this.coverT = 0; }
       // 有視線才看得出換彈；每側一名側翼兵推進，步槍兵與重裝兵輪流壓制。
-      if (!this.post && this.role === 'flank' && this.sees && (G.vm.reloadT >= 0 || coveringFire(G.enemies, this)) && this.pushCd <= 0 && dist > 7 && dist < 36) {
+      if (!this.post && this.role === 'flank' && this.sees && !scout && (G.vm.reloadT >= 0 || coveringFire(G.enemies, this)) && this.pushCd <= 0 && dist > 7 && dist < 36) {
         const goal = squadFlank(this.pos, target, G.enemies, this, this.side, Math.max(7, dist - 5), 0.45);
         const side = Math.sign((this.pos.z - target.z) * (goal.x - target.x) - (this.pos.x - target.x) * (goal.z - target.z)) || this.side;
         if (flankAvailable(G.enemies, this, side)) {
@@ -195,7 +215,7 @@ export class Trooper {
           this.phase = 'move'; this.pushCd = 5; this.pushT = 2.4; this.pushSide = side; this.navT = 0;
         }
       }
-      if (this.nades > 0 && !this.sees && this.notSeen > 3 && G.throwGrenade && G.t - (G.lastNade ?? -99) > 8) {
+      if (this.nades > 0 && !G.scout?.active && !this.sees && this.notSeen > 3 && G.throwGrenade && G.t - (G.lastNade ?? -99) > 8) {
         const dL = this.pos.distanceTo(this.lastSeen);
         if (dL > 7 && dL < 24) { this.nades--; G.lastNade = G.t; G.throwGrenade(s.headPos(new THREE.Vector3()).add(_w.set(0, 0.3, 0)), this.lastSeen.clone(), this); this.phase = 'hide'; this.phaseT = rr(0.8, 1.4); }
       }
@@ -241,7 +261,7 @@ export class Trooper {
         if (this.cover && this.cover.peek) { _v.set(this.cover.peek.x - this.pos.x, 0, this.cover.peek.z - this.pos.z); if (_v.length() > 0.2) { mv.copy(_v).normalize(); speed = 1.6; } }
         if (this.phaseT <= 0 || (this.burst <= 0 && this.aimT > 3)) { this.phase = 'hide'; this.phaseT = rr(0.7, 1.8); if (Math.random() < 0.3) this.coverT = 0; }
         // 被玩家用瞄準鏡對準（準心 3 度以內）一下子就縮回去，有時直接換位置
-        if (this.sees && G.ads > 0.6 && G.aimDir && !this.post) {
+        if (this.sees && !scout && G.ads > 0.6 && G.aimDir && !this.post) {
           const to = s.chestPos(_u).sub(G.playerEye).normalize();
           if (to.dot(G.aimDir) > 0.9986) this.aimedT += dt; else this.aimedT = Math.max(0, this.aimedT - dt);
           if (this.aimedT > this.duckAt && this.burst <= 0) { this.phase = 'hide'; this.phaseT = rr(0.7, 1.3); this.aimedT = 0; if (Math.random() < 0.35) this.coverT = 0; }
@@ -251,31 +271,31 @@ export class Trooper {
       if (this.post && this.stagger <= 0) { _v.set(this.def.x - this.pos.x, 0, this.def.z - this.pos.z); if (_v.length() > 0.3) { mv.copy(_v).normalize(); speed = T.walk; } }
       // 太近：退後＋側移，邊打
       if (dist < 4.5 && !this.post) {
-        mv.set(this.pos.x - P.pos.x, 0, this.pos.z - P.pos.z).normalize().add(_v.set(Math.cos(G.t + this.id), 0, Math.sin(G.t + this.id)).multiplyScalar(0.6)).normalize();
+        mv.set(this.pos.x - attack.pos.x, 0, this.pos.z - attack.pos.z).normalize().add(_v.set(Math.cos(G.t + this.id), 0, Math.sin(G.t + this.id)).multiplyScalar(0.6)).normalize();
         speed = T.walk * 1.6; mode = 'aim'; s.crouchT = 0; this.phase = 'peek'; this.phaseT = Math.max(this.phaseT, 0.5);
       }
       // 瞄準：看得到（或剛看不到）時對準玩家身體
-      const aimTgt = this.sees ? eye.clone().add(_w.set(0, -0.35, 0)) : this.lastSeen.clone().add(_w.set(0, 1.2, 0));
+      const aimTgt = scout ? scout.pos.clone() : this.sees ? eye.clone().add(_w.set(0, -0.35, 0)) : this.lastSeen.clone().add(_w.set(0, 1.2, 0));
       const mz = s.chestPos(new THREE.Vector3());
       const dy = aimTgt.y - mz.y, dh = Math.hypot(aimTgt.x - mz.x, aimTgt.z - mz.z);
       s.aimYaw = lerpAngle(s.aimYaw, Math.atan2(aimTgt.x - mz.x, aimTgt.z - mz.z), 1 - Math.exp(-dt * (mode === 'aim' ? 10 : 5)));
       s.aimPitch = damp(s.aimPitch, Math.atan2(dy, dh), 6, dt);
       // 開槍
-      if (mode === 'aim' && this.sees) {
+      if (mode === 'aim' && targetSeen) {
         this.aimT += dt;
         const ready = sniper ? 1.1 : this.reaction ?? 0.28;
         if (this.burst <= 0 && this.aimT > ready && G.canShoot(this) && s.reloadT < 0 && this.stagger <= 0) { this.burst = Math.min(this.ammo, Math.round(rr(T.burst[0], T.burst[1] + 0.99))); this.shotT = 0; }
         if (this.burst > 0) {
           this.shotT -= dt;
           if (this.shotT <= 0) {
-            const fired = this.fire(aimTgt); this.burst--; if (fired) this.ammo--; this.shotT = T.gap * rr(0.8, 1.3);
+            const fired = this.fire(aimTgt, attack); this.burst--; if (fired) this.ammo--; this.shotT = T.gap * rr(0.8, 1.3);
             if (this.burst <= 0) { this.aimT = sniper ? -0.6 : rr(-0.55, -0.18); }
             // 彈匣打空：蹲回掩護換彈
             if (this.ammo <= 0) { this.burst = 0; s.reloadT = 0; this.ammo = this.mag; if (this.phase === 'peek') { this.phase = 'hide'; this.phaseT = 1.8; } G.audio.reload && Math.random() < 0.5 && this.pos.distanceTo(P.pos) < 18 && G.audio.radio('enemy', this.pos); }
           }
         }
       } else { this.burst = 0; this.aimT = Math.max(0, this.aimT - dt * 2); }
-      if (sniper) this._laser(mode === 'aim' && this.sees && this.burst <= 0, aimTgt);
+      if (sniper) this._laser(mode === 'aim' && targetSeen && this.burst <= 0, aimTgt);
     }
     if (mode !== 'aim' && this.phase !== 'hide') s.crouchT = 0;
     // ---- 移動＋碰撞＋同伴分開
@@ -343,14 +363,14 @@ export class Trooper {
     }
   }
 
-  fire(tgt) {
+  fire(tgt, target = this.G.player) {
     const G = this.G, s = this.s, T = this.T;
     const m = s.muzzle(new THREE.Vector3());
     if (!G.solid.sees(m, tgt) || allyInLane(m, tgt, G.enemies, this, 0.3, 1.8)) { this.burst = 1; this.coverT = Math.min(this.coverT, 0.8); return false; }
     const dist = m.distanceTo(tgt);
     // 準度：距離、玩家移動、蹲、難度
-    const P = G.player;
-    let spread = T.acc * (1 + P.moveK * 0.6) * (P.crouchK > 0.5 ? 0.85 : 1) * G.diff.acc;
+    const P = target;
+    let spread = T.acc * (1 + (P.moveK ?? Math.min(1, P.vel.length() / 7)) * 0.6) * (P.crouchK > 0.5 ? 0.85 : 1) * G.diff.acc;
     if (this.type !== 'sniper') spread *= clamp(dist / 12, 0.6, 1.6);
     // 預判：稍微領先玩家移動
     const lead = dist / T.speed * 0.85;
@@ -534,9 +554,9 @@ export class Drone {
   }
   get alive() { return !this.dead; }
   hitTest(o, d, maxT) { if (this.dead) return null; const t = raySphere(o, d, this.pos, 0.55); return t >= 0 && t < maxT ? { t, part: 'body' } : null; }
-  damage(dmg, dir) {
+  damage(dmg, dir, part = 'body', from = this.G.player.pos) {
     if (this.dead) return false;
-    this.hp -= dmg; this.vel.addScaledVector(dir, 3); this.alert(this.G.player.pos, 1);
+    this.hp -= dmg; this.vel.addScaledVector(dir, 3); this.alert(from, 1);
     this.hp0 = this.hp0 || 90; this.barT = 2.6;   // 血條（hud.js）
     this.G.fx.spray(this.pos, dir.clone().negate(), 8);
     if (this.hp <= 0) { this.dead = true; this.fallV = 1; this.spin = rr(-6, 6); this.G.audio.droneStop(this.id); return true; }
@@ -563,8 +583,9 @@ export class Drone {
     const eye = G.playerEye;
     this.losT -= dt;
     if (this.losT <= 0) { this.losT = 0.25; this.sees = this.pos.distanceTo(eye) < 50 && G.solid.sees(this.pos, eye) && !P.dead; if (this.sees) this.lastSeen.copy(P.pos); }
+    const scout = spotScout(this, dt), attack = scout || P, targetSeen = !!scout || this.sees, targetEye = scout ? scout.pos : eye;
     this.reportT -= dt;
-    if (this.state === 'combat' && this.sees && this.reportT <= 0) { this.reportT = 1.2; shareContact(G.enemies, this, 36, (e, p) => e.alert(p, 0.8)); }
+    if (this.state === 'combat' && this.sees && !scout && this.reportT <= 0) { this.reportT = 1.2; shareContact(G.enemies, this, 36, (e, p) => e.alert(p, 0.8)); }
     if (this.state !== 'combat' && this.sees) { this.aware += dt * 1.2; if (this.aware >= 1) { this.state = 'combat'; G.audio.radio('enemy', this.pos); } }
     // 移動：巡邏繞圈；戰鬥時在玩家前上方 8～14 m 的圈上側飛
     this.goalT -= dt;
@@ -592,13 +613,13 @@ export class Drone {
     this.root.rotation.z = Math.sin(this.t * 1.7) * 0.05;
     G.audio.droneLoop(this.id, this.pos, 0.6 + 0.4 * Math.min(1, this.vel.length() / 4));
     // 開槍
-    if (this.state === 'combat' && this.sees) {
+    if (this.state === 'combat' && targetSeen) {
       this.shotT -= dt;
       if (this.shotT <= 0 && G.canShoot(this)) {
         const m = this.root.localToWorld(new THREE.Vector3(0, -0.14, 0.4));
-        if (!G.solid.sees(m, eye) || allyInLane(m, eye, G.enemies, this, 0.3, 1.8)) { this.burst = 0; this.shotT = 0.2; return; }
+        if (!G.solid.sees(m, targetEye) || allyInLane(m, targetEye, G.enemies, this, 0.3, 1.8)) { this.burst = 0; this.shotT = 0.2; return; }
         if (this.burst <= 0) this.burst = 3;
-        const d = eye.clone().add(_w.set(0, -0.3, 0)).addScaledVector(P.vel, 0.15).sub(m).normalize();
+        const d = targetEye.clone().add(_w.set(0, scout ? 0 : -0.3, 0)).addScaledVector(attack.vel, 0.15).sub(m).normalize();
         const sp = 0.05 * G.diff.acc;
         d.x += rr(-sp, sp); d.y += rr(-sp, sp); d.z += rr(-sp, sp); d.normalize();
         G.bolt(m, d, 45, 6 * G.diff.dmg, this);

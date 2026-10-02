@@ -158,7 +158,7 @@ const G = {
   playerEye: new THREE.Vector3(), aimDir: new THREE.Vector3(0, 0, 1), ads: 0, diff: { acc: 1, dmg: 1 }, bolts: [], grenades: [], nadeN: 3, loot: [],
   chapterTag: '', objText: '', objSub: '', lastHit: -99, scopeRange: 0, stats: { shots: 0, hits: 0, kills: 0, heads: 0, taken: 0, time: 0 },
   // 同時最多四名開火；其餘包抄、換位或等待射界。
-  canShoot(e) { let n = 0; for (const o of G.enemies) if (o !== e && !o.dead && o.burst > 0 && o.sees && (!o.s || o.s.mode === 'aim')) n++; return n < 4; },
+  canShoot(e) { let n = 0; for (const o of G.enemies) if (o !== e && !o.dead && o.burst > 0 && (o.sees || o.scoutSeen) && (!o.s || o.s.mode === 'aim')) n++; return n < 4; },
   // 敵人丟手榴彈：拋物線丟到目標附近（落點有一點誤差），撞牆撞地會彈，2.6 秒後爆炸
   throwGrenade(from, to, owner) {
     to.x += (Math.random() - 0.5) * 2.4; to.z += (Math.random() - 0.5) * 2.4; to.y = solid.floorAt(to.x, to.z, to.y + 1) + 0.1;
@@ -178,7 +178,8 @@ const G = {
   },
   // 範圍傷害（無人機墜毀）
   splash(p, r, dmg) {
-    const d = player.pos.distanceTo(p);
+    const d = player.pos.distanceTo(p), sd = G.scout?.active ? G.scout.pos.distanceTo(p) : r;
+    if (sd < r) G.scout.damage(dmg * (1 - sd / r));
     if (d < r) hurtPlayer(dmg * (1 - d / r), p);
     for (const e of G.enemies) if (!e.dead && e.pos.distanceTo(p) < r) e.damage(dmg * 2, _v.subVectors(e.pos, p).normalize().clone(), 'body', p);
     shake(0.4 * (1 - Math.min(1, d / 20)));
@@ -302,7 +303,7 @@ function spawn(def) {
   G.enemies.push(e); return e;
 }
 const patrols = new Patrols(G, S.ENCOUNTERS, spawn);
-G.contacts = new Contacts(); G.scout = new Scout(G);
+G.contacts = new Contacts(); G.scout = new Scout(G); G.onScoutLost = bodyCamera;
 G.patrols = patrols; G.footExtent = S.FOOT_EXTENT || 140;
 function arrive(def) { if (G.enemies.filter(e => !e.dead).length >= MAX_ACTORS) return null; const at = arrivalPoint(G, def); return at ? spawn(at) : null; }
 function reinforce(a, defs, delay = 0) {
@@ -701,6 +702,26 @@ function playerShoot(shot) {
   hearNoise(G, player.pos, 32, .8);
   recoilV += (shot.weapon === 'rifle' ? (vm.scoped ? 0.03 : 0.022) : 0.008) * 14;
 }
+function scoutShoot(shot) {
+  const { from, dir: d } = shot, wh = shotRay(from, d, shot.range);
+  let maxT = wh ? wh.t : shot.range, target = null, part = null;
+  for (const e of G.enemies) { const h = e.hitTest(from, d, maxT); if (h) { maxT = h.t; target = e; part = h.part; } }
+  const end = from.clone().addScaledVector(d, maxT);
+  fx.beam(from, end, 'drone'); fx.muzzle(from, d, [.5, 2.2, 3.8]); audio.enemyShot(from, 'drone'); G.stats.shots++;
+  if (target) {
+    const dmg = part === 'head' ? shot.head : part === 'limb' ? shot.limb : shot.dmg;
+    const armored = target.T?.armor && part !== 'head', killed = target.damage(dmg, d.clone(), part, G.scout.pos);
+    G.contacts.reveal(target, G.contacts.now); G.stats.hits++; G.lastHit = G.t;
+    fx.impact(end, d.clone().negate(), target.type === 'drone' ? 'metal' : armored ? 'armor' : 'body', [3, 1.6, .6], .7);
+    audio.hit(from.clone().addScaledVector(d, Math.min(maxT, 3)), part === 'head' ? 'head' : armored ? 'armor' : 'body');
+    audio.hitmark(killed ? 'kill' : part === 'head' ? 'head' : 'hit'); hud.marker(killed ? 'kill' : part === 'head' ? 'head' : 'hit');
+    if (killed) { G.stats.kills++; if (part === 'head') G.stats.heads++; }
+  } else if (wh) {
+    fx.impact(end, wh.n, /metal|rust|corr/.test(wh.mat) ? 'metal' : 'concrete', [1, 1.8, 3], .6);
+    if (wh.b?.obj) D.hit(wh.b.obj, shot.dmg, end, d); else D.wall(end, wh.n, wh.mat, shot.dmg);
+  }
+  hearNoise(G, G.scout.pos, 45, .8);
+}
 const pistolBolts = [];
 
 // 敵人光彈：移動、撞牆、打到玩家、擦身而過
@@ -719,6 +740,12 @@ function updateBolts(dt) {
     const wh = solid.ray(b.p, b.dir, step);
     const lim = wh ? wh.t : step;
     const hit = segCapsule(b.p, b.dir, lim, foot.x, foot.z, foot.y + 0.2, eye.y + 0.1, 0.36);
+    const droneHit = G.scout.hitTest(b.p, b.dir, lim);
+    if (droneHit >= 0 && (hit < 0 || droneHit < hit) && !finale) {
+      const p = b.p.clone().addScaledVector(b.dir, droneHit);
+      G.scout.damage(b.dmg); fx.impact(p, b.dir.clone().negate(), 'metal', [4, .6, .3], .5);
+      G.bolts.splice(i, 1); continue;
+    }
     if (hit >= 0 && !player.dead && !finale) {
       hurtPlayer(b.dmg, b.p.clone().addScaledVector(b.dir, -5));
       fx.impact(b.p.clone().addScaledVector(b.dir, hit), b.dir.clone().negate(), 'body', [4, 0.6, 0.3], 0.5);
@@ -1101,6 +1128,7 @@ function frame(now = performance.now()) {
   vm.light(camera, world.lightDir, null, inShade, dt);
   if (G.scout.active) {
     G.scout.camera(camera); vm.holder.visible = false; vm.arms.root.visible = false; vm.scoped = false; vm.ads = 0;
+    if (K.has('M0') || K.has('Tfire')) { const shot = G.scout.fire(camera); if (shot) scoutShoot(shot); }
   }
   if (vm.scoped) { const d = camera.getWorldDirection(new THREE.Vector3()); const h = shotRay(G.playerEye, d, 400); G.scopeRange = h ? h.t : 0; }   // 測距跟子彈用同一條射線
   // 敵人、光彈、手榴彈、遭遇戰（敵人會讀玩家準心方向、是不是正在用瞄準鏡）
