@@ -2,7 +2,7 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { createHairKit } from './hero-hair.js?v=20261002h';
 import { forgedBlade } from './hero-weapons.js?v=20261002b';
 import { indexGeometry } from './index-geometry.js?v=20261002c';
-import { createBowKit } from './hero-bow.js?v=20261002j';
+import { createBowKit } from './hero-bow.js?v=20261002k';
 
 // One GPU texture per asset across the local character and all teammates.
 const textureCache = new Map();

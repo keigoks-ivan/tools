@@ -40,7 +40,8 @@ export function createBowKit(T,root,fingerRest) {
   const palm=new T.Vector3(),tip=new T.Vector3(),offset=new T.Vector3(-.045,-.012,.025),q=new T.Quaternion(),rest=new T.Vector3(0,0,-.04);
   bow.userData.updateBow=()=>{
     bow.updateWorldMatrix(true,true);right.getWorldQuaternion(q);palm.copy(offset).applyQuaternion(q).add(right.getWorldPosition(tip));bow.worldToLocal(palm);
-    const tension=T.MathUtils.clamp(finger.quaternion.angleTo(fingerRest)/1.2,0,1),flex=tension*.07;
+    const nearString=Math.abs(palm.x)<.10&&Math.abs(palm.y)<.15&&palm.z<-.08;
+    const tension=nearString?T.MathUtils.clamp(finger.quaternion.angleTo(fingerRest)/1.2,0,1):0,flex=tension*.07;
     const positions=stringGeometry.attributes.position;
     for(const {limb,side} of limbs) {
       limb.rotation.x=-side*flex;limb.updateMatrix();tip.set(0,side*.64,-.04).applyMatrix4(limb.matrix);

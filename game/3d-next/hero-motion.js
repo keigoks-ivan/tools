@@ -1,7 +1,7 @@
 // Character poses are baked once into normal animation tracks. Local players,
 // turntables and interpolated teammates therefore use the same choreography.
 import { createFreeMotionSampler } from './free-motion.js?v=20261002j';
-import { HEROES } from './heroes.js?v=20261002j';
+import { HEROES } from './heroes.js?v=20261002k';
 
 export function createArmSolver(T, root, side, limb = 'Arm') {
   const upper = root.getObjectByName(`J_Bip_${side}_Upper${limb}`), lower = root.getObjectByName(`J_Bip_${side}_Lower${limb}`), hand = root.getObjectByName(`J_Bip_${side}_${limb === 'Arm' ? 'Hand' : 'Foot'}`);
@@ -134,13 +134,15 @@ export function createPolearmClips(T, source, animations) {
         if (hipTrack) { hips.position.x = hipTrack.values[0]; hips.position.z = hipTrack.values[2]; }
         hips.quaternion.setFromEuler(new T.Euler(0,p[6],0));
       } else {
-        hips.position.set(p[6]*.13, .86-Math.max(0,p[7])*.30, -Math.abs(p[6])*.025);
+        hips.position.set(p[6]*.28, .86-Math.max(0,p[7])*.30, -Math.abs(p[6])*.025);
         hips.position.y += Math.sin(t*Math.PI*2)*.003;
+        const transfer=name==='azureIdle'?0:T.MathUtils.smoothstep(t,.12,.40)*(1-T.MathUtils.smoothstep(t,name==='azureSweep'?.44:name==='azureRise'?.46:name==='azureGuard'?.42:.69,name==='azureSweep'?.60:name==='azureRise'?.62:name==='azureGuard'?.56:.96));
+        hips.position.z+=transfer*.10;
         hips.quaternion.setFromEuler(new T.Euler(p[7]*.35,p[6]*2.1,-p[6]*.08));
       }
       const sourceName=name==='azureRise' ? 'Melee_2H_Attack_Chop' : name==='azureSlam' ? 'Melee_2H_Attack_Chop' : name==='azureUlt' ? seconds>=2.65?'Melee_2H_Attack_Chop':'Melee_2H_Attack_Spin' : name==='azureSweep'||name==='azureGuard' ? 'Melee_2H_Attack_Slice' : 'Melee_2H_Idle';
-      const sourcePhase=name==='azureRise' ? .32*Math.min(1,seconds/.49) : name==='azureSlam' ? .32+.20*T.MathUtils.smoothstep(seconds,.25,.68)+.48*T.MathUtils.smoothstep(seconds,.72,1.12) : name==='azureUlt' ? seconds<2.65?seconds/2.65*.8:.32+.20*T.MathUtils.smoothstep(seconds,2.65,3.05)+.48*T.MathUtils.smoothstep(seconds,3.15,3.6) : t;
-      const blendIn=name==='azureRise' ? T.MathUtils.smoothstep(seconds,0,.14) : name==='azureUlt'&&seconds>=2.65 ? T.MathUtils.smoothstep(seconds,2.65,2.83) : 1;
+      const sourcePhase=name==='azureRise' ? .55-.23*T.MathUtils.smootherstep(seconds,0,.60) : name==='azureSlam' ? .32+.20*Math.min(1,(seconds/.68)**1.7)+.48*T.MathUtils.smoothstep(seconds,.72,1.12) : name==='azureUlt' ? seconds<2.65?seconds/2.65*.8:.32+.20*T.MathUtils.smoothstep(seconds,2.65,3.05)+.48*T.MathUtils.smoothstep(seconds,3.15,3.6) : t;
+      const blendIn=name==='azureRise' ? T.MathUtils.smoothstep(seconds,0,.22) : name==='azureUlt'&&seconds>=2.65 ? T.MathUtils.smoothstep(seconds,2.65,2.83) : 1;
       const previousSource=name==='azureUlt'?'Melee_2H_Attack_Spin':'Melee_2H_Attack_Slice', previousTime=(name==='azureUlt'?.8:.43/.7)*imported.duration(previousSource);
       const sourceTime=sourcePhase*imported.duration(sourceName);
       if(base!==run) {
@@ -160,11 +162,11 @@ export function createPolearmClips(T, source, animations) {
         const advance = striking ? T.MathUtils.smoothstep(t,.12,.40) : 0;
         const recovery = name==='azureSweep' ? [.44,.60] : name==='azureRise' ? [.46,.62] : name==='azureGuard' ? [.42,.56] : [.69,.96];
         const recover = striking ? T.MathUtils.smoothstep(t,...recovery) : 0;
-        const lift = .075*(Math.sin(advance*Math.PI)+Math.sin(recover*Math.PI));
+        const lift = .10*(Math.sin(advance*Math.PI)+Math.sin(recover*Math.PI));
         const travel = T.MathUtils.smoothstep(advance,.15,.85), returnTravel = T.MathUtils.smoothstep(recover,.15,.85);
         turnRotation.setFromAxisAngle(up,p[6]*.9);
         footRotation.copy(turnRotation).multiply(feet[0].rotation);
-        feet[0].solve(rightTarget.set(-.22,.09+lift,-.20+.16*travel*(1-returnTravel)),pole.set(-.1,0,1),footRotation);
+        feet[0].solve(rightTarget.set(-.22,.09+lift,-.20+.34*travel*(1-returnTravel)),pole.set(-.1,0,1),footRotation);
         footRotation.copy(turnRotation).multiply(feet[1].rotation);
         feet[1].solve(leftTarget.set(.22,.09,.22),pole.set(.1,0,1),footRotation);
       }
@@ -177,7 +179,7 @@ export function createPolearmClips(T, source, animations) {
           imported.position(previousSource,previousTime,'J_Bip_L_Hand',leftTarget);sourceLeft.lerp(leftTarget,1-blendIn);
         }
         sourceCentre.copy(sourceRight).lerp(sourceLeft,.5);
-        sourceCentre.x=T.MathUtils.clamp(sourceCentre.x,-.05,.07);sourceCentre.y=T.MathUtils.clamp(sourceCentre.y,1.10,1.36);sourceCentre.z=Math.max(.40,sourceCentre.z);
+        sourceCentre.x=T.MathUtils.clamp(sourceCentre.x,-.14,.14);sourceCentre.y=T.MathUtils.clamp(sourceCentre.y,1.0,1.43);sourceCentre.z=Math.max(.32,sourceCentre.z);
         imported.rotation(sourceName,sourceTime,'J_Bip_C_WeaponGrip',sourceRotation);
         if(blendIn<1){imported.rotation(previousSource,previousTime,'J_Bip_C_WeaponGrip',previousRotation);sourceRotation.slerp(previousRotation,1-blendIn);}
         // The source weapon socket preserves the actual blade swing and roll.
@@ -296,7 +298,7 @@ export function createArcherClips(T, source, animations) {
   const rotation=new T.Quaternion(), handRotation=new T.Quaternion();
   const mountInverse=new T.Quaternion().setFromRotationMatrix(new T.Matrix4().makeBasis(new T.Vector3(0,1,0),new T.Vector3(0,0,1),new T.Vector3(1,0,0))).invert();
   const profile=HEROES.jade, moves=[...new Map([...profile.chain,...profile.charges,profile.counter,profile.air].map(move=>[move.clip,move])).values()];
-  const definitions=[['jadeIdle',idle.duration,[],idle],['jadeRun',run.duration,[],run],['jadeStep',profile.dodge.duration,[],idle],...moves.map(move=>[move.clip,move.duration,move.hits,idle]),['jadeUlt',3.6,[.65,2.75],idle]];
+  const definitions=[['jadeIdle',idle.duration,[],idle],['jadeRun',run.duration,[],run],...moves.map(move=>[move.clip,move.duration,move.hits,idle]),['jadeUlt',3.6,[.65,2.75],idle]];
   return definitions.map(([name,duration,shots,base])=>{
     right.reset();left.reset();
     const times=[],values=bones.map(()=>[]),positions=[],count=Math.ceil(duration*90);
@@ -311,17 +313,22 @@ export function createArcherClips(T, source, animations) {
         draw=Math.max(draw,loaded*(1-T.MathUtils.smoothstep(seconds,at+.055,at+.16)));
         tension=Math.max(tension,loaded*(1-T.MathUtils.smoothstep(seconds,at,at+.035)));
       }
-      const stepping=name==='jadeStep', phase=seconds/duration;
+      const phase=seconds/duration;
       const fan=['jadeFan','jadeSpread'].includes(name), burst=name==='jadeBurst';
       const cant=name==='jadeDouble' ? -.10 : fan ? -.22 : burst ? .13 : 0;
-      const spring=stepping ? T.MathUtils.smoothstep(seconds,0,.10)*(1-T.MathUtils.smoothstep(seconds,.20,.30)) : 0;
       const lift=name==='jadeUlt' ? .62*T.MathUtils.smoothstep(seconds,.12,.40)*(1-T.MathUtils.smoothstep(seconds,.75,1.0)) : 0;
+      const move=moves.find(move=>move.clip===name);
+      const end=move?(Number.isFinite(move.cancel)?move.cancel:move.duration):duration;
+      const step=move&&name!=='jadeAir'?T.MathUtils.smoothstep(seconds,.02,Math.min(.18,end*.35)):0;
+      const recover=move?T.MathUtils.smoothstep(seconds,name==='jadeDouble'?.34:Math.max(shots.at(-1)+.04,end-.15),name==='jadeDouble'?.54:end):0;
+      const travel=T.MathUtils.smoothstep(step,.12,.88)*(1-T.MathUtils.smoothstep(recover,.12,.88)),footLift=move&&name!=='jadeAir'?.095*(Math.sin(step*Math.PI)+Math.sin(recover*Math.PI)):0;
+      const sideStep=['jadeFan','jadeSpread','jadeBurst'].includes(name);
       const bob=base===run ? Math.sin(phase*Math.PI*4)*.012 : Math.sin(phase*Math.PI*2)*.003;
       if(base!==run) {
-        hips.position.set(draw*(fan?.045:burst?-.02:.018),.95-draw*(fan?.045:burst?.035:.025)+spring*.10+bob,0);
-        hips.quaternion.setFromEuler(new T.Euler(.015-spring*.12,-.45-draw*(fan?.65:burst?.30:.45),spring*.045));
+        hips.position.set(draw*(fan?.045:burst?-.02:.018),.95-draw*(fan?.045:burst?.035:.025)+bob,0);
+        hips.quaternion.setFromEuler(new T.Euler(.015,-.45-draw*(fan?.65:burst?.30:.45),0));
       } else { hips.position.x=0;hips.position.z=0; }
-      let sourceName='Ranged_Bow_Idle',sourceTime=seconds%imported.duration(sourceName),sourceWeight=base===run||stepping?0:1;
+      let sourceName='Ranged_Bow_Idle',sourceTime=seconds%imported.duration(sourceName),sourceWeight=base===run?0:1;
       let sourceMix=0;
       for(const [index,at] of shots.entries()) {
         const start=index?shots[index-1]+.12:0, end=index+1<shots.length?at+.12:duration;
@@ -337,8 +344,8 @@ export function createArcherClips(T, source, animations) {
       if(sourceWeight) {
         imported.apply('Ranged_Bow_Idle',seconds%imported.duration('Ranged_Bow_Idle'));
         if(sourceMix)imported.apply(sourceName,sourceTime,sourceMix);
-        hips.position.set(draw*.018,.95-draw*.025+bob,0);
-        // Keep the stance planted while retaining the imported weight transfer.
+        hips.position.set(draw*.018+travel*(sideStep?.065:-.065),.95-draw*.025-travel*.02+bob,travel*(sideStep?.03:-.05));
+        // The support foot stays planted as the stepping foot transfers weight.
         hips.rotation.y-=draw*(fan?.20:burst?.06:.10);
       }
       neck.rotation.y+=T.MathUtils.clamp(.20+draw*.20,0,.40);
@@ -349,12 +356,12 @@ export function createArcherClips(T, source, animations) {
       }
       root.updateMatrixWorld(true);
       if(base!==run) {
-        feet[0].solve(target.set(-.16,.09+spring*.30,-.16-spring*.12),pole.set(-.1,0,1),feet[0].rotation);
-        feet[1].solve(target.set(.16,.09+spring*.16,.16+spring*.08),pole.set(.1,0,1),feet[1].rotation);
+        feet[0].solve(target.set(-.16-travel*(sideStep?0:.12),.09+(sideStep?0:footLift),-.16-travel*(sideStep?0:.22)),pole.set(-.1,0,1),feet[0].rotation);
+        feet[1].solve(target.set(.16+travel*(sideStep?.22:0),.09+(sideStep?footLift:0),.16+travel*(sideStep?.10:0)),pole.set(.1,0,1),feet[1].rotation);
       }
-      rotation.setFromEuler(new T.Euler(-lift,0,-.30*(1-draw)-spring*.12+cant*draw,'YXZ'));
+      rotation.setFromEuler(new T.Euler(-lift,0,-.30*(1-draw)+cant*draw,'YXZ'));
       handRotation.copy(rotation).multiply(mountInverse);
-      centre.set(.08+spring*.04,1.18+draw*.205+lift*.18+spring*.10+bob,.30+draw*.11);
+      centre.set(.08+travel*(sideStep?.065:-.065),1.18+draw*.205+lift*.18-travel*.02+bob,.30+draw*.11+travel*(sideStep?.03:-.05));
       direction.set(0,0,1).applyQuaternion(rotation);
       target.copy(centre).sub(offset.set(.045,-.012,.025).applyQuaternion(handRotation));
       leftGuide.set(.6,-.6,-.2);rightGuide.set(-1,-.4,0);
@@ -374,7 +381,6 @@ export function createArcherClips(T, source, animations) {
         target.z=Math.max(target.z,.15*(1-draw)-.06*draw);
       }
       if(base===run)target.set(-.18,1.04+Math.sin(phase*Math.PI*2)*.06,.18+Math.cos(phase*Math.PI*2)*.10);
-      if(stepping)target.lerp(offset.set(-.18,1.10+spring*.10,.16),spring);
       right(target,rightGuide,handRotation);
       times.push(seconds);bones.forEach((b,i)=>values[i].push(...b.quaternion.toArray()));positions.push(...hips.position.toArray());
     }

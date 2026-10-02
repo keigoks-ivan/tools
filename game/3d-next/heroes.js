@@ -59,12 +59,11 @@ export const HEROES = {
     id: 'jade', name: '翠翎', mark: '翎', weapon: '翡翠長弓', color: '#91e5b6', tint: 0x91e5b6,
     style: '四段羽箭連技', description: '快射、雙連射、扇形三箭接三連貫矢；重擊可接破甲、散射與羽箭終結。', special: '翠羽天雨',
     maxHp: 90, speed: 1.16, aimRange: 560, aimArc: Math.PI + .01,
-    dodge: { clip: 'jadeStep', duration: .30, cooldown: .48, invulnerable: .30, moveStart: .05, moveEnd: .24 },
     air: { clip: 'jadeAir', duration: .5, hit: .22, hits: [.22], radius: 480, damage: 8, projectile: { speed: 1100, width: 10 } },
     chain: [
-      { name: '點羽快射', clip: 'jadeShot', duration: .50, hits: [.24], cancel: .34, moveCancel: .34, fxTier: 1, radius: 520, damage: 12, dash: 0, projectile: { speed: 1500, width: 12, pierce: 2 } },
+      { name: '點羽快射', clip: 'jadeShot', duration: .50, hits: [.24], cancel: .42, moveCancel: .42, fxTier: 1, radius: 520, damage: 12, dash: 0, projectile: { speed: 1500, width: 12, pierce: 2 } },
       { name: '穿花雙矢', clip: 'jadeDouble', duration: .84, hits: [.24,.59], cancel: .70, moveCancel: .70, fxTier: 2, radius: 520, damage: 8, dash: 0, projectile: { speed: 1500, width: 12 } },
-      { name: '展翎三箭', clip: 'jadeFan', duration: .72, hits: [.36], cancel: .47, moveCancel: .47, fxTier: 3, radius: 480, damage: 12, finisher: 14, dash: 0, projectile: { speed: 1400, width: 12, arrows: 3, spread: .22, pierce: 2 } },
+      { name: '展翎三箭', clip: 'jadeFan', duration: .72, hits: [.36], cancel: .60, moveCancel: .60, fxTier: 3, radius: 480, damage: 12, finisher: 14, dash: 0, projectile: { speed: 1400, width: 12, arrows: 3, spread: .22, pierce: 2 } },
       { name: '翠羽貫心', clip: 'jadeBurst', duration: 1.08, hits: [.24,.57,.90], cancel: Infinity, moveCancel: 1.01, fxTier: 4, radius: 560, damage: 8, finisher: 14, dash: 0, projectile: { speed: 1800, width: 12, pierce: 3 } },
     ],
     charges: [

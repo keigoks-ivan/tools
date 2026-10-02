@@ -156,7 +156,7 @@ test('azure strikes pivot over the supporting foot, lift the stepping foot, and 
   const clips=createPolearmClips(T,root,gltf.animations), mixer=new T.AnimationMixer(root);
   for(const clip of clips.filter(c=>c.name!=='azureRun')) {
     mixer.stopAllAction(); const action=mixer.clipAction(clip).reset().setLoop(T.LoopOnce,1).play(); action.clampWhenFinished=true;
-    const feet=new Map(), previous=new Map(); let minHip=Infinity,maxHip=-Infinity,maxLift=0,minTurn=Infinity,maxTurn=-Infinity;
+    const feet=new Map(), previous=new Map(); let minHip=Infinity,maxHip=-Infinity,maxLift=0,maxStride=0,minTurn=Infinity,maxTurn=-Infinity;
     for(let frame=0;frame<=Math.ceil(clip.duration*120);frame++) {
       mixer.setTime(Math.min(clip.duration,frame/120)); root.updateMatrixWorld(true);
       const hips=root.getObjectByName('J_Bip_C_Hips');minHip=Math.min(minHip,hips.position.y);maxHip=Math.max(maxHip,hips.position.y);
@@ -167,9 +167,9 @@ test('azure strikes pivot over the supporting foot, lift the stepping foot, and 
         const pos=foot.getWorldPosition(new T.Vector3());
         if(!feet.has(side))feet.set(side,pos.clone());
         if(side==='L'||clip.name==='azureIdle') assert.ok(feet.get(side).distanceTo(pos)<.003,`${clip.name}/${frame}/${side}: supporting foot moved`);
-        assert.ok(pos.y>=.087 && pos.y<.17,`${clip.name}/${side}: foot penetrated the ground or kicked`);
+        assert.ok(pos.y>=.087 && pos.y<.21,`${clip.name}/${side}: foot penetrated the ground or kicked`);
         if(side==='R') {
-          maxLift=Math.max(maxLift,pos.y-.09);
+          maxLift=Math.max(maxLift,pos.y-.09);maxStride=Math.max(maxStride,Math.abs(pos.z-feet.get(side).z));
           const last=previous.get(side);
           if(last && pos.y<.095 && last.y<.095) assert.ok(Math.hypot(pos.x-last.x,pos.z-last.z)<.002,`${clip.name}/${frame}: rear foot slid while grounded (${Math.hypot(pos.x-last.x,pos.z-last.z)}, ${pos.y})`);
         }
@@ -183,7 +183,8 @@ test('azure strikes pivot over the supporting foot, lift the stepping foot, and 
     assert.ok(Math.abs(separation.x-.44)<.003 && Math.abs(separation.z-.42)<.003,`${clip.name}: stance is not staggered`);
     if(['azureSweep','azureRise','azureSlam','azureUlt'].includes(clip.name)) {
       assert.ok(maxHip-minHip>.025,`${clip.name}: pelvis did not transfer weight`);
-      assert.ok(maxLift>.06,`${clip.name}: rear foot did not lift to step`);
+      assert.ok(maxStride>.30,`${clip.name}: stepping distance is too small`);
+      assert.ok(maxLift>.085,`${clip.name}: rear foot did not lift to step`);
       assert.ok(maxTurn-minTurn>(clip.name==='azureSlam'?.15:1.0),`${clip.name}: torso remained square through the cut`);
     }
   }

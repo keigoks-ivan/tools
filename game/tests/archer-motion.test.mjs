@@ -26,17 +26,18 @@ test('bow draw and release retain stable joints and do not modify the source rig
   const original=bones.map(b=>b.quaternion.toArray()), tracks=gltf.animations.map(c=>c.tracks.map(t=>Array.from(t.values)));
   const clips=createArcherClips(T,root,gltf.animations), mixer=new T.AnimationMixer(root);
   assert.deepEqual(bones.map(b=>b.quaternion.toArray()),original);assert.deepEqual(gltf.animations.map(c=>c.tracks.map(t=>Array.from(t.values))),tracks);
-  assert.equal(clips.length,12);
+  assert.equal(clips.length,11);
   const equipment=createHeroEquipment(T,root,root.getObjectByName('Hero_sword'));equipment.apply(HEROES.jade);
   const bow=root.getObjectByName('jade_J_Bip_L_Hand_weapon');
   const string=root.getObjectByName('jade_bow_string'), arrow=root.getObjectByName('jade_nocked_arrow'), stringGeometry=string.geometry;
   for(const clip of clips) {
+    const move=[...HEROES.jade.chain,...HEROES.jade.charges,HEROES.jade.counter,HEROES.jade.air].find(move=>move.clip===clip.name);
     mixer.stopAllAction();const action=mixer.clipAction(clip).reset().setLoop(T.LoopOnce,1).play();action.clampWhenFinished=true;
-    const previous=new Map(), planted=new Map();
-    let stepHeight=0;
+    const previous=new Map(), planted=new Map(), previousFeet=new Map();
+    let maxStride=0,maxLift=0;
     for(let frame=0;frame<=Math.ceil(clip.duration*120);frame++) {
       mixer.setTime(Math.min(clip.duration,frame/120));root.updateMatrixWorld(true);equipment.update();
-      if(['jadeIdle','jadeRun','jadeStep'].includes(clip.name)) {
+      if(['jadeIdle','jadeRun'].includes(clip.name)) {
         assert.ok(!arrow.visible,`${clip.name}: carrying the bow accidentally nocks an arrow`);
         assert.ok(Math.abs(string.geometry.attributes.position.getZ(1)+.04)<.005,`${clip.name}: carrying the bow pulls the string`);
       }
@@ -45,23 +46,21 @@ test('bow draw and release retain stable joints and do not modify the source rig
         assert.ok(hand.getWorldPosition(new T.Vector3()).toArray().every(Number.isFinite));
         if(previous.has(side))assert.ok(previous.get(side).angleTo(upper.quaternion)<.4,`${clip.name}/${frame}/${side}: elbow flip`);
         previous.set(side,upper.quaternion.clone());
-        if(clip.name==='jadeStep') {
+        if(!['jadeRun'].includes(clip.name)) {
           const foot=root.getObjectByName(`J_Bip_${side}_Foot`).getWorldPosition(new T.Vector3());
-          stepHeight=Math.max(stepHeight,foot.y);
-          if(frame===0)planted.set(side,foot.clone());
-          if(frame===Math.ceil(clip.duration*120))assert.ok(foot.distanceTo(planted.get(side))<.003,'step does not return to its landing stance');
-          const time=Math.min(clip.duration,frame/120),dodge=HEROES.jade.dodge;
-          if(time>dodge.moveStart && time<dodge.moveEnd)assert.ok(foot.y>.095,'dodge travels while its foot is planted');
-        }
-        if(!['jadeRun','jadeStep'].includes(clip.name)) {
-          const foot=root.getObjectByName(`J_Bip_${side}_Foot`).getWorldPosition(new T.Vector3());
-          if(planted.has(side))assert.ok(foot.distanceTo(planted.get(side))<.003,`${clip.name}/${side}: planted foot moved`);else planted.set(side,foot);
+          if(!planted.has(side))planted.set(side,foot.clone());
+          const steppingSide=['jadeFan','jadeSpread','jadeBurst'].includes(clip.name)?'L':'R';
+          if(!move||clip.name==='jadeAir'||side!==steppingSide)assert.ok(foot.distanceTo(planted.get(side))<.003,`${clip.name}/${side}: supporting foot moved`);
+          const last=previousFeet.get(side);
+          assert.ok(foot.y>=.087&&foot.y<.22,`${clip.name}/${side}: foot height`);
+          if(last&&last.y<.095&&foot.y<.095)assert.ok(Math.hypot(foot.x-last.x,foot.z-last.z)<.003,`${clip.name}/${side}: grounded foot slid`);
+          maxStride=Math.max(maxStride,Math.hypot(foot.x-planted.get(side).x,foot.z-planted.get(side).z));maxLift=Math.max(maxLift,foot.y-.09);
+          previousFeet.set(side,foot.clone());
         }
       }
     }
-    if(clip.name==='jadeStep')assert.ok(stepHeight>.22,'evasive step never leaves the ground');
-    const move=[...HEROES.jade.chain,...HEROES.jade.charges,HEROES.jade.counter,HEROES.jade.air].find(move=>move.clip===clip.name);
     if(move)assert.equal(clip.duration,move.duration,'animation and release clock disagree');
+    if(move&&clip.name!=='jadeAir'){assert.ok(maxStride>.15,`${clip.name}: no visible attack step`);assert.ok(maxLift>.08,`${clip.name}: step did not lift`);}
     if(clip.name==='jadeShot'){
       action.reset().setLoop(T.LoopOnce,1).play();mixer.setTime(HEROES.jade.chain[0].hits[0]-.02); root.updateMatrixWorld(true);equipment.update();
       assert.ok(arrow.visible);const position=string.geometry.attributes.position;
@@ -75,12 +74,19 @@ test('bow draw and release retain stable joints and do not modify the source rig
       assert.equal(string.geometry,stringGeometry,'string geometry allocated during animation');
     }
   }
+  mixer.stopAllAction();const roll=gltf.animations.find(c=>c.name==='roll');
+  mixer.clipAction(roll).reset().setLoop(T.LoopOnce,1).play();
+  for(let at=0;at<roll.duration;at+=1/120){
+    mixer.setTime(at);root.updateMatrixWorld(true);equipment.update();
+    assert.ok(!arrow.visible,'rolling accidentally nocks an arrow');
+    assert.ok(Math.abs(string.geometry.attributes.position.getZ(1)+.04)<.005,'rolling pulls the bow string');
+  }
   equipment.dispose();
 });
 
 test('all archer poses and ultimate clocks pass the deployed relay sanitizer',async()=>{
   const gltf=await loadRig();
-  for(const clip of createArcherClips(T,gltf.scene,gltf.animations)) {
+  for(const clip of [...createArcherClips(T,gltf.scene,gltf.animations),gltf.animations.find(c=>c.name==='roll')]) {
     const packet=JSON.parse(encodeState({character:'jade',anim:clip.name,musou:2.9,time:clip.duration*.5,x:0,y:0,z:0,yaw:0},42));
     assert.ok(packet.d.a.length<=24);const decoded=decodeState(cleanState(packet.d));
     assert.equal(decoded.character,'jade');assert.equal(decoded.anim,clip.name);assert.equal(decoded.musou,2.9);

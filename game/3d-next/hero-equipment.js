@@ -1,5 +1,5 @@
-import { createArmSolver } from './hero-motion.js?v=20261002j';
-import { createHeroArt } from './hero-art.js?v=20261002j';
+import { createArmSolver } from './hero-motion.js?v=20261002k';
+import { createHeroArt } from './hero-art.js?v=20261002k';
 
 // Keep the animated sword's skin weights and vertex order so the existing blade sampler
 // continues to follow it. Visible weapons and clothing are authored in hero-art.js.

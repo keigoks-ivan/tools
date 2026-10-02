@@ -54,7 +54,7 @@ test('a non-piercing arrow stops at the nearest target even when enemies are sto
 
 test('movement cancels released shot recovery and preserves the next combo step',()=>{
   const a=arenaFor(),x=a.hero.x;target(a,350);a._startAttack('attack');
-  advance(a,.33,{x:-1});assert.equal(a.hero.action,'attack');assert.equal(a.hero.x,x);
+  advance(a,HEROES.jade.chain[0].moveCancel-.01,{x:-1});assert.equal(a.hero.action,'attack');assert.equal(a.hero.x,x);
   advance(a,.03,{x:-1});assert.equal(a.hero.action,'run');assert.ok(a.hero.x<x);
   a.update(1/120,{attack:true});assert.equal(a.hero.combo,2);assert.equal(a.attack.clip,'jadeDouble');
 });
@@ -67,22 +67,20 @@ test('double shot keeps both releases before movement cancels recovery',()=>{
 });
 
 test('a queued heavy branch has priority over movement recovery cancellation',()=>{
-  const a=arenaFor();a._startAttack('attack');advance(a,.36,{x:-1,heavy:true});
+  const a=arenaFor();a._startAttack('attack');advance(a,HEROES.jade.chain[0].cancel+.02,{x:-1,heavy:true});
   assert.equal(a.attack.clip,'jadePierce');assert.equal(a.hero.action,'heavy');assert.equal(a.attack.charge,2);
 });
 
-test('evasive step travels smoothly, finishes promptly and leaves other characters unchanged',()=>{
-  const a=arenaFor(),x=a.hero.x;a._startDodge(1,0);assert.equal(a.hero.x,x);
-  advance(a,.05);assert.equal(a.hero.x,x);advance(a,.10);assert.ok(a.hero.x>x+20&&a.hero.x<x+76);
-  advance(a,.15);assert.ok(Math.abs(a.hero.x-x-76)<1e-6);assert.equal(a.hero.action,'idle');assert.ok(a.hero.dodgeCooldown>0);
-  advance(a,.18);assert.ok(a.hero.dodgeCooldown<=1e-6);
-  for(const id of ['violet','azure','amber']) {
-    const b=new Arena({heroProfile:HEROES[id]});const start=b.hero.x;b._startDodge(1,0);
-    assert.equal(b.hero.x,start+76);advance(b,.3);assert.equal(b.hero.action,'dodge');advance(b,.12);assert.equal(b.hero.action,'idle');
-  }
+test('jade shares the other heroes roll timing, displacement and invulnerability',()=>{
+  const reference=new Arena({heroProfile:HEROES.violet}),jade=arenaFor();
+  reference._startDodge(1,0);jade._startDodge(1,0);
+  const state=a=>({x:a.hero.x,y:a.hero.y,action:a.hero.action,invulnerable:a.hero.invulnerable,cooldown:a.hero.dodgeCooldown});
+  assert.deepEqual(state(jade),state(reference));assert.equal(jade.hero.x,716);
+  for(let i=0;i<72;i++){reference.update(1/120,{});jade.update(1/120,{});assert.deepEqual(state(jade),state(reference));}
+  assert.equal(jade.hero.action,'idle');assert.equal(jade.hero.dodgeCooldown,0);
 });
 
-test('evasive step remains inside map bounds at every integration step',()=>{
+test('roll remains inside map bounds',()=>{
   const a=arenaFor();a.hero.x=a.bounds.maxX-5;a.hero.y=a.bounds.maxY-5;a._startDodge(1,1);
   for(let i=0;i<40;i++){a.update(1/120,{});assert.ok(a.hero.x<=a.bounds.maxX);assert.ok(a.hero.y<=a.bounds.maxY);}
 });
