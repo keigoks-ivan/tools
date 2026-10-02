@@ -9,7 +9,7 @@ import { createGreatswordClips, createDualBladeClips, createArcherClips } from '
 import { createArrowFx } from './hero-bow.js?v=20261002w';
 import { createHeroSpecialFx } from './hero-special-fx.js?v=20261002w';
 import { createHeroEnvironment } from './hero-hair.js?v=20261002h';
-import { createChapterWorld } from './chapter-world.js?v=20261002c';
+import { createChapterWorld } from './chapter-world.js?v=20261002bg7';
 import { FramePacer } from '../frame-pacing.js';
 import { createNightMarket } from './world.js';
 import { createOni, prepareRiggedOni, createRiggedOni } from './oni.js';
@@ -43,7 +43,7 @@ let lazyModules = null;
 export function loadLazyModules() {
   if (!lazyModules) {
     lazyModules = Promise.all([
-      marchLevel ? Promise.all([import('./march.js?v=20261002j'), import('./march-art.js?v=20260925f')]) : null,
+      marchLevel ? Promise.all([import('./march.js?v=20261002j'), import('./march-art.js?v=20261002bg7')]) : null,
       // ?hero=vroid：打擊特效模組（combat-fx.js）；載入失敗時退回下方原本的特效與時間倍率
       heroChoice === 'vroid' ? import('./combat-fx.js?v=20261002w').catch(error => { console.warn('combat-fx failed, using built-in effects', error); return null; }) : null,
     ]).catch(error => { lazyModules = null; throw error; });

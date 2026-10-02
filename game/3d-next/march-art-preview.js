@@ -5,7 +5,9 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone as cloneSkinned } from 'three/addons/utils/SkeletonUtils.js';
 import { MarchDirector, LAYOUT, toWorld } from './march.js';
-import { createMarchArt } from './march-art.js';
+import { createMarchArt } from './march-art.js?v=20261002bg7';
+import { createChapterWorld } from './chapter-world.js?v=20261002bg7';
+import { CHAPTERS } from './campaign.js';
 import { prepareRiggedOni, createRiggedOni } from './oni.js';
 
 const params = new URLSearchParams(location.search);
@@ -35,13 +37,27 @@ const world = graybox
   ? (await import('./march-world.js')).createMarchWorld(THREE, scene)
   : await createMarchArt(THREE, scene, LAYOUT);
 const buildMs = Math.round(performance.now() - t0);
+const chapterWorld = graybox ? null : createChapterWorld(THREE, scene, world);
+const worldColors = new Map();
+world.group.traverse(o => { for (const m of [].concat(o.material || [])) if (m.color && !worldColors.has(m)) worldColors.set(m,m.color.clone()); });
+function applyChapter(id) {
+  const chapter = CHAPTERS.find(c => c.id === id) || CHAPTERS[0];
+  chapterWorld?.apply(chapter);
+  scene.background.setHex(chapter.background);
+  scene.fog?.color.setHex(chapter.fog); moon.color.setHex(chapter.moon); rim.color.setHex(chapter.rim);
+  const tint = new THREE.Color(chapter.tint);
+  for (const [m,color] of worldColors) m.color.copy(color).multiply(tint);
+  $('chapter').value = chapter.id;
+}
+applyChapter(params.get('chapter'));
+$('chapter').addEventListener('change', e => applyChapter(e.target.value));
 if (params.has('seg')) march.skipTo(Math.max(0, Math.min(3, Number(params.get('seg')))));
 
 // ---- heroine (VRoid swordswoman, toon shaded like battle.js) ----
 const hero = new THREE.Group();
 scene.add(hero);
 let heroMixer = null;
-try {
+if (params.get('scenery') !== '1') try {
   const gltf = await new GLTFLoader().loadAsync('../assets/heroes/swordswoman-v4.glb?v=20260924b');
   const model = gltf.scene;
   const gradient = new THREE.DataTexture(new Uint8Array([96, 160, 220, 255]), 4, 1, THREE.RedFormat);
@@ -229,7 +245,8 @@ function step(dt) {
 function info() {
   const i = renderer.info.render;
   const s = world.stats ? world.stats() : null;
-  $('info').textContent = `${graybox ? '灰模' : '美術'} · ${fps} fps · ${i.calls} draws · ${i.triangles} tris · 段 ${march.segmentIndex + 1}` + (s ? ` · 靜態 ${s.staticTriangles} tris · 貼圖 ${(s.textureBytes / 1048576).toFixed(1)} MB · 建置 ${buildMs} ms` : '');
+  const chapterStats = chapterWorld?.stats?.();
+  $('info').textContent = `${graybox ? '灰模' : '美術'} · ${fps} fps · ${i.calls} draws · ${i.triangles} tris · 段 ${march.segmentIndex + 1}` + (s ? ` · 靜態 ${chapterStats?.triangles || s.staticTriangles} tris · 貼圖 ${(s.textureBytes / 1048576).toFixed(1)} MB · 建置 ${buildMs} ms` : '');
 }
 function frame(now) {
   requestAnimationFrame(frame);
@@ -240,6 +257,7 @@ function frame(now) {
   heroMixer?.update(dt);
   for (const actor of crowd) { try { actor.update('idle', now / 1000, dt, { action: 'idle', actionTime: now / 1000 }); } catch {} }
   world.update(view(), dt, now / 1000);
+  chapterWorld?.update(dt);
   syncCamera(dt);
   renderer.render(scene, camera);
   frames++;

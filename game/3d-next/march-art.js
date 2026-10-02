@@ -127,7 +127,7 @@ export async function createMarchArt(THREE, scene, layout = LAYOUT, options = {}
       b.vertex(tmpV.x, tmpV.y, tmpV.z, n[0], n[1], n[2], uvs[k][0], uvs[k][1], o.tint || WHITE, o.emit ?? 0, ao[k]);
     }
     b.index.push(i0, i0 + 1, i0 + 2, i0, i0 + 2, i0 + 3);
-    if (o.double) quad(b, m, [c[1], c[0], c[3], c[2]], uv, { ...o, double: false, uvs: [uvs[1], uvs[0], uvs[3], uvs[2]] });
+    if (o.double && b.kind !== 'cutout') quad(b, m, [c[1], c[0], c[3], c[2]], uv, { ...o, double: false, uvs: [uvs[1], uvs[0], uvs[3], uvs[2]] });
   }
   /** Quad (or triangle when two corners repeat) flipped as needed so its normal faces `want`. */
   function quadUp(b, m, c, want, uv = {}, o = {}) {
@@ -280,11 +280,11 @@ export async function createMarchArt(THREE, scene, layout = LAYOUT, options = {}
   function roof(m, halfLen, halfDepth, rise, o = {}) {
     const b = B('props', new THREE.Vector3().setFromMatrixPosition(m).z);
     const tileUv = region('roof');
-    const nu = Math.max(2, Math.round(halfLen * 2 / (o.cellU ?? 2.2))), nv = 3;
+    const nu = Math.max(3, Math.round(halfLen * 2 / (o.cellU ?? 1.8))), nv = 4;
     const curl = o.curl ?? 0.45;
     const P = (u, v, side) => {  // u -1..1 along the ridge, v 0 ridge .. 1 eave
       const x = u * (halfLen + v * (o.flare ?? 0.35));
-      const y = rise * (1 - Math.pow(v, 0.75)) + curl * Math.pow(Math.abs(u), 4) * v * v;
+      const y = rise * Math.pow(1 - v, 1.45) + curl * Math.pow(Math.abs(u), 4) * v * v;
       return [x, y, side * v * halfDepth];
     };
     for (const side of [1, -1]) {
@@ -314,7 +314,23 @@ export async function createMarchArt(THREE, scene, layout = LAYOUT, options = {}
     }
     // ridge beam with raised ends
     box(b, child(m, 0, rise - 0.05, 0), halfLen * 2 + 0.2, 0.32, 0.36, { uv: region('roof', 0, 0, 1, 0.25), tint: [0.8, 0.8, 0.9] });
-    for (const end of [-1, 1]) box(b, child(m, end * (halfLen + 0.05), rise + 0.12, 0, 0, 0, -end * 0.5), 0.22, 0.5, 0.3, { uv: region('sw_black'), tint: [2.2, 2.2, 2.6] });
+    for (const end of [-1, 1]) lathe(b, child(m, end * (halfLen + 0.05), rise + 0.12, 0, 0, 0, -end * 0.3), [[0.15, 0], [0.18, 0.12], [0.1, 0.36], [0.04, 0.5]], 6, tileUv, { tint: [0.8, 0.8, 0.95] });
+  }
+  // Draped cloth breaks the rectangular tent silhouette without a cloth simulation.
+  // It joins the existing props batch and uses the same painted fabric atlas.
+  function canopy(m, halfWidth, yFront, yBack, front, back, uv, tint = WHITE) {
+    const b = B('props', new THREE.Vector3().setFromMatrixPosition(m).z), nx = 6, nz = 3;
+    const point = (u, v) => [u * halfWidth, yFront + (yBack - yFront) * v - 0.22 * (1 - u * u) * (0.7 + 0.3 * Math.sin(v * Math.PI)), front + (back - front) * v];
+    const mapped = (u, v) => [uv.u0 + (uv.u1 - uv.u0) * (u + 1) / 2, uv.v0 + (uv.v1 - uv.v0) * v];
+    for (let i = 0; i < nx; i++) for (let j = 0; j < nz; j++) {
+      const u0 = i / nx * 2 - 1, u1 = (i + 1) / nx * 2 - 1, v0 = j / nz, v1 = (j + 1) / nz;
+      quad(b, m, [point(u0, v0), point(u1, v0), point(u1, v1), point(u0, v1)], uv, { double: true, emit: 0.28, tint, uvs: [mapped(u0,v0),mapped(u1,v0),mapped(u1,v1),mapped(u0,v1)] });
+    }
+    for (let i = 0; i < nx * 2; i++) {
+      const u0 = i / nx - 1, u1 = (i + 1) / nx - 1, a = point(u0,0), c = point(u1,0);
+      const drop = u => 0.25 + 0.08 * (1 - Math.cos((u + 1) * Math.PI * 6));
+      quad(b, m, [[a[0],a[1]-drop(u0),a[2]], [c[0],c[1]-drop(u1),c[2]],c,a], uv, { double: true, emit: 0.35, tint, uvs: [mapped(u0,.75),mapped(u1,.75),mapped(u1,1),mapped(u0,1)] });
+    }
   }
   function stoneLantern(x, z, y = heightAt(x, z), scale = 1) {
     const b = B('props', z), s = scale;
@@ -416,14 +432,24 @@ export async function createMarchArt(THREE, scene, layout = LAYOUT, options = {}
       const uv = style === 'hanok' ? upperUv : h < 4 ? region('upper_modern', 0, 0.5, 1, 1) : upperUv;
       quad(b, child(m, 0, shopH + 0.3 + f * 2.4, 0.005), [[-width / 2, 0, 0], [width / 2, 0, 0], [width / 2, h, 0], [-width / 2, h, 0]], uv, { emit: 0.72, tint: [1, 1, 1.05] });
     }
+    if (style === 'modern') {
+      for (let f = 0; f < floors; f++) {
+        const y = shopH + 0.3 + f * 2.4;
+        box(b, child(m, 0, y + 2.2, 0.18), width - 0.2, 0.12, 0.42, { uv: region('stone'), tint: [0.72,0.7,0.78] });
+        if (f % 2 === 0) {
+          const bx = width * (o.facade % 2 ? -0.22 : 0.22);
+          box(b, child(m, bx, y + 0.05, 0.4), width * 0.4, 0.14, 0.95, { uv: region('stone'), tint: [0.65,0.65,0.78] });
+          box(b, child(m, bx, y + 0.85, 0.84), width * 0.4, 0.06, 0.045, { uv: region('sw_metal') });
+          for (let k = 0; k < 5; k++) box(b, child(m, bx + (k / 4 - 0.5) * width * 0.4, y + 0.15, 0.84), 0.035, 0.7, 0.035, { uv: region('sw_metal') });
+        }
+      }
+    }
     // shop eave / awning
     if (style === 'hanok' || o.eave) {
       roof(child(m, 0, shopH + 0.05, 0.55), width / 2 + 0.2, 0.75, 0.35, { curl: 0.15, flare: 0.1, cellU: 2.2 });
     } else {
       const aw = o.awning === 'tarp' ? region('tarp') : region('awning');
-      const aq = [[-width / 2 + 0.1, shopH - 0.35, 1.3], [width / 2 - 0.1, shopH - 0.35, 1.3], [width / 2 - 0.1, shopH + 0.05, 0.02], [-width / 2 + 0.1, shopH + 0.05, 0.02]];
-      quad(b, m, aq, aw, { double: true, emit: 0.35 });
-      quad(b, m, [[-width / 2 + 0.1, shopH - 0.62, 1.3], [width / 2 - 0.1, shopH - 0.62, 1.3], [width / 2 - 0.1, shopH - 0.35, 1.3], [-width / 2 + 0.1, shopH - 0.35, 1.3]], region(o.awning === 'tarp' ? 'tarp' : 'awning', 0, 0.8, 1, 1), { double: true, emit: 0.4 });
+      canopy(m, width / 2 - 0.1, shopH - 0.35, shopH + 0.05, 1.3, 0.02, aw);
     }
     // roof
     if (style === 'hanok') {
@@ -474,8 +500,7 @@ export async function createMarchArt(THREE, scene, layout = LAYOUT, options = {}
     const front = 0.35, back = -1.5, yF = 2.95, yB = 3.25;   // valance stays above the gameplay camera
     for (const s of [-1, 1]) for (const [pz, py] of [[front, yF], [back, yB]]) box(b, child(m, s * hw, 0, pz), 0.05, py, 0.05, { uv: metal });
     const tt = o.tarpTint || [1, 1, 1];
-    quad(b, m, [[-hw - 0.1, yF, front + 0.1], [hw + 0.1, yF, front + 0.1], [hw + 0.1, yB, back - 0.05], [-hw - 0.1, yB, back - 0.05]], tarp, { double: true, emit: 0.28, tint: tt.map(v => v * 0.85) });
-    quad(b, m, [[-hw - 0.1, yF - 0.4, front + 0.1], [hw + 0.1, yF - 0.4, front + 0.1], [hw + 0.1, yF, front + 0.1], [-hw - 0.1, yF, front + 0.1]], region('tarp', 0, 0.7, 1, 1), { double: true, emit: 0.35, tint: tt.map(v => v * 0.8) });
+    canopy(m, hw + 0.1, yF, yB, front + 0.1, back - 0.05, tarp, tt.map(v => v * 0.85));
     quad(b, m, [[-hw, 0.95, back], [hw, 0.95, back], [hw, yB, back], [-hw, yB, back]], tarp, { double: true, emit: 0.35, tint: tt.map(v => v * 0.85) });
     for (const s of [-1, 1]) quad(b, m, [[s * hw, yF - 0.6, front], [s * hw, yB - 0.6, back], [s * hw, yB, back], [s * hw, yF, front]], tarp, { double: true, emit: 0.4, tint: tt });
     // menu board on the valance
