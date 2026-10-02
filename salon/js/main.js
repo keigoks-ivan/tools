@@ -16,7 +16,7 @@ const canvas=document.getElementById('scene'),box=document.getElementById('game'
 canvas.width=box.clientWidth;canvas.height=box.clientHeight;ctx.fillStyle='#fff2db';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#efadc0';for(let i=0;i<5;i++){let a=i*Math.PI*2/5;ctx.beginPath();ctx.arc(canvas.width/2+Math.cos(a)*14,canvas.height/2+Math.sin(a)*14,11,0,Math.PI*2);ctx.fill()}ctx.fillStyle='#f9d37b';ctx.beginPath();ctx.arc(canvas.width/2,canvas.height/2,8,0,Math.PI*2);ctx.fill();
 // Artwork never blocks play. Missing or slow files use the vector portrait.
 const artSets=new Map(guests.map(g=>[g.id,{offsets:g.artOffsets||{}}]));let art=artSets.get('cocoa');
-const loadImage=url=>new Promise(resolve=>{const im=new Image();const timer=setTimeout(()=>resolve(null),5000);im.onload=()=>{clearTimeout(timer);resolve(im)};im.onerror=()=>{clearTimeout(timer);resolve(null)};im.src=url});
+const loadImage=url=>new Promise(resolve=>{const im=new Image();im.onload=()=>resolve(im);im.onerror=()=>resolve(null);im.src=url});
 for(const [name,url] of Object.entries(guest.art))loadImage(url).then(im=>{if(im){artSets.get('cocoa')[name]=im;previews.clear();tieShots.clear()}});
 for(const g of guests.filter(g=>g.atlas))loadImage(g.atlas).then(atlas=>{if(!atlas)return;const set=artSets.get(g.id);['normal','blink','happy','surprise'].forEach((name,i)=>{const cell=document.createElement('canvas');cell.width=Math.round(atlas.width/2);cell.height=Math.round(atlas.height/2);cell.getContext('2d').drawImage(atlas,(i%2)*atlas.width/2,Math.floor(i/2)*atlas.height/2,atlas.width/2,atlas.height/2,0,0,cell.width,cell.height);set[name]=cell});previews.clear();tieShots.clear()});
 const memory=new SalonMemory(),memoryReady=memory.open();let touched=false;
