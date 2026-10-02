@@ -13,16 +13,19 @@ export function createChapterWorld(T, scene, world) {
   function build(kind) {
     const frost = kind === 'frost', group = new T.Group(), batches = new Map(), owned = new Set();
     group.name = `chapter-${kind}`; scene.add(group);
-    const stoneMap = world.group.getObjectByName('march-stone-0')?.material.uniforms?.map?.value || null;
+    const surface = world.group.getObjectByName('march-stone-0')?.material.uniforms || {};
+    const stoneMap = surface.stoneColour?.value || surface.map?.value || null;
+    const normalMap = surface.stoneSurface?.value || null;
+    const woodMap = surface.woodGrain?.value || null;
     const propsMap = world.group.getObjectByName('march-props-0')?.material.map || null;
     const material = (color, extra = {}) => { const m = new T.MeshStandardMaterial({ color, roughness: 0.82, ...extra }); owned.add(m); return m; };
-    const stone = material(frost ? 0x9ab8c8 : 0xb4ad9d, { map: stoneMap });
+    const stone = material(frost ? 0xc2d5df : 0xd5cbbb, { map: stoneMap, normalMap, normalScale: new T.Vector2(0.65,0.65), roughnessMap: normalMap, roughness: 1 });
     const dark = material(frost ? 0x243a46 : 0x302636);
     const metal = material(frost ? 0x95b7c7 : 0xc7a060, { metalness: 0.65, roughness: 0.38 });
     const roof = material(frost ? 0x638498 : 0x8e99ad, { map: propsMap, roughness: 0.8 });
     const snow = material(0xd3e1e8, { roughness: 0.94 });
-    const red = material(frost ? 0x673d45 : 0xbf6665, { map: propsMap });
-    const wood = material(frost ? 0x536c7c : 0x9b8470, { map: propsMap });
+    const red = material(frost ? 0x4a3c41 : 0x8e3329, { map: propsMap, bumpMap: woodMap, bumpScale: 0.035, roughness: 0.76 });
+    const wood = material(frost ? 0x8493a0 : 0xe2c6a0, { map: woodMap || propsMap, bumpMap: woodMap, bumpScale: 0.045, roughness: 0.88 });
     const lattice = material(frost ? 0x577589 : 0xb69b77, { map: propsMap });
     const light = material(frost ? 0x9ceaff : 0xffc273, { emissive: frost ? 0x54bddc : 0xff762c, emissiveIntensity: 1.2 });
     function put(geometry, mat, x, y, z, sx = 1, sy = 1, sz = 1, rx = 0, ry = 0, rz = 0) {
@@ -34,28 +37,37 @@ export function createChapterWorld(T, scene, world) {
     const pole = (mat, x, y, z, radius, height) => put(new T.CylinderGeometry(radius, radius * 1.1, height, 8), mat, x, y, z);
     // Grid vertices agree with the collision surface, including the terraces.
     const p = [], uv = [], ix = [], nx = 64, nz = 136;
-    for (let z = 0; z <= nz; z++) for (let x = 0; x <= nx; x++) { const wx = x - 32, wz = 20 - z; p.push(wx, world.heightAt(wx, wz) + 0.01, wz); uv.push(x / 6, z / 6); if (x < nx && z < nz) { const n = z * (nx + 1) + x; ix.push(n, n + 1, n + nx + 1, n + 1, n + nx + 2, n + nx + 1); } }
+    for (let z = 0; z <= nz; z++) for (let x = 0; x <= nx; x++) { const wx = x - 32, wz = 20 - z; p.push(wx, world.heightAt(wx, wz) + 0.01, wz); uv.push(wx / 4, -wz / 4); if (x < nx && z < nz) { const n = z * (nx + 1) + x; ix.push(n, n + 1, n + nx + 1, n + 1, n + nx + 2, n + nx + 1); } }
     const floor = new T.BufferGeometry(); floor.setAttribute('position', new T.Float32BufferAttribute(p, 3)); floor.setAttribute('uv', new T.Float32BufferAttribute(uv, 2)); floor.setIndex(ix); floor.computeVertexNormals();
-    // Atlas UVs use the top-left flagstone tile; fract keeps detail at metre scale.
-    stone.onBeforeCompile = shader => { shader.fragmentShader = shader.fragmentShader.replace('#include <map_fragment>', '#ifdef USE_MAP\ndiffuseColor *= texture2D(map, vec2(0.004,0.504)+fract(vMapUv)*0.492);\n#endif'); };
-    stone.customProgramCacheKey = () => 'chapter-flagstone-v1';
+    // The normal map's alpha packs roughness; its RGB remains linear normal data.
+    stone.onBeforeCompile = shader => {
+      if (!surface.stoneColour) shader.fragmentShader = shader.fragmentShader.replace('#include <map_fragment>', '#ifdef USE_MAP\ndiffuseColor *= texture2D(map, vec2(0.004,0.504)+fract(vMapUv)*0.492);\n#endif');
+      if (normalMap) shader.fragmentShader = shader.fragmentShader.replace('#include <roughnessmap_fragment>', 'float roughnessFactor = roughness;\n#ifdef USE_ROUGHNESSMAP\nroughnessFactor *= texture2D(roughnessMap,vRoughnessMapUv).a;\n#endif');
+      if (frost) shader.fragmentShader = shader.fragmentShader.replace('#include <color_fragment>', '#include <color_fragment>\ndiffuseColor.rgb = mix(diffuseColor.rgb,vec3(dot(diffuseColor.rgb,vec3(0.2126,0.7152,0.0722))),0.7);');
+    };
+    stone.customProgramCacheKey = () => `chapter-stone-bg8-${frost}-${!!normalMap}-${!!surface.stoneColour}`;
     const floorColors = [];
     for (let i = 0; i < p.length; i += 3) {
       const x = p[i], z = p[i + 2], width = z > -31 ? 10.6 : z > -53 ? 16.2 : z > -85 ? 15.4 : 11.2;
       const dz = ((8 - z) % 8 + 8) % 8, nearLamp = Math.exp(-(Math.pow(Math.abs(x) - (width - 0.5), 2) + Math.pow(Math.min(dz,8-dz),2)) / 10);
       const pool = nearLamp * 0.8;
-      floorColors.push(0.65 + pool * (frost ? 0.35 : 0.8), 0.7 + pool * (frost ? 0.65 : 0.46), 0.8 + pool * (frost ? 0.8 : 0.2));
+      // Bake contact and colonnade shade into the existing floor vertices, once.
+      const lampContact = Math.exp(-(Math.pow(Math.abs(x)-(width-0.5),2)*2.5+Math.pow(Math.min(dz,8-dz),2)*2.5));
+      let occlusion = (1-lampContact*0.48)*(1-0.2*Math.exp(-Math.pow(Math.abs(x)-width,2)/1.8));
+      for (const [az,aw] of [[-24,8.4],[-48,14.5],[-82,13],[-105,6]]) occlusion *= 1-0.42*Math.exp(-(Math.pow(Math.abs(x)-aw,2)+Math.pow(z-az,2))/1.6);
+      if (!frost) occlusion *= 1-0.24*Math.exp(-Math.pow(Math.abs(x)-(width+3),2)/9);
+      floorColors.push((0.65 + pool * (frost ? 0.35 : 0.8))*occlusion, (0.7 + pool * (frost ? 0.65 : 0.46))*occlusion, (0.8 + pool * (frost ? 0.8 : 0.2))*occlusion);
     }
     floor.setAttribute('color', new T.Float32BufferAttribute(floorColors,3)); stone.vertexColors = true;
     put(floor, stone, 0, 0, 0);
     function lantern(x, z) {
       const y = world.heightAt(x, z);
-      box(dark, x, y + 0.3, z, 0.9, 0.6, 0.9); pole(metal, x, y + 1.25, z, 0.11, 1.5);
+      put(new T.CylinderGeometry(0.43,0.57,0.5,8),dark,x,y+0.25,z); pole(metal, x, y + 1.25, z, 0.11, 1.5);
       box(light, x, y + 2.25, z, 0.38, 0.65, 0.38);
       for (const dx of [-0.23, 0.23]) for (const dz of [-0.23, 0.23]) pole(dark, x + dx, y + 2.25, z + dz, 0.035, 0.8);
       put(new T.ConeGeometry(0.58, 0.3, 4), roof, x, y + 2.75, z, 1, 1, 1, 0, Math.PI / 4);
     }
-    // Reuse the night-market atlas; no additional textures or texture allocations.
+    // All sets share the base world's maps, without allocating textures per chapter.
     function atlas(mat, rect) {
       mat.onBeforeCompile = shader => { shader.fragmentShader = shader.fragmentShader.replace('#include <map_fragment>', `#ifdef USE_MAP
 diffuseColor *= texture2D(map, vec2(${rect[0]},${rect[1]})+fract(vMapUv)*vec2(${rect[2]},${rect[3]}));
@@ -64,7 +76,16 @@ diffuseColor *= texture2D(map, vec2(${rect[0]},${rect[1]})+fract(vMapUv)*vec2(${
     }
     atlas(roof, [0.501, 0.626, 0.248, 0.123]);
     atlas(red, [0.876, 0.626, 0.123, 0.123]);
-    atlas(wood, [0.751, 0.626, 0.123, 0.123]);
+    if (!woodMap) atlas(wood, [0.751, 0.626, 0.123, 0.123]);
+    red.onBeforeCompile = shader => {
+      shader.uniforms.woodGrain = { value: woodMap || propsMap };
+      shader.fragmentShader = 'uniform sampler2D woodGrain;\n'+shader.fragmentShader;
+      shader.fragmentShader = shader.fragmentShader.replace('#include <map_fragment>', `#ifdef USE_MAP
+        vec3 grain = texture2D(woodGrain,vMapUv).rgb;
+        diffuseColor.rgb *= vec3(0.72)+grain*1.5;
+        #endif`);
+    };
+    red.customProgramCacheKey = () => 'chapter-lacquer-grain-bg8';
     atlas(lattice, [0.751, 0.751, 0.248, 0.123]);
     function tileRoof(x, y, z, width, depth, rise) {
       const nx = 8, nz = 6, p = [], uv = [], ids = [], curl = Math.min(0.7, width * 0.065);
@@ -104,6 +125,8 @@ diffuseColor *= texture2D(map, vec2(${rect[0]},${rect[1]})+fract(vMapUv)*vec2(${
         pole(red, side * width, y + height / 2, z, 0.32, height);
         pole(metal, side * width, y + 0.7, z, 0.37, 0.2);
         pole(metal, side * width, y + height - 0.9, z, 0.36, 0.17);
+        put(new T.CylinderGeometry(0.43,0.57,0.38,8),dark,side*width,y+0.19,z);
+        pole(metal,side*width,y+height-0.3,z,0.48,0.16);
       }
       box(red, 0, y + height - 0.7, z, width * 2 + 1, 0.34, 0.6);
       tileRoof(0, y + height, z, width * 2 + 2, 2.8, 0.85);
@@ -130,7 +153,8 @@ diffuseColor *= texture2D(map, vec2(${rect[0]},${rect[1]})+fract(vMapUv)*vec2(${
         box(wood, side * (width + 1.1), y + 8.95, z - 3, 0.5, 0.6, 8);
         box(lattice, side * (width + 6.8), y + 3.4, z - 3, 0.18, 4.8, 7.5);
         for (const dz of [-6, -3, 0]) pole(red, side * (width + 6.8), y + 4.8, z + dz, 0.18, 9.6);
-        pole(dark, side * (width + 1.1), y + 0.25, z, 0.62, 0.5);
+        put(new T.CylinderGeometry(0.47,0.62,0.5,8),dark,side*(width+1.1),y+0.25,z);
+        pole(metal,side*(width+1.1),y+0.55,z,0.46,0.08);
         hangingCloth(side * (width + 1.1), y + 10.5, z + 0.5, 1.3, 3.1);
         box(metal, side * (width + 1.1), y + 7.4, z + 0.53, 0.075, 2.8, 0.04);
       }
@@ -143,20 +167,31 @@ diffuseColor *= texture2D(map, vec2(${rect[0]},${rect[1]})+fract(vMapUv)*vec2(${
     }
     if (frost) {
       const mountainMat = material(0xffffff, { vertexColors: true, roughness: 1 });
+      if (woodMap) {
+        // Reuse a neutral grain sample as subtle horizontal rock strata, below the snow tint.
+        mountainMat.onBeforeCompile = shader => {
+          shader.uniforms.rockGrain = { value: woodMap };
+          shader.vertexShader = 'varying vec3 vRockPosition;\n'+shader.vertexShader;
+          shader.vertexShader = shader.vertexShader.replace('#include <begin_vertex>', '#include <begin_vertex>\nvRockPosition=position;');
+          shader.fragmentShader = 'uniform sampler2D rockGrain; varying vec3 vRockPosition;\n'+shader.fragmentShader;
+          shader.fragmentShader = shader.fragmentShader.replace('#include <color_fragment>', '#include <color_fragment>\nfloat strata=dot(texture2D(rockGrain,vec2(vRockPosition.y*0.35,(vRockPosition.x+vRockPosition.z)*0.08)).rgb,vec3(0.2126,0.7152,0.0722));\ndiffuseColor.rgb*=0.82+strata*2.4;');
+        };
+        mountainMat.customProgramCacheKey = () => 'chapter-rock-strata-bg8';
+      }
       const rockColor = new T.Color(0x455969), snowColor = new T.Color(0xd2e4ec);
       for (let i = 0; i < 16; i++) for (const side of [-1,1]) {
         const z=15-i*9, x=side*(34+i%3*5), height=14+i%4*3, p=[], uv=[], ids=[], colors=[];
         // An indexed terrain patch gives irregular ridgelines instead of cone silhouettes.
-        for(let j=0;j<=8;j++) for(let k=0;k<=10;k++) {
-          const u=k/5-1,v=j/4-1,edge=Math.max(0,1-u*u)*Math.max(0,1-v*v);
+        for(let j=0;j<=10;j++) for(let k=0;k<=11;k++) {
+          const u=k/5.5-1,v=j/5-1,edge=Math.max(0,1-u*u)*Math.max(0,1-v*v);
           const peak=Math.max(Math.exp(-((u+0.16*Math.sin(i))* (u+0.16*Math.sin(i))*3.5+(v+0.15)*(v+0.15)*4)),0.78*Math.exp(-((u-0.4)*(u-0.4)*9+(v-0.25)*(v-0.25)*8)));
-          const rough=1+0.1*Math.sin(u*17+i)*Math.cos(v*13-i)+0.07*Math.sin(u*9+v*7+i);
-          p.push(u*14,height*Math.pow(edge,0.55)*peak*rough,v*12); uv.push(k/10,j/8);
-          if(k<10&&j<8){const n=j*11+k;ids.push(n,n+11,n+1,n+1,n+11,n+12);}
+          const rough=1+0.1*Math.sin(u*7+i)*Math.cos(v*6-i)+0.05*Math.sin(u*5+v*4+i);
+          p.push(u*14,height*Math.pow(edge,0.65)*peak*rough,v*12); uv.push(k/11,j/10);
+          if(k<11&&j<10){const n=j*12+k;ids.push(n,n+12,n+1,n+1,n+12,n+13);}
         }
         const mountain=new T.BufferGeometry(); mountain.setAttribute('position',new T.Float32BufferAttribute(p,3)); mountain.setAttribute('uv',new T.Float32BufferAttribute(uv,2)); mountain.setIndex(ids); mountain.computeVertexNormals();
         const normal=mountain.attributes.normal;
-        for(let k=0;k<p.length/3;k++){const snowLine=0.38+0.06*Math.sin(p[k*3]*0.8+i);const snow=Math.max(0,Math.min(1,(p[k*3+1]/height-snowLine)/0.16))*Math.max(0,Math.min(1,normal.getY(k)*1.4));const color=rockColor.clone().lerp(snowColor,snow);colors.push(color.r,color.g,color.b);}
+        for(let k=0;k<p.length/3;k++){const snowLine=0.3+0.06*Math.sin(p[k*3]*0.4+i);const snow=Math.max(0,Math.min(1,(p[k*3+1]/height-snowLine)/0.32))*Math.max(0,Math.min(1,normal.getY(k)*1.4));const color=rockColor.clone().lerp(snowColor,snow);colors.push(color.r,color.g,color.b);}
         mountain.setAttribute('color',new T.Float32BufferAttribute(colors,3));put(mountain,mountainMat,x,-4,z,1,1,1,0,i*0.8);
       }
     }

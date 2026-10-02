@@ -22,11 +22,13 @@
  *
  * Assets (lazy, only fetched by this module): ../assets/march/march-props.webp (2048² atlas),
  * march-stone.webp (1024², flagstone + ashlar), march-sky.webp (2048x512), atlas.json.
- * Painted by game/scripts/march-art/paint_atlas.py.
+ * Base atlases painted by game/scripts/march-art/paint_atlas.py. Shared 512² stone colour,
+ * packed normal/roughness and wood grain maps: assets/march/SURFACE-CREDITS.md.
  */
 import { LAYOUT, heightAt as layoutHeightAt, toWorld } from './march.js';
 
 const VERSION = '20260925b';
+const SURFACE_VERSION = '20261002bg8';
 const TAU = Math.PI * 2;
 
 // Floor lightmap covers this world rectangle (metres) at LM_PPM pixels per metre.
@@ -59,20 +61,22 @@ export async function createMarchArt(THREE, scene, layout = LAYOUT, options = {}
   const loader = new THREE.TextureLoader();
   // options.source(file)：預載好的內容（圖檔為 object URL、atlas.json 為物件，可為 Promise）；沒有就照舊從網路抓
   const preloaded = file => Promise.resolve(options.source?.(file) ?? null);
-  const loadTexture = (file, srgb = true) => preloaded(file).then(url => loader.loadAsync(url || `${base}${file}?v=${VERSION}`)).then(texture => {
+  const loadTexture = (file, srgb = true, version = VERSION) => preloaded(file).then(url => loader.loadAsync(url || `${base}${file}?v=${version}`)).then(texture => {
     texture.colorSpace = srgb ? THREE.SRGBColorSpace : THREE.NoColorSpace;
     texture.anisotropy = options.anisotropy ?? 4;
     return texture;
   });
   const timing = { start: performance.now() };
-  const [atlasInfo, propsTexture, stoneTexture, skyTexture] = await Promise.all([
+  const [atlasInfo, propsTexture, stoneTexture, skyTexture, stoneColour, stoneSurface, woodGrain] = await Promise.all([
     preloaded('atlas.json').then(json => json || fetch(`${base}atlas.json?v=${VERSION}`).then(response => response.json())),
     loadTexture('march-props.webp'), loadTexture('march-stone.webp'), loadTexture('march-sky.webp'),
+    loadTexture('stone-colour.webp', true, SURFACE_VERSION), loadTexture('stone-surface.webp', false, SURFACE_VERSION), loadTexture('wood-grain.webp', true, SURFACE_VERSION),
   ]);
   timing.fetched = performance.now();
   skyTexture.wrapS = THREE.MirroredRepeatWrapping;
   skyTexture.anisotropy = 1;
-  const textures = [propsTexture, stoneTexture, skyTexture];
+  const textures = [propsTexture, stoneTexture, skyTexture, stoneColour, stoneSurface, woodGrain];
+  for (const texture of [stoneColour, stoneSurface, woodGrain]) texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
   const ATLAS = atlasInfo.size[0];
   /** UV rect of a named atlas region; optional sub-rect in region fractions (top-left origin). */
   function region(name, fx0 = 0, fy0 = 0, fx1 = 1, fy1 = 1) {
@@ -1134,6 +1138,7 @@ export async function createMarchArt(THREE, scene, layout = LAYOUT, options = {}
     fog: true,
     uniforms: THREE.UniformsUtils.merge([fogUniforms, {
       map: { value: null }, lightMap: { value: null }, emitMap: { value: null },
+      stoneColour: { value: null }, stoneSurface: { value: null }, woodGrain: { value: null },
       lmRect: { value: new THREE.Vector4(LM.minX, LM.minZ, 1 / (LM.maxX - LM.minX), 1 / (LM.maxZ - LM.minZ)) },
       lmScale: { value: LM.scale }, wetness: { value: options.wetness ?? 1 }, reflGain: { value: options.reflGain ?? 1.7 },
     }]),
@@ -1150,6 +1155,7 @@ export async function createMarchArt(THREE, scene, layout = LAYOUT, options = {}
       }`,
     fragmentShader: /* glsl */`
       uniform sampler2D map; uniform sampler2D lightMap; uniform sampler2D emitMap; uniform vec4 lmRect; uniform float lmScale; uniform float wetness; uniform float reflGain;
+      uniform sampler2D stoneColour; uniform sampler2D stoneSurface;
       varying vec3 vWorld; varying vec3 vNormal; varying vec3 vColor;
       #include <fog_pars_fragment>
       void main() {
@@ -1163,6 +1169,12 @@ export async function createMarchArt(THREE, scene, layout = LAYOUT, options = {}
         vec3 albedo = tex.rgb;
         vec3 col;
         if (up) {
+          // Two small shared maps provide relief and dry/wet variation without extra geometry.
+          vec2 surfaceUv = vec2(vWorld.x, -vWorld.z) / 4.0;
+          albedo = texture2D(stoneColour, surfaceUv).rgb;
+          vec4 surface = texture2D(stoneSurface, surfaceUv);
+          vec3 relief = normalize(vec3((surface.r - 0.5) * 1.1, max(0.2, surface.b * 2.0 - 1.0), -(surface.g - 0.5) * 1.1));
+          float microLight = 0.72 + 0.35 * max(0.0, dot(relief, normalize(vec3(-0.45,0.8,0.4))));
           vec2 lmuv = (vWorld.xz - lmRect.xy) * lmRect.zw;
           vec3 light = texture2D(lightMap, lmuv).rgb * lmScale * vColor;
           vec3 toFrag = vWorld - cameraPosition;
@@ -1179,12 +1191,12 @@ export async function createMarchArt(THREE, scene, layout = LAYOUT, options = {}
             float t = 1.25 + float(k) * 0.38;
             refl += textureLod(emitMap, (vWorld.xz + dir * reach * t - lmRect.xy) * lmRect.zw, lodBase + float(k) * 0.12).rgb * (1.1 - float(k) * 0.12);
           }
-          float wet = tex.a * wetness;
+          float wet = tex.a * wetness * (1.0 - surface.a * 0.35);
           float cosV = clamp(eye / max(length(toFrag), 1e-3), 0.0, 1.0);
           float fres = pow(1.0 - cosV, 4.0);
           float macro = texture2D(map, vec2(fract(vWorld.x * 0.037), 0.5 + 0.5 * fract(vWorld.z * 0.053))).a;
           refl *= reflGain;
-          col = albedo * light * (0.82 + 0.35 * macro) + refl * (0.4 + refl * 0.6) * wet * (0.35 + 0.9 * fres) + wet * fres * vec3(0.03, 0.028, 0.07);
+          col = albedo * light * microLight * (0.62 + 0.28 * macro) + refl * (0.4 + refl * 0.6) * wet * (0.35 + 0.9 * fres) + wet * fres * vec3(0.03, 0.028, 0.07);
         } else {
           col = albedo * vColor * (0.85 + 0.3 * tex.a);
         }
@@ -1194,10 +1206,27 @@ export async function createMarchArt(THREE, scene, layout = LAYOUT, options = {}
       }`,
   });
   stoneMaterial.uniforms.map.value = stoneTexture;
+  stoneMaterial.uniforms.stoneColour.value = stoneColour;
+  stoneMaterial.uniforms.stoneSurface.value = stoneSurface;
+  stoneMaterial.uniforms.woodGrain.value = woodGrain;
   stoneMaterial.uniforms.lightMap.value = lightMap;
   stoneMaterial.uniforms.emitMap.value = emitMap;
   stoneTexture.wrapS = stoneTexture.wrapT = THREE.RepeatWrapping;
   const propsMaterial = new THREE.MeshBasicMaterial({ name: 'march-props', map: propsTexture, vertexColors: true, toneMapped: false });
+  propsMaterial.onBeforeCompile = shader => {
+    shader.uniforms.woodGrain = { value: woodGrain };
+    shader.fragmentShader = 'uniform sampler2D woodGrain;\n' + shader.fragmentShader;
+    shader.fragmentShader = shader.fragmentShader.replace('#include <map_fragment>', `#include <map_fragment>
+      #ifdef USE_MAP
+      // Select only wood/lacquer atlas regions; signs, fabric and lanterns retain their paint.
+      float timber = step(0.751,vMapUv.x)*step(vMapUv.x,0.999)*step(0.626,vMapUv.y)*step(vMapUv.y,0.749);
+      float lacquer = step(0.876,vMapUv.x);
+      vec2 grainUv = vec2(fract((vMapUv.x-0.75)*8.0),(vMapUv.y-0.625)*8.0);
+      vec3 grain = texture2D(woodGrain,grainUv).rgb;
+      diffuseColor.rgb *= mix(vec3(1.0),vec3(0.65)+grain*3.5,timber*(1.0-lacquer*0.6));
+      #endif`);
+  };
+  propsMaterial.customProgramCacheKey = () => 'march-timber-bg8';
   const cutoutMaterial = new THREE.MeshBasicMaterial({ name: 'march-cutout', map: propsTexture, vertexColors: true, toneMapped: false, alphaTest: 0.5, side: THREE.DoubleSide });
   const glowMaterial = new THREE.ShaderMaterial({
     name: 'march-glow',

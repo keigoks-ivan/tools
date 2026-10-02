@@ -9,12 +9,12 @@ import { createGreatswordClips, createDualBladeClips, createArcherClips } from '
 import { createArrowFx } from './hero-bow.js?v=20261002w';
 import { createHeroSpecialFx } from './hero-special-fx.js?v=20261002w';
 import { createHeroEnvironment } from './hero-hair.js?v=20261002h';
-import { createChapterWorld } from './chapter-world.js?v=20261002bg7';
+import { createChapterWorld } from './chapter-world.js?v=20261002bg8';
 import { FramePacer } from '../frame-pacing.js';
 import { createNightMarket } from './world.js';
 import { createOni, prepareRiggedOni, createRiggedOni } from './oni.js';
 import { touchHint, HoldRepeat } from './touch-input.js';
-import { assetPlan, createPreloader } from './preload.js?v=20260925c';
+import { assetPlan, createPreloader } from './preload.js?v=20261002bg8';
 
 const $ = id => document.getElementById(id);
 const isMobile = () => matchMedia('(pointer: coarse)').matches || innerWidth <= 900;
@@ -43,7 +43,7 @@ let lazyModules = null;
 export function loadLazyModules() {
   if (!lazyModules) {
     lazyModules = Promise.all([
-      marchLevel ? Promise.all([import('./march.js?v=20261002j'), import('./march-art.js?v=20261002bg7')]) : null,
+      marchLevel ? Promise.all([import('./march.js?v=20261002j'), import('./march-art.js?v=20261002bg8')]) : null,
       // ?hero=vroid：打擊特效模組（combat-fx.js）；載入失敗時退回下方原本的特效與時間倍率
       heroChoice === 'vroid' ? import('./combat-fx.js?v=20261002w').catch(error => { console.warn('combat-fx failed, using built-in effects', error); return null; }) : null,
     ]).catch(error => { lazyModules = null; throw error; });
@@ -58,7 +58,7 @@ export function parseGltf(buffer) { return new GLTFLoader().parseAsync(buffer, '
 export function createBattleAssets(options = {}) {
   return createPreloader({ plan: assetPlan({ hero: heroChoice, march: marchLevel }), loadEngine: () => loadLazyModules().then(() => ({ parseGltf })), ...options });
 }
-const MARCH_FILES = { 'atlas.json': 'march-atlas', 'march-props.webp': 'march-props', 'march-stone.webp': 'march-stone', 'march-sky.webp': 'march-sky' };
+const MARCH_FILES = { 'atlas.json': 'march-atlas', 'march-props.webp': 'march-props', 'march-stone.webp': 'march-stone', 'march-sky.webp': 'march-sky', 'stone-colour.webp': 'stone-colour', 'stone-surface.webp': 'stone-surface', 'wood-grain.webp': 'wood-grain' };
 
 // VRoid 模型：四階卡通明暗＋背面外擴描邊，保留眼睛、眉毛、頭髮貼圖的透明設定
 export function toonVroidHero(root) {

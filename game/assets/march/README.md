@@ -1,6 +1,6 @@
 # Night-market march level textures
 
-Loaded only by `game/3d-next/march-art.js` (the `?level=march` art scene). Painted offline by
+Loaded only by `game/3d-next/march-art.js` (the `?level=march` art scene). Base atlases painted offline by
 `game/scripts/march-art/paint_atlas.py` (PIL + numpy, no downloads, no external services).
 
 | File | Pixels | Bytes | Content |
@@ -9,6 +9,8 @@ Loaded only by `game/3d-next/march-art.js` (the `?level=march` art scene). Paint
 | `march-stone.webp` | 1024×1024 RGBA | ~259 KB | Top half: wet flagstones (4 m × 2 m tile, alpha = wetness). Bottom half: ashlar (alpha = grime). World-space triplanar in the floor shader |
 | `march-sky.webp` | 2048×512 RGB | ~95 KB | Skyline band cropped from `assets/gen/sky.jpg` (moon and corner sparkle removed), mirror-tiled around the horizon |
 | `atlas.json` | — | ~2 KB | Named pixel rects inside `march-props.webp` |
+
+Shared realistic stone/wood detail maps and source licenses are documented in [SURFACE-CREDITS.md](SURFACE-CREDITS.md). They add three 512² maps, reused by all five chapters.
 
 Glyphs are generic Korean words (떡볶이, 포장마차, 국수, 노래방, 호떡, 야시장, 달빛시장, 분식 · 오뎅, 밤의 골목) and 魂門 on the gate plaque; no brand names.
 

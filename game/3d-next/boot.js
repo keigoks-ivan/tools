@@ -1,5 +1,5 @@
 import { installGameGestures } from '../2d/touch-gestures.js';
-import { assetPlan, createPreloader } from './preload.js?v=20260925c';
+import { assetPlan, createPreloader } from './preload.js?v=20261002bg8';
 import { CHAPTERS } from './campaign.js?v=20261002j';
 
 // 手機防誤觸縮放：連點放大、雙指縮放（iOS gesture*）一律擋下；萬一仍被放大，重設 viewport 讓畫面縮回原比例
@@ -74,7 +74,7 @@ const assets = createPreloader({
   plan: assetPlan({ hero: vroid ? 'vroid' : 'rumi', march: vroid && params.get('level') !== 'single' }),
   loadEngine: () => loadBattleModule().then(async module => { await module.loadLazyModules(); return module; }),
 });
-const loadBattleModule = () => import('./battle.js?v=20261002bg7');
+const loadBattleModule = () => import('./battle.js?v=20261002bg8');
 if (params.has('debug')) window.__assets = assets;   // ?debug：各項下載／步驟的開始與完成時間（__assets.progress.items）
 let audio = null;
 const audioReady = vroid
@@ -115,7 +115,7 @@ let battlePromise = null, battleReady = false, prefetching = false;
 // battle.js 的 import 圖：一次全部送出請求，不用等 battle.js 下載完才發現要抓 three.js（版本字串與 battle.js 相同，測試會比對）
 const ENGINE_MODULES = ['../lib/three.module.js', '../lib/addons/loaders/GLTFLoader.js', '../lib/addons/utils/SkeletonUtils.js',
   '../2d/combat.js?v=20261002j', '../frame-pacing.js', './world.js', './oni.js', './touch-input.js',
-  ...(vroid ? ['./combat-fx.js?v=20261002w'] : []), ...(vroid && params.get('level') !== 'single' ? ['./march.js?v=20261002j', './march-art.js?v=20261002bg7'] : [])];
+  ...(vroid ? ['./combat-fx.js?v=20261002w'] : []), ...(vroid && params.get('level') !== 'single' ? ['./march.js?v=20261002j', './march-art.js?v=20261002bg8'] : [])];
 function preloadModules() {
   for (const href of ENGINE_MODULES) {
     const link = document.createElement('link');

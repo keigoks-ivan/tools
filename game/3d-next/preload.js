@@ -45,6 +45,9 @@ export function assetPlan({ hero = 'vroid', march = true, base = new URL('../', 
     file('march-props', 'scene', 'assets/march/march-props.webp', VERSIONS.march, 396774, 'blob');
     file('march-stone', 'scene', 'assets/march/march-stone.webp', VERSIONS.march, 258568, 'blob');
     file('march-sky', 'scene', 'assets/march/march-sky.webp', VERSIONS.march, 95296, 'blob');
+    file('stone-colour', 'scene', 'assets/march/stone-colour.webp', '20261002bg8', 77410, 'blob');
+    file('stone-surface', 'scene', 'assets/march/stone-surface.webp', '20261002bg8', 201150, 'blob');
+    file('wood-grain', 'scene', 'assets/march/wood-grain.webp', '20261002bg8', 25684, 'blob');
     step('world', 'scene', 450);
   }
   if (vroid) {

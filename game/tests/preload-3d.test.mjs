@@ -205,6 +205,13 @@ test('preload versions and module URLs agree with the modules that consume them'
   const plan = assetPlan({ base: gameRoot.href });
   const version = id => new URL(plan.find(item => item.id === id).url).searchParams.get('v');
   assert.equal(version('march-props'), marchArt.match(/const VERSION = '([^']+)'/)[1], 'march texture ?v= differs from march-art.js');
+  const surfaceVersion = marchArt.match(/const SURFACE_VERSION = '([^']+)'/)[1];
+  let surfaceBytes = 0;
+  for (const id of ['stone-colour','stone-surface','wood-grain']) {
+    assert.equal(version(id),surfaceVersion,'shared surface texture cache version must match its loader');
+    surfaceBytes += plan.find(item => item.id === id).bytes;
+  }
+  assert.ok(surfaceBytes < 350000,'surface detail downloads remain bounded');
   assert.equal(version('fx-strips'), combatFx.match(/const FX_VERSION = '([^']+)'/)[1], 'fx texture ?v= differs from combat-fx.js');
   // the same preload.js / lazy-module URLs everywhere, so the module map never loads a second copy
   const preloadUrls = new Set([...boot.matchAll(/preload\.js\?v=[\w]+/g), ...battle.matchAll(/preload\.js\?v=[\w]+/g), ...index.matchAll(/preload\.js\?v=[\w]+/g)].map(m => m[0]));

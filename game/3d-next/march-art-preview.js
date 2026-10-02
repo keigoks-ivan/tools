@@ -5,8 +5,8 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone as cloneSkinned } from 'three/addons/utils/SkeletonUtils.js';
 import { MarchDirector, LAYOUT, toWorld } from './march.js';
-import { createMarchArt } from './march-art.js?v=20261002bg7';
-import { createChapterWorld } from './chapter-world.js?v=20261002bg7';
+import { createMarchArt } from './march-art.js?v=20261002bg8';
+import { createChapterWorld } from './chapter-world.js?v=20261002bg8';
 import { CHAPTERS } from './campaign.js';
 import { prepareRiggedOni, createRiggedOni } from './oni.js';
 
