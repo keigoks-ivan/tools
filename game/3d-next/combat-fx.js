@@ -1101,14 +1101,14 @@ function hudCss(base) {
 .cfx-gauge-full{animation:cfx-gauge .9s ease-in-out infinite}
 @keyframes cfx-gauge{0%,100%{box-shadow:0 0 6px 1px rgba(190,120,255,.55);filter:brightness(1.05)}50%{box-shadow:0 0 16px 4px rgba(225,165,255,.95);filter:brightness(1.55)}}
 .cfx-title{left:0;right:0;top:12%;height:200px}
-.cfx-title .band{position:absolute;left:4%;right:4%;top:34%;bottom:34%;opacity:.8;background:linear-gradient(180deg,rgba(255,255,255,0) 30%,rgba(236,210,255,.3) 50%,rgba(255,255,255,0) 70%),linear-gradient(90deg,rgba(8,2,18,0),rgba(46,10,92,.62) 14%,rgba(128,48,230,.62) 52%,rgba(46,10,92,.58) 88%,rgba(8,2,18,0));-webkit-mask:url(${base}fx-brush.png?v=${FX_VERSION}) 0 0/100% 100% no-repeat;mask:url(${base}fx-brush.png?v=${FX_VERSION}) 0 0/100% 100% no-repeat;transform-origin:0 50%}
+.cfx-title .band{position:absolute;left:4%;right:4%;top:34%;bottom:34%;opacity:.8;background:var(--cfx-band,linear-gradient(180deg,rgba(255,255,255,0) 30%,rgba(236,210,255,.3) 50%,rgba(255,255,255,0) 70%),linear-gradient(90deg,rgba(8,2,18,0),rgba(46,10,92,.62) 14%,rgba(128,48,230,.62) 52%,rgba(46,10,92,.58) 88%,rgba(8,2,18,0)));-webkit-mask:url(${base}fx-brush.png?v=${FX_VERSION}) 0 0/100% 100% no-repeat;mask:url(${base}fx-brush.png?v=${FX_VERSION}) 0 0/100% 100% no-repeat;transform-origin:0 50%}
 .cfx-title .txt{position:absolute;left:0;right:0;top:50%;display:flex;justify-content:center;gap:.04em;transform:translateY(-56%) skewX(-7deg)}
-.cfx-title .txt span{display:inline-block;font:900 clamp(64px,11.5vw,156px)/1 ${CJK_SERIF};color:#fbf5ff;-webkit-text-stroke:2.5px #14061f;text-shadow:0 0 22px rgba(176,96,255,.95),0 0 4px rgba(255,255,255,.8),6px 7px 0 #0c0317}
+.cfx-title .txt span{display:inline-block;font:900 clamp(64px,11.5vw,156px)/1 ${CJK_SERIF};color:#fbf5ff;-webkit-text-stroke:2.5px #14061f;text-shadow:0 0 22px var(--cfx-glow,rgba(176,96,255,.95)),0 0 4px rgba(255,255,255,.8),6px 7px 0 #0c0317}
 .cfx-title.grain .txt span{-webkit-mask:url(${base}fx-grain.png?v=${FX_VERSION}) center/100% 100%;mask:url(${base}fx-grain.png?v=${FX_VERSION}) center/100% 100%}
 .cfx-title .txt span.dot{font-size:.5em;align-self:center;margin:0 -.1em}
-.cfx-title.true .band{background:linear-gradient(180deg,rgba(255,255,255,0) 30%,rgba(255,200,240,.35) 50%,rgba(255,255,255,0) 70%),linear-gradient(90deg,rgba(8,2,18,0),rgba(70,6,60,.62) 14%,rgba(190,30,170,.62) 52%,rgba(70,6,60,.58) 88%,rgba(8,2,18,0))}
-.cfx-title.true .txt span{text-shadow:0 0 26px rgba(255,80,220,.95),0 0 4px rgba(255,255,255,.8),6px 7px 0 #1a0214}
-.cfx-title .sub{position:absolute;left:0;right:0;bottom:-6px;text-align:center;font:italic 700 13px/1 Georgia,serif;letter-spacing:.6em;color:#dccbff;text-shadow:0 1px 0 #000,0 0 10px rgba(160,100,255,.8)}
+.cfx-title.true .band{background:var(--cfx-true-band,linear-gradient(180deg,rgba(255,255,255,0) 30%,rgba(255,200,240,.35) 50%,rgba(255,255,255,0) 70%),linear-gradient(90deg,rgba(8,2,18,0),rgba(70,6,60,.62) 14%,rgba(190,30,170,.62) 52%,rgba(70,6,60,.58) 88%,rgba(8,2,18,0)))}
+.cfx-title.true .txt span{text-shadow:0 0 26px var(--cfx-true-glow,rgba(255,80,220,.95)),0 0 4px rgba(255,255,255,.8),6px 7px 0 #1a0214}
+.cfx-title .sub{position:absolute;left:0;right:0;bottom:-6px;text-align:center;font:italic 700 13px/1 Georgia,serif;letter-spacing:.6em;color:var(--cfx-sub,#dccbff);text-shadow:0 1px 0 #000,0 0 10px var(--cfx-glow,rgba(160,100,255,.8))}
 @media (max-width:900px),(pointer:coarse){
  .cfx-combo{right:22%;top:24%}.cfx-combo .n{font-size:46px}.cfx-combo .h{font-size:13px}.cfx-combo .bar{width:92px}
  .cfx-banner{height:84px}.cfx-banner b{font-size:44px}.cfx-title{height:150px}.cfx-stamp{transform:scale(.75)}
@@ -1750,11 +1750,11 @@ export function createCombatFx(o) {
   // purely which time base they age on (see writeItems), so those other callers' timing is untouched.
   function slam(x, z, { radius = 3, palette = 'violet', crack = true, debris = 10, musou = false } = {}) {
     const y = groundAt(x, z);
-    const tint = palette === 'red' ? [2.2, 0.7, 0.35] : [1.3, 0.7, 2.2];
+    const tint = palette === 'red' ? [2.2, 0.7, 0.35] : MUSOU_TINT.normal;
     if (crack) {
       const angle = rnd(0, Math.PI * 2);
       decal(x, y + 0.03, z, DECAL_CELLS.scorch, radius * 1.1, radius * 1.2, { life: 1.8, angle, color: [0.01, 0.0, 0.03], alpha: 0.9, mode: 1, fadeFrom: 0.6, musou });
-      decal(x, y + 0.045, z, DECAL_CELLS.crack, radius * 1.15, radius * 1.25, { life: 1.6, angle, color: palette === 'red' ? [2.6, 1.0, 0.5] : [1.9, 1.3, 3.0], alpha: 1, mode: 0, fadeFrom: 0.35, musou });
+      decal(x, y + 0.045, z, DECAL_CELLS.crack, radius * 1.15, radius * 1.25, { life: 1.6, angle, color: palette === 'red' ? [2.6, 1.0, 0.5] : theme.crack, alpha: 1, mode: 0, fadeFrom: 0.35, musou });
     }
     decal(x, y + 0.06, z, DECAL_CELLS.burst, radius * 0.5, radius * 1.3, { life: 0.22, angle: rnd(0, 6.28), color: tint, alpha: 1, fadeFrom: 0.2, musou });
     groundRing(x, y + 0.08, z, 0.3, radius * 1.35, { life: 0.36, width: 0.55, color: tint, musou });
@@ -1884,6 +1884,21 @@ export function createCombatFx(o) {
   //    white flash, blast, push-in, ramp back.
   //  * the current 3-hit special ('special' without timeline): same wind-up, the third swing is the finisher.
   const MUSOU_TINT = { normal: [1.3, 0.7, 2.2], true: [1.9, 0.45, 1.9] };
+  // Musou theme: the 天刃 (violet) defaults below; setTheme() gives another hero its own title, colours and
+  // whether the giant spirit blade / portrait cut-in appear. Only colours and text change, never timing.
+  const DEFAULT_THEME = { title: '天刃亂舞', trueTitle: '真・無雙', sub: 'HEAVEN BLADE RAMPAGE', trueSub: 'TRUE HEAVEN BLADE RAMPAGE',
+    tint: [1.3, 0.7, 2.2], trueTint: [1.9, 0.45, 1.9], crack: [1.9, 1.3, 3.0], wisp: [1.2, 0.75, 2.2], spiritBlade: true, cutin: true, css: null };
+  let theme = DEFAULT_THEME;
+  function setTheme(next) {
+    theme = next ? { ...DEFAULT_THEME, cutin: false, ...next } : DEFAULT_THEME;
+    MUSOU_TINT.normal = theme.tint; MUSOU_TINT.true = theme.trueTint;
+    const title = hud?.el?.title;
+    if (title) for (const name of ['band', 'true-band', 'glow', 'true-glow', 'sub']) {
+      const value = theme.css?.[name];
+      if (value) title.style.setProperty(`--cfx-${name}`, value); else title.style.removeProperty(`--cfx-${name}`);
+    }
+    if (hud?.el?.titleText) hud.el.titleText.dataset.text = '';
+  }
   const MUSOU_TIMELINE = { normal: { windup: 0.55, finish: 3.6, end: 4.2 }, true: { windup: 0.55, finish: 4.3, end: 5.0 } };
   function readTimeline(event, isTrue) {
     const base = MUSOU_TIMELINE[isTrue ? 'true' : 'normal'];
@@ -1985,7 +2000,7 @@ export function createCombatFx(o) {
     for (let i = 0; i < count(flurry ? 5 : 8); i++) {
       const a = rnd(0, Math.PI * 2), r = rnd(1.0, 2.6) * k;
       particles.emit(STYLE.wisp, x + Math.cos(a) * r, y + 0.1, z + Math.sin(a) * r, Math.cos(a) * 0.6, rnd(10, 16), Math.sin(a) * 0.6,
-        rnd(0.25, 0.4), rnd(0.05, 0.09), 0.02, 1.2, 0.75, 2.2, 1);
+        rnd(0.25, 0.4), rnd(0.05, 0.09), 0.02, theme.wisp[0], theme.wisp[1], theme.wisp[2], 1);
     }
     const arcs = flurry ? 2 : 3;
     for (let i = 0; i < arcs; i++) {
@@ -2028,7 +2043,7 @@ export function createCombatFx(o) {
     pillar(x, y, z, 0.12, 0.34, 2.6, { life: 0.28, color: [tint[0] * 1.15, tint[1] * 1.35, tint[2] * 1.05], alpha: 0.55, musou: true });
     for (let i = 0; i < count(16); i++) {
       const a = rnd(0, Math.PI * 2), r = rnd(1.0, radius * 0.8);
-      particles.emit(STYLE.wisp, x + Math.cos(a) * r, y + 0.1, z + Math.sin(a) * r, 0, rnd(12, 20), 0, rnd(0.3, 0.5), rnd(0.06, 0.1), 0.02, 1.3, 0.8, 2.3, 1);
+      particles.emit(STYLE.wisp, x + Math.cos(a) * r, y + 0.1, z + Math.sin(a) * r, 0, rnd(12, 20), 0, rnd(0.3, 0.5), rnd(0.06, 0.1), 0.02, theme.wisp[0] * 1.08, theme.wisp[1] * 1.07, theme.wisp[2] * 1.05, 1);
     }
     for (let i = 0; i < count(44); i++) {
       const a = rnd(0, Math.PI * 2), sp = rnd(7, 15);
@@ -2125,7 +2140,7 @@ export function createCombatFx(o) {
         if (cut) fovPunch(cut === 'cut2' ? -3 : cut === 'leap' ? 4 : 6, 0.2);
         // (round 4) portrait cut-in moved from right-after-the-blast (where it covered her face during the cleave
         // frame) to the start of the leap: it plays out during the leap's own slow-mo, well clear of the cleave.
-        if (cut === 'leap' && musou.isTrue && hud) musou.cutinT = -0.12;
+        if (cut === 'leap' && musou.isTrue && hud && theme.cutin) musou.cutinT = -0.12;
       }
       else musou.cutT += realDt;
     } else musou.cut = null;
@@ -2146,7 +2161,7 @@ export function createCombatFx(o) {
   }
   /** Spirit blade + 真・無雙 flame shroud transform/reveal per phase (see the `spirit` state comment above). */
   function updateSpirit(realDt, gameDt) {
-    if (!musou.active || !musou.longForm) {
+    if (!musou.active || !musou.longForm || !theme.spiritBlade) {
       if (spirit.phase !== 'hidden') { spirit.phase = 'hidden'; spirit.reveal = 0; spiritBlade.mesh.visible = false; flameShroud.mesh.visible = false; }
       return;
     }
@@ -2337,14 +2352,14 @@ export function createCombatFx(o) {
   }
   function setTitle(isTrue) {
     const el = hud.el;
-    const text = isTrue ? '真・無雙' : '天刃亂舞';
+    const text = isTrue ? theme.trueTitle : theme.title;
     if (el.titleText.dataset.text !== text) {
       el.titleText.dataset.text = text;
       el.titleText.innerHTML = [...text].map(ch => `<span${ch === '・' ? ' class="dot"' : ''}>${ch}</span>`).join('');
       el.titleChars = [...el.titleText.children];
     }
     el.title.classList.toggle('true', isTrue);
-    el.titleSub.textContent = isTrue ? 'TRUE HEAVEN BLADE RAMPAGE' : 'HEAVEN BLADE RAMPAGE';
+    el.titleSub.textContent = isTrue ? theme.trueSub : theme.sub;
   }
   function banner(text, sub) {
     hud.el.bannerText.textContent = text;
@@ -2960,7 +2975,7 @@ export function createCombatFx(o) {
   return {
     /** Resolves once the FX textures have loaded (or failed); effects before that draw nothing. */
     ready: Promise.all(loading),
-    onEvent, update, trackAirborne,
+    onEvent, update, trackAirborne, setTheme,
     timeScale: () => timing === 'game' ? 1 : Math.min(slow.value(), musou.active && musou.curve ? curveAt(musou.curve, musou.g) : 1),
     cameraOffset, cameraPre, cameraPost,
     reset, prewarm, dispose, stats,

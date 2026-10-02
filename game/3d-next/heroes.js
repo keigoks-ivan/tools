@@ -19,6 +19,10 @@ export const HEROES = {
   azure: {
     id: 'azure', name: '蒼鋒', mark: '蒼', weapon: '蒼龍大劍', color: '#82cfff', tint: 0x82cfff,
     style: '大劍橫掃', description: '橫掃、挑斬、重劈三連段，雙手大劍壓制敵群。', special: '蒼龍裂陣',
+    // Ultimate presentation in combat-fx: title, colour grade and whether the giant spirit blade appears.
+    musouTheme: { title: '蒼龍裂陣', trueTitle: '真・蒼龍裂陣', sub: 'AZURE DRAGON SUNDER', trueSub: 'TRUE AZURE DRAGON SUNDER',
+      tint: [0.55, 1.45, 2.4], trueTint: [0.4, 1.7, 2.7], crack: [1.2, 2.2, 3.0], wisp: [0.7, 1.6, 2.4], spiritBlade: true,
+      css: { band: 'linear-gradient(180deg,rgba(255,255,255,0) 30%,rgba(210,245,255,.3) 50%,rgba(255,255,255,0) 70%),linear-gradient(90deg,rgba(4,4,8,0),rgba(8,40,86,.62) 14%,rgba(40,150,230,.62) 52%,rgba(8,40,86,.62) 88%,rgba(4,4,8,0))', 'true-band': 'linear-gradient(180deg,rgba(255,255,255,0) 30%,rgba(230,255,255,.38) 50%,rgba(255,255,255,0) 70%),linear-gradient(90deg,rgba(4,4,8,0),rgba(4,60,96,.62) 14%,rgba(60,210,255,.66) 52%,rgba(4,60,96,.62) 88%,rgba(4,4,8,0))', glow: 'rgba(96,200,255,.95)', 'true-glow': 'rgba(150,240,255,.98)', sub: '#cfefff' } },
     maxHp: 125, speed: 0.86,
     chain: [
       { clip: 'azureSweep', duration: 0.7, hits: [0.28], cancel: 0.43, radius: 235, arc: Math.PI * 1.3, damage: 12, dash: 80 },
@@ -38,6 +42,10 @@ export const HEROES = {
   amber: {
     id: 'amber', name: '金燕', mark: '燕', weapon: '疾風雙刃', color: '#ffd37a', tint: 0xffd37a,
     style: '疾速突進', description: '六段快斬，單擊較輕、移動較快；重擊穿過敵陣。', special: '金燕八閃',
+    // Ultimate presentation in combat-fx: title, colour grade and whether the giant spirit blade appears.
+    musouTheme: { title: '金燕八閃', trueTitle: '真・金燕八閃', sub: 'GOLDEN SWALLOW EIGHT FLASHES', trueSub: 'TRUE GOLDEN SWALLOW EIGHT FLASHES',
+      tint: [2.3, 1.5, 0.5], trueTint: [2.6, 1.15, 0.35], crack: [3.0, 2.0, 0.9], wisp: [2.2, 1.6, 0.6], spiritBlade: false,
+      css: { band: 'linear-gradient(180deg,rgba(255,255,255,0) 30%,rgba(255,240,200,.3) 50%,rgba(255,255,255,0) 70%),linear-gradient(90deg,rgba(4,4,8,0),rgba(92,46,6,.62) 14%,rgba(230,150,40,.62) 52%,rgba(92,46,6,.62) 88%,rgba(4,4,8,0))', 'true-band': 'linear-gradient(180deg,rgba(255,255,255,0) 30%,rgba(255,225,190,.38) 50%,rgba(255,255,255,0) 70%),linear-gradient(90deg,rgba(4,4,8,0),rgba(110,30,4,.62) 14%,rgba(255,110,30,.66) 52%,rgba(110,30,4,.62) 88%,rgba(4,4,8,0))', glow: 'rgba(255,190,70,.95)', 'true-glow': 'rgba(255,130,40,.98)', sub: '#ffefc8' } },
     maxHp: 85, speed: 1.18,
     chain: Array.from({ length: 6 }, (_, i) => ({
       clip: `amberCut${i + 1}`,
@@ -58,6 +66,10 @@ export const HEROES = {
   jade: {
     id: 'jade', name: '翠翎', mark: '翎', weapon: '翡翠長弓', color: '#91e5b6', tint: 0x91e5b6,
     style: '四段羽箭連技', description: '快射、雙連射、扇形三箭接三連貫矢；重擊可接破甲、散射與羽箭終結。', special: '翠羽天雨',
+    // Ultimate presentation in combat-fx: title, colour grade and whether the giant spirit blade appears.
+    musouTheme: { title: '翠羽天雨', trueTitle: '真・翠羽天雨', sub: 'JADE FEATHER SKYFALL', trueSub: 'TRUE JADE FEATHER SKYFALL',
+      tint: [0.6, 2.2, 1.2], trueTint: [0.45, 2.5, 1.5], crack: [1.4, 2.8, 1.8], wisp: [0.8, 2.2, 1.3], spiritBlade: false,
+      css: { band: 'linear-gradient(180deg,rgba(255,255,255,0) 30%,rgba(220,255,230,.3) 50%,rgba(255,255,255,0) 70%),linear-gradient(90deg,rgba(4,4,8,0),rgba(6,70,40,.62) 14%,rgba(60,200,120,.62) 52%,rgba(6,70,40,.62) 88%,rgba(4,4,8,0))', 'true-band': 'linear-gradient(180deg,rgba(255,255,255,0) 30%,rgba(235,255,240,.38) 50%,rgba(255,255,255,0) 70%),linear-gradient(90deg,rgba(4,4,8,0),rgba(4,86,60,.62) 14%,rgba(90,240,170,.66) 52%,rgba(4,86,60,.62) 88%,rgba(4,4,8,0))', glow: 'rgba(120,240,170,.95)', 'true-glow': 'rgba(170,255,210,.98)', sub: '#dcffe8' } },
     maxHp: 90, speed: 1.16, aimRange: 560, aimArc: Math.PI + .01,
     air: { clip: 'jadeAir', duration: .5, hit: .22, hits: [.22], radius: 480, damage: 8, projectile: { speed: 1100, width: 10 } },
     chain: [

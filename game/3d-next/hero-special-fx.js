@@ -1,5 +1,5 @@
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { createArrowGeometry } from './hero-bow.js?v=20261002n';
+import { createArrowGeometry } from './hero-bow.js?v=20261002o';
 
 // Character silhouettes and soft ribbons share a bounded, reusable mesh pool.
 // No full-screen postprocessing or per-frame geometry/texture allocation.

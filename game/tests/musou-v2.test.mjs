@@ -3,6 +3,7 @@ import test from 'node:test';
 import * as THREE from 'three';
 import { Arena, MUSOU_FLURRY } from '../2d/combat.js';
 import { createCombatFx, koGrade, swingHitstop, QUALITY } from '../3d-next/combat-fx.js';
+import { HEROES } from '../3d-next/heroes.js';
 
 const STEP = 1 / 60;
 
@@ -188,8 +189,8 @@ const at = new THREE.Vector3(0, 0, -1.5);
 /** Drives one full 天刃 long-form musou (real MUSOU_FLURRY timing, sweeps and leapAt) through combat-fx, calling
  * cameraPre/cameraPost every step (like battle.js) so the post-cleave screen split actually captures. Returns the
  * highest fx.stats() seen from the finisher through a short recovery window. */
-function runLongMusou(fx, camera, target, { isTrue = false, enemies } = {}) {
-  const F = isTrue ? MUSOU_FLURRY.true : MUSOU_FLURRY.standard;
+function runLongMusou(fx, camera, target, { isTrue = false, enemies, flurry = MUSOU_FLURRY } = {}) {
+  const F = isTrue ? flurry.true : flurry.standard;
   const every = (F.swingEnd - F.swingStart) / (F.swings - 1);
   const swingTimes = Array.from({ length: F.swings }, (_, i) => F.swingStart + i * every);
   fx.onEvent({
@@ -413,5 +414,47 @@ test('real Arena event order (special → musouStart) still gives combat-fx the 
   }
   assert.equal(fx.debugMusou().leapAt ?? MUSOU_FLURRY.standard.leapAt, MUSOU_FLURRY.standard.leapAt);
   assert.ok(sawLeapCut, 'the leap camera cut never engaged with the real Arena event order');
+  fx.dispose();
+});
+
+// ---------------------------------------------------------------------------------------------
+// Hero themes: 蒼鋒／金燕／翠翎 reuse the long-form staging (camera cuts, slow motion, finisher blast) in their own
+// colours. Only 蒼鋒 grows the giant spirit blade; the theme never leaks back into 紫刃's default 天刃 look.
+// ---------------------------------------------------------------------------------------------
+for (const id of ['azure', 'amber', 'jade']) {
+  test(`${id} ultimate uses its own theme with the long-form staging and cleans up`, () => {
+    const { fx, camera, target } = makeFx('desktop'), theme = HEROES[id].musouTheme;
+    fx.setTheme(theme);
+    let bladeSeen = false, cutSeen = new Set();
+    const F = HEROES[id].flurry.standard, every = (F.swingEnd - F.swingStart) / (F.swings - 1);
+    fx.onEvent({ type: 'musouStart', duration: F.duration, radius: F.radius, finishRadius: F.finishRadius, swings: Array.from({ length: F.swings }, (_, i) => F.swingStart + i * every),
+      impact: F.impact, timeScale: F.timeScale, freezes: F.freezes, facing: 0 }, at, target);
+    let game = 0, swing = 0;
+    while (game < F.impact) {
+      if (swing < F.swings && game >= F.swingStart + swing * every) { fx.onEvent({ type: 'swing', kind: 'special', flurry: true, index: swing, radius: F.radius }, at, target); swing++; }
+      fx.update(STEP, STEP * fx.timeScale(), { heroAction: 'special' }); fx.cameraPre(camera); fx.cameraPost(camera);
+      game += STEP * fx.timeScale();
+      const d = fx.debugMusou(); if (d.cut) cutSeen.add(d.cut); if (fx.debugAftermath().spiritBlade.visible) bladeSeen = true;
+    }
+    fx.onEvent({ type: 'musouFinish', radius: F.finishRadius }, at, target);
+    for (let i = 0; i < 10; i++) { fx.update(STEP, STEP * fx.timeScale(), { heroAction: 'special' }); fx.cameraPre(camera); fx.cameraPost(camera); const d = fx.debugMusou(); if (d.cut) cutSeen.add(d.cut); }
+    assert.equal(swing, F.swings);
+    assert.ok(cutSeen.has('cut1') && cutSeen.has('cut2') && cutSeen.has('cut3'), `${id}: camera cuts ${[...cutSeen]}`);
+    assert.equal(bladeSeen, !!theme.spiritBlade, `${id}: spirit blade ${bladeSeen ? 'shown' : 'missing'}`);
+    for (let i = 0; i < 60; i++) { fx.update(.08, .08 * fx.timeScale(), { heroAction: 'idle' }); fx.cameraPre(camera); fx.cameraPost(camera); }
+    const after = fx.debugAftermath();
+    assert.equal(after.musou.active, false); assert.equal(after.spiritBlade.visible, false);
+    fx.dispose();
+  });
+}
+
+test('clearing the theme restores the violet 天刃 colours', () => {
+  const { fx, camera, target } = makeFx('desktop');
+  const blast = () => { const c = fx.objects.at(-1).material.uniforms.uColor.value; return [c.r, c.g, c.b].map(v => +v.toFixed(3)); };
+  runLongMusou(fx, camera, target); const violet = blast();
+  fx.setTheme(HEROES.amber.musouTheme); runLongMusou(fx, camera, target, { flurry: HEROES.amber.flurry }); const amber = blast();
+  fx.setTheme(null); runLongMusou(fx, camera, target); const again = blast();
+  assert.ok(amber[0] > amber[2] && violet[2] > violet[0], `blast colours ${amber} / ${violet}`);
+  assert.deepEqual(again, violet);
   fx.dispose();
 });

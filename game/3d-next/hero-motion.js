@@ -1,7 +1,7 @@
 // Character poses are baked once into normal animation tracks. Local players,
 // turntables and interpolated teammates therefore use the same choreography.
-import { MOCAP } from './mocap-data.js?v=20261002n';
-import { HEROES } from './heroes.js?v=20261002n';
+import { MOCAP } from './mocap-data.js?v=20261002o';
+import { HEROES } from './heroes.js?v=20261002o';
 
 // Mixamo motion capture, retargeted offline (assets/animations/README.md), is
 // time-warped so each recorded impact lands on the combat clock in heroes.js.
@@ -163,7 +163,7 @@ export function createArcherClips(T, source) {
     { clip: RECOIL, fade: .03, warp: [[2.72, .16], [2.75, .19], [3.6, .70]] },
   ], { overlay: t => {
     // Lean back from the waist so the arrow line rises toward the sky (the hero faces +Z).
-    up.setFromAxisAngle(axis, -.55 * T.MathUtils.smoothstep(t, .1, .45) * (1 - T.MathUtils.smoothstep(t, .85, 1.2))); return [['J_Bip_C_Spine', up]];
+    up.setFromAxisAngle(axis, -.85 * T.MathUtils.smoothstep(t, .1, .45) * (1 - T.MathUtils.smoothstep(t, .85, 1.2))); return [['J_Bip_C_Spine', up]];
   } }));
   return clips;
 }

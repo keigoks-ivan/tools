@@ -2,12 +2,12 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone as cloneSkinned } from 'three/addons/utils/SkeletonUtils.js';
 import { Arena } from '../2d/combat.js?v=20261002j';
-import { heroFor } from './heroes.js?v=20261002n';
+import { heroFor } from './heroes.js?v=20261002o';
 import { Campaign, CHAPTERS, chapterTuning } from './campaign.js?v=20261002j';
-import { createHeroEquipment } from './hero-equipment.js?v=20261002n';
-import { createGreatswordClips, createDualBladeClips, createArcherClips } from './hero-motion.js?v=20261002n';
-import { createArrowFx } from './hero-bow.js?v=20261002n';
-import { createHeroSpecialFx } from './hero-special-fx.js?v=20261002n';
+import { createHeroEquipment } from './hero-equipment.js?v=20261002o';
+import { createGreatswordClips, createDualBladeClips, createArcherClips } from './hero-motion.js?v=20261002o';
+import { createArrowFx } from './hero-bow.js?v=20261002o';
+import { createHeroSpecialFx } from './hero-special-fx.js?v=20261002o';
 import { createHeroEnvironment } from './hero-hair.js?v=20261002h';
 import { createChapterWorld } from './chapter-world.js?v=20261002c';
 import { FramePacer } from '../frame-pacing.js';
@@ -45,7 +45,7 @@ export function loadLazyModules() {
     lazyModules = Promise.all([
       marchLevel ? Promise.all([import('./march.js?v=20261002j'), import('./march-art.js?v=20260925f')]) : null,
       // ?hero=vroid：打擊特效模組（combat-fx.js）；載入失敗時退回下方原本的特效與時間倍率
-      heroChoice === 'vroid' ? import('./combat-fx.js?v=20261002d').catch(error => { console.warn('combat-fx failed, using built-in effects', error); return null; }) : null,
+      heroChoice === 'vroid' ? import('./combat-fx.js?v=20261002o').catch(error => { console.warn('combat-fx failed, using built-in effects', error); return null; }) : null,
     ]).catch(error => { lazyModules = null; throw error; });
   }
   return lazyModules;
@@ -540,14 +540,17 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
     for (const event of (march || arena).drainEvents()) {
       const x = toWorldX(event.x ?? arena.hero.x), z = toWorldZ(event.y ?? arena.hero.y);
       fxPos.set(x, groundAt(x, z), z);
-      const customSpecial = equipment && heroProfile.id !== 'violet' && (['special', 'musouStart', 'musouFinish'].includes(event.type) || event.type === 'swing' && event.flurry);
-      const bowSwing = heroProfile.id === 'jade' && ['slash','swing','airSlash'].includes(event.type);
+      // combat-fx stages every hero's ultimate (title, camera cuts, slow motion) in that hero's theme; the hero's
+      // own dragon / swallow / arrow-rain effects (heroSpecialFx) play on top. Jade's ordinary shots draw no sword arcs.
+      const customSpecial = equipment && heroProfile.id !== 'violet' && !combatFx && (['special', 'musouStart', 'musouFinish'].includes(event.type) || event.type === 'swing' && event.flurry);
+      const bowSwing = heroProfile.id === 'jade' && (['slash','airSlash'].includes(event.type) || event.type === 'swing' && !event.flurry);
       if (!customSpecial && !bowSwing) combatFx?.onEvent(event.type === 'hit' && heroFxTint ? { ...event, tint: heroFxTint } : event, fxPos, enemies.get(event.enemyId)?.root);
       arrowFx?.onEvent(event);
       heroSpecialFx?.onEvent(event, fxPos);
       audio?.onEvent(event);
       if (march) marchEvent(event, x, z);
-      if (event.type === 'special' && equipment) toast(`${heroProfile.special}！`, 1.8);
+      const themedTitle = combatFx && equipment && heroProfile.id !== 'violet';   // combat-fx shows the name as the musou title
+      if (event.type === 'special' && equipment && !themedTitle) toast(`${heroProfile.special}！`, 1.8);
       if (event.type === 'slash' && arena.musou) {
         // 變招／閃避反擊各有自己的動作（arena.attack.clip）；一般連段與單按重擊照舊
         play(arena.attack?.clip || (event.kind === 'heavy' ? 'charge' : `combo${event.combo || 1}`), arena.attack?.duration || 0.5);
@@ -601,7 +604,7 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
       }
       if (event.type === 'special' && event.flurry) {
         play(equipment ? heroProfile.id === 'azure' ? 'azureUlt' : heroProfile.id === 'amber' ? 'amberUlt' : heroProfile.id === 'jade' ? 'jadeUlt' : 'charge' : 'musouFlurry', equipment && heroProfile.id !== 'violet' ? heroProfile.flurry.standard.duration : equipment ? 0.8 : event.finishAt || 3.6);
-        toast(`${event.true ? '真・' : ''}${equipment ? heroProfile.special : '天刃亂舞'}！`);
+        if (!themedTitle) toast(`${event.true ? '真・' : ''}${equipment ? heroProfile.special : '天刃亂舞'}！`);
         if (event.true) flash(x, z, equipment && heroProfile.id !== 'violet' ? heroProfile.tint : 0xa040ff, 2.4, 0.8);
       } else if (event.type === 'special' && arena.musou) {
         play('musou', 2.0); if (!combatFx) toast('天刃亂舞！');
@@ -938,7 +941,7 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
       if (now < slowUntil) dt *= slowScale;
       if (now < freezeUntil) dt = 0;
     }
-    if (equipment && heroProfile.id !== 'violet' && arena.attack?.flurry) dt *= arena.timeScale();
+    if (!combatFx && equipment && heroProfile.id !== 'violet' && arena.attack?.flurry) dt *= arena.timeScale();
     for (const action of holds.tick(realDt)) edges[action] = true;
     const inputX = joystick.x + Number(keys.has('d') || keys.has('arrowright')) - Number(keys.has('a') || keys.has('arrowleft'));
     const inputY = joystick.y + Number(keys.has('s') || keys.has('arrowdown')) - Number(keys.has('w') || keys.has('arrowup'));
@@ -1146,6 +1149,7 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
     heroFxTint = heroProfile.id === 'violet' ? null : new THREE.Color(heroProfile.tint).toArray();
     arena.heroProfile = heroProfile; equipment?.apply(heroProfile);
     heroSpecialFx?.setStyle(heroProfile.id);
+    combatFx?.setTheme?.(heroProfile.id === 'violet' ? null : heroProfile.musouTheme);
     const routeDots = document.querySelector("#comboRoute div");
     if (routeDots) routeDots.innerHTML = "<i></i>".repeat(heroProfile.chain.length);
     document.querySelector('[data-action="special"]')?.setAttribute('aria-label', heroProfile.special);

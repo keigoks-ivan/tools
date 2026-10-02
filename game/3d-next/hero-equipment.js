@@ -1,4 +1,4 @@
-import { createHeroArt } from './hero-art.js?v=20261002n';
+import { createHeroArt } from './hero-art.js?v=20261002o';
 
 // Moves a captured arm's hand onto a nearby target with the smallest change: the elbow bends
 // for the new reach, then the whole arm swings by the shortest arc. Unlike a full two-bone
