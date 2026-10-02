@@ -13,14 +13,22 @@ export class Contacts {
       else c.fresh = this.now - c.t < .6;
     }
     if (this.clock < .25) return; this.clock = 0;
-    const origin = camera.position, forward = camera.getWorldDirection(new THREE.Vector3());
+    camera.updateMatrixWorld();
+    const origin = camera.position, point = new THREE.Vector3(), screen = new THREE.Vector3();
+    const visible = p => {
+      screen.copy(p).project(camera);
+      return screen.z >= -1 && screen.z <= 1 && Math.abs(screen.x) <= 1 && Math.abs(screen.y) <= 1 && G.solid.sees(origin, p);
+    };
     for (const e of G.enemies) {
       if (e.dead || e.pos.distanceTo(origin) > 95) continue;
-      const head = e.pos.clone().add(new THREE.Vector3(0, e.type === 'drone' ? 0 : 1.4, 0));
-      if (head.clone().sub(origin).normalize().dot(forward) < .5 || !G.solid.sees(origin, head)) continue;
-      const screen = head.clone().project(camera);
-      if (screen.z < -1 || screen.z > 1 || Math.abs(screen.x) > 1 || Math.abs(screen.y) > 1) continue;
-      this.reveal(e, this.now);
+      // 動畫骨架包含蹲姿與體型；頭或胸口露出才登記，完全遮蔽不穿牆標記。
+      if (e.s) e.s.headPos(point); else point.copy(e.pos).y += e.type === 'drone' ? 0 : 1.4;
+      let seen = visible(point);
+      if (!seen && e.type !== 'drone') {
+        if (e.s) e.s.chestPos(point); else point.copy(e.pos).y += .9;
+        seen = visible(point);
+      }
+      if (seen) this.reveal(e, this.now);
     }
   }
 }
@@ -60,7 +68,7 @@ export class Scout {
     this.blades.instanceMatrix.needsUpdate = true;
     this.yaw -= ctl.lookX || 0; this.pitch = clamp(this.pitch - (ctl.lookY || 0), -1.35, 1.2);
     const speed = ctl.sprint ? 11 : 7, sn = Math.sin(this.yaw), cs = Math.cos(this.yaw);
-    const move = new THREE.Vector3(sn * (ctl.my || 0) + cs * (ctl.mx || 0), (ctl.up ? 1 : 0) - (ctl.down ? 1 : 0), cs * (ctl.my || 0) - sn * (ctl.mx || 0)).clampLength(0, 1).multiplyScalar(speed * dt);
+    const move = new THREE.Vector3(sn * (ctl.my || 0) - cs * (ctl.mx || 0), (ctl.up ? 1 : 0) - (ctl.down ? 1 : 0), cs * (ctl.my || 0) + sn * (ctl.mx || 0)).clampLength(0, 1).multiplyScalar(speed * dt);
     const L = move.length();
     if (L > 0) { const hit = this.G.solid.ray(this.pos, move.clone().normalize(), L + .4); if (hit) move.setLength(Math.max(0, hit.t - .4)); }
     const p = this.pos.clone().add(move), from = this.G.player.pos;

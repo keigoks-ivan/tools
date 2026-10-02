@@ -554,8 +554,18 @@ async function reconControls() {
     assert(!G.vm.holder.visible&&!G.vm.arms.root.visible,path+' 無人機畫面不被主角武器擋住');
     key('Space',10);const before=S.pos.clone();key('KeyW',12);
     assert(S.pos.distanceTo(before)>1&&G.player.pos.distanceTo(body)<.01,path+' 飛行控制與原地主角分離');
+    const right=new T.Vector3().setFromMatrixColumn(G.hud.cam.matrixWorld,0),start=S.pos.clone();key('KeyD',5);
+    assert(S.pos.clone().sub(start).dot(right)>.5,path+' D 向畫面右側飛行');const rightStart=S.pos.clone();key('KeyA',5);
+    assert(S.pos.clone().sub(rightStart).dot(right)<-.5,path+' A 向畫面左側飛行');
     key('M0',5);assert(G.vm.ammo[G.vm.cur]===ammo,path+' 操控時不會誤射主角武器');
-    step(10);assert(G.contacts.items.size>0,path+' 偵察視線發現敵人並登記雷達');
+    G.contacts.reset();step(10);
+    const cam=G.hud.cam,visible=G.enemies.filter(e=>{
+      if(e.dead||e.pos.distanceTo(cam.position)>95)return false;
+      const p=e.s?e.s.headPos():e.pos.clone(),screen=p.clone().project(cam);
+      return screen.z>=-1&&screen.z<=1&&Math.abs(screen.x)<.9&&Math.abs(screen.y)<.9&&G.solid.sees(cam.position,p);
+    });
+    assert(visible.length>0,path+' 畫面內有實際看得到的敵人');
+    assert(visible.every(e=>G.contacts.items.has(e.id)),path+' 每名可見敵人都已登記雷達 '+JSON.stringify(visible.map(e=>e.id)));
     assert(S.active,path+' 截圖前仍在實際操控');G.hud.banner=null;G.hud.sub=null;G.hud.subQ.length=0;
     await save(path+'-scout-radar');G.bolt=shoot;
     const eye=G.playerEye.clone();G.bolt(eye.clone().add(new T.Vector3(0,0,.7)),new T.Vector3(0,0,-1),60,9,null);step(1);

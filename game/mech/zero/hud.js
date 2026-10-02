@@ -153,11 +153,11 @@ export class HUD {
     x.beginPath();x.arc(0,0,r,0,Math.PI*2);x.fill();x.stroke();
     x.strokeStyle='rgba(127,243,255,.15)';x.beginPath();x.arc(0,0,r*.5,0,Math.PI*2);x.moveTo(-r,0);x.lineTo(r,0);x.moveTo(0,-r);x.lineTo(0,r);x.stroke();
     x.save();x.beginPath();x.arc(0,0,r-2,0,Math.PI*2);x.clip();
-    const plot=(p,col,hollow=false)=>{const dx=p.x-origin.x,dz=p.z-origin.z,px=(dx*Math.cos(yaw)-dz*Math.sin(yaw))*r/90,py=-(dx*Math.sin(yaw)+dz*Math.cos(yaw))*r/90;x.beginPath();x.arc(px,py,3,0,Math.PI*2);x.fillStyle=x.strokeStyle=col;hollow?x.stroke():x.fill();};
+    const plot=(p,col,hollow=false)=>{const dx=p.x-origin.x,dz=p.z-origin.z;let px=(-dx*Math.cos(yaw)+dz*Math.sin(yaw))*r/90,py=-(dx*Math.sin(yaw)+dz*Math.cos(yaw))*r/90;const L=Math.hypot(px,py);if(L>r-6){px*=(r-6)/L;py*=(r-6)/L;}x.beginPath();x.arc(px,py,3,0,Math.PI*2);x.fillStyle=x.strokeStyle=col;hollow?x.stroke():x.fill();};
     for(const c of G.contacts.items.values()){x.globalAlpha=Math.max(.25,1-(G.contacts.now-c.t)/14);plot(c.p,c.type==='drone'?'#f8c76a':RD,!c.fresh);}
     x.globalAlpha=1;if(G.scout.active)plot(G.player.pos,CY);x.restore();
     x.fillStyle=CY;x.beginPath();x.moveTo(0,-5);x.lineTo(4,4);x.lineTo(0,2);x.lineTo(-4,4);x.closePath();x.fill();
-    x.shadowColor='rgba(0,0,0,.9)';x.shadowBlur=4;x.textAlign='center';x.font='500 11px "Noto Sans TC",sans-serif';x.fillStyle=CY;x.fillText('已發現敵人 · 90 m',0,-r-9);x.fillStyle='#9fb4bb';x.fillText('空心：最後目擊位置',0,r+15);
+    x.shadowColor='rgba(0,0,0,.9)';x.shadowBlur=4;x.textAlign='center';x.font='500 11px "Noto Sans TC",sans-serif';x.fillStyle=CY;x.fillText(`已發現 ${G.contacts.items.size} 名 · 90 m`,0,-r-9);x.fillStyle='#9fb4bb';x.fillText('空心：最後目擊位置',0,r+15);
     x.textAlign='left';x.fillText(`[N] 偵察無人機 ${Math.ceil(G.scout.battery/45*100)}%`,-r,r+34);x.restore();
   }
   _scout(W, H, G) {
