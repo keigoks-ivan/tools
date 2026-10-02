@@ -56,7 +56,8 @@ export function createMarchBot({ skill = 'expert', seed = 7 } = {}) {
       goal = toPx(entry.x, entry.z - 2);
       const close = nearest(fighters);
       if (close && dist(close, hero) < 120) target = close;
-    } else if (segment === 1 && live.some(enemy => enemy.kind === 'lantern')) {
+    } else if ((segment === 1 || segment === 2 && march.siege) && live.some(enemy => enemy.kind === 'lantern')) {
+      // Objective props: lanterns / rifts in the plaza, the city gate on a siege stairway.
       const close = nearest(fighters);
       target = close && dist(close, hero) < 150 ? close : nearest(live.filter(enemy => enemy.kind === 'lantern'));
     } else if (segment === 2 && march.hud().timer !== null) {

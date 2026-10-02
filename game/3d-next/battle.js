@@ -3,13 +3,14 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone as cloneSkinned } from 'three/addons/utils/SkeletonUtils.js';
 import { Arena } from '../2d/combat.js?v=20261002j';
 import { heroFor } from './heroes.js?v=20261002w';
-import { Campaign, CHAPTERS, chapterTuning } from './campaign.js?v=20261002j';
+import { Campaign, CHAPTERS, chapterTuning } from './campaign.js?v=20261002y';
 import { createHeroEquipment } from './hero-equipment.js?v=20261002w';
 import { createGreatswordClips, createDualBladeClips, createArcherClips } from './hero-motion.js?v=20261002w';
 import { createArrowFx } from './hero-bow.js?v=20261002w';
 import { createHeroSpecialFx } from './hero-special-fx.js?v=20261002w';
 import { createHeroEnvironment } from './hero-hair.js?v=20261002h';
-import { createChapterWorld } from './chapter-world.js?v=20261002bg8';
+import { createChapterWorld } from './chapter-world.js?v=20261002y';
+import { createChapterProps } from './chapter-props.js?v=20261002y';
 import { FramePacer } from '../frame-pacing.js';
 import { createNightMarket } from './world.js';
 import { createOni, prepareRiggedOni, createRiggedOni } from './oni.js';
@@ -43,7 +44,7 @@ let lazyModules = null;
 export function loadLazyModules() {
   if (!lazyModules) {
     lazyModules = Promise.all([
-      marchLevel ? Promise.all([import('./march.js?v=20261002j'), import('./march-art.js?v=20261002bg8')]) : null,
+      marchLevel ? Promise.all([import('./march.js?v=20261002y'), import('./march-art.js?v=20261002y')]) : null,
       // ?hero=vroid：打擊特效模組（combat-fx.js）；載入失敗時退回下方原本的特效與時間倍率
       heroChoice === 'vroid' ? import('./combat-fx.js?v=20261002w').catch(error => { console.warn('combat-fx failed, using built-in effects', error); return null; }) : null,
     ]).catch(error => { lazyModules = null; throw error; });
@@ -279,6 +280,7 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
   const heroSpecialFx = equipment ? createHeroSpecialFx(THREE, scene, groundAt) : null;
   const campaign = marchLevel ? new Campaign(pageParams.get('chapter')) : null;
   const chapterWorld = campaign && world?.group ? createChapterWorld(THREE, scene, world) : null;
+  const chapterProps = campaign && world ? createChapterProps(THREE, scene, { heightAt: world.heightAt, world }) : null;   // 裂隙、城門等章節任務道具
   const nextChapterButton = document.getElementById('nextChapter');
   const restartCampaignButton = document.getElementById('restartCampaign');
   const worldColors = new Map();
@@ -361,12 +363,13 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
     if (role !== 'officer') return riggedOni ? createRiggedOni(THREE, riggedOni, role, cloneSkinned) : createOni(THREE, role);
     // 敵將：守將模型縮小並換色（赤角偏紅、影爪偏藍）
     const actor = riggedOni ? createRiggedOni(THREE, riggedOni, 'boss', cloneSkinned) : createOni(THREE, 'boss');
-    actor.root.scale.setScalar(0.8);
+    // The chased foe is the chapter's boss itself, full size.
+    actor.root.scale.setScalar(enemy?.variant === 'chase' ? 1 : 0.8);
     const tinted = [];
     if (riggedOni) actor.root.traverse(object => {
       if (!object.isSkinnedMesh || object.material !== riggedOni.toon) return;
       object.material = riggedOni.toon.clone();
-      object.material.color.setHex(enemy?.variant === 'shadow' ? 0x8fa6ff : 0xff8f80);
+      object.material.color.setHex(enemy?.variant === 'shadow' ? 0x8fa6ff : enemy?.variant === 'chase' ? 0xc4ecff : 0xff8f80);
       tinted.push(object.material);
     });
     const dispose = actor.dispose;
@@ -957,7 +960,9 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
     for (const key of Object.keys(edges)) delete edges[key];
     onEvents();
     syncEnemies(dt);
-    world?.update(march.view(), dt, performance.now() / 1000);
+    const marchView = march.view();
+    world?.update(marchView, dt, performance.now() / 1000);
+    chapterProps?.update(marchView, dt);
     chapterWorld?.update(realDt);
     syncHero(dt);
     coopView?.update(realDt);   // [coop] 隊友插值與動作

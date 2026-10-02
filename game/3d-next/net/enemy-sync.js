@@ -465,8 +465,8 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
   // ---------------------------------------------------------------- 隊友：關卡鏡像
   function freshSeg(index) {
     const t = T();
-    if (index === 0) return { kills: 0, spawned: 0, nextGroupAt: Infinity, hints: 0, officerAt: null, foeId: null };
-    if (index === 1) return { broken: 0, lanternIds: [], nextSpawnAt: [], officerAt: null, foeId: null };
+    if (index === 0) return { kills: 0, spawned: 0, nextGroupAt: Infinity, hints: 0, officerAt: null, foeId: null, escapes: 0, chaseAt: null };
+    if (index === 1) return { broken: 0, lanternIds: [], nextSpawnAt: [], officerAt: null, foeId: null, officersLeft: 0 };
     if (index === 2) return { lamp: { hp: t.stairs.lampHp, maxHp: t.stairs.lampHp, down: 0 }, timer: t.stairs.holdSeconds, secured: false, nextWaveAt: Infinity, nextTopAt: Infinity, side: 'left', officerAt: null, foeId: null, breaks: 0 };
     return { foeId: null };
   }
@@ -499,11 +499,15 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
     arena.kills = L.kills;
     const seg = march.seg;
     seg.foeId = L.foeId;
-    if (L.segment === 0) { seg.kills = L.segKills; seg.spawned = L.spawned; }
+    if (L.segment === 0) { seg.kills = L.segKills; seg.spawned = L.spawned; seg.escapes = L.escapes; }
     else if (L.segment === 1) {
       seg.broken = L.broken;
       for (const enemy of arena.enemies) if (enemy.kind === 'lantern') seg.lanternIds[enemy.lanternIndex] = enemy.id;
-    } else if (L.segment === 2) Object.assign(seg, { timer: L.timer, secured: L.secured, breaks: L.breaks, lamp: { ...seg.lamp, hp: L.lampHp, down: L.lampDown } });
+    } else if (L.segment === 2) {
+      Object.assign(seg, { timer: L.timer, secured: L.secured, breaks: L.breaks, lamp: { ...seg.lamp, hp: L.lampHp, down: L.lampDown } });
+      // Siege chapters: the city gate is a lantern-type prop with its own index.
+      for (const enemy of arena.enemies) if (enemy.kind === 'lantern' && enemy.lanternIndex === level.SIEGE_GATE?.index) seg.gateId = enemy.id;
+    }
   }
   function guestEvent(event) {
     const type = event.type;
@@ -675,6 +679,7 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
       e.cooldown = Math.max(e.cooldown || 0, 0.6);
       if (!e.prop) { e.action = 'chase'; e.actionTime = 0; }
       if (e.kind === 'officer' && e.variant === 'shadow') Object.assign(e, { mode: 'chase', modeTime: 0, lunges: 0 });
+      if (e.kind === 'officer' && e.variant === 'chase') Object.assign(e, { chase: true, mode: 'flee', modeTime: 0, escapes: march.seg?.escapes | 0 });
       if (e.special && e.ai === 'external') Object.assign(e, { mode: 'move', modeTime: 0 });
       if (e.kind === 'boss') Object.assign(e, { mode: 'chase', modeTime: 0, move: null, lift: 0, intangible: false, slam: null, resummonAt: time + t.boss.resummon.every });
       march.units.set(e.id, e);
@@ -686,11 +691,14 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
       seg.spawned = Math.max(seg.spawned || 0, (seg.kills || 0) + alive);
       seg.nextGroupAt = time + 1.5;
       seg.hints = seg.kills >= 24 ? 3 : seg.kills >= 16 ? 2 : seg.kills >= 8 ? 1 : 0;
-      seg.officerAt = seg.kills >= t.market.goal && !seg.foeId && !gateOpen && t.officers.market ? time + 1 : null;
+      seg.officerAt = seg.kills >= t.market.goal && !seg.foeId && !gateOpen && t.officers.market && !t.market.chase ? time + 1 : null;
+      // A new host whose chase foe is gone (and the gate still shut) sends it again.
+      seg.chaseAt = t.market.chase && !gateOpen && !arena.enemies.some(e => e.chase && e.action !== 'dead') ? time + 1 : null;
     } else if (i === 1) {
-      for (let k = 0; k < level.LEVEL.lanterns.length; k++) if (seg.lanternIds[k] === undefined) seg.lanternIds[k] = -1;
+      for (let k = 0; k < march.objectiveSpots.length; k++) if (seg.lanternIds[k] === undefined) seg.lanternIds[k] = -1;
+      seg.officersLeft = arena.enemies.filter(e => e.kind === 'officer' && e.action !== 'dead').length;
       seg.nextSpawnAt = seg.lanternIds.map((_, k) => time + 1.5 + k);
-      seg.officerAt = seg.broken >= 3 && !seg.foeId && !gateOpen ? time + 1.2 : null;
+      seg.officerAt = seg.broken >= march.objectiveSpots.length && !seg.foeId && !seg.officersLeft && !gateOpen ? time + 1.2 : null;
     } else if (i === 2) {
       Object.assign(seg, { nextWaveAt: time + 1.5, nextTopAt: time + t.stairs.topGroupEvery, side: seg.side || 'left' });
       seg.officerAt = seg.secured && !seg.foeId && !gateOpen ? time + 1 : null;
@@ -803,7 +811,7 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
         if (role === 'host' && options.hp !== undefined && !options.prop) options = { ...options, hp: scaledHp(options.hp, players()), damage: scaledDamage(options.damage, unitRole, players()) };
         return orig._spawnUnit.call(march, unitRole, wx, wz, options);
       };
-      for (const name of ['_raider', '_lunger']) {
+      for (const name of ['_raider', '_lunger', '_fleer']) {
         march[name] = (enemy, dt) => withHero(heroFor(enemy, arena.hero), () => orig[name].call(march, enemy, dt));
       }
       march._boss = (enemy, dt) => {

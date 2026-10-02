@@ -1969,9 +1969,12 @@ export async function createMarchArt(THREE, scene, layout = LAYOUT, options = {}
     }
     // soul gate portal brightens once the last barrier opens
     portalMaterial.uniforms.power.value = 0.8 + (view.segment >= 3 ? 0.5 : 0) + Math.sin(clock * 1.3) * 0.08;
+    // Chapters with their own objective props (rifts, a city gate) hide the demon lanterns.
+    const ownProps = view.objectiveStyle && view.objectiveStyle !== 'lantern';
     view.lanterns.forEach((state, i) => {
       const lantern = demonLanterns[i];
       if (!lantern) return;
+      if (ownProps) { lantern.body.visible = lantern.halo.visible = false; return; }
       if (state.broken) {
         lantern.body.position.set(lantern.base.x + 0.45, lantern.y + 0.45, lantern.base.z);
         lantern.body.rotation.set(0.3, 0, 1.25);
@@ -1991,8 +1994,9 @@ export async function createMarchArt(THREE, scene, layout = LAYOUT, options = {}
       lantern.body.visible = view.segment <= 2;
       lantern.halo.visible = lantern.halo.visible && view.segment <= 1;
     });
-    lanternPostMesh.visible = view.segment <= 2;
+    lanternPostMesh.visible = view.segment <= 2 && !ownProps;
     const lamp = view.lamp;
+    flame.visible = lampHalo.visible = !lamp.hidden;
     if (lamp.down) {
       flame.material.color.setRGB(0.15, 0.1, 0.25);
       flame.scale.set(0.5, 0.5, 1);

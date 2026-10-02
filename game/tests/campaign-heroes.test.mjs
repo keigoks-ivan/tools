@@ -80,7 +80,7 @@ test('chapter settings are independent, preserve co-op defaults, and each boss c
   for (let index = 0; index < CHAPTERS.length; index++) {
     const tuning = chapterTuning(index);
     const march = new MarchDirector({ tuning, heroProfile: HEROES.azure });
-    assert.equal(march.hud().objective, `擊倒妖兵 0／${tuning.market.goal}`);
+    assert.equal(march.hud().objective, tuning.market.chase ? `追上${tuning.market.chase.name}（0／2 次脫逃）` : `擊倒妖兵 0／${tuning.market.goal}`);
     march.skipTo(3);
     const boss = march.arena.enemies.find(e => e.kind === 'boss');
     assert.equal(boss.name, CHAPTERS[index].boss);

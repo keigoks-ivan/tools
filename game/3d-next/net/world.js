@@ -23,7 +23,7 @@ export const ACTIONS = ['chase', 'telegraph', 'attack', 'hit', 'dead', 'idle'];
 /** 敵人種類碼：決定隊友那邊用什麼模型、什麼數值（recipeFor），也決定換房主時怎麼接手 AI */
 export const TYPES = ['grunt', 'runner', 'raider:grunt', 'raider:runner', 'officer:market', 'officer:red', 'officer:shadow', 'boss',
   'breakable:crate', 'breakable:jar', 'breakable:barrel', 'lantern', 'elite',
-  ...SPECIAL_ROLES, 'captain'];   // 只能往後加：種類碼是陣列索引，插在中間會讓新舊版本對不上
+  ...SPECIAL_ROLES, 'captain', 'officer:chase'];   // 只能往後加：種類碼是陣列索引，插在中間會讓新舊版本對不上
 export const BITS = { intangible: 1, phase2: 2, broken: 4 };
 
 /** 隊友重播的關卡事件。英雄自己的事件（揮刀、受傷、補血、無雙…）各自在本機產生，不轉送 */
@@ -62,6 +62,10 @@ export function recipeFor(type, T, index = 0) {
   if (key === 'officer:shadow') {
     const o = T.officers.shadow;
     return { role: 'officer', options: { kind: 'officer', name: o.name, hp: o.hp, ai: 'external', fixed: true, specialScale: o.specialScale, guard: o.guard, guardRearm: o.guardRearm, variant: 'shadow', action: 'chase', mode: 'chase', modeTime: 0, cooldown: 1.2, range: 80 } };
+  }
+  if (key === 'officer:chase') {
+    const c = T.market.chase || T.officers.red;
+    return { role: 'officer', options: { kind: 'officer', chase: true, name: c.name, hp: c.hp, ai: 'external', fixed: true, specialScale: 0.5, guard: false, variant: 'chase', action: 'idle', mode: 'flee', modeTime: 0, cooldown: 1.5, range: 90, escapes: 0 } };
   }
   if (key.startsWith('officer:')) {
     const variant = key.slice(8), o = T.officers[variant];
@@ -122,7 +126,7 @@ export function levelStatus(march) {
   let broken = 0;
   for (const k of march.brokenProps) broken += 2 ** k;
   const lv = [i, gates, broken, seg.foeId || 0, march.arena.kills];
-  if (i === 0) lv.push(seg.kills | 0, seg.spawned | 0);
+  if (i === 0) lv.push(seg.kills | 0, seg.spawned | 0, seg.escapes | 0);
   else if (i === 1) lv.push(seg.broken | 0);
   else if (i === 2) lv.push(hp10(seg.lamp.hp), Math.round(seg.lamp.down * 10), Math.round(seg.timer * 10), seg.secured ? 1 : 0, seg.breaks | 0);
   return lv;
@@ -135,7 +139,7 @@ export function decodeLevel(lv) {
   const gatesOpen = [];
   for (let k = 0; k < 8; k++) gatesOpen.push(!!(gates & (1 << k)));
   const out = { segment, gatesOpen, brokenProps, foeId: foeId || null, kills };
-  if (segment === 0) Object.assign(out, { segKills: a, spawned: b });
+  if (segment === 0) Object.assign(out, { segKills: a, spawned: b, escapes: c });
   else if (segment === 1) Object.assign(out, { broken: a });
   else if (segment === 2) Object.assign(out, { lampHp: a, lampDown: b / 10, timer: c / 10, secured: !!d, breaks: e });
   return out;
