@@ -2,12 +2,12 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone as cloneSkinned } from 'three/addons/utils/SkeletonUtils.js';
 import { Arena } from '../2d/combat.js?v=20261002j';
-import { heroFor } from './heroes.js?v=20261002m';
+import { heroFor } from './heroes.js?v=20261002n';
 import { Campaign, CHAPTERS, chapterTuning } from './campaign.js?v=20261002j';
-import { createHeroEquipment } from './hero-equipment.js?v=20261002m';
-import { createGreatswordClips, createDualBladeUltimate, createArcherClips } from './hero-motion.js?v=20261002m';
-import { createArrowFx } from './hero-bow.js?v=20261002m';
-import { createHeroSpecialFx } from './hero-special-fx.js?v=20261002m';
+import { createHeroEquipment } from './hero-equipment.js?v=20261002n';
+import { createGreatswordClips, createDualBladeClips, createArcherClips } from './hero-motion.js?v=20261002n';
+import { createArrowFx } from './hero-bow.js?v=20261002n';
+import { createHeroSpecialFx } from './hero-special-fx.js?v=20261002n';
 import { createHeroEnvironment } from './hero-hair.js?v=20261002h';
 import { createChapterWorld } from './chapter-world.js?v=20261002c';
 import { FramePacer } from '../frame-pacing.js';
@@ -238,7 +238,7 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
     const cut = THREE.AnimationUtils.subclip(clip, clip.name, Math.round(window[0] * 24), Math.round(window[1] * 24), 24);
     return cut;
   });
-  if (heroChoice === 'vroid') clips.push(...createGreatswordClips(THREE, heroModel, gltf.animations), createDualBladeUltimate(THREE, heroModel, gltf.animations), ...createArcherClips(THREE,heroModel,gltf.animations));
+  if (heroChoice === 'vroid') clips.push(...createGreatswordClips(THREE, heroModel, gltf.animations), ...createDualBladeClips(THREE, heroModel), ...createArcherClips(THREE,heroModel,gltf.animations));
   const actions = new Map(clips.map(clip => [clip.name, mixer.clipAction(clip)]));
   for (const clip of clips) for (const track of clip.tracks) {
     if (/^(azure|jade)/.test(clip.name) || !/Hips\.position$/i.test(track.name)) continue;

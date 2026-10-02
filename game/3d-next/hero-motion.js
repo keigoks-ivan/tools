@@ -1,63 +1,7 @@
 // Character poses are baked once into normal animation tracks. Local players,
 // turntables and interpolated teammates therefore use the same choreography.
-import { MOCAP } from './mocap-data.js?v=20261002m';
-import { HEROES } from './heroes.js?v=20261002m';
-
-export function createArmSolver(T, root, side, limb = 'Arm') {
-  const upper = root.getObjectByName(`J_Bip_${side}_Upper${limb}`), lower = root.getObjectByName(`J_Bip_${side}_Lower${limb}`), hand = root.getObjectByName(`J_Bip_${side}_${limb === 'Arm' ? 'Hand' : 'Foot'}`);
-  const shoulder = new T.Vector3(), elbow = new T.Vector3(), wrist = new T.Vector3(), axis = new T.Vector3(), bend = new T.Vector3(), desired = new T.Vector3(), end = new T.Vector3(), from = new T.Vector3(), to = new T.Vector3();
-  const world = new T.Quaternion(), parent = new T.Quaternion(), normal = new T.Vector3(), z = new T.Vector3();
-  const frame = new T.Matrix4(), previousNormal=new T.Vector3();
-  const rootRotation=new T.Quaternion(),previousRootRotation=new T.Quaternion(),rootDelta=new T.Quaternion();
-  let hasNormal=false;
-  upper.getWorldPosition(shoulder); lower.getWorldPosition(elbow); hand.getWorldPosition(wrist);
-  const restNormal = new T.Vector3().subVectors(elbow, shoulder).cross(new T.Vector3().subVectors(wrist, elbow)).normalize();
-  const frames = new Map();
-  for (const [bone, child] of [[upper, lower], [lower, hand]]) {
-    const x = child.position.clone().normalize();
-    const y = restNormal.clone().applyQuaternion(bone.getWorldQuaternion(new T.Quaternion()).invert());
-    y.addScaledVector(x, -y.dot(x)).normalize();
-    if (y.lengthSq() < .5) { y.set(0,0,1).addScaledVector(x,-x.z).normalize(); }
-    const local = new T.Matrix4().makeBasis(x, y, new T.Vector3().crossVectors(x, y));
-    frames.set(bone, new T.Quaternion().setFromRotationMatrix(local).invert());
-  }
-  function aim(bone, point) {
-    bone.getWorldPosition(from); to.subVectors(point, from).normalize();
-    z.crossVectors(to, normal).normalize();
-    frame.makeBasis(to, normal, z);
-    world.setFromRotationMatrix(frame).multiply(frames.get(bone));
-    bone.parent.getWorldQuaternion(parent).invert();
-    bone.quaternion.copy(parent.multiply(world)); bone.updateMatrixWorld(true);
-  }
-  const solve = (target, pole, rotation) => {
-    upper.getWorldPosition(shoulder); lower.getWorldPosition(elbow); hand.getWorldPosition(wrist);
-    const a = shoulder.distanceTo(elbow), b = elbow.distanceTo(wrist);
-    axis.subVectors(target, shoulder); const d = T.MathUtils.clamp(axis.length(), Math.abs(a - b) + 0.005, (a + b) * 0.98); axis.normalize();
-    end.copy(shoulder).addScaledVector(axis, d);
-    bend.copy(pole).addScaledVector(axis, -pole.dot(axis)).normalize();
-    const along = (a * a - b * b + d * d) / (2 * d), height = Math.sqrt(Math.max(0, a * a - along * along));
-    desired.copy(shoulder).addScaledVector(axis, along).addScaledVector(bend, height);
-    normal.crossVectors(bend, axis).normalize();
-    root.getWorldQuaternion(rootRotation);
-    if(limb==='Arm' && hasNormal) {
-      rootDelta.copy(previousRootRotation).invert().premultiply(rootRotation);previousNormal.applyQuaternion(rootDelta);
-      previousNormal.addScaledVector(axis,-previousNormal.dot(axis)).normalize();
-      if(normal.dot(previousNormal)<0)normal.negate();
-      const angle=previousNormal.angleTo(normal);
-      if(angle>.15) {
-        const sign=new T.Vector3().crossVectors(previousNormal,normal).dot(axis)<0?-1:1;
-        normal.copy(previousNormal).applyAxisAngle(axis,sign*.15);
-      }
-      bend.crossVectors(axis,normal).normalize();desired.copy(shoulder).addScaledVector(axis,along).addScaledVector(bend,height);
-    }
-    previousNormal.copy(normal);previousRootRotation.copy(rootRotation);hasNormal=true;
-    aim(upper, desired); aim(lower, end);
-    hand.parent.getWorldQuaternion(parent).invert(); hand.quaternion.copy(parent.multiply(rotation)); hand.updateMatrixWorld(true);
-    return end.distanceTo(target);
-  };
-  solve.reset=()=>{hasNormal=false;};
-  return solve;
-}
+import { MOCAP } from './mocap-data.js?v=20261002n';
+import { HEROES } from './heroes.js?v=20261002n';
 
 // Mixamo motion capture, retargeted offline (assets/animations/README.md), is
 // time-warped so each recorded impact lands on the combat clock in heroes.js.
@@ -109,6 +53,27 @@ function sampleSegments(T, segments, t, rest) {
   return blendPose(T, samplePose(T, segments[i - 1], t, rest), pose, T.MathUtils.smoothstep(since / fade, 0, 1));
 }
 const LOWER_BODY = /^J_Bip_(C_Hips|[LR]_(UpperLeg|LowerLeg|Foot|ToeBase))\./;
+// A bone-only copy of the rig answers "where are the feet" for a sampled pose
+// without touching the source model.
+const floorRigs = new WeakMap();
+function floorRig(T, source) {
+  if (!floorRigs.has(source)) {
+    const rig = source.clone(true); rig.position.set(0, 0, 0); rig.quaternion.identity(); rig.scale.set(1, 1, 1); rig.updateMatrixWorld(true);
+    const legs = ['Hips', 'L_UpperLeg', 'L_LowerLeg', 'R_UpperLeg', 'R_LowerLeg'].map(n => rig.getObjectByName(`J_Bip_${n.includes('_') ? n : `C_${n}`}`));
+    const feet = ['L', 'R'].map(side => rig.getObjectByName(`J_Bip_${side}_Foot`));
+    floorRigs.set(source, { rig, legs, feet, floor: Math.min(...feet.map(f => f.getWorldPosition(new T.Vector3()).y)) - .015, point: new T.Vector3() });
+  }
+  return floorRigs.get(source);
+}
+// Crossfading a tall stance into a crouch can sink a foot; lift the hips just enough.
+function keepFeetAboveFloor(T, source, pose) {
+  const { rig, legs, feet, floor, point } = floorRig(T, source), hips = pose.get('J_Bip_C_Hips.position');
+  if (!hips) return;
+  for (const bone of legs) { const value = pose.get(`${bone.name}.quaternion`); if (value) bone.quaternion.fromArray(value); }
+  legs[0].position.fromArray(hips); rig.updateMatrixWorld(true);
+  const low = Math.min(...feet.map(foot => foot.getWorldPosition(point).y));
+  if (low < floor) hips[1] += (floor - low) / rig.getObjectByName('J_Bip_C_Hips').parent.getWorldScale(point).y;
+}
 // lower: segments that supply the hips and legs (jump, back-step) under the shot.
 // overlay(t): [[bone, rotation]] — a world-space turn applied on top of the capture.
 function bakeMocap(T, source, name, duration, segments, { lower, overlay } = {}) {
@@ -128,6 +93,7 @@ function bakeMocap(T, source, name, duration, segments, { lower, overlay } = {})
       const frame = parentWorld(bone, pose).clone();
       q.fromArray(value).premultiply(frame).premultiply(rotation).premultiply(frame.invert()).toArray(qa); value.splice(0, 4, ...qa);
     }
+    keepFeetAboveFloor(T, source, pose);
     times.push(t);
     for (const [track, value] of pose) { if (!values.has(track)) values.set(track, []); values.get(track).push(...value); }
   }
@@ -202,44 +168,39 @@ export function createArcherClips(T, source) {
   return clips;
 }
 
-// The eight dash beats have one continuous upper-body animation. Keeping the
-// planted lower-body pose avoids fast-forwarding a sword clip's kicks each hit.
-export function createDualBladeUltimate(T, source, animations) {
-  const idle = animations.find(c => c.name === 'idle');
-  if (!idle || !source.getObjectByName('J_Bip_R_Hand')) return null;
-  const root = source.clone(true); root.position.set(0,0,0); root.quaternion.identity(); root.scale.set(1,1,1);
-  const bones = []; root.traverse(b => { if (b.isBone) bones.push(b); });
-  for (const track of idle.tracks) { const [name,property] = track.name.split('.'); root.getObjectByName(name)?.[property]?.fromArray(track.createInterpolant().evaluate(.1)); }
-  root.updateMatrixWorld(true);
-  const base = bones.map(b => ({ position:b.position.clone(), quaternion:b.quaternion.clone() }));
-  const right = createArmSolver(T,root,'R'), left = createArmSolver(T,root,'L');
-  const hips = root.getObjectByName('J_Bip_C_Hips'), chest = root.getObjectByName('J_Bip_C_Chest');
-  const handRotation = new T.Quaternion(), mountInverse = new T.Quaternion().setFromRotationMatrix(new T.Matrix4().makeBasis(new T.Vector3(0,1,0),new T.Vector3(0,0,1),new T.Vector3(1,0,0))).invert();
-  const target = new T.Vector3(), pole = new T.Vector3(), times = [], values = bones.map(() => []), positions = [];
-  for (let frame=0;frame<=168;frame++) {
-    const at=frame/60;
-    bones.forEach((b,i) => { b.position.copy(base[i].position); b.quaternion.copy(base[i].quaternion); });
-    let stroke=0;
-    for (let i=0;i<8;i++) {
-      const beat=.38+i*(2.05-.38)/7, p=(at-beat)/.18;
-      if (p>=-1 && p<=1) stroke+=Math.sin((p+1)*Math.PI)*(i%2?-1:1);
-    }
-    const finish=T.MathUtils.smoothstep(at,2.12,2.30)*(1-T.MathUtils.smoothstep(at,2.35,2.62));
-    const cross=T.MathUtils.smoothstep(at,2.30,2.35)*(1-T.MathUtils.smoothstep(at,2.5,2.8));
-    hips.quaternion.setFromEuler(new T.Euler(0,stroke*.15,0)); chest.rotation.y+=stroke*.18;
-    chest.rotation.x+=cross*.1; root.updateMatrixWorld(true);
-    for (const side of [-1,1]) {
-      handRotation.setFromEuler(new T.Euler(Math.PI/2-(.25+finish*.7-cross*.8),side*(.7-stroke*.6-cross*.8),side*(.35+cross*.6),'YXZ')).multiply(mountInverse);
-      target.set(side*(.23-cross*.19)+stroke*.12,1.14+Math.abs(stroke)*.12+finish*.22-cross*.08,.22+cross*.06);
-      (side<0?right:left)(target,pole.set(side*.8,-.45,-.35),handRotation);
-    }
-    times.push(at); bones.forEach((b,i) => values[i].push(...b.quaternion.toArray())); positions.push(...hips.position.toArray());
-  }
-  const tracks=bones.map((b,i) => new T.QuaternionKeyframeTrack(`${b.name}.quaternion`,times,values[i]));
-  tracks.push(new T.VectorKeyframeTrack(`${hips.name}.position`,times,positions));
-  return new T.AnimationClip('amberUlt',2.8,tracks).optimize();
+// Dual blades (金燕). Captures: a dual-weapon combo, a one-handed sword combo,
+// a double-dagger stab, a backflip kick and a running twist flip. Source seconds
+// are hand-speed peaks; one strike per cut so consecutive cuts never repeat.
+export function createDualBladeClips(T, source) {
+  if (!source.getObjectByName('J_Bip_L_Hand')) return [];
+  const DUAL = 'am_dual_weapon_combo', ONE = 'am_one_hand_sword_combo', STAB = 'am_double_dagger_stab', FLIP = 'am_flip_kick', TWIST = 'am_front_twist_flip';
+  const moves = [
+    ['amberCut1', .32, [{ clip: DUAL, warp: [[0, .50], [.12, .70], [.32, .90]] }]],
+    ['amberCut2', .32, [{ clip: DUAL, warp: [[0, .90], [.12, 1.10], [.32, 1.32]] }]],
+    ['amberCut3', .32, [{ clip: ONE, warp: [[0, .78], [.12, 1.00], [.32, 1.25]] }]],
+    ['amberCut4', .32, [{ clip: ONE, warp: [[0, 1.75], [.12, 1.97], [.32, 2.20]] }]],
+    ['amberCut5', .32, [{ clip: DUAL, warp: [[0, 1.55], [.12, 1.78], [.32, 2.00]] }]],
+    // Sixth cut: a running twist flip with a blade on the way up and on the way down.
+    ['amberCut6', .56, [{ clip: TWIST, warp: [[0, .40], [.12, .64], [.34, 1.40], [.56, 1.62]] }]],
+    ['amberStab', .50, [{ clip: STAB, warp: [[0, .35], [.10, .50], [.23, .80], [.37, 1.13], [.50, 1.35]] }]],
+    ['amberFlip', .50, [{ clip: FLIP, warp: [[0, .10], [.10, .23], [.23, .62], [.37, 1.20], [.50, 1.45]] }]],
+    ['amberHeavy', .52, [{ clip: STAB, warp: [[0, .95], [.13, 1.13], [.33, 1.77], [.52, 2.05]] }]],
+    ['amberCounter', .34, [{ clip: DUAL, warp: [[0, 2.50], [.10, 2.70], [.34, 3.00]] }]],
+    // 金燕八閃: eight cuts on the flurry beats (0.38 s, then every 0.239 s), the fifth
+    // and sixth in a mid-air twist, then both blades cross at 2.35 s.
+    ['amberUlt', 2.8, [
+      { clip: DUAL, warp: [[0, .20], [.38, .70]] },
+      { clip: DUAL, fade: .08, warp: [[.50, .92], [.62, 1.10]] },
+      { clip: ONE, fade: .08, warp: [[.74, .80], [.86, 1.00]] },
+      { clip: ONE, fade: .08, warp: [[.97, 1.80], [1.09, 1.97]] },
+      { clip: TWIST, fade: .10, warp: [[1.18, .45], [1.33, .67], [1.57, 1.13], [1.70, 1.30]] },
+      { clip: STAB, fade: .10, warp: [[1.68, .95], [1.81, 1.13]] },
+      { clip: ONE, fade: .08, warp: [[1.93, 2.80], [2.05, 3.00]] },
+      { clip: DUAL, fade: .18, warp: [[2.10, 1.55], [2.35, 1.79], [2.80, 2.30]] },
+    ]],
+  ];
+  return moves.map(([name, duration, segments]) => bakeMocap(T, source, name, duration, segments));
 }
-
 
 // Preview the same early cancels and crossfade used by the playable chain.
 export function createComboPreview(T, clips, profile=HEROES.jade) {

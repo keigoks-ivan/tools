@@ -6,7 +6,7 @@
  */
 
 /** 會畫刀光的動作片段 */
-export const TRAIL_ANIM = /^(slash|heavy|air|plunge|musou|special|combo|azure(?:Sweep|Rise|Slam|Guard|Ult)|amberUlt)/;
+export const TRAIL_ANIM = /^(slash|heavy|air|plunge|musou|special|combo|azure(?:Sweep|Rise|Slam|Guard|Ult)|amber(?:Cut|Stab|Flip|Heavy|Counter|Ult))/;
 /** 會留殘影的動作片段 */
 export const GHOST_ANIMS = new Set(['roll', 'heavy', 'heavyfin', 'airSlash', 'plunge', 'musou', 'musouLeap', 'musouFlurry', 'musouFinish']);
 const GHOST_EVERY = 0.06;   // 秒

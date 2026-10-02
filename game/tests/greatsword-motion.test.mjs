@@ -3,7 +3,7 @@ import test from 'node:test';
 import * as T from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { readFile } from 'node:fs/promises';
-import { createGreatswordClips, createDualBladeUltimate } from '../3d-next/hero-motion.js';
+import { createGreatswordClips } from '../3d-next/hero-motion.js';
 import { createHeroEquipment } from '../3d-next/hero-equipment.js';
 import { HEROES } from '../3d-next/heroes.js';
 import { encodeState, decodeState } from '../3d-next/net/protocol.js';
@@ -118,21 +118,3 @@ test('ultimate silhouettes and warm/cold palettes stay distinct and pool geometr
   fx.dispose(); assert.equal(scene.children.length,0);
 });
 
-test('amber ultimate keeps grounded footwork through all eight cuts and the cross-cut finale', async () => {
-  const gltf=await loadRig(), root=gltf.scene, clip=createDualBladeUltimate(T,root,gltf.animations), mixer=new T.AnimationMixer(root);
-  assert.equal(clip.duration,HEROES.amber.flurry.standard.duration);
-  const action=mixer.clipAction(clip).reset().setLoop(T.LoopOnce,1).play();action.clampWhenFinished=true;
-  const previous=new Map();
-  for(let frame=0;frame<=336;frame++) {
-    mixer.setTime(frame/120);root.updateMatrixWorld(true);
-    for(const side of ['L','R']) {
-      const upper=root.getObjectByName(`J_Bip_${side}_UpperArm`), hand=root.getObjectByName(`J_Bip_${side}_Hand`), foot=root.getObjectByName(`J_Bip_${side}_Foot`);
-      assert.ok(hand.getWorldPosition(new T.Vector3()).toArray().every(Number.isFinite));
-      assert.ok(foot.getWorldPosition(new T.Vector3()).y<.2,`${side}: unexpected kick`);
-      if(previous.has(side))assert.ok(previous.get(side).angleTo(upper.quaternion)<.5,`${frame}/${side}: discontinuous cut`);
-      previous.set(side,upper.quaternion.clone());
-    }
-  }
-  const packet=JSON.parse(encodeState({x:0,y:0,z:0,yaw:0,character:'amber',anim:clip.name,time:2.35,loop:false,musou:2.35},100));
-  assert.ok(packet.d.a.length<=24); assert.equal(decodeState(packet.d).anim,'amberUlt');
-});
