@@ -136,7 +136,16 @@
     .combo-route[hidden]{display:none}.combo-route b{display:block;color:var(--hero-color);font-size:18px}.combo-route span{display:block;font-size:11px;color:#f2e7db;margin:4px 0}.combo-route i{display:inline-block;width:13px;height:3px;margin-right:4px;background:#4b4a57}.combo-route i.lit{background:var(--hero-color);box-shadow:0 0 7px var(--hero-color)}
     @media(pointer:coarse){.combo-route{bottom:190px}}@media(max-height:500px){.combo-route{left:calc(14px + var(--safe-left,0px));bottom:74px;padding:6px 10px}.combo-route b{font-size:14px}.combo-route span{font-size:10px}}
     #title{overflow-y:auto;align-items:start}#title,#title *{touch-action:pan-y!important}#title .title-content{align-self:center}
-    .room-loadout{display:grid;gap:8px;text-align:left}.room-loadout select{width:100%;padding:10px;color:#eee;background:#1b2131;border:1px solid #5d6374;border-radius:6px;font:inherit}.room-loadout p{font-size:12px;line-height:1.6}.room-loadout label{font-size:12px;color:#bdb6c9}
+    .room-loadout{display:grid;gap:8px;text-align:left}.room-loadout select{width:100%;padding:10px;color:#eee;background:#1b2131;border:1px solid #5d6374;border-radius:6px;font:inherit}.room-loadout p{font-size:12px;line-height:1.6}.room-loadout label,.room-loadout .room-label{font-size:12px;color:#bdb6c9}
+    .hero-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+    .hero-card{padding:10px 8px;border:1px solid #494451;border-radius:6px;background:#131b2a;color:#e9e1ef;font:inherit;text-align:left;cursor:pointer}
+    .hero-card[aria-pressed="true"]{border-color:var(--hero-color);background:linear-gradient(145deg,#2a3045,#161c2b);box-shadow:inset 0 0 0 1px var(--hero-color)}
+    .hero-card:disabled{cursor:default;opacity:.75}.hero-card:focus-visible{outline:2px solid #fff;outline-offset:3px}
+    .hero-card i{display:block;font-style:normal;font-size:22px;color:var(--hero-color)}.hero-card b{display:block;color:var(--hero-color);font-size:17px;margin:4px 0}
+    .hero-card small{display:block;font-size:10px;color:#cec7d6;line-height:1.5}.hero-card em{display:block;font-style:normal;font-size:11px;color:var(--hero-color);margin-top:6px}
+    .hero-card .team{display:block;min-height:1.5em;margin-top:6px;font-size:11px;color:#f1e4ca}
+    .room-loadout .pick-note{margin:0;color:#bdb6c9}
+    @media(max-width:650px){.hero-cards{grid-template-columns:repeat(2,1fr)}}
   </style>
   <script type="importmap">{"imports":{"three":"../lib/three.module.js","three/addons/":"../lib/addons/"}}</script>
 </head>
@@ -148,7 +157,7 @@
       <div class="title-content">
         <div class="edition"><span class="edition-mark"></span> VIOLET EDGE　／　TRIO</div>
         <h1 id="gameTitle">紫刃夜行<br><em>四人連線</em></h1>
-        <p class="title-subtitle">四人同場・四位角色・五關戰役</p>
+        <p class="title-subtitle">四人同場・角色自由選・五關戰役</p>
         <form id="gatePanel" class="trio-panel" hidden autocomplete="off">
           <h2>輸入你的代號</h2>
           <p>每台裝置只需要輸入一次。</p>
@@ -165,7 +174,7 @@
           <span id="roomCode" class="trio-code">----</span>
           <p>把房號告訴兄弟，他們在這一頁輸入房號加入。最多 4 人。</p>
           <ul id="memberList" class="trio-members"></ul>
-          <div class="room-loadout"><label for="characterSelect">你的角色</label><select id="characterSelect"></select><label for="chapterSelect">出擊關卡</label><select id="chapterSelect"></select><p id="chapterNote"></p></div>
+          <div class="room-loadout"><span id="characterLabel" class="room-label">你的角色</span><div id="characterCards" class="hero-cards" role="group" aria-labelledby="characterLabel"></div><p class="pick-note">可以和隊友選同一位角色。</p><label for="chapterSelect">出擊關卡</label><select id="chapterSelect"></select><p id="chapterNote"></p></div>
           <button id="start" class="primary-button" type="button"><span>準備完成</span><b aria-hidden="true">↗</b></button>
           <p style="margin-top:12px"><button id="leaveRoom" class="trio-link" type="button">離開房間</button></p>
         </div>

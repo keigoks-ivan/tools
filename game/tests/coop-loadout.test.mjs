@@ -104,3 +104,13 @@ test('four players can independently choose the new archer and share the host ch
   for(const control of [a,b,c,d])control.prepare();hub.flush();
   assert.deepEqual([...hub.launches.values()].map(runs=>runs[0]),[{character:'jade',chapter:4},{character:'azure',chapter:4},{character:'amber',chapter:4},{character:'violet',chapter:4}]);
 });
+
+test('every player may choose the same hero; each launches with it and sees teammates on that hero', () => {
+  const hub = lobby(), players = ['A', 'B', 'C', 'D'].map(id => hub.add(id)); hub.flush();
+  for (const player of players) assert.equal(player.setCharacter('azure'), true);
+  hub.flush();
+  for (const player of players) for (const other of ['A', 'B', 'C', 'D']) assert.equal(player.choice(other).character, 'azure');
+  for (const player of players) player.prepare();
+  hub.flush();
+  assert.deepEqual([...hub.launches.values()].map(runs => runs[0].character), ['azure', 'azure', 'azure', 'azure']);
+});

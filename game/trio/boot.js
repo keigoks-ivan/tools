@@ -35,10 +35,17 @@ let liveBattle = null;
 const roomLoadout = new RoomLoadout({ client, character: params.get('character'), chapter: Number(params.get('chapter')) || 0,
   currentChapter: () => liveBattle?.campaign?.index ?? roomLoadout.chapter,
   onChange: () => renderMembers(), onLaunch: options => launchBattle(options) });
-for (const hero of Object.values(HEROES)) { const option = document.createElement('option'); option.value = hero.id; option.textContent = `${hero.name} ／ ${hero.weapon}`; $('characterSelect').append(option); }
+// Character cards: any hero, including one a teammate already chose. Each card lists who picked it.
+const heroCards = new Map(Object.values(HEROES).map(hero => {
+  const card = document.createElement('button'); card.type = 'button'; card.className = 'hero-card'; card.style.setProperty('--hero-color', hero.color);
+  const add = (tag, text, cls) => { const el = document.createElement(tag); el.textContent = text; if (cls) el.className = cls; card.append(el); return el; };
+  add('i', hero.mark); add('b', hero.name); add('small', hero.weapon); add('small', `體力 ${hero.maxHp}`); add('em', hero.special);
+  const team = add('span', '', 'team');
+  card.addEventListener('click', () => roomLoadout.setCharacter(hero.id));
+  $('characterCards').append(card);
+  return [hero.id, { card, team }];
+}));
 for (const [i, chapter] of CHAPTERS.entries()) { const option = document.createElement('option'); option.value = i; option.textContent = `${String(i + 1).padStart(2, '0')} ${chapter.name}`; $('chapterSelect').append(option); }
-$('characterSelect').value = roomLoadout.character;
-$('characterSelect').addEventListener('change', event => roomLoadout.setCharacter(event.target.value));
 $('chapterSelect').addEventListener('change', event => roomLoadout.setChapter(Number(event.target.value)));
 const lobbyPulse = setInterval(() => roomLoadout.publish(), 2000);
 setupTeamOverlay({ coop, client, getCamera: () => liveBattle?.camera, canvas: $('battle') });
@@ -139,7 +146,12 @@ function renderMembers() {
     return item;
   }));
   $('roomCode').textContent = client.room && client.room !== 'NEW' ? client.room : '----';
-  $('characterSelect').value = roomLoadout.character; $('characterSelect').disabled = !!roomLoadout.launched;
+  const pickedBy = new Map();
+  for (const member of client.members.values()) if (member.id !== client.you) { const id = roomLoadout.choice(member.id).character; pickedBy.set(id, [...(pickedBy.get(id) || []), member.name]); }
+  for (const [id, { card, team }] of heroCards) {
+    card.setAttribute('aria-pressed', String(id === roomLoadout.character)); card.disabled = !!roomLoadout.launched;
+    team.textContent = pickedBy.has(id) ? `隊友：${pickedBy.get(id).join('、')}` : '';
+  }
   $('chapterSelect').value = String(roomLoadout.chapter); $('chapterSelect').disabled = !roomLoadout.isHost || !!roomLoadout.launched;
   $('chapterNote').textContent = roomLoadout.isHost ? '你是房主，選好關卡後按準備，全員準備完成就會一起出擊。' : roomLoadout.run ? '戰鬥已開始，選好角色後加入目前關卡。' : '關卡由房主選擇，準備完成後會一起出擊。';
   $('start').querySelector('span').textContent = roomLoadout.ready ? '已準備・等待隊伍' : roomLoadout.run ? '加入戰鬥' : '準備完成';
