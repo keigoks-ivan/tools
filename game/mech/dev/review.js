@@ -15,7 +15,7 @@ async function load(path, query = '') {
   html = html.replace(/<base href="[^"]+">/, '');
   html = html.replace(/(<script type="importmap">)([\s\S]*?)(<\/script>)/, (_, a, json, b) => {
     const map = JSON.parse(json);
-    for (const file of ['urban.js', 'anim.js', 'env.js', 'stages.js', 'battlefields.js', 'fieldart.js', 'encounter.js', 'post.js', 'roofline.js', 'mechs.js', 'combat.js', 'cockpit.js', 'zero/kit.js', 'zero/map.js', 'zero/guns.js', 'zero/viewmodel.js', 'zero/main.js', 'zero/hud.js', 'zero/sfx.js', 'zero/mech6.js', 'lastline/map.js', 'lastline/script.js', 'lastline/mission.js', 'lastline/convoy.js', 'lastline/escort.mjs']) {
+    for (const file of ['urban.js', 'anim.js', 'env.js', 'streetfront.js', 'stages.js', 'battlefields.js', 'fieldart.js', 'encounter.js', 'post.js', 'roofline.js', 'mechs.js', 'combat.js', 'cockpit.js', 'zero/kit.js', 'zero/map.js', 'zero/guns.js', 'zero/viewmodel.js', 'zero/main.js', 'zero/hud.js', 'zero/sfx.js', 'zero/mech6.js', 'lastline/map.js', 'lastline/script.js', 'lastline/mission.js', 'lastline/convoy.js', 'lastline/escort.mjs', 'lastline/operations.mjs', 'lastline/foot-ops.js', 'input.js']) {
       const url = new URL('/game/mech/' + file, location.href).href;
       for (const key of Object.keys(map.imports)) if (new URL(key, entryBase).href === url) delete map.imports[key];
       map.imports[url] = url + '?qa=' + revision;
@@ -435,6 +435,7 @@ async function weapons() {
   const G = win.__G; renderer = win.__renderer; post = { render: () => win.__step(1) };
   const metrics = [];
   for (const kind of ['rifle', 'pistol', 'smg']) {
+    win.document.querySelector('#resume').click(); frame.focus();
     let triangles = 0, meshes = 0;
     G.vm.g[kind].traverse(o => { if (o.isMesh) { meshes++; triangles += (o.geometry.index ? o.geometry.index.count : o.geometry.attributes.position.count) / 3 * (o.isInstancedMesh ? o.count : 1); } });
     metrics.push({ kind, triangles, meshes });
@@ -442,6 +443,18 @@ async function weapons() {
     const code = { rifle: 'Digit1', pistol: 'Digit2', smg: 'Digit3' }[kind];
     win.dispatchEvent(new win.KeyboardEvent('keydown', { code })); win.__step(50); win.dispatchEvent(new win.KeyboardEvent('keyup', { code }));
     assert(G.vm.cur === kind, `${kind} 切換成功`);
+    G.vm.g[kind].traverse(o=>{if(o.geometry)for(const k of ['position','normal'])assertSilent(Array.from(o.geometry.attributes[k].array).every(Number.isFinite),`${kind} 幾何座標正常`);});
+    for(const q of [0,1,2]) { win.document.querySelector('#resume').click(); win.document.querySelector(`[data-q="${q}"]`).click(); win.__step(20); assert(errors.length===0,`${kind} 畫質 ${q} 材質正常`); }
+    if (kind === 'smg') {
+      const checkAim=()=>{
+        const T=win.__T,M=G.vm.model,eye=M.worldToLocal(new T.Vector3()),dir=M.worldToLocal(new T.Vector3(0,0,-1)).sub(eye);
+        const p=eye.addScaledVector(dir,(M.userData.sightZ-eye.z)/dir.z);
+        assert(G.vm.ads>.99&&!G.vm.scoped&&Math.abs(p.x)<.023&&Math.abs(p.y-M.userData.sightY)<.02,'衝鋒槍瞄點射線穿過開放瞄具，沒有被槍身遮住');
+      };
+      win.__botCtl={ads:true};win.__step(120);checkAim();await save('zero-smg-ads');
+      for(const q of [0,1,2]) { win.document.querySelector('#resume').click();win.document.querySelector(`[data-q="${q}"]`).click();win.__step(60);checkAim(); }
+      win.__botCtl={};
+    }
     const before = G.vm.ammo[kind];
     win.__botCtl = { ads: true }; win.dispatchEvent(new win.KeyboardEvent('keydown', { code: 'Tfire' })); win.__step(30); win.dispatchEvent(new win.KeyboardEvent('keyup', { code: 'Tfire' })); win.__botCtl = {}; win.__step(1);
     assert(G.vm.ammo[kind] < before, `${kind} 實際射擊消耗彈藥`);
@@ -459,7 +472,7 @@ async function campaignFoot() {
   await load('/game/mech/lastline/index.html', '?mute&god&ch=1&all&fps=0');
   let G = win.__G, T = win.__T, map = win.__map, S = win.__S;
   renderer = win.__renderer; post = { render: () => win.__step(1) };
-  assert(S.CHAPTERS.length === 5 && S.FIRST_MECH === 4, '獨立五章，三章步兵／兩章機甲');
+  assert(S.CHAPTERS.length === 7 && S.FIRST_MECH === 4, '獨立七章，三章步兵／四章機甲');
   assert(S.ENCOUNTERS.every(e => e.ch <= 3), '步兵路線全部屬於前三章');
   assert(S.LAYOUT === map.layout && !win.__world.cityEnabled && !win.__world.blds.length, '港區獨立地圖，沒有背後的舊住宅城市');
   assert(map.triangles < 120000 && map.meshes.length <= 12, `港區靜態結構 ${map.triangles} 三角形／${map.meshes.length} 合併網格`);
@@ -477,7 +490,8 @@ async function campaignFoot() {
       G.player.reset(new T.Vector3(p.x, p.y - 1.2, p.z), 0); step(4);
     } else step(Math.ceil(((E.wait || 0) + .2) / .05));
     assert(win.__flow.active.includes(E.id), `${E.id} 實際觸發區啟動`);
-    kill();
+    const bypassFoes=E.operation?.bypass?G.enemies.filter(e=>!e.dead):[];
+    if(!E.operation?.bypass)kill();
     if (E.targets) for (const id of E.targets) { const obj = map.targets[id]?.obj; assert(!!obj, `${id} 可破壞目標存在`); G.destruct.hit(obj, 10000, obj.pos, new T.Vector3(0, 1, 0)); }
     for (const pickup of E.pickups || []) {
       const it = map.items[pickup.id]; assert(!!it, `${pickup.id} 情報／互動道具存在`);
@@ -485,9 +499,26 @@ async function campaignFoot() {
     }
     if (E.pickup) { const at = map.marks[E.pickup.at]; G.player.reset(at.clone(), 0); step(1); key('KeyE'); }
     if (E.hold) for (let i = 0; i < Math.ceil((E.hold.t + 1) / .05); i++) { kill(); step(1); }
-    kill(); step(4);
+    if(E.operation) {
+      const op=win.__flow.operations.find(a=>a.id===E.id)?.operation;assert(!!op,E.id+' 現場任務存在');
+      const task=op.task;
+      if(task.kind==='escort')assert(op.crew.length===2&&op.crew.every(s=>s.root.parent===G.scene),E.id+' 兩名救援工程兵實際出現');
+      let steps=0;
+      if(task.kind==='console')win.dispatchEvent(new win.KeyboardEvent('keydown',{code:'KeyE'}));
+      while(!task.done&&steps++<3000){
+        const p=task.point;G.player.reset(new T.Vector3(p[0],p.y||0,p[1]),0);
+        if(!E.operation.bypass)kill();step(1);
+      }
+      win.dispatchEvent(new win.KeyboardEvent('keyup',{code:'KeyE'}));
+      assert(task.done,E.id+' 到場操作／分區防守／實際護送完成');
+      if(task.kind==='escort')assert(op.crew.every(s=>Math.hypot(s.pos.x-task.pos[0],s.pos.z-task.pos[1])<1.2),E.id+' 人物抵達護送終點');
+
+    }
+    if(!E.operation?.bypass)kill(); step(4);
+    if(E.operation?.bypass)assert(bypassFoes.some(e=>!e.dead)&&bypassFoes.every(e=>!G.enemies.includes(e)),E.id+' 不必清光巡邏隊也能離開');
     assert(win.__flow.done.includes(E.id), `${E.id} 擊倒／目標／互動／守點完成`);
-    if (E.id === 'C3' || E.id === 'D3') {
+    if(E.id==='B5'){G.player.reset(new T.Vector3(-180,0,-134),0);step(3);renderer.render=render;await save('lastline-rescue');renderer.render=()=>{};frame.focus();}
+    if (E.id === 'C7' || E.id === 'D3') {
       const p = E.mark; G.player.reset(new T.Vector3(p.x, 0, p.z), 0); step(4);
       assert(win.__flow.chapter === E.ch + 1, `自然銜接第 ${E.ch + 1} 章`);
     }
@@ -531,30 +562,50 @@ async function campaignMech(chapter = 4, choice = 'rescue') {
   assert(M.combat.enemies.length <= 5, '車隊章同時單位預算受限');
   for (const q of [0, 2, 1]) { win.document.querySelector(`[data-q="${q}"]`).click(); win.__step(2); assert(errors.length === 0, `第 ${chapter} 章畫質 ${q} 渲染正常`); }
   await save(`lastline-convoy-${chapter}`);
+  if(chapter===6){
+    const warning=win.__scene.getObjectByName('lastline-salvo-warning'),op=mission.operation;
+    M.player.pos.set(op.point[0],0,op.point[1]);const hp=M.player.ap;
+    for(let i=0;i<320;i++)mission.tick(.05);
+    if(choice==='artillery')assert(!warning.visible&&M.player.ap===hp,'壓制砲陣分支取消遠程落點砲擊');
+    else {
+      assert(M.player.ap<hp,'砲擊落點具有實際傷害');
+      for(let i=0;i<300&&!warning.visible;i++)mission.tick(.05);
+      assert(warning.visible,'下一發先出現紅色地面預警');M.player.pos.x+=30;const dodgeHp=M.player.ap;
+      for(let i=0;i<120;i++)mission.tick(.05);
+      assert(M.player.ap===dodgeHp,'離開預警落點可避開砲擊傷害');
+    }
+  }
   const memory = { ...renderer.info.memory }, render = renderer.render.bind(renderer); renderer.render = () => {};
   // 戰鬥傷害命中、敵機退場與正式波次控制皆執行；自動檢查隔離玩家受傷。
   M.combat.hurt = () => {};
   const step = n => { win.__scene.updateMatrixWorld(true); for (let i = 0; i < n; i++) M.tick(.05); };
   const kill = () => { for (const e of M.combat.enemies) if (!e.dead) M.combat.damageEnemy(e, 100000, 1000, e.pos.clone(), new T.Vector3(0, 1, 0), true); };
   let chosen = false;
-  for (let i = 0; i < 2500 && !M.ending; i++) {
+  let ops=0;
+  for (let i = 0; i < 6000 && !M.ending; i++) {
     M.player.ap = M.player.apMax;
     if (!mission.panel.hidden && mission.panel.querySelector('[data-choice]')) { mission.panel.querySelector(`[data-choice="${choice}"]`).click(); chosen = true; }
-    const p = mission.convoy.pos; M.player.pos.set(p[0] - 18, 0, p[1]); M.player.vel.set(0, 0, 0);
+    const task=mission.operation,p=task&&!task.done?task.point:mission.convoy.pos;
+    M.player.pos.set(p[0]-(task&&!task.done?0:18),0,p[1]);M.player.vel.set(0,0,0);
+    if(task&&!task.done) {win.dispatchEvent(new win.KeyboardEvent('keydown',{code:'KeyB'}));ops++;}
+    else win.dispatchEvent(new win.KeyboardEvent('keyup',{code:'KeyB'}));
     kill(); step(1);
+    assertSilent(M.combat.enemies.filter(e=>!e.dead&&!e.gone).length<=5,'機甲同時活動敵人最多五個');
     assertSilent(M.player.pos.toArray().every(Number.isFinite) && mission.truck.trucks.every(r => r.position.toArray().every(Number.isFinite)), '車隊與護衛位置');
     if (!mission.panel.hidden && mission.panel.querySelector('[data-retry]')) throw Error('自動流程意外失敗：' + mission.panel.textContent);
   }
   assert(!!M.ending, `第 ${chapter} 章所有戰鬥與車隊路段通關`);
   assert(mission.convoy.index === mission.convoy.route.length - 1, '車隊實際抵達終點，無跳過運送');
+  assert(ops>0,'機甲通關必須完成現場任務，清敵不能直接跳過');
   if (chapter === 4) {
     assert(chosen && mission.convoy.choice === choice, `分支選擇 ${choice} 正確保存`);
-    step(550);
-    await wait(() => win.__m6 && win.__flow.chapter === 5);
-    assert(win.__m6.mission.convoy.choice === choice, '車隊章自然銜接最後防線，保留分支與車隊耐久');
+  }
+  if(chapter<7){
+    step(550);await wait(()=>win.__m6&&win.__flow.chapter===chapter+1);
+    assert(win.__m6.mission.convoy.choice===choice,'自然銜接下一章，保留選擇與車隊狀態');
   }
   renderer.render = render; M.tick(.05);
-  if (chapter === 5) {
+  if (chapter === 7) {
     step(170); renderer.render = render; M.tick(.05);
     assert(mission.evacGate.beam.rotation.z > 1.5 && mission.truck.trucks[1].position.z < -405, '閘門打開，兩輛車實際通過救援站');
     await save('lastline-evacuation');
@@ -568,7 +619,7 @@ async function campaignMech(chapter = 4, choice = 'rescue') {
 async function campaignEdges() {
   await load('/game/mech/lastline/index.html', '?mute&ch=4&all&fps=0'); await wait(() => win.__m6); win.__step(200);
   let M = win.__m6, mission = M.mission;
-  const saved = JSON.parse(win.localStorage.getItem('lastline.checkpoint'));
+  let saved = JSON.parse(win.localStorage.getItem('lastline.checkpoint'));
   const enemy = M.combat.enemies.find(e => !e.vehicle); enemy.pos.set(mission.convoy.pos[0] + 60, 0, mission.convoy.pos[1]);
   const hp = mission.convoy.hp;
   for (let i = 0; i < 220; i++) mission.tick(.05);
@@ -578,6 +629,11 @@ async function campaignEdges() {
   for (const e of M.combat.enemies) e.dead = true;
   for (let i = 0; i < 220; i++) mission.tick(.05);
   assert(mission.convoy.hp === damaged, '預警期間擊倒標定敵人，取消射擊');
+  const op=mission.operation,at=op.point;M.player.pos.set(at[0],0,at[1]);
+  win.dispatchEvent(new win.KeyboardEvent('keydown',{code:'KeyB'}));for(let i=0;i<90;i++)mission.tick(.05);
+  win.dispatchEvent(new win.KeyboardEvent('keyup',{code:'KeyB'}));
+  assert(op.done,'按住 B 接通設施，檢查點保留完成站');
+  saved=JSON.parse(win.localStorage.getItem('lastline.checkpoint'));
   const before = mission.convoy.snapshot(); win.dispatchEvent(new win.Event('blur')); win.__step(100);
   assert(JSON.stringify(mission.convoy.snapshot()) === JSON.stringify(before), '失焦暫停不推進車隊與計時');
   win.document.querySelector('#resume').click();
@@ -585,6 +641,7 @@ async function campaignEdges() {
   assert(!mission.panel.hidden && mission.panel.textContent.includes('失去行動能力'), '車隊耗盡耐久顯示失敗與重試');
   mission.panel.querySelector('[data-retry]').click(); win.__step(4);
   assert(mission.convoy.hp === saved.convoy.hp && M.wave === saved.wave, '重試恢復安全路口、耐久與波次');
+  assert(mission.operation.done,'戰敗重試保留已接通的控制站');
   M.player.qbT = 0; M.combat.hurt(100000, M.player.pos.clone());
   for (let i = 0; i < 70; i++) M.tick(.05);
   assert(!mission.panel.hidden && mission.panel.textContent.includes('蒼焰失去戰力'), '玩家戰敗也使用相同檢查點重試');
@@ -595,19 +652,20 @@ async function campaignEdges() {
   win.document.querySelector('#campaignResume').click(); await wait(() => win.__m6); win.__step(200);
   M = win.__m6; mission = M.mission;
   assert(win.__flow.chapter === 4 && M.wave === saved.wave && mission.convoy.hp === saved.convoy.hp, '重載後從檢查點啟動正確章節');
+  assert(mission.operation.done,'重載檢查點保留完成的現場作業');
   assert(errors.length === 0, '存檔／暫停／兩種戰敗沒有執行錯誤');
   report.textContent = JSON.stringify({ checks: result, errors }, null, 2); state.textContent = '續作邊界檢查通過';
 }
 const assertSilent = (ok, text) => { if (!ok) throw Error(text); };
 
-for (const [id, fn] of [['japaneseSigns', japaneseSigns], ['harborArt', harborArt], ['campaignFoot', campaignFoot], ['campaign4', () => campaignMech(4)], ['campaign5', () => campaignMech(5)], ['campaignArtillery', async () => { localStorage.setItem('lastline.choice', JSON.stringify('artillery')); await campaignMech(5, 'artillery'); }], ['campaignEdges', campaignEdges], ['mech', mech], ['fields', battlefields], ['enemyMotion', enemyMotion], ['zero', zero], ['tactics', tactics], ['infantry', infantry], ['art', art], ['hero', hero], ['city', city], ['mountains', mountains], ['weapons', weapons], ['save', save]]) document.querySelector('#' + id).onclick = () => fn().catch(e => { state.textContent = '失敗'; report.textContent += '\n' + e.stack; });
+for (const [id, fn] of [['japaneseSigns', japaneseSigns], ['harborArt', harborArt], ['campaignFoot', campaignFoot], ['campaign4', () => campaignMech(4)], ['campaign5', () => campaignMech(5)], ['campaign6', () => campaignMech(6)], ['campaign7', () => campaignMech(7)], ['campaign6Artillery', async()=>{localStorage.setItem('lastline.choice',JSON.stringify('artillery'));await campaignMech(6,'artillery');}], ['campaignArtillery', async () => { localStorage.setItem('lastline.choice', JSON.stringify('artillery')); await campaignMech(7, 'artillery'); }], ['campaignEdges', campaignEdges], ['mech', mech], ['fields', battlefields], ['enemyMotion', enemyMotion], ['zero', zero], ['tactics', tactics], ['infantry', infantry], ['art', art], ['hero', hero], ['city', city], ['mountains', mountains], ['weapons', weapons], ['save', save]]) document.querySelector('#' + id).onclick = () => fn().catch(e => { state.textContent = '失敗'; report.textContent += '\n' + e.stack; });
 
 async function harborArt() {
   await load('/game/mech/lastline/index.html', '?mute&god&ch=1&all&fps=0');
   renderer = win.__renderer; post = { render: () => win.__step(1) };
   win.__G.player.reset(new win.__T.Vector3(-180, 0, -193), 0); win.__step(3);
-  const map=win.__map, shelves=win.__solid.list.filter(b=>b.x0<-130 && b.y1>2.8 && b.y1<3.2 && b.x1-b.x0<2 && b.z1-b.z0<1);
-  assert(shelves.length===8,'八座港區貨架為三公尺高，貨箱落在承板上');
+  const map=win.__map, shelves=win.__solid.list.filter(b=>b.x1<100 && b.y1>2.8 && b.y1<3.2 && b.x1-b.x0<2 && b.z1-b.z0<1);
+  assert(shelves.length===12,'十二座掃描貨架為三公尺高，海關、冷藏站和修船棚沒有穿出屋頂的大貨架');
   assert(map.triangles<120000 && map.meshes.length<=9,'港區合併幾何維持十二萬三角形，至多九個材質網格');
   await save('lastline-customs', true);
   const footChecks=[...result];

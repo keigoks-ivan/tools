@@ -166,7 +166,7 @@ export class ViewModel {
     const M = this.model, ud = M.userData, rifle = this.cur === 'rifle';
     // 腰射位置、舉槍位置
     const hip = rifle ? new THREE.Vector3(0.17, -0.205, 0.15) : this.cur === 'smg' ? new THREE.Vector3(0.17, -0.205, -0.1) : new THREE.Vector3(0.17, -0.19, -0.4);
-    const ads = rifle ? new THREE.Vector3(0, -ud.scopeY, 0.08) : new THREE.Vector3(0, -ud.sightY, this.cur === 'smg' ? -0.16 : -0.36);
+    const ads = rifle ? new THREE.Vector3(0, -ud.scopeY, 0.08) : new THREE.Vector3(0, -ud.sightY, this.cur === 'smg' ? -0.23 : -0.36);
     const pos = hip.clone().lerp(ads, ease(this.ads));
     const rot = new THREE.Euler(0, Math.PI, 0, 'YXZ');
     // 腰射時槍口稍微往內

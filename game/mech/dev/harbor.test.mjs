@@ -13,7 +13,7 @@ function harbor() {
   const map = buildMap(scene, mats, solid, placer, { rockN: null });
   return { scene, solid, map };
 }
-const enemies = E => [...E.enemies, ...(E.stealth?.reinforce || []), ...(E.hold?.waves.flat() || [])];
+const enemies = E => [...E.enemies, ...(E.pressure?.list||[]), ...(E.stealth?.reinforce || []), ...(E.hold?.waves.flat() || [])];
 test('港區獨立地圖：所有章節入口、任務導引、敵人和互動都不在實體牆內', () => {
   const { solid, map } = harbor();
   const clear = (x, y, z, name) => {
@@ -29,6 +29,9 @@ test('港區獨立地圖：所有章節入口、任務導引、敵人和互動�
     for (const p of E.pickups || []) { assert(map.items[p.id]); clear(...map.items[p.id].p.toArray(), p.id); }
     for (const id of E.targets || []) assert(map.targets[id]?.h, id + ' 缺少目標模型');
     if (E.pickup) assert(map.marks[E.pickup.at]);
+    for(const p of E.operation?.points||[])clear(p[0],p.y||0,p[1],E.id+' 操作點');
+    const route=E.operation?.route||[];
+    for(let i=1;i<route.length;i++)for(let t=0;t<=1;t+=.02){const a=route[i-1],b=route[i];clear(a[0]+(b[0]-a[0])*t,0,a[1]+(b[1]-a[1])*t,E.id+' 護送路線');}
   }
 });
 test('車隊整條路線和後車延伸留有至少 12 公尺寬，敵機降落區不在屋內或海上', () => {
@@ -36,11 +39,11 @@ test('車隊整條路線和後車延伸留有至少 12 公尺寬，敵機降落�
   for (const C of Object.values(S.MECH_CONFIGS)) {
     for (let j = 1; j < C.route.length; j++) {
       const a = C.route[j - 1], b = C.route[j], d = Math.hypot(b[0] - a[0], b[1] - a[1]);
-      for (let t = j === 1 ? -20 : 0; t <= d + (C.chapter === 5 && j === C.route.length - 1 ? 85 : 0); t += 2) {
+      for (let t = j === 1 ? -20 : 0; t <= d + (C.final && j === C.route.length - 1 ? 85 : 0); t += 2) {
         const x = a[0] + (b[0] - a[0]) * t / d, z = a[1] + (b[1] - a[1]) * t / d;
         assert(x < SHORE - 6, '車隊開到海上');
         for (const box of solid.list) if (!box.noMove && box.y1 > .5 && box.y0 < 5)
-          assert(x < box.x0 - 6 || x > box.x1 + 6 || z < box.z0 - 6 || z > box.z1 + 6, '車隊路線被結構擋住');
+          assert(x < box.x0 - 6 || x > box.x1 + 6 || z < box.z0 - 6 || z > box.z1 + 6, `第 ${C.chapter} 章車隊 ${x},${z} 被結構擋住 ${JSON.stringify(box)}`);
       }
     }
     for (const W of C.waves) for (const [kind, x, z] of W.list) if (kind !== 'heli') {
@@ -68,7 +71,7 @@ test('登機引導的兩段樓梯與胸前平台有連續承重面；合併場�
     }
     assert(n < 1600 && Math.abs(pilot.pos.y - y) < .2, '登機路被牆或階梯阻擋');
   }
-  assert(map.triangles < 120000); assert(map.meshes.length <= 12);
+  assert(map.triangles < 120000, `港區 ${map.triangles} 三角形`); assert(map.meshes.length <= 12);
   scene.traverse(o => {
     assert(!o.isLight, '地圖不另外增加光源');
     if (!o.isMesh) return;

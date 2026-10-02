@@ -269,7 +269,7 @@ export class Combat {
     // 關卡流程：開場 → 一批批打完 → 過關
     this.phaseT -= dt;
     if (this.phase === 'intro' && this.phaseT <= 0) { this.phase = 'fight'; if (this.enc) this.enc.begin(); else this.spawnGroup(); }
-    else if (this.phase === 'fight' && (this.enc ? this.enc.update(dt) : this.enemies.length === 0 && this.events.length === 0)) {
+    else if (this.phase === 'fight' && (this.enc ? this.enc.update(dt) : this.enemies.length === 0 && this.events.length === 0 && (!this.canAdvance || this.canAdvance()))) {
       if (!this.enc && this.group < this.def.groups.length) this.spawnGroup();
       else {
         const last = this.stage === STAGES.length;

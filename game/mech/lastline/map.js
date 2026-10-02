@@ -20,10 +20,11 @@ export function buildMap(scene, mats, solid, PL, A, world) {
       float portRange(float x, float a, float b) { return smoothstep(a-.3,a+.3,x)*(1.0-smoothstep(b-.3,b+.3,x)); }`)
       .replace('#include <map_fragment>', `#include <map_fragment>
         float roadH=portLine(abs(vPort.y+120.0),12.0)*portRange(vPort.x,174.0,612.0);
-        float roadV=portLine(abs(vPort.x-360.0),12.0)*portRange(vPort.y,-120.0,120.0);
+        float roadV=portLine(abs(vPort.x-360.0),12.0)*portRange(vPort.y,-372.0,120.0);
+        float roadNorth=portLine(abs(vPort.y+360.0),12.0)*portRange(vPort.x,348.0,612.0);
         float roadExit=portLine(abs(vPort.x-600.0),12.0)*portRange(vPort.y,-580.0,290.0);
         float roadCross=portLine(abs(vPort.y-120.0),12.0)*portRange(vPort.x,348.0,612.0);
-        float portRoad=max(max(roadH,roadV),max(roadExit,roadCross));
+        float portRoad=max(roadNorth,max(max(roadH,roadV),max(roadExit,roadCross)));
         vec2 panel=mod(vPort+vec2(2.0,3.0),vec2(6.0,8.0));
         float joint=max(portLine(min(panel.x,6.0-panel.x),.018),portLine(min(panel.y,8.0-panel.y),.018))*(1.0-portRoad);
         vec3 pavement=mix(sampledDiffuseColor.rgb,texture2D(portAsphalt,vPort/7.0).rgb*vec3(.62,.65,.68),portRoad);
@@ -49,6 +50,13 @@ export function buildMap(scene, mats, solid, PL, A, world) {
   };
   ground.customProgramCacheKey = () => 'harbor-ground-v1';
   mats = { ...mats, portGround: ground, portGlass: new THREE.MeshStandardMaterial({ color: 0x263c43, roughness: .26, metalness: .18, vertexColors: true }) };
+  // 貨櫃、起重機與屋面是塗裝鋼材：漆面使用非金屬反射，保留原掃描與風化。
+  for (const key of ['metal', 'corr', 'rust']) {
+    const original = mats[key], painted = original.clone();
+    painted.onBeforeCompile = original.onBeforeCompile;
+    painted.metalnessMap = null; painted.metalness = key === 'rust' ? .18 : .08;
+    painted.color.set(0xe1e2df); mats[key] = painted;
+  }
   const b = new Builder(mats, solid);
   const M = { b, lights: [], zones: {}, marks: {}, targets: {}, items: {}, layout: 'harbor-v1' };
   const V = (x, z, y = 0) => new THREE.Vector3(x, y, z);
@@ -96,13 +104,13 @@ export function buildMap(scene, mats, solid, PL, A, world) {
       box('brick', x1 - .45, x1, 0, h, z0, z1);
       for (const z of [z0, z1 - .4]) {
         box('wall', x0, midX - door, 0, h, z, z + .4); box('wall', midX + door, x1, 0, h, z, z + .4);
-        box('metal', midX - door, midX + door, 4.8, h, z, z + .4);
+        box('metal', midX - door, midX + door, Math.min(4.8,h-.4), h, z, z + .4);
       }
     } else {
       box('wall', x0, x1, 0, h, z0, z0 + .4); box('wall', x0, x1, 0, h, z1 - .4, z1);
       for (const x of [x0, x1 - .4]) {
         box('brick', x, x + .4, 0, h, z0, midZ - door); box('brick', x, x + .4, 0, h, midZ + door, z1);
-        box('metal', x, x + .4, 4.8, h, midZ - door, midZ + door);
+        box('metal', x, x + .4, Math.min(4.8,h-.4), h, midZ - door, midZ + door);
       }
     }
     roof(x0 - .7, x1 + .7, z0 - .6, z1 + .6, h, rise);
@@ -113,7 +121,8 @@ export function buildMap(scene, mats, solid, PL, A, world) {
     box('floor', x0, x1, -.2, 0, z0, z1, { solid: false });
     // 挑簷、排水管與混凝土踢腳，尺寸以公尺計。
     for (const x of [x0, x1]) {
-      box('concrete', x - .16, x + .16, 0, .55, z0, z1);
+      if(doors==='x')for(const [a,c] of [[z0,midZ-door],[midZ+door,z1]])box('concrete',x-.16,x+.16,0,.55,a,c);
+      else box('concrete', x - .16, x + .16, 0, .55, z0, z1);
       beam([x, h, z0], [x, h, z1], .12, 'rust'); pipe(x, 0, z0 + 1, .08, h, 'rust');
     }
     // 工業高窗、窗框與窗台；玻璃共用一個材質，不用住宅立面貼圖。
@@ -132,10 +141,11 @@ export function buildMap(scene, mats, solid, PL, A, world) {
     }
   }
   function container(x, z, tint, y = 0, length = 12.2) {
-    box('corr', x - 1.22, x + 1.22, y, y + 2.6, z - length / 2, z + length / 2, { tint });
+    box('corr', x - 1.22, x + 1.22, y, y + 2.6, z - length / 2, z + length / 2, { tint, skip:'ny' });
     for (const dx of [-1.19, 1.19]) for (const dz of [-length / 2, length / 2])
-      box('metal', x + dx - .045, x + dx + .045, y, y + 2.64, z + dz - .08, z + dz + .08, { tint: metal });
-    for (const dx of [-.7, .7]) beam([x + dx, y + .2, z + length / 2 + .02], [x + dx, y + 2.4, z + length / 2 + .02], .035);
+      box('metal', x + dx - .045, x + dx + .045, y, y + 2.64, z + dz - .08, z + dz + .08, { tint: metal, skip: 'ny' });
+    // 門鎖用四面鋼條，省下小圓柱端蓋與背面，把幾何留給近景作業設備。
+    for (const dx of [-.7, .7]) b.deco('metal', x + dx - .025, x + dx + .025, y + .2, y + 2.4, z + length / 2 + .01, z + length / 2 + .06, { tint: metal, skip: 'nz ny py' });
     box('metal', x - 1.2, x + 1.2, y + 2.55, y + 2.65, z - length / 2, z - length / 2 + .12, { tint: metal });
   }
   function stairs(x0, x1, z0, z1, y0, y1) {
@@ -234,6 +244,22 @@ export function buildMap(scene, mats, solid, PL, A, world) {
   }
   shed(-208, -152, -205, -130, 8, 'z', 3);
   shed(-149, -113, -122, -78, 6.2, 'x', 1.8);
+  // 西翼拘留室與臨時救護站有自己的門路，任務不靠站在空地上讀文字。
+  shed(-222,-210,-184,-153,5.2,'z',1.6);
+  shed(-140,-116,-56,-34,3.6,'z',.8);
+  for(const [x,z] of [[-216,-176],[-218,-162],[-135,-40],[-122,-40],[-128,-38],[-132,-110],[-120,-108],[-12,-41],[-3,-38],[0,-42],[5,42],[8,49],[63,90]]) {
+    b.deco('metal',x-.32,x+.32,.35,1.8,z,z+.18,{tint:metal});
+    b.deco('portGlass',x-.24,x+.24,1.2,1.6,z-.02,z-.01,{tint:[.45,.72,.63]});
+    for(const y of [.62,.78,.94])b.deco('metal',x-.18,x+.18,y,y+.06,z-.04,z-.02,{tint:[.23,.27,.28]});
+  }
+  prop('metal_office_desk',-135,-38);prop('metal_office_desk',-122,-38);
+  prop('metal_jerrycan_green',-136,-49);prop('propane_tank',-137,-48);
+  for(const x of [-131,-128.8,-126.6]) {
+    box('metal',x-.36,x+.36,.67,.72,-42,-40.1,{tint:metal});
+    box('wall',x-.33,x+.33,.72,.8,-41.97,-40.13,{tint:[.78,.8,.75]});
+    for(const dx of [-.29,.29])for(const z of [-41.8,-40.3])box('metal',x+dx-.025,x+dx+.025,0,.67,z-.025,z+.025,{tint:metal});
+    b.deco('wall',x-.28,x+.28,.8,.9,-41.92,-41.6,{tint:[.86,.87,.81]});
+  }
   for (const [x, z] of [[-197, -182], [-163, -170], [-195, -149], [-140, -89], [-197, -176], [-197, -170], [-162, -158], [-162, -149]]) {
     // 掃描貨架原始高度 21.4 m，縮成 3 m；箱底對齊四層承板，避免穿屋頂與懸空。
     prop('steel_frame_shelves_01', x, z, 0, 0, { scale: .14 });
@@ -250,6 +276,22 @@ export function buildMap(scene, mats, solid, PL, A, world) {
       b.B.portGlass.quad([x-.6,6.78,z-.08],[x+.6,6.78,z-.08],[x+.6,6.78,z+.08],[x-.6,6.78,z+.08],[0,-1,0],[1,1,1,1],null,[1.8,1.9,1.7]);
     }
   }
+  for (const z of [-190,-174,-158,-142]) {
+    for(const zz of [z-5.5,z,z+5.5])for(const x of [-205,-201]) {
+      box('metal',x-.08,x+.08,0,5.2,zz-.08,zz+.08,{tint:[.52,.43,.28]});
+      beam([x,.4,zz],[x,4.85,zz+1.2],.035);
+    }
+    for(const y of [.4,1.95,3.5]) {
+      for(const x of [-205,-201]) b.deco('metal',x-.09,x+.09,y,y+.13,z-5.5,z+5.5,{tint:[.68,.4,.22]});
+      b.deco('metal',-205,-201,y+.13,y+.18,z-5.5,z+5.5,{tint:metal});
+      for(let i=0;i<4;i++) {
+        const zz=z-4.6+i*2.6;
+        b.deco('wall',-204.65,-201.4,y+.18,y+1.25,zz-.8,zz+.8,{tint:[.68,.58,.41]});
+        for(const x of [-204.0,-202.0]) b.deco('metal',x-.025,x+.025,y+.18,y+1.27,zz-.82,zz+.82,{tint:[.22,.25,.26]});
+      }
+    }
+    solid.add({x0:-205.1,x1:-200.9,y0:0,y1:5.2,z0:z-5.6,z1:z+5.6,mat:'metal'});
+  }
   prop('concrete_road_barrier_02', -177, -216); prop('covered_car', -158, -225, 0, .2);
   for (const [x, z] of [[-203, -192], [-156, -182], [-204, -143], [-90, -122], [-46, -92], [65, 56]]) {
     prop('barrel_03', x, z); prop('Barrel_01', x + 1.2, z + .2); prop('old_tyre', x + .4, z + 1.6, 0, .3);
@@ -258,7 +300,7 @@ export function buildMap(scene, mats, solid, PL, A, world) {
   item('radio', 'metal_jerrycan_green', -135, -106, .8); item('codes', 'cardboard_box_01', -130, -106, .8); item('smap', 'cardboard_box_01', -125, -106, .8);
   // 第 2 章：冷藏貨運站的鋼屋架、儲槽與低掩體。
   shed(-95, -40, -128, -80, 8, 'x', 4);
-  for (const x of [-90, -75, -55]) { prop('plastic_crate_02', x, -117); prop('steel_frame_shelves_01', x, -88); }
+  for (const x of [-90, -75, -55]) { prop('plastic_crate_02', x, -117); prop('steel_frame_shelves_01', x, -88, 0, 0, { scale: .14 }); }
   for (const [x, z, c] of [[-95, -50, [.55, .38, .3]], [-60, -52, paint], [-20, -74, [.63, .58, .4]], [30, -85, paint]]) container(x, z, c);
   for (const [x, z] of [[-78, -64], [-42, -59], [-8, -63], [22, -58], [0, 24], [29, 35]]) prop('concrete_road_barrier_02', x, z, 0, Math.PI / 2);
   target('jam1', -71, -71); target('jam2', -38, -71); target('jam3', -4, -71);
@@ -277,10 +319,11 @@ export function buildMap(scene, mats, solid, PL, A, world) {
   deck(2, 32, 102, 107, 12.4); deck(30, 34, 98, 107, 12.4); deck(32, 43, 98, 101.5, 12.4);
   for (const x of [2, 6]) beam([x, 8, 74], [x, 8, 90], .035);
   beam([2, 13.4, 107], [32, 13.4, 107], .035);
-  prop('tool_cart', 20, 86); prop('steel_frame_shelves_01', 60, 98); prop('propane_tank', 57, 58);
+  prop('tool_cart', 20, 86); prop('steel_frame_shelves_01', 60, 98, 0, 0, { scale: .14 }); prop('propane_tank', 57, 58);
   item('fuse', 'old_military_crate', 19, 40); item('panel1', null, 18, 62); item('panel2', null, 62, 62);
   prop('utility_box_02', 18, 61, 0, 0, { noBreak: true }); prop('utility_box_02', 62, 61, 0, 0, { noBreak: true });
   target('tow1', 58, 90); target('tow2', 23, 91);
+  target('override',64,82);
   for (const z of [57, 70, 84, 98]) {
     beam([11, 22, z], [69, 22, z], .17); beam([11, 23.5, z], [69, 23.5, z], .14);
     for (let x = 11; x < 68; x += 6) beam([x, 22, z], [x + 6, 23.5, z], .075);
@@ -309,6 +352,76 @@ export function buildMap(scene, mats, solid, PL, A, world) {
   }
   for (const z of [-210, -60, 15, 75, 175]) for (let j = 0; j < 4; j++) {
     container(555 + j * 5, z, colors[j], 0); if (j % 2) container(555 + j * 5, z, colors[j], 2.6);
+  }
+  // 岸邊轉運棚：坡屋面、裝卸月台、斜撐與通風百葉形成不同於堆場的輪廓。
+  // x=600 的撤離車道與敵機落點保留；設備只在既有碼頭的作業帶內。
+  for (const [z0, z1] of [[-168, -135], [-20, 10], [82, 103]]) {
+    box('concrete', 625, 666, 0, 1.2, z0, z1, { tint: [.67,.65,.59] });
+    box('brick', 647, 666, 1.2, 8.6, z0, z1);
+    for (const z of [z0-.12, z1+.12]) {
+      box('metal', 647, 666, 8.6, 9, z-.15, z+.15, { tint: [.61,.65,.65] });
+      for (let x=649; x<665; x+=3) {
+        b.deco('portGlass', x,x+2,5.8,7.2,z-.025,z+.025);
+        for (const y of [5.8,6.5,7.2]) b.deco('metal',x,x+2,y-.035,y+.035,z-.06,z+.06,{tint:metal});
+      }
+    }
+    b.B.corr.quad([624,7.4,z1+.8],[666.7,9.2,z1+.8],[666.7,9.2,z0-.8],[624,7.4,z0-.8],[-.042,.999,0],[1,1,1,1],null,[.65,.68,.65]);
+    b.B.corr.quad([624,7.34,z0-.8],[666.7,9.14,z0-.8],[666.7,9.14,z1+.8],[624,7.34,z1+.8],[.042,-.999,0],[.7,.7,.7,.7],null,[.65,.68,.65]);
+    for (const z of [z0+1,z1-1]) {
+      box('metal',625,625.22,1.2,7.45,z-.11,z+.11,{tint:metal});
+      beam([625,5.9,z],[628.5,7.6,z],.08);
+      beam([624,7.4,z],[666.7,9.2,z],.1); pipe(666.3,0,z,.12,9,'rust');
+    }
+    for (let z=z0+4; z<z1-2; z+=8) {
+      b.deco('corr',646.88,646.98,1.2,5.7,z,z+5,{tint:[.46,.55,.57]});
+      for (const zz of [z,z+5]) b.deco('metal',646.72,647,1.2,5.9,zz-.1,zz+.1,{tint:metal});
+      box('metal',626,628,1.2,1.4,z,z+4,{tint:[.25,.27,.26],solid:false});
+      for (const zz of [z+.7,z+3.3]) b.deco('metal',624.85,625.04,.35,.95,zz-.4,zz+.4,{tint:[.12,.14,.15]});
+    }
+    for (let z=z0+2; z<z1-2; z+=6) {
+      box('metal',664.9,665.7,9.2,9.5,z,z+3,{tint:[.52,.57,.56],solid:false});
+      for (let k=0;k<4;k++) b.deco('metal',664.75,665.85,9.5+k*.13,9.55+k*.13,z,z+3,{tint:metal});
+    }
+  }
+  // 管線支架和閥件；不是一排沒有接頭的巨型方塊。
+  for (const z0 of [-302, 132]) {
+    for (const y of [2.2,3.2]) beam([626,y,z0],[626,y,z0+34],.23,'metal',[.56,.61,.58]);
+    for (let z=z0;z<=z0+34;z+=8) {
+      box('concrete',624.8,627.2,0,.5,z-.55,z+.55);
+      beam([626,0,z],[626,3.4,z],.12); beam([624.9,2,z],[627.1,2,z],.08);
+    }
+    for (const z of [z0+4,z0+27]) {
+      pipe(626,3.2,z,.12,.65,'metal');
+      const g=new THREE.TorusGeometry(.36,.045,4,12).rotateX(Math.PI/2);
+      mesh('metal',g,626,3.87,z,0,{tint:[.58,.28,.18]});g.dispose();
+    }
+  }
+  function forklift(x,z) {
+    const base=1.2;
+    const ochre=[.78,.49,.14], rubber=[.14,.16,.17];
+    box('metal',x-1,x+1,.6+base,1.3+base,z-1.5,z+1.3,{tint:ochre});
+    box('metal',x-.95,x+.95,1.3+base,1.7+base,z-.9,z-.3,{tint:ochre});
+    b.deco('metal',x-.43,x+.43,1.25+base,1.4+base,z-.25,z+.4,{tint:rubber});
+    b.deco('metal',x-.43,x+.43,1.4+base,2.05+base,z-.3,z-.15,{tint:rubber});
+    for(const dx of [-1,1])for(const dz of [-.95,.9]) {
+      const g=new THREE.CylinderGeometry(.48,.48,.27,12).rotateZ(Math.PI/2);
+      mesh('metal',g,x+dx,.5+base,z+dz,0,{tint:rubber});g.dispose();
+    }
+    for(const dx of [-.82,.82])for(const dz of [-.55,.85])beam([x+dx,1.3+base,z+dz],[x+dx,2.85+base,z+dz],.055);
+    box('metal',x-.93,x+.93,2.85+base,2.97+base,z-.7,z+1,{tint:ochre,solid:false});
+    for(const dx of [-.55,.55]) {
+      box('metal',x+dx-.09,x+dx+.09,.3+base,3.3+base,z+1.45,z+1.6,{tint:metal});
+      b.deco('metal',x+dx-.12,x+dx+.12,.28+base,.37+base,z+1.5,z+3.15,{tint:metal});
+    }
+    beam([x-.65,.65+base,z+1.56],[x+.65,.65+base,z+1.56],.08);
+  }
+  forklift(634,-143);forklift(633,92);
+  for(const [x,z] of [[637,-158],[632,-6],[640,87]]) {
+    for(const y of [1.2,2.35]) {
+      for(let i=0;i<4;i++)b.deco('rust',x-1.3,x+1.3,y,y+.12,z-.9+i*.5,z-.62+i*.5,{tint:[.72,.59,.4]});
+      for(const dx of [-.95,.95])b.deco('rust',x+dx-.12,x+dx+.12,y-.18,y,z-.9,z+1,{tint:[.66,.5,.32]});
+    }
+    box('corr',x-1.15,x+1.15,1.32,2.3,z-.8,z+.85,{tint:[.65,.62,.51]});
   }
   // 港務辦公樓：磚構、逐層玻璃與屋頂水箱，不用住宅樓體輪廓。
   box('brick', 500, 546, 0, 20, 240, 278);
@@ -355,11 +468,18 @@ export function buildMap(scene, mats, solid, PL, A, world) {
   }
   // 船體以輪廓拉伸，有收尖船首、船舷和多層艦橋，避免另一個巨大方盒。
   const hull = new THREE.Shape(); hull.moveTo(-16, -65); hull.lineTo(16, -65); hull.lineTo(16, 38); hull.quadraticCurveTo(15, 60, 0, 73); hull.quadraticCurveTo(-15, 60, -16, 38); hull.closePath();
-  const hullG = new THREE.ExtrudeGeometry(hull, { depth: 9, bevelEnabled: true, bevelSegments: 1, steps: 1, bevelSize: 1, bevelThickness: 1, curveSegments: 8 }).rotateX(-Math.PI / 2);
+  const hullG = new THREE.ExtrudeGeometry(hull, { depth: 9, bevelEnabled: true, bevelSegments: 1, steps: 1, bevelSize: 1, bevelThickness: 1, curveSegments: 8 }).rotateX(-Math.PI / 2).rotateY(Math.PI);
   mesh('rust', hullG, 735, -4, 45, 0, { tint: [.37, .3, .27], solid: true }); hullG.dispose();
   box('metal', 722, 748, 5, 5.4, -13, 80, { tint: metal, solid: false });
   for (let level = 0; level < 3; level++) box('wall', 722 + level, 748 - level, 5 + level * 4, 9 + level * 4, -17 + level, 6 - level, { tint: [.73, .78, .77], solid: false });
-  for (let i = 0; i < 5; i++) container(728 + (i % 2) * 7, 30 + Math.floor(i / 2) * 16, colors[i % 4], 5.5);
+  for (let i = 0; i < 12; i++) container(728 + (i % 3) * 5, 23 + Math.floor(i / 3) * 16, colors[i % 4], 5.5);
+  for (const x of [718.8,751.2]) {
+    b.deco('metal',x-.08,x+.08,2.8,3.2,-17,80,{tint:[.73,.73,.64]});
+    for(const z of [0,12,24,36,48,60,72]) {
+      const ring=new THREE.TorusGeometry(.35,.065,4,10).rotateY(Math.PI/2);
+      mesh('metal',ring,x,1.8,z,0,{tint:[.12,.15,.17]});ring.dispose();
+    }
+  }
   beam([734, 17, -10], [734, 33, -10], .14); beam([724, 28, -10], [745, 28, -10], .07);
   for (const x of [723, 747]) for (let z = 8; z < 88; z += 5) {
     beam([x, 5.5, z], [x, 6.6, z], .035);
@@ -384,11 +504,25 @@ export function buildMap(scene, mats, solid, PL, A, world) {
     mesh('concrete', g, 684, -1.2, z, 0, { tint: [.64, .67, .66] });
     g.rotateX(Math.PI / 2); mesh('concrete', g, 684, -1.2, z, 0, { tint: [.62, .65, .64] }); g.dispose();
   }
+  for (const [x,z] of [[574,-290],[573,145],[620,-380],[620,240]]) {
+    pipe(x,0,z,.2,18,'metal',[.66,.68,.65]);
+    box('concrete',x-.65,x+.65,0,.7,z-.65,z+.65);
+    beam([x-2,18,z],[x+2,18,z],.09);
+    for(const dx of [-1.5,-.5,.5,1.5]) {
+      b.deco('metal',x+dx-.35,x+dx+.35,17.8,18.3,z-.4,z+.35,{tint:metal});
+      b.deco('portGlass',x+dx-.28,x+dx+.28,17.88,18.23,z+.351,z+.36,{tint:[1.3,1.4,1.25]});
+    }
+  }
+  // 海堤的分段壓頂與潮線，遠看也能區分乾燥作業坪和濕潤岸壁。
+  for(let z=-585;z<315;z+=8) {
+    b.deco('concrete',678.6,680.2,.82,1.02,z,z+7.92,{tint:[.69,.7,.64]});
+    b.deco('concrete',679.99,680.02,-1.8,-.35,z,z+7.92,{tint:[.31,.38,.33],shade:()=>1});
+  }
   for (const [x, z] of [[560, -340], [640, -320], [540, -130], [558, 132], [555, -420]]) {
     const g = new THREE.CylinderGeometry(1, 1.8, 3.4, 6); mesh('concrete', g, x, 1.7, z, 0, { tint: [.68, .66, .6] }); g.dispose();
     solid.add({ x0: x - 1.8, x1: x + 1.8, y0: 0, y1: 3.4, z0: z - 1.8, z1: z + 1.8, mat: 'concrete' });
   }
-  for (const z of [-360, -335, -295]) for (const x of [550, 650]) {
+  for (const z of [-360, -335, -295]) for (const x of (z===-360?[650]:[550,650])) {
     box('concrete', x - 4, x + 4, 0, 2.4, z - 1.2, z + 1.2, { tint: [.63, .65, .6] });
     beam([x - 2, 0, z - 1], [x + 2, 3, z + 1], .23, 'rust'); beam([x + 2, 0, z - 1], [x - 2, 3, z + 1], .23, 'rust');
   }

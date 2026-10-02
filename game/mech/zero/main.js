@@ -180,8 +180,10 @@ const G = {
   },
 };
 window.__G = G; window.__S = S;   // 測試用
+const footOps = campaign ? await import('../lastline/foot-ops.js') : null;
+const rescuedCrew=[];
 // 測試用：看目前章節、已清的段落
-window.__flow = { get chapter() { return chapter; }, get done() { return [...done]; }, get active() { return active.map((a) => a.E.id); }, get mech() { return !!mechWalk; } };
+window.__flow = { get chapter() { return chapter; }, get done() { return [...done]; }, get active() { return active.map((a) => a.E.id); }, get operations() { return active.filter(a=>a.operation).map(a=>({id:a.E.id,operation:a.operation})); }, get mech() { return !!mechWalk; } };
 // 可破壞的道具：地圖建好時登記的全部接上
 const D = (G.destruct = new Destruct(G));
 for (const r of placer.reg) D.register(r.name, r.h, r.box);
@@ -282,6 +284,8 @@ function updateGrenades(dt) {
   }
 }
 function clearEnemies() {
+  for(const a of active)a.operation?.dispose();
+  for(const o of rescuedCrew)o.dispose();rescuedCrew.length=0;
   for (const e of G.enemies) e.dispose();
   for (const g of G.grenades) scene.remove(g.m);
   for (const L of G.loot) scene.remove(L.m); G.loot.length = 0;
@@ -294,12 +298,13 @@ function spawn(def) {
 const doneT = {};   // 每段清完的時間（after＋wait 用）
 function markDone(id, old = false) { done.add(id); doneT[id] = old ? -1e9 : campaign ? G.t : performance.now() / 1000; }   // old＝讀檔／選關還原的，不必再等 wait
 function startEncounter(E) {
+  if(E.operation?.kind==='escort'){for(const o of rescuedCrew)o.dispose();rescuedCrew.length=0;}
   const list = E.enemies.map(spawn);
   // hold＝守住幾秒（期間一波波增援）；stealth＝別被發現（被發現就叫增援）；targets＝要炸掉的東西；pickups＝要撿的東西（全部都要做完、敵人全倒才算清完）
   const tg = E.targets ? E.targets.map((id) => map.targets[id] && map.targets[id].obj).filter(Boolean) : null;
   // 已經撿過的東西（死掉重來時）算數，不用再撿一次（模型也已經收起來了）
   const got = new Set((E.pickups || []).map((P, i) => (pickedItems.has(P.id) ? i : -1)).filter((i) => i >= 0));
-  active.push({ E, list, picked: false, t0: G.t, n: list.length, holdT: 0, wave: 0, spotted: false, tg, got, beats: new Set() });
+  active.push({ E, list, operation:E.operation&&footOps?footOps.createFootOperation(E,G,input):null, picked: false, t0: G.t, n: list.length, holdT: 0, wave: 0, pressure:0, spotted: false, tg, got, beats: new Set() });
   for (const [who, text, now] of E.lines) hud.say(who, text, 3.6, now);
   if (E.lines.length) audio.radio('in');
   G.objText = list.length ? E.fight || '擊倒所有敵人' : E.obj;   // 開打後改成「要打誰」，不要還寫著「爬上高架道路」
@@ -309,17 +314,19 @@ function startEncounter(E) {
 // 這一段做完了沒：守的時間到、目標都炸掉、東西都撿了、敵人全倒
 function encDone(a) {
   const E = a.E;
+  if(a.operation&&!a.operation.done)return false;
   if (E.hold && a.holdT < E.hold.t) return false;
   if (E.pickup && !a.picked) return false;
   if (E.pickups && a.got.size < E.pickups.length) return false;
   if (a.tg && a.tg.some((o) => o.alive)) return false;
-  return a.list.every((e) => e.dead);
+  return E.operation?.bypass || a.list.every((e) => e.dead);
 }
 // 任務進行中：守點的計時與增援、潛行被發現、炸掉目標、撿東西（按 E）
 const mm = (t) => `${Math.floor(t / 60)}:${String(Math.floor(t % 60)).padStart(2, '0')}`;
 const pickedItems = new Set();   // 這一章撿過的東西（map.items 的 id）
 function updateMissions(dt) {
   hud.pins.length = 0;
+  for(let i=rescuedCrew.length-1;i>=0;i--){const o=rescuedCrew[i],p=o.task.pos;if(Math.hypot(player.pos.x-p[0],player.pos.z-p[1])>30){o.dispose();rescuedCrew.splice(i,1);}else o.update(dt);}
   for (const a of active) {
     const E = a.E;
     for (let i = 0; i < (E.beats || []).length; i++) {
@@ -365,6 +372,11 @@ function updateMissions(dt) {
           if (P.lines) for (const [w, t, now] of P.lines) hud.say(w, t, 3.4, now);
         }
       });
+    }
+    a.operation?.update(dt);
+    if(E.pressure&&a.operation&&!a.operation.done){
+      const due=Math.min(E.pressure.list.length,Math.floor(a.operation.task.time/E.pressure.gap));
+      if(a.pressure<due&&G.enemies.filter(e=>!e.dead).length<5){a.list.push(spawn({alert:true,...E.pressure.list[a.pressure++]}));hud.note('裝卸門增援・守住配電箱','#ff6a55');}
     }
   }
 }
@@ -484,6 +496,9 @@ function updateEncounters() {
   for (const a of [...active]) {
     if (!encDone(a)) continue;
     active.splice(active.indexOf(a), 1);
+    a.operation?.complete();
+    if(a.operation?.crew.length)rescuedCrew.push(a.operation);else a.operation?.dispose();
+    if(a.E.operation?.bypass)for(const e of a.list){e.dispose();const i=G.enemies.indexOf(e);if(i>=0)G.enemies.splice(i,1);}
     markDone(a.E.id);
     for (const [w, t, now] of a.E.done) hud.say(w, t, 3.6, now);
     if (a.E.done.length) audio.radio('in');
@@ -514,6 +529,7 @@ function updateFoes() {
   hud.foes.length = 0; G.objSub = '';
   const a = active[0]; if (!a) return;
   const E = a.E, left = a.list.filter((e) => !e.dead), sub = [];
+  if(a.operation)sub.push(a.operation.status);
   if (E.hold) sub.push(a.holdT < E.hold.t ? `撐住 ${mm(E.hold.t - a.holdT)}` : '時間到　清掉剩下的');
   if (E.stealth && !a.spotted) sub.push('別被發現');
   if (a.tg) sub.push(`${E.tgName || '目標'} ${a.tg.filter((o) => !o.alive).length}/${a.tg.length}`);
@@ -932,6 +948,7 @@ function begin(n) {
   }
   startChapter(n);
   if (campaign) {
+    if(n===1&&!resumeSave)writeSave('operations',{});
     const saved = resumeSave ? readSave('checkpoint') : null, foot = saved?.chapter === n ? saved.foot : null;
     const ids = new Set(S.ENCOUNTERS.filter(e => e.ch <= n).map(e => e.id));
     if (foot && foot.layout === S.LAYOUT && Array.isArray(foot.p) && foot.p.length === 3 && foot.p.every(Number.isFinite) && Math.max(Math.abs(foot.p[0]), Math.abs(foot.p[2])) < (S.FOOT_EXTENT || 140) && foot.p[1] >= 0 && foot.p[1] < 40 && Number.isFinite(foot.yaw) && Array.isArray(foot.done) && foot.done.every(id => ids.has(id))) {

@@ -101,7 +101,7 @@ export async function startMech(X) {
   keys.style.cssText = 'position:fixed;right:24px;top:56%;z-index:7;pointer-events:none;font:500 13px/1.9 "Noto Sans TC",sans-serif;color:#cfe6ec;background:rgba(6,12,16,0.55);padding:10px 16px;border-right:2px solid #7ff3ff;transition:opacity 1.2s';
   keys.innerHTML = M6.keys.map(([k, t]) => `<div><b style="color:#7ff3ff;display:inline-block;min-width:92px">${k}</b>${t}</div>`).join('');
   if (!input.touch.on) document.body.appendChild(keys);
-  for (const [id, t] of M6.touch) { const b = $(id); if (b) b.textContent = t; }
+  for (const [id, t] of M6.touch) { const b = $(id); if (b) { b.textContent = t; if(id==='tSupport') b.style.display='flex'; } }
   const nb = $('tNade'); if (nb) nb.style.display = 'none';
 
   // ---------------------------------------------------------------- 自機
@@ -265,6 +265,7 @@ export async function startMech(X) {
     Object.defineProperty(C, 'def', { value: DEF });
     world.blocked = BLOCK;   // Combat 開場會把路障清掉（setRoute），這裡再封一次
     C.spawnGroup = spawnGroup;
+    C.canAdvance = () => !mission || mission.waveComplete;
     C.missionRetry = restart;
     const say = C.say.bind(C);
     C.say = (text, sub, t, color) => (text === 'STAGE CLEAR' || text === 'ALL CLEAR' ? say(M6.clear[0], M6.clear[1], 4, 'am') : say(text, sub, t, color));

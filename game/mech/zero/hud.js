@@ -42,13 +42,14 @@ export class HUD {
     x.clearRect(0, 0, W, H);
     if (!G || !G.playing) { this._subs(dt, W, H); this._banner(dt, W, H); return; }
     const vm = G.vm, P = G.player, cx = W / 2, cy = H / 2;
+    this.clearAim = vm.cur === 'smg' && vm.ads > .5 ? Math.min(W,H)*.09 : 0;
     // ---- 狙擊鏡
     if (vm.scoped) this._scope(W, H, G);
     // ---- 準心（依散布張開）
     else if (!P.dead) {
       const W0 = vm.W, spread = vm.spreadNow ?? THREE.MathUtils.lerp(W0.spread * (1 + P.moveK * 0.8 + (P.grounded ? 0 : 1.5)), W0.adsSpread, vm.ads);   // 跟子彈用同一個散布（連射會張開）
       const px = spread / Math.tan(THREE.MathUtils.degToRad(this.cam.fov / 2)) * (H / 2) + 4 + vm.kick.z * 2;
-      const a = 1 - vm.ads * 0.85 - P.sprintK;
+      const a = 1 - vm.ads * (vm.cur === 'smg' ? 1 : 0.85) - P.sprintK;
       if (a > 0.05) {
         x.globalAlpha = clamp(a, 0, 1);
         x.strokeStyle = 'rgba(230,250,255,0.9)'; x.lineWidth = 1.5; x.shadowColor = 'rgba(0,0,0,0.6)'; x.shadowBlur = 3;
@@ -58,8 +59,12 @@ export class HUD {
         x.fillStyle = 'rgba(230,250,255,0.9)'; x.fillRect(cx - 1, cy - 1, 2, 2);
         x.shadowBlur = 0; x.globalAlpha = 1;
       }
-      // 手槍與衝鋒槍舉槍時：小點
-      if (vm.cur !== 'rifle' && vm.ads > 0.5) { x.fillStyle = 'rgba(127,243,255,0.9)'; x.fillRect(cx - 1.5, cy - 1.5, 3, 3); }
+      // 衝鋒槍的反射瞄點對準實際射線；黑邊在亮天空和暗室內都能辨識。
+      if (vm.cur === 'smg' && vm.ads > .5 && !vm.busy && P.sprintK < .35) {
+        x.globalAlpha = clamp((vm.ads - .5) * 2, 0, 1);
+        x.beginPath(); x.arc(cx,cy,2.2,0,Math.PI*2); x.fillStyle='rgba(18,13,9,.85)'; x.fill();
+        x.beginPath(); x.arc(cx,cy,1.2,0,Math.PI*2); x.fillStyle='#ffb568'; x.fill(); x.globalAlpha=1;
+      } else if (vm.cur === 'pistol' && vm.ads > .5) { x.fillStyle = 'rgba(127,243,255,0.9)'; x.fillRect(cx - 1.5, cy - 1.5, 3, 3); }
     }
     // ---- 被打到的敵人頭上的血條
     if (G.enemies) this._bars(dt, W, H, G);
@@ -185,6 +190,7 @@ export class HUD {
     const v = p.clone().project(this.cam);
     const behind = v.z > 1;
     let sx = (v.x * 0.5 + 0.5) * W, sy = (-v.y * 0.5 + 0.5) * H;
+    if (!behind && Math.hypot(sx-W/2,sy-H/2) < this.clearAim) return;
     if (behind) { sx = W - sx; sy = H - sy; }
     const m = 56, cx = W / 2, cy = H / 2;
     const off = behind || sx < m || sx > W - m || sy < m || sy > H - m;

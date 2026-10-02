@@ -9,6 +9,7 @@ import * as PR from './props.js';
 import { facade, FLOOR } from './models.js';
 import { shopMaterial, shopUV } from '../urban.js';
 import { roofline } from '../roofline.js';
+import { streetfront } from '../streetfront.js';
 
 const H1 = 3.4;   // 一層樓高
 
@@ -200,6 +201,11 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
       }
     }
     if (o.shop) {
+      streetfront(a0,a1,asian,(lo,hi,y0,y1,d0,d1,col)=>{
+        const p=fix+out*d0,q=fix+out*d1,mat=col[4]===2?'metal':'concrete',opts={tint:col.slice(0,3)};
+        if(along)b.deco(mat,lo,hi,y0,y1,Math.min(p,q),Math.max(p,q),opts);
+        else b.deco(mat,Math.min(p,q),Math.max(p,q),y0,y1,lo,hi,opts);
+      });
       // 少量有弧度的布棚；紋理、材質及幾何桶都已載入，沒有額外燈光。
       const count = Math.min(2, Math.floor((a1 - a0) / 8));
       for (let i = 0; i < count; i++) {

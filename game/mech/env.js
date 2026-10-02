@@ -6,6 +6,7 @@ import { mergeGeometries, mergeVertices } from 'three/addons/utils/BufferGeometr
 import { makeFacade, FACADE_TILE } from './textures.js';
 import { shopMaterial, shopUV } from './urban.js';
 import { roofline } from './roofline.js';
+import { streetfront } from './streetfront.js';
 import { BATTLEFIELDS, fieldHeight, fieldLayout, routeDistance, fieldGridCoordinate, fieldGridIndex } from './battlefields.js';
 
 import { fieldTreeGeometry, fieldShrubGeometry, fieldRockGeometry, fieldArchitecture, fieldLeafMaterial, fieldRadar, fieldGroundMask } from './fieldart.js';
@@ -621,6 +622,7 @@ function architecture(B, signs, x0, x1, z0, z1, H, style, F, district, roofTop, 
     };
     // 每面最多三個店面：真正的拱圈、玻璃、門框與遮陽棚，併在既有屋頂桶。
     const shops = Math.min(3, Math.floor((a1 - a0 - 2) / 7));
+    if (style >= 2 && H < 32 && shops) streetfront(a0, a1, asian, box);
     for (let i = 0; i < shops; i++) {
       const a = a0 + (a1 - a0) * (i + 0.5) / shops, rad = 1.35;
       const arch = !asian && (style === 2 || style === 4);
@@ -629,6 +631,12 @@ function architecture(B, signs, x0, x1, z0, z1, H, style, F, district, roofTop, 
       box(a - rad - 0.14, a - rad, 0.65, y, 0.03, 0.23, stone);
       box(a + rad, a + rad + 0.14, 0.65, y, 0.03, 0.23, stone);
       box(a - 0.03, a + 0.03, 0.7, y, 0.04, 0.13, steel);
+      // 門檻、橫框與分離把手，在街層產生實際側光，不是照片上的線。
+      if(H<45) {
+        box(a-rad,a+rad,.65,.72,.04,.3,stone);
+        box(a-rad,a+rad,1.98,2.04,.04,.15,steel);
+        box(a+.09,a+.13,1.05,1.42,.15,.22,steel);
+      }
       if (arch) {
         for (let k = 0; k < 8; k++) {
           const t0 = k * Math.PI / 8, t1 = (k + 1) * Math.PI / 8;
@@ -637,9 +645,14 @@ function architecture(B, signs, x0, x1, z0, z1, H, style, F, district, roofTop, 
           face([p(rad, t0, 0.24), p(rad + 0.18, t0, 0.24), p(rad + 0.18, t1, 0.24), p(rad, t1, 0.24)], stone);
         }
         if (i === 1) {
-          const cloth = [0.16, 0.25, 0.22, 0, 5];
-          face([point(a - 1.7, 3.35, 0.1), point(a + 1.7, 3.35, 0.1), point(a + 1.7, 3.0, 1.35), point(a - 1.7, 3.0, 1.35)], cloth);
-          box(a - 1.7, a + 1.7, 2.8, 3.0, 1.3, 1.35, cloth);
+          for (let stripe=0;stripe<8;stripe++) {
+            const lo=a-1.7+stripe*.425,hi=lo+.425,cloth=stripe%2?[.75,.7,.58,0,5]:[.16,.25,.22,0,5];
+            for(let k=0;k<3;k++) {
+              const t0=k/3,t1=(k+1)/3;
+              face([point(lo,3.4-.46*t0*t0,.1+1.25*t0),point(hi,3.4-.46*t0*t0,.1+1.25*t0),point(hi,3.4-.46*t1*t1,.1+1.25*t1),point(lo,3.4-.46*t1*t1,.1+1.25*t1)],cloth);
+            }
+            face([point(lo,2.78,1.35),point(hi,2.78,1.35),point(hi,2.94,1.35),point(lo,2.94,1.35)],cloth);
+          }
         }
       } else box(a - rad, a + rad, y, y + 0.12, 0.03, 0.23, steel);
       if (asian) {
