@@ -56,6 +56,22 @@ export function createMarchBot({ skill = 'expert', seed = 7 } = {}) {
       goal = toPx(entry.x, entry.z - 2);
       const close = nearest(fighters);
       if (close && dist(close, hero) < 120) target = close;
+    } else if (segment === 0 && march.advance && !march.gates[0].open) {
+      // Push to the end of the street; only swing at what is in the way.
+      const close = nearest(fighters);
+      if (close && dist(close, hero) < 140) target = close;
+      else goal = toPx(0, LEVEL.segments[0].minZ + 1.5);
+    } else if (segment === 1 && march.beacons && !march.gates[1].open) {
+      // Stand in the nearest unlit beacon and fight whatever comes close.
+      // Finish the most advanced beacon first (nearest on ties) instead of wandering between them.
+      const unlit = march.view().beacons.filter(beacon => !beacon.lit);
+      const beacon = unlit.reduce((best, b) => !best || b.progress > best.progress + 0.05 || Math.abs(b.progress - best.progress) <= 0.05 && dist(b, hero) < dist(best, hero) ? b : best, null);
+      const close = nearest(fighters);
+      if (close && dist(close, hero) < 120) target = close;   // cut through anyone in the way
+      else if (beacon && dist(beacon, hero) > beacon.radius * 60 * 0.6) goal = beacon;
+      else if (close && dist(close, hero) < 170) target = close;
+      else if (beacon) goal = beacon;
+      else target = close;
     } else if ((segment === 1 || segment === 2 && march.siege) && live.some(enemy => enemy.kind === 'lantern')) {
       // Objective props: lanterns / rifts in the plaza, the city gate on a siege stairway.
       const close = nearest(fighters);
@@ -85,7 +101,10 @@ export function createMarchBot({ skill = 'expert', seed = 7 } = {}) {
     // 1. Dodge out of ground telegraphs and enemy tells that are about to land.
     const canDodge = hero.dodgeCooldown <= 0 && hero.action !== 'dodge' && hero.action !== 'special';
     if (canDodge) {
+      // With the way forward open and health to spare, run through archer lines instead of side-stepping forever.
+      const pushOn = march.gates[march.segmentIndex]?.open && hero.hp > hero.maxHp * 0.4;
       for (const hazard of march.hazards) {
+        if (pushOn && hazard.shape !== 'circle') continue;
         const left = hazard.until - march.time;
         if (left < 0 || left > 0.3 || !insideHazard(hazard, hero, 25) || !willDodge(`h${hazard.id}`)) continue;
         const away = hazard.shape === 'circle' ? Math.atan2(hero.y - hazard.y, hero.x - hazard.x) : hazard.facing + Math.PI / 2;

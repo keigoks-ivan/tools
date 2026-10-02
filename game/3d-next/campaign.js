@@ -1,4 +1,4 @@
-import { TUNING } from './march.js?v=20261002y';
+import { TUNING } from './march.js?v=20261003a';
 
 // Chapters share collision and objective rules; the final two have separate sets.
 export const CHAPTERS = [
@@ -7,8 +7,10 @@ export const CHAPTERS = [
   { id: 'ember', name: '赤月圍城', intro: '赤月下的盾兵與弓手封鎖街道，先破防再突圍。', boss: '赤月鎮將',
     background: 0x28121a, fog: 0x351a23, moon: 0xffbc91, rim: 0xe75c46, tint: 0xffd2b1, environment: 'ember', segments: ['城外市街', '甕城廣場', '城門坡道', '城樓之上'],
     tuning: {
-      market: { goal: 100, runnerShare: 0.15, groupEvery: 5.5 },
-      plaza: { lanternHp: 360, groupEvery: 5 },
+      // 第 1 段：不用殺滿數量，頂著箭雨衝到街底。第 2 段：站進光圈點燃三座烽火台。第 4 段：魔王戰同時有箭雨。
+      market: { goal: 60, runnerShare: 0.15, groupEvery: 5, advance: true },
+      plaza: { lanternHp: 360, groupEvery: 5.5, groupSize: 3, beacons: { radius: 2.4, fillSeconds: 10, drain: 0.05 } },
+      volleys: { first: 2.5, every: { 0: 3.0, 3: 6.5 }, count: { 0: 2, 3: 1 }, radius: 2.3, telegraph: 1.1, damage: 10 },
       // 第 3 段：打爛城門（城門算道具，多人時血量不加乘），弓手從兩側射。
       stairs: { mode: 'siege', gateName: '赤月城門', gateHp: 640, holdSeconds: 90, lampHp: 50 },
       specials: { first: 8, every: 10, maxAlive: 3, mix: [['shield', 'archer'], ['shield', 'archer'], ['archer', 'archer', 'shield'], ['shield', 'archer']] },

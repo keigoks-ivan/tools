@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone } from 'three/addons/utils/SkeletonUtils.js';
-import { toonVroidHero } from './battle.js?v=20261002y';
+import { toonVroidHero } from './battle.js?v=20261003a';
 import { createHeroEquipment } from './hero-equipment.js?v=20261002w';
 import { createGreatswordClips, createDualBladeClips, createArcherClips, createComboPreview } from './hero-motion.js?v=20261002w';
 import { HEROES } from './heroes.js?v=20261002w';

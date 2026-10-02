@@ -279,6 +279,8 @@ export class MarchDirector {
     this.brokenProps = new Set();
     this.nextPickupId = 1;
     this.nextHazardId = 1;
+    this.impacts = [];
+    this.nextVolleyAt = Infinity;
     this.gates = LEVEL.gates.map(gate => ({ ...gate, open: false }));
     this.combo = 0;
     this.maxCombo = 0;
@@ -304,6 +306,14 @@ export class MarchDirector {
   get siege() { return this.tuning.stairs.mode === 'siege'; }
   /** Market objective: a kill count (default), or chase a fleeing foe when tuning.market.chase is set. */
   get chase() { return this.tuning.market.chase || null; }
+  /** Market objective: reach the far end of the street (under arrow volleys) instead of a kill count. */
+  get advance() { return this.tuning.market.advance || null; }
+  /** Plaza objective: light beacons by standing in their circles instead of breaking lanterns. */
+  get beacons() { return this.tuning.plaza.beacons || null; }
+  /** Heroes on the field (co-op overrides this on the host with the teammates who are up). */
+  teamHeroes() { return [this.arena.hero]; }
+  /** Damage one hero from a non-enemy source (co-op routes teammates through the relay). */
+  _hurtTeamHero(hero, damage, source) { if (hero === this.arena.hero) this.arena.hurtHero(damage, source); }
 
   update(dt, input = {}) {
     if (this.state !== 'play') return this.hud();
@@ -316,6 +326,7 @@ export class MarchDirector {
       this.time += step;
       this._constrain();
       this._tickSegment(step);
+      if (this.tuning.volleys) this._tickVolleys();
       if (this.tuning.specials) this._tickSpecials();
       if (this.tuning.captains) this._tickCaptains();
       this._tickExternal(step);
@@ -381,6 +392,11 @@ export class MarchDirector {
         return { index, ...toPx(lantern.x, lantern.z), hp, maxHp: this.tuning.plaza.lanternHp, broken: hp <= 0, enemyId: unit?.id ?? null };
       }) : this.objectiveSpots.map((lantern, index) => ({ index, ...toPx(lantern.x, lantern.z), hp: this.tuning.plaza.lanternHp, maxHp: this.tuning.plaza.lanternHp, broken: false, enemyId: null })),
       lamp: { ...toPx(LEVEL.lamp.x, LEVEL.lamp.z), hidden: this.siege, ...(this.segmentIndex === 2 ? { hp: seg.lamp.hp, maxHp: seg.lamp.maxHp, down: seg.lamp.down > 0, secured: seg.secured } : { hp: 1, maxHp: 1, down: false, secured: this.segmentIndex > 2 }) },
+      beacons: this.beacons ? this.objectiveSpots.map((spot, index) => {
+        const b = this.segmentIndex === 1 ? seg.beacons?.[index] : null;
+        return { index, ...toPx(spot.x, spot.z), radius: this.beacons.radius, progress: b ? b.progress : this.segmentIndex > 1 ? 1 : 0, lit: b ? b.lit : this.segmentIndex > 1 };
+      }) : null,
+      impacts: this.impacts.filter(impact => this.time - impact.at < 1.6).map(impact => ({ ...impact, age: this.time - impact.at })),
       siegeGate: this.siege ? (() => {
         const t = this.tuning.stairs, unit = this.segmentIndex === 2 ? this.units.get(seg.gateId) : null;
         const hp = this.segmentIndex < 2 ? t.gateHp : unit ? unit.hp : 0;
@@ -447,9 +463,13 @@ export class MarchDirector {
     if (this.state === 'clear') return '夜市重歸寧靜';
     if (this.state === 'dead') return '重新集結';
     if (this.gates[i]?.open) return `前進：${this.tuning.segmentNames?.[i + 1] || LEVEL.segments[i + 1].name}`;
+    if (i === 0 && this.advance) {
+      const front = Math.min(...this.teamHeroes().map(hero => toWorld(hero.x, hero.y).z));
+      return `頂著箭雨衝到街底（還有 ${Math.max(0, Math.ceil(front - (LEVEL.segments[0].minZ + 3)))} 公尺）`;
+    }
     if (i === 0 && this.chase) return `追上${this.chase.name}（${Math.min(seg.escapes | 0, 2)}／2 次脫逃）`;
     if (i === 0) return seg.kills >= this.tuning.market.goal && this.tuning.officers.market ? `擊倒敵將 ${this.tuning.officers.market.name}` : `擊倒妖兵 ${Math.min(seg.kills, this.tuning.market.goal)}／${this.tuning.market.goal}`;
-    const spots = this.objectiveSpots.length, verb = this.tuning.plaza.verb || '打破妖燈';
+    const spots = this.objectiveSpots.length, verb = this.beacons ? '點燃烽火台' : this.tuning.plaza.verb || '打破妖燈';
     if (i === 1 && seg.broken < spots) return `${verb} ${seg.broken}／${spots}`;
     if (i === 1) return seg.officersLeft > 1 ? `擊倒敵將（剩 ${seg.officersLeft} 名）` : `擊倒敵將 ${this.tuning.officers[(this.tuning.plaza.officers || ['red'])[0]].name}`;
     if (i === 2 && this.siege) return seg.secured ? `擊倒敵將 ${this.tuning.officers.shadow.name}` : `打破${this.tuning.stairs.gateName}`;
@@ -484,6 +504,8 @@ export class MarchDirector {
       this._emit('heal', { x: hero.x, y: hero.y, amount: heal });
     }
     this._emit('segment', { index, id: segment.id, name: segment.name, heal, x: hero.x, y: hero.y });
+    const volleys = this.tuning.volleys;
+    this.nextVolleyAt = volleys && volleys.every[index] ? this.time + volleys.first : Infinity;
     LAYOUT.breakables.forEach((spot, breakIndex) => {
       if (spot.segment !== index || this.brokenProps.has(breakIndex)) return;
       this._spawnUnit('breakable', spot.x, spot.z, {
@@ -493,17 +515,22 @@ export class MarchDirector {
     });
     if (index === 0) {
       this.seg = { kills: 0, spawned: 0, nextGroupAt: this.time + 1.2, hints: 0, officerAt: null, foeId: null, escapes: 0, chaseAt: this.chase ? this.time + 2 : null };
-      this._say(this.chase ? `${this.chase.name}就在前面，追上去！` : '輕攻擊：J（攻）連按打出五連斬', 5);
+      this._say(this.chase ? `${this.chase.name}就在前面，追上去！` : this.advance ? '城牆上的弓手在放箭！地上紅圈亮起就閃開，一路衝到街底' : '輕攻擊：J（攻）連按打出五連斬', 5);
     } else if (index === 1) {
       this.seg = { broken: 0, lanternIds: [], nextSpawnAt: [], officerAt: null, foeId: null, officersLeft: 0 };
-      this.objectiveSpots.forEach((lantern, i) => {
+      if (this.beacons) {
+        // Beacons: no props to break; groups keep coming at each unlit beacon. seg.broken counts lit beacons.
+        this.seg.beacons = this.objectiveSpots.map(() => ({ progress: 0, lit: false }));
+        this.seg.nextSpawnAt = this.objectiveSpots.map((_, i) => this.time + 1.5 + i * 2);
+        this._say(`站進烽火台的光圈裡點燃它，${this.objectiveSpots.length} 座都點亮才能前進`, 4);
+      } else this.objectiveSpots.forEach((lantern, i) => {
         const unit = this._spawnUnit('lantern', lantern.x, lantern.z, {
           hp: this.tuning.plaza.lanternHp, ai: 'external', fixed: true, prop: true, kind: 'lantern', lanternIndex: i, action: 'idle', range: 0, cooldown: 0,
         });
         this.seg.lanternIds.push(unit.id);
         this.seg.nextSpawnAt.push(this.time + 1.5 + i * 2);
       });
-      this._say(this.tuning.plaza.intro || '打破三盞妖燈，燈不滅，妖兵不停', 4);
+      if (!this.beacons) this._say(this.tuning.plaza.intro || '打破三盞妖燈，燈不滅，妖兵不停', 4);
     } else if (index === 2) {
       const t = this.tuning.stairs;
       this.seg = { lamp: { hp: t.lampHp, maxHp: t.lampHp, down: 0 }, timer: t.holdSeconds, secured: false, nextWaveAt: this.time + 1.5, nextTopAt: this.time + t.topGroupEvery, side: this._rand() < 0.5 ? 'left' : 'right', officerAt: null, foeId: null, breaks: 0 };
@@ -632,7 +659,7 @@ export class MarchDirector {
       if (seg.kills === 24 && seg.hints === 2) { seg.hints = 3; this._say('打破木箱、酒甕、木桶，裡面有護符、靈燈和魂晶', 5); }
       if (seg.kills === 34 && seg.hints === 3) { seg.hints = 4; this._say('變招：輕攻擊按 1～4 下再接重擊，每種按法都是不同的招', 6); }
       if (seg.kills === 46 && seg.hints === 4) { seg.hints = 5; this._say('閃避完馬上按輕攻擊：轉身反擊「迴身斬」', 5); }
-      if (seg.kills >= this.tuning.market.goal) {
+      if (seg.kills >= this.tuning.market.goal && !this.advance) {
         if (this.tuning.officers.market) { if (seg.officerAt === null && !seg.foeId) seg.officerAt = this.time + 1; }
         else this._openGate(0);
       }
@@ -688,6 +715,8 @@ export class MarchDirector {
     const region = this._region();
     const solids = [];
     if (region.some(s => s.id === 'plaza')) solids.push(LEVEL.fountain);
+    // Beacon pedestals stand in the middle of their circles.
+    if (this.beacons && region.some(s => s.id === 'plaza')) for (const spot of this.objectiveSpots) solids.push({ x: spot.x, z: spot.z, r: 0.55 });
     if (region.some(s => s.id === 'stairs') && !this.siege) solids.push(LEVEL.lamp);
     const fix = body => {
       let p = clampToRegion(region, toWorld(body.x, body.y));
@@ -735,6 +764,7 @@ export class MarchDirector {
     if (i === 0 && !this.gates[0].open) {
       const t = this.tuning.market, segment = LEVEL.segments[0];
       if (seg.chaseAt !== null && this.time >= seg.chaseAt) { seg.chaseAt = null; this._spawnChaser(); }
+      if (this.advance && this.teamHeroes().some(hero => toWorld(hero.x, hero.y).z <= segment.minZ + 3)) { this._openGate(0); return; }
       if (seg.officerAt !== null && this.time >= seg.officerAt && (!this.arena.heroProfile || this.room() > 0)) {
         seg.officerAt = null;
         this._spawnOfficer('market', LAYOUT.spawns.officers.market);
@@ -754,6 +784,8 @@ export class MarchDirector {
           seg.nextGroupAt = this.time + t.groupEvery;
         } else seg.nextGroupAt = this.time + 1;
       }
+    } else if (i === 1 && this.beacons) {
+      this._tickBeacons(dt, seg);
     } else if (i === 1) {
       const t = this.tuning.plaza;
       seg.lanternIds.forEach((id, index) => {
@@ -785,6 +817,68 @@ export class MarchDirector {
       }
     } else if (i === 2) {
       this._tickLamp(dt, seg);
+    }
+  }
+
+  /** Beacons fill while a hero stands in the circle (faster with more heroes), drain while only enemies hold it. */
+  _tickBeacons(dt, seg) {
+    const t = this.tuning.plaza, b = this.beacons, r = b.radius * PX_PER_M;
+    const heroes = this.teamHeroes().filter(hero => hero.action !== 'dead' && !hero.downed);
+    this.objectiveSpots.forEach((spot, index) => {
+      const beacon = seg.beacons[index], at = toPx(spot.x, spot.z);
+      if (!beacon.lit) {
+        const inside = heroes.filter(hero => Math.hypot(hero.x - at.x, hero.y - at.y) <= r).length;
+        const foes = this.arena.enemies.some(enemy => !enemy.prop && enemy.action !== 'dead' && Math.hypot(enemy.x - at.x, enemy.y - at.y) <= r);
+        if (inside) beacon.progress = Math.min(1, beacon.progress + dt * (1 + 0.5 * (inside - 1)) / b.fillSeconds);
+        else if (foes) beacon.progress = Math.max(0, beacon.progress - dt * b.drain);
+        if (beacon.progress >= 1) {
+          beacon.lit = true; seg.broken++;
+          this._emit('beaconLit', { index, ...at, lit: seg.broken });
+          this._say(seg.broken < this.objectiveSpots.length ? `烽火點燃 ${seg.broken}／${this.objectiveSpots.length}` : '三座烽火全亮！', 2.5);
+          if (seg.broken === this.objectiveSpots.length) seg.officerAt = this.time + 1.2;
+        }
+      }
+      // Each unlit beacon keeps calling defenders until it burns.
+      if (beacon.lit || this.time < seg.nextSpawnAt[index]) return;
+      const size = Math.min(t.groupSize, this.room());
+      if (size <= 0) { seg.nextSpawnAt[index] = this.time + 1; return; }
+      for (let k = 0; k < size; k++) { const a = k / size * Math.PI * 2 + this.time; this._grunt(spot.x + Math.cos(a) * (b.radius + 1.6), spot.z + Math.sin(a) * (b.radius + 1.6), t.runnerShare); }
+      this._emit('group', { size, side: 0, ...at });
+      seg.nextSpawnAt[index] = this.time + t.groupEvery;
+    });
+    if (seg.officerAt !== null && this.time >= seg.officerAt && (!this.arena.heroProfile || this.room() > 0)) {
+      seg.officerAt = null;
+      seg.foeId = this._spawnOfficer('red', LAYOUT.spawns.officers.red).id;
+      seg.officersLeft = 1;
+    }
+  }
+
+  /** Arrow volleys from the walls: a red circle on (and around) each hero, then arrows land. */
+  _tickVolleys() {
+    const v = this.tuning.volleys;
+    for (const hazard of this.hazards) {
+      if (hazard.attack !== 'volley' || hazard.landed || this.time < hazard.until) continue;
+      hazard.landed = true;
+      for (const hero of this.teamHeroes()) {
+        if (hero.action === 'dead' || hero.downed || Math.hypot(hero.x - hazard.x, hero.y - hazard.y) > hazard.radius + 18) continue;
+        this._hurtTeamHero(hero, v.damage, { id: 0, role: 'volley', facing: 0, ground: true });
+      }
+      this.impacts.push({ x: hazard.x, y: hazard.y, radius: hazard.radius, at: this.time, seed: hazard.id });
+      if (this.impacts.length > 12) this.impacts.shift();
+      this._emit('volley', { x: hazard.x, y: hazard.y, radius: hazard.radius });
+    }
+    if (this.time < this.nextVolleyAt || this.gates[this.segmentIndex]?.open || this.state !== 'play') return;
+    this.nextVolleyAt = this.time + v.every[this.segmentIndex];
+    for (const hero of this.teamHeroes()) {
+      if (hero.action === 'dead' || hero.downed) continue;
+      const w = toWorld(hero.x, hero.y);
+      const count = typeof v.count === 'number' ? v.count : v.count[this.segmentIndex] || 1;
+      for (let k = 0; k < count; k++) {
+        // The first circle leads the hero a little; the rest land nearby so standing still is never safe.
+        const lead = k === 0 ? 1.2 : 2 + this._rand() * 2.5, a = k === 0 ? -Math.PI / 2 : this._rand() * Math.PI * 2;
+        const p = clampToRegion(this._region(), { x: w.x + Math.cos(a) * lead, z: w.z + Math.sin(a) * lead }), px = toPx(p.x, p.z);
+        this._hazard({ shape: 'circle', x: px.x, y: px.y, radius: v.radius * PX_PER_M, until: this.time + v.telegraph, ownerId: 0, attack: 'volley' });
+      }
     }
   }
 

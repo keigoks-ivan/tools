@@ -466,7 +466,7 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
   function freshSeg(index) {
     const t = T();
     if (index === 0) return { kills: 0, spawned: 0, nextGroupAt: Infinity, hints: 0, officerAt: null, foeId: null, escapes: 0, chaseAt: null };
-    if (index === 1) return { broken: 0, lanternIds: [], nextSpawnAt: [], officerAt: null, foeId: null, officersLeft: 0 };
+    if (index === 1) return { broken: 0, lanternIds: [], nextSpawnAt: [], officerAt: null, foeId: null, officersLeft: 0, ...(t.plaza.beacons ? { beacons: march.objectiveSpots.map(() => ({ progress: 0, lit: false })) } : {}) };
     if (index === 2) return { lamp: { hp: t.stairs.lampHp, maxHp: t.stairs.lampHp, down: 0 }, timer: t.stairs.holdSeconds, secured: false, nextWaveAt: Infinity, nextTopAt: Infinity, side: 'left', officerAt: null, foeId: null, breaks: 0 };
     return { foeId: null };
   }
@@ -503,6 +503,7 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
     else if (L.segment === 1) {
       seg.broken = L.broken;
       for (const enemy of arena.enemies) if (enemy.kind === 'lantern') seg.lanternIds[enemy.lanternIndex] = enemy.id;
+      if (march.beacons) seg.beacons = march.objectiveSpots.map((_, k) => ({ progress: L.beacons[k] || 0, lit: (L.beacons[k] || 0) >= 1 }));
     } else if (L.segment === 2) {
       Object.assign(seg, { timer: L.timer, secured: L.secured, breaks: L.breaks, lamp: { ...seg.lamp, hp: L.lampHp, down: L.lampDown } });
       // Siege chapters: the city gate is a lantern-type prop with its own index.
@@ -527,6 +528,9 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
     } else if (type === 'kill' || type === 'flee' || type === 'despawn') {
       removePuppet(event.enemyId);
       decoder.known.delete(event.enemyId);
+    } else if (type === 'volley') {
+      march.impacts.push({ x: event.x, y: event.y, radius: event.radius, at: march.time, seed: march.impacts.length });
+      if (march.impacts.length > 12) march.impacts.shift();
     } else if (type === 'breakableBroken') march.brokenProps.add(event.index);
     else if (type === 'hint') { march.hint = event.text; march.hintUntil = march.time + (event.seconds || 4); }
     else if (type === 'bossPhase') { const boss = march.units.get(event.enemyId); if (boss) boss.phase = 2; }
@@ -703,6 +707,8 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
       Object.assign(seg, { nextWaveAt: time + 1.5, nextTopAt: time + t.stairs.topGroupEvery, side: seg.side || 'left' });
       seg.officerAt = seg.secured && !seg.foeId && !gateOpen ? time + 1 : null;
     }
+    // A new host resumes the arrow volleys of this segment.
+    march.nextVolleyAt = t.volleys?.every?.[i] && !gateOpen ? time + 2 : Infinity;
     buffers.clear(); decoder.reset();
     encoder.reset(); epochCount++;
     targets = new Map(); retargetAt = -Infinity; outbox = []; dmBox = [];
@@ -811,6 +817,9 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
         if (role === 'host' && options.hp !== undefined && !options.prop) options = { ...options, hp: scaledHp(options.hp, players()), damage: scaledDamage(options.damage, unitRole, players()) };
         return orig._spawnUnit.call(march, unitRole, wx, wz, options);
       };
+      // Arrow volleys and beacon circles count every hero who is up; teammates take their hits through the relay.
+      march.teamHeroes = () => role === 'host' && multi() ? [arena.hero, ...[...proxies.values()].filter(p => p.alive && !p.downed)] : [arena.hero];
+      march._hurtTeamHero = (hero, damage, source) => { if (!hero.remote) arena.hurtHero(damage, source); else if (hero.invulnerable <= 0) queueDamage(hero, damage, source, true); };
       for (const name of ['_raider', '_lunger', '_fleer']) {
         march[name] = (enemy, dt) => withHero(heroFor(enemy, arena.hero), () => orig[name].call(march, enemy, dt));
       }

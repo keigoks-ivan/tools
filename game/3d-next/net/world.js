@@ -31,7 +31,7 @@ export const FORWARD_EVENTS = new Set([
   'telegraph', 'enemyAttack', 'kill', 'guardBreak', 'segment', 'gateOpen', 'gateClose', 'hint', 'officer', 'officerDown', 'bossDown',
   'bossIntro', 'bossPhase', 'roar', 'bossJump', 'bossSlam', 'bossSweep', 'summon', 'stagger', 'lanternBroken', 'lanternSpawn',
   'breakableBroken', 'lampHit', 'lampBroken', 'lampRestored', 'lampSecured', 'group', 'flee', 'despawn', 'drop', 'pickupLost',
-  'clear', 'groundTelegraph', 'arrow', 'bomberBlast',
+  'clear', 'groundTelegraph', 'arrow', 'bomberBlast', 'volley', 'beaconLit',
 ]);
 
 export function enemyType(enemy) {
@@ -127,7 +127,7 @@ export function levelStatus(march) {
   for (const k of march.brokenProps) broken += 2 ** k;
   const lv = [i, gates, broken, seg.foeId || 0, march.arena.kills];
   if (i === 0) lv.push(seg.kills | 0, seg.spawned | 0, seg.escapes | 0);
-  else if (i === 1) lv.push(seg.broken | 0);
+  else if (i === 1) lv.push(seg.broken | 0, ...(seg.beacons || []).map(b => Math.round(b.progress * 100)));
   else if (i === 2) lv.push(hp10(seg.lamp.hp), Math.round(seg.lamp.down * 10), Math.round(seg.timer * 10), seg.secured ? 1 : 0, seg.breaks | 0);
   return lv;
 }
@@ -140,7 +140,7 @@ export function decodeLevel(lv) {
   for (let k = 0; k < 8; k++) gatesOpen.push(!!(gates & (1 << k)));
   const out = { segment, gatesOpen, brokenProps, foeId: foeId || null, kills };
   if (segment === 0) Object.assign(out, { segKills: a, spawned: b, escapes: c });
-  else if (segment === 1) Object.assign(out, { broken: a });
+  else if (segment === 1) Object.assign(out, { broken: a, beacons: [b, c, d].map(v => v / 100) });
   else if (segment === 2) Object.assign(out, { lampHp: a, lampDown: b / 10, timer: c / 10, secured: !!d, breaks: e });
   return out;
 }

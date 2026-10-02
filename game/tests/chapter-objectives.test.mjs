@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { MarchDirector, SIEGE_GATE, toWorld } from '../3d-next/march.js';
+import { MarchDirector, SIEGE_GATE, toWorld, toPx } from '../3d-next/march.js';
 import { CHAPTERS, chapterTuning } from '../3d-next/campaign.js';
 import { HEROES } from '../3d-next/heroes.js';
 import { levelStatus, decodeLevel, enemyType, recipeFor, TYPES } from '../3d-next/net/world.js';
@@ -73,4 +73,50 @@ test('天闕決戰: three officers enter together and the gate waits for all of 
     march.arena._damageEnemy(officer, 9999, 'heavy'); step(march, 0.2);
     assert.equal(march.gates[1].open, k === 2, `gate after ${k + 1} officers`);
   }
+});
+
+test('赤月圍城 street: no kill count — reaching the far end under arrow volleys opens the gate', () => {
+  const march = director('ember');
+  assert.match(march.hud().objective, /^頂著箭雨衝到街底/);
+  step(march, 3);
+  const volleys = march.hazards.filter(h => h.attack === 'volley');
+  assert.equal(volleys.length, 2, 'two red circles per hero per volley');
+  // Standing in a circle when it lands hurts; the arrows stay stuck for the renderer.
+  const hero = march.arena.hero, hp = hero.hp;
+  Object.assign(hero, { x: volleys[0].x, y: volleys[0].y });
+  step(march, 1.2);
+  assert.ok(hero.hp < hp, 'volley did not hurt'); assert.ok(march.view().impacts.length >= 1);
+  assert.ok(!march.gates[0].open);
+  Object.assign(hero, toPx(0, -28)); step(march, 0.1);
+  assert.ok(march.gates[0].open, 'reaching the end did not open the gate');
+});
+
+test('赤月圍城 plaza: beacons fill while a hero stands in them, drain while only enemies hold them', () => {
+  const march = director('ember'); march.skipTo(1);
+  assert.equal(march.hud().objective, '點燃烽火台 0／3');
+  assert.ok(march.arena.enemies.every(e => e.kind !== 'lantern'), 'no lanterns to break');
+  const spot = march.objectiveSpots[0], hero = march.arena.hero;
+  Object.assign(hero, toPx(spot.x + 1, spot.z)); march.arena.enemies.length = 0; march.units.clear();
+  step(march, 5);
+  const half = march.seg.beacons[0].progress; assert.ok(half > 0.4 && half < 0.6, `progress ${half}`);
+  march.seg.nextSpawnAt = march.seg.nextSpawnAt.map(() => Infinity); march.arena.enemies.length = 0; march.units.clear();
+  Object.assign(hero, toPx(0, -34)); step(march, 1);
+  assert.equal(march.seg.beacons[0].progress, half, 'an empty circle should hold its fill');
+  const guard = march._grunt(spot.x, spot.z, 0); guard.ai = 'external'; step(march, 1);
+  assert.ok(march.seg.beacons[0].progress < half, 'an enemy standing in the circle should drain it');
+  march.arena.enemies.length = 0; march.units.clear();
+  march.seg.beacons[0].progress = half;
+  Object.assign(hero, toPx(spot.x + 1, spot.z)); step(march, 6);
+  assert.ok(march.seg.beacons[0].lit); assert.equal(march.hud().objective, '點燃烽火台 1／3');
+  for (const b of march.seg.beacons.slice(1)) b.progress = 0.999;
+  for (const [k, s] of march.objectiveSpots.slice(1).entries()) { Object.assign(hero, toPx(s.x + 1, s.z)); step(march, 0.3); assert.ok(march.seg.beacons[k + 1].lit); }
+  step(march, 2);
+  assert.ok(march.arena.enemies.some(e => e.kind === 'officer' && e.action !== 'dead'));
+  const lv = decodeLevel(levelStatus(march)); assert.deepEqual(lv.beacons, [1, 1, 1]);
+});
+
+test('赤月圍城 boss fight keeps lighter volleys; other chapters have none', () => {
+  const ember = director('ember'); ember.skipTo(3); step(ember, 3.5);
+  assert.equal(ember.hazards.filter(h => h.attack === 'volley').length, 1);
+  for (const id of ['night', 'rift', 'frost', 'citadel']) { const m = director(id); step(m, 4); assert.ok(!m.hazards.some(h => h.attack === 'volley'), id); }
 });

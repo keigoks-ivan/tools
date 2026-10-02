@@ -3,14 +3,14 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone as cloneSkinned } from 'three/addons/utils/SkeletonUtils.js';
 import { Arena } from '../2d/combat.js?v=20261002j';
 import { heroFor } from './heroes.js?v=20261002w';
-import { Campaign, CHAPTERS, chapterTuning } from './campaign.js?v=20261002y';
+import { Campaign, CHAPTERS, chapterTuning } from './campaign.js?v=20261003a';
 import { createHeroEquipment } from './hero-equipment.js?v=20261002w';
 import { createGreatswordClips, createDualBladeClips, createArcherClips } from './hero-motion.js?v=20261002w';
 import { createArrowFx } from './hero-bow.js?v=20261002w';
 import { createHeroSpecialFx } from './hero-special-fx.js?v=20261002w';
 import { createHeroEnvironment } from './hero-hair.js?v=20261002h';
-import { createChapterWorld } from './chapter-world.js?v=20261002y';
-import { createChapterProps } from './chapter-props.js?v=20261002y';
+import { createChapterWorld } from './chapter-world.js?v=20261003a';
+import { createChapterProps } from './chapter-props.js?v=20261003a';
 import { FramePacer } from '../frame-pacing.js';
 import { createNightMarket } from './world.js';
 import { createOni, prepareRiggedOni, createRiggedOni } from './oni.js';
@@ -44,7 +44,7 @@ let lazyModules = null;
 export function loadLazyModules() {
   if (!lazyModules) {
     lazyModules = Promise.all([
-      marchLevel ? Promise.all([import('./march.js?v=20261002y'), import('./march-art.js?v=20261002y')]) : null,
+      marchLevel ? Promise.all([import('./march.js?v=20261003a'), import('./march-art.js?v=20261003a')]) : null,
       // ?hero=vroid：打擊特效模組（combat-fx.js）；載入失敗時退回下方原本的特效與時間倍率
       heroChoice === 'vroid' ? import('./combat-fx.js?v=20261002w').catch(error => { console.warn('combat-fx failed, using built-in effects', error); return null; }) : null,
     ]).catch(error => { lazyModules = null; throw error; });
@@ -732,6 +732,8 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
     else if (event.type === 'guard') { if (!combatFx) burst(x, z, 0xbfe4ff, 6, 1.1); popText('擋', x, y + 2.1, z, '#cfe8ff'); }
     else if (event.type === 'guardBreak' && !combatFx) { flash(x, z, 0xffd24a, 1.6, 0.4); burst(x, z, 0xffe07a, 20, 1.1); popText('破', x, y + 2.3, z, '#ffd24a'); shake = Math.max(shake, 0.45); }
     else if (event.type === 'sidestep') flash(x, z, 0x9aa4b8, 0.6, 0.2);
+    else if (event.type === 'volley') { flash(x, z, 0xffa060, (event.radius || 140) / 60, 0.22); burst(x, z, 0xc9a07a, 12, 0.15); shake = Math.max(shake, 0.15); }
+    else if (event.type === 'beaconLit') { flash(x, z, 0xffb050, 3, 0.7); burst(x, z, 0xffc070, 28, 1.6); shake = Math.max(shake, 0.3); }
     else if (event.type === 'bossSlam' && !combatFx) { flash(x, z, 0xff5a3c, (event.radius || 180) / 60, 0.5); burst(x, z, 0xffb080, 24, 0.2); shake = Math.max(shake, 0.65); }
     else if (event.type === 'bossSweep' && !combatFx) { flash(x, z, 0xff7050, (event.radius || 216) / 60, 0.4); for (let i = 0; i < 2; i++) crescent(x, z, i * Math.PI, { radius: (event.radius || 216) / 60 * 0.8, life: 0.35, spin: 2.4 }); shake = Math.max(shake, 0.4); }
     else if (event.type === 'arrow') streak(x, z, event.facing || 0, (event.length || 720) / 60);

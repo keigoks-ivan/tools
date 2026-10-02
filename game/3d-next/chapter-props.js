@@ -2,7 +2,7 @@
 // gate (赤月圍城). Driven by march.view() every frame; geometry and materials are built once,
 // each frame only moves meshes and writes a few uniforms.
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { toWorld } from './march.js?v=20261002y';
+import { toWorld } from './march.js?v=20261003a';
 
 const RIFT_VERTEX = 'varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }';
 // A swirling tear: dark violet core, cyan rim, noise-driven spiral arms; fades out as it closes.
@@ -132,6 +132,53 @@ export function createChapterProps(T, scene, { heightAt, world = null }) {
     return { hinge, side, fall: 0 };
   });
 
+  // ---- beacons (赤月圍城 plaza) ----
+  // A stone pedestal with a bronze fire bowl; the flame grows with the fill, and the ground ring
+  // shows progress as an arc. Lit beacons throw a soft column of light.
+  const RING_FRAGMENT = `uniform float progress, time, lit; varying vec2 vUv;
+    void main(){ vec2 p=vUv*2.0-1.0; float r=length(p); float a=atan(p.x,-p.y)/6.2831853+0.5;
+      float band=smoothstep(0.80,0.84,r)*smoothstep(1.0,0.96,r);
+      float fill=step(a,progress);
+      vec3 base=vec3(0.35,0.12,0.06), hot=mix(vec3(1.6,0.55,0.15),vec3(2.2,1.3,0.4),lit);
+      float pulse=0.75+0.25*sin(time*4.0);
+      vec3 col=mix(base,hot*pulse,fill);
+      float inner=smoothstep(0.84,0.2,r)*0.18*(0.3+progress)*pulse;
+      gl_FragColor=vec4(col*band+hot*inner, band*(0.45+0.55*fill)+inner);
+      #include <colorspace_fragment>
+    }`;
+  const ringPlane = keep(new T.PlaneGeometry(2, 2));
+  const pedestalGeometry = keep(new T.LatheGeometry([[0.62, 0], [0.62, 0.12], [0.5, 0.2], [0.42, 0.85], [0.5, 0.95], [0.5, 1.05], [0.36, 1.12], [0, 1.12]].map(([x, y]) => new T.Vector2(x, y)), 18));
+  const bowlGeometry = keep(new T.LatheGeometry([[0.12, 0], [0.42, 0.08], [0.6, 0.26], [0.64, 0.34], [0.58, 0.34], [0.52, 0.26], [0, 0.2]].map(([x, y]) => new T.Vector2(x, y)), 20));
+  const flameGeometry = keep(new T.ConeGeometry(0.42, 1.3, 14, 1, true));
+  const columnGeometry = keep(new T.CylinderGeometry(0.55, 0.9, 7, 20, 1, true));
+  const bronze = keep(new T.MeshStandardMaterial({ color: 0x8a5a2b, roughness: 0.42, metalness: 0.8 }));
+  const flameMaterial = keep(new T.MeshBasicMaterial({ color: 0xffa040, transparent: true, opacity: 0.9, depthWrite: false, blending: T.AdditiveBlending, side: T.DoubleSide }));
+  const columnMaterial = keep(new T.MeshBasicMaterial({ color: 0xff8a3a, transparent: true, opacity: 0, depthWrite: false, blending: T.AdditiveBlending, side: T.DoubleSide }));
+  const beaconSets = Array.from({ length: 3 }, () => {
+    const g = new T.Group(); g.visible = false; group.add(g);
+    const pedestal = new T.Mesh(pedestalGeometry, stone); g.add(pedestal);
+    const bowl = new T.Mesh(bowlGeometry, bronze); bowl.position.y = 1.1; g.add(bowl);
+    const flames = [0, 1, 2].map(k => { const f = new T.Mesh(flameGeometry, flameMaterial); f.position.y = 1.45; f.rotation.y = k * 2.1; g.add(f); return f; });
+    const ringMaterial = keep(new T.ShaderMaterial({ uniforms: { progress: { value: 0 }, time: { value: 0 }, lit: { value: 0 } }, vertexShader: RIFT_VERTEX, fragmentShader: RING_FRAGMENT, transparent: true, depthWrite: false }));
+    const ring = new T.Mesh(ringPlane, ringMaterial); ring.rotation.x = -Math.PI / 2; ring.position.y = 0.05; g.add(ring);
+    const column = new T.Mesh(columnGeometry, columnMaterial.clone()); keep(column.material); column.position.y = 4.6; g.add(column);
+    return { g, flames, ring, ringMaterial, column };
+  });
+
+  // ---- arrow volleys ----
+  // One merged arrow (shaft, head, fletching) drawn as two instanced pools: arrows falling inside a
+  // volley's red circle during its last moments, and arrows left standing in the ground afterwards.
+  const arrowParts = [new T.CylinderGeometry(0.012, 0.012, 0.85, 5), new T.ConeGeometry(0.03, 0.12, 6), new T.PlaneGeometry(0.07, 0.16), new T.PlaneGeometry(0.07, 0.16)];
+  arrowParts[0].translate(0, 0, 0); arrowParts[1].translate(0, -0.48, 0); arrowParts[1].rotateX(Math.PI);
+  arrowParts[2].translate(0, 0.36, 0); arrowParts[3].rotateY(Math.PI / 2); arrowParts[3].translate(0, 0.36, 0);
+  const tint = (g, c) => { const n = g.attributes.position.count, colors = new Float32Array(n * 3); for (let i = 0; i < n; i++) colors.set(c, i * 3); g.setAttribute('color', new T.BufferAttribute(colors, 3)); return g.index ? g.toNonIndexed() : g; };
+  const arrowGeometry = keep(mergeGeometries([tint(arrowParts[0], [0.36, 0.24, 0.16]), tint(arrowParts[1], [0.55, 0.55, 0.6]), tint(arrowParts[2], [0.8, 0.12, 0.1]), tint(arrowParts[3], [0.8, 0.12, 0.1])].map(g => { g.deleteAttribute('uv'); g.deleteAttribute('normal'); g.computeVertexNormals(); return g; })));
+  arrowParts.forEach(g => g.dispose());
+  const arrowMaterial = keep(new T.MeshStandardMaterial({ vertexColors: true, roughness: 0.7, side: T.DoubleSide }));
+  const PER_VOLLEY = 9, falling = new T.InstancedMesh(arrowGeometry, arrowMaterial, 14 * PER_VOLLEY), stuck = new T.InstancedMesh(arrowGeometry, arrowMaterial, 12 * PER_VOLLEY);
+  for (const pool of [falling, stuck]) { pool.frustumCulled = false; pool.count = 0; group.add(pool); }
+  const scatter = (seed, j, radius) => { const a = (seed * 12.9898 + j * 78.233) % 6.2832, r = radius * Math.sqrt(((seed * 3.17 + j * 0.618) % 1 + 1) % 1); return [Math.cos(a * 7.1) * r, Math.sin(a * 7.1) * r, a]; };
+
   let clock = 0, gateShake = 0, lastGateHp = null;
   const place = (object, view) => { const w = toWorld(view.x, view.y); object.position.set(w.x, heightAt(w.x, w.z), w.z); return w; };
 
@@ -173,6 +220,47 @@ export function createChapterProps(T, scene, { heightAt, world = null }) {
       shards.instanceMatrix.needsUpdate = true;
       shards.visible = rift;
 
+      // Beacons
+      beaconSets.forEach((b, i) => {
+        const state = view.beacons && view.segment <= 1 ? view.beacons[i] : null;
+        b.g.visible = !!state;
+        if (!state) return;
+        place(b.g, state);
+        const p = state.progress, lit = state.lit ? 1 : 0;
+        b.ring.scale.setScalar(state.radius);
+        b.ringMaterial.uniforms.progress.value = p; b.ringMaterial.uniforms.time.value = clock + i; b.ringMaterial.uniforms.lit.value = lit;
+        b.flames.forEach((f, k) => {
+          const size = 0.25 + p * 0.75 + lit * 0.5, flick = 1 + Math.sin(clock * (9 + k * 3) + i) * 0.12;
+          f.scale.set(size * (1 - k * 0.18), size * flick * (1.2 - k * 0.2), size * (1 - k * 0.18));
+          f.position.y = 1.4 + f.scale.y * 0.55; f.rotation.y = clock * (0.8 + k * 0.4) + k * 2.1;
+        });
+        b.column.material.opacity = lit * (0.16 + Math.sin(clock * 2 + i) * 0.04);
+      });
+
+      // Arrow volleys: arrows drop through the last 0.4 of each telegraph, then stay stuck for a while.
+      let n = 0;
+      for (const hazard of view.hazards) {
+        if (hazard.attack !== 'volley' || hazard.progress < 0.6 || n >= falling.instanceMatrix.count - PER_VOLLEY) continue;
+        const w = toWorld(hazard.x, hazard.y), y0 = heightAt(w.x, w.z), r = hazard.radius / 60, fall = (hazard.progress - 0.6) / 0.4;
+        for (let j = 0; j < PER_VOLLEY; j++, n++) {
+          const [dx, dz, a] = scatter(hazard.id, j, r * 0.9), stagger = Math.min(1, fall * (1.25 - (j % 3) * 0.1));
+          pos.set(w.x + dx - 0.6 * (1 - stagger), y0 + 0.45 + (1 - stagger) * 9, w.z + dz + 0.9 * (1 - stagger));
+          e.set(0.25, a, 0.1); q.setFromEuler(e); scl.setScalar(0.72);
+          falling.setMatrixAt(n, matrix.compose(pos, q, scl));
+        }
+      }
+      falling.count = n; falling.instanceMatrix.needsUpdate = true;
+      n = 0;
+      for (const impact of view.impacts || []) {
+        const w = toWorld(impact.x, impact.y), y0 = heightAt(w.x, w.z), r = impact.radius / 60, fade = 1 - Math.max(0, (impact.age - 1.1) / 0.5);
+        for (let j = 0; j < PER_VOLLEY && n < stuck.instanceMatrix.count; j++, n++) {
+          const [dx, dz, a] = scatter(impact.seed ?? 0, j, r * 0.9);
+          pos.set(w.x + dx, y0 + 0.22, w.z + dz); e.set(0.25 + (j % 4) * 0.06, a, 0.1); q.setFromEuler(e); scl.setScalar(Math.max(0.001, fade) * 0.72);
+          stuck.setMatrixAt(n, matrix.compose(pos, q, scl));
+        }
+      }
+      stuck.count = n; stuck.instanceMatrix.needsUpdate = true;
+
       const siege = view.siegeGate;
       gate.visible = !!siege && view.segment <= 3;
       if (siege) {
@@ -193,6 +281,6 @@ export function createChapterProps(T, scene, { heightAt, world = null }) {
         ember.emissiveIntensity = 2 + Math.sin(clock * 11) * 0.35 + Math.sin(clock * 27) * 0.2;
       }
     },
-    dispose() { scene.remove(group); shards.dispose(); for (const x of owned) x.dispose(); },
+    dispose() { scene.remove(group); shards.dispose(); falling.dispose(); stuck.dispose(); for (const x of owned) x.dispose(); },
   };
 }
