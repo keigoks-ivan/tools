@@ -61,8 +61,8 @@ export class FieldMap {
     x.save(); x.beginPath(); x.rect(ox, oz, (x1 - x0) * k, (z1 - z0) * k); x.clip(); x.fillStyle = '#445462';
     for (const b of G.solid.list) if (!b.dead && !b.noMove && b.y0 < 3 && b.y1 > 1.5) { const p = point({ x: b.x0, z: b.z0 }); x.fillRect(p[0], p[1], (b.x1 - b.x0) * k, (b.z1 - b.z0) * k); }
     for (const c of G.contacts.items.values()) { const p = point(c.p); x.fillStyle = c.fresh ? '#ff7264' : '#ffd477'; x.beginPath(); x.arc(...p, 3, 0, Math.PI * 2); x.fill(); }
-    const mark = (p, col, label, selected = false) => { const [a,b] = point(p); x.strokeStyle = col; x.fillStyle = col; x.lineWidth = selected ? 3 : 1; x.beginPath(); x.moveTo(a,b-7); x.lineTo(a+7,b); x.lineTo(a,b+7); x.lineTo(a-7,b); x.closePath(); x.stroke(); x.font = '14px "Noto Sans TC",sans-serif'; x.fillStyle = '#e9eef2'; const w = x.measureText(label).width, left = a + 11 + w > ox + (x1 - x0) * k ? a - 11 - w : a + 11; x.fillText(label, Math.max(ox + 3, left), b+5); };
-    if (G.hud.obj) mark(G.hud.obj.p, '#ffd477', '主線', !F.selected);
+    const mark = (p, col, label, selected = false, labelY = 5) => { const [a,b] = point(p); x.strokeStyle = col; x.fillStyle = col; x.lineWidth = selected ? 3 : 1; x.beginPath(); x.moveTo(a,b-7); x.lineTo(a+7,b); x.lineTo(a,b+7); x.lineTo(a-7,b); x.closePath(); x.stroke(); x.font = '14px "Noto Sans TC",sans-serif'; x.fillStyle = '#e9eef2'; const w = x.measureText(label).width, left = a + 11 + w > ox + (x1 - x0) * k ? a - 11 - w : a + 11; x.fillText(label, Math.max(ox + 3, left), b+labelY); };
+    if (G.hud.obj) mark(G.hud.obj.p, '#ffd477', '主線', !F.selected, 24);
     for (const o of F.outposts) mark(F.position(o), F.claimed.has(o.id) ? '#8799a5' : F.secured(o) ? '#b7efad' : '#ceadff', o.name, F.selected === o.id);
     x.save(); x.translate(...point(G.player.pos)); x.rotate(Math.PI - G.player.yaw); x.fillStyle = '#82f1ff'; x.beginPath(); x.moveTo(0,-9); x.lineTo(6,7); x.lineTo(0,4); x.lineTo(-6,7); x.closePath(); x.fill(); x.restore();
     if (G.scout.active) mark(G.scout.pos, '#82f1ff', '無人機'); x.restore();
