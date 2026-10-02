@@ -45,7 +45,11 @@ try {
   const clips = [...source.animations, ...createPolearmClips(THREE, source.scene, source.animations), ...createArcherClips(THREE, source.scene, source.animations)];
   // Play the shared roll at the same 0.42-second combat duration.
   const roll=clips.find(c=>c.name==='roll'),previewRoll=roll.clone();
-  previewRoll.tracks.forEach(track=>track.scale(.42/roll.duration));previewRoll.duration=.42;clips[clips.indexOf(roll)]=previewRoll;
+  previewRoll.tracks.forEach(track=>track.scale(.42/roll.duration));previewRoll.duration=.42;
+  // Keep the roll centred on the turntable, like the in-place run preview.
+  const rollRoot=previewRoll.tracks.find(track=>track.name==='J_Bip_C_Hips.position');
+  for(let i=3;i<rollRoot.values.length;i+=3){rollRoot.values[i]=rollRoot.values[0];rollRoot.values[i+2]=rollRoot.values[2];}
+  clips[clips.indexOf(roll)]=previewRoll;
   clips.push(createComboPreview(THREE,clips,HEROES.azure),createComboPreview(THREE,clips,HEROES.jade));
   for (const [i, profile] of profiles.entries()) {
     const model = clone(source.scene);
