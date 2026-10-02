@@ -30,7 +30,7 @@ export function encodeLobbyState(character, ready, revision) {
   return { x: 0, y: 0, z: 0, r: 0, a: `loadout_${character}_${ready ? 1 : 0}`, c: revision };
 }
 export function decodeLobbyState(d) {
-  const match = /^loadout_(violet|azure|amber)_([01])$/.exec(d?.a || '');
+  const match = /^loadout_(violet|azure|amber|jade)_([01])$/.exec(d?.a || '');
   return match && Number.isInteger(d.c) && d.c >= 0 && d.c <= 1e13 ? { ch: match[1], ready: Number(match[2]), rv: d.c } : null;
 }
 
@@ -61,7 +61,7 @@ export function encodeState(s, clock) {
   const d = { x: r3(s.x), y: r3(s.y), z: r3(s.z), r: r3(s.yaw), c: Math.round(clock) };
   if (s.lift) d.h = r3(s.lift);
   if (s.anim) d.a = s.anim;
-  if (['violet', 'azure', 'amber'].includes(s.character)) {
+  if (['violet', 'azure', 'amber', 'jade'].includes(s.character)) {
     // Namespaced animation names fit the deployed relay's 24-character allowlist.
     // The suffix carries the ultimate clock without changing clip playback time.
     const musou = Number.isFinite(s.musou) && s.musou >= 0 && s.musou <= 10 ? `_m${Math.round(s.musou * 1000).toString(36)}` : '';
@@ -76,7 +76,7 @@ export function encodeState(s, clock) {
 
 /** relay 轉來的 d → 插值用快照 */
 export function decodeState(d) {
-  const match = /^(violet|azure|amber)_([\w-]+?)(?:_m([0-9a-z]{1,3}))?$/.exec(d.a || '');
+  const match = /^(violet|azure|amber|jade)_([\w-]+?)(?:_m([0-9a-z]{1,3}))?$/.exec(d.a || '');
   const ms = match?.[3] ? parseInt(match[3], 36) / 1000 : -1;
   return { x: d.x, y: d.y, z: d.z, yaw: d.r, lift: d.h || 0, anim: match?.[2] || d.a || 'idle', time: d.at || 0, scale: d.ts ?? 1, loop: d.l !== 0, t: d.c, st: d.st | 0,
     ...(match ? { character: match[1], musou: ms <= 10 ? ms : -1 } : {}) };

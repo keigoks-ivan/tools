@@ -56,7 +56,7 @@ test('new host retains the lobby selection and failed loading can retry the same
 });
 
 test('relay preserves selected character and ultimate timing while dropping malformed metadata', () => {
-  for (const character of ['violet', 'azure', 'amber']) {
+  for (const character of ['violet', 'azure', 'amber', 'jade']) {
     const encoded = JSON.parse(encodeState({ x: 1, y: 2, z: 3, yaw: 0, character, musou: 1.2346 }, 300));
     const snap = decodeState(cleanState(encoded.d)); assert.equal(snap.character, character); assert.equal(snap.musou, 1.235);
   }
@@ -69,7 +69,7 @@ test('relay preserves selected character and ultimate timing while dropping malf
 
 test('all animated hero states and lobby variants pass the unchanged production relay allowlist', () => {
   const clips = ['idle', 'run', 'combo1', 'combo2', 'combo3', 'combo4', 'combo5', 'charge', 'heavyfin', 'musou', 'musouFlurry', 'jump', 'dead'];
-  for (const character of ['violet', 'azure', 'amber']) for (const anim of clips) for (const musou of [-1, 0, 1.235, 10]) {
+  for (const character of ['violet', 'azure', 'amber', 'jade']) for (const anim of clips) for (const musou of [-1, 0, 1.235, 10]) {
     const packet = JSON.parse(encodeState({ character, anim, musou, x: 0, y: 0, z: 0, yaw: 0, time: 0.4 }, 42));
     assert.ok(/^[\w-]{1,24}$/.test(packet.d.a), packet.d.a);
     const result = decodeState(cleanState(packet.d));
@@ -96,4 +96,11 @@ test('client routes lobby envelopes separately from gameplay and rejects configu
   client.handle(JSON.stringify({ ...packet, p: 'A', d: cleanState(packet.d) }));
   assert.equal(states[0].d.character, 'azure'); assert.equal(states[0].d.anim, 'combo3');
   client.handle(JSON.stringify({ t: 'e', p: 'A', d: { q: 'A:1', cp: 4, n: [] } })); assert.equal(worlds.length, 1);
+});
+
+test('four players can independently choose the new archer and share the host chapter',()=>{
+  const hub=lobby(),a=hub.add('A'),b=hub.add('B'),c=hub.add('C'),d=hub.add('D');hub.flush();
+  a.setCharacter('jade');b.setCharacter('azure');c.setCharacter('amber');d.setCharacter('violet');a.setChapter(4);hub.flush();
+  for(const control of [a,b,c,d])control.prepare();hub.flush();
+  assert.deepEqual([...hub.launches.values()].map(runs=>runs[0]),[{character:'jade',chapter:4},{character:'azure',chapter:4},{character:'amber',chapter:4},{character:'violet',chapter:4}]);
 });

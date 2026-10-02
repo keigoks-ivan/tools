@@ -812,3 +812,21 @@ test('all character ultimate damage remains valid through the multiplayer claim 
   }
   assert.equal(validateClaimEntry([1, 1000, SOURCES.indexOf('special'), 1], enemy, { x: 0, y: 0 }).ok, false);
 });
+
+test('guest archer flight predicts a hit and claims it once through host authority',async()=>{
+  const {HEROES}=await import('../3d-next/heroes.js');
+  const {room,A,B,restore}=setup();
+  try {
+    A.frozen=true;A.arena.enemies=[];B.arena.heroProfile=HEROES.jade;
+    const enemy=A.arena.spawn('grunt',B.arena.hero.x+300,B.arena.hero.y,{hp:100,fixed:true,ai:'external'});
+    for(let i=0;i<12;i++)step(room,[A,B]);
+    const puppet=B.arena.enemies.find(e=>e.id===enemy.id);assert.ok(puppet);
+    B.arena.hero.facing=0;B.arena._startAttack('heavy');
+    for(let i=0;i<35;i++)step(room,[A,B]);assert.equal(enemy.hp,100,'damage applied before the draw release');
+    for(let i=0;i<35;i++)step(room,[A,B]);
+    const claims=room.log.h.flatMap(c=>c.h).filter(entry=>entry[0]===enemy.id);
+    assert.equal(claims.length,1);assert.equal(claims[0][1],24);
+    A.frozen=false;for(let i=0;i<12;i++)step(room,[A,B]);assert.equal(enemy.hp,76);
+    assert.equal(puppet.hp,76);assert.equal(room.log.oversize,0);
+  }finally{restore();}
+});

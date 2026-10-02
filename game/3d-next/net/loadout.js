@@ -1,11 +1,11 @@
-import { encodeLobbyState } from './protocol.js?v=20261002b';
+import { encodeLobbyState } from './protocol.js?v=20261002h';
 
 // Lobby choices travel through the same authenticated room relay as gameplay.
 // Only the current host chooses the chapter or starts a run. Late joiners can
 // choose a character before entering the already-running chapter.
 export class RoomLoadout {
   constructor({ client, character = 'violet', chapter = 0, onLaunch, onChange = () => {}, currentChapter = () => this.chapter }) {
-    this.client = client; this.character = ['violet', 'azure', 'amber'].includes(character) ? character : 'violet';
+    this.client = client; this.character = ['violet', 'azure', 'amber', 'jade'].includes(character) ? character : 'violet';
     this.chapter = this.validChapter(chapter) ? chapter : 0;
     this.ready = false; this.choices = new Map(); this.run = 0; this.launched = 0; this.room = null; this.revision = 0;
     this.onLaunch = onLaunch; this.onChange = onChange; this.currentChapter = currentChapter;
@@ -28,7 +28,7 @@ export class RoomLoadout {
     if (this.isHost) this.client.send('e', { loadout: { ch: this.character, ready: this.ready ? 1 : 0, rv: this.revision, lv: this.launched ? this.currentChapter() : this.chapter, ...(this.run ? { go: this.run } : {}) } });
   }
   setCharacter(value) {
-    if (this.launched || !['violet', 'azure', 'amber'].includes(value)) return false;
+    if (this.launched || !['violet', 'azure', 'amber', 'jade'].includes(value)) return false;
     this.character = value; this.ready = false; this.publish(); this.changed(); return true;
   }
   setChapter(value) {
@@ -55,7 +55,7 @@ export class RoomLoadout {
   receive(id, d) {
     if (!this.client.members.has(id)) return;
     const choice = this.choices.get(id) || { character: 'violet', ready: false };
-    if (['violet', 'azure', 'amber'].includes(d.ch)) choice.character = d.ch;
+    if (['violet', 'azure', 'amber', 'jade'].includes(d.ch)) choice.character = d.ch;
     if (d.ready === 0 || d.ready === 1) choice.ready = d.ready === 1;
     if (Number.isInteger(d.rv)) choice.revision = d.rv;
     this.choices.set(id, choice);

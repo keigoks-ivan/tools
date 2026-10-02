@@ -52,7 +52,7 @@
     .combo-route{position:absolute;left:calc(24px + var(--safe-left,0px));bottom:94px;padding:10px 14px;border-left:2px solid var(--hero-color);background:linear-gradient(90deg,rgba(9,12,22,.88),rgba(9,12,22,.15));pointer-events:none}
     .combo-route[hidden]{display:none}.combo-route b{display:block;color:var(--hero-color);font-size:18px}.combo-route span{display:block;font-size:11px;color:#f2e7db;margin:4px 0}.combo-route i{display:inline-block;width:13px;height:3px;margin-right:4px;background:#4b4a57}.combo-route i.lit{background:var(--hero-color);box-shadow:0 0 7px var(--hero-color)}
     @media(pointer:coarse){.combo-route{bottom:190px}}@media(max-height:500px){.combo-route{left:calc(14px + var(--safe-left,0px));bottom:74px;padding:6px 10px}.combo-route b{font-size:14px}.combo-route span{font-size:10px}}
-    .hero-options{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:20px 0;text-align:left}
+    .hero-options{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:20px 0;text-align:left}
     .hero-option{padding:15px 10px;border:1px solid #494451;border-radius:6px;background:#131b2a;color:#e9e1ef;font:inherit;cursor:pointer}
     .hero-option[aria-pressed="true"]{border-color:var(--hero-color);background:linear-gradient(145deg,#2a3045,#161c2b);box-shadow:inset 0 0 0 1px var(--hero-color)}
     .hero-option:focus-visible{outline:2px solid #fff;outline-offset:3px}
@@ -67,6 +67,7 @@
     .loadout-actions{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:16px}
     .loadout-actions .primary-button,.loadout-actions .sound-toggle{margin:0}
     @media(max-height:500px) and (orientation:landscape){.loadout-card{padding:12px 22px}.loadout-card h2{font-size:18px;margin-top:6px}.loadout-card p{margin-top:6px}.hero-options{margin:8px 0}.loadout-actions{margin-top:8px}.hero-option{padding:8px}.hero-option .hero-symbol{display:none}.hero-option b{font-size:17px;margin:2px 0}.hero-option span{margin-top:5px;line-height:1.45}.hero-option em{margin-top:5px}.loadout-card .loadout-note{display:none}}
+    @media(max-width:650px){.hero-options{grid-template-columns:repeat(2,1fr)}}
     @media(max-width:430px){.loadout-card{padding:20px 14px}.hero-options{gap:6px}.hero-option{padding:10px 7px}.hero-option small{font-size:9px}.hero-option span{font-size:10px}.loadout-actions .primary-button{min-width:145px}}
     @media(prefers-reduced-motion:reduce){.load-progress i{transition:none}}
   </style>
@@ -81,9 +82,9 @@
       <div class="title-content">
         <div class="edition"><span class="edition-mark"></span> VIOLET EDGE　／　3D FIELD TEST</div>
         <h1 id="gameTitle">紫刃夜行<br><em>VIOLET EDGE</em></h1>
-        <p class="title-subtitle">三位武者・五關戰役</p>
-        <p class="title-copy">從夜市突圍一路闖到霜橋與天闕。選擇長刀、偃月刀或雙刃，以不同招式封住鬼門。</p>
-        <p class="prototype-note">三位武者　·　五關戰役　·　<span id="soundNote">靜音測試</span></p>
+        <p class="title-subtitle">四位武者・五關戰役</p>
+        <p class="title-copy">從夜市突圍一路闖到霜橋與天闕。選擇長刀、偃月刀、雙刃或弓箭，以不同招式封住鬼門。</p>
+        <p class="prototype-note">四位武者　·　五關戰役　·　<span id="soundNote">靜音測試</span></p>
         <button id="soundToggle" class="sound-toggle" type="button" aria-pressed="false" hidden>🔊 聲音：開</button> <button id="fullscreenToggle" class="sound-toggle fullscreen-toggle" type="button" aria-pressed="false" hidden>⛶ 全螢幕（F）</button>
         <button id="start" class="primary-button" type="button"><span>選擇角色與關卡</span><b aria-hidden="true">↗</b></button>
         <div id="loadPanel" class="load-panel" hidden><div class="load-head"><span class="load-stage">角色模型</span><b class="load-pct">0%</b></div><div class="load-progress" role="progressbar" aria-label="載入進度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i></i></div></div>
@@ -96,15 +97,16 @@
       <div class="dialog-card loadout-card">
         <div class="section-kicker">VIOLET EDGE ／ 出擊準備</div>
         <h2 id="loadoutTitle">選擇角色</h2>
-        <p>三種武器、三種戰鬥節奏。通關後可接續下一關。</p>
+        <p>四種武器、四種戰鬥節奏。通關後可接續下一關。</p>
         <div class="hero-options" aria-label="角色選擇">
           <button type="button" class="hero-option" data-character="violet" aria-pressed="true" style="--hero-color:#b994ff"><span class="hero-symbol">刀</span><b>紫刃</b><small>靈力長刀 · 體力 100</small><span>五段均衡連斬<br>昇龍斬／地裂斬</span><em>月影一閃</em></button>
           <button type="button" class="hero-option" data-character="azure" aria-pressed="false" style="--hero-color:#82cfff"><span class="hero-symbol">戟</span><b>蒼鋒</b><small>蒼龍偃月刀 · 體力 125</small><span>橫掃・挑斬・重劈破防<br>破陣斬／崩山震</span><em>蒼龍裂陣</em></button>
           <button type="button" class="hero-option" data-character="amber" aria-pressed="false" style="--hero-color:#ffd37a"><span class="hero-symbol">雙</span><b>金燕</b><small>疾風雙刃 · 體力 85</small><span>六段高速快斬<br>燕返斬／穿風突</span><em>金燕八閃</em></button>
+          <button type="button" class="hero-option" data-character="jade" aria-pressed="false" style="--hero-color:#91e5b6"><span class="hero-symbol">弓</span><b>翠翎</b><small>翡翠長弓 · 體力 90</small><span>快射・雙連射・扇形三箭<br>破甲貫矢／翠羽散射</span><em>翠羽天雨</em></button>
         </div>
         <label class="chapter-label" for="chapterSelect">起始關卡</label>
         <select id="chapterSelect"><option value="0">01 夜市突圍 · 妖燈與魂燈</option><option value="1">02 赤月圍城 · 盾兵與弓手</option><option value="2">03 虛空封魂 · 召喚師與疾行妖兵</option><option value="3">04 霜橋追魂 · 雪橋與冰燈</option><option value="4">05 天闕決戰 · 長廊與祭燈</option></select>
-        <p class="loadout-note">J 連斬 · 連斬途中 K 變招 · Shift 閃避後 J 反擊 · E 大絕<br>可按 1 / 2 / 3 選角。可長按 J 接續連斬。</p>
+        <p class="loadout-note">J 連斬 · 連斬途中 K 變招 · Shift 閃避後 J 反擊 · E 大絕<br>可按 1 / 2 / 3 / 4 選角。可長按 J 接續連斬。</p>
         <div class="loadout-actions"><button id="loadoutBack" class="sound-toggle" type="button">返回</button><button id="deploy" class="primary-button" type="button"><span>出擊</span><b aria-hidden="true">↗</b></button></div>
       </div>
     </section>
@@ -127,6 +129,6 @@
     <footer id="help" class="help-bar"><span class="desktop-help"><b>移動</b> WASD / ↑↓←→ <i></i> <b>連斬</b> J 連按／長按 <i></i> <b>重擊</b> K <i></i> <span data-branch-help><b>變招</b> J×1～4→K</span> <i></i> <b>閃避</b> Shift <i></i> <b>絕招</b> E <i></i> <span data-jump-help hidden><b>跳躍</b> Space <i></i></span> <b>暫停</b> P<span data-fullscreen-help hidden> <i></i> <b>全螢幕</b> F</span></span><span class="touch-help">左側移動　·　右側攻擊</span><span class="silent-note" id="soundState">靜音試作</span></footer>
     <div id="diagnostics"></div>
   </main>
-  <script type="module" src="./boot.js?v=20261002g"></script>
+  <script type="module" src="./boot.js?v=20261002h"></script>
 </body>
 </html>

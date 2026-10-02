@@ -213,3 +213,66 @@ export function createDualBladeUltimate(T, source, animations) {
   tracks.push(new T.VectorKeyframeTrack(`${hips.name}.position`,times,positions));
   return new T.AnimationClip('amberUlt',2.8,tracks).optimize();
 }
+
+// Huang Zhong's official bow showcase informs the open stance, cheek anchor
+// and held follow-through. These are authored clips, not imported game assets.
+export function createArcherClips(T, source, animations) {
+  const idle=animations.find(c=>c.name==='idle'), run=animations.find(c=>c.name==='run');
+  if(!idle || !source.getObjectByName('J_Bip_L_Hand')) return [];
+  const root=source.clone(true); root.position.set(0,0,0); root.quaternion.identity(); root.scale.set(1,1,1);
+  const bones=[];root.traverse(b=>{if(b.isBone)bones.push(b);});
+  const rest=bones.map(b=>({position:b.position.clone(),rotation:b.quaternion.clone()}));
+  root.updateMatrixWorld(true);
+  const feet=['R','L'].map(side=>({ solve:createArmSolver(T,root,side,'Leg'), rotation:root.getObjectByName(`J_Bip_${side}_Foot`).getWorldQuaternion(new T.Quaternion()) }));
+  for(const track of idle.tracks) { const [name,property]=track.name.split('.'); root.getObjectByName(name)?.[property]?.fromArray(track.createInterpolant().evaluate(.1)); }
+  root.updateMatrixWorld(true);
+  const right=createArmSolver(T,root,'R'), left=createArmSolver(T,root,'L');
+  const hips=root.getObjectByName('J_Bip_C_Hips'), chest=root.getObjectByName('J_Bip_C_Chest'), neck=root.getObjectByName('J_Bip_C_Neck');
+  const target=new T.Vector3(), pole=new T.Vector3(), offset=new T.Vector3(), centre=new T.Vector3(), direction=new T.Vector3();
+  const rotation=new T.Quaternion(), handRotation=new T.Quaternion();
+  const mountInverse=new T.Quaternion().setFromRotationMatrix(new T.Matrix4().makeBasis(new T.Vector3(0,1,0),new T.Vector3(0,0,1),new T.Vector3(1,0,0))).invert();
+  const definitions=[['jadeIdle',idle.duration,[],idle],['jadeRun',run.duration,[],run],['jadeShot',.68,[.34],idle],['jadeDouble',.84,[.30,.52],idle],['jadeFan',.9,[.48],idle],['jadeSpread',.9,[.48],idle],['jadePierce',1.1,[.64],idle],['jadeGuard',.6,[.26],idle],['jadeAir',.5,[.22],idle],['jadeUlt',3.6,[.65,2.75],idle]];
+  return definitions.map(([name,duration,shots,base])=>{
+    const times=[],values=bones.map(()=>[]),positions=[],count=Math.ceil(duration*90);
+    const samplers=base===run ? run.tracks.map(track=>{const[name,property]=track.name.split('.');return {bone:root.getObjectByName(name),property,sample:track.createInterpolant()};}) : [];
+    for(let frame=0;frame<=count;frame++) {
+      const seconds=frame/count*duration;
+      bones.forEach((b,i)=>{b.position.copy(rest[i].position);b.quaternion.copy(rest[i].rotation);});
+      for(const {bone,property,sample} of samplers) if(bone)bone[property].fromArray(sample.evaluate(seconds));
+      let draw=0,tension=0;
+      for(const at of shots) {
+        const loaded=T.MathUtils.smoothstep(seconds,Math.max(0,at-.23),at-.055);
+        draw=Math.max(draw,loaded*(1-T.MathUtils.smoothstep(seconds,at+.075,at+.21)));
+        tension=Math.max(tension,loaded*(1-T.MathUtils.smoothstep(seconds,at,at+.035)));
+      }
+      const striking=shots.length>0, lift=name==='jadeUlt' ? .62*T.MathUtils.smoothstep(seconds,.12,.40)*(1-T.MathUtils.smoothstep(seconds,.75,1.0)) : 0;
+      if(base!==run) {
+        hips.position.set(0,.91-draw*.025,0);
+        hips.quaternion.setFromEuler(new T.Euler(.015,-.45-(striking?.35:0)-draw*.10,0));
+      } else { hips.position.x=0;hips.position.z=0; }
+      chest.rotation.y-=draw*.12; neck.rotation.y+=striking?.55:.35;
+      for(const side of ['R','L']) for(const finger of ['Index','Middle','Ring','Little']) for(let joint=1;joint<=3;joint++) {
+        const bone=root.getObjectByName(`J_Bip_${side}_${finger}${joint}`);
+        const curl=side==='L' ? [0,.85,1.2,.65][joint] : [0,.6,1.2,.65][joint]*tension;
+        bone.quaternion.multiply(new T.Quaternion().setFromAxisAngle(new T.Vector3(0,0,1),(side==='R'?1:-1)*curl));
+      }
+      root.updateMatrixWorld(true);
+      if(base!==run) {
+        feet[0].solve(target.set(-.20,.09,-.19),pole.set(-.1,0,1),feet[0].rotation);
+        feet[1].solve(target.set(.20,.09,.20),pole.set(.1,0,1),feet[1].rotation);
+      }
+      rotation.setFromEuler(new T.Euler(-lift,0,-.08*(1-draw),'YXZ'));
+      handRotation.copy(rotation).multiply(mountInverse);
+      centre.set(.08,1.28+draw*.07+lift*.18,.41);
+      direction.set(0,0,1).applyQuaternion(rotation);
+      target.copy(centre).sub(offset.set(.045,-.012,.025).applyQuaternion(handRotation));
+      left(target,pole.set(.6,-.6,-.2),handRotation);
+      target.copy(centre).addScaledVector(direction,-.08-draw*.38).sub(offset.set(-.045,-.012,.025).applyQuaternion(handRotation));
+      right(target,pole.set(-1,-.4,0),handRotation);
+      times.push(seconds);bones.forEach((b,i)=>values[i].push(...b.quaternion.toArray()));positions.push(...hips.position.toArray());
+    }
+    const tracks=bones.map((b,i)=>new T.QuaternionKeyframeTrack(`${b.name}.quaternion`,times,values[i]));
+    tracks.push(new T.VectorKeyframeTrack(`${hips.name}.position`,times,positions));
+    return new T.AnimationClip(name,duration,tracks).optimize();
+  });
+}

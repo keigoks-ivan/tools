@@ -3,7 +3,7 @@ import { indexGeometry } from './index-geometry.js?v=20261002c';
 
 // Rounded, tapered locks follow the head; a small shader sway moves loose tips.
 export function createHairKit(T, source, id, strandTexture = null) {
-  const colors = { violet: [0x281731, 0x33203c, 0x3e2948], azure: [0x172932, 0x23353e, 0x2d404a], amber: [0x362218, 0x453023, 0x543b2a] }[id];
+  const colors = { violet: [0x281731, 0x33203c, 0x3e2948], azure: [0x172932, 0x23353e, 0x2d404a], amber: [0x362218, 0x453023, 0x543b2a], jade:[0x1c3027,0x294338,0x365248] }[id];
   const clock = { value: 0 };
   const materials = colors.map(color => {
     const m = new T.MeshPhysicalMaterial({ color, map: strandTexture, alphaTest: strandTexture ? 0.28 : 0, side: T.DoubleSide, roughness: 0.79, metalness: 0, sheen: 0.12, sheenColor: new T.Color(color).multiplyScalar(1.4), sheenRoughness: 0.65, anisotropy: 0.45, envMapIntensity: 0.28 });

@@ -137,6 +137,8 @@ export class Arena {
     this.inputBuffer = null;
     this.comboUntil = -Infinity;
     this.enemies = [];
+    this.projectiles = [];
+    this.nextProjectileId = 1;
     this.events = [];
     this.hero = {
       x: WIDTH * 0.5, y: 500, hp: this.heroProfile?.maxHp ?? 100, maxHp: this.heroProfile?.maxHp ?? 100, energy: 0,
@@ -178,6 +180,7 @@ export class Arena {
     this.hero.dodgeCooldown = Math.max(0, this.hero.dodgeCooldown - dt);
     this._readInput(input);
     this._advanceHero(dt);
+    this._advanceProjectiles(dt);
     this._advanceEnemies(dt);
     this._removeDefeated();
     if (this.director) return this.snapshot();
@@ -334,16 +337,17 @@ export class Arena {
   _startAttack(kind, branch = false) {
     const hero = this.hero;
     const now = this.time || 0;
+    let aimTarget = null;
     if (this.warriorMode) {
       const freeAim = Math.hypot(this.moveInput.x, this.moveInput.y) < 0.1;
       const nearest = this.enemies.filter(enemy => enemy.action !== 'dead' && !enemy.intangible)
         .map(enemy => ({ enemy, distance: distance(hero, enemy) }))
         .filter(candidate => this.musou
-          ? candidate.distance <= MUSOU_AIM.range && Math.abs(angleDifference(hero.facing, Math.atan2(candidate.enemy.y - hero.y, candidate.enemy.x - hero.x))) < MUSOU_AIM.arc
+          ? candidate.distance <= (this.heroProfile?.aimRange ?? MUSOU_AIM.range) && Math.abs(angleDifference(hero.facing, Math.atan2(candidate.enemy.y - hero.y, candidate.enemy.x - hero.x))) < (this.heroProfile?.aimArc ?? MUSOU_AIM.arc)
           : candidate.distance <= 230 && (freeAim ||
           Math.abs(angleDifference(hero.facing, Math.atan2(candidate.enemy.y - hero.y, candidate.enemy.x - hero.x))) < 1.2))
         .sort((a, b) => a.distance - b.distance)[0];
-      if (nearest) hero.facing = Math.atan2(nearest.enemy.y - hero.y, nearest.enemy.x - hero.x);
+      if (nearest) { aimTarget = nearest.enemy; hero.facing = Math.atan2(nearest.enemy.y - hero.y, nearest.enemy.x - hero.x); }
     }
     if (this.musou) {
       const chain = this.heroProfile?.chain ?? MUSOU_CHAIN;
@@ -365,7 +369,7 @@ export class Arena {
       hero.action = kind;
       hero.actionTime = 0;
       this.attackSerial++;
-      this.attack = { kind, ...move, hitIndex: 0, serial: this.attackSerial, branch, musou: true, charge, counter };
+      this.attack = { kind, ...move, ...(move.projectile ? { targetId: aimTarget?.id } : {}), hitIndex: 0, serial: this.attackSerial, branch, musou: true, charge, counter };
       this._emit('slash', { x: hero.x, y: hero.y, facing: hero.facing, kind, combo: hero.combo, branch, ...(charge ? { charge, name: move.name } : null), ...(counter ? { counter: true, name: move.name } : null) });
       return;
     }
@@ -436,6 +440,7 @@ export class Arena {
       hero.action = 'airSlash';
       hero.actionTime = 0;
       this.air.slashDone = false;
+      if (this.heroProfile?.air) this._emit('airAttackStart', { clip: this.heroProfile.air.clip, duration: this.heroProfile.air.duration });
     }
   }
 
@@ -448,12 +453,13 @@ export class Arena {
       const k = Math.min(1, air.t / JUMP.duration);
       hero.height = JUMP.height * 4 * k * (1 - k);
       if (hero.action === 'airSlash') {
-        const slash = JUMP.airSlash, before = hero.actionTime;
+        const slash = this.heroProfile?.air || JUMP.airSlash, before = hero.actionTime;
         hero.actionTime += dt;
         if (!air.slashDone && before <= slash.hit && hero.actionTime >= slash.hit) {
           air.slashDone = true;
           this._emit('airSlash', { x: hero.x, y: hero.y, facing: hero.facing, index: air.slashes - 1, radius: slash.radius, arc: slash.arc, height: hero.height });
-          for (const enemy of this.enemies) {
+          if (slash.projectile) this._fireArrows(slash, slash.damage, 'attack');
+          else for (const enemy of this.enemies) {
             if (enemy.action === 'dead' || distance(hero, enemy) > slash.radius) continue;
             if (Math.abs(angleDifference(hero.facing, Math.atan2(enemy.y - hero.y, enemy.x - hero.x))) > slash.arc * 0.5) continue;
             this._damageEnemy(enemy, slash.damage, 'attack');
@@ -658,10 +664,15 @@ export class Arena {
     const attack = this.attack;
     const before = hero.actionTime;
     hero.actionTime += dt;
+    // Track the selected target while drawing; released arrows remain ballistic.
+    if (attack.projectile && attack.hitIndex < attack.hits.length && attack.targetId) {
+      const target = this.enemies.find(enemy => enemy.id === attack.targetId && enemy.action !== 'dead' && !enemy.intangible);
+      if (target && distance(hero,target) <= attack.radius) hero.facing = Math.atan2(target.y-hero.y,target.x-hero.x);
+    }
     // 出招時往前衝，移動搖桿可以帶著連段轉向
     if (attack.kind !== 'special' && before < attack.duration * 0.6) {
       const moving = Math.hypot(this.moveInput.x, this.moveInput.y) > 0.1;
-      if (moving) hero.facing = Math.atan2(this.moveInput.y, this.moveInput.x);
+      if (moving && !attack.projectile) hero.facing = Math.atan2(this.moveInput.y, this.moveInput.x);
       const speed = attack.dash ?? (attack.kind === 'heavy' ? 210 : 150);
       hero.x = clamp(hero.x + Math.cos(hero.facing) * speed * dt, this.bounds.minX, this.bounds.maxX);
       hero.y = clamp(hero.y + Math.sin(hero.facing) * speed * dt * 0.8, this.bounds.minY, this.bounds.maxY);
@@ -672,6 +683,7 @@ export class Arena {
       const damage = last && attack.finisher ? attack.finisher : attack.damage;
       const source = attack.kind === 'special' ? 'special' : last && attack.finisher ? 'heavy' : attack.kind;
       this._emit('swing', { x: hero.x, y: hero.y, facing: hero.facing, kind: attack.kind, combo: hero.combo, index, last, radius: attack.radius, ...(attack.charge ? { charge: attack.charge } : null), ...(attack.counter ? { counter: true } : null) });
+      if (attack.projectile) { this._fireArrows(attack, damage, source); continue; }
       for (const enemy of this.enemies) {
         if (enemy.action === 'dead') continue;
         const d = distance(hero, enemy);
@@ -702,6 +714,39 @@ export class Arena {
       if (d > attack.radius || Math.abs(angleDifference(hero.facing, angle)) > attack.arc * 0.5) continue;
       this._damageEnemy(enemy, attack.damage, attack.kind);
     }
+  }
+
+  _fireArrows(attack, damage, source) {
+    const p=attack.projectile, count=p.arrows || 1;
+    for(let i=0;i<count && this.projectiles.length<64;i++) {
+      const facing=this.hero.facing+(i-(count-1)/2)*(p.spread || 0);
+      const shot={ id:this.nextProjectileId++, x:this.hero.x+Math.cos(facing)*20, y:this.hero.y+Math.sin(facing)*20, facing, speed:p.speed, remaining:attack.radius-20,
+        width:p.width, pierce:p.pierce || 1, damage, source, struck:new Set() };
+      this.projectiles.push(shot);
+      this._emit('arrow', { id:shot.id, x:shot.x, y:shot.y, facing, speed:shot.speed, range:shot.remaining, pierce:shot.pierce, height:this.hero.height || 0 });
+    }
+  }
+
+  _advanceProjectiles(dt) {
+    if (!this.projectiles.length) return;
+    for(const shot of this.projectiles) {
+      const travel=Math.min(shot.remaining,shot.speed*dt), dx=Math.cos(shot.facing)*travel, dy=Math.sin(shot.facing)*travel;
+      // Sweep the full segment so a fast arrow cannot tunnel through a target.
+      const candidates=[];
+      for(const enemy of this.enemies) {
+        if(enemy.action==='dead' || enemy.intangible || shot.struck.has(enemy.id)) continue;
+        const ex=enemy.x-shot.x, ey=enemy.y-shot.y;
+        const t=clamp((ex*dx+ey*dy)/(travel*travel || 1),0,1);
+        if(Math.hypot(ex-dx*t,ey-dy*t)<=shot.width+(enemy.prop?26:18)) candidates.push({enemy,t});
+      }
+      candidates.sort((a,b)=>a.t-b.t || a.enemy.id-b.enemy.id);
+      for(const {enemy} of candidates) {
+        shot.struck.add(enemy.id); this._damageEnemy(enemy,shot.damage,shot.source);
+        if(--shot.pierce<=0) { shot.remaining=0; break; }
+      }
+      shot.x+=dx; shot.y+=dy; shot.remaining-=travel;
+    }
+    this.projectiles=this.projectiles.filter(shot=>shot.remaining>0);
   }
 
   _damageEnemy(enemy, damage, source, pushOverride = null) {

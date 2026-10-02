@@ -1,4 +1,5 @@
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { createArrowGeometry } from './hero-bow.js?v=20261002h';
 
 // Character silhouettes and soft ribbons share a bounded, reusable mesh pool.
 // No full-screen postprocessing or per-frame geometry/texture allocation.
@@ -15,6 +16,7 @@ export function createHeroSpecialFx(T, scene, groundAt, { capacity = 96 } = {}) 
   }
   const arc = ribbon(Math.PI * 1.55, .16), coreArc = ribbon(Math.PI * 1.55, .025), wing = ribbon(Math.PI * .85, .27);
   const shard = new T.OctahedronGeometry(1), beam = new T.PlaneGeometry(1,1);
+  const arrow = createArrowGeometry(T);
   // A coiling body, crest, snout and swept horns give the dragon a silhouette.
   const body = new T.CatmullRomCurve3(Array.from({length:33},(_,i) => { const t=i/32,a=t*Math.PI*2.4; return new T.Vector3(Math.cos(a)*(1-t*.35),t*2.2,Math.sin(a)*(1-t*.35)); }));
   const head = body.getPoint(1), parts = [new T.TubeGeometry(body,72,.085,8,false)];
@@ -48,6 +50,7 @@ export function createHeroSpecialFx(T, scene, groundAt, { capacity = 96 } = {}) 
     violet: { main:0xcd96ff, rim:0xf1dfff, shade:0x7a409f },
     azure: { main:0x66ddff, rim:0xddf9ff, shade:0x3687a3 },
     amber: { main:0xffce68, rim:0xfff1c2, shade:0xd87532 },
+    jade: { main:0x91e5b6, rim:0xf2ffdf, shade:0x35956a },
   };
   const up = new T.Vector3(0,1,0), rotation = new T.Quaternion();
   function emit(geometry,pos,scale,life,options={}) {
@@ -91,6 +94,22 @@ export function createHeroSpecialFx(T, scene, groundAt, { capacity = 96 } = {}) 
     onEvent(event,pos) {
       if (style==='violet') return;
       const facing=event.facing || 0, radius=(event.radius || event.finishRadius || 240)/60;
+      if (style==='jade') {
+        if(event.type==='musouStart') {
+          groundHalo(pos,2.2,1.0);
+          for(let i=0;i<3;i++) emit(ring,at(pos,1.3+i*.2),[.7+i*.25,.7+i*.25,1],.85,{rotation:[0,Math.PI/2-facing,i*.25],spin:i%2?1:-1,color:palettes.jade.rim,fade:.5});
+          emit(beam,at(pos,2.4),[.12,3.2,1],.7,{color:palettes.jade.rim,vy:5,fade:.5});
+        }
+        if(event.type==='swing' && event.flurry || event.type==='musouFinish') {
+          const finish=event.type==='musouFinish', count=capacity<64 ? finish?18:9 : finish?36:18;
+          for(let i=0;i<count;i++) {
+            const a=i/count*Math.PI*2+(event.index || 0)*.55,r=radius*(.25+.65*((i*7)%count)/count);
+            emit(arrow,new T.Vector3(pos.x+Math.cos(a)*r,pos.y+2.3+(i%3)*.35,pos.z+Math.sin(a)*r),[finish?1.8:1,finish?1.8:1,finish?1.8:1],.25+(i%3)*.04,{rotation:[Math.PI/2,0,a],velocity:[0,-12,0],color:i%3?palettes.jade.main:palettes.jade.rim,fade:.95});
+          }
+          groundHalo(pos,radius,finish?.85:.35,finish);sparks(pos,finish?12:6,radius,finish);
+        }
+        return;
+      }
       if (event.type==='musouStart') {
         groundHalo(pos,2.4,1.0);
         sparks(pos,capacity<64?6:12,1.3);
@@ -151,7 +170,7 @@ export function createHeroSpecialFx(T, scene, groundAt, { capacity = 96 } = {}) 
       }
     },
     reset() { for (const item of items) item.mesh.visible=false; },
-    dispose() { for (const item of items) { scene.remove(item.mesh); item.material.dispose(); item.bodyMaterial.dispose(); } for (const g of [ring,shard,arc,coreArc,wing,beam,dragon,bird]) g.dispose(); },
+    dispose() { for (const item of items) { scene.remove(item.mesh); item.material.dispose(); item.bodyMaterial.dispose(); } for (const g of [ring,shard,arc,coreArc,wing,beam,dragon,bird,arrow]) g.dispose(); },
     stats() { return {active:items.filter(item=>item.mesh.visible).length,capacity:items.length}; },
   };
 }

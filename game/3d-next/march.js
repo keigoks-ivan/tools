@@ -18,7 +18,7 @@
  * for the HUD, `march.view()` for world props (march-world.js update), and `march.result`
  * once `march.state !== 'play'`.
  */
-import { Arena } from '../2d/combat.js?v=20261002b';
+import { Arena } from '../2d/combat.js?v=20261002h';
 import { CAPTAIN, CAPTAIN_HINT, CAPTAIN_NAMES, SPECIAL_HINTS, SPECIAL_MIX, SPECIAL_UNITS, captainOptions, inLine, specialOptions } from './specials.js';
 
 export const PX_PER_M = 60;

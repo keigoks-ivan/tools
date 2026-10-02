@@ -6,8 +6,9 @@
 import { SnapshotBuffer } from './interp.js';
 import { SLOT_COLORS, playerColor } from './colors.js';
 import { GHOST_ANIMS, TRAIL_ANIM, makeGhosts, makePeerTrail } from './peer-fx.js?v=20261002d';
-import { heroFor } from '../heroes.js?v=20261002d';
-import { createHeroSpecialFx } from '../hero-special-fx.js?v=20261002d';
+import { heroFor } from '../heroes.js?v=20261002h';
+import { createHeroSpecialFx } from '../hero-special-fx.js?v=20261002h';
+import { createArrowFx } from '../hero-bow.js?v=20261002h';
 
 /** 依座位輪用的色調（名單外的名字才用到；Matt／Myles／Mike 固定配色見 colors.js） */
 export const TEAM_TINTS = SLOT_COLORS;
@@ -87,7 +88,7 @@ export function createTeammates({ THREE, scene, template, clips, cloneSkinned, q
     const specialFx = equipment ? createHeroSpecialFx(THREE, scene, groundAt, { capacity: 48 }) : null;
     const bones = [];
     model.traverse(object => { if (object.isBone) bones.push(object); });
-    const peer = { id, name, tint, root, model, mixer, actions, label, owned, trail, ghosts, specialFx, equipment, ready: !equipment, character: null, musouAt: -1, swing: 0, finished: false, previous: new THREE.Vector3(), bones, buffer: new SnapshotBuffer(), current: null, currentName: '', lastTime: 0 };
+    const peer = { id, name, tint, root, model, mixer, actions, label, owned, trail, ghosts, specialFx, equipment, arrowFx:null, arrowClip:'', arrowTime:-1, arrowIndex:0, ready: !equipment, character: null, musouAt: -1, swing: 0, finished: false, previous: new THREE.Vector3(), bones, buffer: new SnapshotBuffer(), current: null, currentName: '', lastTime: 0 };
     equipment?.ready?.then(() => { peer.ready = true; }).catch(error => console.error('teammate art failed', error));
     peers.set(id, peer);
     play(peer, 'idle', true, 1, 0);
@@ -122,7 +123,7 @@ export function createTeammates({ THREE, scene, template, clips, cloneSkinned, q
     peer.label.dispose();
     peer.trail.dispose();
     peer.ghosts?.dispose();
-    peer.specialFx?.dispose(); peer.equipment?.dispose();
+    peer.specialFx?.dispose(); peer.arrowFx?.dispose(); peer.equipment?.dispose();
     peers.delete(id);
   }
 
@@ -132,10 +133,12 @@ export function createTeammates({ THREE, scene, template, clips, cloneSkinned, q
     for (const peer of peers.values()) {
       const s = peer.buffer.sample(now);
       peer.specialFx?.update(dt);
-      if (!s || !peer.ready || now - peer.buffer.receivedAt > STALE_MS) { peer.root.visible = false; peer.trail.clear(); peer.ghosts?.clear(); continue; }
+      if (!s || !peer.ready || now - peer.buffer.receivedAt > STALE_MS) { peer.root.visible = false; peer.trail.clear(); peer.arrowFx?.reset(); peer.ghosts?.clear(); continue; }
       const profile = heroFor(s.character);
       if (peer.equipment && peer.character !== profile.id) {
         peer.equipment.apply(profile); peer.character = profile.id; peer.specialFx.setStyle(profile.id);
+        peer.arrowFx?.reset(); peer.arrowClip=''; peer.arrowTime=-1; peer.arrowIndex=0;
+        if(profile.id==='jade' && !peer.arrowFx)peer.arrowFx=createArrowFx(THREE,scene,groundAt,{capacity:quality==='mobile'?32:48});
         peer.ghosts?.dispose(); peer.ghosts = quality === 'mobile' ? null : makeGhosts({ THREE, scene, template: peer.model, cloneSkinned, color: profile.tint, count: 2 });
       }
       peer.root.visible = true;
@@ -149,6 +152,20 @@ export function createTeammates({ THREE, scene, template, clips, cloneSkinned, q
       peer.lastTime = s.time;
       peer.mixer.update(dt);
       peer.equipment?.update();
+      if(profile.id==='jade' && peer.arrowFx) {
+        if(peer.arrowClip!==anim || s.time<peer.arrowTime-.05) {peer.arrowClip=anim;peer.arrowIndex=0;}
+        const shot=[...profile.chain,...profile.charges,profile.heavy,profile.counter,profile.air].find(move=>move?.clip===anim);
+        while(shot && peer.arrowIndex<shot.hits.length && s.time>=shot.hits[peer.arrowIndex]) {
+          const at=shot.hits[peer.arrowIndex++];if(s.time-at>.20)continue;
+          const p=shot.projectile,count=p.arrows || 1;
+          for(let i=0;i<count;i++) {
+            const facing=Math.PI/2-s.yaw+(i-(count-1)/2)*(p.spread || 0);
+            peer.arrowFx.onEvent({type:'arrow',x:640+s.x*60+Math.cos(facing)*20,y:500+s.z*60+Math.sin(facing)*20,facing,height:s.lift || 0,speed:p.speed,range:shot.radius-20,pierce:p.pierce || 1});
+          }
+        }
+        peer.arrowTime=s.time;
+      }
+      peer.arrowFx?.update(dt);
       const slashing = TRAIL_ANIM.test(anim);
       if (slashing) peer.root.updateMatrixWorld(true);
       peer.trail.update(slashing);
@@ -158,14 +175,14 @@ export function createTeammates({ THREE, scene, template, clips, cloneSkinned, q
         const pos = new THREE.Vector3(s.x, groundAt(s.x, s.z), s.z);
         if (at >= 0 && (peer.musouAt < 0 || at < peer.musouAt - 0.1)) {
           peer.swing = 0; peer.finished = false;
-          peer.specialFx.onEvent({ type: 'musouStart', finishRadius: p.finishRadius }, pos);
+          peer.specialFx.onEvent({ type: 'musouStart', finishRadius: p.finishRadius, facing:Math.PI/2-s.yaw }, pos);
         }
         const swingAt = index => p.swingStart + (p.swingEnd - p.swingStart) * index / Math.max(1, p.swings - 1);
         while (at >= 0 && peer.swing < p.swings && at >= swingAt(peer.swing)) {
           const index = peer.swing++;
           peer.specialFx.onEvent({ type: 'swing', flurry: true, index, facing: Math.PI / 2 - s.yaw, radius: p.swingRadii?.[index] || p.radius, from: { x: 640 + peer.previous.x * 60, y: 500 + peer.previous.z * 60 } }, pos);
         }
-        if (!peer.finished && (at >= p.impact || at < 0 && peer.musouAt >= 0)) { peer.finished = true; peer.specialFx.onEvent({ type: 'musouFinish', radius: p.finishRadius }, pos); }
+        if (!peer.finished && (at >= p.impact || at < 0 && peer.musouAt >= 0)) { peer.finished = true; peer.specialFx.onEvent({ type: 'musouFinish', radius: p.finishRadius, facing:Math.PI/2-s.yaw }, pos); }
         peer.musouAt = at; peer.previous.copy(pos);
       }
     }

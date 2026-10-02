@@ -124,13 +124,16 @@ export function createMarchBot({ skill = 'expert', seed = 7 } = {}) {
     };
     if (target) {
       const d = steer(target.x, target.y);
-      const reach = target.prop ? 120 : target.role === 'boss' ? 150 : 165;
-      if (d < 110) { input.x *= 0.2; input.y *= 0.2; }
+      const ranged = arena.heroProfile?.chain[0].projectile;
+      const reach = ranged && !target.prop ? arena.heroProfile.chain[0].radius * .55 : target.prop ? 120 : target.role === 'boss' ? 150 : 165;
+      if (ranged && !target.prop && d < 180) { input.x *= -1; input.y *= -1; }
+      else if (ranged && d < reach) { input.x = 0; input.y = 0; }
+      else if (d < 110) { input.x *= 0.2; input.y *= 0.2; }
       // Guarded officers / boss: open with a heavy (guard break), then chain lights while they are stunned.
       const guarded = target.guard && !((target.guardBrokenUntil ?? -Infinity) > arena.time) && !((target.guardRearmUntil ?? -Infinity) > arena.time);
-      if (d < reach) input[guarded ? 'heavy' : 'attack'] = true;
-      const crowd = fighters.filter(enemy => dist(enemy, hero) < 260).length;
-      if (hero.energy >= 100 && (crowd >= 4 || (target.role === 'boss' || target.role === 'officer') && d < 250)) input.special = true;
+      if (d < reach) input[guarded || ranged && target.prop ? 'heavy' : 'attack'] = true;
+      const crowd = fighters.filter(enemy => dist(enemy, hero) < (ranged ? 420 : 260)).length;
+      if (hero.energy >= 100 && (crowd >= 4 || (target.role === 'boss' || target.role === 'officer') && d < (ranged ? 420 : 250))) input.special = true;
     } else if (goal) {
       steer(goal.x, goal.y);
     }

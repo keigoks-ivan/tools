@@ -2,7 +2,7 @@
  * 三人連線客戶端：代號登入（換憑證）、開房／加入、斷線重連、送出與接收角色狀態。
  * 不依賴 Three.js，瀏覽器以外的環境可注入 WebSocket／fetch／storage（game/tests/coop-net.test.mjs）。
  */
-import { CLOSE_TEXT, FATAL_CLOSE, PING_MS, TOKEN_KEY, backoffDelay, decodeLobbyState, decodeState, encodeState, wsUrl } from './protocol.js?v=20261002b';
+import { CLOSE_TEXT, FATAL_CLOSE, PING_MS, TOKEN_KEY, backoffDelay, decodeLobbyState, decodeState, encodeState, wsUrl } from './protocol.js?v=20261002h';
 
 /** localStorage 包一層 try/catch：私密模式或封鎖網站資料時仍能玩，只是每次要重新輸入代號 */
 export function safeStorage(backing = globalThis.localStorage) {

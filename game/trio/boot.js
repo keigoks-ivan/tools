@@ -3,12 +3,12 @@
 // 第二階段：房主的裝置跑敵人（出兵、AI、血量、段落），大家打同一批敵人；隊友的命中申報給房主（net/enemy-sync.js）。
 // 第三階段：倒地與救援、全滅才輸（任何人都能按重來）、合體大招、補給由房主裁定、交棒看誰看得到畫面（net/team.js）。
 import { installGameGestures } from '../2d/touch-gestures.js';
-import { CoopClient } from '../3d-next/net/client.js?v=20261002b';
-import { createCoop } from '../3d-next/net/coop.js?v=20261002d';
-import { relayUrl } from '../3d-next/net/protocol.js?v=20261002b';
-import { RoomLoadout } from '../3d-next/net/loadout.js?v=20261002b';
-import { HEROES } from '../3d-next/heroes.js?v=20261002d';
-import { CHAPTERS } from '../3d-next/campaign.js?v=20261002b';
+import { CoopClient } from '../3d-next/net/client.js?v=20261002h';
+import { createCoop } from '../3d-next/net/coop.js?v=20261002h';
+import { relayUrl } from '../3d-next/net/protocol.js?v=20261002h';
+import { RoomLoadout } from '../3d-next/net/loadout.js?v=20261002h';
+import { HEROES } from '../3d-next/heroes.js?v=20261002h';
+import { CHAPTERS } from '../3d-next/campaign.js?v=20261002h';
 import { setupFullscreenUi } from './fullscreen.js?v=trio11';
 import { setupWipeTransitions } from './wipe.js?v=trio11';
 import { setupTeamOverlay } from './overlay.js?v=trio11';
@@ -22,7 +22,7 @@ for (const type of ['gesturestart', 'gesturechange', 'gestureend']) {
 }
 
 // 引擎：版本字串與單人頁不同也沒關係（兩頁不會同時開），battle.js 內部的 import 網址相同
-const loadBattleModule = () => import('../3d-next/battle.js?v=20261002g');
+const loadBattleModule = () => import('../3d-next/battle.js?v=20261002h');
 const params = new URLSearchParams(location.search);
 
 const client = new CoopClient({ relay: relayUrl(location) });

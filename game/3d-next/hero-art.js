@@ -1,7 +1,8 @@
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { createHairKit } from './hero-hair.js?v=20261002c';
+import { createHairKit } from './hero-hair.js?v=20261002h';
 import { forgedBlade } from './hero-weapons.js?v=20261002b';
 import { indexGeometry } from './index-geometry.js?v=20261002c';
+import { createBowKit } from './hero-bow.js?v=20261002h';
 
 // One GPU texture per asset across the local character and all teammates.
 const textureCache = new Map();
@@ -40,6 +41,7 @@ export function createHeroArt(T, root, sword) {
   if (hairStrands) { hairStrands.colorSpace = T.SRGBColorSpace; hairStrands.flipY = true; hairStrands.anisotropy = 4; }
   const ready = Promise.all(loading);
   let activeId = 'violet';
+  const bowFingerRest = root.getObjectByName('J_Bip_R_Index2').quaternion.clone();
   const styledHair = new Map();
   function textured(material, row, col, repeat = 1, strength = 0.45) {
     if (!atlas) return material;
@@ -55,6 +57,7 @@ export function createHeroArt(T, root, sword) {
     violet: { cloth: 0x8853ac, metal: 0xb3a1ce, trim: 0xdbb478, glow: 0xcd96ff, hair: 0x77549c },
     azure: { cloth: 0x407795, metal: 0x88a8bd, trim: 0xd5ddeb, glow: 0x66ddff, hair: 0x4b687c },
     amber: { cloth: 0xa96838, metal: 0x4a4650, trim: 0xe3b86d, glow: 0xffce68, hair: 0x946334 },
+    jade: { cloth: 0x327555, metal: 0xe4dfcd, trim: 0xc8ae74, glow: 0x91e5b6, hair: 0x466455 },
   };
   const baseMeshes = [];
   root.traverse(o => { if (o.isMesh) baseMeshes.push(o); });
@@ -141,7 +144,7 @@ export function createHeroArt(T, root, sword) {
   };
   function build(id) {
     const p = palette[id], groups = new Map(), batches = new Map();
-    const row = ['violet', 'azure', 'amber'].indexOf(id);
+    const row = id === 'jade' ? 1 : ['violet', 'azure', 'amber'].indexOf(id);
     const cloth = textured(new T.MeshStandardMaterial({ color: p.cloth, side: T.DoubleSide, roughness: 0.93 }), row, id === 'violet' ? 1 : 0, 1, 0.75);
     const dark = textured(new T.MeshStandardMaterial({ color: 0x171b25, roughness: 0.68, metalness: 0.05 }), row, id === 'violet' ? 3 : 1);
     const steel = textured(new T.MeshStandardMaterial({ color: p.metal, roughness: 0.42, metalness: 0.45 }), row, 2);
@@ -238,6 +241,22 @@ export function createHeroArt(T, root, sword) {
         plate(head, crest, [s * 0.105, 1.603, -0.009], trim, 0.6);
       }
       line(head, [[-0.065, 1.702, -0.09], [-0.065, 1.705, -0.19], [-0.065, 1.71, -0.26]], trim, 0.004);
+    } else if (id === 'jade') {
+      sleeve(-1, true); sleeve(1, true);
+      drape(hips, .17, .27, [-.11,1.02,.14], cloth);
+      drape(chest, .22, .31, [-.08,1.43,-.13], cloth, true);
+      plate('J_Bip_L_UpperArm', [[-.04,.025],[.05,.035],[.06,-.055],[-.04,-.07]], [.15,1.41,.01], steel);
+      plate('J_Bip_L_LowerArm', [[-.03,.09],[.035,.08],[.03,-.09],[-.03,-.10]], [.40,1.38,.015], dark);
+      line(chest, [[-.10,1.39,.13],[.01,1.29,.15],[.13,1.14,.11]], dark,.014);
+      // Angled leather quiver and visible shafts on the drawing-hand side.
+      add(chest,new T.CylinderGeometry(.053,.043,.39,16,1,true),leatherGrip,[-.09,1.30,-.20],[0,0,-.30]);
+      for(const y of [1.13,1.48]) add(chest,new T.TorusGeometry(.053,.005,5,16),trim,[-.09+(y-1.30)*.30,y,-.20],[Math.PI/2,0,-.30]);
+      for(let i=0;i<7;i++) {
+        const x=-.14+(i%3)*.025,z=-.21+Math.floor(i/3)*.018,y=1.48+(i%2)*.022;
+        add(chest,new T.CylinderGeometry(.003,.003,.39,6),wood,[x,y-.03,z],[0,0,-.30]);
+        add(chest,new T.BoxGeometry(.027,.07,.002),steel,[x-.045,y+.145,z],[0,0,-.30]);
+      }
+      for(const side of [-1,1]) plate(head,crest,[side*.07,1.67,-.13],trim,.5);
     } else {
       sleeve(-1, true); sleeve(1, true);
       drape(hips, 0.14, 0.19, [0.13, 1.01, -0.15], cloth, true);
@@ -289,7 +308,8 @@ export function createHeroArt(T, root, sword) {
       for (const [mat, geometries] of wm) { const mesh = new T.Mesh(compact(mergeGeometries(geometries)), mat); mesh.frustumCulled = false; weapon.add(mesh); geometries.forEach(g => g.dispose()); }
       groups.set(hand + '_weapon', weapon);
     }
-    weapon('J_Bip_R_Hand', id === 'azure' ? 'glaive' : id === 'amber' ? 'dagger' : 'katana');
+    if (id === 'jade') groups.set('bow',createBowKit(T,root,bowFingerRest));
+    else weapon('J_Bip_R_Hand', id === 'azure' ? 'glaive' : id === 'amber' ? 'dagger' : 'katana');
     if (id === 'amber') weapon('J_Bip_L_Hand', 'dagger');
     for (const { bone, material, geometries } of batches.values()) {
       const mesh = new T.Mesh(compact(mergeGeometries(geometries)), material); mesh.frustumCulled = false; group(bone).add(mesh);
@@ -302,7 +322,7 @@ export function createHeroArt(T, root, sword) {
   return {
     ready,
     update() {
-      for (const group of kits.get(activeId) || []) group.userData.updateHair?.(performance.now() / 1000);
+      for (const group of kits.get(activeId) || []) { group.userData.updateHair?.(performance.now() / 1000); group.userData.updateBow?.(); }
     },
     apply(profile) {
       activeId = profile.id;
@@ -310,16 +330,16 @@ export function createHeroArt(T, root, sword) {
       if (!kits.has(profile.id)) kits.set(profile.id, build(profile.id));
       for (const [id, groups] of kits) for (const group of groups) group.visible = id === profile.id;
       for (const mesh of baseMeshes) {
-        if (mesh.userData.fullCostumeGeometry) mesh.geometry = profile.id === 'amber' ? shortened.get(mesh.userData.fullCostumeGeometry) : mesh.userData.fullCostumeGeometry;
+        if (mesh.userData.fullCostumeGeometry) mesh.geometry = ['amber','jade'].includes(profile.id) ? shortened.get(mesh.userData.fullCostumeGeometry) : mesh.userData.fullCostumeGeometry;
         const materials = [].concat(mesh.material);
         if (longPanels.has(mesh.geometry)) mesh.visible = profile.id === 'violet';
         if (/^(Hair|Braid)/.test(mesh.name) || oldHairGeometries.has(mesh.geometry)) mesh.visible = false;
-        if (mesh.userData.hairFoundation) { mesh.visible = true; mesh.material.color.setHex({ violet: 0x281731, azure: 0x172932, amber: 0x362218 }[profile.id]); }
+        if (mesh.userData.hairFoundation) { mesh.visible = true; mesh.material.color.setHex({ violet: 0x281731, azure: 0x172932, amber: 0x362218, jade:0x1c3027 }[profile.id]); }
         if (mesh.userData.fullHairGeometry) mesh.geometry = styledHair.get(profile.id) || mesh.userData.fullHairGeometry;
         for (const m of materials) {
           if (!m.color || m.side === T.BackSide) continue;
           if (m.name === 'Atelier hair foundation') continue;
-          const row = ['violet', 'azure', 'amber'].indexOf(profile.id);
+          const row = profile.id === 'jade' ? 1 : ['violet', 'azure', 'amber'].indexOf(profile.id);
           if (/Charcoal pinstripe/.test(m.name)) { m.color.setHex(profile.id === 'azure' ? 0x243844 : 0x292630); textured(m, row, 0, 1, 0.22); }
           else if (/Bottoms_01|Black leather|Boot leather|Strap leather/.test(m.name)) { m.color.setHex(profile.id === 'amber' ? 0x40302a : 0x292b35); textured(m, row, profile.id === 'violet' ? 3 : 1, 1, 0.18); }
           else if (/Plum damask/.test(m.name)) { m.color.setHex(p.cloth); textured(m, row, profile.id === 'violet' ? 1 : 0, 1, 0.55); }
@@ -341,7 +361,7 @@ export function createHeroArt(T, root, sword) {
       const geometries = new Set(), materials = new Set();
       for (const groups of kits.values()) for (const group of groups) {
         group.removeFromParent();
-        group.traverse(mesh => { if (mesh.isMesh) { geometries.add(mesh.geometry); for (const m of [].concat(mesh.material)) materials.add(m); } });
+        group.traverse(mesh => { if (mesh.isMesh || mesh.isLine) { geometries.add(mesh.geometry); for (const m of [].concat(mesh.material)) materials.add(m); } });
       }
       for (const mesh of baseMeshes) if (!sourceGeometry.has(mesh.geometry)) geometries.add(mesh.geometry);
       for (const mesh of baseMeshes) for (const m of [].concat(mesh.material)) if (!sourceMaterials.has(m)) materials.add(m);

@@ -3,8 +3,8 @@
  * battle.js 在主角模型與動作片段建好後呼叫 coop.attach(ctx)，每一格呼叫回傳物件的 update(realDt)。
  * 單人頁不傳 coop，battle.js 的掛鉤全部是 `coop?.` / `coopView?.`，不會執行。
  */
-import { SEND_HZ } from './protocol.js?v=20261002b';
-import { createTeammates } from './teammates.js?v=20261002d';
+import { SEND_HZ } from './protocol.js?v=20261002h';
+import { createTeammates } from './teammates.js?v=20261002h';
 import { createEnemySync } from './enemy-sync.js?v=20261002b';
 import { WORLD_HZ } from './world.js';
 import { readStatus, statusBits } from './team.js';

@@ -121,8 +121,8 @@ try {
   await sleep(200);
   check(!a.messages.some(m => m.t === 's'), 'sender does not get its own state back');
 
-  for (const animation of ['azureIdle', 'azureRun', 'azureSweep', 'azureRise', 'azureSlam', 'azureGuard', 'azureUlt', 'amberUlt']) {
-    const character = animation.startsWith('amber') ? 'amber' : 'azure';
+  for (const animation of ['azureIdle', 'azureRun', 'azureSweep', 'azureRise', 'azureSlam', 'azureGuard', 'azureUlt', 'amberUlt', 'jadeIdle', 'jadeRun', 'jadeShot', 'jadeDouble', 'jadeFan', 'jadeSpread', 'jadePierce', 'jadeGuard', 'jadeAir', 'jadeUlt']) {
+    const character = animation.startsWith('jade') ? 'jade' : animation.startsWith('amber') ? 'amber' : 'azure';
     const name = `${character}_${animation}_m2cr`;
     a.ws.send(JSON.stringify({ t: 's', d: { x: 0, y: 0, z: 0, r: 0, a: name, at: 0.4, ts: 1, l: 0, c: 2345 } }));
     const motion = await b.next(m => m.t === 's' && m.d?.a === name);
@@ -134,6 +134,12 @@ try {
   a.ws.send(JSON.stringify({ t: 'e', d: { loadout: { ch: 'azure', lv: 4, ready: 1, rv: 12345, go: 12345 } } }));
   const loadout = await b.next(m => m.t === 'e');
   check(loadout?.d.loadout.ch === 'azure' && loadout.d.loadout.lv === 4 && loadout.d.loadout.rv === 12345 && loadout.d.loadout.go === 12345, 'current host chapter and run reach guests through the existing authoritative envelope');
+  a.ws.send(JSON.stringify({t:'s',d:{x:0,y:0,z:0,r:0,a:'loadout_jade_1',c:12346}}));
+  const archerChoice=await b.next(m=>m.t==='s'&&m.d?.a==='loadout_jade_1');
+  check(archerChoice?.d.c===12346,'jade archer selection passes the existing relay');
+  a.ws.send(JSON.stringify({t:'e',d:{loadout:{ch:'jade',lv:4,ready:1,rv:12346,go:12346}}}));
+  const archerRun=await b.next(m=>m.t==='e'&&m.d?.loadout?.ch==='jade');
+  check(archerRun?.d.loadout.lv===4,'jade archer launches the synchronized host chapter');
   for (const p of [a, b, c]) p.messages.length = 0;
 
   // --- 速率限制：一口氣送 60 則，其他人最多收到 40 則 ---
