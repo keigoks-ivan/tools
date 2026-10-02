@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone } from 'three/addons/utils/SkeletonUtils.js';
-import { toonVroidHero } from './battle.js?v=20261002d';
+import { toonVroidHero } from './battle.js?v=20261002e';
 import { createHeroEquipment } from './hero-equipment.js?v=20261002d';
-import { createPolearmClips } from './hero-motion.js?v=20261002d';
+import { createPolearmClips } from './hero-motion.js?v=20261002e';
 import { HEROES } from './heroes.js?v=20261002d';
 import { createHeroEnvironment } from './hero-hair.js?v=20261002c';
 
@@ -19,8 +19,11 @@ for (const [color, intensity, pos] of [[0xffefd8, 3, [-3, 5, 5]], [0xa3cfff, 2.5
   const light = new THREE.DirectionalLight(color, intensity); light.position.set(...pos); scene.add(light);
 }
 const actors = [];
+const controls = document.querySelectorAll('#controls button, #controls select, #motion-controls button, #motion-controls select, #motion-time');
+controls.forEach(control => { control.disabled = true; });
 let rotating = false, angle = 0, action = 'idle';
 let subject = 'all', detail = false;
+let motion = 'azureIdle', paused = false, speed = 1;
 function resize() {
   const w = innerWidth, h = innerHeight; renderer.setSize(w, h); camera.aspect = w / h;
   const x = subject === 'all' ? 0 : (Number(subject) - 1) * 1.35;
@@ -28,6 +31,7 @@ function resize() {
   camera.lookAt(x, detail ? 1.56 : 0.95, 0); camera.updateProjectionMatrix();
   actors.forEach((actor, i) => actor.turntable.visible = subject === 'all' || i === Number(subject));
   document.querySelector('footer').hidden = detail;
+  document.getElementById('motion-controls').hidden = subject !== '1' || detail;
   document.querySelector('footer').style.gridTemplateColumns = subject === 'all' ? 'repeat(3,1fr)' : '1fr';
   document.querySelectorAll('footer > div').forEach((item, i) => { item.hidden = subject !== 'all' && i !== Number(subject); });
   document.getElementById('detail').textContent = detail ? '全身檢視' : '髮型近看';
@@ -53,13 +57,40 @@ try {
     actors[i].plinth = plinth; actors[i].rim = rim;
   }
   document.getElementById('status').textContent = '';
+  controls.forEach(control => { control.disabled = false; });
+  subject = document.getElementById('subject').value; resize();
   document.getElementById('front').onclick = () => { angle = 0; rotating = false; };
+  document.getElementById('side').onclick = () => { angle = Math.PI / 2; rotating = false; };
   document.getElementById('back').onclick = () => { angle = Math.PI; rotating = false; };
   document.getElementById('rotate').onclick = () => { rotating = !rotating; };
   document.getElementById('pose').onclick = () => {
     action = action === 'idle' ? 'combo2' : 'idle';
-    for (const actor of actors) { actor.mixer.stopAllAction(); actor.mixer.clipAction(actor.clips.find(c => c.name === (actor.profile.id === 'azure' ? action === 'idle' ? 'azureIdle' : 'azureSweep' : action))).reset().play(); }
+    for (const actor of actors) { if (actor.profile.id === 'azure') { motion = action === 'idle' ? 'azureIdle' : 'azureSweep'; document.getElementById('motion').value = motion; setMotion(motion); continue; } actor.mixer.stopAllAction(); actor.mixer.clipAction(actor.clips.find(c => c.name === action)).reset().play(); }
   };
+  const azure = actors.find(actor => actor.profile.id === 'azure');
+  const clock = document.getElementById('motion-time');
+  function setMotion(name) {
+    motion = name; azure.mixer.stopAllAction();
+    const clip = azure.clips.find(c => c.name === name);
+    azure.mixer.clipAction(clip).reset().setLoop(THREE.LoopRepeat, Infinity).play(); clock.max = clip.duration;
+    azure.mixer.setTime(0); clock.value = 0;
+  }
+  setMotion(document.getElementById('motion').value);
+  document.getElementById('motion').onchange = event => setMotion(event.target.value);
+  document.getElementById('motion-play').onclick = () => {
+    paused = !paused; document.getElementById('motion-play').textContent = paused ? '播放' : '暫停';
+    const clip = azure.clips.find(c => c.name === motion), playing = azure.mixer.clipAction(clip);
+    if (!paused) { if (playing.time >= clip.duration) playing.reset(); playing.paused = false; playing.setLoop(THREE.LoopRepeat, Infinity).play(); }
+  };
+  function seek(time) {
+    paused = true; document.getElementById('motion-play').textContent = '播放';
+    const playing = azure.mixer.clipAction(azure.clips.find(c => c.name === motion));
+    playing.paused = false; playing.enabled = true; playing.setLoop(THREE.LoopOnce, 1); playing.clampWhenFinished = true;
+    azure.mixer.setTime(time);
+  }
+  clock.oninput = () => seek(Number(clock.value));
+  document.getElementById('motion-step').onclick = () => seek(Math.min(Number(clock.max), Number(clock.value) + 1/60));
+  document.getElementById('motion-speed').onchange = event => { speed = Number(event.target.value); };
   document.getElementById('subject').onchange = event => { subject = event.target.value; if (subject === 'all') detail = false; resize(); };
   document.getElementById('detail').onclick = () => {
     detail = !detail;
@@ -73,10 +104,16 @@ function frame(t) {
   const dt = Math.min(0.05, (t - last) / 1000); last = t;
   if (rotating) angle += dt * 0.5;
   for (const actor of actors) {
-    actor.turntable.rotation.y = 0; actor.mixer.update(dt); actor.equipment.update(); actor.look.update(t / 1000);
+    actor.turntable.rotation.y = 0; if (actor.profile.id !== 'azure' || !paused) actor.mixer.update(dt * (actor.profile.id === 'azure' ? speed : 1)); actor.equipment.update(); actor.look.update(t / 1000);
     actor.model.updateMatrixWorld(true);
     const facing = new THREE.Vector3(0, 0, 1).applyQuaternion(actor.model.getObjectByName('J_Bip_C_Hips').getWorldQuaternion(new THREE.Quaternion()));
-    actor.turntable.rotation.y = angle - Math.atan2(facing.x, facing.z);
+    // The Azure clips are authored facing +Z. Do not cancel their hip turn.
+    actor.turntable.rotation.y = actor.profile.id === 'azure' ? angle : angle - Math.atan2(facing.x, facing.z);
+    if (actor.profile.id === 'azure') {
+      const time = actor.mixer.clipAction(actor.clips.find(c => c.name === motion)).time;
+      document.getElementById('motion-time').value = time;
+      document.getElementById('motion-clock').textContent = `${time.toFixed(2)}s`;
+    }
     actor.plinth.visible = actor.rim.visible = actor.turntable.visible;
     actor.model.traverse(o => { if (/_Hand_weapon$/.test(o.name)) o.visible = !detail; });
   }

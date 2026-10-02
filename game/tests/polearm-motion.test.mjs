@@ -37,8 +37,10 @@ test('polearm clips keep both palms on the shaft without elbow flips or altering
       const origin=weapon.getWorldPosition(new T.Vector3()), shaft=new T.Vector3(0,1,0).transformDirection(weapon.matrixWorld);
       for(const side of ['L','R']) {
         const hand=root.getObjectByName(`J_Bip_${side}_Hand`), upper=root.getObjectByName(`J_Bip_${side}_UpperArm`), lower=root.getObjectByName(`J_Bip_${side}_LowerArm`);
-        const palm=hand.getWorldPosition(new T.Vector3()).add(new T.Vector3(-.045,-.012,.025).applyQuaternion(hand.getWorldQuaternion(new T.Quaternion())));
-        assert.ok(palm.sub(origin).cross(shaft).length()<.012,`${clip.name}/${frame}/${side}: palm left the shaft`);
+        const palm=hand.getWorldPosition(new T.Vector3()).add(new T.Vector3(side==='R'?-.045:.045,-.012,.025).applyQuaternion(hand.getWorldQuaternion(new T.Quaternion())));
+        const relative=palm.sub(origin);
+        assert.ok(Math.abs(relative.dot(shaft)-(side==='L'?.40:0))<.015,`${clip.name}/${frame}/${side}: grip slid along the shaft`);
+        assert.ok(relative.cross(shaft).length()<.012,`${clip.name}/${frame}/${side}: palm left the shaft`);
         const a=upper.getWorldPosition(new T.Vector3()),b=lower.getWorldPosition(new T.Vector3()),c=hand.getWorldPosition(new T.Vector3());
         assert.ok(a.distanceTo(c)<(a.distanceTo(b)+b.distanceTo(c))*.995,`${clip.name}/${side}: locked elbow`);
         if(previous.has(side)) assert.ok(previous.get(side).angleTo(upper.quaternion)<.4,`${clip.name}/${frame}/${side}: elbow flipped`);
@@ -57,7 +59,7 @@ test('polearm clips keep both palms on the shaft without elbow flips or altering
     for(let t=0;t<duration;t+=1/120) {
       mixer.update(1/120);root.updateMatrixWorld(true);if(index===0&&t<.14)continue;
       const hand=root.getObjectByName('J_Bip_L_Hand'), origin=weapon.getWorldPosition(new T.Vector3()),shaft=new T.Vector3(0,1,0).transformDirection(weapon.matrixWorld);
-      const palm=hand.getWorldPosition(new T.Vector3()).add(new T.Vector3(-.045,-.012,.025).applyQuaternion(hand.getWorldQuaternion(new T.Quaternion())));
+      const palm=hand.getWorldPosition(new T.Vector3()).add(new T.Vector3(.045,-.012,.025).applyQuaternion(hand.getWorldQuaternion(new T.Quaternion())));
       assert.ok(palm.sub(origin).cross(shaft).length()<.025,`${name}: grip lost during combo blend`);
     }
   }
@@ -116,4 +118,31 @@ test('amber ultimate keeps grounded footwork through all eight cuts and the cros
   }
   const packet=JSON.parse(encodeState({x:0,y:0,z:0,yaw:0,character:'amber',anim:clip.name,time:2.35,loop:false,musou:2.35},100));
   assert.ok(packet.d.a.length<=24); assert.equal(decodeState(packet.d).anim,'amberUlt');
+});
+
+
+test('azure strikes transfer weight over planted staggered feet with flexed knees and a closed supporting hand', async () => {
+  const gltf=await loadRig(), root=gltf.scene;
+  const finger=root.getObjectByName('J_Bip_L_Index2'), open=finger.quaternion.clone();
+  const clips=createPolearmClips(T,root,gltf.animations), mixer=new T.AnimationMixer(root);
+  for(const clip of clips.filter(c=>c.name!=='azureRun')) {
+    mixer.stopAllAction(); const action=mixer.clipAction(clip).reset().setLoop(T.LoopOnce,1).play(); action.clampWhenFinished=true;
+    const feet=new Map(); let minHip=Infinity,maxHip=-Infinity;
+    for(let frame=0;frame<=Math.ceil(clip.duration*120);frame++) {
+      mixer.setTime(Math.min(clip.duration,frame/120)); root.updateMatrixWorld(true);
+      const hips=root.getObjectByName('J_Bip_C_Hips');minHip=Math.min(minHip,hips.position.y);maxHip=Math.max(maxHip,hips.position.y);
+      for(const side of ['R','L']) {
+        const upper=root.getObjectByName(`J_Bip_${side}_UpperLeg`), lower=root.getObjectByName(`J_Bip_${side}_LowerLeg`), foot=root.getObjectByName(`J_Bip_${side}_Foot`);
+        const pos=foot.getWorldPosition(new T.Vector3());
+        if(!feet.has(side))feet.set(side,pos.clone());
+        assert.ok(feet.get(side).distanceTo(pos)<.003,`${clip.name}/${frame}/${side}: foot slid or lifted`);
+        const a=upper.getWorldPosition(new T.Vector3()),b=lower.getWorldPosition(new T.Vector3());
+        assert.ok(a.distanceTo(pos)<(a.distanceTo(b)+b.distanceTo(pos))*.98,`${clip.name}/${side}: knee locked`);
+      }
+      assert.ok(finger.quaternion.angleTo(open)>.8,`${clip.name}: supporting fingers remained open`);
+    }
+    const separation=feet.get('L').clone().sub(feet.get('R'));
+    assert.ok(Math.abs(separation.x-.38)<.003 && Math.abs(separation.z-.30)<.003,`${clip.name}: stance is not staggered`);
+    if(['azureSweep','azureRise','azureSlam','azureUlt'].includes(clip.name))assert.ok(maxHip-minHip>.015,`${clip.name}: pelvis did not transfer weight`);
+  }
 });

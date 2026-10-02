@@ -5,7 +5,7 @@ import { Arena } from '../2d/combat.js?v=20261002b';
 import { heroFor } from './heroes.js?v=20261002d';
 import { Campaign, CHAPTERS, chapterTuning } from './campaign.js?v=20261002b';
 import { createHeroEquipment } from './hero-equipment.js?v=20261002d';
-import { createPolearmClips, createDualBladeUltimate } from './hero-motion.js?v=20261002d';
+import { createPolearmClips, createDualBladeUltimate } from './hero-motion.js?v=20261002e';
 import { createHeroSpecialFx } from './hero-special-fx.js?v=20261002d';
 import { createHeroEnvironment } from './hero-hair.js?v=20261002c';
 import { createChapterWorld } from './chapter-world.js?v=20261002c';
@@ -240,7 +240,7 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
   if (heroChoice === 'vroid') clips.push(...createPolearmClips(THREE, heroModel, gltf.animations), createDualBladeUltimate(THREE, heroModel, gltf.animations));
   const actions = new Map(clips.map(clip => [clip.name, mixer.clipAction(clip)]));
   for (const clip of clips) for (const track of clip.tracks) {
-    if (!/Hips\.position$/i.test(track.name)) continue;
+    if (clip.name.startsWith('azure') || !/Hips\.position$/i.test(track.name)) continue;
     const x = track.values[0], z = track.values[2];
     for (let i = 0; i < track.values.length; i += 3) { track.values[i] = x; track.values[i + 2] = z; }
   }
