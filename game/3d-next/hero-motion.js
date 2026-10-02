@@ -65,6 +65,7 @@ export function createPolearmClips(T, source, animations) {
   const weaponRotation = new T.Quaternion(), handRotation = new T.Quaternion(), leftRotation = new T.Quaternion();
   const mountInverse = new T.Quaternion().setFromRotationMatrix(new T.Matrix4().makeBasis(new T.Vector3(0, 1, 0), new T.Vector3(0, 0, 1), new T.Vector3(1, 0, 0))).invert();
   const flip = new T.Quaternion().setFromAxisAngle(new T.Vector3(0, 0, 1), Math.PI);
+  const footRotation = new T.Quaternion(), turnRotation = new T.Quaternion(), up = new T.Vector3(0,1,0);
   // [time, grip centre x/y/z, shaft yaw/pitch, hip turn, torso lean]. The
   // blade leads a curved stroke; the pelvis shifts between planted, staggered feet.
   const guard = [0, -.015, 1.13, .25, .95, .35, -.10, .015];
@@ -110,17 +111,28 @@ export function createPolearmClips(T, source, animations) {
         if (hipTrack) { hips.position.x = hipTrack.values[0]; hips.position.z = hipTrack.values[2]; }
         hips.quaternion.setFromEuler(new T.Euler(0,p[6],0));
       } else {
-        hips.position.set(p[6]*.10, .94-Math.max(0,p[7])*.22, -Math.abs(p[6])*.035);
+        hips.position.set(p[6]*.13, .90-Math.max(0,p[7])*.30, -Math.abs(p[6])*.025);
         hips.position.y += Math.sin(t*Math.PI*2)*.003;
-        hips.quaternion.setFromEuler(new T.Euler(p[7]*.20,p[6],-p[6]*.05));
+        hips.quaternion.setFromEuler(new T.Euler(p[7]*.35,p[6]*2.1,-p[6]*.08));
       }
-      chest.rotation.x += p[7]; chest.rotation.y += p[6]*.30;
-      neck.rotation.y -= p[6]*.95;
+      chest.rotation.x += p[7]*1.45; chest.rotation.y += p[6]*.35;
+      neck.rotation.y -= T.MathUtils.clamp(p[6]*1.1,-.4,.4);
       root.updateMatrixWorld(true);
       if (base !== run) {
-        // Ankles remain fixed in world space as hips turn and knees absorb weight.
-        feet[0].solve(rightTarget.set(-.19,.09,-.14),pole.set(-.08,0,1),feet[0].rotation);
-        feet[1].solve(leftTarget.set(.19,.09,.16),pole.set(.08,0,1),feet[1].rotation);
+        // Guan Yu's official showcase was reviewed for step/pivot and broad
+        // body-led cuts. The front foot supports; the rear foot lifts to advance
+        // and lifts again on recovery. No grounded foot translates along the floor.
+        const striking = name !== 'azureIdle';
+        const advance = striking ? T.MathUtils.smoothstep(t,.12,.40) : 0;
+        const recovery = name==='azureSweep' ? [.44,.60] : name==='azureRise' ? [.46,.62] : name==='azureGuard' ? [.42,.56] : [.69,.96];
+        const recover = striking ? T.MathUtils.smoothstep(t,...recovery) : 0;
+        const lift = .075*(Math.sin(advance*Math.PI)+Math.sin(recover*Math.PI));
+        const travel = T.MathUtils.smoothstep(advance,.15,.85), returnTravel = T.MathUtils.smoothstep(recover,.15,.85);
+        turnRotation.setFromAxisAngle(up,p[6]*.9);
+        footRotation.copy(turnRotation).multiply(feet[0].rotation);
+        feet[0].solve(rightTarget.set(-.22,.09+lift,-.20+.16*travel*(1-returnTravel)),pole.set(-.1,0,1),footRotation);
+        footRotation.copy(turnRotation).multiply(feet[1].rotation);
+        feet[1].solve(leftTarget.set(.22,.09,.22),pole.set(.1,0,1),footRotation);
       }
       weaponRotation.setFromEuler(new T.Euler(Math.PI/2-p[5],p[4],0,'YXZ'));
       handRotation.copy(weaponRotation).multiply(mountInverse);
@@ -148,8 +160,9 @@ export function createPolearmClips(T, source, animations) {
         }
         if (!corrected) break;
       }
-      right(rightTarget,pole.set(-.9,-.2,-.4),handRotation);
-      left(leftTarget,pole.set(.9,-.2,-.4),leftRotation);
+      turnRotation.setFromAxisAngle(up,p[6]*2.1);
+      right(rightTarget,pole.set(-.9,-.2,-.4).applyQuaternion(turnRotation),handRotation);
+      left(leftTarget,pole.set(.9,-.2,-.4).applyQuaternion(turnRotation),leftRotation);
       times.push(seconds); bones.forEach((bone,j) => values[j].push(...bone.quaternion.toArray()));
       positions.push(hips.position.x, hips.position.y, hips.position.z);
     }

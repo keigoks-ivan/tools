@@ -50,7 +50,7 @@ test('polearm clips keep both palms on the shaft without elbow flips or altering
   }
   // Sample the actual early-cancel windows, including both crossfades. A
   // transition may relax the grip slightly, but must not fling a hand off it.
-  mixer.stopAllAction(); let current = null;
+  mixer.stopAllAction(); let current = null, previousFoot = null;
   const sequence = [['azureIdle',.3],['azureSweep',HEROES.azure.chain[0].cancel],['azureRise',HEROES.azure.chain[1].cancel],['azureSlam',HEROES.azure.chain[2].duration],['azureIdle',.3]];
   for (const [index,[name,duration]] of sequence.entries()) {
     const action=mixer.clipAction(clips.find(c=>c.name===name));
@@ -61,6 +61,10 @@ test('polearm clips keep both palms on the shaft without elbow flips or altering
       const hand=root.getObjectByName('J_Bip_L_Hand'), origin=weapon.getWorldPosition(new T.Vector3()),shaft=new T.Vector3(0,1,0).transformDirection(weapon.matrixWorld);
       const palm=hand.getWorldPosition(new T.Vector3()).add(new T.Vector3(.045,-.012,.025).applyQuaternion(hand.getWorldQuaternion(new T.Quaternion())));
       assert.ok(palm.sub(origin).cross(shaft).length()<.025,`${name}: grip lost during combo blend`);
+      const foot=root.getObjectByName('J_Bip_R_Foot').getWorldPosition(new T.Vector3());
+      if(previousFoot && foot.y<.095 && previousFoot.y<.095) assert.ok(Math.hypot(foot.x-previousFoot.x,foot.z-previousFoot.z)<.003,`${name}: grounded foot slid during combo blend`);
+      previousFoot=foot;
+
     }
   }
   equipment.dispose();
@@ -121,28 +125,41 @@ test('amber ultimate keeps grounded footwork through all eight cuts and the cros
 });
 
 
-test('azure strikes transfer weight over planted staggered feet with flexed knees and a closed supporting hand', async () => {
+test('azure strikes pivot over the supporting foot, lift the stepping foot, and keep a closed supporting hand', async () => {
   const gltf=await loadRig(), root=gltf.scene;
   const finger=root.getObjectByName('J_Bip_L_Index2'), open=finger.quaternion.clone();
   const clips=createPolearmClips(T,root,gltf.animations), mixer=new T.AnimationMixer(root);
   for(const clip of clips.filter(c=>c.name!=='azureRun')) {
     mixer.stopAllAction(); const action=mixer.clipAction(clip).reset().setLoop(T.LoopOnce,1).play(); action.clampWhenFinished=true;
-    const feet=new Map(); let minHip=Infinity,maxHip=-Infinity;
+    const feet=new Map(), previous=new Map(); let minHip=Infinity,maxHip=-Infinity,maxLift=0,minTurn=Infinity,maxTurn=-Infinity;
     for(let frame=0;frame<=Math.ceil(clip.duration*120);frame++) {
       mixer.setTime(Math.min(clip.duration,frame/120)); root.updateMatrixWorld(true);
       const hips=root.getObjectByName('J_Bip_C_Hips');minHip=Math.min(minHip,hips.position.y);maxHip=Math.max(maxHip,hips.position.y);
+      const facing=new T.Vector3(0,0,1).applyQuaternion(hips.quaternion), turn=Math.atan2(facing.x,facing.z);
+      minTurn=Math.min(minTurn,turn);maxTurn=Math.max(maxTurn,turn);
       for(const side of ['R','L']) {
         const upper=root.getObjectByName(`J_Bip_${side}_UpperLeg`), lower=root.getObjectByName(`J_Bip_${side}_LowerLeg`), foot=root.getObjectByName(`J_Bip_${side}_Foot`);
         const pos=foot.getWorldPosition(new T.Vector3());
         if(!feet.has(side))feet.set(side,pos.clone());
-        assert.ok(feet.get(side).distanceTo(pos)<.003,`${clip.name}/${frame}/${side}: foot slid or lifted`);
+        if(side==='L'||clip.name==='azureIdle') assert.ok(feet.get(side).distanceTo(pos)<.003,`${clip.name}/${frame}/${side}: supporting foot moved`);
+        assert.ok(pos.y>=.087 && pos.y<.17,`${clip.name}/${side}: foot penetrated the ground or kicked`);
+        if(side==='R') {
+          maxLift=Math.max(maxLift,pos.y-.09);
+          const last=previous.get(side);
+          if(last && pos.y<.095 && last.y<.095) assert.ok(Math.hypot(pos.x-last.x,pos.z-last.z)<.002,`${clip.name}/${frame}: rear foot slid while grounded (${Math.hypot(pos.x-last.x,pos.z-last.z)}, ${pos.y})`);
+        }
+        previous.set(side,pos.clone());
         const a=upper.getWorldPosition(new T.Vector3()),b=lower.getWorldPosition(new T.Vector3());
         assert.ok(a.distanceTo(pos)<(a.distanceTo(b)+b.distanceTo(pos))*.98,`${clip.name}/${side}: knee locked`);
       }
       assert.ok(finger.quaternion.angleTo(open)>.8,`${clip.name}: supporting fingers remained open`);
     }
     const separation=feet.get('L').clone().sub(feet.get('R'));
-    assert.ok(Math.abs(separation.x-.38)<.003 && Math.abs(separation.z-.30)<.003,`${clip.name}: stance is not staggered`);
-    if(['azureSweep','azureRise','azureSlam','azureUlt'].includes(clip.name))assert.ok(maxHip-minHip>.015,`${clip.name}: pelvis did not transfer weight`);
+    assert.ok(Math.abs(separation.x-.44)<.003 && Math.abs(separation.z-.42)<.003,`${clip.name}: stance is not staggered`);
+    if(['azureSweep','azureRise','azureSlam','azureUlt'].includes(clip.name)) {
+      assert.ok(maxHip-minHip>.025,`${clip.name}: pelvis did not transfer weight`);
+      assert.ok(maxLift>.06,`${clip.name}: rear foot did not lift to step`);
+      assert.ok(maxTurn-minTurn>1.0,`${clip.name}: torso remained square through the cut`);
+    }
   }
 });
