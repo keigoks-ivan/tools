@@ -32,7 +32,7 @@ test('character choice changes real health, movement, attack reach and damage; r
 });
 
 test('every combo and heavy branch is playable and uses a real animation clip', () => {
-  const clips = new Set(['combo1', 'combo2', 'combo3', 'combo4', 'combo5', 'slash2', 'slash3', 'slash4', 'heavy', 'heavyfin']);
+  const clips = new Set(['combo1', 'combo2', 'combo3', 'combo4', 'combo5', 'slash2', 'slash3', 'slash4', 'heavy', 'heavyfin', 'azureSweep', 'azureRise', 'azureSlam', 'azureGuard']);
   for (const hero of Object.values(HEROES)) {
     const arena = makeArena(hero);
     for (let i = 0; i < hero.chain.length; i++) {
@@ -143,6 +143,8 @@ test('weapon variants keep the authored skeleton and restore the original geomet
   json.images = []; json.textures = [];
   json.buffers[0].uri = `data:application/octet-stream;base64,${bytes.subarray(28 + size).toString('base64')}`;
   const gltf = await new GLTFLoader().parseAsync(JSON.stringify(json), '');
+  const { createPolearmClips } = await import('../3d-next/hero-motion.js');
+  gltf.animations.push(...createPolearmClips(THREE, gltf.scene, gltf.animations));
   const sword = gltf.scene.getObjectByName('Hero_sword');
   const source = sword.geometry;
   const originals = source.attributes.position.array.slice();

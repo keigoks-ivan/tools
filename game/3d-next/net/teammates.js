@@ -5,9 +5,9 @@
  */
 import { SnapshotBuffer } from './interp.js';
 import { SLOT_COLORS, playerColor } from './colors.js';
-import { GHOST_ANIMS, TRAIL_ANIM, makeGhosts, makePeerTrail } from './peer-fx.js';
-import { heroFor } from '../heroes.js?v=20261002b';
-import { createHeroSpecialFx } from '../hero-special-fx.js?v=20261002b';
+import { GHOST_ANIMS, TRAIL_ANIM, makeGhosts, makePeerTrail } from './peer-fx.js?v=20261002d';
+import { heroFor } from '../heroes.js?v=20261002d';
+import { createHeroSpecialFx } from '../hero-special-fx.js?v=20261002d';
 
 /** 依座位輪用的色調（名單外的名字才用到；Matt／Myles／Mike 固定配色見 colors.js） */
 export const TEAM_TINTS = SLOT_COLORS;
@@ -84,7 +84,7 @@ export function createTeammates({ THREE, scene, template, clips, cloneSkinned, q
     const equipment = createEquipment?.(model);
     const trail = makePeerTrail({ THREE, scene, sword, color: tint, segments: quality === 'mobile' ? 9 : 12 });
     const ghosts = !equipment && quality !== 'mobile' ? makeGhosts({ THREE, scene, template, cloneSkinned, color: tint }) : null;
-    const specialFx = equipment ? createHeroSpecialFx(THREE, scene, groundAt, { capacity: 32 }) : null;
+    const specialFx = equipment ? createHeroSpecialFx(THREE, scene, groundAt, { capacity: 48 }) : null;
     const bones = [];
     model.traverse(object => { if (object.isBone) bones.push(object); });
     const peer = { id, name, tint, root, model, mixer, actions, label, owned, trail, ghosts, specialFx, equipment, ready: !equipment, character: null, musouAt: -1, swing: 0, finished: false, previous: new THREE.Vector3(), bones, buffer: new SnapshotBuffer(), current: null, currentName: '', lastTime: 0 };
@@ -97,7 +97,8 @@ export function createTeammates({ THREE, scene, template, clips, cloneSkinned, q
   function play(peer, name, loop, scale, time) {
     const next = peer.actions.get(name) || peer.actions.get('idle');
     if (!next) return;
-    if (peer.current && peer.current !== next) peer.current.fadeOut(0.08);
+    const blend = name.startsWith('azure') ? 0.14 : 0.08;
+    if (peer.current && peer.current !== next) peer.current.fadeOut(blend);
     next.reset();
     next.enabled = true;
     next.setEffectiveWeight(1);
@@ -105,7 +106,8 @@ export function createTeammates({ THREE, scene, template, clips, cloneSkinned, q
     next.setLoop(loop ? THREE.LoopRepeat : THREE.LoopOnce, loop ? Infinity : 1);
     next.clampWhenFinished = !loop;
     next.time = Math.max(0, Math.min(time || 0, next.getClip().duration));
-    next.fadeIn(peer.current ? 0.08 : 0).play();
+    if (peer.current !== next || !name.startsWith('azure')) next.fadeIn(peer.current ? blend : 0);
+    next.play();
     peer.current = next;
     peer.currentName = name;
   }

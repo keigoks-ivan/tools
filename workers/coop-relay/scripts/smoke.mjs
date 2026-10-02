@@ -121,6 +121,13 @@ try {
   await sleep(200);
   check(!a.messages.some(m => m.t === 's'), 'sender does not get its own state back');
 
+  for (const animation of ['azureIdle', 'azureRun', 'azureSweep', 'azureRise', 'azureSlam', 'azureGuard', 'azureUlt', 'amberUlt']) {
+    const character = animation.startsWith('amber') ? 'amber' : 'azure';
+    const name = `${character}_${animation}_m2cr`;
+    a.ws.send(JSON.stringify({ t: 's', d: { x: 0, y: 0, z: 0, r: 0, a: name, at: 0.4, ts: 1, l: 0, c: 2345 } }));
+    const motion = await b.next(m => m.t === 's' && m.d?.a === name);
+    check(motion?.d.at === 0.4 && motion.d.l === 0, `${animation} and ultimate clock pass the unchanged relay allowlist`);
+  }
   a.ws.send(JSON.stringify({ t: 's', d: { x: 0, y: 0, z: 0, r: 0, a: 'loadout_azure_1', c: 12345 } }));
   const choice = await b.next(m => m.t === 's');
   check(choice?.d.a === 'loadout_azure_1' && choice.d.c === 12345, 'selected character, readiness and revision pass the deployed state allowlist');

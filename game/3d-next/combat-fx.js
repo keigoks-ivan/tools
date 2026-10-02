@@ -1625,8 +1625,8 @@ export function createCombatFx(o) {
     tangent.normalize();
     const special = event.source === 'special', heavy = event.source === 'heavy';
     const armored = !!event.armored;
-    const hot = armored ? [1.1, 1.5, 2.4] : heavy ? [2.4, 1.9, 1.5] : [2.3, 1.9, 2.7];
-    const violet = armored ? [0.5, 0.8, 1.8] : [0.95, 0.42, 1.9];
+    const hot = event.tint ? event.tint.map(c => c * 1.4 + .35) : armored ? [1.1, 1.5, 2.4] : heavy ? [2.4, 1.9, 1.5] : [2.3, 1.9, 2.7];
+    const violet = event.tint || (armored ? [0.5, 0.8, 1.8] : [0.95, 0.42, 1.9]);
     // bright cores (only the first few hits of a frame get the full flare, the rest share it)
     const ws = Math.min(w, 1.5);
     if (nth < 3) {
@@ -2581,7 +2581,7 @@ export function createCombatFx(o) {
       const time = pick(i1, 6) + (pick(i2, 6) - pick(i1, 6)) * f;
       const ageU = 1 - Math.min(1, (now - time) / trailState.life);   // 1 = newest
       strips.put(v[0], v[1], v[2], v[3], v[4], v[5], stripU(ageU), stripV(STRIP_ROWS.trail, 0), stripU(ageU), stripV(STRIP_ROWS.trail, 1),
-        1.15 * heat, 1.0 * heat, 1.35 * heat, 1, 0);
+        (trailState.tint?.[0] ?? 1.15) * heat, (trailState.tint?.[1] ?? 1.0) * heat, (trailState.tint?.[2] ?? 1.35) * heat, 1, 0);
     }
     strips.close();
   }
@@ -2599,7 +2599,7 @@ export function createCombatFx(o) {
     trailState.visible = blade.count >= 2;
     if (attacking && blade.count && tier >= 1 && gameDt > 0) {
       const tip = blade.tip(0, tmp);
-      particles.emit(STYLE.glow, tip.x, tip.y, tip.z, 0, 0, 0, 0.09, 0.35 + tier * 0.1, 0.2, 1.0, 0.55, 1.9, 0.8);
+      particles.emit(STYLE.glow, tip.x, tip.y, tip.z, 0, 0, 0, 0.09, 0.35 + tier * 0.1, 0.2, trailState.tint?.[0] ?? 1.0, trailState.tint?.[1] ?? 0.55, trailState.tint?.[2] ?? 1.9, 0.8);
       if (tier >= 3 && rand() < 0.5) particles.emit(STYLE.ember, tip.x, tip.y, tip.z, rnd(-0.6, 0.6), rnd(0, 1), rnd(-0.6, 0.6), 0.5, 0.1, 0.03, 1.4, 0.7, 2.2, 1);
     }
     if (swordMaterial) {
@@ -2706,6 +2706,7 @@ export function createCombatFx(o) {
   }
 
   function update(realDt, gameDt, state = {}) {
+    trailState.tint = state.heroTint || null;
     realDt = Math.max(0, Math.min(0.1, realDt || 0));
     gameDt = Math.max(0, Math.min(0.1, gameDt ?? realDt));
     realTime += realDt;

@@ -1,9 +1,10 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone } from 'three/addons/utils/SkeletonUtils.js';
-import { toonVroidHero } from './battle.js?v=20261002c';
-import { createHeroEquipment } from './hero-equipment.js?v=20261002c';
-import { HEROES } from './heroes.js?v=20261002b';
+import { toonVroidHero } from './battle.js?v=20261002d';
+import { createHeroEquipment } from './hero-equipment.js?v=20261002d';
+import { createPolearmClips } from './hero-motion.js?v=20261002d';
+import { HEROES } from './heroes.js?v=20261002d';
 import { createHeroEnvironment } from './hero-hair.js?v=20261002c';
 
 const canvas = document.getElementById('view');
@@ -34,6 +35,7 @@ function resize() {
 resize(); window.addEventListener('resize', resize);
 try {
   const source = await new GLTFLoader().loadAsync('../assets/heroes/swordswoman-v4.glb?v=20260925d');
+  const clips = [...source.animations, ...createPolearmClips(THREE, source.scene, source.animations)];
   for (const [i, profile] of Object.values(HEROES).entries()) {
     const model = clone(source.scene);
     const clonedMaterials = new Map();
@@ -43,8 +45,8 @@ try {
     equipment.apply(profile); await equipment.ready;
     const turntable = new THREE.Group(); turntable.position.x = (i - 1) * 1.35; turntable.add(model); scene.add(turntable);
     const mixer = new THREE.AnimationMixer(model);
-    mixer.clipAction(source.animations.find(c => c.name === 'idle')).play();
-    actors.push({ model, turntable, mixer, look, equipment });
+    mixer.clipAction(clips.find(c => c.name === (profile.id === 'azure' ? 'azureIdle' : 'idle'))).play();
+    actors.push({ model, turntable, mixer, look, equipment, clips, profile });
     const plinth = new THREE.Mesh(new THREE.CylinderGeometry(0.46, 0.49, 0.04, 48), new THREE.MeshStandardMaterial({ color: 0x252738, roughness: 0.55, metalness: 0.35 }));
     plinth.position.set(turntable.position.x, -0.025, 0); scene.add(plinth);
     const rim = new THREE.Mesh(new THREE.TorusGeometry(0.475, 0.003, 4, 48), new THREE.MeshBasicMaterial({ color: profile.tint })); rim.rotation.x = Math.PI / 2; rim.position.set(turntable.position.x, -0.01, 0); scene.add(rim);
@@ -56,7 +58,7 @@ try {
   document.getElementById('rotate').onclick = () => { rotating = !rotating; };
   document.getElementById('pose').onclick = () => {
     action = action === 'idle' ? 'combo2' : 'idle';
-    for (const actor of actors) { actor.mixer.stopAllAction(); actor.mixer.clipAction(source.animations.find(c => c.name === action)).reset().play(); }
+    for (const actor of actors) { actor.mixer.stopAllAction(); actor.mixer.clipAction(actor.clips.find(c => c.name === (actor.profile.id === 'azure' ? action === 'idle' ? 'azureIdle' : 'azureSweep' : action))).reset().play(); }
   };
   document.getElementById('subject').onchange = event => { subject = event.target.value; if (subject === 'all') detail = false; resize(); };
   document.getElementById('detail').onclick = () => {

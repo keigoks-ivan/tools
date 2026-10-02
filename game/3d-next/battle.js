@@ -2,10 +2,11 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone as cloneSkinned } from 'three/addons/utils/SkeletonUtils.js';
 import { Arena } from '../2d/combat.js?v=20261002b';
-import { heroFor } from './heroes.js?v=20261002b';
+import { heroFor } from './heroes.js?v=20261002d';
 import { Campaign, CHAPTERS, chapterTuning } from './campaign.js?v=20261002b';
-import { createHeroEquipment } from './hero-equipment.js?v=20261002c';
-import { createHeroSpecialFx } from './hero-special-fx.js?v=20261002b';
+import { createHeroEquipment } from './hero-equipment.js?v=20261002d';
+import { createPolearmClips, createDualBladeUltimate } from './hero-motion.js?v=20261002d';
+import { createHeroSpecialFx } from './hero-special-fx.js?v=20261002d';
 import { createHeroEnvironment } from './hero-hair.js?v=20261002c';
 import { createChapterWorld } from './chapter-world.js?v=20261002c';
 import { FramePacer } from '../frame-pacing.js';
@@ -43,7 +44,7 @@ export function loadLazyModules() {
     lazyModules = Promise.all([
       marchLevel ? Promise.all([import('./march.js?v=20261002b'), import('./march-art.js?v=20260925f')]) : null,
       // ?hero=vroid：打擊特效模組（combat-fx.js）；載入失敗時退回下方原本的特效與時間倍率
-      heroChoice === 'vroid' ? import('./combat-fx.js?v=20261002b').catch(error => { console.warn('combat-fx failed, using built-in effects', error); return null; }) : null,
+      heroChoice === 'vroid' ? import('./combat-fx.js?v=20261002d').catch(error => { console.warn('combat-fx failed, using built-in effects', error); return null; }) : null,
     ]).catch(error => { lazyModules = null; throw error; });
   }
   return lazyModules;
@@ -236,6 +237,7 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
     const cut = THREE.AnimationUtils.subclip(clip, clip.name, Math.round(window[0] * 24), Math.round(window[1] * 24), 24);
     return cut;
   });
+  if (heroChoice === 'vroid') clips.push(...createPolearmClips(THREE, heroModel, gltf.animations), createDualBladeUltimate(THREE, heroModel, gltf.animations));
   const actions = new Map(clips.map(clip => [clip.name, mixer.clipAction(clip)]));
   for (const clip of clips) for (const track of clip.tracks) {
     if (!/Hips\.position$/i.test(track.name)) continue;
@@ -247,20 +249,23 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
   function play(name, duration = 0) {
     const next = actions.get(name) || actions.get('idle');
     if (currentName === name && duration === 0) return;
-    if (currentAction && currentAction !== next) currentAction.fadeOut(0.08);
+    const blend = name.startsWith('azure') ? 0.14 : 0.08;
+    if (currentAction && currentAction !== next) currentAction.fadeOut(blend);
     next.reset();
     next.enabled = true;
     next.setEffectiveWeight(1);
     next.setEffectiveTimeScale(duration > 0 ? next.getClip().duration / duration : 1);
     next.setLoop(duration > 0 ? THREE.LoopOnce : THREE.LoopRepeat, duration > 0 ? 1 : Infinity);
     next.clampWhenFinished = duration > 0;
-    next.fadeIn(0.08).play();
+    if (currentAction !== next || !name.startsWith('azure')) next.fadeIn(blend);
+    next.play();
     currentAction = next;
     currentName = name;
   }
   play('idle');
   // [coop] 三人連線：隊友沿用這個主角模型與片段；local() 是送給隊友的本機狀態。單人頁 coop 為 null
   let heroProfile = heroFor(pageParams.get('character'));
+  let heroFxTint = null;
   const coopView = coop?.attach({ THREE, scene, heroModel, clips, cloneSkinned, groundAt,
     createEquipment: model => createHeroEquipment(THREE, model, model.getObjectByName('Hero_sword')),
     local: () => ({ x: hero.position.x, y: hero.position.y, z: hero.position.z, yaw: hero.rotation.y, lift: heroModel.position.y - heroBaseY, anim: currentName, time: currentAction?.time || 0, scale: currentAction?.getEffectiveTimeScale() || 1, loop: currentAction?.loop !== THREE.LoopOnce, character: heroProfile.id, musou: arena.attack?.flurry ? arena.hero.actionTime : -1 }) }) || null;
@@ -534,7 +539,7 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
       const x = toWorldX(event.x ?? arena.hero.x), z = toWorldZ(event.y ?? arena.hero.y);
       fxPos.set(x, groundAt(x, z), z);
       const customSpecial = equipment && heroProfile.id !== 'violet' && (['special', 'musouStart', 'musouFinish'].includes(event.type) || event.type === 'swing' && event.flurry);
-      if (!customSpecial) combatFx?.onEvent(event, fxPos, enemies.get(event.enemyId)?.root);
+      if (!customSpecial) combatFx?.onEvent(event.type === 'hit' && heroFxTint ? { ...event, tint: heroFxTint } : event, fxPos, enemies.get(event.enemyId)?.root);
       heroSpecialFx?.onEvent(event, fxPos);
       audio?.onEvent(event);
       if (march) marchEvent(event, x, z);
@@ -591,9 +596,9 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
         }
       }
       if (event.type === 'special' && event.flurry) {
-        play(equipment ? heroProfile.id === 'azure' ? 'heavy' : heroProfile.id === 'amber' ? 'slash4' : 'charge' : 'musouFlurry', equipment ? 0.8 : event.finishAt || 3.6);
+        play(equipment ? heroProfile.id === 'azure' ? 'azureUlt' : heroProfile.id === 'amber' ? 'amberUlt' : 'charge' : 'musouFlurry', equipment && heroProfile.id !== 'violet' ? heroProfile.flurry.standard.duration : equipment ? 0.8 : event.finishAt || 3.6);
         toast(`${event.true ? '真・' : ''}${equipment ? heroProfile.special : '天刃亂舞'}！`);
-        if (event.true) flash(x, z, 0xa040ff, 2.4, 0.8);
+        if (event.true) flash(x, z, equipment && heroProfile.id !== 'violet' ? heroProfile.tint : 0xa040ff, 2.4, 0.8);
       } else if (event.type === 'special' && arena.musou) {
         play('musou', 2.0); if (!combatFx) toast('天刃亂舞！');
       } else if (event.type === 'special') {
@@ -633,16 +638,16 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
         shake = Math.max(shake, 0.5);
       }
       if (event.type === 'musouFinish') {
-        play(equipment && heroProfile.id === 'azure' ? 'heavyfin' : equipment && heroProfile.id === 'amber' ? 'combo4' : 'musouFinish', 0.6);
+        if (!equipment || heroProfile.id === 'violet') play('musouFinish', 0.6);
         if (!combatFx) {
           flash(x, z, event.true ? 0xb050ff : 0xf2e2ff, (event.radius || 320) / 60, 0.6);
           burst(x, z, event.true ? 0xc070ff : 0xffe8c0, 36, 0.4);
           shake = Math.max(shake, 0.7);
         }
       }
-      if (equipment && event.type === 'swing' && event.flurry) {
-        play(heroProfile.id === 'azure' ? 'heavyfin' : heroProfile.id === 'amber' ? event.index % 2 ? 'slash4' : 'slash3' : 'slash2', heroProfile.id === 'azure' ? 0.68 : heroProfile.id === 'amber' ? 0.22 : 0.38);
-        if (heroProfile.id === 'azure') shake = Math.max(shake, 0.3);
+      if (equipment && event.type === 'swing' && event.flurry && heroProfile.id === 'azure') shake = Math.max(shake, 0.3);
+      if (equipment && event.type === 'swing' && event.flurry && heroProfile.id === 'violet') {
+        play('slash2', 0.38);
       }
       if (event.type === 'telegraph') {
         flash(x, z, 0xff665e, event.role === 'boss' ? 1.4 : 0.84, event.duration || 0.7);
@@ -830,7 +835,7 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
     heroGround = groundAt(toWorldX(h.x), toWorldZ(h.y));
     hero.position.set(toWorldX(h.x), heroGround + (h.height || 0), toWorldZ(h.y));
     hero.rotation.y = yawFromFacing(h.facing);
-    if (h.action === 'idle' || h.action === 'run') play(h.action);
+    if (h.action === 'idle' || h.action === 'run') play(equipment && heroProfile.id === 'azure' ? h.action === 'run' ? 'azureRun' : 'azureIdle' : h.action);
     if (h.action === 'dead' && currentName !== 'death') play('death', 1);
     if (h.action === 'win' && currentName !== 'win') play('win', 1.2);
     // 天刃演出：離地時間到了就播躍起片段（沒有該片段時 play() 會自動退回 idle），
@@ -953,7 +958,7 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
     updatePopups(realDt);
     if (combatFx) {
       if (march) combatFx.setCombo(march.combo);
-      combatFx.update(realDt, dt, { heroAction: arena.hero.action, energy: arena.hero.energy, enemies });
+      combatFx.update(realDt, dt, { heroAction: arena.hero.action, energy: arena.hero.energy, enemies, heroTint: heroFxTint });
     }
     heroSpecialFx?.update(dt);
     audio?.update(realDt, realDt > 0 ? dt / realDt : 1, arena.hero);   // 慢動作：音樂低通＋音效降調；hitstop 短定格不觸發
@@ -1058,6 +1063,7 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
         for (const value of Object.values(material)) if (value?.isTexture) renderer.initTexture(value);
       }
     });
+    heroSpecialFx?.warm(renderer, camera);
     renderer.compile(scene, camera);
   }
   function pause(value = !paused) {
@@ -1128,6 +1134,7 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
   function configure({ character, chapter } = {}) {
     if (running || heroChoice !== 'vroid') return;
     heroProfile = heroFor(character);
+    heroFxTint = heroProfile.id === 'violet' ? null : new THREE.Color(heroProfile.tint).toArray();
     arena.heroProfile = heroProfile; equipment?.apply(heroProfile);
     heroSpecialFx?.setStyle(heroProfile.id);
     const routeDots = document.querySelector("#comboRoute div");
