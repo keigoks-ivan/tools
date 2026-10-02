@@ -1,4 +1,4 @@
-import {rgb} from './looks.js?v=14';
+import {rgb} from './looks.js?v=15';
 function ellipse(c,x,y,rx,ry,color,a=0){c.fillStyle=color;c.beginPath();c.ellipse(x,y,rx,ry,a,0,Math.PI*2);c.fill()}
 function star(c,n,outer,inner){c.beginPath();for(let i=0;i<n*2;i++){const a=i*Math.PI/n-Math.PI/2,r=i%2?inner:outer;const x=Math.cos(a)*r,y=Math.sin(a)*r;i?c.lineTo(x,y):c.moveTo(x,y)}c.closePath();c.fill()}
 export function ornament(c,kind,x,y,size=44,color=0,angle=0){

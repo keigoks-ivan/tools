@@ -1,4 +1,4 @@
-import {palette} from './data.js?v=14';
+import {palette} from './data.js?v=15';
 export const wishNames=['玫瑰派對','海洋精靈','陽光花園','彩虹夢想','月光仙子','蜜桃蝴蝶'];
 export const colorNames=['玫瑰粉','蜜桃橘','陽光金','薄荷綠','天空藍','薰衣草紫'];
 export function checkWish(hair,items,wish){

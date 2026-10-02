@@ -1,16 +1,17 @@
-import {StudioUI} from './studio.js?v=14';
-import {drawRoom,drawBody,drawFallbackFace} from './studio-art.js?v=14';
-import {guests,wishes} from './looks.js?v=14';
-import {SalonMemory} from './memory.js?v=14';
-import {ReplayUI} from './replay-ui.js?v=14';
-import {ornament,createDecorate} from './ornaments.js?v=14';
-import {createLayout,toWorld,inStage} from './layout.js?v=14';
-import {HairSystem,setHairTexture,setHairPlate} from './hair.js?v=14';
-import {guest,palette} from './data.js?v=14';
-import {createCut} from './tools/cut.js?v=14';
-import {createGrow} from './tools/grow.js?v=14';
-import {createColor} from './tools/color.js?v=14';
-import {createComb} from './tools/comb.js?v=14';
+import {StudioUI} from './studio.js?v=15';
+import {drawRoom,drawBody,drawFallbackFace} from './studio-art.js?v=15';
+import {guests,wishes} from './looks.js?v=15';
+import {SalonMemory} from './memory.js?v=15';
+import {ReplayUI} from './replay-ui.js?v=15';
+import {ornament,createDecorate} from './ornaments.js?v=15';
+import {createLayout,toWorld,inStage} from './layout.js?v=15';
+import {HairSystem,setHairTexture,setHairPlate} from './hair.js?v=15';
+import {guest,palette} from './data.js?v=15';
+import {createCut} from './tools/cut.js?v=15';
+import {createGrow} from './tools/grow.js?v=15';
+import {createColor} from './tools/color.js?v=15';
+import {createComb} from './tools/comb.js?v=15';
+import {createTie} from './tools/tie.js?v=15';
 const canvas=document.getElementById('scene'),box=document.getElementById('game'),ctx=canvas.getContext('2d',{alpha:false});
 canvas.width=box.clientWidth;canvas.height=box.clientHeight;ctx.fillStyle='#fff2db';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#efadc0';for(let i=0;i<5;i++){let a=i*Math.PI*2/5;ctx.beginPath();ctx.arc(canvas.width/2+Math.cos(a)*14,canvas.height/2+Math.sin(a)*14,11,0,Math.PI*2);ctx.fill()}ctx.fillStyle='#f9d37b';ctx.beginPath();ctx.arc(canvas.width/2,canvas.height/2,8,0,Math.PI*2);ctx.fill();
 // Artwork never blocks play. Missing or slow files use the vector portrait.
@@ -23,14 +24,14 @@ let currentGuest=guests[0],wishIndex=0;const ornaments=[],history=[],drafts={};l
 const textureImage=new Image();textureImage.onload=()=>setHairTexture(textureImage);textureImage.src='./assets/art/hair-texture.webp';
 loadImage('./assets/art/hair-plate.webp').then(im=>{if(im)setHairPlate(im)});
 const env={hair:new HairSystem(),H:844,colorIndex:0,react};
-const tools={cut:createCut(env),grow:createGrow(env),color:createColor(env),comb:createComb(env),decorate:createDecorate(env,ornaments,save)};env.ornament='bow';
+const tools={cut:createCut(env),grow:createGrow(env),color:createColor(env),comb:createComb(env),tie:createTie(env),decorate:createDecorate(env,ornaments,save)};env.ornament='bow';
 
 let selected='cut',pointer=null,expression='normal',reactionUntil=0,nextExpression=null,blinkAt=performance.now()+4200,blinkUntil=0,last=performance.now(),headDx=0;
 function state(){return {version:1,guest:currentGuest.id,hair:env.hair.snapshot(),ornaments:structuredClone(ornaments),wish:wishIndex};}
 function bookmark(){touched=true;history.push(state());if(history.length>8)history.shift()}
 function save(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>{drafts[currentGuest.id]=state();memory.draft({active:currentGuest.id,drafts})},350)}
 function editKey(snapshot){return JSON.stringify([snapshot.hair.strands.map(s=>[s.rest,s.tie,s.nodes.map(p=>[p.homeX,p.homeY,p.c])]),snapshot.ornaments])}
-function stop(){if(pointer){const old=pointer;pointer=null;if(!old.ui){tools[old.tool].onUp();if(editKey(old.before)!==editKey(state())){touched=true;history.push(old.before);if(history.length>8)history.shift();save()}}if(canvas.hasPointerCapture(old.id))canvas.releasePointerCapture(old.id)}}
+function stop(cancel=true){if(pointer){const old=pointer;pointer=null;if(!old.ui){tools[old.tool].onUp({cancel});if(editKey(old.before)!==editKey(state())){touched=true;history.push(old.before);if(history.length>8)history.shift();save()}}if(old.target.hasPointerCapture(old.id))old.target.releasePointerCapture(old.id)}}
 function restore(snapshot){
  const profile=guests.find(g=>g.id===snapshot?.guest);if(!profile)return false;
  stop();currentGuest=profile;art=artSets.get(profile.id)||artSets.get('cocoa');env.hair.reset(profile);
@@ -69,7 +70,10 @@ const replay=new ReplayUI({memory,guests:guests.filter(g=>artSets.has(g.id)),sto
 });
 const studio=new StudioUI({replay,stop,selected:()=>selected,colorIndex:()=>env.colorIndex,wish:()=>wishIndex,hair:()=>env.hair,items:()=>ornaments,canUndo:()=>history.length>0,problem:()=>memory.problem,guest:()=>currentGuest.id,celebrate:()=>{for(let i=0;i<60;i++)env.hair.particles.push({x:195,y:230,vx:(Math.random()-.5)*250,vy:-60-Math.random()*150,life:1+Math.random(),color:['#fff4ab','#eb9fb9','#a3c7b4'][i%3],size:2+Math.random()*3})},
  select:kind=>{stop();selected=kind;if(kind==='decorate')replay.open('accessories')},
- color:i=>{stop();env.colorIndex=i;if(selected!=='decorate')selected='color'},
+ color:i=>{stop();env.colorIndex=i;if(selected!=='decorate'&&selected!=='tie')selected='color'},
+ bindTieControl:(button,band=null)=>bindTieControl(button,band),
+ editTie:(index,point)=>{stop();const band=index===null?{color:env.colorIndex}:env.hair.ties[index];if(!band)return;if(point&&!env.hair.freeTarget(point,index))return;bookmark();point?env.hair.tieAt(point,band.color,index):env.hair.releaseTie(index);react('happy');save()},
+ untieAll:()=>{stop();if(!env.hair.activeTies().length)return;bookmark();env.hair.untie();react('happy');save()},
  undo:()=>{stop();const previous=history.pop();if(previous)restore(previous)},
  dyeAll:()=>{stop();bookmark();for(const strand of env.hair.strands){for(const node of strand.nodes)node.c=[...palette[env.colorIndex]];strand.textureDirty=true}react('happy');save();studio.notify('新髮色完成！也可以再加上局部挑染。')}
 });
@@ -77,7 +81,7 @@ memoryReady.then(()=>{if(memory.current?.drafts){const saved=memory.current;for(
 document.querySelector('.loading')?.remove();
 window.addEventListener('pagehide',()=>{clearTimeout(saveTimer);drafts[currentGuest.id]=state();memory.draft({active:currentGuest.id,drafts})});
 function react(type){expression=type;reactionUntil=performance.now()+(type==='surprise'?500:1200);nextExpression=type==='surprise'?'happy':null}
-let layout;
+let layout;env.tieRadius=()=>32/layout.world.scale;env.tieFeedback=message=>studio.notify(message);
 const coarsePointer=matchMedia('(pointer: coarse)');
 function size(){
  const r=box.getBoundingClientRect(),d=Math.min(2,devicePixelRatio||1);
@@ -100,17 +104,22 @@ coarsePointer.addEventListener('change',size);
 size();
 function pos(e){const r=canvas.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}
 function uiDown(p){if(replay.hit(p))return true;return !inStage(p,layout)}
-canvas.addEventListener('pointerdown',e=>{
- e.preventDefault();if(pointer)return;const p=pos(e);if(uiDown(p))return;
- canvas.setPointerCapture(e.pointerId);pointer={id:e.pointerId,ui:false,tool:selected,before:state()};touched=true;tools[selected].onDown(toWorld(p,layout));
-});
-canvas.addEventListener('pointermove',e=>{
+function begin(e,tool=selected,options=null){
+ e.preventDefault();if(pointer)return;const p=pos(e);if(!options&&uiDown(p))return;
+ const target=e.currentTarget;target.setPointerCapture(e.pointerId);pointer={id:e.pointerId,ui:false,tool,before:state(),target};touched=true;tools[tool].onDown(toWorld(p,layout),options||{});
+}
+function move(e){
  if(!pointer||pointer.id!==e.pointerId||pointer.ui)return;e.preventDefault();
  const coalesced=e.getCoalescedEvents?.(),events=coalesced?.length?coalesced:[e];
- for(const q of events){const p=pos(q);if(!inStage(p,layout)){end(e);break}tools[pointer.tool].onMove(toWorld(p,layout))}
-});
-function end(e){if(!pointer||pointer.id!==e.pointerId)return;stop()}
-canvas.addEventListener('pointerup',end);canvas.addEventListener('pointercancel',end);canvas.addEventListener('lostpointercapture',end);
+ for(const q of events){const p=pos(q);if(!inStage(p,layout)&&pointer.tool!=='tie'){end(e);break}tools[pointer.tool].onMove(toWorld(p,layout))}
+}
+function end(e){if(!pointer||pointer.id!==e.pointerId)return;stop(e.type==='pointercancel'||e.type==='lostpointercapture')}
+function bindPointer(target,down){target.addEventListener('pointerdown',down);target.addEventListener('pointermove',move);for(const type of ['pointerup','pointercancel','lostpointercapture'])target.addEventListener(type,end);}
+bindPointer(canvas,e=>begin(e));
+function bindTieControl(button,band=null){bindPointer(button,e=>begin(e,'tie',{spawn:band===null,band}));
+ if(band===null)button.addEventListener('keydown',e=>{if(['Enter',' '].includes(e.key)){e.preventDefault();studio.api.editTie(null,{x:env.hair.tieHandles().some(b=>b.x<195)?285:105,y:300})}});
+ if(band!==null)button.addEventListener('keydown',e=>{const b=env.hair.ties[band];if(!b)return;const delta={ArrowLeft:[-12,0],ArrowRight:[12,0],ArrowUp:[0,-12],ArrowDown:[0,12]}[e.key];if(delta){e.preventDefault();studio.api.editTie(band,{x:b.x+delta[0],y:b.y+delta[1]})}else if(['Enter',' ','Delete','Backspace'].includes(e.key)){e.preventDefault();studio.api.editTie(band,null)}});
+}
 function plate(target,img,dy=0){if(img)target.drawImage(img,0,0,img.width,img.height*611/844,0,dy,390,611)}
 // 髮飾：每種樣子＋顏色只畫一次（陰影、漸層很花時間），之後直接貼上。髮飾數量不限，放幾百個也不會卡。
 const ornamentSprites=new Map();

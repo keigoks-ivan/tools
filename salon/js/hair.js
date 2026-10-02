@@ -1,5 +1,5 @@
-import {guest} from './data.js?v=14';
-import {HairGL,domeTris} from './hair-gl.js?v=14';
+import {guest,palette} from './data.js?v=15';
+import {HairGL,domeTris} from './hair-gl.js?v=15';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const mix=(a,b,t)=>a.map((v,i)=>v+(b[i]-v)*t);
 const css=(c,m=1)=>`rgb(${c.map(v=>Math.round(clamp(v*m,0,255))).join(',')})`;
@@ -67,6 +67,19 @@ const TIE_STYLES={
 };
 function curve(a,b,c,d){const points=[a];for(let i=1;i<=120;i++){const t=i/120,u=1-t;points.push({x:u*u*u*a.x+3*u*u*t*b.x+3*u*t*t*c.x+t*t*t*d.x,y:u*u*u*a.y+3*u*u*t*b.y+3*u*t*t*c.y+t*t*t*d.y})}return arcPath(points)}
 function arcPath(points){let length=0;const distances=[0];for(let i=1;i<points.length;i++){length+=Math.hypot(points[i].x-points[i-1].x,points[i].y-points[i-1].y);distances.push(length)}return {length,at(distance){const goal=clamp(distance,0,length);let i=1;while(i<distances.length-1&&distances[i]<goal)i++;const a=points[i-1],b=points[i],t=(goal-distances[i-1])/Math.max(.001,distances[i]-distances[i-1]);return {x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t}}}}
+function gatherRoute(s,mode,bx,by){const a={x:s.rootX,y:s.rootY},side=s.side;let c1,c2;
+ if(mode==='free'){const t=clamp((by-210)/110,0,1),hx=a.x+(bx-a.x)*.6;c1={x:hx+(a.x+side*64-hx)*t,y:Math.min(a.y,by)-12+16*t};c2={x:bx+side*18*t,y:by-16-64*t}}
+ else if(mode==='double'||mode==='braids'){c1={x:a.x+side*64,y:a.y+4};c2={x:bx+side*18,y:by-80}}
+ else if(mode==='single'){c1={x:a.x+(284-a.x)*.6,y:a.y+6};c2={x:bx+14,y:by-95}}
+ else if(mode==='buns'||mode==='high'){c1={x:a.x+side*44,y:112};c2={x:bx+side*15,y:by-29}}
+ else{c1={x:a.x+(bx-a.x)*.6,y:Math.min(a.y,by)-12};c2={x:bx,y:by-16}}
+ return curve(a,c1,c2,{x:bx,y:by});
+}
+function releaseStrand(s){for(const p of s.nodes){delete p.bx;delete p.by}if(!s.loose){if(s.tie)s.tie=null;return;}
+ for(let j=0;j<s.nodes.length;j++){const p=s.nodes[j],q=s.loose[j];if(q){p.x=q.x;p.y=q.y;p.px=p.homeX=p.x;p.py=p.homeY=p.y}}
+ s.tie=null;s.front=s.wasFront;s.styled=!!s.wasStyled;delete s.loose;delete s.wasFront;delete s.wasStyled;s.textureDirty=true;
+}
+function segmentDistance(p,a,b){const dx=b.x-a.x,dy=b.y-a.y,t=clamp(((p.x-a.x)*dx+(p.y-a.y)*dy)/(dx*dx+dy*dy||1),0,1);return Math.hypot(p.x-a.x-dx*t,p.y-a.y-dy*t)}
 function smoothBends(s,strength=.18){const n=s.nodes,pin=pinFlags(s),moves=[];
  for(let j=3;j<n.length-1;j++){if(pin[j]||(s.tie&&j<=s.tie.index))continue;const a=n[j-1],b=n[j+1],t=s.rest[j-1]/Math.max(.001,s.rest[j-1]+s.rest[j]);moves.push({j,x:(a.x+(b.x-a.x)*t-n[j].x)*strength,y:(a.y+(b.y-a.y)*t-n[j].y)*strength})}
  for(const m of moves){n[m.j].x+=m.x;n[m.j].y+=m.y}
@@ -181,16 +194,13 @@ export class HairSystem{
   }
   for(const p of n){p.homeX=p.px=p.x;p.homeY=p.py=p.y;}
  }
- tie(mode='double',color=0){
-  this.untie();const S=TIE_STYLES[mode];if(!S)return 0;let count=0;const bands=[];
-  const bandAt=b=>{let index=bands.findIndex(q=>Math.abs(q.x-b.x)<1&&Math.abs(q.y-b.y)<1);if(index<0){index=bands.length;bands.push(b)}return index};
-  for(const s of this.strands){if(s.bang||s.nodes.length<6||(S.pick&&!S.pick(s)))continue;
-   const n=s.nodes,side=s.side,[x,y]=S.band(side),bx=x+s.lane*2,by=y+s.lane*.25,a={x:s.rootX,y:s.rootY};let c1,c2;
-   if(mode==='double'||mode==='braids'){c1={x:a.x+side*64,y:a.y+4};c2={x:bx+side*18,y:by-80}}
-   else if(mode==='single'){c1={x:a.x+(284-a.x)*.6,y:a.y+6};c2={x:bx+14,y:by-95}}
-   else if(mode==='buns'||mode==='high'){c1={x:a.x+side*44,y:112};c2={x:bx+side*15,y:by-29}}
-   else{c1={x:a.x+(bx-a.x)*.6,y:Math.min(a.y,by)-12};c2={x:bx,y:by-16}}
-   const route=curve(a,c1,c2,{x:bx,y:by}),needed=route.length,total=s.rest.reduce((a,b)=>a+b,0);if(total<needed+26)continue;
+ tie(mode='double',color=0,custom=null){
+  if(!custom)this.untie();const S=custom?{band:()=>[custom.point.x,custom.point.y],front:Math.abs(custom.point.x-195)>40,fan:1,bow:38}:TIE_STYLES[mode];if(!S)return 0;let count=0;const bands=custom?this.ties:[];let customBand=custom?.band??null;
+  const bandAt=b=>{if(custom){if(customBand===null){const alive=new Set(this.strands.filter(s=>s.tie).flatMap(s=>[s.tie.band,...(s.tie.extra||[]).filter(e=>e.i<s.nodes.length).map(e=>e.band)]));customBand=bands.findIndex((_,i)=>!alive.has(i));if(customBand<0)customBand=bands.length;}bands[customBand]=b;return customBand;}let index=bands.findIndex(q=>Math.abs(q.x-b.x)<1&&Math.abs(q.y-b.y)<1);if(index<0){index=bands.length;bands.push(b)}return index};
+  for(const s of this.strands){if(s.bang||s.nodes.length<6||(S.pick&&!S.pick(s))||(custom&&!custom.ids.has(s.id)))continue;
+   if(custom)releaseStrand(s);
+   const n=s.nodes,side=s.side,[x,y]=S.band(side),bx=x+s.lane*2,by=y+s.lane*.25;
+   const route=gatherRoute(s,mode,bx,by),needed=route.length,total=s.rest.reduce((a,b)=>a+b,0);if(total<needed+26)continue;
    let travel=0,k=-1;for(let j=1;j<n.length-1;j++){travel+=s.rest[j-1];if(travel>=needed){k=j;break}}if(k<0)continue;
    const old=s.rest[k-1],first=old-(travel-needed);
    if(n.length<16&&first>=2&&old-first>=2){const t=first/old,a=n[k-1],b=n[k],p=pt(a.x+(b.x-a.x)*t,a.y+(b.y-a.y)*t,mix(a.c,b.c,t));p.paintX=(a.paintX??a.homeX)+((b.paintX??b.homeX)-(a.paintX??a.homeX))*t;p.paintY=(a.paintY??a.homeY)+((b.paintY??b.homeY)-(a.paintY??a.homeY))*t;n.splice(k,0,p);s.rest.splice(k-1,1,first,old-first);travel=needed;}
@@ -210,7 +220,19 @@ export class HairSystem{
    for(const p of n){p.homeX=p.px=p.x;p.homeY=p.py=p.y}this.relaxShape(s,24);s.textureDirty=true;count++;
   }this.ties=bands;return count;
  }
- untie(){for(const s of this.strands){for(const p of s.nodes){delete p.bx;delete p.by}if(!s.loose)continue;for(let j=0;j<s.nodes.length;j++){const p=s.nodes[j],q=s.loose[j];if(q){p.x=q.x;p.y=q.y;p.px=p.homeX=p.x;p.py=p.homeY=p.y}}s.tie=null;s.front=s.wasFront;s.styled=!!s.wasStyled;delete s.loose;delete s.wasFront;delete s.wasStyled;this.relaxShape(s);s.textureDirty=true;}this.ties=[];}
+ freeTarget(p,band=null){
+  if(!p||!Number.isFinite(p.x+p.y)||p.x<45||p.x>345||p.y<145||p.y>510||(p.x>135&&p.x<255&&p.y>225&&p.y<355))return null;
+  const side=p.x<155?-1:p.x>235?1:0,point={x:p.x,y:p.y};
+  const members=this.strands.filter(s=>!s.bang&&s.nodes.length>=6&&(band!==null?s.tie?.band===band:(!side||s.side===side)&&s.nodes.slice(1).some((b,j)=>segmentDistance(point,s.nodes[j],b)<62)));
+  const reachable=members.filter(s=>{const needed=gatherRoute(s,'free',p.x+s.lane*2,p.y+s.lane*.25).length,total=s.rest.reduce((a,b)=>a+b,0);return total>=needed+26&&s.rest.slice(0,-1).reduce((a,b)=>a+b,0)>=needed});
+  if(!reachable.length||(band!==null&&reachable.length!==members.length))return null;
+  if(band===null){const remaining=new Set(this.strands.filter(s=>s.tie&&!reachable.includes(s)).map(s=>s.tie.band));if(remaining.size>=6)return null;}
+  return {point,ids:new Set(reachable.map(s=>s.id)),band};
+ }
+ tieAt(p,color=0,band=null){if(!Number.isInteger(color)||color<0||color>=palette.length)return 0;const target=this.freeTarget(p,band);return target?this.tie('free',color,target):0;}
+ releaseTie(band){let count=0;for(const s of this.strands)if(s.tie?.band===band){releaseStrand(s);this.relaxShape(s);count++;}return count;}
+ tieHandles(){return this.ties.flatMap((b,i)=>this.strands.some(s=>s.tie?.band===i)?[{...b,index:i}]:[]);}
+ untie(){for(const s of this.strands){const tied=!!s.loose;releaseStrand(s);if(tied)this.relaxShape(s);}this.ties=[];}
  activeTies(){
   // 還有頭髮綁著的髮圈才畫（剪到髮圈上面，那撮就鬆開了）；舊存檔沒有 band 編號，照位置對
   const alive=new Set();for(const s of this.strands){const T=s.tie;if(!T||T.index>=s.nodes.length)continue;
@@ -295,8 +317,8 @@ export class HairSystem{
  restore(saved){
   if(saved?.version!==1||!Array.isArray(saved.strands)||saved.strands.length<150||saved.strands.length>250)return false;
   const finitePoint=p=>p&&Number.isFinite(p.x)&&Number.isFinite(p.y)&&Math.abs(p.x)<2000&&Math.abs(p.y)<2000;
-  const valid=saved.strands.every(s=>s&&Number.isFinite(s.width)&&s.width>0&&s.width<=30&&[-1,1].includes(s.side)&&typeof s.front==='boolean'&&(!s.loose||(Array.isArray(s.loose)&&s.loose.every(finitePoint)))&&(!s.tie||(Number.isInteger(s.tie.index)&&s.tie.index>=1&&s.tie.index<s.nodes?.length&&finitePoint(s.tie)&&TIE_MODES.includes(s.tie.mode)&&(!s.tie.extra||(Array.isArray(s.tie.extra)&&s.tie.extra.every(e=>finitePoint(e)&&Number.isInteger(e.i)&&e.i>=1&&e.i<16)))))&&Array.isArray(s.nodes)&&s.nodes.length>=2&&s.nodes.length<=16&&Array.isArray(s.rest)&&s.rest.length===s.nodes.length-1&&s.rest.every(v=>Number.isFinite(v)&&v>=0)&&s.nodes.every(p=>p&&['x','y','px','py','homeX','homeY'].every(k=>Number.isFinite(p[k])&&Math.abs(p[k])<2000)&&(p.bx===undefined||(Number.isFinite(p.bx)&&Number.isFinite(p.by)))&&Array.isArray(p.c)&&p.c.length===3&&p.c.every(v=>Number.isFinite(v)&&v>=0&&v<=255))&&Number.isFinite(s.rootX)&&Number.isFinite(s.rootY));
-  if(!valid||!Array.isArray(saved.ties||[])||!(saved.ties||[]).every(b=>finitePoint(b)&&TIE_MODES.includes(b.mode)&&Number.isFinite(b.size)&&b.size>0&&b.size<100))return false;
+  const valid=saved.strands.every(s=>s&&Number.isFinite(s.width)&&s.width>0&&s.width<=30&&[-1,1].includes(s.side)&&typeof s.front==='boolean'&&(!s.loose||(Array.isArray(s.loose)&&s.loose.every(finitePoint)))&&(!s.tie||(Number.isInteger(s.tie.index)&&s.tie.index>=1&&s.tie.index<s.nodes?.length&&finitePoint(s.tie)&&(TIE_MODES.includes(s.tie.mode)||s.tie.mode==='free'&&s.tie.guided===true&&Number.isInteger(s.tie.band)&&s.tie.band>=0&&s.tie.band<saved.ties?.length)&&(!s.tie.extra||(Array.isArray(s.tie.extra)&&s.tie.extra.every(e=>finitePoint(e)&&Number.isInteger(e.i)&&e.i>=1&&e.i<16)))))&&Array.isArray(s.nodes)&&s.nodes.length>=2&&s.nodes.length<=16&&Array.isArray(s.rest)&&s.rest.length===s.nodes.length-1&&s.rest.every(v=>Number.isFinite(v)&&v>=0)&&s.nodes.every(p=>p&&['x','y','px','py','homeX','homeY'].every(k=>Number.isFinite(p[k])&&Math.abs(p[k])<2000)&&(p.bx===undefined||(Number.isFinite(p.bx)&&Number.isFinite(p.by)))&&Array.isArray(p.c)&&p.c.length===3&&p.c.every(v=>Number.isFinite(v)&&v>=0&&v<=255))&&Number.isFinite(s.rootX)&&Number.isFinite(s.rootY));
+  if(!valid||!Array.isArray(saved.ties||[])||!(saved.ties||[]).every(b=>finitePoint(b)&&(TIE_MODES.includes(b.mode)||b.mode==='free')&&(b.color===undefined||Number.isInteger(b.color)&&b.color>=0&&b.color<palette.length)&&Number.isFinite(b.size)&&b.size>0&&b.size<100))return false;
   this.strands=structuredClone(saved.strands);for(const s of this.strands){s.textureDirty=true;for(const p of s.nodes){p.px=p.x;p.py=p.y}}
   this.ties=structuredClone(saved.ties||[]);this.cutCount=saved.cutCount||0;this.fallen=[];this.particles=[];const legacy=this.strands.find(s=>s.tie&&!s.tie.guided);if(legacy)this.tie(legacy.tie.mode,this.ties[legacy.tie.band]?.color??0);return true;
  }
