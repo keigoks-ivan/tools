@@ -2,7 +2,7 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { createHairKit } from './hero-hair.js?v=20261002h';
 import { forgedBlade } from './hero-weapons.js?v=20261002b';
 import { indexGeometry } from './index-geometry.js?v=20261002c';
-import { createBowKit } from './hero-bow.js?v=20261002h';
+import { createBowKit } from './hero-bow.js?v=20261002j';
 
 // One GPU texture per asset across the local character and all teammates.
 const textureCache = new Map();
@@ -151,7 +151,7 @@ export function createHeroArt(T, root, sword) {
     const trim = textured(new T.MeshStandardMaterial({ color: p.trim, roughness: 0.4, metalness: 0.55 }), row, 2);
     const glow = new T.MeshStandardMaterial({ color: p.glow, emissive: p.glow, emissiveIntensity: 0.65, roughness: 0.22, metalness: 0.35 });
     const edge = new T.MeshStandardMaterial({ color: 0xe5ebf6, metalness: 0.85, roughness: 0.2 });
-    const forgedSteel = new T.MeshStandardMaterial({ color: 0x7b848c, metalness: 0.86, roughness: 0.29 });
+    const forgedSteel = new T.MeshStandardMaterial({ color: id==='azure'?0xaab7c0:0x7b848c, metalness: id==='azure'?.72:.86, roughness: id==='azure'?.34:.29 });
     forgedSteel.onBeforeCompile = shader => {
       shader.vertexShader = 'varying vec2 steelUv;\n' + shader.vertexShader;
       shader.vertexShader = shader.vertexShader.replace('#include <begin_vertex>', 'steelUv = uv;\n#include <begin_vertex>');

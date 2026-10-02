@@ -53,18 +53,65 @@ export function createBowKit(T,root,fingerRest) {
 }
 
 export function createArrowFx(T,scene,groundAt,{capacity=64}={}) {
-  const geometry=createArrowGeometry(T),material=new T.MeshStandardMaterial({color:0xccefdc,emissive:0x247b4c,emissiveIntensity:.5,metalness:.2,roughness:.5});
-  const items=Array.from({length:capacity},()=>{const mesh=new T.Mesh(geometry,material);mesh.visible=false;scene.add(mesh);return {mesh,remaining:0,speed:0,vx:0,vz:0};});let cursor=0;
+  const shaft=createArrowGeometry(T),parts=[];
+  for(const turn of [0,Math.PI/2]) {
+    const strip=new T.PlaneGeometry(1,1);strip.rotateX(Math.PI/2);strip.rotateZ(turn);strip.translate(0,0,-.15);parts.push(strip);
+  }
+  const ribbon=mergeGeometries(parts);parts.forEach(g=>g.dispose());
+  const core=ribbon.clone(),alpha=new Float32Array(capacity);
+  for(const geometry of [ribbon,core])geometry.setAttribute('arrowAlpha',new T.InstancedBufferAttribute(alpha,1).setUsage(T.DynamicDrawUsage));
+  function glowMaterial() {
+    const material=new T.MeshBasicMaterial({color:0xffffff,transparent:true,side:T.DoubleSide,depthWrite:false,blending:T.AdditiveBlending,toneMapped:false});
+    material.defines={USE_UV:''};material.customProgramCacheKey=()=> 'jade-arrow-ribbon-v1';
+    material.onBeforeCompile=shader=>{
+      shader.vertexShader='attribute float arrowAlpha; varying float vArrowAlpha;\n'+shader.vertexShader;
+      shader.vertexShader=shader.vertexShader.replace('#include <begin_vertex>','#include <begin_vertex>\nvArrowAlpha=arrowAlpha;');
+      shader.fragmentShader='varying float vArrowAlpha;\n'+shader.fragmentShader;
+      shader.fragmentShader=shader.fragmentShader.replace('#include <alphamap_fragment>','#include <alphamap_fragment>\ndiffuseColor.a *= vArrowAlpha * pow(max(0.0,1.0-abs(vUv.x*2.0-1.0)),1.6) * smoothstep(0.0,0.45,vUv.y) * (1.0-smoothstep(0.85,1.0,vUv.y));');
+    };
+    return material;
+  }
+  const materials=[new T.MeshStandardMaterial({color:0xe7ead6,emissive:0x35956a,emissiveIntensity:.5,metalness:.25,roughness:.45}),glowMaterial(),glowMaterial()];
+  const meshes=[shaft,ribbon,core].map((geometry,i)=>{const mesh=new T.InstancedMesh(geometry,materials[i],capacity);mesh.frustumCulled=false;mesh.visible=false;mesh.instanceMatrix.setUsage(T.DynamicDrawUsage);scene.add(mesh);return mesh;});
+  const items=Array.from({length:capacity},()=>({visible:false,remaining:0,speed:0,vx:0,vz:0,tier:1,position:new T.Vector3()}));
+  const dummy=new T.Object3D(),color=new T.Color();let cursor=0;
+  function write(index) {
+    const item=items[index];dummy.position.copy(item.position);dummy.rotation.set(0,Math.atan2(item.vx,item.vz),0);
+    for(const [i,mesh] of meshes.entries()) {
+      if(!item.visible)dummy.scale.setScalar(0);
+      else if(i===0)dummy.scale.setScalar(1+item.tier*.06);
+      else dummy.scale.set(i===1?.13+item.tier*.045:.025+item.tier*.009,i===1?.13+item.tier*.045:.025+item.tier*.009,.9+item.tier*.28);
+      dummy.updateMatrix();mesh.setMatrixAt(index,dummy.matrix);
+    }
+    alpha[index]=item.visible?.65+item.tier*.06:0;
+  }
+  function flush(){const active=items.some(item=>item.visible);for(const mesh of meshes){mesh.visible=active;mesh.instanceMatrix.needsUpdate=true;}ribbon.attributes.arrowAlpha.needsUpdate=true;core.attributes.arrowAlpha.needsUpdate=true;}
+  for(let i=0;i<capacity;i++)write(i);
   return {
     onEvent(event) {
       if(event.type!=='arrow')return;
-      const item=items[cursor++%capacity],x=(event.x-640)/60,z=(event.y-500)/60;
-      Object.assign(item,{id:event.id,remaining:event.range/60,speed:event.speed/60,vx:Math.cos(event.facing),vz:Math.sin(event.facing)});
-      item.mesh.position.set(x,groundAt(x,z)+1.30+(event.height || 0),z);item.mesh.rotation.set(0,Math.PI/2-event.facing,0);item.mesh.scale.setScalar(event.pierce>1?1.3:1);item.mesh.visible=true;
+      const index=cursor++%capacity,item=items[index],x=(event.x-640)/60,z=(event.y-500)/60;
+      Object.assign(item,{id:event.id,remaining:event.range/60,speed:event.speed/60,vx:Math.cos(event.facing),vz:Math.sin(event.facing),tier:Math.min(5,event.fxTier||1),visible:true});
+      item.position.set(x,groundAt(x,z)+1.30+(event.height||0),z);
+      meshes[1].setColorAt(index,color.setHex(item.tier>=4?0x79e5b8:0x51d8a0));meshes[2].setColorAt(index,color.setHex(item.tier>=4?0xffedbc:0xf2ffdf));
+      meshes[1].instanceColor.needsUpdate=true;meshes[2].instanceColor.needsUpdate=true;write(index);flush();
     },
-    update(dt,projectiles) {for(const item of items)if(item.mesh.visible){if(projectiles){const shot=projectiles.find(p=>p.id===item.id);if(!shot){item.mesh.visible=false;continue;}item.mesh.position.x=(shot.x-640)/60;item.mesh.position.z=(shot.y-500)/60;continue;}const d=Math.min(item.remaining,item.speed*dt);item.mesh.position.x+=item.vx*d;item.mesh.position.z+=item.vz*d;item.remaining-=d;if(item.remaining<=0)item.mesh.visible=false;}},
-    reset(){for(const item of items)item.mesh.visible=false;},
-    dispose(){for(const item of items)scene.remove(item.mesh);geometry.dispose();material.dispose();},
-    stats(){return {capacity,active:items.filter(item=>item.mesh.visible).length};},
+    update(dt,projectiles) {
+      for(const [index,item] of items.entries()) {
+        if(!item.visible)continue;
+        if(projectiles) {
+          const shot=projectiles.find(p=>p.id===item.id);
+          if(!shot)item.visible=false;
+          else {item.position.x=(shot.x-640)/60;item.position.z=(shot.y-500)/60;}
+        } else {
+          const distance=Math.min(item.remaining,item.speed*dt);item.position.x+=item.vx*distance;item.position.z+=item.vz*distance;item.remaining-=distance;if(item.remaining<=0)item.visible=false;
+        }
+        write(index);
+      }
+      flush();
+    },
+    reset(){items.forEach((item,i)=>{item.visible=false;write(i);});flush();},
+    dispose(){for(const mesh of meshes){scene.remove(mesh);mesh.dispose();}for(const geometry of [shaft,ribbon,core])geometry.dispose();for(const material of materials)material.dispose();},
+    stats(){return {capacity,active:items.filter(item=>item.visible).length};},
   };
 }

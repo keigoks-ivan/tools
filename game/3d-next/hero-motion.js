@@ -1,12 +1,15 @@
 // Character poses are baked once into normal animation tracks. Local players,
 // turntables and interpolated teammates therefore use the same choreography.
-import { HEROES } from './heroes.js?v=20261002i';
+import { createFreeMotionSampler } from './free-motion.js?v=20261002j';
+import { HEROES } from './heroes.js?v=20261002j';
 
-function createArmSolver(T, root, side, limb = 'Arm') {
+export function createArmSolver(T, root, side, limb = 'Arm') {
   const upper = root.getObjectByName(`J_Bip_${side}_Upper${limb}`), lower = root.getObjectByName(`J_Bip_${side}_Lower${limb}`), hand = root.getObjectByName(`J_Bip_${side}_${limb === 'Arm' ? 'Hand' : 'Foot'}`);
   const shoulder = new T.Vector3(), elbow = new T.Vector3(), wrist = new T.Vector3(), axis = new T.Vector3(), bend = new T.Vector3(), desired = new T.Vector3(), end = new T.Vector3(), from = new T.Vector3(), to = new T.Vector3();
   const world = new T.Quaternion(), parent = new T.Quaternion(), normal = new T.Vector3(), z = new T.Vector3();
-  const frame = new T.Matrix4();
+  const frame = new T.Matrix4(), previousNormal=new T.Vector3();
+  const rootRotation=new T.Quaternion(),previousRootRotation=new T.Quaternion(),rootDelta=new T.Quaternion();
+  let hasNormal=false;
   upper.getWorldPosition(shoulder); lower.getWorldPosition(elbow); hand.getWorldPosition(wrist);
   const restNormal = new T.Vector3().subVectors(elbow, shoulder).cross(new T.Vector3().subVectors(wrist, elbow)).normalize();
   const frames = new Map();
@@ -26,7 +29,7 @@ function createArmSolver(T, root, side, limb = 'Arm') {
     bone.parent.getWorldQuaternion(parent).invert();
     bone.quaternion.copy(parent.multiply(world)); bone.updateMatrixWorld(true);
   }
-  return (target, pole, rotation) => {
+  const solve = (target, pole, rotation) => {
     upper.getWorldPosition(shoulder); lower.getWorldPosition(elbow); hand.getWorldPosition(wrist);
     const a = shoulder.distanceTo(elbow), b = elbow.distanceTo(wrist);
     axis.subVectors(target, shoulder); const d = T.MathUtils.clamp(axis.length(), Math.abs(a - b) + 0.005, (a + b) * 0.98); axis.normalize();
@@ -35,10 +38,25 @@ function createArmSolver(T, root, side, limb = 'Arm') {
     const along = (a * a - b * b + d * d) / (2 * d), height = Math.sqrt(Math.max(0, a * a - along * along));
     desired.copy(shoulder).addScaledVector(axis, along).addScaledVector(bend, height);
     normal.crossVectors(bend, axis).normalize();
+    root.getWorldQuaternion(rootRotation);
+    if(limb==='Arm' && hasNormal) {
+      rootDelta.copy(previousRootRotation).invert().premultiply(rootRotation);previousNormal.applyQuaternion(rootDelta);
+      previousNormal.addScaledVector(axis,-previousNormal.dot(axis)).normalize();
+      if(normal.dot(previousNormal)<0)normal.negate();
+      const angle=previousNormal.angleTo(normal);
+      if(angle>.15) {
+        const sign=new T.Vector3().crossVectors(previousNormal,normal).dot(axis)<0?-1:1;
+        normal.copy(previousNormal).applyAxisAngle(axis,sign*.15);
+      }
+      bend.crossVectors(axis,normal).normalize();desired.copy(shoulder).addScaledVector(axis,along).addScaledVector(bend,height);
+    }
+    previousNormal.copy(normal);previousRootRotation.copy(rootRotation);hasNormal=true;
     aim(upper, desired); aim(lower, end);
     hand.parent.getWorldQuaternion(parent).invert(); hand.quaternion.copy(parent.multiply(rotation)); hand.updateMatrixWorld(true);
     return end.distanceTo(target);
   };
+  solve.reset=()=>{hasNormal=false;};
+  return solve;
 }
 
 export function createPolearmClips(T, source, animations) {
@@ -48,6 +66,8 @@ export function createPolearmClips(T, source, animations) {
   const root = source.clone(true); root.position.set(0, 0, 0); root.quaternion.identity(); root.scale.set(1, 1, 1);
   const bones = []; root.traverse(b => { if (b.isBone) bones.push(b); });
   const hips = root.getObjectByName('J_Bip_C_Hips'), chest = root.getObjectByName('J_Bip_C_Chest');
+  const imported=createFreeMotionSampler(T,root,'polearm');
+  const sourceRight=new T.Vector3(),sourceLeft=new T.Vector3(),sourceCentre=new T.Vector3(),sourceRotation=new T.Quaternion(),previousRotation=new T.Quaternion();
   const neck = root.getObjectByName('J_Bip_C_Neck');
   const torsoRest = ['C_Spine','C_Chest','C_UpperChest','C_Neck','C_Head','R_Shoulder','L_Shoulder'].map(name => { const bone=root.getObjectByName(`J_Bip_${name}`); return { bone, rotation:bone.quaternion.clone() }; });
   const grip = [];
@@ -84,6 +104,7 @@ export function createPolearmClips(T, source, animations) {
   ];
   const clips = [];
   for (const [name, duration, keys, base] of definitions) {
+    right.reset();left.reset();
     const hipTrack = base.tracks.find(track => track.name === `${hips.name}.position`);
     // Monotone Hermite tangents maintain speed through the impact keys without
     // overshooting a wrist target. Extremes and the resting ends have zero speed.
@@ -113,16 +134,27 @@ export function createPolearmClips(T, source, animations) {
         if (hipTrack) { hips.position.x = hipTrack.values[0]; hips.position.z = hipTrack.values[2]; }
         hips.quaternion.setFromEuler(new T.Euler(0,p[6],0));
       } else {
-        hips.position.set(p[6]*.13, .90-Math.max(0,p[7])*.30, -Math.abs(p[6])*.025);
+        hips.position.set(p[6]*.13, .86-Math.max(0,p[7])*.30, -Math.abs(p[6])*.025);
         hips.position.y += Math.sin(t*Math.PI*2)*.003;
         hips.quaternion.setFromEuler(new T.Euler(p[7]*.35,p[6]*2.1,-p[6]*.08));
       }
-      chest.rotation.x += p[7]*1.45; chest.rotation.y += p[6]*.35;
+      const sourceName=name==='azureRise' ? 'Melee_2H_Attack_Chop' : name==='azureSlam' ? 'Melee_2H_Attack_Chop' : name==='azureUlt' ? seconds>=2.65?'Melee_2H_Attack_Chop':'Melee_2H_Attack_Spin' : name==='azureSweep'||name==='azureGuard' ? 'Melee_2H_Attack_Slice' : 'Melee_2H_Idle';
+      const sourcePhase=name==='azureRise' ? .32*Math.min(1,seconds/.49) : name==='azureSlam' ? .32+.20*T.MathUtils.smoothstep(seconds,.25,.68)+.48*T.MathUtils.smoothstep(seconds,.72,1.12) : name==='azureUlt' ? seconds<2.65?seconds/2.65*.8:.32+.20*T.MathUtils.smoothstep(seconds,2.65,3.05)+.48*T.MathUtils.smoothstep(seconds,3.15,3.6) : t;
+      const blendIn=name==='azureRise' ? T.MathUtils.smoothstep(seconds,0,.14) : name==='azureUlt'&&seconds>=2.65 ? T.MathUtils.smoothstep(seconds,2.65,2.83) : 1;
+      const previousSource=name==='azureUlt'?'Melee_2H_Attack_Spin':'Melee_2H_Attack_Slice', previousTime=(name==='azureUlt'?.8:.43/.7)*imported.duration(previousSource);
+      const sourceTime=sourcePhase*imported.duration(sourceName);
+      if(base!==run) {
+        const hipPosition=hips.position.clone();
+        if(blendIn<1)imported.apply(previousSource,previousTime);
+        imported.apply(sourceName,sourceTime,blendIn);hips.position.copy(hipPosition);
+        hips.rotation.y+=p[6]*.35;
+      }
+      chest.rotation.x += p[7]*.35; chest.rotation.y += p[6]*.10;
       neck.rotation.y -= T.MathUtils.clamp(p[6]*1.1,-.4,.4);
       root.updateMatrixWorld(true);
       if (base !== run) {
-        // Guan Yu's official showcase was reviewed for step/pivot and broad
-        // body-led cuts. The front foot supports; the rear foot lifts to advance
+        // Grounding adapts the imported two-handed stroke to a long weapon.
+        // The front foot supports; the rear foot lifts to advance
         // and lifts again on recovery. No grounded foot translates along the floor.
         const striking = name !== 'azureIdle';
         const advance = striking ? T.MathUtils.smoothstep(t,.12,.40) : 0;
@@ -137,22 +169,49 @@ export function createPolearmClips(T, source, animations) {
         feet[1].solve(leftTarget.set(.22,.09,.22),pole.set(.1,0,1),footRotation);
       }
       weaponRotation.setFromEuler(new T.Euler(Math.PI/2-p[5],p[4],0,'YXZ'));
+      if(base!==run) {
+        imported.position(sourceName,sourceTime,'J_Bip_R_Hand',sourceRight);
+        imported.position(sourceName,sourceTime,'J_Bip_L_Hand',sourceLeft);
+        if(blendIn<1) {
+          imported.position(previousSource,previousTime,'J_Bip_R_Hand',rightTarget);sourceRight.lerp(rightTarget,1-blendIn);
+          imported.position(previousSource,previousTime,'J_Bip_L_Hand',leftTarget);sourceLeft.lerp(leftTarget,1-blendIn);
+        }
+        sourceCentre.copy(sourceRight).lerp(sourceLeft,.5);
+        sourceCentre.x=T.MathUtils.clamp(sourceCentre.x,-.05,.07);sourceCentre.y=T.MathUtils.clamp(sourceCentre.y,1.10,1.36);sourceCentre.z=Math.max(.40,sourceCentre.z);
+        imported.rotation(sourceName,sourceTime,'J_Bip_C_WeaponGrip',sourceRotation);
+        if(blendIn<1){imported.rotation(previousSource,previousTime,'J_Bip_C_WeaponGrip',previousRotation);sourceRotation.slerp(previousRotation,1-blendIn);}
+        // The source weapon socket preserves the actual blade swing and roll.
+        weaponRotation.copy(sourceRotation);
+      }
       handRotation.copy(weaponRotation).multiply(mountInverse);
       direction.set(0,1,0).applyQuaternion(weaponRotation);
       // A 40 cm grip supports the long blade. Targets and elbow guides are
       // authored together; neither shoulder has to chase the weapon behind it.
       // Carry descending cuts beside the right shoulder rather than through
       // the centre of the chest; keep both grip targets on the same rigid shaft.
-      const downstroke = Math.max(0,-Math.sin(p[5]));
-      rightTarget.set(p[1]-direction.x*.08-downstroke*.25,p[2],p[3]*.68+downstroke*.12).addScaledVector(direction,-.20);
+      if(base!==run){p[1]=sourceCentre.x;p[2]=sourceCentre.y;p[3]=sourceCentre.z/ .68;}
+      rightTarget.set(p[1]-(base===run?direction.x*.08:0),p[2],p[3]*.68).addScaledVector(direction,-.20);
       offset.set(-.045,-.012,.025).applyQuaternion(handRotation); rightTarget.sub(offset);
       leftRotation.copy(handRotation).multiply(flip);
       leftTarget.copy(rightTarget).add(offset).addScaledVector(direction,.40).sub(offset.set(.045,-.012,.025).applyQuaternion(leftRotation));
       // Project the rigid grip as a pair into both reach spheres. Translating
       // both wrists together preserves spacing; independently clamping wrists
       // would bend the shaft or slide the supporting hand during a low stroke.
-      for (let pass=0;pass<12;pass++) {
+      for (let pass=0;pass<24;pass++) {
         let corrected=false;
+        for(const torsoName of (name==='azureSlam'||name==='azureUlt'&&seconds>=2.65?['C_Spine','C_Chest','C_UpperChest']:[])) {
+          const torso=root.getObjectByName(`J_Bip_${torsoName}`).getWorldPosition(new T.Vector3());
+          const palmOffset=new T.Vector3(-.045,-.012,.025).applyQuaternion(handRotation);
+          const closest=rightTarget.clone().add(palmOffset).addScaledVector(direction,torso.clone().sub(rightTarget).sub(palmOffset).dot(direction));
+          const away=closest.sub(torso),distance=away.length();
+          const clearance=.19*(name==='azureUlt'?T.MathUtils.smoothstep(seconds,2.65,2.85):1);
+          if(distance<clearance) {
+            const outward=new T.Vector3(-1,0,0).addScaledVector(direction,direction.x);
+            if(outward.lengthSq()<.001)outward.set(0,0,1).addScaledVector(direction,-direction.z);
+            outward.normalize();const along=away.dot(outward),travel=-along+Math.sqrt(along*along+clearance*clearance-distance*distance);
+            outward.multiplyScalar(travel);rightTarget.add(outward);leftTarget.add(outward);corrected=true;
+          }
+        }
         for (const [side,target] of [['R',rightTarget],['L',leftTarget]]) {
           const upper=root.getObjectByName(`J_Bip_${side}_UpperArm`), lower=root.getObjectByName(`J_Bip_${side}_LowerArm`), hand=root.getObjectByName(`J_Bip_${side}_Hand`);
           const shoulder=upper.getWorldPosition(new T.Vector3());
@@ -216,8 +275,8 @@ export function createDualBladeUltimate(T, source, animations) {
   return new T.AnimationClip('amberUlt',2.8,tracks).optimize();
 }
 
-// Huang Zhong's official bow showcase informs the open stance, cheek anchor
-// and held follow-through. These are authored clips, not imported game assets.
+// KayKit CC0 bow clips provide torso, head and arm trajectories. IK adapts
+// the imported motion to this rig's bow grip, cheek anchor and combat clock.
 export function createArcherClips(T, source, animations) {
   const idle=animations.find(c=>c.name==='idle'), run=animations.find(c=>c.name==='run');
   if(!idle || !source.getObjectByName('J_Bip_L_Hand')) return [];
@@ -225,6 +284,8 @@ export function createArcherClips(T, source, animations) {
   const bones=[];root.traverse(b=>{if(b.isBone)bones.push(b);});
   const rest=bones.map(b=>({position:b.position.clone(),rotation:b.quaternion.clone()}));
   const restRotations=new Map(bones.map((bone,i)=>[bone,rest[i].rotation]));
+  const imported=createFreeMotionSampler(T,root,'bow');
+  const elbowGuide=new T.Vector3(),shoulderGuide=new T.Vector3(),rightGuide=new T.Vector3(-1,-.4,0),leftGuide=new T.Vector3(.6,-.6,-.2);
   root.updateMatrixWorld(true);
   const feet=['R','L'].map(side=>({ solve:createArmSolver(T,root,side,'Leg'), rotation:root.getObjectByName(`J_Bip_${side}_Foot`).getWorldQuaternion(new T.Quaternion()) }));
   for(const track of idle.tracks) { const [name,property]=track.name.split('.'); root.getObjectByName(name)?.[property]?.fromArray(track.createInterpolant().evaluate(.1)); }
@@ -234,9 +295,10 @@ export function createArcherClips(T, source, animations) {
   const target=new T.Vector3(), pole=new T.Vector3(), offset=new T.Vector3(), centre=new T.Vector3(), direction=new T.Vector3();
   const rotation=new T.Quaternion(), handRotation=new T.Quaternion();
   const mountInverse=new T.Quaternion().setFromRotationMatrix(new T.Matrix4().makeBasis(new T.Vector3(0,1,0),new T.Vector3(0,0,1),new T.Vector3(1,0,0))).invert();
-  const profile=HEROES.jade, moves=[...profile.chain,...profile.charges,profile.counter,profile.air];
+  const profile=HEROES.jade, moves=[...new Map([...profile.chain,...profile.charges,profile.counter,profile.air].map(move=>[move.clip,move])).values()];
   const definitions=[['jadeIdle',idle.duration,[],idle],['jadeRun',run.duration,[],run],['jadeStep',profile.dodge.duration,[],idle],...moves.map(move=>[move.clip,move.duration,move.hits,idle]),['jadeUlt',3.6,[.65,2.75],idle]];
   return definitions.map(([name,duration,shots,base])=>{
+    right.reset();left.reset();
     const times=[],values=bones.map(()=>[]),positions=[],count=Math.ceil(duration*90);
     const samplers=base===run ? run.tracks.map(track=>{const[name,property]=track.name.split('.');return {bone:root.getObjectByName(name),property,sample:track.createInterpolant()};}) : [];
     for(let frame=0;frame<=count;frame++) {
@@ -244,20 +306,42 @@ export function createArcherClips(T, source, animations) {
       bones.forEach((b,i)=>{b.position.copy(rest[i].position);b.quaternion.copy(rest[i].rotation);});
       for(const {bone,property,sample} of samplers) if(bone)bone[property].fromArray(sample.evaluate(seconds));
       let draw=0,tension=0;
-      for(const at of shots) {
-        const loaded=T.MathUtils.smoothstep(seconds,Math.max(0,at-.23),at-.055);
+      for(const [index,at] of shots.entries()) {
+        const loaded=T.MathUtils.smoothstep(seconds,Math.max(0,at-.16,index?shots[index-1]+.18:name==='jadeShot'?0:.12),at-.04);
         draw=Math.max(draw,loaded*(1-T.MathUtils.smoothstep(seconds,at+.055,at+.16)));
         tension=Math.max(tension,loaded*(1-T.MathUtils.smoothstep(seconds,at,at+.035)));
       }
       const stepping=name==='jadeStep', phase=seconds/duration;
+      const fan=['jadeFan','jadeSpread'].includes(name), burst=name==='jadeBurst';
+      const cant=name==='jadeDouble' ? -.10 : fan ? -.22 : burst ? .13 : 0;
       const spring=stepping ? T.MathUtils.smoothstep(seconds,0,.10)*(1-T.MathUtils.smoothstep(seconds,.20,.30)) : 0;
       const lift=name==='jadeUlt' ? .62*T.MathUtils.smoothstep(seconds,.12,.40)*(1-T.MathUtils.smoothstep(seconds,.75,1.0)) : 0;
       const bob=base===run ? Math.sin(phase*Math.PI*4)*.012 : Math.sin(phase*Math.PI*2)*.003;
       if(base!==run) {
-        hips.position.set(draw*.018,.95-draw*.025+spring*.10+bob,0);
-        hips.quaternion.setFromEuler(new T.Euler(.015-spring*.12,-.45-draw*.45,spring*.045));
+        hips.position.set(draw*(fan?.045:burst?-.02:.018),.95-draw*(fan?.045:burst?.035:.025)+spring*.10+bob,0);
+        hips.quaternion.setFromEuler(new T.Euler(.015-spring*.12,-.45-draw*(fan?.65:burst?.30:.45),spring*.045));
       } else { hips.position.x=0;hips.position.z=0; }
-      chest.rotation.y-=draw*.12; neck.rotation.y+=.35+draw*.20;
+      let sourceName='Ranged_Bow_Idle',sourceTime=seconds%imported.duration(sourceName),sourceWeight=base===run||stepping?0:1;
+      let sourceMix=0;
+      for(const [index,at] of shots.entries()) {
+        const start=index?shots[index-1]+.12:0, end=index+1<shots.length?at+.12:duration;
+        if(seconds>=start && seconds<=end) {
+          const upper=name==='jadeUlt' && index===0;
+          sourceName=seconds<=at ? `Ranged_Bow_Draw${upper?'_Up':''}` : `Ranged_Bow_Release${upper?'_Up':''}`;
+          const d=imported.duration(sourceName);
+          sourceTime=seconds<=at ? d*(.35+.65*T.MathUtils.smoothstep(seconds,start,at-.035)) : Math.min(d,(seconds-at)*1.5);
+          sourceMix=T.MathUtils.smoothstep(seconds,start,start+.06)*(1-T.MathUtils.smoothstep(seconds,end-.06,end));
+          break;
+        }
+      }
+      if(sourceWeight) {
+        imported.apply('Ranged_Bow_Idle',seconds%imported.duration('Ranged_Bow_Idle'));
+        if(sourceMix)imported.apply(sourceName,sourceTime,sourceMix);
+        hips.position.set(draw*.018,.95-draw*.025+bob,0);
+        // Keep the stance planted while retaining the imported weight transfer.
+        hips.rotation.y-=draw*(fan?.20:burst?.06:.10);
+      }
+      neck.rotation.y+=T.MathUtils.clamp(.20+draw*.20,0,.40);
       for(const side of ['R','L']) for(const finger of ['Index','Middle','Ring','Little']) for(let joint=1;joint<=3;joint++) {
         const bone=root.getObjectByName(`J_Bip_${side}_${finger}${joint}`);
         const curl=side==='L' ? [0,.85,1.2,.65][joint] : [0,.6,1.2,.65][joint]*tension;
@@ -268,20 +352,55 @@ export function createArcherClips(T, source, animations) {
         feet[0].solve(target.set(-.16,.09+spring*.30,-.16-spring*.12),pole.set(-.1,0,1),feet[0].rotation);
         feet[1].solve(target.set(.16,.09+spring*.16,.16+spring*.08),pole.set(.1,0,1),feet[1].rotation);
       }
-      rotation.setFromEuler(new T.Euler(-lift,0,-.30*(1-draw)-spring*.12,'YXZ'));
+      rotation.setFromEuler(new T.Euler(-lift,0,-.30*(1-draw)-spring*.12+cant*draw,'YXZ'));
       handRotation.copy(rotation).multiply(mountInverse);
       centre.set(.08+spring*.04,1.18+draw*.205+lift*.18+spring*.10+bob,.30+draw*.11);
       direction.set(0,0,1).applyQuaternion(rotation);
       target.copy(centre).sub(offset.set(.045,-.012,.025).applyQuaternion(handRotation));
-      left(target,pole.set(.6,-.6,-.2),handRotation);
+      leftGuide.set(.6,-.6,-.2);rightGuide.set(-1,-.4,0);
+      if(sourceWeight) {
+        for(const [side,guide] of [['R',rightGuide]]) {
+          imported.position(sourceName,sourceTime,`J_Bip_${side}_LowerArm`,elbowGuide);
+          imported.position(sourceName,sourceTime,`J_Bip_${side}_UpperArm`,shoulderGuide);
+          guide.normalize().lerp(elbowGuide.sub(shoulderGuide).normalize(),.35*sourceMix).normalize();
+        }
+      }
+      left(target,leftGuide,handRotation);
       target.copy(centre).addScaledVector(direction,-.08-draw*.38).sub(offset.set(-.045,-.012,.025).applyQuaternion(handRotation));
+      if(sourceWeight) {
+        imported.position(sourceName,sourceTime,'J_Bip_R_Hand',offset);
+        target.lerp(offset,T.MathUtils.clamp((1-draw)*sourceMix,.0,.65));
+        target.x=Math.min(target.x,-.12*(1-draw)+.12*draw);
+        target.z=Math.max(target.z,.15*(1-draw)-.06*draw);
+      }
       if(base===run)target.set(-.18,1.04+Math.sin(phase*Math.PI*2)*.06,.18+Math.cos(phase*Math.PI*2)*.10);
       if(stepping)target.lerp(offset.set(-.18,1.10+spring*.10,.16),spring);
-      right(target,pole.set(-1,-.4,0),handRotation);
+      right(target,rightGuide,handRotation);
       times.push(seconds);bones.forEach((b,i)=>values[i].push(...b.quaternion.toArray()));positions.push(...hips.position.toArray());
     }
     const tracks=bones.map((b,i)=>new T.QuaternionKeyframeTrack(`${b.name}.quaternion`,times,values[i]));
     tracks.push(new T.VectorKeyframeTrack(`${hips.name}.position`,times,positions));
     return new T.AnimationClip(name,duration,tracks).optimize();
   });
+}
+
+// Preview the same early cancels and crossfade used by the playable chain.
+export function createComboPreview(T, clips, profile=HEROES.jade) {
+  const moves=profile.chain, segments=[];let duration=0;
+  for(const move of moves){segments.push({move,start:duration,clip:clips.find(c=>c.name===move.clip)});duration+=Number.isFinite(move.cancel)?move.cancel:move.duration;}
+  const times=[], tracks=segments[0].clip.tracks.map(track=>({name:track.name,type:track.ValueTypeName,values:[]}));
+  const samples=segments.map(({clip})=>new Map(clip.tracks.map(track=>[track.name,track.createInterpolant()])));
+  const a=new T.Quaternion(),b=new T.Quaternion(),p=new T.Vector3(),q=new T.Vector3(),count=Math.ceil(duration*90);
+  for(let frame=0;frame<=count;frame++) {
+    const at=frame/count*duration;times.push(at);let index=0;
+    while(index<segments.length-1&&at>=segments[index+1].start)index++;
+    const elapsed=at-segments[index].start,blend=index?Math.min(1,elapsed/(profile.id==='azure'?.14:.08)):1;
+    for(const track of tracks) {
+      const current=samples[index].get(track.name).evaluate(elapsed);
+      const previous=index?samples[index-1].get(track.name).evaluate(segments[index].start-segments[index-1].start+elapsed):current;
+      if(track.type==='quaternion') {a.fromArray(previous);b.fromArray(current);a.slerp(b,blend);track.values.push(...a.toArray());}
+      else {p.fromArray(previous);q.fromArray(current);p.lerp(q,blend);track.values.push(...p.toArray());}
+    }
+  }
+  return new T.AnimationClip(`${profile.id}Combo`,duration,tracks.map(track=>new (track.type==='quaternion'?T.QuaternionKeyframeTrack:T.VectorKeyframeTrack)(track.name,times,track.values))).optimize();
 }

@@ -33,7 +33,7 @@ test('polearm clips keep both palms on the shaft without elbow flips or altering
     mixer.stopAllAction(); const action=mixer.clipAction(clip).reset().setLoop(T.LoopOnce,1).play(); action.clampWhenFinished=true;
     const previous=new Map();
     for (let frame=0;frame<=Math.ceil(clip.duration*120);frame++) {
-      mixer.setTime(Math.min(clip.duration,frame/120)); root.updateMatrixWorld(true);
+      mixer.setTime(Math.min(clip.duration,frame/120)); root.updateMatrixWorld(true);equipment.update();
       const origin=weapon.getWorldPosition(new T.Vector3()), shaft=new T.Vector3(0,1,0).transformDirection(weapon.matrixWorld);
       for(const side of ['L','R']) {
         const hand=root.getObjectByName(`J_Bip_${side}_Hand`), upper=root.getObjectByName(`J_Bip_${side}_UpperArm`), lower=root.getObjectByName(`J_Bip_${side}_LowerArm`);
@@ -43,7 +43,7 @@ test('polearm clips keep both palms on the shaft without elbow flips or altering
         assert.ok(relative.cross(shaft).length()<.012,`${clip.name}/${frame}/${side}: palm left the shaft`);
         const a=upper.getWorldPosition(new T.Vector3()),b=lower.getWorldPosition(new T.Vector3()),c=hand.getWorldPosition(new T.Vector3());
         assert.ok(a.distanceTo(c)<(a.distanceTo(b)+b.distanceTo(c))*.995,`${clip.name}/${side}: locked elbow`);
-        if(previous.has(side)) assert.ok(previous.get(side).angleTo(upper.quaternion)<.4,`${clip.name}/${frame}/${side}: elbow flipped`);
+        if(previous.has(side)) assert.ok(previous.get(side).angleTo(upper.quaternion)<.4,`${clip.name}/${frame}/${side}: elbow flipped (${previous.get(side).angleTo(upper.quaternion)})`);
         previous.set(side,upper.quaternion.clone());
       }
     }
@@ -57,7 +57,7 @@ test('polearm clips keep both palms on the shaft without elbow flips or altering
     if(current&&current!==action)current.fadeOut(.14);
     action.reset().setEffectiveWeight(1).setLoop(T.LoopOnce,1).fadeIn(.14).play(); action.clampWhenFinished=true; current=action;
     for(let t=0;t<duration;t+=1/120) {
-      mixer.update(1/120);root.updateMatrixWorld(true);if(index===0&&t<.14)continue;
+      mixer.update(1/120);root.updateMatrixWorld(true);equipment.update();if(index===0&&t<.14)continue;
       const hand=root.getObjectByName('J_Bip_L_Hand'), origin=weapon.getWorldPosition(new T.Vector3()),shaft=new T.Vector3(0,1,0).transformDirection(weapon.matrixWorld);
       const palm=hand.getWorldPosition(new T.Vector3()).add(new T.Vector3(.045,-.012,.025).applyQuaternion(hand.getWorldQuaternion(new T.Quaternion())));
       assert.ok(palm.sub(origin).cross(shaft).length()<.025,`${name}: grip lost during combo blend`);
@@ -70,7 +70,7 @@ test('polearm clips keep both palms on the shaft without elbow flips or altering
   equipment.dispose();
 });
 
-test('authored polearm clips and ultimate clock fit the deployed relay and share the same pose on clones', async () => {
+test('retargeted polearm clips and ultimate clock fit the deployed relay and share the same pose on clones', async () => {
   const gltf=await loadRig(), clips=createPolearmClips(T,gltf.scene,gltf.animations), other=gltf.scene.clone(true);
   const a=new T.AnimationMixer(gltf.scene), b=new T.AnimationMixer(other);
   for (const clip of clips) {
@@ -87,10 +87,17 @@ test('azure heavy impacts carry the shaft outside the central torso', async () =
   const gltf=await loadRig(), root=gltf.scene, clips=createPolearmClips(T,root,gltf.animations), mixer=new T.AnimationMixer(root);
   const equipment=createHeroEquipment(T,root,root.getObjectByName('Hero_sword')); equipment.apply(HEROES.azure);
   const weapon=root.getObjectByName('azure_J_Bip_R_Hand_weapon');
+  // A raised blade must descend at impact rather than turn into another sweep.
+  for(const [name,at,raised] of [['azureRise',.49,true],['azureSlam',.68,false]]) {
+    mixer.stopAllAction(); mixer.clipAction(clips.find(c=>c.name===name)).reset().setLoop(T.LoopOnce,1).play();
+    mixer.setTime(at);root.updateMatrixWorld(true);equipment.update();
+    const shaft=new T.Vector3(0,1,0).transformDirection(weapon.matrixWorld);
+    assert.ok(raised?shaft.y>.45:shaft.y<-.15,`${name}: blade did not follow the overhead cut`);
+  }
   for(const [name,start,end] of [['azureSlam',.68,.85],['azureUlt',3.05,3.32]]) {
     mixer.stopAllAction(); mixer.clipAction(clips.find(c=>c.name===name)).reset().setLoop(T.LoopOnce,1).play();
     for(let at=start;at<=end;at+=1/120) {
-      mixer.setTime(at); root.updateMatrixWorld(true);
+      mixer.setTime(at); root.updateMatrixWorld(true);equipment.update();
       const origin=weapon.getWorldPosition(new T.Vector3()), shaft=new T.Vector3(0,1,0).transformDirection(weapon.matrixWorld);
       for(const name of ['C_Spine','C_Chest','C_UpperChest']) {
         const relative=root.getObjectByName(`J_Bip_${name}`).getWorldPosition(new T.Vector3()).sub(origin);
@@ -177,7 +184,7 @@ test('azure strikes pivot over the supporting foot, lift the stepping foot, and 
     if(['azureSweep','azureRise','azureSlam','azureUlt'].includes(clip.name)) {
       assert.ok(maxHip-minHip>.025,`${clip.name}: pelvis did not transfer weight`);
       assert.ok(maxLift>.06,`${clip.name}: rear foot did not lift to step`);
-      assert.ok(maxTurn-minTurn>1.0,`${clip.name}: torso remained square through the cut`);
+      assert.ok(maxTurn-minTurn>(clip.name==='azureSlam'?.15:1.0),`${clip.name}: torso remained square through the cut`);
     }
   }
 });

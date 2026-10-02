@@ -1,5 +1,5 @@
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { createArrowGeometry } from './hero-bow.js?v=20261002h';
+import { createArrowGeometry } from './hero-bow.js?v=20261002j';
 
 // Character silhouettes and soft ribbons share a bounded, reusable mesh pool.
 // No full-screen postprocessing or per-frame geometry/texture allocation.
@@ -31,6 +31,8 @@ export function createHeroSpecialFx(T, scene, groundAt, { capacity = 96 } = {}) 
   const outline = [[0,.08],[-.26,.28],[-1,.58],[-.62,.16],[-.88,.18],[-.48,-.02],[-.63,-.1],[-.23,-.14],[-.12,-.28],[0,-.5],[.12,-.28],[.23,-.14],[.63,-.1],[.48,-.02],[.88,.18],[.62,.16],[1,.58],[.26,.28],[.07,.18],[.05,.30],[0,.37],[-.05,.30]];
   birdShape.moveTo(...outline[0]); outline.slice(1).forEach(p => birdShape.lineTo(...p)); birdShape.closePath();
   const bird = new T.ShapeGeometry(birdShape);
+  const featherShape=new T.Shape();featherShape.moveTo(0,-.5);featherShape.quadraticCurveTo(-.28,.05,0,.65);featherShape.quadraticCurveTo(.22,.05,0,-.5);
+  const feather=new T.ShapeGeometry(featherShape);
   const items = Array.from({ length: capacity }, () => {
     const material = new T.MeshBasicMaterial({ transparent:true, opacity:0, side:T.DoubleSide, depthWrite:false, blending:T.AdditiveBlending, toneMapped:false });
     const softMask = { value: 0 };
@@ -95,6 +97,18 @@ export function createHeroSpecialFx(T, scene, groundAt, { capacity = 96 } = {}) 
       if (style==='violet') return;
       const facing=event.facing || 0, radius=(event.radius || event.finishRadius || 240)/60;
       if (style==='jade') {
+        if(event.type==='arrow' || event.type==='arrowImpact') {
+          const impact=event.type==='arrowImpact',tier=Math.min(5,event.fxTier||1),x=(event.x-640)/60,z=(event.y-500)/60;
+          const centre=new T.Vector3(x,groundAt(x,z)+1.30+(event.height||0),z),yaw=Math.PI/2-facing;
+          emit(ring,centre,[impact?.18+tier*.045:.14+tier*.025,impact?.18+tier*.045:.14+tier*.025,1],impact?.25:.16,{rotation:[0,yaw,0],growth:impact?1.2:.6,color:palettes.jade.rim,fade:impact?.70:.40});
+          const count=impact?4+tier:2;
+          for(let i=0;i<count;i++) {
+            const angle=(i/count)*Math.PI*2,spread=impact?.8+tier*.12:.35;
+            emit(feather,centre,[.10+tier*.018,.20+tier*.04,1],impact?.38:.22,{rotation:[0,yaw,angle],velocity:[Math.cos(angle)*spread,Math.sin(angle)*spread,impact?0:.8],spin:i%2?1.5:-1.5,color:i%3===0?0xffedbc:palettes.jade.main,fade:impact?.70:.40});
+          }
+          emit(shard,centre,[impact?.08:.04,impact?.08:.04,impact?.08:.04],.14,{color:palettes.jade.rim,growth:1.1,fade:.85});
+          return;
+        }
         if(event.type==='musouStart') {
           groundHalo(pos,2.2,1.0);
           for(let i=0;i<3;i++) emit(ring,at(pos,1.3+i*.2),[.7+i*.25,.7+i*.25,1],.85,{rotation:[0,Math.PI/2-facing,i*.25],spin:i%2?1:-1,color:palettes.jade.rim,fade:.5});
@@ -170,7 +184,7 @@ export function createHeroSpecialFx(T, scene, groundAt, { capacity = 96 } = {}) 
       }
     },
     reset() { for (const item of items) item.mesh.visible=false; },
-    dispose() { for (const item of items) { scene.remove(item.mesh); item.material.dispose(); item.bodyMaterial.dispose(); } for (const g of [ring,shard,arc,coreArc,wing,beam,dragon,bird,arrow]) g.dispose(); },
+    dispose() { for (const item of items) { scene.remove(item.mesh); item.material.dispose(); item.bodyMaterial.dispose(); } for (const g of [ring,shard,arc,coreArc,wing,beam,dragon,bird,feather,arrow]) g.dispose(); },
     stats() { return {active:items.filter(item=>item.mesh.visible).length,capacity:items.length}; },
   };
 }

@@ -3,7 +3,7 @@ import test from 'node:test';
 import * as T from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { readFile } from 'node:fs/promises';
-import { createArcherClips } from '../3d-next/hero-motion.js';
+import { createArcherClips, createComboPreview } from '../3d-next/hero-motion.js';
 import { createHeroEquipment } from '../3d-next/hero-equipment.js';
 import { HEROES } from '../3d-next/heroes.js';
 import { encodeState, decodeState } from '../3d-next/net/protocol.js';
@@ -26,7 +26,7 @@ test('bow draw and release retain stable joints and do not modify the source rig
   const original=bones.map(b=>b.quaternion.toArray()), tracks=gltf.animations.map(c=>c.tracks.map(t=>Array.from(t.values)));
   const clips=createArcherClips(T,root,gltf.animations), mixer=new T.AnimationMixer(root);
   assert.deepEqual(bones.map(b=>b.quaternion.toArray()),original);assert.deepEqual(gltf.animations.map(c=>c.tracks.map(t=>Array.from(t.values))),tracks);
-  assert.equal(clips.length,11);
+  assert.equal(clips.length,12);
   const equipment=createHeroEquipment(T,root,root.getObjectByName('Hero_sword'));equipment.apply(HEROES.jade);
   const bow=root.getObjectByName('jade_J_Bip_L_Hand_weapon');
   const string=root.getObjectByName('jade_bow_string'), arrow=root.getObjectByName('jade_nocked_arrow'), stringGeometry=string.geometry;
@@ -97,4 +97,22 @@ test('flying arrows and emerald ultimate reuse bounded pools and dispose all sce
   assert.ok(scene.children.some(mesh=>mesh.visible&&mesh.material.color.g>mesh.material.color.r));
   for(let i=0;i<40;i++){fx.onEvent({type:'swing',flurry:true,radius:420,index:i},new T.Vector3());fx.update(.03);}
   assert.equal(scene.children.length,count);fx.update(2);assert.equal(fx.stats().active,0);fx.dispose();assert.equal(scene.children.length,0);
+});
+
+
+test('the four-stage preview matches combat cancels and keeps joints continuous through every blend',async()=>{
+  const gltf=await loadRig(),root=gltf.scene,clips=createArcherClips(T,root,gltf.animations),clip=createComboPreview(T,clips,HEROES.jade);
+  const expected=HEROES.jade.chain.reduce((sum,move)=>sum+(Number.isFinite(move.cancel)?move.cancel:move.duration),0);
+  assert.equal(clip.duration,expected);
+  const mixer=new T.AnimationMixer(root),action=mixer.clipAction(clip).setLoop(T.LoopOnce,1).play();action.clampWhenFinished=true;
+  const previous=new Map();
+  for(let frame=0;frame<=Math.ceil(clip.duration*120);frame++) {
+    mixer.setTime(Math.min(clip.duration,frame/120));root.updateMatrixWorld(true);
+    for(const side of ['L','R']) {
+      const joint=root.getObjectByName(`J_Bip_${side}_UpperArm`);
+      if(previous.has(side))assert.ok(previous.get(side).angleTo(joint.quaternion)<.4,`${frame}/${side}: combo transition snapped`);
+      previous.set(side,joint.quaternion.clone());
+      assert.ok(root.getObjectByName(`J_Bip_${side}_Foot`).getWorldPosition(new T.Vector3()).y>=.087,'combo blend penetrated the floor');
+    }
+  }
 });

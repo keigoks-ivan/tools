@@ -1,10 +1,12 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone } from 'three/addons/utils/SkeletonUtils.js';
-import { toonVroidHero } from './battle.js?v=20261002i';
-import { createHeroEquipment } from './hero-equipment.js?v=20261002h';
-import { createPolearmClips, createArcherClips } from './hero-motion.js?v=20261002i';
-import { HEROES } from './heroes.js?v=20261002i';
+import { toonVroidHero } from './battle.js?v=20261002j';
+import { createHeroEquipment } from './hero-equipment.js?v=20261002j';
+import { createPolearmClips, createArcherClips, createComboPreview } from './hero-motion.js?v=20261002j';
+import { HEROES } from './heroes.js?v=20261002j';
+import { createArrowFx } from './hero-bow.js?v=20261002j';
+import { createHeroSpecialFx } from './hero-special-fx.js?v=20261002j';
 import { createHeroEnvironment } from './hero-hair.js?v=20261002h';
 
 const canvas = document.getElementById('view');
@@ -41,6 +43,7 @@ resize(); window.addEventListener('resize', resize);
 try {
   const source = await new GLTFLoader().loadAsync('../assets/heroes/swordswoman-v4.glb?v=20260925d');
   const clips = [...source.animations, ...createPolearmClips(THREE, source.scene, source.animations), ...createArcherClips(THREE, source.scene, source.animations)];
+  clips.push(createComboPreview(THREE,clips,HEROES.azure),createComboPreview(THREE,clips,HEROES.jade));
   for (const [i, profile] of profiles.entries()) {
     const model = clone(source.scene);
     const clonedMaterials = new Map();
@@ -56,10 +59,15 @@ try {
     plinth.position.set(turntable.position.x, -0.025, 0); scene.add(plinth);
     const rim = new THREE.Mesh(new THREE.TorusGeometry(0.475, 0.003, 4, 48), new THREE.MeshBasicMaterial({ color: profile.tint })); rim.rotation.x = Math.PI / 2; rim.position.set(turntable.position.x, -0.01, 0); scene.add(rim);
     actors[i].plinth = plinth; actors[i].rim = rim;
+    if(profile.id==='jade') {
+      actors[i].arrows=createArrowFx(THREE,scene,()=>0,{capacity:24});
+      actors[i].specialFx=createHeroSpecialFx(THREE,scene,()=>0,{capacity:32});actors[i].specialFx.setStyle('jade');
+    }
   }
   document.getElementById('status').textContent = '';
   controls.forEach(control => { control.disabled = false; });
-  if (new URLSearchParams(location.search).get('character') === 'jade') document.getElementById('subject').value = '3';
+  const selected=profiles.findIndex(profile=>profile.id===new URLSearchParams(location.search).get('character'));
+  if(selected>=0)document.getElementById('subject').value=String(selected);
   subject = document.getElementById('subject').value; resize();
   document.getElementById('front').onclick = () => { angle = 0; rotating = false; };
   document.getElementById('side').onclick = () => { angle = Math.PI / 2; rotating = false; };
@@ -76,16 +84,17 @@ try {
   const clock = document.getElementById('motion-time');
   function setMotion(name) {
     motion = name; motionActor = actors.find(actor => name.startsWith(actor.profile.id)); motionActor.mixer.stopAllAction();
+    actors.forEach(actor=>{actor.arrows?.reset();actor.specialFx?.reset();});
     const clip = motionActor.clips.find(c => c.name === name);
     motionActor.mixer.clipAction(clip).reset().setLoop(THREE.LoopRepeat, Infinity).play(); clock.max = clip.duration;
     motionActor.mixer.setTime(0); clock.value = 0;
   }
   function selectMotionActor() {
     const jade = subject === '3', id = jade ? 'jade' : 'azure';
-    const choices = jade ? [['Idle','持弓待機'],['Run','持弓跑步'],['Step','輕巧躍步'],['Shot','一段・快射'],['Double','二段・雙連射'],['Fan','三段・扇形三箭'],['Spread','扇形五箭'],['Pierce','蓄力穿透箭'],['Guard','退步返矢'],['Ult','翠羽天雨']] : [['Idle','持刀待機'],['Run','持刀跑步'],['Sweep','一段・橫掃'],['Rise','二段・挑斬'],['Slam','三段・重劈'],['Guard','回斬'],['Ult','蒼龍裂陣']];
+    const choices = jade ? [['Idle','持弓待機'],['Run','持弓跑步'],['Step','輕巧躍步'],['Shot','一段・快射'],['Double','二段・雙連射'],['Fan','三段・扇形三箭'],['Burst','四段・三連貫矢'],['Combo','完整四段連技'],['Spread','扇形五箭'],['Pierce','蓄力穿透箭'],['Guard','退步返矢'],['Ult','翠羽天雨']] : [['Idle','持刀待機'],['Run','持刀跑步'],['Sweep','一段・橫掃'],['Rise','二段・挑斬'],['Slam','三段・重劈'],['Combo','完整三段連技'],['Guard','回斬'],['Ult','蒼龍裂陣']];
     const select = document.getElementById('motion'); select.replaceChildren(...choices.map(([suffix,label]) => new Option(label,id+suffix)));
     const label = jade ? '翠翎動作' : '蒼鋒動作'; document.getElementById('motion-label').textContent = label; select.setAttribute('aria-label',label);
-    setMotion(id+'Idle');
+    select.value=id+'Combo';setMotion(select.value);
   }
   selectMotionActor();
   document.getElementById('motion').onchange = event => setMotion(event.target.value);
@@ -110,6 +119,24 @@ try {
     document.getElementById('detail').textContent = detail ? '全身檢視' : '髮型近看'; resize();
   };
 } catch (error) { document.getElementById('status').textContent = '模型載入失敗，請重新整理。'; console.error(error); }
+function showArrows(actor,time) {
+  actor.arrows.reset();actor.specialFx.reset();
+  if(detail||!actor.turntable.visible)return;
+  const moves=actor.profile.chain,cues=[];let start=0;
+  if(motion==='jadeCombo')for(const move of moves) {for(const [index,at] of move.hits.entries())cues.push({move,index,at:start+at});start+=Number.isFinite(move.cancel)?move.cancel:move.duration;}
+  else {const move=[...moves,...actor.profile.charges,actor.profile.counter,actor.profile.air].find(move=>move.clip===motion);if(move)for(const [index,at] of move.hits.entries())cues.push({move,index,at});}
+  let newest=null;
+  for(const cue of cues) {
+    const age=time-cue.at,p=cue.move.projectile;if(age<0||age>(cue.move.radius-20)/p.speed)continue;
+    for(let i=0;i<(p.arrows||1);i++) {
+      const facing=Math.PI/2-angle+(i-((p.arrows||1)-1)/2)*(p.spread||0),distance=20+age*p.speed;
+      const event={type:'arrow',x:640+actor.turntable.position.x*60+Math.cos(facing)*distance,y:500+Math.sin(facing)*distance,facing,range:cue.move.radius-20,speed:p.speed,fxTier:(cue.move.fxTier||1)+(cue.move.clip==='jadeBurst'&&cue.index===cue.move.hits.length-1?1:0)};
+      actor.arrows.onEvent(event);
+      if(!newest||age<newest.age)newest={event:{...event,x:640+actor.turntable.position.x*60+Math.cos(facing)*20,y:500+Math.sin(facing)*20},age};
+    }
+  }
+  if(newest){actor.specialFx.onEvent(newest.event,actor.turntable.position);actor.specialFx.update(newest.age);}
+}
 let last = 0;
 function frame(t) {
   requestAnimationFrame(frame); if (document.hidden) { last = t; return; } if (t - last < 33) return;
@@ -119,12 +146,13 @@ function frame(t) {
     actor.turntable.rotation.y = 0; if (actor !== motionActor || !paused) actor.mixer.update(dt * (actor === motionActor ? speed : 1)); actor.equipment.update(); actor.look.update(t / 1000);
     actor.model.updateMatrixWorld(true);
     const facing = new THREE.Vector3(0, 0, 1).applyQuaternion(actor.model.getObjectByName('J_Bip_C_Hips').getWorldQuaternion(new THREE.Quaternion()));
-    // The Azure clips are authored facing +Z. Do not cancel their hip turn.
+    // Retargeted combat clips face +Z; preserve their animated torso turns.
     actor.turntable.rotation.y = ['azure','jade'].includes(actor.profile.id) ? angle : angle - Math.atan2(facing.x, facing.z);
     if (actor === motionActor) {
       const time = actor.mixer.clipAction(actor.clips.find(c => c.name === motion)).time;
       document.getElementById('motion-time').value = time;
       document.getElementById('motion-clock').textContent = `${time.toFixed(2)}s`;
+      if(actor.arrows)showArrows(actor,time);
     }
     actor.plinth.visible = actor.rim.visible = actor.turntable.visible;
     actor.model.traverse(o => { if (/_Hand_weapon$/.test(o.name)) o.visible = !detail; });

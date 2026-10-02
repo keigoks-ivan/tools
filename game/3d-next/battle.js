@@ -1,13 +1,13 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone as cloneSkinned } from 'three/addons/utils/SkeletonUtils.js';
-import { Arena } from '../2d/combat.js?v=20261002i';
-import { heroFor } from './heroes.js?v=20261002i';
-import { Campaign, CHAPTERS, chapterTuning } from './campaign.js?v=20261002i';
-import { createHeroEquipment } from './hero-equipment.js?v=20261002h';
-import { createPolearmClips, createDualBladeUltimate, createArcherClips } from './hero-motion.js?v=20261002i';
-import { createArrowFx } from './hero-bow.js?v=20261002h';
-import { createHeroSpecialFx } from './hero-special-fx.js?v=20261002h';
+import { Arena } from '../2d/combat.js?v=20261002j';
+import { heroFor } from './heroes.js?v=20261002j';
+import { Campaign, CHAPTERS, chapterTuning } from './campaign.js?v=20261002j';
+import { createHeroEquipment } from './hero-equipment.js?v=20261002j';
+import { createPolearmClips, createDualBladeUltimate, createArcherClips } from './hero-motion.js?v=20261002j';
+import { createArrowFx } from './hero-bow.js?v=20261002j';
+import { createHeroSpecialFx } from './hero-special-fx.js?v=20261002j';
 import { createHeroEnvironment } from './hero-hair.js?v=20261002h';
 import { createChapterWorld } from './chapter-world.js?v=20261002c';
 import { FramePacer } from '../frame-pacing.js';
@@ -43,7 +43,7 @@ let lazyModules = null;
 export function loadLazyModules() {
   if (!lazyModules) {
     lazyModules = Promise.all([
-      marchLevel ? Promise.all([import('./march.js?v=20261002i'), import('./march-art.js?v=20260925f')]) : null,
+      marchLevel ? Promise.all([import('./march.js?v=20261002j'), import('./march-art.js?v=20260925f')]) : null,
       // ?hero=vroid：打擊特效模組（combat-fx.js）；載入失敗時退回下方原本的特效與時間倍率
       heroChoice === 'vroid' ? import('./combat-fx.js?v=20261002d').catch(error => { console.warn('combat-fx failed, using built-in effects', error); return null; }) : null,
     ]).catch(error => { lazyModules = null; throw error; });
@@ -894,7 +894,7 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
       const active = h.action === 'attack' || arena.time <= arena.comboUntil;
       route.hidden = !active && h.action !== 'heavy';
       route.style.setProperty('--hero-color', heroProfile.color);
-      route.querySelector('b').textContent = h.action === 'heavy' ? arena.attack?.name || '重擊' : `${h.combo} / ${heroProfile.chain.length} ${heroProfile.id === 'jade' ? '連射' : '連斬'}`;
+      route.querySelector('b').textContent = h.action === 'heavy' ? arena.attack?.name || '重擊' : `${h.combo} / ${heroProfile.chain.length} ${heroProfile.id === 'jade' ? heroProfile.chain[h.combo-1]?.name || '羽箭連技' : '連斬'}`;
       route.querySelector('span').textContent = h.action === 'heavy' ? '變招完成' : arena.inputBuffer?.kind === 'heavy' ? '重擊已接招' : isMobile() ? `攻 接下一${heroProfile.id === 'jade' ? '箭' : '刀'} · 重 變招` : `J 接下一${heroProfile.id === 'jade' ? '箭' : '刀'} · K 變招`;
       for (const [i, dot] of [...route.querySelectorAll('i')].entries()) dot.classList.toggle('lit', i < h.combo);
     }

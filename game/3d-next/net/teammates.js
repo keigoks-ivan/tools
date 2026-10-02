@@ -6,9 +6,9 @@
 import { SnapshotBuffer } from './interp.js';
 import { SLOT_COLORS, playerColor } from './colors.js';
 import { GHOST_ANIMS, TRAIL_ANIM, makeGhosts, makePeerTrail } from './peer-fx.js?v=20261002d';
-import { heroFor } from '../heroes.js?v=20261002i';
-import { createHeroSpecialFx } from '../hero-special-fx.js?v=20261002h';
-import { createArrowFx } from '../hero-bow.js?v=20261002h';
+import { heroFor } from '../heroes.js?v=20261002j';
+import { createHeroSpecialFx } from '../hero-special-fx.js?v=20261002j';
+import { createArrowFx } from '../hero-bow.js?v=20261002j';
 
 /** 依座位輪用的色調（名單外的名字才用到；Matt／Myles／Mike 固定配色見 colors.js） */
 export const TEAM_TINTS = SLOT_COLORS;
@@ -160,7 +160,8 @@ export function createTeammates({ THREE, scene, template, clips, cloneSkinned, q
           const p=shot.projectile,count=p.arrows || 1;
           for(let i=0;i<count;i++) {
             const facing=Math.PI/2-s.yaw+(i-(count-1)/2)*(p.spread || 0);
-            peer.arrowFx.onEvent({type:'arrow',x:640+s.x*60+Math.cos(facing)*20,y:500+s.z*60+Math.sin(facing)*20,facing,height:s.lift || 0,speed:p.speed,range:shot.radius-20,pierce:p.pierce || 1});
+            const event={type:'arrow',x:640+s.x*60+Math.cos(facing)*20,y:500+s.z*60+Math.sin(facing)*20,facing,height:s.lift || 0,speed:p.speed,range:shot.radius-20,pierce:p.pierce || 1,fxTier:(shot.fxTier||1)+(shot.clip==='jadeBurst'&&peer.arrowIndex===shot.hits.length?1:0)};
+            peer.arrowFx.onEvent(event);peer.specialFx.onEvent(event,peer.root.position);
           }
         }
         peer.arrowTime=s.time;

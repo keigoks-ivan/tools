@@ -32,7 +32,7 @@ test('character choice changes real health, movement, attack reach and damage; r
 });
 
 test('every combo and heavy branch is playable and uses a real animation clip', () => {
-  const clips = new Set(['combo1', 'combo2', 'combo3', 'combo4', 'combo5', 'slash2', 'slash3', 'slash4', 'heavy', 'heavyfin', 'azureSweep', 'azureRise', 'azureSlam', 'azureGuard', 'jadeShot', 'jadeDouble', 'jadeFan', 'jadeSpread', 'jadePierce', 'jadeGuard']);
+  const clips = new Set(['combo1', 'combo2', 'combo3', 'combo4', 'combo5', 'slash2', 'slash3', 'slash4', 'heavy', 'heavyfin', 'azureSweep', 'azureRise', 'azureSlam', 'azureGuard', 'jadeShot', 'jadeDouble', 'jadeFan', 'jadeBurst', 'jadeSpread', 'jadePierce', 'jadeGuard']);
   for (const hero of Object.values(HEROES)) {
     const arena = makeArena(hero);
     for (let i = 0; i < hero.chain.length; i++) {

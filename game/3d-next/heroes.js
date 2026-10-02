@@ -1,4 +1,4 @@
-import { MUSOU_CHAIN, MUSOU_CHARGE, MUSOU_HEAVY, MUSOU_COUNTER, MUSOU_FLURRY } from '../2d/combat.js?v=20261002i';
+import { MUSOU_CHAIN, MUSOU_CHARGE, MUSOU_HEAVY, MUSOU_COUNTER, MUSOU_FLURRY } from '../2d/combat.js?v=20261002j';
 
 const full = Math.PI * 2;
 const flurry = changes => ({
@@ -57,20 +57,22 @@ export const HEROES = {
   },
   jade: {
     id: 'jade', name: '翠翎', mark: '翎', weapon: '翡翠長弓', color: '#91e5b6', tint: 0x91e5b6,
-    style: '遠距連射', description: '快射、雙連射、扇形三箭；重擊穿透直線敵群。', special: '翠羽天雨',
+    style: '四段羽箭連技', description: '快射、雙連射、扇形三箭接三連貫矢；重擊可接破甲、散射與羽箭終結。', special: '翠羽天雨',
     maxHp: 90, speed: 1.16, aimRange: 560, aimArc: Math.PI + .01,
     dodge: { clip: 'jadeStep', duration: .30, cooldown: .48, invulnerable: .30, moveStart: .05, moveEnd: .24 },
     air: { clip: 'jadeAir', duration: .5, hit: .22, hits: [.22], radius: 480, damage: 8, projectile: { speed: 1100, width: 10 } },
     chain: [
-      { clip: 'jadeShot', duration: .50, hits: [.24], cancel: .34, moveCancel: .34, radius: 520, damage: 12, dash: 0, projectile: { speed: 1500, width: 12, pierce: 2 } },
-      { clip: 'jadeDouble', duration: .66, hits: [.23,.43], cancel: .53, moveCancel: .53, radius: 520, damage: 8, dash: 0, projectile: { speed: 1500, width: 12 } },
-      { clip: 'jadeFan', duration: .72, hits: [.36], cancel: Infinity, moveCancel: .47, radius: 480, damage: 12, finisher: 14, dash: 0, projectile: { speed: 1400, width: 12, arrows: 3, spread: .22, pierce: 2 } },
+      { name: '點羽快射', clip: 'jadeShot', duration: .50, hits: [.24], cancel: .34, moveCancel: .34, fxTier: 1, radius: 520, damage: 12, dash: 0, projectile: { speed: 1500, width: 12, pierce: 2 } },
+      { name: '穿花雙矢', clip: 'jadeDouble', duration: .84, hits: [.24,.59], cancel: .70, moveCancel: .70, fxTier: 2, radius: 520, damage: 8, dash: 0, projectile: { speed: 1500, width: 12 } },
+      { name: '展翎三箭', clip: 'jadeFan', duration: .72, hits: [.36], cancel: .47, moveCancel: .47, fxTier: 3, radius: 480, damage: 12, finisher: 14, dash: 0, projectile: { speed: 1400, width: 12, arrows: 3, spread: .22, pierce: 2 } },
+      { name: '翠羽貫心', clip: 'jadeBurst', duration: 1.08, hits: [.24,.57,.90], cancel: Infinity, moveCancel: 1.01, fxTier: 4, radius: 560, damage: 8, finisher: 14, dash: 0, projectile: { speed: 1800, width: 12, pierce: 3 } },
     ],
     charges: [
-      { name: '破甲貫矢', clip: 'jadePierce', duration: 1.1, hits: [.64], cancel: Infinity, moveCancel: .75, radius: 560, damage: 24, finisher: 24, dash: 0, projectile: { speed: 1800, width: 14, pierce: 3 } },
-      { name: '翠羽散射', clip: 'jadeSpread', duration: .72, hits: [.36], cancel: Infinity, moveCancel: .47, radius: 480, damage: 12, finisher: 12, dash: 0, projectile: { speed: 1100, width: 12, arrows: 5, spread: .15 } },
+      { name: '破甲貫矢', clip: 'jadePierce', duration: 1.1, hits: [.64], cancel: Infinity, moveCancel: .75, fxTier: 4, radius: 560, damage: 24, finisher: 24, dash: 0, projectile: { speed: 1800, width: 14, pierce: 3 } },
+      { name: '翠羽散射', clip: 'jadeSpread', duration: .72, hits: [.36], cancel: Infinity, moveCancel: .47, fxTier: 3, radius: 480, damage: 12, finisher: 12, dash: 0, projectile: { speed: 1100, width: 12, arrows: 5, spread: .15 } },
+      { name: '翠羽貫心', clip: 'jadeBurst', duration: 1.08, hits: [.24,.57,.90], cancel: Infinity, moveCancel: 1.01, fxTier: 4, radius: 560, damage: 8, finisher: 14, dash: 0, projectile: { speed: 1800, width: 12, pierce: 3 } },
     ],
-    heavy: { name: '破甲貫矢', clip: 'jadePierce', duration: 1.1, hits: [.64], cancel: Infinity, moveCancel: .75, radius: 560, damage: 24, finisher: 24, dash: 0, projectile: { speed: 1800, width: 14, pierce: 3 } },
+    heavy: { name: '破甲貫矢', clip: 'jadePierce', duration: 1.1, hits: [.64], cancel: Infinity, moveCancel: .75, fxTier: 4, radius: 560, damage: 24, finisher: 24, dash: 0, projectile: { speed: 1800, width: 14, pierce: 3 } },
     counter: { ...MUSOU_COUNTER, name: '退步返矢', clip: 'jadeGuard', duration: .48, hits: [.22], cancel: .33, moveCancel: .33, radius: 500, damage: 11, dash: -110, projectile: { speed: 1200, width: 12 } },
     flurry: flurry({ duration: 3.6, swingStart: .95, swingEnd: 2.2, swings: 6, radius: 420, damage: 5, steer: 0,
       impact: 2.9, finishRadius: 460, finishDamage: 24, leapAt: null, sweeps: [],

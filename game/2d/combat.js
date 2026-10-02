@@ -699,7 +699,7 @@ export class Arena {
       const damage = last && attack.finisher ? attack.finisher : attack.damage;
       const source = attack.kind === 'special' ? 'special' : last && attack.finisher ? 'heavy' : attack.kind;
       this._emit('swing', { x: hero.x, y: hero.y, facing: hero.facing, kind: attack.kind, combo: hero.combo, index, last, radius: attack.radius, ...(attack.charge ? { charge: attack.charge } : null), ...(attack.counter ? { counter: true } : null) });
-      if (attack.projectile) { this._fireArrows(attack, damage, source); continue; }
+      if (attack.projectile) { this._fireArrows(attack, damage, source, index); continue; }
       for (const enemy of this.enemies) {
         if (enemy.action === 'dead') continue;
         const d = distance(hero, enemy);
@@ -734,14 +734,15 @@ export class Arena {
     }
   }
 
-  _fireArrows(attack, damage, source) {
+  _fireArrows(attack, damage, source, index = 0) {
     const p=attack.projectile, count=p.arrows || 1;
     for(let i=0;i<count && this.projectiles.length<64;i++) {
       const facing=this.hero.facing+(i-(count-1)/2)*(p.spread || 0);
       const shot={ id:this.nextProjectileId++, x:this.hero.x+Math.cos(facing)*20, y:this.hero.y+Math.sin(facing)*20, facing, speed:p.speed, remaining:attack.radius-20,
-        width:p.width, pierce:p.pierce || 1, damage, source, struck:new Set() };
+        width:p.width, pierce:p.pierce || 1, damage, source, height:this.hero.height || 0,
+        fxTier:(attack.fxTier || 1)+(attack.clip==='jadeBurst' && index===attack.hits.length-1 ? 1 : 0), struck:new Set() };
       this.projectiles.push(shot);
-      this._emit('arrow', { id:shot.id, x:shot.x, y:shot.y, facing, speed:shot.speed, range:shot.remaining, pierce:shot.pierce, height:this.hero.height || 0 });
+      this._emit('arrow', { id:shot.id, x:shot.x, y:shot.y, facing, speed:shot.speed, range:shot.remaining, pierce:shot.pierce, height:shot.height, fxTier:shot.fxTier, combo:this.hero.combo, last:index===attack.hits.length-1 });
     }
   }
 
@@ -759,7 +760,9 @@ export class Arena {
       }
       candidates.sort((a,b)=>a.t-b.t || a.enemy.id-b.enemy.id);
       for(const {enemy} of candidates) {
+        const before=enemy.hp;
         shot.struck.add(enemy.id); this._damageEnemy(enemy,shot.damage,shot.source);
+        if(enemy.hp<before)this._emit('arrowImpact',{ id:shot.id, x:enemy.x, y:enemy.y, facing:shot.facing, height:shot.height, fxTier:shot.fxTier, enemyId:enemy.id });
         if(--shot.pierce<=0) { shot.remaining=0; break; }
       }
       shot.x+=dx; shot.y+=dy; shot.remaining-=travel;

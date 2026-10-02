@@ -121,7 +121,7 @@ try {
   await sleep(200);
   check(!a.messages.some(m => m.t === 's'), 'sender does not get its own state back');
 
-  for (const animation of ['azureIdle', 'azureRun', 'azureSweep', 'azureRise', 'azureSlam', 'azureGuard', 'azureUlt', 'amberUlt', 'jadeIdle', 'jadeRun', 'jadeStep', 'jadeShot', 'jadeDouble', 'jadeFan', 'jadeSpread', 'jadePierce', 'jadeGuard', 'jadeAir', 'jadeUlt']) {
+  for (const animation of ['azureIdle', 'azureRun', 'azureSweep', 'azureRise', 'azureSlam', 'azureGuard', 'azureUlt', 'amberUlt', 'jadeIdle', 'jadeRun', 'jadeStep', 'jadeShot', 'jadeDouble', 'jadeFan', 'jadeBurst', 'jadeSpread', 'jadePierce', 'jadeGuard', 'jadeAir', 'jadeUlt']) {
     const character = animation.startsWith('jade') ? 'jade' : animation.startsWith('amber') ? 'amber' : 'azure';
     const name = `${character}_${animation}_m2cr`;
     a.ws.send(JSON.stringify({ t: 's', d: { x: 0, y: 0, z: 0, r: 0, a: name, at: 0.4, ts: 1, l: 0, c: 2345 } }));

@@ -61,8 +61,9 @@ test('movement cancels released shot recovery and preserves the next combo step'
 
 test('double shot keeps both releases before movement cancels recovery',()=>{
   const a=arenaFor();a.hero.combo=1;a.comboUntil=a.time+1;a._startAttack('attack');
-  advance(a,.42,{x:1});assert.equal(a.hero.action,'attack');assert.equal(a.drainEvents().filter(e=>e.type==='arrow').length,1);
-  advance(a,.12,{x:1});assert.equal(a.drainEvents().filter(e=>e.type==='arrow').length,1);assert.equal(a.hero.action,'run');
+  const move=HEROES.jade.chain[1],beforeSecond=move.hits[1]-.02;
+  advance(a,beforeSecond,{x:1});assert.equal(a.hero.action,'attack');assert.equal(a.drainEvents().filter(e=>e.type==='arrow').length,1);
+  advance(a,move.moveCancel-beforeSecond+.02,{x:1});assert.equal(a.drainEvents().filter(e=>e.type==='arrow').length,1);assert.equal(a.hero.action,'run');
 });
 
 test('a queued heavy branch has priority over movement recovery cancellation',()=>{
@@ -84,4 +85,21 @@ test('evasive step travels smoothly, finishes promptly and leaves other characte
 test('evasive step remains inside map bounds at every integration step',()=>{
   const a=arenaFor();a.hero.x=a.bounds.maxX-5;a.hero.y=a.bounds.maxY-5;a._startDodge(1,1);
   for(let i=0;i<40;i++){a.update(1/120,{});assert.ok(a.hero.x<=a.bounds.maxX);assert.ok(a.hero.y<=a.bounds.maxY);}
+});
+
+
+test('held light input plays four distinct bow stages and releases nine arrows with a brighter final shot',()=>{
+  const a=arenaFor(),events=[];const duration=HEROES.jade.chain.reduce((sum,move)=>sum+(Number.isFinite(move.cancel)?move.cancel:move.duration),0);
+  for(let time=0;time<duration-.03;time+=1/120){a.update(1/120,{attack:true});events.push(...a.drainEvents());}
+  assert.deepEqual(events.filter(e=>e.type==='slash').map(e=>e.combo),[1,2,3,4]);
+  const arrows=events.filter(e=>e.type==='arrow');assert.equal(arrows.length,9);
+  assert.deepEqual(arrows.map(e=>e.fxTier),[1,2,2,3,3,3,4,4,5]);
+});
+
+test('arrow impact effects occur on the damaged enemy, preserve height, and do not repeat on pierced targets',()=>{
+  const a=arenaFor(),near=target(a,140),far=target(a,250);a.hero.height=.2;
+  a._fireArrows(HEROES.jade.chain[3],8,'attack',2);a.drainEvents();a._advanceProjectiles(.2);
+  const hits=a.drainEvents().filter(e=>e.type==='arrowImpact');
+  assert.deepEqual(hits.map(e=>e.enemyId),[near.id,far.id]);assert.equal(hits[0].x,near.x);assert.equal(hits[1].x,far.x);
+  assert.ok(hits.every(e=>e.height===.2&&e.fxTier===5));a._advanceProjectiles(.1);assert.equal(a.drainEvents().filter(e=>e.type==='arrowImpact').length,0);
 });
