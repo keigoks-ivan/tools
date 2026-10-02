@@ -132,6 +132,6 @@ export class Input {
       const off = () => { if (this.keys.has(key)) this.up.add(key); this.keys.delete(key); };
       b.addEventListener('pointerup', off); b.addEventListener('pointercancel', off);
     };
-    btn('tFire', 'Tfire'); btn('tBoost', 'Tboost'); btn('tJump', 'Tjump'); btn('tMsl', 'Tmsl'); btn('tSaber', 'Tsaber'); btn('tCannon', 'Tcannon'); btn('tOd', 'Tod'); btn('tLock', 'Tlock'); btn('tView', 'Tview'); btn('tNade', 'Tnade'); btn('tSupport', 'Tsupport');
+    btn('tFire', 'Tfire'); btn('tBoost', 'Tboost'); btn('tJump', 'Tjump'); btn('tMsl', 'Tmsl'); btn('tSaber', 'Tsaber'); btn('tCannon', 'Tcannon'); btn('tOd', 'Tod'); btn('tLock', 'Tlock'); btn('tView', 'Tview'); btn('tNade', 'Tnade'); btn('tSupport', 'Tsupport'); btn('tScout', 'Tscout');
   }
 }

@@ -7,6 +7,8 @@ export class Reinforcements {
   }
   tick(now, alive, spawn) {
     if (!this.pending.length || this.pending[0].at > now || now < this.next || alive >= this.cap) return null;
-    const e = spawn(this.pending.shift().def); this.next = now + this.gap; return e;
+    const e = spawn(this.pending[0].def);
+    if (!e) { this.next = now + this.gap; return null; }
+    this.pending.shift(); this.next = now + this.gap; return e;
   }
 }

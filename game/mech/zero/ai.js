@@ -19,6 +19,18 @@ export const TYPES = {
   sniper: { hp: 110, walk: 1.3, run: 3.8, burst: [1, 1], gap: 1, dmg: 50, speed: 150, acc: 0.005, scale: 1, look: 'sniper', gun: 'sniper', score: 300 },
 };
 
+export function hearNoise(G, p, radius, strength) {
+  for (const e of G.enemies) {
+    if (e.dead || e.state === 'combat' && e.sees) continue;
+    const d = e.pos.distanceTo(p); if (d > radius) continue;
+    const clear = G.solid.sees(e.pos.clone().add(new THREE.Vector3(0, 1.5, 0)), p.clone().add(new THREE.Vector3(0, .8, 0)));
+    if (!clear && d > radius * .45) continue;
+    const at = p.clone(); const error = clear ? .6 : 2;
+    at.x += rr(-error, error); at.z += rr(-error, error);
+    e.alert(at, strength * (1 - .4 * d / radius));
+  }
+}
+
 const MAG = { trooper: 18, officer: 24, heavy: 40, sniper: 4 };
 
 export class Trooper {
@@ -45,7 +57,7 @@ export class Trooper {
     this.stepPh = 0;
     this.hitFlash = 0;
     if (this.type === 'sniper') { this.laser = new THREE.Mesh(LASER_GEO, laserMat()); this.laser.visible = false; G.scene.add(this.laser); }
-    this.lastSpeak = -99;
+    this.lastSpeak = -99; this.searchT = 0; this.inspectT = rr(0, .7); this.seenBodies = new Set();
     // 手榴彈（nades 小於 1＝有這個機率帶一顆）、多久沒看到玩家、被瞄準多久
     this.nades = T.nades ? (T.nades >= 1 ? T.nades : (Math.random() < T.nades ? 1 : 0)) : 0;
     this.notSeen = 0; this.hunt = false; this.aimedT = 0; this.duckAt = rr(0.3, 0.7);
@@ -103,7 +115,7 @@ export class Trooper {
   alert(p, k = 1) {
     if (this.dead) return;
     this.aware = Math.min(1, this.aware + k);
-    if (p) this.lastSeen.copy(p);
+    if (p) { this.lastSeen.copy(p); if (this.state !== 'combat') this.searchT = 6 + k * 3; }
     if (this.aware >= 1 && this.state !== 'combat') {
       this.state = 'combat'; this.phase = 'move'; this.cover = null; this.coverT = 0;
       if (this.G.t - this.lastSpeak > 3) { this.lastSpeak = this.G.t; this.G.audio.radio('enemy', this.pos); }
@@ -142,19 +154,26 @@ export class Trooper {
       else this.aware = Math.max(0, this.aware - dt * 0.06);
       if (this.aware >= 1) this.alert(P.pos, 1);
     }
+    if (this.state !== 'combat') this.inspectBodies(dt);
     const mv = new THREE.Vector3();
     let speed = 0, face = s.yaw, mode = 'patrol';
     if (this.state === 'patrol' || this.state === 'idle') {
       if (this.patrol) {
         const tp = this.patrol[this.pi];
         _v.set(tp[0] - this.pos.x, 0, tp[1] - this.pos.z);
-        if (_v.length() < 0.6) { this.wait -= dt; if (this.wait <= 0) { this.pi = (this.pi + 1) % this.patrol.length; this.wait = rr(1.5, 4); } }
+        if (_v.length() < 0.6) { face = (this.s.yaw || this.def.yaw || 0) + Math.sin(G.t * 1.4 + this.id) * .04; this.wait -= dt; if (this.wait <= 0) { this.pi = (this.pi + 1) % this.patrol.length; this.wait = rr(1.5, 4); } }
         else { mv.copy(_v).normalize(); speed = T.walk; face = Math.atan2(_v.x, _v.z); }
       } else {
         // 站崗：偶爾左右看
         face = (this.def.yaw ?? 0) + Math.sin(G.t * 0.3 + this.id) * 0.6;
       }
-      if (this.aware > 0.3) { face = Math.atan2(this.lastSeen.x - this.pos.x, this.lastSeen.z - this.pos.z); speed = 0; }
+      if (this.searchT > 0) {
+        this.searchT -= dt; _v.subVectors(this.lastSeen, this.pos).setY(0);
+        face = Math.atan2(_v.x, _v.z);
+        if (_v.length() > 2 && !this.post) { mv.copy(_v).normalize(); speed = T.walk * 1.15; }
+        else { speed = 0; face += Math.sin(G.t * 1.8 + this.id) * .65; }
+        if (this.searchT <= 0 && !this.sees) { this.aware = Math.min(this.aware, .25); this.cover = null; this.path = {}; }
+      } else if (this.aware > 0.3) { face = Math.atan2(this.lastSeen.x - this.pos.x, this.lastSeen.z - this.pos.z); speed = 0; }
       s.aimYaw = lerpAngle(s.aimYaw, face, 1 - Math.exp(-dt * 3));
       s.aimPitch = damp(s.aimPitch, 0, 3, dt);
       mode = 'patrol';
@@ -277,7 +296,7 @@ export class Trooper {
           for (const [x, z] of [[mx, mz], [bx, bz]]) if (Math.abs(G.solid.floorAt(x, z, this.pos.y + 0.5) - this.pos.y) > 0.6) return false;
           return true;
         };
-        const goal = dist >= 4.5 && this.cover && (this.phase === 'move' || this.phase === 'hide') ? this.cover : { x: this.pos.x + mv.x * 6, z: this.pos.z + mv.z * 6 };
+        const goal = this.state !== 'combat' && this.searchT > 0 ? this.lastSeen : dist >= 4.5 && this.cover && (this.phase === 'move' || this.phase === 'hide') ? this.cover : { x: this.pos.x + mv.x * 6, z: this.pos.z + mv.z * 6 };
         const path = routeDirection(this.path || (this.path = {}), this.pos, goal, clear, G.t, 1.5);
         const routed = path && this.path.points.length;
         const nav = steer(routed ? path.x : mv.x, routed ? path.z : mv.z, (x, z) => {
@@ -305,6 +324,23 @@ export class Trooper {
     if (sp > 0.6) { this.stepPh += dt * sp / 1.5; if (this.stepPh > 1) { this.stepPh -= 1; if (dist < 25) G.audio.trooperStep(this.pos); } }
     // 遠的少做程序層
     s.update(dt, dist > 45);
+  }
+
+  inspectBodies(dt) {
+    this.inspectT = (this.inspectT ?? 0) - dt; if (this.inspectT > 0) return; this.inspectT = .7;
+    this.seenBodies ||= new Set();
+    for (const e of this.G.enemies) {
+      if (!e.dead || this.seenBodies.has(e.id) || e.pos.distanceTo(this.pos) > 12) continue;
+      const head = this.s.headPos(new THREE.Vector3()), body = e.pos.clone().add(new THREE.Vector3(0, .4, 0));
+      const dir = body.clone().sub(head).normalize();
+      if (dir.dot(new THREE.Vector3(Math.sin(this.s.aimYaw), 0, Math.cos(this.s.aimYaw))) < .05 || !this.G.solid.sees(head, body)) continue;
+      this.seenBodies.add(e.id); this.alert(e.pos, .65);
+      if (this.G.t - this.lastSpeak > 3) { this.lastSpeak = this.G.t; this.G.audio.radio('enemy', this.pos); }
+      for (const mate of this.G.enemies) if (mate !== this && !mate.dead && mate.state !== 'combat' && mate.pos.distanceTo(this.pos) < 20) {
+        mate.seenBodies?.add(e.id); mate.alert(e.pos, .35);
+      }
+      break;
+    }
   }
 
   fire(tgt) {

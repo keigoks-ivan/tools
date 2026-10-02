@@ -5,7 +5,7 @@ import { steer, flankPoint, squadFlank, coveringFire, segmentBox, planRoute, rou
 import { Combat } from '../combat.js';
 import { Encounter, parse } from '../encounter.js';
 import { STAGE_DATA } from '../stages.js';
-import { Trooper, Drone, TYPES } from '../zero/ai.js';
+import { Trooper, Drone, TYPES, hearNoise } from '../zero/ai.js';
 import { Solid } from '../zero/kit.js';
 
 const V = (x = 0, y = 0, z = 0) => new THREE.Vector3(x, y, z);
@@ -232,4 +232,23 @@ test('drone three-shot bursts release the slot during cooldown and cannot shoot 
   assert.equal(shots, 3); assert.equal(e.burst, 0); assert(e.shotT >= .9);
   e.shotT = 0; e.sees = true; e.losT = 1; e.G.solid.sees = () => false; e.update(.01);
   assert.equal(shots, 3); assert.equal(e.burst, 0);
+});
+
+test('patrol investigates a heard location and resumes its route without tracking a hidden player', () => {
+  const e = soldierFixture();e.def={yaw:0};e.state='patrol';e.aware=0;e.sees=false;e.losT=10;e.cover=null;e.searchT=0;e.patrol=[[10,0],[20,0]];e.pi=0;e.wait=2;e.lastSpeak=-99;
+  const heard=V(10,0,8);e.alert(heard,.4);const start=e.pos.clone();e.G.player.pos.set(-80,0,-80);e.update(.1);
+  assert(e.pos.z>start.z);assert(e.searchT>0);assert.deepEqual(e.lastSeen.toArray(),heard.toArray());
+  e.searchT=.05;e.update(.1);assert(e.aware<=.25);assert.equal(e.state,'patrol');
+});
+test('hearing respects walls, distance and stronger visual information', () => {
+  const e=soldierFixture();e.state='idle';e.aware=0;e.sees=false;e.G.solid.sees=()=>false;
+  hearNoise(e.G,V(25,0,0),20,.6);assert.equal(e.aware,0);
+  hearNoise(e.G,V(14,0,0),20,.6);assert(e.aware>0&&e.aware<1);assert(e.searchT>0);
+  e.state='combat';e.sees=true;const at=e.lastSeen.clone();hearNoise(e.G,V(12,0,0),20,.8);assert.deepEqual(e.lastSeen.toArray(),at.toArray());
+});
+test('a discovered body prompts one investigation and warns nearby guards without revealing the player', () => {
+  const e=soldierFixture();e.state='idle';e.aware=0;e.sees=false;e.lastSpeak=-99;e.s.aimYaw=0;
+  const body={dead:true,id:20,pos:V(10,0,5)},mate={dead:false,state:'idle',pos:V(12,0,0),seenBodies:new Set(),reports:[],alert(p,k){this.reports.push([p.clone(),k]);}};
+  e.G.enemies.push(body,mate);e.inspectBodies(.1);assert.equal(e.aware,.65);assert(e.searchT>0);assert.deepEqual(e.lastSeen.toArray(),body.pos.toArray());assert.equal(mate.reports.length,1);
+  for(let i=0;i<5;i++)e.inspectBodies(1);assert.equal(e.aware,.65);assert.equal(mate.reports.length,1);
 });

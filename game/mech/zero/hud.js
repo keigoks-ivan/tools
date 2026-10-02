@@ -42,6 +42,7 @@ export class HUD {
     x.clearRect(0, 0, W, H);
     if (!G || !G.playing) { this._subs(dt, W, H); this._banner(dt, W, H); return; }
     const vm = G.vm, P = G.player, cx = W / 2, cy = H / 2;
+    if (G.scout?.active) { this._scout(W, H, G); this._radar(W, H, G); this._subs(dt, W, H); this._banner(dt, W, H); return; }
     this.clearAim = vm.cur === 'smg' && vm.ads > .5 ? Math.min(W,H)*.09 : 0;
     // ---- 狙擊鏡
     if (vm.scoped) this._scope(W, H, G);
@@ -140,8 +141,33 @@ export class HUD {
       x.font = '500 15px "Noto Sans TC", sans-serif'; x.fillStyle = '#e8f3f6'; x.fillText(G.objText, 34, 62);
       if (G.objSub) { x.font = '500 13px "Noto Sans TC", sans-serif'; x.fillStyle = '#ff9a8a'; x.fillText(G.objSub, 34, 82); }
     }
+    this._radar(W, H, G);
     this._subs(dt, W, H);
     this._banner(dt, W, H);
+  }
+
+  _radar(W, H, G) {
+    if (!G.contacts || W < 320 || H < 320) return;
+    const x=this.x, r=H<550?42:54, cx=34+r, cy=H-154-r, origin=G.scout.active?G.scout.pos:G.player.pos, yaw=G.scout.active?G.scout.yaw:G.player.yaw;
+    x.save();x.translate(cx,cy);x.fillStyle='rgba(5,15,20,.78)';x.strokeStyle='rgba(127,243,255,.4)';x.lineWidth=1;
+    x.beginPath();x.arc(0,0,r,0,Math.PI*2);x.fill();x.stroke();
+    x.strokeStyle='rgba(127,243,255,.15)';x.beginPath();x.arc(0,0,r*.5,0,Math.PI*2);x.moveTo(-r,0);x.lineTo(r,0);x.moveTo(0,-r);x.lineTo(0,r);x.stroke();
+    x.save();x.beginPath();x.arc(0,0,r-2,0,Math.PI*2);x.clip();
+    const plot=(p,col,hollow=false)=>{const dx=p.x-origin.x,dz=p.z-origin.z,px=(dx*Math.cos(yaw)-dz*Math.sin(yaw))*r/90,py=-(dx*Math.sin(yaw)+dz*Math.cos(yaw))*r/90;x.beginPath();x.arc(px,py,3,0,Math.PI*2);x.fillStyle=x.strokeStyle=col;hollow?x.stroke():x.fill();};
+    for(const c of G.contacts.items.values()){x.globalAlpha=Math.max(.25,1-(G.contacts.now-c.t)/14);plot(c.p,c.type==='drone'?'#f8c76a':RD,!c.fresh);}
+    x.globalAlpha=1;if(G.scout.active)plot(G.player.pos,CY);x.restore();
+    x.fillStyle=CY;x.beginPath();x.moveTo(0,-5);x.lineTo(4,4);x.lineTo(0,2);x.lineTo(-4,4);x.closePath();x.fill();
+    x.shadowColor='rgba(0,0,0,.9)';x.shadowBlur=4;x.textAlign='center';x.font='500 11px "Noto Sans TC",sans-serif';x.fillStyle=CY;x.fillText('已發現敵人 · 90 m',0,-r-9);x.fillStyle='#9fb4bb';x.fillText('空心：最後目擊位置',0,r+15);
+    x.textAlign='left';x.fillText(`[N] 偵察無人機 ${Math.ceil(G.scout.battery/45*100)}%`,-r,r+34);x.restore();
+  }
+  _scout(W, H, G) {
+    const x=this.x,S=G.scout,cx=W/2,cy=H/2;
+    x.save();x.shadowColor='rgba(0,0,0,.9)';x.shadowBlur=4;x.strokeStyle='rgba(127,243,255,.8)';x.lineWidth=1.5;
+    for(const [sx,sy] of [[-1,-1],[1,-1],[-1,1],[1,1]]){x.beginPath();x.moveTo(cx+sx*42,cy+sy*25);x.lineTo(cx+sx*42,cy+sy*38);x.lineTo(cx+sx*28,cy+sy*38);x.stroke();}
+    x.textAlign='center';x.font='600 16px "Noto Sans TC",sans-serif';x.fillStyle=CY;x.fillText('偵察無人機',cx,38);
+    x.font='500 12px "Noto Sans TC",sans-serif';x.fillStyle='#edf6f8';x.fillText(`電量 ${Math.ceil(S.battery/45*100)}% · 航程 ${S.pos.distanceTo(G.player.pos).toFixed(0)} / 85 m`,cx,60);
+    x.fillText('WASD 飛行 · 空白鍵上升 · C 下降 · N 返回',cx,H-52);x.fillStyle=AM;x.fillText('主角留在原地，遭到攻擊會立即切回',cx,H-30);
+    x.textAlign='left';x.fillStyle='#edf6f8';x.fillText(`主角生命 ${Math.ceil(G.player.hp)} · 護盾 ${Math.ceil(G.player.shield)}`,34,40);x.restore();
   }
 
   _bar(x0, y0, w, h, k, col, bg) {
