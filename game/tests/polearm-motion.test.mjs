@@ -83,6 +83,24 @@ test('authored polearm clips and ultimate clock fit the deployed relay and share
   }
 });
 
+test('azure heavy impacts carry the shaft outside the central torso', async () => {
+  const gltf=await loadRig(), root=gltf.scene, clips=createPolearmClips(T,root,gltf.animations), mixer=new T.AnimationMixer(root);
+  const equipment=createHeroEquipment(T,root,root.getObjectByName('Hero_sword')); equipment.apply(HEROES.azure);
+  const weapon=root.getObjectByName('azure_J_Bip_R_Hand_weapon');
+  for(const [name,start,end] of [['azureSlam',.68,.85],['azureUlt',3.05,3.32]]) {
+    mixer.stopAllAction(); mixer.clipAction(clips.find(c=>c.name===name)).reset().setLoop(T.LoopOnce,1).play();
+    for(let at=start;at<=end;at+=1/120) {
+      mixer.setTime(at); root.updateMatrixWorld(true);
+      const origin=weapon.getWorldPosition(new T.Vector3()), shaft=new T.Vector3(0,1,0).transformDirection(weapon.matrixWorld);
+      for(const name of ['C_Spine','C_Chest','C_UpperChest']) {
+        const relative=root.getObjectByName(`J_Bip_${name}`).getWorldPosition(new T.Vector3()).sub(origin);
+        assert.ok(relative.cross(shaft).length()>.14,`${name}/${at}: heavy-impact shaft crossed the torso centre`);
+      }
+    }
+  }
+  equipment.dispose();
+});
+
 test('ultimate silhouettes and warm/cold palettes stay distinct and pool geometry is reused through repeated casts', () => {
   const scene=new T.Scene(), fx=createHeroSpecialFx(T,scene,()=>0), pos=new T.Vector3();
   const initial=new Set(scene.children.map(o=>o));

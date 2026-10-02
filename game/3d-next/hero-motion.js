@@ -139,7 +139,10 @@ export function createPolearmClips(T, source, animations) {
       direction.set(0,1,0).applyQuaternion(weaponRotation);
       // A 40 cm grip supports the long blade. Targets and elbow guides are
       // authored together; neither shoulder has to chase the weapon behind it.
-      rightTarget.set(p[1]-direction.x*.08,p[2],p[3]*.68).addScaledVector(direction,-.20);
+      // Carry descending cuts beside the right shoulder rather than through
+      // the centre of the chest; keep both grip targets on the same rigid shaft.
+      const downstroke = Math.max(0,-Math.sin(p[5]));
+      rightTarget.set(p[1]-direction.x*.08-downstroke*.25,p[2],p[3]*.68+downstroke*.12).addScaledVector(direction,-.20);
       offset.set(-.045,-.012,.025).applyQuaternion(handRotation); rightTarget.sub(offset);
       leftRotation.copy(handRotation).multiply(flip);
       leftTarget.copy(rightTarget).add(offset).addScaledVector(direction,.40).sub(offset.set(.045,-.012,.025).applyQuaternion(leftRotation));
