@@ -1,7 +1,7 @@
 // Character poses are baked once into normal animation tracks. Local players,
 // turntables and interpolated teammates therefore use the same choreography.
-import { MOCAP } from './mocap-data.js?v=20261002o';
-import { HEROES } from './heroes.js?v=20261002o';
+import { MOCAP } from './mocap-data.js?v=20261002w';
+import { HEROES } from './heroes.js?v=20261002w';
 
 // Mixamo motion capture, retargeted offline (assets/animations/README.md), is
 // time-warped so each recorded impact lands on the combat clock in heroes.js.

@@ -1,12 +1,12 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone } from 'three/addons/utils/SkeletonUtils.js';
-import { toonVroidHero } from './battle.js?v=20261002o';
-import { createHeroEquipment } from './hero-equipment.js?v=20261002o';
-import { createGreatswordClips, createDualBladeClips, createArcherClips, createComboPreview } from './hero-motion.js?v=20261002o';
-import { HEROES } from './heroes.js?v=20261002o';
-import { createArrowFx } from './hero-bow.js?v=20261002o';
-import { createHeroSpecialFx } from './hero-special-fx.js?v=20261002o';
+import { toonVroidHero } from './battle.js?v=20261002w';
+import { createHeroEquipment } from './hero-equipment.js?v=20261002w';
+import { createGreatswordClips, createDualBladeClips, createArcherClips, createComboPreview } from './hero-motion.js?v=20261002w';
+import { HEROES } from './heroes.js?v=20261002w';
+import { createArrowFx } from './hero-bow.js?v=20261002w';
+import { createHeroSpecialFx } from './hero-special-fx.js?v=20261002w';
 import { createHeroEnvironment } from './hero-hair.js?v=20261002h';
 
 const canvas = document.getElementById('view');

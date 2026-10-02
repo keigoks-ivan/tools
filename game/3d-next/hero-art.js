@@ -1,8 +1,9 @@
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { createHairKit } from './hero-hair.js?v=20261002h';
-import { forgedBlade } from './hero-weapons.js?v=20261002o';
+import { forgedBlade } from './hero-weapons.js?v=20261002w';
 import { indexGeometry } from './index-geometry.js?v=20261002c';
-import { createBowKit } from './hero-bow.js?v=20261002o';
+import { createBowKit } from './hero-bow.js?v=20261002w';
+import { createClothKit } from './hero-cloth.js?v=20261002w';
 
 // One GPU texture per asset across the local character and all teammates.
 const textureCache = new Map();
@@ -199,6 +200,22 @@ export function createHeroArt(T, root, sword) {
       const g = new T.BufferGeometry(); g.setAttribute('position', new T.Float32BufferAttribute(positions, 3)); g.setAttribute('uv', new T.Float32BufferAttribute(uvs, 2)); g.setIndex(indices); g.computeVertexNormals(); add(bone, g, material, pos);
       for (const side of [-1, 1]) line(bone, Array.from({ length: 12 }, (_, i) => { const v = i / 11; return [pos[0] + side * width * (0.8 + v * 0.2) / 2, pos[1] - v * height, pos[2] + (back ? -1 : 1) * (0.015 * v + 0.035 * Math.sin(v * Math.PI))]; }), trim, 0.0025);
     }
+    // Simulated cloth (see hero-cloth.js). Spheres follow the torso and legs in rest space (model faces +Z,
+    // character's left is +X) so a cape or tabard drapes over the body instead of passing through it.
+    const torso = [['J_Bip_C_UpperChest', [0, 1.32, -0.02], 0.12], ['J_Bip_C_Chest', [0, 1.2, -0.02], 0.12], ['J_Bip_C_Spine', [0, 1.08, -0.01], 0.115], ['J_Bip_C_Hips', [0, 0.96, 0], 0.145]];
+    const limbs = ['L', 'R'].flatMap(side => {
+      const x = side === 'L' ? 0.09 : -0.09;
+      return [[`J_Bip_${side}_UpperLeg`, [x, 0.8, 0.01], 0.085], [`J_Bip_${side}_UpperLeg`, [x, 0.62, 0.01], 0.075], [`J_Bip_${side}_LowerLeg`, [x, 0.42, 0.01], 0.065], [`J_Bip_${side}_LowerLeg`, [x, 0.24, 0.01], 0.06],
+        [`J_Bip_${side}_UpperArm`, [side === 'L' ? 0.22 : -0.22, 1.38, -0.02], 0.055]];
+    });
+    function clothKit(name, pin, shape, { outerFacesBody, lining, hem, cols, rows, colliders = [...torso, ...limbs] }) {
+      // A fresh material per kit: clone() would drop the atlas shader and show the whole swatch sheet.
+      // The patterned face draws on both sides; the lining covers the inner side with a small depth bias,
+      // so the inner view is the lining and the outer view is the pattern without depth fighting.
+      const outer = textured(new T.MeshStandardMaterial({ color: p.cloth, roughness: 0.93, vertexColors: true, side: T.DoubleSide }), row, id === 'violet' ? 1 : 0, 2, 0.75);
+      const inner = new T.MeshStandardMaterial({ color: lining, roughness: 0.9, side: outerFacesBody ? T.FrontSide : T.BackSide, polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -2 });
+      groups.set(name, createClothKit(T, root, { name: `${id}_${name}`, pin, shape, cols, rows, colliders, materials: [outer, inner], hem }));
+    }
     function sleeve(side, short = false) {
       const upper = `J_Bip_${side < 0 ? 'R' : 'L'}_UpperArm`, lower = `J_Bip_${side < 0 ? 'R' : 'L'}_LowerArm`;
       for (const [bone, begin, end, radius] of [[upper, 0.13, short ? 0.23 : 0.34, 0.044], ...(!short ? [[lower, 0.35, 0.49, 0.034]] : [])]) {
@@ -214,8 +231,20 @@ export function createHeroArt(T, root, sword) {
     add(chest, new T.OctahedronGeometry(0.016), glow, [0, 1.32, 0.149]);
     if (id === 'azure') {
       sleeve(-1); sleeve(1);
-      drape(hips, 0.17, 0.44, [0, 1.02, 0.16], cloth);
-      drape(chest, 0.32, 0.4, [0, 1.43, -0.13], cloth, true);
+      // Full cape from the shoulders to mid-calf, 40 cm across the shoulders and 62 cm at the hem, and a front tabard to the knee.
+      clothKit('cape', 'J_Bip_C_UpperChest', (u, v) => {
+        // Five soft pleats deepen toward the hem, so the cape folds instead of hanging as a flat sheet.
+        const top = -0.04 - 0.08 * Math.sin(Math.PI * u), hang = -0.15 - 0.03 * v - 0.028 * v * Math.cos(u * Math.PI * 10), k = Math.min(1, v * 8);
+        return [(u - 0.5) * (0.4 + 0.22 * v), 1.44 - v * 0.94, top * (1 - k) + hang * k];
+      }, { outerFacesBody: true, lining: 0x14212c, hem: [1.9, 2.0, 2.2], cols: 13, rows: 16 });
+      // Rolled collar along the pinned edge and a silver clasp on each shoulder.
+      line(chest, Array.from({ length: 13 }, (_, i) => { const u = i / 12; return [(u - 0.5) * 0.42, 1.445 + 0.012 * Math.sin(Math.PI * u), -0.04 - 0.085 * Math.sin(Math.PI * u)]; }), dark, 0.016);
+      for (const s of [-1, 1]) {
+        add(chest, new T.CylinderGeometry(0.026, 0.026, 0.01, 18), trim, [s * 0.2, 1.43, -0.025], [Math.PI / 2, 0, 0]);
+        add(chest, new T.OctahedronGeometry(0.011), glow, [s * 0.2, 1.43, -0.012]);
+      }
+      clothKit('tabard', 'J_Bip_C_Hips', (u, v) => [(u - 0.5) * (0.17 + 0.07 * v), 1.02 - v * 0.48, 0.155 + 0.02 * v],
+        { outerFacesBody: false, lining: 0x14212c, hem: [1.9, 2.0, 2.2], cols: 5, rows: 9 });
       for (let i = 0; i < 3; i++) line(head, [[-0.06, 1.69 + i * 0.015, -0.17], [0, 1.735 + i * 0.005, -0.2], [0.06, 1.69 + i * 0.015, -0.17]], trim, 0.003);
       plate(chest, [[-0.112, 0.1], [-0.055, 0.125], [0, 0.09], [0.055, 0.125], [0.112, 0.1], [0.105, -0.025], [0, -0.105], [-0.105, -0.025]], [0, 1.275, 0.117]);
       for (const s of [-1, 1]) {
@@ -242,8 +271,13 @@ export function createHeroArt(T, root, sword) {
       line(head, [[-0.065, 1.702, -0.09], [-0.065, 1.705, -0.19], [-0.065, 1.71, -0.26]], trim, 0.004);
     } else if (id === 'jade') {
       sleeve(-1, true); sleeve(1, true);
-      drape(hips, .17, .27, [-.11,1.02,.14], cloth);
-      drape(chest, .22, .31, [-.08,1.43,-.13], cloth, true);
+      clothKit('tabard', 'J_Bip_C_Hips', (u, v) => [-0.11 + (u - 0.5) * (0.17 + 0.05 * v), 1.02 - v * 0.3, 0.145 + 0.015 * v],
+        { outerFacesBody: false, lining: 0x16271f, hem: [1.6, 1.7, 1.4], cols: 5, rows: 7 });
+      // Short asymmetric half-cape over the bow shoulder.
+      clothKit('cape', 'J_Bip_C_UpperChest', (u, v) => {
+        const top = -0.05 - 0.07 * Math.sin(Math.PI * u), k = Math.min(1, v * 3);
+        return [-0.06 + (u - 0.5) * (0.26 + 0.14 * v), 1.44 - v * 0.42, top * (1 - k) + (-0.15 - 0.03 * v) * k];
+      }, { outerFacesBody: true, lining: 0x16271f, hem: [1.6, 1.7, 1.4], cols: 8, rows: 9 });
       plate('J_Bip_L_UpperArm', [[-.04,.025],[.05,.035],[.06,-.055],[-.04,-.07]], [.15,1.41,.01], steel);
       plate('J_Bip_L_LowerArm', [[-.03,.09],[.035,.08],[.03,-.09],[-.03,-.10]], [.40,1.38,.015], dark);
       line(chest, [[-.10,1.39,.13],[.01,1.29,.15],[.13,1.14,.11]], dark,.014);
@@ -258,7 +292,9 @@ export function createHeroArt(T, root, sword) {
       for(const side of [-1,1]) plate(head,crest,[side*.07,1.67,-.13],trim,.5);
     } else {
       sleeve(-1, true); sleeve(1, true);
-      drape(hips, 0.14, 0.19, [0.13, 1.01, -0.15], cloth, true);
+      // Two sash tails tied at the back of the belt.
+      for (const x of [0.03, 0.09]) clothKit(`sash${x}`, 'J_Bip_C_Hips', (u, v) => [x + (u - 0.5) * 0.055, 1.0 - v * (x < 0.05 ? 0.36 : 0.28), -0.135 - 0.01 * v],
+        { outerFacesBody: true, lining: 0x2a1c14, hem: [1.7, 1.5, 1.1], cols: 3, rows: 8 });
       // Short jacket with outward lapels; no long plum skirt panels.
       for (const s of [-1, 1]) {
         plate(chest, [[-0.028, 0.13], [0.026, 0.12], [0.033, -0.085], [-0.025, -0.07]], [s * 0.075, 1.29, 0.119], cloth);
@@ -319,7 +355,7 @@ export function createHeroArt(T, root, sword) {
   return {
     ready,
     update() {
-      for (const group of kits.get(activeId) || []) { group.userData.updateHair?.(performance.now() / 1000); group.userData.updateBow?.(); }
+      for (const group of kits.get(activeId) || []) { group.userData.updateHair?.(performance.now() / 1000); group.userData.updateBow?.(); group.userData.updateCloth?.(); }
     },
     apply(profile) {
       activeId = profile.id;

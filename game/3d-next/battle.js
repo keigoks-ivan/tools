@@ -2,12 +2,12 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { clone as cloneSkinned } from 'three/addons/utils/SkeletonUtils.js';
 import { Arena } from '../2d/combat.js?v=20261002j';
-import { heroFor } from './heroes.js?v=20261002o';
+import { heroFor } from './heroes.js?v=20261002w';
 import { Campaign, CHAPTERS, chapterTuning } from './campaign.js?v=20261002j';
-import { createHeroEquipment } from './hero-equipment.js?v=20261002o';
-import { createGreatswordClips, createDualBladeClips, createArcherClips } from './hero-motion.js?v=20261002o';
-import { createArrowFx } from './hero-bow.js?v=20261002o';
-import { createHeroSpecialFx } from './hero-special-fx.js?v=20261002o';
+import { createHeroEquipment } from './hero-equipment.js?v=20261002w';
+import { createGreatswordClips, createDualBladeClips, createArcherClips } from './hero-motion.js?v=20261002w';
+import { createArrowFx } from './hero-bow.js?v=20261002w';
+import { createHeroSpecialFx } from './hero-special-fx.js?v=20261002w';
 import { createHeroEnvironment } from './hero-hair.js?v=20261002h';
 import { createChapterWorld } from './chapter-world.js?v=20261002c';
 import { FramePacer } from '../frame-pacing.js';
@@ -45,7 +45,7 @@ export function loadLazyModules() {
     lazyModules = Promise.all([
       marchLevel ? Promise.all([import('./march.js?v=20261002j'), import('./march-art.js?v=20260925f')]) : null,
       // ?hero=vroid：打擊特效模組（combat-fx.js）；載入失敗時退回下方原本的特效與時間倍率
-      heroChoice === 'vroid' ? import('./combat-fx.js?v=20261002o').catch(error => { console.warn('combat-fx failed, using built-in effects', error); return null; }) : null,
+      heroChoice === 'vroid' ? import('./combat-fx.js?v=20261002w').catch(error => { console.warn('combat-fx failed, using built-in effects', error); return null; }) : null,
     ]).catch(error => { lazyModules = null; throw error; });
   }
   return lazyModules;
