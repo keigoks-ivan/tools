@@ -1,7 +1,12 @@
 'use strict';
-// All sounds are synthesized locally; the first player gesture unlocks audio.
+// Recorded effects and an original sampled-brass fanfare; gesture unlocks audio.
 window.BaseballAudio=(()=>{
-  let ctx=null, master=null, crowd=null, active=false, enabled=true, volume=0.65;
+  let ctx=null, master=null, crowd=null, crowdSource=null, music=null, active=false, enabled=true, volume=0.65, decoding=false;
+  const buffers={}, voices=new Set();
+  const files={soft:'hit-soft.wav',line:'hit-line.wav',power:'hit-power.wav',mitt1:'mitt-1.wav',mitt2:'mitt-2.wav',step:'step.wav',bounce:'bounce.wav',cheer:'cheer.mp3',bed:'crowd-bed.mp3',homerun:'homerun.mp3'};
+  const assets=Promise.all(Object.entries(files).map(async ([name,file])=>{
+    try { const r=await fetch(`assets/audio/${file}?v=28`); return r.ok?[name,await r.arrayBuffer()]:null; } catch(e){ return null; }
+  }));
   try { enabled=localStorage.getItem('baseball-sound')!=='off'; volume=Number(localStorage.getItem('baseball-volume')||0.65); } catch(e) {}
   volume=Math.max(0,Math.min(1,Number.isFinite(volume)?volume:0.65));
   const button=document.getElementById('soundToggle'), slider=document.getElementById('soundVolume');
@@ -18,16 +23,54 @@ window.BaseballAudio=(()=>{
     for(let i=0;i<a.length;i++){ low=low*0.97+(Math.random()*2-1)*0.03; a[i]=loop?low*5:Math.random()*2-1; }
     return b;
   }
+  function crowdBed(){
+    if(!ctx||!buffers.bed) return;
+    if(crowdSource){ crowdSource.stop(); crowdSource.disconnect(); }
+    crowdSource=ctx.createBufferSource(); crowdSource.buffer=buffers.bed; crowdSource.loop=true;
+    crowdSource.connect(crowd); crowdSource.start();
+    crowd.gain.setTargetAtTime(active?0.22:0,ctx.currentTime,.5);
+  }
+  function decode(){
+    if(decoding) return; decoding=true;
+    assets.then(rows=>Promise.all(rows.filter(Boolean).map(async ([name,data])=>{
+      try { buffers[name]=await ctx.decodeAudioData(data); if(name==='bed') crowdBed(); } catch(e) {}
+    })));
+  }
+  function sample(name,gain=1,rate=1,duration=0,bus=master){
+    if(!ctx||ctx.state!=='running'||!buffers[name]||!enabled||document.hidden) return null;
+    const s=ctx.createBufferSource(), g=ctx.createGain(); s.buffer=buffers[name]; s.playbackRate.value=rate;
+    g.gain.value=gain; s.connect(g); g.connect(bus); voices.add(s);
+    s.onended=()=>{ voices.delete(s); s.disconnect(); g.disconnect(); if(music?.source===s) music=null; };
+    if(duration){
+      const d=Math.min(duration,s.buffer.duration), t=ctx.currentTime;
+      g.gain.setValueAtTime(gain,t+Math.max(0,d-.12)); g.gain.linearRampToValueAtTime(0,t+d); s.start(t,0,d);
+    } else s.start();
+    return {source:s,gain:g};
+  }
+  function stopMusic(){
+    if(!music) return;
+    const voice=music; music=null; voice.gain.gain.setTargetAtTime(0,ctx.currentTime,.07); voice.source.stop(ctx.currentTime+.3);
+  }
+  function duckMusic(){
+    if(!music) return; const g=music.gain.gain, t=ctx.currentTime;
+    g.cancelScheduledValues(t); g.setTargetAtTime(.22,t,.025); g.setTargetAtTime(.8,t+.55,.18);
+  }
+  function homeRun(){
+    stopMusic(); music=sample('homerun',.8);
+    if(!music) fanfare();
+  }
   function unlock(){
     if(!ctx){
       const Audio=window.AudioContext||window.webkitAudioContext;
       if(!Audio){ button.disabled=true; button.title='此瀏覽器不支援音效'; return; }
       try {
-        ctx=new Audio(); master=ctx.createGain(); master.gain.value=enabled?volume:0; master.connect(ctx.destination);
+        ctx=new Audio({latencyHint:'interactive'}); master=ctx.createGain(); master.gain.value=enabled?volume:0;
+        const limiter=ctx.createDynamicsCompressor(); limiter.threshold.value=-3; limiter.knee.value=4; limiter.ratio.value=12; limiter.attack.value=.003; limiter.release.value=.12;
+        master.connect(limiter); limiter.connect(ctx.destination);
         crowd=ctx.createGain(); crowd.gain.value=active?0.12:0; crowd.connect(master);
         const source=ctx.createBufferSource(), filter=ctx.createBiquadFilter();
         source.buffer=noiseBuffer(4,true); source.loop=true; filter.type='bandpass'; filter.frequency.value=680; filter.Q.value=0.6;
-        source.connect(filter); filter.connect(crowd); source.start();
+        source.connect(filter); filter.connect(crowd); source.start(); crowdSource=source; decode();
       } catch(e){ ctx=null; return; }
     }
     if(ctx.state==='suspended') ctx.resume().catch(()=>{});
@@ -47,6 +90,7 @@ window.BaseballAudio=(()=>{
     s.connect(f); f.connect(g); g.connect(master); s.start(t); s.stop(t+duration+0.02); s.onended=()=>{s.disconnect();f.disconnect();g.disconnect();};
   }
   function cheer(big=false){
+    if(sample('cheer',big?0.42:0.25,1,big?5:2.6)) return;
     noise(big?2.5:1.2,big?0.6:0.3,1100,0.45,0,1600);
     for(let i=0;i<(big?12:5);i++) noise(0.055,0.11,1800,0.6,0.12+i*0.105);
     if(big){ tone(1900,0.7,0.028,'sine',0.4,2200); tone(1650,0.55,0.02,'sine',1,1950); }
@@ -56,32 +100,36 @@ window.BaseballAudio=(()=>{
   }
   function play(name,power=0){
     if(!ctx||!enabled||document.hidden) return;
+    if(['pitch','throw','swing','hit','mitt','strike'].includes(name)) duckMusic();
     if(name==='select') tone(740,0.065,0.055,'sine',0,1046);
-    if(name==='start'){ fanfare(); cheer(); }
-    if(name==='pitch') noise(0.17,0.22,1700,0.8,0,450);
+    if(name==='start'){ stopMusic(); if(!sample('homerun',.4,1,1.9)) fanfare(); cheer(); }
+    if(name==='pitch'||name==='throw') noise(0.17,name==='throw'?0.13:0.22,1700,0.8,0,450);
     if(name==='swing') noise(0.2,0.23,850,0.7,0,3000);
     if(name==='hit'){
       const p=Math.max(0,Math.min(1,power));
-      noise(0.075,0.7,2600+p*1400,0.5); tone(180+p*100,0.13,0.3,'triangle',0,65); tone(1500,0.045,0.13,'sine',0,700);
+      if(!sample(p<.32?'soft':p>.72?'power':'line',.66+p*.28,.988+Math.random()*.024)){
+        noise(0.075,0.7,2600+p*1400,0.5); tone(180+p*100,0.13,0.3,'triangle',0,65); tone(1500,0.045,0.13,'sine',0,700);
+      }
     }
-    if(name==='mitt'){ noise(0.065,0.38,480,0.6); tone(115,0.08,0.18,'sine',0,55); }
-    if(name==='step') noise(0.09,0.09,420,0.7);
-    if(name==='bounce'){ noise(0.07,0.12,600); tone(90,0.06,0.08,'sine',0,50); }
+    if(name==='mitt'&&!sample(Math.random()<.5?'mitt1':'mitt2',.75)){ noise(0.065,0.38,480,0.6); tone(115,0.08,0.18,'sine',0,55); }
+    if(name==='step'&&!sample('step',.3)) noise(0.09,0.09,420,0.7);
+    if(name==='bounce'&&!sample('bounce',.45)){ noise(0.07,0.12,600); tone(90,0.06,0.08,'sine',0,50); }
     if(name==='strike'){ tone(440,0.09,0.08,'triangle'); tone(660,0.15,0.08,'triangle',0.08); }
     if(name==='out'){ tone(523,0.12,0.1,'triangle'); tone(392,0.23,0.1,'triangle',0.12); }
     if(name==='hitResult') cheer();
-    if(name==='homerun'){ cheer(true); fanfare(); }
-    if(name==='end'){ cheer(true); fanfare(); }
+    if(name==='homerun'){ cheer(true); homeRun(); }
+    if(name==='end'){ cheer(true); homeRun(); }
   }
   function setActive(value){
     active=value;
-    if(crowd) crowd.gain.setTargetAtTime(active?0.12:0,ctx.currentTime,0.4);
+    if(crowd) crowd.gain.setTargetAtTime(active?(buffers.bed?0.22:0.12):0,ctx.currentTime,0.4);
+    if(value) stopMusic();
   }
   button.onclick=()=>{ enabled=!enabled; unlock(); controls(); try {localStorage.setItem('baseball-sound',enabled?'on':'off');} catch(e) {} if(enabled) play('select'); };
   slider.addEventListener('input',()=>{ volume=Number(slider.value)/100; unlock(); controls(); try {localStorage.setItem('baseball-volume',String(volume));} catch(e) {} });
   document.addEventListener('pointerdown',unlock,{once:true});
   document.addEventListener('keydown',unlock,{once:true});
-  document.addEventListener('visibilitychange',()=>{ if(!ctx) return; if(document.hidden) ctx.suspend().catch(()=>{}); else if(active) ctx.resume().catch(()=>{}); });
+  document.addEventListener('visibilitychange',()=>{ if(!ctx) return; if(document.hidden) ctx.suspend().catch(()=>{}); else if(active||music) ctx.resume().catch(()=>{}); });
   controls();
-  return {unlock,play,setActive,get state(){return {enabled,volume,active,context:ctx?.state||'locked'};}};
+  return {unlock,play,setActive,get state(){return {enabled,volume,active,context:ctx?.state||'locked',samples:Object.keys(buffers).length,voices:voices.size};}};
 })();
