@@ -1,8 +1,57 @@
 <!doctype html>
-<html lang="zh-Hant"><head><meta charset="UTF-8"><meta name="robots" content="noindex"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#fff5e7"><meta name="description" content="小花食堂：逛市場、買菜、下廚、招待朋友。不用識字的日系可愛扮家家酒遊戲。"><title>小花食堂 · Little Bloom Kitchen</title><link rel="stylesheet" href="style.css?v=3"></head>
-<body><main id="game"><header class="topbar"><div class="brand"><span class="flower">✿</span><div>小花食堂<small>LITTLE BLOOM KITCHEN</small></div></div><div class="tools"><button class="icon" id="voice" aria-label="開關聲音" aria-pressed="true">🔊</button><button class="icon" id="help" aria-label="聽聽玩法">💡</button><button class="icon" id="parents" aria-label="大人說明">⚙</button></div></header>
-<section id="world" aria-label="遊戲場景"><div id="art" aria-hidden="true"></div><div class="shade"></div><div id="sceneTitle"></div><div id="ticket"></div><div id="scene"></div><div id="feedback" aria-live="polite"></div><div id="particles" aria-hidden="true"></div></section>
-<section id="tray" aria-label="操作區"></section><div id="nav" aria-label="市場和廚房"></div><p id="liveStatus" class="sr-only" aria-live="polite"></p>
-<div id="welcome" class="overlay"><div class="welcome-art"></div><div class="welcome-card"><div class="eyebrow">一間小店，好多好朋友</div><h1>小花<span>食堂</span><i>✿</i></h1><p>逛逛市場，煮一點幸福。</p><div class="journey" aria-hidden="true">🧺 <b>···</b> 🍳 <b>···</b> 🍽️</div><button id="start" class="start" disabled aria-label="開始玩">▶</button><small>自由扮家家酒 · 慢速英文女聲</small></div></div>
-<dialog id="guide" aria-labelledby="guideTitle"><button id="closeGuide" class="icon close" aria-label="關閉說明">×</button><h2 id="guideTitle">像玩具小廚房一樣玩</h2><p>沒有指定的菜色或正確答案。孩子可以自由挑食材，選工具煮好，再請朋友吃。</p><p>🧺 市場：想拿什麼就點什麼。每點一次會慢慢念出食材英文名稱；再點一次可放回。選一樣、幾樣或全部都可以。</p><p>🍳 廚房：煮湯、平底鍋、果汁機任選一種，點一下就做出料理。也能換工具試試，或去市場加食材。點桌面小食材可拿走。</p><p>🍽️ 點做好的料理，就能請朋友吃。食材會留在桌上，想繼續煮什麼由孩子決定。</p><p>🔊 固定、自然音高的慢速英文女聲。食材卡顯示單字，點選會念單字，沒有拼字、答題或考試。💡 只說明可以怎麼玩，不指定食材。</p><p>沒有倒數、金幣、失敗或付費。進度只存在這台裝置，舊存檔仍保留。</p><p><a href="/games/">回遊戲目錄</a> · <a href="DESIGN.md" target="_blank" rel="noopener">設計筆記</a></p></dialog>
-</main><script type="module" src="game.js?v=3"></script></body></html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8"><meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#fff7ea">
+<meta name="description" content="小花食堂：點點食材、切切菜、攪一攪、餵朋友。不用識字的小廚房遊戲。">
+<title>小花食堂 · Little Bloom Kitchen</title>
+<link rel="stylesheet" href="style.css?v=4">
+</head>
+<body>
+<main id="game">
+  <header class="topbar">
+    <div class="brand"><span class="flower">✿</span><span>小花食堂<small>LITTLE BLOOM KITCHEN</small></span></div>
+    <div class="tools">
+      <button class="icon" id="voice" aria-label="開關聲音" aria-pressed="true">🔊</button>
+      <button class="icon" id="help" aria-label="再看一次手勢示範">👆</button>
+      <button class="icon" id="parents" aria-label="大人說明">⚙</button>
+    </div>
+  </header>
+  <nav id="journey" aria-label="料理進度"></nav>
+  <section id="world" aria-label="小廚房工作桌">
+    <div class="kitchen-backdrop" aria-hidden="true"></div>
+    <div class="window-decor" aria-hidden="true">☀️</div>
+    <div id="friend"></div>
+    <div class="counter-top" aria-hidden="true"></div>
+    <div id="scene"></div>
+    <div id="cue" aria-hidden="true"></div>
+    <div id="particles" aria-hidden="true"></div>
+    <div id="dragFood" aria-hidden="true" hidden></div>
+  </section>
+  <section id="tray" aria-label="挑食材或料理工具"></section>
+  <p id="liveStatus" class="sr-only" aria-live="polite"></p>
+  <div id="welcome" class="overlay">
+    <div class="welcome-card">
+      <span class="welcome-flower" aria-hidden="true">✿</span>
+      <h1>小花食堂</h1>
+      <div class="welcome-toy" aria-hidden="true"><span>🥕</span><span>🍲</span><span>🐰</span><i>💕</i></div>
+      <button id="start" class="start" disabled aria-label="開始玩">▶</button>
+      <p>點一點，做給朋友吃</p>
+    </div>
+  </div>
+  <dialog id="guide" aria-labelledby="guideTitle">
+    <button id="closeGuide" class="icon close" aria-label="關閉說明">×</button>
+    <h2 id="guideTitle">不用讀字的小廚房</h2>
+    <p>🥕 點下方食材，直接放到砧板；也可以拖過去。再點同一樣食材可拿走，自由搭配，沒有指定食譜。</p>
+    <p>👆 點砧板三下，或在砧板上滑動，食材就會變成小塊。牛奶和麵粉會倒進碗裡。</p>
+    <p>🍲 選湯鍋、平底鍋或果汁機。在大工具上點五下或滑動攪拌，看著食物慢慢變化。任何食材都能用任何工具。</p>
+    <p>🐰 煮好了，點料理或朋友就能餵食，也可以把料理拖給朋友。朋友吃完，下一位會來玩。</p>
+    <p>👆 手勢會自動示範；上方手指可以重播。可以隨時用食材籃換材料。沒有倒數、分數、失敗或付費。</p>
+    <p>🔊 保留慢速英文女聲念食材。即使靜音，全部動作仍可靠畫面完成。聲音偏好與招待朋友的次數只保存在此裝置；舊存檔保留。</p>
+    <p><a href="/games/">回遊戲目錄</a> · <a href="DESIGN.md" target="_blank" rel="noopener">設計筆記</a></p>
+  </dialog>
+</main>
+<script type="module" src="game.js?v=4"></script>
+</body>
+</html>
