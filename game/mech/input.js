@@ -14,6 +14,12 @@ export class Input {
     this.shiftT = 0;            // Shift 按住多久（分辨點一下＝閃避、按住＝衝刺）
     this.onLockChange = null;
 
+    // Safari 的固定定位觸控區仍可能觸發連點縮放；遊戲操作已由 pointer 事件處理。
+    const preventTouchZoom = (e) => { if (this.enabled && e.cancelable) e.preventDefault(); };
+    for (const surface of [canvas, document.getElementById('touch')]) {
+      if (surface) surface.addEventListener('touchend', preventTouchZoom, { passive: false });
+    }
+
     addEventListener('keydown', (e) => {
       if (!this.enabled) return;
       const k = e.code;
