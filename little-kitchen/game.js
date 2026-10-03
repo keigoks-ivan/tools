@@ -1,186 +1,163 @@
-import {foods,methods,guests,fresh,restore,toggleFood,cook,dish,serve} from './model.js?v=3';
+import {foods,guests,fresh,restore} from './model.js?v=3';
 import {createNarrator} from './voice.js?v=3';
-import {foodSVG,utensil,boardArt,bowlArt,cookwareArt,plateArt} from './art.js?v=5';
-const $=id=>document.getElementById(id);
-let state=fresh();
-try{state=restore(localStorage.getItem('little-bloom-v3'),localStorage.getItem('little-bloom-v2')||localStorage.getItem('little-bloom-v1'));}catch{}
-if(new URLSearchParams(location.search).get('muted')==='1')state.sound=false;
-state.scene='kitchen';
-let stage=state.method?'serve':state.ingredients.length?'prep':'pick';
-let started=false,prepared={},focusFood=state.ingredients[0]||null,stirs=0,tool=state.method,portions=0,page=0,liquid=false;
-let audio,loopSound=null,gesture=null,suppressClick=false,celebratingGuest=null,holdTimer=null,holding=false;
-const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
-function save(){try{localStorage.setItem('little-bloom-v3',JSON.stringify(state));}catch{}}
+import {foodSVG,utensil,boardArt,cookwareArt,plateArt} from './art.js?v=5';
+import {createWorkshop,addFood,cutFood,hitPiece,transferToCooker,addLiquid,pushFood,tossFood,plateFood,stepWorkshop} from './simulation.js?v=6';
+import {createRenderer} from './renderer.js?v=6';
+const $=id=>document.getElementById(id),s=createWorkshop();
+let prefs=fresh();try{prefs=restore(localStorage.getItem('little-bloom-v3'),localStorage.getItem('little-bloom-v2')||localStorage.getItem('little-bloom-v1'));}catch{}
+if(new URLSearchParams(location.search).get('muted')==='1')prefs.sound=false;
+let started=false,page=0,activeTool='knife',gesture=null,pointer=null,selected=null,renderer=null,lastTime=null,time=0,celebrating=false,transferTimer=null,logicalHeight=540;
+let audio,loop=null,loopKind='',hintUntil=0;
+const canvas=$('worktop'),reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+function save(){try{localStorage.setItem('little-bloom-v3',JSON.stringify({...prefs,scene:'kitchen',ingredients:[],method:null}));}catch{}}
 function getAudioContext(){audio??=new(window.AudioContext||window.webkitAudioContext)();return audio;}
-const narration=createNarrator({allowed:()=>started&&state.sound&&!document.hidden&&!$('guide').open,getAudioContext,onStatus:mode=>{$('voice').dataset.playback=mode;}});
-function speak(key,text){narration.speak(key,text);}
-function stopKitchenSound(){try{loopSound?.stop();loopSound?.disconnect();}catch{}loopSound=null;}
-function kitchenSound(){
-  stopKitchenSound();
-  if(!started||!state.sound||document.hidden||$('guide').open||stage!=='cook'||(tool==='blender'&&!holding))return;
-  try{
-    const c=getAudioContext();if(c.state==='suspended')c.resume();const gain=c.createGain();gain.gain.value=tool==='blender'?.018:.035;gain.connect(c.destination);
-    if(tool==='blender'){
-      const oscillator=c.createOscillator();oscillator.type='sawtooth';oscillator.frequency.value=83;oscillator.connect(gain);oscillator.onended=()=>gain.disconnect();oscillator.start();loopSound=oscillator;
-    }else{
-      const buffer=c.createBuffer(1,c.sampleRate,c.sampleRate),data=buffer.getChannelData(0);
-      for(let i=0;i<data.length;i++)data[i]=(Math.random()*2-1)*(Math.random()>.97?1:.12);
-      const source=c.createBufferSource();source.buffer=buffer;source.loop=true;const filter=c.createBiquadFilter();filter.type='lowpass';filter.frequency.value=tool==='pan'?2400:650;source.connect(filter);filter.connect(gain);source.onended=()=>{filter.disconnect();gain.disconnect();};source.start();loopSound=source;
-    }
+const narrator=createNarrator({allowed:()=>started&&prefs.sound&&!document.hidden&&!$('guide').open,getAudioContext});
+function tone(kind='cut'){
+  if(!started||!prefs.sound||document.hidden||$('guide').open)return;
+  try{const c=getAudioContext();c.resume();const o=c.createOscillator(),g=c.createGain();o.type='triangle';o.frequency.setValueAtTime(kind==='cut'?175:kind==='pour'?390:240,c.currentTime);o.frequency.exponentialRampToValueAtTime(70,c.currentTime+.12);g.gain.setValueAtTime(.045,c.currentTime);g.gain.exponentialRampToValueAtTime(.001,c.currentTime+.16);o.connect(g);g.connect(c.destination);o.onended=()=>{o.disconnect();g.disconnect();};o.start();o.stop(c.currentTime+.17);}catch{}
+}
+function stopSound(){try{loop?.stop();loop?.disconnect();}catch{}loop=null;loopKind='';}
+function updateSound(){
+  const kind=started&&prefs.sound&&!document.hidden&&!$('guide').open&&s.station==='stove'&&s.vessels[s.method].length?(s.blending?'blender':s.heat[s.method]?s.method:''):'';
+  if(kind===loopKind)return;stopSound();if(!kind)return;
+  try{const c=getAudioContext();c.resume();const g=c.createGain();g.gain.value=.025;g.connect(c.destination);
+    if(kind==='blender'){const o=c.createOscillator();o.type='sawtooth';o.frequency.value=80;o.connect(g);o.onended=()=>g.disconnect();o.start();loop=o;}
+    else{const buffer=c.createBuffer(1,c.sampleRate,c.sampleRate),data=buffer.getChannelData(0);for(let i=0;i<data.length;i++)data[i]=(Math.random()*2-1)*.25;const source=c.createBufferSource(),filter=c.createBiquadFilter();source.buffer=buffer;source.loop=true;filter.type='lowpass';filter.frequency.value=kind==='pan'?2100:650;source.connect(filter);filter.connect(g);source.onended=()=>{filter.disconnect();g.disconnect();};source.start();loop=source;}loopKind=kind;
   }catch{}
 }
-function kitchenTap(kind='cut'){
-  if(!started||!state.sound||document.hidden||$('guide').open)return;
-  try{const c=getAudioContext();if(c.state==='suspended')c.resume();const o=c.createOscillator(),g=c.createGain();o.type=kind==='cut'?'triangle':'sine';o.frequency.setValueAtTime(kind==='cut'?210:kind==='pour'?430:245,c.currentTime);o.frequency.exponentialRampToValueAtTime(kind==='cut'?65:320,c.currentTime+.09);g.gain.setValueAtTime(.045,c.currentTime);g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+.13);o.connect(g);g.connect(c.destination);o.onended=()=>{o.disconnect();g.disconnect();};o.start();o.stop(c.currentTime+.14);}catch{}
-}
-function button(content,label,action,cls='',extra=''){return `<button class="${cls}" data-action="${action}" aria-label="${label}" ${stage==='celebrate'?'disabled':''} ${extra}>${content}</button>`;}
-function hand(mode='tap'){return `<span class="demo-hand ${mode}" aria-hidden="true">👆</span>`;}
-function dots(done,total){return `<span class="action-dots" aria-hidden="true">${Array.from({length:total},(_,i)=>`<i class="${i<done?'done':''}"></i>`).join('')}</span>`;}
-function totalPrep(id){return ['milk','flour','rice'].includes(id)?2:3;}
-function cookSteps(){return tool==='pot'?5:3;}
-function prepIcon(){return ['milk','flour','rice'].includes(focusFood)?'🥣':'🔪';}
-function toolArt(kind){return `<span class="moving-tool tool-${kind}" aria-hidden="true">${utensil(kind)}</span>`;}
-function liquidArt(kind){return kind==='oil'?'<svg viewBox="0 0 120 150" aria-hidden="true"><path d="M42 24h36v24l16 22v63H25V70l17-22Z" fill="#e5e6bb" stroke="#8e9f7d" stroke-width="5"/><path d="M30 85h59v43H30Z" fill="#dab251"/><rect x="40" y="12" width="40" height="18" rx="4" fill="#809975"/><path d="M46 98q-15 18 5 23 20-5 5-23" fill="#ffdf77"/></svg>':'<svg viewBox="0 0 120 150" aria-hidden="true"><path d="M19 40h65l-5 92H29Z" fill="#d3e6e3" stroke="#7ba7ae" stroke-width="5"/><path d="M83 50q45-4 27 48l-30 8" fill="none" stroke="#7ba7ae" stroke-width="9"/><path d="M25 77h54l-4 49H32Z" fill="#94c9d4"/><path d="M35 47v48" stroke="#fffaf0" stroke-width="7" stroke-linecap="round"/></svg>';}
+const fridgeIcon='<svg viewBox="0 0 100 100" aria-hidden="true"><rect x="21" y="9" width="60" height="84" rx="10" fill="#a7cbbb" stroke="#609589" stroke-width="5"/><path d="M23 40h56" stroke="#609589" stroke-width="5"/><path d="M31 22v10m0 19v20" stroke="#fff3d6" stroke-width="6" stroke-linecap="round"/><path d="M35 93v5m32-5v5" stroke="#609589" stroke-width="6"/></svg>';
+const handIcon='<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M28 53V32q0-11 9-9 7 1 7 13V17q0-14 11-10 5 2 5 17v15-18q0-9 10-6 5 3 5 13v16-10q0-8 8-5 6 2 6 14v26q-2 22-23 25H49q-14-4-21-17L12 57q-6-9 3-12 7-2 13 8" fill="#edbb86" stroke="#b88959" stroke-width="4"/></svg>';
+const waterIcon='<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M22 24h51l-4 64H28Z" fill="#cde7df" stroke="#709f9e" stroke-width="4"/><path d="M74 31q35 0 15 38H71" fill="none" stroke="#709f9e" stroke-width="6"/><path d="M27 48h42l-4 34H31Z" fill="#88c8db"/><path d="M35 29v29" stroke="#fffce8" stroke-width="6"/></svg>';
+const oilIcon='<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M39 20h24v15l15 22v33H24V57l15-22Z" fill="#dce5b7" stroke="#8ea36b" stroke-width="4"/><path d="M29 60h44v26H29Z" fill="#e7ba4f"/><rect x="36" y="9" width="30" height="13" rx="4" fill="#78986c"/><path d="M49 64q-18 22 3 22 21 0 3-22" fill="#ffe395"/></svg>';
+const saltIcon='<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M30 36h42l7 53H23Z" fill="#faf0d8" stroke="#b3a17c" stroke-width="4"/><path d="M28 36v-8q21-17 45 0v8Z" fill="#9caaa4" stroke="#718a82" stroke-width="4"/><g fill="#edf2df"><circle cx="40" cy="28" r="3"/><circle cx="51" cy="24" r="3"/><circle cx="62" cy="28" r="3"/></g><path d="M37 64h25m-22 9h20" stroke="#d8c6a0" stroke-width="5"/></svg>';
+const washIcon='<svg viewBox="0 0 100 100" aria-hidden="true"><path d="M13 74V29q0-16 17-16h28q18 0 18 17v12H60V29H31v45" fill="#acccc1" stroke="#7aa297" stroke-width="5"/><path d="M64 48v12m12-12v20m-7 1v15" stroke="#89c7db" stroke-width="6" stroke-linecap="round"/></svg>';
+function icon(kind){return kind==='fridge'?fridgeIcon:kind==='board'?boardArt('carrot',0):kind==='stove'?cookwareArt(s.method,[],{loaded:false}):kind==='serve'?plateArt([], 'pan',0):kind==='hand'?handIcon:kind==='water'?waterIcon:kind==='oil'?oilIcon:kind==='salt'?saltIcon:kind==='wash'?washIcon:utensil(kind);}
+function button(content,label,action,cls='',extra=''){return `<button class="toy-button ${cls}" data-action="${action}" aria-label="${label}" ${extra}>${content}</button>`;}
+function currentFoodNames(pieces){return [...new Set(pieces.map(p=>foods[p.id][1]))].join('、');}
 function render(){
-  $('world').className=`stage-${stage} ${tool?'method-'+tool:''}`;
-  $('voice').textContent=state.sound?'🔊':'🔇';$('voice').setAttribute('aria-pressed',String(state.sound));
-  const current=stage==='pick'?0:stage==='prep'?1:['plate','serve','celebrate'].includes(stage)?3:2;
-  $('journey').innerHTML=['🥕','🔪','🍳','🍽️'].map((icon,i)=>`<span class="journey-stop ${i<current?'done':''} ${i===current?'current':''}" ${i===current?'aria-current="step"':''} aria-label="${['拿食材','準備食材','煮菜','盛盤與餵朋友'][i]}">${icon}</span>${i<3?'<span class="journey-arrow" aria-hidden="true">›</span>':''}`).join('');
-  const guest=celebratingGuest??state.customer;
-  $('friend').innerHTML=`${button(`<span class="guest-art" style="background-position:${guest*100/3}% center"></span>`,stage==='serve'?'餵朋友':guests[guest],stage==='serve'?'serve':'hello',`friend-button ${stage==='celebrate'?'happy':''}`,`id="guestTarget"`)}<span class="friend-bubble" aria-hidden="true">${stage==='celebrate'?'💕':stage==='serve'?'😋':'😊'}</span>`;
-  let work='',cue='',status='';
-  if(stage==='pick'){
-    work=`<div class="work-surface empty-board" id="workTarget">${boardArt('carrot',0)}<span class="empty-food" aria-hidden="true">＋</span>${hand()}</div>`;cue='<span>🥕</span><b>↓</b><span>🔪</span>';status='從冰箱拿一樣大食材，放到砧板。';
-  }else if(stage==='prep'){
-    const count=prepared[focusFood]||0,pouring=totalPrep(focusFood)===2;
-    work=button(`${pouring?bowlArt(state.ingredients.filter(id=>(prepared[id]||0)>0),1):boardArt(focusFood,count)}${pouring?`<span class="pour-ingredient ${count?'pouring':''}">${foodSVG(focusFood)}</span><span class="pour-stream" aria-hidden="true"></span>`:toolArt('knife')}${hand(pouring?'pour':'slice')}${dots(count,totalPrep(focusFood))}`,'點或滑動砧板準備食材','prep',`work-surface prep-surface ${count?'has-cuts':''}`,`id="workTarget"`);
-    cue=`<span>${prepIcon()}</span><b>↓</b><span class="cue-food">${foodSVG(focusFood)}</span>`;status=`${foods[focusFood][1]}：${pouring?'把食材倒進碗裡':'讓刀子切過食材'}。`;
-  }else if(stage==='tools'){
-    work=`<div class="work-surface" id="workTarget">${bowlArt(state.ingredients)}<span class="board-sparkle" aria-hidden="true">✨</span></div>`;cue='<span>🍲</span><span>🍳</span><span>🥤</span>';status='食材準備好了，選要用的鍋子。';
-  }else if(stage==='load'){
-    work=button(`${cookwareArt(tool,[],{loaded:false})}<span class="ingredient-bowl">${bowlArt(state.ingredients)}</span><span class="load-arrow" aria-hidden="true">↘</span>${hand('pour')}`,'把食材倒入鍋子','load','work-surface load-surface',`id="workTarget"`);cue='<span>🥣</span><b>↘</b><span>🍳</span>';status='把切好的食材倒進鍋子。';
-  }else if(stage==='heat'){
-    work=`<div class="work-surface ${liquid?'liquid-added':''}" id="workTarget">${cookwareArt(tool,state.ingredients,{fluid:liquid})}${liquid?'<span class="liquid-stream" aria-hidden="true"></span>':''}</div>`;cue=tool==='blender'?'<span>▶</span><b>↓</b><span>🌀</span>':liquid?'<span>🔥</span><b>↑</b><span>🍳</span>':`<span>${tool==='pot'?'💧':'🫒'}</span><b>↓</b><span>🍳</span>`;status=tool==='blender'?'按大按鈕，開啟果汁機。':liquid?'轉開爐火，開始煮菜。':tool==='pot'?'把水倒進湯鍋。':'倒一點油，準備炒菜。';
-  }else if(stage==='cook'){
-    work=button(`${cookwareArt(tool,state.ingredients,{heat:true,progress:stirs/cookSteps()})}${tool==='blender'?'<span class="blend-control" aria-hidden="true">▶</span>':toolArt(tool==='pan'?'spatula':'spoon')}${hand(tool==='pan'?'flip':tool==='pot'?'stir':'tap')}${dots(stirs,cookSteps())}`,'點或滑動工具來料理','stir',`work-surface cooking-surface ${stirs?'cooking-active':''} ${holding?'holding':''}`,`id="workTarget"`);cue=tool==='pan'?'<span>🍳</span><b>↗</b><span>🔥</span>':tool==='pot'?'<span>🥄</span><b>↻</b><span>🍲</span>':'<span>👆</span><b>↓</b><span>🌀</span>';status=tool==='pan'?'用鍋鏟翻炒，食材會慢慢變金黃。':tool==='pot'?'拿湯匙攪拌，湯正在冒泡泡。':'按住或點大按鈕，把食材打成飲料。';
-  }else if(stage==='plate'){
-    work=button(`${cookwareArt(tool,state.ingredients,{progress:1,plating:true})}${tool==='blender'?'<span class="pour-arrow" aria-hidden="true">↘</span>':toolArt('ladle')}<span class="plate-preview">${plateArt(state.ingredients,tool,portions)}</span>${hand('pour')}${dots(portions,3)}`,'把料理盛到盤子裡','plate','work-surface plating-surface',`id="workTarget"`);cue=`<span>${tool==='blender'?'🥤':'🥄'}</span><b>→</b><span>🍽️</span>`;status='煮好了！自己把料理盛到盤子或杯子。';
-  }else if(stage==='serve'){
-    work=button(`${plateArt(state.ingredients,state.method)}<span class="serve-arrow" aria-hidden="true">➜</span>${hand('feed')}`,'點料理或把料理拖給朋友','serve','work-surface made-food',`id="workTarget"`);cue='<span>🍽️</span><b>→</b><span>😋</span>';status='把自己煮好的料理給朋友吃。';
+  $('world').dataset.station=s.station;$('world').dataset.method=s.method;$('game').dataset.station=s.station;
+  canvas.dataset.pieces=String(s.station==='board'?s.board.length:s.station==='stove'?s.vessels[s.method].length:s.plate.length);
+  $('voice').textContent=prefs.sound?'🔊':'🔇';$('voice').setAttribute('aria-pressed',String(prefs.sound));
+  $('stations').innerHTML=['fridge','board','stove','serve'].map((id,i)=>button(icon(id),['打開冰箱選食材','回到砧板','回到爐台','到餐桌'][i],`station:${id}`,`station-button ${s.station===id?'active':''}`,`aria-pressed="${s.station===id}"`)).join('');
+  $('fridge').hidden=s.station!=='fridge';canvas.hidden=s.station==='fridge';$('cookers').hidden=s.station!=='stove';$('dropCooker').hidden=s.station!=='board';$('friend').hidden=s.station!=='serve';
+  if(s.station==='fridge'){
+    $('foodShelf').dataset.page=String(page);
+    $('foodShelf').innerHTML=Object.entries(foods).slice(page*6,page*6+6).map(([id,f])=>button(foodSVG(id),f[1],`food:${id}`,'fridge-food')).join('');
+    $('tray').innerHTML=button('‹','冰箱上一層','page:0','page-button',page===0?'disabled':'')+'<span class="shelf-indicator" aria-hidden="true">'+(page===0?'● ○':'○ ●')+'</span>'+button('›','冰箱下一層','page:1','page-button',page===1?'disabled':'');
+    $('liveStatus').textContent='打開冰箱，拿一樣食材到砧板。';
+  }else if(s.station==='board'){
+    $('tray').innerHTML=button(icon('knife'),'拿刀切食材','tool:knife',activeTool==='knife'?'selected':'')+button(icon('hand'),'用手搬食材','tool:hand',activeTool==='hand'?'selected':'')+button(icon('wash'),'沖洗砧板上的食材','wash')+button(icon('stove')+'<span class="transfer-arrow">↘</span>','把砧板食材倒進鍋裡','transfer','pour-button',s.board.length?'':'disabled');
+    $('dropCooker').innerHTML=icon('stove')+'<span class="drop-arrow" aria-hidden="true">↓</span>';
+    $('liveStatus').textContent=activeTool==='knife'?'滑過食材才會切開，在哪裡切就分成哪裡的兩塊。':'用手搬食材，可以逐塊放進右下角的鍋子。';
+  }else if(s.station==='stove'){
+    $('cookers').innerHTML=['pan','pot','blender'].map((id,i)=>button(cookwareArt(id,[],{loaded:false}),['平底鍋','湯鍋','果汁機'][i],`method:${id}`,s.method===id?'selected':'',`aria-pressed="${s.method===id}"`)).join('');
+    const heat=s.heat[s.method]||0;
+    $('tray').innerHTML=(s.method==='blender'?button('<span class="motor-symbol">▶</span>','按住果汁機開關','motor','motor-button'):button(`<span class="dial" style="--dial:${heat*250}deg"><i></i></span><span class="fire-symbol">${heat?'🔥':'○'}</span>`,'轉動爐火開關','heat','heat-button',`aria-pressed="${heat>0}"`))+button(icon(s.method==='pan'?'oil':'water'),s.method==='pan'?'倒油進鍋':'倒水進鍋',s.method==='pan'?'liquid:oil':'liquid:water')+button(icon('salt'),'撒一點鹽','salt')+button(icon('serve')+'<span class="transfer-arrow">↘</span>','把鍋裡的料理倒進盤子','plate','pour-button',s.vessels[s.method].length?'':'disabled');
+    $('liveStatus').textContent=s.method==='blender'?'按住果汁機，放開就停，想打多細由自己決定。':'移動鍋鏟推食材，拖動鍋柄翻炒。火力會持續把食材煮熟，可隨時關火和加料。';
   }else{
-    work=`<div class="work-surface meal-shared">${plateArt([],tool,0)}<span>💖</span></div>`;cue='<span>💕</span><span>✨</span><span>💕</span>';status='朋友吃得好開心！下一位朋友要來了。';
+    $('tray').innerHTML=button(icon('board'),'再拿食材來料理','station:fridge')+button('<span class="feed-picture">🍽️ → 😋</span>','把盤子給朋友吃','feed','feed-button',s.plate.length&&!celebrating?'':'disabled');
+    $('liveStatus').textContent=celebrating?'朋友正在品嚐你做的料理。':'把盤子拖給朋友，或點朋友餵一口。';
   }
-  $('scene').innerHTML=work;$('cue').innerHTML=cue;$('liveStatus').textContent=status;
-  if(stage==='pick'||stage==='prep'||stage==='celebrate'){
-    const entries=Object.entries(foods).slice(page*6,page*6+6);
-    $('tray').innerHTML=`<div class="food-shelf ${page===1?'four-foods':''}">${entries.map(([id,f])=>button(`${foodSVG(id)}${state.ingredients.includes(id)?'<i class="selected-check" aria-hidden="true">✓</i>':''}`,f[1],`food:${id}`,`play-food ${state.ingredients.includes(id)?'selected':''}`,`aria-pressed="${state.ingredients.includes(id)}"`)).join('')}</div><div class="shelf-pages">${button('‹','前一層冰箱','page:0','shelf-arrow',page===0?'disabled':'')}<span aria-hidden="true">🧊 <i class="${page===0?'current':''}"></i><i class="${page===1?'current':''}"></i></span>${button('›','下一層冰箱','page:1','shelf-arrow',page===1?'disabled':'')}${stage==='prep'&&['carrot','broccoli','tomato','strawberry','fish'].includes(focusFood)?button('💧','洗洗食材','wash','wash-button'):''}</div>`;
-  }else if(stage==='tools'){
-    $('tray').innerHTML=`<div class="tool-choices">${Object.entries(methods).map(([id,m],i)=>button(cookwareArt(id,[],{loaded:false})+(i===0?hand():''),m[1],`tool:${id}`,'toy-tool')).join('')}</div>${button('🧺','換食材','ingredients','change-food')}`;
-  }else{
-    let control='';
-    if(stage==='load')control=button(bowlArt(state.ingredients),'把食材倒入鍋子','load','action-control');
-    else if(stage==='heat')control=button(tool==='blender'?'▶':liquid?'<svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="47" fill="#efdfbf" stroke="#aa9270" stroke-width="7"/><circle cx="60" cy="60" r="30" fill="#a4b9ac" stroke="#7c978d" stroke-width="5"/><path d="M60 60l20-17" stroke="#fff8e6" stroke-width="10" stroke-linecap="round"/><path d="M20 56q0-27 28-37" fill="none" stroke="#cb825f" stroke-width="6"/><path d="M42 11l14 5-9 15" fill="none" stroke="#cb825f" stroke-width="6"/></svg>':liquidArt(tool==='pot'?'water':'oil'),tool==='blender'?'開啟果汁機':liquid?'開火':tool==='pot'?'加水':'加油',tool==='blender'||liquid?'heat':'liquid','action-control recommended');
-    else if(stage==='cook')control=button(tool==='blender'?'▶':utensil(tool==='pan'?'spatula':'spoon'),'點或滑動料理工具', 'stir','action-control');
-    else if(stage==='plate')control=button(tool==='blender'?liquidArt('water'):utensil('ladle'),'把料理盛到盤子裡','plate','action-control');
-    $('tray').innerHTML=`<div class="ingredient-summary" aria-hidden="true">${state.ingredients.slice(0,4).map(id=>foodSVG(id,{piece:true})).join('')}</div>${control.replace('</button>',hand()+'</button>')}${button('🧺','換食材','ingredients','change-food')}`;
-  }
+  $('friend').innerHTML=`<button data-action="feed" aria-label="餵朋友" class="guest-button" ${!s.plate.length||celebrating?'disabled':''}><span class="guest-art" style="background-position:${prefs.customer*100/3}% center"></span></button><span class="guest-bubble" aria-hidden="true">${celebrating?s.reaction:'😊'}</span>`;
+  $('cue').innerHTML=s.station==='fridge'?'<span>👆</span><span>🥕</span>':s.station==='board'?`<span>${activeTool==='knife'?'🔪':'✋'}</span><b>↔</b><span>🥕</span>`:s.station==='stove'?`<span>${s.method==='blender'?'👆':'🥄'}</span><b>${s.method==='blender'?'↓':'↻'}</b><span>${s.method==='blender'?'🌀':'🍳'}</span>`:'<span>🍽️</span><b>→</b><span>😋</span>';
+  $('worktop').setAttribute('aria-label',s.station==='board'?'砧板：滑動刀子切食材，或用手搬食材':s.station==='stove'?'料理台：攪拌食材、操作鍋柄或果汁機':'料理盤：把料理給朋友');
+  $('foodDescription').textContent=currentFoodNames(s.station==='stove'?s.vessels[s.method]:s.station==='serve'?s.plate:s.board);updateSound();
 }
-function animate(symbol='✨'){
-  if(reduced)return;
-  for(let i=0;i<6;i++){const el=document.createElement('span');el.className='particle';el.textContent=symbol;el.style.left=`${30+Math.random()*40}%`;el.style.top=`${25+Math.random()*45}%`;$('particles').append(el);setTimeout(()=>el.remove(),900);}
-}
-function hint(){
-  if(!started||$('guide').open)return;
-  render();$('world').classList.add('hint-replay');
-  if(stage==='pick')speak('free-choose','Choose any food you like.');
-  else if(stage==='tools')speak('free-tools','You can make soup, cook in the pan, or use the blender.');
-  else if(stage==='serve')speak('free-ready','You made it! Share with a friend, or try another tool.');
-}
-function advancePrep(){focusFood=state.ingredients.find(id=>(prepared[id]||0)<totalPrep(id))||null;stage=focusFood?'prep':'tools';}
+function cancelGesture(){if(gesture&&canvas.hasPointerCapture(gesture.id))canvas.releasePointerCapture(gesture.id);gesture=null;pointer=null;s.plateOffset=null;s.blending=false;updateSound();}
+function effect(kind){s.effect={kind,until:time+1};}
+function changeStation(id){if(!['fridge','board','stove','serve'].includes(id))return;cancelGesture();s.station=id;selected=null;render();}
 function act(action){
-  if(!started||stage==='celebrate'||$('guide').open)return;
+  if(!started||$('guide').open||celebrating||transferTimer)return;
   const [type,id]=action.split(':');
-  if(type==='page'){page=id==='1'?1:0;render();return;}
-  if(type==='food'){
-    if(toggleFood(state,id)){
-      stopKitchenSound();delete prepared[id];tool=null;stirs=0;portions=0;liquid=false;
-      if(state.ingredients.includes(id))focusFood=id;else focusFood=state.ingredients.find(food=>(prepared[food]||0)<totalPrep(food))||null;
-      stage=!state.ingredients.length?'pick':focusFood?'prep':'tools';render();save();speak(`word-${id}`,`${foods[id][2]}. ${foods[id][2]}.`);
+  if(type==='station')changeStation(id);
+  else if(type==='page'){page=id==='1'?1:0;render();}
+  else if(type==='food'){if(addFood(s,id)){activeTool='knife';render();narrator.speak(`word-${id}`,`${foods[id][2]}. ${foods[id][2]}.`);}}
+  else if(type==='tool'){activeTool=id==='hand'?'hand':'knife';pointer=null;render();}
+  else if(type==='wash'){effect('wash');tone('pour');}
+  else if(type==='method'&&Object.hasOwn(s.vessels,id)){cancelGesture();s.method=id;render();}
+  else if(type==='liquid'){if(addLiquid(s,id)){effect('pour');tone('pour');}}
+  else if(type==='salt'){s.seasoning=Math.min(3,s.seasoning+.25);effect('salt');tone('pour');}
+  else if(type==='heat'&&s.method!=='blender'){s.heat[s.method]=s.heat[s.method]===0?.55:s.heat[s.method]<1?1:0;render();}
+  else if(type==='motor'&&s.method==='blender'){s.blending=true;updateSound();setTimeout(()=>{s.blending=false;updateSound();},450);}
+  else if(type==='transfer'&&s.board.length){
+    cancelGesture();$('world').classList.add('transferring');tone('pour');
+    transferTimer=setTimeout(()=>{transferToCooker(s);transferTimer=null;$('world').classList.remove('transferring');changeStation('stove');},reduced?0:480);
+  }else if(type==='plate'){if(plateFood(s)){tone('pour');render();}}
+  else if(type==='feed'&&s.plate.length){
+    cancelGesture();s.reaction=s.plate.some(p=>p.id==='strawberry')?'😍':s.plate.some(p=>p.id==='fish'&&p.cooked<.3)?'😮':s.seasoning>1?'😆':'😋';celebrating=true;prefs.served++;s.served++;save();render();$('friend').classList.add('tasting');narrator.speak('thanks','Yummy! Thank you!');
+    setTimeout(()=>{s.plate=[];prefs.customer=(prefs.customer+1)%guests.length;s.plateBlend=0;s.juice=false;s.blend=0;celebrating=false;s.seasoning=0;save();$('friend').classList.remove('tasting');changeStation('fridge');},1800);
+  }
+}
+$('game').addEventListener('click',e=>{const target=e.target.closest('[data-action]');if(target&&target.dataset.action!=='motor')act(target.dataset.action);});
+function point(e){const r=canvas.getBoundingClientRect(),scale=r.width/720,zoom=s.station==='stove'?1.25:1,x=(e.clientX-r.left)/scale,y=(e.clientY-r.top)/scale-(logicalHeight-540)/2;return {x:360+(x-360)/zoom,y:270+(y-270)/zoom};}
+function down(e){
+  if(!started||$('guide').open||celebrating||transferTimer||gesture||e.isPrimary===false||e.button>0)return;
+  const p=point(e);gesture={id:e.pointerId,start:p,last:p,trail:[p],moved:false,station:s.station};pointer={...p,trail:gesture.trail};canvas.setPointerCapture(e.pointerId);
+  if(s.station==='board'&&activeTool==='hand'){gesture.piece=hitPiece(s.board,p);selected=gesture.piece?.uid||null;if(gesture.piece){gesture.original={x:gesture.piece.x,y:gesture.piece.y};gesture.offset={x:gesture.piece.x-p.x,y:gesture.piece.y-p.y};}}
+  else if(s.station==='stove'){
+    if(s.method==='blender'&&Math.hypot(p.x-356,p.y-423)<70){gesture.motor=true;s.blending=true;updateSound();}
+    else if(s.method!=='blender'&&Math.hypot(p.x-563,p.y-446)<50){gesture.dial=true;gesture.dialAngle=Math.atan2(p.y-446,p.x-563);}
+    else if(s.method==='pan'&&p.x>515&&p.y>280&&p.y<385)gesture.handle=true;
+  }else if(s.station==='serve')gesture.feed=!!hitPiece(s.plate.map(p=>({...p,x:p.x-40})),p)||s.plateMethod==='blender';
+}
+function move(e){
+  if(!gesture||gesture.id!==e.pointerId)return;const p=point(e),g=gesture;
+  if(Math.hypot(p.x-g.start.x,p.y-g.start.y)>12)g.moved=true;
+  if(g.station==='board'&&g.piece){g.piece.x+=p.x-g.last.x;g.piece.y+=p.y-g.last.y;g.piece.vx=0;g.piece.vy=0;}
+  else if(g.station==='board'&&activeTool==='knife'&&!g.sliced&&g.moved&&!hitPiece(s.board,p)&&Math.hypot(p.x-g.start.x,p.y-g.start.y)>70){const cuts=cutFood(s,g.start,p);if(cuts){g.sliced=true;tone('cut');canvas.dataset.pieces=String(s.board.length);$('liveStatus').textContent=`砧板上有 ${s.board.length} 塊食材。`;}}
+  else if(g.station==='stove'){
+    if(g.dial){const angle=Math.atan2(p.y-446,p.x-563),delta=Math.atan2(Math.sin(angle-g.dialAngle),Math.cos(angle-g.dialAngle));s.heat[s.method]=Math.max(0,Math.min(1,s.heat[s.method]+delta/(Math.PI*1.4)));g.dialAngle=angle;updateSound();}
+    else if(g.handle){tossFood(s,Math.min(1,Math.abs(p.y-g.last.y)/70));}
+    else if(s.method!=='blender')pushFood(s,g.last,p);
+  }
+  else if(g.station==='serve'&&g.feed)s.plateOffset={x:p.x-g.start.x,y:p.y-g.start.y};
+  g.last=p;g.trail.push(p);if(g.trail.length>60)g.trail.shift();pointer={...p,trail:g.trail};
+}
+function up(e,cancelled=false){
+  if(!gesture||gesture.id!==e.pointerId)return;const g=gesture,p=point(e);gesture=null;s.blending=false;s.plateOffset=null;pointer=null;
+  if(canvas.hasPointerCapture(e.pointerId))canvas.releasePointerCapture(e.pointerId);
+  if(cancelled){if(g.piece){g.piece.x=g.original.x;g.piece.y=g.original.y;}updateSound();return;}
+  if(g.station==='board'){
+    if(activeTool==='knife'){
+      const hit=hitPiece(s.board,p),cuts=g.sliced?0:g.moved?cutFood(s,g.start,p):hit?cutFood(s,{x:p.x-170,y:p.y},{x:p.x+170,y:p.y}):0;
+      if(cuts){tone('cut');canvas.dataset.pieces=String(s.board.length);$('liveStatus').textContent=`切開了 ${cuts} 樣食材，砧板上有 ${s.board.length} 塊食材。`;}
+    }else if(g.piece){
+      const drop=$('dropCooker').getBoundingClientRect(),fridge=$('stations').querySelector('[data-action="station:fridge"]')?.getBoundingClientRect();if(e.clientX>=drop.left-25&&e.clientX<=drop.right+25&&e.clientY>=drop.top-25&&e.clientY<=drop.bottom+25){transferToCooker(s,g.piece.uid);tone('pour');render();}
+      else if(fridge&&e.clientX>=fridge.left&&e.clientX<=fridge.right&&e.clientY>=fridge.top&&e.clientY<=fridge.bottom){s.board=s.board.filter(p=>p.uid!==g.piece.uid);selected=null;render();}
+      else if(!g.moved&&selected){g.piece.vx=20;}
     }
-  }else if(type==='wash'&&stage==='prep'){
-    $('world').classList.remove('washing');void $('world').offsetWidth;$('world').classList.add('washing');kitchenTap('pour');setTimeout(()=>$('world').classList.remove('washing'),1200);
-  }else if(type==='prep'&&stage==='prep'){
-    const active=focusFood;prepared[active]=(prepared[active]||0)+1;kitchenTap(totalPrep(active)===2?'pour':'cut');
-    if(prepared[active]>=totalPrep(active))advancePrep();render();
-  }else if(type==='tool'&&stage==='tools'&&Object.hasOwn(methods,id)){
-    tool=id;stirs=0;portions=0;liquid=false;stage='load';render();
-  }else if(type==='load'&&stage==='load'){
-    stage='heat';render();$('scene').classList.add('just-loaded');kitchenTap('pour');
-  }else if(type==='liquid'&&stage==='heat'&&tool!=='blender'){
-    liquid=true;render();kitchenTap('pour');
-  }else if(type==='heat'&&stage==='heat'&&(liquid||tool==='blender')){
-    stage='cook';render();kitchenSound();
-  }else if(type==='stir'&&stage==='cook'){
-    stirs++;kitchenTap('stir');
-    if(stirs>=cookSteps()){stopKitchenSound();stopHold();cook(state,tool);stage='plate';save();}render();
-  }else if(type==='plate'&&stage==='plate'){
-    portions++;kitchenTap('pour');if(portions>=3){stage='serve';animate();}render();
-  }else if(type==='serve'&&stage==='serve'){
-    const customer=state.customer;if(!serve(state))return;save();stopKitchenSound();celebratingGuest=customer;stage='celebrate';render();animate('💕');speak('thanks','Yummy! Thank you!');
-    setTimeout(()=>{celebratingGuest=null;state.ingredients=[];state.method=null;prepared={};focusFood=null;stirs=0;portions=0;tool=null;liquid=false;stage='pick';save();render();},1800);
-  }else if(type==='ingredients'){
-    stopKitchenSound();stopHold();state.method=null;prepared={};focusFood=state.ingredients[0]||null;stage=focusFood?'prep':'pick';stirs=0;portions=0;tool=null;liquid=false;save();render();
-  }else if(type==='hello'){
-    $('friend').classList.remove('wave');void $('friend').offsetWidth;$('friend').classList.add('wave');kitchenTap('stir');
-  }
+  }else if(g.station==='stove'&&g.dial){if(!g.moved)act('heat');else render();}
+  else if(g.station==='stove'&&g.handle&&!g.moved){tossFood(s);tone('wood');}
+  else if(g.station==='serve'&&g.feed&&!g.moved)act('feed');
+  else if(g.station==='serve'&&g.feed&&g.moved){const r=$('friend').getBoundingClientRect();if(e.clientX>=r.left-35&&e.clientX<=r.right+35&&e.clientY>=r.top-35&&e.clientY<=r.bottom+35)act('feed');}
+  updateSound();
 }
-function moveUtensil(e){
-  const target=$('workTarget');if(!target)return;const bounds=target.getBoundingClientRect();
-  const x=Math.max(10,Math.min(85,(e.clientX-bounds.left)/bounds.width*100)),y=Math.max(8,Math.min(75,(e.clientY-bounds.top)/bounds.height*100));
-  target.style.setProperty('--tool-x',`${x}%`);target.style.setProperty('--tool-y',`${y}%`);
-}
-function stopHold(){clearTimeout(holdTimer);holdTimer=null;holding=false;$('world').classList.remove('motor-on');$('workTarget')?.classList.remove('holding');if(tool==='blender')stopKitchenSound();}
-function holdBlend(){
-  if(!holding||stage!=='cook'||tool!=='blender'||document.hidden||$('guide').open)return;
-  if(gesture)gesture.activated=true;act('stir');if(holding)holdTimer=setTimeout(holdBlend,420);
-}
-$('game').addEventListener('click',e=>{if(suppressClick&&e.detail!==0){suppressClick=false;return;}const b=e.target.closest('[data-action]');if(b)act(b.dataset.action);});
-$('game').addEventListener('pointerdown',e=>{
-  suppressClick=false;if(!started||stage==='celebrate'||$('guide').open||e.isPrimary===false||e.button>0)return;
-  const target=e.target.closest('[data-action]');if(!target)return;const action=target.dataset.action;
-  if(!/^(food:|prep$|stir$|plate$|load$|serve$)/.test(action))return;
-  gesture={pointer:e.pointerId,action,x:e.clientX,y:e.clientY,lastX:e.clientX,lastY:e.clientY,distance:0,moved:false,activated:false,stage,focusFood};$('game').setPointerCapture(e.pointerId);if(!action.startsWith('food:'))moveUtensil(e);
-  if(action==='stir'&&stage==='cook'&&tool==='blender'){holding=true;kitchenSound();holdTimer=setTimeout(holdBlend,420);$('world').classList.add('motor-on');}
+canvas.addEventListener('pointerdown',down);canvas.addEventListener('pointermove',move);canvas.addEventListener('pointerup',e=>up(e));canvas.addEventListener('pointercancel',e=>up(e,true));canvas.addEventListener('lostpointercapture',()=>{if(gesture){gesture=null;pointer=null;s.plateOffset=null;s.blending=false;updateSound();}});
+canvas.addEventListener('keydown',e=>{
+  if(!started||$('guide').open||celebrating||transferTimer)return;
+  if(!['Enter',' '].includes(e.key))return;e.preventDefault();
+  if(s.station==='board'&&activeTool==='knife'&&s.board.length){const p=s.board.find(p=>p.uid===selected)||s.board[0];if(cutFood(s,{x:p.x-180,y:p.y},{x:p.x+180,y:p.y}))tone('cut');}
+  else if(s.station==='stove')s.method==='blender'?act('motor'):tossFood(s);
+  else if(s.station==='serve')act('feed');
 });
-$('game').addEventListener('pointermove',e=>{
-  if(!gesture||e.pointerId!==gesture.pointer)return;const g=gesture;g.distance+=Math.hypot(e.clientX-g.lastX,e.clientY-g.lastY);g.lastX=e.clientX;g.lastY=e.clientY;
-  if(Math.hypot(e.clientX-g.x,e.clientY-g.y)>14)g.moved=true;
-  if(g.action.startsWith('food:')||g.action==='serve'){
-    if(!g.moved)return;const ghost=$('dragFood');ghost.hidden=false;ghost.innerHTML=g.action==='serve'?plateArt(state.ingredients,state.method):foodSVG(g.action.split(':')[1]);ghost.style.left=`${e.clientX}px`;ghost.style.top=`${e.clientY}px`;
-  }else{
-    moveUtensil(e);
-    if(g.moved&&g.distance>=58&&stage===g.stage&&(g.action!=='prep'||focusFood===g.focusFood)&&!(tool==='blender'&&stage==='cook')){g.distance=0;g.activated=true;act(g.action);moveUtensil(e);}
-  }
-});
-function endGesture(e,cancelled=false){
-  if(!gesture||e.pointerId!==gesture.pointer)return;const g=gesture;gesture=null;stopHold();$('world').classList.remove('motor-on');$('dragFood').hidden=true;
-  if($('game').hasPointerCapture(e.pointerId))$('game').releasePointerCapture(e.pointerId);suppressClick=true;if(cancelled)return;
-  if(!g.moved){if(!g.activated)act(g.action);if(stage===g.stage&&!g.action.startsWith('food:'))moveUtensil(e);return;}
-  if(g.action.startsWith('food:')){
-    const bounds=$('workTarget')?.getBoundingClientRect();if(bounds&&e.clientX>=bounds.left-30&&e.clientX<=bounds.right+30&&e.clientY>=bounds.top-30&&e.clientY<=bounds.bottom+30){const id=g.action.split(':')[1];if(!state.ingredients.includes(id))act(g.action);}
-  }else if(g.action==='serve'&&stage==='serve'){
-    const bounds=$('guestTarget').getBoundingClientRect();if(e.clientX>=bounds.left-45&&e.clientX<=bounds.right+45&&e.clientY>=bounds.top-45&&e.clientY<=bounds.bottom+45)act('serve');
-  }else if(!g.activated&&stage===g.stage&&(g.action!=='prep'||focusFood===g.focusFood))act(g.action);
+// The physical motor stops as soon as the held button loses its pointer.
+$('tray').addEventListener('pointerdown',e=>{if(e.target.closest('[data-action="motor"]')&&started&&!celebrating&&!$('guide').open&&e.isPrimary!==false){s.blending=true;$('tray').setPointerCapture(e.pointerId);$('tray').classList.add('motor-on');updateSound();}});
+function stopMotor(){s.blending=false;$('tray').classList.remove('motor-on');updateSound();}
+$('tray').addEventListener('pointerup',stopMotor);$('tray').addEventListener('pointercancel',stopMotor);$('tray').addEventListener('lostpointercapture',stopMotor);
+$('tray').addEventListener('keydown',e=>{if(e.target.closest('[data-action="motor"]')&&['Enter',' '].includes(e.key)){e.preventDefault();s.blending=true;updateSound();}});$('tray').addEventListener('keyup',stopMotor);$('tray').addEventListener('focusout',stopMotor);
+$('dropCooker').onclick=()=>{if(activeTool==='hand'&&selected&&s.board.some(p=>p.uid===selected)){transferToCooker(s,selected);selected=null;render();}else act('transfer');};
+$('start').onclick=()=>{started=true;$('welcome').hidden=true;render();};
+$('voice').onclick=()=>{prefs.sound=!prefs.sound;if(!prefs.sound){narrator.stop();stopSound();}else updateSound();save();$('voice').textContent=prefs.sound?'🔊':'🔇';$('voice').setAttribute('aria-pressed',String(prefs.sound));};
+$('help').onclick=()=>{hintUntil=time+4;$('world').classList.add('show-hint');setTimeout(()=>$('world').classList.remove('show-hint'),4000);};
+$('parents').onclick=()=>{cancelGesture();stopMotor();$('guide').showModal();narrator.stop();stopSound();};$('closeGuide').onclick=()=>$('guide').close();$('guide').addEventListener('close',updateSound);
+document.addEventListener('visibilitychange',()=>{lastTime=null;if(document.hidden){cancelGesture();stopMotor();narrator.stop();stopSound();audio?.suspend();}else updateSound();});
+function frame(now){
+  if(!document.hidden&&!$('guide').open){const dt=lastTime===null?0:(now-lastTime)/1000;time+=Math.min(dt,.05);if(started&&!celebrating){stepWorkshop(s,dt);if(gesture?.piece){gesture.piece.x=gesture.last.x+gesture.offset.x;gesture.piece.y=gesture.last.y+gesture.offset.y;}}
+    if(!canvas.hidden){const r=canvas.getBoundingClientRect();logicalHeight=Math.max(400,Math.round(r.height/r.width*720));if(canvas.height!==logicalHeight*2)canvas.height=logicalHeight*2;s.boardBounds={top:95-(logicalHeight-540)/2,bottom:logicalHeight-100-(logicalHeight-540)/2};}
+    renderer?.draw(s,time,pointer,activeTool,logicalHeight);const contents=s.vessels[s.method],ready=contents.length&&contents.every(p=>p.cooked>.8);canvas.dataset.cooked=(contents.length?contents.reduce((n,p)=>n+p.cooked,0)/contents.length:0).toFixed(2);canvas.dataset.blend=s.blend.toFixed(2);$('aroma').hidden=s.station!=='stove'||!ready||s.method==='blender';
+    if(hintUntil>time)$('cue').classList.add('demonstrating');else $('cue').classList.remove('demonstrating');lastTime=now;
+  }else lastTime=null;
+  requestAnimationFrame(frame);
 }
-$('game').addEventListener('pointerup',e=>endGesture(e));
-$('game').addEventListener('pointercancel',e=>endGesture(e,true));
-$('game').addEventListener('lostpointercapture',()=>{gesture=null;stopHold();$('dragFood').hidden=true;});
-$('start').onclick=()=>{started=true;$('welcome').classList.add('hidden');render();hint();};
-$('voice').onclick=()=>{state.sound=!state.sound;if(!state.sound){narration.stop();stopKitchenSound();}else kitchenSound();$('voice').textContent=state.sound?'🔊':'🔇';$('voice').setAttribute('aria-pressed',String(state.sound));save();};
-$('help').onclick=hint;
-$('parents').onclick=()=>{$('guide').showModal();narration.stop();stopKitchenSound();stopHold();gesture=null;$('dragFood').hidden=true;};
-$('closeGuide').onclick=()=>{$('guide').close();kitchenSound();};
-$('guide').addEventListener('close',kitchenSound);
-document.addEventListener('visibilitychange',()=>{if(document.hidden){narration.stop();stopKitchenSound();stopHold();audio?.suspend();gesture=null;$('dragFood').hidden=true;}else if(state.sound){audio?.resume();kitchenSound();}});
-$('welcomeFood').innerHTML=foodSVG('carrot')+'<span>🍳</span><span>🐰</span><i>💕</i>';
-render();$('start').disabled=false;
+render();requestAnimationFrame(frame);
+createRenderer(canvas).then(result=>{renderer=result;$('start').disabled=false;$('loading').hidden=true;}).catch(()=>{$('loading').textContent='圖片載入失敗，請重新整理。';});
