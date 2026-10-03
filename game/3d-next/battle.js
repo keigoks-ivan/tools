@@ -13,7 +13,7 @@ import { createChapterWorld } from './chapter-world.js?v=20261003a';
 import { createChapterProps } from './chapter-props.js?v=20261003a';
 import { FramePacer } from '../frame-pacing.js';
 import { createNightMarket } from './world.js';
-import { createOni, prepareRiggedOni, createRiggedOni } from './oni.js';
+import { createOni, prepareRiggedOni, createRiggedOni } from './oni.js?v=20261003enemy1';
 import { touchHint, HoldRepeat } from './touch-input.js';
 import { assetPlan, createPreloader } from './preload.js?v=20261002bg8';
 
@@ -303,7 +303,7 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
   const effects = [];
   const enemies = new Map();
   const corpses = [];   // rigged oni finishing their death clip after the Arena removed them
-  // 特殊敵人：小兵模型換色、縮放，再掛上盾牌／弓／背上的火藥球／法杖。材質與形狀每種只建一次、大家共用
+  // 骨架版使用合併裝備的兵種模型；程序模型保留輕量配件作為載入失敗時的替代。
   const SPECIAL_LOOK = { archer: { color: 0x9fe08a, scale: 0.95 }, shield: { color: 0xe6c36a, scale: 1.1 }, bomber: { color: 0xff9a4a, scale: 0.82 }, summoner: { color: 0xc08aff, scale: 1 }, captain: { color: 0xd0503a, scale: 1.32 } };
   const specialKit = {};
   const kit = () => {
@@ -322,18 +322,19 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
     specialKit.pole = new THREE.CylinderGeometry(0.025, 0.025, 1.6, 6);
     specialKit.flag = new THREE.PlaneGeometry(0.5, 0.75);
     specialKit.banner = new THREE.MeshLambertMaterial({ color: 0xb8231c, emissive: 0x3a0806, side: THREE.DoubleSide });
-    specialKit.tints = new Map();
     return specialKit;
   };
   function makeSpecial(role) {
-    const look = SPECIAL_LOOK[role], k = kit();
-    const actor = riggedOni ? createRiggedOni(THREE, riggedOni, 'grunt', cloneSkinned) : createOni(THREE, 'grunt');
+    const look = SPECIAL_LOOK[role];
+    if (riggedOni) {
+      const actor = createRiggedOni(THREE,riggedOni,role,cloneSkinned);
+      actor.root.scale.setScalar(look.scale);
+      return actor;
+    }
+    const k = kit();
+    const actor = createOni(THREE, 'grunt');
     actor.role = role;
     actor.root.scale.setScalar(look.scale);
-    if (riggedOni) {
-      if (!k.tints.has(role)) { const m = riggedOni.toon.clone(); m.color.setHex(look.color); k.tints.set(role, m); }
-      actor.root.traverse(object => { if (object.isSkinnedMesh && object.material === riggedOni.toon) object.material = k.tints.get(role); });
-    }
     const add = (geometry, material, x, y, z, rx = 0, ry = 0, rz = 0) => {
       const mesh = new THREE.Mesh(geometry, material);
       mesh.position.set(x, y, z); mesh.rotation.set(rx, ry, rz);
@@ -361,19 +362,10 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
   const makeEnemy = (role, enemy) => {
     if (SPECIAL_LOOK[role]) return makeSpecial(role);
     if (role !== 'officer') return riggedOni ? createRiggedOni(THREE, riggedOni, role, cloneSkinned) : createOni(THREE, role);
-    // 敵將：守將模型縮小並換色（赤角偏紅、影爪偏藍）
-    const actor = riggedOni ? createRiggedOni(THREE, riggedOni, 'boss', cloneSkinned) : createOni(THREE, 'boss');
-    // The chased foe is the chapter's boss itself, full size.
+    // 敵將沿用守將動作，裝甲、披袍與魂光按變體配置。
+    const style = enemy?.variant === 'shadow' ? 'officer-shadow' : enemy?.variant === 'chase' ? 'officer-chase' : 'officer-red';
+    const actor = riggedOni ? createRiggedOni(THREE, riggedOni, 'boss', cloneSkinned, { style }) : createOni(THREE, 'boss');
     actor.root.scale.setScalar(enemy?.variant === 'chase' ? 1 : 0.8);
-    const tinted = [];
-    if (riggedOni) actor.root.traverse(object => {
-      if (!object.isSkinnedMesh || object.material !== riggedOni.toon) return;
-      object.material = riggedOni.toon.clone();
-      object.material.color.setHex(enemy?.variant === 'shadow' ? 0x8fa6ff : enemy?.variant === 'chase' ? 0xc4ecff : 0xff8f80);
-      tinted.push(object.material);
-    });
-    const dispose = actor.dispose;
-    actor.dispose = () => { dispose(); for (const material of tinted) material.dispose(); };
     return actor;
   };
   const march = marchModules ? new marchModules[0].MarchDirector({ seed: 17, mobile: isMobile(), ...(campaign ? { tuning: chapterTuning(campaign.index), heroProfile } : {}) }) : null;

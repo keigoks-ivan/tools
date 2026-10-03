@@ -74,7 +74,7 @@ const assets = createPreloader({
   plan: assetPlan({ hero: vroid ? 'vroid' : 'rumi', march: vroid && params.get('level') !== 'single' }),
   loadEngine: () => loadBattleModule().then(async module => { await module.loadLazyModules(); return module; }),
 });
-const loadBattleModule = () => import('./battle.js?v=20261003a');
+const loadBattleModule = () => import('./battle.js?v=20261003enemy1');
 if (params.has('debug')) window.__assets = assets;   // ?debug：各項下載／步驟的開始與完成時間（__assets.progress.items）
 let audio = null;
 const audioReady = vroid
@@ -114,7 +114,7 @@ function setupSoundUi() {
 let battlePromise = null, battleReady = false, prefetching = false;
 // battle.js 的 import 圖：一次全部送出請求，不用等 battle.js 下載完才發現要抓 three.js（版本字串與 battle.js 相同，測試會比對）
 const ENGINE_MODULES = ['../lib/three.module.js', '../lib/addons/loaders/GLTFLoader.js', '../lib/addons/utils/SkeletonUtils.js',
-  '../2d/combat.js?v=20261002j', '../frame-pacing.js', './world.js', './oni.js', './touch-input.js',
+  '../2d/combat.js?v=20261002j', '../frame-pacing.js', './world.js', './oni.js?v=20261003enemy1', './oni-art.js?v=20261003enemy1', './touch-input.js',
   ...(vroid ? ['./combat-fx.js?v=20261002w'] : []), ...(vroid && params.get('level') !== 'single' ? ['./march.js?v=20261003a', './march-art.js?v=20261003a'] : [])];
 function preloadModules() {
   for (const href of ENGINE_MODULES) {

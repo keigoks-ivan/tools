@@ -1,3 +1,5 @@
+import { createOniArt, ONI_LOOKS } from './oni-art.js?v=20261003enemy1';
+
 /**
  * Lightweight, fully geometric oni enemy for the 3D arena.
  * Local forward is +Z; the arena rotates root to face its target.
@@ -284,15 +286,15 @@ const RIG_CLIPS = {
 const WALK_SPEED = 1.26, RUN_SPEED = 1.81;   // in-place gait speed of the clips at scale 1 (m/s)
 const RIG_SCALE = { grunt: 1, runner: 0.92, elite: 1.12, boss: 1.4 };
 
-/** Build shared resources once: toon material (keeps the emissive seams/eyes), outline, clips. */
+/** Shared role surfaces, skinned equipment, emissive seams, outline and source clips. */
 export function prepareRiggedOni(THREE, gltf) {
   const gradient = new THREE.DataTexture(new Uint8Array([96, 160, 220, 255]), 4, 1, THREE.RedFormat);
   gradient.minFilter = gradient.magFilter = THREE.NearestFilter;
   gradient.needsUpdate = true;
   let source = null;
   gltf.scene.traverse(object => { if (object.isSkinnedMesh && !source) source = object.material; });
-  const toon = new THREE.MeshToonMaterial({
-    name: 'oni-toon', map: source?.map || null, gradientMap: gradient,
+  const toon = new THREE.MeshStandardMaterial({
+    name: 'oni-surface', map: source?.map || null, vertexColors: true, roughness: 0.7, metalness: 0.3,
     emissive: new THREE.Color(0xffffff), emissiveMap: source?.emissiveMap || null,
     emissiveIntensity: Math.max(1.6, source?.emissiveIntensity || 1),
   });
@@ -309,9 +311,27 @@ export function prepareRiggedOni(THREE, gltf) {
     templates[object.name] = object;
   });
   const clips = new Map(gltf.animations.map(clip => [clip.name, clip]));
+  const art = createOniArt(THREE,templates), styles = new Map();
+  function material(style) {
+    if(!styles.has(style)) {
+      const m=toon.clone();m.emissive.setHex((ONI_LOOKS[style] || ONI_LOOKS.grunt).glow);
+      m.onBeforeCompile = shader => {
+        // The atlas is exported with glTF's top-down UVs. Neutralise only its cloth
+        // patch before vertex tinting, so green/red uniforms keep their own colour.
+        shader.fragmentShader = shader.fragmentShader.replace('#include <map_fragment>', '#ifdef USE_MAP\nvec4 sampledDiffuseColor=texture2D(map,vMapUv);\nfloat clothMask=step(0.875,vMapUv.x)*step(0.4375,vMapUv.y)*(1.0-step(0.5625,vMapUv.y));\nsampledDiffuseColor.rgb=mix(sampledDiffuseColor.rgb,vec3(clamp(dot(sampledDiffuseColor.rgb,vec3(0.2126,0.7152,0.0722))*16.0,0.24,0.8)),clothMask);\ndiffuseColor*=sampledDiffuseColor;\n#endif');
+        // Keep skin and cloth matte, with restrained metal highlights on atlas armour cells.
+        shader.fragmentShader = shader.fragmentShader.replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\n#ifdef USE_MAP\nroughnessFactor=mix(0.84,0.48,step(0.5625,vMapUv.y));\n#endif');
+        shader.fragmentShader = shader.fragmentShader.replace('#include <metalnessmap_fragment>', '#include <metalnessmap_fragment>\n#ifdef USE_MAP\nmetalnessFactor*=step(0.5625,vMapUv.y);\n#endif');
+        shader.fragmentShader = shader.fragmentShader.replace('#include <emissivemap_fragment>', '#ifdef USE_EMISSIVEMAP\nvec3 mask=texture2D(emissiveMap,vEmissiveMapUv).rgb;\ntotalEmissiveRadiance*=max(mask.r,max(mask.g,mask.b));\n#endif');
+      };
+      m.customProgramCacheKey=()=> 'oni-surfaces-enemy1';styles.set(style,m);
+    }
+    return styles.get(style);
+  }
   return {
-    scene: gltf.scene, clips, toon, outline, gradient, templates,
+    scene: gltf.scene, clips, toon, outline, gradient, templates, art, material,
     dispose() {
+      art.dispose();for(const m of styles.values()) m.dispose();styles.clear();
       toon.dispose(); outline.dispose(); gradient.dispose();
       source?.map?.dispose(); source?.emissiveMap?.dispose();
       for (const mesh of Object.values(templates)) mesh.geometry.dispose();
@@ -323,7 +343,7 @@ export function prepareRiggedOni(THREE, gltf) {
  * Animated oni instance. `clone` is SkeletonUtils.clone. update(action, time, dt, enemy) follows the
  * Arena state; battle.js forwards combat events through onTelegraph / onHit / onKill.
  */
-export function createRiggedOni(THREE, shared, role, clone) {
+export function createRiggedOni(THREE, shared, role, clone, { style = role } = {}) {
   const boss = role === 'boss';
   const keep = boss ? 'oni_boss' : 'oni_grunt';
   const root = new THREE.Group();
@@ -335,6 +355,8 @@ export function createRiggedOni(THREE, shared, role, clone) {
   let body = null;
   model.traverse(object => { if (object.isSkinnedMesh) body = object; });
   if (body) {
+    body.geometry = shared.art.geometry(style);
+    body.material = shared.material(style);
     const shell = body.clone(false);   // shares geometry + skeleton; inverted-hull ink line
     shell.material = shared.outline;
     shell.frustumCulled = false;

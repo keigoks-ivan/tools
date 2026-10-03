@@ -16,6 +16,8 @@ The Node tests execute game functions in a VM with controlled browser/audio depe
 
 Frame pacing tests use synthetic 60/120 Hz callbacks, jitter and stalls. The skinned-asset test parses all five actual runtime enemy GLBs with the vendored loader, omitting image references only in an in-memory copy to avoid browser image APIs. It checks merged buffers and animated vertex positions, then validates cloned poses. The original files are never rewritten; framebuffer appearance still needs browser testing.
 
+The oni role-art test parses the actual oni-v2 rig, validates equipment weights and atlas UVs for all 12 styles, enforces geometry/draw/cache budgets, samples real attack clips for hand attachment, and checks clone isolation and shared disposal. Image references are stripped only from its in-memory test copy.
+
 Startup checks run the actual lightweight entry with a stubbed dynamic import, and extracted loading functions with controlled dependencies. They cover no engine load before a user action, duplicate requests, mute handoff, per-stage dependencies, caching and failed-stage retry. They never import the full game engine or create WebGL.
 
 ## Runtime GLB packaging
