@@ -4,7 +4,18 @@ export function roofline(x0, x1, z0, z1, h, kind, face, box) {
   if (w < 5 || d < 5) return;
   const stone = [0.66, 0.63, 0.57, 0, 1], metal = [0.22, 0.26, 0.29, 0, 2], tile = [0.43, 0.24, 0.17, 0, 3], glass = [0.10, 0.17, 0.20, 0, 4];
   const panel = (a, b, c, e, col) => face(a, b, c, e, col);
-  if (kind === 'old') {
+  if (kind === 'japan' || kind === 'japan-tower') {
+    // 日本集合住宅的平屋頂：電梯機房、金屬雨庇、百葉與架高水箱。
+    const ax = x0 + w * .3, bx = x1 - w * .3, az = z0 + d * .35, bz = z1 - d * .35;
+    const y = h + .05, top = y + (kind === 'japan-tower' ? 4.8 : 2.3);
+    box(ax, bx, y, top, az, bz, stone);
+    box(ax - .25, bx + .25, top, top + .16, az - .25, bz + .25, metal);
+    for (let i = 0; i < 5; i++) panel([ax + .25, y + .3 + i * .25, bz + .01], [bx - .25, y + .3 + i * .25, bz + .01], [bx - .25, y + .39 + i * .25, bz + .01], [ax + .25, y + .39 + i * .25, bz + .01], metal);
+    const cx = x0 + w * .18, cz = z0 + d * .2;
+    for (const x of [cx - .6, cx + .6]) box(x - .06, x + .06, y, y + .7, cz - .7, cz + .7, metal);
+    box(cx - .85, cx + .85, y + .7, y + 2, cz - .75, cz + .75, [0.54, 0.57, 0.56, 0, 2]);
+    box(cx - .92, cx + .92, y + 2, y + 2.12, cz - .82, cz + .82, metal);
+  } else if (kind === 'old') {
     const count = Math.max(1, Math.min(4, Math.round(w / 16))), span = w / count;
     for (let i = 0; i < count; i++) {
       const lo = x0 + i * span, hi = lo + span, rise = Math.min(6, span * 0.3), y = h + 0.15;

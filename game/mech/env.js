@@ -3,10 +3,11 @@ import * as THREE from 'three';
 import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
 import { mergeGeometries, mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
-import { makeFacade, FACADE_TILE } from './textures.js';
-import { shopMaterial, shopUV } from './urban.js';
+import { makeFacade, FACADE_TILE, japaneseFacade } from './textures.js';
+import { shopMaterial, shopUV, civicMaterial, civicUV } from './urban.js';
 import { roofline } from './roofline.js';
 import { streetfront } from './streetfront.js';
+import { japaneseScenery } from './japan.js';
 import { BATTLEFIELDS, fieldHeight, fieldLayout, routeDistance, fieldGridCoordinate, fieldGridIndex } from './battlefields.js';
 
 import { fieldTreeGeometry, fieldShrubGeometry, fieldRockGeometry, fieldArchitecture, fieldLeafMaterial, fieldRadar, fieldGroundMask } from './fieldart.js';
@@ -183,11 +184,12 @@ function makeSkyDome(sky, sunDir, fog, sunFog, gain) {
 
 // ---------------------------------------------------------------- 地形高度
 const noise = new ImprovedNoise();
+// 六甲山系的東西向山脊：山側集中在城北，港灣側保留開闊水平線。
 const MOUNTAIN_PEAKS = [
-  [-3700, -2200, 1120, 1200, 950], [-1000, -4200, 800, 1100, 1050],
-  [1700, -3400, 1250, 1250, 900], [4100, -800, 950, 900, 1400],
-  [3500, 2900, 1120, 1200, 1000], [200, 4100, 780, 1000, 900],
-  [-2800, 3600, 900, 1100, 900], [-4200, 900, 680, 950, 1150],
+  [-3900, -2500, 700, 1100, 900], [-2700, -2900, 850, 1000, 850],
+  [-1500, -2500, 920, 1050, 850], [-200, -2800, 780, 1050, 900],
+  [1000, -2600, 930, 1100, 900], [2400, -2900, 830, 1100, 950],
+  [3600, -2500, 720, 1200, 900], [-4500, -1400, 520, 1000, 1100],
 ];
 function fbm(x, z, oct, seed = 0) {
   let s = 0, a = 1, f = 1, n = 0;
@@ -339,8 +341,8 @@ function terrainMaterial(A) {
           float lx = abs(p.x) < R ? p.x : c.x; float ly = p.y;
           float lz = abs(p.y) < R ? p.y : c.y; float lxx = p.x;
           float mV = roadV * (1.0 - inter), mH = roadH * (1.0 - inter);
-          yellow += mV * (aaLine(abs(abs(lx) - 0.35), 0.12));
-          yellow += mH * (aaLine(abs(abs(lz) - 0.35), 0.12));
+          yellow += mV * (aaLine(abs(lx), 0.12));
+          yellow += mH * (aaLine(abs(lz), 0.12));
           float dashV = step(fract(ly / 12.0), 0.5), dashH = step(fract(lxx / 12.0), 0.5);
           white += mV * dashV * aaLine(abs(abs(lx) - 6.8), 0.12);
           white += mH * dashH * aaLine(abs(abs(lz) - 6.8), 0.12);
@@ -354,6 +356,7 @@ function terrainMaterial(A) {
           return vec4(road, walk, clamp(white,0.0,1.0), clamp(yellow,0.0,1.0));
         }`)
       .replace('#include <map_fragment>', `
+        if (battlefield < .5 && vTW.z > 820.0) discard;
         vec4 G = battlefield < 0.5 ? ground(vTW.xz) : vec4(0.0);
         if (battlefield > 4.5 && battlefield < 5.5) {
           float runway = (1.0 - smoothstep(46.0, 48.0, abs(vTW.x + 420.0))) * (1.0 - smoothstep(880.0, 900.0, abs(vTW.z)));
@@ -597,7 +600,7 @@ function architecture(B, signs, x0, x1, z0, z1, H, style, F, district, roofTop, 
   const glass = [0.055, 0.095, 0.11, 0, 4];
   const floor = F.h / F.rows, bay = F.w / F.cols;
   const sides = [['x', z1, 1, x0, x1], ['x', z0, -1, x0, x1], ['z', x1, 1, z0, z1], ['z', x0, -1, z0, z1]];
-  const asian = style >= 2 && x0 > 120 && z0 < 240;
+  const asian = style >= 2;
   for (const [si, [axis, fix, out, a0, a1]] of sides.entries()) {
     const box = (lo, hi, y0, y1, d0, d1, c) => {
       const p = fix + out * d0, q = fix + out * d1;
@@ -694,9 +697,9 @@ function architecture(B, signs, x0, x1, z0, z1, H, style, F, district, roofTop, 
       }
     }
     if (style >= 2) {
-      const mid = (a0 + a1) / 2, idx = asian ? 4 + (Math.abs(Math.round(a0)) % 2) : Math.abs(Math.round(a0 + fix)) % 4;
-      const lo = asian ? mid + 2 : mid - 2.8, hi = asian ? mid + 3.2 : mid + 2.8, y0 = asian ? 3.6 : 2.9, y1 = asian ? 7.2 : 4.1;
-      const d = asian ? 0.6 : 0.18;
+      const mid = (a0 + a1) / 2, idx = Math.abs(Math.round(a0 + fix)) % 8, vertical = idx === 4 || idx === 5;
+      const lo = vertical ? mid + 2 : mid - 2.8, hi = vertical ? mid + 3.2 : mid + 2.8, y0 = vertical ? 3.6 : 2.9, y1 = vertical ? 7.2 : 4.1;
+      const d = vertical ? 0.6 : 0.18;
       box(lo - 0.08, hi + 0.08, y0 - 0.08, y1 + 0.08, 0, d, steel);
       const p = (a, y) => axis === 'x' ? [a, y, fix + out * (d + 0.012)] : [fix + out * (d + 0.012), y, a];
       const uv = shopUV(idx), pts = [p(lo, y0), p(hi, y0), p(hi, y1), p(lo, y1)];
@@ -716,7 +719,7 @@ function architecture(B, signs, x0, x1, z0, z1, H, style, F, district, roofTop, 
     }
   }
   // 街屋的山牆、工廠鋸齒屋頂與退縮冠頂皆併入原本可破壞的屋頂區段。
-  const kind = H >= 45 ? 'tower' : district === 'old' || district === 'mixed' && style !== 3 ? 'old' : district === 'east' ? 'east' : 'industrial';
+  const kind = H >= 45 ? 'japan-tower' : 'japan';
   roofline(...crown, roofTop, kind, (a, b, c, d, col) => {
     const n = new THREE.Vector3().subVectors(new THREE.Vector3(...b), new THREE.Vector3(...a)).cross(new THREE.Vector3().subVectors(new THREE.Vector3(...c), new THREE.Vector3(...a))).normalize();
     const axes = Math.abs(n.y) > 0.5 ? [0, 2] : Math.abs(n.x) > 0.5 ? [2, 1] : [0, 1];
@@ -946,11 +949,14 @@ export class World {
     this.A = A;
     // 四種建材共用一張 1024 貼圖；非同步載入，不等待新貼圖才顯示標題。
     A.surfaceAtlas={value:A.asphD};A.surfaceReady={value:0};
+    const surfacesLoaded = new Promise(resolve => {
+      this._surfaceLoaded = resolve;
+    });
     new THREE.TextureLoader().load(new URL('./assets/field-surfaces-v1.webp',import.meta.url).href,texture=>{
       const c=document.createElement('canvas');c.width=c.height=1024;c.getContext('2d').drawImage(texture.image,0,0,1024,1024);
       texture.image=c;texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=4;texture.needsUpdate=true;
-      A.surfaceAtlas.value=texture;A.surfaceReady.value=1;
-    },undefined,()=>{});
+      A.surfaceAtlas.value=texture;A.surfaceReady.value=1;this._surfaceLoaded(texture.image);
+    },undefined,()=>this._surfaceLoaded(null));
     this.boxes = [];          // {x0,x1,z0,z1,top}
     this.grid = new Map();    // 空間格
     this.cellSize = 60;
@@ -1006,14 +1012,16 @@ export class World {
     const before = new Set(scene.children);
     if (city) {
       this.buildCity();
-      let facadePending=3;
-      const facadeDone=()=>{this.cityFacadeReady=--facadePending===0;};
-      for(const [i,name] of [[2,'city-brick-v2'],[3,'city-stone-v2'],[4,'city-piers-v2']])new THREE.TextureLoader().load(new URL('./assets/'+name+'.webp',import.meta.url).href,texture=>{
-        const c=document.createElement('canvas');c.width=c.height=512;c.getContext('2d').drawImage(texture.image,0,0,512,512);
-        texture.image=c;texture.name=name;texture.colorSpace=THREE.SRGBColorSpace;texture.wrapS=texture.wrapT=THREE.RepeatWrapping;
-        texture.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());texture.needsUpdate=true;
-        const old=A.fac[i][0];A.fac[i][0]=texture;this.cityFacadeMaterials[i].map=texture;old.dispose();facadeDone();
-      },undefined,facadeDone);
+      this.cityFacadeReady = false;
+      surfacesLoaded.then(scan => {
+        for (const i of [2, 3, 4]) {
+          const old = A.fac[i], maps = japaneseFacade(i, scan), mat = this.cityFacadeMaterials[i];
+          A.fac[i] = maps; [mat.map, mat.normalMap, mat.roughnessMap] = maps; mat.aoMap = maps[2]; mat.needsUpdate = true;
+          for (const t of maps) t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+          for (const t of old) t.dispose();
+        }
+        this.cityFacadeReady = true;
+      });
       this.buildProps();
     } else {
       this._initBlds(); this._indexTrample();
@@ -1203,7 +1211,7 @@ export class World {
     }
   }
 
-  height(x, z) { return this.terrain.height(x, z); }
+  height(x, z) { return this.cityEnabled && (!this.battlefield || this.battlefield === 'city') && z > 820 ? -2 : this.terrain.height(x, z); }
 
   addCollider(b) {
     const i = this.boxes.length;
@@ -1406,7 +1414,7 @@ export class World {
           addBox(bk.roof, x0, x1, H - 0.01, H, z0, z1, rc, 12);
           // 女兒牆
           const pitched = H < 45 && (district === 'old' || district === 'mixed' && style !== 3);
-          const pw = 0.45, ph = pitched ? 0.18 : 0.9;
+          const pw = 0.45, ph = 0.9;
           addBox(bk.roof, x0, x1, H, H + ph, z0, z0 + pw, rc); addBox(bk.roof, x0, x1, H, H + ph, z1 - pw, z1, rc);
           addBox(bk.roof, x0, x0 + pw, H, H + ph, z0, z1, rc); addBox(bk.roof, x1 - pw, x1, H, H + ph, z0, z1, rc);
           // 屋頂設備
@@ -1910,6 +1918,34 @@ export class World {
     const curbMesh = new THREE.Mesh(curb.geometry(), new THREE.MeshStandardMaterial({ map: this.A.rockD, normalMap: this.A.rockN, roughness: 0.92, vertexColors: true }));
     curbMesh.receiveShadow = true; scene.add(curbMesh);
 
+    // 神戶港塔與住宅神社放在既有公園用地，保留戰鬥道路和目標建築。
+    const parks = this.blocks.filter(b => b.kind === 'park' && Math.hypot(b.x, b.z) > 200);
+    const port = [...parks].sort((a, b) => Math.hypot(a.x + 180, a.z - 540) - Math.hypot(b.x + 180, b.z - 540))[0];
+    const shrine = [...parks].filter(b => b !== port).sort((a, b) => Math.hypot(a.x + 300, a.z + 180) - Math.hypot(b.x + 300, b.z + 180))[0];
+    const detail = new GeoBucket(), civic = new GeoBucket();
+    const normal = (a,b,c) => new THREE.Vector3().subVectors(new THREE.Vector3(...b),new THREE.Vector3(...a)).cross(new THREE.Vector3().subVectors(new THREE.Vector3(...c),new THREE.Vector3(...a))).normalize().toArray();
+    const streets = [];
+    for (const x of [-360, -240, -120, 120]) for (const z of [-300, -240, -180, -120, -60, 0]) if (!blocked(x + 16, z, .3)) streets.push([x + 16, z, -Math.PI / 2, 0, streets.length % 8]);
+    const sites = { tower: port ? [port.x, port.z, 1, 0] : null, shrine: shrine ? [shrine.x, shrine.z - 6, 1.4, 0] : null, streets };
+    japaneseScenery({
+      box: (...args) => addBox(detail, ...args, 4),
+      face: (a,b,c,d,col) => { const n=normal(a,b,c),axes=Math.abs(n[1])>.5?[0,2]:Math.abs(n[0])>.5?[2,1]:[0,1]; detail.quad(a,b,c,d,n,[a,b,c,d].map(p=>[p[axes[0]]/2,p[axes[1]]/2]),col); },
+      sign: (p,id) => civic.quad(...p,normal(...p),civicUV(id),[.95,.95,.95]),
+      solid: b => this.addCollider({x0:b.x0,x1:b.x1,z0:b.z0,z1:b.z1,top:b.y1}),
+    }, sites);
+    this.japanSites = sites;
+    for (const [bucket,mat,name] of [[detail,architecturalMaterial(this.A),'kobe-landmarks'],[civic,civicMaterial(),'kobe-wayfinding']]) {
+      const mesh = new THREE.Mesh(bucket.geometry(), mat); mesh.name = name; mesh.castShadow = bucket === detail; mesh.receiveShadow = true; scene.add(mesh);
+    }
+
+    const seaMat = new THREE.MeshStandardMaterial({color:0x2d5360,roughness:.36,metalness:.12,normalMap:this.A.rockN,normalScale:new THREE.Vector2(.10,.10),envMapIntensity:.7});
+    const seaGeo = new THREE.PlaneGeometry(10000,10000).rotateX(-Math.PI/2);
+    const seaUV=seaGeo.attributes.uv; for(let i=0;i<seaUV.count;i++)seaUV.setXY(i,seaUV.getX(i)*800,seaUV.getY(i)*800);
+    const sea=new THREE.Mesh(seaGeo,seaMat);sea.name='kobe-bay';sea.position.set(0,-1,5820);sea.receiveShadow=true;sea.userData.noAO=true;scene.add(sea);
+    // 海堤的厚度留在陸地側，合併沿岸混凝土，不增加碰撞長牆封住戰鬥路線。
+    const seawall=new GeoBucket();addBox(seawall,-CITY.half,CITY.half,-2,.35,818.8,820,[.54,.57,.55,0,1],4);
+    const wall=new THREE.Mesh(seawall.geometry(),architecturalMaterial(this.A));wall.name='kobe-seawall';wall.receiveShadow=true;scene.add(wall);
+
     // --- 路燈 ---
     const lamps = [];
     const B = CITY.block;
@@ -1925,7 +1961,7 @@ export class World {
     // 城外主幹道
     for (let t = CITY.half + 30; t < 2600; t += 60) for (const sg of [-1, 1]) for (const side of [-1, 1]) {
       const off = side * (CITY.road + 1.2);
-      lamps.push([off, sg * t, -side * Math.PI / 2]);
+      if (sg * t < 810) lamps.push([off, sg * t, -side * Math.PI / 2]);
       lamps.push([sg * t, off, side > 0 ? Math.PI : 0]);
     }
     const lampMat = new THREE.MeshStandardMaterial({ color: 0x2c2e31, roughness: 0.6, metalness: 0.6 });
@@ -1985,13 +2021,14 @@ export class World {
       for (let k = 0; k < n; k++) {
         const x = THREE.MathUtils.lerp(bl.lx0, bl.lx1, r()), z = THREE.MathUtils.lerp(bl.lz0, bl.lz1, r());
         if (bl.kind === 'plaza' && Math.hypot(x - bl.x, z - bl.z) < 30) continue;
+        if (sites.tower && Math.hypot(x-sites.tower[0],z-sites.tower[1]) < 18 || sites.shrine && Math.hypot(x-sites.shrine[0],z-sites.shrine[1]) < 12) continue;
         trees.push([x, z]);
       }
     }
     for (let k = 0; k < 900; k++) {
       const a = r() * Math.PI * 2, d = CITY.half + 60 + Math.pow(r(), 0.7) * 1400;
       const x = Math.cos(a) * d, z = Math.sin(a) * d;
-      if (Math.abs(x) < 24 || Math.abs(z) < 24 || Math.max(Math.abs(x), Math.abs(z)) < CITY.half + 30) continue;
+      if (z > 810 || Math.abs(x) < 24 || Math.abs(z) < 24 || Math.max(Math.abs(x), Math.abs(z)) < CITY.half + 30) continue;
       if (fbm(x / 400, z / 400, 2, 3) < -0.05) continue; // 成片的林子
       trees.push([x, z]);
     }

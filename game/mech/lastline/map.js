@@ -2,7 +2,8 @@
 // 共用掃描材質；靜態結構按材質合併，海面不建立反射攝影機。
 import * as THREE from 'three';
 import { Builder } from '../zero/kit.js';
-import { JAPANESE_FONT, PORT_LABELS } from '../urban.js';
+import { JAPANESE_FONT, PORT_LABELS, civicMaterial } from '../urban.js';
+import { japaneseBuilder } from '../japan.js';
 
 export const SHORE = 680;
 export function buildMap(scene, mats, solid, PL, A, world) {
@@ -57,6 +58,9 @@ export function buildMap(scene, mats, solid, PL, A, world) {
     painted.metalnessMap = null; painted.metalness = key === 'rust' ? .18 : .08;
     painted.color.set(0xe1e2df); mats[key] = painted;
   }
+  mats.civic = civicMaterial();
+  mats.landmarkPaint = new THREE.MeshStandardMaterial({ color: 0xffffff, normalMap: mats.metal.normalMap, roughness: .68, metalness: .04, vertexColors: true });
+  mats.landmarkPaint.userData.tile = 2;
   const b = new Builder(mats, solid);
   const M = { b, lights: [], zones: {}, marks: {}, targets: {}, items: {}, layout: 'harbor-v1' };
   const V = (x, z, y = 0) => new THREE.Vector3(x, y, z);
@@ -66,7 +70,7 @@ export function buildMap(scene, mats, solid, PL, A, world) {
   const mesh = (mat, g, x, y, z, ry = 0, o = {}) => b.mesh(mat, g, x, y, z, ry, { shade: () => 1, ...o });
   const beam = (a, c, r = .08, mat = 'metal', tint = metal) => {
     const p = new THREE.Vector3(...a), q = new THREE.Vector3(...c), d = q.clone().sub(p);
-    const g = new THREE.CylinderGeometry(r, r, d.length(), 6);
+    const g = new THREE.CylinderGeometry(r, r, d.length(), 6, 1, true);
     g.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize()));
     mesh(mat, g, ...p.add(q).multiplyScalar(.5).toArray(), 0, { tint }); g.dispose();
   };
@@ -541,7 +545,7 @@ export function buildMap(scene, mats, solid, PL, A, world) {
       cx.font = '32px ' + JAPANESE_FONT; cx.fillText(PORT_LABELS[1], 256, 155);
       cx.font = '24px ' + JAPANESE_FONT; cx.fillText(PORT_LABELS[2], 256, 212);
     }; draw();
-    const texture = new THREE.CanvasTexture(cv); texture.colorSpace = THREE.SRGBColorSpace;
+    const texture = new THREE.CanvasTexture(cv); texture.colorSpace = THREE.SRGBColorSpace; texture.name = 'port-signs';
     document.fonts?.load('bold 48px "Noto Sans JP"', PORT_LABELS.join('')).then(() => { draw(); texture.needsUpdate = true; }).catch(() => {});
     const mat = new THREE.MeshStandardMaterial({ map: texture, roughness: .8 });
     const g = new THREE.PlaneGeometry(10, 5);
@@ -549,6 +553,13 @@ export function buildMap(scene, mats, solid, PL, A, world) {
       const sign = new THREE.Mesh(g, mat); sign.position.set(x, y, z); sign.rotation.y = ry; scene.add(sign);
     }
   }
+  M.japanSites = { tower: [640, 400, 1, 0], maritime: [570, 405, 1, 0], shrine: [-243, -275, .75, 0], streets: [
+    [-211,-208,Math.PI,0,4],[-211,-130,Math.PI/2,0,0],[-111,-124,0,0,6],
+    [-111,-72,0,0,5],[9,-5,0,0,1],[176,-135,0,0,4],
+    [344,-138,Math.PI/2,0,0],[344,-200,Math.PI/2,0,6],[344,-265,Math.PI/2,0,4],
+    [614,138,0,0,7],[614,66,0,0,6],[614,-8,0,0,5],
+  ] };
+  japaneseBuilder(b, M.japanSites);
   const meshes = b.build(scene); M.meshes = meshes;
   M.triangles = meshes.reduce((sum, mesh) => sum + (mesh.geometry.index?.count || mesh.geometry.attributes.position.count) / 3, 0);
   scene.userData.lastlineLayout = M.layout;

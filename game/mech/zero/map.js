@@ -7,9 +7,10 @@ import * as THREE from 'three';
 import { Builder, grimeShader } from './kit.js';
 import * as PR from './props.js';
 import { facade, FLOOR } from './models.js';
-import { shopMaterial, shopUV } from '../urban.js';
+import { shopMaterial, shopUV, civicMaterial } from '../urban.js';
 import { roofline } from '../roofline.js';
 import { streetfront } from '../streetfront.js';
+import { japaneseBuilder } from '../japan.js';
 
 const H1 = 3.4;   // 一層樓高
 
@@ -36,7 +37,10 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
   mats.sand = new THREE.MeshStandardMaterial({ color: 0x7d6f55, roughness: 1, vertexColors: true, map: mats.floor.map, normalMap: mats.floor.normalMap });
   mats.paint = new THREE.MeshStandardMaterial({ color: 0x55655f, roughness: 0.55, metalness: 0.35, vertexColors: true, map: mats.rust.map, roughnessMap: mats.rust.roughnessMap });
   mats.paint2 = new THREE.MeshStandardMaterial({ color: 0x9a9384, roughness: 0.55, metalness: 0.3, vertexColors: true, map: mats.rust.map, roughnessMap: mats.rust.roughnessMap });
-  mats.sign = shopMaterial();
+  mats.sign = shopMaterial(); mats.civic = civicMaterial();
+  mats.landmarkPaint = new THREE.MeshStandardMaterial({ color: 0xffffff, normalMap: mats.metal.normalMap, roughness: .68, metalness: .04, vertexColors: true });
+  mats.landmarkPaint.userData.tile = 2; mats.landmarkPaint.userData.grime = .35;
+  mats.landmarkPaint.onBeforeCompile = sh => grimeShader(sh, mats.landmarkPaint);
   mats.red = new THREE.MeshStandardMaterial({ color: 0x8a1f1a, roughness: 0.45, metalness: 0.4, vertexColors: true });
   // 燒過的鐵皮（車、公車）：鏽鐵照片貼圖，不太反光；煙燻、灰燼用頂點色
   mats.burnt = new THREE.MeshStandardMaterial({ color: 0x9a938c, roughness: 0.9, metalness: 0.2, vertexColors: true, map: mats.rust.map, normalMap: mats.rust.normalMap, roughnessMap: mats.rust.roughnessMap });
@@ -155,7 +159,7 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
   }
   function streetDetails(x0, x1, z0, z1, h, win, o) {
     if (!win || o.y0 || h < 8 || Math.max(x1 - x0, z1 - z0) > 90) return;
-    const asian = x0 > -36 && z0 < 35;
+    const asian = true;
     const sd = [...win].find(s => !o.hide || !o.hide[s]); if (!sd) return;
     const along = sd === 'n' || sd === 's', out = sd === 'n' || sd === 'e' ? 1 : -1;
     const a0 = along ? x0 : z0, a1 = along ? x1 : z1, fix = sd === 'n' ? z1 : sd === 's' ? z0 : sd === 'e' ? x1 : x0;
@@ -166,25 +170,34 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
       if (along) b.deco(mat, lo, hi, y0, y1, Math.min(p, q), Math.max(p, q));
       else b.deco(mat, Math.min(p, q), Math.max(p, q), y0, y1, lo, hi);
     };
-    if (!asian && o.kit !== 'factory' && h < 24) {
-      // 舊街的石材簷口、托座與三角山牆：只加在可見街面，共用原混凝土桶。
-      for (const [y, d, t] of [[h - 0.2, 0.22, 0.14], [h + 0.02, 0.38, 0.16], [h + 0.25, 0.52, 0.18]]) trim('concrete', a0, a1, y, y + t, 0, d);
-      for (let a = a0 + 1.2; a < a1 - 1; a += 3.2) trim('concrete', a - 0.13, a + 0.13, h - 0.5, h, 0, 0.3);
-      if (ph(x0, z0) > 0.45) {
-        const c = (a0 + a1) / 2, w = Math.min(3.4, (a1 - a0) / 4);
-        const pts = [at(c - w, h + 0.45, 0.1), at(c + w, h + 0.45, 0.1), at(c, h + 1.9, 0.1), at(c, h + 1.9, 0.1)];
-        if (along ? out < 0 : out > 0) pts.reverse();
-        b.B.concrete.quad(...pts, along ? [0, 0, out] : [out, 0, 0], [0.85, 0.85, 1, 1]);
-      }
-    }
     // 不占用可行走的平台：外圍街屋用同一套城市冠頂，細節併入既有材質桶。
     if (h >= 12 && h <= 28 && !o.noParapet && !o.hide) {
-      const kind = o.kit === 'factory' ? 'industrial' : asian ? 'east' : 'old';
+      const kind = o.kit === 'factory' ? 'industrial' : 'japan';
       const material = col => col[4] === 4 ? 'glass' : col[4] === 2 ? 'rust' : 'concrete';
       roofline(x0, x1, z0, z1, h, kind, (a, c, d, e, col) => {
         const n = new THREE.Vector3().subVectors(new THREE.Vector3(...c), new THREE.Vector3(...a)).cross(new THREE.Vector3().subVectors(new THREE.Vector3(...d), new THREE.Vector3(...a))).normalize();
         b.B[material(col)].quad(a, c, d, e, n.toArray(), [1, 1, 1, 1], null, col.slice(0, 3));
       }, (a, c, d, e, f, g, col) => b.deco(material(col), a, c, d, e, f, g, { shade: () => 1, tint: col.slice(0, 3) }));
+    }
+    if (o.kit !== 'factory') for (let y = H1; y < Math.min(h - 2, H1 * 4); y += H1) {
+      for (let a = a0 + 2; a < a1 - 2; a += 6.4) {
+        const lo = a - 1.65, hi = Math.min(a1 - .25, a + 1.65);
+        trim('concrete', lo, hi, y - .16, y, 0, .7);
+        trim('concrete', lo, hi, y + .06, y + .75, .6, .7);
+        trim('metal', lo, hi, y + .85, y + .91, .65, .71);
+        for (const p of [lo, hi - .06]) trim('concrete', p, p + .06, y, y + .95, 0, .7);
+        trim('concrete', (lo + hi) / 2 - .025, (lo + hi) / 2 + .025, y, y + 1.85, .1, .66);
+      }
+    }
+    if (o.shop) {
+      const count = Math.min(3, Math.floor((a1 - a0) / 7));
+      for (let i = 0; i < count; i++) {
+        const c = a0 + (a1 - a0) * (i + .5) / count;
+        trim('glass', c - 1.2, c + 1.2, .12, 2.55, .012, .035);
+        for (const a of [c - 1.22, c, c + 1.2]) trim('metal', a, a + .045, .1, 2.6, .035, .1);
+        for (const y of [.1, 2.55]) trim('metal', c - 1.25, c + 1.25, y, y + .045, .035, .1);
+        trim('metal', c + .12, c + .15, .95, 1.32, .1, .16);
+      }
     }
     if (asian && o.shop) {
       // 日式木格子與三片暖簾；貼牆擺放，不改步兵路線或碰撞。
@@ -228,9 +241,10 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
     }
     const pipe = at(a0 + 0.35, 0, 0.12); b.mesh('rust', PR.pipeGeo(Math.min(h, 11), 0.055).translate(0, Math.min(h, 11) / 2, 0), ...pipe, 0, { solid: false });
     if (!o.shop && ph(x0, z0) < 0.4) return;
-    const c = (a0 + a1) / 2, lo = asian ? c : c - 2.2, hi = asian ? c + 0.8 : c + 2.2, bot = asian ? 3.4 : 2.9, top = asian ? 6.4 : 3.8, d = asian ? 0.45 : 0.17;
+    const idx = Math.floor(ph(x0, z0) * 8), vertical = idx === 4 || idx === 5;
+    const c = (a0 + a1) / 2, lo = vertical ? c : c - 2.2, hi = vertical ? c + .8 : c + 2.2, bot = vertical ? 3.4 : 2.9, top = vertical ? 6.4 : 3.8, d = vertical ? .45 : .17;
     const pts = [at(lo, bot, d), at(hi, bot, d), at(hi, top, d), at(lo, top, d)];
-    const uv = shopUV(asian ? 4 + Math.floor(ph(x0, z0) * 2) : Math.floor(ph(x0, z0) * 4));
+    const uv = shopUV(idx);
     if (along ? out < 0 : out > 0) { pts.reverse(); uv.reverse(); }
     b.B.sign.quad(...pts, along ? [0, 0, out] : [out, 0, 0], [0.9, 0.9, 0.9, 0.9], uv);
   }
@@ -240,6 +254,18 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
   function kitMass(x0, x1, z0, z1, h, win, o) {
     const kit = o.kit, km = kit === 'factory' ? 'kbrick' : 'kplaster';
     const kf = Math.max(1, Math.min(Math.floor(h / FLOOR), o.kitFloors ?? 3)), kTop = kf * FLOOR;
+    if (kit === 'apt') {
+      // 保持舊模組會消耗的亂數次數，避免改美術時移動後面的道具和敵人掩體。
+      if (h > kTop + .2) for (const sd of win) {
+        const n = Math.floor(((sd === 'n' || sd === 's' ? x1 - x0 : z1 - z0) - 1) / (o.spacing || 3.2));
+        for (let f = Math.ceil((kTop + .3) / H1); f * H1 + 2.6 < h; f++) for (let i = 0; i < n; i++) { rnd(); rnd(); }
+      }
+      const dry = { add: () => null, M: PL.M };
+      for (const sd of win) facade(dry, kit, sd, x0, x1, z0, z1, kf, rnd, { shutters: o.shop, noGround: o.noGround, hide: o.hide && o.hide[sd] });
+      const saved = seed;
+      mass(x0, x1, z0, z1, h, 'concrete', win, { ...o, kit: undefined, trim: 'concrete', ww: 1.65 });
+      seed = saved; return;
+    }
     const I = 0.34;
     const ix0 = x0 + (win.includes('w') ? I : 0), ix1 = x1 - (win.includes('e') ? I : 0), iz0 = z0 + (win.includes('s') ? I : 0), iz1 = z1 - (win.includes('n') ? I : 0);
     b.block(km, ix0, ix1, 0, Math.min(h, kTop), iz0, iz1, { skip: 'ny', solid: false });
@@ -1181,6 +1207,12 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
   buildDecals(scene, DEC);
   // 遠方幾柱濃煙（在街區外、底部藏在外圍高樓後面）
   scene.add(PR.smokePlumes([[-60, 10, -240, 80, 280], [170, 10, -150, 110, 330], [230, 10, 110, 70, 240], [40, 10, 250, 120, 340], [-210, 10, 150, 90, 280], [-240, 10, -90, 60, 220]]));
+  M.japanSites = { shrine: [-7.6, 21.8, .65, 0], arcade: [-58, -4, -1, 8, 0], streets: [
+    [-94.7,-61,Math.PI/2,0,0],[-94.7,-33,Math.PI/2,0,6],[-35.7,-47.7,0,0,2],
+    [14.3,-32,Math.PI/2,0,0],[46.7,-24,-Math.PI/2,0,6],[-35.7,20.4,Math.PI/2,0,5],
+    [6.3,24,0,0,1],[113.3,-72,-Math.PI/2,0,4],[113.3,-12,-Math.PI/2,0,7],
+  ] };
+  japaneseBuilder(b, M.japanSites);
   M.meshes = b.build(scene);
   return M;
 }

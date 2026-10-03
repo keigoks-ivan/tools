@@ -49,6 +49,49 @@ function stains(ctx, w, h, r, count, color, maxA) {
 // ---------- 建築立面：一張圖 = 8 開間 × 8 層（每開間 4m、每層 3.6m） ----------
 export const FACADE_TILE = { w: 32, h: 28.8 };
 
+// 512px 日式住宅立面：共用掃描混凝土底材，六開間／六層與城市 UV 尺度一致。
+// 三張貼圖同時生成，滑窗、凹槽與粗糙度遮罩不會沿用舊磚牆的錯位資料。
+export function japaneseFacade(style, scan) {
+  const S = 512, cell = S / 6, r = rng(301 + style);
+  const [c, a] = canvas(S, S), [rc, rough] = canvas(S, S), [nc, normal] = canvas(S, S);
+  a.fillStyle = ['#b7b6ac', '#a8afb0', '#b4a89b'][style - 2]; a.fillRect(0, 0, S, S);
+  if (scan) {
+    a.globalAlpha = .32;
+    for (let y = 0; y < S; y += 128) for (let x = 0; x < S; x += 128) a.drawImage(scan, 520, 8, 496, 496, x, y, 128, 128);
+    a.globalAlpha = 1;
+  }
+  rough.fillStyle = 'rgb(255,220,0)'; rough.fillRect(0, 0, S, S);
+  normal.fillStyle = 'rgb(128,128,255)'; normal.fillRect(0, 0, S, S);
+  for (let j = 0; j < 6; j++) for (let i = 0; i < 6; i++) {
+    const x = i * cell, y = j * cell, wx = x + cell * .18, wy = y + cell * .18, ww = cell * .64, wh = cell * .6;
+    if (style === 4) {
+      a.strokeStyle = 'rgba(73,64,57,.24)'; a.lineWidth = .6;
+      for (let v = y; v < y + cell; v += 7) for (let u = x; u < x + cell; u += 14) a.strokeRect(u, v, 14, 7);
+    }
+    a.fillStyle = 'rgba(25,30,29,.28)'; a.fillRect(wx - 3, wy - 2, ww + 6, wh + 6);
+    a.fillStyle = '#555d5b'; a.fillRect(wx - 2, wy - 1, ww + 4, wh + 2);
+    const reflection = a.createLinearGradient(0, wy, 0, wy + wh);
+    reflection.addColorStop(0, '#293e49'); reflection.addColorStop(.48, '#42545b'); reflection.addColorStop(1, '#1b272c');
+    a.fillStyle = reflection; a.fillRect(wx, wy, ww, wh);
+    if (r() < .62) {
+      const length = wh * (.26 + r() * .6), offset = r() < .5 ? 0 : ww * .53;
+      a.fillStyle = ['#88877c', '#666d68', '#99958a'][i % 3]; a.fillRect(wx + offset + 2, wy + 1, ww * .44, length);
+      a.strokeStyle = 'rgba(35,35,31,.3)'; a.lineWidth = 1;
+      for (let u = wx + offset + 3; u < wx + offset + ww * .44; u += 3) { a.beginPath(); a.moveTo(u, wy + 1); a.lineTo(u, wy + length); a.stroke(); }
+    }
+    a.fillStyle = '#b0b5ae'; a.fillRect(wx + ww / 2 - .7, wy, 1.4, wh);
+    a.fillStyle = '#cfcdc0'; a.fillRect(wx - 2, wy + wh + 1, ww + 4, 2);
+    rough.fillStyle = 'rgb(255,65,0)'; rough.fillRect(wx, wy, ww, wh);
+    normal.fillStyle = 'rgb(92,128,248)'; normal.fillRect(wx - 2, wy, 2, wh);
+    normal.fillStyle = 'rgb(164,128,248)'; normal.fillRect(wx + ww, wy, 2, wh);
+    normal.fillStyle = 'rgb(128,164,248)'; normal.fillRect(wx - 2, wy - 1, ww + 4, 2);
+    normal.fillStyle = 'rgb(128,92,248)'; normal.fillRect(wx - 2, wy + wh, ww + 4, 2);
+    a.fillStyle = 'rgba(37,39,37,.25)'; a.fillRect(x, y + cell - 4, cell, 1);
+  }
+  stains(a, S, S, r, 60, '34,37,32', .13); grain(a, S, S, 6, r);
+  return [tex(c), tex(nc, false), tex(rc, false)].map((t, i) => { t.name = 'city-japanese-' + style + '-' + i; return t; });
+}
+
 export function makeFacade(style, seed = 1) {
   const S = 1024, bay = S / 8, fl = S / 8;
   const r = rng(seed * 97 + 13);
