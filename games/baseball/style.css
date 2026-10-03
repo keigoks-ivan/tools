@@ -7,6 +7,7 @@
 html,body{height:100%;overflow:hidden;background:#0d1d36;font-family:var(--font);color:var(--ink);user-select:none;-webkit-user-select:none;touch-action:none}
 #game,#overlay{position:fixed;inset:0;display:block;width:100%;height:100%}
 #overlay{pointer-events:none}
+#game{background:#83a8bd}
 #hud{position:fixed;inset:0;pointer-events:none}
 button{font-family:var(--font)}
 
@@ -68,6 +69,9 @@ button{font-family:var(--font)}
 .face.happy::after{height:5px;top:15px;border-radius:0 0 8px 8px}
 .face.tired{background:radial-gradient(circle at 38% 32%,#ffe0c0,#ff9a3a 60%,#d06000)}
 .face.tired::after{height:4px;top:17px;border-radius:8px 8px 0 0}
+.face.portrait{width:34px;height:34px;background-size:cover;border-color:#daeaff;border-radius:9px}
+.face.portrait::before,.face.portrait::after{display:none}
+.face.portrait.tired{border-color:#ff9a3a}
 .pos{font-weight:900;font-size:14px;min-width:26px;text-align:center;background:linear-gradient(180deg,#eaffcf,#5ccc34);color:#10203a;border:2px solid #fff;border-radius:6px;padding:1px 5px;box-shadow:0 1px 0 rgba(0,0,0,.3)}
 .pos.red{background:linear-gradient(180deg,#ffe3e3,#ff5e5e)}
 .pl .sub{font-weight:900;font-size:14px;margin-top:5px;display:flex;gap:10px;align-items:center;white-space:nowrap;text-shadow:0 1px 0 #0a2a5a}
@@ -142,7 +146,7 @@ body.mode-bat .plabel{top:15%;transform:translateX(-50%)}
 .subtitle{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);max-width:min(560px,60vw);text-align:center;color:#fff;font-weight:900;font-size:15px;
   padding:3px 14px;border-radius:999px;background:rgba(5,15,35,.55);text-shadow:0 1px 2px #000}
 .subtitle:empty{display:none}
-.help{position:absolute;right:clamp(8px,2vw,28px);top:clamp(8px,2vh,22px);background:rgba(8,20,40,.72);color:#fff;border-radius:10px;padding:6px 10px;font-size:12px;line-height:1.7;font-weight:700;max-width:46vw;
+.help{position:absolute;right:clamp(8px,2vw,28px);top:70px;background:rgba(8,20,40,.72);color:#fff;border-radius:10px;padding:6px 10px;font-size:12px;line-height:1.7;font-weight:700;max-width:46vw;
   border:1px solid rgba(255,255,255,.25)}
 .help kbd{background:#fff;color:#111;border-radius:4px;padding:0 5px;font-family:var(--font);font-size:11px;box-shadow:0 1px 0 #889}
 .skips{position:absolute;left:clamp(8px,2vw,28px);top:clamp(132px,19vh,152px);display:flex;flex-direction:column;gap:6px;pointer-events:auto;z-index:2}
@@ -179,6 +183,7 @@ body.cine .panels,body.cine .pmenu,body.cine .help,body.cine .sb,body.cine .touc
 .sideHd .who{font-weight:900;font-size:13px;color:#fff;background:#1458b4;border-radius:6px;padding:2px 8px;flex:none}
 .side.opp .sideHd .who{background:#b4142a}
 .sideHd .hdT{display:flex;align-items:center;gap:8px;min-width:0}
+#hdUser,#hdOpp{min-width:0;flex:1}
 .sideHd .tname{font-weight:900;font-size:22px;color:#10203a;white-space:nowrap}
 .sideHd .venue{font-size:12px;color:#5a6f8a;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sideHd .chip{width:56px;height:34px;font-size:16px}
@@ -310,3 +315,58 @@ body.cine .panels,body.cine .pmenu,body.cine .help,body.cine .sb,body.cine .touc
 /* 登場名牌放上方中間，避開右下球員框和左下投球選單 */
 .banner{left:50%;top:12%;bottom:auto;transform:translateX(-50%) translateY(-8px)}
 .banner.show{transform:translateX(-50%)}
+
+/* Stadium sound and contact feedback */
+.sound-controls{position:fixed;right:max(14px,env(safe-area-inset-right));top:max(14px,env(safe-area-inset-top));z-index:20;display:flex;align-items:center;gap:9px;padding:7px 10px;color:#f5f9ff;background:linear-gradient(145deg,rgba(13,37,62,.94),rgba(19,59,87,.88));border:1px solid #85aabe;border-radius:12px;box-shadow:0 4px 18px #07192b55;backdrop-filter:blur(12px)}
+.sound-controls button{display:flex;align-items:center;gap:6px;border:0;background:transparent;color:inherit;font-size:12px;font-weight:700;cursor:pointer;min-height:30px}
+.sound-controls svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.sound-controls label{font-size:11px;color:#b3cfdd}
+.sound-controls input{width:68px;accent-color:#ffcf76;cursor:pointer;touch-action:pan-x}
+.sound-controls button:focus-visible,.sound-controls input:focus-visible{outline:2px solid #ffe09c;outline-offset:4px}
+.contact-readout{position:absolute;left:50%;top:15%;transform:translate(-50%,-10px);opacity:0;transition:opacity .18s,transform .25s;display:flex;align-items:center;gap:14px;padding:10px 18px;background:linear-gradient(125deg,rgba(10,31,49,.94),rgba(22,56,75,.94));border:1px solid #c9dcd9;border-top:3px solid #ffcf76;border-radius:10px;color:#fff;box-shadow:0 6px 22px #06182c66;white-space:nowrap}
+.contact-readout.show{opacity:1;transform:translate(-50%,0)}
+.contact-readout>span{color:#ffe09c;font-size:14px;font-weight:900}
+.contact-readout b{font-family:Rubik,sans-serif;font-size:25px;line-height:1}
+.contact-readout small{font-size:12px;color:#c0d4df}
+.contact-readout em{font-size:12px;font-style:normal;color:#c0d4df}
+body.mode-bat .panels{left:50%;right:auto;bottom:16px;transform:translateX(-50%);width:min(740px,calc(100% - 32px));display:grid;grid-template-columns:1fr 1fr;align-items:end;gap:16px}
+body.mode-bat .panels .tag{position:absolute;left:50%;top:-24px;transform:translateX(-50%);margin:0;white-space:nowrap}
+body.mode-bat .pl .ss{display:none}
+body.mode-bat .subtitle{bottom:150px}
+.heat-panel{position:absolute;left:20px;top:242px;width:154px;padding:8px;background:rgba(11,29,53,.88);border:1px solid rgba(207,231,255,.6);border-radius:12px;color:#fff;pointer-events:auto;box-shadow:0 5px 16px rgba(0,0,0,.2)}
+.heat-panel[hidden],.heat-panel [hidden]{display:none}
+.heat-panel button{width:100%;padding:4px;border:0;border-radius:6px;background:#26486d;color:#fff;font:700 13px "Noto Sans TC",sans-serif;cursor:pointer}
+.heat-panel button:focus-visible{outline:2px solid #ffd23a;outline-offset:2px}
+.heat-name{font-weight:900;font-size:13px;text-align:center;margin:5px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.heat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+.heat-grid span{padding:6px 0;text-align:center;font:800 13px "Rubik",sans-serif;border-radius:3px}
+.heat-grid p{grid-column:1/-1;font-size:12px;text-align:center}
+.heat-key{display:flex;justify-content:space-between;font-size:10px;margin-top:5px}
+.heat-key span:first-child{color:#98c6ff}.heat-key span:last-child{color:#ffb0b7}
+.heat-panel a{display:block;font-size:10px;color:#c3e5ff;margin-top:4px;text-align:center}
+.heat-panel small{display:block;font-size:9px;color:#b7c5d7;text-align:center;margin-top:2px}
+.pl .pos{font-size:12px;letter-spacing:0}
+@media(max-width:560px){
+  .screen.title{padding-top:56px}
+  .sound-controls{top:max(10px,env(safe-area-inset-top));right:max(10px,env(safe-area-inset-right));gap:6px;padding:4px 8px}
+  .sound-controls label{display:none}.sound-controls input{width:48px}.sound-controls button span{display:none}
+  .contact-readout{top:23%;padding:8px 12px;gap:8px}.contact-readout b{font-size:21px}.contact-readout>span{font-size:12px}
+  body.mode-bat .panels{width:calc(100% - 16px);bottom:10px;gap:6px}
+  body.mode-bat .pl{padding:5px}
+  body.mode-bat .pl .top{gap:3px}
+  body.mode-bat .pl .face{display:none}
+  body.mode-bat .pl .ord{width:16px;font-size:16px}
+  body.mode-bat .pl .nbar{font-size:14px;padding:1px 3px;letter-spacing:0}
+  body.mode-bat .pl .pos{font-size:9px;min-width:0;padding:1px 3px}
+  body.mode-bat .pl .sub{font-size:10px;gap:3px;flex-wrap:wrap}
+  body.mode-bat .pl .g{font-size:13px;margin-left:1px}
+  body.mode-bat .pl .traj{width:16px;height:16px;font-size:10px;margin-left:1px}
+  body.mode-bat .pl .kmhv{font-size:13px}
+  body.mode-bat .pl .stamrow{gap:4px}
+  body.mode-bat .pl .stl{font-size:9px}
+  body.mode-bat .pl .pc{font-size:12px;min-width:30px}
+  body.mode-bat .subtitle{bottom:132px;max-width:94vw}
+  .heat-panel{left:auto;right:8px;top:68px;width:130px;padding:6px}
+  .heat-grid span{font-size:12px;padding:4px 0}
+}
+@media(prefers-reduced-motion:reduce){.contact-readout{transition:none}}

@@ -43,14 +43,15 @@ function pit(pid){
   const hand=P.throws||'R';
   if(!(s.pitches&&s.pitches.length) && hand==='L') pitches=pitches.map(p=>({...p,px:-p.px}));
   const fb=pitches.find(p=>['FF','SI'].includes(p.t))||pitches[0];
+  const levels=Object.fromEntries(pitches.map(p=>[p.t,clamp(Math.round(p.whiff*12+Math.hypot(p.px-fb.px,p.pz-fb.pz)*0.8),1,7)]));
   const maxMph=Math.max(...pitches.map(p=>p.mph))+2.2;
   const perStart=s.gs?ip/s.gs:0;
   const starter=(s.gs||0)>=5;
   const stamina=r0(starter?40+perStart*5:25+Math.min(ip,70)*0.25);
-  const r={id:pid,P,s,hand,pitches,
+  const r={id:pid,P,s,hand,pitches,levels,
     kmh:Math.round(maxMph*1.609), control:r0(55+(3.3-bb9)*15), stamina, k9, bb9, starter,
     limit:starter?Math.round(55+stamina*0.6):Math.round(18+stamina*0.4),
-    brk:pitches.filter(p=>p!==fb).map(p=>({t:p.t,name:p.name,lv:clamp(Math.round(p.whiff*12+Math.hypot(p.px-fb.px,p.pz-fb.pz)*0.8),1,7),px:p.px,pz:p.pz}))};
+    brk:pitches.filter(p=>p!==fb).map(p=>({t:p.t,name:p.name,lv:levels[p.t],px:p.px,pz:p.pz}))};
   return RCACHE['p'+pid]=r;
 }
 const nameOf=pid=>{const P=PLAYERS[pid]; return P?(P.zh||P.last||P.full):'?';};
@@ -110,21 +111,34 @@ function aimFor(p,pr,br,balls,strikes){
   if(balls===3){ x*=0.5; y=(y+(top+bot)/2)/2; }
   return {x,y};
 }
-// 依球種與瞄準點做出一球（fat＝疲勞 0～1）
+// 遊戲用的球路輪廓：水平／垂直幅度，以及累積變化的時間曲線。
+const PITCH_SHAPES={
+  FF:{x:1.0,y:.9,ex:2,ey:2}, SI:{x:2.6,y:1.55,ex:2.6,ey:2.8}, FC:{x:2.2,y:1.1,ex:3.1,ey:2.6},
+  SL:{x:3.1,y:1.8,ex:3.3,ey:3}, ST:{x:4,y:1.25,ex:2.5,ey:2.4}, SV:{x:2.8,y:2.1,ex:2.8,ey:2.7},
+  CU:{x:1.9,y:2.45,ex:2.1,ey:2.45}, KC:{x:1.4,y:2.8,ex:2.1,ey:3.1}, CS:{x:1.5,y:2.6,ex:2,ey:2.3},
+  CH:{x:2.8,y:2,ex:2.7,ey:3}, FS:{x:1.3,y:2.6,ex:2,ey:4.2}, FO:{x:1.4,y:2.8,ex:2.2,ey:4},
+  SC:{x:3,y:2.1,ex:2.5,ey:2.9}, KN:{x:1.1,y:1.1,ex:2,ey:2,flutter:.5}
+};
+// 依投手該球種的變化等級、真實位移與球速調整輪廓，疲勞會削弱變化。
 function buildPitch(p,pr,aim,fat=0,noise=true){
   const sig = 0.25 + (100-pr.control)*0.0072 + fat*0.25;
   const end = noise?{x:aim.x+gauss()*sig, y:aim.y+gauss()*sig}:{...aim};
-  const mph = p.mph + gauss()*0.9 - fat*2.5;
+  const mph = p.mph + (noise?gauss()*0.9:0) - fat*2.5;
   const tReal = 53.9/(mph*1.467*0.93);
   const drop = 0.5*32.2*tReal*tReal;
-  const B = {x:p.px*1.25, y:-drop+p.pz};
+  const level=pr.levels?.[p.t]||pr.brk?.find(b=>b.t===p.t)?.lv||clamp(Math.round(p.whiff*12),1,7);
+  const shape=PITCH_SHAPES[p.t]||{x:1.8,y:1.8,ex:2.5,ey:2.5}, strength=(.6+level*.14)*(1-clamp(fat,0,1)*.18);
+  const B = {x:clamp(p.px*shape.x*strength,-7,7), y:clamp((-drop+p.pz)*shape.y*strength,-12,5)};
+  const motion={ex:shape.ex,ey:shape.ey,flutter:(shape.flutter||0)*strength,phase:noise?rnd(0,Math.PI*2):(+pr.id||0)%97*.37};
   const T = 0.40*(98/mph)*diff.slow;
-  return {p, mph, kmh:Math.round(mph*1.609), end, B, T};
+  return {p, mph, kmh:Math.round(mph*1.609), end, B, T,level,motion};
 }
 function makePitch(pr,br,balls,strikes,fat){ const p=choosePitch(pr,balls,strikes); return buildPitch(p,pr,aimFor(p,pr,br,balls,strikes),fat); }
 function pitchPos(P,u,rel){
-  const Q = {x:P.end.x-P.B.x, y:P.end.y-P.B.y};
-  return { x: rel.x + (Q.x-rel.x)*u + P.B.x*u*u, y: rel.y + (Q.y-rel.y)*u + P.B.y*u*u, z: rel.z + (0-rel.z)*u };
+  const m=P.motion||{ex:2,ey:2,flutter:0,phase:0}, t=Math.max(0,u), envelope=Math.sin(Math.PI*clamp(t,0,1));
+  const flutter=m.flutter*envelope;
+  return {x:rel.x+(P.end.x-rel.x)*t+P.B.x*(Math.pow(t,m.ex)-t)+flutter*Math.sin(t*19+m.phase),
+    y:rel.y+(P.end.y-rel.y)*t+P.B.y*(Math.pow(t,m.ey)-t)+flutter*.65*Math.sin(t*27+m.phase*1.7), z:rel.z*(1-t)};
 }
 
 /* ---------- 電腦打者：用該打者的揮棒率、追打率、揮空率、擊球初速 ---------- */

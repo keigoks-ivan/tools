@@ -18,9 +18,11 @@ function buildStadium(){
   {
     const tex=canvasTex(2048,1024,(g,W,H)=>{
       const gr=g.createLinearGradient(0,0,0,H*0.5);
-      gr.addColorStop(0,'#2a6fc8'); gr.addColorStop(0.65,'#5ea4e6'); gr.addColorStop(1,'#b9dcf5');
+      gr.addColorStop(0,'#12376b'); gr.addColorStop(0.55,'#286da9'); gr.addColorStop(0.86,'#4b9dce'); gr.addColorStop(1,'#80b8d6');
       g.fillStyle=gr; g.fillRect(0,0,W,H*0.5);
-      g.fillStyle='#b9dcf5'; g.fillRect(0,H*0.5,W,H*0.5);
+      g.fillStyle='#80b8d6'; g.fillRect(0,H*0.5,W,H*0.5);
+      const glow=g.createRadialGradient(W*0.73,H*0.43,2,W*0.73,H*0.43,H*0.2);
+      glow.addColorStop(0,'rgba(255,238,193,.65)'); glow.addColorStop(1,'rgba(255,210,155,0)'); g.fillStyle=glow; g.fillRect(0,0,W,H/2);
       for(let c=0;c<26;c++){
         const cx=rand()*W, cy=H*(0.16+rand()*0.26), n=5+Math.floor(rand()*8), s=16+rand()*36;
         for(let i=0;i<n;i++){
@@ -33,8 +35,8 @@ function buildStadium(){
     });
     const sky=new THREE.Mesh(new THREE.SphereGeometry(3000,48,24),new THREE.MeshBasicMaterial({map:tex,side:THREE.BackSide,fog:false,depthWrite:false,toneMapped:false}));
     sky.renderOrder=-1; scene.add(sky);
-    scene.background=new THREE.Color(0xa8d4f4);
-    if(scene.fog){ scene.fog.color.set(0xb4daf5); scene.fog.near=900; scene.fog.far=4200; }
+    scene.background=new THREE.Color(0xd6d1c5);
+    if(scene.fog){ scene.fog.color.set(0xc7cdd1); scene.fog.near=850; scene.fog.far=3300; }
   }
 
   /* ---------- 地面：遠處的草 ---------- */
@@ -50,7 +52,7 @@ function buildStadium(){
     const F={x0:-460,x1:460,z0:-860,z1:60}, W=2048, H=2048;
     const cv=document.createElement('canvas'); cv.width=W; cv.height=H; const g=cv.getContext('2d');
     const img=g.createImageData(W,H), d=img.data;
-    const c1=[60,108,44], c2=[72,122,52], foul=[64,112,46], track=[170,98,70], track2=[158,90,64];
+    const c1=[20,72,31], c2=[31,94,39], foul=[25,80,36], track=[146,80,48], track2=[132,70,42];
     const sq=24;
     for(let j=0;j<H;j++){
       const z=F.z0+(F.z1-F.z0)*(j+0.5)/H;
@@ -72,12 +74,12 @@ function buildStadium(){
     }
     g.putImageData(img,0,0);
     const t=new THREE.CanvasTexture(cv); t.colorSpace=THREE.SRGBColorSpace; t.anisotropy=8;
-    const m=new THREE.Mesh(new THREE.PlaneGeometry(F.x1-F.x0,F.z1-F.z0),new THREE.MeshLambertMaterial({map:t}));
+    const m=new THREE.Mesh(new THREE.PlaneGeometry(F.x1-F.x0,F.z1-F.z0),new THREE.MeshStandardMaterial({map:t,bumpMap:t,bumpScale:0.12,roughness:0.96}));
     m.rotation.x=-Math.PI/2; m.position.set((F.x0+F.x1)/2,0,(F.z0+F.z1)/2); m.receiveShadow=true; scene.add(m);
   }
 
   /* ---------- 內野土、白線（透明處露出下面的草紋） ---------- */
-  const DIRT='#b46e4e';
+  const DIRT='#9e5939';
   const IF={x0:-112,x1:112,z0:-172,z1:52,res:2048};
   {
     const infTex=canvasTex(IF.res,IF.res,(g,W,H)=>{
@@ -94,7 +96,11 @@ function buildStadium(){
       g.beginPath(); g.arc(...P(0,-60.5),R(9.5),0,Math.PI*2); g.fill();
       for(const b of [BASES.first,BASES.second,BASES.third]){ g.beginPath(); g.arc(...P(b.x,b.z),R(9),0,Math.PI*2); g.fill(); }
       g.save(); g.globalCompositeOperation='source-atop';
-      noise(g,W,H,90000,['#a96546','#bd7756','#b06b4b','#c27e5c'],2);
+      noise(g,W,H,90000,['#894930','#a96744','#965335','#b3734c'],2);
+      g.strokeStyle='rgba(246,210,166,.13)'; g.lineWidth=1;
+      for(let r=20;r<95;r+=0.65){ g.beginPath(); g.arc(...P(0,-60.5),R(r),0,Math.PI*2); g.stroke(); }
+      g.strokeStyle='rgba(76,44,27,.1)'; g.lineWidth=R(0.09);
+      for(let i=0;i<170;i++){ const x=(rand()-0.5)*210,z=-rand()*160; g.beginPath(); g.moveTo(...P(x,z)); g.lineTo(...P(x+0.3+rand(),z+rand()*0.4)); g.stroke(); }
       const rg=g.createRadialGradient(...P(0,0),R(2),...P(0,0),R(13)); rg.addColorStop(0,'rgba(120,80,50,.35)'); rg.addColorStop(1,'rgba(120,80,50,0)');
       g.fillStyle=rg; g.beginPath(); g.arc(...P(0,0),R(13),0,Math.PI*2); g.fill();
       const mg=g.createRadialGradient(...P(0,-60.5),R(1),...P(0,-60.5),R(9)); mg.addColorStop(0,'rgba(130,90,60,.3)'); mg.addColorStop(1,'rgba(130,90,60,0)');
@@ -110,7 +116,7 @@ function buildStadium(){
       g.fillStyle='#fafafa'; g.beginPath(); g.moveTo(...P(-0.708,-0.708)); g.lineTo(...P(0.708,-0.708)); g.lineTo(...P(0.708,0)); g.lineTo(...P(0,0.708)); g.lineTo(...P(-0.708,0)); g.closePath(); g.fill();
       for(const s of [-1,1]){ g.fillStyle='#b9775a'; g.beginPath(); g.arc(...P(s*38,14),R(2.6),0,Math.PI*2); g.fill(); g.strokeStyle='#f0f0ea'; g.lineWidth=R(0.2); g.stroke(); }
     });
-    const infield=new THREE.Mesh(new THREE.PlaneGeometry(IF.x1-IF.x0,IF.z1-IF.z0),new THREE.MeshLambertMaterial({map:infTex,transparent:true}));
+    const infield=new THREE.Mesh(new THREE.PlaneGeometry(IF.x1-IF.x0,IF.z1-IF.z0),new THREE.MeshStandardMaterial({map:infTex,bumpMap:infTex,bumpScale:0.035,roughness:1,transparent:true}));
     infield.rotation.x=-Math.PI/2; infield.position.set((IF.x0+IF.x1)/2,0.03,(IF.z0+IF.z1)/2); infield.receiveShadow=true; scene.add(infield);
   }
   for(const s of [-1,1]){
@@ -118,8 +124,8 @@ function buildStadium(){
     l.rotation.x=-Math.PI/2; l.rotation.z=-s*Math.PI/4; const mid=(158+330)/2/Math.SQRT2; l.position.set(s*mid,0.05,-mid); scene.add(l);
   }
   {
-    const mt=canvasTex(256,256,(g,w,h)=>{ g.fillStyle=DIRT; g.fillRect(0,0,w,h); noise(g,w,h,6000,['#a96546','#bd7756','#c27e5c'],2); });
-    const mound=new THREE.Mesh(new THREE.CylinderGeometry(5.5,9.2,0.8,48),new THREE.MeshLambertMaterial({map:mt})); mound.position.set(0,0.4,-60.5); mound.receiveShadow=true; scene.add(mound);
+    const mt=canvasTex(256,256,(g,w,h)=>{ g.fillStyle=DIRT; g.fillRect(0,0,w,h); noise(g,w,h,6000,['#894930','#a96744','#b3734c'],2); });
+    const mound=new THREE.Mesh(new THREE.CylinderGeometry(5.5,9.2,0.8,48),new THREE.MeshStandardMaterial({map:mt,bumpMap:mt,bumpScale:0.06,roughness:1})); mound.position.set(0,0.4,-60.5); mound.receiveShadow=true; scene.add(mound);
     const rubber=new THREE.Mesh(new THREE.BoxGeometry(2,0.12,0.5),lam(0xffffff)); rubber.position.set(0,0.83,-60.5); scene.add(rubber);
     for(const b of [BASES.first,BASES.second,BASES.third]){const m=new THREE.Mesh(new THREE.BoxGeometry(1.4,0.3,1.4),lam(0xffffff));m.position.set(b.x,0.15,b.z);m.rotation.y=Math.PI/4;m.castShadow=true;scene.add(m);}
   }
@@ -158,14 +164,15 @@ function buildStadium(){
   /* ---------- 外野全壘打牆：藍色軟墊＋白色廣告字＋距離 ---------- */
   {
     const t=canvasTex(2048,128,(g,w,h)=>{
-      const gr=g.createLinearGradient(0,0,0,h); gr.addColorStop(0,'#2475b8'); gr.addColorStop(1,'#1a5f9a');
+      const gr=g.createLinearGradient(0,0,0,h); gr.addColorStop(0,'#174c65'); gr.addColorStop(1,'#10354b');
       g.fillStyle=gr; g.fillRect(0,0,w,h);
       g.fillStyle='rgba(0,0,0,.18)'; for(let i=0;i<w;i+=w/48) g.fillRect(i,0,2,h);
+      g.strokeStyle='rgba(255,255,255,.1)'; g.lineWidth=1; g.beginPath(); g.moveTo(0,4); g.lineTo(w,4); g.moveTo(0,h-4); g.lineTo(w,h-4); g.stroke();
       g.fillStyle='#ffffff'; g.textAlign='center'; g.textBaseline='middle';
       const words=['PLAY BALL 2026','PAWA STADIUM','HOME RUN','NINE INNINGS'];
       for(let i=0;i<8;i++){ g.font='900 40px Arial,sans-serif'; g.fillText(words[i%4],(i+0.5)*w/8,h/2+2,w/8-40); }
     });
-    ring(-45,45,120,fenceDist,fenceDist,C(0),C(FENCE_H),new THREE.MeshLambertMaterial({map:t}));
+    ring(-45,45,120,fenceDist,fenceDist,C(0),C(FENCE_H),new THREE.MeshStandardMaterial({map:t,roughness:0.7}));
     ring(-45,45,120,fenceDist,p=>fenceDist(p)+0.8,C(FENCE_H),C(FENCE_H),new THREE.MeshBasicMaterial({color:0xffd23a}));
     // 距離數字：牆頂上的小白牌
     for(const p of [-45,-22,0,22,45]){ const n=String(Math.round(fenceDist(p))), a=p*D2R, r=fenceDist(p)-0.2;
@@ -240,6 +247,35 @@ function buildStadium(){
   }
   deck(-45,45,p=>Math.abs(p)<BEYE);
   deck(45,315);
+  // Upper deck, press boxes and roof form a distinct stadium silhouette.
+  {
+    const roofMat=new THREE.MeshStandardMaterial({color:0x263b50,roughness:0.6,metalness:0.25});
+    const glass=canvasTex(512,128,(g,w,h)=>{
+      g.fillStyle='#254654'; g.fillRect(0,0,w,h);
+      for(let x=0;x<w;x+=32){ g.fillStyle=x%96===0?'#d9ba7f':'#6d9ba4'; g.fillRect(x+2,5,26,h-12); g.fillStyle='rgba(7,28,41,.55)'; g.fillRect(x+2,h*0.5,26,2); }
+    });
+    for(const [a,b] of [[-44,-9],[9,44],[52,136],[224,308],[140,220]]){
+      const r=p=>deckBack(p)+7, y=p=>deckTop(p)+9;
+      ring(a,b,Math.ceil(b-a),r,p=>r(p)+19,y,p=>y(p)+11,new THREE.MeshLambertMaterial({color:0x687788}));
+      const upperRows=6;
+      for(let row=0;row<upperRows;row++){
+        const rad=p=>r(p)+row*3;
+        ring(a,b,Math.ceil(b-a),rad,p=>rad(p)+2.9,p=>y(p)+row*1.7,p=>y(p)+row*1.7,new THREE.MeshLambertMaterial({color:row%2?0x2b5365:0x446b77}));
+        for(let phi=a;phi<b;){ const radius=rad(phi), theta=phi*D2R;
+          if(rand()<0.8) fans.push([Math.sin(theta)*radius,y(phi)+row*1.7,-Math.cos(theta)*radius,Math.PI-theta]);
+          phi+=2.5/radius/D2R;
+        }
+      }
+      ring(a,b,Math.ceil(b-a),r,r,p=>y(p)-8,y,new THREE.MeshBasicMaterial({map:glass}),(b-a)*2);
+      ring(a,b,Math.ceil(b-a),p=>r(p)-3,p=>r(p)+23,p=>y(p)+16,p=>y(p)+19,roofMat);
+      ring(a,b,Math.ceil(b-a),p=>r(p)-3,p=>r(p)-3,p=>y(p)+15,p=>y(p)+16,new THREE.MeshBasicMaterial({color:0xc6dcde}));
+      for(let p=a+3;p<b;p+=12){ const theta=p*D2R, radius=r(p)+19, height=y(p)+18;
+        const post=new THREE.Mesh(new THREE.CylinderGeometry(0.45,0.6,18,6),roofMat); post.position.set(Math.sin(theta)*radius,height-9,-Math.cos(theta)*radius); scene.add(post);
+      }
+    }
+    const ribbon=canvasTex(1024,64,(g,w,h)=>{ g.fillStyle='#122941'; g.fillRect(0,0,w,h); g.fillStyle='#ffdc8b'; g.font='900 28px Arial'; g.textBaseline='middle'; g.textAlign='center'; g.fillText('DIAMOND  •  PLAY BALL  •  2026  •  NINE INNINGS',w/2,h/2); });
+    ring(-315,45,360,p=>deckBack(p)-0.2,p=>deckBack(p)-0.2,p=>deckTop(p)+4,p=>deckTop(p)+7,new THREE.MeshBasicMaterial({map:ribbon,toneMapped:false}),160);
+  }
   ring(-45,45,120,p=>fenceDist(p)+0.8,p=>fenceDist(p)+9,C(FENCE_H),C(FENCE_H+3),new THREE.MeshLambertMaterial({color:0x2a3346}));
   // 看台最上緣：藍色廣告帶（一整圈）＋背後的牆
   {
@@ -321,6 +357,8 @@ function buildStadium(){
       const crown=new THREE.Mesh(new THREE.CylinderGeometry(26,5,20,4,1,true),latMat(20)); crown.rotation.y=Math.PI/4; crown.position.y=h+10; grp.add(crown);
       const panel=new THREE.Mesh(new THREE.BoxGeometry(56,30,3),[lam(0x3a404a),lam(0x3a404a),lam(0x3a404a),lam(0x3a404a),new THREE.MeshBasicMaterial({map:lamps}),lam(0x3a404a)]);
       panel.position.set(0,h+30,0); panel.rotation.x=-0.2; grp.add(panel);
+      const halo=canvasTex(64,64,(g,w,h)=>{ const r=g.createRadialGradient(w/2,h/2,0,w/2,h/2,w/2); r.addColorStop(0,'rgba(255,249,222,.55)'); r.addColorStop(0.2,'rgba(255,244,207,.16)'); r.addColorStop(1,'rgba(255,244,207,0)'); g.fillStyle=r; g.fillRect(0,0,w,h); });
+      const glow=new THREE.Sprite(new THREE.SpriteMaterial({map:halo,transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,toneMapped:false})); glow.position.set(0,h+30,2); glow.scale.set(105,65,1); grp.add(glow);
       const flag=new THREE.Mesh(new THREE.BoxGeometry(14,30,1),new THREE.MeshLambertMaterial({color:0x1d4fa0})); flag.position.set(0,h*0.55,9); grp.add(flag);
     }
   }
