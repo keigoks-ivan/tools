@@ -11,6 +11,7 @@ import {
 } from '../3d-next/net/world.js';
 import { CLAIM_LIMITS, ClaimMeter, SOURCES, assignTargets, validateClaimEntry } from '../3d-next/net/authority.js';
 import { createEnemySync } from '../3d-next/net/enemy-sync.js';
+import { specialOptions } from '../3d-next/specials.js';
 import { cleanClaim, cleanPayload } from '../../workers/coop-relay/src/logic.js';
 
 const STEP = 1 / 60;
@@ -310,6 +311,46 @@ function setup() {
 }
 
 const liveIds = arena => arena.enemies.filter(e => e.action !== 'dead').map(e => e.id).sort((a, b) => a - b);
+
+test('first co-op market refills cleared enemies while unbroken props remain on both devices', () => {
+  const { room, A, B, restore } = setup();
+  try {
+    for (let i = 0; i < 80; i++) step(room, [A, B]);
+    const first = A.arena.enemies.filter(e => !e.prop && e.action !== 'dead');
+    assert.ok(first.length > 0);
+    for (const e of first) A.arena._damageEnemy(e, 9999, 'heavy');
+    for (let i = 0; i < 108; i++) step(room, [A, B]);
+    const next = A.arena.enemies.filter(e => !e.prop && e.action !== 'dead');
+    assert.ok(next.length > 0, 'host left an empty battlefield until the regular group timer');
+    assert.equal(A.arena.enemies.filter(e => e.prop).length, 6);
+    assert.deepEqual(liveIds(B.arena), liveIds(A.arena));
+    assert.ok(next.every(e => e.id > Math.max(...first.map(e => e.id))));
+    assert.ok(next.length <= ENEMY_CAP.desktop);
+  } finally { restore(); }
+});
+
+test('host migration keeps the market quota separate from special troops and finishes the last group', () => {
+  const { room, A, B, restore } = setup();
+  try {
+    const goal = A.march.tuning.market.goal;
+    A.march.seg.spawned = goal - 1; A.march.seg.kills = goal - 4; A.march.seg.nextGroupAt = Infinity;
+    for (let k = 0; k < 3; k++) A.march._grunt(k, -3, 0);
+    for (const role of ['shield', 'archer', 'bomber']) A.march._spawnUnit(role, -3, -5, specialOptions(role));
+    for (let i = 0; i < 7; i++) step(room, [A, B]);
+    assert.equal(B.march.seg.spawned, goal - 1);
+    room.setHost('B');
+    assert.equal(B.march.seg.spawned, goal - 1, 'special troops consumed the remaining ordinary-enemy quota');
+    for (const e of B.arena.enemies.filter(e => !e.prop && !e.special)) B.arena._damageEnemy(e, 9999, 'heavy');
+    for (let i = 0; i < 120; i++) step(room, [B, A]);
+    const last = B.arena.enemies.filter(e => !e.prop && !e.special && !e.captain && !e.escort && e.kind !== 'officer');
+    assert.equal(last.length, 1, 'last ordinary enemy never spawned after handoff');
+    B.arena._damageEnemy(last[0], 9999, 'heavy');
+    for (let i = 0; i < 90; i++) step(room, [B, A]);
+    assert.equal(B.march.seg.kills, goal);
+    assert.ok(B.arena.enemies.some(e => e.kind === 'officer'), 'market officer did not appear');
+    assert.deepEqual(liveIds(A.arena), liveIds(B.arena));
+  } finally { restore(); }
+});
 
 test('host runs the level and the guest mirrors the same enemies without running AI', () => {
   const { room, A, B, restore, baseline } = setup();

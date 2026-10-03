@@ -4,7 +4,7 @@
 // 第三階段：倒地與救援、全滅才輸（任何人都能按重來）、合體大招、補給由房主裁定、交棒看誰看得到畫面（net/team.js）。
 import { installGameGestures } from '../2d/touch-gestures.js';
 import { CoopClient } from '../3d-next/net/client.js?v=20261002h';
-import { createCoop } from '../3d-next/net/coop.js?v=20261003a';
+import { createCoop } from '../3d-next/net/coop.js?v=20261003spawn1';
 import { relayUrl } from '../3d-next/net/protocol.js?v=20261002h';
 import { RoomLoadout } from '../3d-next/net/loadout.js?v=20261002h';
 import { HEROES } from '../3d-next/heroes.js?v=20261002w';
@@ -22,7 +22,7 @@ for (const type of ['gesturestart', 'gesturechange', 'gestureend']) {
 }
 
 // 引擎：版本字串與單人頁不同也沒關係（兩頁不會同時開），battle.js 內部的 import 網址相同
-const loadBattleModule = () => import('../3d-next/battle.js?v=20261003enemy2');
+const loadBattleModule = () => import('../3d-next/battle.js?v=20261003spawn1');
 const params = new URLSearchParams(location.search);
 
 const client = new CoopClient({ relay: relayUrl(location) });

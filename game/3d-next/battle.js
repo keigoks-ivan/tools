@@ -1137,8 +1137,17 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
   window.addEventListener('orientationchange', resize);
   window.visualViewport?.addEventListener('resize', resize);   // iOS 網址列收合、分割畫面時 window resize 不一定會觸發
   window.addEventListener('blur', () => { if (!running) return; if (coop) clearInput(); else pause(true); });   // [coop] 連線中切到別的視窗不暫停（隊友還在動），但放掉按鍵與搖桿，免得回來時卡在同一邊
-  // 鎖屏、切 App：回來時停在暫停畫面，不直接接著打
-  document.addEventListener('visibilitychange', () => { if (document.hidden) { if (running) pause(true); stopFrames(); } else resumeFrames(); });
+  // 單人切 App 後保留暫停；多人只停止背景繪製，回來續跑，避免房主出兵一直停住。
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      if (running && !coop) pause(true);
+      stopFrames();
+      if (running && coop) audio?.setPaused(true);
+    } else {
+      resumeFrames();
+      if (running && coop) audio?.setPaused(paused || isPortrait());
+    }
+  });
   canvas.addEventListener('webglcontextlost', event => { event.preventDefault(); stopFrames(); toast('3D 畫面暫停，請重新載入頁面。', 10); });
   if (debug) document.body.classList.add('debug');
   resize();

@@ -5,7 +5,7 @@
  */
 import { SEND_HZ } from './protocol.js?v=20261002h';
 import { createTeammates } from './teammates.js?v=20261003a';
-import { createEnemySync } from './enemy-sync.js?v=20261003a';
+import { createEnemySync } from './enemy-sync.js?v=20261003spawn1';
 import { WORLD_HZ } from './world.js';
 import { readStatus, statusBits } from './team.js';
 import { createTeamFx } from './team-fx.js';

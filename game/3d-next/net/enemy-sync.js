@@ -246,6 +246,11 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
     refreshProxies(Math.min(dt, 0.1));
     applyClaims();
     retarget();
+    // Co-op clears groups faster. Refill an empty field without counting scenery as soldiers;
+    // the shared single-player director retains its authored wave cadence while enemies remain.
+    if (march.segmentIndex === 0 && march.alive() === 0 && march.seg.spawned > 0 && march.seg.nextGroupAt - march.time > 1.5) {
+      march.seg.nextGroupAt = march.time + 1.5;
+    }
     const r = orig.update.call(march, dt, input);
     noteSim();
     hostTeam(dt);
@@ -691,8 +696,8 @@ export function createEnemySync({ client, now = () => performance.now(), peers =
     arena.nextEnemyId = Math.max(arena.nextEnemyId, maxId + 1);
     const seg = march.seg, i = march.segmentIndex, gateOpen = march.gates[i]?.open;
     if (i === 0) {
-      const alive = arena.enemies.filter(e => !e.prop && e.action !== 'dead').length;
-      seg.spawned = Math.max(seg.spawned || 0, (seg.kills || 0) + alive);
+      // The mirrored count already tracks ordinary groups; special troops and escorts are outside that quota.
+      seg.spawned = Math.max(seg.spawned || 0, seg.kills || 0);
       seg.nextGroupAt = time + 1.5;
       seg.hints = seg.kills >= 24 ? 3 : seg.kills >= 16 ? 2 : seg.kills >= 8 ? 1 : 0;
       seg.officerAt = seg.kills >= t.market.goal && !seg.foeId && !gateOpen && t.officers.market && !t.market.chase ? time + 1 : null;

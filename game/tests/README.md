@@ -18,6 +18,8 @@ Frame pacing tests use synthetic 60/120 Hz callbacks, jitter and stalls. The ski
 
 The oni role-art test parses the actual oni-v2 rig, validates equipment weights and atlas UVs for all 12 styles, enforces live/dead geometry/draw/cache budgets, samples real attack clips for hand attachment, and checks clone isolation and shared disposal. It also checks bow face winding, the small equipment texture and immediate equipment retirement without duplicating vertex buffers. The lifecycle test executes the actual battle sync and result functions to prevent dead snapshots recreating equipment and unfinished corpses remaining in the result frame. Image references are stripped only from the rig's in-memory test copy.
 
+The co-op sync suite covers empty-field refill with unbroken scenery and preservation of ordinary-enemy quotas through host migration. Battle visibility checks execute the actual pause, RAF and visibility handlers to verify that a returning co-op host resumes while manual and single-player pauses remain intact.
+
 Startup checks run the actual lightweight entry with a stubbed dynamic import, and extracted loading functions with controlled dependencies. They cover no engine load before a user action, duplicate requests, mute handoff, per-stage dependencies, caching and failed-stage retry. They never import the full game engine or create WebGL.
 
 ## Runtime GLB packaging
