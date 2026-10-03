@@ -159,7 +159,7 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
   }
   function streetDetails(x0, x1, z0, z1, h, win, o) {
     if (!win || o.y0 || h < 8 || Math.max(x1 - x0, z1 - z0) > 90) return;
-    const asian = true;
+    const asian = !o.historic;
     const sd = [...win].find(s => !o.hide || !o.hide[s]); if (!sd) return;
     const along = sd === 'n' || sd === 's', out = sd === 'n' || sd === 'e' ? 1 : -1;
     const a0 = along ? x0 : z0, a1 = along ? x1 : z1, fix = sd === 'n' ? z1 : sd === 's' ? z0 : sd === 'e' ? x1 : x0;
@@ -179,7 +179,15 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
         b.B[material(col)].quad(a, c, d, e, n.toArray(), [1, 1, 1, 1], null, col.slice(0, 3));
       }, (a, c, d, e, f, g, col) => b.deco(material(col), a, c, d, e, f, g, { shade: () => 1, tint: col.slice(0, 3) }));
     }
-    if (o.kit !== 'factory') for (let y = H1; y < Math.min(h - 2, H1 * 4); y += H1) {
+    if (o.historic) {
+      // 舊居留地的石造壁柱和簷口，避免所有街屋都長成同一種陽台公寓。
+      for (let a=a0+.4;a<a1;a+=6.4) {
+        trim('plaster',a-.14,a+.14,.5,h-.3,0,.16);
+        for(const y of [.5,h-.55])trim('plaster',a-.23,a+.23,y,y+.2,0,.22);
+      }
+      for(const y of [H1,h-.3])trim('plaster',a0,a1,y,y+.18,0,.22);
+    }
+    if (!o.historic && o.kit !== 'factory') for (let y = H1; y < Math.min(h - 2, H1 * 4); y += H1) {
       for (let a = a0 + 2; a < a1 - 2; a += 6.4) {
         const lo = a - 1.65, hi = Math.min(a1 - .25, a + 1.65);
         trim('concrete', lo, hi, y - .16, y, 0, .7);
@@ -236,7 +244,7 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
       }
     }
     // 已載入的掃描冷氣機，共用原有 instancing；不改路線和碰撞。
-    if (PL && PL.M.has('exterior_aircon_unit')) for (let a = a0 + 3; a < a1 - 2; a += 12) {
+    if (!o.historic && PL && PL.M.has('exterior_aircon_unit')) for (let a = a0 + 3; a < a1 - 2; a += 12) {
       const p = at(a, 4.1, 0.18); PL.add('exterior_aircon_unit', ...p, ry, { cast: true });
     }
     const pipe = at(a0 + 0.35, 0, 0.12); b.mesh('rust', PR.pipeGeo(Math.min(h, 11), 0.055).translate(0, Math.min(h, 11) / 2, 0), ...pipe, 0, { solid: false });
@@ -263,7 +271,8 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
       const dry = { add: () => null, M: PL.M };
       for (const sd of win) facade(dry, kit, sd, x0, x1, z0, z1, kf, rnd, { shutters: o.shop, noGround: o.noGround, hide: o.hide && o.hide[sd] });
       const saved = seed;
-      mass(x0, x1, z0, z1, h, 'concrete', win, { ...o, kit: undefined, trim: 'concrete', ww: 1.65 });
+      const historic = h < 24 && ph(x0,z0) < .38;
+      mass(x0, x1, z0, z1, h, historic ? 'plaster' : 'concrete', win, { ...o, historic, kit: undefined, trim: historic ? 'plaster' : 'concrete', ww: historic ? 1.35 : 1.65, wh: historic ? 1.95 : 1.7 });
       seed = saved; return;
     }
     const I = 0.34;
@@ -309,7 +318,7 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
     const n = Math.floor((a1 - a0 - 1) / sp);
     const start = a0 + (a1 - a0 - n * sp) / 2 + sp / 2;
     for (let f = f0; f * H1 + 2.6 < h; f++) {
-      const y0 = f * H1 + 0.95, y1 = y0 + wh;
+      const y0 = f * H1 + 0.95, y1 = Math.min(h, y0 + wh);
       for (let i = 0; i < n; i++) {
         const c = start + i * sp, lo = c - ww / 2, hi = c + ww / 2;
         const lit = rnd() < 0.05, broken = rnd() < 0.35;

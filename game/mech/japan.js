@@ -3,7 +3,7 @@ const stone = [.64, .66, .62, 0, 1], steel = [.17, .21, .22, 0, 2];
 const vermilion = [.63, .12, .045, 0, 6], ivory = [.78, .79, .72, 0, 6];
 const wood = [.28, .21, .15, 0, 5], tile = [.16, .21, .23, 0, 3], glass = [.1, .19, .23, 0, 4];
 
-export function japaneseScenery(out, { tower = null, shrine = null, streets = [], arcade = null, maritime = null } = {}) {
+export function japaneseScenery(out, { tower = null, shrine = null, streets = [], arcade = null, maritime = null, waterfront = null } = {}) {
   const box = (...args) => out.box(...args);
   const face = (a, b, c, d, color) => out.face(a, b, c, d, color);
   function beam(a, b, r, color, sides = 6) {
@@ -55,8 +55,8 @@ export function japaneseScenery(out, { tower = null, shrine = null, streets = []
     // 五層觀景台、窗框、樓板邊與屋頂玻璃欄杆。
     for (const y of [74, 79, 84, 89, 94]) {
       drum(12.2, y, y + .4, ivory); drum(11.9, y + .4, y + 4.2, glass); drum(12.2, y + 4.2, y + 4.6, ivory);
-      for (let i = 0; i < 28; i++) {
-        const a = i / 28 * Math.PI * 2;
+      for (let i = 0; i < 20; i++) {
+        const a = i / 20 * Math.PI * 2;
         beam(P(Math.cos(a) * 12, y + .4, Math.sin(a) * 12), P(Math.cos(a) * 12, y + 4.2, Math.sin(a) * 12), .065 * scale, ivory, 4);
       }
     }
@@ -90,21 +90,44 @@ export function japaneseScenery(out, { tower = null, shrine = null, streets = []
   if (maritime) {
     const [x, z, scale = 1, ground = 0] = maritime;
     const P = (u, y, v) => [x + u * scale, ground + y * scale, z + v * scale];
-    box(x - 21 * scale, x + 21 * scale, ground, ground + 5 * scale, z - 15 * scale, z + 15 * scale, ivory);
-    solid(x - 21 * scale, x + 21 * scale, ground, ground + 5 * scale, z - 15 * scale, z + 15 * scale);
-    // 海洋博物館式的白色帆形空間桁架，稜線和橫向支撐均為實際鋼管。
-    for (let i = 0; i <= 12; i++) {
-      const v = -16 + i * 32 / 12, top = 7 + 22 * Math.sin((i / 12) * Math.PI * .75), apex = P(-8 + i * .85, top, v);
-      const a = P(-24, 5.2, v), b = P(24, 5.2, v);
-      beam(a, apex, .13 * scale, ivory); beam(apex, b, .13 * scale, ivory); beam(a, b, .09 * scale, ivory);
-      if (i > 0) for (let j = 0; j <= 8; j++) {
-        const t = j / 8, previousTop = 7 + 22 * Math.sin(((i - 1) / 12) * Math.PI * .75), previousX = -8 + (i - 1) * .85;
-        for (const edge of [-24, 24]) beam(P(edge + (-8 + i * .85 - edge) * t, 5.2 + (top - 5.2) * t, v), P(edge + (previousX - edge) * t, 5.2 + (previousTop - 5.2) * t, v - 32 / 12), .065 * scale, ivory);
+    box(x - 43 * scale, x + 43 * scale, ground, ground + 6 * scale, z - 21 * scale, z + 21 * scale, ivory);
+    solid(x - 43 * scale, x + 43 * scale, ground, ground + 6 * scale, z - 21 * scale, z + 21 * scale);
+    // 參照神戶海洋博物館實景：兩片下凹的曲面帆、斜向格構與懸挑邊，不能做成三角帳篷。
+    const sailPaint=[.86,.89,.88,0,6];
+    for (let wing = 0; wing < 2; wing++) {
+      const sail = (u,v) => P(wing ? 8+40*u : -48+60*u,
+        6.5+(wing ? 16*u*u*(1-v)*(1-v) : 28*(1-u)*(1-u)*v*v)+3*(u-.5)**2+4*(v-.4)**2,
+        -23+46*v);
+      for (let i = 0; i <= 8; i++) for (let j = 0; j <= 6; j++) {
+        const u=i/8,v=j/6,p=sail(u,v);
+        if(i<8)beam(p,sail((i+1)/8,v),.16*scale,sailPaint,4);
+        if(j<6)beam(p,sail(u,(j+1)/6),.16*scale,sailPaint,4);
+        if(i<8&&j<6)beam((i+j)%2?p:sail((i+1)/8,v),(i+j)%2?sail((i+1)/8,(j+1)/6):sail(u,(j+1)/6),.11*scale,sailPaint,4);
+        // 下弦桿與腹桿讓格構有厚度，遠看也保留曲面輪廓。
+        const lower=q=>[q[0],q[1]-.65*scale,q[2]];
+        if(i<8&&j%2===0)beam(lower(p),lower(sail((i+1)/8,v)),.09*scale,sailPaint,4);
+        if(i%2===0&&j%2===0)beam(p,lower(p),.08*scale,sailPaint,4);
+        if(i<8&&j<6&&i%2===0&&j%2===0)beam(p,lower(sail((i+1)/8,(j+1)/6)),.08*scale,sailPaint,4);
       }
     }
-    for (let u = -18; u < 18; u += 4) {
-      face(P(u, .8, -15.02), P(u, 4.2, -15.02), P(u + 3.6, 4.2, -15.02), P(u + 3.6, .8, -15.02), glass);
-      beam(P(u, .8, -15.06), P(u, 4.3, -15.06), .08 * scale, steel);
+    for (let u = -40; u < 40; u += 5) {
+      face(P(u, .8, -21.02), P(u, 5.5, -21.02), P(u + 4.7, 5.5, -21.02), P(u + 4.7, .8, -21.02), glass);
+      beam(P(u, .8, -21.06), P(u, 5.5, -21.06), .08 * scale, steel,4);
+    }
+  }
+
+  if (waterfront) {
+    const [x0,x1,z0,z1,ground=0]=waterfront;
+    box(x0,x1,ground,ground+.08,z0,z1,stone);
+    // 兩公尺鋪面分格用薄面合併，保留港邊廣場的尺度，不下載新貼圖。
+    for(let x=x0+2;x<x1;x+=2)face([x-.01,ground+.085,z0],[x-.01,ground+.085,z1],[x+.01,ground+.085,z1],[x+.01,ground+.085,z0],[.34,.38,.38,0,1]);
+    for(let z=z0+2;z<z1;z+=2)face([x0,ground+.086,z-.01],[x0,ground+.086,z+.01],[x1,ground+.086,z+.01],[x1,ground+.086,z-.01],[.34,.38,.38,0,1]);
+    for(let x=x0+5;x<x1-2;x+=16) {
+      for(const p of [x-1.2,x+1.2])box(p-.06,p+.06,ground+.08,ground+.48,z1-8,z1-7.6,steel);
+      for(let z=z1-8;z<z1-7.4;z+=.12)box(x-1.4,x+1.4,ground+.48,ground+.53,z,z+.09,wood);
+      box(x-1.4,x+1.4,ground+.6,ground+1,z1-8.06,z1-8,wood);
+      beam([x,ground+.08,z1-2],[x,ground+1.08,z1-2],.055,steel,4);
+      if(x+16<x1-2)for(const y of [.55,1.08])beam([x,ground+y,z1-2],[x+16,ground+y,z1-2],.035,steel,4);
     }
   }
 

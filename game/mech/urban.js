@@ -7,6 +7,32 @@ export const PORT_LABELS = ['神戸港', '避難経路', '税関倉庫・貨物�
 export const CIVIC_LABELS = ['止まれ', '三宮駅', '元町商店街', '稲荷神社', '神戸港', '避難場所', '30', '横断歩道'];
 export const JAPANESE_FONT = '"Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif';
 
+// 小幅交叉波紋與岸邊碎浪，共用天空反射；不建立反射攝影機或水面模擬。
+export function harborWater(axis, shore) {
+  const material = new THREE.MeshStandardMaterial({ color: 0x294958, roughness: .38, metalness: .06, envMapIntensity: .9 });
+  const time = { value: 0 }; material.userData.seaTime = time;
+  material.onBeforeCompile = sh => {
+    sh.uniforms.seaTime = time;
+    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec2 vSea;')
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvSea=(modelMatrix*vec4(transformed,1.0)).xz;');
+    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', `#include <common>
+      varying vec2 vSea; uniform float seaTime;
+      float seaNoise(vec2 p){return sin(p.x*1.731+cos(p.y*.713))*sin(p.y*1.137+sin(p.x*.519));}`)
+      .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
+        float a=dot(vSea,vec2(.21,.12))+seaTime*.6+seaNoise(vSea*.017+seaTime*.01)*5.0;
+        float b=dot(vSea,vec2(-.11,.34))-seaTime*.43+seaNoise(vSea*.023+16.0)*3.0;
+        vec2 slope=vec2(.21,.12)*cos(a)*.14+vec2(-.11,.34)*cos(b)*.045;
+        slope+=vec2(.8,.4)*cos(dot(vSea,vec2(.8,.4))+seaTime)*.006;
+        normal=normalize(mat3(viewMatrix)*vec3(-slope.x,1.0,-slope.y));`)
+      .replace('#include <map_fragment>', `#include <map_fragment>
+        float bank=1.0-smoothstep(.1,2.2,abs(vSea.${axis === 'x' ? 'x' : 'y'}-${shore.toFixed(1)}));
+        float foam=bank*smoothstep(.55,.92,sin(vSea.x*1.7+vSea.y*2.3+seaTime*.7)*.5+.5);
+        diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.38,.44,.43),foam*.24);`);
+  };
+  material.customProgramCacheKey = () => 'kobe-water-' + axis + '-' + shore;
+  return material;
+}
+
 export function shopMaterial() {
   const c = document.createElement('canvas'); c.width = 1024; c.height = 512;
   const ctx = c.getContext('2d');

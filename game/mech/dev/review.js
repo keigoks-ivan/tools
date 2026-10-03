@@ -15,7 +15,7 @@ async function load(path, query = '') {
   html = html.replace(/<base href="[^"]+">/, '');
   html = html.replace(/(<script type="importmap">)([\s\S]*?)(<\/script>)/, (_, a, json, b) => {
     const map = JSON.parse(json);
-    for (const file of ['urban.js', 'japan.js', 'textures.js', 'anim.js', 'env.js', 'streetfront.js', 'stages.js', 'battlefields.js', 'fieldart.js', 'encounter.js', 'post.js', 'roofline.js', 'mechs.js', 'combat.js', 'cockpit.js', 'zero/kit.js', 'zero/map.js', 'zero/guns.js', 'zero/viewmodel.js', 'zero/main.js', 'zero/hud.js', 'zero/sfx.js', 'zero/mech6.js', 'lastline/map.js', 'lastline/script.js', 'lastline/mission.js', 'lastline/convoy.js', 'lastline/escort.mjs', 'lastline/operations.mjs', 'lastline/foot-ops.js', 'input.js', 'tactics.js', 'reinforcements.mjs', 'zero/ai.js', 'zero/script.js', 'zero/patrol.js', 'zero/recon.js', 'zero/field.js']) {
+    for (const file of ['kobe-relief.mjs', 'urban.js', 'japan.js', 'textures.js', 'anim.js', 'env.js', 'streetfront.js', 'stages.js', 'battlefields.js', 'fieldart.js', 'encounter.js', 'post.js', 'roofline.js', 'mechs.js', 'combat.js', 'cockpit.js', 'zero/kit.js', 'zero/map.js', 'zero/guns.js', 'zero/viewmodel.js', 'zero/main.js', 'zero/hud.js', 'zero/sfx.js', 'zero/mech6.js', 'lastline/map.js', 'lastline/script.js', 'lastline/mission.js', 'lastline/convoy.js', 'lastline/escort.mjs', 'lastline/operations.mjs', 'lastline/foot-ops.js', 'input.js', 'tactics.js', 'reinforcements.mjs', 'zero/ai.js', 'zero/script.js', 'zero/patrol.js', 'zero/recon.js', 'zero/field.js']) {
       const url = new URL('/game/mech/' + file, location.href).href;
       for (const key of Object.keys(map.imports)) if (new URL(key, entryBase).href === url) delete map.imports[key];
       map.imports[url] = url + '?qa=' + revision;
@@ -336,7 +336,7 @@ async function city() {
   const geometries = new Set(); W.scene.traverse(o => { if (o.geometry) geometries.add(o.geometry); });
   const triangles = [...geometries].reduce((n,g) => n + (g.index ? g.index.count : g.attributes.position.count) / 3, 0);
   let meshes = 0; W.scene.traverse(o => { if (o.isMesh) meshes++; });
-  assert(triangles < 1400000, '城市幾何維持 140 萬三角形以下');
+  assert(triangles < 1400000, `城市幾何 ${triangles}，維持 140 萬三角形以下`);
   report.textContent = JSON.stringify({ checks: result, triangles, meshes, memory: renderer.info.memory, errors }, null, 2);
   state.textContent = '街景通過';
 }
@@ -349,10 +349,12 @@ async function mountains() {
     ['mountains-east', [600, 90, 120, -Math.PI / 2, -0.035]],
     ['mountains-slopes', [-1350, 110, 1200, Math.PI / 4, -0.03]],
   ]) { win.__cam.set(...view); win.__step(2); await save(name); }
+  assert(W.A.relief instanceof win.Uint16Array && W.A.relief.length === 257**2, '實際六甲山高度資料已載入');
+  assert(Math.max(...W.A.relief) < 950 && W.terrain.source(0,600) === 0, '保留真實海拔與可遊玩平地，沒有放大峰高');
   const terrain = W.terrainMesh.geometry, T = win.__T;
   const ray = new T.Raycaster(), down = new T.Vector3(0, -1, 0);
   for (const seg of [160, 72]) {
-    const field = new W.terrain.constructor(10000, seg), g = field.geometry(), far = field.backdropGeometry();
+    const field = new W.terrain.constructor(10000, seg, W.terrain.source), g = field.geometry(), far = field.backdropGeometry();
     const mesh = new T.Mesh(g, new T.MeshBasicMaterial()); mesh.updateMatrixWorld();
     for (const [x, z] of [[0,0], [700,700], [-700,-700], [350,-610], [-2800,3150], [1731,-3267]]) {
       ray.set(new T.Vector3(x, 3000, z), down);
@@ -1037,6 +1039,7 @@ async function kobeArt() {
   const shop=W.blds.find(b=>b.H<25&&b.seg.length===3&&b.cx< -120);
   win.__cam.set(shop.cx+12,3,shop.z1+24,Math.atan2(12,24),.04);W.followShadow(new win.__T.Vector3(shop.cx+12,3,shop.z1+24));W.sun.shadow.needsUpdate=true;win.__step(2);await save('kobe-residential',true);
   assert([2,3,4].every(i=>W.A.fac[i].every(t=>t.image.width===512&&t.name.startsWith('city-japanese-'))),'日式立面的色彩、法線與粗糙度均為 512 貼圖');
+  win.__cam.set(x+90,42,980,Math.atan2(140,250),-.08);W.followShadow(new win.__T.Vector3(x+90,42,980));win.__step(2);await save('kobe-waterfront',true);
   const stats={main:renderer.info.memory};checks.push(...result);
   await load('/game/mech/zero/index.html','?mute&god&ch=3&all&fps=0');renderer=win.__renderer;post={render:()=>win.__step(1)};
   win.__G.player.reset(new win.__T.Vector3(-56,0,-1),Math.PI/2);win.__G.player.pitch=-.03;win.__step(3);await save('kobe-motomachi',true);
@@ -1044,7 +1047,8 @@ async function kobeArt() {
   stats.prequel=renderer.info.memory;checks.push(...result);
   win.__G.player.reset(new win.__T.Vector3(-7.6,0,19),0);win.__step(3);await save('kobe-shrine',true);
   await load('/game/mech/lastline/index.html','?mute&god&ch=1&all&fps=0');renderer=win.__renderer;post={render:()=>win.__step(1)};
-  win.__G.player.reset(new win.__T.Vector3(637,0,307),0);win.__G.player.pitch=.35;win.__step(3);await save('kobe-harbor-landmarks',true);
+  win.__G.player.reset(new win.__T.Vector3(600,0,280),Math.atan2(5,125));win.__G.player.pitch=.3;win.__step(60);await save('kobe-harbor-landmarks',true);
+  assert(win.__world.A.relief instanceof win.Uint16Array && win.__world.terrain.source(-4500,0)>350 && win.__world.height(600,-500)===0,'港區使用真實山脊，任務道路維持平整');
   assert(win.__map.triangles<120000&&win.__map.meshes.length<=11,'港區新增地標仍維持十二萬三角形內，路牌與地標漆面僅多兩個材質桶');
   stats.harbor={triangles:win.__map.triangles,meshes:win.__map.meshes.length,memory:renderer.info.memory};checks.push(...result);
   assert(errors.length===0,'神戶城市、商店街與港灣沒有渲染錯誤');

@@ -48,7 +48,7 @@ renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 const scene = new THREE.Scene();
 const FOV = 72;
-const camera = new THREE.PerspectiveCamera(FOV, innerWidth / innerHeight, 0.05, 4000);
+const camera = new THREE.PerspectiveCamera(FOV, innerWidth / innerHeight, 0.05, 12000);
 camera.rotation.order = 'YXZ';
 const vScene = new THREE.Scene();
 const vCam = new THREE.PerspectiveCamera(54, innerWidth / innerHeight, 0.01, 10);
@@ -93,7 +93,7 @@ const world = new World(renderer, scene, A, { terrainSegments: 72, city: !campai
   world.sun.shadow.bias = -0.00025; world.sun.shadow.normalBias = 0.035;
 }
 // 黃昏的戰場：遠處被煙塵蓋成暖灰色（霧濃一點、偏褐）；太陽偏暖、陰影保留天空的冷色；天空地平線一層霾（全部只改參數，不多畫東西）
-scene.fog.color.setRGB(0.38, 0.325, 0.28); scene.fog.density = 0.003;
+scene.fog.color.setRGB(0.38, 0.325, 0.28); scene.fog.density = 0.0014;
 world.sun.color.setRGB(1.0, 0.81, 0.62); world.sun.intensity = 4.2;
 scene.environmentIntensity = 0.42;
 scene.traverse((o) => {

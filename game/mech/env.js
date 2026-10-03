@@ -4,10 +4,11 @@ import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
 import { mergeGeometries, mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
 import { makeFacade, FACADE_TILE, japaneseFacade } from './textures.js';
-import { shopMaterial, shopUV, civicMaterial, civicUV } from './urban.js';
+import { shopMaterial, shopUV, civicMaterial, civicUV, harborWater } from './urban.js';
 import { roofline } from './roofline.js';
 import { streetfront } from './streetfront.js';
 import { japaneseScenery } from './japan.js';
+import { decodeKobeRelief, kobeCityHeight } from './kobe-relief.mjs';
 import { BATTLEFIELDS, fieldHeight, fieldLayout, routeDistance, fieldGridCoordinate, fieldGridIndex } from './battlefields.js';
 
 import { fieldTreeGeometry, fieldShrubGeometry, fieldRockGeometry, fieldArchitecture, fieldLeafMaterial, fieldRadar, fieldGroundMask } from './fieldart.js';
@@ -36,16 +37,17 @@ export async function loadAssets(renderer, onProgress = () => {}, compact = true
   });
   const hdrP = new RGBELoader().setDataType(THREE.FloatType).loadAsync(ASSET + 'env.hdr').then(step);
   const skyP = tl.loadAsync(ASSET + 'sky.jpg').then((t) => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return step(t); });
-  const [hdr, sky, grassD, grassN, grassA, asphD, asphN, asphA, rubD, rubN, rockD, rockN, rockA] = await Promise.all([
+  const [hdr, sky, grassD, grassN, grassA, asphD, asphN, asphA, rubD, rubN, rockD, rockN, rockA, relief] = await Promise.all([
     hdrP, skyP,
     T('grass_diff.jpg', true), T('grass_nor.jpg'), T('grass_arm.jpg'),
     T('asphalt_diff.jpg', true), T('asphalt_nor.jpg'), T('asphalt_arm.jpg'),
     T('rubble_diff.jpg', true), T('rubble_nor.jpg'),
     T('rock_diff.jpg', true), T('rock_nor.jpg'), T('rock_arm.jpg'),
+    fetch(new URL('./assets/kobe-relief-v1.bin',import.meta.url)).then(r=>{if(!r.ok)throw new Error('Kobe relief unavailable');return r.arrayBuffer();}).then(decodeKobeRelief).catch(()=>null),
   ]);
   const fac = await Promise.all(FACADES.map((f) => Promise.all([T(`fac_${f.name}_col.jpg`, true), T(`fac_${f.name}_nor.jpg`), T(`fac_${f.name}_arm.jpg`)])));
   const [wearM, wearN, frameM, frameN] = await Promise.all([T('wear_mask.jpg'), T('wear_nor.jpg'), T('frame_mask.jpg'), T('frame_nor.jpg')]);
-  return { hdr, sky, grassD, grassN, grassA, asphD, asphN, asphA, rubD, rubN, rockD, rockN, rockA, fac, wearM, wearN, frameM, frameN };
+  return { hdr, sky, grassD, grassN, grassA, asphD, asphN, asphA, rubD, rubN, rockD, rockN, rockA, fac, wearM, wearN, frameM, frameN, relief };
 }
 
 // 照片立面：tile＝一張貼圖代表幾公尺；rows/cols＝窗格數（算亮燈用）
@@ -224,13 +226,14 @@ function rawHeight(x, z) {
 }
 
 class Terrain {
-  constructor(size = 10000, seg = 320) {
+  constructor(size = 10000, seg = 320, source = rawHeight) {
     this.size = size; this.seg = seg; this.cell = size / seg;
+    this.source = source;
     const n = seg + 1;
     this.h = new Float32Array(n * n);
     for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) {
       const x = -size / 2 + i * this.cell, z = -size / 2 + j * this.cell;
-      this.h[j * n + i] = rawHeight(x, z);
+      this.h[j * n + i] = source(x, z);
     }
   }
   height(x, z) {
@@ -273,11 +276,9 @@ class Terrain {
     for (let j = 0; j <= rings; j++) for (let i = 0; i <= count; i++) {
       const side = Math.floor((i % count) / seg), t = (i % seg) / seg * 2 - 1;
       const bx = [t, 1, -t, -1][side], bz = [-1, t, 1, -t][side];
-      const half = size / 2 + j / rings * 4000, x = bx * half, z = bz * half;
+      const half = size / 2 + j / rings * 9000, x = bx * half, z = bz * half;
       const edge = this.height(bx * size / 2, bz * size / 2);
-      const n = noise.noise(x / 1550, 36.7, z / 1550);
-      const ridge = Math.max(0, (0.95 - Math.sqrt(n * n + 0.025)) / 0.8);
-      const far = 380 + ridge * ridge * 1450 + fbm(x / 550, z / 550, 3, 57) * 180 + noise.noise(x/240,17,z/240)*75;
+      const far = this.source(x,z);
       const h = THREE.MathUtils.lerp(edge, far, smooth(0, 1800, half - size / 2));
       const k = j * (count + 1) + i;
       pos.set([x, h, z], k * 3); uv.set([x / 15, z / 15], k * 2);
@@ -376,12 +377,15 @@ function terrainMaterial(A) {
         vec3 terrainN = normalize(vTN);
         float slope = 1.0 - terrainN.y;
         float mountain = smoothstep(battlefield > 0.5 ? 650.0 : 1350.0, battlefield > 0.5 ? 1250.0 : 1950.0, length(vTW.xz));
+        float kobe = battlefield < .5 || battlefield > 5.5 ? 1.0 : 0.0;
+        mountain *= mix(1.0,smoothstep(35.0,150.0,vTW.y),kobe);
         // 森林覆蓋由坡度與海拔決定，以貼圖表現樹冠，不建立數萬棵遠樹。
         float treeline = 0.0;
         if (mountain > 0.001) {
           float canopy = tn(vTW.xz / 8.0);
           float facing = dot(terrainN.xz, normalize(vec2(-.6,.8))) * .5 + .5;
           vec3 forest = mix(vec3(0.038,0.072,0.028), vec3(0.10,0.145,0.048), macro);
+          forest = mix(forest,mix(vec3(.035,.075,.045),vec3(.095,.145,.075),macro),kobe);
           forest *= mix(0.72, 1.28, canopy) * mix(.78,1.12,facing);
           forest = mix(forest,forest*vec3(1.2,1.08,.77),smoothstep(.52,.72,dry)*.35);
           float meadow = smoothstep(0.50, 0.72, dry) * (1.0 - smoothstep(0.08, 0.25, slope));
@@ -401,7 +405,7 @@ function terrainMaterial(A) {
         float strata = sin(vTW.y * 0.095 + vTW.x * 0.018 + vTW.z * 0.012 + macro * 9.0) * 0.5 + 0.5;
         rock *= mix(vec3(0.42,0.46,0.49),vec3(.78,.81,.80),surfaceReady) * mix(0.90, 1.04, strata) * mix(0.86, 1.10, dry);
         rock *= 1.0 - smoothstep(.48,.70,dry) * smoothstep(.12,.42,slope) * .15;
-        float rk = smoothstep(0.20, 0.48, slope + (macro - 0.5) * 0.14 + treeline * 0.14);
+        float rk = smoothstep(mix(.20,.38,kobe), mix(.48,.68,kobe), slope + (macro - 0.5) * 0.14 + treeline * 0.14);
         if (battlefield > 3.5 && battlefield < 4.5) grass = mix(grass, texture2D(rubD, vTW.xz / 14.0).rgb * vec3(0.85,0.63,0.40), 0.85);
         if (battlefield > 1.5 && battlefield < 2.5) grass *= vec3(0.65,0.83,0.64);
         if (battlefield > 0.5) {
@@ -595,12 +599,12 @@ function addBox(B, x0, x1, y0, y1, z0, z1, col, uvScale = 8) {
 }
 
 // 立面細節仍寫進同一棟的合併區段：沒有額外材質／draw call，倒塌時跟著樓體一起消失。
-function architecture(B, signs, x0, x1, z0, z1, H, style, F, district, roofTop, crown = [x0, x1, z0, z1], exposed = [true, true, true, true]) {
+function architecture(B, signs, x0, x1, z0, z1, H, style, F, district, roofTop, crown = [x0, x1, z0, z1], exposed = [true, true, true, true], uo = 0) {
   const stone = style < 2 ? [0.48, 0.5, 0.52, 0, 1] : [0.72, 0.69, 0.63, 0, 1], steel = [0.12, 0.15, 0.17, 0, 2];
   const glass = [0.055, 0.095, 0.11, 0, 4];
   const floor = F.h / F.rows, bay = F.w / F.cols;
   const sides = [['x', z1, 1, x0, x1], ['x', z0, -1, x0, x1], ['z', x1, 1, z0, z1], ['z', x0, -1, z0, z1]];
-  const asian = style >= 2;
+  const historic = style === 2, asian = style >= 3;
   for (const [si, [axis, fix, out, a0, a1]] of sides.entries()) {
     const box = (lo, hi, y0, y1, d0, d1, c) => {
       const p = fix + out * d0, q = fix + out * d1;
@@ -609,10 +613,13 @@ function architecture(B, signs, x0, x1, z0, z1, H, style, F, district, roofTop, 
     };
     // 樓板邊、窗台與垂直分格產生真實的側光和遮蔭，不再只靠照片上的陰影。
     for (let y = floor; y < H - 0.3; y += floor * (style < 2 ? 2 : 1)) {
-      box(a0, a1, y - 0.12, y + 0.08, 0, style < 2 ? 0.18 : 0.32, stone);
+      box(a0, a1, y - 0.05, y + 0.03, 0, historic ? .18 : .08, stone);
     }
-    const step = style < 2 ? bay * 3 : bay * 2;
-    for (let a = a0 + step; a < a1 - 1; a += step) box(a - 0.12, a + 0.12, 0.3, H, 0, 0.24, stone);
+    // 舊居留地用石造壁柱；住宅使用細窗框，不讓外牆變成整片粗格子。
+    if (historic) for (let a = a0 + bay * 2; a < a1 - 1; a += bay * 2) {
+      box(a - .16, a + .16, .65, H - .35, 0, .2, stone);
+      for (const y of [.65, H - .65]) box(a - .25, a + .25, y, y + .25, 0, .24, stone);
+    }
     box(a0, a1, 0.05, 0.65, 0, 0.22, [0.38, 0.36, 0.33, 0, 1]);
     box(a0 - 0.2, a1 + 0.2, H - 0.35, H, 0, 0.4, stone);
     // 相鄰地塊的窄樓縫只留貼牆線腳，不放相向的陽台、梯架、店棚與招牌。
@@ -623,12 +630,31 @@ function architecture(B, signs, x0, x1, z0, z1, H, style, F, district, roofTop, 
       if ((Math.abs(n.y) > 0.5 ? n.y : (axis === 'x' ? n.z : n.x) * out) < 0) { pts.reverse(); n.negate(); }
       B.quad(...pts, n.toArray(), [[0, 0], [1, 0], [1, 1], [0, 1]], c);
     };
+    if (style >= 2 && H < 45) {
+      // 近街兩層窗框有實際斜邊和窗台，與四面牆累積 UV 開間對齊。
+      const w=x1-x0,d=z1-z0,phase=uo+[0,w+d,w,2*w+d][si]/F.w;
+      const first=bay*(Math.ceil(phase*F.cols-.5)+.5-phase*F.cols),ww=bay*(historic?.46:.64),wh=floor*(historic?.7:.6);
+      for(let offset=first;offset<a1-a0;offset+=bay) {
+        const a=si===1||si===2?a1-offset:a0+offset,lo=a-ww/2,hi=a+ww/2;
+        if(lo<a0+.2||hi>a1-.2)continue;
+        for(let f=1;f<3&&f*floor+floor*.88<H;f++) {
+          const bot=f*floor+floor*(historic?.18:.22),top=bot+wh,rim=historic?stone:[.55,.59,.58,0,2];
+          for(const [aa,bb,cc,dd] of [
+            [[lo-.07,bot-.07,.015],[hi+.07,bot-.07,.015],[hi,bot,.12],[lo,bot,.12]],
+            [[lo,top,.12],[hi,top,.12],[hi+.07,top+.07,.015],[lo-.07,top+.07,.015]],
+            [[lo-.07,bot-.07,.015],[lo,bot,.12],[lo,top,.12],[lo-.07,top+.07,.015]],
+            [[hi,bot,.12],[hi+.07,bot-.07,.015],[hi+.07,top+.07,.015],[hi,top,.12]],
+          ])face([point(...aa),point(...bb),point(...cc),point(...dd)],rim);
+          box(lo-.12,hi+.12,bot-.09,bot-.025,0,.23,stone);
+        }
+      }
+    }
     // 每面最多三個店面：真正的拱圈、玻璃、門框與遮陽棚，併在既有屋頂桶。
     const shops = Math.min(3, Math.floor((a1 - a0 - 2) / 7));
     if (style >= 2 && H < 32 && shops) streetfront(a0, a1, asian, box);
     for (let i = 0; i < shops; i++) {
       const a = a0 + (a1 - a0) * (i + 0.5) / shops, rad = 1.35;
-      const arch = !asian && (style === 2 || style === 4);
+      const arch = historic;
       const y = arch ? 1.75 : 2.8;
       face([point(a - rad, 0.7, 0.035), point(a + rad, 0.7, 0.035), point(a + rad, y, 0.035), point(a - rad, y, 0.035)], glass);
       box(a - rad - 0.14, a - rad, 0.65, y, 0.03, 0.23, stone);
@@ -677,7 +703,7 @@ function architecture(B, signs, x0, x1, z0, z1, H, style, F, district, roofTop, 
       const mid = (a0 + a1) / 2, w = Math.min(8, (a1 - a0) * 0.32);
       box(mid - w, mid + w, 3.15, 3.38, 0, 1.8, steel);
       for (const a of [mid - w + 0.3, mid + w - 0.3]) box(a - 0.12, a + 0.12, 0, 3.2, 1.5, 1.74, steel);
-    } else {
+    } else if (!historic) {
       // 住宅陽台：只做近地面的三層，遠處沿用原立面，幾何量不隨樓高暴增。
       for (let y = floor * 2; y < Math.min(H - 1, floor * 4); y += floor) {
         for (let a = a0 + 5; a < a1 - 3; a += 12) {
@@ -708,7 +734,7 @@ function architecture(B, signs, x0, x1, z0, z1, H, style, F, district, roofTop, 
       signs.quad(...pts, axis === 'x' ? [0, 0, out] : [out, 0, 0], uv, [0.85, 0.85, 0.85]);
     }
     // 少數磚街屋的側面消防梯；階梯為斜面，併入原可破壞樓體。
-    if(style===2&&axis==='z'&&out===1&&H<32&&Math.abs(Math.round(x0+z0))%4===0) {
+    if(style===4&&axis==='z'&&out===1&&H<32&&Math.abs(Math.round(x0+z0))%4===0) {
       const mid=(a0+a1)/2;
       for(let y=floor*2;y<Math.min(H-1,floor*5);y+=floor) {
         box(mid-2.1,mid+2.1,y-.12,y,0,1.1,steel);
@@ -976,7 +1002,7 @@ export class World {
     const { fog, sunFog } = horizonColors(A.sky, this.sunDir, this.skyGain);
     this.fogColor = fog; this.sunFogColor = sunFog;
     installHeightFog(this.sunDir, sunFog);
-    scene.fog = new THREE.FogExp2(fog, 0.00042);
+    scene.fog = new THREE.FogExp2(fog, 0.00024);
 
     const pm = new THREE.PMREMGenerator(renderer);
     A.hdr.mapping = THREE.EquirectangularReflectionMapping;
@@ -1000,7 +1026,7 @@ export class World {
     scene.add(hemi); this.hemi=hemi;
 
     // 地形
-    this.terrain = new Terrain(10000, terrainSegments);
+    this.terrain = new Terrain(10000, terrainSegments, A.relief ? (x,z)=>kobeCityHeight(A.relief,x,z) : rawHeight);
     const tmesh = new THREE.Mesh(this.terrain.geometry(), terrainMaterial(A));
     tmesh.receiveShadow = true;
     scene.add(tmesh);
@@ -1049,12 +1075,12 @@ export class World {
     T.detailed = !!F.mode;
     for (let i = 0; i < T.h.length; i++) {
       const x = fieldGridCoordinate(i % (T.seg + 1), T.seg, T.size, T.detailed), z = fieldGridCoordinate(Math.floor(i / (T.seg + 1)), T.seg, T.size, T.detailed);
-      T.h[i] = F.mode ? fieldHeight(x, z, profile, terrainRoute, rawHeight(x,z)) : this.cityHeights[i];
+      T.h[i] = F.mode ? fieldHeight(x, z, profile, terrainRoute, T.source(x,z)) : this.cityHeights[i];
       p.setXYZ(i, x, T.h[i], z); uv.setXY(i, x / 15, z / 15);
     }
     p.needsUpdate = uv.needsUpdate = true; this.terrainMesh.geometry.computeVertexNormals(); this.terrainMesh.geometry.computeBoundingSphere();
     this.terrainMesh.material.userData.battlefield.value = F.mode;
-    this.scene.fog.density = F.mode ? profile === 'forest' ? .00018 : .00012 : .00042;
+    this.scene.fog.density = F.mode ? profile === 'forest' ? .00018 : .00012 : .00024;
     this.scene.environmentIntensity=F.mode?.43:.55;
     if(F.mode) {
       const az=Math.atan2(this.sunDir.z,this.sunDir.x),el=Math.max(Math.asin(this.sunDir.y),THREE.MathUtils.degToRad(32));
@@ -1399,7 +1425,7 @@ export class World {
         const ruin = kind === 'ruin' ? true : r() < 0.08;
         // 0 玻璃帷幕 1 辦公 2 紅磚 3 混凝土 4 磚柱
         const rawStyle = ruin ? 2 + ((r() * 3) | 0) : (H > 75 ? (r() < 0.6 ? 0 : 1) : H > 45 ? [1, 3, 4, 0][(r() * 4) | 0] : 2 + ((r() * 3) | 0));
-        const style = !ruin && district === 'old' ? (bi % 2 ? 2 : 4) : !ruin && district === 'east' ? (bj % 2 ? 3 : 4) : rawStyle;
+        const style = !ruin && district === 'old' ? 2 + Math.abs(Math.floor(x0*.13+z0*.17))%3 : !ruin && district === 'east' ? (bj % 2 ? 3 : 4) : rawStyle;
         const F = FACADES[style];
         const tint = 0.8 + r() * 0.3;
         const col = [tint, tint * (0.97 + r() * 0.05), tint * (0.93 + r() * 0.07), ruin ? 0.75 + r() * 0.25 : (r() < 0.15 ? 0.35 : 0)];
@@ -1437,7 +1463,7 @@ export class World {
           }
           const exposed = [c1 >= lz1 || c1 - z1 >= 1.5, c0 <= lz0 || z0 - c0 >= 1.5,
             a1 >= lx1 || a1 - x1 >= 1.5, a0 <= lx0 || x0 - a0 >= 1.5];
-          architecture(bk.roof, bk.signs, x0, x1, z0, z1, H, style, F, district, roofTop, crown, exposed);
+          architecture(bk.roof, bk.signs, x0, x1, z0, z1, H, style, F, district, roofTop, crown, exposed, uo);
           rec.box = { x0, x1, z0, z1, top: H + 0.2 };
           this.addCollider(rec.box);
           rec.f1 = rec.fB.p.length / 3; rec.r1 = rec.rB.p.length / 3; rec.H = H;
@@ -1477,6 +1503,21 @@ export class World {
           }
         }
       }
+    }
+    // 神戶市區沿海岸延伸到山麓，不能在作戰街區外突然變成草原。
+    // 遠景只有牆面與平屋頂，共用現有立面；不用詳細窗框、碰撞或動態物件。
+    const distant=[new GeoBucket(),new GeoBucket()], distantRoof=new GeoBucket();
+    const hs=(x,z)=>{const v=Math.sin(x*12.9898+z*78.233)*43758.5453;return v-Math.floor(v);};
+    for(let z=-3100;z<=650;z+=100)for(let x=-3300;x<=3300;x+=95) {
+      if(Math.max(Math.abs(x),Math.abs(z))<900||this.terrain.height(x,z)>125||hs(x,z)<.22)continue;
+      const px=x+hs(z,x)*25,pz=z+hs(x+7,z)*20,w=18+hs(x,z+1)*26,d=16+hs(x+1,z)*20;
+      const ground=Math.max(...[[px,pz],[px+w,pz],[px,pz+d],[px+w,pz+d]].map(([a,b])=>this.terrain.height(a,b))),H=ground+3.4*(2+Math.floor(hs(x+2,z)*6)),i=hs(x,z+5)<.6?0:1;
+      const tint=.50+hs(x,z+8)*.38,warm=hs(x,z+11);
+      addWalls(distant[i],px,px+w,pz,pz+d,ground-2,H,[tint,tint*(.9+warm*.15),tint*(.78+warm*.25),0],0,0,null,FACADES[i+3]);
+      distantRoof.quad([px,H,pz+d],[px+w,H,pz+d],[px+w,H,pz],[px,H,pz],[0,1,0],[[0,0],[w/4,0],[w/4,d/4],[0,d/4]],[.55,.56,.54,0,1]);
+    }
+    for(const [bucket,mat] of [[distant[0],fmats[3]],[distant[1],fmats[4]],[distantRoof,roofMat]]) {
+      const mesh=new THREE.Mesh(bucket.geometry(),mat);mesh.name='kobe-foothill-city';mesh.userData.noAO=true;this.scene.add(mesh);
     }
     for (const bk of buckets) {
       for (let s = 0; s < NF; s++) {
@@ -1926,7 +1967,7 @@ export class World {
     const normal = (a,b,c) => new THREE.Vector3().subVectors(new THREE.Vector3(...b),new THREE.Vector3(...a)).cross(new THREE.Vector3().subVectors(new THREE.Vector3(...c),new THREE.Vector3(...a))).normalize().toArray();
     const streets = [];
     for (const x of [-360, -240, -120, 120]) for (const z of [-300, -240, -180, -120, -60, 0]) if (!blocked(x + 16, z, .3)) streets.push([x + 16, z, -Math.PI / 2, 0, streets.length % 8]);
-    const sites = { tower: port ? [port.x, port.z, 1, 0] : null, shrine: shrine ? [shrine.x, shrine.z - 6, 1.4, 0] : null, streets };
+    const sites = { tower: port ? [port.x, port.z, 1, 0] : null, maritime: port ? [port.x-75,780,.75,0] : null, waterfront: port ? [port.x-120,port.x+50,746,818] : null, shrine: shrine ? [shrine.x, shrine.z - 6, 1.4, 0] : null, streets };
     japaneseScenery({
       box: (...args) => addBox(detail, ...args, 4),
       face: (a,b,c,d,col) => { const n=normal(a,b,c),axes=Math.abs(n[1])>.5?[0,2]:Math.abs(n[0])>.5?[2,1]:[0,1]; detail.quad(a,b,c,d,n,[a,b,c,d].map(p=>[p[axes[0]]/2,p[axes[1]]/2]),col); },
@@ -1938,10 +1979,11 @@ export class World {
       const mesh = new THREE.Mesh(bucket.geometry(), mat); mesh.name = name; mesh.castShadow = bucket === detail; mesh.receiveShadow = true; scene.add(mesh);
     }
 
-    const seaMat = new THREE.MeshStandardMaterial({color:0x2d5360,roughness:.36,metalness:.12,normalMap:this.A.rockN,normalScale:new THREE.Vector2(.10,.10),envMapIntensity:.7});
+    const seaMat = harborWater('z', 820);
     const seaGeo = new THREE.PlaneGeometry(10000,10000).rotateX(-Math.PI/2);
     const seaUV=seaGeo.attributes.uv; for(let i=0;i<seaUV.count;i++)seaUV.setXY(i,seaUV.getX(i)*800,seaUV.getY(i)*800);
     const sea=new THREE.Mesh(seaGeo,seaMat);sea.name='kobe-bay';sea.position.set(0,-1,5820);sea.receiveShadow=true;sea.userData.noAO=true;scene.add(sea);
+    sea.onBeforeRender = () => { seaMat.userData.seaTime.value = performance.now() * .001; };
     // 海堤的厚度留在陸地側，合併沿岸混凝土，不增加碰撞長牆封住戰鬥路線。
     const seawall=new GeoBucket();addBox(seawall,-CITY.half,CITY.half,-2,.35,818.8,820,[.54,.57,.55,0,1],4);
     const wall=new THREE.Mesh(seawall.geometry(),architecturalMaterial(this.A));wall.name='kobe-seawall';wall.receiveShadow=true;scene.add(wall);

@@ -2,8 +2,9 @@
 // 共用掃描材質；靜態結構按材質合併，海面不建立反射攝影機。
 import * as THREE from 'three';
 import { Builder } from '../zero/kit.js';
-import { JAPANESE_FONT, PORT_LABELS, civicMaterial } from '../urban.js';
+import { JAPANESE_FONT, PORT_LABELS, civicMaterial, harborWater } from '../urban.js';
 import { japaneseBuilder } from '../japan.js';
+import { KOBE_RELIEF, kobeCityHeight } from '../kobe-relief.mjs';
 
 export const SHORE = 680;
 export function buildMap(scene, mats, solid, PL, A, world) {
@@ -65,12 +66,12 @@ export function buildMap(scene, mats, solid, PL, A, world) {
   const M = { b, lights: [], zones: {}, marks: {}, targets: {}, items: {}, layout: 'harbor-v1' };
   const V = (x, z, y = 0) => new THREE.Vector3(x, y, z);
   const metal = [0.54, 0.6, 0.64], paint = [0.3, 0.44, 0.49];
-  const box = (mat, x0, x1, y0, y1, z0, z1, o = {}) => b.block(mat, x0, x1, y0, y1, z0, z1, { ground: Math.min(0, y0), ...o });
+  const box = (mat, x0, x1, y0, y1, z0, z1, o = {}) => b.block(mat, x0, x1, y0, y1, z0, z1, { ground: Math.min(0, y0), skip: y0 <= .05 ? 'ny' : '', ...o });
   // 置中的高幾何不能套用 Builder 的底部原點明暗，否則下半部會出現負值顏色。
   const mesh = (mat, g, x, y, z, ry = 0, o = {}) => b.mesh(mat, g, x, y, z, ry, { shade: () => 1, ...o });
   const beam = (a, c, r = .08, mat = 'metal', tint = metal) => {
     const p = new THREE.Vector3(...a), q = new THREE.Vector3(...c), d = q.clone().sub(p);
-    const g = new THREE.CylinderGeometry(r, r, d.length(), 6, 1, true);
+    const g = new THREE.CylinderGeometry(r, r, d.length(), r <= .07 ? 4 : 6, 1, true);
     g.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize()));
     mesh(mat, g, ...p.add(q).multiplyScalar(.5).toArray(), 0, { tint }); g.dispose();
   };
@@ -96,7 +97,7 @@ export function buildMap(scene, mats, solid, PL, A, world) {
       for (const z of [z0, z1]) beam([xa, ya - .15, z], [xb, yb - .15, z], .12);
     }
   }
-  function shed(x0, x1, z0, z1, h, doors = 'z', rise = 3) {
+  function shed(x0, x1, z0, z1, h, doors = 'z', rise = 3, masonry = false) {
     const door = 6, midX = (x0 + x1) / 2, midZ = (z0 + z1) / 2;
     if (doors === 'z') {
       if (x0 === 10 && z0 === 52) {
@@ -107,7 +108,7 @@ export function buildMap(scene, mats, solid, PL, A, world) {
       } else box('brick', x0, x0 + .45, 0, h, z0, z1);
       box('brick', x1 - .45, x1, 0, h, z0, z1);
       for (const z of [z0, z1 - .4]) {
-        box('wall', x0, midX - door, 0, h, z, z + .4); box('wall', midX + door, x1, 0, h, z, z + .4);
+        box(masonry ? 'brick' : 'wall', x0, midX - door, 0, h, z, z + .4); box(masonry ? 'brick' : 'wall', midX + door, x1, 0, h, z, z + .4);
         box('metal', midX - door, midX + door, Math.min(4.8,h-.4), h, z, z + .4);
       }
     } else {
@@ -117,7 +118,22 @@ export function buildMap(scene, mats, solid, PL, A, world) {
         box('metal', x, x + .4, Math.min(4.8,h-.4), h, midZ - door, midZ + door);
       }
     }
-    roof(x0 - .7, x1 + .7, z0 - .6, z1 + .6, h, rise);
+    if (masonry) {
+      // 神戶港舊倉庫的紅磚山牆、深色雙坡屋面與磚造扶壁；門口仍沿用原貨運通道。
+      for(const [a,c,ya,yc] of [[x0-.7,midX,h,h+rise],[midX,x1+.7,h+rise,h]]) {
+        const n=new THREE.Vector3(ya-yc,c-a,0).normalize().toArray();
+        b.B.corr.quad([a,ya,z0-.6],[a,ya,z1+.6],[c,yc,z1+.6],[c,yc,z0-.6],n,[1,1,1,1],null,[.28,.31,.32]);
+        b.B.corr.quad([c,yc-.12,z0-.6],[c,yc-.12,z1+.6],[a,ya-.12,z1+.6],[a,ya-.12,z0-.6],n.map(v=>-v),[1,1,1,1],null,[.28,.31,.32]);
+      }
+      for(const [z,n] of [[z0,-1],[z1,1]]) {
+        const p=[[x0,h,z],[x1,h,z],[midX,h+rise,z],[midX,h+rise,z]];if(n<0)p.reverse();
+        b.B.brick.quad(...p,[0,0,n],[1,1,1,1]);
+        for(let x=x0+2;x<x1;x+=6)if(Math.abs(x-midX)>door+.3) {
+          box('brick',x-.18,x+.18,0,h,z-.18,z+.18,{solid:false});
+          box('concrete',x-.22,x+.22,h-.22,h,z-.24,z+.24,{solid:false});
+        }
+      }
+    } else roof(x0 - .7, x1 + .7, z0 - .6, z1 + .6, h, rise);
     for (let z = z0 + 2; z < z1; z += 6) for (const x of [x0 + .7, x1 - .7]) {
       box('metal', x - .13, x + .13, 0, h, z - .16, z + .16, { tint: metal });
       beam([x, h - .8, z], [x < midX ? x + 3 : x - 3, h - .15, z], .075);
@@ -186,11 +202,15 @@ export function buildMap(scene, mats, solid, PL, A, world) {
       const t = THREE.MathUtils.clamp((x - start) / (SHORE - start), 0, 1);
       return 1 - t * t * (3 - 2 * t);
     };
-    const height = world.height.bind(world);
-    world.height = (x, z) => x > SHORE ? -10 : height(x, z) * coast(x, z) * .68;
+    const height = A.relief ? (x,z)=>kobeCityHeight(A.relief,-z+KOBE_RELIEF.anchorX,x-SHORE+KOBE_RELIEF.anchorZ) : world.terrain.source;
+    const source = (x,z)=>height(x,z)*coast(x,z)*(A.relief?1:.68);
+    world.terrain.source=source;
+    const T=world.terrain;
+    for(let j=0;j<=T.seg;j++)for(let i=0;i<=T.seg;i++)T.h[j*(T.seg+1)+i]=source(-T.size/2+i*T.cell,-T.size/2+j*T.cell);
+    world.height = (x, z) => x > SHORE ? -10 : world.terrain.height(x,z);
     for (const mesh of [world.terrainMesh, world.mountainMesh]) {
       const p = mesh.geometry.attributes.position;
-      for (let i = 0; i < p.count; i++) p.setY(i, p.getY(i) * coast(p.getX(i), p.getZ(i)) * .68);
+      for (let i = 0; i < p.count; i++) p.setY(i,source(p.getX(i),p.getZ(i)));
       p.needsUpdate = true; mesh.geometry.computeVertexNormals(); mesh.geometry.computeBoundingSphere();
     }
     const floor = solid.floorAt.bind(solid);
@@ -201,7 +221,7 @@ export function buildMap(scene, mats, solid, PL, A, world) {
       sh.fragmentShader = sh.fragmentShader.replace('vec4 G = battlefield', `if(vTW.x > ${SHORE.toFixed(1)}) discard;\n        vec4 G = battlefield`);
     };
     material.customProgramCacheKey = () => 'lastline-coast-v1'; material.needsUpdate = true;
-    scene.fog.color.setRGB(.39, .47, .52); scene.fog.density = .0015;
+    scene.fog.color.setRGB(.39, .47, .52); scene.fog.density = .0003;
     world.sun.color.setRGB(1, .94, .84); world.sun.intensity = 3.4;
     world.hemi.color.setRGB(.44, .58, .73); world.hemi.intensity = .36;
     scene.environmentIntensity = .48;
@@ -210,19 +230,10 @@ export function buildMap(scene, mats, solid, PL, A, world) {
   b.B.portGround.quad([-250,.025,320], [SHORE,.025,320], [SHORE,.025,-590], [-250,.025,-590], [0,1,0]);
   // 海堤有厚度與潮痕，沒有穿越海面的隱形地板。
   box('concrete', SHORE - 1.2, SHORE, -4, .85, -590, 320, { tint: [.48, .53, .54] });
-  const water = new THREE.MeshStandardMaterial({ color: 0x274a59, roughness: .32, metalness: .28,
-    normalMap: A.rockN, normalScale: new THREE.Vector2(.22, .22), envMapIntensity: .8 });
-  const seaTime = { value: 0 };
-  water.onBeforeCompile = sh => {
-    sh.uniforms.seaTime = seaTime;
-    sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vSea;')
-      .replace('#include <begin_vertex>', '#include <begin_vertex>\nvSea=(modelMatrix*vec4(position,1.0)).xyz;');
-    sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vSea; uniform float seaTime;')
-      .replace('#include <normal_fragment_maps>', '#include <normal_fragment_maps>\nnormal=normalize(normal+vec3(sin(vSea.x*.23+vSea.z*.13+seaTime*.7)*.10,cos(vSea.z*.29-seaTime*.45)*.08,0.0));');
-  };
+  const water = harborWater('x', SHORE);
   const sea = new THREE.Mesh(new THREE.PlaneGeometry(5600, 9000).rotateX(-Math.PI / 2), water);
   const uv = sea.geometry.attributes.uv; for (let i = 0; i < uv.count; i++) uv.setXY(i, uv.getX(i) * 600, uv.getY(i) * 900);
-  sea.onBeforeRender = () => { seaTime.value = performance.now() * .001; };
+  sea.onBeforeRender = () => { water.userData.seaTime.value = performance.now() * .001; };
   sea.position.set(SHORE + 2800, -1, 0); sea.name = 'lastline-sea'; sea.receiveShadow = true; scene.add(sea);
 
   // 第 1 章：不是住宅後巷，而是貨運鐵道、海關倉庫與通訊室。
@@ -246,7 +257,7 @@ export function buildMap(scene, mats, solid, PL, A, world) {
     }
     solid.add({ x0: -229.8, x1: -224.2, z0: z - 6.7, z1: z + 6.7, y0: 0, y1: 4.2, mat: 'metal' });
   }
-  shed(-208, -152, -205, -130, 8, 'z', 3);
+  shed(-208, -152, -205, -130, 8, 'z', 3, true);
   shed(-149, -113, -122, -78, 6.2, 'x', 1.8);
   // 西翼拘留室與臨時救護站有自己的門路，任務不靠站在空地上讀文字。
   shed(-222,-210,-184,-153,5.2,'z',1.6);
@@ -553,7 +564,7 @@ export function buildMap(scene, mats, solid, PL, A, world) {
       const sign = new THREE.Mesh(g, mat); sign.position.set(x, y, z); sign.rotation.y = ry; scene.add(sign);
     }
   }
-  M.japanSites = { tower: [640, 400, 1, 0], maritime: [570, 405, 1, 0], shrine: [-243, -275, .75, 0], streets: [
+  M.japanSites = { tower: [640, 400, 1, 0], maritime: [570, 405, 1, 0], waterfront: [514,SHORE,320,477], shrine: [-243, -275, .75, 0], streets: [
     [-211,-208,Math.PI,0,4],[-211,-130,Math.PI/2,0,0],[-111,-124,0,0,6],
     [-111,-72,0,0,5],[9,-5,0,0,1],[176,-135,0,0,4],
     [344,-138,Math.PI/2,0,0],[344,-200,Math.PI/2,0,6],[344,-265,Math.PI/2,0,4],
