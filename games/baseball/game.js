@@ -55,30 +55,16 @@ function faceTex(o){
     g.lineTo(W*0.68,H*0.3); g.closePath(); g.fill();
     g.strokeStyle='rgba(255,225,188,.12)'; g.lineWidth=1.5;
     for(let i=0;i<44;i++){ const x=W*(0.32+0.36*i/44); g.beginPath(); g.moveTo(x-8,H*.23); g.quadraticCurveTo(x+4,H*.3,x,H*(i%2?.385:.325)); g.stroke(); }
-    const cx=W*0.5, ey=H*0.56, dx=W*0.056;
-    for(const s of [-1,1]){
-      const x=cx+s*dx;
-      const blush=g.createRadialGradient(x+s*17,ey+55,3,x+s*17,ey+55,42); blush.addColorStop(0,'rgba(190,91,70,.20)'); blush.addColorStop(1,'rgba(190,91,70,0)'); g.fillStyle=blush; g.fillRect(x-45,ey+18,90,78);
-      g.strokeStyle=o.hair; g.lineCap='round'; g.lineWidth=o.sharp?13:10;
-      g.beginPath(); g.moveTo(x-s*18,ey-56+(o.sharp?6:0)); g.quadraticCurveTo(x+s*5,ey-67,x+s*29,ey-(o.sharp?66:61)); g.stroke();
-      g.fillStyle='#80513e'; g.beginPath(); g.ellipse(x,ey+2,31,39,0,0,Math.PI*2); g.fill();
-      const white=g.createLinearGradient(0,ey-34,0,ey+34); white.addColorStop(0,'#cbd5e1'); white.addColorStop(.38,'#fffefa'); white.addColorStop(1,'#f1e7d9');
-      g.fillStyle=white; g.beginPath(); g.ellipse(x,ey+3,28,35,0,0,Math.PI*2); g.fill();
-      const gr=g.createRadialGradient(x,ey+7,3,x,ey+2,34); gr.addColorStop(0,'#120804'); gr.addColorStop(0.55,o.iris); gr.addColorStop(.82,'#b68b55'); gr.addColorStop(1,'#1b1717');
-      g.fillStyle=gr; g.beginPath(); g.ellipse(x,ey+2,o.sharp?21:23,o.sharp?29:33,0,0,Math.PI*2); g.fill();
-      g.strokeStyle='rgba(242,209,150,.3)'; g.lineWidth=1;
-      for(let i=0;i<26;i++){ const a=i/26*Math.PI*2; g.beginPath(); g.moveTo(x+Math.cos(a)*13,ey+3+Math.sin(a)*19); g.lineTo(x+Math.cos(a)*20,ey+3+Math.sin(a)*28); g.stroke(); }
-      g.fillStyle='#080302'; g.beginPath(); g.ellipse(x,ey+4,10,15,0,0,Math.PI*2); g.fill();
-      g.fillStyle='#fff'; g.beginPath(); g.ellipse(x+s*-6,ey-11,7.5,9,0,0,Math.PI*2); g.fill();
-      g.beginPath(); g.ellipse(x+s*7,ey+16,3.5,3.5,0,0,Math.PI*2); g.fill();
-      g.strokeStyle='#120a06'; g.lineWidth=o.sharp?12:9;
-      g.beginPath(); g.ellipse(x,ey+(o.sharp?9:6),29,o.sharp?34:38,0,Math.PI*1.08,Math.PI*1.92); g.stroke();
-      if(o.sharp){ g.fillStyle=o.skin; g.fillRect(x-36,ey-50,72,16); }
+    const cx=W*0.5, ey=H*0.56;
+    for(const side of [-1,1]){
+      const x=cx+side*W*.078;
+      const blush=g.createRadialGradient(x,ey+55,3,x,ey+55,42); blush.addColorStop(0,'rgba(190,91,70,.22)'); blush.addColorStop(1,'rgba(190,91,70,0)'); g.fillStyle=blush; g.fillRect(x-45,ey+18,90,78);
     }
-    if(o.beard){ g.fillStyle=o.hair; g.globalAlpha=0.35; g.beginPath(); g.ellipse(cx,ey+92,70,34,0,0,Math.PI*2); g.fill();
-      for(let i=0;i<90;i++){ const a=i*2.4,r=12+Math.sqrt(i/90)*52; g.fillRect(cx+Math.cos(a)*r,ey+94+Math.sin(a)*r*.42,1.5,3); } g.globalAlpha=1; }
-    g.strokeStyle='#965741'; g.lineWidth=3; g.beginPath(); g.moveTo(cx-11,ey+74); g.quadraticCurveTo(cx,ey+79,cx+11,ey+74); g.stroke();
-    g.strokeStyle='rgba(255,233,208,.6)'; g.lineWidth=2; g.beginPath(); g.moveTo(cx-8,ey+81); g.lineTo(cx+8,ey+81); g.stroke();
+    if(o.beard){
+      const beard=g.createLinearGradient(0,ey+67,0,ey+136); beard.addColorStop(0,'rgba(35,22,15,.10)'); beard.addColorStop(1,o.hair);
+      g.fillStyle=beard; g.globalAlpha=.64; g.beginPath(); g.moveTo(cx-72,ey+61); g.quadraticCurveTo(cx-72,ey+115,cx-34,ey+129); g.quadraticCurveTo(cx,ey+144,cx+34,ey+129); g.quadraticCurveTo(cx+72,ey+115,cx+72,ey+61); g.quadraticCurveTo(cx+40,ey+85,cx,ey+86); g.quadraticCurveTo(cx-40,ey+85,cx-72,ey+61); g.fill();
+      g.fillStyle=o.hair; for(let i=0;i<130;i++){ const a=i*2.4,r=12+Math.sqrt(i/130)*54; g.fillRect(cx+Math.cos(a)*r,ey+106+Math.sin(a)*r*.35,1,2.2); } g.globalAlpha=1;
+    }
   });
   t.wrapS=THREE.RepeatWrapping; t.flipY=false; return t;
 }
@@ -143,7 +129,8 @@ function makePawa(o){
   if(o.chestPad) upper.add(part('chest_pad',gloss(o.chestPad,{roughness:0.5,clearcoat:0.4})));
   const head=new THREE.Group(); head.position.y=3.32; upper.add(head);
   const headFace=faceTex(o.face);
-  head.add(part('head',new THREE.MeshStandardMaterial({map:headFace,roughness:0.55})));
+  const skull=part('head',new THREE.MeshStandardMaterial({map:headFace,roughness:0.55})); head.add(skull);
+  const face=window.BaseballFaces.create(head,skull,o.face);
   head.add(part('ear_L',skin)); head.add(part('ear_R',skin));
   const nose=limbMesh(jointGeo,skin,head); nose.position.set(0,-.27,1.018); nose.scale.set(.1,.12,.075);
   for(const s of [-1,1]){ const inner=limbMesh(jointGeo,std(0xb87860,.75),head); inner.position.set(s*1.223,-.08,.105); inner.scale.set(.055,.14,.055); }
@@ -180,20 +167,8 @@ function makePawa(o){
     feet.forEach(f=>{ f.scale.set(1.15,1.1,1); });
   }
   root.scale.setScalar(o.scale||1.35);
-  let portrait=null;
-  if(o.articulated){
-    const p=document.createElement('canvas'); p.width=p.height=128; const g=p.getContext('2d');
-    const bg=g.createLinearGradient(0,0,128,128); bg.addColorStop(0,'#769ec2'); bg.addColorStop(1,'#182f4d'); g.fillStyle=bg; g.fillRect(0,0,128,128);
-    g.fillStyle=o.face.skin; for(const x of [23,105]){ g.beginPath(); g.ellipse(x,72,8,13,0,0,Math.PI*2); g.fill(); }
-    g.save(); g.beginPath(); g.roundRect(25,30,78,85,25); g.clip(); g.fillRect(25,30,78,85); g.drawImage(headFace.image,700,290,650,660,25,30,78,85); g.restore();
-    const cap=g.createLinearGradient(0,10,0,48); cap.addColorStop(0,o.cap.color); cap.addColorStop(1,'#10263e'); g.fillStyle=cap;
-    g.beginPath(); g.moveTo(21,48); g.quadraticCurveTo(19,8,64,8); g.quadraticCurveTo(109,8,107,48); g.closePath(); g.fill();
-    g.fillStyle=o.cap.color; g.beginPath(); g.ellipse(64,47,48,9,0,0,Math.PI*2); g.fill();
-    g.fillStyle=o.cap.ink||'#fff'; g.font='italic 900 24px Rubik,Arial'; g.textAlign='center'; g.fillText(o.cap.logo||'',64,36);
-    g.strokeStyle='rgba(255,255,255,.3)'; g.lineWidth=2; g.beginPath(); g.moveTo(30,25); g.quadraticCurveTo(43,14,60,14); g.stroke();
-    portrait=p.toDataURL('image/png');
-  }
-  return {root,yaw,upper,head,hR,hL,feet,rig,portrait,glove,gloveHand:glove?(o.gloveRight?hR:hL):null};
+  const portrait=o.articulated?window.BaseballFaces.portrait(o,headFace):null;
+  return {root,yaw,upper,head,hR,hL,feet,rig,portrait,face,glove,gloveHand:glove?(o.gloveRight?hR:hL):null};
 }
 function disposeModel(c){
   if(!c) return; c.root.parent&&c.root.parent.remove(c.root);
@@ -204,10 +179,10 @@ function seeded(id){ let s=(+id||1)%2147483647; return ()=>((s=s*16807%214748364
 const SKINS=['#f4cba3','#efc097','#e3ae84','#d29a6c','#b98057','#986441','#7a4f33'];
 function faceFor(pid){
   const P=PLAYERS[pid]||{}, r=seeded(pid);
-  if(P.zh) return {skin:'#f3c8a0',hair:'#1c1410',iris:'#4e2c18',sharp:r()<0.5};
+  if(P.zh) return {skin:'#f3c8a0',hair:'#1c1410',iris:'#4e2c18',sharp:r()<0.5,seed:+pid,brow:r(),eye:r(),smile:r()};
   const sk=SKINS[Math.min(SKINS.length-1,Math.floor(Math.pow(r(),1.3)*SKINS.length))];
   const hairs=['#1c1410','#2e2016','#4a3220','#6b4a2a','#a07a46'];
-  return {skin:sk,hair:hairs[Math.floor(Math.pow(r(),1.8)*hairs.length)],iris:['#4e2c18','#6a3e24','#3c5a7a','#5a6a3a'][Math.floor(r()*4)],sharp:r()<0.45,beard:r()<0.3};
+  return {skin:sk,hair:hairs[Math.floor(Math.pow(r(),1.8)*hairs.length)],iris:['#4e2c18','#6a3e24','#3c5a7a','#5a6a3a'][Math.floor(r()*4)],sharp:r()<0.45,beard:r()<0.3,seed:+pid,brow:r(),eye:r(),smile:r()};
 }
 function teamLook(abbr,home){
   const T=TEAM(abbr), [p,s]=T.colors;
@@ -609,6 +584,8 @@ function throwPitch(){
   startWindup(buildPitch(p,pr,{x:G.cur.x,y:G.cur.y},fatigue(GM)));
 }
 function endPitch(kind){
+  window.BaseballFaces.react(C.batter,kind==='ball'?'confident':kind==='foul'?'focus':'frustrated',G.t);
+  window.BaseballFaces.react(C.pitcher,kind==='ball'?'frustrated':'confident',G.t);
   showPitchLabel(G.pitch);
   if(kind==='strike'||kind==='whiff') SFX.play('strike');
   if(kind==='ball'){ GM.balls++; if(GM.balls>=4){ finishPA({kind:'BB',text:'四壞球保送'}); return; } showCall('壞球','blue'); say(pick(['壞球。','偏掉了。','選掉了。'])); }
@@ -620,6 +597,10 @@ function endPitch(kind){
 }
 // 打席結束
 function finishPA(res,pre){
+  const hit=['1B','2B','3B','HR'].includes(res.kind);
+  window.BaseballFaces.react(C.batter,hit?'joy':res.kind==='BB'?'confident':'frustrated',G.t,2.7);
+  window.BaseballFaces.react(C.runner,hit?'joy':'focus',G.t,2.7);
+  window.BaseballFaces.react(C.pitcher,hit?'concern':'confident',G.t,2.7);
   const g=GM, inningBefore=g.inning, halfBefore=g.half;
   const runsBefore=batting(g).runs;
   const text=applyResult(g,res,pre);
@@ -680,6 +661,8 @@ function startPlay(bb,pt){
     ball.visible=false; G.play=null; FX.resetTrail(); $('contactReadout').classList.remove('show');
     endPitch('foul'); G.waitUntil=G.t+.65; return;
   }
+  window.BaseballFaces.react(C.batter,'confident',G.t,.8);
+  window.BaseballFaces.react(C.pitcher,'concern',G.t,.8);
   const pre=advance(g.bases,g.outs,res,curBatter(g));
   G.play={sim,res,pre,t:0,bb,ended:false,look:null,br,gloved:false,bounced:false}; ball.visible=true;
   const readout=$('contactReadout'); readout.innerHTML=`<span>${bb.ev>=100?'強勁擊球':bb.la>45?'高飛球':'擊球'}</span><b>${Math.round(bb.ev*1.609)}<small> km/h</small></b><em>仰角 ${Math.round(bb.la)}°</em>`; readout.classList.add('show');
@@ -865,16 +848,33 @@ function update(dt){
   if(G.state==='play'||G.state==='settle') updatePlay(dt);
   FX.update(dt,G.state,G.swing?G.t-G.swing.t0:-1,G.swing?.mode==='power');
 }
+const faceAim=new THREE.Vector3(), facePitcherAim=new THREE.Vector3(), faceBatterAim=new THREE.Vector3();
+let faceTime=0;
+function updateFaces(){
+  if(!GM) return;
+  const dt=clamp(G.t-faceTime,0,.1); faceTime=G.t;
+  const flying=['pitch','play','settle'].includes(G.state), hero=G.state==='closeup';
+  facePitcherAim.copy(flying?ball.position:faceAim.set(G.cur.x,G.cur.y,0));
+  faceBatterAim.copy(flying?ball.position:C.pitcher.root.position); faceBatterAim.y=flying?ball.position.y:5;
+  const effort=G.state==='windup'?Math.sin(clamp(G.windT/RELEASE_T,0,1)*Math.PI):0;
+  window.BaseballFaces.update(C.pitcher,G.t,dt,facePitcherAim,hero?'confident':effort>.25?'effort':'focus',effort,G.state==='pitch');
+  const swinging=G.swing&&G.t>=G.swing.t0&&G.t-G.swing.t0<.28;
+  window.BaseballFaces.update(C.batter,G.t,dt,faceBatterAim,hero?'confident':swinging?'effort':'focus',swinging?1:0,G.state==='pitch'||swinging);
+  for(const c of [C.runner,...Object.values(C.runners),C.ump,...Object.values(C.fielders)]){
+    if(!c||c===C.pitcher||camera.position.distanceTo(c.root.position)>145) continue;
+    window.BaseballFaces.update(c,G.t,dt,facePitcherAim,'focus');
+  }
+}
 function renderFrame(){
   [C.pitcher,C.batter,C.runner,...Object.values(C.runners)].forEach(c=>{ if(c&&c.root.visible) syncLimbs(c); });
   $('heatPanel').hidden=!GM||G.mode!=='pitch'||!['aim','windup','pitch','between'].includes(G.state);
   const batView=!['play','settle','done','result','closeup'].includes(G.state)&&G.mode==='bat';
   if(C.catcher) C.catcher.root.visible=!batView; C.ump.root.visible=!batView;
-  updateFocus(); composer.render();
+  updateFaces(); updateFocus(); composer.render();
   drawOverlay();
 }
 function updateFocus(){
-  let tgt = G.state==='closeup' ? (G.closeWho==='P'?C.pitcher:C.batter).head.getWorldPosition(new THREE.Vector3())
+  let tgt = G.state==='closeup' ? (G.closeWho==='P'?C.pitcher:C.batter).head.localToWorld(new THREE.Vector3(0,-.12,1.02))
     : (G.state==='play'||G.state==='settle') ? ball.position
     : G.mode==='pitch' ? new THREE.Vector3(BSIDE*1.5,3,0.5) : new THREE.Vector3(0,3,-60);
   bokeh.uniforms.focus.value=camera.position.distanceTo(tgt);
