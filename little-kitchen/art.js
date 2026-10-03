@@ -1,9 +1,12 @@
-// Code-native food illustrations: the same ingredients stay visible from board to plate.
+import {atlasURL,sprites} from './food-sprites.js?v=7';
+// Food textures stay visible from the fridge through the board and onto the plate.
 const colors={carrot:'#ed8d35',broccoli:'#5e9b53',rice:'#f4e6c6',seaweed:'#46734f',bread:'#d6a063',tomato:'#e46e55',flour:'#f1ddb3',milk:'#fff5df',strawberry:'#d85e6d',fish:'#e8ac8d'};
 export function foodDrawing(id,{cut=0,cooked=0,piece=false}={}){
+  if(sprites[id]&&!cut&&!(piece&&['milk','flour','rice','egg'].includes(id))){const [x,y,w,h]=sprites[id].frame,scale=180/Math.max(w,h),left=100-w*scale/2,top=100-h*scale/2;return `<defs><clipPath id="food-${id}"><rect x="${left}" y="${top}" width="${w*scale}" height="${h*scale}"/></clipPath></defs><image href="${atlasURL}" x="${left-x*scale}" y="${top-y*scale}" width="${1536*scale}" height="${1024*scale}" clip-path="url(#food-${id})"/>`;}
   const shade=cooked?'#a86237':'#bd783e';
   if(piece){
     switch(id){
+      case 'egg':return '<defs><radialGradient id="white"><stop stop-color="#fff9e8"/><stop offset="1" stop-color="#f0ecd49c"/></radialGradient><radialGradient id="yolk"><stop stop-color="#ffdc50"/><stop offset="1" stop-color="#efa626"/></radialGradient></defs><path d="M25 93q-3-39 48-40 22-29 62-7 37 0 40 42 20 47-32 61-47 32-92-2-34-7-26-54" fill="url(#white)" stroke="#e9dfbc" stroke-width="2"/><ellipse cx="102" cy="98" rx="31" ry="28" fill="url(#yolk)"/><ellipse cx="93" cy="88" rx="12" ry="5" fill="#fff3a1" opacity=".7"/>';
       case 'carrot':return '<ellipse cx="100" cy="100" rx="53" ry="40" fill="#ee963b" stroke="#c87129" stroke-width="7"/><ellipse cx="100" cy="100" rx="24" ry="19" fill="#f7ba61"/><path d="M66 81l12 9m44 28l11 5" stroke="#ffd28a" stroke-width="5"/>';
       case 'tomato':return '<path d="M39 73q61-68 123 4L102 155Z" fill="#e86e53" stroke="#bd4f3e" stroke-width="6"/><path d="M54 76q48-44 92 2l-43 58Z" fill="#f4976a"/><path d="M79 76l10 8m22-10l-7 10m22 10l-12 4" stroke="#ffe3a1" stroke-width="8" stroke-linecap="round"/>';
       case 'broccoli':return '<path d="M88 97l-9 59h36l-7-60" fill="#a4bd69" stroke="#648c46" stroke-width="5"/><g fill="#6b9f50" stroke="#427943" stroke-width="5"><circle cx="70" cy="91" r="28"/><circle cx="125" cy="91" r="29"/><circle cx="98" cy="65" r="35"/></g><g fill="#91b865"><circle cx="88" cy="50" r="8"/><circle cx="61" cy="82" r="7"/></g>';

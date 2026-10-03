@@ -1,8 +1,12 @@
 import assert from 'node:assert/strict';
 import {foods,methods,fresh,toggleFood,cook,dish,serve,restore} from '../model.js';
-const ids=Object.keys(foods);let combinations=0;
-for(let mask=1;mask<2**ids.length;mask++){
-  const s=fresh();for(let i=0;i<ids.length;i++)if(mask&(1<<i))toggleFood(s,ids[i]);
+const ids=Object.keys(foods),original=['carrot','broccoli','rice','seaweed','bread','tomato','flour','milk','strawberry','fish'],sets=[];let combinations=0;
+// Retain exhaustive coverage of the original ten foods, then cover every new food and pair.
+for(let mask=1;mask<2**original.length;mask++)sets.push(original.filter((_,i)=>mask&(1<<i)));
+for(let i=0;i<ids.length;i++){sets.push([ids[i]]);for(let j=i+1;j<ids.length;j++)sets.push([ids[i],ids[j]]);}
+sets.push(ids);
+for(const selected of sets){
+  const s=fresh();for(const id of selected)toggleFood(s,id);
   const chosen=[...s.ingredients];
   for(const tool of Object.keys(methods)){
     assert(cook(s,tool));const meal=dish(s);assert.equal(meal.method,tool);

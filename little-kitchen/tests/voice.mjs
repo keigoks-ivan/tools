@@ -1,7 +1,9 @@
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {createNarrator} from '../voice.js';
+import {foods} from '../model.js';
 const manifest=JSON.parse(readFileSync(new URL('../assets/voice/lines.json',import.meta.url)));
+for(const id of Object.keys(foods))assert(manifest.lines[`word-${id}`],`${id} needs recorded narration`);
 for(const[key,text] of Object.entries(manifest.lines)){
   const clip=readFileSync(new URL(`../assets/voice/${key}.wav`,import.meta.url));
   assert.equal(clip.toString('ascii',0,4),'RIFF');assert(clip.length>8000);assert(!/[\u3400-\u9fff]/u.test(text));
@@ -15,4 +17,4 @@ enabled=false;await narration.speak('thanks','Yummy! Thank you!');assert.equal(s
 let resolve;enabled=true;
 const slow=createNarrator({allowed:()=>enabled,getAudioContext:()=>context,fetcher:()=>new Promise(r=>resolve=r)});
 const pending=slow.speak('thanks','Yummy! Thank you!');slow.stop();resolve({ok:true,arrayBuffer:async()=>new ArrayBuffer(10)});await pending;assert.equal(starts,2,'cancelled loading clip cannot speak later');
-console.log('PASS: 15 current WAV clips; fixed female playback; replay cache; mute; stale audio cancellation.');
+console.log(`PASS: ${Object.keys(manifest.lines).length} current WAV clips; fixed female playback; replay cache; mute; stale audio cancellation.`);

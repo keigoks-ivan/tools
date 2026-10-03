@@ -1,8 +1,8 @@
-import {foods,guests,fresh,restore} from './model.js?v=3';
-import {createNarrator} from './voice.js?v=3';
-import {foodSVG,utensil,boardArt,cookwareArt,plateArt} from './art.js?v=5';
-import {createWorkshop,addFood,cutFood,hitPiece,transferToCooker,addLiquid,pushFood,tossFood,plateFood,stepWorkshop} from './simulation.js?v=6';
-import {createRenderer} from './renderer.js?v=6';
+import {foods,guests,fresh,restore} from './model.js?v=7';
+import {createNarrator} from './voice.js?v=7';
+import {foodSVG,utensil,boardArt,cookwareArt,plateArt} from './art.js?v=7';
+import {createWorkshop,addFood,cutFood,hitPiece,transferToCooker,addLiquid,pushFood,tossFood,plateFood,stepWorkshop} from './simulation.js?v=7';
+import {createRenderer} from './renderer.js?v=7';
 const $=id=>document.getElementById(id),s=createWorkshop();
 let prefs=fresh();try{prefs=restore(localStorage.getItem('little-bloom-v3'),localStorage.getItem('little-bloom-v2')||localStorage.getItem('little-bloom-v1'));}catch{}
 if(new URLSearchParams(location.search).get('muted')==='1')prefs.sound=false;
@@ -43,7 +43,8 @@ function render(){
   if(s.station==='fridge'){
     $('foodShelf').dataset.page=String(page);
     $('foodShelf').innerHTML=Object.entries(foods).slice(page*6,page*6+6).map(([id,f])=>button(foodSVG(id),f[1],`food:${id}`,'fridge-food')).join('');
-    $('tray').innerHTML=button('‹','冰箱上一層','page:0','page-button',page===0?'disabled':'')+'<span class="shelf-indicator" aria-hidden="true">'+(page===0?'● ○':'○ ●')+'</span>'+button('›','冰箱下一層','page:1','page-button',page===1?'disabled':'');
+    const pages=Math.ceil(Object.keys(foods).length/6);
+    $('tray').innerHTML=button('‹','冰箱上一層',`page:${page-1}`,'page-button',page===0?'disabled':'')+'<span class="shelf-indicator" aria-hidden="true">'+Array.from({length:pages},(_,i)=>i===page?'●':'○').join(' ')+'</span>'+button('›','冰箱下一層',`page:${page+1}`,'page-button',page===pages-1?'disabled':'');
     $('liveStatus').textContent='打開冰箱，拿一樣食材到砧板。';
   }else if(s.station==='board'){
     $('tray').innerHTML=button(icon('knife'),'拿刀切食材','tool:knife',activeTool==='knife'?'selected':'')+button(icon('hand'),'用手搬食材','tool:hand',activeTool==='hand'?'selected':'')+button(icon('wash'),'沖洗砧板上的食材','wash')+button(icon('stove')+'<span class="transfer-arrow">↘</span>','把砧板食材倒進鍋裡','transfer','pour-button',s.board.length?'':'disabled');
@@ -70,7 +71,7 @@ function act(action){
   if(!started||$('guide').open||celebrating||transferTimer)return;
   const [type,id]=action.split(':');
   if(type==='station')changeStation(id);
-  else if(type==='page'){page=id==='1'?1:0;render();}
+  else if(type==='page'){const next=Number(id);if(Number.isInteger(next))page=Math.max(0,Math.min(Math.ceil(Object.keys(foods).length/6)-1,next));render();}
   else if(type==='food'){if(addFood(s,id)){activeTool='knife';render();narrator.speak(`word-${id}`,`${foods[id][2]}. ${foods[id][2]}.`);}}
   else if(type==='tool'){activeTool=id==='hand'?'hand':'knife';pointer=null;render();}
   else if(type==='wash'){effect('wash');tone('pour');}

@@ -1,10 +1,17 @@
 // A toy kitchen: every ingredient works with every tool. No orders or recipes.
 export const foods = {
   carrot:['🥕','紅蘿蔔','carrot','#ef9b45'], broccoli:['🥦','花椰菜','broccoli','#88ad58'],
-  rice:['🍚','白飯','rice','#ede0bb'], seaweed:['🌿','海苔','seaweed','#79975d'],
-  bread:['🍞','麵包','bread','#d6a76b'], tomato:['🍅','番茄','tomato','#e77862'],
-  flour:['🌾','麵粉','flour','#e8d4a2'], milk:['🥛','牛奶','milk','#f3e5d1'],
-  strawberry:['🍓','草莓','strawberry','#e99aab'], fish:['🐟','魚','fish','#e6b59b']
+  tomato:['🍅','番茄','tomato','#e77862'], potato:['🥔','馬鈴薯','potato','#e6cc97'],
+  cucumber:['🥒','小黃瓜','cucumber','#a2bd79'], corn:['🌽','玉米','corn','#edcf68'],
+  onion:['🧅','洋蔥','onion','#e4c6a2'], mushroom:['🍄','蘑菇','mushroom','#c5a68a'],
+  pepper:['🫑','甜椒','bell pepper','#e76f58'], strawberry:['🍓','草莓','strawberry','#e99aab'],
+  apple:['🍎','蘋果','apple','#edd2a0'], banana:['🍌','香蕉','banana','#f1dc9b'],
+  orange:['🍊','柳橙','orange','#f2ad56'], egg:['🥚','雞蛋','egg','#efcf7b'],
+  chicken:['🍗','雞肉','chicken','#e9c0b1'], fish:['🐟','鮭魚','salmon','#e6b59b'],
+  shrimp:['🦐','蝦仁','shrimp','#edc2a8'], tofu:['⬜','豆腐','tofu','#eee3ca'],
+  cheese:['🧀','起司','cheese','#edce7b'], bread:['🍞','麵包','bread','#d6a76b'],
+  seaweed:['🌿','海苔','seaweed','#79975d'], rice:['🍚','白飯','rice','#ede0bb'],
+  milk:['🥛','牛奶','milk','#f3e5d1'], flour:['🌾','麵粉','flour','#e8d4a2']
 };
 export const methods={pot:['🍲','煮湯'],pan:['🍳','平底鍋'],blender:['🥤','果汁機']};
 export const guests=['Bunny','Bear','Mia','Leo'];

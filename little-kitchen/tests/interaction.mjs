@@ -4,6 +4,9 @@ import {readFileSync} from 'node:fs';
 import * as sim from '../simulation.js';
 import * as model from '../model.js';
 import * as art from '../art.js';
+import {sprites} from '../food-sprites.js';
+import {mixtureColor} from '../renderer.js';
+assert.equal(sim.foodIds.length,24);assert.deepEqual(Object.keys(sprites).sort(),[...sim.foodIds].sort());
 // Geometry must preserve the same ingredient and its texture through real cuts.
 for(const id of sim.foodIds){
   for(const angle of [0,.3,1.2]){
@@ -11,11 +14,14 @@ for(const id of sim.foodIds){
     assert.equal(sim.cutFood(s,{x:15,y:10},{x:130,y:10}),0,'empty space is not a chop');
     const cut=sim.cutFood(s,{x:120,y:270},{x:610,y:270});
     if(['milk','flour','rice'].includes(id))assert.equal(cut,0);else assert.equal(cut,1);
-    const total=s.board.reduce((n,p)=>n+sim.area(p.poly),0);assert(Math.abs(total-original)<1e-6,`${id} must retain its area`);
+    const total=s.board.reduce((n,p)=>n+sim.area(p.poly),0);if(id==='egg'){assert.equal(s.board.length,1);assert(s.board[0].cracked&&s.board[0].poured);}else assert(Math.abs(total-original)<1e-6,`${id} must retain its area`);
     assert(s.board.every(piece=>piece.id===id));
   }
 }
 const square=[{x:-100,y:-100},{x:100,y:-100},{x:100,y:100},{x:-100,y:100}];
+const egg=sim.createWorkshop();sim.addFood(egg,'egg');sim.transferToCooker(egg);assert(egg.vessels.pan[0].cracked&&egg.vessels.pan[0].poured,'egg shell stays out of the pan');
+const untouched=sim.createWorkshop(),shell=sim.addFood(untouched,'egg'),edge=shell.poly.findIndex((p,i)=>p.y===shell.poly[(i+1)%shell.poly.length].y),y=shell.y+shell.poly[edge].y*shell.scale;assert.equal(sim.cutFood(untouched,{x:1000,y},{x:1200,y}),0,'a distant stroke along the extension of an edge cannot crack the egg');assert(!shell.cracked);
+const juice=sim.createWorkshop(),fruit=sim.addFood(juice,'orange');assert.equal(mixtureColor([fruit]),model.foods.orange[3]);sim.cutFood(juice,{x:120,y:270},{x:610,y:270});assert.equal(mixtureColor(juice.board),model.foods.orange[3],'cutting does not change juice color');sim.addFood(juice,'milk');assert.notEqual(mixtureColor(juice.board),model.foods.orange[3],'milk lightens the actual mixture');
 for(const x of [-70,0,70]){const pieces=sim.splitPolygon(square,{x,y:-150},{x,y:150});assert(pieces);assert(Math.abs(pieces.reduce((n,p)=>n+sim.area(p),0)-40000)<1e-6);if(x)assert.notEqual(sim.area(pieces[0]),sim.area(pieces[1]),'cut position changes portion size');}
 for(const method of ['pan','pot','blender'])for(const id of sim.foodIds){const work=sim.createWorkshop();work.method=method;sim.addFood(work,id);assert.equal(sim.transferToCooker(work),1);assert.equal(work.vessels[method][0].id,id);assert(sim.plateFood(work));assert.equal(work.plate[0].id,id);}
 const physical=sim.createWorkshop();sim.addFood(physical,'carrot');sim.cutFood(physical,{x:150,y:270},{x:610,y:270});const uid=physical.board[0].uid;assert.equal(sim.transferToCooker(physical,uid),1);assert.equal(physical.board.length,1);assert.equal(physical.vessels.pan.length,1);assert.equal(sim.transferToCooker(physical,uid),0,'the same piece cannot duplicate');
@@ -43,6 +49,7 @@ q.api.act('tool:hand');let piece=q.api.read().s.board[0],original={x:piece.x,y:p
 q.pointer('pointerdown',piece.x,piece.y);q.pointer('pointermove',620,470);q.pointer('pointerup',620,470);assert.equal(q.api.read().s.board.length,1);assert.equal(q.api.read().s.vessels.pan.length,1);
 q.api.act('station:fridge');q.api.act('food:broccoli');assert.equal(q.api.read().s.board.length,2);assert.equal(q.api.read().s.vessels.pan.length,1,'adding food keeps cooking contents');q.api.act('transfer');q.flush(480);assert.equal(q.api.read().s.station,'stove');assert.equal(q.api.read().s.vessels.pan.length,3);
 q.api.act('heat');q.api.act('liquid:oil');q.api.act('salt');assert(q.api.read().s.heat.pan>0);assert(q.api.read().s.liquid.pan>0);assert(q.api.read().s.seasoning>0);q.api.act('plate');assert.equal(q.api.read().s.station,'serve');q.api.act('feed');q.api.act('feed');assert.equal(q.api.read().prefs.served,1);q.flush(1800);assert.equal(q.api.read().s.station,'fridge');assert.equal(q.api.read().s.plate.length,0);assert.equal(q.hardware(),0);
+const shelves=setup();shelves.element('start').onclick();const shelfFoods=[];for(let page=0;page<4;page++){shelves.api.act(`page:${page}`);const html=shelves.element('foodShelf').innerHTML;const ids=[...html.matchAll(/data-action="food:([a-z]+)"/g)].map(m=>m[1]);assert.equal(ids.length,6);shelfFoods.push(...ids);}assert.deepEqual(shelfFoods,sim.foodIds);shelves.api.act('page:99');assert.equal(shelves.element('foodShelf').dataset.page,'3');shelves.api.act('page:-1');assert.equal(shelves.element('foodShelf').dataset.page,'0');
 const motor=setup('');motor.element('start').onclick();motor.api.act('food:strawberry');motor.api.act('station:stove');motor.api.act('method:blender');motor.api.act('station:board');motor.api.act('transfer');motor.flush(480);
 const event={pointerId:1,isPrimary:true,target:{closest:()=>({})}};motor.element('tray').listeners.pointerdown(event);assert(motor.api.read().s.blending);assert.equal(motor.loops(),1);motor.element('tray').listeners.pointerup(event);assert(!motor.api.read().s.blending);assert.equal(motor.loops(),0);motor.element('tray').listeners.pointerdown(event);motor.context.document.hidden=true;motor.context.document.visibilitychange();assert(!motor.api.read().s.blending);assert.equal(motor.loops(),0);motor.context.document.hidden=false;motor.context.document.visibilitychange();assert.equal(motor.loops(),0);
 const sound=setup('');sound.element('start').onclick();sound.api.act('food:carrot');sound.api.act('transfer');sound.flush(480);sound.api.act('heat');assert.equal(sound.loops(),1);sound.element('voice').onclick();assert.equal(sound.loops(),0);sound.element('voice').onclick();assert.equal(sound.loops(),1);sound.element('parents').onclick();assert.equal(sound.loops(),0);sound.element('closeGuide').onclick();sound.element('guide').listeners.close();assert.equal(sound.loops(),1);sound.api.act('station:fridge');assert.equal(sound.loops(),0,'moving away quiets the worktop');sound.api.act('station:stove');assert.equal(sound.loops(),1);sound.api.act('plate');assert.equal(sound.loops(),0);

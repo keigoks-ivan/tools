@@ -1,8 +1,9 @@
 // The workshop owns physical food pieces, rather than a sequence of tap counters.
-export const foodIds=['carrot','broccoli','rice','seaweed','bread','tomato','flour','milk','strawberry','fish'];
+import {foods} from './model.js?v=7';
+import {sprites} from './food-sprites.js?v=7';
+export const foodIds=Object.keys(foods);
 const circle=(rx,ry,n=20)=>Array.from({length:n},(_,i)=>({x:Math.cos(i*Math.PI*2/n)*rx,y:Math.sin(i*Math.PI*2/n)*ry}));
-const shapes={carrot:[[-60,76],[4,-31],[27,-45],[32,-82],[67,-88],[80,-48],[92,-46],[88,-19],[63,5]],fish:[[-87,-21],[-48,8],[-15,-26],[36,-41],[87,-6],[31,47],[-48,23],[-87,40]],bread:[[-66,-45],[-57,-70],[10,-77],[59,-60],[64,-15],[61,77],[-60,77]],seaweed:[[-75,-52],[65,-69],[80,56],[-59,81]],milk:[[-37,-58],[-25,-78],[22,-78],[40,-57],[40,78],[-38,78]],flour:[[-47,-73],[45,-73],[40,-47],[60,68],[2,87],[-56,68],[-44,-47]]};
-export function polygon(id){return shapes[id]?shapes[id].map(([x,y])=>({x,y})):circle(id==='rice'?94:86,id==='strawberry'?95:90);}
+export function polygon(id){return sprites[id]?sprites[id].poly.map(([x,y])=>({x,y})):circle(86,90);}
 export function area(poly){return Math.abs(poly.reduce((sum,p,i)=>{const q=poly[(i+1)%poly.length];return sum+p.x*q.y-q.x*p.y;},0))/2;}
 function center(poly){return {x:poly.reduce((n,p)=>n+p.x,0)/poly.length,y:poly.reduce((n,p)=>n+p.y,0)/poly.length};}
 export function localPoint(piece,point){const c=Math.cos(-piece.angle),s=Math.sin(-piece.angle),x=(point.x-piece.x)/piece.scale,y=(point.y-piece.y)/piece.scale;return {x:x*c-y*s,y:x*s+y*c};}
@@ -17,7 +18,7 @@ export function splitPolygon(poly,a,b){
 function segmentTouches(poly,a,b){
   if(contains(poly,a)||contains(poly,b))return true;
   const cross=(a,b,c)=>(b.x-a.x)*(c.y-a.y)-(b.y-a.y)*(c.x-a.x);
-  return poly.some((p,i)=>{const q=poly[(i+1)%poly.length];return cross(a,b,p)*cross(a,b,q)<=0&&cross(p,q,a)*cross(p,q,b)<=0;});
+  return poly.some((p,i)=>{const q=poly[(i+1)%poly.length];return Math.max(a.x,b.x)>=Math.min(p.x,q.x)&&Math.min(a.x,b.x)<=Math.max(p.x,q.x)&&Math.max(a.y,b.y)>=Math.min(p.y,q.y)&&Math.min(a.y,b.y)<=Math.max(p.y,q.y)&&cross(a,b,p)*cross(a,b,q)<=0&&cross(p,q,a)*cross(p,q,b)<=0;});
 }
 export function createWorkshop(){return {station:'fridge',board:[],vessels:{pan:[],pot:[],blender:[]},plate:[],method:'pan',heat:{pan:0,pot:0},liquid:{pan:0,pot:0,blender:0},seasoning:0,blending:false,blend:0,juice:false,nextId:1,served:0};}
 export function addFood(s,id){
@@ -31,7 +32,9 @@ export function cutFood(s,a,b){
   s.board=s.board.flatMap(p=>{
     if(['milk','flour','rice'].includes(p.id)||available<1)return [p];
     const la=localPoint(p,a),lb=localPoint(p,b);
-    if(!segmentTouches(p.poly,la,lb))return [p];const parts=splitPolygon(p.poly,la,lb);if(!parts)return [p];cuts++;available--;
+    if(!segmentTouches(p.poly,la,lb))return [p];
+    if(p.id==='egg'&&!p.cracked){p.cracked=true;p.poured=true;p.poly=circle(75,58);p.tex={x:-100,y:-100};cuts++;return [p];}
+    const parts=splitPolygon(p.poly,la,lb);if(!parts)return [p];cuts++;available--;
     return parts.map((poly,i)=>{const c=center(poly),cos=Math.cos(p.angle),sin=Math.sin(p.angle),sign=i?1:-1,shift=v=>({x:v.x-c.x,y:v.y-c.y}),onLine=poly.filter(v=>Math.abs((lb.x-la.x)*(v.y-la.y)-(lb.y-la.y)*(v.x-la.x))<1e-5),edges=(p.edges||[]).map(edge=>({a:shift(edge.a),b:shift(edge.b)}));if(onLine.length>=2)edges.push({a:shift(onLine[0]),b:shift(onLine[onLine.length-1])});return {...p,uid:s.nextId++,x:p.x+(c.x*cos-c.y*sin)*p.scale+normal.x*sign*11,y:p.y+(c.x*sin+c.y*cos)*p.scale+normal.y*sign*11,poly:poly.map(shift),tex:{x:p.tex.x-c.x,y:p.tex.y-c.y},edges,vx:normal.x*sign*90,vy:normal.y*sign*90,spin:sign*.16,cut:p.cut+1};});
   });return cuts;
 }
@@ -39,7 +42,7 @@ function vesselPlace(p,index){p.x=350+Math.cos(index*2.4)*(40+index%4*25);p.y=24
 export function transferToCooker(s,uid=null){
   const moving=uid===null?[...s.board]:s.board.filter(p=>p.uid===uid);if(!moving.length)return 0;
   const ids=new Set(moving.map(p=>p.uid));s.board=s.board.filter(p=>!ids.has(p.uid));
-  for(const p of moving){if(['milk','flour','rice'].includes(p.id)){p.poured=true;p.poly=circle(65,60);p.tex={x:-100,y:-100};}vesselPlace(p,s.vessels[s.method].length);s.vessels[s.method].push(p);}
+  for(const p of moving){if(['milk','flour','rice'].includes(p.id)||p.id==='egg'&&!p.cracked){p.poured=true;p.cracked=p.id==='egg';p.poly=circle(65,60);p.tex={x:-100,y:-100};}vesselPlace(p,s.vessels[s.method].length);s.vessels[s.method].push(p);}
   if(s.method==='pan'&&s.vessels.pan.some(p=>p.id==='flour')&&s.vessels.pan.some(p=>p.id==='milk'))for(const p of s.vessels.pan)if(['flour','milk'].includes(p.id)){p.pancake=true;p.poly=circle(70,50);}
   s.juice=false;return moving.length;
 }

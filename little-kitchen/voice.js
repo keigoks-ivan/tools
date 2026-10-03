@@ -28,7 +28,7 @@ export function createNarrator({allowed, getAudioContext, onStatus=()=>{}, fetch
       let pending=buffers.get(key);
       if(!pending){
         pending=(async()=>{
-          const response=await fetcher(new URL(`./assets/voice/${key}.wav`,import.meta.url));
+          const response=await fetcher(new URL(`./assets/voice/${key}.wav?v=7`,import.meta.url));
           if(!response.ok)throw Error('Voice clip unavailable');
           return context.decodeAudioData(await response.arrayBuffer());
         })();
