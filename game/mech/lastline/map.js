@@ -218,14 +218,15 @@ export function buildMap(scene, mats, solid, PL, A, world) {
     const material = world.terrainMesh.material, compile = material.onBeforeCompile;
     material.onBeforeCompile = sh => {
       compile(sh);
-      sh.fragmentShader = sh.fragmentShader.replace('vec4 G = battlefield', `if(vTW.x > ${SHORE.toFixed(1)}) discard;\n        vec4 G = battlefield`);
+      sh.fragmentShader = sh.fragmentShader.replace('vec2 cityP=', `if(vTW.x > ${SHORE.toFixed(1)}) discard;\n        vec2 cityP=`);
     };
-    material.customProgramCacheKey = () => 'lastline-coast-v1'; material.needsUpdate = true;
+    material.customProgramCacheKey = () => 'lastline-coast-v2'; material.needsUpdate = true;
     scene.fog.color.setRGB(.39, .47, .52); scene.fog.density = .0003;
     world.sun.color.setRGB(1, .94, .84); world.sun.intensity = 3.4;
     world.hemi.color.setRGB(.44, .58, .73); world.hemi.intensity = .36;
     scene.environmentIntensity = .48;
     world.skyDome.material.uniforms.fogCol.value.copy(scene.fog.color);
+    world.buildKobeBackdrop({harbor:true});
   }
   b.B.portGround.quad([-250,.025,320], [SHORE,.025,320], [SHORE,.025,-590], [-250,.025,-590], [0,1,0]);
   // 海堤有厚度與潮痕，沒有穿越海面的隱形地板。

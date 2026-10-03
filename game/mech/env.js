@@ -9,6 +9,7 @@ import { roofline } from './roofline.js';
 import { streetfront } from './streetfront.js';
 import { japaneseScenery } from './japan.js';
 import { decodeKobeRelief, kobeCityHeight } from './kobe-relief.mjs';
+import { kobeCityBlocks, kobeRailway, kobeWaterfront, KOBE_CITY } from './kobe-city.mjs';
 import { BATTLEFIELDS, fieldHeight, fieldLayout, routeDistance, fieldGridCoordinate, fieldGridIndex } from './battlefields.js';
 
 import { fieldTreeGeometry, fieldShrubGeometry, fieldRockGeometry, fieldArchitecture, fieldLeafMaterial, fieldRadar, fieldGroundMask } from './fieldart.js';
@@ -303,9 +304,11 @@ function terrainMaterial(A) {
   });
   mat.userData.battlefield = { value: 0 };
   mat.userData.fieldMask = { value: null };
+  mat.userData.cityLandUse = { value: null };
   mat.onBeforeCompile = (sh) => {
     Object.assign(sh.uniforms, {
       battlefield: mat.userData.battlefield, fieldMask: mat.userData.fieldMask,
+      cityLandUse: mat.userData.cityLandUse,
       surfaceAtlas:A.surfaceAtlas, surfaceReady:A.surfaceReady,
       asphD: { value: A.asphD }, asphN: { value: A.asphN }, asphA: { value: A.asphA },
       rubD: { value: A.rubD }, rubN: { value: A.rubN }, rockD: { value: A.rockD }, rockN: { value: A.rockN },
@@ -318,7 +321,7 @@ function terrainMaterial(A) {
         uniform sampler2D asphD, asphN, asphA, rubD, rubN, rockD, rockN, surfaceAtlas;
         uniform float surfaceReady;
         vec3 scanned(vec2 uv,vec2 tile){return texture2D(surfaceAtlas,tile+vec2(.008)+fract(uv)*.484).rgb;}
-        uniform float battlefield; uniform sampler2D fieldMask;
+        uniform float battlefield; uniform sampler2D fieldMask, cityLandUse;
         varying vec3 vTW; varying vec3 vTN;
         float th(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7))) * 43758.5453); }
         float tn(vec2 p){ vec2 i=floor(p), f=fract(p); f=f*f*(3.0-2.0*f);
@@ -330,12 +333,14 @@ function terrainMaterial(A) {
           float B = ${CITY.block.toFixed(1)}, R = ${CITY.road.toFixed(1)}, W = ${CITY.walk.toFixed(1)};
           vec2 c = p - B * floor(p / B + 0.5);
           vec2 ac = abs(c);
-          float inCity = 1.0 - step(${CITY.half.toFixed(1)}, max(abs(p.x), abs(p.y)));
+          float core = 1.0 - step(${CITY.half.toFixed(1)}, max(abs(p.x), abs(p.y)));
+          float developed = texture2D(cityLandUse,p/10000.0+.5).r;
+          float inCity = max(core,developed);
           float extX = step(abs(p.x), R), extZ = step(abs(p.y), R);
           float roadV = max(step(ac.x, R) * inCity, extX);   // 南北向
           float roadH = max(step(ac.y, R) * inCity, extZ);   // 東西向
           float road = max(roadV, roadH);
-          float walk = (1.0 - road) * inCity * step(min(ac.x, ac.y), W);
+          float walk = (1.0 - road) * max(inCity * step(min(ac.x, ac.y), W),developed*.82);
           float inter = roadV * roadH;
           float white = 0.0, yellow = 0.0;
           // 南北向道路標線
@@ -358,7 +363,9 @@ function terrainMaterial(A) {
         }`)
       .replace('#include <map_fragment>', `
         if (battlefield < .5 && vTW.z > 820.0) discard;
-        vec4 G = battlefield < 0.5 ? ground(vTW.xz) : vec4(0.0);
+        vec2 cityP=battlefield>5.5?vec2(-vTW.z-180.0,vTW.x-140.0):vTW.xz;
+        vec4 G = battlefield < 0.5 || battlefield > 5.5 ? ground(cityP) : vec4(0.0);
+        if(battlefield>5.5)G*=texture2D(cityLandUse,cityP/10000.0+.5).r;
         if (battlefield > 4.5 && battlefield < 5.5) {
           float runway = (1.0 - smoothstep(46.0, 48.0, abs(vTW.x + 420.0))) * (1.0 - smoothstep(880.0, 900.0, abs(vTW.z)));
           float line = aaLine(abs(vTW.x + 420.0), 0.7) * step(fract(vTW.z / 42.0), 0.55);
@@ -718,7 +725,10 @@ function architecture(B, signs, x0, x1, z0, z1, H, style, F, district, roofTop, 
         // 住宅街的外掛冷氣與窗上遮陽板；公尺尺度，沒有放大的裝飾。
         for (let y = floor + 0.4; y < Math.min(H - 1, floor * 4); y += floor) for (let a = a0 + 4; a < a1 - 2; a += 9) {
           box(a - 0.45, a + 0.45, y, y + 0.6, 0, 0.45, [0.62, 0.64, 0.62, 0, 2]);
-          for (let k = 0; k < 4; k++) box(a - 0.3, a + 0.3, y + 0.12 + k * 0.09, y + 0.15 + k * 0.09, 0.45, 0.46, steel);
+          for (let k = 0; k < 4; k++) {
+            const bot=y+.12+k*.09;
+            face([point(a-.3,bot,.46),point(a+.3,bot,.46),point(a+.3,bot+.03,.46),point(a-.3,bot+.03,.46)],steel);
+          }
         }
       }
     }
@@ -978,6 +988,7 @@ export class World {
     const surfacesLoaded = new Promise(resolve => {
       this._surfaceLoaded = resolve;
     });
+    this.surfacesLoaded = surfacesLoaded;
     new THREE.TextureLoader().load(new URL('./assets/field-surfaces-v1.webp',import.meta.url).href,texture=>{
       const c=document.createElement('canvas');c.width=c.height=1024;c.getContext('2d').drawImage(texture.image,0,0,1024,1024);
       texture.image=c;texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=4;texture.needsUpdate=true;
@@ -1504,21 +1515,7 @@ export class World {
         }
       }
     }
-    // 神戶市區沿海岸延伸到山麓，不能在作戰街區外突然變成草原。
-    // 遠景只有牆面與平屋頂，共用現有立面；不用詳細窗框、碰撞或動態物件。
-    const distant=[new GeoBucket(),new GeoBucket()], distantRoof=new GeoBucket();
-    const hs=(x,z)=>{const v=Math.sin(x*12.9898+z*78.233)*43758.5453;return v-Math.floor(v);};
-    for(let z=-3100;z<=650;z+=100)for(let x=-3300;x<=3300;x+=95) {
-      if(Math.max(Math.abs(x),Math.abs(z))<900||this.terrain.height(x,z)>125||hs(x,z)<.22)continue;
-      const px=x+hs(z,x)*25,pz=z+hs(x+7,z)*20,w=18+hs(x,z+1)*26,d=16+hs(x+1,z)*20;
-      const ground=Math.max(...[[px,pz],[px+w,pz],[px,pz+d],[px+w,pz+d]].map(([a,b])=>this.terrain.height(a,b))),H=ground+3.4*(2+Math.floor(hs(x+2,z)*6)),i=hs(x,z+5)<.6?0:1;
-      const tint=.50+hs(x,z+8)*.38,warm=hs(x,z+11);
-      addWalls(distant[i],px,px+w,pz,pz+d,ground-2,H,[tint,tint*(.9+warm*.15),tint*(.78+warm*.25),0],0,0,null,FACADES[i+3]);
-      distantRoof.quad([px,H,pz+d],[px+w,H,pz+d],[px+w,H,pz],[px,H,pz],[0,1,0],[[0,0],[w/4,0],[w/4,d/4],[0,d/4]],[.55,.56,.54,0,1]);
-    }
-    for(const [bucket,mat] of [[distant[0],fmats[3]],[distant[1],fmats[4]],[distantRoof,roofMat]]) {
-      const mesh=new THREE.Mesh(bucket.geometry(),mat);mesh.name='kobe-foothill-city';mesh.userData.noAO=true;this.scene.add(mesh);
-    }
+    this.buildKobeBackdrop();
     for (const bk of buckets) {
       for (let s = 0; s < NF; s++) {
         const g = bk.f[s].geo = bk.f[s].geometry();
@@ -1532,6 +1529,76 @@ export class World {
       if (sg) { const m = new THREE.Mesh(sg, signMat); m.receiveShadow = true; this.scene.add(m); }
     }
     this._initBlds();
+  }
+
+  buildKobeBackdrop({ harbor = false } = {}) {
+    // 外圍街廓使用既有立面與建材；沒有角色、碰撞、陰影或每幀更新。
+    if(!this.cityFacadeMaterials) {
+      this.cityFacadeMaterials=FACADES.map((f,i)=>buildingMaterial(this.A,i));this.cityFacadeReady=false;
+      this.surfacesLoaded.then(scan=>{
+        for(const i of [2,3,4]) {
+          const old=this.A.fac[i],maps=japaneseFacade(i,scan),mat=this.cityFacadeMaterials[i];
+          this.A.fac[i]=maps;[mat.map,mat.normalMap,mat.roughnessMap]=maps;mat.aoMap=maps[2];mat.needsUpdate=true;
+          for(const t of maps)t.anisotropy=Math.min(8,this.renderer.capabilities.getMaxAnisotropy());
+          for(const t of old)t.dispose();
+        }
+        this.cityFacadeReady=true;
+      });
+    }
+    const toWorld=(x,z)=>harbor?[z+140,-x-180]:[x,z];
+    const reserve=harbor?(x0,x1,z0,z1)=>z1>540||(z1+140>-380&&-x0-180>-850&&-x1-180<650):undefined;
+    const blocks=kobeCityBlocks((x,z)=>this.terrain.height(...toWorld(x,z)),reserve);
+    const buckets=FACADES.map(()=>new GeoBucket()),roof=new GeoBucket();
+    for(const bl of blocks)for(const lot of bl.lots) {
+      const {x0,x1,z0,z1,ground,H,style,tint,pitched}=lot;
+      addWalls(buckets[style],x0,x1,z0,z1,ground-2,H,[tint,tint*.98,tint*.93,0],0,0,null,FACADES[style]);
+      const col=pitched?[.24,.27,.28,0,3]:[.48,.5,.49,0,1],w=x1-x0,d=z1-z0;
+      if(pitched) {
+        const mid=(x0+x1)/2,top=H+Math.min(3.2,w*.16);
+        for(const p of [ [[x0,H,z1],[mid,top,z1],[mid,top,z0],[x0,H,z0]],[[mid,top,z1],[x1,H,z1],[x1,H,z0],[mid,top,z0]],
+          [[x0,H,z0],[mid,top,z0],[x1,H,z0],[x1,H,z0]],[[x1,H,z1],[mid,top,z1],[x0,H,z1],[x0,H,z1]] ]) {
+          const n=new THREE.Vector3().subVectors(new THREE.Vector3(...p[1]),new THREE.Vector3(...p[0])).cross(new THREE.Vector3().subVectors(new THREE.Vector3(...p[2]),new THREE.Vector3(...p[0]))).normalize().toArray();
+          roof.quad(...p,n,p.map(q=>[q[0]/3,q[2]/3]),col);
+        }
+      } else roof.quad([x0,H,z1],[x1,H,z1],[x1,H,z0],[x0,H,z0],[0,1,0],[[0,0],[w/4,0],[w/4,d/4],[0,d/4]],col);
+      if(style===0)addBox(roof,x0+w*.2,x1-w*.2,H,H+3.4,z0+d*.2,z1-d*.2,[.36,.39,.4,0,2],4);
+      if(style===2)for(const z of [z0,z1])addBox(roof,x0-.2,x1+.2,H-.2,H,z-.2,z+.2,[.74,.71,.64,0,1],4);
+      if(style>=3&&!pitched&&Math.hypot((x0+x1)/2,(z0+z1)/2)<2200)for(let y=ground+3.4;y<Math.min(H-1,ground+10);y+=3.4) {
+        roof.quad([x0,y,z1+.5],[x1,y,z1+.5],[x1,y,z1],[x0,y,z1],[0,1,0],[[0,0],[w/4,0],[w/4,.125],[0,.125]],[.66,.68,.66,0,1]);
+        roof.quad([x0,y-.18,z1+.5],[x1,y-.18,z1+.5],[x1,y+.4,z1+.5],[x0,y+.4,z1+.5],[0,0,1],[[0,0],[w/4,0],[w/4,.145],[0,.145]],[.72,.74,.71,0,1]);
+      }
+    }
+    const details={
+      box:(...a)=>addBox(roof,...a,4),
+      face:(a,b,c,d,col)=>{
+        const n=new THREE.Vector3().subVectors(new THREE.Vector3(...b),new THREE.Vector3(...a)).cross(new THREE.Vector3().subVectors(new THREE.Vector3(...c),new THREE.Vector3(...a))).normalize().toArray();
+        const axes=Math.abs(n[1])>.5?[0,2]:Math.abs(n[0])>.5?[2,1]:[0,1];
+        roof.quad(a,b,c,d,n,[a,b,c,d].map(p=>[p[axes[0]]/4,p[axes[1]]/4]),col);
+      },
+    };
+    kobeRailway(details,(x,z)=>this.terrain.height(...toWorld(x,z)));
+    kobeWaterfront(details,harbor?-280:0);
+    const meshes=[];
+    const detailMat=architecturalMaterial(this.A);detailMat.color.setHex(0xffffff);
+    for(const [bucket,mat] of [...buckets.map((b,i)=>[b,this.cityFacadeMaterials[i]]),[roof,detailMat]]) {
+      const g=bucket.geometry();if(!g)continue;
+      if(harbor)g.rotateY(Math.PI/2).translate(140,0,-180);
+      const mesh=new THREE.Mesh(g,mat);mesh.name='kobe-city-backdrop';mesh.userData.noAO=true;this.scene.add(mesh);meshes.push(mesh);
+    }
+    const cv=document.createElement('canvas');cv.width=cv.height=512;const ctx=cv.getContext('2d');
+    ctx.fillStyle='#000';ctx.fillRect(0,0,512,512);
+    const paved=(x0,x1,z0,z1)=>{ctx.fillStyle='#f00';ctx.fillRect((x0+5000)/10000*512,(5000-z1)/10000*512,(x1-x0)/10000*512,(z1-z0)/10000*512);};
+    for(const bl of blocks) {
+      if(bl.hillside)for(const l of bl.lots)paved(l.x0-3,l.x1+3,l.z0-3,l.z1+3);
+      else paved(bl.x0-18,bl.x1+18,bl.z0-18,bl.z1+18);
+    }
+    if(!harbor) {
+      for(const bl of this.blocks)if(bl.kind!=='park')paved(bl.lx0,bl.lx1,bl.lz0,bl.lz1);
+      paved(-KOBE_CITY.half,KOBE_CITY.half,744,820);
+    }
+    const mask=new THREE.CanvasTexture(cv);mask.name='kobe-land-use';mask.generateMipmaps=false;mask.minFilter=THREE.LinearFilter;
+    this.terrainMesh.material.userData.cityLandUse.value=mask;
+    this.kobeBackdrop={blocks,meshes,harbor};
   }
 
   // ---------------------------------------------------------------- 可破壞建築
@@ -1974,6 +2041,12 @@ export class World {
       sign: (p,id) => civic.quad(...p,normal(...p),civicUV(id),[.95,.95,.95]),
       solid: b => this.addCollider({x0:b.x0,x1:b.x1,z0:b.z0,z1:b.z1,top:b.y1}),
     }, sites);
+    const sx=KOBE_CITY.station,sy=this.terrain.height(sx,KOBE_CITY.rail)+11.5;
+    for(const x of [sx-109,sx+109])addBox(detail,x-.09,x+.09,sy+1.2,sy+1.35,KOBE_CITY.rail-9,KOBE_CITY.rail+9,[.22,.28,.28,0,2],4);
+    for(const [a,b,c,d] of [[[sx-3,sy,KOBE_CITY.rail+9.05],[sx+3,sy,KOBE_CITY.rail+9.05],[sx+3,sy+1.2,KOBE_CITY.rail+9.05],[sx-3,sy+1.2,KOBE_CITY.rail+9.05]],
+      [[sx-109.05,sy,KOBE_CITY.rail-3],[sx-109.05,sy,KOBE_CITY.rail+3],[sx-109.05,sy+1.2,KOBE_CITY.rail+3],[sx-109.05,sy+1.2,KOBE_CITY.rail-3]]]) {
+      civic.quad(a,b,c,d,normal(a,b,c),civicUV(1),[.95,.95,.95]);
+    }
     this.japanSites = sites;
     for (const [bucket,mat,name] of [[detail,architecturalMaterial(this.A),'kobe-landmarks'],[civic,civicMaterial(),'kobe-wayfinding']]) {
       const mesh = new THREE.Mesh(bucket.geometry(), mat); mesh.name = name; mesh.castShadow = bucket === detail; mesh.receiveShadow = true; scene.add(mesh);

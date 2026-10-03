@@ -15,7 +15,7 @@ async function load(path, query = '') {
   html = html.replace(/<base href="[^"]+">/, '');
   html = html.replace(/(<script type="importmap">)([\s\S]*?)(<\/script>)/, (_, a, json, b) => {
     const map = JSON.parse(json);
-    for (const file of ['kobe-relief.mjs', 'urban.js', 'japan.js', 'textures.js', 'anim.js', 'env.js', 'streetfront.js', 'stages.js', 'battlefields.js', 'fieldart.js', 'encounter.js', 'post.js', 'roofline.js', 'mechs.js', 'combat.js', 'cockpit.js', 'zero/kit.js', 'zero/map.js', 'zero/guns.js', 'zero/viewmodel.js', 'zero/main.js', 'zero/hud.js', 'zero/sfx.js', 'zero/mech6.js', 'lastline/map.js', 'lastline/script.js', 'lastline/mission.js', 'lastline/convoy.js', 'lastline/escort.mjs', 'lastline/operations.mjs', 'lastline/foot-ops.js', 'input.js', 'tactics.js', 'reinforcements.mjs', 'zero/ai.js', 'zero/script.js', 'zero/patrol.js', 'zero/recon.js', 'zero/field.js']) {
+    for (const file of ['kobe-city.mjs', 'kobe-relief.mjs', 'urban.js', 'japan.js', 'textures.js', 'anim.js', 'env.js', 'streetfront.js', 'stages.js', 'battlefields.js', 'fieldart.js', 'encounter.js', 'post.js', 'roofline.js', 'mechs.js', 'combat.js', 'cockpit.js', 'zero/kit.js', 'zero/map.js', 'zero/guns.js', 'zero/viewmodel.js', 'zero/main.js', 'zero/hud.js', 'zero/sfx.js', 'zero/mech6.js', 'lastline/map.js', 'lastline/script.js', 'lastline/mission.js', 'lastline/convoy.js', 'lastline/escort.mjs', 'lastline/operations.mjs', 'lastline/foot-ops.js', 'input.js', 'tactics.js', 'reinforcements.mjs', 'zero/ai.js', 'zero/script.js', 'zero/patrol.js', 'zero/recon.js', 'zero/field.js']) {
       const url = new URL('/game/mech/' + file, location.href).href;
       for (const key of Object.keys(map.imports)) if (new URL(key, entryBase).href === url) delete map.imports[key];
       map.imports[url] = url + '?qa=' + revision;
@@ -37,7 +37,7 @@ async function load(path, query = '') {
   const world=win.__game?.world||win.__world||win.__G?.world;
   if(world) {
     await wait(()=>world.A.surfaceReady.value===1 && world.fieldFoliageReady && world.cityFacadeReady);
-    assert(world.A.surfaceAtlas.value.image.width===1024 && (world.cityEnabled === false || [2,3,4].every(i=>world.A.fac[i][0].image.width===512 && world.A.fac[i][0].name.startsWith('city-'))),'共用建材 1024；城市立面 512，港區不建立住宅城市');
+    assert(world.A.surfaceAtlas.value.image.width===1024 && [2,3,4].every(i=>world.A.fac[i][0].image.width===512 && world.A.fac[i][0].name.startsWith('city-')),'共用建材 1024；三款城市立面均使用 512 貼圖');
     if(win.__G && win.__flow.chapter < (win.__S.FIRST_MECH||6)) assert(world.cityTreeMeshes.every(m=>!m.visible),'步兵模式不因枝葉延遲載入而打開遠處樹林');
   }
   await win.document.fonts.load('bold 45px "Noto Sans JP"', SHOP_LABELS.concat(SHOP_SUBTITLES, PORT_LABELS, CIVIC_LABELS).join(''));
@@ -294,6 +294,8 @@ async function city() {
   win.__step(2); await save('city-street');
   win.__cam.set(0, 90, 250, 0, -0.14); win.__step(2); await save('city-skyline');
   const W = win.__world;
+  assert(W.kobeBackdrop.blocks.length>900&&W.kobeBackdrop.meshes.length<=5,'沿海街廓與山麓住宅合併成五個遠景網格');
+  assert(W.terrainMesh.material.userData.cityLandUse.value.image.width===512,'街廓鋪面使用一張 512 用地遮罩');
   assert(W.cityTreeMeshes.length===3 && W.cityTreeMeshes.every(m=>m.customDepthMaterial===W.fieldTreeDepth),'城市三種枝葉剪影共用材質與陰影剪影');
   const street = W.blds.filter(b=>b.cx < -120 && b.cz < 480 && b.H < 45);
   assert(street.length > 30 && street.filter(b=>Math.min(b.w,b.d)<25).length > street.length*.7, '舊城多數街屋短邊小於 25 公尺，避免寬扁巨型住宅');
@@ -701,7 +703,7 @@ async function campaignFoot() {
   renderer = win.__renderer; post = { render: () => win.__step(1) };
   assert(S.CHAPTERS.length === 7 && S.FIRST_MECH === 4, '獨立七章，三章步兵／四章機甲');
   assert(S.ENCOUNTERS.every(e => e.ch <= 3), '步兵路線全部屬於前三章');
-  assert(S.LAYOUT === map.layout && !win.__world.cityEnabled && !win.__world.blds.length, '港區獨立地圖，沒有背後的舊住宅城市');
+  assert(S.LAYOUT === map.layout && !win.__world.cityEnabled && !win.__world.blds.length, '港區獨立地圖，任務區保留港務設施與作戰路線');
   assert(map.triangles < 120000 && map.meshes.length <= 12, `港區靜態結構 ${map.triangles} 三角形／${map.meshes.length} 合併網格`);
   win.__step(60); assert(G.vm.cur === 'smg', '續作預設衝鋒槍、三武器可切換');
   await save('lastline-infantry');
@@ -1040,6 +1042,12 @@ async function kobeArt() {
   win.__cam.set(shop.cx+12,3,shop.z1+24,Math.atan2(12,24),.04);W.followShadow(new win.__T.Vector3(shop.cx+12,3,shop.z1+24));W.sun.shadow.needsUpdate=true;win.__step(2);await save('kobe-residential',true);
   assert([2,3,4].every(i=>W.A.fac[i].every(t=>t.image.width===512&&t.name.startsWith('city-japanese-'))),'日式立面的色彩、法線與粗糙度均為 512 貼圖');
   win.__cam.set(x+90,42,980,Math.atan2(140,250),-.08);W.followShadow(new win.__T.Vector3(x+90,42,980));win.__step(2);await save('kobe-waterfront',true);
+  for(const [name,view] of [
+    ['kobe-complete-coast',[-430,92,1420,Math.atan2(-270,620),.06]],
+    ['kobe-city-station',[-140,W.height(-140,-780)+11,-780,-Math.PI/2,-.02]],
+    ['kobe-city-hillside',[-1100,W.height(-1100,-1600)+55,-1600,Math.PI,.08]],
+  ]) {win.__cam.set(...view);W.followShadow(new win.__T.Vector3(...view.slice(0,3)));W.sun.shadow.needsUpdate=true;win.__step(2);await save(name,true);}
+  assert(W.kobeBackdrop.blocks.length>900&&W.kobeBackdrop.meshes.length===5,'港景、鐵道與完整街廓沿用五個靜態材質網格');
   const stats={main:renderer.info.memory};checks.push(...result);
   await load('/game/mech/zero/index.html','?mute&god&ch=3&all&fps=0');renderer=win.__renderer;post={render:()=>win.__step(1)};
   win.__G.player.reset(new win.__T.Vector3(-56,0,-1),Math.PI/2);win.__G.player.pitch=-.03;win.__step(3);await save('kobe-motomachi',true);
@@ -1049,8 +1057,11 @@ async function kobeArt() {
   await load('/game/mech/lastline/index.html','?mute&god&ch=1&all&fps=0');renderer=win.__renderer;post={render:()=>win.__step(1)};
   win.__G.player.reset(new win.__T.Vector3(600,0,280),Math.atan2(5,125));win.__G.player.pitch=.3;win.__step(60);await save('kobe-harbor-landmarks',true);
   assert(win.__world.A.relief instanceof win.Uint16Array && win.__world.terrain.source(-4500,0)>350 && win.__world.height(600,-500)===0,'港區使用真實山脊，任務道路維持平整');
+  assert(win.__world.kobeBackdrop.harbor&&win.__world.kobeBackdrop.blocks.length>700,'港區西側與山麓補上神戶市街，保留任務區');
+  const backdropTriangles=win.__world.kobeBackdrop.meshes.reduce((n,m)=>n+m.geometry.index.count/3,0);
+  assert(backdropTriangles<70000&&win.__world.kobeBackdrop.meshes.length===5,`港區新增市景 ${backdropTriangles} 三角形，控制在七萬、五個靜態網格內`);
   assert(win.__map.triangles<120000&&win.__map.meshes.length<=11,'港區新增地標仍維持十二萬三角形內，路牌與地標漆面僅多兩個材質桶');
-  stats.harbor={triangles:win.__map.triangles,meshes:win.__map.meshes.length,memory:renderer.info.memory};checks.push(...result);
+  stats.harbor={triangles:win.__map.triangles,meshes:win.__map.meshes.length,backdropTriangles,memory:renderer.info.memory};checks.push(...result);
   assert(errors.length===0,'神戶城市、商店街與港灣沒有渲染錯誤');
   report.textContent=JSON.stringify({checks,stats,errors},null,2);state.textContent='神戶場景通過';
 }
