@@ -8,7 +8,7 @@ import { MarchDirector, LAYOUT, toWorld } from './march.js';
 import { createMarchArt } from './march-art.js?v=20261003a';
 import { createChapterWorld } from './chapter-world.js?v=20261003a';
 import { CHAPTERS } from './campaign.js';
-import { prepareRiggedOni, createRiggedOni } from './oni.js?v=20261003enemy1';
+import { prepareRiggedOni, createRiggedOni } from './oni.js?v=20261003enemy2';
 
 const params = new URLSearchParams(location.search);
 const $ = id => document.getElementById(id);

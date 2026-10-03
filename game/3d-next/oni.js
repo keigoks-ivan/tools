@@ -1,4 +1,4 @@
-import { createOniArt, ONI_LOOKS } from './oni-art.js?v=20261003enemy1';
+import { createOniArt, createOniGearTexture, ONI_LOOKS } from './oni-art.js?v=20261003enemy2';
 
 /**
  * Lightweight, fully geometric oni enemy for the 3D arena.
@@ -311,27 +311,54 @@ export function prepareRiggedOni(THREE, gltf) {
     templates[object.name] = object;
   });
   const clips = new Map(gltf.animations.map(clip => [clip.name, clip]));
-  const art = createOniArt(THREE,templates), styles = new Map();
+  const art = createOniArt(THREE,templates), gearTexture=createOniGearTexture(THREE), styles = new Map();
   function material(style) {
     if(!styles.has(style)) {
       const m=toon.clone();m.emissive.setHex((ONI_LOOKS[style] || ONI_LOOKS.grunt).glow);
       m.onBeforeCompile = shader => {
-        // The atlas is exported with glTF's top-down UVs. Neutralise only its cloth
-        // patch before vertex tinting, so green/red uniforms keep their own colour.
-        shader.fragmentShader = shader.fragmentShader.replace('#include <map_fragment>', '#ifdef USE_MAP\nvec4 sampledDiffuseColor=texture2D(map,vMapUv);\nfloat clothMask=step(0.875,vMapUv.x)*step(0.4375,vMapUv.y)*(1.0-step(0.5625,vMapUv.y));\nsampledDiffuseColor.rgb=mix(sampledDiffuseColor.rgb,vec3(clamp(dot(sampledDiffuseColor.rgb,vec3(0.2126,0.7152,0.0722))*16.0,0.24,0.8)),clothMask);\ndiffuseColor*=sampledDiffuseColor;\n#endif');
-        // Keep skin and cloth matte, with restrained metal highlights on atlas armour cells.
-        shader.fragmentShader = shader.fragmentShader.replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\n#ifdef USE_MAP\nroughnessFactor=mix(0.84,0.48,step(0.5625,vMapUv.y));\n#endif');
-        shader.fragmentShader = shader.fragmentShader.replace('#include <metalnessmap_fragment>', '#include <metalnessmap_fragment>\n#ifdef USE_MAP\nmetalnessFactor*=step(0.5625,vMapUv.y);\n#endif');
-        shader.fragmentShader = shader.fragmentShader.replace('#include <emissivemap_fragment>', '#ifdef USE_EMISSIVEMAP\nvec3 mask=texture2D(emissiveMap,vEmissiveMapUv).rgb;\ntotalEmissiveRadiance*=max(mask.r,max(mask.g,mask.b));\n#endif');
+        shader.uniforms.oniGearMap={value:gearTexture};
+        shader.fragmentShader='uniform sampler2D oniGearMap;\n'+shader.fragmentShader;
+        // Existing body UVs stay in 0..1; equipment UVs encode one of four shared patches.
+        shader.fragmentShader = shader.fragmentShader.replace('#include <map_fragment>', `
+#ifdef USE_MAP
+vec4 sampledDiffuseColor=texture2D(map,vMapUv);
+float clothMask=step(0.875,vMapUv.x)*step(0.4375,vMapUv.y)*(1.0-step(0.5625,vMapUv.y));
+sampledDiffuseColor.rgb=mix(sampledDiffuseColor.rgb,vec3(clamp(dot(sampledDiffuseColor.rgb,vec3(0.2126,0.7152,0.0722))*16.0,0.24,0.8)),clothMask);
+float oniGearMask=step(1.5,vMapUv.x);
+float oniGearId=floor(vMapUv.x*0.5);
+float oniCell=max(0.0,oniGearId-1.0);
+vec2 oniGearUv=(vec2(mod(oniCell,2.0),floor(oniCell*0.5))+vec2(fract(vMapUv.x),vMapUv.y))*0.5;
+vec4 oniGearTexel=vec4(1.0);
+if(oniGearMask>0.5) oniGearTexel=texture2D(oniGearMap,oniGearUv);
+sampledDiffuseColor=mix(sampledDiffuseColor,vec4(oniGearTexel.rgb,1.0),oniGearMask);
+diffuseColor*=sampledDiffuseColor;
+#endif`);
+        shader.fragmentShader = shader.fragmentShader.replace('#include <roughnessmap_fragment>', `#include <roughnessmap_fragment>
+#ifdef USE_MAP
+roughnessFactor=mix(mix(0.84,0.48,step(0.5625,vMapUv.y)),oniGearTexel.a,oniGearMask);
+#endif`);
+        shader.fragmentShader = shader.fragmentShader.replace('#include <metalnessmap_fragment>', `#include <metalnessmap_fragment>
+#ifdef USE_MAP
+float oniMetal=step(1.5,oniGearId)*(1.0-step(2.5,oniGearId))+step(3.5,oniGearId);
+metalnessFactor=mix(metalnessFactor*step(0.5625,vMapUv.y),oniMetal*0.65,oniGearMask);
+#endif`);
+        shader.fragmentShader = shader.fragmentShader.replace('#include <emissivemap_fragment>', `
+#ifdef USE_EMISSIVEMAP
+vec3 mask=texture2D(emissiveMap,vEmissiveMapUv).rgb;
+totalEmissiveRadiance*=max(mask.r,max(mask.g,mask.b));
+#ifdef USE_MAP
+totalEmissiveRadiance*=1.0-oniGearMask;
+#endif
+#endif`);
       };
-      m.customProgramCacheKey=()=> 'oni-surfaces-enemy1';styles.set(style,m);
+      m.customProgramCacheKey=()=> 'oni-surfaces-enemy2';styles.set(style,m);
     }
     return styles.get(style);
   }
   return {
-    scene: gltf.scene, clips, toon, outline, gradient, templates, art, material,
+    scene: gltf.scene, clips, toon, outline, gradient, templates, art, material, gearTexture,
     dispose() {
-      art.dispose();for(const m of styles.values()) m.dispose();styles.clear();
+      art.dispose();gearTexture.dispose();for(const m of styles.values()) m.dispose();styles.clear();
       toon.dispose(); outline.dispose(); gradient.dispose();
       source?.map?.dispose(); source?.emissiveMap?.dispose();
       for (const mesh of Object.values(templates)) mesh.geometry.dispose();
@@ -352,12 +379,12 @@ export function createRiggedOni(THREE, shared, role, clone, { style = role } = {
   const drop = [];
   model.traverse(object => { if (object.isSkinnedMesh && object.name !== keep) drop.push(object); });
   for (const object of drop) object.removeFromParent();
-  let body = null;
+  let body = null, shell = null;
   model.traverse(object => { if (object.isSkinnedMesh) body = object; });
   if (body) {
     body.geometry = shared.art.geometry(style);
     body.material = shared.material(style);
-    const shell = body.clone(false);   // shares geometry + skeleton; inverted-hull ink line
+    shell = body.clone(false);   // shares geometry + skeleton; inverted-hull ink line
     shell.material = shared.outline;
     shell.frustumCulled = false;
     shell.raycast = () => {};
@@ -446,6 +473,9 @@ export function createRiggedOni(THREE, shared, role, clone, { style = role } = {
     },
     /** Starts the death clip; the caller keeps the actor alive until finished() is true. */
     onKill() {
+      if(actor.dying>=0) return;
+      // Held equipment retires with its owner, even while the longer fall animation is still playing.
+      if(body) { body.geometry=shared.art.corpseGeometry(style);shell.geometry=body.geometry; }
       attackPhase = ''; downStage = '';
       const name = boss ? 'bossDeath' : Math.random() < 0.5 ? 'death' : 'death2';
       play(name, { fade: 0.08, loop: false, timeScale: boss ? 1 : 1.25 });

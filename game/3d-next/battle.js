@@ -13,7 +13,7 @@ import { createChapterWorld } from './chapter-world.js?v=20261003a';
 import { createChapterProps } from './chapter-props.js?v=20261003a';
 import { FramePacer } from '../frame-pacing.js';
 import { createNightMarket } from './world.js';
-import { createOni, prepareRiggedOni, createRiggedOni } from './oni.js?v=20261003enemy1';
+import { createOni, prepareRiggedOni, createRiggedOni } from './oni.js?v=20261003enemy2';
 import { touchHint, HoldRepeat } from './touch-input.js';
 import { assetPlan, createPreloader } from './preload.js?v=20261002bg8';
 
@@ -796,7 +796,7 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
   function syncEnemies(dt) {
     const active = new Set();
     for (const enemy of arena.enemies) {
-      if (enemy.prop) continue;   // 妖燈等道具由 march-world 繪製
+      if (enemy.prop || enemy.action === 'dead') continue;   // 道具另繪製，死亡角色由 corpses 管理
       active.add(enemy.id);
       let actor = enemies.get(enemy.id);
       if (!actor) {
@@ -905,6 +905,10 @@ export async function createBattle(canvas, { audio = null, assets = null, coop =
     updateHud();
     running = false;
     stopFrames();
+    // No more corpse ticks after results. Remove their remaining meshes before the final frame.
+    for (const corpse of corpses) corpse.dispose();
+    corpses.length = 0;
+    renderer.render(scene, camera);
     if (campaign && arena.state === 'win') campaign.complete(march.result);
     $('resultTitle').textContent = arena.state === 'win' ? (campaign ? `${campaign.chapter.name}・完成` : '夜市重歸寧靜') : '重新集結';
     if (nextChapterButton) {
