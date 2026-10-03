@@ -227,7 +227,7 @@ const woodTex=canvasTex(128,512,(g,w,h)=>{
 });
 const batMesh=part('bat',new THREE.MeshPhysicalMaterial({map:woodTex,roughness:0.4,clearcoat:0.45})); swingElev.add(batMesh);
 C.ump=makePawa({face:{skin:'#e3ae84',hair:'#2e2016',iris:'#4e2c18'},uni:{base:'#1a2540',trim:'#1a2540',belt:'#111',numColor:'#1a2540',num:''},cap:{color:0x15161a,catcher:true,cage:0x222222},shoe:0x111111,scale:1.3});
-C.ump.root.position.set(1.0,0,6.6); C.ump.root.rotation.y=Math.PI; C.ump.upper.position.y=-0.3; C.ump.upper.rotation.x=0.3; scene.add(C.ump.root);
+C.ump.root.position.set(1.0,0,6.6); C.ump.root.rotation.y=Math.PI; scene.add(C.ump.root);
 const ballTex=canvasTex(512,256,(g,w,h)=>{
   g.fillStyle='#fffdf4'; g.fillRect(0,0,w,h); noise(g,w,h,3500,['#ece9de','#f6f3ea'],1);
   for(const offset of [0.25,0.75]){
@@ -275,10 +275,10 @@ function setDefense(){
     const pid=byPos[p.k]||f.T.bench.find(i=>!Object.values(byPos).includes(i))||f.lineup[0].id;
     if(p.k==='C'){
       const c=playerModel(pid,f.abbr,home,'catch'); c.root.position.set(0,0,3.6); c.root.rotation.y=Math.PI; scene.add(c.root);
-      c.upper.position.y=-0.62; c.feet[0].position.set(-0.95,0.2,0.1); c.feet[1].position.set(0.95,0.2,0.1);
+      applyPose(c,mcSample('catcher',0,false),1); c.feet[0].position.x-=0.35; c.feet[1].position.x+=0.35;
       c.hL.position.copy(MITT_HOME); c.hR.position.set(-0.95,1.0,0.5); C.catcher=c; C.fielders.C=c; continue;
     }
-    const c=playerModel(pid,f.abbr,home,'field'); c.root.position.set(p.x,0,p.z); c.root.lookAt(0,0,0); c.home={x:p.x,z:p.z}; scene.add(c.root); C.fielders[p.k]=c;
+    const c=playerModel(pid,f.abbr,home,'field'); c.root.position.set(p.x,0,p.z); c.root.lookAt(0,0,0); c.home={x:p.x,z:p.z}; c.m=handOf(pid); scene.add(c.root); C.fielders[p.k]=c; runPose(c,0,false,c.m);
   }
   setPitcher(f.pitcher);
 }
@@ -297,69 +297,87 @@ function setRunners(){
 const ease=t=>t<0?0:t>1?1:t*t*(3-2*t);
 const lerp=(a,b,t)=>a+(b-a)*t;
 const L3=(a,b,u)=>[lerp(a[0],b[0],u),lerp(a[1],b[1],u),lerp(a[2],b[2],u)];
-// 投球關鍵格（右投；左投左右鏡射）：T＝投球手、Gl＝手套手、fS＝跨步腳、fP＝軸心腳
-const PK=[
-  {t:0.00,yaw:-1.45,lean:0.00,up:[0,0,0],       T:[0,2.0,0.75],     Gl:[0.05,2.1,0.9], fS:[0.55,0.2,0.65], fP:[-0.55,0.2,-0.6]},
-  {t:0.28,yaw:-1.65,lean:-0.06,up:[0,0.12,-0.1],T:[0,2.5,0.7],      Gl:[0.05,2.6,0.8], fS:[0.6,1.25,0.3],fP:[-0.55,0.2,-0.6]},
-  {t:0.56,yaw:-1.78,lean:-0.12,up:[0,0.25,-0.3],T:[0.1,2.7,0.6],    Gl:[0.1,2.75,0.8], fS:[0.7,2.05,0.2],fP:[-0.55,0.2,-0.6]},
-  {t:0.78,yaw:-1.4,lean:0.02,up:[0,-0.1,0.45],  T:[-1.55,2.3,-0.7], Gl:[1.3,2.25,0.9], fS:[0.65,1.1,1.7],fP:[-0.55,0.2,-0.6]},
-  {t:0.99,yaw:-0.6,lean:0.24,up:[0,-0.3,1.45],  T:[-1.0,3.5,-0.5],  Gl:[0.9,2,0.65],   fS:[0.6,0.2,2.85],fP:[-0.6,0.3,-0.3]},
-  {t:1.08,yaw:-0.2,lean:0.36,up:[0,-0.45,1.8],  T:[-0.65,3.8,0.4],  Gl:[0.65,1.8,0.4], fS:[0.6,0.2,2.85],fP:[-0.65,0.4,-0.1]},
-  {t:1.15,yaw:0.1,lean:0.48,up:[0,-0.5,2.0],    T:[-0.4,3.1,1.6],   Gl:[0.5,1.65,0.2], fS:[0.6,0.2,2.85],fP:[-0.65,0.65,0.1]},
-  {t:1.34,yaw:0.5,lean:0.72,up:[0,-0.6,2.25],   T:[0.9,1.25,1.3],   Gl:[0.65,1.6,0.1], fS:[0.6,0.2,2.85],fP:[-0.8,1.6,0.9]},
-  {t:1.68,yaw:0.3,lean:0.4,up:[0,-0.3,2.25],    T:[0.65,1.1,0.7],   Gl:[0.8,1.65,0.2], fS:[0.6,0.2,2.8],fP:[-0.8,0.65,2.4]},
-  {t:2.20,yaw:0,lean:0.05,up:[0,0,2],           T:[-1,1.45,0.2],    Gl:[1,1.5,0.3],    fS:[0.6,0.2,2.5],fP:[-0.6,0.2,2.2]},
-];
+/* ---------- 動作捕捉（assets/mocap.js，由 tools/bake_mocap.py 從 Mixamo 烘出） ----------
+   每格 25 個數：0 hips、3 spine、6 head、9 左手、12 右手、15 左腳、18 右腳（x,y,z 公尺，角色面向 +Z）
+   21 hips 朝向、22 spine 朝向、23 head 朝向、24 前傾（弧度）。
+   二頭身沒有手臂和腿：只把人的手、腳、身體轉向／高低／前傾、頭轉向搬到浮空零件上。 */
+const MC=window.MOCAP||{}, MC_N=25;
+for(const k in MC){   // 每段找：手最快格（peakF）、之後手停下來那格（catchF＝接到）、手最低格（lowF＝撿球）
+  const c=MC[k], f=c.f, sp=[0];
+  for(let i=1;i<c.n;i++){ const a=f[i-1], b=f[i]; sp.push(Math.max(Math.hypot(b[9]-a[9],b[10]-a[10],b[11]-a[11]),Math.hypot(b[12]-a[12],b[13]-a[13],b[14]-a[14]))); }
+  let pk=1; for(let i=1;i<c.n;i++) if(sp[i]>sp[pk]) pk=i;
+  let ct=pk; while(ct<c.n-1 && sp[ct]>sp[pk]*0.3) ct++;
+  let lo=0; for(let i=0;i<c.n;i++) if(Math.min(f[i][10],f[i][13])<Math.min(f[lo][10],f[lo][13])) lo=i;
+  c.peakF=pk; c.catchF=ct; c.lowF=lo;
+}
+const wrapA=d=>d>Math.PI?d-2*Math.PI:d<-Math.PI?d+2*Math.PI:d;
+function mcSample(name,t,loop,out){
+  const c=MC[name]; out=out||new Float32Array(MC_N);
+  let fr=t*c.fps;
+  if(loop){ const L=c.n-1; fr=((fr%L)+L)%L; } else fr=clamp(fr,0,c.n-1);
+  const i=Math.floor(fr), j=Math.min(i+1,c.n-1), u=fr-i, a=c.f[i], b=c.f[j];
+  for(let k=0;k<MC_N;k++) out[k]=a[k]+(k>=21&&k<=23?wrapA(b[k]-a[k]):b[k]-a[k])*u;
+  return out;
+}
+function mcMix(a,b,w,out){ for(let k=0;k<MC_N;k++) out[k]=a[k]+(k>=21&&k<=23?wrapA(b[k]-a[k]):b[k]-a[k])*w; return out; }
+// 人體公尺 → 二頭身局部單位
+const MK={hand:2.0, foot:2.3, body:2.0, drop:1.25};
+// c：二頭身模型；P：姿勢；m：1 或 -1（左投、左打、左撇子野手鏡射）；noHands：手不動（打者的手掛在球棒上）
+function applyPose(c,P,m,noHands){
+  const hy=P[1], bx=P[0]*m*MK.body, bz=P[2]*MK.body, by=clamp((hy-0.95)*MK.drop,-0.9,0.4);
+  const yaw=P[22]*m;
+  c.yaw.position.set(bx,by,bz); c.yaw.rotation.y=yaw;
+  c.upper.rotation.x=clamp(P[24],-0.4,0.9)*0.8;
+  c.head.rotation.y=clamp(wrapA(P[23]-P[22])*m,-1.2,1.2);
+  const cs=Math.cos(yaw), sn=Math.sin(yaw);
+  if(!noHands){
+    const place=(h,i)=>{
+      const y=1.65+by+(P[i+1]-hy)*1.95;
+      let rx=P[i]*m*MK.hand-bx, rz=P[i+2]*MK.hand-bz;
+      const d=Math.hypot(rx,rz), lim=y>2.55+by?1.45:(y>0.45+by?1.12:0);   // 手不要陷進身體或頭
+      if(lim && d<lim){ if(d<1e-3){ rx=0; rz=lim; } else { rx*=lim/d; rz*=lim/d; } }
+      h.position.set(rx*cs-rz*sn, y-by, rx*sn+rz*cs);
+    };
+    place(c.hR, m>0?12:9); place(c.hL, m>0?9:12);
+  }
+  const foot=(f,i)=>{ f.position.set(P[i]*m*MK.foot, 0.05+Math.max(0,P[i+1]-0.07)*1.6, P[i+2]*MK.foot); f.rotation.y=P[21]*m; };
+  foot(c.feet[0], m>0?18:15); foot(c.feet[1], m>0?15:18);
+}
+const _pA=new Float32Array(MC_N), _pB=new Float32Array(MC_N), _pC=new Float32Array(MC_N);
+const READY=mcSample('gkMid',0,false);          // 野手、跑者的預備姿勢
 const RELEASE_T=1.15;
 const throwHand=()=>PHAND>0?C.pitcher.hR:C.pitcher.hL;
+// 投球：出手格對齊 RELEASE_T，出手前把整段揮臂壓進 RELEASE_T 秒，出手後照原速
 function posePitcher(t){
-  const pc=C.pitcher; if(!pc) return; const m=PHAND;
-  let i=0; while(i<PK.length-2 && t>PK[i+1].t) i++;
-  const a=PK[i], b=PK[i+1], u=ease((t-a.t)/(b.t-a.t)), mx=v=>[v[0]*m,v[1],v[2]];
-  pc.yaw.rotation.y=m*lerp(a.yaw,b.yaw,u);
-  pc.yaw.position.set(...L3(a.up,b.up,u));
-  pc.upper.rotation.x=lerp(a.lean,b.lean,u);
-  pc.head.rotation.y=m*clamp(-lerp(a.yaw,b.yaw,u),0,1.5)*0.92;
-  const thr=m>0?pc.hR:pc.hL, glv=m>0?pc.hL:pc.hR, fS=m>0?pc.feet[1]:pc.feet[0], fP=m>0?pc.feet[0]:pc.feet[1];
-  thr.position.set(...mx(L3(a.T,b.T,u))); glv.position.set(...mx(L3(a.Gl,b.Gl,u)));
-  fS.position.set(...mx(L3(a.fS,b.fS,u))); fP.position.set(...mx(L3(a.fP,b.fP,u)));
-  fS.rotation.y = t<0.9? -1.4*m : 0; fP.rotation.y = t<1.0? -1.4*m : 0;
-  fS.rotation.x=t>0.55&&t<0.99?-0.35*Math.sin((t-0.55)/0.44*Math.PI):0;
-  fP.rotation.x=t>1.1&&t<1.68?0.65*Math.sin((t-1.1)/0.58*Math.PI):0;
-  thr.rotation.x=t>0.78?-0.5*Math.sin(clamp((t-0.78)/0.65,0,1)*Math.PI):0;
-  pc.upper.rotation.z=-m*0.12*Math.sin(clamp(t/1.6,0,1)*Math.PI);
+  const pc=C.pitcher; if(!pc) return;
+  const rel=MC.pitch.fast/30, ct=t<RELEASE_T?t*rel/RELEASE_T:rel+(t-RELEASE_T);
+  applyPose(pc,mcSample('pitch',ct,false,_pA),PHAND);
 }
-const STANCE={yaw:-1.2,elev:1.0};
+// 打擊：身體、頭、腳跟著動作捕捉；球棒和兩隻手照原本的揮棒（判定時機不變），握把位置跟著人的雙手
+const STANCE={yaw:-2.05,elev:0.75};
 function poseBatter(st,cy){
   const c=C.batter; if(!c) return; const m=C.batterM;
-  let y,el,tw,stride=0,load=0,settle=0;
-  const contactElev=-0.1-(cy-2.4)*0.3;
-  const power=G.swing?.mode==='power';
-  if(st<0){
-    load=G.state==='windup'?ease((G.windT-0.65)/0.5):G.state==='pitch'?1:0;
-    const breathe=Math.sin(G.t*2.6)*0.025;
-    y=STANCE.yaw-load*0.18; el=STANCE.elev+load*0.12+breathe; tw=-load*0.15;
+  const idle=mcSample('batIdle',G.t*0.8,true,_pA);
+  let P=idle;
+  if(st>=0){
+    const clip=C.swingClip||'whiff', K=MC[clip].fast/30;
+    mcSample(clip,st+K-0.13,false,_pB);
+    P=st<0.06?mcMix(idle,_pB,st/0.06,_pC):_pB;
   }
-  else if(st<0.13){ const u=st/0.13, e=u*u*u; y=lerp(STANCE.yaw-0.18,0,e); el=lerp(STANCE.elev+0.12,contactElev,ease(u*1.25)); tw=lerp(-0.15,0.75,ease(u)); stride=ease(u); load=1-u; }
-  else if(st<0.42){ const u=clamp((st-0.13)/0.29,0,1), e=1-Math.pow(1-u,3); y=lerp(0,power?3.35:2.95,e); el=lerp(contactElev,power?1.15:0.95,e); tw=lerp(0.75,power?1.55:1.3,e); stride=1; }
-  else { settle=ease((st-0.55)/0.45); y=lerp(power?3.35:2.95,STANCE.yaw,settle); el=lerp(power?1.15:0.95,STANCE.elev,settle); tw=lerp(power?1.55:1.3,0,settle); stride=1-settle; }
+  applyPose(c,P,m,true);
+  let y,el;
+  const contactElev=-0.1-(cy-2.4)*0.3;
+  if(st<0){ y=STANCE.yaw; el=STANCE.elev; }
+  else if(st<0.13){ const u=st/0.13, e=u*u; y=lerp(STANCE.yaw,0,e); el=lerp(STANCE.elev,contactElev,Math.min(1,u*1.3)); }
+  else { const u=Math.min(1,(st-0.13)/0.22), e=1-(1-u)*(1-u); y=lerp(0,3.0,e); el=lerp(contactElev,0.95,e); }
   swingYaw.rotation.y=m*y; swingElev.rotation.x=-el;
-  c.yaw.rotation.y=m*tw*0.55;
-  const held=st<0?1:st<.13?1-ease(st/.13):settle;
-  swingYaw.position.set(-m*held*.6,2.0+held*.6+(st>=0&&st<0.2?(cy-2.4)*0.22:0),.35+held*.75);
-  c.yaw.position.set(-m*load*0.14,-load*0.08,0); c.upper.rotation.z=m*(load*0.07-stride*0.1); c.upper.rotation.x=stride*0.1;
-  const front=m>0?c.feet[1]:c.feet[0], rear=m>0?c.feet[0]:c.feet[1];
-  front.position.set(m*(0.92+stride*0.48-load*0.1),0.2+load*0.28,-m*.42); rear.position.set(-m*.92,0.2,m*.42);
-  front.rotation.y=-m*Math.PI/2+m*tw*0.2; rear.rotation.y=-m*Math.PI/2+m*tw*0.75; rear.rotation.x=stride*0.25;
-  c.head.rotation.y=m*(1.2-tw*0.4);
+  // 握把＝人的雙手中點（換到打者根座標）
+  const hx=(P[9]+P[12])/2, hyy=(P[10]+P[13])/2, hz=(P[11]+P[14])/2, by=c.yaw.position.y;
+  swingYaw.position.set(clamp(hx*m*MK.hand,-1.0,0.6), clamp(1.65+by+(hyy-P[1])*1.95,1.6,2.9)+(st>=0&&st<0.2?(cy-2.4)*0.22:0), clamp(hz*MK.hand,-0.2,0.9));
 }
-function runPose(c,t,moving){
-  const s=moving?Math.sin(t*15):0;
-  c.feet[0].position.z=0.1+s*0.55; c.feet[1].position.z=0.1-s*0.55;
-  c.feet[0].position.y=0.2+Math.max(0,s)*0.35; c.feet[1].position.y=0.2+Math.max(0,-s)*0.35;
-  c.hR.position.z=0.2-s*0.5; c.hL.position.z=0.25+s*0.5;
-  c.yaw.position.y=moving?Math.abs(Math.cos(t*15))*0.18:0;
-}
+// 跑步（原地循環，根節點移動由呼叫端處理）或預備姿勢
+function runPose(c,t,moving,m=1){ applyPose(c,moving?mcSample('run',t*1.35,true,_pA):READY,m); }
+const handOf=pid=>(PLAYERS[pid]?.throws==='L')?-1:1;
 
 /* =========================================================
    鏡頭
@@ -505,7 +523,8 @@ function setMode(m){
 function resetPlayers(){
   ball.visible=false; FX.reset(); $('contactReadout').classList.remove('show'); if(C.runner){ disposeModel(C.runner); C.runner=null; }
   if(C.batter) C.batter.root.visible=true;
-  for(const k in C.fielders){ if(k==='P'||k==='C') continue; const f=C.fielders[k]; f.root.position.set(f.home.x,0,f.home.z); f.root.lookAt(0,0,0); runPose(f,0,false); }
+  for(const k in C.fielders){ if(k==='P'||k==='C') continue; const f=C.fielders[k]; f.root.position.set(f.home.x,0,f.home.z); f.root.lookAt(0,0,0); runPose(f,0,false,f.m); }
+  C.umpT=null; applyPose(C.ump,mcSample('ump',0,false,_pA),1); C.swingClip='whiff';
   posePitcher(0); poseBatter(-1,G.cur.y); if(C.catcher) C.catcher.hL.position.copy(MITT_HOME);
   setRunners();
   G.swing=null; G.decide=null; G.play=null;
@@ -560,7 +579,8 @@ function endPitch(kind){
   if(kind==='strike'||kind==='whiff') SFX.play('strike');
   if(kind==='ball'){ GM.balls++; if(GM.balls>=4){ finishPA({kind:'BB',text:'四壞球保送'}); return; } showCall('壞球','blue'); say(pick(['壞球。','偏掉了。','選掉了。'])); }
   else if(kind==='foul'){ if(GM.strikes<2) GM.strikes++; showCall('界外','blue'); say(pick(['界外！','打成界外球。'])); }
-  else { GM.strikes++; if(GM.strikes>=3){ finishPA({kind:'K',text:kind==='whiff'?'揮棒落空三振':'站著被三振'}); return; }
+  else { if(kind==='strike') C.umpT=G.t;
+    GM.strikes++; if(GM.strikes>=3){ finishPA({kind:'K',text:kind==='whiff'?'揮棒落空三振':'站著被三振'}); return; }
     showCall(kind==='whiff'?'揮空':'好球'); say(kind==='whiff'?pick(['揮空！','揮棒落空！']):pick(['好球！','進壘了！'])); }
   setCount(); G.state='between'; G.waitUntil=G.t+1.3;
 }
@@ -633,6 +653,47 @@ function startPlay(bb,pt){
   G.state='play'; G.camFixed=false; $('plabel').classList.remove('show');
   say(bb.ev>=100?'打到了！強勁的擊球——':bb.la>45?'高高飛起——':'打到了！');
 }
+
+const gloveHand=f=>((f===C.pitcher?PHAND:(f.m||1))>0?f.hL:f.hR);
+// 負責接球的野手：跑向落點 → 接球（低／中／高、滾地球撿球、勉強時撲球）→ 傳球
+function fielderAct(P,dt){
+  const res=P.res, pts=P.sim.pts, hm=res.fielder, f=C.fielders[hm.k], m=f.m||1, tc=res.t;
+  if(!(res.idx>=0) || !pts[res.idx]) return;     // 場地規則二壘安打等沒有接球點的情況
+  if(!P.fx){
+    const tg=pts[res.idx], prev=pts[Math.max(0,res.idx-60)];
+    let face=Math.hypot(prev.x-tg.x,prev.z-tg.z)>2?Math.atan2(prev.x-tg.x,prev.z-tg.z):Math.atan2(-tg.x,-tg.z);   // 面向球來的方向
+    const react=hm.inf?0.28:0.42, d=Math.hypot(tg.x-hm.x,tg.z-hm.z);
+    let clip=tg.b?'pickup':(tg.y<2.5?'gkLow':tg.y<6.8?'gkMid':'gkHigh');
+    const lat=(tg.x-hm.x)*Math.cos(face)-(tg.z-hm.z)*Math.sin(face);
+    // 跑很遠才搆到（內野滾地球橫移超過 30 呎、外野接飛球橫移超過 75 呎）就撲球
+    if((hm.inf&&tg.b&&Math.abs(lat)>30) || (!hm.inf&&!tg.b&&Math.abs(lat)>75)) clip=lat*m>0?'diveL':'diveR';
+    if(clip==='gkHigh' && d>60 && !tg.b) clip='gkRunJump';
+    const cf=(clip==='pickup'?MC[clip].lowF:MC[clip].catchF)/30;
+    // 接球動作本身會帶著身體位移：根節點停在落點前面一點，讓手套剛好到球
+    const cp=MC[clip].f[Math.round(cf*30)], lx=cp[0]*m*MK.body*1.35, lz=cp[2]*MK.body*1.35;
+    const ox=lx*Math.cos(face)+lz*Math.sin(face), oz=-lx*Math.sin(face)+lz*Math.cos(face);
+    P.fx={clip,cf,face,react,tx:tg.x-ox,tz:tg.z-oz,start:Math.max(react+0.05,tc-cf),hx:f.root.position.x,hz:f.root.position.z};
+  }
+  const X=P.fx, u=clamp((P.t-X.react)/Math.max(0.05,X.start-X.react),0,1), far=Math.hypot(X.tx-X.hx,X.tz-X.hz)>3;
+  f.root.position.x=lerp(X.hx,X.tx,u); f.root.position.z=lerp(X.hz,X.tz,u);
+  let pose;
+  if(P.t<X.start){ if(u<1&&far){ f.root.lookAt(X.tx,0,X.tz); pose=mcSample('run',P.t*1.35,true,_pA); } else { f.root.rotation.set(0,X.face,0); pose=READY; } }
+  else {
+    f.root.rotation.set(0,X.face,0);
+    pose=mcSample(X.clip,P.t-X.start,false,_pB);
+    if(P.t-X.start<0.15) pose=mcMix(far?mcSample('run',P.t*1.35,true,_pA):READY,pose,(P.t-X.start)/0.15,_pC);
+  }
+  if(res.throwTo){
+    const rel=tc+0.35, lead=0.45, F=MC.throw.fast/30;
+    if(P.t>=rel-lead){
+      const B=BASES[res.throwTo]; f.root.lookAt(B.x,0,B.z);
+      const th=mcSample('throw',P.t-rel+F,false,_pA);
+      const w=clamp((P.t-(rel-lead))/0.15,0,1);
+      pose=w<1?mcMix(pose,th,w,_pC):th;
+    }
+  }
+  applyPose(f,pose,m);
+}
 const basePath=[BASES.home,BASES.first,BASES.second,BASES.third,BASES.home];
 function pathAt(s){ s=clamp(s,0,4); const i=Math.min(Math.floor(s),3), u=s-i, a=basePath[i], b=basePath[i+1]; return {x:lerp(a.x,b.x,u),z:lerp(a.z,b.z,u),dir:Math.atan2(b.x-a.x,b.z-a.z)}; }
 function updatePlay(dt){
@@ -642,21 +703,17 @@ function updatePlay(dt){
   const ci=res.idx>=0?res.idx:Infinity, caught=k>=ci;
   if(caught&&res.fielder&&!P.gloved){ P.gloved=true; SFX.play('mitt'); FX.resetTrail(); }
   if(bp.y<0.35&&P.t>0.15&&!P.bounced){ P.bounced=true; SFX.play('bounce'); FX.dust(new THREE.Vector3(bp.x,0.15,bp.z)); }
-  if(res.fielder && C.fielders[res.fielder.k] && res.fielder.k!=='C' && res.fielder.k!=='P'){
-    const f=C.fielders[res.fielder.k], tg=pts[res.idx], hm=res.fielder;
-    const react=hm.inf?0.28:0.42, d=Math.hypot(tg.x-hm.x,tg.z-hm.z), u=clamp((P.t-react)/Math.max(0.01,res.t-react),0,1);
-    f.root.position.x=lerp(hm.x,tg.x,u); f.root.position.z=lerp(hm.z,tg.z,u);
-    if(u<1&&d>3) f.root.lookAt(tg.x,0,tg.z); runPose(f,P.t,u<1&&d>3);
-  }
+  if(res.fielder && C.fielders[res.fielder.k] && res.fielder.k!=='C' && res.fielder.k!=='P') fielderAct(P,dt);
+  if(C.runner && !C.runner.root.visible && P.t>=0.4 && !P.foul){ C.batter.root.visible=false; C.runner.root.visible=true; }
   if(caught && res.fielder){
     const f=C.fielders[res.fielder.k], tc=pts[ci].t;
     if(res.throwTo && P.t>tc+0.35){
       const B=BASES[res.throwTo], fr=pts[ci], u=clamp((P.t-tc-0.35)/Math.max(0.2,res.throwT-0.5),0,1);
       ball.position.set(lerp(fr.x,B.x,u),3+Math.sin(u*Math.PI)*6,lerp(fr.z,B.z,u));
-      if(res.throwTo==='first'){ const fb=C.fielders['1B']; fb.root.position.x=lerp(fb.root.position.x,BASES.first.x-1,0.1); fb.root.position.z=lerp(fb.root.position.z,BASES.first.z+1,0.1); }
+      if(res.throwTo==='first' && res.fielder.k!=='1B'){ const fb=C.fielders['1B'], bx=BASES.first.x-1, bz=BASES.first.z+1, far=Math.hypot(fb.root.position.x-bx,fb.root.position.z-bz)>1.5; fb.root.position.x=lerp(fb.root.position.x,bx,0.1); fb.root.position.z=lerp(fb.root.position.z,bz,0.1); if(far) fb.root.lookAt(bx,0,bz); else fb.root.lookAt(res.fielder.x,0,res.fielder.z); runPose(fb,P.t,far,fb.m); }
       if(u>=1&&!P.ended){ P.ended=true; P.endAt=P.t+0.5; SFX.play('mitt'); }
     } else {
-      const wp=new THREE.Vector3(); f.hL.getWorldPosition(wp); ball.position.copy(wp);
+      const wp=new THREE.Vector3(); gloveHand(f).getWorldPosition(wp); ball.position.copy(wp);
       if(!res.throwTo&&!P.ended){ P.ended=true; P.endAt=P.t+0.6; }
     }
   } else {
@@ -750,9 +807,10 @@ function update(dt){
         const bpos=pitchPos(G.pitch,1,G.rel);
         if(G.mode==='bat'){
           const bb=contact(br,BSIDE,{x:bpos.x,y:bpos.y},G.cur,G.t-(G.relT+G.pitch.T),G.swing.mode);
-          if(bb) startPlay(bb,{x:bpos.x,y:bpos.y,z:0});
+          if(bb){ C.swingClip=G.swing.mode==='power'?'hitHR':'hitSingle'; startPlay(bb,{x:bpos.x,y:bpos.y,z:0}); }
         } else if(G.decide && !G.decide.whiff){
           const bb=G.decide.foul?{ev:rnd(55,85),la:rnd(-10,65),spray:(Math.random()<.5?-1:1)*rnd(52,115)}:G.decide.bb;
+          C.swingClip=bb.ev>100?'hitHR':bb.ev>92?'hitDouble':'hitSingle';
           startPlay(bb,{x:bpos.x,y:bpos.y,z:0});
         }
       }
@@ -761,13 +819,14 @@ function update(dt){
   if(G.state==='pitch'){
     const u=(G.t-G.relT)/G.pitch.T, end=pitchPos(G.pitch,1,G.rel);
     const p=pitchPos(G.pitch,Math.min(u,1.065),G.rel); ball.position.set(p.x,p.y,p.z);
-    if(u>=0.8 && C.catcher){ const lp=C.catcher.root.worldToLocal(new THREE.Vector3(end.x,end.y,end.z+3.4)); lp.y-=0.4; C.catcher.hL.position.lerp(lp,0.3); }
+    if(u>=0.8 && C.catcher){ const lp=C.catcher.root.worldToLocal(new THREE.Vector3(end.x,end.y,end.z+3.4)); lp.sub(C.catcher.yaw.position); lp.y-=0.4; C.catcher.hL.position.lerp(lp,0.3); }
     if(u>=1.065){
       SFX.play('mitt');
       if(G.swing) endPitch('whiff'); else endPitch(isStrikeFor(br,end.x,end.y)?'strike':'ball');
-      if(G.state!=='done' && C.catcher){ const lp=C.catcher.hL.position; ball.visible=G.mode==='pitch'; ball.position.copy(C.catcher.root.localToWorld(lp.clone())); }
+      if(G.state!=='done' && C.catcher){ const wp=new THREE.Vector3(); C.catcher.hL.getWorldPosition(wp); ball.visible=G.mode==='pitch'; ball.position.copy(wp); }
     }
   }
+  if(C.umpT!=null){ const ut=G.t-C.umpT; applyPose(C.ump,mcSample('ump',ut,false,_pA),1); if(ut>MC.ump.n/30) C.umpT=null; }
   if(G.state==='play'||G.state==='settle') updatePlay(dt);
   FX.update(dt,G.state,G.swing?G.t-G.swing.t0:-1,G.swing?.mode==='power');
 }
