@@ -5,6 +5,7 @@ import { Vehicles, VKIND } from './vehicles.js';
 import { parse, encGroups, setRoute, Encounter } from './encounter.js';
 import { STAGE_DATA } from './stages.js';
 import { steer, squadFlank, coveringFire, shareContact, flankAvailable, segmentBox, routeDirection, allyInLane } from './tactics.js';
+import { FLIGHT, airInterceptHeight, rayCapsule } from './flight.mjs';
 
 const clamp = THREE.MathUtils.clamp;
 const rand = (a, b) => a + Math.random() * (b - a);
@@ -61,18 +62,6 @@ function blade(m) {
   return [h.localToWorld(new THREE.Vector3(0, -0.9, 1.9)), h.localToWorld(new THREE.Vector3(0, -0.9, 12.1))];
 }
 
-// 射線（原點 o、單位方向 d）對直立膠囊：回傳命中距離或 -1
-function rayCapsule(o, d, cap, maxT) {
-  const hx = d.x, hz = d.z, h2 = hx * hx + hz * hz;
-  let t = h2 > 1e-6 ? ((cap.x - o.x) * hx + (cap.z - o.z) * hz) / h2 : 0;
-  t = clamp(t, 0, maxT);
-  const px = o.x + hx * t - cap.x, pz = o.z + hz * t - cap.z, dh = Math.hypot(px, pz);
-  if (dh > cap.r) return -1;
-  const y = o.y + d.y * t;
-  if (y < cap.y0 - cap.r || y > cap.y1 + cap.r) return -1;
-  const back = h2 > 1e-6 ? Math.sqrt(cap.r * cap.r - dh * dh) / Math.sqrt(h2) : 0;
-  return Math.max(0, t - back);
-}
 // 光束從樓的表面 p 往 d 方向穿出去要走多遠（樓＝x0..x1、z0..z1、gy..top 的盒子）
 function exitBox(p, d, b) {
   let t = 400;
@@ -106,6 +95,7 @@ class Enemy {
     this.los = false; this.losT = Math.random() * 0.3;
     this.dead = false; this.dying = 0;
     this.thrust = 0; this.hover = 0;
+    this.airborne = false; this.airNavT = 0; this.airHeight = 0; this.airContact = 0;
     this.locks = 0;           // 被玩家飛彈鎖了幾發
     this.warn = 0;            // 準備開火的警示（HUD 用）0..1
     this.aim = V3();
@@ -456,7 +446,7 @@ export class Combat {
     const wy = Math.atan2(c.x, c.z), wp = Math.atan2(c.y, Math.hypot(c.x, c.z));
     const k = 1 - Math.exp(-(snap ? LOCK.snap : LOCK.assist) * dt);
     pl.yaw += wrap(wy - pl.yaw) * k;
-    pl.pitch = clamp(pl.pitch + (wp - pl.pitch) * k, -0.62, 0.72);
+    pl.pitch = clamp(pl.pitch + (wp - pl.pitch) * k, -FLIGHT.pitch, FLIGHT.pitch);
   }
 
   startReload() { if (this.rifle.reload < 0) { this.rifle.reload = 0; this.audio.reload(); } }
@@ -560,7 +550,6 @@ export class Combat {
     this.hero.saber.visible = true;
     if (tgt) {
       const d = _a.subVectors(tgt.pos, pl.pos); const dist = d.length();
-      d.y = (tgt.pos.y - pl.pos.y) / Math.max(1, dist);
       pl.dash(d.normalize(), 105, clamp((dist - 16) / 105, 0.08, 0.7));
       this.cockpit.kick('qb', 1.2);
     } else pl.dash(_a.copy(this.aimDir), 45, 0.18);
@@ -572,8 +561,9 @@ export class Combat {
     const tgt = SB.target && !SB.target.dead ? SB.target : null;
     if (SB.phase === 'dash') {
       if (tgt) {
-        const dir = _a.subVectors(tgt.pos, pl.pos).setY(0);
+        const dir = _a.subVectors(tgt.pos, pl.pos);
         pl.yaw = damp(pl.yaw, pl.yaw + wrap(Math.atan2(dir.x, dir.z) - pl.yaw), 10, dt);
+        if(pl.flying)pl.pitch=damp(pl.pitch,clamp(Math.atan2(dir.y,Math.hypot(dir.x,dir.z)),-FLIGHT.pitch,FLIGHT.pitch),10,dt);
       }
       const close = tgt ? tgt.pos.distanceTo(pl.pos) < 26 : true;
       if (pl.dashT <= 0 || close || SB.t > 0.8) { SB.phase = 'swing'; hero.swing = 1; this.audio.saberSwing(); if (tgt) pl.dashT = 0; }
@@ -593,11 +583,12 @@ export class Combat {
         const cands = tgt ? [tgt] : this.enemies;
         for (const e of cands) {
           if (e.dead) continue;
-          const d = _a.subVectors(e.pos, pl.pos); d.y = 0;
+          const d = _a.subVectors(e.pos, pl.pos);
           const dist = d.length();
           if (dist > 30 * (0.5 + 0.5 * e.scale)) continue;
           if (e.vehicle && Math.abs(e.chest(_c).y - (pl.pos.y + 8)) > 22) continue;   // 天上的直升機砍不到
-          if (d.normalize().dot(_b.set(Math.sin(pl.yaw), 0, Math.cos(pl.yaw))) < 0.2) continue;
+          const facing=_b.set(Math.sin(pl.yaw)*Math.cos(pl.pitch),Math.sin(pl.pitch),Math.cos(pl.yaw)*Math.cos(pl.pitch));
+          if (d.normalize().dot(facing) < 0.2) continue;
           hitE = e; break;
         }
         if (hitE) {
@@ -842,6 +833,9 @@ export class Combat {
     const pl = this.player, w = this.world;
     const pc = this.hero.bones.torso.getWorldPosition(_d);
     const playerChest = V3().copy(pc);
+    const highPlayer=!pl.grounded&&pl.pos.y-w.height(pl.pos.x,pl.pos.z)>24&&!this.dead;
+    let airSlots=FLIGHT.enemies;
+    for(const e of this.enemies)if(e.airborne&&!e.dead&&!e.gone)airSlots--;
     for (const e of this.enemies) {
       if (e.gone || e.vehicle) continue;   // 載具在 vehicles.js 裡動
       const m = e.m, K = e.K, k = e.scale;
@@ -902,6 +896,21 @@ export class Combat {
         continue;
       }
 
+      if(e.los)e.airContact=3;else e.airContact=Math.max(0,e.airContact-dt);
+      if(!e.airborne&&highPlayer&&e.los&&e.kind!=='heavy'&&airSlots>0&&dist<600&&e.stagT<=0) {
+        e.airborne=true;airSlots--;e.grounded=false;e.vel.y=Math.max(e.vel.y,14);e.airNavT=0;
+      }
+      if(e.airborne&&(e.los&&!highPlayer||e.airContact<=0))e.airborne=false;
+      if(e.airborne) {
+        e.airNavT-=dt;
+        if(e.airNavT<=0) {
+          e.airNavT=.35;
+          const roof=Math.max(w.support(e.pos.x,e.pos.z,5*k,1e4),w.support(e.pos.x+e.vel.x*1.4,e.pos.z+e.vel.z*1.4,5*k,1e4));
+          e.airHeight=airInterceptHeight(w.height(e.pos.x,e.pos.z),roof,e.lastSeen.y,e.flankSide,this.stats.time);
+        }
+        e.cover=null;e.coverT=0;
+      }
+
       // ---- 移動：保持喜歡的距離、左右繞、偶爾衝刺
       const wish = V3();
       if (e.stagT > 0) {
@@ -936,7 +945,7 @@ export class Combat {
           wish.set(goal.x - e.pos.x, 0, goal.z - e.pos.z).normalize();
         }
         if (rush) e.boostT = Math.max(e.boostT, 0.5);
-        if (e.coverCd <= 0 && e.lastHit < 1.2 && (e.role === 'support' || e.ap < e.apMax * 0.4)) {
+        if (!e.airborne && e.coverCd <= 0 && e.lastHit < 1.2 && (e.role === 'support' || e.ap < e.apMax * 0.4)) {
           e.coverCd = 4; e.cover = this.enemyCover(e, e.los ? playerChest : e.lastSeen.clone().add(V3(0, 12, 0))); e.coverT = e.cover ? 3 : 0;
         }
         if (e.cover && e.coverT > 0) {
@@ -969,7 +978,7 @@ export class Combat {
         e.lockReact = e.locks > 0 ? e.lockReact + dt : 0;
         if (e.lockReact > 0.5 && e.kind !== 'heavy' && e.qbCd <= 0) { this.enemyQB(e, 1); e.lockReact = 0; }
         // 王牌近身：光劍突擊
-        if (e.kind === 'ace' && dist < 90 && e.fireCd < 0.8 && e.lunge <= 0 && e.los && Math.random() < dt * 1.2 && this.canAttack(e)) {
+        if (e.kind === 'ace' && dist < 90 && Math.abs(e.pos.y-pl.pos.y)<45 && e.fireCd < 0.8 && e.lunge <= 0 && e.los && Math.random() < dt * 1.2 && this.canAttack(e)) {
           e.lunge = 0.9; this.note('WARNING  MELEE', 'rd'); this.audio.alert('lock');
           e.m.swing = 0;
         }
@@ -978,10 +987,10 @@ export class Combat {
           if (Math.random() < (e.kind === 'ace' ? 0.8 : e.kind === 'grunt' ? 0.35 : 0.1)) { e.vel.y = 20; e.grounded = false; e.hover = e.kind === 'ace' ? rand(0.8, 2) : rand(0, 0.6); }
         }
       }
-      const vmax = e.boostT > 0 ? K.boost : K.walk;
+      const vmax = e.airborne ? (e.boostT>0?Math.max(64,K.boost):32) : e.boostT > 0 ? K.boost : K.walk;
       const hv = _b.set(e.vel.x, 0, e.vel.z);
       const tgtV = wish.multiplyScalar(vmax);
-      let rate = e.grounded ? 26 : 10;
+      let rate = e.grounded ? 26 : e.airborne?28:10;
       if (hv.length() > vmax + 2) rate = e.grounded ? 36 : 14;
       if (e.qbT > 0) rate = 0;
       const dv = tgtV.sub(hv), L = dv.length();
@@ -990,11 +999,11 @@ export class Combat {
       // 光劍突擊
       if (e.lunge > 0) {
         e.lunge -= dt;
-        if (e.lunge > 0.45) { e.vel.x = dirP.x * 95; e.vel.z = dirP.z * 95; e.thrust = 1; }
+        if (e.lunge > 0.45) { e.vel.x = dirP.x * 95; e.vel.z = dirP.z * 95; if(e.airborne)e.vel.y=clamp((pl.pos.y-e.pos.y)*3,-32,32); e.thrust = 1; }
         else if (!e.lungeHit) {
           e.lungeHit = true; e.m.swing = 1;
           this.audio.saberSwing();
-          if (dist < 30 && this.player.qbT <= 0) this.hurt(1100, e.pos, 'saber');
+          if (e.pos.distanceTo(pl.pos) < 30 && this.player.qbT <= 0) this.hurt(1100, e.pos, 'saber');
           else this.note('DODGED', 'gr');
         }
         if (e.m.swing > 0) {
@@ -1005,14 +1014,14 @@ export class Combat {
         if (e.lunge <= 0) { e.lungeHit = false; e.m.swing = 0; e.fireCd = rand(1.5, 2.5); }
       }
       this.moveEnemy(e, dt, false);
-      const thr = Math.max(e.boostT > 0 ? 1 : 0, e.qbT > 0 ? 1 : 0, e.hover > 0 ? 1 : 0, e.lunge > 0.45 ? 1 : 0);
+      const thr = Math.max(e.airborne ? .7 : 0,e.boostT > 0 ? 1 : 0, e.qbT > 0 ? 1 : 0, e.hover > 0 ? 1 : 0, e.lunge > 0.45 ? 1 : 0);
       e.thrust = damp(e.thrust, thr, 10, dt);
       this.audio.enemyBoost(e.id, e.pos, e.thrust);
 
       // ---- 開火
       const aim = e.los && dist < K.range + 150 && e.stagT <= 0 ? playerChest : null;
       if (e.stagT <= 0 && e.lunge <= 0) this.enemyFire(e, dt, dist, playerChest);
-      m.animate(dt, { vel: e.vel, grounded: e.grounded, boost: e.grounded && (e.boostT > 0 || e.qbT > 0) ? 1 : 0, torsoYaw: e.face, pitch: 0, thrust: e.thrust, aim, lean: e.stagT > 0 ? 0.35 : 0, groundAt: e.groundAt, brace: e.burst > 0 || e.charge > 0 || e.volley > 0 ? 1 : 0 });
+      m.animate(dt, { vel: e.vel, grounded: e.grounded, boost: e.grounded && (e.boostT > 0 || e.qbT > 0) ? 1 : 0, torsoYaw: e.face, pitch: 0, thrust: e.thrust, aim, lean: e.stagT > 0 ? 0.35 : 0, flight:e.airborne?1:0, groundAt: e.groundAt, brace: e.burst > 0 || e.charge > 0 || e.volley > 0 ? 1 : 0 });
       if (m.footfall) {
         const fp = m.bones[m.footfall > 0 ? 'ankleR' : 'ankleL'].getWorldPosition(_b); fp.y -= m.motion.ankleY * k;
         this.audio.enemyStep(fp, e.kind === 'heavy' ? 1.3 : 0.9);
@@ -1041,8 +1050,9 @@ export class Combat {
   moveEnemy(e, dt, dying) {
     const w = this.world, k = e.scale, r = 3.4 * k;
     if (!e.grounded) {
-      e.vel.y -= 30 * dt;
-      if (e.hover > 0 && !dying) { e.hover -= dt; e.vel.y = Math.min(12, e.vel.y + 36 * dt); }
+      if(e.airborne&&!dying&&e.stagT<=0&&e.lunge<=.45)e.vel.y=damp(e.vel.y,clamp((e.airHeight-e.pos.y)*1.2,-22,26),4,dt);
+      else if(!e.airborne||dying||e.stagT>0)e.vel.y-=30*dt;
+      if (!e.airborne && e.hover > 0 && !dying) { e.hover -= dt; e.vel.y = Math.min(12, e.vel.y + 36 * dt); }
     }
     e.pos.addScaledVector(e.vel, dt);
     e.bumped = w.collide(e.pos, r, e.pos.y);

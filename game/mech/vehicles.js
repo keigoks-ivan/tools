@@ -1140,9 +1140,10 @@ export class Vehicles {
     // 高度：地面＋巡航高度；前方有高樓就爬升越過
     const lx = v.pos.x + v.vel.x * 2.5, lz = v.pos.z + v.vel.z * 2.5;
     const roof = Math.max(w.support(v.pos.x, v.pos.z, 9, 1e4), w.support(lx, lz, 9, 1e4));
-    // 最高只爬到離地 115 m：更高的大樓就從旁邊繞過去（撞到牆會被推開、沿牆滑）
+    // 攔截空中目標時爬升；仍有高度上限，撞牆會繞開。
     const gnd = w.height(v.pos.x, v.pos.z);
-    const ty = Math.max(gnd + v.alt, Math.min(roof + 24, gnd + 115));
+    const intercept=!pl.grounded&&p.y-gnd>24&&v.los?p.y+(v.mode==='run'?-8:18):gnd+v.alt;
+    const ty = Math.max(Math.min(intercept,gnd+250),Math.min(roof+24,gnd+250));
     v.vel.y = damp(v.vel.y, clamp((ty - v.pos.y) * 0.9, -7, 16), 2.5, dt);
     v.pos.addScaledVector(v.vel, dt);
     if (w.collide(v.pos, 7, v.pos.y - 2)) { v.vel.x *= 0.5; v.vel.z *= 0.5; v.vel.y = Math.max(v.vel.y, 8); }
@@ -1239,7 +1240,9 @@ export class Vehicles {
     v.yawRate = damp(v.yawRate, dY / Math.max(dt, 1e-4), 4, dt);
     // 高度：你頭上 passAlt；前方有樓、有山就拉高
     const lx = v.pos.x + fx * 300, lz = v.pos.z + fz * 300;
-    const ty = Math.max(p.y + v.passAlt, w.support(v.pos.x, v.pos.z, 12, 1e4) + 45, w.support(lx, lz, 12, 1e4) + 45, w.height(lx, lz) + 110);
+    const airTarget=!C.player.grounded&&p.y-w.height(p.x,p.z)>24;
+    const clearance=airTarget?30:45;
+    const ty = Math.max(p.y+(airTarget?(v.js==='in'?-12:35):v.passAlt),w.support(v.pos.x,v.pos.z,12,1e4)+clearance,w.support(lx,lz,12,1e4)+clearance,w.height(lx,lz)+(airTarget?40:110));
     v.climb += clamp(clamp(Math.atan2(ty - v.pos.y, 350), -0.3, 0.4) - v.climb, -0.4 * dt, 0.4 * dt);
     const cp = Math.cos(v.climb);
     v.vel.set(Math.sin(v.yaw) * cp, Math.sin(v.climb), Math.cos(v.yaw) * cp).multiplyScalar(v.speed);

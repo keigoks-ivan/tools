@@ -15,7 +15,7 @@ async function load(path, query = '') {
   html = html.replace(/<base href="[^"]+">/, '');
   html = html.replace(/(<script type="importmap">)([\s\S]*?)(<\/script>)/, (_, a, json, b) => {
     const map = JSON.parse(json);
-    for (const file of ['kobe-city.mjs', 'kobe-relief.mjs', 'urban.js', 'japan.js', 'textures.js', 'anim.js', 'env.js', 'streetfront.js', 'stages.js', 'battlefields.js', 'fieldart.js', 'encounter.js', 'post.js', 'roofline.js', 'mechs.js', 'combat.js', 'cockpit.js', 'zero/kit.js', 'zero/map.js', 'zero/guns.js', 'zero/viewmodel.js', 'zero/main.js', 'zero/hud.js', 'zero/sfx.js', 'zero/mech6.js', 'lastline/map.js', 'lastline/script.js', 'lastline/mission.js', 'lastline/convoy.js', 'lastline/escort.mjs', 'lastline/operations.mjs', 'lastline/foot-ops.js', 'input.js', 'tactics.js', 'reinforcements.mjs', 'zero/ai.js', 'zero/script.js', 'zero/patrol.js', 'zero/recon.js', 'zero/field.js']) {
+    for (const file of ['kobe-city.mjs', 'kobe-relief.mjs', 'urban.js', 'japan.js', 'textures.js', 'anim.js', 'env.js', 'streetfront.js', 'stages.js', 'battlefields.js', 'fieldart.js', 'encounter.js', 'post.js', 'roofline.js', 'mechs.js', 'combat.js', 'cockpit.js', 'player.js', 'flight.mjs', 'vehicles.js', 'hud.js', 'zero/kit.js', 'zero/map.js', 'zero/guns.js', 'zero/viewmodel.js', 'zero/main.js', 'zero/hud.js', 'zero/sfx.js', 'zero/mech6.js', 'lastline/map.js', 'lastline/script.js', 'lastline/mission.js', 'lastline/convoy.js', 'lastline/escort.mjs', 'lastline/operations.mjs', 'lastline/foot-ops.js', 'input.js', 'tactics.js', 'reinforcements.mjs', 'zero/ai.js', 'zero/script.js', 'zero/patrol.js', 'zero/recon.js', 'zero/field.js']) {
       const url = new URL('/game/mech/' + file, location.href).href;
       for (const key of Object.keys(map.imports)) if (new URL(key, entryBase).href === url) delete map.imports[key];
       map.imports[url] = url + '?qa=' + revision;
@@ -145,6 +145,93 @@ async function enemyMotion() {
   assert(renderer.info.memory.geometries===before.geometries && renderer.info.memory.textures===before.textures,'重複骨架動作沒有新增 GPU 幾何或貼圖');
   assert(errors.length===0,'敵機靜音戰鬥與動畫沒有執行錯誤');
   report.textContent=JSON.stringify({checks:result,steps,steadyBefore:before,steadyAfter:renderer.info.memory,errors},null,2);state.textContent='敵機動作通過';
+}
+
+async function flight() {
+  const checks=[],stats=[];
+  for(const path of ['', 'zero/', 'lastline/']) {
+    const main=path==='';
+    await load('/game/mech/'+path+'index.html',main?'?mute&nobrief&all&fps=0':'?mute&ch='+(path==='zero/'?6:4)+'&all&fps=0');result=checks;
+    if(!main)await wait(()=>win.__m6);
+    const M=main?win.__game:win.__m6,W=main?M.world:win.__world,T=win.__T;
+    renderer=main?M.post.renderer:win.__renderer;post=main?M.post:{render:()=>win.__step(1)};
+    const render=renderer.render.bind(renderer);renderer.render=()=>{};
+    const step=n=>{for(let i=0;i<n;i++){if(main)M.tick(1/60);else win.__step(1);}};
+    const press=(code,on=true)=>win.dispatchEvent(new win.KeyboardEvent(on?'keydown':'keyup',{code}));
+    const tap=code=>{press(code);step(1);press(code,false);step(1);};
+    if(main){M.launch(8);if(M.state==='paused')win.document.querySelector('#resume').click();}
+    else win.document.querySelector('#resume').click();
+    step(220);
+    const C=M.combat,p=M.player,hero=M.hero;C.hurt=()=>{};
+    const x=main?0:path==='zero/'?180:560,z=main?-120:path==='zero/'?120:250;
+    p.pos.set(x,W.height(x,z),z);p.vel.set(0,0,0);p.grounded=true;p.flying=false;p.en=100;p.overheat=0;p.lockMove=0;p.yaw=0;
+    tap('KeyT');step(100);assert(p.flying&&!p.grounded&&p.pos.y>W.height(x,z)+6,(path||'本篇')+' T 起飛');
+    press('Space');step(180);press('Space',false);step(120);
+    const high=p.pos.y;step(120);
+    assert(Math.abs(p.pos.y-high)<.4&&high>W.height(x,z)+60,(path||'本篇')+' 上升後放開可定高');
+    const en=p.en;press('KeyW');press('ShiftLeft');step(100);press('ShiftLeft',false);press('KeyW',false);
+    const speed=p.speed;assert(speed>60&&p.en<en-20,(path||'本篇')+' 空中高速推進消耗 EN');
+    step(150);const before=p.pos.y;press('ControlLeft');step(60);press('ControlLeft',false);step(90);
+    assert(p.pos.y<before-15&&p.flying,(path||'本篇')+' Ctrl 下降後重新定高');
+    tap('KeyV');tap('KeyV');assert(p.flying,(path||'本篇')+' V 切換兩種視角保留飛行');
+    const triangles=hero.meshes.reduce((n,m)=>n+(m.geometry.index?m.geometry.index.count:m.geometry.attributes.position.count)/3,0);
+    assert(triangles<=80000&&hero.meshes.length<=30,(path||'本篇')+' 空戰翼沿用八萬三角形、三十網格預算');
+    for(const b of Object.values(hero.bones))if(b?.quaternion)assertSilent(b.quaternion.toArray().every(Number.isFinite),'空中姿勢旋轉必須有限');
+    assert(hero.wings.every(w=>Math.abs(w.g.rotation.z)>.3),(path||'本篇')+' 空戰翼實際展開');
+    if(main) {
+      const foes=[];
+      p.pos.set(x,W.height(x,z)+110,z);p.vel.set(0,0,0);p.flightAltitude=p.pos.y;p.en=100;
+      C.enc=null;C.enemies.forEach(e=>e.m.root.removeFromParent());C.enemies.length=0;C.events.length=0;
+      for(let i=0;i<5;i++){
+        const kind=i===4?'heavy':'grunt',ex=x+(i-2)*24,ez=z-120;
+        const e=C.spawn(kind,i,3,{x:ex,z:ez,tx:ex,tz:ez,ground:true});e.vel.set(0,0,0);e.dropping=false;e.grounded=true;foes.push(e);
+      }
+      step(300);
+      const interceptors=foes.filter(e=>e.airborne);
+      assert(interceptors.length>0&&interceptors.length<=3,'實際 AI 升空追擊，最多三架攔截');
+      assert(interceptors.some(e=>e.pos.y-W.height(e.pos.x,e.pos.z)>35)&&!foes[4].airborne,'攔截機改變高度，重裝機留在地面');
+      const e=interceptors[0];e.pos.copy(p.pos).add(new T.Vector3(0,80,0));e.m.root.updateMatrixWorld(true);
+      C.lockTarget=null;C.soft=null;C.eye.copy(p.pos).add(new T.Vector3(0,10,0));C.aimDir.set(0,1,0);C.aimSkip=0;C.rifle.cd=0;C.rifle.reload=-1;
+      const hp=e.ap;C.fireRifle();assert(e.ap<hp,'實際步槍能命中正上方敵機');
+      C.lockTarget=e;C.saber.phase=null;C.startSaber();assert(p.dashV.y>90,'光劍突進能追向上方敵機');p.dashT=0;C.saber.phase=null;
+      C.saber.phase='swing';C.saber.target=e;C.saber.hit=false;hero.swing=.6;
+      const farHp=e.ap;C.updateSaber(.02);assert(e.ap===farHp,'高度差八十公尺不能隔空砍中');C.saber.phase=null;
+      const ray=W.raycast.bind(W);W.raycast=()=>.5;for(const f of foes)f.losT=0;
+      for(let i=0;i<210;i++)C.updateEnemies(1/60);W.raycast=ray;
+      assert(foes.every(f=>!f.airborne),'失去目視三秒後停止追蹤空中高度');
+      step(150);renderer.render=render;M.tick(1/60);const memory={...renderer.info.memory};
+      const pose=p.animState(C.aimPoint);
+      for(let i=0;i<300;i++){pose.flight=i%2;hero.animate(1/60,pose);}post.render(1);
+      assert(renderer.info.memory.geometries===memory.geometries&&renderer.info.memory.textures===memory.textures,'重複飛行動作沒有新增 GPU 幾何或貼圖');
+      p.yaw=Math.PI;p.pitch=-.16;step(45);if(!hero.root.visible)tap('KeyV');
+      await save('mech-air-combat');renderer.render=()=>{};
+    }
+    press('KeyC');step(600);press('KeyC',false);
+    assert(p.grounded&&!p.flying&&(main?M.state==='play':!M.ending),(path||'本篇')+' C 安全落地後任務持續');
+    assert(errors.length===0,(path||'本篇')+' 空戰靜音測試沒有執行錯誤');
+    stats.push({path:path||'main',heldAltitude:high,boostSpeed:speed,triangles,meshes:hero.meshes.length,memory:renderer.info.memory});
+    renderer.render=render;step(1);
+  }
+  report.textContent=JSON.stringify({checks,stats,errors},null,2);state.textContent='三款空戰通過';
+}
+
+async function flightArt() {
+  await load('/game/mech/index.html','?mute&nobrief&all&fps=0');
+  const M=win.__game,p=M.player;post=M.post;renderer=post.renderer;
+  const render=renderer.render.bind(renderer);renderer.render=()=>{};
+  M.launch(1);if(M.state==='paused')win.document.querySelector('#resume').click();M.run(3.7);M.combat.hurt=()=>{};
+  p.pos.set(240,0,480);p.vel.set(0,0,0);p.grounded=true;p.yaw=Math.PI;p.pitch=-.12;p.en=100;
+  const press=(code,on=true)=>win.dispatchEvent(new win.KeyboardEvent(on?'keydown':'keyup',{code}));
+  press('KeyT');M.tick(1/60);press('KeyT',false);press('Space');M.run(4);press('Space',false);M.run(1);
+  if(!M.hero.root.visible){press('KeyV');M.tick(1/60);press('KeyV',false);}
+  press('KeyW');press('ShiftLeft');M.run(1.1);renderer.render=render;M.tick(1/60);
+  assert(p.flying&&p.speed>60&&M.hero.root.visible,'神戶上空實際高速飛行與背後視角');
+  await save('mech-kobe-flight');
+  M.camera.position.set(p.pos.x+14,p.pos.y+13,p.pos.z+24);M.camera.lookAt(p.pos.x,p.pos.y+10,p.pos.z);M.camera.updateMatrixWorld();
+  win.__see.c.value.w=0;win.__see.t.value.w=0;win.__see.a.value=0;
+  const blur=post.u.speed.value;post.u.speed.value=0;await save('mech-flight-airframe',true);post.u.speed.value=blur;
+  press('KeyW',false);press('ShiftLeft',false);
+  assert(errors.length===0,'飛行畫面沒有執行錯誤');state.textContent='空戰畫面通過';
 }
 
 async function battlefields() {
@@ -807,6 +894,9 @@ async function campaignMech(chapter = 4, choice = 'rescue') {
       assert(warning.visible,'下一發先出現紅色地面預警');M.player.pos.x+=30;const dodgeHp=M.player.ap;
       for(let i=0;i<120;i++)mission.tick(.05);
       assert(M.player.ap===dodgeHp,'離開預警落點可避開砲擊傷害');
+      M.player.pos.y=win.__world.height(M.player.pos.x,M.player.pos.z)+100;const airHp=M.player.ap;
+      for(let i=0;i<600;i++)mission.tick(.05);
+      assert(M.player.ap===airHp,'空中一百公尺不受地面砲擊落點隔空傷害');M.player.pos.y=0;
     }
   }
   const memory = { ...renderer.info.memory }, render = renderer.render.bind(renderer); renderer.render = () => {};
@@ -976,7 +1066,7 @@ async function fieldOps() {
   report.textContent=JSON.stringify({checks,metrics,errors},null,2);state.textContent='開放戰區通過';
 }
 
-for (const [id, fn] of [['kobeArt', kobeArt], ['fieldAudit', fieldAudit], ['fieldOps', fieldOps], ['scoutCombat', scoutCombat], ['reconControls', reconControls], ['prequelFoot', prequelFoot], ['patrolWorld', patrolWorld], ['japaneseSigns', japaneseSigns], ['harborArt', harborArt], ['campaignFoot', campaignFoot], ['campaign4', () => campaignMech(4)], ['campaign5', () => campaignMech(5)], ['campaign6', () => campaignMech(6)], ['campaign7', () => campaignMech(7)], ['campaign6Artillery', async()=>{localStorage.setItem('lastline.choice',JSON.stringify('artillery'));await campaignMech(6,'artillery');}], ['campaignArtillery', async () => { localStorage.setItem('lastline.choice', JSON.stringify('artillery')); await campaignMech(7, 'artillery'); }], ['campaignEdges', campaignEdges], ['mech', mech], ['fields', battlefields], ['enemyMotion', enemyMotion], ['zero', zero], ['tactics', tactics], ['prequelMechCampaign', prequelMechCampaign], ['campaignMain', campaignMain], ['enemyPressure', enemyPressure], ['infantry', infantry], ['art', art], ['hero', hero], ['city', city], ['mountains', mountains], ['weapons', weapons], ['save', save]]) document.querySelector('#' + id).onclick = () => fn().catch(e => { state.textContent = '失敗'; report.textContent += '\n' + e.stack; });
+for (const [id, fn] of [['flightArt', flightArt], ['flight', flight], ['kobeArt', kobeArt], ['fieldAudit', fieldAudit], ['fieldOps', fieldOps], ['scoutCombat', scoutCombat], ['reconControls', reconControls], ['prequelFoot', prequelFoot], ['patrolWorld', patrolWorld], ['japaneseSigns', japaneseSigns], ['harborArt', harborArt], ['campaignFoot', campaignFoot], ['campaign4', () => campaignMech(4)], ['campaign5', () => campaignMech(5)], ['campaign6', () => campaignMech(6)], ['campaign7', () => campaignMech(7)], ['campaign6Artillery', async()=>{localStorage.setItem('lastline.choice',JSON.stringify('artillery'));await campaignMech(6,'artillery');}], ['campaignArtillery', async () => { localStorage.setItem('lastline.choice', JSON.stringify('artillery')); await campaignMech(7, 'artillery'); }], ['campaignEdges', campaignEdges], ['mech', mech], ['fields', battlefields], ['enemyMotion', enemyMotion], ['zero', zero], ['tactics', tactics], ['prequelMechCampaign', prequelMechCampaign], ['campaignMain', campaignMain], ['enemyPressure', enemyPressure], ['infantry', infantry], ['art', art], ['hero', hero], ['city', city], ['mountains', mountains], ['weapons', weapons], ['save', save]]) document.querySelector('#' + id).onclick = () => fn().catch(e => { state.textContent = '失敗'; report.textContent += '\n' + e.stack; });
 
 async function harborArt() {
   await load('/game/mech/lastline/index.html', '?mute&god&ch=1&all&fps=0');

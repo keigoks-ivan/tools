@@ -20,6 +20,15 @@ test('分區防守：待在目前據點才計時，離開和命中停止，必�
  work(o,10,{hurt:true});assert.equal(o.progress,progress);work(o,4);assert.equal(o.index,1);
  work(o,20,{player:[0,0]});assert(!o.done);work(o,10);assert(o.done);
 });
+test('飛過控制站不能隔空作業；防守據點也計算垂直距離',()=>{
+ const o=new Operation({kind:'console',radius:2,points:[point(0,0)]});
+ work(o,10,{altitude:80});assert.equal(o.progress,0);assert(!o.done);
+ work(o,10,{altitude:0});assert(o.done);
+ const m=new Operation({kind:'console',radius:16,points:[point(0,0)]});work(m,10,{altitude:10});assert.equal(m.progress,0);
+ const d=new Operation({kind:'defend',radius:30,points:[point(0,0)]});
+ work(d,10,{altitude:50});assert.equal(d.progress,0);
+ work(d,10,{altitude:20});assert(d.done);
+});
 test('護送需要護衛靠近、附近威脅清除；人物依折線走，不跳到終點',()=>{
  const def={kind:'escort',radius:14,speed:2,route:[[0,0],[4,0],[4,4]]},o=new Operation(def);
  work(o,10,{player:[30,0]});assert.deepEqual(o.pos,[0,0]);work(o,10,{threat:true});assert.deepEqual(o.pos,[0,0]);

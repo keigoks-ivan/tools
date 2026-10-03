@@ -6,10 +6,10 @@ export class Operation {
   }
   get point() { return this.kind==='escort'?this.pos:this.def.points[this.index]; }
   get fraction() { return this.kind==='escort'?this.index/(this.def.route.length-1):this.progress/(this.point?.seconds||1); }
-  step(dt,{player,held=false,hurt=false,threat=false}) {
+  step(dt,{player,held=false,hurt=false,threat=false,altitude=0}) {
     if(this.done||!Number.isFinite(dt)||dt<=0)return;
     dt=Math.min(dt,.1);this.time+=dt;
-    const p=this.point,near=Math.hypot(player[0]-p[0],player[1]-p[1])<(this.def.radius||(this.kind==='escort'?14:2));
+    const p=this.point,near=Math.hypot(player[0]-p[0],player[1]-p[1],altitude)<(this.def.radius||(this.kind==='escort'?14:2))&&(this.kind!=='console'||Math.abs(altitude)<4);
     if(this.kind==='escort') {
       if(!near||threat)return;
       const next=this.def.route[this.index+1],dx=next[0]-this.pos[0],dz=next[1]-this.pos[1],d=Math.hypot(dx,dz),move=dt*(this.def.speed||2.4);

@@ -92,7 +92,7 @@ export const LINES = {
   mech: [[EN, '修船場機動巡邏開始。'], [OP, '外側吊車軌道有敵機。藏在棚內，讓它過去。'], [OP, '它走遠了。繼續啟動。']],
   hatch: [[OP, '離線金鑰已辨識。胸前艙門開了，按 E 上機。']],
 };
-const keys = [['W A S D', '移動／滑鼠瞄準'], ['左鍵／右鍵', '40 發步槍／鎖定飛彈'], ['F／E', '光劍／光波砲'], ['Shift／空白', '噴射／跳躍'], ['R／V', '換彈／切換視角'], ['B', '按住接通現場設施'], ['Esc', '暫停／畫質設定']];
+const keys = [['W A S D', '移動／滑鼠瞄準'], ['左鍵／右鍵', '40 發步槍／鎖定飛彈'], ['F／E', '光劍／光波砲'], ['Shift', '點一下閃避，按住推進'], ['T', '起飛／停止飛行'], ['空白／C・Ctrl', '上升／下降，放開定高'], ['R／V', '換彈／切換視角'], ['B', '按住接通現場設施'], ['Esc', '暫停／畫質設定']];
 const touch = [...PREQUEL_CONTROLS.touch, ['tSupport','接通']];
 const wave = (title, go, list, lines, more = {}) => ({ title, sub: '守住車隊，清除敵軍', go: [...go, 90], cp: [go[0] - 22, go[1], Math.PI / 2], list, lines, obj: title, music: 4, repair: 0.18, ...more });
 const mission = new URL('./mission.js', import.meta.url).href;

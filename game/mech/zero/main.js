@@ -1033,6 +1033,7 @@ function begin(n) {
     touchUI.style.display = input.touch.on ? 'block' : 'none';
     startMech(); return;
   }
+  for(const id of ['tFlight','tDescend']){const b=$(id);if(b)b.style.display='none';}
   startChapter(n);
   if (campaign) {
     if(n===1&&!resumeSave)writeSave('operations',{});

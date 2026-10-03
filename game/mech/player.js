@@ -1,5 +1,6 @@
 // 玩家機體的移動：走路、衝刺滑行、快速閃避、跳躍／上升、落地、撞建築、踩車
 import * as THREE from 'three';
+import { FLIGHT } from './flight.mjs';
 
 const clamp = THREE.MathUtils.clamp;
 const damp = (a, b, k, dt) => a + (b - a) * (1 - Math.exp(-k * dt));
@@ -22,6 +23,7 @@ export class Player {
     this.en = P.en; this.enIdle = 0; this.overheat = 0;
     this.qbCd = 0; this.qbT = 0; this.qbDir = new THREE.Vector3();
     this.boosting = 0; this.hovering = 0; this.thrust = 0;
+    this.flying = false; this.flightCut = false; this.flightAltitude = 0;
     this.dashT = 0; this.dashV = new THREE.Vector3();
     this.odT = 0;            // 覺醒剩餘秒數（>0 時 EN 不消耗）
     this.lockMove = 0;       // 重落地硬直
@@ -37,13 +39,22 @@ export class Player {
   }
 
   // 光劍突進：強制往某方向衝 t 秒
-  dash(dir, speed, t) { this.dashV.copy(dir).setY(0).normalize().multiplyScalar(speed); this.dashT = t; this.vel.y = Math.max(this.vel.y, dir.y * speed * 0.5); }
+  dash(dir, speed, t) { this.dashV.copy(dir); if(!this.flying)this.dashV.y=0; this.dashV.normalize().multiplyScalar(speed); this.dashT = t; this.vel.y = this.flying?this.dashV.y:Math.max(this.vel.y,dir.y*speed*.5); }
 
   update(dt, inp) {
     const H = this.hooks, w = this.world;
+    if(!inp.hover)this.flightCut=false;
+    if(inp.flightBlocked)this.flying=false;
+    if(inp.flight && !inp.flightBlocked) {
+      if(this.flying){this.flying=false;this.flightCut=true;}
+      else if(this.overheat<=0&&this.en>=FLIGHT.restartEN&&this.lockMove<=0) {
+        this.flying=true;this.flightAltitude=this.pos.y;
+        if(this.grounded&&this.useEN(P.cJump)){this.vel.y=P.jump;this.grounded=false;this.airT=0;if(H.jump)H.jump();}
+      }
+    }
     // ---- 視角
     this.yaw -= inp.lookX;
-    this.pitch = clamp(this.pitch - inp.lookY, -0.62, 0.72);
+    this.pitch = clamp(this.pitch - inp.lookY, -FLIGHT.pitch, FLIGHT.pitch);
     const sy = Math.sin(this.yaw), cy = Math.cos(this.yaw);
     const fwd = _v.set(sy, 0, cy), right = _w.set(-cy, 0, sy);
     // ---- 想去的方向
@@ -63,14 +74,14 @@ export class Player {
     // ---- 衝刺滑行（按住 Shift）
     const cost = this.grounded ? P.cBoost : P.cBoostAir;
     this.boosting = inp.boost && this.lockMove <= 0 && this.overheat <= 0 && this.useEN(cost * dt) ? 1 : 0;
-    const vmax = this.boosting ? P.boost : P.walk;
+    const vmax = this.flying ? (this.boosting?FLIGHT.boost:FLIGHT.cruise) : this.boosting ? P.boost : P.walk;
     const target = new THREE.Vector3();
     if (hasIn) target.copy(wish).normalize().multiplyScalar(vmax * Math.min(1, wish.length()));
     else if (this.boosting) target.copy(fwd).multiplyScalar(vmax);
     if (this.lockMove > 0) target.set(0, 0, 0);
     // 加速度：地面反應快、空中慢；超速（閃避後）慢慢收
     const hv = new THREE.Vector3(this.vel.x, 0, this.vel.z), sp = hv.length();
-    let rate = this.grounded ? (hasIn || this.boosting ? (this.boosting ? 60 : 30) : 36) : (this.boosting ? 40 : 12);
+    let rate = this.grounded ? (hasIn || this.boosting ? (this.boosting ? 60 : 30) : 36) : this.flying ? (this.boosting?55:25) : (this.boosting ? 40 : 12);
     if (sp > vmax + 2) rate = this.grounded ? 42 : 20;
     if (this.qbT > 0) rate = 0;
     const dv = target.sub(hv);
@@ -84,15 +95,29 @@ export class Player {
       this.vel.y = P.jump; this.grounded = false; this.airT = 0;
       if (H.jump) H.jump();
     }
-    const hov = !this.grounded && inp.hover && this.airT > 0.12 && this.overheat <= 0 && this.useEN(P.cHover * dt);
+    if(!this.grounded&&inp.hover&&!this.flying&&!this.flightCut&&!inp.flightBlocked&&this.airT>.12&&this.overheat<=0&&this.en>=FLIGHT.restartEN) {
+      this.flying=true;this.flightAltitude=this.pos.y;
+    }
+    const vertical=(inp.hover?1:0)-(inp.descend?1:0);
+    if(this.flying&&!this.useEN((FLIGHT.idleCost+(hasIn?FLIGHT.moveCost:0)+(vertical>0?FLIGHT.riseCost:0))*dt)) {this.flying=false;this.flightCut=true;}
+    if(this.flying&&this.en<=0){this.flying=false;this.flightCut=true;}
+    const hov = this.flying;
+    let ceiling=Infinity;
     if (hov && !this.hovering && H.hover) H.hover(true);
     this.hovering = hov ? 1 : 0;
     if (!this.grounded) {
       this.airT += dt;
-      this.vel.y -= P.g * dt;
-      if (hov) this.vel.y = Math.min(P.hoverMax, this.vel.y + P.hoverAcc * dt);
-      else if (this.boosting) this.vel.y = damp(this.vel.y, Math.max(this.vel.y, -4), 4, dt);   // 空中衝刺時幾乎不掉
-      if (this.dashT > 0) this.vel.y = Math.max(this.vel.y, -2);
+      if(hov) {
+        ceiling=w.height(this.pos.x,this.pos.z)+FLIGHT.ceiling;
+        let want=vertical>0?FLIGHT.rise:vertical<0?-FLIGHT.descend:clamp((this.flightAltitude-this.pos.y)*3,-8,8);
+        if(this.airT<.65&&!inp.descend)want=Math.max(want,12);
+        want=Math.min(want,Math.max(-8,(ceiling-this.pos.y)*3));
+        this.vel.y=damp(this.vel.y,want,5,dt);
+        if(vertical||this.airT<.65)this.flightAltitude=this.pos.y+this.vel.y*.18;
+      } else this.vel.y -= P.g * dt;
+      if (!hov && this.boosting) this.vel.y = damp(this.vel.y, Math.max(this.vel.y, -4), 4, dt);
+      if(this.flying&&this.dashT>0){this.vel.y=this.dashV.y;this.flightAltitude=this.pos.y+this.vel.y*dt;}
+      if (!this.flying && this.dashT > 0) this.vel.y = Math.max(this.vel.y, -2);
       this.vel.y = Math.max(this.vel.y, -60);
     }
     this.thrust = damp(this.thrust, Math.max(this.boosting, this.hovering, this.qbT > 0 ? 1 : 0, this.dashT > 0 ? 1 : 0), 12, dt);
@@ -101,6 +126,7 @@ export class Player {
     const p = this.pos;
     const ox = p.x, oz = p.z;
     p.x += this.vel.x * dt; p.z += this.vel.z * dt; p.y += this.vel.y * dt;
+    if(this.flying&&p.y>ceiling){p.y=ceiling;this.vel.y=Math.min(0,this.vel.y);this.flightAltitude=ceiling;}
     const hit = w.collide(p, P.r, p.y);
     if (hit) {   // 撞牆：把往牆裡的速度扣掉
       const nx = p.x - (ox + this.vel.x * dt), nz = p.z - (oz + this.vel.z * dt), nl = Math.hypot(nx, nz);
@@ -114,7 +140,7 @@ export class Player {
       else { p.y = damp(p.y, ground, 25, dt); this.vel.y = 0; }
     } else if (p.y <= ground && this.vel.y <= 0) {
       const s = clamp(-this.vel.y / 26, 0, 1.6);
-      p.y = ground; this.grounded = true;
+      p.y = ground; this.grounded = true; this.flying=false;this.hovering=0;
       if (s > 0.9) this.lockMove = 0.28;
       this.vel.y = 0;
       if (H.land) H.land(s);
@@ -127,6 +153,7 @@ export class Player {
 
     // ---- EN 回充
     if (this.enIdle > P.delay && this.overheat <= 0) this.en = Math.min(P.en, this.en + (this.grounded ? P.regen : P.regenAir) * dt);
+    if(this.flying&&!this.boosting&&!vertical&&!hasIn&&this.dashT<=0&&this.overheat<=0)this.en=Math.min(P.en,this.en+FLIGHT.recovery*dt);
     if (this.odT > 0) this.en = P.en;
   }
 
@@ -134,7 +161,7 @@ export class Player {
   animState(aim) {
     return {
       vel: this.vel, grounded: this.grounded, boost: this.grounded ? Math.max(this.boosting, this.qbT > 0 ? 1 : 0) : 0,
-      torsoYaw: this.yaw, pitch: this.pitch, thrust: this.thrust, aim, lean: this.dashT > 0 ? 0.25 : 0,
+      torsoYaw: this.yaw, pitch: this.pitch, thrust: this.thrust, aim, lean: this.dashT > 0 ? 0.25 : 0, flight: this.flying?1:0,
     };
   }
 }

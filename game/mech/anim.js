@@ -118,6 +118,8 @@ export class MechMotion {
     m.pose.boost = damp(m.pose.boost, st.grounded && st.boost > 0.5 ? 1 : 0, 8, dt);
     m.pose.air = damp(m.pose.air, st.grounded ? 0 : 1, 6, dt);
     const Bst = m.pose.boost, Air = m.pose.air;
+    this.flight=damp(this.flight||0,st.flight||0,6,dt);
+    const Flight=this.flight, flightSpeed=Flight*smooth(8,75,sp);
     const walkW = (1 - Bst) * (1 - Air);
     const P = this.gait, HR = !!m.stance;   // 主角機：衝刺／飛行用英雄機的誇張姿勢（前傾、雙腳往後拖、盾在前）
 
@@ -238,8 +240,8 @@ export class MechMotion {
       const bh = HR ? (r ? 0.15 : 0.5) : r ? -0.38 : 0.28, bk = HR ? (r ? 0.75 : 1.25) : r ? 0.55 : 0.95, ba = HR ? (r ? 0.45 : 0.6) : r ? 0.05 : 0.35;
       const ah = HR ? (r ? -0.45 : 0.2) : r ? -0.6 : -0.12, ak = HR ? (r ? 1.0 : 1.1) : r ? 1.1 : 0.55, aa = HR ? (r ? 0.35 : 0.5) : r ? 0.2 : 0.4;
       const bw = Bst * (1 - Air), aw = Air;
-      hipA = lerp(lerp(hipA, bh, bw), ah, aw) + shake;
-      kneeA = lerp(lerp(kneeA, bk, bw), ak, aw) - shake;
+      hipA = lerp(lerp(hipA, bh, bw), ah+flightSpeed*.45, aw) + shake;
+      kneeA = lerp(lerp(kneeA, bk, bw), ak+flightSpeed*.25, aw) - shake;
       ank = lerp(lerp(ank, ba, bw), aa, aw);
       roll = lerp(roll, -sx * (HR ? 0.08 : 0.05), bw) * (1 - aw) + (-sx * (HR ? 0.16 : 0.1)) * aw;
       hipA -= m.land * 0.4; kneeA += m.land * 0.85; ank -= m.land * 0.45;
@@ -264,8 +266,8 @@ export class MechMotion {
     const tw = wrap(st.torsoYaw - m.legYaw) - b.pelvis.rotation.y;
     const twist = this.twist.step(this.twist.x + wrap(tw - this.twist.x), dt);
     if (Math.abs(this.twist.v) > 2.5) m.servo = Math.min(1, Math.abs(this.twist.v) / 6);
-    const leanT = clamp(this.accF * 0.02, -0.3, 0.3) + Bst * (HR ? 0.45 : 0.2) + Air * (HR ? 0.15 : 0.05) + 0.04 * g * Math.min(1, af / 12) + (st.lean || 0) + (m.stance ? m.stance.chest * (1 - g) : 0);
-    const rollT = clamp(-this.accS * 0.012, -0.2, 0.2) - (Bst > 0.3 ? side * 0.006 : 0) + sway * 0.05;
+    const leanT = clamp(this.accF * 0.02, -0.3, 0.3) + Bst * (HR ? 0.45 : 0.2) + Air * (HR ? 0.15 : 0.05) + flightSpeed*.4 + 0.04 * g * Math.min(1, af / 12) + (st.lean || 0) + (m.stance ? m.stance.chest * (1 - g) : 0);
+    const rollT = clamp(-this.accS * 0.012, -0.2, 0.2) - Flight*clamp(yawRate*.16,-.32,.32) - (Bst > 0.3 ? side * 0.006 : 0) + sway * 0.05;
     const quake = this.shock * (P ? 0.006 : 0.02);
     b.torso.rotation.y = twist;
     b.torso.rotation.x = this.lean.step(leanT + (P ? this.brace * 0.06 - rc * 0.09 : 0), dt) + Math.sin(this.t * 47) * quake;
@@ -283,7 +285,7 @@ export class MechMotion {
     if (m.wings) {
       this.wingO = damp(this.wingO || 0, Math.max(Bst, Air, m.thrust > 0.3 ? 1 : 0), 5, dt);
       const wo = this.wingO;
-      for (const w of m.wings) { w.g.rotation.z = -w.sx * 0.5 * wo; w.g.rotation.y = -w.sx * 0.22 * wo; w.g.rotation.x = 0.15 * wo; }
+      for (const w of m.wings) { w.g.rotation.z = -w.sx * (.5*wo+.35*Flight); w.g.rotation.y = -w.sx * (.22*wo+.1*flightSpeed); w.g.rotation.x = .15*wo-.22*flightSpeed; }
     }
 
     // ---- 推進器

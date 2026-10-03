@@ -265,8 +265,8 @@ export class HUD {
     const kmh = (P.speed || 0) * 3.6;
     this.vtape(sx0, sy0, kmh, 1.2 * s, 10, 20, sd, 'cy');
     this.text('GS  KM/H', sx0 + sd * 22 * s, sy0 - th - 11 * s, 10, 'dim', 0.9, 'center');
-    const mode = P.boosting ? 'BOOST' : P.hovering ? 'HOVER' : P.grounded === false ? 'AIR' : 'GND';
-    this.text(mode, sx0 + sd * 22 * s, sy0 + th + 12 * s, 11, P.boosting || P.hovering ? 'cy' : 'dim', 1, 'center', 700);
+    const mode = P.flying ? (P.boosting?'空中推進':'定高飛行') : P.boosting ? 'BOOST' : P.hovering ? 'HOVER' : P.grounded === false ? 'AIR' : 'GND';
+    this.text(mode, sx0 + sd * 22 * s, sy0 + th + 12 * s, 11, P.boosting || P.hovering ? 'cy' : 'dim', 1, 'center', 700, SANS);
     const agl = Math.max(0, P.pos.y - (g.groundY ?? 0)), vs = P.vel ? P.vel.y : 0;
     this.vtape(lx0, sy0, agl, 3 * s, 5, 10, 1, 'cy');
     const vy = sy0 - clamp(vs, -th / (3 * s), th / (3 * s)) * 3 * s;   // 升降率指標：一秒後的高度
@@ -285,6 +285,7 @@ export class HUD {
     this.text('EN', x0 - 6 * s, y0 + 11 * s, 9, 'dim', 0.95, 'right');
     this.bar(x0, y0 + 10 * s, bw, 2 * s, P.en / 100, enC);
     if (P.overheat > 0) this.text('EN OVERHEAT', cx, y0 + 22 * s, 11, 'rd', 1, 'center', 700);
+    else if(P.flying)this.text('空白 ↑　C／Ctrl ↓　Shift 推進　T 降落',cx,y0+22*s,11,'cy',.9,'center',600,SANS);
     const M = C.msl, SB = C.saber, CN = C.cannon, OD = C.od, cb = 560 * s, cw = cb / 5, wy = y0 + 38 * s;
     const chip = (i, label, val, v, col, hot) => {   // 五格武器：比血條寬一點，字才不會擠在一起
       const x = cx - cb / 2 + i * cw + 4 * s, w = cw - 8 * s;

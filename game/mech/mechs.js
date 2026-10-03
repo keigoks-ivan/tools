@@ -970,7 +970,7 @@ export class Mech {
     rcB.put(sten('fuel', 0.8, 0.08, { tint: 1, seg: 3 }), 0.55, 0.55);
     A(bk, blk(2.1, 1.0, 0.6, 0.1, 0.2), S.frame, [0, 1.6, -2.7]);
     for (const sx of [-1, 1]) {
-      A(bk, bell(0.8, 1.4), S.dark, [sx * 0.75, 1.7, -2.75], [0.35, 0, 0]);
+      A(bk, bell(0.9, 1.7), S.dark, [sx * 0.75, 1.7, -2.75], [0.35, 0, 0]);
       A(bk, cyl(0.55, 0.55, 0.25), S.frame, [sx * 0.75, 1.75, -2.73], [0.35, 0, 0]);
       this.nozzles.push({ bone: bk, pos: [sx * 0.75, 0.4, -3.25], rot: [0.35, 0, 0], r: 0.8, len: 7 });
       // 光劍柄（肩後斜插）
@@ -983,6 +983,8 @@ export class Mech {
       WG.position.set(sx * 1.15, 3.05, -2.95);
       bk.add(WG);
       (this.wings || (this.wings = [])).push({ g: WG, sx });
+      A(WG,blk(.72,.6,.65,.08),S.frame,[sx*.3,.05,0]);
+      this.vent(WG,.52,.36,3,S,[sx*.3,.05,-.36],[0,PI,0]);
       const wp = WG.position, wR = [0, sx * 0.25, 0];
       for (const [k, q] of [[[0.95, 2.7], [2.0, 2.95], [3.55, 7.35], [2.9, 7.5]], [[1.7, 2.35], [2.65, 2.55], [4.2, 6.35], [3.62, 6.6]], [[2.35, 1.85], [3.15, 2.0], [4.72, 5.05], [4.2, 5.3]]].entries()) {
         const z = -2.95 - k * 0.16;

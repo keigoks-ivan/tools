@@ -312,20 +312,20 @@ export const STAGE_DATA = [
           lines: [[EN, '後路被切斷了！死守前哨！']] },
       ] } },
   // ================================================================ 第 8 關
-  { battlefield: 'airfield', fieldLabel: '高原航空基地', name: '制空權', en: 'AIR SUPREMACY', tip: '直升機從樓後升起、戰機低空掠過——飛彈一次鎖多台', music: 4, tier: 5,
-    brief: ['聯邦空軍整備完成，但城南高原航空基地的防空網讓飛機一架也進不來。', '防空砲架在機場掩體上，由雷達站統一指揮。', '沿路打垮防空陣地和雷達，替最後的總攻打開空中走廊。', '牠們會把能飛的全部派上來。'],
-    start: [[OP, '防空網不倒，空軍就飛不進來。'], [OP, '砲架在掩體頂上。整座打垮，砲就一起倒。']],
+  { battlefield: 'airfield', fieldLabel: '高原航空基地', name: '制空權', en: 'AIR SUPREMACY', tip: 'T 啟動飛行；空白上升、C／Ctrl 下降，放開升降鍵定高；Shift 高速推進', music: 4, tier: 5,
+    brief: ['聯邦空軍整備完成，但城南高原航空基地的防空網讓飛機一架也進不來。', '展開蒼焰的空戰翼。按 T 起飛，以不同高度繞過火力線。', '沿路打垮防空陣地和雷達，替最後的總攻打開空中走廊。', '敵方機甲會升空攔截，戰機則從上方俯衝。高速推進消耗 EN，定高停留可緩慢回充。'],
+    start: [[OP, '防空網不倒，空軍就飛不進來。'], [OP, '按 T 展開空戰翼。空白上升，C 或 Ctrl 下降；放開就定高。'], [OP, 'Shift 高速推進，EN 低就減速停留。防空砲在掩體頂上，拆掉掩體才能清空走廊。']],
     end: [[OP, '防空網瓦解。空軍，路開了。'], ['聯邦空軍', '鷹群進入神戶空域。謝了，蒼焰。'], [DOG, '藍色的，我在巢穴等你。']],
     route:
     // 中央廣場南緣出發 → 沿 x＝0 往南 → 蛇行穿過城南的塔樓區 → 塔樓區中間的空地（防空指揮所）
     { cp: [4, 8], arena: 175, fin: 60, par: 550, over: 2,
       pts: [[60, -60], [0, -120], [0, -240], [0, -360], [0, -480], [120, -480], [240, -480], [240, -360], [120, -360], [120, -240], [120, -120], [240, -120], [300, -180]],
       secs: [
-        { at: 1, amb: 'heli@rise*2 tank@out*2', amb2: 'heli@rise tank@side*2 grunt@drop grunt@side', tip: '直升機從樓後面升起——一露頭就打' },
+        { at: 1, amb: 'heli@rise*2 tank@out grunt@drop', amb2: 'heli@rise tank@side*2 grunt@drop grunt@side', tip: '按 T 起飛，拉高後用飛彈鎖定直升機；空戰機甲會爬升追擊' },
         { at: 2, amb: 'heli@rise*2 tank@side grunt@roof', amb2: 'jet@out tank@out*2 heli@rise grunt@side', amb3: 'grunt@drop heli@rise*2 grunt@side', tip: '打垮兩座防空陣地',
           targets: [{ x: 37, z: -205, name: '防空陣地' }, { x: -41, z: -300, name: '防空陣地' }],
           go: [[OP, '前面路口兩側的樓頂有防空砲。']], lines: [[EN, '防空陣地遭到攻擊！']], clear: [[OP, '兩座防空砲沉默了。']] },
-        { at: 3, amb: 'jet@out*2 tank@out*2', amb2: 'jet@out heli@rise*2 grunt@drop grunt@side', tip: '戰機掠過後會繞一大圈——等牠回頭時鎖定',
+        { at: 3, amb: 'jet@out*2 tank@out ace@drop', amb2: 'jet@out heli@rise*2 grunt@drop grunt@side', tip: '空中側閃躲開俯衝；王牌機會逼近斬擊，保持高度與距離',
           lines: [[EN, '戰鬥機隊，攔截那台機體！']] },
         { at: 4, amb: 'heavy@drop heli@rise tank@side*2', amb2: 'grunt@roof*2 tank@out*2 grunt@side', amb3: 'heli@rise*2 tank@side grunt@side',
           lines: [[EN, '重裝隊到位。把牠壓在地面上！']] },

@@ -17,7 +17,7 @@ const clamp = THREE.MathUtils.clamp;
 const HANGAR = { x0: 10.5, x1: 69.5, z0: 52.5, z1: 111.5, h: 28 };
 // 每段最多三台輪流出手，耐打度維持七折；靠射擊頻率與包抄增加壓力。
 const TIER = { atk: 3, fire: 1.15, aim: 1.1, dmg: 0.6, ap: 0.7, alt: false };
-const IDLE = { mx: 0, my: 0, lookX: 0, lookY: 0, fire: false, lockHold: false, qb: false, boost: false, jump: false, hover: false, saber: false, cannon: false, hardLock: false, od: false, reload: false };
+const IDLE = { mx: 0, my: 0, lookX: 0, lookY: 0, fire: false, lockHold: false, qb: false, boost: false, jump: false, hover: false, flight:false,descend:false,flightBlocked:true, saber: false, cannon: false, hardLock: false, od: false, reload: false };
 // 前傳改成人聲版的幾個音效（受傷、跳、落地、換彈、子彈呼嘯），這章換回本篇機體版
 const MECH_SFX = new Set(['hurt', 'jump', 'land', 'reload', 'whiz']);
 // 戰車不走的路段：基地正中央那九個路口（x、z＝-120、0、120）連出去的路都被前傳的建築壓著（同 encounter.js 的 edgeKey）
@@ -103,6 +103,8 @@ export async function startMech(X) {
   if (!input.touch.on) document.body.appendChild(keys);
   for (const [id, t] of M6.touch) { const b = $(id); if (b) { b.textContent = t; if(id==='tSupport') b.style.display='flex'; } }
   const nb = $('tNade'); if (nb) nb.style.display = 'none';
+  for(const id of ['tFlight','tDescend']){const b=$(id);if(b)b.style.display='flex';}
+  if($('tJump'))$('tJump').textContent='上升';
 
   // ---------------------------------------------------------------- 自機
   if (hero.hatchOpen) hero.hatchOpen(0);
@@ -122,7 +124,7 @@ export async function startMech(X) {
   function place(P) {
     player.pos.set(P.x, world.height(P.x, P.z), P.z);
     player.vel.set(0, 0, 0); player.yaw = P.yaw; player.pitch = 0; hero.legYaw = P.yaw;
-    player.grounded = true; player.en = 100; player.overheat = 0; player.odT = 0; player.dashT = 0; player.lockMove = 0;
+    player.grounded = true; player.en = 100; player.overheat = 0; player.odT = 0; player.dashT = 0; player.lockMove = 0; player.flying=false;player.flightCut=false;player.hovering=0;player.airT=0;
     player.ap = player.apMax;
     hero.swing = 0; hero.saber.visible = false;
   }
@@ -560,7 +562,7 @@ export async function startMech(X) {
   function crush() {
     const p = player.pos;
     for (const o of D.objs) {
-      if (!o.alive || o.kind === 'surface' || !o.pos || o.pos.y > p.y + 4) continue;
+      if (!o.alive || o.kind === 'surface' || !o.pos || o.pos.y > p.y + 4 || o.pos.y < p.y - 4) continue;
       const dx = o.pos.x - p.x, dz = o.pos.z - p.z;
       if (dx * dx + dz * dz > 18) continue;
       D.hit(o, 1e4, _p.copy(o.pos), _d.set(dx, 0, dz).normalize().clone());

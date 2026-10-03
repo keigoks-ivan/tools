@@ -87,7 +87,7 @@ async function game() {
     else if (E) { const [a, b] = E.pts; x = a.x; z = a.z; yaw = Math.atan2(b.x - a.x, b.z - a.z); }
     player.pos.set(x, world.height(x, z), z);
     player.vel.set(0, 0, 0); player.yaw = yaw; player.pitch = 0; hero.legYaw = yaw;
-    player.grounded = true; player.en = 100; player.overheat = 0; player.odT = 0; player.dashT = 0; player.lockMove = 0;
+    player.grounded = true; player.en = 100; player.overheat = 0; player.odT = 0; player.dashT = 0; player.lockMove = 0; player.flying=false;player.flightCut=false;player.hovering=0;player.airT=0;
     player.ap = player.apMax;
     hero.swing = 0; hero.saber.visible = false;
   }
@@ -423,7 +423,7 @@ async function game() {
     if (inp.pause && live) { input.unlock(); pause(); input.endFrame(); return; }
     if (inp.view && live) { tpView = !tpView; store.set('view', tpView ? 1 : 0); applyView(); }
     const canMove = (state === 'play' || boot > 0.85) && !combat.dead && state !== 'result';
-    if (!canMove) inp = Object.assign({}, inp, idle, { fire: false, lockHold: false, qb: false, boost: false, jump: false, hover: false, saber: false, cannon: false, hardLock: false, od: false, reload: false, lookX: state === 'result' ? 0 : inp.lookX, lookY: state === 'result' ? 0 : inp.lookY });
+    if (!canMove) inp = Object.assign({}, inp, idle, { fire: false, lockHold: false, qb: false, boost: false, jump: false, hover: false, flight:false,descend:false,flightBlocked:true, saber: false, cannon: false, hardLock: false, od: false, reload: false, lookX: state === 'result' ? 0 : inp.lookX, lookY: state === 'result' ? 0 : inp.lookY });
 
     // 光波砲充能／發射中：機體要撐住後座——轉向變慢、走不快、不能衝刺
     if (combat && combat.cannon.phase) inp = Object.assign({}, inp, { lookX: inp.lookX * 0.45, lookY: inp.lookY * 0.45, mx: inp.mx * 0.35, my: inp.my * 0.35, boost: false });

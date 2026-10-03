@@ -114,7 +114,7 @@ export function createMission({ scene, world, player, fx, config, combat, zhud, 
       const clear = C.phase === 'fight' && !C.enemies.some(e => !e.gone) && !C.events.some(e => e.spawn);
       if(operation&&!operation.done&&C.phase==='fight') {
         const before=operation.index;
-        operation.step(dt,{player:[player.pos.x,player.pos.z],held:input.keys.has('KeyB')||input.keys.has('Tsupport'),hurt:C.damageFx>.35});
+        operation.step(dt,{player:[player.pos.x,player.pos.z],altitude:player.pos.y-world.height(...operation.point),held:input.keys.has('KeyB')||input.keys.has('Tsupport'),hurt:C.damageFx>.35});
         if(operation.index!==before){C.note('現場作業完成','gr');checkpoint.operation=operation.snapshot();write('checkpoint',checkpoint);if(config.chapter===5&&C.group===2&&operation.done){write('broadcast',true);zhud.say('白鷺','城外收到原始簽章了。現在他們無法銷毀證據。',4,true);}}
         const due=Math.min(3,Math.floor(operation.time/8));
         if(!operation.done&&pressure<due&&C.enemies.filter(e=>!e.dead&&!e.gone).length+C.events.filter(e=>e.spawn).length<7){
@@ -128,7 +128,7 @@ export function createMission({ scene, world, player, fx, config, combat, zhud, 
       if(config.bombardment&&!this.waveComplete&&convoy.choice!=='artillery') {
         salvoCd-=dt;
         if(!salvo&&salvoCd<=0){salvo={x:player.pos.x,z:player.pos.z,t:completed.frequency?5:3.5};warning.position.set(salvo.x,world.height(salvo.x,salvo.z)+.08,salvo.z);warning.visible=true;zhud.say('楠','砲擊落點已確認！離開紅色標記！',2,true);}
-        if(salvo){salvo.t-=dt;warning.scale.setScalar(.95+.05*Math.sin(time*12));if(salvo.t<=0){const p=new THREE.Vector3(salvo.x,world.height(salvo.x,salvo.z)+1,salvo.z);fx.explosion(p,.7);C.audio.explosion(p,.7);if(Math.hypot(player.pos.x-salvo.x,player.pos.z-salvo.z)<12)C.hurt(player.apMax*.1,p);if(Math.hypot(convoy.pos[0]-salvo.x,convoy.pos[1]-salvo.z)<15)convoy.damage(6);salvo=null;warning.visible=false;salvoCd=12;}}
+        if(salvo){salvo.t-=dt;warning.scale.setScalar(.95+.05*Math.sin(time*12));if(salvo.t<=0){const p=new THREE.Vector3(salvo.x,world.height(salvo.x,salvo.z)+1,salvo.z);fx.explosion(p,.7);C.audio.explosion(p,.7);if(player.pos.distanceTo(p)<12)C.hurt(player.apMax*.1,p);if(Math.hypot(convoy.pos[0]-salvo.x,convoy.pos[1]-salvo.z)<15)convoy.damage(6);salvo=null;warning.visible=false;salvoCd=12;}}
       } else {salvo=null;warning.visible=false;}
       if (convoy.hp <= 0) { C.dead = true; C.phase = 'done'; fail(false); }
     },
@@ -158,7 +158,7 @@ export function createMission({ scene, world, player, fx, config, combat, zhud, 
       }
       X.restore(); h._f = null;
       if(operation&&!operation.done){
-        const p=operation.point,goal=h.proj(Q.set(p[0],world.height(p[0],p[1])+5,p[1]),{}),label=operation.kind==='defend'?`${p.label} ${Math.ceil(p.seconds-operation.progress)} 秒`:`按住 B・${p.label} ${Math.round(operation.fraction*100)}%`;
+        const p=operation.point,goal=h.proj(Q.set(p[0],world.height(p[0],p[1])+5,p[1]),{}),label=operation.kind==='defend'?`${p.label} ${Math.ceil(p.seconds-operation.progress)} 秒`:`${Math.abs(player.pos.y-world.height(...p))>=4?'降落後按住 B':'按住 B'}・${p.label} ${Math.round(operation.fraction*100)}%`;
         if(goal.front)h.text(label,goal.x,goal.y-25*s,14,'am',1,'center',700);else h.edgeMark(goal,'am','現場作業',w,h.h,1);
       }
       if(salvo){const p=h.proj(Q.set(salvo.x,world.height(salvo.x,salvo.z)+1,salvo.z),{});if(p.front)h.text(`砲擊落點 ${salvo.t.toFixed(1)} 秒`,p.x,p.y,16,'rd',1,'center',700);}
