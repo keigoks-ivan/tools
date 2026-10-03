@@ -55,9 +55,9 @@ export function japaneseFacade(style, scan) {
   const S = 512, cell = S / 6, r = rng(301 + style);
   const [c, a] = canvas(S, S), [rc, rough] = canvas(S, S), [nc, normal] = canvas(S, S);
   const historic = style === 2;
-  a.fillStyle = ['#c1b7a4', '#a8afb0', '#b4a89b'][style - 2]; a.fillRect(0, 0, S, S);
+  a.fillStyle = ['#c1b7a4', '#d5d8d1', '#c6b6a0'][style - 2]; a.fillRect(0, 0, S, S);
   if (scan) {
-    a.globalAlpha = historic ? .18 : .32;
+    a.globalAlpha = historic ? .18 : .09;
     for (let y = 0; y < S; y += 128) for (let x = 0; x < S; x += 128) a.drawImage(scan, 520, 8, 496, 496, x, y, 128, 128);
     a.globalAlpha = 1;
   }
@@ -65,10 +65,11 @@ export function japaneseFacade(style, scan) {
   normal.fillStyle = 'rgb(128,128,255)'; normal.fillRect(0, 0, S, S);
   if (historic || style === 4) {
     // 石材／磁磚接縫的陰影與法線一同繪製，不能沿用舊磚牆法線。
-    const h = historic ? cell / 5 : 7, w = historic ? cell : 14;
+    const h = historic ? cell / 5 : 2.6, w = historic ? cell : 5.2;
     for (let j = 0; j * h < S; j++) for (let x = -w; x < S; x += w) {
       const u = x + (j % 2 ? w / 2 : 0), y = j * h;
-      a.strokeStyle = historic ? 'rgba(83,76,63,.22)' : 'rgba(73,64,57,.24)'; a.lineWidth = .6; a.strokeRect(u, y, w, h);
+      if (!historic) { a.fillStyle = `rgba(255,247,225,${r()*.13})`; a.fillRect(u+.25,y+.25,w-.5,h-.5); }
+      a.strokeStyle = historic ? 'rgba(83,76,63,.22)' : 'rgba(89,80,69,.22)'; a.lineWidth = historic ? .6 : .35; a.strokeRect(u, y, w, h);
       normal.fillStyle = 'rgb(128,137,254)'; normal.fillRect(u, y, w, .8);
       normal.fillStyle = 'rgb(137,128,254)'; normal.fillRect(u, y, .8, h);
     }
@@ -105,7 +106,7 @@ export function japaneseFacade(style, scan) {
     normal.fillStyle = 'rgb(128,92,248)'; normal.fillRect(wx - 2, wy + wh, ww + 4, 2);
     a.fillStyle = 'rgba(37,39,37,.25)'; a.fillRect(x, y + cell - 4, cell, 1);
   }
-  stains(a, S, S, r, 60, '34,37,32', .13); grain(a, S, S, 6, r);
+  stains(a, S, S, r, 60, '34,37,32', historic ? .13 : .045); grain(a, S, S, historic ? 6 : 3, r);
   return [tex(c), tex(nc, false), tex(rc, false)].map((t, i) => { t.name = 'city-japanese-' + style + '-' + i; return t; });
 }
 

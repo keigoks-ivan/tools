@@ -39,3 +39,33 @@ test('路牌使用有效圖集 UV，港塔保留紅漆，拱棚中央與鳥居�
   for(const [x,z]of [[100,0],[175,0]]) {const p=new THREE.Vector3(x,0,z);assert(!solid.pushOut(p,.36,0,1.8,.45));}
   const p=new THREE.Vector3(0,0,0);assert(solid.pushOut(p,.36,0,1.8,.45),'港塔基座不能穿過');
 });
+
+test('商店街兩側店屋保留中央通道，立面補強不新增碰撞，路口與店面合併在既有桶', () => {
+  const mats=Object.fromEntries([...SURFACES,'glass','civic','sign','landmarkPaint'].map(k=>[k,new THREE.MeshStandardMaterial({vertexColors:true})]));
+  const solid=new Solid(),b=new Builder(mats,solid),scene=new THREE.Scene();
+  japaneseBuilder(b,{arcade:[0,36,0],shops:[[0,36,-4.15,1],[0,36,4.15,-1]],crossings:[[60,0,0,7]]});
+  const meshes=b.build(scene),triangles=meshes.reduce((n,m)=>n+(m.geometry.index?.count||m.geometry.attributes.position.count)/3,0);
+  assert(triangles<10000&&meshes.length<=6);assert(scene.children.every(o=>!o.isLight));
+  for(let x=-5;x<42;x+=.5)for(const z of [-2,0,2])assert(!solid.pushOut(new THREE.Vector3(x,0,z),.36,0,1.8,.45),'店屋擋住商店街中央通道');
+  assert(solid.pushOut(new THREE.Vector3(3,0,-5),.36,0,1.8,.45),'店屋本體必須有碰撞');
+  const before=solid.list.length;
+  japaneseBuilder(b,{shops:[[80,92,0,1,0,true]]});assert(solid.list.length===before,'貼在既有牆面的店招與窗框不新增量體');
+  for(const mesh of meshes)for(const a of Object.values(mesh.geometry.attributes))assert([...a.array].every(Number.isFinite));
+});
+
+test('兩側店招從街道觀看均為正向文字，旋轉的入口標牌也保持左右與上下', () => {
+  const mats=Object.fromEntries([...SURFACES,'glass','civic','sign','landmarkPaint'].map(k=>[k,new THREE.MeshStandardMaterial({vertexColors:true})]));
+  const b=new Builder(mats,new Solid()),scene=new THREE.Scene();
+  japaneseBuilder(b,{arcade:[0,24,0],shops:[[0,24,-4.15,1],[0,24,4.15,-1]]});b.build(scene);
+  for(const name of ['sign','civic']) {
+    const {position:p,normal:n,uv}=b.B[name].mesh.geometry.attributes;
+    for(let i=0;i<p.count;i+=3) {
+      const a=new THREE.Vector3().fromBufferAttribute(p,i),du=new THREE.Vector3().fromBufferAttribute(p,i+1).sub(a),dv=new THREE.Vector3().fromBufferAttribute(p,i+2).sub(a);
+      const u1=uv.getX(i+1)-uv.getX(i),u2=uv.getX(i+2)-uv.getX(i),v1=uv.getY(i+1)-uv.getY(i),v2=uv.getY(i+2)-uv.getY(i),det=u1*v2-u2*v1;
+      assert(Math.abs(det)>.00001);
+      const right=du.clone().multiplyScalar(v2).addScaledVector(dv,-v1).divideScalar(det),up=dv.clone().multiplyScalar(u1).addScaledVector(du,-u2).divideScalar(det);
+      const screenRight=new THREE.Vector3(0,1,0).cross(new THREE.Vector3().fromBufferAttribute(n,i));
+      assert(right.dot(screenRight)>0,'店招文字鏡像');assert(up.y>0,'店招文字上下顛倒');
+    }
+  }
+});

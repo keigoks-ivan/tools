@@ -7,7 +7,7 @@ import * as THREE from 'three';
 import { Builder, grimeShader } from './kit.js';
 import * as PR from './props.js';
 import { facade, FLOOR } from './models.js';
-import { shopMaterial, shopUV, civicMaterial } from '../urban.js';
+import { shopMaterial, shopUV, civicMaterial, japaneseWall } from '../urban.js';
 import { roofline } from '../roofline.js';
 import { streetfront } from '../streetfront.js';
 import { japaneseBuilder } from '../japan.js';
@@ -38,6 +38,7 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
   mats.paint = new THREE.MeshStandardMaterial({ color: 0x55655f, roughness: 0.55, metalness: 0.35, vertexColors: true, map: mats.rust.map, roughnessMap: mats.rust.roughnessMap });
   mats.paint2 = new THREE.MeshStandardMaterial({ color: 0x9a9384, roughness: 0.55, metalness: 0.3, vertexColors: true, map: mats.rust.map, roughnessMap: mats.rust.roughnessMap });
   mats.sign = shopMaterial(); mats.civic = civicMaterial();
+  mats.jpconcrete = japaneseWall(mats.concrete);
   mats.landmarkPaint = new THREE.MeshStandardMaterial({ color: 0xffffff, normalMap: mats.metal.normalMap, roughness: .68, metalness: .04, vertexColors: true });
   mats.landmarkPaint.userData.tile = 2; mats.landmarkPaint.userData.grime = .35;
   mats.landmarkPaint.onBeforeCompile = sh => grimeShader(sh, mats.landmarkPaint);
@@ -107,6 +108,7 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
   // 建築量體（外圍、不進去）：四面牆＋窗；win＝哪幾面開窗 'nsew'
   const mass = (x0, x1, z0, z1, h, mat = 'wall', win = 'nsew', o = {}) => {
     if (o.kit && PL && win) return kitMass(x0, x1, z0, z1, h, win, o);
+    if (win && !o.historic && !o.y0 && ['wall','brick','concrete'].includes(mat)) mat='jpconcrete';
     const y0 = o.y0 || 0;
     const f0 = Math.max(o.shop ? 1 : 0, Math.ceil(y0 / H1));
     if (!win) b.block(mat, x0, x1, y0, h, z0, z1, { skip: 'ny', ground: y0 });
@@ -187,15 +189,13 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
       }
       for(const y of [H1,h-.3])trim('plaster',a0,a1,y,y+.18,0,.22);
     }
-    if (!o.historic && o.kit !== 'factory') for (let y = H1; y < Math.min(h - 2, H1 * 4); y += H1) {
-      for (let a = a0 + 2; a < a1 - 2; a += 6.4) {
-        const lo = a - 1.65, hi = Math.min(a1 - .25, a + 1.65);
-        trim('concrete', lo, hi, y - .16, y, 0, .7);
-        trim('concrete', lo, hi, y + .06, y + .75, .6, .7);
-        trim('metal', lo, hi, y + .85, y + .91, .65, .71);
-        for (const p of [lo, hi - .06]) trim('concrete', p, p + .06, y, y + .95, 0, .7);
-        trim('concrete', (lo + hi) / 2 - .025, (lo + hi) / 2 + .025, y, y + 1.85, .1, .66);
-      }
+    if (!o.historic && o.kit !== 'factory') for (let y = H1; y < Math.min(h - 2, H1 * 8); y += H1) {
+      const lo=a0+.3,hi=a1-.3;
+      trim('concrete', lo, hi, y - .16, y, 0, .85);
+      trim('concrete', lo, hi, y + .08, y + .82, .73, .85);
+      trim('metal', lo, hi, y + .96, y + 1.02, .77, .85);
+      for(let a=lo;a<hi;a+=6.4)trim('concrete',a,a+.06,y,y+1.85,.06,.83);
+      trim('concrete',hi-.06,hi,y,y+1.85,.06,.83);
     }
     if (o.shop) {
       const count = Math.min(3, Math.floor((a1 - a0) / 7));
@@ -228,7 +228,7 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
         else b.deco(mat,Math.min(p,q),Math.max(p,q),y0,y1,lo,hi,opts);
       });
       // 少量有弧度的布棚；紋理、材質及幾何桶都已載入，沒有額外燈光。
-      const count = Math.min(2, Math.floor((a1 - a0) / 8));
+      const count = asian ? 1 : Math.min(2, Math.floor((a1 - a0) / 8));
       for (let i = 0; i < count; i++) {
         const c = a0 + (a1 - a0) * (i + 0.5) / count, w = 3.2;
         for (let j = 0; j < 8; j++) for (let k = 0; k < 3; k++) {
@@ -238,7 +238,7 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
           const pts = [at(lo, y0, d0), at(hi, y0, d0), at(hi, y1, d1), at(lo, y1, d1)];
           const n = new THREE.Vector3().subVectors(new THREE.Vector3(...pts[1]), new THREE.Vector3(...pts[0])).cross(new THREE.Vector3().subVectors(new THREE.Vector3(...pts[2]), new THREE.Vector3(...pts[0]))).normalize();
           if (n.y < 0) { pts.reverse(); n.negate(); }
-          b.B.fabric.quad(...pts, n.toArray(), [0.92, 0.92, 1, 1], null, j % 2 ? [0.9, 0.87, 0.78] : asian ? [0.5, 0.25, 0.2] : [0.22, 0.38, 0.3]);
+          b.B.fabric.quad(...pts, n.toArray(), [0.92, 0.92, 1, 1], null, asian ? [.23,.33,.3] : j % 2 ? [.9,.87,.78] : [.22,.38,.3]);
         }
         trim('metal', c - w / 2, c + w / 2, 3.02, 3.08, 0.12, 0.17);
       }
@@ -253,7 +253,7 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
     const c = (a0 + a1) / 2, lo = vertical ? c : c - 2.2, hi = vertical ? c + .8 : c + 2.2, bot = vertical ? 3.4 : 2.9, top = vertical ? 6.4 : 3.8, d = vertical ? .45 : .17;
     const pts = [at(lo, bot, d), at(hi, bot, d), at(hi, top, d), at(lo, top, d)];
     const uv = shopUV(idx);
-    if (along ? out < 0 : out > 0) { pts.reverse(); uv.reverse(); }
+    if (along ? out < 0 : out > 0) { pts.reverse(); uv.reverse(); const sum=uv[0][0]+uv[1][0];for(const p of uv)p[0]=sum-p[0]; }
     b.B.sign.quad(...pts, along ? [0, 0, out] : [out, 0, 0], [0.9, 0.9, 0.9, 0.9], uv);
   }
   // 沿牆 a0～a1 扣掉 o.hide[side] 那段
@@ -262,7 +262,7 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
   function kitMass(x0, x1, z0, z1, h, win, o) {
     const kit = o.kit, km = kit === 'factory' ? 'kbrick' : 'kplaster';
     const kf = Math.max(1, Math.min(Math.floor(h / FLOOR), o.kitFloors ?? 3)), kTop = kf * FLOOR;
-    if (kit === 'apt') {
+    if (kit === 'apt' || kit === 'factory' && o.shop) {
       // 保持舊模組會消耗的亂數次數，避免改美術時移動後面的道具和敵人掩體。
       if (h > kTop + .2) for (const sd of win) {
         const n = Math.floor(((sd === 'n' || sd === 's' ? x1 - x0 : z1 - z0) - 1) / (o.spacing || 3.2));
@@ -271,7 +271,7 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
       const dry = { add: () => null, M: PL.M };
       for (const sd of win) facade(dry, kit, sd, x0, x1, z0, z1, kf, rnd, { shutters: o.shop, noGround: o.noGround, hide: o.hide && o.hide[sd] });
       const saved = seed;
-      const historic = h < 24 && ph(x0,z0) < .38;
+      const historic = h < 24 && x0 < -100 && z0 > 60 && ph(x0,z0) < .22;
       mass(x0, x1, z0, z1, h, historic ? 'plaster' : 'concrete', win, { ...o, historic, kit: undefined, trim: historic ? 'plaster' : 'concrete', ww: historic ? 1.35 : 1.65, wh: historic ? 1.95 : 1.7 });
       seed = saved; return;
     }
@@ -800,7 +800,7 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
     mass(-44, -36, -70, -48, 16, 'concrete', 'n', { shop: true, kit: 'factory' });
     mass(-5.7, 48, -70, -48, 16, 'concrete', 'n', { shop: true, kit: 'factory' });
     mass(-36, -5.7, -70, -60.3, 16, 'concrete', '');
-    room(-35.7, -6, -60, -48.3, { h: 5.2, floor: 'floor', wall: 'concrete', ext: PL ? 'kbrick' : 'concrete', doors: { n: [[-33.3, 2.2], [-8.5, 2.2]] }, windows: { n: [[-28, 1.8], [-21.5, 1.8], [-15, 1.8]] }, upper: 16, upperWin: 'n', trim: PL ? 'kbrick' : null, lightP: 0.55 });
+    room(-35.7, -6, -60, -48.3, { h: 5.2, floor: 'floor', wall: 'concrete', ext: 'jpconcrete', doors: { n: [[-33.3, 2.2], [-8.5, 2.2]] }, windows: { n: [[-28, 1.8], [-21.5, 1.8], [-15, 1.8]] }, upper: 16, upperWin: 'n', trim: PL ? 'kbrick' : null, lightP: 0.55 });
     // 柱子、機台（半人高，當掩護）
     for (const x of [-29, -21, -13]) P.column(x, -54.2, 5.2, 0.25);
     for (const [x0, x1, z0, z1, h] of [[-33.2, -31, -57.6, -55.6, 1.45], [-26.6, -24.2, -52.6, -50.9, 1.3], [-19.8, -17.4, -57.8, -55.8, 1.55], [-12.2, -10.2, -53.4, -51.6, 1.35]]) {
@@ -1220,7 +1220,7 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
     [-94.7,-61,Math.PI/2,0,0],[-94.7,-33,Math.PI/2,0,6],[-35.7,-47.7,0,0,2],
     [14.3,-32,Math.PI/2,0,0],[46.7,-24,-Math.PI/2,0,6],[-35.7,20.4,Math.PI/2,0,5],
     [6.3,24,0,0,1],[113.3,-72,-Math.PI/2,0,4],[113.3,-12,-Math.PI/2,0,7],
-  ] };
+  ], shops: [[-36,-2,5.96,-1,0,true],[-95,-64,-30.04,-1,0,true]], crossings: [[-30,-41,Math.PI/2,11.4]] };
   japaneseBuilder(b, M.japanSites);
   M.meshes = b.build(scene);
   return M;

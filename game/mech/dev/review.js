@@ -1,4 +1,4 @@
-import { SHOP_LABELS, SHOP_SUBTITLES, PORT_LABELS, CIVIC_LABELS, JAPANESE_FONT } from '../urban.js?v=5';
+import { SHOP_LABELS, SHOP_SUBTITLES, PORT_LABELS, CIVIC_LABELS, JAPANESE_FONT } from '../urban.js?v=7';
 // 開發用：透過真實遊戲模組與既有除錯介面做固定步進，所有載入均帶 mute。
 const frame = document.querySelector('#game'), report = document.querySelector('#report'), state = document.querySelector('#state');
 let win, result = [], errors = [], post, renderer;
@@ -1066,7 +1066,7 @@ async function fieldOps() {
   report.textContent=JSON.stringify({checks,metrics,errors},null,2);state.textContent='開放戰區通過';
 }
 
-for (const [id, fn] of [['flightArt', flightArt], ['flight', flight], ['kobeArt', kobeArt], ['fieldAudit', fieldAudit], ['fieldOps', fieldOps], ['scoutCombat', scoutCombat], ['reconControls', reconControls], ['prequelFoot', prequelFoot], ['patrolWorld', patrolWorld], ['japaneseSigns', japaneseSigns], ['harborArt', harborArt], ['campaignFoot', campaignFoot], ['campaign4', () => campaignMech(4)], ['campaign5', () => campaignMech(5)], ['campaign6', () => campaignMech(6)], ['campaign7', () => campaignMech(7)], ['campaign6Artillery', async()=>{localStorage.setItem('lastline.choice',JSON.stringify('artillery'));await campaignMech(6,'artillery');}], ['campaignArtillery', async () => { localStorage.setItem('lastline.choice', JSON.stringify('artillery')); await campaignMech(7, 'artillery'); }], ['campaignEdges', campaignEdges], ['mech', mech], ['fields', battlefields], ['enemyMotion', enemyMotion], ['zero', zero], ['tactics', tactics], ['prequelMechCampaign', prequelMechCampaign], ['campaignMain', campaignMain], ['enemyPressure', enemyPressure], ['infantry', infantry], ['art', art], ['hero', hero], ['city', city], ['mountains', mountains], ['weapons', weapons], ['save', save]]) document.querySelector('#' + id).onclick = () => fn().catch(e => { state.textContent = '失敗'; report.textContent += '\n' + e.stack; });
+for (const [id, fn] of [['japanStreets', japanStreets], ['flightArt', flightArt], ['flight', flight], ['kobeArt', kobeArt], ['fieldAudit', fieldAudit], ['fieldOps', fieldOps], ['scoutCombat', scoutCombat], ['reconControls', reconControls], ['prequelFoot', prequelFoot], ['patrolWorld', patrolWorld], ['japaneseSigns', japaneseSigns], ['harborArt', harborArt], ['campaignFoot', campaignFoot], ['campaign4', () => campaignMech(4)], ['campaign5', () => campaignMech(5)], ['campaign6', () => campaignMech(6)], ['campaign7', () => campaignMech(7)], ['campaign6Artillery', async()=>{localStorage.setItem('lastline.choice',JSON.stringify('artillery'));await campaignMech(6,'artillery');}], ['campaignArtillery', async () => { localStorage.setItem('lastline.choice', JSON.stringify('artillery')); await campaignMech(7, 'artillery'); }], ['campaignEdges', campaignEdges], ['mech', mech], ['fields', battlefields], ['enemyMotion', enemyMotion], ['zero', zero], ['tactics', tactics], ['prequelMechCampaign', prequelMechCampaign], ['campaignMain', campaignMain], ['enemyPressure', enemyPressure], ['infantry', infantry], ['art', art], ['hero', hero], ['city', city], ['mountains', mountains], ['weapons', weapons], ['save', save]]) document.querySelector('#' + id).onclick = () => fn().catch(e => { state.textContent = '失敗'; report.textContent += '\n' + e.stack; });
 
 async function harborArt() {
   await load('/game/mech/lastline/index.html', '?mute&god&ch=1&all&fps=0');
@@ -1074,7 +1074,7 @@ async function harborArt() {
   win.__G.player.reset(new win.__T.Vector3(-180, 0, -193), 0); win.__step(3);
   const map=win.__map, shelves=win.__solid.list.filter(b=>b.x1<100 && b.y1>2.8 && b.y1<3.2 && b.x1-b.x0<2 && b.z1-b.z0<1);
   assert(shelves.length===12,'十二座掃描貨架為三公尺高，海關、冷藏站和修船棚沒有穿出屋頂的大貨架');
-  assert(map.triangles<120000 && map.meshes.length<=11,'港區合併幾何維持十二萬三角形，至多十一個材質網格');
+  assert(map.triangles<120000 && map.meshes.length<=12,'港區合併幾何維持十二萬三角形，至多十二個材質網格');
   await save('lastline-customs', true);
   const footChecks=[...result];
   await load('/game/mech/lastline/index.html', '?mute&ch=4&all&fps=0'); await wait(() => win.__m6); win.__step(200);
@@ -1150,8 +1150,31 @@ async function kobeArt() {
   assert(win.__world.kobeBackdrop.harbor&&win.__world.kobeBackdrop.blocks.length>700,'港區西側與山麓補上神戶市街，保留任務區');
   const backdropTriangles=win.__world.kobeBackdrop.meshes.reduce((n,m)=>n+m.geometry.index.count/3,0);
   assert(backdropTriangles<70000&&win.__world.kobeBackdrop.meshes.length===5,`港區新增市景 ${backdropTriangles} 三角形，控制在七萬、五個靜態網格內`);
-  assert(win.__map.triangles<120000&&win.__map.meshes.length<=11,'港區新增地標仍維持十二萬三角形內，路牌與地標漆面僅多兩個材質桶');
+  assert(win.__map.triangles<120000&&win.__map.meshes.length<=12,'港區新增地標仍維持十二萬三角形內，路牌、地標漆面與店招使用三個材質桶');
   stats.harbor={triangles:win.__map.triangles,meshes:win.__map.meshes.length,backdropTriangles,memory:renderer.info.memory};checks.push(...result);
   assert(errors.length===0,'神戶城市、商店街與港灣沒有渲染錯誤');
   report.textContent=JSON.stringify({checks,stats,errors},null,2);state.textContent='神戶場景通過';
+}
+
+async function japanStreets() {
+  const checks=[],stats={};
+  await load('/game/mech/index.html','?mute&free&fps=0');renderer=win.__renderer;post=win.__post;
+  const W=win.__world,[x0,x1,z]=W.japanSites.arcade;
+  assert(W.japanSites.shops.length===2,'本篇空地改成兩側窄店屋的商店街，主戰鬥道路保留');
+  win.__cam.set(x0-9,2.8,z,-Math.PI/2,.03);W.followShadow(new win.__T.Vector3(x0-9,2.8,z));W.sun.shadow.needsUpdate=true;win.__step(2);await save('japan-mech-arcade',true);
+  win.__cam.set((x0+x1)/2,10,z+30,0,.04);W.followShadow(new win.__T.Vector3((x0+x1)/2,10,z+30));win.__step(2);await save('japan-mech-shops',true);
+  win.__cam.set(-120,3,-90,0,.12);W.followShadow(new win.__T.Vector3(-120,3,-90));win.__step(2);await save('japan-mech-crossing',true);
+  stats.main={textures:renderer.info.memory.textures,farTriangles:W.kobeBackdrop.meshes.reduce((n,m)=>n+m.geometry.index.count/3,0)};
+  assert(stats.main.farTriangles<70000,'日本山麓與外圍住宅仍在七萬三角形內');checks.push(...result);
+  await load('/game/mech/zero/index.html','?mute&god&ch=3&all&fps=0');renderer=win.__renderer;post={render:()=>win.__step(1)};
+  const G=win.__G;
+  assert(win.__map.b.mats.jpconcrete.name==='japanese-ceramic','前傳外圍住宅與街屋換成小口磁磚立面，共用既有掃描圖');
+  G.player.reset(new win.__T.Vector3(-36,0,-1),0);G.player.pitch=.07;win.__step(3);await save('japan-zero-shops',true);
+  G.player.reset(new win.__T.Vector3(-43,0,-40.8),Math.PI/2);G.player.pitch=.12;win.__step(3);await save('japan-zero-crossing',true);
+  stats.prequel={textures:renderer.info.memory.textures,mapMeshes:win.__map.meshes.length};checks.push(...result);
+  await load('/game/mech/lastline/index.html','?mute&god&ch=1&all&fps=0');renderer=win.__renderer;post={render:()=>win.__step(1)};
+  win.__G.player.reset(new win.__T.Vector3(-189,0,-236),Math.PI);win.__G.player.pitch=.13;win.__step(3);await save('japan-lastline-street',true);
+  assert(win.__map.triangles<120000&&win.__map.meshes.length<=12,'失落防線新增港邊街屋仍低於十二萬三角形，合併網格不超過十二個');
+  stats.lastline={triangles:win.__map.triangles,mapMeshes:win.__map.meshes.length,textures:renderer.info.memory.textures};checks.push(...result);
+  assert(errors.length===0,'三款日本街景沒有渲染錯誤');report.textContent=JSON.stringify({checks,stats,errors},null,2);state.textContent='日本街景通過';
 }

@@ -11,15 +11,16 @@ export function kobeCityBlocks(height, reserve = (x0,x1,z0,z1)=>x0<840&&x1>-840&
     const lo=Math.min(...samples),hi=Math.max(...samples),key=hash(x,z);
     if(hi>145||hi-lo>16||lo<-.5||key<.045)continue;
     const hillside=hi>35||z<-1440,commercial=!hillside&&x>-240&&x<1800&&z<240;
-    const count=hillside?3:commercial?2:3,span=(x1-x0)/count,lots=[];
+    const count=hillside&&Math.hypot(x+60,z+60)<2200?6:hillside?3:commercial?2:3,span=(x1-x0)/count,lots=[];
     for(let i=0;i<count;i++) {
-      const a=x0+i*span+.7,c=x0+(i+1)*span-1.1;
+      const width=hillside?Math.min(12.2,span-1.8):span-1.8;
+      const a=x0+i*span+(span-width)/2,c=a+width;
       const rail=z===-840&&Math.abs(x)<2880;
-      const d=rail?22:hillside?22+hash(x+i,z+3)*17:50+hash(x+i,z+3)*29;
-      const b=rail?(i%2?z1-d:z0):z0+hash(x+i,z+4)*(z1-z0-d),e=b+d;
+      const d=rail?22:hillside?16+hash(x+i,z+3)*7:55+hash(x+i,z+3)*24;
+      const b=rail?(i%2?z1-d:z0):hillside?(i%2?z1-d-3:z0+3):z0+hash(x+i,z+4)*(z1-z0-d),e=b+d;
       const ground=Math.max(...[[a,b],[c,b],[a,e],[c,e]].map(([u,v])=>height(u,v)));
-      const floors=hillside?2+Math.floor(hash(x+i,z+1)*3):commercial?5+Math.floor(hash(x+i,z+1)*14):3+Math.floor(hash(x+i,z+1)*7);
-      const style=commercial&&floors>12?0:!hillside&&x< -240&&z> -1080&&z<360&&i===0?2:3+Math.floor(hash(x+i,z+5)*2);
+      const floors=hillside?2:commercial?5+Math.floor(hash(x+i,z+1)*10):3+Math.floor(hash(x+i,z+1)*5);
+      const style=commercial&&floors>12?0:!hillside&&x> -600&&x< -240&&z> -1080&&z< -840&&i===0?2:3+Math.floor(hash(x+i,z+5)*2);
       lots.push({x0:a,x1:c,z0:b,z1:e,ground,H:ground+floors*3.4,style,pitched:hillside,tint:.72+hash(x+i,z+8)*.25});
     }
     blocks.push({x0,x1,z0,z1,hillside,lots});

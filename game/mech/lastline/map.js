@@ -2,7 +2,7 @@
 // 共用掃描材質；靜態結構按材質合併，海面不建立反射攝影機。
 import * as THREE from 'three';
 import { Builder } from '../zero/kit.js';
-import { JAPANESE_FONT, PORT_LABELS, civicMaterial, harborWater } from '../urban.js';
+import { JAPANESE_FONT, PORT_LABELS, civicMaterial, shopMaterial, harborWater } from '../urban.js';
 import { japaneseBuilder } from '../japan.js';
 import { KOBE_RELIEF, kobeCityHeight } from '../kobe-relief.mjs';
 
@@ -60,6 +60,7 @@ export function buildMap(scene, mats, solid, PL, A, world) {
     painted.color.set(0xe1e2df); mats[key] = painted;
   }
   mats.civic = civicMaterial();
+  mats.sign = shopMaterial();
   mats.landmarkPaint = new THREE.MeshStandardMaterial({ color: 0xffffff, normalMap: mats.metal.normalMap, roughness: .68, metalness: .04, vertexColors: true });
   mats.landmarkPaint.userData.tile = 2;
   const b = new Builder(mats, solid);
@@ -163,10 +164,10 @@ export function buildMap(scene, mats, solid, PL, A, world) {
   function container(x, z, tint, y = 0, length = 12.2) {
     box('corr', x - 1.22, x + 1.22, y, y + 2.6, z - length / 2, z + length / 2, { tint, skip:'ny' });
     for (const dx of [-1.19, 1.19]) for (const dz of [-length / 2, length / 2])
-      box('metal', x + dx - .045, x + dx + .045, y, y + 2.64, z + dz - .08, z + dz + .08, { tint: metal, skip: 'ny' });
+      box('metal', x + dx - .045, x + dx + .045, y, y + 2.64, z + dz - .08, z + dz + .08, { tint: metal, skip: 'ny ' + (dx < 0 ? 'px' : 'nx') + ' ' + (dz < 0 ? 'pz' : 'nz') });
     // 門鎖用四面鋼條，省下小圓柱端蓋與背面，把幾何留給近景作業設備。
     for (const dx of [-.7, .7]) b.deco('metal', x + dx - .025, x + dx + .025, y + .2, y + 2.4, z + length / 2 + .01, z + length / 2 + .06, { tint: metal, skip: 'nz ny py' });
-    box('metal', x - 1.2, x + 1.2, y + 2.55, y + 2.65, z - length / 2, z - length / 2 + .12, { tint: metal });
+    box('metal', x - 1.2, x + 1.2, y + 2.55, y + 2.65, z - length / 2, z - length / 2 + .12, { tint: metal, skip: 'ny' });
   }
   function stairs(x0, x1, z0, z1, y0, y1) {
     const n = Math.ceil((y1 - y0) / .18);
@@ -570,7 +571,7 @@ export function buildMap(scene, mats, solid, PL, A, world) {
     [-111,-72,0,0,5],[9,-5,0,0,1],[176,-135,0,0,4],
     [344,-138,Math.PI/2,0,0],[344,-200,Math.PI/2,0,6],[344,-265,Math.PI/2,0,4],
     [614,138,0,0,7],[614,66,0,0,6],[614,-8,0,0,5],
-  ] };
+  ], shops: [[-216,-162,-251,1]], crossings: [[360,-143,0,22],[600,143,Math.PI,22]] };
   japaneseBuilder(b, M.japanSites);
   const meshes = b.build(scene); M.meshes = meshes;
   M.triangles = meshes.reduce((sum, mesh) => sum + (mesh.geometry.index?.count || mesh.geometry.attributes.position.count) / 3, 0);

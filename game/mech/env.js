@@ -691,7 +691,7 @@ function architecture(B, signs, x0, x1, z0, z1, H, style, F, district, roofTop, 
           }
         }
       } else box(a - rad, a + rad, y, y + 0.12, 0.03, 0.23, steel);
-      if (asian) {
+      if (asian && i % 3 === 1) {
         // 日式店面：木格子與分片暖簾保留門口的尺度，細節只在面向街道的立面。
         const wood = [0.26, 0.19, 0.14, 0, 1], cloth = [0.22, 0.29, 0.34, 0, 5];
         for (const side of [-1, 1]) for (let k = 0; k < 4; k++) {
@@ -711,15 +711,14 @@ function architecture(B, signs, x0, x1, z0, z1, H, style, F, district, roofTop, 
       box(mid - w, mid + w, 3.15, 3.38, 0, 1.8, steel);
       for (const a of [mid - w + 0.3, mid + w - 0.3]) box(a - 0.12, a + 0.12, 0, 3.2, 1.5, 1.74, steel);
     } else if (!historic) {
-      // 住宅陽台：只做近地面的三層，遠處沿用原立面，幾何量不隨樓高暴增。
-      for (let y = floor * 2; y < Math.min(H - 1, floor * 4); y += floor) {
-        for (let a = a0 + 5; a < a1 - 3; a += 12) {
-          const lo = a - 1.8, hi = Math.min(a1 - 0.5, a + 1.8);
-          box(lo, hi, y - 0.18, y, 0, 1.05, stone);
-          for (const h of [0.42, 0.95]) box(lo, hi, y + h, y + h + 0.06, 0.99, 1.05, steel);
-          for (let p = lo; p <= hi; p += 1.2) box(p, p + 0.045, y, y + 1, 0.99, 1.05, steel);
-          for (const p of [lo, hi - 0.05]) box(p, p + 0.05, y + 0.95, y + 1.01, 0.02, 1.05, steel);
-        }
+      // 連續外廊、避難隔板與實體胸牆形成日本集合住宅的深度；近街五層保留固定上限。
+      const lo = a0 + .35, hi = a1 - .35, rail = style === 4 ? [.55,.48,.39,0,1] : [.75,.76,.71,0,1];
+      for (let y = floor * 2; y < Math.min(H - 1, floor * 7); y += floor) {
+        box(lo, hi, y - .18, y, 0, 1.15, stone);
+        box(lo, hi, y + .08, y + .82, 1.02, 1.14, rail);
+        box(lo, hi, y + .96, y + 1.02, 1.06, 1.14, steel);
+        for (let p = lo; p <= hi; p += bay * 2) box(p, p + .07, y, y + 1.85, .06, 1.13, [.73,.74,.68,0,6]);
+        box(hi-.07,hi,y,y+1.85,.06,1.13,[.73,.74,.68,0,6]);
       }
       if (asian) {
         // 住宅街的外掛冷氣與窗上遮陽板；公尺尺度，沒有放大的裝飾。
@@ -740,7 +739,7 @@ function architecture(B, signs, x0, x1, z0, z1, H, style, F, district, roofTop, 
       const p = (a, y) => axis === 'x' ? [a, y, fix + out * (d + 0.012)] : [fix + out * (d + 0.012), y, a];
       const uv = shopUV(idx), pts = [p(lo, y0), p(hi, y0), p(hi, y1), p(lo, y1)];
       // 正面頂點朝向 +Z／-X，其餘面反轉繞序。
-      if (axis === 'x' ? out < 0 : out > 0) { pts.reverse(); uv.reverse(); }
+      if (axis === 'x' ? out < 0 : out > 0) { pts.reverse(); uv.reverse(); const sum=uv[0][0]+uv[1][0];for(const p of uv)p[0]=sum-p[0]; }
       signs.quad(...pts, axis === 'x' ? [0, 0, out] : [out, 0, 0], uv, [0.85, 0.85, 0.85]);
     }
     // 少數磚街屋的側面消防梯；階梯為斜面，併入原可破壞樓體。
@@ -1386,6 +1385,7 @@ export class World {
     const CH = 3; // 3×3 區塊
     const buckets = [];
     const signMat = shopMaterial();
+    this.citySignMaterial = signMat;
     for (let i = 0; i < CH * CH; i++) buckets.push({ f: FACADES.map(() => new GeoBucket()), roof: new GeoBucket(), inner: new GeoBucket(), signs: new GeoBucket() });
     const chunkOf = (x, z) => {
       const cx = Math.min(CH - 1, Math.max(0, Math.floor((x + CITY.half) / (2 * CITY.half) * CH)));
@@ -1413,7 +1413,7 @@ export class World {
       const lots = [];
       const split = r();
       if (district === 'old' || district === 'east' && split < 0.65) {
-        const alongX = (bi + bj) % 2 === 0, count = district === 'old' ? 4 : 3;
+        const alongX = (bi + bj) % 2 === 0, count = district === 'old' ? 6 : 4;
         const lo = alongX ? lx0 : lz0, hi = alongX ? lx1 : lz1;
         let edge = lo;
         for (let i = 0; i < count; i++) {
@@ -1431,12 +1431,13 @@ export class World {
         const sx = street ? Math.max(0, (a1 - a0 - 46) * 0.5) : (a1 - a0) * (0.08 + r() * 0.09), sz = street ? Math.max(0, (c1 - c0 - 46) * 0.5) : (c1 - c0) * (0.08 + r() * 0.09);
         const x0 = a0 + sx + r() * sh, x1 = a1 - sx - r() * sh, z0 = c0 + sz + r() * sh, z1 = c1 - sz - r() * sh;
         const rawFloors = Math.max(3, Math.round((8 + r() * r() * 42) * hScale * (kind === 'ruin' ? 0.8 : 1)));
-        const floors = district === 'old' ? 4 + ((r() * 4) | 0) : district === 'east' ? Math.min(14, Math.max(5, rawFloors + ((r() * 4) | 0))) : rawFloors;
+        const floors = district === 'old' ? 3 + ((r() * 4) | 0) : district === 'east' ? Math.min(10, Math.max(4, rawFloors + ((r() * 4) | 0))) : rawFloors;
         const H = floors * 3.6;
         const ruin = kind === 'ruin' ? true : r() < 0.08;
-        // 0 玻璃帷幕 1 辦公 2 紅磚 3 混凝土 4 磚柱
+        // 洋風石造僅留在小片舊居留地；元町與住宅區以窄街屋、塗裝和磁磚公寓為主。
         const rawStyle = ruin ? 2 + ((r() * 3) | 0) : (H > 75 ? (r() < 0.6 ? 0 : 1) : H > 45 ? [1, 3, 4, 0][(r() * 4) | 0] : 2 + ((r() * 3) | 0));
-        const style = !ruin && district === 'old' ? 2 + Math.abs(Math.floor(x0*.13+z0*.17))%3 : !ruin && district === 'east' ? (bj % 2 ? 3 : 4) : rawStyle;
+        const heritage = !ruin && bx > -360 && bx < -120 && bz > 120 && bz < 360 && rawStyle === 2;
+        const style = heritage ? 2 : street || rawStyle === 2 ? 3 + Math.abs(Math.floor(x0*.13+z0*.17))%2 : rawStyle;
         const F = FACADES[style];
         const tint = 0.8 + r() * 0.3;
         const col = [tint, tint * (0.97 + r() * 0.05), tint * (0.93 + r() * 0.07), ruin ? 0.75 + r() * 0.25 : (r() < 0.15 ? 0.35 : 0)];
@@ -2030,15 +2031,21 @@ export class World {
     const parks = this.blocks.filter(b => b.kind === 'park' && Math.hypot(b.x, b.z) > 200);
     const port = [...parks].sort((a, b) => Math.hypot(a.x + 180, a.z - 540) - Math.hypot(b.x + 180, b.z - 540))[0];
     const shrine = [...parks].filter(b => b !== port).sort((a, b) => Math.hypot(a.x + 300, a.z + 180) - Math.hypot(b.x + 300, b.z + 180))[0];
-    const detail = new GeoBucket(), civic = new GeoBucket();
+    const detail = new GeoBucket(), civic = new GeoBucket(), shops = new GeoBucket();
     const normal = (a,b,c) => new THREE.Vector3().subVectors(new THREE.Vector3(...b),new THREE.Vector3(...a)).cross(new THREE.Vector3().subVectors(new THREE.Vector3(...c),new THREE.Vector3(...a))).normalize().toArray();
     const streets = [];
-    for (const x of [-360, -240, -120, 120]) for (const z of [-300, -240, -180, -120, -60, 0]) if (!blocked(x + 16, z, .3)) streets.push([x + 16, z, -Math.PI / 2, 0, streets.length % 8]);
-    const sites = { tower: port ? [port.x, port.z, 1, 0] : null, maritime: port ? [port.x-75,780,.75,0] : null, waterfront: port ? [port.x-120,port.x+50,746,818] : null, shrine: shrine ? [shrine.x, shrine.z - 6, 1.4, 0] : null, streets };
+    for (const x of [-480, -360, -240, -120, 120, 240]) for (const z of [-420, -360, -300, -240, -180, -120, -60, 0, 60, 120]) if (!blocked(x + 16, z, .3)) streets.push([x + 16, z, -Math.PI / 2, 0, streets.length % 2 ? 7 : 6]);
+    const arcade = this.blocks.filter(b=>b.kind==='lot'&&b.x< -120&&b.z<360).sort((a,b)=>Math.hypot(a.x+300,a.z+180)-Math.hypot(b.x+300,b.z+180))[0];
+    const sites = { tower: port ? [port.x, port.z, 1, 0] : null, maritime: port ? [port.x-75,780,.75,0] : null, waterfront: port ? [port.x-120,port.x+50,746,818] : null, shrine: shrine ? [shrine.x, shrine.z - 6, 1.4, 0] : null, streets,
+      arcade: arcade ? [arcade.lx0+4,arcade.lx1-4,arcade.z,8,0] : null,
+      shops: arcade ? [[arcade.lx0+4,arcade.lx1-4,arcade.z-4.15,1],[arcade.lx0+4,arcade.lx1-4,arcade.z+4.15,-1]] : [],
+      crossings: [[-120,-97,0,28,0,false],[-240,143,0,28,0,false],[23,-240,Math.PI/2,28,0,false],[143,0,Math.PI/2,28,0,false]],
+    };
     japaneseScenery({
       box: (...args) => addBox(detail, ...args, 4),
       face: (a,b,c,d,col) => { const n=normal(a,b,c),axes=Math.abs(n[1])>.5?[0,2]:Math.abs(n[0])>.5?[2,1]:[0,1]; detail.quad(a,b,c,d,n,[a,b,c,d].map(p=>[p[axes[0]]/2,p[axes[1]]/2]),col); },
-      sign: (p,id) => civic.quad(...p,normal(...p),civicUV(id),[.95,.95,.95]),
+      sign: (p,id,aspect) => civic.quad(...p,normal(...p),civicUV(id,id===2&&aspect>2),[.95,.95,.95]),
+      shop: (p,id,reverse) => {const uv=shopUV(id);if(reverse){uv.reverse();const sum=uv[0][0]+uv[1][0];for(const p of uv)p[0]=sum-p[0];}shops.quad(...p,normal(...p),uv,[.95,.95,.95]);},
       solid: b => this.addCollider({x0:b.x0,x1:b.x1,z0:b.z0,z1:b.z1,top:b.y1}),
     }, sites);
     const sx=KOBE_CITY.station,sy=this.terrain.height(sx,KOBE_CITY.rail)+11.5;
@@ -2048,7 +2055,7 @@ export class World {
       civic.quad(a,b,c,d,normal(a,b,c),civicUV(1),[.95,.95,.95]);
     }
     this.japanSites = sites;
-    for (const [bucket,mat,name] of [[detail,architecturalMaterial(this.A),'kobe-landmarks'],[civic,civicMaterial(),'kobe-wayfinding']]) {
+    for (const [bucket,mat,name] of [[detail,architecturalMaterial(this.A),'kobe-landmarks'],[civic,civicMaterial(),'kobe-wayfinding'],[shops,this.citySignMaterial,'kobe-arcade-shops']]) {
       const mesh = new THREE.Mesh(bucket.geometry(), mat); mesh.name = name; mesh.castShadow = bucket === detail; mesh.receiveShadow = true; scene.add(mesh);
     }
 
