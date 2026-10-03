@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>MLB 實況野球風</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;700;900&family=Rubik:ital,wght@0,600;0,800;0,900;1,800;1,900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=23">
+</head>
+<body>
+<canvas id="game"></canvas>
+<canvas id="overlay"></canvas>
+
+<div id="hud">
+  <!-- 左上記分板 -->
+  <div class="sb">
+    <div class="sb-top"><span class="inn" id="inn"><b id="innN">1</b><i id="innH">▲</i></span><span class="inn-t" id="innT">局上</span></div>
+    <div class="sb-body">
+      <div class="teams">
+        <div class="tm" id="tA"></div>
+        <div class="tm" id="tH"></div>
+      </div>
+      <div class="sb-side">
+        <div class="dia"><i class="b2"></i><i class="b3"></i><i class="b1"></i></div>
+        <div class="bso">
+          <div><b>B</b><span class="lt g" id="b1"></span><span class="lt g" id="b2"></span><span class="lt g" id="b3"></span></div>
+          <div><b>S</b><span class="lt y" id="s1"></span><span class="lt y" id="s2"></span></div>
+          <div><b>O</b><span class="lt r" id="o1"></span><span class="lt r" id="o2"></span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 右下：打者、投手 -->
+  <div class="panels">
+    <div class="pl bat">
+      <div class="top"><span class="ord" id="bOrd">1</span><span class="nbar g" id="bNm"></span><span class="face" id="bFace"></span><span class="pos" id="bPos"></span></div>
+      <div class="sub" id="batLine"></div>
+      <div class="ss" id="batStat"></div>
+    </div>
+    <div class="tag" id="kTag"></div>
+    <div class="pl pit">
+      <div class="top"><span class="ord">P</span><span class="nbar r" id="pNm"></span><span class="face happy" id="pFace"></span><span class="pos red" id="pRole">先發</span></div>
+      <div class="sub" id="pitLine"></div>
+      <div class="stamrow"><span class="stl">體力</span><div class="stam"><i id="stam"></i></div><span class="pc" id="pcount">0</span></div>
+    </div>
+  </div>
+
+  <div class="plabel" id="plabel"><div class="pn" id="pname"></div><div class="kmh"><b id="kmh"></b><small>km/h</small></div></div>
+  <div class="call" id="call"></div>
+  <div class="banner" id="banner">
+    <span class="chip big" id="bChip">DET</span>
+    <div class="bmain"><div class="bn"><span class="num" id="bNum"></span><span id="bName"></span></div>
+      <div class="bs" id="bannerStats"></div></div>
+  </div>
+  <div class="pmenu" id="pmenu"></div>
+  <div class="skips"><button id="skipBtn"><i>▶▶</i>跳過打席</button><button id="simBtn"><i>▶▶|</i>模擬到換局</button></div>
+  <div class="subtitle" id="subtitle"></div>
+  <div class="help" id="help"></div>
+  <div class="touch" id="touch"><button class="b2" id="tBbtn">強振</button><button class="b1" id="tAbtn">揮棒</button></div>
+</div>
+
+<!-- 換局時的比分表 -->
+<div class="screen hide" id="linescore"><div class="lsCard" id="lsBox"></div></div>
+
+<!-- 選隊（標題畫面） -->
+<div class="screen title" id="intro">
+  <div class="tcard">
+    <div class="logo"><span class="l1">MLB 2026</span><span class="l2">實況野球風</span><span class="l3">30 隊真實名單・九局比賽</span></div>
+    <div class="duo">
+      <div class="side you">
+        <div class="sideHd"><span class="who">你的球隊</span><span id="hdUser"></span></div>
+        <div class="grid" id="gridUser"></div>
+        <div class="split">
+          <div><div class="mini-t">先發投手</div><div class="splist" id="spUser"></div></div>
+          <div><div class="mini-t">打序</div><div class="lu" id="luUser"></div></div>
+        </div>
+      </div>
+      <div class="vs">VS</div>
+      <div class="side opp">
+        <div class="sideHd"><span class="who">對手</span><span id="hdOpp"></span></div>
+        <div class="grid" id="gridOpp"></div>
+        <div class="split">
+          <div><div class="mini-t">先發投手</div><div class="splist" id="spOpp"></div></div>
+          <div><div class="mini-t">打序</div><div class="lu" id="luOpp"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="bar">
+      <div class="seg" id="homeSel"><button data-h="0" class="on">客隊・先攻</button><button data-h="1">主隊・後攻</button></div>
+      <div class="seg" id="diffSel"><button data-d="easy">簡單</button><button data-d="normal" class="on">普通</button><button data-d="hard">困難</button></div>
+      <button class="go" id="start">PLAY BALL</button>
+    </div>
+    <div class="note">進攻時你打擊，防守時你投球，守備和跑壘交給電腦。數據來自 MLB Stats API、Baseball Savant（截至 2026-10-03）。<br><span id="dateNote"></span></div>
+  </div>
+</div>
+
+<!-- 比賽結束 -->
+<div class="screen hide" id="result">
+  <div class="rcard">
+    <h2 id="rTitle"></h2>
+    <div class="det" id="rDet"></div>
+    <div class="log" id="rLog"></div>
+    <div class="tot" id="rTot"></div>
+    <div class="rbtn"><button class="go small" id="again">同樣兩隊再一場</button><button class="go small alt" id="toMenu">回選隊</button></div>
+  </div>
+</div>
+
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.166.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.166.0/examples/jsm/"}}</script>
+<script src="assets/pawa_parts.js?v=23"></script>
+<script src="assets/teams.js?v=23"></script>
+<script src="logic.js?v=23"></script>
+<script type="module">
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
+import {EffectComposer} from 'three/addons/postprocessing/EffectComposer.js';
+import {RenderPass} from 'three/addons/postprocessing/RenderPass.js';
+import {BokehPass} from 'three/addons/postprocessing/BokehPass.js';
+import {OutputPass} from 'three/addons/postprocessing/OutputPass.js';
+window.THREE=THREE; window.X3={RoomEnvironment,EffectComposer,RenderPass,BokehPass,OutputPass};
+const bin=Uint8Array.from(atob(window.PAWA_GLB),c=>c.charCodeAt(0));
+// 依序載入：模型 → stadium.js → game.js
+const load=src=>new Promise((ok,ng)=>{ const s=document.createElement('script'); s.src=src; s.onload=ok; s.onerror=ng; document.body.appendChild(s); });
+new GLTFLoader().parse(bin.buffer,'',async g=>{ window.PAWA=g.scene; await load('stadium.js?v=23'); await load('game.js?v=23'); },e=>console.error(e));
+</script>
+</body>
+</html>
