@@ -32,6 +32,7 @@ function bat(pid){
     zsw:reg(h.zsw,n,LG.zsw,150), osw:reg(h.osw,n,LG.osw,150), whiff:reg(h.whiff,n,LG.whiff,150),
     sprint, hp1b:h.hp1b||(LG.hp1b-(sprint-LG.sprint)*0.12),
     szTop:P.szTop||3.4, szBot:P.szBot||1.6, bats:P.bats||'R'};
+  r.ab=batAbilities(r); r.has=k=>r.ab.some(a=>a.k===k);
   return RCACHE['b'+pid]=r;
 }
 const DEFAULT_PITCHES=[{t:'FF',name:'四縫線速球',mph:93.5,use:.55,whiff:.2,px:-0.6,pz:1.3},{t:'SL',name:'滑球',mph:85,use:.3,whiff:.33,px:0.4,pz:0.1},{t:'CH',name:'變速球',mph:85,use:.15,whiff:.3,px:-1.1,pz:0.5}];
@@ -52,7 +53,89 @@ function pit(pid){
     kmh:Math.round(maxMph*1.609), control:r0(55+(3.3-bb9)*15), stamina, k9, bb9, starter,
     limit:starter?Math.round(55+stamina*0.6):Math.round(18+stamina*0.4),
     brk:pitches.filter(p=>p!==fb).map(p=>({t:p.t,name:p.name,lv:levels[p.t],px:p.px,pz:p.pz}))};
+  r.perStart=perStart; r.maxMph=maxMph-2.2; r.ab=pitAbilities(r); r.has=k=>r.ab.some(a=>a.k===k);
   return RCACHE['p'+pid]=r;
+}
+
+/* =========================================================
+   特殊能力（實況野球式）：門檻全部來自 2026 年真實數據
+   金＝g（前約 10%）、藍＝b（前約 20%）、紅＝r（後約 10%）。每人最多 4 個。
+   門檻依 2026 全聯盟分布（打者 PA≥150 共 368 人、投手 BF≥100 共 417 人）：
+   barrel% 中位 7.2、P90 13.0；打擊率 P90 .280；BB% P90 .124；追打率 P25 26.2；
+   K% P90 .305；衝刺速度 P90 29.1；得點圈 OPS 減全季 OPS 的 P90 +.171、P10 −.105；
+   投手 K% P90 .299、BB% P10 .057、P90 .128；HR/9 P90 1.68；滾飛比 P90 .58；最快球速 P90 97.7。
+   ========================================================= */
+const AB_DEF={
+  power_g:{name:'強打者',c:'g',d:'擊球初速提高'},  power_b:{name:'長打力',c:'b',d:'擊球初速小幅提高'},
+  contact_g:{name:'安打製造機',c:'g',d:'不容易揮空，打擊游標變大'},
+  eye_b:{name:'選球眼',c:'b',d:'壞球不太追打'},
+  risp_g:{name:'勝負強者',c:'g',d:'得點圈有人時打得更好'}, risp_b:{name:'得點圈◎',c:'b',d:'得點圈有人時打得較好'},
+  risp_r:{name:'得點圈✕',c:'r',d:'得點圈有人時容易揮空'},
+  vsl_b:{name:'對左投◎',c:'b',d:'面對左投打得較好'},
+  speed_g:{name:'盜壘王',c:'g',d:'盜壘成功率大幅提高'}, speed_b:{name:'快腿',c:'b',d:'盜壘、內野安打較容易'},
+  k_r:{name:'三振王',c:'r',d:'容易揮空'},
+  // 投手
+  pk_g:{name:'奪三振',c:'g',d:'打者較容易揮空'}, pk_b:{name:'三振能力',c:'b',d:'打者稍微容易揮空'},
+  ctl_g:{name:'控球大師',c:'g',d:'進壘點更準'}, ctl_r:{name:'四壞球',c:'r',d:'進壘點較散'},
+  gb_b:{name:'重球',c:'b',d:'打者容易打成滾地球'}, hr_r:{name:'被全壘打',c:'r',d:'容易被打遠'},
+  velo_g:{name:'剛速球',c:'g',d:'速球更難打'},
+  same_b:{name:'打者殺手',c:'b',d:'面對同手打者較強'},
+  pr_b:{name:'危機◎',c:'b',d:'得點圈有人時較強'}, pr_r:{name:'怕危機',c:'r',d:'得點圈有人時較弱'},
+  stam_b:{name:'尾勁',c:'b',d:'投到後段體力下滑較慢'},
+  arm_b:{name:'強肩',c:'b',d:'盜壘阻殺率提高'}
+};
+const abOf=keys=>keys.map(k=>({k,...AB_DEF[k]})).sort((a,b)=>'gbr'.indexOf(a.c)-'gbr'.indexOf(b.c)).slice(0,4);
+function batAbilities(r){
+  const h=r.h||{}, n=r.n||0, k=[]; if(n<120) return abOf(k);
+  const ops=(h.obp||0)+(h.slg||0);
+  if((h.brl||0)>=13) k.push('power_g'); else if((h.brl||0)>=10.4) k.push('power_b');
+  if(n>=200 && (h.avg||0)>=.285) k.push('contact_g');
+  if(h.bb/n>=.115 && (h.osw||99)<=27) k.push('eye_b');
+  if(h.risp && h.risp[0]>=60){ const d=h.risp[2]-ops; if(d>=.17) k.push('risp_g'); else if(d>=.09) k.push('risp_b'); else if(d<=-.12) k.push('risp_r'); }
+  if(h.vl && h.vl[0]>=60 && h.vl[2]-ops>=.12) k.push('vsl_b');
+  if((h.sb||0)>=25) k.push('speed_g'); else if((h.sprint||0)>=28.8) k.push('speed_b');
+  if(h.k/n>=.30) k.push('k_r');
+  const P=r.P||{}; if(P.c && P.c.pop && P.c.pop<=1.89) k.push('arm_b');
+  return abOf(k);
+}
+function pitAbilities(r){
+  const s=r.s||{}, bf=s.bf||0, k=[]; if(bf<100) return abOf(k);
+  const kp=s.k/bf, bbp=s.bb/bf, ip=(s.outs||0)/3, hr9=ip?s.hr/ip*9:0;
+  if(kp>=.30) k.push('pk_g'); else if(kp>=.265) k.push('pk_b');
+  if(bbp<=.055) k.push('ctl_g'); else if(bbp>=.13) k.push('ctl_r');
+  if((s.gbr||0)>=.58) k.push('gb_b');
+  if(hr9>=1.68 && ip>=30) k.push('hr_r');
+  if(r.maxMph>=98.5) k.push('velo_g');
+  if(s.vl && s.vr && s.vl[0]>=120 && s.vr[0]>=120){ const same=r.hand==='L'?s.vl:s.vr, opp=r.hand==='L'?s.vr:s.vl; if(same[2]-opp[2]<=-.22) k.push('same_b'); }
+  if(s.risp && s.risp[0]>=60 && s.vl && s.vr){ const base=(s.vl[2]*s.vl[0]+s.vr[2]*s.vr[0])/(s.vl[0]+s.vr[0]); const d=s.risp[2]-base; if(d<=-.16) k.push('pr_b'); else if(d>=.22) k.push('pr_r'); }
+  if(r.starter && r.perStart>=6.2) k.push('stam_b');
+  return abOf(k);
+}
+/* ---------- 打席情境：給能力判斷用（每次打席結果後自動更新） ---------- */
+let CUR_CTX={risp:false,late:false,pHand:'R',hitRun:false,def:{},catcherPop:1.95};
+function setCtx(g){
+  if(!g) return;
+  const f=fielding(g), bt=batting(g), c=f.lineup.find(l=>l.pos==='C');
+  CUR_CTX={risp:!!(g.bases[1]||g.bases[2]), late:g.inning>=9, pHand:pit(f.pitcher).hand, hitRun:false,
+    def:CUR_CTX.def&&CUR_CTX.keepDef?CUR_CTX.def:{}, catcherPop:(c&&PLAYERS[c.id]?.c?.pop)||1.95,
+    catcherArm:!!(c&&bat(c.id).has('arm_b')), diff:bt.runs-f.runs, outs:g.outs, bases:g.bases.slice()};
+}
+// 能力在這一打席的加成（揮空倍率、追打倍率、初速加減、仰角加減、游標倍率）
+function abMods(br,pr){
+  const m={whiff:1,chase:1,ev:0,la:0,cursor:1}, x=CUR_CTX, side=batSide(br,pr), same=(side==='R')===(pr.hand==='R');
+  if(br.has('power_g')) m.ev+=1.1; else if(br.has('power_b')) m.ev+=0.5;
+  if(br.has('contact_g')){ m.whiff*=0.9; m.cursor*=1.06; }
+  if(br.has('eye_b')) m.chase*=0.85;
+  if(x.risp){ if(br.has('risp_g')){ m.ev+=1.5; m.whiff*=0.9; m.cursor*=1.05; } else if(br.has('risp_b')){ m.ev+=0.8; m.whiff*=0.95; } else if(br.has('risp_r')) m.whiff*=1.08; }
+  if(pr.hand==='L' && br.has('vsl_b')){ m.ev+=1; m.whiff*=0.94; }
+  if(br.has('k_r')) m.whiff*=1.05;
+  if(pr.has('pk_g')) m.whiff*=1.06; else if(pr.has('pk_b')) m.whiff*=1.03;
+  if(pr.has('gb_b')) m.la-=4;
+  if(pr.has('hr_r')) m.ev+=0.8;
+  if(same && pr.has('same_b')) m.whiff*=1.05;
+  if(x.risp){ if(pr.has('pr_b')) m.whiff*=1.05; else if(pr.has('pr_r')) m.whiff*=0.95; }
+  if(x.hitRun){ m.whiff*=0.8; m.chase*=1.2; m.ev-=2; m.la-=5; m.cursor*=1.1; }
+  return m;
 }
 const nameOf=pid=>{const P=PLAYERS[pid]; return P?(P.zh||P.last||P.full):'?';};
 
@@ -121,7 +204,7 @@ const PITCH_SHAPES={
 };
 // 依投手該球種的變化等級、真實位移與球速調整輪廓，疲勞會削弱變化。
 function buildPitch(p,pr,aim,fat=0,noise=true){
-  const sig = 0.25 + (100-pr.control)*0.0072 + fat*0.25;
+  const sig = (0.25 + (100-pr.control)*0.0072 + fat*0.25)*(pr.has&&pr.has('ctl_g')?0.9:pr.has&&pr.has('ctl_r')?1.1:1);
   const end = noise?{x:aim.x+gauss()*sig, y:aim.y+gauss()*sig}:{...aim};
   const mph = p.mph + (noise?gauss()*0.9:0) - fat*2.5;
   const tReal = 53.9/(mph*1.467*0.93);
@@ -145,7 +228,8 @@ function pitchPos(P,u,rel){
 function batterDecide(P,br,pr,balls,strikes){
   const e=P.end, inZ=isStrikeFor(br,e.x,e.y);
   const ox=Math.max(0,Math.abs(e.x)-PLATE_HALF), oy=Math.max(0,br.szBot-e.y,e.y-br.szTop), off=Math.hypot(ox,oy);
-  let ps = inZ ? br.zsw/100 : 0.62*(br.osw/29)*Math.exp(-off*1.8);
+  const M=abMods(br,pr);
+  let ps = inZ ? br.zsw/100 : 0.62*(br.osw/29)*Math.exp(-off*1.8)*M.chase;
   if(strikes===2) ps = inZ?Math.max(ps,0.88):ps*1.5;
   if(balls===3 && strikes<2) ps*=0.55;
   if(balls+strikes===0) ps*=0.8;
@@ -154,18 +238,20 @@ function batterDecide(P,br,pr,balls,strikes){
   let pw = 0.5*P.p.whiff + 0.5*br.whiff/100;
   pw *= inZ?1.0:1.8;
   pw *= 1 + (pr.k9-LG.k9)*0.03;
+  pw *= 0.96*M.whiff*(pr.has('velo_g')&&FASTBALLS.includes(P.p.t)?1.08:1);
   if(Math.random()<pw) return {swing:true, whiff:true};
   if(Math.random()<0.36) return {swing:true, foul:true};
   const side=batSide(br,pr)==='R'?-1:1, pull=side;     // 右打拉向左外野（負）
-  const ev = clamp(br.avgEV + gauss()*11 - (inZ?0:6), 45, br.maxEV+1);
-  const la = 12 + (e.y-2.3)*9 + (br.power-60)*0.12 + gauss()*24;
+  const ev = clamp(br.avgEV + M.ev + gauss()*11 - (inZ?0:6), 45, br.maxEV+1+Math.max(0,M.ev));
+  const la = 12 + M.la + (e.y-2.3)*9 + (br.power-60)*0.12 + gauss()*24;
   const spray = pull*(8 + (e.x*side)*16) + gauss()*20;
   return {swing:true, bb:{ev,la,spray}};
 }
 
 /* ---------- 玩家打擊：游標與時機 ---------- */
 function cursorSize(br,mode){
-  const base = (0.40 + br.meet*0.0045)*diff.cur, k = mode==='power'?0.68:1;
+  const pr=typeof GM!=='undefined'&&GM?pit(curPitcher(GM)):null, M=pr&&br.has?abMods(br,pr):{cursor:1};
+  const base = (0.40 + br.meet*0.0045)*diff.cur*M.cursor, k = mode==='power'?0.68:1;
   return {rx:base*k, ry:base*k*0.78};
 }
 function contact(br,side,ball,cur,dt,mode){
@@ -175,7 +261,8 @@ function contact(br,side,ball,cur,dt,mode){
   const tim = dt/diff.win;                       // -1 太早 … +1 太晚
   let q = 1 - 0.55*Math.pow(dn,1.5) - 0.35*tim*tim;
   const maxEV = (98 + br.power*0.22)*(mode==='power'?1.04:0.97);
-  let ev = 64 + (maxEV-64)*clamp(q,0,1) + gauss()*3;
+  const pr=typeof GM!=='undefined'&&GM?pit(curPitcher(GM)):null, M=pr&&br.has?abMods(br,pr):{ev:0,la:0};
+  let ev = 64 + (maxEV-64)*clamp(q,0,1) + gauss()*3 + M.ev;
   let la = 10 + (dy/ry)*42 + (br.traj-2)*4 + gauss()*5;
   let spray = -side*tim*44 + (dx/rx)*8 + gauss()*6;  // 太晚 → 推向反方向
   if(dn>0.9 && Math.random()<0.55){ spray = (Math.random()<.5?-1:1)*rnd(70,140); la = rnd(-5,60); ev*=0.7; }
@@ -223,7 +310,8 @@ function simulateBall(p0,bb){
 }
 const isFairAt=(x,z)=>Math.abs(Math.atan2(x,-z)*180/Math.PI)<=45 && z<=0.5;
 const dirOf=(x,z)=>{const phi=Math.atan2(x,-z)*180/Math.PI; return phi<-15?'左外野':phi>15?'右外野':'中外野';};
-function resolvePlay(sim,bb,br){
+function resolvePlay(sim,bb,br){ return applyDefense(resolvePlay0(sim,bb,br),bb,br); }
+function resolvePlay0(sim,bb,br){
   const out={kind:'',text:'',fielder:null,idx:-1,throwTo:null,bases:0,air:false};
   if(sim.hr){ out.kind='HR'; out.text='全壘打'; out.bases=4; out.dist=Math.hypot(sim.pts.at(-1).x,sim.pts.at(-1).z); return out; }
   let best=null;
@@ -295,7 +383,7 @@ function advance(bases,outs,res,batterId){
     const nb=[batterId,null,null], inf=res.ground;
     if(b[2]) mv(b[2],3,4);
     if(b[1]){ if(!inf && Math.random()<0.68+(spd(b[1])-27)*0.08) mv(b[1],2,4); else { mv(b[1],2,3); nb[2]=b[1]; } }
-    if(b[0]){ const to3 = !inf && !nb[2] && (res.phi||0)>10 && Math.random()<0.35+(spd(b[0])-27)*0.06;
+    if(b[0]){ const to3 = !inf && !nb[2] && (CUR_CTX.hitRun ? Math.random()<0.85 : (res.phi||0)>10 && Math.random()<0.35+(spd(b[0])-27)*0.06);
       if(to3){ mv(b[0],1,3); nb[2]=b[0]; } else { mv(b[0],1,2); nb[1]=b[0]; } }
     mv(batterId,0,1); return fin(nb,o);
   }
@@ -304,7 +392,13 @@ function advance(bases,outs,res,batterId){
     if(b[0]){ if(b[1]){ if(b[2]) mv(b[2],3,4); nb[2]=b[1]; mv(b[1],2,3); } nb[1]=b[0]; mv(b[0],1,2); }
     nb[0]=batterId; mv(batterId,0,1); return fin(nb,o);
   }
-  if(k==='K'){ return fin(b,o+1); }
+  if(k==='K'){
+    if(CUR_CTX.hitRun && b[0] && !b[1] && outs<2){   // 打帶跑揮空：跑者硬衝二壘
+      if(Math.random()<stealProb(b[0],2)-0.08){ mv(b[0],1,2); return fin([null,b[0],b[2]],o+1); }
+      note='三振雙殺'; return fin([null,null,b[2]],o+2);
+    }
+    return fin(b,o+1);
+  }
   if(k==='OUT' && res.air){
     o++;
     if(o<3 && !res.foul){
@@ -315,7 +409,7 @@ function advance(bases,outs,res,batterId){
     return fin(b,o);
   }
   if(k==='OUT'){   // 內野滾地球
-    if(b[0] && outs<2 && (res.t||9)<1.9 && Math.random()<0.48-(bat(batterId).sprint-27)*0.06){
+    if(b[0] && outs<2 && !CUR_CTX.hitRun && (res.t||9)<1.9 && Math.random()<0.48-(bat(batterId).sprint-27)*0.06){
       o+=2; note='雙殺打'; const nb=[null,null,null];
       if(o<3){ if(b[2]) mv(b[2],3,4); if(b[1]){ mv(b[1],2,3); nb[2]=b[1]; } }
       return fin(nb,o);
@@ -326,7 +420,7 @@ function advance(bases,outs,res,batterId){
       if(b[1]){ if(b[2] && o<3){ mv(b[2],3,4); } nb[2]=b[1]; mv(b[1],2,3); }
       nb[1]=b[0]; mv(b[0],1,2);
     } else if(o<3){
-      if(b[2] && Math.random()<0.5){ mv(b[2],3,4); nb[2]=null; }
+      if(b[2] && Math.random()<(CUR_CTX.def.infieldIn?0.15:0.5)){ mv(b[2],3,4); nb[2]=null; }
       if(b[1] && !nb[2] && (res.fielder&&['1B','2B'].includes(res.fielder.k)) && Math.random()<0.6){ mv(b[1],2,3); nb[2]=b[1]; nb[1]=null; }
     }
     return fin(nb,o);
@@ -345,27 +439,32 @@ const TEAM=abbr=>TEAMS.find(t=>t.abbr===abbr);
 function newGame(awayAbbr,homeAbbr,userAbbr,spAway,spHome){
   const mk=(abbr,sp)=>{ const T=TEAM(abbr); return {abbr,T,lineup:T.lineup.map(l=>({...l})),idx:0,pitcher:sp||T.rotation[0],
     usedPen:[],line:[],runs:0,hits:0,pc:{},inningRuns:0}; };
-  return {away:mk(awayAbbr,spAway),home:mk(homeAbbr,spHome),user:userAbbr,inning:1,half:'top',outs:0,bases:[null,null,null],
+  const g={away:mk(awayAbbr,spAway),home:mk(homeAbbr,spHome),user:userAbbr,inning:1,half:'top',outs:0,bases:[null,null,null],
           balls:0,strikes:0,over:false,log:[],pbp:[]};
+  setCtx(g); return g;
 }
 const batting=g=>g.half==='top'?g.away:g.home, fielding=g=>g.half==='top'?g.home:g.away;
 const curBatter=g=>{const t=batting(g); return t.lineup[t.idx%9].id;};
 const curPitcher=g=>fielding(g).pitcher;
-function fatigue(g){ const t=fielding(g), pr=pit(t.pitcher), pc=t.pc[t.pitcher]||0; return clamp((pc-pr.limit*0.75)/(pr.limit*0.5),0,1); }
+function fatigue(g){ const t=fielding(g), pr=pit(t.pitcher), pc=t.pc[t.pitcher]||0; return clamp((pc-pr.limit*0.75)/(pr.limit*0.5),0,1)*(pr.has('stam_b')?0.6:1); }
 // 打席結束後套用結果；回傳說明文字
 function applyResult(g,res,pre){
   const t=batting(g), f=fielding(g), bid=curBatter(g);
   const a=pre||advance(g.bases,g.outs,res,bid);
+  const outsBefore=g.outs, leadBefore=Math.sign(t.runs-f.runs);
   g.bases=a.bases; g.outs=a.outs; t.runs+=a.runs; t.inningRuns+=a.runs;
+  // 勝敗投手（簡化）：取得最後一次領先時，領先隊的投手記勝、對方當時的投手記敗
+  if(a.runs && Math.sign(t.runs-f.runs)>0 && leadBefore<=0){ g.wp=t.pitcher; g.lp=f.pitcher; g.wpSide=t===g.away?'away':'home'; }
   t.line[g.inning-1]=(t.line[g.inning-1]||0)+a.runs;
   if(['1B','2B','3B','HR'].includes(res.kind)) t.hits++;
   t.idx++; g.balls=0; g.strikes=0;
   let text=res.text+(a.note?'（'+a.note+'）':'')+(a.runs?`，得 ${a.runs} 分`:'');
-  g.pbp.push({inning:g.inning,half:g.half,batter:bid,pitcher:f.pitcher,text,kind:res.kind,runs:a.runs});
+  g.pbp.push({inning:g.inning,half:g.half,batter:bid,pitcher:f.pitcher,text,kind:res.kind,runs:a.runs,outs:a.outs-outsBefore,rbi:a.note==='雙殺打'?0:a.runs,scorers:a.scorers,team:t.abbr});
   g.lastAdvance=a;
   // 再見安打
   if(g.half==='bottom' && g.inning>=9 && g.home.runs>g.away.runs){ g.over=true; text+='　再見勝！'; return text; }
   if(g.outs>=3) endHalf(g);
+  setCtx(g);
   return text;
 }
 function endHalf(g){
@@ -380,7 +479,7 @@ function endHalf(g){
   }
   fielding(g).inningRuns=0; batting(g).inningRuns=0;
   if(g.inning>=10){ const bt=batting(g); g.bases[1]=bt.lineup[(bt.idx+8)%9].id; }   // 延長賽二壘自動跑者
-  g.halfChanged=true;
+  g.halfChanged=true; CUR_CTX.keepDef=false; CUR_CTX.def={};
 }
 // 電腦教練：要不要換投
 function maybeChangePitcher(g){
@@ -394,6 +493,95 @@ function maybeChangePitcher(g){
   if(g.inning<9 && next===f.T.bullpen[0] && avail.length>1) next=avail.find(i=>i!==f.T.bullpen[0]);
   f.usedPen.push(next); const old=f.pitcher; f.pitcher=next;
   return {old,next};
+}
+
+/* =========================================================
+   戰術規則：盜壘、觸擊、打帶跑、故意四壞、守備布陣（介面在 tactics.js）
+   ========================================================= */
+// 盜壘成功率：跑者衝刺速度、捕手二壘傳球時間（pop time）、左投牽制較佳。2026 聯盟平均約 78%。
+function stealProb(runnerId,toBase){
+  const r=bat(runnerId), pop=CUR_CTX.catcherPop||1.95;
+  let p=0.70+(r.sprint-27.5)*0.07+(pop-1.95)*1.6-(CUR_CTX.pHand==='L'&&toBase===2?0.04:0)-(toBase===3?0.06:0);
+  if(r.has('speed_g')) p+=0.08; else if(r.has('speed_b')) p+=0.03;
+  if(CUR_CTX.catcherArm) p-=0.04;
+  return clamp(p,0.35,0.96);
+}
+// 盜壘：直接結算（跑者 base＝1 或 2）。回傳說明文字；會更新壘況、出局，必要時換局。
+function doSteal(g,from){
+  const id=g.bases[from-1]; if(!id || g.bases[from]) return null;
+  const ok=Math.random()<stealProb(id,from+1), f=fielding(g), t=batting(g);
+  g.bases[from-1]=null;
+  if(ok) g.bases[from]=id; else g.outs++;
+  const text=`${nameOf(id)}盜${from===1?'二':'三'}壘${ok?'成功':'失敗，出局'}`;
+  g.pbp.push({inning:g.inning,half:g.half,batter:id,pitcher:f.pitcher,text,kind:ok?'SB':'CS',runs:0,outs:ok?0:1,rbi:0,steal:true,team:t.abbr});
+  if(g.outs>=3) endHalf(g);
+  setCtx(g); return {ok,text,id,from};
+}
+// 觸擊：犧牲觸擊（送跑者）或突襲觸擊（求安打）。回傳 {res,pre} 交給 applyResult。
+function buntPlay(g,kind){
+  const bid=curBatter(g), br=bat(bid), b=g.bases.slice(), o=g.outs, moves=[], scorers=[];
+  const mv=(id,from,to)=>{ moves.push({id,from,to}); if(to>=4) scorers.push(id); };
+  const adv=(nb,no,note)=>({bases:no>=3?[null,null,null]:nb,outs:Math.min(no,3),runs:no>=3?0:scorers.length,scorers:no>=3?[]:scorers,moves,note});
+  const hitP = kind==='drag' ? clamp(0.24+(br.sprint-27)*0.09+(br.has('speed_b')||br.has('speed_g')?0.06:0),0.06,0.55) : clamp(0.04+(br.sprint-27)*0.03,0.01,0.12);
+  const r=Math.random();
+  if(r<hitP){   // 觸擊安打：大家推進一個壘
+    const nb=[bid,null,null]; if(b[2]) mv(b[2],3,4); if(b[1]){ mv(b[1],2,3); nb[2]=b[1]; } if(b[0]){ mv(b[0],1,2); nb[1]=b[0]; } mv(bid,0,1);
+    return {res:{kind:'1B',text:'觸擊安打',ground:true},pre:adv(nb,o,'')};
+  }
+  if(kind==='drag' || !(b[0]||b[1])){ const nb=b.slice(); return {res:{kind:'OUT',text:'觸擊被刺殺',ground:true},pre:adv(nb,o+1,'')}; }
+  const ok=r<hitP+0.74+(br.meet-50)*0.004;
+  if(ok){   // 犧牲觸擊成功：打者出局，跑者各推進一個壘
+    const nb=[null,null,null]; if(b[2]&&o<2){ mv(b[2],3,4); } else if(b[2]) nb[2]=b[2];
+    if(b[1]){ mv(b[1],2,3); nb[2]=b[1]; } if(b[0]){ mv(b[0],1,2); nb[1]=b[0]; }
+    return {res:{kind:'OUT',text:'犧牲觸擊成功',ground:true,sac:true},pre:adv(nb,o+1,'犧牲觸擊')};
+  }
+  if(r<hitP+0.74+(br.meet-50)*0.004+0.16){   // 前導跑者被封殺，打者上一壘
+    const nb=[bid,null,null]; if(b[0]&&b[1]){ nb[1]=b[0]; mv(b[0],1,2); nb[2]=b[2]; } else if(b[1]){ nb[2]=b[2]; } else { nb[1]=b[1]; nb[2]=b[2]; }
+    mv(bid,0,1); return {res:{kind:'OUT',text:'觸擊失敗，前導跑者被封殺',ground:true},pre:adv(nb,o+1,'')};
+  }
+  return {res:{kind:'OUT',text:'觸擊成小飛球被接殺'},pre:adv(b.slice(),o+1,'')};
+}
+// 守備布陣對擊球結果的修正（前進守備、拉打布陣）
+function applyDefense(out,bb,br){
+  const d=CUR_CTX.def||{}; if(!out||!out.ground||!br) return out;
+  const pullLeft=br.bats!=='L', toPull=pullLeft?bb.spray<0:bb.spray>0;
+  if(d.infieldIn && out.kind==='OUT' && out.fielder&&out.fielder.inf && Math.random()<0.14){ out.kind='1B'; out.bases=1; out.text='前進守備被穿過，安打'; }
+  if(d.shift){
+    if(toPull && out.kind==='1B' && Math.random()<0.3){ out.kind='OUT'; out.bases=0; out.text='布陣守住，滾地球出局'; out.throwTo='first'; }
+    else if(!toPull && out.kind==='OUT' && Math.random()<0.12){ out.kind='1B'; out.bases=1; out.text='打向布陣空檔，安打'; }
+  }
+  return out;
+}
+// 電腦教練的戰術（玩家沒操作的那一隊才用）。回傳 {type,...} 或 null；呼叫端負責執行與字幕。
+function cpuOffense(g){
+  const b=g.bases, o=g.outs, t=batting(g), f=fielding(g), diff=t.runs-f.runs, br=bat(curBatter(g));
+  if(b[0] && !b[1] && Math.abs(diff)<=4){ const s=bat(b[0]).sprint; if(s>=28.0 && Math.random()<(s>=29?0.30:0.16)) return {type:'steal',from:1}; }
+  if(b[1] && !b[2] && o===1 && bat(b[1]).sprint>=29 && Math.random()<0.05) return {type:'steal',from:2};
+  if(o===0 && (b[0]||b[1]) && !b[2] && g.inning>=7 && Math.abs(diff)<=1 && br.power<52 && br.meet<50 && Math.random()<0.4) return {type:'bunt',kind:'sac'};
+  if(!b[0]&&!b[1]&&!b[2] && br.sprint>=29.2 && Math.random()<0.02) return {type:'bunt',kind:'drag'};
+  if(b[0] && !b[1] && o<2 && br.meet>=60 && Math.random()<0.06) return {type:'hitrun'};
+  return null;
+}
+function cpuDefense(g){
+  const b=g.bases, o=g.outs, t=batting(g), f=fielding(g), lead=f.runs-t.runs, br=bat(curBatter(g));
+  const nextB=bat(t.lineup[(t.idx+1)%9].id);
+  if(!b[0] && (b[1]||b[2]) && g.inning>=7 && lead>=-1 && lead<=2 && br.power>=72 && nextB.power<62 && Math.random()<0.5) return {type:'ibb'};
+  const def={};
+  if(b[2] && o<2 && g.inning>=7 && lead>=0 && lead<=1) def.infieldIn=true;
+  if(br.power>=72 && !b[0]) def.shift=true;
+  return (def.infieldIn||def.shift)?{type:'def',def}:null;
+}
+// 電腦對電腦跑一個打席（含戰術）：模擬、球季、校準共用。user＝玩家隊伍（不替它下戰術）。
+function simTacticPA(g,user){
+  const bt=batting(g), fd=fielding(g);
+  if(bt.abbr!==user){ const c=cpuOffense(g);
+    if(c&&c.type==='steal'){ const r=doSteal(g,c.from); if(r) return {tactic:'steal',text:r.text}; }
+    if(c&&c.type==='bunt'){ const r=buntPlay(g,c.kind); return {res:r.res,pre:r.pre,tactic:'bunt'}; }
+    if(c&&c.type==='hitrun') CUR_CTX.hitRun=true; }
+  if(fd.abbr!==user){ const c=cpuDefense(g);
+    if(c&&c.type==='ibb') return {res:{kind:'BB',text:'故意四壞',ibb:true},tactic:'ibb'};
+    if(c&&c.type==='def'){ CUR_CTX.def=c.def; } }
+  const r=simPA(g); return {res:r.res,P:r.P,n:r.n};
 }
 // 電腦對電腦跑完一個打席（跳過用）
 function simPA(g){

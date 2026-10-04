@@ -118,6 +118,14 @@ window.BaseballAudio=(()=>{
     if(name==='out'){ tone(523,0.12,0.1,'triangle'); tone(392,0.23,0.1,'triangle',0.12); }
     if(name==='hitResult') cheer();
     if(name==='homerun'){ cheer(true); homeRun(); }
+    // 手感與觀眾反應（feel.js 呼叫）
+    if(name==='sweet'){ tone(2350,0.16,0.09,'sine',0,1900); tone(3520,0.09,0.05,'sine',0.01,3100); noise(0.05,0.35,5200,0.9); }
+    if(name==='tip'){ noise(0.04,0.28,3800,1.2); tone(900,0.05,0.05,'triangle',0,600); }
+    if(name==='whiff') noise(0.32,0.12,500,0.5,0.05,220);
+    if(name==='crowdCheer'){ const p=Math.max(0,Math.min(1,power)); if(!sample('cheer',0.12+p*0.32,0.97+Math.random()*0.06,1.4+p*3)){ noise(1+p*1.6,0.18+p*0.35,1100,0.45,0,1500); } }
+    if(name==='crowdGroan'){ const p=Math.max(0.3,Math.min(1,power)); noise(1.1+p*0.5,0.16+p*0.2,780,0.5,0,260); noise(0.9,0.08+p*0.08,420,0.6,0.05,180); }
+    if(name==='crowdOoh'){ noise(0.85,0.16,380,0.7,0,980); }
+    if(name==='clap'){ for(let i=0;i<9;i++) noise(0.045,0.1+Math.random()*0.05,1500+Math.random()*900,0.6,i*0.11+Math.random()*0.03); }
     if(name==='end'){ cheer(true); homeRun(); }
   }
   function setActive(value){
