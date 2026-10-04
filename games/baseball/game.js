@@ -599,6 +599,8 @@ function startWindup(P){
   $('plabel').classList.remove('show'); say(G.abN===1?`${nameOf(f.pitcher)}，投了！`:pick(['投了！',`第 ${G.abN} 球——`,'抬腿——']));
   setPanels();
 }
+const PLAYER_SWING_RATE=1.4;
+function swingTime(){ return G.swing?(G.t-G.swing.t0)*(G.swing.mode==='ai'?1:PLAYER_SWING_RATE):-1; }
 function swing(mode){
   if(G.mode!=='bat') return;
   if(!(G.state==='windup'||G.state==='pitch')||G.swing) return;
@@ -818,7 +820,7 @@ function update(dt){
   G.tgt.x+=kx*flip*aimSpeed*dt; G.tgt.y+=ky*aimSpeed*dt;
   const mx=PLATE_HALF+0.75; G.tgt.x=clamp(G.tgt.x,-mx,mx); G.tgt.y=clamp(G.tgt.y,br.szBot-0.75,br.szTop+0.75);
   const sp=G.mode==='pitch'?14:18, dx=G.tgt.x-G.cur.x, dy=G.tgt.y-G.cur.y, dd=Math.hypot(dx,dy);
-  const locked = G.mode==='bat' ? (G.swing && G.t-G.swing.t0<0.4) : (!['aim','closeup'].includes(G.state) || (window.FEEL&&FEEL.meterActive()));
+  const locked = G.mode==='bat' ? (G.swing && swingTime()<0.4) : (!['aim','closeup'].includes(G.state) || (window.FEEL&&FEEL.meterActive()));
   if(!locked){ if(dd>sp*dt){G.cur.x+=dx/dd*sp*dt; G.cur.y+=dy/dd*sp*dt;} else {G.cur.x=G.tgt.x; G.cur.y=G.tgt.y;} }
 
   if(G.state==='closeup'){
@@ -854,7 +856,7 @@ function update(dt){
     }
   }
   if(G.swing){
-    const st=G.t-G.swing.t0; poseBatter(st,G.mode==='bat'?G.cur.y:G.pitch.end.y);
+    const st=swingTime(); poseBatter(st,G.mode==='bat'?G.cur.y:G.pitch.end.y);
     if(st>=0.02&&!G.swing.sounded){ G.swing.sounded=true; SFX.play('swing'); }
     if(!G.swing.done && st>=0.13){
       G.swing.done=true;
@@ -885,7 +887,7 @@ function update(dt){
   }
   if(C.umpT!=null){ const ut=G.t-C.umpT; applyPose(C.ump,mcSample('ump',ut,false,_pA),1); if(ut>MC.ump.n/30) C.umpT=null; }
   if(G.state==='play'||G.state==='settle') updatePlay(dt);
-  FX.update(dt,G.state,G.swing?G.t-G.swing.t0:-1,G.swing?.mode==='power');
+  FX.update(dt,G.state,swingTime(),G.swing?.mode==='power');
   window.FEEL&&FEEL.update(dt);
 }
 const faceAim=new THREE.Vector3(), facePitcherAim=new THREE.Vector3(), faceBatterAim=new THREE.Vector3();
@@ -898,7 +900,7 @@ function updateFaces(){
   faceBatterAim.copy(flying?ball.position:C.pitcher.root.position); faceBatterAim.y=flying?ball.position.y:5;
   const effort=G.state==='windup'?Math.sin(clamp(G.windT/RELEASE_T,0,1)*Math.PI):0;
   window.BaseballFaces.update(C.pitcher,G.t,dt,facePitcherAim,effort>.25?'effort':'focus',effort,G.state==='pitch');
-  const swinging=G.swing&&G.t>=G.swing.t0&&G.t-G.swing.t0<.28;
+  const st=swingTime(), swinging=G.swing&&st>=0&&st<.28;
   window.BaseballFaces.update(C.batter,G.t,dt,faceBatterAim,swinging?'effort':'focus',swinging?1:0,G.state==='pitch'||swinging);
   for(const c of [C.runner,...Object.values(C.runners),C.ump,...Object.values(C.fielders)]){
     if(!c||c===C.pitcher||camera.position.distanceTo(c.root.position)>145) continue;
