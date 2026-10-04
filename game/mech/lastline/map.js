@@ -2,6 +2,7 @@
 // 共用掃描材質；靜態結構按材質合併，海面不建立反射攝影機。
 import * as THREE from 'three';
 import { Builder } from '../zero/kit.js';
+import { car, carMaterials } from '../zero/props.js';
 import { JAPANESE_FONT, PORT_LABELS, civicMaterial, shopMaterial, harborWater, streetGlassMaterial } from '../urban.js';
 import { japaneseBuilder } from '../japan.js';
 import { kobeStreetDetails } from '../kobe-street.mjs';
@@ -83,7 +84,7 @@ export function buildMap(scene, mats, solid, PL, A, world) {
     const n=new THREE.Vector3().subVectors(new THREE.Vector3(...c),new THREE.Vector3(...a)).cross(new THREE.Vector3().subVectors(new THREE.Vector3(...d),new THREE.Vector3(...a))).normalize().toArray();
     b.B[portMat(col)].quad(a,c,d,e,n,[1,1,1,1],null,col.slice(0,3));
   }};
-  const M = { b, lights: [], zones: {}, marks: {}, targets: {}, items: {}, layout: 'harbor-v1' };
+  const M = { b, lights: [], zones: {}, marks: {}, targets: {}, items: {}, cars: [], layout: 'harbor-v1' };
   const V = (x, z, y = 0) => new THREE.Vector3(x, y, z);
   const metal = [0.54, 0.6, 0.64], paint = [0.3, 0.44, 0.49];
   const box = (mat, x0, x1, y0, y1, z0, z1, o = {}) => b.block(mat, x0, x1, y0, y1, z0, z1, { ground: Math.min(0, y0), skip: y0 <= .05 ? 'ny' : '', ...o });
@@ -211,6 +212,21 @@ export function buildMap(scene, mats, solid, PL, A, world) {
     for (const x of [x0, x1]) for (const z of [z0, z1]) pipe(x, 0, z, .12, y);
   }
   function prop(name, x, z, y = 0, ry = 0, extra = {}) { return PL.add(name, x, y, z, ry, { solid: true, ...extra }); }
+  function civilianCar(x, z, ry = 0) {
+    const g = car(1, false), materials = carMaterials(), group = new THREE.Group(), meshes = [];
+    for (const [key, mat] of [['body', 'carPaint'], ['dark', 'carDark'], ['metal', 'carMetal'], ['glass', 'carGlass'], ['lights', 'carLights']]) if (g[key]) {
+      const m = new THREE.Mesh(g[key], materials[mat]); m.name = 'civilian-car-' + key;
+      m.castShadow = !materials[mat].userData.noCast; m.receiveShadow = true; group.add(m); meshes.push(m);
+    }
+    group.position.set(x, 0, z); group.rotation.y = ry; group.updateMatrix(); group.matrixAutoUpdate = false; scene.add(group);
+    const bb = new THREE.Box3();
+    for (const m of meshes) { m.geometry.computeBoundingBox(); bb.union(m.geometry.boundingBox); }
+    bb.applyMatrix4(group.matrix);
+    const box = solid.add({ x0: bb.min.x, x1: bb.max.x, y0: bb.min.y, y1: bb.max.y, z0: bb.min.z, z1: bb.max.z, mat: 'metal' });
+    if (PL.reg) PL.reg.push({ name: 'covered_car', h: { mat: group.matrix, geometries: meshes.map(mesh => mesh.geometry), hide() { group.visible = false; box.dead = true; } }, box });
+    const triangles = meshes.reduce((sum, mesh) => sum + (mesh.geometry.index?.count || mesh.geometry.attributes.position.count) / 3, 0);
+    M.cars.push({ x, y: 0, z, ry, profile: g.profile, meshes, triangles });
+  }
   function item(id, name, x, z, y = 0) { M.items[id] = { h: name ? prop(name, x, z, y, 0, { solid: false, noBreak: true }) : null, p: V(x, z, y) }; }
   function target(id, x, z) {
     const h = prop('portable_generator', x, z);
@@ -332,7 +348,7 @@ export function buildMap(scene, mats, solid, PL, A, world) {
     }
     solid.add({x0:-205.1,x1:-200.9,y0:0,y1:5.2,z0:z-5.6,z1:z+5.6,mat:'metal'});
   }
-  prop('concrete_road_barrier_02', -177, -216); prop('covered_car', -158, -225, 0, .2);
+  prop('concrete_road_barrier_02', -177, -216); civilianCar(-158, -225, .2);
   for (const [x, z] of [[-203, -192], [-156, -182], [-204, -143], [-90, -122], [-46, -92], [65, 56]]) {
     prop('barrel_03', x, z); prop('Barrel_01', x + 1.2, z + .2); prop('old_tyre', x + .4, z + 1.6, 0, .3);
   }
@@ -623,6 +639,8 @@ export function buildMap(scene, mats, solid, PL, A, world) {
     [626,313,.8],[626,350,.86],[626,385,.81],[626,432,.8],[626,465,.82]]);
   const meshes = b.build(scene); M.meshes = meshes;
   M.triangles = meshes.reduce((sum, mesh) => sum + (mesh.geometry.index?.count || mesh.geometry.attributes.position.count) / 3, 0);
+  M.carTriangles = M.cars.reduce((sum, car) => sum + car.triangles, 0);
+  M.totalTriangles = M.triangles + M.carTriangles; M.totalMeshes = M.meshes.length + M.cars.reduce((sum, car) => sum + car.meshes.length, 0);
   scene.userData.lastlineLayout = M.layout;
   return M;
 }

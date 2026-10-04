@@ -2,6 +2,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { grimeTex } from './kit.js';
+import { buildJapaneseCar } from '../japanese-cars.mjs';
 
 const cache = {};
 function prism(pts, w, bev = 0.04, holes = []) {
@@ -92,61 +93,19 @@ function wheel(x, z, burned, r = 0.19, side = 1) {
 const flip = (g) => { const ix = g.index.array; for (let i = 0; i < ix.length; i += 3) { const t = ix[i + 1]; ix[i + 1] = ix[i + 2]; ix[i + 2] = t; } const n = g.attributes.normal; for (let i = 0; i < n.count; i++) n.setXYZ(i, -n.getX(i), -n.getY(i), -n.getZ(i)); return g; };
 const liner = (x, z, r, w, y = 0.3) => tint(flip(new THREE.CylinderGeometry(r, r, w, 12, 1, true, 0, Math.PI).rotateZ(Math.PI / 2).translate(x, y, z)), [0.25, 0.24, 0.23]);
 
-// ---------------------------------------------------------------- 轎車（長 4.6 m，面向 +Z）
-//   variant：0 三廂、1 兩廂（掀背）、2 車頭撞爛；burned＝燒毀（沒玻璃、只剩鋼圈、煙燻）
-export function car(variant = 0, burned = true) {
-  const key = 'car' + variant + (burned ? 'b' : 'p');
-  if (cache[key]) return cache[key];
-  const hatch = variant === 1, crash = variant === 2, sd = variant * 3.7 + (burned ? 0 : 11);
-  const L = 2.3, AX = [1.38, -1.4], AR = 0.43;
-  const zs = [-2.3, -2.26, -2.18, -2.05, -1.9, -1.72, -1.55, -1.4, -1.25, -1.05, -0.95, -0.8, -0.62, -0.36, -0.3, -0.24, -0.05, 0.12, 0.35, 0.5, 0.7, 0.88, 1.05, 1.2, 1.38, 1.56, 1.75, 1.95, 2.12, 2.22, 2.28, 2.3];
-  const rf = hatch ? -1.72 : -0.95, rb = hatch ? -2.05 : -1.55;   // 車頂後緣、後窗下緣
-  const gh = (z) => sstep(rb, rf, z) * (1 - sstep(0.35, 1.05, z));
-  const sill = (z) => { let y = burned ? 0.2 : 0.3; for (const a of AX) { const d = Math.abs(z - a); if (d < AR) y = Math.max(y, 0.3 + Math.sqrt(AR * AR - d * d)); } return y; };
-  const ring = (z) => {
-    const e = Math.abs(z), end = sstep(1.9, 2.3, e), g = gh(z);
-    const wb = 0.9 - end * 0.1 - (z > 0 ? end * 0.06 : 0), ws = wb - 0.05, ys = sill(z) + end * 0.12;
-    const hood = z > 0 ? lerp(0.95, 0.84, sstep(1.0, 2.25, z)) : lerp(0.98, hatch ? 0.95 : 0.93, sstep(-1.6, -2.28, z));
-    const yb = hood - end * 0.1, yr = 1.43 - (burned ? 0.07 * Math.sin(Math.PI * sstep(-1, 0.4, z)) : 0), wr = 0.68;
-    const deck = [[wb - 0.12, yb + 0.02], [wb - 0.22, yb + 0.035], [wb * 0.6, yb + 0.05], [wb * 0.3, yb + 0.058], [0, yb + 0.06]];
-    const cab = [[wr + 0.1, yb + 0.05], [wr, yr - 0.07], [wr - 0.1, yr], [wr * 0.5, yr + 0.03], [0, yr + 0.035]];
-    return [[ws, ys], [wb + 0.02, ys + (yb - ys) * 0.38], [wb + 0.01, yb - 0.08], [wb - 0.04, yb], ...deck.map((d, i) => [lerp(d[0], cab[i][0], g), lerp(d[1], cab[i][1], g)])];
-  };
-  const inCab = (z0, z1) => z0 >= rb - 0.01 && z1 <= 1.06;
-  // 側窗（B 柱 -0.36～-0.24、C 柱在後面）、前後擋風玻璃
-  const side = (z0, z1) => (z0 >= (hatch ? -1.72 : -0.8) && z1 <= -0.36) || (z0 >= -0.24 && z1 <= 0.88 && z0 >= -0.24);
-  const shield = (z0, z1, k) => (z0 >= 0.35 && z1 <= 1.05 && k >= 6) || (z0 >= rb && z1 <= rf && k >= 7);   // 後窗兩側留寬一點的 C 柱
-  const win = (z0, z1, k) => (k === 4 && side(z0, z1)) || shield(z0, z1, k);
-  const col = (x, y, z, k) => {
-    if (!burned) { const d = 0.82 + hn(x, y, z, sd) * 0.18; return [d, d, d]; }
-    // 燒過：整體鏽褐，窗框一圈燻黑，上面零星灰白的灰燼
-    const up = sstep(0.7, 1.2, y), s = soot(x, y, z, sd), w = k >= 3 && k <= 6 && inCab(z, z) ? 0.5 : 1, ash = up * sstep(0.62, 0.9, hn(Math.round(x * 4), 1, Math.round(z * 5), sd));
-    let v = lerp(0.5, 0.7, up) * lerp(0.55, 1, s) * w * (0.85 + hn(x, y, z, sd) * 0.2);
-    for (const seam of [0.88, -0.3, -1.05]) if (Math.abs(z - seam) < 0.02 && k < 4) v *= 0.35;   // 門縫
-    return [lerp(v * 1.08, 0.78, ash), lerp(v * 0.86, 0.75, ash), lerp(v * 0.72, 0.72, ash)];
-  };
-  const warp = (p) => {
-    if (crash && p.z > 1.3) { const t = sstep(1.3, 2.3, p.z); p.z -= t * 0.45; p.y -= t * 0.12 * sstep(0.5, 1, p.y); p.x *= 1 - t * 0.06; }
-    if (burned) { p.y += (hn(Math.round(p.x * 3), 0, Math.round(p.z * 4), sd) - 0.5) * 0.02 * sstep(0.6, 1.0, p.y) * (1 - sstep(1.2, 1.35, p.y)); }
-  };
-  const L0 = loft({ z: zs, ring, skip: burned ? win : null, glass: burned ? null : win, inner: (z0, z1, k) => inCab(z0, z1) && !win(z0, z1, k), col, warp });
-  // 車頭：保險桿、水箱罩、大燈洞；車尾：保險桿、尾燈
-  const zf = crash ? 1.88 : 2.3, dk = [0.2, 0.19, 0.18];
-  const dark = [L0.inner && tint(L0.inner, [0.16, 0.15, 0.14]), box(1.62, 0.16, 4.1, 0, 0.22, 0, dk), box(1.5, 0.1, 2.3, 0, 0.4, -0.35, [0.22, 0.21, 0.2]),
-    box(1.5, 0.22, 0.35, 0, 0.78, 0.95, [0.18, 0.17, 0.16]), box(0.9, 0.14, 0.05, 0, 0.62, zf + 0.005, [0.1, 0.1, 0.1])];
-  for (const x of [-0.6, 0.6]) { dark.push(box(0.28, 0.11, 0.03, x, 0.72, zf - 0.005, [0.08, 0.08, 0.08])); dark.push(box(0.26, 0.1, 0.03, x, 0.8, -2.29, [burned ? 0.12 : 0.5, 0.06, 0.05])); }
-  // 座椅：燒掉只剩鐵架
-  const metal = [];
-  for (const [x, z, w] of [[-0.4, 0.2, 0.52], [0.4, 0.2, 0.52], [0, -0.75, 1.3]]) {
-    (burned ? metal : dark).push(box(w, 0.08, 0.5, x, 0.58, z, burned ? [0.35, 0.3, 0.27] : [0.3, 0.28, 0.26]));
-    (burned ? metal : dark).push(tint(new THREE.BoxGeometry(w, 0.5, 0.07).rotateX(-0.2).translate(x, 0.85, z - 0.27), burned ? [0.35, 0.3, 0.27] : [0.3, 0.28, 0.26]));
-  }
-  metal.push(tint(new THREE.TorusGeometry(0.17, 0.018, 4, 12).rotateX(-1.1).translate(-0.4, 0.95, 0.62), [0.4, 0.4, 0.4]));
-  for (const a of AX) for (const s of [-1, 1]) { const w = wheel(s * 0.74, a, burned, 0.19, s); metal.push(...w.rim); dark.push(...w.dark); dark.push(liner(s * 0.66, a, AR - 0.02, 0.36)); }
-  // 保險桿（跟車身同材質；燒掉的車後保險桿掉一邊）
-  const bc = burned ? [0.32, 0.27, 0.23] : [0.3, 0.3, 0.3], bump = (rz, y, z) => tint(new THREE.CylinderGeometry(0.08, 0.08, 1.78, 8).rotateZ(Math.PI / 2).scale(1, 1, 0.8).rotateZ(rz).translate(0, y, z), bc);
-  const body = mergeC([L0.body, bump(0, 0.46, zf + 0.02), bump(burned ? 0.12 : 0, burned ? 0.37 : 0.46, -2.31)]);
-  return (cache[key] = { body, dark: mergeC(dark), metal: mergeC(metal), glass: L0.glass });
+// ---------------------------------------------------------------- 日本乘用車（面向 +Z）；保留舊的撞車 variant 2
+export function car(variant = 0, burned = true, detail = true) {
+  return buildJapaneseCar(variant === 2 ? 0 : variant === 3 ? 2 : variant, { burned, crashed: variant === 2, detail });
+}
+
+// 乘用車的烤漆、橡膠、輪圈與玻璃不套建築窗簾或鏽鐵照片；全車共用五個材質。
+export function carMaterials() {
+  if (cache.carMaterials) return cache.carMaterials;
+  const material = (opts) => new THREE.MeshStandardMaterial({ color: 0xffffff, vertexColors: true, ...opts });
+  const carPaint = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: .26, metalness: .06, clearcoat: .8, clearcoatRoughness: .18, envMapIntensity: 1, vertexColors: true });
+  const carGlass = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: .09, metalness: 0, clearcoat: 1, clearcoatRoughness: .06, envMapIntensity: 1.2, vertexColors: true });
+  carGlass.userData.noCast = true;
+  return (cache.carMaterials = { carPaint, carDark: material({ roughness: .94 }), carMetal: material({ roughness: .24, metalness: .7 }), carGlass, carLights: material({ roughness: .18, metalness: .05 }) });
 }
 
 // ---------------------------------------------------------------- 燒毀的公車（長 10.4、寬 2.5、高 3 m，面向 +Z）：一整排窗洞看得到燒黑的車廂和座椅鐵架

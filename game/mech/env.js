@@ -4,6 +4,8 @@ import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
 import { mergeGeometries, mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
 import { makeFacade, FACADE_TILE, japaneseFacade } from './textures.js';
+import { buildJapaneseCar } from './japanese-cars.mjs';
+import { instancedCarMaterial } from './car-material.js';
 import { shopMaterial, shopUV, civicMaterial, civicUV, harborWater } from './urban.js';
 import { roofline } from './roofline.js';
 import { streetfront } from './streetfront.js';
@@ -970,32 +972,22 @@ function treeGeometry() {
   return m;
 }
 
-export function carGeometry() {
-  // 轎車：側面輪廓擠出（車身）＋較窄的車艙（深色玻璃）＋車頂＋輪胎
-  const ext = (pts, w, bev, col) => {
-    const sh = new THREE.Shape(pts.map(([x, y]) => new THREE.Vector2(x, y)));
-    const g = new THREE.ExtrudeGeometry(sh, { depth: w - bev * 2, bevelEnabled: true, bevelThickness: bev, bevelSize: bev, bevelSegments: 2, curveSegments: 4 });
-    g.translate(0, 0, -(w - bev * 2) / 2);
-    g.deleteAttribute('uv');
-    const n = g.attributes.position.count, c = new Float32Array(n * 3);
-    for (let i = 0; i < n; i++) c.set(col, i * 3);
-    g.setAttribute('color', new THREE.BufferAttribute(c, 3));
-    return g.index ? g.toNonIndexed() : g;
-  };
-  const body = ext([[-2.2, 0.32], [2.15, 0.32], [2.28, 0.55], [2.22, 0.8], [1.2, 0.95], [-1.5, 0.98], [-2.22, 0.9], [-2.3, 0.6]], 1.78, 0.1, [1, 1, 1]);
-  const cab = ext([[-1.55, 0.92], [1.05, 0.92], [0.35, 1.38], [-0.95, 1.4]], 1.52, 0.06, [0.035, 0.04, 0.045]);
-  const roof = ext([[-0.98, 1.36], [0.4, 1.34], [0.32, 1.45], [-0.9, 1.46]], 1.46, 0.04, [1, 1, 1]);
-  const parts = [body, cab, roof];
-  for (const [x, z] of [[1.35, 0.8], [-1.35, 0.8], [1.35, -0.8], [-1.35, -0.8]]) {
-    const w = new THREE.CylinderGeometry(0.34, 0.34, 0.24, 14).rotateX(Math.PI / 2).translate(x, 0.34, z).toNonIndexed();
-    w.deleteAttribute('uv');
-    const c = new Float32Array(w.attributes.position.count * 3).fill(0.03);
-    w.setAttribute('color', new THREE.BufferAttribute(c, 3));
-    parts.push(w);
+const carGeometries = new Map();
+export function carGeometry(variant = 0, detail = false) {
+  const key = `${variant}:${detail}`;
+  if (carGeometries.has(key)) return carGeometries.get(key);
+  const model = buildJapaneseCar(variant, { detail }), parts = [];
+  for (const [part, name] of ['body', 'dark', 'metal', 'glass', 'lights'].entries()) {
+    if (!model[name]) continue;
+    const g = model[name].clone().rotateY(Math.PI / 2);
+    g.setAttribute('carPart', new THREE.Float32BufferAttribute(new Float32Array(g.attributes.position.count).fill(part), 1));
+    parts.push(g);
   }
-  const m = mergeGeometries(parts);
-  m.computeVertexNormals();
-  return m;
+  // 街道與路障原本面向 +X；共享車型面向 +Z，轉一次保持既有擺放與踩壓方向。
+  const g = mergeGeometries(parts); g.computeBoundingBox(); g.computeBoundingSphere();
+  g.userData.profile = model.profile;
+  for (const part of parts) part.dispose();
+  carGeometries.set(key, g); return g;
 }
 
 function lampGeometry() {
@@ -2199,27 +2191,24 @@ export class World {
       const x = vert ? k * B + lane : t, z = vert ? t : k * B + lane;
       const ang = (vert ? Math.PI / 2 : 0) + (lane > 0 ? 0 : Math.PI) + (r() - 0.5) * (r() < 0.2 ? 1.6 : 0.15);
       const burnt = r() < 0.3;
-      cars.push([x, z, ang, burnt ? [0.05 + r() * 0.04, 0.035 + r() * 0.02, 0.025] : palette[(r() * palette.length) | 0]]);
+      cars.push([x, z, ang, burnt ? [0.05 + r() * 0.04, 0.035 + r() * 0.02, 0.025] : palette[(r() * palette.length) | 0], burnt]);
     }
-    const carMat = new THREE.MeshStandardMaterial({ roughness: 0.42, metalness: 0.35, vertexColors: true, map: this.A.rubD });
-    carMat.onBeforeCompile = (sh) => {
-      // 車身灰塵：用瓦礫貼圖當髒污遮罩（世界座標）
-      sh.vertexShader = sh.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 vCW;')
-        .replace('#include <project_vertex>', '#include <project_vertex>\nvCW = (modelMatrix * instanceMatrix * vec4(transformed,1.0)).xyz;');
-      sh.fragmentShader = sh.fragmentShader.replace('#include <common>', '#include <common>\nvarying vec3 vCW;')
-        .replace('#include <map_fragment>', `float dirt = texture2D(map, vCW.xz / 3.0 + vCW.y * 0.1).g;
-          diffuseColor.rgb = mix(diffuseColor.rgb, vec3(0.3, 0.27, 0.23), smoothstep(0.3, 0.7, dirt) * 0.55);`)
-        .replace('#include <roughnessmap_fragment>', '#include <roughnessmap_fragment>\nroughnessFactor = mix(0.35, 0.95, smoothstep(0.3, 0.7, dirt));');
-    };
-    const carMesh = new THREE.InstancedMesh(carGeometry(), carMat, cars.length);
-    cars.forEach(([x, z, a, c], i) => {
-      dummy.position.set(x, 0, z); dummy.rotation.set(0, a, 0); dummy.scale.setScalar(1); dummy.updateMatrix();
-      carMesh.setMatrixAt(i, dummy.matrix);
-      carMesh.setColorAt(i, new THREE.Color(c[0], c[1], c[2]));
-      this.trample.push({ mesh: [carMesh], i, x, z, ry: a, r: 2.6, kind: 'car', down: 0 });
-    });
-    carMesh.castShadow = true; carMesh.receiveShadow = true;
-    scene.add(carMesh);
+    const carMat = instancedCarMaterial(this.A.rubD);
+    this.carMeshes = [];
+    // 每種車型一個實例批次，輪胎、玻璃與車燈不隨烤漆一起染色。
+    for (let variant = 0; variant < 3; variant++) {
+      const group = cars.filter((car, i) => i % 3 === variant);
+      if (!group.length) continue;
+      const carMesh = new THREE.InstancedMesh(carGeometry(variant), carMat, group.length);
+      group.forEach(([x, z, a, c, burnt], i) => {
+        dummy.position.set(x, 0, z); dummy.rotation.set(0, a, 0); dummy.scale.setScalar(1); dummy.updateMatrix();
+        carMesh.setMatrixAt(i, dummy.matrix);
+        carMesh.setColorAt(i, new THREE.Color(c[0], c[1], c[2]));
+        this.trample.push({ mesh: [carMesh], i, x, z, ry: a, r: 2.6, kind: 'car', variant, burnt, down: 0 });
+      });
+      carMesh.castShadow = true; carMesh.receiveShadow = true; carMesh.computeBoundingSphere();
+      this.carMeshes.push(carMesh); scene.add(carMesh);
+    }
 
     // --- 樹 ---
     const trees = [];

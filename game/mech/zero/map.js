@@ -50,6 +50,7 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
   for (const k of ['red', 'olive']) alias(k, 'painted', 1.7);   // 原本沒貼圖的純色：乘上鏽鐵照片會變暗，補回來
   mats.warm.userData.alias = 'lamp'; mats.warm.userData.aliasTint = [2.2 / 2.6, 1.2 / 2.4, 0.5 / 2.0];   // 暖色窗燈＝日光燈的桶染橘
   for (const k of ['lamp', 'glass', 'hazard']) mats[k].userData.noCast = true;
+  Object.assign(mats, PR.carMaterials());
   // 貨櫃：真的波浪鐵皮貼圖，染三種常見顏色
   for (const [k, c] of [['cGreen', 0x8a9a74], ['cRed', 0xc27358], ['cBlue', 0x7d93a6], ['cont', 0xffffff]]) { const m = mats.corr.clone(); m.color.set(c); m.metalnessMap = null; m.metalness = 0.15; m.userData.tile = 2.2; m.onBeforeCompile = mats.corr.onBeforeCompile; mats[k] = m; }   // 烤漆：不是裸金屬
   for (const k of ['cGreen', 'cRed', 'cBlue']) alias(k, 'cont');   // 三種貨櫃色共用一個桶
@@ -76,7 +77,7 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
     m.customProgramCacheKey=()=> 'street-surface-'+key+'-v1';
   }
   const b = new Builder(mats, solid);
-  const M = { b, lights: [], zones: {}, marks: {}, targets: {}, items: {} };
+  const M = { b, lights: [], zones: {}, marks: {}, targets: {}, items: {}, cars: [] };
   // ---- 任務用（script.js 的 targets／pickups 用 id 找）
   // 要炸掉的目標：可破壞的道具（destruct.js 的 BRK 裡有的模型，例如 portable_generator、utility_box_02）；沒有模型就不放，那一段的「炸掉目標」自動算完成
   const target = (id, name, x, z, ry = 0, y = 0, o = {}) => { const h = PL && PL.M.has(name) ? PL.add(name, x, y, z, ry, { solid: true, hit: 'metal', ...o }) : null; if (h) M.targets[id] = { h, p: new THREE.Vector3(x, y + 0.9, z) }; };
@@ -480,15 +481,14 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
       b.obox('olive', x, y + s / 2, z, s / 2, s / 2, s / 2, ry);
       b.obox('metal', x, y + s / 2, z, s / 2 + 0.02, 0.05, s / 2 + 0.02, ry, { solid: false });
     },
-    // 燒毀的車（三成還看得出原本的漆色）
+    // 棄置乘用車：一半左右保留烤漆與玻璃，仍有覆蓋車和燒毀的殘骸。
     car(x, z, ry = 0, y = 0) {
-      if (PL && PL.M.has('covered_car') && rnd() < 0.55) { PL.add('covered_car', x, 0, z, ry, { solid: true, hit: 'metal', top: 1.3, inset: 0.1 }); return; }
-      // 兩成是還沒燒的棄車（烤漆、玻璃），其他燒到只剩鐵殼；車型（三廂／掀背／車頭撞爛）也從同一個亂數取，不多抽
-      const r = rnd(), burned = r >= 0.2, g = PR.car(Math.floor(r * 97) % 3, burned), paint = burned ? 'burnt' : r < 0.1 ? 'paint' : 'paint2';
-      b.mesh(paint, g.body, x, y, z, ry, { shade: 1 }); carBoxes(g.body, x, y, z, ry, y + 1.2);
-      b.mesh('void', g.dark, x, y, z, ry, { shade: 1 });
-      b.mesh('metal', g.metal, x, y, z, ry, { shade: 1 });
-      if (g.glass) b.mesh('glass', g.glass, x, y, z, ry, { shade: 0.8 });
+      const covered = PL && PL.M.has('covered_car') ? rnd() : 1;
+      if (covered < 0.15) { PL.add('covered_car', x, 0, z, ry, { solid: true, hit: 'metal', top: 1.3, inset: 0.1 }); M.cars.push({ x, y: 0, z, ry, covered: true }); return; }
+      // 舊覆蓋車只抽一次；改成可見車後仍沿用那次亂數，下游的場景配置不變。
+      const r = covered < 0.55 ? (covered - 0.15) / 0.4 : rnd(), burned = r >= 0.6;
+      const g = PR.car([0, 1, 3][Math.floor(r * 97) % 3], burned), drawn = drawCar(g, x, y, z, ry, burned, CAR_PAINT[Math.floor(r * 71) % CAR_PAINT.length]);
+      if (covered < 0.55 && PL.reg) registerCar(drawn);
       if (burned) scorch(x, y, z, 3.4, ry);
     },
     barrel(x, z, mat = 'olive') { if (PL) { PL.add(mat === 'rust' ? 'barrel_03' : 'Barrel_01', x, 0, z, rnd() * 6, { solid: true, hit: 'metal' }); return; } const g = PR.barrel(); b.mesh(mat, g.body, x, 0, z, rnd() * 3, { solid: true, hitMat: 'metal' }); b.mesh('metal', g.metal, x, 0, z, 0); },
@@ -610,14 +610,39 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
     b.deco('canvas', x - 0.3, x + 0.3, 0.75, 0.84, z1 - 0.48, z1 - 0.14, { tint: [0.85, 0.85, 0.82] });
   }
   // 車的碰撞盒：正放一個盒子；斜放切成沿車長的三段，各自取外接盒（原本一個大外接盒，斜的車四角會有看不見的牆）
-  function carBoxes(g, x, y, z, ry, top) {
-    g.computeBoundingBox(); const bb = g.boundingBox, c = Math.cos(ry), s = Math.sin(ry), off = Math.abs(Math.sin(2 * ry));
-    const n = off < 0.25 ? 1 : 3, L = (bb.max.z - bb.min.z) / n;
+  function carBoxes(g, x, y, z, ry) {
+    const bb = new THREE.Box3();
+    for (const key of ['body', 'dark', 'metal', 'glass', 'lights']) if (g[key]) { g[key].computeBoundingBox(); bb.union(g[key].boundingBox); }
+    const c = Math.cos(ry), s = Math.sin(ry), off = Math.abs(Math.sin(2 * ry));
+    const n = off < 0.25 ? 1 : 3, L = (bb.max.z - bb.min.z) / n, boxes = [];
     for (let i = 0; i < n; i++) {
       let x0 = 1e9, x1 = -1e9, z0 = 1e9, z1 = -1e9;
       for (const lx of [bb.min.x, bb.max.x]) for (const lz of [bb.min.z + i * L, bb.min.z + (i + 1) * L]) { const wx = x + lx * c + lz * s, wz = z - lx * s + lz * c; x0 = Math.min(x0, wx); x1 = Math.max(x1, wx); z0 = Math.min(z0, wz); z1 = Math.max(z1, wz); }
-      solid.add({ x0, x1, y0: y + bb.min.y, y1: top, z0, z1, mat: 'metal' });
+      boxes.push(solid.add({ x0, x1, y0: y + bb.min.y, y1: y + bb.max.y, z0, z1, mat: 'metal' }));
     }
+    return boxes;
+  }
+  const CAR_PAINT = [[.82, .84, .8], [.38, .43, .46], [.06, .12, .17], [.39, .055, .045], [.065, .075, .08]];
+  function drawCar(g, x, y, z, ry, burned = false, tint = CAR_PAINT[0]) {
+    const ranges = [], boxes = carBoxes(g, x, y, z, ry);
+    const parts = [[burned ? 'burnt' : 'carPaint', g.body], ['carDark', g.dark], ['carMetal', g.metal], ['carGlass', g.glass], ['carLights', g.lights]];
+    for (const [mat, geometry] of parts) if (geometry) {
+      const bucket = b.B[mat], start = bucket.p.length;
+      b.mesh(mat, geometry, x, y, z, ry, { shade: 1, tint: mat === 'carPaint' ? tint : undefined });
+      ranges.push({ bucket, start, end: bucket.p.length });
+    }
+    const h = { mat: new THREE.Matrix4().makeRotationY(ry).setPosition(x, y, z), geometries: parts.map(([, geometry]) => geometry).filter(Boolean), hide() {
+      for (const { bucket, start, end } of ranges) { const p = bucket.mesh.geometry.attributes.position; p.array.fill(0, start, end); p.needsUpdate = true; }
+      for (const box of boxes) box.dead = true;
+    } };
+    for (const box of boxes) Object.defineProperty(box, 'geometryHandle', { value: h });
+    M.cars.push({ x, y, z, ry, burned, profile: g.profile, triangles: parts.reduce((sum, [, geometry]) => sum + (geometry ? (geometry.index?.count || geometry.attributes.position.count) / 3 : 0), 0) });
+    return { h, boxes };
+  }
+  function registerCar({ h, boxes }) {
+    // 分段碰撞盒都指向同一輛車，保留覆蓋車的耐久、起火與爆炸處理。
+    for (const box of boxes.slice(1)) Object.defineProperty(box, 'obj', { get: () => boxes[0].obj });
+    PL.reg.push({ name: 'covered_car', h, box: boxes[0] });
   }
   function aabb(x, y, z, hx, hy, hz, ry, mat) {
     const c = Math.abs(Math.cos(ry)), s = Math.abs(Math.sin(ry)), ex = hx * c + hz * s, ez = hx * s + hz * c;
@@ -682,7 +707,7 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
     room(-87.7, -72, -76, -62.3, { h: 3.8, floor: 'floor', wall: 'concrete', ext: PL ? 'kplaster' : 'plaster', doors: { w: [[-74.4, 1.6]], n: [[-77, 3.4]] }, windows: { n: [[-84, 1.6]] }, upper: 11, upperWin: 'wn', trim: PL ? 'kplaster' : null, lightP: 0.7 });
     b.deco('rust', -78.9, -75.1, 2.32, 2.75, -62.05, -61.7);   // 捲上去的鐵捲門外殼
     // 待修的車（沒燒過）、工作台、鐵架、輪胎、油桶
-    { const g = PR.car(1, false); b.mesh('paint', g.body, -81.8, 0, -69.6, Math.PI / 2 + 0.06, { shade: 1 }); carBoxes(g.body, -81.8, 0, -69.6, Math.PI / 2 + 0.06, 1.2); b.mesh('void', g.dark, -81.8, 0, -69.6, Math.PI / 2 + 0.06, { shade: 1 }); b.mesh('metal', g.metal, -81.8, 0, -69.6, Math.PI / 2 + 0.06, { shade: 1 }); if (g.glass) b.mesh('glass', g.glass, -81.8, 0, -69.6, Math.PI / 2 + 0.06, { shade: 0.8 }); }
+    drawCar(PR.car(1, false), -81.8, 0, -69.6, Math.PI / 2 + 0.06, false, CAR_PAINT[2]);
     P.crate(-73.3, -72.2, 1.1, 0.1); P.crate(-73, -74.6, 0.8, 0.4); P.barrel(-72.9, -64.3); P.barrel(-73.6, -65.1, 'rust');
     b.block('paint', -86.9, -84.4, 0, 0.9, -69.4, -68.6); b.deco('metal', -86.95, -84.35, 0.9, 0.95, -69.45, -68.55);   // 零件櫃（矮，當掩護）
     if (PL) {
@@ -1148,7 +1173,7 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
     b.block('concrete', -36, -32.2, DY, DY + 1, 40, 40.4); b.block('concrete', -29.3, -2, DY, DY + 1, 40, 40.4);
     b.block('concrete', -36, 6, DY, DY + 1, 49.6, 50);
     b.deco('concrete', -36, 6, DY, DY + 0.02, 44.9, 45.1, { solid: false, skip: 'ny' });   // 中線
-    const hulk = (x, z, ry) => { const r = rnd(), g = PR.car(Math.floor(r * 97) % 3, true); b.mesh('burnt', g.body, x, DY, z, ry, { shade: 1 }); carBoxes(g.body, x, DY, z, ry, DY + 1.2); b.mesh('void', g.dark, x, DY, z, ry, { shade: 1 }); b.mesh('metal', g.metal, x, DY, z, ry, { shade: 1 }); scorch(x, DY, z, 3.4, ry); };
+    const hulk = (x, z, ry) => { const r = rnd(), g = PR.car(Math.floor(r * 97) % 3, true); drawCar(g, x, DY, z, ry, true); scorch(x, DY, z, 3.4, ry); };
     const barrier = (x, z, ry) => {
       if (!(PL && PL.M.has('concrete_road_barrier_02'))) return b.obox('concrete', x, DY + 0.45, z, 1.5, 0.45, 0.3, ry, { hitMat: 'concrete' });
       const c = Math.cos(ry), s = Math.sin(ry);   // 跟地面上一樣用掃描的紐澤西護欄，兩節一組（不抽 rnd，別處的樣子不變）

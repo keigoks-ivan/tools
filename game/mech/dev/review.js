@@ -15,7 +15,7 @@ async function load(path, query = '') {
   html = html.replace(/<base href="[^"]+">/, '');
   html = html.replace(/(<script type="importmap">)([\s\S]*?)(<\/script>)/, (_, a, json, b) => {
     const map = JSON.parse(json);
-    for (const file of ['kobe-street.mjs', 'kobe-autumn.js', 'kobe-harbor.mjs', 'kobe-city.mjs', 'kobe-relief.mjs', 'urban.js', 'japan.js', 'textures.js', 'anim.js', 'env.js', 'preview.js', 'streetfront.js', 'stages.js', 'battlefields.js', 'fieldart.js', 'encounter.js', 'post.js', 'roofline.js', 'mechs.js', 'combat.js', 'cockpit.js', 'player.js', 'flight.mjs', 'vehicles.js', 'hud.js', 'zero/kit.js', 'zero/map.js', 'zero/guns.js', 'zero/human.js', 'zero/viewmodel.js', 'zero/main.js', 'zero/hud.js', 'zero/sfx.js', 'zero/mech6.js', 'lastline/map.js', 'lastline/script.js', 'lastline/mission.js', 'lastline/convoy.js', 'lastline/escort.mjs', 'lastline/operations.mjs', 'lastline/foot-ops.js', 'input.js', 'tactics.js', 'reinforcements.mjs', 'zero/ai.js', 'zero/script.js', 'zero/patrol.js', 'zero/recon.js', 'zero/field.js']) {
+    for (const file of ['japanese-cars.mjs', 'car-material.js', 'zero/props.js', 'kobe-street.mjs', 'kobe-autumn.js', 'kobe-harbor.mjs', 'kobe-city.mjs', 'kobe-relief.mjs', 'urban.js', 'japan.js', 'textures.js', 'anim.js', 'env.js', 'preview.js', 'streetfront.js', 'stages.js', 'battlefields.js', 'fieldart.js', 'encounter.js', 'post.js', 'roofline.js', 'mechs.js', 'combat.js', 'cockpit.js', 'player.js', 'flight.mjs', 'vehicles.js', 'hud.js', 'zero/kit.js', 'zero/map.js', 'zero/guns.js', 'zero/human.js', 'zero/viewmodel.js', 'zero/main.js', 'zero/hud.js', 'zero/sfx.js', 'zero/mech6.js', 'lastline/map.js', 'lastline/script.js', 'lastline/mission.js', 'lastline/convoy.js', 'lastline/escort.mjs', 'lastline/operations.mjs', 'lastline/foot-ops.js', 'input.js', 'tactics.js', 'reinforcements.mjs', 'zero/ai.js', 'zero/script.js', 'zero/patrol.js', 'zero/recon.js', 'zero/field.js']) {
       const url = new URL('/game/mech/' + file, location.href).href;
       for (const key of Object.keys(map.imports)) if (new URL(key, entryBase).href === url) delete map.imports[key];
       map.imports[url] = url + '?qa=' + revision;
@@ -1173,7 +1173,7 @@ async function fieldOps() {
   report.textContent=JSON.stringify({checks,metrics,errors},null,2);state.textContent='開放戰區通過';
 }
 
-for (const [id, fn] of [['realismArt', realismArt], ['autumnArt', autumnArt], ['japanStreets', japanStreets], ['flightArt', flightArt], ['flight', flight], ['kobeArt', kobeArt], ['fieldAudit', fieldAudit], ['fieldOps', fieldOps], ['scoutCombat', scoutCombat], ['reconControls', reconControls], ['prequelFoot', prequelFoot], ['openingPace', openingPace], ['patrolWorld', patrolWorld], ['japaneseSigns', japaneseSigns], ['harborArt', harborArt], ['campaignFoot', campaignFoot], ['campaign4', () => campaignMech(4)], ['campaign5', () => campaignMech(5)], ['campaign6', () => campaignMech(6)], ['campaign7', () => campaignMech(7)], ['campaign6Artillery', async()=>{localStorage.setItem('lastline.choice',JSON.stringify('artillery'));await campaignMech(6,'artillery');}], ['campaignArtillery', async () => { localStorage.setItem('lastline.choice', JSON.stringify('artillery')); await campaignMech(7, 'artillery'); }], ['campaignEdges', campaignEdges], ['mech', mech], ['fields', battlefields], ['enemyMotion', enemyMotion], ['zero', zero], ['tactics', tactics], ['prequelMechCampaign', prequelMechCampaign], ['campaignMain', campaignMain], ['enemyPressure', enemyPressure], ['enemyHandling', enemyHandling], ['infantry', infantry], ['art', art], ['hero', hero], ['city', city], ['mountains', mountains], ['weapons', weapons], ['save', save]]) document.querySelector('#' + id).onclick = () => fn().catch(e => { state.textContent = '失敗'; report.textContent += '\n' + e.stack; });
+for (const [id, fn] of [['carArt', carArt], ['realismArt', realismArt], ['autumnArt', autumnArt], ['japanStreets', japanStreets], ['flightArt', flightArt], ['flight', flight], ['kobeArt', kobeArt], ['fieldAudit', fieldAudit], ['fieldOps', fieldOps], ['scoutCombat', scoutCombat], ['reconControls', reconControls], ['prequelFoot', prequelFoot], ['openingPace', openingPace], ['patrolWorld', patrolWorld], ['japaneseSigns', japaneseSigns], ['harborArt', harborArt], ['campaignFoot', campaignFoot], ['campaign4', () => campaignMech(4)], ['campaign5', () => campaignMech(5)], ['campaign6', () => campaignMech(6)], ['campaign7', () => campaignMech(7)], ['campaign6Artillery', async()=>{localStorage.setItem('lastline.choice',JSON.stringify('artillery'));await campaignMech(6,'artillery');}], ['campaignArtillery', async () => { localStorage.setItem('lastline.choice', JSON.stringify('artillery')); await campaignMech(7, 'artillery'); }], ['campaignEdges', campaignEdges], ['mech', mech], ['fields', battlefields], ['enemyMotion', enemyMotion], ['zero', zero], ['tactics', tactics], ['prequelMechCampaign', prequelMechCampaign], ['campaignMain', campaignMain], ['enemyPressure', enemyPressure], ['enemyHandling', enemyHandling], ['infantry', infantry], ['art', art], ['hero', hero], ['city', city], ['mountains', mountains], ['weapons', weapons], ['save', save]]) document.querySelector('#' + id).onclick = () => fn().catch(e => { state.textContent = '失敗'; report.textContent += '\n' + e.stack; });
 
 async function harborArt() {
   await load('/game/mech/lastline/index.html', '?mute&god&ch=1&all&fps=0');
@@ -1383,4 +1383,77 @@ async function realismArt() {
   assert(win.__map.triangles<120000&&win.__map.meshes.length<=12,'港區建築細節維持十二萬三角形與十二個材質桶內');
   stats.harborTriangles=win.__map.triangles;audit('lastline',win.__world);
   report.textContent=JSON.stringify({checks,stats,errors},null,2);state.textContent='三款建築光影通過';
+}
+
+async function carArt() {
+  const checks=[],stats={};
+  const carHits=(G,obj,profile)=>{
+    const T=win.__T;
+    const mesh=new T.Mesh(undefined,new T.MeshBasicMaterial({side:T.DoubleSide}));mesh.matrixAutoUpdate=false;mesh.matrixWorld.copy(obj.handle.mat);
+    for(const [point,direction,label]of [[[0,2.2,0],[0,-1,0],'車頂'],[[profile.width/2+.45,profile.wheelRadius,profile.axles[1]],[-1,0,0],'輪胎']]){
+      const origin=new T.Vector3(...point).applyMatrix4(obj.handle.mat),dir=new T.Vector3(...direction).transformDirection(obj.handle.mat),ray=new T.Raycaster(origin,dir,0,3);let expected=Infinity;
+      for(const geometry of obj.handle.geometries){mesh.geometry=geometry;const h=ray.intersectObject(mesh,false)[0];if(h)expected=Math.min(expected,h.distance);}
+      const hit=G.shotRay(origin,dir,3);
+      assert(Number.isFinite(expected)&&(hit?.b.obj===obj||hit?.b.geometryHandle===obj.handle)&&Math.abs(hit.t-expected)<.0001,'玩家子彈命中新車實際'+label+'，而非舊覆蓋車模型');
+    }
+    mesh.material.dispose();
+  };
+  await load('/game/mech/index.html','?mute&free&quality=1&fps=0');renderer=win.__renderer;post=win.__post;
+  const W=win.__world,T=win.__T;
+  assert(W.carMeshes.length===3,'本篇三款日系車分成三個實例批次');
+  assert(W.carMeshes.every(m=>m.geometry.attributes.carPart&&m.geometry.attributes.position.count/3<=750),'每款遠景汽車保留表面分類且不超過 750 三角形');
+  for(let variant=0;variant<3;variant++) {
+    const cars=W.trample.filter(o=>o.kind==='car'&&o.variant===variant&&!o.burnt&&Math.abs(o.x)<550&&Math.abs(o.z)<550);
+    const c=cars.find(o=>{const paint=new T.Color();o.mesh[0].getColorAt(o.i,paint);return paint.r>.3;})||cars[0];
+    assert(!!c,'車型 '+variant+' 在實際街道上有未燒毀車');
+    const d=new T.Vector3(3.8,2.05,3.5).applyAxisAngle(new T.Vector3(0,1,0),c.ry);
+    win.__cam.set(c.x+d.x,d.y,c.z+d.z,Math.atan2(d.x,d.z),-Math.atan2(d.y-.75,Math.hypot(d.x,d.z)));
+    W.followShadow(new T.Vector3(c.x,0,c.z));W.sun.shadow.needsUpdate=true;win.__step(3);await save('cars-mech-'+variant,true);
+  }
+  const c=W.trample.find(o=>o.kind==='car'&&!o.down),matrix=new T.Matrix4();
+  W.stomp(c.x,c.z,.1);c.mesh[0].getMatrixAt(c.i,matrix);
+  assert(c.down===1&&matrix.elements.every(Number.isFinite),'新版汽車被機甲踩壓後仍正常變形');
+  const geometries=new Set();W.scene.traverse(o=>{if(o.geometry)geometries.add(o.geometry);});
+  const cityTriangles=[...geometries].reduce((n,g)=>n+(g.index?.count||g.attributes.position.count)/3,0);
+  assert(cityTriangles<1400000,'本篇城市與新車共用幾何資料仍低於 140 萬三角形');
+  stats.main={cars:W.carMeshes.reduce((n,m)=>n+m.count,0),batches:W.carMeshes.length,triangles:W.carMeshes.map(m=>m.geometry.attributes.position.count/3),instancedCarTriangles:W.carMeshes.reduce((n,m)=>n+m.geometry.attributes.position.count/3*m.count,0),cityTriangles};checks.push(...result);
+  await load('/game/mech/zero/index.html','?mute&god&ch=3&all&fps=0');renderer=win.__renderer;post={render:()=>win.__step(1)};win.__step(60);
+  const M=win.__map,G=win.__G;
+  for(const [i,inspiration]of ['Toyota Prius','Honda Fit','Mazda CX-30'].entries()) {
+    const car=M.cars.find(c=>!c.covered&&!c.burned&&c.profile.inspiration===inspiration);
+    assert(!!car,inspiration+' 出現在前傳實際車輛配置');
+    const d=new win.__T.Vector3(3.8,0,4.3).applyAxisAngle(new win.__T.Vector3(0,1,0),car.ry);
+    G.player.reset(new win.__T.Vector3(car.x+d.x,car.y,car.z+d.z),Math.atan2(-d.x,-d.z));
+    G.player.pitch=-.12;win.__step(3);await save('cars-zero-'+i,true);
+  }
+  const active=M.cars.filter(c=>!c.covered);
+  assert(active.every(c=>c.triangles<=2200),'前傳每輛近景車不超過 2200 三角形');
+  assert(active.filter(c=>!c.burned).length>active.filter(c=>c.burned&&c.y===0).length,'前傳街道保留更多看得清車型的完整車輛');
+  const testObj=G.destruct.objs.find(o=>o.kind==='car'&&o.handle.geometries&&active.some(c=>!c.burned&&Math.hypot(o.pos.x-c.x,o.pos.z-c.z)<.1)),testCar=active.find(c=>Math.hypot(testObj.pos.x-c.x,testObj.pos.z-c.z)<.1),wrecks=G.destruct.wrecks.length;
+  assert(testObj?.hp0===650,'前傳新車保留原有破壞登記');
+  carHits(G,testObj,testCar.profile);
+  const garage=active.find(c=>Math.hypot(c.x+81.8,c.z+69.6)<.1),garageBox=G.solid.list.find(b=>b.geometryHandle&&Math.hypot(b.geometryHandle.mat.elements[12]-garage.x,b.geometryHandle.mat.elements[14]-garage.z)<.1);
+  assert(!!garageBox&&!garageBox.obj,'機庫外原有靜態汽車保留相同破壞設定');carHits(G,{handle:garageBox.geometryHandle},garage.profile);
+  G.destruct.hit(testObj,400,testObj.pos,new win.__T.Vector3(0,1,0));
+  assert(testObj.fire&&testObj.alive,'前傳新車受損先起火');
+  G.destruct.hit(testObj,300,testObj.pos,new win.__T.Vector3(0,1,0));
+  const oldBoxes=G.solid.list.filter(b=>b.obj===testObj);
+  assert(!testObj.alive&&oldBoxes.length>0&&oldBoxes.every(b=>b.dead)&&G.destruct.wrecks.length===wrecks+1,'前傳新車爆炸後清除全部碰撞盒並生成一個殘骸');
+  stats.prequel={cars:M.cars.map(c=>({covered:!!c.covered,burned:!!c.burned,model:c.profile?.inspiration,triangles:c.triangles})),meshes:M.meshes.length};checks.push(...result);
+  await load('/game/mech/lastline/index.html','?mute&god&ch=1&all&fps=0');renderer=win.__renderer;post={render:()=>win.__step(1)};win.__step(60);
+  const H=win.__map,car=H.cars[0];
+  win.__G.player.reset(new win.__T.Vector3(car.x+3.8,0,car.z+4.3),Math.atan2(-3.8,-4.3));win.__G.player.pitch=-.12;
+  win.__step(3);await save('cars-lastline-fit',true);
+  assert(H.cars.length===1&&car.profile.inspiration==='Honda Fit','港區原覆蓋車位置換成可辨識的日系掀背車');
+  assert(H.totalTriangles===H.triangles+H.carTriangles&&H.totalTriangles<120000,'港區結構連同新汽車仍低於十二萬三角形');
+  assert(car.meshes.length===5&&car.meshes.every(m=>!m.material.map&&!m.material.transparent),'車身、車窗與輪圈共用五個材質，不新增貼圖或透明排序');
+  const obj=win.__G.destruct.objs.find(o=>o.kind==='car'&&Math.hypot(o.pos.x-car.x,o.pos.z-car.z)<.1);
+  assert(obj?.hp0===650,'替換車輛保留既有耐久與破壞登記');
+  carHits(win.__G,obj,car.profile);
+  const D=win.__G.destruct,oldWrecks=D.wrecks.length;
+  D.hit(obj,400,obj.pos,new win.__T.Vector3(0,1,0));assert(obj.fire&&obj.alive,'港區新車受損先起火');
+  D.hit(obj,300,obj.pos,new win.__T.Vector3(0,1,0));
+  assert(!obj.alive&&obj.box.dead&&car.meshes.every(m=>!m.parent.visible)&&D.wrecks.length===oldWrecks+1,'港區新車爆炸後隱藏五個部件、移除碰撞並生成一個殘骸');
+  stats.lastline={triangles:H.totalTriangles,carTriangles:H.carTriangles,meshes:H.totalMeshes};checks.push(...result);
+  assert(errors.length===0,'三款汽車沒有執行或材質編譯錯誤');report.textContent=JSON.stringify({checks,stats,errors},null,2);state.textContent='三款日系汽車通過';
 }

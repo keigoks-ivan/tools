@@ -611,11 +611,11 @@ function nextChapter(n) {
 const _rc = new THREE.Raycaster(), _pm = new THREE.Mesh(undefined, new THREE.MeshBasicMaterial({ side: THREE.DoubleSide })), _hole = [];
 _pm.matrixAutoUpdate = false;
 // 模型 name 擺在 mat：射線打到網格的距離＋法線（沒打到＝null）
-function meshHit(name, mat, o, d, far) {
-  const M = MODELS.get(name); if (!M) return null;
+function meshHit(name, mat, o, d, far, geometries = null) {
+  const M = geometries ? null : MODELS.get(name); if (!geometries && !M) return null;
   _rc.set(o, d); _rc.far = far; _pm.matrixWorld.copy(mat);
   let best = null;
-  for (const p of M.parts) { _pm.geometry = p.geo; const h = _rc.intersectObject(_pm, false)[0]; if (h && (!best || h.distance < best.distance)) best = h; }
+  for (const p of geometries || M.parts) { _pm.geometry = geometries ? p : p.geo; const h = _rc.intersectObject(_pm, false)[0]; if (h && (!best || h.distance < best.distance)) best = h; }
   if (!best) return null;
   const n = best.face ? best.face.normal.clone().transformDirection(mat) : d.clone().negate();
   if (n.dot(d) > 0) n.negate();
@@ -656,6 +656,8 @@ function realHit(b, o, d, far) {
     }
     return { t: lo, n: ax === 1 ? new THREE.Vector3(0, d.y > 0 ? -1 : 1, 0) : d.clone().negate() };
   }
+  const geometryHandle = ob?.handle?.geometries ? ob.handle : b.geometryHandle;
+  if (geometryHandle) return meshHit(null, geometryHandle.mat, o, d, far, geometryHandle.geometries);
   if (ob && ob.handle && ob.name && MODELS.has(ob.name)) return meshHit(ob.name, ob.handle.mat, o, d, far);
   return undefined;
 }

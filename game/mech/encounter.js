@@ -4,6 +4,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { carGeometry } from './env.js';
+import { instancedCarMaterial } from './car-material.js';
 
 const rand = (a, b) => a + Math.random() * (b - a);
 const clamp = THREE.MathUtils.clamp;
@@ -212,7 +213,7 @@ function buildRoute(world, E) {
   };
   const concMat = new THREE.MeshStandardMaterial({ map: A.rubD, normalMap: A.rubN, roughness: 0.95, color: 0xb0aaa0 });
   const steelMat = new THREE.MeshStandardMaterial({ map: A.rubD, color: 0x4a4540, metalness: 0.6, roughness: 0.55 });
-  const carMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.9, metalness: 0.25 });
+  const carMat = instancedCarMaterial(A.rubD);
   const rubMat = new THREE.MeshStandardMaterial({ map: A.rubD, normalMap: A.rubN, roughness: 0.95, color: 0x8a8580 });
   const brdMat = new THREE.MeshStandardMaterial({ map: stripeTexture(), roughness: 0.55 });
   const la = new THREE.MeshBasicMaterial({ color: new THREE.Color(6, 0.45, 0.2) }), lb = la.clone();
