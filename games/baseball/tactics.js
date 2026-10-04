@@ -9,27 +9,30 @@ const TACTICS={
   ensure(){
     if(this.el) return this.el;
     const el=document.createElement('div'); el.className='ss-tac hide'; el.id='ssTac'; document.body.appendChild(el);
-    el.addEventListener('click',e=>{ const b=e.target.closest('[data-t]'); if(b) this.choose(b.dataset.t,b.dataset.v); });
+    el.setAttribute('role','dialog'); el.setAttribute('aria-label','戰術選單');
+    el.addEventListener('click',e=>{ if(e.target.closest('.ss-close')){ this.close(); return; } const b=e.target.closest('[data-t]'); if(b) this.choose(b.dataset.t,b.dataset.v); });
     this.el=el; return el;
   },
   canOpen(){ return typeof GM!=='undefined' && GM && !GM.over && ['aim','ready'].includes(G.state) && !this.busy; },
   userSide(){ return batting(GM).abbr===GM.user?'off':fielding(GM).abbr===GM.user?'def':null; },
-  toggle(){ if(this.prev!==null) this.close(); else this.open(); },
+  isOpen(){ return !!this.el&&!this.el.classList.contains('hide'); },
+  toggle(){ if(this.isOpen()) this.close(); else this.open(); },
   open(){
     if(!this.canOpen() || !this.userSide()) return;
     this.prev=G.state; G.state='tactic'; this.render('main'); this.el.classList.remove('hide');
   },
   close(resume=true){
-    if(!this.el) return; this.el.classList.add('hide');
+    if(this.el) this.el.classList.add('hide');
     if(this.prev!==null && resume){ G.state=this.prev; G.waitUntil=G.t+0.8; }
     this.prev=null;
+    if(resume&&this.el?.contains(document.activeElement)) document.activeElement.blur();
   },
   pause(){ this.prev=this.prev??G.state; G.state='tactic'; },
   // 選單內容
   render(view){
     const g=GM, side=this.userSide(), b=g.bases, o=g.outs, el=this.ensure();
-    const row=(t,v,label,sub,dis)=>`<button class="ss-tr${dis?' dis':''}" data-t="${dis?'':t}" data-v="${v??''}"><b>${label}</b><span>${sub||''}</span></button>`;
-    let h='';
+    const row=(t,v,label,sub,dis)=>`<button class="ss-tr${dis?' dis':''}"${dis?' disabled':''} data-t="${dis?'':t}" data-v="${v??''}"><b>${label}</b><span>${sub||''}</span></button>`;
+    let h='<button type="button" class="ss-close" aria-label="關閉戰術選單">✕</button>';
     if(view==='main'&&side==='off'){
       const pct=(id,to)=>Math.round(stealProb(id,to)*100);
       h+=`<div class="ss-th">進攻戰術<small>${batting(g).T.zh}</small></div>`;
@@ -110,7 +113,7 @@ const TACTICS={
     const g=GM; this.pause(); const r=buntPlay(g,kind);
     say(kind==='sac'?'犧牲觸擊……':'突襲觸擊……');
     if(byUser) ACH.onTactic(kind==='sac'?'sac':'drag',!!(r.res.sac||r.res.kind==='1B'));
-    setTimeout(()=>finishPA(r.res,r.pre),700);
+    setTimeout(()=>{ if(r.res.kind==='1B'&&typeof startBuntPlay==='function') startBuntPlay(r.res,r.pre); else finishPA(r.res,r.pre); },700);
   },
   ibb(byUser){ this.pause(); say('故意四壞，直接保送。'); if(byUser) ACH.onTactic('ibb',true); setTimeout(()=>finishPA({kind:'BB',text:'故意四壞',ibb:true}),700); },
   // 盜壘後：換局就照換局流程，否則回到同一個打席
@@ -124,6 +127,7 @@ const TACTICS={
   /* ---------- 每個打席開始時（setupPA 尾端呼叫） ---------- */
   beforePA(first){
     if(typeof GM==='undefined'||!GM||GM.over) return;
+    this.close(false);
     const g=GM, idx=batting(g).idx+(g.half==='top'?0:1000)+g.inning*10000;
     if(!first) this.cutin(idx);
     const bt=batting(g), fd=fielding(g);
@@ -162,7 +166,8 @@ const TACTICS={
 if(typeof document!=='undefined'){
   addEventListener('keydown',e=>{
     if(e.target&&['INPUT','SELECT','TEXTAREA'].includes(e.target.tagName)) return;
+    if(e.repeat) return;
     if(e.key==='t'||e.key==='T'){ TACTICS.toggle(); }
-    else if(e.key==='Escape' && TACTICS.prev!==null) TACTICS.close();
+    else if(e.key==='Escape' && TACTICS.isOpen()) TACTICS.close();
   });
 }

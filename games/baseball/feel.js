@@ -72,11 +72,16 @@ body.fx-replaying .panels,body.fx-replaying .contact-readout,body.fx-replaying .
   }
   function drawMeter(g){
     if(!(G.mode==='pitch'&&G.state==='aim')) return;
-    const W=Math.min(340,innerWidth*0.6), H=16, x=(innerWidth-W)/2, y=innerHeight-112;
+    const compact=innerWidth<=940||innerHeight<=780, portrait=innerWidth<=560;
+    const panels=document.querySelector('.panels'), boxes=panels.querySelectorAll('.pl');
+    const gap=compact&&!portrait?boxes[1].getBoundingClientRect().left-boxes[0].getBoundingClientRect().right-24:innerWidth-32;
+    const W=Math.min(340,innerWidth*0.6,gap), H=16, x=(innerWidth-W)/2, y=portrait?panels.getBoundingClientRect().top-44:innerHeight-112;
     g.save();
     g.fillStyle='rgba(10,26,50,.78)'; roundRect(g,x-10,y-28,W+20,H+40,10); g.fill();
     g.fillStyle='#fff'; g.font='900 13px "Noto Sans TC",sans-serif'; g.textAlign='center';
-    g.fillText(meter.active?'再按一次：停在綠色區出手':'空白鍵／點一下：開始蓄力',innerWidth/2,y-10);
+    g.font=`900 ${compact?11:13}px "Noto Sans TC",sans-serif`;
+    const label=compact?(meter.active?'再按投球：綠區出手':'按投球：開始蓄力'):(meter.active?'再按一次：停在綠色區出手':'空白鍵／點一下：開始蓄力');
+    g.fillText(label,innerWidth/2,y-10,W+8);
     const grd=g.createLinearGradient(x,0,x+W,0); grd.addColorStop(0,'#3a6fd0'); grd.addColorStop(0.75,'#ffd23a'); grd.addColorStop(1,'#ff5a3a');
     g.fillStyle='#14202e'; roundRect(g,x,y,W,H,8); g.fill();
     g.fillStyle=grd; roundRect(g,x+2,y+2,(W-4)*(meter.active?meter.pos:0),H-4,6); g.fill();
