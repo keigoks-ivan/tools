@@ -51,8 +51,8 @@ export async function startMech(X) {
   camera.fov = 70; camera.near = 0.5; camera.far = 6000; camera.updateProjectionMatrix();
   vCam.fov = 70; vCam.near = 0.05; vCam.far = 20; vCam.updateProjectionMatrix();
   const sc = world.sun.shadow.camera;
-  sc.left = -150; sc.right = 150; sc.top = 150; sc.bottom = -150; sc.updateProjectionMatrix();
-  world.sun.shadow.bias = -0.0004; world.sun.shadow.normalBias = 0.5;
+  sc.left = -150; sc.right = 150; sc.top = 150; sc.bottom = -150; sc.near = 600; sc.far = 1800; sc.updateProjectionMatrix();
+  world.sun.shadow.bias = -0.000035; world.sun.shadow.normalBias = 0.035;
   for (const o of world.cityInst || []) o.visible = true;   // 前傳藏起來的城市樹、路燈、車：飛過外圍高樓看得到
   if (!world.zeroBoxes) {
     world.zeroBoxes = true;

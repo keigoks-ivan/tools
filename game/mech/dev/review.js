@@ -1,4 +1,4 @@
-import { SHOP_LABELS, SHOP_SUBTITLES, PORT_LABELS, CIVIC_LABELS, JAPANESE_FONT } from '../urban.js?v=8';
+import { SHOP_LABELS, SHOP_SUBTITLES, PORT_LABELS, CIVIC_LABELS, JAPANESE_FONT } from '../urban.js?v=9';
 // 開發用：透過真實遊戲模組與既有除錯介面做固定步進，所有載入均帶 mute。
 const frame = document.querySelector('#game'), report = document.querySelector('#report'), state = document.querySelector('#state');
 let win, result = [], errors = [], post, renderer;
@@ -15,13 +15,14 @@ async function load(path, query = '') {
   html = html.replace(/<base href="[^"]+">/, '');
   html = html.replace(/(<script type="importmap">)([\s\S]*?)(<\/script>)/, (_, a, json, b) => {
     const map = JSON.parse(json);
-    for (const file of ['kobe-street.mjs', 'kobe-autumn.js', 'kobe-harbor.mjs', 'kobe-city.mjs', 'kobe-relief.mjs', 'urban.js', 'japan.js', 'textures.js', 'anim.js', 'env.js', 'streetfront.js', 'stages.js', 'battlefields.js', 'fieldart.js', 'encounter.js', 'post.js', 'roofline.js', 'mechs.js', 'combat.js', 'cockpit.js', 'player.js', 'flight.mjs', 'vehicles.js', 'hud.js', 'zero/kit.js', 'zero/map.js', 'zero/guns.js', 'zero/human.js', 'zero/viewmodel.js', 'zero/main.js', 'zero/hud.js', 'zero/sfx.js', 'zero/mech6.js', 'lastline/map.js', 'lastline/script.js', 'lastline/mission.js', 'lastline/convoy.js', 'lastline/escort.mjs', 'lastline/operations.mjs', 'lastline/foot-ops.js', 'input.js', 'tactics.js', 'reinforcements.mjs', 'zero/ai.js', 'zero/script.js', 'zero/patrol.js', 'zero/recon.js', 'zero/field.js']) {
+    for (const file of ['kobe-street.mjs', 'kobe-autumn.js', 'kobe-harbor.mjs', 'kobe-city.mjs', 'kobe-relief.mjs', 'urban.js', 'japan.js', 'textures.js', 'anim.js', 'env.js', 'preview.js', 'streetfront.js', 'stages.js', 'battlefields.js', 'fieldart.js', 'encounter.js', 'post.js', 'roofline.js', 'mechs.js', 'combat.js', 'cockpit.js', 'player.js', 'flight.mjs', 'vehicles.js', 'hud.js', 'zero/kit.js', 'zero/map.js', 'zero/guns.js', 'zero/human.js', 'zero/viewmodel.js', 'zero/main.js', 'zero/hud.js', 'zero/sfx.js', 'zero/mech6.js', 'lastline/map.js', 'lastline/script.js', 'lastline/mission.js', 'lastline/convoy.js', 'lastline/escort.mjs', 'lastline/operations.mjs', 'lastline/foot-ops.js', 'input.js', 'tactics.js', 'reinforcements.mjs', 'zero/ai.js', 'zero/script.js', 'zero/patrol.js', 'zero/recon.js', 'zero/field.js']) {
       const url = new URL('/game/mech/' + file, location.href).href;
       for (const key of Object.keys(map.imports)) if (new URL(key, entryBase).href === url) delete map.imports[key];
       map.imports[url] = url + '?qa=' + revision;
     }
     return a + JSON.stringify(map) + b;
   });
+  html=html.replace(/(<script type="module" src=")([^"]+)(")/g,(_,a,url,b)=>a+url+(url.includes('?')?'&':'?')+'qa='+revision+b);
   const control = `<base href="${entryBase}"><script>window.__qaErrors=[];addEventListener('error',e=>__qaErrors.push(e.message));addEventListener('unhandledrejection',e=>__qaErrors.push(String(e.reason?.stack||e.reason)));window.__raf=[];window.requestAnimationFrame=fn=>(__raf.push(fn),__raf.length);window.__step=(n=1)=>{for(let i=0;i<n;i++){const q=__raf.splice(0);for(const f of q)f(performance.now())}};<\/script>`;
   // srcdoc has its own queryless URL, so replace the main module with an explicit wrapper setting the desired query via parent-provided URLSearchParams.
   const setup = `<script>const NativeParams=URLSearchParams;window.URLSearchParams=class extends NativeParams{constructor(v){super(v===location.search?'${query}':v)}};<\/script>`;
@@ -164,6 +165,13 @@ async function flight() {
     else win.document.querySelector('#resume').click();
     step(220);
     const C=M.combat,p=M.player,hero=M.hero;C.hurt=()=>{};
+    const ground=new T.Vector3(p.pos.x,W.height(p.pos.x,p.pos.z),p.pos.z),air=ground.clone().add(new T.Vector3(0,260,0));
+    W.followShadow(air);W.sun.updateMatrixWorld(true);W.sun.target.updateMatrixWorld(true);W.sun.shadow.updateMatrices(W.sun);
+    for(const point of [ground,air]) {
+      const ndc=point.clone().project(W.sun.shadow.camera);
+      assert(Math.max(Math.abs(ndc.x),Math.abs(ndc.y),Math.abs(ndc.z))<1,(path||'本篇')+' 最高飛行高度與下方地面同時在陰影範圍');
+    }
+    assert(W.viewP===air,(path||'本篇')+' 遠景細節仍使用實際玩家高度');
     const x=main?0:path==='zero/'?180:560,z=main?-120:path==='zero/'?120:250;
     p.pos.set(x,W.height(x,z),z);p.vel.set(0,0,0);p.grounded=true;p.flying=false;p.en=100;p.overheat=0;p.lockMove=0;p.yaw=0;
     tap('KeyT');step(100);assert(p.flying&&!p.grounded&&p.pos.y>W.height(x,z)+6,(path||'本篇')+' T 起飛');
@@ -208,7 +216,7 @@ async function flight() {
       await save('mech-air-combat');renderer.render=()=>{};
     }
     press('KeyC');step(600);press('KeyC',false);
-    assert(p.grounded&&!p.flying&&(main?M.state==='play':!M.ending),(path||'本篇')+' C 安全落地後任務持續');
+    assert(p.grounded&&!p.flying&&(main?M.state==='play':!M.ending),(path||'本篇')+' C 安全落地後任務持續 '+JSON.stringify({grounded:p.grounded,flying:p.flying,state:M.state,ending:M.ending,position:p.pos.toArray(),ground:W.height(p.pos.x,p.pos.z)}));
     assert(errors.length===0,(path||'本篇')+' 空戰靜音測試沒有執行錯誤');
     stats.push({path:path||'main',heldAltitude:high,boostSpeed:speed,triangles,meshes:hero.meshes.length,memory:renderer.info.memory});
     renderer.render=render;step(1);
@@ -300,7 +308,7 @@ async function battlefields() {
     const R=C.enc.R;
     assert(R.boxes.every(b=>W.nearBoxes((b.x0+b.x1)/2,(b.z0+b.z1)/2,2,[]).includes(b)), `第 ${n} 關重玩路障碰撞仍登記`);
     G.toTitle();
-    assertSilent(W.scene.environment===W.envMap && W.lightDir.distanceTo(W.cityLightDir)<.001 && W.scene.environmentIntensity===.55 && W.sun.shadow.camera.right===260 && !W.terrainMesh.castShadow,'城市光影配置未復原');
+    assertSilent(W.scene.environment===W.envMap && W.lightDir.distanceTo(W.cityLightDir)<.001 && W.scene.environmentIntensity===.7 && W.sun.shadow.camera.right===180 && !W.terrainMesh.castShadow,'城市光影配置未復原');
     assertSilent(!W.terrain.detailed && W.terrainMesh.geometry.attributes.position.getX(1)===-5000+W.terrain.cell,'城市地形座標沒有復原');
     assert(W.battlefield==='city' && W.cityObjects.every(o=>o.visible || o===W.beacon), '回標題恢復原城市與碰撞');
     await new Promise(r=>setTimeout(r,0));
@@ -1165,7 +1173,7 @@ async function fieldOps() {
   report.textContent=JSON.stringify({checks,metrics,errors},null,2);state.textContent='開放戰區通過';
 }
 
-for (const [id, fn] of [['autumnArt', autumnArt], ['japanStreets', japanStreets], ['flightArt', flightArt], ['flight', flight], ['kobeArt', kobeArt], ['fieldAudit', fieldAudit], ['fieldOps', fieldOps], ['scoutCombat', scoutCombat], ['reconControls', reconControls], ['prequelFoot', prequelFoot], ['openingPace', openingPace], ['patrolWorld', patrolWorld], ['japaneseSigns', japaneseSigns], ['harborArt', harborArt], ['campaignFoot', campaignFoot], ['campaign4', () => campaignMech(4)], ['campaign5', () => campaignMech(5)], ['campaign6', () => campaignMech(6)], ['campaign7', () => campaignMech(7)], ['campaign6Artillery', async()=>{localStorage.setItem('lastline.choice',JSON.stringify('artillery'));await campaignMech(6,'artillery');}], ['campaignArtillery', async () => { localStorage.setItem('lastline.choice', JSON.stringify('artillery')); await campaignMech(7, 'artillery'); }], ['campaignEdges', campaignEdges], ['mech', mech], ['fields', battlefields], ['enemyMotion', enemyMotion], ['zero', zero], ['tactics', tactics], ['prequelMechCampaign', prequelMechCampaign], ['campaignMain', campaignMain], ['enemyPressure', enemyPressure], ['enemyHandling', enemyHandling], ['infantry', infantry], ['art', art], ['hero', hero], ['city', city], ['mountains', mountains], ['weapons', weapons], ['save', save]]) document.querySelector('#' + id).onclick = () => fn().catch(e => { state.textContent = '失敗'; report.textContent += '\n' + e.stack; });
+for (const [id, fn] of [['realismArt', realismArt], ['autumnArt', autumnArt], ['japanStreets', japanStreets], ['flightArt', flightArt], ['flight', flight], ['kobeArt', kobeArt], ['fieldAudit', fieldAudit], ['fieldOps', fieldOps], ['scoutCombat', scoutCombat], ['reconControls', reconControls], ['prequelFoot', prequelFoot], ['openingPace', openingPace], ['patrolWorld', patrolWorld], ['japaneseSigns', japaneseSigns], ['harborArt', harborArt], ['campaignFoot', campaignFoot], ['campaign4', () => campaignMech(4)], ['campaign5', () => campaignMech(5)], ['campaign6', () => campaignMech(6)], ['campaign7', () => campaignMech(7)], ['campaign6Artillery', async()=>{localStorage.setItem('lastline.choice',JSON.stringify('artillery'));await campaignMech(6,'artillery');}], ['campaignArtillery', async () => { localStorage.setItem('lastline.choice', JSON.stringify('artillery')); await campaignMech(7, 'artillery'); }], ['campaignEdges', campaignEdges], ['mech', mech], ['fields', battlefields], ['enemyMotion', enemyMotion], ['zero', zero], ['tactics', tactics], ['prequelMechCampaign', prequelMechCampaign], ['campaignMain', campaignMain], ['enemyPressure', enemyPressure], ['enemyHandling', enemyHandling], ['infantry', infantry], ['art', art], ['hero', hero], ['city', city], ['mountains', mountains], ['weapons', weapons], ['save', save]]) document.querySelector('#' + id).onclick = () => fn().catch(e => { state.textContent = '失敗'; report.textContent += '\n' + e.stack; });
 
 async function harborArt() {
   await load('/game/mech/lastline/index.html', '?mute&god&ch=1&all&fps=0');
@@ -1329,4 +1337,50 @@ async function autumnArt() {
   stats.lastline={trees:win.__map.autumn.count,triangles:win.__map.triangles,farTriangles,memory:{...renderer.info.memory},newStaticMeshes:win.__map.autumn.meshes.length};checks.push(...result);
   assert(errors.length===0,'三款秋季神戶景色沒有執行或渲染錯誤');
   report.textContent=JSON.stringify({checks,stats,errors},null,2);state.textContent='三款秋季場景通過';
+}
+
+async function realismArt() {
+  const checks=[],stats={};
+  const audit=(key,W)=>{
+    const sc=W.sun.shadow.camera,u=W.skyDome.material.uniforms;
+    assert(u.sunDir.value.distanceTo(W.lightDir)<.00001,'天空太陽與真實投影日照方向一致');
+    const photograph=W.lightDir.clone().applyMatrix3(u.skyRotation.value);
+    assert(photograph.distanceTo(W.sunDir)<.00001,'天空照片的亮部旋轉至投影日照方向');
+    assert(W.scene.environment===W.envMap&&W.cityEnvTarget.texture===W.envMap,'玻璃反射由目前可見天空一次烘焙');
+    assert(Math.abs(W.sun.shadow.bias)*(sc.far-sc.near)<.05&&W.sun.shadow.normalBias<=.035,'陰影深度與法線偏移保持五公分內');
+    stats[key]={shadow:{size:W.sun.shadow.mapSize.x,extent:sc.right,biasMeters:Math.abs(W.sun.shadow.bias)*(sc.far-sc.near),normalBias:W.sun.shadow.normalBias},memory:{...renderer.info.memory},lights:W.scene.children.filter(o=>o.isLight).length};
+    assert(errors.length===0,'沒有執行或材質編譯錯誤');checks.push(...result);
+  };
+  await load('/game/mech/index.html','?mute&free&quality=1&fps=0');renderer=win.__renderer;post=win.__post;
+  const W=win.__world;
+  assert(!post.gtao.enabled&&W.sun.shadow.mapSize.x===2048,'中畫質保留 2048 陰影，不新增整場景 AO 通道');
+  assert(post.bloom.strength<=.35&&post.bloom.threshold>=1.8,'光暈收斂，日照亮部保留建築材質');
+  for(const [name,view]of [
+    ['realism-mech-avenue',[-120,5,-90,0,.045]],
+    ['realism-mech-waterfront',[-260,10,800,Math.PI/2,.02]],
+    ['realism-mech-close',[-120,3,-145,Math.PI/2,.06]],
+  ]){win.__cam.set(...view);W.followShadow(new win.__T.Vector3(...view.slice(0,3)));W.sun.shadow.needsUpdate=true;win.__step(3);await save(name,true);}
+  const [x0,x1,z]=W.japanSites.arcade;
+  win.__cam.set(x0-9,2.8,z,-Math.PI/2,.03);W.followShadow(new win.__T.Vector3(x0-9,2.8,z));W.sun.shadow.needsUpdate=true;win.__step(3);await save('realism-mech-arcade',true);
+  const office=W.blds.find(b=>b.H>70&&b.cx>0);
+  if(office){win.__cam.set(office.cx,4,office.z1+8,0,.25);W.followShadow(new win.__T.Vector3(office.cx,4,office.z1+8));W.sun.shadow.needsUpdate=true;win.__step(3);await save('realism-mech-office',true);}
+  audit('main',W);
+  await load('/game/mech/zero/index.html','?mute&god&ch=3&all&fps=0');renderer=win.__renderer;post={render:()=>win.__step(1)};win.document.querySelector('[data-q="1"]').click();win.__step(60);
+  assert(win.__map.b.mats.landmarkPaint.normalMap===win.__map.b.mats.concrete.normalMap&&win.__map.b.mats.landmarkPaint.normalScale.x<=.12,'店屋外牆使用細微建材凹凸，沒有防滑金屬紋');
+  for(const [name,p,yaw,pitch]of [
+    ['realism-zero-street',[-43,0,-40.8],Math.PI/2,.11],
+    ['realism-zero-motomachi',[-56,0,-1],Math.PI/2,.11],
+    ['realism-zero-shrine',[-7.6,0,17],0,.08],
+  ]){win.__G.player.reset(new win.__T.Vector3(...p),yaw);win.__G.player.pitch=pitch;win.__step(3);await save(name,true);}
+  audit('prequel',win.__world);
+  await load('/game/mech/lastline/index.html','?mute&god&ch=1&all&fps=0');renderer=win.__renderer;post={render:()=>win.__step(1)};win.document.querySelector('[data-q="1"]').click();win.__step(60);
+  assert(win.__map.b.mats.landmarkPaint.normalMap===win.__map.b.mats.concrete.normalMap&&win.__map.b.mats.landmarkPaint.normalScale.x<=.12,'港區店屋使用細微牆面凹凸，共用既有貼圖');
+  for(const [name,p,yaw,pitch]of [
+    ['realism-lastline-street',[-218,0,-240],Math.PI/2,.035],
+    ['realism-lastline-promenade',[548,0,323],Math.atan2(92,77),.075],
+    ['realism-lastline-coast',[625,0,475],Math.atan2(-180,-75),.07],
+  ]){win.__G.player.reset(new win.__T.Vector3(...p),yaw);win.__G.player.pitch=pitch;win.__step(3);await save(name,true);}
+  assert(win.__map.triangles<120000&&win.__map.meshes.length<=12,'港區建築細節維持十二萬三角形與十二個材質桶內');
+  stats.harborTriangles=win.__map.triangles;audit('lastline',win.__world);
+  report.textContent=JSON.stringify({checks,stats,errors},null,2);state.textContent='三款建築光影通過';
 }

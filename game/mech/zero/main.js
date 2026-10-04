@@ -89,15 +89,15 @@ const world = new World(renderer, scene, A, { terrainSegments: 72, city: !campai
   }
   // 影子：人的尺度，範圍縮小
   const sc = world.sun.shadow.camera;
-  sc.left = -48; sc.right = 48; sc.top = 48; sc.bottom = -48; sc.updateProjectionMatrix();
-  world.sun.shadow.bias = -0.00025; world.sun.shadow.normalBias = 0.035;
+  sc.left = -48; sc.right = 48; sc.top = 48; sc.bottom = -48; sc.near = 900; sc.far = 1600; sc.updateProjectionMatrix();
+  world.sun.shadow.bias = -0.00003; world.sun.shadow.normalBias = 0.02;
 }
 // 黃昏的戰場：遠處被煙塵蓋成暖灰色（霧濃一點、偏褐）；太陽偏暖、陰影保留天空的冷色；天空地平線一層霾（全部只改參數，不多畫東西）
-scene.fog.color.setRGB(0.38, 0.325, 0.28); scene.fog.density = 0.0014;
-world.sun.color.setRGB(1.0, 0.81, 0.62); world.sun.intensity = 4.2;
-scene.environmentIntensity = 0.42;
+scene.fog.color.setRGB(0.38, 0.36, 0.325); scene.fog.density = 0.00105;
+world.sun.color.setRGB(1.0, 0.9, 0.76); world.sun.intensity = 3.1;
+scene.environmentIntensity = 0.72;
 scene.traverse((o) => {
-  if (o.isHemisphereLight) { o.color.setRGB(0.3, 0.4, 0.58); o.groundColor.setRGB(0.09, 0.07, 0.05); o.intensity = 0.3; }
+  if (o.isHemisphereLight) { o.color.setRGB(0.46, 0.52, 0.62); o.groundColor.setRGB(0.25, 0.23, 0.20); o.intensity = 0.55; }
   const u = o.material && o.material.uniforms;
   if (!campaign && u && u.fogCol && u.sunFog && !o.material.userData.haze) {
     o.material.userData.haze = true; u.fogCol.value.copy(scene.fog.color); u.gain.value *= 0.9;
@@ -112,6 +112,7 @@ scene.traverse((o) => {
 const solid = new Solid();
 const placer = new Placer(MODELS, solid);
 const map = buildMap(scene, SURF, solid, placer, A, world);
+world.refreshEnvironment();
 const fieldItems = {};
 for (const o of S.OUTPOSTS || []) {
   const [x, z] = o.supply, y = solid.floorAt(x, z, 1);
@@ -134,7 +135,7 @@ vScene.environment = world.envMap;
 const post = new Post(renderer, scene, camera, vScene, vCam);
 post.gtao.updateGtaoMaterial({ radius: 0.9, distanceExponent: 1.5, thickness: 0.8, scale: 1.1, distanceFallOff: 1 });
 post.gtao.updatePdMaterial({ radius: 4, rings: 2, samples: 12 });
-post.u.vignette.value = 0.44; post.u.grain.value = 0.02;
+post.u.vignette.value = 0.3; post.u.grain.value = 0.012;
 
 const fx = new FXL(scene);
 fx.setFog(scene.fog.color, scene.fog.density);

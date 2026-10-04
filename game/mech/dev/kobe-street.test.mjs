@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
-import { recessedFacade, kobeStreetDetails } from '../kobe-street.mjs';
+import { recessedFacade, kobeStreetDetails, storefrontOpenings } from '../kobe-street.mjs';
 import { buildAutumnTrees, forestCanopy } from '../kobe-autumn.js';
 
 test('近街四面窗洞的玻璃確實後退，貼圖開間和樓層保持一致',()=>{
@@ -21,9 +21,30 @@ test('近街四面窗洞的玻璃確實後退，貼圖開間和樓層保持一�
   const ray=new THREE.Raycaster(new THREE.Vector3(1.7,4.6,20),new THREE.Vector3(0,0,-1));
   const hit=ray.intersectObject(mesh)[0];assert(hit);assert(Math.abs(hit.point.z-(10.2-.24))<1e-5,'窗洞前仍殘留平面牆');
   assert(details.some(p=>p.slice(0,4).some(v=>v[2]<10.2)&&p.slice(0,4).some(v=>v[2]===10.2)),'缺少窗洞側面');
-  const far=[];recessedFacade({wall:(...a)=>far.push(a),detail:()=>assert.fail('遠樓新增細節')},
-    {x0:0,x1:17,z0:0,z1:10.2,H:64,style:3,tint:[1,1,1],phase:0,exposed:[true,true,true,true]},F);
+  const far=[];recessedFacade({wall:(...a)=>far.push(a),detail:()=>assert.fail('隱藏窄巷面新增細節')},
+    {x0:0,x1:17,z0:0,z1:10.2,H:64,style:3,tint:[1,1,1],phase:0,exposed:[false,false,false,false]},F);
   assert.equal(far.length,4);
+});
+
+test('街層窗洞與店面共用開間契約，拱角封閉而入口通透，辦公樓保留單一實體入口',()=>{
+  for(const style of [0,2,3,4]) {
+    const walls=[],details=[],F={w:20.4,h:20.4,cols:6,rows:6},H=style===0?64:17;
+    recessedFacade({wall:(...a)=>walls.push(a),detail:(...a)=>details.push(a)},
+      {x0:0,x1:17,z0:0,z1:10.2,H,style,tint:[1,1,1],exposed:[true,false,false,false]},F);
+    const opening=storefrontOpenings(17,style)[0],positions=[];
+    for(const [a,b,c,d]of walls)for(const i of [0,1,2,0,2,3])positions.push(...[a,b,c,d][i]);
+    const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));g.computeVertexNormals();
+    const mesh=new THREE.Mesh(g,new THREE.MeshBasicMaterial({side:THREE.DoubleSide}));mesh.updateMatrixWorld();
+    const hitAt=(x,y)=>new THREE.Raycaster(new THREE.Vector3(x,y,20),new THREE.Vector3(0,0,-1)).intersectObject(mesh)[0];
+    const entry=hitAt(opening.center+.4,1.2);assert(!entry||entry.point.z<1,'店面前仍有完整一樓牆面');
+    assert(details.some(face=>face.slice(0,4).some(p=>Math.abs(p[2]-(10.2-.32))<1e-6)),'街層缺少凹進洞口的陰影內緣');
+    if(style===2) {
+      assert(hitAt(opening.center+opening.radius*.9,2.85)?.point.z>10,'拱頂外側留下矩形缺口');
+      const inside=hitAt(opening.center,2.95);assert(!inside||inside.point.z<1,'弧頂中央仍被牆面遮住');
+    }
+    if(style===0)assert.equal(storefrontOpenings(17,style).length,1);
+    assert(walls.length*2+details.length*2<700,'單一近街立面不建立過量窗洞幾何');
+  }
 });
 
 test('旋轉街段的路緣、格柵和人孔蓋朝外，三街段保持小型幾何預算',()=>{

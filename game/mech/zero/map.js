@@ -7,7 +7,7 @@ import * as THREE from 'three';
 import { Builder, grimeShader } from './kit.js';
 import * as PR from './props.js';
 import { facade, FLOOR } from './models.js';
-import { shopMaterial, shopUV, civicMaterial, japaneseWall, kobeRoadMaterial } from '../urban.js';
+import { shopMaterial, shopUV, civicMaterial, japaneseWall, kobeRoadMaterial, streetGlassMaterial } from '../urban.js';
 import { roofline } from '../roofline.js';
 import { streetfront } from '../streetfront.js';
 import { japaneseBuilder } from '../japan.js';
@@ -18,17 +18,7 @@ const H1 = 3.4;   // 一層樓高
 
 export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
   // 額外的純色材質：玻璃、窗洞深處、燈、警示漆
-  mats.glass = new THREE.MeshStandardMaterial({ color: 0x334650, roughness: 0.18, metalness: 0.05, envMapIntensity: 1.35, vertexColors: true });
-  mats.glass.onBeforeCompile=sh=>{
-    sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nvarying vec3 vWindowWorld;').replace('#include <begin_vertex>','#include <begin_vertex>\nvWindowWorld=(modelMatrix*vec4(transformed,1.0)).xyz;');
-    sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nvarying vec3 vWindowWorld;').replace('#include <map_fragment>',`#include <map_fragment>
-      float pane=fract(sin(dot(floor(vWindowWorld.xz/2.2)+floor(vWindowWorld.y/3.4),vec2(127.1,311.7)))*43758.5453);
-      float curtain=step(.62,pane)*(1.0-smoothstep(.25,.8,fract(vWindowWorld.y/3.4)));
-      diffuseColor.rgb*=.68+.32*pane;
-      diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.065,.06,.05)*(.8+.2*sin((vWindowWorld.x+vWindowWorld.z)*36.0)),curtain*.4);`)
-      .replace('#include <roughnessmap_fragment>','#include <roughnessmap_fragment>\nroughnessFactor+=pane*.12;');
-  };
-  mats.glass.customProgramCacheKey=()=> 'street-glazing-v1';
+  mats.glass = streetGlassMaterial();
   mats.void = new THREE.MeshStandardMaterial({ color: 0x0b0b0c, roughness: 1, vertexColors: true });
   mats.lamp = new THREE.MeshBasicMaterial({ color: new THREE.Color(2.6, 2.4, 2.0), vertexColors: true });
   mats.warm = new THREE.MeshBasicMaterial({ color: new THREE.Color(2.2, 1.2, 0.5), vertexColors: true });
@@ -43,7 +33,7 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
   mats.jpconcrete = japaneseWall(mats.concrete);
   const streetSegments=[[-20,-41,0,40,10],[-80,-44,Math.PI/2,20,12],[-18,-1,0,26,9]];
   if(surfaces?.asphD)mats.floor=kobeRoadMaterial(mats.floor,surfaces,streetSegments);
-  mats.landmarkPaint = new THREE.MeshStandardMaterial({ color: 0xffffff, normalMap: mats.metal.normalMap, roughness: .68, metalness: .04, vertexColors: true });
+  mats.landmarkPaint = new THREE.MeshStandardMaterial({ color: 0xffffff, normalMap: mats.concrete.normalMap, normalScale: new THREE.Vector2(.12, .12), roughness: .78, metalness: 0, vertexColors: true });
   mats.landmarkPaint.userData.tile = 2; mats.landmarkPaint.userData.grime = .35;
   mats.landmarkPaint.onBeforeCompile = sh => grimeShader(sh, mats.landmarkPaint);
   mats.red = new THREE.MeshStandardMaterial({ color: 0x8a1f1a, roughness: 0.45, metalness: 0.4, vertexColors: true });

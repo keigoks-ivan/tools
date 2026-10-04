@@ -7,6 +7,28 @@ export const PORT_LABELS = ['神戸港', '避難経路', '税関倉庫・貨物�
 export const CIVIC_LABELS = ['止まれ', '三宮駅', '元町商店街', '稲荷神社', '神戸港', '避難場所', '30', '横断歩道'];
 export const JAPANESE_FONT = '"Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif';
 
+// 店窗與港務窗共用天空反射；頂點色代表玻璃／室內，不再乘第二層深藍底色。
+export function streetGlassMaterial() {
+  const material=new THREE.MeshStandardMaterial({color:0xffffff,roughness:.24,metalness:0,envMapIntensity:1.15,vertexColors:true});
+  material.onBeforeCompile=sh=>{
+    sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nvarying vec3 vWindowWorld,vWindowNormal;')
+      .replace('#include <begin_vertex>','#include <begin_vertex>\nvWindowWorld=(modelMatrix*vec4(transformed,1.0)).xyz;vWindowNormal=mat3(modelMatrix)*objectNormal;');
+    sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nvarying vec3 vWindowWorld,vWindowNormal;')
+      .replace('#include <map_fragment>',`#include <map_fragment>
+        float along=abs(vWindowNormal.x)>.5?vWindowWorld.z:vWindowWorld.x;
+        vec2 paneP=vec2(along/2.7,vWindowWorld.y/3.2),cell=floor(paneP),local=fract(paneP);
+        float pane=fract(sin(dot(cell,vec2(127.1,311.7)))*43758.5453);
+        float ceiling=smoothstep(.7,.85,local.y)*(1.0-smoothstep(.94,.99,local.y));
+        float curtain=step(.65,pane)*(1.0-smoothstep(.45,.72,local.x));
+        vec3 interior=clamp(diffuseColor.rgb*.24+vec3(.025,.035,.037),vec3(.035),vec3(.16));
+        interior*=.74+pane*.25;interior+=vec3(.008,.007,.005)*ceiling;
+        vec3 fabric=vec3(.12,.115,.098)*(.92+.08*cos(along*35.0));
+        diffuseColor.rgb=mix(interior,fabric,curtain*.6);`)
+      .replace('#include <roughnessmap_fragment>','#include <roughnessmap_fragment>\nroughnessFactor+=pane*.1;');
+  };
+  material.customProgramCacheKey=()=> 'kobe-street-glass-v2';return material;
+}
+
 // 步兵街道共用既有柏油掃描；範圍限定在室外街段，室內地坪沿用原材質。
 export function kobeRoadMaterial(source, A, segments) {
   const material=source.clone(),compile=source.onBeforeCompile;
@@ -48,6 +70,7 @@ export function kobeRoadMaterial(source, A, segments) {
 export function japaneseWall(source) {
   const material=source.clone(),compile=source.onBeforeCompile;
   material.color.set(0xffffff);material.name='japanese-ceramic';
+  material.normalScale.set(.22,.22);
   material.onBeforeCompile=sh=>{
     compile(sh);
     sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nvarying vec3 vJpWall,vJpNormal;')

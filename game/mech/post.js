@@ -132,7 +132,7 @@ export class Post {
     this.cockpit = new RenderPass(cockpitScene, cockpitCam);
     this.cockpit.clear = false;
     this.cockpit.clearDepth = true;
-    this.bloom = new UnrealBloomPass(new THREE.Vector2(size.x / 2, size.y / 2), 0.55, 0.55, 1.4);
+    this.bloom = new UnrealBloomPass(new THREE.Vector2(size.x / 2, size.y / 2), 0.32, 0.4, 1.8);
     // 保險：畫面上只要有一顆壞掉的像素（NaN），光暈會把它糊成一大塊黑；在光暈入口把壞值換成 0
     const hp = this.bloom.materialHighPassFilter, hpA = 'vec4 texel = texture2D( tDiffuse, vUv );';
     if (hp.fragmentShader.includes(hpA)) hp.fragmentShader = hp.fragmentShader.replace(hpA, hpA + ' if ( any( isnan( texel ) ) || !( dot( abs( texel ), vec4( 1.0 ) ) < 1e20 ) ) texel = vec4( 0.0 );');

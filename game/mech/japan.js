@@ -34,97 +34,138 @@ export function japaneseScenery(out, { tower = null, shrine = null, streets = []
     const P=(x,y,d)=>[x,ground+y,z+side*d];
     const B=(lo,hi,y0,y1,d0,d1,col)=>box(lo,hi,ground+y0,ground+y1,Math.min(z+side*d0,z+side*d1),Math.max(z+side*d0,z+side*d1),col);
     const pane=(lo,hi,y0,y1,d,col)=>{const pts=[P(lo,y0,d),P(hi,y0,d),P(hi,y1,d),P(lo,y1,d)];if(side<0)pts.reverse();face(...pts,col);};
+    // 牆上細框只保留外露三面；不畫嵌在牆內的背面與封頭。下緣與內側預留接觸陰影。
+    const tint=(col,k)=>col.map((v,j)=>j<3?v*k:v);
+    const trim=(a,b,y0,y1,d0,d1,col,vertical=false)=>{
+      pane(a,b,y0,y1,d1,col);
+      const faces=vertical?[[P(a,y0,d0),P(a,y0,d1),P(a,y1,d1),P(a,y1,d0)],
+        [P(b,y0,d1),P(b,y0,d0),P(b,y1,d0),P(b,y1,d1)]]:
+        [[P(a,y1,d1),P(b,y1,d1),P(b,y1,d0),P(a,y1,d0)],
+          [P(a,y0,d0),P(b,y0,d0),P(b,y0,d1),P(a,y0,d1)]];
+      for(let j=0;j<faces.length;j++){const pts=faces[j];if(side<0)pts.reverse();face(...pts,tint(col,j?.72:.9));}
+    };
     for(let i=0;i<count;i++) {
       const lo=x0+i*span+.04,hi=x0+(i+1)*span-.04,c=(lo+hi)/2,h=[9.7,13.1,6.6,10.2,12.6,7.1][i%6];
-      const paint=[[.48,.45,.38,0,6],[.62,.64,.59,0,6],[.32,.25,.19,0,6],[.47,.51,.48,0,6],[.3,.38,.4,0,6],[.59,.52,.41,0,6]][i%6];
+      const paint=[[.61,.59,.54,0,6],[.65,.65,.61,0,6],[.52,.49,.43,0,6],[.59,.60,.56,0,6],[.48,.52,.51,0,6],[.64,.60,.52,0,6]][i%6];
+      const frame=[.16,.19,.19,0,2],base=[.33,.35,.33,0,6],ledge=[.56,.56,.52,0,6];
+      const ww=i%3===0?3.1:2.7,wl=c-ww/2,wr=c+ww/2,recess=facade?.025:-.32;
+      const rows=[];for(let y=3.6;y<h-1;y+=3.2)rows.push([y,y+1.8]);
       if(!facade) {
         // 量體正面切出窗洞與店面，玻璃後退；側牆與背面仍合併成少量面。
         const rear=[P(hi,0,-7),P(lo,0,-7),P(lo,h,-7),P(hi,h,-7)];if(side<0)rear.reverse();face(...rear,paint);
         for(const [edge,outside] of [[lo,-1],[hi,1]]) {
-          const pts=[P(edge,0,-7),P(edge,0,0),P(edge,h,0),P(edge,h,-7)];if(outside*side>0)pts.reverse();face(...pts,paint);
+          const sidePane=(a,b,y0,y1,inset,col)=>{
+            const pts=[P(edge-outside*inset,y0,-a),P(edge-outside*inset,y0,-b),P(edge-outside*inset,y1,-b),P(edge-outside*inset,y1,-a)];
+            if(outside*side<0)pts.reverse();face(...pts,col);
+          };
+          if((i===0&&outside<0)||(i===count-1&&outside>0)) {
+            let previous=0;
+            for(const [y,top] of rows) {
+              sidePane(0,7,previous,y,0,paint);sidePane(0,1.2,y,top,0,paint);sidePane(4,7,y,top,0,paint);
+              sidePane(1.2,4,y,top,.22,[.17,.24,.25,0,4]);
+              for(const yy of [y,top-.05])sidePane(1.2,4,yy,yy+.05,.14,frame);
+              for(const d of [1.2,2.58,3.95])sidePane(d,d+.05,y,top,.14,frame);
+              for(const [j,pts]of [[P(edge,y,-1.2),P(edge,y,-4),P(edge-outside*.22,y,-4),P(edge-outside*.22,y,-1.2)],
+                [P(edge-outside*.22,top,-1.2),P(edge-outside*.22,top,-4),P(edge,top,-4),P(edge,top,-1.2)],
+                [P(edge-outside*.22,y,-1.2),P(edge-outside*.22,top,-1.2),P(edge,top,-1.2),P(edge,y,-1.2)],
+                [P(edge,y,-4),P(edge,top,-4),P(edge-outside*.22,top,-4),P(edge-outside*.22,y,-4)]].entries()) {
+                if(outside*side<0)pts.reverse();face(...pts,tint(paint,j===1?.55:.76));
+              }
+              previous=top;
+            }
+            sidePane(0,7,previous,h,0,paint);
+          } else sidePane(0,7,0,h,0,paint);
         }
         const holes=[[lo+.35,hi-.35,.15,2.55]];
-        for(let y=3.6;y<h-1;y+=3.2)holes.push([c-1.25,c+1.25,y,y+1.8]);
+        for(const [y,top] of rows)holes.push([wl,wr,y,top]);
         let previous=0;
         for(const [a,b,y0,y1] of holes) {
           pane(lo,hi,previous,y0,0,paint);pane(lo,a,y0,y1,0,paint);pane(b,hi,y0,y1,0,paint);previous=y1;
-          for(const pts of [[P(a,y0,0),P(b,y0,0),P(b,y0,-.2),P(a,y0,-.2)],
-            [P(a,y1,-.2),P(b,y1,-.2),P(b,y1,0),P(a,y1,0)],
-            [P(a,y0,-.2),P(a,y1,-.2),P(a,y1,0),P(a,y0,0)],
-            [P(b,y0,0),P(b,y1,0),P(b,y1,-.2),P(b,y0,-.2)]]) {if(side<0)pts.reverse();face(...pts,ivory);}
+          for(const [j,pts] of [[P(a,y0,0),P(b,y0,0),P(b,y0,recess),P(a,y0,recess)],
+            [P(a,y1,recess),P(b,y1,recess),P(b,y1,0),P(a,y1,0)],
+            [P(a,y0,recess),P(a,y1,recess),P(a,y1,0),P(a,y0,0)],
+            [P(b,y0,0),P(b,y1,0),P(b,y1,recess),P(b,y0,recess)]].entries()) {if(side<0)pts.reverse();face(...pts,tint(paint,j===1?.55:.76));}
         }
         pane(lo,hi,previous,h,0,paint);
         solid(lo,hi,ground,ground+h,Math.min(z,z-side*7),Math.max(z,z-side*7));
-        B(lo-.1,hi+.1,h,h+.16,-7.1,.1,ivory);
-        if(i%3===1)B(c-.7,c+.7,h+.16,h+1.3,-5,-3.5,paint);
-        // 端部側牆也有窗與層間線，不讓入口兩邊留下整面空白盒子。
-        if(i===0||i===count-1) {
-          const ex=i===0?lo-.012:hi+.012;
-          for(let y=3.7;y<h-1;y+=3.2) {
-            const pts=[[ex,ground+y,z-side*1.2],[ex,ground+y,z-side*4],[ex,ground+y+1.6,z-side*4],[ex,ground+y+1.6,z-side*1.2]];
-            if((i===0)===(side>0))pts.reverse();face(...pts,glass);
-            box(ex-.04,ex+.04,ground+y-.09,ground+y-.02,Math.min(z-side*1.1,z-side*4.1),Math.max(z-side*1.1,z-side*4.1),ivory);
-            for(const d of [1.15,2.6,4.05])B(ex-.04,ex+.04,y-.04,y+1.64,-d-.025,-d+.025,ivory);
-          }
-        }
+        B(lo-.05,hi+.05,h,h+.16,-7.05,.05,ledge);
+        trim(lo-.08,hi+.08,h-.16,h+.42,0,.11,paint);
+        trim(lo-.11,hi+.11,h+.42,h+.49,0,.16,ledge);
+        B(lo,lo+.15,h+.16,h+.42,-7,0,paint);B(hi-.15,hi,h+.16,h+.42,-7,0,paint);
+        B(lo+.15,hi-.15,h+.16,h+.42,-7,-6.85,paint);
+        pane(lo,hi,h-.25,h-.16,.008,tint(paint,.64));
+        // 深色防水層落在女兒牆後，不把整棟屋頂畫成亮白色盒蓋。
+        const roof=[P(lo+.22,h+.165,-.22),P(hi-.22,h+.165,-.22),P(hi-.22,h+.165,-6.78),P(lo+.22,h+.165,-6.78)];
+        if(side<0)roof.reverse();face(...roof,[.29,.31,.29,0,6]);
+        if(i%3===1)B(c-.7,c+.7,h+.16,h+1.05,-5,-3.5,tint(paint,.88));
       }
-      // 褐色石材店屋與淺色塗裝混排；減少細小重複面，近街保留石板接縫。
+      // 石材下層、抹灰上層與細磁磚混排；接縫避開實際窗洞。
       if(!facade&&i%3===2) {
-        const mortar=[.22,.21,.18,0,6];
-        const rows=[];for(let y=3.6;y<h-1;y+=3.2)rows.push([y,y+1.8]);
-        for(let y=3.4;y<h;y+=.6) {
-          if(rows.some(([a,b])=>y>=a&&y<=b)){pane(lo,c-1.25,y,y+.006,.018,mortar);pane(c+1.25,hi,y,y+.006,.018,mortar);}
+        const mortar=tint(paint,.76);
+        for(let y=3.4;y<h;y+=.65) {
+          if(rows.some(([a,b])=>y>=a&&y<=b)){pane(lo,wl,y,y+.006,.012,mortar);pane(wr,hi,y,y+.006,.012,mortar);}
           else pane(lo,hi,y,y+.006,.018,mortar);
         }
-        for(let x=lo+.9;x<hi;x+=.9) {
-          if(x<c-1.25||x>c+1.25)pane(x,x+.006,3.4,h,.019,mortar);
+        for(let x=lo+1.3;x<hi;x+=1.3) {
+          if(x<wl||x>wr)pane(x,x+.006,3.4,h,.019,mortar);
           else {let y=3.4;for(const [a,b]of rows){pane(x,x+.006,y,a,.019,mortar);y=b;}pane(x,x+.006,y,h,.019,mortar);}
         }
       }
       // 平らなアルミ引き戸、二枚のガラス、シャッター付きの店舗を交互に配置。
       if(i%4===3) {
-        pane(lo+.3,hi-.3,.15,2.55,.025,[.42,.45,.43,0,2]);
-        for(let y=.3;y<2.55;y+=.14)B(lo+.3,hi-.3,y,y+.025,.03,.045,steel);
+        pane(lo+.35,hi-.35,.15,2.55,recess,[.34,.37,.36,0,2]);
+        for(let y=.3;y<2.55;y+=.14)pane(lo+.35,hi-.35,y,y+.012,recess+.006,[.25,.29,.28,0,2]);
       } else {
-        pane(lo+.35,hi-.35,.15,2.55,facade?.025:-.19,glass);
-        for(const x of [lo+.3,c-1.1,c-.52,c+.52,hi-.35])B(x,x+.045,.12,2.6,.035,.1,ivory);
-        B(lo+.3,hi-.3,.12,.18,.035,.1,ivory);B(lo+.3,hi-.3,2.55,2.61,.035,.1,ivory);
-        B(c+.36,c+.39,1,1.4,.1,.17,steel);
+        // 通高展示窗、獨立入口與上方氣窗，框架嵌進洞口；室內底部比窗頂暗。
+        pane(lo+.35,c-.55,.15,2.12,recess,[.16,.22,.22,0,4]);pane(c+.55,hi-.35,.15,2.12,recess,[.19,.23,.22,0,4]);
+        pane(c-.55,c+.55,.15,2.12,recess,[.11,.17,.18,0,4]);
+        pane(lo+.35,hi-.35,2.12,2.55,recess,[.24,.29,.28,0,4]);
+        for(const x of [lo+.35,c-.55,c+.50,hi-.40])trim(x,x+.05,.15,2.55,recess,recess+.075,frame,true);
+        for(const y of [.15,2.08,2.5])trim(lo+.35,hi-.35,y,y+.05,recess,recess+.075,frame);
+        pane(lo+.4,c-.60,.2,.47,recess+.008,[.12,.16,.15,0,6]);pane(c+.6,hi-.4,.2,.47,recess+.008,[.13,.17,.16,0,6]);
+        trim(c+.34,c+.37,1,1.4,recess+.075,recess+.16,[.45,.49,.47,0,2],true);
       }
-      B(lo,hi,0,.22,0,.09,steel);
-      B(lo+.1,hi-.1,2.58,2.66,0,.85,i%2?steel:[.19,.32,.29,0,6]);
+      trim(lo,hi,0,.15,0,.035,base);
+      pane(lo,lo+.35,.15,2.55,.003,base);pane(hi-.35,hi,.15,2.55,.003,base);
+      trim(lo+.1,hi-.1,2.58,2.66,0,.85,i%2?steel:[.22,.31,.28,0,6]);
       if(i%2===0) {
         const pts=[P(lo+.1,2.65,.04),P(hi-.1,2.65,.04),P(hi-.1,2.4,.9),P(lo+.1,2.4,.9)];
         if(side<0)pts.reverse();face(...pts,[.18,.3,.25,0,6]);
       }
-      for(let y=3.6;y<h-1;y+=3.2) {
-        pane(c-1.25,c+1.25,y,y+1.8,facade?.025:-.19,glass);
-        for(const x of [c-1.3,c,c+1.25])B(x,x+.05,y-.04,y+1.85,.03,.1,ivory);
-        B(c-1.3,c+1.3,y-.1,y-.03,0,.16,stone);
+      for(const [y,top] of rows) {
+        const k=(i+Math.round(y/3.2))%3;
+        pane(wl,wr,y,top,recess,k===0?[.19,.26,.27,0,4]:k===1?[.27,.30,.29,0,4]:[.15,.21,.23,0,4]);
+        for(const x of [wl,c-.025,wr-.05])trim(x,x+.05,y,top,recess,recess+.08,frame,true);
+        for(const yy of [y,top-.05])trim(wl,wr,yy,yy+.05,recess,recess+.08,frame);
+        trim(wl-.10,wr+.10,y-.11,y-.03,0,.16,ledge);
+        pane(wl-.1,wr+.1,top+.04,top+.09,.006,tint(paint,.68));
+        // 房間簾幕在玻璃內側的深處；每層保留不同開合，沒有外加燈光。
+        if(k!==2)pane(wl+.07,wl+.38,y+.07,top-.07,recess+.012,k?[.43,.41,.36,0,6]:[.32,.35,.33,0,6]);
         if(i%3===1) {
-          B(lo+.2,hi-.2,y-.18,y-.1,0,.75,ivory);
-          B(lo+.2,hi-.2,y+.1,y+.78,.66,.74,paint);
-          B(lo+.2,hi-.2,y+.78,y+.83,.65,.76,steel);
+          trim(lo+.3,hi-.3,y-.18,y-.1,0,.68,ledge);
+          trim(lo+.3,hi-.3,y+.1,y+.78,.60,.68,tint(paint,.83));
+          trim(lo+.3,hi-.3,y+.78,y+.83,.59,.70,frame);
         } else {
-          B(c-1.3,c+1.3,y+1.82,y+1.9,0,.35,steel);
-          if(i%2===0)pane(c-1.18,c-.75,y+.08,y+1.66,facade?.03:-.16,[.37,.35,.30,0,6]);
+          trim(wl-.09,wr+.09,top+.10,top+.17,0,.22,ledge);
         }
-        B(hi-1.1,hi-.35,y+.1,y+.65,.05,.43,ivory);
-        const fan=(t)=>P(hi-.73+Math.cos(t)*.2,y+.37+Math.sin(t)*.2,.445);
-        for(let k=0;k<8;k++) {const a=fan(k/8*Math.PI*2),b=fan((k+1)/8*Math.PI*2);if(side>0)face(P(hi-.73,y+.37,.445),a,b,b,steel);else face(P(hi-.73,y+.37,.445),b,a,a,steel);}
+        // 設備集中在服務側，避免每層每窗都掛同一個空調盒。
+        if(i%3===1&&y===3.6) {
+          B(hi-1.0,hi-.35,y+.1,y+.55,.05,.35,ledge);
+          for(let yy=y+.18;yy<y+.5;yy+=.07)pane(hi-.93,hi-.42,yy,yy+.02,.356,frame);
+        }
       }
-      B(lo+.12,hi-.12,3.38,3.48,.035,.19,ivory);
-      pane(lo+.15,hi-.15,2.68,3.38,.09,ivory);
+      trim(lo+.06,hi-.06,3.38,3.48,0,.19,ledge);
+      pane(lo+.15,hi-.15,2.68,3.38,.05,[.42,.44,.4,0,6]);
       const id=[0,1,2,3,7,6][i%6],w=Math.min(span-.4,3.3),pts=[P(c-w/2,2.68,.12),P(c+w/2,2.68,.12),P(c+w/2,3.38,.12),P(c-w/2,3.38,.12)];
       if(side<0)pts.reverse();out.shop?.(pts,id,side<0);
       if(i%4===3) {
         // 突出看板朝街道兩端，使用圖集中真正直排的「食堂」，不是把橫排文字拉長。
         const blade=[P(lo+.2,3.5,.85),P(lo+.2,3.5,.1),P(lo+.2,5.7,.1),P(lo+.2,5.7,.85)];
         out.shop?.(blade,4,false);out.shop?.(blade.slice().reverse(),4,true);
-        B(lo+.16,lo+.24,3.46,3.5,.08,.89,steel);B(lo+.16,lo+.24,5.7,5.74,.08,.89,steel);
+        trim(lo+.16,lo+.24,3.46,3.5,.08,.89,steel);trim(lo+.16,lo+.24,5.7,5.74,.08,.89,steel);
       }
       // 屋外配管與電表，貼牆放置，走道內沒有額外碰撞小物。
-      B(lo+.13,lo+.18,0,h-.3,.04,.09,steel);B(hi-.28,hi-.12,1.3,1.6,.04,.15,steel);
+      trim(lo+.13,lo+.18,.15,h-.3,.015,.065,frame,true);trim(hi-.28,hi-.12,1.3,1.6,.015,.10,frame);
     }
   }
 

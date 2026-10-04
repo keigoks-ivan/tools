@@ -69,3 +69,23 @@ test('兩側店招從街道觀看均為正向文字，旋轉的入口標牌也�
     }
   }
 });
+
+test('店面與轉角側窗有連續窗洞，嵌入式窗框不遮住玻璃，兩側朝街面的繞序正確', () => {
+  for(const side of [-1,1]) {
+    const mats=Object.fromEntries([...SURFACES,'glass','civic','sign','landmarkPaint'].map(k=>[k,new THREE.MeshStandardMaterial({vertexColors:true})]));
+    const b=new Builder(mats,new Solid()),scene=new THREE.Scene();
+    japaneseBuilder(b,{shops:[[0,6,0,side]]});const meshes=b.build(scene);
+    scene.updateMatrixWorld(true);
+    for(const [origin,direction,axis,depth]of [
+      [[1.2,1.2,side*2],[0,0,-side],'z',side*-.32],
+      [[2.15,4.5,side*2],[0,0,-side],'z',side*-.32],
+      [[-2,4.5,side*-2],[1,0,0],'x',.26],
+    ]) {
+      const hits=new THREE.Raycaster(new THREE.Vector3(...origin),new THREE.Vector3(...direction)).intersectObjects(meshes);
+      assert(hits.length&&hits[0].object.name==='lvl-glass','窗洞前方不能有覆蓋玻璃的牆面或粗窗框');
+      assert(Math.abs(hits[0].point[axis]-depth)<.001,'玻璃必須位於牆內而非貼在牆上');
+    }
+    const triangles=meshes.reduce((n,m)=>n+m.geometry.attributes.position.count/3,0);
+    assert(triangles<600&&meshes.length<=4,'轉角窗與細框沿用既有材質桶和有限靜態幾何');
+  }
+});

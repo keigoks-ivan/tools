@@ -49,107 +49,175 @@ function stains(ctx, w, h, r, count, color, maxA) {
 // ---------- 建築立面：一張圖 = 8 開間 × 8 層（每開間 4m、每層 3.6m） ----------
 export const FACADE_TILE = { w: 32, h: 28.8 };
 
+// 玻璃、室內與框料的遮罩共用同一窗洞；紅色為局部遮蔽，綠色為粗糙度。
+function facadeWindow(a, rough, normal, wx, wy, ww, wh, r, { historic = false, aluminum = false, mullion = true } = {}) {
+  const room = r(), sky = 98 + r() * 22, warm = room > .79;
+  a.fillStyle = historic ? '#73766c' : aluminum ? '#89928e' : '#414c4b';
+  a.fillRect(wx - 1.6, wy - 1.6, ww + 3.2, wh + 3.2);
+  rough.fillStyle = 'rgb(230,164,0)'; rough.fillRect(wx - 1.6, wy - 1.6, ww + 3.2, wh + 3.2);
+  const glass = a.createLinearGradient(0, wy, 0, wy + wh);
+  glass.addColorStop(0, `rgb(${sky},${sky + 15},${sky + 19})`);
+  glass.addColorStop(.42, warm ? '#7b827a' : '#768991');
+  glass.addColorStop(.66, warm ? '#57665f' : '#465b62');
+  glass.addColorStop(1, room < .18 ? '#2a383a' : '#35494e');
+  a.fillStyle = glass; a.fillRect(wx, wy, ww, wh);
+  a.save(); a.beginPath(); a.rect(wx, wy, ww, wh); a.clip();
+  // 玻璃後方可見頂板、側牆與退後的窗簾；反射只保留柔和天空與對街樓體的輪廓。
+  if (room > .28) {
+    a.fillStyle = 'rgba(211,210,186,.12)'; a.fillRect(wx, wy + wh * .1, ww, wh * .13);
+    a.fillStyle = 'rgba(22,30,29,.16)'; a.fillRect(wx + ww * .12, wy + wh * .24, ww * .73, wh * .63);
+    const side = a.createLinearGradient(wx, 0, wx + ww * .25, 0);
+    side.addColorStop(0, 'rgba(34,39,34,.23)'); side.addColorStop(1, 'rgba(34,39,34,0)');
+    a.fillStyle = side; a.fillRect(wx, wy + wh * .23, ww * .25, wh * .77);
+  }
+  const curtain = room > .58;
+  if (curtain) {
+    const side = r() < .5 ? 0 : .54, length = wh * (.48 + r() * .46);
+    a.fillStyle = warm ? 'rgba(186,178,155,.7)' : 'rgba(149,154,143,.61)';
+    a.fillRect(wx + ww * side + 1.5, wy + 1, ww * .44 - 2, length);
+    a.strokeStyle = 'rgba(40,44,37,.15)'; a.lineWidth = .6;
+    for (let u = wx + ww * side + 3; u < wx + ww * (side + .44) - 1; u += 2.8) {
+      a.beginPath(); a.moveTo(u, wy + 1); a.lineTo(u, wy + length); a.stroke();
+    }
+  }
+  const reflectedWall = a.createLinearGradient(wx, 0, wx + ww, 0);
+  reflectedWall.addColorStop(0, 'rgba(176,180,172,.08)');
+  reflectedWall.addColorStop(.46, 'rgba(176,180,172,.17)');
+  reflectedWall.addColorStop(.51, 'rgba(39,56,62,.08)');
+  reflectedWall.addColorStop(1, 'rgba(176,180,172,.02)');
+  a.fillStyle = reflectedWall; a.fillRect(wx, wy + wh * .48, ww, wh * .52);
+  a.fillStyle = 'rgba(203,213,211,.13)'; a.fillRect(wx, wy + wh * .32, ww, wh * .032);
+  // 窗框附近的接觸陰影固定在窗內，玻璃中央仍接收環境光。
+  const shade = a.createLinearGradient(0, wy, 0, wy + wh * .14);
+  shade.addColorStop(0, 'rgba(15,20,18,.38)'); shade.addColorStop(1, 'rgba(15,20,18,0)');
+  a.fillStyle = shade; a.fillRect(wx, wy, ww, wh * .14);
+  a.strokeStyle = 'rgba(21,29,26,.27)'; a.lineWidth = 1.2; a.strokeRect(wx + .6, wy + .6, ww - 1.2, wh - 1.2);
+  a.restore();
+  rough.fillStyle = `rgb(239,${45 + Math.floor(r() * 13)},0)`; rough.fillRect(wx, wy, ww, wh);
+  rough.fillStyle = 'rgb(190,54,0)'; rough.fillRect(wx, wy, ww, 1.2);
+  normal.fillStyle = 'rgb(128,128,255)'; normal.fillRect(wx, wy, ww, wh);
+  const frame = historic ? '#62685e' : aluminum ? '#adb5b1' : '#4f5c59';
+  const line = (x, y, w, h) => {
+    a.fillStyle = frame; a.fillRect(x, y, w, h);
+    a.fillStyle = 'rgba(213,218,207,.28)'; a.fillRect(x, y, w > h ? w : .35, w > h ? .35 : h);
+    rough.fillStyle = 'rgb(235,152,0)'; rough.fillRect(x, y, w, h);
+    normal.fillStyle = w > h ? 'rgb(128,138,254)' : 'rgb(138,128,254)'; normal.fillRect(x, y, w, h);
+  };
+  if (mullion) line(wx + ww / 2 - .6, wy, 1.2, wh);
+  if (historic) line(wx, wy + wh * .25 - .6, ww, 1.2);
+  a.fillStyle = 'rgba(204,215,208,.42)'; a.fillRect(wx - 1.1, wy - 1.1, ww + 2.2, .55);
+  normal.fillStyle = 'rgb(118,128,254)'; normal.fillRect(wx - 1.6, wy, 1.3, wh);
+  normal.fillStyle = 'rgb(138,128,254)'; normal.fillRect(wx + ww + .3, wy, 1.3, wh);
+  normal.fillStyle = 'rgb(128,138,254)'; normal.fillRect(wx - 1.6, wy - 1.6, ww + 3.2, 1.3);
+  normal.fillStyle = 'rgb(128,118,254)'; normal.fillRect(wx - 1.6, wy + wh + .3, ww + 3.2, 1.3);
+}
+
 // 512px 神戶立面：舊居留地石造商樓、混凝土住宅、磁磚公寓，共用六開間／六層 UV。
-// 三張貼圖同時生成，滑窗、凹槽與粗糙度遮罩不會沿用舊磚牆的錯位資料。
+// 窗洞位置維持 recessedFacade 的 3.4m 開間；每層石材、框料、窗內遮蔽一同生成。
 export function japaneseFacade(style, scan) {
   if(style<2)return officeFacade(style);
   const S = 512, cell = S / 6, r = rng(301 + style);
   const [c, a] = canvas(S, S), [rc, rough] = canvas(S, S), [nc, normal] = canvas(S, S);
   const historic = style === 2;
-  a.fillStyle = ['#c4bda9', '#c6cbc8', '#bba78d'][style - 2]; a.fillRect(0, 0, S, S);
+  a.fillStyle = ['#b4ae9f', '#b9beb9', '#aaa597'][style - 2]; a.fillRect(0, 0, S, S);
   if (scan) {
-    a.globalAlpha = historic ? .18 : .09;
+    a.globalAlpha = historic ? .1 : .045;
     for (let y = 0; y < S; y += 128) for (let x = 0; x < S; x += 128) a.drawImage(scan, 520, 8, 496, 496, x, y, 128, 128);
     a.globalAlpha = 1;
   }
-  rough.fillStyle = 'rgb(255,220,0)'; rough.fillRect(0, 0, S, S);
+  rough.fillStyle = style === 4 ? 'rgb(255,174,0)' : 'rgb(255,211,0)'; rough.fillRect(0, 0, S, S);
   normal.fillStyle = 'rgb(128,128,255)'; normal.fillRect(0, 0, S, S);
   if (historic || style === 4) {
     // 石材／磁磚接縫的陰影與法線一同繪製，不能沿用舊磚牆法線。
     const h = historic ? cell / 6 : 1.5, w = historic ? cell / 2 : 5.7;
-    for (let j = 0; j * h < S; j++) for (let x = -w; x < S; x += w) {
-      const u = x + (j % 2 ? w / 2 : 0), y = j * h;
-      a.fillStyle = `rgba(255,247,225,${r()*(historic?.09:.15)})`; a.fillRect(u+.25,y+.25,w-.5,h-.5);
-      a.strokeStyle = historic ? 'rgba(83,76,63,.22)' : 'rgba(89,80,69,.22)'; a.lineWidth = historic ? .6 : .35; a.strokeRect(u, y, w, h);
-      normal.fillStyle = 'rgb(128,137,254)'; normal.fillRect(u, y, w, historic?.65:.35);
-      normal.fillStyle = 'rgb(137,128,254)'; normal.fillRect(u, y, historic?.65:.35, h);
+    // 小口磁磚只畫 20×20 個，再以 Canvas pattern 鋪滿；不為 3 萬塊磁磚重複發出繪圖指令。
+    const patches = historic ? null : [canvas(114,30),canvas(114,30),canvas(114,30)];
+    const [stone, grit, relief] = patches ? patches.map(p=>p[1]) : [a,rough,normal];
+    const width = historic ? S : 114, height = historic ? S : 30;
+    if (patches) {
+      grit.fillStyle='rgb(255,174,0)';grit.fillRect(0,0,width,height);
+      relief.fillStyle='rgb(128,128,255)';relief.fillRect(0,0,width,height);
     }
+    for (let j = 0; j * h < height; j++) for (let x = -w; x < width; x += w) {
+      const u = x + (j % 2 ? w / 2 : 0), y = j * h;
+      const tone = r();
+      stone.fillStyle = `rgba(${tone < .5 ? '57,53,42' : '237,231,211'},${historic ? .025 + tone * .09 : .02 + tone * .08})`;
+      stone.fillRect(u + .25, y + .25, w - .5, h - .5);
+      stone.strokeStyle = historic ? 'rgba(67,64,52,.2)' : 'rgba(75,74,62,.32)';
+      stone.lineWidth = historic ? .7 : .33; stone.strokeRect(u, y, w, h);
+      stone.fillStyle = historic ? 'rgba(239,233,212,.21)' : 'rgba(239,235,218,.14)'; stone.fillRect(u + .45, y + .45, w - .9, historic ? .45 : .2);
+      grit.fillStyle = `rgb(255,${Math.round(historic ? 203 + tone * 23 : 158 + tone * 32)},0)`;
+      grit.fillRect(u + .3, y + .3, w - .6, h - .6);
+      relief.fillStyle = 'rgb(128,134,254)'; relief.fillRect(u, y, w, historic ? .65 : .33);
+      relief.fillStyle = 'rgb(134,128,254)'; relief.fillRect(u, y, historic ? .65 : .33, h);
+    }
+    if (patches) [a,rough,normal].forEach((ctx,i)=>{ctx.fillStyle=ctx.createPattern(patches[i][0],'repeat');ctx.fillRect(0,0,S,S);});
   }
   for (let j = 0; j < 6; j++) for (let i = 0; i < 6; i++) {
     const x = i * cell, y = j * cell, ww = cell * (historic ? .46 : .64), wh = cell * (historic ? .7 : .6);
     const wx = x + (cell - ww) / 2, wy = y + cell * (historic ? .12 : .18);
     if (historic) {
-      a.fillStyle = '#d4cbb8'; a.fillRect(wx - 5, wy - 4, ww + 10, wh + 10);
-      a.fillStyle = '#a59b89'; a.fillRect(wx - 5, wy + wh + 3, ww + 10, 3);
+      a.fillStyle = '#c7bfac'; a.fillRect(wx - 4.1, wy - 3.3, ww + 8.2, wh + 7.1);
+      a.strokeStyle = 'rgba(61,60,48,.19)'; a.lineWidth = .6; a.strokeRect(wx - 4.1, wy - 3.3, ww + 8.2, wh + 7.1);
+      a.fillStyle = 'rgba(240,232,211,.41)'; a.fillRect(wx - 3.5, wy - 2.8, ww + 7, .8);
+      a.fillStyle = '#989481'; a.fillRect(wx - 4.7, wy + wh + 3.4, ww + 9.4, 1.3);
     }
     if(style===3) {
-      a.strokeStyle='rgba(77,83,82,.17)';a.lineWidth=.55;a.strokeRect(x+.2,y+.2,cell-.4,cell-.4);
-      a.fillStyle=`rgba(240,244,238,${r()*.055})`;a.fillRect(x+1,y+1,cell-2,cell-2);
+      a.fillStyle = `rgba(${r() < .5 ? '32,43,36' : '241,242,230'},${.01 + r() * .055})`; a.fillRect(x + 1, y + 1, cell - 2, cell - 2);
+      a.strokeStyle = 'rgba(54,63,56,.24)'; a.lineWidth = .8; a.strokeRect(x + .4, y + .4, cell - .8, cell - .8);
+      a.strokeStyle = 'rgba(231,235,225,.32)'; a.lineWidth = .6; a.strokeRect(x + 1.2, y + 1.2, cell - 2.4, cell - 2.4);
+      normal.fillStyle = 'rgb(128,134,254)'; normal.fillRect(x, y, cell, .8);
+      normal.fillStyle = 'rgb(134,128,254)'; normal.fillRect(x, y, .8, cell);
     }
-    a.fillStyle = 'rgba(25,30,29,.32)'; a.fillRect(wx - 3, wy - 2, ww + 6, wh + 6);
-    a.fillStyle = '#555d5b'; a.fillRect(wx - 2, wy - 1, ww + 4, wh + 2);
-    const reflection = a.createLinearGradient(0, wy, 0, wy + wh);
-    const dark=r()<.24;
-    reflection.addColorStop(0, dark?'#1c2b32':'#51656d'); reflection.addColorStop(.40, dark?'#253238':'#607279'); reflection.addColorStop(1, '#19282e');
-    a.fillStyle = reflection; a.fillRect(wx, wy, ww, wh);
-    // 對街樓體的低對比反射與不同室內深度，避免整棟貼上相同的藍色窗格。
-    a.save();a.beginPath();a.rect(wx,wy,ww,wh);a.clip();
-    for(let k=0;k<3;k++) {
-      const u=wx+(k-.2)*ww/2.4,h=wh*(.16+r()*.3);
-      a.fillStyle='rgba(16,28,34,.18)';a.fillRect(u,wy+wh*.62-h,ww*.25,wh);
-      a.fillStyle='rgba(149,167,166,.14)';a.fillRect(u+1,wy+wh*.62-h,1,wh);
-    }
-    a.restore();
-    if (r() < .62) {
-      const length = wh * (.26 + r() * .6), offset = r() < .5 ? 0 : ww * .53;
-      a.fillStyle = ['#88877c', '#666d68', '#99958a'][i % 3]; a.fillRect(wx + offset + 2, wy + 1, ww * .44, length);
-      a.strokeStyle = 'rgba(35,35,31,.3)'; a.lineWidth = 1;
-      for (let u = wx + offset + 3; u < wx + offset + ww * .44; u += 3) { a.beginPath(); a.moveTo(u, wy + 1); a.lineTo(u, wy + length); a.stroke(); }
-    }
-    a.fillStyle = historic ? '#373d3b' : '#b0b5ae'; a.fillRect(wx + ww / 2 - .7, wy, 1.4, wh);
+    facadeWindow(a, rough, normal, wx, wy, ww, wh, r, { historic, aluminum: style === 4 });
+    a.fillStyle = historic ? '#c9c1af' : '#b2b6ac'; a.fillRect(wx - 2.2, wy + wh + 1.7, ww + 4.4, 1.1);
+    a.fillStyle = 'rgba(32,39,32,.21)'; a.fillRect(wx - 2, wy + wh + 2.8, ww + 4, .8);
     if (historic) {
-      for (const t of [.33,.66]) a.fillRect(wx, wy + wh * t - .7, ww, 1.4);
-      a.fillStyle = '#d4cbb8'; a.fillRect(wx + ww / 2 - 3, wy - 5, 6, 4);
+      a.fillStyle = '#c7bfac'; a.fillRect(wx + ww / 2 - 2.6, wy - 4, 5.2, 3);
+      a.fillStyle = 'rgba(69,66,53,.17)'; a.fillRect(x, y + cell - 2.3, cell, .8);
+      a.fillStyle = 'rgba(226,218,196,.21)'; a.fillRect(x, y + cell - 1.5, cell, .65);
     }
-    a.fillStyle = '#cfcdc0'; a.fillRect(wx - 2, wy + wh + 1, ww + 4, 2);
-    rough.fillStyle = 'rgb(214,49,0)'; rough.fillRect(wx, wy, ww, wh);
-    normal.fillStyle = 'rgb(128,128,255)'; normal.fillRect(wx, wy, ww, wh);
-    normal.fillStyle = 'rgb(92,128,248)'; normal.fillRect(wx - 2, wy, 2, wh);
-    normal.fillStyle = 'rgb(164,128,248)'; normal.fillRect(wx + ww, wy, 2, wh);
-    normal.fillStyle = 'rgb(128,164,248)'; normal.fillRect(wx - 2, wy - 1, ww + 4, 2);
-    normal.fillStyle = 'rgb(128,92,248)'; normal.fillRect(wx - 2, wy + wh, ww + 4, 2);
-    a.fillStyle = 'rgba(37,39,37,.25)'; a.fillRect(x, y + cell - 4, cell, 1);
   }
-  stains(a, S, S, r, 60, '34,37,32', historic ? .13 : .045); grain(a, S, S, historic ? 6 : 3, r);
+  // 雨水痕只從窗台下緣延伸，避免大片隨機污漬蓋過石材與玻璃。
+  for (let j = 0; j < 6; j++) for (let i = 0; i < 6; i++) if (r() < .46) {
+    const y = j * cell + cell * (historic ? .85 : .80), x = (i + .22 + r() * .55) * cell;
+    const wet = a.createLinearGradient(0, y, 0, y + cell * .16);
+    wet.addColorStop(0, 'rgba(44,47,35,.07)'); wet.addColorStop(1, 'rgba(44,47,35,0)');
+    a.fillStyle = wet; a.fillRect(x, y, .7 + r() * 1.5, cell * .16);
+  }
+  grain(a, S, S, historic ? 4 : 2, r);
   return [tex(c), tex(nc, false), tex(rc, false)].map((t, i) => { t.name = 'city-japanese-' + style + '-' + i; return t; });
 }
 
 function officeFacade(style) {
   const S=512,cols=style===0?16:12,rows=style===0?10:8,cw=S/cols,ch=S/rows,r=rng(823+style);
   const [c,a]=canvas(S,S),[rc,rough]=canvas(S,S),[nc,normal]=canvas(S,S);
-  a.fillStyle=style===0?'#48565a':'#b8bfbc';a.fillRect(0,0,S,S);
-  rough.fillStyle='rgb(255,211,0)';rough.fillRect(0,0,S,S);
+  a.fillStyle=style===0?'#626e70':'#aaafa7';a.fillRect(0,0,S,S);
+  rough.fillStyle=style===0?'rgb(255,148,0)':'rgb(255,206,0)';rough.fillRect(0,0,S,S);
   normal.fillStyle='rgb(128,128,255)';normal.fillRect(0,0,S,S);
   for(let j=0;j<rows;j++)for(let i=0;i<cols;i++) {
     const x=i*cw,y=j*ch,wx=x+cw*(style===0?.045:.12),wy=y+ch*(style===0?.035:.14),ww=cw*(style===0?.91:.76),wh=ch*(style===0?.73:.65);
-    const reflection=a.createLinearGradient(wx,wy,wx+ww*.4,wy+wh),room=r();
-    reflection.addColorStop(0,room<.18?'#293c46':'#748c96');reflection.addColorStop(.38,room<.18?'#3a515b':'#5d7885');reflection.addColorStop(1,'#2c414b');
-    a.fillStyle=reflection;a.fillRect(wx,wy,ww,wh);
-    if(room>.62) {
-      a.fillStyle=`rgba(182,181,162,${.23+r()*.22})`;a.fillRect(wx+.5,wy+.4,ww-1,wh*(.25+r()*.5));
-      a.fillStyle='rgba(51,59,56,.17)';for(let u=wx+1;u<wx+ww;u+=2.2)a.fillRect(u,wy,1,wh*.55);
-    }
-    a.fillStyle='rgba(203,215,213,.16)';a.fillRect(wx,wy,ww,.8);a.fillRect(wx,wy,.65,wh);
-    a.fillStyle='rgba(27,39,44,.35)';a.fillRect(wx,wy+wh,ww,.75);
-    rough.fillStyle='rgb(239,44,0)';rough.fillRect(wx,wy,ww,wh);
-    normal.fillStyle='rgb(110,128,254)';normal.fillRect(wx-.5,wy,.6,wh);
-    normal.fillStyle='rgb(144,128,254)';normal.fillRect(wx+ww,wy,.6,wh);
     if(style===0) {
-      const tone=100+Math.floor(r()*13);a.fillStyle=`rgb(${tone-8},${tone},${tone+3})`;a.fillRect(x+.5,wy+wh+1,cw-1,ch-wh-2);
-      a.fillStyle='#a3afae';a.fillRect(x,y,.65,ch);a.fillRect(x,y+ch-1,cw,.8);
+      // 幕牆樓板前的背漆玻璃比視窗粗糙；細金屬立梃保持 36m/16 開間尺度。
+      const tone=86+Math.floor(r()*12);a.fillStyle=`rgb(${tone-3},${tone+8},${tone+10})`;a.fillRect(x+.5,y+ch*.80,cw-1,ch*.20);
+      a.fillStyle='rgba(29,40,41,.3)';a.fillRect(x,y+ch*.79,cw,.7);
+      a.fillStyle='#9aa4a0';a.fillRect(x,y,.65,ch);a.fillRect(x,y+ch-.8,cw,.55);
+      rough.fillStyle='rgb(248,128,0)';rough.fillRect(x+.6,y+ch*.80,cw-1.2,ch*.18);
+      normal.fillStyle='rgb(135,128,254)';normal.fillRect(x,y,.6,ch);
+    } else {
+      a.fillStyle=`rgba(${r()<.5?'37,43,37':'234,236,220'},${.02+r()*.055})`;a.fillRect(x+.7,y+.7,cw-1.4,ch-1.4);
+      a.strokeStyle='rgba(48,58,52,.22)';a.lineWidth=.65;a.strokeRect(x+.3,y+.3,cw-.6,ch-.6);
+      a.strokeStyle='rgba(219,224,208,.25)';a.lineWidth=.5;a.strokeRect(x+1.1,y+1.1,cw-2.2,ch-2.2);
+      normal.fillStyle='rgb(128,135,254)';normal.fillRect(x,y,cw,.7);
+      normal.fillStyle='rgb(135,128,254)';normal.fillRect(x,y,.7,ch);
+    }
+    facadeWindow(a,rough,normal,wx,wy,ww,wh,r,{aluminum:style===0,mullion:style!==0});
+    if(style===1) {
+      a.fillStyle='#b9bcb0';a.fillRect(wx-1.6,wy+wh+1.2,ww+3.2,1);
+      a.fillStyle='rgba(36,44,38,.2)';a.fillRect(wx-1,wy+wh+2.2,ww+2,.7);
     }
   }
-  grain(a,S,S,3,r);stains(a,S,S,r,32,'38,43,40',.035);
+  grain(a,S,S,2,r);
   return [tex(c),tex(nc,false),tex(rc,false)].map((t,i)=>{t.name='city-japanese-'+style+'-'+i;return t;});
 }
 

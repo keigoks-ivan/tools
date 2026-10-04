@@ -1,5 +1,11 @@
 // 神戶街層細節：公尺尺度的窗洞、石材路緣與排水設施，呼叫端合併進既有材質桶。
 // 比例參考神戶觀光局明石町筋實景：https://www.feel-photo.info/a75/
+export function storefrontOpenings(length, style) {
+  const count=style<2?(length>9?1:0):Math.min(3,Math.floor((length-2)/7)),radius=style<2?1.65:1.35;
+  return Array.from({length:Math.max(0,count)},(_,i)=>({center:length*(i+.5)/count,radius,
+    bottom:style<2?.08:.12,spring:style===2?1.75:style<2?3.12:2.8,arched:style===2}));
+}
+
 export function recessedFacade(out, { x0, x1, z0, z1, H, style, tint, phase = 0, exposed }, F) {
   const floor = F.h / F.rows, bay = F.w / F.cols, historic = style === 2;
   const sides = [[x0,z1,x1,z1,0], [x1,z1,x1,z0,2], [x1,z0,x0,z0,1], [x0,z0,x0,z1,3]];
@@ -12,12 +18,41 @@ export function recessedFacade(out, { x0, x1, z0, z1, H, style, tint, phase = 0,
       out.wall(P(lo,bot,depth),P(hi,bot,depth),P(hi,top,depth),P(lo,top,depth),[nx,0,nz],
         [[u+lo/F.w,bot/F.h],[u+hi/F.w,bot/F.h],[u+hi/F.w,top/F.h],[u+lo/F.w,top/F.h]],tint);
     };
-    if (style<2 || H>=45 || !exposed[side]) wall(0,length,0,H);
+    if (!exposed[side]) wall(0,length,0,H);
     else {
+      let prev=0;
+      const shops=storefrontOpenings(length,style);
+      if(shops.length) {
+        const {bottom,spring,arched,radius}=shops[0],cap=spring+(arched?radius:0),depth=-.32;
+        wall(0,length,0,bottom);let along=0;
+        const reveal=[.43,.45,.42,0,1],shade=[.30,.33,.31,0,1];
+        for(const {center}of shops) {
+          const lo=center-radius,hi=center+radius;
+          wall(along,lo,bottom,cap);along=hi;
+          const edges=[[P(lo,bottom),P(hi,bottom),P(hi,bottom,depth),P(lo,bottom,depth)],
+            [P(lo,bottom,depth),P(lo,spring,depth),P(lo,spring),P(lo,bottom)],
+            [P(hi,bottom),P(hi,spring),P(hi,spring,depth),P(hi,bottom,depth)]];
+          for(const [i,pts]of edges.entries())out.detail(...pts,i===2?shade:reveal);
+          if(arched) {
+            // 窗洞的弧頂和拱角都切成連續面；不留下矩形洞口的透明角落。
+            for(let k=0;k<8;k++) {
+              const t0=Math.PI-k*Math.PI/8,t1=Math.PI-(k+1)*Math.PI/8;
+              const a=center+Math.cos(t0)*radius,b=center+Math.cos(t1)*radius,y0=spring+Math.sin(t0)*radius,y1=spring+Math.sin(t1)*radius;
+              const pts=[P(a,y0),P(b,y1),P(b,cap),P(a,cap)];
+              if(cap-y1<1e-5){pts[2]=P(a,cap);pts[3]=P(a,cap);}
+              out.wall(...pts,[nx,0,nz],pts.map(p=>{
+                const local=(p[0]-ax)*dx+(p[2]-az)*dz;return [u+local/F.w,p[1]/F.h];
+              }),tint);
+              out.detail(P(a,y0,depth),P(b,y1,depth),P(b,y1),P(a,y0),shade);
+            }
+          } else out.detail(P(lo,spring,depth),P(hi,spring,depth),P(hi,spring),P(lo,spring),shade);
+        }
+        wall(along,length,bottom,cap);prev=cap;
+      }
+      if(style<2||H>=45){wall(0,length,prev,H);u+=length/F.w;continue;}
       const first=bay*(Math.ceil(u*F.cols-.5)+.5-u*F.cols), ww=bay*(historic?.46:.64), wh=floor*(historic?.7:.6);
       const windows=[];
       for(let a=first;a<length;a+=bay)if(a-ww/2>.2&&a+ww/2<length-.2)windows.push([a-ww/2,a+ww/2]);
-      let prev=0;
       for(let f=1;f<3&&f*floor+floor*.88<H;f++) {
         const bot=f*floor+floor*(historic?.18:.22),top=bot+wh;
         wall(0,length,prev,bot);let along=0;

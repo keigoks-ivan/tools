@@ -2,7 +2,7 @@
 // 共用掃描材質；靜態結構按材質合併，海面不建立反射攝影機。
 import * as THREE from 'three';
 import { Builder } from '../zero/kit.js';
-import { JAPANESE_FONT, PORT_LABELS, civicMaterial, shopMaterial, harborWater } from '../urban.js';
+import { JAPANESE_FONT, PORT_LABELS, civicMaterial, shopMaterial, harborWater, streetGlassMaterial } from '../urban.js';
 import { japaneseBuilder } from '../japan.js';
 import { kobeStreetDetails } from '../kobe-street.mjs';
 import { buildAutumnTrees } from '../kobe-autumn.js';
@@ -65,7 +65,7 @@ export function buildMap(scene, mats, solid, PL, A, world) {
         mapN=mix(mapN,(texture2D(portAsphaltN,vPort/2.8).xyz*2.0-1.0)*vec3(.2,.2,1.0),portRoad);mapN.xy*=mix(1.0,.14,footPaving);`);
   };
   ground.customProgramCacheKey = () => 'harbor-ground-v2';
-  mats = { ...mats, portGround: ground, portGlass: new THREE.MeshStandardMaterial({ color: 0x263c43, roughness: .26, metalness: .18, vertexColors: true }) };
+  mats = { ...mats, portGround: ground, portGlass: streetGlassMaterial() };
   // 貨櫃、起重機與屋面是塗裝鋼材：漆面使用非金屬反射，保留原掃描與風化。
   for (const key of ['metal', 'corr', 'rust']) {
     const original = mats[key], painted = original.clone();
@@ -75,7 +75,7 @@ export function buildMap(scene, mats, solid, PL, A, world) {
   }
   mats.civic = civicMaterial();
   mats.sign = shopMaterial();
-  mats.landmarkPaint = new THREE.MeshStandardMaterial({ color: 0xffffff, normalMap: mats.metal.normalMap, roughness: .68, metalness: .04, vertexColors: true });
+  mats.landmarkPaint = new THREE.MeshStandardMaterial({ color: 0xffffff, normalMap: mats.concrete.normalMap, normalScale: new THREE.Vector2(.12, .12), roughness: .78, metalness: 0, vertexColors: true });
   mats.landmarkPaint.userData.tile = 2;
   const b = new Builder(mats, solid);
   const portMat=col=>col[4]===7?'brick':col[4]===4?'portGlass':col[4]===1?'concrete':col[4]===3?'corr':col[4]===5?'rust':col[4]===2?'metal':'landmarkPaint';
@@ -246,9 +246,9 @@ export function buildMap(scene, mats, solid, PL, A, world) {
     };
     material.customProgramCacheKey = () => 'lastline-coast-v2'; material.needsUpdate = true;
     scene.fog.color.setRGB(.39, .47, .52); scene.fog.density = .0003;
-    world.sun.color.setRGB(1, .94, .84); world.sun.intensity = 3.4;
-    world.hemi.color.setRGB(.44, .58, .73); world.hemi.intensity = .36;
-    scene.environmentIntensity = .48;
+    world.sun.color.setRGB(1, .95, .86); world.sun.intensity = 3.1;
+    world.hemi.color.setRGB(.48, .56, .65); world.hemi.intensity = .38;
+    scene.environmentIntensity = .7;
     world.skyDome.material.uniforms.fogCol.value.copy(scene.fog.color);
     world.buildKobeBackdrop({harbor:true});
   }

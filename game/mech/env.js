@@ -8,7 +8,7 @@ import { shopMaterial, shopUV, civicMaterial, civicUV, harborWater } from './urb
 import { roofline } from './roofline.js';
 import { streetfront } from './streetfront.js';
 import { japaneseScenery } from './japan.js';
-import { recessedFacade, kobeStreetDetails } from './kobe-street.mjs';
+import { recessedFacade, storefrontOpenings, kobeStreetDetails } from './kobe-street.mjs';
 import { autumnFoliage, buildAutumnTrees, forestCanopy } from './kobe-autumn.js';
 import { decodeKobeRelief, kobeCityHeight } from './kobe-relief.mjs';
 import { kobeCityBlocks, kobeRailway, kobeWaterfront, KOBE_CITY } from './kobe-city.mjs';
@@ -150,25 +150,28 @@ function installHeightFog(sunDir, sunFog) {
 }
 
 // ---------------------------------------------------------------- 天空穹頂
-function makeSkyDome(sky, sunDir, fog, sunFog, gain) {
+function makeSkyDome(sky, sunDir, fog, sunFog, gain, sourceSun = sunDir) {
   const geo = new THREE.SphereGeometry(1, 64, 32);
   const mat = new THREE.ShaderMaterial({
     uniforms: {
       map: { value: sky }, gain: { value: gain }, sunDir: { value: sunDir.clone() },
       fogCol: { value: fog.clone() }, sunFog: { value: sunFog.clone() }, environmentCapture: { value: 0 },
+      skyRotation: { value: new THREE.Matrix3().setFromMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(sunDir,sourceSun))) },
     },
     vertexShader: `varying vec3 vDir;
       void main(){ vDir = position; vec4 p = projectionMatrix * modelViewMatrix * vec4(position,1.0); gl_Position = p.xyww; }`,
-    fragmentShader: `uniform sampler2D map; uniform float gain, environmentCapture; uniform vec3 sunDir, fogCol, sunFog; varying vec3 vDir;
+    fragmentShader: `uniform sampler2D map; uniform float gain, environmentCapture; uniform vec3 sunDir, fogCol, sunFog; uniform mat3 skyRotation; varying vec3 vDir;
       #define PI 3.14159265
       void main(){
         vec3 d = normalize(vDir);
-        float u = atan(d.z, d.x) / (2.0*PI) + 0.5;
+        vec3 skyRay = skyRotation * d;
+        float u = atan(skyRay.z, skyRay.x) / (2.0*PI) + 0.5;
         float el = asin(clamp(d.y,-1.0,1.0)) * 180.0 / PI;
-        float v = clamp((el - (${SKY_ELEV_MIN.toFixed(1)})) / (90.0 - (${SKY_ELEV_MIN.toFixed(1)})), 0.002, 0.999);
+        float sampleEl = asin(clamp(skyRay.y,-1.0,1.0)) * 180.0 / PI;
+        float v = clamp((sampleEl - (${SKY_ELEV_MIN.toFixed(1)})) / (90.0 - (${SKY_ELEV_MIN.toFixed(1)})), 0.002, 0.999);
         vec3 c = texture2D(map, vec2(u, v)).rgb * gain;
         float sd = max(dot(d, sunDir), 0.0);
-        c += vec3(1.0,0.78,0.52) * (pow(sd, 1600.0) * 60.0 + pow(sd, 60.0) * 0.5);
+        c += vec3(1.0,0.88,0.72) * (pow(sd, 2400.0) * 18.0 + pow(sd, 90.0) * 0.18);
         float s = pow(sd, 7.0);
         vec3 fc = mix(fogCol, sunFog, s);
         c = mix(c, fc, smoothstep(4.0, -2.0, el) * 0.9);
@@ -637,58 +640,78 @@ function addBox(B, x0, x1, y0, y1, z0, z1, col, uvScale = 8) {
 // 立面細節仍寫進同一棟的合併區段：沒有額外材質／draw call，倒塌時跟著樓體一起消失。
 function architecture(B, signs, x0, x1, z0, z1, H, style, F, district, roofTop, crown = [x0, x1, z0, z1], exposed = [true, true, true, true], uo = 0) {
   const stone = style < 2 ? [0.48, 0.5, 0.52, 0, 1] : [0.72, 0.69, 0.63, 0, 1], steel = [0.12, 0.15, 0.17, 0, 2];
-  const glass = [0.055, 0.095, 0.11, 0, 4];
+  const glass = [0.17, 0.23, 0.24, 0, 4];
   const floor = F.h / F.rows, bay = F.w / F.cols;
   const sides = [['x', z1, 1, x0, x1], ['x', z0, -1, x0, x1], ['z', x1, 1, z0, z1], ['z', x0, -1, z0, z1]];
   const historic = style === 2, asian = style >= 3;
   for (const [si, [axis, fix, out, a0, a1]] of sides.entries()) {
+    const point = (a, y, d) => axis === 'x' ? [a, y, fix + out * d] : [fix + out * d, y, a];
+    const face = (pts, c, expected = null) => {
+      const n = new THREE.Vector3().subVectors(new THREE.Vector3(...pts[1]), new THREE.Vector3(...pts[0])).cross(new THREE.Vector3().subVectors(new THREE.Vector3(...pts[2]), new THREE.Vector3(...pts[0]))).normalize();
+      const aim = expected || (Math.abs(n.y) > .5 ? [0,1,0] : axis === 'x' ? [0,0,out] : [out,0,0]);
+      if(n.dot(new THREE.Vector3(...aim))<0){pts.reverse();n.negate();}
+      const axes=Math.abs(n.y)>.5?[0,2]:Math.abs(n.x)>.5?[2,1]:[0,1];
+      B.quad(...pts,n.toArray(),pts.map(p=>[p[axes[0]]/4,p[axes[1]]/4]),c);
+    };
     const box = (lo, hi, y0, y1, d0, d1, c) => {
       const p = fix + out * d0, q = fix + out * d1;
       if (axis === 'x') addBox(B, lo, hi, y0, y1, Math.min(p, q), Math.max(p, q), c, 4);
       else addBox(B, Math.min(p, q), Math.max(p, q), y0, y1, lo, hi, c, 4);
     };
+    // 嵌牆框料只畫外露三面，避免每根薄線腳都建立完整五面盒。
+    const trim=(lo,hi,y0,y1,d0,d1,c,vertical=false)=>{
+      face([point(lo,y0,d1),point(hi,y0,d1),point(hi,y1,d1),point(lo,y1,d1)],c);
+      const shade=c.map((v,i)=>i<3?v*.78:v);
+      if(vertical) {
+        face([point(lo,y0,d0),point(lo,y0,d1),point(lo,y1,d1),point(lo,y1,d0)],shade,axis==='x'?[-1,0,0]:[0,0,-1]);
+        face([point(hi,y0,d1),point(hi,y0,d0),point(hi,y1,d0),point(hi,y1,d1)],shade,axis==='x'?[1,0,0]:[0,0,1]);
+      } else {
+        face([point(lo,y1,d1),point(hi,y1,d1),point(hi,y1,d0),point(lo,y1,d0)],c,[0,1,0]);
+        face([point(lo,y0,d0),point(hi,y0,d0),point(hi,y0,d1),point(lo,y0,d1)],shade,[0,-1,0]);
+      }
+    };
+    const openings=storefrontOpenings(a1-a0,style);
     // 樓板邊、窗台與垂直分格產生真實的側光和遮蔭，不再只靠照片上的陰影。
     for (let y = floor; y < H - 0.3; y += floor * (style < 2 ? 2 : 1)) {
-      box(a0, a1, y - 0.05, y + 0.03, 0, historic ? .18 : .08, stone);
+      trim(a0, a1, y - 0.05, y + 0.03, 0, historic ? .18 : .08, stone);
     }
     // 舊居留地用石造壁柱；住宅使用細窗框，不讓外牆變成整片粗格子。
-    if (historic) for (let a = a0 + bay * 2; a < a1 - 1; a += bay * 2) {
-      box(a - .16, a + .16, .65, H - .35, 0, .2, stone);
-      for (const y of [.65, H - .65]) box(a - .25, a + .25, y, y + .25, 0, .24, stone);
+    const perimeterPhase=uo+(si===0?0:si===1?(x1-x0+z1-z0)/F.w:si===2?(x1-x0)/F.w:(2*(x1-x0)+z1-z0)/F.w);
+    const firstPier=bay*(Math.ceil(perimeterPhase*F.cols)-perimeterPhase*F.cols);
+    if (historic) for (let along=firstPier; along<a1-a0-.3; along+=bay*2) {
+      if(along<.3)continue;
+      const a=si===1||si===2?a1-along:a0+along;
+      // 上層壁柱不穿過街層開口；店面兩侧以獨立石材門梃收邊。
+      trim(a - .12, a + .12, floor+.08, H - .35, 0, .14, stone, true);
+      for (const y of [floor+.08, H-.55]) trim(a - .18, a + .18, y, y + .15, 0, .18, stone);
     }
-    box(a0, a1, 0.05, 0.65, 0, 0.22, [0.38, 0.36, 0.33, 0, 1]);
-    box(a0 - 0.2, a1 + 0.2, H - 0.35, H, 0, 0.4, stone);
+    const base=[.39,.39,.35,0,1];
+    if(exposed[si]&&openings.length) {
+      let along=a0;
+      for(const {center,radius}of openings){trim(along,a0+center-radius,.03,.48,0,.15,base);along=a0+center+radius;}
+      trim(along,a1,.03,.48,0,.15,base);
+    } else trim(a0,a1,.03,.48,0,.15,base);
+    trim(a0, a1, H - (historic?.2:.12), H, 0, historic?.24:style<2?.10:.12, stone);
     // 相鄰地塊的窄樓縫只留貼牆線腳，不放相向的陽台、梯架、店棚與招牌。
     if (!exposed[si]) continue;
-    const point = (a, y, d) => axis === 'x' ? [a, y, fix + out * d] : [fix + out * d, y, a];
-    const face = (pts, c) => {
-      const n = new THREE.Vector3().subVectors(new THREE.Vector3(...pts[1]), new THREE.Vector3(...pts[0])).cross(new THREE.Vector3().subVectors(new THREE.Vector3(...pts[2]), new THREE.Vector3(...pts[0]))).normalize();
-      if ((Math.abs(n.y) > 0.5 ? n.y : (axis === 'x' ? n.z : n.x) * out) < 0) { pts.reverse(); n.negate(); }
-      B.quad(...pts, n.toArray(), [[0, 0], [1, 0], [1, 1], [0, 1]], c);
-    };
     // 每面最多三個店面：真正的拱圈、玻璃、門框與遮陽棚，併在既有屋頂桶。
-    const shops = Math.min(3, Math.floor((a1 - a0 - 2) / 7));
-    if (style >= 2 && H < 32 && shops) streetfront(a0, a1, asian, box);
-    for (let i = 0; i < shops; i++) {
-      const a = a0 + (a1 - a0) * (i + 0.5) / shops, rad = 1.35;
-      const arch = historic;
-      const y = arch ? 1.75 : 2.8;
-      face([point(a - rad, 0.7, 0.035), point(a + rad, 0.7, 0.035), point(a + rad, y, 0.035), point(a - rad, y, 0.035)], glass);
-      box(a - rad - 0.14, a - rad, 0.65, y, 0.03, 0.23, stone);
-      box(a + rad, a + rad + 0.14, 0.65, y, 0.03, 0.23, stone);
-      box(a - 0.03, a + 0.03, 0.7, y, 0.04, 0.13, steel);
+    if (style >= 2 && H < 32 && openings.length) streetfront(a0, a1, asian, box);
+    for (const [i,{center,radius:rad,bottom:bot,spring:y,arched:arch}]of openings.entries()) {
+      const a=a0+center,depth=-.32,top=y+(arch?rad:0),transom=Math.min(y-.12,style<2?2.45:2.14);
+      face([point(a-rad,bot,depth),point(a+rad,bot,depth),point(a+rad,y,depth),point(a-rad,y,depth)],glass);
+      trim(a-rad-.11,a-rad,bot,y,0,.10,stone,true);trim(a+rad,a+rad+.11,bot,y,0,.10,stone,true);
+      for(const p of [a-rad,a-.025,a+rad-.05])trim(p,p+.05,bot,p===a-.025?top-.04:y,depth,depth+.08,steel,true);
       // 門檻、橫框與分離把手，在街層產生實際側光，不是照片上的線。
-      if(H<45) {
-        box(a-rad,a+rad,.65,.72,.04,.3,stone);
-        box(a-rad,a+rad,1.98,2.04,.04,.15,steel);
-        box(a+.09,a+.13,1.05,1.42,.15,.22,steel);
-      }
+      trim(a-rad,a+rad,bot-.025,bot+.02,depth,.06,stone);
+      trim(a-rad,a+rad,transom,transom+.05,depth,depth+.08,steel);
+      trim(a+.09,a+.13,1.05,1.42,depth+.08,depth+.18,[.40,.43,.42,0,2],true);
+      face([point(a-rad,transom+.05,depth+.004),point(a+rad,transom+.05,depth+.004),point(a+rad,y,depth+.004),point(a-rad,y,depth+.004)],[.23,.29,.30,0,4]);
       if (arch) {
         for (let k = 0; k < 8; k++) {
           const t0 = k * Math.PI / 8, t1 = (k + 1) * Math.PI / 8;
           const p = (r, t, d) => point(a + Math.cos(t) * r, y + Math.sin(t) * r, d);
-          face([point(a, y, 0.035), p(rad, t0, 0.035), p(rad, t1, 0.035), point(a, y, 0.035)], glass);
-          face([p(rad, t0, 0.24), p(rad + 0.18, t0, 0.24), p(rad + 0.18, t1, 0.24), p(rad, t1, 0.24)], stone);
+          face([point(a,y,depth),p(rad,t0,depth),p(rad,t1,depth),point(a,y,depth)],glass);
+          face([p(rad,t0,.10),p(rad+.14,t0,.10),p(rad+.14,t1,.10),p(rad,t1,.10)],stone);
         }
         if (i === 1) {
           for (let stripe=0;stripe<8;stripe++) {
@@ -700,15 +723,15 @@ function architecture(B, signs, x0, x1, z0, z1, H, style, F, district, roofTop, 
             face([point(lo,2.78,1.35),point(hi,2.78,1.35),point(hi,2.94,1.35),point(lo,2.94,1.35)],cloth);
           }
         }
-      } else box(a - rad, a + rad, y, y + 0.12, 0.03, 0.23, steel);
+      } else trim(a-rad,a+rad,y-.05,y,depth,depth+.08,steel);
       if (asian && i % 3 === 1) {
         // 日式店面：木格子與分片暖簾保留門口的尺度，細節只在面向街道的立面。
         const wood = [0.26, 0.19, 0.14, 0, 1], cloth = [0.22, 0.29, 0.34, 0, 5];
         for (const side of [-1, 1]) for (let k = 0; k < 4; k++) {
           const lo = a + side * (rad + .25 + k * .18);
-          box(lo - .025, lo + .025, .7, 2.65, .04, .09, wood);
+          trim(lo-.025,lo+.025,.25,2.65,.015,.07,wood,true);
         }
-        box(a - 2.3, a + 2.3, 2.68, 2.78, 0, .18, wood);
+        trim(a-2.3,a+2.3,2.68,2.78,0,.18,wood);
         for (let k = 0; k < 3; k++) {
           const lo = a - rad + k * .9;
           face([point(lo, 2.08, .2), point(lo + .85, 2.08, .2), point(lo + .85, 2.68, .2), point(lo, 2.68, .2)], cloth);
@@ -899,7 +922,7 @@ function architecturalMaterial(A) {
   patchGroundAO(m);
   return m;
 }
-function patchGroundAO(m, k = 16) {
+function patchGroundAO(m, k = 1.6) {
   const prev = m.onBeforeCompile;
   m.onBeforeCompile = (sh, r) => {
     if (prev) prev(sh, r);
@@ -914,8 +937,8 @@ function patchGroundAO(m, k = 16) {
     sh.fragmentShader = sh.fragmentShader
       .replace('#include <common>', '#include <common>\nvarying float vWY;')
       .replace('#include <aomap_fragment>', `#include <aomap_fragment>
-        float gao = mix(0.42, 1.0, smoothstep(0.0, ${k.toFixed(1)}, vWY));
-        reflectedLight.indirectDiffuse *= gao; reflectedLight.directDiffuse *= mix(0.75, 1.0, gao);`);
+        float gao = mix(0.78, 1.0, smoothstep(0.0, ${k.toFixed(1)}, vWY));
+        reflectedLight.indirectDiffuse *= gao;`);
   };
 }
 
@@ -1043,36 +1066,32 @@ export class World {
 
     // 天空與光
     this.sunDir = findSun(A.hdr);
-    // 光線用的太陽稍微拉高，讓城市不全在陰影裡（天空圖上的太陽位置不變）
+    // 秋日下午的日照、天空照片與反射使用同一個方向。
     const el = Math.asin(this.sunDir.y);
-    const lightEl = Math.max(el, THREE.MathUtils.degToRad(18));
+    const lightEl = Math.max(el, THREE.MathUtils.degToRad(24));
     const az = Math.atan2(this.sunDir.z, this.sunDir.x);
     this.lightDir = new THREE.Vector3(Math.cos(az) * Math.cos(lightEl), Math.sin(lightEl), Math.sin(az) * Math.cos(lightEl));
-    this.skyGain = 1.25;
+    this.skyGain = 1.05;
     const { fog, sunFog } = horizonColors(A.sky, this.sunDir, this.skyGain);
     this.fogColor = fog; this.sunFogColor = sunFog;
-    installHeightFog(this.sunDir, sunFog);
+    installHeightFog(this.lightDir, sunFog);
     scene.fog = new THREE.FogExp2(fog, 0.00024);
 
-    const pm = new THREE.PMREMGenerator(renderer);
-    A.hdr.mapping = THREE.EquirectangularReflectionMapping;
-    this.envMap = pm.fromEquirectangular(A.hdr).texture;
-    pm.dispose();
-    scene.environment = this.envMap;
-    scene.environmentIntensity = 0.55;
-    this.skyDome=makeSkyDome(A.sky, this.sunDir, fog, sunFog, this.skyGain);
+    this.skyDome=makeSkyDome(A.sky, this.lightDir, fog, sunFog, this.skyGain, this.sunDir);
     scene.add(this.skyDome);this.cityLightDir=this.lightDir.clone();
+    this.refreshEnvironment();
+    scene.environmentIntensity = 0.7;
 
-    const sun = new THREE.DirectionalLight(new THREE.Color(1.0, 0.9, 0.77), 3.8);
+    const sun = new THREE.DirectionalLight(new THREE.Color(1.0, 0.95, 0.86), 3.1);
     sun.castShadow = true;
     sun.shadow.mapSize.set(4096, 4096);
     const sc = sun.shadow.camera;
-    sc.left = -260; sc.right = 260; sc.top = 260; sc.bottom = -260; sc.near = 10; sc.far = 2400;
-    sun.shadow.bias = -0.0001; sun.shadow.normalBias = 0.08;
+    sc.left = -180; sc.right = 180; sc.top = 180; sc.bottom = -180; sc.near = 600; sc.far = 1800;
+    sun.shadow.bias = -0.000035; sun.shadow.normalBias = 0.035;
     sun.shadow.autoUpdate = false;   // 影子圖每兩格重畫一次（followShadow 裡開關），省一半顯示卡工
     scene.add(sun, sun.target);
     this.sun = sun;
-    const hemi = new THREE.HemisphereLight(0x7f98c0, 0x3a2e24, 0.28);
+    const hemi = new THREE.HemisphereLight(0x9faec0, 0x514a3d, 0.32);
     scene.add(hemi); this.hemi=hemi;
 
     // 地形
@@ -1110,6 +1129,19 @@ export class World {
     this.battlefield = 'city';
   }
 
+  captureSky() {
+    const skyScene=new THREE.Scene(),pm=new THREE.PMREMGenerator(this.renderer);
+    const capture=new THREE.WebGLCubeRenderTarget(128,{type:THREE.HalfFloatType,minFilter:THREE.LinearFilter,generateMipmaps:false});
+    skyScene.add(this.skyDome);this.skyDome.material.uniforms.environmentCapture.value=1;
+    try {new THREE.CubeCamera(.1,10000,capture).update(this.renderer,skyScene);return pm.fromCubemap(capture.texture);}
+    finally {this.scene.add(this.skyDome);this.skyDome.material.uniforms.environmentCapture.value=0;capture.dispose();pm.dispose();}
+  }
+
+  refreshEnvironment() {
+    const next=this.captureSky();
+    this.cityEnvTarget?.dispose();this.cityEnvTarget=next;this.envMap=next.texture;this.scene.environment=this.envMap;
+  }
+
   setBattlefield(profile = 'city', route = null) {
     if (!BATTLEFIELDS[profile] || !route) profile = 'city';
     if (this.battlefield === profile && (profile === 'city' || this.fieldRoute === route)) return;
@@ -1131,27 +1163,25 @@ export class World {
     p.needsUpdate = uv.needsUpdate = true; this.terrainMesh.geometry.computeVertexNormals(); this.terrainMesh.geometry.computeBoundingSphere();
     this.terrainMesh.material.userData.battlefield.value = F.mode;
     this.scene.fog.density = F.mode ? profile === 'forest' ? .00018 : .00012 : .00024;
-    this.scene.environmentIntensity=F.mode?.43:.55;
+    this.scene.environmentIntensity=F.mode?.43:.7;
     if(F.mode) {
       const az=Math.atan2(this.sunDir.z,this.sunDir.x),el=Math.max(Math.asin(this.sunDir.y),THREE.MathUtils.degToRad(32));
       this.lightDir.set(Math.cos(az)*Math.cos(el),Math.sin(el),Math.sin(az)*Math.cos(el));
     } else this.lightDir.copy(this.cityLightDir);
-    this.skyDome.material.uniforms.sunDir.value.copy(F.mode?this.lightDir:this.sunDir);
+    this.skyDome.material.uniforms.sunDir.value.copy(this.lightDir);
+    this.skyDome.material.uniforms.skyRotation.value.setFromMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(this.lightDir,this.sunDir)));
     // 戶外反射與補光由同一個可見天空烘焙，首次進場一次；之後所有場地共用。
     if(F.mode && !this.fieldEnvMap) {
-      const skyScene=new THREE.Scene(),pm=new THREE.PMREMGenerator(this.renderer);
-      const capture=new THREE.WebGLCubeRenderTarget(128,{type:THREE.HalfFloatType,minFilter:THREE.LinearFilter,generateMipmaps:false});
-      skyScene.add(this.skyDome);this.skyDome.material.uniforms.environmentCapture.value=1;
-      try {new THREE.CubeCamera(.1,10000,capture).update(this.renderer,skyScene);this.fieldEnvMap=pm.fromCubemap(capture.texture).texture;}
-      finally {this.scene.add(this.skyDome);this.skyDome.material.uniforms.environmentCapture.value=0;capture.dispose();pm.dispose();}
+      this.fieldEnvTarget=this.captureSky();this.fieldEnvMap=this.fieldEnvTarget.texture;
     }
     this.scene.environment=F.mode?this.fieldEnvMap:this.envMap;
-    this.sun.intensity=F.mode?3.5:3.8;
-    this.sun.color.setRGB(1,F.mode?.91:.9,F.mode?.79:.77);
-    this.hemi.intensity=F.mode?.32:.28;
-    const sc=this.sun.shadow.camera,extent=F.mode?190:260;
+    this.sun.intensity=F.mode?3.5:3.1;
+    this.sun.color.setRGB(1,F.mode?.91:.95,F.mode?.79:.86);
+    this.hemi.intensity=.32;
+    const sc=this.sun.shadow.camera,extent=F.mode?190:180;
+    sc.near=600;sc.far=1800;
     sc.left=sc.bottom=-extent;sc.right=sc.top=extent;sc.updateProjectionMatrix();
-    this.sun.shadow.bias=F.mode?-.00008:-.0001;this.sun.shadow.normalBias=.08;
+    this.sun.shadow.bias=F.mode?-.00004:-.000035;this.sun.shadow.normalBias=.035;
     this.terrainMesh.castShadow=!!F.mode;
     for (const o of this.cityObjects) o.visible = !F.mode;
     for (const k of ['blds', 'trample', 'smokeSites', 'fireSites', 'lampSites']) this[k] = F.mode ? [] : this.cityState[k];
@@ -2369,7 +2399,9 @@ export class World {
     const z = this.lightDir;
     const x = new THREE.Vector3(0, 1, 0).cross(z).normalize();
     const y = z.clone().cross(x);
-    const px = Math.round(p.dot(x) / size) * size, py = Math.round(p.dot(y) / size) * size, pz = p.dot(z);
+    // 空戰時投影同時涵蓋機體與下方地面，維持原本貼圖範圍。
+    const focus = p.clone(); focus.y = (p.y + this.height(p.x, p.z)) * .5;
+    const px = Math.round(focus.dot(x) / size) * size, py = Math.round(focus.dot(y) / size) * size, pz = focus.dot(z);
     const c = x.multiplyScalar(px).addScaledVector(y, py).addScaledVector(z, pz);
     s.target.position.copy(c);
     s.position.copy(c).addScaledVector(z, 1200);

@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import { loadAssets, World } from './env.js';
 import { Mech, initMechMaterials } from './mechs.js';
 import { Post } from './post.js';
+import { qualityLevel, pixelRatio } from './runtime.js';
 
 const canvas = document.getElementById('gl');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' });
@@ -30,6 +31,13 @@ post.setSize(innerWidth, innerHeight);
 document.getElementById('title').classList.add('hide');
 
 const q = new URLSearchParams(location.search);
+if(q.has('quality')) {
+  const level=qualityLevel(+q.get('quality'));
+  renderer.setPixelRatio(pixelRatio(innerWidth,innerHeight,devicePixelRatio,level));renderer.setSize(innerWidth,innerHeight);
+  post.setSize(innerWidth,innerHeight);post.setQuality(level);post.gtao.enabled=level>1;
+  world.sun.shadow.mapSize.setScalar([1024,2048,4096][level]);world.sun.shadow.needsUpdate=true;
+  renderer.shadowMap.type=level>0?THREE.PCFSoftShadowMap:THREE.PCFShadowMap;
+}
 const show = q.get('show');
 const mechs = [];
 const place = (style, scheme, x, z, yaw) => {
