@@ -312,8 +312,8 @@ export class Soldier {
     this.recoil = 0; this.reloadT = -1;
     this.dead = false; this.rag = null;
     this.weapon = o.weapon || null;         // 自己的座標：原點＝槍托，+Z＝槍口方向
-    this.grip = o.grip || new THREE.Vector3(0, -0.07, 0.27);
-    this.fore = o.fore || new THREE.Vector3(-0.005, -0.045, 0.56);
+    this.grip = o.grip || this.weapon?.userData.gripR || new THREE.Vector3(0, -0.07, 0.27);
+    this.fore = o.fore || this.weapon?.userData.gripL || new THREE.Vector3(-0.005, -0.045, 0.56);
     this._wq = new THREE.Quaternion(); this._wp = new THREE.Vector3();
     this.lod = 0;
   }
@@ -426,10 +426,8 @@ export class Soldier {
     } else reload.stop();
     this.mixer.update(0);
     this.root.updateMatrixWorld(true);
-    if (far) { this._placeWeaponSimple(); return; }   // 遠處：只播動作，不做程序層
-
     const B = this.B;
-    this._feet(dt, sp);
+    if (!far) this._feet(dt, sp);
     // ---- 姿勢權重
     const wantAim = this.mode === 'aim' ? 1 : 0, wantRun = this.mode === 'run' || wRun > 0.5 ? 1 : 0;
     this.aimW = damp(this.aimW, wantAim, 7, dt);
@@ -454,12 +452,13 @@ export class Soldier {
       _q.setFromAxisAngle(ax, clamp(hl, 0, 0.7) * 0.6); rotW(B.Spine1, _q);
       _q.setFromAxisAngle(ax, clamp(hl, 0, 0.7) * 0.5 * (this.headSnap || 0.3)); rotW(B.Head, _q);
     }
-    // ---- 槍與雙手
-    if (this.weapon) this._placeWeapon(dt);
-    // ---- 頭看向瞄準方向
     // 探頭：身體往側邊傾（lean －1 左、＋1 右）
     this.leanK = damp(this.leanK || 0, this.lean || 0, 6, dt);
     if (Math.abs(this.leanK) > 0.01) { _q.setFromAxisAngle(_d.set(Math.sin(this.bodyYaw), 0, Math.cos(this.bodyYaw)), this.leanK * 0.32); rotW(B.Spine1, _q); }
+    // 遠處保留雙手握槍，省略腳掌接地與手指細節。
+    if (this.weapon) this._placeWeapon(dt, far);
+    if (far) return;
+    // ---- 頭看向瞄準方向
     const ad = _d.set(Math.sin(this.aimYaw) * Math.cos(this.aimPitch), Math.sin(this.aimPitch), Math.cos(this.aimYaw) * Math.cos(this.aimPitch));
     const hf = _e.copy(cal.headFwd).applyQuaternion(B.Head.getWorldQuaternion(_q3)).normalize();
     _q.setFromUnitVectors(hf, ad); _q.slerp(_q2.identity(), 0.3);
@@ -474,12 +473,12 @@ export class Soldier {
     const F = _b.set(Math.sin(yaw) * Math.cos(pitch), Math.sin(pitch), Math.cos(yaw) * Math.cos(pitch));
     const R = _c.crossVectors(F, UP).normalize();
     const U = _d.crossVectors(R, F).normalize();
-    const aw = this.aimW, rw = this.runW, pw = 1 - aw - rw;
+    const aw = this.aimW, rw = this.runW * (1 - aw), pw = 1 - aw - rw;
     // 舉槍：槍托頂右肩窩
-    const aimP = _e.copy(chest).addScaledVector(R, 0.16 * sc).addScaledVector(U, 0.13 * sc).addScaledVector(F, 0.0);
+    const aimP = _e.copy(chest).addScaledVector(R, 0.13 * sc).addScaledVector(U, 0.13 * sc).addScaledVector(F, -0.04 * sc);
     outP.copy(aimP).multiplyScalar(aw);
-    // 低姿：槍托在右腰上方，槍口朝下前方
-    outP.addScaledVector(_e.copy(chest).addScaledVector(R, 0.19 * sc).addScaledVector(U, -0.02 * sc).addScaledVector(F, 0.02 * sc), Math.max(0, pw));
+    // 低姿：槍托收近胸側，槍口朝下前方
+    outP.addScaledVector(_e.copy(chest).addScaledVector(R, 0.15 * sc).addScaledVector(F, -0.08 * sc), Math.max(0, pw));
     // 跑步：槍斜抱胸前
     outP.addScaledVector(_e.copy(chest).addScaledVector(R, 0.2 * sc).addScaledVector(U, -0.16 * sc).addScaledVector(F, 0.1 * sc), rw);
     const recoil = this.recoil;
@@ -530,13 +529,7 @@ export class Soldier {
     }
   }
 
-  _placeWeaponSimple() {
-    if (!this.weapon) return;
-    this._weaponFrame(this._wp, this._wq);
-    this.weapon.position.copy(this._wp); this.weapon.quaternion.copy(this._wq);
-  }
-
-  _placeWeapon(dt) {
+  _placeWeapon(dt, far = false) {
     const B = this.B, w = this.weapon, sc = this.root.scale.x;
     this.recoil = Math.max(0, this.recoil - dt * 6);
     this._weaponFrame(this._wp, this._wq);
@@ -559,12 +552,12 @@ export class Soldier {
     // 手型：握把（右）／托護木（左）
     const F = new THREE.Vector3(0, 0, 1).applyQuaternion(this._wq), U = new THREE.Vector3(0, 1, 0).applyQuaternion(this._wq);
     const L = Rw.clone().negate();
-    this._hand('Right', F.clone().addScaledVector(U, -0.45), U.clone().negate().addScaledVector(F, 0.35), 1.0);
-    this._hand('Left', Rw.clone().addScaledVector(F, 0.45).addScaledVector(U, 0.2), F.clone().negate(), 0.75);
+    this._hand('Right', F.clone().addScaledVector(U, -0.45), U.clone().negate().addScaledVector(F, 0.35), 0.78, !far);
+    this._hand('Left', Rw.clone().addScaledVector(F, 0.45).addScaledVector(U, 0.2), F.clone().negate(), 0.78, !far);
   }
 
   // 手的世界朝向：D＝手指方向、S＝食指→小指方向；curl＝握拳程度
-  _hand(side, D, S, curl) {
+  _hand(side, D, S, curl, fingers = true) {
     const c = this.kit.cal.hand[side];
     const hand = this.B[side + 'Hand'];
     basisOf(D, S, _m); basisOf(c.D, c.S, _m2); _m2.invert();
@@ -572,7 +565,7 @@ export class Soldier {
     // 標定時 root 沒轉，這裡的 Q 已是世界朝向，所以直接乘標定的手朝向
     _q.multiply(c.Q);
     setW(hand, _q);
-    curlFingers(this.B, this.kit.cal, side, curl);
+    if (fingers) curlFingers(this.B, this.kit.cal, side, curl);
   }
 
   // ---- 死亡：切成布娃娃

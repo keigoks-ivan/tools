@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
-import { steer, flankPoint, squadFlank, coveringFire, segmentBox, planRoute, routeDirection, allyInLane } from '../tactics.js';
+import { steer, flankPoint, squadFlank, searchPoint, coveringFire, segmentBox, planRoute, routeDirection, allyInLane } from '../tactics.js';
 import { Combat } from '../combat.js';
 import { Encounter, parse } from '../encounter.js';
 import { STAGE_DATA } from '../stages.js';
@@ -279,4 +279,58 @@ test('enemy drones fire at a confirmed scout and remember the aircraft as damage
   const S=G.scout={active:true,pos:V(0,7,30),vel:V(),exposed:6};let shots=0;G.bolt=()=>shots++;
   for(let i=0;i<8;i++)e.update(.05);assert(e.scoutSeen);assert(shots>0);assert.deepEqual(e.lastSeen.toArray(),S.pos.toArray());
   S.pos.set(8,7,30);e.damage(1,V(1,0,0),'body',S.pos);assert.deepEqual(e.lastSeen.toArray(),S.pos.toArray());
+});
+
+test('open ground does not make infantry lower its rifle and pretend to hide', () => {
+  const e = soldierFixture(); e.phase = 'move'; e.cover.copy(e.pos); e.cover.protected = false; e.burst = 0;
+  e.update(.1); assert.equal(e.phase, 'peek');
+  e.ammo = 18; e.mag = 18; e.aimT = .5; e.shotT = 0; e.s.aimW = 1;
+  let shots = 0; e.fire = () => { shots++; return true; };
+  e.update(.1); assert.equal(e.s.mode, 'aim'); assert.equal(shots, 1);
+  e.phaseT = 0; e.update(.1); assert.notEqual(e.phase, 'hide'); assert.equal(e.coverT, 0);
+});
+
+test('support infantry covers an advance while maintaining an aimed walking pace', () => {
+  const e = soldierFixture(); e.role = 'support'; e.phase = 'move'; e.cover.set(10,0,10); e.cover.protected = false; e.burst = 0;
+  e.update(.1); assert.equal(e.s.mode, 'aim'); assert(e.s.vel.length() <= e.T.walk * 1.4);
+});
+
+test('rifle must be raised before a new infantry burst can start', () => {
+  const e = soldierFixture(); e.phase = 'peek'; e.ammo = 18; e.burst = 0; e.aimT = 1; e.s.aimW = .4;
+  let shots = 0; e.fire = () => { shots++; return true; };
+  e.update(.1); assert.equal(shots, 0);
+  e.s.aimW = .9; e.update(.1); assert.equal(shots, 1);
+});
+
+test('hidden players cannot make infantry retreat or change its search direction', () => {
+  const a = soldierFixture(), b = soldierFixture();
+  for (const e of [a,b]) { e.sees = false; e.navT = 1; e.nav.set(0,0,1); e.lastSeen.set(0,0,-10); e.phase = 'move'; e.cover.set(10,0,6); e.cover.protected = false; }
+  a.G.player.pos.set(10,0,1); b.G.player.pos.set(200,0,200);
+  a.update(.1); b.update(.1);
+  assert.equal(a.phase, b.phase); assert.equal(a.s.mode,b.s.mode);
+  assert(a.s.vel.distanceTo(b.s.vel) < 1e-8); assert(a.pos.distanceTo(b.pos) < 1e-8);
+});
+
+test('search sectors cover remembered contact without following an unseen player', () => {
+  const contact = V(50,0,-30), a = searchPoint(contact, 3.1, 1, 7, 2), b = searchPoint(contact, 5.9, 1, 7, 2), c = searchPoint(contact, 6, 1, 7, 2);
+  assert.deepEqual(a,b); assert.notDeepEqual(a,c);
+  for (let t=0;t<20;t++) {
+    const p=searchPoint(contact,t,-1,40,5); assert(Math.abs(Math.hypot(p.x-contact.x,p.z-contact.z)-40)<1e-8);
+  }
+  const e=soldierFixture(); e.sees=false; e.notSeen=4; e.G.player.pos.set(1000,0,1000);
+  const cover=e.findCover(true); assert.equal(cover.protected,false); assert(cover.distanceTo(e.lastSeen)<8);
+});
+
+test('a fresh squad report lets a hidden flank soldier move under covering fire', () => {
+  const e=soldierFixture();e.sees=false;e.role='flank';e.pushCd=0;e.G.player.pos.set(500,0,500);
+  e.G.enemies.push({pos:V(12,0,3),role:'support',sees:true,burst:4,state:'combat'});
+  e.alert(V(),.8);e.update(.1);assert(e.pushT>0);assert.equal(e.phase,'move');assert(e.cover.distanceTo(e.lastSeen)<15);
+  const stale=soldierFixture();stale.sees=false;stale.role='flank';stale.pushCd=0;stale.contactAt=-5;
+  stale.G.enemies.push({pos:V(12,0,3),role:'support',sees:true,burst:4,state:'combat'});
+  stale.update(.1);assert(!(stale.pushT>0),'old contact cannot authorize an advance');
+});
+
+test('a visible change of firing angle makes infantry reassess its old cover', () => {
+  const e=soldierFixture();e.cover.protected=true;e.coverTarget=V(0,0,-10);
+  let found=0;e.findCover=()=>{found++;return e.cover;};e.update(.1);assert.equal(found,1);
 });

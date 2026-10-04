@@ -15,7 +15,7 @@ async function load(path, query = '') {
   html = html.replace(/<base href="[^"]+">/, '');
   html = html.replace(/(<script type="importmap">)([\s\S]*?)(<\/script>)/, (_, a, json, b) => {
     const map = JSON.parse(json);
-    for (const file of ['kobe-city.mjs', 'kobe-relief.mjs', 'urban.js', 'japan.js', 'textures.js', 'anim.js', 'env.js', 'streetfront.js', 'stages.js', 'battlefields.js', 'fieldart.js', 'encounter.js', 'post.js', 'roofline.js', 'mechs.js', 'combat.js', 'cockpit.js', 'player.js', 'flight.mjs', 'vehicles.js', 'hud.js', 'zero/kit.js', 'zero/map.js', 'zero/guns.js', 'zero/viewmodel.js', 'zero/main.js', 'zero/hud.js', 'zero/sfx.js', 'zero/mech6.js', 'lastline/map.js', 'lastline/script.js', 'lastline/mission.js', 'lastline/convoy.js', 'lastline/escort.mjs', 'lastline/operations.mjs', 'lastline/foot-ops.js', 'input.js', 'tactics.js', 'reinforcements.mjs', 'zero/ai.js', 'zero/script.js', 'zero/patrol.js', 'zero/recon.js', 'zero/field.js']) {
+    for (const file of ['kobe-city.mjs', 'kobe-relief.mjs', 'urban.js', 'japan.js', 'textures.js', 'anim.js', 'env.js', 'streetfront.js', 'stages.js', 'battlefields.js', 'fieldart.js', 'encounter.js', 'post.js', 'roofline.js', 'mechs.js', 'combat.js', 'cockpit.js', 'player.js', 'flight.mjs', 'vehicles.js', 'hud.js', 'zero/kit.js', 'zero/map.js', 'zero/guns.js', 'zero/human.js', 'zero/viewmodel.js', 'zero/main.js', 'zero/hud.js', 'zero/sfx.js', 'zero/mech6.js', 'lastline/map.js', 'lastline/script.js', 'lastline/mission.js', 'lastline/convoy.js', 'lastline/escort.mjs', 'lastline/operations.mjs', 'lastline/foot-ops.js', 'input.js', 'tactics.js', 'reinforcements.mjs', 'zero/ai.js', 'zero/script.js', 'zero/patrol.js', 'zero/recon.js', 'zero/field.js']) {
       const url = new URL('/game/mech/' + file, location.href).href;
       for (const key of Object.keys(map.imports)) if (new URL(key, entryBase).href === url) delete map.imports[key];
       map.imports[url] = url + '?qa=' + revision;
@@ -573,6 +573,52 @@ async function enemyPressure() {
   assert(errors.length===0,'增援壓力測試沒有執行錯誤');
   report.textContent=JSON.stringify({checks:result,peak,mechPeak,cpuMsPerStep:(performance.now()-before)/900,errors},null,2);state.textContent='敵人增援壓力通過';
 }
+async function enemyHandling() {
+  await load('/game/mech/zero/index.html', '?mute&god&ch=1&all&fps=0');
+  const G=win.__G,T=win.__T,script=win.document.createElement('script');script.type='module';
+  script.textContent="import {Soldier} from './human.js'; import {makeEnemyRifle} from './guns.js'; window.__enemyRig={Soldier,makeEnemyRifle};";
+  win.document.head.append(script);await wait(()=>win.__enemyRig);
+  const {Soldier,makeEnemyRifle}=win.__enemyRig;
+  renderer=win.__renderer;
+  const scene=new T.Scene();scene.background=new T.Color(0x28313a);scene.environment=win.__world.envMap;
+  scene.add(new T.HemisphereLight(0xd5e6ff,0x43362c,1.6));
+  const light=new T.DirectionalLight(0xffe4cc,3.2);light.position.set(-4,7,5);scene.add(light);
+  scene.add(new T.Mesh(new T.PlaneGeometry(30,30).rotateX(-Math.PI/2),new T.MeshStandardMaterial({color:0x30383c,roughness:.9})));
+  const soldiers=[],metrics=[];
+  for(const [i,kind] of ['carbine','sniper','heavy'].entries()) {
+    const s=new Soldier(G.kit,kind==='carbine'?'trooper':kind,{weapon:makeEnemyRifle(kind),scale:kind==='heavy'?1.12:1});
+    scene.add(s.root,s.weapon);soldiers.push(s);
+    for(const pose of ['patrol','aim','run','crouch','reload','far']) {
+      s.pos.set(-92,0,-74);s.aimYaw=.3;s.aimPitch=.15;s.bodyYaw=.3;
+      s.mode=pose==='run'?'run':pose==='patrol'?'patrol':'aim';s.vel.set(0,0,pose==='run'?4:0);s.crouchT=pose==='crouch'?1:0;s.reloadT=pose==='reload'?.4:-1;
+      for(let n=0;n<40;n++)s.update(1/60,pose==='far');
+      s.root.updateMatrixWorld(true);s.weapon.updateMatrixWorld(true);
+      const right=s.B.RightHand.getWorldPosition(new T.Vector3()).distanceTo(s.weapon.localToWorld(s.grip.clone()));
+      const left=s.B.LeftHand.getWorldPosition(new T.Vector3()).distanceTo(s.weapon.localToWorld(s.fore.clone()));
+      metrics.push({kind,pose,right,left});
+      assert(s.weapon.position.distanceTo(s.B.Spine2.getWorldPosition(new T.Vector3()))<.5,kind+' '+pose+' 槍托跟隨上身');
+      assert(right<.05,kind+' '+pose+' 右手握把誤差 '+right.toFixed(3)+'m');
+      if(pose!=='reload')assert(left<.025,kind+' '+pose+' 左手護木誤差 '+left.toFixed(3)+'m');
+    }
+    for(const pitch of [-.65,.65])for(const yaw of [-1.4,2.4]) {
+      s.aimYaw=yaw;s.aimPitch=pitch;s.mode='aim';s.vel.set(0,0,0);s.crouchT=0;s.reloadT=-1;
+      for(let n=0;n<90;n++)s.update(1/60);
+      for(const [side,grip] of [['Right',s.grip],['Left',s.fore]]) {
+        const error=s.B[side+'Hand'].getWorldPosition(new T.Vector3()).distanceTo(s.weapon.localToWorld(grip.clone()));
+        assert(error<.035,kind+' 高低與轉身 '+side+' 手腕誤差 '+error.toFixed(3)+'m');
+      }
+    }
+    s.pos.set((i-1)*1.7,0,0);s.aimYaw=s.bodyYaw=.3;s.aimPitch=0;s.mode='aim';s.vel.set(0,0,0);s.crouchT=0;s.reloadT=-1;
+    for(let n=0;n<60;n++)s.update(1/60);
+  }
+  const cam=new T.PerspectiveCamera(38,renderer.domElement.width/renderer.domElement.height,.05,50);cam.position.set(3.4,2.6,7.5);cam.lookAt(0,1,0);
+  renderer.outputColorSpace=T.SRGBColorSpace;renderer.toneMapping=T.ACESFilmicToneMapping;renderer.toneMappingExposure=1;
+  post={render:()=>renderer.render(scene,cam)};
+  await save('enemy-rifle-aim',true);
+  for(const [i,s] of soldiers.entries()){s.mode=i===1?'run':'patrol';s.vel.set(0,0,i===1?4:0);for(let n=0;n<40;n++)s.update(1/60);}
+  await save('enemy-rifle-carry',true);
+  report.textContent=JSON.stringify({checks:result,metrics,memory:renderer.info.memory,errors},null,2);state.textContent=errors.length?'有錯誤':'敵人持槍通過';
+}
 async function infantry() {
   await load('/game/mech/zero/index.html', '?mute&god&ch=1&all&fps=0');
   const G = win.__G, T = win.__T, script = win.document.createElement('script'); script.type = 'module';
@@ -1066,7 +1112,7 @@ async function fieldOps() {
   report.textContent=JSON.stringify({checks,metrics,errors},null,2);state.textContent='開放戰區通過';
 }
 
-for (const [id, fn] of [['japanStreets', japanStreets], ['flightArt', flightArt], ['flight', flight], ['kobeArt', kobeArt], ['fieldAudit', fieldAudit], ['fieldOps', fieldOps], ['scoutCombat', scoutCombat], ['reconControls', reconControls], ['prequelFoot', prequelFoot], ['patrolWorld', patrolWorld], ['japaneseSigns', japaneseSigns], ['harborArt', harborArt], ['campaignFoot', campaignFoot], ['campaign4', () => campaignMech(4)], ['campaign5', () => campaignMech(5)], ['campaign6', () => campaignMech(6)], ['campaign7', () => campaignMech(7)], ['campaign6Artillery', async()=>{localStorage.setItem('lastline.choice',JSON.stringify('artillery'));await campaignMech(6,'artillery');}], ['campaignArtillery', async () => { localStorage.setItem('lastline.choice', JSON.stringify('artillery')); await campaignMech(7, 'artillery'); }], ['campaignEdges', campaignEdges], ['mech', mech], ['fields', battlefields], ['enemyMotion', enemyMotion], ['zero', zero], ['tactics', tactics], ['prequelMechCampaign', prequelMechCampaign], ['campaignMain', campaignMain], ['enemyPressure', enemyPressure], ['infantry', infantry], ['art', art], ['hero', hero], ['city', city], ['mountains', mountains], ['weapons', weapons], ['save', save]]) document.querySelector('#' + id).onclick = () => fn().catch(e => { state.textContent = '失敗'; report.textContent += '\n' + e.stack; });
+for (const [id, fn] of [['japanStreets', japanStreets], ['flightArt', flightArt], ['flight', flight], ['kobeArt', kobeArt], ['fieldAudit', fieldAudit], ['fieldOps', fieldOps], ['scoutCombat', scoutCombat], ['reconControls', reconControls], ['prequelFoot', prequelFoot], ['patrolWorld', patrolWorld], ['japaneseSigns', japaneseSigns], ['harborArt', harborArt], ['campaignFoot', campaignFoot], ['campaign4', () => campaignMech(4)], ['campaign5', () => campaignMech(5)], ['campaign6', () => campaignMech(6)], ['campaign7', () => campaignMech(7)], ['campaign6Artillery', async()=>{localStorage.setItem('lastline.choice',JSON.stringify('artillery'));await campaignMech(6,'artillery');}], ['campaignArtillery', async () => { localStorage.setItem('lastline.choice', JSON.stringify('artillery')); await campaignMech(7, 'artillery'); }], ['campaignEdges', campaignEdges], ['mech', mech], ['fields', battlefields], ['enemyMotion', enemyMotion], ['zero', zero], ['tactics', tactics], ['prequelMechCampaign', prequelMechCampaign], ['campaignMain', campaignMain], ['enemyPressure', enemyPressure], ['enemyHandling', enemyHandling], ['infantry', infantry], ['art', art], ['hero', hero], ['city', city], ['mountains', mountains], ['weapons', weapons], ['save', save]]) document.querySelector('#' + id).onclick = () => fn().catch(e => { state.textContent = '失敗'; report.textContent += '\n' + e.stack; });
 
 async function harborArt() {
   await load('/game/mech/lastline/index.html', '?mute&god&ch=1&all&fps=0');

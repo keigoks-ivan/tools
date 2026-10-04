@@ -424,7 +424,8 @@ export function makeEnemyRifle(kind = 'carbine') {
   if (!ENEMY[kind].geo) ENEMY[kind].geo = Object.fromEntries(Object.entries(P).filter(([, v]) => v.length).map(([k, v]) => [k, merge(v)]));
   const g = new THREE.Group();
   for (const [k, geo] of Object.entries(ENEMY[kind].geo)) { const m = new THREE.Mesh(geo, M[k]); m.castShadow = k !== 'glow'; g.add(m); }
-  g.userData = { kind, muzzle: new THREE.Vector3(0, 0, L + 0.09) };
+  g.userData = { kind, muzzle: new THREE.Vector3(0, 0, L + 0.09),
+    gripR: new THREE.Vector3(-0.027, -0.025, 0.225), gripL: new THREE.Vector3(0.07, -0.055, kind === 'heavy' ? 0.48 : 0.46) };
   return g;
 }
 

@@ -13,6 +13,11 @@ export function flankPoint(pos, target, side, distance, angle = 0.65) {
   const dx = pos.x - target.x, dz = pos.z - target.z, a = Math.atan2(dx, dz) + side * angle;
   return { x: target.x + Math.sin(a) * distance, z: target.z + Math.cos(a) * distance };
 }
+// 搜索最後通報位置的不同扇區；不讀取躲藏玩家的位置，三秒才換一次方向。
+export function searchPoint(contact, elapsed, side, radius, id = 0) {
+  const angle = id * 2.399963 + Math.floor(Math.max(0, elapsed) / 3) * side * Math.PI / 3;
+  return { x: contact.x + Math.sin(angle) * radius, z: contact.z + Math.cos(angle) * radius };
+}
 // 包抄方向避開同伴的進攻線；僅使用已看見或通報的目標位置。
 export function squadFlank(pos, target, allies, self, side, distance, angle = 0.65) {
   const a = flankPoint(pos, target, side, distance, angle), b = flankPoint(pos, target, -side, distance, angle);

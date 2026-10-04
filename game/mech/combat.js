@@ -4,7 +4,7 @@ import { Mech } from './mechs.js';
 import { Vehicles, VKIND } from './vehicles.js';
 import { parse, encGroups, setRoute, Encounter } from './encounter.js';
 import { STAGE_DATA } from './stages.js';
-import { steer, squadFlank, coveringFire, shareContact, flankAvailable, segmentBox, routeDirection, allyInLane } from './tactics.js';
+import { steer, squadFlank, searchPoint, coveringFire, shareContact, flankAvailable, segmentBox, routeDirection, allyInLane } from './tactics.js';
 import { FLIGHT, airInterceptHeight, rayCapsule } from './flight.mjs';
 
 const clamp = THREE.MathUtils.clamp;
@@ -940,7 +940,8 @@ export class Combat {
         e.navGoal.copy(e.pos).addScaledVector(wish, 70);
         // 側翼繞到另一個射角；失去視線只追最後看見的位置。
         if (hunt || e.role === 'flank' && dist > lo) {
-          const goal = rush ? e.pushGoal : hunt ? e.lastSeen : squadFlank(e.pos, e.lastSeen, this.enemies, e, e.flankSide, rush ? Math.max(lo, dist - 60) : (lo + hi) * 0.5);
+          const goal = rush ? e.pushGoal : hunt ? dist < 60 ? searchPoint(e.lastSeen, e.noLos, e.flankSide, 40, e.id) : e.lastSeen
+            : squadFlank(e.pos, e.lastSeen, this.enemies, e, e.flankSide, (lo + hi) * 0.5);
           e.navGoal.set(goal.x, e.pos.y, goal.z);
           wish.set(goal.x - e.pos.x, 0, goal.z - e.pos.z).normalize();
         }
