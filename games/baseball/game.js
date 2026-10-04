@@ -839,7 +839,7 @@ function update(dt){
   G.tgt.x+=kx*flip*aimSpeed*dt; G.tgt.y+=ky*aimSpeed*dt;
   const mx=PLATE_HALF+0.75; G.tgt.x=clamp(G.tgt.x,-mx,mx); G.tgt.y=clamp(G.tgt.y,br.szBot-0.75,br.szTop+0.75);
   const sp=G.mode==='pitch'?14:18, dx=G.tgt.x-G.cur.x, dy=G.tgt.y-G.cur.y, dd=Math.hypot(dx,dy);
-  const locked = G.mode==='bat' ? (G.swing && swingTime()<0.4) : (!['aim','closeup'].includes(G.state) || (window.FEEL&&FEEL.meterActive()));
+  const locked = G.mode==='bat' ? (G.swing && swingTime()<0.4 && !(touchLast&&!G.swing.done)) : (!['aim','closeup'].includes(G.state) || (window.FEEL&&FEEL.meterActive()));
   if(!locked){ if(dd>sp*dt){G.cur.x+=dx/dd*sp*dt; G.cur.y+=dy/dd*sp*dt;} else {G.cur.x=G.tgt.x; G.cur.y=G.tgt.y;} }
 
   if(G.state==='closeup'){
@@ -1028,11 +1028,12 @@ addEventListener('keydown',e=>{
 addEventListener('keyup',e=>{ const k=e.key.length===1?e.key.toLowerCase():e.key; keys[k]=false; });
 addEventListener('blur',()=>{ for(const k in keys) keys[k]=false; touchLast=null; });
 let touchLast=null;
-canvas.addEventListener('touchstart',e=>{ if(!G.camFixed||G.state==='tactic') return; const t=e.touches[0]; touchLast={x:t.clientX,y:t.clientY}; e.preventDefault(); },{passive:false});
-canvas.addEventListener('touchmove',e=>{ if(!G.camFixed||G.state==='tactic') return; const t=e.touches[0]; if(touchLast){ const f=G.mode==='pitch'?-0.02:0.02; G.tgt.x+=(t.clientX-touchLast.x)*f; G.tgt.y-=(t.clientY-touchLast.y)*Math.abs(f); } touchLast={x:t.clientX,y:t.clientY}; e.preventDefault(); },{passive:false});
-canvas.addEventListener('touchend',()=>touchLast=null);
-canvas.addEventListener('touchcancel',()=>touchLast=null);
-const tap=(id,fn)=>{ $(id).addEventListener('touchstart',e=>{e.preventDefault();fn();}); $(id).addEventListener('click',fn); };
+canvas.addEventListener('touchstart',e=>{ if(!G.camFixed||G.state==='tactic') return; if(!touchLast){ const t=e.changedTouches[0]; touchLast={id:t.identifier,x:t.clientX,y:t.clientY}; } e.preventDefault(); },{passive:false});
+canvas.addEventListener('touchmove',e=>{ if(!G.camFixed||G.state==='tactic'){ touchLast=null; return; } if(!touchLast) return; const t=Array.from(e.touches).find(t=>t.identifier===touchLast.id); if(!t) return; const f=G.mode==='pitch'?-0.02:0.02; G.tgt.x+=(t.clientX-touchLast.x)*f; G.tgt.y-=(t.clientY-touchLast.y)*Math.abs(f); touchLast={id:t.identifier,x:t.clientX,y:t.clientY}; e.preventDefault(); },{passive:false});
+const endAimTouch=e=>{ if(touchLast&&Array.from(e.changedTouches).some(t=>t.identifier===touchLast.id)) touchLast=null; };
+canvas.addEventListener('touchend',endAimTouch);
+canvas.addEventListener('touchcancel',endAimTouch);
+const tap=(id,fn)=>{ const el=$(id); el.addEventListener('touchstart',e=>{e.preventDefault();if(!el.disabled)fn();},{passive:false}); el.addEventListener('click',fn); };
 tap('tAbtn',()=>G.mode==='pitch'?throwPitch():swing('meet'));
 tap('tBbtn',()=>swing('power'));
 $('skipBtn').onclick=skipPA; $('simBtn').onclick=simHalf;
