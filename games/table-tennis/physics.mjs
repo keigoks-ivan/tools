@@ -12,6 +12,8 @@ const CONTACT_NEAR = 1.42;
 const CONTACT_FAR = 1.78;
 const SWING_DURATION = 0.40;
 const WINDUP = 0.12;
+const SERVE_PREPARATION = 0.48;
+const SERVE_RECOVERY = 0.30;
 
 export function serverFor(score, firstServer = 1) {
   const total = score[0] + score[1];
@@ -163,14 +165,15 @@ export class Match {
     if (this.phase !== 'ready' || this.pendingServe) return false;
     const side = this.server;
     const target = { x: clamp(side === 1 ? this.playerX : this.opponentX, -0.42, 0.42), y: 1.15, z: side * 1.28 };
-    const contactDelay = 0.16;
+    const contactDelay = SERVE_PREPARATION;
+    const duration = contactDelay + SERVE_RECOVERY;
     const key = side === 1 ? 'playerSwing' : 'opponentSwing';
     this.pendingServe = { side, startedAt: this.clock, at: this.clock + contactDelay, target };
     this[key] = { startedAt: this.clock, activeAt: this.clock + contactDelay,
-      activeUntil: this.clock + contactDelay, until: this.clock + SWING_DURATION,
+      activeUntil: this.clock + contactDelay, until: this.clock + duration,
       contactDelay, handedness: 'forehand', target, shot: { power: 0.3, spin: 0 }, serve: true, hit: false };
     this.onEvent({ type: 'swing', side, handedness: 'forehand', ...target, power: 0.3, spin: 0,
-      duration: SWING_DURATION, contactDelay, contactTime: this.pendingServe.at, serve: true });
+      duration, contactDelay, contactTime: this.pendingServe.at, serve: true });
     return true;
   }
   canHit(side) {
@@ -285,10 +288,10 @@ export class Match {
     if (this.phase === 'point' && this.clock >= this.nextAt) {
       this.phase = 'ready';
       this.ball = null;
-      this.autoServeAt = this.clock + (this.practice ? 0.35 : 0.9);
+      this.autoServeAt = this.clock + Math.max(this.practice ? 0.35 : 0.9, SERVE_PREPARATION);
       this.onEvent({ type: 'ready', server: this.server });
     }
-    if (this.phase === 'ready' && !this.pendingServe && (this.server === -1 || this.practice) && this.clock >= this.autoServeAt - 0.16) this.prepareServe();
+    if (this.phase === 'ready' && !this.pendingServe && (this.server === -1 || this.practice) && this.clock >= this.autoServeAt - SERVE_PREPARATION) this.prepareServe();
     if (this.pendingServe && this.clock >= this.pendingServe.at) this.serve();
     if (this.phase !== 'rally') return;
     const opponentContact = this.contact(-1);

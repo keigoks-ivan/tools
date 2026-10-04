@@ -58,22 +58,32 @@ test('a serve input starts a visible preparation before launching the ball and p
   assert.equal(match.strike(), false);
   const swing = events.find(e => e.type === 'swing');
   assert.equal(swing.at, 0);
-  assert.equal(swing.contactTime, 0.16);
+  assert.equal(swing.contactTime, 0.48);
+  assert.equal(swing.contactDelay, 0.48);
+  assert.equal(swing.duration, 0.78);
   assert.equal(swing.serve, true);
   assert.equal(swing.handedness, 'forehand');
-  for (let i = 0; i < 35; i++) match.step(DT);
+  for (let i = 0; i < 115; i++) {
+    match.step(DT);
+    assert.equal(match.strike(), false, 'inputs during preparation cannot queue another serve');
+  }
   assert.equal(match.ball, null);
   until(match, () => match.phase === 'rally', 0.1);
   const serve = events.find(e => e.type === 'serve');
-  assert.ok(serve.at >= 0.16 && serve.at < 0.16 + DT);
+  assert.ok(serve.at >= 0.48 && serve.at < 0.48 + DT);
   assert.deepEqual([serve.x, serve.y, serve.z], [swing.x, swing.y, swing.z]);
   assert.equal(match.pendingServe, null);
   assert.equal(match.playerSwing.hit, true);
   assert.equal(match.playerSwing.serve, true);
+  assert.equal(match.playerSwing.until, 0.78);
   assert.equal(match.inputReady, false, 'the visible follow-through continues after launch');
-  until(match, () => match.inputReady, 0.3);
+  assert.equal(match.serve(), false, 'the launched serve cannot be struck twice');
+  until(match, () => match.inputReady, 0.31);
   assert.equal(events.filter(e => e.type === 'serve').length, 1);
   assert.equal(events.filter(e => e.type === 'miss').length, 0);
+  assert.equal(match.strike(), true);
+  assert.equal(events.at(-1).type, 'swing');
+  assert.equal(events.at(-1).at, match.clock, 'the first input after recovery starts immediately');
 });
 
 test('automatic practice and opponent serves each prepare once before launch', () => {
@@ -88,9 +98,11 @@ test('automatic practice and opponent serves each prepare once before launch', (
     assert.equal(match.ball, null);
     match.step(0.1);
     assert.equal(match.ball, null);
-    until(match, () => match.phase === 'rally', 0.1);
+    until(match, () => match.phase === 'rally', 0.4);
     const serve = events.find(e => e.type === 'serve');
-    assert.ok(serve.at - swing.at >= 0.16);
+    assert.ok(serve.at - swing.at >= 0.48);
+    assert.ok(serve.at - swing.at < 0.48 + DT);
+    assert.ok(serve.at >= match.autoServeAt && serve.at < match.autoServeAt + DT * 2);
     assert.equal(events.filter(e => e.type === 'swing').length, 1);
     assert.equal(events.filter(e => e.type === 'serve').length, 1);
     assert.ok(server === 1 ? match.playerSwing : match.opponentSwing);
@@ -241,14 +253,17 @@ test('a net-touch serve is a let and practice starts another serve after a point
 });
 
 test('fixed simulation steps give identical outcomes at different render rates', () => {
-  function simulate(dt) {
+  function simulate(dt, prepared = false) {
     const { match, events } = setup();
+    if (prepared) { match.start('easy'); events.length = 0; match.strike(); }
     for (let i = 0; i < Math.round(1.2 / dt); i++) match.step(dt, 0.3);
     return { ball: match.ball, playerX: match.playerX, opponentX: match.opponentX, clock: match.clock,
       events: events.map(e => ({ type: e.type, side: e.side, at: e.at })) };
   }
   assert.deepEqual(simulate(1 / 60), simulate(1 / 120));
   assert.deepEqual(simulate(1 / 30), simulate(1 / 240));
+  assert.deepEqual(simulate(1 / 60, true), simulate(1 / 120, true));
+  assert.deepEqual(simulate(1 / 30, true), simulate(1 / 240, true));
 });
 
 test('a cached contact prediction counts down and is refreshed after each bounce', () => {

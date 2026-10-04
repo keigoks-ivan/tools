@@ -4,36 +4,39 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#171d1c">
-<meta name="description" content="3D 桌球對戰：控制站位、揮拍時機與旋轉，在球館裡打一局。">
-<title>RALLY — 桌球俱樂部</title>
-<link rel="stylesheet" href="style.css?v=2">
+<meta name="theme-color" content="#090e18">
+<meta name="description" content="3D 競技桌球：在燈光球場中對拉，掌握揮拍時機、旋轉與落點。">
+<title>RALLY — 競技桌球</title>
+<link rel="stylesheet" href="style.css?v=3">
 <script type="importmap">{"imports":{"three":"../../game/lib/three.module.js"}}</script>
 </head>
 <body>
 <header class="topbar">
   <a class="back" href="../" aria-label="回到遊戲機台">↖ <span data-en="Games">遊戲機台</span></a>
-  <div class="brand">RALLY<span data-en="TABLE TENNIS CLUB">桌球俱樂部</span></div>
+  <div class="brand">RALLY<span data-en="TABLE TENNIS ARENA">競技桌球</span></div>
   <div class="tools"><button id="language" aria-label="Switch language">EN</button><button id="sound" aria-pressed="false" data-en="Sound off">音效關</button><button id="pause" aria-label="暫停比賽" data-en="Pause">暫停</button></div>
 </header>
 <main class="layout">
   <section class="court" id="court" aria-label="桌球球場">
     <canvas id="game" tabindex="0" aria-label="移動滑鼠選落點，點一下或按空白鍵揮拍。手機拖曳選落點，按揮拍擊球。"></canvas>
-    <div class="venue"><i></i><span data-en="COURT 01">01 號球桌</span><span class="venue-light" data-en="Afternoon session">午後練球</span></div>
+    <div class="venue"><i></i><span data-en="CENTRE COURT">中央球場</span><span class="venue-light" data-en="MATCH SESSION">競賽練習</span></div>
     <div class="scoreboard">
       <div class="team"><span class="serve-dot" id="yourServe"></span><span data-en="YOU / LEFT">你 / 左手</span><strong id="yourScore">00</strong></div>
       <span class="score-divider">:</span>
       <div class="team"><strong id="aiScore">00</strong><span data-en="AI / RIGHT">AI / 右手</span><span class="serve-dot" id="aiServe"></span></div>
       <small id="format">對拉練習 · 自動開始下一球</small>
     </div>
+    <button class="camera-button" id="camera" aria-pressed="false" data-en="Broadcast view">轉播鏡頭</button>
+    <div class="demo-badge" id="demoBadge" hidden data-en="MOTION DEMO · TAP SWING TO PLAY">動作示範 · 按揮拍接手</div>
     <div class="rally-pill"><span data-en="RALLY">連續回合</span><strong id="rallyCount">0</strong></div>
     <div class="contact-cue" id="contactCue" hidden aria-hidden="true"></div>
     <div class="callout" id="callout" role="status" aria-live="polite"></div>
     <div class="start-panel" id="startPanel">
-      <div class="eyebrow">LET’S PLAY</div>
-      <h1 data-en="Find your rhythm.">先對拉幾球。</h1>
-      <p data-en="Aim with the mouse. Click once to swing. Your player handles the footwork.">滑鼠選落點，點一下揮拍。球員會自動調整站位。</p>
+      <div class="eyebrow">STEP INTO THE ARENA</div>
+      <h1 data-en="Every ball. Every move.">跟上每一球。</h1>
+      <p data-en="Choose your placement. Watch the bounce, then swing. Automatic footwork keeps you in position.">選落點、看落桌，再揮拍。用自動步法，先抓住對拉節奏。</p>
       <button class="primary" id="start"><span data-en="Start playing">開始練球</span><b>↗</b></button>
+      <button class="demo-button" id="demo" data-en="Watch a rally first →">先看對拉示範 →</button>
       <small data-en="Mouse, touch or keyboard">支援滑鼠、觸控與鍵盤</small>
     </div>
     <div class="pause-panel" id="pausePanel" hidden><h2 data-en="Take a breath.">休息一下。</h2><button class="primary" id="resume" data-en="Back to the table">繼續比賽</button></div>
@@ -42,7 +45,7 @@
       <div class="timing"><span id="timingLabel" data-en="WATCH THE BALL">看來球，跟上節奏</span><div class="timing-track"><i class="timing-zone"></i><i class="timing-marker" id="timingMarker"></i></div></div>
       <button class="stroke-button" id="stroke"><span id="strokeLabel" data-en="SWING">揮拍</span><b>↗</b></button>
     </div>
-    <div class="loading" id="loading" data-en="Opening the club…">正在打開球館…</div>
+    <div class="loading" id="loading" data-en="Preparing the arena…">正在準備球場…</div>
   </section>
   <aside class="sidebar">
     <div class="section-heading"><span>01 / <span data-en="MATCH SETUP">對戰設定</span></span><span class="live-dot"></span></div>
@@ -63,7 +66,7 @@
     <button class="reset" id="reset" data-en="↻ Restart game">↻ 重新開始</button>
   </aside>
 </main>
-<footer><span>RALLY / TABLE TENNIS CLUB</span><a href="https://www.youtube.com/watch?v=m8DybsKawQs" target="_blank" rel="noopener" data-en="Motion reference: Lin Yun-Ju / Tomokazu Harimoto · WTT">動作參考：林昀儒／張本智和 · WTT</a></footer>
-<script type="module" src="main.js?v=2"></script>
+<footer><span>RALLY / TABLE TENNIS ARENA</span><a href="https://www.youtube.com/watch?v=m8DybsKawQs" target="_blank" rel="noopener" data-en="Motion reference: Lin Yun-Ju / Tomokazu Harimoto · WTT">動作參考：林昀儒／張本智和 · WTT</a></footer>
+<script type="module" src="main.js?v=3"></script>
 </body>
 </html>

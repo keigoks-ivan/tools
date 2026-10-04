@@ -1,10 +1,10 @@
-import { Match, clamp } from './physics.mjs?v=2';
-import { createScene } from './scene.js?v=2';
+import { Match, clamp } from './physics.mjs?v=3';
+import { createScene } from './scene.js?v=3';
 
 const $ = id => document.getElementById(id), canvas = $('game');
 let view = null, paused = false, language = 'zh', aim = 0, spin = 1, mode = 'practice';
 let targetX = 0, callUntil = 0, audio = null, sound = false, touch = null;
-let renderTime = 0, previous = performance.now(), started = false, lastCoach = 'welcome';
+let renderTime = 0, previous = performance.now(), started = false, lastCoach = 'welcome', demonstrating = false, cameraMode = 'broadcast';
 const keys = new Set(), zhText = new Map();
 document.querySelectorAll('[data-en]').forEach(el => zhText.set(el, el.innerHTML));
 const coaches = {
@@ -59,10 +59,12 @@ function updateHud() {
   $('yourServe').classList.toggle('active', match.server === 1); $('aiServe').classList.toggle('active', match.server === -1);
   $('rallyCount').textContent = match.shots; $('bestRally').textContent = match.best; $('speed').textContent = match.lastSpeed ? Math.round(match.lastSpeed) : '—';
   $('format').textContent = mode === 'practice' ? t('對拉練習 · 自動開始下一球', 'RALLY PRACTICE · AUTO RESTART') : t('11 分制 · 領先 2 分獲勝', 'FIRST TO 11 · WIN BY 2');
-  $('strokeLabel').textContent = match.phase === 'ready' && match.server === 1 ? t('發球', 'SERVE') : t('揮拍', 'SWING');
-  $('stroke').disabled = !started || paused || !match.inputReady;
+  $('strokeLabel').textContent = demonstrating ? t('接手操作', 'TAKE CONTROL') : match.phase === 'ready' && match.server === 1 ? t('發球', 'SERVE') : t('揮拍', 'SWING');
+  $('stroke').disabled = !started || paused || (!demonstrating && !match.inputReady);
 }
-function start() {
+function start(isDemo = false) {
+  demonstrating = isDemo; $('demoBadge').hidden = !demonstrating;
+  if (demonstrating) { mode = 'practice'; document.querySelectorAll('[data-mode]').forEach(btn => { const selected = btn.dataset.mode === mode; btn.classList.toggle('selected', selected); btn.setAttribute('aria-pressed', String(selected)); }); }
   unlockAudio(); started = true; paused = false; touch = null; targetX = 0; keys.clear(); view?.reset();
   $('startPanel').hidden = true; $('resultPanel').hidden = true; $('pausePanel').hidden = true; $('difficulty').disabled = true;
   document.querySelectorAll('[data-mode]').forEach(btn => { btn.disabled = true; }); $('pause').textContent = t('暫停', 'Pause'); $('callout').classList.remove('show');
@@ -83,11 +85,13 @@ function setSpin(value) {
 function setAim(value) {
   aim = clamp(value, -1, 1); document.querySelectorAll('[data-aim]').forEach(btn => { const selected = Math.abs(Number(btn.dataset.aim) - aim) < 0.15; btn.classList.toggle('selected', selected); btn.setAttribute('aria-pressed', String(selected)); });
 }
-function swing() { if (!started || paused || !match.inputReady) return; unlockAudio(); match.strike({ aim, power: Number($('power').value) / 100, spin, assist: $('assist').checked }); updateHud(); }
+function swing() { if (!started || paused) return; if (demonstrating) { demonstrating = false; $('demoBadge').hidden = true; coach('welcome'); updateHud(); return; } if (!match.inputReady) return; unlockAudio(); match.strike({ aim, power: Number($('power').value) / 100, spin, assist: $('assist').checked }); updateHud(); }
 function pointAt(event) { if (paused || !view) return; if ($('assist').checked) setAim(view.aimTarget(event.clientX)); else targetX = view.moveTarget(event.clientX); }
-$('start').addEventListener('click', start); $('again').addEventListener('click', start);
+$('start').addEventListener('click', () => start()); $('again').addEventListener('click', () => start());
+$('demo').addEventListener('click', () => start(true));
+$('camera').addEventListener('click', () => { cameraMode = cameraMode === 'broadcast' ? 'player' : 'broadcast'; view?.setCamera(cameraMode); $('camera').setAttribute('aria-pressed', String(cameraMode === 'player')); $('camera').textContent = cameraMode === 'player' ? t('選手鏡頭', 'Player view') : t('轉播鏡頭', 'Broadcast view'); });
 $('reset').addEventListener('click', () => {
-  started = false; paused = false; touch = null; keys.clear(); targetX = 0; match.reset(); view?.reset(); $('startPanel').hidden = false; $('resultPanel').hidden = true; $('pausePanel').hidden = true; $('difficulty').disabled = false;
+  started = false; paused = false; demonstrating = false; $('demoBadge').hidden = true; touch = null; keys.clear(); targetX = 0; match.reset(); view?.reset(); $('startPanel').hidden = false; $('resultPanel').hidden = true; $('pausePanel').hidden = true; $('difficulty').disabled = false;
   document.querySelectorAll('[data-mode]').forEach(btn => { btn.disabled = false; }); $('pause').textContent = t('暫停', 'Pause'); $('callout').classList.remove('show'); coach('welcome'); updateHud();
 });
 $('pause').addEventListener('click', () => pause()); $('resume').addEventListener('click', () => pause(false));
@@ -95,7 +99,7 @@ $('sound').addEventListener('click', () => { sound = !sound; unlockAudio(); $('s
 $('language').addEventListener('click', () => {
   language = language === 'zh' ? 'en' : 'zh'; document.documentElement.lang = language === 'zh' ? 'zh-Hant' : 'en';
   document.querySelectorAll('[data-en]').forEach(el => { if (language === 'en') el.textContent = el.dataset.en; else el.innerHTML = zhText.get(el); }); $('language').textContent = language === 'zh' ? 'EN' : '中文';
-  $('sound').textContent = sound ? t('音效開', 'Sound on') : t('音效關', 'Sound off'); $('pause').textContent = paused ? t('繼續', 'Resume') : t('暫停', 'Pause'); coach(lastCoach); if (match.phase === 'over') showResult(); updateHud();
+  $('sound').textContent = sound ? t('音效開', 'Sound on') : t('音效關', 'Sound off'); $('pause').textContent = paused ? t('繼續', 'Resume') : t('暫停', 'Pause'); $('camera').textContent = cameraMode === 'player' ? t('選手鏡頭', 'Player view') : t('轉播鏡頭', 'Broadcast view'); coach(lastCoach); if (match.phase === 'over') showResult(); updateHud();
 });
 document.querySelectorAll('[data-mode]').forEach(btn => btn.addEventListener('click', () => { mode = btn.dataset.mode; document.querySelectorAll('[data-mode]').forEach(item => { const selected = item === btn; item.classList.toggle('selected', selected); item.setAttribute('aria-pressed', String(selected)); }); updateHud(); }));
 document.querySelectorAll('[data-spin]').forEach(btn => btn.addEventListener('click', () => setSpin(Number(btn.dataset.spin)))); document.querySelectorAll('[data-aim]').forEach(btn => btn.addEventListener('click', () => setAim(Number(btn.dataset.aim))));
@@ -110,7 +114,8 @@ canvas.addEventListener('pointerdown', event => {
   else if (!touch) { touch = { id: event.pointerId, x: event.clientX, y: event.clientY, dragged: false }; canvas.setPointerCapture(event.pointerId); pointAt(event); }
 });
 canvas.addEventListener('pointerup', event => { if (touch?.id === event.pointerId) { const tap = !touch.dragged; touch = null; if (tap) swing(); } }); canvas.addEventListener('pointercancel', event => { if (touch?.id === event.pointerId) touch = null; });
-$('stroke').addEventListener('click', swing);
+$('stroke').addEventListener('pointerdown', event => { if (event.button !== 0) return; event.preventDefault(); canvas.focus({ preventScroll: true }); swing(); });
+$('stroke').addEventListener('click', event => { if (event.detail === 0) swing(); });
 window.addEventListener('keydown', event => {
   if (event.target instanceof HTMLSelectElement || event.target instanceof HTMLInputElement || !started) return;
   const key = event.key.toLowerCase(); if ([' ', 'arrowleft', 'arrowright', 'a', 'd', 'p', 'escape', '1', '2', '3'].includes(key)) event.preventDefault(); if (event.repeat) return;
@@ -118,23 +123,24 @@ window.addEventListener('keydown', event => {
   keys.add(key); if (key === ' ') swing(); if (key === '1') setSpin(1); if (key === '2') setSpin(0); if (key === '3') setSpin(-1); if (key === 'arrowleft') setAim(aim - 0.5); if (key === 'arrowright') setAim(aim + 0.5);
 });
 window.addEventListener('keyup', event => keys.delete(event.key.toLowerCase())); window.addEventListener('blur', () => pause(true)); document.addEventListener('visibilitychange', () => { if (document.hidden) pause(true); });
-function contextLost() { pause(true); $('loading').hidden = false; $('loading').textContent = t('畫面暫時中斷。重新整理頁面即可回到球館。', 'The court view was interrupted. Reload to reopen the club.'); }
-try { view = createScene(canvas, $('court'), contextLost); $('loading').hidden = true; } catch (error) { console.error(error); $('loading').textContent = t('球館無法開啟。請開啟瀏覽器硬體加速後重新整理。', 'Could not open the club. Enable hardware acceleration and reload.'); }
+function contextLost() { pause(true); $('loading').hidden = false; $('loading').textContent = t('畫面暫時中斷。重新整理頁面即可回到球場。', 'The court view was interrupted. Reload to reopen the arena.'); }
+try { view = createScene(canvas, $('court'), contextLost); $('loading').hidden = true; } catch (error) { console.error(error); $('loading').textContent = t('球場無法開啟。請開啟瀏覽器硬體加速後重新整理。', 'Could not open the arena. Enable hardware acceleration and reload.'); }
 coach('welcome'); updateHud();
 function frame(now) {
   requestAnimationFrame(frame); const dt = Math.min((now - previous) / 1000, 0.25); previous = now;
   if (!paused) {
     if (!started) renderTime += dt;
     else {
+      if (demonstrating && match.timingReady) { setAim(Math.sin(match.totalHits * 1.31) * 0.62); match.strike({ aim, power: 0.55, spin: match.totalHits % 7 === 4 ? 0 : 1, assist: true }); }
       const contact = match.contact(1);
-      if ($('assist').checked) {
+      if ($('assist').checked || demonstrating) {
         if (contact?.legal) targetX = clamp(contact.x + (contact.x < 0 ? 0.22 : -0.16), -1.1, 1.1);
         else if (!match.playerSwing || match.clock > match.playerSwing.startedAt + match.playerSwing.contactDelay + 0.15) targetX = 0;
       } else { if (keys.has('a')) targetX -= dt * 2.1; if (keys.has('d')) targetX += dt * 2.1; targetX = clamp(targetX, -1.1, 1.1); }
       for (let remaining = dt; remaining > 0.00001; remaining -= 0.1) match.step(Math.min(remaining, 0.1), targetX); renderTime = match.clock;
     }
   }
-  const contact = match.contact(1), ready = started && !paused && match.timingReady;
+  const contact = match.contact(1), ready = started && !paused && match.timingReady && contact.time >= 0.12;
   $('court').classList.toggle('ready-to-swing', Boolean(ready)); $('stroke').dataset.ready = String(Boolean(ready));
   $('timingMarker').style.left = `${contact ? clamp((0.7 - contact.time) / 0.7 * 100, 0, 100) : 0}%`;
   $('timingLabel').textContent = paused ? t('暫停中', 'PAUSED') : ready ? t('現在揮拍', 'SWING NOW') : match.playerSwing ? t('揮拍中 · 準備還原', 'STROKE / RECOVER') : contact ? t('看來球 · 等待時機', 'WATCH THE BALL') : match.phase === 'ready' ? t('準備發球', 'READY TO SERVE') : t('還原 · 準備下一球', 'RECOVER / NEXT BALL'); updateHud();
