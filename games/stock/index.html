@@ -7,7 +7,7 @@
 <title>盤感 LAB 新手版</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;700;900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=1">
+<link rel="stylesheet" href="style.css?v=2">
 </head>
 <body>
 <a class="back" href="/games/" aria-label="返回遊戲大廳">← 遊戲大廳</a>
@@ -16,12 +16,20 @@
   <section id="start" class="screen">
     <h1>盤感 LAB <em>新手版</em></h1>
     <ol class="howto">
-      <li>隨機抽一檔股票，先看前 60 個交易日的走勢。</li>
+      <li>先看前 60 個交易日的走勢。「隨機一局」會抽一檔股票，「名場面」是一段歷史行情。</li>
       <li>接著玩 60 個交易日，每天用收盤價買進或賣出。</li>
-      <li>結束後跟「買進放著不動」比一比，看誰賺得多。</li>
+      <li>結束後跟「買進放著不動」和三位電腦對手比一比，看誰賺得多。</li>
     </ol>
-    <button id="startBtn" class="big primary">開始新的一局</button>
+    <button id="startBtn" class="big primary">隨機一局</button>
+    <button id="sceneBtn" class="big alt">名場面</button>
     <p id="best" class="muted"></p>
+  </section>
+
+  <section id="levels" class="screen" hidden>
+    <h2>名場面</h2>
+    <p class="muted">每一關是一段真實行情，玩完才揭曉是哪一段。打贏「買進放著不動」會打 ✓。</p>
+    <div id="levelList" class="levels"></div>
+    <button id="levelsBack" class="mid wide">← 回首頁</button>
   </section>
 
   <section id="game" class="screen" hidden>
@@ -65,19 +73,26 @@
     <h2>本局結果</h2>
     <p id="rName" class="rname"></p>
     <p id="rRange" class="muted"></p>
+    <div id="rScene" class="scene" hidden>
+      <b id="rSceneTitle"></b>
+      <p id="rSceneText"></p>
+    </div>
     <div class="cards">
       <div class="rc"><span>你的報酬率</span><b id="rYou">—</b></div>
       <div class="rc"><span>買進後放著不動</span><b id="rHold">—</b></div>
     </div>
     <p id="rVerdict" class="verdict"></p>
+    <ol id="rRank" class="rank"></ol>
     <ul class="rlist">
       <li>交易次數：<b id="rTrades">0</b> 次</li>
       <li>最終資產：<b id="rEquity">—</b></li>
-      <li>放著不動的算法：第 1 天收盤全部買進，抱到結束。</li>
+      <li>電腦對手跟你用同一段價格、同樣的起始資金，每天收盤成交，不收手續費，只買整股。</li>
     </ul>
+    <button id="nextLevelBtn" class="big primary" hidden>下一關 ▶</button>
+    <button id="backLevelsBtn" class="big alt" hidden>回關卡列表</button>
     <button id="againBtn" class="big primary">再玩一局</button>
   </section>
 </main>
-<script src="app.js?v=1"></script>
+<script src="app.js?v=2"></script>
 </body>
 </html>
