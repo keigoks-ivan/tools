@@ -81,8 +81,39 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
   // ---- 任務用（script.js 的 targets／pickups 用 id 找）
   // 要炸掉的目標：可破壞的道具（destruct.js 的 BRK 裡有的模型，例如 portable_generator、utility_box_02）；沒有模型就不放，那一段的「炸掉目標」自動算完成
   const target = (id, name, x, z, ry = 0, y = 0, o = {}) => { const h = PL && PL.M.has(name) ? PL.add(name, x, y, z, ry, { solid: true, hit: 'metal', ...o }) : null; if (h) M.targets[id] = { h, p: new THREE.Vector3(x, y + 0.9, z) }; };
-  // 要撿的東西（情報、零件）：走近按 E；name＝擺在那裡的模型（可以是 null，只標位置）
-  const item = (id, name, x, y, z, ry = 0, o = {}) => { const h = name && PL && PL.M.has(name) ? PL.add(name, x, y, z, ry, { cast: false, ...o }) : null; M.items[id] = { h, p: new THREE.Vector3(x, y, z) }; };
+  // 任務物件併進既有桶；收取只改其頂點範圍，重玩可原位還原，不依賴掃描模型下載。
+  const itemPart = draw => {
+    const starts = new Map([...new Set(Object.values(b.B))].map(bucket => [bucket, bucket.p.length]));
+    draw();
+    const ranges = [...starts].filter(([bucket, start]) => bucket.p.length > start).map(([bucket, start]) => ({ bucket, start, data: new Float32Array(bucket.p.slice(start)) }));
+    let visible = true;
+    const set = on => {
+      if (on === visible) return; visible = on;
+      for (const {bucket, start, data} of ranges) {
+        const position = bucket.mesh?.geometry.attributes.position, array = position?.array || bucket.p;
+        if (on) for (let i = 0; i < data.length; i++) array[start + i] = data[i];
+        else array.fill(0, start, start + data.length);
+        if (position) position.needsUpdate = true;
+      }
+    };
+    return { get visible() { return visible; }, hide() { set(false); }, show() { set(true); }, reset() { set(true); } };
+  };
+  const item = (id, x, y, z, ry, draw) => {
+    const c = Math.cos(ry), s = Math.sin(ry);
+    const box = (mat, px, py, pz, w, h, d, tint = [1, 1, 1]) => b.obox(mat, x + px * c + pz * s, y + py + h / 2, z - px * s + pz * c, w / 2, h / 2, d / 2, ry, { solid: false, noBottom: true, shade: () => 1, tint });
+    const mesh = (mat, geo, px, py, pz, tint = [1, 1, 1]) => b.mesh(mat, geo, x + px * c + pz * s, y + py, z - px * s + pz * c, ry, { shade: 1, tint });
+    M.items[id] = { h: itemPart(() => draw(box, mesh)), p: new THREE.Vector3(x, y, z), pin: new THREE.Vector3(x, y + .14, z) };
+  };
+  const record = (id, x, y, z, ry, tint, bound = false) => item(id, x, y, z, ry, box => {
+    const w = id === 'rec_a' ? .46 : .37, d = id === 'rec_a' ? .52 : .46, base = id === 'codes' ? .035 : .008;
+    box('canvas', 0, base, 0, w, .018, d, tint);
+    box('canvas', .008, base + .018, 0, w - .028, bound ? .045 : .024, d - .025, [.88, .88, .81]);
+    if (bound) { box('canvas', 0, base + .063, 0, w, .014, d, tint); box('canvas', -w / 2 + .012, base + .006, 0, .024, .071, d, tint); }
+    else box('metal', 0, base + .042, -d / 2 + .045, .13, .015, .045, [.76, .77, .73]);
+    const top = base + (bound ? .078 : .044);
+    box('canvas', 0, top, -.06, w * .58, .002, .16, [.96, .95, .88]);
+    for (let row = 0; row < 3; row++) box('canvas', -.015, top + .002, -.105 + row * .045, w * .43, .002, .006, [.38, .45, .43]);
+  });
   // 固定雜湊（不動到地圖 rnd 的順序）、攤位帆布的幾種褪色
   const ph = (x, z) => { const v = Math.sin(x * 12.9898 + z * 78.233) * 43758.5453; return v - Math.floor(v); };
   const TARP = [[0.36, 0.46, 0.6], [0.62, 0.3, 0.24], [0.44, 0.47, 0.34], [0.76, 0.72, 0.64], [0.72, 0.46, 0.24]];
@@ -765,19 +796,27 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
     }
     M.lights.push({ p: new THREE.Vector3(-63, 2.9, -57), c: 0xffe2c0, i: 22, d: 12 });
   }, [-66, -60, -62, -52, 10, 'nw', { kit: 'factory' }]);
-  // 據點裡撿得起來的東西：桌上的無線電、密碼本（小網格，撿走就藏起來）；牆上的地圖只標位置
+  // 無線電與密碼本放在桌面上；掃描桌子的高度 .787m，封面不再埋進桌板。
   {
-    const put = (id, x, y, z, ry, parts) => {
-      const g = new THREE.Group();
-      for (const [w, h, d, px, py, pz, mat] of parts) { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); m.position.set(px, py + h / 2, pz); m.userData.noAO = true; g.add(m); }
-      g.position.set(x, y, z); g.rotation.y = ry; scene.add(g);
-      M.items[id] = { h: { hide() { g.visible = false; } }, p: new THREE.Vector3(x, y, z) };
-    };
-    const olive = new THREE.MeshStandardMaterial({ color: 0x3f4632, roughness: 0.7, metalness: 0.3 }), led = new THREE.MeshBasicMaterial({ color: new THREE.Color(0.4, 2.4, 0.6) });
-    const book = new THREE.MeshStandardMaterial({ color: 0x5a1f1a, roughness: 0.8 });
-    put('radio', -61.05, 0.76, -57.45, 0.2, [[0.34, 0.2, 0.22, 0, 0, 0, olive], [0.02, 0.36, 0.02, 0.12, 0.2, -0.06, olive], [0.05, 0.03, 0.012, -0.08, 0.14, 0.111, led]]);
-    put('codes', -60.95, 0.76, -56.45, -0.35, [[0.22, 0.045, 0.3, 0, 0, 0, book]]);
-    item('smap', null, -63, 1.1, -61.1);
+    let handset;
+    item('radio', -61.05, .76, -57.45, .2, box => {
+      box('paint', 0, .035, 0, .40, .22, .25, [.72, 1.05, .72]);
+      box('metal', .13, .255, -.075, .018, .34, .018, [.48, .52, .48]);
+      box('void', -.075, .13, .127, .14, .065, .008);
+      box('lamp', -.075, .145, .133, .105, .035, .004, [.12, .46, .21]);
+      for (let row = 0; row < 4; row++) box('void', .075, .095 + row * .03, .131, .10, .009, .005);
+      for (const x of [-.10, .07]) box('metal', x, .255, .015, .045, .025, .045, [.60, .62, .57]);
+      handset = itemPart(() => {
+        box('void', .245, .055, .015, .065, .18, .075);
+        box('paint', .245, .12, .055, .035, .05, .02, [.8, 1.2, .85]);
+      });
+    });
+    M.items.radio.persistent = true;
+    M.items.radio.h = { get visible() { return true; }, get installed() { return !handset.visible; }, hide: () => handset.hide(), install: () => handset.hide(), show: () => handset.show(), reset: () => handset.show() };
+    record('codes', -60.95, .76, -56.45, -.35, [.53, .20, .17], true);
+    // 地圖是拍照情報；完成互動後仍留在牆上。
+    let mapRead = false;
+    M.items.smap = { persistent: true, h: { get visible() { return true; }, get installed() { return mapRead; }, install() { mapRead = true; }, hide() { mapRead = true; }, show() { mapRead = false; }, reset() { mapRead = false; } }, p: new THREE.Vector3(-63, 1.1, -61.1), pin: new THREE.Vector3(-63, 1.6, -61.66) };
   }
   ground('floor', -95, -60, -58, -30);
   // 店面鐵捲門（北側）
@@ -929,7 +968,15 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
     if (PL) PL.add('metal_office_desk', 37, 0, 34.9, 0, { solid: true });   // 櫃台（大廳北牆邊）
     P.crate(42.6, 31.2, 1.1, 0.15); P.crate(21.3, 35.1, 1.0, 1.5);
     P.barrel(25.6, 35.3, 'rust'); P.barrel(26.3, 35.45, 'rust');
-    item('fuse', 'cardboard_box_01', 38.3, 0.79, 45, 0.4, { noBreak: true });   // 控制室桌面 y 0.79
+    item('fuse', 38.3, .79, 45, .4, (box, mesh) => {
+      box('paint2', 0, .008, 0, .42, .025, .37, [.87, .90, .82]);
+      for (const x of [-.195, .195]) box('metal', x, .033, 0, .025, .055, .37, [.65, .67, .61]);
+      for (const z of [-.17, .17]) box('metal', 0, .033, z, .37, .055, .025, [.65, .67, .61]);
+      for (const z of [-.105, 0, .105]) {
+        mesh('glass', new THREE.CylinderGeometry(.026, .026, .22, 6).rotateZ(Math.PI / 2), 0, .065, z, [.65, .84, .78]);
+        for (const x of [-.13, .13]) mesh('metal', new THREE.CylinderGeometry(.032, .032, .04, 6).rotateZ(Math.PI / 2), x, .065, z, [.76, .78, .71]);
+      }
+    });
     seed = s0;
   }
   M.zones.F = { x0: 20, x1: 44, z0: 30, z1: 52 };
@@ -1055,9 +1102,27 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
     cable(65.95, 0.3, 68.9, 42.6, 0.05, 101.2); cable(42.6, 0.05, 101.2, 42.55, 0.9, 103.1);
     cable(65.95, 0.3, 68.1, 50, 0.05, 89.5); cable(50, 0.05, 89.5, 37.6, 0.05, 99.5); cable(37.6, 0.05, 99.5, 37.45, 0.9, 101.4);
     // G3：維修架的兩個配電箱在西側走道（y 7）上，靠牆；走道內側加三片防彈鋼板當掩護（對面走道有狙擊手）
-    //   配電箱本身只是擺設（item 不放模型：按 E 裝保險絲時配電箱不會跟著消失）；按 E 的點在箱子前面的走道上，沿走道直走就到（不會卡在柱子）
-    for (const z of [76, 100.5]) if (PL) PL.add('utility_box_02', HX0 + 0.47, CW, z, Math.PI / 2, { solid: true, hit: 'metal', noBreak: true });
-    item('panel1', null, HX0 + 1.3, CW, 76); item('panel2', null, HX0 + 1.3, CW, 100.5);
+    // 操作面朝走道；空槽、保險絲與紅／綠狀態各有實體，安裝後保留箱體。
+    for (const [i, z] of [76, 100.5].entries()) {
+      const cabinet = PL && PL.add('utility_box_02', HX0 + .47, CW, z, Math.PI / 2, { solid: true, hit: 'metal', noBreak: true });
+      if (!cabinet) b.deco('paint2', HX0 + .26, HX0 + .67, CW, CW + 1.12, z - .46, z + .46);
+      const panel = (mat, y0, y1, z0, z1, d0 = .69, d1 = .73, tint = [1, 1, 1]) => b.deco(mat, HX0 + d0, HX0 + d1, CW + y0, CW + y1, z + z0, z + z1, { ground: CW, tint });
+      panel('metal', .14, .98, -.37, .37, .685, .70, [.66, .68, .62]);
+      panel('void', .34, .83, -.24, .24, .702, .712);
+      for (const dz of [-.32, .29]) for (const yy of [.22, .91]) panel('metal', yy, yy + .035, dz, dz + .035, .702, .728, [.42, .46, .43]);
+      for (const dz of [-.13, .13]) for (const yy of [.39, .75]) panel('metal', yy, yy + .06, dz - .06, dz + .06, .712, .754, [.79, .79, .72]);
+      const warning = itemPart(() => panel('lamp', .895, .94, -.15, -.07, .711, .728, [.68, .12, .06]));
+      const installed = itemPart(() => {
+        for (const dz of [-.13, .13]) {
+          panel('canvas', .445, .75, dz - .037, dz + .037, .715, .765, [.91, .90, .77]);
+          for (const yy of [.435, .735]) panel('metal', yy, yy + .035, dz - .042, dz + .042, .716, .773, [.78, .80, .76]);
+        }
+        panel('lamp', .895, .94, -.15, -.07, .729, .74, [.10, .58, .18]);
+      });
+      installed.hide();
+      const install = () => { warning.hide(); installed.show(); }, reset = () => { warning.show(); installed.hide(); };
+      M.items['panel' + (i + 1)] = { persistent: true, h: { get visible() { return true; }, get installed() { return installed.visible; }, hide: install, install, show: reset, reset }, p: new THREE.Vector3(HX0 + 1.3, CW, z), pin: new THREE.Vector3(HX0 + .76, CW + .68, z) };
+    }
     for (const [z0, z1] of [[63, 64.6], [73.6, 75.2], [88, 89.6]]) {
       b.block('paint', HX0 + 2.5, HX0 + 2.68, CW, CW + 1.15, z0, z1);
       b.deco('metal', HX0 + 2.3, HX0 + 2.88, CW, CW + 0.05, z0 + 0.1, z0 + 0.3); b.deco('metal', HX0 + 2.3, HX0 + 2.88, CW, CW + 0.05, z1 - 0.3, z1 - 0.1);   // 兩隻腳
@@ -1109,9 +1174,9 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
         b.obox('canvas', x, 0.034, z, 0.15, 0.004, 0.21, ry, { solid: false, tint: [0.86, 0.85, 0.8] });
       M.lights.push({ p: new THREE.Vector3(-40, 3.1, 12), c: 0xe4ecff, i: 28, d: 14 });
       // 三份病歷（走近按 E）：掛號櫃台上、東牆辦公桌上、東北角矮櫃上
-      item('rec_a', 'cardboard_box_01', -46.2, 1.16, 12.1, 0.4, { scale: 0.75, noBreak: true });
-      item('rec_b', 'cardboard_box_01', -36.8, 0.78, 11.2, 0.2, { scale: 0.7, noBreak: true });
-      item('rec_c', 'cardboard_box_01', -37.4, 1.28, 17.35, -0.3, { scale: 0.7, noBreak: true });
+      record('rec_a', -46.2, 1.16, 12.1, .4, [.44, .61, .61]);
+      record('rec_b', -36.8, .78, 11.2, .2, [.63, .60, .43]);
+      record('rec_c', -37.4, 1.28, 17.35, -.3, [.32, .45, .58], true);
       seed = s0; for (let i = 0; i < 16; i++) rnd();
       hk = k0;
     }

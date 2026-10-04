@@ -9,6 +9,7 @@ import { kobeStreetDetails, kobeBlockStreets } from '../kobe-street.mjs';
 import { buildAutumnTrees } from '../kobe-autumn.js';
 import { KOBE_RELIEF, kobeCityHeight } from '../kobe-relief.mjs';
 import { kobeHarborScenery, harborWindow } from '../kobe-harbor.mjs';
+import { ENCOUNTERS } from './script.js';
 
 export const SHORE = 680;
 export function buildMap(scene, mats, solid, PL, A, world) {
@@ -90,7 +91,7 @@ export function buildMap(scene, mats, solid, PL, A, world) {
     const n=new THREE.Vector3().subVectors(new THREE.Vector3(...c),new THREE.Vector3(...a)).cross(new THREE.Vector3().subVectors(new THREE.Vector3(...d),new THREE.Vector3(...a))).normalize().toArray();
     b.B[portMat(col)].quad(a,c,d,e,n,[1,1,1,1],null,col.slice(0,3));
   }};
-  const M = { b, lights: [], zones: {}, marks: {}, targets: {}, items: {}, cars: [], layout: 'harbor-v1' };
+  const M = { b, lights: [], zones: {}, marks: {}, targets: {}, items: {}, operationProps: {}, cars: [], layout: 'harbor-v1' };
   const V = (x, z, y = 0) => new THREE.Vector3(x, y, z);
   const metal = [0.54, 0.6, 0.64], paint = [0.3, 0.44, 0.49];
   const box = (mat, x0, x1, y0, y1, z0, z1, o = {}) => b.block(mat, x0, x1, y0, y1, z0, z1, { ground: Math.min(0, y0), skip: y0 <= .05 ? 'ny' : '', ...o });
@@ -233,7 +234,124 @@ export function buildMap(scene, mats, solid, PL, A, world) {
     const triangles = meshes.reduce((sum, mesh) => sum + (mesh.geometry.index?.count || mesh.geometry.attributes.position.count) / 3, 0);
     M.cars.push({ x, y: 0, z, ry, profile: g.profile, meshes, triangles });
   }
-  function item(id, name, x, z, y = 0) { M.items[id] = { h: name ? prop(name, x, z, y, 0, { solid: false, noBreak: true }) : null, p: V(x, z, y) }; }
+  // 任務道具寫進既有材質桶；只在拿取／重玩時更新自己的頂點範圍，不依賴掃描模型下載。
+  function visual(draw) {
+    const buckets = [b.B.landmarkPaint, b.B.metal], starts = buckets.map(bucket => bucket.p.length);
+    draw();
+    const ranges = buckets.map((bucket, i) => ({ bucket, start: starts[i], positions: bucket.p.slice(starts[i]), colors: bucket.c.slice(starts[i]) })).filter(r => r.positions.length);
+    const bounds=new THREE.Box3();for(const r of ranges)for(let i=0;i<r.positions.length;i+=3)bounds.expandByPoint(new THREE.Vector3(...r.positions.slice(i,i+3)));
+    let visible = true;
+    const write = (r, attr, values) => {
+      const target = r.bucket.mesh?.geometry.attributes[attr];
+      if (target) { target.array.set(values, r.start); target.needsUpdate = true; }
+      else { const a = attr === 'position' ? r.bucket.p : r.bucket.c; for (let i = 0; i < values.length; i++) a[r.start + i] = values[i]; }
+    };
+    return {
+      ranges, bounds, triangles: ranges.reduce((n, r) => n + r.positions.length / 9, 0),
+      get visible() { return visible; }, set visible(value) { value ? this.show() : this.hide(); },
+      hide() { if (!visible) return; visible = false; for (const r of ranges) write(r, 'position', new Float32Array(r.positions.length)); },
+      show() { if (visible) return; visible = true; for (const r of ranges) write(r, 'position', r.positions); },
+      tint(color) { for (const r of ranges) write(r, 'color', r.colors.map((v, i) => color[i % 3])); },
+      resetTint() { for (const r of ranges) write(r, 'color', r.colors); },
+      reset() { this.show();this.resetTint(); },
+    };
+  }
+  const enamel = [.42,.49,.46], darkPanel = [.065,.085,.085], paper = [.8,.79,.68], brass = [.57,.4,.15];
+  const detail = (x,y,z,w,h,d,tint=enamel) => b.deco('landmarkPaint',x-w/2,x+w/2,y,y+h,z-d/2,z+d/2,{tint,skip:'ny'});
+  function cylinder(x,y,z,r,h,tint,axis='y') {
+    const g = new THREE.CylinderGeometry(r,r,h,8);
+    if(axis==='z')g.rotateX(Math.PI/2);
+    mesh('landmarkPaint',g,x,y,z,0,{tint});g.dispose();
+  }
+  function table(x,z,y=.76,w=1.1,d=.7) {
+    detail(x,y-.05,z,w,.05,d,[.36,.39,.36]);
+    for(const dx of [-w*.39,w*.39])detail(x+dx,0,z,.045,y-.05,d*.75,[.26,.29,.28]);
+  }
+  function documents(x,y,z,map=false) {
+    detail(x,y,z,.56,.025,.43,map?[.63,.68,.55]:[.28,.38,.42]);
+    detail(x+.02,y+.026,z,.49,.009,.36,paper);
+    if(map) {
+      detail(x-.06,y+.037,z,.025,.006,.29,[.39,.47,.48]);
+      detail(x,y+.037,z+.025,.39,.006,.018,[.39,.47,.48]);
+      detail(x+.15,y+.044,z+.025,.1,.006,.025,[.63,.25,.17]);
+    } else for(let i=0;i<3;i++)detail(x+.025,y+.037,z-.08+i*.07,.33-i*.045,.006,.012,[.28,.32,.31]);
+    detail(x-.19,y+.041,z-.17,.12,.012,.025,brass);
+  }
+  function radio(x,y,z) {
+    detail(x,y,z,.54,.3,.3,[.24,.32,.26]);
+    detail(x-.13,y+.09,z+.156,.18,.13,.015,darkPanel);
+    for(const dx of [.055,.125,.195])detail(x+dx,y+.065,z+.16,.023,.16,.016,[.1,.13,.11]);
+    detail(x+.18,y+.3,z-.1,.015,.49,.015,darkPanel);
+  }
+  function cartridge(x,y,z,axis='z') {
+    cylinder(x,y+.1,z,.07,.36,[.78,.79,.7],axis);
+    for(const d of [-.17,.17])cylinder(x,y+.1+(axis==='y'?d:0),z+(axis==='z'?d:0),.08,.045,brass,axis);
+  }
+  function item(id, name, x, z, y = 0) {
+    if(name === null) { M.items[id]={h:null,p:V(x,z,y)};return; }
+    if(id==='fuse') {
+      detail(x,.04,z,.78,.27,.54,[.39,.3,.18]);detail(x,.315,z,.66,.025,.43,darkPanel);
+      detail(x,.32,z-.29,.78,.35,.055,[.39,.3,.18]);
+      for(const dx of [-.19,.19])detail(x+dx,.34,z,.11,.05,.38,brass);
+    } else table(x,z,y-.035);
+    const h=visual(()=>id==='radio'?radio(x,y,z):id==='fuse'?cartridge(x,.34,z):documents(x,y,z,id==='smap'));
+    if(id==='radio') {
+      const signal=visual(()=>detail(x-.16,y+.21,z+.168,.06,.025,.012,[.64,.34,.12])),show=h.show.bind(h),hide=h.hide.bind(h);
+      let connected=false;Object.defineProperty(h,'installed',{get:()=>connected});
+      h.signal=signal;h.triangles+=signal.triangles;
+      h.show=()=>{show();signal.show();};h.hide=()=>{hide();signal.hide();};
+      h.install=()=>{connected=true;h.show();signal.tint([.18,.65,.32]);};h.reset=()=>{connected=false;h.show();signal.resetTint();};
+    }
+    M.items[id]={h,p:V(x,z,y),pin:h.bounds.getCenter(new THREE.Vector3()),persistent:id==='radio',kind:id==='radio'?'radio':id==='fuse'?'fuse':id==='smap'?'map':'documents'};
+  }
+  function operationProp(point,kind) {
+    const x=point[0],z=point[1]+.8;
+    const body=visual(()=>{
+      if(['terminal','manifest','relay','medicine'].includes(kind)) {
+        table(x,z);
+        if(kind==='medicine') {
+          detail(x,.77,z,.65,.2,.42,[.53,.25,.2]);detail(x,.98,z-.235,.65,.29,.035,[.53,.25,.2]);
+          detail(x,.99,z-.25,.04,.2,.018,paper);detail(x,.99+.08,z-.25,.2,.04,.019,paper);
+          for(const dx of [-.16,.16]) { detail(x+dx,.98,z,.08,.17,.08,paper);detail(x+dx,1.15,z,.07,.035,.07,[.24,.43,.35]); }
+        } else {
+          detail(x,.78,z+.1,.57,.035,.19,darkPanel);
+          detail(x,1,z-.1,.65,.43,.055,[.25,.3,.3]);detail(x,1.04,z-.065,.55,.31,.016,darkPanel);
+          detail(x,.92,z-.1,.045,.14,.09,[.25,.3,.3]);
+          if(kind==='manifest')documents(x+.35,.78,z);
+          if(kind==='relay')detail(x+.4,.77,z-.15,.018,.88,.018,darkPanel);
+        }
+      } else if(kind==='oxygen') {
+        detail(x,.06,z,.55,.09,.46,darkPanel);cylinder(x,.68,z,.17,1.08,[.28,.43,.34]);
+        cylinder(x,1.25,z,.095,.1,brass);detail(x,1.29,z,.28,.045,.045,brass);
+        detail(x+.16,1.2,z-.1,.18,.16,.08,[.72,.73,.62]);detail(x+.16,1.23,z-.145,.12,.1,.016,darkPanel);
+        detail(x+.25,.3,z-.1,.023,.9,.023,darkPanel);
+      } else if(kind==='pump') {
+        detail(x,.05,z,1.05,.13,.55,enamel);cylinder(x,.48,z,.22,.55,[.33,.4,.4],'z');
+        cylinder(x-.32,.38,z,.08,.7,brass);detail(x+.33,.18,z,.22,.73,.27,enamel);
+        detail(x+.33,.64,z-.145,.15,.17,.025,darkPanel);
+      } else {
+        const lock=kind==='lock',crane=kind==='crane';
+        detail(x,0,z,.72,.12,.43,darkPanel);
+        detail(x,.12,z,lock?.12:crane?.28:.62,lock?.85:crane?.73:.46,.23,enamel);
+        detail(x,lock?.97:crane?.85:.58,z,lock?.38:crane?.75:.88,lock?.48:crane?.25:1.05,.27,enamel);
+        const faceY=lock?1.08:crane?.88:.81;
+        detail(x,faceY,z-.145,lock?.28:crane?.64:.72,lock?.25:crane?.16:.55,.023,darkPanel);
+        if(crane)for(const dx of [-.2,.2]) { detail(x+dx,.97,z-.07,.025,.25,.025,[.32,.35,.33]);detail(x+dx,1.2,z-.07,.09,.06,.07,[.53,.25,.17]); }
+        else for(const dx of [-.18,0,.18])detail(x+dx,lock?1.13:.93,z-.165,lock?.035:.075,lock?.12:.18,.035,brass);
+        if(kind==='fuse')for(const dx of [-.12,.12])detail(x+dx,.95,z-.18,.06,.05,.15,[.68,.69,.59]);
+      }
+    });
+    const lampY=['terminal','manifest','relay'].includes(kind)?1.38:kind==='medicine'?1.12:kind==='oxygen'?1.35:kind==='pump'?.85:kind==='lock'?1.4:kind==='crane'?1.04:1.5;
+    const lamp=visual(()=>detail(x+(kind==='lock'?.1:kind==='pump'?.33:kind==='oxygen'?.16:.2),lampY,z-(kind==='medicine'?.26:.17),.075,.04,.035,[.64,.34,.12]));
+    const installed=kind==='fuse'?visual(()=>cartridge(x,1,z-.185,'y')):null;
+    installed?.hide();let complete=false;
+    const h={p:V(point[0],point[1]),pin:body.bounds.getCenter(new THREE.Vector3()),kind,body,lamp,installedPart:installed,get installed(){return complete;},
+      install(){complete=true;body.show();lamp.show();lamp.tint([.18,.65,.32]);installed?.show();},
+      reset(){complete=false;body.show();lamp.show();lamp.resetTint();installed?.hide();},
+      hide(){body.hide();lamp.hide();installed?.hide();},show(){body.show();lamp.show();if(complete)installed?.show();},
+      triangles:body.triangles+lamp.triangles+(installed?.triangles||0)};
+    return h;
+  }
   function target(id, x, z) {
     const h = prop('portable_generator', x, z);
     M.targets[id] = { h, hp: 80, kind: 'generator' };
@@ -309,11 +427,6 @@ export function buildMap(scene, mats, solid, PL, A, world) {
   // 西翼拘留室與臨時救護站有自己的門路，任務不靠站在空地上讀文字。
   shed(-222,-210,-184,-153,5.2,'z',1.6);
   shed(-140,-116,-56,-34,3.6,'z',.8);
-  for(const [x,z] of [[-216,-176],[-218,-162],[-135,-40],[-122,-40],[-128,-38],[-132,-110],[-120,-108],[-12,-41],[-3,-38],[0,-42],[5,42],[8,49],[63,90]]) {
-    b.deco('metal',x-.32,x+.32,.35,1.8,z,z+.18,{tint:metal});
-    b.deco('portGlass',x-.24,x+.24,1.2,1.6,z-.02,z-.01,{tint:[.45,.72,.63]});
-    for(const y of [.62,.78,.94])b.deco('metal',x-.18,x+.18,y,y+.06,z-.04,z-.02,{tint:[.23,.27,.28]});
-  }
   prop('metal_office_desk',-135,-38);prop('metal_office_desk',-122,-38);
   prop('metal_jerrycan_green',-136,-49);prop('propane_tank',-137,-48);
   for(const x of [-131,-128.8,-126.6]) {
@@ -370,8 +483,12 @@ export function buildMap(scene, mats, solid, PL, A, world) {
   prop('metal_office_desk', 25, -31); item('rec_a', 'cardboard_box_01', 20, -31, .8);
   item('rec_b', 'cardboard_box_01', 25, -31, .8); item('rec_c', 'cardboard_box_01', 30, -31, .8);
   M.marks.key = V(25, -37, .8);
-  M.keyMesh = new THREE.Mesh(new THREE.BoxGeometry(.22, .04, .12), new THREE.MeshStandardMaterial({ color: 0x82cad3, roughness: .28, metalness: .7 }));
-  M.keyMesh.position.copy(M.marks.key); scene.add(M.keyMesh);
+  table(25,-37,.76,.8,.6);
+  M.keyMesh = M.keyHandle = visual(()=>{
+    detail(25,.8,-37,.33,.035,.2,[.58,.68,.66]);detail(25,.837,-37,.28,.007,.16,darkPanel);
+    for(let i=0;i<4;i++)detail(24.9+i*.065,.845,-36.945,.035,.006,.055,brass);
+    detail(25,.845,-37.025,.16,.009,.06,[.58,.68,.66]);
+  });
   // 第 3 章：修船棚的圓拱輪廓與機體維修架，樓梯可從地面一路走到胸前。
   shed(10, 70, 52, 112, 24, 'z', 7);
   box('brick', 70, 120, 0, 11, 76, 112); roof(70, 120, 76, 112, 11, 4);
@@ -386,6 +503,10 @@ export function buildMap(scene, mats, solid, PL, A, world) {
   prop('utility_box_02', 18, 61, 0, 0, { noBreak: true }); prop('utility_box_02', 62, 61, 0, 0, { noBreak: true });
   target('tow1', 58, 90); target('tow2', 23, 91);
   target('override',64,82);
+  const operationKinds={B3:['alarm','alarm'],B4:['lock'],C4:['terminal','terminal'],C6:['oxygen','medicine'],C7:['manifest'],
+    D2:['power','lock'],D2C:['relay'],KEY2:['terminal','terminal'],F3:['crane','crane'],G3:['fuse','fuse','pump']};
+  for(const E of ENCOUNTERS)if(E.operation?.kind==='console')
+    M.operationProps[E.id]=E.operation.points.map((point,i)=>operationProp(point,operationKinds[E.id]?.[i]||'terminal'));
   for (const z of [57, 70, 84, 98]) {
     beam([11, 22, z], [69, 22, z], .17); beam([11, 23.5, z], [69, 23.5, z], .14);
     for (let x = 11; x < 68; x += 6) beam([x, 22, z], [x + 6, 23.5, z], .075);

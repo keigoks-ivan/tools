@@ -4,6 +4,9 @@ import { Operation } from './operations.mjs';
 
 export function createFootOperation(E,G,input) {
   const def=E.operation,task=new Operation(def),crew=[];
+  const props=G.operationProps?.[E.id]||[];
+  for(const h of props)h.reset();
+  let shownIndex=task.index;
   if(def.kind==='escort')for(let i=0;i<2;i++) {
     const s=new Soldier(G.kit,'pilot',{world:G.solid});s.eye.visible=false;
     s.root.position.set(task.pos[0]+i*.65,0,task.pos[1]-i*.7);G.scene.add(s.root);crew.push(s);
@@ -15,6 +18,7 @@ export function createFootOperation(E,G,input) {
       const p=G.player.pos,at=task.point;
       const threat=def.kind==='escort'&&G.enemies.some(e=>!e.dead&&Math.hypot(e.pos.x-at[0],e.pos.z-at[1])<10&&G.solid.sees(e.pos.clone().add(new THREE.Vector3(0,1.4,0)),new THREE.Vector3(at[0],1.2,at[1])));
       task.step(dt,{player:[p.x,p.z],held:input.keys.has('KeyE')||input.keys.has('Tlock'),hurt:G.player.hurtT<.25,threat});
+      if(task.index!==shownIndex){for(let i=shownIndex;i<task.index;i++)props[i]?.install();shownIndex=task.index;}
       for(const [i,s] of crew.entries()) {
         const previous=s.pos.clone(),x=task.pos[0]+i*.65,z=task.pos[1]-i*.7;
         s.pos.set(x,G.solid.floorAt(x,z,1),z);G.solid.pushOut(s.pos,.3,s.pos.y,s.pos.y+1.7,.45);
@@ -23,7 +27,7 @@ export function createFootOperation(E,G,input) {
         s.update(dt);G.hud.pins.push({p:s.pos,h:2});
       }
       if(!task.done) {
-        const point=task.point;G.hud.pins.push({p:new THREE.Vector3(point[0],point.y||0,point[1]),h:1.2});
+        const point=task.point,prop=props[task.index];G.hud.pins.push({p:prop?.pin||prop?.p||new THREE.Vector3(point[0],point.y||0,point[1]),h:prop?.pin ? .25 : 1.2});
         if(Math.hypot(p.x-point[0],p.z-point[1])<(def.radius||2)&&def.kind==='console')G.hud.prompt=`按住 E　${point.label} ${Math.round(task.fraction*100)}%`;
       }
     },

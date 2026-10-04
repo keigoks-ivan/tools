@@ -15,7 +15,7 @@ async function load(path, query = '') {
   html = html.replace(/<base href="[^"]+">/, '');
   html = html.replace(/(<script type="importmap">)([\s\S]*?)(<\/script>)/, (_, a, json, b) => {
     const map = JSON.parse(json);
-    for (const file of ['japanese-cars.mjs', 'car-material.js', 'zero/props.js', 'kobe-street.mjs', 'kobe-autumn.js', 'kobe-harbor.mjs', 'kobe-city.mjs', 'kobe-relief.mjs', 'urban.js', 'japan.js', 'textures.js', 'anim.js', 'env.js', 'preview.js', 'streetfront.js', 'stages.js', 'battlefields.js', 'fieldart.js', 'encounter.js', 'post.js', 'roofline.js', 'mechs.js', 'combat.js', 'cockpit.js', 'player.js', 'flight.mjs', 'vehicles.js', 'hud.js', 'zero/kit.js', 'zero/map.js', 'zero/guns.js', 'zero/human.js', 'zero/viewmodel.js', 'zero/main.js', 'zero/hud.js', 'zero/sfx.js', 'zero/mech6.js', 'lastline/map.js', 'lastline/script.js', 'lastline/mission.js', 'lastline/convoy.js', 'lastline/escort.mjs', 'lastline/operations.mjs', 'lastline/foot-ops.js', 'input.js', 'tactics.js', 'reinforcements.mjs', 'zero/ai.js', 'zero/script.js', 'zero/patrol.js', 'zero/recon.js', 'zero/field.js']) {
+    for (const file of ['japanese-cars.mjs', 'car-material.js', 'zero/props.js', 'kobe-street.mjs', 'kobe-autumn.js', 'kobe-harbor.mjs', 'kobe-city.mjs', 'kobe-relief.mjs', 'urban.js', 'japan.js', 'textures.js', 'anim.js', 'env.js', 'preview.js', 'streetfront.js', 'stages.js', 'battlefields.js', 'fieldart.js', 'encounter.js', 'post.js', 'roofline.js', 'mechs.js', 'combat.js', 'cockpit.js', 'player.js', 'flight.mjs', 'vehicles.js', 'hud.js', 'zero/kit.js', 'zero/map.js', 'zero/guns.js', 'zero/human.js', 'zero/viewmodel.js', 'zero/main.js', 'zero/mission-props.mjs', 'zero/hud.js', 'zero/sfx.js', 'zero/mech6.js', 'lastline/map.js', 'lastline/script.js', 'lastline/mission.js', 'lastline/convoy.js', 'lastline/escort.mjs', 'lastline/operations.mjs', 'lastline/foot-ops.js', 'input.js', 'tactics.js', 'reinforcements.mjs', 'zero/ai.js', 'zero/script.js', 'zero/patrol.js', 'zero/recon.js', 'zero/field.js']) {
       const url = new URL('/game/mech/' + file, location.href).href;
       for (const key of Object.keys(map.imports)) if (new URL(key, entryBase).href === url) delete map.imports[key];
       map.imports[url] = url + '?qa=' + revision;
@@ -888,7 +888,12 @@ async function prequelFoot() {
       for(const r of G.patrols.group(E))if(!r.dead&&!r.actor){G.player.reset(r.pos.clone(),0);step(12);kill();}
       G.player.reset(operator,0);
       for(const id of E.targets||[]) {const o=map.targets[id]?.obj;if(o?.alive)G.destruct.hit(o,10000,o.pos,new T.Vector3(0,1,0));}
-      for(const P of E.pickups||[]){const it=map.items[P.id];G.player.reset(it.p.clone(),0);step(1);key('KeyE');}
+      for(const P of E.pickups||[])assert(map.items[P.id]?.h?.visible,P.id+' 拿取／安裝前有可見實體');
+      for(const P of E.pickups||[]){
+        const it=map.items[P.id];
+        G.player.reset(it.p.clone(),0);step(1);key('KeyE');
+        assert(it.persistent?it.h.visible&&it.h.installed:!it.h.visible,P.id+' E 互動後物件狀態正確');
+      }
       if(E.pickup){G.player.reset(map.marks[E.pickup.at].clone(),0);step(1);key('KeyE');}
       let n=0;
       while(!win.__flow.done.includes(E.id)&&n++<2400){kill();step(1);peak=Math.max(peak,G.enemies.filter(e=>!e.dead).length);}
@@ -896,6 +901,9 @@ async function prequelFoot() {
       assert(G.enemies.every(e=>e.pos.toArray().every(Number.isFinite)),E.id+' 所有人物座標正常');
     }
   }
+  win.document.querySelector('#quit').click();win.document.querySelector('[data-c="1"]').click();step(1);
+  assert(Object.values(map.items).every(it=>it.h?.visible),'同頁重開前傳恢復所有可拿取物件');
+  assert(['smap','panel1','panel2'].every(id=>!map.items[id].h.installed),'前傳重玩恢復牆圖與安裝設備');
   assert(peak<=24,'前傳全五章人物模型數有上限');assert(errors.length===0,'前傳完整步兵流程沒有執行錯誤');
   renderer.render=render;report.textContent=JSON.stringify({checks:result,peak,errors},null,2);state.textContent='前傳步兵全流程通過';
 }
@@ -927,14 +935,16 @@ async function campaignFoot() {
     if(!E.operation?.bypass)kill();
     if (E.targets) for (const id of E.targets) { const obj = map.targets[id]?.obj; assert(!!obj, `${id} 可破壞目標存在`); G.destruct.hit(obj, 10000, obj.pos, new T.Vector3(0, 1, 0)); }
     for (const pickup of E.pickups || []) {
-      const it = map.items[pickup.id]; assert(!!it, `${pickup.id} 情報／互動道具存在`);
+      const it = map.items[pickup.id]; assert(it?.h?.visible, `${pickup.id} 情報／互動道具有可見實體`);
       G.player.reset(it.p.clone(), 0); step(1); key('KeyE');
+      assert(it.persistent?it.h.visible&&it.h.installed:!it.h.visible,pickup.id+' E 互動後物件狀態正確');
     }
     if (E.pickup) { const at = map.marks[E.pickup.at]; G.player.reset(at.clone(), 0); step(1); key('KeyE'); }
     if (E.hold) for (let i = 0; i < Math.ceil((E.hold.t + 1) / .05); i++) { kill(); step(1); }
     if(E.operation) {
       const op=win.__flow.operations.find(a=>a.id===E.id)?.operation;assert(!!op,E.id+' 現場任務存在');
       const task=op.task;
+      if(task.kind==='console')assert(map.operationProps[E.id]?.length===E.operation.points.length&&map.operationProps[E.id].every(h=>h.body&&h.pin),E.id+' 每個操作點都有用途明確的實體設備');
       if(task.kind==='escort')assert(op.crew.length===2&&op.crew.every(s=>s.root.parent===G.scene),E.id+' 兩名救援工程兵實際出現');
       let steps=0;
       if(task.kind==='console')win.dispatchEvent(new win.KeyboardEvent('keydown',{code:'KeyE'}));
@@ -944,6 +954,7 @@ async function campaignFoot() {
       }
       win.dispatchEvent(new win.KeyboardEvent('keyup',{code:'KeyE'}));
       assert(task.done,E.id+' 到場操作／分區防守／實際護送完成');
+      if(task.kind==='console')assert(map.operationProps[E.id].every(h=>h.installed),E.id+' 操作完成保留設備與完成指示');
       if(task.kind==='escort')assert(op.crew.every(s=>Math.hypot(s.pos.x-task.pos[0],s.pos.z-task.pos[1])<1.2),E.id+' 人物抵達護送終點');
 
     }
@@ -977,6 +988,7 @@ async function campaignFoot() {
   win.document.querySelector('#campaignResume').click(); win.__step(2);
   assert(win.__flow.chapter === 3 && win.__flow.done.includes('G2'), '重新載入後保留步兵進度，不必重打一整章');
   G = win.__G; T = win.__T; map = win.__map; S = win.__S; renderer = win.__renderer;
+  assert(Object.values(map.operationProps).flat().every(h=>h.installed),'讀檔恢復已完成 E 設備的實體狀態');
   render = renderer.render.bind(renderer); renderer.render = () => {}; T.Clock.prototype.getDelta = () => .05;
   assert(G.hud.obj?.route?.length === S.HATCH_ROUTE.length, '續玩恢復登機路線與互動');
   // 沿實際胸前平台觸發艙門，再用正式互動進入機甲。

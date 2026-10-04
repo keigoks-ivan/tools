@@ -8,6 +8,7 @@ import { Patrols, arrivalPoint, updateInfantry, MAX_ACTORS } from './patrol.js';
 import { Contacts, Scout } from './recon.js';
 import { FieldOps, FieldMap } from './field.js';
 import { qualityLevel, pixelRatio, FrameGate } from '../runtime.js';
+import { collectMissionItem, syncMissionProps } from './mission-props.mjs';
 
 // 本篇的 env.js 用相對路徑 './assets/' 讀天空、HDR、城市貼圖：
 //   前傳有縮小的 webp 版（assets/env/，遠景看不出差別、下載少 12 MB）；沒有的才去本篇資料夾拿
@@ -162,7 +163,7 @@ window.__renderer = renderer; window.__scene = scene; window.__solid = solid; wi
 // ---------------------------------------------------------------- 遊戲狀態（AI 也讀這個）
 const NADE_START = 3, NADE_MAX = 5;   // 玩家手榴彈：每章開頭至少幾顆、最多帶幾顆
 const G = {
-  scene, solid, kit, audio, fx, player, vm, hud, fieldItems, t: 0, nextId: 1, enemies: [], playing: false,
+  scene, solid, kit, audio, fx, player, vm, hud, fieldItems, operationProps: map.operationProps, t: 0, nextId: 1, enemies: [], playing: false,
   // 偵察與玩家射擊共用實際形狀判定，避免車框、護欄缺口被外接盒誤擋。
   reconSees(a, b) { const d = b.clone().sub(a), L = d.length(); return L < .05 || !shotRay(a, d.divideScalar(L), L - .05); },
   playerEye: new THREE.Vector3(), aimDir: new THREE.Vector3(0, 0, 1), ads: 0, diff: { acc: 1, dmg: 1 }, bolts: [], grenades: [], nadeN: 3, loot: [],
@@ -400,12 +401,12 @@ function updateMissions(dt) {
       E.pickups.forEach((P, i) => {
         if (a.got.has(i)) return;
         const it = map.items[P.id]; if (!it) { a.got.add(i); return; }
-        hud.pins.push({ p: it.p, h: 0.6 });
+        hud.pins.push({ p: it.pin || it.p, h: it.pin ? .25 : .6 });
         const near = Math.hypot(player.pos.x - it.p.x, player.pos.z - it.p.z) < 2 && Math.abs(player.pos.y - it.p.y) < 1.6;
         if (!near || player.dead) return;
         hud.prompt = P.text || '按 E　拿取';
         if (input.pressed('KeyE') || input.pressed('Tlock')) {
-          a.got.add(i); pickedItems.add(P.id); hud.prompt = null; if (it.h) it.h.hide();
+          a.got.add(i); pickedItems.add(P.id); hud.prompt = null; collectMissionItem(it);
           hud.note(`${E.itemName || '情報'} ${a.got.size}/${E.pickups.length}`, '#ffb347');
           if (P.lines) for (const [w, t, now] of P.lines) hud.say(w, t, 3.4, now);
         }
@@ -508,6 +509,7 @@ function startChapter(n) {
   const C = S.CHAPTERS[n - 1];
   done.clear();
   for (const E of S.ENCOUNTERS) if (E.ch < n) markDone(E.id, true);
+  syncMissionProps(map, S.ENCOUNTERS, done, pickedItems);
   player.reset(map.marks[C.start].clone(), C.yaw);
   G.nadeN = NADE_START;
   if (q.has('x')) player.reset(new THREE.Vector3(+q.get('x'), +(q.get('y') || 0), +q.get('z')), +(q.get('yaw') || 0));
@@ -842,6 +844,7 @@ function respawn() {
   const cp = checkpoint;
   clearEnemies(); active = [];
   done.clear(); for (const id of cp.done) markDone(id, true);
+  syncMissionProps(map, S.ENCOUNTERS, done, pickedItems);
   chapter = cp.ch;
   player.reset(cp.p, cp.yaw); vm.refill(); G.nadeN = cp.nades ?? NADE_START;
   G.field.reset(cp.field);
@@ -1046,7 +1049,7 @@ function begin(n) {
     const ids = new Set(S.ENCOUNTERS.filter(e => e.ch <= n).map(e => e.id));
     if (foot && foot.layout === S.LAYOUT && Array.isArray(foot.p) && foot.p.length === 3 && foot.p.every(Number.isFinite) && Math.max(Math.abs(foot.p[0]), Math.abs(foot.p[2])) < (S.FOOT_EXTENT || 140) && foot.p[1] >= 0 && foot.p[1] < 40 && Number.isFinite(foot.yaw) && Array.isArray(foot.done) && foot.done.every(id => ids.has(id))) {
       checkpoint = { p: new THREE.Vector3(...foot.p), yaw: foot.yaw, done: foot.done, ch: n, nades: clamp(foot.nades || 0, 0, NADE_MAX), patrols: foot.patrols, field: foot.field };
-      pickedItems.clear(); for (const id of Array.isArray(foot.picked) ? foot.picked : []) if (map.items[id]) { pickedItems.add(id); map.items[id].h?.hide(); }
+      pickedItems.clear(); for (const id of Array.isArray(foot.picked) ? foot.picked : []) if (map.items[id]) pickedItems.add(id);
       respawn();
       for (const k of Object.keys(G.stats)) if (Number.isFinite(saved.stats?.[k])) G.stats[k] = Math.max(0, saved.stats[k]);
     }
