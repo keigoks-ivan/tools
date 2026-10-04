@@ -6,19 +6,19 @@ const canvas=document.getElementById('game');
 const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
 renderer.setPixelRatio(Math.min(devicePixelRatio,1.75));
 renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=0.98;
+renderer.toneMapping=THREE.ACESFilmicToneMapping; renderer.toneMappingExposure=1.02;
 const scene=new THREE.Scene();
 scene.background=new THREE.Color(0x8cc8f0);
 scene.fog=new THREE.Fog(0x9fd0f0,700,1600);
 const camera=new THREE.PerspectiveCamera(10,1,1,4000);
-{ const pm=new THREE.PMREMGenerator(renderer); scene.environment=pm.fromScene(new X3.RoomEnvironment(),0.04).texture; scene.environmentIntensity=0.4; }
-scene.add(new THREE.HemisphereLight(0xc8e2ff,0x80614a,0.85));
-const sun=new THREE.DirectionalLight(0xffd9a3,2.5);
-sun.position.set(-65,75,-95); sun.target.position.set(0,0,-28); scene.add(sun); scene.add(sun.target);
+{ const pm=new THREE.PMREMGenerator(renderer); scene.environment=pm.fromScene(new X3.RoomEnvironment(),0.04).texture; scene.environmentIntensity=0.32; }
+scene.add(new THREE.HemisphereLight(0xb9d5ed,0x795e46,0.8));
+const sun=new THREE.DirectionalLight(0xffd4a1,2.1);
+sun.position.set(-95,55,-120); sun.target.position.set(0,0,-28); scene.add(sun); scene.add(sun.target);
 sun.castShadow=true; sun.shadow.mapSize.set(2048,2048); sun.shadow.radius=4;
 Object.assign(sun.shadow.camera,{left:-48,right:48,top:48,bottom:-48,near:10,far:260}); sun.shadow.bias=-0.0004; sun.shadow.normalBias=0.02;
-const fill=new THREE.DirectionalLight(0xdfefff,0.6); fill.position.set(40,30,80); scene.add(fill);
-const rim=new THREE.DirectionalLight(0xcbe6ff,1.2); rim.position.set(25,50,40); scene.add(rim);
+const fill=new THREE.DirectionalLight(0xdfefff,0.65); fill.position.set(40,30,80); scene.add(fill);
+const rim=new THREE.DirectionalLight(0xcbe6ff,0.95); rim.position.set(25,50,40); scene.add(rim);
 // 後製：景深（背景模糊）
 const composer=new X3.EffectComposer(renderer,new THREE.WebGLRenderTarget(1,1,{samples:4,type:THREE.HalfFloatType}));
 composer.addPass(new X3.RenderPass(scene,camera));
@@ -413,13 +413,13 @@ const handOf=pid=>(PLAYERS[pid]?.throws==='L')?-1:1;
    ========================================================= */
 const CAMS={
   pitch:{pos:new THREE.Vector3(-14,13,-212), look:new THREE.Vector3(-1.5,0.4,0), fov:6.4, fovP:12},
-  bat:  {pos:new THREE.Vector3(1.4,6.2,24),  look:new THREE.Vector3(0.2,0.8,-60.5), fov:31, fovP:54},
+  bat:  {pos:new THREE.Vector3(1.4,6.2,24),  look:new THREE.Vector3(0.2,0.8,-60.5), fov:35, fovP:54},
 };
 let camMode='pitch';
 function camSet(name){
   const c=CAMS[name], fl=name==='pitch'&&BSIDE>0?-1:1, fb=name==='bat'&&BSIDE>0?-1:1;     // 左打時鏡頭換邊
   const portrait=innerWidth/innerHeight<1, center=portrait&&name==='bat';
-  const dockLift=portrait?(name==='pitch'&&innerHeight<=700?4:0):name==='bat'?(innerHeight<=540?2.5:innerWidth<=940||innerHeight<=780?3:0):innerHeight<=540?2:0;
+  const dockLift=portrait?(name==='pitch'&&innerHeight<=700?4:0):name==='bat'?(innerHeight<=540?2.5:innerWidth<=940||innerHeight<=780?1.8:0):innerHeight<=540?2:0;
   camera.position.set(center?0:c.pos.x*fl*fb,c.pos.y,c.pos.z); camera.lookAt(center?0:c.look.x*fl*fb,c.look.y-dockLift,c.look.z);
   camera.fov=portrait?c.fovP:name==='bat'&&innerHeight<=540?44:c.fov; camera.updateProjectionMatrix();
 }
@@ -478,6 +478,7 @@ function setCount(){
   for(let i=1;i<=3;i++) $('b'+i).classList.toggle('on',GM.balls>=i);
   for(let i=1;i<=2;i++) $('s'+i).classList.toggle('on',GM.strikes>=i);
   for(let i=1;i<=2;i++) $('o'+i).classList.toggle('on',GM.outs>=i);
+  if(window.setStadiumScore) setStadiumScore(GM);
 }
 function setScore(){
   const g=GM, top=g.half==='top';
@@ -927,6 +928,7 @@ function updateFaces(){
   }
 }
 function renderFrame(){
+  if(window.updateStadium) updateStadium(G.t);
   [C.pitcher,C.batter,C.runner,...Object.values(C.runners)].forEach(c=>{ if(c&&c.root.visible) syncLimbs(c); });
   $('heatPanel').hidden=!GM||G.mode!=='pitch'||!['aim','windup','pitch','between'].includes(G.state);
   $('skipBtn').disabled=$('simBtn').disabled=!GM||!['aim','ready','between'].includes(G.state);
