@@ -60,7 +60,8 @@ a{color:inherit}
 .card.baseball{--ac:#2f8be6;--ac2:#ffd23a;--btn-ink:#fff}
 .card.table-tennis{--ac:#d3ef85;--ac2:#75b5a6;--btn-ink:#203529}
 .card.flight{--ac:#91dfdf;--ac2:#6b98d5;--btn-ink:#143342}
-@media(min-width:780px){.card.flight{grid-column:1/-1;display:grid;grid-template-columns:1.15fr 1fr}}
+.card.stock{--ac:#3ddc97;--ac2:#ff6b6b;--btn-ink:#06170f}
+@media(min-width:780px){.shelf.solo{grid-template-columns:1fr}.shelf.solo>.card{display:grid;grid-template-columns:1.15fr 1fr;align-items:stretch}.shelf.solo>.card .thumb{aspect-ratio:auto;height:100%;min-height:260px;border-bottom:0;border-right:1px solid var(--line)}}
 
 .thumb{position:relative;display:block;aspect-ratio:16/10;overflow:hidden;background:#05060d;border-bottom:1px solid var(--line)}
 .thumb img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .35s ease}
@@ -133,6 +134,17 @@ a{color:inherit}
 .ep .play{color:var(--btn-ink);background:linear-gradient(90deg,var(--c),color-mix(in srgb,var(--c) 70%,#fff));box-shadow:0 8px 22px color-mix(in srgb,var(--c) 30%,transparent),inset 0 1px 0 rgba(255,255,255,.28)}
 .link{display:block;font-size:13.5px;color:var(--muted);text-align:center;margin:clamp(12px,1.8vw,16px) 0 0}
 
+/* ---------- categories ---------- */
+.chips{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:0 0 clamp(8px,2vw,16px)}
+.chip{display:inline-flex;align-items:center;min-height:40px;padding:8px 18px;border-radius:999px;text-decoration:none;
+  font-size:14.5px;font-weight:700;letter-spacing:.04em;color:var(--ink);background:rgba(255,255,255,.05);border:1px solid var(--line2);
+  transition:background .15s ease,border-color .15s ease}
+.chip:hover{background:rgba(255,255,255,.1);border-color:rgba(255,216,79,.6)}
+.cat{scroll-margin-top:84px;margin-top:clamp(28px,5vw,48px)}
+.cat-title{display:flex;align-items:center;gap:14px;margin:0 0 clamp(14px,2vw,20px);font-size:clamp(22px,3.4vw,28px);font-weight:900;letter-spacing:.04em;line-height:1.2}
+.cat-title::before{content:"";flex:0 0 auto;width:5px;height:1.1em;border-radius:3px;background:linear-gradient(180deg,#ffd84f,#ff8065)}
+.cat-title::after{content:"";flex:1;height:1px;background:var(--line2)}
+
 .foot{margin-top:clamp(28px,5vw,44px);text-align:center;color:var(--dim);font-size:13.5px;line-height:1.7}
 
 a:focus-visible{outline:3px solid #ffd84f;outline-offset:3px}
@@ -149,28 +161,21 @@ a:focus-visible{outline:3px solid #ffd84f;outline-offset:3px}
 
 <main class="wrap">
   <header class="hero">
-    <div class="kicker">Game Shelf<i></i>9 Games</div>
+    <div class="kicker">Game Shelf<i></i>10 Games</div>
     <h1><span class="lang-en">Pick a game.</span><span class="lang-zh" style="display:none">今天玩哪一台？</span></h1>
-    <p><span class="lang-en">Nine home-made games on one shelf. Hit Play and you're in.</span><span class="lang-zh" style="display:none">九個自己做的遊戲都放在這裡，按下按鈕就直接進去。</span></p>
+    <p><span class="lang-en">Ten home-made games on one shelf. Hit Play and you're in.</span><span class="lang-zh" style="display:none">十個自己做的遊戲都放在這裡，按下按鈕就直接進去。</span></p>
   </header>
 
-  <section class="shelf" aria-label="Games">
+  <nav class="chips" aria-label="Categories">
+    <a class="chip" href="#cat-action"><span class="lang-en">Action &amp; Adventure</span><span class="lang-zh" style="display:none">動作冒險</span></a>
+    <a class="chip" href="#cat-sports"><span class="lang-en">Sports</span><span class="lang-zh" style="display:none">運動</span></a>
+    <a class="chip" href="#cat-sim"><span class="lang-en">Simulation</span><span class="lang-zh" style="display:none">模擬</span></a>
+    <a class="chip" href="#cat-kids"><span class="lang-en">For Kids</span><span class="lang-zh" style="display:none">小朋友</span></a>
+  </nav>
 
-    <article class="card flight">
-      <a class="thumb" href="/games/flight/" tabindex="-1" aria-hidden="true">
-        <img src="/games/img/flight.jpg" width="1280" height="720" alt="" loading="eager">
-        <span class="tag"><span class="lang-en">Civil Flight Simulator</span><span class="lang-zh" style="display:none">民航飛行模擬</span></span>
-      </a>
-      <div class="body">
-        <h2 class="title">天際航線 <small>Skybound</small></h2>
-        <p class="pitch"><span class="lang-en">Take a twinjet from Taoyuan 05L into the skies over Taiwan. Real satellite scenery and terrain, cockpit instruments, takeoffs, ILS approaches and crosswinds. Choose the cockpit, chase or wing view.</span><span class="lang-zh" style="display:none">駕駛雙發客機，從桃園 05L 起飛。衛星影像與真實地形呈現台灣海岸，搭配座艙儀表、起降、ILS 進場與側風；座艙、機尾、機翼三種視角自由切換。</span></p>
-        <ul class="ctrl">
-          <li><span class="lang-en">Arrow keys fly · W / S thrust · C camera</span><span class="lang-zh" style="display:none">方向鍵操縱 · W／S 油門 · C 視角</span></li>
-          <li><span class="lang-en">Keyboard, mouse, gamepad or touch · starts muted</span><span class="lang-zh" style="display:none">鍵盤、滑鼠、手把或觸控 · 預設靜音</span></li>
-        </ul>
-        <div class="actions"><a class="play" href="/games/flight/"><span class="lang-en">Enter the cockpit</span><span class="lang-zh" style="display:none">進入座艙</span><span class="arrow" aria-hidden="true">▶</span></a></div>
-      </div>
-    </article>
+  <section class="cat" id="cat-action" aria-labelledby="cat-action-h">
+    <h2 class="cat-title" id="cat-action-h"><span class="lang-en">Action &amp; Adventure</span><span class="lang-zh" style="display:none">動作冒險</span></h2>
+    <div class="shelf solo">
 
     <!-- 1. 鋼鐵黃昏系列：前傳＋本篇並排，標出建議順序 -->
     <article class="series" aria-labelledby="dusk-title">
@@ -268,6 +273,13 @@ a:focus-visible{outline:3px solid #ffd84f;outline-offset:3px}
       </div>
     </article>
 
+    </div>
+  </section>
+
+  <section class="cat" id="cat-sports" aria-labelledby="cat-sports-h">
+    <h2 class="cat-title" id="cat-sports-h"><span class="lang-en">Sports</span><span class="lang-zh" style="display:none">運動</span></h2>
+    <div class="shelf">
+
     <article class="card table-tennis">
       <a class="thumb" href="/games/table-tennis/" tabindex="-1" aria-hidden="true">
         <img src="/games/table-tennis/cover.webp" width="1104" height="832" alt="" loading="lazy">
@@ -302,6 +314,53 @@ a:focus-visible{outline:3px solid #ffd84f;outline-offset:3px}
         </div>
       </div>
     </article>
+
+    </div>
+  </section>
+
+  <section class="cat" id="cat-sim" aria-labelledby="cat-sim-h">
+    <h2 class="cat-title" id="cat-sim-h"><span class="lang-en">Simulation</span><span class="lang-zh" style="display:none">模擬</span></h2>
+    <div class="shelf">
+
+    <article class="card flight">
+      <a class="thumb" href="/games/flight/" tabindex="-1" aria-hidden="true">
+        <img src="/games/img/flight.jpg" width="1280" height="720" alt="" loading="eager">
+        <span class="tag"><span class="lang-en">Civil Flight Simulator</span><span class="lang-zh" style="display:none">民航飛行模擬</span></span>
+      </a>
+      <div class="body">
+        <h2 class="title">天際航線 <small>Skybound</small></h2>
+        <p class="pitch"><span class="lang-en">Take a twinjet from Taoyuan 05L into the skies over Taiwan. Real satellite scenery and terrain, cockpit instruments, takeoffs, ILS approaches and crosswinds. Choose the cockpit, chase or wing view.</span><span class="lang-zh" style="display:none">駕駛雙發客機，從桃園 05L 起飛。衛星影像與真實地形呈現台灣海岸，搭配座艙儀表、起降、ILS 進場與側風；座艙、機尾、機翼三種視角自由切換。</span></p>
+        <ul class="ctrl">
+          <li><span class="lang-en">Arrow keys fly · W / S thrust · C camera</span><span class="lang-zh" style="display:none">方向鍵操縱 · W／S 油門 · C 視角</span></li>
+          <li><span class="lang-en">Keyboard, mouse, gamepad or touch · starts muted</span><span class="lang-zh" style="display:none">鍵盤、滑鼠、手把或觸控 · 預設靜音</span></li>
+        </ul>
+        <div class="actions"><a class="play" href="/games/flight/"><span class="lang-en">Enter the cockpit</span><span class="lang-zh" style="display:none">進入座艙</span><span class="arrow" aria-hidden="true">▶</span></a></div>
+      </div>
+    </article>
+
+    <!-- 盤感 LAB 新手版 -->
+    <article class="card stock">
+      <a class="thumb" href="/games/stock/" tabindex="-1" aria-hidden="true">
+        <img src="/games/img/stock-starter.webp" width="800" height="500" alt="" loading="lazy">
+        <span class="tag"><span class="lang-en">Stock trading sim</span><span class="lang-zh" style="display:none">股票模擬</span></span>
+      </a>
+      <div class="body">
+        <h2 class="title">盤感 LAB 新手版 <small>Market Lab · Starter</small></h2>
+        <p class="pitch"><span class="lang-en">Get a random real stock and practice trading on its actual past prices. You only have three moves: buy, sell, next day. After 60 days, your result is compared with simply buying and holding.</span><span class="lang-zh" style="display:none">隨機抽一檔真實股票，用過去的真實走勢練習買賣。只有買進、賣出、下一天三個動作，60 天後和「買了放著不動」比成績。</span></p>
+        <ul class="ctrl">
+          <li><span class="lang-en">Works on phone and desktop</span><span class="lang-zh" style="display:none">手機・電腦都能玩</span></li>
+          <li><span class="lang-en">No sign-up</span><span class="lang-zh" style="display:none">不用註冊</span></li>
+        </ul>
+        <div class="actions"><a class="play" href="/games/stock/"><span class="lang-en">Play</span><span class="lang-zh" style="display:none">開始玩</span><span class="arrow" aria-hidden="true">▶</span></a></div>
+      </div>
+    </article>
+
+    </div>
+  </section>
+
+  <section class="cat" id="cat-kids" aria-labelledby="cat-kids-h">
+    <h2 class="cat-title" id="cat-kids-h"><span class="lang-en">For Kids</span><span class="lang-zh" style="display:none">小朋友</span></h2>
+    <div class="shelf">
 
     <!-- 3. 小小設計師（還沒上線，先藏起來；上線時拿掉 style="display:none"，標題文字改回「三個」） -->
     <article class="card designer" style="display:none">
@@ -351,7 +410,9 @@ a:focus-visible{outline:3px solid #ffd84f;outline-offset:3px}
       </div>
     </article>
 
+    </div>
   </section>
+
 
   <p class="foot"><span class="lang-en">Everything runs in the browser. Nothing to install.</span><span class="lang-zh" style="display:none">全部在瀏覽器裡跑，不用安裝。</span></p>
 </main>

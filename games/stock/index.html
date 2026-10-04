@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>盤感 LAB 新手版</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=1">
+</head>
+<body>
+<a class="back" href="/games/" aria-label="返回遊戲大廳">← 遊戲大廳</a>
+
+<main>
+  <section id="start" class="screen">
+    <h1>盤感 LAB <em>新手版</em></h1>
+    <ol class="howto">
+      <li>隨機抽一檔股票，先看前 60 個交易日的走勢。</li>
+      <li>接著玩 60 個交易日，每天用收盤價買進或賣出。</li>
+      <li>結束後跟「買進放著不動」比一比，看誰賺得多。</li>
+    </ol>
+    <button id="startBtn" class="big primary">開始新的一局</button>
+    <p id="best" class="muted"></p>
+  </section>
+
+  <section id="game" class="screen" hidden>
+    <header class="gbar">
+      <div><strong id="stockName">—</strong> <span id="stockSym" class="muted"></span></div>
+      <div class="day"><span id="dayText">第 1 天／60</span></div>
+    </header>
+    <div class="layout">
+      <div class="chartbox">
+        <div class="legend"><span class="ma20">MA20</span><span class="ma60">MA60</span><span class="muted">紅漲綠跌</span><span id="tip" class="tip muted"></span></div>
+        <canvas id="chart"></canvas>
+      </div>
+      <div class="panel">
+        <div class="hud">
+          <div><span>現金</span><b id="hCash">—</b></div>
+          <div><span>持股（股）</span><b id="hShares">—</b></div>
+          <div><span>總資產</span><b id="hEquity">—</b></div>
+          <div><span>報酬率</span><b id="hRet">—</b></div>
+        </div>
+        <div class="price-line">今日收盤價 <b id="hPrice">—</b></div>
+        <div class="chips" role="radiogroup" aria-label="交易比例">
+          <button class="chip" data-f="0.25" role="radio" aria-checked="false">1/4</button>
+          <button class="chip on" data-f="0.5" role="radio" aria-checked="true">1/2</button>
+          <button class="chip" data-f="1" role="radio" aria-checked="false">全部</button>
+        </div>
+        <div class="row2">
+          <button id="buyBtn" class="big buy">買進</button>
+          <button id="sellBtn" class="big sell">賣出</button>
+        </div>
+        <div class="trade-hint muted" id="hint">&nbsp;</div>
+        <button id="nextBtn" class="big primary">下一天 ▶</button>
+        <div class="row2">
+          <button id="autoBtn" class="mid" aria-pressed="false">自動播放</button>
+          <button id="endBtn" class="mid">提早結束</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="result" class="screen" hidden>
+    <h2>本局結果</h2>
+    <p id="rName" class="rname"></p>
+    <p id="rRange" class="muted"></p>
+    <div class="cards">
+      <div class="rc"><span>你的報酬率</span><b id="rYou">—</b></div>
+      <div class="rc"><span>買進後放著不動</span><b id="rHold">—</b></div>
+    </div>
+    <p id="rVerdict" class="verdict"></p>
+    <ul class="rlist">
+      <li>交易次數：<b id="rTrades">0</b> 次</li>
+      <li>最終資產：<b id="rEquity">—</b></li>
+      <li>放著不動的算法：第 1 天收盤全部買進，抱到結束。</li>
+    </ul>
+    <button id="againBtn" class="big primary">再玩一局</button>
+  </section>
+</main>
+<script src="app.js?v=1"></script>
+</body>
+</html>
