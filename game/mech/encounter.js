@@ -213,7 +213,7 @@ function buildRoute(world, E) {
   };
   const concMat = new THREE.MeshStandardMaterial({ map: A.rubD, normalMap: A.rubN, roughness: 0.95, color: 0xb0aaa0 });
   const steelMat = new THREE.MeshStandardMaterial({ map: A.rubD, color: 0x4a4540, metalness: 0.6, roughness: 0.55 });
-  const carMat = instancedCarMaterial(A.rubD);
+  const carMat = instancedCarMaterial(A.rubD, { burned: true });
   const rubMat = new THREE.MeshStandardMaterial({ map: A.rubD, normalMap: A.rubN, roughness: 0.95, color: 0x8a8580 });
   const brdMat = new THREE.MeshStandardMaterial({ map: stripeTexture(), roughness: 0.55 });
   const la = new THREE.MeshBasicMaterial({ color: new THREE.Color(6, 0.45, 0.2) }), lb = la.clone();

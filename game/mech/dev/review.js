@@ -23,7 +23,8 @@ async function load(path, query = '') {
     return a + JSON.stringify(map) + b;
   });
   html=html.replace(/(<script type="module" src=")([^"]+)(")/g,(_,a,url,b)=>a+url+(url.includes('?')?'&':'?')+'qa='+revision+b);
-  const control = `<base href="${entryBase}"><script>window.__qaErrors=[];addEventListener('error',e=>__qaErrors.push(e.message));addEventListener('unhandledrejection',e=>__qaErrors.push(String(e.reason?.stack||e.reason)));window.__raf=[];window.requestAnimationFrame=fn=>(__raf.push(fn),__raf.length);window.__step=(n=1)=>{for(let i=0;i<n;i++){const q=__raf.splice(0);for(const f of q)f(performance.now())}};<\/script>`;
+  // 固定步進測試不隨其他瀏覽分頁切換而暫停。
+  const control = `<base href="${entryBase}"><script>Object.defineProperty(document,'hidden',{value:false,configurable:true});window.__qaErrors=[];addEventListener('error',e=>__qaErrors.push(e.message));addEventListener('unhandledrejection',e=>__qaErrors.push(String(e.reason?.stack||e.reason)));window.__raf=[];window.requestAnimationFrame=fn=>(__raf.push(fn),__raf.length);window.__step=(n=1)=>{for(let i=0;i<n;i++){const q=__raf.splice(0);for(const f of q)f(performance.now())}};<\/script>`;
   // srcdoc has its own queryless URL, so replace the main module with an explicit wrapper setting the desired query via parent-provided URLSearchParams.
   const setup = `<script>const NativeParams=URLSearchParams;window.URLSearchParams=class extends NativeParams{constructor(v){super(v===location.search?'${query}':v)}};<\/script>`;
   frame.srcdoc = html.replace('<head>', '<head>' + control + setup);
@@ -41,6 +42,7 @@ async function load(path, query = '') {
     assert(await world.forestLoaded&&world.A.forestReady.value===1,'秋季六甲山的 512 林冠色彩與高度材質已載入');
     assert(world.A.surfaceAtlas.value.image.width===1024 && [0,1,2,3,4].every(i=>world.A.fac[i][0].image.width===512 && world.A.fac[i][0].name.startsWith('city-')),'共用建材 1024；三款城市立面均使用 512 貼圖');
     if(win.__G && win.__flow.chapter < (win.__S.FIRST_MECH||6)) assert(world.cityTreeMeshes.every(m=>!m.visible),'步兵模式不因枝葉延遲載入而打開遠處樹林');
+    await world.carEnvironmentReady;
   }
   await win.document.fonts.load('bold 45px "Noto Sans JP"', SHOP_LABELS.concat(SHOP_SUBTITLES, PORT_LABELS, CIVIC_LABELS).join(''));
   win.__step(2); frame.focus();
@@ -51,6 +53,11 @@ async function save(name = 'capture', clean = false) {
   post.render(1);
   const cv = win.document.createElement('canvas'); cv.width = renderer.domElement.width; cv.height = renderer.domElement.height;
   const cx = cv.getContext('2d'); cx.drawImage(renderer.domElement, 0, 0);
+  if(name.startsWith('cars-')) {
+    const pixels=cx.getImageData(0,0,cv.width,cv.height).data;
+    let visible=false;for(let i=0;i<pixels.length;i+=256)if(pixels[i]+pixels[i+1]+pixels[i+2]>12){visible=true;break;}
+    assert(visible,'汽車截圖 '+name+' 有實際畫面，不是空白畫布');
+  }
   if (!clean) for (const c of win.document.querySelectorAll('canvas[id^="hud"]')) cx.drawImage(c, 0, 0, cv.width, cv.height);
   const data = cv.toDataURL('image/png');
   const a = document.createElement('a'); a.href = data; a.download = name + '.png'; a.textContent = '下載 ' + name;
@@ -317,6 +324,7 @@ async function battlefields() {
   for(const n of [4,5,6,7,8,9,4,5,6,7,8,9]) { G.launch(n); G.run(4); post.render(1); counts.push(renderer.info.memory.geometries); G.toTitle(); await new Promise(r=>setTimeout(r,0)); }
   assert(counts.slice(6).every((v,i)=>v===counts[i]), '第二輪切換六種場地沒有累積 GPU 幾何');
   assert(renderer.info.memory.textures===residentTextures, '第二輪換場未累積貼圖');
+  assert(W.carProbeCaptures===1&&W.carMeshes.every(m=>m.material.envMap===W.carEnvTarget.texture),'六種場地切換後仍共用原汽車反射，沒有重新烘焙');
   assert(errors.length===0, '場地切換與完整通關沒有執行錯誤');
   report.textContent=JSON.stringify({checks:result,budgets,counts,errors},null,2); state.textContent='六種場地通過';
 }
@@ -1401,6 +1409,10 @@ async function carArt() {
   await load('/game/mech/index.html','?mute&free&quality=1&fps=0');renderer=win.__renderer;post=win.__post;
   const W=win.__world,T=win.__T;
   assert(W.carMeshes.length===3,'本篇三款日系車分成三個實例批次');
+  assert(W.carProbeCaptures===1&&W.carEnvTarget.texture.name==='car-street-reflection','本篇所有汽車共用一次烘焙的街道與建築反射');
+  assert(W.carEnvTarget.width<=384&&W.carEnvTarget.height<=512,'汽車反射使用 128 立方圖及低解析度 PMREM');
+  assert(W.carMeshes.every(m=>m.material.isMeshPhysicalMaterial&&m.material.clearcoat===1&&m.material.envMap===W.carEnvTarget.texture&&!m.material.transmission),'汽車使用雙層烤漆，沿用三批次且不啟用透射額外通道');
+  assert(W.trample.filter(o=>o.kind==='car').every(o=>o.mesh[0].geometry.attributes.instanceFinish.getX(o.i)===(o.burnt?0:1)),'金屬烤漆區分完整車與燒毀車，不把黑車誤當殘骸');
   assert(W.carMeshes.every(m=>m.geometry.attributes.carPart&&m.geometry.attributes.position.count/3<=750),'每款遠景汽車保留表面分類且不超過 750 三角形');
   for(let variant=0;variant<3;variant++) {
     const cars=W.trample.filter(o=>o.kind==='car'&&o.variant===variant&&!o.burnt&&Math.abs(o.x)<550&&Math.abs(o.z)<550);
@@ -1410,15 +1422,19 @@ async function carArt() {
     win.__cam.set(c.x+d.x,d.y,c.z+d.z,Math.atan2(d.x,d.z),-Math.atan2(d.y-.75,Math.hypot(d.x,d.z)));
     W.followShadow(new T.Vector3(c.x,0,c.z));W.sun.shadow.needsUpdate=true;win.__step(3);await save('cars-mech-'+variant,true);
   }
-  const c=W.trample.find(o=>o.kind==='car'&&!o.down),matrix=new T.Matrix4();
+  const c=W.trample.find(o=>o.kind==='car'&&!o.down&&!o.burnt),matrix=new T.Matrix4();
   W.stomp(c.x,c.z,.1);c.mesh[0].getMatrixAt(c.i,matrix);
   assert(c.down===1&&matrix.elements.every(Number.isFinite),'新版汽車被機甲踩壓後仍正常變形');
+  assert(c.mesh[0].geometry.attributes.instanceFinish.getX(c.i)===0,'踩壓後的殘骸不保留完整烤漆光澤');
+  const carEnvironment=W.refreshCarEnvironment(new T.Vector3(0,1.25,-45),W.carMeshes.map(m=>m.material));
+  assert(carEnvironment===W.carEnvTarget.texture&&W.carProbeCaptures===1,'重新取用汽車反射不新增烘焙或貼圖');
   const geometries=new Set();W.scene.traverse(o=>{if(o.geometry)geometries.add(o.geometry);});
   const cityTriangles=[...geometries].reduce((n,g)=>n+(g.index?.count||g.attributes.position.count)/3,0);
   assert(cityTriangles<1400000,'本篇城市與新車共用幾何資料仍低於 140 萬三角形');
   stats.main={cars:W.carMeshes.reduce((n,m)=>n+m.count,0),batches:W.carMeshes.length,triangles:W.carMeshes.map(m=>m.geometry.attributes.position.count/3),instancedCarTriangles:W.carMeshes.reduce((n,m)=>n+m.geometry.attributes.position.count/3*m.count,0),cityTriangles};checks.push(...result);
   await load('/game/mech/zero/index.html','?mute&god&ch=3&all&fps=0');renderer=win.__renderer;post={render:()=>win.__step(1)};win.__step(60);
   const M=win.__map,G=win.__G;
+  assert(win.__world.carProbeCaptures===1&&M.meshes.filter(m=>m.material.userData.carSurface).every(m=>m.material.envMap===win.__world.carEnvTarget.texture),'前傳五個汽車表面共用一張街景反射');
   for(const [i,inspiration]of ['Toyota Prius','Honda Fit','Mazda CX-30'].entries()) {
     const car=M.cars.find(c=>!c.covered&&!c.burned&&c.profile.inspiration===inspiration);
     assert(!!car,inspiration+' 出現在前傳實際車輛配置');
@@ -1442,6 +1458,7 @@ async function carArt() {
   stats.prequel={cars:M.cars.map(c=>({covered:!!c.covered,burned:!!c.burned,model:c.profile?.inspiration,triangles:c.triangles})),meshes:M.meshes.length};checks.push(...result);
   await load('/game/mech/lastline/index.html','?mute&god&ch=1&all&fps=0');renderer=win.__renderer;post={render:()=>win.__step(1)};win.__step(60);
   const H=win.__map,car=H.cars[0];
+  assert(win.__world.carProbeCaptures===1&&car.meshes.every(m=>m.material.envMap===win.__world.carEnvTarget.texture),'港區汽車共用一次烘焙的港務街景反射');
   win.__G.player.reset(new win.__T.Vector3(car.x+3.8,0,car.z+4.3),Math.atan2(-3.8,-4.3));win.__G.player.pitch=-.12;
   win.__step(3);await save('cars-lastline-fit',true);
   assert(H.cars.length===1&&car.profile.inspiration==='Honda Fit','港區原覆蓋車位置換成可辨識的日系掀背車');

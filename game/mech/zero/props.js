@@ -3,6 +3,7 @@ import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { grimeTex } from './kit.js';
 import { buildJapaneseCar } from '../japanese-cars.mjs';
+import { carReflectionShader } from '../car-material.js';
 
 const cache = {};
 function prism(pts, w, bev = 0.04, holes = []) {
@@ -102,10 +103,16 @@ export function car(variant = 0, burned = true, detail = true) {
 export function carMaterials() {
   if (cache.carMaterials) return cache.carMaterials;
   const material = (opts) => new THREE.MeshStandardMaterial({ color: 0xffffff, vertexColors: true, ...opts });
-  const carPaint = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: .26, metalness: .06, clearcoat: .8, clearcoatRoughness: .18, envMapIntensity: 1, vertexColors: true });
-  const carGlass = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: .09, metalness: 0, clearcoat: 1, clearcoatRoughness: .06, envMapIntensity: 1.2, vertexColors: true });
+  const carPaint = new THREE.MeshPhysicalMaterial({ color: 0xffffff, roughness: .24, metalness: .24, clearcoat: 1, clearcoatRoughness: .07, ior: 1.5, specularIntensity: 1, envMapIntensity: 1, vertexColors: true });
+  const carGlass = new THREE.MeshPhysicalMaterial({ color: 0x7b8589, roughness: .045, metalness: 0, clearcoat: 1, clearcoatRoughness: .035, ior: 1.52, specularIntensity: 1, transparent: false, opacity: 1, transmission: 0, envMapIntensity: 1.2, vertexColors: true });
+  carPaint.onBeforeCompile = sh => { sh.fragmentShader = carReflectionShader(sh.fragmentShader, 1.25); };
+  carGlass.onBeforeCompile = sh => { sh.fragmentShader = carReflectionShader(sh.fragmentShader, 1.4); };
+  carPaint.customProgramCacheKey = () => 'japanese-car-paint-reflection-v2';
+  carGlass.customProgramCacheKey = () => 'japanese-car-glass-reflection-v2';
   carGlass.userData.noCast = true;
-  return (cache.carMaterials = { carPaint, carDark: material({ roughness: .94 }), carMetal: material({ roughness: .24, metalness: .7 }), carGlass, carLights: material({ roughness: .18, metalness: .05 }) });
+  const materials = (cache.carMaterials = { carPaint, carDark: material({ roughness: .94 }), carMetal: material({ roughness: .24, metalness: .7 }), carGlass, carLights: material({ roughness: .18, metalness: .05 }) });
+  for (const m of Object.values(materials)) m.userData.carSurface = true;
+  return materials;
 }
 
 // ---------------------------------------------------------------- 燒毀的公車（長 10.4、寬 2.5、高 3 m，面向 +Z）：一整排窗洞看得到燒黑的車廂和座椅鐵架

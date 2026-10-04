@@ -1119,6 +1119,9 @@ export class World {
     this.cityState = { boxes: [...this.boxes], blds: this.blds, trample: this.trample, smokeSites: this.smokeSites, fireSites: this.fireSites, lampSites: this.lampSites };
     this.cityHeights = this.terrain.h.slice();
     this.battlefield = 'city';
+    this.carProbeCaptures = 0;
+    this.carEnvironmentReady = city ? surfacesLoaded.then(() => this.battlefield === 'city'
+      ? this.refreshCarEnvironment(new THREE.Vector3(0, this.height(0, -45) + 1.25, -45), this.carMeshes.map(m => m.material)) : null) : Promise.resolve(null);
   }
 
   captureSky() {
@@ -1132,6 +1135,58 @@ export class World {
   refreshEnvironment() {
     const next=this.captureSky();
     this.cityEnvTarget?.dispose();this.cityEnvTarget=next;this.envMap=next.texture;this.scene.environment=this.envMap;
+  }
+
+  captureCarEnvironment(point) {
+    const renderer=this.renderer,scene=this.scene,sun=this.sun,sky=this.skyDome;
+    const target=renderer.getRenderTarget(),face=renderer.getActiveCubeFace(),mip=renderer.getActiveMipmapLevel();
+    const viewport=renderer.getViewport(new THREE.Vector4()),scissor=renderer.getScissor(new THREE.Vector4()),scissorTest=renderer.getScissorTest();
+    const xr=renderer.xr.enabled,autoClear=renderer.autoClear,clearColor=renderer.autoClearColor,clearDepth=renderer.autoClearDepth;
+    const shadowAuto=renderer.shadowMap.autoUpdate,shadowUpdate=renderer.shadowMap.needsUpdate;
+    const sunAuto=sun.shadow.autoUpdate,sunUpdate=sun.shadow.needsUpdate,sunPosition=sun.position.clone(),sunTarget=sun.target.position.clone();
+    const before=scene.onBeforeRender,after=scene.onAfterRender,override=scene.overrideMaterial;
+    const skyBefore=sky.onBeforeRender,skyPosition=sky.position.clone(),objects=[];
+    const capture=new THREE.WebGLCubeRenderTarget(128,{type:THREE.HalfFloatType,minFilter:THREE.LinearFilter,generateMipmaps:false});
+    const pm=new THREE.PMREMGenerator(renderer),camera=new THREE.CubeCamera(.1,10000,capture);
+    try {
+      scene.traverse(o => {
+        if (!o.isMesh && !o.isSprite) return;
+        objects.push([o,o.visible,o.receiveShadow]);
+        const materials=Array.isArray(o.material)?o.material:[o.material];
+        if (o.userData.mech || materials.some(m=>m?.userData.carSurface)) o.visible=false;
+        o.receiveShadow=false;
+      });
+      // 反射只捕捉街景，沿用日照方向；六面不另建或重繪遊戲陰影貼圖。
+      renderer.shadowMap.autoUpdate=renderer.shadowMap.needsUpdate=false;
+      sun.shadow.autoUpdate=sun.shadow.needsUpdate=false;
+      renderer.autoClear=renderer.autoClearColor=renderer.autoClearDepth=true;
+      renderer.setScissorTest(false);
+      scene.onBeforeRender=scene.onAfterRender=sky.onBeforeRender=()=>{};scene.overrideMaterial=null;
+      sun.target.position.copy(point);sun.position.copy(point).addScaledVector(this.lightDir,1200);
+      sun.target.updateMatrixWorld();sun.updateMatrixWorld();
+      sky.position.copy(point);sky.updateMatrixWorld();camera.position.copy(point);
+      camera.update(renderer,scene);
+      const next=pm.fromCubemap(capture.texture);next.texture.name='car-street-reflection';
+      this.carProbeCaptures++;return next;
+    } finally {
+      for (const [o,visible,receiveShadow] of objects) {o.visible=visible;o.receiveShadow=receiveShadow;}
+      scene.onBeforeRender=before;scene.onAfterRender=after;scene.overrideMaterial=override;
+      sky.onBeforeRender=skyBefore;sky.position.copy(skyPosition);sky.updateMatrixWorld();
+      sun.position.copy(sunPosition);sun.target.position.copy(sunTarget);sun.updateMatrixWorld();sun.target.updateMatrixWorld();
+      sun.shadow.autoUpdate=sunAuto;sun.shadow.needsUpdate=sunUpdate;
+      renderer.shadowMap.autoUpdate=shadowAuto;renderer.shadowMap.needsUpdate=shadowUpdate;
+      renderer.xr.enabled=xr;renderer.autoClear=autoClear;renderer.autoClearColor=clearColor;renderer.autoClearDepth=clearDepth;
+      renderer.setRenderTarget(target,face,mip);
+      renderer.setViewport(viewport);renderer.setScissor(scissor);renderer.setScissorTest(scissorTest);
+      capture.dispose();pm.dispose();
+    }
+  }
+
+  refreshCarEnvironment(point,materials) {
+    if (!this.carEnvTarget) this.carEnvTarget=this.captureCarEnvironment(point);
+    const texture=this.carEnvTarget.texture;
+    for (const material of new Set(materials)) if (material && material.envMap!==texture) {material.envMap=texture;material.needsUpdate=true;}
+    return texture;
   }
 
   setBattlefield(profile = 'city', route = null) {
@@ -1186,6 +1241,8 @@ export class World {
     if (F.mode) this.buildBattlefield(profile, layout);
     this._indexTrample();
     this.sun.shadow.needsUpdate = true;
+    if (!F.mode && this.carMeshes?.length && !this.carEnvTarget) this.carEnvironmentReady = this.surfacesLoaded.then(() =>
+      this.battlefield === 'city' ? this.refreshCarEnvironment(new THREE.Vector3(0, this.height(0, -45) + 1.25, -45), this.carMeshes.map(m => m.material)) : null);
   }
 
   buildBattlefield(profile, layout) {
@@ -2193,13 +2250,15 @@ export class World {
       const burnt = r() < 0.3;
       cars.push([x, z, ang, burnt ? [0.05 + r() * 0.04, 0.035 + r() * 0.02, 0.025] : palette[(r() * palette.length) | 0], burnt]);
     }
-    const carMat = instancedCarMaterial(this.A.rubD);
+    const carMat = instancedCarMaterial(this.A.rubD, { finishAttribute: true });
     this.carMeshes = [];
     // 每種車型一個實例批次，輪胎、玻璃與車燈不隨烤漆一起染色。
     for (let variant = 0; variant < 3; variant++) {
       const group = cars.filter((car, i) => i % 3 === variant);
       if (!group.length) continue;
-      const carMesh = new THREE.InstancedMesh(carGeometry(variant), carMat, group.length);
+      const geometry = carGeometry(variant).clone();
+      geometry.setAttribute('instanceFinish', new THREE.InstancedBufferAttribute(new Float32Array(group.map(c => c[4] ? 0 : 1)), 1));
+      const carMesh = new THREE.InstancedMesh(geometry, carMat, group.length);
       group.forEach(([x, z, a, c, burnt], i) => {
         dummy.position.set(x, 0, z); dummy.rotation.set(0, a, 0); dummy.scale.setScalar(1); dummy.updateMatrix();
         carMesh.setMatrixAt(i, dummy.matrix);
@@ -2340,6 +2399,7 @@ export class World {
             d.position.set(o.x, -0.1, o.z); d.rotation.set((Math.random() - 0.5) * 0.2, o.ry, (Math.random() - 0.5) * 0.3); d.scale.set(1.08, 0.32, 1.12); d.updateMatrix();
             o.mesh[0].setMatrixAt(o.i, d.matrix); o.mesh[0].instanceMatrix.needsUpdate = true;
             o.mesh[0].setColorAt(o.i, new THREE.Color(0.06, 0.055, 0.05)); o.mesh[0].instanceColor.needsUpdate = true;
+            const finish = o.mesh[0].geometry.attributes.instanceFinish; finish.setX(o.i, 0); finish.needsUpdate = true;
           } else {
             let ax = o.x - x, az = o.z - z;
             if (dirX || dirZ) { ax = dirX; az = dirZ; }

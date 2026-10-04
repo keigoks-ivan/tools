@@ -2,6 +2,7 @@
 //   流程：標題（選章節）→ 開場字卡 → 第一人稱戰鬥（章節／遭遇戰／檢查點）→ 機庫爬上鋼彈 → 跳進駕駛艙 → 接到《鋼鐵黃昏》的駕駛艙
 //   除錯：?ch=1..3 直接開章、?x=&z=&yaw= 指定位置、?god 無敵、?mute 靜音、?final 直接到最後一幕
 import * as THREE from 'three';
+import { carMaterials } from './props.js';
 import { Reinforcements } from '../reinforcements.mjs';
 import { Patrols, arrivalPoint, updateInfantry, MAX_ACTORS } from './patrol.js';
 import { Contacts, Scout } from './recon.js';
@@ -120,6 +121,7 @@ for (const o of S.OUTPOSTS || []) {
   fieldItems[o.id] = new THREE.Vector3(x, y + .4, z);
 }
 const placed = placer.build(scene);
+world.carEnvironmentReady = Promise.resolve(world.refreshCarEnvironment(new THREE.Vector3(campaign ? -158 : -42, 1.25, campaign ? -225 : -1), Object.values(carMaterials())));
 console.log('[zero] 掃描模型', placed);
 // 點光源：每個像素都要把場景裡的每一盞點光算一遍（離多遠都算），地圖六盞很貴。
 //   改成固定三盞，每次畫之前搬到離鏡頭最近的三個燈位（機庫三盞同時亮，其他地方最多兩盞）：畫面一樣，shader 少算三盞
