@@ -11,9 +11,13 @@ import { roofline } from './roofline.js';
 import { streetfront, frontageProfile, frontageDetails } from './streetfront.js';
 import { japaneseScenery } from './japan.js';
 import { recessedFacade, storefrontOpenings, kobeStreetDetails, kobeBlockStreets } from './kobe-street.mjs';
-import { autumnFoliage, autumnTreeTint, buildAutumnTrees, forestCanopy } from './kobe-autumn.js';
+import { autumnFoliage, autumnTreeTint, autumnTreeGeometry, buildAutumnTrees, forestCanopy } from './kobe-autumn.js';
 import { decodeKobeRelief, kobeCityHeight } from './kobe-relief.mjs';
 import { kobeCityBlocks, kobeRailway, kobeWaterfront, KOBE_CITY } from './kobe-city.mjs';
+import { kitanoScenery, kitanoSignMaterial, kitanoSignUV } from './kobe-kitano.js';
+import { kitanoGardenMaterial } from './kobe-garden.mjs';
+import { kitanoHeritageMaterial } from './kobe-heritage.mjs';
+import { Solid } from './zero/kit.js';
 import { BATTLEFIELDS, fieldHeight, fieldLayout, routeDistance, fieldGridCoordinate, fieldGridIndex } from './battlefields.js';
 
 import { fieldTreeGeometry, fieldShrubGeometry, fieldRockGeometry, fieldArchitecture, fieldLeafMaterial, fieldRadar, fieldGroundMask } from './fieldart.js';
@@ -21,6 +25,7 @@ import { fieldTreeGeometry, fieldShrubGeometry, fieldRockGeometry, fieldArchitec
 const ASSET = './assets/';
 const COMPACT = new URL('./zero/assets/env/', import.meta.url).href;
 export const CITY = { block: 120, road: 14, walk: 18, half: 740 };
+const KITANO_MAIN = { x: -800, z: -240, yaw: Math.PI };
 const SKY_ELEV_MIN = -10; // 天空圖裁到 -10°
 
 function rng(seed) {
@@ -1021,8 +1026,10 @@ function pylonGeometry() {
 
 // ---------------------------------------------------------------- 世界
 export class World {
-  constructor(renderer, scene, A, { terrainSegments = 160, city = true } = {}) {
+  constructor(renderer, scene, A, { terrainSegments = 160, city = true, kitano = true, sceneryReserve = null } = {}) {
     this.cityEnabled = city;
+    this.kitanoEnabled = city && kitano;
+    this.sceneryReserve = sceneryReserve;
     this.scene = scene;
     this.renderer = renderer;
     this.A = A;
@@ -1389,6 +1396,8 @@ export class World {
   // 腳下支撐高度：地形或屋頂（只算腳底下方、可以踩上去的）
   support(x, z, r, feetY) {
     let h = this.height(x, z);
+    const kb = this.kitano?.bounds;
+    if (kb && this.battlefield === 'city' && x >= kb.x0-r && x <= kb.x1+r && z >= kb.z0-r && z <= kb.z1+r) h = Math.max(h, this.kitanoSolid.floorAt(x, z, feetY + 1.5, r * .5));
     for (const b of this.nearBoxes(x, z, r, this._tmpA || (this._tmpA = []))) {
       if (x > b.x0 - r * 0.5 && x < b.x1 + r * 0.5 && z > b.z0 - r * 0.5 && z < b.z1 + r * 0.5 && b.top <= feetY + 1.5) h = Math.max(h, b.top);
     }
@@ -1397,7 +1406,8 @@ export class World {
 
   // 圓柱推出建築
   collide(pos, r, feetY) {
-    let hit = false;
+    const kb = this.kitano?.bounds;
+    let hit = kb && this.battlefield === 'city' && pos.x >= kb.x0-r && pos.x <= kb.x1+r && pos.z >= kb.z0-r && pos.z <= kb.z1+r ? this.kitanoSolid.pushOut(pos, r, feetY, feetY + 18, 1.5) : false;
     for (const b of this.nearBoxes(pos.x, pos.z, r + 2, this._tmpB || (this._tmpB = []))) {
       if (b.top <= feetY + 1.5) continue;
       const cx = Math.max(b.x0, Math.min(pos.x, b.x1)), cz = Math.max(b.z0, Math.min(pos.z, b.z1));
@@ -1422,6 +1432,14 @@ export class World {
   raycast(a, b, outN) {
     let best = 2;
     const dx = b.x - a.x, dy = b.y - a.y, dz = b.z - a.z;
+    const kb = this.kitano?.bounds;
+    if (kb && this.battlefield === 'city' && Math.max(a.x,b.x) >= kb.x0 && Math.min(a.x,b.x) <= kb.x1 && Math.max(a.z,b.z) >= kb.z0 && Math.min(a.z,b.z) <= kb.z1) {
+      const delta = new THREE.Vector3(dx,dy,dz), distance = delta.length();
+      if (distance > .001) {
+        const hit = this.kitanoSolid.ray(a, delta.divideScalar(distance), distance);
+        if (hit) { best = hit.t / distance; if (outN) outN.copy(hit.n); }
+      }
+    }
     const len = Math.hypot(dx, dz);
     const steps = Math.max(1, Math.ceil(len / 50));
     const seen = new Set();
@@ -1556,6 +1574,8 @@ export class World {
         const tint = 0.8 + r() * 0.3;
         const col = [tint, tint * (0.97 + r() * 0.05), tint * (0.93 + r() * 0.07), ruin ? 0.75 + r() * 0.25 : (r() < 0.15 ? 0.35 : 0)];
         const uo = Math.floor(r() * F.cols) / F.cols, vo = Math.floor(r() * 8) / 8;
+        const reserve = this.sceneryReserve;
+        if (reserve && x0 < reserve.x1 && x1 > reserve.x0 && z0 < reserve.z1 && z1 > reserve.z0) continue;
         const bk = chunkOf((x0 + x1) / 2, (z0 + z1) / 2);
         if (!ruin) {
           // 可破壞：記下這棟在各合併網格裡的頂點區段（每棟連續寫入）
@@ -1668,7 +1688,8 @@ export class World {
       });
     }
     const toWorld=(x,z)=>harbor?[z+140,-x-180]:[x,z];
-    const reserve=harbor?(x0,x1,z0,z1)=>z1>540||(z1+140>-380&&-x0-180>-850&&-x1-180<650):undefined;
+    const reserve=harbor?(x0,x1,z0,z1)=>z1>540||(z1+140>-380&&-x0-180>-850&&-x1-180<650):this.kitanoEnabled?(x0,x1,z0,z1)=>
+      (x0<840&&x1>-840&&z0<840&&z1>-840)||(x0<-710&&x1>-890&&z0<-190&&z1>-570):undefined;
     const blocks=kobeCityBlocks((x,z)=>this.terrain.height(...toWorld(x,z)),reserve);
     const buckets=FACADES.map(()=>new GeoBucket()),roof=new GeoBucket();
     for(const bl of blocks)for(const lot of bl.lots) {
@@ -2174,6 +2195,29 @@ export class World {
       const n=normal(a,b,c),axes=Math.abs(n[1])>.5?[0,2]:Math.abs(n[0])>.5?[2,1]:[0,1];
       detail.quad(a,b,c,d,n,[a,b,c,d].map(p=>[p[axes[0]]/2,p[axes[1]]/2]),col);
     }};
+    if (this.kitanoEnabled) {
+      const signs = new GeoBucket(), lawns = new GeoBucket(), heritage = new GeoBucket(), ground = Math.max(.04,this.terrain.height(KITANO_MAIN.x,KITANO_MAIN.z));
+      this.kitanoSolid = new Solid();
+      this.kitano = kitanoScenery({
+        face:(a,b,c,d,col)=>{
+          const bucket=col[4]===9?lawns:col[4]===6?heritage:null;
+          if(bucket)bucket.quad(a,b,c,d,normal(a,b,c),[a,b,c,d].map(p=>[p[0],p[2]]),col);
+          else streetDetails.face(a,b,c,d,col);
+        },
+        sign: (pts,id) => signs.quad(...pts,normal(...pts),kitanoSignUV(id),[1,1,1]),
+        solid: b => this.kitanoSolid.add({ ...b, mat:'concrete' }),
+        floor: b => this.kitanoSolid.add({ ...b, mat:'concrete' }),
+      }, { ...KITANO_MAIN, ground });
+      // 西側の既存道路から坂の入口まで、段差のない短い連絡路。
+      streetDetails.face([-800,ground+.04,-246],[-720,.04,-246],[-720,.04,-234],[-800,ground+.04,-234],[.54,.54,.49,0,8]);
+      this.kitanoSolid.add({x0:-800,x1:-720,y0:.04,y1:ground+.04,z0:-246,z1:-234,ramp:{axis:'x',dir:-1},mat:'concrete'});
+      const sign = new THREE.Mesh(signs.geometry(),kitanoSignMaterial());
+      sign.name='kitano-wayfinding';sign.receiveShadow=true;scene.add(sign);
+      const lawn = new THREE.Mesh(lawns.geometry(),kitanoGardenMaterial());
+      lawn.name='kitano-gardens';lawn.receiveShadow=true;scene.add(lawn);
+      const paint = new THREE.Mesh(heritage.geometry(),kitanoHeritageMaterial());
+      paint.name='kitano-heritage-paint';paint.castShadow=true;paint.receiveShadow=true;scene.add(paint);
+    }
     kobeStreetDetails(streetDetails,[[-120,-300,Math.PI/2,72,28,0,false],[-240,60,Math.PI/2,72,28,0,false],[180,120,0,72,28,0,false]]);
     const streetSites={frontages:[],bicycles:[],planters:[],utilities:[],service:[]};
     for(const [x,z,ry,kind]of [[-120,-180,0,'shopping'],[-240,60,0,'shopping'],[-360,-300,0,'residential'],[120,-60,0,'residential'],[240,180,0,'service'],[180,120,Math.PI/2,'service']]) {
@@ -2194,7 +2238,11 @@ export class World {
       const tx=x+side*16.9;if(!blocked(tx,z,2.4))autumnPoints.push([tx,z,.68+.10* Math.sin(z)]);
     }
     if(port)for(let x=port.x-105;x<port.x+50;x+=24)autumnPoints.push([x,774,.8]);
-    this.autumnStreet=buildAutumnTrees(scene,autumnPoints,(x,z)=>this.height(x,z));
+    if (this.kitano) autumnPoints.push(...this.kitano.treePoints);
+    this.autumnStreet=buildAutumnTrees(scene,autumnPoints,(x,z)=>{
+      const kb=this.kitano?.bounds;
+      return kb&&x>=kb.x0&&x<=kb.x1&&z>=kb.z0&&z<=kb.z1?this.kitano.heightAt(x,z):this.height(x,z);
+    });
     const sx=KOBE_CITY.station,sy=this.terrain.height(sx,KOBE_CITY.rail)+11.5;
     for(const x of [sx-109,sx+109])addBox(detail,x-.09,x+.09,sy+1.2,sy+1.35,KOBE_CITY.rail-9,KOBE_CITY.rail+9,[.22,.28,.28,0,2],4);
     for(const [a,b,c,d] of [[[sx-3,sy,KOBE_CITY.rail+9.05],[sx+3,sy,KOBE_CITY.rail+9.05],[sx+3,sy+1.2,KOBE_CITY.rail+9.05],[sx-3,sy+1.2,KOBE_CITY.rail+9.05]],
@@ -2302,8 +2350,8 @@ export class World {
     }
     this.prepareFoliage();
     const autumn=autumnFoliage();this.cityTreeDepth=autumn.depth;
-    this.cityTreeMeshes=[1,3,5].map((variant,j)=>{
-      const m=new THREE.InstancedMesh(this.fieldTrees[variant],autumn.material,Math.floor(trees.length/3)+(j<trees.length%3?1:0));
+    this.cityTreeMeshes=[0,1,2].map((variant,j)=>{
+      const m=new THREE.InstancedMesh(autumnTreeGeometry(false,variant),autumn.material,Math.floor(trees.length/3)+(j<trees.length%3?1:0));
       m.castShadow=m.receiveShadow=true;m.customDepthMaterial=this.cityTreeDepth;m.userData.noAO=true;m.visible=!!this.fieldFoliageReady;scene.add(m);return m;
     });
     trees.forEach(([x, z], i) => {

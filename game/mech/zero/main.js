@@ -9,6 +9,7 @@ import { Contacts, Scout } from './recon.js';
 import { FieldOps, FieldMap } from './field.js';
 import { qualityLevel, pixelRatio, FrameGate } from '../runtime.js';
 import { collectMissionItem, syncMissionProps } from './mission-props.mjs';
+import { ScenicMusic } from '../scenic-music.mjs';
 
 // 本篇的 env.js 用相對路徑 './assets/' 讀天空、HDR、城市貼圖：
 //   前傳有縮小的 webp 版（assets/env/，遠景看不出差別、下載少 12 MB）；沒有的才去本篇資料夾拿
@@ -24,6 +25,7 @@ const cdn = await import('../cdn.js').then((m) => m.useCDN()).catch(() => null);
 THREE.DefaultLoadingManager.setURLModifier((u) => { const v = lite(u); return cdn ? cdn(v) : v; });
 
 const q = new URLSearchParams(location.search);
+const scenicMusic = new ScenicMusic();
 const campaign = document.body.dataset.campaign === 'lastline';
 let resumeSave = false;
 const readSave = (key) => { try { return JSON.parse(localStorage.getItem('lastline.' + key)); } catch { return null; } };
@@ -46,6 +48,7 @@ const canvas = $('gl');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, powerPreference: 'high-performance' });
 renderer.setSize(innerWidth, innerHeight);
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = campaign ? 1 : 1.12;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 const scene = new THREE.Scene();
@@ -63,7 +66,7 @@ const [A, SURF, MODELS, kit] = await Promise.all([
 status.textContent = campaign ? '建立港區' : '建立街區';
 await new Promise((r) => setTimeout(r, 0));
 initMechMaterials(A);
-const world = new World(renderer, scene, A, { terrainSegments: 72, city: !campaign });
+const world = new World(renderer, scene, A, { terrainSegments: 72, city: !campaign, kitano: false, sceneryReserve: campaign ? null : { x0:120,x1:420,z0:-40,z1:92 } });
 // 街區內原本的路燈、車、樹拿掉（地圖自己擺道具）
 {
   const zero = new THREE.Matrix4().makeScale(0, 0, 0);
@@ -97,9 +100,12 @@ const world = new World(renderer, scene, A, { terrainSegments: 72, city: !campai
 // 黃昏的戰場：遠處被煙塵蓋成暖灰色（霧濃一點、偏褐）；太陽偏暖、陰影保留天空的冷色；天空地平線一層霾（全部只改參數，不多畫東西）
 scene.fog.color.setRGB(0.38, 0.36, 0.325); scene.fog.density = 0.00105;
 world.sun.color.setRGB(1.0, 0.9, 0.76); world.sun.intensity = 3.1;
-scene.environmentIntensity = 0.72;
+scene.environmentIntensity = campaign ? 0.72 : 0.84;
 scene.traverse((o) => {
-  if (o.isHemisphereLight) { o.color.setRGB(0.46, 0.52, 0.62); o.groundColor.setRGB(0.25, 0.23, 0.20); o.intensity = 0.65; }
+  if (o.isHemisphereLight) {
+    if(campaign){o.color.setRGB(0.46,0.52,0.62);o.groundColor.setRGB(0.25,0.23,0.20);o.intensity=0.65;}
+    else {o.color.setRGB(0.56,0.63,0.72);o.groundColor.setRGB(0.34,0.31,0.27);o.intensity=0.90;}
+  }
   const u = o.material && o.material.uniforms;
   if (!campaign && u && u.fogCol && u.sunFog && !o.material.userData.haze) {
     o.material.userData.haze = true; u.fogCol.value.copy(scene.fog.color); u.gain.value *= 0.9;
@@ -138,7 +144,7 @@ vScene.environment = world.envMap;
 const post = new Post(renderer, scene, camera, vScene, vCam);
 post.gtao.updateGtaoMaterial({ radius: 0.9, distanceExponent: 1.5, thickness: 0.8, scale: 1.1, distanceFallOff: 1 });
 post.gtao.updatePdMaterial({ radius: 4, rings: 2, samples: 12 });
-post.u.vignette.value = 0.3; post.u.grain.value = 0.012;
+post.u.vignette.value = campaign ? 0.3 : 0.2; post.u.grain.value = 0.012;
 
 const fx = new FXL(scene);
 fx.setFog(scene.fog.color, scene.fog.density);
@@ -158,12 +164,14 @@ const idleSt = { vel: new THREE.Vector3(), grounded: true, boost: 0, torsoYaw: M
 for (let i = 0; i < 30; i++) hero.animate(1 / 30, idleSt);
 const hound = new Mech('grunt', 'grunt');
 hound.root.visible = false; scene.add(hound.root);
-window.__renderer = renderer; window.__scene = scene; window.__solid = solid; window.__map = map; window.__hero = hero; window.__world = world;
+window.__renderer = renderer; window.__post = post; window.__scene = scene; window.__solid = solid; window.__map = map; window.__hero = hero; window.__world = world;
 
 // ---------------------------------------------------------------- 遊戲狀態（AI 也讀這個）
 const NADE_START = 3, NADE_MAX = 5;   // 玩家手榴彈：每章開頭至少幾顆、最多帶幾顆
 const G = {
-  scene, solid, kit, audio, fx, player, vm, hud, fieldItems, operationProps: map.operationProps, t: 0, nextId: 1, enemies: [], playing: false,
+  scene, solid, kit, audio, fx, player, vm, hud, fieldItems, operationProps: map.operationProps, kitano: map.kitano,
+  scenicWaypoint: map.kitano ? { p: new THREE.Vector3(...map.kitanoConnector.route[0]), name: '北野異人館街' } : null,
+  t: 0, nextId: 1, enemies: [], playing: false,
   // 偵察與玩家射擊共用實際形狀判定，避免車框、護欄缺口被外接盒誤擋。
   reconSees(a, b) { const d = b.clone().sub(a), L = d.length(); return L < .05 || !shotRay(a, d.divideScalar(L), L - .05); },
   playerEye: new THREE.Vector3(), aimDir: new THREE.Vector3(0, 0, 1), ads: 0, diff: { acc: 1, dmg: 1 }, bolts: [], grenades: [], nadeN: 3, loot: [],
@@ -315,7 +323,7 @@ function spawn(def) {
 }
 const patrols = new Patrols(G, [...S.ENCOUNTERS, ...(S.OUTPOSTS || [])], spawn);
 G.contacts = new Contacts(); G.scout = new Scout(G); G.onScoutLost = bodyCamera;
-G.patrols = patrols; G.footExtent = S.FOOT_EXTENT || 140;
+G.patrols = patrols; G.footExtent = S.FOOT_EXTENT || 140; G.arrivalExtent = campaign ? 320 : 140;
 G.field = new FieldOps(G, S.OUTPOSTS || []);
 G.onFieldClaim = () => {
   checkpoint = { p: player.pos.clone(), yaw: player.yaw, done: [...done], ch: chapter, nades: G.nadeN, patrols: patrols.snapshot(), field: G.field.snapshot() };
@@ -524,6 +532,7 @@ function startChapter(n) {
   hud.title(`第 ${n} 章　${C.name}`, C.en, 4);
   const L = S.LINES[n === 1 ? 'start' : 'ch' + n];
   if (L) { setTimeout(() => audio.radio('in'), 1500); for (const [w, t] of L) hud.say(w, t, 3.8); }
+  scenicMusic.reset();
   audio.music('battle', { stage: C.music });
   mechWalk = null; hound.root.visible = false;
   if (alarmOn) { alarmOn = false; audio.alarm(false); }
@@ -604,6 +613,7 @@ function nextChapter(n) {
   const first = objective();
   G.objText = first ? first.obj : ''; hud.obj = first ? guideObj(first) : null;
   checkpoint = { p: player.pos.clone(), yaw: player.yaw, done: [...done], ch: n, nades: G.nadeN, patrols: patrols.snapshot(), field: G.field.snapshot() };
+  scenicMusic.reset();
   audio.music('battle', { stage: C.music });
   if (n > progress()) store.set('ch', n);
 }
@@ -830,6 +840,7 @@ player.onLand = (k) => { audio.land(k); vm.land(k * 0.5); shake(k * 0.2); };
 function stepSurface() { const p = player.pos; if (p.y > 1 || (p.z > 52 && p.x > 10)) return 'metal'; if (p.x < -86 && p.z < -58) return 'gravel'; return 'concrete'; }
 
 function die() {
+  audio.music('fail');
   stage = 'dead';
   audio.lowHealth(false);
   setTimeout(() => {
@@ -910,6 +921,11 @@ async function startMech() {
   if (progress() < chapter) store.set('ch', chapter);
   try {
     const { startMech: go } = await import('./mech6.js');
+    if(!campaign) {
+      renderer.toneMappingExposure=1;scene.environmentIntensity=.72;
+      world.hemi.color.setRGB(.46,.52,.62);world.hemi.groundColor.setRGB(.25,.23,.20);world.hemi.intensity=.65;
+      post.u.vignette.value=.3;
+    }
     M6 = await go({ renderer, scene, camera, vScene, vCam, post, world, hero, audio, input, zhud: hud, solid, D, fxl: fx, G, S: S.MECH_CONFIGS ? { ...S, MECH6: S.MECH_CONFIGS[chapter] } : S, $, pause, resumeSave, saveChapter: (n) => store.set('ch', Math.max(n, progress())), exit: (u) => { location.href = u; } });
     M6.setQuality(quality);
   } catch (e) {
@@ -1176,7 +1192,13 @@ function frame(now = performance.now()) {
   audio.lowHealth(player.hp < 35 && !player.dead && stage === 'play');
   audio.setListener(camera.position, camera.getWorldDirection(_w));
   audio.breath(player.stam);
-  audio.setIntensity(active.length ? 1 : 0.3);
+  let scenic = false;
+  if (stage === 'play' && !finale && !player.dead) {
+    const threat = player.hurtT < 2 || G.enemies.some(e => !e.dead && (e.state === 'combat' || e.sees) && e.pos.distanceToSquared(player.pos) < 95 * 95);
+    scenic = scenicMusic.update(dt,player.pos,G.kitano?.bounds,threat);
+    audio.music(scenic ? 'kitano' : 'battle', { stage: S.CHAPTERS[chapter - 1].music });
+  }
+  audio.setIntensity(scenic ? .22 : active.length ? 1 : 0.3);
   world.followShadow(camera.position);
   world.update(dt);
   fx.update(dt, true);

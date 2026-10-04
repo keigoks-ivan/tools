@@ -31,8 +31,8 @@ test('所有港區 E 拿取與控制站即使沒有掃描資產也有對應實�
     }
   }
   assert.equal(stations,18);assert(map.keyHandle.triangles>0);
-  assert.equal(map.meshes.length,12);assert.equal(map.totalMeshes,17);assert(map.totalTriangles<130000);
-  assert.equal(solid.list.length,2887,'道具不新增碰撞');
+  assert.equal(map.meshes.length,15);assert.equal(map.totalMeshes,20);assert(map.baseTriangles<130000);assert(map.kitano.triangles<44000);
+  assert.equal(map.baseColliders,2887,'道具不新增碰撞');
 });
 test('拿取與安裝可重設，操作只更新道具本身，不更動其他合併幾何',()=>{
   const {map}=harbor(),item=map.items.codes.h,peer=map.items.smap.h;

@@ -626,7 +626,8 @@ export const LINES = {
 };
 
 // 可自由攻略的補給哨站；駐軍先存在，不列入主線的清除條件。
-export const FIELD_BOUNDS = [-106, 96, -102, 124];
+export const FOOT_EXTENT = 440;
+export const FIELD_BOUNDS = [-106, 430, -102, 124];
 export const OUTPOSTS = [
   { id: 'FREE_Z1', name: '東側巡檢站', supply: [59, -43], enemies: [
     { type: 'trooper', x: 56, z: -41, yaw: -Math.PI / 2 },

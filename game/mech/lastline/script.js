@@ -5,7 +5,7 @@ const OP = '白鷺', ME = '零號', CIV = '車隊長・米拉', HQ = '聯邦指�
 const V = (x, z, y = 0) => new THREE.Vector3(x, y, z);
 export const SAVE_KEY = 'lastline';
 export const LAYOUT = 'harbor-v1';
-export const FOOT_EXTENT = 320;
+export const FOOT_EXTENT = 600;
 export const FIRST_MECH = 4;
 export const INTRO = [
   '神戶守住了，神戶港卻收到撤退命令。',
@@ -218,7 +218,7 @@ const supportColumns = {
 };
 for (const [chapter, lists] of Object.entries(supportColumns)) MECH_CONFIGS[chapter].waves.forEach((w, i) => { w.reinforce = lists[i]; });
 
-export const FIELD_BOUNDS = [-236, 142, -244, 128];
+export const FIELD_BOUNDS = [-236, 142, -570, 128];
 export const OUTPOSTS = [
   { id: 'FREE_H1', name: '鐵道轉運哨站', supply: [-216, -220], enemies: [
     soldier(-218, -192, 'trooper', { yaw: 0 }), soldier(-214, -178, 'trooper', { yaw: 0 }), soldier(-216, -164, 'officer', { yaw: 0 }),

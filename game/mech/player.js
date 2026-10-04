@@ -133,7 +133,9 @@ export class Player {
       if (nl > 1e-4) { const d = (this.vel.x * nx + this.vel.z * nz) / nl; if (d < 0) { this.vel.x -= d * nx / nl; this.vel.z -= d * nz / nl; } }
     }
     const lim = 700;
-    p.x = clamp(p.x, -lim, lim); p.z = clamp(p.z, -lim, lim);
+    const kitano = w.battlefield === 'city' ? w.kitano?.bounds : null;
+    p.x = clamp(p.x, kitano ? Math.min(-lim,kitano.x0-12) : -lim, kitano ? Math.max(lim,kitano.x1+12) : lim);
+    p.z = clamp(p.z, kitano ? Math.min(-lim,kitano.z0-12) : -lim, kitano ? Math.max(lim,kitano.z1+12) : lim);
     const ground = w.support(p.x, p.z, P.r, p.y);
     if (this.grounded) {
       if (ground < p.y - 1.6) { this.grounded = false; this.airT = 0.2; }   // 從屋頂走出去

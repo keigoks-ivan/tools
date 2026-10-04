@@ -35,7 +35,7 @@ test('前傳每個 E 任務都有可見實體，缺少掃描模型時仍保留�
     else if (id === 'smap') assert(hit.point.z > -61.68, '紙地圖埋在室內粉刷層');
     else assert(hit.point.y > it.p.y + .02, id + ' 埋在桌面下面');
   }
-  assert(map.meshes.length <= 30, '缺模型的備援地圖新增過多材質桶');
+  assert(map.meshes.length <= 32, '缺模型備援地圖含北野路牌、草地與歷史漆面仍不超過32桶');
   assert.deepEqual(map.marks.key.toArray(), [-38.6, 0, 32.4]);
 });
 

@@ -1,5 +1,6 @@
 // 神戶街層細節：公尺尺度的窗洞、石材路緣與排水設施，呼叫端合併進既有材質桶。
 // 比例參考神戶觀光局明石町筋實景：https://www.feel-photo.info/a75/
+import { gardenPlanting } from './kobe-autumn.js';
 export function storefrontOpenings(length, style) {
   const count=style<2?(length>9?1:0):Math.min(3,Math.floor((length-2)/7)),radius=style<2?1.65:1.35;
   return Array.from({length:Math.max(0,count)},(_,i)=>({center:length*(i+.5)/count,radius,
@@ -192,13 +193,7 @@ export function kobeBlockStreets(out, { frontages = [], parking = [], service = 
     block(P,a,b,.02,.44,-.3,.3,[.48,.48,.43,0,1]);
     plane(P,a+.08,b-.08,.445,-.22,.22,[.18,.17,.13,0,6]);
     for(const v of [-.3,.23])block(P,a-.035,b+.035,.43,.49,v,v+.07,kerb);
-    for(let u=a+.23;u<b;u+=.37) {
-      const top=.7+.13*Math.sin(u*7+site.x);
-      for(const d of [-.11,.12]) {
-        const p=P(u,.46,d),q=P(u-.20,top,d-.12),r=P(u+.22,top-.05,d+.13);
-        face(p,q,r,r,green);face(r,q,p,p,green);
-      }
-    }
+    gardenPlanting({face},{sites:[{...site,ground:(site.ground??.025)+.445,length:Math.max(.1,length-.16),width:.44,height:.38}]});
   }
   for(const site of bicycles) {
     const {count=2}=site,P=local(site);

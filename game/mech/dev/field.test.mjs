@@ -43,3 +43,10 @@ test('optional posts stay outside story gates and preserve stealth bypass routes
   assert.equal(ZERO.find(e=>e.id==='B2').enemies.length,3);assert.equal(ZERO.find(e=>e.id==='E0').enemies.length,3);
   assert.equal(LAST.find(e=>e.id==='B4').enemies.length,1);assert.equal(LAST.find(e=>e.id==='D2C').enemies.length,1);
 });
+
+test('北野觀景路標可獨立選取，不改哨站補給或主線狀態',()=>{
+  const {F,G}=fixture();G.scenicWaypoint={p:new T.Vector3(130,0,26),name:'北野異人館街'};
+  F.selected='__kitano';assert.equal(F.waypoint(),G.scenicWaypoint);assert.deepEqual(F.snapshot(),{claimed:[]});
+  F.selected=null;assert.equal(F.waypoint(),null);F.selected='FREE_TEST';assert.equal(F.waypoint().p,G.fieldItems.FREE_TEST);
+  delete G.scenicWaypoint;F.selected='__kitano';assert.equal(F.waypoint(),null);
+});

@@ -55,16 +55,39 @@ const sstep = (a, b, x) => { const u = clamp((x - a) / (b - a), 0, 1); return u 
 const PCS = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
 
 // 和弦名稱 → { r: 根音音級, iv: 音程 }；支援 'Dm'、'Bb'、'C#'、'Asus'、'Dadd9'
-function chordOf(name) {
+export function chordOf(name) {
   let r = PCS[name[0]], i = 1;
   if (name[i] === 'b') { r -= 1; i++; } else if (name[i] === '#') { r += 1; i++; }
-  const rest = name.slice(i), minor = rest[0] === 'm';
-  const iv = [0, rest.includes('sus') ? 5 : minor ? 3 : 4, 7];
+  const rest = name.slice(i), minor = /^m(?!aj)/.test(rest);
+  const iv = [0, rest.includes('sus2') ? 2 : rest.includes('sus') ? 5 : minor ? 3 : 4, 7];
+  if (rest.includes('maj7')) iv.push(11);
+  else if (rest.includes('7')) iv.push(10);
+  else if (rest.includes('6')) iv.push(9);
   if (rest.includes('add9')) iv.push(2);
   return { r: (r + 12) % 12, iv };
 }
 // 把和弦音排進 [lo, lo+12) 的音域
 const voiceIn = (ch, lo) => ch.iv.map((x) => lo + ((((ch.r + x - lo) % 12) + 12) % 12)).sort((a, b) => a - b);
+// 保留共同音並讓四個聲部就近銜接；擴展和弦省略五度，避免增加長音振盪器。
+export function voiceLeadChord(ch, previous = null, lo = 52, hi = 76) {
+  const intervals=ch.iv.length>4?ch.iv.filter(x=>x!==7):ch.iv;
+  const pcs=[...new Set(intervals.map(x=>(ch.r+x)%12))],candidates=[];
+  for(let m=lo;m<=hi;m++)if(pcs.includes((m%12+12)%12))candidates.push(m);
+  const anchor=[lo+3,lo+8,lo+12,lo+17],target=previous||anchor;let best=null,cost=Infinity;
+  const choose=(notes,start)=>{
+    if(notes.length===4) {
+      if(!pcs.every(pc=>notes.some(m=>m%12===pc)))return;
+      if(notes[1]-notes[0]<3||notes[2]-notes[1]<2||notes[3]-notes[2]<2||notes[3]-notes[0]<12)return;
+      const steps=notes.map((m,i)=>Math.abs(m-target[i])),register=notes.reduce((sum,m,i)=>sum+Math.abs(m-anchor[i]),0);
+      const value=steps.reduce((a,b)=>a+b,0)+Math.max(...steps)*.18+register*.4+(notes[3]-notes[0])*.035;
+      if(value<cost){cost=value;best=notes.slice();}return;
+    }
+    for(let i=start;i<candidates.length-(3-notes.length);i++){notes.push(candidates[i]);choose(notes,i+1);notes.pop();}
+  };
+  choose([],0);
+  if(!best)throw new RangeError('Chord does not fit four music voices');
+  return best;
+}
 const bassOf = (ch) => 33 + ((ch.r - 9 + 12) % 12);   // 貝斯根音落在 A1～G#2
 const shift = (list, k) => list.map(([m, d]) => [m == null ? null : m + k, d]);
 
@@ -101,17 +124,17 @@ const THEME = [...THEME_B1, ...THEME_B2];
 // A2 段的法國號呼應句
 const HORN_A2 = [[62, 2], [67, 2], [69, 2], [64, 2], [65, 2], [69, 2], [67, 2], [64, 2], [65, 2], [62, 2], [62, 2], [70, 2], [69, 4], [69, 2], [73, 2]];
 const BATTLE_CH = [
-  'Dm', 'Dm', 'Bb', 'C', 'Dm', 'Dm', 'Bb', 'A',
-  'Gm', 'A', 'Dm', 'C', 'Bb', 'Gm', 'A', 'A',
-  'Bb', 'C', 'Am', 'Dm', 'Bb', 'C', 'Dm', 'Dm',
-  'Bb', 'C', 'Am', 'Dm', 'Gm', 'A', ['Bb', 'C'], 'A',
+  'Dmadd9', 'Dm7', 'Bbmaj7', 'Cadd9', 'Dmadd9', 'Dm7', 'Bbmaj7', 'A7',
+  'Gm7', 'A7', 'Dmadd9', 'Cadd9', 'Bbmaj7', 'Gm7', 'Asus', 'A7',
+  'Bbmaj7', 'Cadd9', 'Am7', 'Dm7', 'Bbmaj7', 'Cadd9', 'Dmadd9', 'Dm',
+  'Bbmaj7', 'Cadd9', 'Am7', 'Dm7', 'Gm7', 'A7', ['Bbmaj7', 'Cadd9'], 'A7',
 ];
 // 標題曲各聲部音量（固定混音，不隨強度變化）
 // 聲部音量倍率（以離線渲染逐聲部獨奏量測後定出：旋律與和聲聲部要和鼓、貝斯站在同一個量級）
 const MUS_MIX = { pad: 7, str: 8, lead: 5.2, stab: 4.5, horn: 4.5, choir: 5.6, ost: 4.5, ctr: 4.5, brass: 4.5, bass: 0.9, bell: 2, dr: 0.8 };
 // 標題曲各聲部音量（固定混音，不隨強度變化）
 const TITLE_MIX = { pad: 8, str: 9.5, choir: 5.9, bell: 3, pno: 3, sub: 1.1, dr: 1.2 };
-const TITLE_CH = ['Dm', 'Bb', 'Gm', ['Asus', 'A'], 'Bb', 'C', 'Am', 'Dm', 'Bb', 'C', 'Dm', 'Dm', 'Gm', 'A', ['Bb', 'C'], 'A'];
+const TITLE_CH = ['Dmadd9', 'Bbmaj7', 'Gm7', ['Asus', 'A7'], 'Bbmaj7', 'Cadd9', 'Am7', 'Dmadd9', 'Bbmaj7', 'Cadd9', 'Dm7', 'Dmadd9', 'Gm7', 'A7', ['Bbmaj7', 'Cadd9'], 'A7'];
 
 // 戰鬥曲：2 小節前奏＋32 小節循環（A1 推進 → A2 法國號 → B1/B2 英雄主旋律）。
 // o = { tr: 移調半音, bpm, dense: 鼓更密, ctr: 對位旋律, bright: 弦樂墊更亮, taiko: B 段太鼓, fin: 終章（太鼓、合唱、雙踏、銅管齊奏）, lift: 最後段升調半音 }
@@ -124,9 +147,10 @@ function battleScore(o) {
   const ch = (i, q) => { const c = CH[i]; return chordOf(Array.isArray(c) ? c[q < 2 ? 0 : 1] : c); };
   const TH = o.lift ? [...THEME_B1.slice(0, -1), [74, 2], [75, 2], ...THEME_B2] : THEME;
   // ── 前奏：小鼓（終章＝太鼓＋定音鼓）滾奏漸強、貝斯八分推進
-  const iCh = [chordOf('Dm'), chordOf('A')];
+  const iCh = [chordOf('Dmadd9'), chordOf('A7')];let padVoice=null;
   for (let b = 0; b < 2; b++) {
-    S.at(b * 4, { k: 'pad', n: [48 + iCh[b].r, ...voiceIn(iCh[b], 55)], d: 4, v: 0.8 });
+    padVoice=voiceLeadChord(iCh[b],padVoice);
+    S.at(b * 4, { k: 'pad', n: padVoice, d: 4, v: 0.8 });
     if (o.fin) S.at(b * 4, { k: 'choir', n: voiceIn(iCh[b], 60), d: 4, v: 0.6 + 0.3 * b });
     for (let e = 0; e < 8; e++) S.at(b * 4 + e / 2, { k: 'bass', m: bassOf(iCh[b]) + (e % 2 ? 12 : 0), d: 0.42, v: 0.45 + 0.035 * (b * 8 + e) });
   }
@@ -153,7 +177,8 @@ function battleScore(o) {
     const fill = i === 15 || i === 31, small = i === 7 || i === 23;
     // 和聲墊（B 段高強度加合唱；終章全程合唱）
     for (const [q, c, d] of split ? [[0, c0, 2], [2, c2, 2]] : [[0, c0, 4]]) {
-      S.at(B + q, { k: 'pad', n: [48 + c.r, ...voiceIn(c, 55)], d, v: 0.8 });
+      padVoice=voiceLeadChord(c,padVoice);
+      S.at(B + q, { k: 'pad', n: padVoice, d, v: 0.8 });
       if (o.fin) S.at(B + q, { k: 'choir', n: voiceIn(c, 60), d, v: 0.9 });
       else if (!A) S.at(B + q, { k: 'choir', n: voiceIn(c, 60), d, v: 0.8, min: 0.55 });
     }
@@ -165,11 +190,13 @@ function battleScore(o) {
       else S.at(B + 2.5, { k: 'stab', n: voiceIn(c0, 57), v: 0.6, min: 0.55 });
     }
     // 貝斯：八分音符八度跳（A 段 3-3-2 重音），高強度加十六分推進
+    S.at(B, { k:'bass', m:bassOf(c0), d:3.72, v:.52, max:.35 });
+    if(A)for(const [q,j,v]of [[1.5,2,.36],[3,3,.28]])S.at(B+q,{k:'pno',m:padVoice[j]+12,d:1.25,v,max:.4});
     for (let e = 0; e < 8; e++) {
       const q = e / 2, r = bassOf(ch(i, q));
       const oct = A ? e % 2 === 1 : e === 3 || e === 7;
       const acc = A ? e === 0 || e === 3 || e === 6 : e % 2 === 0;
-      S.at(B + q, { k: 'bass', m: r + (oct ? 12 : 0), d: 0.42, v: acc ? 1 : 0.72 });
+      S.at(B + q, { k: 'bass', m: r + (oct ? 12 : 0), d: 0.42, v: acc ? 1 : 0.72, min:.35 });
     }
     S.at(B + 3.75, { k: 'bass', m: bassOf(ch(i, 3.75)) + 12, d: 0.2, v: 0.6, min: 0.6 });
     if (A) S.at(B + 1.75, { k: 'bass', m: bassOf(c0), d: 0.2, v: 0.55, min: 0.7 });
@@ -177,7 +204,7 @@ function battleScore(o) {
     const pat = A ? [0, 7, 12, 7, -1, 7, 12, 7] : [0, -1, 7, 12, -2, 12, 7, -1];
     for (let s = 0; s < 16; s++) {
       const q = s / 4, c = ch(i, q), base = 50 + ((c.r - 2 + 12) % 12), x = pat[s % 8];
-      S.at(B + q, { k: 'ost', m: base + (x === -1 ? c.iv[1] : x === -2 ? c.iv[1] + 12 : x), v: s % 4 === 0 ? 0.85 : 0.6, min: 0.2, p: 0 });
+      S.at(B + q, { k: 'ost', m: base + (x === -1 ? c.iv[1] : x === -2 ? c.iv[1] + 12 : x), v: s % 4 === 0 ? 0.85 : 0.6, min: 0.38, p: 0 });
     }
     // 鼓：過門小節的後段讓給過門
     const cut = fill ? 2 : small ? 3 : 4, fmin = fill ? 0.3 : 0.55;
@@ -187,10 +214,10 @@ function battleScore(o) {
     if (o.fin && !A && i % 2 === 0 && i % 8) S.at(B, { k: 'c', v: 0.55, min: 0.6 });
     const KA = [[0, 1], [1.5, 0.85], [2.5, 0.8, 0.3], [3.5, 0.6, 0.7], [0.75, 0.5, 0.85]];
     const KB = [[0, 1], [2, 0.9], [2.5, 0.7, 0.45], [0.75, 0.5, 0.75], [3.5, 0.5, 0.8]];
-    for (const [q, v, mn] of A ? KA : KB) g(q, { k: 'k', v, min: mn || (q ? 0.18 : 0) });
-    g(1, { k: 's', v: 0.9, min: 0.18 }); g(3, { k: 's', v: 0.95, min: 0.18 });
+    for (const [q, v, mn] of A ? KA : KB) g(q, { k: 'k', v, min: mn || (q ? 0.38 : 0.26) });
+    g(1, { k: 's', v: 0.9, min: 0.38 }); g(3, { k: 's', v: 0.95, min: 0.38 });
     g(1.75, { k: 's', v: 0.22, min: 0.7 }); g(3.75, { k: 's', v: 0.18, min: 0.8 });
-    for (let e = 0; e < 8; e++) g(e / 2, { k: e === 7 && A && i % 2 ? 'o' : 'h', v: e % 2 ? 0.7 : 0.9, min: 0.22, p: 0 });
+    for (let e = 0; e < 8; e++) g(e / 2, { k: e === 7 && A && i % 2 ? 'o' : 'h', v: e % 2 ? 0.7 : 0.9, min: 0.38, p: 0 });
     for (let e = 0; e < 8; e++) g(e / 2 + 0.25, { k: 'h', v: 0.45, min: o.dense ? 0.4 : 0.6, p: 0 });
     if (fill) {
       const T = [0, 0, 1, 1, 2, 2];
@@ -231,21 +258,22 @@ function battleScore(o) {
 // 標題曲：76 BPM、16 小節（約 50.5 秒）無縫循環。廢墟上的黃昏：寬廣弦樂墊＋低音，稀疏鋼琴分解和弦；
 // 第 5 小節起主題動機——偶數輪由 FM 鐘琴獨唱，奇數輪換成大提琴（弦樂低八度）＋鋼琴；合唱第 9 小節進（奇數輪全程）。
 function titleScore() {
-  const S = new Score(16, 76);
+  const S = new Score(16, 76);let padVoice=null;
   for (let i = 0; i < 16; i++) {
-    const B = i * 4, sp = Array.isArray(TITLE_CH[i]);
+    const B = i * 4, sp = Array.isArray(TITLE_CH[i]),voicings={};
     const ch = (q) => chordOf(sp ? TITLE_CH[i][q < 2 ? 0 : 1] : TITLE_CH[i]);
     for (const [q, d] of sp ? [[0, 2], [2, 2]] : [[0, 4]]) {
       const c = ch(q);
-      S.at(B + q, { k: 'pad', n: [41 + ((c.r - 5 + 12) % 12), ...voiceIn(c, 53)], d, v: 0.9 });
+      padVoice=voiceLeadChord(c,padVoice,52,76);voicings[q]=padVoice;
+      S.at(B + q, { k: 'pad', n: padVoice, d, v: 0.9 });
       S.at(B + q, { k: 'sub', m: bassOf(c), d, v: 0.8 });
-      if (i >= 8) S.at(B + q, { k: 'choir', n: voiceIn(c, 60), d, v: 0.8 });
+      if (i >= 8) S.at(B + q, { k: 'choir', n: voiceIn(c, 60), d, v: 0.65 });
       else if (i >= 2) S.at(B + q, { k: 'choir', n: voiceIn(c, 60), d, v: 0.55, pz: 1 });
     }
     // 稀疏鋼琴：每小節四個音的分解和弦
-    for (const [q, x, v] of [[0, 0, 0.5], [1, 7, 0.34], [1.5, 12, 0.3], [2.5, -1, 0.32]]) {
-      const c = ch(q), r = 43 + ((c.r - 7 + 12) % 12);
-      S.at(B + q, { k: 'pno', m: r + (x < 0 ? 12 + c.iv[1] : x), d: 2, v });
+    for (const [q, j, v] of [[0, 0, 0.5], [1, 2, 0.34], [1.5, 3, 0.3], [2.5, 1, 0.32]]) {
+      const notes=voicings[sp&&q>=2?2:0];
+      S.at(B + q, { k: 'pno', m: notes[j], d: 2, v });
     }
     if (i >= 12) for (const q of [0, 2.5]) S.at(B + q, { k: 'b', v: q ? 0.35 : 0.5, pz: 1 });
   }
@@ -257,6 +285,34 @@ function titleScore() {
   S.mel(48, 'pno', THEME_END, { v: 0.6, pz: 1 });
   S.at(60, { k: 'sw', d: 4, v: 0.5, pz: 1 });
   Object.assign(S, { loop: true, from: 0, flat: true, padFc: 1500, padA: 1.2, rv: 0.34, mix: TITLE_MIX });
+  return S;
+}
+
+// 北野の秋：F長調と平行のD短調を行き来するピアノ、近接四声和音、控えめな弦の応答。
+function kitanoScore() {
+  const S=new Score(24,78),chords=['Fmaj7','Cadd9','Dm7','Am7','Bbmaj7','Fadd9','Gm7','C7',
+    'Dmadd9','Am7','Bbmaj7','Fadd9','Gm7','Cadd9','Asus','A7',
+    'Fmaj7','Cadd9','Dm7','Am7','Bbmaj7','Gm7','C7','Fmaj7'];
+  const lines=[[[69,1],[72,1],[76,2]],[[74,1.5],[72,.5],[67,2]],[[65,1],[69,1],[72,2]],[[72,1],[71,1],[69,2]],
+    [[69,1.5],[70,.5],[74,2]],[[72,2],[69,1],[65,1]],[[67,1],[69,1],[70,2]],[[69,1],[67,1],[64,1.5],[null,.5]]];
+  let notes=null;
+  for(let i=0;i<24;i++) {
+    const B=i*4,c=chordOf(chords[i]);notes=voiceLeadChord(c,notes,53,77);
+    S.at(B,{k:'pad',n:notes,d:3.8,v:.62});
+    S.at(B,{k:'sub',m:bassOf(c),d:3.3,v:.55});
+    for(const [q,j,v]of [[0,0,.3],[1.5,2,.23],[2.75,1,.2]])S.at(B+q,{k:'pno',m:notes[j],d:1.5,v});
+    // 中段留給低八度弦樂，旋律每兩拍取和弦內音，保留觀景時的呼吸。
+    if(i>=8&&i<16) {
+      S.mel(B,'str',[[notes[2],2],[i%2?null:notes[3],2]],{v:.52});
+      if(i%2===0)S.at(B+3,{k:'pno',m:notes[3]+12,d:1,v:.37});
+    } else {
+      const line=i===23?[[69,1],[67,1],[65,1.5],[null,.5]]:lines[i%8];
+      S.mel(B,'pno',line,{v:i<8?.57:.52});
+    }
+    if(i%8===0)S.at(B+3,{k:'bell',m:notes[3]+12,d:1,v:.18,pz:1});
+  }
+  Object.assign(S,{loop:true,flat:true,padA:.75,padFc:1350,rv:.28,
+    mix:{pad:5.4,pno:2.8,str:4.2,sub:.55,bell:1.3}});
   return S;
 }
 
@@ -335,7 +391,7 @@ const STAGES = [
   { tr: 3, bpm: 160, dense: true, ctr: true, bright: true, taiko: true },
 ];
 const SCORES = {
-  title: titleScore,
+  title: titleScore, kitano: kitanoScore,
   battle1: () => battleScore(STAGES[0]), battle2: () => battleScore(STAGES[1]), battle3: () => battleScore(STAGES[2]),
   battle4: () => battleScore(STAGES[3]), battle5: () => battleScore(STAGES[4]),
   // 終章：E 小調 170 BPM，第 24～30 小節升到 F♯ 小調
@@ -343,7 +399,8 @@ const SCORES = {
   clear: clearScore, allclear: allclearScore, fail: failScore,
 };
 const SCORE_CACHE = {};
-const scoreOf = (key) => SCORE_CACHE[key] || (SCORE_CACHE[key] = SCORES[key]());
+export const musicScore = (key) => SCORE_CACHE[key] || (SCORE_CACHE[key] = SCORES[key]());
+const scoreOf=musicScore;
 
 // ───────────────────────── 配樂：預先合成的樂器取樣 ─────────────────────────
 // 鼓組、鋼琴、撥弦、銅管短音在第一次放音樂時用 JS 算好（一次、數十毫秒），之後每個音只是一個 BufferSource＋增益。
@@ -430,7 +487,7 @@ function synthKit(sr) {
 
 // 柔音鋼琴：非諧和分音（琴弦剛性）＋雙弦微走音＋毛氈琴槌
 function synthPiano(sr, root, sec) {
-  const a = new Float32Array(Math.floor(sr * sec)), f0 = mtof(root), B = 0.0004;
+  const a = new Float32Array(Math.floor(sr * sec)), f0 = mtof(root), B = 0.00016;
   for (let k = 1; k <= 16; k++) {
     const fk = f0 * k * Math.sqrt(1 + B * k * k);
     if (fk > 9000) break;
@@ -1526,7 +1583,7 @@ export class Audio {
   }
 
   // ───────────────────────── 配樂 ─────────────────────────
-  // music('title' | 'battle' {stage 1..6} | 'final' | 'clear' | 'allclear' | 'fail' | 'off')
+  // music('title' | 'kitano' | 'battle' {stage 1..6} | 'final' | 'clear' | 'allclear' | 'fail' | 'off')
   // 同一首（同一個識別鍵）重複呼叫不做任何事；循環曲之間交叉淡化約 1 秒；進短曲時舊曲 0.35 秒淡出。
   music(name, opts) {
     let n = String(name || 'off');
@@ -1767,7 +1824,7 @@ export class Audio {
       case 'bass': return this._mBass(tr, t, e.m + T, e.d * beat, v);
       case 'lead': return this._mLead(tr, t, e.m + T, e.d * beat, v);
       case 'ost': return this._mSamp(mb.pluck, e.m + T - 50, t, v * 0.16, tr.L.ost, e.p ?? 1, 0.2, 0.05);
-      case 'stab': for (const m of e.n) this._mSamp(mb.stab, m + T - 57, t, v * 0.13, tr.L.stab, 1); return;
+      case 'stab': for (const m of e.n) this._mSamp(mb.stab, m + T - 57, t, v * 0.13 * Math.sqrt(3/e.n.length), tr.L.stab, 1); return;
       case 'pno': {
         const m = e.m + T;
         let best = mb.pno[0];
@@ -1844,7 +1901,7 @@ export class Audio {
       g.setTargetAtTime(0, end, 0.28);
     }
     notes.forEach((m, i) => {
-      const f = mtof(m), d = 7 + 4 * (i % 2);
+      const f = mtof(m), d = 4 + 2 * (i % 2);
       for (const [det, dst] of [[-d, v.out], [d, g2]]) {
         const o = c.createOscillator(); o.type = 'sawtooth';
         o.frequency.value = f; o.detune.value = det;
@@ -1904,8 +1961,9 @@ export class Audio {
     const v = this._mv(tr.choirIn, 1); if (!v) return;
     const c = this.ctx, g = v.out.gain, end = t + dur;
     g.setValueAtTime(0, t);
-    g.linearRampToValueAtTime(0.11 * vel, t + Math.min(0.5, dur * 0.4));
-    g.setValueAtTime(0.11 * vel, end);
+    const pk=.11*vel*Math.sqrt(3/notes.length);
+    g.linearRampToValueAtTime(pk, t + Math.min(0.5, dur * 0.4));
+    g.setValueAtTime(pk, end);
     g.setTargetAtTime(0, end, 0.3);
     notes.forEach((m) => {
       for (const det of [-8, 8]) {                       // 每個聲部兩位歌者，略走音＝合唱團

@@ -25,12 +25,12 @@
   td, th { border-bottom:1px solid var(--line); padding:3px 6px; text-align:right; }
   td:first-child, th:first-child { text-align:left; }
   .bad { color:var(--bad); } .ok { color:var(--ok); }
-  #meterWrap { overflow-x:auto; }
+  #meterWrap, #harmonyWrap { overflow-x:auto; }
 </style>
 </head>
 <body>
 <h1>鋼鐵黃昏 IRON DUSK｜音效測試台</h1>
-<div class="sub">先按「啟動音訊」（瀏覽器規定要有使用者操作）。世界音效的位置由下方「距離／方位」決定（0° 正前方，90° 右方）。</div>
+<div class="sub">即時試聽需按「啟動音訊」。離線和聲檢查維持靜音，不需啟動音訊。世界音效的位置由「距離／方位」決定（0° 正前方，90° 右方）。</div>
 
 <div class="grid">
   <section>
@@ -46,6 +46,7 @@
     <h2>配樂（music）</h2>
     <div>
       <button data-mus="title">標題</button>
+      <button data-mus="kitano">北野秋日</button>
       <button id="musBattle">戰鬥</button>
       <label style="display:inline-flex">關卡 <select id="stage"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select></label>
       <button data-mus="final">終章</button>
@@ -150,11 +151,13 @@
     <div class="sub">每個音效各自在 OfflineAudioContext 渲染，量混音前（raw）與最終輸出的峰值與 RMS，並檢查 NaN 與例外。</div>
     <button class="big" id="meter">執行量測</button>
     <button class="big" id="mbench">配樂量測（各 20 秒）</button>
+    <button class="big" id="harmonyCheck">離線和聲檢查（靜音）</button>
+    <div id="harmonyWrap" aria-live="polite"></div>
     <div id="meterWrap"></div>
   </section>
 </div>
 
-<script type="importmap">{"imports":{"three":"../../lib/three.module.js"}}</script>
+<script type="importmap">{"imports":{"three":"../../lib/three.module.js","../audio.js":"../audio.js?v=1"}}</script>
 <script type="module">
 import { Audio as MechAudio } from '../audio.js';
 
@@ -174,7 +177,7 @@ const allCalls = (a, pos) => {
   a.debris(pos); for (const k of ['car', 'tree', 'lamp']) a.trample(pos, k);
   for (const k of ['hover', 'click', 'stage']) a.ui(k);
   a.setIntensity(0.4); a.setMusicVolume(0.7);
-  for (const k of ['title', 'final', 'clear', 'allclear', 'fail', 'off']) a.music(k);
+  for (const k of ['title', 'kitano', 'final', 'clear', 'allclear', 'fail', 'off']) a.music(k);
   for (let st = 1; st <= 6; st++) a.music('battle', { stage: st });
   a.music('off');
   for (const k of ['tank', 'apc', 'heli', 'jet']) a.vehicleLoop('v' + k, pos, k, 0.7);
@@ -351,27 +354,47 @@ async function renderMusic(setup, sec = 20, ev = []) {
   const a = new MechAudio();
   a._attach(ctx, false);
   const t0 = performance.now();
+  const voices=new Set(),tracks=new Set();let mvMax=0,nodeMax=0;
+  const tally=()=>{
+    let nodes=0;
+    for(const tr of tracks)if(tr.releaseAt===undefined||ctx.currentTime<tr.releaseAt)nodes+=tr.R.nodes.length;else tracks.delete(tr);
+    for(const v of voices)nodes+=v.nodes.length;
+    mvMax=Math.max(mvMax,a.mv);nodeMax=Math.max(nodeMax,nodes);
+  };
+  const track=a._mTrack.bind(a);
+  a._mTrack=(...args)=>{
+    const tr=track(...args),kill=tr.R.kill.bind(tr.R);tracks.add(tr);
+    tr.R.kill=at=>{tr.releaseAt=at;kill(at);};tally();return tr;
+  };
+  const voice=a._mv.bind(a);
+  a._mv=(...args)=>{
+    const v=voice(...args);if(!v)return v;
+    voices.add(v);const add=v.add.bind(v),done=v.done.bind(v);
+    v.add=n=>{const result=add(n);tally();return result;};
+    v.done=()=>{done();if(v.last){const ended=v.last.onended;v.last.onended=()=>{ended?.();voices.delete(v);};}else voices.delete(v);};
+    tally();return v;
+  };
   setup(a);
-  let mvMax = 0;
   const evs = ev.slice();
   for (let i = 1; i < sec * 10; i++) {
     const t = i / 10;
     ctx.suspend(t).then(() => {
       while (evs.length && evs[0][0] <= t + 1e-6) evs.shift()[1](a);
       a._musTick(); a._tick();
-      mvMax = Math.max(mvMax, a.mv);
+      tally();
       ctx.resume();
     });
   }
   const buf = await ctx.startRendering();
   const ms = performance.now() - t0;
   const L = buf.getChannelData(0), R = buf.getChannelData(1);
-  let pk = 0, ss = 0, nan = 0, last = 0;
+  let pk = 0, ss = 0, nan = 0, last = 0,tailPeak=0;
   for (let i = 0; i < L.length; i++) {
     const l = L[i], r = R[i];
     if (!Number.isFinite(l) || !Number.isFinite(r)) { nan++; continue; }
     const ax = Math.max(Math.abs(l), Math.abs(r));
     if (ax > pk) pk = ax;
+    if(i>=L.length-SR)tailPeak=Math.max(tailPeak,ax);
     if (ax > 0.001) last = i;
     ss += (l * l + r * r) / 2;
   }
@@ -394,11 +417,12 @@ async function renderMusic(setup, sec = 20, ev = []) {
     let s = 0; for (let j = i; j < i + W; j++) s += (KL[j] * KL[j] + KR[j] * KR[j]) / 2;
     kwin = Math.max(kwin, Math.sqrt(s / W));
   }
-  return { pk, rms: Math.sqrt(ss / active), win, lk: Math.sqrt(ks2 / active), lkw: kwin, len: last / SR, nan, ms, mvMax, err: a.lastError ? String(a.lastError) : '' };
+  return { pk, rms: Math.sqrt(ss / active), win, lk: Math.sqrt(ks2 / active), lkw: kwin, len: last / SR, nan, ms, mvMax, nodeMax, tailPeak, err: a.lastError ? String(a.lastError) : '' };
 }
 window.renderMusic = renderMusic;
 const MUS_CASES = [
   ['title', (a) => a.music('title')],
+  ['kitano', (a) => a.music('kitano')],
   ['battle st1 I=0.2', (a) => { a.setIntensity(0.2); a.music('battle', { stage: 1 }); }],
   ['battle st1 I=1.0', (a) => { a.setIntensity(1); a.music('battle', { stage: 1 }); }],
   ['battle st5 I=0.2', (a) => { a.setIntensity(0.2); a.music('battle', { stage: 5 }); }],
@@ -438,6 +462,35 @@ $('mbench').onclick = async () => {
   const h = ['配樂', '峰 dB', 'RMS dB', '最大 400ms RMS', 'K 加權 RMS', 'K 加權 400ms', '長度 s', '渲染 ms', '渲染/實時', 'NaN', '配樂聲部峰', '錯誤'];
   $('meterWrap').innerHTML = '<table><tr>' + h.map((x) => `<th>${x}</th>`).join('') + '</tr>' + rows.map((r) =>
     `<tr><td>${r.name}</td><td class="${parseFloat(r.pk) > -0.1 ? 'bad' : ''}">${r.pk}</td><td>${r.rms}</td><td>${r.win}</td><td>${r.lk}</td><td>${r.lkw}</td><td>${r.len}</td><td>${r.ms}</td><td>${r.rt}</td><td class="${r.nan ? 'bad' : 'ok'}">${r.nan}</td><td>${r.mv}</td><td class="bad">${r.err}</td></tr>`).join('') + '</table>';
+};
+window.runHarmonyCheck=async()=>{
+  const cases=[
+    ['北野秋日',a=>a.music('kitano'),32],
+    ['標題和聲',a=>a.music('title'),32],
+    ['戰鬥・低強度',a=>{a.setIntensity(.2);a.music('battle',{stage:1});},16],
+    ['戰鬥・高強度',a=>{a.setIntensity(.9);a.music('battle',{stage:5});},36],
+    ['終章',a=>{a.setIntensity(1);a.music('final');},36],
+    ['北野→戰鬥→北野',a=>a.music('kitano'),18,[[5,a=>{a.setIntensity(.9);a.music('battle',{stage:2});}],[11,a=>a.music('kitano')]]],
+    ['配樂音量歸零',a=>a.music('kitano'),7,[[2,a=>a.setMusicVolume(0)]],true],
+    ['暫停閘靜音',a=>a.music('kitano'),7,[[2,a=>{a.paused=true;a.pauseG.gain.value=0;}]],true],
+  ],rows=[];
+  const draw=done=>{
+    const h=['曲目／情境','峰值 dB','非有限值','配樂聲部峰','配樂節點峰','結果'];
+    $('harmonyWrap').innerHTML='<p>'+ (done?'離線檢查完成，沒有啟動即時音訊。':'離線檢查中 '+rows.length+' / '+cases.length+'，維持靜音。')+'</p><table><tr>'+h.map(x=>'<th>'+x+'</th>').join('')+'</tr>'+rows.map(r=>
+      `<tr><td>${r.name}</td><td>${r.pk}</td><td>${r.nan}</td><td>${r.mv}</td><td>${r.nodes}</td><td class="${r.ok?'ok':'bad'}">${r.ok?'通過':r.error||'超出預算或有殘留聲音'}</td></tr>`).join('')+'</table>';
+  };
+  draw(false);
+  for(const [name,setup,sec,events=[],silentTail=false]of cases) {
+    const r=await renderMusic(setup,sec,events),ok=r.pk<.99&&!r.nan&&!r.err&&r.mvMax<=48&&r.nodeMax<=512&&(!silentTail||r.tailPeak<1e-6);
+    rows.push({name,pk:db(r.pk),nan:r.nan,mv:r.mvMax,nodes:r.nodeMax,ok,error:r.err,renderMs:Math.round(r.ms)});draw(false);
+  }
+  window.harmonyResults=rows;draw(true);return rows;
+};
+$('harmonyCheck').onclick=async()=>{
+  $('harmonyCheck').disabled=true;
+  try { await window.runHarmonyCheck(); }
+  catch(error) { $('harmonyWrap').textContent='離線檢查失敗：'+String(error); }
+  finally { $('harmonyCheck').disabled=false; }
 };
 </script>
 </body>

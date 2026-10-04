@@ -15,7 +15,7 @@ async function load(path, query = '') {
   html = html.replace(/<base href="[^"]+">/, '');
   html = html.replace(/(<script type="importmap">)([\s\S]*?)(<\/script>)/, (_, a, json, b) => {
     const map = JSON.parse(json);
-    for (const file of ['japanese-cars.mjs', 'car-material.js', 'zero/props.js', 'kobe-street.mjs', 'kobe-autumn.js', 'kobe-harbor.mjs', 'kobe-city.mjs', 'kobe-relief.mjs', 'urban.js', 'japan.js', 'textures.js', 'anim.js', 'env.js', 'preview.js', 'streetfront.js', 'stages.js', 'battlefields.js', 'fieldart.js', 'encounter.js', 'post.js', 'roofline.js', 'mechs.js', 'combat.js', 'cockpit.js', 'player.js', 'flight.mjs', 'vehicles.js', 'hud.js', 'zero/kit.js', 'zero/map.js', 'zero/guns.js', 'zero/human.js', 'zero/viewmodel.js', 'zero/main.js', 'zero/mission-props.mjs', 'zero/hud.js', 'zero/sfx.js', 'zero/mech6.js', 'lastline/map.js', 'lastline/script.js', 'lastline/mission.js', 'lastline/convoy.js', 'lastline/escort.mjs', 'lastline/operations.mjs', 'lastline/foot-ops.js', 'input.js', 'tactics.js', 'reinforcements.mjs', 'zero/ai.js', 'zero/script.js', 'zero/patrol.js', 'zero/recon.js', 'zero/field.js']) {
+    for (const file of ['japanese-cars.mjs', 'car-material.js', 'zero/props.js', 'kobe-street.mjs', 'kobe-kitano.js', 'kobe-garden.mjs', 'kobe-heritage.mjs', 'scenic-music.mjs', 'audio.js', 'kobe-autumn.js', 'kobe-harbor.mjs', 'kobe-city.mjs', 'kobe-relief.mjs', 'urban.js', 'japan.js', 'textures.js', 'anim.js', 'env.js', 'preview.js', 'streetfront.js', 'stages.js', 'battlefields.js', 'fieldart.js', 'encounter.js', 'post.js', 'roofline.js', 'mechs.js', 'combat.js', 'cockpit.js', 'player.js', 'flight.mjs', 'vehicles.js', 'hud.js', 'zero/kit.js', 'zero/map.js', 'zero/guns.js', 'zero/human.js', 'zero/viewmodel.js', 'zero/main.js', 'zero/mission-props.mjs', 'zero/hud.js', 'zero/sfx.js', 'zero/mech6.js', 'lastline/map.js', 'lastline/script.js', 'lastline/mission.js', 'lastline/convoy.js', 'lastline/escort.mjs', 'lastline/operations.mjs', 'lastline/foot-ops.js', 'input.js', 'tactics.js', 'reinforcements.mjs', 'zero/ai.js', 'zero/script.js', 'zero/patrol.js', 'zero/recon.js', 'zero/field.js']) {
       const url = new URL('/game/mech/' + file, location.href).href;
       for (const key of Object.keys(map.imports)) if (new URL(key, entryBase).href === url) delete map.imports[key];
       map.imports[url] = url + '?qa=' + revision;
@@ -914,7 +914,7 @@ async function campaignFoot() {
   assert(S.CHAPTERS.length === 7 && S.FIRST_MECH === 4, '獨立七章，三章步兵／四章機甲');
   assert(S.ENCOUNTERS.every(e => e.ch <= 3), '步兵路線全部屬於前三章');
   assert(S.LAYOUT === map.layout && !win.__world.cityEnabled && !win.__world.blds.length, '港區獨立地圖，任務區保留港務設施與作戰路線');
-  assert(map.totalTriangles < 130000 && map.meshes.length <= 12, `港區結構含汽車 ${map.totalTriangles} 三角形／${map.meshes.length} 合併網格`);
+  assert(map.baseTriangles < 130000 && map.kitano.triangles < 44000 && map.meshes.length <= 15, `港區結構含汽車 ${map.totalTriangles} 三角形／${map.meshes.length} 合併網格`);
   win.__step(60); assert(G.vm.cur === 'smg', '續作預設衝鋒槍、三武器可切換');
   await save('lastline-infantry');
   let render = renderer.render.bind(renderer); renderer.render = () => {};
@@ -1153,7 +1153,9 @@ async function fieldOps() {
     const flow=JSON.stringify(win.__flow.done),obj=G.objText,t=G.t;
     key('KeyM');assert(!win.document.querySelector('#fieldMap').hidden,path+' M 打開戰術地圖');
     win.__step(60);assert(G.t===t+.05||G.t===t+1/60,path+' 戰術地圖暫停世界更新');
-    assert(win.document.querySelectorAll('#fieldMap [data-site]').length===4,path+' 主線與三個獨立哨站');
+    assert(win.document.querySelectorAll('#fieldMap [data-site]').length===5,path+' 主線、北野觀景路標與三個獨立哨站');
+    win.document.querySelector('#fieldMap [data-site="__kitano"]').click();
+    assert(F.waypoint()===G.scenicWaypoint&&G.objText===obj&&JSON.stringify(win.__flow.done)===flow,path+' 北野觀景路標不改主線與哨站進度');
     win.document.querySelector('#fieldMap [data-site="'+F.outposts[0].id+'"]').click();
     assert(F.selected===F.outposts[0].id&&G.objText===obj&&JSON.stringify(win.__flow.done)===flow,path+' 選支線保留主線進度與劇情');
     // Save the actual paused 2D tactical map through the normal capture path.
@@ -1193,7 +1195,7 @@ async function fieldOps() {
   report.textContent=JSON.stringify({checks,metrics,errors},null,2);state.textContent='開放戰區通過';
 }
 
-for (const [id, fn] of [['carArt', carArt], ['realismArt', realismArt], ['autumnArt', autumnArt], ['japanStreets', japanStreets], ['flightArt', flightArt], ['flight', flight], ['kobeArt', kobeArt], ['fieldAudit', fieldAudit], ['fieldOps', fieldOps], ['scoutCombat', scoutCombat], ['reconControls', reconControls], ['prequelFoot', prequelFoot], ['openingPace', openingPace], ['patrolWorld', patrolWorld], ['japaneseSigns', japaneseSigns], ['harborArt', harborArt], ['campaignFoot', campaignFoot], ['campaign4', () => campaignMech(4)], ['campaign5', () => campaignMech(5)], ['campaign6', () => campaignMech(6)], ['campaign7', () => campaignMech(7)], ['campaign6Artillery', async()=>{localStorage.setItem('lastline.choice',JSON.stringify('artillery'));await campaignMech(6,'artillery');}], ['campaignArtillery', async () => { localStorage.setItem('lastline.choice', JSON.stringify('artillery')); await campaignMech(7, 'artillery'); }], ['campaignEdges', campaignEdges], ['mech', mech], ['fields', battlefields], ['enemyMotion', enemyMotion], ['zero', zero], ['tactics', tactics], ['prequelMechCampaign', prequelMechCampaign], ['campaignMain', campaignMain], ['enemyPressure', enemyPressure], ['enemyHandling', enemyHandling], ['infantry', infantry], ['art', art], ['hero', hero], ['city', city], ['mountains', mountains], ['weapons', weapons], ['save', save]]) document.querySelector('#' + id).onclick = () => fn().catch(e => { state.textContent = '失敗'; report.textContent += '\n' + e.stack; });
+for (const [id, fn] of [['scenicMusic', scenicMusicCheck], ['prequelBrightness', prequelBrightness], ['kitanoArt', kitanoArt], ['missionPropsArt', missionPropsArt], ['carArt', carArt], ['realismArt', realismArt], ['autumnArt', autumnArt], ['japanStreets', japanStreets], ['flightArt', flightArt], ['flight', flight], ['kobeArt', kobeArt], ['fieldAudit', fieldAudit], ['fieldOps', fieldOps], ['scoutCombat', scoutCombat], ['reconControls', reconControls], ['prequelFoot', prequelFoot], ['openingPace', openingPace], ['patrolWorld', patrolWorld], ['japaneseSigns', japaneseSigns], ['harborArt', harborArt], ['campaignFoot', campaignFoot], ['campaign4', () => campaignMech(4)], ['campaign5', () => campaignMech(5)], ['campaign6', () => campaignMech(6)], ['campaign7', () => campaignMech(7)], ['campaign6Artillery', async()=>{localStorage.setItem('lastline.choice',JSON.stringify('artillery'));await campaignMech(6,'artillery');}], ['campaignArtillery', async () => { localStorage.setItem('lastline.choice', JSON.stringify('artillery')); await campaignMech(7, 'artillery'); }], ['campaignEdges', campaignEdges], ['mech', mech], ['fields', battlefields], ['enemyMotion', enemyMotion], ['zero', zero], ['tactics', tactics], ['prequelMechCampaign', prequelMechCampaign], ['campaignMain', campaignMain], ['enemyPressure', enemyPressure], ['enemyHandling', enemyHandling], ['infantry', infantry], ['art', art], ['hero', hero], ['city', city], ['mountains', mountains], ['weapons', weapons], ['save', save]]) document.querySelector('#' + id).onclick = () => fn().catch(e => { state.textContent = '失敗'; report.textContent += '\n' + e.stack; });
 
 async function harborArt() {
   await load('/game/mech/lastline/index.html', '?mute&god&ch=1&all&fps=0');
@@ -1201,7 +1203,7 @@ async function harborArt() {
   win.__G.player.reset(new win.__T.Vector3(-180, 0, -193), 0); win.__step(3);
   const map=win.__map, shelves=win.__solid.list.filter(b=>b.x1<100 && b.y1>2.8 && b.y1<3.2 && b.x1-b.x0<2 && b.z1-b.z0<1);
   assert(shelves.length===12,'十二座掃描貨架為三公尺高，海關、冷藏站和修船棚沒有穿出屋頂的大貨架');
-  assert(map.totalTriangles<130000 && map.meshes.length<=12,'港區合併幾何維持十三萬三角形（含汽車），至多十二個材質網格');
+  assert(map.baseTriangles<130000 && map.kitano.triangles<44000 && map.meshes.length<=14,'原港區低於十三萬；新北野低於四萬四，合併網格最多十五個');
   const backdropTriangles=win.__world.kobeBackdrop.meshes.reduce((n,m)=>n+m.geometry.index.count/3,0);
   assert(backdropTriangles<70000&&win.__world.kobeBackdrop.meshes.length===5,'紅磚倉庫、信號所與客船仍併入五個背景網格，低於七萬三角形');
   await save('lastline-customs', true);
@@ -1289,7 +1291,7 @@ async function kobeArt() {
   assert(win.__world.kobeBackdrop.harbor&&win.__world.kobeBackdrop.blocks.length>700,'港區西側與山麓補上神戶市街，保留任務區');
   const backdropTriangles=win.__world.kobeBackdrop.meshes.reduce((n,m)=>n+m.geometry.index.count/3,0);
   assert(backdropTriangles<70000&&win.__world.kobeBackdrop.meshes.length===5,`港區新增市景 ${backdropTriangles} 三角形，控制在七萬、五個靜態網格內`);
-  assert(win.__map.totalTriangles<130000&&win.__map.meshes.length<=12,'港區新增地標仍維持十三萬三角形（含汽車）內，路牌、地標漆面與店招使用三個材質桶');
+  assert(win.__map.baseTriangles<130000&&win.__map.kitano.triangles<44000&&win.__map.meshes.length<=15,'原港區含汽車維持十三萬內；北野另有四萬四預算與共用草地與歷史漆面桶');
   stats.harbor={triangles:win.__map.triangles,meshes:win.__map.meshes.length,backdropTriangles,memory:renderer.info.memory};checks.push(...result);
   assert(errors.length===0,'神戶城市、商店街與港灣沒有渲染錯誤');
   report.textContent=JSON.stringify({checks,stats,errors},null,2);state.textContent='神戶場景通過';
@@ -1313,7 +1315,7 @@ async function japanStreets() {
   stats.prequel={textures:renderer.info.memory.textures,mapMeshes:win.__map.meshes.length};checks.push(...result);
   await load('/game/mech/lastline/index.html','?mute&god&ch=1&all&fps=0');renderer=win.__renderer;post={render:()=>win.__step(1)};
   win.__G.player.reset(new win.__T.Vector3(-189,0,-236),Math.PI);win.__G.player.pitch=.13;win.__step(3);await save('japan-lastline-street',true);
-  assert(win.__map.totalTriangles<130000&&win.__map.meshes.length<=12,'失落防線新增港邊街屋仍低於十三萬三角形（含汽車），合併網格不超過十二個');
+  assert(win.__map.baseTriangles<130000&&win.__map.kitano.triangles<44000&&win.__map.meshes.length<=15,'原港區街屋含汽車低於十三萬；北野另列預算，結構網格最多十五個');
   stats.lastline={triangles:win.__map.triangles,mapMeshes:win.__map.meshes.length,textures:renderer.info.memory.textures};checks.push(...result);
   assert(errors.length===0,'三款日本街景沒有渲染錯誤');report.textContent=JSON.stringify({checks,stats,errors},null,2);state.textContent='日本街景通過';
 }
@@ -1351,7 +1353,7 @@ async function autumnArt() {
     ['autumn-lastline-coast',[625,0,475],Math.atan2(-180,-75),.07],
   ]){win.__G.player.reset(new win.__T.Vector3(...p),yaw);win.__G.player.pitch=pitch;win.__step(3);await save(name,true);}
   assert(win.__map.autumn.count===15&&win.__map.autumn.meshes.length===3,'續作十五棵楓樹分布在店屋、神社與港邊步道');
-  assert(win.__map.totalTriangles<130000&&win.__map.meshes.length<=12,'續作街層細節仍在十三萬三角形（含汽車）、十二個材質桶內');
+  assert(win.__map.baseTriangles<130000&&win.__map.kitano.triangles<44000&&win.__map.meshes.length<=15,'續作原街層含汽車低於十三萬；北野另列預算，結構材質桶最多十五個');
   const farTriangles=win.__world.kobeBackdrop.meshes.reduce((n,m)=>n+m.geometry.index.count/3,0);
   assert(farTriangles<70000,'續作的市景遠樓仍低於七萬三角形');
   stats.lastline={trees:win.__map.autumn.count,triangles:win.__map.triangles,farTriangles,memory:{...renderer.info.memory},newStaticMeshes:win.__map.autumn.meshes.length};checks.push(...result);
@@ -1407,7 +1409,7 @@ async function realismArt() {
     ['city-lastline-storefront',[-198,0,-245],Math.PI,.09],
   ]){win.__G.player.reset(new win.__T.Vector3(...p),yaw);win.__G.player.pitch=pitch;win.__step(3);await save(name,true);}
   stats.streetsLastline=win.__map.streetscape;
-  assert(win.__map.totalTriangles<130000&&win.__map.meshes.length<=12,'港區建築細節維持十三萬三角形（含汽車）與十二個材質桶內');
+  assert(win.__map.baseTriangles<130000&&win.__map.kitano.triangles<44000&&win.__map.meshes.length<=15,'原港區建築含汽車低於十三萬；北野另列預算，結構材質桶最多十五個');
   stats.harborTriangles=win.__map.totalTriangles;audit('lastline',win.__world);
   report.textContent=JSON.stringify({checks,stats,errors},null,2);state.textContent='三款建築光影通過';
 }
@@ -1481,7 +1483,7 @@ async function carArt() {
   win.__G.player.reset(new win.__T.Vector3(car.x+3.8,0,car.z+4.3),Math.atan2(-3.8,-4.3));win.__G.player.pitch=-.12;
   win.__step(3);await save('cars-lastline-fit',true);
   assert(H.cars.length===1&&car.profile.inspiration==='Honda Fit','港區原覆蓋車位置換成可辨識的日系掀背車');
-  assert(H.totalTriangles===H.triangles+H.carTriangles&&H.totalTriangles<130000,'港區結構連同新汽車仍低於十三萬三角形（含汽車）');
+  assert(H.totalTriangles===H.triangles+H.carTriangles&&H.baseTriangles<130000&&H.kitano.triangles<44000,'原港區含新汽車低於十三萬；北野另有四萬四預算');
   assert(car.meshes.length===5&&car.meshes.every(m=>!m.material.map&&!m.material.transparent),'車身、車窗與輪圈共用五個材質，不新增貼圖或透明排序');
   const obj=win.__G.destruct.objs.find(o=>o.kind==='car'&&Math.hypot(o.pos.x-car.x,o.pos.z-car.z)<.1);
   assert(obj?.hp0===650,'替換車輛保留既有耐久與破壞登記');
@@ -1492,4 +1494,136 @@ async function carArt() {
   assert(!obj.alive&&obj.box.dead&&car.meshes.every(m=>!m.parent.visible)&&D.wrecks.length===oldWrecks+1,'港區新車爆炸後隱藏五個部件、移除碰撞並生成一個殘骸');
   stats.lastline={triangles:H.totalTriangles,carTriangles:H.carTriangles,meshes:H.totalMeshes};checks.push(...result);
   assert(errors.length===0,'三款汽車沒有執行或材質編譯錯誤');report.textContent=JSON.stringify({checks,stats,errors},null,2);state.textContent='三款日系汽車通過';
+}
+
+async function missionPropsArt() {
+  const checks=[],stats={};
+  for(const [name,path,ch,ids]of [['zero','zero/',1,['radio','codes','smap']],['lastline','lastline/',3,['fuse']]]) {
+    await load('/game/mech/'+path+'index.html','?mute&god&ch='+ch+'&all&fps=0');result=checks;
+    const G=win.__G,T=win.__T,map=win.__map,W=win.__world;
+    renderer=win.__renderer;post={render:()=>win.__step(1)};
+    const view=async(it,label)=>{
+      const at=it.pin||it.p,dx=it.p.x-at.x,dz=it.p.z-at.z;
+      const side=Math.hypot(dx,dz)>.3?new T.Vector3(dx,0,dz).normalize():new T.Vector3(.35,0,-1).normalize();
+      const p=at.clone().addScaledVector(side,1.8);p.y=win.__solid.floorAt(p.x,p.z,it.p.y+.5);
+      G.player.reset(p,Math.atan2(at.x-p.x,at.z-p.z));G.player.pitch=Math.atan2(at.y-p.y-1.6,1.8);
+      W.followShadow(p);W.sun.shadow.needsUpdate=true;win.__step(2);await save(label,true);
+    };
+    for(const id of ids){const it=map.items[id];assert(it?.h?.visible,id+' 可見實體');await view(it,'mission-'+name+'-'+id);}
+    if(name==='lastline') {
+      const h=map.operationProps.G3[0];assert(h.body.visible&&!h.installed,'配電箱待安裝外殼存在');
+      await view(h,'mission-lastline-fuse-before');h.install();
+      assert(h.body.visible&&h.installedPart.visible&&h.installed,'保險絲裝入後外殼保留與綠燈');
+      await view(h,'mission-lastline-fuse-after');h.reset();
+      await view(map.operationProps.C6[0],'mission-lastline-oxygen');
+    }
+    stats[name]={triangles:map.totalTriangles||map.meshes.reduce((n,m)=>n+m.geometry.attributes.position.count/3,0),operationPoints:Object.values(map.operationProps||{}).flat().length};
+    assert(errors.length===0,name+' 任務模型材質沒有錯誤');
+  }
+  report.textContent=JSON.stringify({checks,stats,errors},null,2);state.textContent='任務物件畫面通過';
+}
+
+async function kitanoArt() {
+  const checks=[],stats={};
+  for(const [name,path,query]of [['main','','?mute&free&x=-800&y=3&z=-230&fps=0'],['zero','zero/','?mute&god&ch=1&all&fps=0'],['lastline','lastline/','?mute&god&ch=1&all&fps=0']]) {
+    await load('/game/mech/'+path+'index.html',query);result=checks;
+    const W=win.__world||win.__game?.world,T=win.__T,K=name==='main'?W.kitano:win.__map.kitano;
+    renderer=win.__renderer;post=name==='main'?win.__post:{render:()=>win.__step(1)};
+    if(name!=='main')win.__G.vm.vScene.visible=false;
+    assert(K?.landmarks.length>=4&&K.houses.length>=14,name+' 北野地標與沿坡洋館完整建立');
+    if(name==='zero')assert(!W.blds.some(b=>b.x0<K.bounds.x1&&b.x1>K.bounds.x0&&b.z0<K.bounds.z1&&b.z1>K.bounds.z0),'前傳背景高樓不擋入北野坡道與洋館');
+    const walk=K.routes.walk;assert(Math.hypot(walk.at(-1)[0]-walk[0][0],walk.at(-1)[2]-walk[0][2])>=270,name+' 北野步道長度至少270公尺');
+    assert(K.triangles<44000,name+' 北野街區獨立幾何預算低於44000三角形');
+    const eye=(p,target)=>{
+      if(name==='main')win.__cam.set(p[0],p[1],p[2],Math.atan2(p[0]-target[0],p[2]-target[2]),-Math.atan2(p[1]-target[1],Math.hypot(p[0]-target[0],p[2]-target[2])));
+      else {const G=win.__G;G.player.reset(new T.Vector3(p[0],p[1]-1.6,p[2]),Math.atan2(target[0]-p[0],target[2]-p[2]));const actual=G.player.eye;G.player.pitch=Math.atan2(target[1]-actual.y,Math.hypot(actual.x-target[0],actual.z-target[2]));}
+      W.followShadow(new T.Vector3(...p));W.sun.shadow.needsUpdate=true;
+    };
+    const start=walk[0],next=walk[1];eye([start[0],start[1]+2,start[2]],[next[0],next[1]+2,next[2]]);win.__step(2);await save('kitano-'+name+'-entrance',true);
+    const yaw=name==='zero'?Math.PI/2:Math.PI,co=Math.cos(yaw),si=Math.sin(yaw),origin=walk[0];
+    const local=(u,y,v)=>[origin[0]+u*co+v*si,K.bounds.y0+y,origin[2]-u*si+v*co];
+    for(const [id,u,v,target]of [['moegi',-43.5,65.2,[-32,12.4,75.8]],['kazamidori',-12,76,[-1,16.1,99.5]],['uroko',52,86.4,[43,17.5,100]],['autumn-vista',-2.8,276,[0,22.33,196]]]) {
+      const p=local(u,0,v);p[1]=K.heightAt(p[0],p[2])+1.62;
+      eye(p,local(...target));win.__step(2);await save('kitano-'+name+'-'+id,true);
+    }
+    if(name!=='main') {
+      const G=win.__G,render=renderer.render.bind(renderer);renderer.render=()=>{};
+      for(const [routeName,points]of Object.entries(K.routes)) {
+        G.player.reset(new T.Vector3(...points[0]),0);
+        for(const [x,y,z]of points.slice(1)) {
+          let steps=0,limit=Math.ceil(Math.hypot(G.player.pos.x-x,G.player.pos.z-z)*30)+600;
+          while(Math.hypot(G.player.pos.x-x,G.player.pos.z-z)>.18&&steps++<limit){G.player.yaw=Math.atan2(x-G.player.pos.x,z-G.player.pos.z);G.player.update(1/60,{mx:0,my:1,lookX:0,lookY:0,sprint:true});}
+          assert(steps<limit&&Math.abs(G.player.pos.y-y)<.35,name+' 正式人物可走 '+routeName+' '+x.toFixed(1)+','+z.toFixed(1));
+        }
+      }
+      renderer.render=render;
+      assert(!W.kitano,name+' 步兵沒有重複生成本篇的北野街區');
+    }
+    let texture;
+    W.scene.traverse(o=>{if(o.material?.map?.name==='kitano-fixed-signs')texture=o.material.map;});
+    assert(texture?.image.width===512&&texture.image.height===256,name+' 北野日文路牌共用512×256圖集');
+    const lawn=name==='main'?W.scene.getObjectByName('kitano-gardens'):win.__map.meshes.find(m=>m.material.name==='kitano-garden-grass');
+    assert(lawn?.receiveShadow&&lawn.material.map?.image.width===512&&lawn.material.bumpMap===lawn.material.map,name+' 秋草接收陰影並僅共用一張512草圖與微凹凸');
+    const litter=(name==='main'?W.autumnStreet:win.__map.autumn).meshes.find(m=>m.name==='kobe-autumn-litter').geometry.attributes.position;
+    for(let i=0;i<litter.count;i+=6){const x=litter.getX(i),z=litter.getZ(i);if(x<K.bounds.x0||x>K.bounds.x1||z<K.bounds.z0||z>K.bounds.z1)continue;let lo=Infinity,hi=-Infinity;for(let k=0;k<6;k++){const y=litter.getY(i+k);lo=Math.min(lo,y);hi=Math.max(hi,y);}assertSilent(hi-lo<2,name+' 庭園落葉跳上洋館屋頂變成垂直薄片');}
+    assert(true,name+' 庭園落葉沿坡面鋪設，沒有屋頂高度的垂直薄片');
+    stats[name]={houses:K.houses.length,triangles:K.triangles,trees:K.treePoints.length,gardenPlants:K.planting.plants,treeTrianglesMax:K.treePoints.length*352,totalDistrictTrianglesMax:K.triangles+K.treePoints.length*352,routeLength:Math.hypot(walk.at(-1)[0]-walk[0][0],walk.at(-1)[2]-walk[0][2]),memory:renderer.info.memory};
+    assert(errors.length===0,name+' 北野建築與植栽沒有渲染錯誤');
+  }
+  report.textContent=JSON.stringify({checks,stats,errors},null,2);state.textContent='三款秋景北野通過';
+}
+
+
+async function prequelBrightness() {
+  const checks=[],stats={};
+  await load('/game/mech/zero/index.html','?mute&god&ch=3&all&fps=0');result=checks;
+  const G=win.__G,W=win.__world,T=win.__T,P=win.__post;
+  renderer=win.__renderer;post={render:()=>win.__step(1)};
+  const lighting=(old)=>{
+    renderer.toneMappingExposure=old?1:1.12;W.scene.environmentIntensity=old ? .72 : .84;
+    W.hemi.intensity=old ? .65 : .90;W.hemi.color.setRGB(...(old?[.46,.52,.62]:[.56,.63,.72]));
+    W.hemi.groundColor.setRGB(...(old?[.25,.23,.20]:[.34,.31,.27]));P.u.vignette.value=old ? .30 : .20;
+  };
+  const lightCount=W.scene.children.filter(o=>o.isLight).length,memory={...renderer.info.memory};
+  const K=win.__map.kitano,entrance=K.routes.walk[0],next=K.routes.walk[1];
+  for(const [name,p,target]of [
+    ['street',[-20,0,1],[-20,2,15]],
+    ['hospital',[-52,0,10],[-46,1.5,23]],
+    ['kitano',[entrance[0],entrance[1],entrance[2]],[next[0],next[1]+2,next[2]]],
+  ]) {
+    G.player.reset(new T.Vector3(...p),Math.atan2(target[0]-p[0],target[2]-p[2]));
+    G.player.pitch=Math.atan2(target[1]-G.player.eye.y,Math.hypot(target[0]-p[0],target[2]-p[2]));
+    W.followShadow(G.player.pos);W.sun.shadow.needsUpdate=true;
+    for(const old of [true,false]){lighting(old);win.__step(2);await save('brightness-zero-'+name+'-'+(old?'before':'after'),true);}
+  }
+  assert(W.scene.children.filter(o=>o.isLight).length===lightCount,'前傳亮度調整沒有新增光源');
+  assert(renderer.info.memory.geometries===memory.geometries&&renderer.info.memory.textures===memory.textures,'亮度調整未增加幾何或貼圖');
+  stats.prequel={exposure:renderer.toneMappingExposure,environment:W.scene.environmentIntensity,hemisphere:W.hemi.intensity,vignette:P.u.vignette.value,lights:lightCount,memory};
+  await load('/game/mech/lastline/index.html','?mute&god&ch=1&all&fps=0');
+  assert(win.__renderer.toneMappingExposure===1&&win.__world.scene.environmentIntensity===.7&&win.__world.hemi.intensity===.38&&win.__post.u.vignette.value===.3,'前傳專用亮度調整保留續作原照明 '+JSON.stringify({exposure:win.__renderer.toneMappingExposure,env:win.__world.scene.environmentIntensity,hemi:win.__world.hemi.intensity,vignette:win.__post.u.vignette.value}));
+  assert(errors.length===0,'亮度調整沒有渲染錯誤');
+  report.textContent=JSON.stringify({checks,stats,errors},null,2);state.textContent='前傳明暗對照通過';
+}
+
+
+async function scenicMusicCheck() {
+  const checks=[],stats={};
+  for(const [name,path]of [['main',''],['zero','zero/'],['lastline','lastline/']]) {
+    await load('/game/mech/'+path+'index.html','?mute&god&ch=1&all&nobrief&fps=0');result=checks;
+    const G=name==='main'?win.__game:win.__G,T=win.__T,W=win.__world||G.world,K=W.kitano||win.__map.kitano;
+    renderer=name==='main'?G.post.renderer:win.__renderer;const render=renderer.render.bind(renderer);renderer.render=()=>{};
+    if(name==='main'){G.launch(1);G.run(4);}else win.__step(60);
+    const p=K.routes.walk.at(-2);G.player.pos.set(...p);G.player.vel.set(0,0,0);
+    const step=n=>name==='main'?G.run(n/60):win.__step(n);
+    step(660);assert(G.audio._musKey==='kitano',name+' 平靜北野使用秋日和聲配樂 '+JSON.stringify({key:G.audio._musKey,state:G.state,pos:G.player.pos.toArray(),bounds:K.bounds,field:W.battlefield,damage:G.combat?.damageFx,lock:G.combat?.lockAlert}));
+    if(name==='main')G.combat.damageFx=1;else G.player.damage(1);
+    step(1);assert(G.audio._musKey!=='kitano'&&G.audio._musKey.startsWith('battle'),name+' 受攻擊立即回到原章戰鬥配樂');
+    step(120);assert(G.audio._musKey!=='kitano',name+' 停火兩秒不會立刻反覆切曲');
+    step(660);assert(G.audio._musKey==='kitano',name+' 停火後恢復北野配樂');
+    G.player.pos.x=0;G.player.pos.z=0;step(1);assert(G.audio._musKey!=='kitano',name+' 離開北野恢復章節曲目');
+    if(name==='main'){G.toTitle();step(1);assert(G.audio._musKey==='title','本篇標題曲不受景觀切換覆寫');}
+    renderer.render=render;stats[name]={key:G.audio._musKey,volume:G.audio._vol};
+    assert(errors.length===0,name+' 配樂切換沒有執行錯誤');
+  }
+  report.textContent=JSON.stringify({checks,stats,errors},null,2);state.textContent='三款景觀配樂切換通過';
 }

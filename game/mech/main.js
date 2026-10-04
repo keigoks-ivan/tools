@@ -3,6 +3,7 @@
 //   ?show=… 或 ?free 會改載入 preview.js（美術／動作預覽）
 import * as THREE from 'three';
 import { qualityLevel, pixelRatio, FrameGate } from './runtime.js';
+import { ScenicMusic } from './scenic-music.mjs';
 
 const q = new URLSearchParams(location.search);
 // 大檔案（貼圖、HDR、模型）改從 jsDelivr 下載，網站主機給大檔很慢；不能用時照舊從本站（見 cdn.js）
@@ -55,7 +56,7 @@ async function game() {
     console.warn('[mech] fx.js 載入失敗，改用空殼', err);
     fx = new Proxy({}, { get: (_, k) => (k === 'missile' ? () => ({ pos: new THREE.Vector3(), dir: new THREE.Vector3(0, 0, 1), alive: true }) : () => {}) });
   }
-  const audio = new Sound();
+  const audio = new Sound(), scenicMusic = new ScenicMusic();
   if (q.has('mute')) audio.setVolume(0);   // 測試用：?mute 全程靜音
   const input = new Input(canvas);
   const hud = new HUD($('hud'), camera);
@@ -318,6 +319,7 @@ async function game() {
     touchUI.style.display = input.touch.on ? 'block' : 'none';
     applyView();
     audio.ui('boot');
+    scenicMusic.reset();
     audio.music('battle', { stage: STAGES[stageNo - 1].music || stageNo });
   }
   function pause() {
@@ -470,9 +472,17 @@ async function game() {
     const danger = player.ap / player.apMax < 0.3 && !C.dead && state !== 'result';
     audio.setDanger(danger);
     // 配樂強度：附近敵人越多、被鎖定、挨打、血少、覺醒，音樂就疊越多層
-    let near = 0;
-    for (const e of C.enemies) if (!e.dead && e.pos.distanceToSquared(player.pos) < 400 * 400) near += e.vehicle ? 0.5 : e.kind === 'grunt' ? 1 : 1.6;
-    audio.setIntensity(state !== 'play' ? 0.15 : clamp(0.2 + near * 0.08 + C.lockAlert * 0.25 + C.damageFx * 0.3 + (danger ? 0.2 : 0) + odV * 0.35, 0, 1));
+    let near = 0, scenicThreat = false, scenic = false;
+    for (const e of C.enemies) if (!e.dead) {
+      const d2 = e.pos.distanceToSquared(player.pos);
+      if (d2 < 400 * 400) near += e.vehicle ? 0.5 : e.kind === 'grunt' ? 1 : 1.6;
+      if (d2 < 200 * 200) scenicThreat = true;
+    }
+    if (state === 'play') {
+      scenic = scenicMusic.update(rdt,player.pos,world.battlefield === 'city' ? world.kitano?.bounds : null,scenicThreat || C.lockAlert > .1 || C.damageFx > .04);
+      audio.music(scenic ? 'kitano' : 'battle', { stage: STAGES[stageNo - 1].music || stageNo });
+    }
+    audio.setIntensity(state !== 'play' ? 0.15 : scenic ? .22 : clamp(0.2 + near * 0.08 + C.lockAlert * 0.25 + C.damageFx * 0.3 + (danger ? 0.2 : 0) + odV * 0.35, 0, 1));
 
     // ---- 畫面後製
     odV += ((C.od.active ? 1 : 0) - odV) * (1 - Math.exp(-rdt * 4));

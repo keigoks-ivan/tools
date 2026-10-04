@@ -10,6 +10,9 @@ import { buildAutumnTrees } from '../kobe-autumn.js';
 import { KOBE_RELIEF, kobeCityHeight } from '../kobe-relief.mjs';
 import { kobeHarborScenery, harborWindow } from '../kobe-harbor.mjs';
 import { ENCOUNTERS } from './script.js';
+import { kitanoBuilder, kitanoSignMaterial, kitanoSignUV } from '../kobe-kitano.js';
+import { kitanoGardenMaterial } from '../kobe-garden.mjs';
+import { kitanoHeritageMaterial } from '../kobe-heritage.mjs';
 
 export const SHORE = 680;
 export function buildMap(scene, mats, solid, PL, A, world) {
@@ -85,6 +88,9 @@ export function buildMap(scene, mats, solid, PL, A, world) {
   mats.sign = shopMaterial();
   mats.landmarkPaint = new THREE.MeshStandardMaterial({ color: 0xffffff, normalMap: mats.concrete.normalMap, normalScale: new THREE.Vector2(.12, .12), roughness: .78, metalness: 0, vertexColors: true });
   mats.landmarkPaint.userData.tile = 2;
+  mats.kitanoSigns=kitanoSignMaterial();
+  mats.kitanoGarden=kitanoGardenMaterial();
+  mats.kitanoHeritage=kitanoHeritageMaterial();
   const b = new Builder(mats, solid);
   const portMat=col=>col[4]===8?'portGround':col[4]===7?'brick':col[4]===4?'portGlass':col[4]===1?'concrete':col[4]===3?'corr':col[4]===5?'rust':col[4]===2?'metal':'landmarkPaint';
   const portArt={face:(a,c,d,e,col)=>{
@@ -783,13 +789,25 @@ export function buildMap(scene, mats, solid, PL, A, world) {
   utilities:[{x:-208.3,z:-197,ry:-Math.PI/2,kind:'power'},{x:-96,z:-119,ry:-Math.PI/2,kind:'power'},
     {x:36,z:-47,ry:Math.PI/2},{x:546.2,z:264,ry:Math.PI/2,kind:'power'},{x:647,z:-162,ry:-Math.PI/2,kind:'power'}]};
   M.streetscape=kobeBlockStreets(portArt,M.streetSites);
+  M.baseColliders=solid.list.length;
+  const kitanoStart=[...new Set(Object.values(b.B))].reduce((n,bucket)=>n+bucket.p.length/9,0);
+  M.kitano=kitanoBuilder(b,{x:-169,z:-278,yaw:Math.PI,ground:0,detail:true});
+  M.kitano.triangles=[...new Set(Object.values(b.B))].reduce((n,bucket)=>n+bucket.p.length/9,0)-kitanoStart;
+  const connectorStart=b.B.landmarkPaint.p.length,signStart=b.B.kitanoSigns.p.length;
+  for(const [x0,x1,z0,z1]of [[-154,-146,-272,-237],[-173,-154,-272,-264],[-173,-165,-278,-272]])
+    b.deco('landmarkPaint',x0,x1,.026,.04,z0,z1,{tint:[.36,.37,.34],skip:'ny nx px nz pz'});
+  b.deco('landmarkPaint',-154.1,-154,.04,2.7,-241,-240.9,{tint:[.22,.26,.23],skip:'ny'});
+  b.B.kitanoSigns.quad([-157,2,-240.8],[-153.8,2,-240.8],[-153.8,2.8,-240.8],[-157,2.8,-240.8],[0,0,1],[1,1,1,1],kitanoSignUV(0));
+  M.kitanoConnector={route:[[-150,0,-240],[-150,.04,-268],[-169,.04,-268],[-169,.035,-278]],triangles:(b.B.landmarkPaint.p.length-connectorStart+b.B.kitanoSigns.p.length-signStart)/9};
   M.autumn=buildAutumnTrees(scene,[[-216,-232,.76],[-200,-232,.73],[-180,-232,.81],[-166,-232,.72],
     [-238,-270,.7],[-249,-263,.76],[530,313,.82],[554,313,.83],[578,313,.79],[603,313,.86],
-    [626,313,.8],[626,350,.86],[626,385,.81],[626,432,.8],[626,465,.82]]);
+    [626,313,.8],[626,350,.86],[626,385,.81],[626,432,.8],[626,465,.82],...M.kitano.treePoints],
+    (x,z)=>x>=M.kitano.bounds.x0&&x<=M.kitano.bounds.x1&&z>=M.kitano.bounds.z0&&z<=M.kitano.bounds.z1?(M.kitano.heightAt?.(x,z)??solid.floorAt(x,z,40)):0);
   const meshes = b.build(scene); M.meshes = meshes;
   M.triangles = meshes.reduce((sum, mesh) => sum + (mesh.geometry.index?.count || mesh.geometry.attributes.position.count) / 3, 0);
   M.carTriangles = M.cars.reduce((sum, car) => sum + car.triangles, 0);
   M.totalTriangles = M.triangles + M.carTriangles; M.totalMeshes = M.meshes.length + M.cars.reduce((sum, car) => sum + car.meshes.length, 0);
+  M.baseTriangles=M.totalTriangles-M.kitano.triangles-M.kitanoConnector.triangles;
   scene.userData.lastlineLayout = M.layout;
   return M;
 }

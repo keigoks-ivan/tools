@@ -13,6 +13,9 @@ import { streetfront } from '../streetfront.js';
 import { japaneseBuilder } from '../japan.js';
 import { kobeStreetDetails, kobeBlockStreets } from '../kobe-street.mjs';
 import { buildAutumnTrees } from '../kobe-autumn.js';
+import { kitanoBuilder, kitanoSignMaterial, kitanoSignUV } from '../kobe-kitano.js';
+import { kitanoGardenMaterial } from '../kobe-garden.mjs';
+import { kitanoHeritageMaterial } from '../kobe-heritage.mjs';
 
 const H1 = 3.4;   // 一層樓高
 
@@ -51,6 +54,9 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
   mats.warm.userData.alias = 'lamp'; mats.warm.userData.aliasTint = [2.2 / 2.6, 1.2 / 2.4, 0.5 / 2.0];   // 暖色窗燈＝日光燈的桶染橘
   for (const k of ['lamp', 'glass', 'hazard']) mats[k].userData.noCast = true;
   Object.assign(mats, PR.carMaterials());
+  mats.kitanoSigns = kitanoSignMaterial();
+  mats.kitanoGarden=kitanoGardenMaterial();
+  mats.kitanoHeritage=kitanoHeritageMaterial();
   // 貨櫃：真的波浪鐵皮貼圖，染三種常見顏色
   for (const [k, c] of [['cGreen', 0x8a9a74], ['cRed', 0xc27358], ['cBlue', 0x7d93a6], ['cont', 0xffffff]]) { const m = mats.corr.clone(); m.color.set(c); m.metalnessMap = null; m.metalness = 0.15; m.userData.tile = 2.2; m.onBeforeCompile = mats.corr.onBeforeCompile; mats[k] = m; }   // 烤漆：不是裸金屬
   for (const k of ['cGreen', 'cRed', 'cBlue']) alias(k, 'cont');   // 三種貨櫃色共用一個桶
@@ -186,7 +192,7 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
     put(a0, a1, prev, h);
   }
   function streetDetails(x0, x1, z0, z1, h, win, o) {
-    if (!win || o.y0 || h < 8 || Math.max(x1 - x0, z1 - z0) > 90) return;
+    if (o.noStreetDetail || !win || o.y0 || h < 8 || Math.max(x1 - x0, z1 - z0) > 90) return;
     const asian = !o.historic;
     const sd = [...win].find(s => !o.hide || !o.hide[s]); if (!sd) return;
     const along = sd === 'n' || sd === 's', out = sd === 'n' || sd === 'e' ? 1 : -1;
@@ -686,7 +692,14 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
   mass(-122, 122, -128, -114, 34, 'wall', 'n');
   mass(-122, 122, 114, 128, 30, 'wall', 's');
   mass(-128, -114, -114, 114, 32, 'brick', 'e');
-  mass(114, 128, -114, 114, 28, 'wall', 'w');
+  {
+    const oldSeed=seed;
+    mass(114,128,-114,20,28,'wall','w',{noStreetDetail:true});
+    mass(114,128,32,114,28,'wall','w',{noStreetDetail:true});
+    mass(114,128,20,32,28,'wall','w',{y0:4.2,noStreetDetail:true});
+    // 洞口上方仍有原屋頂；保留原整棟外樓消耗的亂數，其他街區掩體不變。
+    seed=oldSeed;burnMass(114,128,-114,114,28,'w');
+  }
 
   // ============================================================ A 公寓（起點）
   // 兩個房間，北牆出門進窄巷；房間 2 天花板塌了一角，光從上面進來
@@ -1333,9 +1346,21 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
     {x:-3,z:-34.45,length:1.5,ground:.15},{x:-7,z:5.47,length:1.7,ground:.15}],
   utilities:[{x:-94.74,z:-83.5,ry:Math.PI/2},{x:-42,z:-48,kind:'power'},{x:14,z:47,ry:-Math.PI/2,kind:'power'}]};
   M.streetscape=kobeBlockStreets(streetArt,M.streetSites);
+  M.baseColliders=solid.list.length;
+  const kitanoStart=[...new Set(Object.values(b.B))].reduce((n,bucket)=>n+bucket.p.length/9,0);
+  M.kitano=kitanoBuilder(b,{x:130,z:26,yaw:Math.PI/2,ground:0,detail:true});
+  M.kitano.triangles=[...new Set(Object.values(b.B))].reduce((n,bucket)=>n+bucket.p.length/9,0)-kitanoStart;
+  const connectorStart=b.B.landmarkPaint.p.length,signStart=b.B.kitanoSigns.p.length;
+  b.deco('landmarkPaint',106,130,.02,.035,22,30,{tint:[.36,.37,.34],skip:'ny nx px nz pz'});
+  b.deco('landmarkPaint',107.95,108.05,.035,2.7,20.65,20.75,{tint:[.22,.26,.23],skip:'ny'});
+  b.B.kitanoSigns.quad([107.94,2,19.1],[107.94,2,22.3],[107.94,2.8,22.3],[107.94,2.8,19.1],[-1,0,0],[1,1,1,1],kitanoSignUV(0));
+  M.kitanoConnector={route:[[104,0,26],[130,.035,26]],triangles:(b.B.landmarkPaint.p.length-connectorStart+b.B.kitanoSigns.p.length-signStart)/9};
   M.autumn=buildAutumnTrees(scene,[[-35,-34.9,.66],[-23,-34.9,.69],[-9,-34.9,.72],[-86.8,-50,.69],[-86.8,-36,.68],
-    [-32,4.7,.65],[-18,4.7,.72],[-5,4.7,.67],[-10,19,.62],[-5,27,.63]]);
+    [-32,4.7,.65],[-18,4.7,.72],[-5,4.7,.67],[-10,19,.62],[-5,27,.63],...M.kitano.treePoints],
+    (x,z)=>x>=M.kitano.bounds.x0&&x<=M.kitano.bounds.x1&&z>=M.kitano.bounds.z0&&z<=M.kitano.bounds.z1?(M.kitano.heightAt?.(x,z)??solid.floorAt(x,z,40)):0);
   M.meshes = b.build(scene);
+  M.triangles=M.meshes.reduce((n,m)=>n+(m.geometry.index?.count||m.geometry.attributes.position.count)/3,0);
+  M.baseTriangles=M.triangles-M.kitano.triangles-M.kitanoConnector.triangles;
   return M;
 }
 

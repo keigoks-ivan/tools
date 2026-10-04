@@ -103,7 +103,7 @@ export function arrivalPoint(G, def) {
   const base = new THREE.Vector3(def.x, def.y || (def.type === 'drone' ? 4 : 0), def.z);
   for (const radius of [0, 8, 16, 24, 32, 48, 64]) for (const [dx, dz] of radius ? [[0, 1], [1, 0], [0, -1], [-1, 0], [.707, .707], [.707, -.707], [-.707, .707], [-.707, -.707]] : [[0, 0]]) {
     const p = base.clone(); p.x += dx * radius; p.z += dz * radius;
-    if (Math.hypot(p.x, p.z) > (G.footExtent || 160) * 1.42 || p.distanceTo(G.player.pos) < 18) continue;
+    if (Math.hypot(p.x, p.z) > (G.arrivalExtent || G.footExtent || 160) * 1.42 || p.distanceTo(G.player.pos) < 18) continue;
     if (def.type !== 'drone') { p.y = G.solid.floorAt(p.x, p.z, base.y + .5); if (Math.abs(p.y - base.y) > .6) continue; }
     if (G.solid.pushOut(p.clone(), .6, p.y, p.y + 1.7, .45)) continue;
     const head = p.clone().add(new THREE.Vector3(0, def.type === 'drone' ? 0 : 1.5, 0));

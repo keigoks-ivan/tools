@@ -47,9 +47,9 @@ test('前傳與港區的自行車、植槽與表箱避開固定任務點、敵�
   const document=globalThis.document;t.after(()=>{if(document===undefined)delete globalThis.document;else globalThis.document=document;});
   for(const [build,script,harbor]of [[zeroMap,zeroScript,false],[harborMap,harborScript,true]]) {
     const map=mapFixture(build,harbor),bounds=[];
-    assert(map.meshes.length<=(harbor?12:28),'街緣新增材質桶');
+    assert(map.meshes.length<=(harbor?15:31),'街緣僅追加北野路牌、草地與歷史漆面共用桶');
     assert(map.streetscape.frontages>=8,'街景只覆蓋零星位置');
-    assert(map.streetscape.triangles<=(harbor?6500:4000),'街景超出靜態幾何預算');
+    assert(map.streetscape.triangles<=(harbor?7000:4000),'街景超出靜態幾何預算');
     for(const key of ['bicycles','planters','utilities'])for(const site of map.streetSites[key]) {
       const box=new THREE.Box3();
       kobeBlockStreets({face:(...args)=>{for(const p of args.slice(0,4))box.expandByPoint(new THREE.Vector3(...p));}},{[key]:[site]});

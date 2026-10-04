@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import * as THREE from 'three';
-import { autumnTreeTint, buildAutumnTrees, forestCanopy } from '../kobe-autumn.js';
+import { autumnTreeTint, autumnTreeGeometry, gardenPlanting, buildAutumnTrees, forestCanopy } from '../kobe-autumn.js';
 import { fieldTreeGeometry } from '../fieldart.js';
 import { kobeCityBlocks, KOBE_CITY } from '../kobe-city.mjs';
 import { decodeKobeRelief, kobeCityHeight } from '../kobe-relief.mjs';
@@ -90,4 +90,51 @@ test('遠山冠層保持一張512資料圖，冠隙和樹種色帶都可讀取',
   for(let i=0;i<data.length;i+=4){if(data[i]<40)openings++;species.add(data[i+1]);}
   assert(openings>512*512*.10&&openings<512*512*.45,'林冠需要大小不一的開口');
   assert(species.size>100,'樹種色帶不能只剩固定兩色');
+});
+
+test('新楓樹和松樹留出彎曲枝幹與小葉簇，近遠景幾何均不高於舊預算',()=>{
+  for(const pine of [false,true])for(const variant of [0,1,2]) {
+    const g=autumnTreeGeometry(pine,variant),old=fieldTreeGeometry(pine,variant),p=g.attributes.position;
+    assert(g.index.count<=old.index.count,'枝葉細化增加每樹三角形');
+    for(const a of Object.values(g.attributes))assert([...a.array].every(Number.isFinite));
+    const cards=[],centers=[];
+    for(let i=0;i<p.count;i+=4)if(g.attributes.leaf.getX(i)>.5) {
+      const points=Array.from({length:4},(_,k)=>new THREE.Vector3().fromBufferAttribute(p,i+k));
+      const w=Math.max(...points.flatMap(a=>points.map(b=>a.distanceTo(b))));
+      assert(w<(pine?1.8:3.8),'葉團退回巨大片狀剪影');cards.push(points);
+      centers.push(points.reduce((sum,q)=>sum.add(q),new THREE.Vector3()).multiplyScalar(.25));
+      for(const q of points)assert(q.y>(pine?2:3),'低枝葉片擋住樹幹與街道視野');
+    }
+    assert.equal(cards.length,pine?24:42);
+    if(!pine)assert(centers.filter(c=>Math.hypot(c.x,c.z)<1.6).length>=12,'楓冠內部沒有層疊葉簇，只在枝梢形成稀疏小團');
+    g.computeBoundingBox();assert(g.boundingBox.min.y>=0);
+    const size=g.boundingBox.getSize(new THREE.Vector3());assert(size.y>7&&size.y<12&&size.x<8);
+    for(let i=0;i<g.attributes.uv.count;i++) {
+      const u=g.attributes.uv.getX(i),v=g.attributes.uv.getY(i);
+      assert(u>=0&&u<=1&&v>=0&&v<=1);
+      if(g.attributes.leaf.getX(i)>.5) {
+        assert(pine?v>.75&&u<.5:v<.5,'松枝或楓冠採樣到錯誤圖集區');
+        if(!pine)assert(variant===1?u>.5:u<.5,'同棵樹的主色應一致，不混成紅黃綠花球');
+      }
+    }
+    g.dispose();old.dispose();
+  }
+});
+
+test('庭院與窄花槽的細草、灌木和疏花穗固定生長在土面內，沒有新材質或碰撞',()=>{
+  for(const [length,width,height,kind]of [[3.4,3,.8,'mixed'],[1.8,.44,.38,'grass'],[2.2,.44,.42,'shrub']])for(const ry of [0,Math.PI/2,.73]) {
+    const site={x:12,z:-34,ground:7,length,width,height,kind,ry},faces=[],colors=new Set();
+    const result=gardenPlanting({face:(a,b,c,d,col)=>{
+      for(const p of [a,b,c,d]) {
+        assert(p.every(Number.isFinite));const x=p[0]-site.x,z=p[2]-site.z,u=x*Math.cos(ry)-z*Math.sin(ry),v=x*Math.sin(ry)+z*Math.cos(ry);
+        assert(Math.abs(u)<=length/2+.001&&Math.abs(v)<=width/2+.001,'植栽伸出花槽擋住通路');
+        assert(p[1]>=site.ground&&p[1]<=site.ground+height*1.15,'植栽浮空或超過預定高度');
+      }
+      const normal=new THREE.Vector3(...b).sub(new THREE.Vector3(...a)).cross(new THREE.Vector3(...c).sub(new THREE.Vector3(...a)));
+      assert(normal.length()>1e-8,'草葉或花穗主三角形退化');assert.equal(col[4],6);colors.add(col.slice(0,3).join(','));faces.push([a,b,c,d,col]);
+    }},{sites:[site]});
+    const repeated=[];gardenPlanting({face:(...args)=>repeated.push(args)},{sites:[site]});assert.deepEqual(faces,repeated);
+    assert(result.plants>=3&&result.plants<=10);assert(result.triangles<=700);assert.equal(result.triangles,faces.length*2);
+    assert(colors.size>=2,'所有植栽成了同一種綠色');
+  }
 });

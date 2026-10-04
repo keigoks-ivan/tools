@@ -71,7 +71,9 @@ test('登機引導的兩段樓梯與胸前平台有連續承重面；街區含�
     }
     assert(n < 1600 && Math.abs(pilot.pos.y - y) < .2, '登機路被牆或階梯阻擋');
   }
-  assert(map.totalTriangles < 130000, `港區含汽車 ${map.totalTriangles} 三角形`); assert(map.meshes.length <= 12 && map.totalMeshes <= 17);
+  assert(map.baseTriangles < 130000, `原港區含汽車 ${map.baseTriangles} 三角形`);
+  assert(map.kitano.triangles < 44000, `北野街區 ${map.kitano.triangles} 三角形`);
+  assert(map.meshes.length <= 15 && map.totalMeshes <= 20);
   scene.traverse(o => {
     assert(!o.isLight, '地圖不另外增加光源');
     if (!o.isMesh) return;

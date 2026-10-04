@@ -66,3 +66,9 @@ test('old checkpoint overlap is repaired on the same floor without losing the so
   P.reset(new Set(),[{key:'A:0',p:[10,0,0],hp:70,ammo:4,pi:1,dead:false}]);const r=P.group(A)[0];
   assert(!G.solid.pushOut(r.pos.clone(),.34,r.pos.y,r.pos.y+1.7,.45));assert(r.pos.distanceTo(v(10,0))<1);assert.equal(r.pos.y,0);assert.equal(r.data.hp,70);assert.equal(r.data.ammo,4);assert.equal(r.data.pi,1);assert(!r.dead);
 });
+
+test('觀景街區擴展存檔範圍時，增援仍使用原作戰到達範圍',()=>{
+  const {G}=fixture();G.footExtent=440;G.arrivalExtent=140;
+  assert.equal(arrivalPoint(G,{x:300,z:0}),null);
+  assert(arrivalPoint(G,{x:100,z:0}));
+});
