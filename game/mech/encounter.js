@@ -28,7 +28,7 @@ export function parse(R, n) {
     const a = P[c.at - 1], b = P[c.at], d = P[c.at + 1];
     const turn = !!d && Math.abs((b.x - a.x) * (d.z - b.z) - (b.z - a.z) * (d.x - b.x)) > 1;
     return { i, at: c.at, s: b.s, turn, tip: c.tip, last: i === N - 1, trig: i === N - 1 ? R.fin : 58, pre: L(c.pre), waves: [c.amb, c.amb2, c.amb3].filter(Boolean).map(L),
-      go: c.go, lines: c.lines, talkClear: c.clear, hold: c.hold, gap: c.gap,
+      go: c.go, lines: c.lines, talkClear: c.clear, hold: c.hold, gap: c.gap, waveGap: c.waveGap,
       boss: c.boss ? { ...c.boss, halfWave: L(c.boss.halfWave), lowWave: L(c.boss.lowWave) } : null,
       beats: (c.beats || []).map(b => ({ ...b, spawn: L(b.spawn) })), targets: c.targets };
   });
@@ -341,7 +341,7 @@ export class Encounter {
       const holding = c.hold && this.holdT < c.hold;
       if (c.hold) { const was = this.holdT < c.hold; this.holdT += dt; if (was && this.holdT >= c.hold) C.note('守住了　清掉剩下的', 'gr'); }
       if (holding) { if (!this.queue.length && (mine <= E.over || this.beatT > (c.gap || 18))) this.ambush(this.beat % c.waves.length + 1, true); }
-      else if (!c.hold && this.beat < c.waves.length) { if (!this.queue.length && (mine <= E.over || this.beatT > 28)) this.ambush(this.beat + 1); }
+      else if (!c.hold && this.beat < c.waves.length) { if (!this.queue.length && this.beatT >= (c.waveGap || 0) && (mine <= E.over || this.beatT > 28)) this.ambush(this.beat + 1); }
       else if (!this.queue.length && this.cleared(c) && this.tgDone()) { this.clrT += dt; if (this.clrT > 0.7) return this.clear(c); }
       else this.clrT = 0;
     }

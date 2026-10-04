@@ -44,8 +44,8 @@ export const STAGE_DATA = [
     { cp: [4, 8], arena: 130, fin: 60, par: 520, over: 1,
       pts: [[-600, -660], [-600, -480], [-360, -480], [-360, -360], [-240, -360], [-120, -360], [-120, -240], [0, -240], [120, -240], [240, -240], [360, -240], [480, -240], [480, -360], [480, -480], [540, -480]],
       secs: [
-        { at: 1, pre: 'tank@far*2', amb: 'tank@out*2 tank@side', amb2: 'tank@out*2 grunt@side', tip: '轉角後面有戰車——左鍵射擊，先開火的贏',
-          lines: [[OP, '前方路口，獵犬的戰車。先開火。']] },
+        { at: 1, pre: 'tank@far', amb: 'tank@out', amb2: 'tank@side*2', amb3: 'tank@out*2 grunt@side*2', waveGap: 12, tip: '先觀察前方哨車——左鍵射擊，增援會分批抵達',
+          lines: [[OP, '先處理前方哨車。支路有增援訊號，留意轉角。']] },
         { at: 2, amb: 'tank@side grunt@drop*2 tank@out', amb2: 'tank@out*2 grunt@drop grunt@side', amb3: 'grunt@drop tank@side grunt@side', tip: '敵機從天而降——Tab 換目標，落地前就打',
           go: [[ALLY, '……這裡是第三裝甲連……有人聽得到嗎……'], [OP, '聽得到。撐住，我們過去。']],
           lines: [[OP, '上空有機體降落，是獵犬的量產機。']] },

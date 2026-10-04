@@ -26,9 +26,9 @@ const soldier = (x, z, type = 'trooper', more = {}) => ({ type, x, z, yaw: Math.
 const drone = (x, z, y = 7) => ({ type: 'drone', x, z, y });
 const encounter = (id, ch, obj, guide, enemies, more = {}) => ({ id, ch, obj, fight: obj, guide, enemies, trigger: p => Math.hypot(p.x - guide[0], p.z - guide[1]) < 4, lines: [], done: [], ...more });
 export const ENCOUNTERS = [
-  encounter('B', 1, '穿過貨運鐵道入口', [-180, -215], [soldier(-183, -207), soldier(-174, -210, 'trooper', { patrol: [[-174, -210], [-166, -219]] }), soldier(-187, -214)], {
-    lines: [[OP, '海關倉庫南門有三個哨兵。貨運車和混凝土護欄能擋子彈。'], [OP, '衝鋒槍按 3，先避開探照方向。']], done: [[CIV, '名單留在海關通訊室。孩子們還在車上等。']] }),
-  encounter('B2', 1, '潛入海關倉庫', [-180, -196], [soldier(-183, -181), soldier(-175, -168), soldier(-187, -155, 'officer'), soldier(-186, -168)], {
+  encounter('B', 1, '穿過貨運鐵道入口', [-180, -215], [soldier(-178, -210, 'trooper', { yaw: Math.PI / 2, patrol: [[-178, -210], [-169, -210]] })], {
+    lines: [[OP, '鐵道口有一個巡邏兵，倉庫裡還有守軍。先看清路線，貨運車和混凝土護欄能擋子彈。'], [OP, '衝鋒槍按 3，先避開探照方向。']], done: [[CIV, '名單留在海關通訊室。孩子們還在車上等。']] }),
+  encounter('B2', 1, '潛入海關倉庫', [-180, -196], [soldier(-192, -185, 'trooper', { yaw: 0 }), soldier(-158, -169), soldier(-158, -154, 'officer'), soldier(-198, -173)], {
     stealth: { reinforce: [soldier(-180, -139), soldier(-174, -143)], lines: [[EN, '海關倉庫有人！北門包過去！', true]] },
     lines: [[OP, '倉庫內有貨架，左側可以繞。軍官在最裡面。']], done: [[OP, '西翼拘留室裡有救援人員。先從鐵道側道找警報電源，之後再去東面的通訊室。']] }),
   encounter('C', 1, '清除海關裝卸坪', [-180, -125], [soldier(-169, -112), soldier(-157, -103, 'officer'), soldier(-184, -105), drone(-165, -112), soldier(-176, -115), soldier(-160, -117, 'trooper', { patrol: [[-160, -117], [-166, -117]] })], {
@@ -221,8 +221,8 @@ for (const [chapter, lists] of Object.entries(supportColumns)) MECH_CONFIGS[chap
 export const FIELD_BOUNDS = [-236, 142, -244, 128];
 export const OUTPOSTS = [
   { id: 'FREE_H1', name: '鐵道轉運哨站', supply: [-216, -220], enemies: [
-    soldier(-220, -224), soldier(-214, -211), soldier(-216, -202, 'officer'),
-    soldier(-220, -205, 'trooper', { patrol: [[-220, -205], [-220, -215]] }),
+    soldier(-218, -192, 'trooper', { yaw: 0 }), soldier(-214, -178, 'trooper', { yaw: 0 }), soldier(-216, -164, 'officer', { yaw: 0 }),
+    soldier(-224, -185, 'trooper', { yaw: 0, patrol: [[-224, -185], [-224, -170]] }),
   ] },
   { id: 'FREE_H2', name: '岸邊封鎖哨站', supply: [78, -62], enemies: [
     soldier(76, -71), soldier(88, -66, 'officer'), soldier(87, -55),

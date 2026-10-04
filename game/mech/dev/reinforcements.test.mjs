@@ -1,9 +1,49 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { Reinforcements } from '../reinforcements.mjs';
+import { Reinforcements, waveArrivalTime } from '../reinforcements.mjs';
 import { Combat } from '../combat.js';
+import { Encounter, parse } from '../encounter.js';
+import { STAGE_DATA } from '../stages.js';
 import { ENCOUNTERS, MECH6 } from '../zero/script.js';
 import { ENCOUNTERS as LAST, MECH_CONFIGS } from '../lastline/script.js';
+
+test('opening guards leave room to observe before larger resident groups', () => {
+  for (const [encounters, start] of [[ENCOUNTERS, [-91.6, -91.6]], [LAST, [-180, -232]]]) {
+    const first = encounters[0]; assert.equal(first.enemies.length, 1);
+    const d = first.enemies[0]; assert(d.patrol?.length >= 2); assert(!d.alert);
+    assert(Math.hypot(d.x - start[0], d.z - start[1]) >= 20);
+    for (const [x, z] of d.patrol) assert(Math.hypot(x - start[0], z - start[1]) >= 18);
+    assert(encounters[1].enemies.length > first.enemies.length);
+  }
+});
+test('opening mech arrivals build from one unit to pairs and trios before support', () => {
+  const wave = MECH6.waves[0];
+  const times = [...wave.list, ...wave.reinforce].map((_, i) => waveArrivalTime(wave, i, true));
+  assert.equal(times.filter(t => t <= 10).length, 1);
+  assert.equal(times.filter(t => t <= 20).length, 3);
+  assert.equal(times.filter(t => t < 24).length, 3);
+  assert(times[wave.list.length] >= times[wave.list.length - 1] + 6);
+  for (let i = 1; i < times.length; i++) assert(times[i] > times[i - 1]);
+  for (const config of Object.values(MECH_CONFIGS)) {
+    const w = config.waves[0]; const main = w.list.map((_, i) => waveArrivalTime(w, i, true));
+    assert.equal(main.filter(t => t <= 10).length, 1);
+    assert(waveArrivalTime(w, w.list.length, true) >= main.at(-1) + 6);
+  }
+  assert.equal(waveArrivalTime(wave, 2), 2.8);
+  assert.equal(waveArrivalTime(wave, wave.list.length), 7);
+});
+test('first main-game area cannot overlap opening reinforcement waves immediately', () => {
+  const E = parse(STAGE_DATA[0].route, 1), c = E.secs[0];
+  assert.equal(c.pre.length, 1); assert.equal(c.waves[0].length, 1);
+  assert.equal(c.pre.length + c.waves.flat().length, 8);
+  const advances = [];
+  const C = { def: {}, player: { pos: { x: -600, z: -480 } }, enemies: [], events: [], lines() {}, note() {}, audio: { ui() {} }, dead: false };
+  const encounter = Object.assign(Object.create(Encounter.prototype), { C, E, sec: 0, N: E.secs.length, state: 'fight', beat: 1, beatT: 0, fightT: 0, beatSeen: new Set(), mine: [], queue: [], tg: [], peak: 0, prog: 180, ambush(b) { advances.push(b); this.beat = b; this.beatT = 0; } });
+  for (let i = 0; i < 239; i++) encounter.update(.05);
+  assert.deepEqual(advances, []);
+  encounter.update(.1); assert.deepEqual(advances, [2]);
+  encounter.update(.05); assert.deepEqual(advances, [2]);
+});
 
 test('infantry arrival queue holds at eight, spaces arrivals and drains every finite wave', () => {
   const queue = new Reinforcements(), enemies = Array.from({ length: 8 }, () => ({ dead: false }));

@@ -12,6 +12,7 @@ import { Combat } from '../combat.js';
 import { HUD as MechHUD } from '../hud.js';
 import { Cockpit } from '../cockpit.js';
 import { SEE } from '../mechs.js';
+import { waveArrivalTime } from '../reinforcements.mjs';
 
 const clamp = THREE.MathUtils.clamp;
 const HANGAR = { x0: 10.5, x1: 69.5, z0: 52.5, z1: 111.5, h: 28 };
@@ -233,7 +234,7 @@ export async function startMech(X) {
     const list = [...W.list, ...W.reinforce || []];
     list.forEach(([kind, x, z, y], i) => {
       if (kind === 'ace' && noDog) return;
-      this.events.push({ spawn: true, t: i < W.list.length ? 1.4 + i * 0.7 : 7 + (i - W.list.length) * 1.2, fn: () => {
+      this.events.push({ spawn: true, t: waveArrivalTime(W, i, k === 0), fn: () => {
         const e = this.spawn(kind, i, list.length, x === undefined ? null : { x, z, y: y ?? 0, tx: A.x, tz: A.z });
         if (kind === 'ace' && W.boss) { boss = e; e.ap = e.apMax = Math.round(e.apMax * W.boss.ap); e.flee = W.boss.flee || 0; e.label = 'BLACK DOG'; }
       } });

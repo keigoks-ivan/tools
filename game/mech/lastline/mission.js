@@ -117,7 +117,7 @@ export function createMission({ scene, world, player, fx, config, combat, zhud, 
         operation.step(dt,{player:[player.pos.x,player.pos.z],altitude:player.pos.y-world.height(...operation.point),held:input.keys.has('KeyB')||input.keys.has('Tsupport'),hurt:C.damageFx>.35});
         if(operation.index!==before){C.note('現場作業完成','gr');checkpoint.operation=operation.snapshot();write('checkpoint',checkpoint);if(config.chapter===5&&C.group===2&&operation.done){write('broadcast',true);zhud.say('白鷺','城外收到原始簽章了。現在他們無法銷毀證據。',4,true);}}
         const due=Math.min(3,Math.floor(operation.time/8));
-        if(!operation.done&&pressure<due&&C.enemies.filter(e=>!e.dead&&!e.gone).length+C.events.filter(e=>e.spawn).length<7){
+        if(!operation.done&&pressure<due&&(C.group!==1||!C.events.some(e=>e.spawn))&&C.enemies.filter(e=>!e.dead&&!e.gone).length+C.events.filter(e=>e.spawn).length<7){
           const source=config.waves[C.group-1]?.list.find(e=>e[0]==='grunt'||e[0]==='heavy');
           if(source){C.spawn('grunt',0,1,{x:source[1],z:source[2],ground:true,tx:player.pos.x,tz:player.pos.z});zhud.say('白鷺','敵方正在逼近作業區，掩護還沒有結束！',2,true);}pressure++;
         }
