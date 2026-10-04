@@ -852,6 +852,24 @@ function architecturalMaterial(A) {
             float shelf = step(0.92, fract(vAW.y / 0.6)) * step(0.4, fract(along / 1.1));
             diffuseColor.rgb += vec3(0.025, 0.018, 0.009) * shelf;
           }
+          if (vSurface > 6.5 && vSurface < 7.5) {
+            // 紅磚遠景共用既有雜訊，公尺尺度的交錯磚縫由導數抗鋸齒。
+            float along=abs(vAN.x)>.5?vAW.z:vAW.x;
+            vec2 b=vec2(along/.24+mod(floor(vAW.y/.085),2.0)*.5,vAW.y/.085);
+            vec2 edge=min(fract(b),1.0-fract(b)),aa=max(fwidth(b),vec2(.002));
+            float mortar=1.0-min(smoothstep(.02-aa.x,.02+aa.x,edge.x),smoothstep(.035-aa.y,.035+aa.y,edge.y));
+            float brickTone=fract(sin(dot(floor(b),vec2(127.1,311.7)))*43758.5453);
+            float weather=.83+.09*sin(along*.23+sin(vAW.y*.31))+.08*sin(along*.071-vAW.y*.6);
+            diffuseColor.rgb*=mix(.78,1.12,brickTone)*weather;
+            diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.25,.23,.19)*vColor,mortar*.65);
+          }
+          if(vSurface>4.5 && vSurface<5.5) {
+            vec2 w=abs(vAN.y)>.5?vAW.xz:vec2(abs(vAN.x)>.5?vAW.z:vAW.x,vAW.y);
+            float joint=min(fract(w.x/.19),1.0-fract(w.x/.19)),aa=max(fwidth(w.x/.19),.001);
+            float grain=sin(w.y*39.0+sin(w.x*17.0)*1.5)*.045+sin(w.y*111.0+w.x*4.0)*.018;
+            diffuseColor.rgb*=.88+grain;
+            diffuseColor.rgb*=mix(.7,1.0,smoothstep(.013-aa,.013+aa,joint));
+          }
           diffuseColor.rgb *= mix(0.76, 1.0, smoothstep(0.1, 1.3, vAW.y));
         }`)
       .replace('#include <roughnessmap_fragment>', `#include <roughnessmap_fragment>
@@ -861,7 +879,7 @@ function architecturalMaterial(A) {
       .replace('vec3 mapN = texture2D( normalMap, vNormalMapUv ).xyz * 2.0 - 1.0;', `vec3 mapN = texture2D( normalMap, vNormalMapUv ).xyz * 2.0 - 1.0;
         if (vSurface > 0.5) mapN.xy *= vSurface > 3.5 && vSurface < 4.5 ? 0.03 : 0.2;`);
   };
-  m.customProgramCacheKey = () => 'architecture-v2';
+  m.customProgramCacheKey = () => 'architecture-v3';
   patchGroundAO(m);
   return m;
 }

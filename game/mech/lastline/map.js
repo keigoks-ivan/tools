@@ -5,6 +5,7 @@ import { Builder } from '../zero/kit.js';
 import { JAPANESE_FONT, PORT_LABELS, civicMaterial, shopMaterial, harborWater } from '../urban.js';
 import { japaneseBuilder } from '../japan.js';
 import { KOBE_RELIEF, kobeCityHeight } from '../kobe-relief.mjs';
+import { kobeHarborScenery, harborWindow } from '../kobe-harbor.mjs';
 
 export const SHORE = 680;
 export function buildMap(scene, mats, solid, PL, A, world) {
@@ -64,6 +65,11 @@ export function buildMap(scene, mats, solid, PL, A, world) {
   mats.landmarkPaint = new THREE.MeshStandardMaterial({ color: 0xffffff, normalMap: mats.metal.normalMap, roughness: .68, metalness: .04, vertexColors: true });
   mats.landmarkPaint.userData.tile = 2;
   const b = new Builder(mats, solid);
+  const portMat=col=>col[4]===7?'brick':col[4]===4?'portGlass':col[4]===1?'concrete':col[4]===3?'corr':col[4]===5?'rust':col[4]===2?'metal':'landmarkPaint';
+  const portArt={face:(a,c,d,e,col)=>{
+    const n=new THREE.Vector3().subVectors(new THREE.Vector3(...c),new THREE.Vector3(...a)).cross(new THREE.Vector3().subVectors(new THREE.Vector3(...d),new THREE.Vector3(...a))).normalize().toArray();
+    b.B[portMat(col)].quad(a,c,d,e,n,[1,1,1,1],null,col.slice(0,3));
+  }};
   const M = { b, lights: [], zones: {}, marks: {}, targets: {}, items: {}, layout: 'harbor-v1' };
   const V = (x, z, y = 0) => new THREE.Vector3(x, y, z);
   const metal = [0.54, 0.6, 0.64], paint = [0.3, 0.44, 0.49];
@@ -150,6 +156,10 @@ export function buildMap(scene, mats, solid, PL, A, world) {
     const wy = h * .55, wh = Math.min(2.2, h * .22);
     for (const z of [z0 - .012, z1 + .012]) for (let x = x0 + 3; x < x1 - 4; x += 6) {
       if (doors === 'z' && Math.abs(x + 2 - midX) < door + 1 && wy < 5) continue;
+      if(masonry) {
+        harborWindow(portArt,x+2,z,{ry:z<midZ?Math.PI:0,base:wy-.2,spring:wy+1.1,radius:1.1});
+        continue;
+      }
       b.deco('portGlass', x, x + 4, wy, wy + wh, z - .025, z + .025);
       for (const xx of [x, x + 2, x + 4]) b.deco('metal', xx - .05, xx + .05, wy - .07, wy + wh + .07, z - .06, z + .06, { tint: metal });
       for (const y of [wy, wy + wh / 2, wy + wh]) b.deco('metal', x - .07, x + 4.07, y - .05, y + .05, z - .06, z + .06, { tint: metal });
@@ -241,7 +251,7 @@ export function buildMap(scene, mats, solid, PL, A, world) {
   // 第 1 章：不是住宅後巷，而是貨運鐵道、海關倉庫與通訊室。
   M.marks.start = V(-180, -232); M.marks.ch2 = V(-105, -100); M.marks.ch3 = V(0, 5);
   for (const x of [-228, -226.5]) beam([x, .04, -320], [x, .04, 280], .065, 'rust');
-  for (let z = -315; z < 280; z += 1.2) b.deco('rust', -229, -225.5, -.03, .02, z, z + .15);
+  for (let z = -315; z < 280; z += 1.2) b.deco('rust', -229, -225.5, .025, .08, z, z + .15, {skip:'ny nx px nz pz'});
   for (const z of [-96, -80, 24, 40]) {
     box('metal', -229.8, -224.2, .7, 1.2, z - 6.7, z + 6.7, { tint: metal });
     // 漏斗車傾斜側壁與下部卸料口，有別於貨櫃的平直輪廓。
@@ -443,10 +453,27 @@ export function buildMap(scene, mats, solid, PL, A, world) {
   // 港務辦公樓：磚構、逐層玻璃與屋頂水箱，不用住宅樓體輪廓。
   box('brick', 500, 546, 0, 20, 240, 278);
   for (const z of [239.95, 278.05]) for (const y of [3, 7.5, 12, 16.5]) for (let x = 503; x < 542; x += 6) {
-    b.deco('portGlass', x, x + 3.4, y, y + 2.1, z - .025, z + .025);
-    for (const xx of [x, x + 1.7, x + 3.4]) b.deco('metal', xx - .035, xx + .035, y - .05, y + 2.15, z - .06, z + .06);
-    b.deco('concrete', x - .15, x + 3.55, y - .18, y - .06, z - .2, z + .2);
+    const back=z<250?'pz':'nz';
+    b.deco('portGlass', x, x + 3.4, y, y + 2.1, z - .025, z + .025,{skip:'px nx py ny '+back});
+    for (const xx of [x, x + 1.7, x + 3.4]) b.deco('metal', xx - .035, xx + .035, y - .05, y + 2.15, z - .06, z + .06,{skip:'py ny '+back});
+    b.deco('concrete', x - .15, x + 3.55, y - .18, y - .06, z - .2, z + .2,{skip:'ny '+back});
   }
+  // 辦公樓的側面同樣有窗台、豎梃與分層線；石質牆腳、入口雨庇和排水管具有實際厚度。
+  for(const x of [499.95,546.05])for(const y of [3,7.5,12,16.5])for(let z=243;z<273;z+=6) {
+    const back=x<520?'px':'nx';
+    b.deco('portGlass',x-.025,x+.025,y,y+2.1,z,z+3.4,{skip:'pz nz py ny '+back});
+    for(const zz of [z,z+1.7,z+3.4])b.deco('metal',x-.06,x+.06,y-.05,y+2.15,zz-.035,zz+.035,{skip:'py ny '+back});
+    b.deco('concrete',x-.2,x+.2,y-.18,y-.06,z-.15,z+3.55,{skip:'ny '+back});
+  }
+  b.deco('concrete',499.8,546.2,.025,.65,239.8,278.2,{skip:'py ny',tint:[.69,.67,.59]});
+  for(const x of [500,546])for(const z of [240,278]) {
+    b.deco('concrete',x-.16,x+.16,.65,20,z-.16,z+.16,{skip:'py ny',tint:[.7,.69,.63]});
+    pipe(x+1,0,z,.055,20,'metal');
+  }
+  b.deco('portGlass',520.9,525.1,.65,3.1,239.82,239.84,{skip:'px nx py ny pz'});
+  for(const x of [520.9,523,525.1])b.deco('metal',x-.04,x+.04,.65,3.12,239.75,239.87,{skip:'py ny pz'});
+  b.deco('metal',519.8,526.2,3.15,3.27,238.1,240,{tint:paint,skip:'pz'});
+  for(const x of [520,526])beam([x,2.7,239.8],[x,3.18,238.3],.045);
   for (const y of [4.5, 9, 13.5, 20]) b.deco('concrete', 499.8, 546.2, y, y + .18, 239.8, 278.2, { skip: 'py ny', tint: [.72, .73, .7] });
   box('concrete', 499.5, 546.5, 20, 20.3, 239.5, 278.5); pipe(519, 20.3, 262, 3, 4, 'metal');
   roof(498.5, 547.5, 238.5, 243, 22, 1.2);
@@ -535,6 +562,10 @@ export function buildMap(scene, mats, solid, PL, A, world) {
     b.deco('concrete',678.6,680.2,.82,1.02,z,z+7.92,{tint:[.69,.7,.64]});
     b.deco('concrete',679.99,680.02,-1.8,-.35,z,z+7.92,{tint:[.31,.38,.33],shade:()=>1});
   }
+  // 神戶港客船泊位與岸壁附件。留在 x=680 海側，不侵入 x=600 的撤離車道。
+  kobeHarborScenery(portArt,{launches:[[694,-430,0,1.1]],quays:[[SHORE,-270,384,Math.PI/2]],
+    moorings:[[[679,.85,-459],[689,1.4,-442]],[[679,.85,-395],[689,1.4,-418]]],
+  });
   for (const [x, z] of [[560, -340], [640, -320], [540, -130], [558, 132], [555, -420]]) {
     const g = new THREE.CylinderGeometry(1, 1.8, 3.4, 6); mesh('concrete', g, x, 1.7, z, 0, { tint: [.68, .66, .6] }); g.dispose();
     solid.add({ x0: x - 1.8, x1: x + 1.8, y0: 0, y1: 3.4, z0: z - 1.8, z1: z + 1.8, mat: 'concrete' });

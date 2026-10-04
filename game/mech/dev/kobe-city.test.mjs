@@ -38,17 +38,17 @@ test('靜態車站與列車輸出有限幾何，橋面、軌道與雨棚朝上',
   }},height);
   assert(panels>50&&triangles<4000);
 });
-test('波浪旅館的曲面立面朝外、露台與屋面朝上，整組海岸細節低於一萬三角形',()=>{
+test('波浪旅館的曲面立面朝外、露台與屋面朝上，港邊倉庫與船隻共用有限幾何',()=>{
   let triangles=0,curved=0;
   kobeWaterfront({box:(...a)=>{assert(a.slice(0,6).every(Number.isFinite));triangles+=10;},face:(a,b,c,d)=>{
     assert([a,b,c,d].flat().every(Number.isFinite));triangles+=2;
-    if(a[2]<975||b[2]<975)return;
+    if(a[2]<975||b[2]<975||Math.max(a[2],b[2],c[2],d[2])>1070)return;
     const u=b.map((v,i)=>v-a[i]),v=c.map((n,i)=>n-a[i]);
     const n=[u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]];
     if(Math.abs(n[1])>.001)assert(n[1]>0,'旅館露台或屋面朝下');
     else if(Math.abs(n[0])+Math.abs(n[2])>.001) {assert(n[0]*(a[0]+80)+n[2]*(a[2]-980)>=-.001,'旅館曲面立面向內');curved++;}
   }});
-  assert(triangles<10000&&curved>100);
+  assert(triangles<15000&&curved>100);
 });
 test('港區旋轉後的旅館碼頭連接海岸，觀覽車基座留在陸地',()=>{
   const boxes=[];

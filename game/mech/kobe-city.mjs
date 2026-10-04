@@ -1,4 +1,5 @@
 // 神戶的沿海街廓、三宮商辦與北側山麓住宅。保留中央作戰街區，外圍只產生靜態遠景。
+import { kobeHarborScenery } from './kobe-harbor.mjs';
 export const KOBE_CITY = { block: 120, half: 4680, north: -2640, south: 720, rail: -780, station: 0 };
 const hash = (x,z) => { const n=Math.sin(x*12.9898+z*78.233)*43758.5453; return n-Math.floor(n); };
 
@@ -124,4 +125,10 @@ export function kobeWaterfront(out, shoreOffset = 0) {
       const p=[[x-.7,y-1.6,z],[x+.7,y-1.6,z],[x+.7,y-.4,z],[x-.7,y-.4,z]];if(z<wz)p.reverse();face(...p,glass);
     }
   }
+  kobeHarborScenery({box,face},{
+    warehouses:[[-516,745,64,14],[-516,765,64,14]],
+    signal:[-448,804],launches:[[-288,849,Math.PI/2]],
+    quays:[[cx,1090,32,0,2]],
+    moorings:[[[-315,.85,818],[-302,1.4,844.3]],[[-260,.85,818],[-276,1.4,844.3]]],
+  });
 }

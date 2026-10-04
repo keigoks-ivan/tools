@@ -15,7 +15,7 @@ async function load(path, query = '') {
   html = html.replace(/<base href="[^"]+">/, '');
   html = html.replace(/(<script type="importmap">)([\s\S]*?)(<\/script>)/, (_, a, json, b) => {
     const map = JSON.parse(json);
-    for (const file of ['kobe-city.mjs', 'kobe-relief.mjs', 'urban.js', 'japan.js', 'textures.js', 'anim.js', 'env.js', 'streetfront.js', 'stages.js', 'battlefields.js', 'fieldart.js', 'encounter.js', 'post.js', 'roofline.js', 'mechs.js', 'combat.js', 'cockpit.js', 'player.js', 'flight.mjs', 'vehicles.js', 'hud.js', 'zero/kit.js', 'zero/map.js', 'zero/guns.js', 'zero/human.js', 'zero/viewmodel.js', 'zero/main.js', 'zero/hud.js', 'zero/sfx.js', 'zero/mech6.js', 'lastline/map.js', 'lastline/script.js', 'lastline/mission.js', 'lastline/convoy.js', 'lastline/escort.mjs', 'lastline/operations.mjs', 'lastline/foot-ops.js', 'input.js', 'tactics.js', 'reinforcements.mjs', 'zero/ai.js', 'zero/script.js', 'zero/patrol.js', 'zero/recon.js', 'zero/field.js']) {
+    for (const file of ['kobe-harbor.mjs', 'kobe-city.mjs', 'kobe-relief.mjs', 'urban.js', 'japan.js', 'textures.js', 'anim.js', 'env.js', 'streetfront.js', 'stages.js', 'battlefields.js', 'fieldart.js', 'encounter.js', 'post.js', 'roofline.js', 'mechs.js', 'combat.js', 'cockpit.js', 'player.js', 'flight.mjs', 'vehicles.js', 'hud.js', 'zero/kit.js', 'zero/map.js', 'zero/guns.js', 'zero/human.js', 'zero/viewmodel.js', 'zero/main.js', 'zero/hud.js', 'zero/sfx.js', 'zero/mech6.js', 'lastline/map.js', 'lastline/script.js', 'lastline/mission.js', 'lastline/convoy.js', 'lastline/escort.mjs', 'lastline/operations.mjs', 'lastline/foot-ops.js', 'input.js', 'tactics.js', 'reinforcements.mjs', 'zero/ai.js', 'zero/script.js', 'zero/patrol.js', 'zero/recon.js', 'zero/field.js']) {
       const url = new URL('/game/mech/' + file, location.href).href;
       for (const key of Object.keys(map.imports)) if (new URL(key, entryBase).href === url) delete map.imports[key];
       map.imports[url] = url + '?qa=' + revision;
@@ -1173,6 +1173,8 @@ async function harborArt() {
   const map=win.__map, shelves=win.__solid.list.filter(b=>b.x1<100 && b.y1>2.8 && b.y1<3.2 && b.x1-b.x0<2 && b.z1-b.z0<1);
   assert(shelves.length===12,'十二座掃描貨架為三公尺高，海關、冷藏站和修船棚沒有穿出屋頂的大貨架');
   assert(map.triangles<120000 && map.meshes.length<=12,'港區合併幾何維持十二萬三角形，至多十二個材質網格');
+  const backdropTriangles=win.__world.kobeBackdrop.meshes.reduce((n,m)=>n+m.geometry.index.count/3,0);
+  assert(backdropTriangles<70000&&win.__world.kobeBackdrop.meshes.length===5,'紅磚倉庫、信號所與客船仍併入五個背景網格，低於七萬三角形');
   await save('lastline-customs', true);
   const footChecks=[...result];
   await load('/game/mech/lastline/index.html', '?mute&ch=4&all&fps=0'); await wait(() => win.__m6); win.__step(200);
@@ -1186,8 +1188,18 @@ async function harborArt() {
   await save('lastline-harbor', true);
   camera.position.set(550, 36, -300); camera.lookAt(650, 14, -450); world.followShadow(camera.position);
   await save('lastline-breakwater', true);
+  for(const [name,eye,target] of [
+    ['kobe-passenger-berth',[722,5,-456],[694,4,-430]],
+    ['kobe-harbor-office',[568,6,225],[521,10,257]],
+    ['kobe-brick-warehouses',[615,3.5,298],[615,3.8,344]],
+    ['kobe-signal-station',[691,5,248],[664,14,268]],
+    ['kobe-harbor-panorama',[825,125,500],[605,20,290]],
+  ]) {
+    camera.position.set(...eye);camera.lookAt(...target);world.followShadow(camera.position);world.sun.shadow.needsUpdate=true;
+    await save(name,true);
+  }
   assert(errors.length === 0, '海關、港區與防波堤實際畫面沒有渲染錯誤');
-  report.textContent = JSON.stringify({ checks: result, staticTriangles:map.triangles, staticMeshes:map.meshes.length, memory: renderer.info.memory, errors }, null, 2); state.textContent = '神戶港美術通過';
+  report.textContent = JSON.stringify({ checks: result, staticTriangles:map.triangles, staticMeshes:map.meshes.length, backdropTriangles, memory: renderer.info.memory, errors }, null, 2); state.textContent = '神戶港美術通過';
 }
 
 async function japaneseSigns() {
