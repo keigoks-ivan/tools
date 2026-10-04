@@ -7,61 +7,63 @@
 <meta name="theme-color" content="#171d1c">
 <meta name="description" content="3D 桌球對戰：控制站位、揮拍時機與旋轉，在球館裡打一局。">
 <title>RALLY — 桌球俱樂部</title>
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css?v=2">
 <script type="importmap">{"imports":{"three":"../../game/lib/three.module.js"}}</script>
 </head>
 <body>
 <header class="topbar">
   <a class="back" href="../" aria-label="回到遊戲機台">↖ <span data-en="Games">遊戲機台</span></a>
   <div class="brand">RALLY<span data-en="TABLE TENNIS CLUB">桌球俱樂部</span></div>
-  <div class="tools"><button id="language" aria-label="Switch language">EN</button><button id="sound" aria-pressed="true" data-en="Sound on">音效開</button><button id="pause" aria-label="暫停比賽" data-en="Pause">暫停</button></div>
+  <div class="tools"><button id="language" aria-label="Switch language">EN</button><button id="sound" aria-pressed="false" data-en="Sound off">音效關</button><button id="pause" aria-label="暫停比賽" data-en="Pause">暫停</button></div>
 </header>
 <main class="layout">
   <section class="court" id="court" aria-label="桌球球場">
-    <canvas id="game" tabindex="0" aria-label="移動滑鼠或拖曳來移動球員，按住後放開擊球。空白鍵也可以擊球。"></canvas>
+    <canvas id="game" tabindex="0" aria-label="移動滑鼠選落點，點一下或按空白鍵揮拍。手機拖曳選落點，按揮拍擊球。"></canvas>
     <div class="venue"><i></i><span data-en="COURT 01">01 號球桌</span><span class="venue-light" data-en="Afternoon session">午後練球</span></div>
     <div class="scoreboard">
-      <div class="team"><span class="serve-dot" id="yourServe"></span><span data-en="YOU">你</span><strong id="yourScore">00</strong></div>
+      <div class="team"><span class="serve-dot" id="yourServe"></span><span data-en="YOU / LEFT">你 / 左手</span><strong id="yourScore">00</strong></div>
       <span class="score-divider">:</span>
-      <div class="team"><strong id="aiScore">00</strong><span data-en="LIN / AI">阿林 / AI</span><span class="serve-dot" id="aiServe"></span></div>
-      <small data-en="FIRST TO 11 · WIN BY 2">11 分制 · 領先 2 分獲勝</small>
+      <div class="team"><strong id="aiScore">00</strong><span data-en="AI / RIGHT">AI / 右手</span><span class="serve-dot" id="aiServe"></span></div>
+      <small id="format">對拉練習 · 自動開始下一球</small>
     </div>
     <div class="rally-pill"><span data-en="RALLY">連續回合</span><strong id="rallyCount">0</strong></div>
+    <div class="contact-cue" id="contactCue" hidden aria-hidden="true"></div>
     <div class="callout" id="callout" role="status" aria-live="polite"></div>
     <div class="start-panel" id="startPanel">
       <div class="eyebrow">LET’S PLAY</div>
-      <h1 data-en="Your next rally.">來打一局。</h1>
-      <p data-en="Follow the ball. Find your rhythm.">跟上來球，找到揮拍的節奏。</p>
-      <button class="primary" id="start"><span data-en="Step up to the table">站上球桌</span><b>↗</b></button>
+      <h1 data-en="Find your rhythm.">先對拉幾球。</h1>
+      <p data-en="Aim with the mouse. Click once to swing. Your player handles the footwork.">滑鼠選落點，點一下揮拍。球員會自動調整站位。</p>
+      <button class="primary" id="start"><span data-en="Start playing">開始練球</span><b>↗</b></button>
       <small data-en="Mouse, touch or keyboard">支援滑鼠、觸控與鍵盤</small>
     </div>
     <div class="pause-panel" id="pausePanel" hidden><h2 data-en="Take a breath.">休息一下。</h2><button class="primary" id="resume" data-en="Back to the table">繼續比賽</button></div>
     <div class="result-panel" id="resultPanel" hidden><div class="eyebrow">MATCH COMPLETE</div><h2 id="resultTitle"></h2><p id="resultText"></p><button class="primary" id="again" data-en="One more game ↗">再打一局 ↗</button></div>
     <div class="court-bottom">
-      <div class="timing"><span id="timingLabel" data-en="READY WHEN YOU ARE">準備好了就發球</span><div class="timing-track"><i class="timing-zone"></i><i class="timing-marker" id="timingMarker"></i></div></div>
-      <button class="stroke-button" id="stroke"><span id="strokeLabel" data-en="SERVE / SWING">發球 / 揮拍</span><b>↗</b></button>
+      <div class="timing"><span id="timingLabel" data-en="WATCH THE BALL">看來球，跟上節奏</span><div class="timing-track"><i class="timing-zone"></i><i class="timing-marker" id="timingMarker"></i></div></div>
+      <button class="stroke-button" id="stroke"><span id="strokeLabel" data-en="SWING">揮拍</span><b>↗</b></button>
     </div>
     <div class="loading" id="loading" data-en="Opening the club…">正在打開球館…</div>
   </section>
   <aside class="sidebar">
     <div class="section-heading"><span>01 / <span data-en="MATCH SETUP">對戰設定</span></span><span class="live-dot"></span></div>
+    <div class="segments mode-group"><button data-mode="practice" class="selected" aria-pressed="true" data-en="Rally practice">對拉練習</button><button data-mode="match" aria-pressed="false" data-en="11-point match">11 分對戰</button></div>
     <label class="field-label" for="difficulty" data-en="Opponent level">對手程度</label>
     <select id="difficulty"><option value="easy" data-en="Club beginner">球館新手</option><option value="normal" data-en="Regular player">熟練球友</option><option value="hard" data-en="Club champion">球館高手</option></select>
-    <label class="assist"><span><b data-en="Timing assist">擊球時機輔助</b><small data-en="Swing early; we help with contact.">提前揮拍，輔助抓準接觸時機。</small></span><input type="checkbox" id="assist" checked><span class="switch" aria-hidden="true"></span></label>
+    <label class="assist"><span><b data-en="Automatic footwork">自動步法</b><small data-en="Focus on aiming and timing. Turn off to move manually.">專心選落點與揮拍。關閉後自行移動。</small></span><input type="checkbox" id="assist" checked><span class="switch" aria-hidden="true"></span></label>
     <div class="section-heading second"><span>02 / <span data-en="YOUR SHOT">你的擊球</span></span></div>
     <div class="field-label"><span data-en="Spin">旋轉</span><span class="key-hint">1 / 2 / 3</span></div>
     <div class="segments" id="spinGroup"><button data-spin="1" class="selected" aria-pressed="true"><b>↗</b><span data-en="Topspin">上旋</span></button><button data-spin="0" aria-pressed="false"><b>→</b><span data-en="Flat">平擊</span></button><button data-spin="-1" aria-pressed="false"><b>↘</b><span data-en="Backspin">下旋</span></button></div>
     <div class="field-label aim-label"><span data-en="Placement">落點</span><span class="key-hint">← / →</span></div>
     <div class="segments placement" id="aimGroup"><button data-aim="-1" aria-pressed="false" data-en="Left">左側</button><button data-aim="0" class="selected" aria-pressed="true" data-en="Middle">中路</button><button data-aim="1" aria-pressed="false" data-en="Right">右側</button></div>
-    <div class="power-row"><span data-en="Swing power">揮拍力道</span><strong id="powerLabel">50%</strong></div><div class="power-track"><i id="powerBar"></i></div>
+    <div class="power-row"><label for="power" data-en="Swing power">揮拍力道</label><strong id="powerLabel">55%</strong></div><input class="power-slider" id="power" type="range" min="25" max="95" value="55" aria-label="揮拍力道">
     <div class="section-heading second"><span>03 / <span data-en="AT THE TABLE">球桌表現</span></span></div>
     <div class="stats"><div><strong id="bestRally">0</strong><span data-en="Best rally">最長回合</span></div><div><strong id="speed">—</strong><span data-en="Ball speed · km/h">球速 · km/h</span></div></div>
-    <div class="coach"><span class="coach-label" data-en="COURTSIDE NOTE">場邊提醒</span><p id="coachText">先移動到來球前方，等球彈起再揮拍。開啟輔助時，可以提前按一下。</p></div>
-    <details class="instructions" open><summary data-en="How to play">操作方式 <span>＋</span></summary><div><p><kbd>↔</kbd><span data-en="Move mouse / drag to move your player">移動滑鼠／拖曳：左右移動</span></p><p><kbd>↗</kbd><span data-en="Hold, then release to swing">按住再放開：蓄力揮拍</span></p><p><kbd>A D</kbd><span data-en="Move · Space: swing · P: pause">移動 · 空白鍵揮拍 · P 暫停</span></p></div></details>
+    <div class="coach"><span class="coach-label" data-en="COURTSIDE NOTE">場邊提醒</span><p id="coachText">滑鼠選落點，看到「現在揮拍」就點一下。</p></div>
+    <details class="instructions" open><summary data-en="How to play">操作方式 <span>＋</span></summary><div><p><kbd>↔</kbd><span data-en="Mouse / drag: choose placement">滑鼠／拖曳：選擇落點</span></p><p><kbd>↗</kbd><span data-en="Click / Space / swing button: stroke">點一下／空白鍵／揮拍鈕：擊球</span></p><p><kbd>A D</kbd><span data-en="Manual footwork · P: pause">手動步法 · P 暫停</span></p></div></details>
     <button class="reset" id="reset" data-en="↻ Restart game">↻ 重新開始</button>
   </aside>
 </main>
-<footer><span>RALLY / TABLE TENNIS CLUB</span><span data-en="A little footwork. A better next shot.">移動到位，把下一球打好。</span></footer>
-<script type="module" src="main.js"></script>
+<footer><span>RALLY / TABLE TENNIS CLUB</span><a href="https://www.youtube.com/watch?v=m8DybsKawQs" target="_blank" rel="noopener" data-en="Motion reference: Lin Yun-Ju / Tomokazu Harimoto · WTT">動作參考：林昀儒／張本智和 · WTT</a></footer>
+<script type="module" src="main.js?v=2"></script>
 </body>
 </html>
