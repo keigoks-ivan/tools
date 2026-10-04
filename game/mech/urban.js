@@ -7,6 +7,43 @@ export const PORT_LABELS = ['神戸港', '避難経路', '税関倉庫・貨物�
 export const CIVIC_LABELS = ['止まれ', '三宮駅', '元町商店街', '稲荷神社', '神戸港', '避難場所', '30', '横断歩道'];
 export const JAPANESE_FONT = '"Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif';
 
+// 步兵街道共用既有柏油掃描；範圍限定在室外街段，室內地坪沿用原材質。
+export function kobeRoadMaterial(source, A, segments) {
+  const material=source.clone(),compile=source.onBeforeCompile;
+  material.onBeforeCompile=sh=>{
+    compile(sh);Object.assign(sh.uniforms,{kobeAsphalt:{value:A.asphD},kobeAsphaltN:{value:A.asphN}});
+    sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nvarying vec3 vKobeRoad,vKobeRoadN;')
+      .replace('#include <begin_vertex>','#include <begin_vertex>\nvKobeRoad=(modelMatrix*vec4(transformed,1.0)).xyz;vKobeRoadN=mat3(modelMatrix)*objectNormal;');
+    sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nvarying vec3 vKobeRoad,vKobeRoadN;uniform sampler2D kobeAsphalt,kobeAsphaltN;')
+      .replace('#include <map_fragment>',`#include <map_fragment>
+        float kobeRoad=0.0,kobeWalk=0.0,kobePaint=0.0;
+        ${segments.map(([x,z,ry,length,width])=>`{
+          vec2 offset=vKobeRoad.xz-vec2(${x.toFixed(2)},${z.toFixed(2)});
+          vec2 p=vec2(dot(offset,vec2(${Math.cos(ry).toFixed(6)},${(-Math.sin(ry)).toFixed(6)})),dot(offset,vec2(${Math.sin(ry).toFixed(6)},${Math.cos(ry).toFixed(6)})));
+          float along=1.0-smoothstep(${(length/2-.2).toFixed(2)},${(length/2).toFixed(2)},abs(p.x));
+          float road=along*(1.0-smoothstep(${(width/2-.03).toFixed(2)},${(width/2+.03).toFixed(2)},abs(p.y)));
+          kobeRoad=max(kobeRoad,road);kobeWalk=max(kobeWalk,along*(1.0-road)*(1.0-step(${(width/2+1.8).toFixed(2)},abs(p.y))));
+          float edge=abs(abs(p.y)-${(width/2-.55).toFixed(2)}),aa=max(fwidth(edge),.001);
+          kobePaint=max(kobePaint,road*(1.0-smoothstep(.06-aa,.06+aa,edge)));
+        }`).join('\n')}
+        float outdoor=step(.8,vKobeRoadN.y)*(1.0-step(.08,vKobeRoad.y));kobeRoad*=outdoor;kobeWalk*=outdoor;
+        vec3 roadScan=mix(texture2D(kobeAsphalt,vKobeRoad.xz/2.8).rgb*.72,vec3(.063,.067,.070),.35);
+        float repair=sin(vKobeRoad.x*.14+sin(vKobeRoad.z*.11))*sin(vKobeRoad.z*.25);
+        roadScan*=.91+repair*.07;
+        float row=floor(vKobeRoad.z/.3);vec2 block=vec2(vKobeRoad.x+mod(row,2.0)*.3,vKobeRoad.z)/vec2(.6,.3);
+        vec2 joint=min(fract(block),1.0-fract(block)),aa=max(fwidth(block),vec2(.001));
+        float mortar=1.0-min(smoothstep(.009-aa.x,.009+aa.x,joint.x),smoothstep(.016-aa.y,.016+aa.y,joint.y));
+        float tone=fract(sin(dot(floor(block),vec2(127.1,311.7)))*43758.5453);
+        vec3 stone=vec3(.25,.245,.225)*(.86+tone*.23)*(1.0-mortar*.23);
+        vec3 surface=mix(sampledDiffuseColor.rgb,roadScan,kobeRoad);surface=mix(surface,stone,kobeWalk);
+        surface=mix(surface,vec3(.51,.52,.47),kobePaint*outdoor*.7);
+        diffuseColor.rgb*=surface/max(sampledDiffuseColor.rgb,vec3(.005));`)
+      .replace('#include <roughnessmap_fragment>','#include <roughnessmap_fragment>\nroughnessFactor=mix(roughnessFactor,.86,kobeRoad);roughnessFactor=mix(roughnessFactor,.8,kobeWalk);')
+      .replace('vec3 mapN = texture2D( normalMap, vNormalMapUv ).xyz * 2.0 - 1.0;','vec3 mapN = texture2D( normalMap, vNormalMapUv ).xyz * 2.0 - 1.0;\nmapN=mix(mapN,(texture2D(kobeAsphaltN,vKobeRoad.xz/2.8).xyz*2.0-1.0)*vec3(.2,.2,1.0),kobeRoad);mapN.xy*=mix(1.0,.14,kobeWalk);');
+  };
+  material.customProgramCacheKey=()=> 'kobe-street-paving-v1';return material;
+}
+
 // 集合住宅的小口磁磚：接縫依世界公尺取樣，共用既有掃描圖，不新增下載或大貼圖。
 export function japaneseWall(source) {
   const material=source.clone(),compile=source.onBeforeCompile;

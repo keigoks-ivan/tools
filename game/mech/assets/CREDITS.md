@@ -11,6 +11,8 @@
 
 [field-foliage-v2.webp](field-foliage-v2.webp) 是既有 [field-foliage-v1.png](field-foliage-v1.png) 的 WebP 編碼版本，保留透明邊緣；[原生成提示詞](field-foliage-v1.prompt.txt)。
 
+2026-10-04 [秋季六甲山林冠](kobe-autumn-forest-v1.webp) 由 `imagegen` 內建工具生成，並非實地航拍。[完整提示詞](kobe-autumn-forest-v1.prompt.txt)。供三款遊戲共用：512² WebP，RGB 為林冠色彩，A 為由明暗提取的細部高度，沒有另一張法線圖或遠山樹群。材質非同步載入，失敗時使用程序林冠。
+
 | 檔案 | 來源 | 授權 |
 |---|---|---|
 | `mech_paint.jpg` | Poly Haven「Green Metal Rust」（Rob Tuytel）https://polyhaven.com/a/green_metal_rust ：1k diffuse／roughness／displacement 重新打包成一張（R 漆面明暗細節、G 粗糙度、B 鏽斑遮罩） | CC0 |

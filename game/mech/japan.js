@@ -38,7 +38,23 @@ export function japaneseScenery(out, { tower = null, shrine = null, streets = []
       const lo=x0+i*span+.04,hi=x0+(i+1)*span-.04,c=(lo+hi)/2,h=[9.7,13.1,6.6,10.2,12.6,7.1][i%6];
       const paint=[[.48,.45,.38,0,6],[.62,.64,.59,0,6],[.32,.25,.19,0,6],[.47,.51,.48,0,6],[.3,.38,.4,0,6],[.59,.52,.41,0,6]][i%6];
       if(!facade) {
-        B(lo,hi,0,h,-7,0,paint);solid(lo,hi,ground,ground+h,Math.min(z,z-side*7),Math.max(z,z-side*7));
+        // 量體正面切出窗洞與店面，玻璃後退；側牆與背面仍合併成少量面。
+        const rear=[P(hi,0,-7),P(lo,0,-7),P(lo,h,-7),P(hi,h,-7)];if(side<0)rear.reverse();face(...rear,paint);
+        for(const [edge,outside] of [[lo,-1],[hi,1]]) {
+          const pts=[P(edge,0,-7),P(edge,0,0),P(edge,h,0),P(edge,h,-7)];if(outside*side>0)pts.reverse();face(...pts,paint);
+        }
+        const holes=[[lo+.35,hi-.35,.15,2.55]];
+        for(let y=3.6;y<h-1;y+=3.2)holes.push([c-1.25,c+1.25,y,y+1.8]);
+        let previous=0;
+        for(const [a,b,y0,y1] of holes) {
+          pane(lo,hi,previous,y0,0,paint);pane(lo,a,y0,y1,0,paint);pane(b,hi,y0,y1,0,paint);previous=y1;
+          for(const pts of [[P(a,y0,0),P(b,y0,0),P(b,y0,-.2),P(a,y0,-.2)],
+            [P(a,y1,-.2),P(b,y1,-.2),P(b,y1,0),P(a,y1,0)],
+            [P(a,y0,-.2),P(a,y1,-.2),P(a,y1,0),P(a,y0,0)],
+            [P(b,y0,0),P(b,y1,0),P(b,y1,-.2),P(b,y0,-.2)]]) {if(side<0)pts.reverse();face(...pts,ivory);}
+        }
+        pane(lo,hi,previous,h,0,paint);
+        solid(lo,hi,ground,ground+h,Math.min(z,z-side*7),Math.max(z,z-side*7));
         B(lo-.1,hi+.1,h,h+.16,-7.1,.1,ivory);
         if(i%3===1)B(c-.7,c+.7,h+.16,h+1.3,-5,-3.5,paint);
         // 端部側牆也有窗與層間線，不讓入口兩邊留下整面空白盒子。
@@ -52,18 +68,25 @@ export function japaneseScenery(out, { tower = null, shrine = null, streets = []
           }
         }
       }
-      // トアロード實景的褐色磁磚店屋與淺色塗裝混排；接縫只用薄面，無額外材質。
+      // 褐色石材店屋與淺色塗裝混排；減少細小重複面，近街保留石板接縫。
       if(!facade&&i%3===2) {
         const mortar=[.22,.21,.18,0,6];
-        for(let y=3.4;y<h;y+=.18)pane(lo,hi,y,y+.008,.018,mortar);
-        for(let x=lo+.28;x<hi;x+=.28)pane(x,x+.008,3.4,h,.019,mortar);
+        const rows=[];for(let y=3.6;y<h-1;y+=3.2)rows.push([y,y+1.8]);
+        for(let y=3.4;y<h;y+=.6) {
+          if(rows.some(([a,b])=>y>=a&&y<=b)){pane(lo,c-1.25,y,y+.006,.018,mortar);pane(c+1.25,hi,y,y+.006,.018,mortar);}
+          else pane(lo,hi,y,y+.006,.018,mortar);
+        }
+        for(let x=lo+.9;x<hi;x+=.9) {
+          if(x<c-1.25||x>c+1.25)pane(x,x+.006,3.4,h,.019,mortar);
+          else {let y=3.4;for(const [a,b]of rows){pane(x,x+.006,y,a,.019,mortar);y=b;}pane(x,x+.006,y,h,.019,mortar);}
+        }
       }
       // 平らなアルミ引き戸、二枚のガラス、シャッター付きの店舗を交互に配置。
       if(i%4===3) {
         pane(lo+.3,hi-.3,.15,2.55,.025,[.42,.45,.43,0,2]);
         for(let y=.3;y<2.55;y+=.14)B(lo+.3,hi-.3,y,y+.025,.03,.045,steel);
       } else {
-        pane(lo+.35,hi-.35,.15,2.55,.025,glass);
+        pane(lo+.35,hi-.35,.15,2.55,facade?.025:-.19,glass);
         for(const x of [lo+.3,c-1.1,c-.52,c+.52,hi-.35])B(x,x+.045,.12,2.6,.035,.1,ivory);
         B(lo+.3,hi-.3,.12,.18,.035,.1,ivory);B(lo+.3,hi-.3,2.55,2.61,.035,.1,ivory);
         B(c+.36,c+.39,1,1.4,.1,.17,steel);
@@ -75,12 +98,17 @@ export function japaneseScenery(out, { tower = null, shrine = null, streets = []
         if(side<0)pts.reverse();face(...pts,[.18,.3,.25,0,6]);
       }
       for(let y=3.6;y<h-1;y+=3.2) {
-        pane(c-1.25,c+1.25,y,y+1.8,.025,glass);
+        pane(c-1.25,c+1.25,y,y+1.8,facade?.025:-.19,glass);
         for(const x of [c-1.3,c,c+1.25])B(x,x+.05,y-.04,y+1.85,.03,.1,ivory);
         B(c-1.3,c+1.3,y-.1,y-.03,0,.16,stone);
-        B(lo+.2,hi-.2,y-.18,y-.1,0,.75,ivory);
-        B(lo+.2,hi-.2,y+.1,y+.78,.66,.74,paint);
-        B(lo+.2,hi-.2,y+.78,y+.83,.65,.76,steel);
+        if(i%3===1) {
+          B(lo+.2,hi-.2,y-.18,y-.1,0,.75,ivory);
+          B(lo+.2,hi-.2,y+.1,y+.78,.66,.74,paint);
+          B(lo+.2,hi-.2,y+.78,y+.83,.65,.76,steel);
+        } else {
+          B(c-1.3,c+1.3,y+1.82,y+1.9,0,.35,steel);
+          if(i%2===0)pane(c-1.18,c-.75,y+.08,y+1.66,facade?.03:-.16,[.37,.35,.30,0,6]);
+        }
         B(hi-1.1,hi-.35,y+.1,y+.65,.05,.43,ivory);
         const fan=(t)=>P(hi-.73+Math.cos(t)*.2,y+.37+Math.sin(t)*.2,.445);
         for(let k=0;k<8;k++) {const a=fan(k/8*Math.PI*2),b=fan((k+1)/8*Math.PI*2);if(side>0)face(P(hi-.73,y+.37,.445),a,b,b,steel);else face(P(hi-.73,y+.37,.445),b,a,a,steel);}
@@ -245,10 +273,8 @@ export function japaneseScenery(out, { tower = null, shrine = null, streets = []
 
   if (waterfront) {
     const [x0,x1,z0,z1,ground=0]=waterfront;
-    box(x0,x1,ground,ground+.08,z0,z1,stone);
-    // 兩公尺鋪面分格用薄面合併，保留港邊廣場的尺度，不下載新貼圖。
-    for(let x=x0+2;x<x1;x+=2)face([x-.01,ground+.085,z0],[x-.01,ground+.085,z1],[x+.01,ground+.085,z1],[x+.01,ground+.085,z0],[.34,.38,.38,0,1]);
-    for(let z=z0+2;z<z1;z+=2)face([x0,ground+.086,z-.01],[x0,ground+.086,z+.01],[x1,ground+.086,z+.01],[x1,ground+.086,z-.01],[.34,.38,.38,0,1]);
+    // 鋪面接縫由共用石材材質繪製，不用粗糙混凝土掃描或額外分格幾何。
+    box(x0,x1,ground,ground+.08,z0,z1,[.64,.63,.58,0,8]);
     for(let x=x0+5;x<x1-2;x+=16) {
       for(const p of [x-1.2,x+1.2])box(p-.06,p+.06,ground+.08,ground+.48,z1-8,z1-7.6,steel);
       for(let z=z1-8;z<z1-7.4;z+=.12)box(x-1.4,x+1.4,ground+.48,ground+.53,z,z+.09,wood);
@@ -330,7 +356,7 @@ export function japaneseScenery(out, { tower = null, shrine = null, streets = []
 }
 
 export function japaneseBuilder(b, sites) {
-  const mat = col => col[4] === 4 ? (b.B.portGlass ? 'portGlass' : 'glass') : col[4] === 1 ? 'concrete' : col[4] === 6 && b.B.landmarkPaint ? 'landmarkPaint' : col[4] === 6 && b.B.painted ? 'painted' : col[4] === 2 || col[4] === 6 ? 'metal' : 'rust';
+  const mat = col => col[4] === 8 ? (b.B.portGround ? 'portGround' : 'concrete') : col[4] === 4 ? (b.B.portGlass ? 'portGlass' : 'glass') : col[4] === 1 ? 'concrete' : col[4] === 6 && b.B.landmarkPaint ? 'landmarkPaint' : col[4] === 6 && b.B.painted ? 'painted' : col[4] === 2 || col[4] === 6 ? 'metal' : 'rust';
   japaneseScenery({
     box: (a,c,d,e,f,g,col) => b.deco(mat(col),a,c,d,e,f,g,{tint:col.slice(0,3),shade:()=>1}),
     face: (a,c,d,e,col) => b.B[mat(col)].quad(a,c,d,e,faceNormal(a,c,d),[1,1,1,1],null,col.slice(0,3)),

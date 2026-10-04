@@ -7,10 +7,12 @@ import * as THREE from 'three';
 import { Builder, grimeShader } from './kit.js';
 import * as PR from './props.js';
 import { facade, FLOOR } from './models.js';
-import { shopMaterial, shopUV, civicMaterial, japaneseWall } from '../urban.js';
+import { shopMaterial, shopUV, civicMaterial, japaneseWall, kobeRoadMaterial } from '../urban.js';
 import { roofline } from '../roofline.js';
 import { streetfront } from '../streetfront.js';
 import { japaneseBuilder } from '../japan.js';
+import { kobeStreetDetails } from '../kobe-street.mjs';
+import { buildAutumnTrees } from '../kobe-autumn.js';
 
 const H1 = 3.4;   // 一層樓高
 
@@ -39,6 +41,8 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
   mats.paint2 = new THREE.MeshStandardMaterial({ color: 0x9a9384, roughness: 0.55, metalness: 0.3, vertexColors: true, map: mats.rust.map, roughnessMap: mats.rust.roughnessMap });
   mats.sign = shopMaterial(); mats.civic = civicMaterial();
   mats.jpconcrete = japaneseWall(mats.concrete);
+  const streetSegments=[[-20,-41,0,40,10],[-80,-44,Math.PI/2,20,12],[-18,-1,0,26,9]];
+  if(surfaces?.asphD)mats.floor=kobeRoadMaterial(mats.floor,surfaces,streetSegments);
   mats.landmarkPaint = new THREE.MeshStandardMaterial({ color: 0xffffff, normalMap: mats.metal.normalMap, roughness: .68, metalness: .04, vertexColors: true });
   mats.landmarkPaint.userData.tile = 2; mats.landmarkPaint.userData.grime = .35;
   mats.landmarkPaint.onBeforeCompile = sh => grimeShader(sh, mats.landmarkPaint);
@@ -1222,6 +1226,12 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
     [6.3,24,0,0,1],[113.3,-72,-Math.PI/2,0,4],[113.3,-12,-Math.PI/2,0,7],
   ], shops: [[-36,-2,5.96,-1,0,true],[-95,-64,-30.04,-1,0,true]], crossings: [[-30,-41,Math.PI/2,11.4]] };
   japaneseBuilder(b, M.japanSites);
+  kobeStreetDetails({face:(a,c,d,e,col)=>{
+    const n=new THREE.Vector3().subVectors(new THREE.Vector3(...c),new THREE.Vector3(...a)).cross(new THREE.Vector3().subVectors(new THREE.Vector3(...d),new THREE.Vector3(...a))).normalize().toArray();
+    b.B[col[4]===2?'metal':col[4]===6?'landmarkPaint':'concrete'].quad(a,c,d,e,n,[1,1,1,1],null,col.slice(0,3));
+  }},streetSegments);
+  M.autumn=buildAutumnTrees(scene,[[-35,-34.9,.66],[-23,-34.9,.69],[-9,-34.9,.72],[-86.8,-50,.69],[-86.8,-36,.68],
+    [-32,4.7,.65],[-18,4.7,.72],[-5,4.7,.67],[-10,19,.62],[-5,27,.63]]);
   M.meshes = b.build(scene);
   return M;
 }

@@ -1,4 +1,4 @@
-import { SHOP_LABELS, SHOP_SUBTITLES, PORT_LABELS, CIVIC_LABELS, JAPANESE_FONT } from '../urban.js?v=7';
+import { SHOP_LABELS, SHOP_SUBTITLES, PORT_LABELS, CIVIC_LABELS, JAPANESE_FONT } from '../urban.js?v=8';
 // 開發用：透過真實遊戲模組與既有除錯介面做固定步進，所有載入均帶 mute。
 const frame = document.querySelector('#game'), report = document.querySelector('#report'), state = document.querySelector('#state');
 let win, result = [], errors = [], post, renderer;
@@ -15,7 +15,7 @@ async function load(path, query = '') {
   html = html.replace(/<base href="[^"]+">/, '');
   html = html.replace(/(<script type="importmap">)([\s\S]*?)(<\/script>)/, (_, a, json, b) => {
     const map = JSON.parse(json);
-    for (const file of ['kobe-harbor.mjs', 'kobe-city.mjs', 'kobe-relief.mjs', 'urban.js', 'japan.js', 'textures.js', 'anim.js', 'env.js', 'streetfront.js', 'stages.js', 'battlefields.js', 'fieldart.js', 'encounter.js', 'post.js', 'roofline.js', 'mechs.js', 'combat.js', 'cockpit.js', 'player.js', 'flight.mjs', 'vehicles.js', 'hud.js', 'zero/kit.js', 'zero/map.js', 'zero/guns.js', 'zero/human.js', 'zero/viewmodel.js', 'zero/main.js', 'zero/hud.js', 'zero/sfx.js', 'zero/mech6.js', 'lastline/map.js', 'lastline/script.js', 'lastline/mission.js', 'lastline/convoy.js', 'lastline/escort.mjs', 'lastline/operations.mjs', 'lastline/foot-ops.js', 'input.js', 'tactics.js', 'reinforcements.mjs', 'zero/ai.js', 'zero/script.js', 'zero/patrol.js', 'zero/recon.js', 'zero/field.js']) {
+    for (const file of ['kobe-street.mjs', 'kobe-autumn.js', 'kobe-harbor.mjs', 'kobe-city.mjs', 'kobe-relief.mjs', 'urban.js', 'japan.js', 'textures.js', 'anim.js', 'env.js', 'streetfront.js', 'stages.js', 'battlefields.js', 'fieldart.js', 'encounter.js', 'post.js', 'roofline.js', 'mechs.js', 'combat.js', 'cockpit.js', 'player.js', 'flight.mjs', 'vehicles.js', 'hud.js', 'zero/kit.js', 'zero/map.js', 'zero/guns.js', 'zero/human.js', 'zero/viewmodel.js', 'zero/main.js', 'zero/hud.js', 'zero/sfx.js', 'zero/mech6.js', 'lastline/map.js', 'lastline/script.js', 'lastline/mission.js', 'lastline/convoy.js', 'lastline/escort.mjs', 'lastline/operations.mjs', 'lastline/foot-ops.js', 'input.js', 'tactics.js', 'reinforcements.mjs', 'zero/ai.js', 'zero/script.js', 'zero/patrol.js', 'zero/recon.js', 'zero/field.js']) {
       const url = new URL('/game/mech/' + file, location.href).href;
       for (const key of Object.keys(map.imports)) if (new URL(key, entryBase).href === url) delete map.imports[key];
       map.imports[url] = url + '?qa=' + revision;
@@ -37,7 +37,8 @@ async function load(path, query = '') {
   const world=win.__game?.world||win.__world||win.__G?.world;
   if(world) {
     await wait(()=>world.A.surfaceReady.value===1 && world.fieldFoliageReady && world.cityFacadeReady);
-    assert(world.A.surfaceAtlas.value.image.width===1024 && [2,3,4].every(i=>world.A.fac[i][0].image.width===512 && world.A.fac[i][0].name.startsWith('city-')),'共用建材 1024；三款城市立面均使用 512 貼圖');
+    assert(await world.forestLoaded&&world.A.forestReady.value===1,'秋季六甲山的 512 林冠色彩與高度材質已載入');
+    assert(world.A.surfaceAtlas.value.image.width===1024 && [0,1,2,3,4].every(i=>world.A.fac[i][0].image.width===512 && world.A.fac[i][0].name.startsWith('city-')),'共用建材 1024；三款城市立面均使用 512 貼圖');
     if(win.__G && win.__flow.chapter < (win.__S.FIRST_MECH||6)) assert(world.cityTreeMeshes.every(m=>!m.visible),'步兵模式不因枝葉延遲載入而打開遠處樹林');
   }
   await win.document.fonts.load('bold 45px "Noto Sans JP"', SHOP_LABELS.concat(SHOP_SUBTITLES, PORT_LABELS, CIVIC_LABELS).join(''));
@@ -383,7 +384,7 @@ async function city() {
   const W = win.__world;
   assert(W.kobeBackdrop.blocks.length>900&&W.kobeBackdrop.meshes.length<=5,'沿海街廓與山麓住宅合併成五個遠景網格');
   assert(W.terrainMesh.material.userData.cityLandUse.value.image.width===512,'街廓鋪面使用一張 512 用地遮罩');
-  assert(W.cityTreeMeshes.length===3 && W.cityTreeMeshes.every(m=>m.customDepthMaterial===W.fieldTreeDepth),'城市三種枝葉剪影共用材質與陰影剪影');
+  assert(W.cityTreeMeshes.length===3 && W.cityTreeMeshes.every(m=>m.customDepthMaterial===W.cityTreeDepth),'城市三種枝葉剪影共用材質與陰影剪影');
   const street = W.blds.filter(b=>b.cx < -120 && b.cz < 480 && b.H < 45);
   assert(street.length > 30 && street.filter(b=>Math.min(b.w,b.d)<25).length > street.length*.7, '舊城多數街屋短邊小於 25 公尺，避免寬扁巨型住宅');
   assert(new Set(street.map(b=>b.H)).size >= 4, '連棟街屋具備至少四種實際樓高');
@@ -1164,7 +1165,7 @@ async function fieldOps() {
   report.textContent=JSON.stringify({checks,metrics,errors},null,2);state.textContent='開放戰區通過';
 }
 
-for (const [id, fn] of [['japanStreets', japanStreets], ['flightArt', flightArt], ['flight', flight], ['kobeArt', kobeArt], ['fieldAudit', fieldAudit], ['fieldOps', fieldOps], ['scoutCombat', scoutCombat], ['reconControls', reconControls], ['prequelFoot', prequelFoot], ['openingPace', openingPace], ['patrolWorld', patrolWorld], ['japaneseSigns', japaneseSigns], ['harborArt', harborArt], ['campaignFoot', campaignFoot], ['campaign4', () => campaignMech(4)], ['campaign5', () => campaignMech(5)], ['campaign6', () => campaignMech(6)], ['campaign7', () => campaignMech(7)], ['campaign6Artillery', async()=>{localStorage.setItem('lastline.choice',JSON.stringify('artillery'));await campaignMech(6,'artillery');}], ['campaignArtillery', async () => { localStorage.setItem('lastline.choice', JSON.stringify('artillery')); await campaignMech(7, 'artillery'); }], ['campaignEdges', campaignEdges], ['mech', mech], ['fields', battlefields], ['enemyMotion', enemyMotion], ['zero', zero], ['tactics', tactics], ['prequelMechCampaign', prequelMechCampaign], ['campaignMain', campaignMain], ['enemyPressure', enemyPressure], ['enemyHandling', enemyHandling], ['infantry', infantry], ['art', art], ['hero', hero], ['city', city], ['mountains', mountains], ['weapons', weapons], ['save', save]]) document.querySelector('#' + id).onclick = () => fn().catch(e => { state.textContent = '失敗'; report.textContent += '\n' + e.stack; });
+for (const [id, fn] of [['autumnArt', autumnArt], ['japanStreets', japanStreets], ['flightArt', flightArt], ['flight', flight], ['kobeArt', kobeArt], ['fieldAudit', fieldAudit], ['fieldOps', fieldOps], ['scoutCombat', scoutCombat], ['reconControls', reconControls], ['prequelFoot', prequelFoot], ['openingPace', openingPace], ['patrolWorld', patrolWorld], ['japaneseSigns', japaneseSigns], ['harborArt', harborArt], ['campaignFoot', campaignFoot], ['campaign4', () => campaignMech(4)], ['campaign5', () => campaignMech(5)], ['campaign6', () => campaignMech(6)], ['campaign7', () => campaignMech(7)], ['campaign6Artillery', async()=>{localStorage.setItem('lastline.choice',JSON.stringify('artillery'));await campaignMech(6,'artillery');}], ['campaignArtillery', async () => { localStorage.setItem('lastline.choice', JSON.stringify('artillery')); await campaignMech(7, 'artillery'); }], ['campaignEdges', campaignEdges], ['mech', mech], ['fields', battlefields], ['enemyMotion', enemyMotion], ['zero', zero], ['tactics', tactics], ['prequelMechCampaign', prequelMechCampaign], ['campaignMain', campaignMain], ['enemyPressure', enemyPressure], ['enemyHandling', enemyHandling], ['infantry', infantry], ['art', art], ['hero', hero], ['city', city], ['mountains', mountains], ['weapons', weapons], ['save', save]]) document.querySelector('#' + id).onclick = () => fn().catch(e => { state.textContent = '失敗'; report.textContent += '\n' + e.stack; });
 
 async function harborArt() {
   await load('/game/mech/lastline/index.html', '?mute&god&ch=1&all&fps=0');
@@ -1287,4 +1288,45 @@ async function japanStreets() {
   assert(win.__map.triangles<120000&&win.__map.meshes.length<=12,'失落防線新增港邊街屋仍低於十二萬三角形，合併網格不超過十二個');
   stats.lastline={triangles:win.__map.triangles,mapMeshes:win.__map.meshes.length,textures:renderer.info.memory.textures};checks.push(...result);
   assert(errors.length===0,'三款日本街景沒有渲染錯誤');report.textContent=JSON.stringify({checks,stats,errors},null,2);state.textContent='日本街景通過';
+}
+
+
+async function autumnArt() {
+  const checks=[],stats={};
+  await load('/game/mech/index.html','?mute&free&fps=0');renderer=win.__renderer;post=win.__post;
+  const W=win.__world;
+  for(const [name,view]of [
+    ['autumn-mech-avenue',[-120,5,-90,0,.045]],
+    ['autumn-mech-waterfront',[-260,10,800,Math.PI/2,.02]],
+    ['autumn-rokko-panorama',[0,155,650,0,-.01]],
+    ['autumn-rokko-foothills',[-600,95,-850,0,-.005]],
+  ]){win.__cam.set(...view);W.followShadow(new win.__T.Vector3(...view.slice(0,3)));W.sun.shadow.needsUpdate=true;win.__step(3);await save(name,true);}
+  assert(W.autumnStreet.count>=20,'本篇市街與港邊有固定秋季行道樹與落葉');
+  assert(W.cityTreeMeshes.every(m=>m.material.map.name==='kobe-autumn-leaves'&&m.material.map.image.width===512),'本篇行道樹與周邊林木共用 512 楓葉剪影');
+  assert([0,1,2,3,4].every(i=>W.A.fac[i].every(t=>t.image.width===512)),'住宅、石造和玻璃商辦全改用 512 立面');
+  assert(W.autumnStreet.count<=160&&W.autumnStreet.meshes.length===3,'本篇楓樹街道維持兩個實例批次與一個落葉網格');
+  assert(W.terrainMesh.material.userData.canopy.value.image.width===512,'六甲林冠細節只有一張 512 圖，沒有建立遠山樹群');
+  assert(!win.performance.getEntriesByType('resource').some(r=>/\/fac_[^/]+_(col|nor|arm)\.(jpg|webp)/.test(r.name)),'開局不用再下載十五張舊立面貼圖');
+  stats.main={trees:W.autumnStreet.count,memory:{...renderer.info.memory},newStaticMeshes:W.autumnStreet.meshes.length};checks.push(...result);
+  await load('/game/mech/zero/index.html','?mute&god&ch=3&all&fps=0');renderer=win.__renderer;post={render:()=>win.__step(1)};win.__step(60);
+  for(const [name,p,yaw,pitch]of [
+    ['autumn-zero-street',[-43,0,-40.8],Math.PI/2,.11],
+    ['autumn-zero-shrine',[-7.6,0,17],0,.08],
+    ['autumn-zero-motomachi',[-56,0,-1],Math.PI/2,.11],
+  ]){win.__G.player.reset(new win.__T.Vector3(...p),yaw);win.__G.player.pitch=pitch;win.__step(3);await save(name,true);}
+  assert(win.__map.autumn.count===10&&win.__map.autumn.meshes.length===3,'前傳十棵楓樹與落葉合併成三個固定網格');
+  stats.prequel={trees:win.__map.autumn.count,memory:{...renderer.info.memory},newStaticMeshes:win.__map.autumn.meshes.length};checks.push(...result);
+  await load('/game/mech/lastline/index.html','?mute&god&ch=1&all&fps=0');renderer=win.__renderer;post={render:()=>win.__step(1)};win.__step(60);
+  for(const [name,p,yaw,pitch]of [
+    ['autumn-lastline-street',[-218,0,-240],Math.PI/2,.035],
+    ['autumn-lastline-promenade',[548,0,323],Math.atan2(92,77),.075],
+    ['autumn-lastline-coast',[625,0,475],Math.atan2(-180,-75),.07],
+  ]){win.__G.player.reset(new win.__T.Vector3(...p),yaw);win.__G.player.pitch=pitch;win.__step(3);await save(name,true);}
+  assert(win.__map.autumn.count===15&&win.__map.autumn.meshes.length===3,'續作十五棵楓樹分布在店屋、神社與港邊步道');
+  assert(win.__map.triangles<120000&&win.__map.meshes.length<=12,'續作街層細節仍在十二萬三角形、十二個材質桶內');
+  const farTriangles=win.__world.kobeBackdrop.meshes.reduce((n,m)=>n+m.geometry.index.count/3,0);
+  assert(farTriangles<70000,'續作的市景遠樓仍低於七萬三角形');
+  stats.lastline={trees:win.__map.autumn.count,triangles:win.__map.triangles,farTriangles,memory:{...renderer.info.memory},newStaticMeshes:win.__map.autumn.meshes.length};checks.push(...result);
+  assert(errors.length===0,'三款秋季神戶景色沒有執行或渲染錯誤');
+  report.textContent=JSON.stringify({checks,stats,errors},null,2);state.textContent='三款秋季場景通過';
 }

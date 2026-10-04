@@ -4,6 +4,8 @@ import * as THREE from 'three';
 import { Builder } from '../zero/kit.js';
 import { JAPANESE_FONT, PORT_LABELS, civicMaterial, shopMaterial, harborWater } from '../urban.js';
 import { japaneseBuilder } from '../japan.js';
+import { kobeStreetDetails } from '../kobe-street.mjs';
+import { buildAutumnTrees } from '../kobe-autumn.js';
 import { KOBE_RELIEF, kobeCityHeight } from '../kobe-relief.mjs';
 import { kobeHarborScenery, harborWindow } from '../kobe-harbor.mjs';
 
@@ -27,10 +29,20 @@ export function buildMap(scene, mats, solid, PL, A, world) {
         float roadNorth=portLine(abs(vPort.y+360.0),12.0)*portRange(vPort.x,348.0,612.0);
         float roadExit=portLine(abs(vPort.x-600.0),12.0)*portRange(vPort.y,-580.0,290.0);
         float roadCross=portLine(abs(vPort.y-120.0),12.0)*portRange(vPort.x,348.0,612.0);
-        float portRoad=max(roadNorth,max(max(roadH,roadV),max(roadExit,roadCross)));
+        float roadOld=portLine(abs(vPort.y+240.0),6.0)*portRange(vPort.x,-234.0,-144.0);
+        float portRoad=max(roadOld,max(roadNorth,max(max(roadH,roadV),max(roadExit,roadCross))));
         vec2 panel=mod(vPort+vec2(2.0,3.0),vec2(6.0,8.0));
         float joint=max(portLine(min(panel.x,6.0-panel.x),.018),portLine(min(panel.y,8.0-panel.y),.018))*(1.0-portRoad);
-        vec3 pavement=mix(sampledDiffuseColor.rgb,texture2D(portAsphalt,vPort/7.0).rgb*vec3(.62,.65,.68),portRoad);
+        vec3 asphalt=mix(texture2D(portAsphalt,vPort/2.8).rgb*.72,vec3(.063,.067,.070),.35);
+        vec3 pavement=mix(sampledDiffuseColor.rgb,asphalt,portRoad);
+        float oldWalk=portRange(vPort.x,-234.0,-144.0)*portRange(abs(vPort.y+240.0),6.0,8.2);
+        float promenade=portRange(vPort.x,514.0,678.0)*portRange(vPort.y,314.0,477.0);
+        float footPaving=max(oldWalk,promenade);
+        vec2 paver=vec2(vPort.x+mod(floor(vPort.y/.3),2.0)*.3,vPort.y),cell=mod(paver,vec2(.6,.3));
+        float seam=max(portLine(min(cell.x,.6-cell.x),.004),portLine(min(cell.y,.3-cell.y),.004));
+        float stoneTone=fract(sin(dot(floor(paver/vec2(.6,.3)),vec2(127.1,311.7)))*43758.5453);
+        vec3 stone=vec3(.24,.235,.21)*(.86+stoneTone*.23)*(1.0-seam*.23);
+        pavement=mix(pavement,stone,footPaving);joint*=1.0-footPaving;
         diffuseColor.rgb/=max(sampledDiffuseColor.rgb,vec3(.005));
         diffuseColor.rgb*=pavement*(1.0-joint*.38);
         float tyre=max(roadH*portLine(abs(abs(vPort.y+120.0)-3.2),.55),roadV*portLine(abs(abs(vPort.x-360.0)-3.2),.55));
@@ -40,18 +52,19 @@ export function buildMap(scene, mats, solid, PL, A, world) {
         float drain=portLine(abs(vPort.x-623.0),.22);
         float grate=portLine(abs(mod(vPort.y,.32)-.16),.025);
         diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.025,.032,.034),drain*(1.0-grate*.65));
-        float edge=max(roadExit*portLine(abs(abs(vPort.x-600.0)-10.8),.09),roadH*portLine(abs(abs(vPort.y+120.0)-10.8),.09));
+        float edge=max(roadOld*portLine(abs(abs(vPort.y+240.0)-5.45),.06),max(roadExit*portLine(abs(abs(vPort.x-600.0)-10.8),.09),roadH*portLine(abs(abs(vPort.y+120.0)-10.8),.09)));
         vec2 bay=mod(vPort-vec2(215.0,-66.0),vec2(20.0,26.0));
         float loading=portRange(vPort.x,215.0,525.0)*portRange(vPort.y,-66.0,64.0)*(1.0-portRoad);
         float paint=max(edge,loading*max(portLine(min(bay.x,20.0-bay.x),.07),portLine(min(bay.y,26.0-bay.y),.07)));
-        diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.43,.30,.07),paint*.75);`)
+        diffuseColor.rgb=mix(diffuseColor.rgb,mix(vec3(.43,.30,.07),vec3(.51,.52,.47),roadOld),paint*.75);`)
       .replace('#include <roughnessmap_fragment>', `#include <roughnessmap_fragment>
         roughnessFactor=mix(roughnessFactor,.91,portRoad);
+        roughnessFactor=mix(roughnessFactor,.83,footPaving);
         roughnessFactor=mix(roughnessFactor,.82,paint);`)
       .replace('vec3 mapN = texture2D( normalMap, vNormalMapUv ).xyz * 2.0 - 1.0;', `vec3 mapN = texture2D( normalMap, vNormalMapUv ).xyz * 2.0 - 1.0;
-        mapN=mix(mapN,texture2D(portAsphaltN,vPort/7.0).xyz*2.0-1.0,portRoad);`);
+        mapN=mix(mapN,(texture2D(portAsphaltN,vPort/2.8).xyz*2.0-1.0)*vec3(.2,.2,1.0),portRoad);mapN.xy*=mix(1.0,.14,footPaving);`);
   };
-  ground.customProgramCacheKey = () => 'harbor-ground-v1';
+  ground.customProgramCacheKey = () => 'harbor-ground-v2';
   mats = { ...mats, portGround: ground, portGlass: new THREE.MeshStandardMaterial({ color: 0x263c43, roughness: .26, metalness: .18, vertexColors: true }) };
   // 貨櫃、起重機與屋面是塗裝鋼材：漆面使用非金屬反射，保留原掃描與風化。
   for (const key of ['metal', 'corr', 'rust']) {
@@ -604,6 +617,10 @@ export function buildMap(scene, mats, solid, PL, A, world) {
     [614,138,0,0,7],[614,66,0,0,6],[614,-8,0,0,5],
   ], shops: [[-216,-162,-251,1]], crossings: [[360,-143,0,22],[600,143,Math.PI,22]] };
   japaneseBuilder(b, M.japanSites);
+  kobeStreetDetails(portArt,[[-190,-240,0,40,12],[566,320,0,72,12],[600,250,Math.PI/2,56,24,0,false]]);
+  M.autumn=buildAutumnTrees(scene,[[-216,-232,.76],[-200,-232,.73],[-180,-232,.81],[-166,-232,.72],
+    [-238,-270,.7],[-249,-263,.76],[530,313,.82],[554,313,.83],[578,313,.79],[603,313,.86],
+    [626,313,.8],[626,350,.86],[626,385,.81],[626,432,.8],[626,465,.82]]);
   const meshes = b.build(scene); M.meshes = meshes;
   M.triangles = meshes.reduce((sum, mesh) => sum + (mesh.geometry.index?.count || mesh.geometry.attributes.position.count) / 3, 0);
   scene.userData.lastlineLayout = M.layout;

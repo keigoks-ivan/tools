@@ -52,10 +52,11 @@ export const FACADE_TILE = { w: 32, h: 28.8 };
 // 512px 神戶立面：舊居留地石造商樓、混凝土住宅、磁磚公寓，共用六開間／六層 UV。
 // 三張貼圖同時生成，滑窗、凹槽與粗糙度遮罩不會沿用舊磚牆的錯位資料。
 export function japaneseFacade(style, scan) {
+  if(style<2)return officeFacade(style);
   const S = 512, cell = S / 6, r = rng(301 + style);
   const [c, a] = canvas(S, S), [rc, rough] = canvas(S, S), [nc, normal] = canvas(S, S);
   const historic = style === 2;
-  a.fillStyle = ['#c1b7a4', '#d5d8d1', '#c6b6a0'][style - 2]; a.fillRect(0, 0, S, S);
+  a.fillStyle = ['#c4bda9', '#c6cbc8', '#bba78d'][style - 2]; a.fillRect(0, 0, S, S);
   if (scan) {
     a.globalAlpha = historic ? .18 : .09;
     for (let y = 0; y < S; y += 128) for (let x = 0; x < S; x += 128) a.drawImage(scan, 520, 8, 496, 496, x, y, 128, 128);
@@ -65,13 +66,13 @@ export function japaneseFacade(style, scan) {
   normal.fillStyle = 'rgb(128,128,255)'; normal.fillRect(0, 0, S, S);
   if (historic || style === 4) {
     // 石材／磁磚接縫的陰影與法線一同繪製，不能沿用舊磚牆法線。
-    const h = historic ? cell / 5 : 2.6, w = historic ? cell : 5.2;
+    const h = historic ? cell / 6 : 1.5, w = historic ? cell / 2 : 5.7;
     for (let j = 0; j * h < S; j++) for (let x = -w; x < S; x += w) {
       const u = x + (j % 2 ? w / 2 : 0), y = j * h;
-      if (!historic) { a.fillStyle = `rgba(255,247,225,${r()*.13})`; a.fillRect(u+.25,y+.25,w-.5,h-.5); }
+      a.fillStyle = `rgba(255,247,225,${r()*(historic?.09:.15)})`; a.fillRect(u+.25,y+.25,w-.5,h-.5);
       a.strokeStyle = historic ? 'rgba(83,76,63,.22)' : 'rgba(89,80,69,.22)'; a.lineWidth = historic ? .6 : .35; a.strokeRect(u, y, w, h);
-      normal.fillStyle = 'rgb(128,137,254)'; normal.fillRect(u, y, w, .8);
-      normal.fillStyle = 'rgb(137,128,254)'; normal.fillRect(u, y, .8, h);
+      normal.fillStyle = 'rgb(128,137,254)'; normal.fillRect(u, y, w, historic?.65:.35);
+      normal.fillStyle = 'rgb(137,128,254)'; normal.fillRect(u, y, historic?.65:.35, h);
     }
   }
   for (let j = 0; j < 6; j++) for (let i = 0; i < 6; i++) {
@@ -81,11 +82,24 @@ export function japaneseFacade(style, scan) {
       a.fillStyle = '#d4cbb8'; a.fillRect(wx - 5, wy - 4, ww + 10, wh + 10);
       a.fillStyle = '#a59b89'; a.fillRect(wx - 5, wy + wh + 3, ww + 10, 3);
     }
-    a.fillStyle = 'rgba(25,30,29,.28)'; a.fillRect(wx - 3, wy - 2, ww + 6, wh + 6);
+    if(style===3) {
+      a.strokeStyle='rgba(77,83,82,.17)';a.lineWidth=.55;a.strokeRect(x+.2,y+.2,cell-.4,cell-.4);
+      a.fillStyle=`rgba(240,244,238,${r()*.055})`;a.fillRect(x+1,y+1,cell-2,cell-2);
+    }
+    a.fillStyle = 'rgba(25,30,29,.32)'; a.fillRect(wx - 3, wy - 2, ww + 6, wh + 6);
     a.fillStyle = '#555d5b'; a.fillRect(wx - 2, wy - 1, ww + 4, wh + 2);
     const reflection = a.createLinearGradient(0, wy, 0, wy + wh);
-    reflection.addColorStop(0, '#293e49'); reflection.addColorStop(.48, '#42545b'); reflection.addColorStop(1, '#1b272c');
+    const dark=r()<.24;
+    reflection.addColorStop(0, dark?'#1c2b32':'#51656d'); reflection.addColorStop(.40, dark?'#253238':'#607279'); reflection.addColorStop(1, '#19282e');
     a.fillStyle = reflection; a.fillRect(wx, wy, ww, wh);
+    // 對街樓體的低對比反射與不同室內深度，避免整棟貼上相同的藍色窗格。
+    a.save();a.beginPath();a.rect(wx,wy,ww,wh);a.clip();
+    for(let k=0;k<3;k++) {
+      const u=wx+(k-.2)*ww/2.4,h=wh*(.16+r()*.3);
+      a.fillStyle='rgba(16,28,34,.18)';a.fillRect(u,wy+wh*.62-h,ww*.25,wh);
+      a.fillStyle='rgba(149,167,166,.14)';a.fillRect(u+1,wy+wh*.62-h,1,wh);
+    }
+    a.restore();
     if (r() < .62) {
       const length = wh * (.26 + r() * .6), offset = r() < .5 ? 0 : ww * .53;
       a.fillStyle = ['#88877c', '#666d68', '#99958a'][i % 3]; a.fillRect(wx + offset + 2, wy + 1, ww * .44, length);
@@ -98,7 +112,7 @@ export function japaneseFacade(style, scan) {
       a.fillStyle = '#d4cbb8'; a.fillRect(wx + ww / 2 - 3, wy - 5, 6, 4);
     }
     a.fillStyle = '#cfcdc0'; a.fillRect(wx - 2, wy + wh + 1, ww + 4, 2);
-    rough.fillStyle = 'rgb(220,65,0)'; rough.fillRect(wx, wy, ww, wh);
+    rough.fillStyle = 'rgb(214,49,0)'; rough.fillRect(wx, wy, ww, wh);
     normal.fillStyle = 'rgb(128,128,255)'; normal.fillRect(wx, wy, ww, wh);
     normal.fillStyle = 'rgb(92,128,248)'; normal.fillRect(wx - 2, wy, 2, wh);
     normal.fillStyle = 'rgb(164,128,248)'; normal.fillRect(wx + ww, wy, 2, wh);
@@ -108,6 +122,35 @@ export function japaneseFacade(style, scan) {
   }
   stains(a, S, S, r, 60, '34,37,32', historic ? .13 : .045); grain(a, S, S, historic ? 6 : 3, r);
   return [tex(c), tex(nc, false), tex(rc, false)].map((t, i) => { t.name = 'city-japanese-' + style + '-' + i; return t; });
+}
+
+function officeFacade(style) {
+  const S=512,cols=style===0?16:12,rows=style===0?10:8,cw=S/cols,ch=S/rows,r=rng(823+style);
+  const [c,a]=canvas(S,S),[rc,rough]=canvas(S,S),[nc,normal]=canvas(S,S);
+  a.fillStyle=style===0?'#48565a':'#b8bfbc';a.fillRect(0,0,S,S);
+  rough.fillStyle='rgb(255,211,0)';rough.fillRect(0,0,S,S);
+  normal.fillStyle='rgb(128,128,255)';normal.fillRect(0,0,S,S);
+  for(let j=0;j<rows;j++)for(let i=0;i<cols;i++) {
+    const x=i*cw,y=j*ch,wx=x+cw*(style===0?.045:.12),wy=y+ch*(style===0?.035:.14),ww=cw*(style===0?.91:.76),wh=ch*(style===0?.73:.65);
+    const reflection=a.createLinearGradient(wx,wy,wx+ww*.4,wy+wh),room=r();
+    reflection.addColorStop(0,room<.18?'#293c46':'#748c96');reflection.addColorStop(.38,room<.18?'#3a515b':'#5d7885');reflection.addColorStop(1,'#2c414b');
+    a.fillStyle=reflection;a.fillRect(wx,wy,ww,wh);
+    if(room>.62) {
+      a.fillStyle=`rgba(182,181,162,${.23+r()*.22})`;a.fillRect(wx+.5,wy+.4,ww-1,wh*(.25+r()*.5));
+      a.fillStyle='rgba(51,59,56,.17)';for(let u=wx+1;u<wx+ww;u+=2.2)a.fillRect(u,wy,1,wh*.55);
+    }
+    a.fillStyle='rgba(203,215,213,.16)';a.fillRect(wx,wy,ww,.8);a.fillRect(wx,wy,.65,wh);
+    a.fillStyle='rgba(27,39,44,.35)';a.fillRect(wx,wy+wh,ww,.75);
+    rough.fillStyle='rgb(239,44,0)';rough.fillRect(wx,wy,ww,wh);
+    normal.fillStyle='rgb(110,128,254)';normal.fillRect(wx-.5,wy,.6,wh);
+    normal.fillStyle='rgb(144,128,254)';normal.fillRect(wx+ww,wy,.6,wh);
+    if(style===0) {
+      const tone=100+Math.floor(r()*13);a.fillStyle=`rgb(${tone-8},${tone},${tone+3})`;a.fillRect(x+.5,wy+wh+1,cw-1,ch-wh-2);
+      a.fillStyle='#a3afae';a.fillRect(x,y,.65,ch);a.fillRect(x,y+ch-1,cw,.8);
+    }
+  }
+  grain(a,S,S,3,r);stains(a,S,S,r,32,'38,43,40',.035);
+  return [tex(c),tex(nc,false),tex(rc,false)].map((t,i)=>{t.name='city-japanese-'+style+'-'+i;return t;});
 }
 
 export function makeFacade(style, seed = 1) {
