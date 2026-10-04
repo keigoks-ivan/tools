@@ -218,7 +218,7 @@ const supportColumns = {
 };
 for (const [chapter, lists] of Object.entries(supportColumns)) MECH_CONFIGS[chapter].waves.forEach((w, i) => { w.reinforce = lists[i]; });
 
-export const FIELD_BOUNDS = [-236, 142, -570, 128];
+export const FIELD_BOUNDS = [-236, 624, -570, 128];
 export const OUTPOSTS = [
   { id: 'FREE_H1', name: '鐵道轉運哨站', supply: [-216, -220], enemies: [
     soldier(-218, -192, 'trooper', { yaw: 0 }), soldier(-214, -178, 'trooper', { yaw: 0 }), soldier(-216, -164, 'officer', { yaw: 0 }),

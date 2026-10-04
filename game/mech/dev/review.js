@@ -15,7 +15,7 @@ async function load(path, query = '') {
   html = html.replace(/<base href="[^"]+">/, '');
   html = html.replace(/(<script type="importmap">)([\s\S]*?)(<\/script>)/, (_, a, json, b) => {
     const map = JSON.parse(json);
-    for (const file of ['japanese-cars.mjs', 'car-material.js', 'zero/props.js', 'kobe-street.mjs', 'kobe-kitano.js', 'kobe-garden.mjs', 'kobe-heritage.mjs', 'scenic-music.mjs', 'audio.js', 'kobe-autumn.js', 'kobe-harbor.mjs', 'kobe-city.mjs', 'kobe-relief.mjs', 'urban.js', 'japan.js', 'textures.js', 'anim.js', 'env.js', 'preview.js', 'streetfront.js', 'stages.js', 'battlefields.js', 'fieldart.js', 'encounter.js', 'post.js', 'roofline.js', 'mechs.js', 'combat.js', 'cockpit.js', 'player.js', 'flight.mjs', 'vehicles.js', 'hud.js', 'zero/kit.js', 'zero/map.js', 'zero/guns.js', 'zero/human.js', 'zero/viewmodel.js', 'zero/main.js', 'zero/mission-props.mjs', 'zero/hud.js', 'zero/sfx.js', 'zero/mech6.js', 'lastline/map.js', 'lastline/script.js', 'lastline/mission.js', 'lastline/convoy.js', 'lastline/escort.mjs', 'lastline/operations.mjs', 'lastline/foot-ops.js', 'input.js', 'tactics.js', 'reinforcements.mjs', 'zero/ai.js', 'zero/script.js', 'zero/patrol.js', 'zero/recon.js', 'zero/field.js']) {
+    for (const file of ['japanese-cars.mjs', 'car-material.js', 'zero/props.js', 'kobe-street.mjs', 'kobe-kitano.js', 'kobe-garden.mjs', 'kobe-heritage.mjs', 'scenic-music.mjs', 'kobe-history.mjs', 'kobe-history-plaques.mjs', 'zero/vehicle-ops.mjs', 'zero/vehicle-story.mjs', 'zero/vehicle-routes.mjs', 'zero/vehicle-model.mjs', 'zero/ground-vehicle.mjs', 'audio.js', 'kobe-autumn.js', 'kobe-harbor.mjs', 'kobe-city.mjs', 'kobe-relief.mjs', 'urban.js', 'japan.js', 'textures.js', 'anim.js', 'env.js', 'preview.js', 'streetfront.js', 'stages.js', 'battlefields.js', 'fieldart.js', 'encounter.js', 'post.js', 'roofline.js', 'mechs.js', 'combat.js', 'cockpit.js', 'player.js', 'flight.mjs', 'vehicles.js', 'hud.js', 'zero/kit.js', 'zero/map.js', 'zero/guns.js', 'zero/human.js', 'zero/viewmodel.js', 'zero/main.js', 'zero/mission-props.mjs', 'zero/hud.js', 'zero/sfx.js', 'zero/mech6.js', 'lastline/map.js', 'lastline/script.js', 'lastline/mission.js', 'lastline/convoy.js', 'lastline/escort.mjs', 'lastline/operations.mjs', 'lastline/foot-ops.js', 'input.js', 'tactics.js', 'reinforcements.mjs', 'zero/ai.js', 'zero/script.js', 'zero/patrol.js', 'zero/recon.js', 'zero/field.js']) {
       const url = new URL('/game/mech/' + file, location.href).href;
       for (const key of Object.keys(map.imports)) if (new URL(key, entryBase).href === url) delete map.imports[key];
       map.imports[url] = url + '?qa=' + revision;
@@ -50,6 +50,8 @@ async function load(path, query = '') {
 }
 async function save(name = 'capture', clean = false) {
   if (!post) return;
+  // 前一張 PNG 的非同步儲存可能讓 iframe 失焦；新畫面前恢復這種自動暫停。
+  if(win.document.querySelector('#pause')?.style.display==='flex'&&!win.__history?.isOpen&&!win.__G?.ground.reader.isOpen&&(!win.__G?.ground.menu||win.__G.ground.menu.hidden))win.document.querySelector('#resume').click();
   post.render(1);
   const cv = win.document.createElement('canvas'); cv.width = renderer.domElement.width; cv.height = renderer.domElement.height;
   const cx = cv.getContext('2d'); cx.drawImage(renderer.domElement, 0, 0);
@@ -1195,7 +1197,7 @@ async function fieldOps() {
   report.textContent=JSON.stringify({checks,metrics,errors},null,2);state.textContent='開放戰區通過';
 }
 
-for (const [id, fn] of [['scenicMusic', scenicMusicCheck], ['prequelBrightness', prequelBrightness], ['kitanoArt', kitanoArt], ['missionPropsArt', missionPropsArt], ['carArt', carArt], ['realismArt', realismArt], ['autumnArt', autumnArt], ['japanStreets', japanStreets], ['flightArt', flightArt], ['flight', flight], ['kobeArt', kobeArt], ['fieldAudit', fieldAudit], ['fieldOps', fieldOps], ['scoutCombat', scoutCombat], ['reconControls', reconControls], ['prequelFoot', prequelFoot], ['openingPace', openingPace], ['patrolWorld', patrolWorld], ['japaneseSigns', japaneseSigns], ['harborArt', harborArt], ['campaignFoot', campaignFoot], ['campaign4', () => campaignMech(4)], ['campaign5', () => campaignMech(5)], ['campaign6', () => campaignMech(6)], ['campaign7', () => campaignMech(7)], ['campaign6Artillery', async()=>{localStorage.setItem('lastline.choice',JSON.stringify('artillery'));await campaignMech(6,'artillery');}], ['campaignArtillery', async () => { localStorage.setItem('lastline.choice', JSON.stringify('artillery')); await campaignMech(7, 'artillery'); }], ['campaignEdges', campaignEdges], ['mech', mech], ['fields', battlefields], ['enemyMotion', enemyMotion], ['zero', zero], ['tactics', tactics], ['prequelMechCampaign', prequelMechCampaign], ['campaignMain', campaignMain], ['enemyPressure', enemyPressure], ['enemyHandling', enemyHandling], ['infantry', infantry], ['art', art], ['hero', hero], ['city', city], ['mountains', mountains], ['weapons', weapons], ['save', save]]) document.querySelector('#' + id).onclick = () => fn().catch(e => { state.textContent = '失敗'; report.textContent += '\n' + e.stack; });
+for (const [id, fn] of [['groundVehicles', groundVehicles], ['historyReader', historyReaderCheck], ['groundEdges', groundEdges], ['scenicMusic', scenicMusicCheck], ['prequelBrightness', prequelBrightness], ['kitanoArt', kitanoArt], ['missionPropsArt', missionPropsArt], ['carArt', carArt], ['realismArt', realismArt], ['autumnArt', autumnArt], ['japanStreets', japanStreets], ['flightArt', flightArt], ['flight', flight], ['kobeArt', kobeArt], ['fieldAudit', fieldAudit], ['fieldOps', fieldOps], ['scoutCombat', scoutCombat], ['reconControls', reconControls], ['prequelFoot', prequelFoot], ['openingPace', openingPace], ['patrolWorld', patrolWorld], ['japaneseSigns', japaneseSigns], ['harborArt', harborArt], ['campaignFoot', campaignFoot], ['campaign4', () => campaignMech(4)], ['campaign5', () => campaignMech(5)], ['campaign6', () => campaignMech(6)], ['campaign7', () => campaignMech(7)], ['campaign6Artillery', async()=>{localStorage.setItem('lastline.choice',JSON.stringify('artillery'));await campaignMech(6,'artillery');}], ['campaignArtillery', async () => { localStorage.setItem('lastline.choice', JSON.stringify('artillery')); await campaignMech(7, 'artillery'); }], ['campaignEdges', campaignEdges], ['mech', mech], ['fields', battlefields], ['enemyMotion', enemyMotion], ['zero', zero], ['tactics', tactics], ['prequelMechCampaign', prequelMechCampaign], ['campaignMain', campaignMain], ['enemyPressure', enemyPressure], ['enemyHandling', enemyHandling], ['infantry', infantry], ['art', art], ['hero', hero], ['city', city], ['mountains', mountains], ['weapons', weapons], ['save', save]]) document.querySelector('#' + id).onclick = () => fn().catch(e => { state.textContent = '失敗'; report.textContent += '\n' + e.stack; });
 
 async function harborArt() {
   await load('/game/mech/lastline/index.html', '?mute&god&ch=1&all&fps=0');
@@ -1626,4 +1628,98 @@ async function scenicMusicCheck() {
     assert(errors.length===0,name+' 配樂切換沒有執行錯誤');
   }
   report.textContent=JSON.stringify({checks,stats,errors},null,2);state.textContent='三款景觀配樂切換通過';
+}
+
+async function groundVehicles() {
+  const checks=[],stats=[];
+  for(const [campaign,id,ch,after] of [['zero','zero_patrol',2,'D1'],['zero','zero_kitano',3,'I2'],['lastline','lastline_manifest',1,'B5'],['lastline','lastline_channel',2,'D2C'],['lastline','lastline_shuttle',3,'F3']]) {
+    await load('/game/mech/'+campaign+'/index.html',`?mute&god&ch=${ch}&all&fps=0`);result=checks;
+    const G=win.__G,T=win.__T,O=G.ground;renderer=win.__renderer;post={render:()=>win.__step(1)};
+    T.Clock.prototype.getDelta=()=>.05;const render=renderer.render.bind(renderer);renderer.render=()=>{};
+    const step=n=>win.__step(n),key=(code,on)=>win.dispatchEvent(new win.KeyboardEvent(on?'keydown':'keyup',{code})),tap=code=>{key(code,true);step(1);key(code,false);step(1);};
+    step(2);O.done.add(after);assert(O.accept(id),id+' 在主線里程碑後接受接駁');
+    const v=O.vehicle;assert(v.model.profile.triangles<6500&&v.model.profile.drawCalls<=9,id+' 車模細節保持6500tri/9calls內');
+    const beforeDone=[...O.done];let stages=0,driven=0,previous=null;
+    while(O.story.current&&stages++<40) {
+      const c=O.story.current,token=c.token;assert(c.point.every(Number.isFinite),token+' 有實際三維站點');
+      if(c.kind==='drive') {
+        if(!v.occupied){G.player.reset(v.pos.clone().add(new T.Vector3(-v.profile.width/2-.65,0,0)),v.yaw);tap('KeyE');if(!v.occupied){v.enter(G.player.pos);G.player.frozen=true;}}
+        v.setMode('drive');let n=0;
+        while(O.story.current?.token===token&&n++<14000){
+          const at=O.story.current.point,dx=at[0]-v.pos.x,dz=at[2]-v.pos.z,L=Math.hypot(dx,dz),a=Math.atan2(dx,dz),delta=Math.atan2(Math.sin(a-v.yaw),Math.cos(a-v.yaw));
+          const reverse=Math.abs(delta)>1.7,goal=reverse?Math.atan2(Math.sin(a+Math.PI-v.yaw),Math.cos(a+Math.PI-v.yaw)):delta;win.__botCtl={my:reverse?-.75:Math.abs(goal)>.4?.45:.75,mx:(reverse?1:-1)*Math.max(-1,Math.min(1,goal*2.4)),lookX:0,lookY:0};
+          const old=v.pos.clone();step(1);driven+=old.distanceTo(v.pos);assertSilent(G.enemies.filter(e=>!e.dead).length<=24,id+' 活動人物上限');
+          if(v.lastBlock&&n>100)throw Error(token+' 行車受阻 '+JSON.stringify({pos:v.pos.toArray(),yaw:v.yaw,target:at,block:v.lastBlock,delta,L}));
+        }
+        win.__botCtl={};assert(n<14000,token+' 使用真正駕駛控制、轉彎與碰撞抵達'+(n>=14000?' '+JSON.stringify({pos:v.pos.toArray(),yaw:v.yaw,speed:v.speed,occupied:v.occupied,current:O.story.current,flow:win.__flow,dead:G.player.dead}):''));
+        v.setMode('gun');step(80);assert(O.leave(),token+' 停車後安全下車');
+      } else {
+        if(v.occupied){v.speed=0;O.leave();}
+        if(c.walkRoute){for(const [x,y,z]of c.walkRoute){let n=0;while(Math.hypot(G.player.pos.x-x,G.player.pos.z-z)>.2&&n++<2500){G.player.yaw=Math.atan2(x-G.player.pos.x,z-G.player.pos.z);G.player.update(1/60,{mx:0,my:1,lookX:0,lookY:0,sprint:true});}assert(n<2500&&Math.abs(G.player.pos.y-y)<.45,token+' 北野使用正式步行坡道');}}
+        else G.player.reset(new T.Vector3(...c.point),0);
+        step(3);
+        assert(O.props.length>0&&O.props.some(m=>m.geometry.attributes.position.count>50),token+' E 站點有設備／物資實體');
+        if(!previous){G.player.reset(new T.Vector3(c.point[0]+3,c.point[1],c.point[2]+4),Math.atan2(-3,-4));G.player.pitch=-.12;renderer.render=render;step(1);await save('vehicle-'+id+'-operation',true);renderer.render=()=>{};G.player.reset(new T.Vector3(...c.point),0);step(2);}
+        if(c.kind==='clear') {for(let i=0;i<80&&!O.guards.get(token)?.some(r=>r.actor);i++)step(1);const guards=O.guards.get(token);assert(guards?.length===4,token+' 四名守軍預先巡邏');for(const r of guards){r.data.dead=true;if(r.actor)r.actor.damage(10000,new T.Vector3(0,0,1),'head',G.player.pos);}step(3);}
+        else {key('KeyE',true);let n=0;while(O.story.current?.token===token&&n++<1400){G.player.hurtT=99;step(1);}key('KeyE',false);assert(n<1400,token+' 下車操作／守點完成');}
+      }
+      if(!previous){renderer.render=render;G.player.frozen=false;G.player.reset(v.pos.clone().add(new T.Vector3(6,0,7)),Math.atan2(-6,-7));G.player.pitch=-.03;win.__step(1);await save('vehicle-'+id+'-front',true);renderer.render=()=>{};previous=true;}
+    }
+    assert(stages<40&&O.story.completed.has(id),id+' 完整支線完成');
+    assert(beforeDone.every(d=>O.done.has(d))&&O.done.size===beforeDone.length,id+' 支線不代替主線任務');
+    assert(!G.player.frozen&&!v.occupied,id+' 結束接駁返回徒步');
+    assert(driven>200,id+' 實際駕駛超過200公尺');
+    stats.push({id,driven:Math.round(driven),stages,model:v.model.profile,guardRecords:[...O.sidePatrols.values()].reduce((n,p)=>n+p.records.length,0)});
+    const saved=O.snapshot();assert(O.restore(saved),id+' 完成支線保存／還原，不重發獎勵');
+    assert(O.vehicle?.hp===saved.vehicle.hp&&O.vehicle.ammo===saved.vehicle.ammo&&!O.occupied,id+' 已完成的停放車保留耐久與彈藥');
+    assert(O.story.completed.has(id)&&!O.story.current,id+' 完成紀錄保留');
+    renderer.render=render;assert(errors.length===0,id+' 無程式／渲染錯誤');
+  }
+  report.textContent=JSON.stringify({checks,stats,errors},null,2);state.textContent='五段武裝載具支線通過';
+}
+
+async function groundEdges() {
+  const checks=[];await load('/game/mech/zero/index.html','?mute&ch=2&all&fps=0');result=checks;
+  const G=win.__G,O=G.ground,T=win.__T;renderer=win.__renderer;post={render:()=>win.__step(1)};
+  const render=renderer.render.bind(renderer);renderer.render=()=>{};T.Clock.prototype.getDelta=()=>.05;O.done.add('D1');win.dispatchEvent(new win.KeyboardEvent('keydown',{code:'KeyK'}));win.__step(1);win.dispatchEvent(new win.KeyboardEvent('keyup',{code:'KeyK'}));assert(!O.menu.hidden,'K 打開接駁選單並暫停');O.menu.querySelector('[data-mission=zero_patrol]').click();win.__step(1);assert(O.menu.hidden&&O.story.current?.missionId==='zero_patrol','實際選單接受支線後回到遊戲');
+  const v=O.vehicle;G.player.reset(v.pos.clone().add(new T.Vector3(-1.7,0,0)),v.yaw);v.enter(G.player.pos);G.player.frozen=true;win.__step(1);
+  const key=(code,on)=>win.dispatchEvent(new win.KeyboardEvent(on?'keydown':'keyup',{code}));key('KeyN',true);win.__step(1);key('KeyN',false);assert(!G.scout.active,'坐在車內不會同時操控無人機');
+  const hp=v.hp;G.bolt(v.pos.clone().add(new T.Vector3(0,1,8)),new T.Vector3(0,0,-1),180,30,null);win.__step(4);assert(v.hp<hp,'敵方實際子彈打到車身會扣耐久');
+  v.setMode('gun');v.viewYaw=v.yaw;v.viewPitch=.05;win.__step(2);key('M0',true);win.__step(12);key('M0',false);assert(v.ammo<v.profile.ammo&&G.stats.shots>0,'停車機槍實際開火、扣彈、射擊回饋');
+  const saved=O.snapshot();O.restore(saved);assert(O.vehicle.hp===saved.vehicle.hp&&O.vehicle.ammo===saved.vehicle.ammo&&!O.occupied&&!G.player.frozen,'中途還原保留耐久彈藥，車先停妥並返回徒步');
+  const cv=O.vehicle;G.player.reset(cv.pos.clone().add(new T.Vector3(-1.7,0,0)),cv.yaw);cv.enter(G.player.pos);G.player.frozen=true;O.damage(10000);assert(!O.occupied&&!G.player.frozen&&!O.story.current&&!G.player.dead,'車毀立即返回安全徒步視角，主線仍可走');
+  O.restore({...saved,vehicle:null});assert(!O.story.current&&!O.vehicle,'缺車存檔不會復活滿彈載人車');
+  O.restore(saved);key('KeyJ',true);win.__step(1);key('KeyJ',false);assert(O.reader.isOpen&&win.document.querySelector('#pause').style.display==='flex','史實閱讀暫停遊戲');const at=G.t;win.__step(100);assert(G.t===at,'閱讀期間敵人與物理時間停止');
+  const article=O.reader.article;assert(article.textContent.includes('一八六八')&&article.querySelector('a').href.startsWith('https://www.city.kobe.lg.jp/'),'史實卡實際显示核對日期與官方來源');O.reader.close();win.__step(2);
+  O.story.active=null;O.accept('zero_patrol');const moving=O.vehicle;G.player.reset(moving.pos.clone().add(new T.Vector3(-1.7,0,0)),0);moving.enter(G.player.pos);G.player.frozen=true;moving.speed=3;O.reset();assert(!G.player.frozen&&!O.vehicle,'奔馳中重開也能恢復步兵，沒有凍結軟鎖');
+  O.accept('zero_patrol');const photo=O.vehicle;G.player.reset(photo.pos.clone().add(new T.Vector3(-1.7,0,0)),photo.yaw);photo.enter(G.player.pos);G.player.frozen=true;renderer.render=render;win.__step(1);await save('vehicle-patrol-driving');photo.setMode('gun');win.__step(1);await save('vehicle-patrol-gun');O.leave(true);assert(errors.length===0,'載具邊界無程式錯誤');report.textContent=JSON.stringify({checks,errors},null,2);state.textContent='載具傷害與存檔通過';
+}
+
+async function historyReaderCheck() {
+  const checks=[];
+  for(const [name,path]of [['main',''],['zero','zero/'],['lastline','lastline/']]){
+    await load('/game/mech/'+path+'index.html','?mute&god&ch=1&all&nobrief&fps=0');result=checks;
+    const G=name==='main'?win.__game:win.__G,R=name==='main'?win.__history:G.ground.reader;
+    renderer=name==='main'?G.post.renderer:win.__renderer;const render=renderer.render.bind(renderer);renderer.render=()=>{};
+    const step=n=>name==='main'?G.run(n/60):win.__step(n);
+    if(name==='main'){G.launch(1);step(240);}else step(4);
+    win.dispatchEvent(new win.KeyboardEvent('keydown',{code:'KeyJ'}));step(1);win.dispatchEvent(new win.KeyboardEvent('keyup',{code:'KeyJ'}));
+    assert(R.isOpen&&win.document.querySelector('#pause').style.display==='flex',name+' J 開啟史實，暫停戰鬥');
+    const p=G.player.pos.clone(),at=G.t;step(100);assert(G.player.pos.equals(p)&&(name==='main'||G.t===at),name+' 閱讀期間人物與物理停止');
+    for(const [id,b]of R.buttons){b.click();assert(R.selected===id&&R.article.querySelector('a')?.href.startsWith('https://')&&R.article.textContent.includes('官方資料'),name+' '+id+' 正確文章與官方來源');}
+    assert(R.read.size===8,name+' 八張史實卡閱讀紀錄');const saved=R.snapshot();assert(R.restore(JSON.parse(JSON.stringify(saved)))&&R.read.size===8,name+' 閱讀存檔可還原');
+    R.closeButton.dispatchEvent(new win.KeyboardEvent('keydown',{code:'Escape',bubbles:true}));step(1);assert(!R.isOpen&&win.document.querySelector('#pause').style.display==='none',name+' Esc 關閉史實並恢復遊戲');
+    if(name==='main'){
+      const plaques=G.world.scene.getObjectByName('kobe-history-plaques');assert(plaques?.visible,'本篇北野有實體史實牌');G.launch(4);assert(!plaques.visible,'切換山區場地不留下城市史實牌');G.launch(1);assert(plaques.visible,'回城市恢復史實牌');
+    }else{
+      for(const it of G.ground.historyPlaques.items){
+        G.player.reset(new win.__T.Vector3(...it.base),0);step(2);G.hud.prompt='';
+        win.dispatchEvent(new win.KeyboardEvent('keydown',{code:'KeyE'}));step(1);win.dispatchEvent(new win.KeyboardEvent('keyup',{code:'KeyE'}));
+        assert(R.isOpen&&R.selected===it.id,name+' '+it.id+' 實體牌 E 打開對應歷史');R.close();step(2);
+      }
+      G.ground.reader.open('moegi');renderer.render=render;win.__step(1);renderer.render=()=>{};
+    }
+    renderer.render=render;assert(errors.length===0,name+' 史實閱讀沒有執行錯誤');
+  }
+  report.textContent=JSON.stringify({checks,errors},null,2);state.textContent='三款史實圖鑑通過';
 }

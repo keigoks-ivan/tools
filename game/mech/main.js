@@ -4,6 +4,8 @@
 import * as THREE from 'three';
 import { qualityLevel, pixelRatio, FrameGate } from './runtime.js';
 import { ScenicMusic } from './scenic-music.mjs';
+import { HistoryReader } from './kobe-history.mjs';
+import { createHistoryPlaques } from './kobe-history-plaques.mjs';
 
 const q = new URLSearchParams(location.search);
 // 大檔案（貼圖、HDR、模型）改從 jsDelivr 下載，網站主機給大檔很慢；不能用時照舊從本站（見 cdn.js）
@@ -247,6 +249,14 @@ async function game() {
 
   // ---------------------------------------------------------------- 流程
   let state = 'title', boot = 0, bootLen = 3.4, titleT = 0;
+  const history = new HistoryReader({onOpen:()=>{pause();input.unlock();},onClose:()=>{input.reset();resume();},onRead:()=>{try{localStorage.setItem('mech.history',JSON.stringify(history.snapshot()));}catch{}}});
+  const historyPlaques=createHistoryPlaques(scene,world.kitano);
+  world.cityObjects.push(...historyPlaques.meshes);
+  try{history.restore(JSON.parse(localStorage.getItem('mech.history')));}catch{}
+  window.__history=history;
+  const historyButton=document.createElement('button');historyButton.type='button';historyButton.className='btn';historyButton.textContent='神戶史實 · J';historyButton.style.cssText='position:fixed;right:150px;top:8px;z-index:20;padding:8px;font-size:13px';historyButton.hidden=true;document.body.append(historyButton);
+  const historyAt=()=>historyPlaques.items.find(it=>it.p.distanceTo(player.pos)<12)?.id;
+  historyButton.onclick=()=>{if(state==='play')history.open(historyAt());};
   const touchUI = $('touch');
   status.textContent = '選擇關卡';
   renderStages();
@@ -298,6 +308,7 @@ async function game() {
   }
   // 回標題選關：清掉戰場、機體擺回展示鏡頭
   function toTitle() {
+    historyButton.hidden=true;
     $('result').style.display = 'none'; $('pause').style.display = 'none';
     audio.setPaused(false); audio.setDanger(false); audio.setLockAlert(0); audio.boost(0);
     input.unlock(); input.enabled = false;
@@ -312,6 +323,7 @@ async function game() {
     $('title').classList.remove('hide');
   }
   function startBoot(len) {
+    historyButton.hidden=false;
     combat.prep();   // 遭遇戰：擺路障、第一區的遠處目標
     state = 'boot'; boot = 0; bootLen = len;
     input.enabled = true;
@@ -420,6 +432,7 @@ async function game() {
       if (boot >= 1) { state = 'play'; combat.start(); }
     }
     const live = state === 'play' || state === 'boot';
+    if(state==='play'&&input.pressed('KeyJ')){history.open(historyAt());input.endFrame();return;}
     let inp = input.state(rdt);
     if (window.__game.fake) Object.assign(inp, window.__game.fake);
     if (inp.pause && live) { input.unlock(); pause(); input.endFrame(); return; }

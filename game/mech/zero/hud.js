@@ -42,6 +42,7 @@ export class HUD {
     x.clearRect(0, 0, W, H);
     if (!G || !G.playing) { this._subs(dt, W, H); this._banner(dt, W, H); return; }
     const vm = G.vm, P = G.player, cx = W / 2, cy = H / 2;
+    if(G.ground?.occupied){G.ground.draw(this,W,H);if(this.obj)this._objective(W,H,G);this._radar(W,H,G);this._subs(dt,W,H);this._banner(dt,W,H);this.hit=Math.max(0,this.hit-dt);return;}
     if (G.scout?.active) { this._scout(W, H, G); this.hit = Math.max(0, this.hit - dt); this._radar(W, H, G); this._subs(dt, W, H); this._banner(dt, W, H); return; }
     this.clearAim = vm.cur === 'smg' && vm.ads > .5 ? Math.min(W,H)*.09 : 0;
     // ---- 狙擊鏡
@@ -144,6 +145,7 @@ export class HUD {
     }
     if (G.field) { x.font = '500 12px "Noto Sans TC",sans-serif'; x.fillStyle = '#ceadff'; x.fillText('[M] 戰術地圖 · 自由攻略哨站', 34, 104); }
     this._radar(W, H, G);
+    G.ground?.draw(this,W,H);
     this._subs(dt, W, H);
     this._banner(dt, W, H);
   }

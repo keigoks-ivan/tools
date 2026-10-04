@@ -10,6 +10,7 @@ import { FieldOps, FieldMap } from './field.js';
 import { qualityLevel, pixelRatio, FrameGate } from '../runtime.js';
 import { collectMissionItem, syncMissionProps } from './mission-props.mjs';
 import { ScenicMusic } from '../scenic-music.mjs';
+import { VehicleOps } from './vehicle-ops.mjs';
 
 // 本篇的 env.js 用相對路徑 './assets/' 讀天空、HDR、城市貼圖：
 //   前傳有縮小的 webp 版（assets/env/，遠景看不出差別、下載少 12 MB）；沒有的才去本篇資料夾拿
@@ -28,8 +29,8 @@ const q = new URLSearchParams(location.search);
 const scenicMusic = new ScenicMusic();
 const campaign = document.body.dataset.campaign === 'lastline';
 let resumeSave = false;
-const readSave = (key) => { try { return JSON.parse(localStorage.getItem('lastline.' + key)); } catch { return null; } };
-const writeSave = (key, value) => { try { localStorage.setItem('lastline.' + key, JSON.stringify(value)); } catch {} };
+const readSave = (key) => { try { return JSON.parse(localStorage.getItem((campaign?'lastline.':'zero.') + key)); } catch { return null; } };
+const writeSave = (key, value) => { try { localStorage.setItem((campaign?'lastline.':'zero.') + key, JSON.stringify(value)); } catch {} };
 const $ = (id) => document.getElementById(id);
 const clamp = THREE.MathUtils.clamp, lerp = THREE.MathUtils.lerp;
 const bar = document.querySelector('#bar i'), status = $('status');
@@ -66,7 +67,7 @@ const [A, SURF, MODELS, kit] = await Promise.all([
 status.textContent = campaign ? '建立港區' : '建立街區';
 await new Promise((r) => setTimeout(r, 0));
 initMechMaterials(A);
-const world = new World(renderer, scene, A, { terrainSegments: 72, city: !campaign, kitano: false, sceneryReserve: campaign ? null : { x0:120,x1:420,z0:-40,z1:92 } });
+const world = new World(renderer, scene, A, { terrainSegments: 72, city: !campaign, kitano: false, sceneryReserve: campaign ? null : { x0:120,x1:420,z0:-82,z1:92 } });
 // 街區內原本的路燈、車、樹拿掉（地圖自己擺道具）
 {
   const zero = new THREE.Matrix4().makeScale(0, 0, 0);
@@ -273,8 +274,8 @@ let chapter = 1, checkpoint = null, stage = 'play';
 let mechWalk = null, finale = null, hatchOpen = 0, alarmOn = false;   // M6＝第 6 章（mech6.js）進行中
 const progress = () => clamp(store.get('ch', 1), 1, S.CHAPTERS.length);
 function saveFoot() {
-  if (!campaign || !checkpoint) return;
-  writeSave('checkpoint', { chapter, foot: { layout: S.LAYOUT, p: checkpoint.p.toArray(), yaw: checkpoint.yaw, done: checkpoint.done, nades: checkpoint.nades, picked: [...pickedItems], patrols: checkpoint.patrols, field: checkpoint.field }, stats: G.stats });
+  if (!checkpoint) return;
+  writeSave('checkpoint', { chapter, foot: { layout: S.LAYOUT||'zero-v1', p: checkpoint.p.toArray(), yaw: checkpoint.yaw, done: checkpoint.done, nades: checkpoint.nades, picked: [...pickedItems], patrols: checkpoint.patrols, field: checkpoint.field, vehicles: checkpoint.vehicles }, stats: G.stats });
 }
 
 // 手榴彈的樣子：墨綠色小圓柱＋一顆閃爍的紅燈（越接近爆炸閃越快）
@@ -326,17 +327,23 @@ G.contacts = new Contacts(); G.scout = new Scout(G); G.onScoutLost = bodyCamera;
 G.patrols = patrols; G.footExtent = S.FOOT_EXTENT || 140; G.arrivalExtent = campaign ? 320 : 140;
 G.field = new FieldOps(G, S.OUTPOSTS || []);
 G.onFieldClaim = () => {
-  checkpoint = { p: player.pos.clone(), yaw: player.yaw, done: [...done], ch: chapter, nades: G.nadeN, patrols: patrols.snapshot(), field: G.field.snapshot() };
+  checkpoint = { p: player.pos.clone(), yaw: player.yaw, done: [...done], ch: chapter, nades: G.nadeN, patrols: patrols.snapshot(), field: G.field.snapshot(), vehicles: G.ground.snapshot() };
   saveFoot();
 };
 const fieldMap = new FieldMap(G, S.FIELD_BOUNDS, () => { fieldMap.close(); input.reset(); resume(); });
+G.ground = new VehicleOps({G,campaign:campaign?'lastline':'zero',materials:carMaterials(),surfaces:SURF,map,input,camera,pause,resume,
+  canOpen:()=>state==='play'&&stage==='play'&&!finale&&!player.dead,
+  fallback:()=>map.marks[S.CHAPTERS[chapter-1].start],spawn:d=>G.enemies.filter(e=>!e.dead).length<MAX_ACTORS?spawn(d):null,shoot:vehicleShoot,
+  changed:()=>{if(!checkpoint)return;checkpoint={p:player.pos.clone(),yaw:player.yaw,done:[...done],ch:chapter,nades:G.nadeN,patrols:patrols.snapshot(),field:G.field.snapshot(),vehicles:G.ground.snapshot()};saveFoot();}
+});
+addEventListener('keydown',e=>{if(!e.repeat&&!G.ground.menu.hidden&&['KeyK','Escape'].includes(e.code)){e.preventDefault();e.stopPropagation();G.ground.closeMenu();}});
 function showFieldMap() { if (stage !== 'play' || finale || player.dead) return; pause(); input.unlock(); fieldMap.open(); }
 $('fieldOpen').onclick = showFieldMap;
 function arrive(def) { if (G.enemies.filter(e => !e.dead).length >= MAX_ACTORS) return null; const at = arrivalPoint(G, def); return at ? spawn(at) : null; }
 function reinforce(a, defs, delay = 0) {
   const source = a.list.find(e => !e.dead && e.sees && e.lastSeen) || a.list.find(e => e.state === 'combat' && e.lastSeen);
   const at = source?.lastSeen || new THREE.Vector3(a.E.guide[0], 0, a.E.guide[1]);
-  a.reinforcements.add(defs.map(d => ({ ...d, alert: true, lastSeen: at.clone() })), G.t, delay);
+  a.reinforcements.add(defs.map(d => ({ ...d, alert: true, lastSeen: at.clone() })), G.t, delay+(G.ground?.warningSeconds||0));
 }
 const doneT = {};   // 每段清完的時間（after＋wait 用）
 function markDone(id, old = false) { done.add(id); doneT[id] = old ? -1e9 : G.t; }   // old＝讀檔／選關還原的，不必再等 wait
@@ -518,13 +525,14 @@ function startChapter(n) {
   done.clear();
   for (const E of S.ENCOUNTERS) if (E.ch < n) markDone(E.id, true);
   syncMissionProps(map, S.ENCOUNTERS, done, pickedItems);
+  G.ground.reset();G.ground.chapter=n;G.ground.done=done;
   player.reset(map.marks[C.start].clone(), C.yaw);
   G.nadeN = NADE_START;
   if (q.has('x')) player.reset(new THREE.Vector3(+q.get('x'), +(q.get('y') || 0), +q.get('z')), +(q.get('yaw') || 0));
   vm.refill();
   G.field.reset(); $('fieldOpen').hidden = false;
   patrols.reset(done); patrols.update(0, true);
-  checkpoint = { p: player.pos.clone(), yaw: player.yaw, done: [...done], ch: n, nades: G.nadeN, patrols: patrols.snapshot(), field: G.field.snapshot() };
+  checkpoint = { p: player.pos.clone(), yaw: player.yaw, done: [...done], ch: n, nades: G.nadeN, patrols: patrols.snapshot(), field: G.field.snapshot(), vehicles: G.ground.snapshot() };
   G.chapterTag = `CHAPTER ${n}　${C.en}`;
   const first = objective();
   G.objText = first ? first.obj : '';
@@ -560,7 +568,7 @@ function updateEncounters() {
     for (const [w, t, now] of a.E.done) hud.say(w, t, 3.6, now);
     if (a.E.done.length) audio.radio('in');
     hud.note(a.E.pickup ? '取得啟動金鑰' : a.E.operation?.bypass ? '任務完成・巡邏隊仍在附近' : '區域清除', '#ffb347');
-    checkpoint = { p: player.pos.clone(), yaw: player.yaw, done: [...done], ch: chapter, nades: G.nadeN, patrols: patrols.snapshot(), field: G.field.snapshot() };
+    checkpoint = { p: player.pos.clone(), yaw: player.yaw, done: [...done], ch: chapter, nades: G.nadeN, patrols: patrols.snapshot(), field: G.field.snapshot(), vehicles: G.ground.snapshot() };
     saveFoot();
     const nx = objective();
     if (a.E.id === 'G2') { toCockpit(); if (alarmOn) { alarmOn = false; audio.alarm(false); } }
@@ -608,11 +616,12 @@ function nextChapter(n) {
   const C = S.CHAPTERS[n - 1];
   hud.title(`第 ${n} 章　${C.name}`, C.en, 4);
   chapter = n;
+  G.ground.chapter=n;
   G.chapterTag = `CHAPTER ${n}　${C.en}`;
   const L = S.LINES['ch' + n]; if (L) { audio.radio('in'); for (const [w, t] of L) hud.say(w, t, 3.8); }
   const first = objective();
   G.objText = first ? first.obj : ''; hud.obj = first ? guideObj(first) : null;
-  checkpoint = { p: player.pos.clone(), yaw: player.yaw, done: [...done], ch: n, nades: G.nadeN, patrols: patrols.snapshot(), field: G.field.snapshot() };
+  checkpoint = { p: player.pos.clone(), yaw: player.yaw, done: [...done], ch: n, nades: G.nadeN, patrols: patrols.snapshot(), field: G.field.snapshot(), vehicles: G.ground.snapshot() };
   scenicMusic.reset();
   audio.music('battle', { stage: C.music });
   if (n > progress()) store.set('ch', n);
@@ -755,6 +764,15 @@ function scoutShoot(shot) {
   }
   hearNoise(G, G.scout.pos, 45, .8);
 }
+function vehicleShoot(shot) {
+  const {origin:from,direction:d,damage:dmg,range}=shot,wh=shotRay(from,d,range);
+  let t=wh?.t??range,target=null,part=null;
+  for(const e of G.enemies){const h=e.hitTest(from,d,t);if(h){t=h.t;target=e;part=h.part;}}
+  const end=from.clone().addScaledVector(d,t);fx.beam(from,end,'drone');fx.muzzle(from,d,[3.2,1.5,.5]);audio.enemyShot(from,'trooper');G.stats.shots++;
+  if(target){const killed=target.damage(dmg*(part==='head'?1.6:part==='limb'?.75:1),d.clone(),part,from);G.contacts.reveal(target,G.contacts.now);G.stats.hits++;G.lastHit=G.t;fx.impact(end,d.clone().negate(),target.type==='drone'?'metal':target.T?.armor?'armor':'body',[3,1.5,.6],.8);hud.marker(killed?'kill':part==='head'?'head':'hit');audio.hitmark(killed?'kill':'hit');if(killed){G.stats.kills++;if(part==='head')G.stats.heads++;}}
+  else if(wh){fx.impact(end,wh.n,/metal|rust|corr/.test(wh.mat)?'metal':'concrete',[2,1.3,.6],.7);if(wh.b?.obj)D.hit(wh.b.obj,dmg,end,d);else D.wall(end,wh.n,wh.mat,dmg);}
+  hearNoise(G,from,80,1);
+}
 const pistolBolts = [];
 
 // 敵人光彈：移動、撞牆、打到玩家、擦身而過
@@ -772,6 +790,8 @@ function updateBolts(dt) {
     const step = b.speed * dt;
     const wh = solid.ray(b.p, b.dir, step);
     const lim = wh ? wh.t : step;
+    const vehicleHit=G.ground.hitTest(b.p,b.dir,lim);
+    if(vehicleHit!==null&&!finale){const p=b.p.clone().addScaledVector(b.dir,vehicleHit);if(!q.has('god'))G.ground.damage(b.dmg);fx.impact(p,b.dir.clone().negate(),'metal',[4,.8,.3],.65);G.bolts.splice(i,1);continue;}
     const hit = segCapsule(b.p, b.dir, lim, foot.x, foot.z, foot.y + 0.2, eye.y + 0.1, 0.36);
     const droneHit = G.scout.hitTest(b.p, b.dir, lim);
     if (droneHit >= 0 && (hit < 0 || droneHit < hit) && !finale) {
@@ -823,6 +843,7 @@ function shake(k) { shakeK = Math.min(1.5, shakeK + k); }
 function hurtPlayer(dmg, from) {
   if (dmg > 0 && G.scout?.active && !finale && !M6) { G.scout.attacked(); bodyCamera(); }
   if (q.has('god') || player.dead || finale || M6) return;
+  if(G.ground.occupied){G.ground.damage(dmg);G.stats.taken+=dmg;dmgFlash=Math.min(1,dmgFlash+dmg/50);audio.hurt(clamp(dmg/25,.2,1),0);return;}
   const hpDmg = player.damage(dmg);
   G.stats.taken += dmg;
   const a = -wrap(Math.atan2(from.x - player.pos.x, from.z - player.pos.z) - player.yaw);
@@ -857,6 +878,7 @@ function respawn() {
   done.clear(); for (const id of cp.done) markDone(id, true);
   syncMissionProps(map, S.ENCOUNTERS, done, pickedItems);
   chapter = cp.ch;
+  G.ground.restore(cp.vehicles);G.ground.chapter=chapter;G.ground.done=done;
   player.reset(cp.p, cp.yaw); vm.refill(); G.nadeN = cp.nades ?? NADE_START;
   G.field.reset(cp.field);
   patrols.reset(done, cp.patrols); patrols.update(0, true);
@@ -914,6 +936,7 @@ function updateFinale(dt) {
 }
 // 第 6 章：開蒼焰，每一幀交給 mech6.js；載入失敗就照舊直接接本篇
 async function startMech() {
+  G.ground.suspend();
   if ($('tScout')) $('tScout').style.display = 'none';
   finale = null; stage = 'mech'; $('fieldOpen').hidden = true; chapter = S.CHAPTERS[chapter - 1].mech ? chapter : (S.FIRST_MECH || 6); G.playing = false; player.frozen = true;
   hud.prompt = null; hud.obj = null; G.objText = ''; clearEnemies(); active = [];
@@ -1008,7 +1031,7 @@ let state = 'title';
 function renderChapters() {
   const nx = q.has('all') ? S.CHAPTERS.length : progress();
   $('chapters').innerHTML = S.CHAPTERS.map((C) => `<button class="chp${C.n > nx ? ' lock' : ''}${C.n === nx ? ' next' : ''}" data-c="${C.n}"${C.n > nx ? ' disabled' : ''}><b>CHAPTER ${C.n}</b><span>${C.n > nx ? 'LOCKED' : C.name}</span></button>`).join('');
-  if (campaign && $('campaignResume')) {
+  if ($('campaignResume')) {
     const saved = readSave('checkpoint');
     $('campaignResume').hidden = !saved || !S.CHAPTERS[saved.chapter - 1];
     $('campaignResume').onclick = () => { const cp = readSave('checkpoint'); if (cp && S.CHAPTERS[cp.chapter - 1]) { resumeSave = true; launch(cp.chapter); } };
@@ -1018,7 +1041,7 @@ status.textContent = '選擇章節';
 bar.style.width = '100%';
 renderChapters();
 $('chapters').style.display = 'flex';
-$('chapters').addEventListener('click', (ev) => { const b = ev.target.closest('.chp'); if (b && !b.disabled) { resumeSave = false; if (campaign) writeSave('checkpoint', null); launch(+b.dataset.c); } });
+$('chapters').addEventListener('click', (ev) => { const b = ev.target.closest('.chp'); if (b && !b.disabled) { resumeSave = false; writeSave('checkpoint', null); launch(+b.dataset.c); } });
 document.addEventListener('mouseover', (ev) => { const b = ev.target.closest('.chp:not(.lock), .btn'); if (b && !b.contains(ev.relatedTarget)) audio.ui('hover'); });
 document.addEventListener('click', (ev) => { if (ev.target.closest('.btn, .chp')) audio.ui('click'); });
 for (const k of ['pointerdown', 'keydown']) addEventListener(k, () => audio.unlock(), { once: true });
@@ -1059,18 +1082,19 @@ function begin(n) {
   }
   for(const id of ['tFlight','tDescend']){const b=$(id);if(b)b.style.display='none';}
   startChapter(n);
-  if (campaign) {
-    if(n===1&&!resumeSave)writeSave('operations',{});
+  if (campaign || resumeSave) {
+    if(campaign&&n===1&&!resumeSave)writeSave('operations',{});
     const saved = resumeSave ? readSave('checkpoint') : null, foot = saved?.chapter === n ? saved.foot : null;
     const ids = new Set(S.ENCOUNTERS.filter(e => e.ch <= n).map(e => e.id));
-    if (foot && foot.layout === S.LAYOUT && Array.isArray(foot.p) && foot.p.length === 3 && foot.p.every(Number.isFinite) && Math.max(Math.abs(foot.p[0]), Math.abs(foot.p[2])) < (S.FOOT_EXTENT || 140) && foot.p[1] >= 0 && foot.p[1] < 40 && Number.isFinite(foot.yaw) && Array.isArray(foot.done) && foot.done.every(id => ids.has(id))) {
-      checkpoint = { p: new THREE.Vector3(...foot.p), yaw: foot.yaw, done: foot.done, ch: n, nades: clamp(foot.nades || 0, 0, NADE_MAX), patrols: foot.patrols, field: foot.field };
+    if (foot && foot.layout === (S.LAYOUT||'zero-v1') && Array.isArray(foot.p) && foot.p.length === 3 && foot.p.every(Number.isFinite) && Math.max(Math.abs(foot.p[0]), Math.abs(foot.p[2])) < (S.FOOT_EXTENT || 140) && foot.p[1] >= 0 && foot.p[1] < 40 && Number.isFinite(foot.yaw) && Array.isArray(foot.done) && foot.done.every(id => ids.has(id))) {
+      checkpoint = { p: new THREE.Vector3(...foot.p), yaw: foot.yaw, done: foot.done, ch: n, nades: clamp(foot.nades || 0, 0, NADE_MAX), patrols: foot.patrols, field: foot.field, vehicles: foot.vehicles };
       pickedItems.clear(); for (const id of Array.isArray(foot.picked) ? foot.picked : []) if (map.items[id]) pickedItems.add(id);
       respawn();
       for (const k of Object.keys(G.stats)) if (Number.isFinite(saved.stats?.[k])) G.stats[k] = Math.max(0, saved.stats[k]);
     }
-    vm.swap('smg'); saveFoot();
+    if(campaign)vm.swap('smg');
   }
+  saveFoot();
   if (q.has('final')) { for (const E of S.ENCOUNTERS) done.add(E.id); player.reset(new THREE.Vector3(14, 0, 90), 0); toCockpit(); }
   state = 'play'; stage = 'play'; G.playing = true;
   input.enabled = true;
@@ -1088,6 +1112,7 @@ function resume() {
   state = 'play'; clock.getDelta();
 }
 function toTitle() {
+  G.ground.suspend();
   fieldMap.close();
   if (M6 || stage === 'mech') { location.href = location.pathname; return; }   // 第 6 章換了整套機體系統：直接重新載入回標題
   $('pause').style.display = 'none'; $('result').style.display = 'none';
@@ -1124,10 +1149,12 @@ function frame(now = performance.now()) {
   }
   if (stage === 'mech') { if (M6) M6.tick(dt); input.endFrame(); return; }   // 第 6 章（載入中先停在黑畫面）
   const c = input.state(dt), K = input.keys;
+  if(stage==='play'&&!finale&&!player.dead&&input.pressed('KeyK')){G.ground.openMenu();input.endFrame();return;}
+  if(stage==='play'&&!finale&&!player.dead&&input.pressed('KeyJ')){G.ground.reader.open(G.ground.historyId());input.endFrame();return;}
   if (stage === 'play' && !finale && input.pressed('KeyM')) { showFieldMap(); input.endFrame(); return; }
   if (c.pause && !finale) { pause(); input.endFrame(); return; }
   if (!G.scout.active && (input.pressed('KeyC') || input.pressed('Tod'))) crouchToggle = !crouchToggle;
-  if (stage === 'play' && !finale && (input.pressed('KeyN') || input.pressed('Tscout'))) G.scout.toggle();
+  if (stage === 'play' && !finale && !G.ground.occupied && (input.pressed('KeyN') || input.pressed('Tscout'))) G.scout.toggle();
   const run = K.has('ShiftLeft') || K.has('ShiftRight') || K.has('Tboost');
   if (run && c.my > 0.3) crouchToggle = false;
   const lookK = vm.scoped ? WEAPONS.rifle.fov / FOV * 1.1 : 1 - vm.ads * 0.3;
@@ -1136,7 +1163,9 @@ function frame(now = performance.now()) {
   if (stage === 'play' && !finale) {
     G.stats.time += dt;
     G.scout.update(dt, { ...ctl, up: K.has('Space') || K.has('Tjump'), down: K.has('KeyC') || K.has('ControlLeft') || K.has('Tod') });
-    player.update(dt, G.scout.active ? { mx: 0, my: 0, lookX: 0, lookY: 0, crouch: player.crouchK > .5 } : ctl);
+    G.ground.controls(dt,ctl);
+    player.update(dt, G.scout.active || G.ground.occupied ? { mx: 0, my: 0, lookX: 0, lookY: 0, crouch: player.crouchK > .5 } : ctl);
+    G.ground.blockFoot(player);
     // 後座造成的鏡頭上揚（大部分會回來）
     recoilV -= recoil * 60 * dt; recoilV *= Math.exp(-14 * dt); recoil += recoilV * dt;
     player.pitch = clamp(player.pitch + recoilV * dt * 0.35, -1.45, 1.45);
@@ -1161,7 +1190,7 @@ function frame(now = performance.now()) {
   camera.updateProjectionMatrix();
   camera.updateMatrixWorld();
   // 武器
-  if (stage === 'play' && !finale && !player.dead && !G.scout.active) {
+  if (stage === 'play' && !finale && !player.dead && !G.scout.active && !G.ground.occupied) {
     if (input.pressed('KeyG') || input.pressed('Tnade')) { if (G.nadeN <= 0) hud.note('沒有手榴彈了', '#8aa3ab'); else if (vm.throwNade()) audio.throw(); }
     const shot = vm.update(dt, { fire: K.has('M0') || K.has('Tfire'), ads: ctl.ads, reload: c.reload || input.pressed('Tsaber'), swap: input.pressed('KeyQ') || input.pressed('Tcannon'), swapTo: input.pressed('Digit1') ? 'rifle' : input.pressed('Digit2') ? 'pistol' : input.pressed('Digit3') ? 'smg' : null, hold: run }, player, { x: c.lookX, y: c.lookY });
     if (shot) playerShoot(shot);
@@ -1170,6 +1199,7 @@ function frame(now = performance.now()) {
   // 視角場景的光：在陰影裡嗎（往太陽方向打一條線）
   const inShade = !!solid.ray(G.playerEye, world.lightDir, 80);
   vm.light(camera, world.lightDir, null, inShade, dt);
+  G.ground.cameraOverride();
   if (G.scout.active) {
     G.scout.camera(camera); vm.holder.visible = false; vm.arms.root.visible = false; vm.scoped = false; vm.ads = 0;
     if (K.has('M0') || K.has('Tfire')) { const shot = G.scout.fire(camera); if (shot) scoutShoot(shot); }
@@ -1178,10 +1208,15 @@ function frame(now = performance.now()) {
   // 敵人、光彈、手榴彈、遭遇戰（敵人會讀玩家準心方向、是不是正在用瞄準鏡）
   camera.getWorldDirection(G.aimDir); G.ads = vm.ads;
   patrols.update(dt); updateInfantry(G, dt);
+  for(const e of G.enemies)G.ground.blockFoot(e);
   updateBolts(dt);
   updateGrenades(dt);
   D.update(dt);
-  if (stage === 'play' && !finale) { updateEncounters(); updateHatch(dt); updateMissions(dt); updatePickup(); updateLoot(); G.field.update(input); }   // updateHatch 每幀先清提示，任務的「按 E」要排在它後面
+  if (stage === 'play' && !finale) {
+    if(!G.ground.occupied){updateEncounters();updateHatch(dt);updateMissions(dt);updatePickup();updateLoot();G.field.update(input);}
+    else hud.prompt=null;
+    G.ground.update(dt,chapter,done);
+  }   // updateHatch 每幀先清提示，任務的「按 E」要排在它後面
   updateFoes();
   updateGuide(dt);
   updateMechWalk(dt);
