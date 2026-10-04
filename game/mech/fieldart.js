@@ -22,12 +22,12 @@ function branch(a,b,radius) {
 export function fieldTreeGeometry(pine = true, variant = 0) {
   const lean=(variant-1)*.35, tall=variant===2?1.18:variant===1?.9:1;
   const parts=[branch([0,0,0],[lean,(pine?10.4:6.6)*tall,.15],pine?.32:.42)];
-  const card=(pts,variant)=>{
+  const card=(pts,variant,tint=[.78,.83,.70])=>{
     const g=new THREE.BufferGeometry(),pos=[],uv=[],corners=[[0,0],[1,0],[1,1],[0,1]],x=(variant%2)*.5,y=variant<2?.5:0;
     for(const i of [0,1,2,0,2,3]){pos.push(...pts[i]);uv.push(x+.003+corners[i][0]*.494,y+.003+corners[i][1]*.494);}
     g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));g.computeVertexNormals();
     for(let i=0;i<g.attributes.normal.count;i++){const n=new THREE.Vector3(pos[i*3]*.12,.85,pos[i*3+2]*.12).normalize();g.attributes.normal.setXYZ(i,n.x,n.y,n.z);}
-    parts.push(colored(g,[.78,.83,.70],true));
+    parts.push(colored(g,tint,true));
   };
   if(pine) {
     for(let level=0;level<8;level++) {
@@ -39,12 +39,22 @@ export function fieldTreeGeometry(pine = true, variant = 0) {
       }
     }
   } else {
+    const wide=variant===1,reach=wide?3.55:variant===2?2.85:2.45;
     for(let i=0;i<10;i++) {
-      const a=i*2.399+variant,dist=(i<7?2.0:1.0)*(variant===1?1.4:.9),y=(4.9+(i%4)*1.25+Math.sin(i*3.1+variant)*.55)*tall,x=Math.cos(a)*dist+lean,z=Math.sin(a)*dist,size=1.6+(i%3)*.35;
-      parts.push(branch([.1,3.4+(i%3),0],[x,y,z],.13));
+      // 十束枝葉分出高梢、偏冠與低枝；同樣的卡片數，不再堆成等半徑圓球。
+      const a=i*2.399+variant+.32*Math.sin(i*4.7+variant),outer=i<7;
+      const dist=(outer?reach:reach*.34)*(.78+.20*Math.sin(i*3.7+variant));
+      const y=(outer?5.25+(i%3)*.86:8.05+(i-7)*.32)*tall;
+      const x=Math.cos(a)*dist+lean+(wide?.72:.28),z=Math.sin(a)*dist*(wide?.78:1.05)+.26;
+      const width=(outer?1.52:1.12)*(1+.17*Math.sin(i*5.1+variant)),rise=wide?1.10:1.42;
+      const start=[lean*.3,2.9+(i%4)*.65,.08];
+      parts.push(branch(start,[x,y-.32,z],outer?.16:.10));
       for(let axis=0;axis<3;axis++) {
-        const t=a+axis*Math.PI/3,dx=Math.cos(t)*size,dz=Math.sin(t)*size;
-        card([[x-dx,y-size*.7,z-dz],[x+dx,y-size*.7,z+dz],[x+dx,y+size*.7,z+dz],[x-dx,y+size*.7,z-dz]],2+i%2);
+        const t=a+axis*Math.PI/3+.17*Math.sin(i+axis),dx=Math.cos(t)*width,dz=Math.sin(t)*width;
+        const lift=.28*Math.sin(i*2.3+axis),top=rise*(.85+.16*Math.sin(i+axis*3));
+        card([[x-dx,y-rise*.55+lift,z-dz],[x+dx,y-rise*.55-lift,z+dz],
+          [x+dx*.82,y+top-lift,z+dz*.82],[x-dx*.72,y+top+lift,z-dz*.72]],
+          2+((i+variant+(axis===2?1:0))%3===0?0:1),[.95,.95,.82]);
       }
     }
   }

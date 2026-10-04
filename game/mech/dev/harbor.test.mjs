@@ -53,7 +53,7 @@ test('車隊整條路線和後車延伸留有至少 12 公尺寬，敵機降落�
     }
   }
 });
-test('登機引導的兩段樓梯與胸前平台有連續承重面；合併場景低於 12 萬三角形', () => {
+test('登機引導的兩段樓梯與胸前平台有連續承重面；街區含汽車低於 13 萬三角形', () => {
   const { scene, solid, map } = harbor();
   for (let i = 1; i < S.HATCH_ROUTE.length; i++) {
     const a = S.HATCH_ROUTE[i - 1], b = S.HATCH_ROUTE[i];
@@ -71,7 +71,7 @@ test('登機引導的兩段樓梯與胸前平台有連續承重面；合併場�
     }
     assert(n < 1600 && Math.abs(pilot.pos.y - y) < .2, '登機路被牆或階梯阻擋');
   }
-  assert(map.triangles < 120000, `港區 ${map.triangles} 三角形`); assert(map.meshes.length <= 12);
+  assert(map.totalTriangles < 130000, `港區含汽車 ${map.totalTriangles} 三角形`); assert(map.meshes.length <= 12 && map.totalMeshes <= 17);
   scene.traverse(o => {
     assert(!o.isLight, '地圖不另外增加光源');
     if (!o.isMesh) return;

@@ -35,6 +35,8 @@ export async function loadSurfaces(renderer, onStep = () => {}) {
     const col = s.col ? T(s.col + '_col.webp', true).catch(() => T(s.tex + '_col.webp', true)) : T(s.tex + '_col.webp', true);
     const [map, normalMap, arm] = await Promise.all([col, T(s.tex + '_nor.webp'), T(s.tex + '_arm.webp')]);
     const m = new THREE.MeshStandardMaterial({ map, normalMap, roughnessMap: arm, aoMap: arm, metalnessMap: s.metal ? arm : null, metalness: s.metal ? 1 : 0, roughness: 1, color: s.color, vertexColors: true });
+    m.aoMapIntensity = .72;
+    m.normalScale.setScalar(k === 'floor' || k === 'tile' ? .42 : s.metal ? .7 : .65);
     // aoMap 預設吃第二組 UV：這裡直接用第一組（每個頂點都用同一套世界 UV）
     m.onBeforeCompile = (sh) => { sh.fragmentShader = sh.fragmentShader.replace('#include <aomap_fragment>', AO_CHUNK); grimeShader(sh, m); };
     m.userData.tile = s.tile; m.userData.grime = s.metal ? 0.6 : 1;

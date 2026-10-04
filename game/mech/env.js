@@ -6,12 +6,12 @@ import { mergeGeometries, mergeVertices } from 'three/addons/utils/BufferGeometr
 import { makeFacade, FACADE_TILE, japaneseFacade } from './textures.js';
 import { buildJapaneseCar } from './japanese-cars.mjs';
 import { instancedCarMaterial } from './car-material.js';
-import { shopMaterial, shopUV, civicMaterial, civicUV, harborWater } from './urban.js';
+import { shopMaterial, shopUV, civicMaterial, civicUV, harborWater, streetGlassFragment } from './urban.js';
 import { roofline } from './roofline.js';
-import { streetfront } from './streetfront.js';
+import { streetfront, frontageProfile, frontageDetails } from './streetfront.js';
 import { japaneseScenery } from './japan.js';
-import { recessedFacade, storefrontOpenings, kobeStreetDetails } from './kobe-street.mjs';
-import { autumnFoliage, buildAutumnTrees, forestCanopy } from './kobe-autumn.js';
+import { recessedFacade, storefrontOpenings, kobeStreetDetails, kobeBlockStreets } from './kobe-street.mjs';
+import { autumnFoliage, autumnTreeTint, buildAutumnTrees, forestCanopy } from './kobe-autumn.js';
 import { decodeKobeRelief, kobeCityHeight } from './kobe-relief.mjs';
 import { kobeCityBlocks, kobeRailway, kobeWaterfront, KOBE_CITY } from './kobe-city.mjs';
 import { BATTLEFIELDS, fieldHeight, fieldLayout, routeDistance, fieldGridCoordinate, fieldGridIndex } from './battlefields.js';
@@ -414,7 +414,15 @@ function terrainMaterial(A) {
           forest=mix(forest,fallTone,fallCover*kobe*.90)*mix(1.0,mix(.72,1.08,crowns.b),kobe);
           float meadow = smoothstep(0.50, 0.72, dry) * (1.0 - smoothstep(0.08, 0.25, slope));
           forest = mix(forest, grass * vec3(0.62,0.72,0.42), meadow * mix(.65,.07,kobe));
-          forest=mix(forest,crowns.rgb*mix(.84,1.10,macro),forestReady*kobe);
+          float scanLuma=dot(crowns.rgb,vec3(.2126,.7152,.0722));
+          vec3 greenScan=mix(crowns.rgb,scanLuma*vec3(.64,1.07,.58),.75);
+          vec3 goldScan=mix(crowns.rgb,scanLuma*vec3(1.45,1.11,.43),.52);
+          vec3 redScan=mix(crowns.rgb,scanLuma*vec3(1.52,.59,.38),.62);
+          float warmRegion=smoothstep(.36,.70,macro+(dry-.5)*.22),redRegion=smoothstep(.58,.78,dry+macro*.08);
+          vec3 scanForest=mix(greenScan,mix(goldScan,redScan,redRegion),warmRegion)*mix(.84,1.08,macro)*mix(.82,1.06,facing);
+          float forestEdge=(1.0-smoothstep(35.0,100.0,vTW.y))*smoothstep(.58,.80,dry)*(1.0-smoothstep(.05,.18,slope));
+          scanForest=mix(scanForest,grass*vec3(.73,.85,.61),forestEdge*.28);
+          forest=mix(forest,scanForest,forestReady*kobe);
           treeline = smoothstep(1050.0, 1580.0, vTW.y + (macro - 0.5) * 180.0);
           grass = mix(grass, mix(forest, grass * vec3(0.65,0.70,0.54), treeline), mountain);
         }
@@ -458,7 +466,7 @@ function terrainMaterial(A) {
         float paved=(battlefield > 2.5 && battlefield < 3.5)||(battlefield > 4.5 && battlefield < 5.5)?max(fieldGround.r,fieldGround.g):0.0;
         if(surfaceReady>.5 && max(max(G.x,G.y),paved)>.001) asph=mix(asph,scanned(vTW.xz/1.8,vec2(.5,0.0))*.72,.8);
         asph=mix(asph,vec3(dot(asph,vec3(.2126,.7152,.0722)))*vec3(.94,.98,1.02),.7*kobe);
-        asph=mix(asph,vec3(.063,.067,.070),kobe*.50);
+        asph=mix(asph,vec3(.075,.079,.082),kobe*.66);
         asph *= mix(mix(.85,.93,kobe),mix(1.12,1.05,kobe),tfbm(vTW.xz/23.0));
         vec3 rub = texture2D(rubD, vTW.xz / 6.0).rgb;
         vec3 walkC = asph * 1.55 + 0.03;
@@ -507,7 +515,7 @@ function terrainMaterial(A) {
         vec3 nG = texture2D( normalMap, vNormalMapUv ).xyz * 2.0 - 1.0;
         vec3 nA = texture2D( asphN, vTW.xz / 7.0 ).xyz * 2.0 - 1.0;
         vec3 nR = texture2D( rockN, vTW.xz / 38.0 ).xyz * 2.0 - 1.0;
-        vec3 mapN = mix( mix(nG, nR, rk), nA * vec3(mix(.8,.2,kobe),mix(.8,.2,kobe),1.0), 1.0 - isGrass );
+        vec3 mapN = mix( mix(nG, nR, rk), nA * vec3(mix(.8,.12,kobe),mix(.8,.12,kobe),1.0), 1.0 - isGrass );
         mapN.xy*=mix(1.0,.10,G.y);
         if(battlefield > 0.5) {
           vec3 nSoil=texture2D(rubN,vTW.xz/7.0).xyz*2.0-1.0;
@@ -697,12 +705,13 @@ function architecture(B, signs, x0, x1, z0, z1, H, style, F, district, roofTop, 
     // 相鄰地塊的窄樓縫只留貼牆線腳，不放相向的陽台、梯架、店棚與招牌。
     if (!exposed[si]) continue;
     // 每面最多三個店面：真正的拱圈、玻璃、門框與遮陽棚，併在既有屋頂桶。
-    if (style >= 2 && H < 32 && openings.length) streetfront(a0, a1, asian, box);
+    if (style >= 2 && H < 32 && openings.length) streetfront(a0, a1, asian, box, {seed:x0*.61+z0*.39+si*17});
     for (const [i,{center,radius:rad,bottom:bot,spring:y,arched:arch}]of openings.entries()) {
       const a=a0+center,depth=-.32,top=y+(arch?rad:0),transom=Math.min(y-.12,style<2?2.45:2.14);
-      face([point(a-rad,bot,depth),point(a+rad,bot,depth),point(a+rad,y,depth),point(a-rad,y,depth)],glass);
+      const seed=x0*.61+z0*.39+si*17+i*7.3,profile=frontageProfile(seed,asian);
+      face([point(a-rad,bot,depth),point(a+rad,bot,depth),point(a+rad,y,depth),point(a-rad,y,depth)],style>=2?profile.glass:glass);
       trim(a-rad-.11,a-rad,bot,y,0,.10,stone,true);trim(a+rad,a+rad+.11,bot,y,0,.10,stone,true);
-      for(const p of [a-rad,a-.025,a+rad-.05])trim(p,p+.05,bot,p===a-.025?top-.04:y,depth,depth+.08,steel,true);
+      for(const p of [a-rad,a-.025,a+rad-.05])trim(p,p+.05,bot,p===a-.025?top-.04:y,depth,depth+.08,style>=2?profile.frame:steel,true);
       // 門檻、橫框與分離把手，在街層產生實際側光，不是照片上的線。
       trim(a-rad,a+rad,bot-.025,bot+.02,depth,.06,stone);
       trim(a-rad,a+rad,transom,transom+.05,depth,depth+.08,steel);
@@ -726,19 +735,7 @@ function architecture(B, signs, x0, x1, z0, z1, H, style, F, district, roofTop, 
           }
         }
       } else trim(a-rad,a+rad,y-.05,y,depth,depth+.08,steel);
-      if (asian && i % 3 === 1) {
-        // 日式店面：木格子與分片暖簾保留門口的尺度，細節只在面向街道的立面。
-        const wood = [0.26, 0.19, 0.14, 0, 1], cloth = [0.22, 0.29, 0.34, 0, 5];
-        for (const side of [-1, 1]) for (let k = 0; k < 4; k++) {
-          const lo = a + side * (rad + .25 + k * .18);
-          trim(lo-.025,lo+.025,.25,2.65,.015,.07,wood,true);
-        }
-        trim(a-2.3,a+2.3,2.68,2.78,0,.18,wood);
-        for (let k = 0; k < 3; k++) {
-          const lo = a - rad + k * .9;
-          face([point(lo, 2.08, .2), point(lo + .85, 2.08, .2), point(lo + .85, 2.68, .2), point(lo, 2.68, .2)], cloth);
-        }
-      }
+      if(style>=2&&!(arch&&i===1))frontageDetails(box,{center:a,radius:rad,bottom:bot,top,depth,seed,japanese:asian,face:(pts,col)=>face(pts.map(p=>point(...p)),col)});
     }
     if (style < 2) {
       // 街層雨棚；突出量保持在人行道內。
@@ -766,13 +763,13 @@ function architecture(B, signs, x0, x1, z0, z1, H, style, F, district, roofTop, 
         }
       }
     }
-    if (style >= 2) {
-      const mid = (a0 + a1) / 2, idx = Math.abs(Math.round(a0 + fix)) % 8, vertical = idx === 4 || idx === 5;
-      const lo = vertical ? mid + 2 : mid - 2.8, hi = vertical ? mid + 3.2 : mid + 2.8, y0 = vertical ? 3.6 : 2.9, y1 = vertical ? 7.2 : 4.1;
-      const d = vertical ? 0.6 : 0.18;
+    if (style >= 2) for(const [i,{center,radius}]of openings.entries()) {
+      const mid=a0+center,profile=frontageProfile(x0*.61+z0*.39+si*17+i*7.3,asian),idx=profile.sign,vertical=idx===4||idx===5;
+      const lo=vertical?mid+radius+.19:mid-radius-.04,hi=vertical?lo+.42:mid+radius+.04,y0=vertical?2.65:3.35,y1=vertical?3.97:3.87;
+      const d = vertical ? .35 : historic?.24:.16;
       box(lo - 0.08, hi + 0.08, y0 - 0.08, y1 + 0.08, 0, d, steel);
       const p = (a, y) => axis === 'x' ? [a, y, fix + out * (d + 0.012)] : [fix + out * (d + 0.012), y, a];
-      const uv = shopUV(idx), pts = [p(lo, y0), p(hi, y0), p(hi, y1), p(lo, y1)];
+      const uv = shopUV(idx,!vertical), pts = [p(lo, y0), p(hi, y0), p(hi, y1), p(lo, y1)];
       // 正面頂點朝向 +Z／-X，其餘面反轉繞序。
       if (axis === 'x' ? out < 0 : out > 0) { pts.reverse(); uv.reverse(); const sum=uv[0][0]+uv[1][0];for(const p of uv)p[0]=sum-p[0]; }
       signs.quad(...pts, axis === 'x' ? [0, 0, out] : [out, 0, 0], uv, [0.85, 0.85, 0.85]);
@@ -883,9 +880,7 @@ function architecturalMaterial(A) {
             diffuseColor.rgb *= 1.0 - tile * 0.24;
           }
           if (vSurface > 3.5 && vSurface < 4.5) {
-            float along = abs(vAN.x) > 0.5 ? vAW.z : vAW.x;
-            float shelf = step(0.92, fract(vAW.y / 0.6)) * step(0.4, fract(along / 1.1));
-            diffuseColor.rgb += vec3(0.025, 0.018, 0.009) * shelf;
+            ${streetGlassFragment('vAW','vAN')}
           }
           if (vSurface > 6.5 && vSurface < 7.5) {
             // 紅磚遠景共用既有雜訊，公尺尺度的交錯磚縫由導數抗鋸齒。
@@ -920,7 +915,7 @@ function architecturalMaterial(A) {
       .replace('vec3 mapN = texture2D( normalMap, vNormalMapUv ).xyz * 2.0 - 1.0;', `vec3 mapN = texture2D( normalMap, vNormalMapUv ).xyz * 2.0 - 1.0;
         if (vSurface > 0.5) mapN.xy *= vSurface > 3.5 && vSurface < 4.5 ? 0.03 : 0.2;`);
   };
-  m.customProgramCacheKey = () => 'architecture-v4';
+  m.customProgramCacheKey = () => 'architecture-v5';
   patchGroundAO(m);
   return m;
 }
@@ -939,7 +934,7 @@ function patchGroundAO(m, k = 1.6) {
     sh.fragmentShader = sh.fragmentShader
       .replace('#include <common>', '#include <common>\nvarying float vWY;')
       .replace('#include <aomap_fragment>', `#include <aomap_fragment>
-        float gao = mix(0.78, 1.0, smoothstep(0.0, ${k.toFixed(1)}, vWY));
+        float gao = mix(0.86, 1.0, smoothstep(0.0, ${k.toFixed(1)}, vWY));
         reflectedLight.indirectDiffuse *= gao;`);
   };
 }
@@ -1083,7 +1078,7 @@ export class World {
     sun.shadow.autoUpdate = false;   // 影子圖每兩格重畫一次（followShadow 裡開關），省一半顯示卡工
     scene.add(sun, sun.target);
     this.sun = sun;
-    const hemi = new THREE.HemisphereLight(0x9faec0, 0x514a3d, 0.32);
+    const hemi = new THREE.HemisphereLight(0x9faec0, 0x514a3d, 0.46);
     scene.add(hemi); this.hemi=hemi;
 
     // 地形
@@ -1224,7 +1219,7 @@ export class World {
     this.scene.environment=F.mode?this.fieldEnvMap:this.envMap;
     this.sun.intensity=F.mode?3.5:3.1;
     this.sun.color.setRGB(1,F.mode?.91:.95,F.mode?.79:.86);
-    this.hemi.intensity=.32;
+    this.hemi.intensity=F.mode?.32:.46;
     const sc=this.sun.shadow.camera,extent=F.mode?190:180;
     sc.near=600;sc.far=1800;
     sc.left=sc.bottom=-extent;sc.right=sc.top=extent;sc.updateProjectionMatrix();
@@ -2172,7 +2167,7 @@ export class World {
       box: (...args) => addBox(detail, ...args, 4),
       face: (a,b,c,d,col) => { const n=normal(a,b,c),axes=Math.abs(n[1])>.5?[0,2]:Math.abs(n[0])>.5?[2,1]:[0,1]; detail.quad(a,b,c,d,n,[a,b,c,d].map(p=>[p[axes[0]]/2,p[axes[1]]/2]),col); },
       sign: (p,id,aspect) => civic.quad(...p,normal(...p),civicUV(id,id===2&&aspect>2),[.95,.95,.95]),
-      shop: (p,id,reverse) => {const uv=shopUV(id);if(reverse){uv.reverse();const sum=uv[0][0]+uv[1][0];for(const p of uv)p[0]=sum-p[0];}shops.quad(...p,normal(...p),uv,[.95,.95,.95]);},
+      shop: (p,id,reverse) => {const width=Math.hypot(...p[1].map((v,i)=>v-p[0][i])),height=Math.hypot(...p[2].map((v,i)=>v-p[1][i])),uv=shopUV(id,width/height>2);if(reverse){uv.reverse();const sum=uv[0][0]+uv[1][0];for(const p of uv)p[0]=sum-p[0];}shops.quad(...p,normal(...p),uv,[.95,.95,.95]);},
       solid: b => this.addCollider({x0:b.x0,x1:b.x1,z0:b.z0,z1:b.z1,top:b.y1}),
     }, sites);
     const streetDetails={face:(a,b,c,d,col)=>{
@@ -2180,6 +2175,20 @@ export class World {
       detail.quad(a,b,c,d,n,[a,b,c,d].map(p=>[p[axes[0]]/2,p[axes[1]]/2]),col);
     }};
     kobeStreetDetails(streetDetails,[[-120,-300,Math.PI/2,72,28,0,false],[-240,60,Math.PI/2,72,28,0,false],[180,120,0,72,28,0,false]]);
+    const streetSites={frontages:[],bicycles:[],planters:[],utilities:[],service:[]};
+    for(const [x,z,ry,kind]of [[-120,-180,0,'shopping'],[-240,60,0,'shopping'],[-360,-300,0,'residential'],[120,-60,0,'residential'],[240,180,0,'service'],[180,120,Math.PI/2,'service']]) {
+      const nx=Math.cos(ry),nz=-Math.sin(ry),tx=Math.sin(ry),tz=Math.cos(ry);
+      for(const side of [-1,1]) {
+        const x0=x+side*CITY.walk*nx,z0=z+side*CITY.walk*nz,angle=ry-side*Math.PI/2;
+        streetSites.frontages.push({x:x0,z:z0,ry:angle,length:72,depth:CITY.walk-CITY.road-.15,ground:.13,kind});
+        const p={x:x0-side*.65*nx+27*tx,z:z0-side*.65*nz+27*tz,ry:angle,ground:.13};
+        if(kind==='shopping'&&side===1)streetSites.bicycles.push({...p,count:2});
+        else if(kind==='residential')streetSites.planters.push({...p,length:2.2});
+        else if(kind==='service'&&side===-1)streetSites.utilities.push({...p,kind:'power'});
+      }
+    }
+    if(port)streetSites.service.push({x:port.x-68,z:762,ry:0,length:24,width:2.3,ground:.13});
+    this.streetDetails=kobeBlockStreets(streetDetails,streetSites);
     const autumnPoints=[];
     for(const x of [-360,-240,-120,120,240])for(const z of [-330,-306,-282,-210,-186,-162,-90,-66,-42,150,174,198,270,294,318])for(const side of [-1,1]) {
       const tx=x+side*16.9;if(!blocked(tx,z,2.4))autumnPoints.push([tx,z,.68+.10* Math.sin(z)]);
@@ -2303,7 +2312,8 @@ export class World {
       dummy.position.set(x, this.height(x, z) - 0.2, z); dummy.rotation.set(0, ry, 0); dummy.scale.set(s, s * (0.8 + r() * 0.5), s); dummy.updateMatrix();
       treeMesh.setMatrixAt(index, dummy.matrix);
       const v = 0.75 + r() * 0.4;
-      treeMesh.setColorAt(index, new THREE.Color(v, v * (0.9 + r() * 0.2), v * 0.85));
+      const shade=.9+r()*.2;
+      treeMesh.setColorAt(index, autumnTreeTint(x,z).multiplyScalar(v*shade));
       this.trample.push({ mesh: [treeMesh], i:index, x, z, ry, r: 1.5, kind: 'tree', down: 0, s, y: this.height(x, z) - 0.2, sy: dummy.scale.y });
     });
 

@@ -2,6 +2,7 @@
 // 實景參考：神戶觀光局 https://www.feel-photo.info/c10/ 、https://www.feel-photo.info/a78/
 // 元町入口與天棚：https://www.feel-photo.info/神戸元町商店街/ 、https://www.kobe-motomachi.or.jp/photo-gallery/photo.html
 import { shopUV, civicUV } from './urban.js';
+import { frontageProfile, frontageDetails } from './streetfront.js';
 const stone = [.64, .66, .62, 0, 1], steel = [.17, .21, .22, 0, 2];
 const vermilion = [.63, .12, .045, 0, 6], ivory = [.78, .79, .72, 0, 6];
 const wood = [.28, .21, .15, 0, 5], tile = [.16, .21, .23, 0, 3], glass = [.1, .19, .23, 0, 4];
@@ -46,8 +47,9 @@ export function japaneseScenery(out, { tower = null, shrine = null, streets = []
     };
     for(let i=0;i<count;i++) {
       const lo=x0+i*span+.04,hi=x0+(i+1)*span-.04,c=(lo+hi)/2,h=[9.7,13.1,6.6,10.2,12.6,7.1][i%6];
+      const seed=lo*.61+z*.39+i*7.171,profile=frontageProfile(seed);
       const paint=[[.61,.59,.54,0,6],[.65,.65,.61,0,6],[.52,.49,.43,0,6],[.59,.60,.56,0,6],[.48,.52,.51,0,6],[.64,.60,.52,0,6]][i%6];
-      const frame=[.16,.19,.19,0,2],base=[.33,.35,.33,0,6],ledge=[.56,.56,.52,0,6];
+      const frame=profile.frame,base=[.33,.35,.33,0,6],ledge=[.56,.56,.52,0,6];
       const ww=i%3===0?3.1:2.7,wl=c-ww/2,wr=c+ww/2,recess=facade?.025:-.32;
       const rows=[];for(let y=3.6;y<h-1;y+=3.2)rows.push([y,y+1.8]);
       if(!facade) {
@@ -113,11 +115,11 @@ export function japaneseScenery(out, { tower = null, shrine = null, streets = []
       }
       // 平らなアルミ引き戸、二枚のガラス、シャッター付きの店舗を交互に配置。
       if(i%4===3) {
-        pane(lo+.35,hi-.35,.15,2.55,recess,[.34,.37,.36,0,2]);
-        for(let y=.3;y<2.55;y+=.14)pane(lo+.35,hi-.35,y,y+.012,recess+.006,[.25,.29,.28,0,2]);
+        pane(lo+.35,hi-.35,.15,2.55,recess,[.34,.37,.36,0,6]);
+        for(let y=.3;y<2.55;y+=.14)pane(lo+.35,hi-.35,y,y+.012,recess+.006,[.25,.29,.28,0,6]);
       } else {
         // 通高展示窗、獨立入口與上方氣窗，框架嵌進洞口；室內底部比窗頂暗。
-        pane(lo+.35,c-.55,.15,2.12,recess,[.16,.22,.22,0,4]);pane(c+.55,hi-.35,.15,2.12,recess,[.19,.23,.22,0,4]);
+        pane(lo+.35,c-.55,.15,2.12,recess,tint(profile.glass,.86));pane(c+.55,hi-.35,.15,2.12,recess,profile.glass);
         pane(c-.55,c+.55,.15,2.12,recess,[.11,.17,.18,0,4]);
         pane(lo+.35,hi-.35,2.12,2.55,recess,[.24,.29,.28,0,4]);
         for(const x of [lo+.35,c-.55,c+.50,hi-.40])trim(x,x+.05,.15,2.55,recess,recess+.075,frame,true);
@@ -127,11 +129,8 @@ export function japaneseScenery(out, { tower = null, shrine = null, streets = []
       }
       trim(lo,hi,0,.15,0,.035,base);
       pane(lo,lo+.35,.15,2.55,.003,base);pane(hi-.35,hi,.15,2.55,.003,base);
-      trim(lo+.1,hi-.1,2.58,2.66,0,.85,i%2?steel:[.22,.31,.28,0,6]);
-      if(i%2===0) {
-        const pts=[P(lo+.1,2.65,.04),P(hi-.1,2.65,.04),P(hi-.1,2.4,.9),P(lo+.1,2.4,.9)];
-        if(side<0)pts.reverse();face(...pts,[.18,.3,.25,0,6]);
-      }
+      frontageDetails((...args)=>B(...args),{center:c,radius:Math.min(1.9,(span-.9)/2),top:2.55,depth:recess,seed,
+        face:i%4===3?null:(points,col)=>{const pts=points.map(p=>P(...p));if(side<0)pts.reverse();face(...pts,col);}});
       for(const [y,top] of rows) {
         const k=(i+Math.round(y/3.2))%3;
         pane(wl,wr,y,top,recess,k===0?[.19,.26,.27,0,4]:k===1?[.27,.30,.29,0,4]:[.15,.21,.23,0,4]);
@@ -156,7 +155,7 @@ export function japaneseScenery(out, { tower = null, shrine = null, streets = []
       }
       trim(lo+.06,hi-.06,3.38,3.48,0,.19,ledge);
       pane(lo+.15,hi-.15,2.68,3.38,.05,[.42,.44,.4,0,6]);
-      const id=[0,1,2,3,7,6][i%6],w=Math.min(span-.4,3.3),pts=[P(c-w/2,2.68,.12),P(c+w/2,2.68,.12),P(c+w/2,3.38,.12),P(c-w/2,3.38,.12)];
+      const id=profile.sign,w=Math.min(span-.4,3.3),pts=[P(c-w/2,2.68,.12),P(c+w/2,2.68,.12),P(c+w/2,3.38,.12),P(c-w/2,3.38,.12)];
       if(side<0)pts.reverse();out.shop?.(pts,id,side<0);
       if(i%4===3) {
         // 突出看板朝街道兩端，使用圖集中真正直排的「食堂」，不是把橫排文字拉長。
@@ -397,12 +396,12 @@ export function japaneseScenery(out, { tower = null, shrine = null, streets = []
 }
 
 export function japaneseBuilder(b, sites) {
-  const mat = col => col[4] === 8 ? (b.B.portGround ? 'portGround' : 'concrete') : col[4] === 4 ? (b.B.portGlass ? 'portGlass' : 'glass') : col[4] === 1 ? 'concrete' : col[4] === 6 && b.B.landmarkPaint ? 'landmarkPaint' : col[4] === 6 && b.B.painted ? 'painted' : col[4] === 2 || col[4] === 6 ? 'metal' : 'rust';
+  const mat = col => col[4] === 8 ? (b.B.portGround ? 'portGround' : 'concrete') : col[4] === 4 ? (b.B.portGlass ? 'portGlass' : 'glass') : col[4] === 1 ? 'concrete' : (col[4] === 5 || col[4] === 6) && b.B.landmarkPaint ? 'landmarkPaint' : col[4] === 6 && b.B.painted ? 'painted' : col[4] === 2 || col[4] === 6 ? 'metal' : 'rust';
   japaneseScenery({
     box: (a,c,d,e,f,g,col) => b.deco(mat(col),a,c,d,e,f,g,{tint:col.slice(0,3),shade:()=>1}),
     face: (a,c,d,e,col) => b.B[mat(col)].quad(a,c,d,e,faceNormal(a,c,d),[1,1,1,1],null,col.slice(0,3)),
     sign: (points,id,aspect) => b.B.civic.quad(...points,faceNormal(...points),[1,1,1,1],civicUV(id,id===2&&aspect>2)),
-    shop: (points,id,reverse) => {const uv=shopUV(id);if(reverse){uv.reverse();const sum=uv[0][0]+uv[1][0];for(const p of uv)p[0]=sum-p[0];}b.B.sign.quad(...points,faceNormal(...points),[1,1,1,1],uv);},
+    shop: (points,id,reverse) => {const distance=(a,b)=>Math.hypot(...a.map((v,i)=>v-b[i])),uv=shopUV(id,distance(points[0],points[1])/distance(points[1],points[2])>2);if(reverse){uv.reverse();const sum=uv[0][0]+uv[1][0];for(const p of uv)p[0]=sum-p[0];}b.B.sign.quad(...points,faceNormal(...points),[1,1,1,1],uv);},
     solid: bounds => b.solid.add({...bounds,mat:'concrete'}),
   },sites);
 }

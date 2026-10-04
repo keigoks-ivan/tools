@@ -5,7 +5,7 @@ import { Builder } from '../zero/kit.js';
 import { car, carMaterials } from '../zero/props.js';
 import { JAPANESE_FONT, PORT_LABELS, civicMaterial, shopMaterial, harborWater, streetGlassMaterial } from '../urban.js';
 import { japaneseBuilder } from '../japan.js';
-import { kobeStreetDetails } from '../kobe-street.mjs';
+import { kobeStreetDetails, kobeBlockStreets } from '../kobe-street.mjs';
 import { buildAutumnTrees } from '../kobe-autumn.js';
 import { KOBE_RELIEF, kobeCityHeight } from '../kobe-relief.mjs';
 import { kobeHarborScenery, harborWindow } from '../kobe-harbor.mjs';
@@ -34,17 +34,23 @@ export function buildMap(scene, mats, solid, PL, A, world) {
         float portRoad=max(roadOld,max(roadNorth,max(max(roadH,roadV),max(roadExit,roadCross))));
         vec2 panel=mod(vPort+vec2(2.0,3.0),vec2(6.0,8.0));
         float joint=max(portLine(min(panel.x,6.0-panel.x),.018),portLine(min(panel.y,8.0-panel.y),.018))*(1.0-portRoad);
-        vec3 asphalt=mix(texture2D(portAsphalt,vPort/2.8).rgb*.72,vec3(.063,.067,.070),.35);
+        vec3 asphalt=mix(texture2D(portAsphalt,vPort/2.8).rgb*.62,vec3(.075,.078,.079),.28);
         vec3 pavement=mix(sampledDiffuseColor.rgb,asphalt,portRoad);
         float oldWalk=portRange(vPort.x,-234.0,-144.0)*portRange(abs(vPort.y+240.0),6.0,8.2);
+        float customsApron=portRange(vPort.x,-218.0,-146.0)*portRange(vPort.y,-234.0,-205.5)*(1.0-portRoad);
+        float warehouseWalk=portRange(vPort.x,-218.0,-146.0)*portRange(vPort.y,-234.0,-229.5);
         float promenade=portRange(vPort.x,514.0,678.0)*portRange(vPort.y,314.0,477.0);
-        float footPaving=max(oldWalk,promenade);
+        float footPaving=max(oldWalk,max(warehouseWalk,promenade));
         vec2 paver=vec2(vPort.x+mod(floor(vPort.y/.3),2.0)*.3,vPort.y),cell=mod(paver,vec2(.6,.3));
         float seam=max(portLine(min(cell.x,.6-cell.x),.004),portLine(min(cell.y,.3-cell.y),.004));
         float stoneTone=fract(sin(dot(floor(paver/vec2(.6,.3)),vec2(127.1,311.7)))*43758.5453);
         vec3 stone=vec3(.24,.235,.21)*(.86+stoneTone*.23)*(1.0-seam*.23);
+        stone*=mix(1.0,.62,warehouseWalk);
+        pavement=mix(pavement,sampledDiffuseColor.rgb*.27,customsApron);
         pavement=mix(pavement,stone,footPaving);joint*=1.0-footPaving;
         diffuseColor.rgb/=max(sampledDiffuseColor.rgb,vec3(.005));
+        float replacedSurface=max(customsApron,max(portRoad,footPaving));
+        diffuseColor.rgb/=mix(vec3(1.0),max(diffuse,vec3(.01)),replacedSurface);
         diffuseColor.rgb*=pavement*(1.0-joint*.38);
         float tyre=max(roadH*portLine(abs(abs(vPort.y+120.0)-3.2),.55),roadV*portLine(abs(abs(vPort.x-360.0)-3.2),.55));
         tyre=max(tyre,max(roadExit*portLine(abs(abs(vPort.x-600.0)-3.2),.55),roadCross*portLine(abs(abs(vPort.y-120.0)-3.2),.55)));
@@ -65,7 +71,7 @@ export function buildMap(scene, mats, solid, PL, A, world) {
       .replace('vec3 mapN = texture2D( normalMap, vNormalMapUv ).xyz * 2.0 - 1.0;', `vec3 mapN = texture2D( normalMap, vNormalMapUv ).xyz * 2.0 - 1.0;
         mapN=mix(mapN,(texture2D(portAsphaltN,vPort/2.8).xyz*2.0-1.0)*vec3(.2,.2,1.0),portRoad);mapN.xy*=mix(1.0,.14,footPaving);`);
   };
-  ground.customProgramCacheKey = () => 'harbor-ground-v2';
+  ground.customProgramCacheKey = () => 'harbor-ground-v4';
   mats = { ...mats, portGround: ground, portGlass: streetGlassMaterial() };
   // 貨櫃、起重機與屋面是塗裝鋼材：漆面使用非金屬反射，保留原掃描與風化。
   for (const key of ['metal', 'corr', 'rust']) {
@@ -79,7 +85,7 @@ export function buildMap(scene, mats, solid, PL, A, world) {
   mats.landmarkPaint = new THREE.MeshStandardMaterial({ color: 0xffffff, normalMap: mats.concrete.normalMap, normalScale: new THREE.Vector2(.12, .12), roughness: .78, metalness: 0, vertexColors: true });
   mats.landmarkPaint.userData.tile = 2;
   const b = new Builder(mats, solid);
-  const portMat=col=>col[4]===7?'brick':col[4]===4?'portGlass':col[4]===1?'concrete':col[4]===3?'corr':col[4]===5?'rust':col[4]===2?'metal':'landmarkPaint';
+  const portMat=col=>col[4]===8?'portGround':col[4]===7?'brick':col[4]===4?'portGlass':col[4]===1?'concrete':col[4]===3?'corr':col[4]===5?'rust':col[4]===2?'metal':'landmarkPaint';
   const portArt={face:(a,c,d,e,col)=>{
     const n=new THREE.Vector3().subVectors(new THREE.Vector3(...c),new THREE.Vector3(...a)).cross(new THREE.Vector3().subVectors(new THREE.Vector3(...d),new THREE.Vector3(...a))).normalize().toArray();
     b.B[portMat(col)].quad(a,c,d,e,n,[1,1,1,1],null,col.slice(0,3));
@@ -634,6 +640,28 @@ export function buildMap(scene, mats, solid, PL, A, world) {
   ], shops: [[-216,-162,-251,1]], crossings: [[360,-143,0,22],[600,143,Math.PI,22]] };
   japaneseBuilder(b, M.japanSites);
   kobeStreetDetails(portArt,[[-190,-240,0,40,12],[566,320,0,72,12],[600,250,Math.PI/2,56,24,0,false]]);
+  M.streetSites={frontages:[
+    {x:-189,z:-251,ry:0,length:54,depth:5,ground:.12,kind:'shopping'},
+    {x:-200,z:-205,ry:Math.PI,length:16,depth:2.1,ground:.12,kind:'service'},
+    {x:-160,z:-205,ry:Math.PI,length:16,depth:2.1,ground:.12,kind:'service'},
+    {x:-113,z:-100,ry:Math.PI/2,length:34,depth:1.3,kind:'service',gaps:[[-7,7]]},
+    {x:-40,z:-100,ry:Math.PI/2,length:40,depth:1.2,kind:'service',gaps:[[-7,7]]},
+    {x:36,z:-37,ry:Math.PI/2,length:22,depth:1.3,kind:'service'},
+    {x:70,z:66,ry:Math.PI/2,length:20,depth:1.2,kind:'service'},
+    {x:523,z:239.8,ry:Math.PI,length:46,depth:2.4,ground:.12,gaps:[[-4,4]]},
+    {x:523,z:278.2,ry:0,length:46,depth:2.2,ground:.12,kind:'residential'},
+    {x:615,z:-225,ry:-Math.PI/2,length:170,depth:3.5,kind:'service'},
+    {x:615,z:35,ry:-Math.PI/2,length:140,depth:3.5,kind:'service'},
+    {x:565,z:316,ry:0,length:94,depth:2.8,ground:.08,kind:'shopping'},
+  ],parking:[{x:-159.5,z:-227.5,ry:0,stalls:3,bayWidth:2.8},{x:548,z:244,ry:Math.PI/2,stalls:4}],
+  service:[{x:-182,z:-209,ry:Math.PI,length:12,width:4.4},{x:-98,z:-100,ry:-Math.PI/2,length:17,width:3},
+    {x:380,z:-180,length:26,width:4.2},{x:566,z:-305,length:30,width:4},{x:640,z:142,length:26,width:4}],
+  bicycles:[{x:-213,z:-250.4,count:2,ground:.12},{x:510,z:239.1,ry:Math.PI,count:2,ground:.12}],
+  planters:[{x:-201,z:-250.25,length:2},{x:-183,z:-250.25,length:2},{x:-164,z:-250.25,length:1.7},
+    {x:506,z:238.8,length:2.2},{x:540,z:238.8,length:2.2},{x:536,z:317.5,length:2.4},{x:603,z:317.5,length:2.4}],
+  utilities:[{x:-208.3,z:-197,ry:-Math.PI/2,kind:'power'},{x:-96,z:-119,ry:-Math.PI/2,kind:'power'},
+    {x:36,z:-47,ry:Math.PI/2},{x:546.2,z:264,ry:Math.PI/2,kind:'power'},{x:647,z:-162,ry:-Math.PI/2,kind:'power'}]};
+  M.streetscape=kobeBlockStreets(portArt,M.streetSites);
   M.autumn=buildAutumnTrees(scene,[[-216,-232,.76],[-200,-232,.73],[-180,-232,.81],[-166,-232,.72],
     [-238,-270,.7],[-249,-263,.76],[530,313,.82],[554,313,.83],[578,313,.79],[603,313,.86],
     [626,313,.8],[626,350,.86],[626,385,.81],[626,432,.8],[626,465,.82]]);

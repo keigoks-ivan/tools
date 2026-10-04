@@ -2,27 +2,55 @@
 import { kobeHarborScenery } from './kobe-harbor.mjs';
 export const KOBE_CITY = { block: 120, half: 4680, north: -2640, south: 720, rail: -780, station: 0 };
 const hash = (x,z) => { const n=Math.sin(x*12.9898+z*78.233)*43758.5453; return n-Math.floor(n); };
+const smooth=(a,b,x)=>{const t=Math.max(0,Math.min(1,(x-a)/(b-a)));return t*t*(3-2*t);};
+function districtNoise(x,z) {
+  const a=Math.floor(x),b=Math.floor(z),u=smooth(0,1,x-a),v=smooth(0,1,z-b);
+  return (hash(a,b)*(1-u)+hash(a+1,b)*u)*(1-v)+(hash(a,b+1)*(1-u)+hash(a+1,b+1)*u)*v;
+}
 
 export function kobeCityBlocks(height, reserve = (x0,x1,z0,z1)=>x0<840&&x1>-840&&z0<840&&z1>-840) {
   const blocks=[];
   for(let z=KOBE_CITY.north;z<KOBE_CITY.south;z+=120)for(let x=-KOBE_CITY.half;x<KOBE_CITY.half;x+=120) {
-    const x0=x+18,x1=x+102,z0=z+18,z1=z+102;
+    const x0=x+18+(hash(x,z+11)-.5)*24,x1=x+102+(hash(x,z+12)-.5)*24;
+    const z0=z+18+(z===-840?0:(hash(x,z+13)-.5)*24),z1=z+102+(z===-840?0:(hash(x,z+14)-.5)*24);
     if(reserve(x0,x1,z0,z1))continue;
     const samples=[[x0,z0],[x1,z0],[x0,z1],[x1,z1]].map(([a,b])=>height(a,b));
     const lo=Math.min(...samples),hi=Math.max(...samples),key=hash(x,z);
     if(hi>145||hi-lo>16||lo<-.5||key<.045)continue;
     const hillside=hi>35||z<-1440,commercial=!hillside&&x>-240&&x<1800&&z<240;
-    const count=hillside&&Math.hypot(x+60,z+60)<2200?6:hillside?3:commercial?2:3,span=(x1-x0)/count,lots=[];
+    const district=districtNoise(x/460+8,z/380-3),lots=[];
+    if(hillside) {
+      // 住宅聚在較平緩的山腹，林帶與谷地留空；每棟另驗坡差與道路間距。
+      if(key<.10+(1-district)*.32+smooth(65,145,hi)*.12)continue;
+      const count=Math.hypot(x+60,z+60)<2200?5:3,anchorX=x0+(x1-x0)*(.3+hash(x,z+21)*.4),anchorZ=z0+(z1-z0)*(.3+hash(x,z+22)*.4);
+      for(let i=0;i<count*8&&lots.length<count;i++) {
+        let width=10+hash(x+i*19,z+23)*5,depth=13+hash(x+i*23,z+24)*7;
+        const cx=anchorX+(hash(x+i*31,z+25)-.5)*(x1-x0)*.86,cz=anchorZ+(hash(x+i*37,z+26)-.5)*(z1-z0)*.86;
+        if(Math.abs(height(cx,cz+6)-height(cx,cz-6))>Math.abs(height(cx+6,cz)-height(cx-6,cz))) [width,depth]=[depth,width];
+        const a=Math.max(x0+1.5,Math.min(x1-width-1.5,cx-width/2)),c=a+width;
+        const b=Math.max(z0+1.5,Math.min(z1-depth-1.5,cz-depth/2)),e=b+depth;
+        if(a<2880&&c>-2880&&b<KOBE_CITY.rail+18&&e>KOBE_CITY.rail-18)continue;
+        if(lots.some(l=>a<l.x1+3&&c>l.x0-3&&b<l.z1+3&&e>l.z0-3))continue;
+        const terrain=[[a,b],[c,b],[a,e],[c,e],[(a+c)/2,(b+e)/2]].map(([u,v])=>height(u,v));
+        const ground=Math.max(...terrain);
+        if(ground-Math.min(...terrain)>2||ground>145)continue;
+        const floors=hash(x+i,z+27)<.16?1:hash(x+i,z+28)>.86?3:2;
+        lots.push({x0:a,x1:c,z0:b,z1:e,ground,H:ground+floors*3.4,style:3+(hash(x+i,z+29)>.5?1:0),pitched:true,tint:.74+hash(x+i,z+30)*.24});
+      }
+      if(lots.length)blocks.push({x0,x1,z0,z1,hillside,lots});
+      continue;
+    }
+    const count=commercial?2:3,weights=Array.from({length:count},(_,i)=>.85+hash(x+i,z+31)*.3),total=weights.reduce((a,b)=>a+b,0);
+    let cursor=x0;
     for(let i=0;i<count;i++) {
-      const width=hillside?Math.min(12.2,span-1.8):span-1.8;
-      const a=x0+i*span+(span-width)/2,c=a+width;
+      const span=(x1-x0)*weights[i]/total,width=span-1.8,a=cursor+.9,c=a+width;cursor+=span;
       const rail=z===-840&&Math.abs(x)<2880;
-      const d=rail?22:hillside?16+hash(x+i,z+3)*7:55+hash(x+i,z+3)*24;
-      const b=rail?(i%2?z1-d:z0):hillside?(i%2?z1-d-3:z0+3):z0+hash(x+i,z+4)*(z1-z0-d),e=b+d;
+      const d=rail?22:(z1-z0)*(.64+hash(x+i,z+3)*.22);
+      const b=rail?(i%2?z1-d:z0):z0+hash(x+i,z+4)*(z1-z0-d),e=b+d;
       const ground=Math.max(...[[a,b],[c,b],[a,e],[c,e]].map(([u,v])=>height(u,v)));
-      const floors=hillside?2:commercial?5+Math.floor(hash(x+i,z+1)*10):3+Math.floor(hash(x+i,z+1)*5);
+      const density=districtNoise((x+i*20)/650+17,z/540+9),floors=commercial?5+Math.floor(density*7+hash(x+i,z+1)*4):3+Math.floor(density*3+hash(x+i,z+1)*4);
       const style=commercial&&floors>12?0:!hillside&&x> -600&&x< -240&&z> -1080&&z< -840&&i===0?2:3+Math.floor(hash(x+i,z+5)*2);
-      lots.push({x0:a,x1:c,z0:b,z1:e,ground,H:ground+floors*3.4,style,pitched:hillside,tint:.72+hash(x+i,z+8)*.25});
+      lots.push({x0:a,x1:c,z0:b,z1:e,ground,H:ground+floors*3.4,style,pitched:false,tint:.72+hash(x+i,z+8)*.25});
     }
     blocks.push({x0,x1,z0,z1,hillside,lots});
   }

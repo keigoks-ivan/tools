@@ -1,4 +1,4 @@
-import { SHOP_LABELS, SHOP_SUBTITLES, PORT_LABELS, CIVIC_LABELS, JAPANESE_FONT } from '../urban.js?v=9';
+import { SHOP_LABELS, SHOP_SUBTITLES, PORT_LABELS, CIVIC_LABELS, JAPANESE_FONT } from '../urban.js?v=10';
 // 開發用：透過真實遊戲模組與既有除錯介面做固定步進，所有載入均帶 mute。
 const frame = document.querySelector('#game'), report = document.querySelector('#report'), state = document.querySelector('#state');
 let win, result = [], errors = [], post, renderer;
@@ -53,10 +53,10 @@ async function save(name = 'capture', clean = false) {
   post.render(1);
   const cv = win.document.createElement('canvas'); cv.width = renderer.domElement.width; cv.height = renderer.domElement.height;
   const cx = cv.getContext('2d'); cx.drawImage(renderer.domElement, 0, 0);
-  if(name.startsWith('cars-')) {
+  {
     const pixels=cx.getImageData(0,0,cv.width,cv.height).data;
     let visible=false;for(let i=0;i<pixels.length;i+=256)if(pixels[i]+pixels[i+1]+pixels[i+2]>12){visible=true;break;}
-    assert(visible,'汽車截圖 '+name+' 有實際畫面，不是空白畫布');
+    assert(visible,'截圖 '+name+' 有實際畫面，不是空白畫布');
   }
   if (!clean) for (const c of win.document.querySelectorAll('canvas[id^="hud"]')) cx.drawImage(c, 0, 0, cv.width, cv.height);
   const data = cv.toDataURL('image/png');
@@ -906,7 +906,7 @@ async function campaignFoot() {
   assert(S.CHAPTERS.length === 7 && S.FIRST_MECH === 4, '獨立七章，三章步兵／四章機甲');
   assert(S.ENCOUNTERS.every(e => e.ch <= 3), '步兵路線全部屬於前三章');
   assert(S.LAYOUT === map.layout && !win.__world.cityEnabled && !win.__world.blds.length, '港區獨立地圖，任務區保留港務設施與作戰路線');
-  assert(map.triangles < 120000 && map.meshes.length <= 12, `港區靜態結構 ${map.triangles} 三角形／${map.meshes.length} 合併網格`);
+  assert(map.totalTriangles < 130000 && map.meshes.length <= 12, `港區結構含汽車 ${map.totalTriangles} 三角形／${map.meshes.length} 合併網格`);
   win.__step(60); assert(G.vm.cur === 'smg', '續作預設衝鋒槍、三武器可切換');
   await save('lastline-infantry');
   let render = renderer.render.bind(renderer); renderer.render = () => {};
@@ -1189,7 +1189,7 @@ async function harborArt() {
   win.__G.player.reset(new win.__T.Vector3(-180, 0, -193), 0); win.__step(3);
   const map=win.__map, shelves=win.__solid.list.filter(b=>b.x1<100 && b.y1>2.8 && b.y1<3.2 && b.x1-b.x0<2 && b.z1-b.z0<1);
   assert(shelves.length===12,'十二座掃描貨架為三公尺高，海關、冷藏站和修船棚沒有穿出屋頂的大貨架');
-  assert(map.triangles<120000 && map.meshes.length<=12,'港區合併幾何維持十二萬三角形，至多十二個材質網格');
+  assert(map.totalTriangles<130000 && map.meshes.length<=12,'港區合併幾何維持十三萬三角形（含汽車），至多十二個材質網格');
   const backdropTriangles=win.__world.kobeBackdrop.meshes.reduce((n,m)=>n+m.geometry.index.count/3,0);
   assert(backdropTriangles<70000&&win.__world.kobeBackdrop.meshes.length===5,'紅磚倉庫、信號所與客船仍併入五個背景網格，低於七萬三角形');
   await save('lastline-customs', true);
@@ -1277,7 +1277,7 @@ async function kobeArt() {
   assert(win.__world.kobeBackdrop.harbor&&win.__world.kobeBackdrop.blocks.length>700,'港區西側與山麓補上神戶市街，保留任務區');
   const backdropTriangles=win.__world.kobeBackdrop.meshes.reduce((n,m)=>n+m.geometry.index.count/3,0);
   assert(backdropTriangles<70000&&win.__world.kobeBackdrop.meshes.length===5,`港區新增市景 ${backdropTriangles} 三角形，控制在七萬、五個靜態網格內`);
-  assert(win.__map.triangles<120000&&win.__map.meshes.length<=12,'港區新增地標仍維持十二萬三角形內，路牌、地標漆面與店招使用三個材質桶');
+  assert(win.__map.totalTriangles<130000&&win.__map.meshes.length<=12,'港區新增地標仍維持十三萬三角形（含汽車）內，路牌、地標漆面與店招使用三個材質桶');
   stats.harbor={triangles:win.__map.triangles,meshes:win.__map.meshes.length,backdropTriangles,memory:renderer.info.memory};checks.push(...result);
   assert(errors.length===0,'神戶城市、商店街與港灣沒有渲染錯誤');
   report.textContent=JSON.stringify({checks,stats,errors},null,2);state.textContent='神戶場景通過';
@@ -1301,7 +1301,7 @@ async function japanStreets() {
   stats.prequel={textures:renderer.info.memory.textures,mapMeshes:win.__map.meshes.length};checks.push(...result);
   await load('/game/mech/lastline/index.html','?mute&god&ch=1&all&fps=0');renderer=win.__renderer;post={render:()=>win.__step(1)};
   win.__G.player.reset(new win.__T.Vector3(-189,0,-236),Math.PI);win.__G.player.pitch=.13;win.__step(3);await save('japan-lastline-street',true);
-  assert(win.__map.triangles<120000&&win.__map.meshes.length<=12,'失落防線新增港邊街屋仍低於十二萬三角形，合併網格不超過十二個');
+  assert(win.__map.totalTriangles<130000&&win.__map.meshes.length<=12,'失落防線新增港邊街屋仍低於十三萬三角形（含汽車），合併網格不超過十二個');
   stats.lastline={triangles:win.__map.triangles,mapMeshes:win.__map.meshes.length,textures:renderer.info.memory.textures};checks.push(...result);
   assert(errors.length===0,'三款日本街景沒有渲染錯誤');report.textContent=JSON.stringify({checks,stats,errors},null,2);state.textContent='日本街景通過';
 }
@@ -1339,7 +1339,7 @@ async function autumnArt() {
     ['autumn-lastline-coast',[625,0,475],Math.atan2(-180,-75),.07],
   ]){win.__G.player.reset(new win.__T.Vector3(...p),yaw);win.__G.player.pitch=pitch;win.__step(3);await save(name,true);}
   assert(win.__map.autumn.count===15&&win.__map.autumn.meshes.length===3,'續作十五棵楓樹分布在店屋、神社與港邊步道');
-  assert(win.__map.triangles<120000&&win.__map.meshes.length<=12,'續作街層細節仍在十二萬三角形、十二個材質桶內');
+  assert(win.__map.totalTriangles<130000&&win.__map.meshes.length<=12,'續作街層細節仍在十三萬三角形（含汽車）、十二個材質桶內');
   const farTriangles=win.__world.kobeBackdrop.meshes.reduce((n,m)=>n+m.geometry.index.count/3,0);
   assert(farTriangles<70000,'續作的市景遠樓仍低於七萬三角形');
   stats.lastline={trees:win.__map.autumn.count,triangles:win.__map.triangles,farTriangles,memory:{...renderer.info.memory},newStaticMeshes:win.__map.autumn.meshes.length};checks.push(...result);
@@ -1370,6 +1370,9 @@ async function realismArt() {
   ]){win.__cam.set(...view);W.followShadow(new win.__T.Vector3(...view.slice(0,3)));W.sun.shadow.needsUpdate=true;win.__step(3);await save(name,true);}
   const [x0,x1,z]=W.japanSites.arcade;
   win.__cam.set(x0-9,2.8,z,-Math.PI/2,.03);W.followShadow(new win.__T.Vector3(x0-9,2.8,z));W.sun.shadow.needsUpdate=true;win.__step(3);await save('realism-mech-arcade',true);
+  win.__cam.set(x0+18,1.85,z+1,0,.08);W.followShadow(new win.__T.Vector3(x0+18,1.85,z+1));W.sun.shadow.needsUpdate=true;win.__step(3);await save('city-mech-storefront',true);
+  assert(W.streetDetails.frontages===12&&W.streetDetails.triangles<9000,'本篇十二段街緣、店街單車與住宅植槽合併到原地標桶，新增幾何低於九千三角形');
+  stats.streetsMain=W.streetDetails;
   const office=W.blds.find(b=>b.H>70&&b.cx>0);
   if(office){win.__cam.set(office.cx,4,office.z1+8,0,.25);W.followShadow(new win.__T.Vector3(office.cx,4,office.z1+8));W.sun.shadow.needsUpdate=true;win.__step(3);await save('realism-mech-office',true);}
   audit('main',W);
@@ -1379,7 +1382,9 @@ async function realismArt() {
     ['realism-zero-street',[-43,0,-40.8],Math.PI/2,.11],
     ['realism-zero-motomachi',[-56,0,-1],Math.PI/2,.11],
     ['realism-zero-shrine',[-7.6,0,17],0,.08],
+    ['city-zero-storefront',[-20,0,1],0,.09],
   ]){win.__G.player.reset(new win.__T.Vector3(...p),yaw);win.__G.player.pitch=pitch;win.__step(3);await save(name,true);}
+  stats.streetsPrequel=win.__map.streetscape;
   audit('prequel',win.__world);
   await load('/game/mech/lastline/index.html','?mute&god&ch=1&all&fps=0');renderer=win.__renderer;post={render:()=>win.__step(1)};win.document.querySelector('[data-q="1"]').click();win.__step(60);
   assert(win.__map.b.mats.landmarkPaint.normalMap===win.__map.b.mats.concrete.normalMap&&win.__map.b.mats.landmarkPaint.normalScale.x<=.12,'港區店屋使用細微牆面凹凸，共用既有貼圖');
@@ -1387,9 +1392,11 @@ async function realismArt() {
     ['realism-lastline-street',[-218,0,-240],Math.PI/2,.035],
     ['realism-lastline-promenade',[548,0,323],Math.atan2(92,77),.075],
     ['realism-lastline-coast',[625,0,475],Math.atan2(-180,-75),.07],
+    ['city-lastline-storefront',[-198,0,-245],Math.PI,.09],
   ]){win.__G.player.reset(new win.__T.Vector3(...p),yaw);win.__G.player.pitch=pitch;win.__step(3);await save(name,true);}
-  assert(win.__map.triangles<120000&&win.__map.meshes.length<=12,'港區建築細節維持十二萬三角形與十二個材質桶內');
-  stats.harborTriangles=win.__map.triangles;audit('lastline',win.__world);
+  stats.streetsLastline=win.__map.streetscape;
+  assert(win.__map.totalTriangles<130000&&win.__map.meshes.length<=12,'港區建築細節維持十三萬三角形（含汽車）與十二個材質桶內');
+  stats.harborTriangles=win.__map.totalTriangles;audit('lastline',win.__world);
   report.textContent=JSON.stringify({checks,stats,errors},null,2);state.textContent='三款建築光影通過';
 }
 
@@ -1462,7 +1469,7 @@ async function carArt() {
   win.__G.player.reset(new win.__T.Vector3(car.x+3.8,0,car.z+4.3),Math.atan2(-3.8,-4.3));win.__G.player.pitch=-.12;
   win.__step(3);await save('cars-lastline-fit',true);
   assert(H.cars.length===1&&car.profile.inspiration==='Honda Fit','港區原覆蓋車位置換成可辨識的日系掀背車');
-  assert(H.totalTriangles===H.triangles+H.carTriangles&&H.totalTriangles<120000,'港區結構連同新汽車仍低於十二萬三角形');
+  assert(H.totalTriangles===H.triangles+H.carTriangles&&H.totalTriangles<130000,'港區結構連同新汽車仍低於十三萬三角形（含汽車）');
   assert(car.meshes.length===5&&car.meshes.every(m=>!m.material.map&&!m.material.transparent),'車身、車窗與輪圈共用五個材質，不新增貼圖或透明排序');
   const obj=win.__G.destruct.objs.find(o=>o.kind==='car'&&Math.hypot(o.pos.x-car.x,o.pos.z-car.z)<.1);
   assert(obj?.hp0===650,'替換車輛保留既有耐久與破壞登記');

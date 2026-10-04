@@ -98,7 +98,7 @@ scene.fog.color.setRGB(0.38, 0.36, 0.325); scene.fog.density = 0.00105;
 world.sun.color.setRGB(1.0, 0.9, 0.76); world.sun.intensity = 3.1;
 scene.environmentIntensity = 0.72;
 scene.traverse((o) => {
-  if (o.isHemisphereLight) { o.color.setRGB(0.46, 0.52, 0.62); o.groundColor.setRGB(0.25, 0.23, 0.20); o.intensity = 0.55; }
+  if (o.isHemisphereLight) { o.color.setRGB(0.46, 0.52, 0.62); o.groundColor.setRGB(0.25, 0.23, 0.20); o.intensity = 0.65; }
   const u = o.material && o.material.uniforms;
   if (!campaign && u && u.fogCol && u.sunFog && !o.material.userData.haze) {
     o.material.userData.haze = true; u.fogCol.value.copy(scene.fog.color); u.gain.value *= 0.9;

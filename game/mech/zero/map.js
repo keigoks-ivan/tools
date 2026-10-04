@@ -11,7 +11,7 @@ import { shopMaterial, shopUV, civicMaterial, japaneseWall, kobeRoadMaterial, st
 import { roofline } from '../roofline.js';
 import { streetfront } from '../streetfront.js';
 import { japaneseBuilder } from '../japan.js';
-import { kobeStreetDetails } from '../kobe-street.mjs';
+import { kobeStreetDetails, kobeBlockStreets } from '../kobe-street.mjs';
 import { buildAutumnTrees } from '../kobe-autumn.js';
 
 const H1 = 3.4;   // 一層樓高
@@ -192,7 +192,7 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
       for(let a=lo;a<hi;a+=6.4)trim('concrete',a,a+.06,y,y+1.85,.06,.83);
       trim('concrete',hi-.06,hi,y,y+1.85,.06,.83);
     }
-    if (o.shop) {
+    if (o.shop && !o.rowShops) {
       const count = Math.min(3, Math.floor((a1 - a0) / 7));
       for (let i = 0; i < count; i++) {
         const c = a0 + (a1 - a0) * (i + .5) / count;
@@ -202,7 +202,7 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
         trim('metal', c + .12, c + .15, .95, 1.32, .1, .16);
       }
     }
-    if (asian && o.shop) {
+    if (asian && o.shop && !o.rowShops) {
       // 日式木格子與三片暖簾；貼牆擺放，不改步兵路線或碰撞。
       const c = (a0 + a1) / 2;
       for (const side of [-1, 1]) for (let k = 0; k < 4; k++) {
@@ -216,7 +216,7 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
         b.B.fabric.quad(...pts, along ? [0, 0, out] : [out, 0, 0], [1, 1, 1, 1], null, [.25, .31, .37]);
       }
     }
-    if (o.shop) {
+    if (o.shop && !o.rowShops) {
       streetfront(a0,a1,asian,(lo,hi,y0,y1,d0,d1,col)=>{
         const p=fix+out*d0,q=fix+out*d1,mat=col[4]===2?'metal':'concrete',opts={tint:col.slice(0,3)};
         if(along)b.deco(mat,lo,hi,y0,y1,Math.min(p,q),Math.max(p,q),opts);
@@ -243,6 +243,7 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
       const p = at(a, 4.1, 0.18); PL.add('exterior_aircon_unit', ...p, ry, { cast: true });
     }
     const pipe = at(a0 + 0.35, 0, 0.12); b.mesh('rust', PR.pipeGeo(Math.min(h, 11), 0.055).translate(0, Math.min(h, 11) / 2, 0), ...pipe, 0, { solid: false });
+    if (o.rowShops) return;
     if (!o.shop && ph(x0, z0) < 0.4) return;
     const idx = Math.floor(ph(x0, z0) * 8), vertical = idx === 4 || idx === 5;
     const c = (a0 + a1) / 2, lo = vertical ? c : c - 2.2, hi = vertical ? c + .8 : c + 2.2, bot = vertical ? 3.4 : 2.9, top = vertical ? 6.4 : 3.8, d = vertical ? .45 : .17;
@@ -745,7 +746,7 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
 
   // ============================================================ C 市場廣場（x -95～-60，z -58～-30）
   mass(-114, -95, -40, -8, 17, 'wall', 'e', { kit: 'apt' });
-  mass(-95, -64, -30, -10, 12, 'brick', 's', { shop: true, kit: 'apt' });
+  mass(-95, -64, -30, -10, 12, 'brick', 's', { shop: true, rowShops: true, kit: 'apt' });
   // 東南角的小倉庫：打通成獵犬軍團的據點（第 1 章 C2 搜東西、C3 守點）；北門對廣場，西牆兩扇窗看得到修車行門口
   keepRnd(() => {
     room(-65.7, -60.3, -61.7, -52.3, { h: 3.4, floor: 'floor', wall: 'plaster', ext: PL ? 'kbrick' : 'brick', doors: { n: [[-63, 1.6]] }, windows: { w: [[-59.8, 1.4], [-55.4, 1.4]] }, upper: 10, upperWin: 'nw', trim: PL ? 'kbrick' : null, lights: false });
@@ -1073,7 +1074,7 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
     // ---- H 北區住宅街（x -60～-2，z -8～6）：商場走道北門出來，往西走到街底的醫院
     ground('floor', -60, -2, -8, 6);
     b.deco('concrete', -60, -2, 0, 0.15, 4.8, 6);
-    mass(-36, -2, 6, 20, 16, 'brick', 's', { shop: true, kit: 'apt' });
+    mass(-36, -2, 6, 20, 16, 'brick', 's', { shop: true, rowShops: true, kit: 'apt' });
     mass(-2, 6, -8, 14, 18, 'wall', 'w', { kit: 'apt' });
     P.deck(-26, -20, 4.6, 6, 3.6, 'concrete'); P.rail('x', 4.7, -26, -20, 3.6);   // 二樓陽台
     P.car(-44, -3, 0.3); P.car(-30, 2, 2.9); P.car(-16, -5, 1.4); P.car(-57, -4, 0.2);
@@ -1241,10 +1242,32 @@ export function buildMap(scene, mats, solid, PL = null, surfaces = null) {
     [6.3,24,0,0,1],[113.3,-72,-Math.PI/2,0,4],[113.3,-12,-Math.PI/2,0,7],
   ], shops: [[-36,-2,5.96,-1,0,true],[-95,-64,-30.04,-1,0,true]], crossings: [[-30,-41,Math.PI/2,11.4]] };
   japaneseBuilder(b, M.japanSites);
-  kobeStreetDetails({face:(a,c,d,e,col)=>{
+  const streetArt={face:(a,c,d,e,col)=>{
     const n=new THREE.Vector3().subVectors(new THREE.Vector3(...c),new THREE.Vector3(...a)).cross(new THREE.Vector3().subVectors(new THREE.Vector3(...d),new THREE.Vector3(...a))).normalize().toArray();
     b.B[col[4]===2?'metal':col[4]===6?'landmarkPaint':'concrete'].quad(a,c,d,e,n,[1,1,1,1],null,col.slice(0,3));
-  }},streetSegments);
+  }};
+  kobeStreetDetails(streetArt,streetSegments);
+  // 步道靠在原牆與路緣之間；入口留白，作業泊位放在外圍而非戰鬥道路。
+  M.streetSites={frontages:[
+    {x:-95,z:-78,ry:Math.PI/2,length:26,depth:.65,kind:'residential'},
+    {x:-88,z:-84,ry:-Math.PI/2,length:14,depth:.65,kind:'service'},
+    {x:-79.5,z:-30.1,ry:Math.PI,length:30,depth:1.25,kind:'shopping'},
+    {x:-95,z:-44,ry:Math.PI/2,length:22,depth:1,kind:'shopping'},
+    {x:-25.15,z:-34,ry:Math.PI,length:21.7,depth:1.2,ground:.15},
+    {x:.15,z:-34,ry:Math.PI,length:11.7,depth:1.2,ground:.15},
+    {x:-21,z:-48,ry:0,length:29.4,depth:1.2,ground:.15,kind:'service',gaps:[[-14.2,-10.4],[10.7,14.3]]},
+    {x:-19,z:5.96,ry:Math.PI,length:34,depth:1.16,ground:.15,kind:'residential'},
+    {x:-52,z:6,ry:Math.PI,length:15,depth:1.15,ground:.15,gaps:[[-2,2]]},
+    {x:-36,z:43,ry:Math.PI/2,length:12,depth:.75,kind:'service'},
+    {x:47,z:-24,ry:Math.PI/2,length:18,depth:.7,kind:'service'},
+    {x:14,z:37,ry:-Math.PI/2,length:22,depth:.8,kind:'service'},
+  ],parking:[{x:52,z:-65,ry:0,stalls:2},{x:-28,z:21,ry:0,stalls:2}],
+  service:[{x:80,z:-18,length:18,width:4},{x:84,z:28,length:20,width:3.2},{x:40,z:55,length:20,width:2}],
+  bicycles:[{x:-94.6,z:-89,ry:Math.PI/2,count:1},{x:-28,z:5.48,ry:Math.PI,count:2,ground:.15}],
+  planters:[{x:-93.9,z:-31.9,ry:Math.PI/2,length:1.7},{x:-22,z:-34.45,length:1.8,ground:.15},
+    {x:-3,z:-34.45,length:1.5,ground:.15},{x:-7,z:5.47,length:1.7,ground:.15}],
+  utilities:[{x:-94.74,z:-83.5,ry:Math.PI/2},{x:-42,z:-48,kind:'power'},{x:14,z:47,ry:-Math.PI/2,kind:'power'}]};
+  M.streetscape=kobeBlockStreets(streetArt,M.streetSites);
   M.autumn=buildAutumnTrees(scene,[[-35,-34.9,.66],[-23,-34.9,.69],[-9,-34.9,.72],[-86.8,-50,.69],[-86.8,-36,.68],
     [-32,4.7,.65],[-18,4.7,.72],[-5,4.7,.67],[-10,19,.62],[-5,27,.63]]);
   M.meshes = b.build(scene);

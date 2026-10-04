@@ -8,35 +8,49 @@ export const CIVIC_LABELS = ['止まれ', '三宮駅', '元町商店街', '稲�
 export const JAPANESE_FONT = '"Noto Sans JP", "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif';
 
 // 店窗與港務窗共用天空反射；頂點色代表玻璃／室內，不再乘第二層深藍底色。
+export function streetGlassFragment(world='vWindowWorld',normal='vWindowNormal') {
+  return `
+    float sgAlong=abs(${normal}.x)>.5?${world}.z:${world}.x;
+    vec2 sgCellP=vec2(sgAlong/2.7,${world}.y/3.2),sgCell=floor(sgCellP),sgLocal=fract(sgCellP);
+    float sgPane=fract(sin(dot(sgCell,vec2(127.1,311.7)))*43758.5453);
+    vec3 sgView=normalize(cameraPosition-${world});
+    float sgFacing=max(abs(dot(sgView,normalize(${normal}))),.35);
+    float sgShift=clamp((abs(${normal}.x)>.5?sgView.z:sgView.x)/sgFacing,-1.5,1.5)*.035;
+    sgLocal.x=clamp(sgLocal.x+sgShift,.0,1.0);
+    float sgCeiling=smoothstep(.69,.78,sgLocal.y)*(1.0-smoothstep(.86,.94,sgLocal.y));
+    float sgRear=smoothstep(.14,.26,sgLocal.x)*(1.0-smoothstep(.77,.88,sgLocal.x));
+    float sgCurtain=step(.66,sgPane)*(1.0-smoothstep(.30,.50,sgLocal.x));
+    float sgBlind=step(.35,sgPane)*(1.0-step(.56,sgPane))*smoothstep(.45,.56,sgLocal.y);
+    float sgSlat=1.0-smoothstep(.74,.95,fract(${world}.y/.10));
+    vec3 sgRoom=clamp(diffuseColor.rgb*.28+vec3(.040,.047,.047),vec3(.045),vec3(.19));
+    sgRoom*=.78+sgPane*.18;sgRoom*=1.0-sgRear*.13;
+    sgRoom+=vec3(.028,.026,.019)*sgCeiling;
+    vec3 sgFabric=mix(vec3(.115,.128,.124),vec3(.175,.154,.114),step(.84,sgPane));
+    sgFabric*=.94+.06*cos(sgAlong*28.0);
+    sgRoom=mix(sgRoom,sgFabric,sgCurtain*.68);
+    sgRoom=mix(sgRoom,vec3(.14,.145,.132)*(.90+sgSlat*.1),sgBlind*.42);
+    diffuseColor.rgb=sgRoom;`;
+}
 export function streetGlassMaterial() {
-  const material=new THREE.MeshStandardMaterial({color:0xffffff,roughness:.24,metalness:0,envMapIntensity:1.15,vertexColors:true});
+  const material=new THREE.MeshStandardMaterial({color:0xffffff,roughness:.23,metalness:0,envMapIntensity:1.2,vertexColors:true});
   material.onBeforeCompile=sh=>{
     sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nvarying vec3 vWindowWorld,vWindowNormal;')
       .replace('#include <begin_vertex>','#include <begin_vertex>\nvWindowWorld=(modelMatrix*vec4(transformed,1.0)).xyz;vWindowNormal=mat3(modelMatrix)*objectNormal;');
     sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nvarying vec3 vWindowWorld,vWindowNormal;')
-      .replace('#include <map_fragment>',`#include <map_fragment>
-        float along=abs(vWindowNormal.x)>.5?vWindowWorld.z:vWindowWorld.x;
-        vec2 paneP=vec2(along/2.7,vWindowWorld.y/3.2),cell=floor(paneP),local=fract(paneP);
-        float pane=fract(sin(dot(cell,vec2(127.1,311.7)))*43758.5453);
-        float ceiling=smoothstep(.7,.85,local.y)*(1.0-smoothstep(.94,.99,local.y));
-        float curtain=step(.65,pane)*(1.0-smoothstep(.45,.72,local.x));
-        vec3 interior=clamp(diffuseColor.rgb*.24+vec3(.025,.035,.037),vec3(.035),vec3(.16));
-        interior*=.74+pane*.25;interior+=vec3(.008,.007,.005)*ceiling;
-        vec3 fabric=vec3(.12,.115,.098)*(.92+.08*cos(along*35.0));
-        diffuseColor.rgb=mix(interior,fabric,curtain*.6);`)
-      .replace('#include <roughnessmap_fragment>','#include <roughnessmap_fragment>\nroughnessFactor+=pane*.1;');
+      .replace('#include <map_fragment>','#include <map_fragment>'+streetGlassFragment())
+      .replace('#include <roughnessmap_fragment>','#include <roughnessmap_fragment>\nroughnessFactor+=sgPane*.1;');
   };
-  material.customProgramCacheKey=()=> 'kobe-street-glass-v2';return material;
+  material.customProgramCacheKey=()=> 'kobe-street-glass-v3';return material;
 }
 
 // 步兵街道共用既有柏油掃描；範圍限定在室外街段，室內地坪沿用原材質。
 export function kobeRoadMaterial(source, A, segments) {
   const material=source.clone(),compile=source.onBeforeCompile;
   material.onBeforeCompile=sh=>{
-    compile(sh);Object.assign(sh.uniforms,{kobeAsphalt:{value:A.asphD},kobeAsphaltN:{value:A.asphN}});
+    compile(sh);Object.assign(sh.uniforms,{kobeAsphalt:{value:A.asphD},kobeAsphaltN:{value:A.asphN},kobeRoadTint:{value:source.color.clone()}});
     sh.vertexShader=sh.vertexShader.replace('#include <common>','#include <common>\nvarying vec3 vKobeRoad,vKobeRoadN;')
       .replace('#include <begin_vertex>','#include <begin_vertex>\nvKobeRoad=(modelMatrix*vec4(transformed,1.0)).xyz;vKobeRoadN=mat3(modelMatrix)*objectNormal;');
-    sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nvarying vec3 vKobeRoad,vKobeRoadN;uniform sampler2D kobeAsphalt,kobeAsphaltN;')
+    sh.fragmentShader=sh.fragmentShader.replace('#include <common>','#include <common>\nvarying vec3 vKobeRoad,vKobeRoadN;uniform sampler2D kobeAsphalt,kobeAsphaltN;uniform vec3 kobeRoadTint;')
       .replace('#include <map_fragment>',`#include <map_fragment>
         float kobeRoad=0.0,kobeWalk=0.0,kobePaint=0.0;
         ${segments.map(([x,z,ry,length,width])=>`{
@@ -49,7 +63,7 @@ export function kobeRoadMaterial(source, A, segments) {
           kobePaint=max(kobePaint,road*(1.0-smoothstep(.06-aa,.06+aa,edge)));
         }`).join('\n')}
         float outdoor=step(.8,vKobeRoadN.y)*(1.0-step(.08,vKobeRoad.y));kobeRoad*=outdoor;kobeWalk*=outdoor;
-        vec3 roadScan=mix(texture2D(kobeAsphalt,vKobeRoad.xz/2.8).rgb*.72,vec3(.063,.067,.070),.35);
+        vec3 roadScan=mix(texture2D(kobeAsphalt,vKobeRoad.xz/2.8).rgb*.72,vec3(.063,.067,.070),.48);
         float repair=sin(vKobeRoad.x*.14+sin(vKobeRoad.z*.11))*sin(vKobeRoad.z*.25);
         roadScan*=.91+repair*.07;
         float row=floor(vKobeRoad.z/.3);vec2 block=vec2(vKobeRoad.x+mod(row,2.0)*.3,vKobeRoad.z)/vec2(.6,.3);
@@ -59,11 +73,13 @@ export function kobeRoadMaterial(source, A, segments) {
         vec3 stone=vec3(.25,.245,.225)*(.86+tone*.23)*(1.0-mortar*.23);
         vec3 surface=mix(sampledDiffuseColor.rgb,roadScan,kobeRoad);surface=mix(surface,stone,kobeWalk);
         surface=mix(surface,vec3(.51,.52,.47),kobePaint*outdoor*.7);
-        diffuseColor.rgb*=surface/max(sampledDiffuseColor.rgb,vec3(.005));`)
+        diffuseColor.rgb*=surface/max(sampledDiffuseColor.rgb,vec3(.005));
+        // 室外柏油／鋪面已有校準色，不再乘一次室內混凝土地坪的棕灰底色。
+        diffuseColor.rgb*=mix(vec3(1.0),1.0/max(kobeRoadTint,vec3(.05)),max(kobeRoad,kobeWalk));`)
       .replace('#include <roughnessmap_fragment>','#include <roughnessmap_fragment>\nroughnessFactor=mix(roughnessFactor,.86,kobeRoad);roughnessFactor=mix(roughnessFactor,.8,kobeWalk);')
       .replace('vec3 mapN = texture2D( normalMap, vNormalMapUv ).xyz * 2.0 - 1.0;','vec3 mapN = texture2D( normalMap, vNormalMapUv ).xyz * 2.0 - 1.0;\nmapN=mix(mapN,(texture2D(kobeAsphaltN,vKobeRoad.xz/2.8).xyz*2.0-1.0)*vec3(.2,.2,1.0),kobeRoad);mapN.xy*=mix(1.0,.14,kobeWalk);');
   };
-  material.customProgramCacheKey=()=> 'kobe-street-paving-v1';return material;
+  material.customProgramCacheKey=()=> 'kobe-street-paving-v2';return material;
 }
 
 // 集合住宅的小口磁磚：接縫依世界公尺取樣，共用既有掃描圖，不新增下載或大貼圖。
@@ -119,31 +135,46 @@ export function harborWater(axis, shore) {
 }
 
 export function shopMaterial() {
-  const material = new THREE.MeshStandardMaterial({ roughness: .7, metalness: .12, vertexColors: true });
+  const material = new THREE.MeshStandardMaterial({ roughness: .78, metalness: .03, vertexColors: true });
   if (typeof document === 'undefined') return material;
   const c = document.createElement('canvas'); c.width = 1024; c.height = 512;
   const ctx = c.getContext('2d');
-  const colors = [['#3b4b42', '#ddd3b4'], ['#5f3430', '#e2d6b9'], ['#ddd8c9', '#34504a'], ['#39495a', '#d5d4c5'], ['#833b31', '#eee3c7'], ['#ddd4b4', '#2e443d'], ['#55504b', '#dfd4b7'], ['#3e4345', '#d8caa7']];
+  const colors = [['#ded3b9', '#514737'], ['#4b3930', '#eee3ca'], ['#e3decd', '#345343'], ['#31444c', '#e2e3d4'], ['#40392f', '#e9dfc9'], ['#e8e6d7', '#375b48'], ['#4a4a3e', '#ded2b4'], ['#5a5549', '#e5ddca']];
   const signs = SHOP_LABELS.map((label, i) => [label, ...colors[i]]);
   const draw = () => {
     for (let i = 0; i < signs.length; i++) {
       const x = i % 4 * 256, y = Math.floor(i / 4) * 256, [label, bg, ink] = signs[i];
       ctx.fillStyle = bg; ctx.fillRect(x, y, 256, 256);
       const vertical = i === 4 || i === 5;
-      ctx.strokeStyle = ink; ctx.lineWidth = 3; ctx.strokeRect(x + 9, y + (vertical ? 9 : 99), 238, vertical ? 238 : 55);
+      // 字先留乾淨的底；褪色與板材紋理畫在字後面，避免把日文字筆畫磨成亂碼。
+      const top=vertical?9:99,height=vertical?238:55;
+      ctx.strokeStyle='rgba(21,25,19,.13)';ctx.lineWidth=.8;
+      for(let k=0;k<12;k++) {
+        const yy=y+top+((k*31+i*7)%height);ctx.beginPath();ctx.moveTo(x+9,yy);ctx.lineTo(x+247,yy+.3);ctx.stroke();
+      }
+      const border=i===0||i===6,strip=i===2||i===5;
+      if(border){ctx.strokeStyle=ink;ctx.lineWidth=1.2;ctx.strokeRect(x+10,y+top+2,236,height-4);ctx.strokeRect(x+14,y+top+5,228,height-10);}
+      else if(strip){ctx.fillStyle=i===5?'#577465':'#577563';ctx.fillRect(x+9,y+top+1,238,3);ctx.fillRect(x+9,y+top+height-4,238,3);}
+      else {ctx.fillStyle='rgba(235,234,216,.30)';ctx.fillRect(x+9,y+top+1,238,1);ctx.fillStyle='rgba(12,20,18,.35)';ctx.fillRect(x+9,y+top+height-2,238,2);}
+      if(i===3)for(let k=0;k<3;k++){ctx.fillStyle=['#ad5a48','#d9d9ca','#537481'][k];ctx.fillRect(x+13+k*3,y+top+7,3,height-14);}
+      if(vertical){ctx.strokeStyle=ink;ctx.lineWidth=1.2;ctx.strokeRect(x+89,y+11,78,234);}
+      if(i===5){ctx.fillStyle='#627c67';ctx.fillRect(x+125,y+16,6,16);ctx.fillRect(x+120,y+21,16,6);}
       ctx.fillStyle = ink; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       const font = JAPANESE_FONT;
       if (i === 4 || i === 5) {
         ctx.font = 'bold 76px ' + font; [...label].forEach((s, j) => ctx.fillText(s, x + 128, y + 76 + j * 108));
       } else {
-        ctx.font = 'bold 34px ' + font; ctx.fillText(label, x + 128, y + 117);
-        ctx.font = '14px ' + font; ctx.fillText(SHOP_SUBTITLES[i], x + 128, y + 144);
+        ctx.font = (i===1||i===6?'bold 32px ':'bold 33px ') + font;ctx.fillText(label,x+128,y+118,214);
+        ctx.font = '13px ' + font;ctx.fillText(SHOP_SUBTITLES[i],x+128,y+144,214);
       }
-      // 漆面褪色與積灰，不用高解析素材。
-      for (let k = 0; k < 100; k++) {
-        const px = (k * 73 + i * 17) % 256, py = (k * 109 + i * 31) % 256;
-        ctx.fillStyle = k % 2 ? 'rgba(26,24,20,.1)' : 'rgba(230,225,207,.13)'; ctx.fillRect(x + px, y + py, 3 + k % 7, 2);
-      }
+    }
+    // 直排食堂／薬局另有橫排門楣；借用前兩格未採樣的上緣，不增加圖集尺寸。
+    for(const id of [4,5]) {
+      const x=(id-4)*256,[bg,ink]=colors[id];
+      ctx.fillStyle=bg;ctx.fillRect(x+1,14,254,55);
+      ctx.strokeStyle=ink;ctx.lineWidth=1.2;ctx.strokeRect(x+10,18,236,47);
+      ctx.fillStyle=ink;ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='bold 36px '+JAPANESE_FONT;
+      ctx.fillText(SHOP_LABELS[id],x+128,41,214);
     }
   }; draw();
   const map = new THREE.CanvasTexture(c); map.colorSpace = THREE.SRGBColorSpace; map.anisotropy = 4; map.name = 'shop-signs';
@@ -198,8 +229,18 @@ export function civicMaterial() {
   document.fonts?.load('bold 42px "Noto Sans JP"', CIVIC_LABELS.join('')).then(() => { draw(); map.needsUpdate = true; }).catch(() => {});
   material.map = map; return material;
 }
-export function shopUV(i) {
+export function shopUV(i, horizontal = false) {
+  if(horizontal&&(i===4||i===5)) {
+    const uv=civicUV(i-4),y=.5;
+    uv[0][1]=uv[1][1]=y+(1-69/256)/2;
+    uv[2][1]=uv[3][1]=y+(1-14/256)/2;
+    return uv;
+  }
   const uv = civicUV(i);
+  if(i===4||i===5) {
+    // 兩個直排字的實際版心是 80×253px；裁掉空白側翼，避免字被橫向壓扁。
+    const x=(i%4)*256;uv[0][0]=uv[3][0]=(x+88)/1024;uv[1][0]=uv[2][0]=(x+168)/1024;
+  }
   if (i !== 4 && i !== 5) {
     const y = 1 - (Math.floor(i / 4) + 1) / 2;
     uv[0][1] = uv[1][1] = y + (1 - 154 / 256) / 2;
