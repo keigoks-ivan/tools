@@ -159,6 +159,7 @@ function makePawa(o){
     const g=new THREE.Group();
     g.add(part('glove',leather(col))); g.add(part('glove_web',leather(dark)));
     g.add(part('glove_lace',std(o.gloveLace||0x3a1a08,0.6))); g.add(part('glove_patch',std(o.glovePatch||0xd8c8a0,0.5)));
+    g.children.forEach(p=>p.position.y=.34);   // 動作捕捉的手節點是手腕，皮革掌根接在這裡
     g.scale.set(1.0*(o.gloveRight?-1:1),1.0,1.0); glove=g; return g;
   };
   const hR=new THREE.Group(), hL=new THREE.Group();
@@ -239,7 +240,7 @@ const ballTex=canvasTex(512,256,(g,w,h)=>{
 const ball=new THREE.Mesh(new THREE.SphereGeometry(0.27,24,16),new THREE.MeshStandardMaterial({map:ballTex,roughness:0.72,emissive:0xfff4d5,emissiveIntensity:0.25}));
 ball.castShadow=true; ball.visible=false; scene.add(ball);
 const FX=createBaseballEffects(scene,camera,ball,batMesh), SFX=window.BaseballAudio;
-const MITT_HOME=new THREE.Vector3(0.25,1.75,1.05);
+const MITT_HOME=new THREE.Vector3(0.15,1.35,1.22);
 let BSIDE=-1, PHAND=1;          // 打者站位（-1 右打站三壘側）、投手慣用手（1 右投）
 
 function setBatter(pid){
@@ -275,8 +276,7 @@ function setDefense(){
     const pid=byPos[p.k]||f.T.bench.find(i=>!Object.values(byPos).includes(i))||f.lineup[0].id;
     if(p.k==='C'){
       const c=playerModel(pid,f.abbr,home,'catch'); c.root.position.set(0,0,3.6); c.root.rotation.y=Math.PI; scene.add(c.root);
-      applyPose(c,mcSample('catcher',0,false),1); c.feet[0].position.x-=0.35; c.feet[1].position.x+=0.35;
-      c.hL.position.copy(MITT_HOME); c.hR.position.set(-0.95,1.0,0.5); C.catcher=c; C.fielders.C=c; continue;
+      poseCatcher(c); C.catcher=c; C.fielders.C=c; continue;
     }
     const c=playerModel(pid,f.abbr,home,'field'); c.root.position.set(p.x,0,p.z); c.root.lookAt(0,0,0); c.home={x:p.x,z:p.z}; c.m=handOf(pid); scene.add(c.root); C.fielders[p.k]=c; runPose(c,0,false,c.m);
   }
@@ -322,6 +322,48 @@ function mcSample(name,t,loop,out){
 function mcMix(a,b,w,out){ for(let k=0;k<MC_N;k++) out[k]=a[k]+(k>=21&&k<=23?wrapA(b[k]-a[k]):b[k]-a[k])*w; return out; }
 // 人體公尺 → 二頭身局部單位
 const MK={hand:2.0, foot:2.3, body:2.0, drop:1.25};
+// 手套局部 +Z 是袋口、+Y 是指尖；以手腕為支點，接球點使用口袋而非手節點。
+const GLOVE_POCKET=new THREE.Vector3(0,.40,.09);
+const _gloveNormal=new THREE.Vector3(), _gloveTips=new THREE.Vector3(), _gloveSide=new THREE.Vector3();
+const _gloveBasis=new THREE.Matrix4(), _gloveWorldQ=new THREE.Quaternion(), _gloveTarget=new THREE.Vector3();
+const _gloveHead=new THREE.Vector3(), _gloveClear=new THREE.Vector3();
+const GLOVE_CLEAR=[new THREE.Vector3(0,.45,0),new THREE.Vector3(0,1.05,.05),new THREE.Vector3(.48,.5,.08)];
+function aimGlove(c,nx,ny,nz,fx,fy,fz,world=false){
+  if(!c.glove) return;
+  _gloveNormal.set(nx,ny,nz).normalize(); _gloveTips.set(fx,fy,fz).normalize();
+  if(world){ c.yaw.getWorldQuaternion(_gloveWorldQ).invert(); _gloveNormal.applyQuaternion(_gloveWorldQ); _gloveTips.applyQuaternion(_gloveWorldQ); }
+  _gloveSide.crossVectors(_gloveTips,_gloveNormal);
+  if(_gloveSide.lengthSq()<.001){ _gloveTips.set(1,0,0); _gloveSide.crossVectors(_gloveTips,_gloveNormal); }
+  _gloveSide.normalize(); _gloveTips.crossVectors(_gloveNormal,_gloveSide).normalize();
+  c.glove.quaternion.setFromRotationMatrix(_gloveBasis.makeBasis(_gloveSide,_gloveTips,_gloveNormal));
+}
+function glovePocket(c,out){ c.root.updateMatrixWorld(true); return c.glove.localToWorld(out.copy(GLOVE_POCKET)); }
+function placeGlove(c,target,w=1){
+  c.root.updateMatrixWorld(true); c.yaw.worldToLocal(_gloveTarget.copy(target));
+  _gloveNormal.copy(GLOVE_POCKET).applyQuaternion(c.glove.quaternion);
+  c.gloveHand.position.lerp(_gloveTarget.sub(_gloveNormal),w);
+}
+function clearGloveHead(c){
+  c.root.updateMatrixWorld(true); c.head.getWorldPosition(_gloveHead); c.yaw.worldToLocal(_gloveHead);
+  const radius=1.22*c.head.scale.x+.35;
+  for(let i=0;i<3;i++) for(const p of GLOVE_CLEAR){
+    _gloveClear.copy(p).multiply(c.glove.scale).applyQuaternion(c.glove.quaternion).add(c.gloveHand.position).sub(_gloveHead);
+    const d=_gloveClear.length();
+    if(d<radius){ if(d<.001) _gloveClear.set(0,-1,1).normalize(); else _gloveClear.multiplyScalar(1/d); c.gloveHand.position.addScaledVector(_gloveClear,radius-d); }
+  }
+}
+function fieldGlove(c,ground){
+  const h=c.gloveHand, other=h===c.hL?c.hR:c.hL, side=h===c.hL?1:-1;
+  h.position.lerp(other.position,.45);
+  aimGlove(c,0,ground?1:.18,ground?.35:1,0,ground?-.35:1,ground?1:-.1);
+  other.position.set(h.position.x-side*.38,h.position.y+.32,h.position.z-.12);
+}
+function poseCatcher(c=C.catcher){
+  if(!c) return;
+  applyPose(c,mcSample('catcher',0,false),1); c.feet[0].position.x-=.35; c.feet[1].position.x+=.35;
+  c.gloveHand.position.copy(MITT_HOME); c.hR.position.set(-.55,.9,-.2);
+  aimGlove(c,0,.08,1,0,1,-.08);
+}
 // c：二頭身模型；P：姿勢；m：1 或 -1（左投、左打、左撇子野手鏡射）；noHands：手不動（打者的手掛在球棒上）
 function applyPose(c,P,m,noHands){
   const hy=P[1], bx=P[0]*m*MK.body, bz=P[2]*MK.body, by=clamp((hy-0.95)*MK.drop,-0.9,0.4);
@@ -334,14 +376,12 @@ function applyPose(c,P,m,noHands){
     const place=(h,i)=>{
       const y=1.65+by+(P[i+1]-hy)*1.95;
       let rx=P[i]*m*MK.hand-bx, rz=P[i+2]*MK.hand-bz;
-      // 大頭比例需要把手套留在身體外側；仍沿用捕捉動作的高度與前後位移。
-      if(h===c.gloveHand && y>0.45+by && y<3.4+by && Math.abs(rz)<1.25 && Math.abs(rx)<1.3) rx=(h===c.hL?1:-1)*1.3;
       const d=Math.hypot(rx,rz), lim=y>2.55+by?1.45:(y>0.45+by?1.12:0);   // 手不要陷進身體或頭
       if(lim && d<lim){ if(d<1e-3){ rx=0; rz=lim; } else { rx*=lim/d; rz*=lim/d; } }
       h.position.set(rx*cs-rz*sn, y-by, rx*sn+rz*cs);
     };
     place(c.hR, m>0?12:9); place(c.hL, m>0?9:12);
-    if(c.glove){ c.glove.rotation.set(-0.18,-yaw,0); }
+    if(c.glove) aimGlove(c,0,.15,1,0,1,-.15);
   }
   const foot=(f,i)=>{ f.position.set(P[i]*m*MK.foot, 0.05+Math.max(0,P[i+1]-0.07)*1.6, P[i+2]*MK.foot); f.rotation.y=P[21]*m; };
   foot(c.feet[0], m>0?18:15); foot(c.feet[1], m>0?15:18);
@@ -355,6 +395,13 @@ function posePitcher(t){
   const pc=C.pitcher; if(!pc) return;
   const rel=MC.pitch.fast/30, ct=t<RELEASE_T?t*rel/RELEASE_T:rel+(t-RELEASE_T);
   applyPose(pc,mcSample('pitch',ct,false,_pA),PHAND);
+  const h=pc.gloveHand, side=PHAND, joined=1-ease((t-.28)/.22), tucked=ease((t-.82)/.33);
+  _gloveTarget.set(side*.22,2.05,1.38); h.position.lerp(_gloveTarget,joined);
+  _gloveTarget.set(-side*.08,2.10,1.51); throwHand().position.lerp(_gloveTarget,joined);
+  _gloveTarget.set(side*.52,1.05,1.32).applyEuler(pc.upper.rotation).add(pc.upper.position); h.position.lerp(_gloveTarget,tucked);
+  const lean=pc.upper.rotation.x;
+  aimGlove(pc,-side*.35*joined,.25+Math.sin(lean)*tucked,1-tucked-Math.cos(lean)*tucked,side*.12,Math.cos(lean*tucked),Math.sin(lean*tucked));
+  clearGloveHead(pc);
 }
 // 打擊：身體、頭、腳跟著動作捕捉；球棒和兩隻手照原本的揮棒（判定時機不變），握把位置跟著人的雙手
 const STANCE={yaw:-1.3,elev:1.2};
@@ -405,7 +452,14 @@ function poseBatter(st,cy){
   clearBatHead(c);
 }
 // 跑步（原地循環，根節點移動由呼叫端處理）或預備姿勢
-function runPose(c,t,moving,m=1){ applyPose(c,moving?mcSample('run',t*1.35,true,_pA):READY,m); }
+function runPose(c,t,moving,m=1){
+  applyPose(c,moving?mcSample('run',t*1.35,true,_pA):READY,m);
+  if(c.glove){
+    const side=c.gloveHand===c.hL?1:-1;
+    if(moving) aimGlove(c,-side*.65,.15,.7,0,-.65,.75);
+    else { c.gloveHand.position.set(side*.28,1.15,1.5); (side>0?c.hR:c.hL).position.set(-side*.35,1.42,1.42); aimGlove(c,0,.2,1,0,-1,.2); }
+  }
+}
 const handOf=pid=>(PLAYERS[pid]?.throws==='L')?-1:1;
 
 /* =========================================================
@@ -562,7 +616,9 @@ function resetPlayers(){
   if(C.batter) C.batter.root.visible=true;
   for(const k in C.fielders){ if(k==='P'||k==='C') continue; const f=C.fielders[k]; f.root.position.set(f.home.x,0,f.home.z); f.root.lookAt(0,0,0); runPose(f,0,false,f.m); }
   C.umpT=null; applyPose(C.ump,mcSample('ump',0,false,_pA),1); C.swingClip='whiff';
-  posePitcher(0); poseBatter(-1,G.cur.y); if(C.catcher) C.catcher.hL.position.copy(MITT_HOME);
+  C.pitcher.root.position.set(0,.8,-60.5); C.pitcher.root.rotation.set(0,0,0);
+  if(C.catcher){ C.catcher.root.position.set(0,0,3.6); C.catcher.root.rotation.set(0,Math.PI,0); poseCatcher(); }
+  posePitcher(0); poseBatter(-1,G.cur.y);
   setRunners();
   G.swing=null; G.decide=null; G.play=null;
 }
@@ -733,7 +789,7 @@ function startBuntPlay(res,pre){
 const gloveHand=f=>f.gloveHand||((f===C.pitcher?PHAND:(f.m||1))>0?f.hL:f.hR);
 // 負責接球的野手：跑向落點 → 接球（低／中／高、滾地球撿球、勉強時撲球）→ 傳球
 function fielderAct(P,dt){
-  const res=P.res, pts=P.sim.pts, hm=res.fielder, f=C.fielders[hm.k], m=f.m||1, tc=res.t;
+  const res=P.res, pts=P.sim.pts, hm=res.fielder, f=C.fielders[hm.k], m=f.m||(f===C.pitcher?PHAND:1), tc=res.t;
   if(!(res.idx>=0) || !pts[res.idx]) return;     // 場地規則二壘安打等沒有接球點的情況
   if(!P.fx){
     const tg=pts[res.idx], prev=pts[Math.max(0,res.idx-60)];
@@ -745,13 +801,14 @@ function fielderAct(P,dt){
     if((hm.inf&&tg.b&&Math.abs(lat)>30) || (!hm.inf&&!tg.b&&Math.abs(lat)>75)) clip=lat*m>0?'diveL':'diveR';
     if(clip==='gkHigh' && d>60 && !tg.b) clip='gkRunJump';
     const cf=(clip==='pickup'?MC[clip].lowF:MC[clip].catchF)/30;
-    // 接球動作本身會帶著身體位移：根節點停在落點前面一點，讓手套剛好到球
-    const cp=MC[clip].f[Math.round(cf*30)], lx=cp[0]*m*MK.body*1.35, lz=cp[2]*MK.body*1.35;
-    const ox=lx*Math.cos(face)+lz*Math.sin(face), oz=-lx*Math.sin(face)+lz*Math.cos(face);
-    P.fx={clip,cf,face,react,tx:tg.x-ox,tz:tg.z-oz,start:Math.max(react+0.05,tc-cf),hx:f.root.position.x,hz:f.root.position.z};
+    // 使用實際皮革口袋的偏移，讓落點落進手套，不再跳到手腕或身體中央。
+    f.root.rotation.set(0,face,0); applyPose(f,MC[clip].f[Math.round(cf*30)],m); fieldGlove(f,!!tg.b);
+    const wp=glovePocket(f,new THREE.Vector3());
+    P.fx={clip,cf,face,react,tx:tg.x-(wp.x-f.root.position.x),tz:tg.z-(wp.z-f.root.position.z),start:Math.min(tc,Math.max(react+0.05,tc-cf)),hx:f.root.position.x,hy:f.root.position.y,hz:f.root.position.z};
   }
   const X=P.fx, u=clamp((P.t-X.react)/Math.max(0.05,X.start-X.react),0,1), far=Math.hypot(X.tx-X.hx,X.tz-X.hz)>3;
   f.root.position.x=lerp(X.hx,X.tx,u); f.root.position.z=lerp(X.hz,X.tz,u);
+  if(f===C.pitcher) f.root.position.y=lerp(X.hy,0,u);
   let pose;
   if(P.t<X.start){ if(u<1&&far){ f.root.lookAt(X.tx,0,X.tz); pose=mcSample('run',P.t*1.35,true,_pA); } else { f.root.rotation.set(0,X.face,0); pose=READY; } }
   else {
@@ -759,16 +816,32 @@ function fielderAct(P,dt){
     pose=mcSample(X.clip,P.t-X.start,false,_pB);
     if(P.t-X.start<0.15) pose=mcMix(far?mcSample('run',P.t*1.35,true,_pA):READY,pose,(P.t-X.start)/0.15,_pC);
   }
+  let transfer=0;
   if(res.throwTo){
-    const rel=tc+0.35, lead=0.45, F=MC.throw.fast/30;
+    const rel=tc+0.35, lead=0.20, F=MC.throw.fast/30;
     if(P.t>=rel-lead){
       const B=BASES[res.throwTo]; f.root.lookAt(B.x,0,B.z);
-      const th=mcSample('throw',P.t-rel+F,false,_pA);
-      const w=clamp((P.t-(rel-lead))/0.15,0,1);
+      const th=mcSample('throw',P.t<rel?F+(P.t-rel)*F/lead:F+P.t-rel,false,_pA);
+      const w=clamp((P.t-(rel-lead))/0.10,0,1); transfer=w;
       pose=w<1?mcMix(pose,th,w,_pC):th;
     }
   }
-  applyPose(f,pose,m);
+  if(P.t<X.start) runPose(f,P.t,u<1&&far,m); else applyPose(f,pose,m);
+  if(P.t>=X.start && !transfer){
+    const tg=pts[res.idx], prev=pts[Math.max(0,res.idx-12)];
+    fieldGlove(f,!!tg.b);
+    const dx=prev.x-tg.x, dz=prev.z-tg.z, flat=Math.max(.01,Math.hypot(dx,dz));
+    aimGlove(f,dx,tg.b?flat*2.8:Math.max(.2,prev.y-tg.y),dz,tg.b?dx:0,tg.b?-flat*.35:1,tg.b?dz:0,true);
+    const w=ease((P.t-(tc-.22))/.22);
+    placeGlove(f,new THREE.Vector3(tg.x,Math.max(.52,tg.y),tg.z),w);
+    const other=f.gloveHand===f.hL?f.hR:f.hL, side=m;
+    other.position.set(f.gloveHand.position.x-side*.38,f.gloveHand.position.y+.32,f.gloveHand.position.z-.12);
+  } else if(transfer){
+    const side=m;
+    _gloveTarget.set(side*.52,1.05,1.32).applyEuler(f.upper.rotation).add(f.upper.position); f.gloveHand.position.lerp(_gloveTarget,transfer);
+    aimGlove(f,-side*.25,.2,-1,0,1,0);
+    clearGloveHead(f);
+  }
 }
 const basePath=[BASES.home,BASES.first,BASES.second,BASES.third,BASES.home];
 function pathAt(s){ s=clamp(s,0,4); const i=Math.min(Math.floor(s),3), u=s-i, a=basePath[i], b=basePath[i+1]; return {x:lerp(a.x,b.x,u),z:lerp(a.z,b.z,u),dir:Math.atan2(b.x-a.x,b.z-a.z)}; }
@@ -779,18 +852,26 @@ function updatePlay(dt){
   const ci=res.idx>=0?res.idx:Infinity, caught=k>=ci;
   if(caught&&res.fielder&&!P.gloved){ P.gloved=true; SFX.play('mitt'); FX.resetTrail(); }
   if(bp.y<0.35&&P.t>0.15&&!P.bounced){ P.bounced=true; SFX.play('bounce'); FX.dust(new THREE.Vector3(bp.x,0.15,bp.z)); }
-  if(res.fielder && C.fielders[res.fielder.k] && res.fielder.k!=='C' && res.fielder.k!=='P') fielderAct(P,dt);
+  if(res.fielder && C.fielders[res.fielder.k]) fielderAct(P,dt);
   if(C.runner && !C.runner.root.visible && P.t>=0.4 && !P.foul){ C.batter.root.visible=false; C.runner.root.visible=true; }
   if(caught && res.fielder){
     const f=C.fielders[res.fielder.k], tc=pts[ci].t;
     if(res.throwTo && P.t>tc+0.35){
-      if(!P.thrown){ P.thrown=true; SFX.play('throw'); }
-      const B=BASES[res.throwTo], fr=pts[ci], u=clamp((P.t-tc-0.35)/Math.max(0.2,res.throwT-0.5),0,1);
-      ball.position.set(lerp(fr.x,B.x,u),3+Math.sin(u*Math.PI)*6,lerp(fr.z,B.z,u));
-      if(res.throwTo==='first' && res.fielder.k!=='1B'){ const fb=C.fielders['1B'], bx=BASES.first.x-1, bz=BASES.first.z+1, far=Math.hypot(fb.root.position.x-bx,fb.root.position.z-bz)>1.5; fb.root.position.x=lerp(fb.root.position.x,bx,0.1); fb.root.position.z=lerp(fb.root.position.z,bz,0.1); if(far) fb.root.lookAt(bx,0,bz); else fb.root.lookAt(res.fielder.x,0,res.fielder.z); runPose(fb,P.t,far,fb.m); }
+      if(!P.thrown){ P.thrown=true; P.throwFrom=new THREE.Vector3(); (f.gloveHand===f.hL?f.hR:f.hL).getWorldPosition(P.throwFrom); SFX.play('throw'); }
+      const B=BASES[res.throwTo], fr=P.throwFrom, u=clamp((P.t-tc-0.35)/Math.max(0.2,res.throwT-0.5),0,1);
+      ball.position.set(lerp(fr.x,B.x,u),lerp(fr.y,3,u)+Math.sin(u*Math.PI)*6,lerp(fr.z,B.z,u));
+      const rk=res.throwTo==='first'?'1B':res.throwTo==='third'?'3B':res.fielder.k==='2B'?'SS':'2B', fb=C.fielders[rk];
+      if(fb && fb!==f){
+        const bx=B.x+(res.throwTo==='first'?-1:1), bz=B.z+1, far=Math.hypot(fb.root.position.x-bx,fb.root.position.z-bz)>1.5;
+        fb.root.position.x=lerp(fb.root.position.x,bx,0.1); fb.root.position.z=lerp(fb.root.position.z,bz,0.1);
+        if(far) fb.root.lookAt(bx,0,bz); else fb.root.lookAt(fr.x,0,fr.z); runPose(fb,P.t,far,fb.m);
+        if(u>.55){ aimGlove(fb,fr.x-B.x,fr.y-3,fr.z-B.z,0,1,0,true); placeGlove(fb,new THREE.Vector3(B.x,3,B.z),ease((u-.55)/.45)); }
+        if(u>=1) glovePocket(fb,ball.position);
+      }
       if(u>=1&&!P.ended){ P.ended=true; P.endAt=P.t+0.5; SFX.play('mitt'); }
     } else {
-      const wp=new THREE.Vector3(); gloveHand(f).getWorldPosition(wp); ball.position.copy(wp);
+      glovePocket(f,ball.position);
+      if(res.throwTo){ const wp=new THREE.Vector3(); (f.gloveHand===f.hL?f.hR:f.hL).getWorldPosition(wp); ball.position.lerp(wp,ease((P.t-tc-.15)/.20)); }
       if(!res.throwTo&&!P.ended){ P.ended=true; P.endAt=P.t+0.6; }
     }
   } else {
@@ -865,7 +946,7 @@ function update(dt){
     G.planted=true; const foot=PHAND>0?C.pitcher.feet[1]:C.pitcher.feet[0], wp=new THREE.Vector3(); foot.getWorldPosition(wp); FX.dust(wp); SFX.play('step');
   }
   if(G.state==='windup'){
-    const wp=new THREE.Vector3(); throwHand().getWorldPosition(wp); ball.position.copy(wp); ball.visible=G.windT>0.2;
+    const wp=new THREE.Vector3(); throwHand().getWorldPosition(wp); ball.position.copy(wp); ball.visible=G.windT>0.45;
     if(G.windT>=RELEASE_T){
       G.state='pitch'; G.relT=G.t; G.rel={x:wp.x,y:wp.y,z:wp.z};
       SFX.play('pitch');
@@ -897,12 +978,18 @@ function update(dt){
   if(G.state==='pitch'){
     const u=(G.t-G.relT)/G.pitch.T, end=pitchPos(G.pitch,1,G.rel);
     const p=pitchPos(G.pitch,Math.min(u,1.065),G.rel); ball.position.set(p.x,p.y,p.z);
-    if(u>=0.8 && C.catcher){ const lp=C.catcher.root.worldToLocal(new THREE.Vector3(end.x,end.y,end.z+3.4)); lp.sub(C.catcher.yaw.position); lp.y-=0.4; C.catcher.hL.position.lerp(lp,0.3); }
+    if(u>=0.8 && C.catcher){
+      const catchU=1+2/Math.max(1,-G.rel.z), received=pitchPos(G.pitch,catchU,G.rel), low=received.y<1.35;
+      const dx=G.rel.x-received.x, dz=G.rel.z-received.z, flat=Math.max(.01,Math.hypot(dx,dz));
+      aimGlove(C.catcher,dx,low?flat*2.8:G.rel.y-received.y,dz,low?dx:0,low?-flat*.35:1,low?dz:0,true);
+      placeGlove(C.catcher,new THREE.Vector3(received.x,Math.max(.52,received.y),received.z),ease((u-.8)/(catchU-.8)));
+      if(u>=catchU) glovePocket(C.catcher,ball.position);
+    }
     if(u>=1.065){
       SFX.play('mitt');
       if(!G.swing && window.FEEL) FEEL.edgeCall(br,end);
       if(G.swing) endPitch('whiff'); else endPitch(isStrikeFor(br,end.x,end.y)?'strike':'ball');
-      if(G.state!=='done' && C.catcher){ const wp=new THREE.Vector3(); C.catcher.hL.getWorldPosition(wp); ball.visible=G.mode==='pitch'; ball.position.copy(wp); }
+      if(G.state!=='done' && C.catcher){ ball.visible=G.mode==='pitch'; glovePocket(C.catcher,ball.position); }
     }
   }
   if(C.umpT!=null){ const ut=G.t-C.umpT; applyPose(C.ump,mcSample('ump',ut,false,_pA),1); if(ut>MC.ump.n/30) C.umpT=null; }
