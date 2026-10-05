@@ -22,6 +22,7 @@ export const NOVICE = Object.freeze({
 // Same condition main.js mission() uses for the stabilised approach (routeIndex only matters for the takeoff scenario).
 export function approachActive(state, data, routeIndex = 0) {
   if (state.crashed || (state.touchdown && state.onGround)) return false;
+  if (state.tour) return false; // sightseeing tour: no ILS boxes, no automatic gear and flaps until the tour is over
   const aligned = data.agl < 800 && data.distanceToThreshold > -300 && data.distanceToThreshold < 13000 && Math.abs(state.position.x) < 1500 && Math.min(data.heading, 360 - data.heading) < 35;
   return state.scenario === 'approach' || (aligned && (state.scenario !== 'runway' || routeIndex >= 3));
 }
@@ -55,7 +56,7 @@ function altitudeWords(data, targetFt) {
   return Math.abs(d) < 250 ? [`高度保持 ${t} 呎`, `hold ${t} ft`] : d < 0 ? [`爬升到 ${t} 呎`, `climb to ${t} ft`] : [`下降到 ${t} 呎`, `descend to ${t} ft`];
 }
 
-// The one thing to do now. ctx: { touch, routeIndex, route, circuitAltFt, notice: { gear: {age, to}, flaps: {age, to} } }
+// The one thing to do now. ctx: { touch, routeIndex, route, circuitAltFt, tour: { diff, altFt } | null, notice: { gear: {age, to}, flaps: {age, to} } }
 export function nextStep(state, data, commands, ctx = {}) {
   const touch = !!ctx.touch, kt = data.indicatedAirspeed * KT, step = (id, zh, en, glow = null) => ({ id, zh, en, glow });
   if (state.crashed) return step('none', '', '');
@@ -75,6 +76,10 @@ export function nextStep(state, data, commands, ctx = {}) {
     const to = n[recent].to, zh = recent === 'gear' ? `起落架已自動${to ? '放下' : '收起'}` : `襟翼已自動${to === 0 ? '收起' : `放到 ${to}`}`;
     const en = recent === 'gear' ? `Gear ${to ? 'lowered' : 'raised'} automatically` : `Flaps ${to === 0 ? 'retracted' : `set to ${to}`} automatically`;
     return step(`auto-${recent}`, zh, en, n[recent].age < NOVICE.glowSec ? recent : null);
+  }
+  if (ctx.tour) { // sightseeing tour: ctx.tour = { diff, altFt } from tour.mjs nextRingCue (diff = degrees to turn, + = right)
+    const turn = TURN[Math.abs(ctx.tour.diff) < 10 ? 'straight' : ctx.tour.diff > 0 ? 'right' : 'left'], alt = altitudeWords(data, ctx.tour.altFt);
+    return step('tour', `飛向下一個圈：${turn[0]}，${alt[0]}`, `Fly to the next ring: ${turn[1].toLowerCase()}, ${alt[1]}`);
   }
   if (approach) {
     if (!commands.gear || commands.flaps < 3) {

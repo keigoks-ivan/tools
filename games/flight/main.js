@@ -6,6 +6,7 @@ import { createWorld } from './world.js';
 import { createGeoScenery } from './geoscenery.js';
 import { createInstruments } from './instruments.js';
 import { nextStep, ilsCue, autoConfig, approachActive, approachBoxes } from './novice.mjs';
+import { TOURS, RING, tourById, tourLengthM, createTourState, createTourRun, updateTourRun, nextRingCue, ringNormal, ringHeightM, nearestLandmark, parseTourBest, recordTourBest, formatTime } from './tour.mjs';
 import { LEVELS, levelById, nextLevel, createLevelState, windAt, grade, bestStars, isUnlocked, recordResult, parseProgress, starText } from './challenge.mjs';
 
 const $ = id => document.getElementById(id);
@@ -37,6 +38,8 @@ let sceneTime = 0, lastTime = 0, accumulator = 0, lastUI = 0, toastTimer;
 let routeIndex = 0, departed = false, resultShown = false, brakeLatch = false;
 let level = null, progress = {}; // landing challenge (challenge.mjs): the active level, and best stars per level
 try { progress = parseProgress(localStorage.getItem('flightChallenge')); } catch {}
+let tour = null, tourRun = null, tourBest = {}, tourRings = null, tourLoading = false, tourLoadToken = 0, tourSceneryId = null, tourCaptionId = ''; // sightseeing tour (tour.mjs)
+try { tourBest = parseTourBest(localStorage.getItem('flightTourBest')); } catch {}
 let novice = false, autoMem = {}, notice = {}, ilsLast = null, glowing = '', approachBoxGroup = null; // novice mode (novice.mjs)
 let lookYaw = 0, lookPitch = 0, looking = false, lastPointer = { x: 0, y: 0 };
 let mouse = { x: 0, y: 0, inside: false }, touch = { x: 0, y: 0, active: false }, touchBrake = false;
@@ -56,7 +59,7 @@ function localize() {
   document.documentElement.lang = locale === 'zh' ? 'zh-Hant' : 'en';
   document.querySelectorAll('[data-zh][data-en]').forEach(el => { el.textContent = el.dataset[locale]; });
   $('lang-button').textContent = locale === 'zh' ? 'EN' : '中文';
-  updateSceneryText(); renderLevels(); updateUI();
+  updateSceneryText(); renderLevels(); renderTours(); updateUI();
 }
 function setPause(value) {
   paused = value; held.clear(); axes = { pitch: 0, roll: 0, yaw: 0 }; accumulator = 0;
@@ -118,20 +121,87 @@ function renderLevels() {
     card.append(input, no, text, stars); list.append(card);
   }
 }
+// ---- Sightseeing tours (logic lives in tour.mjs) ----
+function saveTourBest() { try { localStorage.setItem('flightTourBest', JSON.stringify(tourBest)); } catch {} }
+function renderTours() {
+  const list = $('tour-list'), keep = document.querySelector('input[name=tour]:checked')?.value;
+  list.textContent = '';
+  for (const t of TOURS) {
+    const card = document.createElement('label'), input = document.createElement('input'), text = document.createElement('span'), name = document.createElement('strong'), desc = document.createElement('small'), meta = document.createElement('small'), no = document.createElement('b'), best = document.createElement('span');
+    card.className = 'level-card'; input.type = 'radio'; input.name = 'tour'; input.value = t.id; input.checked = keep ? keep === t.id : t === TOURS[0];
+    text.className = 'level-text'; name.textContent = tr(t.zh, t.en); desc.textContent = tr(t.descZh, t.descEn);
+    const km = tourLengthM(t) / 1000, minutes = Math.round(km * 1000 / (200 / KT) / 60);
+    meta.textContent = tr(`全長約 ${Math.round(km)} 公里，約 ${minutes} 分鐘。晴天，${t.id === 'alps' ? '空氣穩定的早晨最適合' : '能見度好的日子最適合'}。`, `About ${Math.round(km)} km, around ${minutes} min. Clear weather${t.id === 'alps' ? ': best on a calm morning.' : ': best on a day of good visibility.'}`);
+    text.append(name, desc, meta);
+    no.className = 'level-no'; no.textContent = String(TOURS.indexOf(t) + 1).padStart(2, '0'); best.className = 'level-stars';
+    best.textContent = tourBest[t.id] ? `${tr('最佳', 'Best')} ${formatTime(tourBest[t.id])}` : tr('尚無紀錄', 'No time yet');
+    card.append(input, no, text, best); list.append(card);
+  }
+}
 function updateScenarioUI() {
-  const challenge = document.querySelector('input[name=scenario]:checked').value === 'challenge';
-  $('challenge-picker').hidden = !challenge; $('weather').disabled = challenge; // the level sets the weather
-  $('weather').title = challenge ? tr('降落挑戰的天候由關卡決定。', 'Landing challenge levels set their own weather.') : '';
+  const value = document.querySelector('input[name=scenario]:checked').value, challenge = value === 'challenge', touring = value === 'tour';
+  $('challenge-picker').hidden = !challenge; $('tour-picker').hidden = !touring; $('weather').disabled = challenge || touring; // the level sets the weather; tours are clear weather
+  $('weather').title = challenge ? tr('降落挑戰的天候由關卡決定。', 'Landing challenge levels set their own weather.') : touring ? tr('觀光航線一律晴天。', 'Sightseeing tours are always clear weather.') : '';
+}
+// Rings: unlit tori across the sky, perpendicular to the incoming leg. The next one is bright, the following two dim, passed ones are hidden.
+const RING_LOOK = [[0xffb020, 1, .12], [0xffd27a, .45, 0], [0xffd27a, .22, 0]];
+function createTourRings(def) {
+  const group = new THREE.Group(), torus = new THREE.TorusGeometry(RING.radius, RING.tube, 10, 56), disc = new THREE.CircleGeometry(RING.radius, 40), z = new THREE.Vector3(0, 0, 1);
+  group.visible = false;
+  def.rings.forEach((r, i) => {
+    const flat = (color, opacity) => new THREE.MeshBasicMaterial({ color, transparent: true, opacity, depthWrite: false, fog: false, toneMapped: false, side: THREE.DoubleSide });
+    const holder = new THREE.Group(), n = ringNormal(def, i), band = new THREE.Mesh(torus, flat(0xffb020, 1)), fill = new THREE.Mesh(disc, flat(0xffb020, .12));
+    band.renderOrder = fill.renderOrder = 6; band.frustumCulled = fill.frustumCulled = false; holder.add(band, fill);
+    holder.position.set(r.x, ringHeightM(r), r.z); holder.quaternion.setFromUnitVectors(z, new THREE.Vector3(n.x, n.y, n.z));
+    holder.userData = { band, fill }; group.add(holder);
+  });
+  scene.add(group); return group;
+}
+function disposeTourRings() {
+  if (!tourRings) return;
+  scene.remove(tourRings); const geos = new Set(); tourRings.traverse(o => { if (o.isMesh) { geos.add(o.geometry); o.material.dispose(); } }); geos.forEach(g => g.dispose()); tourRings = null;
+}
+function updateTourRings() {
+  if (!tourRings) return;
+  const show = !!tourRun && active && !tourRun.done; tourRings.visible = show; if (!show) return;
+  tourRings.children.forEach((holder, i) => {
+    const k = i - tourRun.next, look = RING_LOOK[k]; holder.visible = !!look; if (!look) return;
+    const { band, fill } = holder.userData, d = holder.position.distanceTo(camera.position);
+    band.material.color.setHex(look[0]); band.material.opacity = look[1]; fill.material.opacity = look[2]; fill.visible = look[2] > 0;
+    holder.scale.setScalar(clamp(d / 3500, 1, 3)); // visual only: far rings are drawn larger so they can be seen from far away; the hit radius never changes
+  });
+}
+// High-resolution scenery for the tour (geoscenery.js, optional): the sim waits while it loads; a failure or a 20 s timeout starts the tour on the base scenery.
+function applyTourScenery(id) {
+  if (typeof scenery?.setTour !== 'function' || id === tourSceneryId) return;
+  const token = ++tourLoadToken; tourSceneryId = id;
+  if (!id) { tourLoading = false; $('tour-loading').hidden = true; try { scenery.setTour(null); } catch (error) { console.warn(error); } return; }
+  tourLoading = true; $('tour-loading').hidden = false;
+  const timeout = new Promise(resolve => setTimeout(resolve, 20000));
+  Promise.race([Promise.resolve().then(() => scenery.setTour(id)), timeout]).catch(error => console.warn('tour scenery', error)).finally(() => { if (token === tourLoadToken) { tourLoading = false; $('tour-loading').hidden = true; } });
+}
+function updateTour() {
+  if (!tour || !tourRun || resultShown) return;
+  for (const e of updateTourRun(tourRun, state.position)) toast(e.type === 'hit' ? `✓ ${tr('通過', 'Ring')} ${e.index + 1} / ${tour.rings.length}` : `✗ ${tr(`錯過第 ${e.index + 1} 圈`, `Missed ring ${e.index + 1}`)}`);
+  if (tourRun.done) showResult();
+}
+function continueFlying() { // after the tour: free flight where you are; the normal approach logic takes over again
+  $('result-dialog').close(); disposeTourRings(); delete state.tour; tour = null; tourRun = null; resultShown = false; $('tour-caption').hidden = true; $('tour-hud').hidden = true;
+  setPause(false); updateUI();
 }
 function startFlight() {
   let scenario = document.querySelector('input[name=scenario]:checked').value;
+  const chosenTour = scenario === 'tour' ? tourById(document.querySelector('input[name=tour]:checked')?.value) : null;
+  if (scenario === 'tour' && !chosenTour) { toast(tr('先選一條航線。', 'Pick a route first.')); return; }
   const chosen = scenario === 'challenge' ? levelById(document.querySelector('input[name=level]:checked')?.value) : null;
   if (scenario === 'challenge' && (!chosen || !isUnlocked(progress, chosen.id))) { toast(tr('先選一個已解鎖的關卡。', 'Pick an unlocked level first.')); return; }
   dialogs.forEach(d => { if (d.open) d.close(); });
   level = chosen; if (level) scenario = 'approach'; // a level is an approach that starts airborne
-  state = level ? createLevelState(level) : createFlightState(scenario); data = getFlightData(state);
+  tour = chosenTour; tourRun = tour ? createTourRun(tour) : null; if (tour) scenario = 'cruise'; // a tour is free flight that starts airborne, trimmed, over its first leg
+  disposeTourRings(); if (tour) tourRings = createTourRings(tour); tourCaptionId = ''; $('tour-caption').hidden = true; $('tour-hud').hidden = !tour;
+  state = tour ? createTourState(tour) : level ? createLevelState(level) : createFlightState(scenario); data = getFlightData(state);
   commands = { throttle: state.throttle, flaps: state.flaps, gear: state.gear, trim: state.trim, spoilers: false };
-  weather = level ? level.weather : $('weather').value; brakeLatch = false; touchBrake = false;
+  weather = tour ? 'clear' : level ? level.weather : $('weather').value; brakeLatch = false; touchBrake = false;
   active = true; departed = scenario !== 'runway'; resultShown = false; routeIndex = scenario === 'runway' ? 0 : 4;
   novice = document.querySelector('input[name=mode]:checked').value === 'novice'; autoMem = {}; notice = {}; ilsLast = null; setGlow(null);
   simulator.classList.toggle('novice', novice); simulator.classList.toggle('coarse', coarsePointer);
@@ -142,8 +212,9 @@ function startFlight() {
   $('throttle').value = Math.round(commands.throttle * 100);
   $('ap-speed').value = scenario === 'runway' ? 180 : Math.round(state.autopilot.speed * KT); // 180 kt keeps the turn radius inside the circuit legs
   $('ap-altitude').value = scenario === 'runway' ? AIRPORT.circuitAltFt : Math.round((state.autopilot.altitude + ELEVATION) * FT / 100) * 100;
-  $('ap-heading').value = Math.round(BEARING);
-  toast(tr('↓ 拉起、↑ 壓低機頭。短按操縱，放開會回中。', '↓ pitches up, ↑ down. Use short inputs; release to center.'));
+  $('ap-heading').value = tour ? Math.round(heading(data.heading + BEARING)) % 360 : Math.round(BEARING);
+  toast(tour ? tr('飛過發亮的圈，越快飛完越好。↓ 拉起、↑ 壓低機頭。', 'Fly through the glowing rings, as fast as you can. ↓ pitches up, ↑ down.') : tr('↓ 拉起、↑ 壓低機頭。短按操縱，放開會回中。', '↓ pitches up, ↑ down. Use short inputs; release to center.'));
+  applyTourScenery(tour ? tour.scenery : null);
   updateUI(); updateCamera(1);
 }
 const startLabel = $('start-button').firstElementChild, startText = { zh: startLabel.dataset.zh, en: startLabel.dataset.en };
@@ -249,8 +320,18 @@ function updateCamera(dt) {
     camera.lookAt(cameraTarget);
   }
 }
+function tourStep() { // the same line novice mode shows as its hint (nextStep with a tour branch), also used in the mission card
+  const cue = nextRingCue(tourRun, state, data);
+  return { cue, step: cue ? nextStep(state, data, commands, { touch: coarsePointer, tour: { diff: cue.diff, altFt: cue.altFt }, notice: {} }) : null };
+}
 function mission() {
   const speed = data.indicatedAirspeed * KT;
+  if (tour && tourRun) {
+    const n = tour.rings.length, done = tourRun.hits + tourRun.misses, { cue, step } = tourStep();
+    if (!cue) return [tr('航線完成', 'Tour complete'), tr('每個圈都飛過了。', 'All rings flown.'), n, 1];
+    const km = (cue.distanceM / 1000).toFixed(1);
+    return [tr(`下一個圈 ${cue.index + 1} / ${n}`, `Next ring ${cue.index + 1} / ${n}`), `${tr(step.zh, step.en)}${tr('　· 還有', ' · ')} ${km} ${tr('公里', 'km')}`, cue.index + 1, done / n];
+  }
   if (state.scenario === 'runway' && !departed) {
     if (!state.onGround && data.agl > 120) departed = true;
     if (state.onGround && speed < 20) return [tr('準備起飛', 'Ready for departure'), tr('襟翼 1，油門推至 100%。↑ 壓低、↓ 拉起。起飛與進場都用 14 跑道，是簡化設定；實際多用 28 或 16 起飛。', 'Flaps 1. Thrust 100%. ↑ nose down, ↓ nose up. Takeoff and landing both use runway 14, a simplification; real departures mostly use 28 or 16.'), 1, .1];
@@ -275,12 +356,13 @@ function updateUI() {
   const [stage, instruction, number, missionProgress] = mission();
   // In a challenge the card names the level and its goal; the flare and landing-roll instructions still take over near the ground.
   const landing = level && (state.touchdown || data.agl < 25);
-  $('mission-eyebrow').textContent = level ? `${tr('降落挑戰', 'LANDING CHALLENGE')} · ${tr(`第 ${level.id} 關`, `LEVEL ${level.id}`)}` : `${AIRPORT.city.en.toUpperCase()} · ${AIRPORT.icao} · RWY ${AIRPORT.runway.ident}`;
+  const touring = !!(tour && tourRun);
+  $('mission-eyebrow').textContent = touring ? `${tr('觀光航線', 'SIGHTSEEING TOUR')} · ${tr(tour.tagZh, tour.tagEn.toUpperCase())}` : level ? `${tr('降落挑戰', 'LANDING CHALLENGE')} · ${tr(`第 ${level.id} 關`, `LEVEL ${level.id}`)}` : `${AIRPORT.city.en.toUpperCase()} · ${AIRPORT.icao} · RWY ${AIRPORT.runway.ident}`;
   $('mission-stage').textContent = level && !landing ? tr(level.zh, level.en) : stage; $('mission-instruction').textContent = level && !landing ? tr(level.descZh, level.descEn) : instruction;
-  $('mission-number').textContent = `0${number} / 04`; $('mission-progress').style.width = `${missionProgress * 100}%`;
+  $('mission-number').textContent = touring ? formatTime(state.elapsed) : `0${number} / 04`; $('mission-progress').style.width = `${missionProgress * 100}%`;
   const wind = Math.round(data.windSpeed * KT), gust = level?.wind.gust ? ` G${Math.round(level.wind.cross + level.wind.gust)}` : ''; // peak of the gust cycle, METAR style (G23)
-  $('wind-label').textContent = wind ? `${tr('風', 'WIND')} ${Math.round(heading(data.windDirection + BEARING))}° · ${wind}${gust} KT` : tr('無風 · 0 KT', 'CALM · 0 KT');
-  $('distance-label').textContent = data.onGround ? `RWY ${Math.round(data.runwayRemaining).toLocaleString()} M` : `${Math.max(0, data.distanceToThreshold / 1852).toFixed(1)} NM · ${AIRPORT.runway.ident}`;
+  $('wind-label').textContent = touring ? `${tr('圈', 'RINGS')} ${tourRun.hits} / ${tour.rings.length}${tourRun.misses ? ` · ${tr('錯過', 'MISSED')} ${tourRun.misses}` : ''}` : wind ? `${tr('風', 'WIND')} ${Math.round(heading(data.windDirection + BEARING))}° · ${wind}${gust} KT` : tr('無風 · 0 KT', 'CALM · 0 KT');
+  $('distance-label').textContent = touring ? `${tr('最佳', 'BEST')} ${tourBest[tour.id] ? formatTime(tourBest[tour.id]) : '—'}` : data.onGround ? `RWY ${Math.round(data.runwayRemaining).toLocaleString()} M` : `${Math.max(0, data.distanceToThreshold / 1852).toFixed(1)} NM · ${AIRPORT.runway.ident}`;
   $('control-label').textContent = touch.active || coarsePointer && $('control-mode').value === 'keyboard' ? tr('觸控操縱', 'Touch control') : { keyboard: tr('鍵盤操縱', 'Keyboard'), mouse: tr('滑鼠操縱', 'Mouse'), gamepad: tr('手把操縱', 'Gamepad') }[$('control-mode').value];
   $('control-values').textContent = `PITCH ${Math.round(axes.pitch * 100)} · ROLL ${Math.round(axes.roll * 100)}`;
   $('ap-button').setAttribute('aria-pressed', String(state.autopilot.enabled));
@@ -323,7 +405,14 @@ function updateUI() {
   simulator.dataset.agl = (data.agl * FT).toFixed(1); simulator.dataset.verticalSpeed = (data.verticalSpeed * 196.85).toFixed(0); simulator.dataset.elapsed = state.elapsed.toFixed(1);
   $('flight-summary').textContent = `${tr('空速', 'Airspeed')} ${Math.round(data.indicatedAirspeed * KT)} KT, ${tr('高度', 'Altitude')} ${Math.round((data.altitude + ELEVATION) * FT)} FT, ${tr('航向', 'Heading')} ${Math.round(heading(data.heading + BEARING))}°`;
   if (novice) updateNovice();
+  if (touring) updateTourHud();
   if (active && !resultShown && (state.crashed || state.touchdown && state.onGround && data.groundSpeed < 2.5 && state.elapsed - state.touchdown.elapsed > 3)) showResult();
+}
+function updateTourHud() {
+  const n = tour.rings.length, landmark = resultShown || tourRun.done ? null : nearestLandmark(tour, state.position);
+  $('th-time').textContent = formatTime(state.elapsed); $('th-rings').textContent = `${tourRun.hits} / ${n}`;
+  const box = $('tour-caption'); box.hidden = !landmark;
+  if (landmark) { box.dataset.id = landmark.id; $('tc-name').textContent = tr(landmark.zh, landmark.en); $('tc-fact').textContent = tr(landmark.factZh, landmark.factEn); }
 }
 // ---- Novice mode (logic lives in novice.mjs) ----
 const GLOW_TARGETS = { throttle: '#throttle', gear: '#gear-button', flaps: '#flaps-button', brake: '#brake-button, #touch-brake' };
@@ -334,7 +423,8 @@ function setGlow(id) {
 function updateNovice() {
   const show = active && !resultShown, cue = approachActive(state, data, routeIndex) ? ilsCue(data, ilsLast) : null; ilsLast = cue; // arrows only on the approach
   const age = a => a ? { age: state.elapsed - a.at, to: a.to } : null;
-  const step = nextStep(state, data, commands, { touch: coarsePointer, routeIndex, route, circuitAltFt: AIRPORT.circuitAltFt, notice: { gear: age(notice.gear), flaps: age(notice.flaps) } });
+  const ringCue = tour && tourRun ? nextRingCue(tourRun, state, data) : null;
+  const step = nextStep(state, data, commands, { touch: coarsePointer, routeIndex, route, circuitAltFt: AIRPORT.circuitAltFt, tour: ringCue && { diff: ringCue.diff, altFt: ringCue.altFt }, notice: { gear: age(notice.gear), flaps: age(notice.flaps) } });
   $('novice-hint').hidden = !show || step.id === 'none'; $('novice-strip').hidden = !active;
   $('novice-hint').dataset.step = step.id; $('novice-hint-text').textContent = tr(step.zh, step.en); setGlow(show ? step.glow : null);
   const vs = Math.round(data.verticalSpeed * 196.85 / 10) * 10;
@@ -388,7 +478,7 @@ function updateApproachBoxes() {
   }
 }
 function drawInstruments() {
-  instruments.draw(state, data, { airport: AIRPORT, headingOffset: BEARING, altitudeOffset: ELEVATION, ap: state.autopilot, route: state.scenario === 'runway' ? route : [], target: state.scenario === 'runway' ? route[routeIndex] : { x: 0, z: RUNWAY.nearThreshold, name: `RWY ${AIRPORT.runway.ident}` }, runway: RUNWAY, locale });
+  instruments.draw(state, data, { airport: AIRPORT, headingOffset: BEARING, altitudeOffset: ELEVATION, ap: state.autopilot, route: state.scenario === 'runway' ? route : [], target: state.scenario === 'runway' ? route[routeIndex] : tour && tourRun && !tourRun.done ? { x: tour.rings[tourRun.next].x, z: tour.rings[tourRun.next].z, name: `RING ${tourRun.next + 1}` } : { x: 0, z: RUNWAY.nearThreshold, name: `RWY ${AIRPORT.runway.ident}` }, runway: RUNWAY, locale });
 }
 function showResult() {
   resultShown = true; setPause(true);
@@ -396,7 +486,9 @@ function showResult() {
   $('result-dialog').classList.toggle('challenge', !!level); $('result-challenge').hidden = !level; $('next-level-button').hidden = true;
   $('result-eyebrow').textContent = level ? `${tr('降落挑戰', 'LANDING CHALLENGE')} · ${tr(`第 ${level.id} 關 ${level.zh}`, `LEVEL ${level.id} ${level.en}`)}` : 'FLIGHT MQ218 · DEBRIEF';
   const retry = $('retry-button'); retry.dataset.zh = level ? '再試一次' : '再飛一次'; retry.dataset.en = level ? 'Try again' : 'Fly again'; retry.textContent = retry.dataset[locale];
+  const menu = $('result-menu-button'); menu.dataset.zh = tour ? '選擇航線' : '選擇航班'; menu.dataset.en = tour ? 'Choose route' : 'Choose flight'; menu.textContent = menu.dataset[locale]; $('tour-continue-button').hidden = true;
   if (level) { showLevelResult(); return; }
+  if (tour && tourRun?.done && !state.crashed) { showTourResult(); return; }
   const reasons = {
     'gear-up': ['起落架未放下', 'Landing gear was retracted'], 'off-runway': ['未在跑道內接地', 'Touchdown outside the runway'],
     'hard-landing': ['接地下降率過大', 'Excessive touchdown sink rate'], 'wing-strike': ['接地傾角過大', 'Excessive bank at touchdown'],
@@ -413,6 +505,23 @@ function showResult() {
   $('result-offset').textContent = t ? `${Math.abs(t.lateralOffset).toFixed(1)} M` : '—';
   $('result-speed').textContent = t ? `${Math.round(t.speed * KT)} KT` : '—';
   $('result-dialog').showModal(); $('pause-banner').hidden = true;
+}
+function showTourResult() {
+  const n = tour.rings.length, all = tourRun.hits === n, seconds = state.elapsed, before = tourBest[tour.id];
+  tourBest = recordTourBest(tourBest, tour.id, seconds); saveTourBest();
+  const record = !before || seconds < before;
+  $('result-dialog').classList.add('challenge'); $('result-challenge').hidden = false; $('next-level-button').hidden = true; $('tour-continue-button').hidden = false;
+  $('result-eyebrow').textContent = `${tr('觀光航線', 'SIGHTSEEING TOUR')} · ${tr(tour.zh, tour.en)}`;
+  $('result-title').textContent = all ? tr('全部通過', 'Every ring') : tr('航線完成', 'Tour complete');
+  $('result-description').textContent = all ? tr('每個圈都穿過了。', 'You flew through every ring.') : tr(`穿過 ${tourRun.hits} 個圈，錯過 ${tourRun.misses} 個。想拿星星，每個圈都要穿過。`, `${tourRun.hits} rings flown through, ${tourRun.misses} missed. Hit every ring for the star.`);
+  $('result-stars').textContent = all ? '★' : '☆'; $('result-stars').setAttribute('aria-label', all ? tr('全部通過，得一顆星', 'All rings hit: one star') : tr('尚未全部通過', 'Not every ring hit'));
+  const list = $('result-checks'); list.textContent = '';
+  for (const [zh, en, value, ok] of [['用時', 'Time', formatTime(seconds), null], ['穿過的圈', 'Rings hit', `${tourRun.hits} / ${n}`, all]]) {
+    const li = document.createElement('li'), text = document.createElement('span'), mark = document.createElement('b');
+    if (ok !== null) li.dataset.ok = String(ok); text.textContent = `${tr(zh, en)}　${value}`; mark.textContent = ok === null ? '' : ok ? '✓' : '✗'; li.append(text, mark); list.append(li);
+  }
+  $('result-best').textContent = `${tr('最佳時間', 'Best time')} ${formatTime(tourBest[tour.id])}${record ? tr('　· 新紀錄', '  · New record') : ''}`;
+  renderTours(); $('result-dialog').showModal(); $('pause-banner').hidden = true;
 }
 function showLevelResult() {
   const g = grade(state, data), crashReasons = { 'gear-up': ['起落架未放下', 'Landing gear was retracted'], 'off-runway': ['未在跑道內接地', 'Touchdown outside the runway'], 'hard-landing': ['接地下降率過大', 'Excessive touchdown sink rate'], 'wing-strike': ['接地傾角過大', 'Excessive bank at touchdown'], 'tail-strike': ['接地俯仰角過大', 'Unsafe pitch at touchdown'], 'side-load': ['未與跑道方向對齊', 'Misaligned at touchdown'], 'runway-overrun': ['衝出跑道', 'Runway overrun'], 'ground-impact': ['撞地', 'Ground impact'] };
@@ -455,7 +564,7 @@ function updateAudio() {
 function animate(now) {
   requestAnimationFrame(animate);
   const dt = Math.min(.1, (now - lastTime) / 1000 || 0); lastTime = now; sceneTime += dt;
-  if (active && !paused && !state.crashed && terrainReady) {
+  if (active && !paused && !state.crashed && terrainReady && !tourLoading) {
     if (novice) runAutoConfig();
     const input = inputFrame(dt); accumulator += dt;
     const wind = weather === 'crosswind' ? { x: 7.72, y: 0, z: 0 } : weather === 'overcast' ? { x: 1.7, y: 0, z: 2 } : { x: 0, y: 0, z: 0 };
@@ -463,9 +572,9 @@ function animate(now) {
       stepFlight(state, input, 1 / 120, { wind: level ? windAt(level, state.elapsed) : wind, groundElevation: scenery?.groundHeight(state.position.x, state.position.z) || 0 });
       accumulator -= 1 / 120;
     }
-    data = getFlightData(state);
+    data = getFlightData(state); updateTour();
   }
-  updateApproachBoxes(); world.update(sceneTime, state, weather); scenery?.update(sceneTime, state);
+  updateApproachBoxes(); updateTourRings(); world.update(sceneTime, state, weather); scenery?.update(sceneTime, state);
   plane.update({ ...state, rollInput: axes.roll, dt }, data);
   updateCamera(dt); renderer.render(scene, camera);
   if (active && !panelHidden) drawInstruments();
@@ -476,6 +585,7 @@ $('start-button').addEventListener('click', startFlight);
 $('retry-button').addEventListener('click', startFlight);
 $('next-level-button').addEventListener('click', () => { const next = level && nextLevel(level.id); const input = next && document.querySelector(`input[name=level][value="${next.id}"]`); if (input && !input.disabled) { input.checked = true; startFlight(); } });
 document.querySelectorAll('input[name=scenario]').forEach(r => r.addEventListener('change', updateScenarioUI));
+$('tour-continue-button').addEventListener('click', continueFlying);
 $('result-menu-button').addEventListener('click', () => { $('result-dialog').close(); showDialog($('flight-dialog')); });
 $('menu-button').addEventListener('click', () => showDialog($('flight-dialog')));
 $('help-button').addEventListener('click', () => showDialog($('help-dialog')));
@@ -569,7 +679,7 @@ try {
   $('ap-altitude').min = apFloorFt(); $('ap-altitude').value = AIRPORT.circuitAltFt; $('ap-heading').value = Math.round(BEARING);
   scenery = createGeoScenery(THREE, scene, { airport: AIRPORT, renderer, maxAnisotropy: softwareRenderer() ? 1 : renderer.capabilities.getMaxAnisotropy(), highRes, attributionTarget: $('scenery-credit'), onStatus: onSceneryStatus });
   // ?debug exposes the live objects to browser tests (teleporting, camera placement); it changes nothing in normal play.
-  if (new URLSearchParams(location.search).has('debug')) window.__flight = { THREE, get state() { return state; }, set state(v) { state = v; }, get data() { return data; }, set data(v) { data = v; }, camera, scene, renderer, scenery, world, get commands() { return commands; }, setView, setPanel, get route() { return route; }, get novice() { return novice; }, get notice() { return notice; }, get level() { return level; }, get progress() { return progress; }, set progress(v) { progress = v; renderLevels(); }, showResult };
+  if (new URLSearchParams(location.search).has('debug')) window.__flight = { THREE, get state() { return state; }, set state(v) { state = v; }, get data() { return data; }, set data(v) { data = v; }, camera, scene, renderer, scenery, world, get commands() { return commands; }, setView, setPanel, get route() { return route; }, get novice() { return novice; }, get notice() { return notice; }, get level() { return level; }, get tour() { return tour; }, get tourRun() { return tourRun; }, get tourRings() { return tourRings; }, get tourLoading() { return tourLoading; }, get tourBest() { return tourBest; }, tours: TOURS, get progress() { return progress; }, set progress(v) { progress = v; renderLevels(); }, showResult };
   $('loading').hidden = true; $('start-button').disabled = true; updateScenarioUI(); localize(); requestAnimationFrame(animate);
   renderer.domElement.addEventListener('webglcontextlost', e => { e.preventDefault(); setPause(true); toast(tr('顯示卡連線中斷，請重新載入頁面。', 'Graphics context lost. Reload the page.')); });
 } catch (error) {

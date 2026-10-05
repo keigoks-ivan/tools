@@ -193,3 +193,19 @@ test('no "raise the gear" advice while the gear was lowered because the aircraft
   const { state, data } = make('runway', s => { s.onGround = false; Object.assign(s.position, { z: 0, y: 200 }); s.velocity = { x: 0, y: -3, z: -80 }; }, 150);
   assert.notEqual(step(state, data, cmd({ gear: true, flaps: 0 })).id, 'gear');
 });
+
+test('sightseeing tour: hint points at the next ring, there is no approach logic, gear stays up', () => {
+  // Over the lake, aligned with runway 14 and low enough that the normal approach logic would fire.
+  const { state, data } = make('cruise', s => { s.tour = 'city'; Object.assign(s.position, { x: 0, z: 6000, y: 300 }); s.gear = false; s.gearPosition = 0; s.flaps = 0; s.flapPosition = 0; });
+  assert.equal(approachActive({ ...state, tour: undefined }, data), true); // sanity: without the tour flag this IS an approach
+  assert.equal(approachActive(state, data), false);
+  const c = cmd({ gear: false, flaps: 0 });
+  const s = nextStep(state, { ...data, altitude: 1000 / FT - RUNWAY.fieldElevation + 1300 / FT + 400 / FT }, c, { tour: { diff: -40, altFt: 4000 } });
+  assert.equal(s.id, 'tour'); assert.match(s.zh, /^飛向下一個圈：往左轉，/); assert.match(s.en, /^Fly to the next ring: turn left, /);
+  assert.match(nextStep(state, data, c, { tour: { diff: 40, altFt: 4000 } }).zh, /往右轉/);
+  assert.match(nextStep(state, data, c, { tour: { diff: 3, altFt: 4000 } }).zh, /直飛/);
+  assert.match(nextStep(state, data, c, { tour: { diff: 3, altFt: 4000 } }).zh, /爬升到 4,000 呎/);
+  assert.deepEqual(autoConfig(state, data, c, {}, 0), {}); // no gear lowering below 2,000 ft AGL
+  state.velocity.y = -3; data.verticalSpeed = -3; data.agl = 120; // the sink-rate safety rule still works
+  assert.equal(autoConfig(state, data, c, {}, 0).gear, true);
+});
