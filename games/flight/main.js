@@ -5,6 +5,7 @@ import { createAircraft, createCockpit } from './aircraft.js';
 import { createWorld } from './world.js';
 import { createGeoScenery } from './geoscenery.js';
 import { createInstruments } from './instruments.js';
+import { nextStep, ilsCue, autoConfig, approachActive, approachBoxes } from './novice.mjs';
 
 const $ = id => document.getElementById(id);
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -33,6 +34,7 @@ let active = false, paused = false, panelHidden = false, view = 0, weather = 'cl
 let renderer, scenery, scene, camera, plane, cockpit, world, terrainReady = false;
 let sceneTime = 0, lastTime = 0, accumulator = 0, lastUI = 0, toastTimer;
 let routeIndex = 0, departed = false, resultShown = false, brakeLatch = false;
+let novice = false, autoMem = {}, notice = {}, ilsLast = null, glowing = '', approachBoxGroup = null; // novice mode (novice.mjs)
 let lookYaw = 0, lookPitch = 0, looking = false, lastPointer = { x: 0, y: 0 };
 let mouse = { x: 0, y: 0, inside: false }, touch = { x: 0, y: 0, active: false }, touchBrake = false;
 let axes = { pitch: 0, roll: 0, yaw: 0 }, lastGamepadButtons = [], gamepadNotice = false;
@@ -78,10 +80,11 @@ function setView(next = (view + 1) % 3) {
 }
 function setPanel(hidden) {
   // On a short landscape screen "hidden" keeps only the throttle, gear, flaps and brake as a small overlay.
-  panelHidden = hidden; const compact = hidden && compactLayout.matches;
-  $('cockpit-panel').hidden = !active || (hidden && !compact);
-  $('restore-panel').hidden = !active || !hidden;
-  simulator.classList.toggle('panel-hidden', hidden); simulator.classList.toggle('panel-compact', compact);
+  // Novice mode always uses the compact overlay (no instrument panel), so the instrument panel counts as hidden.
+  panelHidden = hidden || novice; const compact = panelHidden && (novice || compactLayout.matches);
+  $('cockpit-panel').hidden = !active || (panelHidden && !compact);
+  $('restore-panel').hidden = !active || !panelHidden || novice;
+  simulator.classList.toggle('panel-hidden', panelHidden); simulator.classList.toggle('panel-compact', compact);
   if (renderer) resizeView();
 }
 function resizeView() {
@@ -102,7 +105,10 @@ function startFlight() {
   commands = { throttle: state.throttle, flaps: state.flaps, gear: state.gear, trim: state.trim, spoilers: false };
   weather = $('weather').value; brakeLatch = false; touchBrake = false;
   active = true; departed = scenario !== 'runway'; resultShown = false; routeIndex = scenario === 'runway' ? 0 : 4;
-  setPause(false); setView(0); setPanel(compactLayout.matches && coarsePointer); configureQuality();
+  novice = document.querySelector('input[name=mode]:checked').value === 'novice'; autoMem = {}; notice = {}; ilsLast = null; setGlow(null);
+  simulator.classList.toggle('novice', novice); simulator.classList.toggle('coarse', coarsePointer);
+  for (const id of ['novice-hint', 'novice-strip']) $(id).hidden = !novice;
+  setPause(false); setView(0); setPanel(novice || compactLayout.matches && coarsePointer); configureQuality();
   $('mission-panel').hidden = false; $('control-cue').hidden = false;
   $('touch-controls').hidden = !matchMedia('(pointer: coarse)').matches;
   $('throttle').value = Math.round(commands.throttle * 100);
@@ -132,9 +138,13 @@ function onSceneryStatus(status) {
 function toggleAP() {
   if (!active || dialogs.some(d => d.open)) return;
   if (state.onGround || data.agl < 30) { toast(tr('離地 100 呎後可接通自動駕駛。', 'Autopilot is available above 100 ft.')); return; }
+  if (novice && !state.autopilot.enabled) { // the AP settings are hidden in novice mode: hold what the aircraft is doing now
+    $('ap-speed').value = clamp(Math.round(data.indicatedAirspeed * KT / 5) * 5, 110, 290); $('ap-heading').value = Math.round(heading(data.heading + BEARING)) % 360;
+    $('ap-altitude').value = Math.max(apFloorFt(), Math.round((data.altitude + ELEVATION) * FT / 100) * 100);
+  }
   state.autopilot.enabled = !state.autopilot.enabled;
   if (!state.autopilot.enabled) commands.throttle = state.throttle;
-  toast(state.autopilot.enabled ? tr('自動駕駛：保持選定空速、航向與高度。', 'Autopilot holds selected speed, heading and altitude.') : tr('自動駕駛解除。', 'Autopilot disconnected.'));
+  toast(state.autopilot.enabled && novice ? tr('自動駕駛：保持現在的速度、方向和高度。', 'Autopilot holds your current speed, heading and altitude.') : state.autopilot.enabled ? tr('自動駕駛：保持選定空速、航向與高度。', 'Autopilot holds selected speed, heading and altitude.') : tr('自動駕駛解除。', 'Autopilot disconnected.'));
   updateUI();
 }
 function gear() {
@@ -281,7 +291,70 @@ function updateUI() {
   simulator.dataset.roll = data.roll.toFixed(1); simulator.dataset.onGround = String(state.onGround); simulator.dataset.phase = stage;
   simulator.dataset.agl = (data.agl * FT).toFixed(1); simulator.dataset.verticalSpeed = (data.verticalSpeed * 196.85).toFixed(0); simulator.dataset.elapsed = state.elapsed.toFixed(1);
   $('flight-summary').textContent = `${tr('空速', 'Airspeed')} ${Math.round(data.indicatedAirspeed * KT)} KT, ${tr('高度', 'Altitude')} ${Math.round((data.altitude + ELEVATION) * FT)} FT, ${tr('航向', 'Heading')} ${Math.round(heading(data.heading + BEARING))}°`;
+  if (novice) updateNovice();
   if (active && !resultShown && (state.crashed || state.touchdown && state.onGround && data.groundSpeed < 2.5 && state.elapsed - state.touchdown.elapsed > 3)) showResult();
+}
+// ---- Novice mode (logic lives in novice.mjs) ----
+const GLOW_TARGETS = { throttle: '#throttle', gear: '#gear-button', flaps: '#flaps-button', brake: '#brake-button, #touch-brake' };
+function setGlow(id) {
+  if (id === glowing) return; glowing = id;
+  for (const [key, selector] of Object.entries(GLOW_TARGETS)) document.querySelectorAll(selector).forEach(el => el.classList.toggle('glow', key === id));
+}
+function updateNovice() {
+  const show = active && !resultShown, cue = approachActive(state, data, routeIndex) ? ilsCue(data, ilsLast) : null; ilsLast = cue; // arrows only on the approach
+  const age = a => a ? { age: state.elapsed - a.at, to: a.to } : null;
+  const step = nextStep(state, data, commands, { touch: coarsePointer, routeIndex, route, circuitAltFt: AIRPORT.circuitAltFt, notice: { gear: age(notice.gear), flaps: age(notice.flaps) } });
+  $('novice-hint').hidden = !show || step.id === 'none'; $('novice-strip').hidden = !active;
+  $('novice-hint').dataset.step = step.id; $('novice-hint-text').textContent = tr(step.zh, step.en); setGlow(show ? step.glow : null);
+  const vs = Math.round(data.verticalSpeed * 196.85 / 10) * 10;
+  $('ns-speed').textContent = Math.round(data.indicatedAirspeed * KT);
+  $('ns-alt').textContent = Math.round((data.altitude + ELEVATION) * FT).toLocaleString('en-US');
+  $('ns-vs').textContent = Math.abs(vs) < 100 ? tr('平飛', 'Level') : `${vs > 0 ? tr('上升', 'Up') : tr('下降', 'Down')} ${Math.abs(vs).toLocaleString('en-US')}`;
+  $('ns-vs').dataset.dir = Math.abs(vs) < 100 ? 'level' : vs > 0 ? 'up' : 'down';
+  $('ns-hdg').textContent = String(Math.round(heading(data.heading + BEARING)) % 360).padStart(3, '0');
+  $('ns-ils').hidden = !cue;
+  if (cue) {
+    const mark = { left: '←', right: '→', ok: '✓', low: '↓', high: '↑' };
+    for (const [id, part] of [['ns-ils-h', cue.h], ['ns-ils-v', cue.v]]) {
+      const el = $(id); el.hidden = !part; if (!part) continue;
+      el.textContent = `${mark[part.state]} ${tr(part.zh, part.en)}`; el.dataset.state = part.state; el.dataset.far = String(!!part.far);
+    }
+  }
+  $('ap-novice-button').setAttribute('aria-pressed', String(state.autopilot.enabled)); $('ap-novice-value').textContent = state.autopilot.enabled ? 'ON' : 'OFF';
+}
+// Gear and flaps look after themselves in novice mode; the hint shows what moved and the button glows for a moment.
+function runAutoConfig() {
+  const change = autoConfig(state, data, commands, autoMem, routeIndex);
+  if (change.gear !== undefined) { commands.gear = change.gear; notice.gear = { at: state.elapsed, to: change.gear }; }
+  if (change.flaps !== undefined) { commands.flaps = change.flaps; notice.flaps = { at: state.elapsed, to: change.flaps }; }
+}
+// Frames along the ILS glidepath (positions from approachBoxes(), the same geometry physics.mjs uses for the deviations).
+// Each frame is four flat bars of real width (a 1 px line vanishes at distance); bars thicken with distance. Unlit, no fog, no depth write.
+function createApproachBoxes() {
+  const group = new THREE.Group(), bar = new THREE.PlaneGeometry(1, 1);
+  const flat = (color, opacity) => new THREE.MeshBasicMaterial({ color, transparent: true, opacity, depthWrite: false, fog: false, toneMapped: false, side: THREE.DoubleSide });
+  group.visible = false;
+  for (const b of approachBoxes()) {
+    // Own materials per frame so each one can fade independently as the aircraft approaches it (see updateApproachBoxes).
+    const frame = new THREE.Group(), t = 2.5 + 2.5 * b.fade, hw = b.w / 2, hh = b.h / 2, yellow = flat(0xffe14d, .95), dark = flat(0x08141c, .6);
+    // [centre x, centre y, width, height] of the four bars; the dark outline is 1.2 m larger on every side and sits just behind.
+    for (const [x, y, w, h] of [[0, hh, b.w + t, t], [0, -hh, b.w + t, t], [-hw, 0, t, b.h + t], [hw, 0, t, b.h + t]]) {
+      for (const [material, grow, depth, order] of [[dark, 2.4, -.1, 4], [yellow, 0, 0, 5]]) {
+        const mesh = new THREE.Mesh(bar, material); mesh.position.set(x, y, depth); mesh.scale.set(w + grow, h + grow, 1); mesh.renderOrder = order; mesh.frustumCulled = false; frame.add(mesh);
+      }
+    }
+    frame.position.set(b.x, b.y, b.z); frame.userData = { z: b.z, yellow, dark }; group.add(frame);
+  }
+  scene.add(group); return group;
+}
+function updateApproachBoxes() {
+  if (!approachBoxGroup) return;
+  const show = novice && active && !state.crashed && approachActive(state, data, routeIndex); approachBoxGroup.visible = show;
+  // Full opacity beyond 600 m ahead, fading linearly to nothing at 120 m, so the player flies "through" each frame instead of seeing it vanish.
+  if (show) for (const frame of approachBoxGroup.children) {
+    const { z, yellow, dark } = frame.userData, alpha = clamp((state.position.z - z - 120) / 480, 0, 1);
+    frame.visible = alpha > 0; yellow.opacity = .95 * alpha; dark.opacity = .6 * alpha;
+  }
 }
 function drawInstruments() {
   instruments.draw(state, data, { airport: AIRPORT, headingOffset: BEARING, altitudeOffset: ELEVATION, ap: state.autopilot, route: state.scenario === 'runway' ? route : [], target: state.scenario === 'runway' ? route[routeIndex] : { x: 0, z: RUNWAY.nearThreshold, name: `RWY ${AIRPORT.runway.ident}` }, runway: RUNWAY, locale });
@@ -330,6 +403,7 @@ function animate(now) {
   requestAnimationFrame(animate);
   const dt = Math.min(.1, (now - lastTime) / 1000 || 0); lastTime = now; sceneTime += dt;
   if (active && !paused && !state.crashed && terrainReady) {
+    if (novice) runAutoConfig();
     const input = inputFrame(dt); accumulator += dt;
     const wind = weather === 'crosswind' ? { x: 7.72, y: 0, z: 0 } : weather === 'overcast' ? { x: 1.7, y: 0, z: 2 } : { x: 0, y: 0, z: 0 };
     while (accumulator >= 1 / 120) {
@@ -338,7 +412,7 @@ function animate(now) {
     }
     data = getFlightData(state);
   }
-  world.update(sceneTime, state, weather); scenery?.update(sceneTime, state);
+  updateApproachBoxes(); world.update(sceneTime, state, weather); scenery?.update(sceneTime, state);
   plane.update({ ...state, rollInput: axes.roll, dt }, data);
   updateCamera(dt); renderer.render(scene, camera);
   if (active && !panelHidden) drawInstruments();
@@ -365,6 +439,9 @@ $('ap-altitude').addEventListener('change', e => { e.target.value = Math.round(a
 compactLayout.addEventListener('change', () => { if (active) setPanel(compactLayout.matches && coarsePointer ? true : panelHidden); });
 $('restore-panel').addEventListener('click', () => setPanel(false));
 $('ap-button').addEventListener('click', toggleAP);
+$('ap-novice-button').addEventListener('click', toggleAP);
+document.querySelectorAll('input[name=mode]').forEach(r => r.addEventListener('change', () => { try { localStorage.setItem('flightMode', r.value); } catch {} }));
+try { const saved = localStorage.getItem('flightMode'); if (saved === 'novice' || saved === 'advanced') document.querySelector(`input[name=mode][value=${saved}]`).checked = true; } catch {}
 $('gear-button').addEventListener('click', gear);
 $('flaps-button').addEventListener('click', e => {
   if (e.shiftKey) flaps(true);
@@ -411,7 +488,7 @@ const yoke = $('touch-yoke');
 function touchMove(e) {
   const rect = yoke.getBoundingClientRect();
   touch = { x: clamp((e.clientX - rect.left - rect.width / 2) / (rect.width * .4), -1, 1), y: clamp((e.clientY - rect.top - rect.height / 2) / (rect.height * .4), -1, 1), active: true };
-  $('touch-stick').style.transform = `translate(${touch.x * 27}px,${touch.y * 27}px)`;
+  $('touch-stick').style.transform = `translate(${touch.x * (novice ? 38 : 27)}px,${touch.y * (novice ? 38 : 27)}px)`;
 }
 yoke.addEventListener('pointerdown', e => { yoke.setPointerCapture(e.pointerId); touchMove(e); });
 yoke.addEventListener('pointermove', e => { if (touch.active) touchMove(e); });
@@ -429,7 +506,7 @@ try {
   renderer.shadowMap.type = THREE.PCFSoftShadowMap; $('flight-view').append(renderer.domElement);
   renderer.domElement.setAttribute('aria-label', `${AIRPORT.city.en} flight simulation`);
   scene = new THREE.Scene(); camera = new THREE.PerspectiveCamera(65, innerWidth / innerHeight, .15, 200000);
-  scene.add(camera); world = createWorld(THREE, scene, { airport: AIRPORT });
+  scene.add(camera); world = createWorld(THREE, scene, { airport: AIRPORT }); approachBoxGroup = createApproachBoxes();
   plane = createAircraft(THREE); scene.add(plane.group); cockpit = createCockpit(THREE); camera.add(cockpit); cockpit.visible = false;
   configureQuality(); camera.position.set(55, 29, state.position.z + 66); updateCamera(1);
   $('mission-eyebrow').textContent = `${AIRPORT.city.en.toUpperCase()} · ${AIRPORT.icao} · RWY ${AIRPORT.runway.ident}`;
@@ -437,7 +514,7 @@ try {
   $('ap-altitude').min = apFloorFt(); $('ap-altitude').value = AIRPORT.circuitAltFt; $('ap-heading').value = Math.round(BEARING);
   scenery = createGeoScenery(THREE, scene, { airport: AIRPORT, renderer, maxAnisotropy: softwareRenderer() ? 1 : renderer.capabilities.getMaxAnisotropy(), highRes, attributionTarget: $('scenery-credit'), onStatus: onSceneryStatus });
   // ?debug exposes the live objects to browser tests (teleporting, camera placement); it changes nothing in normal play.
-  if (new URLSearchParams(location.search).has('debug')) window.__flight = { THREE, get state() { return state; }, set state(v) { state = v; }, get data() { return data; }, set data(v) { data = v; }, camera, scene, renderer, scenery, world, get commands() { return commands; }, setView, setPanel, get route() { return route; } };
+  if (new URLSearchParams(location.search).has('debug')) window.__flight = { THREE, get state() { return state; }, set state(v) { state = v; }, get data() { return data; }, set data(v) { data = v; }, camera, scene, renderer, scenery, world, get commands() { return commands; }, setView, setPanel, get route() { return route; }, get novice() { return novice; }, get notice() { return notice; } };
   $('loading').hidden = true; $('start-button').disabled = true; localize(); requestAnimationFrame(animate);
   renderer.domElement.addEventListener('webglcontextlost', e => { e.preventDefault(); setPause(true); toast(tr('顯示卡連線中斷，請重新載入頁面。', 'Graphics context lost. Reload the page.')); });
 } catch (error) {

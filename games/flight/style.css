@@ -44,3 +44,69 @@ button,.lever-panel,.mission-panel,.toast,.control-cue{touch-action:manipulation
 .panel-compact .scenery-meta{top:auto;bottom:46px;left:100px;right:250px;width:auto;max-width:none;text-align:center}
 .panel-compact .scenery-meta #scenery-credit{height:auto}
 .panel-compact .scenery-meta .geo-attribution{position:static!important;font-size:6px!important;padding:2px 5px!important}
+
+/* Novice mode: difficulty picker, hint + readout strip, glowing buttons, bigger touch controls. Everything is scoped to .novice (or its own classes), so advanced mode is untouched. */
+.mode-picker{margin:0 0 18px;padding:0;border:none;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mode-picker legend{font-size:10px;letter-spacing:1.2px;color:#9db9c5;margin-bottom:10px}
+.mode-option{position:relative;display:block;padding:10px 12px;border:1px solid #345463;border-radius:6px;cursor:pointer;background:rgba(37,63,77,.3)}
+.mode-option:has(input:checked){border-color:#79ced8;background:rgba(65,122,138,.22)}
+.mode-option input{position:absolute;inset:0;opacity:0;margin:0;cursor:pointer}
+.mode-option:has(input:focus-visible){outline:2px solid var(--cyan);outline-offset:2px}
+.mode-option strong{display:block;font-size:13px;font-weight:500}
+.mode-option small{display:block;font-size:10px;line-height:1.5;color:#a0bbc7;margin-top:4px}
+.novice-only{display:none!important}
+.novice-top{display:contents}
+.novice .novice-top{position:absolute;top:78px;left:50%;transform:translateX(-50%);width:min(640px,calc(100vw - 24px));display:flex;flex-direction:column;gap:8px;align-items:stretch;z-index:5;pointer-events:none}
+.novice .annunciation{position:static;transform:none;align-self:center;max-width:100%}
+.novice .control-cue,.novice .compact-readout{display:none!important}
+.novice-hint{display:flex;align-items:center;gap:14px;padding:10px 18px;background:rgba(10,26,36,.92);border:2px solid #ffe14d;border-radius:10px;box-shadow:0 4px 18px rgba(0,0,0,.35)}
+.nh-label{flex:none;font:700 11px/1 ui-monospace,monospace;letter-spacing:2px;color:#0b1a22;background:#ffe14d;border-radius:4px;padding:5px 7px}
+.novice-hint strong{font-size:22px;font-weight:600;line-height:1.35;color:#fff}
+.novice-strip{display:flex;flex-direction:column-reverse;gap:6px}
+.ns-cells{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.ns-cell{display:flex;flex-direction:column;align-items:center;min-width:0;padding:6px 4px 5px;background:rgba(10,26,36,.86);border:1px solid rgba(192,225,237,.22);border-radius:8px}
+.ns-label{font-size:11px;letter-spacing:1px;color:#b4d0da;white-space:nowrap}
+.ns-label i{font-style:normal;font-size:9px;color:#7ea4b3;letter-spacing:0}
+.ns-cell b{font:600 clamp(18px,5.2vw,30px)/1.2 ui-monospace,SFMono-Regular,monospace;color:#fff;white-space:nowrap}
+.ns-cell b[data-dir=up]{color:#8df0b4}.ns-cell b[data-dir=down]{color:#ffcf7a}
+.ns-cell small{font-size:10px;color:#a9c3cc;white-space:nowrap}
+.ns-ils{display:flex;gap:8px;justify-content:center}
+.ns-ils>span{flex:1;max-width:260px;text-align:center;padding:6px 10px;border-radius:8px;font-size:20px;font-weight:700;white-space:nowrap;background:rgba(10,26,36,.92);border:2px solid #ffb347;color:#ffcf7a}
+.ns-ils>span[data-state=ok]{border-color:#7df0a8;color:#8df0b4}
+.ns-ils>span[data-far=true]:not([data-state=ok]){border-color:#ff7a66;color:#ffb0a3}
+@keyframes novice-glow{0%,100%{box-shadow:0 0 0 0 rgba(255,225,77,0),0 0 6px 1px rgba(255,225,77,.55)}50%{box-shadow:0 0 0 4px rgba(255,225,77,.45),0 0 18px 6px rgba(255,225,77,.9)}}
+.glow{animation:novice-glow 1s ease-in-out infinite;border-color:#ffe14d!important}
+.novice .configuration-controls .novice-only{display:flex!important;grid-column:1/-1;flex-direction:row;justify-content:space-between;padding:5px 9px}
+.novice.panel-compact .cockpit-panel .mcp{display:block;position:absolute;left:12px;bottom:10px;padding:0;background:none;border:0;height:auto;pointer-events:auto}
+.novice.panel-compact .cockpit-panel .mcp>:not(.mcp-right),.novice.panel-compact .cockpit-panel .mcp-right>button{display:none}
+.novice.coarse .cockpit-panel .mcp{display:none}
+.novice .mission-panel{top:84px}
+@media(max-width:1100px),(max-height:500px){.novice .mission-panel{display:none}}
+@media(min-width:1101px) and (min-height:501px){.novice .novice-top{width:min(640px,calc(100vw - 680px))}}
+@media(max-width:850px){.novice .novice-top{top:62px}.novice-hint strong{font-size:18px}}
+@media(max-width:600px){.novice .novice-top{top:58px;gap:6px}.novice-hint{padding:7px 12px;gap:10px}.novice-hint strong{font-size:16px}.nh-label{font-size:9px;padding:4px 5px}.ns-label{font-size:10px;letter-spacing:0}.ns-label i{display:none}.ns-cell small{font-size:9px}.ns-ils>span{font-size:16px;padding:5px 6px}}
+@media(max-height:500px) and (min-width:601px){.novice .novice-top{top:60px;gap:5px}.novice-hint{padding:6px 14px}.novice-hint strong{font-size:17px}.ns-cell{padding:3px 4px}.ns-cell b{font-size:20px}.ns-cell small{font-size:9px}.ns-ils>span{font-size:16px;padding:3px 8px}}
+/* Touch devices: yoke, brake and throttle about 1.4x. */
+.novice.coarse .touch-yoke{width:146px;height:146px}
+.novice.coarse .touch-yoke i{width:53px;height:53px}
+.novice.coarse .touch-controls{justify-content:flex-start;gap:14px;left:12px;right:230px;bottom:12px}
+.novice.coarse .touch-controls>button{width:90px;height:62px;font-size:15px}
+.novice.coarse .cockpit-panel .lever-panel{width:210px;padding:10px 11px;right:10px;bottom:12px}
+.novice.coarse .cockpit-panel .lever-panel>label{font-size:13px}
+.novice.coarse .cockpit-panel .lever-panel>label>b{font-size:18px}
+.novice.coarse .cockpit-panel .lever-panel>input{-webkit-appearance:none;appearance:none;height:36px;margin:6px 0 8px;background:transparent}
+.novice.coarse .lever-panel>input::-webkit-slider-runnable-track{height:10px;border-radius:5px;background:#3e5f6d}
+.novice.coarse .lever-panel>input::-webkit-slider-thumb{-webkit-appearance:none;width:34px;height:34px;margin-top:-12px;border-radius:50%;background:var(--cyan);border:2px solid #0d2733}
+.novice.coarse .lever-panel>input::-moz-range-track{height:10px;border-radius:5px;background:#3e5f6d}
+.novice.coarse .lever-panel>input::-moz-range-thumb{width:30px;height:30px;border-radius:50%;background:var(--cyan);border:2px solid #0d2733}
+.novice.coarse .configuration-controls{gap:7px}
+.novice.coarse .configuration-controls button{padding:8px 4px;gap:4px}
+.novice.coarse .configuration-controls button>span{font-size:11px}
+.novice.coarse .configuration-controls button>b{font-size:15px}
+@media(max-width:600px){.novice.coarse .touch-controls{right:12px;bottom:12px;justify-content:space-between}.novice.coarse .cockpit-panel .lever-panel{bottom:176px;width:200px}}
+@media(prefers-reduced-motion:reduce){.glow{animation:none;box-shadow:0 0 0 3px #ffe14d}}
+.novice .toast{top:auto;bottom:18px;max-width:min(80%,calc(100vw - 340px))}
+@media(max-width:600px){.novice .toast{left:12px;transform:none;bottom:176px;max-width:170px;font-size:11px;padding:8px 12px}}
+@media(max-height:500px) and (min-width:601px){.novice.coarse .novice-top{left:12px;transform:none;width:calc(100vw - 252px)}}
+@media(max-width:600px){.novice.panel-compact .scenery-meta{left:8px;right:8px;top:auto;bottom:2px;width:auto;max-width:none;text-align:center}.novice.coarse .touch-controls{bottom:40px}.novice.coarse .cockpit-panel .lever-panel{bottom:204px}.novice .toast{bottom:204px}}
+@media(max-height:500px) and (min-width:601px){.novice.coarse .toast{left:236px;max-width:320px}}
