@@ -242,7 +242,7 @@ function setModel(id) {
   if (plane) { scene.remove(plane.group); plane.dispose?.(); }
   if (cockpit) { camera.remove(cockpit); cockpit.dispose?.(); }
   plane = id === 'light' ? createLightAircraft(THREE) : createAircraft(THREE); scene.add(plane.group);
-  cockpit = id === 'light' ? createLightCockpit(THREE) : createCockpit(THREE); camera.add(cockpit);
+  cockpit = id === 'light' ? createLightCockpit(THREE) : createCockpit(THREE, { headingOffset: BEARING, altitudeOffset: ELEVATION, runwayIdent: AIRPORT.runway.ident }); camera.add(cockpit);
   plane.group.visible = !active || view !== 0; cockpit.visible = active && view === 0; modelAircraft = id;
 }
 function rebuildApproachBoxes(id) {
@@ -660,7 +660,7 @@ function animate(now) {
   }
   updateApproachBoxes(); updateTourRings(); world.update(sceneTime, state, weather); scenery?.update(sceneTime, state);
   plane.update({ ...state, rollInput: axes.roll, pitchInput: axes.pitch, yawInput: axes.yaw, dt }, data);
-  if (cockpit?.visible) cockpit.update?.({ ...state, rollInput: axes.roll, pitchInput: axes.pitch, yawInput: axes.yaw, dt }, data);
+  if (cockpit?.visible) cockpit.update?.({ ...state, rollInput: axes.roll, pitchInput: axes.pitch, yawInput: axes.yaw, dt, lookYaw, lookPitch }, data);
   updateCamera(dt); renderer.render(scene, camera);
   if (active && !panelHidden) drawInstruments();
   if (now - lastUI > 100) { lastUI = now; updateUI(); updateAudio(); }
