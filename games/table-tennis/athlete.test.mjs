@@ -153,11 +153,13 @@ test('serve holds the palm through release, clears the toss and meets the ball w
     for (let frame = 0; frame < 120; frame++) actor.update(frame / 120, 1 / 120, 0, null, false);
     const event = { serve: true, x: 0, y: 1.15, z: side * 1.28, contactTime: 1.48, contactDelay: 0.48, spin: -0.6 };
     actor.beginSwing(1, event);
+    const initial = actor.freeHandWorld.clone();
     let hold, release, clear;
     for (let frame = 0; frame <= 96; frame++) {
       const time = 1 + frame / 120;
       actor.update(time, 1 / 120, 0, null, false);
-      if (frame === 0) hold = actor.freeHandWorld.clone();
+      if (frame === 0) assert.ok(initial.distanceTo(actor.freeHandWorld) < 0.001, 'serve preparation snaps the palm to a new position');
+      if (frame === 12) hold = actor.freeHandWorld.clone();
       if (frame === 21) release = actor.freeHandWorld.clone();
       if (frame === 39) clear = actor.freeHandWorld.clone();
       if (frame === 58) {
@@ -366,5 +368,148 @@ test('whole-body contact poses keep upper arms outside the chest surface', () =>
         }
       }
     }
+  }
+});
+
+test('palm follows the actual forearm while the shakehand grip stays on the handle', () => {
+  for (const side of [-1, 1]) for (const profile of ['lin-yun-ju', 'harimoto']) for (const kind of ['forehand', 'backhand', 'flick', 'push', 'serve']) {
+    const left = profile === 'lin-yun-ju', mirror = left ? -1 : 1, short = ['flick', 'push'].includes(kind), serve = kind === 'serve';
+    const actor = createAthlete(new THREE.Scene(), side, 0x799583, left ? 'left' : 'right', profile);
+    const depth = short ? 1.65 : 1.94;
+    for (let f = 0; f < 60; f++) actor.update(f / 120, 1 / 120, 0, null, true, null, { rootZ: depth });
+    const event = { x: side * mirror * (['backhand', 'flick'].includes(kind) ? -0.12 : 0.27), y: short ? 0.96 : serve ? 1.15 : 1.08, z: side * (short ? 1.1 : serve ? 1.28 : 1.54), contactDelay: serve ? 0.48 : 0.24, handedness: ['backhand', 'flick'].includes(kind) ? 'backhand' : 'forehand', shotType: kind === 'forehand' ? 'loop' : kind, spin: kind === 'push' ? -1 : 1, serve };
+    actor.beginSwing(0.5, event);
+    const end = actor.root.getObjectByName(`arm-${-mirror}-end`), lower = actor.root.getObjectByName(`arm-${-mirror}-lower`), paddle = actor.root.getObjectByName('paddle');
+    let previousNormal = null;
+    for (let f = 0; f <= 120; f++) {
+      actor.update(0.5 + f / 120, 1 / 120, 0, null, true, null, { rootZ: depth });
+      const forearm = world(end).sub(world(lower)).normalize();
+      const palm = new THREE.Vector3(0, 1, 0).applyQuaternion(end.getWorldQuaternion(new THREE.Quaternion()));
+      const palmNormal = new THREE.Vector3(0, 0, 1).applyQuaternion(end.getWorldQuaternion(new THREE.Quaternion()));
+      assert.ok(palm.angleTo(forearm) < Math.PI / 6, `${profile}/${kind}: palm folds back along the forearm`);
+      if (previousNormal) assert.ok(palmNormal.angleTo(previousNormal) < 0.70, `${profile}/${kind}/${f}: palm rolls abruptly around the forearm`);
+      previousNormal = palmNormal;
+      const grip = paddle.localToWorld(new THREE.Vector3(0, 0.026, 0.007));
+      const knuckles = end.localToWorld(new THREE.Vector3(0, 0.036, 0));
+      assert.ok(grip.distanceTo(knuckles) < 0.003, 'racket slides out of the palm grip');
+      assert.ok(Math.abs(grip.distanceTo(world(end)) - 0.036) < 0.003, 'palm length changes');
+      assert.ok(end.getObjectByName('hand-grip').userData.reachError < 0.003, `${profile}/${side}/${kind}/${f}: fingers cannot wrap the actual handle ${end.getObjectByName('hand-grip').userData.reachError}`);
+    }
+  }
+});
+
+test('normal forehand contacts retain room for the arm on either court side', () => {
+  for (const side of [-1, 1]) for (const profile of ['lin-yun-ju', 'harimoto']) for (const y of [0.96, 1.08, 1.20]) for (const offset of [0.20, 0.27, 0.40]) {
+    const left = profile === 'lin-yun-ju', mirror = left ? -1 : 1;
+    const actor = createAthlete(new THREE.Scene(), side, 0x799583, left ? 'left' : 'right', profile);
+    for (let f = 0; f < 60; f++) actor.update(f / 120, 1 / 120, 0, null, true);
+    const event = { x: side * mirror * offset, y, z: side * 1.54, contactDelay: 0.24, handedness: 'forehand', shotType: 'loop' };
+    actor.beginSwing(0.5, event);
+    const feet = actor.metrics().feet;
+    for (let f = 0; f <= 60; f++) actor.update(0.5 + f / 240, 1 / 240, 0, null, true);
+    actor.contact(0.74, event); actor.update(0.74, 0, 0, null, true);
+    const shoulder = world(actor.root.getObjectByName(`arm-${-mirror}-anchor`)), elbow = world(actor.root.getObjectByName(`arm-${-mirror}-lower`)), wrist = actor.handWorld;
+    const inner = THREE.MathUtils.radToDeg(shoulder.clone().sub(elbow).angleTo(wrist.clone().sub(elbow)));
+    assert.ok(inner >= 59, `${profile}/${side}/${y}/${offset}: cramped ${inner.toFixed(2)} degree elbow`);
+    if (wrist.y < shoulder.y) assert.ok(elbow.y < shoulder.y, 'low forehand elbow rises above the shoulder');
+    assert.ok(actor.paddleWorld.distanceTo(new THREE.Vector3(event.x, event.y, event.z)) < 0.005);
+    assert.ok(actor.metrics().legReachError < 0.001);
+    assert.ok(actor.metrics().contactRetreat <= 0.22);
+    assert.deepEqual(actor.metrics().feet, feet, 'the shoulder clearance slides the feet');
+  }
+});
+
+test('serve exits continuously at the exact clip boundary for active and idle players', () => {
+  for (const side of [-1, 1]) for (const handed of ['left', 'right']) for (const active of [false, true]) {
+    const actor = createAthlete(new THREE.Scene(), side, 0x799583, handed);
+    for (let f = 0; f < 60; f++) actor.update(f / 120, 1 / 120, 0, null, active);
+    actor.beginSwing(0.5, { serve: true, x: 0, y: 1.15, z: side * 1.28, contactDelay: 0.48 });
+    const sign = handed === 'left' ? -1 : 1, freeElbow = actor.root.getObjectByName(`arm-${sign}-lower`);
+    let previousHand = actor.freeHandWorld.clone(), previousElbow = world(freeElbow);
+    for (let f = 0; f <= 105; f++) {
+      actor.update(0.5 + f / 120, 1 / 120, 0, null, active);
+      const elbow = world(freeElbow), hand = actor.freeHandWorld.clone();
+      assert.ok(hand.distanceTo(previousHand) < 0.060, `${side}/${handed}/${active}/${f}: serve hand jumps between preparation, release or recovery`);
+      assert.ok(elbow.distanceTo(previousElbow) < 0.060, `${side}/${handed}/${active}/${f}: serve elbow jumps between preparation, release or recovery`);
+      if (f >= 92) {
+        assert.ok(hand.distanceTo(previousHand) < 0.012, 'free hand resets to the ball-hold pose when serve expires');
+        assert.ok(elbow.distanceTo(previousElbow) < 0.012, 'free elbow snaps at the serve clip boundary');
+      }
+      previousHand = hand; previousElbow = elbow;
+    }
+    assert.equal(actor.metrics().phase, 'ready');
+    actor.reset(); actor.update(0, 1 / 120, 0, null, active);
+    assert.equal(actor.metrics().phase, 'ready');
+  }
+});
+
+test('the blade and both rubbers remain outside the transformed forearm skin through the stroke', () => {
+  for (const side of [-1, 1]) for (const profile of ['lin-yun-ju', 'harimoto']) for (const kind of ['forehand', 'backhand', 'flick', 'push', 'serve']) {
+    const left = profile === 'lin-yun-ju', mirror = left ? -1 : 1, short = ['flick', 'push'].includes(kind), serve = kind === 'serve';
+    const actor = createAthlete(new THREE.Scene(), side, 0x799583, left ? 'left' : 'right', profile), depth = short ? 1.65 : 1.94;
+    for (let f = 0; f < 60; f++) actor.update(f / 120, 1 / 120, 0, null, true, null, { rootZ: depth });
+    const event = { x: side * mirror * (['backhand', 'flick'].includes(kind) ? -0.12 : 0.27), y: short ? 0.96 : serve ? 1.15 : 1.08, z: side * (short ? 1.1 : serve ? 1.28 : 1.54), contactDelay: serve ? 0.48 : 0.24, handedness: ['backhand', 'flick'].includes(kind) ? 'backhand' : 'forehand', shotType: kind === 'forehand' ? 'loop' : kind, spin: kind === 'push' ? -1 : 1, serve };
+    actor.beginSwing(0.5, event);
+    const skin = actor.root.getObjectByName(`arm-${-mirror}-skin`), paddle = actor.root.getObjectByName('paddle'), position = skin.geometry.attributes.position;
+    const point = new THREE.Vector3(); let previousRotation = null;
+    for (let f = 0; f <= 120; f++) {
+      actor.update(0.5 + f / 120, 1 / 120, 0, null, true, null, { rootZ: depth });
+      const rotation = paddle.getWorldQuaternion(new THREE.Quaternion());
+      if (previousRotation) assert.ok(rotation.angleTo(previousRotation) < 0.35, `${profile}/${kind}/${f}: racket orientation jumps ${rotation.angleTo(previousRotation)} between renders`);
+      previousRotation = rotation;
+      skin.skeleton.update();
+      for (let vertex = 0; vertex < position.count; vertex++) {
+        if (position.getY(vertex) > -0.305 - 0.285 * 0.08) continue;
+        point.fromBufferAttribute(position, vertex); skin.applyBoneTransform(vertex, point); point.applyMatrix4(skin.matrixWorld); paddle.worldToLocal(point);
+        const wood = (point.x / 0.085) ** 2 + ((point.y - 0.127) / (0.085 * 1.13)) ** 2;
+        const rubber = (point.x / 0.082) ** 2 + ((point.y - 0.127) / (0.082 * 1.13)) ** 2;
+        const inWood = wood < 1 && point.z > 0.0025 && point.z < 0.0155;
+        const inRubber = rubber < 1 && (point.z > 0.01625 && point.z < 0.01975 || point.z > -0.00225 && point.z < 0.00125);
+        assert.ok(!inWood && !inRubber, `${profile}/${side}/${kind}/${f}: forearm vertex ${vertex} enters the blade`);
+      }
+    }
+  }
+});
+
+test('grip clearance preserves the contact center and authored face normal', () => {
+  for (const side of [-1, 1]) for (const profile of ['lin-yun-ju', 'harimoto']) for (const kind of ['forehand', 'backhand', 'flick', 'push', 'serve']) {
+    const left = profile === 'lin-yun-ju', mirror = left ? -1 : 1, short = ['flick', 'push'].includes(kind), serve = kind === 'serve';
+    const actor = createAthlete(new THREE.Scene(), side, 0x799583, left ? 'left' : 'right', profile), depth = short ? 1.65 : 1.94;
+    for (let f = 0; f < 60; f++) actor.update(f / 120, 1 / 120, 0, null, true, null, { rootZ: depth });
+    const event = { x: side * mirror * (['backhand', 'flick'].includes(kind) ? -0.12 : 0.27), y: short ? 0.82 : serve ? 1.15 : 1.08, z: side * (short ? 1.1 : serve ? 1.28 : 1.54), contactDelay: serve ? 0.48 : 0.24, handedness: ['backhand', 'flick'].includes(kind) ? 'backhand' : 'forehand', shotType: kind === 'forehand' ? 'loop' : kind, spin: kind === 'push' ? -1 : 1, serve };
+    actor.beginSwing(0.5, event);
+    for (let f = 0; f < event.contactDelay * 240; f++) actor.update(0.5 + f / 240, 1 / 240, 0, null, true, null, { rootZ: depth });
+    actor.contact(0.5 + event.contactDelay, event); actor.update(0.5 + event.contactDelay, 1 / 240, 0, null, true, null, { rootZ: depth });
+    const wrist = actor.metrics().bodyPose.wrist, tilt = short ? 1 : 0;
+    const authored = new THREE.Quaternion().setFromEuler(new THREE.Euler(THREE.MathUtils.lerp(wrist[0], 1.25, tilt), wrist[1] * mirror, wrist[2] * mirror));
+    const expected = new THREE.Vector3(0, 0, 1).applyQuaternion(authored).applyQuaternion(actor.root.getWorldQuaternion(new THREE.Quaternion()));
+    const actual = new THREE.Vector3(0, 0, 1).applyQuaternion(actor.root.getObjectByName('paddle').getWorldQuaternion(new THREE.Quaternion()));
+    assert.ok(actual.angleTo(expected) < 0.001, 'clearance changes the strike face instead of its in-plane grip roll');
+    assert.ok(actor.paddleWorld.distanceTo(new THREE.Vector3(event.x, event.y, event.z)) < 0.005, 'clearance moves the physical impact');
+  }
+});
+
+test('flick recovery extends across and up without lifting the elbow beside the head', () => {
+  for (const side of [-1, 1]) for (const profile of ['lin-yun-ju', 'harimoto']) {
+    const left = profile === 'lin-yun-ju', mirror = left ? -1 : 1;
+    const actor = createAthlete(new THREE.Scene(), side, 0x799583, left ? 'left' : 'right', profile);
+    for (let f = 0; f < 60; f++) actor.update(f / 120, 1 / 120, 0, null, true, null, { rootZ: 1.65 });
+    const event = { x: -side * mirror * 0.12, y: 0.96, z: side * 1.1, contactDelay: 0.24, handedness: 'backhand', shotType: 'flick' };
+    const definition = motionDefinition(profile, 'backhand', 'flick', false, true);
+    actor.beginSwing(0.5, event);
+    const shoulder = actor.root.getObjectByName(`arm-${-mirror}-anchor`), elbow = actor.root.getObjectByName(`arm-${-mirror}-lower`);
+    for (let f = 0; f <= 90; f++) {
+      actor.update(0.5 + f / 120, 1 / 120, 0, null, true, null, { rootZ: 1.65 });
+      assert.ok(world(elbow).y - world(shoulder).y <= 0.056, 'flick IK places the elbow beside the head');
+    }
+    actor.reset();
+    for (let f = 0; f < 60; f++) actor.update(f / 120, 1 / 120, 0, null, true, null, { rootZ: 1.65 });
+    actor.beginSwing(0.5, event);
+    const follow = 0.5 + event.contactDelay + definition.followTime;
+    for (let time = 0.5; time < follow; time += 1 / 240) actor.update(time, 1 / 240, 0, null, true, null, { rootZ: 1.65 });
+    actor.update(follow, 1 / 240, 0, null, true, null, { rootZ: 1.65 });
+    const e = world(elbow), w = actor.handWorld;
+    assert.ok(w.y > e.y + 0.015, 'flick forearm hangs vertically down at follow-through');
+    assert.ok((w.z - e.z) * -side > 0.08, 'flick forearm does not extend in front of the elbow');
   }
 });

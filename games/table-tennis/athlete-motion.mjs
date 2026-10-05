@@ -25,6 +25,27 @@ export function solveTwoBone(origin, target, pole, upperLength, lowerLength) {
   };
 }
 
+// Keep an authored bend plane unless it would put the joint above the permitted
+// shoulder-relative height. The correction stays on the same IK circle.
+export function limitJointHeight(target, pole, up, upperLength, lowerLength, maximum) {
+  const direction = unit(target), vertical = unit(up);
+  let bend = sub(pole, mul(direction, dot(pole, direction)));
+  if (length(bend) < 0.0001) bend = sub(mul(vertical, -1), mul(direction, -dot(vertical, direction)));
+  bend = unit(bend);
+  const distance = clamp(length(target), Math.abs(upperLength - lowerLength) + 0.001, upperLength + lowerLength - 0.001);
+  const along = (upperLength ** 2 - lowerLength ** 2 + distance ** 2) / (2 * distance);
+  const radius = Math.sqrt(Math.max(0, upperLength ** 2 - along ** 2));
+  const projectedUp = sub(vertical, mul(direction, dot(vertical, direction)));
+  const projection = length(projectedUp);
+  if (projection < 0.0001 || radius < 0.0001) return bend;
+  const heightAxis = unit(projectedUp), cosine = dot(bend, heightAxis);
+  const ceiling = clamp((maximum - along * dot(direction, vertical)) / (radius * projection), -1, 1);
+  if (cosine <= ceiling) return bend;
+  let sideways = sub(bend, mul(heightAxis, cosine));
+  if (length(sideways) < 0.0001) sideways = [direction[1] * heightAxis[2] - direction[2] * heightAxis[1], direction[2] * heightAxis[0] - direction[0] * heightAxis[2], direction[0] * heightAxis[1] - direction[1] * heightAxis[0]];
+  return add(mul(heightAxis, ceiling), mul(unit(sideways), Math.sqrt(Math.max(0, 1 - ceiling ** 2))));
+}
+
 // Cubic Hermite keys share tangents at contact, so a hit continues the stroke.
 export function strokeDuration(handedness = 'forehand', spin = 1, serve = false) {
   if (serve) return 0.30;

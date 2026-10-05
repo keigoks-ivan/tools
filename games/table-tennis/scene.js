@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { TABLE, clamp } from './physics.mjs?v=4';
-import { createAthlete } from './athlete.js?v=4';
+import { createAthlete } from './athlete.js?v=6';
 import { mergeGeometries } from '../../game/lib/addons/utils/BufferGeometryUtils.js';
 
 const vector = (x, y, z) => new THREE.Vector3(x, y, z);

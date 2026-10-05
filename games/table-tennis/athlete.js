@@ -1,10 +1,12 @@
 import * as THREE from 'three';
 import { mergeGeometries } from '../../game/lib/addons/utils/BufferGeometryUtils.js';
-import { sampleServe, sampleStroke, smoothstep, solveTwoBone } from './athlete-motion.mjs?v=4';
-import { blendBodyPose, motionDefinition, MOTION_PROFILES, readyBodyPose, resolveMotionProfile, sampleBodyClip } from './motion-clips.mjs?v=4';
+import { limitJointHeight, sampleServe, sampleStroke, smoothstep, solveTwoBone } from './athlete-motion.mjs?v=6';
+import { blendBodyPose, motionDefinition, MOTION_PROFILES, readyBodyPose, resolveMotionProfile, sampleBodyClip } from './motion-clips.mjs?v=6';
 
 const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
 const DOWN = new THREE.Vector3(0, -1, 0);
+const GRIP_LENGTH = 0.036;
+const GRIP_POINT = new THREE.Vector3(0, 0.026, 0.007);
 const vec = a => new THREE.Vector3(...a);
 const material = (color, roughness = 0.85) => new THREE.MeshStandardMaterial({ color, roughness });
 const sphere = new THREE.SphereGeometry(1, 20, 14);
@@ -130,7 +132,7 @@ function jointChain(parent, upperLength, lowerLength, upperMat, lowerMat, radii,
 function mergeStatic(parent) {
   for (const child of [...parent.children]) if (!child.isMesh) mergeStatic(child);
   const groups = new Map();
-  for (const mesh of parent.children) if (mesh.isMesh && !mesh.isSkinnedMesh) {
+  for (const mesh of parent.children) if (mesh.isMesh && !mesh.isSkinnedMesh && !mesh.userData.dynamicGrip) {
     const group = groups.get(mesh.material) || []; group.push(mesh); groups.set(mesh.material, group);
   }
   for (const [mat, meshes] of groups) if (meshes.length > 1) {
@@ -194,6 +196,14 @@ function shoeGeometry() {
 }
 function handGeometry(parent, skin, sign, gripping) {
   oval(parent, skin, [0, 0.012, 0], [0.028, 0.040, 0.022]);
+  if (gripping) {
+    const segment = new THREE.CapsuleGeometry(0.0055, 0.009, 4, 6);
+    const geometry = mergeGeometries(Array.from({ length: 10 }, () => segment.clone()));
+    const grip = addMesh(parent, geometry, skin); grip.name = 'hand-grip';
+    grip.userData = { dynamicGrip: true, positions: geometry.attributes.position.array.slice(), normals: geometry.attributes.normal.array.slice(), count: segment.attributes.position.count };
+    geometry.boundingSphere = new THREE.Sphere(new THREE.Vector3(), 0.12); segment.dispose();
+    return;
+  }
   for (let i = 0; i < 4; i++) {
     const finger = addMesh(parent, new THREE.CapsuleGeometry(0.006, gripping ? 0.025 : 0.032, 5, 8), skin, [(i - 1.5) * 0.012, 0.047 + (i === 0 || i === 3 ? -0.003 : 0.002), gripping ? 0.010 : 0]);
     finger.rotation.x = gripping ? -0.85 : -0.12;
@@ -201,9 +211,50 @@ function handGeometry(parent, skin, sign, gripping) {
   const thumb = addMesh(parent, new THREE.CapsuleGeometry(0.008, 0.027, 5, 8), skin, [-sign * 0.023, 0.018, 0.015]); thumb.rotation.z = -sign * 0.55; thumb.rotation.x = -0.35;
 }
 
-function placeChain(chain, targetInAnchor, pole, dt = 0) {
+function updateGrip(end, paddle, sign) {
+  const mesh = end.getObjectByName('hand-grip'), { positions, normals, count } = mesh.userData;
+  const position = mesh.geometry.attributes.position, normal = mesh.geometry.attributes.normal;
+  const gripCenter = end.worldToLocal(paddle.localToWorld(GRIP_POINT.clone()));
+  const handleAxis = new THREE.Vector3(0, 1, 0).applyQuaternion(paddle.quaternion);
+  const handleNormal = new THREE.Vector3(0, 0, 1).applyQuaternion(paddle.quaternion);
+  const segments = []; let error = 0;
+  for (let i = 0; i < 5; i++) {
+    const thumb = i === 4;
+    const knuckle = thumb ? new THREE.Vector3(-sign * 0.022, 0.008, 0.014) : new THREE.Vector3((i - 1.5) * 0.010, 0.028, 0.012);
+    const axial = clamp(knuckle.clone().sub(gripCenter).dot(handleAxis), -0.022, 0.022);
+    const nearest = gripCenter.clone().addScaledVector(handleAxis, axial);
+    const radial = knuckle.clone().sub(nearest).normalize();
+    const wrapped = handleAxis.clone().cross(radial).normalize();
+    const tip = nearest.clone().addScaledVector(wrapped, thumb ? -0.014 : 0.014);
+    const pole = thumb ? handleNormal.clone().multiplyScalar(sign * 0.030).add(new THREE.Vector3(-sign * 0.03, 0.03, 0)) : new THREE.Vector3(0, 0.04, 0.025);
+    const result = solveTwoBone(knuckle.toArray(), tip.toArray(), pole.toArray(), 0.024, 0.024);
+    error = Math.max(error, result.reachError);
+    segments.push([knuckle, vec(result.joint)], [vec(result.joint), vec(result.end)]);
+  }
+  const point = new THREE.Vector3(), surface = new THREE.Vector3();
+  for (let segment = 0; segment < segments.length; segment++) {
+    const [start, endPoint] = segments[segment], midpoint = start.clone().add(endPoint).multiplyScalar(0.5);
+    const direction = endPoint.clone().sub(start), scale = direction.length() / 0.020;
+    const rotation = new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.normalize());
+    for (let vertex = 0; vertex < count; vertex++) {
+      const index = segment * count + vertex, offset = index * 3;
+      point.set(positions[offset], positions[offset + 1] * scale, positions[offset + 2]).applyQuaternion(rotation).add(midpoint);
+      surface.set(normals[offset], normals[offset + 1] / scale, normals[offset + 2]).normalize().applyQuaternion(rotation);
+      position.setXYZ(index, point.x, point.y, point.z); normal.setXYZ(index, surface.x, surface.y, surface.z);
+    }
+  }
+  position.needsUpdate = true; normal.needsUpdate = true;
+  mesh.userData.reachError = error;
+}
+
+function placeChain(chain, targetInAnchor, pole, dt = 0, heightLimit) {
   const direction = targetInAnchor.clone().normalize(), preferred = vec(pole);
   preferred.addScaledVector(direction, -preferred.dot(direction));
+  if (heightLimit?.outward) {
+    const stable = heightLimit.outward.clone().addScaledVector(direction, -heightLimit.outward.dot(direction)).normalize();
+    const conditioning = smoothstep((0.10 - preferred.length()) / 0.08);
+    preferred.normalize().lerp(stable, conditioning);
+  }
   const anchorRotation = chain.anchor.getWorldQuaternion(new THREE.Quaternion());
   if (chain.bendWorld) {
     const previous = chain.bendWorld.clone().applyQuaternion(anchorRotation.clone().invert());
@@ -220,8 +271,10 @@ function placeChain(chain, targetInAnchor, pole, dt = 0) {
       }
     }
   }
+  const lowerLength = chain.lowerLength + (chain.gripLength ?? 0);
+  if (heightLimit) preferred.fromArray(limitJointHeight(targetInAnchor.toArray(), preferred.toArray(), heightLimit.up.toArray(), chain.upperLength, lowerLength, heightLimit.maximum));
   preferred.normalize(); chain.bendWorld = preferred.clone().applyQuaternion(anchorRotation);
-  const result = solveTwoBone([0, 0, 0], targetInAnchor.toArray(), preferred.toArray(), chain.upperLength, chain.lowerLength);
+  const result = solveTwoBone([0, 0, 0], targetInAnchor.toArray(), preferred.toArray(), chain.upperLength, lowerLength);
   const elbow = vec(result.joint), end = vec(result.end);
   chain.upper.quaternion.setFromUnitVectors(DOWN, elbow.clone().normalize());
   const lowerDirection = end.sub(elbow).normalize().applyQuaternion(chain.upper.quaternion.clone().invert());
@@ -237,6 +290,59 @@ function orientEnd(root, end, rotation) {
   const desired = quat.clone().multiply(new THREE.Quaternion().setFromEuler(rotation));
   end.parent.getWorldQuaternion(quat);
   end.quaternion.copy(quat.invert().multiply(desired));
+}
+
+function orientPalm(root, arm, rotation, dt) {
+  const forearm = arm.end.getWorldPosition(new THREE.Vector3()).sub(arm.lower.getWorldPosition(new THREE.Vector3())).normalize();
+  const authored = root.getWorldQuaternion(new THREE.Quaternion()).multiply(new THREE.Quaternion().setFromEuler(rotation));
+  let normal = new THREE.Vector3(0, 0, 1).applyQuaternion(authored);
+  normal.addScaledVector(forearm, -normal.dot(forearm));
+  if (normal.lengthSq() < 0.0001) {
+    normal = arm.palmNormal?.clone() ?? new THREE.Vector3(1, 0, 0).applyQuaternion(authored);
+    normal.addScaledVector(forearm, -normal.dot(forearm));
+  }
+  normal.normalize();
+  if (arm.palmNormal) {
+    const previous = arm.palmNormal.clone().addScaledVector(forearm, -arm.palmNormal.dot(forearm));
+    if (previous.lengthSq() > 0.0001) {
+      previous.normalize();
+      if (normal.dot(previous) < 0) normal.negate();
+      const angle = previous.angleTo(normal), maximum = dt * 12;
+      const roll = new THREE.Quaternion().setFromUnitVectors(previous, normal);
+      roll.slerp(new THREE.Quaternion(), angle > maximum ? 1 - maximum / angle : 0);
+      normal.copy(previous).applyQuaternion(roll);
+    }
+  }
+  arm.palmNormal = normal.clone();
+  const across = forearm.clone().cross(normal).normalize();
+  const desired = new THREE.Quaternion().setFromRotationMatrix(new THREE.Matrix4().makeBasis(across, forearm, normal));
+  arm.end.quaternion.copy(arm.end.parent.getWorldQuaternion(new THREE.Quaternion()).invert().multiply(desired));
+}
+
+function bladeNearForearm(root, arm, center, rotation) {
+  const positions = arm.skin.geometry.attributes.position;
+  if (!arm.forearmVertices) arm.forearmVertices = Array.from({ length: positions.count }, (_, index) => index).filter(index => positions.getY(index) <= -arm.upperLength - arm.lowerLength * 0.08);
+  arm.skin.skeleton.update();
+  const skinToRoot = root.matrixWorld.clone().invert().multiply(arm.skin.matrixWorld), inverse = rotation.clone().invert();
+  const point = new THREE.Vector3(), margin = 0.002;
+  const elbow = root.worldToLocal(arm.lower.getWorldPosition(new THREE.Vector3()));
+  const wrist = root.worldToLocal(arm.end.getWorldPosition(new THREE.Vector3()));
+  // A continuous forearm envelope anticipates contact between the sampled skin
+  // vertices, so the minimum safe roll does not switch at individual vertices.
+  for (let sample = 1; sample <= 16; sample++) {
+    const t = sample / 16, radius = THREE.MathUtils.lerp(0.048, 0.023, clamp((t - 0.40) / 0.60, 0, 1));
+    point.copy(elbow).lerp(wrist, t).sub(center).applyQuaternion(inverse); point.y += 0.127; point.z += 0.009;
+    const gap = Math.max(-0.00225 - point.z, point.z - 0.01975, 0);
+    if (gap >= radius + margin) continue;
+    const radial = Math.sqrt((radius + margin) ** 2 - gap ** 2);
+    if ((point.x / (0.085 + radial)) ** 2 + ((point.y - 0.127) / (0.085 * 1.13 + radial)) ** 2 < 1) return true;
+  }
+  for (const index of arm.forearmVertices) {
+    point.fromBufferAttribute(positions, index); arm.skin.applyBoneTransform(index, point);
+    point.applyMatrix4(skinToRoot).sub(center).applyQuaternion(inverse); point.y += 0.127; point.z += 0.009;
+    if ((point.x / (0.085 + margin)) ** 2 + ((point.y - 0.127) / (0.085 * 1.13 + margin)) ** 2 < 1 && point.z > -0.00225 - margin && point.z < 0.01975 + margin) return true;
+  }
+  return false;
 }
 
 export function createAthlete(scene, side, color, handed = 'right', profileId = handed === 'left' ? 'lin-yun-ju' : 'harimoto') {
@@ -314,7 +420,7 @@ export function createAthlete(scene, side, color, handed = 'right', profileId = 
   mergeStatic(root);
 
   const handWorld = new THREE.Vector3(), freeHandWorld = new THREE.Vector3(), paddleWorld = new THREE.Vector3();
-  let stroke = null, strokeId = 0, previousX = null, previousZ = null, velocity = 0, depthVelocity = 0, nextFoot = 0, readyAmount = 0.62, serveAmount = 0, rallyAmount = 0;
+  let stroke = null, strokeId = 0, previousX = null, previousZ = null, velocity = 0, depthVelocity = 0, nextFoot = 0, readyAmount = 0.62, serveAmount = 0;
   let footTime = null, footRootX = 0, footRootZ = side * 1.94;
   let lastCenter = new THREE.Vector3(-0.18 * mirror, 1.04, 0.37);
   let pose = { phase: 'ready', handedness: 'forehand', contact: false };
@@ -334,6 +440,7 @@ export function createAthlete(scene, side, color, handed = 'right', profileId = 
       handedness: event.handedness || (localContact(target).x * mirror > 0.025 ? 'backhand' : 'forehand'),
       spin: event.spin ?? 1, target, ready: lastCenter.clone(), contact: false, serve: !!event.serve,
       shotType: event.shotType ?? (event.spin < -0.1 ? 'push' : Math.abs(event.spin ?? 1) < 0.15 ? 'drive' : 'loop'), stance: event.stance, bodyReady: bodyPose,
+      freeReady: root.worldToLocal(freeHandWorld.clone()),
     };
   }
   function contact(time, event = {}) {
@@ -350,7 +457,7 @@ export function createAthlete(scene, side, color, handed = 'right', profileId = 
     dominant = arms.find(arm => arm.sign === -mirror); dominant.end.add(paddle);
     for (const arm of arms) {
       for (const child of [...arm.end.children]) if (child.isMesh) { arm.end.remove(child); child.geometry.dispose(); }
-      handGeometry(arm.end, skin, arm.sign, arm === dominant); mergeStatic(arm.end); arm.bendWorld = null;
+      handGeometry(arm.end, skin, arm.sign, arm === dominant); mergeStatic(arm.end); arm.bendWorld = null; arm.palmNormal = null; arm.handleRoll = 0;
     }
     const jerseyColor = next === 'lin-yun-ju' ? 0xce6733 : 0x426eae;
     shirt.map?.dispose(); shirt.map = jerseyTexture(jerseyColor, next === 'lin-yun-ju' ? 1 : -1);
@@ -374,7 +481,6 @@ export function createAthlete(scene, side, color, handed = 'right', profileId = 
     root.position.x = x;
     readyAmount += ((active || stroke ? 1 : 0.62) - readyAmount) * (1 - Math.exp(-elapsed * 16));
     serveAmount += ((stroke?.serve ? 1 : 0) - serveAmount) * (1 - Math.exp(-elapsed * 13));
-    rallyAmount += ((active && !stroke?.serve ? 1 : 0) - rallyAmount) * (1 - Math.exp(-elapsed * 14));
     if (swingState && !stroke && swingState.target && time < swingState.until) beginSwing(swingState.startedAt ?? time, { ...swingState.target, ...swingState });
     const tableReceive = stroke && !stroke.serve && Math.abs(stroke.target.z) < 1.37;
     const definition = motionDefinition(motionProfile, stroke?.handedness, stroke?.shotType, stroke?.serve, tableReceive);
@@ -404,6 +510,22 @@ export function createAthlete(scene, side, color, handed = 'right', profileId = 
     spine.rotation.set(bodyPose.chest[0] - (1 - readyAmount) * 0.10, bodyPose.chest[1] * mirror, bodyPose.chest[2] * mirror + clamp(-localVelocity * 0.025, -0.06, 0.06));
     head.rotation.set(bodyPose.neck[0], bodyPose.neck[1] * mirror, bodyPose.neck[2] * mirror);
     head.rotation.y += ball ? clamp(((ball.x - x) * -side) * 0.13 - bodyPose.chest[1] * mirror * 0.40, -0.28, 0.28) : -bodyPose.chest[1] * mirror * 0.40;
+    let contactRetreat = 0;
+    if (stroke && !stroke.serve && !tableReceive && stroke.handedness === 'forehand') {
+      dominant.anchor.position.y = 0.405 + bodyPose.shoulders[0]; root.updateMatrixWorld(true);
+      const shoulder = root.worldToLocal(dominant.anchor.getWorldPosition(new THREE.Vector3()));
+      const face = new THREE.Quaternion().setFromEuler(new THREE.Euler(bodyPose.wrist[0], bodyPose.wrist[1] * mirror, bodyPose.wrist[2] * mirror));
+      const normal = new THREE.Vector3(0, 0, 1).applyQuaternion(face);
+      face.premultiply(new THREE.Quaternion().setFromAxisAngle(normal, (dominant.handleRoll ?? 0) * Math.exp(-elapsed * 8)));
+      const grip = vec(sample.center).sub(bladeCenter.clone().sub(GRIP_POINT).applyQuaternion(face));
+      const lateral = grip.x - shoulder.x, vertical = grip.y - shoulder.y;
+      const requiredDepth = Math.sqrt(Math.max(0, 0.335 ** 2 - lateral ** 2 - vertical ** 2));
+      const phaseWeight = smoothstep((time - stroke.startedAt) / Math.max(0.075, stroke.lead * 0.80)) * (1 - smoothstep((time - stroke.contactAt) / definition.followTime));
+      // A close forehand needs room between the shoulder and actual grip. A
+      // small hip retreat retains the planted feet and leaves short shots alone.
+      contactRetreat = clamp(requiredDepth - (grip.z - shoulder.z), 0, 0.22) * phaseWeight;
+      pelvis.position.z -= contactRetreat;
+    }
     // A planted foot keeps its world position until a discrete shuffle transfers it.
     const footPose = leg => bodyPose.feet[leg.sign === -mirror ? 0 : 1];
     for (const leg of legs) if (leg.worldX === null) {
@@ -481,40 +603,106 @@ export function createAthlete(scene, side, color, handed = 'right', profileId = 
     const lowBallTilt = tableReceive || stroke?.shotType === 'push' ? smoothstep((0.95 - target.y) / 0.12) * swingBlend : 0;
     const wristRotation = new THREE.Euler(THREE.MathUtils.lerp(bodyPose.wrist[0], 1.25, lowBallTilt), bodyPose.wrist[1] * mirror, bodyPose.wrist[2] * mirror);
     const wristQuaternion = new THREE.Quaternion().setFromEuler(wristRotation);
+    let handleRoll = (dominant.handleRoll ?? 0) * Math.exp(-elapsed * 8);
+    const authoredNormal = new THREE.Vector3(0, 0, 1).applyQuaternion(wristQuaternion);
+    wristQuaternion.premultiply(new THREE.Quaternion().setFromAxisAngle(authoredNormal, handleRoll));
     const worldCenter = root.localToWorld(center.clone());
-    const normal = new THREE.Vector3(0, 0, 1).applyQuaternion(wristQuaternion);
-    const up = new THREE.Vector3(0, 1, 0).applyQuaternion(wristQuaternion);
-    const bladeExtentZ = 0.096 * Math.sqrt(Math.max(0, 1 - normal.z ** 2)) + 0.012;
-    const handleExtentZ = -0.101 * up.z + 0.0345 * Math.abs(up.z) - 0.002 * normal.z + 0.017;
-    if (stroke && Math.abs(worldCenter.z) < 1.37 + Math.max(bladeExtentZ, handleExtentZ) && Math.abs(worldCenter.x) < 0.8625) {
-      const bladeClearance = 0.096 * Math.sqrt(Math.max(0, 1 - normal.y ** 2)) + 0.012;
-      const handleClearance = 0.101 * up.y + 0.0345 * Math.abs(up.y) + 0.002 * normal.y + 0.017;
-      const clearance = Math.max(bladeClearance, handleClearance);
-      center.y = Math.max(center.y, 0.76 + clearance);
-    }
-    const handTarget = center.clone().sub(bladeCenter.clone().applyQuaternion(wristQuaternion));
+    const keepAboveTable = () => {
+      const normal = new THREE.Vector3(0, 0, 1).applyQuaternion(wristQuaternion);
+      const up = new THREE.Vector3(0, 1, 0).applyQuaternion(wristQuaternion);
+      const bladeExtentZ = 0.096 * Math.sqrt(Math.max(0, 1 - normal.z ** 2)) + 0.012;
+      const handleExtentZ = -0.101 * up.z + 0.0345 * Math.abs(up.z) - 0.002 * normal.z + 0.017;
+      if (stroke && Math.abs(worldCenter.z) < 1.37 + Math.max(bladeExtentZ, handleExtentZ) && Math.abs(worldCenter.x) < 0.8625) {
+        const bladeClearance = 0.096 * Math.sqrt(Math.max(0, 1 - normal.y ** 2)) + 0.012;
+        const handleClearance = 0.101 * up.y + 0.0345 * Math.abs(up.y) + 0.002 * normal.y + 0.017;
+        center.y = Math.max(center.y, 0.76 + Math.max(bladeClearance, handleClearance));
+      }
+    };
+    keepAboveTable();
+    const gripTarget = center.clone().sub(bladeCenter.clone().sub(GRIP_POINT).applyQuaternion(wristQuaternion));
     for (const arm of arms) {
       const isDominant = arm === dominant;
       arm.anchor.position.y = 0.405 + bodyPose.shoulders[isDominant ? 0 : 1];
       root.updateMatrixWorld(true);
-      const balancing = new THREE.Vector3(0.04 * mirror, 1.055, 0.625);
       const freeHand = vec(bodyPose.freeHand); freeHand.x *= mirror; freeHand.y -= lowContact * 0.6;
-      balancing.lerp(freeHand, rallyAmount);
+      const balancing = freeHand.clone();
+      const serveRecovery = stroke?.serve ? smoothstep((time - stroke.contactAt - 0.105) / 0.195) : 1;
       if (stroke?.serve) {
-        const release = smoothstep((time - stroke.startedAt - 0.18) / 0.14);
+        const release = smoothstep((time - stroke.startedAt - 0.18) / 0.165);
         balancing.set(THREE.MathUtils.lerp(0.04, 0.27, release) * mirror, THREE.MathUtils.lerp(1.055, 0.94, release) + sample.toss * 0.08, THREE.MathUtils.lerp(0.625, 0.30, release));
+        balancing.lerp(freeHand, serveRecovery);
+        balancing.lerp(stroke.freeReady, 1 - smoothstep((time - stroke.startedAt) / 0.11));
       }
-      const armTarget = isDominant ? handTarget : balancing;
+      const armTarget = isDominant ? gripTarget : balancing;
+      arm.gripLength = isDominant ? GRIP_LENGTH : 0;
       const elbow = vec(isDominant ? bodyPose.playingElbow : bodyPose.freeElbow);
       elbow.x *= mirror; elbow.y -= lowContact * 0.8;
       // Clip elbows are points in court-facing body space, transformed with the
       // actual shoulder. IK adjusts reach while retaining the authored bend plane.
-      placeChain(arm, rootPointToAnchor(root, arm.anchor, armTarget), rootPointToAnchor(root, arm.anchor, elbow).toArray(), elapsed);
-      root.updateMatrixWorld(true);
-      const freePalm = stroke?.serve ? THREE.MathUtils.lerp(1.35, 1.90, smoothstep((time - stroke.startedAt - 0.18) / 0.14)) : THREE.MathUtils.lerp(1.35, bodyPose.freePalm, rallyAmount);
-      orientEnd(root, arm.end, isDominant ? wristRotation : new THREE.Euler(freePalm, 0, 0.25 * mirror));
+      const shoulder = root.worldToLocal(arm.anchor.getWorldPosition(new THREE.Vector3()));
+      const forehand = isDominant && stroke && !stroke.serve && !tableReceive && stroke.handedness === 'forehand';
+      const flick = isDominant && stroke && !stroke.serve && stroke.shotType === 'flick';
+      const up = new THREE.Vector3(0, 1, 0).applyQuaternion(arm.anchor.getWorldQuaternion(new THREE.Quaternion()).invert());
+      // At a low forehand contact, a nearly collinear elbow key can project into
+      // an upward bend. Use the closest plane below the shoulder instead.
+      const outward = new THREE.Vector3(arm.sign * 0.30, -0.10, 0.04).applyQuaternion(root.getWorldQuaternion(new THREE.Quaternion())).applyQuaternion(arm.anchor.getWorldQuaternion(new THREE.Quaternion()).invert());
+      const previousBend = arm.bendWorld?.clone();
+      const solveArm = () => {
+        const belowShoulder = shoulder.y - armTarget.y;
+        const heightLimit = flick ? { up, maximum: 0.055 } : forehand && belowShoulder > 0 ? { up, outward, maximum: -belowShoulder * 0.25 } : null;
+        arm.bendWorld = previousBend?.clone() ?? null;
+        placeChain(arm, rootPointToAnchor(root, arm.anchor, armTarget), rootPointToAnchor(root, arm.anchor, elbow).toArray(), elapsed, heightLimit);
+        root.updateMatrixWorld(true);
+      };
+      solveArm();
+      for (let iteration = 0; isDominant && iteration < 3; iteration++) {
+        if (!bladeNearForearm(root, arm, center, wristQuaternion)) break;
+        const forearm = root.worldToLocal(arm.end.getWorldPosition(new THREE.Vector3())).sub(root.worldToLocal(arm.lower.getWorldPosition(new THREE.Vector3()))).normalize();
+        const faceNormal = new THREE.Vector3(0, 0, 1).applyQuaternion(wristQuaternion);
+        const handle = new THREE.Vector3(0, 1, 0).applyQuaternion(wristQuaternion);
+        const projected = forearm.clone().addScaledVector(faceNormal, -forearm.dot(faceNormal));
+        const projection = projected.length();
+        if (projection < 0.35) break;
+        projected.normalize();
+        const roll = Math.atan2(faceNormal.dot(handle.clone().cross(projected)), handle.dot(projected));
+        if (Math.abs(roll) < 0.001) break;
+        // Roll within the face plane instead of pointing the blade back into
+        // the forearm. Each candidate solves the real grip again; the face
+        // normal and impact center stay unchanged.
+        const before = wristQuaternion.clone(), previousHeight = center.y;
+        const tryRoll = correction => {
+          wristQuaternion.copy(before).premultiply(new THREE.Quaternion().setFromAxisAngle(faceNormal, correction));
+          center.y = previousHeight; keepAboveTable();
+          armTarget.copy(center).sub(bladeCenter.clone().sub(GRIP_POINT).applyQuaternion(wristQuaternion));
+          solveArm();
+          return !bladeNearForearm(root, arm, center, wristQuaternion);
+        };
+        let unsafe = 0, safe = roll, found = false;
+        for (let step = 1; step <= 6; step++) {
+          const candidate = roll * step / 6;
+          if (tryRoll(candidate)) { safe = candidate; found = true; break; }
+          unsafe = candidate;
+        }
+        if (found) for (let search = 0; search < 6; search++) {
+          const midpoint = (unsafe + safe) * 0.5;
+          if (tryRoll(midpoint)) safe = midpoint; else unsafe = midpoint;
+        }
+        tryRoll(safe); handleRoll += safe;
+      }
+      if (isDominant) wristRotation.setFromQuaternion(wristQuaternion);
+      const releasedPalm = stroke?.serve ? THREE.MathUtils.lerp(1.35, 1.90, smoothstep((time - stroke.startedAt - 0.18) / 0.165)) : bodyPose.freePalm;
+      const freePalm = THREE.MathUtils.lerp(releasedPalm, bodyPose.freePalm, serveRecovery);
+      orientPalm(root, arm, isDominant ? wristRotation : new THREE.Euler(freePalm, 0, 0.25 * mirror), elapsed);
     }
     root.updateMatrixWorld(true);
+    dominant.handleRoll = handleRoll;
+    // Shakehand grip: the racket handle and palm length are separate axes.
+    // Preserve the authored face while the wrist follows the actual forearm.
+    const paddleRotation = root.getWorldQuaternion(new THREE.Quaternion()).multiply(wristQuaternion);
+    paddle.quaternion.copy(dominant.end.getWorldQuaternion(new THREE.Quaternion()).invert().multiply(paddleRotation));
+    paddle.position.set(0, GRIP_LENGTH, 0).sub(GRIP_POINT.clone().applyQuaternion(paddle.quaternion));
+    root.updateMatrixWorld(true);
+    updateGrip(dominant.end, paddle, dominant.sign);
     dominant.end.getWorldPosition(handWorld);
     arms.find(arm => arm !== dominant).end.getWorldPosition(freeHandWorld);
     paddleWorld.copy(bladeCenter); paddle.localToWorld(paddleWorld);
@@ -527,6 +715,7 @@ export function createAthlete(scene, side, color, handed = 'right', profileId = 
       reachError: dominant.reachError,
       shotStyle: stroke?.shotType ?? 'ready', profileId: motionProfile, bodyPose, rootDepth: Math.abs(root.position.z),
       pelvisHeight: pelvis.position.y, feet: legs.map(leg => [leg.worldX, leg.worldZ]), legReachError: Math.max(...legs.map(leg => leg.reachError)),
+      contactRetreat, handleRoll,
     };
     root.userData.pose = pose;
   }
@@ -536,10 +725,10 @@ export function createAthlete(scene, side, color, handed = 'right', profileId = 
     strike(time, position, spin) { contact(time, { ...position, spin }); },
     endSwing() { if (stroke) stroke.contact = false; },
     reset() {
-      stroke = null; strokeId = 0; previousX = null; previousZ = null; velocity = 0; depthVelocity = 0; nextFoot = 0; readyAmount = 0.62; serveAmount = 0; rallyAmount = 0; bodyPose = readyBodyPose(motionProfile);
+      stroke = null; strokeId = 0; previousX = null; previousZ = null; velocity = 0; depthVelocity = 0; nextFoot = 0; readyAmount = 0.62; serveAmount = 0; bodyPose = readyBodyPose(motionProfile);
       footTime = null; footRootX = root.position.x; footRootZ = root.position.z;
       for (const leg of legs) { leg.worldX = null; leg.worldZ = null; leg.step = null; }
-      for (const chain of [...legs, ...arms]) chain.bendWorld = null;
+      for (const chain of [...legs, ...arms]) { chain.bendWorld = null; chain.palmNormal = null; chain.handleRoll = 0; }
       lastCenter.copy(readyCenter);
     },
     metrics() { return { ...pose, armLengths: [dominant.upperLength, dominant.lowerLength], legLengths: [legs[0].upperLength, legs[0].lowerLength] }; },

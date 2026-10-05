@@ -58,9 +58,21 @@ export function motionDefinition(id, handedness = 'forehand', shotType = 'loop',
     keys[i].hips[2] += short ? 0.11 : 0.07; keys[i].hips[1] -= short ? 0.035 : 0.015;
     keys[i].chest[0] += short ? 0.11 : 0.065; keys[i].playingElbow[2] += short ? 0.14 : 0.075;
     keys[i].playingElbow[1] += short ? i === 1 ? 0.11 : 0.05 : 0;
-    keys[i].feet[0][1] += short ? 0.22 : 0.17; keys[i].knees[0][2] += short ? 0.16 : 0.11;
-    keys[i].freeHand = [0.37, 0.82, 0.25]; keys[i].freeElbow = [0.36, 0.86, 0.22];
-    if (short) keys[i].wrist[0] = i === 1 ? 0.55 : 0.05;
+    keys[i].feet[0][1] += short ? 0.22 : 0.17;
+    if (short && i === 1) keys[i].hips[2] -= 0.13;
+    // Knee poles follow the planted foot's facing, including the forward step.
+    keys[i].knees = keys[i].feet.map(([x, z], leg) => {
+      const hipX = keys[i].hips[0] + (leg ? 0.097 : -0.097) * Math.cos(keys[i].hipYaw);
+      const hipZ = keys[i].hips[2] - (leg ? 0.097 : -0.097) * Math.sin(keys[i].hipYaw);
+      return [(hipX + x) * 0.5 + Math.sin(keys[i].footYaw[leg]) * 0.23, (keys[i].hips[1] + 0.047) * 0.5, (hipZ + z) * 0.5 + Math.cos(keys[i].footYaw[leg]) * 0.23];
+    });
+    keys[i].freeHand = [0.32, 0.87, 0.50]; keys[i].freeElbow = [0.33, 0.80, 0.29];
+    if (short) {
+      keys[i].wrist[0] = i === 1 ? 0.55 : 0.05;
+      // Keep the flick elbow beside the shoulder, then extend across and up.
+      // A pole far ahead of the grip projects into an overhead IK bend.
+      keys[i].playingElbow = i === 1 ? [-0.30, 1.02, 0.40] : i === 2 ? [-0.28, 1.03, 0.47] : [-0.26, 1.00, 0.55];
+    }
   }
   if (serve) {
     const r = profile.ready;
@@ -72,7 +84,7 @@ export function motionDefinition(id, handedness = 'forehand', shotType = 'loop',
   return {
     keys, followTime, duration,
     wind: [block ? back ? 0.03 : -0.035 : back ? 0.07 : push ? -0.075 : -0.12, short ? 0.045 : push ? 0.09 : flat ? -0.02 : back ? -0.06 : -0.105, block ? -0.04 : back ? -0.12 : -0.10],
-    follow: [short ? -0.19 : back ? -0.115 : push ? 0.08 : 0.245, short ? 0.025 : push ? -0.115 : flat ? 0.025 : back ? 0.09 : 0.235, block ? 0.085 : back ? 0.14 : 0.085],
+    follow: [short ? -0.16 : back ? -0.115 : push ? 0.08 : 0.245, short ? 0.12 : push ? -0.115 : flat ? 0.025 : back ? 0.09 : 0.235, short ? 0.17 : block ? 0.085 : back ? 0.14 : 0.085],
     velocity: [back ? -1.15 : push ? 0.70 : 2.0, push ? -1.1 : flat ? 0.2 : back ? 0.9 : 1.7, short ? 2.15 : block ? 1.0 : 2.1],
   };
 }

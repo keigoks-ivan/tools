@@ -113,12 +113,12 @@ $('matchupPair').addEventListener('change', () => { pairingId = $('matchupPair')
 $('matchupHalfLife').addEventListener('change', renderMatchups);
 $('openLab').addEventListener('click', async () => {
   $('lab').hidden = false; $('openLab').hidden = true;
-  try { const { createMotionLab } = await import('./motion-lab.js?v=4'); motionLab = createMotionLab(() => language); } catch (error) {
+  try { const { createMotionLab } = await import('./motion-lab.js?v=6'); motionLab = createMotionLab(() => language); } catch (error) {
     console.error(error); $('lab').hidden = true; $('openLab').hidden = false; $('error').hidden = false; $('error').textContent = t('3D 示範無法開啟，請開啟硬體加速或重新整理。', 'The 3D lab could not open. Enable hardware acceleration or reload.');
   }
 });
 const results = await Promise.allSettled(['../supporting-research.json', '../reference-corpus.json', '../style-analysis.json', './techniques.json', './reference-frames.json', './other-players.json', './matchups.json', './game-simulation.json'].map(async path => {
-  const response = await fetch(`${path}?v=5`); if (!response.ok) throw new Error(path); return response.json();
+  const response = await fetch(`${path}?v=6`); if (!response.ok) throw new Error(path); return response.json();
 }));
 research = results[0].status === 'fulfilled' ? results[0].value : null;
 corpus = results[1].status === 'fulfilled' ? results[1].value : null;
