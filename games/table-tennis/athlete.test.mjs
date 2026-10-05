@@ -513,3 +513,42 @@ test('flick recovery extends across and up without lifting the elbow beside the 
     assert.ok((w.z - e.z) * -side > 0.08, 'flick forearm does not extend in front of the elbow');
   }
 });
+
+test('real lab preparation and complete cycles keep both arms clear and supporting knees forward', () => {
+  const clips = [['forehand', 'loop'], ['forehand', 'counter'], ['backhand', 'counter'], ['backhand', 'block'], ['backhand', 'flick'], ['forehand', 'push'], ['forehand', 'serve']];
+  for (const side of [-1, 1]) for (const profile of ['lin-yun-ju', 'harimoto']) for (const [handedness, shotType] of clips) {
+    const left = profile === 'lin-yun-ju', mirror = left ? -1 : 1, short = ['flick', 'push'].includes(shotType), serve = shotType === 'serve';
+    const actor = createAthlete(new THREE.Scene(), side, 0x799583, left ? 'left' : 'right', profile);
+    for (let i = 0; i < 24; i++) actor.update(-0.4 + i / 60, 1 / 60, 0, null, true, null, { rootZ: 1.94 });
+    const lead = serve ? 0.48 : 0.24, definition = motionDefinition(profile, handedness, shotType, serve), duration = lead + definition.duration + 0.12;
+    const event = { x: side * mirror * (handedness === 'backhand' ? -0.12 : 0.27), y: short ? 0.96 : serve ? 1.15 : 1.08, z: side * (short ? 1.10 : serve ? 1.28 : 1.54), contactDelay: lead, handedness, shotType, spin: shotType === 'push' ? -1 : 1, serve };
+    actor.beginSwing(0, event);
+    const spine = actor.root.getObjectByName('spine'), head = actor.root.getObjectByName('head');
+    let previousHead = world(head), previousElbows = [-1, 1].map(sign => world(actor.root.getObjectByName(`arm-${sign}-lower`))), previousFeet = actor.metrics().feet;
+    for (let f = 0; f <= Math.ceil(duration * 120); f++) {
+      const at = f / 120;
+      const enter = THREE.MathUtils.smoothstep(at, 0, lead * 0.85), leave = THREE.MathUtils.smoothstep(at, lead + 0.12, duration - 0.07);
+      if (f === Math.ceil(lead * 120)) actor.contact(lead, event);
+      actor.update(at, 1 / 120, 0, null, true, null, { rootZ: short ? 1.94 - 0.29 * enter * (1 - leave) : 1.94 });
+      for (const sign of [-1, 1]) {
+        const s = world(actor.root.getObjectByName(`arm-${sign}-anchor`)), e = world(actor.root.getObjectByName(`arm-${sign}-lower`)), w = world(actor.root.getObjectByName(`arm-${sign}-end`));
+        assert.ok(Math.abs(s.distanceTo(e) - 0.305) < 1e-7 && Math.abs(e.distanceTo(w) - 0.285) < 1e-7);
+        assert.ok(e.distanceTo(previousElbows[sign === -1 ? 0 : 1]) < 0.060, `${profile}/${shotType}/${at}: elbow jumps during playback`);
+        for (const t of [0.35, 0.5, 0.65, 0.8, 1]) {
+          const p = spine.worldToLocal(s.clone().lerp(e, t));
+          if (Math.abs(p.x) < 0.155 && p.y > 0.08 && p.y < 0.36) assert.ok(Math.abs(p.z) > 0.14, `${profile}/${handedness}/${shotType}/${at}: upper arm enters the torso during the full cycle`);
+        }
+        previousElbows[sign === -1 ? 0 : 1] = e;
+        const hip = actor.root.worldToLocal(world(actor.root.getObjectByName(`leg-${sign}-anchor`))), knee = actor.root.worldToLocal(world(actor.root.getObjectByName(`leg-${sign}-lower`))), ankle = actor.root.worldToLocal(world(actor.root.getObjectByName(`leg-${sign}-end`)));
+        const forward = new THREE.Vector3(0, 0, 1).applyQuaternion(actor.root.getObjectByName(`leg-${sign}-end`).getWorldQuaternion(new THREE.Quaternion())).applyQuaternion(actor.root.getWorldQuaternion(new THREE.Quaternion()).invert()); forward.y = 0;
+        const bend = knee.clone().sub(hip.clone().lerp(ankle, 0.5)); bend.y = 0;
+        assert.ok(knee.y < hip.y && knee.y > ankle.y && bend.dot(forward) > 0, 'the supporting knee bends behind the planted foot');
+        if (!short && !serve && handedness === 'forehand') assert.ok(bend.angleTo(forward) < 0.30, 'forehand knee turns away from its supporting foot');
+      }
+      assert.ok(world(head).distanceTo(previousHead) < 0.060, 'head or neck jumps in the lab cycle'); previousHead = world(head);
+      const feet = actor.metrics().feet;
+      if (!short) assert.deepEqual(feet, previousFeet, 'stationary lab motion slides the supporting feet');
+      previousFeet = feet;
+    }
+  }
+});

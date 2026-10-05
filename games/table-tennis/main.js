@@ -1,5 +1,5 @@
 import { Match, clamp } from './physics.mjs?v=4';
-import { createScene } from './scene.js?v=6';
+import { createScene } from './scene.js?v=7';
 
 const $ = id => document.getElementById(id), canvas = $('game');
 let view = null, paused = false, language = 'zh', aim = 0, spin = 1, mode = 'practice';

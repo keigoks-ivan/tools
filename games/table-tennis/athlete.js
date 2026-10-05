@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from '../../game/lib/addons/utils/BufferGeometryUtils.js';
-import { limitJointHeight, sampleServe, sampleStroke, smoothstep, solveTwoBone } from './athlete-motion.mjs?v=6';
-import { blendBodyPose, motionDefinition, MOTION_PROFILES, readyBodyPose, resolveMotionProfile, sampleBodyClip } from './motion-clips.mjs?v=6';
+import { limitJointHeight, sampleServe, sampleStroke, smoothstep, solveTwoBone } from './athlete-motion.mjs?v=7';
+import { blendBodyPose, motionDefinition, MOTION_PROFILES, readyBodyPose, resolveMotionProfile, sampleBodyClip } from './motion-clips.mjs?v=7';
 
 const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
 const DOWN = new THREE.Vector3(0, -1, 0);
@@ -594,6 +594,13 @@ export function createAthlete(scene, side, color, handed = 'right', profileId = 
     for (const leg of legs) {
       const index = leg.sign === -mirror ? 0 : 1;
       const knee = vec(bodyPose.knees[index]); knee.x *= mirror; knee.y -= lowContact * 0.5;
+      if (stroke && !stroke.serve && !tableReceive && stroke.handedness === 'forehand') {
+        const hip = root.worldToLocal(leg.anchor.getWorldPosition(new THREE.Vector3()));
+        const yaw = bodyPose.footYaw[index] * mirror;
+        const aligned = hip.lerp(leg.ankle, 0.5).add(new THREE.Vector3(Math.sin(yaw) * 0.23, 0, Math.cos(yaw) * 0.23));
+        const alignment = smoothstep((time - stroke.startedAt) / 0.075) * (1 - smoothstep((time - stroke.contactAt - clipDuration + 0.12) / 0.12));
+        knee.lerp(aligned, alignment);
+      }
       placeChain(leg, rootPointToAnchor(root, leg.anchor, leg.ankle), rootPointToAnchor(root, leg.anchor, knee).toArray(), elapsed);
       root.updateMatrixWorld(true);
       orientEnd(root, leg.end, new THREE.Euler(leg.pitch, bodyPose.footYaw[index] * mirror, 0));
@@ -642,6 +649,8 @@ export function createAthlete(scene, side, color, handed = 'right', profileId = 
       const shoulder = root.worldToLocal(arm.anchor.getWorldPosition(new THREE.Vector3()));
       const forehand = isDominant && stroke && !stroke.serve && !tableReceive && stroke.handedness === 'forehand';
       const flick = isDominant && stroke && !stroke.serve && stroke.shotType === 'flick';
+      const freeForehand = !isDominant && stroke && !stroke.serve && !tableReceive && stroke.handedness === 'forehand';
+      const outsideBody = freeForehand || isDominant && stroke?.serve;
       const up = new THREE.Vector3(0, 1, 0).applyQuaternion(arm.anchor.getWorldQuaternion(new THREE.Quaternion()).invert());
       // At a low forehand contact, a nearly collinear elbow key can project into
       // an upward bend. Use the closest plane below the shoulder instead.
@@ -649,7 +658,9 @@ export function createAthlete(scene, side, color, handed = 'right', profileId = 
       const previousBend = arm.bendWorld?.clone();
       const solveArm = () => {
         const belowShoulder = shoulder.y - armTarget.y;
-        const heightLimit = flick ? { up, maximum: 0.055 } : forehand && belowShoulder > 0 ? { up, outward, maximum: -belowShoulder * 0.25 } : null;
+        // The balancing and serving elbows stay outside the torso on the same
+        // IK circle, with an outward fallback for a nearly collinear clip pole.
+        const heightLimit = outsideBody ? { up: new THREE.Vector3(-arm.sign, 0, 0), outward: new THREE.Vector3(arm.sign * 0.30, -0.10, 0.12), maximum: -0.025 } : flick ? { up, maximum: 0.055 } : forehand && belowShoulder > 0 ? { up, outward, maximum: -belowShoulder * 0.25 } : null;
         arm.bendWorld = previousBend?.clone() ?? null;
         placeChain(arm, rootPointToAnchor(root, arm.anchor, armTarget), rootPointToAnchor(root, arm.anchor, elbow).toArray(), elapsed, heightLimit);
         root.updateMatrixWorld(true);

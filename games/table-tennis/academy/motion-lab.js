@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { createAthlete } from '../athlete.js?v=6';
-import { motionDefinition } from '../motion-clips.mjs?v=6';
+import { createAthlete } from '../athlete.js?v=7';
+import { motionDefinition } from '../motion-clips.mjs?v=7';
 
 export function createMotionLab(getLanguage) {
   const $ = id => document.getElementById(id), canvas = $('labCanvas');
