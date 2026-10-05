@@ -7,6 +7,7 @@ import { createInstruments } from './instruments.js';
 
 const $ = id => document.getElementById(id);
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const coarsePointer = matchMedia('(pointer: coarse)').matches;
 const KT = 1.943844, FT = 3.28084, BEARING = 49.08, ELEVATION = 21;
 const heading = v => ((v % 360) + 360) % 360;
 const simulator = $('simulator');
@@ -189,7 +190,7 @@ function mission() {
     if (!state.onGround && data.agl > 120) departed = true;
     if (state.onGround && speed < 20) return [tr('準備起飛', 'Ready for departure'), tr('襟翼 1，油門推至 100%。↑ 壓低、↓ 拉起。', 'Flaps 1. Set thrust to 100%. ↑ nose down, ↓ nose up.'), 1, .1];
     if (state.onGround && speed < AIRCRAFT.rotateSpeed * KT) return [tr('起飛滑跑', 'Takeoff roll'), tr('保持跑道中線；空速 140 節開始短按 ↓ 抬頭。', 'Hold the centerline. At 140 kt, briefly press ↓ to rotate.'), 2, .27];
-    return [tr('建立爬升', 'Establish the climb'), tr('保持約 10° 仰角。正爬升後收起落架，180 節後逐段收襟翼。', 'Hold about 10° pitch. Retract gear in a positive climb; retract flaps above 180 kt.'), 3, .45];
+    return [tr('建立爬升', 'Establish the climb'), tr('保持約 10° 仰角。正爬升後收起落架，並在 180 節前開始收襟翼，再按 A 接自動駕駛。', 'Hold about 10° pitch. Retract gear in a positive climb, start retracting flaps before 180 kt, then press A for autopilot.'), 3, .45];
   }
   if (state.touchdown && state.onGround) return [tr('落地滑跑', 'Landing roll'), tr('油門收至 0%，B 展開擾流板，按住空白鍵煞車。', 'Idle thrust, B deploys spoilers. Hold Space to brake to a stop.'), 4, .95];
   const aligned = data.agl < 800 && data.distanceToThreshold > -300 && data.distanceToThreshold < 13000 && Math.abs(state.position.x) < 1500 && Math.min(data.heading, 360 - data.heading) < 35;
@@ -212,7 +213,7 @@ function updateUI() {
   const wind = Math.round(data.windSpeed * KT);
   $('wind-label').textContent = wind ? `${tr('風', 'WIND')} ${Math.round(heading(data.windDirection + BEARING))}° · ${wind} KT` : tr('無風 · 0 KT', 'CALM · 0 KT');
   $('distance-label').textContent = data.onGround ? `RWY ${Math.round(data.runwayRemaining).toLocaleString()} M` : `${Math.max(0, data.distanceToThreshold / 1852).toFixed(1)} NM · 05L`;
-  $('control-label').textContent = touch.active ? tr('觸控操縱', 'Touch control') : { keyboard: tr('鍵盤操縱', 'Keyboard'), mouse: tr('滑鼠操縱', 'Mouse'), gamepad: tr('手把操縱', 'Gamepad') }[$('control-mode').value];
+  $('control-label').textContent = touch.active || coarsePointer && $('control-mode').value === 'keyboard' ? tr('觸控操縱', 'Touch control') : { keyboard: tr('鍵盤操縱', 'Keyboard'), mouse: tr('滑鼠操縱', 'Mouse'), gamepad: tr('手把操縱', 'Gamepad') }[$('control-mode').value];
   $('control-values').textContent = `PITCH ${Math.round(axes.pitch * 100)} · ROLL ${Math.round(axes.roll * 100)}`;
   $('ap-button').setAttribute('aria-pressed', String(state.autopilot.enabled));
   $('ap-status').textContent = state.autopilot.enabled ? 'SPD · HDG · ALT' : 'MANUAL FLIGHT';
@@ -247,8 +248,10 @@ function updateUI() {
   simulator.dataset.roll = data.roll.toFixed(1); simulator.dataset.onGround = String(state.onGround); simulator.dataset.phase = stage;
   simulator.dataset.agl = (data.agl * FT).toFixed(1); simulator.dataset.verticalSpeed = (data.verticalSpeed * 196.85).toFixed(0); simulator.dataset.elapsed = state.elapsed.toFixed(1);
   $('flight-summary').textContent = `${tr('空速', 'Airspeed')} ${Math.round(data.indicatedAirspeed * KT)} KT, ${tr('高度', 'Altitude')} ${Math.round((data.altitude + ELEVATION) * FT)} FT, ${tr('航向', 'Heading')} ${Math.round(heading(data.heading + BEARING))}°`;
-  instruments.draw(state, data, { headingOffset: BEARING, altitudeOffset: ELEVATION, ap: state.autopilot, route: state.scenario === 'runway' ? route : [], target: state.scenario === 'runway' ? route[routeIndex] : { x: 0, z: RUNWAY.nearThreshold, name: 'RWY 05L' }, runway: RUNWAY, locale });
   if (active && !resultShown && (state.crashed || state.touchdown && state.onGround && data.groundSpeed < 2.5 && state.elapsed - state.touchdown.elapsed > 3)) showResult();
+}
+function drawInstruments() {
+  instruments.draw(state, data, { headingOffset: BEARING, altitudeOffset: ELEVATION, ap: state.autopilot, route: state.scenario === 'runway' ? route : [], target: state.scenario === 'runway' ? route[routeIndex] : { x: 0, z: RUNWAY.nearThreshold, name: 'RWY 05L' }, runway: RUNWAY, locale });
 }
 function showResult() {
   resultShown = true; setPause(true);
@@ -257,12 +260,13 @@ function showResult() {
     'gear-up': ['起落架未放下', 'Landing gear was retracted'], 'off-runway': ['未在跑道內接地', 'Touchdown outside the runway'],
     'hard-landing': ['接地下降率過大', 'Excessive touchdown sink rate'], 'wing-strike': ['接地傾角過大', 'Excessive bank at touchdown'],
     'tail-strike': ['接地俯仰角過大', 'Unsafe pitch at touchdown'], 'side-load': ['未與跑道方向對齊', 'Misaligned at touchdown'],
-    'runway-overrun': ['衝出跑道', 'Runway overrun'],
+    'runway-overrun': ['衝出跑道', 'Runway overrun'], 'ground-impact': ['撞地', 'Ground impact'],
   };
   let score = 0;
   if (!state.crashed && t) score = Math.round(clamp(100 - Math.max(0, t.sinkRate - 1) * 12 - Math.abs(t.lateralOffset) * 1.2 - Math.abs(t.roll) * 2 - Math.max(0, Math.abs(t.speed * KT - 140) - 12) * .6 - Math.min(25, Math.abs(t.position.z - RUNWAY.touchdownTarget) / 50), 0, 100));
-  $('result-title').textContent = state.crashed ? tr('航班中止', 'Flight ended') : score >= 85 ? tr('平穩落地', 'Smooth landing') : tr('完成落地', 'Landing complete');
-  $('result-description').textContent = state.crashed ? (reasons[state.crashReason] || ['重試並保持穩定進場。', 'Try again with a stabilized approach.'])[locale === 'zh' ? 0 : 1] : tr('已在桃園 05L 跑道安全停穩。評分包含下降率、中線偏移、空速與接地位置。', 'Stopped safely on Taoyuan 05L. Your score reflects sink rate, alignment, speed and touchdown position.');
+  const offRunway = !state.crashed && !data.onRunway;
+  $('result-title').textContent = state.crashed ? tr('航班中止', 'Flight ended') : offRunway ? tr('停在跑道外', 'Stopped off the runway') : score >= 85 ? tr('平穩落地', 'Smooth landing') : tr('完成落地', 'Landing complete');
+  $('result-description').textContent = state.crashed ? (reasons[state.crashReason] || ['重試並保持穩定進場。', 'Try again with a stabilized approach.'])[locale === 'zh' ? 0 : 1] : offRunway ? tr('飛機停在跑道外，未在跑道內停穩。評分仍依下降率、中線偏移、空速與接地位置計算。', 'The aircraft stopped off the runway. Your score still reflects sink rate, alignment, speed and touchdown position.') : tr('已在桃園 05L 跑道安全停穩。評分包含下降率、中線偏移、空速與接地位置。', 'Stopped safely on Taoyuan 05L. Your score reflects sink rate, alignment, speed and touchdown position.');
   $('result-score').textContent = state.crashed ? '—' : `${score} / 100`;
   $('result-sink').textContent = t ? `${Math.round(t.sinkRate * 196.85)} FT/MIN` : '—';
   $('result-offset').textContent = t ? `${Math.abs(t.lateralOffset).toFixed(1)} M` : '—';
@@ -304,6 +308,7 @@ function animate(now) {
   world.update(sceneTime, state, weather); scenery?.update(sceneTime, state);
   plane.update({ ...state, rollInput: axes.roll, dt }, data);
   updateCamera(dt); renderer.render(scene, camera);
+  if (active && !panelHidden) drawInstruments();
   if (now - lastUI > 100) { lastUI = now; updateUI(); updateAudio(); }
 }
 

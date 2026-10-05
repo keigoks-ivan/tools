@@ -347,7 +347,7 @@ export function createAircraft(THREE) {
     for (const flap of flaps) flap.pivot.rotation.x = flapExtension * 0.155;
     const spoilerValue = data.spoilers ?? state.spoilers ?? false;
     for (const spoiler of spoilers) spoiler.pivot.rotation.x = -(typeof spoilerValue === 'number' ? clamp(spoilerValue, 0, 1) : Number(spoilerValue)) * 0.95;
-    const roll = clamp(data.rollInput ?? data.roll ?? state.rollInput ?? 0, -1, 1);
+    const roll = clamp(state.rollInput ?? data.rollInput ?? 0, -1, 1);
     for (const aileron of ailerons) aileron.pivot.rotation.x = roll * aileron.side * 0.24;
     for (const fan of engineFans) fan.rotation.z += dt * (2 + (data.engine ?? state.engine ?? data.throttle ?? state.throttle ?? 0) * 55);
     const lights = data.lights ?? true;

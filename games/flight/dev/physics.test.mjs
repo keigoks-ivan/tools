@@ -223,3 +223,51 @@ test('internal fixed substeps produce the same flight at different render frame 
   stepFlight(a, {}, Number.NaN);
   assert.deepEqual(a.position, originalPosition);
 });
+
+test('overspeed warning uses indicated airspeed against the flap limit', () => {
+  const s = createFlightState('cruise');
+  s.position.y = 10000; s.velocity = { x: 0, y: 0, z: -200 }; s.flapPosition = 0;
+  const f = getFlightData(s);
+  assert.ok(f.airspeed > AIRCRAFT.maxSpeed && f.indicatedAirspeed < AIRCRAFT.maxSpeed);
+  assert.equal(f.overspeedWarning, false);
+  s.flapPosition = 1; s.velocity = { x: 0, y: 0, z: -105 };
+  s.position.y = 0;
+  assert.equal(getFlightData(s).overspeedWarning, false);
+  s.velocity.z = -115;
+  assert.equal(getFlightData(s).overspeedWarning, true);
+});
+
+test('autopilot never commands a speed above the current flap limit', () => {
+  const s = createFlightState('cruise');
+  s.flaps = 1; s.flapPosition = 1;
+  run(s, 120, () => ({ flaps: 1, autopilot: { enabled: true, heading: 0, altitude: 1800, speed: 120 } }));
+  const f = getFlightData(s);
+  assert.equal(s.crashed, false);
+  assert.equal(f.overspeedWarning, false);
+  assert.ok(f.indicatedAirspeed < 109);
+});
+
+test('high-speed or nose-down ground contact is ground impact, not gear-up or tail-strike', () => {
+  for (const [label, modify] of [
+    ['dive', s => { s.velocity = { x: 0, y: -240, z: -20 }; }],
+    ['nose-down', s => { s.quaternion = quaternionFromEuler(-10 * RAD, 0, 0); s.velocity.y = -2; }],
+  ]) {
+    const s = createFlightState('cruise');
+    s.gear = false; s.gearPosition = 0; s.position.y = label === 'dive' ? 40 : 4.1; s.position.z = 800;
+    modify(s);
+    run(s, 2);
+    assert.equal(s.crashed, true, label);
+    assert.equal(s.crashReason, 'ground-impact', label);
+  }
+});
+
+test('climbing into rising terrain crashes even with positive vertical speed, but runway liftoff does not', () => {
+  const s = createFlightState('cruise');
+  s.position.x = 5000; s.position.y = 300.5; s.velocity = { x: 0, y: 3, z: -80 };
+  stepFlight(s, {}, 1 / 120, { groundElevation: 310 });
+  assert.equal(s.crashed, true);
+  assert.equal(s.crashReason, 'ground-impact');
+  const t = createFlightState('runway');
+  run(t, 60, () => ({ throttle: 1, flaps: 1, pitch: 0 }));
+  assert.equal(t.crashed, false);
+});

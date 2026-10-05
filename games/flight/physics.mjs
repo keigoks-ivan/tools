@@ -17,6 +17,8 @@ const length = v => Math.hypot(v.x, v.y, v.z);
 const wrapAngle = v => ((v + 180) % 360 + 360) % 360 - 180;
 const unit = v => { const n = length(v) || 1; return { x: v.x / n, y: v.y / n, z: v.z / n }; };
 const copy = v => ({ x: v.x || 0, y: v.y || 0, z: v.z || 0 });
+// Indicated-airspeed limit (m/s): VMO clean, reduced with flap extension.
+const speedLimit = flapPosition => flapPosition > 0.2 ? 120 - 11 * flapPosition : AIRCRAFT.maxSpeed;
 
 export function normalizeQuaternion(q) {
   const n = Math.hypot(q.x, q.y, q.z, q.w);
@@ -159,7 +161,9 @@ function autopilotControls(state, controls, air, angles, dt) {
   const climbThrust = (AIRCRAFT.emptyMass + state.fuel) * G * state.velocity.y / Math.max(air.speed, 30);
   const availableThrust = AIRCRAFT.maxThrust * Math.pow(air.density / 1.225, 0.7) * Math.max(0.55, 1 - air.speed * 0.0011);
   const indicatedSpeed = air.speed * Math.sqrt(air.density / 1.225);
-  const speedError = ap.speed - indicatedSpeed;
+  // Never command a speed above the current flap limit (4 m/s margin) and pull thrust back if above it.
+  const speedCap = speedLimit(state.flapPosition) - 4;
+  const speedError = Math.min(ap.speed, speedCap) - indicatedSpeed;
   ap.speedIntegral = clamp((ap.speedIntegral || 0) + speedError * dt * 0.0015, -0.18, 0.18);
   const trimPitchRate = clamp(((2.6 + state.trim * 8) * RAD - air.aoa) * 0.55, -0.13, 0.13);
   return {
@@ -167,7 +171,7 @@ function autopilotControls(state, controls, air, angles, dt) {
     pitch: clamp((pitchTarget - angles.pitch) * 0.12 - state.angularVelocity.x * 2 - trimPitchRate / 0.19, -0.65, 0.65),
     roll: clamp((bankTarget - angles.roll) * 0.055 + state.angularVelocity.z * 1.8, -0.65, 0.65),
     yaw: clamp(air.beta * 1.4, -0.3, 0.3),
-    throttle: clamp((drag + climbThrust) / availableThrust + speedError * 0.025 + ap.speedIntegral, 0, 1),
+    throttle: clamp((drag + climbThrust) / availableThrust + speedError * 0.025 + ap.speedIntegral - Math.max(0, indicatedSpeed - speedCap) * 0.2, 0, 1),
   };
 }
 
@@ -263,7 +267,9 @@ function advance(state, controls, dt) {
 
   const onRunway = Math.abs(state.position.x) <= RUNWAY.width / 2 && Math.abs(state.position.z) <= RUNWAY.length / 2;
   const contactHeight = (onRunway ? RUNWAY.elevation : state.groundElevation) + (state.gearPosition > 0.95 ? AIRCRAFT.gearHeight : 1.4);
-  if (!state.onGround && state.position.y <= contactHeight && state.velocity.y <= 0) {
+  // Descending contact is a touchdown; rising terrain (not the runway) is hit regardless of vertical speed.
+  const terrainHit = !onRunway && state.velocity.y > 0 && state.position.y < contactHeight - 0.05;
+  if (!state.onGround && state.position.y <= contactHeight && (state.velocity.y <= 0 || terrainHit)) {
     const landingAngles = attitude(state.quaternion);
     state.touchdown = {
       sinkRate: Math.max(0, -state.velocity.y), speed: air.speed,
@@ -272,11 +278,12 @@ function advance(state, controls, dt) {
       headingError: wrapAngle(landingAngles.heading - RUNWAY.heading), elapsed: state.elapsed,
     };
     state.position.y = contactHeight;
-    if (state.gearPosition < 0.95) crash(state, 'gear-up');
+    if (terrainHit || state.touchdown.sinkRate > 10 || air.speed > 110 || landingAngles.pitch < -4) crash(state, 'ground-impact');
+    else if (state.gearPosition < 0.95) crash(state, 'gear-up');
     else if (Math.abs(state.position.x) > RUNWAY.width / 2 || Math.abs(state.position.z) > RUNWAY.length / 2) crash(state, 'off-runway');
     else if (state.touchdown.sinkRate > 4.5) crash(state, 'hard-landing');
     else if (Math.abs(landingAngles.roll) > 8) crash(state, 'wing-strike');
-    else if (landingAngles.pitch > 13 || landingAngles.pitch < -4) crash(state, 'tail-strike');
+    else if (landingAngles.pitch > 13) crash(state, 'tail-strike');
     else if (Math.abs(state.touchdown.headingError) > 20) crash(state, 'side-load');
     state.onGround = true;
     state.velocity.y = 0;
@@ -332,7 +339,7 @@ export function getFlightData(state) {
     groundTrack: (Math.atan2(state.velocity.x, -state.velocity.z) / RAD + 360) % 360,
     aoa: air.aoa / RAD, sideslip: air.beta / RAD, gLoad: state.gLoad,
     stallSpeed, stallWarning: !state.onGround && (air.aoa > aero.stallAlpha - 2 * RAD || air.speed < stallSpeed * 1.08),
-    overspeedWarning: air.speed > AIRCRAFT.maxSpeed || (state.flapPosition > 0.2 && air.speed > 120 - 11 * state.flapPosition),
+    overspeedWarning: air.speed * Math.sqrt(air.density / 1.225) > speedLimit(state.flapPosition),
     gearWarning: !state.onGround && state.position.y < 180 && state.velocity.y < -0.5 && state.gearPosition < 0.95,
     engineN1: state.fuel > 0 && !state.crashed ? 20 + state.engine * 80 : 0,
     distanceToThreshold: distance, localizer, glideslope,
