@@ -41,3 +41,7 @@ New airport codes and coordinates in `../data.mjs` were checked against the [Our
 ## Dispatch and passport artwork (release 18)
 
 `../ui-career.js`: seven original inline SVG regional postcards, created directly for this game. They use schematic skylines, mountains, coastlines and architecture, with no external photographs, manufacturer artwork or third-party illustrations. Airline emblems, XP meters, passport stamps and mission cards are original HTML/CSS/vector artwork. No new bitmap downloads or external runtime resources.
+
+## v20 interactive airport (2026-10-06)
+
+`../ui-airport.js` builds the main airport directly from original procedural geometry: a rounded miniature island, terminal and jet bridges, tower, three facilities, runway markings/lights, trees, clouds, vehicles, passengers and simplified aircraft. No new raster assets, manufacturer models or external runtime services are used. Aircraft shapes are schematic, with distinct regional/turboprop/narrowbody/widebody dimensions; actual type names and simplified range/capacity come from the existing catalog. All 180 bases share this illustrative scene. Geometry and the game shell are original project code, redistributable with the repository. three.js remains MIT licensed. The pre-existing v19 OpenAI-generated airport illustration is retained only for the no-WebGL fallback; its credits and prompt above remain applicable.

@@ -1,5 +1,5 @@
 // Optional v2 systems. Economic assumptions are design values; the base game is unchanged without facilities.
-import { MODES, CONST, CITIES, AIRCRAFT } from './data.mjs?v=19';
+import { MODES, CONST, CITIES, AIRCRAFT } from './data.mjs?v=20';
 export const FACILITIES = {
   depot: { zh: '維修基地', en: 'Maintenance depot', cost: 6000000, monthly: 25000, years: 10,
     effectZh: '維修費 −30%', effectEn: 'Maintenance −30%',

@@ -1,9 +1,9 @@
 // One-line switch between the real model and the mock.
 // REAL model (default):
-export * from './data.mjs?v=19';
-export * from './model.mjs?v=19';
+export * from './data.mjs?v=20';
+export * from './model.mjs?v=20';
 // MOCK (comment out the two lines above and uncomment this one):
 // export * from './mock-model.mjs';
 
 // 資料來源 page data (sources.mjs: SOURCES, DESIGN_VALUES, VERIFICATION)
-export { SOURCES, DESIGN_VALUES, VERIFICATION, AIRCRAFT_REFERENCES } from './sources.mjs?v=19';
+export { SOURCES, DESIGN_VALUES, VERIFICATION, AIRCRAFT_REFERENCES } from './sources.mjs?v=20';

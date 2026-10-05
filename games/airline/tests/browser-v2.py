@@ -27,16 +27,16 @@ async def answer_events(page):
         else: break
 
 async def refresh_panel(page):
-    await page.locator('[data-tab="fleet"]').click()
-    await page.locator('[data-tab="routes"]').click()
+    await page.locator('[data-dock="fleet"]').click()
+    await page.locator('[data-dock="routes"]').click()
 
 async def full_game(browser, mode, hub, kind):
     context=await browser.new_context(viewport={'width':1280,'height':800})
     page=await context.new_page();errors=[]
     page.on('pageerror',lambda e:errors.append(str(e)))
     await page.goto(URL+'?debug=1')
-    await page.locator(f'[data-mode="{mode}"]').click()
-    await page.locator(f'[data-hub="{hub}"]').click()
+    await page.locator('#configure-game').click();await page.locator(f'[data-mode="{mode}"]').click();await page.locator('#setup-close').click()
+    await page.locator('#choose-hub').click();await page.locator('#hub-search').fill(hub);await page.locator(f'[data-pick-hub="{hub}"]').click()
     await page.locator('#go-new').click()
     await answer_events(page)
     await page.evaluate('''()=>{const a=__tq.app;a.state=__tq.B.newGame({mode:a.state.mode,hub:a.state.hub,seed:1});a.draft=null;}''')
@@ -73,9 +73,10 @@ async def main():
             page.on('console',lambda m:console_errors.append(m.text) if m.type=='error' and 'favicon' not in m.text and '404' not in m.text else None)
             await page.goto(URL+'?debug=1');await page.wait_for_timeout(150)
             assert not await page.evaluate('document.documentElement.scrollWidth>innerWidth'),'Start overflow'
-            await page.locator('[data-scenario="margin"]').click();await page.locator('#go-new').click()
+            await page.locator('#configure-game').click();await page.locator('[data-scenario="margin"]').click();await page.locator('#setup-close').click();await page.locator('#go-new').click()
             await answer_events(page)
             # Ordinary touch/click route creation and forecast selection.
+            await page.locator('[data-dock="routes"]').click()
             await page.locator('#add-route').click();await page.locator('#city-search').fill('PVG')
             await page.locator('[data-destination="PVG"]').click()
             assert 'Airbus A320neo' in await page.locator('#pscroll').inner_text()
@@ -89,6 +90,7 @@ async def main():
             assert abs(await page.evaluate('__tq.app.clock.elapsed')-before)<.05
             # Next-turn route changes cannot change the current frozen economic result.
             current=await page.evaluate('JSON.stringify(__tq.app.active.report)')
+            await page.locator('[data-dock="routes"]').click()
             edited_city=await page.locator('[data-route]').first.get_attribute('data-route')
             await page.locator(f'[data-route="{edited_city}"]').first.click()
             await page.locator('[data-fare="high"]').click();await page.locator('#done').click()
@@ -105,7 +107,7 @@ async def main():
             await page.wait_for_timeout(1000)
             assert not await page.evaluate('document.documentElement.scrollWidth>innerWidth'),'Main overflow'
             await page.screenshot(path=str(OUT/f'network-{width}x{height}{"-dark" if dark else ""}.png'))
-            await page.locator('[data-tab="hub"]').click();await page.locator('[data-facility="depot"]').click()
+            await page.locator('[data-dock="hub"]').click();await page.locator('[data-facility="depot"]').click()
             await page.screenshot(path=str(OUT/f'hub-{width}x{height}{"-dark" if dark else ""}.png'))
             await page.locator('#skip').click();assert await page.locator('#next').count()
             assert not await page.evaluate('document.documentElement.scrollWidth>innerWidth'),'Report overflow'
@@ -126,9 +128,9 @@ async def main():
             results['games'].append(await full_game(browser,mode,hub,kind))
         # A model decision must agree with the fleet panel, estimates and actual operations.
         context=await browser.new_context();page=await context.new_page();await page.goto(URL+'?debug=1')
-        await page.locator('[data-mode="decade"]').click();await page.locator('#go-new').click();await page.locator('[data-opt="lcc"]').click()
+        await page.locator('#configure-game').click();await page.locator('[data-mode="decade"]').click();await page.locator('#setup-close').click();await page.locator('#go-new').click();await page.locator('[data-opt="lcc"]').click()
         assert await page.evaluate('__tq.app.draft.businessModel')=='lcc'
-        await page.locator('[data-tab="fleet"]').click();await page.locator('[data-bm="fsc"]').click();await page.locator('[data-bm="lcc"]').click()
+        await page.locator('[data-dock="fleet"]').click();await page.locator('[data-bm="fsc"]').click();await page.locator('[data-bm="lcc"]').click()
         assert await page.evaluate('__tq.app.draft.eventChoices["b-model"]')=='lcc'
         await page.locator('[data-tab="routes"]').click();await page.locator('#add-route').click();await page.locator('#city-search').fill('HKG')
         await page.locator('[data-destination="HKG"]').click();await page.locator('#open').click();await page.locator('#run').click()
@@ -137,7 +139,7 @@ async def main():
         # Cold first-play bytes and frame time with the largest available network.
         context=await browser.new_context(viewport={'width':1280,'height':800})
         page=await context.new_page();await page.goto(URL+'?debug=1')
-        await page.locator('[data-mode="decade"]').click();await page.locator('#go-new').click();await answer_events(page)
+        await page.locator('#configure-game').click();await page.locator('[data-mode="decade"]').click();await page.locator('#setup-close').click();await page.locator('#go-new').click();await answer_events(page)
         await page.evaluate('''()=>{const a=__tq.app;a.draft.routes=new Map(Object.values(__tq.B.CITIES).filter(c=>c.id!==a.state.hub).map(c=>{const o=__tq.B.routeOptions(a.state,c.id);return {city:c.id,type:o.eligibleTypes.at(-1),weekly:7,fare:'mid'};}).filter(r=>r.type).map(r=>[r.city,r]));}''')
         await refresh_panel(page);await page.wait_for_timeout(2000)
         frames=await page.evaluate('''()=>new Promise(resolve=>{const times=[];let last=0;function frame(t){__tq.app.map.setTime({elapsed:t/1000,speed:1});if(last)times.push(t-last);last=t;if(times.length<120)requestAnimationFrame(frame);else{times.sort((a,b)=>a-b);__tq.app.map.setTime({elapsed:t/1000,speed:0});resolve({mean:times.reduce((a,b)=>a+b)/times.length,p95:times[Math.floor(times.length*.95)]});}}requestAnimationFrame(frame);})''')
@@ -148,8 +150,9 @@ async def main():
         context=await browser.new_context(viewport={'width':390,'height':844})
         await context.add_init_script('''const get=HTMLCanvasElement.prototype.getContext;HTMLCanvasElement.prototype.getContext=function(type,...args){return /webgl/.test(type)?null:get.call(this,type,...args);};''')
         page=await context.new_page();await page.goto(URL+'?debug=1');await page.locator('#go-new').click();await answer_events(page);await page.wait_for_timeout(1600)
-        assert await page.locator('.mapbox svg').count()
-        await page.locator('#add-route').click();await page.locator('[data-destination="PVG"]').click();await page.locator('#open').click();await page.locator('#skip').click();assert await page.locator('#next').count()
+        assert await page.locator('.airport-fallback').count()
+        await page.locator('[data-dock="network"]').click();await page.wait_for_timeout(1400);assert await page.locator('.mapbox svg').count()
+        await page.locator('[data-dock="routes"]').click();await page.locator('#add-route').click();await page.locator('[data-destination="PVG"]').click();await page.locator('#open').click();await page.locator('#skip').click();assert await page.locator('#next').count()
         results['fallback']='passed';await context.close()
         # Damaged saves are ignored without breaking a new game.
         context=await browser.new_context()

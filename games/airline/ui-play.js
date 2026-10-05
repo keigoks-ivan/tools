@@ -1,9 +1,9 @@
 // Visual feedback only: every goal and badge reads the existing economic results.
-import { airportPicture } from './ui-scene.js?v=19';
-import { CITIES, AIRCRAFT } from './data.mjs?v=19';
-import { FACILITIES } from './v2.mjs?v=19';
-import { aircraftArt } from './ui-art-v2.js?v=19';
-import { tr, pick, esc, fmtUSD, fmtPct, fmtNum } from './ui-util.js?v=19';
+import { airportPicture } from './ui-scene.js?v=20';
+import { CITIES, AIRCRAFT } from './data.mjs?v=20';
+import { FACILITIES } from './v2.mjs?v=20';
+import { aircraftArt } from './ui-art-v2.js?v=20';
+import { tr, pick, esc, fmtUSD, fmtPct, fmtNum } from './ui-util.js?v=20';
 
 export function aircraftStats(type, model = 'fsc') {
   const a = AIRCRAFT[type]; if (!a) return '';

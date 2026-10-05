@@ -1,14 +1,15 @@
 // 天青航空：航線經營 — UI. All game logic lives in the model (backend.mjs); this file only renders and collects decisions.
-import * as B from './backend.mjs?v=19';
-import { createNetwork } from './ui-network.js?v=19';
-import { FACILITIES, SCENARIOS, scenarioProgress, newClock, advanceClock, turnSeconds, fuelOrder } from './v2.mjs?v=19';
-import { aircraftArt, facilityArt } from './ui-art-v2.js?v=19';
-import { playIcon, routeTicket, hubScene, goalList, resultBadges, aircraftStats, rangeComparison } from './ui-play.js?v=19';
-import { airportPicture, orbitBackdrop } from './ui-scene.js?v=19';
-import { createSoundtrack } from './ui-music.js?v=19';
-import { readCareer } from './career.mjs?v=19';
-import { missionTitle, careerHeader, dispatchView, missionPin, passportView, rivalView, careerResult } from './ui-career.js?v=19';
-import { BRAND_EN, tr, pick, esc, $, $$, fmtUSD, fmtPct, fmtNum, fmtFare, term, withTerms, markTermSeen, locale, setLocale } from './ui-util.js?v=19';
+import * as B from './backend.mjs?v=20';
+import { createAirport } from './ui-airport.js?v=20';
+import { createNetwork } from './ui-network.js?v=20';
+import { FACILITIES, SCENARIOS, scenarioProgress, newClock, advanceClock, turnSeconds, fuelOrder } from './v2.mjs?v=20';
+import { aircraftArt, facilityArt } from './ui-art-v2.js?v=20';
+import { playIcon, routeTicket, goalList, resultBadges, aircraftStats, rangeComparison } from './ui-play.js?v=20';
+import { orbitBackdrop } from './ui-scene.js?v=20';
+import { createSoundtrack } from './ui-music.js?v=20';
+import { readCareer } from './career.mjs?v=20';
+import { missionTitle, careerHeader, dispatchView, missionPin, passportView, rivalView, careerResult } from './ui-career.js?v=20';
+import { BRAND_EN, tr, pick, esc, $, $$, fmtUSD, fmtPct, fmtNum, fmtFare, term, withTerms, markTermSeen, locale, setLocale } from './ui-util.js?v=20';
 
 const { MODES, HUBS, CITIES, CITY_REGIONS, AIRCRAFT, LESSONS, GLOSSARY } = B;
 const INDUSTRY = B.CONST?.industryMargin ?? 0.039;
@@ -36,7 +37,7 @@ const store = {
   del(k) { try { localStorage.removeItem(k); } catch {} },
 };
 
-const app = { screen: 'start', prev: 'start', sel: { mode: modeList[0].id, hub: (B.DEFAULT_HUB || 'TPE') }, state: null, draft: null, map: null, city: null, tmp: null, report: null, reportTurn: 0, lastMargin: null, panelMin: false, tab: 'routes', active: null, clock: newClock(), scenario: 'free' };
+const app = { screen: 'start', prev: 'start', sel: { mode: modeList[0].id, hub: (B.DEFAULT_HUB || 'TPE') }, state: null, draft: null, map: null, city: null, tmp: null, report: null, reportTurn: 0, lastMargin: null, panelMin: false, panelOpen: false, view: 'airport', tab: 'routes', active: null, clock: newClock(), scenario: 'free' };
 if (!Object.hasOwn(CITIES, app.sel.hub)) app.sel.hub = hubList[0].id;
 try { const s = JSON.parse(store.get('tq-airline-sel') || 'null'); if (s && modeList.some((m) => m.id === s.mode) && Object.hasOwn(CITIES, s.hub)) app.sel = { mode: s.mode, hub: s.hub }; app.scenario = SCENARIOS[s?.scenario] ? s.scenario : 'free'; } catch {}
 
@@ -121,53 +122,22 @@ function chrome() {
 
 /* ---------- start ---------- */
 function renderStart() {
-  const saves = readSaves();
-  const modeCards = modeList.map((m) => `
-    <button type="button" class="choice" role="radio" aria-checked="${app.sel.mode === m.id}" data-mode="${esc(m.id)}">
-      <b><span>${esc(pick(m))}</span><span class="meta">${tr(`約 ${m.minutes} 分鐘`, `~${m.minutes} min`)}</span></b>
-      <span class="sub"><b class="cad">${esc(cadence(m))}</b> ${esc(pick(m, 'descZh', 'descEn'))}</span></button>`).join('');
-  const hubCards = hubList.map((h) => `
-    <button type="button" class="choice" role="radio" aria-checked="${app.sel.hub === h.id}" data-hub="${esc(h.id)}">
-      <b><span>${esc(pick(h))}</span><span class="meta">${esc(h.id)}</span></b>
-      <span class="sub">${esc(pick(h, 'teachZh', 'teachEn'))}</span></button>`).join('');
-  const how = [
-    tr('選模式和基地，所有航線都從基地出發。', 'Pick a mode and a hub. Every route starts at the hub.'),
-    tr('點地圖上的城市，選機型、每週班次和票價。', 'Tap a city on the map. Choose aircraft, weekly flights and fare.'),
-    tr('開始營運，航班自動起飛。可以暫停、快轉或直接看月底。', 'Start operations. Flights depart automatically; pause, speed up or jump to settlement.'),
-    tr('看結果頁：哪條航線賺、哪條賠，原因寫得很白。', 'Read the results: which routes made money, which lost, and why.'),
-    tr('飛行中可以規劃下期。月底看損益，目標超過行業的 3.9%。', 'Plan the next turn during playback. Review settlement and aim to beat the industry’s 3.9% margin.'),
-  ].map((t) => `<li>${esc(t)}</li>`).join('');
-  const saveHtml = saves.length ? `<section class="sect"><h2>${tr('繼續上次的遊戲', 'Continue')}</h2><div class="saves">${saves.map((o) => `
-    <div class="save"><div class="t"><b>${esc(pick(modeOf(o.mode)))} · ${esc(pick(hubOf(o.hub)))}</b><small>${esc(turnLabelFromSave(o))} · ${tr('現金', 'Cash')} ${esc(fmtUSD(o.cash))}</small></div>
-    <button type="button" class="btn sec" data-continue="${esc(o.mode)}">${tr('繼續', 'Continue')}</button></div>`).join('')}</div></section>` : '';
-  let best = {}; try { best = JSON.parse(store.get(BEST_KEY) || '{}'); } catch {}
-  const bk = best[`${app.sel.hub}-${app.sel.mode}`];
-  appEl.innerHTML = `<div class="wrap start-wrap">
-    <section class="hero game-hero">${airportPicture('hero-world')}<div class="hero-shade" aria-hidden="true"></div><div class="hero-air-traffic" aria-hidden="true"><img src="./art/v2/sprite.webp?v=19" width="64" height="64" alt=""></div><div class="hero-copy">
-      <div class="kicker">${esc(BRAND_EN)} <span class="edition">${tr('航空經營遊戲', 'AIRLINE MANAGEMENT GAME')}</span></div>
-      <h1>${tr('天青航空', esc(BRAND_EN))}<small>${tr('航線經營', 'AIRLINE MANAGER')}</small></h1>
-      <p class="poem">${tr('從一條航線，經營你的世界。', 'Your world begins with one route.')}</p>
-      <p class="hint" style="margin-top:10px">${tr('接首航任務、挑戰對手，收集世界各地的城市章。', 'Take first-flight missions, face rivals and collect city stamps around the world.')}</p>
-      <div class="hero-actions"><button type="button" class="btn" id="go-new">${tr('開始經營','Start playing')} ▶</button><small>${esc(pick(hubOf(app.sel.hub)))} · ${esc(pick(modeOf(app.sel.mode)))}</small></div>
-    </div><div class="hero-scene-label"><span class="live-dot"></span>${tr('世界航線，從這裡出發。','A world of routes starts here.')}<b>${app.sel.hub}</b></div><button type="button" class="hero-hub-select" id="hero-hub-select"><small>${tr('出發基地','HOME AIRPORT')}</small><b>${app.sel.hub} <span>${esc(pick(hubOf(app.sel.hub)))}</span></b><em>${tr('自由選擇 180 個機場','Choose any of 180 airports')} ↗</em></button></section>
-    <div class="play-feature-strip"><span>⚑ ${tr('限期任務','Timed missions')}</span><span>★ ${tr('公司升級','Airline levels')}</span><button type="button" class="link" id="passport-home">▣ ${tr(`旅行手冊 · ${Object.keys(readPassport()).length} 城`, `Passport · ${Object.keys(readPassport()).length} cities`)} ↗</button></div>
-    ${saveHtml}
-    <section class="sect scenario-select"><h2>${tr('這次想完成什麼？', 'Choose your ambition')}</h2><div class="scenario-choices">${Object.entries(SCENARIOS).map(([id,c],i)=>`<button type="button" class="scenario-choice" data-scenario="${id}" aria-pressed="${app.scenario===id}"><span class="scenario-no">0${i+1}</span>${playIcon(id)}<small>${esc(pick(c,'tagZh','tagEn'))}</small><b>${esc(pick(c))}</b><span>${esc(pick(c,'descZh','descEn'))}</span></button>`).join('')}</div></section>
-    <section class="sect"><h2>${tr('選擇模式', 'Mode')}</h2><div class="choices two" role="radiogroup" aria-label="${tr('模式', 'Mode')}">${modeCards}</div></section>
-    <section class="sect hub-select-section"><h2>${tr('選擇你的起點', 'Choose your starting point')}</h2><button type="button" class="selected-hub" id="choose-hub"><span class="selected-hub-code">${app.sel.hub}</span><span><b>${esc(pick(hubOf(app.sel.hub)))}</b><small>${esc(pick(CITY_REGIONS[hubOf(app.sel.hub).region]))} · ${tr('180 個機場皆可作為基地','All 180 airports can be your base')}</small></span><em>${tr('更換基地','Change airport')} ↗</em></button><p class="hub-picker-note">${tr('市場大小、機場成本與轉機位置會影響你的航網。以下是五個建議起點。','Market size, airport costs and connecting geography shape your network. Five suggested starting points below.')}</p><div class="choices hubs" role="radiogroup" aria-label="${tr('基地', 'Hub')}">${hubCards}</div></section>
-    <div class="cta-row"><button type="button" class="btn" id="go-new-more">${tr('開始經營', 'Start')} →</button>${bk ? `<span class="hint">${tr('這組的最佳成績', 'Your best here')}：${esc(fmtPct(bk.margin))} · ${esc(bk.grade || '')}</span>` : ''}</div>
-    <section class="sect"><h2>${tr('怎麼玩', 'How to play')}</h2><ol class="howto">${how}</ol></section>
-    <div class="foot"><button type="button" class="link" id="go-src">${tr('資料來源', 'Data sources')}</button><span>${tr('數字依真實航空業資料簡化而成，是教學用的模擬，不是預測。', 'Numbers are simplified from real industry data. This is a teaching sim, not a forecast.')}</span></div>
-  </div>`;
-  $$('[data-mode]').forEach((b) => b.addEventListener('click', () => { app.sel.mode = b.dataset.mode; if(SCENARIOS[app.scenario]?.mode && SCENARIOS[app.scenario].mode!==app.sel.mode)app.scenario='free'; store.set('tq-airline-sel', JSON.stringify({ ...app.sel, scenario: app.scenario })); renderStart(); $(`[data-mode="${app.sel.mode}"]`).focus(); }));
-  $$('[data-hub]').forEach((b) => b.addEventListener('click', () => { app.sel.hub = b.dataset.hub; store.set('tq-airline-sel', JSON.stringify({ ...app.sel, scenario: app.scenario })); renderStart(); $(`[data-hub="${app.sel.hub}"]`).focus(); }));
-  $$('[data-scenario]').forEach(b=>b.onclick=()=>{app.scenario=b.dataset.scenario; const sc=SCENARIOS[app.scenario]; if(sc.mode)app.sel.mode=sc.mode; renderStart();});
-  $('#go-new').addEventListener('click', () => newGame());
-  $('#go-new-more').addEventListener('click', () => newGame());
-  $('#go-src').addEventListener('click', () => go('sources'));
-  $('#passport-home').onclick=showPassport;
-  $('#choose-hub').onclick=showHubPicker; $('#hero-hub-select').onclick=showHubPicker;
-  $$('[data-continue]').forEach((b) => b.addEventListener('click', () => continueGame(b.dataset.continue)));
+  app.map?.destroy(); app.map=null;
+  const saves=readSaves();
+  appEl.innerHTML=`<div class="title-game"><div class="title-world" id="title-world"></div><div class="title-vignette" aria-hidden="true"></div><div class="title-logo"><span>SKYGLAZE</span><h1>${tr('天青航空','SKYGLAZE')}</h1><p>${tr('打造你的航空王國','BUILD YOUR AIRLINE')}</p></div><div class="title-menu"><button type="button" class="title-play" id="go-new"><i>▶</i><span>${tr('開始新遊戲','NEW GAME')}<small>${esc(pick(modeOf(app.sel.mode)))} · ${app.sel.hub}</small></span></button>${saves.map(o=>`<button type="button" class="title-option" data-continue="${esc(o.mode)}"><i>↻</i><span>${tr('繼續旅程','CONTINUE')}<small>${esc(pick(hubOf(o.hub)))} · ${esc(turnLabelFromSave(o))}</small></span></button>`).join('')}<button type="button" class="title-option" id="configure-game"><i>⚙</i><span>${tr('模式與挑戰','MODE & CHALLENGE')}<small>${esc(pick(SCENARIOS[app.scenario]))}</small></span></button><button type="button" class="title-option" id="choose-hub"><i>⌖</i><span>${tr('選擇出發基地','HOME AIRPORT')}<small>${app.sel.hub} · ${esc(pick(hubOf(app.sel.hub)))} / 180</small></span></button><button type="button" class="title-option" id="passport-home"><i>▣</i><span>${tr('旅行手冊','TRAVEL PASSPORT')}<small>${tr(`已收藏 ${Object.keys(readPassport()).length} 座城市`,`${Object.keys(readPassport()).length} cities collected`)}</small></span></button></div><div class="title-caption"><span class="live-dot"></span>${tr('你的世界，從第一班飛機開始。','Your world starts with its first departure.')}</div><div class="title-footer"><button type="button" id="how-play">${tr('怎麼玩','How to play')}</button><button type="button" id="go-src">${tr('資料來源','Sources')}</button><span>SKYGLAZE / v20</span></div></div>`;
+  app.map=createAirport($('#title-world'),{hubId:app.sel.hub,preview:true});app.map.update({fleet:[{type:'MQ-320'},{type:'MQ-350'},{type:'MQ-72'}],routes:[],facilities:{depot:1,lounge:1,tank:1}});
+  $('#go-new').onclick=newGame;$('#configure-game').onclick=showSetup;$('#choose-hub').onclick=showHubPicker;$('#passport-home').onclick=showPassport;$('#go-src').onclick=()=>go('sources');$('#how-play').onclick=showHow;
+  $$('[data-continue]').forEach(b=>b.onclick=()=>continueGame(b.dataset.continue));
+}
+function showSetup(){
+  const m=overlay(`<div class="career-dialog-top"><small>${tr('新的旅程','NEW ADVENTURE')}</small><button type="button" class="ghost" id="setup-close">${tr('返回','Back')} ×</button></div><h2>${tr('這次，挑戰什麼？','Choose your adventure')}</h2><div class="choices two" role="radiogroup" aria-label="${tr('模式','Mode')}">${modeList.map(mode=>`<button type="button" class="choice" role="radio" aria-checked="${app.sel.mode===mode.id}" data-mode="${mode.id}"><b>${esc(pick(mode))}</b><span class="sub">${esc(cadence(mode))} · ${mode.turns} ${tr('回合','turns')}</span></button>`).join('')}</div><div class="scenario-choices">${Object.entries(SCENARIOS).map(([id,c],i)=>`<button type="button" class="scenario-choice" data-scenario="${id}" aria-pressed="${app.scenario===id}"><span class="scenario-no">0${i+1}</span>${playIcon(id)}<small>${esc(pick(c,'tagZh','tagEn'))}</small><b>${esc(pick(c))}</b><span>${esc(pick(c,'descZh','descEn'))}</span></button>`).join('')}</div><p class="hint">${tr('出發基地','Home airport')}：${app.sel.hub} · ${esc(pick(hubOf(app.sel.hub)))}</p><button type="button" class="btn block" id="setup-start">${tr('出發，開始新遊戲','Depart — new game')} ▶</button>`,{label:tr('模式與挑戰','Mode and challenge')});m.classList.add('setup-dialog');
+  const remember=()=>{store.set('tq-airline-sel',JSON.stringify({...app.sel,scenario:app.scenario}));$('#go-new small').textContent=pick(modeOf(app.sel.mode))+' · '+app.sel.hub;$('#configure-game small').textContent=pick(SCENARIOS[app.scenario]);};
+  $$('[data-mode]',m).forEach(b=>b.onclick=()=>{app.sel.mode=b.dataset.mode;if(SCENARIOS[app.scenario]?.mode&&SCENARIOS[app.scenario].mode!==app.sel.mode)app.scenario='free';remember();showSetup();});
+  $$('[data-scenario]',m).forEach(b=>b.onclick=()=>{app.scenario=b.dataset.scenario;if(SCENARIOS[app.scenario].mode)app.sel.mode=SCENARIOS[app.scenario].mode;remember();showSetup();});
+  $('#setup-close').onclick=()=>{closeOverlay();renderStart();};$('#setup-start').onclick=newGame;
+}
+function showHow(){
+  overlay(`<div class="kick">SKYGLAZE / ${tr('飛行指南','FLIGHT MANUAL')}</div><h2>${tr('點機場，就能開始經營。','Your airport is your controller.')}</h2><ol class="howto"><li>${tr('點航廈或下方「航圖」，選目的地、機型、班次與票價。','Tap the terminal or World map. Choose destination, aircraft, frequency and fares.')}</li><li>${tr('點「開始營運」，看飛機滑行起飛。可暫停、快轉或直接結算。','Start operations and watch departures. Pause, speed up or jump to settlement.')}</li><li>${tr('點塔台接任務；點設施排定興建；點飛機查看航程和座位。','Tap the tower for missions, buildings for construction, or aircraft for range and seats.')}</li><li>${tr('營運中可以安排下期航線。結算時看每條航線的賺賠原因，再調整。','Plan next-turn routes during playback. Review each route’s profit or loss at settlement and adjust.')}</li></ol><p class="hint">${tr('拖曳旋轉機場，雙指或滾輪縮放。場景航班為縮時示意；帳目由供需模型結算。','Drag to orbit; pinch or scroll to zoom. Traffic is sampled; accounts settle through the demand model.')}</p><button type="button" class="btn block" id="how-close">${tr('準備好了','Ready')} ✓</button>`,{label:tr('怎麼玩','How to play')});$('#how-close').onclick=closeOverlay;
 }
 function showHubPicker() {
   const m=overlay(`<div class="career-dialog-top"><small>${tr('自由選擇基地','CHOOSE YOUR HOME AIRPORT')}</small><button type="button" class="ghost" id="hub-picker-close">${tr('返回','Back')} ×</button></div><h2>${tr('你的航空公司，從哪裡出發？','Where does your airline begin?')}</h2><p class="hint">${tr('可選全部 180 個機場。選定後，這一局的航線都從這裡出發。','Choose any of 180 airports. All routes in this game depart from your chosen base.')}</p><div class="hub-picker-controls"><label>${tr('搜尋機場','Find an airport')}<input type="search" id="hub-search" placeholder="${tr('城市名稱或機場代碼，例如高雄、LAX','City or airport code, e.g. London, LAX')}" autocomplete="off"></label><label>${tr('區域','Region')}<select id="hub-region"><option value="">${tr('全部區域','All regions')}</option>${Object.entries(CITY_REGIONS).map(([id,r])=>`<option value="${id}">${esc(pick(r))}</option>`).join('')}</select></label></div><div class="hub-picker-count" id="hub-picker-count" role="status"></div><div class="hub-airports" id="hub-airports" role="radiogroup" aria-label="${tr('基地機場','Home airport')}"></div>`,{label:tr('自由選擇基地','Choose home airport')});
@@ -188,7 +158,7 @@ function newGame() {
   app.state = B.newGame({ mode: app.sel.mode, hub: app.sel.hub, seed: SCENARIOS[app.scenario]?.seed ?? ((Date.now() % 100000) + 1) });
   app.state.scenario = app.scenario;
   app.active = null; app.clock = newClock(); app.draft = null; app.tab = 'routes'; app.panelMin = false;
-  app.report = null; app.lastMargin = null; app.city = null; app.tmp = null;
+  app.report = null; app.lastMargin = null; app.city = null; app.tmp = null; app.view='airport'; app.panelOpen=false;
   go('main');
 }
 function continueGame(mode) {
@@ -197,7 +167,7 @@ function continueGame(mode) {
     app.scenario = app.state.scenario || 'free'; app.active = o.v === 2 && o.active?.report?.company ? o.active : null;
     app.clock = { ...newClock(), ...(app.active ? o.clock : {}), running: false };
     app.draft = o.v === 2 && o.draft ? { ...o.draft, routes: new Map(o.draft.routes.map(r=>[r.city,r])), facilities: new Set(o.draft.facilities || []) } : null;
-    app.report = null; app.lastMargin = app.state.history.at(-1)?.margin ?? null; app.tab = 'routes'; app.city = null; app.tmp = null; syncPassport(); go('main');
+    app.report = null; app.lastMargin = app.state.history.at(-1)?.margin ?? null; app.tab = 'routes'; app.city = null; app.tmp = null; app.view='airport';app.panelOpen=false;syncPassport(); go('main');
   } catch { store.del(SAVE_KEY(mode)); app.active = null; app.draft = null; renderStart(); }
 }
 
@@ -224,54 +194,66 @@ function fleetDecision(routes) {
 const buildDecisions = (routes = draftRoutes()) => ({ facilities: [...app.draft.facilities], buyFuel: app.draft.buyFuel, routes, fleet: fleetDecision(routes), hedge: app.draft.hedge, eventChoices: app.draft.eventChoices, ...(isSeasonMode(app.state.mode) ? { businessModel: bizModel() } : {}) });
 
 function renderMain() {
-  const s = app.state;
-  if (!app.draft || app.draft.forTurn !== s.turn) { initDraft(); app.draft.forTurn = s.turn; }
-  appEl.innerHTML = `<div class="game">
-    <div class="mapbox" id="mapbox">${orbitBackdrop()}<img class="map-mascot" src="./art/v2/mascot.webp?v=19" width="120" height="120" alt="" aria-hidden="true"><div class="map-watermark">${esc(BRAND_EN)}<small>${tr('全球航網', 'GLOBAL NETWORK')}</small></div>
-      <div class="network-heading"><span class="live-dot"></span>${tr('航網營運中心', 'NETWORK OPERATIONS')}<small>${s.hub} / ${esc(pick(hubOf(s.hub)))}</small></div>
-      <div class="mapctl"><button type="button" id="zin" aria-label="${tr('放大', 'Zoom in')}">+</button><button type="button" id="zout" aria-label="${tr('縮小', 'Zoom out')}">−</button><button type="button" id="zfit" aria-label="${tr('回到基地', 'Recenter')}">⌖</button></div>
-      <div class="flight-hud" id="flight-hud"></div><button type="button" class="mission-pin" id="mission-pin" aria-label="${tr('打開任務板','Open dispatch board')}"></button>
-      <button type="button" class="base-launch" id="base-launch">${airportPicture('base-picture')}<span><small>${tr('返回基地','HOME BASE')}</small><b>${s.hub} <i>↗</i></b></span></button>
-      <div class="maplegend"><span><i></i>${tr('獲利／預估獲利', 'Profit / estimated profit')}</span><span><i class="loss"></i>${tr('虧損', 'Loss')}</span><span><i class="r"></i>${tr('對手', 'Rivals')}</span><small>${tr('航班與候機點為縮時示意', 'Flights and passenger dots are sampled')}</small></div>
-      <div class="clockbar"><div class="clock-label"><b id="clock-day"></b><small id="clock-status"></small></div><div class="time-track"><i id="clock-progress"></i></div><div class="time-controls"><button type="button" id="pause" aria-label="${tr('暫停／繼續', 'Pause / resume')}">▶</button>${[1,2,4].map(n=>`<button type="button" data-speed="${n}" aria-pressed="${app.clock.speed===n}">${n}×</button>`).join('')}<button type="button" id="skip" aria-label="${tr('直接結算', 'Jump to settlement')}">↦</button></div></div>
-    </div>
-    <aside class="panel" id="panel" aria-label="${tr('營運面板', 'Operations panel')}"><button type="button" class="handle" id="handle"></button>
-      <div class="panel-heading"><div><small>${tr('你的航空公司', 'YOUR AIRLINE')}</small><h2>${tr('天青航空', BRAND_EN)}</h2></div><span class="hub-code">${s.hub}</span></div>
-      <nav class="panel-tabs" aria-label="${tr('營運分類', 'Operations tabs')}">${[['routes','✈','航線','Routes'],['missions','⚑','任務','Missions'],['fleet','◒','機隊燃油','Fleet'],['hub','⌂','基地','Hub']].map(([id,icon,zh,en])=>`<button type="button" data-tab="${id}" aria-pressed="${app.tab===id}"><span aria-hidden="true">${icon}</span>${tr(zh,en)}</button>`).join('')}</nav>
-      <div class="panel-scroll" id="pscroll"></div><div class="panel-foot" id="pfoot"></div></aside></div>`;
-  app.map = createNetwork($('#mapbox'), { hubId: s.hub, onCityClick: selectCity });
-  $('#zin').onclick=()=>app.map.zoomBy(1.2); $('#zout').onclick=()=>app.map.zoomBy(1/1.2); $('#zfit').onclick=()=>app.map.recenter();
-  $('#handle').onclick=()=>{app.panelMin=!app.panelMin;syncPanelMin();};
-  $('#base-launch').onclick=()=>showHub('depot');
-  $('#mission-pin').onclick=showMissions;
-  $$('[data-tab]').forEach(b=>b.onclick=()=>{app.tab=b.dataset.tab;app.city=null;refreshMap();renderPanel();});
-  $('#pause').onclick=togglePlayback; $('#skip').onclick=()=>{if(app.active)settleTurn();else runTurn(true);};
+  const s=app.state;
+  if(!app.draft||app.draft.forTurn!==s.turn){initDraft();app.draft.forTurn=s.turn;}
+  app.panelOpen=false;
+  appEl.innerHTML=`<div class="play-game" data-view="${app.view}" id="play-game"><div class="play-world mapbox" id="mapbox"></div><div class="game-vignette" aria-hidden="true"></div><div class="play-location"><small>${tr('你的基地','YOUR AIRPORT')}</small><b>${s.hub}<span>${esc(pick(hubOf(s.hub)))}</span></b><em id="world-instruction">${tr('點建築開始操作 · 拖曳旋轉','Tap a building · drag to orbit')}</em></div><div class="flight-hud" id="flight-hud"></div><button type="button" class="mission-pin" id="mission-pin"></button><div class="world-controls"><button type="button" id="zin" aria-label="${tr('放大','Zoom in')}">＋</button><button type="button" id="zout" aria-label="${tr('縮小','Zoom out')}">−</button><button type="button" id="zfit" aria-label="${tr('回到基地','Recenter')}">⌖</button><button type="button" id="world-search" aria-label="${tr('搜尋目的地','Find destination')}">⌕</button></div><div class="play-feedback" id="play-feedback" role="status"></div><div class="maplegend"><span><i></i>${tr('獲利','Profit')}</span><span><i class="loss"></i>${tr('虧損','Loss')}</span><span><i class="r"></i>${tr('對手','Rivals')}</span></div><div class="game-bottom"><div class="clockbar"><div class="clock-label"><b id="clock-day"></b><small id="clock-status"></small></div><div class="time-track"><i id="clock-progress"></i></div><div class="time-controls"><button type="button" id="pause" aria-label="${tr('暫停／繼續','Pause / resume')}">▶</button>${[1,2,4].map(n=>`<button type="button" data-speed="${n}" aria-pressed="${app.clock.speed===n}">${n}×</button>`).join('')}<button type="button" id="skip" aria-label="${tr('直接結算','Jump to settlement')}">↦</button></div></div><nav class="game-dock" aria-label="${tr('遊戲操作','Game controls')}">${[['airport','⌂','機場','Airport'],['network','◎','航圖','World'],['routes','✈','航線','Routes'],['fleet','◒','機隊','Fleet'],['missions','⚑','任務','Missions'],['hub','⚒','建設','Build']].map(([id,icon,zh,en])=>`<button type="button" data-dock="${id}"><i aria-hidden="true">${icon}</i><span>${tr(zh,en)}</span></button>`).join('')}<button type="button" class="dock-run" id="world-run"><i>▶</i><span></span></button></nav><div class="world-runmsg" id="world-runmsg" role="alert"></div></div><aside class="panel game-drawer" id="panel" hidden aria-label="${tr('操作面板','Control panel')}"><div class="drawer-heading"><small id="drawer-title"></small><button type="button" id="drawer-close" aria-label="${tr('關閉面板','Close panel')}">×</button></div><nav class="panel-tabs" aria-label="${tr('營運分類','Operations tabs')}">${[['routes','航線','Routes'],['missions','任務','Missions'],['fleet','機隊','Fleet'],['hub','建設','Build']].map(([id,zh,en])=>`<button type="button" data-tab="${id}" aria-pressed="${app.tab===id}">${tr(zh,en)}</button>`).join('')}</nav><div class="panel-scroll" id="pscroll"></div><div class="panel-foot" id="pfoot"></div></aside></div>`;
+  mountWorld();
+  $('#zin').onclick=()=>app.map?.zoomBy(1.2);$('#zout').onclick=()=>app.map?.zoomBy(1/1.2);$('#zfit').onclick=()=>app.map?.recenter();$('#world-search').onclick=destinationPicker;
+  $('#drawer-close').onclick=closePanel;$('#mission-pin').onclick=showMissions;
+  $$('[data-tab]').forEach(b=>b.onclick=()=>openPanel(b.dataset.tab));
+  $$('[data-dock]').forEach(b=>b.onclick=()=>{const id=b.dataset.dock;if(['airport','network'].includes(id)){closePanel();setWorld(id);}else if(id==='missions')showMissions();else openPanel(id);});
+  $('#world-run').onclick=()=>app.active?togglePlayback():runTurn();
+  $('#pause').onclick=togglePlayback;$('#skip').onclick=()=>{if(app.active)settleTurn();else runTurn(true);};
   $$('[data-speed]').forEach(b=>b.onclick=()=>{app.clock.speed=Number(b.dataset.speed);syncClock();saveGame();});
-  refreshMap();renderHud();renderPanel();syncClock();
-  const ev=(B.pendingEvents(s)||[]).filter(e=>!(e.id in app.draft.eventChoices));
-  if (!app.active && ev.length) askEvents(ev);
+  renderHud();renderPanel();syncClock();
+  const ev=(B.pendingEvents(s)||[]).filter(e=>!(e.id in app.draft.eventChoices));if(!app.active&&ev.length)askEvents(ev);
 }
-function syncPanelMin(){const p=$('#panel');if(!p)return;p.classList.toggle('min',app.panelMin);const h=$('#handle');h.textContent=app.panelMin?tr('展開營運面板','Expand operations'):tr('收合面板','Collapse panel');h.setAttribute('aria-expanded',String(!app.panelMin));}
+function mountWorld(){
+  app.map?.destroy();app.map=null;const box=$('#mapbox');box.replaceChildren();
+  if(app.view==='network'){box.innerHTML=orbitBackdrop();app.map=createNetwork(box,{hubId:app.state.hub,onCityClick:selectCity});}
+  else app.map=createAirport(box,{hubId:app.state.hub,onSelect:worldSelect});
+  $('#play-game').dataset.view=app.view;$$('[data-dock]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.dock===app.view)));
+  $('#world-instruction').textContent=app.view==='airport'?tr('點建築開始操作 · 拖曳旋轉','Tap a building · drag to orbit'):tr('點城市開航線 · 搜尋 180 個航點','Tap a city to plan · 180 airports');
+  refreshMap();app.map.setTime({elapsed:app.clock.elapsed,speed:app.clock.running?app.clock.speed:0});
+}
+function setWorld(view){if(app.view===view)return;app.view=view;mountWorld();}
+function worldSelect(id,type){
+  if(id==='terminal'){setWorld('network');destinationPicker();}
+  else if(id==='tower')showMissions();
+  else if(id==='fleet')showAircraft(type||'MQ-320');
+  else showHub(id);
+}
+function openPanel(tab){app.tab=tab;app.city=null;app.tmp=null;app.panelOpen=true;app.panelMin=false;refreshMap();renderPanel();$('#drawer-close').focus({preventScroll:true});}
+function closePanel(){app.panelOpen=false;syncPanelMin();app.map?.focus('');const b=$(`[data-dock="${app.tab}"]`);b?.focus({preventScroll:true});}
+function syncPanelMin(){const p=$('#panel');if(!p)return;p.hidden=!app.panelOpen;$('#play-game').classList.toggle('drawer-open',app.panelOpen);$('#drawer-title').textContent=app.city?`${app.state.hub} → ${app.city}`:tr({routes:'航線調度',fleet:'機隊與燃油',missions:'任務板',hub:'基地建設'}[app.tab],{routes:'ROUTE CONTROL',fleet:'FLEET & FUEL',missions:'DISPATCH',hub:'CONSTRUCTION'}[app.tab]);}
+function showAircraft(type){
+  const a=AIRCRAFT[type];if(!a)return;
+  const m=overlay(`<div class="career-dialog-top"><small>${tr('你的機隊','YOUR FLEET')}</small><button type="button" class="ghost" id="plane-close" aria-label="${tr('關閉','Close')}">×</button></div><div class="plane-showcase">${aircraftArt(type)}<span>SKYGLAZE / ${type.replace('MQ-','')}</span></div><h2>${esc(pick(a))}</h2>${aircraftStats(type,bizModel())}<p class="hint">${tr('先用航程確認飛得到，再依市場客量選擇座位數。數值為遊戲簡化設定。','Check range first, then match capacity to market demand. Figures are simplified game profiles.')}</p><button type="button" class="btn block" id="plane-fleet">${tr('管理機隊與燃油','Manage fleet and fuel')} →</button>`,{label:pick(a)});m.classList.add('plane-dialog');$('#plane-close').onclick=closeOverlay;$('#plane-fleet').onclick=()=>{closeOverlay();openPanel('fleet');};
+}
 function mapMetrics(){
   if(app.active)return Object.fromEntries(app.active.report.routes.map(r=>[r.city,r]));
   return Object.fromEntries(draftRoutes().map(r=>[r.city,B.estimateRoute(planningState(),r.city,r.type,r.weekly,r.fare)]));
 }
-function refreshMap(){app.map?.update({routes:app.active?app.active.start.routes:draftRoutes(),rivals:rivalCities(app.state),selected:app.city,metrics:mapMetrics(),weeks:modeOf(app.state.mode).weeksPerTurn});}
-function selectCity(id){if(id===app.state.hub){app.city=null;app.tab='hub';app.panelMin=false;renderPanel();return;}app.tab='routes';app.city=id;app.tmp=null;app.panelMin=false;app.map?.focus(id);refreshMap();renderPanel();}
+function refreshMap(){app.map?.update({routes:app.active?app.active.start.routes:draftRoutes(),rivals:rivalCities(app.state),selected:app.city,metrics:mapMetrics(),weeks:modeOf(app.state.mode).weeksPerTurn,active:!!app.active,fleet:app.state.fleet,facilities:app.state.facilities,queued:[...app.draft.facilities]});}
+function selectCity(id){app.panelOpen=true;if(id===app.state.hub){app.city=null;app.tab='hub';app.panelMin=false;renderPanel();return;}app.tab='routes';app.city=id;app.tmp=null;app.panelMin=false;app.map?.focus(id);refreshMap();renderPanel();}
 function renderPanel(){if(!$('#pscroll'))return;syncPanelMin();$$('[data-tab]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.tab===app.tab)));(app.city?renderRoutePanel:app.tab==='hub'?renderFacilities:app.tab==='fleet'?renderFleet:app.tab==='missions'?renderMissions:renderOverview)();const key=app.city||app.tab;if(key!==app.panelKey)$('#pscroll').scrollTop=0;app.panelKey=key;if(!app.city)renderRunButton();saveGame();}
 function renderRunButton(){
-  $('#pfoot').innerHTML=`<p class="decision-timing">${app.active?tr('現在的調整，下一期生效。','Changes now take effect next turn.'):tr('飛機自動調度，月底統一結算。','Aircraft are assigned automatically. Accounts settle at turn end.')}</p><button type="button" class="btn block" id="run">${app.active?(app.clock.running?tr('Ⅱ 暫停營運','Ⅱ Pause operations'):tr('▶ 繼續營運','▶ Resume operations')):tr(`開始${turnWord(app.state)} ▶`,`Start ${turnWord(app.state)} ▶`)}</button><div class="hint" id="runmsg" role="alert"></div>`;
+  syncWorldRun();$('#pfoot').innerHTML=`<p class="decision-timing">${app.active?tr('現在的調整，下一期生效。','Changes now take effect next turn.'):tr('飛機自動調度，月底統一結算。','Aircraft are assigned automatically. Accounts settle at turn end.')}</p><button type="button" class="btn block" id="run">${app.active?(app.clock.running?tr('Ⅱ 暫停營運','Ⅱ Pause operations'):tr('▶ 繼續營運','▶ Resume operations')):tr(`開始${turnWord(app.state)} ▶`,`Start ${turnWord(app.state)} ▶`)}</button><div class="hint" id="runmsg" role="alert"></div>`;
   $('#run').onclick=()=>app.active?togglePlayback():runTurn();
 }
-function renderHud(){
-  const s=app.state, last=s.history.at(-1), challenge=scenarioProgress(s,app.report);
-  const cash=s.cash, margin=last?.margin, routes=app.active?.start.routes || draftRoutes();
-  const activeCo=app.active?.report.company;
-  const points=s.history.map((x,i)=>`${8+i*120/Math.max(1,s.history.length-1)},${35-clampHud(x.margin)*24}`).join(' ');
-  $('#flight-hud').innerHTML=`<div class="hud-cash"><small>${tr('可用現金','AVAILABLE CASH')}</small><b>${esc(fmtUSD(cash))}</b><svg viewBox="0 0 140 44" aria-hidden="true"><path d="M0 36 H140" stroke="#ccdbe6" fill="none"/><polyline points="${points || '8,34 60,34 130,34'}" fill="none" stroke="#2f5d8c" stroke-width="2"/></svg></div><div class="hud-kpis"><div><small>${tr('上期淨利率','LAST MARGIN')}</small><b class="${margin<0?'negative':''}">${margin==null?'—':fmtPct(margin)}</b><span>${tr('業界','Industry')} 3.9%</span></div><div><small>${tr('營運航線','ACTIVE ROUTES')}</small><b>${routes.length}<em>${tr('條','')}</em></b><span>${tr('自動派機','Auto assignment')}</span></div></div>${activeCo?`<div class="live-summary"><small>${tr('本期推估 · 月底結算','TURN ESTIMATE · SETTLED AT END')}</small><b class="${activeCo.profit<0?'negative':''}">${activeCo.profit>=0?'+':''}${esc(fmtUSD(activeCo.profit))}</b><span>${tr('載客','Load')} ${fmtPct(activeCo.loadFactor,0)} / ${tr('平衡','BE')} ${fmtPct(activeCo.breakEvenLF,0)}</span></div>`:''}<div class="challenge-mini"><span>◇ ${esc(pick(challenge.sc))}</span><small>${s.turn}/${totalTurns(s)} ${tr('已結算','settled')}</small><div class="time-track"><i style="width:${challenge.progress*100}%"></i></div></div>`;
-  $('#mission-pin').innerHTML=missionPin(s);
+function syncWorldRun(){
+  const b=$('#world-run');if(!b)return;
+  $('i',b).textContent=app.active&&app.clock.running?'Ⅱ':'▶';$('span',b).textContent=app.active?(app.clock.running?tr('暫停','Pause'):tr('繼續','Resume')):tr('開始營運','Depart');
+  b.classList.toggle('running',!!app.active);b.setAttribute('aria-pressed',String(!!app.active&&app.clock.running));
 }
-const clampHud=v=>Math.max(-1,Math.min(1,v*5));
+function renderHud(){
+  const s=app.state,margin=s.history.at(-1)?.margin,routes=app.active?.start.routes||draftRoutes(),co=app.active?.report.company,career=readCareer(s);
+  $('#flight-hud').innerHTML=`<div class="resource-chip cash-chip"><i>$</i><span><small>${tr('現金','CASH')}</small><b>${esc(fmtUSD(s.cash))}</b></span></div><button type="button" class="resource-chip" id="hud-routes"><i>✈</i><span><small>${tr('航線','ROUTES')}</small><b>${routes.length}</b></span></button><div class="resource-chip margin-chip"><i>${margin==null?'◇':margin>=0?'↗':'↘'}</i><span><small>${tr('上期淨利率','LAST MARGIN')}</small><b class="${margin<0?'negative':''}">${margin==null?'—':fmtPct(margin)}</b></span></div><button type="button" class="resource-chip xp-chip" id="hud-career"><i>★</i><span><small>${tr('成長值','XP')}</small><b>${fmtNum(career.xp)}</b></span></button>`;
+  $('#hud-routes').onclick=()=>openPanel('routes');$('#hud-career').onclick=showMissions;
+  $('#mission-pin').innerHTML=missionPin(s);$('#play-feedback').innerHTML=co?`<span class="live-dot"></span><b>${tr('本期推估','TURN ESTIMATE')} ${co.profit>=0?'+':''}${esc(fmtUSD(co.profit))}</b><small>${tr('載客','Load')} ${fmtPct(co.loadFactor,0)} / ${tr('平衡','BE')} ${fmtPct(co.breakEvenLF,0)}</small>`:`<span>✈</span><b>${routes.length?tr('班表準備好了！','Ready for departure!'):tr('點航廈，安排第一條航線。','Tap the terminal to plan a flight.')}</b><small>${routes.length?tr(`${routes.length} 條航線，按開始營運讓機隊出發。`,`${routes.length} routes ready. Depart to start operations.`):tr('接任務、開航線，再按開始營運。','Choose a mission, plan routes, then depart.')}</small>`;
+  syncWorldRun();refreshMap();
+}
 function destinationPicker(){
   const destinations=Object.values(CITIES).filter(c=>c.id!==app.state.hub).map(c=>({c,o:B.routeOptions(planningState(),c.id)})).sort((a,b)=>a.o.distanceKm-b.o.distanceKm);
   const m=overlay(`<div class="kick">${tr('擴展你的航網','EXPAND YOUR NETWORK')}</div><h2>${tr('下一站，飛去哪裡？','Where will you fly next?')}</h2><p class="hint">${tr(`全球 ${Object.keys(CITIES).length} 個航點，從近程支線到跨洲幹線。`,`Explore ${Object.keys(CITIES).length} airports, from regional hops to intercontinental routes.`)}</p><input class="city-search" id="city-search" type="search" placeholder="${tr('搜尋城市或機場代碼','Search city or airport code')}" aria-label="${tr('搜尋城市','Search cities')}"><div class="destination-filters"><select id="city-region" aria-label="${tr('航點區域','Airport region')}"><option value="all">${tr('全球航點','All regions')}</option>${Object.entries(CITY_REGIONS).map(([id,r])=>`<option value="${id}">${esc(pick(r))}</option>`).join('')}</select><label><input id="city-reachable" type="checkbox">${tr('機型航程內','Within aircraft range')}</label></div><p class="hint" id="city-count" role="status"></p><div class="destination-list" id="destination-list"></div><button type="button" class="btn sec block" id="city-cancel">${tr('返回','Back')}</button>`,{label:tr('選擇目的地','Choose destination')});
@@ -291,7 +273,7 @@ function renderOverview(){
   $('#pscroll').innerHTML=`<div class="section-eyebrow">${tr('航線規劃','ROUTE PLANNING')}<span>${app.active?tr('下一期','NEXT TURN'):tr('本期','THIS TURN')}</span></div><h2 class="panel-intro">${routes.length?tr('每條航線，都要算得過。','Make every route earn its place.'):tr('先開一條，讓機隊起飛。','Your fleet is ready. Open a route.')}</h2>
     <button type="button" class="dispatch-nudge" id="view-missions"><span>⚑</span><div><small>${tr('本期挑戰','YOUR CHALLENGE')}</small><b>${readCareer(s).active?esc(missionTitle(readCareer(s).active)):tr('選個任務，讓這趟更有目標。','Choose a mission for this adventure.')}</b></div><i>↗</i></button>
     <button type="button" class="aircraft-guide-link" id="aircraft-guide">✈ ${tr('機型圖鑑','Aircraft guide')}<small>${tr('比較航程與座位','Compare range & seats')} →</small></button>
-    ${!routes.length?`<div class="onboarding"><img src="./art/v2/mascot.webp?v=19" width="84" height="84" alt=""><div><b>${tr('一起把第一條航線開起來！','Let’s open your first route!')}</b><p>${tr('先選城市，再看飛機能飛多遠、能坐幾人。','Pick a city, then compare aircraft range and seats.')}</p></div></div><p class="hint">${tr('可以先研究這三個市場：','Three markets to explore first:')}</p>${suggestions.map(r=>`<button type="button" class="suggestion" data-route="${r.id}"><b>${r.id} <span>${esc(pick(CITIES[r.id]))}</span></b><small>${esc(pick(AIRCRAFT[r.type]))} · ${tr('預估載客','Est. load')} ${fmtPct(r.e.lf,0)}</small><i>↗</i></button>`).join('')}`:''}
+    ${!routes.length?`<div class="onboarding"><img src="./art/v2/mascot.webp?v=20" width="84" height="84" alt=""><div><b>${tr('一起把第一條航線開起來！','Let’s open your first route!')}</b><p>${tr('先選城市，再看飛機能飛多遠、能坐幾人。','Pick a city, then compare aircraft range and seats.')}</p></div></div><p class="hint">${tr('可以先研究這三個市場：','Three markets to explore first:')}</p>${suggestions.map(r=>`<button type="button" class="suggestion" data-route="${r.id}"><b>${r.id} <span>${esc(pick(CITIES[r.id]))}</span></b><small>${esc(pick(AIRCRAFT[r.type]))} · ${tr('預估載客','Est. load')} ${fmtPct(r.e.lf,0)}</small><i>↗</i></button>`).join('')}`:''}
     <div class="rlist">${routes.map(r=>routeTicket(s,r,metrics[r.city],lfBar,!!app.active)).join('')}</div>
     <button type="button" class="add-route" id="add-route"><span>＋</span>${tr('新增航線','Add a route')}<small>${tr(`${Object.keys(CITIES).length} 個航點`,`${Object.keys(CITIES).length} airports`)}</small></button>
     <div class="psec scenario-status"><div class="goal-heading">${playIcon(challenge.id)}<div><small>${tr('本局目標','YOUR AMBITION')}</small><h3>${esc(pick(challenge.sc))}</h3></div></div>${goalList(challenge,s)}<p class="hint">${tr('依已結算結果更新，期末驗收。','Updated from settled results; checked at game end.')}</p></div>`;
@@ -322,7 +304,7 @@ function bindCareer(root){
   });
 }
 function openMissionPlan(){
-  const mission=readCareer(app.state).active;app.tab='routes';app.panelMin=false;
+  app.panelOpen=true;setWorld('network');const mission=readCareer(app.state).active;app.tab='routes';app.panelMin=false;
   if(mission?.city){
     app.city=mission.city;app.tmp=null;
     if(!app.draft.routes.has(mission.city))app.tmp={...mission.plan,defType:mission.plan.type,note:tr('任務班表建議，可自行調整。這是穩定期估計，首航與事件仍會影響實際結果。','Suggested mission schedule; edit it freely. This is a steady-state forecast; launch ramp-up and events affect the result.')};
@@ -342,7 +324,7 @@ function showRivals(){
 function aircraftGuide(){
   const o=app.city?B.routeOptions(planningState(),app.city):null,types=modeOf(app.state.mode).types,exact=o?B.distanceKm(CITIES[app.state.hub],CITIES[app.city]):0;
   const entries=Object.entries(AIRCRAFT).sort((a,b)=>o?(Number(b[1].rangeKm>=exact)*2+Number(types.includes(b[0])))-(Number(a[1].rangeKm>=exact)*2+Number(types.includes(a[0]))):0);
-  const m=overlay(`<div class="guide-intro"><img src="./art/v2/mascot.webp?v=19" width="100" height="100" alt=""><div><div class="kick">${tr('天青機型圖鑑','SKYGLAZE AIRCRAFT GUIDE')}</div><h2>${tr('這一趟，誰來飛？','Who will fly this route?')}</h2><p class="hint">${o?tr(`航線距離 ${fmtNum(o.distanceKm)} km。先看航程，再看座位。`,`Route distance: ${fmtNum(o.distanceKm)} km. Check range, then seats.`):tr('先用航程篩選，再用客量決定大小。','Choose range first, then size for your demand.')}</p></div></div><div class="aircraft-guide-grid">${entries.map(([t,a])=>`<article class="guide-aircraft" data-guide-aircraft="${t}"><div class="guide-plane">${aircraftArt(t)}<span>${esc(pick(a,'classZh','classEn'))}</span></div><h3>${esc(pick(a))}</h3>${aircraftStats(t,bizModel())}${o?rangeComparison(t,o.distanceKm,a.rangeKm>=exact):''}<p class="guide-availability">${types.includes(t)?tr('本模式可使用','Available in this mode'):tr('十年模式可使用','Available in Ten Years')}</p></article>`).join('')}</div><p class="hint">${tr('座位數是每個單程航班的容量，不是一定會來的客人。載客率會隨需求、票價和班次改變。航程與座位採遊戲簡化設定。','Seats are capacity per one-way flight, not guaranteed passengers. Load depends on demand, fares and frequency. Range and capacity are simplified game settings.')}</p><button type="button" class="btn block" id="guide-close">${tr('知道了，回去排航線','Got it — back to planning')}</button>`,{label:tr('機型圖鑑','Aircraft guide')});
+  const m=overlay(`<div class="guide-intro"><img src="./art/v2/mascot.webp?v=20" width="100" height="100" alt=""><div><div class="kick">${tr('天青機型圖鑑','SKYGLAZE AIRCRAFT GUIDE')}</div><h2>${tr('這一趟，誰來飛？','Who will fly this route?')}</h2><p class="hint">${o?tr(`航線距離 ${fmtNum(o.distanceKm)} km。先看航程，再看座位。`,`Route distance: ${fmtNum(o.distanceKm)} km. Check range, then seats.`):tr('先用航程篩選，再用客量決定大小。','Choose range first, then size for your demand.')}</p></div></div><div class="aircraft-guide-grid">${entries.map(([t,a])=>`<article class="guide-aircraft" data-guide-aircraft="${t}"><div class="guide-plane">${aircraftArt(t)}<span>${esc(pick(a,'classZh','classEn'))}</span></div><h3>${esc(pick(a))}</h3>${aircraftStats(t,bizModel())}${o?rangeComparison(t,o.distanceKm,a.rangeKm>=exact):''}<p class="guide-availability">${types.includes(t)?tr('本模式可使用','Available in this mode'):tr('十年模式可使用','Available in Ten Years')}</p></article>`).join('')}</div><p class="hint">${tr('座位數是每個單程航班的容量，不是一定會來的客人。載客率會隨需求、票價和班次改變。航程與座位採遊戲簡化設定。','Seats are capacity per one-way flight, not guaranteed passengers. Load depends on demand, fares and frequency. Range and capacity are simplified game settings.')}</p><button type="button" class="btn block" id="guide-close">${tr('知道了，回去排航線','Got it — back to planning')}</button>`,{label:tr('機型圖鑑','Aircraft guide')});
   m.classList.add('aircraft-guide-dialog');m.focus({preventScroll:true});m.scrollTop=0;$('#guide-close').onclick=closeOverlay;
 }
 function renderFleet(){
@@ -360,16 +342,13 @@ function renderFleet(){
   $('#buy-fuel')?.addEventListener('click',()=>{d.buyFuel=!d.buyFuel;renderPanel();});
 }
 function renderFacilities(){
-  const s=app.state,d=app.draft;
-  $('#pscroll').innerHTML=`<div class="section-eyebrow">${s.hub} / ${tr('樞紐建設','HUB DEVELOPMENT')}</div><h2 class="panel-intro">${tr('歡迎回到你的基地。','Welcome to your home base.')}</h2>${hubScene(s,d.facilities)}<button type="button" class="hub-enter" id="hub-enter">${tr('進入基地 · 選擇設施','Enter your hub · explore facilities')} ↗</button><p class="hint">${tr('興建先付現金，每期還有營運費與折舊。','Construction uses cash upfront; running costs and depreciation recur.')}</p><div class="facility-list">${Object.entries(FACILITIES).map(([id,f])=>facilityCard(id,f)).join('')}</div>`;
-  $$('[data-hub-detail]').forEach(b=>b.onclick=()=>showHub(b.dataset.hubDetail));$('#hub-enter').onclick=()=>showHub('depot');
-  bindFacilities($('#pscroll'));
+  $('#pscroll').innerHTML=`<div class="section-eyebrow">${app.state.hub} / ${tr('基地建設','CONSTRUCTION')}</div><h2 class="panel-intro">${tr('擴建你的機場。','Grow your airport.')}</h2><p class="hint">${tr('點場景裡的建築，也能查看設施。興建先付現金，每期另有營運費與折舊。','Buildings in the world open these controls. Construction costs cash; running costs and depreciation recur.')}</p><div class="facility-list">${Object.entries(FACILITIES).map(([id,f])=>facilityCard(id,f)).join('')}</div>`;bindFacilities($('#pscroll'));
 }
 function facilityCard(id,f){const built=!!app.state.facilities?.[id],queued=app.draft.facilities.has(id);return `<article class="facility-card ${built?'built':queued?'queued':''}">${facilityArt(id)}<div class="facility-title"><h3>${esc(pick(f))}</h3><span>${built?tr('已啟用','ACTIVE'):queued?tr('已排定','PLANNED'):esc(fmtUSD(f.cost))}</span></div><b class="facility-effect">${esc(pick(f,'effectZh','effectEn'))}</b><p>${esc(pick(f,'lessonZh','lessonEn'))}</p><small>${tr('每月營運費','Running cost/mo')} ${fmtUSD(f.monthly)} · ${tr('折舊','Depreciation')} ${f.years} ${tr('年','years')}</small><button type="button" class="btn sec block" data-facility="${id}" ${built?'disabled':''}>${built?'✓ '+tr('營運中','Operating'):queued?tr('取消興建','Cancel build'):tr('興建','Build')}</button></article>`;}
-function bindFacilities(root,after){$$('[data-facility]',root).forEach(b=>b.onclick=()=>{const id=b.dataset.facility;if(app.draft.facilities.has(id))app.draft.facilities.delete(id);else app.draft.facilities.add(id);renderPanel();after?.(id);});}
+function bindFacilities(root,after){$$('[data-facility]',root).forEach(b=>b.onclick=()=>{const id=b.dataset.facility;if(app.draft.facilities.has(id))app.draft.facilities.delete(id);else app.draft.facilities.add(id);renderPanel();refreshMap();after?.(id);});}
 function showHub(id){
-  const m=overlay(`<div class="hub-dialog-title"><div><small>${app.state.hub} / ${tr('樞紐基地','HOME BASE')}</small><h2>${esc(pick(hubOf(app.state.hub)))}</h2></div><button type="button" class="ghost" id="hub-close">${tr('返回航網','Back to network')} ×</button></div><div class="hub-workshop">${hubScene(app.state,app.draft.facilities,true)}<div class="hub-inspector">${facilityCard(id,FACILITIES[id])}<p class="hint">${app.active?tr('下一期開始營運時興建。','Built when next-turn operations start.'):tr('開始營運時興建，先扣除建設費。','Built at start of operations; capital is charged upfront.')}</p></div></div>`,{label:tr('樞紐基地','Home base')});
-  m.classList.add('hub-dialog');$('#hub-close').onclick=closeOverlay;$$('[data-hub-detail]',m).forEach(b=>b.onclick=()=>showHub(b.dataset.hubDetail));bindFacilities(m,showHub);
+  if(!FACILITIES[id])return;setWorld('airport');app.tab='hub';app.city=null;app.panelOpen=true;syncPanelMin();app.map?.focus(id);
+  $('#pscroll').innerHTML=`<div class="section-eyebrow">${app.state.hub} / ${tr('基地設施','AIRPORT FACILITY')}</div>${facilityCard(id,FACILITIES[id])}<p class="hint">${app.active?tr('下一期開始營運時興建。','Built when next-turn operations start.'):tr('開始營運時興建，先扣除建設費。','Built at start of operations; capital is charged upfront.')}</p><button type="button" class="ghost block" id="all-facilities">${tr('查看全部設施','All facilities')} →</button>`;$('#pfoot').innerHTML=`<button type="button" class="btn block" id="facility-done">${tr('返回機場','Back to airport')} ✓</button>`;$('#facility-done').onclick=closePanel;$('#all-facilities').onclick=()=>openPanel('hub');bindFacilities($('#pscroll'),showHub);saveGame();
 }
 let toastTimer;
 function routeOpened(r){
@@ -486,12 +465,13 @@ function runTurn(immediate = false) {
   const pend=(B.pendingEvents(s)||[]).filter(e=>!(e.id in app.draft.eventChoices));
   if(pend.length){askEvents(pend);return;}
   const res=B.applyDecisions(s,buildDecisions());
-  if(res.errors.length){if(msg)msg.innerHTML=res.errors.map(e=>`<span style="color:var(--warn)">${esc(pick(e))}</span>`).join('<br>');return;}
+  if(res.errors.length){if(msg)msg.innerHTML=res.errors.map(e=>`<span style="color:var(--warn)">${esc(pick(e))}</span>`).join('<br>');if($('#world-runmsg'))$('#world-runmsg').textContent=res.errors.map(e=>pick(e)).join(' · ');return;}
+  if($('#world-runmsg'))$('#world-runmsg').textContent='';
   const out=B.simulateTurn(res.state);
   app.active={start:res.state,state:out.state,report:out.report,turn:s.turn};
   app.state=res.state;app.clock={...newClock(),speed:app.clock.speed,running:true};
   initDraft();app.draft.forTurn=s.turn;app.draft.forNext=true;
-  refreshMap();renderHud();renderPanel();syncClock();saveGame();
+  refreshMap();renderHud();renderPanel();syncClock();saveGame();if(!immediate)closePanel();
   if(immediate)settleTurn();
 }
 function settleTurn(){
@@ -503,9 +483,9 @@ function settleTurn(){
   app.draft=queued;app.draft.forTurn=app.state.turn;app.draft.forNext=false;app.draft.eventChoices={};
   saveGame();go('results');
 }
-function togglePlayback(){if(!app.active){runTurn();return;}app.clock.running=!app.clock.running;syncClock();if(!app.city)renderRunButton();saveGame();}
+function togglePlayback(){if(!app.active){runTurn();return;}app.clock.running=!app.clock.running;syncClock();syncWorldRun();if(!app.city)renderRunButton();saveGame();}
 function syncClock(){
-  if(!$('#clock-day'))return;
+  if(!$('#clock-day'))return;syncWorldRun();
   const frac=app.clock.elapsed/turnSeconds(app.state.mode),day=1+Math.floor(frac*(isSeasonMode(app.state.mode)?179:29));
   $('#clock-day').textContent=app.active?tr(`${isSeasonMode(app.state.mode)?'季內':'月內'}第 ${day} 天`, `Day ${day} of ${isSeasonMode(app.state.mode)?'season':'month'}`):tr('規劃中','Planning');
   $('#clock-status').textContent=app.active?(app.clock.running?tr('航班自動營運','Automatic departures'):tr('已暫停','Paused')):tr(`${turnSeconds(app.state.mode)} 秒跑完本期，可直接結算。`,`${turnSeconds(app.state.mode)} seconds per turn. Settlement can be skipped to.`);
@@ -596,7 +576,7 @@ function renderResults() {
       <div class="mini"><div>${tr('收入', 'Revenue')}<b>${esc(fmtUSD(r.revenue))}</b></div><div>${tr('成本', 'Cost')}<b>${esc(fmtUSD(r.cost))}</b></div><div>${tr('損益', 'Profit')}<b style="color:${r.profit >= 0 ? 'var(--good)' : 'var(--warn)'}">${esc(fmtUSD(r.profit))}</b></div><div>${tr('旅客', 'Passengers')}<b>${fmtNum(r.pax)} / ${fmtNum(r.seats)}</b></div><div>${term('RASK')} / ${term('CASK')}<b>${(r.rask * 100).toFixed(1)}¢ / ${(r.cask * 100).toFixed(1)}¢</b></div><div>${tr('平均票價', 'Avg fare')}<b>${esc(fmtFare(r.avgFare))}</b></div></div>
       ${r.costs ? `<details class="cb"><summary>${tr('成本拆開看', 'Cost breakdown')}</summary>${costBlock(r.costs, r.cost)}</details>` : ''}</article>`; }).join('');
   appEl.innerHTML = `<div class="rwrap">
-    <div class="rhead"><div><small>${esc(turnLabel(s, app.reportTurn))}</small><h1>${tr('這回合的成績單', 'Turn results')}</h1></div></div>
+    <div class="rhead"><div><small>${esc(turnLabel(s, app.reportTurn))}</small><h1>${tr('本期結算', 'TURN COMPLETE')}</h1></div></div>
     ${careerResult(s,rep)}${resultBadges(s,rep)}
     <section class="card"><h2>${tr('公司整體', 'Company')}</h2>
       <div class="profit num ${co.profit >= 0 ? 'pos' : 'neg'}">${esc(fmtUSD(co.profit))}</div>
@@ -619,7 +599,11 @@ function renderResults() {
     ${routeCards || `<div class="card"><p class="hint">${tr('這回合沒有航線，只付了租金和管理費用。', 'No routes this turn. Only fixed costs were paid.')}</p></div>`}
     <div class="sticky-next"><button type="button" class="btn block" id="next">${last ? tr('看總成績', 'See final report') : tr(`下一${isSeasonMode(s.mode) ? '季' : '個月'}`, 'Next turn')} →</button></div></div>`;
   $('#next').addEventListener('click', () => { if (last) { store.del(SAVE_KEY(s.mode)); go('end'); } else go('main'); });
-  bindCareer(appEl);
+  bindCareer(appEl);reportWorld();
+}
+function reportWorld(){
+  const box=document.createElement('div');box.className='settlement-world';box.setAttribute('aria-hidden','true');appEl.prepend(box);
+  app.map=createAirport(box,{hubId:app.state.hub,preview:true,still:true});app.map.update({fleet:app.state.fleet,routes:app.state.routes,facilities:app.state.facilities});
 }
 
 /* ---------- end report ---------- */
@@ -648,7 +632,7 @@ function renderEnd() {
     ${tips.length ? `<section class="card"><h2>${tr('換一種走法再玩', 'Try a different line')}</h2><ul class="tips">${tips.map((t) => `<li>${withTerms(t)}</li>`).join('')}</ul></section>` : ''}
     <div class="cta-row"><button type="button" class="btn" id="again">${tr('再玩一次', 'Play again')}</button><button type="button" class="btn sec" id="change">${tr('換基地或模式', 'Change hub or mode')}</button><button type="button" class="link" id="src">${tr('資料來源', 'Data sources')}</button></div></div>`;
   $('#again').onclick = () => newGame(); $('#change').onclick = () => go('start'); $('#src').onclick = () => go('sources');
-  bindCareer(appEl);
+  bindCareer(appEl);reportWorld();
 }
 
 function scenarioReport(s){
@@ -669,7 +653,7 @@ function renderSources() {
   appEl.innerHTML = `<div class="rwrap"><button type="button" class="back-sm" id="b">‹ ${tr('返回', 'Back')}</button><h1 style="margin-bottom:6px">${tr('資料來源', 'Data sources')}</h1>
     <p class="hint">${tr('遊戲裡的數字來自這些公開資料，再簡化成教學用的版本。三種標籤：已查證是讀過原始來源；二手資料是只在二手整理裡看到；設計值是沒有公開數字、為了玩法而訂。', 'Game numbers come from these public sources, simplified for teaching. Three tags: Verified means read in the original source; Secondary means seen only in a second-hand summary; Design value means no public figure exists and the number was chosen for gameplay.')}</p>
     <section class="card" style="margin-top:16px"><h2>${tr('全航點重算與動態供需','All-pair audit and dynamic markets')}</h2><p>${tr('180 個航點、16,110 組配對。1,493 組有官方客量，其餘為校準估算。季節、事件與班次會改變供需，其他航空在結算後逐步調整運力。','180 airports, 16,110 pairs. 1,493 have official traffic; others are fitted estimates. Seasons, events and frequency change the market; incumbents adjust capacity after settlement.')}</p><p><a href="./design/demand/all-pairs.csv" download>${tr('下載全部方向的重算表（CSV）','Download all directions (CSV)')}</a> · <a href="./design/demand/README.md">${tr('資料定義、誤差與授權','Definitions, uncertainty and credits')}</a></p></section>
-    <section class="card" style="margin-top:16px"><h2>${tr('v2 機型、美術與設施','v2 aircraft, art and facilities')}</h2><p>${tr('機型採實際名稱，遊戲航程、座位、租金與耗油為簡化設定。設施的費用、商務吸引力與儲油容量為設計值；維修減少 30% 參考 AirTycoon 4。','Real aircraft names; game range, seats, rent and fuel burn are simplified assumptions. Facility costs, appeal and storage are design values. The 30% maintenance reduction references AirTycoon 4.')}</p><p class="hint">${tr('地球影像：NASA Earth Observatory，Blue Marble: Next Generation（Reto Stöckli）。海岸線：Natural Earth，公有領域。飛機、設施與旅行手冊明信片：本站自製。機場場景與吉祥物：OpenAI imagegen 原創美術。各基地共用示意場景，非實際機場建築。配樂：本站原創和弦與旋律，以 Web Audio 合成。three.js：MIT 授權。','Earth imagery: NASA Earth Observatory, Blue Marble: Next Generation (Reto Stöckli). Coastlines: Natural Earth, public domain. Aircraft, facility art and passport postcards: original. Airport environments and mascot: original art generated with OpenAI imagegen. Airports share an illustrative scene, not a replica of each real airport. Music: original chords and melody synthesised with Web Audio. three.js: MIT.')}</p><p><a href="https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/" target="_blank" rel="noopener">NASA Earth Observatory</a> · <a href="https://apps.apple.com/us/app/airtycoon-4/id989733380" target="_blank" rel="noopener">AirTycoon 4</a> · <a href="./design/LICENSES.md">${tr('美術授權','Asset licences')}</a></p><p style="margin-top:10px">${tr('原廠機型資料','Manufacturer references')}：${B.AIRCRAFT_REFERENCES.map(x=>`<a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.name)}</a>`).join(' · ')}</p></section>
+    <section class="card" style="margin-top:16px"><h2>${tr('v2 機型、美術與設施','v2 aircraft, art and facilities')}</h2><p>${tr('機型採實際名稱，遊戲航程、座位、租金與耗油為簡化設定。設施的費用、商務吸引力與儲油容量為設計值；維修減少 30% 參考 AirTycoon 4。','Real aircraft names; game range, seats, rent and fuel burn are simplified assumptions. Facility costs, appeal and storage are design values. The 30% maintenance reduction references AirTycoon 4.')}</p><p class="hint">${tr('地球影像：NASA Earth Observatory，Blue Marble: Next Generation（Reto Stöckli）。海岸線：Natural Earth，公有領域。飛機、設施與旅行手冊明信片：本站自製。立體機場、建築與小飛機：本站自製程序美術。備用機場插畫與吉祥物：OpenAI imagegen 原創美術。各基地共用示意場景，非實際機場建築。配樂：本站原創和弦與旋律，以 Web Audio 合成。three.js：MIT 授權。','Earth imagery: NASA Earth Observatory, Blue Marble: Next Generation (Reto Stöckli). Coastlines: Natural Earth, public domain. Aircraft, facility art and passport postcards: original. 3D airport, buildings and miniature aircraft: original procedural art. Fallback airport illustrations and mascot: original art generated with OpenAI imagegen. Airports share an illustrative scene, not a replica of each real airport. Music: original chords and melody synthesised with Web Audio. three.js: MIT.')}</p><p><a href="https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/" target="_blank" rel="noopener">NASA Earth Observatory</a> · <a href="https://apps.apple.com/us/app/airtycoon-4/id989733380" target="_blank" rel="noopener">AirTycoon 4</a> · <a href="./design/LICENSES.md">${tr('美術授權','Asset licences')}</a></p><p style="margin-top:10px">${tr('原廠機型資料','Manufacturer references')}：${B.AIRCRAFT_REFERENCES.map(x=>`<a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.name)}</a>`).join(' · ')}</p></section>
     <div style="margin-top:10px">${srcHtml}</div>
     ${dvHtml ? `<h2 style="margin:22px 0 4px;font-size:18px">${tr('只有設計值的部分', 'Design values only')}</h2>${dvHtml}` : ''}
     ${verHtml ? `<h2 style="margin:22px 0 4px;font-size:18px">${tr('查證結果', 'What the check found')}</h2>${verHtml}` : ''}</div>`;
@@ -687,13 +671,13 @@ function showTerm(btn) {
 }
 function hideTerm() { if (!pop.hidden) { pop.hidden = true; const f = pop._for; pop._for = null; if (f && document.contains(f)) f.focus({ preventScroll: true }); } }
 document.addEventListener('click', (e) => { const t = e.target.closest?.('[data-term]'); if (t) { e.preventDefault(); showTerm(t); } else if (!pop.hidden && !e.target.closest('#term-pop')) hideTerm(); });
-document.addEventListener('keydown', (e) => { if (e.key === 'Escape') hideTerm(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { hideTerm(); if($('#overlay').hidden&&app.screen==='main'&&app.panelOpen)closePanel(); } });
 
 /* ---------- chrome wiring ---------- */
 $('#lang-btn').addEventListener('click', () => { setLocale(locale === 'zh' ? 'en' : 'zh'); chrome(); go(app.screen === 'main' && !app.draft ? 'main' : app.screen); });
 $('#menu-btn').addEventListener('click', () => {
-  const m = overlay(`<h2>${tr('選單', 'Menu')}</h2><div class="opts" style="margin-top:12px"><button type="button" class="opt" data-m="src"><b>${tr('資料來源', 'Data sources')}</b></button><button type="button" class="opt" data-m="home"><b>${tr('回到開始畫面', 'Back to start')}</b><small>${tr('航班進度與下期規劃會自動存檔，可從開始畫面繼續。', 'Playback and next-turn plans autosave. Continue from the start screen.')}</small></button><button type="button" class="opt" data-m="x"><b>${tr('關閉', 'Close')}</b></button></div>`, { label: tr('選單', 'Menu') });
-  $$('[data-m]', m).forEach((b) => b.addEventListener('click', () => { closeOverlay(); if (b.dataset.m === 'src') go('sources'); if (b.dataset.m === 'home') go('start'); }));
+  const m = overlay(`<h2>${tr('選單', 'Menu')}</h2><div class="opts" style="margin-top:12px"><button type="button" class="opt" data-m="fullscreen"><b>${tr('全螢幕遊玩', 'Fullscreen')}</b></button><button type="button" class="opt" data-m="help"><b>${tr('怎麼玩', 'How to play')}</b></button><button type="button" class="opt" data-m="src"><b>${tr('資料來源', 'Data sources')}</b></button><button type="button" class="opt" data-m="home"><b>${tr('回到開始畫面', 'Back to start')}</b><small>${tr('航班進度與下期規劃會自動存檔，可從開始畫面繼續。', 'Playback and next-turn plans autosave. Continue from the start screen.')}</small></button><button type="button" class="opt" data-m="x"><b>${tr('關閉', 'Close')}</b></button></div>`, { label: tr('選單', 'Menu') });
+  $$('[data-m]', m).forEach((b) => b.addEventListener('click', () => { closeOverlay();if(b.dataset.m==='fullscreen'){if(document.fullscreenElement)document.exitFullscreen?.();else document.documentElement.requestFullscreen?.().catch(()=>{});}if(b.dataset.m==='help')showHow(); if (b.dataset.m === 'src') go('sources'); if (b.dataset.m === 'home') go('start'); }));
 });
 
 /* ---------- debug hook (?debug) ---------- */

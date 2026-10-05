@@ -25,7 +25,7 @@ async def main():
             page.on('pageerror',lambda e:errors.append(str(e)))
             page.on('console',lambda m:console.append(m.text) if m.type=='error' and 'favicon' not in m.text and '404' not in m.text else None)
             label=f'{width}x{height}{"-dark" if dark else ""}'
-            await page.goto(URL+'?debug=1');await page.locator('[data-scenario="margin"]').click();await page.locator('#go-new').click();await answer_events(page)
+            await page.goto(URL+'?debug=1');await page.locator('#configure-game').click();await page.locator('[data-scenario="margin"]').click();await page.locator('#setup-close').click();await page.locator('#go-new').click();await answer_events(page)
             assert await page.evaluate('__tq.music.stats().muted')
             await page.locator('#music-btn').click();await page.wait_for_function('!__tq.music.stats().busy');await page.wait_for_timeout(650)
             sound=await page.evaluate('__tq.music.stats()');assert not sound['muted'] and sound['rms']>0 and len(sound['chords'])==16
