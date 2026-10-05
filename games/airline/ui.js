@@ -1,6 +1,6 @@
 // 天青航空：航線經營 — UI. All game logic lives in the model (backend.mjs); this file only renders and collects decisions.
 import * as B from './backend.mjs';
-import { airlinerSVG, cloudLines } from './ui-art.js';
+import { cloudLines } from './ui-art.js';
 import { createMap } from './ui-map.js';
 import { BRAND_EN, tr, pick, esc, $, $$, fmtUSD, fmtPct, fmtNum, fmtFare, term, withTerms, markTermSeen, locale, setLocale } from './ui-util.js';
 
@@ -121,7 +121,7 @@ function renderStart() {
       <h1>${tr('天青航空', esc(BRAND_EN))}<small>${tr('航線經營', 'AIRLINE MANAGER')}</small></h1>
       <p class="poem">${tr('雨過天青雲破處，開一家自己的航空公司。', 'Where clouds break after rain, run an airline of your own.')}</p>
       <p class="hint" style="margin-top:10px">${tr('看一次，就懂航空公司怎麼賺錢，又為什麼賠錢。', 'See how an airline makes money, and why it loses it.')}</p>
-    </div><div class="art">${airlinerSVG({ id: 'hero', brand: BRAND_EN, label: tr('天青航空客機', BRAND_EN + ' airliner') })}${cloudLines}</div></section>
+    </div><div class="art"><img class="airliner" src="./art/hero.webp" width="1241" height="348" alt="${tr('天青航空客機', BRAND_EN + ' airliner')}" decoding="async">${cloudLines}</div></section>
     ${saveHtml}
     <section class="sect"><h2>${tr('選擇模式', 'Mode')}</h2><div class="choices two" role="radiogroup" aria-label="${tr('模式', 'Mode')}">${modeCards}</div></section>
     <section class="sect"><h2>${tr('選擇基地', 'Hub')}</h2><div class="choices hubs" role="radiogroup" aria-label="${tr('基地', 'Hub')}">${hubCards}</div></section>
