@@ -32,18 +32,18 @@
     </div>
     <div class="kpi-card">
       <div class="kpi-label"><span class="lang-en">Resale Condo YoY</span><span class="lang-zh" style="display:none">中古公寓年增率</span></div>
-      <div class="kpi-value" style="color:#16a34a">+27%</div>
-      <div class="kpi-delta" style="color:#16a34a"><span class="lang-en">Metro H1 2025</span><span class="lang-zh" style="display:none">都會區2025上半年</span></div>
+      <div class="kpi-value" style="color:#dc2626">-2.8%</div>
+      <div class="kpi-delta" style="color:#16a34a"><span class="lang-en">Metro, Aug 2026</span><span class="lang-zh" style="display:none">都會區2026年8月</span></div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label"><span class="lang-en">Tokyo Contract Rate</span><span class="lang-zh" style="display:none">東京契約率</span></div>
-      <div class="kpi-value" style="color:#16a34a">68.8%</div>
-      <div class="kpi-delta" style="color:#16a34a"><span class="lang-en">Initial contract</span><span class="lang-zh" style="display:none">初月契約率</span></div>
+      <div class="kpi-value" style="color:#16a34a">63.9%</div>
+      <div class="kpi-delta" style="color:#16a34a"><span class="lang-en">Initial contract, H1 2026</span><span class="lang-zh" style="display:none">初月契約率，2026上半年</span></div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label"><span class="lang-en">Osaka Contract Rate</span><span class="lang-zh" style="display:none">大阪契約率</span></div>
-      <div class="kpi-value" style="color:#16a34a">77.2%</div>
-      <div class="kpi-delta" style="color:#16a34a"><span class="lang-en">Seller's market</span><span class="lang-zh" style="display:none">賣方市場</span></div>
+      <div class="kpi-value" style="color:#16a34a">71.7%</div>
+      <div class="kpi-delta" style="color:#16a34a"><span class="lang-en">Seller's market, Kinki H1 2026</span><span class="lang-zh" style="display:none">賣方市場，近畿圈2026上半年</span></div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label"><span class="lang-en">Renter Share</span><span class="lang-zh" style="display:none">租屋比例</span></div>
@@ -102,11 +102,11 @@ c1.setOption({
   tooltip:baseTooltip,
   legend:Object.assign({},baseLegend,{data:txnLabels}),
   grid:baseGrid,
-  xAxis:mkAxis({type:'category',data:['2020','2021','2022','2023','2024','2025H1']}),
+  xAxis:mkAxis({type:'category',data:['2020','2021','2022','2023','2024','2025H1','2026H1']}),
   yAxis:mkAxis({type:'value',axisLabel:{formatter:function(v){return fmtK(v);}}}),
   series:[
-    {name:txnLabels[0],type:'line',smooth:true,data:[28000,38000,36000,33000,38000,24659],lineStyle:{color:C.navy,width:2},itemStyle:{color:C.navy}},
-    {name:txnLabels[1],type:'line',smooth:true,data:[6500,7800,7200,6900,8000,8582],lineStyle:{color:C.orange,width:2},itemStyle:{color:C.orange}}
+    {name:txnLabels[0],type:'line',smooth:true,data:[28000,38000,36000,33000,38000,24659,24438],lineStyle:{color:C.navy,width:2},itemStyle:{color:C.navy}},
+    {name:txnLabels[1],type:'line',smooth:true,data:[6500,7800,7200,6900,8000,8582,null],lineStyle:{color:C.orange,width:2},itemStyle:{color:C.orange}}
   ]
 });
 allCharts.push(c1);
@@ -131,10 +131,10 @@ allCharts.push(c2);
 
 /* Chart 3: Initial Contract Rate */
 var c3=echarts.init(document.getElementById('chartJpContractRate'));
-var crLabelsEn=['Tokyo 23W','Greater Osaka','National'];
+var crLabelsEn=['Tokyo 23W (H1 26)','Kinki (H1 26)','National'];
 var crLabelsZh=['\u6771\u4eac23\u5340','\u5927\u962a\u570f','\u5168\u570b'];
 var crLabels=lang==='zh'?crLabelsZh:crLabelsEn;
-var crValues=[68.8,77.2,66.0];
+var crValues=[63.9,71.7,66.0];
 var crColors=crValues.map(function(v){return v>70?C.green:v>60?C.navy:C.orange;});
 c3.setOption({
   tooltip:Object.assign({},baseTooltip,{trigger:'axis',axisPointer:{type:'shadow'}}),

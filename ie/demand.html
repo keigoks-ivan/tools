@@ -23,11 +23,11 @@
   </section>
 
   <section class="kpi-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:0 20px 24px">
-    <div class="kpi-card"><div class="kpi-label"><span class="lang-en">Population</span><span class="lang-zh" style="display:none">人口</span></div><div class="kpi-value">5.38M</div></div>
-    <div class="kpi-card"><div class="kpi-label"><span class="lang-en">Net Migration</span><span class="lang-zh" style="display:none">淨移民</span></div><div class="kpi-value">+68,900</div></div>
+    <div class="kpi-card"><div class="kpi-label"><span class="lang-en">Population (Apr 2026)</span><span class="lang-zh" style="display:none">人口（2026年4月）</span></div><div class="kpi-value">5.53M</div></div>
+    <div class="kpi-card"><div class="kpi-label"><span class="lang-en">Net Migration (yr to Apr 2026)</span><span class="lang-zh" style="display:none">淨移民（至2026年4月止一年）</span></div><div class="kpi-value">+48,100</div></div>
     <div class="kpi-card"><div class="kpi-label"><span class="lang-en">Tech Employment</span><span class="lang-zh" style="display:none">科技就業</span></div><div class="kpi-value">120K+</div></div>
-    <div class="kpi-card"><div class="kpi-label"><span class="lang-en">FTB Share</span><span class="lang-zh" style="display:none">首購族比例</span></div><div class="kpi-value">52%</div></div>
-    <div class="kpi-card"><div class="kpi-label"><span class="lang-en">Mortgage Drawdowns</span><span class="lang-zh" style="display:none">房貸撥款</span></div><div class="kpi-value">&euro;14.2B</div></div>
+    <div class="kpi-card"><div class="kpi-label"><span class="lang-en">FTB Share (2025)</span><span class="lang-zh" style="display:none">首購族比例（2025）</span></div><div class="kpi-value">60%</div></div>
+    <div class="kpi-card"><div class="kpi-label"><span class="lang-en">Mortgage Drawdowns (2025)</span><span class="lang-zh" style="display:none">房貸撥款（2025）</span></div><div class="kpi-value">&euro;14.5B</div></div>
     <div class="kpi-card"><div class="kpi-label"><span class="lang-en">Affordability PTI</span><span class="lang-zh" style="display:none">房價收入比</span></div><div class="kpi-value">6.5x</div></div>
   </section>
 
@@ -48,8 +48,8 @@
   </section>
 
   <footer class="source-footer" style="text-align:center;padding:20px;font-size:11px;color:#5a7a9a">
-    <span class="lang-en">Sources: CSO Ireland, Central Bank of Ireland, BPFI &middot; Updated Q1 2026</span>
-    <span class="lang-zh" style="display:none">資料來源：愛爾蘭中央統計局、愛爾蘭中央銀行、BPFI &middot; 更新於 2026 年第一季</span>
+    <span class="lang-en">Sources: CSO Ireland, Central Bank of Ireland, BPFI &middot; Updated Sep 2026</span>
+    <span class="lang-zh" style="display:none">資料來源：愛爾蘭中央統計局、愛爾蘭中央銀行、BPFI &middot; 更新於 2026 年 9 月</span>
   </footer>
 </main>
 
@@ -65,23 +65,23 @@ var allCharts=[];
 function initCharts(){
   allCharts.forEach(function(c){c.dispose();});
   allCharts=[];
-  var years=['2018','2019','2020','2021','2022','2023','2024','2025'];
+  var years=['2018','2019','2020','2021','2022','2023','2024','2025','2026'];
 
   // Net Migration
   var c1=echarts.init(document.getElementById('chartMigration'));
-  c1.setOption({tooltip:baseTooltip,grid:baseGrid,xAxis:mkAxis({type:'category',data:years}),yAxis:mkAxis({type:'value',name:'Persons'}),series:[{name:'Net Migration',type:'bar',data:[34000,33700,28900,-4500,61100,77600,72300,68900],itemStyle:{color:function(p){return p.value<0?C.red:C.blue;}}}]});
+  c1.setOption({tooltip:baseTooltip,grid:baseGrid,xAxis:mkAxis({type:'category',data:years}),yAxis:mkAxis({type:'value',name:'Persons'}),series:[{name:'Net Migration',type:'bar',data:[44400,44000,44700,21800,51700,77600,79300,59700,48100],itemStyle:{color:function(p){return p.value<0?C.red:C.blue;}}}]});
   allCharts.push(c1);
 
   // Population Growth
   var c2=echarts.init(document.getElementById('chartPopGrowth'));
-  c2.setOption({tooltip:baseTooltip,grid:baseGrid,xAxis:mkAxis({type:'category',data:years}),yAxis:mkAxis({type:'value',name:'Million'}),series:[{name:'Population',type:'line',smooth:true,areaStyle:{color:'rgba(37,99,235,0.1)'},data:[4.86,4.92,4.98,5.01,5.12,5.26,5.33,5.38],lineStyle:{color:C.blue,width:2},itemStyle:{color:C.blue}}]});
+  c2.setOption({tooltip:baseTooltip,grid:baseGrid,xAxis:mkAxis({type:'category',data:years}),yAxis:mkAxis({type:'value',name:'Million'}),series:[{name:'Population',type:'line',smooth:true,areaStyle:{color:'rgba(37,99,235,0.1)'},data:[4.88,4.96,5.03,5.07,5.18,5.28,5.38,5.46,5.53],lineStyle:{color:C.blue,width:2},itemStyle:{color:C.blue}}]});
   allCharts.push(c2);
 
   // Buyer type pie
   var c3=echarts.init(document.getElementById('chartBuyerType'));
   c3.setOption({tooltip:{trigger:'item',backgroundColor:'#fff',borderColor:'#ccd9e8',textStyle:{color:C.navy,fontSize:11}},series:[{type:'pie',radius:['35%','65%'],center:['50%','55%'],data:[
-    {value:52,name:'First-Time Buyers',itemStyle:{color:C.blue}},
-    {value:28,name:'Mover Purchasers',itemStyle:{color:C.green}},
+    {value:60,name:'First-Time Buyers',itemStyle:{color:C.blue}},
+    {value:19,name:'Mover Purchasers',itemStyle:{color:C.green}},
     {value:12,name:'Buy-to-Let',itemStyle:{color:C.orange}},
     {value:8,name:'Non-Mortgage/Cash',itemStyle:{color:C.muted}}
   ],label:{fontSize:11,color:C.navy}}]});
@@ -89,7 +89,7 @@ function initCharts(){
 
   // Mortgage value
   var c4=echarts.init(document.getElementById('chartMortgageVal'));
-  c4.setOption({tooltip:baseTooltip,grid:baseGrid,xAxis:mkAxis({type:'category',data:years}),yAxis:mkAxis({type:'value',name:'EUR Billion'}),series:[{name:'Drawdowns',type:'bar',data:[8.9,9.5,7.8,9.2,12.1,13.5,13.8,14.2],itemStyle:{color:C.green}}]});
+  c4.setOption({tooltip:baseTooltip,grid:baseGrid,xAxis:mkAxis({type:'category',data:years.slice(0,8)}),yAxis:mkAxis({type:'value',name:'EUR Billion'}),series:[{name:'Drawdowns',type:'bar',data:[8.9,9.5,7.8,9.2,12.1,13.5,13.8,14.5],itemStyle:{color:C.green}}]});
   allCharts.push(c4);
 }
 

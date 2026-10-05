@@ -15,7 +15,7 @@
   <div id="nav-root"></div>
   <main class="container">
     <div class="page-header">
-      <span class="updated"><span class="lang-en">LAST UPDATED: Q1 2026</span><span class="lang-zh" style="display:none">最後更新：2026年Q1</span></span>
+      <span class="updated"><span class="lang-en">LAST UPDATED: JUN 2026</span><span class="lang-zh" style="display:none">最後更新：2026年6月</span></span>
       <h1><span class="lang-en">Demand Analysis</span><span class="lang-zh" style="display:none">需求分析</span></h1>
       <p class="subtitle"><span class="lang-en">Transactions, Migration &amp; Buyer Composition</span><span class="lang-zh" style="display:none">交易量、移民與買家結構</span></p>
     </div>
@@ -37,14 +37,14 @@
       <div class="kpi-card orange">
         <div class="kpi-label"><span class="lang-en">NET MIGRATION</span><span class="lang-zh" style="display:none">淨移民</span></div>
         <div class="kpi-value"><span class="lang-en">High</span><span class="lang-zh" style="display:none">高位</span></div>
-        <span class="kpi-badge badge-orange"><span class="lang-en">Demand driver</span><span class="lang-zh" style="display:none">需求驅動力</span></span>
-        <div class="kpi-source">ABS 2025</div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">Demand driver · 292K NOM</span><span class="lang-zh" style="display:none">需求驅動力 · 淨海外移民29.2萬</span></span>
+        <div class="kpi-source">ABS Mar 2026</div>
       </div>
       <div class="kpi-card orange">
         <div class="kpi-label"><span class="lang-en">INVESTOR SHARE</span><span class="lang-zh" style="display:none">投資者佔比</span></div>
-        <div class="kpi-value">42%</div>
-        <span class="kpi-badge badge-orange"><span class="lang-en">Rising</span><span class="lang-zh" style="display:none">上升中</span></span>
-        <div class="kpi-source">APRA 2025</div>
+        <div class="kpi-value">39%</div>
+        <span class="kpi-badge badge-orange"><span class="lang-en">Falling (QoQ)</span><span class="lang-zh" style="display:none">下降中（季減）</span></span>
+        <div class="kpi-source">ABS Jun Qtr 2026</div>
       </div>
       <div class="kpi-card orange">
         <div class="kpi-label"><span class="lang-en">RENTER SHARE</span><span class="lang-zh" style="display:none">租客佔比</span></div>
@@ -82,8 +82,8 @@
     </div>
 
     <div class="source-footer">
-      <span class="lang-en"><strong>Sources:</strong> ABS, APRA, CoreLogic, NHFIC. Data as of Q1 2026 unless stated otherwise.</span>
-      <span class="lang-zh" style="display:none"><strong>資料來源：</strong>ABS、APRA、CoreLogic、NHFIC。除另行標註外，資料截至2026年Q1。</span>
+      <span class="lang-en"><strong>Sources:</strong> ABS, APRA, Cotality (CoreLogic), NHFIC. Data as of Jun 2026 unless stated otherwise.</span>
+      <span class="lang-zh" style="display:none"><strong>資料來源：</strong>ABS、APRA、Cotality（原CoreLogic）、NHFIC。除另行標註外，資料截至2026年6月。</span>
     </div>
   </main>
 
@@ -138,7 +138,7 @@
       tooltip:{trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,textStyle:{color:C.navy,fontSize:11,fontFamily:'Inter'}},
       legend:Object.assign({},baseLegend,{data:[en?'Net Migration (K)':'淨移民(千)',en?'Price YoY %':'房價年增%']}),
       grid:{left:50,right:50,top:40,bottom:30,containLabel:true},
-      xAxis:mkAxis({type:'category',data:years}),
+      xAxis:mkAxis({type:'category',data:years.concat(['2026 YTD'])}),
       yAxis:[
         mkAxis({type:'value',name:en?'Migration (K)':'移民(千)',position:'left',axisLabel:{formatter:'{value}K'}}),
         mkAxis({type:'value',name:en?'Price YoY %':'房價%',position:'right',splitLine:{show:false},axisLabel:{formatter:'{value}%'}})
@@ -148,7 +148,7 @@
           name:en?'Net Migration (K)':'淨移民(千)',
           type:'bar',
           yAxisIndex:0,
-          data:[240,-96,-85,320,510,490,450],
+          data:[240,-96,-85,320,510,490,450,292],
           itemStyle:{color:C.navy,borderRadius:[3,3,0,0]},
           barWidth:'40%'
         },
@@ -156,7 +156,7 @@
           name:en?'Price YoY %':'房價年增%',
           type:'line',
           yAxisIndex:1,
-          data:[3.2,3.8,20.2,7.3,-4.5,13.0,5.9],
+          data:[3.2,3.8,20.2,7.3,-4.5,13.0,5.9,0.0],
           smooth:true,
           symbol:'circle',symbolSize:6,
           lineStyle:{color:C.orange,width:2},
@@ -167,7 +167,7 @@
     allCharts.push(c2);
 
     // Chart 3: Buyer Type Composition
-    var buyerYears=['2021','2022','2023','2024','2025'];
+    var buyerYears=['2021','2022','2023','2024','2025','2026 Q2'];
     var c3=echarts.init(document.getElementById('chartAuBuyerType'));
     c3.setOption({
       tooltip:baseTooltip,
@@ -179,7 +179,7 @@
         {
           name:en?'Owner-Occupier':'自住',
           type:'line',
-          data:[68,70,65,62,58],
+          data:[68,70,65,62,58,60.8],
           smooth:true,
           symbol:'circle',symbolSize:6,
           lineStyle:{color:C.navy,width:2},
@@ -188,7 +188,7 @@
         {
           name:en?'Investor':'投資者',
           type:'line',
-          data:[32,30,35,38,42],
+          data:[32,30,35,38,42,39.2],
           smooth:true,
           symbol:'circle',symbolSize:6,
           lineStyle:{color:C.orange,width:2},

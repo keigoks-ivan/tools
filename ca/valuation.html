@@ -45,12 +45,12 @@
     <div class="kpi-card orange">
       <div class="kpi-label"><span class="lang-en">Toronto Yield</span><span class="lang-zh" style="display:none">多倫多收益率</span></div>
       <div class="kpi-value">3.8%</div>
-      <div class="kpi-delta" style="color:#d97706"><span class="lang-en">Near BOC rate</span><span class="lang-zh" style="display:none">接近央行利率</span></div>
+      <div class="kpi-delta" style="color:#d97706"><span class="lang-en">Above BOC rate</span><span class="lang-zh" style="display:none">高於央行利率</span></div>
     </div>
     <div class="kpi-card orange">
       <div class="kpi-label"><span class="lang-en">Yield Spread vs BOC</span><span class="lang-zh" style="display:none">利差 vs 央行利率</span></div>
-      <div class="kpi-value">+0.55%</div>
-      <div class="kpi-delta" style="color:#d97706"><span class="lang-en">Thin carry</span><span class="lang-zh" style="display:none">微薄利差</span></div>
+      <div class="kpi-value">+1.55%</div>
+      <div class="kpi-delta" style="color:#d97706"><span class="lang-en">Low end of norm</span><span class="lang-zh" style="display:none">處於常態區間低端</span></div>
     </div>
   </div>
 
@@ -71,8 +71,8 @@
       <h3><span class="lang-en">Yield vs BOC Rate</span><span class="lang-zh" style="display:none">租金收益率 vs 央行利率</span></h3>
       <div id="chartCaYieldSpread" style="height:220px"></div>
       <div class="insight-box" style="border-left-color:#dc2626">
-        <span class="lang-en">Canada experienced negative carry during 2023 when the BOC rate peaked at 5.00%, exceeding rental yields. The spread has since recovered to +0.55% following rate cuts, but remains thin compared to historical norms of +1.5&ndash;2.0%.</span>
-        <span class="lang-zh" style="display:none">2023年BOC利率升至5.00%高峰時，加拿大經歷負利差，超過租金收益率。降息後利差已恢復至+0.55%，但相較歷史常態+1.5至2.0%仍然微薄。</span>
+        <span class="lang-en">Canada experienced negative carry during 2023 when the BOC rate peaked at 5.00%, exceeding rental yields. The spread has since recovered to +1.55% following rate cuts, the low end of the historical norm of +1.5&ndash;2.0%.</span>
+        <span class="lang-zh" style="display:none">2023年BOC利率升至5.00%高峰時，加拿大經歷負利差，超過租金收益率。降息後利差已恢復至+1.55%，處於歷史常態+1.5至2.0%的低端。</span>
       </div>
     </div>
     <div class="chart-card half">
@@ -94,7 +94,7 @@
     </div>
     <div class="summary-card orange-left">
       <h4><span class="lang-en">Yield Spread</span><span class="lang-zh" style="display:none">利差分析</span></h4>
-      <p><span class="lang-en">The +0.55% spread is a significant improvement from the -1.0% negative carry during the 2023 rate peak, but remains well below the +2.0% spread that characterized the pre-pandemic era. Further BOC cuts toward 2.5% would restore meaningful positive carry. Variable-rate mortgage holders are the primary beneficiaries of the easing cycle.</span><span class="lang-zh" style="display:none">+0.55%的利差相較2023年利率高峰時的-1.0%負利差有顯著改善，但仍遠低於疫情前+2.0%的利差水平。BOC進一步降息至2.5%將恢復有意義的正利差。浮動利率房貸持有者是降息週期的主要受益者。</span></p>
+      <p><span class="lang-en">The +1.55% spread is a significant improvement from the -1.0% negative carry during the 2023 rate peak, but remains below the +2.0% spread that characterized the pre-pandemic era. The BOC has held at 2.25% since October 2025; a move up to 2.5% would narrow the spread to +1.3%. Variable-rate mortgage holders are the primary beneficiaries of the easing cycle.</span><span class="lang-zh" style="display:none">+1.55%的利差相較2023年利率高峰時的-1.0%負利差有顯著改善，但仍低於疫情前+2.0%的利差水平。BOC自2025年10月起維持2.25%；若升至2.5%，利差將收窄至+1.3%。浮動利率房貸持有者是降息週期的主要受益者。</span></p>
     </div>
   </div>
 
@@ -174,7 +174,7 @@ function initCharts(lang){
     yAxis:mkAxis({type:'value',axisLabel:{formatter:'{value}%'}}),
     series:[
       {name:'Rental Yield',type:'line',smooth:0.3,data:[4.5,4.2,3.5,3.8,3.8,3.8,3.8],lineStyle:{color:C.green},itemStyle:{color:C.green},symbol:'circle',symbolSize:5,areaStyle:{color:{type:'linear',x:0,y:0,x2:0,y2:1,colorStops:[{offset:0,color:'rgba(22,163,74,0.15)'},{offset:1,color:'rgba(22,163,74,0.02)'}]}}},
-      {name:'BOC Rate',type:'line',step:'end',data:[1.75,0.25,0.25,4.25,5.00,4.25,3.25],lineStyle:{color:C.red,type:'dashed'},itemStyle:{color:C.red},symbol:'circle',symbolSize:5}
+      {name:'BOC Rate',type:'line',step:'end',data:[1.75,0.25,0.25,4.25,5.00,3.25,2.25],lineStyle:{color:C.red,type:'dashed'},itemStyle:{color:C.red},symbol:'circle',symbolSize:5}
     ]
   });
 
@@ -188,8 +188,8 @@ function initCharts(lang){
     xAxis:mkAxis({type:'category',data:['2019','2020','2021','2022','2023','2024','2025']}),
     yAxis:mkAxis({type:'value'}),
     series:[
-      {name:'Nominal Index',type:'line',smooth:0.2,data:[100,108,131,121,116,118,116],lineStyle:{color:C.navy},itemStyle:{color:C.navy},symbol:'circle',symbolSize:5},
-      {name:'Real Index',type:'line',smooth:0.2,data:[100,106,124,110,104,104,101],lineStyle:{color:C.muted,type:'dashed'},itemStyle:{color:C.muted},symbol:'circle',symbolSize:5}
+      {name:'Nominal Index',type:'line',smooth:0.2,data:[100,108,131,121,116,118,null],lineStyle:{color:C.navy},itemStyle:{color:C.navy},symbol:'circle',symbolSize:5},
+      {name:'Real Index',type:'line',smooth:0.2,data:[100,106,124,110,104,104,null],lineStyle:{color:C.muted,type:'dashed'},itemStyle:{color:C.muted},symbol:'circle',symbolSize:5}
     ]
   });
 }

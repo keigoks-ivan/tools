@@ -17,7 +17,7 @@
   <div id="nav-root"></div>
   <main class="container">
     <div class="page-header">
-      <span class="updated"><span class="lang-en">LAST UPDATED: Q1 2026</span><span class="lang-zh" style="display:none">最後更新：2026年Q1</span></span>
+      <span class="updated"><span class="lang-en">LAST UPDATED: SEP 2026</span><span class="lang-zh" style="display:none">最後更新：2026年9月</span></span>
       <h1><span class="lang-en">Supply Pipeline Analysis</span><span class="lang-zh" style="display:none">供給分析</span></h1>
       <p class="subtitle"><span class="lang-en">Building Consents, Listings &amp; Rental Inventory</span><span class="lang-zh" style="display:none">建築許可、上架量與租賃庫存</span></p>
     </div>
@@ -25,10 +25,10 @@
     <div class="section-label"><span class="lang-en">SUPPLY INDICATORS</span><span class="lang-zh" style="display:none">供給指標</span></div>
     <div class="kpi-grid">
       <div class="kpi-card green">
-        <div class="kpi-label"><span class="lang-en">SEP CONSENTS</span><span class="lang-zh" style="display:none">9月建築許可</span></div>
-        <div class="kpi-value">3,747</div>
-        <span class="kpi-badge badge-green">+27% YoY</span>
-        <div class="kpi-source">Stats NZ Sep 2025</div>
+        <div class="kpi-label"><span class="lang-en">AUG CONSENTS</span><span class="lang-zh" style="display:none">8月建築許可</span></div>
+        <div class="kpi-value">3,440</div>
+        <span class="kpi-badge badge-green">+11.7% YoY</span>
+        <div class="kpi-source">Stats NZ Aug 2026</div>
       </div>
       <div class="kpi-card orange">
         <div class="kpi-label"><span class="lang-en">RENTAL LISTINGS</span><span class="lang-zh" style="display:none">租賃上架量</span></div>
@@ -37,12 +37,12 @@
       </div>
       <div class="kpi-card green">
         <div class="kpi-label"><span class="lang-en">NEW LISTINGS</span><span class="lang-zh" style="display:none">新增上架量</span></div>
-        <div class="kpi-value">+5.5%</div>
-        <span class="kpi-badge badge-green">YoY 2025</span>
+        <div class="kpi-value">-5.1%</div>
+        <span class="kpi-badge badge-green">YoY Aug 2026</span>
       </div>
       <div class="kpi-card orange">
         <div class="kpi-label"><span class="lang-en">AUCKLAND INVENTORY</span><span class="lang-zh" style="display:none">奧克蘭庫存</span></div>
-        <div class="kpi-value">31 wk</div>
+        <div class="kpi-value">37 wk</div>
         <span class="kpi-badge badge-orange"><span class="lang-en">Elevated</span><span class="lang-zh" style="display:none">偏高</span></span>
       </div>
       <div class="kpi-card red">
@@ -80,8 +80,8 @@
     </div>
 
     <div class="source-footer">
-      <span class="lang-en">Stats NZ &middot; REINZ &middot; Trade Me Property Q1 2026<br><em>Not investment advice.</em></span>
-      <span class="lang-zh" style="display:none">紐西蘭統計局 &middot; REINZ &middot; Trade Me Property 2026年Q1<br><em>非投資建議。</em></span>
+      <span class="lang-en">Stats NZ &middot; REINZ &middot; Trade Me Property Sep 2026<br><em>Not investment advice.</em></span>
+      <span class="lang-zh" style="display:none">紐西蘭統計局 &middot; REINZ &middot; Trade Me Property 2026年9月<br><em>非投資建議。</em></span>
     </div>
   </main>
 
@@ -109,10 +109,10 @@
     var c1=echarts.init(document.getElementById('chartNzConsents'));allCharts.push(c1);
     c1.setOption({
       tooltip:baseTooltip,grid:baseGrid,
-      xAxis:mkAxis({type:'category',data:['2020','2021','2022','2023','2024','2025E']}),
+      xAxis:mkAxis({type:'category',data:['2020','2021','2022','2023','2024','2025','YE Aug 2026']}),
       yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:function(v){return fmtK(v);}})}),
       series:[{
-        type:'line',data:[39000,48000,50000,37000,33000,38000],
+        type:'line',data:[39000,48000,50000,37000,33000,36619,41268],
         lineStyle:{color:C.orange,width:2},itemStyle:{color:C.orange},
         areaStyle:{color:'rgba(217,119,6,0.12)'},smooth:0.2,symbol:'circle',symbolSize:6,
         markPoint:{data:[{type:'max',name:'Peak',label:{formatter:lang==='zh'?'高峰':'Peak',fontSize:9},itemStyle:{color:C.orange}}]}
@@ -123,10 +123,10 @@
     var c2=echarts.init(document.getElementById('chartNzListings'));allCharts.push(c2);
     c2.setOption({
       tooltip:baseTooltip,grid:baseGrid,
-      xAxis:mkAxis({type:'category',data:['2022','2023','2024','2025']}),
+      xAxis:mkAxis({type:'category',data:['2022','2023','2024','2025','Aug 2026']}),
       yAxis:mkAxis({type:'value',axisLabel:Object.assign({},baseText,{formatter:'{value}%'})}),
       series:[{
-        type:'bar',data:[-15,8,12,5.5].map(function(v){return{value:v,itemStyle:{color:v>=0?C.green:C.red,borderRadius:v>=0?[4,4,0,0]:[0,0,4,4]}};}),
+        type:'bar',data:[-15,8,12,5.5,-5.1].map(function(v){return{value:v,itemStyle:{color:v>=0?C.green:C.red,borderRadius:v>=0?[4,4,0,0]:[0,0,4,4]}};}),
         barMaxWidth:45,
         label:{show:true,position:'top',fontFamily:'JetBrains Mono',fontSize:10,formatter:function(p){return(p.value>=0?'+':'')+p.value+'%';}}
       }]
