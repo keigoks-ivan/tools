@@ -26,3 +26,9 @@ No runtime fetches to third parties: every file above is local and can be commit
 - `../ui-play.js`: original SVG challenge icons and game UI artwork.
 - `../ui-music.js`: original 16-bar chord progression, melody and synthesized instruments. No samples, recordings or external music are loaded. Web Audio renders a looping buffer only after the player enables music; default is mute.
 - Production v2 does **not** load Black Marble, and makes no runtime requests to NASA or any third party. Textures and fonts are local/system resources.
+
+## Airport catalog expansion (release 16)
+
+`../art/v2/mascot.webp`: original alternate miniature airplane character generated with the built-in OpenAI imagegen tool, selected after the owner requested a different mascot. Re-encoded to transparent 512×512 WebP. No external photo, logo or manufacturer artwork. Final prompt, mode and original source path are recorded in `V2-IMPLEMENTATION.md`.
+
+New airport codes and coordinates in `../data.mjs` were checked against the [OurAirports public-domain dataset](https://ourairports.com/data/) downloaded on 2026-10-05. Only the selected airports' fields are baked into the game; there is no runtime data fetch. Source CSV SHA-256: `1baffe51282f40a192490ff27654309dd9252e9dafd7a179f69b2f4fa96a75af`. Names are local translations, and all catchment, appeal, season, fee and slot assumptions are game design values. OurAirports releases its data to the Public Domain and does not guarantee accuracy. Phnom Penh uses the current Techo airport (KTI), checked against [the operator's airport opening notice](https://www.techoairport.com.kh/news/kti-inauguration-ceremony).

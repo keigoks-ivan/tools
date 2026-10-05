@@ -2,6 +2,15 @@
 
 Generated from sources.mjs. Status: verified = read in a public source on 2026-10-05; secondary = low-quality summary only; design = game design value.
 
+## 全球航點的機場代碼與座標 / Airport codes and coordinates [verified]
+
+新增 148 個航點，共 180 個。新增航點的機場代碼與座標核對 OurAirports 2026-10-05 公開資料，並使用有定期航班的機場。每個城市只選一座機場，避免重複計算同一都會區需求。新增城市的有效航空集客規模取概略都會／島嶼人口的 65%（設計值），用以簡化搭機參與程度，並非人口統計。集客規模、商務與觀光權重、費用、季節與時段限制皆為簡化遊戲設定，不代表實測客量或現行航權。
+
+148 added airports, 180 total. New codes and coordinates checked against the 2026-10-05 OurAirports public-domain data, selecting airports with scheduled service. One airport per city avoids duplicating metropolitan demand. New effective air-travel catchments use 65% of approximate metro/island populations as a design assumption for participation, not a census count. Catchments, business/leisure weights, fees, seasons and slot limits are simplified game assumptions, not measured traffic or current traffic rights.
+
+- Source: OurAirports open data (Public Domain) — https://ourairports.com/data/
+- Used for: CITIES.*.id / lat / lon; CITY_REGIONS
+
 ## 全球航空業獲利與載客率 / Industry profit and load factor [verified]
 
 2025 年淨利 395 億美元、淨利率 3.9%、每位旅客獲利 7.90 美元；2026 年預測淨利率 3.9%、載客率 83.8%、燃油占營運成本 25.7%、人事占 28%、投入資本報酬率 6.8%（資金成本 8.2%）。
@@ -157,16 +166,16 @@ The InterVISTAS study for IATA is clear on direction: business travellers are le
 
 ## 需求模型 / Demand model [design]
 
-重力模型（需求與兩地人口乘積成正比、隨距離遞減）是航空需求研究的標準做法；遊戲只取其形狀，常數 8,000 使台北到東京的整體市場約每週 6 萬人次、蘇黎世到倫敦約 5 萬人次，與公開的年旅客量同一個量級。城市人口為概略都會區數字。淡旺季曲線與 ±25% 幅度為設計值。
+重力模型（需求與兩地人口乘積成正比、隨距離遞減）是航空需求研究的標準做法；遊戲只取其形狀，常數 8,000 使台北到東京的整體市場約每週 6 萬人次、蘇黎世到倫敦約 5 萬人次，與公開的年旅客量同一個量級。城市規模是簡化的都會區／有效航空集客數字，並非人口統計。淡旺季曲線與 ±25% 幅度為設計值。
 
-A gravity model (demand proportional to the product of populations, decaying with distance) is the standard form in air-demand research. The game uses only its shape; the constant 8,000 puts the Taipei-Tokyo total market near 60,000 passengers a week and Zurich-London near 50,000, the same order as published annual traffic. City populations are rough metro figures. Seasonal curves and the +/-25% swing are design values.
+A gravity model (demand proportional to the product of populations, decaying with distance) is the standard form in air-demand research. The game uses only its shape; the constant 8,000 puts the Taipei-Tokyo total market near 60,000 passengers a week and Zurich-London near 50,000, the same order as published annual traffic. City sizes are simplified metro/effective air-travel catchments, not census counts. Seasonal curves and the +/-25% swing are design values.
 
 - Source: Academic air-demand literature (Mainz, NASA, EUR papers); general knowledge
 - Used for: pairBase(); CITIES.*.pop / season
 
 ## Design values
 
-- **各樞紐的票價指數 / Hub yield index**: TPE 1.17/1.23, NRT 1.09/1.10, SIN 1.32/1.33, DXB 1.20/1.23, ZRH 1.42/1.22 (year/decade). 把示範玩家的整體淨利率校準到約 5.5%，並讓五個樞紐的難度接近；數值高代表該樞紐的本地市場票價較貴或競爭較弱。這是校準值，不是量測值。 Calibrates the sample operator’s overall margin to about 5.5% and keeps the five hubs comparable in difficulty; a higher index means pricier fares or weaker competition at that hub. A calibration, not a measurement.
+- **各樞紐的票價指數 / Hub yield index**: TPE 1.171/1.232, NRT 1.100/1.150, SIN 1.315/1.331, DXB 1.204/1.200, ZRH 1.250/1.221 (year/decade). 把示範玩家的整體淨利率校準到約 5.5%，並讓五個樞紐的難度接近；數值高代表該樞紐的本地市場票價較貴或競爭較弱。這是校準值，不是量測值。 Calibrates the sample operator’s overall margin to about 5.5% and keeps the five hubs comparable in difficulty; a higher index means pricier fares or weaker competition at that hub. A calibration, not a measurement.
 - **航班份額與對手 / Frequency share and rivals**: freq exponent 1.45 (business) / 1.2 (leisure); other carriers = 6 x (market/1000)^0.65 flights; spill p = 2. 班次越多，份額越大（S 形曲線）；商務客更看重班次。其他航空的班次隨市場大小增加；當週需求超過座位時，座位並不能全部賣出（溢出）。 More flights win disproportionate share (S-curve), more so for business travellers. Other carriers’ frequency grows with market size; when demand exceeds seats, not every seat sells (spill).
 - **廉航參數 / Low-cost parameters**: fare 0.72 (short) to 0.86 (long) of full-service; business appeal 0.55, leisure 0.80; crew x0.86, ground x0.80, airport x0.88, overhead x0.72, distribution 1.5% vs 5.5%; seats +10 to 16%; transfers x0.25. 短程票價約低二成八，長程只低一成四；成本優勢在寬體機上只有一半。 Short-haul fares about 28% lower, long-haul 14%; the cost advantage is halved on widebodies.
 - **新航線爬升期 / Route ramp-up**: year: 70%, 90%, 100% of potential; decade: 90%, 100%. 新航線前幾個回合只拿到部分客人。 New routes win only part of their potential in the first turns.

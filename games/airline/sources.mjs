@@ -5,6 +5,12 @@
 // usedFor lists the CONST / data field the value feeds. url may be null for design values.
 
 export const SOURCES = [
+  { id: 'airport-geography', status: 'verified',
+    topicZh: '全球航點的機場代碼與座標', topicEn: 'Airport codes and coordinates',
+    valueZh: '新增 148 個航點，共 180 個。新增航點的機場代碼與座標核對 OurAirports 2026-10-05 公開資料，並使用有定期航班的機場。每個城市只選一座機場，避免重複計算同一都會區需求。新增城市的有效航空集客規模取概略都會／島嶼人口的 65%（設計值），用以簡化搭機參與程度，並非人口統計。集客規模、商務與觀光權重、費用、季節與時段限制皆為簡化遊戲設定，不代表實測客量或現行航權。',
+    valueEn: '148 added airports, 180 total. New codes and coordinates checked against the 2026-10-05 OurAirports public-domain data, selecting airports with scheduled service. One airport per city avoids duplicating metropolitan demand. New effective air-travel catchments use 65% of approximate metro/island populations as a design assumption for participation, not a census count. Catchments, business/leisure weights, fees, seasons and slot limits are simplified game assumptions, not measured traffic or current traffic rights.',
+    sourceName: 'OurAirports open data (Public Domain)', url: 'https://ourairports.com/data/',
+    usedFor: ['CITIES.*.id / lat / lon', 'CITY_REGIONS'] },
   { id: 'iata-outlook-2025', status: 'verified',
     topicZh: '全球航空業獲利與載客率', topicEn: 'Industry profit and load factor',
     valueZh: '2025 年淨利 395 億美元、淨利率 3.9%、每位旅客獲利 7.90 美元；2026 年預測淨利率 3.9%、載客率 83.8%、燃油占營運成本 25.7%、人事占 28%、投入資本報酬率 6.8%（資金成本 8.2%）。',
@@ -108,8 +114,8 @@ export const SOURCES = [
     usedFor: ['CONST.elasticity', 'CONST.shareElasticityMult'] },
   { id: 'gravity', status: 'design',
     topicZh: '需求模型', topicEn: 'Demand model',
-    valueZh: '重力模型（需求與兩地人口乘積成正比、隨距離遞減）是航空需求研究的標準做法；遊戲只取其形狀，常數 8,000 使台北到東京的整體市場約每週 6 萬人次、蘇黎世到倫敦約 5 萬人次，與公開的年旅客量同一個量級。城市人口為概略都會區數字。淡旺季曲線與 ±25% 幅度為設計值。',
-    valueEn: 'A gravity model (demand proportional to the product of populations, decaying with distance) is the standard form in air-demand research. The game uses only its shape; the constant 8,000 puts the Taipei-Tokyo total market near 60,000 passengers a week and Zurich-London near 50,000, the same order as published annual traffic. City populations are rough metro figures. Seasonal curves and the +/-25% swing are design values.',
+    valueZh: '重力模型（需求與兩地人口乘積成正比、隨距離遞減）是航空需求研究的標準做法；遊戲只取其形狀，常數 8,000 使台北到東京的整體市場約每週 6 萬人次、蘇黎世到倫敦約 5 萬人次，與公開的年旅客量同一個量級。城市規模是簡化的都會區／有效航空集客數字，並非人口統計。淡旺季曲線與 ±25% 幅度為設計值。',
+    valueEn: 'A gravity model (demand proportional to the product of populations, decaying with distance) is the standard form in air-demand research. The game uses only its shape; the constant 8,000 puts the Taipei-Tokyo total market near 60,000 passengers a week and Zurich-London near 50,000, the same order as published annual traffic. City sizes are simplified metro/effective air-travel catchments, not census counts. Seasonal curves and the +/-25% swing are design values.',
     sourceName: 'Academic air-demand literature (Mainz, NASA, EUR papers); general knowledge', url: null,
     usedFor: ['pairBase()', 'CITIES.*.pop / season'] }
 ];
@@ -117,7 +123,7 @@ export const SOURCES = [
 // Design values with no external source. Listed so the 「資料來源」 page can show them as design choices.
 export const DESIGN_VALUES = [
   { id: 'hub-yield', zhName: '各樞紐的票價指數', enName: 'Hub yield index',
-    value: 'TPE 1.17/1.23, NRT 1.09/1.10, SIN 1.32/1.33, DXB 1.20/1.23, ZRH 1.42/1.22 (year/decade)',
+    value: 'TPE 1.171/1.232, NRT 1.100/1.150, SIN 1.315/1.331, DXB 1.204/1.200, ZRH 1.250/1.221 (year/decade)',
     zh: '把示範玩家的整體淨利率校準到約 5.5%，並讓五個樞紐的難度接近；數值高代表該樞紐的本地市場票價較貴或競爭較弱。這是校準值，不是量測值。',
     en: 'Calibrates the sample operator’s overall margin to about 5.5% and keeps the five hubs comparable in difficulty; a higher index means pricier fares or weaker competition at that hub. A calibration, not a measurement.' },
   { id: 'share', zhName: '航班份額與對手', enName: 'Frequency share and rivals',

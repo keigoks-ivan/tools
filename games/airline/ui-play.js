@@ -1,8 +1,19 @@
 // Visual feedback only: every goal and badge reads the existing economic results.
-import { CITIES, AIRCRAFT } from './data.mjs?v=15';
-import { FACILITIES } from './v2.mjs?v=15';
-import { aircraftArt } from './ui-art-v2.js?v=15';
-import { tr, pick, esc, fmtUSD, fmtPct } from './ui-util.js';
+import { CITIES, AIRCRAFT } from './data.mjs?v=16';
+import { FACILITIES } from './v2.mjs?v=16';
+import { aircraftArt } from './ui-art-v2.js?v=16';
+import { tr, pick, esc, fmtUSD, fmtPct, fmtNum } from './ui-util.js';
+
+export function aircraftStats(type, model = 'fsc') {
+  const a = AIRCRAFT[type]; if (!a) return '';
+  return `<div class="aircraft-stats"><span><small>${tr('最大航程','MAX RANGE')}</small><b>${fmtNum(a.rangeKm)} <em>km</em></b></span><span><small>${tr('每班座位','SEATS / FLIGHT')}</small><b>${fmtNum(a.seats[model])} <em>${tr('座','seats')}</em></b></span></div>`;
+}
+
+export function rangeComparison(type, distance, eligible) {
+  const a = AIRCRAFT[type]; if (!a) return '';
+  const spare = Math.round(a.rangeKm - distance);
+  return `<div class="range-comparison ${eligible?'fits':'too-far'}"><div><b>${eligible?tr('✓ 這架飛得到','✓ Within range'):tr('超出航程','Out of range')}</b><span>${eligible?tr(`航程餘裕 ${fmtNum(Math.max(0,spare))} km`,`${fmtNum(Math.max(0,spare))} km to spare`):tr(`還差 ${fmtNum(Math.abs(spare))} km`,`${fmtNum(Math.abs(spare))} km too far`)}</span></div><div class="range-track"><i style="width:${Math.min(100,distance/a.rangeKm*100)}%"></i></div><small>${tr('航線','ROUTE')} ${fmtNum(distance)} km <span>${tr('機型上限','AIRCRAFT LIMIT')} ${fmtNum(a.rangeKm)} km</span></small></div>`;
+}
 
 export function playIcon(id) {
   const shape = id === 'margin' ? '<path d="M20 58V44h13v14m8 0V32h13v26m8 0V19h13v39" fill="#8aafce"/><path d="m21 31 20-12 13 3 19-13" fill="none" stroke="#2f5d8c" stroke-width="4"/><circle cx="75" cy="17" r="10" fill="#dfc37b"/><path d="m70 17 4 4 6-7" fill="none" stroke="#fff" stroke-width="2"/>'
@@ -24,7 +35,7 @@ export function routeTicket(s, r, e, bar, active) {
 }
 
 export function hubScene(s, queued, large = false) {
-  return `<div class="hub-scene ${large?'large':''}"><img src="./art/v2/airport.webp?v=15" width="1536" height="1024" decoding="async" alt="${tr('天青航空的迷你機場，跑道、航廈與飛機','A miniature SKYGLAZE airport with runway, terminal and aircraft')}"><span class="airport-beacon" aria-hidden="true"></span><span class="hub-scene-code">${s.hub}<small>${tr('你的基地','YOUR HUB')}</small></span><div class="hub-hotspots">${Object.entries(FACILITIES).map(([id,f],i)=>`<button type="button" class="hub-hotspot ${s.facilities?.[id]?'built':queued.has(id)?'queued':''}" data-hub-detail="${id}"><i>${['⚙','♧','◒'][i]}</i><span>${esc(pick(f))}<small>${s.facilities?.[id]?tr('營運中','ACTIVE'):queued.has(id)?tr('已排定','PLANNED'):tr('查看設施','EXPLORE')}</small></span></button>`).join('')}</div></div>`;
+  return `<div class="hub-scene ${large?'large':''}"><img src="./art/v2/airport.webp?v=16" width="1536" height="1024" decoding="async" alt="${tr('天青航空的迷你機場，跑道、航廈與飛機','A miniature SKYGLAZE airport with runway, terminal and aircraft')}"><span class="airport-beacon" aria-hidden="true"></span><span class="hub-scene-code">${s.hub}<small>${tr('你的基地','YOUR HUB')}</small></span><div class="hub-hotspots">${Object.entries(FACILITIES).map(([id,f],i)=>`<button type="button" class="hub-hotspot ${s.facilities?.[id]?'built':queued.has(id)?'queued':''}" data-hub-detail="${id}"><i>${['⚙','♧','◒'][i]}</i><span>${esc(pick(f))}<small>${s.facilities?.[id]?tr('營運中','ACTIVE'):queued.has(id)?tr('已排定','PLANNED'):tr('查看設施','EXPLORE')}</small></span></button>`).join('')}</div></div>`;
 }
 
 export function goalList(challenge, state) {

@@ -4,7 +4,7 @@ export function createNetwork(box, options) {
   let live = null, dead = false, current = {}, time = { elapsed: 0, speed: 0 };
   const loading = document.createElement('div'); loading.className = 'globe-loading';
   loading.textContent = tr('正在準備航網…', 'Preparing your network…'); box.append(loading);
-  const ready = import('./ui-globe.js?v=15').then(async mod => {
+  const ready = import('./ui-globe.js?v=16').then(async mod => {
     if (dead) return;
     live = await mod.createGlobe(box, options);
     if (dead) { live.destroy(); return; }

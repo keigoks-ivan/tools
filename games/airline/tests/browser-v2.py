@@ -82,14 +82,15 @@ async def main():
             assert abs(await page.evaluate('__tq.app.clock.elapsed')-before)<.25
             # Next-turn route changes cannot change the current frozen economic result.
             current=await page.evaluate('JSON.stringify(__tq.app.active.report)')
-            await page.locator('[data-route="PVG"]').first.click()
+            edited_city=await page.locator('[data-route]').first.get_attribute('data-route')
+            await page.locator(f'[data-route="{edited_city}"]').first.click()
             await page.locator('[data-fare="high"]').click();await page.locator('#done').click()
             assert current==await page.evaluate('JSON.stringify(__tq.app.active.report)')
             elapsed=await page.evaluate('__tq.app.clock.elapsed')
             await page.reload();await page.locator('[data-continue="year"]').click()
             assert await page.evaluate('!__tq.app.clock.running && !!__tq.app.active')
             assert abs(await page.evaluate('__tq.app.clock.elapsed')-elapsed)<.25
-            assert await page.evaluate('__tq.app.draft.routes.get("PVG").fare')=='high'
+            assert await page.evaluate('city=>__tq.app.draft.routes.get(city).fare',edited_city)=='high'
             await page.locator('#pause').click();await page.locator('[data-speed="4"]').click()
             await page.wait_for_timeout(1200)
             assert await page.evaluate('__tq.app.clock.elapsed')>elapsed+3
@@ -103,7 +104,7 @@ async def main():
             assert not await page.evaluate('document.documentElement.scrollWidth>innerWidth'),'Report overflow'
             await page.locator('#next').click()
             assert await page.evaluate('__tq.app.draft.facilities.has("depot")'), 'Next-turn facility lost'
-            assert await page.evaluate('__tq.app.draft.routes.get("PVG").fare')=='high'
+            assert await page.evaluate('city=>__tq.app.draft.routes.get(city).fare',edited_city)=='high'
             await page.locator('#lang-btn').click()
             assert await page.evaluate('document.documentElement.lang')=='en'
             await page.locator('#menu-btn').click();await page.locator('[data-m="src"]').click()
@@ -132,8 +133,8 @@ async def main():
         await page.locator('[data-mode="decade"]').click();await page.locator('#go-new').click();await answer_events(page)
         await page.evaluate('''()=>{const a=__tq.app;a.draft.routes=new Map(Object.values(__tq.B.CITIES).filter(c=>c.id!==a.state.hub).map(c=>{const o=__tq.B.routeOptions(a.state,c.id);return {city:c.id,type:o.eligibleTypes.at(-1),weekly:7,fare:'mid'};}).filter(r=>r.type).map(r=>[r.city,r]));}''')
         await refresh_panel(page);await page.wait_for_timeout(2000)
-        frames=await page.evaluate('''()=>new Promise(resolve=>{const times=[];let last=0;function frame(t){if(last)times.push(t-last);last=t;if(times.length<120)requestAnimationFrame(frame);else{times.sort((a,b)=>a-b);resolve({mean:times.reduce((a,b)=>a+b)/times.length,p95:times[Math.floor(times.length*.95)]});}}requestAnimationFrame(frame);})''')
-        stats=await page.evaluate('__tq.app.map.stats()');assert not stats.get('fallback'),stats
+        frames=await page.evaluate('''()=>new Promise(resolve=>{const times=[];let last=0;function frame(t){__tq.app.map.setTime({elapsed:t/1000,speed:1});if(last)times.push(t-last);last=t;if(times.length<120)requestAnimationFrame(frame);else{times.sort((a,b)=>a-b);__tq.app.map.setTime({elapsed:t/1000,speed:0});resolve({mean:times.reduce((a,b)=>a+b)/times.length,p95:times[Math.floor(times.length*.95)]});}}requestAnimationFrame(frame);})''')
+        stats=await page.evaluate('__tq.app.map.stats()');assert not stats.get('fallback') and stats['frames']>10,stats
         results['performance']={'frameMs':frames,'renderer':stats,'decodedBytes':await page.evaluate('performance.getEntriesByType("resource").reduce((n,e)=>n+e.decodedBodySize,0)')}
         await context.close()
         # No-WebGL fallback must retain playable route controls.
