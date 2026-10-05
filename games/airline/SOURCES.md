@@ -2,13 +2,49 @@
 
 Generated from sources.mjs. Status: verified = read in a public source on 2026-10-05; secondary = low-quality summary only; design = game design value.
 
+## 歐洲航線客量與座位 / European route passengers and seats [verified]
+
+Eurostat avia_par_*，29 個報告國，2024 年 PAS_BRD 旅客與 ST_PAS 座位。雙向航段統計，含定期與非定期客運。兩端機場同時報告時，只選一份；不同年份與來源不加總。
+
+Eurostat avia_par_*, 29 reporting countries, annual 2024 PAS_BRD passengers and ST_PAS seats. Bidirectional flight stages, scheduled and non-scheduled passenger flights. Mirrored reporters, sources and years are never added together.
+
+- Source: Eurostat air transport statistics <https://ec.europa.eu/eurostat/cache/metadata/EN/avia_pa_esms.htm>
+- Used for: OBSERVED_MARKETS: 714 pairs
+
+## 英國國際航線客量 / UK international route passengers [verified]
+
+CAA 2025 年 Table 12.1，採定期航班雙向客量。此表沒有座位數，運力另外估算，並在航線面板標示。
+
+CAA annual 2025 Table 12.1, scheduled passengers in both directions. Seats are not provided; capacity is separately estimated and labelled in the route panel.
+
+- Source: UK Civil Aviation Authority <https://www.caa.co.uk/data-and-analysis/uk-aviation-market/airports/uk-airport-data/uk-airport-data-2025/annual-2025/>
+- Used for: OBSERVED_MARKETS: 138 pairs
+
+## 美國國際航線客量與座位 / US international route passengers and seats [verified]
+
+BTS T-100 International Segment，2025 年全年、所有航空公司、定期客運 F 類，合計雙向與 12 個月。航段客量包含轉機旅客，不是完整起訖需求。
+
+BTS T-100 International Segment, all carriers, 12 months of 2025, scheduled passenger class F. Directions and carriers aggregated. Flight-leg traffic includes connections, not true journey O-D.
+
+- Source: US DOT Bureau of Transportation Statistics <https://www.transtats.bts.gov/DL_SelectFields.aspx?gnoyr_VQ=FJE>
+- Used for: OBSERVED_MARKETS: 530 pairs
+
+## 台灣航線實際客量與座位 / Taiwan route passengers and seats [verified]
+
+民航局 2025 年統計表 53-1、53-2、53-4。桃園—洛杉磯雙向旅客 995,840 人次、座位 1,365,065 個，歷史載客率 73%。只取航線合計，不重複加上各航空公司明細。
+
+Taiwan CAA 2025 tables 53-1, 53-2 and 53-4. TPE–LAX: 995,840 passengers and 1,365,065 seats, both directions; historical load 73%. Route totals only; carrier subtotals are not added again.
+
+- Source: Taiwan Civil Aviation Administration, 2025 annual statistics <https://www.caa.gov.tw/article.aspx?a=1746&lang=1>
+- Used for: OBSERVED_MARKETS: 111 pairs
+
 ## 全球航點的機場代碼與座標 / Airport codes and coordinates [verified]
 
 新增 148 個航點，共 180 個。新增航點的機場代碼與座標核對 OurAirports 2026-10-05 公開資料，並使用有定期航班的機場。每個城市只選一座機場，避免重複計算同一都會區需求。新增城市的有效航空集客規模取概略都會／島嶼人口的 65%（設計值），用以簡化搭機參與程度，並非人口統計。集客規模、商務與觀光權重、費用、季節與時段限制皆為簡化遊戲設定，不代表實測客量或現行航權。
 
 148 added airports, 180 total. New codes and coordinates checked against the 2026-10-05 OurAirports public-domain data, selecting airports with scheduled service. One airport per city avoids duplicating metropolitan demand. New effective air-travel catchments use 65% of approximate metro/island populations as a design assumption for participation, not a census count. Catchments, business/leisure weights, fees, seasons and slot limits are simplified game assumptions, not measured traffic or current traffic rights.
 
-- Source: OurAirports open data (Public Domain) — https://ourairports.com/data/
+- Source: OurAirports open data (Public Domain) <https://ourairports.com/data/>
 - Used for: CITIES.*.id / lat / lon; CITY_REGIONS
 
 ## 全球航空業獲利與載客率 / Industry profit and load factor [verified]
@@ -67,36 +103,36 @@ Ryanair FY2025 unit cost ex-fuel was EUR 36 per passenger. No absolute ex-fuel C
 
 ## 窄體機租金 / Narrowbody lease rates [verified]
 
-新的 A320neo、737 MAX 8 月租約 40 萬美元，A321neo 約 46 萬美元；2025 年海南航空一筆租約約 34.5 萬到 36 萬美元。MQ-320 取 40 萬、MQ-321 取 46 萬。
+新的 A320neo、737 MAX 8 月租約 40 萬美元，A321neo 約 46 萬美元；2025 年海南航空一筆租約約 34.5 萬到 36 萬美元。Airbus A320neo 取 40 萬、Airbus A321LR 取 46 萬。
 
-New A320neo / 737 MAX 8 about US$400k a month, A321neo about US$460k; a 2025 Hainan Airlines deal about US$345-360k. MQ-320 uses 400k, MQ-321 uses 460k.
+New A320neo / 737 MAX 8 about US$400k a month, A321neo about US$460k; a 2025 Hainan Airlines deal about US$345-360k. Airbus A320neo uses 400k, Airbus A321LR uses 460k.
 
 - Source: ch-aviation, 2025 <https://www.ch-aviation.com/news/144317-chinas-hainan-airlines-holding-announces-new-a320neo-leases>
 - Used for: AIRCRAFT[MQ-320].leasePerMonth; AIRCRAFT[MQ-321].leasePerMonth
 
 ## 寬體機租金 / Widebody lease rates [verified]
 
-A350-900 月租約 92.5 萬美元（2021 年 1 月）至 95.4 萬美元（2023 年 1 月）；777-300ER 機齡 12 年約 31.4 萬美元（2022 年 10 月）；A330 機齡 10 年約 20 萬出頭；新的 787-8 約 86.2 萬美元（2010 年資料）。MQ-350 取 95 萬；MQ-400 設為較新世代的大型雙發機，取 105 萬（設計值）。
+A350-900 月租約 92.5 萬美元（2021 年 1 月）至 95.4 萬美元（2023 年 1 月）；777-300ER 機齡 12 年約 31.4 萬美元（2022 年 10 月）；A330 機齡 10 年約 20 萬出頭；新的 787-8 約 86.2 萬美元（2010 年資料）。Airbus A350-900 取 95 萬；Boeing 777-300ER 的遊戲租金沿用平衡設定，取 105 萬（設計值，不代表真實市場租金）。
 
-A350-900 about US$925k a month (Jan 2021) to US$954k (Jan 2023); 12-year-old 777-300ER about US$314k (Oct 2022); 10-year-old A330 in the low US$200ks; new 787-8 about US$862k (2010 data). MQ-350 uses 950k; MQ-400 is a newer-generation large twin at 1,050k (design value).
+A350-900 about US$925k a month (Jan 2021) to US$954k (Jan 2023); 12-year-old 777-300ER about US$314k (Oct 2022); 10-year-old A330 in the low US$200ks; new 787-8 about US$862k (2010 data). Airbus A350-900 uses 950k; Boeing 777-300ER retains the game’s balancing rate of 1,050k (design value, not a real market quote).
 
 - Source: IBA / aviation press via search (iba.aero, aircraft interiors, AJOT) <https://www.iba.aero/insight/new-generation-widebody-lease-rates-are-rising/>
 - Used for: AIRCRAFT[MQ-350].leasePerMonth; AIRCRAFT[MQ-400].leasePerMonth
 
 ## 每輪擋小時燃油消耗 / Fuel burn per block hour [verified]
 
-A320neo 巡航約 2,200 到 2,400 公斤每小時（Lufthansa 機隊平均 2,250）；777-300ER 約 7.35 公噸每小時（Aircraft Commerce）；Airbus 稱 A350-900 單座位燃油比 777-200ER 少約三成。MQ-320 取 2,450（含滑行與爬升，輪擋平均），MQ-400 取 7,300，MQ-350 取 5,800（由 777 與 Airbus 說法推算，設計值）。支線機與渦槳為設計值。
+A320neo 巡航約 2,200 到 2,400 公斤每小時（Lufthansa 機隊平均 2,250）；777-300ER 約 7.35 公噸每小時（Aircraft Commerce）；Airbus 稱 A350-900 單座位燃油比 777-200ER 少約三成。Airbus A320neo 取 2,450（含滑行與爬升，輪擋平均），Boeing 777-300ER 取 7,300，Airbus A350-900 取 5,800（由 777 與 Airbus 說法推算，設計值）。支線機與渦槳為設計值。
 
-A320neo cruise about 2,200-2,400 kg/h (Lufthansa fleet average 2,250); 777-300ER about 7.35 t/h (Aircraft Commerce); Airbus says the A350-900 burns about 30% less per seat than the 777-200ER. MQ-320 uses 2,450 (block average incl. taxi and climb), MQ-400 7,300, MQ-350 5,800 (derived from the 777 figure and Airbus’s claim; design). Regional jet and turboprop are design values.
+A320neo cruise about 2,200-2,400 kg/h (Lufthansa fleet average 2,250); 777-300ER about 7.35 t/h (Aircraft Commerce); Airbus says the A350-900 burns about 30% less per seat than the 777-200ER. Airbus A320neo uses 2,450 (block average incl. taxi and climb), Boeing 777-300ER 7,300, Airbus A350-900 5,800 (derived from the 777 figure and Airbus’s claim; design). Regional jet and turboprop are design values.
 
 - Source: The Flying Engineer / Wikipedia A320neo; Aircraft Commerce 777 fuel guide; Airbus <https://theflyingengineer.com/airbus-a320neo-vs-boeing-737-max-fuel-burn-comparison/>
 - Used for: AIRCRAFT.*.fuelPerBlockHour; CONST.fuelPriceUsdPerKg = 0.72 (jet about US$0.72/kg, i.e. roughly US$90-100/bbl crude plus crack spread; design)
 
 ## 機組成本 / Crew cost [secondary]
 
-A320 的機組成本約每飛行小時 1,000 到 1,200 美元，總直接營運成本每飛行小時 6,000 到 7,500 美元（低品質彙整）。MIT 航空資料顯示不同航空公司的同型機組與維修成本可差三到四倍（例如 737-500：United 機組 927、維修 1,048；Southwest 機組 388、維修 251 美元每輪擋小時，舊資料）。MQ-320 的機組成本取 1,100 × 1.1，再加地勤人事，使人事占成本 24% 到 28%（IATA 人事 28%）。
+A320 的機組成本約每飛行小時 1,000 到 1,200 美元，總直接營運成本每飛行小時 6,000 到 7,500 美元（低品質彙整）。MIT 航空資料顯示不同航空公司的同型機組與維修成本可差三到四倍（例如 737-500：United 機組 927、維修 1,048；Southwest 機組 388、維修 251 美元每輪擋小時，舊資料）。Airbus A320neo 的機組成本取 1,100 × 1.25，再加地勤人事，使人事占成本 24% 到 28%（IATA 人事 28%）。
 
-A320 crew cost is about US$1,000-1,200 per flight hour and total direct operating cost US$6,000-7,500 per flight hour (low-quality compilation). MIT airline data show crew and maintenance cost per block hour for the same type differing 3-4x between carriers (737-500: United crew 927, maintenance 1,048; Southwest 388 and 251; old data). MQ-320 crew is 1,100 x 1.1 plus ground staff, putting labour at 24-28% of cost (IATA 28%).
+A320 crew cost is about US$1,000-1,200 per flight hour and total direct operating cost US$6,000-7,500 per flight hour (low-quality compilation). MIT airline data show crew and maintenance cost per block hour for the same type differing 3-4x between carriers (737-500: United crew 927, maintenance 1,048; Southwest 388 and 251; old data). Airbus A320neo crew is 1,100 x 1.25 plus ground staff, putting labour at 24-28% of cost (IATA 28%).
 
 - Source: Aviation Week operating-cost tables; MIT Airline Data Project; aircraft operating-cost compilations <https://web.mit.edu/airlinedata/www/2016%2012%20Month%20Documents/Aircraft%20and%20Related/Carrier%20Detail%20Block%20Hour/United%20Airlines%20Aircraft%20Operating%20Statistics%2D%20Cost%20Per%20Block%20Hour%20%28Unadjusted%29.htm>
 - Used for: AIRCRAFT.*.crewPerBlockHour; CONST.crewScale; CONST.groundLabourPerDep / PerPax
@@ -157,32 +193,33 @@ Heathrow’s legal cap is 480,000 movements a year and slots are extremely scarc
 
 ## 價格彈性 / Price elasticity [design]
 
-IATA 委託 InterVISTAS 的研究方向明確：商務客彈性低於觀光客。我們沒讀到完整數值表，而且各家摘要對長程與短程誰的彈性較高說法不一致。遊戲取觀光 -1.6、商務 -0.7（設計值），長程再乘 0.8（依設計規格，長程較不敏感）。因為採份額模型，指數乘 2，使航班在 50% 市占時的有效彈性約等於設定值。
+商務客比觀光客不敏感。遊戲取觀光 -1.6、商務 -0.7，長程乘 0.8，皆為設計值。新航空在整體市場的占比通常很小，份額指數直接使用彈性參數，不再乘 2；占比越大，有效價格彈性越低。
 
-The InterVISTAS study for IATA is clear on direction: business travellers are less elastic than leisure. We could not read the full numeric tables, and summaries disagree on whether long-haul is more or less elastic than short-haul. The game uses leisure -1.6 and business -0.7 (design values), times 0.8 on long-haul (per the design spec). In a share model the exponent is doubled so that effective elasticity at a 50% share about equals the stated value.
+Leisure elasticity -1.6, business -0.7 and long-haul x0.8 are design assumptions. For a small entrant the share exponent uses elasticity directly, without the old x2. Effective elasticity falls as market share grows.
 
 - Source: InterVISTAS for IATA, "Estimating air travel demand elasticities" <https://www.iata.org/en/iata-repository/publications/economic-reports/estimating-air-travel-demand-elasticities---by-intervistas>
 - Used for: CONST.elasticity; CONST.shareElasticityMult
 
 ## 需求模型 / Demand model [design]
 
-重力模型（需求與兩地人口乘積成正比、隨距離遞減）是航空需求研究的標準做法；遊戲只取其形狀，常數 8,000 使台北到東京的整體市場約每週 6 萬人次、蘇黎世到倫敦約 5 萬人次，與公開的年旅客量同一個量級。城市規模是簡化的都會區／有效航空集客數字，並非人口統計。淡旺季曲線與 ±25% 幅度為設計值。
+180 個航點共有 16,110 組配對，1,493 組採官方航段客量；其餘由已觀測航線校準人口、距離、機場與區域影響後估算。留出 288 組航線驗證，估算偏差中位數 1.52 倍、九成約在 2.81 倍內；這不是未開航市場的可信區間。沒有資料不等於沒有需求，也不代表有直飛航班。季節曲線與需求事件為設計值。
 
-A gravity model (demand proportional to the product of populations, decaying with distance) is the standard form in air-demand research. The game uses only its shape; the constant 8,000 puts the Taipei-Tokyo total market near 60,000 passengers a week and Zurich-London near 50,000, the same order as published annual traffic. City sizes are simplified metro/effective air-travel catchments, not census counts. Seasonal curves and the +/-25% swing are design values.
+180 airports yield 16,110 pairs; 1,493 use official flight-leg traffic. Others are fitted estimates using population, distance, airport and region effects. On 288 held-out operating routes, median multiplicative error is 1.52x, P90 is 2.81x; not a confidence interval for unserved markets. Missing data means neither zero demand nor an existing nonstop service. Seasonality and events are design assumptions.
 
 - Source: Academic air-demand literature (Mainz, NASA, EUR papers); general knowledge
 - Used for: pairBase(); CITIES.*.pop / season
 
 ## Design values
 
-- **各樞紐的票價指數 / Hub yield index**: TPE 1.171/1.232, NRT 1.100/1.150, SIN 1.315/1.331, DXB 1.204/1.200, ZRH 1.250/1.221 (year/decade). 把示範玩家的整體淨利率校準到約 5.5%，並讓五個樞紐的難度接近；數值高代表該樞紐的本地市場票價較貴或競爭較弱。這是校準值，不是量測值。 Calibrates the sample operator’s overall margin to about 5.5% and keeps the five hubs comparable in difficulty; a higher index means pricier fares or weaker competition at that hub. A calibration, not a measurement.
-- **航班份額與對手 / Frequency share and rivals**: freq exponent 1.45 (business) / 1.2 (leisure); other carriers = 6 x (market/1000)^0.65 flights; spill p = 2. 班次越多，份額越大（S 形曲線）；商務客更看重班次。其他航空的班次隨市場大小增加；當週需求超過座位時，座位並不能全部賣出（溢出）。 More flights win disproportionate share (S-curve), more so for business travellers. Other carriers’ frequency grows with market size; when demand exceeds seats, not every seat sells (spill).
-- **廉航參數 / Low-cost parameters**: fare 0.72 (short) to 0.86 (long) of full-service; business appeal 0.55, leisure 0.80; crew x0.86, ground x0.80, airport x0.88, overhead x0.72, distribution 1.5% vs 5.5%; seats +10 to 16%; transfers x0.25. 短程票價約低二成八，長程只低一成四；成本優勢在寬體機上只有一半。 Short-haul fares about 28% lower, long-haul 14%; the cost advantage is halved on widebodies.
+- **各樞紐的票價指數 / Hub yield index**: TPE 1.1659/1.1450, NRT 1.1171/1.0763, SIN 1.0985/1.0855, DXB 1.0843/1.0537, ZRH 1.1461/1.0800 (year/decade); crew scale 1.25. 新客量模型重新校準票價與機組成本，使示範玩家的整體淨利率維持 3% 到 8%，成本占比維持既有測試範圍。這些是設計值，不是實收票價或薪資；官方客量與座位沒有為獲利而修改。 Yield and crew cost are recalibrated for the new route mix to keep sample margins at 3–8% and costs inside the existing test bands. These are design values, not paid fares or wages; official passengers and seats are unchanged.
+- **航班份額與對手 / Frequency share and rivals**: seat-proportional share; frequency premium 0.12 business / 0.05 leisure; spill p=8; missing capacity: traffic/0.82. 以座位數分配旅客，再由票價、班次與服務調整。其他航空運力採官方座位數；缺少座位資料時，以 82% 參考載客率估算。82% 不是玩家載客率下限，也不是各航線的實測值。 Share follows seat capacity, fares, frequency and service. Incumbent seats use official data; missing seats use traffic/82%. This design assumption is neither a player load floor nor measured route occupancy.
+- **廉航參數 / Low-cost parameters**: fare 0.8 short / 0.95 long of full-service economy; business appeal 0.55, leisure 1.15; crew x0.86, ground x0.8, airport x0.88, overhead x0.72, distribution 1.5%; denser seats; transfers x0.1. 短程參考票價低二成，長程低 5%；長程傳統航空另含高艙等溢價。廉航對商務客吸引力較弱，對價格敏感觀光客較強；成本優勢在寬體上減半。這些都是設計值。 Reference fares are 20% lower short-haul and 5% lower long-haul; full-service long-haul adds a premium-cabin uplift. Low-cost appeal is lower for business and higher for price-sensitive leisure. Widebody cost advantages are halved. These are design assumptions.
 - **新航線爬升期 / Route ramp-up**: year: 70%, 90%, 100% of potential; decade: 90%, 100%. 新航線前幾個回合只拿到部分客人。 New routes win only part of their potential in the first turns.
-- **轉機旅客 / Transfer traffic**: K = 0.012 (year) / 0.03 (decade); detour limit 1.8; takes at most 60% of spare seats; through fare 92% of reference, split by leg distance. 兩條支線經樞紐轉接的潛在旅客，視繞路程度、班次與票價而定；一年模式只有小幅效果。 Potential connecting passengers between two spokes depend on detour, frequency and fare; the effect is small in Year mode.
+- **運力的動態調整 / Dynamic capacity response**: 15% monthly convergence; ±4% baseline capacity/month; index 0.4–2.5; half of player seats displaces incumbent target. 需求依季節、成長與事件變化，玩家增班立即增加座位。其他航空於結算後逐步調整運力；需求衝擊不會當期撤掉所有航班。反應速度與調整幅度為設計值，存檔保留調整結果。 Demand follows seasons, growth and events; player frequency adds seats immediately. Incumbents adjust gradually after settlement, so shocks do not instantly remove schedules. Response speed and bounds are design assumptions, preserved in saves.
+- **轉機旅客 / Transfer traffic**: K=0.012 year / 0.03 decade; detour<=1.8; reserve 15% of leg traffic; at most 60% of spare seats; through fare 92%. 官方航段客量含轉機，沒有完整起訖資料。先保留 15% 市場給獨立轉機模型，避免在全部歷史客量上再加轉機客；比例為設計值，不是實測比率。每條線轉機增量不超過保留客量與 60% 空位。 Official leg traffic includes connections without true O-D. A design 15% reserve is excluded from local demand and caps the separate transfer model, avoiding adding connections to the entire observed market. It is not measured. Transfers are also capped at 60% of spare seats.
 - **貸款與買機 / Loans and purchases**: 20% down, 80% loan, 12-year amortisation, floating base rate 5.5%, 25-year depreciation to 10% residual, resale at 92% of book (70% in the pandemic), lease return fee 2 months, government relief loan 3%. 買機自付兩成，其餘貸款；浮動利率；疫情期間二手機價下跌。 20% down, floating-rate loan, resale value drops in the pandemic.
 - **管理費用與起降費係數 / Overhead and scaling**: overhead US$330k + 70k per aircraft a month; route launch US$120k; airport scale 1.3; ground labour US$1,300 per departure + 11 per passenger. 固定成本隨機隊擴大；新航線有開辦費。 Fixed costs grow with the fleet; new routes carry a launch cost.
-- **起始資金與機隊 / Starting cash and fleet**: year: US$45M and 2 x MQ-320 leased; decade: US$150M, 2 x MQ-320 and 1 x MQ-190 leased. 設計值。 Design values.
+- **起始資金與機隊 / Starting cash and fleet**: year: US$45M and 2 x Airbus A320neo leased; decade: US$150M, 2 x Airbus A320neo and 1 x Embraer E190 leased. 設計值。 Design values.
 
 ## Verification summary
 
@@ -192,3 +229,7 @@ A gravity model (demand proportional to the product of populations, decaying wit
 - Found: IATA 2025/2026 outlook (margin, load factor, fuel and labour shares), IATA cost structure (fuel 28.7%, depreciation 9.1%, crew 8.6%, maintenance 8.4%, G&A 7.7%, station 7.1%, navigation 4.3%), narrowbody and widebody lease rates, A320neo and 777-300ER fuel burn, Ryanair ancillary revenue and unit cost, Changi and Zurich charges, online fare examples, hedge ratios.
 - Not found in a primary source (treated as design values): the 80% industry break-even load factor, the low-cost vs full-service CASK ratio, numeric elasticities, regional-jet and turboprop costs, a measured A350 burn, full airport tariff tables.
 - Sources contradict each other on whether long-haul is more or less elastic; the game follows the design spec (less sensitive) and flags it as a design value.
+
+## v17 全航點重算
+
+[來源、資料定義、誤差與重現方法](design/demand/README.md) · [32,220 個方向的重算表](design/demand/all-pairs.csv) · [稽核結果](design/demand/audit.json)。

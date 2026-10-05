@@ -1,7 +1,9 @@
 // 天青航空：航線經營 — economic model. Pure, deterministic given a seed, no DOM, no dependencies.
 // Money: US$ (constant dollars). rask/cask: US$ per available seat-km. All state is plain JSON.
-import { FACILITIES, fuelOrder } from './v2.mjs?v=16';
-import { CONST, MODES, HUBS, CITIES, AIRCRAFT, EVENTS, LESSONS, RIVALS, HUB_WEATHER } from './data.mjs?v=16';
+import { FACILITIES, fuelOrder } from './v2.mjs?v=17';
+import { CONST, MODES, HUBS, CITIES, AIRCRAFT, EVENTS, LESSONS, RIVALS, HUB_WEATHER } from './data.mjs?v=17';
+import { marketProfile } from './demand.mjs?v=17';
+export { marketProfile, DEMAND_SOURCES } from './demand.mjs?v=17';
 
 // ============================================================ utilities
 const clone = o => JSON.parse(JSON.stringify(o));
@@ -33,7 +35,7 @@ function lccFactor(d) { const t = clamp((d - 2000) / 5000, 0, 1); return CONST.l
 // full-service long-haul fares include premium-cabin seats (design: up to +25% at 8,000 km and beyond); low-cost long-haul is one cabin
 const cabinMix = d => 1 + CONST.premiumUplift * clamp((d - 2000) / 6000, 0, 1);
 // fares track local income and cost levels: dearer in Zurich/London/Tokyo, cheaper in Bangkok/Manila (design, via the airport fee level)
-const plOf = (s, a, b) => (0.78 + 0.22 * (a.feeLevel + b.feeLevel) / 2) * CONST.hubYield[s.hub][s.mode];
+const plOf = (s, a, b) => (0.78 + 0.22 * (a.feeLevel + b.feeLevel) / 2) * (CONST.hubYield[s.hub]?.[s.mode] ?? 1);
 const priceLevel = (d, model) => (model === 'lcc' ? lccFactor(d) : 1);
 const fareLevel = (d, model) => (model === 'lcc' ? lccFactor(d) : cabinMix(d));
 const seatsOf = (ac, model) => ac.seats[model === 'lcc' ? 'lcc' : 'fsc'];
@@ -43,11 +45,28 @@ function ancillaryPerPax(d, model) { const a = CONST.ancillary[model === 'lcc' ?
 const modeOf = s => MODES[s.mode];
 
 // ============================================================ market
-const KGRAV = 8000;
 function pairBase(a, b) {
-  const d = dist(a, b);
-  const tour = (a.tourism + b.tourism) / 2;
-  return KGRAV * Math.sqrt(a.pop * b.pop) * (0.7 + 0.6 * tour) / Math.pow(d / 1000 + 0.5, 0.8);
+  return marketProfile(a, b, dist(a, b)).weeklyPax;
+}
+function backgroundSeats(s, ctx, city) {
+  const h = CITIES[s.hub], c = CITIES[city];
+  const baseline = marketProfile(h, c, dist(h, c)).weeklySeats * (CONST.hubDemand[s.hub] ?? 1) * ctx.m.demandScale;
+  return Math.max(baseline * 0.2, baseline - (s.marketRivalBase?.[city] || 0)) * (s.marketSupply?.[city] ?? ctx.growth);
+}
+// Incumbents react after settlement. Historical traffic/capacity remains immutable.
+function updateMarketSupply(s, ctx) {
+  s.marketSupply ||= {};
+  for (const city of new Set([...Object.keys(s.marketSupply), ...s.routes.map(r => r.city)])) {
+    const h = CITIES[s.hub], c = CITIES[city], p = marketProfile(h, c, dist(h, c));
+    const r = s.routes.find(r => r.city === city);
+    const own = r ? 2 * r.weekly * seatsOf(AIRCRAFT[r.type], s.model) : 0;
+    const allSeats = p.weeklySeats * (CONST.hubDemand[s.hub] ?? 1) * ctx.m.demandScale;
+    const base = Math.max(allSeats * 0.2, allSeats - (s.marketRivalBase?.[city] || 0));
+    const previous = s.marketSupply[city] ?? ctx.growth;
+    const target = clamp(ctx.growth * ctx.demandAll - 0.5 * own / base, 0.4, 2.5);
+    const response = 1 - Math.pow(0.85, ctx.mpt);
+    s.marketSupply[city] = clamp(previous + clamp((target - previous) * response, -0.04 * ctx.mpt, 0.04 * ctx.mpt), 0.4, 2.5);
+  }
 }
 const bizShare = (a, b) => clamp(0.10 + 0.38 * Math.sqrt(a.business * b.business), 0.1, 0.5);
 const longhaulMult = d => 1 - 0.2 * clamp((d - 1500) / 2500, 0, 1);
@@ -58,7 +77,6 @@ function monthsOfTurn(s) {
 }
 function seasonOf(city, months) { return months.reduce((a, m) => a + city.season[m], 0) / months.length; }
 function pairSeason(a, b, months) { return Math.sqrt(seasonOf(a, months) * seasonOf(b, months)); }
-const bgFlights = M => Math.max(2.5, CONST.bgA * Math.pow(M / 1000, CONST.bgB));
 
 function modsFactor(s, kind, seg, t) {
   let f = 1;
@@ -98,8 +116,8 @@ function buildCtx(s, { noise = true } = {}) {
 // score of a carrier in a segment
 function carrierScore(f, seats, fareRatio, quality, seg, e) {
   if (f <= 0) return 0;
-  const sf = Math.pow(seats / CONST.seatsRef, CONST.seatsExp);
-  return Math.pow(f * sf, CONST.freqExp[seg]) * quality * Math.pow(fareRatio, -CONST.shareElasticityMult * e);
+  const frequency = Math.pow(clamp(f / 7, 0.15, 4), CONST.freqExp[seg] - 1);
+  return f * seats / CONST.seatsRef * frequency * quality * Math.pow(fareRatio, -CONST.shareElasticityMult * e);
 }
 function rivalsAt(s, cityId) {
   const out = [];
@@ -114,24 +132,29 @@ function evalLocal(s, ctx, r, { ramp = true, noRivals = false } = {}) {
   const weeklyEff = r.weekly * (1 - ctx.cancel);
   const nz = ctx.noise ? 1 + (rngFor(s.seed, 'mk', ctx.t, r.city)() - 0.5) * 0.08 : 1;
   const sea = pairSeason(h, c, ctx.months);
-  const M = pairBase(h, c) * CONST.hubDemand[s.hub] * ctx.m.demandScale * sea * ctx.growth * ctx.demandAll * nz;
+  const profile = marketProfile(h, c, d);
+  const scale = (CONST.hubDemand[s.hub] ?? 1) * ctx.m.demandScale * ctx.growth;
+  const legMarket = profile.weeklyPax * scale * sea * ctx.demandAll * nz;
+  // Flight-leg counts include connections. Reserve a design share for the separate transfer model.
+  const M = legMarket * (1 - CONST.connectionReserve);
   const b = bizShare(h, c), lh = longhaulMult(d);
   const fareRatio = priceLevel(d, s.model) * CONST.fareTier[r.fare];
   const q = s.model === 'lcc' ? CONST.lcc.quality : CONST.fsc.quality;
   const rv = noRivals ? [] : rivalsAt(s, r.city);
-  const Fbg = bgFlights(M / ctx.demandAll);   // other carriers' schedules do not shrink within the turn a demand shock hits
-  const out = { M, d, seats, sea, b, fareRatio, rivals: rv };
+  // Existing seats are annual-average capacity; demand shocks do not immediately remove schedules.
+  const Fbg = backgroundSeats(s, ctx, r.city) * (1 - CONST.connectionReserve) / (2 * CONST.seatsRef);
+  const out = { M, d, seats, sea, b, fareRatio, rivals: rv, transferReserve: legMarket * CONST.connectionReserve };
   const demandSeg = {};
   for (const seg of ['biz', 'lei']) {
     const e = CONST.elasticity[seg] * lh;
     const Mseg = M * (seg === 'biz' ? b * Math.pow(sea, 0.3 - 1) * ctx.demandBiz : (1 - b) * ctx.demandLei);
     const appeal = seg === 'biz' && s.model === 'fsc' && s.facilities?.lounge ? 1.08 : 1;
     const you = carrierScore(weeklyEff, seats, fareRatio, q[seg] * appeal, seg, e);
-    let others = Math.pow(Fbg, CONST.freqExp[seg]);
+    let others = Fbg;
     for (const x of rv) others += carrierScore(x.weekly, x.kind === 'lcc' ? 186 : 168, x.fare, x.kind === 'lcc' ? CONST.lcc.quality[seg] : 1, seg, e);
     const share = you / (you + others);
     // share you would have without the named rivals (for the "rival took x%" explanation)
-    let shareNo = you / (you + Math.pow(Fbg, CONST.freqExp[seg]));
+    let shareNo = you / (you + Fbg);
     demandSeg[seg] = { M: Mseg, share, shareNo };
   }
   const rampF = ramp ? CONST.ramp[s.mode][Math.min(r.age || 0, CONST.ramp[s.mode].length - 1)] : 1;
@@ -193,7 +216,7 @@ export function newGame({ mode = 'year', hub = 'TPE', seed = 1 } = {}) {
   seed = Number.isFinite(+seed) ? Math.floor(+seed) : 1;
   const m = MODES[mode];
   const s = {
-    v: 1, facilities: {}, reserve: { kg: 0, unitPrice: 0 }, scenario: 'free', mode, hub, seed, turn: 0, cash: m.startCash, model: 'fsc', modelSwitches: 0,
+    v: 1, facilities: {}, marketSupply: {}, marketRivalBase: {}, reserve: { kg: 0, unitPrice: 0 }, scenario: 'free', mode, hub, seed, turn: 0, cash: m.startCash, model: 'fsc', modelSwitches: 0,
     fleet: [], nextAc: 1, routes: [], hedge: { frac: 0, lock: 1, age: 0 }, fuelSpot: 1, rate: CONST.baseRate,
     rivals: [], plan: {}, choices: {}, mods: [], slotCaps: {}, labourMult: 1, lessons: {}, history: [], totals: { revenue: 0, profit: 0 },
     pending: { ownershipCash: 0, ownershipNonCash: 0, overheadCash: 0 }, debt: [], deferred: 0, defer: { pct: 0, turnsLeft: 0, after: 0 },
@@ -217,6 +240,14 @@ export function newGame({ mode = 'year', hub = 'TPE', seed = 1 } = {}) {
     s.rivals.push(mkRival(RIVALS.fsc, pick(ranked.slice(0, 10), 4), 10));
     s.rivals.push(mkRival(RIVALS.lcc, pick(ranked.filter(x => x.d < 5000 && x.d > 700).slice(0, 10), 3), 7));
   }
+  // Initial named rivals are part of the observed total capacity, not seats added on top of it.
+  for (const rv of s.rivals) for (const [city, x] of Object.entries(rv.routes)) {
+    const seats = 2 * x.weekly * (rv.kind === 'lcc' ? 186 : 168);
+    s.marketRivalBase[city] = (s.marketRivalBase[city] || 0) + seats;
+  }
+  for (const city of Object.keys(s.marketRivalBase)) {
+    s.marketRivalBase[city] = Math.min(s.marketRivalBase[city], marketProfile(h, CITIES[city], dist(h, CITIES[city])).weeklySeats * 0.8);
+  }
   return s;
 }
 function addAircraft(s, type, kind, leaseMult) {
@@ -231,7 +262,7 @@ export function routeOptions(state, cityId) {
   if (!c || cityId === state.hub) return null;
   const m = modeOf(state), ctx = buildCtx(state, { noise: false });
   const d = dist(h, c), ref = refFareMid(d) * plOf(state, h, c), lf = fareLevel(d, state.model);
-  const M = pairBase(h, c) * CONST.hubDemand[state.hub] * ctx.m.demandScale * pairSeason(h, c, ctx.months) * ctx.growth * ctx.demandAll;
+  const M = pairBase(h, c) * (CONST.hubDemand[state.hub] ?? 1) * ctx.m.demandScale * pairSeason(h, c, ctx.months) * ctx.growth * ctx.demandAll;
   const types = m.types.filter(t => AIRCRAFT[t].rangeKm >= d);
   const rv = rivalsAt(state, cityId);
   const cap = capFor(state, cityId);
@@ -243,7 +274,9 @@ export function routeOptions(state, cityId) {
     refFareFsc: Math.round(ref),
     refFareEconomy: Math.round(ref * lf * CONST.fareTier.mid / (state.model === 'lcc' ? 1 : cabinMix(d))),   // mid fare without the premium-cabin share, comparable with economy fares seen online
     ancillaryPerPax: Math.round(ancillaryPerPax(d, state.model)),
-    eligibleTypes: types, estMarketPaxPerWeek: Math.round(M),
+    eligibleTypes: types, estMarketPaxPerWeek: Math.round(M), market: marketProfile(h, c, d),
+    otherSeatsPerWeek: Math.round(backgroundSeats(state, ctx, cityId) + rv.reduce((sum, x) => sum + 2 * x.weekly * (x.kind === 'lcc' ? 186 : 168), 0)),
+    supplyIndex: state.marketSupply?.[cityId] ?? ctx.growth,
     rivalsOnRoute: rv.length, rivals: rv, slotLimited: !!c.slotLimited && m.slots, maxWeekly: cap,
     businessShare: +bizShare(h, c).toFixed(2), seasonFactor: +pairSeason(h, c, ctx.months).toFixed(3)
   };
@@ -540,7 +573,7 @@ export function simulateTurn(state) {
   const noRiv = routes.map(r => evalLocal(s, ctx, r, { noRivals: true }));
   // transfers
   const pairs = transferPairs(s, ctx, routes, locals);
-  const spare = locals.map(l => Math.max(0, l.seatsWeek - l.paxB - l.paxL) * CONST.transferSpareShare);
+  const spare = locals.map(l => Math.min(l.transferReserve, Math.max(0, l.seatsWeek - l.paxB - l.paxL) * CONST.transferSpareShare));
   const want = routes.map(() => 0);
   for (const p of pairs) { want[p.i] += p.T; want[p.j] += p.T; }
   const scl = want.map((w, i) => (w > 0 ? Math.min(1, spare[i] / w) : 1));
@@ -689,6 +722,7 @@ export function simulateTurn(state) {
   updateLessons(s, ctx, report, rows);
   report.lessons = Object.entries(s.lessons).filter(([, v]) => v.seen === t).map(([k]) => k);
   s.history.push({ turn: t, revenue: company.revenue, profit: company.profit, margin: company.margin, cash: company.cash, lf: company.loadFactor, fuelIndex: company.fuelIndex, aircraft: company.fleet, pax: company.pax, transferPax: company.transferPax });
+  updateMarketSupply(s, ctx);
   s.turn++;
   // game over
   if (s.cash < 0) {
@@ -843,9 +877,10 @@ export function serialize(state) { return JSON.stringify(state); }
 export function deserialize(str) {
   const o = JSON.parse(str);
   if (!o || o.v !== 1 || !MODES[o.mode]) throw new Error('bad save');
-  o.facilities ||= {}; o.reserve ||= { kg: 0, unitPrice: 0 }; o.scenario ||= 'free';
+  o.facilities ||= {}; o.marketSupply ||= {}; o.reserve ||= { kg: 0, unitPrice: 0 }; o.scenario ||= 'free';
+  o.marketRivalBase ||= newGame({ mode: o.mode, hub: o.hub, seed: o.seed }).marketRivalBase;
   return o;
 }
 
 export { CITIES, AIRCRAFT, MODES, HUBS, EVENTS, LESSONS };
-export const _internals = { pairBase, bizShare, bgFlights, dist, maxHours, seatsOf, fareLevel, ancillaryPerPax, buildCtx, evalLocal };
+export const _internals = { pairBase, bizShare, dist, maxHours, seatsOf, fareLevel, ancillaryPerPax, buildCtx, evalLocal };

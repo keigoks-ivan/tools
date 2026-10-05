@@ -2,7 +2,7 @@
 import { newGame, applyDecisions, simulateTurn, pendingEvents, fleetNeeded, estimateRoute, routeOptions, endReport } from './model.mjs';
 import { CITIES, AIRCRAFT, MODES, EVENTS } from './data.mjs';
 
-const FREQS = [2, 3, 4, 5, 7, 10];
+const FREQS = [1, 2, 3, 4, 5, 7, 10, 14, 21, 28];
 
 function candidates(state, { minLF = 0.7, types = null, minMargin = 0.07 } = {}) {
   const m = MODES[state.mode], out = [];
@@ -45,7 +45,7 @@ export function sensibleBot({ model = 'fsc', budget = null, hedge = 0.5, minLF =
   return function (state, last) {
     const m = MODES[state.mode];
     if (state.turn === 0) mem = { planTurn: -99 };
-    const bud = budget ?? (state.mode === 'year' ? 5 : 9);
+    const bud = budget ?? (buy ? 4 : state.mode === 'year' ? 5 : 9);
     const every = state.mode === 'year' ? 6 : 6;
     const dec = { routes: [], fleet: {}, eventChoices: {} };
     for (const e of pendingEvents(state)) {
@@ -59,7 +59,8 @@ export function sensibleBot({ model = 'fsc', budget = null, hedge = 0.5, minLF =
     if (state.turn >= m.hedgeFromTurn && hedge > 0 && state.hedge.frac < hedge) dec.hedge = hedge;
     const st = (dec.businessModel || dec.eventChoices['a-model'] || dec.eventChoices['b-model']) ? { ...state, model } : state;
     const have = Object.fromEntries(state.routes.map(r => [r.city, r]));
-    const replan = state.turn - mem.planTurn >= every || state.routes.length === 0 || dec.businessModel;
+    const shock = state.mods.some(x => x.kind === 'demand' && x.seg === 'all' && x.seq[state.turn-x.start] < 0.7);
+    const replan = state.turn - mem.planTurn >= every || state.routes.length === 0 || dec.businessModel || shock;
     if (!replan) {
       // hold the network; nudge frequencies from last turn's load factors and keep the fleet in step
       const routes = state.routes.map(r => ({ city: r.city, type: r.type, weekly: r.weekly, fare: r.fare }));
@@ -67,7 +68,7 @@ export function sensibleBot({ model = 'fsc', budget = null, hedge = 0.5, minLF =
         const x = last.routes.find(y => y.city === r.city);
         if (!x || state.turn - mem.planTurn < 2) continue;
         if (x.lf < 0.6 && r.weekly > 2) r.weekly = Math.max(2, Math.floor(r.weekly * 0.8));
-        else if (x.lf > 0.9 && x.profit > 0 && r.weekly < 21) { const t = routes.map(q => q === r ? { ...q, weekly: Math.ceil(q.weekly * 1.2) } : q); const nd = Object.values(fleetNeeded(state, t)).reduce((a, b) => a + b, 0); if (nd <= bud + 1) r.weekly = Math.ceil(r.weekly * 1.2); }
+        else if (x.lf > 0.9 && x.profit > 0 && r.weekly < 21) { const weekly = Math.min(routeOptions(state,r.city).maxWeekly,Math.ceil(r.weekly * 1.2)); const t = routes.map(q => q === r ? { ...q, weekly } : q); const nd = Object.values(fleetNeeded(state, t)).reduce((a, b) => a + b, 0); if (nd <= bud + 1) r.weekly = weekly; }
       }
       dec.routes = routes; const mv0 = fleetMoves(state, routes); dec.fleet = { lease: mv0.lease, returnLease: mv0.returnLease };
       return dec;
@@ -80,7 +81,13 @@ export function sensibleBot({ model = 'fsc', budget = null, hedge = 0.5, minLF =
       const o = routeOptions(st, id); if (!o) continue;
       for (const ty of o.eligibleTypes) {
         const lv = [];
-        for (const w of FREQS) { if (w > o.maxWeekly) break; const e = estimateRoute(st, id, ty, w, 'mid'); if (e) lv.push({ w, e }); }
+        for (const w of FREQS) {
+          if (w > o.maxWeekly) break;
+          // A low-cost operator must compare fares too; its base fare is already discounted.
+          for (const fare of st.model === 'lcc' ? ['mid', 'high'] : ['mid']) {
+            const e = estimateRoute(st, id, ty, w, fare); if (e) lv.push({ w, fare, e });
+          }
+        }
         if (lv.length) table[id + '|' + ty] = lv;
       }
     }
@@ -98,7 +105,7 @@ export function sensibleBot({ model = 'fsc', budget = null, hedge = 0.5, minLF =
     const bestPer = {};
     for (const o of opts) if (!bestPer[o.id] || o.score > bestPer[o.id].score) bestPer[o.id] = o;
     const ranked = Object.values(bestPer).sort((a, b) => b.score - a.score);
-    const maxRoutes = state.mode === 'year' ? 5 : 8;
+    const maxRoutes = model === 'lcc' ? (state.mode === 'year' ? 10 : 16) : (state.mode === 'year' ? 5 : 8);
     for (const o of ranked) {
       if (Object.keys(cur).length >= maxRoutes) break;
       if (used + o.e.aircraftFraction > bud + 0.3) continue;
@@ -106,14 +113,29 @@ export function sensibleBot({ model = 'fsc', budget = null, hedge = 0.5, minLF =
     }
     // sticky: keep running routes that are not clearly losing (never wipe the network on a one-turn shock)
     for (const r of state.routes) if (!cur[r.city]) {
-      const e = estimateRoute(st, r.city, r.type, r.weekly, 'mid');
+      const e = estimateRoute(st, r.city, r.type, r.weekly, r.fare);
       if (e && e.profit > -0.1 * e.revenue && used + e.aircraftFraction <= bud + 0.3) {
         const key = r.city + '|' + r.type; if (!table[key]) continue;
-        const lvIdx = Math.max(0, table[key].findIndex(x => x.w >= r.weekly));
+        const lvIdx = Math.max(0, table[key].findIndex(x => x.w >= r.weekly && x.fare === r.fare));
         cur[r.city] = { key, lv: lvIdx }; used += e.aircraftFraction;
       }
     }
-    dec.routes = Object.entries(cur).map(([id, c]) => ({ city: id, type: c.key.split('|')[1], weekly: table[c.key][c.lv].w, fare: 'mid' }));
+    // Fill the available aircraft hours with profitable frequency increases before leasing more.
+    for (;;) {
+      let best = null;
+      for (const [id, c] of Object.entries(cur)) {
+        const now = table[c.key][c.lv];
+        for (let k = 0; k < table[c.key].length; k++) {
+          const next = table[c.key][k], extra = next.e.aircraftFraction - now.e.aircraftFraction, gain = next.e.profit - now.e.profit;
+          if (next.w <= now.w || next.fare !== now.fare || gain <= 0 || used + extra > bud + 0.3) continue;
+          const score = gain / Math.max(0.05, extra);
+          if (!best || score > best.score) best = { id, k, extra, score };
+        }
+      }
+      if (!best) break;
+      cur[best.id].lv = best.k; used += best.extra;
+    }
+    dec.routes = Object.entries(cur).map(([id, c]) => ({ city: id, type: c.key.split('|')[1], weekly: table[c.key][c.lv].w, fare: table[c.key][c.lv].fare }));
     if (last) for (const r of dec.routes) {
       const x = last.routes.find(y => y.city === r.city && y.type === r.type);
       if (x && x.lf < 0.5 && r.weekly > 2) r.weekly = Math.max(2, Math.round(r.weekly * Math.max(0.5, x.lf / 0.72)));

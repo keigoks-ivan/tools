@@ -15,17 +15,16 @@ export const CONST = {
   fareTier: { low: 0.8, mid: 1.0, high: 1.25 },       // design
   segFare: { biz: 1.6, lei: 0.8 },                      // fare paid by segment relative to the reference fare (design)
   elasticity: { biz: 0.7, lei: 1.6 },                   // InterVISTAS-style values, flagged design
-  shareElasticityMult: 2.0,     // in a share model own-price elasticity is k*(1-share); k=2e gives ~e at 50% share
-  freqExp: { biz: 1.45, lei: 1.2 },
-  seatsRef: 160, seatsExp: 0.7,
-  spillP: 2, transferSpareShare: 0.6, premiumUplift: 0.25,
-  bgA: 6, bgB: 0.65,          // background (other carriers) weekly flights = bgA*(market/1000)^bgB, 160-seat equivalents (design)
+  shareElasticityMult: 1.0,     // a small entrant has low share in the observed total market; k=e approximates its elasticity
+  freqExp: { biz: 1.12, lei: 1.05 },
+  seatsRef: 160,
+  spillP: 8, transferSpareShare: 0.6, connectionReserve: 0.15, premiumUplift: 0.25,
   ramp: { year: [0.7, 0.9, 1], decade: [0.9, 1] },
   rampLabel: 'age 0,1,2 turns',
   hedge: { premium: 0.02, tenor: { year: 9, decade: 4 } },
   tiers: ['low', 'mid', 'high'],
   // costs not tied to an aircraft type (US$)
-  groundLabourPerDep: 1300, groundLabourPerPax: 11, crewScale: 1.1, airportScale: 1.3, fareScale: 1, hubDemand: { TPE: 1, NRT: 1, SIN: 1, DXB: 1, ZRH: 1 }, hubYield: { TPE: { year: 1.171, decade: 1.232 }, NRT: { year: 1.100, decade: 1.150 }, SIN: { year: 1.315, decade: 1.331 }, DXB: { year: 1.204, decade: 1.200 }, ZRH: { year: 1.250, decade: 1.221 } }, transferHandling: 14,
+  groundLabourPerDep: 1300, groundLabourPerPax: 11, crewScale: 1.25, airportScale: 1.3, fareScale: 1, hubDemand: { TPE: 1, NRT: 1, SIN: 1, DXB: 1, ZRH: 1 }, hubYield: { TPE: { year: 1.1659, decade: 1.145 }, NRT: { year: 1.1171, decade: 1.0763 }, SIN: { year: 1.0985, decade: 1.0855 }, DXB: { year: 1.0843, decade: 1.0537 }, ZRH: { year: 1.1461, decade: 1.08 } }, transferHandling: 14,
   paxCharge: 3.0,
   distribution: { fsc: 0.055, lcc: 0.015 },
   overhead: { base: 330000, perAircraft: 70000 },   // per month
@@ -37,9 +36,9 @@ export const CONST = {
   govLoanRate: 0.03,
   ancillary: { fsc: { base: 6, pct: 0.02 }, lcc: { base: 20, pct: 0.045 } },
   lcc: {
-    fareFactorShort: 0.72, fareFactorLong: 0.86,   // LCC base fare vs full-service reference (design; fares seen online 25-35% lower short haul)
-    quality: { biz: 0.55, lei: 0.8 },
-    crewMult: 0.86, groundMult: 0.8, airportMult: 0.88, overheadMult: 0.72, extraHours: 1.5, transferMult: 0.25,
+    fareFactorShort: 0.8, fareFactorLong: 0.95,   // LCC reference discount; simplified design assumption, not measured fares
+    quality: { biz: 0.55, lei: 1.15 },
+    crewMult: 0.86, groundMult: 0.8, airportMult: 0.88, overheadMult: 0.72, extraHours: 1.5, transferMult: 0.1,
     switchCostPerAircraft: 450000, switchDemandHit: 0.9
   },
   fsc: { quality: { biz: 1, lei: 1 } },

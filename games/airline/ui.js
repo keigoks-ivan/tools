@@ -1,11 +1,11 @@
 // 天青航空：航線經營 — UI. All game logic lives in the model (backend.mjs); this file only renders and collects decisions.
-import * as B from './backend.mjs?v=16';
-import { createNetwork } from './ui-network.js?v=16';
-import { FACILITIES, SCENARIOS, scenarioProgress, newClock, advanceClock, turnSeconds, fuelOrder } from './v2.mjs?v=16';
-import { aircraftArt, facilityArt } from './ui-art-v2.js?v=16';
-import { playIcon, routeTicket, hubScene, goalList, resultBadges, aircraftStats, rangeComparison } from './ui-play.js?v=16';
-import { createSoundtrack } from './ui-music.js?v=16';
-import { BRAND_EN, tr, pick, esc, $, $$, fmtUSD, fmtPct, fmtNum, fmtFare, term, withTerms, markTermSeen, locale, setLocale } from './ui-util.js';
+import * as B from './backend.mjs?v=17';
+import { createNetwork } from './ui-network.js?v=17';
+import { FACILITIES, SCENARIOS, scenarioProgress, newClock, advanceClock, turnSeconds, fuelOrder } from './v2.mjs?v=17';
+import { aircraftArt, facilityArt } from './ui-art-v2.js?v=17';
+import { playIcon, routeTicket, hubScene, goalList, resultBadges, aircraftStats, rangeComparison } from './ui-play.js?v=17';
+import { createSoundtrack } from './ui-music.js?v=17';
+import { BRAND_EN, tr, pick, esc, $, $$, fmtUSD, fmtPct, fmtNum, fmtFare, term, withTerms, markTermSeen, locale, setLocale } from './ui-util.js?v=17';
 
 const { MODES, HUBS, CITIES, CITY_REGIONS, AIRCRAFT, LESSONS, GLOSSARY } = B;
 const INDUSTRY = B.CONST?.industryMargin ?? 0.039;
@@ -138,7 +138,7 @@ function renderStart() {
       <p class="poem">${tr('從一條航線，經營你的世界。', 'Your world begins with one route.')}</p>
       <p class="hint" style="margin-top:10px">${tr('看一次，就懂航空公司怎麼賺錢，又為什麼賠錢。', 'See how an airline makes money, and why it loses it.')}</p>
       <div class="hero-actions"><button type="button" class="btn" id="go-new">${tr('開始經營','Start playing')} ▶</button><small>${esc(pick(hubOf(app.sel.hub)))} · ${esc(pick(modeOf(app.sel.mode)))}</small></div>
-    </div><div class="art airport-hero"><img class="airport-illustration" src="./art/v2/airport.webp?v=16" width="1536" height="1024" alt="${tr('天青航空的機場與客機', BRAND_EN + ' airport and aircraft')}" decoding="async"><div class="hero-flight-ticket"><span>${tr('準備首航','READY FOR TAKEOFF')}</span><b>${app.sel.hub} <i>✈</i> HKG</b><small>${tr('Airbus A320neo · 你的第一條航線','Airbus A320neo · your first route')}</small></div><img class="hero-mascot" src="./art/v2/mascot.webp?v=16" width="150" height="150" alt="${tr('天青航空的可愛小飛機','SKYGLAZE’s friendly little plane')}"><div class="hero-caption">${tr('你的機隊，你的航網。', 'YOUR FLEET. YOUR NETWORK.')}</div></div></section>
+    </div><div class="art airport-hero"><img class="airport-illustration" src="./art/v2/airport.webp?v=17" width="1536" height="1024" alt="${tr('天青航空的機場與客機', BRAND_EN + ' airport and aircraft')}" decoding="async"><div class="hero-flight-ticket"><span>${tr('準備首航','READY FOR TAKEOFF')}</span><b>${app.sel.hub} <i>✈</i> HKG</b><small>${tr('Airbus A320neo · 你的第一條航線','Airbus A320neo · your first route')}</small></div><img class="hero-mascot" src="./art/v2/mascot.webp?v=17" width="150" height="150" alt="${tr('天青航空的可愛小飛機','SKYGLAZE’s friendly little plane')}"><div class="hero-caption">${tr('你的機隊，你的航網。', 'YOUR FLEET. YOUR NETWORK.')}</div></div></section>
     ${saveHtml}
     <section class="sect scenario-select"><h2>${tr('這次想完成什麼？', 'Choose your ambition')}</h2><div class="scenario-choices">${Object.entries(SCENARIOS).map(([id,c],i)=>`<button type="button" class="scenario-choice" data-scenario="${id}" aria-pressed="${app.scenario===id}"><span class="scenario-no">0${i+1}</span>${playIcon(id)}<small>${esc(pick(c,'tagZh','tagEn'))}</small><b>${esc(pick(c))}</b><span>${esc(pick(c,'descZh','descEn'))}</span></button>`).join('')}</div></section>
     <section class="sect"><h2>${tr('選擇模式', 'Mode')}</h2><div class="choices two" role="radiogroup" aria-label="${tr('模式', 'Mode')}">${modeCards}</div></section>
@@ -201,11 +201,11 @@ function renderMain() {
   const s = app.state;
   if (!app.draft || app.draft.forTurn !== s.turn) { initDraft(); app.draft.forTurn = s.turn; }
   appEl.innerHTML = `<div class="game">
-    <div class="mapbox" id="mapbox"><img class="map-mascot" src="./art/v2/mascot.webp?v=16" width="120" height="120" alt="" aria-hidden="true"><div class="map-watermark">${esc(BRAND_EN)}<small>${tr('全球航網', 'GLOBAL NETWORK')}</small></div>
+    <div class="mapbox" id="mapbox"><img class="map-mascot" src="./art/v2/mascot.webp?v=17" width="120" height="120" alt="" aria-hidden="true"><div class="map-watermark">${esc(BRAND_EN)}<small>${tr('全球航網', 'GLOBAL NETWORK')}</small></div>
       <div class="network-heading"><span class="live-dot"></span>${tr('航網營運中心', 'NETWORK OPERATIONS')}<small>${s.hub} / ${esc(pick(hubOf(s.hub)))}</small></div>
       <div class="mapctl"><button type="button" id="zin" aria-label="${tr('放大', 'Zoom in')}">+</button><button type="button" id="zout" aria-label="${tr('縮小', 'Zoom out')}">−</button><button type="button" id="zfit" aria-label="${tr('回到基地', 'Recenter')}">⌖</button></div>
       <div class="flight-hud" id="flight-hud"></div>
-      <button type="button" class="base-launch" id="base-launch"><img src="./art/v2/airport.webp?v=16" width="1536" height="1024" alt=""><span><small>${tr('返回基地','HOME BASE')}</small><b>${s.hub} <i>↗</i></b></span></button>
+      <button type="button" class="base-launch" id="base-launch"><img src="./art/v2/airport.webp?v=17" width="1536" height="1024" alt=""><span><small>${tr('返回基地','HOME BASE')}</small><b>${s.hub} <i>↗</i></b></span></button>
       <div class="maplegend"><span><i></i>${tr('獲利／預估獲利', 'Profit / estimated profit')}</span><span><i class="loss"></i>${tr('虧損', 'Loss')}</span><span><i class="r"></i>${tr('對手', 'Rivals')}</span><small>${tr('航班與候機點為縮時示意', 'Flights and passenger dots are sampled')}</small></div>
       <div class="clockbar"><div class="clock-label"><b id="clock-day"></b><small id="clock-status"></small></div><div class="time-track"><i id="clock-progress"></i></div><div class="time-controls"><button type="button" id="pause" aria-label="${tr('暫停／繼續', 'Pause / resume')}">▶</button>${[1,2,4].map(n=>`<button type="button" data-speed="${n}" aria-pressed="${app.clock.speed===n}">${n}×</button>`).join('')}<button type="button" id="skip" aria-label="${tr('直接結算', 'Jump to settlement')}">↦</button></div></div>
     </div>
@@ -262,7 +262,7 @@ function renderOverview(){
   const suggestions=routes.length?[]:Object.keys(CITIES).filter(id=>id!==s.hub).map(id=>{const d=defaultChoice(id),e=B.estimateRoute(planningState(),id,d.type,d.weekly,'mid');return{id,...d,e};}).filter(r=>r.e).sort((a,b)=>b.e.profit-a.e.profit).slice(0,3);
   $('#pscroll').innerHTML=`<div class="section-eyebrow">${tr('航線規劃','ROUTE PLANNING')}<span>${app.active?tr('下一期','NEXT TURN'):tr('本期','THIS TURN')}</span></div><h2 class="panel-intro">${routes.length?tr('每條航線，都要算得過。','Make every route earn its place.'):tr('先開一條，讓機隊起飛。','Your fleet is ready. Open a route.')}</h2>
     <button type="button" class="aircraft-guide-link" id="aircraft-guide">✈ ${tr('機型圖鑑','Aircraft guide')}<small>${tr('比較航程與座位','Compare range & seats')} →</small></button>
-    ${!routes.length?`<div class="onboarding"><img src="./art/v2/mascot.webp?v=16" width="84" height="84" alt=""><div><b>${tr('一起把第一條航線開起來！','Let’s open your first route!')}</b><p>${tr('先選城市，再看飛機能飛多遠、能坐幾人。','Pick a city, then compare aircraft range and seats.')}</p></div></div><p class="hint">${tr('可以先研究這三個市場：','Three markets to explore first:')}</p>${suggestions.map(r=>`<button type="button" class="suggestion" data-route="${r.id}"><b>${r.id} <span>${esc(pick(CITIES[r.id]))}</span></b><small>${esc(pick(AIRCRAFT[r.type]))} · ${tr('預估載客','Est. load')} ${fmtPct(r.e.lf,0)}</small><i>↗</i></button>`).join('')}`:''}
+    ${!routes.length?`<div class="onboarding"><img src="./art/v2/mascot.webp?v=17" width="84" height="84" alt=""><div><b>${tr('一起把第一條航線開起來！','Let’s open your first route!')}</b><p>${tr('先選城市，再看飛機能飛多遠、能坐幾人。','Pick a city, then compare aircraft range and seats.')}</p></div></div><p class="hint">${tr('可以先研究這三個市場：','Three markets to explore first:')}</p>${suggestions.map(r=>`<button type="button" class="suggestion" data-route="${r.id}"><b>${r.id} <span>${esc(pick(CITIES[r.id]))}</span></b><small>${esc(pick(AIRCRAFT[r.type]))} · ${tr('預估載客','Est. load')} ${fmtPct(r.e.lf,0)}</small><i>↗</i></button>`).join('')}`:''}
     <div class="rlist">${routes.map(r=>routeTicket(s,r,metrics[r.city],lfBar,!!app.active)).join('')}</div>
     <button type="button" class="add-route" id="add-route"><span>＋</span>${tr('新增航線','Add a route')}<small>${tr(`${Object.keys(CITIES).length} 個航點`,`${Object.keys(CITIES).length} airports`)}</small></button>
     <div class="psec scenario-status"><div class="goal-heading">${playIcon(challenge.id)}<div><small>${tr('本局目標','YOUR AMBITION')}</small><h3>${esc(pick(challenge.sc))}</h3></div></div>${goalList(challenge,s)}<p class="hint">${tr('依已結算結果更新，期末驗收。','Updated from settled results; checked at game end.')}</p></div>`;
@@ -271,7 +271,7 @@ function renderOverview(){
 function aircraftGuide(){
   const o=app.city?B.routeOptions(planningState(),app.city):null,types=modeOf(app.state.mode).types,exact=o?B.distanceKm(CITIES[app.state.hub],CITIES[app.city]):0;
   const entries=Object.entries(AIRCRAFT).sort((a,b)=>o?(Number(b[1].rangeKm>=exact)*2+Number(types.includes(b[0])))-(Number(a[1].rangeKm>=exact)*2+Number(types.includes(a[0]))):0);
-  const m=overlay(`<div class="guide-intro"><img src="./art/v2/mascot.webp?v=16" width="100" height="100" alt=""><div><div class="kick">${tr('天青機型圖鑑','SKYGLAZE AIRCRAFT GUIDE')}</div><h2>${tr('這一趟，誰來飛？','Who will fly this route?')}</h2><p class="hint">${o?tr(`航線距離 ${fmtNum(o.distanceKm)} km。先看航程，再看座位。`,`Route distance: ${fmtNum(o.distanceKm)} km. Check range, then seats.`):tr('先用航程篩選，再用客量決定大小。','Choose range first, then size for your demand.')}</p></div></div><div class="aircraft-guide-grid">${entries.map(([t,a])=>`<article class="guide-aircraft" data-guide-aircraft="${t}"><div class="guide-plane">${aircraftArt(t)}<span>${esc(pick(a,'classZh','classEn'))}</span></div><h3>${esc(pick(a))}</h3>${aircraftStats(t,bizModel())}${o?rangeComparison(t,o.distanceKm,a.rangeKm>=exact):''}<p class="guide-availability">${types.includes(t)?tr('本模式可使用','Available in this mode'):tr('十年模式可使用','Available in Ten Years')}</p></article>`).join('')}</div><p class="hint">${tr('座位數是每個單程航班的容量，不是一定會來的客人。載客率會隨需求、票價和班次改變。航程與座位採遊戲簡化設定。','Seats are capacity per one-way flight, not guaranteed passengers. Load depends on demand, fares and frequency. Range and capacity are simplified game settings.')}</p><button type="button" class="btn block" id="guide-close">${tr('知道了，回去排航線','Got it — back to planning')}</button>`,{label:tr('機型圖鑑','Aircraft guide')});
+  const m=overlay(`<div class="guide-intro"><img src="./art/v2/mascot.webp?v=17" width="100" height="100" alt=""><div><div class="kick">${tr('天青機型圖鑑','SKYGLAZE AIRCRAFT GUIDE')}</div><h2>${tr('這一趟，誰來飛？','Who will fly this route?')}</h2><p class="hint">${o?tr(`航線距離 ${fmtNum(o.distanceKm)} km。先看航程，再看座位。`,`Route distance: ${fmtNum(o.distanceKm)} km. Check range, then seats.`):tr('先用航程篩選，再用客量決定大小。','Choose range first, then size for your demand.')}</p></div></div><div class="aircraft-guide-grid">${entries.map(([t,a])=>`<article class="guide-aircraft" data-guide-aircraft="${t}"><div class="guide-plane">${aircraftArt(t)}<span>${esc(pick(a,'classZh','classEn'))}</span></div><h3>${esc(pick(a))}</h3>${aircraftStats(t,bizModel())}${o?rangeComparison(t,o.distanceKm,a.rangeKm>=exact):''}<p class="guide-availability">${types.includes(t)?tr('本模式可使用','Available in this mode'):tr('十年模式可使用','Available in Ten Years')}</p></article>`).join('')}</div><p class="hint">${tr('座位數是每個單程航班的容量，不是一定會來的客人。載客率會隨需求、票價和班次改變。航程與座位採遊戲簡化設定。','Seats are capacity per one-way flight, not guaranteed passengers. Load depends on demand, fares and frequency. Range and capacity are simplified game settings.')}</p><button type="button" class="btn block" id="guide-close">${tr('知道了，回去排航線','Got it — back to planning')}</button>`,{label:tr('機型圖鑑','Aircraft guide')});
   m.classList.add('aircraft-guide-dialog');m.focus({preventScroll:true});m.scrollTop=0;$('#guide-close').onclick=closeOverlay;
 }
 function renderFleet(){
@@ -316,10 +316,11 @@ function defaultChoice(city) {
   if(!el.length)return {type:null,weekly:3,note:tr('此模式沒有航程足夠的機型。','No aircraft in this mode has enough range.')};
   const narrow = el.filter((t) => !AIRCRAFT[t].widebody), pool = narrow.length ? narrow : el;
   const est = (t, w) => { try { return B.estimateRoute(planningState(), city, t, w, 'mid')?.profit ?? -Infinity; } catch { return -Infinity; } };
-  const asc = [...pool].sort((a, b) => seatsOf(a) - seatsOf(b)), ps = asc.map((t) => est(t, 7)), top = Math.max(...ps), tol = Math.max(0.1 * Math.abs(top), 30000);
+  const asc = [...pool].sort((a, b) => seatsOf(a) - seatsOf(b));
+  const choices = asc.map(type => [1,2,3,4,5,7,10,14].filter(w=>w<=o.maxWeekly).map(weekly=>({type,weekly,profit:est(type,weekly)})).sort((a,b)=>b.profit-a.profit)[0]);
+  const ps = choices.map(x=>x.profit), top = Math.max(...ps), tol = Math.max(0.1 * Math.abs(top), 30000);
   const type = asc[ps.findIndex((p) => p >= top - tol)] || asc[0];   // smallest type within 10% of the best estimate
-  let weekly = 7;
-  if (!narrow.length) { let bp = -Infinity; for (const w of [3, 4, 5, 7]) { const p = est(type, w); if (p > bp + 1) { bp = p; weekly = w; } } }
+  const weekly = choices.find(x=>x.type===type).weekly;
   const wide = el.some((t) => AIRCRAFT[t].widebody), small = pool.length > 1 || (pool.length === 1 && wide && narrow.length);
   const note = !narrow.length ? tr('這個距離只有寬體機飛得到，先從較少的班次開始。', 'Only widebodies reach this far, so it starts with fewer flights.')
     : wide ? tr('預設用能飛到、又和市場大小合得來的最小機型。寬體機座位多、租金貴，這個距離用不到。', 'Default: the smallest type that fits this market. A widebody is too big and costly for this distance.')
@@ -345,7 +346,7 @@ function renderRoutePanel() {
     ${activeRoute?`<div class="active-route-note"><small>${tr('本期營運','CURRENT OPERATIONS')}</small><b>${activeRoute.profit>=0?'+':''}${esc(fmtUSD(activeRoute.profit))}</b><p>${esc(pick(activeRoute,'reasonZh','reasonEn'))}</p></div>`:''}
     ${c.blurbZh ? `<p class="hint">${esc(pick(c, 'blurbZh', 'blurbEn'))}</p>` : ''}
     <div class="psec"><div class="kv three"><div><small>${tr('距離', 'Distance')}</small><b>${fmtNum(o.distanceKm)} km</b></div><div><small>${tr('單程飛行', 'Block time')}</small><b>${(o.blockHoursByType?.[r.type] ?? o.blockHours).toFixed(1)} h</b></div><div><small>${tr('每週市場', 'Market/wk')}</small><b>${fmtNum(o.estMarketPaxPerWeek)}</b></div></div>
-      <p class="hint" style="margin-top:6px">${tr('每週市場是估計單程旅客數，由雙方城市大小和距離推算。', 'Market is an estimate of one-way passengers per week.')} ${o.rivalsOnRoute ? `<span class="pill warn">${tr(`${o.rivalsOnRoute} 家對手已在飛`, `${o.rivalsOnRoute} rival(s) fly it`)}</span>` : `<span class="pill good">${tr('目前沒有對手', 'No rival yet')}</span>`} ${o.slotLimited ? `<span class="pill warn">${tr('機場時段有限', 'Slot-limited')}</span>` : ''}</p></div>
+      ${marketNote(o)}<p class="hint" style="margin-top:6px">${tr('其他航空每週座位', 'Other airlines’ seats/week')}：<b>${fmtNum(o.otherSeatsPerWeek)}</b> · ${tr('你的每週座位', 'Your seats/week')}：<b id="your-seats">${fmtNum(2*r.weekly*seatsOf(r.type))}</b>。${tr('增班會分走客人；其他航空在後續回合逐步調整運力。','More flights split demand; other airlines adjust capacity in later turns.')} ${o.rivalsOnRoute ? `<span class="pill warn">${tr(`${o.rivalsOnRoute} 家主要對手`, `${o.rivalsOnRoute} named rival(s)`)}</span>` : ''} ${o.slotLimited ? `<span class="pill warn">${tr('機場時段有限', 'Slot-limited')}</span>` : ''}</p></div>
     <div class="psec"><h3><span>${tr('機型', 'Aircraft')}</span><button type="button" class="ghost" id="aircraft-guide">${tr('比較全部機型','Compare all aircraft')}</button></h3>${rangeComparison(r.type,o.distanceKm,!!r.type&&o.eligibleTypes.includes(r.type))}${!open && r.note && r.type === r.defType ? `<p class="hint" style="margin-bottom:6px">${esc(r.note)}</p>` : ''}<div role="radiogroup" aria-label="${tr('機型', 'Aircraft')}">${acOpts}</div></div>
     <div class="psec"><h3><span>${term('週班次', tr('每週班次', 'Flights per week'))}</span><span class="hint">${tr('一班＝來回一趟', 'one = one round trip')}</span></h3>
       <div class="stepper"><button type="button" id="wm" aria-label="${tr('減少班次', 'Fewer')}" ${r.weekly <= 1 ? 'disabled' : ''}>−</button><output id="wv" aria-live="polite">${r.weekly}</output><button type="button" id="wp" aria-label="${tr('增加班次', 'More')}" ${r.weekly >= (o.maxWeekly || 28) ? 'disabled' : ''}>＋</button><small>${tr(`每週約 ${fmtNum(r.weekly * 2 * seatsOf(r.type))} 個單程座位`, `≈ ${fmtNum(r.weekly * 2 * seatsOf(r.type))} one-way seats/wk`)}</small></div></div>
@@ -368,14 +369,21 @@ function renderRoutePanel() {
   renderEstimate(r);
 }
 /** Dry run of the real model for this route under current conditions. Skipped quietly if the model cannot run it. */
+function marketNote(o) {
+  const m = o.market;
+  if (m.kind === 'estimated') return `<p class="hint" data-market-kind="estimated">${tr('估算市場：每週雙向航段旅客，由官方航線客量校準。這組航點沒有實測資料，誤差可能較大；不代表已有直飛航班。','Estimated weekly flight-leg passengers in both directions, fitted to official traffic. This pair has no observations and may differ substantially; it does not imply an existing nonstop service.')}</p>`;
+  const src = B.DEMAND_SOURCES[m.source];
+  return `<p class="hint" data-market-kind="observed"><a href="${esc(src.url)}" target="_blank" rel="noopener">${esc(pick(src))} ${m.year}</a> · ${tr('全年雙向旅客','Annual passengers, both directions')} ${fmtNum(m.annualPax)}${m.historicalLF!=null?` · ${tr('歷史載客率','Historical load')} ${fmtPct(m.historicalLF,0)}`:''}。${tr('每週市場含兩個方向，會隨季節與事件變化；歷史載客率不等於你的預估。','Weekly demand includes both directions and changes with seasons and events; historical load is not your forecast.')}${m.capacityEstimated?tr('座位數另行估算。','Seat capacity is estimated separately.'):''}</p>`;
+}
 function renderEstimate(r) {
+  const own = $('#your-seats'); if (own && r.type) own.textContent = fmtNum(2*r.weekly*seatsOf(r.type));
   const box = $('#estbox'); if (!box) return;
   let e = null;
   try { e = B.estimateRoute ? B.estimateRoute(planningState(), r.city, r.type, r.weekly, r.fare) : null; } catch { e = null; }
   if (!e) { box.innerHTML = ''; return; }
   const ok = e.profit >= 0, be = e.revenue > 0 ? Math.min(1.5, e.lf * e.cost / e.revenue) : null;
   box.innerHTML = `<div class="est"><div class="lfrow"><span>${tr('載客率','Load')}</span>${lfBar(e.lf,be,e.lf<be)}<b>${fmtPct(e.lf,0)}</b></div><b>${tr('預估', 'Estimate')}</b>：${term('載客率')} <b>${fmtPct(e.lf, 0)}</b>${be != null ? `（${tr('損益平衡', 'break-even')} ${fmtPct(be, 0)}）` : ''} · ${tr(`${turnWord(app.state)}損益`, 'profit')} <b style="color:${ok ? 'var(--good)' : 'var(--warn)'}">${esc(fmtUSD(e.profit))}</b>
-    <p class="hint" style="margin-top:4px">${tr('只算這一條航線在穩定狀態下的結果，飛機成本按用掉的比例攤。轉機客、事件、設施固定費和對手反應不在內。', 'Steady state for this route alone, aircraft cost shared pro rata. Transfers, events, fixed facility costs and rival moves are not included.')}</p></div>`;
+    <p class="hint" style="margin-top:4px">${tr('依本期供需估算穩定客量，首航還有客源累積期。飛機成本按使用比例攤；轉機客、未來事件、設施固定費和下回合的對手調整不在內。', 'Steady demand at current market conditions; new routes still ramp up. Aircraft costs are pro rata; transfers, future events, fixed facility costs and next-turn rival changes are excluded.')}</p></div>`;
 }
 
 /* ----- events ----- */
@@ -579,6 +587,7 @@ function renderSources() {
   const verHtml = ver ? `<ul class="tips">${(ver[locale] || ver.zh).map((t) => `<li>${esc(t)}</li>`).join('')}</ul>` : '';
   appEl.innerHTML = `<div class="rwrap"><button type="button" class="back-sm" id="b">‹ ${tr('返回', 'Back')}</button><h1 style="margin-bottom:6px">${tr('資料來源', 'Data sources')}</h1>
     <p class="hint">${tr('遊戲裡的數字來自這些公開資料，再簡化成教學用的版本。三種標籤：已查證是讀過原始來源；二手資料是只在二手整理裡看到；設計值是沒有公開數字、為了玩法而訂。', 'Game numbers come from these public sources, simplified for teaching. Three tags: Verified means read in the original source; Secondary means seen only in a second-hand summary; Design value means no public figure exists and the number was chosen for gameplay.')}</p>
+    <section class="card" style="margin-top:16px"><h2>${tr('全航點重算與動態供需','All-pair audit and dynamic markets')}</h2><p>${tr('180 個航點、16,110 組配對。1,493 組有官方客量，其餘為校準估算。季節、事件與班次會改變供需，其他航空在結算後逐步調整運力。','180 airports, 16,110 pairs. 1,493 have official traffic; others are fitted estimates. Seasons, events and frequency change the market; incumbents adjust capacity after settlement.')}</p><p><a href="./design/demand/all-pairs.csv" download>${tr('下載全部方向的重算表（CSV）','Download all directions (CSV)')}</a> · <a href="./design/demand/README.md">${tr('資料定義、誤差與授權','Definitions, uncertainty and credits')}</a></p></section>
     <section class="card" style="margin-top:16px"><h2>${tr('v2 機型、美術與設施','v2 aircraft, art and facilities')}</h2><p>${tr('機型採實際名稱，遊戲航程、座位、租金與耗油為簡化設定。設施的費用、商務吸引力與儲油容量為設計值；維修減少 30% 參考 AirTycoon 4。','Real aircraft names; game range, seats, rent and fuel burn are simplified assumptions. Facility costs, appeal and storage are design values. The 30% maintenance reduction references AirTycoon 4.')}</p><p class="hint">${tr('地球影像：NASA Earth Observatory，Blue Marble: Next Generation（Reto Stöckli）。海岸線：Natural Earth，公有領域。飛機與設施插畫：本站自製。機場場景：OpenAI imagegen 生成。配樂：本站原創和弦與旋律，以 Web Audio 合成。three.js：MIT 授權。','Earth imagery: NASA Earth Observatory, Blue Marble: Next Generation (Reto Stöckli). Coastlines: Natural Earth, public domain. Aircraft and facility art: original. Airport scene: generated with OpenAI imagegen. Music: original chords and melody synthesised with Web Audio. three.js: MIT.')}</p><p><a href="https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/" target="_blank" rel="noopener">NASA Earth Observatory</a> · <a href="https://apps.apple.com/us/app/airtycoon-4/id989733380" target="_blank" rel="noopener">AirTycoon 4</a> · <a href="./design/LICENSES.md">${tr('美術授權','Asset licences')}</a></p><p style="margin-top:10px">${tr('原廠機型資料','Manufacturer references')}：${B.AIRCRAFT_REFERENCES.map(x=>`<a href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.name)}</a>`).join(' · ')}</p></section>
     <div style="margin-top:10px">${srcHtml}</div>
     ${dvHtml ? `<h2 style="margin:22px 0 4px;font-size:18px">${tr('只有設計值的部分', 'Design values only')}</h2>${dvHtml}` : ''}

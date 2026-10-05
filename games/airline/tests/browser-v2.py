@@ -14,7 +14,7 @@ async def decisions(page, kind='sensible'):
         if(!window.testBots){const b=await import('./bots.mjs');window.testBots={sensible:b.sensibleBot(),naive:b.naiveBot()};}
         const a=__tq.app,s=a.state,d=testBots[kind](s,a.report);
         a.draft.routes=new Map((d.routes||s.routes).map(r=>[r.city,r]));
-        a.draft.eventChoices=d.eventChoices||{};
+        a.draft.eventChoices={...a.draft.eventChoices,...(d.eventChoices||{})};
         if(d.hedge!==undefined)a.draft.hedge=d.hedge;
         if(d.businessModel)a.draft.businessModel=d.businessModel;
         return {turn:s.turn,routes:a.draft.routes.size};
@@ -46,10 +46,15 @@ async def full_game(browser, mode, hub, kind):
     await page.reload();await page.locator(f'[data-continue="{mode}"]').click()
     for _ in range(25):
         if await page.evaluate('!!(__tq.app.state.finished||__tq.app.state.gameOver)'): break
+        await answer_events(page)
         await decisions(page,kind)
-        await page.evaluate('__tq.ff(1)')
-        assert await page.locator('#next').count(), 'Settlement report missing'
-        assert await page.locator('.reason').count(), 'Per-route explanation missing'
+        await page.locator('#skip').click()
+        assert await page.locator('#next').count(), await page.evaluate('''()=>({error:'Settlement report missing',turn:__tq.app.state.turn,screen:__tq.app.screen,runmsg:document.querySelector('#runmsg')?.innerText,overlay:document.querySelector('#overlay')?.innerText})''')
+        routes=await page.evaluate('__tq.app.report.routes.length')
+        assert await page.locator('.reason').count()==routes, 'Per-route explanation missing'
+        if not routes:
+            assert await page.evaluate('__tq.app.report.company.costTotal>0 && __tq.app.report.company.revenue===0')
+            assert '沒有航線收入，租金與固定費用仍要支付。' in await page.locator('.rwrap').inner_text()
         await page.locator('#next').click()
     summary=await page.evaluate('''()=>({mode:__tq.app.state.mode,hub:__tq.app.state.hub,...__tq.B.endReport(__tq.app.state)})''')
     assert not errors, errors
