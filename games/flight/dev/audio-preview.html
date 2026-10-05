@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Flight audio · silent offline checks</title>
+  <style>body{margin:28px;max-width:1050px;font:14px/1.6 ui-monospace,monospace;color:#dce8ec;background:#10191f}h1{font-size:20px}pre{white-space:pre-wrap}table{border-collapse:collapse;width:100%}td,th{padding:8px 14px;border-bottom:1px solid #344751;text-align:left}canvas{width:220px;height:50px;vertical-align:middle}</style>
+</head>
+<body>
+  <h1>Flight audio · silent offline checks</h1>
+  <p>These checks render Web Audio into memory with OfflineAudioContext. No live AudioContext is created and nothing plays through speakers.</p>
+  <p id="status">Rendering…</p>
+  <table><thead><tr><th>Sound field</th><th>Peak</th><th>RMS dBFS</th><th>Waveform</th></tr></thead><tbody id="results"></tbody></table>
+  <pre id="report"></pre>
+  <script type="module">
+    import { renderFlightAudioPreview } from '../audio.js';
+    const cases = [
+      ['jet-idle-cockpit', { aircraft:'jet', view:0, power:0, airspeed:0 }],
+      ['jet-takeoff-cockpit', { aircraft:'jet', view:0, power:1, airspeed:75, onGround:true, groundSpeed:75 }],
+      ['jet-takeoff-exterior', { aircraft:'jet', view:1, power:1, airspeed:75 }],
+      ['jet-wing-view', { aircraft:'jet', view:2, power:.75, airspeed:120 }],
+      ['light-cruise-cockpit', { aircraft:'light', view:0, power:.7, airspeed:48 }],
+      ['light-climb-exterior', { aircraft:'light', view:1, power:1, airspeed:45 }],
+      ['gear-flaps-touchdown', { aircraft:'jet', view:0, power:.24, airspeed:72, gearMoving:true, flapsMoving:true, events:[{ type:'touchdown',at:1,sinkRate:2.5,speed:72 },{ type:'gear-lock',at:1.6 },{ type:'stall',at:2,volume:.65 }] }],
+      ['paused-silence', { aircraft:'light', view:1, power:1, airspeed:70, paused:true }],
+      ['pause-tail', { aircraft:'jet', view:1, power:1, airspeed:115, pauseAt:1 }],
+    ];
+    const records = [];
+    try {
+      for (const [name, options] of cases) {
+        const buffer = await renderFlightAudioPreview(OfflineAudioContext, options), a = buffer.getChannelData(0), b = buffer.getChannelData(1);
+        let peak = 0, energy = 0, tail = 0;
+        for (let i=0;i<a.length;i++) { peak=Math.max(peak,Math.abs(a[i]),Math.abs(b[i])); energy += (a[i]*a[i]+b[i]*b[i])/2; if(i>2*buffer.sampleRate)tail=Math.max(tail,Math.abs(a[i]),Math.abs(b[i])); }
+        const rms=Math.sqrt(energy/a.length), record={name,peak,rmsDb:rms?20*Math.log10(rms):-Infinity,tailPeak:tail,finite:[...a,...b].every(Number.isFinite)};
+        records.push(record);
+        const row=document.createElement('tr');
+        for(const value of [name,peak.toFixed(4),rms?record.rmsDb.toFixed(1):'silent']) { const td=document.createElement('td'); td.textContent=value;row.append(td); }
+        const td=document.createElement('td'), canvas=document.createElement('canvas');canvas.width=440;canvas.height=100;td.append(canvas);row.append(td);document.getElementById('results').append(row);
+        const ctx=canvas.getContext('2d');ctx.strokeStyle='#7cd8ca';ctx.beginPath();for(let x=0;x<440;x++){const y=50-a[Math.floor(x*a.length/440)]*160;x?ctx.lineTo(x,y):ctx.moveTo(x,y);}ctx.stroke();
+      }
+      const silence=records.find(r=>r.name==='paused-silence'), tail=records.find(r=>r.name==='pause-tail');
+      const passed=records.every(r=>r.finite&&r.peak<.9)&&silence.peak===0&&tail.tailPeak<.000001&&records.filter(r=>!r.name.includes('silence')).every(r=>r.peak>.005);
+      document.getElementById('status').textContent=passed?'PASS · all fields contain finite, unclipped audio; paused output is zero and pause tail decays to silence.':'FAIL · inspect the rendered metrics.';
+      document.body.dataset.result=passed?'pass':'fail';document.getElementById('report').textContent=JSON.stringify(records,null,2);
+    } catch(error) { document.getElementById('status').textContent=`ERROR · ${error.message}`;document.body.dataset.result='error'; }
+  </script>
+</body>
+</html>

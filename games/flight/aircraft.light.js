@@ -1,3 +1,5 @@
+import { createAviationSurfaceKit, sceneEnvironmentBinding } from './aviation-materials.js?v=20261005';
+
 // MQ-172 雲雀 (Lark): fictional high-wing, single-engine four-seat trainer in the 天青航空 (SKYGLAZE) livery. Metres.
 // The aircraft's nose points along local -Z, +X is the right wing, +Y is up. Origin = physics reference point;
 // wheel bottoms sit at y = -1.2 (mains at x = +-1.26, z = 0.18; nose wheel at z = -1.58). Same {group, update, dispose}
@@ -395,6 +397,7 @@ export function createLightAircraft(THREE) {
   const group = new THREE.Group();
   group.name = 'MQ-172 light single';
   const K = geometryKit(THREE);
+  const finish = createAviationSurfaceKit(THREE);
   const env = skyEnvironment(THREE);
   const phys = (color, roughness, extra = {}) => new THREE.MeshPhysicalMaterial({ color, roughness, metalness: 0, envMap: env, envMapIntensity: 0.4, ...extra });
   const std = (color, roughness = 0.5, metalness = 0.1, extra = {}) => new THREE.MeshStandardMaterial({ color, roughness, metalness, envMap: env, envMapIntensity: 0.5, ...extra });
@@ -405,7 +408,7 @@ export function createLightAircraft(THREE) {
     accent: phys(0x6ba0e4, 0.34, { clearcoat: 0.55, clearcoatRoughness: 0.14 }),  // cowling blue: wheel pants, intake lips
     navy: phys(0x3a689c, 0.36, { clearcoat: 0.5, clearcoatRoughness: 0.15 }),     // tips
     fin: phys(0xffffff, 0.36, { clearcoat: 0.55, clearcoatRoughness: 0.14 }),
-    glass: phys(0x0a1824, 0.05, { clearcoat: 1, clearcoatRoughness: 0.03, envMapIntensity: 1.6, specularIntensity: 1 }),
+    glass: phys(0x152d3d, 0.05, { transparent: true, opacity: 0.94, depthWrite: false, ior: 1.49, clearcoat: 1, clearcoatRoughness: 0.04, envMapIntensity: 0.95, specularIntensity: 1 }),
     lens: phys(0xdfeefa, 0.04, { transparent: true, opacity: 0.16, envMapIntensity: 1.4, depthWrite: false }),
     spinner: std(0xe2e6ea, 0.16, 1, { envMapIntensity: 1.15 }),
     metal: std(0xb4bec6, 0.32, 0.85, { envMapIntensity: 0.9 }),
@@ -417,6 +420,11 @@ export function createLightAircraft(THREE) {
     blade: std(0xffffff, 0.45, 0.25, { vertexColors: true, envMapIntensity: 0.6 }),
     lamp: new THREE.MeshStandardMaterial({ color: 0xfff6dc, emissive: 0xfff1cc, emissiveIntensity: 0.9, roughness: 0.15, metalness: 0.6, envMap: env }),
   };
+  for (const key of ['accent', 'navy', 'paint', 'flap']) finish.apply(materials[key], 'paint', { repeat: [3, 3], bumpScale: 0.0001 });
+  finish.apply(materials.spinner, 'brushed', { repeat: [3, 4], bumpScale: 0.00002 });
+  finish.apply(materials.metal, 'brushed', { repeat: [2, 4], bumpScale: 0.00007 });
+  finish.apply(materials.exhaust, 'brushed', { repeat: [2, 3], bumpScale: 0.00015 });
+  finish.apply(materials.rubber, 'rubber', { repeat: [1, 5], bumpScale: 0.0035 });
   const B = bucketSet(THREE, K);
 
   // ---- Livery textures ---------------------------------------------------------------------------------------------------
@@ -484,14 +492,17 @@ export function createLightAircraft(THREE) {
     line(K.rounded([[U(-2.38), V(0.3)], [U(-2.02), V(0.3)], [U(-2.02), V(TAU - 0.3) - H], [U(-2.38), V(TAU - 0.3) - H]], 6, 3), true); // oil door on top
     const texture = new THREE.CanvasTexture(canvas); texture.colorSpace = THREE.SRGBColorSpace; texture.anisotropy = 4;
     materials.body.map = texture;
+    finish.relief(materials.body, { bumpScale: 0.003 });
   }
 
   // ---- Glass: wraparound windscreen, cabin windows, rear deck window -------------------------------------------------------
   {
     const { windscreen: outline, doorWin, rearWin, deck } = windowOutlines(K);
+    B.add('dark', K.patch(outline, (z, th) => surf(z, th, 0.002), { rings: 6, normal: surfNormal, step: 0.08 }));
     B.add('glass', K.patch(outline, (z, th) => surf(z, th, 0.007), { rings: 6, normal: surfNormal, step: 0.08 }));
     // Side windows in (z, y), both sides.
     for (const side of [-1, 1]) for (const win of [doorWin, rearWin]) {
+      B.add('dark', K.patch(win, (z, y) => surf(z, thetaAt(z, y, side), 0.002), { rings: 4, normal: (z, y) => surfNormal(z, thetaAt(z, y, side)), step: 0.07 }));
       B.add('glass', K.patch(win, (z, y) => surf(z, thetaAt(z, y, side), 0.008), { rings: 4, normal: (z, y) => surfNormal(z, thetaAt(z, y, side)), step: 0.07 }));
     }
     // Rear deck window behind the wing ("all-round view").
@@ -557,6 +568,7 @@ export function createLightAircraft(THREE) {
     for (const t of [0.07, 0.24, 0.66]) for (let x = 0; x < Wd; x += 5) g.fillRect(x, (1 - t) * Hd, 1.5, 1.5);
     g.fillStyle = 'rgba(70,80,90,0.2)'; g.fillRect(0, (1 - 0.07) * Hd - 1, Wd, 1);
     const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; materials.wing.map = t;
+    finish.relief(materials.wing, { bumpScale: 0.002 });
   }
   B.add('wing', W.fixed); B.add('wing', K.mirrorX(W.fixed));
   B.add('navy', W.tip); B.add('navy', K.mirrorX(W.tip));
@@ -770,12 +782,21 @@ export function createLightAircraft(THREE) {
     const pts = [new THREE.Vector2(r * 0.55, -w * 0.42)];
     for (let i = 0; i <= 8; i++) { const a = -Math.PI / 2 + i / 8 * Math.PI; pts.push(new THREE.Vector2(r - w * 0.3 + Math.cos(a) * w * 0.3, Math.sin(a) * w / 2)); }
     pts.push(new THREE.Vector2(r * 0.55, w * 0.42));
-    const g = new THREE.LatheGeometry(pts, 18); g.rotateZ(Math.PI / 2); return g;
+    const g = new THREE.LatheGeometry(pts, 18), uv = g.attributes.uv;
+    // Tread grooves follow the circumference; the shared tyre map's U runs across the axle.
+    for (let i = 0; i < uv.count; i++) { const u = uv.getX(i); uv.setXY(i, uv.getY(i), u); }
+    g.rotateZ(Math.PI / 2); return g;
   };
   function wheel(x, y, z, r, w) {
     const tire = new THREE.Mesh(tireGeometry(r, w), materials.rubber); tire.position.set(x, y, z); tire.castShadow = true; tire.receiveShadow = true; group.add(tire);
     const hub = K.place(new THREE.CylinderGeometry(r * 0.55, r * 0.55, w * 0.9, 14), [0, 0, 0], [0, 0, Math.PI / 2]);
     const hm = new THREE.Mesh(hub, materials.metal); tire.add(hm);
+    const bolts = [];
+    for (const side of [-1, 1]) for (let i = 0; i < 6; i++) {
+      const a = i / 6 * TAU;
+      bolts.push(K.place(new THREE.CylinderGeometry(0.0045, 0.0045, 0.008, 6), [side * w * 0.47, Math.cos(a) * r * 0.38, Math.sin(a) * r * 0.38], [0, 0, Math.PI / 2]));
+    }
+    tire.add(new THREE.Mesh(K.merge(bolts), materials.metal));
     wheels.push({ tire, radius: r });
   }
   // Wheel pant: streamlined teardrop (NACA-style thickness along z), the tyre shows through the bottom.
@@ -799,6 +820,8 @@ export function createLightAircraft(THREE) {
     const sx = side * 0.86, sy = -0.86;
     B.add('metal', K.place(new THREE.CylinderGeometry(0.012, 0.012, 0.16, 8), [sx, sy, MAIN.z - 0.08], [Math.PI / 2, 0, 0]));
     B.add('metal', K.place(new THREE.BoxGeometry(0.11, 0.012, 0.08), [sx, sy + 0.01, MAIN.z - 0.17]));
+    const hose = new THREE.TubeGeometry(new THREE.CatmullRomCurve3([[side * 0.53, -0.58, MAIN.z + 0.04], [side * 0.86, -0.76, MAIN.z + 0.04], [side * 1.18, axleY + 0.08, MAIN.z + 0.03]].map(p => new THREE.Vector3(...p))), 10, 0.004, 5, false);
+    B.add('dark', hose);
   }
   {
     const axleY = -1.2 + NOSE.r;
@@ -839,10 +862,12 @@ export function createLightAircraft(THREE) {
 
   B.build(group, materials);
   for (const m of group.children) if (m.isMesh && (m.material === materials.lens || m.material === materials.decal)) { m.castShadow = false; }
+  const reflectScene = sceneEnvironmentBinding(group, env);
 
   const input = (name, state, data) => state[name] ?? data[name] ?? 0;
   let flapExtension = 0, elapsed = 0, propAngle = 0;
   function update(state = {}, data = {}) {
+    reflectScene();
     const dt = clamp(data.dt ?? state.dt ?? 1 / 60, 0, 0.1); elapsed += dt;
     const targetFlaps = clamp(data.flaps ?? state.flaps ?? 0, 0, 3);
     const actualFlaps = data.flapPosition ?? state.flapPosition;
@@ -854,10 +879,13 @@ export function createLightAircraft(THREE) {
     elevator.rotation.x = -clamp(input('pitchInput', state, data), -1, 1) * 0.4;   // pull (+) = TE up
     rudder.rotation.y = clamp(input('yawInput', state, data), -1, 1) * 0.4;          // right (+) = TE right
     const engine = data.engine ?? state.engine ?? data.throttle ?? state.throttle ?? 0;
-    propAngle += dt * (3 + clamp(engine, 0, 1) * 70);
+    const rpm = data.engineRpm ?? (state.crashed || state.fuel === 0 ? 0 : 700 + clamp(engine, 0, 1) * 2000);
+    propAngle += dt * Math.max(0, rpm) * TAU / 60;
     prop.rotation.z = -propAngle; // clockwise seen from the cockpit
-    const fast = engine > 0.3;
-    blades.visible = !fast; disc.visible = fast;
+    const blur = clamp((rpm - 350) / 1000, 0, 1);
+    blades.visible = blur < 0.98; disc.visible = blur > 0.02;
+    materials.blade.transparent = true; materials.blade.opacity = 1 - blur;
+    disc.material.opacity = blur * 0.85;
     const speed = data.groundSpeed ?? state.speed ?? 0;
     for (const w of wheels) w.tire.rotation.x -= speed * dt / w.radius;
     const lights = data.lights ?? true;
@@ -865,7 +893,7 @@ export function createLightAircraft(THREE) {
     for (const light of beacons) light.visible = lights && elapsed % 1.3 < 0.14;
     for (const light of strobes) light.visible = lights && (elapsed % 1.1 < 0.065 || (elapsed % 1.1 > 0.15 && elapsed % 1.1 < 0.21));
   }
-  return { group, update, dispose: () => disposeTree(group) };
+  return { group, update, dispose: () => { disposeTree(group); finish.dispose(); env?.dispose(); } };
 }
 
 // ============================================================================================================================
@@ -882,6 +910,7 @@ export function createLightCockpit(THREE, options = {}) {
   const EYE = options.eye ?? [-0.30, 0.55, -0.5];
   const cabin = new THREE.Group(); cabin.name = 'cabin (aircraft coordinates)'; cabin.position.set(-EYE[0], -EYE[1], -EYE[2]); group.add(cabin);
   const K = geometryKit(THREE), B = bucketSet(THREE, K), WO = windowOutlines(K), dom = hasDOM();
+  const finish = createAviationSurfaceKit(THREE);
   const profile = options.profile || {};
   const V = { s0: 40, s1: 48, fe: 85, no: 129, ne: 163, ref: 65 };
   if (profile.speedLimit?.clean) V.ne = Math.round(profile.speedLimit.clean * KT);
@@ -912,14 +941,25 @@ export function createLightCockpit(THREE, options = {}) {
     radio: std(0x222427, 0.5, 0, { envMapIntensity: 0.35 }),
     radioLit: basic({ color: new THREE.Color(1.2, 1.2, 1.2) }),
     gaugeA: basic({ color: 0xeeeeee }), gaugeB: basic({ color: 0xeeeeee }), gaugeC: basic({ color: 0xeeeeee }),
-    glass: basic({ color: 0xa9c3d2, transparent: true, opacity: 0.06, depthWrite: false, side: THREE.DoubleSide }),
+    glass: new THREE.MeshPhysicalMaterial({ color: 0xdceaf0, transparent: true, opacity: 0.06, depthWrite: false, side: THREE.DoubleSide, roughness: 0.05, clearcoat: 0.8, clearcoatRoughness: 0.08, ior: 1.49, envMap: skyEnv, envMapIntensity: 0.32 }),
+    gaugeGlass: new THREE.MeshPhysicalMaterial({ color: 0xc5dae0, transparent: true, opacity: 0.035, depthWrite: false, roughness: 0.06, clearcoat: 1, clearcoatRoughness: 0.07, envMap: cabEnv, envMapIntensity: 0.3 }),
     skylight: basic({ color: 0x24525e, transparent: true, opacity: 0.5, depthWrite: false, side: THREE.DoubleSide }),
     card: basic({ color: 0xffffff }),
     wing: outside(0xf1eee6, 0.45),
     flap: outside(0xe4e2da, 0.45),
     navy: outside(0x3a689c, 0.4),
     cowl: outside(0x6ba0e4, 0.36, { clearcoat: 0.55, clearcoatRoughness: 0.14, side: THREE.DoubleSide }),
+    fabric: std(0xffffff, 0.96, 0, { vertexColors: true, envMapIntensity: 0.12 }),
+    belt: std(0x26282a, 0.97, 0, { envMapIntensity: 0.1 }),
+    carpet: std(0xffffff, 0.97, 0, { vertexColors: true, side: THREE.DoubleSide, envMapIntensity: 0.1 }),
+    glare: std(0xffffff, 0.98, 0, { vertexColors: true, side: THREE.DoubleSide, envMapIntensity: 0.1 }),
   };
+  for (const key of ['shell', 'trim', 'yoke', 'panel', 'radio', 'glare']) finish.apply(M[key], 'plastic', { repeat: [5, 4], bumpScale: key === 'glare' ? 0.00045 : 0.0002 });
+  finish.apply(M.fabric, 'fabric', { repeat: [6, 6], bumpScale: 0.0007 });
+  finish.apply(M.belt, 'fabric', { repeat: [2, 10], bumpScale: 0.00025 });
+  finish.apply(M.carpet, 'fabric', { repeat: [13, 16], bumpScale: 0.001 });
+  for (const key of ['metal', 'column']) finish.apply(M[key], 'brushed', { repeat: [3, 5], bumpScale: 0.000035 });
+  finish.apply(M.glass, 'glass', { bumpScale: 0.000008 });
 
   // Vertex colours: base colour times a cheap cabin occlusion term (darker toward the floor and the firewall).
   const occlusion = (x, y, z) => (0.4 + 0.6 * smooth(-0.55, 0.62, y)) * (0.55 + 0.45 * smooth(-1.58, -1.05, z));
@@ -1053,7 +1093,7 @@ export function createLightCockpit(THREE, options = {}) {
   const wallX = (z, y, side = 1, off = OFF) => surf(z, side * thetaAt(z, y, 1), off)[0];
   {
     const rows = []; for (let z = -1.6; z <= 1.25; z += 0.15) rows.push([[wallX(z, FLOOR, -1) * 1.02, FLOOR, z], [0, FLOOR, z], [wallX(z, FLOOR, 1) * 1.02, FLOOR, z]]);
-    B.add('shell', tint(sheet(rows), C(0x34322f)));
+    B.add('carpet', tint(sheet(rows), C(0x34322f)));
     const fw = [], zf = -1.6; // firewall below the glare shield
     for (let i = 0; i <= 16; i++) { const y = lerp(FLOOR, 0.36, i / 16); fw.push([[wallX(zf, y, -1), y, zf], [0, y, zf], [wallX(zf, y, 1), y, zf]]); }
     B.add('shell', tint(sheet(fw), C(0x2a2b2d)));
@@ -1112,18 +1152,23 @@ export function createLightCockpit(THREE, options = {}) {
       for (const t of [0.25, 0.5, 0.75, 1]) row.push([lerp(a[0], s[0], t), lerp(a[1], s[1], t) + Math.sin(t * Math.PI) * 0.004, lerp(a[2], s[2], t)]);
       rows.push(row);
     }
-    B.add('shell', tint(sheet(rows), C(0x1c1d20), { shade: false }));
+    B.add('glare', tint(sheet(rows), C(0x1c1d20), { shade: false }));
   }
   // Pedestal under the panel centre, seats, door furniture, overhead parts.
   B.add('shell', tint(K.place(roundedBox(0.12, 0.52, 0.2, 0.012, 2), [0.03, -0.2, -1.075]), C(0x3a3c40)));
   const seat = (x, z, w, rear = false) => {
     const fabric = C(0x77746d), bolster = C(0x45464a), tmp = new THREE.Color();
     const col = (px) => tmp.copy(bolster).lerp(fabric, 1 - smooth(w * 0.3, w * 0.42, Math.abs(px - x)));
-    B.add('shell', tint(K.place(roundedBox(w, 0.12, rear ? 0.44 : 0.48, 0.045), [x, -0.31, z], [0.07, 0, 0]), col));
-    B.add('shell', tint(K.place(roundedBox(w, 0.64, 0.12, 0.05), [x, 0.09, z + (rear ? 0.3 : 0.33)], [0.2, 0, 0]), col));
+    B.add('fabric', tint(K.place(roundedBox(w, 0.12, rear ? 0.44 : 0.48, 0.045), [x, -0.31, z], [0.07, 0, 0]), col));
+    B.add('fabric', tint(K.place(roundedBox(w, 0.64, 0.12, 0.05), [x, 0.09, z + (rear ? 0.3 : 0.33)], [0.2, 0, 0]), col));
     if (!rear) {
-      B.add('shell', tint(K.place(roundedBox(0.26, 0.15, 0.085, 0.035, 3), [x, 0.53, z + 0.445], [0.2, 0, 0]), C(0x5a5853), { shade: false }));
+      B.add('fabric', tint(K.place(roundedBox(0.26, 0.15, 0.085, 0.035, 3), [x, 0.53, z + 0.445], [0.2, 0, 0]), C(0x5a5853), { shade: false }));
       for (const s of [-1, 1]) B.add('metal', K.place(new THREE.CylinderGeometry(0.005, 0.005, 0.1, 6), [x + s * 0.07, 0.445, z + 0.43], [0.2, 0, 0]));
+      // Shoulder harness and lap buckle on the unoccupied seats.
+      const a = new THREE.Vector3(x - w * 0.27, 0.39, z + 0.245), b = new THREE.Vector3(x + w * 0.23, -0.26, z + 0.19), direction = b.clone().sub(a);
+      const belt = new THREE.BoxGeometry(0.033, direction.length(), 0.003);
+      belt.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.clone().normalize())); belt.translate(...a.add(b).multiplyScalar(0.5).toArray()); B.add('belt', belt);
+      B.add('metal', K.place(roundedBox(0.047, 0.026, 0.007, 0.003, 2), [x + w * 0.23, -0.26, z + 0.187]));
     }
   };
   seat(-0.3, -0.66, 0.46); seat(0.3, -0.66, 0.46); seat(0, 0.42, 1.0, true);
@@ -1264,6 +1309,8 @@ export function createLightCockpit(THREE, options = {}) {
     T('VOR 1 / ILS', -0.11, 0.153, 0.0034, '#cfcfca'); T('ENGINE', -0.485, 0.122, 0.0036, '#cfcfca', 700);
     g.strokeStyle = 'rgba(255,255,255,0.13)'; g.lineWidth = 2; g.beginPath(); for (let i = 0; i <= 40; i++) { const u = PANEL.u0 + 0.005 + (PANEL.u1 - PANEL.u0 - 0.01) * i / 40; const y = Y(vTop(u)) + 3; i ? g.lineTo(X(u), y) : g.moveTo(X(u), y); } g.stroke();
     M.panel.map = canvasTexture(c); M.panel.color.set(0xffffff);
+    // Approximate diffuse daylight bounced through the side windows onto the shaded instrument panel.
+    M.panel.emissiveMap = M.panel.map; M.panel.emissive.set(0xffffff); M.panel.emissiveIntensity = 0.16;
   }
 
   // ---- Radio stack: six units drawn once (512 x 828), displays re-used by an unlit overlay so they glow --------------------------
@@ -1326,6 +1373,7 @@ export function createLightCockpit(THREE, options = {}) {
       }
     }
     const tex = canvasTexture(c); M.radio.map = tex; M.radio.color.set(0xffffff); M.radioLit.map = tex;
+    M.radio.emissiveMap = tex; M.radio.emissive.set(0xffffff); M.radio.emissiveIntensity = 0.12;
     const uvRect = (geom, r) => { const t = geom.attributes.uv; for (let i = 0; i < t.count; i++) t.setXY(i, lerp((r.u0 - STACK.u0) / (STACK.u1 - STACK.u0), (r.u1 - STACK.u0) / (STACK.u1 - STACK.u0), t.getX(i)), lerp((r.v0 - STACK.v0) / (STACK.v1 - STACK.v0), (r.v1 - STACK.v0) / (STACK.v1 - STACK.v0), t.getY(i))); return geom; };
     for (const r of unitRects) B.add('radio', onPanel(uvRect(new THREE.PlaneGeometry(r.u1 - r.u0, r.v1 - r.v0), r).translate((r.u0 + r.u1) / 2, (r.v0 + r.v1) / 2, -0.003)));
     for (const r of lit) B.add('radioLit', onPanel(uvRect(new THREE.PlaneGeometry(r.u1 - r.u0, r.v1 - r.v0), r).translate((r.u0 + r.u1) / 2, (r.v0 + r.v1) / 2, -0.0024)));
@@ -1334,6 +1382,7 @@ export function createLightCockpit(THREE, options = {}) {
   const knob = (u, v, r = 0.0085) => {
     B.add('black', onPanel(new THREE.CylinderGeometry(r, r * 1.05, 0.008, 14).rotateX(Math.PI / 2).translate(u, v, 0.001)));
     B.add('black', onPanel(new THREE.CylinderGeometry(r * 0.65, r * 0.68, 0.016, 10).rotateX(Math.PI / 2).translate(u, v, 0.005)));
+    B.add('metal', onPanel(new THREE.TorusGeometry(r * 0.91, 0.00065, 4, 18).translate(u, v, 0.006)));
   };
   { const r = unit('gps'); knob(r.u0 + 0.014, lerp(r.v1, r.v0, 0.3)); knob(r.u0 + 0.014, lerp(r.v1, r.v0, 0.72)); }
   { const r = unit('navcom'); knob(r.u0 + 0.03, r.v0 + 0.0085, 0.0062); knob(r.u1 - 0.03, r.v0 + 0.0085, 0.0062); }
@@ -1393,6 +1442,7 @@ export function createLightCockpit(THREE, options = {}) {
     const horn = (s) => new THREE.TubeGeometry(new THREE.CatmullRomCurve3([[0.03, 0.0, 0], [0.085, -0.006, 0], [0.13, 0.008, 0], [0.152, 0.055, 0], [0.155, 0.11, 0], [0.142, 0.15, 0]].map(([x, y, z]) => new THREE.Vector3(s * x, y, z))), 18, 0.0135, 8, false);
     const grip = (s) => new THREE.TubeGeometry(new THREE.CatmullRomCurve3([[0.153, 0.05, 0], [0.156, 0.095, 0], [0.149, 0.136, 0]].map(([x, y, z]) => new THREE.Vector3(s * x, y, z))), 8, 0.0175, 10, false);
     const parts = [horn(-1), horn(1), grip(-1), grip(1), roundedBox(0.085, 0.05, 0.045, 0.014, 3), K.place(new THREE.SphereGeometry(0.0145, 8, 6), [-0.142, 0.15, 0]), K.place(new THREE.SphereGeometry(0.0145, 8, 6), [0.142, 0.15, 0])];
+    for (const side of [-1, 1]) for (let i = 0; i < 5; i++) parts.push(K.place(new THREE.TorusGeometry(0.0175, 0.00065, 4, 12), [side * 0.155, 0.07 + i * 0.012, 0], [Math.PI / 2, 0, 0]));
     wheel.add(new THREE.Mesh(K.merge(parts), M.yoke));
     wheel.add(new THREE.Mesh(K.merge([K.place(new THREE.BoxGeometry(0.05, 0.022, 0.003), [0, 0.002, 0.0235])]), M.metal));
     wheel.add(new THREE.Mesh(K.merge([K.place(new THREE.CylinderGeometry(0.004, 0.004, 0.008, 8), [-0.148, 0.163, 0.004]), K.place(new THREE.BoxGeometry(0.006, 0.01, 0.006), [-0.137, 0.115, 0.017])]), M.red));
@@ -1585,7 +1635,17 @@ export function createLightCockpit(THREE, options = {}) {
       g.font = `700 13px ${FONT}`; g.textAlign = 'left'; g.fillText('ET', 8, 16); g.fillText('UT', 8, 34); }),
   };
 
+  for (const [u, v] of Object.values(G)) {
+    B.add('black', onPanel(new THREE.TorusGeometry(R6 + 0.0012, 0.0018, 6, 36).translate(u, v, -0.0002)));
+    B.add('gaugeGlass', onPanel(new THREE.CircleGeometry(R6 * 0.985, 40).translate(u, v, -0.001)));
+    for (const sx of [-1, 1]) for (const sy of [-1, 1]) {
+      const x = u + sx * (R6 + 0.002), y = v + sy * (R6 + 0.002);
+      B.add('metal', onPanel(new THREE.CylinderGeometry(0.0021, 0.0021, 0.0012, 8).rotateX(Math.PI / 2).translate(x, y, 0.001)));
+      B.add('black', onPanel(new THREE.BoxGeometry(0.0029, 0.0005, 0.0003).translate(x, y, 0.0017)));
+    }
+  }
   B.build(cabin, M, { castShadow: false, receiveShadow: false });
+  const reflectOutside = sceneEnvironmentBinding(group, skyEnv);
 
   // ---- Update -----------------------------------------------------------------------------------------------------------------
   const last = {}; let acc = 1, elapsed = 0, flapExtension = 0, prevHdg = null, prevRoll = null, turnRate = 0, rollRate = 0, vsLag = null, rpmLag = null, oilT = null, oilP = null;
@@ -1594,6 +1654,7 @@ export function createLightCockpit(THREE, options = {}) {
   const changed = (key, value) => { const s = JSON.stringify(value); if (last[key] === s) return false; last[key] = s; return true; };
   const q = (v, step) => Math.round(v / step) * step;
   function update(state = {}, data = {}) {
+    reflectOutside();
     const dt = clamp(data.dt ?? state.dt ?? 1 / 60, 0, 0.1); elapsed += dt;
     const input = (k) => clamp(state[k] ?? data[k] ?? 0, -1, 1);
     const roll = input('rollInput'), pitch = input('pitchInput'), yaw = input('yawInput');
@@ -1609,7 +1670,12 @@ export function createLightCockpit(THREE, options = {}) {
     for (const a of ailerons) a.pivot.rotation.x = -roll * a.side * 0.3;
     const trim = clamp(data.trim ?? state.trim ?? 0, -1, 1); trimWheel.rotation.x = -trim * 9; trimPointer.position.y = -0.09 + clamp(trim, -0.5, 0.6) * 0.07;
     const engine = clamp(data.engine ?? state.engine ?? data.throttle ?? state.throttle ?? 0, 0, 1);
-    if (disc) { disc.visible = engine > 0.3 && (data.engineRpm ?? 1) > 0; disc.rotation.z -= dt * (3 + engine * 70) * 0.13; }
+    if (disc) {
+      const rpm = data.engineRpm ?? (state.crashed || state.fuel === 0 ? 0 : RPM.idle + engine * (RPM.max - RPM.idle));
+      const blur = clamp((rpm - 350) / 1000, 0, 1);
+      disc.visible = blur > 0.02; disc.material.opacity = blur;
+      disc.rotation.z -= dt * Math.max(0, rpm) * TAU / 60 * 0.13;
+    }
     const lights = data.lights ?? true; navR.visible = navG.visible = lights;
     strobe.visible = lights && (elapsed % 1.1 < 0.065 || (elapsed % 1.1 > 0.15 && elapsed % 1.1 < 0.21));
     // Flight-data derived values (smoothed like the real instruments).
@@ -1643,6 +1709,6 @@ export function createLightCockpit(THREE, options = {}) {
   update({}, {});
   group.group = group;
   group.update = update;
-  group.dispose = () => disposeTree(group);
+  group.dispose = () => { disposeTree(group); finish.dispose(); skyEnv?.dispose(); };
   return group;
 }

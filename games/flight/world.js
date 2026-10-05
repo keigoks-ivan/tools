@@ -1,3 +1,5 @@
+import { createAtmosphere } from './atmosphere.js?v=20261005';
+
 // Airport scenery: runway 14/32 with markings and lighting, the other two runways as flat surfaces, a few buildings.
 // Everything place-specific comes from the airport config; the ground itself (imagery + terrain) is geoscenery.js.
 const CLEAR_FOG = 0.000013, FOG_DENSITY = 0.0009; // exponential-squared: 4% of the scene is visible at 2 km, 17% at 1.5 km
@@ -71,27 +73,11 @@ export function createWorld(THREE, scene, options = {}) {
     map.wrapS = map.wrapT = THREE.RepeatWrapping; return map;
   }
 
-  const previousFog = scene.fog, previousBackground = scene.background;
-  const fog = new THREE.FogExp2(0xb8cbd4, CLEAR_FOG); // light enough that the Alps, 65-80 km away, stay visible
-  scene.fog = fog; scene.background = new THREE.Color(0x9cbdd3);
-  const skyMaterial = material(new THREE.ShaderMaterial({
-    side: THREE.BackSide, depthWrite: false, fog: false, toneMapped: false,
-    uniforms: {
-      zenith: { value: new THREE.Color(0x397aae) }, horizon: { value: new THREE.Color(0xc5d9de) },
-      sunDirection: { value: new THREE.Vector3(-0.52, 0.54, -0.66).normalize() }, cloudiness: { value: 0 },
-    },
-    vertexShader: 'varying vec3 direction; void main(){ direction=normalize(position); gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }',
-    fragmentShader: `varying vec3 direction; uniform vec3 zenith; uniform vec3 horizon; uniform vec3 sunDirection; uniform float cloudiness;
-      void main(){ vec3 d=normalize(direction); float h=max(d.y,0.0); vec3 col=mix(horizon,zenith,pow(h,0.46));
-      float sun=max(dot(d,sunDirection),0.0); col+=vec3(1.0,0.8,0.5)*pow(sun,24.0)*0.16*(1.0-cloudiness);
-      col+=vec3(1.0,0.93,0.78)*smoothstep(0.99996,0.999985,sun)*(1.0-cloudiness); gl_FragColor=vec4(col,1.0); }`,
-  }));
-  const sky = addMesh(geometry(new THREE.SphereGeometry(90000, 32, 16)), skyMaterial, 0, 0, 0);
-  sky.renderOrder = -10;
-  const hemisphere = new THREE.HemisphereLight(0xcde5f6, 0x77795d, 1.6); root.add(hemisphere);
-  const sunlight = new THREE.DirectionalLight(0xffeed0, 2.4);
-  sunlight.position.set(-5200, 5400, -6600); root.add(sunlight);
-
+  const atmosphere = createAtmosphere(THREE, scene, { quality: options.quality, clearFog: CLEAR_FOG, fogDensity: FOG_DENSITY });
+  // The image-based terrain stays unlit; a transparent receiver anchors aircraft and airport buildings to its surveyed flat airfield.
+  const zone = airport.flatZone;
+  const airportShadows = ground(material(new THREE.ShadowMaterial({ color: 0x18232d, opacity: 0.3, depthWrite: false })), (zone.minX + zone.maxX) / 2, (zone.minZ + zone.maxZ) / 2, zone.maxX - zone.minX, zone.maxZ - zone.minZ, 0.018);
+  airportShadows.name = 'Airfield contact shadows'; airportShadows.visible = options.quality !== 'low';
 
   // Ground shown until the baked terrain is ready (and if it cannot be loaded): a plain meadow.
   const landscape = new THREE.Group(); landscape.name = 'Fallback ground'; root.add(landscape);
@@ -100,9 +86,9 @@ export function createWorld(THREE, scene, options = {}) {
   ground(standard(0xffffff, { map: grassMap }), 0, 0, 160000, 160000, -0.5);
   target = root;
 
-  // Pavement is unlit and tinted like the aerial photo, so the 3D runways blend into the imagery below them.
+  // Close-range aggregate and tyre wear supplement the pavement already visible on the aerial photo.
   const asphaltMap = surfaceTexture('#8d8c86', 0.1); asphaltMap.repeat.set(3, 150);
-  const asphalt = basic(0xffffff, { map: asphaltMap });
+  const asphalt = standard(0xffffff, { map: asphaltMap, bumpMap: asphaltMap, bumpScale: 0.018, roughness: 0.96 });
   const paint = standard(0xe6e6d5);
   const rubberMap = texture(128, 512, (ctx, w, h) => {
     for (let i = 0; i < 280; i++) {
@@ -189,75 +175,76 @@ export function createWorld(THREE, scene, options = {}) {
     return addMesh(plane, basic(0xffffff, { map, side: THREE.DoubleSide }), x, y, z, w, h, 1, parent);
   }
 
-  // Buildings: boxes placed from end points measured (or estimated) on the imagery.
-  const terminalWhite = standard(0xd4d7ce), terminalRoof = standard(0xb5beb8, { roughness: 0.55 });
-  const glass = standard(0x375460, { roughness: 0.24, metalness: 0.25 }), structure = standard(0x87958f);
+  // Keep the configured building footprints; articulation is confined to their existing walls and roofs.
+  const terminalWhite = standard(0xd2d4cb), terminalRoof = standard(0xb0b9b5, { roughness: 0.7, metalness: 0.18 });
+  const glass = standard(0x526c7a, { roughness: 0.18, metalness: 0.28 }), structure = standard(0x87958f, { roughness: 0.68 });
+  const architectureDetails = [];
+  const facadeTexture = texture(512, 256, (ctx, w, h) => {
+    const gradient = ctx.createLinearGradient(0, 0, 0, h); gradient.addColorStop(0, '#8395a1'); gradient.addColorStop(0.46, '#536773'); gradient.addColorStop(1, '#253d4a');
+    ctx.fillStyle = gradient; ctx.fillRect(0, 0, w, h);
+    for (let x = 0; x < w; x += 64) {
+      ctx.fillStyle = x % 128 ? 'rgba(14,25,32,.15)' : 'rgba(163,173,180,.12)'; ctx.fillRect(x + 2, 0, 60, h);
+      ctx.fillStyle = '#a4b0b5'; ctx.fillRect(x, 0, 2, h);
+      ctx.fillStyle = 'rgba(15,27,35,.8)'; ctx.fillRect(x + 3, h * 0.72, 59, 2);
+    }
+    ctx.fillStyle = '#9fa9ac'; ctx.fillRect(0, h * 0.46, w, 3);
+  });
   for (const b of airport.buildings) {
     const dx = b.b[0] - b.a[0], dz = b.b[1] - b.a[1], len = Math.hypot(dx, dz);
     const holder = new THREE.Group(); holder.position.set((b.a[0] + b.b[0]) / 2, 0, (b.a[1] + b.b[1]) / 2); holder.rotation.y = Math.atan2(-dx, -dz); root.add(holder);
-    box(terminalWhite, 0, b.height / 2, 0, b.width, b.height, len, holder);
-    box(terminalRoof, 0, b.height + 0.9, 0, b.width + 3, 1.8, len + 3, holder);
-    for (const side of [-1, 1]) box(glass, side * (b.width / 2 + 0.05), b.height * 0.55, 0, 0.3, b.height * 0.5, len - 4, holder);
-    if (b.id === 'terminal') sign(airport.name.en.replace(' ', '  '), 0, b.height * 0.55, -len / 2 - 0.1, 58, 5.5, {}, holder).rotation.y = Math.PI;
+    holder.name = `${b.id} surveyed footprint`;
+    const detail = new THREE.Group(); detail.name = `${b.id} roof detail`; holder.add(detail); architectureDetails.push(detail);
+    box(terminalWhite, 0, 2.6, 0, b.width, 5.2, len, holder).castShadow = true;
+    box(glass, 0, (b.height + 5.2) / 2, 0, b.width - 0.35, b.height - 5.2, len - 0.35, holder).castShadow = true;
+    box(terminalRoof, 0, b.height + 0.45, 0, b.width + 2, 0.9, len + 2, holder).castShadow = true;
+    const map = facadeTexture.clone(); map.wrapS = THREE.RepeatWrapping; map.repeat.set(len / 18, 1); map.needsUpdate = true; textures.add(map);
+    const facade = standard(0xffffff, { map, roughness: 0.26, metalness: 0.22 });
+    for (const side of [-1, 1]) {
+      const sheet = addMesh(plane, facade, side * (b.width / 2 + 0.04), b.height * 0.59, 0, len - 1, b.height * 0.58, 1, holder);
+      sheet.rotation.y = side * Math.PI / 2;
+      box(structure, side * (b.width / 2 + 0.11), 5.5, 0, 0.2, 0.26, len, holder);
+    }
+    const columns = [], equipment = [], skylights = [], rails = [];
+    for (let z = -len / 2 + 6; z < len / 2 - 5; z += 12) for (const side of [-1, 1]) columns.push({ x: side * (b.width / 2 + 0.14), y: b.height / 2, z, w: 0.28, h: b.height, d: 0.36 });
+    for (let z = -len / 2 + 20; z < len / 2 - 15; z += 45) {
+      equipment.push({ x: 0, y: b.height + 1.15, z, w: 5.4, h: 1.6, d: 8 });
+      skylights.push({ x: -b.width * 0.27, y: b.height + 0.96, z, w: 4.8, h: 0.55, d: 13 });
+      skylights.push({ x: b.width * 0.27, y: b.height + 0.96, z, w: 4.8, h: 0.55, d: 13 });
+    }
+    for (const side of [-1, 1]) rails.push({ x: side * (b.width / 2 - 0.45), y: b.height + 1.4, z: 0, w: 0.055, h: 0.08, d: len - 2 });
+    target = holder; instances(cube, structure, columns).castShadow = true;
+    target = detail; instances(cube, terminalRoof, equipment); instances(cube, glass, skylights); instances(cube, structure, rails); target = root;
+    if (b.id === 'terminal') sign(airport.name.en, 0, b.height * 0.62, -len / 2 - 0.1, Math.min(58, b.width - 4), 3.8, { background: '#405563' }, holder).rotation.y = Math.PI;
   }
   const t = airport.tower, towerGroup = new THREE.Group(); towerGroup.position.set(t.x, 0, t.z); towerGroup.scale.setScalar(t.height / 60); root.add(towerGroup);
   const towerConcrete = standard(0xc2ccc4);
-  box(towerConcrete, 0, 24, 0, 11, 48, 13, towerGroup);
+  box(towerConcrete, 0, 24, 0, 11, 48, 13, towerGroup).castShadow = true;
   box(structure, 0, 46, 0, 18, 3, 20, towerGroup);
   box(glass, 0, 50, 0, 21, 6, 23, towerGroup);
   box(terminalWhite, 0, 54, 0, 26, 1.8, 28, towerGroup);
   box(structure, 0, 57.6, 0, 0.8, 5, 0.8, towerGroup);
   addMesh(sphere, redLight, 0, 60.3, 0, 0.55, 0.55, 0.55, towerGroup);
   box(towerConcrete, 12, 4, 26, 46, 8, 31, towerGroup);
-
-  const cloudMap = texture(512, 256, (ctx, w, h) => {
-    for (let layer = 0; layer < 2; layer++) for (let i = 0; i < 32; i++) {
-      const x = 40 + random() * 420, y = 75 + random() * 100, r = 22 + random() * 51;
-      const gradient = ctx.createRadialGradient(x, y, r * 0.03, x, y, r);
-      const col = layer ? '252,253,245' : '202,218,225';
-      gradient.addColorStop(0, `rgba(${col},.7)`); gradient.addColorStop(0.6, `rgba(${col},.32)`); gradient.addColorStop(1, `rgba(${col},0)`);
-      ctx.fillStyle = gradient; ctx.fillRect(x - r, y - r, r * 2, r * 2);
-    }
-  });
-  const cloudMaterial = material(new THREE.SpriteMaterial({ map: cloudMap, transparent: true, opacity: 0.67, depthWrite: false, fog: true, color: 0xffffff }));
-  const clouds = [];
-  for (let i = 0; i < 24; i++) {
-    const cloud = new THREE.Sprite(cloudMaterial), width = 1400 + random() * 3100;
-    const x = -25000 + random() * 50000, z = -34000 + random() * 65000;
-    cloud.position.set(x, 2400 + random() * 2200, z); cloud.scale.set(width, width * 0.37, 1);
-    root.add(cloud); clouds.push({ object: cloud, x, z, width, altitude: cloud.position.y, speed: 2 + random() * 5 });
+  const towerFrames = [];
+  for (const side of [-1, 1]) for (let v = -10; v <= 10; v += 5) {
+    towerFrames.push({ x: side * 10.6, y: 50, z: v, w: 0.22, h: 6.1, d: 0.22 });
+    towerFrames.push({ x: v, y: 50, z: side * 11.6, w: 0.22, h: 6.1, d: 0.22 });
   }
+  target = towerGroup; instances(cube, structure, towerFrames); target = root;
 
-  let currentWeather = '';
   function update(time, state, weather = 'clear') {
+    atmosphere.update(time, state, weather);
     const position = state?.position || state?.pos || state || { x: 0, y: 0, z: 0 };
-    sky.position.set(position.x || 0, position.y || 0, position.z || 0);
-    const type = typeof weather === 'string' ? weather : weather?.type || 'clear';
-    if (type !== currentWeather) {
-      currentWeather = type;
-      const foggy = type === 'fog', overcast = type === 'overcast' || foggy; // fog: overcast look, grey sky, and a dense haze that hides the runway until about 2 km
-      skyMaterial.uniforms.zenith.value.set(foggy ? 0x9aa4a8 : overcast ? 0x899ba5 : 0x397aae);
-      skyMaterial.uniforms.horizon.value.set(foggy ? 0xb7bfc1 : overcast ? 0xb9c6c8 : 0xc5d9de);
-      skyMaterial.uniforms.cloudiness.value = overcast ? 0.9 : 0;
-      fog.color.set(foggy ? 0xb7bfc1 : overcast ? 0xb9c6c8 : 0xb8cbd4); fog.density = foggy ? FOG_DENSITY : overcast ? 0.00006 : CLEAR_FOG;
-      sunlight.intensity = overcast ? 0.6 : 2.4; hemisphere.intensity = overcast ? 1.9 : 1.6;
-      cloudMaterial.opacity = overcast ? 0.94 : 0.67;
-      for (const cloud of clouds) cloud.object.scale.set(cloud.width * (overcast ? 2.5 : 1), cloud.width * (overcast ? 0.5 : 0.37), 1);
-    }
-    const seconds = Number.isFinite(time) ? time : 0;
-    for (const cloud of clouds) {
-      cloud.object.position.x = cloud.x + Math.sin(seconds * 0.0006) * 100 + seconds * cloud.speed;
-      cloud.object.position.y = cloud.altitude * (type === 'overcast' || type === 'fog' ? 0.64 : 1);
-    }
     const distance = Math.max(1, (position.z || 0) - aimpoint);
     const angle = Math.atan2(Math.max(0, position.y || 0), distance) * 180 / Math.PI;
     const g = airport.ils.glideslopeDeg, transitions = [g - 0.3, g - 0.1, g + 0.1, g + 0.3];
     papiLamps.forEach((lamp, i) => { lamp.material = angle > transitions[i] ? whiteLight : redLight; });
   }
   update(0, { position: { x: 0, y: 4, z: near - 180 } });
-  return { runway, update, setGeographic(enabled) { landscape.visible = !enabled; }, dispose() {
+  architectureDetails.forEach(detail => { detail.visible = options.quality !== 'low'; });
+  return { runway, update, atmosphere: atmosphere.uniforms, setQuality(value) { atmosphere.setQuality(value); airportShadows.visible = value !== 'low'; architectureDetails.forEach(detail => { detail.visible = value !== 'low'; }); }, setGeographic(enabled) { landscape.visible = !enabled; }, dispose() {
     scene.remove(root);
-    if (scene.fog === fog) { scene.fog = previousFog; scene.background = previousBackground; }
+    atmosphere.dispose();
     geometries.forEach(value => value.dispose()); materials.forEach(value => value.dispose()); textures.forEach(value => value.dispose());
   } };
 }

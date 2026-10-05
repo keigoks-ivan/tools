@@ -1,3 +1,5 @@
+import { createAviationSurfaceKit, roundedCabinPart, sceneEnvironmentBinding } from './aviation-materials.js?v=20261005';
+
 // MQ-320 civil twinjet (fictional A320neo / 737 MAX class) and its two-crew glass cockpit, built procedurally.
 // All dimensions are metres. The aircraft's nose points along local -Z, +X is the right wing, +Y is up.
 // Gear contact points: main wheels (±3.22 ± 0.3, -4.0, 2.75), nose wheels (±0.195, -4.0, -13.56); profiles.mjs gearHeight 4.
@@ -218,6 +220,7 @@ function disposeObject(root) {
 // =====================================================================================================
 export function createAircraft(THREE) {
   const K = geometryKit(THREE), { v3 } = K;
+  const finish = createAviationSurfaceKit(THREE);
   const group = new THREE.Group();
   group.name = 'MQ-320 civil twinjet';
   const env = skyEnvironment(THREE);
@@ -315,12 +318,13 @@ export function createAircraft(THREE) {
     }
     bodyMap = new THREE.CanvasTexture(canvas); bodyMap.colorSpace = THREE.SRGBColorSpace; bodyMap.anisotropy = 4;
   }
-  const paint = phys({ color: 0xffffff, map: bodyMap, roughness: 0.45, metalness: 0.04, clearcoat: 0.35, clearcoatRoughness: 0.2, envMapIntensity: 0.32 });
+  const paint = phys({ color: 0xffffff, map: bodyMap, roughness: 0.37, metalness: 0.04, clearcoat: 0.58, clearcoatRoughness: 0.17, envMapIntensity: 0.42 });
+  finish.relief(paint, { bumpScale: 0.008 });
   const fuselage = new THREE.Mesh(K.merge([fuselageGeometry, tailCap]), paint);
   fuselage.name = 'fuselage'; fuselage.castShadow = fuselage.receiveShadow = true; group.add(fuselage);
 
   // ---------------- Windows ----------------
-  const glass = phys({ color: 0x0b1219, roughness: 0.06, metalness: 0.35, clearcoat: 1, clearcoatRoughness: 0.03, envMapIntensity: 1.25 });
+  const glass = phys({ color: 0x182b3b, transparent: true, opacity: 0.94, depthWrite: false, roughness: 0.045, metalness: 0.05, clearcoat: 1, clearcoatRoughness: 0.04, ior: 1.52, envMapIntensity: 0.95 });
   const frameDark = std({ color: 0x1c2733, roughness: 0.55, metalness: 0.2 });
   const glassParts = [], darkParts = [];
   // patch on the fuselage over a quad in (z, theta) parameter space
@@ -363,6 +367,10 @@ export function createAircraft(THREE) {
       darkParts.push(orientOutward(surfacePatch(frame, 0.006, 6, 6), 0.3));
       glassParts.push(orientOutward(surfacePatch(c, 0.012, 6, 6), 0.3));
     }
+    // Parked windscreen wipers: separate from the dark glass so the arm catches sunlight.
+    const front = cockpitWindows(side)[0], mix = t => [lerp(front[0][0], front[1][0], t), lerp(front[0][1], front[1][1], t)];
+    const at = t => surfaceAt(...mix(t), 0.035);
+    darkParts.push(K.rod(at(0.08), at(0.72), 0.013, 0.013, 6), K.rod(at(0.38), at(0.78).add(v3(0, -0.06, 0)), 0.014, 0.019, 6));
   }
   // cabin window strip: rounded rectangles that follow the fuselage curvature
   function cabinWindow(zc, yc, side, w = 0.25, h = 0.35, r = 0.1, off = 0.011) {
@@ -519,6 +527,7 @@ export function createAircraft(THREE) {
     wingMap = new THREE.CanvasTexture(canvas); wingMap.colorSpace = THREE.SRGBColorSpace; wingMap.anisotropy = 4;
   }
   const wingGrey = std({ color: 0xffffff, map: wingMap, roughness: 0.46, metalness: 0.28 });
+  finish.relief(wingGrey, { bumpScale: 0.005 });
   const PLAIN_UV = [0.5, 0.015]; // plain grey corner of the wing texture
   const wingUV = (table, span0, span1) => (p) => { const x = Math.abs(p.x), st = station(table, x); return [clamp((p.z - st.le) / st.chord, 0, 1), clamp(1 - (x - span0) / (span1 - span0), 0, 1) * 0.94 + 0.05]; };
   const staticWing = [], movables = { flaps: [], ailerons: [], spoilers: [], elevators: [], rudder: null };
@@ -797,6 +806,22 @@ export function createAircraft(THREE) {
   const lipMetal = std({ color: 0xd2d8dc, roughness: 0.2, metalness: 1, envMapIntensity: 1.1 });
   const engineMetal = std({ color: 0x5d646b, roughness: 0.42, metalness: 0.75 });
   const darkMetal = std({ color: 0x23282e, roughness: 0.5, metalness: 0.6 });
+  finish.apply(lipMetal, 'brushed', { repeat: [2, 12], bumpScale: 0.00004 });
+  finish.apply(engineMetal, 'brushed', { repeat: [3, 6], bumpScale: 0.00015 });
+  finish.apply(darkMetal, 'brushed', { repeat: [2, 8], bumpScale: 0.0002 });
+  if (isBrowser) {
+    const [canvas, g] = canvas2d(1024, 256);
+    g.fillStyle = '#ffffff'; g.fillRect(0, 0, 1024, 256);
+    g.strokeStyle = 'rgba(25,42,55,0.38)'; g.lineWidth = 1.5;
+    for (const x of [120, 510, 825]) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, 256); g.stroke(); }
+    for (const y of [45, 95, 162, 212]) { g.beginPath(); g.moveTo(135, y); g.lineTo(815, y); g.stroke(); }
+    g.fillStyle = '#c4ced7'; g.font = '600 12px Arial';
+    for (const y of [67, 190]) { g.fillText('NO STEP', 475, y); g.strokeRect(250, y - 10, 55, 21); }
+    g.fillStyle = 'rgba(50,64,76,0.32)';
+    for (const x of [126, 504, 831]) for (let y = 5; y < 256; y += 13) g.fillRect(x, y, 1.2, 1.2);
+    ink.map = new THREE.CanvasTexture(canvas); ink.map.colorSpace = THREE.SRGBColorSpace; ink.map.anisotropy = 4;
+    finish.relief(ink, { bumpScale: 0.006 });
+  }
   const inkParts = [], lipParts = [], engineMetalParts = [], darkMetalParts = [], engineFans = [];
   let fanMat = null, spinMat = null, faceMat = null;
   const SEG = 48;
@@ -884,6 +909,8 @@ export function createAircraft(THREE) {
   const chrome = std({ color: 0xe6ebee, roughness: 0.12, metalness: 1, envMapIntensity: 1.2 });
   const rubber = new THREE.MeshStandardMaterial({ color: 0x15191d, roughness: 0.88, metalness: 0 });
   const hubMaterial = std({ color: 0xb8bfc4, roughness: 0.35, metalness: 0.75, side: THREE.DoubleSide });
+  finish.apply(chrome, 'brushed', { bumpScale: 0.00002 });
+  finish.apply(rubber, 'rubber', { repeat: [1, 8], bumpScale: 0.007 });
   const gears = [], wheelSets = [];
   // tyre: lathe around x (axle). Profile in (axial offset, radius).
   function tyre(radius, width) {
@@ -901,6 +928,10 @@ export function createAircraft(THREE) {
       tyres.push(K.placed(tyre(radius, width), v3(x, 0, 0)));
       const outer = Math.sign(x) || 1;
       hubs.push(K.placed(hub(radius, width, outer), v3(x, 0, 0)));
+      for (let i = 0; i < 8; i++) {
+        const angle = i / 8 * TAU, y = Math.cos(angle) * radius * 0.32, z = Math.sin(angle) * radius * 0.32;
+        hubs.push(K.rod(v3(x + width * 0.42 * outer, y, z), v3(x + width * 0.49 * outer, y, z), radius * 0.022, radius * 0.022, 6));
+      }
     }
     const t = new THREE.Mesh(K.merge(tyres), rubber), h = new THREE.Mesh(K.merge(hubs), hubMaterial);
     t.castShadow = h.castShadow = true; set.add(t, h); wheelSets.push({ set, radius }); return set;
@@ -918,6 +949,8 @@ export function createAircraft(THREE) {
     const legDoor = K.box(side * 0.2, -0.55, 0.02, 0.045, 1.55, 0.62); K.setUV(legDoor, ...PLAIN_UV);
     const sm = new THREE.Mesh(K.merge(strut), gearPaint), cm = new THREE.Mesh(K.merge(shiny), chrome), dm = new THREE.Mesh(legDoor, wingGrey);
     sm.castShadow = cm.castShadow = dm.castShadow = true; gear.add(sm, cm, dm);
+    const hose = new THREE.TubeGeometry(new THREE.CatmullRomCurve3([v3(0.12, 0.1, -0.18), v3(0.17, -1.5, -0.22), v3(0.14, -2.2, -0.3), v3(0.23, -2.42, -0.19)]), 15, 0.013, 6, false);
+    const brakes = new THREE.Mesh(K.merge([hose, K.box(-0.15, -2.25, -0.26, 0.11, 0.22, 0.16), K.box(0.15, -2.25, -0.26, 0.11, 0.22, 0.16)]), darkMetal); gear.add(brakes);
     wheelSet(gear, [-0.3, 0.3], 0.55, 0.36, -2.42, 0);
     gears.push({ group: gear, side, nose: false });
   }
@@ -991,10 +1024,12 @@ export function createAircraft(THREE) {
   const navGlow = glow([[-17.72, 0.99, 5.66, 0xff2a40], [17.72, 0.99, 5.66, 0x2bffad], [0, 1.36, 18.62, 0xe6f2ff]], 1.1, 0.75);
   const strobeGlow = glow([[-17.86, 0.99, 7.52, 0xf4f9ff], [17.86, 0.99, 7.52, 0xf4f9ff]], 3.2, 1);
   const beaconGlow = glow([[0, 2.43, 2.0, 0xff3040], [0, -1.79, 2.0, 0xff3040]], 1.6, 0.9);
+  const reflectScene = sceneEnvironmentBinding(group, env);
 
   // ---------------- Animation ----------------
   let gearExtension = 1, flapExtension = 0, spoilerExtension = 0, elapsed = 0;
   function update(state = {}, data = {}) {
+    reflectScene();
     const dt = clamp(data.dt ?? state.dt ?? 1 / 60, 0, 0.1); elapsed += dt;
     const gearValue = data.gear ?? state.gear ?? true;
     const targetGear = typeof gearValue === 'number' ? clamp(gearValue, 0, 1) : (gearValue ? 1 : 0);
@@ -1024,15 +1059,18 @@ export function createAircraft(THREE) {
     const pitch = clamp(state.pitchInput ?? data.pitchInput ?? 0, -1, 1);
     for (const elevator of movables.elevators) elevator.pivot.rotation.x = -pitch * 0.32; // pull: trailing edges up
     const yaw = clamp(state.yawInput ?? data.yawInput ?? 0, -1, 1);
+    noseGear.rotation.y = data.onGround ? -yaw * 0.42 * clamp(1 - speed / 55, 0, 1) : 0;
     movables.rudder.rotation.x = yaw * 0.3; // right yaw: trailing edge to the right
-    for (const fan of engineFans) fan.rotation.z += dt * (2 + (data.engine ?? state.engine ?? data.throttle ?? state.throttle ?? 0) * 55);
+    const engine = data.engine ?? state.engine ?? data.throttle ?? state.throttle ?? 0;
+    const n1 = data.engineN1 ?? (state.crashed || state.fuel === 0 ? 0 : 20 + engine * 80);
+    for (const fan of engineFans) fan.rotation.z += dt * Math.max(0, n1) * 0.57;
     const lights = data.lights ?? true;
     navMesh.visible = navGlow.visible = lights;
     beaconMesh.visible = beaconGlow.visible = lights && elapsed % 1.3 < 0.14;
     strobeMesh.visible = strobeGlow.visible = lights && (elapsed % 1.1 < 0.065 || (elapsed % 1.1 > 0.15 && elapsed % 1.1 < 0.21));
   }
   update({}, {});
-  return { group, update, dispose: () => disposeObject(group) };
+  return { group, update, dispose: () => { disposeObject(group); finish.dispose(); env?.dispose(); } };
 }
 
 // =====================================================================================================
@@ -1318,6 +1356,7 @@ function drawFCU(g, v) { // 512 x 48 over the glareshield's FCU strip (0.6 m x 0
 
 export function createCockpit(THREE, options = {}) {
   const K = geometryKit(THREE), { v3 } = K;
+  const finish = createAviationSurfaceKit(THREE);
   const group = new THREE.Group(); group.name = 'MQ-320 flight deck';
   const headingOffset = options.headingOffset ?? 0, altitudeOffset = options.altitudeOffset ?? 0;
   const env = skyEnvironment(THREE, { interior: true });
@@ -1481,7 +1520,7 @@ export function createCockpit(THREE, options = {}) {
       rows.forEach(([t, c, a], i) => { const x = a === 'center' ? X + W / 2 : X + 10, y = Y + 13 + i * 19.5; txt(m, t, x, y, i < 2 ? 15 : 13, c, a); txt(e, t, x, y, i < 2 ? 15 : 13, c, a); }); }
     // interior bounce light: add a dim copy of the albedo to the emissive map, more for the down-facing overhead
     e.globalCompositeOperation = 'lighter';
-    for (const [name, fill] of [['panel', 0.4], ['glare', 0.4], ['overhead', 0.95], ['pedestal', 0.3], ['consoleL', 0.3], ['consoleR', 0.3]]) { const [x, y, w, h] = REG[name]; e.globalAlpha = fill; e.drawImage(cm, x, y, w, h, x, y, w, h); }
+    for (const [name, fill] of [['panel', 0.2], ['glare', 0.17], ['overhead', 0.38], ['pedestal', 0.16], ['consoleL', 0.17], ['consoleR', 0.17]]) { const [x, y, w, h] = REG[name]; e.globalAlpha = fill; e.drawImage(cm, x, y, w, h, x, y, w, h); }
     e.globalAlpha = 1; e.globalCompositeOperation = 'source-over';
     // grain over the painted surfaces (map only) so large flat panels do not read as plastic
     for (let i = 0; i < 16000; i++) { m.fillStyle = `rgba(${rnd() < 0.5 ? '0,0,0' : '255,255,255'},${rnd() * 0.025})`; m.fillRect(rnd() * AW, rnd() * AH, 2 + rnd() * 9, 2 + rnd() * 9); }
@@ -1502,6 +1541,9 @@ export function createCockpit(THREE, options = {}) {
     metal: new THREE.MeshStandardMaterial({ color: 0xa3acb3, roughness: 0.3, metalness: 0.85, envMap: env, envMapIntensity: 0.7 }),
     seat: new THREE.MeshStandardMaterial({ color: 0x2f3a46, roughness: 0.92, metalness: 0 }),
   };
+  for (const key of ['atlas', 'lining', 'frame', 'trim', 'glare', 'knob']) finish.apply(mat[key], 'plastic', { repeat: key === 'atlas' ? [8, 4] : [4, 4], bumpScale: key === 'glare' ? 0.0005 : 0.0002 });
+  finish.apply(mat.metal, 'brushed', { repeat: [3, 3], bumpScale: 0.00003 });
+  finish.apply(mat.seat, 'fabric', { repeat: [6, 6], bumpScale: 0.0008 });
   const parts = { atlas: [], lining: [], ceiling: [], frame: [], trim: [], glare: [], knob: [], metal: [], seat: [] };
   // ---- geometry helpers ----
   function quad(list, a, b, c, d, uv = null) { // a b c d counter-clockwise seen from the front
@@ -1540,11 +1582,19 @@ export function createCockpit(THREE, options = {}) {
   // standby compass hanging under the centre header
   boxAt(parts.frame, CX, 0.252, -0.6, 0.044, 0.03, 0.034);
   // windscreen glass: a faint tint that picks up a sky sheen at grazing angles, kept nearly clear for the approach view
-  const glassMat = new THREE.MeshStandardMaterial({ color: 0xa9cbd0, transparent: true, opacity: 0.07, roughness: 0.04, metalness: 0, envMap: env, envMapIntensity: 0.7, depthWrite: false });
+  const glassMat = new THREE.MeshPhysicalMaterial({ color: 0xd8e8ed, transparent: true, opacity: 0.065, roughness: 0.05, metalness: 0, clearcoat: 0.8, clearcoatRoughness: 0.08, ior: 1.52, envMap: env, envMapIntensity: 0.35, depthWrite: false });
+  finish.apply(glassMat, 'glass', { bumpScale: 0.000008 });
   { const list = [], out = v3(0, 0, -0.012);
     quadToEye(list, WB.L.clone().add(out), WB.C.clone().add(out), WT.C.clone().add(out), WT.L.clone().add(out));
     quadToEye(list, WB.C.clone().add(out), WB.R.clone().add(out), WT.R.clone().add(out), WT.C.clone().add(out));
     const glass = new THREE.Mesh(K.merge(list), glassMat); glass.name = 'windscreen glass'; glass.renderOrder = 3; group.add(glass); }
+  for (const sd of [-1, 1]) {
+    const X = x => sd < 0 ? x : mirror(x), a = v3(X(-0.43), -0.247, -0.835), b = v3(X(0.18), -0.229, -0.99);
+    beam(parts.trim, a, b, 0.008, 0.009, v3(0, 1, 0));
+    cyl(parts.metal, a.clone().lerp(b, 0.5), a.clone().add(v3(0.11 * -sd, -0.042, 0.025)), 0.004, 0.005, 8);
+    // Header fasteners and glazing seals remain outside the clear centre of the windscreen.
+    beam(parts.trim, WB[sd < 0 ? 'L' : 'R'].clone().add(v3(0, 0.007, -0.006)), WB.C.clone().add(v3(0, 0.007, -0.006)), 0.008, 0.008, v3(0, 1, 0));
+  }
   // ---------------- Side walls: sliding window and aft window openings ----------------
   const postZ = (y) => lerp(WB.L.z, WT.L.z, (y - WB.L.y) / (WT.L.y - WB.L.y)); // corner post line
   const SILL = -0.15, HEAD = 0.225;
@@ -1646,6 +1696,11 @@ export function createCockpit(THREE, options = {}) {
     onPanel(parts.trim, new THREE.BoxGeometry(size + 2 * t, t * 1.5, h), xc, d0 + size + t * 0.75, h / 2);
     onPanel(parts.trim, new THREE.BoxGeometry(t, size, h), xc - size / 2 - t / 2, dc, h / 2);
     onPanel(parts.trim, new THREE.BoxGeometry(t, size, h), xc + size / 2 + t / 2, dc, h / 2);
+    for (const sx of [-1, 1]) for (const sy of [-1, 1]) {
+      const x = xc + sx * (size / 2 + 0.005), d = sy < 0 ? d0 - 0.004 : d0 + size + 0.01;
+      onPanel(parts.metal, new THREE.CylinderGeometry(0.0026, 0.0026, 0.0016, 8).rotateX(Math.PI / 2), x, d, 0.008);
+      onPanel(parts.knob, new THREE.BoxGeometry(0.0032, 0.0005, 0.0003), x, d, 0.009);
+    }
     if (size > 0.1) for (const s of [-1, 1]) parts.knob.push(K.rod(panelAt(xc + s * 0.06, d0 + size + 0.008).addScaledVector(panelNormal, 0.006), panelAt(xc + s * 0.06, d0 + size + 0.008).addScaledVector(panelNormal, 0.017), 0.006, 0.0055, 10));
   }
   const gearLightMat = new THREE.MeshBasicMaterial({ color: 0x18201a, toneMapped: false });
@@ -1740,8 +1795,17 @@ export function createCockpit(THREE, options = {}) {
     for (const [u, v, r] of [[0.06, 0.06, 0.01], [0.66, 0.06, 0.01], [0.42, 0.25, 0.01], [0.54, 0.25, 0.01], [0.66, 0.18, 0.009], [0.06, 0.4, 0.012], [0.06, 0.52, 0.012], [0.06, 0.64, 0.012]]) parts.knob.push(K.rod(at(u, v, 0), at(u, v, 0.014), r, r * 0.9, 12));
   }
   // ---------------- First officer's seat (seen when looking right) ----------------
-  { const sx = 2 * CX; boxAt(parts.seat, sx, -0.52, 0.02, 0.5, 0.1, 0.5); boxAt(parts.seat, sx, -0.12, 0.3, 0.48, 0.72, 0.12, -0.12, 0, 0); boxAt(parts.seat, sx, 0.33, 0.35, 0.3, 0.2, 0.1, -0.12, 0, 0);
-    for (const s of [-1, 1]) boxAt(parts.trim, sx + s * 0.27, -0.33, 0.05, 0.05, 0.06, 0.4); }
+  { const sx = 2 * CX, tilt = new THREE.Quaternion().setFromEuler(new THREE.Euler(-0.12, 0, 0));
+    parts.seat.push(K.placed(roundedCabinPart(THREE, 0.5, 0.1, 0.5, 0.035), v3(sx, -0.52, 0.02)));
+    parts.seat.push(K.placed(roundedCabinPart(THREE, 0.48, 0.72, 0.12, 0.035), v3(sx, -0.12, 0.3), tilt));
+    parts.seat.push(K.placed(roundedCabinPart(THREE, 0.3, 0.2, 0.1, 0.028), v3(sx, 0.33, 0.35), tilt));
+    for (const s of [-1, 1]) {
+      boxAt(parts.trim, sx + s * 0.27, -0.33, 0.05, 0.05, 0.06, 0.4);
+      beam(parts.trim, v3(sx + s * 0.17, 0.18, 0.238), v3(sx + s * 0.025, -0.45, 0.215), 0.027, 0.003, v3(0, 0, 1));
+      boxAt(parts.metal, sx + s * 0.04, -0.455, 0.212, 0.046, 0.025, 0.004);
+      beam(parts.lining, v3(sx + s * 0.203, -0.45, 0.226), v3(sx + s * 0.203, 0.2, 0.292), 0.0015, 0.0015, v3(0, 0, 1));
+    }
+  }
   // ---------------- Closing surfaces (the exterior model is hidden in this view) ----------------
   quadToEye(parts.trim, v3(-0.75, -1.2, -0.95), v3(1.87, -1.2, -0.95), v3(1.87, -1.2, 1.6), v3(-0.75, -1.2, 1.6));        // floor
   quadToEye(parts.lining, v3(-0.75, -1.2, 1.6), v3(1.87, -1.2, 1.6), v3(1.87, 0.5, 1.6), v3(-0.75, 0.5, 1.6));            // rear bulkhead
@@ -1823,7 +1887,7 @@ export function createCockpit(THREE, options = {}) {
     const key = `${v.ap}|${Math.round(v.apSpeed)}|${Math.round(v.apHdg)}|${Math.round(v.apAlt / 100)}`;
     if (key !== fcu.key) { fcu.key = key; drawFCU(fcu.g, v); fcu.texture.needsUpdate = true; }
   }
-  group.update = update; group.dispose = () => disposeObject(group);
+  group.update = update; group.dispose = () => { disposeObject(group); finish.dispose(); };
   update({}, {});
   return group;
 }

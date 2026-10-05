@@ -5,14 +5,17 @@
 // fragment shader feathers together, so layer edges and colour differences never show as hard seams.
 //
 // Tour patches (dev/bake_tours.py, data/lszh/tours.json): scenery.setTour('alps' | 'city') adds two more imagery
-// slots (tour-mid, tour-detail, feathered over the base layers), a finer DEM patch mesh (the base rings are sunk under
-// it) and makes groundHeight() follow the tour DEM; setTour(null) removes and disposes all of it.
+// slots (tour-mid, tour-detail, feathered over the base layers), a finer DEM patch mesh (the base rings are clipped and
+// stitched around it) and makes groundHeight() follow the tour DEM; setTour(null) removes and disposes all of it.
 //
 // Country layer (dev/bake_country.py, data/lszh/country/): all of Switzerland beyond the far box. One imagery texture
 // (~90 m/px) and a 200 m DEM, loaded lazily (aircraft > 45 km from the airport, scenery.ensureCountry(), or a tour whose
 // box lies outside the far box). Until then nothing is requested and the airport view is unchanged. The ground outside the
 // far ring is a set of 16 km chunks (472 m cells, 236 m near the aircraft) whose vertices are relative to the chunk centre
 // (mesh.position carries the large local-frame offset), so float32 vertex precision does not degrade ~170 km from the origin.
+import { addTerrainLighting, createImageVegetation, terrainAtmosphere } from './terrain-visuals.js?v=20261005';
+import { createTerrainStitch } from './terrain-stitch.js?v=20261005';
+
 const EARTH_RADIUS = 6378137;
 
 export function createGeoScenery(THREE, scene, config) {
@@ -28,6 +31,9 @@ export function createGeoScenery(THREE, scene, config) {
   const base = config.baseUrl || './data/lszh/';
   const group = new THREE.Group(); group.name = 'Geographic scenery'; scene.add(group);
   const geometries = new Set(), textures = new Set();
+  const visualUniforms = terrainAtmosphere(THREE, config.atmosphere);
+  let quality = config.quality || 'medium', vegetation = null;
+  visualUniforms.uTerrainQuality.value = quality === 'low' ? 0 : quality === 'high' ? 2 : 1;
   let disposed = false, outsideCoverage = false, layersShown = 0, failed = 0, terrainSettled = false;
   let manifest = null, near = null, far = null, material = null;
   const ringMeshes = [];
@@ -69,7 +75,6 @@ export function createGeoScenery(THREE, scene, config) {
 
   const TOUR_EDGE = 0.04;      // fraction of the tour DEM box over which its heights ease into the base terrain
   const TOUR_FEATHER = 0.18;   // tour imagery feather = this fraction of the layer's half size (wide, so patch edges do not read as seams)
-  const TOUR_RING_SINK = 60;   // metres the base rings are sunk below the lowest nearby patch terrain, so they never show through the patch
   // ---- elevation -------------------------------------------------------------------------------------------
   function sampleDem(dem, mx, my) {
     const px = (mx - dem.minX) / (dem.maxX - dem.minX) * dem.n - 0.5, py = (dem.maxY - my) / (dem.maxY - dem.minY) * dem.n - 0.5;
@@ -116,14 +121,13 @@ export function createGeoScenery(THREE, scene, config) {
   // ---- terrain mesh: nested square rings in Web Mercator, vertices in the local frame ------------------------
   // Squares centred on the airport and aligned with Web Mercator. [outer half size, cell size, inner half size] in ground metres. 2040/60=34, (8520-2040)/120=54, (23240-8520)/320=46, (80240-23240)/1000=57 cells.
   const RINGS = [[2040, 60, 0], [8520, 120, 2040], [23240, 320, 8520], [80240, 1000, 23240]];
-  function ringHeight(x, z, cell) { // ring vertex height: real ground, or (inside an active tour patch) sunk below all nearby patch terrain
-    const h = groundHeight(x, z);
-    if (!tourDem) return h;
-    const point = localToMercator(x, z), d = tourDem;
-    if (point.x < d.minX || point.x > d.maxX || point.y < d.minY || point.y > d.maxY) return h;
-    let low = h;
-    for (let i = -2; i <= 2; i++) for (let j = -2; j <= 2; j++) low = Math.min(low, groundHeight(x + i * cell / 2, z + j * cell / 2));
-    return low - TOUR_RING_SINK;
+  function terrainJoin(positions, extra, indices, pointAt, origin = {}) {
+    const d = tourDem;
+    return createTerrainStitch({ box: d, divisions: d ? Math.max(2, Math.round(2 * d.groundHalfM / (d.meshCellM || 60))) : 0, pointAt, positions, extra, indices,
+      originX: origin.x || 0, originZ: origin.z || 0,
+      project(point) { const east = (point.mx - originX) * groundScale, north = (point.my - originY) * groundScale; return { x: cosine * east - sine * north, z: -sine * east - cosine * north }; },
+      height: (x, z) => groundHeight(x, z) - 0.1,
+    });
   }
   function ringGeometry(outer, cell, inner) {
     const hm = outer / groundScale, cm = cell / groundScale, im = inner / groundScale;
@@ -134,7 +138,7 @@ export function createGeoScenery(THREE, scene, config) {
       const east = (mx - originX) * groundScale, north = (my - originY) * groundScale;
       const x = cosine * east - sine * north, z = -sine * east - cosine * north;
       const i = (row * stride + col) * 3;
-      positions[i] = x; positions[i + 1] = ringHeight(x, z, cell) - 0.1; positions[i + 2] = z;
+      positions[i] = x; positions[i + 1] = groundHeight(x, z) - 0.1; positions[i + 2] = z;
     }
     const included = (r, c) => { // is the cell (r, c) part of the ring (not outside the square, not inside the hole)?
       if (r < 0 || c < 0 || r >= n || c >= n) return false;
@@ -144,15 +148,12 @@ export function createGeoScenery(THREE, scene, config) {
     };
     const skirt = Math.max(8, cell * 0.8), extra = [];
     const vertexIndex = (r, c) => r * stride + c;
-    function pushSkirt(a, b) {
-      const base = positions.length / 3 + extra.length / 3;
-      for (const v of [a, b]) extra.push(positions[v * 3], positions[v * 3 + 1] - skirt, positions[v * 3 + 2]);
-      indices.push(a, base, b, b, base, base + 1);
-    }
+    const join = terrainJoin(positions, extra, indices, index => ({ mx: originX - hm + index % stride * cm, my: originY + hm - Math.floor(index / stride) * cm, index }));
+    const pushSkirt = (a, b) => join.skirt(a, b, skirt);
     for (let r = 0; r < n; r++) for (let c = 0; c < n; c++) {
       if (!included(r, c)) continue;
       const a = vertexIndex(r, c), b = a + 1, d = a + stride, e = d + 1;
-      indices.push(a, d, b, b, d, e);
+      join.triangle(a, d, b); join.triangle(b, d, e);
       if (!included(r - 1, c)) pushSkirt(b, a);
       if (!included(r + 1, c)) pushSkirt(d, e);
       if (!included(r, c - 1)) pushSkirt(a, d);
@@ -180,6 +181,7 @@ export function createGeoScenery(THREE, scene, config) {
       for (const i of [4, 5]) { uniforms[`uTex${i}`] = { value: placeholder }; uniforms[`uBox${i}`] = { value: new THREE.Vector4(0, 0, 1, 1) }; }
     }
     const m = new THREE.MeshBasicMaterial({ color: 0xffffff, fog: true });
+    m.extensions = { derivatives: true };
     m.onBeforeCompile = shader => {
       Object.assign(shader.uniforms, uniforms);
       shader.vertexShader = shader.vertexShader.replace('#include <common>', '#include <common>\nvarying vec2 vXZ;').replace('#include <begin_vertex>', '#include <begin_vertex>\nvXZ = position.xz;');
@@ -205,6 +207,7 @@ export function createGeoScenery(THREE, scene, config) {
         if (uLoadC > 0.0) { vec2 uvC = layerUV(uBoxC, mer); outerCol = mix(fogColor, texture2D(uTexC, uvC).rgb, uLoadC * countryEdge(uvC)); }
         col = mix(outerCol, col, mix(1.0, edgeWeight(uv0, 0.07), uLoaded.x));
         diffuseColor.rgb *= col;`);
+      addTerrainLighting(shader, visualUniforms);
     };
     m.customProgramCacheKey = () => shared ? 'tour-patch' : 'ring';
     m.userData.uniforms = uniforms; m.userData.placeholder = placeholder;
@@ -233,7 +236,7 @@ export function createGeoScenery(THREE, scene, config) {
       mesh.frustumCulled = false; mesh.renderOrder = -1; mesh.name = `terrain ring ${i}`; group.add(mesh); ringMeshes.push(mesh);
     });
   }
-  function rebuildRings(box) { // after a tour starts/stops (or the country DEM arrives): new ring heights (sunk under the patch, or back to plain terrain)
+  function rebuildRings(box) { // after a tour starts/stops (or the country DEM arrives): clip and join the patch, or restore plain terrain
     ringMeshes.forEach((mesh, i) => {
       const old = mesh.geometry; mesh.geometry = ringGeometry(...RINGS[i]); old.dispose(); geometries.delete(old);
     });
@@ -245,6 +248,12 @@ export function createGeoScenery(THREE, scene, config) {
     const file = (config.highRes && meta.files['4096']) || meta.files['3072'] || meta.files['2048'];
     const image = await loadImage(base + file);
     if (disposed) return;
+    if (index === 2 && !vegetation) {
+      try {
+        vegetation = createImageVegetation(THREE, image, meta, { airport, groundScale, originX, originY, cosine, sine, groundHeight });
+        if (vegetation) { group.add(vegetation.group); vegetation.setQuality(quality); }
+      } catch (error) { console.warn('Optional vegetation unavailable', error); }
+    }
     const texture = new THREE.Texture(image); texture.colorSpace = THREE.SRGBColorSpace; texture.anisotropy = Math.min(4, config.maxAnisotropy || 4); // 16x costs ~4x the whole frame in a software renderer; 4x keeps the ground sharp enough
     texture.generateMipmaps = true; texture.minFilter = THREE.LinearMipmapLinearFilter; texture.magFilter = THREE.LinearFilter;
     texture.wrapS = texture.wrapT = THREE.ClampToEdgeWrapping; texture.needsUpdate = true; textures.add(texture);
@@ -365,7 +374,7 @@ export function createGeoScenery(THREE, scene, config) {
     for (let r = 0; r <= n; r++) for (let col = 0; col <= n; col++) {
       const east = (x0 + col * cm - originX) * groundScale, north = (y0 + size - r * cm - originY) * groundScale;
       const x = cosine * east - sine * north, z = -sine * east - cosine * north, i = (r * stride + col) * 3;
-      positions[i] = x - c.cx; positions[i + 1] = ringHeight(x, z, cell) - 0.1; positions[i + 2] = z - c.cz; // relative to the chunk centre (float32 precision)
+      positions[i] = x - c.cx; positions[i + 1] = groundHeight(x, z) - 0.1; positions[i + 2] = z - c.cz; // relative to the chunk centre (float32 precision)
     }
     const included = (r, col) => {
       if (r < 0 || col < 0 || r >= n || col >= n) return false;
@@ -373,15 +382,12 @@ export function createGeoScenery(THREE, scene, config) {
       return mx > d.minX && mx < d.maxX && my > d.minY && my < d.maxY;
     };
     const skirt = Math.max(8, cell * 0.8);
-    function pushSkirt(a, b) {
-      const first = stride * stride + extra.length / 3;
-      for (const v of [a, b]) extra.push(positions[v * 3], positions[v * 3 + 1] - skirt, positions[v * 3 + 2]);
-      indices.push(a, first, b, b, first, first + 1);
-    }
+    const join = terrainJoin(positions, extra, indices, index => ({ mx: x0 + index % stride * cm, my: y0 + size - Math.floor(index / stride) * cm, index }), { x: c.cx, z: c.cz });
+    const pushSkirt = (a, b) => join.skirt(a, b, skirt);
     for (let r = 0; r < n; r++) for (let col = 0; col < n; col++) {
       if (!included(r, col)) continue;
       const a = r * stride + col, b = a + 1, e = a + stride, f = e + 1;
-      indices.push(a, e, b, b, e, f);
+      join.triangle(a, e, b); join.triangle(b, e, f);
       if (!included(r - 1, col)) pushSkirt(b, a);
       if (!included(r + 1, col)) pushSkirt(e, f);
       if (!included(r, col - 1)) pushSkirt(a, e);
@@ -402,7 +408,7 @@ export function createGeoScenery(THREE, scene, config) {
     const size = CTRY.chunk * CTRY.cell / groundScale, x0 = originX + c.ci * size, y0 = originY + c.cj * size;
     return !(x0 > box.maxX || x0 + size < box.minX || y0 > box.maxY || y0 + size < box.minY);
   }
-  function refreshCountryChunks(box) { // a tour patch started/stopped: re-sink / restore the country chunks under it
+  function refreshCountryChunks(box) { // a tour patch started/stopped: re-clip / restore the country chunks around it
     for (const c of countryChunks) if (chunkTouches(c, box)) {
       const wasFine = c.div === 2;
       if (c.fine) { c.fine.dispose(); geometries.delete(c.fine); c.fine = null; }
@@ -411,6 +417,7 @@ export function createGeoScenery(THREE, scene, config) {
   }
   function makeCountryMaterial(uniforms) {
     const m = new THREE.MeshBasicMaterial({ color: 0xffffff, fog: true });
+    m.extensions = { derivatives: true };
     m.onBeforeCompile = shader => {
       Object.assign(shader.uniforms, { uTexC: uniforms.uTexC, uBoxC: uniforms.uBoxC, uSizeC: uniforms.uSizeC, uFeatC: uniforms.uFeatC });
       shader.vertexShader = shader.vertexShader.replace('#include <common>', '#include <common>\nvarying vec2 vXZ;').replace('#include <begin_vertex>', '#include <begin_vertex>\nvXZ = (modelMatrix * vec4(position, 1.0)).xz;');
@@ -421,6 +428,7 @@ export function createGeoScenery(THREE, scene, config) {
         vec2 uvC = (mer - uBoxC.xy) * uBoxC.zw; vec2 eC = min(uvC, 1.0 - uvC) * uSizeC;
         diffuseColor.rgb *= mix(fogColor, texture2D(uTexC, uvC).rgb, smoothstep(0.0, max(uFeatC, 1e-3), min(eC.x, eC.y)));`);
       shader.uniforms.uRot = material.userData.uniforms.uRot;
+      addTerrainLighting(shader, visualUniforms);
     };
     m.customProgramCacheKey = () => 'country';
     return m;
@@ -518,7 +526,12 @@ export function createGeoScenery(THREE, scene, config) {
     }
   }
   const ready = loadScenery().catch(error => { console.warn(error); terrainSettled = true; failed++; terrainDone(); notify(); });
-  return { ready, groundHeight, geographicPosition, status, setTour, ensureCountry, update(time, state) {
+  return { ready, groundHeight, geographicPosition, status, setTour, ensureCountry, setQuality(value) {
+    quality = value === 'low' ? 'low' : value === 'high' ? 'high' : 'medium';
+    visualUniforms.uTerrainQuality.value = quality === 'low' ? 0 : quality === 'high' ? 2 : 1;
+    vegetation?.setQuality(quality);
+  }, update(time, state) {
+    if (!config.atmosphere) visualUniforms.uTerrainTime.value = Number.isFinite(time) ? time : 0;
     const position = state?.position || state?.pos;
     if (position && far) {
       const point = localToMercator(position.x, position.z), box = countryShown ? countryMeta : far, margin = 5000;
@@ -528,7 +541,7 @@ export function createGeoScenery(THREE, scene, config) {
     }
   }, dispose() {
     if (disposed) return;
-    disposed = true; clearTour(); scene.remove(group); attribution.remove();
+    disposed = true; clearTour(); scene.remove(group); attribution.remove(); vegetation?.dispose();
     geometries.forEach(value => value.dispose()); textures.forEach(value => value.dispose()); material?.dispose();
   } };
 }
