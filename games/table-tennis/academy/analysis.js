@@ -19,6 +19,15 @@ function renderResearch() {
   $('research').innerHTML = research.sources.filter(source => player === 'all' || source.player === player).map(source => `<article class="card ${escape(source.player)}"><div class="meta">${escape(source.era)} · ${escape(source.date || t('日期未標示', 'Undated'))}</div><h3>${e(source.title)}</h3><p>${e(source.finding)}</p><p class="application">${t('遊戲含義：', 'Game implication: ')}${e(source.implication)}</p>${link(source.url, t('閱讀原始來源', 'Read the original source'))}</article>`).join('');
 }
 function list(items, ordered = false) { const tag = ordered ? 'ol' : 'ul'; return `<${tag}>${items.map(item => `<li>${e(item)}</li>`).join('')}</${tag}>`; }
+function renderSlowMotion(sequence, source) {
+  if (!sequence) return '';
+  return `<div class="slow-motion-study"><h4>${t('慢動作拆解：', 'Slow-motion breakdown: ')}${e(sequence.title)}</h4><div class="slow-motion-phases">${sequence.frames.map(frame => `<figure><img src="${escape(frame.src)}" width="1280" height="720" alt="${e(frame.phaseLabel)} · ${e(frame.caption)}" loading="lazy"><figcaption><b>${e(frame.phaseLabel)}</b> · ${link(`${source.url}&t=${frame.time}s`, frame.timestampLabel)}<p>${e(frame.caption)}</p></figcaption></figure>`).join('')}</div><p class="caption">${sequence.limitations.map(localized).map(escape).join(' · ')}</p></div>`;
+}
+function renderSegmentDetails(segment, video) {
+  const items = segment.observations?.map(item => ({ time: item.start, text: item.visible })) || segment.visibleObservations?.map(text => ({ text })) || [];
+  if (!items.length) return '';
+  return `<details class="segment-observations"><summary>${t('展開逐格觀察', 'Show frame observations')}</summary><ol>${items.map(item => `<li>${item.time === undefined ? '' : `${link(`${video.url}&t=${item.time}s`, `${Math.floor(item.time / 60)}:${(item.time % 60).toFixed(1).padStart(4, '0')}`)} · `}${e(item.text)}</li>`).join('')}</ol></details>`;
+}
 function renderLessons() {
   if (!curriculum) return;
   $('lessonPolicy').textContent = localized(curriculum.authoringPolicy);
@@ -27,7 +36,12 @@ function renderLessons() {
 }
 function renderFrames() {
   if (!frameStudy) return;
-  $('frameList').innerHTML = frameStudy.frames.map(frame => `<article class="frame-study"><figure><div class="reference-frame"><img src="${escape(frame.src)}" width="966" height="881" alt="${e(frame.title)}" loading="lazy"></div><figcaption>${escape(frameStudy.source.publisher)} · ${escape(frame.timestampLabel)} · ${t('原始重播截圖', 'Original replay screenshot')}</figcaption></figure><div class="frame-notes"><h3>${e(frame.title)}</h3>${frame.notes.map((note, i) => `<p><b>${i + 1}</b>${e(note)}</p>`).join('')}${link(`${frameStudy.source.url}&t=${frame.time}s`, t('在原片看前後動作', 'Watch the surrounding movement'))}</div></article>`).join('');
+  $('frameList').innerHTML = frameStudy.frames.map(frame => {
+    const source = frame.source || frameStudy.source, width = Number(frame.width) || (frame.nativeVideo ? 1280 : 966), height = Number(frame.height) || (frame.nativeVideo ? 720 : 881);
+    let timedUrl = source.url;
+    try { const url = new URL(source.url); url.searchParams.set('t', `${frame.time}s`); timedUrl = url.href; } catch {}
+    return `<article class="frame-study"><figure><div class="reference-frame${frame.nativeVideo ? ' native-video' : ''}"><img src="${escape(frame.src)}" width="${width}" height="${height}" alt="${e(frame.title)}" loading="lazy"></div><figcaption>${escape(source.publisher)} · ${escape(frame.timestampLabel)} · ${frame.nativeVideo ? t('原始影片影格', 'Original video frame') : t('早期重播截圖', 'Earlier replay screenshot')}</figcaption></figure><div class="frame-notes"><h3>${e(frame.title)}</h3>${frame.notes.map((note, i) => `<p><b>${i + 1}</b>${e(note)}</p>`).join('')}${link(timedUrl, t('在原片看前後動作', 'Watch the surrounding movement'))}</div>${renderSlowMotion(frame.slowMotion, source)}</article>`;
+  }).join('');
 }
 function render() { renderLessons(); renderResearch(); renderFrames(); renderEvidence(); renderOtherPlayers(); renderMatchups(); renderSimulation(); motionLab?.setLanguage(); }
 const techniqueNames = { serve: ['發球', 'Service'], receive: ['接發球', 'Receive'], thirdBall: ['前三板', 'First three strokes'], forehand: ['正手', 'Forehand'], backhand: ['反手', 'Backhand'], transition: ['正反手銜接', 'Stroke transitions'], footwork: ['步法', 'Footwork'], distance: ['離台距離', 'Table distance'], placement: ['落點', 'Placement'], offenseDefense: ['攻防轉換', 'Attack and defense'] };
@@ -66,8 +80,8 @@ function renderSimulation() {
 function renderEvidence() {
   if (!corpus || !analysis) return;
   const counts = player === 'all' ? corpus.counts : corpus.counts.perPlayer[player];
-  $('countsNote').textContent = t(`片源清單不等於已觀看。已確認的 ${corpus.counts.observedSegments} 筆選手觀察來自 ${corpus.counts.uniqueObservedIntervals} 段重播，同一回合分別記錄兩人的動作。`, `Listed sources are separate from watched footage. ${corpus.counts.observedSegments} player observations come from ${corpus.counts.uniqueObservedIntervals} replay interval; both players are recorded within the same rally.`);
-  $('counts').innerHTML = [[curriculum?.units.length || 0, t('詳細技術單元', 'Detailed lessons')], [counts.metadataVideos, t('已整理官方片源', 'Official sources listed')], [counts.observedVideos, t('實際觀看片源', 'Videos observed')], [counts.observedSegments, t('已觀察動作片段', 'Segments observed')]].map(([value, label]) => `<div><strong>${Number(value || 0)}</strong><span>${label}</span></div>`).join('');
+  $('countsNote').textContent = t(`已下載 ${Number(corpus.counts.downloadedVideos || 0)} 支官方影片；下載不等於觀看。${corpus.counts.observedSegments} 筆選手觀察來自 ${corpus.counts.uniqueObservedIntervals} 段抽樣序列，同一序列可能分別記錄兩名選手。各影片尚未整場閱完。`, `${Number(corpus.counts.downloadedVideos || 0)} official videos downloaded; downloading is separate from viewing. ${corpus.counts.observedSegments} player observation records come from ${corpus.counts.uniqueObservedIntervals} sampled sequences; one sequence may include both players. None of the videos has been watched in full.`);
+  $('counts').innerHTML = [[curriculum?.units.length || 0, t('詳細技術單元', 'Detailed lessons')], [counts.metadataVideos, t('已整理官方片源', 'Official sources listed')], [counts.observedVideos, t('實際觀看片源', 'Videos observed')], [counts.observedSegments, t('選手觀察紀錄', 'Player observations')]].map(([value, label]) => `<div><strong>${Number(value || 0)}</strong><span>${label}</span></div>`).join('');
   const selectedEra = era; $('era').innerHTML = `<option value="all">${t('所有時期', 'All eras')}</option>${corpus.eras.map(item => `<option value="${escape(item.id)}">${e(item.label)}</option>`).join('')}`; $('era').value = selectedEra;
   const profiles = analysis.profiles.filter(profile => player === 'all' || profile.player === player);
   $('eras').innerHTML = `<div class="era-grid">${profiles.flatMap(profile => profile.periods.map(period => {
@@ -83,7 +97,7 @@ function renderEvidence() {
   const opened = new Set([...document.querySelectorAll('.video[open]')].map(node => node.id));
   $('videos').innerHTML = matching.length ? matching.map(video => {
     const segments = corpus.segments.filter(segment => (segment.videoId === video.id || segment.videoId === video.videoId) && (player === 'all' || segment.player === player));
-    return `<details class="video" id="video-${escape(video.id)}" ${opened.has(`video-${video.id}`) ? 'open' : ''}><summary><span>${e(video.title)}<br><small class="meta">${escape(eraName(video.era))} · ${video.status === 'observed' ? t('已看片段', 'Segments observed') : t('片源已整理，尚未觀看', 'Listed, not yet observed')} · ${escape(video.channel)}</small></span>${link(video.url, t('原片', 'Source'))}</summary><div class="segments">${segments.length ? segments.map(segment => `<div class="segment">${link(`${video.url}&t=${Math.floor(segment.start)}s`, segment.timestampLabel)}<div><p>${e(corpus.players.find(item => item.id === segment.player)?.name)} · ${e(segment.observation)}</p>${segment.inference ? `<p class="application">${t('解讀：', 'Interpretation: ')}${e(segment.inference)}</p>` : ''}<small>${(segment.evidenceLimits || []).map(localized).map(escape).join(' · ')}</small></div></div>`).join('') : `<p class="caption">${t('目前僅確認片源，未加入觀察結論。', 'Only the source has been identified; no observation claims are attached.')}</p>`}</div></details>`;
+    return `<details class="video" id="video-${escape(video.id)}" ${opened.has(`video-${video.id}`) ? 'open' : ''}><summary><span>${e(video.title)}<br><small class="meta">${escape(eraName(video.era))} · ${video.status === 'observed' ? t('已看片段', 'Segments observed') : t('片源已整理，尚未觀看', 'Listed, not yet observed')} · ${escape(video.channel)}</small></span>${link(video.url, t('原片', 'Source'))}</summary><div class="segments">${segments.length ? segments.map(segment => `<div class="segment">${link(`${video.url}&t=${Math.floor(segment.start)}s`, segment.timestampLabel)}<div><p>${e(corpus.players.find(item => item.id === segment.player)?.name)} · ${e(segment.observation)}</p>${renderSegmentDetails(segment, video)}${segment.inference ? `<p class="application">${t('解讀：', 'Interpretation: ')}${e(segment.inference)}</p>` : ''}<small>${(segment.evidenceLimits || []).map(localized).map(escape).join(' · ')}</small></div></div>`).join('') : `<p class="caption">${t('目前僅確認片源，未加入觀察結論。', 'Only the source has been identified; no observation claims are attached.')}</p>`}</div></details>`;
   }).join('') : `<p class="caption">${t('這一時期的片源尚待整理。', 'Sources for this era are pending.')}</p>`;
 }
 $('language').addEventListener('click', () => {
@@ -104,7 +118,7 @@ $('openLab').addEventListener('click', async () => {
   }
 });
 const results = await Promise.allSettled(['../supporting-research.json', '../reference-corpus.json', '../style-analysis.json', './techniques.json', './reference-frames.json', './other-players.json', './matchups.json', './game-simulation.json'].map(async path => {
-  const response = await fetch(`${path}?v=4`); if (!response.ok) throw new Error(path); return response.json();
+  const response = await fetch(`${path}?v=5`); if (!response.ok) throw new Error(path); return response.json();
 }));
 research = results[0].status === 'fulfilled' ? results[0].value : null;
 corpus = results[1].status === 'fulfilled' ? results[1].value : null;
