@@ -1,5 +1,5 @@
 // Optional dispatch goals and collections. XP never changes cash, demand or costs.
-import { CITIES, CITY_REGIONS, AIRCRAFT, MODES, CONST } from './data.mjs?v=18';
+import { CITIES, CITY_REGIONS, AIRCRAFT, MODES, CONST } from './data.mjs?v=19';
 
 export const TIERS = [
   { xp: 0, zh: '新生航空', en: 'Newcomer airline', icon: '✈' },

@@ -50,3 +50,39 @@ test('new regional route operates, survives saving and retains deterministic set
   assert.equal(first.report.routes[0].city, 'KHH');
   assert.ok(first.report.routes[0].pax > 0);
 });
+
+test('every catalog airport can be a base in both modes with local rivals, weather and restorable operation', () => {
+  for (const mode of Object.keys(MODES)) for (const hub of Object.keys(CITIES)) {
+    const s = M.newGame({ mode, hub, seed: 1 });
+    assert.equal(s.hub, hub);
+    assert.equal(s.cash, MODES[mode].startCash);
+    assert.equal(M.routeOptions(s, hub), null);
+    for (const rival of s.rivals) assert.ok(!rival.routes[hub]);
+    // Events need text at every new base, including the disruption event.
+    for (const turn of new Set(Object.values(s.plan))) {
+      for (const e of M.pendingEvents({ ...s, turn })) {
+        assert.ok(e.zh && e.en && !e.zh.includes('{weather}'));
+      }
+    }
+    const city = Object.values(CITIES).filter(c => c.id !== hub).sort((a,b) => M.distanceKm(CITIES[hub],a)-M.distanceKm(CITIES[hub],b))[0].id;
+    const o = M.routeOptions(s, city), type = o.eligibleTypes[0];
+    assert.ok(type, `${hub}: nearest airport must be reachable`);
+    const routes = [{ city, type, weekly: 3, fare: 'mid' }];
+    const lease = M.fleetNeeded(s, routes);
+    const planned = M.applyDecisions(s, { routes, fleet: { lease } });
+    assert.deepEqual(planned.errors, [], `${mode}/${hub}`);
+    const restored = M.deserialize(M.serialize(planned.state));
+    assert.equal(restored.hub, hub);
+    const run = M.simulateTurn(restored);
+    assert.equal(run.state.hub, hub);
+    for (const key of ['cash']) assert.ok(Number.isFinite(run.state[key]), `${mode}/${hub}/${key}`);
+    for (const key of ['revenue','profit','loadFactor']) assert.ok(Number.isFinite(run.report.company[key]), `${mode}/${hub}/${key}`);
+  }
+});
+
+test('unknown bases safely default for new games and are rejected in saves', () => {
+  assert.equal(M.newGame({ hub: 'XXX' }).hub, 'TPE');
+  assert.equal(M.newGame({ hub: '__proto__' }).hub, 'TPE');
+  const s = M.newGame({ hub: 'LAX' });
+  assert.throws(() => M.deserialize(JSON.stringify({ ...s, hub: 'XXX' })), /bad save/);
+});

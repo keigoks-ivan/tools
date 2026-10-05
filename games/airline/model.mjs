@@ -1,10 +1,10 @@
 // 天青航空：航線經營 — economic model. Pure, deterministic given a seed, no DOM, no dependencies.
 // Money: US$ (constant dollars). rask/cask: US$ per available seat-km. All state is plain JSON.
-import { FACILITIES, fuelOrder } from './v2.mjs?v=18';
-import { CONST, MODES, HUBS, CITIES, AIRCRAFT, EVENTS, LESSONS, RIVALS, HUB_WEATHER } from './data.mjs?v=18';
-import { marketProfile } from './demand.mjs?v=18';
-import { readCareer, missionOffers, settleCareer } from './career.mjs?v=18';
-export { marketProfile, DEMAND_SOURCES } from './demand.mjs?v=18';
+import { FACILITIES, fuelOrder } from './v2.mjs?v=19';
+import { CONST, MODES, HUBS, CITIES, AIRCRAFT, EVENTS, LESSONS, RIVALS, HUB_WEATHER } from './data.mjs?v=19';
+import { marketProfile } from './demand.mjs?v=19';
+import { readCareer, missionOffers, settleCareer } from './career.mjs?v=19';
+export { marketProfile, DEMAND_SOURCES } from './demand.mjs?v=19';
 
 // ============================================================ utilities
 const clone = o => JSON.parse(JSON.stringify(o));
@@ -213,7 +213,8 @@ const rateNow = s => s.rate;
 // ============================================================ new game
 export function newGame({ mode = 'year', hub = 'TPE', seed = 1 } = {}) {
   if (!MODES[mode]) mode = 'year';
-  if (!HUBS.includes(hub)) hub = 'TPE';
+  // HUBS remains the five calibrated recommendations; any catalog airport may be a base.
+  if (!Object.hasOwn(CITIES, hub)) hub = 'TPE';
   seed = Number.isFinite(+seed) ? Math.floor(+seed) : 1;
   const m = MODES[mode];
   const s = {
@@ -312,7 +313,7 @@ function modelChoiceOpen(s) {
 
 // ============================================================ events
 function eventText(s, e, extra = '') {
-  const w = HUB_WEATHER[s.hub];
+  const w = HUB_WEATHER[s.hub] || { zh: '強風與低能見度', en: 'strong winds and low visibility' };
   return { zh: e.zh.replace('{weather}', w.zh) + extra, en: e.en.replace('{weather}', w.en) + extra };
 }
 export function pendingEvents(state) {
@@ -914,7 +915,7 @@ export function endReport(state) {
 export function serialize(state) { return JSON.stringify(state); }
 export function deserialize(str) {
   const o = JSON.parse(str);
-  if (!o || o.v !== 1 || !MODES[o.mode]) throw new Error('bad save');
+  if (!o || o.v !== 1 || !MODES[o.mode] || !Object.hasOwn(CITIES, o.hub)) throw new Error('bad save');
   o.facilities ||= {}; o.marketSupply ||= {}; o.reserve ||= { kg: 0, unitPrice: 0 }; o.scenario ||= 'free';
   o.marketRivalBase ||= newGame({ mode: o.mode, hub: o.hub, seed: o.seed }).marketRivalBase;
   o.career = readCareer(o);

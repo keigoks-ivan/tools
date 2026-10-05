@@ -1,6 +1,6 @@
-import { CITIES, CITY_REGIONS, AIRCRAFT, RIVALS } from './data.mjs?v=18';
-import { readCareer, tierProgress, albums, ALBUM_GOAL } from './career.mjs?v=18';
-import { tr, pick, esc, fmtNum, fmtUSD } from './ui-util.js?v=18';
+import { CITIES, CITY_REGIONS, AIRCRAFT, RIVALS } from './data.mjs?v=19';
+import { readCareer, tierProgress, albums, ALBUM_GOAL } from './career.mjs?v=19';
+import { tr, pick, esc, fmtNum, fmtUSD } from './ui-util.js?v=19';
 
 export function missionTitle(m) {
   const city = pick(CITIES[m.city]);
@@ -33,7 +33,7 @@ export function missionCard(m, state, active = false, running = false) {
 }
 export function dispatchView(state, offers, running = false) {
   const c = readCareer(state);
-  return `${careerHeader(state)}<div class="dispatch-heading"><div><small>${tr('天青任務板','SKYGLAZE DISPATCH')}</small><h2>${c.active?tr('這次，向目標前進。','Your mission is underway.'):tr('下一趟，由你決定。','Choose your next adventure.')}</h2></div><img src="./art/v2/mascot.webp?v=18" width="76" height="76" alt=""></div><p class="hint">${running?tr('本期已出發；結算後可接新任務。','This turn has departed. Choose a new mission after settlement.'):c.active?tr('進度在結算後更新。可提前完成，不必等到期限。','Progress updates at settlement. Finish early whenever you reach the goal.'):tr('挑一項挑戰，在期限內完成。也可以自由經營。','Choose one timed challenge, or keep playing freely.')}</p><div class="dispatch-grid">${c.active?missionCard(c.active,state,true,running):offers.map(m=>missionCard(m,state,false,running)).join('') || `<p class="hint">${tr('本局任務已結束，城市收集仍會保留。','Missions have ended. Your city collection is kept.')}</p>`}</div><div class="dispatch-links"><button type="button" class="btn sec" data-passport>▣ ${tr('旅行手冊','Travel passport')}</button><button type="button" class="btn sec" data-rival-board>⚑ ${tr('對手雷達','Rival radar')}</button></div><p class="dispatch-note">${tr('成長值用來升級與收集。任務沒有現金補貼，航線仍要靠自己獲利。','XP builds levels and collections. Missions pay no cash; routes must earn their own profit.')}</p>`;
+  return `${careerHeader(state)}<div class="dispatch-heading"><div><small>${tr('天青任務板','SKYGLAZE DISPATCH')}</small><h2>${c.active?tr('這次，向目標前進。','Your mission is underway.'):tr('下一趟，由你決定。','Choose your next adventure.')}</h2></div><img src="./art/v2/mascot.webp?v=19" width="76" height="76" alt=""></div><p class="hint">${running?tr('本期已出發；結算後可接新任務。','This turn has departed. Choose a new mission after settlement.'):c.active?tr('進度在結算後更新。可提前完成，不必等到期限。','Progress updates at settlement. Finish early whenever you reach the goal.'):tr('挑一項挑戰，在期限內完成。也可以自由經營。','Choose one timed challenge, or keep playing freely.')}</p><div class="dispatch-grid">${c.active?missionCard(c.active,state,true,running):offers.map(m=>missionCard(m,state,false,running)).join('') || `<p class="hint">${tr('本局任務已結束，城市收集仍會保留。','Missions have ended. Your city collection is kept.')}</p>`}</div><div class="dispatch-links"><button type="button" class="btn sec" data-passport>▣ ${tr('旅行手冊','Travel passport')}</button><button type="button" class="btn sec" data-rival-board>⚑ ${tr('對手雷達','Rival radar')}</button></div><p class="dispatch-note">${tr('成長值用來升級與收集。任務沒有現金補貼，航線仍要靠自己獲利。','XP builds levels and collections. Missions pay no cash; routes must earn their own profit.')}</p>`;
 }
 export function missionPin(state) {
   const c = readCareer(state), m = c.active, t = tierProgress(c.xp);

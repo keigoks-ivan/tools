@@ -1,9 +1,9 @@
 // SKYGLAZE globe: local NASA/Natural Earth textures; one WebGL draw on view changes,
 // with sampled flight traffic painted on a lightweight 2D overlay.
 import * as THREE from '/game/lib/three.module.js';
-import { CITIES } from './data.mjs?v=18';
-import { VERT, FRAG_PAPER } from './globe-shaders.js?v=18';
-import { tr, pick, fmtUSD } from './ui-util.js?v=18';
+import { CITIES } from './data.mjs?v=19';
+import { VERT, FRAG_GAME } from './globe-shaders.js?v=19';
+import { tr, pick, fmtUSD } from './ui-util.js?v=19';
 const RAD = Math.PI / 180;
 const ll = (lat, lon, r = 1) => new THREE.Vector3(r * Math.cos(lat * RAD) * Math.cos(lon * RAD), r * Math.sin(lat * RAD), -r * Math.cos(lat * RAD) * Math.sin(lon * RAD));
 const load = url => new Promise((resolve, reject) => new THREE.TextureLoader().load(url, resolve, undefined, reject));
@@ -20,15 +20,15 @@ export async function createGlobe(box, { hubId, onCityClick, decorative = false 
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: !mobile, powerPreference: 'low-power' });
   renderer.setClearColor(0, 0); renderer.setPixelRatio(Math.min(devicePixelRatio, mobile ? 1.25 : 1.5));
   const scene = new THREE.Scene(), camera = new THREE.PerspectiveCamera(33, 1, .01, 20);
-  const hub = CITIES[hubId], view = { lat: hub.lat + 5, lon: hub.lon - 5, radius: mobile ? 3.65 : 3.8 };
+  const hub = CITIES[hubId], view = { lat: hub.lat + 5, lon: hub.lon - 5, radius: mobile ? 4.05 : 4.25 };
   let w = 1, h = 1, dirty = true, destroyed = false, frame = 0, lastFrame = 0, slow = 0, paintCount = 0, frameTotal = 0;
   let current = { routes: [], rivals: [], selected: null, metrics: {} }, time = { elapsed: 0, speed: 0 };
   let paths = [], projected = [], cities = [], receipts = [], cachedSignature = '';
-  const sprite = new Image(); sprite.src = new URL('./art/v2/sprite.webp?v=18', import.meta.url).href;
-  const [bm, mask] = await Promise.all([load(new URL(`./art/v2/earth-${mobile ? '2k' : '4k'}.webp?v=18`, import.meta.url).href), load(new URL(`./art/v2/land-${mobile ? '2k' : '4k'}.webp?v=18`, import.meta.url).href)]).catch(e => { renderer.dispose(); throw e; });
+  const sprite = new Image(); sprite.src = new URL('./art/v2/sprite.webp?v=19', import.meta.url).href;
+  const [bm, mask] = await Promise.all([load(new URL(`./art/v2/earth-${mobile ? '2k' : '4k'}.webp?v=19`, import.meta.url).href), load(new URL(`./art/v2/land-${mobile ? '2k' : '4k'}.webp?v=19`, import.meta.url).href)]).catch(e => { renderer.dispose(); throw e; });
   bm.anisotropy = mask.anisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy());
   const camPos = { value: camera.position }, sun = { value: ll(35, hub.lon - 45) };
-  const material = new THREE.ShaderMaterial({ vertexShader: VERT, fragmentShader: FRAG_PAPER, uniforms: { bm: { value: bm }, mask: { value: mask }, camPos, sun } });
+  const material = new THREE.ShaderMaterial({ vertexShader: VERT, fragmentShader: FRAG_GAME, uniforms: { bm: { value: bm }, mask: { value: mask }, camPos, sun } });
   const globe = new THREE.Mesh(new THREE.SphereGeometry(1, mobile ? 80 : 128, mobile ? 40 : 64), material); scene.add(globe);
   const atmosphere = new THREE.Mesh(new THREE.SphereGeometry(1.025, 64, 32), new THREE.ShaderMaterial({
     vertexShader: VERT, fragmentShader: `uniform vec3 camPos; varying vec3 vN; varying vec3 vW; void main(){float rim=pow(1.0-max(dot(normalize(vN),normalize(camPos-vW)),0.0),3.0);gl_FragColor=vec4(.65,.82,1.0,rim*.32);}`,
@@ -85,7 +85,7 @@ export async function createGlobe(box, { hubId, onCityClick, decorative = false 
     let planeBudget = mobile ? 18 : 48;
     for (const p of projected) {
       const r = p.route, metric = current.metrics[r.city], loss = metric?.profit < 0;
-      const color = p.rival ? '#687f99' : loss ? '#b5533c' : '#2f5d8c';
+      const color = p.rival ? '#b7c6db' : loss ? '#ff958c' : '#ffe2a1';
       ctx.strokeStyle = color; ctx.lineWidth = p.rival ? 1 : 1.4 + Math.min(2.6, r.weekly * .13); ctx.globalAlpha = p.rival ? .32 : .8;
       ctx.setLineDash(p.rival ? [4,6] : []); path(p.screen); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
       if (p.rival || decorative) continue;
@@ -111,7 +111,7 @@ export async function createGlobe(box, { hubId, onCityClick, decorative = false 
       }
     }
     if (!decorative) for (const color of [0,1]) {
-      ctx.fillStyle=color?'#709ec6':'#1e3550';ctx.globalAlpha=.85;ctx.beginPath();
+      ctx.fillStyle=color?'#f6d792':'#d9f8f3';ctx.globalAlpha=.85;ctx.beginPath();
       for (const c of cities) {
         if (!c.visible || c.id === hubId) continue;
         const metric = current.metrics[c.id]; if (!metric) continue;
@@ -146,5 +146,5 @@ export async function createGlobe(box, { hubId, onCityClick, decorative = false 
   const contextLost=e=>{e.preventDefault();canvas.classList.add('context-lost');};canvas.addEventListener('webglcontextlost',contextLost);
   const restore=()=>{dirty=true;};canvas.addEventListener('webglcontextrestored',restore);
   frame=requestAnimationFrame(paint);
-  return {update,setTime(next){time=next;},zoomBy(f){view.radius=clamp(view.radius/f,1.65,4.6);dirty=true;},recenter(){view.lat=hub.lat+5;view.lon=hub.lon-5;view.radius=mobile?3.65:3.8;dirty=true;},focus(id){if(!CITIES[id])return;view.lat=(hub.lat+CITIES[id].lat)/2;view.lon=hub.lon+(((CITIES[id].lon-hub.lon+540)%360)-180)/2;dirty=true;},stats(){return{frames:paintCount,meanPaintMs:frameTotal/Math.max(1,paintCount),drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles,pixelRatio:renderer.getPixelRatio(),planes:current.routes.length};},destroy(){destroyed=true;cancelAnimationFrame(frame);ro.disconnect();for(const mesh of [globe,atmosphere]){mesh.geometry.dispose();mesh.material.dispose();}bm.dispose();mask.dispose();canvas.removeEventListener('webglcontextlost',contextLost);canvas.removeEventListener('webglcontextrestored',restore);renderer.dispose();renderer.forceContextLoss();canvas.remove();overlay.remove();labels.remove();}};
+  return {update,setTime(next){time=next;},zoomBy(f){view.radius=clamp(view.radius/f,1.65,4.6);dirty=true;},recenter(){view.lat=hub.lat+5;view.lon=hub.lon-5;view.radius=mobile?4.05:4.25;dirty=true;},focus(id){if(!CITIES[id])return;view.lat=(hub.lat+CITIES[id].lat)/2;view.lon=hub.lon+(((CITIES[id].lon-hub.lon+540)%360)-180)/2;dirty=true;},stats(){return{frames:paintCount,meanPaintMs:frameTotal/Math.max(1,paintCount),drawCalls:renderer.info.render.calls,triangles:renderer.info.render.triangles,pixelRatio:renderer.getPixelRatio(),planes:current.routes.length};},destroy(){destroyed=true;cancelAnimationFrame(frame);ro.disconnect();for(const mesh of [globe,atmosphere]){mesh.geometry.dispose();mesh.material.dispose();}bm.dispose();mask.dispose();canvas.removeEventListener('webglcontextlost',contextLost);canvas.removeEventListener('webglcontextrestored',restore);renderer.dispose();renderer.forceContextLoss();canvas.remove();overlay.remove();labels.remove();}};
 }

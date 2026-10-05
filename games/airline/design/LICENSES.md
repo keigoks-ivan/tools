@@ -1,5 +1,11 @@
 # Asset licences — SKYGLAZE v2 mockups
 
+## Release 19 — twilight game environment (2026-10-06)
+
+- `../art/v3/airport-dusk.webp` (1536×1024) and `airport-dusk-mobile.webp` (768×512): original environment art generated with the built-in OpenAI imagegen tool for this game, then resized/re-encoded as WebP. No third-party photos, airline logos or manufacturer artwork were used. The shared scene illustrates SKYGLAZE’s home airport; it does not reproduce each real airport. Final prompt and generation mode: `V2-IMPLEMENTATION.md`, release 19.
+- `../ui-scene.js` and `../style-game.css`: original orbital scenery, airport lighting accents and game interface. System fonts only; all assets remain local.
+- `../globe-shaders.js`, `FRAG_GAME`: original twilight styling of the existing local NASA Blue Marble and Natural Earth textures; the source credits below continue to apply.
+
 | File | What | Source | Licence / terms | Credit line |
 |---|---|---|---|---|
 | tex/bm_full.jpg (5400×2700), tex/bm_4k.jpg (4096×2048, resized) | Blue Marble: Next Generation, August, with topography and bathymetry | https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/ (file: assets.science.nasa.gov/content/dam/science/esd/eo/images/bmng/bmng-topography-bathymetry/august/world.topo.bathy.200408.3x5400x2700.jpg) | NASA content is generally not subject to copyright in the US; the NASA media guidelines name texture maps, computer graphical simulations and web pages as allowed uses, ask that NASA be acknowledged, and forbid implying NASA endorsement (https://www.nasa.gov/nasa-brand-center/images-and-media/). The BMNG page asks: "Anyone using or republishing Blue Marble: Next Generation please credit NASA Earth Observatory." | "Earth imagery: NASA Earth Observatory (Blue Marble: Next Generation, Reto Stöckli)" |

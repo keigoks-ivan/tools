@@ -82,9 +82,11 @@ async def main():
             await page.locator('#open').click()
             await decisions(page);await refresh_panel(page)
             await page.locator('#run').click();await page.wait_for_timeout(1100)
+            await page.locator('#pause').click()
+            assert not await page.evaluate('__tq.app.clock.running')
             before=await page.evaluate('__tq.app.clock.elapsed')
-            await page.locator('#pause').click();await page.wait_for_timeout(500)
-            assert abs(await page.evaluate('__tq.app.clock.elapsed')-before)<.25
+            await page.wait_for_timeout(500)
+            assert abs(await page.evaluate('__tq.app.clock.elapsed')-before)<.05
             # Next-turn route changes cannot change the current frozen economic result.
             current=await page.evaluate('JSON.stringify(__tq.app.active.report)')
             edited_city=await page.locator('[data-route]').first.get_attribute('data-route')
@@ -156,4 +158,5 @@ async def main():
         await browser.close()
         (OUT/'results.json').write_text(json.dumps(results,ensure_ascii=False,indent=2))
         print(json.dumps(results,ensure_ascii=False,indent=2))
-asyncio.run(main())
+if __name__ == '__main__':
+    asyncio.run(main())

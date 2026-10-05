@@ -1,7 +1,7 @@
 // World map: pan / zoom SVG. Plate carree, baked Natural Earth 110m land. Markers live in screen px (scaled by 1/k).
-import { CITIES } from './backend.mjs?v=18';
+import { CITIES } from './backend.mjs?v=19';
 import { LAND_PATH, MAP_W, MAP_H, project } from './landmap.mjs';
-import { pick, tr } from './ui-util.js?v=18';
+import { pick, tr } from './ui-util.js?v=19';
 
 const NS = 'http://www.w3.org/2000/svg';
 const el = (n, a = {}, parent) => { const e = document.createElementNS(NS, n); for (const k in a) e.setAttribute(k, a[k]); if (parent) parent.appendChild(e); return e; };
