@@ -116,6 +116,16 @@ async def main():
             await context.close()
         for mode,hub,kind in [('year','TPE','sensible'),('decade','SIN','sensible'),('year','TPE','naive')]:
             results['games'].append(await full_game(browser,mode,hub,kind))
+        # A model decision must agree with the fleet panel, estimates and actual operations.
+        context=await browser.new_context();page=await context.new_page();await page.goto(URL+'?debug=1')
+        await page.locator('[data-mode="decade"]').click();await page.locator('#go-new').click();await page.locator('[data-opt="lcc"]').click()
+        assert await page.evaluate('__tq.app.draft.businessModel')=='lcc'
+        await page.locator('[data-tab="fleet"]').click();await page.locator('[data-bm="fsc"]').click();await page.locator('[data-bm="lcc"]').click()
+        assert await page.evaluate('__tq.app.draft.eventChoices["b-model"]')=='lcc'
+        await page.locator('[data-tab="routes"]').click();await page.locator('#add-route').click();await page.locator('#city-search').fill('HKG')
+        await page.locator('[data-destination="HKG"]').click();await page.locator('#open').click();await page.locator('#run').click()
+        assert await page.evaluate('__tq.app.active.start.model')=='lcc'
+        results['modelSwitch']='passed';await context.close()
         # Cold first-play bytes and frame time with the largest available network.
         context=await browser.new_context(viewport={'width':1280,'height':800})
         page=await context.new_page();await page.goto(URL+'?debug=1')

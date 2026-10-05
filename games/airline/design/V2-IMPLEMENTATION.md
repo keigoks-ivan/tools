@@ -20,7 +20,7 @@ Scenarios: open skies, 3.9% first-year profit, five-route connecting hub with 5%
 ## Verification
 
 - `node --test games/airline/model.test.mjs games/airline/v2.test.mjs`: 69 tests, including the unchanged 63 base tests. Base sensible strategies retain the +3…+8% calibration at every hub/mode; naive and idle checks remain. Optional all-facility stress tests allow +1…+12%, since facilities are additional investments, and require positive cash. Optional facilities are not represented as unchanged base calibration.
-- `tests/browser-v2.py`: isolated Chrome, 1280×800, 390×844, 844×390 and dark scheme; route editing, frozen current results, speed and pause, saves/resume, queued facilities, both languages, source credits, fallback and corrupted saves. Full sensible Taipei/year and Singapore/decade runs and a naive Taipei/year run.
+- `tests/browser-v2.py`: isolated Chrome, 1280×800, 390×844, 844×390 and dark scheme; route editing, frozen current results, speed and pause, saves/resume, queued facilities, both languages, source credits, fallback and corrupted saves. A low-cost event choice and subsequent fleet-panel changes are checked against the actual operating model. Full sensible Taipei/year and Singapore/decade runs and a naive Taipei/year run.
 - `tests/play-v2.py`: all 31 destinations other than the chosen hub, opening feedback, interactive facility selection/planning, achievements; actual Web Audio output, default silence, mute, replay and background suspension at all four viewport/theme variants.
 - Local textures only; mobile uses 2K, desktop 4K. The globe has two WebGL draw calls and about 20k desktop triangles, caps pixel ratio and sampled aircraft, and stops repainting when paused. SVG fallback retains every management feature.
 - Detailed measurements and final screenshots accompany this note. A real touch phone has not been tested. Headless SwiftShader frame cadence is a software-rendering measurement, not proof of the 60 FPS real-phone target.
@@ -29,7 +29,7 @@ Final moving-network stress check (31 routes, sampled aircraft): Apple M4 / head
 
 Scenario feasibility was checked in the economic model at TPE: first-year seed 1 with a five-aircraft strategy, network seed 1 with a twelve-aircraft budget, and resilience seed 7 with a nine-aircraft budget all met their respective final goals. Full browser playthroughs ended at +3.97% (Taipei/year), +6.61% (Singapore/decade) and −44.27% (naive Taipei/year), with each route’s explanation visible.
 
-Release cache version: 14. Changed modules and new image assets carry the same version, so cached pre-deployment responses do not mix with the release.
+Release cache version: 15. Changed modules and new image assets carry the same version, so cached pre-deployment responses do not mix with the release.
 
 Machine-readable results: `v2/verification.json`. Final screenshots: `v2/screenshots/`.
 

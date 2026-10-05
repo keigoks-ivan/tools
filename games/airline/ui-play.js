@@ -1,7 +1,7 @@
 // Visual feedback only: every goal and badge reads the existing economic results.
-import { CITIES, AIRCRAFT } from './data.mjs?v=14';
-import { FACILITIES } from './v2.mjs?v=14';
-import { aircraftArt } from './ui-art-v2.js?v=14';
+import { CITIES, AIRCRAFT } from './data.mjs?v=15';
+import { FACILITIES } from './v2.mjs?v=15';
+import { aircraftArt } from './ui-art-v2.js?v=15';
 import { tr, pick, esc, fmtUSD, fmtPct } from './ui-util.js';
 
 export function playIcon(id) {
@@ -24,7 +24,7 @@ export function routeTicket(s, r, e, bar, active) {
 }
 
 export function hubScene(s, queued, large = false) {
-  return `<div class="hub-scene ${large?'large':''}"><img src="./art/v2/airport.webp?v=14" width="1536" height="1024" decoding="async" alt="${tr('天青航空的迷你機場，跑道、航廈與飛機','A miniature SKYGLAZE airport with runway, terminal and aircraft')}"><span class="airport-beacon" aria-hidden="true"></span><span class="hub-scene-code">${s.hub}<small>${tr('你的基地','YOUR HUB')}</small></span><div class="hub-hotspots">${Object.entries(FACILITIES).map(([id,f],i)=>`<button type="button" class="hub-hotspot ${s.facilities?.[id]?'built':queued.has(id)?'queued':''}" data-hub-detail="${id}"><i>${['⚙','♧','◒'][i]}</i><span>${esc(pick(f))}<small>${s.facilities?.[id]?tr('營運中','ACTIVE'):queued.has(id)?tr('已排定','PLANNED'):tr('查看設施','EXPLORE')}</small></span></button>`).join('')}</div></div>`;
+  return `<div class="hub-scene ${large?'large':''}"><img src="./art/v2/airport.webp?v=15" width="1536" height="1024" decoding="async" alt="${tr('天青航空的迷你機場，跑道、航廈與飛機','A miniature SKYGLAZE airport with runway, terminal and aircraft')}"><span class="airport-beacon" aria-hidden="true"></span><span class="hub-scene-code">${s.hub}<small>${tr('你的基地','YOUR HUB')}</small></span><div class="hub-hotspots">${Object.entries(FACILITIES).map(([id,f],i)=>`<button type="button" class="hub-hotspot ${s.facilities?.[id]?'built':queued.has(id)?'queued':''}" data-hub-detail="${id}"><i>${['⚙','♧','◒'][i]}</i><span>${esc(pick(f))}<small>${s.facilities?.[id]?tr('營運中','ACTIVE'):queued.has(id)?tr('已排定','PLANNED'):tr('查看設施','EXPLORE')}</small></span></button>`).join('')}</div></div>`;
 }
 
 export function goalList(challenge, state) {
