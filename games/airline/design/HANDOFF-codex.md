@@ -57,29 +57,39 @@ Commits: `1eba8a3` (game), `bd4a0ee` (hero art from the 3D jet). About 3,000 lin
 ### 4.1 References: what to borrow (verify with your own research)
 - **Fly Corp:** a living world. Planes visibly fly their routes, and passengers pile up at airports as dots. Minimal, beautiful map, speed controls, unlocking new regions, Mini Metro-like flow. The satisfying feedback is constant.
 - **Airline Manager 4:** the management loop. Buy or lease aircraft, set prices, and buy fuel when the price is low (a fuel market). Marketing campaigns, maintenance checks, hub growth, achievements and steady progression. **Avoid** its monetisation-driven waiting and tedium.
-- **AirTycoon 4:** a 3D globe, airport and hub building, aircraft purchase with cabin configuration, slot competition at busy airports, competitor AI and scenarios.
+- **AirTycoon 4:** a turn-based iOS game (2015). Its features are hub buildings (maintenance depot, lounge, fuel tank), buy / lease / used aircraft with cabin class split, competitor airlines and scenarios. See §4.2 for the correction about the globe.
 
-### 4.2 Two directions
-A research agent was producing these when this handoff was written. If they exist, read them:
-- `games/airline/design/research.md`
-- `games/airline/design/directions.md`
-- `games/airline/design/choices.jpg` and `games/airline/design/mockups/*.png`
+### 4.2 Two directions (research done; read these first)
+- `design/research.md`: research on the three reference games, with sources and the 10 most transferable ideas.
+- `design/directions.md`: the two directions in Chinese, each feature tagged with its reference game.
+- `design/choices.jpg`: a one-page comparison, the picture to show the owner.
+- `design/mockups/`: `A-desktop.jpg`, `A-phone.jpg`, `B-desktop.jpg`, `B-phone.jpg`, plus `*-notes.jpg` annotated with which game each feature comes from.
+- `design/mockup-src/`: working three.js source for the mockups (globe, arcs, plane sprites), with NASA textures. See its README.
+- `design/LICENSES.md`: asset licences.
 
-If they are missing, do the research yourself and produce the same files. The two directions are:
+**Correction from the research.** AirTycoon 4 is a turn-based iOS game (TRADEGAME Lab, 2015). No source shows it with a 3D globe; that is AirTycoon 5's map option, and Fly Corp uses a flat map. The globe in both mockups is our own choice. AirTycoon 4's sourced signature features are:
+- hub buildings: a maintenance depot (−30% maintenance), a lounge (more premium passengers), a fuel tank
+- buy, lease or used aircraft, with a tip to keep leases under 30% of the fleet
+- cabin class split
+- competitor airlines
+- turn-based play
 
-- **A, living globe** (Fly Corp feel plus AirTycoon 4's globe and hub building):
-  - A real-time 3D globe with day/night Earth imagery, glowing route arcs, and 3D or sprite planes flying the arcs.
-  - Passenger-dot queues at airports, money pop-ups when flights land, and pause / 1× / 2× / 4× speed.
-  - Unlock regions as you grow.
-  - The monthly or seasonal report card stays as the teaching moment, and time pauses for it.
-- **B, deep tycoon** (Airline Manager 4 plus AirTycoon 4):
-  - A hangar with 3D aircraft and cabin configuration (seat density changes cost per seat).
-  - A fuel market chart (buy low and hedge), marketing, slots, competitor airlines with visible strategies, and achievements across sessions.
-  - It plays more turn-based, with richer screens.
+**A, 即時航網 (living network).**
+- A light-blue 3D globe where time runs, with pause and fast-forward (about 60 s per month).
+- Flight-sim planes fly the routes with trails, passengers queue at airports, and each landing pops its profit or loss.
+- Blue routes make money and red ones lose it; thicker lines mean more flights. Each route has a load factor vs break-even bar.
+- News cards pause the game for decisions.
+- Month-end settlement is the current `model.mjs`, unchanged. Mid-month changes take effect next month.
+- About 5–7 agent-days and about 3 MB of assets.
 
-**Coordinator's recommendation:** A as the base, plus three B mechanics that each teach something: a fuel market (hedging and fuel's cost share), a hangar with seat configuration (seat density and LCC vs full-service), and slots at congested hubs (scarcity). That makes it fun to watch and also teaches.
+**B, 航空大亨 (tycoon).**
+- Turn-based, one season per turn, on a photoreal day/night globe with city lights.
+- Dense panels: an isometric hub scene with terminal, lounge, maintenance depot, fuel tank and slots; the fleet with cabin layout and the lease-share warning; a fuel market; several AI rivals; scenario goals; achievements.
+- About 6–7 new model systems, each recalibrated. About 9–12 agent-days and about 3.5 MB of assets.
 
-The owner has not chosen yet. If they have not told you, show them `choices.jpg` with one Chinese line per option and your recommendation, and wait. If they say 「你決定」 (you decide), build the recommendation.
+**Recommendation (research agent and coordinator agree): A, plus two pieces of B.** The first is B's hub-facility card: three buildings, each teaching one lesson (maintenance cost, premium demand, fuel storage and hedging). The second is scenario challenge cards for replay. A changes what the player sees every second, which is what 「更有趣、畫面厲害很多」 asks for, and it keeps the model and its tests intact. B mostly adds menus and recalibration risk, and bland, menu-heavy screens are the main complaint in reviews of AirTycoon. Choose B instead if the goal becomes many repeated ten-year playthroughs.
+
+**The owner has not chosen yet.** Unless the owner has already told you, show `choices.jpg` with one Chinese line per option plus the recommendation, and wait for 「A」 or 「B」. If they say 「你決定」, build the recommendation.
 
 ### 4.3 Non-negotiables for v2
 1. **Still teaches.** Every lesson in `LESSONS` must still be reachable and explained:
@@ -161,4 +171,4 @@ The owner has not chosen yet. If they have not told you, show them `choices.jpg`
 - `spec-v1.md`: the v1 design spec. Two things in it are out of date: the palette (it was celadon green, now blue, see §2) and the English name (now SKYGLAZE).
 - `research-v1.md`: the v1 research on airline economics and similar games, with sources.
 - `../SOURCES.md`: the real-world numbers used in the model.
-- `research.md`, `directions.md`, `choices.jpg`, `mockups/`: the v2 research and two directions (§4.2), added when ready.
+- `research.md`, `directions.md`, `choices.jpg`, `mockups/`, `mockup-src/`, `LICENSES.md`: the v2 research, the two directions and the mockups (§4.2).

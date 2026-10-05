@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<title>天青航空 · 方向 A 即時航網</title>
+<style>
+:root{
+  --sky:#D6E6F4; --blue-l:#A9C9E8; --blue:#6E9CCB; --blue-d:#2F5D8C; --navy:#1E3550; --bg:#F7F6F2;
+  --ink:#1E3550; --ink2:#4a6280; --muted:#73879e; --warn:#B5533C; --warn-bg:#f6e6e0; --good:#3f7a62; --good-bg:#e3efe8; --gold:#b8963f;
+  --glass:rgba(255,255,255,.80); --line:rgba(47,93,140,.14);
+  --serif:"Noto Serif TC","Songti TC","Source Han Serif TC",serif;
+  --sans:-apple-system,"PingFang TC","Noto Sans TC",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden}
+body{font:14px/1.5 var(--sans);color:var(--ink);background:linear-gradient(180deg,#d9e7f5 0%,#e9f1f8 30%,#f4f6f6 60%,#f7f6f2 100%)}
+#globe,#ov{position:absolute;left:0;top:0;width:100vw;height:100vh;display:block}
+#tags{position:absolute;inset:0;pointer-events:none}
+.num{font-variant-numeric:tabular-nums}
+.serif{font-family:var(--serif)}
+.glass{background:var(--glass);backdrop-filter:blur(14px) saturate(1.2);-webkit-backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.9);box-shadow:0 12px 34px rgba(30,53,80,.14),0 1px 0 rgba(255,255,255,.7) inset;border-radius:18px}
+.phone-only{display:none}
+body.phone .phone-only{display:block} body.phone .desk-only{display:none}
+
+/* ---------- chips on the globe ---------- */
+.chip{position:absolute;transform:translate(-50%,-50%);display:flex;align-items:center;gap:7px;padding:5px 10px 5px 8px;border-radius:999px;background:rgba(255,255,255,.93);box-shadow:0 4px 14px rgba(30,53,80,.18);font-size:12px;white-space:nowrap;color:var(--ink)}
+.chip b{font-family:var(--serif);font-size:12.5px}
+.chip .d{width:8px;height:8px;border-radius:50%;background:var(--blue-d)}
+.chip.bad .d{background:var(--warn)}
+.chip .mb{position:relative;width:46px;height:6px;border-radius:3px;background:#e4ebf2;overflow:visible}
+.chip .mb i{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:var(--blue-d)}
+.chip.bad .mb i{background:var(--warn)}
+.chip .mb s{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--navy);border-radius:1px}
+.chip .tag{font-size:11px;font-weight:700;color:var(--warn);background:var(--warn-bg);border-radius:999px;padding:1px 7px}
+.chip .tag.g{color:var(--good);background:var(--good-bg)}
+.pop{position:absolute;transform:translate(-50%,-100%);font:700 13px var(--sans);padding:3px 9px;border-radius:999px;color:#fff;background:var(--good);box-shadow:0 6px 16px rgba(63,122,98,.35);white-space:nowrap}
+.pop.neg{background:var(--warn);box-shadow:0 6px 16px rgba(181,83,60,.35)}
+.pop::after{content:"";position:absolute;left:50%;top:100%;width:2px;height:16px;transform:translateX(-50%);background:linear-gradient(currentColor,transparent);opacity:.0}
+.pop.fade{opacity:.55;transform:translate(-50%,-100%) scale(.88)}
+.qlabel{position:absolute;font:600 11px var(--sans);color:var(--ink2);white-space:nowrap;background:rgba(255,255,255,.85);border-radius:6px;padding:1px 6px}
+.qlabel.bad{color:var(--warn)}
+.lock{position:absolute;display:flex;gap:7px;align-items:center;padding:6px 11px;border-radius:12px;background:rgba(247,246,242,.78);border:1px dashed rgba(47,93,140,.35);font-size:12px;color:var(--ink2);white-space:nowrap}
+.lock svg{flex:none}
+
+/* ---------- desktop HUD ---------- */
+.brandcard{position:absolute;left:24px;top:22px;width:318px;padding:16px 18px 14px}
+.brand{display:flex;align-items:center;gap:10px}
+.mark{width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 34% 32%,#fff 0,#d6e6f4 30%,#6e9ccb 75%,#2f5d8c 100%);box-shadow:0 2px 6px rgba(47,93,140,.35)}
+.brand h1{margin:0;font:700 21px/1 var(--serif);letter-spacing:.06em}
+.brand small{display:block;font:700 9.5px/1 var(--sans);letter-spacing:.32em;color:var(--blue);margin-top:5px}
+.cash{margin-top:14px;display:flex;align-items:flex-end;justify-content:space-between}
+.cash .l{font-size:12px;color:var(--muted)}
+.cash .v{font:700 28px/1.1 var(--serif);letter-spacing:.01em}
+.cash .v small{font:600 13px var(--sans);color:var(--ink2);margin-right:4px}
+.kv{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:12.5px;color:var(--ink2)}
+.kv b{color:var(--ink);font-size:14px}
+.mbar{position:relative;height:7px;border-radius:4px;background:#e2e9f1;margin-top:6px}
+.mbar i{position:absolute;top:0;bottom:0;border-radius:4px;background:var(--blue-d)}
+.mbar s{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--gold)}
+.mbar em{position:absolute;top:10px;transform:translateX(-50%);font:600 10.5px var(--sans);font-style:normal;color:var(--gold);white-space:nowrap}
+.lessons{margin-top:24px;padding-top:12px;border-top:1px solid var(--line)}
+.lessonbox{position:absolute;right:22px;bottom:22px;width:376px;padding:12px 16px}
+.lessons .t{font-size:12px;color:var(--muted);display:flex;justify-content:space-between}
+.lessons .t b{color:var(--ink)}
+.lchips{display:flex;flex-wrap:wrap;gap:5px;margin-top:7px}
+.lchips span{font-size:11.5px;padding:2px 8px;border-radius:999px;background:#e8eff6;color:var(--blue-d);font-weight:600}
+.lchips span.new{background:var(--warn);color:#fff}
+.lchips span.off{background:transparent;border:1px dashed #c4ccd6;color:#9aa8b8;font-weight:500}
+
+.timebar{position:absolute;left:50%;top:22px;transform:translateX(-50%);margin-left:-196px;display:flex;align-items:center;gap:14px;padding:9px 10px 9px 18px;border-radius:999px}
+.timebar .d{font:700 15px var(--serif);white-space:nowrap}
+.timebar .d small{font:500 12px var(--sans);color:var(--muted);margin-left:6px}
+.ring{width:34px;height:34px}
+.speed{display:flex;gap:2px;background:#e9f0f7;border-radius:999px;padding:3px}
+.speed button{border:0;background:transparent;width:38px;height:30px;border-radius:999px;color:var(--ink2);font:700 12px var(--sans);display:grid;place-items:center}
+.speed button.on{background:var(--blue-d);color:#fff;box-shadow:0 3px 10px rgba(47,93,140,.35)}
+
+.right{position:absolute;right:22px;top:22px;width:376px;display:flex;flex-direction:column;gap:12px}
+.event{padding:14px 16px 14px}
+.kick{display:flex;align-items:center;gap:8px;font:700 11px var(--sans);letter-spacing:.14em;color:var(--warn)}
+.kick .pulse{width:8px;height:8px;border-radius:50%;background:var(--warn);box-shadow:0 0 0 4px rgba(181,83,60,.18)}
+.kick span:last-child{margin-left:auto;color:var(--muted);letter-spacing:0;font-weight:500}
+.event h3{margin:7px 0 4px;font:700 17px var(--serif)}
+.event p{margin:0;font-size:13px;color:var(--ink2)}
+.event .row{display:flex;gap:8px;margin-top:11px;align-items:center}
+.btn{border:0;border-radius:999px;padding:8px 16px;font:700 13px var(--sans);background:var(--blue-d);color:#fff;box-shadow:0 4px 12px rgba(47,93,140,.3)}
+.btn.ghost{background:transparent;color:var(--blue-d);box-shadow:none;border:1.5px solid rgba(47,93,140,.45)}
+.btn.warn{background:var(--warn);box-shadow:0 4px 12px rgba(181,83,60,.3)}
+.gloss{margin-top:10px;font-size:11.5px;color:var(--muted);border-top:1px dashed var(--line);padding-top:8px}
+.gloss b{color:var(--ink2);border-bottom:1px dotted var(--ink2)}
+
+.route{padding:16px 18px 16px}
+.route .hd{display:flex;justify-content:space-between;align-items:flex-start}
+.route h2{margin:0;font:700 21px/1.25 var(--serif);letter-spacing:.02em}
+.route .sub{font-size:12.5px;color:var(--muted);margin-top:2px}
+.route .pl{text-align:right}
+.route .pl small{display:block;font-size:11.5px;color:var(--muted)}
+.route .pl b{font:700 22px var(--serif);color:var(--warn)}
+.seats{margin-top:14px}
+.seats .lab{display:flex;justify-content:space-between;font-size:12.5px;color:var(--ink2)}
+.seats .lab b{font-size:15px;color:var(--ink)}
+.seats .lab .be{color:var(--warn)}
+.seatrow{position:relative;display:grid;grid-template-columns:repeat(25,1fr);gap:3px;margin-top:8px}
+.seatrow i{height:15px;border-radius:4px 4px 2px 2px;background:#dde6ef}
+.seatrow i.f{background:var(--blue-d)}
+.seatrow .bel{position:absolute;top:-6px;bottom:-6px;width:2px;background:var(--warn)}
+.seatrow .bel::after{content:"";position:absolute;top:-4px;left:-3px;width:8px;height:8px;border-radius:50%;background:var(--warn)}
+.why{margin-top:14px;padding:10px 12px;border-radius:12px;background:var(--warn-bg);color:#7d3524;font:600 13.5px/1.55 var(--sans)}
+.why small{display:block;font-weight:500;color:#8f5a4c;margin-top:3px;font-size:12px}
+.costs{margin-top:13px}
+.costs .t{font-size:12px;color:var(--muted);display:flex;justify-content:space-between}
+.stack{display:flex;height:10px;border-radius:5px;overflow:hidden;margin-top:6px}
+.legend{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:7px;font-size:11.5px;color:var(--ink2)}
+.legend span::before{content:"";display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px;background:var(--c)}
+.ctrl{display:flex;gap:10px;margin-top:14px;align-items:center}
+.ctrl .lbl{font-size:12px;color:var(--muted);width:30px}
+.step{display:flex;align-items:center;background:#e9f0f7;border-radius:999px;padding:3px}
+.step button{width:30px;height:28px;border:0;border-radius:999px;background:#fff;color:var(--blue-d);font:700 16px var(--sans);box-shadow:0 1px 3px rgba(30,53,80,.15)}
+.step b{width:44px;text-align:center;font-size:14px}
+.seg{display:flex;background:#e9f0f7;border-radius:999px;padding:3px}
+.seg button{border:0;background:transparent;padding:5px 13px;border-radius:999px;font:600 12.5px var(--sans);color:var(--ink2)}
+.seg button.on{background:#fff;color:var(--blue-d);box-shadow:0 1px 4px rgba(30,53,80,.18)}
+.acts{display:flex;gap:8px;margin-top:14px}
+.acts .btn{flex:1}
+
+.tray{position:absolute;left:24px;bottom:22px;display:flex;align-items:stretch;gap:10px;padding:10px 12px}
+.tray .ttl{display:flex;flex-direction:column;justify-content:center;padding:0 8px 0 4px;border-right:1px solid var(--line);margin-right:2px}
+.tray .ttl b{font:700 15px var(--serif)}
+.tray .ttl small{font-size:11.5px;color:var(--muted)}
+.tok{display:flex;align-items:center;gap:8px;padding:6px 12px 6px 6px;border-radius:14px;background:rgba(255,255,255,.75);border:1px solid var(--line)}
+.tok img,.tok canvas{width:44px;height:44px}
+.tok b{display:block;font:700 13.5px var(--sans)}
+.tok small{display:block;font-size:11.5px;color:var(--muted)}
+.tok .n{font:700 20px var(--serif);margin-left:4px;color:var(--blue-d)}
+.tok.idle{opacity:.55}
+.tok.add{border:1.5px dashed rgba(47,93,140,.45);background:transparent;color:var(--blue-d)}
+.tok.add .plus{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;font:300 28px var(--sans);background:#e9f0f7}
+.legend2{position:absolute;left:372px;top:24px;font-size:11.5px;color:var(--ink2);display:flex;flex-direction:column;gap:4px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.55)}
+.legend2 span{display:flex;align-items:center;gap:7px}
+.legend2 i{display:inline-block}
+
+/* ---------- phone HUD ---------- */
+.status{position:absolute;left:0;right:0;top:0;height:47px;display:flex;align-items:center;justify-content:space-between;padding:0 30px 0 34px;font:600 15.5px var(--sans);color:var(--navy)}
+.ptop{position:absolute;left:12px;right:12px;top:50px;display:flex;align-items:center;gap:10px;padding:9px 10px 9px 12px;border-radius:18px}
+.ptop .mark{width:24px;height:24px}
+.ptop .c{flex:1}
+.ptop .c small{display:block;font-size:10.5px;color:var(--muted);line-height:1.2}
+.ptop .c b{font:700 19px/1.15 var(--serif)}
+.ptop .m{text-align:right;font-size:11px;color:var(--muted);line-height:1.25}
+.ptop .m b{display:block;font-size:14px;color:var(--good)}
+.pspeed{position:absolute;right:12px;top:118px;display:flex;align-items:center;gap:8px;padding:5px 5px 5px 12px;border-radius:999px}
+.pspeed .d{font:700 13px var(--serif)}
+.pspeed .speed button{width:34px;height:28px}
+.pnews{position:absolute;left:12px;top:118px;display:flex;align-items:center;gap:7px;padding:7px 12px;border-radius:999px;font-size:12px;font-weight:600;color:var(--warn)}
+.sheet{position:absolute;left:0;right:0;bottom:0;padding:6px 16px 26px;border-radius:24px 24px 0 0;background:rgba(255,255,255,.9);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 -10px 30px rgba(30,53,80,.16)}
+.grab{width:40px;height:5px;border-radius:3px;background:#cfd8e2;margin:0 auto 10px}
+.sheet h2{margin:0;font:700 19px/1.25 var(--serif)}
+.sheet .sub{font-size:12px;color:var(--muted)}
+.sheet .pl b{font-size:19px}
+.sheet .why{font-size:12.5px;padding:8px 11px;margin-top:9px}
+.sheet .seats{margin-top:9px}
+.sheet .ptray{margin-top:10px}
+.sheet .seatrow{grid-template-columns:repeat(20,1fr)}
+.sheet .seatrow i{height:13px}
+.sheet .ctrl{margin-top:11px}
+.ptray{display:flex;gap:8px;margin-top:12px;overflow:hidden}
+.ptray .tok{padding:4px 10px 4px 4px;border-radius:12px;flex:none}
+.ptray .tok canvas{width:34px;height:34px}
+.ptray .tok b{font-size:12px}
+.ptray .tok small{font-size:10.5px}
+.homebar{position:absolute;left:50%;bottom:8px;width:134px;height:5px;border-radius:3px;background:#1e3550;transform:translateX(-50%)}
+
+/* ---------- reference notes (optional overlay) ---------- */
+.note{position:absolute;display:flex;align-items:center;gap:6px;font:700 11px var(--sans);color:#fff;background:#7a4fb5;border-radius:999px;padding:3px 9px 3px 3px;box-shadow:0 4px 12px rgba(80,40,140,.35);white-space:nowrap;z-index:50}
+.note i{font-style:normal;width:18px;height:18px;border-radius:50%;background:#fff;color:#7a4fb5;display:grid;place-items:center;font-size:11px}
+</style>
+</head>
+<body>
+<canvas id="globe"></canvas>
+<canvas id="ov"></canvas>
+<div id="tags"></div>
+
+<!-- ================= DESKTOP HUD ================= -->
+<div class="desk-only">
+  <section class="glass brandcard">
+    <div class="brand"><div class="mark"></div><div><h1>天青航空</h1><small>SKYGLAZE</small></div></div>
+    <div class="cash"><div><div class="l">現金</div><div class="v num"><small>US$</small><span id="cash"></span></div></div><svg id="spark" width="96" height="34"></svg></div>
+    <div class="kv"><span>本月淨利率</span><b class="num" id="margin"></b></div>
+    <div class="mbar" id="mbar"><i></i><s></s><em>業界平均 3.9%</em></div>
+    <div class="kv" style="margin-top:24px"><span>全公司載客率</span><b class="num" id="lfc"></b></div>
+</section>
+
+  <div class="glass timebar">
+    <div class="d">第 1 年・5 月<small>18 日</small></div>
+    <svg class="ring" viewBox="0 0 36 36"><circle cx="18" cy="18" r="15" fill="none" stroke="#e2e9f1" stroke-width="4"/><circle cx="18" cy="18" r="15" fill="none" stroke="#2F5D8C" stroke-width="4" stroke-linecap="round" stroke-dasharray="54.7 94.2" transform="rotate(-90 18 18)"/></svg>
+    <div class="speed"><button aria-label="暫停"><svg width="12" height="12"><rect x="1" y="1" width="3.5" height="10" rx="1" fill="currentColor"/><rect x="7.5" y="1" width="3.5" height="10" rx="1" fill="currentColor"/></svg></button><button>▶</button><button class="on">▶▶</button><button>▶▶▶</button></div>
+  </div>
+
+  <div class="right">
+    <section class="glass event">
+      <div class="kick"><span class="pulse"></span><span>新聞</span><span>5 月 18 日</span></div>
+      <h3>油價下個月可能大漲</h3>
+      <p>中東局勢緊張，期貨市場油價走高，分析師警告下個月可能大漲。你已經鎖定一半的油價。</p>
+      <div class="row"><button class="btn">鎖到 80%</button><button class="btn ghost">維持 50%</button></div>
+      <div class="gloss"><b>避險</b>：先付一點費用，把之後幾個月的油價固定下來。油價大漲時省錢，油價下跌時多付。</div>
+    </section>
+
+    <section class="glass route">
+      <div class="hd">
+        <div><h2>台北桃園 ⇄ 洛杉磯</h2><div class="sub">MQ-350 寬體・每週 5 班・11,359 公里</div></div>
+        <div class="pl"><small>本月損益</small><b class="num" id="lp"></b></div>
+      </div>
+      <div class="seats">
+        <div class="lab"><span>載客率 <b class="num">56%</b></span><span class="be">損益平衡 <b class="num" style="color:inherit">63%</b></span></div>
+        <div class="seatrow" id="seatrow"></div>
+      </div>
+      <div class="why">大飛機只坐了 56%，攤到每個座位的成本太高。<small>每班 320 個座位，平均只賣出 180 張票。</small></div>
+      <div class="costs">
+        <div class="t"><span>成本花在哪裡</span><span class="num">本月 US$ 823 萬</span></div>
+        <div class="stack" id="stack"></div>
+        <div class="legend" id="legend"></div>
+      </div>
+      <div class="ctrl"><span class="lbl">班次</span><div class="step"><button>−</button><b class="num">5</b><button>＋</button></div><span class="lbl" style="margin-left:6px">票價</span><div class="seg"><button>低</button><button class="on">中</button><button>高</button></div></div>
+      <div class="acts"><button class="btn">減到每週 3 班</button><button class="btn ghost">關閉航線</button></div>
+    </section>
+  </div>
+
+  <div class="legend2 glass" style="left:auto;right:430px;top:auto;bottom:112px;flex-direction:row;gap:14px;border-radius:12px;padding:7px 12px">
+    <span><svg width="22" height="6"><line x1="1" y1="3" x2="21" y2="3" stroke="#2F5D8C" stroke-width="3" stroke-linecap="round"/></svg>賺錢</span>
+    <span><svg width="22" height="6"><line x1="1" y1="3" x2="21" y2="3" stroke="#B5533C" stroke-width="3" stroke-linecap="round"/></svg>虧錢</span>
+    <span><svg width="22" height="6"><line x1="1" y1="3" x2="21" y2="3" stroke="#1E3550" stroke-opacity=".45" stroke-width="1.6" stroke-dasharray="4 3"/></svg>對手航線</span>
+    <span><svg width="8" height="8"><circle cx="4" cy="4" r="3.2" fill="#1E3550"/></svg>商務客</span>
+    <span><svg width="8" height="8"><circle cx="4" cy="4" r="3.2" fill="#6E9CCB"/></svg>觀光客</span>
+    <span style="color:var(--muted)">線越粗，班次越多</span>
+  </div>
+  <section class="glass lessonbox">
+    <div class="lessons" style="margin:0;padding:0;border:0">
+      <div class="t"><span>這一年學到的事</span><b>4／9</b></div>
+      <div class="lchips"><span>載客率與損益平衡</span><span>轉機旅客</span><span>燃油避險</span><span class="new">坐滿也會虧</span><span class="off">淡季</span><span class="off">廉價對手</span><span class="off">閒置飛機</span><span class="off">⋯</span></div>
+    </div>
+    </section>
+
+  <div class="glass tray">
+    <div class="ttl"><b>機庫</b><small>拖到航線上加班</small></div>
+    <div class="tok idle"><canvas class="spr" data-k="tp"></canvas><div><b>MQ-72 渦槳</b><small>短程・70 座</small></div><span class="n num">0</span></div>
+    <div class="tok"><canvas class="spr" data-k="nb"></canvas><div><b>MQ-320 窄體</b><small>6 架都在飛</small></div><span class="n num">6</span></div>
+    <div class="tok"><canvas class="spr" data-k="wb"></canvas><div><b>MQ-350 寬體</b><small>只飛洛杉磯</small></div><span class="n num">2</span></div>
+    <div class="tok add"><div class="plus">＋</div><div><b>租一架</b><small>窄體每月 US$ 40 萬</small></div></div>
+  </div>
+</div>
+
+<!-- ================= PHONE HUD ================= -->
+<div class="phone-only">
+  <div class="status"><span>9:41</span><span><svg width="72" height="14" viewBox="0 0 72 14"><g fill="#1E3550"><rect x="0" y="8" width="3" height="5" rx="1"/><rect x="5" y="6" width="3" height="7" rx="1"/><rect x="10" y="3" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="13" rx="1"/><path d="M30 4.5a9 9 0 0 1 12 0l-1.6 1.7a6.6 6.6 0 0 0-8.8 0zM33 7.7a4.6 4.6 0 0 1 6 0L36 11z"/><rect x="47" y="1" width="22" height="12" rx="3.5" fill="none" stroke="#1E3550" stroke-opacity=".5"/><rect x="49" y="3" width="16" height="8" rx="2"/><rect x="70" y="5" width="1.6" height="4" rx=".8" fill-opacity=".5"/></g></svg></span></div>
+  <div class="glass ptop">
+    <div class="mark"></div>
+    <div class="c"><small>天青航空・現金</small><b class="num">US$ <span class="cashp"></span></b></div>
+    <div class="m">本月淨利率<b class="num" id="marginp"></b></div>
+  </div>
+  <div class="glass pnews"><span class="kick" style="letter-spacing:0"><span class="pulse"></span></span>油價下個月可能大漲 ›</div>
+  <div class="glass pspeed"><span class="d">5 月 18 日</span><div class="speed"><button><svg width="11" height="11"><rect x="1" y="1" width="3.2" height="9" rx="1" fill="currentColor"/><rect x="6.8" y="1" width="3.2" height="9" rx="1" fill="currentColor"/></svg></button><button class="on">▶▶</button></div></div>
+  <section class="sheet">
+    <div class="grab"></div>
+    <div class="route" style="padding:0">
+      <div class="hd">
+        <div><h2>台北桃園 ⇄ 上海浦東</h2><div class="sub">MQ-320 窄體・每週 10 班・票價「低」</div></div>
+        <div class="pl"><small>本月損益</small><b class="num" id="lpp"></b></div>
+      </div>
+      <div class="seats">
+        <div class="lab"><span>載客率 <b class="num">96%</b></span><span class="be">損益平衡 <b class="num" style="color:inherit">113%</b></span></div>
+        <div class="seatrow" id="seatrowp"></div>
+      </div>
+      <div class="why">坐滿了，但票價低於每個座位的成本，載越多虧越多。</div>
+      <div class="ctrl"><span class="lbl">票價</span><div class="seg"><button class="on">低</button><button>中</button><button>高</button></div><button class="btn" style="margin-left:auto;padding:7px 14px">改回「中」</button></div>
+    </div>
+    <div class="ptray">
+      <div class="tok"><canvas class="spr" data-k="nb"></canvas><div><b>MQ-320</b><small>6 架在飛</small></div></div>
+      <div class="tok"><canvas class="spr" data-k="wb"></canvas><div><b>MQ-350</b><small>2 架在飛</small></div></div>
+      <div class="tok add" style="padding-right:10px"><div class="plus" style="width:34px;height:34px;font-size:22px">＋</div><div><b>租一架</b><small>每月 US$ 40 萬</small></div></div>
+    </div>
+  </section>
+  <div class="homebar"></div>
+</div>
+
+<script type="module">
+import { makeGlobe, gcPoints, aircraftSprite, drawPath, fmtUSD } from './globe.js';
+const q = new URLSearchParams(location.search);
+const phone = q.get('layout') === 'phone';
+document.body.classList.add(phone ? 'phone' : 'desk');
+const W = innerWidth, H = innerHeight, DPR = devicePixelRatio;
+const S = await (await fetch('./sim_A.json')).json();
+const C = Object.fromEntries((await (await fetch('./cities.json')).json()).map(c => [c.id, c]));
+const hub = C.TPE;
+const WPT = 52 / 12;
+
+// ---------- camera ----------
+const camD = { camPos: [12, 123, 2.2], lookAt: [29.5, 125.5, 1.0], fov: 30, shift: [-170, -10] };
+const camP = { camPos: [14, 126, 2.7], lookAt: [29, 127, 1.0], fov: 40, shift: [-10, -60] };
+const cfg = { ...(phone ? camP : camD) }; for (const k of ['camPos', 'lookAt', 'shift']) if (q.has(k)) cfg[k] = JSON.parse(q.get(k)); if (q.has('fov')) cfg.fov = +q.get('fov');
+const G = await makeGlobe({ canvas: document.getElementById('globe'), width: W, height: H, dpr: DPR, style: 'paper', ...cfg, sun: [38, 95] });
+
+// ---------- sprites ----------
+const jet = await aircraftSprite({ size: 256 });
+let prop = null; try { prop = await aircraftSprite({ size: 256, light: true }); } catch (e) { prop = jet; }
+for (const c of document.querySelectorAll('canvas.spr')) {
+  c.width = c.height = 96; const x = c.getContext('2d');
+  x.translate(48, 48); x.rotate(Math.PI / 4); const im = c.dataset.k === 'tp' ? prop : jet; const s = c.dataset.k === 'wb' ? 92 : c.dataset.k === 'tp' ? 70 : 80; x.drawImage(im, -s / 2, -s / 2, s, s);
+}
+const shadow = (() => { const c = document.createElement('canvas'); c.width = c.height = 256; const x = c.getContext('2d'); x.drawImage(jet, 0, 0); x.globalCompositeOperation = 'source-in'; x.fillStyle = '#1E3550'; x.fillRect(0, 0, 256, 256); return c; })();
+
+// ---------- overlay ----------
+const ov = document.getElementById('ov'); ov.width = W * DPR; ov.height = H * DPR; const ctx = ov.getContext('2d'); ctx.scale(DPR, DPR);
+const tags = document.getElementById('tags');
+const tag = (html, x, y, cls = 'chip') => { const d = document.createElement('div'); d.className = cls; d.innerHTML = html; d.style.left = x + 'px'; d.style.top = y + 'px'; tags.appendChild(d); return d; };
+const P = (lat, lon, alt = 0) => G.project(lat, lon, alt);
+const routes = S.routes.map(r => ({ ...r, c: C[r.city], pts: gcPoints(hub, C[r.city], 120, r.city === 'LAX' ? 0.10 : 0.16) }));
+const sc = phone ? 1.0 : 1.0; const SEL = phone ? 'PVG' : 'LAX';
+
+// ground tracks
+ctx.save(); ctx.setLineDash([2, 5]); ctx.lineWidth = 1.2; ctx.strokeStyle = 'rgba(47,93,140,.30)';
+for (const r of routes) { drawPath(ctx, r.pts.map(p => P(p.lat, p.lon, 0))); ctx.stroke(); }
+ctx.restore();
+// arcs
+for (const r of routes) {
+  const pts = r.pts.map(p => P(p.lat, p.lon, p.alt));
+  const w = (1.4 + r.weekly * 0.16) * sc;
+  const col = r.profit >= 0 ? '#2F5D8C' : '#B5533C';
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  if (r.city === SEL) { drawPath(ctx, pts); ctx.strokeStyle = 'rgba(181,83,60,.22)'; ctx.lineWidth = w + 14; ctx.stroke(); }
+  drawPath(ctx, pts); ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = w + 4; ctx.stroke();
+  drawPath(ctx, pts); ctx.strokeStyle = col; ctx.lineWidth = w; ctx.stroke();
+  r.scr = pts;
+}
+// rival (LCC) dashed arcs
+ctx.save(); ctx.setLineDash([6, 6]); ctx.lineWidth = 1.6; ctx.strokeStyle = 'rgba(30,53,80,.38)';
+for (const id of ['NRT', 'KIX']) { const pts = gcPoints(hub, C[id], 90, 0.22).map(p => P(p.lat, p.lon, p.alt)); drawPath(ctx, pts); ctx.stroke(); }
+ctx.restore();
+
+// planes
+function plane(r, t, dir, size) {
+  const i = Math.round(t * (r.pts.length - 1)), j = Math.min(r.pts.length - 1, i + 1), k = Math.max(0, i - 1);
+  const a = r.scr[k], b = r.scr[j], p = r.scr[i]; if (!p.visible) return null;
+  let ang = Math.atan2(b.y - a.y, b.x - a.x) + Math.PI / 2; if (dir < 0) ang += Math.PI;
+  const g = r.pts[i], gp = P(g.lat, g.lon, 0);
+  { const L = 16; ctx.save(); ctx.lineCap = 'round';
+    for (let k2 = 1; k2 <= L; k2++) { const i0 = i - dir * (k2 - 1), i1 = i - dir * k2; if (i1 < 0 || i1 >= r.scr.length) break; const A = r.scr[i0], B = r.scr[i1]; if (!A.visible || !B.visible) break;
+      ctx.strokeStyle = `rgba(255,255,255,${0.95 * (1 - k2 / L)})`; ctx.lineWidth = 5.5 * (1 - k2 / L) + 1.5; ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.stroke(); }
+    ctx.restore(); }
+  const s = size * (REFD / p.depth);
+  ctx.save(); ctx.translate(gp.x + 2, gp.y + 3); ctx.rotate(ang); ctx.globalAlpha = 0.13; ctx.filter = 'blur(1.5px)'; ctx.drawImage(shadow, -s / 2, -s / 2, s, s); ctx.restore();
+  ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(ang); ctx.globalAlpha = .55; const o = s * 1.10; ctx.drawImage(shadow, -o / 2, -o / 2, o, o); ctx.globalAlpha = 1; ctx.shadowColor = 'rgba(30,53,80,.45)'; ctx.shadowBlur = 5; ctx.shadowOffsetY = 2; ctx.drawImage(jet, -s / 2, -s / 2, s, s); ctx.restore();
+  return p;
+}
+const R = Object.fromEntries(routes.map(r => [r.city, r]));
+const planeAt = {};
+const plan = { NRT: [[.30, 1], [.72, -1]], KIX: [[.55, 1]], ICN: [[.40, -1]], HKG: [[.5, 1]], MNL: [[.45, -1]], BKK: [[.62, 1]], SIN: [[.35, -1], [.80, 1]], PVG: [[.5, 1]], LAX: [[.16, 1], [.62, -1]] };
+const REFD = P(hub.lat, hub.lon, 0).depth;
+for (const [c, list] of Object.entries(plan)) for (const [t, d] of list) { const sz = (c === 'LAX' ? 40 : 31) * (phone ? 1.0 : 1); planeAt[c + t] = plane(R[c], t, d, sz); }
+
+// airports + passenger queues
+function dots(x, y, n, biz, cols = 6, bad = false) {
+  const r = phone ? 2.7 : 2.6, sp = r * 2.5;
+  for (let i = 0; i < n; i++) {
+    const cx = x + (i % cols) * sp, cy = y - Math.floor(i / cols) * sp;
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, 7); ctx.fillStyle = (i % 10) < Math.round(biz * 10) ? '#1E3550' : '#6E9CCB'; ctx.fill();
+  }
+  if (bad) { const rows = Math.ceil(n / cols); ctx.save(); ctx.strokeStyle = 'rgba(181,83,60,.8)'; ctx.lineWidth = 1.5; ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.roundRect(x - sp * .6, y - (rows - 1) * sp - sp * .6, cols * sp + sp * .2, rows * sp + sp * .2, 6); ctx.stroke(); ctx.restore(); }
+}
+const label = { NRT: [10, -2], KIX: [-12, 15, 'r'], ICN: [10, 4], PVG: [-12, 4, 'r'], HKG: [-12, 4, 'r'], MNL: [11, 4], BKK: [-12, 4, 'r'], SIN: [11, 4], LAX: [10, 4], TPE: [14, 22] };
+const qpos = { NRT: [8, -16], KIX: [-50, -10], ICN: [8, -14], PVG: [-66, -16], HKG: [-54, -14], MNL: [10, -14], BKK: [-50, -12], SIN: [10, -14], LAX: [8, -14] };
+for (const r of routes) {
+  const p = P(r.c.lat, r.c.lon, 0); if (!p.visible) continue;
+  const spill = Math.max(0, r.wantPax - r.pax), n = Math.max(2, Math.min(phone ? 30 : 42, Math.round(spill / 380)));
+  const biz = r.c.biz / (r.c.biz + r.c.tour);
+  const [qx, qy] = qpos[r.city] || [8, -14];
+  dots(p.x + qx, p.y + qy, n, biz, r.city === 'PVG' ? 7 : 6, r.city === 'PVG');
+  r.qx = p.x + qx; r.qy = p.y + qy; r.n = n; r.spill = spill;
+  ctx.beginPath(); ctx.arc(p.x, p.y, 5.5, 0, 7); ctx.fillStyle = '#fff'; ctx.fill(); ctx.lineWidth = 2.2; ctx.strokeStyle = r.profit >= 0 ? '#2F5D8C' : '#B5533C'; ctx.stroke();
+  const [lx, ly, al] = label[r.city] || [10, 4];
+  ctx.font = `600 ${phone ? 12 : 12.5}px -apple-system,"PingFang TC",sans-serif`; ctx.textAlign = al === 'r' ? 'right' : 'left';
+  ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(247,246,242,.95)'; ctx.strokeText(r.c.zh, p.x + lx, p.y + ly); ctx.fillStyle = '#1E3550'; ctx.fillText(r.c.zh, p.x + lx, p.y + ly);
+}
+// hub
+{ const p = P(hub.lat, hub.lon, 0);
+  for (const [rr, a] of [[30, .10], [21, .18]]) { ctx.beginPath(); ctx.arc(p.x, p.y, rr, 0, 7); ctx.fillStyle = `rgba(47,93,140,${a})`; ctx.fill(); }
+  ctx.beginPath(); ctx.arc(p.x, p.y, 10, 0, 7); ctx.fillStyle = '#2F5D8C'; ctx.fill(); ctx.lineWidth = 3; ctx.strokeStyle = '#fff'; ctx.stroke();
+  // transfer passengers circling the hub
+  const nT = 26; for (let i = 0; i < nT; i++) { const a = -2.2 + i * 0.205; const rr = 16 + (i % 2) * 5.5; ctx.beginPath(); ctx.arc(p.x + Math.cos(a) * rr, p.y + Math.sin(a) * rr, 2.6, 0, 7); ctx.fillStyle = i % 3 === 0 ? '#1E3550' : '#6E9CCB'; ctx.fill(); }
+  ctx.font = '700 15px "Songti TC","Noto Serif TC",serif'; ctx.textAlign = 'left'; ctx.lineWidth = 4.5; ctx.strokeStyle = 'rgba(247,246,242,.95)';
+  ctx.strokeText('台北桃園', p.x + 30, p.y + 26); ctx.fillStyle = '#1E3550'; ctx.fillText('台北桃園', p.x + 30, p.y + 26);
+  tag(`轉機旅客 <b class="num" style="margin-left:2px">${S.company.transferPax.toLocaleString()}</b> 人／月`, p.x + 30, p.y + 38, 'qlabel').style.cssText += 'transform:none';
+  window.hubP = p;
+}
+
+// chips with leader lines (anchor = city marker or a point on the arc)
+const pct = x => Math.round(x * 100) + '%';
+function chip(r, at, dx, dy, extra = '') {
+  let p;
+  if (at === 'city') p = P(r.c.lat, r.c.lon, 0); else p = r.scr[Math.round(at * (r.scr.length - 1))];
+  if (!p || !p.visible) return;
+  const bad = r.profit < 0; const lf = Math.min(1, r.lf), be = Math.min(1.2, r.breakEvenLF);
+  const x = p.x + dx, y = p.y + dy;
+  ctx.save(); ctx.strokeStyle = bad ? 'rgba(181,83,60,.75)' : 'rgba(47,93,140,.7)'; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(x, y); ctx.stroke();
+  ctx.beginPath(); ctx.arc(p.x, p.y, 3, 0, 7); ctx.fillStyle = ctx.strokeStyle; ctx.fill(); ctx.restore();
+  tag(`<span class="d"></span><b>${r.c.zh}</b><span class="num">載客 ${pct(r.lf)}</span><span class="mb"><i style="width:${lf * 100 / 1.2}%"></i><s style="left:${be * 100 / 1.2}%"></s></span><span class="num" style="color:var(--muted)">平衡 ${pct(r.breakEvenLF)}</span>${extra}`, x, y, 'chip' + (bad ? ' bad' : ''));
+}
+const CH = phone ? (q.get('chips') ? JSON.parse(q.get('chips')) : { PVG: ['city', 62, -136, '<span class="tag">坐滿也虧</span>'] })
+  : (q.get('chips') ? JSON.parse(q.get('chips')) : { NRT: ['city', 30, 74, '<span class="tag g">賺</span>'], PVG: ['city', -165, 34, '<span class="tag">坐滿也虧</span>'], LAX: [0.22, -20, -78, '<span class="tag">大飛機太空</span>'], BKK: [0.30, -105, 92, '<span class="tag g">轉機 19%</span>'] });
+for (const [c, [at, dx, dy, ex]] of Object.entries(CH)) chip(R[c], at, dx, dy, ex);
+// queue labels
+if (R.PVG.qx) tag(`排隊 ${(R.PVG.spill / 1e4).toFixed(1)} 萬人`, R.PVG.qx - 4, R.PVG.qy - Math.ceil(R.PVG.n / 7) * 6.5 - 16, 'qlabel bad').style.cssText += 'transform:none';
+if (!phone && R.NRT.qx) tag(`沒搭上 ${R.NRT.spill.toLocaleString()} 人`, R.NRT.qx - 2, R.NRT.qy - Math.ceil(R.NRT.n / 6) * 6.5 - 16, 'qlabel').style.cssText += 'transform:none';
+
+// money pops (profit per round trip from the model)
+const perFlight = r => r.profit / (r.weekly * WPT);
+function pop(key, r, dx = 0, dy = -18, fade = false) {
+  const p = planeAt[key]; if (!p) return; const v = perFlight(r);
+  const d = tag(fmtUSD(v), p.x + dx, p.y + dy, 'pop' + (v < 0 ? ' neg' : '') + (fade ? ' fade' : ''));
+}
+pop('NRT0.72', R.NRT, 0, phone ? 40 : -16);
+pop('LAX0.16', R.LAX, 0, -20);
+if (phone) {}
+if (!phone) pop('BKK0.62', R.BKK, 0, -16);
+if (!phone) pop('MNL0.45', R.MNL, 0, -16, true);
+
+// locked region (Fly Corp-style territory unlock)
+if (!phone) {
+  const p = { x: 24, y: 470, visible: true };
+  if (p.visible) tag(`<svg width="14" height="16" viewBox="0 0 14 16"><rect x="1" y="7" width="12" height="8" rx="2" fill="#4a6280"/><path d="M4 7V5a3 3 0 0 1 6 0v2" stroke="#4a6280" stroke-width="2" fill="none"/></svg><span>← <b>南亞・中東</b>　營收累計 US$ 1 億解鎖</span>`, Math.max(14, p.x - 30), p.y, 'lock').style.transform = 'none';
+}
+
+// ---------- HUD numbers ----------
+const co = S.company, man = v => (v / 1e4).toLocaleString('en-US', { maximumFractionDigits: 0 }) + ' 萬';
+const sign = v => (v >= 0 ? '+' : '−') + Math.abs(v * 100).toFixed(1) + '%';
+if (!phone) {
+  document.getElementById('cash').textContent = ' ' + man(co.cash);
+  document.getElementById('margin').textContent = sign(co.margin);
+  document.getElementById('lfc').innerHTML = `${pct(co.loadFactor)}<span style="color:var(--muted);font-weight:500">｜損益平衡 ${pct(co.breakEvenLF)}</span>`;
+  const mb = document.getElementById('mbar'); const sx = v => (v + 0.05) / 0.15 * 100; // -5%..+10%
+  mb.querySelector('i').style.cssText = `left:${sx(0)}%;width:${sx(co.margin) - sx(0)}%`; mb.querySelector('s').style.left = sx(0.039) + '%'; mb.querySelector('em').style.left = sx(0.039) + '%';
+  const h = S.history.map(x => x.cash), mn = Math.min(...h), mx = Math.max(...h);
+  const pts = h.map((v, i) => `${4 + i * 88 / (h.length - 1)},${30 - (v - mn) / (mx - mn) * 24}`).join(' ');
+  document.getElementById('spark').innerHTML = `<polyline points="${pts}" fill="none" stroke="#2F5D8C" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><circle cx="92" cy="${30 - (h.at(-1) - mn) / (mx - mn) * 24}" r="3" fill="#2F5D8C"/>`;
+  const L = R.LAX; document.getElementById('lp').textContent = fmtUSD(L.profit);
+  const sr = document.getElementById('seatrow'); for (let i = 0; i < 25; i++) sr.insertAdjacentHTML('beforeend', `<i class="${i < Math.round(L.lf * 25) ? 'f' : ''}"></i>`);
+  sr.insertAdjacentHTML('beforeend', `<span class="bel" style="left:calc(${L.breakEvenLF * 100}% - 1px)"></span>`);
+  const names = { fuel: ['燃油', '#2F5D8C'], labour: ['人事', '#6E9CCB'], ownership: ['飛機租金', '#1E3550'], airport: ['機場', '#A9C9E8'], maintenance: ['維修', '#b8963f'], distribution: ['售票', '#c9b78a'], overhead: ['管理', '#d6dde5'] };
+  const tot = Object.values(L.costs).reduce((a, b) => a + b, 0);
+  const st = document.getElementById('stack'), lg = document.getElementById('legend');
+  for (const [k, [n, c]] of Object.entries(names)) { const v = L.costs[k] / tot; st.insertAdjacentHTML('beforeend', `<i style="width:${v * 100}%;background:${c}"></i>`); if (v > 0.05) lg.insertAdjacentHTML('beforeend', `<span style="--c:${c}">${n} ${Math.round(v * 100)}%</span>`); }
+} else {
+  document.querySelector('.cashp').textContent = man(co.cash);
+  document.getElementById('marginp').textContent = sign(co.margin);
+  const L = R.PVG; document.getElementById('lpp').textContent = fmtUSD(L.profit);
+  const sr = document.getElementById('seatrowp'); for (let i = 0; i < 20; i++) sr.insertAdjacentHTML('beforeend', `<i class="${i < Math.round(L.lf * 20) ? 'f' : ''}"></i>`);
+  sr.insertAdjacentHTML('beforeend', `<span class="bel" style="left:calc(100% - 1px)"></span>`);
+}
+
+// ---------- reference notes ----------
+if (q.get('notes')) {
+  const N = (n, txt, x, y) => tag(`<i>${n}</i>${txt}`, x, y, 'note');
+  if (!phone) {
+    const hp = window.hubP;
+    N(1, 'Fly Corp／Mini Metro：即時飛行＋變速', 560, 74);
+    N(2, 'Fly Corp：旅客點點在機場排隊', hp.x + 50, hp.y + 66);
+    N(3, 'Fly Corp：地區解鎖', 30, 520);
+    N(4, 'Mini Metro：底部機庫拖曳', 300, 790);
+    N(5, 'AirTycoon 4：依載客率調票價', 1094, 553);
+    N(6, 'Airline Manager 4：油價與避險', 1150, 34);
+  } else {
+    N(1, 'Fly Corp：即時＋變速', 200, 170);
+    N(2, 'Fly Corp：排隊旅客', 30, 300);
+    N(3, 'AirTycoon 4：依載客率調票價', 120, 640);
+  }
+}
+window.__done = 1;
+</script>
+</body>
+</html>

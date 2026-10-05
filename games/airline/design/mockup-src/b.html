@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<title>天青航空 · 方向 B 航空大亨</title>
+<style>
+:root{
+  --bg0:#08111d; --bg1:#0e1d31; --panel:rgba(14,29,49,.80); --panel2:rgba(25,47,77,.75); --bd:rgba(141,180,221,.20);
+  --t1:#E6F0FA; --t2:#B7CDE4; --mut:#7f98b3; --sky:#8DB4DD; --skyb:#BFE0FF; --blue-d:#2F5D8C; --gold:#D9B865; --warn:#EA947E; --good:#7FC3A4;
+  --serif:"Noto Serif TC","Songti TC","Source Han Serif TC",serif;
+  --sans:-apple-system,"PingFang TC","Noto Sans TC",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden}
+body{font:13.5px/1.5 var(--sans);color:var(--t1);background:radial-gradient(120% 90% at 35% 55%,#13294a 0%,#0b1729 45%,#060d18 100%)}
+#stars,#globe,#ov{position:absolute;left:0;top:0;width:100vw;height:100vh;display:block}
+#tags{position:absolute;inset:0;pointer-events:none}
+.num{font-variant-numeric:tabular-nums}
+.pane{background:var(--panel);backdrop-filter:blur(16px) saturate(1.3);-webkit-backdrop-filter:blur(16px);border:1px solid var(--bd);border-radius:16px;box-shadow:0 18px 40px rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.06)}
+.phone-only{display:none} body.phone .phone-only{display:block} body.phone .desk-only{display:none}
+h2,h3{margin:0;font-family:var(--serif);font-weight:700;letter-spacing:.03em}
+.kick{font:700 10.5px var(--sans);letter-spacing:.2em;color:var(--sky)}
+.btn{border:0;border-radius:10px;padding:7px 13px;font:700 12.5px var(--sans);background:linear-gradient(#3a6da3,#2F5D8C);color:#fff;box-shadow:0 4px 12px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.15)}
+.btn.gold{background:linear-gradient(#e2c579,#b8963f);color:#1b1407}
+.btn.ghost{background:rgba(141,180,221,.12);color:var(--t2);box-shadow:none;border:1px solid var(--bd)}
+
+/* top bar */
+.top{position:absolute;left:0;right:0;top:0;height:62px;display:flex;align-items:center;gap:18px;padding:0 18px 0 16px;background:linear-gradient(rgba(8,17,29,.92),rgba(8,17,29,.72));border-bottom:1px solid var(--bd);backdrop-filter:blur(10px)}
+.brand{display:flex;align-items:center;gap:10px;min-width:176px}
+.mark{width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 34% 32%,#fff 0,#d6e6f4 28%,#6e9ccb 70%,#2f5d8c 100%);box-shadow:0 0 14px rgba(141,180,221,.55)}
+.brand b{display:block;font:700 19px/1 var(--serif);letter-spacing:.08em}
+.brand small{display:block;font:700 9px/1 var(--sans);letter-spacing:.34em;color:var(--sky);margin-top:5px}
+.date{padding:6px 12px;border-radius:10px;background:rgba(141,180,221,.12);font:700 14px var(--serif);white-space:nowrap}
+.date small{font:600 11px var(--sans);color:var(--gold);margin-left:6px}
+.kpis{display:flex;gap:6px;flex:1;min-width:0}
+.kpi{padding:5px 12px;border-radius:10px;border:1px solid var(--bd);background:rgba(14,29,49,.6);line-height:1.25;white-space:nowrap}
+.kpi small{display:block;font-size:10.5px;color:var(--mut)}
+.kpi b{font-size:15px}
+.kpi b.w{color:var(--warn)} .kpi b.g{color:var(--good)}
+.kpi em{font-style:normal;font-size:11px;color:var(--mut);margin-left:4px}
+.stars{color:var(--gold);letter-spacing:1px;font-size:13px}
+.endturn{margin-left:auto;padding:10px 18px;border-radius:12px;font-size:14px}
+
+/* left rail */
+.rail{position:absolute;left:12px;top:78px;width:64px;display:flex;flex-direction:column;gap:4px;padding:8px 6px}
+.rail a{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0 7px;border-radius:12px;color:var(--mut);font-size:11px;text-decoration:none}
+.rail a svg{width:22px;height:22px}
+.rail a.on{background:linear-gradient(rgba(141,180,221,.28),rgba(141,180,221,.12));color:var(--t1);box-shadow:inset 0 0 0 1px rgba(141,180,221,.35)}
+.rail a .dot{position:absolute;margin-left:22px;margin-top:-2px;width:7px;height:7px;border-radius:50%;background:var(--warn)}
+
+/* right column */
+.col{position:absolute;right:16px;top:76px;width:468px;display:flex;flex-direction:column;gap:12px}
+.hub{padding:12px 16px 12px}
+.hd{display:flex;justify-content:space-between;align-items:baseline}
+.hd h2{font-size:19px}
+.hd .lv{font:700 12px var(--sans);color:var(--gold);padding:2px 9px;border:1px solid rgba(217,184,101,.45);border-radius:999px}
+.sub{color:var(--mut);font-size:12px}
+#iso{display:block;width:100%;height:138px;margin:8px 0 4px;border-radius:12px;background:linear-gradient(#10233c,#0b1a2d)}
+.fac{display:grid;grid-template-columns:30px 1fr auto auto;gap:4px 10px;align-items:center;padding:5px 0;border-top:1px solid rgba(141,180,221,.12)}
+.fac .ic{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:rgba(141,180,221,.14)}
+.fac b{font-size:13.5px}
+.fac small{display:block;color:var(--mut);font-size:11.5px;line-height:1.35}
+.pips{display:flex;gap:3px}
+.pips i{width:9px;height:9px;border-radius:2px;background:rgba(141,180,221,.18)}
+.pips i.on{background:var(--sky)}
+.fac .btn{padding:5px 10px;font-size:11.5px;border-radius:8px}
+.slots{margin-top:8px;font-size:12px;color:var(--t2)}
+.sbar{display:flex;gap:2px;margin-top:5px}
+.sbar i{flex:1;height:8px;border-radius:2px;background:rgba(141,180,221,.16)}
+.sbar i.on{background:var(--sky)} .sbar i.full{background:var(--warn)}
+
+.fleet{padding:12px 16px 12px}
+.jet{display:flex;align-items:center;gap:14px;margin-top:4px}
+.jet img{width:176px;filter:drop-shadow(0 10px 14px rgba(0,0,0,.45))}
+.jet .spec{font-size:12px;color:var(--t2);line-height:1.6}
+.jet .spec b{color:var(--t1)}
+#cabin{display:block;width:100%;height:54px;margin-top:4px}
+.cl{display:flex;gap:12px;font-size:11.5px;color:var(--t2);margin-top:2px}
+.cl span::before{content:"";display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px;background:var(--c)}
+.lease{margin-top:8px;padding:7px 10px;border-radius:10px;background:rgba(234,148,126,.10);border:1px solid rgba(234,148,126,.35);font-size:12px;color:#f3c2b5}
+.lease .bar{position:relative;height:7px;border-radius:4px;background:rgba(141,180,221,.16);margin:6px 0 2px}
+.lease .bar i{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--warn)}
+.lease .bar s{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--good)}
+.row{display:flex;gap:8px;margin-top:10px}
+.row .btn{flex:1}
+
+/* globe-area cards */
+.scen{position:absolute;left:94px;bottom:18px;width:318px;padding:13px 15px}
+.goal{margin-top:9px;font-size:12.5px}
+.goal .t{display:flex;justify-content:space-between;color:var(--t2)}
+.goal .t b{color:var(--t1)}
+.gbar{height:6px;border-radius:3px;background:rgba(141,180,221,.16);margin-top:4px;position:relative}
+.gbar i{position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:var(--sky)}
+.gbar i.w{background:var(--warn)}
+.gbar s{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--gold)}
+.fuel{position:absolute;left:424px;bottom:18px;width:300px;padding:13px 15px}
+#fuelc{display:block;width:100%;height:70px;margin-top:6px}
+.fuel .big{display:flex;align-items:baseline;gap:8px;margin-top:2px}
+.fuel .big b{font:700 22px var(--sans);color:var(--warn)}
+.fuel .big small{color:var(--t2);font-size:12px}
+.event{position:absolute;left:94px;top:78px;width:520px;padding:12px 15px;border-left:3px solid var(--warn)}
+.event h3{font-size:16px;margin-top:3px}
+.event p{margin:4px 0 0;color:var(--t2);font-size:12.5px}
+.event .res{margin-top:7px;font-size:12.5px;color:var(--good);font-weight:600}
+.ach{position:absolute;left:636px;top:80px;display:flex;align-items:center;gap:10px;padding:9px 14px 9px 10px;border-radius:14px;background:linear-gradient(135deg,rgba(217,184,101,.25),rgba(14,29,49,.85));border:1px solid rgba(217,184,101,.5);box-shadow:0 10px 28px rgba(0,0,0,.4)}
+.ach .medal{width:34px;height:34px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff3c4,#d9b865 55%,#8a6a22);display:grid;place-items:center;color:#3b2a06;font:700 15px var(--serif);box-shadow:0 0 16px rgba(217,184,101,.55)}
+.ach small{display:block;font-size:10.5px;color:var(--gold);letter-spacing:.12em;font-weight:700}
+.ach b{font:700 14px var(--serif)}
+
+/* globe tags */
+.chip{position:absolute;transform:translate(-50%,-50%);padding:4px 9px;border-radius:9px;background:rgba(10,22,38,.86);border:1px solid var(--bd);font-size:11.5px;white-space:nowrap;color:var(--t1);box-shadow:0 6px 16px rgba(0,0,0,.35)}
+.chip b{font-family:var(--serif)}
+.chip .g{color:var(--good)} .chip .w{color:var(--warn)} .chip .m{color:var(--mut)}
+.share{display:flex;align-items:center;gap:8px}
+.lab{position:absolute;font:600 12px var(--sans);color:#dbe8f6;text-shadow:0 1px 3px #000,0 0 8px rgba(0,0,0,.8);white-space:nowrap}
+.hubtag{position:absolute;transform:translate(-50%,0);display:flex;flex-direction:column;align-items:center;gap:4px}
+.hubtag .nm{font:700 15px var(--serif);text-shadow:0 1px 4px #000}
+.hubtag .fx{display:flex;gap:4px}
+.hubtag .fx span{display:flex;align-items:center;gap:3px;font-size:10.5px;padding:2px 6px;border-radius:6px;background:rgba(10,22,38,.85);border:1px solid rgba(217,184,101,.4);color:var(--gold)}
+.pop{position:absolute;transform:translate(-50%,-100%);font:700 12px var(--sans);padding:2px 8px;border-radius:7px;color:#0c2118;background:var(--good);box-shadow:0 0 14px rgba(127,195,164,.55);white-space:nowrap}
+.pop.neg{background:var(--warn);color:#2a0d06;box-shadow:0 0 14px rgba(234,148,126,.5)}
+
+/* phone */
+.status{position:absolute;left:0;right:0;top:0;height:47px;display:flex;align-items:center;justify-content:space-between;padding:0 30px 0 34px;font:600 15.5px var(--sans);color:#fff;z-index:5}
+.ptop{position:absolute;left:10px;right:10px;top:50px;padding:8px 10px;border-radius:16px;display:grid;grid-template-columns:auto 1fr 1fr 1fr;gap:8px;align-items:center}
+.ptop .mark{width:26px;height:26px}
+.ptop .k{line-height:1.2}
+.ptop .k small{display:block;font-size:10px;color:var(--mut)}
+.ptop .k b{font-size:14px}
+.pdate{position:absolute;left:12px;top:118px;font:700 13px var(--serif);padding:5px 10px;border-radius:9px;background:rgba(10,22,38,.7);border:1px solid var(--bd)}
+.pdate small{font:600 10.5px var(--sans);color:var(--gold);margin-left:4px}
+.pach{position:absolute;right:12px;top:118px;display:flex;align-items:center;gap:7px;padding:5px 10px 5px 6px;border-radius:12px;background:linear-gradient(135deg,rgba(217,184,101,.28),rgba(14,29,49,.85));border:1px solid rgba(217,184,101,.5);font:700 11.5px var(--serif)}
+.pach .medal{width:22px;height:22px;font-size:11px}
+.psheet{position:absolute;left:0;right:0;top:440px;bottom:0;border-radius:22px 22px 0 0;padding:10px 14px 0;background:#0a1626;border-top:1px solid var(--bd);box-shadow:0 -14px 30px rgba(0,0,0,.45)}
+.tabs{display:flex;background:rgba(141,180,221,.10);border-radius:11px;padding:3px;margin-bottom:10px}
+.tabs button{flex:1;border:0;background:transparent;color:var(--mut);font:700 12.5px var(--sans);padding:6px 0;border-radius:9px}
+.tabs button.on{background:rgba(141,180,221,.25);color:var(--t1)}
+.psheet #isoP{display:block;width:100%;height:112px;border-radius:12px;margin:8px 0 2px;background:linear-gradient(#10233c,#0b1a2d)}
+.psheet .fac{padding:6px 0}
+.tabbar{position:absolute;left:0;right:0;bottom:0;height:78px;display:flex;justify-content:space-around;padding:8px 6px 0;background:rgba(6,13,24,.97);border-top:1px solid var(--bd)}
+.tabbar a{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:10.5px;color:var(--mut);width:64px}
+.tabbar a.on{color:var(--t1)}
+.tabbar svg{width:23px;height:23px}
+.fab{position:absolute;left:14px;right:14px;bottom:90px;padding:12px 16px;border-radius:14px;font-size:14.5px}
+.homebar{position:absolute;left:50%;bottom:8px;width:134px;height:5px;border-radius:3px;background:#e6f0fa;transform:translateX(-50%)}
+
+.note{position:absolute;display:flex;align-items:center;gap:6px;font:700 11px var(--sans);color:#fff;background:#7a4fb5;border-radius:999px;padding:3px 9px 3px 3px;box-shadow:0 4px 12px rgba(80,40,140,.45);white-space:nowrap;z-index:50}
+.note i{font-style:normal;width:18px;height:18px;border-radius:50%;background:#fff;color:#7a4fb5;display:grid;place-items:center;font-size:11px}
+</style>
+</head>
+<body>
+<canvas id="stars"></canvas>
+<canvas id="globe"></canvas>
+<canvas id="ov"></canvas>
+<div id="tags"></div>
+
+<!-- ================= DESKTOP ================= -->
+<div class="desk-only">
+  <header class="top">
+    <div class="brand"><div class="mark"></div><div><b>天青航空</b><small>SKYGLAZE</small></div></div>
+    <div class="date">第 4 年・夏季<small>20 季中的第 7 季</small></div>
+    <div class="kpis">
+      <div class="kpi"><small>現金</small><b class="num" id="kcash"></b></div>
+      <div class="kpi"><small>本季淨利率</small><b class="num" id="kmargin"></b><em>業界 3.9%</em></div>
+      <div class="kpi"><small>載客率｜損益平衡</small><b class="num" id="klf"></b></div>
+      <div class="kpi"><small>油價（平時＝1）</small><b class="num w" id="kfuel"></b><em>▲ 暴漲</em></div>
+      <div class="kpi"><small>品牌聲望</small><span class="stars">★★★★<span style="opacity:.3">★</span></span></div>
+    </div>
+    <button class="btn gold endturn">結束本季 ▶</button>
+  </header>
+
+  <nav class="pane rail">
+    <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg>總覽</a>
+    <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 18C8 6 16 6 20 18"/><circle cx="4" cy="18" r="2"/><circle cx="20" cy="18" r="2"/></svg>航線</a>
+    <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3v18M4 13l8-3 8 3M8 20l4-1 4 1"/></svg>機隊</a>
+    <a class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 20h18M5 20V10l7-4 7 4v10M9 20v-5h6v5"/></svg>機場</a>
+    <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M7 21h8V5a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2zM15 9h2a2 2 0 0 1 2 2v6a1.5 1.5 0 0 0 3 0V8l-3-3M9 8h4"/></svg>油料<span class="dot"></span></a>
+    <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 10v4h3l6 4V6L7 10zM17 9a4 4 0 0 1 0 6"/></svg>行銷</a>
+    <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="8" cy="9" r="3"/><circle cx="16" cy="9" r="3"/><path d="M3 19c1-3 3-4 5-4s4 1 5 4M11 19c1-3 3-4 5-4s4 1 5 4"/></svg>對手</a>
+    <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M8 4h8v5a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 13v4M8 20h8"/></svg>成就</a>
+  </nav>
+
+  <section class="pane event">
+    <div class="kick" style="color:var(--warn)">事件・本季</div>
+    <h3>油價暴漲，接近平時的兩倍</h3>
+    <p>之後幾個季度逐步回落；消費者信心下滑，需求略降。</p>
+    <div class="res">你在上一季鎖了五成油價，本季少付約 US$ 2,400 萬，公司仍然賺錢。</div>
+  </section>
+
+  <div class="ach"><div class="medal">油</div><div><small>成就解鎖</small><b>撐過第一次油價暴漲</b></div></div>
+
+  <div class="col">
+    <section class="pane hub">
+      <div class="hd"><h2>台北桃園・樞紐</h2><span class="lv">機場等級 3</span></div>
+      <div class="sub">轉機旅客 <b class="num" id="xfer" style="color:var(--t1)"></b> 人次／季，占全部旅客 19%</div>
+      <canvas id="iso"></canvas>
+      <div class="fac"><div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#BFE0FF" stroke-width="1.8"><path d="M3 20h18M5 20V10l7-4 7 4v10"/></svg></div><div><b>航廈</b><small>登機門 24 個，擴建後每週多 60 班</small></div><div class="pips"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></div><button class="btn">擴建 US$ 1,800 萬</button></div>
+      <div class="fac"><div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D9B865" stroke-width="1.8"><path d="M4 18h16M6 18v-5a6 6 0 0 1 12 0v5M12 4v3"/></svg></div><div><b>貴賓室</b><small>商務客多 8%，願意付更高的票價</small></div><div class="pips"><i class="on"></i><i></i><i></i></div><button class="btn ghost">升級 US$ 600 萬</button></div>
+      <div class="fac"><div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#7FC3A4" stroke-width="1.8"><path d="M3 20V9l9-5 9 5v11M3 20h18M8 20v-6h8v6"/></svg></div><div><b>維修基地</b><small>在這裡保養的飛機，維修費少 30%</small></div><div class="pips"><i class="on"></i><i class="on"></i><i></i></div><button class="btn ghost">升級 US$ 900 萬</button></div>
+      <div class="fac"><div class="ic"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#EA947E" stroke-width="1.8"><ellipse cx="12" cy="6" rx="7" ry="2.5"/><path d="M5 6v12c0 1.4 3 2.5 7 2.5s7-1.1 7-2.5V6"/></svg></div><div><b>油庫</b><small>油價低時先買進，最多存一季的用量</small></div><div class="pips"><i class="on"></i><i></i><i></i></div><button class="btn ghost">升級 US$ 400 萬</button></div>
+      <div class="slots"><div style="display:flex;justify-content:space-between"><span>本場起降時段　<b class="num" style="color:var(--t1)">87／100</b> 班每週</span><span style="color:var(--warn)">東京成田時段已滿</span></div><div class="sbar" id="sbar"></div></div>
+    </section>
+
+    <section class="pane fleet">
+      <div class="hd"><h2>機隊・MQ-321 長程窄體</h2><span class="sub">7 架・另有 MQ-400 3 架</span></div>
+      <div class="jet"><img src="./tex/hero.webp" alt=""><div class="spec">航程 <b>7,400 公里</b><br>買價 <b>US$ 6,500 萬</b><br>租金 <b>每月 US$ 46 萬</b><br>每小時油耗 <b>2,850 公斤</b></div></div>
+      <canvas id="cabin"></canvas>
+      <div class="cl"><span style="--c:#D9B865">商務艙 16</span><span style="--c:#8DB4DD">豪華經濟 24</span><span style="--c:#4f7fb0">經濟艙 150</span><span style="color:var(--mut);margin-left:auto">商務艙多，票價高、座位少</span></div>
+      <div class="lease"><div style="display:flex;justify-content:space-between"><b>10 架全是租的</b><span>建議租的不超過 30%，需求下滑時租金照付</span></div><div class="bar"><i style="width:100%"></i><s style="left:30%"></s></div></div>
+      <div class="row"><button class="btn">買新機</button><button class="btn ghost">二手市場（3 架）</button><button class="btn ghost">改座位配置</button></div>
+    </section>
+  </div>
+
+  <section class="pane scen">
+    <div class="kick">情境挑戰</div>
+    <h3 style="font-size:17px;margin-top:2px">亞洲轉機王</h3>
+    <div class="goal"><div class="t"><span>轉機旅客占兩成</span><b class="num">19%</b></div><div class="gbar"><i style="width:95%"></i><s style="left:100%"></s></div></div>
+    <div class="goal"><div class="t"><span>每一季淨利率都高於業界 3.9%</span><b class="num" style="color:var(--warn)">本季 2.6%</b></div><div class="gbar"><i class="w" style="width:67%"></i><s style="left:100%"></s></div></div>
+    <div class="goal"><div class="t"><span>撐過一次油價暴漲，不借錢</span><b style="color:var(--gold)">本季達成</b></div><div class="gbar"><i style="width:100%;background:var(--gold)"></i></div></div>
+  </section>
+
+  <section class="pane fuel">
+    <div style="display:flex;justify-content:space-between;align-items:baseline"><div class="kick">油價市場</div><span class="sub">過去 7 季</span></div>
+    <div class="big"><b class="num">×1.84</b><small>你實際付 <b class="num" style="color:var(--t1)">×1.44</b>（鎖了 50%）</small></div>
+    <canvas id="fuelc"></canvas>
+    <div class="row" style="margin-top:8px"><button class="btn">再鎖兩季</button><button class="btn ghost">從油庫用油</button></div>
+  </section>
+</div>
+
+<!-- ================= PHONE ================= -->
+<div class="phone-only">
+  <div class="status"><span>9:41</span><span><svg width="72" height="14" viewBox="0 0 72 14"><g fill="#fff"><rect x="0" y="8" width="3" height="5" rx="1"/><rect x="5" y="6" width="3" height="7" rx="1"/><rect x="10" y="3" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="13" rx="1"/><path d="M30 4.5a9 9 0 0 1 12 0l-1.6 1.7a6.6 6.6 0 0 0-8.8 0zM33 7.7a4.6 4.6 0 0 1 6 0L36 11z"/><rect x="47" y="1" width="22" height="12" rx="3.5" fill="none" stroke="#fff" stroke-opacity=".5"/><rect x="49" y="3" width="16" height="8" rx="2"/><rect x="70" y="5" width="1.6" height="4" rx=".8" fill-opacity=".5"/></g></svg></span></div>
+  <div class="pane ptop">
+    <div class="mark"></div>
+    <div class="k"><small>現金</small><b class="num" id="pcash"></b></div>
+    <div class="k"><small>本季淨利率</small><b class="num" id="pmargin"></b></div>
+    <div class="k"><small>油價</small><b class="num" style="color:var(--warn)">×1.84 ▲</b></div>
+  </div>
+  <div class="pdate">第 4 年・夏季<small>7／20</small></div>
+  <div class="pach"><div class="medal" style="width:22px;height:22px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff3c4,#d9b865 55%,#8a6a22);display:grid;place-items:center;color:#3b2a06;font:700 11px var(--serif)">油</div>撐過油價暴漲</div>
+  <section class="psheet">
+    <div class="tabs"><button class="on">樞紐</button><button>機隊</button><button>油價</button><button>對手</button></div>
+    <div class="hd"><h2 style="font-size:17px">台北桃園・樞紐</h2><span class="lv" style="font:700 11px var(--sans);color:var(--gold);padding:1px 8px;border:1px solid rgba(217,184,101,.45);border-radius:999px">等級 3</span></div>
+    <canvas id="isoP"></canvas>
+    <div class="fac"><div class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#BFE0FF" stroke-width="1.8"><path d="M3 20h18M5 20V10l7-4 7 4v10"/></svg></div><div><b>航廈</b><small>擴建後每週可多飛 60 班</small></div><div class="pips"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></div><button class="btn">擴建</button></div>
+    </section>
+  <button class="btn gold fab">結束本季 ▶</button>
+  <nav class="tabbar">
+    <a class="on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg>地球</a>
+    <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 18C8 6 16 6 20 18"/><circle cx="4" cy="18" r="2"/><circle cx="20" cy="18" r="2"/></svg>航線</a>
+    <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3v18M4 13l8-3 8 3M8 20l4-1 4 1"/></svg>機隊</a>
+    <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></svg>財報</a>
+    <a><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><circle cx="5" cy="12" r="1.6"/><circle cx="12" cy="12" r="1.6"/><circle cx="19" cy="12" r="1.6"/></svg>更多</a>
+  </nav>
+  <div class="homebar"></div>
+</div>
+
+<script type="module">
+import { makeGlobe, gcPoints, aircraftSprite, drawPath, fmtUSD } from './globe.js';
+const q = new URLSearchParams(location.search);
+const phone = q.get('layout') === 'phone';
+document.body.classList.add(phone ? 'phone' : 'desk');
+const W = innerWidth, H = innerHeight, DPR = devicePixelRatio;
+const S = await (await fetch('./sim_decade.json')).json();
+const C = Object.fromEntries((await (await fetch('./cities.json')).json()).map(c => [c.id, c]));
+const hub = C.TPE;
+
+// stars
+{ const c = document.getElementById('stars'); c.width = W * DPR; c.height = H * DPR; const x = c.getContext('2d'); x.scale(DPR, DPR);
+  let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  for (let i = 0; i < (phone ? 160 : 420); i++) { const r = rnd() ** 3 * 1.4 + 0.25; x.fillStyle = `rgba(${200 + rnd() * 55},${215 + rnd() * 40},255,${0.25 + rnd() * 0.6})`; x.beginPath(); x.arc(rnd() * W, rnd() * H, r, 0, 7); x.fill(); } }
+
+const camD = { camPos: [18, 104, 3.75], lookAt: [18, 104, 0], fov: 30, shift: [-215, 70] };
+const camP = { camPos: [24, 104, 6.0], lookAt: [24, 104, 0], fov: 34, shift: [0, -110] };
+const cfg = { ...(phone ? camP : camD) }; for (const k of ['camPos', 'lookAt', 'shift']) if (q.has(k)) cfg[k] = JSON.parse(q.get(k)); if (q.has('fov')) cfg.fov = +q.get('fov');
+const G = await makeGlobe({ canvas: document.getElementById('globe'), width: W, height: H, dpr: DPR, style: 'photo', ...cfg, sun: [16, 172] });
+const jet = await aircraftSprite({ size: 256 });
+
+const ov = document.getElementById('ov'); ov.width = W * DPR; ov.height = H * DPR; const ctx = ov.getContext('2d'); ctx.scale(DPR, DPR);
+const tags = document.getElementById('tags');
+const tag = (html, x, y, cls) => { const d = document.createElement('div'); d.className = cls; d.innerHTML = html; d.style.left = x + 'px'; d.style.top = y + 'px'; tags.appendChild(d); return d; };
+const P = (lat, lon, alt = 0) => G.project(lat, lon, alt);
+const routes = S.routes.map(r => ({ ...r, c: C[r.city], pts: gcPoints(hub, C[r.city], 140, 0.13) }));
+const R = Object.fromEntries(routes.map(r => [r.city, r]));
+
+// arcs: additive glow
+ctx.globalCompositeOperation = 'lighter';
+for (const r of routes) {
+  const pts = r.pts.map(p => P(p.lat, p.lon, p.alt)); r.scr = pts;
+  const good = r.profit >= 0; const base = good ? [141, 196, 255] : [255, 140, 110];
+  const w = (0.9 + r.weekly * 0.12) * (phone ? 0.9 : 1);
+  for (const [lw, a] of [[w + 9, .06], [w + 4, .14], [w, .95]]) { drawPath(ctx, pts); ctx.strokeStyle = `rgba(${base},${a})`; ctx.lineWidth = lw; ctx.lineCap = 'round'; ctx.stroke(); }
+}
+ctx.globalCompositeOperation = 'source-over';
+// rivals (dashed)
+ctx.save(); ctx.setLineDash([4, 6]); ctx.lineWidth = 1.3; ctx.strokeStyle = 'rgba(230,240,250,.45)';
+for (const r of routes) for (const rv of r.rivals) { const pts = gcPoints(hub, r.c, 90, rv.id === 'lcc' ? 0.2 : 0.17).map(p => P(p.lat, p.lon, p.alt)); drawPath(ctx, pts); ctx.stroke(); }
+ctx.restore();
+
+// planes
+const REFD = P(hub.lat, hub.lon, 0).depth; const planeAt = {};
+function plane(r, t, dir, size) {
+  const i = Math.round(t * (r.pts.length - 1)), j = Math.min(r.pts.length - 1, i + 1), k = Math.max(0, i - 1);
+  const a = r.scr[k], b = r.scr[j], p = r.scr[i]; if (!p.visible) return null;
+  let ang = Math.atan2(b.y - a.y, b.x - a.x) + Math.PI / 2; if (dir < 0) ang += Math.PI;
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';
+  for (let k2 = 1; k2 <= 22; k2++) { const i0 = i - dir * (k2 - 1), i1 = i - dir * k2; if (i1 < 0 || i1 >= r.scr.length) break; const A = r.scr[i0], B = r.scr[i1]; if (!A.visible || !B.visible) break; ctx.strokeStyle = `rgba(220,240,255,${0.5 * (1 - k2 / 22)})`; ctx.lineWidth = 3 * (1 - k2 / 22) + 0.6; ctx.beginPath(); ctx.moveTo(A.x, A.y); ctx.lineTo(B.x, B.y); ctx.stroke(); }
+  ctx.restore();
+  const s = size * (REFD / p.depth);
+  ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(ang); ctx.shadowColor = 'rgba(160,210,255,.85)'; ctx.shadowBlur = 10; ctx.drawImage(jet, -s / 2, -s / 2, s, s); ctx.restore();
+  return p;
+}
+const big = r => r.type === 'MQ-400';
+const plan = { NRT: [[.35, 1], [.75, -1]], KIX: [[.5, -1]], PEK: [[.45, 1]], BKK: [[.4, 1], [.8, -1]], SIN: [[.55, -1]], KUL: [[.3, 1]], CGK: [[.62, 1]], DEL: [[.28, 1], [.7, -1]], BOM: [[.5, 1]] };
+for (const [c, l] of Object.entries(plan)) for (const [t, d] of l) planeAt[c + t] = plane(R[c], t, d, (big(R[c]) ? 30 : 24) * (phone ? 0.9 : 1));
+
+// airports
+for (const r of routes) {
+  const p = P(r.c.lat, r.c.lon, 0); if (!p.visible) continue;
+  const good = r.profit >= 0;
+  ctx.beginPath(); ctx.arc(p.x, p.y, 7, 0, 7); ctx.fillStyle = good ? 'rgba(141,196,255,.25)' : 'rgba(255,140,110,.25)'; ctx.fill();
+  ctx.beginPath(); ctx.arc(p.x, p.y, 3.6, 0, 7); ctx.fillStyle = '#fff'; ctx.fill(); ctx.lineWidth = 1.6; ctx.strokeStyle = good ? '#8DC4FF' : '#FF8C6E'; ctx.stroke();
+  const off = { DEL: [-8, -8, 'r'], BOM: [-8, 4, 'r'], CGK: [8, 14], NRT: [8, 4], KIX: [-6, 16, 'r'], PEK: [8, -6], BKK: [-8, 4, 'r'], SIN: [8, 6], KUL: [-8, 6, 'r'] }[r.city] || [8, 4];
+  const L = tag(r.c.zh, p.x + off[0], p.y + off[1] - 9, 'lab'); if (off[2] === 'r') L.style.transform = 'translateX(-100%)';
+}
+// hub with facility badges
+{ const p = P(hub.lat, hub.lon, 0);
+  const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 34); g.addColorStop(0, 'rgba(217,184,101,.55)'); g.addColorStop(1, 'rgba(217,184,101,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(p.x, p.y, 34, 0, 7); ctx.fill();
+  ctx.beginPath(); ctx.arc(p.x, p.y, 8, 0, 7); ctx.fillStyle = '#D9B865'; ctx.fill(); ctx.lineWidth = 2.5; ctx.strokeStyle = '#fff'; ctx.stroke();
+  for (const rr of [14, 20]) { ctx.beginPath(); ctx.arc(p.x, p.y, rr, 0, 7); ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(217,184,101,.5)'; ctx.stroke(); }
+  if (!phone) tag(`<div class="nm">台北桃園</div><div class="fx"><span>航廈 3</span><span>貴賓室</span><span>維修</span><span>油庫</span></div>`, p.x + 4, p.y + 18, 'hubtag');
+  else tag(`<div class="nm" style="font-size:13px">台北桃園</div>`, p.x, p.y + 12, 'hubtag');
+}
+// route chips
+const pct = x => Math.round(x * 100) + '%';
+function chip(r, t, dx, dy, html) {
+  const p = r.scr[Math.round(t * (r.scr.length - 1))]; if (!p.visible) return;
+  ctx.save(); ctx.strokeStyle = 'rgba(183,205,228,.6)'; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x + dx, p.y + dy); ctx.stroke(); ctx.restore();
+  tag(html, p.x + dx, p.y + dy, 'chip');
+}
+const share = (r) => { const tot = r.weekly + r.rivals.reduce((a, x) => a + x.weekly, 0); return r.weekly / tot; };
+if (!phone) {
+  const n = R.NRT; const sh = share(n);
+  chip(n, .62, -60, -118, `<div class="share"><svg width="26" height="26" viewBox="0 0 36 36"><circle cx="18" cy="18" r="14" fill="none" stroke="rgba(141,180,221,.2)" stroke-width="6"/><circle cx="18" cy="18" r="14" fill="none" stroke="#8DC4FF" stroke-width="6" stroke-dasharray="${sh * 88} 88" transform="rotate(-90 18 18)"/></svg><div><b>東京成田</b>　班次占比 <b class="num">${pct(sh)}</b><br><span class="m">雲錦航空 每週 10 班・輕羽航空 7 班</span></div></div>`);
+  const c = R.CGK; chip(c, .45, -190, -6, `<b>雅加達</b>　<span class="w">載客 ${pct(c.lf)}｜平衡 ${pct(c.breakEvenLF)}</span><br><span class="m">新航線，客人還在累積</span>`);
+  const b = R.BOM; chip(b, .78, -10, 80, `<b>孟買</b>　<span class="g">載客 ${pct(b.lf)}｜平衡 ${pct(b.breakEvenLF)}</span><br><span class="m">輕羽航空每週 12 班，票價低 28%</span>`);
+} else {
+
+}
+// pops
+const perFlight = r => r.profit / (r.weekly * 26);
+function pop(key, r, dx = 0, dy = -14) { const p = planeAt[key]; if (!p) return; const v = perFlight(r); tag(fmtUSD(v), p.x + dx, p.y + dy, 'pop' + (v < 0 ? ' neg' : '')); }
+if (!phone) pop('NRT0.75', R.NRT, 46, 30); pop('BOM0.5', R.BOM); pop('CGK0.62', R.CGK, phone ? 0 : 30, 0);
+
+// ---------- HUD ----------
+const co = S.company;
+const yi = v => (v / 1e8).toFixed(2) + ' 億';
+if (!phone) {
+  document.getElementById('kcash').textContent = 'US$ ' + yi(co.cash);
+  document.getElementById('kmargin').textContent = (co.margin * 100).toFixed(1) + '%';
+  document.getElementById('klf').textContent = `${pct(co.loadFactor)}｜${pct(co.breakEvenLF)}`;
+  document.getElementById('kfuel').textContent = '×' + co.fuelIndex.toFixed(2);
+  document.getElementById('xfer').textContent = co.transferPax.toLocaleString();
+  const sb = document.getElementById('sbar'); for (let i = 0; i < 32; i++) sb.insertAdjacentHTML('beforeend', `<i class="${i < Math.round(87 / 100 * 32) ? 'on' : ''}"></i>`);
+  // fuel chart
+  { const c = document.getElementById('fuelc'), w = c.clientWidth, h = c.clientHeight; c.width = w * DPR; c.height = h * DPR; const x = c.getContext('2d'); x.scale(DPR, DPR);
+    const v = S.history.map(h => h.fuelIndex), n = v.length, X = i => 8 + i * (w - 16) / (n - 1), Y = y => h - 8 - (y - 0.8) / 1.15 * (h - 16);
+    x.strokeStyle = 'rgba(141,180,221,.15)'; x.lineWidth = 1; for (const g of [1, 1.5]) { x.beginPath(); x.moveTo(0, Y(g)); x.lineTo(w, Y(g)); x.stroke(); }
+    x.fillStyle = 'rgba(141,180,221,.6)'; x.font = '10px -apple-system'; x.fillText('平時', 2, Y(1) - 3);
+    const gr = x.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, 'rgba(234,148,126,.35)'); gr.addColorStop(1, 'rgba(234,148,126,0)');
+    x.beginPath(); v.forEach((y, i) => i ? x.lineTo(X(i), Y(y)) : x.moveTo(X(i), Y(y))); x.lineTo(X(n - 1), h); x.lineTo(X(0), h); x.fillStyle = gr; x.fill();
+    x.beginPath(); v.forEach((y, i) => i ? x.lineTo(X(i), Y(y)) : x.moveTo(X(i), Y(y))); x.strokeStyle = '#EA947E'; x.lineWidth = 2; x.stroke();
+    x.setLineDash([3, 3]); x.beginPath(); x.moveTo(X(n - 2), Y(v[n - 2])); x.lineTo(X(n - 1), Y(co.fuelIndexEffective)); x.strokeStyle = '#7FC3A4'; x.stroke(); x.setLineDash([]);
+    x.beginPath(); x.arc(X(n - 1), Y(v[n - 1]), 3.5, 0, 7); x.fillStyle = '#EA947E'; x.fill(); x.beginPath(); x.arc(X(n - 1), Y(co.fuelIndexEffective), 3.5, 0, 7); x.fillStyle = '#7FC3A4'; x.fill(); }
+  // cabin map
+  { const c = document.getElementById('cabin'), w = c.clientWidth, h = c.clientHeight; c.width = w * DPR; c.height = h * DPR; const x = c.getContext('2d'); x.scale(DPR, DPR);
+    const L = 8, Rr = w - 8, cy = h / 2, fh = h - 10;
+    x.beginPath(); x.moveTo(L + 30, cy - fh / 2); x.lineTo(Rr - 34, cy - fh / 2); x.quadraticCurveTo(Rr, cy - fh / 2, Rr, cy); x.quadraticCurveTo(Rr, cy + fh / 2, Rr - 34, cy + fh / 2); x.lineTo(L + 30, cy + fh / 2); x.quadraticCurveTo(L - 8, cy, L + 30, cy - fh / 2); x.closePath();
+    x.fillStyle = 'rgba(141,180,221,.08)'; x.fill(); x.strokeStyle = 'rgba(141,180,221,.35)'; x.lineWidth = 1.2; x.stroke();
+    // nose on the left
+    let px = L + 40; const seat = (sx, sy, sw, shh, col) => { x.fillStyle = col; x.beginPath(); x.roundRect(sx, sy, sw, shh, 1.6); x.fill(); };
+    const rowsJ = 4, rowsW = 4, rowsY = 25;
+    for (let i = 0; i < rowsJ; i++) { for (const yy of [-19, -10, 4, 13]) seat(px, cy + yy, 9, 7, '#D9B865'); px += 13; }
+    px += 6; for (let i = 0; i < rowsW; i++) { for (const yy of [-21, -14.5, -8, 2.5, 9, 15.5]) seat(px, cy + yy, 7, 5.2, '#8DB4DD'); px += 9.5; }
+    px += 6; const step = (Rr - 40 - px) / rowsY; for (let i = 0; i < rowsY; i++) { for (const yy of [-21, -14.5, -8, 2.5, 9, 15.5]) seat(px, cy + yy, step - 2.2, 5.2, '#4f7fb0'); px += step; }
+  }
+} else {
+  document.getElementById('pcash').textContent = 'US$ ' + yi(co.cash);
+  document.getElementById('pmargin').textContent = (co.margin * 100).toFixed(1) + '%';
+}
+
+// ---------- isometric hub scene (AirTycoon-style hub building) ----------
+function isoScene(cv) {
+  const w = cv.clientWidth, h = cv.clientHeight; cv.width = w * DPR; cv.height = h * DPR; const x = cv.getContext('2d'); x.scale(DPR, DPR);
+  const u = Math.min(w / 21.5, h / 8.6); const ox = (w - 21.5 * u) / 2 + 4.4 * u, oy = h * 0.30;
+  const AX = [0.95, 0.17], AY = [-0.55, 0.40], KZ = 0.85;
+  const I = (X, Y, Z = 0) => [ox + (X * AX[0] + Y * AY[0]) * u, oy + (X * AX[1] + Y * AY[1]) * u - Z * KZ * u];
+  const poly = (pts, fill, stroke) => { x.beginPath(); pts.forEach((p, i) => { const [a, b] = I(...p); i ? x.lineTo(a, b) : x.moveTo(a, b); }); x.closePath(); if (fill) { x.fillStyle = fill; x.fill(); } if (stroke) { x.strokeStyle = stroke; x.lineWidth = 1; x.stroke(); } };
+  const box = (X, Y, Z, dx, dy, dz, top, front, side, dash) => {
+    if (dash) { x.save(); x.setLineDash([3, 3]); }
+    const st = dash ? 'rgba(217,184,101,.85)' : null;
+    poly([[X, Y + dy, Z], [X + dx, Y + dy, Z], [X + dx, Y + dy, Z + dz], [X, Y + dy, Z + dz]], front, st);
+    poly([[X, Y, Z], [X, Y + dy, Z], [X, Y + dy, Z + dz], [X, Y, Z + dz]], side, st);
+    poly([[X, Y, Z + dz], [X + dx, Y, Z + dz], [X + dx, Y + dy, Z + dz], [X, Y + dy, Z + dz]], top, st);
+    if (dash) x.restore();
+  };
+  // ground, apron, taxiway, runway
+  poly([[-1.5, -1], [19, -1], [19, 8], [-1.5, 8]], '#132741');
+  poly([[-1, 1.6], [18.5, 1.6], [18.5, 5.0], [-1, 5.0]], '#1c3453');
+  x.save(); x.strokeStyle = 'rgba(217,184,101,.45)'; x.setLineDash([5, 4]); x.beginPath(); let [a, b] = I(-1, 4.5); x.moveTo(a, b); [a, b] = I(18.5, 4.5); x.lineTo(a, b); x.stroke(); x.restore();
+  poly([[-1.5, 5.8], [19, 5.8], [19, 7.2], [-1.5, 7.2]], '#0d1c30');
+  x.save(); x.strokeStyle = 'rgba(230,240,250,.6)'; x.setLineDash([7, 6]); x.beginPath(); [a, b] = I(-1, 6.5); x.moveTo(a, b); [a, b] = I(18.5, 6.5); x.lineTo(a, b); x.stroke(); x.restore();
+  // fuel tanks (left)
+  for (const [tx, ty] of [[-0.6, 0.0], [0.6, -0.3]]) { const [cx, cy] = I(tx, ty, 0); const r = u * .5, hh = u * .9; x.fillStyle = '#b98571'; x.fillRect(cx - r, cy - hh, 2 * r, hh); x.beginPath(); x.ellipse(cx, cy, r, r * .4, 0, 0, 7); x.fill(); x.beginPath(); x.ellipse(cx, cy - hh, r, r * .4, 0, 0, 7); x.fillStyle = '#EA947E'; x.fill(); }
+  // terminal (level 3) + planned extension
+  box(1.5, -0.4, 0, 9.5, 1.6, 1.1, '#d8e7f6', '#4f7fb0', '#3d6894');
+  poly([[1.5, 1.2, .25], [11, 1.2, .25], [11, 1.2, .85], [1.5, 1.2, .85]], 'rgba(191,224,255,.6)');
+  box(11.3, -0.4, 0, 3.6, 1.6, 1.1, 'rgba(217,184,101,.10)', 'rgba(217,184,101,.06)', 'rgba(217,184,101,.05)', true);
+  // jet bridges
+  for (let i = 0; i < 4; i++) box(2.6 + i * 2.2, 1.2, .45, .3, 1.0, .22, '#a8c2de', '#557aa3', '#40648c');
+  // tower
+  box(15.6, 0.0, 0, .5, .5, 2.4, '#a8c2de', '#557aa3', '#40648c'); box(15.35, -0.25, 2.4, 1.0, 1.0, .45, '#bfe0ff', '#6e9ccb', '#4f7fb0');
+  // maintenance hangar
+  box(16.8, 1.8, 0, 2.2, 2.6, 1.3, '#8fd0b2', '#4b8a6e', '#3a7058');
+  // planes
+  const planeIso = (X, Y, rot, s, alpha = 1) => { const [cx, cy] = I(X, Y, 0.05); x.save(); x.globalAlpha = alpha; x.translate(cx, cy); x.transform(AX[0], AX[1], AY[0], AY[1], 0, 0); x.rotate(rot); x.shadowColor = 'rgba(0,0,0,.55)'; x.shadowBlur = 5; x.shadowOffsetY = 2; x.drawImage(jet, -s / 2, -s / 2, s, s); x.restore(); };
+  for (let i = 0; i < 4; i++) planeIso(2.75 + i * 2.2, 3.4, 0, u * 2.5);
+  planeIso(8, 6.5, Math.PI / 2, u * 2.6);
+  planeIso(17.9, 3.1, 0, u * 2.2);
+  // labels
+  x.font = `600 ${phone ? 9.5 : 10.5}px -apple-system,"PingFang TC"`;
+  const lab = (t, X, Y, Z, col, dx = 0) => { const [px, py] = I(X, Y, Z); x.fillStyle = 'rgba(8,17,29,.75)'; const tw = x.measureText(t).width; x.beginPath(); x.roundRect(px - tw / 2 - 5 + dx, py - 13, tw + 10, 16, 5); x.fill(); x.fillStyle = col; x.textAlign = 'center'; x.fillText(t, px + dx, py - 1); };
+  lab('航廈 等級 3', 6, -0.4, 1.5, '#e6f0fa');
+  lab('擴建 → 等級 4', 13.1, -0.4, 1.5, '#D9B865');
+  lab('維修基地', 17.9, 1.8, 1.8, '#9fe0c3');
+  lab('塔台', 15.85, 0, 3.3, '#bfe0ff');
+  lab('油庫', 0, -0.3, 1.5, '#f3c2b5');
+}
+isoScene(document.getElementById(phone ? 'isoP' : 'iso'));
+
+// ---------- reference notes ----------
+if (q.get('notes')) {
+  const N = (n, txt, x, y) => tag(`<i>${n}</i>${txt}`, x, y, 'note');
+  if (!phone) {
+    N(1, 'AirTycoon 4：樞紐蓋設施', 1000, 140);
+    N(2, 'AirTycoon 4／AM4：座位配置、租或買、二手機', 990, 520);
+    N(3, 'Airline Manager 4：油價市場', 440, 700);
+    N(4, 'AirTycoon 4：電腦對手搶航線', 580, 186);
+    N(7, 'AirTycoon 4：回合制，一季一回合', 1080, 20);
+    N(5, 'Fly Corp：情境挑戰', 110, 700);
+    N(6, 'AM4：成就', 650, 130);
+  } else {
+    N(1, 'AirTycoon 4：樞紐蓋設施', 120, 470);
+    N(2, 'AirTycoon 4：回合制季度', 150, 760);
+  }
+}
+window.__done = 1;
+</script>
+</body>
+</html>
