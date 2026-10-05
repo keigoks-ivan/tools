@@ -1,8 +1,8 @@
 // SKYGLAZE globe: local NASA/Natural Earth textures; one WebGL draw on view changes,
 // with sampled flight traffic painted on a lightweight 2D overlay.
 import * as THREE from '/game/lib/three.module.js';
-import { CITIES } from './data.mjs?v=13';
-import { VERT, FRAG_PAPER } from './globe-shaders.js?v=13';
+import { CITIES } from './data.mjs?v=14';
+import { VERT, FRAG_PAPER } from './globe-shaders.js?v=14';
 import { tr, pick, fmtUSD } from './ui-util.js';
 const RAD = Math.PI / 180;
 const ll = (lat, lon, r = 1) => new THREE.Vector3(r * Math.cos(lat * RAD) * Math.cos(lon * RAD), r * Math.sin(lat * RAD), -r * Math.cos(lat * RAD) * Math.sin(lon * RAD));
@@ -24,8 +24,8 @@ export async function createGlobe(box, { hubId, onCityClick, decorative = false 
   let w = 1, h = 1, dirty = true, destroyed = false, frame = 0, lastFrame = 0, slow = 0, paintCount = 0, frameTotal = 0;
   let current = { routes: [], rivals: [], selected: null, metrics: {} }, time = { elapsed: 0, speed: 0 };
   let paths = [], projected = [], cities = [], receipts = [], cachedSignature = '';
-  const sprite = new Image(); sprite.src = new URL('./art/v2/sprite.webp', import.meta.url).href;
-  const [bm, mask] = await Promise.all([load(new URL(`./art/v2/earth-${mobile ? '2k' : '4k'}.webp`, import.meta.url).href), load(new URL(`./art/v2/land-${mobile ? '2k' : '4k'}.webp`, import.meta.url).href)]).catch(e => { renderer.dispose(); throw e; });
+  const sprite = new Image(); sprite.src = new URL('./art/v2/sprite.webp?v=14', import.meta.url).href;
+  const [bm, mask] = await Promise.all([load(new URL(`./art/v2/earth-${mobile ? '2k' : '4k'}.webp?v=14`, import.meta.url).href), load(new URL(`./art/v2/land-${mobile ? '2k' : '4k'}.webp?v=14`, import.meta.url).href)]).catch(e => { renderer.dispose(); throw e; });
   bm.anisotropy = mask.anisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy());
   const camPos = { value: camera.position }, sun = { value: ll(35, hub.lon - 45) };
   const material = new THREE.ShaderMaterial({ vertexShader: VERT, fragmentShader: FRAG_PAPER, uniforms: { bm: { value: bm }, mask: { value: mask }, camPos, sun } });

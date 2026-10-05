@@ -1,10 +1,10 @@
 // 天青航空：航線經營 — UI. All game logic lives in the model (backend.mjs); this file only renders and collects decisions.
-import * as B from './backend.mjs?v=13';
-import { createNetwork } from './ui-network.js?v=13';
-import { FACILITIES, SCENARIOS, scenarioProgress, newClock, advanceClock, turnSeconds, fuelOrder } from './v2.mjs?v=13';
-import { aircraftArt, facilityArt } from './ui-art-v2.js?v=13';
-import { playIcon, routeTicket, hubScene, goalList, resultBadges } from './ui-play.js?v=13';
-import { createSoundtrack } from './ui-music.js?v=13';
+import * as B from './backend.mjs?v=14';
+import { createNetwork } from './ui-network.js?v=14';
+import { FACILITIES, SCENARIOS, scenarioProgress, newClock, advanceClock, turnSeconds, fuelOrder } from './v2.mjs?v=14';
+import { aircraftArt, facilityArt } from './ui-art-v2.js?v=14';
+import { playIcon, routeTicket, hubScene, goalList, resultBadges } from './ui-play.js?v=14';
+import { createSoundtrack } from './ui-music.js?v=14';
 import { BRAND_EN, tr, pick, esc, $, $$, fmtUSD, fmtPct, fmtNum, fmtFare, term, withTerms, markTermSeen, locale, setLocale } from './ui-util.js';
 
 const { MODES, HUBS, CITIES, AIRCRAFT, LESSONS, GLOSSARY } = B;
@@ -138,7 +138,7 @@ function renderStart() {
       <p class="poem">${tr('從一條航線，經營你的世界。', 'Your world begins with one route.')}</p>
       <p class="hint" style="margin-top:10px">${tr('看一次，就懂航空公司怎麼賺錢，又為什麼賠錢。', 'See how an airline makes money, and why it loses it.')}</p>
       <div class="hero-actions"><button type="button" class="btn" id="go-new">${tr('開始經營','Start playing')} ▶</button><small>${esc(pick(hubOf(app.sel.hub)))} · ${esc(pick(modeOf(app.sel.mode)))}</small></div>
-    </div><div class="art airport-hero"><img class="airport-illustration" src="./art/v2/airport.webp" width="1536" height="1024" alt="${tr('天青航空的機場與客機', BRAND_EN + ' airport and aircraft')}" decoding="async"><div class="hero-flight-ticket"><span>${tr('準備首航','READY FOR TAKEOFF')}</span><b>${app.sel.hub} <i>✈</i> HKG</b><small>${tr('Airbus A320neo · 你的第一條航線','Airbus A320neo · your first route')}</small></div><div class="hero-caption">${tr('你的機隊，你的航網。', 'YOUR FLEET. YOUR NETWORK.')}</div></div></section>
+    </div><div class="art airport-hero"><img class="airport-illustration" src="./art/v2/airport.webp?v=14" width="1536" height="1024" alt="${tr('天青航空的機場與客機', BRAND_EN + ' airport and aircraft')}" decoding="async"><div class="hero-flight-ticket"><span>${tr('準備首航','READY FOR TAKEOFF')}</span><b>${app.sel.hub} <i>✈</i> HKG</b><small>${tr('Airbus A320neo · 你的第一條航線','Airbus A320neo · your first route')}</small></div><div class="hero-caption">${tr('你的機隊，你的航網。', 'YOUR FLEET. YOUR NETWORK.')}</div></div></section>
     ${saveHtml}
     <section class="sect scenario-select"><h2>${tr('這次想完成什麼？', 'Choose your ambition')}</h2><div class="scenario-choices">${Object.entries(SCENARIOS).map(([id,c],i)=>`<button type="button" class="scenario-choice" data-scenario="${id}" aria-pressed="${app.scenario===id}"><span class="scenario-no">0${i+1}</span>${playIcon(id)}<small>${esc(pick(c,'tagZh','tagEn'))}</small><b>${esc(pick(c))}</b><span>${esc(pick(c,'descZh','descEn'))}</span></button>`).join('')}</div></section>
     <section class="sect"><h2>${tr('選擇模式', 'Mode')}</h2><div class="choices two" role="radiogroup" aria-label="${tr('模式', 'Mode')}">${modeCards}</div></section>
@@ -205,7 +205,7 @@ function renderMain() {
       <div class="network-heading"><span class="live-dot"></span>${tr('航網營運中心', 'NETWORK OPERATIONS')}<small>${s.hub} / ${esc(pick(hubOf(s.hub)))}</small></div>
       <div class="mapctl"><button type="button" id="zin" aria-label="${tr('放大', 'Zoom in')}">+</button><button type="button" id="zout" aria-label="${tr('縮小', 'Zoom out')}">−</button><button type="button" id="zfit" aria-label="${tr('回到基地', 'Recenter')}">⌖</button></div>
       <div class="flight-hud" id="flight-hud"></div>
-      <button type="button" class="base-launch" id="base-launch"><img src="./art/v2/airport.webp" width="1536" height="1024" alt=""><span><small>${tr('返回基地','HOME BASE')}</small><b>${s.hub} <i>↗</i></b></span></button>
+      <button type="button" class="base-launch" id="base-launch"><img src="./art/v2/airport.webp?v=14" width="1536" height="1024" alt=""><span><small>${tr('返回基地','HOME BASE')}</small><b>${s.hub} <i>↗</i></b></span></button>
       <div class="maplegend"><span><i></i>${tr('獲利／預估獲利', 'Profit / estimated profit')}</span><span><i class="loss"></i>${tr('虧損', 'Loss')}</span><span><i class="r"></i>${tr('對手', 'Rivals')}</span><small>${tr('航班與候機點為縮時示意', 'Flights and passenger dots are sampled')}</small></div>
       <div class="clockbar"><div class="clock-label"><b id="clock-day"></b><small id="clock-status"></small></div><div class="time-track"><i id="clock-progress"></i></div><div class="time-controls"><button type="button" id="pause" aria-label="${tr('暫停／繼續', 'Pause / resume')}">▶</button>${[1,2,4].map(n=>`<button type="button" data-speed="${n}" aria-pressed="${app.clock.speed===n}">${n}×</button>`).join('')}<button type="button" id="skip" aria-label="${tr('直接結算', 'Jump to settlement')}">↦</button></div></div>
     </div>

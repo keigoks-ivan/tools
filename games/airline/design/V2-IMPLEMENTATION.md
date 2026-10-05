@@ -29,6 +29,8 @@ Final moving-network stress check (31 routes, sampled aircraft): Apple M4 / head
 
 Scenario feasibility was checked in the economic model at TPE: first-year seed 1 with a five-aircraft strategy, network seed 1 with a twelve-aircraft budget, and resilience seed 7 with a nine-aircraft budget all met their respective final goals. Full browser playthroughs ended at +3.97% (Taipei/year), +6.61% (Singapore/decade) and −44.27% (naive Taipei/year), with each route’s explanation visible.
 
+Release cache version: 14. Changed modules and new image assets carry the same version, so cached pre-deployment responses do not mix with the release.
+
 Machine-readable results: `v2/verification.json`. Final screenshots: `v2/screenshots/`.
 
 ## Airport illustration
