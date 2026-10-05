@@ -1,9 +1,10 @@
 // 天青航空：航線經營 — economic model. Pure, deterministic given a seed, no DOM, no dependencies.
 // Money: US$ (constant dollars). rask/cask: US$ per available seat-km. All state is plain JSON.
-import { FACILITIES, fuelOrder } from './v2.mjs?v=17';
-import { CONST, MODES, HUBS, CITIES, AIRCRAFT, EVENTS, LESSONS, RIVALS, HUB_WEATHER } from './data.mjs?v=17';
-import { marketProfile } from './demand.mjs?v=17';
-export { marketProfile, DEMAND_SOURCES } from './demand.mjs?v=17';
+import { FACILITIES, fuelOrder } from './v2.mjs?v=18';
+import { CONST, MODES, HUBS, CITIES, AIRCRAFT, EVENTS, LESSONS, RIVALS, HUB_WEATHER } from './data.mjs?v=18';
+import { marketProfile } from './demand.mjs?v=18';
+import { readCareer, missionOffers, settleCareer } from './career.mjs?v=18';
+export { marketProfile, DEMAND_SOURCES } from './demand.mjs?v=18';
 
 // ============================================================ utilities
 const clone = o => JSON.parse(JSON.stringify(o));
@@ -248,6 +249,7 @@ export function newGame({ mode = 'year', hub = 'TPE', seed = 1 } = {}) {
   for (const city of Object.keys(s.marketRivalBase)) {
     s.marketRivalBase[city] = Math.min(s.marketRivalBase[city], marketProfile(h, CITIES[city], dist(h, CITIES[city])).weeklySeats * 0.8);
   }
+  s.career = readCareer(s);
   return s;
 }
 function addAircraft(s, type, kind, leaseMult) {
@@ -329,6 +331,13 @@ export function applyDecisions(state, decisions = {}) {
   const s = clone(state), errors = [], d = decisions || {};
   const m = modeOf(s);
   if (s.finished || s.gameOver) { errors.push(err('GAME_OVER', '遊戲已經結束。', 'The game is over.')); return { state: s, errors }; }
+  s.career = readCareer(s);
+  if (d.mission === null) s.career.active = null;
+  else if (d.mission !== undefined) {
+    const offer = careerBoard(s).find(x => x.id === d.mission);
+    if (!offer) errors.push(err('BAD_MISSION', '這個任務已無法接取，請回任務板重新選擇。', 'This mission is unavailable. Choose from the dispatch board.'));
+    else s.career.active = { ...offer, startedTurn: s.turn, deadline: s.turn + offer.turns, pax: 0, profitable: false, checks: [] };
+  }
   // 1. event choices
   if (d.eventChoices && typeof d.eventChoices === 'object') {
     for (const [id, opt] of Object.entries(d.eventChoices)) {
@@ -545,6 +554,7 @@ export function simulateTurn(state) {
   const s = clone(state);
   const m = modeOf(s);
   if (s.finished || s.gameOver) return { state: s, report: null };
+  s.career = readCareer(s);
   const t = s.turn;
   const ctx = buildCtx(s);
   const report = { turn: t, labelZh: '', labelEn: '', company: null, routes: [], events: [], lessons: [], rivals: [], gameOver: null };
@@ -730,6 +740,8 @@ export function simulateTurn(state) {
     s.gameOver = report.gameOver;
   } else if (s.turn >= m.turns) s.finished = true;
   for (const k of ['revenue', 'profit', 'cash']) company[k] = fin(company[k]);
+  const progression = settleCareer(s, report);
+  s.career = progression.career; report.career = progression.result;
   return { state: s, report };
 }
 
@@ -836,6 +848,32 @@ export function estimateRoute(state, city, type, weekly, fare = 'mid') {
 }
 
 // ============================================================ end report
+// A dispatch board uses forecasts available to the player, never future events or noise.
+export function careerBoard(state) {
+  if (readCareer(state).active || state.finished || state.gameOver) return [];
+  const stamps = readCareer(state).stamps;
+  const markets = Object.keys(CITIES).filter(city => city !== state.hub).map(city => ({ city, o: routeOptions(state, city) }))
+    .filter(x => x.o.eligibleTypes.length).sort((a, b) => b.o.estMarketPaxPerWeek / Math.sqrt(b.o.distanceKm + 500) - a.o.estMarketPaxPerWeek / Math.sqrt(a.o.distanceKm + 500));
+  const pool = new Map();
+  const add = x => { if (x) pool.set(x.city, x); };
+  markets.filter(x => !stamps[x.city]).slice(0, 20).forEach(add);
+  markets.filter(x => x.o.rivalsOnRoute > 0).forEach(add);
+  // Include new regions even when their markets are smaller than the nearest cities.
+  for (const region of new Set(markets.map(x => CITIES[x.city].region))) markets.filter(x => !stamps[x.city] && CITIES[x.city].region === region).slice(0, 2).forEach(add);
+  const candidates = [...pool.values()].map(({ city, o }) => {
+    const narrow = o.eligibleTypes.filter(t => !AIRCRAFT[t].widebody), types = narrow.length ? narrow : o.eligibleTypes;
+    const rivalSeats = o.rivals.reduce((n, r) => n + r.weekly * 2 * (r.kind === 'lcc' ? 186 : 168), 0);
+    let best = null, rivalBest = null;
+    for (const type of types) for (const weekly of [1, 2, 3, 5, 7, 10, 14].filter(w => w <= o.maxWeekly)) for (const fare of ['mid', 'high']) {
+      const e = estimateRoute(state, city, type, weekly, fare);
+      if (!best || e.profit > best.profit) best = { city, profit: e.profit, pax: e.pax, plan: { city, type, weekly, fare } };
+      if (rivalSeats > 0 && weekly * 2 * AIRCRAFT[type].seats[state.model] >= rivalSeats * .7 && (!rivalBest || e.profit > rivalBest.profit)) rivalBest = { profit: e.profit, plan: { city, type, weekly, fare } };
+    }
+    return { ...best, rivalSeats, rivalPlan: rivalBest?.profit > 0 ? rivalBest.plan : null };
+  }).sort((a, b) => b.profit - a.profit);
+  return missionOffers(state, candidates);
+}
+
 export function endReport(state) {
   const s = state;
   const rev = s.totals.revenue, marginTotal = rev > 1 ? clamp(s.totals.profit / rev, -9.99, 9.99) : -1;
@@ -879,6 +917,7 @@ export function deserialize(str) {
   if (!o || o.v !== 1 || !MODES[o.mode]) throw new Error('bad save');
   o.facilities ||= {}; o.marketSupply ||= {}; o.reserve ||= { kg: 0, unitPrice: 0 }; o.scenario ||= 'free';
   o.marketRivalBase ||= newGame({ mode: o.mode, hub: o.hub, seed: o.seed }).marketRivalBase;
+  o.career = readCareer(o);
   return o;
 }
 

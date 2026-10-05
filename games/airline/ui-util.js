@@ -1,5 +1,5 @@
 // Shared helpers: locale, formatting, glossary terms. Everything user-facing goes through tr(zh, en).
-import { GLOSSARY } from './backend.mjs?v=17';
+import { GLOSSARY } from './backend.mjs?v=18';
 
 /** English brand name: the ONE place to change it (also: <title> in index.html, games/index.html card). */
 export const BRAND_EN = 'SKYGLAZE';
