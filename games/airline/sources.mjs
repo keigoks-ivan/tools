@@ -42,26 +42,26 @@ export const SOURCES = [
     usedFor: ['CONST.lcc.* (seat density, crew, ground, airport, overhead multipliers)'] },
   { id: 'lease-narrowbody', status: 'verified',
     topicZh: '窄體機租金', topicEn: 'Narrowbody lease rates',
-    valueZh: '新的 A320neo、737 MAX 8 月租約 40 萬美元，A321neo 約 46 萬美元；2025 年海南航空一筆租約約 34.5 萬到 36 萬美元。MQ-320 取 40 萬、MQ-321 取 46 萬。',
-    valueEn: 'New A320neo / 737 MAX 8 about US$400k a month, A321neo about US$460k; a 2025 Hainan Airlines deal about US$345-360k. MQ-320 uses 400k, MQ-321 uses 460k.',
+    valueZh: '新的 A320neo、737 MAX 8 月租約 40 萬美元，A321neo 約 46 萬美元；2025 年海南航空一筆租約約 34.5 萬到 36 萬美元。Airbus A320neo 取 40 萬、Airbus A321LR 取 46 萬。',
+    valueEn: 'New A320neo / 737 MAX 8 about US$400k a month, A321neo about US$460k; a 2025 Hainan Airlines deal about US$345-360k. Airbus A320neo uses 400k, Airbus A321LR uses 460k.',
     sourceName: 'ch-aviation, 2025', url: 'https://www.ch-aviation.com/news/144317-chinas-hainan-airlines-holding-announces-new-a320neo-leases',
     usedFor: ['AIRCRAFT[MQ-320].leasePerMonth', 'AIRCRAFT[MQ-321].leasePerMonth'] },
   { id: 'lease-widebody', status: 'verified',
     topicZh: '寬體機租金', topicEn: 'Widebody lease rates',
-    valueZh: 'A350-900 月租約 92.5 萬美元（2021 年 1 月）至 95.4 萬美元（2023 年 1 月）；777-300ER 機齡 12 年約 31.4 萬美元（2022 年 10 月）；A330 機齡 10 年約 20 萬出頭；新的 787-8 約 86.2 萬美元（2010 年資料）。MQ-350 取 95 萬；MQ-400 設為較新世代的大型雙發機，取 105 萬（設計值）。',
-    valueEn: 'A350-900 about US$925k a month (Jan 2021) to US$954k (Jan 2023); 12-year-old 777-300ER about US$314k (Oct 2022); 10-year-old A330 in the low US$200ks; new 787-8 about US$862k (2010 data). MQ-350 uses 950k; MQ-400 is a newer-generation large twin at 1,050k (design value).',
+    valueZh: 'A350-900 月租約 92.5 萬美元（2021 年 1 月）至 95.4 萬美元（2023 年 1 月）；777-300ER 機齡 12 年約 31.4 萬美元（2022 年 10 月）；A330 機齡 10 年約 20 萬出頭；新的 787-8 約 86.2 萬美元（2010 年資料）。Airbus A350-900 取 95 萬；Boeing 777-300ER 的遊戲租金沿用平衡設定，取 105 萬（設計值，不代表真實市場租金）。',
+    valueEn: 'A350-900 about US$925k a month (Jan 2021) to US$954k (Jan 2023); 12-year-old 777-300ER about US$314k (Oct 2022); 10-year-old A330 in the low US$200ks; new 787-8 about US$862k (2010 data). Airbus A350-900 uses 950k; Boeing 777-300ER retains the game’s balancing rate of 1,050k (design value, not a real market quote).',
     sourceName: 'IBA / aviation press via search (iba.aero, aircraft interiors, AJOT)', url: 'https://www.iba.aero/insight/new-generation-widebody-lease-rates-are-rising/',
     usedFor: ['AIRCRAFT[MQ-350].leasePerMonth', 'AIRCRAFT[MQ-400].leasePerMonth'] },
   { id: 'fuel-burn', status: 'verified',
     topicZh: '每輪擋小時燃油消耗', topicEn: 'Fuel burn per block hour',
-    valueZh: 'A320neo 巡航約 2,200 到 2,400 公斤每小時（Lufthansa 機隊平均 2,250）；777-300ER 約 7.35 公噸每小時（Aircraft Commerce）；Airbus 稱 A350-900 單座位燃油比 777-200ER 少約三成。MQ-320 取 2,450（含滑行與爬升，輪擋平均），MQ-400 取 7,300，MQ-350 取 5,800（由 777 與 Airbus 說法推算，設計值）。支線機與渦槳為設計值。',
-    valueEn: 'A320neo cruise about 2,200-2,400 kg/h (Lufthansa fleet average 2,250); 777-300ER about 7.35 t/h (Aircraft Commerce); Airbus says the A350-900 burns about 30% less per seat than the 777-200ER. MQ-320 uses 2,450 (block average incl. taxi and climb), MQ-400 7,300, MQ-350 5,800 (derived from the 777 figure and Airbus’s claim; design). Regional jet and turboprop are design values.',
+    valueZh: 'A320neo 巡航約 2,200 到 2,400 公斤每小時（Lufthansa 機隊平均 2,250）；777-300ER 約 7.35 公噸每小時（Aircraft Commerce）；Airbus 稱 A350-900 單座位燃油比 777-200ER 少約三成。Airbus A320neo 取 2,450（含滑行與爬升，輪擋平均），Boeing 777-300ER 取 7,300，Airbus A350-900 取 5,800（由 777 與 Airbus 說法推算，設計值）。支線機與渦槳為設計值。',
+    valueEn: 'A320neo cruise about 2,200-2,400 kg/h (Lufthansa fleet average 2,250); 777-300ER about 7.35 t/h (Aircraft Commerce); Airbus says the A350-900 burns about 30% less per seat than the 777-200ER. Airbus A320neo uses 2,450 (block average incl. taxi and climb), Boeing 777-300ER 7,300, Airbus A350-900 5,800 (derived from the 777 figure and Airbus’s claim; design). Regional jet and turboprop are design values.',
     sourceName: 'The Flying Engineer / Wikipedia A320neo; Aircraft Commerce 777 fuel guide; Airbus', url: 'https://theflyingengineer.com/airbus-a320neo-vs-boeing-737-max-fuel-burn-comparison/',
     usedFor: ['AIRCRAFT.*.fuelPerBlockHour', 'CONST.fuelPriceUsdPerKg = 0.72 (jet about US$0.72/kg, i.e. roughly US$90-100/bbl crude plus crack spread; design)'] },
   { id: 'crew-cost', status: 'secondary',
     topicZh: '機組成本', topicEn: 'Crew cost',
-    valueZh: 'A320 的機組成本約每飛行小時 1,000 到 1,200 美元，總直接營運成本每飛行小時 6,000 到 7,500 美元（低品質彙整）。MIT 航空資料顯示不同航空公司的同型機組與維修成本可差三到四倍（例如 737-500：United 機組 927、維修 1,048；Southwest 機組 388、維修 251 美元每輪擋小時，舊資料）。MQ-320 的機組成本取 1,100 × 1.1，再加地勤人事，使人事占成本 24% 到 28%（IATA 人事 28%）。',
-    valueEn: 'A320 crew cost is about US$1,000-1,200 per flight hour and total direct operating cost US$6,000-7,500 per flight hour (low-quality compilation). MIT airline data show crew and maintenance cost per block hour for the same type differing 3-4x between carriers (737-500: United crew 927, maintenance 1,048; Southwest 388 and 251; old data). MQ-320 crew is 1,100 x 1.1 plus ground staff, putting labour at 24-28% of cost (IATA 28%).',
+    valueZh: 'A320 的機組成本約每飛行小時 1,000 到 1,200 美元，總直接營運成本每飛行小時 6,000 到 7,500 美元（低品質彙整）。MIT 航空資料顯示不同航空公司的同型機組與維修成本可差三到四倍（例如 737-500：United 機組 927、維修 1,048；Southwest 機組 388、維修 251 美元每輪擋小時，舊資料）。Airbus A320neo 的機組成本取 1,100 × 1.1，再加地勤人事，使人事占成本 24% 到 28%（IATA 人事 28%）。',
+    valueEn: 'A320 crew cost is about US$1,000-1,200 per flight hour and total direct operating cost US$6,000-7,500 per flight hour (low-quality compilation). MIT airline data show crew and maintenance cost per block hour for the same type differing 3-4x between carriers (737-500: United crew 927, maintenance 1,048; Southwest 388 and 251; old data). Airbus A320neo crew is 1,100 x 1.1 plus ground staff, putting labour at 24-28% of cost (IATA 28%).',
     sourceName: 'Aviation Week operating-cost tables; MIT Airline Data Project; aircraft operating-cost compilations', url: 'https://web.mit.edu/airlinedata/www/2016%2012%20Month%20Documents/Aircraft%20and%20Related/Carrier%20Detail%20Block%20Hour/United%20Airlines%20Aircraft%20Operating%20Statistics%2D%20Cost%20Per%20Block%20Hour%20%28Unadjusted%29.htm',
     usedFor: ['AIRCRAFT.*.crewPerBlockHour', 'CONST.crewScale', 'CONST.groundLabourPerDep / PerPax'] },
   { id: 'airport-charges', status: 'verified',
@@ -141,7 +141,7 @@ export const DESIGN_VALUES = [
     value: 'overhead US$330k + 70k per aircraft a month; route launch US$120k; airport scale 1.3; ground labour US$1,300 per departure + 11 per passenger',
     zh: '固定成本隨機隊擴大；新航線有開辦費。', en: 'Fixed costs grow with the fleet; new routes carry a launch cost.' },
   { id: 'start', zhName: '起始資金與機隊', enName: 'Starting cash and fleet',
-    value: 'year: US$45M and 2 x MQ-320 leased; decade: US$150M, 2 x MQ-320 and 1 x MQ-190 leased', zh: '設計值。', en: 'Design values.' }
+    value: 'year: US$45M and 2 x Airbus A320neo leased; decade: US$150M, 2 x Airbus A320neo and 1 x Embraer E190 leased', zh: '設計值。', en: 'Design values.' }
 ];
 
 // Honest summary of what the verification pass did and did not find (shown at the bottom of the page).
@@ -157,3 +157,11 @@ export const VERIFICATION = {
     'Sources contradict each other on whether long-haul is more or less elastic; the game follows the design spec (less sensitive) and flags it as a design value.'
   ]
 };
+
+export const AIRCRAFT_REFERENCES = [
+  { name: 'ATR 72-600', url: 'https://www.atr-aircraft.com/regional-mobility/regional-aircraft/atr-72-600/' },
+  { name: 'Embraer E190', url: 'https://www.embraer.com/e-jets/e190/en/' },
+  { name: 'Airbus A320neo / A321LR', url: 'https://www.airbus.com/en/products-services/commercial-aircraft/passenger-aircraft/a320-family' },
+  { name: 'Airbus A350-900', url: 'https://www.airbus.com/en/products-services/commercial-aircraft/passenger-aircraft/a350-family' },
+  { name: 'Boeing 777-300ER', url: 'https://www.boeing.com/commercial/777' },
+];

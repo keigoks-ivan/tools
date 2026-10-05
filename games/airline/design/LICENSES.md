@@ -13,3 +13,16 @@
 Fonts: system fonts only (PingFang TC, Songti TC); nothing downloaded.
 Game data (cities, aircraft, simulated numbers): from the game's own data.mjs / model.mjs (sim_A.json, sim_decade.json, cities.json were produced by running the model; nothing external).
 No runtime fetches to third parties: every file above is local and can be committed to the repo.
+
+## Production v2 assets (2026-10-05)
+
+- `../art/v2/earth-2k.webp` and `earth-4k.webp`: resized/re-encoded from the Blue Marble NG August texture listed above. Credit: **NASA Earth Observatory (Blue Marble: Next Generation, Reto Stöckli)**. The [NASA media usage guidelines](https://www.nasa.gov/nasa-brand-center/images-and-media/) and [dataset credit](https://science.nasa.gov/earth/earth-observatory/blue-marble-next-generation/) were read on 2026-10-05. These are educational texture maps; no NASA identifiers, people or endorsement are used.
+- `../art/v2/land-2k.webp` and `land-4k.webp`: resized/re-encoded from the Natural Earth 50m land/coast/border mask listed above. Public-domain source, original rasterisation.
+- `../art/v2/sprite.webp`: original three.js renders of the repository’s procedural SKYGLAZE aircraft in its blue porcelain livery. Schematic artwork; not a manufacturer photo or certified model.
+- `../ui-art-v2.js`: original SVG aircraft-family silhouettes and isometric facility illustrations. Real aircraft names identify the selected economic profiles; all silhouettes are schematic.
+- `../globe-shaders.js`: original porcelain-coloured shader adapted from our mockup renderer.
+- `/game/lib/three.module.js`: three.js, MIT (existing repository distribution).
+- `../art/v2/airport.webp`: original miniature airport illustration generated with the built-in OpenAI imagegen tool on 2026-10-05, then re-encoded as WebP with its transparency preserved. No third-party photo, airline logo or manufacturer artwork was used. The final prompt and generation mode are recorded in `V2-IMPLEMENTATION.md`.
+- `../ui-play.js`: original SVG challenge icons and game UI artwork.
+- `../ui-music.js`: original 16-bar chord progression, melody and synthesized instruments. No samples, recordings or external music are loaded. Web Audio renders a looping buffer only after the player enables music; default is mute.
+- Production v2 does **not** load Black Marble, and makes no runtime requests to NASA or any third party. Textures and fonts are local/system resources.

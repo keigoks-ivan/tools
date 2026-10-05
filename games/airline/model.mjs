@@ -1,6 +1,7 @@
 // 天青航空：航線經營 — economic model. Pure, deterministic given a seed, no DOM, no dependencies.
 // Money: US$ (constant dollars). rask/cask: US$ per available seat-km. All state is plain JSON.
-import { CONST, MODES, HUBS, CITIES, AIRCRAFT, EVENTS, LESSONS, RIVALS, HUB_WEATHER } from './data.mjs';
+import { FACILITIES, fuelOrder } from './v2.mjs?v=13';
+import { CONST, MODES, HUBS, CITIES, AIRCRAFT, EVENTS, LESSONS, RIVALS, HUB_WEATHER } from './data.mjs?v=13';
 
 // ============================================================ utilities
 const clone = o => JSON.parse(JSON.stringify(o));
@@ -77,11 +78,14 @@ function buildCtx(s, { noise = true } = {}) {
   const baselineFuel = 1 + (noise ? (rngFor(s.seed, 'fuel', t)() - 0.5) * 0.06 : 0);
   const spot = baselineFuel * modsFactor(s, 'fuel', null, t);
   const h = s.hedge;
-  const eff = (1 - h.frac) * spot + h.frac * h.lock * (1 + CONST.hedge.premium);
+  let eff = (1 - h.frac) * spot + h.frac * h.lock * (1 + CONST.hedge.premium);
   const dis = s.mods.find(x => x.kind === 'disruption' && x.start === t);
   const leaseNew = s.mods.find(x => x.kind === 'leaseNew' && t >= x.start && t < x.start + x.turns);
+  const kgTurn = s.routes.reduce((a, r) => a + 2 * r.weekly * W * (1 - (dis?.cancelPct || 0)) * blockHoursFor(AIRCRAFT[r.type], dist(CITIES[s.hub], CITIES[r.city])) * AIRCRAFT[r.type].fuelPerBlockHour, 0);
+  const reserveFrac = s.reserve?.kg > 0 && kgTurn > 0 ? Math.min(0.3 * (1 - h.frac), s.reserve.kg / kgTurn) : 0;
+  eff += reserveFrac * ((s.reserve?.unitPrice || 0) / CONST.fuelPriceUsdPerKg - spot);
   return {
-    m, t, months, W, mpt, spot, eff, hedgeFrac: h.frac,
+    m, t, months, W, mpt, spot, eff, hedgeFrac: h.frac, reserveUsedKg: reserveFrac * kgTurn,
     growth: Math.pow(1 + m.growthPerYear, t * mpt / 12),
     demandAll: modsFactor(s, 'demand', 'all', t), demandBiz: modsFactor(s, 'demand', 'biz', t), demandLei: modsFactor(s, 'demand', 'lei', t),
     cancel: dis ? dis.cancelPct : 0, compPerPax: dis ? dis.compPerPax : 0,
@@ -121,7 +125,8 @@ function evalLocal(s, ctx, r, { ramp = true, noRivals = false } = {}) {
   for (const seg of ['biz', 'lei']) {
     const e = CONST.elasticity[seg] * lh;
     const Mseg = M * (seg === 'biz' ? b * Math.pow(sea, 0.3 - 1) * ctx.demandBiz : (1 - b) * ctx.demandLei);
-    const you = carrierScore(weeklyEff, seats, fareRatio, q[seg], seg, e);
+    const appeal = seg === 'biz' && s.model === 'fsc' && s.facilities?.lounge ? 1.08 : 1;
+    const you = carrierScore(weeklyEff, seats, fareRatio, q[seg] * appeal, seg, e);
     let others = Math.pow(Fbg, CONST.freqExp[seg]);
     for (const x of rv) others += carrierScore(x.weekly, x.kind === 'lcc' ? 186 : 168, x.fare, x.kind === 'lcc' ? CONST.lcc.quality[seg] : 1, seg, e);
     const share = you / (you + others);
@@ -188,7 +193,7 @@ export function newGame({ mode = 'year', hub = 'TPE', seed = 1 } = {}) {
   seed = Number.isFinite(+seed) ? Math.floor(+seed) : 1;
   const m = MODES[mode];
   const s = {
-    v: 1, mode, hub, seed, turn: 0, cash: m.startCash, model: 'fsc', modelSwitches: 0,
+    v: 1, facilities: {}, reserve: { kg: 0, unitPrice: 0 }, scenario: 'free', mode, hub, seed, turn: 0, cash: m.startCash, model: 'fsc', modelSwitches: 0,
     fleet: [], nextAc: 1, routes: [], hedge: { frac: 0, lock: 1, age: 0 }, fuelSpot: 1, rate: CONST.baseRate,
     rivals: [], plan: {}, choices: {}, mods: [], slotCaps: {}, labourMult: 1, lessons: {}, history: [], totals: { revenue: 0, profit: 0 },
     pending: { ownershipCash: 0, ownershipNonCash: 0, overheadCash: 0 }, debt: [], deferred: 0, defer: { pct: 0, turnsLeft: 0, after: 0 },
@@ -395,6 +400,22 @@ export function applyDecisions(state, decisions = {}) {
     const a = s.fleet.splice(idx, 1)[0], proceeds = a.book * CONST.resaleVsBook * ctxNow.assetNow;
     s.cash += proceeds - a.loan; s.pending.ownershipNonCash += Math.max(0, a.book - proceeds);
   }
+  // Optional hub facilities: capital is paid now and depreciated over ten years.
+  s.facilities ||= {}; s.reserve ||= { kg: 0, unitPrice: 0 };
+  if (d.facilities !== undefined && !Array.isArray(d.facilities)) errors.push(err('BAD_FACILITY', '設施清單格式不正確。', 'Invalid facility list.'));
+  else for (const id of d.facilities || []) {
+    const f = FACILITIES[id];
+    if (!f) { errors.push(err('BAD_FACILITY', '沒有這項設施。', 'Unknown facility.')); continue; }
+    if (s.facilities[id]) continue;
+    if (s.cash < f.cost) { errors.push(err('NO_CASH', '現金不足，不能興建設施。', 'Not enough cash to build.')); continue; }
+    s.cash -= f.cost; s.facilities[id] = { book: f.cost };
+  }
+  if (d.buyFuel) {
+    const order = fuelOrder(s);
+    if (!s.facilities.tank || s.reserve.kg > 1 || order.kg <= 0) errors.push(err('NO_TANK', '需要燃油庫、航線與未使用的儲油空間。', 'Fuel storage, routes and empty storage are required.'));
+    else if (s.cash < order.cost) errors.push(err('NO_CASH', '現金不足，不能預購燃油。', 'Not enough cash to prebuy fuel.'));
+    else { s.cash -= order.cost; s.reserve = { kg: order.kg, unitPrice: CONST.fuelPriceUsdPerKg * s.fuelSpot }; }
+  }
   return { state: s, errors };
 }
 
@@ -481,7 +502,7 @@ function costRoute(s, ctx, r, res, pax, rev, transferPax) {
   c.fuel = bh * ac.fuelPerBlockHour * CONST.fuelPriceUsdPerKg * ctx.eff;
   const sizeF = Math.pow(ac.seats.fsc / 168, 0.7);
   c.labour = (bh * ac.crewPerBlockHour * CONST.crewScale * crewMult + (deps * CONST.groundLabourPerDep * sizeF + pax * CONST.groundLabourPerPax) * groundMult) * s.labourMult;
-  c.maintenance = bh * ac.maintPerBlockHour + deps * ac.maintPerCycle;
+  c.maintenance = (bh * ac.maintPerBlockHour + deps * ac.maintPerCycle) * (s.facilities?.depot ? 0.7 : 1);
   c.airport = (deps * (ac.airportPerDep + ac.navPerKm * d) + pax * CONST.paxCharge) * CONST.airportScale * feeAvg * airportMult + transferPax * CONST.transferHandling * 0.5;
   c.distribution = rev * CONST.distribution[lcc ? 'lcc' : 'fsc'];
   return { c, bh, deps };
@@ -571,7 +592,13 @@ export function simulateTurn(state) {
   const hoursByType = {}; let hoursAll = 0;
   for (const rw of rows) { hoursByType[rw.r.type] = (hoursByType[rw.r.type] || 0) + rw.bh; hoursAll += rw.bh; }
   const nAc = s.fleet.length;
-  const ovh = (CONST.overhead.base + CONST.overhead.perAircraft * nAc) * mpt * (s.model === 'lcc' ? CONST.lcc.overheadMult : 1) + s.pending.overheadCash;
+  let facilityDep = 0, facilityRunning = 0;
+  for (const [id, built] of Object.entries(s.facilities || {})) {
+    const f = FACILITIES[id]; if (!f) continue;
+    const dep = Math.min(built.book, f.cost / (f.years * 12) * mpt);
+    built.book -= dep; facilityDep += dep; facilityRunning += f.monthly * mpt;
+  }
+  const ovh = facilityRunning + facilityDep + (CONST.overhead.base + CONST.overhead.perAircraft * nAc) * mpt * (s.model === 'lcc' ? CONST.lcc.overheadMult : 1) + s.pending.overheadCash;
   let allocOwn = 0, allocInt = 0;
   for (const rw of rows) {
     const ty = rw.r.type, share = hoursByType[ty] > 0 ? rw.bh / hoursByType[ty] : 0;
@@ -596,7 +623,9 @@ export function simulateTurn(state) {
   let deferral = 0;
   if (s.defer.turnsLeft > 0) { deferral = leaseCash * s.defer.pct; s.deferred += deferral; s.defer.turnsLeft--; if (s.defer.turnsLeft === 0) s.defer.after = 2; }
   else if (s.defer.after > 0 && s.deferred > 0) { const pay = s.deferred / s.defer.after; deferral = -pay; s.deferred -= pay; s.defer.after--; }
-  s.cash += profit + depTotal + s.pending.ownershipNonCash - principal - govPrincipal + deferral;
+  const fuelPrepaid = ctx.reserveUsedKg * (s.reserve?.unitPrice || 0);
+  if (s.reserve) s.reserve.kg = Math.max(0, s.reserve.kg - ctx.reserveUsedKg);
+  s.cash += profit + depTotal + facilityDep + fuelPrepaid + s.pending.ownershipNonCash - principal - govPrincipal + deferral;
   s.pending = { ownershipCash: 0, ownershipNonCash: 0, overheadCash: 0 };
   // company metrics
   const lfC = ask > 0 ? rpk / ask : 0;
@@ -615,7 +644,8 @@ export function simulateTurn(state) {
     debt: Math.round(s.fleet.reduce((a, x) => a + x.loan, 0) + s.debt.reduce((a, x) => a + x.balance, 0)),
     transferPax: Math.round(xferPax.reduce((a, b) => a + b, 0) * W),
     ancillaryRevenue: Math.round(rows.reduce((a, r) => a + r.ancRev, 0)),
-    ancillaryShare: revenue > 1 ? rows.reduce((a, r) => a + r.ancRev, 0) / revenue : 0
+    ancillaryShare: revenue > 1 ? rows.reduce((a, r) => a + r.ancRev, 0) / revenue : 0,
+    facilityRunning: Math.round(facilityRunning), facilityDep: Math.round(facilityDep), fuelPrepaid: Math.round(fuelPrepaid), reserveKg: Math.round(s.reserve?.kg || 0)
   };
   for (const k of Object.keys(company)) if (typeof company[k] === 'number') company[k] = fin(company[k]);
   // route reports
@@ -658,7 +688,7 @@ export function simulateTurn(state) {
   // lessons
   updateLessons(s, ctx, report, rows);
   report.lessons = Object.entries(s.lessons).filter(([, v]) => v.seen === t).map(([k]) => k);
-  s.history.push({ turn: t, revenue: company.revenue, profit: company.profit, margin: company.margin, cash: company.cash, lf: company.loadFactor, fuelIndex: company.fuelIndex, aircraft: company.fleet });
+  s.history.push({ turn: t, revenue: company.revenue, profit: company.profit, margin: company.margin, cash: company.cash, lf: company.loadFactor, fuelIndex: company.fuelIndex, aircraft: company.fleet, pax: company.pax, transferPax: company.transferPax });
   s.turn++;
   // game over
   if (s.cash < 0) {
@@ -813,6 +843,7 @@ export function serialize(state) { return JSON.stringify(state); }
 export function deserialize(str) {
   const o = JSON.parse(str);
   if (!o || o.v !== 1 || !MODES[o.mode]) throw new Error('bad save');
+  o.facilities ||= {}; o.reserve ||= { kg: 0, unitPrice: 0 }; o.scenario ||= 'free';
   return o;
 }
 
