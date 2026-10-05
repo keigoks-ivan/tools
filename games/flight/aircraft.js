@@ -6,9 +6,11 @@ export function createAircraft(THREE) {
   const group = new THREE.Group();
   group.name = 'MQ-320 civil twinjet';
   const materials = {
-    white: new THREE.MeshStandardMaterial({ color: 0xf3f5f4, roughness: 0.43, metalness: 0.1 }),
-    navy: new THREE.MeshStandardMaterial({ color: 0x122c43, roughness: 0.48, metalness: 0.12 }),
-    teal: new THREE.MeshStandardMaterial({ color: 0x18baa9, roughness: 0.42, metalness: 0.1 }),
+    white: new THREE.MeshStandardMaterial({ color: 0xf1eee6, roughness: 0.43, metalness: 0.1 }),
+    navy: new THREE.MeshStandardMaterial({ color: 0x86b4f0, roughness: 0.45, metalness: 0.1 }), // 天青 sky-blue glaze (fin, winglets)
+    teal: new THREE.MeshStandardMaterial({ color: 0x3a689c, roughness: 0.42, metalness: 0.1 }), // deep blue accent
+    sky: new THREE.MeshStandardMaterial({ color: 0xbcdcff, roughness: 0.43, metalness: 0.1 }), // pale blue door panels
+    ink: new THREE.MeshStandardMaterial({ color: 0x1e3550, roughness: 0.42, metalness: 0.12 }), // ink-navy nacelles
     wing: new THREE.MeshStandardMaterial({ color: 0xc3cbd0, roughness: 0.48, metalness: 0.32 }),
     edge: new THREE.MeshStandardMaterial({ color: 0x758a97, roughness: 0.36, metalness: 0.65 }),
     metal: new THREE.MeshStandardMaterial({ color: 0xa6b7bf, roughness: 0.3, metalness: 0.8 }),
@@ -126,14 +128,16 @@ export function createAircraft(THREE) {
     }
     return mesh(geometry(positions, indices, uvs), material);
   }
-  const bodyMaterial = materials.white.clone();
+  const bodyMaterial = materials.white.clone(); bodyMaterial.color.set(0xffffff);
   if (typeof document !== 'undefined') {
     const canvas = document.createElement('canvas'); canvas.width = 2048; canvas.height = 512;
     const context = canvas.getContext('2d');
-    context.fillStyle = '#f3f5f4'; context.fillRect(0, 0, canvas.width, canvas.height);
-    // The radial UV wraps from the crown, around the right side, belly and left side.
-    context.fillStyle = '#122c43'; context.fillRect(0, 192, 2048, 128);
-    context.fillStyle = '#18baa9'; context.fillRect(0, 180, 2048, 11); context.fillRect(0, 320, 2048, 11);
+    // The radial UV wraps from the crown, around the right side, belly and left side (belly at canvas mid-height):
+    // one soft vertical gradient, pale sky blue on top to a deeper blue underneath.
+    const sky = context.createLinearGradient(0, 0, 0, canvas.height);
+    sky.addColorStop(0, '#b6d8ff'); sky.addColorStop(0.25, '#9ccaff'); sky.addColorStop(0.5, '#82b4f6');
+    sky.addColorStop(0.75, '#9ccaff'); sky.addColorStop(1, '#b6d8ff');
+    context.fillStyle = sky; context.fillRect(0, 0, canvas.width, canvas.height);
     const texture = new THREE.CanvasTexture(canvas); texture.colorSpace = THREE.SRGBColorSpace;
     bodyMaterial.map = texture;
   }
@@ -172,20 +176,34 @@ export function createAircraft(THREE) {
     }
   }
   windows.instanceMatrix.needsUpdate = true; group.add(windows);
-  const titleMaterial = decal('INVESTMQUEST', '#122c43', 1536, 256);
-  const registrationMaterial = decal('MQ-320', '#506773', 768, 256);
+  function wordmark(width = 1536, height = 160) { // 「天青航空」 serif name followed by spaced SKYGLAZE caps
+    if (typeof document === 'undefined') return null;
+    const canvas = document.createElement('canvas'); canvas.width = width; canvas.height = height;
+    const g = canvas.getContext('2d'); g.fillStyle = '#1e3550'; g.textBaseline = 'alphabetic';
+    const cjk = `700 ${height * 0.7}px "Noto Serif TC", "Songti TC", "PMingLiU", "Noto Serif CJK TC", serif`;
+    const latin = `500 ${height * 0.3}px "Helvetica Neue", "Avenir Next", Arial, sans-serif`;
+    g.font = cjk; const w1 = g.measureText('天青航空').width;
+    g.font = latin; if ('letterSpacing' in g) g.letterSpacing = `${height * 0.09}px`; const w2 = g.measureText('SKYGLAZE').width;
+    const gap = height * 0.35, x0 = (width - w1 - gap - w2) / 2;
+    g.textAlign = 'left'; g.font = cjk; if ('letterSpacing' in g) g.letterSpacing = '0px'; g.fillText('天青航空', x0, height * 0.75);
+    g.font = latin; if ('letterSpacing' in g) g.letterSpacing = `${height * 0.09}px`; g.fillText('SKYGLAZE', x0 + w1 + gap, height * 0.74);
+    const texture = new THREE.CanvasTexture(canvas); texture.colorSpace = THREE.SRGBColorSpace;
+    return new THREE.MeshBasicMaterial({ map: texture, transparent: true, depthWrite: false, side: THREE.DoubleSide });
+  }
+  const titleMaterial = wordmark();
+  const registrationMaterial = decal('MQ-320', '#1e3550', 768, 256);
   for (const side of [-1, 1]) {
     if (titleMaterial) curvedDecal(titleMaterial, side, 1.21, -4.6, 10.8, 1.1);
     if (registrationMaterial) curvedDecal(registrationMaterial, side, 0.02, 8.25, 2.2, 0.6);
     for (const z of [-11.95, 10.1]) {
       const door = box(materials.edge, group, side * 1.952, 0.44, z, 0.018, 1.61, 0.77);
       door.rotation.z = side * -0.065;
-      box(materials.white, group, side * 1.965, 0.44, z, 0.02, 1.52, 0.68).rotation.z = side * -0.065;
+      box(materials.sky, group, side * 1.965, 0.44, z, 0.02, 1.52, 0.68).rotation.z = side * -0.065;
       box(materials.dark, group, side * 1.988, 0.55, z + 0.22, 0.024, 0.035, 0.1);
     }
     for (const z of [-1.35, 0.45]) {
       box(materials.edge, group, side * 1.951, 0.66, z, 0.018, 1.13, 0.47);
-      box(materials.white, group, side * 1.962, 0.66, z, 0.02, 1.04, 0.39);
+      box(materials.sky, group, side * 1.962, 0.66, z, 0.02, 1.04, 0.39);
     }
   }
 
@@ -255,9 +273,54 @@ export function createAircraft(THREE) {
   tailIndices.push(0, 2, 1, 0, 3, 2, 4, 5, 6, 4, 6, 7);
   for (let i = 0; i < 4; i++) { const n = (i + 1) % 4; tailIndices.push(i, n, i + 4, n, n + 4, i + 4); }
   mesh(geometry(tailPositions, tailIndices), materials.navy);
-  const tailMark = decal('MQ', '#eaf9f6', 512, 512);
+  // Fin: blue glaze gradient with a porcelain crackle network (開片), drawn as an overlay.
+  // Porcelain crackle (開片): Voronoi cells from jittered seeds (half-plane clipping); each shared edge is drawn once with a slight wobble.
+  function crackleCells(g, W, H, seed, count, color, alpha, width) {
+    let s = seed; const rnd = () => ((s = (s * 16807) % 2147483647) / 2147483647);
+    const pts = []; for (let i = 0; i < count; i++) pts.push([rnd() * W, rnd() * H]);
+    const pad = 60, seen = new Set(); g.strokeStyle = color; g.globalAlpha = alpha; g.lineWidth = width; g.lineCap = 'round';
+    pts.forEach((p, i) => {
+      let poly = [[-pad, -pad], [W + pad, -pad], [W + pad, H + pad], [-pad, H + pad]];
+      pts.forEach((q, j) => {
+        if (j === i || !poly.length) return;
+        const nx = q[0] - p[0], ny = q[1] - p[1], c = (q[0] * q[0] + q[1] * q[1] - p[0] * p[0] - p[1] * p[1]) / 2;
+        const out = [], dist = (v) => v[0] * nx + v[1] * ny - c;
+        for (let k = 0; k < poly.length; k++) {
+          const a = poly[k], b = poly[(k + 1) % poly.length], da = dist(a), db = dist(b);
+          if (da <= 0) out.push(a);
+          if ((da <= 0) !== (db <= 0)) { const t = da / (da - db); out.push([a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t]); }
+        }
+        poly = out;
+      });
+      for (let k = 0; k < poly.length; k++) {
+        let a = poly[k], b = poly[(k + 1) % poly.length];
+        if (a[0] > b[0] || (a[0] === b[0] && a[1] > b[1])) [a, b] = [b, a];
+        const key = `${a[0].toFixed(1)},${a[1].toFixed(1)},${b[0].toFixed(1)},${b[1].toFixed(1)}`;
+        if (seen.has(key) || Math.hypot(b[0] - a[0], b[1] - a[1]) < 0.5) continue; seen.add(key);
+        const wob = (Math.sin(a[0] * 12.9898 + a[1] * 78.233 + b[0] * 3.7 + b[1] * 5.1) * 43758.5453) % 1;
+        const mx = (a[0] + b[0]) / 2 + wob * 7, my = (a[1] + b[1]) / 2 + ((wob * 7919) % 1) * 7;
+        g.beginPath(); g.moveTo(a[0], a[1]); g.quadraticCurveTo(mx, my, b[0], b[1]); g.stroke();
+      }
+    });
+    g.globalAlpha = 1;
+  }
+  let tailMark = null;
+  if (typeof document !== 'undefined') {
+    const W = 1024, H = 816, canvas = document.createElement('canvas'); canvas.width = W; canvas.height = H;
+    const g = canvas.getContext('2d');
+    const glaze = g.createLinearGradient(0, 0, W, H); glaze.addColorStop(0, '#a6caf8'); glaze.addColorStop(1, '#6ba0e4');
+    g.fillStyle = glaze; g.fillRect(0, 0, W, H);
+    crackleCells(g, W, H, 11, 24, '#24497a', 0.55, 5.2);
+    crackleCells(g, W, H, 12, 70, '#4f7db0', 0.45, 2.4);
+    const texture = new THREE.CanvasTexture(canvas); texture.colorSpace = THREE.SRGBColorSpace; texture.anisotropy = 4;
+    tailMark = new THREE.MeshStandardMaterial({ map: texture, roughness: 0.42, metalness: 0.08, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2 });
+  }
   for (const side of [-1, 1]) {
-    if (tailMark) mesh(new THREE.PlaneGeometry(1.78, 1.78), tailMark, group, side * 0.228, 5.25, 15.43).rotation.y = side * Math.PI / 2;
+    if (tailMark) {
+      const fx = (y) => 0.34 - 0.22 * (y - 1.4) / 6.15 + 0.012, fp = [], fu = [], fi = [];
+      tailPoints.forEach(([y, z], i) => { fp.push(side * fx(y), y, z); fu.push((z - 10.1) / 7.8, (y - 1.4) / 6.2); if (i > 1) fi.push(0, i - 1, i); });
+      mesh(geometry(fp, fi, fu), tailMark);
+    }
     const stripe = geometry([side * 0.16, 6.38, 14.25, side * 0.155, 6.38, 16.46, side * 0.19, 5.92, 16.58, side * 0.2, 5.92, 13.89], [0, 1, 2, 0, 2, 3]);
     const stripeMaterial = materials.teal.clone(); stripeMaterial.side = THREE.DoubleSide;
     mesh(stripe, stripeMaterial);
@@ -268,7 +331,7 @@ export function createAircraft(THREE) {
   for (const side of [-1, 1]) {
     const engine = new THREE.Group(); engine.position.set(side * 5.65, -1.61, 0); group.add(engine);
     const sections = [[-4.24, 0.98], [-4.08, 1.085], [-3.55, 1.12], [-1.9, 1.03], [-0.68, 0.83], [0.1, 0.66]];
-    mesh(loft(sections, 36, false), materials.white, engine);
+    mesh(loft(sections, 36, false), materials.ink, engine);
     mesh(new THREE.TorusGeometry(0.971, 0.074, 8, 36), materials.metal, engine, 0, 0, -4.245);
     const throat = mesh(new THREE.CylinderGeometry(0.912, 0.86, 0.64, 32, 1, true), materials.dark, engine, 0, 0, -3.945);
     throat.rotation.x = Math.PI / 2; throat.material.side = THREE.DoubleSide;

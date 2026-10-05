@@ -39,6 +39,13 @@ export const AIRPORT = Object.freeze({
     Object.freeze({ x: -5000, z: 11000 }), Object.freeze({ x: 0, z: 11000 }), // base turn: 9.7 km from the glidepath origin, 3,000 ft intercepts the 3 deg path there
   ]),
   circuitAltFt: 4500, // MSL, about 3,100 ft above the field
+  // MQ-172 circuit (same frame, left-hand): 2,900 ft MSL, base and final at 2,300 ft. Highest terrain within 300 m of the route is 1,883 ft. Same numbers as LIGHT_CIRCUIT in light.pilot.mjs.
+  lightCircuit: Object.freeze({
+    waypoints: Object.freeze([
+      Object.freeze({ x: 0, z: -3500 }), Object.freeze({ x: -2500, z: -3500 }), Object.freeze({ x: -2500, z: 5500 }), Object.freeze({ x: 0, z: 5500 }),
+    ]),
+    altFt: 2900, finalAltFt: 2300,
+  }),
   landmarks: Object.freeze([
     Object.freeze({ id: 'hb', zh: '蘇黎世火車站', en: 'Zurich HB', bearing: 184, km: 10.5 }),
     Object.freeze({ id: 'lake', zh: '蘇黎世湖', en: 'Lake Zurich', bearing: 182, km: 12.5 }),

@@ -2,7 +2,7 @@
 // Frame and units are physics.mjs': metres, local frame (origin = runway 14 centre at field elevation, -z = runway heading 137.3 deg true,
 // +x = right). Ring altitudes are feet MSL (what the pilot reads on the altimeter); the physics state holds metres above the field.
 // Coordinates are whole metres / feet on purpose: dev/check_tours.py hashes them to prove that dev/tour_clearance.json matches this file.
-import { AIRCRAFT, RUNWAY, createFlightState, stepFlight, quaternionFromEuler } from './physics.mjs';
+import { AIRCRAFT, PROFILES, RUNWAY, createFlightState, stepFlight, quaternionFromEuler } from './physics.mjs';
 
 const FT = 3.28084, KT = 1.943844, RAD = Math.PI / 180;
 const freeze = o => Object.freeze(o);
@@ -12,6 +12,10 @@ const ring = (x, z, altFt) => freeze({ x, z, altFt });
 export const RING = freeze({ radius: 150, tube: 12 }); // metres. Hit = crossing the ring plane inside `radius`.
 export const START_KT = 200;                           // indicated, flaps 0, gear up
 export const LIMITS = freeze({ minLegM: 3000, maxTurnDeg: 60, maxGradePct: 5, ringClearFt: 1000, legClearFt: 800 });
+
+// MQ-172 limits (profiles.mjs light.tour.limits): legs >= 2 km, turns <= 75 deg, climb <= 2 %, descent <= 4 %, 5-9 min at the start speed,
+// every leg after a turn >= 1.05 * 2R sin|turn| with R at the autopilot bank. Clearances are checked by dev/check_tours.py (light block).
+export const LIGHT_LIMITS = freeze({ ...PROFILES.light.tour.limits });
 
 const lm = (id, zh, en, x, z, radiusM, factZh, factEn) => freeze({ id, zh, en, x, z, radiusM, factZh, factEn });
 
@@ -47,7 +51,31 @@ export const TOURS = freeze([
     ]),
   }),
 ]);
-export const tourById = id => TOURS.find(t => t.id === id) || null;
+// MQ-172 routes. Facts (Wikipedia, checked 2026-10-05): Walensee, Churfirsten, Quinten, Glärnisch as above; Seerenbachfälle (three falls, 50 + 305 + 190 m, 585 m in total,
+// 47.138 N 9.165 E, Amden SG); Weesen (423 m, west end of the Walensee, 47.133 N 9.100 E); Näfels (437 m, battle of 1388, memorial procession every April);
+// Glarus (472 m, cantonal capital, fire of 10-11 May 1861 destroyed 593 buildings, two thirds of the town, under the Glärnisch).
+export const LIGHT_TOURS = freeze([
+  freeze({
+    id: 'valley', aircraft: 'light', scenery: 'alps', startKt: 100, tagZh: '瓦倫湖低空', tagEn: 'Valley',
+    zh: '瓦倫湖低空：屈爾菲爾斯坦崖下到格拉魯斯', en: 'Walensee low pass: beneath the Churfirsten to Glarus',
+    descZh: '沿瓦倫湖北岸貼著崖壁低飛，過韋森轉進林特河谷，一路南下到格拉魯斯。', descEn: 'Low along the Walensee under the Churfirsten cliffs, past Weesen into the Linth valley and south to Glarus.',
+    // Start over the east end of the lake heading west (100 kt, 3,500 ft). Left of the track: the Churfirsten wall. Valley walls stay >= 600 m away on both sides (dev/check_tours.py).
+    start: ring(-13450, -65357, 3500),
+    rings: freeze([ring(-11238, -63316, 3500), ring(-9214, -61071, 3400), ring(-7227, -58787, 3300), ring(-5060, -55809, 3200), ring(-1141, -55728, 3200), ring(938, -57871, 3250), ring(2938, -59483, 3350), ring(3827, -61668, 3400)]),
+    landmarks: freeze([
+      lm('walensee', '瓦倫湖', 'Walensee', -7150, -58870, 4500, '湖面海拔 419 公尺，北岸是整排陡崖', 'Surface 419 m above sea level, 151 m deep'),
+      lm('churfirsten', '屈爾菲爾斯坦（Churfirsten）', 'Churfirsten', -14080, -61350, 6500, '最高峰 2,306 公尺，南面是陡峭岩壁，直落瓦倫湖', 'Highest peak Hinterrugg, 2,306 m; the south face drops almost sheer to the lake'),
+      lm('quinten', '屈因滕（Quinten）', 'Quinten', -10410, -62520, 2800, '湖北岸的小村，沒有道路，只能搭船或步行', 'A village on the north shore with no road: boat or footpath only'),
+      lm('seerenbach', '澤倫巴赫瀑布（Seerenbachfälle）', 'Seerenbach Falls', -8892, -58653, 3500, '三段瀑布合計落差約 585 公尺，流入瓦倫湖', 'Three falls dropping about 585 m in total into the Walensee'),
+      lm('weesen', '韋森（Weesen）', 'Weesen', -4912, -55747, 2500, '瓦倫湖西端的小鎮，海拔 423 公尺', 'A town at the west end of the Walensee, 423 m above sea level'),
+      lm('naefels', '內費爾斯（Näfels）', 'Näfels', -613, -56745, 2500, '1388 年瑞士邦聯在此擊敗哈布斯堡軍隊，每年 4 月仍有紀念行列', 'Swiss Confederates beat a Habsburg army here in 1388; a memorial procession is held every April'),
+      lm('glarus', '格拉魯斯（Glarus）', 'Glarus', 4407, -62184, 2500, '格拉魯斯州首府，1861 年大火燒掉約三分之二的建築', 'Capital of the canton; the fire of 1861 destroyed about two thirds of the town'),
+      lm('glaernisch', '格拉爾尼施山（Glärnisch）', 'Glärnisch', 10760, -61480, 8000, '最高點約 2,900 公尺', 'Highest point Bächistock, 2,915 m'),
+    ]),
+  }),
+]);
+export const toursFor = x => (typeof x === 'string' ? x : x?.aircraft) === 'light' ? LIGHT_TOURS : TOURS;
+export const tourById = id => TOURS.find(t => t.id === id) || LIGHT_TOURS.find(t => t.id === id) || null;
 
 // ---- geometry ------------------------------------------------------------------------------------------------------
 export const bearing = (a, b) => Math.atan2(b.x - a.x, -(b.z - a.z)) / RAD; // local degrees, 0 = runway heading, clockwise
@@ -72,19 +100,21 @@ export const ringHeightM = ringDef => ringDef.altFt / FT - RUNWAY.fieldElevation
 // ---- start state: level, trimmed, flaps 0, gear up ---------------------------------------------------------------------
 const densityRatio = altitude => Math.pow(Math.max(216.65, 288.15 - Math.max(0, altitude + RUNWAY.fieldElevation) * .0065) / 288.15, 4.2561);
 export function createTourState(tour) {
-  const s = createFlightState('cruise'), h = bearing(tour.start, tour.rings[0]), hr = h * RAD, y = ringHeightM(tour.start);
-  const ias = START_KT / KT, tas = ias / Math.sqrt(densityRatio(y));
+  const light = tour.aircraft === 'light', startKt = tour.startKt || START_KT;
+  const s = createFlightState('cruise', light ? 'light' : 'jet'), h = bearing(tour.start, tour.rings[0]), hr = h * RAD, y = ringHeightM(tour.start);
+  const ias = startKt / KT, tas = ias / Math.sqrt(densityRatio(y));
   s.tour = tour.id;
   s.position = { x: tour.start.x, y, z: tour.start.z };
   s.velocity = { x: tas * Math.sin(hr), y: 0, z: -tas * Math.cos(hr) };
-  s.quaternion = quaternionFromEuler(2.5 * RAD, hr, 0);
-  s.flaps = 0; s.flapPosition = 0; s.gear = false; s.gearPosition = 0;
-  s.throttle = s.engine = .3;
+  s.quaternion = quaternionFromEuler((light ? 2 : 2.5) * RAD, hr, 0);
+  s.flaps = 0; s.flapPosition = 0;
+  if (!light) { s.gear = false; s.gearPosition = 0; } // the light's gear is fixed: it stays down
+  s.throttle = s.engine = light ? .72 : .3;
   // Let the autopilot settle the aircraft for a while, then hand it over with its thrust, trim and attitude but at the start point again.
   s.autopilot = { enabled: true, heading: h, altitude: y, speed: ias };
   for (let i = 0; i < 60 * 120; i++) stepFlight(s, { gear: false, flaps: 0, autopilot: { enabled: true, heading: h, altitude: y, speed: ias } }, 1 / 120, {});
   const settled = { ...s.autopilot };
-  s.position = { x: tour.start.x, y, z: tour.start.z }; s.elapsed = 0; s.fuel = AIRCRAFT.initialFuel; s.angularVelocity = { x: 0, y: 0, z: 0 };
+  s.position = { x: tour.start.x, y, z: tour.start.z }; s.elapsed = 0; s.fuel = (light ? PROFILES.light : AIRCRAFT).initialFuel; s.angularVelocity = { x: 0, y: 0, z: 0 };
   s.autopilot = { ...settled, enabled: false };
   return s;
 }
@@ -134,7 +164,7 @@ export function nearestLandmark(tour, position) {
 export function parseTourBest(text) {
   try {
     const o = JSON.parse(text), out = {};
-    if (o && typeof o === 'object') for (const t of TOURS) { const v = Number(o[t.id]); if (Number.isFinite(v) && v > 0) out[t.id] = v; }
+    if (o && typeof o === 'object') for (const t of [...TOURS, ...LIGHT_TOURS]) { const v = Number(o[t.id]); if (Number.isFinite(v) && v > 0) out[t.id] = v; }
     return out;
   } catch { return {}; }
 }

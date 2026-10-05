@@ -12,6 +12,11 @@ list, so editing a ring without re-running this script fails the test suite.
 Limits (the game's own rules, see tour.test.mjs): >= 1000 ft over the terrain at every ring, >= 800 ft along every leg.
 A second figure, "wide", is the clearance against the highest terrain within 300 m either side of the path.
 
+MQ-172 (light) routes, LIGHT_TOURS in tour.mjs, get a second block "light" in the report (the jet "ringsHash" and "tours" blocks are untouched):
+vertical clearance as above, plus a lateral valley-wall check (from every 100 m leg sample, rays to the left and right in 25 m steps up to 3 km to the
+first point at or above altitude - 500 ft: each side >= 600 m and left + right >= 2 * R30 + 300 m, R30 = turn radius at 30 deg of bank), plus the track
+the scripted pilot (tour.pilot.mjs) actually flies (1 s samples): >= 800 ft over the terrain and >= 400 m to the walls all along it.
+
 Usage: python3 games/flight/dev/check_tours.py            (exit 1 on a violation)
 """
 import hashlib, json, math, os, subprocess, sys
@@ -151,36 +156,124 @@ def rings_hash(tours):
     return hashlib.sha256(json.dumps(flat, separators=(',', ':')).encode()).hexdigest()[:16]
 
 
+def check_vertical(t, terrain):
+    """Ring and leg clearance over the terrain (ft): returns (ring_clear, legs)."""
+    pts = [t['start']] + t['rings']
+    legs, ring_clear = [], []
+    for i, r in enumerate(t['rings']):
+        ground = terrain.msl(r['x'], r['z'])
+        ring_clear.append(round(r['altFt'] - ground * FT))
+    for i in range(1, len(pts)):
+        a, b = pts[i - 1], pts[i]
+        length = math.hypot(b['x'] - a['x'], b['z'] - a['z'])
+        steps = max(1, math.ceil(length / SAMPLE_M))
+        best, bestw, at = 1e9, 1e9, 0
+        for s in range(steps + 1):
+            f = s / steps
+            x, z = a['x'] + (b['x'] - a['x']) * f, a['z'] + (b['z'] - a['z']) * f
+            alt = a['altFt'] + (b['altFt'] - a['altFt']) * f
+            c = alt - terrain.msl(x, z) * FT
+            w = alt - terrain.wide_max(x, z) * FT
+            if c < best:
+                best, at = c, f
+            bestw = min(bestw, w)
+        legs.append({'to': i, 'lengthM': round(length), 'minClearFt': round(best), 'atFraction': round(at, 2), 'minWideClearFt': round(bestw)})
+    return ring_clear, legs
+
+
 def check(tours, terrain):
     report = {'note': terrain.tour_note, 'ringsHash': rings_hash(tours), 'tours': {}}
     ok = True
     for t in tours:
-        pts = [t['start']] + t['rings']
-        legs, ring_clear = [], []
-        for i, r in enumerate(t['rings']):
-            ground = terrain.msl(r['x'], r['z'])
-            ring_clear.append(round(r['altFt'] - ground * FT))
-        for i in range(1, len(pts)):
-            a, b = pts[i - 1], pts[i]
-            length = math.hypot(b['x'] - a['x'], b['z'] - a['z'])
-            steps = max(1, math.ceil(length / SAMPLE_M))
-            best, bestw, at = 1e9, 1e9, 0
-            for s in range(steps + 1):
-                f = s / steps
-                x, z = a['x'] + (b['x'] - a['x']) * f, a['z'] + (b['z'] - a['z']) * f
-                alt = a['altFt'] + (b['altFt'] - a['altFt']) * f
-                c = alt - terrain.msl(x, z) * FT
-                w = alt - terrain.wide_max(x, z) * FT
-                if c < best:
-                    best, at = c, f
-                bestw = min(bestw, w)
-            legs.append({'to': i, 'lengthM': round(length), 'minClearFt': round(best), 'atFraction': round(at, 2), 'minWideClearFt': round(bestw)})
+        ring_clear, legs = check_vertical(t, terrain)
         tour_ok = all(c >= RING_MIN_FT for c in ring_clear) and all(l['minClearFt'] >= LEG_MIN_FT for l in legs)
         ok &= tour_ok
         report['tours'][t['id']] = {'ringClearFt': ring_clear, 'legs': legs, 'minRingFt': min(ring_clear), 'minLegFt': min(l['minClearFt'] for l in legs),
                                     'minWideLegFt': min(l['minWideClearFt'] for l in legs), 'ok': tour_ok}
     report['ok'] = ok
     return report
+
+
+# ---- MQ-172 (light) routes ------------------------------------------------------------------------------------------
+WALL_DROP_FT, WALL_STEP_M, WALL_MAX_M, WALL_SIDE_M, LEG_SAMPLE_M = 500, 25, 3000, 600, 100
+FLOWN_CLEAR_FT, FLOWN_WALL_M, G = 800, 400, 9.80665
+
+
+def load_light():
+    js = ("import {LIGHT_TOURS} from './tour.mjs'; import {flyTour} from './tour.pilot.mjs';"
+          "const out = LIGHT_TOURS.map(t => { const r = flyTour(t, {track: true}); return {tour: t, track: r.track, hits: r.run.hits, timeS: r.time, maxBankDeg: r.maxBank, crashed: r.state.crashed}; });"
+          "process.stdout.write(JSON.stringify(out))")
+    out = subprocess.run(['node', '--input-type=module', '-e', js], cwd=ROOT, capture_output=True, text=True, check=True).stdout
+    return json.loads(out)
+
+
+def turn_radius_m(ias_kt, alt_ft, bank_deg):
+    sigma = max(216.65, 288.15 - alt_ft / FT * 0.0065) / 288.15
+    tas = ias_kt / 1.943844 / math.sqrt(sigma ** 4.2561)
+    return tas * tas / (G * math.tan(math.radians(bank_deg)))
+
+
+def wall_distance(terrain, x, z, fx, fz, alt_ft, left):
+    """Distance (m) from a point to the first terrain point >= alt - 500 ft, to the left or right of the direction (fx, fz) (local frame, unit vector)."""
+    nx, nz = (fz, -fx) if left else (-fz, fx)  # right of (0, -1) is (+1, 0): right = (-fz, fx)
+    limit = (alt_ft - WALL_DROP_FT) / FT
+    d = WALL_STEP_M
+    while d <= WALL_MAX_M:
+        if terrain.msl(x + nx * d, z + nz * d) >= limit:
+            return d
+        d += WALL_STEP_M
+    return WALL_MAX_M
+
+
+def check_light(entry, terrain, bank_deg=30, ias_kt=100):
+    t = entry['tour']
+    pts = [t['start']] + t['rings']
+    ring_clear, legs = check_vertical(t, terrain)
+    need = 2 * turn_radius_m(ias_kt, max(p['altFt'] for p in pts), bank_deg) + 300
+    left_min = right_min = sum_min = 1e9
+    where = {}
+    for i in range(1, len(pts)):
+        a, b = pts[i - 1], pts[i]
+        length = math.hypot(b['x'] - a['x'], b['z'] - a['z'])
+        fx, fz = (b['x'] - a['x']) / length, (b['z'] - a['z']) / length
+        for k in range(math.ceil(length / LEG_SAMPLE_M) + 1):
+            f = min(1.0, k * LEG_SAMPLE_M / length)
+            x, z, alt = a['x'] + (b['x'] - a['x']) * f, a['z'] + (b['z'] - a['z']) * f, a['altFt'] + (b['altFt'] - a['altFt']) * f
+            l, r = wall_distance(terrain, x, z, fx, fz, alt, True), wall_distance(terrain, x, z, fx, fz, alt, False)
+            for key, v in (('left', l), ('right', r), ('sum', l + r)):
+                cur = {'left': left_min, 'right': right_min, 'sum': sum_min}[key]
+                if v < cur:
+                    where[key] = {'leg': i, 'fraction': round(f, 2)}
+            left_min, right_min, sum_min = min(left_min, l), min(right_min, r), min(sum_min, l + r)
+    # the track the scripted pilot flies (1 s samples): vertical clearance and walls (direction = track between neighbouring samples)
+    tr = entry['track']
+    flown_clear, flown_wall, flown_at = 1e9, 1e9, 0
+    for j, p in enumerate(tr):
+        q0, q1 = tr[max(0, j - 1)], tr[min(len(tr) - 1, j + 1)]
+        dx, dz = q1['x'] - q0['x'], q1['z'] - q0['z']
+        n = math.hypot(dx, dz)
+        alt_ft = (p['y'] + FIELD_M) * FT
+        flown_clear = min(flown_clear, alt_ft - terrain.msl(p['x'], p['z']) * FT)
+        if n > 1e-6:
+            w = min(wall_distance(terrain, p['x'], p['z'], dx / n, dz / n, alt_ft, True), wall_distance(terrain, p['x'], p['z'], dx / n, dz / n, alt_ft, False))
+            if w < flown_wall:
+                flown_wall, flown_at = w, p['t']
+    vertical_ok = all(c >= RING_MIN_FT for c in ring_clear) and all(l['minClearFt'] >= LEG_MIN_FT for l in legs)
+    wall_ok = left_min >= WALL_SIDE_M and right_min >= WALL_SIDE_M and sum_min >= need
+    flown_ok = flown_clear >= FLOWN_CLEAR_FT and flown_wall >= FLOWN_WALL_M and entry['hits'] == len(t['rings']) and not entry['crashed']
+    return {'ringClearFt': ring_clear, 'legs': legs, 'minRingFt': min(ring_clear), 'minLegFt': min(l['minClearFt'] for l in legs),
+            'walls': {'minLeftM': round(left_min), 'minRightM': round(right_min), 'minSumM': round(sum_min), 'requiredSumM': round(need),
+                      'sideLimitM': WALL_SIDE_M, 'dropFt': WALL_DROP_FT, 'worst': where},
+            'flown': {'timeS': round(entry['timeS']), 'hits': entry['hits'], 'maxBankDeg': round(entry['maxBankDeg'], 1), 'minClearFt': round(flown_clear),
+                      'minWallM': round(flown_wall), 'minWallAtS': flown_at, 'clearLimitFt': FLOWN_CLEAR_FT, 'wallLimitM': FLOWN_WALL_M},
+            'ok': bool(vertical_ok and wall_ok and flown_ok)}
+
+
+def check_light_all(entries, terrain):
+    tours = [e['tour'] for e in entries]
+    block = {'ringsHash': rings_hash(tours), 'tours': {e['tour']['id']: check_light(e, terrain) for e in entries}}
+    block['ok'] = all(v['ok'] for v in block['tours'].values())
+    return block
 
 
 def main():
@@ -193,6 +286,15 @@ def main():
         for l in r['legs']:
             print(f'  leg -> ring {l["to"]}: {l["lengthM"]:6d} m  min clearance {l["minClearFt"]:6d} ft at {l["atFraction"]:.2f}  (within {WIDE_M} m: {l["minWideClearFt"]} ft)')
         print(f'  {"PASS" if r["ok"] else "FAIL"}: worst leg {r["minLegFt"]} ft (limit {LEG_MIN_FT})')
+    light = check_light_all(load_light(), terrain)
+    for tid, r in light['tours'].items():
+        w, f = r['walls'], r['flown']
+        print(f'\nMQ-172 {tid}: ring clearance (ft) {r["ringClearFt"]}  min {r["minRingFt"]}; worst leg {r["minLegFt"]} ft')
+        print(f'  valley walls (>= alt - {WALL_DROP_FT} ft): left >= {w["minLeftM"]} m, right >= {w["minRightM"]} m (limit {WALL_SIDE_M}), left+right >= {w["minSumM"]} m (limit {w["requiredSumM"]})')
+        print(f'  flown track: {f["timeS"]} s, {f["hits"]} rings, bank {f["maxBankDeg"]} deg, clearance >= {f["minClearFt"]} ft (limit {FLOWN_CLEAR_FT}), walls >= {f["minWallM"]} m (limit {FLOWN_WALL_M})')
+        print(f'  {"PASS" if r["ok"] else "FAIL"}')
+    report['light'] = light
+    report['ok'] = bool(report['ok'] and light['ok'])  # jet "ok" kept per tour in report["tours"]; the top-level flag covers both aircraft
     json.dump(report, open(os.path.join(HERE, 'tour_clearance.json'), 'w'), indent=1)
     print('\nwrote dev/tour_clearance.json')
     return 0 if report['ok'] else 1

@@ -1,12 +1,11 @@
 import { AIRPORT } from './airport.mjs';
+import { PROFILES } from './profiles.mjs';
 
-// Generic twin-engine narrowbody. SI units; this is a simulation model, not aircraft certification data.
-export const AIRCRAFT = Object.freeze({
-  name: 'MQ-320', emptyMass: 50000, initialFuel: 8500,
-  wingArea: 122.6, span: 35.8, length: 37.6, chord: 3.5,
-  maxThrust: 240000, gearHeight: 4, maxSpeed: 155, rotateSpeed: 72,
-  inertia: Object.freeze({ x: 5100000, y: 5700000, z: 1700000 }),
-});
+// Aircraft models live in profiles.mjs. SI units; this is a simulation model, not aircraft certification data.
+// AIRCRAFT is the original twin-engine narrowbody (MQ-320) and keeps every key it always had; the light single (MQ-172) is PROFILES.light.
+export { PROFILES };
+export const AIRCRAFT = PROFILES.jet;
+export const profileOf = state => PROFILES[state?.aircraft] || PROFILES.jet;
 // Runway geometry in the local frame (origin = runway centre, -z = runway heading); values come from the airport config.
 // `elevation` is the local runway height (0); `fieldElevation` is its height above sea level, used for air density.
 export const RUNWAY = Object.freeze({
@@ -23,8 +22,14 @@ const length = v => Math.hypot(v.x, v.y, v.z);
 const wrapAngle = v => ((v + 180) % 360 + 360) % 360 - 180;
 const unit = v => { const n = length(v) || 1; return { x: v.x / n, y: v.y / n, z: v.z / n }; };
 const copy = v => ({ x: v.x || 0, y: v.y || 0, z: v.z || 0 });
-// Indicated-airspeed limit (m/s): VMO clean, reduced with flap extension.
-const speedLimit = flapPosition => flapPosition > 0.2 ? 120 - 11 * flapPosition : AIRCRAFT.maxSpeed;
+// Indicated-airspeed limit (m/s): VMO clean, reduced with flap extension (jet: linear; light: Vfe steps).
+const speedLimit = (P, flapPosition) => {
+  const L = P.speedLimit;
+  if (L.steps) { let v = L.clean; for (const [over, limit] of L.steps) if (flapPosition > over) v = limit; return v; }
+  return flapPosition > L.flapOver ? L.base - L.perFlap * flapPosition : L.clean;
+};
+// Linear interpolation in a per-notch table (index = flap notch 0..3).
+const tableAt = (table, f) => { const i = Math.min(table.length - 2, Math.max(0, Math.floor(f))); return table[i] + (table[i + 1] - table[i]) * clamp(f - i, 0, 1); };
 
 export function normalizeQuaternion(q) {
   const n = Math.hypot(q.x, q.y, q.z, q.w);
@@ -92,55 +97,67 @@ function airState(state) {
   };
 }
 
-function coefficients(aoa, flap, spoilers, agl) {
-  const fraction = flap / 3;
-  const slope = 5.1;
-  const cl0 = 0.22 + 0.75 * fraction;
-  const stallAlpha = (16 - fraction) * RAD;
+function coefficients(P, aoa, flap, spoilers, agl) {
+  const A = P.aero, fraction = flap / 3;
+  const slope = A.slope;
+  const cl0 = A.flapTable ? A.cl0 + tableAt(A.flapTable.cl0, flap) : A.cl0 + A.flapCl0 * fraction;
+  const stallAlpha = (A.stall - A.flapStall * fraction) * RAD;
   const maxLift = cl0 + slope * stallAlpha;
   let lift = cl0 + slope * aoa;
   if (aoa > stallAlpha) {
     lift = maxLift * (0.55 + 0.45 * Math.exp(-(aoa - stallAlpha) * 9)) * Math.max(0.12, Math.cos(aoa));
-  } else if (aoa < -18 * RAD) {
-    const negativeMax = cl0 - slope * 18 * RAD;
-    lift = negativeMax * (0.55 + 0.45 * Math.exp((aoa + 18 * RAD) * 9)) * Math.max(0.12, Math.cos(aoa));
+  } else if (aoa < -A.negStall * RAD) {
+    const negativeMax = cl0 - slope * A.negStall * RAD;
+    lift = negativeMax * (0.55 + 0.45 * Math.exp((aoa + A.negStall * RAD) * 9)) * Math.max(0.12, Math.cos(aoa));
   }
-  const groundEffect = 1 + 0.1 * clamp(1 - Math.max(0, agl) / (AIRCRAFT.span * 0.5), 0, 1);
-  lift *= groundEffect * (spoilers ? 0.55 : 1);
+  const groundEffect = 1 + A.groundEffect * clamp(1 - Math.max(0, agl) / (P.span * 0.5), 0, 1);
+  lift *= groundEffect * (spoilers ? A.spoilerLift : 1);
   const separated = Math.max(0, Math.abs(aoa) - stallAlpha);
+  const flapDrag = A.flapTable ? tableAt(A.flapTable.cd, flap) : fraction * A.flapCd;
   return {
     lift, maxLift, stallAlpha,
-    drag: 0.023 + fraction * 0.07 + 0.045 * lift * lift + (spoilers ? 0.065 : 0) + 0.9 * separated,
+    drag: A.cd0 + flapDrag + A.k * lift * lift + (spoilers ? A.spoilerCd : 0) + A.separatedCd * separated,
   };
 }
 
-export function createFlightState(scenario = 'runway') {
+// Thrust available at full power (N). Jet: lapse with density and a mild speed loss. Prop: power-limited, thrust falls linearly with speed.
+function propSigma(T, density) { const sigma = density / 1.225; return (sigma - T.sigmaOffset) / (1 - T.sigmaOffset); }
+function availableThrust(P, density, speed) {
+  const T = P.thrust;
+  if (T.type === 'prop') return propSigma(T, density) * Math.max(0, P.maxThrust - T.speedSlope * speed);
+  return P.maxThrust * Math.pow(density / 1.225, T.lapseExp) * Math.max(T.floor, 1 - speed * T.slope);
+}
+
+export function createFlightState(scenario = 'runway', aircraft = 'jet') {
+  const P = PROFILES[aircraft] || PROFILES.jet, S = P.scenarios;
   const approach = scenario === 'approach';
   const cruise = scenario === 'cruise';
-  const speed = approach ? 75 : cruise ? 120 : 0;
+  const speed = approach ? S.approach.speed : cruise ? S.cruise.speed : 0;
   const glide = RUNWAY.glideslope * RAD;
-  // The approach starts 7 km from the threshold exactly on the glidepath.
-  const altitude = approach ? AIRCRAFT.gearHeight + (7000 + RUNWAY.nearThreshold - RUNWAY.touchdownTarget) * Math.tan(glide) : cruise ? 1800 : AIRCRAFT.gearHeight;
+  // The approach starts S.approach.km from the threshold exactly on the glidepath.
+  const altitude = approach ? P.gearHeight + (S.approach.km * 1000 + RUNWAY.nearThreshold - RUNWAY.touchdownTarget) * Math.tan(glide) : cruise ? S.cruise.altitude : P.gearHeight;
   const gamma = approach ? -glide : 0;
-  const pitch = approach ? 2 * RAD : cruise ? 4.6 * RAD : 0;
+  const pitch = approach ? S.approach.pitch * RAD : cruise ? S.cruise.pitch * RAD : 0;
+  const gearDown = P.fixedGear || !cruise || S.cruise.gear;
   const state = {
+    aircraft: P.id,
     scenario: approach ? 'approach' : cruise ? 'cruise' : 'runway',
-    position: { x: cruise ? -1400 : 0, y: altitude, z: approach ? RUNWAY.nearThreshold + 7000 : cruise ? 6000 : RUNWAY.length / 2 - 180 },
+    position: { x: cruise ? S.cruise.x : 0, y: altitude, z: approach ? RUNWAY.nearThreshold + S.approach.km * 1000 : cruise ? S.cruise.z : RUNWAY.length / 2 - 180 },
     velocity: { x: 0, y: speed * Math.sin(gamma), z: -speed * Math.cos(gamma) },
     quaternion: quaternionFromEuler(pitch), angularVelocity: { x: 0, y: 0, z: 0 },
-    throttle: approach ? 0.24 : cruise ? 0.205 : 0,
-    engine: approach ? 0.24 : cruise ? 0.205 : 0,
-    flaps: approach ? 3 : cruise ? 0 : 1,
-    flapPosition: approach ? 3 : cruise ? 0 : 1,
-    gear: !cruise, gearPosition: cruise ? 0 : 1,
-    trim: approach ? 0.29 : cruise ? 0.25 : 0.15,
-    brake: 0, spoilers: false, fuel: AIRCRAFT.initialFuel,
+    throttle: approach ? S.approach.throttle : cruise ? S.cruise.throttle : 0,
+    engine: approach ? S.approach.throttle : cruise ? S.cruise.throttle : 0,
+    flaps: approach ? S.approach.flaps : cruise ? S.cruise.flaps : S.runway.flaps,
+    flapPosition: approach ? S.approach.flaps : cruise ? S.cruise.flaps : S.runway.flaps,
+    gear: gearDown, gearPosition: gearDown ? 1 : 0,
+    trim: approach ? S.approach.trim : cruise ? S.cruise.trim : S.runway.trim,
+    brake: 0, spoilers: false, fuel: P.initialFuel,
     onGround: !approach && !cruise, crashed: false, crashReason: '',
     elapsed: 0, touchdown: null, gLoad: 1,
     groundElevation: 0,
     wind: { x: 0, y: 0, z: 0 },
     // Autopilot speed is indicated airspeed in m/s, matching the cockpit speed selector.
-    autopilot: { enabled: false, heading: 0, altitude: approach ? altitude : cruise ? 1800 : 1000, speed: (speed || 120) * Math.sqrt(atmosphere(altitude + RUNWAY.fieldElevation) / 1.225) },
+    autopilot: { enabled: false, heading: 0, altitude: approach ? altitude : cruise ? S.cruise.altitude : S.runway.apAltitude, speed: (speed || S.default.speed) * Math.sqrt(atmosphere(altitude + RUNWAY.fieldElevation) / 1.225) },
   };
   return state;
 }
@@ -155,53 +172,62 @@ function crash(state, reason) {
   state.autopilot.enabled = false;
 }
 
-function autopilotControls(state, controls, air, angles, dt) {
+function autopilotControls(P, state, controls, air, angles, dt) {
   if (!state.autopilot.enabled || state.onGround) return controls;
-  const ap = state.autopilot;
+  const ap = state.autopilot, A = P.ap, S = P.sas;
   const headingError = wrapAngle(ap.heading - angles.heading);
-  const bankTarget = clamp(headingError * 0.8, -25, 25);
+  const bankTarget = clamp(headingError * A.bankGain, -A.bank, A.bank);
   const altitudeError = ap.altitude - state.position.y;
-  const verticalTarget = clamp(altitudeError * 0.035, -8, 8);
+  let verticalTarget = clamp(altitudeError * A.altGain, -A.vs, A.vs);
   const flightPath = Math.atan2(state.velocity.y, Math.hypot(state.velocity.x, state.velocity.z)) / RAD;
-  const pitchTarget = clamp((verticalTarget - state.velocity.y) * 0.75 + flightPath + air.aoa / RAD, -6, 13);
-  const aero = coefficients(air.aoa, state.flapPosition, state.spoilers, state.position.y - state.groundElevation);
-  const drag = 0.5 * air.density * air.speed * air.speed * AIRCRAFT.wingArea * (aero.drag + 0.019 * state.gearPosition);
-  const climbThrust = (AIRCRAFT.emptyMass + state.fuel) * G * state.velocity.y / Math.max(air.speed, 30);
-  const availableThrust = AIRCRAFT.maxThrust * Math.pow(air.density / 1.225, 0.7) * Math.max(0.55, 1 - air.speed * 0.0011);
+  const aero = coefficients(P, air.aoa, state.flapPosition, state.spoilers, state.position.y - state.groundElevation);
+  const drag = 0.5 * air.density * air.speed * air.speed * P.wingArea * (aero.drag + P.aero.cdGear * state.gearPosition);
+  const climbThrust = (P.emptyMass + state.fuel) * G * state.velocity.y / Math.max(air.speed, A.minSpeed);
+  const available = availableThrust(P, air.density, air.speed);
+  // A power-limited aircraft cannot climb on demand: cap the commanded climb at the rate the spare thrust can sustain, so speed is protected.
+  if (A.powerLimited) verticalTarget = Math.min(verticalTarget, Math.max(0, (available - drag) * air.speed / ((P.emptyMass + state.fuel) * G) * A.climbPowerFraction));
+  const pitchTarget = clamp((verticalTarget - state.velocity.y) * A.vsPitchGain + flightPath + air.aoa / RAD, A.pitchMin, A.pitchMax);
   const indicatedSpeed = air.speed * Math.sqrt(air.density / 1.225);
-  // Never command a speed above the current flap limit (4 m/s margin) and pull thrust back if above it.
-  const speedCap = speedLimit(state.flapPosition) - 4;
+  // Never command a speed above the current flap limit (margin) and pull thrust back if above it.
+  const speedCap = speedLimit(P, state.flapPosition) - A.speedMargin;
   const speedError = Math.min(ap.speed, speedCap) - indicatedSpeed;
-  ap.speedIntegral = clamp((ap.speedIntegral || 0) + speedError * dt * 0.0015, -0.18, 0.18);
-  const trimPitchRate = clamp(((2.6 + state.trim * 8) * RAD - air.aoa) * 0.55, -0.13, 0.13);
+  ap.speedIntegral = clamp((ap.speedIntegral || 0) + speedError * dt * A.integralGain, -A.integralMax, A.integralMax);
+  const trimPitchRate = clamp(((S.trimAoaBase + state.trim * S.trimAoaGain) * RAD - air.aoa) * S.aoaGain, -S.aoaLimit, S.aoaLimit);
   return {
     ...controls,
-    pitch: clamp((pitchTarget - angles.pitch) * 0.12 - state.angularVelocity.x * 2 - trimPitchRate / 0.19, -0.65, 0.65),
-    roll: clamp((bankTarget - angles.roll) * 0.055 + state.angularVelocity.z * 1.8, -0.65, 0.65),
-    yaw: clamp(air.beta * 1.4, -0.3, 0.3),
-    throttle: clamp((drag + climbThrust) / availableThrust + speedError * 0.025 + ap.speedIntegral - Math.max(0, indicatedSpeed - speedCap) * 0.2, 0, 1),
+    pitch: clamp((pitchTarget - angles.pitch) * A.pitchGain - state.angularVelocity.x * A.pitchDamp - trimPitchRate / S.pitch, -A.ctrlMax, A.ctrlMax),
+    roll: clamp((bankTarget - angles.roll) * A.rollGain + state.angularVelocity.z * A.rollDamp, -A.ctrlMax, A.ctrlMax),
+    yaw: clamp(air.beta * A.yawGain, -A.yawMax, A.yawMax),
+    throttle: clamp((drag + climbThrust) / available + speedError * A.speedGain + ap.speedIntegral - Math.max(0, indicatedSpeed - speedCap) * A.overspeedGain, 0, 1),
   };
 }
 
 function advance(state, controls, dt) {
+  const P = profileOf(state), T = P.thrust, S = P.sas, GR = P.ground, CR = P.crash;
   const air = airState(state);
   const angles = attitude(state.quaternion);
-  controls = autopilotControls(state, controls, air, angles, dt);
+  controls = autopilotControls(P, state, controls, air, angles, dt);
   state.throttle = controls.throttle;
-  state.engine += (state.throttle - state.engine) * (1 - Math.exp(-dt / (state.throttle > state.engine ? 3.5 : 2.2)));
+  state.engine += (state.throttle - state.engine) * (1 - Math.exp(-dt / (state.throttle > state.engine ? T.spoolUp : T.spoolDown)));
   state.flapPosition += clamp(state.flaps - state.flapPosition, -0.35 * dt, 0.35 * dt);
-  state.gearPosition += clamp((state.gear ? 1 : 0) - state.gearPosition, -dt / 5, dt / 5);
-  state.fuel = Math.max(0, state.fuel - (0.12 + state.engine * 1.23) * dt);
-  const mass = AIRCRAFT.emptyMass + state.fuel;
-  const qArea = 0.5 * air.density * air.speed * air.speed * AIRCRAFT.wingArea;
-  const aero = coefficients(air.aoa, state.flapPosition, state.spoilers, state.position.y - state.groundElevation);
+  if (P.fixedGear) state.gearPosition = 1;
+  else state.gearPosition += clamp((state.gear ? 1 : 0) - state.gearPosition, -dt / P.gear.transit, dt / P.gear.transit);
+  state.fuel = Math.max(0, state.fuel - (T.fuelIdle + state.engine * T.fuelPerEngine) * dt);
+  const mass = P.emptyMass + state.fuel;
+  const qArea = 0.5 * air.density * air.speed * air.speed * P.wingArea;
+  const aero = coefficients(P, air.aoa, state.flapPosition, state.spoilers, state.position.y - state.groundElevation);
   const lift = qArea * aero.lift;
-  const drag = qArea * (aero.drag + 0.019 * state.gearPosition + 0.2 * Math.abs(air.beta));
+  const drag = qArea * (aero.drag + P.aero.cdGear * state.gearPosition + P.aero.betaDrag * Math.abs(air.beta));
   const direction = unit(air.body);
   const liftDirection = unit({ x: 0, y: -air.body.z, z: air.body.y });
-  const thrust = state.fuel > 0 ? AIRCRAFT.maxThrust * state.engine * Math.pow(air.density / 1.225, 0.7) * Math.max(0.55, 1 - air.speed * 0.0011) : 0;
+  let thrust = 0;
+  if (state.fuel > 0) {
+    thrust = T.type === 'prop'
+      ? propSigma(T, air.density) * state.engine * Math.max(0, P.maxThrust - T.speedSlope * air.speed) - (1 - state.engine) * T.idleDrag * qArea
+      : P.maxThrust * state.engine * Math.pow(air.density / 1.225, T.lapseExp) * Math.max(T.floor, 1 - air.speed * T.slope);
+  }
   const bodyForce = {
-    x: -drag * direction.x - qArea * air.beta * 0.72,
+    x: -drag * direction.x - qArea * air.beta * P.aero.sideForce,
     y: lift * liftDirection.y - drag * direction.y,
     z: lift * liftDirection.z - drag * direction.z - thrust,
   };
@@ -210,25 +236,25 @@ function advance(state, controls, dt) {
   state.gLoad = bodyForce.y / (mass * G);
 
   // Stability augmentation damps angular rates while retaining AoA trim, stall and inertia.
-  const targetAoA = (2.6 + state.trim * 8) * RAD;
-  const pitchRateTarget = controls.pitch * 0.19 + clamp((targetAoA - air.aoa) * 0.55, -0.13, 0.13);
-  const rollRateTarget = -controls.roll * 0.31;
-  const yawRateTarget = -controls.yaw * 0.105 - air.beta * 0.55;
-  const controlAuthority = clamp(qArea / 260000, 0, 1.9);
+  const targetAoA = (S.trimAoaBase + state.trim * S.trimAoaGain) * RAD;
+  const pitchRateTarget = controls.pitch * S.pitch + clamp((targetAoA - air.aoa) * S.aoaGain, -S.aoaLimit, S.aoaLimit);
+  const rollRateTarget = -controls.roll * S.roll;
+  const yawRateTarget = -controls.yaw * S.yaw - air.beta * S.betaGain;
+  const controlAuthority = clamp(qArea / S.authorityQ, 0, S.authorityMax);
   const omega = state.angularVelocity;
-  const pitchMoment = AIRCRAFT.inertia.x * (pitchRateTarget - omega.x) * 0.95 * controlAuthority;
-  const rollMoment = AIRCRAFT.inertia.z * (rollRateTarget - omega.z) * 2.1 * controlAuthority;
-  const yawMoment = AIRCRAFT.inertia.y * (yawRateTarget - omega.y) * 0.85 * controlAuthority;
+  const pitchMoment = P.inertia.x * (pitchRateTarget - omega.x) * S.pitchK * controlAuthority;
+  const rollMoment = P.inertia.z * (rollRateTarget - omega.z) * S.rollK * controlAuthority;
+  const yawMoment = P.inertia.y * (yawRateTarget - omega.y) * S.yawK * controlAuthority;
   // Rigid-body cross terms conserve the coupling between yaw, roll and pitch.
-  omega.x += (pitchMoment - (AIRCRAFT.inertia.z - AIRCRAFT.inertia.y) * omega.y * omega.z) / AIRCRAFT.inertia.x * dt;
-  omega.y += (yawMoment - (AIRCRAFT.inertia.x - AIRCRAFT.inertia.z) * omega.z * omega.x) / AIRCRAFT.inertia.y * dt;
-  omega.z += (rollMoment - (AIRCRAFT.inertia.y - AIRCRAFT.inertia.x) * omega.x * omega.y) / AIRCRAFT.inertia.z * dt;
+  omega.x += (pitchMoment - (P.inertia.z - P.inertia.y) * omega.y * omega.z) / P.inertia.x * dt;
+  omega.y += (yawMoment - (P.inertia.x - P.inertia.z) * omega.z * omega.x) / P.inertia.y * dt;
+  omega.z += (rollMoment - (P.inertia.y - P.inertia.x) * omega.x * omega.y) / P.inertia.z * dt;
 
   if (state.onGround) {
     const groundSpeed = Math.hypot(state.velocity.x, state.velocity.z);
     const normal = Math.max(0, G - force.y / mass);
     const onRunway = Math.abs(state.position.x) <= RUNWAY.width / 2 && Math.abs(state.position.z) <= RUNWAY.length / 2;
-    const friction = (onRunway ? 0.014 : 0.085) * normal + controls.brake * 3.8;
+    const friction = (onRunway ? GR.friction : GR.frictionOff) * normal + controls.brake * GR.brake;
     if (groundSpeed > 0.005) {
       const braking = Math.min(friction, groundSpeed / dt);
       acceleration.x -= braking * state.velocity.x / groundSpeed;
@@ -236,24 +262,24 @@ function advance(state, controls, dt) {
     }
     const right = rotateVector(state.quaternion, { x: 1, y: 0, z: 0 });
     const side = state.velocity.x * right.x + state.velocity.z * right.z;
-    const grip = Math.min(5.5, Math.abs(side) * 3) * Math.sign(side) * clamp(normal / G, 0, 1);
+    const grip = Math.min(GR.grip, Math.abs(side) * 3) * Math.sign(side) * clamp(normal / G, 0, 1);
     acceleration.x -= grip * right.x;
     acceleration.z -= grip * right.z;
-    const steering = -controls.yaw * 0.4 * clamp(groundSpeed / 4, 0, 1) / (1 + groundSpeed / 18);
+    const steering = -controls.yaw * GR.steer * clamp(groundSpeed / 4, 0, 1) / (1 + groundSpeed / GR.steerSpeed);
     omega.y += (steering - omega.y) * (1 - Math.exp(-dt * 4));
     omega.z += (angles.roll * RAD * 2.5 - omega.z) * (1 - Math.exp(-dt * 8));
-    if (groundSpeed < 35 || (controls.pitch <= 0.05 && angles.pitch < 0.5)) {
+    if (groundSpeed < GR.noseHoldSpeed || (controls.pitch <= 0.05 && angles.pitch < 0.5)) {
       omega.x += (-angles.pitch * RAD * 4 - omega.x) * (1 - Math.exp(-dt * 8));
     }
     if (angles.pitch < 0) omega.x += (-angles.pitch * RAD * 4 - omega.x) * (1 - Math.exp(-dt * 8));
-    if (angles.pitch > 12.5 && groundSpeed > 25) { crash(state, 'tail-strike'); return; }
-    if (Math.abs(angles.roll) > 8 && groundSpeed > 25) { crash(state, 'wing-strike'); return; }
-    if (force.y > mass * G * 1.015 && groundSpeed > 40) {
+    if (angles.pitch > CR.tailPitch && groundSpeed > CR.strikeSpeed) { crash(state, 'tail-strike'); return; }
+    if (Math.abs(angles.roll) > CR.wingRoll && groundSpeed > CR.strikeSpeed) { crash(state, 'wing-strike'); return; }
+    if (force.y > mass * G * GR.liftOffForce && groundSpeed > GR.liftOffSpeed) {
       state.onGround = false;
     } else {
       acceleration.y = 0;
       state.velocity.y = 0;
-      state.position.y = RUNWAY.elevation + AIRCRAFT.gearHeight;
+      state.position.y = RUNWAY.elevation + P.gearHeight;
       state.gLoad = 1;
     }
   }
@@ -274,7 +300,7 @@ function advance(state, controls, dt) {
   }
 
   const onRunway = Math.abs(state.position.x) <= RUNWAY.width / 2 && Math.abs(state.position.z) <= RUNWAY.length / 2;
-  const contactHeight = (onRunway ? RUNWAY.elevation : state.groundElevation) + (state.gearPosition > 0.95 ? AIRCRAFT.gearHeight : 1.4);
+  const contactHeight = (onRunway ? RUNWAY.elevation : state.groundElevation) + (state.gearPosition > 0.95 ? P.gearHeight : P.gear.bellyHeight);
   // Descending contact is a touchdown; rising terrain (not the runway) is hit regardless of vertical speed.
   const terrainHit = !onRunway && state.velocity.y > 0 && state.position.y < contactHeight - 0.05;
   if (!state.onGround && state.position.y <= contactHeight && (state.velocity.y <= 0 || terrainHit)) {
@@ -286,31 +312,33 @@ function advance(state, controls, dt) {
       headingError: wrapAngle(landingAngles.heading - RUNWAY.heading), elapsed: state.elapsed,
     };
     state.position.y = contactHeight;
-    if (terrainHit || state.touchdown.sinkRate > 10 || air.speed > 110 || landingAngles.pitch < -4) crash(state, 'ground-impact');
+    if (terrainHit || state.touchdown.sinkRate > CR.impactSink || air.speed > CR.impactSpeed || landingAngles.pitch < -4) crash(state, 'ground-impact');
     else if (state.gearPosition < 0.95) crash(state, 'gear-up');
     else if (Math.abs(state.position.x) > RUNWAY.width / 2 || Math.abs(state.position.z) > RUNWAY.length / 2) crash(state, 'off-runway');
-    else if (state.touchdown.sinkRate > 4.5) crash(state, 'hard-landing');
-    else if (Math.abs(landingAngles.roll) > 8) crash(state, 'wing-strike');
-    else if (landingAngles.pitch > 13) crash(state, 'tail-strike');
-    else if (Math.abs(state.touchdown.headingError) > 20) crash(state, 'side-load');
+    else if (state.touchdown.sinkRate > CR.hardSink) crash(state, 'hard-landing');
+    else if (Math.abs(landingAngles.roll) > CR.landingRoll) crash(state, 'wing-strike');
+    else if (landingAngles.pitch > CR.landingPitch) crash(state, 'tail-strike');
+    else if (Math.abs(state.touchdown.headingError) > CR.sideHeading) crash(state, 'side-load');
     state.onGround = true;
     state.velocity.y = 0;
     state.angularVelocity.x *= 0.2;
     state.angularVelocity.z *= 0.2;
   }
-  if (state.onGround && state.position.z < RUNWAY.farThreshold - 60 && Math.hypot(state.velocity.x, state.velocity.z) > 35) crash(state, 'runway-overrun');
+  if (state.onGround && state.position.z < RUNWAY.farThreshold - 60 && Math.hypot(state.velocity.x, state.velocity.z) > CR.overrunSpeed) crash(state, 'runway-overrun');
 }
 
 export function stepFlight(state, input = {}, dt = 1 / 120, environment = {}) {
   if (!Number.isFinite(dt) || dt <= 0 || state.crashed) return state;
+  const P = profileOf(state);
   // Bound interruption recovery; callers should use a fixed-step accumulator for elapsed real time.
   dt = Math.min(dt, 0.25);
   state.wind = copy(environment.wind || state.wind);
   state.groundElevation = environment.groundElevation || 0;
   state.flaps = clamp(Math.round(input.flaps ?? state.flaps), 0, 3);
-  state.gear = input.gear ?? state.gear;
+  // Fixed gear and no spoilers on the light aircraft: those inputs are ignored.
+  state.gear = P.fixedGear ? true : input.gear ?? state.gear;
   state.trim = clamp(input.trim ?? state.trim, -1, 1);
-  state.spoilers = input.spoilers ?? state.spoilers;
+  state.spoilers = P.hasSpoilers ? input.spoilers ?? state.spoilers : false;
   state.brake = clamp(input.brake ?? 0, 0, 1);
   if (input.autopilot) Object.assign(state.autopilot, input.autopilot);
   const controls = {
@@ -327,11 +355,12 @@ export function stepFlight(state, input = {}, dt = 1 / 120, environment = {}) {
 }
 
 export function getFlightData(state, runway = RUNWAY) {
+  const P = profileOf(state);
   const air = airState(state);
   const angles = attitude(state.quaternion);
-  const aero = coefficients(air.aoa, state.flapPosition, state.spoilers, state.position.y - state.groundElevation);
-  const mass = AIRCRAFT.emptyMass + state.fuel;
-  const stallSpeed = Math.sqrt(2 * mass * G / (air.density * AIRCRAFT.wingArea * aero.maxLift));
+  const aero = coefficients(P, air.aoa, state.flapPosition, state.spoilers, state.position.y - state.groundElevation);
+  const mass = P.emptyMass + state.fuel;
+  const stallSpeed = Math.sqrt(2 * mass * G / (air.density * P.wingArea * aero.maxLift));
   const distance = state.position.z - runway.nearThreshold;
   const localizerDistance = state.position.z - (runway.farThreshold - 300);
   const glideDistance = state.position.z - runway.touchdownTarget;
@@ -339,7 +368,8 @@ export function getFlightData(state, runway = RUNWAY) {
   const ilsValid = !state.onGround && !state.crashed && aligned && localizerDistance > 0;
   const gsValid = ilsValid && glideDistance > 0;
   const localizer = ilsValid ? Math.atan2(state.position.x, localizerDistance) / RAD : 0;
-  const glideslope = gsValid ? Math.atan2(state.position.y - AIRCRAFT.gearHeight, glideDistance) / RAD - runway.glideslope : 0;
+  const glideslope = gsValid ? Math.atan2(state.position.y - P.gearHeight, glideDistance) / RAD - runway.glideslope : 0;
+  const running = state.fuel > 0 && !state.crashed;
   return {
     ...angles, airspeed: air.speed, indicatedAirspeed: air.speed * Math.sqrt(air.density / 1.225),
     groundSpeed: Math.hypot(state.velocity.x, state.velocity.z), altitude: state.position.y,
@@ -347,9 +377,11 @@ export function getFlightData(state, runway = RUNWAY) {
     groundTrack: (Math.atan2(state.velocity.x, -state.velocity.z) / RAD + 360) % 360,
     aoa: air.aoa / RAD, sideslip: air.beta / RAD, gLoad: state.gLoad,
     stallSpeed, stallWarning: !state.onGround && (air.aoa > aero.stallAlpha - 2 * RAD || air.speed < stallSpeed * 1.08),
-    overspeedWarning: air.speed * Math.sqrt(air.density / 1.225) > speedLimit(state.flapPosition),
-    gearWarning: !state.onGround && state.position.y < 180 && state.velocity.y < -0.5 && state.gearPosition < 0.95,
-    engineN1: state.fuel > 0 && !state.crashed ? 20 + state.engine * 80 : 0,
+    overspeedWarning: air.speed * Math.sqrt(air.density / 1.225) > speedLimit(P, state.flapPosition),
+    gearWarning: !P.fixedGear && !state.onGround && state.position.y < 180 && state.velocity.y < -0.5 && state.gearPosition < 0.95,
+    engineN1: running ? 20 + state.engine * 80 : 0,
+    // Synthetic RPM for the light aircraft's tachometer (fixed-pitch prop: the real value also depends on airspeed).
+    ...(P.ui.rpm ? { engineRpm: running ? P.ui.rpm.idle + state.engine * (P.ui.rpm.max - P.ui.rpm.idle) : 0 } : {}),
     distanceToThreshold: distance, localizer, glideslope,
     localizerDeviation: localizer, glideslopeDeviation: glideslope, ilsValid, gsValid,
     runwayRemaining: Math.max(0, state.position.z - runway.farThreshold),

@@ -12,8 +12,8 @@ export function carrot(a, b, p, share = .15) {
   return { x: b.x - ux * to * share, z: b.z - uz * to * share };
 }
 
-export function flyTour(tour, { seconds = 600, kt = START_KT } = {}) {
-  const s = createTourState(tour), run = createTourRun(tour), ias = kt / KT;
+export function flyTour(tour, { seconds = 600, kt = tour.startKt || START_KT, track = false } = {}) {
+  const s = createTourState(tour), run = createTourRun(tour), ias = kt / KT, samples = [];
   let maxBank = 0, minAgl = Infinity, data = getFlightData(s);
   updateTourRun(run, s.position);
   for (let i = 0; i < seconds * 120 && !s.crashed && !run.done; i++) {
@@ -26,6 +26,7 @@ export function flyTour(tour, { seconds = 600, kt = START_KT } = {}) {
     data = getFlightData(s);
     updateTourRun(run, s.position);
     maxBank = Math.max(maxBank, Math.abs(data.roll));
+    if (track && i % 120 === 0) samples.push({ t: Math.round(s.elapsed), x: Math.round(s.position.x), y: Math.round(s.position.y * 10) / 10, z: Math.round(s.position.z) }); // 1 s samples, local frame (y = metres above the field)
   }
-  return { state: s, data, run, time: s.elapsed, maxBank };
+  return { state: s, data, run, time: s.elapsed, maxBank, track: samples };
 }

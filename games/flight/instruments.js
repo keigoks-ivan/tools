@@ -53,7 +53,10 @@ export function createInstruments(pfdCanvas, ndCanvas) {
 
     pfd.fillStyle = '#0b191e'; pfd.fillRect(0, 0, 440, 23);
     for (const x of [89, 244, 333]) line(pfd, x, 3, x, 20, color.line);
-    text(pfd, data.onGround ? 'GROUND' : 'THRUST', 43, 11, 9, color.green);
+    if (options.rpmMax && data.engineRpm != null) { // piston engine: RPM readout with a small bar, scaled to the redline
+      text(pfd, `${Math.round(data.engineRpm / 10) * 10} RPM`, 43, 9, 9, color.green);
+      pfd.fillStyle = '#1d3138'; pfd.fillRect(10, 17, 66, 3); pfd.fillStyle = data.engineRpm > options.rpmMax * 0.98 ? color.amber : color.green; pfd.fillRect(10, 17, 66 * clamp(data.engineRpm / options.rpmMax, 0, 1), 3);
+    } else text(pfd, data.onGround ? 'GROUND' : (options.powerLabel || 'THRUST'), 43, 11, 9, color.green);
     text(pfd, ap.enabled ? 'HDG' : 'MANUAL', 162, 11, 11, color.green);
     text(pfd, ap.enabled ? 'ALT' : 'PITCH', 286, 11, 10, color.green);
     text(pfd, ap.enabled ? 'AP 1' : 'FD OFF', 386, 11, 10, ap.enabled ? color.green : color.dim);
@@ -144,7 +147,7 @@ export function createInstruments(pfdCanvas, ndCanvas) {
     }
     if (data.ilsValid !== false) diamond(pfd, cx - clamp((data.localizerDeviation ?? data.localizer ?? 0) / 2.5, -1, 1) * 43, locY);
     if (data.gsValid !== false) diamond(pfd, gsX, cy + clamp((data.glideslopeDeviation ?? data.glideslope ?? 0) / 0.7, -1, 1) * 51);
-    text(pfd, `RA ${Math.max(0, Math.round(((data.agl || 0) - 4) * FT))}`, 279, 214, 10, color.green);
+    text(pfd, `RA ${Math.max(0, Math.round(((data.agl || 0) - (options.gearHeight ?? 4)) * FT))}`, 279, 214, 10, color.green);
     const warning = data.crashed ? 'FLIGHT ENDED' : data.stallWarning ? 'STALL' : data.overspeedWarning ? 'OVERSPEED' : data.gearWarning ? 'GEAR' : '';
     if (warning) {
       pfd.fillStyle = '#501c17'; pfd.fillRect(cx - 52, 186, 104, 20);
