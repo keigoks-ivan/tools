@@ -1,3 +1,5 @@
+import { AIRPORT } from './airport.mjs';
+
 // Generic twin-engine narrowbody. SI units; this is a simulation model, not aircraft certification data.
 export const AIRCRAFT = Object.freeze({
   name: 'MQ-320', emptyMass: 50000, initialFuel: 8500,
@@ -5,9 +7,13 @@ export const AIRCRAFT = Object.freeze({
   maxThrust: 240000, gearHeight: 4, maxSpeed: 155, rotateSpeed: 72,
   inertia: Object.freeze({ x: 5100000, y: 5700000, z: 1700000 }),
 });
+// Runway geometry in the local frame (origin = runway centre, -z = runway heading); values come from the airport config.
+// `elevation` is the local runway height (0); `fieldElevation` is its height above sea level, used for air density.
 export const RUNWAY = Object.freeze({
-  length: 3660, width: 60, elevation: 0, nearThreshold: 1830,
-  farThreshold: -1830, heading: 0, touchdownTarget: 1430,
+  length: AIRPORT.runway.lengthM, width: AIRPORT.runway.widthM, elevation: 0, fieldElevation: AIRPORT.runway.elevationM,
+  // nearThreshold is the landing threshold (displaced from the pavement end); the pavement spans +-length/2.
+  nearThreshold: AIRPORT.runway.lengthM / 2 - (AIRPORT.runway.displacedNearM || 0), farThreshold: -AIRPORT.runway.lengthM / 2, heading: 0,
+  touchdownTarget: AIRPORT.runway.lengthM / 2 - (AIRPORT.runway.displacedNearM || 0) - AIRPORT.runway.touchdownZoneM, glideslope: AIRPORT.ils.glideslopeDeg,
 });
 
 const G = 9.80665;
@@ -82,7 +88,7 @@ function airState(state) {
     relative, body, speed,
     aoa: speed > 1 ? Math.atan2(-body.y, -body.z) : 0,
     beta: speed > 1 ? Math.asin(clamp(body.x / speed, -1, 1)) : 0,
-    density: atmosphere(state.position.y),
+    density: atmosphere(state.position.y + RUNWAY.fieldElevation),
   };
 }
 
@@ -112,12 +118,14 @@ export function createFlightState(scenario = 'runway') {
   const approach = scenario === 'approach';
   const cruise = scenario === 'cruise';
   const speed = approach ? 75 : cruise ? 120 : 0;
-  const altitude = approach ? 370 : cruise ? 1800 : AIRCRAFT.gearHeight;
-  const gamma = approach ? -3 * RAD : 0;
+  const glide = RUNWAY.glideslope * RAD;
+  // The approach starts 7 km from the threshold exactly on the glidepath.
+  const altitude = approach ? AIRCRAFT.gearHeight + (7000 + RUNWAY.nearThreshold - RUNWAY.touchdownTarget) * Math.tan(glide) : cruise ? 1800 : AIRCRAFT.gearHeight;
+  const gamma = approach ? -glide : 0;
   const pitch = approach ? 2 * RAD : cruise ? 4.6 * RAD : 0;
   const state = {
     scenario: approach ? 'approach' : cruise ? 'cruise' : 'runway',
-    position: { x: cruise ? -1400 : 0, y: altitude, z: approach ? 8830 : cruise ? 6000 : 1650 },
+    position: { x: cruise ? -1400 : 0, y: altitude, z: approach ? RUNWAY.nearThreshold + 7000 : cruise ? 6000 : RUNWAY.length / 2 - 180 },
     velocity: { x: 0, y: speed * Math.sin(gamma), z: -speed * Math.cos(gamma) },
     quaternion: quaternionFromEuler(pitch), angularVelocity: { x: 0, y: 0, z: 0 },
     throttle: approach ? 0.24 : cruise ? 0.205 : 0,
@@ -132,7 +140,7 @@ export function createFlightState(scenario = 'runway') {
     groundElevation: 0,
     wind: { x: 0, y: 0, z: 0 },
     // Autopilot speed is indicated airspeed in m/s, matching the cockpit speed selector.
-    autopilot: { enabled: false, heading: 0, altitude: approach ? 370 : cruise ? 1800 : 1000, speed: (speed || 120) * Math.sqrt(atmosphere(altitude) / 1.225) },
+    autopilot: { enabled: false, heading: 0, altitude: approach ? altitude : cruise ? 1800 : 1000, speed: (speed || 120) * Math.sqrt(atmosphere(altitude + RUNWAY.fieldElevation) / 1.225) },
   };
   return state;
 }
@@ -318,20 +326,20 @@ export function stepFlight(state, input = {}, dt = 1 / 120, environment = {}) {
   return state;
 }
 
-export function getFlightData(state) {
+export function getFlightData(state, runway = RUNWAY) {
   const air = airState(state);
   const angles = attitude(state.quaternion);
   const aero = coefficients(air.aoa, state.flapPosition, state.spoilers, state.position.y - state.groundElevation);
   const mass = AIRCRAFT.emptyMass + state.fuel;
   const stallSpeed = Math.sqrt(2 * mass * G / (air.density * AIRCRAFT.wingArea * aero.maxLift));
-  const distance = state.position.z - RUNWAY.nearThreshold;
-  const localizerDistance = state.position.z - (RUNWAY.farThreshold - 300);
-  const glideDistance = state.position.z - RUNWAY.touchdownTarget;
-  const aligned = Math.abs(wrapAngle(angles.heading - RUNWAY.heading)) < 40;
+  const distance = state.position.z - runway.nearThreshold;
+  const localizerDistance = state.position.z - (runway.farThreshold - 300);
+  const glideDistance = state.position.z - runway.touchdownTarget;
+  const aligned = Math.abs(wrapAngle(angles.heading - runway.heading)) < 40;
   const ilsValid = !state.onGround && !state.crashed && aligned && localizerDistance > 0;
   const gsValid = ilsValid && glideDistance > 0;
   const localizer = ilsValid ? Math.atan2(state.position.x, localizerDistance) / RAD : 0;
-  const glideslope = gsValid ? Math.atan2(state.position.y - AIRCRAFT.gearHeight, glideDistance) / RAD - 3 : 0;
+  const glideslope = gsValid ? Math.atan2(state.position.y - AIRCRAFT.gearHeight, glideDistance) / RAD - runway.glideslope : 0;
   return {
     ...angles, airspeed: air.speed, indicatedAirspeed: air.speed * Math.sqrt(air.density / 1.225),
     groundSpeed: Math.hypot(state.velocity.x, state.velocity.z), altitude: state.position.y,
@@ -344,8 +352,8 @@ export function getFlightData(state) {
     engineN1: state.fuel > 0 && !state.crashed ? 20 + state.engine * 80 : 0,
     distanceToThreshold: distance, localizer, glideslope,
     localizerDeviation: localizer, glideslopeDeviation: glideslope, ilsValid, gsValid,
-    runwayRemaining: Math.max(0, state.position.z - RUNWAY.farThreshold),
-    onRunway: Math.abs(state.position.x) <= RUNWAY.width / 2 && Math.abs(state.position.z) <= RUNWAY.length / 2,
+    runwayRemaining: Math.max(0, state.position.z - runway.farThreshold),
+    onRunway: Math.abs(state.position.x) <= runway.width / 2 && Math.abs(state.position.z) <= runway.length / 2,
     onGround: state.onGround, crashed: state.crashed, crashReason: state.crashReason,
     fuel: state.fuel, throttle: state.throttle, trim: state.trim,
     flapPosition: state.flapPosition, gearPosition: state.gearPosition,

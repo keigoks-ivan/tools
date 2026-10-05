@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { createFlightState, stepFlight, getFlightData, AIRCRAFT, RUNWAY } from './physics.mjs';
+import { AIRPORT, apAltitudeLocal, apFloorFt } from './airport.mjs';
 import { createAircraft, createCockpit } from './aircraft.js';
 import { createWorld } from './world.js';
 import { createGeoScenery } from './geoscenery.js';
@@ -8,7 +9,18 @@ import { createInstruments } from './instruments.js';
 const $ = id => document.getElementById(id);
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const coarsePointer = matchMedia('(pointer: coarse)').matches;
-const KT = 1.943844, FT = 3.28084, BEARING = 49.08, ELEVATION = 21;
+const KT = 1.943844, FT = 3.28084, BEARING = AIRPORT.runway.bearing, ELEVATION = AIRPORT.runway.elevationM;
+// Anisotropic filtering on four large textures is very slow on CPU rasterisers (SwiftShader, llvmpipe); real GPUs get the full 4x.
+function softwareRenderer() {
+  try {
+    const gl = renderer.getContext(), info = gl.getExtension('WEBGL_debug_renderer_info');
+    return !!info && /swiftshader|llvmpipe|software/i.test(String(gl.getParameter(info.UNMASKED_RENDERER_WEBGL)));
+  } catch { return false; }
+}
+const airportName = () => tr(AIRPORT.city.zh, AIRPORT.city.en);
+const compactLayout = matchMedia('(max-height:500px) and (orientation:landscape)');
+// Desktop-class devices get the 4096 px imagery; phones and tablets stay at 3072 px to protect GPU memory.
+const highRes = matchMedia('(pointer: fine)').matches && (navigator.deviceMemory ?? 8) >= 8;
 const heading = v => ((v % 360) + 360) % 360;
 const simulator = $('simulator');
 const dialogs = [$('flight-dialog'), $('help-dialog'), $('result-dialog')];
@@ -18,14 +30,14 @@ const tr = (zh, en) => locale === 'zh' ? zh : en;
 let state = createFlightState(), data = getFlightData(state);
 let commands = { throttle: 0, flaps: 1, gear: true, trim: .15, spoilers: false };
 let active = false, paused = false, panelHidden = false, view = 0, weather = 'clear';
-let renderer, scene, camera, plane, cockpit, world, scenery;
+let renderer, scenery, scene, camera, plane, cockpit, world, terrainReady = false;
 let sceneTime = 0, lastTime = 0, accumulator = 0, lastUI = 0, toastTimer;
 let routeIndex = 0, departed = false, resultShown = false, brakeLatch = false;
 let lookYaw = 0, lookPitch = 0, looking = false, lastPointer = { x: 0, y: 0 };
 let mouse = { x: 0, y: 0, inside: false }, touch = { x: 0, y: 0, active: false }, touchBrake = false;
 let axes = { pitch: 0, roll: 0, yaw: 0 }, lastGamepadButtons = [], gamepadNotice = false;
 const held = new Set();
-const route = [{ x: 0, z: -5500 }, { x: -5500, z: -5500 }, { x: -5500, z: 8000 }, { x: 0, z: 9000 }, { x: 0, z: RUNWAY.touchdownTarget }];
+const route = [...AIRPORT.waypoints, { x: 0, z: RUNWAY.touchdownTarget }];
 const instruments = createInstruments($('pfd'), $('nd'));
 const cameraPosition = new THREE.Vector3(), cameraTarget = new THREE.Vector3();
 const q = new THREE.Quaternion(), lookQ = new THREE.Quaternion();
@@ -39,7 +51,7 @@ function localize() {
   document.documentElement.lang = locale === 'zh' ? 'zh-Hant' : 'en';
   document.querySelectorAll('[data-zh][data-en]').forEach(el => { el.textContent = el.dataset[locale]; });
   $('lang-button').textContent = locale === 'zh' ? 'EN' : '中文';
-  updateUI();
+  updateSceneryText(); updateUI();
 }
 function setPause(value) {
   paused = value; held.clear(); axes = { pitch: 0, roll: 0, yaw: 0 }; accumulator = 0;
@@ -65,9 +77,11 @@ function setView(next = (view + 1) % 3) {
   $('view-label').textContent = [tr('座艙', 'Cockpit'), tr('機尾', 'Chase'), tr('機翼', 'Wing')][view];
 }
 function setPanel(hidden) {
-  panelHidden = hidden; $('cockpit-panel').hidden = !active || hidden;
+  // On a short landscape screen "hidden" keeps only the throttle, gear, flaps and brake as a small overlay.
+  panelHidden = hidden; const compact = hidden && compactLayout.matches;
+  $('cockpit-panel').hidden = !active || (hidden && !compact);
   $('restore-panel').hidden = !active || !hidden;
-  simulator.classList.toggle('panel-hidden', hidden);
+  simulator.classList.toggle('panel-hidden', hidden); simulator.classList.toggle('panel-compact', compact);
   if (renderer) resizeView();
 }
 function resizeView() {
@@ -88,25 +102,32 @@ function startFlight() {
   commands = { throttle: state.throttle, flaps: state.flaps, gear: state.gear, trim: state.trim, spoilers: false };
   weather = $('weather').value; brakeLatch = false; touchBrake = false;
   active = true; departed = scenario !== 'runway'; resultShown = false; routeIndex = scenario === 'runway' ? 0 : 4;
-  setPause(false); setView(0); setPanel(false); configureQuality();
+  setPause(false); setView(0); setPanel(compactLayout.matches && coarsePointer); configureQuality();
   $('mission-panel').hidden = false; $('control-cue').hidden = false;
   $('touch-controls').hidden = !matchMedia('(pointer: coarse)').matches;
   $('throttle').value = Math.round(commands.throttle * 100);
-  $('ap-speed').value = Math.round(state.autopilot.speed * KT);
-  $('ap-altitude').value = Math.round((state.autopilot.altitude + ELEVATION) * FT / 100) * 100;
+  $('ap-speed').value = scenario === 'runway' ? 180 : Math.round(state.autopilot.speed * KT); // 180 kt keeps the turn radius inside the circuit legs
+  $('ap-altitude').value = scenario === 'runway' ? AIRPORT.circuitAltFt : Math.round((state.autopilot.altitude + ELEVATION) * FT / 100) * 100;
   $('ap-heading').value = Math.round(BEARING);
-  if (!scenery) scenery = createGeoScenery(THREE, scene, {
-    latitude: 25.08369583, longitude: 121.22971389, bearing: BEARING, elevation: 21,
-    airportBounds: { minX: -180, maxX: 1900, minZ: -2200, maxZ: 2200 },
-    attributionTarget: $('scenery-credit'),
-    onStatus: status => {
-      world.setGeographic(status.imagery);
-      $('scenery-status').textContent = status.outsideCoverage ? tr('已離開地景範圍 · 請返回桃園', 'Outside scenery coverage · return to Taoyuan') : status.phase === 'ready' ? tr('衛星影像 · 真實地形', 'Satellite imagery · real terrain') : status.phase === 'fallback' ? tr('地景連線暫不可用 · 使用機場場景', 'Scenery offline · airport fallback') : `${tr('載入地景', 'Loading scenery')} ${status.loaded} / ${status.total}`;
-      $('scenery-status').dataset.ready = String(status.phase === 'ready');
-    },
-  });
   toast(tr('↓ 拉起、↑ 壓低機頭。短按操縱，放開會回中。', '↓ pitches up, ↑ down. Use short inputs; release to center.'));
   updateUI(); updateCamera(1);
+}
+const startLabel = $('start-button').firstElementChild, startText = { zh: startLabel.dataset.zh, en: startLabel.dataset.en };
+let sceneryState = null;
+function updateSceneryText() {
+  const status = sceneryState; if (!status) return;
+  startLabel.dataset.zh = terrainReady ? startText.zh : '載入地形中…'; startLabel.dataset.en = terrainReady ? startText.en : 'Loading terrain…';
+  startLabel.textContent = startLabel.dataset[locale];
+  $('scenery-status').textContent = status.outsideCoverage ? tr(`已離開地景範圍 · 請返回${airportName()}`, `Outside scenery coverage · return to ${airportName()}`)
+    : status.phase === 'ready' ? tr('空照影像 · 真實地形', 'Aerial imagery · real terrain')
+    : status.phase === 'fallback' ? tr('地景檔案無法載入 · 使用平地', 'Scenery files unavailable · flat ground')
+    : status.phase === 'imagery' ? `${tr('載入影像', 'Loading imagery')} ${status.layers} / ${status.totalLayers}` : tr('載入地形…', 'Loading terrain…');
+  $('scenery-status').dataset.ready = String(status.phase === 'ready');
+}
+function onSceneryStatus(status) {
+  sceneryState = status; world.setGeographic(status.terrain);
+  // Takeoff is only possible once the elevation grid has loaded (or failed), so the first rollout never sees a late terrain.
+  terrainReady = status.terrainSettled; $('start-button').disabled = !terrainReady; updateSceneryText();
 }
 function toggleAP() {
   if (!active || dialogs.some(d => d.open)) return;
@@ -162,10 +183,16 @@ function inputFrame(dt) {
     enabled: state.autopilot.enabled,
     heading: heading((Number($('ap-heading').value) || 0) - BEARING),
     speed: clamp(Number($('ap-speed').value) || 180, 110, 290) / KT,
-    altitude: clamp(Number($('ap-altitude').value) || 3000, 500, 20000) / FT - ELEVATION,
+    altitude: apAltitudeLocal(Number($('ap-altitude').value) || AIRPORT.circuitAltFt),
   } };
 }
 function updateCamera(dt) {
+  const debugCamera = window.__flight && window.__flightCamera; // browser tests only (?debug)
+  if (debugCamera) {
+    camera.position.set(debugCamera.x, debugCamera.y, debugCamera.z); camera.up.set(debugCamera.upx || 0, debugCamera.upy ?? 1, debugCamera.upz || 0);
+    camera.lookAt(debugCamera.tx, debugCamera.ty, debugCamera.tz); if (debugCamera.fov) { camera.fov = debugCamera.fov; camera.updateProjectionMatrix(); }
+    if (cockpit) cockpit.visible = false; if (plane) plane.group.visible = !!debugCamera.plane; return;
+  }
   q.set(state.quaternion.x, state.quaternion.y, state.quaternion.z, state.quaternion.w);
   plane.group.position.set(state.position.x, state.position.y, state.position.z); plane.group.quaternion.copy(q);
   if (active && view === 0) {
@@ -188,22 +215,22 @@ function mission() {
   const speed = data.indicatedAirspeed * KT;
   if (state.scenario === 'runway' && !departed) {
     if (!state.onGround && data.agl > 120) departed = true;
-    if (state.onGround && speed < 20) return [tr('準備起飛', 'Ready for departure'), tr('襟翼 1，油門推至 100%。↑ 壓低、↓ 拉起。', 'Flaps 1. Set thrust to 100%. ↑ nose down, ↓ nose up.'), 1, .1];
+    if (state.onGround && speed < 20) return [tr('準備起飛', 'Ready for departure'), tr('襟翼 1，油門推至 100%。↑ 壓低、↓ 拉起。起飛與進場都用 14 跑道，是簡化設定；實際多用 28 或 16 起飛。', 'Flaps 1. Thrust 100%. ↑ nose down, ↓ nose up. Takeoff and landing both use runway 14, a simplification; real departures mostly use 28 or 16.'), 1, .1];
     if (state.onGround && speed < AIRCRAFT.rotateSpeed * KT) return [tr('起飛滑跑', 'Takeoff roll'), tr('保持跑道中線；空速 140 節開始短按 ↓ 抬頭。', 'Hold the centerline. At 140 kt, briefly press ↓ to rotate.'), 2, .27];
-    return [tr('建立爬升', 'Establish the climb'), tr('保持約 10° 仰角。正爬升後收起落架，並在 180 節前開始收襟翼，再按 A 接自動駕駛。', 'Hold about 10° pitch. Retract gear in a positive climb, start retracting flaps before 180 kt, then press A for autopilot.'), 3, .45];
+    return [tr('建立爬升', 'Establish the climb'), tr('機頭朝東南，遠方是阿爾卑斯山。保持約 10° 仰角，正爬升後收起落架，180 節前開始收襟翼，再按 A 接自動駕駛。', 'Nose toward the southeast, with the Alps ahead. Hold about 10° pitch, retract gear in a positive climb, start retracting flaps before 180 kt, then press A for autopilot.'), 3, .45];
   }
   if (state.touchdown && state.onGround) return [tr('落地滑跑', 'Landing roll'), tr('油門收至 0%，B 展開擾流板，按住空白鍵煞車。', 'Idle thrust, B deploys spoilers. Hold Space to brake to a stop.'), 4, .95];
   const aligned = data.agl < 800 && data.distanceToThreshold > -300 && data.distanceToThreshold < 13000 && Math.abs(state.position.x) < 1500 && Math.min(data.heading, 360 - data.heading) < 35;
   if (state.scenario === 'approach' || aligned && (state.scenario !== 'runway' || routeIndex >= 3)) {
     if (data.agl < 25) return [tr('拉平與接地', 'Flare and touchdown'), tr('約 40 呎開始輕拉，保持 4–6° 仰角，油門收回，勿長按拉起。', 'At about 40 ft, gently flare to 4–6° pitch and idle thrust. Avoid sustained pull.'), 4, .86];
-    return [tr('穩定進場', 'Stabilized approach'), tr('約 145 節、襟翼 3、起落架 DOWN。保持 ILS 菱形置中，下降至跑道。', 'About 145 kt, flaps 3, gear DOWN. Center the ILS diamonds and descend toward the runway.'), 4, .7];
+    return [tr('穩定進場', 'Stabilized approach'), tr('約 145 節、襟翼 3、起落架 DOWN。保持 ILS 14 菱形置中，沿西北方的下滑道降到跑道。', 'About 145 kt, flaps 3, gear DOWN. Keep the ILS 14 diamonds centered and follow the glidepath in from the northwest.'), 4, .7];
   }
   if (state.scenario === 'runway') {
     const point = route[routeIndex];
     if (point && Math.hypot(point.x - state.position.x, point.z - state.position.z) < 1300 && routeIndex < route.length - 1) routeIndex++;
-    return [tr('機場航線', 'Airport circuit'), tr('依導航顯示轉彎繞場，保持約 3,000 呎；接近五邊時降至 1,200 呎。', 'Follow the navigation route at about 3,000 ft; descend to 1,200 ft before final.'), 3, .55 + routeIndex * .06];
+    return [tr('機場航線', 'Airport circuit'), tr('依導航顯示左轉繞場，保持約 4,500 呎（海拔）。右手邊是蘇黎世市區；轉進五邊前降到約 3,000 呎。', 'Follow the route in a left-hand circuit at about 4,500 ft MSL. Zurich city is on your right. Descend to about 3,000 ft before turning onto final.'), 3, .55 + routeIndex * .06];
   }
-  return [tr('自由巡航', 'Free flight'), tr('探索桃園海岸與周邊地形。可用 AP 保持空速、航向與高度，或返回 05L 落地。', 'Explore Taoyuan and the coast. Use AP to hold speed, heading and altitude, or return to 05L.'), 3, .5];
+  return [tr('自由巡航', 'Free flight'), tr('探索蘇黎世機場、湖泊與阿爾卑斯山。可用 AP 保持空速、航向與高度，或從西北方飛回 14 跑道落地。', 'Explore Zurich airport, the lakes and the Alps. Use AP to hold speed, heading and altitude, or return to runway 14 from the northwest.'), 3, .5];
 }
 function updateUI() {
   if (!data) return;
@@ -212,7 +239,7 @@ function updateUI() {
   $('mission-number').textContent = `0${number} / 04`; $('mission-progress').style.width = `${progress * 100}%`;
   const wind = Math.round(data.windSpeed * KT);
   $('wind-label').textContent = wind ? `${tr('風', 'WIND')} ${Math.round(heading(data.windDirection + BEARING))}° · ${wind} KT` : tr('無風 · 0 KT', 'CALM · 0 KT');
-  $('distance-label').textContent = data.onGround ? `RWY ${Math.round(data.runwayRemaining).toLocaleString()} M` : `${Math.max(0, data.distanceToThreshold / 1852).toFixed(1)} NM · 05L`;
+  $('distance-label').textContent = data.onGround ? `RWY ${Math.round(data.runwayRemaining).toLocaleString()} M` : `${Math.max(0, data.distanceToThreshold / 1852).toFixed(1)} NM · ${AIRPORT.runway.ident}`;
   $('control-label').textContent = touch.active || coarsePointer && $('control-mode').value === 'keyboard' ? tr('觸控操縱', 'Touch control') : { keyboard: tr('鍵盤操縱', 'Keyboard'), mouse: tr('滑鼠操縱', 'Mouse'), gamepad: tr('手把操縱', 'Gamepad') }[$('control-mode').value];
   $('control-values').textContent = `PITCH ${Math.round(axes.pitch * 100)} · ROLL ${Math.round(axes.roll * 100)}`;
   $('ap-button').setAttribute('aria-pressed', String(state.autopilot.enabled));
@@ -243,6 +270,12 @@ function updateUI() {
   $('pause-label').textContent = paused ? tr('繼續', 'Resume') : tr('暫停', 'Pause');
   $('sound-label').textContent = audio.enabled ? tr('聲音開', 'Sound on') : tr('靜音', 'Muted');
   $('view-label').textContent = [tr('座艙', 'Cockpit'), tr('機尾', 'Chase'), tr('機翼', 'Wing')][view];
+  if (simulator.classList.contains('panel-compact')) {
+    const signed = v => `${v >= 0 ? '+' : '−'}${Math.abs(v).toFixed(1)}`;
+    // LOC: + means right of the course; GS: + means above the glidepath.
+    const ils = data.ilsValid ? ` · LOC ${signed(data.localizerDeviation)}°${data.gsValid ? ` GS ${signed(data.glideslopeDeviation)}°` : ''}` : '';
+    $('compact-readout').textContent = `IAS ${Math.round(data.indicatedAirspeed * KT)} · ALT ${Math.round((data.altitude + ELEVATION) * FT).toLocaleString()} · V/S ${Math.round(data.verticalSpeed * 196.85)} · HDG ${String(Math.round(heading(data.heading + BEARING)) % 360).padStart(3, '0')}${ils}`;
+  }
   simulator.dataset.airspeed = (data.indicatedAirspeed * KT).toFixed(1); simulator.dataset.altitude = ((data.altitude + ELEVATION) * FT).toFixed(0);
   simulator.dataset.heading = heading(data.heading + BEARING).toFixed(1); simulator.dataset.pitch = data.pitch.toFixed(1);
   simulator.dataset.roll = data.roll.toFixed(1); simulator.dataset.onGround = String(state.onGround); simulator.dataset.phase = stage;
@@ -251,7 +284,7 @@ function updateUI() {
   if (active && !resultShown && (state.crashed || state.touchdown && state.onGround && data.groundSpeed < 2.5 && state.elapsed - state.touchdown.elapsed > 3)) showResult();
 }
 function drawInstruments() {
-  instruments.draw(state, data, { headingOffset: BEARING, altitudeOffset: ELEVATION, ap: state.autopilot, route: state.scenario === 'runway' ? route : [], target: state.scenario === 'runway' ? route[routeIndex] : { x: 0, z: RUNWAY.nearThreshold, name: 'RWY 05L' }, runway: RUNWAY, locale });
+  instruments.draw(state, data, { airport: AIRPORT, headingOffset: BEARING, altitudeOffset: ELEVATION, ap: state.autopilot, route: state.scenario === 'runway' ? route : [], target: state.scenario === 'runway' ? route[routeIndex] : { x: 0, z: RUNWAY.nearThreshold, name: `RWY ${AIRPORT.runway.ident}` }, runway: RUNWAY, locale });
 }
 function showResult() {
   resultShown = true; setPause(true);
@@ -266,7 +299,7 @@ function showResult() {
   if (!state.crashed && t) score = Math.round(clamp(100 - Math.max(0, t.sinkRate - 1) * 12 - Math.abs(t.lateralOffset) * 1.2 - Math.abs(t.roll) * 2 - Math.max(0, Math.abs(t.speed * KT - 140) - 12) * .6 - Math.min(25, Math.abs(t.position.z - RUNWAY.touchdownTarget) / 50), 0, 100));
   const offRunway = !state.crashed && !data.onRunway;
   $('result-title').textContent = state.crashed ? tr('航班中止', 'Flight ended') : offRunway ? tr('停在跑道外', 'Stopped off the runway') : score >= 85 ? tr('平穩落地', 'Smooth landing') : tr('完成落地', 'Landing complete');
-  $('result-description').textContent = state.crashed ? (reasons[state.crashReason] || ['重試並保持穩定進場。', 'Try again with a stabilized approach.'])[locale === 'zh' ? 0 : 1] : offRunway ? tr('飛機停在跑道外，未在跑道內停穩。評分仍依下降率、中線偏移、空速與接地位置計算。', 'The aircraft stopped off the runway. Your score still reflects sink rate, alignment, speed and touchdown position.') : tr('已在桃園 05L 跑道安全停穩。評分包含下降率、中線偏移、空速與接地位置。', 'Stopped safely on Taoyuan 05L. Your score reflects sink rate, alignment, speed and touchdown position.');
+  $('result-description').textContent = state.crashed ? (reasons[state.crashReason] || ['重試並保持穩定進場。', 'Try again with a stabilized approach.'])[locale === 'zh' ? 0 : 1] : offRunway ? tr('飛機停在跑道外，未在跑道內停穩。評分仍依下降率、中線偏移、空速與接地位置計算。', 'The aircraft stopped off the runway. Your score still reflects sink rate, alignment, speed and touchdown position.') : tr(`已在蘇黎世 ${AIRPORT.runway.ident} 跑道安全停穩。評分包含下降率、中線偏移、空速與接地位置。`, `Stopped safely on Zurich runway ${AIRPORT.runway.ident}. Your score reflects sink rate, alignment, speed and touchdown position.`);
   $('result-score').textContent = state.crashed ? '—' : `${score} / 100`;
   $('result-sink').textContent = t ? `${Math.round(t.sinkRate * 196.85)} FT/MIN` : '—';
   $('result-offset').textContent = t ? `${Math.abs(t.lateralOffset).toFixed(1)} M` : '—';
@@ -296,7 +329,7 @@ function updateAudio() {
 function animate(now) {
   requestAnimationFrame(animate);
   const dt = Math.min(.1, (now - lastTime) / 1000 || 0); lastTime = now; sceneTime += dt;
-  if (active && !paused && !state.crashed) {
+  if (active && !paused && !state.crashed && terrainReady) {
     const input = inputFrame(dt); accumulator += dt;
     const wind = weather === 'crosswind' ? { x: 7.72, y: 0, z: 0 } : weather === 'overcast' ? { x: 1.7, y: 0, z: 2 } : { x: 0, y: 0, z: 0 };
     while (accumulator >= 1 / 120) {
@@ -328,6 +361,8 @@ $('view-button').addEventListener('click', () => { if (active) setView(); });
 $('sound-button').addEventListener('click', toggleSound);
 $('lang-button').addEventListener('click', () => { locale = locale === 'zh' ? 'en' : 'zh'; try { localStorage.setItem('lang', locale); } catch {} localize(); });
 $('panel-button').addEventListener('click', () => setPanel(true));
+$('ap-altitude').addEventListener('change', e => { e.target.value = Math.round(apAltitudeLocal(Number(e.target.value)) * FT / 100 + ELEVATION * FT / 100) * 100; });
+compactLayout.addEventListener('change', () => { if (active) setPanel(compactLayout.matches && coarsePointer ? true : panelHidden); });
 $('restore-panel').addEventListener('click', () => setPanel(false));
 $('ap-button').addEventListener('click', toggleAP);
 $('gear-button').addEventListener('click', gear);
@@ -388,15 +423,22 @@ $('touch-brake').addEventListener('pointerdown', e => { e.target.setPointerCaptu
 window.addEventListener('resize', () => { if (renderer) configureQuality(); });
 
 try {
-  renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+  // Logarithmic depth keeps runway markings, terrain and 80 km mountains from z-fighting despite the 0.15 m near plane.
+  renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance', logarithmicDepthBuffer: true });
   renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.05;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap; $('flight-view').append(renderer.domElement);
-  renderer.domElement.setAttribute('aria-label', 'Taoyuan flight simulation');
-  scene = new THREE.Scene(); camera = new THREE.PerspectiveCamera(65, innerWidth / innerHeight, .15, 100000);
-  scene.add(camera); world = createWorld(THREE, scene, { airportName: 'TAOYUAN INTERNATIONAL', runwayLength: RUNWAY.length, runwayNear: RUNWAY.nearThreshold, runwayFar: RUNWAY.farThreshold, runwayLabels: ['05L', '23R'] });
+  renderer.domElement.setAttribute('aria-label', `${AIRPORT.city.en} flight simulation`);
+  scene = new THREE.Scene(); camera = new THREE.PerspectiveCamera(65, innerWidth / innerHeight, .15, 200000);
+  scene.add(camera); world = createWorld(THREE, scene, { airport: AIRPORT });
   plane = createAircraft(THREE); scene.add(plane.group); cockpit = createCockpit(THREE); camera.add(cockpit); cockpit.visible = false;
   configureQuality(); camera.position.set(55, 29, state.position.z + 66); updateCamera(1);
-  $('loading').hidden = true; $('start-button').disabled = false; localize(); requestAnimationFrame(animate);
+  $('mission-eyebrow').textContent = `${AIRPORT.city.en.toUpperCase()} · ${AIRPORT.icao} · RWY ${AIRPORT.runway.ident}`;
+  $('nav-ils').textContent = AIRPORT.ils.ident; $('footer-airport').textContent = `MQ AIR · ${AIRPORT.icao} ${AIRPORT.runway.ident}`;
+  $('ap-altitude').min = apFloorFt(); $('ap-altitude').value = AIRPORT.circuitAltFt; $('ap-heading').value = Math.round(BEARING);
+  scenery = createGeoScenery(THREE, scene, { airport: AIRPORT, renderer, maxAnisotropy: softwareRenderer() ? 1 : renderer.capabilities.getMaxAnisotropy(), highRes, attributionTarget: $('scenery-credit'), onStatus: onSceneryStatus });
+  // ?debug exposes the live objects to browser tests (teleporting, camera placement); it changes nothing in normal play.
+  if (new URLSearchParams(location.search).has('debug')) window.__flight = { THREE, get state() { return state; }, set state(v) { state = v; }, get data() { return data; }, set data(v) { data = v; }, camera, scene, renderer, scenery, world, get commands() { return commands; }, setView, setPanel, get route() { return route; } };
+  $('loading').hidden = true; $('start-button').disabled = true; localize(); requestAnimationFrame(animate);
   renderer.domElement.addEventListener('webglcontextlost', e => { e.preventDefault(); setPause(true); toast(tr('顯示卡連線中斷，請重新載入頁面。', 'Graphics context lost. Reload the page.')); });
 } catch (error) {
   console.error(error); $('loading').textContent = tr('無法啟動 3D 畫面。請使用支援 WebGL 的瀏覽器。', 'Unable to start 3D. Please use a WebGL-capable browser.');

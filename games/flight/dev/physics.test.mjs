@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { AIRPORT, apAltitudeLocal, apFloorFt } from '../airport.mjs';
 import {
   AIRCRAFT, RUNWAY, createFlightState, stepFlight, getFlightData,
   normalizeQuaternion, quaternionFromEuler, rotateVector,
@@ -35,7 +36,7 @@ test('normalization and composed rotations preserve vectors and recover instrume
 
 test('parked aircraft stays on its wheels; engines spool rather than applying instant thrust', () => {
   const parked = run(createFlightState(), 10);
-  near(parked.position.y, AIRCRAFT.gearHeight); near(parked.position.z, RUNWAY.nearThreshold - 180);
+  near(parked.position.y, AIRCRAFT.gearHeight); near(parked.position.z, RUNWAY.length / 2 - 180);
   near(getFlightData(parked).pitch, 0);
   const accelerating = createFlightState();
   stepFlight(accelerating, { throttle: 1 }, 1 / 120);
@@ -65,7 +66,9 @@ test('neutral cruise and configured approach are trimmed, stable states', () => 
   near(Math.hypot(...Object.values(cruise.quaternion)), 1);
   const approach = createFlightState('approach');
   near(getFlightData(approach).distanceToThreshold, 7000);
-  near(approach.position.y, 370);
+  // the approach scenario starts exactly on the configured glidepath
+  near(approach.position.y, AIRCRAFT.gearHeight + (7000 + RUNWAY.nearThreshold - RUNWAY.touchdownTarget) * Math.tan(AIRPORT.ils.glideslopeDeg * RAD));
+  near(getFlightData(approach).glideslopeDeviation, 0, 1e-9);
   near(approach.autopilot.speed, getFlightData(approach).indicatedAirspeed);
   run(approach, 30);
   const af = getFlightData(approach);
@@ -190,12 +193,12 @@ test('autopilot captures heading, altitude and speed through the same forces and
 test('ILS guidance has the proper touchdown glide geometry and a far-end localizer', () => {
   const s = createFlightState('approach');
   s.position.z = RUNWAY.nearThreshold;
-  s.position.y = AIRCRAFT.gearHeight + (RUNWAY.nearThreshold - RUNWAY.touchdownTarget) * Math.tan(3 * RAD);
+  s.position.y = AIRCRAFT.gearHeight + (RUNWAY.nearThreshold - RUNWAY.touchdownTarget) * Math.tan(AIRPORT.ils.glideslopeDeg * RAD);
   const crossing = getFlightData(s);
   assert.equal(crossing.ilsValid, true);
   assert.equal(crossing.gsValid, true);
   near(crossing.glideslopeDeviation, 0);
-  assert.ok(s.position.y > 20 && s.position.y < 30);
+  assert.ok(s.position.y > 15 && s.position.y < 30); // gear height + 300 m x tan(3 deg) at the displaced threshold
   s.position.x = 10;
   assert.ok(Math.abs(getFlightData(s).localizerDeviation) < 0.2);
   s.position.z = RUNWAY.touchdownTarget - 1;
@@ -270,4 +273,37 @@ test('climbing into rising terrain crashes even with positive vertical speed, bu
   const t = createFlightState('runway');
   run(t, 60, () => ({ throttle: 1, flaps: 1, pitch: 0 }));
   assert.equal(t.crashed, false);
+});
+
+test('autopilot altitude floor follows the field elevation, so a high field never gets an underground target', () => {
+  const FT = 3.28084;
+  const high = { runway: { elevationM: 1500 } }; // a 4,900 ft field
+  assert.ok(apFloorFt(high) >= 1500 * FT + 300);
+  assert.ok(apAltitudeLocal(500, high) >= 300 / FT - 1e-9, 'floor must keep the target above the terrain');
+  near(apAltitudeLocal(8000, high), 8000 / FT - 1500, 1e-9);
+  // the configured airport: 500 ft MSL is below the 1,401 ft field, so it is lifted to the floor
+  assert.ok(AIRPORT.runway.elevationM * FT > 1300);
+  assert.ok(apAltitudeLocal(500) > 0);
+  near(apAltitudeLocal(apFloorFt() + 1000), (apFloorFt() + 1000) / FT - AIRPORT.runway.elevationM, 1e-9);
+  assert.equal(apAltitudeLocal(99999) , 20000 / FT - AIRPORT.runway.elevationM);
+});
+
+test('glideslope guidance reads its angle from the runway config', () => {
+  assert.equal(RUNWAY.glideslope, AIRPORT.ils.glideslopeDeg);
+  for (const angle of [3.0, 3.3]) {
+    const runway = { ...RUNWAY, glideslope: angle };
+    const s = createFlightState('approach');
+    s.position.z = RUNWAY.nearThreshold + 3000;
+    s.position.y = AIRCRAFT.gearHeight + (3000 + RUNWAY.nearThreshold - RUNWAY.touchdownTarget) * Math.tan(angle * RAD);
+    near(getFlightData(s, runway).glideslopeDeviation, 0, 1e-9);
+    assert.ok(Math.abs(getFlightData(s, { ...RUNWAY, glideslope: angle + 0.5 }).glideslopeDeviation + 0.5) < 1e-9);
+  }
+});
+
+test('air density follows field elevation: a 427 m field gives a lower indicated-to-true ratio than sea level', () => {
+  const s = createFlightState('cruise');
+  s.position.y = 0;
+  const f = getFlightData(s);
+  const expected = Math.sqrt(Math.pow((288.15 - 0.0065 * RUNWAY.fieldElevation) / 288.15, 4.2561));
+  near(f.indicatedAirspeed / f.airspeed, expected, 1e-6);
 });

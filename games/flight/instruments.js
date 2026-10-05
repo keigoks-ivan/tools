@@ -165,7 +165,7 @@ export function createInstruments(pfdCanvas, ndCanvas) {
     pfd.restore();
     pfd.fillStyle = '#081218'; pfd.fillRect(cx - 23, 254, 46, 22); pfd.strokeStyle = color.white; pfd.lineWidth = 1; pfd.strokeRect(cx - 23, 254, 46, 22);
     text(pfd, headingText(heading), cx, 265, 14, color.white);
-    text(pfd, 'ILS 05L', 8, 260, 9, color.magenta, 'left');
+    text(pfd, options.airport?.ils?.ident || 'ILS', 8, 260, 9, color.magenta, 'left');
     text(pfd, 'TRU', 320, 274, 6, color.dim, 'right');
     text(pfd, '1013 HPA', 403, 260, 9, color.green, 'right');
   }
@@ -190,7 +190,7 @@ export function createInstruments(pfdCanvas, ndCanvas) {
     text(nd, headingText(trueHeading), cx, 15, 18, color.white);
     text(nd, 'TRU', cx + 39, 15, 8, color.dim);
     text(nd, 'ARC', 290, 12, 9, color.green, 'right');
-    text(nd, '05L / 23R', 290, 28, 8, color.magenta, 'right');
+    text(nd, `${options.airport?.runway?.ident || ''} / ${options.airport?.runway?.reciprocal || ''}`, 290, 28, 8, color.magenta, 'right');
 
     nd.save(); clip(nd, 0, 38, 300, 212);
     for (const fraction of [0.5, 1]) {
@@ -213,10 +213,10 @@ export function createInstruments(pfdCanvas, ndCanvas) {
     polygon(nd, [[near[0] + nx, near[1] + ny], [far[0] + nx, far[1] + ny], [far[0] - nx, far[1] - ny], [near[0] - nx, near[1] - ny]], '#223b45', color.white, 1);
     line(nd, near[0], near[1], far[0], far[1], '#b9e2d2', 1);
     line(nd, near[0] - nx * 3, near[1] - ny * 3, near[0] + nx * 3, near[1] + ny * 3, color.green, 1.4);
-    text(nd, '05L', near[0] + 15, near[1] + 8, 9, color.green, 'left');
-    text(nd, '23R', far[0] + 12, far[1] - 6, 8, color.dim, 'left');
+    text(nd, options.airport?.runway?.ident || '', near[0] + 15, near[1] + 8, 9, color.green, 'left');
+    text(nd, options.airport?.runway?.reciprocal || '', far[0] + 12, far[1] - 6, 8, color.dim, 'left');
     const airport = project({ x: -650, z: 0 });
-    text(nd, 'RCTP', airport[0] - 4, airport[1], 9, color.dim, 'right');
+    text(nd, options.airport?.icao || '', airport[0] - 4, airport[1], 9, color.dim, 'right');
 
     const route = options.route || [];
     if (route.length) {
@@ -244,7 +244,7 @@ export function createInstruments(pfdCanvas, ndCanvas) {
     const windHeading = wrap((data.windDirection || 0) + (options.headingOffset || 0));
     text(nd, `${headingText(windHeading)}°/${Math.round((data.windSpeed || 0) * KT)}`, 10, 47, 8, color.dim, 'left');
     nd.fillStyle = '#102026'; nd.fillRect(0, 252, 300, 28); line(nd, 0, 251, 300, 251, color.line);
-    text(nd, target.name || 'RWY 05L', 9, 262, 9, color.magenta, 'left');
+    text(nd, target.name || `RWY ${options.airport?.runway?.ident || ''}`, 9, 262, 9, color.magenta, 'left');
     text(nd, `${(distance / NM).toFixed(1)} NM`, cx, 262, 11, color.green);
     text(nd, `RNG ${range}`, 291, 262, 9, color.dim, 'right');
   }
