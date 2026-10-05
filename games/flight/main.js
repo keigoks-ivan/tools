@@ -242,7 +242,7 @@ function setModel(id) {
   if (plane) { scene.remove(plane.group); plane.dispose?.(); }
   if (cockpit) { camera.remove(cockpit); cockpit.dispose?.(); }
   plane = id === 'light' ? createLightAircraft(THREE) : createAircraft(THREE); scene.add(plane.group);
-  cockpit = id === 'light' ? createLightCockpit(THREE) : createCockpit(THREE, { headingOffset: BEARING, altitudeOffset: ELEVATION, runwayIdent: AIRPORT.runway.ident }); camera.add(cockpit);
+  cockpit = id === 'light' ? createLightCockpit(THREE, { profile: PROFILES.light, altitudeOffset: ELEVATION, headingOffset: BEARING }) : createCockpit(THREE, { headingOffset: BEARING, altitudeOffset: ELEVATION, runwayIdent: AIRPORT.runway.ident }); camera.add(cockpit);
   plane.group.visible = !active || view !== 0; cockpit.visible = active && view === 0; modelAircraft = id;
 }
 function rebuildApproachBoxes(id) {
@@ -369,6 +369,7 @@ function updateCamera(dt) {
   if (active && view === 0) {
     camera.position.copy(new THREE.Vector3(...cam.cockpit).applyQuaternion(q)).add(plane.group.position);
     lookQ.setFromEuler(new THREE.Euler(lookPitch, lookYaw, 0, 'YXZ')); camera.quaternion.copy(q).multiply(lookQ);
+    if (cockpit) cockpit.quaternion.copy(lookQ).invert(); // keep the cockpit fixed to the airframe while looking around
   } else if (active && view === 2) {
     cameraPosition.set(...cam.wing.pos).applyQuaternion(q).add(plane.group.position);
     camera.position.copy(cameraPosition); cameraTarget.set(...cam.wing.look).applyQuaternion(q).add(plane.group.position);
