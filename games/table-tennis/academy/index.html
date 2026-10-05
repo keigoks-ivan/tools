@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#090e18">
+<title>RALLY — 桌球技術與職業選手分析</title>
+<link rel="stylesheet" href="analysis.css?v=4">
+<script type="importmap">{"imports":{"three":"../../../game/lib/three.module.js"}}</script>
+</head>
+<body>
+<header><a href="../?v=4">↖ <span data-en="Back to the game">回到球場</span></a><b>RALLY / TABLE TENNIS ACADEMY</b><button id="language">EN</button></header>
+<main>
+  <div class="eyebrow" data-en="MOTION · TACTICS · DEVELOPMENT">動作 · 打法 · 時期變化</div>
+  <h1 data-en="Table tennis technique. Professional player analysis.">桌球技巧。<br>職業選手動作與戰術。</h1>
+  <p class="lead" data-en="Both take time away from their opponents. Lin combines table flicks, spin and placement changes; Harimoto applies close-table pressure and links compact backhands with forehands. The useful difference lies in preparation, contact and recovery—not a single signature shot.">兩人都會壓縮對手的時間。林昀儒以台內擰拉、旋轉和落點變化銜接；張本智和以近台搶點、緊湊反手與正手銜接施壓。遊戲要表現的是準備、擊球與還原的差異，不能只重複一個招牌動作。</p>
+  <div class="counts" id="counts" aria-live="polite"></div>
+  <p class="caption" id="countsNote"></p>
+  <nav class="section-nav"><a href="#lessons" data-en="Technique lessons">技巧教學</a><a href="#motion-lab" data-en="3D motion lab">3D 動作拆解</a><a href="#frame-study" data-en="Reference frames">原始影格</a><a href="#players" data-en="Player analysis">選手分析</a><a href="#other-players" data-en="More players">更多選手</a><a href="#matchups" data-en="Matchups & win rates">對戰與勝率</a><a href="#video-evidence" data-en="Video evidence">影片紀錄</a></nav>
+  <section id="lessons"><h2 data-en="Technique, step by step">桌球技巧，逐步拆解</h2><p class="caption" data-en="Each lesson connects incoming-ball conditions, body mechanics, practice and tactical choices. Open a topic for the full breakdown.">每個單元把來球條件、身體動作、練習方法與戰術選擇串在一起。展開單元可閱讀完整拆解。</p><p class="caption" id="lessonPolicy"></p><div id="lessonList"></div></section>
+  <section id="motion-lab"><h2 data-en="3D motion breakdown">3D 動作拆解</h2><p class="caption" data-en="Slow down the game’s hand-authored animation, inspect five stages and change the viewing angle. This is an instructional game model, not the athlete’s measured 3D motion capture.">慢放遊戲中的手工動畫，逐一看五個階段並切換角度。這是教學用遊戲模型，並非選手的精確 3D 動捕。</p><button id="openLab" data-en="Open the 3D demonstration">打開 3D 動作示範</button><div id="lab" hidden>
+    <div class="lab-options"><label><span data-en="Player">選手</span><select id="labPlayer"><option value="lin" data-en="Lin Yun-Ju · left">林昀儒 · 左手</option><option value="harimoto" data-en="Harimoto · right">張本智和 · 右手</option></select></label><label><span data-en="Stroke">動作</span><select id="labStroke"><option value="forehand" data-en="Forehand loop">正手弧圈</option><option value="backhand" data-en="Backhand counter">反手反帶</option><option value="flick" data-en="Table flick">台內擰拉</option><option value="push" data-en="Push">推切</option><option value="serve" data-en="Service">發球</option></select></label><label><span data-en="Speed">速度</span><select id="labSpeed"><option value="0.25">0.25×</option><option value="0.5" selected>0.5×</option><option value="1">1×</option></select></label></div>
+    <div class="lab-stage"><canvas id="labCanvas" aria-label="3D 動作教學"></canvas><span id="labPhase"></span></div>
+    <p class="caption" data-en="The pale ball marks the intended game contact point. Pause at contact to inspect how the shoulder, elbow and paddle work together.">淺色小球標示遊戲預定觸球點。停在擊球階段，可檢查肩、肘與球拍怎樣配合。</p>
+    <div class="lab-playback"><button id="labPlay" data-en="Pause">暫停</button><input type="range" id="labTimeline" min="0" max="1000" value="0" aria-label="動作時間"><span id="labTime">0.00s</span></div>
+    <div class="lab-buttons"><button data-phase="ready" data-en="Ready">準備</button><button data-phase="windup" data-en="Windup">引拍</button><button data-phase="contact" data-en="Contact">擊球</button><button data-phase="follow" data-en="Follow-through">收拍</button><button data-phase="recover" data-en="Recovery">還原</button></div>
+    <div class="lab-buttons angles"><button data-angle="threequarter" aria-pressed="true" data-en="Three-quarter">斜前方</button><button data-angle="front" aria-pressed="false" data-en="Front">正面</button><button data-angle="side" aria-pressed="false" data-en="Side">側面</button></div><p class="lab-note" id="labNote"></p>
+  </div><details class="lesson"><summary><span data-en="Watch the complete muted motion preview">看完整靜音動作預覽</span><small>14 CLIPS</small></summary><div class="lesson-content"><video class="motion-preview" controls muted playsinline preload="none" aria-label="靜音遊戲動作示範"><source src="motion-preview.mp4?v=4" type="video/mp4"></video><p class="caption" data-en="Fourteen game-animation clips, including preparation, contact and recovery. This is our rendered game model, separate from the WTT reference footage below.">十四段遊戲動畫，包含引拍、擊球與還原。這是本遊戲模型的錄製畫面，下方另附 WTT 真人參考影格。</p></div></details></section>
+  <section id="frame-study"><h2 data-en="Read the actual movement">對照真人的動作</h2><p class="caption" data-en="Three saved frames from the same WTT Doha 2026 replay, around 4:58–5:05. Orange at the near end is left-handed Lin; blue at the far end is right-handed Harimoto. Whole-second player labels are approximate timecodes, not exact impact times. These frames represent one replay, not three independent rally samples.">以下三張來自已觀看的 WTT Doha 2026 同一段重播，約 4:58–5:05。近端橘衣是左手林昀儒，遠端藍衣是右手張本智和。播放器只顯示整秒，時間碼不是精確觸球時刻；三張影格仍屬同一個回合。</p><div id="frameList"></div></section>
+  <section id="players"><h2 data-en="Professional player analysis">職業選手分析</h2></section>
+  <nav class="filters" aria-label="選手"><button data-player="all" class="selected" aria-pressed="true" data-en="Compare both">兩人比較</button><button data-player="lin" aria-pressed="false" data-en="Lin Yun-Ju">林昀儒</button><button data-player="harimoto" aria-pressed="false" data-en="Tomokazu Harimoto">張本智和</button></nav>
+  <section class="comparison">
+    <h2 data-en="What the game needs to express">遊戲需要呈現的差別</h2>
+    <div class="table-scroll"><table><thead><tr><th data-en="Situation">情境</th><th data-en="Lin · left-handed">林昀儒 · 左手</th><th data-en="Harimoto · right-handed">張本智和 · 右手</th></tr></thead><tbody>
+    <tr><th data-en="Short receive">短球接發</th><td data-en="Move into the ball, flick when reachable; change to pushes when the lane is covered or the ball goes too wide.">先上步到球前，能擰才擰；對手守擰拉或球太外側時改推。</td><td data-en="Attack an available short ball; use a compact low return when height or spin makes attack difficult.">短球有空間就搶；球低或下旋重時用短動作控制。</td></tr>
+    <tr><th data-en="Fast topspin">快速上旋</th><td data-en="Connect a flowing counter with recovery; a stretched stance calls for a shorter return.">反帶與還原連成一個動作；被拉開時縮短回擊。</td><td data-en="Take the ball earlier near the table; compact contact and recovery sustain pressure.">近台提早觸球；緊湊擊球與還原持續搶時間。</td></tr>
+    <tr><th data-en="Low underspin">低的下旋長球</th><td data-en="Lower the stance and lift with spin, rather than hit every ball hard.">降低重心、摩擦起板，依球高決定力道。</td><td data-en="Build the attack with topspin, then link backhand pressure with a forehand opportunity.">先用上旋建立進攻，再銜接反手壓迫與正手機會。</td></tr>
+    <tr><th data-en="Wide forehand">正手大角度</th><td data-en="Move before the swing; hips, shoulder and free arm balance the stroke.">腳先到位，髖、肩與自由手共同維持平衡。</td><td data-en="Use the forehand when position allows; the current player should not be confined to backhands.">站位到位就用正手，近期角色不能只靠反手。</td></tr>
+    <tr><th data-en="After contact">擊球之後</th><td data-en="Recover from the step-in position; a down-the-line flick leaves space that must be covered.">從台內退回；擰直線後必須補回留下的空檔。</td><td data-en="Finish compactly and reset quickly; stay ready for the next early contact.">收拍緊湊、快速還原，準備下一次早點擊球。</td></tr>
+    </tbody></table></div>
+    <p class="caption" data-en="These are qualitative design choices supported by the observations and interviews below. They are not measured career-wide frequencies.">以上是由下方影片觀察與本人訪談支持的定性設計；並非兩人職業生涯的使用率統計。</p>
+  </section>
+  <section><h2 data-en="Changes across eras">不同時期的變化</h2><div id="eras"></div></section>
+  <section><h2 data-en="Technique and tactical detail">技術與打法細節</h2><div id="technical"></div></section>
+  <section><h2 data-en="Player testimony and original technical reports">本人說法與原始技術報導</h2><p class="caption" id="researchMethod"></p><div class="research-grid" id="research"></div></section>
+  <section id="other-players"><h2 data-en="Five more players, through actual matches">從實際比賽分析另外五名選手</h2><p class="caption" id="otherPlayersMethod"></p><div id="otherPlayerList"></div></section>
+  <section id="matchups"><h2 data-en="Matchups, historical results and forecasts">對戰組合、歷史紀錄與勝率推算</h2><p class="caption" id="matchupMethod"></p><div class="matchup-options"><label><span data-en="Pairing">對戰組合</span><select id="matchupPair"></select></label><label><span data-en="Recency half-life">近期資料半衰期</span><select id="matchupHalfLife"><option value="365" data-en="1 year">1 年</option><option value="730" selected data-en="2 years">2 年</option><option value="1460" data-en="4 years">4 年</option></select></label></div><div id="matchupRates"></div><div id="matchupStyle"></div><h3 data-en="Verified match results">可核對的比賽結果</h3><div class="table-scroll" id="matchupHistory"></div><p class="caption" id="matchupLimits"></p><details class="lesson"><summary><span data-en="Game simulation: Lin vs Harimoto">遊戲模擬：林昀儒對張本智和</span><small data-en="11-point game">單局 11 分</small></summary><div class="lesson-content" id="gameSimulation"></div></details><div class="model-note"><h3 data-en="How to read the forecast">如何解讀未來估計</h3><p data-en="The exploratory model starts with a neutral Beta(1,1) prior and weights dated head-to-head results by recency. A two-year half-life gives a match from two years ago half the weight of a current result. The point estimate and 90% credible interval describe the model under that assumption; they are not a validated forecast. Opponent adaptations, injury, equipment, event format and current form are not measured. A selective match sample may bias the estimate; a wider interval does not remove that bias.">探索模型從中性 Beta(1,1) 先驗開始，依距今時間加權已核對的交手結果。半衰期選 2 年，兩年前的一場權重就是近期一場的一半。點估計與 90% 可信區間只描述這個假設下的模型，尚未驗證預測準確度；對手適應、傷勢、器材、賽制及近期狀態都未量化。選擇性的比賽樣本可能造成偏差，區間較寬也不能消除這種偏差。</p></div></section>
+  <section id="video-evidence"><div class="section-row"><h2 data-en="Video evidence and timecodes">影片紀錄與時間碼</h2><label><span data-en="Era">時期</span><select id="era"><option value="all" data-en="All eras">所有時期</option></select></label></div><p class="caption" data-en="Each entry separates what was visible from interpretation. A timecode opens the original source. Shots with obscured feet, hidden wrists or unresolved spin should not be treated as exact 3D measurements.">每條紀錄分開呈現可見動作與解讀；時間碼連到原始影片。腳步被桌子擋住、手腕不清楚或旋轉不明的片段，不能當成精確 3D 量測。</p><div id="videos"></div></section>
+  <section class="method"><h2 data-en="How this becomes a playable character">怎樣轉成遊戲角色</h2><ol>
+  <li data-en="Separate whole-body keyposes for ready, windup, contact, follow-through and recovery. The free arm and legs move with the torso.">分別建立準備、引拍、擊球、收拍、還原的全身姿勢。自由手、腿與軀幹一起動。</li>
+  <li data-en="Predict a legal post-bounce contact. Step forward for short balls and make room for long balls; adapt the wrist endpoint while keeping a coherent elbow and shoulder.">先預測合法落桌後的觸球點。短球上步、長球留空間；調整手腕到球的位置，同時維持合理肩肘。</li>
+  <li data-en="Select flick, push, loop, counter, block or drive from length, height, spin, stance and the opponent’s position. Recent shots help avoid a predictable repeated pattern.">依長短、球高、旋轉、站位與對手位置選擰拉、推切、弧圈、反帶、擋回或進攻。近期擊球紀錄避免固定套路。</li>
+  <li data-en="Game timings, reach and power are calibration parameters. The current animation is hand-authored from 2D references, not automatically recovered 3D motion capture or a trained imitation model.">遊戲時序、可達距離與力道是調校參數。目前動畫依 2D 參考手工建立，尚非自動還原的 3D 動捕或訓練完成的模仿模型。</li>
+  </ol></section>
+  <p class="error" id="error" hidden></p>
+</main>
+<footer>RALLY / TABLE TENNIS ARENA · <span data-en="Research and game calibration are kept distinct.">研究證據與遊戲調校分開記錄。</span></footer>
+<script type="module" src="analysis.js?v=4"></script>
+</body>
+</html>

@@ -1,11 +1,36 @@
-import { Match, clamp } from './physics.mjs?v=3';
-import { createScene } from './scene.js?v=3';
+import { Match, clamp } from './physics.mjs?v=4';
+import { createScene } from './scene.js?v=4';
 
 const $ = id => document.getElementById(id), canvas = $('game');
 let view = null, paused = false, language = 'zh', aim = 0, spin = 1, mode = 'practice';
 let targetX = 0, callUntil = 0, audio = null, sound = false, touch = null;
 let renderTime = 0, previous = performance.now(), started = false, lastCoach = 'welcome', demonstrating = false, cameraMode = 'broadcast';
 const keys = new Set(), zhText = new Map();
+let latestShot = null;
+const playerNames = { lin: ['林昀儒 / 左手', 'LIN / LEFT'], harimoto: ['張本智和 / 右手', 'HARIMOTO / RIGHT'] };
+const shotNames = { flick: ['台內擰拉', 'Table flick'], push: ['推切變化', 'Push'], drive: ['直接進攻', 'Drive'], counter: ['反帶', 'Counter'], block: ['擋回', 'Block'], loop: ['弧圈進攻', 'Loop'] };
+const decisionNotes = {
+  'balanced-return': ['先穩定回擊，留出還原空間。', 'Return steadily and leave room to recover.'],
+  'keep-low-short-ball': ['短球偏低或下旋較重，用推球控制高度。', 'Keep a low or heavily cut short ball under control with a push.'],
+  'wide-forehand-short-receive': ['正手前短球太外側，改推球減少擰拉後的空檔。', 'The short serve is too wide; push to limit the recovery gap.'],
+  'change-the-expected-flick': ['對手已守住擰拉落點，改速推打亂等待。', 'The opponent covers the flick lane; a fast push changes the pattern.'],
+  'attack-reachable-short-ball': ['短球高度與位置可進攻，上步擰拉再還原。', 'The short ball is reachable: step in, flick and recover.'],
+  'controlled-short-receive': ['短球不適合搶攻，先推回保持低弧線。', 'The short ball offers little attack room; return it low.'],
+  'attack-high-ball': ['來球偏高且站位到位，增加進攻力道。', 'The ball is high and the stance is set; attack more strongly.'],
+  'lift-underspin': ['長球帶下旋，以向上摩擦起板。', 'Lift the long underspin ball with topspin.'],
+  'absorb-fast-low-topspin': ['來球快而低，縮短動作擋回並還原。', 'The ball is fast and low; block compactly and recover.'],
+  'early-compact-pressure': ['近台提早反帶，壓縮對手準備時間。', 'Counter early near the table to shorten the opponent’s preparation.'],
+  'recover-from-wide-pressure': ['站位被拉開，先擋回再找回平衡。', 'The wide ball stretches the stance; block and regain balance.'],
+  'flowing-placement-change': ['有揮拍空間，以旋轉和落點銜接下一板。', 'With room to swing, use spin and placement to build the next stroke.'],
+};
+function profileIds() { const player = $('playerProfile').value; return [player, player === 'lin' ? 'harimoto' : 'lin']; }
+function updateProfiles() {
+  const [player, opponent] = profileIds(), index = language === 'zh' ? 0 : 1;
+  $('yourName').textContent = playerNames[player][index]; $('opponentName').textContent = playerNames[opponent][index];
+  $('yourName').closest('.team').style.borderLeftColor = player === 'lin' ? '#f58e53' : '#669aff'; $('opponentName').closest('.team').style.borderLeftColor = opponent === 'lin' ? '#f58e53' : '#669aff';
+  $('profileNote').textContent = player === 'lin' ? t('台內擰拉與反帶，配合推球變化。', 'Table flicks and counters, with varied pushes.') : t('近台搶節奏，反手銜接正手進攻。', 'Early close-table timing, linking backhand pressure with forehand attacks.');
+  view?.setProfiles(player, opponent);
+}
 document.querySelectorAll('[data-en]').forEach(el => zhText.set(el, el.innerHTML));
 const coaches = {
   welcome: ['先從對拉練習開始。滑鼠選落點，看到「現在揮拍」就點一下；球員會自動調整站位。', 'Aim with the mouse, then click when SWING NOW appears. Footwork is automatic.'],
@@ -44,7 +69,7 @@ const match = new Match({ onEvent(event) {
   if (event.type === 'ready') coach(event.server === 1 ? 'ready' : 'receive');
   if (event.type === 'serve') playSound('hit', event.side);
   if (event.type === 'bounce') playSound('bounce', event.z >= 0 ? 1 : -1);
-  if (event.type === 'hit') { playSound('hit', event.side); if (event.side === 1) coach('good'); }
+  if (event.type === 'hit') { playSound('hit', event.side); if (event.side === 1) coach('good'); if (event.shotType && (demonstrating || event.side === -1)) latestShot = event; }
   if (event.type === 'miss') { coach(event.reason); call(event.reason === 'reach' ? t('移動到球前方', 'Move into reach') : t('揮拍沒接上', 'Stroke missed'), 0.7); }
   if (event.type === 'let') call(t('擦網，重新發球', 'Let — serve again'));
   if (event.type === 'point' || event.type === 'over') {
@@ -61,17 +86,26 @@ function updateHud() {
   $('format').textContent = mode === 'practice' ? t('對拉練習 · 自動開始下一球', 'RALLY PRACTICE · AUTO RESTART') : t('11 分制 · 領先 2 分獲勝', 'FIRST TO 11 · WIN BY 2');
   $('strokeLabel').textContent = demonstrating ? t('接手操作', 'TAKE CONTROL') : match.phase === 'ready' && match.server === 1 ? t('發球', 'SERVE') : t('揮拍', 'SWING');
   $('stroke').disabled = !started || paused || (!demonstrating && !match.inputReady);
+  if (latestShot) {
+    const shot = shotNames[latestShot.shotType] || [latestShot.shotType, latestShot.shotType], profile = latestShot.profileId || profileIds()[latestShot.side === 1 ? 0 : 1];
+    $('shotType').textContent = `${playerNames[profile][language === 'zh' ? 0 : 1].split(' / ')[0]} · ${shot[language === 'zh' ? 0 : 1]}`;
+    const reason = latestShot.decisionReason;
+    $('shotReason').textContent = decisionNotes[reason]?.[language === 'zh' ? 0 : 1] || (reason && typeof reason === 'object' ? reason[language] || reason.zh || reason.en : t('依來球長短、旋轉、站位選擇。', 'Chosen from ball length, spin and player positions.'));
+  } else {
+    $('shotType').textContent = '—'; $('shotReason').textContent = t('開始示範，看看兩人怎樣判斷來球。', 'Start the demo to see how each player reads the ball.');
+  }
 }
 function start(isDemo = false) {
   demonstrating = isDemo; $('demoBadge').hidden = !demonstrating;
   if (demonstrating) { mode = 'practice'; document.querySelectorAll('[data-mode]').forEach(btn => { const selected = btn.dataset.mode === mode; btn.classList.toggle('selected', selected); btn.setAttribute('aria-pressed', String(selected)); }); }
-  unlockAudio(); started = true; paused = false; touch = null; targetX = 0; keys.clear(); view?.reset();
-  $('startPanel').hidden = true; $('resultPanel').hidden = true; $('pausePanel').hidden = true; $('difficulty').disabled = true;
+  unlockAudio(); started = true; paused = false; touch = null; targetX = 0; keys.clear(); latestShot = null; updateProfiles(); view?.reset();
+  $('startPanel').hidden = true; $('resultPanel').hidden = true; $('pausePanel').hidden = true; $('difficulty').disabled = true; $('playerProfile').disabled = true;
   document.querySelectorAll('[data-mode]').forEach(btn => { btn.disabled = true; }); $('pause').textContent = t('暫停', 'Pause'); $('callout').classList.remove('show');
-  match.start($('difficulty').value, { practice: mode === 'practice', playerHand: 'left' }); updateHud(); canvas.focus({ preventScroll: true });
+  const [playerProfile, opponentProfile] = profileIds();
+  match.start($('difficulty').value, { practice: mode === 'practice', playerProfile, opponentProfile, autoPlayer: demonstrating }); updateHud(); canvas.focus({ preventScroll: true });
 }
 function showResult() {
-  $('resultPanel').hidden = false; $('difficulty').disabled = false; document.querySelectorAll('[data-mode]').forEach(btn => { btn.disabled = false; });
+  $('resultPanel').hidden = false; $('difficulty').disabled = false; $('playerProfile').disabled = false; document.querySelectorAll('[data-mode]').forEach(btn => { btn.disabled = false; });
   $('resultTitle').textContent = match.score[0] > match.score[1] ? t('這局是你的。', 'Your game.') : t('下一局再來。', 'One more rally.');
   $('resultText').textContent = t(`${match.score[0]} : ${match.score[1]} · 最長 ${match.best} 次連續擊球`, `${match.score[0]} : ${match.score[1]} · Best rally: ${match.best} shots`);
 }
@@ -85,13 +119,14 @@ function setSpin(value) {
 function setAim(value) {
   aim = clamp(value, -1, 1); document.querySelectorAll('[data-aim]').forEach(btn => { const selected = Math.abs(Number(btn.dataset.aim) - aim) < 0.15; btn.classList.toggle('selected', selected); btn.setAttribute('aria-pressed', String(selected)); });
 }
-function swing() { if (!started || paused) return; if (demonstrating) { demonstrating = false; $('demoBadge').hidden = true; coach('welcome'); updateHud(); return; } if (!match.inputReady) return; unlockAudio(); match.strike({ aim, power: Number($('power').value) / 100, spin, assist: $('assist').checked }); updateHud(); }
+function swing() { if (!started || paused) return; if (demonstrating) { demonstrating = false; match.autoPlayer = false; $('demoBadge').hidden = true; coach('welcome'); updateHud(); return; } if (!match.inputReady) return; unlockAudio(); match.strike({ aim, power: Number($('power').value) / 100, spin, assist: $('assist').checked }); updateHud(); }
 function pointAt(event) { if (paused || !view) return; if ($('assist').checked) setAim(view.aimTarget(event.clientX)); else targetX = view.moveTarget(event.clientX); }
 $('start').addEventListener('click', () => start()); $('again').addEventListener('click', () => start());
 $('demo').addEventListener('click', () => start(true));
 $('camera').addEventListener('click', () => { cameraMode = cameraMode === 'broadcast' ? 'player' : 'broadcast'; view?.setCamera(cameraMode); $('camera').setAttribute('aria-pressed', String(cameraMode === 'player')); $('camera').textContent = cameraMode === 'player' ? t('選手鏡頭', 'Player view') : t('轉播鏡頭', 'Broadcast view'); });
 $('reset').addEventListener('click', () => {
   started = false; paused = false; demonstrating = false; $('demoBadge').hidden = true; touch = null; keys.clear(); targetX = 0; match.reset(); view?.reset(); $('startPanel').hidden = false; $('resultPanel').hidden = true; $('pausePanel').hidden = true; $('difficulty').disabled = false;
+  $('playerProfile').disabled = false; latestShot = null;
   document.querySelectorAll('[data-mode]').forEach(btn => { btn.disabled = false; }); $('pause').textContent = t('暫停', 'Pause'); $('callout').classList.remove('show'); coach('welcome'); updateHud();
 });
 $('pause').addEventListener('click', () => pause()); $('resume').addEventListener('click', () => pause(false));
@@ -99,8 +134,9 @@ $('sound').addEventListener('click', () => { sound = !sound; unlockAudio(); $('s
 $('language').addEventListener('click', () => {
   language = language === 'zh' ? 'en' : 'zh'; document.documentElement.lang = language === 'zh' ? 'zh-Hant' : 'en';
   document.querySelectorAll('[data-en]').forEach(el => { if (language === 'en') el.textContent = el.dataset.en; else el.innerHTML = zhText.get(el); }); $('language').textContent = language === 'zh' ? 'EN' : '中文';
-  $('sound').textContent = sound ? t('音效開', 'Sound on') : t('音效關', 'Sound off'); $('pause').textContent = paused ? t('繼續', 'Resume') : t('暫停', 'Pause'); $('camera').textContent = cameraMode === 'player' ? t('選手鏡頭', 'Player view') : t('轉播鏡頭', 'Broadcast view'); coach(lastCoach); if (match.phase === 'over') showResult(); updateHud();
+  $('sound').textContent = sound ? t('音效開', 'Sound on') : t('音效關', 'Sound off'); $('pause').textContent = paused ? t('繼續', 'Resume') : t('暫停', 'Pause'); $('camera').textContent = cameraMode === 'player' ? t('選手鏡頭', 'Player view') : t('轉播鏡頭', 'Broadcast view'); updateProfiles(); coach(lastCoach); if (match.phase === 'over') showResult(); updateHud();
 });
+$('playerProfile').addEventListener('change', updateProfiles);
 document.querySelectorAll('[data-mode]').forEach(btn => btn.addEventListener('click', () => { mode = btn.dataset.mode; document.querySelectorAll('[data-mode]').forEach(item => { const selected = item === btn; item.classList.toggle('selected', selected); item.setAttribute('aria-pressed', String(selected)); }); updateHud(); }));
 document.querySelectorAll('[data-spin]').forEach(btn => btn.addEventListener('click', () => setSpin(Number(btn.dataset.spin)))); document.querySelectorAll('[data-aim]').forEach(btn => btn.addEventListener('click', () => setAim(Number(btn.dataset.aim))));
 $('power').addEventListener('input', () => { $('powerLabel').textContent = `${$('power').value}%`; }); $('assist').addEventListener('change', () => { targetX = match.playerX; keys.clear(); });
@@ -125,17 +161,15 @@ window.addEventListener('keydown', event => {
 window.addEventListener('keyup', event => keys.delete(event.key.toLowerCase())); window.addEventListener('blur', () => pause(true)); document.addEventListener('visibilitychange', () => { if (document.hidden) pause(true); });
 function contextLost() { pause(true); $('loading').hidden = false; $('loading').textContent = t('畫面暫時中斷。重新整理頁面即可回到球場。', 'The court view was interrupted. Reload to reopen the arena.'); }
 try { view = createScene(canvas, $('court'), contextLost); $('loading').hidden = true; } catch (error) { console.error(error); $('loading').textContent = t('球場無法開啟。請開啟瀏覽器硬體加速後重新整理。', 'Could not open the arena. Enable hardware acceleration and reload.'); }
-coach('welcome'); updateHud();
+updateProfiles(); coach('welcome'); updateHud();
 function frame(now) {
   requestAnimationFrame(frame); const dt = Math.min((now - previous) / 1000, 0.25); previous = now;
   if (!paused) {
     if (!started) renderTime += dt;
     else {
-      if (demonstrating && match.timingReady) { setAim(Math.sin(match.totalHits * 1.31) * 0.62); match.strike({ aim, power: 0.55, spin: match.totalHits % 7 === 4 ? 0 : 1, assist: true }); }
-      const contact = match.contact(1);
       if ($('assist').checked || demonstrating) {
-        if (contact?.legal) targetX = clamp(contact.x + (contact.x < 0 ? 0.22 : -0.16), -1.1, 1.1);
-        else if (!match.playerSwing || match.clock > match.playerSwing.startedAt + match.playerSwing.contactDelay + 0.15) targetX = 0;
+        const stance = match.stance(1);
+        targetX = clamp(stance.bodyX ?? stance.recoveryX ?? 0, -1.1, 1.1);
       } else { if (keys.has('a')) targetX -= dt * 2.1; if (keys.has('d')) targetX += dt * 2.1; targetX = clamp(targetX, -1.1, 1.1); }
       for (let remaining = dt; remaining > 0.00001; remaining -= 0.1) match.step(Math.min(remaining, 0.1), targetX); renderTime = match.clock;
     }

@@ -33,18 +33,18 @@ export function strokeDuration(handedness = 'forehand', spin = 1, serve = false)
   return Math.abs(spin) < 0.15 ? 0.37 : 0.47;
 }
 
-export function sampleStroke(age, lead, contact, ready, handedness = 'forehand', spin = 1) {
+export function sampleStroke(age, lead, contact, ready, handedness = 'forehand', spin = 1, clip = {}) {
   const backhand = handedness === 'backhand';
   const direction = backhand ? -1 : 1;
   const low = spin < -0.1, flat = Math.abs(spin) < 0.15;
   const shotStyle = low ? 'push' : flat ? 'drive' : 'loop';
-  const duration = strokeDuration(handedness, spin);
-  const followTime = backhand ? 0.10 : low ? 0.11 : flat ? 0.12 : 0.165;
-  const wind = add(contact, [direction * (low ? -0.065 : backhand ? -0.08 : flat ? -0.18 : -0.22), low ? 0.10 : flat ? -0.015 : backhand ? -0.050 : -0.155, backhand ? -0.115 : low ? -0.16 : flat ? -0.23 : -0.26]);
-  const follow = add(contact, [direction * (low ? 0.075 : backhand ? 0.13 : 0.265), low ? -0.13 : flat ? 0.025 : backhand ? 0.085 : 0.265, low ? 0.14 : backhand ? 0.125 : 0.085]);
-  const times = [-lead, -lead * 0.45, 0, followTime, duration];
-  const keys = [ready, wind, contact, follow, ready];
-  const contactVelocity = [direction * (low ? 0.65 : backhand ? 1.15 : 2.15), low ? -1.15 : flat ? 0.18 : backhand ? 0.75 : 1.75, low ? 1.7 : backhand ? 2.0 : 2.25];
+  const duration = clip.duration ?? strokeDuration(handedness, spin);
+  const followTime = clip.followTime ?? (backhand ? 0.10 : low ? 0.11 : flat ? 0.12 : 0.165);
+  const wind = add(contact, clip.wind ?? [direction * (low ? -0.065 : backhand ? -0.08 : flat ? -0.18 : -0.22), low ? 0.10 : flat ? -0.015 : backhand ? -0.050 : -0.155, backhand ? -0.115 : low ? -0.16 : flat ? -0.23 : -0.26]);
+  const follow = add(contact, clip.follow ?? [direction * (low ? 0.075 : backhand ? 0.13 : 0.265), low ? -0.13 : flat ? 0.025 : backhand ? 0.085 : 0.265, low ? 0.14 : backhand ? 0.125 : 0.085]);
+  const times = [-lead, -lead * (clip.duration ? 0.48 : 0.45), 0, followTime, duration];
+  const keys = [ready, wind, contact, follow, clip.recoveryReady ?? ready];
+  const contactVelocity = clip.velocity ?? [direction * (low ? 0.65 : backhand ? 1.15 : 2.15), low ? -1.15 : flat ? 0.18 : backhand ? 0.75 : 1.75, low ? 1.7 : backhand ? 2.0 : 2.25];
   const tangents = [
     [0, 0, 0],
     mul(sub(contact, ready), 1 / (lead * 0.85)),
@@ -53,7 +53,7 @@ export function sampleStroke(age, lead, contact, ready, handedness = 'forehand',
     [0, 0, 0],
   ];
   if (age <= times[0]) return { center: [...ready], phase: 'windup', load: 0, turn: 0, rise: 0, shotStyle };
-  if (age >= duration) return { center: [...ready], phase: 'ready', load: 0, turn: 0, rise: 0, shotStyle };
+  if (age >= duration) return { center: [...keys[4]], phase: 'ready', load: 0, turn: 0, rise: 0, shotStyle };
   let segment = 0;
   while (age > times[segment + 1]) segment++;
   const span = times[segment + 1] - times[segment];
@@ -74,11 +74,11 @@ export function sampleStroke(age, lead, contact, ready, handedness = 'forehand',
   return { center, phase: age < 0 ? 'windup' : age < followTime ? 'follow-through' : 'recovery', load, turn, rise, shotStyle };
 }
 
-export function sampleServe(age, lead, contact, ready) {
+export function sampleServe(age, lead, contact, ready, recoveryReady = ready) {
   const times = [-lead, -lead * 0.58, -Math.min(0.105, lead * 0.25), 0, 0.105, 0.30];
-  const keys = [ready, add(contact, [-0.13, -0.15, -0.34]), add(contact, [-0.16, -0.10, -0.29]), contact, add(contact, [0.08, 0.075, -0.045]), ready];
+  const keys = [ready, add(contact, [-0.13, -0.15, -0.34]), add(contact, [-0.16, -0.10, -0.29]), contact, add(contact, [0.08, 0.075, -0.045]), recoveryReady];
   const tangents = [[0, 0, 0], [0, 0, 0], [0.3, 0.4, 1.4], [1.0, 0.65, 2.3], [-0.4, -0.1, -0.5], [0, 0, 0]];
-  if (age <= -lead || age >= 0.30) return { center: [...ready], phase: age < 0 ? 'windup' : 'ready', load: 0, turn: 0, rise: 0, toss: 0 };
+  if (age <= -lead || age >= 0.30) return { center: [...(age < 0 ? ready : recoveryReady)], phase: age < 0 ? 'windup' : 'ready', load: 0, turn: 0, rise: 0, toss: 0 };
   let segment = 0; while (age > times[segment + 1]) segment++;
   const span = times[segment + 1] - times[segment], t = (age - times[segment]) / span;
   const basis = [2 * t ** 3 - 3 * t ** 2 + 1, t ** 3 - 2 * t ** 2 + t, -2 * t ** 3 + 3 * t ** 2, t ** 3 - t ** 2];

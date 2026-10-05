@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#090e18">
 <meta name="description" content="3D 競技桌球：在燈光球場中對拉，掌握揮拍時機、旋轉與落點。">
 <title>RALLY — 競技桌球</title>
-<link rel="stylesheet" href="style.css?v=3">
+<link rel="stylesheet" href="style.css?v=4">
 <script type="importmap">{"imports":{"three":"../../game/lib/three.module.js"}}</script>
 </head>
 <body>
@@ -21,13 +21,13 @@
     <canvas id="game" tabindex="0" aria-label="移動滑鼠選落點，點一下或按空白鍵揮拍。手機拖曳選落點，按揮拍擊球。"></canvas>
     <div class="venue"><i></i><span data-en="CENTRE COURT">中央球場</span><span class="venue-light" data-en="MATCH SESSION">競賽練習</span></div>
     <div class="scoreboard">
-      <div class="team"><span class="serve-dot" id="yourServe"></span><span data-en="YOU / LEFT">你 / 左手</span><strong id="yourScore">00</strong></div>
+      <div class="team"><span class="serve-dot" id="yourServe"></span><span id="yourName">林昀儒 / 左手</span><strong id="yourScore">00</strong></div>
       <span class="score-divider">:</span>
-      <div class="team"><strong id="aiScore">00</strong><span data-en="AI / RIGHT">AI / 右手</span><span class="serve-dot" id="aiServe"></span></div>
+      <div class="team"><strong id="aiScore">00</strong><span id="opponentName">張本智和 / 右手</span><span class="serve-dot" id="aiServe"></span></div>
       <small id="format">對拉練習 · 自動開始下一球</small>
     </div>
     <button class="camera-button" id="camera" aria-pressed="false" data-en="Broadcast view">轉播鏡頭</button>
-    <div class="demo-badge" id="demoBadge" hidden data-en="MOTION DEMO · TAP SWING TO PLAY">動作示範 · 按揮拍接手</div>
+    <div class="demo-badge" id="demoBadge" hidden data-en="PLAYER STYLE DEMO · TAP SWING TO PLAY">打法示範 · 按揮拍接手</div>
     <div class="rally-pill"><span data-en="RALLY">連續回合</span><strong id="rallyCount">0</strong></div>
     <div class="contact-cue" id="contactCue" hidden aria-hidden="true"></div>
     <div class="callout" id="callout" role="status" aria-live="polite"></div>
@@ -36,7 +36,7 @@
       <h1 data-en="Every ball. Every move.">跟上每一球。</h1>
       <p data-en="Choose your placement. Watch the bounce, then swing. Automatic footwork keeps you in position.">選落點、看落桌，再揮拍。用自動步法，先抓住對拉節奏。</p>
       <button class="primary" id="start"><span data-en="Start playing">開始練球</span><b>↗</b></button>
-      <button class="demo-button" id="demo" data-en="Watch a rally first →">先看對拉示範 →</button>
+      <button class="demo-button" id="demo" data-en="Watch Lin vs Harimoto →">看林昀儒對張本智和 →</button>
       <small data-en="Mouse, touch or keyboard">支援滑鼠、觸控與鍵盤</small>
     </div>
     <div class="pause-panel" id="pausePanel" hidden><h2 data-en="Take a breath.">休息一下。</h2><button class="primary" id="resume" data-en="Back to the table">繼續比賽</button></div>
@@ -50,6 +50,9 @@
   <aside class="sidebar">
     <div class="section-heading"><span>01 / <span data-en="MATCH SETUP">對戰設定</span></span><span class="live-dot"></span></div>
     <div class="segments mode-group"><button data-mode="practice" class="selected" aria-pressed="true" data-en="Rally practice">對拉練習</button><button data-mode="match" aria-pressed="false" data-en="11-point match">11 分對戰</button></div>
+    <label class="field-label" for="playerProfile" data-en="Play as">使用選手</label>
+    <select id="playerProfile"><option value="lin" data-en="Lin Yun-Ju · left-handed">林昀儒 · 左手</option><option value="harimoto" data-en="Tomokazu Harimoto · right-handed">張本智和 · 右手</option></select>
+    <p class="profile-note" id="profileNote">台內擰拉與反帶，配合推球變化。</p>
     <label class="field-label" for="difficulty" data-en="Opponent level">對手程度</label>
     <select id="difficulty"><option value="easy" data-en="Club beginner">球館新手</option><option value="normal" data-en="Regular player">熟練球友</option><option value="hard" data-en="Club champion">球館高手</option></select>
     <label class="assist"><span><b data-en="Automatic footwork">自動步法</b><small data-en="Focus on aiming and timing. Turn off to move manually.">專心選落點與揮拍。關閉後自行移動。</small></span><input type="checkbox" id="assist" checked><span class="switch" aria-hidden="true"></span></label>
@@ -62,11 +65,13 @@
     <div class="section-heading second"><span>03 / <span data-en="AT THE TABLE">球桌表現</span></span></div>
     <div class="stats"><div><strong id="bestRally">0</strong><span data-en="Best rally">最長回合</span></div><div><strong id="speed">—</strong><span data-en="Ball speed · km/h">球速 · km/h</span></div></div>
     <div class="coach"><span class="coach-label" data-en="COURTSIDE NOTE">場邊提醒</span><p id="coachText">滑鼠選落點，看到「現在揮拍」就點一下。</p></div>
+    <div class="shot-note"><span data-en="LATEST AI DECISION">最近 AI 決策</span><strong id="shotType">—</strong><p id="shotReason" data-en="Start the demo to see how each player reads the ball.">開始示範，看看兩人怎樣判斷來球。</p></div>
+    <a class="analysis-link" href="academy/" data-en="Technique & professional player academy ↗">桌球技巧與職業選手分析專區 ↗</a>
     <details class="instructions" open><summary data-en="How to play">操作方式 <span>＋</span></summary><div><p><kbd>↔</kbd><span data-en="Mouse / drag: choose placement">滑鼠／拖曳：選擇落點</span></p><p><kbd>↗</kbd><span data-en="Click / Space / swing button: stroke">點一下／空白鍵／揮拍鈕：擊球</span></p><p><kbd>A D</kbd><span data-en="Manual footwork · P: pause">手動步法 · P 暫停</span></p></div></details>
     <button class="reset" id="reset" data-en="↻ Restart game">↻ 重新開始</button>
   </aside>
 </main>
-<footer><span>RALLY / TABLE TENNIS ARENA</span><a href="https://www.youtube.com/watch?v=m8DybsKawQs" target="_blank" rel="noopener" data-en="Motion reference: Lin Yun-Ju / Tomokazu Harimoto · WTT">動作參考：林昀儒／張本智和 · WTT</a></footer>
-<script type="module" src="main.js?v=3"></script>
+<footer><span>RALLY / TABLE TENNIS ARENA</span><a href="academy/" data-en="Table tennis academy · technique, motion & tactics">桌球專區 · 技巧、動作與戰術</a></footer>
+<script type="module" src="main.js?v=4"></script>
 </body>
 </html>

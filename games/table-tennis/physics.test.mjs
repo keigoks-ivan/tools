@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { Match, TABLE, serverFor, shotVelocity, advanceBall, predictContact } from './physics.mjs';
+import { Match, TABLE, LEVELS, serverFor, shotVelocity, advanceBall, predictContact, predictIncoming } from './physics.mjs';
 
 const DT = 1 / 240;
 function setup(practice = false) {
@@ -299,4 +299,136 @@ test('restart clears score, swing recovery, prediction and rally statistics', ()
   assert.equal(match.playerSwing, null); assert.equal(match.opponentSwing, null);
   assert.equal(match.ball, null); assert.equal(match.contact(1), null);
   assert.equal(match.level, 'normal'); assert.equal(match.practice, false);
+});
+
+test('profile hands and positive stance depth work on either side without changing the old defaults', () => {
+  for (const [player, opponent] of [['lin', 'harimoto'], ['harimoto', 'lin']]) {
+    const match = new Match(); match.start('easy', { playerProfile: player, opponentProfile: opponent, autoPlayer: true });
+    assert.equal(match.playerHand, player === 'lin' ? 'left' : 'right');
+    assert.equal(match.opponentHand, opponent === 'lin' ? 'left' : 'right');
+    for (const side of [1, -1]) assert.ok(match.stance(side).rootZ > 0);
+    match.start(); assert.equal(match.playerProfile, null); assert.equal(match.opponentProfile, null);
+    assert.equal(match.playerHand, 'right'); assert.equal(match.opponentHand, 'right'); assert.equal(match.autoPlayer, false);
+  }
+});
+
+test('Lin approaches early and flicks an actual short serve after the legal receiving bounce', () => {
+  const events = [];
+  const match = new Match({ random: () => 0.5, onEvent: e => events.push({ ...e, at: match.clock }) });
+  match.start('easy', { practice: true, playerProfile: 'lin', opponentProfile: 'lin', autoPlayer: true });
+  match.server = -1; match.serve();
+  assert.equal(predictIncoming(match.ball, 1).length, 'short');
+  const plan = match.planShot(1);
+  assert.equal(plan.type, 'flick'); assert.equal(plan.contactPolicy, 'short');
+  assert.ok(match.stance(1).rootZ < 1.76, 'the player can move into the table before the ball arrives');
+  until(match, () => events.some(e => e.type === 'hit' && e.side === 1), 3);
+  const hit = events.find(e => e.type === 'hit' && e.side === 1);
+  const swing = events.find(e => e.type === 'swing' && e.side === 1);
+  const bounces = events.filter(e => e.type === 'bounce' && e.at < hit.at);
+  assert.equal(bounces.length, 2); assert.ok(bounces[0].z < 0); assert.ok(bounces[1].z > 0);
+  assert.equal(hit.shotType, 'flick'); assert.ok(hit.z >= 1 && hit.z <= 1.21);
+  assert.ok(hit.y >= TABLE.height + TABLE.radius + 0.025);
+  assert.ok(hit.at - swing.at >= 0.12);
+  assert.equal(hit.decisionReason, 'attack-reachable-short-ball');
+  assert.ok(Math.abs(hit.at - swing.contactTime) < DT * 2);
+  assert.ok(Math.abs(hit.y - swing.y) < 0.015);
+  assert.equal(events.filter(e => e.type === 'hit' && e.side === 1).length, 1);
+});
+
+test('a profile’s table contact policy cannot volley or hit a second receiving bounce', () => {
+  const events = [];
+  const match = new Match({ onEvent: e => events.push(e) });
+  match.start('easy', { playerProfile: 'lin' }); match.phase = 'rally';
+  match.ball = { x: 0, y: 1.05, z: 0.95, vx: 0, vy: 0, vz: 1.5, spin: 0, sideSpin: 0, hitter: -1, received: 0, isServe: false };
+  match.beginSwing(1, { aim: 0, power: 0.5, spin: 1, contactPolicy: 'short', contactDepth: 1, type: 'flick' }, true);
+  for (let i = 0; i < 35; i++) match.step(DT);
+  assert.equal(match.canHit(1), false); assert.equal(match.hit(1), false);
+  assert.equal(events.filter(e => e.type === 'hit').length, 0);
+  match.ball = { ...match.ball, y: 1.0, z: 1.05, received: 2 };
+  assert.equal(match.canHit(1), false); assert.equal(match.hit(1), false);
+});
+
+test('profile contact forecasts update when depth or the table contact policy changes', () => {
+  const match = new Match({ random: () => 0.5 });
+  match.start('easy', { playerProfile: 'lin', opponentProfile: 'harimoto' }); match.server = -1; match.serve();
+  const first = match.contact(1), plan = match.planShot(1);
+  plan.contactDepth = 1.46;
+  const earlier = match.contact(1);
+  assert.ok(earlier.time < first.time);
+  assert.deepEqual(earlier, predictContact(match.ball, 1, 1.46));
+  plan.contactDepth = 1.20; plan.contactPolicy = 'short';
+  const table = match.contact(1);
+  assert.equal(table.legal, true); assert.ok(table.time < earlier.time);
+  assert.deepEqual(table, predictContact(match.ball, 1, 1.20, 'short'));
+});
+
+test('manual profile controls remain authoritative and an early input never queues a future hit', () => {
+  const events = [];
+  const match = new Match({ random: () => 0.5, onEvent: e => events.push({ ...e, at: match.clock }) });
+  match.start('easy', { playerProfile: 'lin', opponentProfile: 'harimoto' }); match.server = -1; match.serve();
+  assert.equal(match.strike({ aim: 0.75, power: 0.8, spin: -1 }), true);
+  const swing = events.find(e => e.type === 'swing');
+  assert.equal(swing.at, 0); assert.equal(swing.shotType, 'push'); assert.equal(swing.spin, -1); assert.equal(swing.power, 0.8);
+  assert.equal(match.playerSwing.shot.aim, 0.75);
+  until(match, () => match.phase === 'point', 3, () => match.stance(1).bodyX);
+  assert.equal(match.totalHits, 0);
+});
+
+test('profile AI sustains friendly rallies and executes both table and long contacts', () => {
+  for (const [player, opponent] of [['lin', 'harimoto'], ['harimoto', 'lin']]) {
+    const events = [];
+    const match = new Match({ random: () => 0.5, onEvent: e => events.push(e) });
+    match.start('easy', { practice: true, playerProfile: player, opponentProfile: opponent, autoPlayer: true });
+    for (let i = 0; i < 30 / DT; i++) match.step(DT);
+    assert.deepEqual(match.score, [0, 0]); assert.ok(match.best >= 40);
+    const harimoto = events.filter(e => e.type === 'hit' && e.profileId === 'harimoto');
+    assert.ok(harimoto.some(e => e.handedness === 'forehand')); assert.ok(harimoto.some(e => e.handedness === 'backhand'));
+    assert.ok(harimoto.some(e => e.shotType === 'counter'));
+    if (player === 'lin') {
+      assert.ok(events.some(e => e.type === 'hit' && e.contactPolicy === 'short'));
+      assert.ok(events.some(e => e.type === 'hit' && e.contactPolicy === 'long'));
+    }
+  }
+});
+
+test('automatic profile decisions and all ball events are identical at 30, 60, 120 and 240 FPS', () => {
+  function simulate(dt) {
+    const events = [];
+    const match = new Match({ random: () => 0.5, onEvent: e => events.push({ ...e, at: match.clock }) });
+    match.start('easy', { practice: true, playerProfile: 'lin', opponentProfile: 'harimoto', autoPlayer: true });
+    for (let i = 0; i < Math.round(8 / dt); i++) match.step(dt);
+    return { ball: match.ball, score: match.score, playerX: match.playerX, opponentX: match.opponentX, clock: match.clock, events };
+  }
+  const reference = simulate(DT);
+  for (const dt of [1 / 30, 1 / 60, 1 / 120]) assert.deepEqual(simulate(dt), reference);
+});
+
+test('competitive automatic players share movement speed and reaction delay', () => {
+  for (const level of Object.keys(LEVELS)) {
+    const match = new Match(); match.start(level, { playerProfile: 'harimoto', opponentProfile: 'harimoto', autoPlayer: true });
+    match.phase = 'rally'; match.playerX = -0.7; match.opponentX = 0.7;
+    match.ball = { x: 0, y: 1.1, z: 0.1, vx: 0, vy: 0, vz: 1, spin: 0, sideSpin: 0, hitter: -1, received: 0, isServe: false };
+    match.playerReactAt = 0.2; match.opponentReactAt = 0.2;
+    match.step(DT); assert.equal(match.playerX, -0.7); assert.equal(match.opponentX, 0.7);
+    match.playerReactAt = 0; match.opponentReactAt = 0;
+    match.step(DT);
+    assert.ok(Math.abs(match.playerX + 0.7 - LEVELS[level].speed * DT) < 1e-12);
+    assert.ok(Math.abs(0.7 - match.opponentX - LEVELS[level].speed * DT) < 1e-12);
+  }
+});
+
+test('competitive automatic players share reach and shot errors on either end', () => {
+  function prepared(side, x, autoPlayer) {
+    const match = new Match({ random: () => 0 }); match.start('hard', { autoPlayer }); match.phase = 'rally';
+    match.ball = { x, y: 1.1, z: side * 1.54, vx: 0, vy: 0, vz: side * 4, spin: 0, sideSpin: 0, hitter: -side, received: 1, isServe: false };
+    match[side === 1 ? 'playerSwing' : 'opponentSwing'] = { hit: false, activeAt: 0, activeUntil: 1, contactDepth: 1.54, contactPolicy: 'long', handedness: 'forehand' };
+    return match;
+  }
+  for (const side of [1, -1]) assert.equal(prepared(side, 0.5, true).hit(side), false);
+  assert.equal(prepared(1, 0.5, false).hit(1), true, 'human reach remains unchanged');
+  const near = prepared(1, 0, true), far = prepared(-1, 0, true);
+  assert.equal(near.hit(1), true); assert.equal(far.hit(-1), true);
+  assert.ok(Math.abs(near.ball.vx - far.ball.vx) < 1e-12);
+  assert.ok(Math.abs(near.ball.vx) > 1, 'the same forced difficulty error applies at both ends');
+  const human = prepared(1, 0, false); human.hit(1); assert.ok(Math.abs(human.ball.vx) < 1e-12);
 });

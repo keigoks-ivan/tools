@@ -3,6 +3,7 @@ import test from 'node:test';
 import { register } from 'node:module';
 import { sampleServe, sampleStroke, solveTwoBone, strokeDuration } from './athlete-motion.mjs';
 import { Match } from './physics.mjs';
+import { blendBodyPose, motionDefinition, readyBodyPose, sampleBodyClip } from './motion-clips.mjs';
 
 register('../../game/tests/three-loader.mjs', import.meta.url);
 const THREE = await import('three');
@@ -115,15 +116,17 @@ test('the stance keeps a planted foot still while the other executes a shuffle',
   actor.update(0, 1 / 120, 0, null, true);
   const feet = [-1, 1].map(sign => actor.root.getObjectByName(`leg-${sign}-end`));
   let stanceFrames = 0;
+  let previousMoving = -1;
   for (let frame = 1; frame <= 90; frame++) {
     const before = feet.map(world);
     actor.update(frame / 120, 1 / 120, frame / 120 * 1.0, null, true);
     const moving = actor.metrics().footMoving;
-    if (moving >= 0) {
+    if (moving >= 0 && (previousMoving === moving || previousMoving < 0)) {
       const planted = 1 - moving;
       assert.ok(world(feet[planted]).distanceTo(before[planted]) < 0.003, 'planted foot slides');
       stanceFrames++;
     }
+    previousMoving = moving;
   }
   assert.ok(stanceFrames > 20, 'shuffle never took a step');
 });
@@ -134,6 +137,7 @@ test('backhand upper arms remain in front of the jersey instead of passing throu
     const actor = createAthlete(new THREE.Scene(), side, 0x799583, handed);
     for (let frame = 0; frame < 120; frame++) actor.update(frame / 120, 1 / 120, 0, null, true);
     actor.beginSwing(1, { x: -side * mirror * 0.16, y: 1.11, z: side * 1.54, contactDelay: 0.16, handedness: 'backhand' });
+    for (let frame = 1; frame <= 19; frame++) actor.update(1 + frame / 120, 1 / 120, 0, null, true);
     actor.update(1.16, 1 / 120, 0, null, true);
     const spine = actor.root.getObjectByName('spine');
     const shoulder = spine.worldToLocal(world(actor.root.getObjectByName(`arm-${-mirror}-anchor`)));
@@ -190,4 +194,177 @@ test('continuous limb skin has normalized joint weights and fits the model trian
   assert.equal(skinCount, 4, 'limbs reverted to separate rigid segments');
   assert.ok(meshCount < 40, `model has ${meshCount} separate draw meshes`);
   assert.ok(triangles < 34000, `model has ${triangles} triangles`);
+});
+
+const flatPose = value => Array.isArray(value) ? value.flatMap(flatPose) : typeof value === 'object' ? Object.values(value).flatMap(flatPose) : [value];
+
+test('separate whole-body libraries remain smooth through every stroke phase', () => {
+  for (const profile of ['lin-yun-ju', 'harimoto']) for (const hand of ['forehand', 'backhand']) for (const type of ['loop', 'drive', 'counter', 'block', 'push', 'flick']) {
+    const definition = motionDefinition(profile, hand, type);
+    const at = time => flatPose(sampleBodyClip(profile, time, 0.16, hand, type));
+    const h = 1e-5;
+    for (const time of [-0.16, -0.16 * 0.48, 0, definition.followTime, definition.duration]) {
+      const before = at(time - h), here = at(time), after = at(time + h);
+      assert.ok([...before, ...here, ...after].every(Number.isFinite));
+      assert.ok(distance(before, after) < 0.001, `${profile}/${type}: body pose jumps`);
+      const incoming = here.map((v, i) => (v - before[i]) / h), outgoing = after.map((v, i) => (v - here[i]) / h);
+      assert.ok(distance(incoming, outgoing) < 0.06, `${profile}/${type}: body tangent jumps`);
+    }
+  }
+  assert.ok(distance(flatPose(readyBodyPose('lin-yun-ju')), flatPose(readyBodyPose('harimoto'))) > 0.18);
+  const flick = sampleBodyClip('lin-yun-ju', -0.08, 0.16, 'backhand', 'flick');
+  const push = sampleBodyClip('lin-yun-ju', -0.08, 0.16, 'backhand', 'push');
+  assert.ok(flick.playingElbow[1] > push.playingElbow[1] + 0.08, 'flick and push use the same elbow load');
+  assert.ok(flick.feet[0][1] > push.feet[0][1] + 0.15, 'flick lacks the playing-side forward step');
+  assert.deepEqual(blendBodyPose(readyBodyPose('lin-yun-ju'), readyBodyPose('harimoto'), 0), readyBodyPose('lin-yun-ju'));
+});
+
+test('ready elbows hang below the shoulders and both profiles recover without head or limb jumps', () => {
+  for (const [handed, profile] of [['left', 'lin-yun-ju'], ['right', 'harimoto']]) {
+    const mirror = handed === 'left' ? -1 : 1;
+    const actor = createAthlete(new THREE.Scene(), 1, 0x799583, handed, profile);
+    for (let f = 0; f < 120; f++) actor.update(f / 120, 1 / 120, 0, null, true);
+    for (const sign of [-1, 1]) {
+      const shoulder = world(actor.root.getObjectByName(`arm-${sign}-anchor`)), elbow = world(actor.root.getObjectByName(`arm-${sign}-lower`));
+      assert.ok(shoulder.y - elbow.y > 0.15, `${profile}: ready elbow is held high`);
+    }
+    for (const handedness of ['forehand', 'backhand']) {
+      actor.beginSwing(1, { x: mirror * (handedness === 'forehand' ? 0.20 : -0.16), y: 1.11, z: 1.54, contactDelay: 0.16, handedness, shotType: 'drive' });
+      const joints = ['head', 'arm--1-lower', 'arm-1-lower', 'arm--1-end', 'arm-1-end', 'leg--1-lower', 'leg-1-lower'].map(name => actor.root.getObjectByName(name));
+      let previous = joints.map(world);
+      for (let frame = 1; frame < 160; frame++) {
+        actor.update(1 + frame / 240, 1 / 240, 0, null, true);
+        const current = joints.map(world);
+        for (let i = 0; i < current.length; i++) assert.ok(current[i].distanceTo(previous[i]) < 0.045, `${profile}/${handedness}: joint ${i} snaps`);
+        assert.ok(Math.abs(actor.root.getObjectByName('head').rotation.x) < 0.55, 'neck hyperextends');
+        previous = current;
+      }
+      assert.equal(actor.metrics().phase, 'ready');
+    }
+    actor.setProfile(profile === 'lin-yun-ju' ? 'harimoto' : 'lin-yun-ju');
+    actor.reset(); actor.update(0, 1 / 120, 0, null, true);
+    assert.notEqual(actor.metrics().profileId, profile);
+  }
+});
+
+test('fore and aft footwork preserves the supporting foot in world XZ', () => {
+  const actor = createAthlete(new THREE.Scene(), 1, 0x799583, 'left');
+  const feet = [-1, 1].map(sign => actor.root.getObjectByName(`leg-${sign}-end`));
+  let supporting = 0;
+  let previousMoving = -1;
+  for (let frame = 0; frame < 360; frame++) {
+    const before = feet.map(world);
+    const x = Math.sin(frame / 120 * 1.2) * 0.32, rootZ = 1.94 - Math.sin(frame / 120) * 0.32;
+    actor.update(frame / 120, 1 / 120, x, null, true, null, { rootZ });
+    if (frame > 0 && actor.metrics().footMoving >= 0 && (previousMoving === actor.metrics().footMoving || previousMoving < 0)) {
+      const planted = 1 - actor.metrics().footMoving;
+      assert.ok(world(feet[planted]).distanceTo(before[planted]) < 0.003, 'support foot slides in depth');
+      supporting++;
+    }
+    previousMoving = actor.metrics().footMoving;
+  }
+  assert.ok(supporting > 50);
+});
+
+test('fast lateral reversals retain a usable stance when render frames are delayed', () => {
+  for (const handed of ['left', 'right']) {
+    const actor = createAthlete(new THREE.Scene(), 1, 0x799583, handed);
+    let time = 0;
+    for (let frame = 0; frame < 200; frame++) {
+      const dt = [1 / 60, 1 / 15, 0.117, 1 / 30][frame % 4];
+      time += dt;
+      actor.update(time, dt, 0.54 * Math.sin(time * 3.7 / 0.54), null, true);
+      const pose = actor.metrics();
+      assert.ok(pose.pelvisHeight > 0.69, `${handed}: lateral transfer collapses the hips`);
+      assert.ok(pose.legReachError < 1e-8, `${handed}: a planted leg loses contact`);
+    }
+  }
+});
+
+test('low short receives meet the ball and keep the blade above the table', () => {
+  for (const side of [-1, 1]) for (const handed of ['left', 'right']) for (const type of ['flick', 'push']) for (const height of [0.82, 0.94, 1.10]) {
+    const actor = createAthlete(new THREE.Scene(), side, 0x799583, handed);
+    for (let f = 0; f < 120; f++) actor.update(f / 120, 1 / 120, 0, null, true, null, { rootZ: 1.60 });
+    const mirror = handed === 'left' ? -1 : 1;
+    const event = { x: -side * mirror * 0.16, y: height, z: side * 1.08, contactTime: 1.24, contactDelay: 0.24, handedness: 'backhand', shotType: type, spin: type === 'push' ? -0.8 : 0.8 };
+    actor.beginSwing(1, event);
+    const paddle = actor.root.getObjectByName('paddle');
+    for (let f = 0; f <= 75; f++) {
+      const t = 1 + f / 120; actor.update(t, 1 / 120, 0, null, true, null, { rootZ: 1.60 });
+      paddle.traverse(mesh => {
+        if (!mesh.isMesh) return;
+        const vertices = mesh.geometry.attributes.position;
+        for (let i = 0; i < vertices.count; i += 3) {
+          const point = mesh.localToWorld(new THREE.Vector3().fromBufferAttribute(vertices, i));
+          if (Math.abs(point.z) < 1.37 && Math.abs(point.x) < 0.7625) assert.ok(point.y > 0.759, `${type}: paddle intersects the tabletop`);
+        }
+      });
+    }
+    actor.contact(1.24, event); actor.update(1.24, 0, 0, null, true, null, { rootZ: 1.60 });
+    assert.ok(actor.paddleWorld.distanceTo(new THREE.Vector3(event.x, event.y, event.z)) < 0.005, 'low short receive misses contact');
+    assert.ok(actor.metrics().reachError < 0.001, 'short receive is out of reach');
+  }
+});
+
+test('low pushes outside the end line remain clear when their follow-through enters the table', () => {
+  for (const side of [-1, 1]) for (const handed of ['left', 'right']) for (const handedness of ['forehand', 'backhand']) {
+    const actor = createAthlete(new THREE.Scene(), side, 0x799583, handed), mirror = handed === 'left' ? -1 : 1;
+    for (let f = 0; f < 120; f++) actor.update(f / 120, 1 / 120, 0, null, true);
+    const event = { x: side * mirror * (handedness === 'forehand' ? 0.20 : -0.16), y: 0.82, z: side * 1.46, contactDelay: 0.25, handedness, shotType: 'push', spin: -0.8 };
+    actor.beginSwing(1, event);
+    let previous = actor.paddleWorld.clone();
+    for (let frame = 0; frame < 180; frame++) {
+      actor.update(1 + frame / 240, 1 / 240, 0, null, true);
+      assert.ok(actor.paddleWorld.distanceTo(previous) < 0.025, 'table clearance causes the paddle to jump');
+      previous.copy(actor.paddleWorld);
+      if (frame === 60) assert.ok(actor.paddleWorld.distanceTo(new THREE.Vector3(event.x, event.y, event.z)) < 0.005);
+      actor.root.getObjectByName('paddle').traverse(mesh => {
+        if (!mesh.isMesh) return;
+        const vertices = mesh.geometry.attributes.position;
+        for (let i = 0; i < vertices.count; i += 3) {
+          const point = mesh.localToWorld(new THREE.Vector3().fromBufferAttribute(vertices, i));
+          if (Math.abs(point.z) < 1.37 && Math.abs(point.x) < 0.7625) assert.ok(point.y > 0.759, 'push follow-through crosses the tabletop');
+        }
+      });
+    }
+  }
+});
+
+test('profile selection changes the playing hand and short-step travel works at fifteen frames per second', () => {
+  for (const side of [-1, 1]) {
+    const actor = createAthlete(new THREE.Scene(), side, 0x799583, 'left');
+    for (const profile of ['harimoto', 'lin-yun-ju', 'harimoto']) {
+      actor.setProfile(profile); actor.reset();
+      const left = profile === 'lin-yun-ju';
+      assert.equal(actor.root.getObjectByName('paddle').parent.name, `arm-${left ? 1 : -1}-end`);
+      for (let f = 0; f < 15; f++) actor.update(f / 15, 1 / 15, 0, null, true, null, { rootZ: 1.94 });
+      const event = { profileId: profile, x: 0, y: 0.91, z: side * 1.1, contactTime: 1.24, contactDelay: 0.24, handedness: 'backhand', shotType: 'flick', stance: { rootZ: 1.6 } };
+      actor.beginSwing(1, event);
+      for (let f = 0; f < 4; f++) actor.update(1 + f / 15, 1 / 15, 0, null, true, null, { rootZ: 1.6 });
+      actor.contact(1.24, event); actor.update(1.24, 0.04, 0, null, true, null, { rootZ: 1.6 });
+      assert.ok(Math.abs(actor.metrics().rootDepth - 1.6) < 1e-6, 'low FPS prevents the root arriving in time');
+      assert.ok(actor.paddleWorld.distanceTo(new THREE.Vector3(event.x, event.y, event.z)) < 0.005);
+      assert.equal(actor.metrics().dominantHand, left ? 'left' : 'right');
+    }
+  }
+});
+
+test('whole-body contact poses keep upper arms outside the chest surface', () => {
+  for (const [handed, profile] of [['left', 'lin-yun-ju'], ['right', 'harimoto']]) for (const handedness of ['forehand', 'backhand']) for (const type of ['loop', 'push', 'counter', 'block']) {
+    const actor = createAthlete(new THREE.Scene(), -1, 0x799583, handed, profile), mirror = handed === 'left' ? -1 : 1;
+    for (let f = 0; f < 120; f++) actor.update(f / 120, 1 / 120, 0, null, true);
+    actor.beginSwing(1, { x: mirror * (handedness === 'forehand' ? -0.20 : 0.16), y: 1.11, z: -1.54, contactDelay: 0.16, handedness, shotType: type, spin: type === 'push' ? -0.8 : 0.8 });
+    const spine = actor.root.getObjectByName('spine');
+    for (let f = 1; f <= 26; f++) {
+      actor.update(1 + f / 120, 1 / 120, 0, null, true);
+      if (f < 16) continue;
+      for (const sign of [-1, 1]) {
+        const shoulder = spine.worldToLocal(world(actor.root.getObjectByName(`arm-${sign}-anchor`))), elbow = spine.worldToLocal(world(actor.root.getObjectByName(`arm-${sign}-lower`)));
+        for (const t of [0.55, 0.75, 1]) {
+          const point = shoulder.clone().lerp(elbow, t);
+          if (Math.abs(point.x) < 0.155 && point.y > 0.08 && point.y < 0.36) assert.ok(Math.abs(point.z) > 0.14, `${profile}/${handedness}/${type}: upper arm enters the chest`);
+        }
+      }
+    }
+  }
 });

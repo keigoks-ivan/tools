@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { TABLE, clamp } from './physics.mjs?v=3';
-import { createAthlete } from './athlete.js?v=3';
+import { TABLE, clamp } from './physics.mjs?v=4';
+import { createAthlete } from './athlete.js?v=4';
 import { mergeGeometries } from '../../game/lib/addons/utils/BufferGeometryUtils.js';
 
 const vector = (x, y, z) => new THREE.Vector3(x, y, z);
@@ -236,6 +236,7 @@ export function createScene(canvas, court, onContextLost) {
   canvas.addEventListener('webglcontextlost', event => { event.preventDefault(); onContextLost(); });
   return {
     scene, camera, renderer, player, opponent,
+    setProfiles(playerId, opponentId) { player.setProfile(playerId); opponent.setProfile(opponentId); },
     setCamera(mode) { cameraMode = mode === 'player' ? 'player' : 'broadcast'; resize(); },
     moveTarget(clientX) {
       const rect = canvas.getBoundingClientRect();
@@ -262,7 +263,7 @@ export function createScene(canvas, court, onContextLost) {
     render(match, time, dt, aim, paused) {
       const b = match.ball;
       const active = match.phase === 'rally';
-      player.update(time, dt, match.playerX, b, active, match.playerSwing); opponent.update(time, dt, match.opponentX, b, active, match.opponentSwing);
+      player.update(time, dt, match.playerX, b, active, match.playerSwing, match.stance(1)); opponent.update(time, dt, match.opponentX, b, active, match.opponentSwing, match.stance(-1));
       if (b && active) {
         ball.visible = true; ball.position.set(b.x, b.y, b.z); ball.rotation.x += dt * b.spin * 12;
         const onTable = Math.abs(b.x) < TABLE.halfWidth && Math.abs(b.z) < TABLE.halfLength;

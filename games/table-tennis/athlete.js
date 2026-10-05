@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { mergeGeometries } from '../../game/lib/addons/utils/BufferGeometryUtils.js';
-import { sampleServe, sampleStroke, strokeDuration, smoothstep, solveTwoBone } from './athlete-motion.mjs?v=3';
+import { sampleServe, sampleStroke, smoothstep, solveTwoBone } from './athlete-motion.mjs?v=4';
+import { blendBodyPose, motionDefinition, MOTION_PROFILES, readyBodyPose, resolveMotionProfile, sampleBodyClip } from './motion-clips.mjs?v=4';
 
 const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
 const DOWN = new THREE.Vector3(0, -1, 0);
@@ -200,8 +201,27 @@ function handGeometry(parent, skin, sign, gripping) {
   const thumb = addMesh(parent, new THREE.CapsuleGeometry(0.008, 0.027, 5, 8), skin, [-sign * 0.023, 0.018, 0.015]); thumb.rotation.z = -sign * 0.55; thumb.rotation.x = -0.35;
 }
 
-function placeChain(chain, targetInAnchor, pole) {
-  const result = solveTwoBone([0, 0, 0], targetInAnchor.toArray(), pole, chain.upperLength, chain.lowerLength);
+function placeChain(chain, targetInAnchor, pole, dt = 0) {
+  const direction = targetInAnchor.clone().normalize(), preferred = vec(pole);
+  preferred.addScaledVector(direction, -preferred.dot(direction));
+  const anchorRotation = chain.anchor.getWorldQuaternion(new THREE.Quaternion());
+  if (chain.bendWorld) {
+    const previous = chain.bendWorld.clone().applyQuaternion(anchorRotation.clone().invert());
+    previous.addScaledVector(direction, -previous.dot(direction));
+    if (previous.lengthSq() > 1e-8) {
+      previous.normalize();
+      if (preferred.length() < 0.025) preferred.copy(previous);
+      else {
+        preferred.normalize();
+        const angle = previous.angleTo(preferred), maxAngle = dt * 14;
+        const rotation = new THREE.Quaternion().setFromUnitVectors(previous, preferred);
+        rotation.slerp(new THREE.Quaternion(), angle > maxAngle ? 1 - maxAngle / angle : 0);
+        preferred.copy(previous).applyQuaternion(rotation);
+      }
+    }
+  }
+  preferred.normalize(); chain.bendWorld = preferred.clone().applyQuaternion(anchorRotation);
+  const result = solveTwoBone([0, 0, 0], targetInAnchor.toArray(), preferred.toArray(), chain.upperLength, chain.lowerLength);
   const elbow = vec(result.joint), end = vec(result.end);
   chain.upper.quaternion.setFromUnitVectors(DOWN, elbow.clone().normalize());
   const lowerDirection = end.sub(elbow).normalize().applyQuaternion(chain.upper.quaternion.clone().invert());
@@ -219,12 +239,13 @@ function orientEnd(root, end, rotation) {
   end.quaternion.copy(quat.invert().multiply(desired));
 }
 
-export function createAthlete(scene, side, color, handed = 'right') {
-  const mirror = handed === 'left' ? -1 : 1;
+export function createAthlete(scene, side, color, handed = 'right', profileId = handed === 'left' ? 'lin-yun-ju' : 'harimoto') {
+  let mirror = handed === 'left' ? -1 : 1;
+  let motionProfile = resolveMotionProfile(profileId), bodyPose = readyBodyPose(motionProfile);
   const root = new THREE.Group(); root.name = side === 1 ? 'player-athlete' : 'opponent-athlete';
   root.position.z = side * 1.94; root.rotation.y = side === 1 ? Math.PI : 0; scene.add(root);
-  const skin = new THREE.MeshPhysicalMaterial({ color: side === 1 ? 0xc58f6b : 0xd2a17c, roughness: 0.62, clearcoat: 0.06, clearcoatRoughness: 0.80, bumpMap: clothWeave, bumpScale: 0.0004 });
-  const jersey = jerseyTexture(color, side);
+  const skin = new THREE.MeshPhysicalMaterial({ color: motionProfile === 'lin-yun-ju' ? 0xc58f6b : 0xd2a17c, roughness: 0.62, clearcoat: 0.06, clearcoatRoughness: 0.80, bumpMap: clothWeave, bumpScale: 0.0004 });
+  const jersey = jerseyTexture(color, motionProfile === 'lin-yun-ju' ? 1 : -1);
   const shirt = new THREE.MeshPhysicalMaterial({ color: jersey ? 0xffffff : color, map: jersey, roughness: 0.79, sheen: 0.50, sheenColor: new THREE.Color(0xd5dbe1), sheenRoughness: 0.86, bumpMap: clothWeave, bumpScale: 0.0010 });
   const sleeves = new THREE.MeshPhysicalMaterial({ color, roughness: 0.80, sheen: 0.40, sheenRoughness: 0.80, bumpMap: clothWeave, bumpScale: 0.0009 });
   const shorts = new THREE.MeshStandardMaterial({ color: 0x14212b, roughness: 0.85, bumpMap: clothWeave, bumpScale: 0.0008 });
@@ -271,7 +292,7 @@ export function createAthlete(scene, side, color, handed = 'right') {
       tube(shoe, trim, [[-0.023, 0.015 - i * 0.005, 0.025 + i * 0.018], [0, 0.020 - i * 0.005, 0.030 + i * 0.018], [0.023, 0.015 - i * 0.005, 0.025 + i * 0.018]], 0.0025);
     }
     mergeColored(shoe); leg.bind();
-    return { ...leg, sign, shoe, worldX: null, step: null };
+    return { ...leg, sign, shoe, worldX: null, worldZ: null, step: null };
   });
   const arms = [-1, 1].map(sign => {
     const arm = jointChain(spine, 0.305, 0.285, skin, skin, [0.047, 0.029, 0.035, 0.023], `arm-${sign}`);
@@ -282,7 +303,7 @@ export function createAthlete(scene, side, color, handed = 'right') {
     arm.bind();
     return { ...arm, sign };
   });
-  const dominant = arms.find(arm => arm.sign === -mirror);
+  let dominant = arms.find(arm => arm.sign === -mirror);
   const paddle = new THREE.Group(); paddle.name = 'paddle'; dominant.end.add(paddle);
   const bladeCenter = new THREE.Vector3(0, 0.127, 0.009);
   const blade = addMesh(paddle, new THREE.CylinderGeometry(0.085, 0.085, 0.013, 48), material(0xb6946b), bladeCenter.toArray(), [1, 1, 1.13]); blade.rotation.x = Math.PI / 2;
@@ -293,21 +314,26 @@ export function createAthlete(scene, side, color, handed = 'right') {
   mergeStatic(root);
 
   const handWorld = new THREE.Vector3(), freeHandWorld = new THREE.Vector3(), paddleWorld = new THREE.Vector3();
-  let stroke = null, strokeId = 0, previousX = null, velocity = 0, nextFoot = 0, readyAmount = 0.62, serveAmount = 0, rallyAmount = 0;
+  let stroke = null, strokeId = 0, previousX = null, previousZ = null, velocity = 0, depthVelocity = 0, nextFoot = 0, readyAmount = 0.62, serveAmount = 0, rallyAmount = 0;
+  let footTime = null, footRootX = 0, footRootZ = side * 1.94;
   let lastCenter = new THREE.Vector3(-0.18 * mirror, 1.04, 0.37);
   let pose = { phase: 'ready', handedness: 'forehand', contact: false };
-  const readyCenter = new THREE.Vector3(-0.19 * mirror, 1.04, 0.34);
+  const readyCenter = new THREE.Vector3();
+  const refreshReady = () => { readyCenter.fromArray(readyBodyPose(motionProfile).paddleReady); readyCenter.x *= mirror; };
+  refreshReady();
 
   function localContact(event, x = root.position.x) {
     return new THREE.Vector3((event.x - x) * -side, event.y, (root.position.z - event.z) * side);
   }
   function beginSwing(time, event = {}) {
+    if (event.profileId) setProfile(event.profileId);
     const lead = Math.max(0.065, event.contactDelay ?? event.lead ?? 0.12);
     const target = { x: event.x ?? root.position.x + side * mirror * 0.19, y: event.y ?? 1.07, z: event.z ?? side * 1.54 };
     stroke = {
       id: ++strokeId, startedAt: time, contactAt: event.contactTime ?? time + lead, lead,
       handedness: event.handedness || (localContact(target).x * mirror > 0.025 ? 'backhand' : 'forehand'),
       spin: event.spin ?? 1, target, ready: lastCenter.clone(), contact: false, serve: !!event.serve,
+      shotType: event.shotType ?? (event.spin < -0.1 ? 'push' : Math.abs(event.spin ?? 1) < 0.15 ? 'drive' : 'loop'), stance: event.stance, bodyReady: bodyPose,
     };
   }
   function contact(time, event = {}) {
@@ -317,51 +343,108 @@ export function createAthlete(scene, side, color, handed = 'right') {
     stroke.spin = event.spin ?? stroke.spin; stroke.contact = true;
   }
 
-  function update(time, dt, x, ball, active, swingState) {
+  function setProfile(id) {
+    const next = resolveMotionProfile(id);
+    if (next === motionProfile && handed === (next === 'lin-yun-ju' ? 'left' : 'right')) return;
+    motionProfile = next; handed = next === 'lin-yun-ju' ? 'left' : 'right'; mirror = handed === 'left' ? -1 : 1;
+    dominant = arms.find(arm => arm.sign === -mirror); dominant.end.add(paddle);
+    for (const arm of arms) {
+      for (const child of [...arm.end.children]) if (child.isMesh) { arm.end.remove(child); child.geometry.dispose(); }
+      handGeometry(arm.end, skin, arm.sign, arm === dominant); mergeStatic(arm.end); arm.bendWorld = null;
+    }
+    const jerseyColor = next === 'lin-yun-ju' ? 0xce6733 : 0x426eae;
+    shirt.map?.dispose(); shirt.map = jerseyTexture(jerseyColor, next === 'lin-yun-ju' ? 1 : -1);
+    shirt.color.setHex(shirt.map ? 0xffffff : jerseyColor); sleeves.color.setHex(jerseyColor); shirt.needsUpdate = true;
+    skin.color.setHex(next === 'lin-yun-ju' ? 0xc58f6b : 0xd2a17c);
+    stroke = null; bodyPose = readyBodyPose(motionProfile); refreshReady(); lastCenter.copy(readyCenter);
+  }
+
+  function update(time, dt, x, ball, active, swingState, stance) {
     const elapsed = clamp(dt || 0, 0, 0.04);
+    const translationStep = clamp(dt || 0, 0, 0.10);
+    const rootDepth = stance?.rootZ ?? swingState?.stance?.rootZ ?? stroke?.stance?.rootZ;
+    if (rootDepth !== undefined) root.position.z += clamp(side * Math.abs(rootDepth) - root.position.z, -translationStep * 3.2, translationStep * 3.2);
     if (previousX === null) previousX = x;
-    const rawVelocity = elapsed > 0 ? (x - previousX) / elapsed : 0;
+    if (previousZ === null) previousZ = root.position.z;
+    const rawVelocity = translationStep > 0 ? (x - previousX) / translationStep : 0;
     velocity += (clamp(rawVelocity, -3.3, 3.3) - velocity) * (1 - Math.exp(-elapsed * 16));
-    previousX = x; root.position.x = x;
+    const rawDepthVelocity = translationStep > 0 ? (root.position.z - previousZ) / translationStep : 0;
+    depthVelocity += (clamp(rawDepthVelocity, -2.6, 2.6) - depthVelocity) * (1 - Math.exp(-elapsed * 16));
+    if (translationStep > 0) { previousZ = root.position.z; previousX = x; }
+    root.position.x = x;
     readyAmount += ((active || stroke ? 1 : 0.62) - readyAmount) * (1 - Math.exp(-elapsed * 16));
     serveAmount += ((stroke?.serve ? 1 : 0) - serveAmount) * (1 - Math.exp(-elapsed * 13));
     rallyAmount += ((active && !stroke?.serve ? 1 : 0) - rallyAmount) * (1 - Math.exp(-elapsed * 14));
     if (swingState && !stroke && swingState.target && time < swingState.until) beginSwing(swingState.startedAt ?? time, { ...swingState.target, ...swingState });
-    const clipDuration = stroke ? strokeDuration(stroke.handedness, stroke.spin, stroke.serve) : 0.47;
+    const tableReceive = stroke && !stroke.serve && Math.abs(stroke.target.z) < 1.37;
+    const definition = motionDefinition(motionProfile, stroke?.handedness, stroke?.shotType, stroke?.serve, tableReceive);
+    if (tableReceive && stroke.shotType !== 'flick') {
+      definition.wind[1] = Math.max(0.04, definition.wind[1]);
+      definition.follow[1] = Math.max(0.025, definition.follow[1]);
+      definition.velocity[1] = 0.10;
+    }
+    const clipDuration = definition.duration;
     if (stroke && time > stroke.contactAt + clipDuration) stroke = null;
     const target = stroke ? localContact(stroke.target, x) : readyCenter.clone();
     const canonicalTarget = [target.x * mirror, target.y, target.z];
     const canonicalReady = stroke ? [stroke.ready.x * mirror, stroke.ready.y, stroke.ready.z] : null;
-    const sampleMotion = offset => stroke.serve ? sampleServe(time - stroke.contactAt + offset, stroke.lead, canonicalTarget, canonicalReady) : sampleStroke(time - stroke.contactAt + offset, stroke.lead, canonicalTarget, canonicalReady, stroke.handedness, stroke.spin);
-    const canonical = stroke ? sampleMotion(0) : { center: [-0.19, 1.04, 0.34], phase: 'ready', load: 0, turn: 0, rise: 0 };
+    const recoveryReady = [readyCenter.x * mirror, readyCenter.y, readyCenter.z];
+    const sampleMotion = offset => stroke.serve ? sampleServe(time - stroke.contactAt + offset, stroke.lead, canonicalTarget, canonicalReady, recoveryReady) : sampleStroke(time - stroke.contactAt + offset, stroke.lead, canonicalTarget, canonicalReady, stroke.handedness, stroke.spin, { ...definition, recoveryReady });
+    const canonical = stroke ? sampleMotion(0) : { center: recoveryReady, phase: 'ready', load: 0, turn: 0, rise: 0 };
     const sample = { ...canonical, center: [canonical.center[0] * mirror, canonical.center[1], canonical.center[2]], turn: canonical.turn * mirror };
-    const hipTurn = stroke ? sampleMotion(0.032).turn * mirror * smoothstep((time - stroke.startedAt) / 0.032) : 0;
     const swingBlend = stroke ? smoothstep((time - stroke.startedAt) / Math.min(stroke.lead, 0.08)) * (1 - smoothstep((time - stroke.contactAt - (clipDuration - 0.25)) / 0.25)) : 0;
     const localVelocity = velocity * -side;
-    const lowContact = stroke ? clamp((1.04 - target.y) * 0.35, 0, 0.10) * swingBlend : 0;
-    const shift = stroke ? clamp(target.x * 0.18, -0.105, 0.105) * swingBlend + sample.turn * 0.080 : 0;
-    // WTT frames provide projected 2D poses; this is an approximate playing stance.
-    pelvis.position.set(shift, 0.905 - readyAmount * 0.105 + serveAmount * 0.028 - lowContact + sample.rise + Math.sin(time * 2.3 + side) * 0.0015, -0.018 + serveAmount * 0.085);
-    pelvis.rotation.set(0, hipTurn * 0.60, clamp(-localVelocity * 0.016, -0.045, 0.045));
-    spine.rotation.set(0.075 + readyAmount * 0.325 - serveAmount * 0.135, sample.turn * 0.40, clamp(-localVelocity * 0.023, -0.060, 0.060));
-    spine.rotation.x += sample.load * 0.045;
-    head.rotation.x = -(0.04 + readyAmount * 0.13);
-    head.rotation.y = ball ? clamp(((ball.x - x) * -side) * 0.16 - sample.turn * 0.8, -0.32, 0.32) : -sample.turn * 0.65;
+    const lowContact = stroke ? clamp((1.04 - target.y) * 0.55, 0, 0.15) * swingBlend : 0;
+    const profileReady = readyBodyPose(motionProfile);
+    bodyPose = stroke ? sampleBodyClip(motionProfile, time - stroke.contactAt, stroke.lead, stroke.handedness, stroke.shotType, stroke.serve, tableReceive) : profileReady;
+    if (stroke) bodyPose = blendBodyPose(stroke.bodyReady, bodyPose, smoothstep((time - stroke.startedAt) / Math.min(stroke.lead, 0.075)));
+    const shiftedX = bodyPose.hips[0] * mirror + (stroke ? clamp(target.x * 0.14, -0.075, 0.075) * swingBlend : 0);
+    pelvis.position.set(shiftedX, bodyPose.hips[1] + (1 - readyAmount) * 0.07 - lowContact, bodyPose.hips[2]);
+    pelvis.rotation.set(0, bodyPose.hipYaw * mirror, clamp(-localVelocity * 0.022, -0.06, 0.06));
+    spine.rotation.set(bodyPose.chest[0] - (1 - readyAmount) * 0.10, bodyPose.chest[1] * mirror, bodyPose.chest[2] * mirror + clamp(-localVelocity * 0.025, -0.06, 0.06));
+    head.rotation.set(bodyPose.neck[0], bodyPose.neck[1] * mirror, bodyPose.neck[2] * mirror);
+    head.rotation.y += ball ? clamp(((ball.x - x) * -side) * 0.13 - bodyPose.chest[1] * mirror * 0.40, -0.28, 0.28) : -bodyPose.chest[1] * mirror * 0.40;
     // A planted foot keeps its world position until a discrete shuffle transfers it.
-    for (const leg of legs) if (leg.worldX === null) leg.worldX = x + -side * leg.sign * 0.28;
-    const movingFoot = legs.find(leg => leg.step);
-    if (!movingFoot) {
-      const candidates = legs.map(leg => ({ leg, error: x + -side * leg.sign * 0.28 - leg.worldX }));
-      candidates.sort((a, b) => Math.abs(b.error) - Math.abs(a.error));
-      if (Math.abs(candidates[0].error) > 0.10) {
-        let choice = candidates[0].leg;
-        if (Math.abs(candidates[0].error) < 0.17) choice = legs[nextFoot];
-        const duration = clamp(0.16 - Math.abs(velocity) * 0.024, 0.078, 0.16);
-        const worldGoal = x + -side * choice.sign * 0.28 + velocity * duration;
-        choice.step = { at: time, from: choice.worldX, to: worldGoal, duration };
-        nextFoot = legs.indexOf(choice) === 0 ? 1 : 0;
+    const footPose = leg => bodyPose.feet[leg.sign === -mirror ? 0 : 1];
+    for (const leg of legs) if (leg.worldX === null) {
+      leg.worldX = x + -side * footPose(leg)[0] * mirror;
+      leg.worldZ = root.position.z + -side * footPose(leg)[1];
+    }
+    // Foot transfers advance between renders too: a slow frame may contain the
+    // landing of one foot and the push-off of the other.
+    const footElapsed = footTime === null ? 0 : clamp(time - footTime, 0, 0.18);
+    const subdivisions = Math.max(1, Math.ceil(footElapsed * 120));
+    const cadence = clamp(MOTION_PROFILES[motionProfile].stepTime - Math.max(Math.hypot(velocity, depthVelocity), Math.hypot(rawVelocity, rawDepthVelocity)) * 0.033, 0.050, 0.16);
+    for (let subdivision = 1; subdivision <= subdivisions; subdivision++) {
+      const progress = subdivision / subdivisions;
+      const stepTime = time - footElapsed * (1 - progress);
+      const bodyX = THREE.MathUtils.lerp(footElapsed ? footRootX : x, x, progress);
+      const bodyZ = THREE.MathUtils.lerp(footElapsed ? footRootZ : root.position.z, root.position.z, progress);
+      for (const leg of legs) if (leg.step) {
+        if (cadence < leg.step.duration) {
+          const previousTime = stepTime - footElapsed / subdivisions;
+          const progress = clamp((previousTime - leg.step.at) / leg.step.duration, 0, 1);
+          leg.step.duration = cadence; leg.step.at = previousTime - progress * cadence;
+        }
+        const progress = clamp((stepTime - leg.step.at) / leg.step.duration, 0, 1);
+        leg.worldX = THREE.MathUtils.lerp(leg.step.from[0], leg.step.to[0], smoothstep(progress));
+        leg.worldZ = THREE.MathUtils.lerp(leg.step.from[1], leg.step.to[1], smoothstep(progress));
+        if (progress >= 1) leg.step = null;
+      }
+      if (!legs.some(leg => leg.step)) {
+        const candidates = legs.map(leg => ({ leg, error: Math.hypot(bodyX + -side * footPose(leg)[0] * mirror - leg.worldX, bodyZ + -side * footPose(leg)[1] - leg.worldZ) }));
+        candidates.sort((a, b) => b.error - a.error);
+        if (candidates[0].error > 0.09) {
+          let choice = candidates[0].leg;
+          if (candidates[0].error < 0.17 && candidates.find(candidate => candidate.leg === legs[nextFoot]).error > 0.075) choice = legs[nextFoot];
+          const duration = cadence;
+          const worldGoal = [bodyX + -side * footPose(choice)[0] * mirror + clamp(rawVelocity * duration * 0.75, -0.07, 0.07), bodyZ + -side * footPose(choice)[1] + clamp(rawDepthVelocity * duration * 0.75, -0.06, 0.06)];
+          choice.step = { at: stepTime, from: [choice.worldX, choice.worldZ], to: worldGoal, duration };
+          nextFoot = legs.indexOf(choice) === 0 ? 1 : 0;
+        }
       }
     }
+    footTime = time; footRootX = x; footRootZ = root.position.z;
     const flight = legs.find(leg => leg.step);
     if (flight) {
       const transfer = Math.sin(clamp((time - flight.step.at) / flight.step.duration, 0, 1) * Math.PI);
@@ -373,12 +456,13 @@ export function createAthlete(scene, side, color, handed = 'right') {
       let lift = 0; leg.pitch = 0;
       if (leg.step) {
         const t = clamp((time - leg.step.at) / leg.step.duration, 0, 1);
-        leg.worldX = THREE.MathUtils.lerp(leg.step.from, leg.step.to, smoothstep(t));
+        leg.worldX = THREE.MathUtils.lerp(leg.step.from[0], leg.step.to[0], smoothstep(t));
+        leg.worldZ = THREE.MathUtils.lerp(leg.step.from[1], leg.step.to[1], smoothstep(t));
         lift = Math.sin(t * Math.PI) ** 1.4 * 0.032;
         leg.pitch = -Math.sin(t * Math.PI) * 0.18;
         if (t >= 1) leg.step = null;
       }
-      leg.ankle = new THREE.Vector3((leg.worldX - x) * -side, 0.083 + lift, leg.sign * 0.025 - 0.015);
+      leg.ankle = new THREE.Vector3((leg.worldX - x) * -side, 0.072 + lift, (leg.worldZ - root.position.z) * -side);
       const hip = leg.anchor.position.clone().applyEuler(pelvis.rotation).add(new THREE.Vector3(pelvis.position.x, 0, pelvis.position.z));
       const horizontalSq = (leg.ankle.x - hip.x) ** 2 + (leg.ankle.z - hip.z) ** 2;
       const maxHeight = leg.ankle.y - hip.y + Math.sqrt(Math.max(0.1, 0.818 ** 2 - horizontalSq));
@@ -386,36 +470,48 @@ export function createAthlete(scene, side, color, handed = 'right') {
     }
     root.updateMatrixWorld(true);
     for (const leg of legs) {
-      placeChain(leg, rootPointToAnchor(root, leg.anchor, leg.ankle), [0, 0, 1]);
+      const index = leg.sign === -mirror ? 0 : 1;
+      const knee = vec(bodyPose.knees[index]); knee.x *= mirror; knee.y -= lowContact * 0.5;
+      placeChain(leg, rootPointToAnchor(root, leg.anchor, leg.ankle), rootPointToAnchor(root, leg.anchor, knee).toArray(), elapsed);
       root.updateMatrixWorld(true);
-      orientEnd(root, leg.end, new THREE.Euler(leg.pitch, -leg.sign * 0.11, 0));
+      orientEnd(root, leg.end, new THREE.Euler(leg.pitch, bodyPose.footYaw[index] * mirror, 0));
     }
     root.updateMatrixWorld(true);
     const center = vec(sample.center);
-    const wristBlend = stroke ? smoothstep((time - stroke.startedAt) / Math.min(0.08, stroke.lead)) * (1 - smoothstep((time - stroke.contactAt - (clipDuration - 0.23)) / 0.23)) : 0;
-    const wristPitch = THREE.MathUtils.lerp(0.14, stroke?.spin < 0 ? -0.20 : 0.14, wristBlend);
-    let wristRoll = mirror * THREE.MathUtils.lerp(-0.18, stroke?.handedness === 'backhand' ? 0.24 : -0.18, wristBlend);
-    if (stroke) wristRoll += sample.turn * 0.45;
-    const wristRotation = new THREE.Euler(wristPitch, sample.turn * 0.38, wristRoll);
+    const lowBallTilt = tableReceive || stroke?.shotType === 'push' ? smoothstep((0.95 - target.y) / 0.12) * swingBlend : 0;
+    const wristRotation = new THREE.Euler(THREE.MathUtils.lerp(bodyPose.wrist[0], 1.25, lowBallTilt), bodyPose.wrist[1] * mirror, bodyPose.wrist[2] * mirror);
     const wristQuaternion = new THREE.Quaternion().setFromEuler(wristRotation);
+    const worldCenter = root.localToWorld(center.clone());
+    const normal = new THREE.Vector3(0, 0, 1).applyQuaternion(wristQuaternion);
+    const up = new THREE.Vector3(0, 1, 0).applyQuaternion(wristQuaternion);
+    const bladeExtentZ = 0.096 * Math.sqrt(Math.max(0, 1 - normal.z ** 2)) + 0.012;
+    const handleExtentZ = -0.101 * up.z + 0.0345 * Math.abs(up.z) - 0.002 * normal.z + 0.017;
+    if (stroke && Math.abs(worldCenter.z) < 1.37 + Math.max(bladeExtentZ, handleExtentZ) && Math.abs(worldCenter.x) < 0.8625) {
+      const bladeClearance = 0.096 * Math.sqrt(Math.max(0, 1 - normal.y ** 2)) + 0.012;
+      const handleClearance = 0.101 * up.y + 0.0345 * Math.abs(up.y) + 0.002 * normal.y + 0.017;
+      const clearance = Math.max(bladeClearance, handleClearance);
+      center.y = Math.max(center.y, 0.76 + clearance);
+    }
     const handTarget = center.clone().sub(bladeCenter.clone().applyQuaternion(wristQuaternion));
     for (const arm of arms) {
       const isDominant = arm === dominant;
+      arm.anchor.position.y = 0.405 + bodyPose.shoulders[isDominant ? 0 : 1];
+      root.updateMatrixWorld(true);
       const balancing = new THREE.Vector3(0.04 * mirror, 1.055, 0.625);
-      balancing.lerp(new THREE.Vector3(0.255 * mirror - sample.turn * 0.24, 1.01 - lowContact + Math.abs(sample.turn) * 0.12, 0.28 + sample.load * 0.045), rallyAmount);
+      const freeHand = vec(bodyPose.freeHand); freeHand.x *= mirror; freeHand.y -= lowContact * 0.6;
+      balancing.lerp(freeHand, rallyAmount);
       if (stroke?.serve) {
         const release = smoothstep((time - stroke.startedAt - 0.18) / 0.14);
         balancing.set(THREE.MathUtils.lerp(0.04, 0.27, release) * mirror, THREE.MathUtils.lerp(1.055, 0.94, release) + sample.toss * 0.08, THREE.MathUtils.lerp(0.625, 0.30, release));
       }
       const armTarget = isDominant ? handTarget : balancing;
-      // A backhand elbow stays ahead of the chest rather than cutting through it.
-      const backhand = stroke?.handedness === 'backhand' && !stroke.serve;
-      const poleZ = isDominant ? backhand ? 0.55 + swingBlend * 0.55 : 0.55 - sample.load * swingBlend * 0.85 : 0.8;
-      const poleX = arm.sign * (isDominant ? backhand ? THREE.MathUtils.lerp(0.24, 0.30, swingBlend) : 0.24 + sample.load * swingBlend * 0.28 : 0.25 + Math.abs(sample.turn) * 0.20);
-      const poleY = isDominant && backhand ? THREE.MathUtils.lerp(-0.78, -0.32, swingBlend) : -0.78 + sample.load * swingBlend * 0.30;
-      placeChain(arm, rootPointToAnchor(root, arm.anchor, armTarget), [poleX, poleY, poleZ]);
+      const elbow = vec(isDominant ? bodyPose.playingElbow : bodyPose.freeElbow);
+      elbow.x *= mirror; elbow.y -= lowContact * 0.8;
+      // Clip elbows are points in court-facing body space, transformed with the
+      // actual shoulder. IK adjusts reach while retaining the authored bend plane.
+      placeChain(arm, rootPointToAnchor(root, arm.anchor, armTarget), rootPointToAnchor(root, arm.anchor, elbow).toArray(), elapsed);
       root.updateMatrixWorld(true);
-      const freePalm = stroke?.serve ? THREE.MathUtils.lerp(1.35, -0.12, smoothstep((time - stroke.startedAt - 0.18) / 0.14)) : THREE.MathUtils.lerp(1.35, -0.12, rallyAmount);
+      const freePalm = stroke?.serve ? THREE.MathUtils.lerp(1.35, 1.90, smoothstep((time - stroke.startedAt - 0.18) / 0.14)) : THREE.MathUtils.lerp(1.35, bodyPose.freePalm, rallyAmount);
       orientEnd(root, arm.end, isDominant ? wristRotation : new THREE.Euler(freePalm, 0, 0.25 * mirror));
     }
     root.updateMatrixWorld(true);
@@ -429,18 +525,21 @@ export function createAthlete(scene, side, color, handed = 'right') {
       target: stroke ? { ...stroke.target } : null, paddle: paddleWorld.toArray(), hand: handWorld.toArray(),
       shoulderTurn: pelvis.rotation.y + spine.rotation.y, hipTurn: pelvis.rotation.y, footMoving: legs.findIndex(leg => leg.step),
       reachError: dominant.reachError,
-      shotStyle: sample.shotStyle ?? 'ready',
+      shotStyle: stroke?.shotType ?? 'ready', profileId: motionProfile, bodyPose, rootDepth: Math.abs(root.position.z),
+      pelvisHeight: pelvis.position.y, feet: legs.map(leg => [leg.worldX, leg.worldZ]), legReachError: Math.max(...legs.map(leg => leg.reachError)),
     };
     root.userData.pose = pose;
   }
   update(0, 0, 0, null, false);
   return {
-    root, handWorld, freeHandWorld, paddleWorld, beginSwing, contact, update,
+    root, handWorld, freeHandWorld, paddleWorld, beginSwing, contact, update, setProfile,
     strike(time, position, spin) { contact(time, { ...position, spin }); },
     endSwing() { if (stroke) stroke.contact = false; },
     reset() {
-      stroke = null; strokeId = 0; previousX = null; velocity = 0; nextFoot = 0; readyAmount = 0.62; serveAmount = 0; rallyAmount = 0;
-      for (const leg of legs) { leg.worldX = null; leg.step = null; }
+      stroke = null; strokeId = 0; previousX = null; previousZ = null; velocity = 0; depthVelocity = 0; nextFoot = 0; readyAmount = 0.62; serveAmount = 0; rallyAmount = 0; bodyPose = readyBodyPose(motionProfile);
+      footTime = null; footRootX = root.position.x; footRootZ = root.position.z;
+      for (const leg of legs) { leg.worldX = null; leg.worldZ = null; leg.step = null; }
+      for (const chain of [...legs, ...arms]) chain.bendWorld = null;
       lastCenter.copy(readyCenter);
     },
     metrics() { return { ...pose, armLengths: [dominant.upperLength, dominant.lowerLength], legLengths: [legs[0].upperLength, legs[0].lowerLength] }; },

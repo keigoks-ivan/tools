@@ -1,0 +1,104 @@
+{
+  "version": 1,
+  "generatedAt": "2026-10-05T00:00:34.057Z",
+  "method": {
+    "zh": "直接執行現行 Match 物理與 Lin／Harimoto 遊戲打法規則，以非練習模式的 AI 對 AI 自動操作，兩端套用相同難度的移速、反應延遲、觸球範圍與擊球誤差。每個難度各交換近／遠端，每個位置組合 50 局，共 300 局。固定亂數 LCG（1664525、1013904223、模數 2³²）；easy／normal／hard 種子分別由 42265／52265／62265 起，每局加 1，交換位置使用相同種子。以 1/60 秒呼叫 step，物理內部為 1/240 秒。每局模擬時間上限 240 秒，未完成的局不計勝負。",
+    "en": "Run the current Match physics and Lin/Harimoto game rules directly in competitive, non-practice AI-versus-AI mode. Both ends use the same difficulty speed, reaction delay, contact reach and shot error. Swap the near/far assignments for each difficulty, with 50 games per assignment and 300 games total. Seeded LCG: multiplier 1664525, increment 1013904223, modulus 2^32. Seeds start at 42265/52265/62265 for easy/normal/hard and increase by one per game; swapped assignments reuse the same seeds. Call step at 1/60 s; internal physics advances at 1/240 s. Cap each game at 240 simulated seconds and exclude unfinished games from wins."
+  },
+  "format": {
+    "zh": "單局 11 分、至少領先 2 分；不模擬七局四勝賽事。games 為嘗試局數，truncated 為未完成局數。",
+    "en": "One game to 11 points, win by two; this does not simulate a best-of-seven match. games counts attempts; truncated counts unfinished games."
+  },
+  "pairings": [
+    {
+      "a": "lin",
+      "b": "harimoto",
+      "levels": [
+        {
+          "level": "easy",
+          "bySide": [
+            {
+              "near": "lin",
+              "games": 50,
+              "winsA": 23,
+              "winsB": 27,
+              "truncated": 0
+            },
+            {
+              "near": "harimoto",
+              "games": 50,
+              "winsA": 27,
+              "winsB": 23,
+              "truncated": 0
+            }
+          ],
+          "games": 100,
+          "winsA": 50,
+          "winsB": 50
+        },
+        {
+          "level": "normal",
+          "bySide": [
+            {
+              "near": "lin",
+              "games": 50,
+              "winsA": 24,
+              "winsB": 22,
+              "truncated": 4
+            },
+            {
+              "near": "harimoto",
+              "games": 50,
+              "winsA": 22,
+              "winsB": 24,
+              "truncated": 4
+            }
+          ],
+          "games": 100,
+          "winsA": 46,
+          "winsB": 46
+        },
+        {
+          "level": "hard",
+          "bySide": [
+            {
+              "near": "lin",
+              "games": 50,
+              "winsA": 23,
+              "winsB": 15,
+              "truncated": 12
+            },
+            {
+              "near": "harimoto",
+              "games": 50,
+              "winsA": 15,
+              "winsB": 23,
+              "truncated": 12
+            }
+          ],
+          "games": 100,
+          "winsA": 38,
+          "winsB": 38
+        }
+      ]
+    }
+  ],
+  "limits": [
+    {
+      "zh": "這是遊戲平衡結果，不是現實選手的歷史勝率，也不是未來賽事勝率預測。",
+      "en": "These are game-balance results, not historical athlete win rates or forecasts of future matches."
+    },
+    {
+      "zh": "本次模擬兩端均使用 easy／normal／hard 移速 1.65／2.3／3.2 m/s、反應延遲 0.25／0.16／0.085 秒，以及同難度的觸球範圍與擊球誤差。真人操作與練習模式仍保留近端 3.7 m/s、沒有難度額外誤差的輔助規則，不能直接用其體驗對照本結果。交換位置與相同亂數種子只能降低位置偏差，未證明模擬代表真實競技能力。",
+      "en": "Both ends in this simulation use easy/normal/hard speeds of 1.65/2.3/3.2 m/s, reaction delays of 0.25/0.16/0.085 s, and equal difficulty reach and shot error. Human control and practice retain near-side assistance of 3.7 m/s with no added difficulty error, so their experience cannot be compared directly with these results. Swapping positions and using matched seeds reduce placement bias but do not validate real competitive ability."
+    },
+    {
+      "zh": "打法、力度、旋轉及動作參數為遊戲設計調校，未由選手真實比賽量化校準；簡化物理未涵蓋疲勞、傷病、器材或臨場調整。",
+      "en": "Shot selection, power, spin and motion are game-design settings rather than quantitatively calibrated athlete parameters. Simplified physics omits fatigue, injuries, equipment and in-match adaptation."
+    },
+    {
+      "zh": "目前只有 Lin 與 Harimoto 有可執行遊戲打法規則，其餘選手不能用本資料推算遊戲對戰結果。",
+      "en": "Only Lin and Harimoto currently have executable game profiles; this dataset cannot simulate the other athletes."
+    }
+  ]
+}
