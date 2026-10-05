@@ -7,6 +7,12 @@
 // Tour patches (dev/bake_tours.py, data/lszh/tours.json): scenery.setTour('alps' | 'city') adds two more imagery
 // slots (tour-mid, tour-detail, feathered over the base layers), a finer DEM patch mesh (the base rings are sunk under
 // it) and makes groundHeight() follow the tour DEM; setTour(null) removes and disposes all of it.
+//
+// Country layer (dev/bake_country.py, data/lszh/country/): all of Switzerland beyond the far box. One imagery texture
+// (~90 m/px) and a 200 m DEM, loaded lazily (aircraft > 45 km from the airport, scenery.ensureCountry(), or a tour whose
+// box lies outside the far box). Until then nothing is requested and the airport view is unchanged. The ground outside the
+// far ring is a set of 16 km chunks (472 m cells, 236 m near the aircraft) whose vertices are relative to the chunk centre
+// (mesh.position carries the large local-frame offset), so float32 vertex precision does not degrade ~170 km from the origin.
 const EARTH_RADIUS = 6378137;
 
 export function createGeoScenery(THREE, scene, config) {
@@ -25,6 +31,9 @@ export function createGeoScenery(THREE, scene, config) {
   let disposed = false, outsideCoverage = false, layersShown = 0, failed = 0, terrainSettled = false;
   let manifest = null, near = null, far = null, material = null;
   const ringMeshes = [];
+  let countryDem = null, countryMeta = null, countryGroup = null, countryMaterial = null, countryPromise = null, countryShown = false, countryAuto = false;
+  const countryChunks = [];
+  let terrainDone; const terrainReady = new Promise(resolve => { terrainDone = resolve; }); // settles when the base terrain (not the imagery layers) is up
   let tour = null, tourSerial = 0, tourManifest = null, tourDem = null; // active tour patch (see setTour)
   const loadedLayers = [false, false, false, false];
   const layerNames = ['far', 'wide', 'mid', 'detail'];
@@ -45,7 +54,7 @@ export function createGeoScenery(THREE, scene, config) {
     return {
       tour: tour?.shown ? tour.id : null,
       phase: disposed ? 'disposed' : terrainSettled ? (near ? (layersShown >= 4 ? 'ready' : 'imagery') : 'fallback') : 'loading',
-      terrain: near !== null, terrainSettled, imagery: layersShown > 0, layers: layersShown, totalLayers: 4, failed, outsideCoverage,
+      country: countryShown, terrain: near !== null, terrainSettled, imagery: layersShown > 0, layers: layersShown, totalLayers: 4, failed, outsideCoverage,
       attribution: airport.attribution,
     };
   }
@@ -69,12 +78,24 @@ export function createGeoScenery(THREE, scene, config) {
     const a = h[top * n + left], b = h[top * n + left + 1], c = h[(top + 1) * n + left], d = h[(top + 1) * n + left + 1];
     return (a * (1 - fx) + b * fx) * (1 - fy) + (c * (1 - fx) + d * fx) * fy;
   }
+  function sampleRectDem(dem, mx, my) { // non-square DEM (country): nx x ny cells
+    const nx = dem.nx, ny = dem.ny, px = (mx - dem.minX) / (dem.maxX - dem.minX) * nx - 0.5, py = (dem.maxY - my) / (dem.maxY - dem.minY) * ny - 0.5;
+    const x = Math.max(0, Math.min(nx - 1.001, px)), y = Math.max(0, Math.min(ny - 1.001, py));
+    const left = Math.floor(x), top = Math.floor(y), fx = x - left, fy = y - top, h = dem.heights;
+    const a = h[top * nx + left], b = h[top * nx + left + 1], c = h[(top + 1) * nx + left], d = h[(top + 1) * nx + left + 1];
+    return (a * (1 - fx) + b * fx) * (1 - fy) + (c * (1 - fx) + d * fx) * fy;
+  }
   const smooth = t => { t = Math.max(0, Math.min(1, t)); return t * t * (3 - 2 * t); };
   function absoluteHeight(mx, my) { // metres above sea level: swissALTI3D inside the near grid, eased into the far grid at its edge
     const f = sampleDem(far, mx, my);
     const u = Math.min(mx - near.minX, near.maxX - mx) / (near.maxX - near.minX), v = Math.min(my - near.minY, near.maxY - my) / (near.maxY - near.minY);
     const w = smooth(Math.min(u, v) / 0.06);
-    const base = w <= 0 ? f : w >= 1 ? sampleDem(near, mx, my) : f + (sampleDem(near, mx, my) - f) * w;
+    let base = w <= 0 ? f : w >= 1 ? sampleDem(near, mx, my) : f + (sampleDem(near, mx, my) - f) * w;
+    if (countryDem) { // country DEM outside the far box, eased in over the outer 6% of the far box
+      const fu = Math.min(mx - far.minX, far.maxX - mx) / (far.maxX - far.minX), fv = Math.min(my - far.minY, far.maxY - my) / (far.maxY - far.minY);
+      const cw = 1 - smooth(Math.min(fu, fv) / 0.06);
+      if (cw > 0) base += (sampleRectDem(countryDem, mx, my) - base) * cw;
+    }
     if (tourDem) { // tour patch: its own swissALTI3D grid, eased into the base terrain over TOUR_EDGE of the box width
       const pu = Math.min(mx - tourDem.minX, tourDem.maxX - mx) / (tourDem.maxX - tourDem.minX), pv = Math.min(my - tourDem.minY, tourDem.maxY - my) / (tourDem.maxY - tourDem.minY);
       const pw = smooth(Math.min(pu, pv) / TOUR_EDGE);
@@ -152,6 +173,7 @@ export function createGeoScenery(THREE, scene, config) {
       uLoaded: { value: new THREE.Vector4(0, 0, 0, 0) },
       uFeather: { value: new THREE.Vector4(0, 0, 0, 0) },
       uLoadTour: { value: new THREE.Vector2(0, 0) }, uFeatTour: { value: new THREE.Vector2(0.01, 0.01) },
+      uTexC: { value: placeholder }, uBoxC: { value: new THREE.Vector4(0, 0, 1, 1) }, uSizeC: { value: new THREE.Vector2(1, 1) }, uLoadC: { value: 0 }, uFeatC: { value: 1 },
     };
     if (!shared) {
       layerNames.forEach((name, i) => { uniforms[`uTex${i}`] = { value: placeholder }; uniforms[`uBox${i}`] = { value: new THREE.Vector4(0, 0, 1, 1) }; });
@@ -166,6 +188,8 @@ export function createGeoScenery(THREE, scene, config) {
         uniform sampler2D uTex0; uniform sampler2D uTex1; uniform sampler2D uTex2; uniform sampler2D uTex3;
         uniform vec4 uBox0; uniform vec4 uBox1; uniform vec4 uBox2; uniform vec4 uBox3;
         uniform sampler2D uTex4; uniform sampler2D uTex5; uniform vec4 uBox4; uniform vec4 uBox5; uniform vec2 uLoadTour; uniform vec2 uFeatTour;
+        uniform sampler2D uTexC; uniform vec4 uBoxC; uniform vec2 uSizeC; uniform float uLoadC; uniform float uFeatC;
+        float countryEdge(vec2 uv) { vec2 e = min(uv, 1.0 - uv) * uSizeC; return smoothstep(0.0, max(uFeatC, 1e-3), min(e.x, e.y)); }
         vec2 layerUV(vec4 box, vec2 m) { return (m - box.xy) * box.zw; }
         float edgeWeight(vec2 uv, float feather) { vec2 e = min(uv, 1.0 - uv); return smoothstep(0.0, max(feather, 1e-5), min(e.x, e.y)); }`)
         .replace('#include <map_fragment>', `
@@ -177,7 +201,9 @@ export function createGeoScenery(THREE, scene, config) {
         col = mix(col, texture2D(uTex3, uv3).rgb, uLoaded.w * edgeWeight(uv3, uFeather.w));
         if (uLoadTour.x > 0.0) { vec2 uv4 = layerUV(uBox4, mer); col = mix(col, texture2D(uTex4, uv4).rgb, uLoadTour.x * edgeWeight(uv4, uFeatTour.x)); }
         if (uLoadTour.y > 0.0) { vec2 uv5 = layerUV(uBox5, mer); col = mix(col, texture2D(uTex5, uv5).rgb, uLoadTour.y * edgeWeight(uv5, uFeatTour.y)); }
-        col = mix(fogColor, col, mix(1.0, edgeWeight(uv0, 0.07), uLoaded.x));
+        vec3 outerCol = fogColor;
+        if (uLoadC > 0.0) { vec2 uvC = layerUV(uBoxC, mer); outerCol = mix(fogColor, texture2D(uTexC, uvC).rgb, uLoadC * countryEdge(uvC)); }
+        col = mix(outerCol, col, mix(1.0, edgeWeight(uv0, 0.07), uLoaded.x));
         diffuseColor.rgb *= col;`);
     };
     m.customProgramCacheKey = () => shared ? 'tour-patch' : 'ring';
@@ -207,10 +233,11 @@ export function createGeoScenery(THREE, scene, config) {
       mesh.frustumCulled = false; mesh.renderOrder = -1; mesh.name = `terrain ring ${i}`; group.add(mesh); ringMeshes.push(mesh);
     });
   }
-  function rebuildRings() { // after a tour starts/stops: new ring heights (sunk under the patch, or back to plain terrain)
+  function rebuildRings(box) { // after a tour starts/stops (or the country DEM arrives): new ring heights (sunk under the patch, or back to plain terrain)
     ringMeshes.forEach((mesh, i) => {
       const old = mesh.geometry; mesh.geometry = ringGeometry(...RINGS[i]); old.dispose(); geometries.delete(old);
     });
+    if (box) refreshCountryChunks(box);
   }
   const frame = () => new Promise(resolve => requestAnimationFrame(() => resolve()));
   async function addLayer(index) {
@@ -277,7 +304,7 @@ export function createGeoScenery(THREE, scene, config) {
     if (t.geometry) { t.geometry.dispose(); geometries.delete(t.geometry); }
     for (const texture of t.textures) { texture.dispose(); textures.delete(texture); }
     t.textures.length = 0; t.mesh = t.geometry = null;
-    if (ringMeshes.length && !disposed) rebuildRings();
+    if (ringMeshes.length && !disposed) rebuildRings(t.box);
     notify();
   }
   async function buildTour(t) {
@@ -288,6 +315,8 @@ export function createGeoScenery(THREE, scene, config) {
     try { all = await tourManifest; } catch (error) { tourManifest = null; throw error; }
     const spec = all.tours?.[t.id];
     if (!spec) throw new Error(`Unknown tour "${t.id}"`);
+    if (spec.dem && (spec.dem.minX < far.minX || spec.dem.maxX > far.maxX || spec.dem.minY < far.minY || spec.dem.maxY > far.maxY)) await ensureCountry(); // the tour lies (partly) beyond the far box
+    if (t.cancelled) throw new Error(`Tour "${t.id}" was cancelled`);
     const pick = files => (config.highRes && files['4096']) || files['3072'] || files['4096'];
     const [dem, midImage, detailImage] = await Promise.all([
       loadDem({ ...spec.dem, stepM: spec.dem.stepM ?? 0.25, offsetM: spec.dem.offsetM ?? 0 }),
@@ -295,10 +324,11 @@ export function createGeoScenery(THREE, scene, config) {
     ]);
     if (t.cancelled) throw new Error(`Tour "${t.id}" was cancelled`);
     tourDem = { ...dem, meshCellM: spec.dem.meshCellM, groundHalfM: spec.dem.groundHalfM };
+    t.box = { minX: dem.minX, maxX: dem.maxX, minY: dem.minY, maxY: dem.maxY };
     t.geometry = patchGeometry(tourDem);
     const patchMaterial = makeMaterial(material);
     t.mesh = new THREE.Mesh(t.geometry, patchMaterial); t.mesh.frustumCulled = false; t.mesh.renderOrder = -1; t.mesh.name = `tour patch ${t.id}`; group.add(t.mesh);
-    rebuildRings();
+    rebuildRings(t.box);
     const u = material.userData.uniforms;
     [spec.layers.mid, spec.layers.detail].forEach((meta, k) => {
       const texture = makeTexture(k ? detailImage : midImage); t.textures.push(texture);
@@ -326,6 +356,149 @@ export function createGeoScenery(THREE, scene, config) {
     return t.promise;
   }
 
+  // ---- country layer --------------------------------------------------------------------------------------
+  const CTRY = { cell: 472, chunk: 34, hole: 5, fineRange: 40000, dropRange: 60000, edgeFeatherM: 15000 }; // 34 cells = 16,048 m; hole = the far ring's 80,240 m half size = 5 chunks
+  function chunkGeometry(c, div) {
+    const cell = CTRY.cell / div, n = CTRY.chunk * div, stride = n + 1, cm = cell / groundScale, size = cm * n, d = countryMeta;
+    const positions = new Float32Array(stride * stride * 3), indices = [], extra = [];
+    const x0 = originX + c.ci * CTRY.chunk * CTRY.cell / groundScale, y0 = originY + c.cj * CTRY.chunk * CTRY.cell / groundScale;
+    for (let r = 0; r <= n; r++) for (let col = 0; col <= n; col++) {
+      const east = (x0 + col * cm - originX) * groundScale, north = (y0 + size - r * cm - originY) * groundScale;
+      const x = cosine * east - sine * north, z = -sine * east - cosine * north, i = (r * stride + col) * 3;
+      positions[i] = x - c.cx; positions[i + 1] = ringHeight(x, z, cell) - 0.1; positions[i + 2] = z - c.cz; // relative to the chunk centre (float32 precision)
+    }
+    const included = (r, col) => {
+      if (r < 0 || col < 0 || r >= n || col >= n) return false;
+      const mx = x0 + (col + 0.5) * cm, my = y0 + size - (r + 0.5) * cm;
+      return mx > d.minX && mx < d.maxX && my > d.minY && my < d.maxY;
+    };
+    const skirt = Math.max(8, cell * 0.8);
+    function pushSkirt(a, b) {
+      const first = stride * stride + extra.length / 3;
+      for (const v of [a, b]) extra.push(positions[v * 3], positions[v * 3 + 1] - skirt, positions[v * 3 + 2]);
+      indices.push(a, first, b, b, first, first + 1);
+    }
+    for (let r = 0; r < n; r++) for (let col = 0; col < n; col++) {
+      if (!included(r, col)) continue;
+      const a = r * stride + col, b = a + 1, e = a + stride, f = e + 1;
+      indices.push(a, e, b, b, e, f);
+      if (!included(r - 1, col)) pushSkirt(b, a);
+      if (!included(r + 1, col)) pushSkirt(e, f);
+      if (!included(r, col - 1)) pushSkirt(a, e);
+      if (!included(r, col + 1)) pushSkirt(f, b);
+    }
+    const all = new Float32Array(positions.length + extra.length); all.set(positions); all.set(extra, positions.length);
+    const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(all, 3));
+    geo.setIndex(new THREE.BufferAttribute(new Uint32Array(indices), 1));
+    geo.boundingSphere = new THREE.Sphere(new THREE.Vector3(0, 2000, 0), CTRY.chunk * CTRY.cell * 0.7072 + 3500); geometries.add(geo); return geo;
+  }
+  function setChunkGeometry(c, div) {
+    const fresh = chunkGeometry(c, div);
+    if (div === 1) { if (c.coarse) { c.coarse.dispose(); geometries.delete(c.coarse); } c.coarse = fresh; }
+    else { if (c.fine) { c.fine.dispose(); geometries.delete(c.fine); } c.fine = fresh; }
+    c.mesh.geometry = fresh; c.div = div;
+  }
+  function chunkTouches(c, box) {
+    const size = CTRY.chunk * CTRY.cell / groundScale, x0 = originX + c.ci * size, y0 = originY + c.cj * size;
+    return !(x0 > box.maxX || x0 + size < box.minX || y0 > box.maxY || y0 + size < box.minY);
+  }
+  function refreshCountryChunks(box) { // a tour patch started/stopped: re-sink / restore the country chunks under it
+    for (const c of countryChunks) if (chunkTouches(c, box)) {
+      const wasFine = c.div === 2;
+      if (c.fine) { c.fine.dispose(); geometries.delete(c.fine); c.fine = null; }
+      setChunkGeometry(c, 1); if (wasFine) setChunkGeometry(c, 2);
+    }
+  }
+  function makeCountryMaterial(uniforms) {
+    const m = new THREE.MeshBasicMaterial({ color: 0xffffff, fog: true });
+    m.onBeforeCompile = shader => {
+      Object.assign(shader.uniforms, { uTexC: uniforms.uTexC, uBoxC: uniforms.uBoxC, uSizeC: uniforms.uSizeC, uFeatC: uniforms.uFeatC });
+      shader.vertexShader = shader.vertexShader.replace('#include <common>', '#include <common>\nvarying vec2 vXZ;').replace('#include <begin_vertex>', '#include <begin_vertex>\nvXZ = (modelMatrix * vec4(position, 1.0)).xz;');
+      shader.fragmentShader = shader.fragmentShader.replace('#include <common>', `#include <common>
+        varying vec2 vXZ; uniform vec3 uRot; uniform sampler2D uTexC; uniform vec4 uBoxC; uniform vec2 uSizeC; uniform float uFeatC;`)
+        .replace('#include <map_fragment>', `
+        vec2 mer = vec2(uRot.x * vXZ.x - uRot.y * vXZ.y, -uRot.y * vXZ.x - uRot.x * vXZ.y) / uRot.z;
+        vec2 uvC = (mer - uBoxC.xy) * uBoxC.zw; vec2 eC = min(uvC, 1.0 - uvC) * uSizeC;
+        diffuseColor.rgb *= mix(fogColor, texture2D(uTexC, uvC).rgb, smoothstep(0.0, max(uFeatC, 1e-3), min(eC.x, eC.y)));`);
+      shader.uniforms.uRot = material.userData.uniforms.uRot;
+    };
+    m.customProgramCacheKey = () => 'country';
+    return m;
+  }
+  function discardCountry() {
+    countryShown = false; countryDem = null;
+    for (const c of countryChunks) for (const g of [c.coarse, c.fine]) if (g) { g.dispose(); geometries.delete(g); }
+    countryChunks.length = 0;
+    if (countryGroup) { group.remove(countryGroup); countryGroup = null; }
+    if (countryMaterial) { countryMaterial.dispose(); countryMaterial = null; }
+    if (material) { const u = material.userData.uniforms; u.uLoadC.value = 0; u.uTexC.value = material.userData.placeholder; }
+    countryMeta = null;
+  }
+  async function buildCountry() {
+    await terrainReady;
+    if (!near || !material) throw new Error('base scenery is not available');
+    const response = await fetch(base + 'country/country.json');
+    if (!response.ok) throw new Error(`country.json: HTTP ${response.status}`);
+    const meta = await response.json(), dir = base + 'country/';
+    const file = (config.highRes && meta.files['4096']) || meta.files['2048'] || meta.files['4096'];
+    const [dem, image] = await Promise.all([
+      (async () => { const i = await loadImage(dir + meta.dem.file), canvas = document.createElement('canvas'); canvas.width = i.naturalWidth; canvas.height = i.naturalHeight;
+        const ctx = canvas.getContext('2d', { willReadFrequently: true }); ctx.drawImage(i, 0, 0);
+        const px = ctx.getImageData(0, 0, canvas.width, canvas.height).data, heights = new Float32Array(canvas.width * canvas.height);
+        for (let k = 0; k < heights.length; k++) heights[k] = (px[k * 4] * 256 + px[k * 4 + 1]) * meta.dem.stepM + meta.dem.offsetM;
+        if (canvas.width !== meta.dem.nx || canvas.height !== meta.dem.ny) throw new Error('country DEM size mismatch');
+        return { ...meta.dem, heights, n: canvas.width }; })(),
+      loadImage(dir + file),
+    ]);
+    if (disposed) throw new Error('scenery disposed');
+    const u = material.userData.uniforms;
+    countryMeta = meta; countryDem = dem;
+    try {
+      countryGroup = new THREE.Group(); countryGroup.name = 'Country terrain'; countryGroup.visible = false; group.add(countryGroup);
+      countryMaterial = makeCountryMaterial(u);
+      const texture = makeTexture(image);
+      u.uTexC.value = texture; u.uBoxC.value.set(meta.minX - originX, meta.minY - originY, 1 / (meta.maxX - meta.minX), 1 / (meta.maxY - meta.minY));
+      u.uSizeC.value.set((meta.maxX - meta.minX) * groundScale, (meta.maxY - meta.minY) * groundScale); u.uFeatC.value = CTRY.edgeFeatherM;
+      const size = CTRY.chunk * CTRY.cell / groundScale, list = [];
+      for (let ci = Math.floor((meta.minX - originX) / size); ci <= Math.floor((meta.maxX - originX) / size); ci++)
+        for (let cj = Math.floor((meta.minY - originY) / size); cj <= Math.floor((meta.maxY - originY) / size); cj++) {
+          if (ci >= -CTRY.hole && ci < CTRY.hole && cj >= -CTRY.hole && cj < CTRY.hole) continue; // the far ring covers this square
+          const c = { ci, cj, div: 0, coarse: null, fine: null, mesh: null, cx: 0, cz: 0 };
+          if (!chunkTouches(c, meta)) continue;
+          const east = (originX + (ci + 0.5) * size - originX) * groundScale, north = ((cj + 0.5) * size) * groundScale;
+          c.cx = cosine * east - sine * north; c.cz = -sine * east - cosine * north; list.push(c);
+        }
+      let slice = 0;
+      for (const c of list) {
+        c.mesh = new THREE.Mesh(new THREE.BufferGeometry(), countryMaterial); c.mesh.position.set(c.cx, 0, c.cz); c.mesh.updateMatrix(); c.mesh.matrixAutoUpdate = false;
+        c.mesh.renderOrder = -1; c.mesh.name = `country chunk ${c.ci},${c.cj}`; countryGroup.add(c.mesh); countryChunks.push(c);
+        setChunkGeometry(c, 1);
+        if (++slice % 16 === 0) { await nextFrame(); if (disposed) throw new Error('scenery disposed'); }
+      }
+      rebuildRings(); // far ring's outer band now follows the country DEM
+      countryGroup.visible = true; u.uLoadC.value = 1; countryShown = true; attribution.hidden = false; notify();
+      await nextFrame();
+    } catch (error) { discardCountry(); throw error; }
+  }
+  // ensureCountry() -> Promise that resolves once the country imagery + DEM are loaded and shown (immediately if already so).
+  // Rejects, leaving the base scenery untouched, if anything is missing; a later call retries.
+  function ensureCountry() {
+    if (disposed) return Promise.reject(new Error('scenery disposed'));
+    if (!countryPromise) countryPromise = buildCountry().catch(error => { countryPromise = null; failed++; console.warn('Country scenery failed', error); notify(); throw error; });
+    return countryPromise;
+  }
+  function updateCountry(px, pz) {
+    const near2 = Math.hypot(px, pz) > 45000;
+    if (near2 && !countryPromise && !countryAuto) { countryAuto = true; ensureCountry().catch(() => {}); } // distant flight: one automatic attempt (a failed load is retried only by an explicit ensureCountry())
+    if (!countryShown) return;
+    let built = 0;
+    for (const c of countryChunks) {
+      const d = Math.hypot(c.cx - px, c.cz - pz);
+      if (c.div === 1 && d < CTRY.fineRange && !built) { if (!c.fine) setChunkGeometry(c, 2); else { c.mesh.geometry = c.fine; c.div = 2; } built++; }
+      else if (c.div === 2 && d > CTRY.dropRange) { c.mesh.geometry = c.coarse; c.div = 1; if (c.fine) { c.fine.dispose(); geometries.delete(c.fine); c.fine = null; } }
+    }
+  }
+
   async function loadScenery() {
     notify();
     manifest = await (await fetch(base + 'scenery.json')).json();
@@ -336,6 +509,7 @@ export function createGeoScenery(THREE, scene, config) {
     if (disposed) return;
     terrainSettled = true;
     if (near) buildTerrain();
+    terrainDone();
     notify();
     if (!near) return;
     for (let i = 0; i < 4 && !disposed; i++) { // low-resolution layers first; detail arrives in the background
@@ -343,13 +517,14 @@ export function createGeoScenery(THREE, scene, config) {
       await frame();
     }
   }
-  const ready = loadScenery().catch(error => { console.warn(error); terrainSettled = true; failed++; notify(); });
-  return { ready, groundHeight, geographicPosition, status, setTour, update(time, state) {
+  const ready = loadScenery().catch(error => { console.warn(error); terrainSettled = true; failed++; terrainDone(); notify(); });
+  return { ready, groundHeight, geographicPosition, status, setTour, ensureCountry, update(time, state) {
     const position = state?.position || state?.pos;
     if (position && far) {
-      const point = localToMercator(position.x, position.z);
-      const outside = point.x < far.minX + 5000 || point.x > far.maxX - 5000 || point.y < far.minY + 5000 || point.y > far.maxY - 5000;
+      const point = localToMercator(position.x, position.z), box = countryShown ? countryMeta : far, margin = 5000;
+      const outside = point.x < box.minX + margin || point.x > box.maxX - margin || point.y < box.minY + margin || point.y > box.maxY - margin;
       if (outside !== outsideCoverage) { outsideCoverage = outside; notify(); }
+      updateCountry(position.x, position.z);
     }
   }, dispose() {
     if (disposed) return;
