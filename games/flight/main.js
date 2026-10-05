@@ -6,6 +6,7 @@ import { createWorld } from './world.js';
 import { createGeoScenery } from './geoscenery.js';
 import { createInstruments } from './instruments.js';
 import { nextStep, ilsCue, autoConfig, approachActive, approachBoxes } from './novice.mjs';
+import { LEVELS, levelById, nextLevel, createLevelState, windAt, grade, bestStars, isUnlocked, recordResult, parseProgress, starText } from './challenge.mjs';
 
 const $ = id => document.getElementById(id);
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -34,6 +35,8 @@ let active = false, paused = false, panelHidden = false, view = 0, weather = 'cl
 let renderer, scenery, scene, camera, plane, cockpit, world, terrainReady = false;
 let sceneTime = 0, lastTime = 0, accumulator = 0, lastUI = 0, toastTimer;
 let routeIndex = 0, departed = false, resultShown = false, brakeLatch = false;
+let level = null, progress = {}; // landing challenge (challenge.mjs): the active level, and best stars per level
+try { progress = parseProgress(localStorage.getItem('flightChallenge')); } catch {}
 let novice = false, autoMem = {}, notice = {}, ilsLast = null, glowing = '', approachBoxGroup = null; // novice mode (novice.mjs)
 let lookYaw = 0, lookPitch = 0, looking = false, lastPointer = { x: 0, y: 0 };
 let mouse = { x: 0, y: 0, inside: false }, touch = { x: 0, y: 0, active: false }, touchBrake = false;
@@ -53,7 +56,7 @@ function localize() {
   document.documentElement.lang = locale === 'zh' ? 'zh-Hant' : 'en';
   document.querySelectorAll('[data-zh][data-en]').forEach(el => { el.textContent = el.dataset[locale]; });
   $('lang-button').textContent = locale === 'zh' ? 'EN' : '中文';
-  updateSceneryText(); updateUI();
+  updateSceneryText(); renderLevels(); updateUI();
 }
 function setPause(value) {
   paused = value; held.clear(); axes = { pitch: 0, roll: 0, yaw: 0 }; accumulator = 0;
@@ -98,12 +101,37 @@ function configureQuality() {
   renderer.shadowMap.enabled = quality === 'high';
   resizeView();
 }
+// ---- Landing challenge (logic lives in challenge.mjs) ----
+function saveProgress() { try { localStorage.setItem('flightChallenge', JSON.stringify(progress)); } catch {} }
+function renderLevels() {
+  const list = $('level-list'), keep = document.querySelector('input[name=level]:checked')?.value;
+  list.textContent = '';
+  const first = LEVELS.find(l => isUnlocked(progress, l.id) && !bestStars(progress, l.id)) || LEVELS.find(l => isUnlocked(progress, l.id));
+  for (const l of LEVELS) {
+    const open = isUnlocked(progress, l.id), card = document.createElement('label'), input = document.createElement('input');
+    card.className = `level-card${open ? '' : ' locked'}`; input.type = 'radio'; input.name = 'level'; input.value = l.id; input.disabled = !open;
+    input.checked = keep ? String(l.id) === keep && open : l === first;
+    const text = document.createElement('span'), name = document.createElement('strong'), desc = document.createElement('small'), no = document.createElement('b'), stars = document.createElement('span');
+    text.className = 'level-text'; name.textContent = tr(l.zh, l.en); desc.textContent = tr(l.descZh, l.descEn); text.append(name, desc);
+    no.className = 'level-no'; no.textContent = l.id; stars.className = 'level-stars';
+    stars.textContent = open ? starText(bestStars(progress, l.id)) : tr('🔒 鎖定', '🔒 Locked'); stars.title = open ? tr('最佳星數', 'Best stars') : tr(`先在第 ${l.id - 1} 關拿到 1 顆星`, `Earn 1 star on level ${l.id - 1} first`);
+    card.append(input, no, text, stars); list.append(card);
+  }
+}
+function updateScenarioUI() {
+  const challenge = document.querySelector('input[name=scenario]:checked').value === 'challenge';
+  $('challenge-picker').hidden = !challenge; $('weather').disabled = challenge; // the level sets the weather
+  $('weather').title = challenge ? tr('降落挑戰的天候由關卡決定。', 'Landing challenge levels set their own weather.') : '';
+}
 function startFlight() {
-  const scenario = document.querySelector('input[name=scenario]:checked').value;
+  let scenario = document.querySelector('input[name=scenario]:checked').value;
+  const chosen = scenario === 'challenge' ? levelById(document.querySelector('input[name=level]:checked')?.value) : null;
+  if (scenario === 'challenge' && (!chosen || !isUnlocked(progress, chosen.id))) { toast(tr('先選一個已解鎖的關卡。', 'Pick an unlocked level first.')); return; }
   dialogs.forEach(d => { if (d.open) d.close(); });
-  state = createFlightState(scenario); data = getFlightData(state);
+  level = chosen; if (level) scenario = 'approach'; // a level is an approach that starts airborne
+  state = level ? createLevelState(level) : createFlightState(scenario); data = getFlightData(state);
   commands = { throttle: state.throttle, flaps: state.flaps, gear: state.gear, trim: state.trim, spoilers: false };
-  weather = $('weather').value; brakeLatch = false; touchBrake = false;
+  weather = level ? level.weather : $('weather').value; brakeLatch = false; touchBrake = false;
   active = true; departed = scenario !== 'runway'; resultShown = false; routeIndex = scenario === 'runway' ? 0 : 4;
   novice = document.querySelector('input[name=mode]:checked').value === 'novice'; autoMem = {}; notice = {}; ilsLast = null; setGlow(null);
   simulator.classList.toggle('novice', novice); simulator.classList.toggle('coarse', coarsePointer);
@@ -244,11 +272,14 @@ function mission() {
 }
 function updateUI() {
   if (!data) return;
-  const [stage, instruction, number, progress] = mission();
-  $('mission-stage').textContent = stage; $('mission-instruction').textContent = instruction;
-  $('mission-number').textContent = `0${number} / 04`; $('mission-progress').style.width = `${progress * 100}%`;
-  const wind = Math.round(data.windSpeed * KT);
-  $('wind-label').textContent = wind ? `${tr('風', 'WIND')} ${Math.round(heading(data.windDirection + BEARING))}° · ${wind} KT` : tr('無風 · 0 KT', 'CALM · 0 KT');
+  const [stage, instruction, number, missionProgress] = mission();
+  // In a challenge the card names the level and its goal; the flare and landing-roll instructions still take over near the ground.
+  const landing = level && (state.touchdown || data.agl < 25);
+  $('mission-eyebrow').textContent = level ? `${tr('降落挑戰', 'LANDING CHALLENGE')} · ${tr(`第 ${level.id} 關`, `LEVEL ${level.id}`)}` : `${AIRPORT.city.en.toUpperCase()} · ${AIRPORT.icao} · RWY ${AIRPORT.runway.ident}`;
+  $('mission-stage').textContent = level && !landing ? tr(level.zh, level.en) : stage; $('mission-instruction').textContent = level && !landing ? tr(level.descZh, level.descEn) : instruction;
+  $('mission-number').textContent = `0${number} / 04`; $('mission-progress').style.width = `${missionProgress * 100}%`;
+  const wind = Math.round(data.windSpeed * KT), gust = level?.wind.gust ? ` G${Math.round(level.wind.cross + level.wind.gust)}` : ''; // peak of the gust cycle, METAR style (G23)
+  $('wind-label').textContent = wind ? `${tr('風', 'WIND')} ${Math.round(heading(data.windDirection + BEARING))}° · ${wind}${gust} KT` : tr('無風 · 0 KT', 'CALM · 0 KT');
   $('distance-label').textContent = data.onGround ? `RWY ${Math.round(data.runwayRemaining).toLocaleString()} M` : `${Math.max(0, data.distanceToThreshold / 1852).toFixed(1)} NM · ${AIRPORT.runway.ident}`;
   $('control-label').textContent = touch.active || coarsePointer && $('control-mode').value === 'keyboard' ? tr('觸控操縱', 'Touch control') : { keyboard: tr('鍵盤操縱', 'Keyboard'), mouse: tr('滑鼠操縱', 'Mouse'), gamepad: tr('手把操縱', 'Gamepad') }[$('control-mode').value];
   $('control-values').textContent = `PITCH ${Math.round(axes.pitch * 100)} · ROLL ${Math.round(axes.roll * 100)}`;
@@ -362,6 +393,10 @@ function drawInstruments() {
 function showResult() {
   resultShown = true; setPause(true);
   const t = state.touchdown;
+  $('result-dialog').classList.toggle('challenge', !!level); $('result-challenge').hidden = !level; $('next-level-button').hidden = true;
+  $('result-eyebrow').textContent = level ? `${tr('降落挑戰', 'LANDING CHALLENGE')} · ${tr(`第 ${level.id} 關 ${level.zh}`, `LEVEL ${level.id} ${level.en}`)}` : 'FLIGHT MQ218 · DEBRIEF';
+  const retry = $('retry-button'); retry.dataset.zh = level ? '再試一次' : '再飛一次'; retry.dataset.en = level ? 'Try again' : 'Fly again'; retry.textContent = retry.dataset[locale];
+  if (level) { showLevelResult(); return; }
   const reasons = {
     'gear-up': ['起落架未放下', 'Landing gear was retracted'], 'off-runway': ['未在跑道內接地', 'Touchdown outside the runway'],
     'hard-landing': ['接地下降率過大', 'Excessive touchdown sink rate'], 'wing-strike': ['接地傾角過大', 'Excessive bank at touchdown'],
@@ -378,6 +413,24 @@ function showResult() {
   $('result-offset').textContent = t ? `${Math.abs(t.lateralOffset).toFixed(1)} M` : '—';
   $('result-speed').textContent = t ? `${Math.round(t.speed * KT)} KT` : '—';
   $('result-dialog').showModal(); $('pause-banner').hidden = true;
+}
+function showLevelResult() {
+  const g = grade(state, data), crashReasons = { 'gear-up': ['起落架未放下', 'Landing gear was retracted'], 'off-runway': ['未在跑道內接地', 'Touchdown outside the runway'], 'hard-landing': ['接地下降率過大', 'Excessive touchdown sink rate'], 'wing-strike': ['接地傾角過大', 'Excessive bank at touchdown'], 'tail-strike': ['接地俯仰角過大', 'Unsafe pitch at touchdown'], 'side-load': ['未與跑道方向對齊', 'Misaligned at touchdown'], 'runway-overrun': ['衝出跑道', 'Runway overrun'], 'ground-impact': ['撞地', 'Ground impact'] };
+  const before = bestStars(progress, level.id), off = !state.crashed && !data.onRunway;
+  progress = recordResult(progress, level.id, g.stars); saveProgress();
+  $('result-title').textContent = state.crashed ? tr('航班中止', 'Flight ended') : off ? tr('停在跑道外', 'Stopped off the runway') : g.pass ? tr(`第 ${level.id} 關過關`, `Level ${level.id} cleared`) : tr('還差一點', 'Not quite');
+  $('result-description').textContent = state.crashed ? (crashReasons[state.crashReason] || ['再試一次，保持穩定進場。', 'Try again with a stabilized approach.'])[locale === 'zh' ? 0 : 1] : off ? tr('飛機停在跑道外，這一關不算過。', 'The aircraft stopped off the runway, so the level is not cleared.')
+    : g.stars === 3 ? tr('三項都達標，完美落地。', 'All three checks passed. A perfect landing.') : g.pass ? tr('三項都達標才有三顆星。看看哪一項差一點。', 'All three checks earn three stars. See which one fell short.') : tr('三項都沒達標。再試一次。', 'No check passed. Try again.');
+  $('result-stars').textContent = starText(g.stars); $('result-stars').setAttribute('aria-label', tr(`${g.stars} 顆星，共 3 顆`, `${g.stars} of 3 stars`));
+  const list = $('result-checks'); list.textContent = '';
+  for (const c of g.checks) {
+    const li = document.createElement('li'), text = document.createElement('span'), mark = document.createElement('b');
+    li.dataset.ok = String(c.ok); text.textContent = tr(c.zh, c.en); mark.textContent = c.ok ? '✓' : '✗'; li.append(text, mark); list.append(li);
+  }
+  const next = nextLevel(level.id), best = bestStars(progress, level.id);
+  $('next-level-button').hidden = !(g.pass && next);
+  $('result-best').textContent = `${tr('最佳成績', 'Best')} ${starText(best)}${g.pass && next && !before && best ? tr(`　· 第 ${next.id} 關已解鎖`, `  · Level ${next.id} unlocked`) : ''}`;
+  renderLevels(); $('result-dialog').showModal(); $('pause-banner').hidden = true;
 }
 async function toggleSound() {
   if (!audio.context) {
@@ -407,7 +460,7 @@ function animate(now) {
     const input = inputFrame(dt); accumulator += dt;
     const wind = weather === 'crosswind' ? { x: 7.72, y: 0, z: 0 } : weather === 'overcast' ? { x: 1.7, y: 0, z: 2 } : { x: 0, y: 0, z: 0 };
     while (accumulator >= 1 / 120) {
-      stepFlight(state, input, 1 / 120, { wind, groundElevation: scenery?.groundHeight(state.position.x, state.position.z) || 0 });
+      stepFlight(state, input, 1 / 120, { wind: level ? windAt(level, state.elapsed) : wind, groundElevation: scenery?.groundHeight(state.position.x, state.position.z) || 0 });
       accumulator -= 1 / 120;
     }
     data = getFlightData(state);
@@ -421,6 +474,8 @@ function animate(now) {
 
 $('start-button').addEventListener('click', startFlight);
 $('retry-button').addEventListener('click', startFlight);
+$('next-level-button').addEventListener('click', () => { const next = level && nextLevel(level.id); const input = next && document.querySelector(`input[name=level][value="${next.id}"]`); if (input && !input.disabled) { input.checked = true; startFlight(); } });
+document.querySelectorAll('input[name=scenario]').forEach(r => r.addEventListener('change', updateScenarioUI));
 $('result-menu-button').addEventListener('click', () => { $('result-dialog').close(); showDialog($('flight-dialog')); });
 $('menu-button').addEventListener('click', () => showDialog($('flight-dialog')));
 $('help-button').addEventListener('click', () => showDialog($('help-dialog')));
@@ -514,8 +569,8 @@ try {
   $('ap-altitude').min = apFloorFt(); $('ap-altitude').value = AIRPORT.circuitAltFt; $('ap-heading').value = Math.round(BEARING);
   scenery = createGeoScenery(THREE, scene, { airport: AIRPORT, renderer, maxAnisotropy: softwareRenderer() ? 1 : renderer.capabilities.getMaxAnisotropy(), highRes, attributionTarget: $('scenery-credit'), onStatus: onSceneryStatus });
   // ?debug exposes the live objects to browser tests (teleporting, camera placement); it changes nothing in normal play.
-  if (new URLSearchParams(location.search).has('debug')) window.__flight = { THREE, get state() { return state; }, set state(v) { state = v; }, get data() { return data; }, set data(v) { data = v; }, camera, scene, renderer, scenery, world, get commands() { return commands; }, setView, setPanel, get route() { return route; }, get novice() { return novice; }, get notice() { return notice; } };
-  $('loading').hidden = true; $('start-button').disabled = true; localize(); requestAnimationFrame(animate);
+  if (new URLSearchParams(location.search).has('debug')) window.__flight = { THREE, get state() { return state; }, set state(v) { state = v; }, get data() { return data; }, set data(v) { data = v; }, camera, scene, renderer, scenery, world, get commands() { return commands; }, setView, setPanel, get route() { return route; }, get novice() { return novice; }, get notice() { return notice; }, get level() { return level; }, get progress() { return progress; }, set progress(v) { progress = v; renderLevels(); }, showResult };
+  $('loading').hidden = true; $('start-button').disabled = true; updateScenarioUI(); localize(); requestAnimationFrame(animate);
   renderer.domElement.addEventListener('webglcontextlost', e => { e.preventDefault(); setPause(true); toast(tr('顯示卡連線中斷，請重新載入頁面。', 'Graphics context lost. Reload the page.')); });
 } catch (error) {
   console.error(error); $('loading').textContent = tr('無法啟動 3D 畫面。請使用支援 WebGL 的瀏覽器。', 'Unable to start 3D. Please use a WebGL-capable browser.');

@@ -1,6 +1,6 @@
 // Airport scenery: runway 14/32 with markings and lighting, the other two runways as flat surfaces, a few buildings.
 // Everything place-specific comes from the airport config; the ground itself (imagery + terrain) is geoscenery.js.
-const CLEAR_FOG = 0.000013;
+const CLEAR_FOG = 0.000013, FOG_DENSITY = 0.0009; // exponential-squared: 4% of the scene is visible at 2 km, 17% at 1.5 km
 
 export function createWorld(THREE, scene, options = {}) {
   const airport = options.airport;
@@ -235,11 +235,11 @@ export function createWorld(THREE, scene, options = {}) {
     const type = typeof weather === 'string' ? weather : weather?.type || 'clear';
     if (type !== currentWeather) {
       currentWeather = type;
-      const overcast = type === 'overcast';
-      skyMaterial.uniforms.zenith.value.set(overcast ? 0x899ba5 : 0x397aae);
-      skyMaterial.uniforms.horizon.value.set(overcast ? 0xb9c6c8 : 0xc5d9de);
+      const foggy = type === 'fog', overcast = type === 'overcast' || foggy; // fog: overcast look, grey sky, and a dense haze that hides the runway until about 2 km
+      skyMaterial.uniforms.zenith.value.set(foggy ? 0x9aa4a8 : overcast ? 0x899ba5 : 0x397aae);
+      skyMaterial.uniforms.horizon.value.set(foggy ? 0xb7bfc1 : overcast ? 0xb9c6c8 : 0xc5d9de);
       skyMaterial.uniforms.cloudiness.value = overcast ? 0.9 : 0;
-      fog.color.set(overcast ? 0xb9c6c8 : 0xb8cbd4); fog.density = overcast ? 0.00006 : CLEAR_FOG;
+      fog.color.set(foggy ? 0xb7bfc1 : overcast ? 0xb9c6c8 : 0xb8cbd4); fog.density = foggy ? FOG_DENSITY : overcast ? 0.00006 : CLEAR_FOG;
       sunlight.intensity = overcast ? 0.6 : 2.4; hemisphere.intensity = overcast ? 1.9 : 1.6;
       cloudMaterial.opacity = overcast ? 0.94 : 0.67;
       for (const cloud of clouds) cloud.object.scale.set(cloud.width * (overcast ? 2.5 : 1), cloud.width * (overcast ? 0.5 : 0.37), 1);
@@ -247,7 +247,7 @@ export function createWorld(THREE, scene, options = {}) {
     const seconds = Number.isFinite(time) ? time : 0;
     for (const cloud of clouds) {
       cloud.object.position.x = cloud.x + Math.sin(seconds * 0.0006) * 100 + seconds * cloud.speed;
-      cloud.object.position.y = cloud.altitude * (type === 'overcast' ? 0.64 : 1);
+      cloud.object.position.y = cloud.altitude * (type === 'overcast' || type === 'fog' ? 0.64 : 1);
     }
     const distance = Math.max(1, (position.z || 0) - aimpoint);
     const angle = Math.atan2(Math.max(0, position.y || 0), distance) * 180 / Math.PI;
