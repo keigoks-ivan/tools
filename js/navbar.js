@@ -1,8 +1,8 @@
-/* Property Monitor — shared navbar (dark gradient, two-row with market dropdowns)
+/* InvestMQuest toolbox — shared navbar (dark gradient, site-wide)
    Drop a <div id="nav-root"></div> on any page and load this script.
-   Auto-detects active market / tool from location.pathname.
-   Row 1: logo + tools (Home, REITs, Markets, Sectors, Screeners) + language.
-   Row 2: market flags with hover dropdowns (Overview/Supply/Demand/Valuation/Risk/Report + cities). */
+   Row 1: logo + five zone dropdowns (Property, Reading, Kids, Games, Other) + language.
+   Row 2/3 (Property pages only): market flags with hover dropdowns + current-market sub-nav.
+   Auto-detects the active zone / link from location.pathname. */
 (function(){
 'use strict';
 
@@ -44,39 +44,63 @@ var SECTIONS = [
   {f:'macro.html',en:'Macro',zh:'總經'}
 ];
 
-/* PRIMARY NAV — main pages always visible. Detail calculators live in Tools dropdown. */
-var TOOLS = [
-  {k:'home',href:'/home.html',en:'Home',zh:'首頁',icon:'<path d="M3 12l9-9 9 9"/><path d="M5 10v10a1 1 0 001 1h12a1 1 0 001-1V10"/>'},
-  {k:'dashboard',href:'/dashboard.html',en:'Dashboard',zh:'儀表板',icon:'<rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/>'},
-  {k:'playbook',href:'/playbook.html',en:'Playbook',zh:'手冊',icon:'<path d="M4 4h12a3 3 0 013 3v13a2 2 0 01-2 2H6a2 2 0 01-2-2V4z"/><path d="M8 8h8M8 12h8M8 16h5"/>'},
-  {k:'reits',href:'/reits.html',en:'REITs',zh:'REITs',icon:'<path d="M3 10l9-7 9 7v10a2 2 0 01-2 2H5a2 2 0 01-2-2V10z"/>'},
-  {k:'history',href:'/history/',en:'History',zh:'歷史',icon:'<path d="M4 5h13a3 3 0 013 3v12H7a3 3 0 01-3-3V5z"/><path d="M4 5a3 3 0 013-3h10v15"/><path d="M9 7h6M9 11h6"/>'},
-  {k:'solo-co',href:'/solo-co.html',en:'Solo Co.',zh:'一人公司',icon:'<circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 016-6h4a6 6 0 016 6v1"/>'},
-  {k:'marketing',href:'/marketing.html',en:'Marketing',zh:'學行銷',icon:'<path d="M3 10v4a1 1 0 001 1h3l6 4V5L7 9H4a1 1 0 00-1 1z"/><path d="M16 9.5a3 3 0 010 5"/><path d="M18.5 7a6 6 0 010 10"/>'}
-];
-
-/* SECONDARY TOOLS — accessed via "Tools ▾" dropdown */
-var SECONDARY_TOOLS = [
-  {k:'game',href:'/games/',en:'Games',zh:'遊戲',icon:'<rect x="2" y="7" width="20" height="10" rx="5"/><path d="M6 12h4M8 10v4"/><circle cx="16" cy="11" r="1"/><circle cx="18" cy="13" r="1"/>'},
-  {k:'reit-vs-direct',href:'/reit-vs-direct.html',en:'REIT vs Direct',zh:'REIT vs 實體',icon:'<path d="M3 12h7M14 12h7"/><path d="M3 6h7M14 6h7"/><path d="M3 18h7M14 18h7"/>'},
-  {k:'methodology',href:'/methodology.html',en:'Methodology',zh:'方法論',icon:'<circle cx="12" cy="12" r="9"/><path d="M12 7v6l4 2"/>'},
-  {k:'visa',href:'/visa.html',en:'Visa Map',zh:'簽證地圖',icon:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/><circle cx="8" cy="14.5" r="1.5"/><path d="M13 14h5M13 17h4"/>'},
-  {k:'carry-heatmap',href:'/carry-heatmap.html',en:'Carry Heatmap',zh:'利差熱力圖',icon:'<rect x="3" y="3" width="6" height="6" rx="1"/><rect x="11" y="3" width="6" height="6" rx="1"/><rect x="19" y="3" width="2" height="6" rx="1"/><rect x="3" y="11" width="6" height="6" rx="1"/><rect x="11" y="11" width="6" height="6" rx="1"/><rect x="19" y="11" width="2" height="6" rx="1"/>'},
-  {k:'pipeline-cliff',href:'/pipeline-cliff.html',en:'Pipeline Cliff',zh:'供給日曆',icon:'<rect x="3" y="5" width="18" height="16" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="8" y1="3" x2="8" y2="7"/><line x1="16" y1="3" x2="16" y2="7"/><rect x="6" y="12" width="3" height="3" fill="currentColor" stroke="none"/><rect x="11" y="12" width="3" height="6" fill="currentColor" stroke="none"/><rect x="16" y="14" width="3" height="4" fill="currentColor" stroke="none"/>'},
-  {k:'timing',href:'/timing.html',en:'Entry Timing',zh:'進場時機',icon:'<circle cx="12" cy="6" r="2.5"/><circle cx="12" cy="12" r="2.5"/><circle cx="12" cy="18" r="2.5"/>'},
-  {k:'stress',href:'/tools/stress-test.html',en:'Stress Test',zh:'壓力測試',icon:'<polyline points="13,2 4,14 11,14 11,22 20,10 13,10"/>'},
-  {k:'buy-rent',href:'/tools/buy-vs-rent.html',en:'Buy vs Rent',zh:'買 vs 租',icon:'<path d="M3 7h13l-3-3M21 17H8l3 3"/>'},
-  {k:'cost-calc',href:'/tools/cost-calculator.html',en:'Cost Calc',zh:'成本計算',icon:'<circle cx="12" cy="12" r="9"/><path d="M12 7v10M9 9h5a2 2 0 010 4h-4a2 2 0 000 4h6"/>'},
-  {k:'compare',href:'/tools/compare.html',en:'City Compare',zh:'城市比較',icon:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 010 18M12 3a14 14 0 000 18"/>'},
-  {k:'yield-spread',href:'/tools/yield-spread.html',en:'Yield Spread',zh:'利差工具',icon:'<path d="M3 17l6-6 4 4 8-8"/>'},
-  {k:'personal-fit',href:'/tools/personal-fit.html',en:'Personal Fit',zh:'個人匹配',icon:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/>'}
-];
-
-/* EDUCATION — Chinese-only learning pages requested for the main navigation. */
-var EDUCATION_TOOLS = [
-  {k:'zhuyin',href:'/education/',label:'注音小樂園',icon:'<path d="M4 5h6a3 3 0 013 3v11a3 3 0 00-3-3H4z"/><path d="M20 5h-6a3 3 0 00-3 3v11a3 3 0 013-3h6z"/>'},
-  {k:'learn-resi',href:'/learn-resi/',label:'住宅房產課程',icon:'<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M9 20v-6h6v6"/>'},
-  {k:'learn-cre',href:'/learn-cre/',label:'商用房產課程',icon:'<rect x="4" y="3" width="16" height="18" rx="1"/><path d="M8 7h2M14 7h2M8 11h2M14 11h2M8 15h2M14 15h2"/>'}
+/* ZONES — site-wide first-row menu: five zones, each a dropdown. Names follow home.html. */
+var ZONES = [
+  {k:'property',en:'Property',zh:'房地產',wide:true,
+    home:{href:'/property/',en:'Property hub',zh:'房產區首頁'},
+    groups:[
+      {en:'Overview & Guides',zh:'總覽與說明',links:[
+        {href:'/dashboard.html',en:'Dashboard',zh:'儀表板'},
+        {href:'/demo/',en:'Guided Tour',zh:'使用導覽'},
+        {href:'/playbook.html',en:'Playbook',zh:'手冊'},
+        {href:'/methodology.html',en:'Methodology',zh:'方法論'}]},
+      {en:'Cross-Market',zh:'跨國比較',links:[
+        {href:'/global/quadrant.html',en:'Four-Quadrant Model',zh:'四象限模型'},
+        {href:'/global/compass.html',en:'Other Markets Compass',zh:'其他市場羅盤'},
+        {href:'/carry-heatmap.html',en:'Carry Heatmap',zh:'利差熱力圖'},
+        {href:'/visa.html',en:'Visa Map',zh:'簽證地圖'}]},
+      {en:'Pick a City',zh:'挑城市',links:[
+        {href:'/tools/compare.html',en:'City Compare',zh:'城市比較'},
+        {href:'/tools/yield-spread.html',en:'Yield Spread',zh:'利差工具'},
+        {href:'/tools/personal-fit.html',en:'Personal Fit',zh:'個人匹配'}]},
+      {en:'Timing & Supply',zh:'時機與供給',links:[
+        {href:'/timing.html',en:'Entry Timing',zh:'進場時機'},
+        {href:'/pipeline-cliff.html',en:'Supply Calendar',zh:'供給日曆'}]},
+      {en:'Buy Calculators',zh:'買房試算',links:[
+        {href:'/tools/stress-test.html',en:'Stress Test',zh:'壓力測試'},
+        {href:'/tools/buy-vs-rent.html',en:'Buy vs Rent',zh:'買 vs 租'},
+        {href:'/tools/cost-calculator.html',en:'Cost Calculator',zh:'成本計算'}]},
+      {en:'REITs & Commercial',zh:'REITs 與商用不動產',links:[
+        {href:'/reits.html',en:'REITs',zh:'REITs'},
+        {href:'/reit-vs-direct.html',en:'REIT vs Direct',zh:'REIT vs 實體'},
+        {href:'/cre.html',en:'Commercial Real Estate',zh:'商用不動產'}]},
+      {en:'Reports & Courses',zh:'報告與課程',links:[
+        {href:'/docs/dd/',en:'KL Project Reports',zh:'吉隆坡建案報告'},
+        {href:'/tw/qingpu/',en:'Qingpu Price Tracker',zh:'青埔房價追蹤'},
+        {href:'/learn-resi/',en:'Residential Course',zh:'住宅房產課程'},
+        {href:'/learn-cre/',en:'Commercial Course',zh:'商用房產課程'}]}
+    ]},
+  {k:'reading',en:'Reading',zh:'讀物',groups:[{links:[
+    {href:'/history/',en:'History',zh:'歷史'},
+    {href:'/solo-co.html',en:'Solo Company Cases',zh:'一人公司範例庫'},
+    {href:'/marketing.html',en:'Learn Marketing',zh:'學行銷'}]}]},
+  {k:'kids',en:'Kids',zh:'小孩',groups:[{links:[
+    {href:'/education/zhuyin/',en:'Zhuyin (Bopomofo)',zh:'注音'},
+    {href:'/education/sight-words/',en:'English Sight Words',zh:'英文 Sight Words'},
+    {href:'/salon/',en:'Little Hair Salon',zh:'小小美髮師'},
+    {href:'/little-kitchen/',en:'Little Flower Kitchen',zh:'小花食堂'}]}]},
+  {k:'games',en:'Games',zh:'遊戲',groups:[{links:[
+    {href:'/games/airline/',en:'SKYGLAZE Airline',zh:'天青航空'},
+    {href:'/games/flight/',en:'Skybound',zh:'天際航線'},
+    {href:'/games/tycoon/',en:'Startup City',zh:'創業之城'},
+    {href:'/games/stock/',en:'Market Sense LAB (Starter)',zh:'盤感 LAB 新手版'},
+    {href:'/games/table-tennis/',en:'RALLY Table Tennis',zh:'RALLY 競技桌球'},
+    {href:'/games/baseball/',en:'MLB-style Baseball',zh:'MLB 實況野球風'},
+    {href:'/game/violet-edge/',en:'Violet Edge',zh:'紫刃夜行'},
+    {href:'/game/mech/',en:'Iron Dusk (Mech)',zh:'鋼鐵黃昏'}]}],
+    more:{href:'/games/',en:'All games →',zh:'全部遊戲 →',exact:true}},
+  {k:'other',en:'Other',zh:'其他',groups:[{links:[
+    {href:'/biz/tt-studio-planner.html',en:'Table Tennis Studio Planner',zh:'桌球教室開館試算'}]}]}
 ];
 
 /* ---------- detect active ---------- */
@@ -88,65 +112,63 @@ var fileSeg = path.split('/').pop() || '';
 if (fileSeg === '') fileSeg = 'index.html';
 else if (fileSeg.indexOf('.') === -1) fileSeg += '.html';
 
-var activeMarket = null, activeTool = null;
+var activeMarket = null;
 var mk = MARKETS.filter(function(m){return m.k===firstSeg;})[0];
-if (mk) {
-  activeMarket = mk.k;
-} else {
-  var allTools = TOOLS.concat(SECONDARY_TOOLS).concat(EDUCATION_TOOLS);
-  var t = allTools.filter(function(x){
-    var href=x.href.replace(/^\//,'');
-    return href===fileSeg || href===path.replace(/^\//,'') || href===(path.replace(/^\//,'').replace(/\.html$/,'')+'.html');
-  })[0];
-  if (t) activeTool = t.k;
-  /* Game hub /games/ and every game under /game/ light up the Games entry */
-  else if (firstSeg === 'games' || firstSeg === 'game') activeTool = 'game';
+if (mk) activeMarket = mk.k;
+
+/* Which zone the current page belongs to. Unlisted pages default to Property (the original site). */
+var activeZone = 'property';
+if (path === '/home.html') activeZone = null;
+else if (firstSeg === 'history' || path === '/solo-co.html' || path === '/marketing.html' || path === '/solo-co' || path === '/marketing') activeZone = 'reading';
+else if (firstSeg === 'education' || firstSeg === 'salon' || firstSeg === 'little-kitchen') activeZone = 'kids';
+else if (firstSeg === 'games' || firstSeg === 'game') activeZone = 'games';
+else if (firstSeg === 'biz') activeZone = 'other';
+var showMarkets = (activeZone === 'property');
+
+/* Current-page match for menu links: exact, or folder link containing the current page. */
+var pNorm = path.replace(/index\.html$/,'');
+var pAlts = [path, pNorm];
+if (path.indexOf('.') === -1 || /\/[^\/.]+$/.test(path)) { pAlts.push(path+'.html'); pAlts.push(path+'/'); }
+function hrefMatch(l){
+  if (pAlts.indexOf(l.href) !== -1) return 2;
+  if (!l.exact && /\/$/.test(l.href) && l.href !== '/' && path.indexOf(l.href) === 0) return 1;
+  return 0;
 }
+var bestLink = null, bestScore = 0, bestLen = 0;
+ZONES.forEach(function(z){
+  var all = [];
+  if (z.home) all.push(z.home);
+  z.groups.forEach(function(g){ g.links.forEach(function(l){ all.push(l); }); });
+  if (z.more) all.push(z.more);
+  all.forEach(function(l){
+    var s = hrefMatch(l);
+    if (s > bestScore || (s === bestScore && s === 1 && l.href.length > bestLen)) { bestScore = s; bestLen = l.href.length; bestLink = l; }
+  });
+});
 
 /* ---------- build HTML ---------- */
 function spanBL(en,zh){return '<span class="imq-en">'+en+'</span><span class="imq-zh">'+zh+'</span>';}
-
-var toolsHtml = TOOLS.map(function(t){
-  var cls = 'imq-tool'+(t.k===activeTool?' on':'');
-  var iconHtml = t.icon ? '<svg class="imq-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+t.icon+'</svg>' : '';
-  return '<a class="'+cls+'" href="'+t.href+'">'+iconHtml+spanBL(t.en,t.zh)+'</a>';
+function linkHtml(l, extra){
+  return '<a class="imq-tools-dd-link'+(extra||'')+(l===bestLink?' on':'')+'" href="'+l.href+'"'+(l===bestLink?' aria-current="page"':'')+'>'+spanBL(l.en,l.zh)+'</a>';
+}
+var zonesHtml = ZONES.map(function(z){
+  var body = '';
+  if (z.home) body += '<div class="imq-dd-home">'+linkHtml(z.home,' imq-dd-hub')+'</div>';
+  var groups = z.groups.map(function(g){
+    return '<div class="imq-zg">'+(g.en?'<div class="imq-zg-title">'+spanBL(g.en,g.zh)+'</div>':'')+g.links.map(function(l){return linkHtml(l);}).join('')+'</div>';
+  }).join('');
+  body += '<div class="imq-zgs">'+groups+'</div>';
+  if (z.more) body += '<div class="imq-dd-more">'+linkHtml(z.more,' imq-dd-hub')+'</div>';
+  var zOn = (z.k === activeZone) ? ' on' : '';
+  return '<div class="imq-tools-dd-wrap imq-zone'+(z.wide?' imq-zone-wide':'')+'" data-zone="'+z.k+'">'+
+    '<button class="imq-tool imq-tools-dd-btn'+zOn+'" type="button" aria-haspopup="true" aria-expanded="false">'+
+      spanBL(z.en,z.zh)+'<span class="imq-caret">▾</span>'+
+    '</button>'+
+    '<div class="imq-tools-dd-menu">'+body+'</div>'+
+  '</div>';
 }).join('');
 
-/* Tools dropdown */
-var secActiveCls = SECONDARY_TOOLS.some(function(s){return s.k===activeTool;}) ? ' on' : '';
-var secLinksHtml = SECONDARY_TOOLS.map(function(s){
-  var iconHtml = s.icon ? '<svg class="imq-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+s.icon+'</svg>' : '';
-  var cls = 'imq-tools-dd-link'+(s.k===activeTool?' on':'');
-  return '<a class="'+cls+'" href="'+s.href+'">'+iconHtml+spanBL(s.en,s.zh)+'</a>';
-}).join('');
-var toolsDropdownHtml = '<div class="imq-tools-dd-wrap">'+
-  '<button class="imq-tool imq-tools-dd-btn'+secActiveCls+'" type="button">'+
-    '<svg class="imq-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a4 4 0 105.7 5.7l-9 9-3-3 9-9a4 4 0 00-3-3z"/></svg>'+
-    spanBL('Tools','工具')+
-    '<span class="imq-caret">▾</span>'+
-  '</button>'+
-  '<div class="imq-tools-dd-menu">'+secLinksHtml+'</div>'+
-'</div>';
-
-/* Education dropdown — intentionally Chinese only. */
-var eduActiveCls = EDUCATION_TOOLS.some(function(s){return s.k===activeTool;}) ? ' on' : '';
-var eduLinksHtml = EDUCATION_TOOLS.map(function(s){
-  var iconHtml = '<svg class="imq-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+s.icon+'</svg>';
-  var cls = 'imq-tools-dd-link'+(s.k===activeTool?' on':'');
-  return '<a class="'+cls+'" href="'+s.href+'">'+iconHtml+'<span>'+s.label+'</span></a>';
-}).join('');
-var educationDropdownHtml = '<div class="imq-tools-dd-wrap imq-edu-dd-wrap">'+
-  '<button class="imq-tool imq-tools-dd-btn'+eduActiveCls+'" type="button" aria-label="開啟教育選單" aria-haspopup="true" aria-expanded="false">'+
-    '<svg class="imq-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h6a3 3 0 013 3v11a3 3 0 00-3-3H4z"/><path d="M20 5h-6a3 3 0 00-3 3v11a3 3 0 013-3h6z"/></svg>'+
-    '<span>教育</span><span class="imq-caret">▾</span>'+
-  '</button>'+
-  '<div class="imq-tools-dd-menu">'+eduLinksHtml+'</div>'+
-'</div>';
-var mobileEducationHtml = '<a class="imq-tool imq-mobile-edu-link'+eduActiveCls+'" href="/education/">'+
-  '<svg class="imq-tool-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h6a3 3 0 013 3v11a3 3 0 00-3-3H4z"/><path d="M20 5h-6a3 3 0 00-3 3v11a3 3 0 013-3h6z"/></svg>'+
-  '<span>教育・注音小樂園</span></a>';
-
-/* Row 2: market flags with hover dropdowns */
+/* Row 2: market flags with hover dropdowns (Property pages only) */
 var flagsHtml = MARKETS.map(function(m){
   var cls = 'imq-flag'+(m.k===activeMarket?' on':'');
   var sectionsHtml = SECTIONS.map(function(s){
@@ -169,11 +191,10 @@ var flagsHtml = MARKETS.map(function(m){
 
 /* Row 3: persistent sub-nav for active country (Sections + Cities) */
 var subnavHtml = '';
-if (activeMarket) {
+if (showMarkets && activeMarket) {
   var activeMk = MARKETS.filter(function(m){return m.k===activeMarket;})[0];
   if (activeMk) {
     var activeFile = fileSeg;
-    // for Malaysia root, the "base" is "/" so compare just filenames
     var secLinks = SECTIONS.map(function(s){
       var href = activeMk.base + s.f;
       var isOn = (s.f === activeFile);
@@ -195,10 +216,8 @@ var html = ''+
 '<nav class="imq-nav">'+
   '<div class="imq-row1">'+
     '<div class="imq-left">'+
-      '<a class="imq-logo" href="/home.html">PROPERTY<span class="imq-dot">·</span>MONITOR<span class="imq-sub">investmquest</span></a>'+
-      '<div class="imq-tools">'+toolsHtml+mobileEducationHtml+'</div>'+
-      educationDropdownHtml+
-      toolsDropdownHtml+
+      '<a class="imq-logo" href="/home.html">InvestMQuest<span class="imq-sub">'+spanBL('Toolbox','工具箱')+'</span></a>'+
+      '<div class="imq-tools">'+zonesHtml+'</div>'+
     '</div>'+
     '<div class="imq-right">'+
       '<div class="imq-lang">'+
@@ -208,9 +227,7 @@ var html = ''+
       '<button class="imq-burger" aria-label="menu">☰</button>'+
     '</div>'+
   '</div>'+
-  '<div class="imq-row2">'+
-    '<div class="imq-flags">'+flagsHtml+'</div>'+
-  '</div>'+
+  (showMarkets ? '<div class="imq-row2"><div class="imq-flags">'+flagsHtml+'</div></div>' : '')+
   subnavHtml+
 '</nav>';
 
@@ -224,35 +241,35 @@ var css = ''+
 '.imq-right{display:flex;align-items:center;gap:12px}'+
 '.imq-logo{font-size:17px;font-weight:700;color:#fff!important;letter-spacing:-.02em;text-decoration:none!important;white-space:nowrap;display:inline-flex;align-items:baseline}'+
 '.imq-logo:hover{color:#fff!important}'+
-'.imq-dot{color:#3b82f6;margin:0 1px}'+
 '.imq-sub{font-size:11px;color:rgba(255,255,255,.4);margin-left:10px;letter-spacing:.04em;font-weight:400}'+
-'.imq-tools{display:flex;gap:3px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none}'+
-'.imq-tools::-webkit-scrollbar{display:none}'+
+'.imq-tools{display:flex;gap:3px;flex-wrap:nowrap}'+
 '.imq-tool{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;font-size:14px;font-weight:500;color:rgba(255,255,255,.75)!important;text-decoration:none!important;border-radius:6px;transition:all .15s;white-space:nowrap;letter-spacing:.01em}'+
 '.imq-tool:hover{color:#fff!important;background:rgba(255,255,255,.06);text-decoration:none!important}'+
 '.imq-tool.on{color:#fff!important;background:rgba(59,130,246,.2);font-weight:600}'+
-'.imq-tool-icon{width:14px;height:14px;flex-shrink:0;color:rgba(255,255,255,.85)}'+
-'.imq-tool:hover .imq-tool-icon{color:#fff}'+
-'.imq-tool.on .imq-tool-icon{color:#fff}'+
-'.imq-mobile-edu-link{display:none}'+
 '.imq-lang{display:flex;gap:4px}'+
 '.imq-lbtn{padding:6px 13px;border:1px solid rgba(255,255,255,.15);border-radius:5px;font-size:13px;cursor:pointer;background:transparent;color:rgba(255,255,255,.75);font-family:inherit;font-weight:500;transition:all .15s}'+
 '.imq-lbtn:hover{color:#fff;border-color:rgba(255,255,255,.3)}'+
 '.imq-lbtn.on{background:#3b82f6;color:#fff;border-color:#3b82f6}'+
 '.imq-burger{display:none;background:transparent;border:1px solid rgba(255,255,255,.15);border-radius:5px;color:#fff;font-size:18px;padding:5px 12px;cursor:pointer}'+
-/* Tools dropdown */
-'.imq-tools-dd-wrap{position:relative;flex-shrink:0;margin-left:3px}'+
+/* Zone dropdowns */
+'.imq-tools-dd-wrap{position:relative;flex-shrink:0}'+
 '.imq-tools-dd-btn{background:transparent;border:none;font-family:inherit;cursor:pointer}'+
 '.imq-tools-dd-btn .imq-caret{margin-left:2px;font-size:10px;opacity:.7;transition:transform .15s}'+
 '.imq-tools-dd-wrap.open .imq-tools-dd-btn .imq-caret{transform:rotate(180deg)}'+
-'.imq-tools-dd-menu{display:none;position:absolute;top:100%;right:0;min-width:220px;background:#0f172a;border:1px solid rgba(255,255,255,.10);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.45);padding:6px;z-index:200;margin-top:6px}'+
+'.imq-tools-dd-menu{display:none;position:absolute;top:100%;left:0;min-width:230px;max-width:calc(100vw - 16px);background:#0f172a;border:1px solid rgba(255,255,255,.10);border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.45);padding:6px;z-index:200;margin-top:6px}'+
 /* invisible bridge to keep hover when moving cursor down to menu */
 '.imq-tools-dd-menu::before{content:"";position:absolute;top:-10px;left:0;right:0;height:10px}'+
-'.imq-tools-dd-wrap:hover .imq-tools-dd-menu,.imq-tools-dd-wrap.open .imq-tools-dd-menu{display:flex;flex-direction:column}'+
+'.imq-tools-dd-wrap:hover .imq-tools-dd-menu,.imq-tools-dd-wrap.open .imq-tools-dd-menu{display:block}'+
 '.imq-tools-dd-link{display:flex;align-items:center;gap:8px;padding:8px 11px;font-size:13px;font-weight:500;color:rgba(255,255,255,.78)!important;text-decoration:none!important;border-radius:5px;transition:all .12s}'+
 '.imq-tools-dd-link:hover{background:rgba(59,130,246,.18);color:#fff!important;text-decoration:none!important}'+
 '.imq-tools-dd-link.on{background:rgba(59,130,246,.28);color:#fff!important;font-weight:600}'+
-'.imq-tools-dd-link .imq-tool-icon{width:14px;height:14px;flex-shrink:0}'+
+'.imq-dd-hub{color:#93c5fd!important;font-weight:600}'+
+'.imq-dd-more{border-top:1px solid rgba(255,255,255,.08);margin-top:4px;padding-top:4px}'+
+'.imq-dd-home{border-bottom:1px solid rgba(255,255,255,.08);margin-bottom:6px;padding-bottom:4px}'+
+'.imq-zone-wide .imq-tools-dd-menu{width:min(900px,calc(100vw - 16px));padding:8px}'+
+'.imq-zone-wide .imq-zgs{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px 8px}'+
+'.imq-zg{min-width:0}'+
+'.imq-zg-title{font-size:10.5px;font-weight:600;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.08em;padding:4px 11px 6px;border-bottom:1px solid rgba(255,255,255,.06);margin-bottom:4px}'+
 /* Row 2 flags */
 '.imq-flags{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;-ms-overflow-style:none;padding:0;min-height:40px;align-items:center}'+
 '.imq-flags::-webkit-scrollbar{display:none}'+
@@ -293,9 +310,6 @@ var css = ''+
   '.imq-logo{font-size:15px}'+
   '.imq-sub{display:none}'+
   '.imq-tools{display:none}'+
-  '.imq-tools-dd-wrap{display:none}'+
-  '.imq-edu-dd-wrap{display:block;margin-left:0}'+
-  '.imq-edu-dd-wrap .imq-tools-dd-menu{position:fixed;top:56px;left:8px;right:8px;min-width:0;margin-top:0}'+
   '.imq-burger{display:inline-block}'+
   '.imq-flags{overflow-x:auto;padding:4px 0}'+
   '.imq-flag-name{display:none}'+
@@ -307,15 +321,19 @@ var css = ''+
   '.imq-sub-links::-webkit-scrollbar{display:none}'+
   '.imq-sub-link{padding:4px 8px;font-size:11.5px}'+
   '.imq-sub-sep{display:none}'+
-  '.imq-tool-icon{width:13px;height:13px}'+
-  '.imq-tools.open{display:flex!important;flex-direction:column;position:absolute;top:52px;left:0;right:0;background:#0f172a;padding:10px;border-top:1px solid rgba(255,255,255,.1);z-index:150}'+
-  '.imq-tools.open .imq-mobile-edu-link{display:inline-flex}'+
+  '.imq-tools.open{display:flex!important;flex-direction:column;gap:0;position:absolute;top:52px;left:0;right:0;max-height:calc(100vh - 52px);max-height:calc(100dvh - 52px);overflow-y:auto;background:#0f172a;padding:6px 10px 10px;border-top:1px solid rgba(255,255,255,.1);z-index:150}'+
+  '.imq-tools.open .imq-tools-dd-wrap{display:block;margin:0;border-bottom:1px solid rgba(255,255,255,.06)}'+
+  '.imq-tools.open .imq-tools-dd-btn{display:flex;width:100%;justify-content:space-between;padding:12px 10px;font-size:15px}'+
+  '.imq-tools-dd-menu{position:static;min-width:0;max-width:none;margin:0;border:none;box-shadow:none;background:transparent;padding:0 0 8px 10px;width:auto!important}'+
+  '.imq-tools-dd-menu::before{display:none}'+
+  '.imq-tools-dd-wrap:hover .imq-tools-dd-menu{display:none}'+
+  '.imq-tools-dd-wrap.open .imq-tools-dd-menu{display:block}'+
+  '.imq-zone-wide .imq-zgs{display:block}'+
+  '.imq-zg{margin-bottom:6px}'+
+  '.imq-tools-dd-link{padding:9px 10px}'+
   '.imq-dd{position:fixed;top:auto;left:8px;right:8px;bottom:8px;min-width:0;max-height:60vh;overflow-y:auto}'+
   '.imq-flag-wrap:hover .imq-dd{display:none}'+
   '.imq-flag-wrap.open .imq-dd{display:grid}'+
-'}'+
-'@media(max-width:480px){'+
-  '.imq-edu-dd-wrap{display:none}'+
 '}';
 
 /* ---------- inject ---------- */
@@ -377,6 +395,7 @@ document.querySelectorAll('.imq-lbtn').forEach(function(b){
 });
 if (typeof window.setLang === 'function') window.setLang(saved);
 
+
 /* ---------- mobile menu ---------- */
 var burger = root.querySelector('.imq-burger');
 var tools = root.querySelector('.imq-tools');
@@ -384,7 +403,28 @@ if (burger && tools) {
   burger.addEventListener('click', function(){ tools.classList.toggle('open'); });
 }
 
-/* ---------- Tools dropdown (click to toggle on touch + as fallback) ---------- */
+/* ---------- zone dropdowns: hover (CSS) + click/tap toggle + Esc/outside close ---------- */
+function isMobile(){ return window.innerWidth <= 820; }
+function closeZones(except){
+  root.querySelectorAll('.imq-tools-dd-wrap.open').forEach(function(w){
+    if (w === except) return;
+    w.classList.remove('open');
+    var b = w.querySelector('.imq-tools-dd-btn');
+    if (b) b.setAttribute('aria-expanded','false');
+  });
+}
+/* keep the menu inside the viewport: right-aligned dropdowns shift left */
+function placeMenu(wrap){
+  var menu = wrap.querySelector('.imq-tools-dd-menu');
+  if (!menu || isMobile()) { if (menu) menu.style.left = ''; return; }
+  menu.style.left = '0px';
+  var r = menu.getBoundingClientRect();
+  if (!r.width) return;
+  var vw = document.documentElement.clientWidth, shift = 0;
+  if (r.right > vw - 8) shift = (vw - 8) - r.right;
+  if (r.left + shift < 8) shift = 8 - r.left;
+  menu.style.left = shift + 'px';
+}
 root.querySelectorAll('.imq-tools-dd-wrap').forEach(function(wrap){
   var btn = wrap.querySelector('.imq-tools-dd-btn');
   if (!btn) return;
@@ -392,23 +432,27 @@ root.querySelectorAll('.imq-tools-dd-wrap').forEach(function(wrap){
     e.preventDefault();
     e.stopPropagation();
     var isOpen = wrap.classList.contains('open');
-    /* close any other open dropdowns */
-    root.querySelectorAll('.imq-tools-dd-wrap.open').forEach(function(w){
-      w.classList.remove('open');
-      var otherBtn = w.querySelector('.imq-tools-dd-btn');
-      if (otherBtn) otherBtn.setAttribute('aria-expanded','false');
-    });
-    if (!isOpen) wrap.classList.add('open');
+    closeZones(wrap);
+    wrap.classList.toggle('open', !isOpen);
     btn.setAttribute('aria-expanded', String(!isOpen));
+    if (!isOpen) placeMenu(wrap);
+  });
+  wrap.addEventListener('mouseenter', function(){ if (!isMobile()) placeMenu(wrap); });
+  /* desktop: leaving the dropdown also drops a click-opened state */
+  wrap.addEventListener('mouseleave', function(){
+    if (!isMobile() && wrap.classList.contains('open')) {
+      wrap.classList.remove('open'); btn.setAttribute('aria-expanded','false');
+    }
   });
 });
 document.addEventListener('click', function(e){
-  if (!e.target.closest('.imq-tools-dd-wrap')) {
-    root.querySelectorAll('.imq-tools-dd-wrap.open').forEach(function(w){
-      w.classList.remove('open');
-      var btn = w.querySelector('.imq-tools-dd-btn');
-      if (btn) btn.setAttribute('aria-expanded','false');
-    });
+  if (!e.target.closest('.imq-tools-dd-wrap')) closeZones(null);
+});
+document.addEventListener('keydown', function(e){
+  if (e.key === 'Escape' || e.key === 'Esc') {
+    closeZones(null);
+    root.querySelectorAll('.imq-flag-wrap.open').forEach(function(w){ w.classList.remove('open'); });
+    if (document.activeElement && document.activeElement.blur && root.contains(document.activeElement)) document.activeElement.blur();
   }
 });
 
