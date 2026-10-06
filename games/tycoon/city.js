@@ -40,7 +40,7 @@ import { Graph, createPeople } from './city-people.js';
 import { createShops } from './city-shop.js';
 import { icon } from './icons.js';
 
-const BX = 4, BZ = 3;            // 街區數（橫、縱）
+const BX = 6, BZ = 4;            // 街區數（橫、縱）
 const PITCH = 4;                 // 路線間距（格）
 const W = BX * PITCH, D = BZ * PITCH;
 const M = 1.5;                   // 底座外擴
@@ -176,7 +176,7 @@ export function createCity(container, opts = {}) {
     }
     return [name, 0];
   }
-  for (let x = -10; x <= 27; x++) for (let z = -10; z <= D; z++) if (roadAt(x, z)) { const [n, r] = roadTile(x, z); put('roads', n, x, z, r); }
+  for (let x = -10; x <= Math.max(27, W); x++) for (let z = -10; z <= D; z++) if (roadAt(x, z)) { const [n, r] = roadTile(x, z); put('roads', n, x, z, r); }
 
   // ---------- 建築登記 ----------
   const buildings = [], lotSpecs = [], specBoxes = [], labelPlanes = [];
@@ -299,6 +299,19 @@ export function createCity(container, opts = {}) {
   commBlock(...bc(1, 2), { keepA: [6], lots: { 6: '商圈', 2: '商圈' } });
   schoolBlock(...bc(2, 2));
   parkBlock(...bc(3, 2));
+  // 追加街區保留原有建築與店面編號，舊存檔可原地擴大。
+  houseBlock(...bc(4, 0), { 2: '住宅', 3: '住宅' });
+  skyBlock(...bc(5, 0), ['building-skyscraper-a', 'building-skyscraper-c', 'building-skyscraper-b', 'building-skyscraper-d'], 2);
+  houseBlock(...bc(4, 1), { 2: '住宅', 3: '住宅' });
+  stationBlock(...bc(5, 1), { lots: { 3: '捷運站旁', 4: '捷運站旁', 6: '捷運站旁' } });
+  commBlock(...bc(4, 2), { lots: { 2: '商圈', 4: '商圈', 6: '商圈' } });
+  houseBlock(...bc(5, 2), { 2: '住宅', 3: '住宅' });
+  schoolBlock(...bc(0, 3));
+  houseBlock(...bc(1, 3), { 2: '住宅', 3: '住宅' });
+  commBlock(...bc(2, 3), { lots: { 2: '商圈', 4: '商圈', 6: '商圈' } });
+  skyBlock(...bc(3, 3), ['building-skyscraper-e', 'building-skyscraper-b', 'building-skyscraper-c', 'building-skyscraper-a'], 2);
+  commBlock(...bc(4, 3), { lots: { 2: '辦公', 4: '辦公', 6: '辦公' } });
+  parkBlock(...bc(5, 3));
   // 預設三家（樣張）
   const DEF = {};
   { const find = (bx, bz) => lotSpecs.find(l => Math.abs(l.bx - bx) < 0.01 && Math.abs(l.bz - bz) < 0.01);
@@ -444,7 +457,7 @@ export function createCity(container, opts = {}) {
     renderer.setPixelRatio(dpr); renderer.setSize(w, h); composer.setPixelRatio(dpr); composer.setSize(w, h);
     camera.aspect = w / h;
     const prevScale = aspectScale; aspectScale = Math.max(1, 1.62 / camera.aspect);
-    if (!resize.done) { camDist = 36 * aspectScale; resize.done = true; } else camDist *= aspectScale / prevScale;
+    if (!resize.done) { camDist = 49 * aspectScale; resize.done = true; } else camDist *= aspectScale / prevScale;
     placeCamera();
   }
   window.addEventListener('resize', resize);
@@ -624,7 +637,8 @@ export function createCity(container, opts = {}) {
       const state = (l) => !l.owner ? '空' : l.owner === 'player' ? '玩家' : '對手';
       const nodes = (g) => g.nodes.map((n, i) => ({ id: i, x: +n.x.toFixed(3), z: +n.z.toFixed(3) }));
       return {
-        lots: shops.lots.map(l => ({ id: l.id, x: +l.door.x.toFixed(3), z: +l.door.z.toFixed(3), bx: l.bx, bz: l.bz, zone: l.zone, state: state(l), owner: l.owner, name: l.name, color: l.color, building: l.building, face: l.face })),
+        populationMultiplier: 2,
+        lots: shops.lots.map(l => ({ id: l.id, x: +l.door.x.toFixed(3), z: +l.door.z.toFixed(3), bx: l.bx, bz: l.bz, zone: l.zone, district: l.bz > 12 ? '南城生活與商辦區' : l.bx > 16 ? '東城新區' : '雲港舊城', state: state(l), owner: l.owner, name: l.name, color: l.color, building: l.building, face: l.face })),
         buildings: buildings.map(b => ({ id: b.id, type: b.type, x: +b.x.toFixed(3), z: +b.z.toFixed(3), w: +b.w.toFixed(2), d: +b.d.toFixed(2), h: +b.h.toFixed(2), floors: b.floors })),
         sidewalk: { nodes: nodes(sidewalk), edges: sidewalk.edges.map(e => [e[0], e[1], +e[2].toFixed(3)]) },
         roads: { nodes: nodes(roads), edges: roads.edges.map(e => [e[0], e[1], +e[2].toFixed(3)]) },

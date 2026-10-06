@@ -167,9 +167,9 @@ try:
         check('損益明細含成本、淨利與利息', all(t in page.inner_text('#report') for t in ['總成本', '淨利', '貸款利息', '原料報廢']))
         page.click('#report [data-rt=an]')
         check('分析顯示門店及含品牌費用損平杯數', all(t in page.inner_text('#report') for t in ['門店損益兩平', '含品牌費用損益兩平', '杯／天']))
-        for tab in ['pl', 'an', 'ch', 'pr', 'rv', 'all']:
+        for tab in ['pl', 'an', 'ch', 'pr', 'rv', 'case', 'all']:
             page.click(f'#report [data-rt={tab}]'); page.wait_for_timeout(150)
-        check('報表六個分頁可切換', page.is_visible('#report .tile'))
+        check('報表七個分頁可切換', page.is_visible('#report .tile'))
         page.click('#report [data-act=mclose]')
 
         # 數字來源

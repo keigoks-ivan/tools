@@ -239,7 +239,7 @@ test('營業稅：剛好 200,000 元走 5/105，199,999 元走 1%（整數比較
     const rr = openShop(w, medianResidentialLot(w)); assert.ok(rr.ok);
     const s = w.shops.find((x) => x.id === rr.shopId);
     s.status = 'open';
-    s.mtd.storeRev = turnover; s.mtd.cogs = 60000; s.mtd.walk = 3000;
+    s.mtd.storeRev = turnover; s.mtd.cogs = 60000; s.mtd.wasteMilli = 60000 * 40; s.mtd.walk = 3000;
     const cash0 = w.companies.player.cash;
     settleShop(w, s, 31, false);
     assert.equal(s.lastPnL.bizTax, expect, String(turnover));
