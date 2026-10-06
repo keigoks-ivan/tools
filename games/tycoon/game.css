@@ -29,6 +29,11 @@ button:disabled{cursor:not-allowed}
 #dock .sep{height:1px;background:var(--line-soft);margin:3px 6px}
 #dock button.mini{padding:6px 0 5px;font-size:11.5px;color:var(--muted)}
 #dock button.mini svg{width:20px;height:20px}
+#map-controls{position:fixed;left:108px;top:92px;display:flex;gap:4px;padding:5px;z-index:5}
+#map-controls button{display:flex;align-items:center;gap:5px;min-height:36px;border:0;border-radius:8px;padding:6px 10px;background:rgba(255,255,255,.06);color:var(--text2);font:inherit;font-size:12px}
+#map-controls button:hover{background:rgba(255,255,255,.15);color:var(--text)}
+#map-controls svg{width:18px;height:18px}
+#map-controls [data-camera=right] svg{transform:scaleX(-1)}
 
 /* 右側面板 */
 #side{position:fixed;right:12px;top:92px;width:344px;max-height:calc(100vh - 92px - 64px);overflow:auto;padding:16px 16px 16px;z-index:5;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.2) transparent}
@@ -135,6 +140,23 @@ body.has-event #side{display:none}
 .ptable th:nth-child(n){width:auto}
 .ptable th:first-child{width:22%}
 .tbl-scroll{overflow:auto}
+#report .tiles{grid-template-columns:repeat(3,minmax(0,1fr))}
+#report .tile .v.up,.finance .up{color:var(--good)}
+#report .tile .v.down,.finance .down{color:var(--bad)}
+.rp-body>.card,.rp-body>.tiles{flex:none}
+.finance table{min-width:540px;table-layout:auto}
+.finance th,.finance td{white-space:nowrap}
+.finance th:first-child{width:auto}
+#finance-period{margin-left:auto;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:5px 8px;font:inherit;font-size:12px}
+.diagnostics{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin-top:12px}
+.diagnosis{padding:14px;border:1px solid var(--line-soft);border-radius:12px}
+.diagnosis h5{margin:0 0 12px;font-size:15px}
+.diagnosis p{font-size:13px;line-height:1.7;color:var(--text2)}
+.diagnosis-stats{display:flex;flex-wrap:wrap;gap:14px}
+.diagnosis-stats span{font-size:12px;color:var(--muted)}
+.diagnosis-stats b{display:block;font-size:17px;color:var(--text);margin-top:4px}
+.owner-choice{display:flex;align-items:center;gap:8px;font-size:14px;margin-top:12px}
+.owner-choice input{accent-color:var(--good)}
 .rivals{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
 .rv{padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.04);border:1px solid var(--line-soft)}
 .rv h5{margin:0 0 4px;font-size:15px}
@@ -198,13 +220,22 @@ body.has-event #side{display:none}
   #dock button.lock .lk{right:10px;top:3px}
   #ticker{display:none}
   #side,#event{left:8px;right:8px;top:auto;bottom:74px;width:auto;max-height:55vh}
-  #tut{bottom:auto;top:112px;flex-wrap:wrap;z-index:6}
+  #tut{bottom:auto;top:148px;flex-wrap:wrap;z-index:6}
+  #map-controls{left:8px;top:92px}
   #report.modal,#sources.modal{top:50%;width:calc(100vw - 16px);height:calc(100vh - 16px);padding:12px;gap:10px}
   .rp-head{flex-wrap:wrap;gap:8px}
   .rp-head .sub{display:none}
   .rp-head .tabs{margin-left:0;order:3;width:100%}
   .rp-head .tabs button{flex:1;padding:6px 4px}
   .tiles{grid-template-columns:repeat(2,1fr)}
+  #report .tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #report .card h4{flex-wrap:wrap}
+  #report .diagnostics{grid-template-columns:1fr}
+  #report .finance-detail table{min-width:0;table-layout:fixed}
+  #report .finance-detail th:first-child{width:60%}
+  #report .finance-detail th:nth-child(2){width:40%}
+  #report .finance-detail td:first-child{white-space:normal}
+  #report .finance-detail th:nth-child(n+3),#report .finance-detail td:nth-child(n+3){display:none}
   .tile .v{font-size:22px}
   .cards{grid-template-columns:1fr}
   .rp-body>*{flex:none}

@@ -50,6 +50,12 @@ try:
         page.wait_for_timeout(1500)
         shot(page, '01-start.png')
         check('開局：有新手提示、暫停中', js(page, "document.querySelector('#tut') && !document.querySelector('#tut').hidden && window.__game.state.speed === 0"))
+        home = js(page, 'window.__city.getView()')
+        page.click('[data-camera=left]')
+        check('地圖向左旋轉且保留位置', js(page, 'window.__city.getView().yaw') > home['yaw'] and js(page, 'window.__city.getView().x') == home['x'])
+        page.click('[data-camera=right]')
+        check('地圖向右旋轉', abs(js(page, 'window.__city.getView().yaw') - home['yaw']) < 0.000001)
+        page.click('[data-camera=home]')
 
         # 點空店面
         lot = js(page, "() => { const g = window.__game; return g.sim.medianResidentialLot(g.world); }")
@@ -80,12 +86,16 @@ try:
         page.wait_for_timeout(500)
         shops = js(page, "window.__game.sim.getShops(window.__game.world, 'player')")
         check('租下開店', len(shops) == 1 and shops[0]['status'] == 'renovating', shops[0]['name'] if shops else '')
+        check('第一家店預設老闆自己顧店', shops[0]['ownerWorks'])
 
         # 改價格、排班
         page.click('#side [data-act="tab:menu"]')
         price0 = shops[0]['prices']['珍珠奶茶']
         page.eval_on_selector('[data-price="珍珠奶茶"]', "(el) => { el.value = String(+el.value + 5); el.dispatchEvent(new Event('input', {bubbles: true})); el.dispatchEvent(new Event('change', {bubbles: true})); }")
         page.click('#side [data-act="tab:staff"]')
+        page.click('#side [data-act="ownerWork"]')
+        check('既有店可改為全聘員工', not js(page, "window.__game.sim.getShops(window.__game.world, 'player')[0].ownerWorks"))
+        page.click('#side [data-act="ownerWork"]')
         page.click('#side [data-act="staff:2:1"]')
         shop = js(page, "window.__game.sim.getShops(window.__game.world, 'player')[0]")
         check('改價格：珍珠奶茶 +5 元', shop['prices']['珍珠奶茶'] == price0 + 5, f"{price0} → {shop['prices']['珍珠奶茶']}")
@@ -153,9 +163,13 @@ try:
         page.wait_for_selector('#report .tile')
         page.wait_for_timeout(500)
         shot(page, '05-report.png')
-        for tab in ['ch', 'pr', 'rv', 'all']:
+        page.click('#report [data-rt=pl]')
+        check('損益明細含成本、淨利與利息', all(t in page.inner_text('#report') for t in ['總成本', '淨利', '貸款利息', '原料報廢']))
+        page.click('#report [data-rt=an]')
+        check('分析顯示門店及含品牌費用損平杯數', all(t in page.inner_text('#report') for t in ['門店損益兩平', '含品牌費用損益兩平', '杯／天']))
+        for tab in ['pl', 'an', 'ch', 'pr', 'rv', 'all']:
             page.click(f'#report [data-rt={tab}]'); page.wait_for_timeout(150)
-        check('報表四個分頁可切換', page.is_visible('#report .tile'))
+        check('報表六個分頁可切換', page.is_visible('#report .tile'))
         page.click('#report [data-act=mclose]')
 
         # 數字來源
@@ -186,6 +200,8 @@ try:
         shot(mp, '_phone-report.png') if False else None
         mp.click('#dock [data-dk=report]', timeout=120000); mp.wait_for_timeout(1500)
         shot(mp, '_phone-report.png')
+        mp.click('#report [data-rt=pl]')
+        check('手機損益金額完整顯示', js(mp, "document.querySelector('#report .finance-detail tbody td:nth-child(2)').getBoundingClientRect().right <= innerWidth"))
         mp.click('#report [data-act=mclose]', timeout=120000)
         mp.click('#dock [data-dk=sources]', timeout=120000); mp.wait_for_timeout(1500)
         shot(mp, '_phone-sources.png')

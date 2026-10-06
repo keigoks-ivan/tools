@@ -89,6 +89,11 @@ async function main() {
   <button data-dk="sources" class="mini">${ic.book}<span>數字來源</span></button>
   <button data-dk="new" class="mini">${ic.again}<span>新遊戲</span></button>
 </nav>
+<div id="map-controls" class="panel" role="group" aria-label="地圖視角">
+  <button data-camera="left" aria-label="地圖向左旋轉" title="向左旋轉 45 度（也可按 Q 或滑鼠右鍵拖曳）">${ic.again}<span>左轉</span></button>
+  <button data-camera="right" aria-label="地圖向右旋轉" title="向右旋轉 45 度（也可按 E 或滑鼠右鍵拖曳）">${ic.again}<span>右轉</span></button>
+  <button data-camera="home" aria-label="回到全圖視角" title="回到全圖視角">全圖</button>
+</div>
 <aside id="side" class="panel" hidden></aside>
 <aside id="event" class="panel" hidden></aside>
 <div id="tut" class="panel" hidden></div>
@@ -107,6 +112,12 @@ async function main() {
   // ───────── 3D 城市 ─────────
   const city = createCity($('#stage'), { targetOffset: [1.6, 0, -0.15], time: 0 });
   await city.ready();
+  const homeView = city.getView();
+  $('#map-controls').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-camera]'); if (!b) return;
+    if (b.dataset.camera === 'home') city.setView(homeView);
+    else city.setView({ yaw: city.getView().yaw + (b.dataset.camera === 'left' ? 1 : -1) * Math.PI / 4 });
+  });
   const map = city.getMapData();
   const bldXZ = Object.fromEntries(map.buildings.map((b) => [b.id, [b.x, b.z]]));
   const bldIds = map.buildings.filter((b) => ['住宅', '辦公', '學校', '捷運站', '商業'].includes(b.type)).map((b) => b.id);
@@ -125,7 +136,7 @@ async function main() {
   let world = null;
   let meta = { cashHist: [] };
   let speed = 0, prevSpeed = 1, acc = 0, lastNow = performance.now();
-  let panel = null, selLot = null, shopTab = 'today', modal = null, reportTab = 'all', srcFilter = '全部', srcQuery = '';
+  let panel = null, selLot = null, shopTab = 'today', modal = null, reportTab = 'all', reportMonth = 'current', srcFilter = '全部', srcQuery = '';
   let everSelected = false, played = false, tutOn = ls.get(TUT_KEY) !== '1';
   let shown = {}, carry = {}, pendingSpawns = [], lastWeather = null, lastLabelAt = 0;
   let hudDirty = true, labelDirty = true, overShown = false, closeConfirm = false, activeEventId = null;
@@ -270,6 +281,7 @@ async function main() {
     const cash = world.companies.player.cash;
     const enough = cash >= info.openCost;
     const myCount = getShops('player').length;
+    const ownerBusy = getShops('player').some((s) => s.ownerWorks);
     return `${head(`空店面 ${info.id}`, `${zoneHtml(info.zone)}<span class="num">${info.ping} 坪</span>`)}
 <dl class="kv">
   <dt>月租（每坪 ${yuan(info.rentPerPing)}）</dt><dd class="num">${money(info.monthlyRent)}</dd>
@@ -285,6 +297,8 @@ async function main() {
   <dt class="tl">合計</dt><dd class="num total">${wan(info.openCost)}</dd>
 </dl>
 <div class="field"><label>店名</label><input type="text" id="shop-name" maxlength="10" value="${esc(myCount ? `${COMPANY.slice(0, 2)}日常${myCount + 1}店` : '半糖日常')}"></div>
+<label class="owner-choice"><input type="checkbox" id="open-owner" ${ownerBusy ? 'disabled' : 'checked'}>老闆自己顧店</label>
+<p class="note">${ownerBusy ? '老闆已在另一家店工作。這家店先由員工經營。' : '每天工作 12 小時，替代每班一位員工。報表不另計老闆薪資，可在排班頁改回全聘員工。'}</p>
 <p class="note ${enough ? '' : 'warn'}">${enough ? `簽約當天起算租金，裝修 ${V.startup.renovationDays} 天後開張。` : `你的現金 ${wan(cash)}，還差 ${wan(info.openCost - cash)}。可以到「貸款」借青創貸款。`}</p>
 ${enough ? '<button class="gbtn primary wide" data-act="rent">租下開店</button>' : '<button class="gbtn wide" data-act="gotoLoan">先去借款</button>'}`;
   }
@@ -340,11 +354,11 @@ ${s.shortage ? '<p class="note warn">有人離職，最忙的班少一人。</p>
   function staffHtml(s) {
     const SH = V.capacity.shifts;
     const rows = SH.map(([a, b], i) => `<div class="stp"><span>${a}–${b} 點</span><span class="ctl"><button data-act="staff:${i}:-1" ${s.staff[i] <= V.capacity.staffMin ? 'disabled' : ''} aria-label="減一人">−</button><b class="num">${s.staff[i]}</b><button data-act="staff:${i}:1" ${s.staff[i] >= V.capacity.staffMax ? 'disabled' : ''} aria-label="加一人">+</button><span style="color:var(--muted);font-size:12px">人</span></span></div>`).join('');
-    const hours = s.staff.reduce((a, n, i) => a + n * (SH[i][1] - SH[i][0]), 0);
+    const hours = s.staff.reduce((a, n, i) => a + (n - (s.ownerWorks ? 1 : 0)) * (SH[i][1] - SH[i][0]), 0);
     const wage = world.wages[s.wageLevel];
     const monthly = hours * 30 * wage * (1 + V.labor.employerPct / 100);
     const opts = ['basic', 'market', 'high'].map((l) => `<button class="opt ${s.wageLevel === l ? 'on' : ''}" data-act="wage:${l}"><b><span>${WAGE[l]}時薪</span><span class="num">$${world.wages[l]}／時</span></b><small>品質 ${V.labor.qualityAdj[l] >= 0 ? '+' : '−'}${Math.abs(V.labor.qualityAdj[l])}${l === 'basic' ? '，招不到人，容易有人離職' : ''}</small></button>`).join('');
-    return `${rows}<p class="note">每月人力成本約 <b class="num">${money(monthly)}</b>（${hours} 人時／天，含勞健保與勞退）。人手不夠就會排隊、流失客人。</p><div class="kv-h" style="margin-top:14px">時薪等級</div>${opts}`;
+    return `<div class="sw"><span>老闆自己顧店</span><button class="tg ${s.ownerWorks ? 'on' : ''}" data-act="ownerWork" aria-label="老闆自己顧店" aria-pressed="${s.ownerWorks}"></button></div><p class="note">${s.ownerWorks ? '班表人數含老闆。老闆每天工作 12 小時，每班少支薪一人，報表不另計老闆薪資。' : '班表人數全部是支薪員工。老闆可以選一家店親自顧店。'}</p>${rows}<p class="note">每月人力成本約 <b class="num">${money(monthly)}</b>（${hours} 支薪人時／天，含勞健保與勞退）。人手不夠就會排隊、流失客人。</p><div class="kv-h" style="margin-top:14px">時薪等級</div>${opts}`;
   }
 
   function settingHtml(s) {
@@ -455,10 +469,11 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
     else if (act === 'gotoLoan') openPanel('loan');
     else if (act === 'rent') {
       const name = ($('#shop-name') || {}).value || '半糖日常';
-      const r = S.openShop(world, selLot, { name: name.trim().slice(0, 10) || '半糖日常', color: PLAYER_COLOR });
+      const r = S.openShop(world, selLot, { name: name.trim().slice(0, 10) || '半糖日常', color: PLAYER_COLOR, ownerWorks: !!$('#open-owner')?.checked });
       if (res(r)) { toast(`租下了，簽約當天起算租金，${V.startup.renovationDays} 天後開張。`); syncShops(); labelDirty = hudDirty = true; shopTab = 'today'; openPanel('shop', selLot); updateTut(); save(); }
     } else if (act === 'tab') { shopTab = a1; renderSide(); }
     else if (act === 'staff' && sh) { const st = [...sh.staff]; st[+a1] += +a2; if (res(S.setStaffing(world, sh.id, st))) renderSide(); }
+    else if (act === 'ownerWork' && sh) { if (res(S.setOwnerWorks(world, sh.id, !sh.ownerWorks))) { renderSide(); save(); } }
     else if (act === 'wage' && sh) { if (res(S.setWageLevel(world, sh.id, a1))) renderSide(); }
     else if (act === 'grade' && sh) { if (res(S.setGrade(world, sh.id, a1))) renderSide(); }
     else if (act === 'deliv' && sh) { if (res(S.setDelivery(world, sh.id, !sh.delivery))) renderSide(); }
@@ -667,9 +682,6 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
   function reportData() {
     const rep = S.getReport(world), co = world.companies.player;
     const rows = co.rows.slice(-12);
-    const last = rows[rows.length - 1], prev = rows[rows.length - 2];
-    const rev = (r) => r.store + r.gmv;
-    const gm = (r) => { let a = 0, c = 0; for (const it of Object.values(r.items)) { a += it.rev; c += it.cost; } return a ? (a - c) / a : null; };
     const shops = getShops('player').filter((s) => s.status !== 'closed');
     const rv = shops.reduce((a, s) => a + s.reviews, 0);
     const star = rv ? shops.reduce((a, s) => a + s.star * s.reviews, 0) / rv : (shops[0] ? shops[0].star : 0);
@@ -678,20 +690,51 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
     const delta = (cur, pre, fmt, up) => (pre == null || cur == null) ? null : { text: fmt(cur - pre), up: up(cur - pre) };
     const tiles = [
       { label: '現金', value: wan(world.companies.player.cash), d: hist.length > 1 ? delta(hist[hist.length - 1][1], hist[hist.length - 2][1], (x) => wan(x, true), (x) => x >= 0) : null, spark: hist.length > 1 ? hist.map((h) => h[1] / 10000) : null, cmp: '較上月' },
-      { label: '上月營收', value: last ? wan(rev(last)) : '—', d: last && prev ? delta(rev(last), rev(prev), (x) => wan(x, true), (x) => x >= 0) : null, spark: rows.length > 1 ? rows.map((r) => rev(r) / 10000) : null, cmp: '較前月' },
-      { label: '上月毛利率', value: last && gm(last) != null ? pct(gm(last)) : '—', d: last && prev && gm(last) != null && gm(prev) != null ? delta(gm(last), gm(prev), (x) => (x >= 0 ? '+' : '−') + Math.abs(x * 100).toFixed(1) + ' 點', (x) => x >= 0) : null, spark: rows.length > 1 ? rows.map((r) => (gm(r) || 0) * 100) : null, cmp: '較前月' },
+      { label: '本月營收', value: money(rep.current.turnover), sub: '截至今日', empty: '門市＋外送標價' },
+      { label: '本月總成本', value: money(rep.current.totalCost), sub: '截至今日', empty: '含人事、租金與利息' },
+      { label: '本月淨利', value: money(rep.current.netProfit, true), tone: rep.current.netProfit < 0 ? 'down' : 'up', empty: rep.current.netMargin == null ? '尚無營收' : `淨利率 ${pct(rep.current.netMargin)}`, spark: rep.financials.length > 1 ? rep.financials.map((r) => r.netProfit / 10000) : null },
       { label: '市占率（近 30 天）', value: pct(sh), d: rep.share.player.length > 1 ? delta(rep.share.player[rep.share.player.length - 1], rep.share.player[rep.share.player.length - 2], (x) => (x >= 0 ? '+' : '−') + Math.abs(x * 100).toFixed(1) + ' 點', (x) => x >= 0) : null, spark: rep.share.player.length > 1 ? rep.share.player.map((x) => x * 100) : null, cmp: '較前月' },
       { label: '口碑星等', value: star ? star.toFixed(1) : '—', stars: star || 0, sub: rv ? `${int(rv)} 則評價` : '', d: null, spark: null },
     ];
     return { rep, rows, tiles, shops };
   }
-  const tilesHtml = (tiles) => tiles.map((t) => `<div class="tile"><label>${t.label}${t.sub ? `<span class="mg">${t.sub}</span>` : ''}</label><div class="v num">${t.value}${t.stars ? `<span class="stars"><span class="bg">${icon.star.repeat(5)}</span><span class="fg" style="width:${(t.stars / 5) * 100}%">${icon.star.repeat(5)}</span></span>` : ''}</div>
-    <div class="row">${t.d ? `<div class="d num ${t.d.up ? 'up' : 'down'}">${t.d.up ? '▲' : '▼'} ${t.d.text.replace(/^[+−]/, '')}<span>${t.cmp}</span></div>` : `<div class="d" style="color:var(--muted);font-weight:400">${t.spark || t.stars ? '' : '月結後才有'}</div>`}${t.spark ? spark(t.spark, '#4fd8a0') : ''}</div></div>`).join('');
+  const tilesHtml = (tiles) => tiles.map((t) => `<div class="tile"><label>${t.label}${t.sub ? `<span class="mg">${t.sub}</span>` : ''}</label><div class="v num ${t.tone || ''}">${t.value}${t.stars ? `<span class="stars"><span class="bg">${icon.star.repeat(5)}</span><span class="fg" style="width:${(t.stars / 5) * 100}%">${icon.star.repeat(5)}</span></span>` : ''}</div>
+    <div class="row">${t.d ? `<div class="d num ${t.d.up ? 'up' : 'down'}">${t.d.up ? '▲' : '▼'} ${t.d.text.replace(/^[+−]/, '')}<span>${t.cmp}</span></div>` : `<div class="d" style="color:var(--muted);font-weight:400">${t.empty || (t.spark || t.stars ? '' : '月結後才有')}</div>`}${t.spark ? spark(t.spark, t.tone === 'down' ? '#e66767' : '#4fd8a0') : ''}</div></div>`).join('');
+
+  const COST_ROWS = [['cogs', '原料'], ['pack', '包材'], ['waste', '原料報廢'], ['commission', '平台佣金'], ['wage', '人事（含勞健保、勞退）'], ['rent', '店租（含裝修期間）'], ['util', '水電'], ['pos', 'POS 與雜支'], ['cardFee', '支付手續費'], ['bizTax', '營業稅'], ['adCost', '社群廣告'], ['extraExpense', '網紅合作與事件支出'], ['loanInterest', '貸款利息'], ['incomeTax', '營所稅（年結入帳）']];
+  function financeHtml(rep) {
+    const selected = rep.financials.find((r) => r.ym === reportMonth) || rep.current;
+    const periods = [selected, ...rep.financials.slice().reverse().filter((r) => r.ym !== selected.ym).slice(0, 2)];
+    const row = (name, key, profit = false) => `<tr><td class="nm">${name}</td>${periods.map((r) => `<td class="num ${profit ? r[key] < 0 ? 'down' : 'up' : ''}">${money(r[key], profit)}</td>`).join('')}</tr>`;
+    return `<div class="card ptable finance finance-detail"><h4>損益明細<select id="finance-period" aria-label="損益明細月份"><option value="current" ${reportMonth === 'current' ? 'selected' : ''}>本月至今</option>${rep.financials.slice().reverse().map((r) => `<option value="${r.ym}" ${reportMonth === r.ym ? 'selected' : ''}>${r.ym}</option>`).join('')}</select></h4><div class="tbl-scroll"><table><thead><tr><th>項目</th>${periods.map((r) => `<th>${r.ym}${r === rep.current ? ' 至今' : ''}</th>`).join('')}</tr></thead><tbody>${row('營收（門市＋外送標價）', 'turnover')}${COST_ROWS.map(([key, name]) => row(name, key)).join('')}${row('總成本', 'totalCost')}${row('淨利', 'netProfit', true)}<tr><td class="nm">淨利率</td>${periods.map((r) => `<td class="num ${r.netProfit < 0 ? 'down' : 'up'}">${r.netMargin == null ? '—' : pct(r.netMargin)}</td>`).join('')}</tr>${row('另列：償還貸款本金', 'loanPrincipal')}</tbody></table></div><p class="note">本月成本隨遊戲時間累計，貸款利息按天估列。本金只影響現金，不扣淨利。裝潢、設備與押金在開店時付現，本版未計折舊。${rep.analysis.some((a) => a.ownerWorks) ? '老闆自己顧店的門店未另計老闆薪資。' : ''}${rep.current.incomplete || rep.financials.some((r) => r.incomplete) ? '舊存檔更新前未記錄部分利息、一次性支出與營所稅，受影響月份的淨利僅供參考。' : ''}</p></div>`;
+  }
+  function profitHistoryHtml(rep) {
+    const periods = [rep.current, ...rep.financials.slice().reverse()];
+    return `<div class="card ptable finance"><h4>每月損益<small>近 12 個月，含品牌費用</small></h4><div class="tbl-scroll"><table><thead><tr><th>月份</th><th>營收</th><th>總成本</th><th>淨利</th><th>淨利率</th></tr></thead><tbody>${periods.map((r, i) => `<tr><td class="nm">${r.ym}${i === 0 ? ' 至今' : r.incomplete ? '＊' : ''}</td><td class="num">${money(r.turnover)}</td><td class="num">${money(r.totalCost)}</td><td class="num ${r.netProfit < 0 ? 'down' : 'up'}">${money(r.netProfit, true)}</td><td class="num">${r.netMargin == null ? '—' : pct(r.netMargin)}</td></tr>`).join('')}</tbody></table></div>${rep.financials.some((r) => r.incomplete) ? '<p class="note">＊舊存檔缺少部分品牌費用，詳見損益明細。</p>' : ''}</div>`;
+  }
+  function analysisHtml(rep) {
+    if (!rep.analysis.length) return '<div class="card"><h4>經營分析</h4><p class="note">開店後就會顯示固定成本，開始營業後可比較日銷杯數與損益兩平杯數。</p></div>';
+    const brandCost = rep.current.adCost + rep.current.extraExpense + rep.current.loanInterest + rep.current.incomeTax;
+    return `<div class="card"><h4>經營分析<small>按各店實際成交與成本計算</small></h4>${brandCost ? `<p class="note">本月品牌費用共 ${money(brandCost)}，包含廣告、一次性支出與利息，已扣在公司淨利。</p>` : ''}<div class="diagnostics">${rep.analysis.map((a) => {
+      const notes = [];
+      if (a.status === 'renovating') notes.push('裝修期間已有租金、尚無營收，這段虧損是開店成本的一部分。');
+      else if (!a.pnl.cups) notes.push('尚無成交資料。先累積營業數字，才能估算損益兩平杯數。');
+      else if (a.contribution <= 0) notes.push('每多賣一杯仍會虧錢。先檢查售價、促銷與平台抽成。');
+      else if (a.dailyCups < a.breakEvenDaily) notes.push(`目前日銷距離門店損益兩平還差約 ${int(a.breakEvenDaily - a.dailyCups)} 杯。每杯扣完變動成本剩 ${yuan(a.contribution)}，還要支付租金與人事。`);
+      else notes.push(`目前日銷已達門店損益兩平。每杯扣完變動成本剩 ${yuan(a.contribution)}，公司淨利還要再扣品牌費用。`);
+      if (a.status !== 'renovating' && !a.ownerWorks) notes.push(`全聘員工的人事約 ${money(a.monthlyWage)}／月。老闆親自顧這家店可少付約 ${money(a.ownerSaving)}／月，一次只能顧一家店。`);
+      if (a.breakEvenWithBrandDaily != null && a.dailyCups < a.breakEvenWithBrandDaily) notes.push(`計入分攤的品牌費用後，每天約需 ${int(a.breakEvenWithBrandDaily)} 杯，目前還差 ${int(a.breakEvenWithBrandDaily - a.dailyCups)} 杯。`);
+      if (a.breakEvenWithBrandDaily > a.capacityDaily) notes.push(`損平杯數已超過目前班表每日最多 ${int(a.capacityDaily)} 杯的產能。先降低固定成本或提高每杯剩餘金額，再評估加人。`);
+      if (a.lostRate > 0.03 || a.avgWait > 12) notes.push(`流失客人占 ${pct(a.lostRate)}。查看每小時杯數，在忙的班增加人手，避免長時間排隊拖累評價。`);
+      if (a.ownerWorks) notes.push('班表含老闆每天 12 小時的工作，淨利未另扣老闆薪資。');
+      return `<article class="diagnosis"><h5>${esc(a.name)}</h5><div class="diagnosis-stats"><span>實際日銷<b class="num">${a.pnl.cups ? int(a.dailyCups) + ' 杯' : '—'}</b></span><span>門店損益兩平<b class="num">${a.breakEvenDaily == null ? '—' : int(a.breakEvenDaily) + ' 杯／天'}</b></span><span>含品牌費用損益兩平<b class="num">${a.breakEvenWithBrandDaily == null ? '—' : int(a.breakEvenWithBrandDaily) + ' 杯／天'}</b></span><span>每月固定成本<b class="num">${money(a.fixedMonthly)}</b></span></div><p class="note">${a.ym}${a.current ? ' 至今' : ''}，${a.sampleDays} 個營業日。損益兩平按目前班表及當期通路組合估算。品牌廣告、當月一次性支出及利息平均分攤，每店 ${money(a.brandAllocation)}／月，未預估年結營所稅。${a.sampleDays < 7 ? '資料少於 7 天，先觀察。' : ''}</p>${notes.map((n) => `<p>${n}</p>`).join('')}<button class="gbtn" data-report-shop="${a.shopId}">查看門店與排班</button></article>`;
+    }).join('')}</div></div>`;
+  }
 
   function productsHtml(rep, shop) {
     const tot = rep.products.reduce((a, p) => a + p.cups, 0);
-    return `<div class="card ptable"><h4>商品<small>近 12 個月累計，售價在店的「菜單」裡調</small></h4><div class="tbl-scroll"><table><thead><tr><th>商品</th><th>目前售價</th><th>毛利率</th><th>杯數占比</th><th>銷量（杯）</th><th>營收</th></tr></thead><tbody>
-    ${rep.products.map((p) => `<tr><td class="nm">${p.name}</td><td class="num">${shop ? '$' + shop.prices[p.name] : '—'}</td><td class="num">${p.cups ? pct(p.grossMargin) : '—'}</td><td class="num">${tot ? pct(p.cups / tot, 0) : '—'}<span class="qbar"><i style="width:${tot ? (p.cups / tot) * 100 : 0}%"></i></span></td><td class="num">${int(p.cups)}</td><td class="num">${p.cups ? money(p.revenue) : '—'}</td></tr>`).join('')}
+    return `<div class="card ptable finance"><h4>商品<small>近 12 個月累計，毛利未扣人事、租金與平台佣金</small></h4><div class="tbl-scroll"><table><thead><tr><th>商品</th><th>目前售價</th><th>原料包材成本</th><th>商品毛利</th><th>毛利率</th><th>杯數占比</th><th>銷量（杯）</th><th>營收</th></tr></thead><tbody>
+    ${rep.products.map((p) => `<tr><td class="nm">${p.name}</td><td class="num">${shop ? '$' + shop.prices[p.name] : '—'}</td><td class="num">${money(p.directCost)}</td><td class="num">${money(p.grossProfit)}</td><td class="num">${p.cups ? pct(p.grossMargin) : '—'}</td><td class="num">${tot ? pct(p.cups / tot, 0) : '—'}<span class="qbar"><i style="width:${tot ? (p.cups / tot) * 100 : 0}%"></i></span></td><td class="num">${int(p.cups)}</td><td class="num">${p.cups ? money(p.revenue) : '—'}</td></tr>`).join('')}
     </tbody></table></div></div>`;
   }
   function channelHtml(rep, rows) {
@@ -713,12 +756,14 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
     const el = $('#report');
     const { rep, rows, tiles, shops } = reportData();
     const c = S.clockOf(world);
-    const tabs = [['all', '總覽'], ['ch', '通路'], ['pr', '商品'], ['rv', '對手']];
+    const tabs = [['all', '總覽'], ['pl', '損益'], ['an', '分析'], ['ch', '通路'], ['pr', '商品'], ['rv', '對手']];
     let body = '';
     const noData = '<div class="empty-note">第一次月結（每月 1 日）之後，這裡才會有數字。</div>';
     const revCard = () => `<div class="card"><h4>營收走勢<small>近 12 個月，依通路，單位：萬元</small></h4><div class="legend"><span><i style="background:#3987e5"></i>門市</span><span><i style="background:#d95926"></i>外送</span></div><div class="chart" id="c1">${rep.months.length ? '' : noData}</div></div>`;
     const shareCard = () => `<div class="card"><h4>市占率<small>全市手搖飲杯數，近 12 個月</small></h4><div class="legend">${[['#199e70', world.companies.player.name], ['#e66767', '大吉茶行'], ['#9085e9', '青柚手作'], ['#8c86a6', '路邊小店']].map(([cl, n]) => `<span><i class="ln" style="background:${cl}"></i>${esc(n)}</span>`).join('')}</div><div class="chart" id="c2">${rep.share.months.length > 1 ? '' : noData}</div></div>`;
-    if (reportTab === 'all') body = `<div class="tiles">${tilesHtml(tiles)}</div><div class="cards">${revCard()}${shareCard()}</div>${productsHtml(rep, shops[0])}`;
+    if (reportTab === 'all') body = `<div class="tiles">${tilesHtml(tiles)}</div>${profitHistoryHtml(rep)}${analysisHtml(rep)}<div class="cards">${revCard()}${shareCard()}</div>${productsHtml(rep, shops[0])}`;
+    else if (reportTab === 'pl') body = `${financeHtml(rep)}${profitHistoryHtml(rep)}`;
+    else if (reportTab === 'an') body = analysisHtml(rep);
     else if (reportTab === 'ch') body = `<div class="cards" style="grid-template-columns:1fr">${revCard()}</div>${channelHtml(rep, rows)}`;
     else if (reportTab === 'pr') body = productsHtml(rep, shops[0]);
     else body = `<div class="cards" style="grid-template-columns:1fr">${shareCard()}</div>${rivalsHtml()}`;
@@ -741,8 +786,11 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
   }
   $('#report').addEventListener('click', (e) => {
     if (e.target.closest('[data-act=mclose]')) return closeModal();
+    const shop = e.target.closest('[data-report-shop]');
+    if (shop) { const s = getShops('player').find((s) => s.id === shop.dataset.reportShop); if (s) { closeModal(); shopTab = 'staff'; openPanel('shop', s.lotId); } return; }
     const b = e.target.closest('[data-rt]'); if (b) { reportTab = b.dataset.rt; renderReport(); }
   });
+  $('#report').addEventListener('change', (e) => { if (e.target.id === 'finance-period') { reportMonth = e.target.value; renderReport(); } });
   function openReport() {
     closePanel(); modal = 'report'; $('#sources').hidden = true;
     $('#report').hidden = false; $('#scrim').hidden = false; renderReport(); updateDock();
