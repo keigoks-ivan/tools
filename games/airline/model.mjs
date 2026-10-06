@@ -3,7 +3,7 @@
 import { FACILITIES, fuelOrder } from './v2.mjs?v=23';
 import { CONST, MODES, HUBS, CITIES, AIRCRAFT, EVENTS, LESSONS, RIVALS, HUB_WEATHER } from './data.mjs?v=22';
 import { marketProfile } from './demand.mjs?v=22';
-import { readCareer, missionOffers, settleCareer } from './career.mjs?v=24';
+import { readCareer, missionOffers, settleCareer } from './career.mjs?v=24.1';
 export { marketProfile, DEMAND_SOURCES } from './demand.mjs?v=22';
 
 // ============================================================ utilities

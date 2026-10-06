@@ -90,6 +90,7 @@ async def decade(browser):
     await page.locator('[data-mode=decade]').click();await page.locator('#setup-start').click();await core.answer_events(page)
     assert (await state(page))['fleet']==3
     await page.locator('[data-dock=fleet]').click();before=await state(page)
+    assert await page.locator('[data-express="MQ-320"]').is_disabled(), 'Do not charge for express when standard delivery is equally fast'
     await page.locator('[data-buy="MQ-350"]').click();ordered=await state(page)
     assert ordered['orders']==1 and ordered['fleet']==3 and ordered['cash']==before['cash']-28000000
     await turn(page);assert (await state(page))['fleet']==3
