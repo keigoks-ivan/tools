@@ -1,8 +1,9 @@
 import { estimatePair, historicalRecord, recentRecord, verifiedMatches } from './matchup-model.mjs?v=4';
+import { createTacticsBoard } from './tactics-board.js?v=8';
 
 let language = 'zh', player = 'all', era = 'all', pairingId = '', playerTopic = 'all', lessonGroup = 'all';
 let framePlayer = 'all', frameEra = 'all', frameTopic = 'all', videoPlayer = 'all', videoEra = 'all', videoStatus = 'observed', activeChapter = 'overview';
-let research = null, corpus = null, analysis = null, curriculum = null, motionLab = null, frameStudy = null, otherPlayers = null, matchups = null, simulation = null;
+let research = null, corpus = null, analysis = null, curriculum = null, motionLab = null, frameStudy = null, otherPlayers = null, matchups = null, simulation = null, tacticsBoard = null;
 const $ = id => document.getElementById(id), original = new Map();
 document.querySelectorAll('[data-en]').forEach(node => original.set(node, node.innerHTML));
 const t = (zh, en) => language === 'zh' ? zh : en;
@@ -20,6 +21,7 @@ const lessonGroups = [
   { id: 'tactics', title: ['回合戰術', 'Rally tactics'], units: ['tactics'] },
 ];
 const lessonStroke = { forehand: 'forehand', backhand: 'backhand', flick: 'flick', push: 'push', serve: 'serve' };
+const lessonBoard = { ...lessonStroke, receive: 'receive', footwork: 'footwork', tactics: 'tactics' };
 const proIds = { '林昀儒': 'lin', '张本智和': 'harimoto', '張本智和': 'harimoto', '樊振東': 'fan', '馬龍': 'ma', '王楚欽': 'wang', '雨果・卡爾德拉諾': 'hugo', '費利克斯・勒布倫': 'felix' };
 const proId = name => proIds[name.split(' / ')[0]];
 const empty = text => `<p class="empty-state">${escape(text)}</p>`;
@@ -51,7 +53,7 @@ function renderDirectory() {
   const core = player === 'all' || ['lin', 'harimoto'].includes(player);
   $('corePlayers').hidden = !core; $('playerEraControl').hidden = !core;
   selectOptions('playerEra', eraOptions(), era);
-  $('playerScope').textContent = core ? t('年代篩選只套用林昀儒與張本智和的研究；技術主題只作用於細節區。其他選手、影格、影片、對戰與 3D 示範各自選擇。', 'Era filters apply only to the Lin and Harimoto studies. The technical topic filters stroke detail only. Other profiles, frames, videos, matchups and the 3D demonstration have separate controls.') : t('此選手目前以官方賽報與已核對賽果整理，尚無本頁的逐格影片或四期動作比較。', 'This profile currently uses official reports and verified results, without the frame-by-frame or four-era motion study available for Lin and Harimoto.');
+  $('playerScope').textContent = core ? t('年代篩選只套用林昀儒與張本智和的研究；技術主題只作用於細節區。其他選手、影格、影片、對戰與 2D 教學演示各自選擇。', 'Era filters apply only to the Lin and Harimoto studies. The technical topic filters stroke detail only. Other profiles, frames, videos, matchups and the 2D teaching demonstration have separate controls.') : t('此選手目前以官方賽報與已核對賽果整理，尚無本頁的逐格影片或四期動作比較。', 'This profile currently uses official reports and verified results, without the frame-by-frame or four-era motion study available for Lin and Harimoto.');
   $('playerFocus').innerHTML = player === 'all' ? '' : `<div class="profile-header"><h2>${escape(profileName(player))}</h2>${pairLink(player)}</div>`;
 }
 function renderResearch() {
@@ -72,7 +74,7 @@ function renderSegmentDetails(segment, video) {
 }
 function lessonContext(unit) {
   const frames = frameStudy?.frames.filter(frame => frame.topics.includes(unit.id)) || [];
-  return `<div class="related-links">${lessonStroke[unit.id] ? `<a href="#motion-lab" data-lab-stroke="${lessonStroke[unit.id]}">${t('慢放此項遊戲動作', 'Slow down this game stroke')} →</a>` : ''}${frames.length ? `<a href="#frame-study" data-frame-topic="${escape(unit.id)}">${t(`對照 ${frames.length} 組真人影格`, `Inspect ${frames.length} athlete frame studies`)} →</a>` : `<a href="#video-evidence">${t('查閱現有影片觀察', 'Browse the existing video observations')} →</a>`}</div>`;
+  return `<div class="related-links">${lessonBoard[unit.id] ? `<a href="#motion-lab" data-board-topic="${lessonBoard[unit.id]}">${t('用 2D 看相關教學情境', 'Explore a related 2D teaching scenario')} →</a>` : ''}${frames.length ? `<a href="#frame-study" data-frame-topic="${escape(unit.id)}">${t(`對照 ${frames.length} 組真人影格`, `Inspect ${frames.length} athlete frame studies`)} →</a>` : `<a href="#video-evidence">${t('查閱現有影片觀察', 'Browse the existing video observations')} →</a>`}</div>`;
 }
 function renderLessons() {
   if (!curriculum) return;
@@ -103,7 +105,12 @@ function renderFrames() {
     return `<article class="frame-study" id="frame-${escape(frame.id)}"><figure><div class="reference-frame${frame.nativeVideo ? ' native-video' : ''}"><img src="${escape(frame.src)}" width="${width}" height="${height}" alt="${e(frame.title)}" loading="lazy"></div><figcaption>${escape(source.publisher)} · ${escape(frame.timestampLabel)} · ${frame.nativeVideo ? t('原始影片影格', 'Original video frame') : t('早期重播截圖', 'Earlier replay screenshot')}</figcaption></figure><div class="frame-notes"><div class="frame-tags"><span class="evidence-tag">${frame.slowMotion ? t('慢動作序列', 'Slow-motion sequence') : t('影格觀察', 'Frame observation')}</span><span class="meta">${frame.players.map(profileName).map(escape).join(' / ')} · ${escape(eraName(frame.era))}</span></div><h3>${e(frame.title)}</h3>${frame.notes.map((note, i) => `<p><b>${i + 1}</b>${e(note)}</p>`).join('')}${link(timedUrl, t('在原片看前後動作', 'Watch the surrounding movement'))}<div class="related-links">${frame.topics.map(id => `<a href="#lesson-${escape(id)}">${e(curriculum?.units.find(unit => unit.id === id)?.title || id)} →</a>`).join('')}${frameRecords(frame, source)}</div></div>${renderSlowMotion(frame.slowMotion, source)}</article>`;
   }).join('') : empty(t('這個組合目前沒有影格。可切換時期、主題，或取消「只看慢動作序列」。', 'No frames match. Change the era or topic, or turn off the slow-motion-only filter.'));
 }
-function render() { renderOverview(); renderLessons(); renderDirectory(); renderResearch(); renderFrames(); renderPlayerStudy(); renderVideos(); renderOtherPlayers(); renderMatchups(); renderSimulation(); motionLab?.setLanguage(); setChapter(activeChapter, false); }
+function renderMotionFrames() {
+  if (!frameStudy) return;
+  const ids = ['world-cup-2019-lin-500', 'doha-2026-harimoto-forehand-864-2', 'doha-2026-harimoto-backhand-2260-1'];
+  $('motionFrameLinks').innerHTML = ids.map(id => frameStudy.frames.find(frame => frame.id === id)).filter(Boolean).map(frame => `<a class="motion-frame-card" href="#frame-${escape(frame.id)}"><img src="${escape(frame.src)}" width="1280" height="720" alt="${e(frame.title)}" loading="lazy"><div><div class="meta">${escape(frame.players.map(profileName).join(' / '))} · ${escape(eraName(frame.era))}</div><h3>${e(frame.title)}</h3><span>${t('閱讀影格與觀察限制', 'Read the frame study and its limits')} →</span></div></a>`).join('');
+}
+function render() { renderOverview(); renderLessons(); renderDirectory(); renderResearch(); renderFrames(); renderPlayerStudy(); renderVideos(); renderOtherPlayers(); renderMatchups(); renderSimulation(); renderMotionFrames(); motionLab?.setLanguage(); tacticsBoard?.setLanguage(); setChapter(activeChapter, false); }
 const techniqueNames = { serve: ['發球', 'Service'], receive: ['接發球', 'Receive'], thirdBall: ['前三板', 'First three strokes'], forehand: ['正手', 'Forehand'], backhand: ['反手', 'Backhand'], transition: ['正反手銜接', 'Stroke transitions'], footwork: ['步法', 'Footwork'], distance: ['離台距離', 'Table distance'], placement: ['落點', 'Placement'], offenseDefense: ['攻防轉換', 'Attack and defense'] };
 function eraName(id) { return localized(corpus?.eras.find(item => item.id === id)?.label) || (id === 'undatedRecent' ? t('近期（日期未明）', 'Recent, undated') : id); }
 function videoFor(id) { return corpus?.videos.find(video => video.id === id || video.videoId === id); }
@@ -157,7 +164,7 @@ function renderPlayerStudy() {
       const supported = periods.filter(period => period.techniques[key]?.status !== 'notObserved').length;
       return `<details class="lesson technique-study" id="study-${escape(profile.player)}-${key}" ${opened.has(`study-${profile.player}-${key}`) || playerTopic !== 'all' ? 'open' : ''}><summary><span>${escape(techniqueNames[key][language === 'zh' ? 0 : 1])}</span><small>${t(`${supported} / ${periods.length} 期有依據`, `${supported} / ${periods.length} eras with evidence`)}</small></summary><div class="lesson-content technical-grid">${periods.map(period => {
         const value = period.techniques[key];
-        return `<article class="card ${escape(profile.player)}"><div class="meta">${escape(eraName(period.era))}</div><span class="evidence-tag${value.status === 'sourceBased' ? ' source' : value.status === 'notObserved' ? ' pending' : ''}">${escape(evidenceLabel(value.status))}</span><p>${value.status === 'notObserved' ? t('目前沒有這一時期可用的影片或原始報導結論；不據此判定球員當年不用這項技術。', 'No usable video or original-report finding is listed for this era. This does not establish that the player did not use the technique.') : e(value.observation)}</p>${value.inference ? `<p class="application">${t('解讀：', 'Interpretation: ')}${e(value.inference)}</p>` : ''}${value.limits?.length ? `<p class="caption">${value.limits.map(localized).map(escape).join(' · ')}</p>` : ''}<div class="lesson-source">${sourceLinks(value.sources)}${value.sources?.length && value.evidence?.length ? ' · ' : ''}${evidenceLinks(value.evidence)}</div>${lessonStroke[key] ? `<div class="related-links"><a href="#motion-lab" data-lab-stroke="${lessonStroke[key]}" data-lab-player="${profile.player}">${t('查看遊戲動作', 'Inspect the game stroke')} →</a></div>` : ''}</article>`;
+        return `<article class="card ${escape(profile.player)}"><div class="meta">${escape(eraName(period.era))}</div><span class="evidence-tag${value.status === 'sourceBased' ? ' source' : value.status === 'notObserved' ? ' pending' : ''}">${escape(evidenceLabel(value.status))}</span><p>${value.status === 'notObserved' ? t('目前沒有這一時期可用的影片或原始報導結論；不據此判定球員當年不用這項技術。', 'No usable video or original-report finding is listed for this era. This does not establish that the player did not use the technique.') : e(value.observation)}</p>${value.inference ? `<p class="application">${t('解讀：', 'Interpretation: ')}${e(value.inference)}</p>` : ''}${value.limits?.length ? `<p class="caption">${value.limits.map(localized).map(escape).join(' · ')}</p>` : ''}<div class="lesson-source">${sourceLinks(value.sources)}${value.sources?.length && value.evidence?.length ? ' · ' : ''}${evidenceLinks(value.evidence)}</div>${lessonBoard[key] ? `<div class="related-links"><a href="#motion-lab" data-board-topic="${lessonBoard[key]}" data-board-player="${profile.player}">${t('查看相關 2D 教學情境', 'Explore a related 2D teaching scenario')} →</a></div>` : ''}</article>`;
       }).join('')}</div></details>`;
     }).join('')}`;
   }).join('');
@@ -214,12 +221,13 @@ let labLoading = null;
 async function openMotionLab(stroke, selectedPlayer) {
   if (stroke && lessonStroke[stroke]) $('labStroke').value = lessonStroke[stroke];
   if (selectedPlayer && ['lin', 'harimoto'].includes(selectedPlayer)) $('labPlayer').value = selectedPlayer;
-  setChapter('motion-lab'); navigateTo('motion-lab'); $('lab').hidden = false; $('openLab').hidden = true;
+  $('legacy-motion').open = true; setChapter('motion-lab'); navigateTo('lab-demonstration'); $('lab').hidden = false; $('openLab').hidden = true;
   try {
     if (!motionLab) { labLoading ||= import('./motion-lab.js?v=7').then(({ createMotionLab }) => { motionLab = createMotionLab(() => language); }); await labLoading; }
     else $('labStroke').dispatchEvent(new Event('change'));
   } catch (error) { labLoading = null; console.error(error); $('lab').hidden = true; $('openLab').hidden = false; $('error').hidden = false; $('error').textContent = t('3D 示範無法開啟，請開啟硬體加速或重新整理。', 'The 3D lab could not open. Enable hardware acceleration or reload.'); }
 }
+function openTacticsDiagram(topic, selectedPlayer) { tacticsBoard.select(topic, selectedPlayer); setChapter('motion-lab'); navigateTo('tactics-demonstration'); }
 $('language').addEventListener('click', () => {
   language = language === 'zh' ? 'en' : 'zh'; document.documentElement.lang = language === 'zh' ? 'zh-Hant' : 'en';
   document.querySelectorAll('[data-en]').forEach(node => { if (language === 'en') node.textContent = node.dataset.en; else node.innerHTML = original.get(node); });
@@ -246,16 +254,17 @@ document.addEventListener('click', event => {
   if (profile) { event.preventDefault(); player = profile.dataset.selectPlayer; renderDirectory(); renderResearch(); renderPlayerStudy(); renderOtherPlayers(); navigateTo('players'); return; }
   const pair = event.target.closest('[data-pair]');
   if (pair) { event.preventDefault(); pairingId = pair.dataset.pair; renderMatchups(); navigateTo('matchups'); return; }
-  const stroke = event.target.closest('[data-lab-stroke]');
-  if (stroke) { event.preventDefault(); openMotionLab(stroke.dataset.labStroke, stroke.dataset.labPlayer); return; }
+  const board = event.target.closest('[data-board-topic]');
+  if (board) { event.preventDefault(); openTacticsDiagram(board.dataset.boardTopic, board.dataset.boardPlayer); return; }
   const frames = event.target.closest('[data-frame-topic]');
   if (frames) { event.preventDefault(); frameTopic = frames.dataset.frameTopic; framePlayer = frameEra = 'all'; $('frameReplay').checked = false; renderFrames(); navigateTo('frame-library'); }
   const anchor = event.target.closest('a[href^="#"]');
-  if (anchor && anchor.hash === location.hash && !profile && !pair && !stroke && !frames) { event.preventDefault(); resolveHash(true); }
+  if (anchor && anchor.hash === location.hash && !profile && !pair && !board && !frames) { event.preventDefault(); resolveHash(true); }
 });
+tacticsBoard = createTacticsBoard(() => language);
 resolveHash();
 const results = await Promise.allSettled(['../supporting-research.json', '../reference-corpus.json', '../style-analysis.json', './techniques.json', './reference-frames.json', './other-players.json', './matchups.json', './game-simulation.json'].map(async path => {
-  const response = await fetch(`${path}?v=7`); if (!response.ok) throw new Error(path); return response.json();
+  const response = await fetch(`${path}?v=8`); if (!response.ok) throw new Error(path); return response.json();
 }));
 research = results[0].status === 'fulfilled' ? results[0].value : null;
 corpus = results[1].status === 'fulfilled' ? results[1].value : null;
