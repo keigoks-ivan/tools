@@ -33,6 +33,7 @@ const isSeasonMode = (mid) => modeList.indexOf(modeOf(mid)) === 1;
 const SAVE_KEY = (m) => `tq-airline-save-${m}`;
 const BEST_KEY = 'tq-airline-best';
 const PASSPORT_KEY = 'tq-airline-passport';
+const SAVE_BACKUP_KEY = 'tq-airline-save-backups';
 const store = {
   get(k) { try { return localStorage.getItem(k); } catch { return null; } },
   set(k, v) { try { localStorage.setItem(k, v); } catch {} },
@@ -73,6 +74,24 @@ function readSaves() {
   const out = [];
   for (const m of modeList) { try { const o = JSON.parse(store.get(SAVE_KEY(m.id)) || 'null'); if (o && o.state) out.push(o); } catch {} }
   return out;
+}
+function clearSaves() {
+  const saves = Object.fromEntries(modeList.map(m => [SAVE_KEY(m.id), store.get(SAVE_KEY(m.id))]).filter(([, v]) => v));
+  if (Object.keys(saves).length) {
+    let backups = {}; try { backups = JSON.parse(store.get(SAVE_BACKUP_KEY) || '{}'); } catch {}
+    const value = JSON.stringify({ ...backups, [Date.now()]: saves });
+    store.set(SAVE_BACKUP_KEY, value);
+    if (store.get(SAVE_BACKUP_KEY) !== value) { alert(tr('無法備份，存檔尚未清除。', 'Backup failed. Saves were not cleared.')); return; }
+  }
+  for (const m of modeList) store.del(SAVE_KEY(m.id));
+  app.state = null; app.active = null; app.draft = null; app.report = null; app.clock = newClock();
+  go('start');
+}
+function restoreSaves() {
+  let backups = {}; try { backups = JSON.parse(store.get(SAVE_BACKUP_KEY) || '{}'); } catch {}
+  const latest = Object.keys(backups).sort((a,b) => Number(b)-Number(a))[0];
+  for (const [key, value] of Object.entries(backups[latest] || {})) if (modeList.some(m => SAVE_KEY(m.id) === key)) store.set(key, value);
+  go('start');
 }
 function recordBest(s, rep) {
   let b = {}; try { b = JSON.parse(store.get(BEST_KEY) || '{}'); } catch {}
@@ -126,10 +145,12 @@ function chrome() {
 function renderStart() {
   app.map?.destroy(); app.map=null;
   const saves=readSaves();
-  appEl.innerHTML=`<div class="title-game"><div class="title-world" id="title-world"></div><div class="title-vignette" aria-hidden="true"></div><div class="title-logo">${brandCrest()}<span>SKYGLAZE</span><h1>${tr('天青航空','SKYGLAZE')}</h1><p>${tr('打造你的航空王國','BUILD YOUR AIRLINE')}</p></div><div class="title-menu"><button type="button" class="title-play" id="go-new"><i>${gameIcon("play")}</i><span>${tr('開始新遊戲','NEW GAME')}<small>${esc(pick(modeOf(app.sel.mode)))} · ${app.sel.hub}</small></span></button>${saves.map(o=>`<button type="button" class="title-option" data-continue="${esc(o.mode)}"><i>${gameIcon("continue")}</i><span>${tr('繼續旅程','CONTINUE')}<small>${esc(pick(hubOf(o.hub)))} · ${esc(turnLabelFromSave(o))}</small></span></button>`).join('')}<button type="button" class="title-option" id="configure-game"><i>${gameIcon("hub")}</i><span>${tr('模式與挑戰','MODE & CHALLENGE')}<small>${esc(pick(SCENARIOS[app.scenario]))}</small></span></button><button type="button" class="title-option" id="choose-hub"><i>${gameIcon("network")}</i><span>${tr('選擇出發基地','HOME AIRPORT')}<small>${app.sel.hub} · ${esc(pick(hubOf(app.sel.hub)))} / 180</small></span></button><button type="button" class="title-option" id="passport-home"><i>${gameIcon("passport")}</i><span>${tr('旅行手冊','TRAVEL PASSPORT')}<small>${tr(`已收藏 ${Object.keys(readPassport()).length} 座城市`,`${Object.keys(readPassport()).length} cities collected`)}</small></span></button></div><div class="title-caption"><span class="live-dot"></span>${tr('你的世界，從第一班飛機開始。','Your world starts with its first departure.')}</div><div class="title-footer"><button type="button" id="how-play">${tr('怎麼玩','How to play')}</button><button type="button" id="go-src">${tr('資料來源','Sources')}</button><span>SKYGLAZE / v22</span></div></div>`;
+  appEl.innerHTML=`<div class="title-game"><div class="title-world" id="title-world"></div><div class="title-vignette" aria-hidden="true"></div><div class="title-logo">${brandCrest()}<span>SKYGLAZE</span><h1>${tr('天青航空','SKYGLAZE')}</h1><p>${tr('打造你的航空王國','BUILD YOUR AIRLINE')}</p></div><div class="title-menu"><button type="button" class="title-play" id="go-new"><i>${gameIcon("play")}</i><span>${tr('開始新遊戲','NEW GAME')}<small>${esc(pick(modeOf(app.sel.mode)))} · ${app.sel.hub}</small></span></button>${saves.map(o=>`<button type="button" class="title-option" data-continue="${esc(o.mode)}"><i>${gameIcon("continue")}</i><span>${tr('繼續旅程','CONTINUE')}<small>${esc(pick(hubOf(o.hub)))} · ${esc(turnLabelFromSave(o))}</small></span></button>`).join('')}<button type="button" class="title-option" id="configure-game"><i>${gameIcon("hub")}</i><span>${tr('模式與挑戰','MODE & CHALLENGE')}<small>${esc(pick(SCENARIOS[app.scenario]))}</small></span></button><button type="button" class="title-option" id="choose-hub"><i>${gameIcon("network")}</i><span>${tr('選擇出發基地','HOME AIRPORT')}<small>${app.sel.hub} · ${esc(pick(hubOf(app.sel.hub)))} / 180</small></span></button><button type="button" class="title-option" id="passport-home"><i>${gameIcon("passport")}</i><span>${tr('旅行手冊','TRAVEL PASSPORT')}<small>${tr(`已收藏 ${Object.keys(readPassport()).length} 座城市`,`${Object.keys(readPassport()).length} cities collected`)}</small></span></button></div><div class="title-caption"><span class="live-dot"></span>${tr('你的世界，從第一班飛機開始。','Your world starts with its first departure.')}</div><div class="title-footer"><button type="button" id="how-play">${tr('怎麼玩','How to play')}</button><button type="button" id="go-src">${tr('資料來源','Sources')}</button>${saves.length?`<button type="button" id="clear-saves">${tr('清除存檔','Clear saves')}</button>`:''}${store.get(SAVE_BACKUP_KEY)?`<button type="button" id="restore-saves">${tr('還原上次清除的存檔','Restore cleared saves')}</button>`:''}<span>SKYGLAZE / v22.3</span></div></div>`;
   app.map=createAirport($('#title-world'),{hubId:app.sel.hub,preview:true});app.map.update({fleet:[{type:'MQ-320'},{type:'MQ-350'},{type:'MQ-72'}],routes:[],facilities:{depot:1,lounge:1,tank:1}});
   $('#go-new').onclick=newGame;$('#configure-game').onclick=showSetup;$('#choose-hub').onclick=showHubPicker;$('#passport-home').onclick=showPassport;$('#go-src').onclick=()=>go('sources');$('#how-play').onclick=showHow;
   $$('[data-continue]').forEach(b=>b.onclick=()=>continueGame(b.dataset.continue));
+  if ($('#clear-saves')) $('#clear-saves').onclick=clearSaves;
+  if ($('#restore-saves')) $('#restore-saves').onclick=restoreSaves;
 }
 function showSetup(){
   const m=overlay(`<div class="career-dialog-top"><small>${tr('新的旅程','NEW ADVENTURE')}</small><button type="button" class="ghost" id="setup-close">${tr('返回','Back')} ×</button></div><h2>${tr('這次，挑戰什麼？','Choose your adventure')}</h2><div class="choices two" role="radiogroup" aria-label="${tr('模式','Mode')}">${modeList.map(mode=>`<button type="button" class="choice" role="radio" aria-checked="${app.sel.mode===mode.id}" data-mode="${mode.id}"><b>${esc(pick(mode))}</b><span class="sub">${esc(cadence(mode))} · ${mode.turns} ${tr('回合','turns')}</span></button>`).join('')}</div><div class="scenario-choices">${Object.entries(SCENARIOS).map(([id,c],i)=>`<button type="button" class="scenario-choice" data-scenario="${id}" aria-pressed="${app.scenario===id}"><span class="scenario-no">0${i+1}</span>${playIcon(id)}<small>${esc(pick(c,'tagZh','tagEn'))}</small><b>${esc(pick(c))}</b><span>${esc(pick(c,'descZh','descEn'))}</span></button>`).join('')}</div><p class="hint">${tr('出發基地','Home airport')}：${app.sel.hub} · ${esc(pick(hubOf(app.sel.hub)))}</p><button type="button" class="btn block" id="setup-start">${tr('出發，開始新遊戲','Depart — new game')} ▶</button>`,{label:tr('模式與挑戰','Mode and challenge')});m.classList.add('setup-dialog');
@@ -678,8 +699,8 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { hideTerm
 /* ---------- chrome wiring ---------- */
 $('#lang-btn').addEventListener('click', () => { setLocale(locale === 'zh' ? 'en' : 'zh'); chrome(); go(app.screen === 'main' && !app.draft ? 'main' : app.screen); });
 $('#menu-btn').addEventListener('click', () => {
-  const m = overlay(`<h2>${tr('選單', 'Menu')}</h2><div class="opts" style="margin-top:12px"><button type="button" class="opt" data-m="fullscreen"><b>${tr('全螢幕遊玩', 'Fullscreen')}</b></button><button type="button" class="opt" data-m="help"><b>${tr('怎麼玩', 'How to play')}</b></button><button type="button" class="opt" data-m="src"><b>${tr('資料來源', 'Data sources')}</b></button><button type="button" class="opt" data-m="home"><b>${tr('回到開始畫面', 'Back to start')}</b><small>${tr('航班進度與下期規劃會自動存檔，可從開始畫面繼續。', 'Playback and next-turn plans autosave. Continue from the start screen.')}</small></button><button type="button" class="opt" data-m="x"><b>${tr('關閉', 'Close')}</b></button></div>`, { label: tr('選單', 'Menu') });
-  $$('[data-m]', m).forEach((b) => b.addEventListener('click', () => { closeOverlay();if(b.dataset.m==='fullscreen'){if(document.fullscreenElement)document.exitFullscreen?.();else document.documentElement.requestFullscreen?.().catch(()=>{});}if(b.dataset.m==='help')showHow(); if (b.dataset.m === 'src') go('sources'); if (b.dataset.m === 'home') go('start'); }));
+  const m = overlay(`<h2>${tr('選單', 'Menu')}</h2><div class="opts" style="margin-top:12px"><button type="button" class="opt" data-m="fullscreen"><b>${tr('全螢幕遊玩', 'Fullscreen')}</b></button><button type="button" class="opt" data-m="help"><b>${tr('怎麼玩', 'How to play')}</b></button><button type="button" class="opt" data-m="src"><b>${tr('資料來源', 'Data sources')}</b></button><button type="button" class="opt" data-m="home"><b>${tr('回到開始畫面', 'Back to start')}</b><small>${tr('航班進度與下期規劃會自動存檔，可從開始畫面繼續。', 'Playback and next-turn plans autosave. Continue from the start screen.')}</small></button><button type="button" class="opt" data-m="clear"><b>${tr('清除存檔', 'Clear saves')}</b><small>${tr('清除兩種模式的進度，回到開始畫面；可還原上次清除的存檔。', 'Clear both modes and return to start. Cleared saves can be restored.')}</small></button><button type="button" class="opt" data-m="x"><b>${tr('關閉', 'Close')}</b></button></div>`, { label: tr('選單', 'Menu') });
+  $$('[data-m]', m).forEach((b) => b.addEventListener('click', () => { closeOverlay();if(b.dataset.m==='fullscreen'){if(document.fullscreenElement)document.exitFullscreen?.();else document.documentElement.requestFullscreen?.().catch(()=>{});}if(b.dataset.m==='help')showHow(); if (b.dataset.m === 'src') go('sources'); if (b.dataset.m === 'home') go('start'); if (b.dataset.m === 'clear') clearSaves(); }));
 });
 
 /* ---------- debug hook (?debug) ---------- */
