@@ -4,6 +4,20 @@ import * as M from './model.mjs';
 
 const order = (s,type='MQ-320',n=1) => M.applyDecisions(s,{fleet:{lease:{[type]:n}}});
 const codes = out => out.errors.map(e=>e.code);
+test('availability matches shared scheduling hours, excludes pending orders and follows business model',()=>{
+  const s=M.newGame(),before=M.serialize(s),type='MQ-320';
+  const routes=['HKG','NRT','ICN'].map(city=>({city,type,weekly:3,fare:'mid'}));
+  const a=M.fleetAvailability(s,routes)[type];
+  const hours=routes.reduce((n,r)=>n+2*r.weekly*M.blockHoursFor(M.AIRCRAFT[type],M.distanceKm(M.CITIES[s.hub],M.CITIES[r.city])),0);
+  assert.equal(a.totalHours,154);assert.equal(a.usedHours,hours);assert.equal(a.remainingHours,154-hours);
+  assert.equal(a.unassigned,2-M.fleetNeeded(s,routes)[type]);assert.equal(a.missing,0);
+  const queued=order(s,'MQ-350').state,waiting=M.fleetAvailability(queued,[])['MQ-350'];
+  assert.equal(waiting.delivered,0);assert.equal(waiting.pending,1);assert.equal(waiting.totalHours,0);
+  const overloaded=M.fleetAvailability(s,[{city:'NRT',type,weekly:28,fare:'mid'}])[type];
+  assert.equal(overloaded.unassigned,0);assert.equal(overloaded.remainingHours,0);assert.ok(overloaded.missing>0);
+  assert.equal(M.fleetAvailability({...s,model:'lcc'},[])[type].totalHours,175);
+  assert.equal(M.fleetAvailability(s,[])[type].unassigned,2);assert.equal(M.serialize(s),before);
+});
 test('lease deposit reserves cash immediately; only delivered aircraft can fly',()=>{
   const s=M.newGame(),before=M.serialize(s),q=M.aircraftQuote(s,'MQ-350');
   const out=order(s,'MQ-350');assert.deepEqual(out.errors,[]);

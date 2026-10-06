@@ -18,6 +18,13 @@ async def turn(page):
     await core.answer_events(page)
     if not await page.locator('#next').count(): await page.locator('#skip').click()
     assert await page.locator('#next').count()
+    deliveries=await page.evaluate('__tq.app.report.deliveries.length')
+    if deliveries:
+        assert await page.locator('.aircraft-delivery-dialog').count()==1
+        assert await page.locator('.aircraft-delivery-dialog [data-delivered-type]').count()>0
+        await page.locator('#delivery-confirm').click()
+        assert await page.locator('.fleet-delivered').count()==1
+    else: assert await page.locator('#delivery-confirm').count()==0
     await page.locator('#next').click();await core.answer_events(page)
 
 async def destination(page,city):
@@ -36,7 +43,7 @@ async def year(browser,width,locale):
     assert ordered['cash']==before['cash']-1900000
     await page.locator('[data-lease="MQ-320"]').click();assert (await state(page))['limits']['ordersLeft']==0
     assert await page.locator('[data-lease="MQ-350"]').is_disabled()
-    await page.locator('[data-cancel-order]').first.click()
+    await page.locator('[data-fleet-model="MQ-350"] [data-cancel-order]').click()
     assert (await state(page))['orders']==1 and (await state(page))['limits']['ordersLeft']==0
     assert (await state(page))['cash']==before['cash']-800000
     # Save/reload retains the committed deposit, queue and spent quota.

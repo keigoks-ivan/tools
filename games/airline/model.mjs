@@ -194,8 +194,7 @@ function transferPairs(s, ctx, routes, locals) {
 }
 
 // ============================================================ fleet maths
-export function fleetNeeded(state, routes) {
-  const W7 = 7, need = {};
+function fleetHours(state, routes) {
   const h = CITIES[state.hub];
   const hours = {};
   for (const r of routes || []) {
@@ -204,8 +203,22 @@ export function fleetNeeded(state, routes) {
     const bh = 2 * r.weekly * blockHoursFor(ac, dist(h, c));
     hours[r.type] = (hours[r.type] || 0) + bh;
   }
-  for (const t of Object.keys(hours)) need[t] = Math.ceil(hours[t] / (W7 * maxHours(AIRCRAFT[t], state.model)) - 1e-9);
+  return hours;
+}
+export function fleetNeeded(state, routes) {
+  const hours = fleetHours(state, routes), need = {};
+  for (const t of Object.keys(hours)) need[t] = Math.ceil(hours[t] / (7 * maxHours(AIRCRAFT[t], state.model)) - 1e-9);
   return need;
+}
+export function fleetAvailability(state, routes = state.routes) {
+  const hours = fleetHours(state, routes), need = fleetNeeded(state, routes);
+  return Object.fromEntries([...new Set([...modeOf(state).types, ...state.fleet.map(a=>a.type)])].map(type=>{
+    const delivered = state.fleet.filter(a=>a.type===type).length, hoursPerAircraft = 7*maxHours(AIRCRAFT[type],state.model);
+    const totalHours = delivered*hoursPerAircraft, usedHours = hours[type]||0;
+    return [type, { delivered, scheduled:Math.min(delivered,need[type]||0), unassigned:Math.max(0,delivered-(need[type]||0)),
+      hoursPerAircraft, totalHours, usedHours, remainingHours:Math.max(0,totalHours-usedHours),
+      missing:Math.max(0,(need[type]||0)-delivered), pending:(state.fleetOrders||[]).filter(o=>o.type===type).length }];
+  }));
 }
 const fleetCount = (s, type) => s.fleet.filter(a => a.type === type).length;
 const rateNow = s => s.rate;

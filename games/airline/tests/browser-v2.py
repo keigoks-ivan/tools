@@ -55,9 +55,12 @@ async def full_game(browser, mode, hub, kind):
         assert await page.locator('#next').count(), await page.evaluate('''()=>({error:'Settlement report missing',turn:__tq.app.state.turn,screen:__tq.app.screen,runmsg:document.querySelector('#runmsg')?.innerText,overlay:document.querySelector('#overlay')?.innerText})''')
         routes=await page.evaluate('__tq.app.report.routes.length')
         assert await page.locator('.reason').count()==routes, 'Per-route explanation missing'
+        last=await page.evaluate('!!(__tq.app.state.finished||__tq.app.state.gameOver)')
+        assert await page.locator('.result-route-planner').count()==(0 if last else routes)
         if not routes:
             assert await page.evaluate('__tq.app.report.company.costTotal>0 && __tq.app.report.company.revenue===0')
             assert '沒有航線收入，租金與固定費用仍要支付。' in await page.locator('.rwrap').inner_text()
+        if await page.locator('#delivery-confirm').count(): await page.locator('#delivery-confirm').click()
         await page.locator('#next').click()
     summary=await page.evaluate('''()=>({mode:__tq.app.state.mode,hub:__tq.app.state.hub,...__tq.B.endReport(__tq.app.state)})''')
     assert not errors, errors
@@ -114,6 +117,7 @@ async def main():
             await page.screenshot(path=str(OUT/f'hub-{width}x{height}{"-dark" if dark else ""}.png'))
             await page.locator('#skip').click();assert await page.locator('#next').count()
             assert not await page.evaluate('document.documentElement.scrollWidth>innerWidth'),'Report overflow'
+            if await page.locator('#delivery-confirm').count(): await page.locator('#delivery-confirm').click()
             await page.locator('#next').click()
             assert await page.evaluate('__tq.app.draft.facilities.has("depot")'), 'Next-turn facility lost'
             assert await page.evaluate('city=>__tq.app.draft.routes.get(city).fare',edited_city)=='high'
