@@ -3,7 +3,7 @@
 import { FACILITIES, fuelOrder } from './v2.mjs?v=23';
 import { CONST, MODES, HUBS, CITIES, AIRCRAFT, EVENTS, LESSONS, RIVALS, HUB_WEATHER } from './data.mjs?v=22';
 import { marketProfile } from './demand.mjs?v=22';
-import { readCareer, missionOffers, settleCareer } from './career.mjs?v=22';
+import { readCareer, missionOffers, settleCareer } from './career.mjs?v=24';
 export { marketProfile, DEMAND_SOURCES } from './demand.mjs?v=22';
 
 // ============================================================ utilities
@@ -130,7 +130,8 @@ function rivalsAt(s, cityId) {
 function evalLocal(s, ctx, r, { ramp = true, noRivals = false } = {}) {
   const h = CITIES[s.hub], c = CITIES[r.city], ac = AIRCRAFT[r.type];
   const d = dist(h, c), seats = seatsOf(ac, s.model);
-  const weeklyEff = r.weekly * (1 - ctx.cancel);
+  const technicalCancel = ctx.readiness?.[r.type]?.cancel || 0;
+  const weeklyEff = r.weekly * (1 - ctx.cancel) * (1 - technicalCancel);
   const nz = ctx.noise ? 1 + (rngFor(s.seed, 'mk', ctx.t, r.city)() - 0.5) * 0.08 : 1;
   const sea = pairSeason(h, c, ctx.months);
   const profile = marketProfile(h, c, d);
@@ -167,7 +168,7 @@ function evalLocal(s, ctx, r, { ramp = true, noRivals = false } = {}) {
   const wantT = wantB + wantL, soft = wantT > 0 ? wantT / Math.pow(1 + Math.pow(wantT / Math.max(1, seatsWeek), CONST.spillP), 1 / CONST.spillP) : 0;
   const scaleSoft = wantT > 0 ? soft / wantT : 0;
   const paxB = wantB * scaleSoft, paxL = wantL * scaleSoft;
-  out.rampF = rampF; out.seatsWeek = seatsWeek; out.weeklyEff = weeklyEff;
+  out.rampF = rampF; out.seatsWeek = seatsWeek; out.weeklyEff = weeklyEff; out.technicalCancel = technicalCancel;
   out.paxB = paxB; out.paxL = paxL; out.want = wantB + wantL; out.wantNoRival = wantBno + wantLno;
   return out;
 }
@@ -194,6 +195,25 @@ function transferPairs(s, ctx, routes, locals) {
 }
 
 // ============================================================ fleet maths
+// Compressed management rules, not maintenance instructions or real delivery forecasts.
+export const MAINTENANCE = {
+  balanced: { zh:'正常保養', en:'Regular care', hours:1, cost:1, repair:8 },
+  push: { zh:'密集運轉', en:'Intensive flying', hours:1.08, cost:.85, repair:4 },
+  care: { zh:'加強保養', en:'Extra care', hours:.88, cost:1.3, repair:14 }
+};
+const careOf = (s,type) => MAINTENANCE[s.maintenance?.[type]] || MAINTENANCE.balanced;
+const weeklyHours = (s,type) => 7 * maxHours(AIRCRAFT[type],s.model) * careOf(s,type).hours;
+export function fleetReadiness(s, routes = s.routes, counts = {}) {
+  const hours = fleetHours(s,routes);
+  return Object.fromEntries([...new Set([...s.fleet.map(a=>a.type),...Object.keys(counts)])].map(type=>{
+    const count=counts[type]??fleetCount(s,type), care=careOf(s,type), condition=s.fleetCondition?.[type] ?? 100;
+    const utilisation=(hours[type]||0)/(count*7*maxHours(AIRCRAFT[type],s.model));
+    const delta=(care.repair+(s.facilities?.depot?2:0)-10*utilisation)*(s.mode==='decade'?2:1);
+    const nextCondition=clamp(condition+delta,50,100);
+    const cancel=clamp(Math.max(0,90-condition)*.004+Math.max(0,utilisation-.92)*.12,0,.2);
+    return [type,{condition,nextCondition,utilisation,cancel,policy:s.maintenance?.[type]||'balanced',maintenanceMult:care.cost}];
+  }));
+}
 function fleetHours(state, routes) {
   const h = CITIES[state.hub];
   const hours = {};
@@ -207,13 +227,13 @@ function fleetHours(state, routes) {
 }
 export function fleetNeeded(state, routes) {
   const hours = fleetHours(state, routes), need = {};
-  for (const t of Object.keys(hours)) need[t] = Math.ceil(hours[t] / (7 * maxHours(AIRCRAFT[t], state.model)) - 1e-9);
+  for (const t of Object.keys(hours)) need[t] = Math.ceil(hours[t] / weeklyHours(state,t) - 1e-9);
   return need;
 }
 export function fleetAvailability(state, routes = state.routes) {
   const hours = fleetHours(state, routes), need = fleetNeeded(state, routes);
   return Object.fromEntries([...new Set([...modeOf(state).types, ...state.fleet.map(a=>a.type)])].map(type=>{
-    const delivered = state.fleet.filter(a=>a.type===type).length, hoursPerAircraft = 7*maxHours(AIRCRAFT[type],state.model);
+    const delivered = state.fleet.filter(a=>a.type===type).length, hoursPerAircraft = weeklyHours(state,type);
     const totalHours = delivered*hoursPerAircraft, usedHours = hours[type]||0;
     return [type, { delivered, scheduled:Math.min(delivered,need[type]||0), unassigned:Math.max(0,delivered-(need[type]||0)),
       hoursPerAircraft, totalHours, usedHours, remainingHours:Math.max(0,totalHours-usedHours),
@@ -232,13 +252,23 @@ export function fleetLimits(s) {
   const orders = s.fleetOrders || [];
   return { maxFleet: Math.max(maxFleet, s.fleet.length), maxRoutes: Math.max(maxRoutes, s.routes.length), ordersPerTurn,
     ordersLeft: Math.max(0, ordersPerTurn - (s.orderTurn === s.turn ? s.orderedThisTurn || 0 : 0)),
-    committed: s.fleet.length + orders.length, depositMonths: 2, deliveryTurns: 1 };
+    committed: s.fleet.length + orders.length, depositMonths: 2 };
 }
-export function aircraftQuote(s, type, kind = 'lease') {
+export function aircraftQuote(s, type, kind = 'lease', express = false) {
   const ac = AIRCRAFT[type]; if (!ac) return null;
   const mult = buildCtx(s, { noise: false }).leaseNewMult;
-  const rate = ac.leasePerMonth * mult, price = ac.price * mult;
-  return { rate, price, upfront: kind === 'own' ? price * CONST.loan.downPct : rate * fleetLimits(s).depositMonths, readyTurn: s.turn + 1 };
+  express = kind === 'lease' && express;
+  const rate = ac.leasePerMonth * mult * (express ? 1.2 : 1), price = ac.price * mult;
+  const deliveryTurns=express?1:kind==='own'?(ac.widebody?3:2):s.mode==='year'?(ac.widebody?3:2):(ac.widebody?2:1);
+  const deposit=kind==='own'?price*CONST.loan.downPct:rate*fleetLimits(s).depositMonths;
+  const bookingFee=express?ac.leasePerMonth*mult*.25:0;
+  return { rate, price, deposit, bookingFee, upfront:deposit+bookingFee, cancelFee:deposit*.15,
+    deliveryTurns, orderedTurn:s.turn, readyTurn:s.turn+deliveryTurns, express };
+}
+export function facilityQuote(s,id) {
+  if (!FACILITIES[id]) return null;
+  const turns=s.mode==='year'?(id==='depot'?3:2):(id==='depot'?2:1);
+  return { id, readyTurn:s.turn+turns, constructionTurns:turns, cost:FACILITIES[id].cost };
 }
 export function routeCapacity(s, routes) {
   const need = fleetNeeded(s, routes), limits = fleetLimits(s);
@@ -256,7 +286,7 @@ export function newGame({ mode = 'year', hub = 'TPE', seed = 1 } = {}) {
   const m = MODES[mode];
   const s = {
     v: 1, facilities: {}, marketSupply: {}, marketRivalBase: {}, reserve: { kg: 0, unitPrice: 0 }, scenario: 'free', mode, hub, seed, turn: 0, cash: m.startCash, model: 'fsc', modelSwitches: 0,
-    fleet: [], nextAc: 1, fleetOrders: [], nextOrder: 1, orderTurn: -1, orderedThisTurn: 0, routes: [], hedge: { frac: 0, lock: 1, age: 0 }, fuelSpot: 1, rate: CONST.baseRate,
+    fleet: [], nextAc: 1, fleetOrders: [], nextOrder: 1, orderTurn: -1, orderedThisTurn: 0, maintenance: {}, fleetCondition: {}, facilityOrders: [], routes: [], hedge: { frac: 0, lock: 1, age: 0 }, fuelSpot: 1, rate: CONST.baseRate,
     rivals: [], plan: {}, choices: {}, mods: [], slotCaps: {}, labourMult: 1, lessons: {}, history: [], totals: { revenue: 0, profit: 0 },
     pending: { ownershipCash: 0, ownershipNonCash: 0, overheadCash: 0 }, debt: [], deferred: 0, defer: { pct: 0, turnsLeft: 0, after: 0 },
     routeStats: {}, lastRoutes: {}, notes: {}, everHedged: false, usedLcc: false, gameOver: null, finished: false, totalTurns: m.turns
@@ -369,7 +399,7 @@ export function applyDecisions(state, decisions = {}) {
   const s = clone(state), errors = [], d = decisions || {};
   const m = modeOf(s);
   if (s.finished || s.gameOver) { errors.push(err('GAME_OVER', '遊戲已經結束。', 'The game is over.')); return { state: s, errors }; }
-  s.fleetOrders ||= []; s.nextOrder ||= 1;
+  s.fleetOrders ||= []; s.nextOrder ||= 1; s.maintenance ||= {}; s.fleetCondition ||= {}; s.facilityOrders ||= [];
   s.career = readCareer(s);
   if (d.mission === null) s.career.active = null;
   else if (d.mission !== undefined) {
@@ -418,24 +448,39 @@ export function applyDecisions(state, decisions = {}) {
     else for (const id of fl.cancelOrders) {
       const i = s.fleetOrders.findIndex(o => o.id === id);
       if (i < 0) errors.push(err('BAD_ORDER', '找不到這筆待交機訂單。', 'Pending order not found.'));
-      else s.cash += s.fleetOrders.splice(i, 1)[0].upfront;
+      else {
+        const o=s.fleetOrders.splice(i,1)[0],fee=o.cancelFee||0;
+        s.cash += o.upfront-(o.bookingFee||0)-fee; s.pending.ownershipNonCash += fee;
+      }
     }
   }
   const leases = listOf(fl.lease, 'lease');
+  const express = listOf(fl.expressLease, 'expressLease');
   const buys = listOf(fl.buy, 'buy');
   if (buys.length && !m.buy) errors.push(err('NO_BUY', '一年模式只能租機，不能買機。', 'Year mode is lease-only.'));
-  const requested = [...leases.map(([type,n]) => ({type,n,kind:'lease'})), ...(m.buy ? buys.map(([type,n]) => ({type,n,kind:'own'})) : [])];
+  const requested = [...leases.map(([type,n]) => ({type,n,kind:'lease'})), ...express.map(([type,n])=>({type,n,kind:'lease',express:true})), ...(m.buy ? buys.map(([type,n]) => ({type,n,kind:'own'})) : [])];
   const limits = fleetLimits(s), quantity = requested.reduce((n,o) => n+o.n,0);
-  const upfront = requested.reduce((n,o) => n+aircraftQuote(s,o.type,o.kind).upfront*o.n,0);
+  const upfront = requested.reduce((n,o) => n+aircraftQuote(s,o.type,o.kind,o.express).upfront*o.n,0);
   if (quantity > limits.ordersLeft) errors.push(err('ORDER_LIMIT', `本回合還能訂 ${limits.ordersLeft} 架，請等下回合再擴張。`, `Only ${limits.ordersLeft} orders remain this turn. Expand next turn.`));
   if (limits.committed + quantity > limits.maxFleet) errors.push(err('FLEET_LIMIT', `機隊容量 ${limits.maxFleet} 架（含待交機）；興建維修基地可擴充。`, `Fleet capacity is ${limits.maxFleet}, including orders. Build a maintenance depot to expand.`));
   if (upfront > s.cash) errors.push(err('NO_CASH', '現金不夠支付租機押金或購機頭期款。', 'Not enough cash for lease deposits or purchase down payments.'));
-  if (s.turn >= m.turns-1 && quantity) errors.push(err('NO_DELIVERY', '最後一回合無法再訂機，遊戲結束前來不及交付。', 'Orders are closed in the final turn; delivery would be after the game.'));
+  if (requested.some(o=>aircraftQuote(s,o.type,o.kind,o.express).readyTurn>=m.turns)) errors.push(err('NO_DELIVERY', '這筆訂單來不及在本局結束前投入營運；改選較快的交機方案。', 'This order would arrive too late to operate. Choose a faster delivery option.'));
   if (!errors.length) for (const o of requested) for (let i=0;i<o.n;i++) {
-    const quote = aircraftQuote(s,o.type,o.kind);
+    const quote = aircraftQuote(s,o.type,o.kind,o.express);
     s.fleetOrders.push({ id:s.nextOrder++, type:o.type, kind:o.kind, ...quote }); s.cash -= quote.upfront;
+    s.pending.ownershipNonCash += quote.bookingFee;
     if (s.orderTurn !== s.turn) { s.orderTurn = s.turn; s.orderedThisTurn = 0; }
     s.orderedThisTurn++;
+  }
+  // Care policies and schedules are validated together; rejected policies keep the previous capacity.
+  if (d.maintenance !== undefined) {
+    if (!d.maintenance || typeof d.maintenance!=='object' || Array.isArray(d.maintenance)) errors.push(err('BAD_MAINTENANCE','保養方案格式不正確。','Invalid care policy.'));
+    else for (const [type,policy] of Object.entries(d.maintenance)) {
+      if (!m.types.includes(type) || !MAINTENANCE[policy]) { errors.push(err('BAD_MAINTENANCE','沒有這個機型或保養方案。','Unknown type or care policy.')); continue; }
+      const trial={...s,maintenance:{...s.maintenance,[type]:policy}},routes=Array.isArray(d.routes)?d.routes:s.routes;
+      if ((fleetNeeded(trial,routes)[type]||0)>fleetCount(s,type)) errors.push(err('CARE_CAPACITY','加強保養需要預留時數，請先減班或調整機型。','Extra care needs reserved hours. Reduce frequency or change aircraft first.'));
+      else s.maintenance[type]=policy;
+    }
   }
   // 5. routes
   if (d.routes !== undefined) {
@@ -507,9 +552,11 @@ export function applyDecisions(state, decisions = {}) {
   else for (const id of d.facilities || []) {
     const f = FACILITIES[id];
     if (!f) { errors.push(err('BAD_FACILITY', '沒有這項設施。', 'Unknown facility.')); continue; }
-    if (s.facilities[id]) continue;
+    if (s.facilities[id] || s.facilityOrders.some(o=>o.id===id)) continue;
+    const quote=facilityQuote(s,id);
+    if (quote.readyTurn>=m.turns) { errors.push(err('NO_COMPLETION','本局剩餘時間不足以完工並啟用。','Not enough time left to complete and use this facility.')); continue; }
     if (s.cash < f.cost) { errors.push(err('NO_CASH', '現金不足，不能興建設施。', 'Not enough cash to build.')); continue; }
-    s.cash -= f.cost; s.facilities[id] = { book: f.cost };
+    s.cash -= f.cost; s.facilityOrders.push(quote);
   }
   if (d.buyFuel) {
     const order = fuelOrder(s);
@@ -603,7 +650,7 @@ function costRoute(s, ctx, r, res, pax, rev, transferPax) {
   c.fuel = bh * ac.fuelPerBlockHour * CONST.fuelPriceUsdPerKg * ctx.eff;
   const sizeF = Math.pow(ac.seats.fsc / 168, 0.7);
   c.labour = (bh * ac.crewPerBlockHour * CONST.crewScale * crewMult + (deps * CONST.groundLabourPerDep * sizeF + pax * CONST.groundLabourPerPax) * groundMult) * s.labourMult;
-  c.maintenance = (bh * ac.maintPerBlockHour + deps * ac.maintPerCycle) * (s.facilities?.depot ? 0.7 : 1);
+  c.maintenance = (bh * ac.maintPerBlockHour + deps * ac.maintPerCycle) * (s.facilities?.depot ? 0.7 : 1) * careOf(s,r.type).cost;
   c.airport = (deps * (ac.airportPerDep + ac.navPerKm * d) + pax * CONST.paxCharge) * CONST.airportScale * feeAvg * airportMult + transferPax * CONST.transferHandling * 0.5;
   c.distribution = rev * CONST.distribution[lcc ? 'lcc' : 'fsc'];
   return { c, bh, deps };
@@ -638,7 +685,13 @@ export function simulateTurn(state) {
     if (s.routes[idx].weekly > 1) s.routes[idx].weekly--; else s.routes.splice(idx, 1);
   }
   const routes = s.routes;
+  ctx.readiness=fleetReadiness(s,routes);
   const locals = routes.map(r => evalLocal(s, ctx, r));
+  // Consume prepaid fuel only for departures that actually operate, including technical cancellations.
+  const fuelKg=locals.reduce((n,l,i)=>n+2*l.weeklyEff*ctx.W*blockHoursFor(AIRCRAFT[routes[i].type],l.d)*AIRCRAFT[routes[i].type].fuelPerBlockHour,0);
+  ctx.reserveUsedKg=Math.min(s.reserve?.kg||0,.3*(1-s.hedge.frac)*fuelKg);
+  ctx.eff=(1-s.hedge.frac)*ctx.spot+s.hedge.frac*s.hedge.lock*(1+CONST.hedge.premium);
+  if(fuelKg>0) ctx.eff+=ctx.reserveUsedKg/fuelKg*((s.reserve?.unitPrice||0)/CONST.fuelPriceUsdPerKg-ctx.spot);
   const noRiv = routes.map(r => evalLocal(s, ctx, r, { noRivals: true }));
   // transfers
   const pairs = transferPairs(s, ctx, routes, locals);
@@ -673,6 +726,7 @@ export function simulateTurn(state) {
     const { c, bh, deps } = costRoute(s, ctx, r, l, paxTurn, revenue, xferPax[i] * W);
     // compensation for cancelled flights
     if (ctx.cancel > 0) c.overhead += ctx.cancel * 2 * r.weekly * ac.seats[s.model] * W * 0.78 * ctx.compPerPax;
+    c.overhead += l.technicalCancel * (1-ctx.cancel) * 2*r.weekly*ac.seats[s.model]*W*.78*55;
     return { r, l, i, ac, d, paxWeek, paxTurn, seatsTurn, lf, revenue, c, bh, deps, fareRevLocal, xferTotal, anc, base, ancRev: paxLocalWeek * anc * W };
   });
   // fleet costs
@@ -766,6 +820,7 @@ export function simulateTurn(state) {
       revenue: Math.round(rw.revenue), cost: Math.round(rcost), costs: Object.fromEntries(KEYS.map(k => [k, Math.round(rw.c[k])])), profit: Math.round(profitR),
       rask: askR > 0 ? rw.revenue / askR : 0, cask: askR > 0 ? rcost / askR : 0, avgFare: fin(avgFare), transferPax: Math.round(xferPax[i] * W), transferShare: xshare,
       distanceKm: Math.round(rw.d), blockHours: +blockHoursFor(rw.ac, rw.d).toFixed(2), rivalLoss: fin(rivalLoss), marginRoute: rw.revenue > 1 ? clamp(profitR / rw.revenue, -9.99, 9.99) : 0,
+      technicalCancel:l.technicalCancel, flownWeekly:rw.l.weeklyEff,
       seasonFactor: l.sea, rampFactor: l.rampF, rivals: l.rivals.map(x => ({ id: x.id, weekly: x.weekly, fare: +x.fare.toFixed(2) })), localPax: Math.round(paxLocalTurn), ancillary: Math.round(rw.ancRev), wantPax: Math.round(l.want * W)
     };
     const rs = reason(s, ctx, row, rw);
@@ -792,15 +847,25 @@ export function simulateTurn(state) {
   report.lessons = Object.entries(s.lessons).filter(([, v]) => v.seen === t).map(([k]) => k);
   s.history.push({ turn: t, revenue: company.revenue, profit: company.profit, margin: company.margin, cash: company.cash, lf: company.loadFactor, fuelIndex: company.fuelIndex, aircraft: company.fleet, pax: company.pax, transferPax: company.transferPax });
   updateMarketSupply(s, ctx);
+  s.fleetCondition ||= {};
+  report.operations=Object.entries(ctx.readiness).map(([type,r])=>({type,...r}));
+  for (const [type,r] of Object.entries(ctx.readiness)) s.fleetCondition[type]=r.nextCondition;
   s.turn++;
   const deliveries = (s.fleetOrders || []).filter(o => o.readyTurn <= s.turn);
   for (const o of deliveries) {
+    const previous=fleetCount(s,o.type),condition=s.fleetCondition[o.type]??100;
     const a = addAircraft(s, o.type, o.kind, 1); a.rate = o.rate; a.price = o.price;
-    if (o.kind === 'lease') a.deposit = o.upfront;
+    s.fleetCondition[o.type]=(condition*previous+100)/(previous+1);
+    if (o.kind === 'lease') a.deposit = o.deposit ?? o.upfront;
     else { a.book = o.price; a.loan = a.loan0 = o.price-o.upfront; }
   }
   s.fleetOrders = (s.fleetOrders || []).filter(o => o.readyTurn > s.turn);
   report.deliveries = deliveries.map(o => ({ type:o.type, kind:o.kind }));
+  const completed=(s.facilityOrders||[]).filter(o=>o.readyTurn<=s.turn);
+  s.facilities ||= {};
+  for (const o of completed) s.facilities[o.id]={book:o.cost};
+  s.facilityOrders=(s.facilityOrders||[]).filter(o=>o.readyTurn>s.turn);
+  report.facilityCompletions=completed.map(o=>o.id);
   // game over
   if (s.cash < 0) {
     report.gameOver = { reason: 'bankrupt', zh: `現金見底（${Math.round(s.cash / 1e6)} 百萬美元），無法支付租金、薪水與貸款，公司倒閉。${bankruptWhy(s, company, report)}`, en: `Cash ran out (US$${(s.cash / 1e6).toFixed(1)}M); the company cannot pay leases, wages and loans and goes under.` };
@@ -831,6 +896,7 @@ function reason(s, ctx, row, rw) {
   const dis = ctx.cancel > 0;
   const q = (zh, en, key) => ({ zh, en, key });
   if (dis) return q(`航班被取消了約 ${pct(ctx.cancel)}%，收入少了，租金和薪水照付。`, `About ${pct(ctx.cancel)}% of flights were cancelled; revenue fell while leases and wages did not.`, 'disruption');
+  if (row.technicalCancel>.015) return q(`機隊狀態與密集排班使約 ${pct(row.technicalCancel)}% 航班無法執行，租金照付且要補償旅客。可減班或加強保養。`, `Fleet condition and tight schedules prevented about ${pct(row.technicalCancel)}% of flights. Rent and passenger compensation still apply. Reduce flying or increase care.`, 'maintenance');
   if (loss && seatsHere >= 250 && lf < 0.65) return q(`大飛機只坐了 ${L}%，攤到每個座位的成本太高。`, `The big aircraft is only ${L}% full, so cost per seat is too high.`, 'widebody');
   if (loss && ctx.spot >= 1.2 && hedgeLow && fuelShare > 0.3) return q(`油價漲了 ${spotUp}%，你沒有避險，燃油占了這條線成本的 ${pct(fuelShare)}%。`, `Fuel is up ${spotUp}% and you are not hedged; fuel is ${pct(fuelShare)}% of this route’s cost.`, 'fuel');
   if (loss && row.rivalLoss >= 0.08) return q(`對手降價或增班，你的客人被搶走約 ${pct(row.rivalLoss)}%。`, `A rival cut fares or added flights and took about ${pct(row.rivalLoss)}% of your passengers.`, 'rival');
@@ -900,6 +966,8 @@ export function estimateRoute(state, city, type, weekly, fare = 'mid') {
   if (!CITIES[city] || !AIRCRAFT[type] || city === s.hub) return null;
   const ctx = buildCtx(s, { noise: false });
   const r = { city, type, weekly, fare, age: 9 };
+  const trial=s.routes.filter(x=>x.city!==city).concat(r),need=fleetNeeded(s,trial);
+  ctx.readiness=fleetReadiness(s,trial,{[type]:Math.max(need[type]||1,fleetCount(s,type))});
   const l = evalLocal(s, ctx, r, { ramp: false });
   const ac = AIRCRAFT[type], d = l.d, W = ctx.W;
   const paxWeek = l.paxB + l.paxL, lf = l.seatsWeek > 0 ? paxWeek / l.seatsWeek : 0;
@@ -908,10 +976,11 @@ export function estimateRoute(state, city, type, weekly, fare = 'mid') {
   const anc = ancillaryPerPax(d, s.model);
   const revenue = (l.paxB * base * CONST.segFare.biz * norm + l.paxL * base * CONST.segFare.lei * norm + paxWeek * anc) * W;
   const { c, bh } = costRoute(s, ctx, r, l, paxWeek * W, revenue, 0);
-  const frac = bh / (7 * W * maxHours(ac, s.model));
+  const frac = 2*weekly*blockHoursFor(ac,d) / weeklyHours(s,type);
   c.ownership = ac.leasePerMonth * ctx.mpt * frac;
+  c.overhead += l.technicalCancel*(1-ctx.cancel)*2*weekly*seatsOf(ac,s.model)*W*.78*55;
   const cost = sumCosts(c) + (CONST.overhead.perAircraft * ctx.mpt * frac);
-  return { pax: Math.round(paxWeek * W), seats: Math.round(l.seatsWeek * W), lf, revenue: Math.round(revenue), cost: Math.round(cost), profit: Math.round(revenue - cost), aircraftFraction: frac, marketPaxPerWeek: Math.round(l.M), costs: Object.fromEntries(KEYS.map(k => [k, Math.round(c[k])])) };
+  return { pax: Math.round(paxWeek * W), seats: Math.round(l.seatsWeek * W), lf, revenue: Math.round(revenue), cost: Math.round(cost), profit: Math.round(revenue - cost), technicalCancel:l.technicalCancel, aircraftFraction: frac, marketPaxPerWeek: Math.round(l.M), costs: Object.fromEntries(KEYS.map(k => [k, Math.round(c[k])])) };
 }
 
 // ============================================================ end report
@@ -943,7 +1012,12 @@ export function careerBoard(state) {
       if (!best || profit > best.profit) best = { city, profit, pax: e.pax, plan: { city, type, weekly, fare } };
       if (rivalSeats > 0 && weekly * 2 * AIRCRAFT[type].seats[state.model] >= rivalSeats * .7 && (!rivalBest || profit > rivalBest.profit)) rivalBest = { profit, plan: { city, type, weekly, fare } };
     }
-    return { ...best, rivalSeats, rivalPlan: rivalBest?.profit > 0 ? rivalBest.plan : null };
+    const waitTurns=plan=>{
+      if(!plan||routeCapacity(state,state.routes.filter(r=>r.city!==city).concat(plan)).fits)return 0;
+      const arrivals=(state.fleetOrders||[]).filter(o=>o.type===plan.type).map(o=>o.readyTurn-state.turn);
+      return arrivals.length?Math.max(...arrivals):aircraftQuote(state,plan.type).deliveryTurns;
+    };
+    return { ...best, waitTurns:waitTurns(best?.plan), rivalWaitTurns:waitTurns(rivalBest?.plan), rivalSeats, rivalPlan: rivalBest?.profit > 0 ? rivalBest.plan : null };
   }).filter(c=>c.plan).sort((a, b) => b.profit - a.profit);
   const ready = candidates.filter(c=>c.profit>0&&routeCapacity(state,state.routes.filter(r=>r.city!==c.city).concat(c.plan)).fits);
   return missionOffers(state, ready.length>=2 ? ready : candidates);
@@ -992,6 +1066,7 @@ export function deserialize(str) {
   if (!o || o.v !== 1 || !MODES[o.mode] || !Object.hasOwn(CITIES, o.hub)) throw new Error('bad save');
   o.facilities ||= {}; o.marketSupply ||= {}; o.reserve ||= { kg: 0, unitPrice: 0 }; o.scenario ||= 'free';
   o.fleetOrders ||= []; o.nextOrder ||= 1; o.orderTurn ??= -1; o.orderedThisTurn ??= 0;
+  o.maintenance ||= {}; o.fleetCondition ||= {}; o.facilityOrders ||= [];
   o.marketRivalBase ||= newGame({ mode: o.mode, hub: o.hub, seed: o.seed }).marketRivalBase;
   o.career = readCareer(o);
   return o;

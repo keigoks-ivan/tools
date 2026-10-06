@@ -45,7 +45,7 @@ async def year(browser,width,locale):
     assert await page.locator('[data-lease="MQ-350"]').is_disabled()
     await page.locator('[data-fleet-model="MQ-350"] [data-cancel-order]').click()
     assert (await state(page))['orders']==1 and (await state(page))['limits']['ordersLeft']==0
-    assert (await state(page))['cash']==before['cash']-800000
+    assert (await state(page))['cash']==before['cash']-800000-285000
     # Save/reload retains the committed deposit, queue and spent quota.
     await page.reload();await page.locator('[data-continue=year]').click();await core.answer_events(page)
     assert (await state(page))['limits']['ordersLeft']==0
@@ -58,19 +58,23 @@ async def year(browser,width,locale):
     frozen=await page.evaluate('JSON.stringify(__tq.app.active.report)')
     await page.locator('[data-dock=fleet]').click();assert await page.locator('[data-lease="MQ-320"]').is_disabled()
     assert frozen==await page.evaluate('JSON.stringify(__tq.app.active.report)')
+    await turn(page);assert (await state(page))['fleet']==2 and (await state(page))['orders']==1
     await turn(page);assert (await state(page))['fleet']==3 and (await state(page))['orders']==0
     # Physical capacity, including pending aircraft, is binding even with money left.
     await page.locator('[data-dock=fleet]').click()
     await page.locator('[data-lease="MQ-320"]').click();await page.locator('[data-lease="MQ-320"]').click()
+    await turn(page);assert (await state(page))['fleet']==3
     await turn(page);assert (await state(page))['fleet']==5
     await page.locator('[data-dock=fleet]').click();await page.locator('[data-lease="MQ-320"]').click()
     assert (await state(page))['limits']['committed']==6
     assert await page.locator('[data-lease="MQ-350"]').is_disabled()
-    await turn(page);await page.locator('[data-dock=fleet]').click()
+    await turn(page);await turn(page);await page.locator('[data-dock=fleet]').click()
     assert await page.locator('[data-lease="MQ-320"]').is_disabled()
     await page.screenshot(path=str(OUT/f'capacity-{width}-{locale}.png'))
     await page.locator('[data-dock=hub]').click();await page.locator('[data-facility=depot]').click()
     assert (await state(page))['limits']['maxFleet']==6
+    await turn(page);assert (await state(page))['limits']['maxFleet']==6
+    await turn(page);assert (await state(page))['limits']['maxFleet']==6
     await turn(page);await page.locator('[data-dock=fleet]').click()
     assert (await state(page))['limits']['maxFleet']==10
     assert await page.locator('[data-lease="MQ-320"]').is_enabled()
@@ -88,6 +92,8 @@ async def decade(browser):
     await page.locator('[data-dock=fleet]').click();before=await state(page)
     await page.locator('[data-buy="MQ-350"]').click();ordered=await state(page)
     assert ordered['orders']==1 and ordered['fleet']==3 and ordered['cash']==before['cash']-28000000
+    await turn(page);assert (await state(page))['fleet']==3
+    await turn(page);assert (await state(page))['fleet']==3
     await turn(page);assert (await state(page))['fleet']==4
     assert await page.evaluate('__tq.app.state.fleet.some(a=>a.type==="MQ-350"&&a.kind==="own"&&a.loan>0)')
     await page.locator('[data-dock=fleet]').click();await page.locator('[data-sell="MQ-350"]').click()

@@ -39,10 +39,10 @@ export function missionOffers(state, candidates) {
   const viable = candidates.filter(c => c.profit > 0 && c.pax > 0);
   const undiscovered = viable.filter(c => !career.stamps[c.city]);
   const offers = [], explorer = choose(undiscovered, state);
-  if (explorer) offers.push(make('explore', { city: explorer.city, plan: explorer.plan, targetPax: Math.max(100, Math.floor(explorer.pax * .65 / 100) * 100), xp: 160 }));
+  if (explorer) offers.push(make('explore', { city: explorer.city, plan: explorer.plan, turns:Math.min(turns+(explorer.waitTurns||0),MODES[state.mode].turns-state.turn), targetPax: Math.max(100, Math.floor(explorer.pax * .65 / 100) * 100), xp: 160 }));
   const competitors = viable.filter(c => c.rivalSeats > 0 && c.rivalPlan);
   const rival = choose(competitors, state, 3);
-  if (rival) offers.push(make('rival', { city: rival.city, plan: rival.rivalPlan, targetSeats: Math.ceil(rival.rivalSeats * .7), xp: 180 }));
+  if (rival) offers.push(make('rival', { city: rival.city, plan: rival.rivalPlan, turns:Math.min(turns+(rival.rivalWaitTurns||0),MODES[state.mode].turns-state.turn), targetSeats: Math.ceil(rival.rivalSeats * .7), xp: 180 }));
   const last = state.history?.at(-1);
   if (last?.profit < 0) {
     offers.push(make('recovery', { targetLoss: Math.ceil(Math.max(-last.profit * .5, CONST.overhead.base * MODES[state.mode].monthsPerTurn)), xp: 140 }));
@@ -52,7 +52,7 @@ export function missionOffers(state, candidates) {
   // A second destination keeps the board useful when no rival market is viable.
   if (offers.length < 3) {
     const second = choose(undiscovered.filter(c => c.city !== explorer?.city), state, 5);
-    if (second) offers.push(make('explore', { city: second.city, plan: second.plan, targetPax: Math.max(100, Math.floor(second.pax * .65 / 100) * 100), xp: 160 }));
+    if (second) offers.push(make('explore', { city: second.city, plan: second.plan, turns:Math.min(turns+(second.waitTurns||0),MODES[state.mode].turns-state.turn), targetPax: Math.max(100, Math.floor(second.pax * .65 / 100) * 100), xp: 160 }));
   }
   return offers.slice(0, 3);
 }

@@ -31,7 +31,7 @@ async def check(browser,name,width,height,locale):
     await page.wait_for_timeout(220);await page.screenshot(path=str(OUT/f'{name}-fleet.png'))
     for city,n in [('HKG',7),('NRT',3)]:
         await fleet.destination(page,city);await page.locator('[data-type="MQ-320"]').click();await frequency(page,n);await page.locator('#open').click()
-    await page.locator('#hud-fleet').click();await page.locator('[data-lease="MQ-350"]').click();await page.locator('[data-buy="MQ-350"]').click()
+    await page.locator('#hud-fleet').click();await page.locator('[data-express="MQ-350"]').click();await page.locator('[data-express="MQ-350"]').click()
     card=page.locator('[data-fleet-model="MQ-350"]')
     assert await card.locator('[data-cancel-order]').count()==2
     assert await card.locator('[data-fleet-count]').inner_text()==('0\n現有架數' if locale=='zh' else '0\nin fleet')

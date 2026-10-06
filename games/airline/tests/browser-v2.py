@@ -13,9 +13,10 @@ async def decisions(page, kind='sensible'):
     return await page.evaluate('''async kind => {
         if(!window.testBots){const b=await import('./bots.mjs');window.testBots={sensible:b.sensibleBot(),naive:b.naiveBot()};}
         const a=__tq.app,s=a.state,d=testBots[kind](s,a.report);
-        const ordered=__tq.B.applyDecisions(s,{routes:d.routes||s.routes,fleet:d.fleet||{},eventChoices:d.eventChoices,businessModel:d.businessModel});
+        const ordered=__tq.B.applyDecisions(s,{routes:d.routes||s.routes,fleet:d.fleet||{},eventChoices:d.eventChoices,businessModel:d.businessModel,maintenance:d.maintenance});
         if(ordered.errors.length)throw new Error(JSON.stringify(ordered.errors));
         a.state=ordered.state;
+        if(d.maintenance)a.draft.maintenance=d.maintenance;
         a.draft.routes=new Map((d.routes||s.routes).map(r=>[r.city,r]));
         a.draft.eventChoices={...a.draft.eventChoices,...(d.eventChoices||{})};
         if(d.hedge!==undefined)a.draft.hedge=d.hedge;

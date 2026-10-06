@@ -14,14 +14,14 @@ function settle(state, report) {
 function planFleet(s, routes) {
   const needed=M.fleetNeeded(s,routes),have=Object.fromEntries(Object.keys(M.AIRCRAFT).map(t=>[t,s.fleet.filter(a=>a.type===t).length]));
   let left=M.fleetLimits(s).ordersLeft;const lease={};
-  for(const [t,n] of Object.entries(needed)){const count=Math.min(Math.max(0,n-have[t]),left);if(count){lease[t]=count;left-=count;}}
+  for(const [t,n] of Object.entries(needed)){const count=Math.min(Math.max(0,n-have[t]-(s.fleetOrders||[]).filter(o=>o.type===t).length),left);if(count){lease[t]=count;left-=count;}}
   return { lease, returnLease:Object.fromEntries(Object.entries(have).filter(([t,n])=>n>(needed[t]||0)).map(([t,n])=>[t,n-(needed[t]||0)])) };
 }
 test('dispatch boards are deterministic, read only and use legal reachable schedules at every hub',()=>{
   for(const mode of Object.keys(MODES))for(const hub of HUBS){
     const s=M.newGame({mode,hub,seed:1}),before=M.serialize(s),board=M.careerBoard(s);
     assert.equal(board.length,3,`${mode}/${hub}`);assert.deepEqual(board,M.careerBoard(s));assert.equal(M.serialize(s),before);
-    for(const m of board){assert.ok(m.turns>0&&m.turns<=3);if(m.plan){const o=M.routeOptions(s,m.city);assert.ok(o.eligibleTypes.includes(m.plan.type));assert.ok(m.plan.weekly<=o.maxWeekly);assert.ok(M.estimateRoute(s,m.city,m.plan.type,m.plan.weekly,m.plan.fare).profit>0);}}
+    for(const m of board){assert.ok(m.turns>0&&m.turns<=3+(m.plan?M.aircraftQuote(s,m.plan.type).deliveryTurns:0));if(m.plan){const o=M.routeOptions(s,m.city);assert.ok(o.eligibleTypes.includes(m.plan.type));assert.ok(m.plan.weekly<=o.maxWeekly);assert.ok(M.estimateRoute(s,m.city,m.plan.type,m.plan.weekly,m.plan.fare).profit>0);}}
     const late={...s,turn:MODES[mode].turns-1};assert.ok(M.careerBoard(late).every(m=>m.turns===1));
   }
 });
@@ -94,7 +94,7 @@ test('recommended first-flight schedules can complete the contract within its de
   for(const mode of Object.keys(MODES))for(const hub of HUBS){
     let s=M.newGame({mode,hub,seed:1});const offer=M.careerBoard(s).find(m=>m.kind==='explore');
     s=M.applyDecisions(s,{mission:offer.id}).state;
-    for(let i=0;i<3&&s.career.active;i++){
+    for(let i=0;i<offer.turns&&s.career.active;i++){
       const wanted=[offer.plan],fleet=planFleet(s,wanted);
       const routes=M.routeCapacity(s,wanted).fits?wanted:[];
       // Keep existing aircraft during the waiting turn; this contract can still finish before its deadline.

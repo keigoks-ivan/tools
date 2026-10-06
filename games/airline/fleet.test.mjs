@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import * as M from './model.mjs';
 
 const order = (s,type='MQ-320',n=1) => M.applyDecisions(s,{fleet:{lease:{[type]:n}}});
+const delivered = s => { let out; do { out=M.simulateTurn(s);s=out.state; } while(s.fleetOrders.length && !s.finished && !s.gameOver);return out; };
 const codes = out => out.errors.map(e=>e.code);
 test('availability matches shared scheduling hours, excludes pending orders and follows business model',()=>{
   const s=M.newGame(),before=M.serialize(s),type='MQ-320';
@@ -25,11 +26,11 @@ test('lease deposit reserves cash immediately; only delivered aircraft can fly',
   assert.equal(out.state.fleet.length,2);assert.equal(out.state.fleetOrders.length,1);
   const routes=[{city:'LAX',type:'MQ-350',weekly:1,fare:'mid'}];
   assert.ok(codes(M.applyDecisions(out.state,{routes})).includes('INSUFFICIENT_FLEET'));
-  const delivered=M.simulateTurn(out.state);
-  assert.equal(delivered.report.company.costs.ownership,800000);
-  assert.equal(delivered.state.fleet.length,3);assert.equal(delivered.state.fleetOrders.length,0);
-  assert.equal(delivered.state.fleet.at(-1).deposit,q.upfront);
-  assert.deepEqual(M.applyDecisions(delivered.state,{routes}).errors,[]);
+  const arrival=delivered(out.state);
+  assert.equal(arrival.report.company.costs.ownership,800000);
+  assert.equal(arrival.state.fleet.length,3);assert.equal(arrival.state.fleetOrders.length,0);
+  assert.equal(arrival.state.fleet.at(-1).deposit,q.upfront);
+  assert.deepEqual(M.applyDecisions(arrival.state,{routes}).errors,[]);
   assert.equal(M.serialize(s),before);
 });
 test('quota spans separate decisions, survives cancellation and save, resets only on settlement',()=>{
@@ -39,7 +40,7 @@ test('quota spans separate decisions, survives cancellation and save, resets onl
     assert.ok(codes(order(M.deserialize(M.serialize(s)))).includes('ORDER_LIMIT'));
     const cash=s.cash,id=s.fleetOrders[0].id,upfront=s.fleetOrders[0].upfront;
     const cancelled=M.applyDecisions(s,{fleet:{cancelOrders:[id]}});
-    assert.deepEqual(cancelled.errors,[]);assert.equal(cancelled.state.cash,cash+upfront);
+    assert.deepEqual(cancelled.errors,[]);assert.equal(cancelled.state.cash,cash+upfront-s.fleetOrders[0].cancelFee);
     assert.equal(M.fleetLimits(cancelled.state).ordersLeft,0);
     assert.ok(codes(order(cancelled.state)).includes('ORDER_LIMIT'));
     s=M.simulateTurn(cancelled.state).state;assert.equal(M.fleetLimits(s).ordersLeft,limits.ordersPerTurn);
@@ -51,8 +52,9 @@ test('pending orders consume fleet capacity; a completed depot expands both capa
   assert.equal(M.fleetLimits(s).committed,6);assert.ok(codes(order(s)).includes('FLEET_LIMIT'));
   s=M.simulateTurn(s).state;assert.ok(codes(order(s)).includes('FLEET_LIMIT'));
   const built=M.applyDecisions(s,{facilities:['depot']});assert.deepEqual(built.errors,[]);
-  assert.equal(M.fleetLimits(built.state).maxFleet,10);assert.equal(M.fleetLimits(built.state).maxRoutes,12);
-  assert.deepEqual(order(built.state).errors,[]);
+  const completed=M.simulateTurn(M.simulateTurn(M.simulateTurn(built.state).state).state).state;
+  assert.equal(M.fleetLimits(built.state).maxFleet,6);assert.equal(M.fleetLimits(completed).maxFleet,10);assert.equal(M.fleetLimits(completed).maxRoutes,12);
+  assert.deepEqual(order(completed).errors,[]);
   const d=M.newGame({mode:'decade'});assert.equal(M.fleetLimits(d).maxFleet,10);
   assert.equal(M.fleetLimits({...d,facilities:{depot:1}}).maxFleet,16);
 });
@@ -71,20 +73,20 @@ test('purchases commit down payment now; loan and depreciation start after deliv
   const s=M.newGame({mode:'decade'}),q=M.aircraftQuote(s,'MQ-320','own');
   const o=M.applyDecisions(s,{fleet:{buy:{'MQ-320':1}}});assert.deepEqual(o.errors,[]);
   assert.equal(o.state.cash,s.cash-q.upfront);assert.equal(o.state.fleet.filter(a=>a.kind==='own').length,0);
-  const delivered=M.simulateTurn(o.state);assert.equal(delivered.report.company.costs.interest,0);
-  const own=delivered.state.fleet.find(a=>a.kind==='own');assert.equal(own.loan,q.price-q.upfront);assert.equal(own.book,q.price);
-  const running=M.simulateTurn(delivered.state);assert.ok(running.report.company.costs.interest>0);
+  const arrival=delivered(o.state);assert.equal(arrival.report.company.costs.interest,0);
+  const own=arrival.state.fleet.find(a=>a.kind==='own');assert.equal(own.loan,q.price-q.upfront);assert.equal(own.book,q.price);
+  const running=M.simulateTurn(arrival.state);assert.ok(running.report.company.costs.interest>0);
   assert.ok(running.state.fleet.find(a=>a.kind==='own').book<q.price);
   const broke=order({...s,cash:1});assert.ok(codes(broke).includes('NO_CASH'));assert.equal(broke.state.cash,1);assert.equal(broke.state.fleetOrders.length,0);
 });
 test('return refunds exactly the paid deposit; cancellation cannot mint cash',()=>{
-  const s=M.simulateTurn(order(M.newGame(),'MQ-350').state).state,a=s.fleet.at(-1);
+  const s=delivered(order(M.newGame(),'MQ-350').state).state,a=s.fleet.at(-1);
   const returned=M.applyDecisions(s,{fleet:{returnLease:{'MQ-350':1}}});assert.deepEqual(returned.errors,[]);
   assert.equal(returned.state.cash,s.cash+a.deposit);assert.equal(returned.state.pending.ownershipCash,2*a.rate);
   const id=order(M.newGame()).state.fleetOrders[0].id;
   const queued=order(M.newGame()).state,cash=queued.cash,upfront=queued.fleetOrders[0].upfront;
   const cancelled=M.applyDecisions(queued,{fleet:{cancelOrders:[id,id]}});
-  assert.ok(codes(cancelled).includes('BAD_ORDER'));assert.equal(cancelled.state.cash,cash+upfront);
+  assert.ok(codes(cancelled).includes('BAD_ORDER'));assert.equal(cancelled.state.cash,cash+upfront-queued.fleetOrders[0].cancelFee);
 });
 test('legacy saves retain their fleet and routes; above-cap fleets cannot keep expanding',()=>{
   const legacy=M.newGame();delete legacy.fleetOrders;delete legacy.nextOrder;delete legacy.orderTurn;delete legacy.orderedThisTurn;

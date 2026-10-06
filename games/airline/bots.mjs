@@ -1,5 +1,5 @@
 // Scripted strategies used by the tests and for calibration. Pure functions of (state, lastReport) -> decisions.
-import { newGame, applyDecisions, simulateTurn, pendingEvents, fleetNeeded, estimateRoute, routeOptions, endReport, fleetLimits, aircraftQuote, routeCapacity } from './model.mjs';
+import { newGame, applyDecisions, simulateTurn, pendingEvents, fleetNeeded, estimateRoute, routeOptions, endReport, fleetLimits, aircraftQuote, routeCapacity, fleetReadiness } from './model.mjs';
 import { CITIES, AIRCRAFT, MODES, EVENTS } from './data.mjs';
 
 const FREQS = [1, 2, 3, 4, 5, 7, 10, 14, 21, 28];
@@ -14,10 +14,12 @@ function candidates(state, { minLF = 0.7, types = null, minMargin = 0.07 } = {})
       if (types && !types.includes(ty)) continue;
       for (const w of FREQS) {
         if (w > o.maxWeekly) continue;
-        const e = estimateRoute(state, id, ty, w, 'mid'); if (!e) continue;
-        if (e.lf < minLF || (minMargin > 0 && e.profit <= 0) || e.profit / Math.max(1, e.revenue) < minMargin) continue;
-        const score = e.profit / Math.max(0.05, e.aircraftFraction);
-        if (!best || score > best.score) best = { city: id, type: ty, weekly: w, fare: 'mid', score, frac: e.aircraftFraction, e };
+        for (const fare of ['mid','high']) {
+          const e = estimateRoute(state, id, ty, w, fare); if (!e) continue;
+          if (e.lf < minLF || (minMargin > 0 && e.profit <= 0) || e.profit / Math.max(1, e.revenue) < minMargin) continue;
+          const score = e.profit / Math.max(0.05, e.aircraftFraction);
+          if (!best || score > best.score) best = { city: id, type: ty, weekly: w, fare, score, frac: e.aircraftFraction, e };
+        }
       }
     }
     if (best) out.push(best);
@@ -45,7 +47,7 @@ function networkPlanner({ model = 'fsc', budget = null, hedge = 0.5, minLF = 0.6
   return function (state, last) {
     const m = MODES[state.mode];
     if (state.turn === 0) mem = { planTurn: -99 };
-    const bud = budget ?? (buy ? 4 : state.mode === 'year' ? 5 : 9);
+    const bud = budget ?? (buy ? 4 : state.mode === 'year' ? 3 : 9);
     const every = state.mode === 'year' ? 6 : 6;
     const dec = { routes: [], fleet: {}, eventChoices: {} };
     for (const e of pendingEvents(state)) {
@@ -85,7 +87,7 @@ function networkPlanner({ model = 'fsc', budget = null, hedge = 0.5, minLF = 0.6
         for (const w of FREQS) {
           if (w > o.maxWeekly) break;
           // A low-cost operator must compare fares too; its base fare is already discounted.
-          for (const fare of st.model === 'lcc' ? ['mid', 'high'] : ['mid']) {
+          for (const fare of st.model==='lcc'||state.mode==='year'?['mid','high']:['mid']) {
             const e = estimateRoute(st, id, ty, w, fare); if (e) lv.push({ w, fare, e });
           }
         }
@@ -147,7 +149,7 @@ function networkPlanner({ model = 'fsc', budget = null, hedge = 0.5, minLF = 0.6
   };
 }
 
-// Schedule only delivered aircraft; orders reserve capacity and cash for next turn.
+// Schedule only delivered aircraft; pending orders reserve capacity and cash.
 function fitSchedules(state, desired) {
   const routes = [], m = MODES[state.mode];
   const fits = trial => routeCapacity(state,trial).fits && (!m.slots || !CITIES[state.hub].slotLimited || trial.reduce((n,r)=>n+r.weekly,0)<=m.hubSlotCap);
@@ -162,11 +164,13 @@ function orderMoves(state, target, routes, buy = false) {
   for (const [type,n] of Object.entries(need)) {
     const have=state.fleet.filter(a=>a.type===type).length+(state.fleetOrders||[]).filter(a=>a.type===type).length;
     const kind=buy&&MODES[state.mode].buy?'own':'lease',q=aircraftQuote(state,type,kind);
-    const count=state.turn>=MODES[state.mode].turns-1?0:Math.max(0,Math.min(n-have,left,Math.floor(cash/q.upfront)));
+    const count=q.readyTurn>=MODES[state.mode].turns?0:Math.max(0,Math.min(n-have,left,Math.floor(cash/q.upfront)));
     if(count){(kind==='own'?purchase:lease)[type]=count;left-=count;cash-=count*q.upfront;}
   }
   for(const type of new Set(state.fleet.map(a=>a.type))){
-    const have=state.fleet.filter(a=>a.type===type),spare=Math.max(0,have.length-Math.max(need[type]||0,used[type]||0));
+    const crisis=state.mods.some(x=>x.kind==='demand'&&x.seg==='all'&&x.seq[state.turn-x.start]<.7);
+    const reserveType=state.fleet.slice().sort((a,b)=>AIRCRAFT[b.type].rangeKm-AIRCRAFT[a.type].rangeKm)[0]?.type;
+    const have=state.fleet.filter(a=>a.type===type),spare=Math.max(0,have.length-Math.max(need[type]||0,used[type]||0,crisis&&type===reserveType?1:0));
     const leased=have.filter(a=>a.kind==='lease').length;
     if(spare){ret[type]=Math.min(spare,leased);if(spare>leased)sell[type]=spare-leased;}
   }
@@ -176,19 +180,21 @@ export function sensibleBot(options = {}) {
   const planner=networkPlanner(options);let target=[];
   return (state,last) => {
     if(!state.turn)target=[];
-    const d=planner({...state,routes:target},last),st={...state,model:d.businessModel||d.eventChoices['a-model']||d.eventChoices['b-model']||state.model};
+    const maintenance=Object.fromEntries(Object.entries(fleetReadiness(state)).map(([type,r])=>[type,r.condition<85||(r.policy==='care'&&r.condition<96)?'care':'balanced']));
+    const d=planner({...state,routes:target,maintenance},last),st={...state,maintenance,model:d.businessModel||d.eventChoices['a-model']||d.eventChoices['b-model']||state.model};
     target=d.routes.slice(0,fleetLimits(st).maxRoutes);
     // Mixed aircraft types must still fit the physical fleet cap, including rounded spare hours.
-    while(Object.values(fleetNeeded(st,target)).reduce((n,v)=>n+v,0)>fleetLimits(st).maxFleet) target=target.slice(0,-1);
+    const physicalBudget=Math.min(fleetLimits(st).maxFleet,options.buy?(options.budget??4):fleetLimits(st).maxFleet);
+    while(Object.values(fleetNeeded(st,target)).reduce((n,v)=>n+v,0)>physicalBudget) target=target.slice(0,-1);
     const routes=fitSchedules(st,target);
     // Keep the starting aircraft productive while other types await delivery.
     const ready=[...new Set(state.fleet.map(a=>a.type))];
     if(state.turn<3)for(const r of state.routes.filter(r=>ready.includes(r.type)).concat(candidates(st,{types:ready,minLF:options.minLF??.62,minMargin:0}).sort((a,b)=>b.score-a.score))){
       if(routes.some(x=>x.city===r.city))continue;
       const fit=fitSchedules(st,routes.concat(r));if(fit.length>routes.length)routes.push(fit.at(-1));
-      if(routes.length>=fleetLimits(st).maxRoutes)break;
+      if(routes.length>=Math.min(fleetLimits(st).maxRoutes,state.mode==='year'?5:8))break;
     }
-    return {...d,routes,fleet:orderMoves(st,target,routes,options.buy)};
+    return {...d,maintenance,routes,fleet:orderMoves(st,target,routes,options.buy)};
   };
 }
 
@@ -224,12 +230,12 @@ export function summarise(res) {
   return { tx: px ? tx / px : 0, margin: rev > 0 ? prof / rev : -1, cash: res.state.cash, lf: ask ? rpk / ask : 0, shares: Object.fromEntries(Object.entries(costs).map(([k, v]) => [k, ct ? v / ct : 0])), revenue: rev, profit: prof, turns: R.length, bankrupt: !!res.state.gameOver, rask: ask ? rev / ask : 0, cask: ask ? ct / ask : 0 };
 }
 
-// Holds the network chosen by `inner` over its first three delivery turns for the rest of the game (no adaptation), so tests can compare one event against a control run.
+// Holds the network chosen by `inner` over its first five delivery turns for the rest of the game (no adaptation), so tests can compare one event against a control run.
 export function frozen(inner, { hedgeFrom = null, hedge = 0 } = {}) {
   let first = null;
   return function (state, last) {
-    if (state.turn === 0 || state.turn < 3) first = inner(state, last);
-    const dec = { routes: first.routes, fleet: state.turn < 3 ? first.fleet : {}, eventChoices: {} };
+    if (state.turn === 0 || state.turn < 5) first = inner(state, last);
+    const dec = { routes: first.routes, fleet: state.turn < 5 ? first.fleet : {}, eventChoices: {} };
     if (state.turn === 0 && first.businessModel) dec.businessModel = first.businessModel;
     if (hedge > 0 && state.turn >= (hedgeFrom ?? MODES[state.mode].hedgeFromTurn) && state.hedge.frac < hedge) dec.hedge = hedge;
     return dec;
