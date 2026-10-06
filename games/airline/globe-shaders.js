@@ -37,26 +37,31 @@ void main(){
 }`;
 
 
-// Twilight strategy map. Real coastlines and relief stay readable under flight traffic.
+// Porcelain adventure globe. Real coastlines remain legible beneath sampled flights.
 const FRAG_GAME = `
 uniform sampler2D bm; uniform sampler2D mask; uniform vec3 sun; uniform vec3 camPos;
 varying vec2 vUv; varying vec3 vN; varying vec3 vW;
 void main(){
   vec3 m=texture2D(mask,vUv).rgb, terrain=texture2D(bm,vUv).rgb;
   float lum=dot(terrain,vec3(.3,.59,.11)), landA=smoothstep(.35,.65,m.r);
-  vec3 ocean=mix(vec3(.055,.22,.39),vec3(.10,.43,.57),smoothstep(.10,.4,lum));
+  vec3 ocean=mix(vec3(.09,.26,.50),vec3(.13,.63,.69),smoothstep(.10,.4,lum));
   vec2 g=abs(fract(vec2(vUv.x*36.,vUv.y*18.))-.5);
   float grid=1.-smoothstep(0.,.007,min(g.x*.5,g.y));
   ocean=mix(ocean,vec3(.30,.65,.75),grid*.18);
-  vec3 land=mix(vec3(.40,.66,.57),vec3(.82,.84,.66),smoothstep(.18,.65,lum));
-  land*=.83+lum*.42;
+  vec3 land=mix(vec3(.37,.65,.54),vec3(.93,.81,.57),smoothstep(.18,.65,lum));
+  land=mix(land,vec3(.89,.91,.94),smoothstep(.72,.94,lum)*.55);
+  land*=.92+lum*.32;
   vec3 col=mix(ocean,land,landA);
-  col=mix(col,vec3(.70,.90,.80),m.g*.42);
+  col=mix(col,vec3(.77,.96,.82),m.g*.50);
   col=mix(col,vec3(.35,.59,.55),m.b*.25*landA);
   vec3 n=normalize(vN);float day=smoothstep(-.4,1.,dot(n,normalize(sun)));
-  col*=.58+.45*day;
+  col*=.62+.42*day;
+  // Still, locally calculated cloud wisps cost no texture or extra draw call.
+  float cloud=sin(vUv.x*83.+sin(vUv.y*31.)*3.)*sin(vUv.y*61.+sin(vUv.x*17.)*2.);
+  cloud=smoothstep(.68,.95,cloud)*(1.-smoothstep(.32,.49,abs(vUv.y-.5)));
+  col=mix(col,vec3(.93,.94,.98),cloud*.20*(.5+day*.5));
   float rim=pow(1.-max(dot(n,normalize(camPos-vW)),0.),3.);
-  col=mix(col,vec3(.28,.67,.85),rim*.68);
+  col=mix(col,vec3(.48,.66,.92),rim*.68);
   gl_FragColor=vec4(col,1.);
 }`;
 

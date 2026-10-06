@@ -1,6 +1,6 @@
 // Historical flight-leg traffic and a fitted proxy for pairs without observations.
 // Annual totals include both directions; missing observations never mean zero demand.
-import { OBSERVED_MARKETS, DEMAND_FIT } from './demand-data.mjs?v=21';
+import { OBSERVED_MARKETS, DEMAND_FIT } from './demand-data.mjs?v=22';
 
 export const DEMAND_SOURCES = {
   'tw-caa': { zh: '台灣民航局', en: 'Taiwan CAA', url: 'https://www.caa.gov.tw/article.aspx?a=1746&lang=1' },

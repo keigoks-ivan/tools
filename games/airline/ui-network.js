@@ -1,10 +1,10 @@
 // Lazy 3D renderer. The original SVG map remains a complete no-WebGL fallback.
-import { tr } from './ui-util.js?v=21';
+import { tr } from './ui-util.js?v=22';
 export function createNetwork(box, options) {
   let live = null, dead = false, current = {}, time = { elapsed: 0, speed: 0 };
   const loading = document.createElement('div'); loading.className = 'globe-loading';
   loading.textContent = tr('正在準備航網…', 'Preparing your network…'); box.append(loading);
-  const ready = import('./ui-globe.js?v=21').then(async mod => {
+  const ready = import('./ui-globe.js?v=22').then(async mod => {
     if (dead) return;
     live = await mod.createGlobe(box, options);
     if (dead) { live.destroy(); return; }
@@ -12,7 +12,7 @@ export function createNetwork(box, options) {
   }).catch(async () => {
     if (live) live.destroy();
     if (dead) return;
-    const { createMap } = await import('./ui-map.js?v=21');
+    const { createMap } = await import('./ui-map.js?v=22');
     if (dead) return;
     live = createMap(box, options); live.update(current); loading.remove();
     const note = document.createElement('div'); note.className = 'map-fallback';

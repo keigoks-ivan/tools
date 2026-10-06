@@ -1,8 +1,9 @@
 // Original miniature airport world. The traffic is a sampled illustration;
 // the deterministic economic model remains the only source of accounts.
-import { AIRCRAFT } from './data.mjs?v=21';
-import { tr, pick } from './ui-util.js?v=21';
-import { buildAirportArt, aircraftGeometry } from './ui-airport-art.js?v=21';
+import { gameIcon } from './ui-premium-art.js?v=22';
+import { AIRCRAFT } from './data.mjs?v=22';
+import { tr, pick } from './ui-util.js?v=22';
+import { buildAirportArt, aircraftGeometry } from './ui-airport-art.js?v=22';
 
 export function createAirport(box, { hubId = 'TPE', onSelect = () => {}, preview = false, still = false } = {}) {
   let dead = false, live = null, current = {}, time = { elapsed: 0, speed: 0 };
@@ -12,11 +13,11 @@ export function createAirport(box, { hubId = 'TPE', onSelect = () => {}, preview
   function fallback() {
     if(dead)return;
     live?.destroy();
-    world.innerHTML = `<picture class="airport-fallback"><source media="(max-width:700px)" srcset="./art/v3/airport-dusk-mobile.webp?v=21"><img src="./art/v3/airport-dusk.webp?v=21" alt="${tr('天青航空機場場景','Skyglaze airport scene')}"></picture><p class="world-fallback-note">${tr('輕量機場 · 所有操作都能使用','Lightweight airport · all controls available')}</p>`;
+    world.innerHTML = `<picture class="airport-fallback"><source media="(max-width:700px)" srcset="./art/v3/airport-dusk-mobile.webp?v=22"><img src="./art/v3/airport-dusk.webp?v=22" alt="${tr('天青航空機場場景','Skyglaze airport scene')}"></picture><p class="world-fallback-note">${tr('輕量機場 · 所有操作都能使用','Lightweight airport · all controls available')}</p>`;
     const labels = [['terminal', '✈', '安排航線', 'Plan routes', 47, 41], ['fleet', '◒', '查看機隊', 'Fleet', 40, 70], ['depot', '⚒', '維修庫', 'Maintenance', 23, 52], ['lounge', '★', '貴賓室', 'Lounge', 66, 46], ['tank', '◉', '儲油槽', 'Fuel tanks', 81, 57], ['tower', '⚑', '任務塔台', 'Dispatch', 27, 28]];
     if(!preview)for (const [id, icon, zh, en, x, y] of labels) {
       const b = document.createElement('button'); b.type = 'button'; b.className = 'world-hotspot fallback-hotspot'; b.dataset.world = id;
-      b.style.left = `${x}%`; b.style.top = `${y}%`; b.innerHTML = `<i>${icon}</i><span>${tr(zh, en)}</span>`; b.onclick = () => onSelect(id); world.append(b);
+      b.style.left = `${x}%`; b.style.top = `${y}%`; b.innerHTML = `<i>${gameIcon(id==='terminal'?'routes':id==='depot'?'hub':id==='tower'?'missions':id)}</i><span>${tr(zh, en)}</span>`; b.onclick = () => onSelect(id); world.append(b);
     }
     live = { update() {}, setTime() {}, destroy() {}, stats: () => ({ kind: 'airport', fallback: true }) };
     loading.remove();
@@ -45,11 +46,16 @@ function airportWorld(T, box, { hubId, onSelect, preview, still }) {
   box.append(renderer.domElement);
   renderer.domElement.className = 'airport-canvas'; renderer.domElement.setAttribute('aria-hidden', 'true');
   const scene = new T.Scene(), camera = new T.OrthographicCamera(-23, 23, 16, -16, .1, 200);
-  scene.add(new T.HemisphereLight(0xd8efff, 0x788f79, 1.7));
-  const sun = new T.DirectionalLight(0xffe4b7, 3.4); sun.position.set(-16, 28, 15); sun.castShadow = true;
+  scene.add(new T.HemisphereLight(0xe4ecff, 0x69b3a6, 1.5));
+  const sun = new T.DirectionalLight(0xffd7b1, 3.1); sun.position.set(-16, 28, 15); sun.castShadow = true;
   sun.shadow.mapSize.set(1024,1024); Object.assign(sun.shadow.camera,{left:-25,right:25,top:25,bottom:-25,near:1,far:70});
   sun.shadow.camera.updateProjectionMatrix(); sun.shadow.bias = -.0004; sun.shadow.normalBias = .04; scene.add(sun);
   const fill = new T.DirectionalLight(0xa6dfff,.65); fill.position.set(20,12,-10); scene.add(fill);
+  const skyFaces = Array.from({length:6},(_,i)=>{
+    const c=document.createElement('canvas');c.width=c.height=32;const x=c.getContext('2d'),g=x.createLinearGradient(0,0,0,32);
+    g.addColorStop(0,i===3?'#78b8b0':'#bbc9f5');g.addColorStop(.55,'#ffd9be');g.addColorStop(1,'#77c4cc');x.fillStyle=g;x.fillRect(0,0,32,32);return c;
+  });
+  const skyReflection=new T.CubeTexture(skyFaces);skyReflection.colorSpace=T.SRGBColorSpace;skyReflection.needsUpdate=true;scene.environment=skyReflection;scene.environmentIntensity=.35;
   const compact = innerWidth<900;
   const geometries = { box: new T.BoxGeometry(1, 1, 1), ball: new T.SphereGeometry(1, compact?12:16, compact?8:10), cylinder: new T.CylinderGeometry(1, 1, 1, compact?12:16), cone: new T.ConeGeometry(1, 1, 10) };
   const materials = new Map(), batches = new Map(), meshes = [], dynamic = new T.Group(); scene.add(dynamic);
@@ -87,14 +93,14 @@ function airportWorld(T, box, { hubId, onSelect, preview, still }) {
   function airplane(type) {
     const g = new T.Group(), wide = ['MQ-350','MQ-400'].includes(type), turbo = type === 'MQ-72';
     const [length,radius,span] = ({'MQ-72':[2.4,.18,2.7],'MQ-190':[2.8,.19,2.4],'MQ-320':[3.1,.21,2.9],'MQ-321':[3.6,.21,2.9],'MQ-350':[4.1,.27,3.8],'MQ-400':[4.55,.29,3.8]})[type] || [3.1,.21,2.9];
-    ball('#dceef0', 0, .5, 0, radius, radius, length/2, g); ball('#264e6a', 0, .57, -length*.4, radius*.8, radius*.4, .19, g);
+    part('fuselage','#edf6f4',0,.5,0,radius,radius,length,0,0,g); ball('#264e6a', 0, .57, -length*.4, radius*.8, radius*.4, .19, g);
     // Swept tapered wings and a tapered fin replace rectangular blocks.
     part('wing','#b4d7de',0,turbo?.66:.42,0,span/2.24,1,wide?1.3:1,0,0,g);
     part('wing','#76adc2',0,.53,length*.36,.49,1,.45,0,0,g);
-    part('fin','#659bb9',0,.55,length*.35,1,turbo?.68:1,.63,0,0,g);
+    part('fin','#187cb4',0,.55,length*.35,1,turbo?.68:1,.63,0,0,g);
     for(const x of [-span*.48,span*.48]){const tip=cube('#5494b3',x,turbo?.68:.53,.2,.08,.21,.18,0,g);tip.rotation.z=x<0?-.18:.18;}
     for(const x of [-span*.27,span*.27]){
-      const engine = cyl('#cee3e2',x,.34,.02,wide?.2:.14,.66,wide?.2:.14,g);engine.rotation.x=Math.PI/2;
+      const engine = cyl('#216886',x,.34,.02,wide?.2:.14,.66,wide?.2:.14,g);engine.rotation.x=Math.PI/2;
       ball('#24485d',x,.34,-.325,wide?.165:.11,wide?.165:.11,.024,g);ball('#81b3c5',x,.34,-.357,.04,.04,.025,g);
       if(turbo){for(const a of [0,Math.PI/3,Math.PI*2/3])part('box','#284e66',x,.36,-.36,.045,.64,.035,0,a,g);}
     }
@@ -138,7 +144,7 @@ function airportWorld(T, box, { hubId, onSelect, preview, still }) {
   const names = [['terminal','✈','開航線','Plan routes'],['fleet','◒','機隊','Fleet'],['depot','⚒','維修庫','Maintenance'],['lounge','★','貴賓室','Lounge'],['tank','◉','儲油槽','Fuel tanks'],['tower','⚑','任務塔台','Dispatch']];
   if (!preview) for (const [id, icon, zh, en] of names) {
     const b = document.createElement('button'); b.type = 'button'; b.className = 'world-hotspot'; b.dataset.world = id;
-    b.innerHTML = `<i aria-hidden="true">${icon}</i><span>${tr(zh, en)}</span><small></small>`;
+    b.innerHTML = `<i aria-hidden="true">${gameIcon(id==='terminal'?'routes':id==='depot'?'hub':id==='tower'?'missions':id)}</i><span>${tr(zh, en)}</span><small></small>`;
     b.setAttribute('aria-label', tr(zh, en)); b.onclick = () => { select(id); onSelect(id, planes[0]?.type); }; box.append(b);
     labels.push({ id, b, pos: new T.Vector3(...positions[id]) });
   }
@@ -229,7 +235,7 @@ function airportWorld(T, box, { hubId, onSelect, preview, still }) {
   return { update, setTime, select,
     zoomBy(f) { zoom = Math.max(.8, Math.min(1.65, zoom*f)); cameraPose(); },
     recenter() { angle = -.28; zoom = 1; select(''); cameraPose(); },
-    stats() { return { kind: 'airport', fallback: false, frames, art: 'miniature-v21', shadows: renderer.shadowMap.enabled, pixelRatio: renderer.getPixelRatio(), light, meanPaintMs: frames ? renderMs/frames : 0, drawCalls: renderer.info.render.calls, triangles: renderer.info.render.triangles, planes: planes.length, angle, zoom, reducedMotion: reduced.matches, active: running, speed }; },
-    destroy() { cancelAnimationFrame(frame); observer.disconnect(); reduced.removeEventListener('change', onMotion); renderer.domElement.removeEventListener('webglcontextlost', lost); scene.traverse(o=>{if(o.isInstancedMesh)o.dispose();}); geometries && Object.values(geometries).forEach(g => g.dispose()); materials.forEach(m => m.dispose()); mat.extra.forEach(m=>m.dispose()); art.textures.forEach(t=>t.dispose()); ring.geometry.dispose(); ring.material.dispose(); sun.shadow.dispose(); renderer.dispose(); renderer.forceContextLoss(); box.replaceChildren(); },
+    stats() { return { kind: 'airport', fallback: false, frames, art: 'coastal-v22', shadows: renderer.shadowMap.enabled, pixelRatio: renderer.getPixelRatio(), light, meanPaintMs: frames ? renderMs/frames : 0, drawCalls: renderer.info.render.calls, triangles: renderer.info.render.triangles, planes: planes.length, angle, zoom, reducedMotion: reduced.matches, active: running, speed }; },
+    destroy() { cancelAnimationFrame(frame); observer.disconnect(); reduced.removeEventListener('change', onMotion); renderer.domElement.removeEventListener('webglcontextlost', lost); scene.traverse(o=>{if(o.isInstancedMesh)o.dispose();}); geometries && Object.values(geometries).forEach(g => g.dispose()); materials.forEach(m => m.dispose()); mat.extra.forEach(m=>m.dispose()); art.textures.forEach(t=>t.dispose()); ring.geometry.dispose(); ring.material.dispose(); sun.shadow.dispose(); skyReflection.dispose(); renderer.dispose(); renderer.forceContextLoss(); box.replaceChildren(); },
   };
 }

@@ -1,10 +1,10 @@
 // 天青航空：航線經營 — economic model. Pure, deterministic given a seed, no DOM, no dependencies.
 // Money: US$ (constant dollars). rask/cask: US$ per available seat-km. All state is plain JSON.
-import { FACILITIES, fuelOrder } from './v2.mjs?v=21';
-import { CONST, MODES, HUBS, CITIES, AIRCRAFT, EVENTS, LESSONS, RIVALS, HUB_WEATHER } from './data.mjs?v=21';
-import { marketProfile } from './demand.mjs?v=21';
-import { readCareer, missionOffers, settleCareer } from './career.mjs?v=21';
-export { marketProfile, DEMAND_SOURCES } from './demand.mjs?v=21';
+import { FACILITIES, fuelOrder } from './v2.mjs?v=22';
+import { CONST, MODES, HUBS, CITIES, AIRCRAFT, EVENTS, LESSONS, RIVALS, HUB_WEATHER } from './data.mjs?v=22';
+import { marketProfile } from './demand.mjs?v=22';
+import { readCareer, missionOffers, settleCareer } from './career.mjs?v=22';
+export { marketProfile, DEMAND_SOURCES } from './demand.mjs?v=22';
 
 // ============================================================ utilities
 const clone = o => JSON.parse(JSON.stringify(o));

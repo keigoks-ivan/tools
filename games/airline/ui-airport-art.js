@@ -28,8 +28,15 @@ export function buildAirportArt(T, { scene, geometries, mat, cube, ball, cyl, pa
   geometries.contact=new T.PlaneGeometry(1,1);geometries.contact.rotateX(-Math.PI/2);
   const contacts=[];
   function contact(x,z,w,d,parent=scene,y=.27) {const m=new T.Mesh(geometries.contact,shadowMaterial);m.position.set(x,y,z);m.scale.set(w,1,d);if(parent===scene){m.updateMatrix();contacts.push(m.matrix.clone());}else parent.add(m);return m;}
-  rounded('#739caf',0,-.8,0,36,1.5,26,1.2);
-  rounded('#8abc9d',0,.02,0,35.6,.2,25.6,1.05);
+  // Sand shelves and stylised rock clusters anchor the playable island in the bay.
+  rounded('#d3b18c',0,-1.28,0,37.1,.3,27.1,1.7);
+  rounded('#efd5aa',0,-1.09,0,36.7,.25,26.7,1.5);
+  rounded('#a5d9d2',0,-1.48,0,38.4,.08,28.4,2);
+  for(const [x,z] of [[-18,-9],[-18,6],[18,-6],[18,9],[-12,13],[9,13]]){
+    ball('#a99489',x,-1.02,z,.7,.65,.7);ball('#d6b79c',x+.45,-1.1,z+.3,.5,.4,.55);
+  }
+  rounded('#b89c85',0,-.8,0,36,1.5,26,1.2);
+  rounded('#8fc6a0',0,.02,0,35.6,.2,25.6,1.05);
   rounded('#d3d1ba',-.4,.17,1.6,30,.1,12.5,.5);
   // Apron slabs, drainage strips, grass inlays, and contrasting runway shoulders.
   for(let x=-14;x<15;x+=2.4)for(let z=-.9;z<6.7;z+=2.4)cube('#c3cec5',x,.244,z,.022,.006,2.3);
@@ -68,7 +75,7 @@ export function buildAirportArt(T, { scene, geometries, mat, cube, ball, cyl, pa
   const roof=new T.Shape();roof.moveTo(-2.95,0);roof.quadraticCurveTo(0,1.5,2.95,0);roof.lineTo(2.95,-.17);roof.quadraticCurveTo(0,1.31,-2.95,-.17);roof.closePath();
   geometries.vault=new T.ExtrudeGeometry(roof,{depth:2.23,bevelEnabled:true,bevelSize:.04,bevelThickness:.035,bevelSegments:2,curveSegments:12});geometries.vault.rotateY(-Math.PI/2);geometries.vault.translate(1.115,0,0);
   for(let i=0;i<6;i++){
-    const x=-6.8+i*2.32;part('vault',i%2?'#80afbd':'#b5d8d9',x,2.71,-3.6,1,1,1);
+    const x=-6.8+i*2.32;part('vault',i%2?'#419fbf':'#89ccde',x,2.71,-3.6,1,1,1);
     bevel('#497f97',x,3.61,-3.7,1.16,.085,2.4,.04);cube('#5c91ad',x+.06,3.666,-3.7,1,.028,2.18);
     for(const z of [-4.5,-3.7,-2.9])cube('#b9d4d6',x,3.687,z,1.12,.018,.025);
   }
@@ -94,7 +101,7 @@ export function buildAirportArt(T, { scene, geometries, mat, cube, ball, cyl, pa
   bevel('#e7e4cf',-10.8,2.05,-5.8,1.5,3.3,1.5,.12);
   cube('#a3c8c9',-10.01,2.1,-5.8,.06,2.8,.35);
   cyl('#779ba8',-10.8,3.96,-5.8,1.5,.25,1.5);cyl('#365e77',-10.8,4.47,-5.8,1.25,.9,1.25);
-  cyl('#9aced2',-10.8,4.48,-5.8,1.26,.4,1.26);cyl('#d5e7df',-10.8,5.01,-5.8,1.56,.17,1.56);
+  cyl('#b3a4e2',-10.8,4.48,-5.8,1.26,.4,1.26);cyl('#d5e7df',-10.8,5.01,-5.8,1.56,.17,1.56);
   for(let i=0;i<8;i++){const a=i*Math.PI/4;cyl('#d8e5d8',-10.8+Math.sin(a)*1.29,4.48,-5.8+Math.cos(a)*1.29,.026,.95,.026);}
   cyl('#5d8899',-10.8,5.45,-5.8,.043,.74,.043);ball('#f4bd6d',-10.8,5.85,-5.8,.1,.09,.1);
   cube('#5c90a4',-11.24,5.32,-5.8,.08,.4,.08);
@@ -114,25 +121,25 @@ export function buildAirportArt(T, { scene, geometries, mat, cube, ball, cyl, pa
     cube('#dfbe6a',1.7,2,0,.12,3.8,.12,0,site);cube('#dfbe6a',.4,3.83,0,3,.12,.12,0,site);cube('#57757e',-.8,3.26,0,.035,1,.035,0,site);cube('#8cb3be',1.3,3.61,0,.45,.35,.4,0,site);
     bevel('#8ba6ad',0,.12,0,4.5,.2,4,.13,g);
     if(id==='depot'){
-      bevel('#dce4db',0,1.33,-.1,4,2.4,3.5,.13,g);
-      bevel('#729cae',0,2.62,-.1,4.6,.24,3.9,.12,g);
-      for(let dx=-2;dx<=2;dx+=.5)cube('#6d9cac',dx,2.77,-.1,.035,.022,3.7,0,g);
+      bevel('#efa384',0,1.33,-.1,4,2.4,3.5,.13,g);
+      bevel('#c46d60',0,2.62,-.1,4.6,.24,3.9,.12,g);
+      for(let dx=-2;dx<=2;dx+=.5)cube('#f5c1a1',dx,2.77,-.1,.035,.022,3.7,0,g);
       cube('#254659',0,1.18,1.68,3.2,1.86,.05,0,g);cube('#f2dca1',0,1.99,1.725,2.9,.11,.02,0,g);
       for(let dx=-1.5;dx<=1.5;dx+=.3)cube('#527986',dx,1.25,1.73,.065,1.38,.024,0,g);
       for(const dx of [-1.82,1.82]){cube('#e6b96e',dx,1.19,1.72,.15,1.9,.14,0,g);ball('#f1d593',dx,2.18,1.8,.095,.09,.05,g);}
       sign('SKY · MRO',0,2.34,1.73,1.7,.3,{parent:g});
       bevel('#aac1bd',-1.1,.34,2.2,.6,.44,.4,.05,g);
     }else if(id==='lounge'){
-      bevel('#e6dec4',0,1.06,0,3.9,1.85,3.4,.2,g);
+      bevel('#c8b8e8',0,1.06,0,3.9,1.85,3.4,.2,g);
       cube('#315a6e',0,1.2,1.73,3.45,1.2,.055,0,g);
       for(let dx=-1.45;dx<1.5;dx+=.55){cube('#80b8b6',dx,1.27,1.77,.47,1,.055,0,g);cube('#dfe0bb',dx,1.34,1.804,.045,.93,.025,0,g);}
-      bevel('#dedec4',0,2.06,0,4.45,.22,3.9,.2,g);bevel('#87b593',0,2.2,0,3.9,.1,3.35,.15,g);
+      bevel('#a88ccd',0,2.06,0,4.45,.22,3.9,.2,g);bevel('#87b593',0,2.2,0,3.9,.1,3.35,.15,g);
       for(const dx of [-1.8,1.8])for(let dz=-1.3;dz<=1.3;dz+=.65)ball('#5f967a',dx,2.35,dz,.2,.24,.25,g);
       for(const dx of [-.85,.8]){cyl('#d7bf87',dx,2.45,.55,.38,.1,.38,g);cyl('#729795',dx,2.3,.55,.045,.25,.045,g);part('cone','#efe1b2',dx,2.93,.55,.7,.22,.7,0,0,g);cyl('#b4a680',dx,2.61,.55,.023,.62,.023,g);}
       sign('SKY LOUNGE',0,1.94,1.8,2,.28,{parent:g});
     }else{
       for(const dx of [-.95,.95]){
-        cyl('#dee9db',dx,1,0,.8,1.65,.8,g);cyl('#83aeb9',dx,1.35,0,.808,.21,.808,g);ball('#c2d7d4',dx,1.84,0,.8,.17,.8,g);cyl('#88aab1',dx,1.96,0,.1,.15,.1,g);
+        cyl('#dee9db',dx,1,0,.8,1.65,.8,g);cyl('#4eb8a6',dx,1.35,0,.808,.21,.808,g);ball('#c2d7d4',dx,1.84,0,.8,.17,.8,g);cyl('#88aab1',dx,1.96,0,.1,.15,.1,g);
         cube('#597c8b',dx+.65,1.1,.42,.038,1.65,.035,0,g);cube('#597c8b',dx+.45,1.1,.62,.035,1.65,.035,0,g);
         for(let y=.4;y<1.9;y+=.2)cube('#597c8b',dx+.56,y,.54,.28,.025,.03,-.7,g);
       }
@@ -146,7 +153,7 @@ export function buildAirportArt(T, { scene, geometries, mat, cube, ball, cyl, pa
   // Pocket gardens, clipped hedges, ornamental trees and a landscaped entrance.
   for(const [x,z] of [[-16,-8],[-15,-6],[-16,-3],[-15,2],[14,-7],[16,-5],[15,-3],[10,-7],[8,-7],[-7,-10],[-4,-10],[3,-10],[6,-10]]){
     cyl('#c8d2b3',x,.23,z,.65,.16,.65);cyl('#9b8463',x,.83,z,.12,1.3,.12);
-    ball('#4c977e',x,1.59,z,.66,.76,.66);ball('#78b38b',x-.24,1.98,z,.59,.63,.55);ball('#a0c597',x+.2,2.18,z,.33,.35,.35);
+    ball(x<0?'#60aa8f':'#dc9dc0',x,1.59,z,.66,.76,.66);ball(x<0?'#96c88d':'#edb5ce',x-.24,1.98,z,.59,.63,.55);ball(x<0?'#b6db9c':'#f9c9dc',x+.2,2.18,z,.33,.35,.35);
     contact(x,z,1.7,1.7);
   }
   for(const z of [-11.15,12])for(let x=-13;x<15;x+=1.3)bevel('#78a98b',x,.39,z,1.16,.35,.36,.1);
@@ -164,6 +171,9 @@ export function buildAirportArt(T, { scene, geometries, mat, cube, ball, cyl, pa
 }
 
 export function aircraftGeometry(T,geometries) {
+  const profile=[[-.5,0],[-.48,.32],[-.44,.72],[-.37,.97],[-.26,1],[.24,1],[.34,.86],[.43,.45],[.5,.04]].map(([z,r])=>new T.Vector2(r,z));
+  geometries.fuselage=new T.LatheGeometry(profile,innerWidth<900?12:16);geometries.fuselage.rotateX(Math.PI/2);
+
   const wing=new T.Shape();wing.moveTo(0,-.3);wing.lineTo(1,-.04);wing.lineTo(1.12,.12);wing.lineTo(.98,.2);wing.lineTo(.14,.14);wing.lineTo(0,.35);wing.lineTo(-.14,.14);wing.lineTo(-.98,.2);wing.lineTo(-1.12,.12);wing.lineTo(-1,-.04);wing.closePath();
   geometries.wing=new T.ExtrudeGeometry(wing,{depth:.055,bevelEnabled:true,bevelSize:.02,bevelThickness:.02,bevelSegments:1});geometries.wing.rotateX(Math.PI/2);
   const tail=new T.Shape();tail.moveTo(-.2,0);tail.lineTo(.05,.85);tail.lineTo(.36,.84);tail.lineTo(.53,0);tail.closePath();

@@ -1,8 +1,8 @@
 // Baked game environments. The airport is an illustrative shared scene, not a replica of the selected airport.
-import { tr } from './ui-util.js?v=21';
+import { tr } from './ui-util.js?v=22';
 
 export function airportPicture(className = '') {
-  return `<picture class="${className}"><source media="(max-width:700px)" srcset="./art/v3/airport-dusk-mobile.webp?v=21"><img src="./art/v3/airport-dusk.webp?v=21" width="1536" height="1024" decoding="async" alt="${tr('黃昏的天青機場，燈光亮起的航廈、跑道與機隊','SKYGLAZE airport at dusk, with illuminated terminal, runway and aircraft')}"></picture>`;
+  return `<picture class="${className}"><source media="(max-width:700px)" srcset="./art/v3/airport-dusk-mobile.webp?v=22"><img src="./art/v3/airport-dusk.webp?v=22" width="1536" height="1024" decoding="async" alt="${tr('黃昏的天青機場，燈光亮起的航廈、跑道與機隊','SKYGLAZE airport at dusk, with illuminated terminal, runway and aircraft')}"></picture>`;
 }
 
 export function orbitBackdrop() {
