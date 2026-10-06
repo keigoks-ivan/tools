@@ -79,9 +79,9 @@ async function main() {
 <nav id="dock" class="panel" aria-label="建造選單">
   <div class="cap">建造</div>
   <button data-dk="shop">${icon.shop}<span>開店</span></button>
-  <button data-dk="factory" class="lock" title="第二步開放"><i class="lk">${ic.lock}</i>${icon.factory}<span>工廠</span></button>
-  <button data-dk="warehouse" class="lock" title="第二步開放"><i class="lk">${ic.lock}</i>${icon.warehouse}<span>倉庫</span></button>
-  <button data-dk="lab" class="lock" title="第二步開放"><i class="lk">${ic.lock}</i>${icon.lab}<span>研發</span></button>
+  <button data-dk="factory" class="lock" title="尚未推出，目前沒有解鎖條件"><i class="lk">${ic.lock}</i>${icon.factory}<span>工廠</span></button>
+  <button data-dk="warehouse" class="lock" title="尚未推出，目前沒有解鎖條件"><i class="lk">${ic.lock}</i>${icon.warehouse}<span>倉庫</span></button>
+  <button data-dk="lab" class="lock" title="尚未推出，目前沒有解鎖條件"><i class="lk">${ic.lock}</i>${icon.lab}<span>研發</span></button>
   <button data-dk="ad">${icon.ad}<span>廣告</span></button>
   <button data-dk="loan">${ic.loan}<span>貸款</span></button>
   <div class="sep"></div>
@@ -840,7 +840,7 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
   $('#dock').addEventListener('click', async (e) => {
     const b = e.target.closest('[data-dk]'); if (!b) return;
     const k = b.dataset.dk;
-    if (b.classList.contains('lock')) return toast('第二步開放。');
+    if (b.classList.contains('lock')) return toast('工廠、倉庫與研發尚未推出，目前沒有營運進度解鎖條件。');
     if (k === 'shop') { if (modal) closeModal(); if (!['lot', 'shop', 'rival'].includes(panel)) { closePanel(); toast('點地圖上掛「招租」的空店面，就能租下開店。'); } }
     else if (k === 'ad') (panel === 'ad' ? closePanel() : openPanel('ad'));
     else if (k === 'loan') (panel === 'loan' ? closePanel() : openPanel('loan'));
