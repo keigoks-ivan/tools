@@ -1,7 +1,7 @@
 // 天青航空：航線經營 — UI. All game logic lives in the model (backend.mjs); this file only renders and collects decisions.
 import * as B from './backend.mjs?v=22';
 import { createAirport } from './ui-airport.js?v=22';
-import { createNetwork } from './ui-network.js?v=22';
+import { createNetwork } from './ui-network.js?v=22.2';
 import { FACILITIES, SCENARIOS, scenarioProgress, newClock, advanceClock, turnSeconds, fuelOrder } from './v2.mjs?v=22';
 import { aircraftArt, facilityArt } from './ui-art-v2.js?v=22';
 import { playIcon, routeTicket, goalList, resultBadges, aircraftStats, rangeComparison } from './ui-play.js?v=22';

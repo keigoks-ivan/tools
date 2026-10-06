@@ -12,7 +12,7 @@ export function createMap(box, { hubId, onCityClick }) {
   box.appendChild(svg);
   const world = el('g', {}, svg);
   for (const dx of [-3600, 0, 3600, 7200]) { const p = el('path', { d: LAND_PATH, class: 'land', transform: `translate(${dx} 0)` }, world); p.setAttribute('aria-hidden', 'true'); }
-  const arcLayer = el('g', {}, svg), cityLayer = el('g', {}, svg);
+  const arcLayer = el('g', {}, svg), flightLayer = el('g', { 'aria-hidden': 'true', 'pointer-events': 'none' }, svg), cityLayer = el('g', {}, svg);
 
   // city positions relative to hub (wrap longitude so Pacific routes stay short)
   const pos = {};
@@ -23,6 +23,8 @@ export function createMap(box, { hubId, onCityClick }) {
   const hubPos = project(hub.lon, hub.lat);
   const view = { cx: hubPos[0], cy: hubPos[1], k: 1 };
   let W = 400, H = 400, current = { routes: [], rivals: [], selected: null }, moved = false;
+  let time = { elapsed: 0, speed: 0 }, flights = [];
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)');
 
   const cityEls = {};
   for (const [id, c] of Object.entries(CITIES)) {
@@ -58,6 +60,7 @@ export function createMap(box, { hubId, onCityClick }) {
       o.g.setAttribute('transform', `translate(${x} ${y}) scale(${1 / view.k})`);
     }
     layoutLabels();
+    paintFlights();
   }
   // Label collision avoidance: greedy by priority; try right, then left, then above/below; hide what still collides.
   function layoutLabels() {
@@ -102,8 +105,23 @@ export function createMap(box, { hubId, onCityClick }) {
   function update(next) {
     current = { ...current, ...next };
     arcLayer.replaceChildren();
+    flightLayer.replaceChildren(); flights = [];
     for (const id of current.rivals || []) if (pos[id]) { const a = el('path', { d: arcPath(id), class: 'arc rival', 'stroke-width': 2 }, arcLayer); a.setAttribute('aria-hidden', 'true'); }
-    for (const r of current.routes || []) if (pos[r.city]) { const a = el('path', { d: arcPath(r.city), class: 'arc', 'stroke-width': Math.min(9, 2 + r.weekly * 0.45) }, arcLayer); a.setAttribute('aria-hidden', 'true'); }
+    let budget = W < 600 ? 16 : 32;
+    for (const [index, r] of (current.routes || []).entries()) if (pos[r.city]) {
+      const a = el('path', { d: arcPath(r.city), class: 'arc', 'stroke-width': Math.min(9, 2 + r.weekly * 0.45) }, arcLayer); a.setAttribute('aria-hidden', 'true');
+      if (!current.active || budget <= 0) continue;
+      const length = a.getTotalLength(), count = Math.min(budget, Math.max(1, Math.min(2, Math.ceil(r.weekly / 7))));
+      if (!length) continue;
+      for (let slot = 0; slot < count; slot++) {
+        const g = el('g', { class: 'map-flight', 'data-flight': r.city }, flightLayer);
+        el('path', { class: 'flight-wake', d: 'M-3 15V43 M3 15V36' }, g);
+        el('path', { class: 'flight-body', d: 'M0-15Q3-14 3-7L14 2V5L3 2L2 10L7 14V16L0 13L-7 16V14L-2 10L-3 2L-14 5V2L-3-7Q-3-14 0-15Z' }, g);
+        el('path', { class: 'flight-livery', d: 'M0-8V9 M-8 2V7 M8 2V7' }, g);
+        flights.push({ g, path: a, length, offset: slot / count + index * .21 });
+      }
+      budget -= count;
+    }
     const mine = new Set((current.routes || []).map((r) => r.city)), riv = new Set(current.rivals || []);
     for (const [id, o] of Object.entries(cityEls)) {
       o.g.classList.toggle('on', mine.has(id));
@@ -113,6 +131,20 @@ export function createMap(box, { hubId, onCityClick }) {
       o.g.setAttribute('aria-label', `${pick(c)}${rt ? tr(`，已開航，每週 ${rt.weekly} 班`, `, route open, ${rt.weekly}/wk`) : ''}${riv.has(id) ? tr('，對手有航線', ', rival present') : ''}`);
     }
     apply();
+  }
+
+  // Use the game clock so pause, speed changes and resumed saves keep the same flight positions.
+  function paintFlights() {
+    const elapsed = reduced.matches ? 0 : time.elapsed;
+    for (const f of flights) {
+      const trip = elapsed / (10 + Math.min(18, f.length / 75)) + f.offset;
+      const phase = trip % 1, forward = Math.floor(trip) % 2 === 0, progress = forward ? phase : 1 - phase;
+      const p = f.path.getPointAtLength(progress * f.length);
+      const q = f.path.getPointAtLength(Math.max(0, Math.min(f.length, (progress + (forward ? .002 : -.002)) * f.length)));
+      const angle = Math.atan2(q.y - p.y, q.x - p.x) * 180 / Math.PI + 90;
+      f.g.setAttribute('transform', `translate(${p.x} ${p.y}) scale(${1 / view.k}) rotate(${angle})`);
+      f.g.setAttribute('opacity', reduced.matches ? 1 : Math.min(1, phase * 10, (1 - phase) * 10));
+    }
   }
 
   // ---- gestures ----
@@ -150,14 +182,17 @@ export function createMap(box, { hubId, onCityClick }) {
 
   const ro = new ResizeObserver(() => { const r = box.getBoundingClientRect(); if (!r.width) return; const first = W === 400 && H === 400; W = r.width; H = r.height; if (first || !view.k) fit(); else apply(); });
   ro.observe(box);
+  const onMotion = () => paintFlights(); reduced.addEventListener('change', onMotion);
   const r0 = box.getBoundingClientRect(); if (r0.width) { W = r0.width; H = r0.height; }
   fit();
 
   return {
     update,
+    setTime(next) { const changed = next.elapsed !== time.elapsed; time = next; if (changed && !reduced.matches) paintFlights(); },
     zoomBy: (f) => zoomAt(f, W / 2 + box.getBoundingClientRect().left, H / 2 + box.getBoundingClientRect().top),
     recenter: fit,
     focus(id) { if (!pos[id]) return; view.cx = (hubPos[0] + pos[id][0]) / 2; view.cy = (hubPos[1] + pos[id][1]) / 2; apply(); },
-    destroy() { ro.disconnect(); svg.remove(); },
+    stats() { return { fallback: true, planes: flights.length, active: !!current.active, reducedMotion: reduced.matches }; },
+    destroy() { ro.disconnect(); reduced.removeEventListener('change', onMotion); svg.remove(); },
   };
 }

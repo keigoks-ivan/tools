@@ -12,9 +12,9 @@ export function createNetwork(box, options) {
   }).catch(async () => {
     if (live) live.destroy();
     if (dead) return;
-    const { createMap } = await import('./ui-map.js?v=22');
+    const { createMap } = await import('./ui-map.js?v=22.2');
     if (dead) return;
-    live = createMap(box, options); live.update(current); loading.remove();
+    live = createMap(box, options); live.update(current); live.setTime(time); loading.remove();
     const note = document.createElement('div'); note.className = 'map-fallback';
     note.textContent = tr('已切換輕量地圖，所有玩法仍可使用。', 'Lightweight map active. All gameplay is available.'); box.append(note);
   });
