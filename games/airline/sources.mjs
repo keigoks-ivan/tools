@@ -166,6 +166,10 @@ export const DESIGN_VALUES = [
   { id: 'overhead', zhName: '管理費用與起降費係數', enName: 'Overhead and scaling',
     value: 'overhead US$330k + 70k per aircraft a month; route launch US$120k; airport scale 1.3; ground labour US$1,300 per departure + 11 per passenger',
     zh: '固定成本隨機隊擴大；新航線有開辦費。', en: 'Fixed costs grow with the fleet; new routes carry a launch cost.' },
+  { id: 'expansion', zhName: '機隊與航網擴張限制', enName: 'Fleet and network expansion',
+    value: 'lease deposit = 2 months; delivery = next turn; orders/turn = 2 year / 3 decade; fleet cap = 6 / 10 (depot 10 / 16); destinations = 8 / 12 (depot 12 / 20)',
+    zh: '訂機先付可退押金或購機頭期款；交付前不能排航線。待交機也占機隊容量。取消退款但不返還本回合訂機額度；退租另收兩個月租金的解約費。數量、押金與交機等待都是遊戲設計值，並非真實航空市場慣例。',
+    en: 'Orders require a refundable lease deposit or a purchase down payment. Pending deliveries cannot fly and consume fleet capacity. Cancellation refunds cash but does not restore the turn quota; lease returns incur a two-month termination fee. Quotas, deposits and delivery times are gameplay assumptions, not real airline market practices.' },
   { id: 'start', zhName: '起始資金與機隊', enName: 'Starting cash and fleet',
     value: 'year: US$45M and 2 x Airbus A320neo leased; decade: US$150M, 2 x Airbus A320neo and 1 x Embraer E190 leased', zh: '設計值。', en: 'Design values.' }
 ];

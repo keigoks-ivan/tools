@@ -2,8 +2,8 @@
 import { MODES, CONST, CITIES, AIRCRAFT } from './data.mjs?v=22';
 export const FACILITIES = {
   depot: { zh: '維修基地', en: 'Maintenance depot', cost: 6000000, monthly: 25000, years: 10,
-    effectZh: '維修費 −30%', effectEn: 'Maintenance −30%',
-    lessonZh: '航班夠多，省下的維修費才會超過基地的固定成本。', lessonEn: 'Enough flights are needed to offset the depot’s fixed costs.' },
+    effectZh: '維修費 −30% · 機隊與航點擴容', effectEn: 'Maintenance −30% · more fleet and destinations',
+    lessonZh: '一年模式擴至 10 架／12 航點；十年模式擴至 16 架／20 航點。維修節省要超過固定成本才划算。', lessonEn: 'Year: 10 aircraft / 12 destinations. Decade: 16 / 20. Maintenance savings must offset fixed costs.' },
   lounge: { zh: '貴賓室', en: 'Premium lounge', cost: 3000000, monthly: 22000, years: 10,
     effectZh: '商務客吸引力 +8%', effectEn: 'Business appeal +8%',
     lessonZh: '提高商務客吸引力，但不保證客滿。廉航模式不增加需求。', lessonEn: 'Attract business travellers; full seats are not guaranteed. No demand bonus in low-cost mode.' },

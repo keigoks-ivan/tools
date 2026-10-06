@@ -172,3 +172,14 @@ Commits: `1eba8a3` (game), `bd4a0ee` (hero art from the 3D jet). About 3,000 lin
 - `research-v1.md`: the v1 research on airline economics and similar games, with sources.
 - `../SOURCES.md`: the real-world numbers used in the model.
 - `research.md`, `directions.md`, `choices.jpg`, `mockups/`, `mockup-src/`, `LICENSES.md`: the v2 research, the two directions and the mockups (§4.2).
+
+
+## 10. v23: manual aircraft orders (2026-10-06)
+
+The owner explicitly requested real expansion constraints instead of automatic leases. `ui.js` now commits manual lease/purchase orders; starting fleets are unchanged. Leases reserve a refundable two-month deposit, purchases reserve 20% down, and both deliver after one settled turn. Pending aircraft cannot fly, consume fleet capacity, and survive saves. Orders per turn: 2 (year), 3 (decade). Cancellation refunds cash but keeps the spent quota; returns refund paid deposits and retain the existing two-month termination charge.
+
+Base fleet/destination caps are 6/8 (year) and 10/12 (decade). A built maintenance depot expands them to 10/12 and 16/20. Route creation and frequency changes require delivered aircraft hours. Legacy games retain existing fleets/routes above the caps but cannot add more until they make room. Missions prefer feasible aircraft schedules and account for whole-aircraft costs.
+
+The former first-year +3–8% calibration assumption is superseded by the owner's delivery/capacity requirement: the default full-service bot earns +0.8–6.6% across the five recommended bases (seed 1); decade calibration remains +3–8%. A legal TPE strategy (`budget:6, minLF:.7`) still beats the 3.9% margin challenge. A focused narrowbody low-cost bot ranges from −2.1% to +21.4%. Passenger demand, fares, operating costs and the 3.9% scoring benchmark were not retuned for these tests.
+
+Verification: `node --test games/airline/*.test.mjs` (99 tests); isolated `tests/browser-v2.py` (four layouts, complete year/decade/bad games, model switch, WebGL fallback, performance); `tests/fleet-browser.py` (manual orders, cash, cancellation, queue reload, quota, capacity, depot, purchases and sales); `tests/map-flight-browser.py` (animation, pause/reload, reduced motion and mute). The save-reset feature shipped separately in v22.3 and retains recoverable backups under `tq-airline-save-backups`.

@@ -1,3 +1,4 @@
+import { deliverFor } from './tests/fleet-helpers.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { CITIES, CONST, MODES, AIRCRAFT, HUBS } from './data.mjs';
@@ -86,7 +87,8 @@ test('demand shocks act immediately, incumbent supply responds later and persist
 
 test('separate connecting traffic stays inside its reserved historical market and spare seats', () => {
   const s=M.newGame({mode:'decade',hub:'TPE',seed:1});s.plan={};s.rivals=[];
-  const st=M.applyDecisions(s,{routes:[{city:'LAX',type:'MQ-350',weekly:7,fare:'mid'},{city:'BKK',type:'MQ-320',weekly:7,fare:'mid'},{city:'KUL',type:'MQ-320',weekly:7,fare:'mid'}],fleet:{lease:{'MQ-350':3,'MQ-320':2}}}).state;
+  const routes=[{city:'LAX',type:'MQ-350',weekly:7,fare:'mid'},{city:'BKK',type:'MQ-320',weekly:7,fare:'mid'},{city:'KUL',type:'MQ-320',weekly:7,fare:'mid'}];
+  const st=M.applyDecisions(deliverFor(s,routes),{routes}).state;
   const out=M.simulateTurn(st).report;
   for(const r of out.routes){
     const l=M._internals.evalLocal(st,M._internals.buildCtx(st),st.routes.find(x=>x.city===r.city));

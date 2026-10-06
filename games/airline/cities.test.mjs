@@ -1,3 +1,4 @@
+import { deliverFor } from './tests/fleet-helpers.mjs';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { CITIES, CITY_REGIONS, HUBS, MODES, AIRCRAFT } from './data.mjs';
@@ -38,10 +39,10 @@ test('all global routes expose correct aircraft range and finite forecasts from 
 });
 
 test('new regional route operates, survives saving and retains deterministic settlement', () => {
-  const s = M.newGame({ mode: 'year', hub: 'TPE', seed: 1 });
+  const routes=[{city:'KHH',type:'MQ-72',weekly:7,fare:'mid'}];
+  const s = deliverFor(M.newGame({ mode: 'year', hub: 'TPE', seed: 1 }),routes);
   const plan = M.applyDecisions(s, {
-    routes: [{ city: 'KHH', type: 'MQ-72', weekly: 7, fare: 'mid' }],
-    fleet: { lease: { 'MQ-72': 1 } }
+    routes: [{ city: 'KHH', type: 'MQ-72', weekly: 7, fare: 'mid' }]
   });
   assert.deepEqual(plan.errors, []);
   const restored = M.deserialize(M.serialize(plan.state));
@@ -68,8 +69,8 @@ test('every catalog airport can be a base in both modes with local rivals, weath
     const o = M.routeOptions(s, city), type = o.eligibleTypes[0];
     assert.ok(type, `${hub}: nearest airport must be reachable`);
     const routes = [{ city, type, weekly: 3, fare: 'mid' }];
-    const lease = M.fleetNeeded(s, routes);
-    const planned = M.applyDecisions(s, { routes, fleet: { lease } });
+    const ready=deliverFor(s,routes);
+    const planned = M.applyDecisions(ready, { routes });
     assert.deepEqual(planned.errors, [], `${mode}/${hub}`);
     const restored = M.deserialize(M.serialize(planned.state));
     assert.equal(restored.hub, hub);

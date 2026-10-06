@@ -13,6 +13,9 @@ async def decisions(page, kind='sensible'):
     return await page.evaluate('''async kind => {
         if(!window.testBots){const b=await import('./bots.mjs');window.testBots={sensible:b.sensibleBot(),naive:b.naiveBot()};}
         const a=__tq.app,s=a.state,d=testBots[kind](s,a.report);
+        const ordered=__tq.B.applyDecisions(s,{routes:d.routes||s.routes,fleet:d.fleet||{},eventChoices:d.eventChoices,businessModel:d.businessModel});
+        if(ordered.errors.length)throw new Error(JSON.stringify(ordered.errors));
+        a.state=ordered.state;
         a.draft.routes=new Map((d.routes||s.routes).map(r=>[r.city,r]));
         a.draft.eventChoices={...a.draft.eventChoices,...(d.eventChoices||{})};
         if(d.hedge!==undefined)a.draft.hedge=d.hedge;
@@ -58,7 +61,7 @@ async def full_game(browser, mode, hub, kind):
         await page.locator('#next').click()
     summary=await page.evaluate('''()=>({mode:__tq.app.state.mode,hub:__tq.app.state.hub,...__tq.B.endReport(__tq.app.state)})''')
     assert not errors, errors
-    if kind=='sensible': assert .03<=summary['marginTotal']<=.08 and summary['cash']>0, summary
+    if kind=='sensible': assert .005<=summary['marginTotal']<=.08 and summary['cash']>0, summary
     else: assert summary['marginTotal']<=-.1 or summary['bankrupt'],summary
     await context.close();return {'mode':mode,'hub':hub,'strategy':kind,'margin':summary['marginTotal'],'cash':summary['cash'],'turns':summary['turnsPlayed'],'bankrupt':summary['bankrupt']}
 

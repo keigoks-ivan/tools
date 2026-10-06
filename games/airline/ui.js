@@ -1,8 +1,8 @@
 // 天青航空：航線經營 — UI. All game logic lives in the model (backend.mjs); this file only renders and collects decisions.
-import * as B from './backend.mjs?v=22';
+import * as B from './backend.mjs?v=23';
 import { createAirport } from './ui-airport.js?v=22';
 import { createNetwork } from './ui-network.js?v=22.2';
-import { FACILITIES, SCENARIOS, scenarioProgress, newClock, advanceClock, turnSeconds, fuelOrder } from './v2.mjs?v=22';
+import { FACILITIES, SCENARIOS, scenarioProgress, newClock, advanceClock, turnSeconds, fuelOrder } from './v2.mjs?v=23';
 import { aircraftArt, facilityArt } from './ui-art-v2.js?v=22';
 import { playIcon, routeTicket, goalList, resultBadges, aircraftStats, rangeComparison } from './ui-play.js?v=22';
 import { orbitBackdrop } from './ui-scene.js?v=22';
@@ -53,7 +53,7 @@ const isOver = (s) => !!(s.over || s.finished || s.gameOver);
 const hedgeOf = (s) => (typeof s.hedge === 'object' && s.hedge ? s.hedge.frac || 0 : s.hedge || 0);
 const totalTurns = (s) => s.totalTurns ?? s.turns ?? modeOf(s.mode).turns;
 const bizModel = () => app.draft?.eventChoices?.['a-model'] || app.draft?.eventChoices?.['b-model'] || app.draft?.businessModel || app.state?.model || 'fsc';
-const planningState = () => ({ ...app.state, model: bizModel() });
+const planningState = () => ({ ...(app.active?.state || app.state), model: bizModel() });
 const seatsOf = (t) => { const a = AIRCRAFT[t]; if (!a) return 0; return typeof a.seats === 'object' ? (a.seats[bizModel()] ?? a.seats.fsc) : a.seats; };
 const hedgeAllowed = (s) => s.turn >= (modeOf(s.mode).hedgeFromTurn ?? 0);
 
@@ -145,7 +145,7 @@ function chrome() {
 function renderStart() {
   app.map?.destroy(); app.map=null;
   const saves=readSaves();
-  appEl.innerHTML=`<div class="title-game"><div class="title-world" id="title-world"></div><div class="title-vignette" aria-hidden="true"></div><div class="title-logo">${brandCrest()}<span>SKYGLAZE</span><h1>${tr('天青航空','SKYGLAZE')}</h1><p>${tr('打造你的航空王國','BUILD YOUR AIRLINE')}</p></div><div class="title-menu"><button type="button" class="title-play" id="go-new"><i>${gameIcon("play")}</i><span>${tr('開始新遊戲','NEW GAME')}<small>${esc(pick(modeOf(app.sel.mode)))} · ${app.sel.hub}</small></span></button>${saves.map(o=>`<button type="button" class="title-option" data-continue="${esc(o.mode)}"><i>${gameIcon("continue")}</i><span>${tr('繼續旅程','CONTINUE')}<small>${esc(pick(hubOf(o.hub)))} · ${esc(turnLabelFromSave(o))}</small></span></button>`).join('')}<button type="button" class="title-option" id="configure-game"><i>${gameIcon("hub")}</i><span>${tr('模式與挑戰','MODE & CHALLENGE')}<small>${esc(pick(SCENARIOS[app.scenario]))}</small></span></button><button type="button" class="title-option" id="choose-hub"><i>${gameIcon("network")}</i><span>${tr('選擇出發基地','HOME AIRPORT')}<small>${app.sel.hub} · ${esc(pick(hubOf(app.sel.hub)))} / 180</small></span></button><button type="button" class="title-option" id="passport-home"><i>${gameIcon("passport")}</i><span>${tr('旅行手冊','TRAVEL PASSPORT')}<small>${tr(`已收藏 ${Object.keys(readPassport()).length} 座城市`,`${Object.keys(readPassport()).length} cities collected`)}</small></span></button></div><div class="title-caption"><span class="live-dot"></span>${tr('你的世界，從第一班飛機開始。','Your world starts with its first departure.')}</div><div class="title-footer"><button type="button" id="how-play">${tr('怎麼玩','How to play')}</button><button type="button" id="go-src">${tr('資料來源','Sources')}</button>${saves.length?`<button type="button" id="clear-saves">${tr('清除存檔','Clear saves')}</button>`:''}${store.get(SAVE_BACKUP_KEY)?`<button type="button" id="restore-saves">${tr('還原上次清除的存檔','Restore cleared saves')}</button>`:''}<span>SKYGLAZE / v22.3</span></div></div>`;
+  appEl.innerHTML=`<div class="title-game"><div class="title-world" id="title-world"></div><div class="title-vignette" aria-hidden="true"></div><div class="title-logo">${brandCrest()}<span>SKYGLAZE</span><h1>${tr('天青航空','SKYGLAZE')}</h1><p>${tr('打造你的航空王國','BUILD YOUR AIRLINE')}</p></div><div class="title-menu"><button type="button" class="title-play" id="go-new"><i>${gameIcon("play")}</i><span>${tr('開始新遊戲','NEW GAME')}<small>${esc(pick(modeOf(app.sel.mode)))} · ${app.sel.hub}</small></span></button>${saves.map(o=>`<button type="button" class="title-option" data-continue="${esc(o.mode)}"><i>${gameIcon("continue")}</i><span>${tr('繼續旅程','CONTINUE')}<small>${esc(pick(hubOf(o.hub)))} · ${esc(turnLabelFromSave(o))}</small></span></button>`).join('')}<button type="button" class="title-option" id="configure-game"><i>${gameIcon("hub")}</i><span>${tr('模式與挑戰','MODE & CHALLENGE')}<small>${esc(pick(SCENARIOS[app.scenario]))}</small></span></button><button type="button" class="title-option" id="choose-hub"><i>${gameIcon("network")}</i><span>${tr('選擇出發基地','HOME AIRPORT')}<small>${app.sel.hub} · ${esc(pick(hubOf(app.sel.hub)))} / 180</small></span></button><button type="button" class="title-option" id="passport-home"><i>${gameIcon("passport")}</i><span>${tr('旅行手冊','TRAVEL PASSPORT')}<small>${tr(`已收藏 ${Object.keys(readPassport()).length} 座城市`,`${Object.keys(readPassport()).length} cities collected`)}</small></span></button></div><div class="title-caption"><span class="live-dot"></span>${tr('你的世界，從第一班飛機開始。','Your world starts with its first departure.')}</div><div class="title-footer"><button type="button" id="how-play">${tr('怎麼玩','How to play')}</button><button type="button" id="go-src">${tr('資料來源','Sources')}</button>${saves.length?`<button type="button" id="clear-saves">${tr('清除存檔','Clear saves')}</button>`:''}${store.get(SAVE_BACKUP_KEY)?`<button type="button" id="restore-saves">${tr('還原上次清除的存檔','Restore cleared saves')}</button>`:''}<span>SKYGLAZE / v23</span></div></div>`;
   app.map=createAirport($('#title-world'),{hubId:app.sel.hub,preview:true});app.map.update({fleet:[{type:'MQ-320'},{type:'MQ-350'},{type:'MQ-72'}],routes:[],facilities:{depot:1,lounge:1,tank:1}});
   $('#go-new').onclick=newGame;$('#configure-game').onclick=showSetup;$('#choose-hub').onclick=showHubPicker;$('#passport-home').onclick=showPassport;$('#go-src').onclick=()=>go('sources');$('#how-play').onclick=showHow;
   $$('[data-continue]').forEach(b=>b.onclick=()=>continueGame(b.dataset.continue));
@@ -160,7 +160,7 @@ function showSetup(){
   $('#setup-close').onclick=()=>{closeOverlay();renderStart();};$('#setup-start').onclick=newGame;
 }
 function showHow(){
-  overlay(`<div class="kick">SKYGLAZE / ${tr('飛行指南','FLIGHT MANUAL')}</div><h2>${tr('點機場，就能開始經營。','Your airport is your controller.')}</h2><ol class="howto"><li>${tr('點航廈或下方「航圖」，選目的地、機型、班次與票價。','Tap the terminal or World map. Choose destination, aircraft, frequency and fares.')}</li><li>${tr('點「開始營運」，看飛機滑行起飛。可暫停、快轉或直接結算。','Start operations and watch departures. Pause, speed up or jump to settlement.')}</li><li>${tr('點塔台接任務；點設施排定興建；點飛機查看航程和座位。','Tap the tower for missions, buildings for construction, or aircraft for range and seats.')}</li><li>${tr('營運中可以安排下期航線。結算時看每條航線的賺賠原因，再調整。','Plan next-turn routes during playback. Review each route’s profit or loss at settlement and adjust.')}</li></ol><p class="hint">${tr('拖曳旋轉機場，雙指或滾輪縮放。場景航班為縮時示意；帳目由供需模型結算。','Drag to orbit; pinch or scroll to zoom. Traffic is sampled; accounts settle through the demand model.')}</p><button type="button" class="btn block" id="how-close">${tr('準備好了','Ready')} ✓</button>`,{label:tr('怎麼玩','How to play')});$('#how-close').onclick=closeOverlay;
+  overlay(`<div class="kick">SKYGLAZE / ${tr('飛行指南','FLIGHT MANUAL')}</div><h2>${tr('點機場，就能開始經營。','Your airport is your controller.')}</h2><ol class="howto"><li>${tr('點航廈或下方「航圖」，選目的地、機型、班次與票價。','Tap the terminal or World map. Choose destination, aircraft, frequency and fares.')}</li><li>${tr('點「開始營運」，看飛機滑行起飛。可暫停、快轉或直接結算。','Start operations and watch departures. Pause, speed up or jump to settlement.')}</li><li>${tr('點機隊手動訂機，先付押金或頭期款，下回合交付。每回合額度與機隊容量有限；維修庫可以擴容。點塔台接任務。','Order aircraft in Fleet: pay a deposit or down payment and wait until next turn. Quotas and fleet capacity limit growth; a depot expands capacity. Tap the tower for missions.')}</li><li>${tr('營運中可以安排下期航線。結算時看每條航線的賺賠原因，再調整。','Plan next-turn routes during playback. Review each route’s profit or loss at settlement and adjust.')}</li></ol><p class="hint">${tr('拖曳旋轉機場，雙指或滾輪縮放。場景航班為縮時示意；帳目由供需模型結算。','Drag to orbit; pinch or scroll to zoom. Traffic is sampled; accounts settle through the demand model.')}</p><button type="button" class="btn block" id="how-close">${tr('準備好了','Ready')} ✓</button>`,{label:tr('怎麼玩','How to play')});$('#how-close').onclick=closeOverlay;
 }
 function showHubPicker() {
   const m=overlay(`<div class="career-dialog-top"><small>${tr('自由選擇基地','CHOOSE YOUR HOME AIRPORT')}</small><button type="button" class="ghost" id="hub-picker-close">${tr('返回','Back')} ×</button></div><h2>${tr('你的航空公司，從哪裡出發？','Where does your airline begin?')}</h2><p class="hint">${tr('可選全部 180 個機場。選定後，這一局的航線都從這裡出發。','Choose any of 180 airports. All routes in this game depart from your chosen base.')}</p><div class="hub-picker-controls"><label>${tr('搜尋機場','Find an airport')}<input type="search" id="hub-search" placeholder="${tr('城市名稱或機場代碼，例如高雄、LAX','City or airport code, e.g. London, LAX')}" autocomplete="off"></label><label>${tr('區域','Region')}<select id="hub-region"><option value="">${tr('全部區域','All regions')}</option>${Object.entries(CITY_REGIONS).map(([id,r])=>`<option value="${id}">${esc(pick(r))}</option>`).join('')}</select></label></div><div class="hub-picker-count" id="hub-picker-count" role="status"></div><div class="hub-airports" id="hub-airports" role="radiogroup" aria-label="${tr('基地機場','Home airport')}"></div>`,{label:tr('自由選擇基地','Choose home airport')});
@@ -197,24 +197,17 @@ function continueGame(mode) {
 /* ---------- main ---------- */
 function initDraft() {
   const s = app.state;
-  app.draft = { routes: new Map(stateRoutes(s).map((r) => [r.city, r])), hedge: hedgeOf(s), businessModel: s.model || s.businessModel || 'fsc', acquire: 'lease', eventChoices: {}, facilities: new Set(), buyFuel: false };
+  app.draft = { routes: new Map(stateRoutes(s).map((r) => [r.city, r])), hedge: hedgeOf(s), businessModel: s.model || s.businessModel || 'fsc', eventChoices: {}, facilities: new Set(), buyFuel: false };
   app.city = null; app.tmp = null;
 }
 const draftRoutes = () => [...app.draft.routes.values()];
-function fleetDecision(routes) {
-  const s = app.state, need = needMap(B.fleetNeeded(planningState(), routes)), have = fleetCounts(s);
-  const add = {}, ret = {};
-  for (const t of new Set([...Object.keys(need), ...Object.keys(have)])) {
-    const d = (need[t] || 0) - (have[t] || 0);
-    if (d > 0) add[t] = d; else if (d < 0) ret[t] = -d;
-  }
-  const f = {};
-  if (app.draft.acquire === 'buy' && modeOf(s.mode).buy) { f.buy = add; f.lease = {}; } else { f.lease = add; f.buy = {}; }
-  f.returnLease = {}; f.sell = {};
-  for(const [type,n] of Object.entries(ret)){const leased=s.fleet.filter(a=>a.type===type&&a.kind==='lease').length;f.returnLease[type]=Math.min(n,leased);if(n>leased)f.sell[type]=n-leased;}
-  return f;
+function commitFleet(fleet) {
+  if (app.active) return;
+  const out = B.applyDecisions(app.state, { fleet });
+  if (out.errors.length) { $('#fleetmsg').textContent = out.errors.map(e => pick(e)).join(' · '); return; }
+  app.state = out.state; refreshMap(); renderHud(); renderPanel(); saveGame();
 }
-const buildDecisions = (routes = draftRoutes()) => ({ facilities: [...app.draft.facilities], buyFuel: app.draft.buyFuel, routes, fleet: fleetDecision(routes), hedge: app.draft.hedge, eventChoices: app.draft.eventChoices, ...(isSeasonMode(app.state.mode) ? { businessModel: bizModel() } : {}) });
+const buildDecisions = (routes = draftRoutes()) => ({ facilities: [...app.draft.facilities], buyFuel: app.draft.buyFuel, routes, hedge: app.draft.hedge, eventChoices: app.draft.eventChoices, ...(isSeasonMode(app.state.mode) ? { businessModel: bizModel() } : {}) });
 
 function renderMain() {
   const s=app.state;
@@ -352,15 +345,24 @@ function aircraftGuide(){
 }
 function renderFleet(){
   const s=app.state,d=app.draft,routes=draftRoutes(),need=needMap(B.fleetNeeded(planningState(),routes)),have=fleetCounts(s),types=modeOf(s.mode).types;
-  const order=fuelOrder({...s,routes,hedge:{...s.hedge,frac:d.hedge}});
+  const order=fuelOrder({...s,routes,hedge:{...s.hedge,frac:d.hedge}}),limits=B.fleetLimits(s);
   const hedgePct=Math.round(d.hedge*100),hedgeOk=hedgeAllowed(s),hasTank=s.facilities?.tank||d.facilities.has('tank');
-  $('#pscroll').innerHTML=`<div class="section-eyebrow">${tr('機隊與能源','FLEET & ENERGY')}</div><h2 class="panel-intro">${tr('用合適的飛機，飛合適的班次。','The right aircraft. The right schedule.')}</h2><button type="button" class="aircraft-guide-link" id="aircraft-guide">✈ ${tr('機型圖鑑','Aircraft guide')}<small>${tr('看全部 6 種機型','See all 6 aircraft')} →</small></button><div class="fleet-cards">${types.map(t=>{const a=AIRCRAFT[t],n=need[t]||0,h=have[t]||0;return `<div class="fleet-card">${aircraftArt(t)}<div><b>${esc(pick(a))}</b>${aircraftStats(t,bizModel())}<span>${tr(`現有 ${h} 架 · 下期需要 ${n} 架`,`Have ${h} · need ${n}`)}</span></div><strong>${n}</strong></div>`;}).join('')}</div><p class="hint">${tr('飛機依航線自動租入或退租。閒置的飛機仍會付租金。航程、座位與成本採遊戲設定。','Aircraft are leased or returned to match your network. Idle aircraft still cost rent. Range, seats and costs use game assumptions.')}</p>
-    ${modeOf(s.mode).buy?`<div class="psec"><h3>${tr('新增飛機','New aircraft')}</h3><div class="seg"><button type="button" data-acq="lease" aria-pressed="${d.acquire==='lease'}">${tr('租賃','Lease')}</button><button type="button" data-acq="buy" aria-pressed="${d.acquire==='buy'}">${tr('貸款購買','Buy with loan')}</button></div><p class="hint">${tr('買機需頭期款與利息，長期成本較低。','Buying needs a down payment and interest; long-term cost is lower.')}</p></div>`:''}
+  $('#pscroll').innerHTML=`<div class="section-eyebrow">${tr('機隊與能源','FLEET & ENERGY')}</div><h2 class="panel-intro">${tr('用合適的飛機，飛合適的班次。','The right aircraft. The right schedule.')}</h2><button type="button" class="aircraft-guide-link" id="aircraft-guide">✈ ${tr('機型圖鑑','Aircraft guide')}<small>${tr('看全部 6 種機型','See all 6 aircraft')} →</small></button><div class="callout fleet-limits"><b>${tr(`機隊 ${limits.committed}/${limits.maxFleet} 架 · 航點 ${routes.length}/${limits.maxRoutes}`,`Fleet ${limits.committed}/${limits.maxFleet} · destinations ${routes.length}/${limits.maxRoutes}`)}</b><p>${tr(`本回合還能訂 ${limits.ordersLeft} 架 / 上限 ${limits.ordersPerTurn} 架`,`Orders left this turn: ${limits.ordersLeft} / ${limits.ordersPerTurn}`)}</p></div><p class="hint">${app.active?tr('本期營運中，結算後才能訂機或退租；可先規劃下期班表。','Operations are running. Order or retire aircraft after settlement; next-turn schedules can be planned now.'):tr('手動租機或購機，下回合交付才能使用。租機先付 2 個月可退押金；閒置飛機照付租金。','Order aircraft manually. Delivery is next turn. Leases require a refundable two-month deposit; idle aircraft still cost rent.')}</p><div id="fleetmsg" role="status" class="hint"></div><div class="fleet-cards">${types.map(t=>{
+      const a=AIRCRAFT[t],n=need[t]||0,h=have[t]||0,q=B.aircraftQuote(s,t),buy=B.aircraftQuote(s,t,'own');
+      const spare=Math.max(0,h-Math.max(n,B.fleetNeeded(s,s.routes)[t]||0)),leased=s.fleet.filter(a=>a.type===t&&a.kind==='lease').length,owned=h-leased;
+      const closed=app.active||limits.ordersLeft<1||limits.committed>=limits.maxFleet||s.turn>=modeOf(s.mode).turns-1;
+      return `<article class="fleet-card fleet-order-card">${aircraftArt(t)}<div><b>${esc(pick(a))}</b>${aircraftStats(t,bizModel())}<span>${tr(`已交機 ${h} 架 · 班表需要 ${n} 架`,`Delivered ${h} · schedule needs ${n}`)}</span><small>${tr('月租','Monthly rent')} ${fmtUSD(q.rate)} · ${tr('押金','Deposit')} ${fmtUSD(q.upfront)}</small><div class="fleet-actions"><button type="button" class="btn sec" data-lease="${t}" ${closed||s.cash<q.upfront?'disabled':''}>${tr('租 1 架','Lease 1')}</button>${modeOf(s.mode).buy?`<button type="button" class="btn sec" data-buy="${t}" ${closed||s.cash<buy.upfront?'disabled':''}>${tr('買 1 架','Buy 1')} · ${fmtUSD(buy.upfront)}</button>`:''}<button type="button" class="ghost" data-return="${t}" ${app.active||!spare||!leased?'disabled':''}>${tr('退租 1 架','Return 1')}</button>${owned?`<button type="button" class="ghost" data-sell="${t}" ${app.active||!spare?'disabled':''}>${tr('出售 1 架','Sell 1')}</button>`:''}</div></div></article>`;
+    }).join('')}</div>${s.fleetOrders?.length?`<div class="psec"><h3>${tr('待交機訂單','Awaiting delivery')}</h3>${s.fleetOrders.map(o=>`<div class="fleet-pending"><div><b>${esc(pick(AIRCRAFT[o.type]))}</b><small>${o.kind==='own'?tr('購買','Purchase'):tr('租賃','Lease')} · ${tr('下回合交付','Arrives next turn')} · ${tr('已付','Paid')} ${fmtUSD(o.upfront)}</small></div><button type="button" class="ghost" data-cancel-order="${o.id}" ${app.active?'disabled':''}>${tr('取消','Cancel')}</button></div>`).join('')}</div>`:''}<p class="hint">${tr('退租會退回押金，另計 2 個月租金的解約費。取消待交機訂單全額退款，本回合額度不返還。維修基地可增加機隊與航點容量。以上為遊戲規則。','Returns refund the deposit and incur a two-month termination fee. Cancelling a pending order refunds the upfront payment but does not restore this turn’s quota. A maintenance depot increases fleet and destination capacity. These are game rules.')}</p>
     ${isSeasonMode(s.mode)?`<div class="psec"><h3>${tr('經營模式','Business model')}</h3><div class="seg"><button type="button" data-bm="fsc" aria-pressed="${d.businessModel==='fsc'}">${tr('全服務','Full-service')}</button><button type="button" data-bm="lcc" aria-pressed="${d.businessModel==='lcc'}">${tr('廉價航空','Low-cost')}</button></div><p class="hint">${tr('廉航增加座位、降低成本，另收行李與餐飲費。中途轉型需要改裝費。','Low-cost adds seats, cuts cost and charges for bags and meals. Switching needs a refit.')}</p></div>`:''}
     <div class="fuel-market psec"><div class="section-eyebrow">${tr('燃油市場','FUEL MARKET')}</div><div class="fuel-price"><b>×${s.fuelSpot.toFixed(2)}</b><span>${tr('相對基準油價','relative to baseline')}</span></div><h3>${term('避險',tr('鎖定燃油價格','Lock fuel prices'))}<b id="hedgeval">${hedgePct}%</b></h3><input type="range" id="hedge" min="0" max="100" step="10" value="${hedgePct}" ${hedgeOk?'':'disabled'} aria-label="${tr('避險比例','Hedge share')}"><p class="hint">${hedgeOk?tr('鎖價要付保費。油價漲了少賠，跌了也少賺。','Locking has a premium. It protects against rises but limits gains from falls.'):tr(`第 ${modeOf(s.mode).hedgeFromTurn+1} 個月起開放避險。`,`Hedging opens in month ${modeOf(s.mode).hedgeFromTurn+1}.`)}</p>
     ${hasTank?`<div class="fuel-reserve"><b>${tr('儲油','Fuel in storage')} ${fmtNum((s.reserve?.kg||0)/1000)} t</b><p class="hint">${tr('本次預購','This order')} ${fmtNum(order.kg/1000)} t · ${esc(fmtUSD(order.cost))}</p><button type="button" class="btn sec block" id="buy-fuel" ${s.reserve?.kg>1||!routes.length?'disabled':''}>${d.buyFuel?tr('取消預購','Cancel order'):tr('預購 3 個月燃油','Prebuy 3 months')}</button><p class="hint">${tr('預購未避險部分的 30%，費用在下一次開始營運時扣除。','Prebuy 30% of unhedged fuel; cash is charged at the next start.')}</p></div>`:''}</div>`;
   $('#aircraft-guide').onclick=aircraftGuide;
-  $$('[data-acq]').forEach(b=>b.onclick=()=>{d.acquire=b.dataset.acq;renderPanel();});$$('[data-bm]').forEach(b=>b.onclick=()=>{d.businessModel=b.dataset.bm;if('b-model' in d.eventChoices)d.eventChoices['b-model']=b.dataset.bm;renderPanel();});
+  $$('[data-lease]').forEach(b=>b.onclick=()=>commitFleet({lease:{[b.dataset.lease]:1}}));
+  $$('[data-buy]').forEach(b=>b.onclick=()=>commitFleet({buy:{[b.dataset.buy]:1}}));
+  $$('[data-return]').forEach(b=>b.onclick=()=>commitFleet({returnLease:{[b.dataset.return]:1}}));
+  $$('[data-sell]').forEach(b=>b.onclick=()=>commitFleet({sell:{[b.dataset.sell]:1}}));
+  $$('[data-cancel-order]').forEach(b=>b.onclick=()=>commitFleet({cancelOrders:[Number(b.dataset.cancelOrder)]}));
+  $$('[data-bm]').forEach(b=>b.onclick=()=>{d.businessModel=b.dataset.bm;if('b-model' in d.eventChoices)d.eventChoices['b-model']=b.dataset.bm;renderPanel();});
   $('#hedge').oninput=()=>{d.hedge=Number($('#hedge').value)/100;$('#hedgeval').textContent=`${$('#hedge').value}%`;saveGame();};
   $('#buy-fuel')?.addEventListener('click',()=>{d.buyFuel=!d.buyFuel;renderPanel();});
 }
@@ -387,10 +389,11 @@ const fareName = (f) => ({ low: tr('低價', 'Low'), mid: tr('中價', 'Mid'), h
 function defaultChoice(city) {
   const s = app.state, o = B.routeOptions(planningState(), city), el = o.eligibleTypes;
   if(!el.length)return {type:null,weekly:3,note:tr('此模式沒有航程足夠的機型。','No aircraft in this mode has enough range.')};
-  const narrow = el.filter((t) => !AIRCRAFT[t].widebody), pool = narrow.length ? narrow : el;
+  const ready = el.filter(t => B.routeCapacity(planningState(),draftRoutes().concat({city,type:t,weekly:1,fare:'mid'})).fits), available = ready.length ? ready : el;
+  const narrow = available.filter((t) => !AIRCRAFT[t].widebody), pool = narrow.length ? narrow : available;
   const est = (t, w) => { try { return B.estimateRoute(planningState(), city, t, w, 'mid')?.profit ?? -Infinity; } catch { return -Infinity; } };
   const asc = [...pool].sort((a, b) => seatsOf(a) - seatsOf(b));
-  const choices = asc.map(type => [1,2,3,4,5,7,10,14].filter(w=>w<=o.maxWeekly).map(weekly=>({type,weekly,profit:est(type,weekly)})).sort((a,b)=>b.profit-a.profit)[0]);
+  const choices = asc.map(type => [1,2,3,4,5,7,10,14].filter(w=>w<=o.maxWeekly&&(!ready.length||B.routeCapacity(planningState(),draftRoutes().concat({city,type,weekly:w,fare:'mid'})).fits)).map(weekly=>({type,weekly,profit:est(type,weekly)})).sort((a,b)=>b.profit-a.profit)[0]);
   const ps = choices.map(x=>x.profit), top = Math.max(...ps), tol = Math.max(0.1 * Math.abs(top), 30000);
   const type = asc[ps.findIndex((p) => p >= top - tol)] || asc[0];   // smallest type within 10% of the best estimate
   const weekly = choices.find(x=>x.type===type).weekly;
@@ -404,15 +407,16 @@ function renderRoutePanel() {
   const s = app.state, city = app.city, c = CITIES[city], o = B.routeOptions(planningState(), city);
   const open = app.draft.routes.has(city);
   if (!open && !app.tmp) { const d = defaultChoice(city); app.tmp = { city, type: d.type, weekly: d.weekly, fare: 'mid', defType: d.type, note: d.note }; }
-  const r = open ? app.draft.routes.get(city) : app.tmp;
+  const r = { ...(open ? app.draft.routes.get(city) : app.tmp) };
   if (!o.eligibleTypes.includes(r.type)) r.type = o.eligibleTypes[0];
-  const routes = draftRoutes().filter((x) => x.city !== city).concat(open || true ? [r] : []);
-  const need = needMap(B.fleetNeeded(planningState(), routes)), have = fleetCounts(s);
+  const others = draftRoutes().filter(x => x.city !== city), routes = others.concat(r);
+  const capacity = B.routeCapacity(planningState(),routes), plusFits = B.routeCapacity(planningState(),others.concat({...r,weekly:r.weekly+1})).fits;
+  const need = needMap(B.fleetNeeded(planningState(), routes)), have = fleetCounts(planningState());
   const activeRoute=app.active?.report.routes.find(x=>x.city===city);
   const ac = AIRCRAFT[r.type];
   const bh = o.blockHoursByType?.[r.type] ?? o.blockHours, hrsWeek = r.weekly * 2 * bh;
-  const acOpts = o.eligibleTypes.length ? o.eligibleTypes.map((t) => { const a = AIRCRAFT[t]; return `
-    <button type="button" class="ac-opt" role="radio" aria-checked="${r.type === t}" data-type="${esc(t)}">${aircraftArt(t)}<div class="t"><b>${esc(pick(a))}</b>${aircraftStats(t,bizModel())}<small>${tr(`租金約 ${fmtUSD(a.leasePerMonth)}／月`, `Lease ≈ ${fmtUSD(a.leasePerMonth)}/mo`)}</small></div></button>`; }).join('') : `<div class="callout warn">${tr('目前沒有任何機型飛得到這麼遠。', 'No aircraft type can fly this far.')}</div>`;
+  const acOpts = o.eligibleTypes.length ? o.eligibleTypes.map((t) => { const a = AIRCRAFT[t], fits=B.routeCapacity(planningState(),others.concat({...r,type:t,weekly:1})).fits; return `
+    <button type="button" class="ac-opt" role="radio" aria-checked="${r.type === t}" data-type="${esc(t)}" ${open&&!fits?'disabled':''}>${aircraftArt(t)}<div class="t"><b>${esc(pick(a))}</b>${aircraftStats(t,bizModel())}<small>${tr(`已交機 ${have[t]||0} 架`,`${have[t]||0} delivered`)}${open&&!fits?' · '+tr('運能不足','No spare capacity'):''}</small><small>${tr(`租金約 ${fmtUSD(a.leasePerMonth)}／月`, `Lease ≈ ${fmtUSD(a.leasePerMonth)}/mo`)}</small></div></button>`; }).join('') : `<div class="callout warn">${tr('目前沒有任何機型飛得到這麼遠。', 'No aircraft type can fly this far.')}</div>`;
   $('#pscroll').innerHTML = `
     <button type="button" class="back-sm" id="back">‹ ${tr('回總覽', 'Overview')}</button>
     <div class="route-code-heading">${s.hub}<span>→</span>${city}</div><p class="decision-timing">${app.active?tr('修改下期航線，本期班表已確定。','Planning next turn; the current schedule is fixed.'):tr('先看估計損益，再決定班表。','Review estimated profit before setting the schedule.')}</p><h2>${esc(pick(hubOf(s.hub)))} → ${esc(pick(c))} <small class="hint">${esc(pick(c, 'en', 'zh'))}</small></h2>
@@ -423,22 +427,30 @@ function renderRoutePanel() {
       ${marketNote(o)}<p class="hint" style="margin-top:6px">${tr('其他航空每週座位', 'Other airlines’ seats/week')}：<b>${fmtNum(o.otherSeatsPerWeek)}</b> · ${tr('你的每週座位', 'Your seats/week')}：<b id="your-seats">${fmtNum(2*r.weekly*seatsOf(r.type))}</b>。${tr('增班會分走客人；其他航空在後續回合逐步調整運力。','More flights split demand; other airlines adjust capacity in later turns.')} ${o.rivalsOnRoute ? `<span class="pill warn">${tr(`${o.rivalsOnRoute} 家主要對手`, `${o.rivalsOnRoute} named rival(s)`)}</span>` : ''} ${o.slotLimited ? `<span class="pill warn">${tr('機場時段有限', 'Slot-limited')}</span>` : ''}</p></div>
     <div class="psec"><h3><span>${tr('機型', 'Aircraft')}</span><button type="button" class="ghost" id="aircraft-guide">${tr('比較全部機型','Compare all aircraft')}</button></h3>${rangeComparison(r.type,o.distanceKm,!!r.type&&o.eligibleTypes.includes(r.type))}${!open && r.note && r.type === r.defType ? `<p class="hint" style="margin-bottom:6px">${esc(r.note)}</p>` : ''}<div role="radiogroup" aria-label="${tr('機型', 'Aircraft')}">${acOpts}</div></div>
     <div class="psec"><h3><span>${term('週班次', tr('每週班次', 'Flights per week'))}</span><span class="hint">${tr('一班＝來回一趟', 'one = one round trip')}</span></h3>
-      <div class="stepper"><button type="button" id="wm" aria-label="${tr('減少班次', 'Fewer')}" ${r.weekly <= 1 ? 'disabled' : ''}>−</button><output id="wv" aria-live="polite">${r.weekly}</output><button type="button" id="wp" aria-label="${tr('增加班次', 'More')}" ${r.weekly >= (o.maxWeekly || 28) ? 'disabled' : ''}>＋</button><small>${tr(`每週約 ${fmtNum(r.weekly * 2 * seatsOf(r.type))} 個單程座位`, `≈ ${fmtNum(r.weekly * 2 * seatsOf(r.type))} one-way seats/wk`)}</small></div></div>
+      <div class="stepper"><button type="button" id="wm" aria-label="${tr('減少班次', 'Fewer')}" ${r.weekly <= 1 ? 'disabled' : ''}>−</button><output id="wv" aria-live="polite">${r.weekly}</output><button type="button" id="wp" aria-label="${tr('增加班次', 'More')}" ${r.weekly >= (o.maxWeekly || 28) || !plusFits ? 'disabled' : ''}>＋</button><small>${tr(`每週約 ${fmtNum(r.weekly * 2 * seatsOf(r.type))} 個單程座位`, `≈ ${fmtNum(r.weekly * 2 * seatsOf(r.type))} one-way seats/wk`)}</small></div></div>
     <div class="psec"><h3><span>${tr('票價水準', 'Fare level')}</span></h3><div class="seg" role="group" aria-label="${tr('票價水準', 'Fare level')}">${['low', 'mid', 'high'].map((f) => `<button type="button" class="fare-btn" aria-pressed="${r.fare === f}" data-fare="${f}"><b>${esc(fareName(f))}</b><small>${esc(fmtFare(o.refFare[f]))}</small></button>`).join('')}</div>
       <p class="hint" style="margin-top:6px">${tr('價格低，客人多但每人賺得少。價格高，客人少。', 'Lower fares fill seats but earn less per passenger.')}</p></div>
     <div class="psec"><div class="callout">${tr(`這條航線每週飛行約 ${hrsWeek.toFixed(0)} 小時，全公司需要 ${esc(pick(ac))} ${need[r.type] ?? '—'} 架，目前有 ${have[r.type] || 0} 架。`, `About ${hrsWeek.toFixed(0)} block hours/week. Fleet need: ${need[r.type] ?? '—'} × ${esc(pick(ac))}, you own ${have[r.type] || 0}.`)}</div></div>
-    <div class="psec" id="estbox"></div>`;
+    ${!capacity.fits?`<div class="callout warn" id="route-capacity">${capacity.routeLimit?tr(`航點容量已滿（${B.fleetLimits(planningState()).maxRoutes} 個），請關閉航線或興建維修基地。`,`Destination capacity is full (${B.fleetLimits(planningState()).maxRoutes}). Close a route or build a depot.`):capacity.slotsExhausted?tr('基地起降時段已滿，請減少其他航線的班次。','Hub slots are full. Reduce frequency on other routes.'):tr('機隊運能不足，請減少班次、調整其他航線，或先訂機並等待交付。','Insufficient aircraft hours. Reduce frequency, adjust other routes, or order aircraft and wait for delivery.')}</div>`:''}<button type="button" class="ghost block" id="route-fleet">${tr('前往機隊訂機或查看運能','Order aircraft or check capacity')} →</button><div class="psec" id="estbox"></div>`;
   $('#pfoot').innerHTML = open
     ? `<div style="display:flex;gap:10px"><button type="button" class="btn block" id="done">${tr('完成', 'Done')}</button><button type="button" class="btn sec" id="close">${tr('關閉航線', 'Close route')}</button></div>`
-    : `<button type="button" class="btn block" id="open" ${o.eligibleTypes.length ? '' : 'disabled'}>${tr('開這條航線', 'Open this route')}</button>`;
-  const upd = () => { if (open) { app.draft.routes.set(city, r); refreshMap(); } renderRoutePanel(); };
+    : `<button type="button" class="btn block" id="open" ${o.eligibleTypes.length && capacity.fits ? '' : 'disabled'}>${capacity.fits?tr('開這條航線','Open this route'):capacity.routeLimit?tr('航點容量已滿','Destination capacity full'):capacity.slotsExhausted?tr('基地時段已滿','Hub slots full'):tr('機隊運能不足','Insufficient aircraft capacity')}</button>`;
+  const upd = next => {
+    if (open) {
+      while (next.weekly>1 && !B.routeCapacity(planningState(),others.concat(next)).fits) next.weekly--;
+      if (!B.routeCapacity(planningState(),others.concat(next)).fits) return;
+      app.draft.routes.set(city,next); refreshMap();
+    } else app.tmp=next;
+    renderRoutePanel(); saveGame();
+  };
   $('#back').onclick = () => { app.city = null; app.tmp = null; refreshMap(); renderPanel(); };
-  $$('[data-type]').forEach((b) => b.addEventListener('click', () => { r.type = b.dataset.type; upd(); }));
-  $('#wm').onclick = () => { r.weekly = Math.max(1, r.weekly - 1); upd(); };
-  $('#wp').onclick = () => { r.weekly = Math.min(o.maxWeekly || 28, r.weekly + 1); upd(); };
-  $$('[data-fare]').forEach((b) => b.addEventListener('click', () => { r.fare = b.dataset.fare; upd(); }));
+  $$('[data-type]').forEach(b => b.onclick = () => upd({...r,type:b.dataset.type}));
+  $('#wm').onclick = () => upd({...r,weekly:Math.max(1,r.weekly-1)});
+  $('#wp').onclick = () => upd({...r,weekly:Math.min(o.maxWeekly||28,r.weekly+1)});
+  $$('[data-fare]').forEach(b => b.onclick = () => upd({...r,fare:b.dataset.fare}));
+  $('#route-fleet')?.addEventListener('click',()=>openPanel('fleet'));
   if (open) { $('#done').onclick = $('#back').onclick; $('#close').onclick = () => { app.draft.routes.delete(city); app.city = null; refreshMap(); renderPanel(); renderHud(); }; }
-  else $('#open')?.addEventListener('click', () => { app.draft.routes.set(city, { city: r.city, type: r.type, weekly: r.weekly, fare: r.fare }); app.tmp = null; app.city = null; refreshMap(); renderPanel(); renderHud(); routeOpened(r); });
+  else $('#open')?.addEventListener('click', () => { if(!B.routeCapacity(planningState(),others.concat(r)).fits)return; app.draft.routes.set(city, { city: r.city, type: r.type, weekly: r.weekly, fare: r.fare }); app.tmp = null; app.city = null; refreshMap(); renderPanel(); renderHud(); routeOpened(r); });
   $('#aircraft-guide').onclick=aircraftGuide;
   renderEstimate(r);
 }
@@ -600,7 +612,7 @@ function renderResults() {
       ${r.costs ? `<details class="cb"><summary>${tr('成本拆開看', 'Cost breakdown')}</summary>${costBlock(r.costs, r.cost)}</details>` : ''}</article>`; }).join('');
   appEl.innerHTML = `<div class="rwrap">
     <div class="rhead"><div><small>${esc(turnLabel(s, app.reportTurn))}</small><h1>${tr('本期結算', 'TURN COMPLETE')}</h1></div></div>
-    ${careerResult(s,rep)}${resultBadges(s,rep)}
+    ${careerResult(s,rep)}${resultBadges(s,rep)}${rep.deliveries?.length?`<section class="card"><h2>${tr('新機已抵達基地','New aircraft delivered')}</h2><p>${rep.deliveries.map(o=>esc(pick(AIRCRAFT[o.type]))).join(' · ')}</p><p class="hint">${tr('下一回合可安排航線；從使用這期開始支付租金或貸款成本。','Available next turn; rent or financing costs start from that turn.')}</p></section>`:''}
     <section class="card"><h2>${tr('公司整體', 'Company')}</h2>
       <div class="profit num ${co.profit >= 0 ? 'pos' : 'neg'}">${esc(fmtUSD(co.profit))}</div>
       <p class="hint">${tr('淨利率', 'Net margin')} <b>${fmtPct(m)}</b>，${beat ? tr('高於', 'above') : tr('低於', 'below')}${tr('行業的', ' the industry’s')} ${fmtPct(INDUSTRY)} · ${tr('期末現金', 'Cash')} ${esc(fmtUSD(co.cash))}</p>
