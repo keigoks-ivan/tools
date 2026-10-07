@@ -1,5 +1,5 @@
 // Scripted strategies used by the tests and for calibration. Pure functions of (state, lastReport) -> decisions.
-import { newGame, applyDecisions, simulateTurn, pendingEvents, fleetNeeded, estimateRoute, routeOptions, endReport, fleetLimits, aircraftQuote, routeCapacity, fleetReadiness } from './model.mjs';
+import { newGame, applyDecisions, simulateTurn, pendingEvents, fleetNeeded, estimateRoute, routeOptions, endReport, fleetLimits, aircraftQuote, routeCapacity, fleetReadiness,crewAvailability,crewQuote } from './model.mjs';
 import { CITIES, AIRCRAFT, MODES, EVENTS } from './data.mjs';
 
 const FREQS = [1, 2, 3, 4, 5, 7, 10, 14, 21, 28];
@@ -42,12 +42,12 @@ function fleetMoves(state, routes) {
 // A sensible operator: greedy network planner. Starting from nothing, it repeatedly adds the next frequency step (or a new route) with the best
 // extra profit per extra aircraft until its fleet budget is used, hedges half, holds fares in a price war, settles a strike, takes relief
 // in a pandemic, and keeps running routes unless they clearly lose money. It only uses public API (estimateRoute) and ignores transfer traffic.
-function networkPlanner({ model = 'fsc', budget = null, hedge = 0.5, minLF = 0.62, buy = false } = {}) {
+function networkPlanner({ model = 'fsc', budget = null, hedge = 0.5, minLF = 0.62, buy = false,types = null } = {}) {
   let mem = { planTurn: -99 };
   return function (state, last) {
     const m = MODES[state.mode];
     if (state.turn === 0) mem = { planTurn: -99 };
-    const bud = budget ?? (buy ? 4 : state.mode === 'year' ? 3 : 9);
+    const bud = budget ?? (buy ? 4 : state.mode === 'year' ? 3 : 4);
     const every = state.mode === 'year' ? 6 : 6;
     const dec = { routes: [], fleet: {}, eventChoices: {} };
     for (const e of pendingEvents(state)) {
@@ -82,6 +82,7 @@ function networkPlanner({ model = 'fsc', budget = null, hedge = 0.5, minLF = 0.6
       if (id === st.hub) continue;
       const o = routeOptions(st, id); if (!o) continue;
       for (const ty of o.eligibleTypes) {
+        if(types&&!types.includes(ty))continue;
         if (model === 'lcc' && AIRCRAFT[ty].widebody) continue;
         const lv = [];
         for (const w of FREQS) {
@@ -164,7 +165,7 @@ function orderMoves(state, target, routes, buy = false) {
   for (const [type,n] of Object.entries(need)) {
     const have=state.fleet.filter(a=>a.type===type).length+(state.fleetOrders||[]).filter(a=>a.type===type).length;
     const kind=buy&&MODES[state.mode].buy?'own':'lease',q=aircraftQuote(state,type,kind);
-    const count=q.readyTurn>=MODES[state.mode].turns?0:Math.max(0,Math.min(n-have,left,Math.floor(cash/q.upfront)));
+    const count=q.readyTurn+(state.mode==='year'?3:1)>=MODES[state.mode].turns?0:Math.max(0,Math.min(n-have,left,Math.floor(cash/q.upfront)));
     if(count){(kind==='own'?purchase:lease)[type]=count;left-=count;cash-=count*q.upfront;}
   }
   for(const type of new Set(state.fleet.map(a=>a.type))){
@@ -175,6 +176,24 @@ function orderMoves(state, target, routes, buy = false) {
     if(spare){ret[type]=Math.min(spare,leased);if(spare>leased)sell[type]=spare-leased;}
   }
   return {lease,buy:purchase,returnLease:ret,sell};
+}
+function personnelMoves(state,target,routes,fleet={}){
+  const wanted=crewAvailability(state,target),flying=crewAvailability(state,routes),hire={},release={};
+  let places=Math.max(0,fleetLimits(state).maxFleet+4-Object.values(wanted).reduce((n,c)=>n+c.ready+c.pending,0));
+  let cash=state.cash-Object.entries(fleet.lease||{}).reduce((n,[t,k])=>n+k*aircraftQuote(state,t).upfront,0)
+    -Object.entries(fleet.buy||{}).reduce((n,[t,k])=>n+k*aircraftQuote(state,t,'own').upfront,0);
+  for(const [type,c]of Object.entries(wanted)){
+    const q=crewQuote(state,type);
+    // Synchronise training with delivery instead of paying idle rosters several months early.
+    const arriving=state.fleet.filter(a=>a.type===type).length+(state.fleetOrders||[]).filter(o=>o.type===type&&o.readyTurn<=q.readyTurn).length
+      +((fleet.lease?.[type]||0)&&aircraftQuote(state,type).readyTurn<=q.readyTurn?fleet.lease[type]:0)
+      +((fleet.buy?.[type]||0)&&aircraftQuote(state,type,'own').readyTurn<=q.readyTurn?fleet.buy[type]:0);
+    const count=q.readyTurn>=MODES[state.mode].turns?0:Math.min(places,Math.max(0,Math.min(c.required,arriving)-c.ready-c.pending),Math.floor(Math.max(0,cash)/q.fee));
+    if(count){hire[type]=count;places-=count;cash-=count*q.fee;}
+    const spare=c.ready-Math.max(c.required,flying[type].required);
+    if(spare>0&&(MODES[state.mode].turns-state.turn)*MODES[state.mode].monthsPerTurn>2){release[type]=Math.min(spare,Math.floor(Math.max(0,cash)/(2*q.monthly)));cash-=release[type]*2*q.monthly;}
+  }
+  return {hire,release};
 }
 export function sensibleBot(options = {}) {
   const planner=networkPlanner(options);let target=[];
@@ -194,7 +213,8 @@ export function sensibleBot(options = {}) {
       const fit=fitSchedules(st,routes.concat(r));if(fit.length>routes.length)routes.push(fit.at(-1));
       if(routes.length>=Math.min(fleetLimits(st).maxRoutes,state.mode==='year'?5:8))break;
     }
-    return {...d,maintenance,routes,fleet:orderMoves(st,target,routes,options.buy)};
+    const fleet=orderMoves(st,target,routes,options.buy);
+    return {...d,maintenance,routes,fleet,personnel:personnelMoves(st,target,routes,fleet)};
   };
 }
 
@@ -206,7 +226,8 @@ export function naiveBot() {
     const near = Object.keys(CITIES).filter(c => c !== state.hub).map(c => ({ c, o: routeOptions(state, c) })).filter(x => x.o.eligibleTypes.includes(big)).sort((a, b) => a.o.distanceKm - b.o.distanceKm).slice(0, 3);
     const routes = near.map(x => ({ city: x.c, type: big, weekly: 7, fare: 'low' }));
     const flying=fitSchedules(state,routes);
-    return {routes:flying,fleet:orderMoves(state,routes,flying),eventChoices:{}};
+    const fleet=orderMoves(state,routes,flying);
+    return {routes:flying,fleet,personnel:personnelMoves(state,routes,flying,fleet),eventChoices:{}};
   };
 }
 export function idleBot() { return () => ({}); }
@@ -235,7 +256,7 @@ export function frozen(inner, { hedgeFrom = null, hedge = 0 } = {}) {
   let first = null;
   return function (state, last) {
     if (state.turn === 0 || state.turn < 5) first = inner(state, last);
-    const dec = { routes: first.routes, fleet: state.turn < 5 ? first.fleet : {}, eventChoices: {} };
+    const dec = { routes: first.routes, fleet: state.turn < 5 ? first.fleet : {}, personnel:state.turn<5?first.personnel:{}, eventChoices: {} };
     if (state.turn === 0 && first.businessModel) dec.businessModel = first.businessModel;
     if (hedge > 0 && state.turn >= (hedgeFrom ?? MODES[state.mode].hedgeFromTurn) && state.hedge.frac < hedge) dec.hedge = hedge;
     return dec;

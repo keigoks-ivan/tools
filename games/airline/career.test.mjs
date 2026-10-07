@@ -98,7 +98,8 @@ test('recommended first-flight schedules can complete the contract within its de
       const wanted=[offer.plan],fleet=planFleet(s,wanted);
       const routes=M.routeCapacity(s,wanted).fits?wanted:[];
       // Keep existing aircraft during the waiting turn; this contract can still finish before its deadline.
-      const out=M.applyDecisions(s,{routes,fleet:routes.length?fleet:{lease:fleet.lease}});assert.equal(out.errors.length,0);
+      const hire=Object.fromEntries(Object.entries(M.crewAvailability(s,wanted)).map(([type,c])=>[type,Math.max(0,c.missing-c.pending)]));
+      const out=M.applyDecisions(s,{routes,fleet:routes.length?fleet:{lease:fleet.lease},personnel:{hire}});assert.equal(out.errors.length,0);
       s=M.simulateTurn(out.state).state;
     }
     assert.ok(s.career.completed.some(m=>m.id===offer.id),`${mode}/${hub}: ${JSON.stringify(s.career)}`);

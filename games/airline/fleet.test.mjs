@@ -26,7 +26,7 @@ test('lease deposit reserves cash immediately; only delivered aircraft can fly',
   assert.equal(out.state.fleet.length,2);assert.equal(out.state.fleetOrders.length,1);
   const routes=[{city:'LAX',type:'MQ-350',weekly:1,fare:'mid'}];
   assert.ok(codes(M.applyDecisions(out.state,{routes})).includes('INSUFFICIENT_FLEET'));
-  const arrival=delivered(out.state);
+  const arrival=delivered(M.applyDecisions(out.state,{personnel:{hire:{'MQ-350':1}}}).state);
   assert.equal(arrival.report.company.costs.ownership,800000);
   assert.equal(arrival.state.fleet.length,3);assert.equal(arrival.state.fleetOrders.length,0);
   assert.equal(arrival.state.fleet.at(-1).deposit,q.upfront);
@@ -82,7 +82,7 @@ test('purchases commit down payment now; loan and depreciation start after deliv
 test('return refunds exactly the paid deposit; cancellation cannot mint cash',()=>{
   const s=delivered(order(M.newGame(),'MQ-350').state).state,a=s.fleet.at(-1);
   const returned=M.applyDecisions(s,{fleet:{returnLease:{'MQ-350':1}}});assert.deepEqual(returned.errors,[]);
-  assert.equal(returned.state.cash,s.cash+a.deposit);assert.equal(returned.state.pending.ownershipCash,2*a.rate);
+  assert.equal(returned.state.cash,s.cash+a.deposit);assert.equal(returned.state.pending.ownershipCash,M.leaseReturnQuote(s,a).fee);
   const id=order(M.newGame()).state.fleetOrders[0].id;
   const queued=order(M.newGame()).state,cash=queued.cash,upfront=queued.fleetOrders[0].upfront;
   const cancelled=M.applyDecisions(queued,{fleet:{cancelOrders:[id,id]}});

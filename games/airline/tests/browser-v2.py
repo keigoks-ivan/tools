@@ -13,7 +13,7 @@ async def decisions(page, kind='sensible'):
     return await page.evaluate('''async kind => {
         if(!window.testBots){const b=await import('./bots.mjs');window.testBots={sensible:b.sensibleBot(),naive:b.naiveBot()};}
         const a=__tq.app,s=a.state,d=testBots[kind](s,a.report);
-        const ordered=__tq.B.applyDecisions(s,{routes:d.routes||s.routes,fleet:d.fleet||{},eventChoices:d.eventChoices,businessModel:d.businessModel,maintenance:d.maintenance});
+        const ordered=__tq.B.applyDecisions(s,{routes:d.routes||s.routes,fleet:d.fleet||{},eventChoices:d.eventChoices,businessModel:d.businessModel,maintenance:d.maintenance,personnel:d.personnel});
         if(ordered.errors.length)throw new Error(JSON.stringify(ordered.errors));
         a.state=ordered.state;
         if(d.maintenance)a.draft.maintenance=d.maintenance;

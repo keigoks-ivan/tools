@@ -5,6 +5,10 @@
 // usedFor lists the CONST / data field the value feeds. url may be null for design values.
 
 export const SOURCES = [
+  { id:'qualified-crew',status:'verified',topicZh:'合格機組與航空公司訓練',topicEn:'Crew qualification and operator training',
+    valueZh:'EASA Air Operations 的 ORO.FC 要求營運人安排合適的機組組成，並完成適用機型或變型的訓練、檢查及近期經驗要求。遊戲據此將交機與合格機組分開；每種機型各用一套輪班編制，未模擬真實個人證照、共同資格與差異訓練。',
+    valueEn:'EASA ORO.FC requires appropriate crew composition and applicable type/variant training, checking and recent experience. The game separates aircraft delivery from roster readiness, using model-specific rotating rosters. Individual licences, common qualifications and differences training are not simulated.',
+    sourceName:'EASA Easy Access Rules for Air Operations, March 2026',url:'https://www.easa.europa.eu/en/document-library/easy-access-rules/online-publications/easy-access-rules-air-operations?erules-id=ERULES-1963177438-11920',usedFor:['crewAvailability','type-qualified roster constraint'] },
   { id: 'route-traffic-tw', status: 'verified', topicZh: '台灣航線實際客量與座位', topicEn: 'Taiwan route passengers and seats',
     valueZh: '民航局 2025 年統計表 53-1、53-2、53-4。桃園—洛杉磯雙向旅客 995,840 人次、座位 1,365,065 個，歷史載客率 73%。只取航線合計，不重複加上各航空公司明細。',
     valueEn: 'Taiwan CAA 2025 tables 53-1, 53-2 and 53-4. TPE–LAX: 995,840 passengers and 1,365,065 seats, both directions; historical load 73%. Route totals only; carrier subtotals are not added again.',
@@ -138,6 +142,10 @@ export const SOURCES = [
 
 // Design values with no external source. Listed so the 「資料來源」 page can show them as design choices.
 export const DESIGN_VALUES = [
+  { id:'staffing-contracts',zhName:'機組、租約與資金調度',enName:'Staffing, leases and treasury',
+    value:'crew fixed share 35%, flight allowance 65%; training fee 0.5 month fixed pay; training 1/2 turns in year (narrow/wide), 1 in decade; cancellation refunds 50%; severance 2 months; standard lease 12/36 months (year/decade), express 3; return fee max(2 months, 25% remaining rent)',
+    zh:'每組代表一套輪班人力，不是一班機組。機組時數上限使用機型的簡化排班預算，並非個人飛時或法定工時。35% 機組費改為固定薪資，65% 隨實際飛行，沒有在原成本上重複加薪資。交機不附送機組；創業機隊已有人員，舊存檔及既有訂單補上編制以保留承諾，舊租約不追溯延長。新租約承諾到期後繼續按月計費，可免解約費退租。等待時間、薪資、訓練費、編制上限與租約解約條件皆為壓縮遊戲設定，不代表真實法規、勞動契約或市場報價。現金支應月數只對固定支出，不含飛行燃油與地勤。',
+    en:'Each roster is a rotating staff establishment, not one flight crew. Hours use simplified aircraft scheduling budgets, not personal or legal duty limits. Existing crew cost is split into 35% fixed payroll and 65% flying allowances rather than double-charged. New aircraft include no staff. Starter aircraft are staffed; legacy fleets and orders receive rosters to honour old commitments, with no retroactive lease extension. New leases roll monthly after commitment expires and can then be returned without a termination fee. Times, pay, training, roster caps and lease termination terms are compressed design assumptions, not regulations, employment terms or market quotes. Cash cover excludes fuel and ground handling.' },
   { id: 'hub-yield', zhName: '各樞紐的票價指數', enName: 'Hub yield index',
     value: 'TPE 1.1659/1.1450, NRT 1.1171/1.0763, SIN 1.0985/1.0855, DXB 1.0843/1.0537, ZRH 1.1461/1.0800 (year/decade); crew scale 1.25',
     zh: '新客量模型重新校準票價與機組成本，使示範玩家的整體淨利率維持 3% 到 8%，成本占比維持既有測試範圍。這些是設計值，不是實收票價或薪資；官方客量與座位沒有為獲利而修改。',

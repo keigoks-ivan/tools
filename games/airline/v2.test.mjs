@@ -75,7 +75,7 @@ test('optional facilities remain modest investments across hubs and both modes',
   assert.ok(idle.end.profit<0);
 });
 test('scenario goals use settled history and require a completed game', () => {
-  const res=play(sensibleBot({budget:6,minLF:.62}),{mode:'year',hub:'TPE',seed:1});res.state.scenario='margin';
+  const res=play(sensibleBot({budget:2,types:['MQ-320'],minLF:.62}),{mode:'year',hub:'TPE',seed:1});res.state.scenario='margin';
   assert.deepEqual(res.errors,[]); // The challenge is winnable through the delivery queue and fleet cap.
   assert.ok(scenarioProgress(res.state).complete);
   assert.equal(scenarioProgress({...res.state,finished:false}).complete,false);
