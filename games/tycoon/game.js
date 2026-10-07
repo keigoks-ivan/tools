@@ -2,6 +2,7 @@
 // 預設網址直接進遊戲；?view=sandbox 進引擎測試台。
 import { createCity } from './city.js';
 import { icon } from './icons.js';
+import { businessIcon } from './business-art.js';
 import { stacked, lines, spark } from './charts.js';
 import { SOURCES } from './sources.js';
 import { listParams } from './params.js';
@@ -102,11 +103,14 @@ async function main() {
   <button data-dk="new" class="mini">${ic.again}<span>新遊戲</span></button>
 </nav>
 <div id="map-controls" class="panel" role="group" aria-label="地圖視角">
-  <button data-camera="left" aria-label="地圖向左旋轉" title="向左旋轉 45 度（也可按 Q 或滑鼠右鍵拖曳）">${ic.again}<span>左轉</span></button>
-  <button data-camera="right" aria-label="地圖向右旋轉" title="向右旋轉 45 度（也可按 E 或滑鼠右鍵拖曳）">${ic.again}<span>右轉</span></button>
+  <button data-camera="left" aria-label="地圖向左旋轉" title="向左旋轉 45 度（Q 或左鍵拖曳）">${ic.again}<span>左轉</span></button>
+  <button data-camera="right" aria-label="地圖向右旋轉" title="向右旋轉 45 度（E 或左鍵拖曳）">${ic.again}<span>右轉</span></button>
+  <button data-camera="in" aria-label="放大地圖" title="放大（滾輪向上）">＋</button>
+  <button data-camera="out" aria-label="縮小地圖" title="縮小（滾輪向下）">−</button>
   <button data-camera="home" aria-label="回到全圖視角" title="回到全圖視角">全圖</button>
   <select id="map-district" aria-label="前往城市區域"><option value="all">選區域</option><option value="old">雲港舊城</option><option value="east">東城新區</option><option value="south">南城新區</option></select>
 </div>
+<div id="map-hint"><span class="desktop-hint">左鍵拖曳旋轉・右鍵或 Shift＋拖曳平移・滾輪縮放</span><span class="touch-hint">單指旋轉・雙指平移、旋轉與縮放</span></div>
 <aside id="side" class="panel" hidden></aside>
 <aside id="event" class="panel" hidden></aside>
 <div id="tut" class="panel" hidden></div>
@@ -130,6 +134,7 @@ async function main() {
   $('#map-controls').addEventListener('click', (e) => {
     const b = e.target.closest('[data-camera]'); if (!b) return;
     if (b.dataset.camera === 'home') { city.setView(homeView); $('#map-district').value = 'all'; }
+    else if (['in', 'out'].includes(b.dataset.camera)) city.setView({ dist: city.getView().dist * (b.dataset.camera === 'in' ? 0.8 : 1.25) });
     else city.setView({ yaw: city.getView().yaw + (b.dataset.camera === 'left' ? 1 : -1) * Math.PI / 4 });
   });
   $('#map-district').addEventListener('change', (e) => {
@@ -207,10 +212,12 @@ async function main() {
   // ───────── 同步 3D：店、標籤 ─────────
   function syncShops() {
     for (const l of S.getLots(world)) {
-      const key = l.state === '空' ? '' : `${l.owner}|${l.name}`;
+      const s = l.state === '空' ? null : world.shops.find(s => s.lotId === l.id && s.status !== 'closed');
+      const cfg = s && { owner: s.owner, name: s.name, businessId: s.businessId, color: s.color || bizOf(s).color, status: s.status, assetLevel: s.assetLevel, prices: s.prices };
+      const key = cfg ? JSON.stringify(cfg) : '';
       if (shown[l.id] === key) continue;
       shown[l.id] = key;
-      if (key) city.setShop(l.id, { owner: l.owner, name: l.name, businessId: l.businessId, color: l.color || (l.owner === 'player' ? PLAYER_COLOR : RIVAL_COLOR) });
+      if (key) city.setShop(l.id, cfg);
       else { city.setShop(l.id, null); city.setLabel(l.id, null); city.setQueue(l.id, 0); }
     }
   }
@@ -220,7 +227,7 @@ async function main() {
       if (s.status === 'renovating') sub = `裝修中，${Math.max(1, Math.ceil((s.openAtT - world.t) / 24))} 天後開張`;
       else if (s.owner === 'player') { const t = S.getShopToday(world, s.id); sub = `今天 ${int(t ? t.cups : 0)} ${unitOf(s)}`; }
       else { const r = S.getRivalInfo(world, s.id); sub = r && r.estDailyCups != null ? `日銷約 ${int(r.estDailyCups)} ${unitOf(s)}` : '營業中'; }
-      city.setLabel(s.lotId, { title: `${bizOf(s).name}・${s.name}`, sub, tone: s.owner === 'player' ? 'green' : 'red' });
+      city.setLabel(s.lotId, { title: s.name, sub: `${bizOf(s).name}・${sub}`, businessId: s.businessId, color: s.color || bizOf(s).color, selected: s.lotId === selLot, tone: s.owner === 'player' ? 'green' : 'red' });
     }
     labelDirty = false;
   }
@@ -312,7 +319,7 @@ async function main() {
   <dt>500 公尺內人口</dt><dd class="num">${int(info.pop500)} 人</dd>
   <dt>500 公尺內營業店</dt><dd class="num">${info.nearbyShops} 家</dd>
 </dl>
-<div class="sec"><h4>選擇創業業態</h4><div class="business-grid">${Object.entries(S.BUSINESSES).map(([id, b]) => `<button class="opt ${selectedBusiness === id ? 'on' : ''}" data-act="business:${id}"><b>${b.name}${b.minPing ? '・大額投資' : ''}</b><small>${wan(S.lotOpenCost(lot, id))} 起（含押金）</small></button>`).join('')}</div><p><b>${biz.model}</b>｜${biz.customer}</p><p class="note">${biz.tradeoff}</p>${biz.minPing ? `<p class="note">地圖標示租賃入口，此業態承租樓層合計 ${leased.ping} 坪；租金與押金按完整面積收取。開店後可付費升級設備，供給增加也會增加維護費。</p>` : ''}<p class="note">所有業態開局可選，只受資金限制。價格、成本、需求與產能是遊戲設計假設；可混合經營，也可專注同業態連鎖。</p></div>
+<div class="sec"><h4>選擇創業業態</h4><div class="business-grid">${Object.entries(S.BUSINESSES).map(([id, b]) => `<button class="opt ${selectedBusiness === id ? 'on' : ''}" data-act="business:${id}"><span class="business-mark" style="color:${b.color}">${businessIcon(id)}</span><b>${b.name}${b.minPing ? '・大額投資' : ''}</b><small>${wan(S.lotOpenCost(lot, id))} 起（含押金）</small></button>`).join('')}</div><p><b>${biz.model}</b>｜${biz.customer}</p><p class="note">${biz.tradeoff}</p>${biz.minPing ? `<p class="note">地圖標示租賃入口，此業態承租樓層合計 ${leased.ping} 坪；租金與押金按完整面積收取。開店後可付費升級設備，供給增加也會增加維護費。</p>` : ''}<p class="note">所有業態開局可選，只受資金限制。價格、成本、需求與產能是遊戲設計假設；可混合經營，也可專注同業態連鎖。</p></div>
 ${expansionEstimateHtml(!ownerBusy)}
 <div class="kv-h">開店要花</div>
 <dl class="kv">
@@ -366,9 +373,10 @@ ${enough ? '<button class="gbtn primary wide" data-act="rent">租下開店</butt
   <div><label>目前排隊</label><b class="num">${int(t.queue)} 人</b></div>
   <div><label>等候時間</label><b class="num ${t.waitMin >= 12 ? 'bad' : ''}">${t.waitMin.toFixed(1)} 分</b></div>
   <div><label>流失客人</label><b class="num ${t.lost > 0 ? 'bad' : ''}">${int(t.lost)} 人</b></div></div>
-<div class="legend sm"><span><i style="background:#3987e5"></i>門市</span><span><i style="background:#d95926"></i>外送</span><span style="margin-left:auto;color:var(--muted)">每小時成交（${unitOf(s)}）</span></div>
+<div class="legend sm"><span><i style="background:#3987e5"></i>門市</span>${bizOf(s).delivery ? '<span><i style="background:#d95926"></i>外送</span>' : ''}<span style="margin-left:auto;color:var(--muted)">每小時成交（${unitOf(s)}）</span></div>
 <div class="hbars"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="今天每小時成交（${unitOf(s)}）">${g}</svg></div>
-<dl class="kv"><dt>今天營收</dt><dd class="num">${money(t.revenue)}</dd><dt>本月至今淨利</dt><dd class="num ${h.mtdPnL.profit >= 0 ? '' : 'bad'}" style="${h.mtdPnL.profit < 0 ? 'color:var(--bad)' : ''}">${money(h.mtdPnL.profit, true)}</dd></dl>
+<dl class="kv"><dt>${bizOf(s).delivery ? '今天入帳（扣平台抽成）' : '今天入帳'}</dt><dd class="num">${money(t.revenue)}</dd><dt>本月至今淨利</dt><dd class="num ${h.mtdPnL.profit >= 0 ? '' : 'bad'}" style="${h.mtdPnL.profit < 0 ? 'color:var(--bad)' : ''}">${money(h.mtdPnL.profit, true)}</dd></dl>
+<p class="note">今天入帳尚未扣商品、耗材、薪資等營運費。${bizOf(s).delivery ? '月報的營收包含平台抽成，抽成另列成本。' : ''}</p>
 ${operationsSummaryHtml(s, t)}
 ${s.shortage ? '<p class="note warn">有人離職，最忙的班少一人。</p>' : ''}`;
   }
@@ -411,8 +419,7 @@ ${s.shortage ? '<p class="note warn">有人離職，最忙的班少一人。</p>
     const SH = V.capacity.shifts;
     const rows = SH.map(([a, b], i) => `<div class="stp"><span>${a}–${b} 點</span><span class="ctl"><button data-act="staff:${i}:-1" ${s.staff[i] <= V.capacity.staffMin ? 'disabled' : ''} aria-label="減一人">−</button><b class="num">${s.staff[i]}</b><button data-act="staff:${i}:1" ${s.staff[i] >= V.capacity.staffMax ? 'disabled' : ''} aria-label="加一人">+</button><span style="color:var(--muted);font-size:12px">人</span></span></div>`).join('');
     const hours = s.staff.reduce((a, n, i) => a + (n - (s.ownerWorks ? 1 : 0)) * (SH[i][1] - SH[i][0]), 0);
-    const wage = Math.round(world.wages[s.wageLevel] * bizOf(s).wageMult);
-    const monthly = hours * 30 * wage * (1 + V.labor.employerPct / 100);
+    const monthly = S.getShopAnalysis(world, s.id).monthlyWage;
     const opts = ['basic', 'market', 'high'].map((l) => `<button class="opt ${s.wageLevel === l ? 'on' : ''}" data-act="wage:${l}"><b><span>${WAGE[l]}時薪</span><span class="num">$${Math.round(world.wages[l] * bizOf(s).wageMult)}／時</span></b><small>品質 ${V.labor.qualityAdj[l] >= 0 ? '+' : '−'}${Math.abs(V.labor.qualityAdj[l])}${l === 'basic' ? '，招不到人，容易有人離職' : ''}</small></button>`).join('');
     return `<div class="sw"><span>老闆自己顧店</span><button class="tg ${s.ownerWorks ? 'on' : ''}" data-act="ownerWork" aria-label="老闆自己顧店" aria-pressed="${s.ownerWorks}"></button></div><p class="note">${s.ownerWorks ? '班表人數含老闆。老闆每天工作 12 小時，每班少支薪一人，報表不另計老闆薪資。' : '班表人數全部是支薪員工。老闆可以選一家店親自顧店。'}</p>${rows}<p class="note">每月人力成本約 <b class="num">${money(monthly)}</b>（${hours} 支薪人時／天，含勞健保與勞退）。人手不夠就會排隊、流失客人。</p><div class="kv-h" style="margin-top:14px">時薪等級</div>${opts}`;
   }
@@ -501,9 +508,9 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
   function openPanel(kind, lotId) {
     if (modal) closeModal();
     panel = kind; if (lotId !== undefined) selLot = lotId;
-    renderSide();
+    renderSide(); labelDirty = true;
   }
-  function closePanel() { panel = null; selLot = null; renderSide(); }
+  function closePanel() { panel = null; selLot = null; renderSide(); labelDirty = true; }
   function updateRepayPreview(input) {
     const co = world.companies.player, l = co.loans.find((x) => x.id === input.dataset.repayInput), amount = +input.value;
     if (!l) return;
@@ -513,7 +520,7 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
     const data = S.getFacilities(world), f = data.facilities.find((f) => f.key === key), co = world.companies.player;
     const status = { none: '尚未建置', building: '施工中', ready: f.active ? '營運中' : '暫停中' }[f.status];
     let body = `<dl class="kv"><dt>建置費</dt><dd>${money(f.cost)}</dd><dt>工期</dt><dd>${f.days} 天</dd><dt>營運固定費</dt><dd>${money(V.expansion.facilities[key].monthly)}／月</dd>${key !== 'warehouse' ? `<dt>暫停固定費</dt><dd>${money(f.standby)}／月</dd>` : ''}</dl>`;
-    if (key !== 'lab') body += `<p class="note">${key === 'warehouse' ? '飲料、咖啡、便當與烘焙店集中採購原料便宜 6%，包材不打折。便利商店與髮廊不適用。原料先付款、2 天後到貨，耗用才列成本；容量按原價額度計，最多 80 萬元。店內首批庫存先用完才領中央原料。' : '每天最多替飲料、咖啡、便當與烘焙店備料 800 份，覆蓋的原料成本少 15%。超額或停產時，各店改自行備料；仍需原班表人力。便利商店與髮廊不使用中央採購或備料。共用批次異常會影響使用備料的分店。'}</p><dl class="kv"><dt>預估每月原料節省</dt><dd>${f.grossSaving == null ? '尚無銷售資料' : money(f.grossSaving)}</dd><dt>扣營運費後效益</dt><dd class="${f.netSaving < 0 ? 'down' : 'up'}">${f.netSaving == null ? '—' : money(f.netSaving, true)}</dd><dt>負擔固定費的規模</dt><dd>${f.breakEvenDaily == null ? '—' : int(f.breakEvenDaily) + ' 份／天'}</dd></dl><p class="note">按可使用後勤的業態之最近月帳銷量與原料組合估算單項效益，假設全月營運且供料充足；便當與烘焙備貨含未售報廢；未計建置回收、折舊與研發收益。${key === 'factory' && f.breakEvenDaily > f.cupsDaily ? '目前每份節省太少，即使滿載仍不足負擔固定費。' : ''}${f.netSaving < 0 ? '目前規模下，這項投資會增加固定費負擔。' : ''}</p>`;
+    if (key !== 'lab') body += `<p class="note">${key === 'warehouse' ? '飲料、咖啡、便當、烘焙與大型餐廳集中採購原料便宜 6%，包材不打折。便利商店、超市、髮廊與健身中心不適用。原料先付款、2 天後到貨，耗用才列成本；容量按原價額度計，最多 80 萬元。店內首批庫存先用完才領中央原料。' : '每天最多替飲料、咖啡、便當與烘焙店備料 800 份，覆蓋的原料成本少 15%。超額或停產時，各店改自行備料；仍需原班表人力。大型餐廳不使用中央備料；便利商店、超市、髮廊與健身中心不使用中央採購或備料。共用批次異常會影響使用備料的分店。'}</p><dl class="kv"><dt>預估每月原料節省</dt><dd>${f.grossSaving == null ? '尚無銷售資料' : money(f.grossSaving)}</dd><dt>扣營運費後效益</dt><dd class="${f.netSaving < 0 ? 'down' : 'up'}">${f.netSaving == null ? '—' : money(f.netSaving, true)}</dd><dt>負擔固定費的規模</dt><dd>${f.breakEvenDaily == null ? '—' : int(f.breakEvenDaily) + ' 份／天'}</dd></dl><p class="note">按可使用後勤的業態之最近月帳銷量與原料組合估算單項效益，假設全月營運且供料充足；便當與烘焙備貨含未售報廢；未計建置回收、折舊與研發收益。${key === 'factory' && f.breakEvenDaily > f.cupsDaily ? '目前每份節省太少，即使滿載仍不足負擔固定費。' : ''}${f.netSaving < 0 ? '目前規模下，這項投資會增加固定費負擔。' : ''}</p>`;
     if (f.status === 'none') body += `<button class="gbtn primary wide" data-act="facilityBuild:${key}" ${co.cash < f.cost ? 'disabled' : ''}>建置${f.name} ${money(f.cost)}</button>${co.cash < f.cost ? '<p class="note warn">現金不足。</p>' : ''}`;
     else if (f.status === 'building') body += `<p class="note warn">還有 ${f.daysLeft} 天完工，完工後開始按天累計固定費。</p>`;
     else {
@@ -543,7 +550,7 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
     const b = e.target.closest('[data-act]'); if (!b || b.disabled) return;
     const [act, a1, a2] = b.dataset.act.split(':');
     const sh = panel === 'shop' ? playerShopAt(selLot) : null;
-    const res = (r) => { if (!r.ok) toast(r.reason, true); else save(); return r.ok; };
+    const res = (r) => { if (!r.ok) toast(r.reason, true); else { syncShops(); labelDirty = hudDirty = true; save(); } return r.ok; };
     if (act === 'close') closePanel();
     else if (act === 'gotoLoan') openPanel('loan');
     else if (act === 'business') { selectedBusiness = a1; renderSide(); }
@@ -607,7 +614,7 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
     if (r.id === 'open-owner') { $('#expansion-estimate').outerHTML = expansionEstimateHtml(r.checked); return; }
     if (r.type !== 'range') return;
     const sh = playerShopAt(selLot);
-    if (r.dataset.price && sh) { const x = S.setPrices(world, sh.id, { [r.dataset.price]: +r.value }); if (!x.ok) toast(x.reason, true); else save(); }
+    if (r.dataset.price && sh) { const x = S.setPrices(world, sh.id, { [r.dataset.price]: +r.value }); if (!x.ok) toast(x.reason, true); else { syncShops(); save(); } }
     else if (r.dataset.markup && sh) { const x = S.setMarkup(world, sh.id, +r.value); if (!x.ok) toast(x.reason, true); else save(); }
   });
 
@@ -642,7 +649,7 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
     const b = e.target.closest('.choice'); if (!b) return;
     const r = S.respondEvent(world, b.dataset.ev, b.dataset.key);
     if (!r.ok) { toast(r.reason, true); return; }
-    activeEventId = null; hudDirty = true; renderEvent(); updateHud(); updateTicker();
+    activeEventId = null; hudDirty = labelDirty = true; syncShops(); renderEvent(); updateHud(); updateTicker();
     if (!document.body.classList.contains('has-event') && prevSpeed && speed === 0 && !modal) setSpeed(prevSpeed);
     save();
   });
@@ -838,7 +845,7 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
     const selected = rep.financials.find((r) => r.ym === reportMonth) || rep.current;
     const periods = [selected, ...rep.financials.slice().reverse().filter((r) => r.ym !== selected.ym).slice(0, 2)];
     const row = (name, key, profit = false) => `<tr><td class="nm">${name}</td>${periods.map((r) => `<td class="num ${profit ? r[key] < 0 ? 'down' : 'up' : ''}">${money(r[key], profit)}</td>`).join('')}</tr>`;
-    return `<div class="card ptable finance finance-detail"><h4>損益明細<select id="finance-period" aria-label="損益明細月份"><option value="current" ${reportMonth === 'current' ? 'selected' : ''}>本月至今</option>${rep.financials.slice().reverse().map((r) => `<option value="${r.ym}" ${reportMonth === r.ym ? 'selected' : ''}>${r.ym}</option>`).join('')}</select></h4><div class="tbl-scroll"><table><thead><tr><th>項目</th>${periods.map((r) => `<th>${r.ym}${r === rep.current ? ' 至今' : ''}</th>`).join('')}</tr></thead><tbody>${row('營收（門市＋外送標價）', 'turnover')}${COST_ROWS.map(([key, name]) => row(name, key)).join('')}${row('總成本', 'totalCost')}${row('淨利', 'netProfit', true)}<tr><td class="nm">淨利率</td>${periods.map((r) => `<td class="num ${r.netProfit < 0 ? 'down' : 'up'}">${r.netMargin == null ? '—' : pct(r.netMargin)}</td>`).join('')}</tr>${row('另列：償還貸款本金', 'loanPrincipal')}${row('另列：開店與設備升級投入', 'shopInvestment')}${row('另列：後勤建置投入', 'facilityCapex')}${row('另列：中央進貨付款', 'stockPurchases')}${row('另列：資產回收現金', 'assetRecoveries')}</tbody></table></div><p class="note">本月成本隨遊戲時間累計，貸款利息按天估列。本金只影響現金，不扣淨利。裝潢、設備與押金在開店時付現，本版未計折舊。${rep.analysis.some((a) => a.ownerWorks) ? '老闆自己顧店的門店未另計老闆薪資。' : ''}${rep.current.incomplete || rep.financials.some((r) => r.incomplete) ? '舊存檔更新前未記錄部分利息、一次性支出與營所稅，受影響月份的淨利僅供參考。' : ''}</p></div>`;
+    return `<div class="card ptable finance finance-detail"><h4>損益明細<select id="finance-period" aria-label="損益明細月份"><option value="current" ${reportMonth === 'current' ? 'selected' : ''}>本月至今</option>${rep.financials.slice().reverse().map((r) => `<option value="${r.ym}" ${reportMonth === r.ym ? 'selected' : ''}>${r.ym}</option>`).join('')}</select></h4><div class="tbl-scroll"><table><thead><tr><th>項目</th>${periods.map((r) => `<th>${r.ym}${r === rep.current ? ' 至今' : ''}</th>`).join('')}</tr></thead><tbody>${row('營收（門市＋外送標價）', 'turnover')}${COST_ROWS.map(([key, name]) => row(name, key)).join('')}${row('總成本', 'totalCost')}${row('淨利', 'netProfit', true)}<tr><td class="nm">淨利率</td>${periods.map((r) => `<td class="num ${r.netProfit < 0 ? 'down' : 'up'}">${r.netMargin == null ? '—' : pct(r.netMargin)}</td>`).join('')}</tr>${row('另列：償還貸款本金', 'loanPrincipal')}${row('另列：開店與設備升級投入', 'shopInvestment')}${row('另列：後勤建置投入', 'facilityCapex')}${row('另列：中央與商品進貨付款', 'stockPurchases')}${row('另列：資產回收現金', 'assetRecoveries')}</tbody></table></div><p class="note">本月成本隨遊戲時間累計，貸款利息按天估列。本金只影響現金，不扣淨利。裝潢、設備與押金在開店時付現，本版未計折舊。${rep.analysis.some((a) => a.ownerWorks) ? '老闆自己顧店的門店未另計老闆薪資。' : ''}${rep.current.incomplete || rep.financials.some((r) => r.incomplete) ? '舊存檔更新前未記錄部分利息、一次性支出與營所稅，受影響月份的淨利僅供參考。' : ''}</p></div>`;
   }
   function profitHistoryHtml(rep) {
     const periods = [rep.current, ...rep.financials.slice().reverse()];
@@ -979,7 +986,7 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
   }
 
   // ───────── 存檔、續玩與可攜式備份 ─────────
-  const savedTime = (date) => date ? new Date(date).toLocaleString('zh-TW', { hour12: false }) : '舊版存檔未記錄時間';
+  function savedTime(date) { return date ? new Date(date).toLocaleString('zh-TW', { hour12: false }) : '舊版存檔未記錄時間'; }
   function updateSaveLabel() {
     const label = $('#save-label'); label.textContent = saveError || saveBlocked ? '未存檔' : '存檔';
     label.parentElement.title = saveError || (savedAt ? `上次保存：${savedTime(savedAt)}` : '存檔與備份');

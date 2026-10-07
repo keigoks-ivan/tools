@@ -35,6 +35,23 @@ button:disabled{cursor:not-allowed}
 #map-controls select{max-width:110px;border:1px solid var(--line);border-radius:8px;background:#222044;color:var(--text2);font:inherit;font-size:12px;padding:5px}
 #map-controls svg{width:18px;height:18px}
 #map-controls [data-camera=right] svg{transform:scaleX(-1)}
+#map-hint{position:fixed;left:114px;top:144px;z-index:4;font-size:11px;color:#eee8d9;text-shadow:0 1px 4px #172a36;pointer-events:none}
+.touch-hint{display:none}
+@media(pointer:coarse){.desktop-hint{display:none}.touch-hint{display:inline}}
+body[data-view=game]{--panel:rgba(20,35,44,.87);--panel-solid:#182b36;--text2:#c2d0d2;--muted:#9aafb5;--gold:#edc17f}
+body[data-view=game] .panel{border-color:rgba(209,227,227,.18);box-shadow:0 10px 30px rgba(9,23,32,.25),inset 0 1px 0 rgba(255,255,255,.08)}
+body[data-view=game] #map-controls select{background:#203742}
+body[data-view=game] #stage canvas{cursor:grab}
+body[data-view=game] .tag .box{max-width:210px;padding:6px 8px;gap:7px;border-radius:8px;background:rgba(23,39,48,.94);border-color:var(--shop-color);box-shadow:0 4px 12px rgba(12,27,32,.3)}
+body[data-view=game] .tag .mk{flex:none;width:27px;height:27px;border-radius:7px;color:var(--shop-color);background:#f5eddb}
+body[data-view=game] .tag b{font-size:12px;max-width:116px;overflow:hidden;text-overflow:ellipsis}
+body[data-view=game] .tag small{font-size:10px;max-width:150px;overflow:hidden;text-overflow:ellipsis;color:#d5dddc}
+body[data-view=game] .tag .owner{flex:none;font-style:normal;font-size:9px;align-self:flex-start;padding:2px 4px;border-radius:3px;background:rgba(255,255,255,.08);color:#ffb6a1}
+body[data-view=game] .tag.me .owner{color:#8be0b7}
+body[data-view=game] .tag.selected .box{box-shadow:0 0 0 2px #edc17f,0 5px 16px rgba(12,27,32,.4)}
+body[data-view=game] .tag .stem{background:linear-gradient(var(--shop-color),rgba(255,255,255,.4));color:var(--shop-color)}
+.business-mark{float:left;width:27px;height:31px;margin:3px 7px 0 0;display:grid;place-items:center}
+.business-mark svg{width:25px;height:25px}
 
 /* 右側面板 */
 #side{position:fixed;right:12px;top:92px;width:344px;max-height:calc(100vh - 92px - 64px);overflow:auto;padding:16px 16px 16px;z-index:5;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.2) transparent}
@@ -229,6 +246,7 @@ body.has-event #side{display:none}
   #topbar .date{flex:1;padding-top:4px}
   #topbar .speed{margin-top:4px}
   #side,#event,#map-controls{top:122px}
+  #map-hint{top:174px}
   #side{max-height:calc(100vh - 122px - 64px)}
 }
 
@@ -252,8 +270,14 @@ body.has-event #side{display:none}
   #dock button.lock .lk{right:10px;top:3px}
   #ticker{display:none}
   #side,#event{left:8px;right:8px;top:auto;bottom:74px;width:auto;max-height:55vh}
-  #tut{bottom:auto;top:184px;flex-wrap:wrap;z-index:6}
-  #map-controls{left:8px;top:134px}
+  #tut{bottom:auto;top:208px;flex-wrap:wrap;z-index:6}
+  #map-controls{left:8px;top:134px;max-width:calc(100vw - 16px)}
+  #map-controls button{padding:6px 7px}
+  #map-controls [data-camera=left] span,#map-controls [data-camera=right] span{display:none}
+  #map-controls select{max-width:94px}
+  #map-hint{left:12px;top:184px;font-size:10px;max-width:calc(100vw - 24px)}
+  body[data-view=game] .tag .box{max-width:170px}
+  body[data-view=game] .tag .owner{display:none}
   #report.modal,#sources.modal,#saves.modal{top:50%;width:calc(100vw - 16px);height:calc(100vh - 16px);padding:12px;gap:10px}
   .rp-head{flex-wrap:wrap;gap:8px}
   .rp-head .sub{display:none}

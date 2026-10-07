@@ -458,6 +458,7 @@ const fail = (code, reason) => ({ ok: false, code, reason });
 const okRes = (extra) => ({ ok: true, ...(extra || {}) });
 function playing(world) { return world.status === 'playing' ? null : fail('ended', '遊戲已經結束'); }
 function ownShop(world, id) {
+  const e = playing(world); if (e) return [null, e];
   const s = shopBy(world, id);
   if (!s || s.owner !== 'player') return [null, fail('no_shop', '找不到這家店')];
   if (s.status === 'closed') return [null, fail('closed', '這家店已經關了')];
@@ -779,6 +780,7 @@ function addLoan(co, kind, amount) {
 }
 
 export function setPlatformBoost(world, on) {
+  const e = playing(world); if (e) return e;
   const co = playerCo(world);
   if (on && !world.events.list.some((e) => e.kind === 'platform')) return fail('noffer', '平台還沒有推出付費曝光方案');
   co.platformBoost = !!on;
@@ -786,6 +788,7 @@ export function setPlatformBoost(world, on) {
 }
 
 export function respondEvent(world, eventId, choice) {
+  const e = playing(world); if (e) return e;
   const ev = world.events.list.find((e) => e.id === eventId);
   if (!ev) return fail('no_event', '找不到這個事件');
   if (ev.status !== 'pending') return fail('done', '這個事件已經處理過了');

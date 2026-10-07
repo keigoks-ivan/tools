@@ -24,7 +24,7 @@
  * ── 其他 ──
  *  setQuality('high'|'low')、getQuality()、setTimeScale(x)、step(sec)（不經繪製快轉模擬）、
  *  setView({x,z,dist,yaw})、getView()、focusLot(id, dist)、project(x,y,z)、stats()
- *  鏡頭：左鍵拖曳平移、滾輪／雙指縮放、Q·E／右鍵拖曳旋轉（有邊界）。
+ *  鏡頭：左鍵拖曳旋轉，右鍵／中鍵／Shift＋左鍵平移，滾輪／雙指縮放，Q·E 旋轉（有邊界）。
  *  網址：?debug 顯示 fps；?q=low|high 指定畫質；?hour=、?weather=
  */
 import * as THREE from 'three';
@@ -38,7 +38,7 @@ import { createKit, BB, FLOOR_H, U, wetStd, windowStd } from './city-kit.js';
 import { sampleEnv, sunDirFor, createSky, createRain, createScenery } from './city-env.js';
 import { Graph, createPeople } from './city-people.js';
 import { createShops } from './city-shop.js';
-import { icon } from './icons.js';
+import { businessIcon } from './business-art.js';
 
 const BX = 6, BZ = 4;            // 街區數（橫、縱）
 const PITCH = 4;                 // 路線間距（格）
@@ -110,13 +110,17 @@ export function createCity(container, opts = {}) {
   const sky = createSky(); scene.add(sky.dome);
   const root = new THREE.Group(); scene.add(root);
   const pmrem = new THREE.PMREMGenerator(renderer);
-  let envTex = null, envHourStamp = -99, envWxStamp = -1;
+  let envTarget = null, envHourStamp = -99;
   function refreshEnvMap(force) {
     const key = Math.round(env.hour * 2) + Math.round(env.cloud * 3) * 0.1 + Math.round(env.rain * 3) * 0.01 + (env.rain > 0 ? 100 : 0);
     if (!force && Math.abs(key - envHourStamp) < 0.5) return;
     envHourStamp = key;
-    const t = pmrem.fromScene(sky.envScene, 0, 0.1, 50);
-    if (envTex) envTex.dispose(); envTex = t.texture; scene.environment = envTex; scenery.waterMat.envMap = envTex; scenery.waterMat.needsUpdate = true;
+    const previous = envTarget, first = !scenery.waterMat.envMap;
+    envTarget = pmrem.fromScene(sky.envScene, 0, 0.1, 50);
+    scene.environment = envTarget.texture; scenery.waterMat.envMap = envTarget.texture;
+    if (first) scenery.waterMat.needsUpdate = true;
+    // PMREM 同時配置 framebuffer 與 depth buffer，必須釋放完整 render target。
+    previous?.dispose();
   }
   const scenery = createScenery(root, { W, D, M });
   const rain = createRain(); scene.add(rain.lines);
@@ -220,7 +224,9 @@ export function createCity(container, opts = {}) {
     ring.forEach(([dx, dz, f], i) => {
       const nm = names[i] || freshName(COMM);
       const isLot = opt.lots && opt.lots[i];
-      const rec = addB({ name: nm, x: cx + dx, z: cz + dz, rot: faceOf[f], v: (opt.keepA && opt.keepA.includes(i)) ? null : vb(), sy: isLot ? 1 : heightJit(nm) });
+      // 街面一格一棟，寬素材須縮入格內，否則會把鄰店的入口與招牌埋進樓體。
+      const fit = Math.min(1, 0.92 / (2 * BB[nm][0]));
+      const rec = addB({ name: nm, x: cx + dx, z: cz + dz, rot: faceOf[f], scale: fit, v: (opt.keepA && opt.keepA.includes(i)) ? null : vb(), sy: (isLot ? 1 : heightJit(nm)) / fit });
       if (isLot) addLot(rec, f, opt.lots[i]);
     });
   }
@@ -431,16 +437,16 @@ export function createCity(container, opts = {}) {
   }
 
   // ---------- 攝影機 ----------
-  let yaw = Math.atan2(0.62, 0.78), tx = home.x, tz = home.z, camDist = 36, aspectScale = 1;
+  let yaw = Math.atan2(0.62, 0.78), tilt = 0, tx = home.x, tz = home.z, camDist = 36, aspectScale = 1;
   const LIM = { x0: -3, x1: W + 3, z0: -3, z1: D + 3 };
-  const distMin = 5.5, distMaxK = 3.5;
+  const distMin = 2.5;
   const zoomRef = () => camDist / aspectScale;
   function placeCamera() {
+    camDist = THREE.MathUtils.clamp(camDist, distMin * aspectScale, 125 * aspectScale);
     const k = smooth(40, 118, zoomRef());
-    const pitch = THREE.MathUtils.lerp(0.6257, 0.15, k), fov = THREE.MathUtils.lerp(30, 48, k);
+    const pitch = THREE.MathUtils.clamp(THREE.MathUtils.lerp(0.6257, 0.48, k) + tilt, 0.28, 1.15), fov = THREE.MathUtils.lerp(30, 48, k);
     if (camera.fov !== fov) { camera.fov = fov; }
     tx = THREE.MathUtils.clamp(tx, LIM.x0, LIM.x1); tz = THREE.MathUtils.clamp(tz, LIM.z0, LIM.z1);
-    camDist = THREE.MathUtils.clamp(camDist, distMin, 125 * aspectScale);
     const cp = Math.cos(pitch);
     camera.position.set(tx + Math.sin(yaw) * cp * camDist, 0.4 + Math.sin(pitch) * camDist, tz + Math.cos(yaw) * cp * camDist);
     camera.lookAt(tx, 0.4, tz);
@@ -477,17 +483,24 @@ export function createCity(container, opts = {}) {
     const cls = { green: 'me', red: 'rival', gray: 'empty' }[cfg.tone] || 'empty';
     if (!e) { const el = document.createElement('div'); el.className = 'tag'; layer.appendChild(el); e = { el, lot: l }; labels.set(lotId, e); }
     e.el.className = 'tag ' + cls;
-    e.el.innerHTML = `<div class="box"><span class="mk">${icon.shop}</span><div><b>${esc(cfg.title || '')}</b>${cfg.sub ? `<small class="num">${esc(cfg.sub)}</small>` : ''}</div></div><div class="stem"></div>`;
+    e.priority = cfg.selected ? 2 : cls === 'me' ? 1 : 0;
+    e.el.classList.toggle('selected', !!cfg.selected);
+    e.el.style.setProperty('--shop-color', cfg.color || '#687784');
+    e.el.innerHTML = `<div class="box"><span class="mk">${businessIcon(cfg.businessId)}</span><div><b>${esc(cfg.title || '')}</b>${cfg.sub ? `<small class="num">${esc(cfg.sub)}</small>` : ''}</div><i class="owner">${cls === 'me' ? '自營' : cls === 'rival' ? '對手' : ''}</i></div><div class="stem"></div>`;
+    e.width = e.el.offsetWidth; e.height = e.el.querySelector('.box').offsetHeight;
   }
   const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   function placeLabels() {
-    const fade = 1 - smooth(60, 95, zoomRef());
-    labels.forEach(({ el, lot }) => {
+    const fade = 1 - 0.4 * smooth(60, 110, zoomRef()), placed = [];
+    [...labels.values()].sort((a, b) => b.priority - a.priority || a.lot.i - b.lot.i).forEach(({ el, lot, width, height, priority }) => {
       const x = lot.x + lot.nx * 0.1, z = lot.z + lot.nz * 0.1;
-      const p = project(x, 1.9, z), g = project(x, 0.08, z);
+      const g = project(x, THREE.MathUtils.lerp(1.05, 0.65, smooth(3, 10, zoomRef())), z), stem = 20;
       el.style.transform = `translate(${g.x}px,${g.y}px) translate(-50%,-100%)`;
-      el.querySelector('.stem').style.height = Math.max(10, g.y - p.y) + 'px';
-      el.style.opacity = fade; el.style.visibility = fade < 0.02 || g.z > 1 ? 'hidden' : 'visible';
+      el.querySelector('.stem').style.height = stem + 'px';
+      const r = { x0: g.x - width / 2 - 3, x1: g.x + width / 2 + 3, y0: g.y - height - stem - 3, y1: g.y - stem + 3 };
+      const visible = g.z < 1 && g.z > -1 && r.x1 > 0 && r.x0 < container.clientWidth && r.y0 > 82 && r.y1 < container.clientHeight && !placed.some(p => r.x0 < p.x1 && r.x1 > p.x0 && r.y0 < p.y1 && r.y1 > p.y0);
+      el.style.opacity = priority ? 1 : fade; el.style.visibility = visible ? 'visible' : 'hidden';
+      if (visible) placed.push(r);
     });
   }
 
@@ -543,8 +556,9 @@ export function createCity(container, opts = {}) {
   if (opts.controls !== false) {
     dom.addEventListener('contextmenu', e => e.preventDefault());
     dom.addEventListener('pointerdown', e => {
+      e.preventDefault();
       dom.setPointerCapture(e.pointerId); ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
-      if (ptrs.size === 1) { drag = { btn: e.button, x: e.clientX, y: e.clientY, moved: 0 }; down = { x: e.clientX, y: e.clientY, t: performance.now() }; }
+      if (ptrs.size === 1) { drag = { btn: e.button, pan: e.button !== 0 || e.shiftKey, moved: 0 }; down = { x: e.clientX, y: e.clientY, t: performance.now() }; }
       else if (ptrs.size === 2) { const [a, b] = [...ptrs.values()]; gest = { d: Math.hypot(a.x - b.x, a.y - b.y), ang: Math.atan2(b.y - a.y, b.x - a.x), mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2 }; drag = null; down = null; }
     });
     dom.addEventListener('pointermove', e => {
@@ -559,22 +573,28 @@ export function createCity(container, opts = {}) {
       const dx = e.clientX - p.x, dy = e.clientY - p.y; p.x = e.clientX; p.y = e.clientY;
       if (drag) {
         drag.moved += Math.abs(dx) + Math.abs(dy);
-        if (drag.btn === 2) { yaw -= dx * 0.006; placeCamera(); } else if (drag.moved > 4) { panBy(dx, dy); setHover(null); }
+        if (drag.moved > 4) {
+          setHover(null); dom.style.cursor = 'grabbing';
+          if (drag.pan) panBy(dx, dy);
+          else { yaw -= dx * 0.006; tilt = THREE.MathUtils.clamp(tilt + dy * 0.003, -0.3, 0.45); placeCamera(); }
+        }
       }
     });
     const up = (e) => {
       const had = ptrs.has(e.pointerId); ptrs.delete(e.pointerId);
       if (ptrs.size < 2) gest = null;
-      if (had && drag && drag.btn === 0 && drag.moved <= 4 && down && performance.now() - down.t < 500) {
+      if (had && drag && drag.btn === 0 && !drag.pan && drag.moved <= 4 && down && performance.now() - down.t < 500) {
         const h = pickAt(e.clientX, e.clientY); if (h) pickCbs.forEach(cb => cb({ type: h.type, id: h.id }));
       }
-      if (ptrs.size === 0) drag = null;
+      if (ptrs.size === 0) { drag = null; down = null; dom.style.cursor = ''; }
     };
-    dom.addEventListener('pointerup', up); dom.addEventListener('pointercancel', e => { ptrs.delete(e.pointerId); drag = null; gest = null; });
+    const cancel = () => { ptrs.clear(); drag = down = gest = hoverQ = null; setHover(null); dom.style.cursor = ''; };
+    dom.addEventListener('pointerup', up); dom.addEventListener('pointercancel', cancel); dom.addEventListener('lostpointercapture', e => { if (ptrs.has(e.pointerId)) cancel(); });
     dom.addEventListener('pointerleave', () => { hoverQ = null; setHover(null); });
-    dom.addEventListener('wheel', e => { e.preventDefault(); camDist *= Math.exp(Math.sign(e.deltaY) * Math.min(Math.abs(e.deltaY), 120) * 0.0016); placeCamera(); }, { passive: false });
-    window.addEventListener('keydown', e => { if (/INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return; keys.add(e.key.toLowerCase()); });
+    dom.addEventListener('wheel', e => { e.preventDefault(); const dy = e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? dom.clientHeight : 1); camDist *= Math.exp(THREE.MathUtils.clamp(dy, -180, 180) * 0.0016); placeCamera(); }, { passive: false });
+    window.addEventListener('keydown', e => { if (/INPUT|TEXTAREA|SELECT/.test(e.target.tagName) || e.target.isContentEditable || e.ctrlKey || e.metaKey || e.altKey) return; const key = e.key.toLowerCase(); if (/^(q|e|w|a|s|d|arrowup|arrowdown|arrowleft|arrowright)$/.test(key)) { e.preventDefault(); keys.add(key); } });
     window.addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
+    window.addEventListener('blur', () => { keys.clear(); cancel(); });
   }
   function keyStep(dt) {
     if (!keys.size) return; let ch = false;
@@ -584,6 +604,27 @@ export function createCity(container, opts = {}) {
     if (keys.has('a') || keys.has('arrowleft')) { mx -= Math.cos(yaw); mz += Math.sin(yaw); } if (keys.has('d') || keys.has('arrowright')) { mx += Math.cos(yaw); mz -= Math.sin(yaw); }
     if (mx || mz) { tx += mx * v; tz += mz * v; ch = true; }
     if (ch) placeCamera();
+  }
+  function focusLot(id, dist = 9) {
+    const l = lotById.get(id); if (!l) return;
+    tx = l.x + l.nx * 0.2; tz = l.z + l.nz * 0.2;
+    const front = Math.atan2(l.nx, l.nz), from = new THREE.Vector3(tx, 0.4, tz), dir = new THREE.Vector3(), hit = new THREE.Vector3(), bounds = new THREE.Box3();
+    const sight = new THREE.Ray(), distances = [...new Set([dist, Math.min(dist, 5.5), Math.min(dist, 3.5), distMin])];
+    // 樓間街道很窄：選店時先找通暢視線，避免鏡頭停在對面樓體裡。
+    let best = null;
+    for (const d of distances) for (const t of [0, 0.25, -0.2]) for (const offset of [0.55, 0, -0.55, 1.15, -1.15]) {
+      const p = THREE.MathUtils.clamp(0.6257 + t, 0.28, 1.15), a = front + offset, distance = d * aspectScale;
+      dir.set(Math.sin(a) * Math.cos(p), Math.sin(p), Math.cos(a) * Math.cos(p)); sight.set(from, dir);
+      let blocked = 0;
+      for (const b of buildings) {
+        if (b.id === l.building) continue;
+        bounds.min.set(b.x - b.w / 2, 0, b.z - b.d / 2); bounds.max.set(b.x + b.w / 2, b.h, b.z + b.d / 2);
+        if (sight.intersectBox(bounds, hit) && hit.distanceTo(from) < distance) blocked++;
+      }
+      const score = blocked * 100 + Math.abs(dist - d) * 2 + Math.abs(t) * 3 + Math.abs(offset - 0.55);
+      if (!best || score < best.score) best = { score, d, t, a };
+    }
+    camDist = best.d * aspectScale; yaw = best.a; tilt = best.t; placeCamera();
   }
 
   // ---------- 主迴圈 ----------
@@ -662,9 +703,9 @@ export function createCity(container, opts = {}) {
     setTimeScale(x) { timeScale = x; },
     freeze(f) { frozen = f; },
     step(sec) { let t = sec; while (t > 1e-6) { const d = Math.min(0.05, t); update(d); t -= d; } },
-    setView(v) { if (v.x !== undefined) tx = v.x; if (v.z !== undefined) tz = v.z; if (v.dist !== undefined) camDist = v.dist * aspectScale; if (v.yaw !== undefined) yaw = v.yaw; placeCamera(); },
-    getView: () => ({ x: tx, z: tz, dist: camDist / aspectScale, yaw }),
-    focusLot(id, dist = 9) { const l = lotById.get(id); if (!l) return; tx = l.door.x - l.nx * 0.2; tz = l.door.z - l.nz * 0.2; camDist = dist * aspectScale; yaw = Math.atan2(l.nx, l.nz) + 0.55; placeCamera(); },
+    setView(v) { if (v.x !== undefined) tx = v.x; if (v.z !== undefined) tz = v.z; if (v.dist !== undefined) camDist = v.dist * aspectScale; if (v.yaw !== undefined) yaw = v.yaw; if (v.tilt !== undefined) tilt = THREE.MathUtils.clamp(v.tilt, -0.3, 0.45); placeCamera(); },
+    getView: () => ({ x: tx, z: tz, dist: camDist / aspectScale, yaw, tilt }),
+    focusLot,
     stats: () => ({ fps: fpsEMA, quality, calls: renderer.info.render.calls, triangles: renderer.info.render.triangles, ...people.counts(), lots: shops.lots.length, buildings: buildings.length, ...kit.stats() }),
     lotsById: lotById,
     pickAt(x, y) { const h = pickAt(x, y); return h && { type: h.type, id: h.id }; }, hovered: () => hover && hover.id,

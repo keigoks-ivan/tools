@@ -1,5 +1,6 @@
 // 本機存檔與 JSON 備份共用格式；相容原本 { w, meta } 的存檔。
 import { deserialize, serialize, BUSINESSES } from './sim.js';
+import { stockLimit } from './businesses.js';
 export const SAVE_KEY = 'tycoon.save.v1';
 export const MANUAL_KEY = 'tycoon.save.manual.v1';
 export const BACKUP_KEY = SAVE_KEY + '.backup';
@@ -30,18 +31,20 @@ function validate(w) {
   for (const s of w.shops) {
     const b = BUSINESSES[s.businessId || 'tea'];
     if (!b || !lots.has(s.lotId) || !w.companies[s.company] || !['open', 'renovating', 'closed'].includes(s.status)) bad();
-    if (!array(s.staff, 3) || !s.staff.every((n) => Number.isInteger(n) && n >= 0 && n <= 6) || !array(s.F, w.bld.length) || !array(s.buyB, w.bld.length) || !array(s.days) || !array(s.history) || !array(s.hourEMA, 12) || !array(s.today?.hourly, 12) || !s.mtd || !s.promo || !s.shortage) bad();
+    if (!array(s.staff, 3) || !s.staff.every((n) => Number.isInteger(n) && n >= 1 && n <= 6) || !array(s.F, w.bld.length) || !array(s.buyB, w.bld.length) || !array(s.days) || !array(s.history) || !array(s.hourEMA, 12) || !array(s.today?.hourly, 12) || !s.mtd || !s.promo || !s.shortage) bad();
     if (!finite(s.inv) || s.inv < 0 || !finite(s.rent) || !Object.keys(b.items).every((k) => finite(s.prices?.[k]) && s.prices[k] > 0)) bad();
     if (!['basic', 'market', 'high'].includes(s.wageLevel) || !['平價', '標準', '講究'].includes(s.grade) || !finite(s.openAtT) || !finite(s.Bw) || !finite(s.Bd) || !finite(s.waitMin)) bad();
     if (!['walk', 'del', 'lost', 'storeRev', 'gmv', 'cogs', 'pack', 'wageMilli', 'openDays', 'rentDays'].every((k) => finite(s.mtd[k]))) bad();
     if (s.assetLevel != null && (!Number.isInteger(s.assetLevel) || s.assetLevel < 0 || s.assetLevel > (b.upgrades?.length || 0))) bad();
+    if (s.stock && (!Number.isInteger(s.stock.day) || s.stock.day < -1 || !['qty', 'value', 'prepared'].every(k => Number.isInteger(s.stock[k]) && s.stock[k] >= 0) || s.stock.qty > s.stock.prepared)) bad();
+    if (s.status !== 'closed' && w.lots.find(l => l.id === s.lotId).shopId !== s.id) bad();
     if (s.operations) {
-      if (!finite(s.operations.seats) || !finite(s.operations.stations)) bad();
+      if (!Number.isInteger(s.operations.seats) || s.operations.seats < 1 || !Number.isInteger(s.operations.stations) || s.operations.stations < 1) bad();
       if (['cafe', 'restaurant'].includes(s.businessId) && !['takeaway', 'balanced', 'dinein'].includes(s.operations.mode)) bad();
       if (s.businessId === 'salon' && !['quick', 'standard', 'premium'].includes(s.operations.service)) bad();
       if (s.businessId === 'fitness' && !['open', 'coached', 'classes'].includes(s.operations.focus)) bad();
-      if (['bento', 'bakery'].includes(s.businessId) && (!finite(s.operations.prep) || !finite(s.operations.markdown))) bad();
-      if (['convenience', 'supermarket'].includes(s.businessId) && (!finite(s.operations.stockTarget) || typeof s.operations.autoStock !== 'boolean')) bad();
+      if (['bento', 'bakery'].includes(s.businessId) && (!Number.isInteger(s.operations.prep) || s.operations.prep < 40 || s.operations.prep > 600 || s.operations.prep % 20 || !(s.businessId === 'bento' ? [0, 15, 30] : [0, 20, 35]).includes(s.operations.markdown))) bad();
+      if (['convenience', 'supermarket'].includes(s.businessId) && (!Number.isInteger(s.operations.stockTarget) || s.operations.stockTarget < (s.businessId === 'supermarket' ? 100000 : 20000) || s.operations.stockTarget > stockLimit(s) || s.operations.stockTarget % (s.businessId === 'supermarket' ? 100000 : 10000) || typeof s.operations.autoStock !== 'boolean')) bad();
     }
   }
 }
