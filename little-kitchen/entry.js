@@ -4,5 +4,5 @@ if(new URLSearchParams(location.search).get('mode')==='free'){
 }else{
   document.body.classList.add('recipe-mode');
   document.getElementById('recipe').hidden=false;
-  import('./recipe-game.js?v=8');
+  import('./recipe-game.js?v=9');
 }

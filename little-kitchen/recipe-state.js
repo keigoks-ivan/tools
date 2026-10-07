@@ -6,6 +6,11 @@ export function createRecipe(){return {stage:'choose',picked:{tomato:false,egg:f
 export function pick(s,id){if(s.stage!=='choose'||!Object.hasOwn(s.picked,id)||s.picked[id])return false;s.picked[id]=true;return true;}
 export function ready(s){return s.stage==='choose'?Object.values(s.picked).every(Boolean):s.stage==='chop'?s.pieces.some(p=>p.cut):s.stage==='crack'?s.cracked:s.stage==='whisk'?s.mix>=.95:s.stage==='pour'?Object.values(s.poured).every(Boolean)&&!s.transfer:s.stage==='cook'?s.cooked>=.95&&s.scramble>=.15:s.stage==='plate'?s.plated&&!s.transfer:s.stage==='feed'?s.bites>=3&&s.chew===0:s.stage==='done';}
 export function advance(s){if(!ready(s)||s.stage==='done')return false;s.stage=stages[stages.indexOf(s.stage)+1];return true;}
+// Continue after the child's action settles; repeated cutting can keep the board open.
+export function continuationDelay(s){
+  if(!ready(s)||s.stage==='done')return null;
+  return {choose:.55,chop:2.2,crack:1.25,whisk:.85,pour:0,cook:1.15,plate:0,feed:0}[s.stage];
+}
 export function chop(s,a,b){
   if(s.stage!=='chop'||s.pieces.length>=12||Math.hypot(b.x-a.x,b.y-a.y)<18)return 0;
   const dx=b.x-a.x,dy=b.y-a.y,len=Math.hypot(dx,dy);let cuts=0;
