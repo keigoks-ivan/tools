@@ -2,6 +2,7 @@
 import { deserialize, serialize, BUSINESSES } from './sim.js';
 import { stockLimit } from './businesses.js';
 import { MARKET_VERSION, districtOf } from './market.js';
+import { strategyValid, managerValid } from './strategy.js';
 export const SAVE_KEY = 'tycoon.save.v1';
 export const MANUAL_KEY = 'tycoon.save.manual.v1';
 export const BACKUP_KEY = SAVE_KEY + '.backup';
@@ -57,6 +58,11 @@ function validate(w) {
     } else if (w.pressure && s.status !== 'closed') bad();
     if (s.assetLevel != null && (!Number.isInteger(s.assetLevel) || s.assetLevel < 0 || s.assetLevel > (b.upgrades?.length || 0))) bad();
     if (s.stock && (!Number.isInteger(s.stock.day) || s.stock.day < -1 || !['qty', 'value', 'prepared'].every(k => Number.isInteger(s.stock[k]) && s.stock[k] >= 0) || s.stock.qty > s.stock.prepared)) bad();
+    if (s.strategy && !strategyValid(s, s.strategy) || s.manager && (!managerValid(s.manager) || s.manager.lastReviewT > w.t)) bad();
+    if (s.stock?.mix && (!array(s.stock.mix, Object.keys(b.items).length) || s.stock.mix.some((n) => !finite(n) || n < 0) || Math.abs(s.stock.mix.reduce((a, n) => a + n, 0) - 1) > 1e-8)) bad();
+    if (s.stock?.weights && !strategyValid(s, { profile: 'balanced', weights: s.stock.weights })) bad();
+    if (s.stock?.grade != null && !['平價', '標準', '講究'].includes(s.stock.grade)) bad();
+    for (const k of ['strategyDayUnits', 'managerDayUnits']) if (s.mtd[k] != null && (!finite(s.mtd[k]) || s.mtd[k] < 0)) bad();
     if (s.status !== 'closed' && w.lots.find(l => l.id === s.lotId).shopId !== s.id) bad();
     if (s.operations) {
       if (!Number.isInteger(s.operations.seats) || s.operations.seats < 1 || !Number.isInteger(s.operations.stations) || s.operations.stations < 1) bad();

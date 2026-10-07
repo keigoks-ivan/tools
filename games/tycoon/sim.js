@@ -10,6 +10,9 @@ import { P, unwrap } from './params.js';
 import { E as EXP, FACILITY_KEYS, newExpansion, ready, effects } from './facilities.js';
 import { BUSINESSES, businessOf, freshBusiness, retailBusiness, premises, assetMonthly, stockLimit, priceBounds, initialOperations, experience, hourlyCapacity } from './businesses.js';
 import { MARKET_VERSION, configureMarket, districtAt, districtOf, updatePopulation, incomeOf, reach, deliveryReach, shareWallet, marketDistricts, walletAt } from './market.js';
+import { PROFILES, MANAGERS, strategyOf, managerOf, strategyEffects, customerFit, strategyValid, managerValid } from './strategy.js';
+import { projectCash } from './forecast.js';
+export { PROFILES, MANAGERS } from './strategy.js';
 export { BUSINESSES, businessOf, retailBusiness, premises, assetMonthly, stockLimit, priceBounds } from './businesses.js';
 
 export const V = unwrap(P);
@@ -403,7 +406,7 @@ function makeShop(world, { company, lot, name, color, rival, businessId = 'tea' 
     id: 'S' + n, n, lotId: lot.id, company, owner: rival ? 'rival' : 'player', name, businessId, assetLevel: 0, assetInvestment: 0, leasedPing: premises(lot, businessId).ping, operations: initialOperations(businessId, premises(lot, businessId).ping), stock: { day: -1, qty: 0, value: 0, prepared: 0 }, color: color || RIVAL_COLORS[company] || biz.color,
     status: 'renovating', createdT: world.t, openAtT: world.t + biz.renovationDays * 24, openedT: null, closedT: null,
     rent: premises(lot, businessId).rent, deposit: premises(lot, businessId).deposit, inv: biz.firstStock,
-    prices, markupPct: V.delivery.markupDefault, delivery: !rival && biz.delivery && V.delivery.playerDefaultOn, staff: [...biz.staff],
+    prices, strategy: { profile: 'balanced', weights: {} }, manager: { ...managerOf({}) }, markupPct: V.delivery.markupDefault, delivery: !rival && biz.delivery && V.delivery.playerDefaultOn, staff: [...biz.staff],
     wageLevel: rival ? cfg.wage : 'market', grade: V.menu.defaultGrade, fixedQ: rival ? cfg.quality : null,
     revSum: 0, revCnt: 0, quality: 60, costMult: 1, mix: [], avgPrice: 55, avgPlat: 63,
     Bw: 0, Bd: 0, waitMin: V.choice.waitBase, closedToday: false,
@@ -470,8 +473,84 @@ export function setOperations(world, shopId, changes) {
   return okRes();
 }
 
-function replenishShop(world, s, target) {
-  const co = world.companies[s.company], buy = Math.min(Math.max(0, target - s.inv), Math.max(0, co.cash));
+export function setStrategy(world, shopId, changes) {
+  const e0 = playing(world); if (e0) return e0;
+  const [s, e] = ownShop(world, shopId); if (e) return e;
+  if (!changes || typeof changes !== 'object' || Object.keys(changes).some((k) => !['profile', 'weights'].includes(k)) || Object.hasOwn(changes, 'weights') && (!changes.weights || typeof changes.weights !== 'object' || Array.isArray(changes.weights))) return fail('strategy', '無效的定位或商品組合');
+  const next = { ...strategyOf(s), ...changes, weights: { ...strategyOf(s).weights, ...(changes.weights || {}) } };
+  if (!strategyValid(s, next)) return fail('strategy', '品項比重只能是 0–3，至少保留一種商品');
+  s.strategy = next; recalcShop(world, s);
+  logEvt(world, 'decision', `「${s.name}」調整定位／商品組合：${PROFILES[next.profile].name}`);
+  return okRes({ pendingBatch: freshBusiness(s.businessId) && s.stock.day === Math.floor(world.t / 24) });
+}
+export function setManager(world, shopId, changes) {
+  const e0 = playing(world); if (e0) return e0;
+  const [s, e] = ownShop(world, shopId); if (e) return e;
+  if (!changes || typeof changes !== 'object' || Object.keys(changes).some((k) => !['tier', 'goal', 'reserveMonths', 'staffing', 'purchasing'].includes(k))) return fail('manager', '無效的委任設定');
+  const old = managerOf(s), next = { ...old, ...changes };
+  if (!managerValid(next)) return fail('manager', '委任設定不在允許範圍內');
+  const cost = next.tier !== old.tier ? MANAGERS[next.tier].hiring : 0;
+  const co = playerCo(world); if (cost > 0 && co.cash < cost) return fail('cash', `招募與交接需要 ${cost.toLocaleString()} 元`);
+  if (cost) charge(world, co, cost);
+  if (next.tier !== old.tier) { next.lastReviewT = null; next.note = next.tier === 'none' ? '已停止委任' : '等待營業資料；每週檢視一次，不代替門店員工'; }
+  s.manager = next;
+  logEvt(world, 'decision', `「${s.name}」委任：${MANAGERS[next.tier].name}，目標${next.goal === 'profit' ? '控制成本' : '降低流失'}`);
+  return okRes({ cost });
+}
+function activeStrategy(world, s) {
+  const x = strategyOf(s);
+  return freshBusiness(s.businessId) && s.stock.day === Math.floor(world.t / 24) && s.stock.weights ? { ...x, weights: s.stock.weights } : x;
+}
+function customerFits(world, s) {
+  const D = derived(world), x = activeStrategy(world, s), key = JSON.stringify(x) + ':' + world.bld.length;
+  D.customerFits ||= new Map();
+  const old = D.customerFits.get(s.id); if (old?.key === key) return old.values;
+  const fx = strategyEffects(s, x), values = Float64Array.from(world.bld, (b) => customerFit(s, b.key, incomeOf(world, b), x, fx));
+  D.customerFits.set(s.id, { key, values }); return values;
+}
+function delegatedReserve(world, s) {
+  const m = managerOf(s), co = world.companies[s.company];
+  if (m.tier === 'none' || !m.purchasing) return 0;
+  const shops = liveShops(world).filter((x) => x.company === s.company);
+  return m.reserveMonths * (shops.reduce((a, x) => a + monthlyFixed(world, x), 0) + Math.max(0, shops.filter((x) => x.status === 'open').length - 1) * EXP.chain.managementPerShop + co.adWan * 10000 + facilityMonthly(co.expansion) + co.loans.reduce((a, l) => a + l.payment, 0));
+}
+function managerReview(world, s) {
+  const m = managerOf(s); if (s.owner !== 'player' || s.status !== 'open' || m.tier === 'none' || m.lastReviewT != null && world.t - m.lastReviewT < 7 * 24) return;
+  const recent = s.days.slice(-MANAGERS[m.tier].sample);
+  if (recent.length < 3) return;
+  const mean = avg(recent.map((d) => d.cups)), lost = avg(recent.map((d) => d.lost));
+  const queueLost = avg(recent.map((d) => Math.max(0, d.lost - (d.stockLost || 0))));
+  const changes = [], sp = V.capacity.wageSpeed[s.wageLevel] * effects(playerCo(world).expansion).speed * strategyEffects(s, activeStrategy(world, s)).speed;
+  if (m.staffing) {
+    const ratio = m.goal === 'service' ? 0.65 : 0.85;
+    const demandMult = 1 + Math.min(0.5, queueLost / Math.max(1, mean));
+    s.staff = s.staff.map((n, i) => {
+      const peak = Math.max(...s.hourEMA.slice(i * 4, i * 4 + 4)) * demandMult;
+      let target = V.capacity.staffMax;
+      for (let k = 1; k <= V.capacity.staffMax; k++) if (hourlyCapacity(s, k, sp) * ratio >= peak) { target = k; break; }
+      const next = clamp(target, n - 1, n + 1);
+      if (next !== n) changes.push(`${SHIFTS[i][0]} 點班 ${n}→${next} 人`);
+      return next;
+    });
+  }
+  if (m.purchasing) {
+    const biz = businessOf(s.businessId), unit = s.mix.reduce((a, n, i) => a + n * Object.values(biz.items)[i].cost * s.costMult, 0);
+    if (freshBusiness(s.businessId)) {
+      const target = clamp(Math.ceil((mean + Math.min(lost, mean * 0.25)) * (m.goal === 'service' ? 1.15 : 1.03) / 20) * 20, 40, 600);
+      if (target !== s.operations.prep) { changes.push(`備貨 ${s.operations.prep}→${target}`); s.operations.prep = target; }
+    } else if (retailBusiness(s.businessId)) {
+      const step = s.businessId === 'supermarket' ? 100000 : 10000, min = s.businessId === 'supermarket' ? 100000 : 20000;
+      const target = clamp(Math.ceil(mean * (unit + biz.packaging) * (m.goal === 'service' ? 4 : 2) / step) * step, min, stockLimit(s));
+      if (target !== s.operations.stockTarget) { changes.push(`目標庫存 ${s.operations.stockTarget.toLocaleString()}→${target.toLocaleString()} 元`); s.operations.stockTarget = target; }
+      // 尊重玩家的自動補貨開關。
+    }
+  }
+  m.lastReviewT = world.t; m.note = `依近 ${recent.length} 天日均 ${Math.round(mean)} 筆、流失 ${Math.round(lost)} 筆：${changes.join('；') || '維持設定'}。${m.purchasing ? `補貨保留 ${m.reserveMonths} 個月固定支出。` : '未委任採購，補貨按你的原設定執行。'}`;
+  if (changes.length) logEvt(world, 'manager', `「${s.name}」${m.note}`);
+  recalcShop(world, s);
+}
+function replenishShop(world, s, target, delegated = false) {
+  const co = world.companies[s.company], buy = Math.min(Math.max(0, target - s.inv), Math.max(0, co.cash - (delegated ? delegatedReserve(world, s) : 0)));
   s.inv += buy; co.cash -= buy; co.cm.stockPurchases += buy;
   return buy;
 }
@@ -487,15 +566,16 @@ export function restockShop(world, shopId) {
 
 function prepareDaily(world, s) {
   if (!freshBusiness(s.businessId) || s.stock.day === world.day.idx) return;
+  recalcShop(world, s);
   const co = world.companies[s.company], biz = businessOf(s.businessId);
   const rawUnit = Object.keys(biz.items).reduce((a, k, i) => a + s.mix[i] * biz.items[k].cost * s.costMult, 0);
-  const qty = Math.min(s.operations.prep, Math.floor((Math.max(0, co.cash) + s.inv) / rawUnit));
+  const qty = Math.min(s.operations.prep, Math.floor((Math.max(0, co.cash - delegatedReserve(world, s)) + s.inv) / rawUnit));
   const covered = s.owner === 'player' ? Math.min(qty, co.expansion.factoryLeft) : 0;
   const nominal = Math.round(rawUnit * qty), cost = Math.round(nominal * (qty ? 1 - EXP.facilities.factory.saving * covered / qty : 1));
   if (covered) { co.expansion.factoryLeft -= covered; co.cm.factoryCups += covered; co.cm.factorySavings += nominal - cost; }
   const fromInv = Math.min(s.inv, cost), supply = s.owner === 'player' ? warehouseSupply(world, cost - fromInv) : { used: 0, cost: 0 };
   s.inv -= fromInv; co.cash -= cost - fromInv - supply.used;
-  s.stock = { day: world.day.idx, qty, value: cost - supply.used + supply.cost, prepared: qty };
+  s.stock = { day: world.day.idx, qty, value: cost - supply.used + supply.cost, prepared: qty, mix: [...s.mix], weights: { ...strategyOf(s).weights }, grade: s.grade };
   s.today.prepared = qty; s.mtd.prepared += qty;
 }
 function writeOffFresh(world, s) {
@@ -540,12 +620,13 @@ function platPrice(p, markup) { return roundDiv(p * (100 + markup), 100); }
 function recalcShop(world, sh) {
   const biz = businessOf(sh.businessId), keys = Object.keys(biz.items);
   let tot = 0;
-  const w = keys.map((k, i) => { const x = biz.items[k].pop * Math.pow(sh.prices[k] / biz.items[k].ref, -V.choice.mixPriceElasticity); tot += x; return x; });
-  sh.mix = w.map((x) => x / tot);
+  const w = keys.map((k, i) => { const x = biz.items[k].pop * (strategyOf(sh).weights[k] ?? 1) * Math.pow(sh.prices[k] / biz.items[k].ref, -V.choice.mixPriceElasticity); tot += x; return x; });
+  const batch = freshBusiness(sh.businessId) && sh.stock.day === Math.floor(world.t / 24) && sh.stock.mix ? sh.stock : null;
+  sh.mix = batch ? [...batch.mix] : w.map((x) => x / tot);
   sh.avgPrice = keys.reduce((s, k, i) => s + sh.mix[i] * sh.prices[k], 0);
   sh.avgPlat = keys.reduce((s, k, i) => s + sh.mix[i] * platPrice(sh.prices[k], sh.markupPct), 0);
   if (sh.fixedQ != null) { sh.quality = sh.fixedQ; sh.costMult = costMultOfQuality(sh.fixedQ); }
-  else { const g = V.menu.grades[sh.grade], fx = effects(world.companies[sh.company].expansion); sh.quality = g.quality + V.labor.qualityAdj[sh.wageLevel] + fx.quality + experience(sh); sh.costMult = g.cost * (biz.warehouse ? fx.material : 1); }
+  else { const g = V.menu.grades[batch?.grade || sh.grade], fx = effects(world.companies[sh.company].expansion); sh.quality = g.quality + V.labor.qualityAdj[sh.wageLevel] + fx.quality + experience(sh) + strategyEffects(sh).quality; sh.costMult = g.cost * (biz.warehouse ? fx.material : 1); }
 }
 const starOf = (sh) => (sh.revSum + V.reviews.priorStar * V.reviews.priorN) / (sh.revCnt + V.reviews.priorN);
 function chainStarOf(world, sh) {
@@ -1005,6 +1086,8 @@ export function stepHour(world) {
 }
 function openForBusiness(world, s) {
   s.status = 'open'; s.openedT = world.t; s.mtd.openDays += 1; s.mtd.tradingDays += 1;
+  accrueManagement(s);
+  s.mtd.maintenanceMilli = (s.mtd.maintenanceMilli || 0) + assetMonthly(s) * 1000;
   if (s.promoPending) beginOpeningPromo(s);
   if (s.owner === 'player') pushEvent(world, { kind: 'info', title: `「${s.name}」裝修完成，開張了`, text: '店面已經裝修完，今天起對外營業。', choices: [] });
 }
@@ -1029,31 +1112,34 @@ function simHour(world, frame, h) {
   const want = groups.reduce((a, g) => a + g.demand.walk.reduce((t, n) => t + n, 0), 0), dpool = groups.reduce((a, g) => a + g.demand.del, 0);
   // 各店靜態項
   const lotI = act.map((s) => D.lotIdx[s.lotId]);
-  const Ew0 = new Float64Array(na), Ed0 = new Float64Array(na), cap = new Int32Array(na), boost = new Float64Array(na), staffNow = new Int32Array(na);
+  const Ew0 = new Float64Array(na), Ed0 = new Float64Array(na), cap = new Int32Array(na), serviceCapacity = new Int32Array(na), boost = new Float64Array(na), staffNow = new Int32Array(na);
   const hasDel = new Uint8Array(na);
   act.forEach((s, j) => {
+    prepareDaily(world, s);
     const co = world.companies[s.company];
+    const sf = strategyEffects(s, activeStrategy(world, s));
     const promoMult = (s.promo.daysLeft > 0 ? s.promo.num / s.promo.den : 1) * markdownOf(s, h);
     const star = chainStarOf(world, s);
-    Ew0[j] = Math.exp(cal.c - Ch.priceCoef * Math.log((s.avgPrice * promoMult) / referencePrice(s.businessId)) + Ch.qualityCoef * (s.quality - Ch.qualityRef) + Ch.starCoef * (star - Ch.starRef));
+    Ew0[j] = Math.exp(cal.c - Ch.priceCoef * sf.priceSensitivity * Math.log((s.avgPrice * promoMult) / referencePrice(s.businessId)) + Ch.qualityCoef * (s.quality - Ch.qualityRef) + Ch.starCoef * (star - Ch.starRef));
     if (s.delivery) {
       hasDel[j] = 1;
       const k2 = Math.min(1, 1 - (1 - s.Fbar) * (1 - co.awareness) + (co.platformBoost ? V.delivery.boostAware : 0));
-      Ed0[j] = Math.exp(cal.c_del - Ch.priceCoef * Math.log(s.avgPlat * markdownOf(s, h) / (s.businessId === 'tea' ? V.delivery.refPrice : referencePrice(s.businessId) * 1.15)) + Ch.qualityCoef * (s.quality - Ch.qualityRef) + V.delivery.starCoef * (star - Ch.starRef) + Ch.awareCoef * Math.log(Ch.awareFloor + (1 - Ch.awareFloor) * k2));
+      Ed0[j] = Math.exp(cal.c_del - Ch.priceCoef * sf.priceSensitivity * Math.log(s.avgPlat * markdownOf(s, h) / (s.businessId === 'tea' ? V.delivery.refPrice : referencePrice(s.businessId) * 1.15)) + Ch.qualityCoef * (s.quality - Ch.qualityRef) + V.delivery.starCoef * (star - Ch.starRef) + Ch.awareCoef * Math.log(Ch.awareFloor + (1 - Ch.awareFloor) * k2));
     }
     let hired = hiredStaff(s, si);
     if (s.shortage.daysLeft > 0 && s.shortage.shift === si) hired = Math.max(s.ownerWorks ? 0 : 1, hired - 1);
     staffNow[j] = hired;
     const n = hired + (s.ownerWorks ? 1 : 0);
-    const sp = V.capacity.wageSpeed[s.wageLevel] * (s.owner === 'player' ? effects(co.expansion).speed : 1);
+    const sp = V.capacity.wageSpeed[s.wageLevel] * (s.owner === 'player' ? effects(co.expansion).speed : 1) * sf.speed;
     cap[j] = hourlyCapacity(s, n, sp);
-    prepareDaily(world, s);
+    serviceCapacity[j] = cap[j];
     if (freshBusiness(s.businessId)) cap[j] = Math.min(cap[j], s.stock.qty);
-    if (retailBusiness(s.businessId)) { const biz = businessOf(s.businessId), unit = Math.max(...Object.values(biz.items).map((it) => it.cost * s.costMult)) + biz.packaging; cap[j] = Math.min(cap[j], Math.floor(s.inv / unit)); }
+    if (retailBusiness(s.businessId)) { const biz = businessOf(s.businessId), unit = Math.max(...Object.values(biz.items).map((it, i) => s.mix[i] > 0 ? it.cost * s.costMult : 0)) + biz.packaging; cap[j] = Math.min(cap[j], Math.floor(s.inv / unit)); }
     boost[j] = t_boost(world, s) ? V.events.viralMult : 1;
   });
   // 每棟樓各自認識每家店：有效知名度 = 1 − (1 − F_sj) × (1 − 品牌名氣)；G＝距離衰減 × 知名度項
   const G = new Float64Array(nb * na);
+  const fits = act.map((s) => customerFits(world, s));
   {
     const kA = act.map((s) => world.companies[s.company].awareness);
     const distances = act.map((s) => walkAttraction(world, s.businessId, D));
@@ -1061,7 +1147,7 @@ function simHour(world, frame, h) {
       const a = distances[j][b * nl + lotI[j]];
       if (a === 0) continue;
       const ke = 1 - (1 - act[j].F[b]) * (1 - kA[j]);
-      G[b * na + j] = a * Math.pow(Ch.awareFloor + (1 - Ch.awareFloor) * ke, Ch.awareCoef);
+      G[b * na + j] = a * Math.pow(Ch.awareFloor + (1 - Ch.awareFloor) * ke, Ch.awareCoef) * fits[j][b];
     }
   }
   // ── 不動點：預期等候 ↔ 到店人數 ──
@@ -1085,7 +1171,7 @@ function simHour(world, frame, h) {
     for (const j of g.members) lamD[j] = hasDel[j] ? g.demand.del * Ed0[j] * Math.exp(-V.delivery.waitCoef * Wu[j]) / (1 + SD) : 0;
     if (world.market) for (let b = 0; b < nb; b++) {
       let sum = 0;
-      for (const j of g.members) { ea[j] = hasDel[j] ? Ed0[j] * Math.exp(-V.delivery.waitCoef * Wu[j]) * D.deliveryReach[b * nl + lotI[j]] : 0; sum += ea[j]; }
+      for (const j of g.members) { ea[j] = hasDel[j] ? Ed0[j] * Math.exp(-V.delivery.waitCoef * Wu[j]) * D.deliveryReach[b * nl + lotI[j]] * fits[j][b] : 0; sum += ea[j]; }
       for (const j of g.members) deliveryOrigins[j][b] = g.demand.del * world.bld[b].pop / world.popAll * ea[j] / (1 + sum);
     }
   }
@@ -1196,7 +1282,7 @@ function simHour(world, frame, h) {
     }
     // 售罄訂單立即流失，不留到隔日；產能不足仍按原排隊規則。
     let cancelled = 0;
-    if ((freshBusiness(s.businessId) && !s.stock.qty) || (retailBusiness(s.businessId) && cap[j] < hourlyCapacity(s, staffNow[j] + (s.ownerWorks ? 1 : 0), V.capacity.wageSpeed[s.wageLevel]))) {
+    if ((freshBusiness(s.businessId) && !s.stock.qty) || (retailBusiness(s.businessId) && cap[j] < serviceCapacity[j])) {
       cancelled = s.Bw + s.Bd; s.Bw = 0; s.Bd = 0; td.stockLost += cancelled + lostW; s.mtd.stockLost += cancelled + lostW; td.lost += cancelled; s.tot.lost += cancelled;
     }
     if (h === CLOSE_H - 1) { cancelled += s.Bw + s.Bd; td.lost += s.Bw + s.Bd; s.tot.lost += s.Bw + s.Bd; s.Bw = 0; s.Bd = 0; }
@@ -1235,6 +1321,10 @@ function distributeOrigins(world, w, n) {
 }
 
 // ───────────────────────── 日的開始與結束 ─────────────────────────
+function accrueManagement(s) {
+  s.mtd.strategyDayUnits = (s.mtd.strategyDayUnits || 0) + strategyEffects(s).monthly;
+  s.mtd.managerDayUnits = (s.mtd.managerDayUnits || 0) + MANAGERS[managerOf(s).tier].monthly;
+}
 function startDay(world) {
   const idx = world.t / 24;
   const di = dateOf(idx);
@@ -1288,11 +1378,12 @@ function startDay(world) {
       if (world.pressure) s.mtd.rentUnits = (s.mtd.rentUnits ?? s.rent * s.mtd.rentDays) + s.rent;
       s.mtd.rentDays += 1;
     }
-    if (s.status === 'open') { s.mtd.openDays += 1; s.mtd.maintenanceMilli = (s.mtd.maintenanceMilli || 0) + assetMonthly(s) * 1000; }
+    if (s.status === 'open') { s.mtd.openDays += 1; s.mtd.maintenanceMilli = (s.mtd.maintenanceMilli || 0) + assetMonthly(s) * 1000; accrueManagement(s); }
     if (s.status === 'open' && !s.closedToday) s.mtd.tradingDays += 1;
     if (s.promo.daysLeft > 0 && s.promo.kind === 'open1p1') world.companies[s.company].awareness = Math.min(1, world.companies[s.company].awareness + V.awareness.openingPromoPerDay);
     s.today = newToday();
-    if (s.status === 'open' && !s.closedToday && retailBusiness(s.businessId) && s.operations.autoStock) replenishShop(world, s, s.operations.stockTarget);
+    if (!world.warm) managerReview(world, s);
+    if (s.status === 'open' && !s.closedToday && retailBusiness(s.businessId) && s.operations.autoStock) replenishShop(world, s, s.operations.stockTarget, true);
     // 缺人
     if (s.shortage.daysLeft > 0) s.shortage.daysLeft--;
     else if (s.status === 'open' && s.wageLevel === 'basic' && (!s.ownerWorks || (s.owner === 'player' && s.staff.some((n) => n > 1)))) {
@@ -1334,7 +1425,7 @@ function endDay(world) {
     updateFamiliarity(world, s);
     const td = s.today;
     const cups = td.walk + td.del;
-    s.days.push({ cups, walk: td.walk, del: td.del, lost: td.lost, wait: td.waitCups ? td.waitSum / td.waitCups : 0, rev: td.rev });
+    s.days.push({ cups, walk: td.walk, del: td.del, lost: td.lost, stockLost: td.stockLost, prepared: td.prepared, unsold: td.unsold, wait: td.waitCups ? td.waitSum / td.waitCups : 0, rev: td.rev });
     if (s.days.length > 130) s.days.shift();
     s.waitDay7.push(td.waitCups ? td.waitSum / td.waitCups : 0); if (s.waitDay7.length > 7) s.waitDay7.shift();
     for (let h = 0; h < NHOURS; h++) s.hourEMA[h] = s.hourEMA[h] * 0.93 + 0.07 * (td.hourly[h][0] + td.hourly[h][1]);
@@ -1438,8 +1529,9 @@ function computePnL(world, s, dim) {
   const turnover = m.storeRev + m.gmv;
   const purchases = m.cogs + m.pack + waste;
   const bizTax = calcBusinessTax(turnover, purchases);
-  const profit = turnover - m.commission - purchases - wage - rent - util - maintenance - pos - cardFee - bizTax;
-  return { turnover, storeRev: m.storeRev, gmv: m.gmv, commission: m.commission, cogs: m.cogs, pack: m.pack, waste, wage, rent, util, maintenance, pos, cardFee, bizTax, profit, cups: m.walk + m.del, walk: m.walk, del: m.del, lost: m.lost, purchases };
+  const strategyCost = Math.floor((m.strategyDayUnits || 0) / dim), managerCost = Math.floor((m.managerDayUnits || 0) / dim);
+  const profit = turnover - m.commission - purchases - wage - rent - util - maintenance - pos - cardFee - bizTax - strategyCost - managerCost;
+  return { turnover, storeRev: m.storeRev, gmv: m.gmv, commission: m.commission, cogs: m.cogs, pack: m.pack, waste, wage, rent, util, maintenance, pos, cardFee, bizTax, strategyCost, managerCost, profit, cups: m.walk + m.del, walk: m.walk, del: m.del, lost: m.lost, purchases };
 }
 /** 結一家店的當月帳（付費用現金、記入歷史）。final＝關店時的最後一筆。 */
 function settleShop(world, s, dim, final) {
@@ -1448,7 +1540,7 @@ function settleShop(world, s, dim, final) {
   if (empty) return null;
   const pnl = computePnL(world, s, dim);
   const co = world.companies[s.company];
-  co.cash -= pnl.waste - (m.prepaidWaste || 0) + pnl.wage + pnl.rent + pnl.util + pnl.maintenance + pnl.pos + pnl.cardFee + pnl.bizTax;
+  co.cash -= pnl.waste - (m.prepaidWaste || 0) + pnl.wage + pnl.rent + pnl.util + pnl.maintenance + pnl.pos + pnl.cardFee + pnl.bizTax + pnl.strategyCost + pnl.managerCost;
   co.yearProfit += pnl.profit;
   const di = world.day || dateOf(0);
   const ym = final ? ymOf(di) : ymOf(dateOf(world.t / 24 - 1));
@@ -1462,7 +1554,7 @@ function settleShop(world, s, dim, final) {
 
 function monthlyFixed(world, s) {
   const wage = (s.staff.reduce((a, _, i) => a + hiredStaff(s, i), 0) * 4 * world.wages[s.wageLevel] * businessOf(s.businessId).wageMult * EMPLOYER_MILLI * 30) / 1000;
-  return s.rent + businessOf(s.businessId).utility + assetMonthly(s) + V.fixedCost.posMonthly + wage;
+  return s.rent + businessOf(s.businessId).utility + assetMonthly(s) + V.fixedCost.posMonthly + wage + strategyEffects(s).monthly + MANAGERS[managerOf(s).tier].monthly;
 }
 function settleMonth(world, prev) {
   const dim = prev.dim, ym = ymOf(prev);
@@ -1728,7 +1820,7 @@ function pressureRivalMonthly(world, di) {
 function descOfShop(world, s) {
   const D = derived(world), co = world.companies[s.company];
   const hired = s.staff.reduce((a, _, i) => a + hiredStaff(s, i), 0) * 4, biz = businessOf(s.businessId);
-  return mkDesc(world, { businessId: s.businessId, assetLevel: s.assetLevel, operations: s.operations, staff: s.staff.map((_, i) => hiredStaff(s, i) + (s.ownerWorks ? 1 : 0)), li: D.lotIdx[s.lotId], co, avgP: s.avgPrice * (s.promo.daysLeft > 0 ? s.promo.num / s.promo.den : 1), avgPlat: s.avgPlat, q: s.quality, star: chainStarOf(world, s), delivery: s.delivery, mix: s.mix, costMult: s.costMult, rent: s.rent, wageH: world.wages[s.wageLevel] * biz.wageMult, sp: V.capacity.wageSpeed[s.wageLevel], ownerWorks: !!s.ownerWorks, hiredHours: hired, fixedStaff: s.owner === 'player' || s.businessId !== 'tea', company: s.company });
+  return mkDesc(world, { businessId: s.businessId, strategy: activeStrategy(world, s), manager: managerOf(s), assetLevel: s.assetLevel, operations: s.operations, staff: s.staff.map((_, i) => hiredStaff(s, i) + (s.ownerWorks ? 1 : 0)), li: D.lotIdx[s.lotId], co, avgP: s.avgPrice * (s.promo.daysLeft > 0 ? s.promo.num / s.promo.den : 1), avgPlat: s.avgPlat, q: s.quality, star: chainStarOf(world, s), delivery: s.delivery, mix: s.mix, costMult: s.costMult, rent: s.rent, wageH: world.wages[s.wageLevel] * biz.wageMult, sp: V.capacity.wageSpeed[s.wageLevel] * (s.owner === 'player' ? effects(co.expansion).speed : 1) * strategyEffects(s, activeStrategy(world, s)).speed, ownerWorks: !!s.ownerWorks, hiredHours: hired, fixedStaff: s.owner === 'player' || s.businessId !== 'tea', company: s.company });
 }
 function descOfCandidate(world, lot, companyId) {
   const D = derived(world), co = world.companies[companyId];
@@ -1742,13 +1834,14 @@ function descOfCandidate(world, lot, companyId) {
 const Ch_ = () => V.choice;
 function mkDesc(world, o) {
   const Ch = V.choice, cal = world.cal, biz = businessOf(o.businessId);
+  const sf = strategyEffects(o);
   const unitIngr = o.mix.reduce((a, m, i) => a + m * Object.values(biz.items)[i].cost, 0) * o.costMult;
-  const base = cal.c - Ch.priceCoef * Math.log(o.avgP / referencePrice(o.businessId)) + Ch.qualityCoef * (o.q - Ch.qualityRef) + Ch.starCoef * (o.star - Ch.starRef) - Ch.waitCoef * queueWait(V.queue.targetRho * V.capacity.workerCups, V.capacity.workerCups); // 尖峰預期等候（ρ≈0.8）
-  const Ed = o.delivery ? Math.exp(cal.c_del - Ch.priceCoef * Math.log(o.avgPlat / (!o.businessId || o.businessId === 'tea' ? V.delivery.refPrice : referencePrice(o.businessId) * 1.15)) + Ch.qualityCoef * (o.q - Ch.qualityRef) + V.delivery.starCoef * (o.star - Ch.starRef) + Ch.awareCoef * Math.log(Ch.awareFloor + (1 - Ch.awareFloor) * (1 - (1 - derived(world).ssFbar[o.li]) * (1 - o.co.awareness))) - V.delivery.waitCoef * Ch.waitBase) : 0;
+  const base = cal.c - Ch.priceCoef * sf.priceSensitivity * Math.log(o.avgP / referencePrice(o.businessId)) + Ch.qualityCoef * (o.q - Ch.qualityRef) + Ch.starCoef * (o.star - Ch.starRef) - Ch.waitCoef * queueWait(V.queue.targetRho * V.capacity.workerCups, V.capacity.workerCups); // 尖峰預期等候（ρ≈0.8）
+  const Ed = o.delivery ? Math.exp(cal.c_del - Ch.priceCoef * sf.priceSensitivity * Math.log(o.avgPlat / (!o.businessId || o.businessId === 'tea' ? V.delivery.refPrice : referencePrice(o.businessId) * 1.15)) + Ch.qualityCoef * (o.q - Ch.qualityRef) + V.delivery.starCoef * (o.star - Ch.starRef) + Ch.awareCoef * Math.log(Ch.awareFloor + (1 - Ch.awareFloor) * (1 - (1 - derived(world).ssFbar[o.li]) * (1 - o.co.awareness))) - V.delivery.waitCoef * Ch.waitBase) : 0;
   const D = derived(world), distances = walkAttraction(world, o.businessId, D), Ew = Math.exp(base);
-  const walkG = Float64Array.from({ length: D.nb }, (_, b) => Ew * distances[b * D.nl + o.li] * Math.pow(Ch.awareFloor + (1 - Ch.awareFloor) * (1 - (1 - D.ssF[b * D.nl + o.li]) * (1 - o.co.awareness)), Ch.awareCoef));
-  const delG = world.market ? Float64Array.from({ length: D.nb }, (_, b) => Ed * D.deliveryReach[b * D.nl + o.li]) : null;
-  return { ...o, k: o.co.awareness, Ew, Ed, unitIngr, walkG, delG };
+  const walkG = Float64Array.from({ length: D.nb }, (_, b) => Ew * distances[b * D.nl + o.li] * Math.pow(Ch.awareFloor + (1 - Ch.awareFloor) * (1 - (1 - D.ssF[b * D.nl + o.li]) * (1 - o.co.awareness)), Ch.awareCoef) * customerFit(o, world.bld[b].key, incomeOf(world, world.bld[b])));
+  const delG = world.market ? Float64Array.from({ length: D.nb }, (_, b) => Ed * D.deliveryReach[b * D.nl + o.li] * customerFit(o, world.bld[b].key, incomeOf(world, world.bld[b]))) : null;
+  return { ...o, k: o.co.awareness, Ew, Ed, unitIngr, walkG, delG, priceSensitivity: sf.priceSensitivity };
 }
 function estimateDay(world, descs) {
   const D = derived(world), Ch = V.choice, n = descs.length, walk = new Array(n).fill(0), del = new Array(n).fill(0); let spend = 0;
@@ -1764,9 +1857,9 @@ function estimateDay(world, descs) {
         for (const j of group.members) {
           const d = descs[j];
           const markdown = d.operations ? markdownOf(d, col + OPEN_H) : 1;
-          ea[j] = d.walkG[b] * Math.pow(markdown, -Ch.priceCoef);
+          ea[j] = d.walkG[b] * Math.pow(markdown, -Ch.priceCoef * d.priceSensitivity);
           sum += ea[j];
-          if (world.market) { ed[j] = d.delG[b]; sumD += ed[j]; }
+          if (world.market) { ed[j] = d.delG[b] * Math.pow(markdown, -Ch.priceCoef * d.priceSensitivity); sumD += ed[j]; }
         }
         for (const j of group.members) {
           origins[j][b] = pool.walk[b] * ea[j] / (1 + sum);
@@ -1810,7 +1903,7 @@ function estProfit(d, walk, del) {
     hiredHours = Math.max(d.hiredHours, (kw + 1) * 12);
   }
   const wage = (hiredHours * d.wageH * EMPLOYER_MILLI * days) / 1000;
-  return turn - comm - purchases - wage - d.rent - (biz.utility + assetMonthly(d) + biz.utilityUnit * c) - V.fixedCost.posMonthly - revW * 0.01 - tax;
+  return turn - comm - purchases - wage - d.rent - (biz.utility + assetMonthly(d) + biz.utilityUnit * c) - V.fixedCost.posMonthly - revW * 0.01 - tax - strategyEffects(d).monthly - MANAGERS[managerOf(d).tier].monthly;
 }
 /** 品牌（現有店＋候選店面）預估每月總獲利；lot＝null 表示不開新店。 */
 function brandEstimate(world, companyId, lot, existing) {
@@ -1877,7 +1970,7 @@ export function getMarketAnalysis(world) {
   return { population: world.popAll, residents, districts, marketVersion: world.market?.version, areaKm2: world.market?.areaKm2, budgetDaily, estimatedSpendDaily: allEst.spend, budgetUse: budgetDaily ? allEst.spend / budgetDaily : null, growth: world.market ? world.popAll / world.bld.reduce((a, b) => a + b.basePop, 0) - 1 : 0, potentialDaily: sectors.reduce((a, s) => a + s.potentialDaily, 0), typicalOrders: sectors.reduce((a, s) => a + s.typicalOrders, 0), capacityDaily: sectors.reduce((a, s) => a + s.capacityDaily, 0), openShops: sectors.reduce((a, s) => a + s.openShops, 0), freeLots: world.lots.filter((l) => !l.shopId).length, lots: world.lots.length, saturation: sectors.reduce((a, s) => a + s.typicalOrders, 0) / Math.max(1, sectors.reduce((a, s) => a + s.potentialDaily, 0)), sectors };
 }
 function dailyCapacity(world, s) {
-  const speed = V.capacity.wageSpeed[s.wageLevel] * (s.owner === 'player' ? effects(playerCo(world).expansion).speed : 1);
+  const speed = V.capacity.wageSpeed[s.wageLevel] * (s.owner === 'player' ? effects(playerCo(world).expansion).speed : 1) * strategyEffects(s, activeStrategy(world, s)).speed;
   const capacity = s.staff.reduce((a, _, i) => a + 4 * hourlyCapacity(s, hiredStaff(s, i) + (s.ownerWorks ? 1 : 0), speed), 0);
   return freshBusiness(s.businessId) ? Math.min(capacity, s.operations.prep) : capacity;
 }
@@ -1940,7 +2033,7 @@ export function getShops(world, owner) {
 }
 function shopSummary(world, s) {
   const co = world.companies[s.company];
-  return { id: s.id, lotId: s.lotId, businessId: s.businessId, assetLevel: s.assetLevel || 0, assetInvestment: s.assetInvestment || 0, leasedPing: s.leasedPing, operations: { ...s.operations }, inventory: s.inv, stock: { ...s.stock }, name: s.name, owner: s.owner, company: s.company, status: s.status, openAtT: s.openAtT, prices: { ...s.prices }, markupPct: s.markupPct, delivery: s.delivery, staff: [...s.staff], ownerWorks: !!s.ownerWorks, wageLevel: s.wageLevel, grade: s.grade, quality: s.quality, star: Math.round(starOf(s) * 10) / 10, reviews: s.revCnt, awareness: co.awareness, promo: s.promo.kind, shortage: s.shortage.daysLeft > 0, rent: s.rent, deposit: s.deposit };
+  return { id: s.id, lotId: s.lotId, businessId: s.businessId, assetLevel: s.assetLevel || 0, assetInvestment: s.assetInvestment || 0, leasedPing: s.leasedPing, operations: { ...s.operations }, strategy: structuredClone(strategyOf(s)), strategyEffects: strategyEffects(s), manager: { ...managerOf(s) }, inventory: s.inv, stock: { ...s.stock }, name: s.name, owner: s.owner, company: s.company, status: s.status, openAtT: s.openAtT, prices: { ...s.prices }, markupPct: s.markupPct, delivery: s.delivery, staff: [...s.staff], ownerWorks: !!s.ownerWorks, wageLevel: s.wageLevel, grade: s.grade, quality: s.quality, star: Math.round(starOf(s) * 10) / 10, reviews: s.revCnt, awareness: co.awareness, promo: s.promo.kind, shortage: s.shortage.daysLeft > 0, rent: s.rent, deposit: s.deposit };
 }
 export function getShopToday(world, shopId) {
   const s = shopBy(world, shopId);
@@ -1973,7 +2066,7 @@ export function getEvents(world) {
   for (const s of world.shops) if (s.status !== 'closed' && world.t < s.boostUntilT && s.owner === 'player') active.push({ kind: 'viral', shopId: s.id, text: '爆紅期間', untilT: s.boostUntilT });
   return { pending: l.filter((e) => e.status === 'pending'), active, recent: l.slice(-20), log: world.eventLog.slice(-60) };
 }
-const PNL_SUM = ['turnover', 'storeRev', 'gmv', 'commission', 'cogs', 'pack', 'waste', 'wage', 'rent', 'util', 'maintenance', 'pos', 'cardFee', 'bizTax', 'profit', 'cups', 'walk', 'del', 'lost'];
+const PNL_SUM = ['strategyCost', 'managerCost', 'turnover', 'storeRev', 'gmv', 'commission', 'cogs', 'pack', 'waste', 'wage', 'rent', 'util', 'maintenance', 'pos', 'cardFee', 'bizTax', 'profit', 'cups', 'walk', 'del', 'lost'];
 function companyPnL(world, co, row, di) {
   const ym = row ? row.ym : ymOf(di);
   const pnl = Object.fromEntries(PNL_SUM.map((k) => [k, 0]));
@@ -2023,7 +2116,8 @@ export function getShopAnalysis(world, shopId) {
   const biz = businessOf(s.businessId);
   const contribution = h.cups ? (h.turnover - h.commission - h.cogs - h.pack - h.waste - biz.utilityUnit * h.cups - h.cardFee - h.bizTax) / h.cups : null;
   const monthlyWage = Math.round(s.staff.reduce((a, _, i) => a + hiredStaff(s, i) * (SHIFTS[i][1] - SHIFTS[i][0]), 0) * world.wages[s.wageLevel] * biz.wageMult * EMPLOYER_MILLI / 1000 * di.dim);
-  const fixedMonthly = s.rent + monthlyWage + biz.utility + assetMonthly(s) + V.fixedCost.posMonthly;
+  const strategyMonthly = strategyEffects(s).monthly, managerMonthly = MANAGERS[managerOf(s).tier].monthly;
+  const fixedMonthly = s.rent + monthlyWage + biz.utility + assetMonthly(s) + V.fixedCost.posMonthly + strategyMonthly + managerMonthly;
   const breakEvenDaily = contribution > 0 ? Math.ceil(fixedMonthly / contribution / di.dim) : null;
   const co = playerCo(world), shopCount = liveShops(world).filter((x) => x.owner === 'player').length;
   const brandMonthly = Math.max(co.adWan * 10000, Math.floor(co.adDayUnits * 10000 / di.dim)) + (co.cm.extraExpense || 0) + (co.cm.researchExpense || 0) + (co.cm.stockWriteOff || 0) + facilityMonthly(co.expansion) + Math.max(0, shopCount - 1) * EXP.chain.managementPerShop + co.loans.reduce((a, l) => a + Math.round(l.balance * V.loan.rate / 12), 0);
@@ -2032,11 +2126,55 @@ export function getShopAnalysis(world, shopId) {
   const capacityDaily = dailyCapacity(world, s);
   const dailyCups = h.tradingDays ? h.cups / h.tradingDays : 0;
   const lostRate = h.cups + h.lost ? h.lost / (h.cups + h.lost) : 0;
-  return { shopId, businessId: s.businessId, unit: biz.unit, operations: { ...s.operations }, inventory: s.inv, prepared: h.prepared || 0, unsold: h.unsold || 0, stockLost: h.stockLost || 0, name: s.name, status: s.status, ownerWorks: !!s.ownerWorks, ym: h.ym, current, sampleDays: h.tradingDays, pnl: h, dailyCups, contribution, fixedMonthly, monthlyWage, breakEvenDaily, breakEvenWithBrandDaily, brandAllocation, capacityDaily, lostRate, avgWait: h.avgWait, ownerSaving: Math.round(NHOURS * world.wages[s.wageLevel] * biz.wageMult * EMPLOYER_MILLI / 1000 * di.dim) };
+  return { shopId, businessId: s.businessId, unit: biz.unit, operations: { ...s.operations }, inventory: s.inv, prepared: h.prepared || 0, unsold: h.unsold || 0, stockLost: h.stockLost || 0, name: s.name, status: s.status, ownerWorks: !!s.ownerWorks, ym: h.ym, current, sampleDays: h.tradingDays, pnl: h, dailyCups, contribution, fixedMonthly, monthlyWage, strategyMonthly, managerMonthly, breakEvenDaily, breakEvenWithBrandDaily, brandAllocation, capacityDaily, lostRate, avgWait: h.avgWait, ownerSaving: Math.round(NHOURS * world.wages[s.wageLevel] * biz.wageMult * EMPLOYER_MILLI / 1000 * di.dim) };
+}
+
+/** 在報表被要求時才計算；典型日只算一次，之後按天彙總收付。 */
+export function getCashForecast(world) {
+  if (world.status !== 'playing') return null;
+  const live = liveShops(world);
+  const future = live.map((s) => { const x = structuredClone(s); x.stock.day = -1; recalcShop(world, x); return x; });
+  const descs = future.map((s) => descOfShop(world, s)), typical = estimateDay(world, descs);
+  const plans = live.flatMap((s, i) => {
+    if (s.owner !== 'player') return [];
+    const recent = s.days.slice(-14), samples = recent.length, d = descs[i], biz = businessOf(s.businessId);
+    const weight = samples >= 7 ? 0.75 : 0;
+    const walk = avg(recent.map((x) => x.walk)) * weight + typical.walk[i] * (1 - weight);
+    const del = avg(recent.map((x) => x.del)) * weight + typical.del[i] * (1 - weight);
+    return [{ shop: s, samples, walk, del, unit: d.unitIngr, price: future[i].avgPrice, plat: future[i].avgPlat, capacity: dailyCapacity(world, future[i]), dailyWage: d.hiredHours * d.wageH * EMPLOYER_MILLI / 1000, wasteRate: Math.max(0, biz.waste - (biz.warehouse ? effects(playerCo(world).expansion).waste : 0)), renewal: getLeaseInfo(world, s.id, { includeAnalysis: false })?.one || null }];
+  });
+  const args = { world, plans, dateOf, computePnL, newMTD, monthlyFixed, V, EXP, endDay: END_DAY };
+  return { base: projectCash(args), stress: projectCash(args, true), sampleDays: plans.map((p) => ({ shopId: p.shop.id, name: p.shop.name, days: p.samples })), assumptions: [
+    '從目前現金起算六個月份，首月只列剩餘收付；未繳的本月薪資、店租和稅仍會在月結支付。',
+    '有 7 天以上資料的店，以近 14 天成交占 75%、目前設定的典型日占 25%；新店使用典型日與開幕爬坡。茶飲另計季節。',
+    '維持目前售價、班表、商品組合、廣告及補貨政策；含既有裝修、已付庫存、中央庫存與在途訂單、設施啟用、貸款攤還、年結稅與工資調漲。店長未來調整與尚未完成的研發效益未納入。',
+    '已選續租或退租照方案投影；尚未選擇的租約假設按目前報價續一年、到期補退押金。未簽報價之後仍可能變動。',
+    '壓力情境為成交需求減少 20%、新採購成本增加 10%。不預知未來競爭、事件或新的展店，也不假設自動借款救援。',
+    '本版仍以成本金額彙總庫存，未模擬每個 SKU 或會員續約；預測為近似收付，結案前最多投影到遊戲期限。',
+  ] };
+}
+
+/** 可驗證的經營取捨，用現有帳目說明而非給保證獲利的配方。 */
+export function getLearningReview(world, shopId) {
+  const a = getShopAnalysis(world, shopId); if (!a) return null;
+  const s = shopBy(world, shopId), fx = strategyEffects(s), co = playerCo(world);
+  const unitReceipt = a.pnl.cups ? (a.pnl.turnover - a.pnl.commission) / a.pnl.cups : null;
+  const afterCut = a.contribution == null ? null : a.contribution - unitReceipt * 0.05;
+  const priceCutExtra = afterCut > 0 ? Math.max(0, a.contribution / afterCut - 1) : null;
+  const ownerCost = s.ownerWorks ? a.ownerSaving : 0;
+  const shops = liveShops(world).filter((x) => x.owner === 'player');
+  const spareCash = co.cash - shops.reduce((total, x) => total + monthlyFixed(world, x), 0) - Math.max(0, shops.filter((x) => x.status === 'open').length - 1) * EXP.chain.managementPerShop - co.adWan * 10000 - facilityMonthly(co.expansion) - co.loans.reduce((total, l) => total + l.payment, 0);
+  return { shopId, name: s.name, profile: PROFILES[strategyOf(s).profile].name, profileEffects: fx, sampleDays: a.sampleDays, contribution: a.contribution, priceCutExtra, ownerCost, economicBreakEven: a.contribution > 0 ? Math.ceil((a.fixedMonthly + a.brandAllocation + ownerCost) / a.contribution / (world.day || dateOf(0)).dim) : null, spareCash, lessons: [
+    { skill: '定位與客群', fact: `${PROFILES[strategyOf(s).profile].name}影響來源客群、價格敏感度與服務速度；目前定位及主推商品每月費用 ${fx.monthly.toLocaleString()} 元。`, action: '比較店面周邊的學校、通勤、住宅與商圈客源，再選擇定位。高品質也要有願意付費的客人。' },
+    { skill: '單筆貢獻與定價', fact: a.contribution == null ? '尚無成交資料，還不能用實際毛利判斷降價。' : `每筆貢獻約 ${a.contribution.toFixed(1)} 元；若各通路售價都降 5%，${afterCut > 0 ? `成交至少須增加 ${(priceCutExtra * 100).toFixed(1)}% 才能維持原貢獻總額` : '每筆貢獻將不再為正'}。`, action: '先調一項設定，觀察至少 7 個營業日；把成交、貢獻與淨利一起比較。這裡的降價計算固定商品及通路組合，未預測會增加多少客人。' },
+    { skill: freshBusiness(s.businessId) ? '備料與報廢' : retailBusiness(s.businessId) ? '庫存與週轉' : '排班與產能', fact: freshBusiness(s.businessId) ? `分析期備貨 ${a.prepared}、未售 ${a.unsold}；未售出的備料也是成本。` : retailBusiness(s.businessId) ? `庫存占用現金 ${s.inv.toLocaleString()} 元，分析期缺貨流失 ${a.stockLost} 筆。` : `每日上限 ${Math.round(a.capacityDaily)} 筆，實際日均 ${Math.round(a.dailyCups)} 筆；流失 ${(a.lostRate * 100).toFixed(1)}%。`, action: '分清楚客源不足、排隊和缺貨。增加供給只有在需求被阻擋時才可能有效，否則會增加薪資、庫存或報廢。' },
+    { skill: '管理與機會成本', fact: `委任每月 ${a.managerMonthly.toLocaleString()} 元，計入損平；${ownerCost ? `老闆每天顧店 12 小時，報表省下約 ${ownerCost.toLocaleString()} 元月薪資` : '目前班表均按支薪員工計算'}。${managerOf(s).tier !== 'none' ? `店長紀錄：${managerOf(s).note}` : ''}`, action: ownerCost ? '另看含老闆工時價值的損平點，確認生意能否支付替代人力。店長負責檢視與決策，不增加櫃檯人手。' : '衡量管理費能否換來更好的排班和備貨；只委任你需要的項目，並檢查店長決策紀錄。' },
+    { skill: '現金與擴張', fact: `扣除全品牌一個月固定支出與貸款期款後，現金餘額約 ${Math.round(spareCash).toLocaleString()} 元。此數還未扣下一批進貨及未付月結變動費。`, action: '展店前同時看正常與壓力現金預測，再評估裝修期、押金和互搶客源；營收成長不等於有足夠現金。' },
+  ] };
 }
 
 /** 12 個月報表：通路、公司損益、市占率、商品與門店診斷。 */
-export function getReport(world) {
+export function getReport(world, { includeMarket = true } = {}) {
   const co = playerCo(world);
   const di = world.status === 'playing' ? world.day || dateOf(Math.floor(world.t / 24)) : dateOf(Math.floor(world.t / 24));
   const rows = co.rows.slice(-12);
@@ -2054,7 +2192,7 @@ export function getReport(world) {
   const catalogue = Object.entries(BUSINESSES).flatMap(([businessId, b]) => Object.keys(b.items).map((name) => ({ name, businessId, unit: b.unit, packaging: b.packaging })));
   const products = catalogue.filter((p) => items[p.name] || world.shops.some((s) => s.company === PLAYER && s.businessId === p.businessId)).map((p) => { const x = items[p.name] || { cups: 0, rev: 0, cost: 0, wasteMilli: 0 }; const directCost = x.cost + x.cups * p.packaging + roundDiv(x.wasteMilli, 1000); return { ...p, cups: x.cups, revenue: x.rev, directCost, grossProfit: x.rev - directCost, avgPrice: x.cups ? x.rev / x.cups : 0, grossMargin: x.rev ? (x.rev - directCost) / x.rev : 0 }; });
 
-  return { months, share, products, financials: rows.map((r) => companyPnL(world, co, r, di)), current: companyPnL(world, co, null, di), analysis: liveShops(world).filter((s) => s.owner === 'player').map((s) => getShopAnalysis(world, s.id)), facilities: getFacilities(world), market: getMarketAnalysis(world) };
+  return { months, share, products, financials: rows.map((r) => companyPnL(world, co, r, di)), current: companyPnL(world, co, null, di), analysis: liveShops(world).filter((s) => s.owner === 'player').map((s) => getShopAnalysis(world, s.id)), facilities: getFacilities(world), market: includeMarket ? getMarketAnalysis(world) : null };
 }
 
 // ───────────────────────── 存檔 ─────────────────────────
@@ -2097,6 +2235,7 @@ export function deserialize(json) {
   for (const co of Object.values(w.companies)) co.revenue30 ||= [0];
   for (const s of w.shops) {
     s.businessId ||= 'tea'; s.assetLevel ||= 0; s.assetInvestment ||= 0; s.leasedPing ||= premises(w.lots.find((l) => l.id === s.lotId), s.businessId).ping; s.operations ||= initialOperations(s.businessId, s.leasedPing); s.stock ||= { day: -1, qty: 0, value: 0, prepared: 0 };
+    if (w.status === 'playing' && freshBusiness(s.businessId) && s.stock.day === Math.floor(w.t / 24) && !s.stock.mix) { s.stock.mix = [...s.mix]; s.stock.weights = { ...strategyOf(s).weights }; s.stock.grade = s.grade; }
     for (const k of ['prepaidWaste', 'prepared', 'unsold', 'stockLost']) s.mtd[k] ??= 0;
     s.mtd.wasteMilli ??= s.mtd.cogs * Math.round(V.menu.wasteRate * 1000);
     for (const k of ['prepared', 'unsold', 'waste', 'stockLost']) s.today[k] ??= 0;
