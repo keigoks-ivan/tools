@@ -27,9 +27,17 @@ function validate(w) {
     if (w.market.version !== MARKET_VERSION || !Number.isInteger(w.market.startT) || w.market.startT < 0 || w.market.startT > w.t || !finite(w.market.areaKm2) || w.market.areaKm2 <= 0) bad();
     for (const b of w.bld) if (!finite(b.basePop) || b.basePop < 0 || !Number.isInteger(b.floors) || b.floors < 1 || districtOf(b.districtId).id !== b.districtId) bad();
   }
+  if (w.pressure) {
+    if (!w.market || w.pressure.version !== 1 || !Number.isInteger(w.pressure.startT) || w.pressure.startT < 0 || w.pressure.startT > w.t) bad();
+    for (const d of Object.keys(w.pressure.occupancy || {})) if (districtOf(d).id !== d || !finite(w.pressure.occupancy[d]) || w.pressure.occupancy[d] < 0 || w.pressure.occupancy[d] > 1 || !finite(w.pressure.population?.[d]) || w.pressure.population[d] <= 0) bad();
+    if (Object.keys(w.pressure.occupancy || {}).length !== 6) bad();
+    if (Object.keys(w.pressure.population || {}).length !== 6 || Object.keys(w.pressure.population).some((d) => !Object.hasOwn(w.pressure.occupancy, d))) bad();
+  }
   for (const l of w.lots) if (!finite(l.ping) || l.ping <= 0 || !finite(l.rent) || !finite(l.deposit) || l.shopId && !ids.has(l.shopId)) bad();
+  for (const l of w.lots) if (l.baseRent != null && (!finite(l.baseRent) || l.baseRent <= 0)) bad();
   for (const co of Object.values(w.companies)) {
     if (!finite(co.cash) || !finite(co.awareness) || !co.cm || !array(co.rows) || !array(co.loans) || !array(co.day30) || !finite(co.adWan) || !finite(co.adDayUnits) || !finite(co.yearProfit)) bad();
+    if (co.lastExpansionT != null && (!Number.isInteger(co.lastExpansionT) || co.lastExpansionT < 0 || co.lastExpansionT > w.t)) bad();
     for (const l of co.loans) if (!finite(l.balance) || l.balance < 0 || !finite(l.payment)) bad();
     if (co.expansion && (!co.expansion.projects || !['factory', 'warehouse', 'lab'].every((k) => ['none', 'building', 'ready'].includes(co.expansion.facilities?.[k]?.status)) || !array(co.expansion.facilities.warehouse.orders))) bad();
   }
@@ -40,6 +48,13 @@ function validate(w) {
     if (!finite(s.inv) || s.inv < 0 || !finite(s.rent) || !Object.keys(b.items).every((k) => finite(s.prices?.[k]) && s.prices[k] > 0)) bad();
     if (!['basic', 'market', 'high'].includes(s.wageLevel) || !['平價', '標準', '講究'].includes(s.grade) || !finite(s.openAtT) || !finite(s.Bw) || !finite(s.Bd) || !finite(s.waitMin)) bad();
     if (!['walk', 'del', 'lost', 'storeRev', 'gmv', 'cogs', 'pack', 'wageMilli', 'openDays', 'rentDays'].every((k) => finite(s.mtd[k]))) bad();
+    if (s.mtd.rentUnits != null && (!finite(s.mtd.rentUnits) || s.mtd.rentUnits < 0)) bad();
+    if (s.lease) {
+      const l = s.lease;
+      if (!w.pressure || !['startT', 'endT', 'noticeAtT', 'termDays'].every((k) => Number.isInteger(l[k]) && l[k] >= 0) || l.endT <= l.startT || ![365, 730].includes(l.termDays) || l.noticeAtT > l.endT) bad();
+      if (l.offer && !['rent', 'longRent'].every((k) => Number.isInteger(l.offer[k]) && l.offer[k] > 0)) bad();
+      if (l.plan && (!['A', 'B', 'C'].includes(l.plan.key) || l.plan.key !== 'C' && (!['rent', 'deposit', 'termDays'].every((k) => Number.isInteger(l.plan[k]) && l.plan[k] > 0) || l.plan.termDays !== (l.plan.key === 'B' ? 730 : 365) || l.plan.deposit !== l.plan.rent * (l.plan.key === 'B' ? 3 : 2)))) bad();
+    } else if (w.pressure && s.status !== 'closed') bad();
     if (s.assetLevel != null && (!Number.isInteger(s.assetLevel) || s.assetLevel < 0 || s.assetLevel > (b.upgrades?.length || 0))) bad();
     if (s.stock && (!Number.isInteger(s.stock.day) || s.stock.day < -1 || !['qty', 'value', 'prepared'].every(k => Number.isInteger(s.stock[k]) && s.stock[k] >= 0) || s.stock.qty > s.stock.prepared)) bad();
     if (s.status !== 'closed' && w.lots.find(l => l.id === s.lotId).shopId !== s.id) bad();
@@ -52,6 +67,7 @@ function validate(w) {
       if (['convenience', 'supermarket'].includes(s.businessId) && (!Number.isInteger(s.operations.stockTarget) || s.operations.stockTarget < (s.businessId === 'supermarket' ? 100000 : 20000) || s.operations.stockTarget > stockLimit(s) || s.operations.stockTarget % (s.businessId === 'supermarket' ? 100000 : 10000) || typeof s.operations.autoStock !== 'boolean')) bad();
     }
   }
+  for (const e of w.events.list) if (e.kind === 'lease' && (!ids.has(e.shopId) || !Number.isInteger(e.leaseEndT) || e.leaseEndT < 0 || !array(e.choices) || !['A', 'B', 'C'].every((key) => e.choices.some((c) => c.key === key)) || !e.choices.every((c) => ['A', 'B', 'C', 'D'].includes(c.key)))) bad();
 }
 
 export function decodeSave(raw) {

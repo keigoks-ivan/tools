@@ -251,7 +251,115 @@ export function createWorld({ mapData, distances, seed = 1, cal, playerName = '�
     warmUp(world);
     if (multiBusiness) seedBusinesses(world);
   }
+  enablePressure(world);
   return world;
+}
+
+// 新城的競爭與租約；舊版小城與已結案存檔仍使用原規則。
+function enablePressure(world) {
+  if (!world.market || world.status !== 'playing' || world.warm) return;
+  if (!world.pressure) {
+    const occupancy = {}, population = {};
+    for (const d of V.market.districts) {
+      const lots = world.lots.filter((l) => l.districtId === d.id);
+      occupancy[d.id] = lots.length ? lots.filter((l) => l.shopId).length / lots.length : 0;
+      population[d.id] = world.bld.filter((b) => b.districtId === d.id).reduce((a, b) => a + b.pop, 0);
+    }
+    world.pressure = { version: 1, startT: world.t, occupancy, population };
+  }
+  for (const l of world.lots) l.baseRent ??= l.rent;
+  for (const s of liveShops(world)) initLease(world, s);
+}
+function initLease(world, s) {
+  if (!world.pressure) return;
+  s.lease ||= { startT: world.t, endT: (Math.floor(world.t / 24) + V.leases.termDays) * 24, termDays: V.leases.termDays, noticeAtT: (Math.floor(world.t / 24) + V.leases.termDays - V.leases.noticeDays) * 24, offer: null, plan: null };
+  s.mtd.rentUnits ??= s.rent * s.mtd.rentDays;
+}
+function updateAskingRents(world) {
+  if (!world.pressure) return;
+  const years = (world.t - world.pressure.startT) / 24 / 365;
+  for (const d of V.market.districts) {
+    const lots = world.lots.filter((l) => l.districtId === d.id), buildings = world.bld.filter((b) => b.districtId === d.id);
+    const basePop = world.pressure.population[d.id], population = buildings.reduce((a, b) => a + b.pop, 0);
+    const occupancy = lots.filter((l) => l.shopId).length / Math.max(1, lots.length);
+    const factor = clamp(Math.pow(1 + V.leases.annualGrowth, years) * (basePop ? population / basePop : 1) * (1 + V.leases.occupancyWeight * (occupancy - world.pressure.occupancy[d.id])), 0.8, 1.6);
+    for (const l of lots) {
+      l.rent = Math.round(l.baseRent * factor); l.rentPerPing = Math.round(l.rent / l.ping); l.deposit = l.rent * V.startup.depositMonths;
+    }
+  }
+}
+function leaseOffer(world, s) {
+  const quoted = premises(world.lots.find((l) => l.id === s.lotId), s.businessId).rent;
+  const rent = Math.round(clamp(quoted, s.rent * (1 - V.leases.renewalLimit), s.rent * (1 + V.leases.renewalLimit)));
+  return { rent, longRent: Math.round(rent * (1 - V.leases.longDiscount)) };
+}
+function leaseBreakFee(world, s) {
+  return s.lease ? Math.round(s.rent * Math.min(V.leases.breakMonths, Math.max(0, s.lease.endT - world.t) / 24 / 30)) : 0;
+}
+export function getLeaseInfo(world, shopId, { includeAnalysis = true } = {}) {
+  const s = shopBy(world, shopId);
+  if (!s || s.status === 'closed' || !s.lease) return null;
+  const lease = s.lease, offer = lease.offer || leaseOffer(world, s), analysis = includeAnalysis ? getShopAnalysis(world, s.id) : null;
+  const dim = (world.day || dateOf(Math.floor(world.t / 24))).dim;
+  const option = (rent, termDays, months) => ({ rent, termDays, deposit: rent * months, cashDelta: rent * months - s.deposit, breakEvenDaily: analysis?.contribution > 0 ? Math.ceil((analysis.fixedMonthly + rent - s.rent) / analysis.contribution / dim) : null });
+  return { endDate: dateOf(lease.endT / 24).key, daysLeft: Math.max(0, Math.ceil((lease.endT - world.t) / 24)), rent: s.rent, deposit: s.deposit, one: option(offer.rent, V.leases.termDays, 2), long: option(offer.longRent, V.leases.termDays * 2, 3), quoted: !!lease.offer, canReview: world.status === 'playing' && world.t >= lease.endT - V.leases.noticeDays * 24, plan: lease.plan ? { ...lease.plan } : null, breakFee: leaseBreakFee(world, s) };
+}
+function leaseNotice(world, s) {
+  if (world.events.list.some((e) => e.kind === 'lease' && e.shopId === s.id && e.status === 'pending')) return;
+  s.lease.offer ||= leaseOffer(world, s);
+  const info = getLeaseInfo(world, s.id), delta = (o) => o.cashDelta >= 0 ? `補押金 ${o.cashDelta.toLocaleString()} 元` : `退押金 ${(-o.cashDelta).toLocaleString()} 元`;
+  pushEvent(world, { kind: 'lease', shopId: s.id, leaseEndT: s.lease.endT, title: `「${s.name}」續租決策`, text: `租約 ${info.endDate} 到期。目前月租 ${s.rent.toLocaleString()} 元。新租金從到期日生效；押金現在補退、不列費用。一年方案損平 ${info.one.breakEvenDaily == null ? '待累積成交資料' : info.one.breakEvenDaily + ' ' + businessOf(s.businessId).unit + '／天'}。兩年鎖租便宜 3%，但押金較多；提早退租最多付兩個月租金。可先延後，查月報或籌措資金。未決定預設續一年，補不起押金則到期退租。`, deadlineT: s.lease.endT, choices: [
+    { key: 'A', label: `續租一年（月租 ${info.one.rent.toLocaleString()} 元；${delta(info.one)}）` },
+    { key: 'B', label: `鎖租兩年（月租 ${info.long.rent.toLocaleString()} 元；${delta(info.long)}）` },
+    { key: 'C', label: '到期退租（繼續營業到租期結束，屆時結清存貨並退押金）' },
+    ...(world.t < s.lease.endT ? [{ key: 'D', label: '延後再談（7 天後提醒，可先看報表或借款）' }] : []),
+  ] });
+}
+export function reviewLease(world, shopId) {
+  const e0 = playing(world); if (e0) return e0;
+  const [s, e] = ownShop(world, shopId); if (e) return e;
+  if (!getLeaseInfo(world, shopId, { includeAnalysis: false })?.canReview) return fail('lease', '到期前 30 天才能處理續租');
+  leaseNotice(world, s); return okRes();
+}
+function chooseLease(world, s, key, auto) {
+  if (key === 'D') { s.lease.plan = null; s.lease.noticeAtT = Math.min(s.lease.endT, world.t + 7 * 24); return okRes(); }
+  if (key === 'C') { s.lease.plan = { key: 'C' }; return okRes(); }
+  const offer = s.lease.offer || leaseOffer(world, s), rent = key === 'B' ? offer.longRent : offer.rent;
+  const deposit = rent * (key === 'B' ? 3 : 2), delta = deposit - s.deposit, co = world.companies[s.company];
+  if (delta > co.cash) {
+    if (auto) return chooseLease(world, s, 'C', false);
+    return fail('cash', `補押金需要 ${Math.max(0, delta).toLocaleString()} 元。可先延後，再查看貸款與月報。`);
+  }
+  co.cash -= delta;
+  if (delta > 0) co.cm.shopInvestment += delta; else co.cm.assetRecoveries -= delta;
+  s.deposit = deposit; s.lease.plan = { key, rent, deposit, termDays: V.leases.termDays * (key === 'B' ? 2 : 1) };
+  return okRes();
+}
+function leaseDay(world) {
+  if (!world.pressure) return;
+  for (const s of [...liveShops(world)]) {
+    const lease = s.lease;
+    if (world.t >= lease.endT) {
+      if (!lease.plan) {
+        const ev = world.events.list.find((e) => e.kind === 'lease' && e.shopId === s.id && e.status === 'pending');
+        if (ev) applyChoice(world, ev, 'A', true); else chooseLease(world, s, 'A', true);
+      }
+      const plan = lease.plan;
+      if (plan.key === 'C') { closeShopInternal(world, s, '租約到期，不再續租'); continue; }
+      s.rent = plan.rent;
+      s.lease = { startT: lease.endT, endT: lease.endT + plan.termDays * 24, termDays: plan.termDays, noticeAtT: lease.endT + (plan.termDays - V.leases.noticeDays) * 24, offer: null, plan: null };
+      logEvt(world, 'decision', `「${s.name}」續租生效，月租 ${s.rent.toLocaleString()} 元，租期 ${plan.termDays} 天`);
+    } else if (world.t >= lease.noticeAtT && !lease.plan) {
+      if (s.owner === 'player') leaseNotice(world, s);
+      else {
+        lease.offer ||= leaseOffer(world, s);
+        const profit = s.lastPnL?.profit;
+        const leaving = profit != null && profit - (lease.offer.rent - s.rent) < 0 && s.lossStreak >= 3;
+        chooseLease(world, s, leaving ? 'C' : 'A', true);
+        logEvt(world, 'rival', `「${s.name}」${s.lease.plan.key === 'C' ? '決定到期退租' : '決定續租一年'}`);
+      }
+    }
+  }
 }
 
 /** 住宅區店面裡，600 公尺內人口排中位數的那一間（規格 14.6）。 */
@@ -315,6 +423,7 @@ function makeShop(world, { company, lot, name, color, rival, businessId = 'tea' 
   recalcShop(world, sh);
   lot.shopId = sh.id;
   world.shops.push(sh);
+  initLease(world, sh);
   return sh;
 }
 function newToday() { return { hourly: new Array(NHOURS).fill(null).map(() => [0, 0]), walk: 0, del: 0, lost: 0, waitCups: 0, waitSum: 0, rev: 0, prepared: 0, unsold: 0, waste: 0, stockLost: 0 }; }
@@ -516,6 +625,7 @@ export function openShop(world, lotId, { name, color, ownerWorks = false, busine
   sh.ownerWorks = !!ownerWorks;
   if (businessId !== 'tea' && !world.multiBusiness) { world.multiBusiness = true; if (!world.noRivals && Object.keys(world.companies).length > 1) seedBusinesses(world); }
   sh.mtd.rentDays = 1;
+  if (world.pressure) sh.mtd.rentUnits = sh.rent;
   logEvt(world, 'open', `玩家租下 ${lot.id}（${lot.zone}），開設${businessOf(businessId).name}「${sh.name}」`);
   // 大吉茶行的反擊：300 公尺內開店 → 社群廣告加到每月 8 萬，維持 3 個月
   const R = V.rivals.daji;
@@ -531,13 +641,18 @@ export function closeShop(world, shopId) {
   const e0 = playing(world); if (e0) return e0;
   const [s, e] = ownShop(world, shopId); if (e) return e;
   const stockRecovery = retailBusiness(s.businessId) ? Math.floor(s.inv * 0.5) : 0;
+  const breakFee = leaseBreakFee(world, s);
   closeShopInternal(world, s, '玩家關店');
-  return okRes({ stockRecovery, refund: s.deposit, equipment: Math.round((businessOf(s.businessId).equipment + (s.assetInvestment || 0)) * V.startup.equipmentRecovery) });
+  return okRes({ breakFee, stockRecovery, refund: s.deposit, equipment: Math.round((businessOf(s.businessId).equipment + (s.assetInvestment || 0)) * V.startup.equipmentRecovery) });
 }
 
 function closeShopInternal(world, s, why) {
+  if (s.status === 'closed') return;
   const co = world.companies[s.company];
   const di = world.day || dateOf(0);
+  const breakFee = leaseBreakFee(world, s);
+  if (breakFee) charge(world, co, breakFee);
+  for (const ev of world.events.list) if (ev.kind === 'lease' && ev.shopId === s.id && ev.status === 'pending') { ev.status = 'resolved'; ev.choice = 'C'; ev.auto = true; }
   if (s.inv > 0 || s.stock.qty > 0) {
     writeOffFresh(world, s);
     const recovered = retailBusiness(s.businessId) ? Math.floor(s.inv * 0.5) : 0;
@@ -557,7 +672,7 @@ function closeShopInternal(world, s, why) {
   s.status = 'closed'; s.closedT = world.t;
   const lot = world.lots.find((l) => l.id === s.lotId); lot.shopId = null;
   s.Bw = 0; s.Bd = 0;
-  logEvt(world, 'close', `「${s.name}」關店：${why}`);
+  logEvt(world, 'close', `「${s.name}」關店：${why}${breakFee ? `；提前退租違約金 ${breakFee.toLocaleString()} 元` : ''}`);
 }
 
 export function setPrices(world, shopId, prices) {
@@ -811,6 +926,14 @@ export function respondEvent(world, eventId, choice) {
   return applyChoice(world, ev, choice, false);
 }
 function applyChoice(world, ev, key, auto) {
+  if (ev.kind === 'lease') {
+    const s = shopBy(world, ev.shopId);
+    if (!s || s.status === 'closed' || s.lease?.endT !== ev.leaseEndT) { ev.status = 'resolved'; return okRes(); }
+    const r = chooseLease(world, s, key, auto); if (!r.ok) return r;
+    ev.status = 'resolved'; ev.choice = key === 'D' ? key : s.lease.plan.key; ev.auto = auto;
+    logEvt(world, 'decision', `${ev.title}：${ev.choices.find((c) => c.key === ev.choice).label}${auto ? '（到期自動套用）' : ''}`);
+    return r;
+  }
   const co = playerCo(world);
   const cost = ev.choices.find((c) => c.key === key).cost || 0;
   if (cost && co.cash < cost && !auto) return fail('cash', `現金不夠：這個選項要 ${cost.toLocaleString()} 元`);
@@ -844,7 +967,7 @@ function applyChoice(world, ev, key, auto) {
 }
 /** 到期仍未回應的事件，套用預設（不動作）選項。 */
 function expireEvents(world) {
-  const defaults = { typhoon: 'A', cold: 'B', milk: 'B', platform: 'B', flame: 'B', batch: 'B' };
+  const defaults = { typhoon: 'A', cold: 'B', milk: 'B', platform: 'B', flame: 'B', batch: 'B', lease: 'A' };
   for (const ev of world.events.list)
     if (ev.status === 'pending' && ev.deadlineT != null && world.t >= ev.deadlineT) applyChoice(world, ev, defaults[ev.kind], true);
 }
@@ -1139,7 +1262,13 @@ function startDay(world) {
   world.day = { ...di, weather, rain, wk: {}, season: V.demand.seasonMult[di.m - 1], walkW: 1, delW: 1, eveBoost: false };
   updatePopulation(world);
   if (!world.warm) {
+    if (di.d === 1) updateAskingRents(world);
+    leaseDay(world);
     expansionDay(world, di);
+    if (world.pressure) for (const co of Object.values(world.companies)) if (co.id !== PLAYER) {
+      const count = liveShops(world).filter((s) => s.company === co.id && s.status === 'open').length;
+      co.cm.chainDayUnits += Math.max(0, count - 1) * EXP.chain.managementPerShop;
+    }
     if (di.d === 1) monthStart(world, di);
     if (di.dow === 1 && idx > 0) weeklyChecks(world, di);
     dayEvents(world, di);
@@ -1155,7 +1284,10 @@ function startDay(world) {
   // 各店每日事項
   for (const s of liveShops(world)) {
     s.closedToday = dm.closeAllPlayer && s.owner === 'player';
-    if (Math.floor(s.createdT / 24) !== idx) s.mtd.rentDays += 1;
+    if (Math.floor(s.createdT / 24) !== idx) {
+      if (world.pressure) s.mtd.rentUnits = (s.mtd.rentUnits ?? s.rent * s.mtd.rentDays) + s.rent;
+      s.mtd.rentDays += 1;
+    }
     if (s.status === 'open') { s.mtd.openDays += 1; s.mtd.maintenanceMilli = (s.mtd.maintenanceMilli || 0) + assetMonthly(s) * 1000; }
     if (s.status === 'open' && !s.closedToday) s.mtd.tradingDays += 1;
     if (s.promo.daysLeft > 0 && s.promo.kind === 'open1p1') world.companies[s.company].awareness = Math.min(1, world.companies[s.company].awareness + V.awareness.openingPromoPerDay);
@@ -1297,7 +1429,7 @@ function monthStart(world, di) {
 function computePnL(world, s, dim) {
   const m = s.mtd, F = V.fixedCost, biz = businessOf(s.businessId);
   const wage = roundDiv(m.wageMilli, 1000);
-  const rent = Math.floor((s.rent * m.rentDays) / dim);
+  const rent = Math.floor((m.rentUnits ?? s.rent * m.rentDays) / dim);
   const util = Math.floor((biz.utility * m.openDays) / dim) + biz.utilityUnit * (m.walk + m.del);
   const maintenance = Math.floor((m.maintenanceMilli || 0) / 1000 / dim);
   const pos = Math.floor((F.posMonthly * m.openDays) / dim);
@@ -1312,7 +1444,7 @@ function computePnL(world, s, dim) {
 /** 結一家店的當月帳（付費用現金、記入歷史）。final＝關店時的最後一筆。 */
 function settleShop(world, s, dim, final) {
   const m = s.mtd;
-  const empty = m.rentDays === 0 && m.walk + m.del === 0 && m.openDays === 0;
+  const empty = m.rentDays === 0 && m.walk + m.del === 0 && m.openDays === 0 && !m.wasteMilli;
   if (empty) return null;
   const pnl = computePnL(world, s, dim);
   const co = world.companies[s.company];
@@ -1464,6 +1596,7 @@ function rivalMonthly(world, di) {
   // 青柚：第二杯半價與永久降價
   const Q = R.qingyou;
   for (const s of liveShops(world)) {
+    if (world.pressure) break;
     if (s.company !== 'qingyou' || s.status !== 'open' || s.permCut) continue;
     if (s.days.length < 120 || s.promo.daysLeft > 0) continue;
     const last30 = avg(s.days.slice(-30).map((d) => d.cups));
@@ -1481,6 +1614,7 @@ function rivalMonthly(world, di) {
       logEvt(world, 'rival', `青柚手作「${s.name}」推出第二杯半價 ${Q.promoDays} 天`);
     }
   }
+  if (world.pressure) { pressureRivalMonthly(world, di); return; }
   // 大吉、青柚：擴張（算整個品牌每月多賺多少，含租金、人力與搶走自己分店的客人）
   for (const co of ['daji', 'qingyou']) {
     const c = world.companies[co];
@@ -1516,6 +1650,79 @@ function rivalMonthly(world, di) {
   }
 }
 const avg = (a) => (a.length ? a.reduce((x, y) => x + y, 0) / a.length : 0);
+
+function rivalCandidate(world, lot, co, businessId) {
+  const biz = businessOf(businessId), cfg = V.rivals[co.id] || { priceFactor: 1, quality: 65, wage: 'market', delivery: biz.delivery };
+  const items = Object.values(biz.items), prices = items.map((it) => Math.round(it.ref * cfg.priceFactor));
+  const weights = items.map((it, i) => it.pop * Math.pow(prices[i] / it.ref, -V.choice.mixPriceElasticity)), total = weights.reduce((a, n) => a + n, 0);
+  const mix = weights.map((n) => n / total), leased = premises(lot, businessId), operations = initialOperations(businessId, leased.ping);
+  let staff = [...biz.staff];
+  if (freshBusiness(businessId)) {
+    const template = liveShops(world).filter((s) => s.company === co.id && s.status === 'open' && s.days.length >= 20).sort((a, b) => (b.lastPnL?.profit || 0) - (a.lastPnL?.profit || 0))[0];
+    if (template) { operations.prep = template.operations.prep; operations.markdown = template.operations.markdown; staff = [...template.staff]; }
+  }
+  return mkDesc(world, { businessId, operations, staff, li: derived(world).lotIdx[lot.id], co, avgP: mix.reduce((a, m, i) => a + m * prices[i], 0), avgPlat: mix.reduce((a, m, i) => a + m * platPrice(prices[i], V.delivery.markupDefault), 0), q: cfg.quality + V.labor.qualityAdj[cfg.wage] + experience({ businessId, operations }), star: V.reviews.priorStar, delivery: cfg.delivery, mix, costMult: V.menu.grades.標準.cost, rent: leased.rent, wageH: world.wages[cfg.wage] * biz.wageMult, sp: V.capacity.wageSpeed[cfg.wage], hiredHours: staff.reduce((a, n) => a + n, 0) * 4, fixedStaff: true, company: co.id });
+}
+function pressureRivalMonthly(world, di) {
+  const cfg = V.competition;
+  if (world.noRivals || world.t < world.pressure.startT + cfg.graceDays * 24) return;
+  const D = derived(world);
+  // 短期促銷依客流下滑觸發；薄毛利商品不能無限降價。
+  for (const s of liveShops(world)) {
+    if (s.owner !== 'rival' || s.company.startsWith('road') || s.status !== 'open' || s.days.length < 90 || s.promo.daysLeft > 0 || world.t < (s.lastPressurePromoT ?? -1e9) + cfg.cooldownDays * 24) continue;
+    const recent = avg(s.days.slice(-30).map((d) => d.cups)), previous = avg(s.days.slice(-90, -30).map((d) => d.cups));
+    const radius = V.market.sectors[s.businessId].radius, li = D.lotIdx[s.lotId];
+    if (recent >= previous * 0.85 || !liveShops(world).some((p) => p.owner === 'player' && p.businessId === s.businessId && p.status === 'open' && world.ll[li * D.nl + D.lotIdx[p.lotId]] <= radius)) continue;
+    const biz = businessOf(s.businessId), co = world.companies[s.company];
+    if (co.cash < monthlyFixed(world, s)) continue;
+    const floor = Math.max(...Object.entries(biz.items).map(([key, it]) => (it.cost * s.costMult * (1 + biz.waste) + biz.packaging + biz.utilityUnit) * 1.1 / s.prices[key]));
+    const percent = Math.ceil(Math.max(1 - cfg.promoPct / 100, floor) * 100);
+    if (percent >= 100) continue;
+    s.promo = { kind: 'competitive', daysLeft: 14, num: percent, den: 100 }; s.lastPressurePromoT = world.t;
+    logEvt(world, 'rival', `「${s.name}」因客流下降推出 ${percent}% 售價促銷，持續 14 天`);
+  }
+  let openings = 0;
+  const brands = Object.values(world.companies).filter((co) => co.id !== PLAYER && !co.id.startsWith('road') && !co.exited).sort((a, b) => a.id.localeCompare(b.id));
+  const offset = (di.y * 12 + di.m) % Math.max(1, brands.length), order = [...brands.slice(offset), ...brands.slice(0, offset)];
+  let descs = liveShops(world).map((s) => descOfShop(world, s)), before = estimateDay(world, descs);
+  for (const co of order) {
+    if (openings >= cfg.maxOpenings) break;
+    const own = liveShops(world).filter((s) => s.company === co.id), id = own[0]?.businessId;
+    if (!id || own.some((s) => s.status === 'renovating') || world.t < (co.lastExpansionT ?? world.pressure.startT) + cfg.cooldownDays * 24) continue;
+    if (own.some((s) => s.lastPnL) && own.reduce((a, s) => a + (s.lastPnL?.profit || 0), 0) <= Math.max(0, own.length - 1) * EXP.chain.managementPerShop) continue;
+    const cap = Math.max(2, Math.round(cfg.cityCaps[id] * world.lots.length / 101));
+    if (own.length >= cap) continue;
+    const fixed = own.reduce((a, s) => a + monthlyFixed(world, s), 0), baseProfit = descs.reduce((a, d, i) => a + (d.company === co.id ? estProfit(d, before.walk[i], before.del[i]) : 0), 0);
+    const competition = world.bld.map((_, b) => 1 + descs.reduce((a, d) => a + (d.businessId === id ? d.walkG[b] : 0), 0)), attraction = walkAttraction(world, id, D);
+    const items = Object.values(businessOf(id).items), margin = items.reduce((a, it) => a + it.pop * (it.ref - it.cost), 0) / items.reduce((a, it) => a + it.pop, 0);
+    const scored = world.lots.filter((l) => !l.shopId).map((lot) => {
+      const li = D.lotIdx[lot.id], demand = world.bld.reduce((a, b, i) => a + b.pop * attraction[i * D.nl + li] / competition[i], 0);
+      return { lot, score: demand * businessOf(id).rate - premises(lot, id).rent / 30.4 / Math.max(1, margin) };
+    });
+    // 每區先保留最佳店面，再取全城前四名，避免對 101 個店面重跑需求池。
+    const candidates = V.market.districts.flatMap((d) => scored.filter((x) => x.lot.districtId === d.id).sort((a, b) => b.score - a.score || a.lot.id.localeCompare(b.lot.id)).slice(0, 1)).sort((a, b) => b.score - a.score || a.lot.id.localeCompare(b.lot.id)).slice(0, cfg.candidates);
+    let best = null;
+    for (const { lot } of candidates) {
+      const candidate = rivalCandidate(world, lot, co, id), cost = lotOpenCost(lot, id);
+      const candidateFixed = candidate.rent + businessOf(id).utility + V.fixedCost.posMonthly + candidate.hiredHours * candidate.wageH * EMPLOYER_MILLI / 1000 * 30.4;
+      const reserve = Math.ceil((fixed + candidateFixed + own.length * EXP.chain.managementPerShop) * cfg.reserveMonths + candidate.rent * businessOf(id).renovationDays / 30.4);
+      if (co.cash < cost + reserve) continue;
+      const all = [...descs, candidate], after = estimateDay(world, all);
+      const profit = all.reduce((a, d, i) => a + (d.company === co.id ? estProfit(d, after.walk[i], after.del[i]) : 0), 0);
+      const gain = profit - baseProfit - EXP.chain.managementPerShop;
+      if (gain <= 0 || cost / gain > cfg.paybackMonths) continue;
+      if (!best || gain > best.gain) best = { lot, gain, cost, reserve, candidate };
+    }
+    if (best) {
+      co.cash -= best.cost; co.cm.shopInvestment += best.cost; co.lastExpansionT = world.t;
+      const s = makeShop(world, { company: co.id, lot: best.lot, name: `${co.name}・${best.lot.district}店`, rival: true, businessId: id });
+      if (freshBusiness(id)) { s.operations.prep = best.candidate.operations.prep; s.operations.markdown = best.candidate.operations.markdown; s.staff = [...best.candidate.staff]; recalcShop(world, s); }
+      s.mtd.rentDays = 1; s.mtd.rentUnits = s.rent; openings++;
+      logEvt(world, 'rival', `${co.name}在 ${best.lot.id}（${best.lot.district}）簽約展店，裝修 ${businessOf(id).renovationDays} 天；預估品牌每月多賺 ${Math.round(best.gain).toLocaleString()} 元，保留現金緩衝 ${best.reserve.toLocaleString()} 元`);
+      descs = liveShops(world).map((s) => descOfShop(world, s)); before = estimateDay(world, descs);
+    }
+  }
+}
 
 // ── 擴張評估：典型日（平日週末加權、全年平均雨天、季節 1.0、無排隊）預估各店杯數，再換算每月獲利 ──
 function descOfShop(world, s) {
@@ -1754,7 +1961,7 @@ export function getRivalInfo(world, shopId) {
   const trueAvg = avg(recent);
   const di = Math.floor(world.t / 24);
   const noise = (stream(world.seed, T.NOISE, di, s.n)() * 2 - 1) * V.rivals.estimateNoise;
-  return { shopId, businessId: s.businessId, name: s.name, company: s.company, status: s.status, prices: { ...s.prices }, star: Math.round(starOf(s) * 10) / 10, reviews: s.revCnt, estDailyCups: s.status === 'open' && recent.length ? Math.round(trueAvg * (1 + noise)) : null, delivery: s.delivery };
+  return { shopId, businessId: s.businessId, name: s.name, company: s.company, status: s.status, prices: { ...s.prices }, star: Math.round(starOf(s) * 10) / 10, reviews: s.revCnt, estDailyCups: s.status === 'open' && recent.length ? Math.round(trueAvg * (1 + noise)) : null, delivery: s.delivery, promoPct: s.promo.daysLeft > 0 ? Math.round(s.promo.num / s.promo.den * 100) : null, promoDays: s.promo.daysLeft, renovationDays: s.status === 'renovating' ? Math.max(0, Math.ceil((s.openAtT - world.t) / 24)) : 0 };
 }
 export function getEvents(world) {
   const l = world.events.list;
@@ -1871,6 +2078,7 @@ export function expandMap(world, mapData, distances) {
   world.ll = world.lots.flatMap((la, i) => { const bi = world.bld.findIndex((b) => b.id === la.building); return world.lots.map((_, j) => i === j ? 0 : bi >= 0 ? world.dM[bi * nl + j] : 1e9); });
   for (const s of world.shops) { s.F.push(...new Array(world.bld.length - oldNb).fill(0)); s.buyB.push(...new Array(world.bld.length - oldNb).fill(0)); s.Fbar = avg(s.F); }
   world.popAll = world.bld.reduce((a, b) => a + b.pop, 0); DERIVED.delete(world);
+  enablePressure(world);
   logEvt(world, 'info', world.market ? '六個生活圈開放；新版區域客源、所得、共同消費預算與成長開始生效。原店租金、現金、貸款與歷史帳目保留。' : '東城與南城開放，新增區域、店面與客源；原店帳目保留。');
   return true;
 }
@@ -1893,8 +2101,9 @@ export function deserialize(json) {
     s.mtd.wasteMilli ??= s.mtd.cogs * Math.round(V.menu.wasteRate * 1000);
     for (const k of ['prepared', 'unsold', 'waste', 'stockLost']) s.today[k] ??= 0;
   }
+  enablePressure(w);
   return w;
 }
 
 // 給測試用
-export const _internals = { queueWait, updateFamiliarity, computePnL, settleShop, settleMonth, derived, starOf, chainStarOf, recalcShop, closeShopInternal, dateOf, daysFromCivil, brandEstimate, ITEMS, END_DAY, yearEnd, startDay };
+export const _internals = { queueWait, updateFamiliarity, computePnL, settleShop, settleMonth, derived, starOf, chainStarOf, recalcShop, closeShopInternal, dateOf, daysFromCivil, brandEstimate, ITEMS, END_DAY, yearEnd, startDay, rivalMonthly, leaseDay, updateAskingRents };
