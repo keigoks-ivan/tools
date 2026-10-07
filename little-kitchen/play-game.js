@@ -120,7 +120,7 @@ canvas.addEventListener('keydown',e=>{
     else{s.heat[s.method]=s.heat[s.method]||.65;stir(s,{x:235,y:245},{x:350,y:245});tossFood(s,.3);}
   }else serveBite();render();
 });
-function stopMotor(){s.blending=false;sound();}canvas.addEventListener('keyup',stopMotor);canvas.addEventListener('blur',()=>{cancel();stopMotor();});
+function stopMotor(){s.blending=false;sound();}canvas.addEventListener('keyup',stopMotor);canvas.addEventListener('blur',()=>{gesture=null;s.plateOffset=null;if(!foodGesture)pointer=null;stopMotor();});
 $('playClear').onclick=()=>{cancel();touch();clearPlace(s);render();};$('playHint').onclick=()=>{interacted=time;forceHint=time+7;};
 $('playLiquid').onclick=()=>{touch();if(addLiquid(s,s.method==='pan'?'oil':'water')){tone('pour');s.effect={kind:'water',until:time+.7};render();}};
 $('playSound').onclick=()=>{prefs.sound=!prefs.sound;if(!prefs.sound){narrator.stop();stopSound();}save();render();};

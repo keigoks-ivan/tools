@@ -8,5 +8,5 @@ if(new URLSearchParams(location.search).get('mode')==='legacy'){
 }else{
   document.body.classList.add('play-mode');
   document.getElementById('play').hidden=false;
-  import('./play-game.js?v=10');
+  import('./play-game.js?v=10.1');
 }
