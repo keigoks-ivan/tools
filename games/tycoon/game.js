@@ -108,7 +108,7 @@ async function main() {
   <button data-camera="in" aria-label="放大地圖" title="放大（滾輪向上）">＋</button>
   <button data-camera="out" aria-label="縮小地圖" title="縮小（滾輪向下）">−</button>
   <button data-camera="home" aria-label="回到全圖視角" title="回到全圖視角">全圖</button>
-  <select id="map-district" aria-label="前往城市區域"><option value="all">選區域</option><option value="old">雲港舊城</option><option value="east">東城新區</option><option value="south">南城新區</option></select>
+  <select id="map-district" aria-label="前往城市區域"><option value="all">選區域</option><option value="old">雲港舊城</option><option value="east">東城新區</option><option value="south">南城生活與商辦區</option><option value="tech">科技商辦生活圈</option><option value="campus">大學與新住宅區</option><option value="river">河岸家庭生活圈</option></select>
 </div>
 <div id="map-hint"><span class="desktop-hint">左鍵拖曳旋轉・右鍵或 Shift＋拖曳平移・滾輪縮放</span><span class="touch-hint">單指旋轉・雙指平移、旋轉與縮放</span></div>
 <aside id="side" class="panel" hidden></aside>
@@ -138,7 +138,7 @@ async function main() {
     else city.setView({ yaw: city.getView().yaw + (b.dataset.camera === 'left' ? 1 : -1) * Math.PI / 4 });
   });
   $('#map-district').addEventListener('change', (e) => {
-    const views = { old: { x: 8, z: 6, dist: 31 }, east: { x: 20, z: 6, dist: 24 }, south: { x: 12, z: 14, dist: 31 } };
+    const views = { old: { x: 8, z: 6, dist: 31 }, east: { x: 20, z: 6, dist: 24 }, south: { x: 12, z: 14, dist: 31 }, tech: { x: 32, z: 8, dist: 41 }, campus: { x: 12, z: 22, dist: 43 }, river: { x: 32, z: 22, dist: 35 } };
     city.setView(views[e.target.value] || homeView);
   });
   const map = city.getMapData();
@@ -306,7 +306,7 @@ async function main() {
   const head = (title, sub) => `<div class="sd-head"><div><h3>${esc(title)}</h3>${sub ? `<div class="sub">${sub}</div>` : ''}</div><button class="xbtn" data-act="close" aria-label="關閉">${icon.close}</button></div>`;
 
   function lotHtml() {
-    const info = S.getLotInfo(world, selLot), biz = S.businessOf(selectedBusiness);
+    const info = S.getLotInfo(world, selLot, selectedBusiness), biz = S.businessOf(selectedBusiness);
     const lot = world.lots.find((l) => l.id === selLot), leased = S.premises(lot, selectedBusiness);
     info.openCost = S.lotOpenCost(lot, selectedBusiness); info.ping = leased.ping; info.monthlyRent = leased.rent; info.deposit = leased.deposit;
     const cash = world.companies.player.cash;
@@ -316,8 +316,9 @@ async function main() {
     return `${head(`空店面 ${info.id}`, `${zoneHtml(info.zone)}<span class="num">${info.ping} 坪</span>`)}
 <dl class="kv">
   <dt>月租（每坪 ${yuan(info.rentPerPing)}）</dt><dd class="num">${money(info.monthlyRent)}</dd>
-  <dt>500 公尺內人口</dt><dd class="num">${int(info.pop500)} 人</dd>
+  <dt>500 公尺內有效客源</dt><dd class="num">${int(info.pop500)} 人</dd>
   <dt>500 公尺內營業店</dt><dd class="num">${info.nearbyShops} 家</dd>
+  ${world.market ? `<dt>生活圈／所得指數</dt><dd>${esc(info.district)}／${info.income.toFixed(2)}</dd><dt>${biz.name}商圈範圍</dt><dd>${info.radius} 公尺・${int(info.catchmentPopulation)} 有效客源</dd><dt>商圈共同日消費預算</dt><dd>${money(info.catchmentBudgetDaily)}</dd>` : ''}
 </dl>
 <div class="sec"><h4>選擇創業業態</h4><div class="business-grid">${Object.entries(S.BUSINESSES).map(([id, b]) => `<button class="opt ${selectedBusiness === id ? 'on' : ''}" data-act="business:${id}"><span class="business-mark" style="color:${b.color}">${businessIcon(id)}</span><b>${b.name}${b.minPing ? '・大額投資' : ''}</b><small>${wan(S.lotOpenCost(lot, id))} 起（含押金）</small></button>`).join('')}</div><p><b>${biz.model}</b>｜${biz.customer}</p><p class="note">${biz.tradeoff}</p>${biz.minPing ? `<p class="note">地圖標示租賃入口，此業態承租樓層合計 ${leased.ping} 坪；租金與押金按完整面積收取。開店後可付費升級設備，供給增加也會增加維護費。</p>` : ''}<p class="note">所有業態開局可選，只受資金限制。價格、成本、需求與產能是遊戲設計假設；可混合經營，也可專注同業態連鎖。</p></div>
 ${expansionEstimateHtml(!ownerBusy)}
@@ -338,7 +339,7 @@ ${enough ? '<button class="gbtn primary wide" data-act="rent">租下開店</butt
 
   function expansionEstimateHtml(ownerWorks) {
     const estimate = S.getExpansionEstimate(world, selLot, { ownerWorks, businessId: selectedBusiness });
-    return `<div class="sec" id="expansion-estimate"><h4>開店前評估</h4><dl class="kv"><dt>新店預估日銷</dt><dd>${int(estimate.newDaily)} ${estimate.unit}</dd><dt>原分店被分走</dt><dd>${int(estimate.lostDaily)} ${estimate.unit}／天</dd><dt>品牌淨增銷量</dt><dd>${int(estimate.netNewDaily)} ${estimate.unit}／天</dd><dt>品牌每月增量獲利</dt><dd class="${estimate.incrementalProfit < 0 ? 'down' : 'up'}">${money(estimate.incrementalProfit, true)}</dd><dt>開店投入回收</dt><dd>${estimate.paybackMonths == null ? '尚無法回收' : '約 ' + estimate.paybackMonths.toFixed(1) + ' 個月'}</dd></dl><p class="note">${esc(world.lots.find((l) => l.id === selLot).district || '雲港舊城')}。按參考售價、標準品質、${S.businessOf(selectedBusiness).staff.map((n) => n + "人").join("／")}班表與${ownerWorks ? '老闆顧店' : '全聘員工'}估算成熟客源典型日，已扣分店互搶客源與新增管理費；新業態已計班表、座位／工作站與預設備貨限制；按日均估算折扣，未計裝修空窗、排隊波動、後勤折扣與對手反擊。${estimate.incrementalProfit < 0 ? '目前條件下擴張會增加虧損。' : ''}</p></div>`;
+    return `<div class="sec" id="expansion-estimate"><h4>開店前評估</h4><dl class="kv"><dt>新店預估日銷</dt><dd>${int(estimate.newDaily)} ${estimate.unit}</dd><dt>同業分店被分走</dt><dd>${int(estimate.lostDaily)} ${estimate.unit}／天</dd><dt>品牌淨增銷量</dt><dd>${int(estimate.netNewDaily)} ${estimate.unit}／天</dd>${world.market ? `<dt>其他業態減少營收</dt><dd>${money(estimate.crossSectorRevenueLostDaily)}／天</dd>` : ''}<dt>品牌每月增量獲利</dt><dd class="${estimate.incrementalProfit < 0 ? 'down' : 'up'}">${money(estimate.incrementalProfit, true)}</dd><dt>開店投入回收</dt><dd>${estimate.paybackMonths == null ? '尚無法回收' : '約 ' + estimate.paybackMonths.toFixed(1) + ' 個月'}</dd></dl><p class="note">${esc(world.lots.find((l) => l.id === selLot).district || '雲港舊城')}。按參考售價、標準品質、${S.businessOf(selectedBusiness).staff.map((n) => n + "人").join("／")}班表與${ownerWorks ? '老闆顧店' : '全聘員工'}估算成熟客源典型日，已扣分店互搶客源、共同預算競爭與新增管理費；新業態已計班表、座位／工作站與預設備貨限制；按日均估算折扣，未計裝修空窗、排隊波動、後勤折扣與對手反擊。${estimate.incrementalProfit < 0 ? '目前條件下擴張會增加虧損。' : ''}</p></div>`;
   }
 
   function costOfItem(s, k) {
@@ -856,7 +857,8 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
   function chainAnalysisHtml(rep) {
     const m = rep.market, c = rep.current, savings = c.warehouseSavings + c.factorySavings;
     const shops = getShops('player').filter((s) => s.status !== 'closed'), f = world.companies.player.expansion.facilities.warehouse;
-    return `<div class="card"><h4>市場與連鎖分析</h4><div class="diagnosis-stats"><span>全城有效人口<b>${int(m.population)} 人</b></span><span>各業態潛在需求合計<b>${int(m.potentialDaily)} 單位</b></span><span>全城供給產能<b>${int(m.capacityDaily)} 單位／天</b></span><span>店面上限／空店面<b>${m.lots}／${m.freeLots} 家</b></span></div><p class="note">典型日選購需求約 ${int(m.typicalOrders)} 單位，需求池成交意願約 ${pct(m.saturation)}，未扣排隊流失。下表按業態分開比較供需，跨業態的單位合計不能當作同一市場的市占。需求按人口、平假日與平均天氣估算，包含選擇不買；產能代表最多能做多少，不代表能賣多少。多開店會分走其他店客源。</p><div class="tbl-scroll"><table><thead><tr><th>業態</th><th>潛在日需求</th><th>日供給上限</th><th>成交意願</th><th>營業店</th></tr></thead><tbody>${m.sectors.map((s) => `<tr><td>${s.name}</td><td>${int(s.potentialDaily)} ${s.unit}</td><td>${int(s.capacityDaily)} ${s.unit}</td><td>${pct(s.saturation)}</td><td>${s.openShops}</td></tr>`).join('')}</tbody></table></div><dl class="kv"><dt>你的分店（含裝修）</dt><dd>${shops.length} 家</dd><dt>本月連鎖管理費</dt><dd>${money(c.chainCost)}</dd><dt>本月後勤固定費</dt><dd>${money(c.facilityCost)}</dd><dt>本月採購與製程已省</dt><dd>${money(savings)}</dd><dt>節省扣後勤固定費</dt><dd class="${savings - c.facilityCost < 0 ? 'down' : 'up'}">${money(savings - c.facilityCost, true)}</dd><dt>倉庫占用資金（含在途）</dt><dd>${money(f.stockCost + f.orders.reduce((a, o) => a + o.cost, 0))}</dd></dl><p>品牌知名度與研發成果由分店共用。第二家起每家每月管理費 ${money(V.expansion.chain.managementPerShop)}，同業態各店選購評價有 25% 來自該業態的品牌平均；一家店的負評會影響同業態分店。</p><p>工廠有供料上限，也有共用批次異常風險。倉庫採購需先付款；新店裝修期間有租金、沒有營收。擴張前先看增量獲利與手上現金。</p></div>`;
+    const cityMarket = m.marketVersion ? `<div class="diagnosis-stats"><span>常住居民／有效客源<b>${int(m.residents)}／${int(m.population)}</b></span><span>城市面積／人口成長<b>${m.areaKm2.toFixed(2)} km²／${pct(m.growth)}</b></span><span>典型日共同消費預算<b>${money(m.budgetDaily)}</b></span><span>預估成交金額／預算使用<b>${money(m.estimatedSpendDaily)}／${pct(m.budgetUse)}</b></span></div><p class="note">有效客源為居民與折算後的上班族、學生及訪客，並非不重複人口。共同預算涵蓋遊戲業態及地圖外外送客源，按時段分配；所有業態一起競爭，市外額度僅用於外送，沒有花掉的額度不遞延；美髮與健身另有低頻消費上限。需求與所得隨生活圈成長，實際成交仍受價格、距離、排隊、備貨與天氣影響。下表日預算為區內平日消費，不含市外外送。</p><div class="tbl-scroll"><table><thead><tr><th>生活圈</th><th>居民</th><th>有效客源</th><th>所得指數</th><th>年人口成長</th><th>區內日預算</th><th>空店／總店面</th></tr></thead><tbody>${m.districts.map((d) => `<tr><td>${esc(d.name)}</td><td>${int(d.residents)}</td><td>${int(d.population)}</td><td>${d.income.toFixed(2)}</td><td>${pct(d.growth)}</td><td>${money(d.budgetDaily)}</td><td>${d.freeLots}／${d.lots}</td></tr>`).join('')}</tbody></table></div>` : `<p>全城有效客源 ${int(m.population)} 人；此局採原版市場規則。</p>`;
+    return `<div class="card city-market"><h4>市場與連鎖分析</h4>${cityMarket}<p>營業店 ${m.openShops} 家，店面 ${m.lots} 個，空店面 ${m.freeLots} 個。</p><p class="note">購買意向尚未分配共同預算，也包含選擇不買；預估日成交已計消費預算與產能。跨業態單位不同，不能加總為同一市場的市占。市占低或有空店面，都不代表下一家分店會賺錢。</p><div class="tbl-scroll"><table><thead><tr><th>業態</th><th>到店範圍</th><th>日購買意向</th><th>預估日成交</th><th>日供給上限</th><th>營業店</th></tr></thead><tbody>${m.sectors.map((s) => `<tr><td>${s.name}</td><td>${s.radius} 公尺</td><td>${int(s.potentialDaily)} ${s.unit}</td><td>${int(s.typicalOrders)} ${s.unit}</td><td>${int(s.capacityDaily)} ${s.unit}</td><td>${s.openShops}</td></tr>`).join('')}</tbody></table></div><dl class="kv"><dt>你的分店（含裝修）</dt><dd>${shops.length} 家</dd><dt>本月連鎖管理費</dt><dd>${money(c.chainCost)}</dd><dt>本月後勤固定費</dt><dd>${money(c.facilityCost)}</dd><dt>本月採購與製程已省</dt><dd>${money(savings)}</dd><dt>節省扣後勤固定費</dt><dd class="${savings - c.facilityCost < 0 ? 'down' : 'up'}">${money(savings - c.facilityCost, true)}</dd><dt>倉庫占用資金（含在途）</dt><dd>${money(f.stockCost + f.orders.reduce((a, o) => a + o.cost, 0))}</dd></dl><p>品牌知名度與研發成果由分店共用。第二家起每家每月管理費 ${money(V.expansion.chain.managementPerShop)}，同業態各店選購評價有 25% 來自該業態的品牌平均；一家店的負評會影響同業態分店。</p><p>工廠有供料上限，也有共用批次異常風險。倉庫採購需先付款；新店裝修期間有租金、沒有營收。擴張前先看增量獲利與手上現金。</p></div>`;
   }
   function analysisHtml(rep) {
     if (!rep.analysis.length) return chainAnalysisHtml(rep) + '<div class="card"><h4>經營分析</h4><p class="note">開店後就會顯示固定成本，開始營業後可比較日銷成交量與損益兩平成交量。</p></div>';
@@ -949,7 +951,7 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
 
   // 數字來源
   const tagOf = (src) => /^S\d/.test(src) ? ['有來源', 't-src'] : src === '推算' ? ['推算', 't-calc'] : src === '文獻' ? ['文獻', 't-lit'] : ['暫定', 't-tmp'];
-  const SEC = { time: '時間', people: '人口與地圖', demand: '需求', choice: '客人怎麼選店', queue: '排隊與等候', calibrated: '校準值（程式算出）', calibrationTargets: '校準目標', items: '品項與成本', menu: '菜單與原料', capacity: '產能與排班', delivery: '外送', reviews: '評價與星等', familiarity: '熟悉度', awareness: '知名度與廣告', lots: '空店面', startup: '開店成本', fixedCost: '固定成本', labor: '人力', tax: '稅', loan: '貸款', rivals: '對手', events: '事件', businesses: '多業態設計假設', expansion: '連鎖後勤與研發', perf: '效能' };
+  const SEC = { time: '時間', people: '人口與地圖', market: '生活圈與消費預算', demand: '需求', choice: '客人怎麼選店', queue: '排隊與等候', calibrated: '校準值（程式算出）', calibrationTargets: '校準目標', items: '品項與成本', menu: '菜單與原料', capacity: '產能與排班', delivery: '外送', reviews: '評價與星等', familiarity: '熟悉度', awareness: '知名度與廣告', lots: '空店面', startup: '開店成本', fixedCost: '固定成本', labor: '人力', tax: '稅', loan: '貸款', rivals: '對手', events: '事件', businesses: '多業態設計假設', expansion: '連鎖後勤與研發', perf: '效能' };
   const srcById = Object.fromEntries(SOURCES.map((s) => [s.id, s]));
   const fmtVal = (v) => { if (typeof v === 'number') return v.toLocaleString('en-US'); if (typeof v === 'string') return v; const j = JSON.stringify(v); return j.length > 80 ? j.slice(0, 78) + '…' : j; };
   const srcLinks = (ids) => ids.map((id) => { const s = srcById[id]; return s ? s.urls.map((u, i) => `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer" title="${esc(s.title)}（${esc(s.date)}，可信度${esc(s.trust)}）">${id}${s.urls.length > 1 ? '-' + (i + 1) : ''}</a>`).join('') : ''; }).join('');

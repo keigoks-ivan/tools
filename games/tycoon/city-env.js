@@ -173,7 +173,7 @@ export function createScenery(root, { W, D, M }) {
   const lands = [
     { x0: -92, x1: -6.5, z0: -6.5, z1: 46 },   // 西
     { x0: -92, x1: 112, z0: -96, z1: -6.5 },    // 北
-    { x0: 23.5, x1: 112, z0: -6.5, z1: 38 },    // 東
+    { x0: W + M + 6, x1: Math.max(112, W + 70), z0: -6.5, z1: Math.max(38, D + 10) }, // 東岸位於可經營城市之外
   ];
   const boxes = [], plates = [], parks = [];
   const clusters = [[-34, -36, 20], [34, -34, 16], [-44, 6, 12]];
@@ -239,7 +239,7 @@ export function createScenery(root, { W, D, M }) {
     put(L, 0.1, 0.06, 0, 0.05, 0.62); put(L, 0.1, 0.06, 0, 0.05, -0.62);
     for (let u = -L / 2 + 0.8; u < L / 2; u += 1.9) { put(0.22, 1.0, 0.5, u, -0.6, 0); }
   }
-  bridge('x', 8, -6.5, -1.5); bridge('z', 8, -6.5, -1.5); bridge('x', 8, 17.5, 23.5);
+  bridge('x', 8, -6.5, -M); bridge('z', 8, -6.5, -M); bridge('x', 8, W + M, W + M + 6);
   // 北橋沿 z 方向：put 的軸交換已處理
   const bridgeMesh = new THREE.Mesh(mergeGeometries(bg), stone); bridgeMesh.receiveShadow = true; bridgeMesh.castShadow = true; root.add(bridgeMesh);
 

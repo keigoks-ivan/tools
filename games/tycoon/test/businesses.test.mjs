@@ -107,7 +107,7 @@ test('高資本服務模式會改變產能與體驗，擴充不憑空增加城�
   assert.equal(S.upgradeShop(f.w, f.shop.id).ok, false); assert.equal(S.serialize(f.w), before); f.co.cash = cash;
 });
 
-test('不同業態需求分開；加入髮廊不會把飲料客人分走，同業態仍有互搶客源', () => {
+test('舊版市場保留不同業態需求分開，同業態仍有互搶客源', () => {
   const { w, shop, co } = setup('tea'), clone = S.deserialize(S.serialize(w));
   const lot = clone.lots.find((l) => !l.shopId);
   const extra = S.openShop(clone, lot.id, { businessId: 'salon' });

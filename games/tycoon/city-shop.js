@@ -58,7 +58,7 @@ export function createShops(root, specs, { wetStd }) {
   const N = specs.length;
   const glowSign = { value: 0.3 }, glowMenu = { value: 0.3 };
   // ---- 招牌貼圖圖集（每家一格 512×128）----
-  const TW = 512, TH = 128, COLS = 4, ROWS = Math.ceil(N / COLS);
+  const TW = 512, TH = 128, COLS = N > 64 ? 8 : 4, ROWS = Math.ceil(N / COLS);
   const atlas = document.createElement('canvas'); atlas.width = TW * COLS; atlas.height = TH * ROWS;
   const actx = atlas.getContext('2d');
   const atlasTex = new THREE.CanvasTexture(atlas); atlasTex.colorSpace = THREE.SRGBColorSpace; atlasTex.anisotropy = 8;
@@ -88,12 +88,13 @@ export function createShops(root, specs, { wetStd }) {
     g.restore(); atlasTex.needsUpdate = true;
   }
   const MW = 256, MH = 384;
-  const menuAtlas = document.createElement('canvas'); menuAtlas.width = MW * COLS; menuAtlas.height = MH * ROWS;
+  const MENU_COLS = N > 64 ? 12 : COLS, MENU_ROWS = Math.ceil(N / MENU_COLS);
+  const menuAtlas = document.createElement('canvas'); menuAtlas.width = MW * MENU_COLS; menuAtlas.height = MH * MENU_ROWS;
   const mctx = menuAtlas.getContext('2d'), menuT = new THREE.CanvasTexture(menuAtlas);
   menuT.colorSpace = THREE.SRGBColorSpace; menuT.anisotropy = 4;
   function drawMenu(l) {
     const g = mctx, b = businessOf(l.businessId), items = Object.entries(b.items);
-    g.save(); g.translate((l.i % COLS) * MW, Math.floor(l.i / COLS) * MH);
+    g.save(); g.translate((l.i % MENU_COLS) * MW, Math.floor(l.i / MENU_COLS) * MH);
     g.fillStyle = '#20332f'; g.fillRect(0, 0, MW, MH); g.strokeStyle = '#d5b480'; g.lineWidth = 8; g.strokeRect(4, 4, MW - 8, MH - 8);
     drawBusinessMark(g, l.businessId, 104, 20, 48);
     g.fillStyle = '#fff0d2'; g.font = FONT.replace('{S}', 25); g.textAlign = 'center'; g.fillText(b.name, MW / 2, 105);
@@ -238,7 +239,7 @@ export function createShops(root, specs, { wetStd }) {
     // 招牌圖集
     const u0 = (l.i % COLS) / COLS, v0 = 1 - (Math.floor(l.i / COLS) + 1) / ROWS;
     rect.setXYZW(l.i, u0, v0, 1 / COLS, 1 / ROWS); rect.needsUpdate = true;
-    menuRect.setXYZW(l.i, u0, v0, 1 / COLS, 1 / ROWS); menuRect.needsUpdate = true;
+    menuRect.setXYZW(l.i, (l.i % MENU_COLS) / MENU_COLS, 1 - (Math.floor(l.i / MENU_COLS) + 1) / MENU_ROWS, 1 / MENU_COLS, 1 / MENU_ROWS); menuRect.needsUpdate = true;
     drawSign(l.i, l); if (occ) drawMenu(l);
   }
   lots.forEach(refresh);

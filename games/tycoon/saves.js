@@ -1,6 +1,7 @@
 // 本機存檔與 JSON 備份共用格式；相容原本 { w, meta } 的存檔。
 import { deserialize, serialize, BUSINESSES } from './sim.js';
 import { stockLimit } from './businesses.js';
+import { MARKET_VERSION, districtOf } from './market.js';
 export const SAVE_KEY = 'tycoon.save.v1';
 export const MANUAL_KEY = 'tycoon.save.manual.v1';
 export const BACKUP_KEY = SAVE_KEY + '.backup';
@@ -22,6 +23,10 @@ function validate(w) {
   const lots = new Set(w.lots.map((l) => l.id)), ids = new Set(w.shops.map((s) => s.id));
   if (lots.size !== w.lots.length || ids.size !== w.shops.length) bad();
   for (const b of w.bld) if (!finite(b.pop) || b.pop < 0) bad();
+  if (w.market) {
+    if (w.market.version !== MARKET_VERSION || !Number.isInteger(w.market.startT) || w.market.startT < 0 || w.market.startT > w.t || !finite(w.market.areaKm2) || w.market.areaKm2 <= 0) bad();
+    for (const b of w.bld) if (!finite(b.basePop) || b.basePop < 0 || !Number.isInteger(b.floors) || b.floors < 1 || districtOf(b.districtId).id !== b.districtId) bad();
+  }
   for (const l of w.lots) if (!finite(l.ping) || l.ping <= 0 || !finite(l.rent) || !finite(l.deposit) || l.shopId && !ids.has(l.shopId)) bad();
   for (const co of Object.values(w.companies)) {
     if (!finite(co.cash) || !finite(co.awareness) || !co.cm || !array(co.rows) || !array(co.loans) || !array(co.day30) || !finite(co.adWan) || !finite(co.adDayUnits) || !finite(co.yearProfit)) bad();

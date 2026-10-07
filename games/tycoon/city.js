@@ -1,6 +1,6 @@
 /* 創業之城：3D 低多邊形城市引擎。素材為 Kenney CC0（assets 內各資料夾的 License.txt），其餘皆程式生成。
  *
- * 座標單位 = 1 格路磚（道路中線每 4 格一條，x: 0..16、z: 0..12，y 向上）。
+ * 座標單位 = 1 格路磚（道路中線每 4 格一條，x: 0..40、z: 0..28，y 向上）。
  * 本檔只負責畫面與介面，不含任何經濟邏輯。
  *
  * import { createCity } from './city.js';
@@ -39,8 +39,9 @@ import { sampleEnv, sunDirFor, createSky, createRain, createScenery } from './ci
 import { Graph, createPeople } from './city-people.js';
 import { createShops } from './city-shop.js';
 import { businessIcon } from './business-art.js';
+import { MARKET_VERSION, districtAt, districtOf } from './market.js';
 
-const BX = 6, BZ = 4;            // 街區數（橫、縱）
+const BX = 10, BZ = 7;           // 街區數（橫、縱）
 const PITCH = 4;                 // 路線間距（格）
 const W = BX * PITCH, D = BZ * PITCH;
 const M = 1.5;                   // 底座外擴
@@ -89,7 +90,7 @@ export function createCity(container, opts = {}) {
   const sun = new THREE.DirectionalLight(0xffb072, 3.9);
   sun.position.set(target.x - 17, 11, target.z + 12); sun.target.position.copy(target);
   sun.castShadow = true; sun.shadow.mapSize.set(4096, 4096);
-  const sc = sun.shadow.camera; sc.left = -17; sc.right = 17; sc.top = 14; sc.bottom = -14; sc.near = 1; sc.far = 70;
+  const sc = sun.shadow.camera; sc.left = -26; sc.right = 26; sc.top = 22; sc.bottom = -22; sc.near = 1; sc.far = 90;
   sun.shadow.bias = -0.0004; sun.shadow.normalBias = 0.03; sun.shadow.radius = 3.5;
   scene.add(sun, sun.target);
   const rim = new THREE.DirectionalLight(0x8fa0ff, 0.6);
@@ -173,15 +174,15 @@ export function createCity(container, opts = {}) {
   const base = new THREE.Mesh(new THREE.BoxGeometry(W + 2 * M, 1.2, D + 2 * M), [
     wetStd(0x8f8794, 1), wetStd(0x8f8794, 1), wetStd(0x7cae58, 1), wetStd(0x2a2030, 1), wetStd(0x8f8794, 1), wetStd(0x8f8794, 1)]);
   base.position.set(W / 2, -0.6 - 0.001, D / 2); base.receiveShadow = true; base.castShadow = true; root.add(base);
-  const plateMats = new Map();
+  const plateMats = new Map(), plateSpecs = new Map();
   function plate(cx, cz, w, d, color, h = 0.05) {
     if (!plateMats.has(color)) plateMats.set(color, wetStd(color, 0.95));
-    const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), plateMats.get(color));
-    m.position.set(cx, h / 2, cz); m.receiveShadow = true; root.add(m); return m;
+    if (!plateSpecs.has(color)) plateSpecs.set(color, []);
+    plateSpecs.get(color).push([cx, cz, w, h, d]);
   }
 
   // ---------- 道路（含橋） ----------
-  const bridgeAt = (x, z) => (z === 8 && x >= -10 && x <= -1) || (x === 8 && z >= -10 && z <= -1) || (z === 8 && x >= 17 && x <= 27);
+  const bridgeAt = (x, z) => (z === 8 && x >= -10 && x <= -1) || (x === 8 && z >= -10 && z <= -1) || (z === 8 && x >= W + 1 && x <= Math.ceil(W + M + 6));
   const roadAt = (x, z) => (x >= 0 && x <= W && z >= 0 && z <= D && (x % PITCH === 0 || z % PITCH === 0)) || bridgeAt(x, z);
   const DIRS = { N: [0, -1], E: [1, 0], S: [0, 1], W: [-1, 0] };
   const rot90 = ([x, z], k) => { for (let i = 0; i < k; i++) [x, z] = [z, -x]; return [x, z]; };
@@ -197,7 +198,7 @@ export function createCity(container, opts = {}) {
     }
     return [name, 0];
   }
-  for (let x = -10; x <= Math.max(27, W); x++) for (let z = -10; z <= D; z++) if (roadAt(x, z)) { const [n, r] = roadTile(x, z); put('roads', n, x, z, r); }
+  for (let x = -10; x <= Math.ceil(W + M + 6); x++) for (let z = -10; z <= D; z++) if (roadAt(x, z)) { const [n, r] = roadTile(x, z); put('roads', n, x, z, r); }
 
   // ---------- 建築登記 ----------
   const buildings = [], lotSpecs = [], specBoxes = [], labelPlanes = [];
@@ -335,6 +336,25 @@ export function createCity(container, opts = {}) {
   skyBlock(...bc(3, 3), ['building-skyscraper-e', 'building-skyscraper-b', 'building-skyscraper-c', 'building-skyscraper-a'], 2);
   commBlock(...bc(4, 3), { lots: { 2: '辦公', 4: '辦公', 6: '辦公' } });
   parkBlock(...bc(5, 3));
+  // 新生活圈接在人行道網格上；原 44 個入口與建築編號維持原值。
+  for (let i = 0; i < BX; i++) for (let j = 0; j < BZ; j++) {
+    if (i < 6 && j < 4) continue;
+    const [cx, cz] = bc(i, j);
+    if ((i + j) % 3 === 0) {
+      plate(cx, cz, 3, 3, 0x73905a); plate(cx, cz, 0.3, 3, 0xc9bda8, 0.06);
+      [[-0.9, -0.8], [0.9, 0.8], [-0.9, 0.8]].forEach(([x, z]) => tree(cx + x, cz + z, true));
+    } else if ((i === 8 && j === 2) || (i === 8 && j === 5)) {
+      stationBlock(cx, cz, { lots: { 3: '捷運站旁', 4: '捷運站旁' } });
+    } else if ((i === 2 && j === 5) || (i === 9 && j === 5)) {
+      schoolBlock(cx, cz);
+    } else if ((j === 0 && i % 2 === 0) || (i === 0 && j === 5) || (i === 7 && j === 6)) {
+      skyBlock(cx, cz, ['building-skyscraper-a', 'building-skyscraper-c', 'building-skyscraper-b', 'building-skyscraper-d'], 2);
+    } else if ((i + j) % 4 === 0) {
+      commBlock(cx, cz, { lots: { 4: '商圈', 6: '商圈' } });
+    } else {
+      houseBlock(cx, cz, { 2: '住宅', 3: '住宅' });
+    }
+  }
   // 預設三家（樣張）
   const DEF = {};
   { const find = (bx, bz) => lotSpecs.find(l => Math.abs(l.bx - bx) < 0.01 && Math.abs(l.bz - bz) < 0.01);
@@ -381,6 +401,12 @@ export function createCity(container, opts = {}) {
     tree(x, z, R() > 0.3);
   }
 
+  // 相同材質的街區地面共用幾何，擴城不逐塊增加繪製呼叫。
+  for (const [color, specs] of plateSpecs) {
+    const im = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), plateMats.get(color), specs.length), m = new THREE.Matrix4();
+    specs.forEach(([x, z, w, h, d], i) => { m.makeScale(w, h, d).setPosition(x, h / 2, z); im.setMatrixAt(i, m); });
+    im.receiveShadow = true; im.computeBoundingSphere(); root.add(im);
+  }
   // ---------- 路燈 ----------
   const lampHeads = [];
   for (let i = 0; i <= BX; i++) for (let j = 0; j <= BZ; j++) {
@@ -431,7 +457,7 @@ export function createCity(container, opts = {}) {
   // ---------- 小人 ----------
   const simUniforms = { uTime: { value: 0 } };
   const people = createPeople(root, {
-    sidewalk, roads, uTime: simUniforms.uTime, laneOff: 0.19, qCap: lotSpecs.length * 12,
+    sidewalk, roads, uTime: simUniforms.uTime, laneOff: 0.19, qCap: Math.min(528, lotSpecs.length * 12),
     doorOf: (id) => { const l = lotById.get(id); return l ? { x: l.door.x, z: l.door.z } : null; },
     lotNrm: (id) => { const l = lotById.get(id); return l ? [l.nx, l.nz] : [0, 1]; },
   });
@@ -481,7 +507,7 @@ export function createCity(container, opts = {}) {
     renderer.setPixelRatio(dpr); renderer.setSize(w, h); composer.setPixelRatio(dpr); composer.setSize(w, h);
     camera.aspect = w / h;
     const prevScale = aspectScale; aspectScale = Math.max(1, 1.62 / camera.aspect);
-    if (!resize.done) { camDist = 49 * aspectScale; resize.done = true; } else camDist *= aspectScale / prevScale;
+    if (!resize.done) { camDist = 76 * aspectScale; resize.done = true; } else camDist *= aspectScale / prevScale;
     placeCamera();
   }
   window.addEventListener('resize', resize);
@@ -705,8 +731,8 @@ export function createCity(container, opts = {}) {
       const state = (l) => !l.owner ? '空' : l.owner === 'player' ? '玩家' : '對手';
       const nodes = (g) => g.nodes.map((n, i) => ({ id: i, x: +n.x.toFixed(3), z: +n.z.toFixed(3) }));
       return {
-        populationMultiplier: 2,
-        lots: shops.lots.map(l => ({ id: l.id, x: +l.door.x.toFixed(3), z: +l.door.z.toFixed(3), bx: l.bx, bz: l.bz, zone: l.zone, district: l.bz > 12 ? '南城生活與商辦區' : l.bx > 16 ? '東城新區' : '雲港舊城', state: state(l), owner: l.owner, name: l.name, color: l.color, building: l.building, face: l.face })),
+        populationMultiplier: 2, marketVersion: MARKET_VERSION,
+        lots: shops.lots.map(l => ({ id: l.id, x: +l.door.x.toFixed(3), z: +l.door.z.toFixed(3), bx: l.bx, bz: l.bz, zone: l.zone, districtId: districtAt(l.bx, l.bz), district: districtOf(districtAt(l.bx, l.bz)).name, state: state(l), owner: l.owner, name: l.name, color: l.color, building: l.building, face: l.face })),
         buildings: buildings.map(b => ({ id: b.id, type: b.type, x: +b.x.toFixed(3), z: +b.z.toFixed(3), w: +b.w.toFixed(2), d: +b.d.toFixed(2), h: +b.h.toFixed(2), floors: b.floors })),
         sidewalk: { nodes: nodes(sidewalk), edges: sidewalk.edges.map(e => [e[0], e[1], +e[2].toFixed(3)]) },
         roads: { nodes: nodes(roads), edges: roads.edges.map(e => [e[0], e[1], +e[2].toFixed(3)]) },
