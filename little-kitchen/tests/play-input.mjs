@@ -1,0 +1,32 @@
+import assert from 'node:assert/strict';
+import vm from 'node:vm';
+import {readFileSync} from 'node:fs';
+import * as state from '../play-state.js';
+import * as sim from '../simulation.js';
+import * as art from '../play-art.js';
+import * as model from '../model.js';
+async function setup(){
+  const elements=new Map(),frames=[];let loops=0;
+  function element(id){if(!elements.has(id))elements.set(id,{innerHTML:'',textContent:'',hidden:false,open:false,dataset:{},width:0,height:0,listeners:{},classList:{toggle(){}},setAttribute(){},querySelectorAll(){return [];},querySelector(){return null;},setPointerCapture(){},hasPointerCapture(){return true;},releasePointerCapture(){},addEventListener(type,fn){this.listeners[type]=fn;},getBoundingClientRect:()=>({left:0,top:123,right:390,bottom:640,width:390,height:517}),showModal(){this.open=true;},close(){this.open=false;}});return elements.get(id);}
+  const param=()=>({value:0,setValueAtTime(){},exponentialRampToValueAtTime(){}});
+  function node(){let running=false;return {gain:param(),frequency:param(),connect(){},disconnect(){},start(){if(this.loop||this.type==='sawtooth'){loops++;running=true;}},stop(){if(running){loops--;running=false;}this.onended?.();}};}
+  class AudioContext{constructor(){this.currentTime=0;this.sampleRate=128;this.state='running';this.destination={};}resume(){}suspend(){}createGain(){return node();}createOscillator(){return node();}createBufferSource(){return node();}createBiquadFilter(){return node();}createBuffer(){return {getChannelData:()=>new Float32Array(128)};}}
+  const context={...state,...sim,...art,...model,console,URLSearchParams,location:{search:'?muted=1'},localStorage:{getItem:()=>null,setItem(){}},devicePixelRatio:1,window:{AudioContext},document:{hidden:false,getElementById:element,addEventListener(type,fn){this[type]=fn;},elementFromPoint:(x,y)=>y>50&&y<123&&x>70&&x<150?{closest:()=>({dataset:{place:'pan'}})}:null},createNarrator:()=>({speak(){},stop(){}}),createArt:()=>Promise.resolve({draw:(_s,_t,_p,_hint,w,h)=>art.view(w,h),foodImage:()=>''}),requestAnimationFrame:fn=>frames.push(fn)};
+  const source=readFileSync(new URL('../play-game.js',import.meta.url),'utf8').replace(/^import .*?;\n/gm,'')+'\n;globalThis.api={read:()=>({s,prefs,gesture,foodGesture}),pick,change,cancel,render};';vm.runInNewContext(source,context);await Promise.resolve();
+  let now=0;const frame=(dt=.05)=>{now+=dt*1000;frames.shift()(now);};frame();
+  const pointer=(type,x,y,extra={})=>element('playCanvas').listeners[type]({pointerId:1,isPrimary:true,button:0,clientX:x,clientY:y,...extra});
+  const button={dataset:{food:'tomato'},setPointerCapture(){},hasPointerCapture(){return true;},releasePointerCapture(){}};
+  const food=(type,x,y,extra={})=>element('playShelf').listeners[type]({pointerId:1,isPrimary:true,button:0,clientX:x,clientY:y,target:{closest:()=>button},...extra});
+  return {api:context.api,context,element,pointer,food,frame,loops:()=>loops};
+}
+const q=await setup();q.food('pointerdown',90,680);q.food('pointercancel',90,680);assert.equal(q.api.read().s.board.length,0,'cancelled taking does not add food');q.food('pointerdown',90,680);q.food('pointerup',90,680);assert.equal(q.api.read().s.board.length,1,'pointerup adds exactly one ingredient');
+q.pointer('pointerdown',85,380,{isPrimary:false});assert.equal(q.api.read().gesture,null);q.pointer('pointerdown',85,380);q.pointer('pointermove',305,380);q.pointer('pointercancel',305,380);assert.equal(q.api.read().s.board.length,1,'cancelled slicing does not cut');q.pointer('pointerdown',85,380);q.pointer('pointermove',305,380);q.pointer('pointerup',305,380);assert.equal(q.api.read().s.board.length,2);
+q.pointer('pointerdown',320,578);q.pointer('pointerup',320,578);assert.equal(q.api.read().s.board.length,0);assert.equal(q.api.read().s.vessels.pan.length,2);assert.equal(q.api.read().s.station,'stove');q.frame();
+q.pointer('pointerdown',284,496);q.pointer('pointerup',284,496);assert.equal(q.api.read().s.heat.pan,.65,'dial does not accidentally serve');assert.equal(q.api.read().s.plate.length,0);
+q.api.change('board');q.api.pick('carrot');q.api.change('pot');q.api.pick('broccoli');assert.equal(q.api.read().s.vessels.pan.length,2);assert.equal(q.api.read().s.board.length,1);assert.equal(q.api.read().s.vessels.pot.length,1);q.api.change('pan');q.frame();q.pointer('pointerdown',320,578);q.pointer('pointerup',320,578);assert.equal(q.api.read().s.station,'serve');assert.equal(q.api.read().s.plate.length,2);q.frame();
+q.pointer('pointerdown',195,495);q.pointer('pointermove',195,280);q.pointer('pointerup',195,280);assert.equal(q.api.read().s.bites,1);q.pointer('pointerdown',195,495);q.pointer('pointerup',195,495);assert.equal(q.api.read().s.bites,1,'rapid feeding cannot double-consume');
+q.api.change('blender');q.api.pick('strawberry');q.api.pick('milk');q.frame();q.element('playSound').onclick();assert.equal(q.loops(),0);q.pointer('pointerdown',174,480);assert(q.api.read().s.blending);assert.equal(q.loops(),1);for(let i=0;i<62;i++)q.frame();assert(q.api.read().s.blend>.99);q.pointer('pointercancel',174,480);assert(!q.api.read().s.blending);assert.equal(q.loops(),0);
+q.pointer('pointerdown',174,480);assert.equal(q.loops(),1);q.context.document.hidden=true;q.context.document.visibilitychange();assert(!q.api.read().s.blending);assert.equal(q.loops(),0);q.context.document.hidden=false;q.context.document.visibilitychange();q.frame();
+q.pointer('pointerdown',174,480);q.element('playParents').onclick();assert(!q.api.read().s.blending);assert.equal(q.loops(),0);q.element('playClose').onclick();q.element('playGuide').listeners.close();q.api.change('pan');q.api.pick('egg');q.api.read().s.heat.pan=1;q.api.render();assert.equal(q.loops(),1);q.element('playSound').onclick();assert.equal(q.loops(),0);
+const drag=await setup();drag.food('pointerdown',90,680);drag.food('pointermove',90,75);drag.food('pointerup',90,75);assert.equal(drag.api.read().s.vessels.pan.length,1);assert.equal(drag.api.read().s.board.length,0);assert.equal(drag.api.read().s.station,'stove','dropping into another workspace follows the ingredient');
+console.log('PASS: actual input routing, one ingredient per tap, dragging into another workspace, cancelled and secondary gestures, cuts and direct pour, separated heat/plate targets, independent containers, drag feeding and chew debounce, held motor/release/cancel/background/dialog/mute. Audio mocked.');
