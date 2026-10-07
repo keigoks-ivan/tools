@@ -102,4 +102,38 @@ const light = {
   tour: { startKt: 100, bankDeg: 30, limits: { minLegM: 2000, maxTurnDeg: 75, maxClimbPct: 2, maxDescentPct: 4, minMinutes: 5, maxMinutes: 9, ringClearFt: 1000, legClearFt: 800, wallM: 600, flownWallM: 400, flownClearFt: 800, wallDropFt: 500 } },
 };
 
-export const PROFILES = deepFreeze({ jet, light });
+// Fictional MQ-16: F-16-class dimensions and thrust; the aerodynamic/SAS model is tuned for this game.
+// Public reference: https://www.169fw.ang.af.mil/About/Fact-Sheets/Article/454065/f-16-fighting-falcon/
+// This is an unarmed flight model, not a reproduction of military flight-control software.
+const fighter = {
+  ...jet,
+  id: 'fighter', name: 'MQ-16', nameZh: '游隼戰鬥機', nameEn: 'Peregrine', emptyMass: 8935, initialFuel: 2500,
+  wingArea: 27.9, span: 9.8, length: 15.06, chord: 3.2,
+  maxThrust: 76500, gearHeight: 2, maxSpeed: 360, rotateSpeed: 72,
+  inertia: { x: 78000, y: 92000, z: 18000 },
+  aero: { ...jet.aero, slope: 4.4, cl0: .12, flapCl0: .32, stall: 27, flapStall: 2, negStall: 20, cd0: .021, flapCd: .028, k: .09, cdGear: .026, spoilerLift: .92, spoilerCd: .10 },
+  thrust: { ...jet.thrust, lapseExp: .55, floor: .8, slope: .00035, spoolUp: 1.8, spoolDown: 1.1, fuelIdle: .06, fuelPerEngine: .78, afterburnerThrust: 128000, afterburnerFuel: 2.6 },
+  gear: { transit: 3.5, bellyHeight: .8, warningAgl: 180, warningVs: -.5 },
+  speedLimit: { clean: 360, flapOver: .2, base: 150, perFlap: 13 },
+  sas: { ...jet.sas, pitch: .65, roll: 2.3, yaw: .22, pitchK: 2.2, rollK: 3.2, yawK: 1.4, authorityQ: 110000, authorityMax: 1.5, trimAoaBase: 2, trimAoaGain: 8, aoaGain: .8, aoaLimit: .22, maxG: 9, minG: -3, maxAoA: 25 },
+  ap: { ...jet.ap, bank: 35, vs: 20, pitchMin: -10, pitchMax: 20, pitchGain: .055, pitchDamp: 1.2, rollGain: .016, rollDamp: .55, ctrlMax: .5 },
+  ground: { ...jet.ground, brake: 4.2, liftOffSpeed: 55, noseHoldSpeed: 40 },
+  crash: { ...jet.crash, tailPitch: 16, impactSpeed: 135, landingPitch: 16, landingRoll: 10 },
+  scenarios: {
+    default: { speed: 180, apAltitude: 1800 },
+    runway: { flaps: 1, trim: 0, throttle: 0, apAltitude: 1800 },
+    approach: { km: 7, speed: 85, pitch: 4.5, throttle: .19, flaps: 3, trim: 0 },
+    cruise: { altitude: 2400, speed: 200, pitch: 2.3, throttle: .21, flaps: 0, trim: 0, x: -1400, z: 6000, gear: false },
+  },
+  ui: {
+    ...jet.ui, label: 'MQ-16 · PEREGRINE', flightLabel: 'VIPER 01', engines: 1,
+    apSpeed: { min: 145, max: 600, def: 300 },
+    cameras: { cockpit: [0, .95, -3.6], wing: { pos: [4.6, 1.5, 4], look: [0, .2, -3] }, chase: { back: 29, side: 8, up: 8, lookAhead: 1 }, attract: [18, 9, 22] },
+    warnings: { ...jet.ui.warnings, bankDeg: 55 }, score: { refKt: 155, tolKt: 15 },
+  },
+  novice: { ...jet.novice, rotateKt: 140, flapRetractKt: 190, flapExtend: [[250, 1], [225, 2], [195, 3]], approachSpeedKt: [145, 180], flareAglM: 12, circuitAltFt: 6000 },
+  challenge: { ...jet.challenge, vrefKt: 155, flareAglM: 12, flapSchedule: [250, 225, 195, 250] },
+  tour: { ...jet.tour, startKt: 300, bankDeg: 35 },
+};
+
+export const PROFILES = deepFreeze({ jet, light, fighter });

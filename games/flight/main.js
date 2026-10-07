@@ -1,19 +1,20 @@
 import * as THREE from 'three';
-import { createFlightState, stepFlight, getFlightData, profileOf, PROFILES, RUNWAY } from './physics.mjs';
+import { createFlightState, stepFlight, getFlightData, profileOf, PROFILES, RUNWAY } from './physics.mjs?v=20261007';
 import { AIRPORT, apAltitudeLocal, apFloorFt } from './airport.mjs';
 import { createAircraft, createCockpit } from './aircraft.js?v=20261005';
 import { createLightAircraft, createLightCockpit } from './aircraft.light.js?v=20261005';
+import { createFighterAircraft, createFighterCockpit } from './aircraft.fighter.js?v=20261007';
 import { createWorld } from './world.js?v=20261005';
 import { createGeoScenery } from './geoscenery.js?v=20261005';
 import { createInstruments } from './instruments.js';
-import { createFlightAudio } from './audio.js?v=20261005';
+import { createFlightAudio } from './audio.js?v=20261007';
 import { createCityBuildings } from './buildings.js?v=20261005';
-import { createLandingAssist, landingAssistEligibility } from './landing-assist.mjs?v=20261005';
-import { nextStep, ilsCue, autoConfig, approachActive, approachBoxes } from './novice.mjs';
-import { TOURS, RING, tourById, tourLengthM, createTourState, createTourRun, updateTourRun, nextRingCue, ringNormal, ringHeightM, nearestLandmark, parseTourBest, recordTourBest, formatTime } from './tour.mjs';
-import * as challengeMod from './challenge.mjs';
-import * as tourMod from './tour.mjs';
-import { LEVELS, createLevelState, windAt, grade, bestStars, isUnlocked, recordResult, parseProgress, starText } from './challenge.mjs';
+import { createLandingAssist, landingAssistEligibility } from './landing-assist.mjs?v=20261007';
+import { nextStep, ilsCue, autoConfig, approachActive, approachBoxes } from './novice.mjs?v=20261007';
+import { TOURS, RING, tourById, tourLengthM, createTourState, createTourRun, updateTourRun, nextRingCue, ringNormal, ringHeightM, nearestLandmark, parseTourBest, recordTourBest, formatTime } from './tour.mjs?v=20261007';
+import * as challengeMod from './challenge.mjs?v=20261007';
+import * as tourMod from './tour.mjs?v=20261007';
+import { LEVELS, createLevelState, windAt, grade, bestStars, isUnlocked, recordResult, parseProgress, starText } from './challenge.mjs?v=20261007';
 
 const $ = id => document.getElementById(id);
 // WP2 helpers (levelsFor / toursFor); until they exist the jet lists are used for both aircraft.
@@ -40,7 +41,7 @@ let locale = 'zh';
 try { locale = localStorage.getItem('lang') === 'en' ? 'en' : 'zh'; } catch {}
 const tr = (zh, en) => locale === 'zh' ? zh : en;
 let state = createFlightState(), data = getFlightData(state);
-let commands = { throttle: 0, flaps: 1, gear: true, trim: .15, spoilers: false };
+let commands = { throttle: 0, flaps: 1, gear: true, trim: .15, spoilers: false, afterburner: false };
 const profileNow = () => profileOf(state), uiNow = () => profileNow().ui;
 let chosenAircraft = 'jet', modelAircraft = null; // chosenAircraft = the start-dialog picker; the flying aircraft is state.aircraft
 let active = false, paused = false, panelHidden = false, view = 0, weather = 'clear';
@@ -48,8 +49,8 @@ let renderer, scenery, scene, camera, plane, cockpit, world, cityBuildings, terr
 let sceneTime = 0, lastTime = 0, accumulator = 0, lastUI = 0, toastTimer;
 let routeIndex = 0, departed = false, resultShown = false, brakeLatch = false;
 let level = null; // landing challenge (challenge.mjs): the active level, and best stars per level (kept per aircraft)
-const progressKey = id => id === 'light' ? 'flightChallenge.light' : 'flightChallenge';
-const progressBy = { jet: {}, light: {} };
+const progressKey = id => id === 'jet' ? 'flightChallenge' : `flightChallenge.${id}`;
+const progressBy = { jet: {}, light: {}, fighter: {} };
 for (const id of Object.keys(progressBy)) { try { progressBy[id] = parseProgress(localStorage.getItem(progressKey(id))); } catch {} }
 let tour = null, tourRun = null, tourBest = {}, tourRings = null, tourLoading = false, tourLoadToken = 0, tourSceneryId = null, tourCaptionId = ''; // sightseeing tour (tour.mjs)
 try { tourBest = parseTourBest(localStorage.getItem('flightTourBest')); } catch {}
@@ -227,7 +228,7 @@ function startFlight() {
   disposeTourRings(); if (tour) tourRings = createTourRings(tour); tourCaptionId = ''; $('tour-caption').hidden = true; $('tour-hud').hidden = !tour;
   state = tour ? createTourState(tour) : level ? createLevelState(level) : createFlightState(scenario, chosenAircraft); data = getFlightData(state);
   applyAircraft(state.aircraft || 'jet'); // the 3D model, gauges, route and AP ranges follow the aircraft actually flying
-  commands = { throttle: state.throttle, flaps: state.flaps, gear: state.gear, trim: state.trim, spoilers: false };
+  commands = { throttle: state.throttle, flaps: state.flaps, gear: state.gear, trim: state.trim, spoilers: false, afterburner: false };
   weather = tour ? 'clear' : level ? level.weather : $('weather').value; brakeLatch = false; touchBrake = false;
   state.wind = level ? windAt(level, state.elapsed) : weather === 'crosswind' ? { x: 7.72, y: 0, z: 0 } : weather === 'overcast' ? { x: 1.7, y: 0, z: 2 } : { x: 0, y: 0, z: 0 };
   data = getFlightData(state);
@@ -257,8 +258,8 @@ function setModel(id) {
   if (modelAircraft === id) return;
   if (plane) { scene.remove(plane.group); plane.dispose?.(); }
   if (cockpit) { camera.remove(cockpit); cockpit.dispose?.(); }
-  plane = id === 'light' ? createLightAircraft(THREE) : createAircraft(THREE); scene.add(plane.group);
-  cockpit = id === 'light' ? createLightCockpit(THREE, { profile: PROFILES.light, altitudeOffset: ELEVATION, headingOffset: BEARING }) : createCockpit(THREE, { headingOffset: BEARING, altitudeOffset: ELEVATION, runwayIdent: AIRPORT.runway.ident }); camera.add(cockpit);
+  plane = id === 'fighter' ? createFighterAircraft(THREE) : id === 'light' ? createLightAircraft(THREE) : createAircraft(THREE); scene.add(plane.group);
+  cockpit = id === 'fighter' ? createFighterCockpit(THREE, { altitudeOffset: ELEVATION, headingOffset: BEARING }) : id === 'light' ? createLightCockpit(THREE, { profile: PROFILES.light, altitudeOffset: ELEVATION, headingOffset: BEARING }) : createCockpit(THREE, { headingOffset: BEARING, altitudeOffset: ELEVATION, runwayIdent: AIRPORT.runway.ident }); camera.add(cockpit);
   plane.group.visible = !active || view !== 0; cockpit.visible = active && view === 0; modelAircraft = id;
 }
 function rebuildApproachBoxes(id) {
@@ -279,17 +280,20 @@ function applyAircraft(id) {
   simulator.dataset.aircraft = id;
   document.querySelectorAll('.jet-only').forEach(el => { el.hidden = light; });
   document.querySelectorAll('.light-only').forEach(el => { el.hidden = !light; });
+  document.querySelectorAll('.fighter-only').forEach(el => { el.hidden = id !== 'fighter'; });
+  document.querySelectorAll('.twinjet-only').forEach(el => { el.hidden = ui.engines !== 2; });
+  $('spoilers-button').firstElementChild.textContent = id === 'fighter' ? 'SPD BRK' : 'SPLR';
   const rpm = ui.engineGauge === 'rpm';
-  $('engine-type').textContent = rpm ? '1 × PISTON' : 'TWINJET'; $('engine-caption').textContent = rpm ? 'RPM' : 'N1 %';
+  $('engine-type').textContent = rpm ? '1 × PISTON' : id === 'fighter' ? '1 × TURBOFAN' : 'TWINJET'; $('engine-caption').textContent = rpm ? 'RPM' : 'N1 %';
   $('fuel-unit').textContent = ui.fuelUnit.toUpperCase();
   $('ap-speed').min = ui.apSpeed.min; $('ap-speed').max = ui.apSpeed.max;
   if (!active) { $('ap-speed').value = ui.apSpeed.def; $('ap-altitude').value = P.novice.circuitAltFt; }
   brandText();
 }
 function chooseAircraft(id) {
-  chosenAircraft = id === 'light' ? 'light' : 'jet';
+  chosenAircraft = PROFILES[id] ? id : 'jet';
   try { localStorage.setItem('flightAircraft', chosenAircraft); } catch {}
-  if (!active) { state = createFlightState('runway', chosenAircraft); data = getFlightData(state); commands = { throttle: 0, flaps: state.flaps, gear: state.gear, trim: state.trim, spoilers: false }; applyAircraft(chosenAircraft); updateCamera(1); }
+  if (!active) { state = createFlightState('runway', chosenAircraft); data = getFlightData(state); commands = { throttle: 0, flaps: state.flaps, gear: state.gear, trim: state.trim, spoilers: false, afterburner: false }; applyAircraft(chosenAircraft); updateCamera(1); }
   renderLevels(); renderTours(); updateUI();
 }
 function updateSceneryText() {
@@ -365,6 +369,11 @@ function spoilers() {
   if (!profileNow().hasSpoilers) { toast(tr('雲雀沒有擾流板。', 'The Lark has no spoilers.')); return; }
   commands.spoilers = !commands.spoilers; updateUI();
 }
+function afterburner() {
+  if (state.aircraft !== 'fighter' || landingAssist.active || state.autopilot.enabled) return;
+  commands.afterburner = !commands.afterburner;
+  toast(commands.afterburner ? tr('後燃器待命：油門 90% 以上才點燃，耗油增加。', 'Afterburner armed: lights above 90% thrust, with higher fuel burn.') : tr('後燃器已關閉', 'Afterburner off')); updateUI();
+}
 function inputFrame(dt) {
   let pitch = Number(held.has('ArrowDown')) - Number(held.has('ArrowUp'));
   let roll = Number(held.has('ArrowRight')) - Number(held.has('ArrowLeft'));
@@ -392,6 +401,7 @@ function inputFrame(dt) {
     }
   }
   if (landingAssist.active || state.autopilot.enabled) { pitch = 0; roll = 0; yaw = 0; thrust = 0; }
+  if (landingAssist.active || state.autopilot.enabled) commands.afterburner = false;
   commands.throttle = clamp(commands.throttle + thrust * dt * .28, 0, 1);
   if (!landingAssist.active && !state.autopilot.enabled) commands.trim = clamp(commands.trim + (Number(held.has('Home')) - Number(held.has('End'))) * dt * .1, -1, 1);
   const blend = 1 - Math.exp(-dt * 7);
@@ -436,7 +446,8 @@ function updateCamera(dt) {
     const h = data.heading * Math.PI / 180;
     const ch = cam.chase;
     cameraPosition.set(active ? Math.sin(h) * -ch.back + Math.cos(h) * ch.side : cam.attract[0], active ? ch.up : cam.attract[1], active ? Math.cos(h) * ch.back + Math.sin(h) * ch.side : cam.attract[2]).add(plane.group.position);
-    camera.position.lerp(cameraPosition, active ? 1 - Math.exp(-dt * 4) : .08);
+    if (active && state.aircraft === 'fighter') camera.position.copy(cameraPosition);
+    else camera.position.lerp(cameraPosition, active ? 1 - Math.exp(-dt * 4) : .08);
     cameraTarget.copy(plane.group.position); cameraTarget.y += active ? ch.lookAhead : 1;
     camera.lookAt(cameraTarget);
   }
@@ -453,39 +464,39 @@ function mission() {
     const km = (cue.distanceM / 1000).toFixed(1);
     return [tr(`下一個圈 ${cue.index + 1} / ${n}`, `Next ring ${cue.index + 1} / ${n}`), `${tr(step.zh, step.en)}${tr('　· 還有', ' · ')} ${km} ${tr('公里', 'km')}`, cue.index + 1, done / n];
   }
-  const P = profileNow(), light = P.id === 'light', rotate = Math.round(P.rotateSpeed * KT);
+  const P = profileNow(), light = P.id === 'light', fighter = P.id === 'fighter', rotate = Math.round(P.rotateSpeed * KT);
   if (state.scenario === 'runway' && !departed) {
     if (!state.onGround && data.agl > 120) departed = true;
     if (state.onGround && speed < 20) return [tr('準備起飛', 'Ready for departure'), light
       ? tr('襟翼 1（10°），油門推至 100%。↑ 壓低、↓ 拉起。起飛與進場都用 14 跑道，是簡化設定；雲雀滑跑約 300 米就能離地。', 'Flaps 1 (10°). Power 100%. ↑ nose down, ↓ nose up. Takeoff and landing both use runway 14, a simplification; the Lark lifts off in about 300 m.')
-      : tr('襟翼 1，油門推至 100%。↑ 壓低、↓ 拉起。起飛與進場都用 14 跑道，是簡化設定；實際多用 28 或 16 起飛。', 'Flaps 1. Thrust 100%. ↑ nose down, ↓ nose up. Takeoff and landing both use runway 14, a simplification; real departures mostly use 28 or 16.'), 1, .1];
+      : fighter ? tr('襟翼 1，油門 100%；R 可開後燃器。約 140 節輕拉，保持正爬升後收起落架。', 'Flaps 1, throttle 100%; R arms afterburner. Rotate gently at 140 kt, raise gear in a positive climb.') : tr('襟翼 1，油門推至 100%。↑ 壓低、↓ 拉起。起飛與進場都用 14 跑道，是簡化設定；實際多用 28 或 16 起飛。', 'Flaps 1. Thrust 100%. ↑ nose down, ↓ nose up. Takeoff and landing both use runway 14, a simplification; real departures mostly use 28 or 16.'), 1, .1];
     if (state.onGround && speed < P.rotateSpeed * KT) return [tr('起飛滑跑', 'Takeoff roll'), tr(`保持跑道中線；空速 ${rotate} 節開始短按 ↓ 抬頭。`, `Hold the centerline. At ${rotate} kt, briefly press ↓ to rotate.`), 2, .27];
     return [tr('建立爬升', 'Establish the climb'), light
       ? tr('機頭朝東南，遠方是阿爾卑斯山。空速保持約 75 節爬升，每分鐘約 600 呎。離地 300 呎以上、空速到 70 節後收襟翼，再按 A 接自動駕駛。', 'Nose toward the southeast, with the Alps ahead. Climb at about 75 kt, roughly 600 ft/min. Above 300 ft and 70 kt, retract the flaps, then press A for autopilot.')
-      : tr('機頭朝東南，遠方是阿爾卑斯山。保持約 10° 仰角，正爬升後收起落架，180 節前開始收襟翼，再按 A 接自動駕駛。', 'Nose toward the southeast, with the Alps ahead. Hold about 10° pitch, retract gear in a positive climb, start retracting flaps before 180 kt, then press A for autopilot.'), 3, .45];
+      : fighter ? tr('保持約 10° 仰角，正爬升後收起落架，190 節收襟翼。R 關後燃器，300 節可按 A 保持速度、高度和航向。', 'Hold about 10° pitch, raise gear in a positive climb, flaps up at 190 kt. R turns off afterburner; at 300 kt press A to hold speed, altitude and heading.') : tr('機頭朝東南，遠方是阿爾卑斯山。保持約 10° 仰角，正爬升後收起落架，180 節前開始收襟翼，再按 A 接自動駕駛。', 'Nose toward the southeast, with the Alps ahead. Hold about 10° pitch, retract gear in a positive climb, start retracting flaps before 180 kt, then press A for autopilot.'), 3, .45];
   }
   if (state.touchdown && state.onGround) return [tr('落地滑跑', 'Landing roll'), light
     ? tr('油門收至 0%，按住空白鍵煞車到停穩。', 'Idle power. Hold Space to brake to a stop.')
-    : tr('油門收至 0%，B 展開擾流板，按住空白鍵煞車。', 'Idle thrust, B deploys spoilers. Hold Space to brake to a stop.'), 4, .95];
+    : fighter ? tr('油門收至 0%，B 展開減速板，按住空白鍵煞車。', 'Idle thrust, B extends speed brakes. Hold Space to brake.') : tr('油門收至 0%，B 展開擾流板，按住空白鍵煞車。', 'Idle thrust, B deploys spoilers. Hold Space to brake to a stop.'), 4, .95];
   const aligned = data.agl < 800 && data.distanceToThreshold > -300 && data.distanceToThreshold < 13000 && Math.abs(state.position.x) < 1500 && Math.min(data.heading, 360 - data.heading) < 35;
   if (state.scenario === 'approach' || aligned && (state.scenario !== 'runway' || routeIndex >= 3)) {
     if (data.agl < P.novice.flareAglM) return [tr('拉平與接地', 'Flare and touchdown'), light
       ? tr('離地約 20 呎輕拉拉平，油門收到怠速，主輪輕輕接地，勿長按拉起。', 'At about 20 ft, ease the nose up to flare, close the power to idle and touch down gently. Avoid sustained pull.')
-      : tr('約 40 呎開始輕拉，保持 4–6° 仰角，油門收回，勿長按拉起。', 'At about 40 ft, gently flare to 4–6° pitch and idle thrust. Avoid sustained pull.'), 4, .86];
+      : fighter ? tr('離地約 40 呎輕拉至約 8° 仰角，柔和減推力，避免拉得太久。', 'At about 40 ft, gently flare toward 8° pitch and reduce thrust smoothly. Avoid a sustained pull.') : tr('約 40 呎開始輕拉，保持 4–6° 仰角，油門收回，勿長按拉起。', 'At about 40 ft, gently flare to 4–6° pitch and idle thrust. Avoid sustained pull.'), 4, .86];
     return [tr('穩定進場', 'Stabilized approach'), light
       ? tr('約 65 節、襟翼 3（30°），固定式起落架不用操作。保持 ILS 14 菱形置中，沿西北方的下滑道降到跑道。', 'About 65 kt, flaps 3 (30°); the gear is fixed. Keep the ILS 14 diamonds centered and follow the glidepath in from the northwest.')
-      : tr('約 145 節、襟翼 3、起落架 DOWN。保持 ILS 14 菱形置中，沿西北方的下滑道降到跑道。', 'About 145 kt, flaps 3, gear DOWN. Keep the ILS 14 diamonds centered and follow the glidepath in from the northwest.'), 4, .7];
+      : fighter ? tr('後燃器關閉，約 155 節、襟翼 3、起落架 DOWN。HUD 飛行軌跡標記對準落地點；新手可按 L 輔助降落。', 'Afterburner off, about 155 kt, flaps 3 and gear DOWN. Aim the HUD flight-path marker at the touchdown zone. Novices can press L for landing assist.') : tr('約 145 節、襟翼 3、起落架 DOWN。保持 ILS 14 菱形置中，沿西北方的下滑道降到跑道。', 'About 145 kt, flaps 3, gear DOWN. Keep the ILS 14 diamonds centered and follow the glidepath in from the northwest.'), 4, .7];
   }
   if (state.scenario === 'runway') {
     const point = route[routeIndex];
     if (point && Math.hypot(point.x - state.position.x, point.z - state.position.z) < (light ? 900 : 1300) && routeIndex < route.length - 1) routeIndex++;
     return [tr('機場航線', 'Airport circuit'), light
       ? tr('依導航顯示左轉繞場，保持約 2,900 呎（海拔）。右手邊是蘇黎世市區；轉進五邊前降到約 2,300 呎，空速收到 65 節左右。', 'Follow the route in a left-hand circuit at about 2,900 ft MSL. Zurich city is on your right. Descend to about 2,300 ft and slow to about 65 kt before turning onto final.')
-      : tr('依導航顯示左轉繞場，保持約 4,500 呎（海拔）。右手邊是蘇黎世市區；轉進五邊前降到約 3,000 呎。', 'Follow the route in a left-hand circuit at about 4,500 ft MSL. Zurich city is on your right. Descend to about 3,000 ft before turning onto final.'), 3, .55 + routeIndex * .06];
+      : fighter ? tr('依導航左轉繞場，保持約 6,000 呎與 300 節；進場前關後燃器，減速到約 155 節。', 'Follow the left circuit at about 6,000 ft and 300 kt. Turn off afterburner and slow to about 155 kt before final.') : tr('依導航顯示左轉繞場，保持約 4,500 呎（海拔）。右手邊是蘇黎世市區；轉進五邊前降到約 3,000 呎。', 'Follow the route in a left-hand circuit at about 4,500 ft MSL. Zurich city is on your right. Descend to about 3,000 ft before turning onto final.'), 3, .55 + routeIndex * .06];
   }
   return [tr('自由巡航', 'Free flight'), light
     ? tr('探索蘇黎世機場、湖泊與山谷。雲雀飛得慢，可以貼著山谷看；用 AP 保持空速、航向與高度，或從西北方飛回 14 跑道落地。', 'Explore Zurich airport, the lakes and the valleys. The Lark is slow enough to follow a valley floor. Use AP to hold speed, heading and altitude, or return to runway 14 from the northwest.')
-    : tr('探索蘇黎世機場、湖泊與阿爾卑斯山。可用 AP 保持空速、航向與高度，或從西北方飛回 14 跑道落地。', 'Explore Zurich airport, the lakes and the Alps. Use AP to hold speed, heading and altitude, or return to runway 14 from the northwest.'), 3, .5];
+    : fighter ? tr('R 後燃器、B 減速板。綠色 HUD 顯示飛行軌跡、Mach、G 和攻角；A 保持航向、高度與速度，按 A 接手。', 'R afterburner, B speed brakes. The green HUD shows flight path, Mach, G and AoA. A holds heading, altitude and speed; press A to take over.') : tr('探索蘇黎世機場、湖泊與阿爾卑斯山。可用 AP 保持空速、航向與高度，或從西北方飛回 14 跑道落地。', 'Explore Zurich airport, the lakes and the Alps. Use AP to hold speed, heading and altitude, or return to runway 14 from the northwest.'), 3, .5];
 }
 function updateUI() {
   if (!data) return;
@@ -515,6 +526,11 @@ function updateUI() {
   $('trim-value').textContent = `${commands.trim >= 0 ? '+' : ''}${commands.trim.toFixed(2)}`;
   const throttle = Math.round((state.autopilot.enabled || landingAssist.active ? state.throttle : commands.throttle) * 100);
   $('throttle-value').textContent = `${throttle}%`;
+  $('afterburner-button').setAttribute('aria-pressed', String(commands.afterburner));
+  $('afterburner-button').disabled = landingAssist.active || state.autopilot.enabled;
+  $('afterburner-value').textContent = (data.afterburnerLevel || 0) > .05 ? 'LIT' : commands.afterburner ? 'ARMED' : 'OFF';
+  $('fighter-readout').textContent = `M ${(data.mach || 0).toFixed(2)} · ${data.gLoad.toFixed(1)} G · AOA ${data.aoa.toFixed(1)}°`;
+  $('fighter-readout').hidden = !active || state.aircraft !== 'fighter';
   if (document.activeElement !== $('throttle')) $('throttle').value = throttle;
   $('throttle').disabled = landingAssist.active || state.autopilot.enabled;
   for (const id of ['gear-button', 'flaps-button', 'spoilers-button', 'brake-button', 'touch-brake']) $(id).disabled = landingAssist.active;
@@ -528,6 +544,7 @@ function updateUI() {
   let warning = '', critical = false;
   const warn = ui.warnings;
   if (data.stallWarning) { warning = 'STALL · LOWER NOSE'; critical = true; }
+  else if (data.gLimitWarning) warning = 'G LIMIT · UNLOAD';
   else if (data.overspeedWarning) warning = warn.overspeedText;
   else if (data.gearWarning) warning = 'LANDING GEAR';
   else if (!state.onGround && data.agl < warn.sinkAgl && data.verticalSpeed < warn.sinkVs) { warning = 'SINK RATE'; critical = true; }
@@ -744,7 +761,7 @@ function animate(now) {
   }
   updateApproachBoxes(); updateTourRings(); world.update(sceneTime, state, weather); scenery?.update(sceneTime, state); cityBuildings?.update(state);
   plane.update({ ...state, rollInput: axes.roll, pitchInput: axes.pitch, yawInput: axes.yaw, dt }, data);
-  if (cockpit?.visible) cockpit.update?.({ ...state, rollInput: axes.roll, pitchInput: axes.pitch, yawInput: axes.yaw, dt, lookYaw, lookPitch }, data);
+  if (cockpit?.visible) cockpit.update?.({ ...state, rollInput: axes.roll, pitchInput: axes.pitch, yawInput: axes.yaw, dt, lookYaw, lookPitch }, state.aircraft === 'fighter' ? { ...data, landingAssist: landingAssist.active, cockpitAspect: camera.aspect } : data);
   updateCamera(dt); updateAudio(dt); renderer.render(scene, camera);
   if (active && !panelHidden) drawInstruments();
   if (now - lastUI > 100) { lastUI = now; updateUI(); }
@@ -784,6 +801,7 @@ $('flaps-button').addEventListener('click', e => {
   else if (!landingAssist.active) { commands.flaps = (commands.flaps + 1) % 4; updateUI(); }
 });
 $('spoilers-button').addEventListener('click', spoilers);
+$('afterburner-button').addEventListener('click', afterburner);
 $('brake-button').addEventListener('click', () => { if (!landingAssist.active) { brakeLatch = !brakeLatch; updateUI(); } });
 $('throttle').addEventListener('input', e => { if (!landingAssist.active && !state.autopilot.enabled) commands.throttle = Number(e.target.value) / 100; });
 $('control-mode').addEventListener('change', () => { mouse.inside = false; gamepadNotice = false; });
@@ -793,7 +811,7 @@ document.addEventListener('keydown', event => {
   if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space', 'Home', 'End'].includes(event.code)) event.preventDefault();
   if (!active) return;
   if (!event.repeat) {
-    const actions = { KeyP: () => setPause(!paused), KeyC: () => setView(), KeyM: toggleSound, KeyH: () => showDialog($('help-dialog')), KeyG: gear, KeyF: () => flaps(event.shiftKey), KeyB: spoilers, KeyA: toggleAP, KeyL: toggleLandingAssist };
+    const actions = { KeyP: () => setPause(!paused), KeyC: () => setView(), KeyM: toggleSound, KeyH: () => showDialog($('help-dialog')), KeyG: gear, KeyF: () => flaps(event.shiftKey), KeyB: spoilers, KeyA: toggleAP, KeyL: toggleLandingAssist, KeyR: afterburner };
     if (actions[event.code]) { actions[event.code](); return; }
   }
   if (!paused) held.add(event.code);
@@ -844,7 +862,7 @@ try {
   renderer.domElement.setAttribute('aria-label', `${AIRPORT.city.en} flight simulation`);
   scene = new THREE.Scene(); camera = new THREE.PerspectiveCamera(65, innerWidth / innerHeight, .15, 200000);
   scene.add(camera); world = createWorld(THREE, scene, { airport: AIRPORT, renderer, quality: $('quality').value });
-  try { if (localStorage.getItem('flightAircraft') === 'light') { chosenAircraft = 'light'; document.querySelector('input[name=aircraft][value=light]').checked = true; } } catch {}
+  try { const saved = localStorage.getItem('flightAircraft'); if (PROFILES[saved]) { chosenAircraft = saved; document.querySelector(`input[name=aircraft][value=${saved}]`).checked = true; } } catch {}
   state = createFlightState('runway', chosenAircraft); data = getFlightData(state); setModel(chosenAircraft); route = routeFor(chosenAircraft); rebuildApproachBoxes(chosenAircraft);
   configureQuality(); camera.position.set(55, 29, state.position.z + 66); updateCamera(1);
   $('mission-eyebrow').textContent = `${AIRPORT.city.en.toUpperCase()} · ${AIRPORT.icao} · RWY ${AIRPORT.runway.ident}`;

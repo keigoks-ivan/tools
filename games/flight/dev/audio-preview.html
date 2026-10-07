@@ -23,6 +23,10 @@
       ['light-cruise-cockpit', { aircraft:'light', view:0, power:.7, airspeed:48 }],
       ['light-climb-exterior', { aircraft:'light', view:1, power:1, airspeed:45 }],
       ['gear-flaps-touchdown', { aircraft:'jet', view:0, power:.24, airspeed:72, gearMoving:true, flapsMoving:true, events:[{ type:'touchdown',at:1,sinkRate:2.5,speed:72 },{ type:'gear-lock',at:1.6 },{ type:'stall',at:2,volume:.65 }] }],
+      ['fighter-dry-cockpit', { aircraft:'fighter', view:0, power:1, airspeed:200 }],
+      ['fighter-dry-exterior', { aircraft:'fighter', view:1, power:1, airspeed:200 }],
+      ['fighter-afterburner', { aircraft:'fighter', view:1, power:1, afterburner:1, airspeed:300 }],
+      ['fighter-paused', { aircraft:'fighter', view:1, power:1, afterburner:1, airspeed:300, paused:true }],
       ['paused-silence', { aircraft:'light', view:1, power:1, airspeed:70, paused:true }],
       ['pause-tail', { aircraft:'jet', view:1, power:1, airspeed:115, pauseAt:1 }],
     ];
@@ -40,7 +44,7 @@
         const ctx=canvas.getContext('2d');ctx.strokeStyle='#7cd8ca';ctx.beginPath();for(let x=0;x<440;x++){const y=50-a[Math.floor(x*a.length/440)]*160;x?ctx.lineTo(x,y):ctx.moveTo(x,y);}ctx.stroke();
       }
       const silence=records.find(r=>r.name==='paused-silence'), tail=records.find(r=>r.name==='pause-tail');
-      const passed=records.every(r=>r.finite&&r.peak<.9)&&silence.peak===0&&tail.tailPeak<.000001&&records.filter(r=>!r.name.includes('silence')).every(r=>r.peak>.005);
+      const passed=records.every(r=>r.finite&&r.peak<.9)&&silence.peak===0&&records.find(r=>r.name==='fighter-paused').peak===0&&tail.tailPeak<.000001&&records.filter(r=>!r.name.includes('silence') && r.name !== 'fighter-paused').every(r=>r.peak>.005);
       document.getElementById('status').textContent=passed?'PASS · all fields contain finite, unclipped audio; paused output is zero and pause tail decays to silence.':'FAIL · inspect the rendered metrics.';
       document.body.dataset.result=passed?'pass':'fail';document.getElementById('report').textContent=JSON.stringify(records,null,2);
     } catch(error) { document.getElementById('status').textContent=`ERROR · ${error.message}`;document.body.dataset.result='error'; }

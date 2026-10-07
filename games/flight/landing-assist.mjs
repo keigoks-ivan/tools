@@ -2,12 +2,14 @@
 // it never moves the aircraft, edits physics, or enables the ALT/HDG autopilot.
 // main owns mode gating and explicit handback. Call update at the fixed
 // physics step with fresh getFlightData, and copy its commands when handing back.
-import { RUNWAY, profileOf } from './physics.mjs';
+import { RUNWAY, profileOf } from './physics.mjs?v=20261007';
 
 const KT = 1.943844, RAD = Math.PI / 180;
 const clamp = (value, low, high) => Math.max(low, Math.min(high, value));
 const wrap = value => ((value + 180) % 360 + 360) % 360 - 180;
-const settings = state => state.aircraft === 'light'
+const settings = state => state.aircraft === 'fighter'
+  ? { vref: 155, minKt: 140, maxKt: 210, flare: 12, minAgl: 25, maxDistance: 13000, maxOffset: 500, baseThrottle: .18, speedGain: .012, speedIntegral: .0008, maxCrosswind: 15.1 }
+  : state.aircraft === 'light'
   ? { vref: 65, minKt: 55, maxKt: 90, flare: 6, minAgl: 15, maxDistance: 7000, maxOffset: 220, baseThrottle: .47, speedGain: .02, speedIntegral: .048, maxCrosswind: 15.1 }
   : { vref: 140, minKt: 120, maxKt: 180, flare: 25, minAgl: 30, maxDistance: 13000, maxOffset: 500, baseThrottle: .22, speedGain: .012, speedIntegral: .00048, maxCrosswind: 15.1 };
 
@@ -33,7 +35,7 @@ export function landingAssistEligibility(state, data) {
   const tolerance = late ? (state.aircraft === 'light' ? 8 : 5) : Math.max(8, path * .3);
   if (data.agl < S.minAgl || Math.abs(state.position.y - path) > tolerance || data.verticalSpeed < (state.aircraft === 'light' ? -4 : -7) || data.verticalSpeed > (state.aircraft === 'light' ? 3 : 5)) return fail('altitude');
   const kt = data.indicatedAirspeed * KT;
-  const maximumKt = distance < 2000 ? Math.min(S.maxKt, state.aircraft === 'light' ? 75 : 160) : S.maxKt;
+  const maximumKt = distance < 2000 ? Math.min(S.maxKt, state.aircraft === 'light' ? 75 : state.aircraft === 'fighter' ? 185 : 160) : S.maxKt;
   if (kt < S.minKt || kt > maximumKt || data.stallWarning || data.overspeedWarning) return fail('speed');
   if (Math.abs(state.wind?.x || 0) * KT > S.maxCrosswind || Math.abs(state.wind?.y || 0) > 1 || (state.wind?.z || 0) < -5) return fail('wind');
   return { eligible: true, reason: '' };
@@ -60,7 +62,7 @@ export function createLandingAssist() {
     const S = settings(state), light = state.aircraft === 'light', kt = data.indicatedAirspeed * KT;
     if (!state.onGround && (Math.abs(state.wind?.x || 0) * KT > S.maxCrosswind || Math.abs(state.wind?.y || 0) > 1 || (state.wind?.z || 0) < -5)) { disengage('wind'); return null; }
     if (phase === 'approach' && data.agl < profileOf(state).gearHeight + 8 && state.position.z > RUNWAY.length / 2) { disengage('altitude'); return null; }
-    const controls = { throttle: 0, pitch: 0, roll: 0, yaw: 0, brake: 0, flaps: 3, gear: true, trim: state.trim, spoilers: false, autopilot: { enabled: false } };
+    const controls = { afterburner: false, throttle: 0, pitch: 0, roll: 0, yaw: 0, brake: 0, flaps: 3, gear: true, trim: state.trim, spoilers: false, autopilot: { enabled: false } };
     if (state.onGround) {
       if (!state.touchdown) { disengage('on-ground'); return null; }
       phase = 'rollout';
@@ -70,6 +72,7 @@ export function createLandingAssist() {
       return controls;
     }
     if (light) controls.flaps = kt > 85 ? 1 : 3;
+    else if (state.aircraft === 'fighter') controls.flaps = kt > 225 ? 1 : kt > 195 ? 2 : 3;
     else controls.flaps = kt > 180 ? 1 : kt > 160 ? 2 : 3;
     // Ground track already includes the wind drift; capture it rather than forcing
     // the nose to point along the runway during a crosswind approach.
@@ -77,13 +80,20 @@ export function createLandingAssist() {
     const trackTarget = clamp(Math.atan2(-state.position.x, lookAhead) / RAD, -12, 12);
     const bankLimit = clamp(data.agl * .4, 4, 22);
     const bankTarget = clamp(wrap(trackTarget - data.groundTrack) * 2.5, -bankLimit, bankLimit);
-    controls.roll = clamp((bankTarget - data.roll) * .055 + state.angularVelocity.z * 1.8, -.65, .65);
+    controls.roll = state.aircraft === 'fighter' ? clamp((bankTarget - data.roll) * .016 + state.angularVelocity.z * .55, -.5, .5) : clamp((bankTarget - data.roll) * .055 + state.angularVelocity.z * 1.8, -.65, .65);
     // Flare only over the pavement, never because terrain or a low approach
     // produced a small AGL before the runway. Once started, flare stays latched.
     if (phase === 'flare' || (data.agl < S.flare && state.position.z <= RUNWAY.length / 2)) {
       phase = 'flare';
-      const vsTarget = light ? -(.25 + Math.max(0, data.agl - 1) * .2) : -(.5 + Math.max(0, data.agl - 4) * .14);
-      controls.pitch = clamp((vsTarget - data.verticalSpeed) * .3, -.4, .5);
+      if (state.aircraft === 'fighter') controls.throttle = data.agl > 3.0 ? clamp(.11 + (150 - kt) * .01, 0, .3) : 0;
+      const vsTarget = state.aircraft === 'fighter' ? -(.35 + Math.max(0, data.agl - 2) * .18) : light ? -(.25 + Math.max(0, data.agl - 1) * .2) : -(.5 + Math.max(0, data.agl - 4) * .14);
+      if (state.aircraft === 'fighter') {
+        const P = profileOf(state), qArea = .5 * 1.225 * data.indicatedAirspeed ** 2 * P.wingArea;
+        const groundEffect = 1 + P.aero.groundEffect * clamp(1 - data.agl / (P.span * .5), 0, 1);
+        const desiredCl = (P.emptyMass + state.fuel) * (9.80665 + (vsTarget - data.verticalSpeed) * .8) / Math.max(qArea, 1);
+        const desiredAoA = (desiredCl / groundEffect - P.aero.cl0 - P.aero.flapCl0 * state.flapPosition / 3) / P.aero.slope / RAD;
+        controls.pitch = clamp((desiredAoA - data.aoa) * .08 - state.angularVelocity.x * .7 - (data.trimPitchRate || 0) / P.sas.pitch, -.35, .35);
+      } else controls.pitch = clamp((vsTarget - data.verticalSpeed) * .3, -.4, .5);
     } else {
       const gamma = Math.atan2(state.velocity.y, Math.hypot(state.velocity.x, state.velocity.z)) / RAD;
       const gs = data.gsValid ? data.glideslopeDeviation : 0;

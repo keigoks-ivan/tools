@@ -1,6 +1,6 @@
 // Novice mode: pure logic (no DOM, no three.js). main.js feeds it the live state and shows the result.
 // Every function reads the same units as physics.mjs: metres, m/s, local frame (-z = runway heading), data.heading in local degrees.
-import { AIRCRAFT, RUNWAY, PROFILES } from './physics.mjs';
+import { AIRCRAFT, RUNWAY, PROFILES } from './physics.mjs?v=20261007';
 
 const KT = 1.943844, FT = 3.28084, RAD = Math.PI / 180;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -30,7 +30,8 @@ export const NOVICE_LIGHT = Object.freeze({
   circuitAltFt: LN.circuitAltFt, finalAltFt: LN.finalAltFt, freeAimM: LN.freeAimM, alignedAglM: LN.alignedAglM, climbPitchDeg: LN.climbPitchDeg,
 });
 // The novice table for an aircraft: 'jet' | 'light' | a flight state (reads state.aircraft). Anything else is the jet.
-export const noviceFor = x => (typeof x === 'string' ? x : x?.aircraft) === 'light' ? NOVICE_LIGHT : NOVICE;
+export const NOVICE_FIGHTER = Object.freeze({ ...NOVICE, ...PROFILES.fighter.novice, approachKt: PROFILES.fighter.novice.approachSpeedKt });
+export const noviceFor = x => ({ light: NOVICE_LIGHT, fighter: NOVICE_FIGHTER }[typeof x === 'string' ? x : x?.aircraft] || NOVICE);
 
 // Same condition main.js mission() uses for the stabilised approach (routeIndex only matters for the takeoff scenario).
 export function approachActive(state, data, routeIndex = 0) {
@@ -94,6 +95,7 @@ export function nextStep(state, data, commands, ctx = {}) {
     const turn = TURN[Math.abs(ctx.tour.diff) < 10 ? 'straight' : ctx.tour.diff > 0 ? 'right' : 'left'], alt = altitudeWords(data, ctx.tour.altFt);
     return step('tour', `飛向下一個圈：${turn[0]}，${alt[0]}`, `Fly to the next ring: ${turn[1].toLowerCase()}, ${alt[1]}`);
   }
+  if (state.aircraft === 'fighter' && state.scenario === 'cruise' && !approach) return step('fighter-cruise', '自由巡航：R 後燃器、A 自動駕駛；留意 HUD 的 G 值與攻角', 'Explore: R afterburner, A autopilot; watch HUD G and AoA');
   if (approach && light) {
     if (commands.flaps < 3) {
       if (kt > N.flapExtend[1][0] + 5) return step('slow-down', `放襟翼 3：先收油門，減速到 ${N.flapExtend[1][0]} 節`, `Flaps 3: reduce power, slow to ${N.flapExtend[1][0]} kt`, 'throttle');
@@ -105,11 +107,11 @@ export function nextStep(state, data, commands, ctx = {}) {
   }
   if (approach) {
     if (!commands.gear || commands.flaps < 3) {
-      if (commands.flaps < 3 && kt > N.flapExtend[2][0] + 5) return step('slow-down', '放襟翼 3 和起落架：先收油門，減速到 160 節', 'Flaps 3 and gear: reduce thrust, slow to 160 kt', 'throttle');
+      if (commands.flaps < 3 && kt > N.flapExtend[2][0] + 5) return step('slow-down', `放襟翼 3 和起落架：先收油門，減速到 ${N.flapExtend[2][0]} 節`, `Flaps 3 and gear: reduce thrust, slow to ${N.flapExtend[2][0]} kt`, 'throttle');
       return step('config', '放襟翼 3 和起落架', 'Set flaps 3 and gear down', !commands.gear ? 'gear' : 'flaps');
     }
-    if (kt > 165) return step('final-fast', '速度太快，收油門', 'Too fast: reduce thrust', 'throttle');
-    if (kt < 125) return step('final-slow', '速度太慢，加油門', 'Too slow: add thrust', 'throttle');
+    if (kt > (N.approachKt?.[1] || 165)) return step('final-fast', '速度太快，收油門', 'Too fast: reduce thrust', 'throttle');
+    if (kt < (N.approachKt?.[0] || 125)) return step('final-slow', '速度太慢，加油門', 'Too slow: add thrust', 'throttle');
     return step('final', '跟著方框飛，對準跑道', 'Follow the boxes to the runway');
   }
   if (state.scenario === 'runway' && state.onGround) {
@@ -152,19 +154,19 @@ export function autoConfig(state, data, commands, mem = {}, routeIndex = 0) {
     } else if (commands.flaps > 0 && !mem.flapsUp && data.agl > N.flapRetractAglM && data.verticalSpeed > 0 && kt >= N.flapRetractKt) { out.flaps = 0; mem.flapsUp = true; }
     return out;
   }
-  if (!commands.gear && ((approach && data.agl < NOVICE.gearDownAglM) || (data.verticalSpeed < -1 && data.agl < NOVICE.gearDownLowAglM))) out.gear = true;
-  else if (commands.gear && !approach && !mem.gearUp && data.agl > NOVICE.gearUpAglM && data.verticalSpeed > NOVICE.gearUpVs) { out.gear = false; mem.gearUp = true; }
+  if (!commands.gear && ((approach && data.agl < N.gearDownAglM) || (data.verticalSpeed < -1 && data.agl < N.gearDownLowAglM))) out.gear = true;
+  else if (commands.gear && !approach && !mem.gearUp && data.agl > N.gearUpAglM && data.verticalSpeed > N.gearUpVs) { out.gear = false; mem.gearUp = true; }
   if (approach) {
-    const best = NOVICE.flapExtend.reduce((a, [max, flaps]) => kt <= max ? Math.max(a, flaps) : a, 0);
+    const best = N.flapExtend.reduce((a, [max, flaps]) => kt <= max ? Math.max(a, flaps) : a, 0);
     if (commands.flaps < best && Math.abs(data.flapPosition - commands.flaps) < .1) out.flaps = commands.flaps + 1;
-  } else if (commands.flaps > 0 && !mem.flapsUp && data.agl > NOVICE.flapRetractAglM && data.verticalSpeed > 0 && kt >= NOVICE.flapRetractKt) { out.flaps = 0; mem.flapsUp = true; }
+  } else if (commands.flaps > 0 && !mem.flapsUp && data.agl > N.flapRetractAglM && data.verticalSpeed > 0 && kt >= N.flapRetractKt) { out.flaps = 0; mem.flapsUp = true; }
   return out;
 }
 
 // Wireframe frames along the glidepath, built from the same geometry as getFlightData's glideslopeDeviation:
 // deviation = atan2(y - gearHeight, z - touchdownTarget) - glideslope, so a point at y = gearHeight + d*tan(gs) is exactly on the path.
 export function approachBoxes(aircraft = 'jet') {
-  const light = (typeof aircraft === 'string' ? aircraft : aircraft?.aircraft) === 'light', N = light ? NOVICE_LIGHT : NOVICE, gh = light ? PROFILES.light.gearHeight : AIRCRAFT.gearHeight;
+  const id = typeof aircraft === 'string' ? aircraft : aircraft?.aircraft, N = noviceFor(id), gh = (PROFILES[id] || AIRCRAFT).gearHeight;
   const zone = RUNWAY.nearThreshold - RUNWAY.touchdownTarget, tan = Math.tan(RUNWAY.glideslope * RAD), out = [];
   for (let d = zone; d <= zone + N.boxFarM + 1e-6; d += N.boxSpacingM) {
     const f = clamp((d - zone) / N.boxFarM, 0, 1), { boxFar: a, boxNear: b } = N;

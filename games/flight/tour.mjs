@@ -2,7 +2,7 @@
 // Frame and units are physics.mjs': metres, local frame (origin = runway 14 centre at field elevation, -z = runway heading 137.3 deg true,
 // +x = right). Ring altitudes are feet MSL (what the pilot reads on the altimeter); the physics state holds metres above the field.
 // Coordinates are whole metres / feet on purpose: dev/check_tours.py hashes them to prove that dev/tour_clearance.json matches this file.
-import { AIRCRAFT, PROFILES, RUNWAY, createFlightState, stepFlight, quaternionFromEuler } from './physics.mjs';
+import { AIRCRAFT, PROFILES, RUNWAY, createFlightState, stepFlight, quaternionFromEuler } from './physics.mjs?v=20261007';
 
 const FT = 3.28084, KT = 1.943844, RAD = Math.PI / 180;
 const freeze = o => Object.freeze(o);
@@ -74,8 +74,9 @@ export const LIGHT_TOURS = freeze([
     ]),
   }),
 ]);
-export const toursFor = x => (typeof x === 'string' ? x : x?.aircraft) === 'light' ? LIGHT_TOURS : TOURS;
-export const tourById = id => TOURS.find(t => t.id === id) || LIGHT_TOURS.find(t => t.id === id) || null;
+export const FIGHTER_TOURS = Object.freeze(TOURS.map(t => freeze({ ...t, id: `fighter-${t.id}`, aircraft: 'fighter', startKt: PROFILES.fighter.tour.startKt })));
+export const toursFor = x => ({ light: LIGHT_TOURS, fighter: FIGHTER_TOURS }[typeof x === 'string' ? x : x?.aircraft] || TOURS);
+export const tourById = id => TOURS.find(t => t.id === id) || LIGHT_TOURS.find(t => t.id === id) || FIGHTER_TOURS.find(t => t.id === id) || null;
 
 // ---- geometry ------------------------------------------------------------------------------------------------------
 export const bearing = (a, b) => Math.atan2(b.x - a.x, -(b.z - a.z)) / RAD; // local degrees, 0 = runway heading, clockwise
@@ -101,7 +102,7 @@ export const ringHeightM = ringDef => ringDef.altFt / FT - RUNWAY.fieldElevation
 const densityRatio = altitude => Math.pow(Math.max(216.65, 288.15 - Math.max(0, altitude + RUNWAY.fieldElevation) * .0065) / 288.15, 4.2561);
 export function createTourState(tour) {
   const light = tour.aircraft === 'light', startKt = tour.startKt || START_KT;
-  const s = createFlightState('cruise', light ? 'light' : 'jet'), h = bearing(tour.start, tour.rings[0]), hr = h * RAD, y = ringHeightM(tour.start);
+  const s = createFlightState('cruise', tour.aircraft || 'jet'), h = bearing(tour.start, tour.rings[0]), hr = h * RAD, y = ringHeightM(tour.start);
   const ias = startKt / KT, tas = ias / Math.sqrt(densityRatio(y));
   s.tour = tour.id;
   s.position = { x: tour.start.x, y, z: tour.start.z };
@@ -114,7 +115,7 @@ export function createTourState(tour) {
   s.autopilot = { enabled: true, heading: h, altitude: y, speed: ias };
   for (let i = 0; i < 60 * 120; i++) stepFlight(s, { gear: false, flaps: 0, autopilot: { enabled: true, heading: h, altitude: y, speed: ias } }, 1 / 120, {});
   const settled = { ...s.autopilot };
-  s.position = { x: tour.start.x, y, z: tour.start.z }; s.elapsed = 0; s.fuel = (light ? PROFILES.light : AIRCRAFT).initialFuel; s.angularVelocity = { x: 0, y: 0, z: 0 };
+  s.position = { x: tour.start.x, y, z: tour.start.z }; s.elapsed = 0; s.fuel = PROFILES[tour.aircraft || 'jet'].initialFuel; s.angularVelocity = { x: 0, y: 0, z: 0 };
   s.autopilot = { ...settled, enabled: false };
   return s;
 }
