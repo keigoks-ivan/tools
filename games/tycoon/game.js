@@ -103,6 +103,7 @@ async function main() {
   <button data-dk="sources" class="mini">${ic.book}<span>數字來源</span></button>
   <button data-dk="saves" class="mini">${ic.save}<span id="save-label">存檔</span></button>
   <button data-dk="new" class="mini">${ic.again}<span>新遊戲</span></button>
+  <button data-dk="routes" class="mini">${ic.again}<span>選經營路線</span></button>
 </nav>
 <div id="map-controls" class="panel" role="group" aria-label="地圖視角">
   <button data-camera="left" aria-label="地圖向左旋轉" title="向左旋轉 45 度（Q 或左鍵拖曳）">${ic.again}<span>左轉</span></button>
@@ -1201,6 +1202,7 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
     else if (k === 'report') (modal === 'report' ? closeModal() : openReport());
     else if (k === 'sources') (modal === 'sources' ? closeModal() : openSources());
     else if (k === 'saves') (modal === 'saves' ? closeModal() : openSaves());
+    else if (k === 'routes') { if (save()) location.href = './'; else openSaves(); }
     else if (k === 'new') {
       if (await confirmBox('要重新開始嗎？目前的自動進度會被取代。手動存檔仍保留，也可先下載備份。', '重新開始')) { saveBlocked = false; startFresh(); fullRefresh(); }
     }
