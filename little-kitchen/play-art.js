@@ -94,7 +94,7 @@ export async function createArt(canvas){
     c.fillStyle='#fff5d00c';c.fillRect(0,0,w,h);
     if(s.station==='board'){
       board(c,l.board.x,l.board.y,l.board.rx,l.board.ry,false);pieces(s.board,l.board,l.scale);
-      if(!s.board.length){c.globalAlpha=.35;fit(c,images.tomato,l.board.x,l.board.y,l.board.rx*.85,l.board.ry);c.globalAlpha=1;ring(l.board,l.board.rx*.42,l.board.ry*.6,t);}
+      if(!s.board.length){c.globalAlpha=.65;fit(c,images.tomato,l.board.x,l.board.y,l.board.rx*.85,l.board.ry);c.globalAlpha=1;ring(l.board,l.board.rx*.42,l.board.ry*.6,t);}
       if(pointer?.mode==='cut'){c.save();c.translate(pointer.x,pointer.y);c.scale(Math.min(1,w/600),Math.min(1,w/600));knife(c,0,0,-.15);c.restore();}
       else if(s.board.length){c.save();c.translate(l.board.x+l.board.rx*.50,l.board.y-l.board.ry*.66);c.scale(Math.min(1,w/600),Math.min(1,w/600));knife(c,0,0,-.15);c.restore();}
       // The small real cooker is a direct drop/pour target, not a next-step button.

@@ -71,6 +71,7 @@ function down(e){
   if(!art||gesture||foodGesture||$('playGuide').open||e.isPrimary===false||e.button>0)return;touch();const p=client(e);canvas.setPointerCapture(e.pointerId);const g={id:e.pointerId,start:p,last:p,distance:0,mode:'',station:s.station};gesture=g;
   if(s.station==='board'){
     if(inside(p,l.transfer,l.transfer.r*1.4,l.transfer.r))g.mode='transfer';
+    else if(!s.board.length&&inside(p,l.board,l.board.rx*.55,l.board.ry*.75))g.mode='take-demo';
     else{g.mode='cut';g.piece=hitPiece(s.board,toFood(p,l));}
   }else if(s.station==='stove'){
     if(inside(p,l.transfer,l.transfer.r*1.4,l.transfer.r))g.mode='plate';
@@ -98,7 +99,8 @@ function up(e,cancelled=false){
     const target=dropTarget({x:e.clientX,y:e.clientY});
     if(g.piece&&g.distance>18&&target&&target!=='board'){if(moveBoard(s,target,g.piece.uid)){tone('pour');if(target==='plate')s.station='serve';else{s.method=target;s.station='stove';}}}
     else{const a=toFood(g.start,l),b=toFood(p,l);if(g.distance<18&&g.piece){a.x=g.piece.x-130;a.y=g.piece.y;b.x=g.piece.x+130;b.y=g.piece.y;}if(chop(s,a,b))tone('cut');}
-  }else if(g.mode==='transfer'){if(moveBoard(s,s.method)){tone('pour');s.station='stove';}}
+  }else if(g.mode==='take-demo'&&g.distance<18)pick('tomato','board');
+  else if(g.mode==='transfer'){if(moveBoard(s,s.method)){tone('pour');s.station='stove';}}
   else if(g.mode==='add-board'){if(moveBoard(s,s.method))tone('pour');}
   else if(g.mode==='plate'){if(pour(s)){tone('pour');}}
   else if(g.mode==='dial'&&g.distance<12){s.heat[s.method]=s.heat[s.method]===0?.65:s.heat[s.method]<.9?1:0;tone('wood');}
