@@ -154,7 +154,7 @@ export function createKit(root, renderer) {
         const m = new THREE.Matrix4();
         g.list.forEach((pm, i) => { m.multiplyMatrices(pm, o.matrixWorld); im.setMatrixAt(i, m); });
         im.instanceMatrix.needsUpdate = true;
-        im.castShadow = true; im.receiveShadow = true; im.frustumCulled = false;
+        im.castShadow = true; im.receiveShadow = true; im.computeBoundingSphere();
         root.add(im); instCount++;
       });
     }));

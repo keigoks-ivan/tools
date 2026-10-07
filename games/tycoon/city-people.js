@@ -105,6 +105,7 @@ export function createPeople(root, { sidewalk, roads, uTime, doorOf, lotNrm, lan
     shirt.setUsage(THREE.DynamicDrawUsage); mo.setUsage(THREE.DynamicDrawUsage);
     g.setAttribute('aShirt', shirt); g.setAttribute('aMo', mo);
     const im = new THREE.InstancedMesh(g, mat, cap);
+    im.count = 0;
     im.instanceMatrix.setUsage(THREE.DynamicDrawUsage); im.frustumCulled = false; im.castShadow = true; im.receiveShadow = true;
     const z = new THREE.Matrix4().makeScale(0, 0, 0); for (let i = 0; i < cap; i++) im.setMatrixAt(i, z);
     root.add(im); return { im, shirt, mo, cap };
@@ -120,7 +121,7 @@ export function createPeople(root, { sidewalk, roads, uTime, doorOf, lotNrm, lan
   })();
   const uMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.7, side: THREE.DoubleSide });
   const umbW = new THREE.InstancedMesh(uGeo, uMat, CAP), umbQ = new THREE.InstancedMesh(uGeo, uMat, QCAP);
-  [umbW, umbQ].forEach(u => { u.frustumCulled = false; u.castShadow = true; u.visible = false; u.instanceMatrix.setUsage(THREE.DynamicDrawUsage); root.add(u); });
+  [umbW, umbQ].forEach(u => { u.count = 0; u.frustumCulled = false; u.castShadow = true; u.visible = false; u.instanceMatrix.setUsage(THREE.DynamicDrawUsage); root.add(u); });
   const ZERO = new THREE.Matrix4().makeScale(0, 0, 0);
   for (let i = 0; i < CAP; i++) { umbW.setMatrixAt(i, ZERO); umbW.setColorAt(i, SHIRTS[i % SHIRTS.length]); }
   for (let i = 0; i < QCAP; i++) { umbQ.setMatrixAt(i, ZERO); umbQ.setColorAt(i, SHIRTS[(i * 5) % SHIRTS.length]); }
@@ -140,10 +141,12 @@ export function createPeople(root, { sidewalk, roads, uTime, doorOf, lotNrm, lan
     const w = { id, slot, pts, seg: 0, s: 0, speed: (opts.speed || 0.55) * (0.88 + Math.random() * 0.24), phase: Math.random() * 6.28, state: 0, t: 0, lot: lotId, cb: opts.onArrive, nrm: lotNrm(lotId), grow: 0 };
     const col = opts.color ? new THREE.Color(opts.color) : SHIRTS[Math.floor(Math.random() * SHIRTS.length)];
     W.shirt.setXYZ(slot, col.r, col.g, col.b); W.mo.setXY(slot, w.phase, 0.62); W.shirt.needsUpdate = true; W.mo.needsUpdate = true;
-    umbW.setColorAt(slot, new THREE.Color().setHSL(Math.random(), 0.55, 0.55)); if (umbW.instanceColor) umbW.instanceColor.needsUpdate = true;
+    W.shirt.addUpdateRange(slot * 3, 3); W.mo.addUpdateRange(slot * 2, 2);
+    umbW.setColorAt(slot, new THREE.Color().setHSL(Math.random(), 0.55, 0.55)); if (umbW.instanceColor) { umbW.instanceColor.addUpdateRange(slot * 3, 3); umbW.instanceColor.needsUpdate = true; }
     walkers.push(w); return id;
   }
   function stepWalkers(dt, t) {
+    if (!walkers.length && !W.im.count) return;
     for (let k = walkers.length - 1; k >= 0; k--) {
       const w = walkers[k]; let x, z, hd, sc = 1, yb = 0;
       if (w.state === 0) {
@@ -164,15 +167,18 @@ export function createPeople(root, { sidewalk, roads, uTime, doorOf, lotNrm, lan
         // 轉向店面、走進門
         hd = Math.atan2(-w.nrm[0], -w.nrm[1]);
         x = b[0] - w.nrm[0] * 0.07 * e; z = b[1] - w.nrm[1] * 0.07 * e; sc = Math.max(0.001, 1 - e);
-        W.mo.setY(w.slot, 0); W.mo.needsUpdate = true;
+        W.mo.setY(w.slot, 0); W.mo.addUpdateRange(w.slot * 2 + 1, 1); W.mo.needsUpdate = true;
         if (w.t >= 1) { free.push(w.slot); _m.copy(ZERO); W.im.setMatrixAt(w.slot, _m); umbW.setMatrixAt(w.slot, ZERO); walkers.splice(k, 1); w.cb && w.cb(w.lot); continue; }
       }
       _q.setFromAxisAngle(UP, hd); _p.set(x, 0.03 + yb, z); _s.setScalar(sc); _m.compose(_p, _q, _s);
       W.im.setMatrixAt(w.slot, _m);
       if (rainy) { _p.set(x, 0.03 + yb, z); umbW.setMatrixAt(w.slot, _m); }
     }
-    W.im.instanceMatrix.needsUpdate = true; W.im.visible = true;
-    if (rainy) umbW.instanceMatrix.needsUpdate = true;
+    let count = 0; for (const w of walkers) count = Math.max(count, w.slot + 1);
+    W.im.count = umbW.count = count;
+    if (count) { W.im.instanceMatrix.clearUpdateRanges(); W.im.instanceMatrix.addUpdateRange(0, count * 16); W.im.instanceMatrix.needsUpdate = true; }
+    umbW.visible = rainy && count > 0;
+    if (rainy && count) { umbW.instanceMatrix.clearUpdateRanges(); umbW.instanceMatrix.addUpdateRange(0, count * 16); umbW.instanceMatrix.needsUpdate = true; }
   }
 
   // ---- 排隊 ----
@@ -187,9 +193,10 @@ export function createPeople(root, { sidewalk, roads, uTime, doorOf, lotNrm, lan
   const lotIndex = new Map();
   function setQueue(lotId, n, anchor) {
     // anchor: { x, z, nx, nz, tx, tz, sx }（店面本地座標系：窗前起點、法線、切線）
+    n = Math.max(0, Math.floor(n)); if (qState.get(lotId) === n) return;
     if (!lotIndex.has(lotId)) lotIndex.set(lotId, lotIndex.size);
     const li = lotIndex.get(lotId), base = li * 12;
-    n = Math.max(0, Math.floor(n)); const show = Math.min(12, n);
+    const show = Math.min(12, n);
     for (let k = 0; k < 12; k++) {
       const slot = base + k;
       if (k < show) {
@@ -202,6 +209,8 @@ export function createPeople(root, { sidewalk, roads, uTime, doorOf, lotNrm, lan
       } else { Q.im.setMatrixAt(slot, ZERO); umbQ.setMatrixAt(slot, ZERO); }
     }
     Q.im.instanceMatrix.needsUpdate = true; Q.shirt.needsUpdate = true; Q.mo.needsUpdate = true; umbQ.instanceMatrix.needsUpdate = true;
+    Q.im.instanceMatrix.addUpdateRange(base * 16, 12 * 16); umbQ.instanceMatrix.addUpdateRange(base * 16, 12 * 16);
+    Q.shirt.addUpdateRange(base * 3, 12 * 3); Q.mo.addUpdateRange(base * 2, 12 * 2);
     // +N 標示
     let sp = sprites.get(lotId);
     if (n > 12) {
@@ -212,6 +221,8 @@ export function createPeople(root, { sidewalk, roads, uTime, doorOf, lotNrm, lan
       sp.position.set(x - anchor.tx * 0.12, 0.3, z - anchor.tz * 0.12); sp.visible = true;
     } else if (sp) sp.visible = false;
     qState.set(lotId, n);
+    let count = 0; for (const [id, size] of qState) if (size > 0) count = Math.max(count, lotIndex.get(id) * 12 + Math.min(12, size));
+    Q.im.count = umbQ.count = count; umbQ.visible = rainy && count > 0;
   }
 
   // ---- 外送機車 ----
@@ -235,6 +246,7 @@ export function createPeople(root, { sidewalk, roads, uTime, doorOf, lotNrm, lan
   })();
   const scMat = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.6 });
   const SC = new THREE.InstancedMesh(scGeo, scMat, SC_CAP);
+  SC.count = 0;
   SC.instanceMatrix.setUsage(THREE.DynamicDrawUsage); SC.frustumCulled = false; SC.castShadow = true;
   for (let i = 0; i < SC_CAP; i++) { SC.setMatrixAt(i, ZERO); SC.setColorAt(i, new THREE.Color(1, 1, 1)); }
   root.add(SC);
@@ -263,11 +275,13 @@ export function createPeople(root, { sidewalk, roads, uTime, doorOf, lotNrm, lan
     const pts = laneRoute(door, lotNrm(lotId), toXZ);
     const slot = scFree.pop(), id = nextId++;
     SC.setColorAt(slot, new THREE.Color(opts.color || '#2fbf7a').lerp(new THREE.Color(1, 1, 1), 0.15));
+    SC.instanceColor.addUpdateRange(slot * 3, 3);
     SC.instanceColor.needsUpdate = true;
     scooters.push({ id, slot, pts, seg: 0, s: 0, speed: opts.speed || 1.5, state: 0, t: 0, cb: opts.onArrive, lot: lotId, hd: 0 });
     return id;
   }
   function stepScooters(dt) {
+    if (!scooters.length && !SC.count) return;
     for (let k = scooters.length - 1; k >= 0; k--) {
       const w = scooters[k];
       let rem = w.speed * dt;
@@ -286,14 +300,16 @@ export function createPeople(root, { sidewalk, roads, uTime, doorOf, lotNrm, lan
       SC.setMatrixAt(w.slot, _m);
       if (done && w.t >= 1) { SC.setMatrixAt(w.slot, ZERO); scFree.push(w.slot); scooters.splice(k, 1); w.cb && w.cb(w.lot); }
     }
-    SC.instanceMatrix.needsUpdate = true;
+    let count = 0; for (const w of scooters) count = Math.max(count, w.slot + 1);
+    SC.count = count;
+    if (count) { SC.instanceMatrix.clearUpdateRanges(); SC.instanceMatrix.addUpdateRange(0, count * 16); SC.instanceMatrix.needsUpdate = true; }
   }
 
   return {
     spawnWalker, spawnScooter, setQueue,
     update(dt, t) { stepWalkers(dt, t); stepScooters(dt); },
-    setRain(r) { rainy = r; umbW.visible = r; umbQ.visible = r; },
+    setRain(r) { rainy = r; umbW.visible = r && W.im.count > 0; umbQ.visible = r && Q.im.count > 0; },
     counts: () => ({ walkers: walkers.length, scooters: scooters.length, queued: [...qState.values()].reduce((a, b) => a + Math.min(12, b), 0) }),
-    clear() { walkers.splice(0).forEach(w => { W.im.setMatrixAt(w.slot, ZERO); umbW.setMatrixAt(w.slot, ZERO); free.push(w.slot); }); W.im.instanceMatrix.needsUpdate = true; },
+    clear() { walkers.splice(0).forEach(w => { W.im.setMatrixAt(w.slot, ZERO); umbW.setMatrixAt(w.slot, ZERO); free.push(w.slot); }); W.im.count = umbW.count = 0; umbW.visible = false; W.im.instanceMatrix.needsUpdate = true; },
   };
 }

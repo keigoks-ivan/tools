@@ -746,6 +746,7 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
   function running() { return speed > 0 && !modal && world.status === 'playing' && !eventBlocking(); }
   function frameLoop(now) {
     requestAnimationFrame(frameLoop);
+    if (document.hidden) { lastNow = now; return; }
     const dt = Math.min(0.25, (now - lastNow) / 1000); lastNow = now;
     if (fastTarget != null && running()) {
       const started = performance.now(); let steps = 0;
@@ -771,7 +772,8 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
       city.setClock((world.t % 24) + Math.min(acc, 0.99));
       const h2 = world.t % 24; $('#h-ff').hidden = !(h2 < V.time.openHour || h2 >= V.time.closeHour);
     } else acc = 0;
-    runSpawns(now);
+    const active = running(); city.freeze(!active);
+    if (active) runSpawns(now);
     if (hudDirty) { updateHud(); updateSpeedBtns(); renderEventOnce(); liveRefresh(); updateTut(); }
     if (labelDirty && now - lastLabelAt > 250) { updateLabels(); lastLabelAt = now; }
     if (world.status !== 'playing' && !overShown) showOver();
@@ -1041,7 +1043,7 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
     catch { toast('備份無法讀取或格式不符，目前進度保持原樣。', true); return; }
     if (await confirmBox(`要匯入 ${esc(saveDescription({ ...slot, ok: true }))} 嗎？將取代現在的進度。`, '匯入進度')) restoreSave(slot);
   });
-  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') save(); });
+  document.addEventListener('visibilitychange', () => { lastNow = performance.now(); if (document.visibilityState === 'hidden') save(); });
   window.addEventListener('pagehide', save);
   window.addEventListener('beforeunload', save);
 

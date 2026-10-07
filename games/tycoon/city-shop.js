@@ -116,7 +116,7 @@ export function createShops(root, specs, { wetStd }) {
     im.name = 'shop-' + name;
     im.instanceMatrix.setUsage(THREE.DynamicDrawUsage); im.frustumCulled = false; im.castShadow = shadow; im.receiveShadow = true;
     if (tint) { geo.setAttribute('aTint', tintAttr()); }
-    root.add(im); defs[name] = { im, occOnly, vacOnly, tint, business }; return im;
+    root.add(im); defs[name] = { im, occOnly, vacOnly, tint, business, slots: new Set() }; return im;
   };
   // 牆面、柱、招牌背板（依店色上色）
   const wallMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.78 }); patchTint(wallMat, 'mul');
@@ -218,6 +218,9 @@ export function createShops(root, specs, { wetStd }) {
       if (d.business && d.business !== l.businessId) vis = false;
       if (l.businessId !== 'tea' && ['cupw', 'cupb'].includes(k)) vis = false;
       if (k === 'works') vis = occ && !open;
+      if (vis) d.slots.add(l.i); else d.slots.delete(l.i);
+      d.im.count = d.slots.size ? Math.max(...d.slots) + 1 : 0;
+      d.im.visible = d.slots.size > 0;
       d.im.setMatrixAt(l.i, vis ? l.B : ZERO); d.im.instanceMatrix.needsUpdate = true;
     }
     // 染色
@@ -228,6 +231,8 @@ export function createShops(root, specs, { wetStd }) {
     // 光圈
     _m.makeTranslation(l.bx, 0.075, l.bz); if (!occ) _m.multiply(new THREE.Matrix4().makeScale(0, 0, 0));
     ringIm.setMatrixAt(l.i, _m); discIm.setMatrixAt(l.i, _m); ringIm.instanceMatrix.needsUpdate = discIm.instanceMatrix.needsUpdate = true;
+    const count = lots.reduce((n, lot) => lot.owner ? Math.max(n, lot.i + 1) : n, 0);
+    ringIm.count = discIm.count = count;
     const rc = new THREE.Color(occ ? OWNER[l.owner]?.ring ?? 0xff5a52 : 0);
     [ringGeo, discGeo].forEach(g => { const a = g.attributes.aTint; a.setXYZ(l.i, rc.r, rc.g, rc.b); a.needsUpdate = true; });
     // 招牌圖集

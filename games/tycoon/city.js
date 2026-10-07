@@ -52,6 +52,15 @@ const pick = (arr) => arr[Math.floor(R() * arr.length)];
 const smooth = (a, b, x) => { const t = THREE.MathUtils.clamp((x - a) / (b - a), 0, 1); return t * t * (3 - 2 * t); };
 
 export function createCity(container, opts = {}) {
+  let started = false, framePending = false, frameId = 0;
+  function requestFrame() {
+    if (!started || framePending || document.hidden) return;
+    framePending = true; frameId = requestAnimationFrame(frame);
+  }
+  function invalidate(shadows = false) {
+    if (shadows) renderer.shadowMap.needsUpdate = true;
+    requestFrame();
+  }
   const qs = new URLSearchParams(location.search);
   const isMobile = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) || (matchMedia && matchMedia('(pointer:coarse)').matches && Math.min(screen.width, screen.height) < 820);
   let quality = opts.quality || qs.get('q') || (isMobile ? 'low' : 'high');
@@ -61,6 +70,8 @@ export function createCity(container, opts = {}) {
   const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
   renderer.setPixelRatio(dpr);
   renderer.shadowMap.enabled = true;
+  renderer.shadowMap.autoUpdate = false;
+  renderer.shadowMap.needsUpdate = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.12;
@@ -89,11 +100,14 @@ export function createCity(container, opts = {}) {
   const composer = new EffectComposer(renderer, rt);
   composer.addPass(new RenderPass(scene, camera));
   const gtao = new GTAOPass(scene, camera, 10, 10);
+  // 全螢幕濾鏡不使用深度緩衝；保留城市與 AO 法線通道的深度。
+  [gtao.gtaoRenderTarget, gtao.pdRenderTarget].forEach(r => { r.depthBuffer = false; });
   gtao.output = GTAOPass.OUTPUT.Default; gtao.blendIntensity = 0.95;
   gtao.updateGtaoMaterial({ radius: 0.5, distanceExponent: 1.4, thickness: 1.2, scale: 1.1, samples: 12, distanceFallOff: 1, screenSpaceRadius: false });
   gtao.updatePdMaterial({ lumaPhi: 10, depthPhi: 2, normalPhi: 3, radius: 5, radiusExponent: 1, rings: 2, samples: 12 });
   composer.addPass(gtao);
   const bloom = new UnrealBloomPass(new THREE.Vector2(10, 10), 0.32, 0.55, 1.15); composer.addPass(bloom);
+  [bloom.renderTargetBright, ...bloom.renderTargetsHorizontal, ...bloom.renderTargetsVertical].forEach(r => { r.depthBuffer = false; });
   composer.addPass(new ShaderPass(gradeShader()));
   composer.addPass(new OutputPass());
 
@@ -102,6 +116,7 @@ export function createCity(container, opts = {}) {
     gtao.enabled = q === 'high' && !opts.noAO;
     sun.shadow.mapSize.set(q === 'high' ? 4096 : 1024, q === 'high' ? 4096 : 1024);
     if (sun.shadow.map) { sun.shadow.map.dispose(); sun.shadow.map = null; }
+    renderer.shadowMap.needsUpdate = true;
     [composer.renderTarget1, composer.renderTarget2].forEach(r => { r.samples = q === 'high' ? 4 : 0; r.dispose(); });
     resize();
   }
@@ -134,6 +149,7 @@ export function createCity(container, opts = {}) {
     const dir = sunDirFor(env);
     sun.color.copy(env.sunC); sun.intensity = env.sunI;
     sun.position.set(target.x + dir.x * 26, Math.max(2, dir.y * 26), target.z + dir.z * 26);
+    renderer.shadowMap.needsUpdate = true;
     rim.intensity = 0.6 * (1 - 0.5 * env.night); hemi.color.copy(env.hemS); hemi.groundColor.copy(env.hemG); hemi.intensity = env.hemI;
     renderer.toneMappingExposure = env.expo;
     scene.fog.color.copy(env.fog); scene.fog.density = env.fogD; renderer.setClearColor(env.hor);
@@ -143,6 +159,7 @@ export function createCity(container, opts = {}) {
     scene.environmentIntensity = 0.1 + 0.55 * wx.rain + 0.2 * env.cloud;
     bloom.strength = 0.3 + 0.62 * Math.pow(env.night, 3) ; bloom.threshold = 1.15 - 0.2 * env.night;
     rain.u.uAmt.value = smooth(0.05, 0.6, wx.rain);
+    rain.lines.visible = rain.u.uAmt.value > 0;
     scenery.update(env, simT);
     shopsRef.s && shopsRef.s.setNight(env.night);
     if (lampRef.l) lampRef.l(smooth(0.3, 0.8, env.night));
@@ -456,6 +473,7 @@ export function createCity(container, opts = {}) {
     rain.lines.position.set(tx, 0, tz); const rs = THREE.MathUtils.clamp(camDist * 0.8, 20, 100); rain.u.uSize.value = rs;
     rain.lines.position.set(tx - rs * 0.15, 0.0, tz - rs * 0.15);
     view = { pitch, fov };
+    labelsDirty = true; invalidate();
   }
   let view = { pitch: 0.6257, fov: 30 };
   function resize() {
@@ -476,10 +494,11 @@ export function createCity(container, opts = {}) {
   const layer = document.createElement('div'); layer.id = 'city-labels'; layer.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:4;overflow:hidden';
   container.parentNode.insertBefore(layer, container.nextSibling);
   const labels = new Map();
+  let labelsDirty = true;
   function setLabel(lotId, cfg) {
     const l = lotById.get(lotId); if (!l) return;
     let e = labels.get(lotId);
-    if (!cfg) { if (e) { e.el.remove(); labels.delete(lotId); } return; }
+    if (!cfg) { if (e) { e.el.remove(); labels.delete(lotId); labelsDirty = true; invalidate(); } return; }
     const cls = { green: 'me', red: 'rival', gray: 'empty' }[cfg.tone] || 'empty';
     if (!e) { const el = document.createElement('div'); el.className = 'tag'; layer.appendChild(el); e = { el, lot: l }; labels.set(lotId, e); }
     e.el.className = 'tag ' + cls;
@@ -488,6 +507,7 @@ export function createCity(container, opts = {}) {
     e.el.style.setProperty('--shop-color', cfg.color || '#687784');
     e.el.innerHTML = `<div class="box"><span class="mk">${businessIcon(cfg.businessId)}</span><div><b>${esc(cfg.title || '')}</b>${cfg.sub ? `<small class="num">${esc(cfg.sub)}</small>` : ''}</div><i class="owner">${cls === 'me' ? '自營' : cls === 'rival' ? '對手' : ''}</i></div><div class="stem"></div>`;
     e.width = e.el.offsetWidth; e.height = e.el.querySelector('.box').offsetHeight;
+    labelsDirty = true; invalidate();
   }
   const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   function placeLabels() {
@@ -537,6 +557,7 @@ export function createCity(container, opts = {}) {
   let hover = null;
   function setHover(h) {
     if ((h && hover && h.id === hover.id) || (!h && !hover)) return; hover = h;
+    invalidate();
     if (!h) { frame3.visible = false; renderer.domElement.style.cursor = ''; return; }
     renderer.domElement.style.cursor = 'pointer';
     if (h.type === 'lot') setFrame(h.lot.box.min, h.lot.box.max, h.lot.B);
@@ -563,7 +584,7 @@ export function createCity(container, opts = {}) {
     });
     dom.addEventListener('pointermove', e => {
       const p = ptrs.get(e.pointerId);
-      if (!p) { hoverQ = [e.clientX, e.clientY]; return; }
+      if (!p) { hoverQ = [e.clientX, e.clientY]; requestFrame(); return; }
       if (ptrs.size === 2 && gest) {
         p.x = e.clientX; p.y = e.clientY; const [a, b] = [...ptrs.values()];
         const d = Math.hypot(a.x - b.x, a.y - b.y), ang = Math.atan2(b.y - a.y, b.x - a.x), mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
@@ -592,7 +613,7 @@ export function createCity(container, opts = {}) {
     dom.addEventListener('pointerup', up); dom.addEventListener('pointercancel', cancel); dom.addEventListener('lostpointercapture', e => { if (ptrs.has(e.pointerId)) cancel(); });
     dom.addEventListener('pointerleave', () => { hoverQ = null; setHover(null); });
     dom.addEventListener('wheel', e => { e.preventDefault(); const dy = e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? dom.clientHeight : 1); camDist *= Math.exp(THREE.MathUtils.clamp(dy, -180, 180) * 0.0016); placeCamera(); }, { passive: false });
-    window.addEventListener('keydown', e => { if (/INPUT|TEXTAREA|SELECT/.test(e.target.tagName) || e.target.isContentEditable || e.ctrlKey || e.metaKey || e.altKey) return; const key = e.key.toLowerCase(); if (/^(q|e|w|a|s|d|arrowup|arrowdown|arrowleft|arrowright)$/.test(key)) { e.preventDefault(); keys.add(key); } });
+    window.addEventListener('keydown', e => { if (/INPUT|TEXTAREA|SELECT/.test(e.target.tagName) || e.target.isContentEditable || e.ctrlKey || e.metaKey || e.altKey) return; const key = e.key.toLowerCase(); if (/^(q|e|w|a|s|d|arrowup|arrowdown|arrowleft|arrowright)$/.test(key)) { e.preventDefault(); keys.add(key); requestFrame(); } });
     window.addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
     window.addEventListener('blur', () => { keys.clear(); cancel(); });
   }
@@ -642,10 +663,12 @@ export function createCity(container, opts = {}) {
     if (Math.abs(wx.rain - wx.tr) > 0.002) { wx.rain += (wx.tr - wx.rain) * k; ch = true; } else if (wx.rain !== wx.tr) { wx.rain = wx.tr; ch = true; }
     if (ch || envDirty) { envDirty = false; applyEnv(); }
     sky.uniforms.uTime.value = simT; rain.u.uTime.value = simT; scenery.wU.uT.value = simT;
-    if (!frozen) { placeCars(simT); people.update(dt * timeScale, simT); }
+    if (!frozen) { placeCars(simT); people.update(dt * timeScale, simT); renderer.shadowMap.needsUpdate = true; }
   }
   let envDirty = true;
   function frame() {
+    framePending = false; frameId = 0;
+    if (document.hidden) return;
     const dt = Math.min(clock.getDelta(), 0.1);
     keyStep(dt);
     update(dt);
@@ -653,26 +676,30 @@ export function createCity(container, opts = {}) {
     renderer.info.reset();
     composer.render();
     frames++;
-    placeLabels();
+    if (labelsDirty) { placeLabels(); labelsDirty = false; }
     api.onFrame && api.onFrame();
     // fps 與自動畫質
     fpsT += dt; if (dt > 0) fpsEMA += (1 / dt - fpsEMA) * 0.05;
     if (dbg && frames % 15 === 0) dbg.textContent = `${fpsEMA.toFixed(0)} fps · ${quality} · ${renderer.info.render.calls} calls · ${(renderer.info.render.triangles / 1000).toFixed(0)}k tri · ${people.counts().walkers} walkers`;
     warm += dt;
-    if (autoQuality && quality === 'high' && warm > 4) { if (fpsEMA < 24) lowStreak += dt; else lowStreak = 0; if (lowStreak > 3) { applyQuality('low'); lowStreak = 0; } }
-    requestAnimationFrame(frame);
+    if (autoQuality && !frozen && quality === 'high' && warm > 4) { if (fpsEMA < 24) lowStreak += dt; else lowStreak = 0; if (lowStreak > 3) { applyQuality('low'); lowStreak = 0; } }
+    if (!frozen || keys.size || wx.cloud !== wx.tc || wx.rain !== wx.tr) requestFrame();
   }
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) { cancelAnimationFrame(frameId); framePending = false; frameId = 0; }
+    else { clock.getDelta(); invalidate(); }
+  });
 
   const api = {
     shops: {}, project, camera, onFrame: null, frames: () => frames, scene, renderer,
     async ready() {
       await Promise.all([kit.finalize(), ...carJobs]);
-      resize(); applyQuality(quality); applyEnv(); refreshEnvMap(true); placeCars(simT);
+      resize(); applyQuality(quality); applyEnv(); placeCars(simT);
       shops.lots.forEach(l => { api.shops[l.id] = { x: l.bx, z: l.bz }; });
       Object.entries(DEF).forEach(([k, id]) => { const l = lotById.get(id); api.shops[k] = { x: l.bx, z: l.bz, lot: id }; });
       api.defaultLots = DEF; api.loaded = true;
     },
-    start() { clock.getDelta(); requestAnimationFrame(frame); },
+    start() { if (started) return; started = true; clock.getDelta(); requestFrame(); },
     // ---- 模擬層介面 ----
     getMapData() {
       const state = (l) => !l.owner ? '空' : l.owner === 'player' ? '玩家' : '對手';
@@ -688,21 +715,21 @@ export function createCity(container, opts = {}) {
     },
     walkDistance(a, b) { return sidewalk.length([a[0], a[1]], [b[0], b[1]]); },
     walkDistanceToLot(a, lotId) { const l = lotById.get(lotId); return l ? sidewalk.length([a[0], a[1]], [l.door.x, l.door.z]) : Infinity; },
-    setShop(lotId, cfg) { const ok = shops.setShop(lotId, cfg); if (ok && !cfg) { people.setQueue(lotId, 0, qAnchor(lotById.get(lotId))); } return ok; },
-    spawnWalker(from, lotId, o) { return people.spawnWalker(from, lotId, o); },
-    setQueue(lotId, n) { const l = lotById.get(lotId); if (!l) return; l.queue = n; people.setQueue(lotId, n, qAnchor(l)); },
-    spawnScooter(lotId, to, o) { return people.spawnScooter(lotId, to, o); },
-    setClock(h) { hour = ((h % 24) + 24) % 24; envDirty = true; applyEnv(); },
+    setShop(lotId, cfg) { const ok = shops.setShop(lotId, cfg); if (ok && !cfg) { const l = lotById.get(lotId); l.queue = 0; people.setQueue(lotId, 0, qAnchor(l)); } if (ok) invalidate(true); return ok; },
+    spawnWalker(from, lotId, o) { const id = people.spawnWalker(from, lotId, o); if (id) invalidate(true); return id; },
+    setQueue(lotId, n) { const l = lotById.get(lotId); if (!l || l.queue === n) return; l.queue = n; people.setQueue(lotId, n, qAnchor(l)); invalidate(true); },
+    spawnScooter(lotId, to, o) { const id = people.spawnScooter(lotId, to, o); if (id) invalidate(true); return id; },
+    setClock(h) { const next = ((h % 24) + 24) % 24; if (next === hour) return; hour = next; envDirty = true; invalidate(); },
     getClock: () => hour,
-    setWeather(w, instant) { wx.tc = w === 'rain' ? 0.85 : w === 'cloudy' ? 0.8 : 0; wx.tr = w === 'rain' ? 1 : 0; api.weather = w; if (instant) { wx.cloud = wx.tc; wx.rain = wx.tr; } envDirty = true; },
+    setWeather(w, instant) { wx.tc = w === 'rain' ? 0.85 : w === 'cloudy' ? 0.8 : 0; wx.tr = w === 'rain' ? 1 : 0; api.weather = w; if (instant) { wx.cloud = wx.tc; wx.rain = wx.tr; } envDirty = true; invalidate(); },
     getWeather: () => api.weather || 'sunny',
     onPick(cb) { pickCbs.add(cb); return () => pickCbs.delete(cb); },
     setLabel,
     // ---- 其他 ----
     setQuality(q) { applyQuality(q === 'low' ? 'low' : 'high'); }, getQuality: () => quality,
     setTimeScale(x) { timeScale = x; },
-    freeze(f) { frozen = f; },
-    step(sec) { let t = sec; while (t > 1e-6) { const d = Math.min(0.05, t); update(d); t -= d; } },
+    freeze(f) { if (frozen === !!f) return; frozen = !!f; clock.getDelta(); lowStreak = 0; invalidate(); },
+    step(sec) { let t = sec; while (t > 1e-6) { const d = Math.min(0.05, t); update(d); t -= d; } invalidate(true); },
     setView(v) { if (v.x !== undefined) tx = v.x; if (v.z !== undefined) tz = v.z; if (v.dist !== undefined) camDist = v.dist * aspectScale; if (v.yaw !== undefined) yaw = v.yaw; if (v.tilt !== undefined) tilt = THREE.MathUtils.clamp(v.tilt, -0.3, 0.45); placeCamera(); },
     getView: () => ({ x: tx, z: tz, dist: camDist / aspectScale, yaw, tilt }),
     focusLot,
