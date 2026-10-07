@@ -7,6 +7,7 @@ import { SOURCES } from './sources.js';
 import { listParams } from './params.js';
 import * as S from './sim.js';
 import { caseReportHtml, caseReportDocument } from './case-report.js';
+import { SAVE_KEY, MANUAL_KEY, BACKUP_KEY, MAX_SAVE_BYTES, encodeSave, decodeSave, loadLocal, storeLocal } from './saves.js';
 
 const q = new URLSearchParams(location.search);
 if (q.get('view') === 'sandbox') {
@@ -35,7 +36,7 @@ async function main() {
   const ZONE_NAME = { 住宅: '住宅巷弄', 商圈: '商圈', 辦公: '辦公區', 學校: '學校周邊', 捷運站旁: '捷運站旁' };
   const WAGE = { basic: '基本', market: '市場', high: '高' };
   const WEEK = ['日', '一', '二', '三', '四', '五', '六'];
-  const SAVE_KEY = 'tycoon.save.v1', TUT_KEY = 'tycoon.tutorial.v1';
+  const TUT_KEY = 'tycoon.tutorial.v1';
   const COMPANY = '日常生活品牌';
   let selectedBusiness = 'tea';
   const bizOf = (s) => S.businessOf(s.businessId);
@@ -47,6 +48,7 @@ async function main() {
     set(k, v) { try { localStorage.setItem(k, v); return true; } catch { return false; } },
     del(k) { try { localStorage.removeItem(k); } catch { /* 略過 */ } },
   };
+  const storage = { getItem: (k) => localStorage.getItem(k), setItem: (k, v) => localStorage.setItem(k, v) };
 
   // ───────── 額外圖示 ─────────
   const sv = (p) => `<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${p}</svg>`;
@@ -55,6 +57,7 @@ async function main() {
     book: sv('<path d="M5 5.5A1.5 1.5 0 0 1 6.5 4H19v14.5H6.5A1.5 1.5 0 0 0 5 20z"/><path d="M5 20a1.5 1.5 0 0 0 1.5 1.5H19"/><path d="M9 8.5h6"/>'),
     loan: sv('<rect x="3.5" y="6.5" width="17" height="11" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6.5 9.5v.1M17.5 14.5v.1"/>'),
     report: sv('<path d="M5 20V4.5h10l4 4V20z"/><path d="M14.5 4.5v4h4M8.5 13.5h7M8.5 16.5h5"/>'),
+    save: sv('<path d="M4 4h13l3 3v13H4zM8 4v6h8V4M8 20v-7h8v7"/>'),
     again: sv('<path d="M4.5 12a7.5 7.5 0 1 0 2.4-5.5"/><path d="M4 4.5v4h4"/>'),
     sun: sv('<circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M18.4 5.6 17 7M7 17l-1.4 1.4"/>'),
     cloud: sv('<path d="M7 18a4 4 0 0 1-.5-7.97A5.5 5.5 0 0 1 17 8.5a4.75 4.75 0 0 1 .5 9.5z"/>'),
@@ -95,6 +98,7 @@ async function main() {
   <div class="sep"></div>
   <button data-dk="report">${ic.report}<span>報表</span></button>
   <button data-dk="sources" class="mini">${ic.book}<span>數字來源</span></button>
+  <button data-dk="saves" class="mini">${ic.save}<span id="save-label">存檔</span></button>
   <button data-dk="new" class="mini">${ic.again}<span>新遊戲</span></button>
 </nav>
 <div id="map-controls" class="panel" role="group" aria-label="地圖視角">
@@ -112,6 +116,7 @@ async function main() {
 <div class="mscrim" id="scrim" hidden></div>
 <section id="report" class="panel modal" hidden aria-label="經營報表"></section>
 <section id="sources" class="panel modal" hidden aria-label="數字來源"></section>
+<section id="saves" class="panel modal" hidden aria-label="存檔與繼續遊戲"></section>
 <div id="tip"></div>
 <div id="over" hidden></div>
 <div id="confirm" hidden></div>`;
@@ -148,6 +153,7 @@ async function main() {
   // ───────── 遊戲狀態 ─────────
   let world = null;
   let meta = { cashHist: [] };
+  let saveBlocked = false, saveError = null, savedAt = null, savedT = -1, lastSaveNow = 0, saveWarned = false, loadNotice = null;
   let speed = 0, prevSpeed = 1, acc = 0, fastTarget = null, lastNow = performance.now();
   let panel = null, selLot = null, shopTab = 'today', modal = null, reportTab = 'all', reportMonth = 'current', srcFilter = '全部', srcQuery = '';
   let everSelected = false, played = false, tutOn = ls.get(TUT_KEY) !== '1';
@@ -160,26 +166,27 @@ async function main() {
     return w;
   }
   function tryLoad() {
-    const raw = ls.get(SAVE_KEY);
-    if (!raw) return null;
-    try {
-      const o = JSON.parse(raw);
-      const w = S.deserialize(o.w);
-      S.expandMap(w, map, distances);
-      meta = o.meta || { cashHist: [] };
-      return w;
-    } catch { return null; }
+    const loaded = loadLocal(storage);
+    if (!loaded.ok) { saveBlocked = loaded.found; saveError = loaded.error; return null; }
+    S.expandMap(loaded.world, map, distances); S.syncBusinesses(loaded.world);
+    meta = loaded.meta; savedAt = loaded.savedAt; savedT = loaded.world.t;
+    loadNotice = loaded.recovered ? '已從上一份可讀備份恢復進度。' : '已讀取上次進度，按播放就能繼續。';
+    return loaded.world;
   }
   function save() {
-    if (!world) return;
-    ls.set(SAVE_KEY, JSON.stringify({ w: S.serialize(world), meta }));
+    if (!world || saveBlocked) return false;
+    const result = storeLocal(storage, encodeSave(world, meta));
+    saveError = result.ok ? null : result.error;
+    if (result.ok) { savedAt = result.savedAt; savedT = world.t; saveWarned = false; }
+    else if (!saveWarned) { toast(saveError, true); saveWarned = true; }
+    lastSaveNow = performance.now(); updateSaveLabel();
+    return result.ok;
   }
   function startFresh(seed) {
     world = newWorld(seed || (Date.now() % 1000000000));
     for (let i = 0; i < 9; i++) S.stepHour(world); // 開局從 09:00 開始，不讓玩家先看一段夜景（sim 本身從 00:00 起算）
     meta = { cashHist: [[S.getKpi(world).date.slice(0, 7), world.companies.player.cash]] };
     resetView();
-    ls.del(SAVE_KEY);
     save();
   }
   function resetView() {
@@ -188,6 +195,7 @@ async function main() {
     panel = null; selLot = null; modal = null; closeConfirm = false; overShown = false; activeEventId = null;
     speed = 0; fastTarget = null; acc = 0; hudDirty = labelDirty = true;
     $('#over').hidden = true;
+    $('#report').hidden = $('#sources').hidden = $('#saves').hidden = $('#scrim').hidden = true;
     everSelected = false; played = false;
   }
 
@@ -238,7 +246,7 @@ async function main() {
     $('#h-ff').hidden = !(speed > 0 && (h < V.time.openHour || h >= V.time.closeHour));
   }
   function updateDock() {
-    const on = { shop: ['lot', 'shop', 'rival'].includes(panel), factory: panel === 'factory', warehouse: panel === 'warehouse', lab: panel === 'lab', ad: panel === 'ad', loan: panel === 'loan', report: modal === 'report', sources: modal === 'sources' };
+    const on = { shop: ['lot', 'shop', 'rival'].includes(panel), factory: panel === 'factory', warehouse: panel === 'warehouse', lab: panel === 'lab', ad: panel === 'ad', loan: panel === 'loan', report: modal === 'report', sources: modal === 'sources', saves: modal === 'saves' };
     $$('#dock button[data-dk]').forEach((b) => b.classList.toggle('on', !!on[b.dataset.dk]));
   }
   function updateTicker() {
@@ -292,7 +300,8 @@ async function main() {
 
   function lotHtml() {
     const info = S.getLotInfo(world, selLot), biz = S.businessOf(selectedBusiness);
-    info.openCost = S.lotOpenCost(world.lots.find((l) => l.id === selLot), selectedBusiness);
+    const lot = world.lots.find((l) => l.id === selLot), leased = S.premises(lot, selectedBusiness);
+    info.openCost = S.lotOpenCost(lot, selectedBusiness); info.ping = leased.ping; info.monthlyRent = leased.rent; info.deposit = leased.deposit;
     const cash = world.companies.player.cash;
     const enough = cash >= info.openCost;
     const myCount = getShops('player').length;
@@ -303,7 +312,7 @@ async function main() {
   <dt>500 公尺內人口</dt><dd class="num">${int(info.pop500)} 人</dd>
   <dt>500 公尺內營業店</dt><dd class="num">${info.nearbyShops} 家</dd>
 </dl>
-<div class="sec"><h4>選擇創業業態</h4><div class="business-grid">${Object.entries(S.BUSINESSES).map(([id, b]) => `<button class="opt ${selectedBusiness === id ? 'on' : ''}" data-act="business:${id}"><b>${b.name}</b><small>${wan(S.lotOpenCost(world.lots.find((l) => l.id === selLot), id))} 起（含此店押金）</small></button>`).join('')}</div><p><b>${biz.model}</b>｜${biz.customer}</p><p class="note">${biz.tradeoff}</p><p class="note">所有業態開局可選。新業態的價格、成本、需求與產能是遊戲設計假設；可混合經營，也可專注同業態連鎖。</p></div>
+<div class="sec"><h4>選擇創業業態</h4><div class="business-grid">${Object.entries(S.BUSINESSES).map(([id, b]) => `<button class="opt ${selectedBusiness === id ? 'on' : ''}" data-act="business:${id}"><b>${b.name}${b.minPing ? '・大額投資' : ''}</b><small>${wan(S.lotOpenCost(lot, id))} 起（含押金）</small></button>`).join('')}</div><p><b>${biz.model}</b>｜${biz.customer}</p><p class="note">${biz.tradeoff}</p>${biz.minPing ? `<p class="note">地圖標示租賃入口，此業態承租樓層合計 ${leased.ping} 坪；租金與押金按完整面積收取。開店後可付費升級設備，供給增加也會增加維護費。</p>` : ''}<p class="note">所有業態開局可選，只受資金限制。價格、成本、需求與產能是遊戲設計假設；可混合經營，也可專注同業態連鎖。</p></div>
 ${expansionEstimateHtml(!ownerBusy)}
 <div class="kv-h">開店要花</div>
 <dl class="kv">
@@ -316,7 +325,7 @@ ${expansionEstimateHtml(!ownerBusy)}
 <div class="field"><label>店名</label><input type="text" id="shop-name" maxlength="10" value="${esc(`${biz.name.replace('店', '')}${myCount + 1}店`)}"></div>
 <label class="owner-choice"><input type="checkbox" id="open-owner" ${ownerBusy ? 'disabled' : 'checked'}>老闆自己顧店</label>
 <p class="note">${ownerBusy ? '老闆已在另一家店工作。這家店先由員工經營。' : '每天工作 12 小時，替代每班一位員工。報表不另計老闆薪資，可在排班頁改回全聘員工。'}</p>
-<p class="note ${enough ? '' : 'warn'}">${enough ? `簽約當天起算租金，裝修 ${V.startup.renovationDays} 天後開張。` : `你的現金 ${wan(cash)}，還差 ${wan(info.openCost - cash)}。可以到「貸款」借青創貸款。`}</p>
+<p class="note ${enough ? '' : 'warn'}">${enough ? `開店後剩餘現金 ${wan(cash - info.openCost)}。` : `你的現金 ${wan(cash)}，還差 ${wan(info.openCost - cash)}。可累積獲利或到「貸款」查看額度。`}簽約起算租金，裝修 ${biz.renovationDays} 天後開張，期間租金約 ${money(leased.rent * biz.renovationDays / 30)}，另需留日常營運資金。</p>
 ${enough ? '<button class="gbtn primary wide" data-act="rent">租下開店</button>' : '<button class="gbtn wide" data-act="gotoLoan">先去借款</button>'}`;
   }
 
@@ -366,7 +375,7 @@ ${s.shortage ? '<p class="note warn">有人離職，最忙的班少一人。</p>
 
   function operationsSummaryHtml(s, t) {
     if (['bento', 'bakery'].includes(s.businessId)) return `<dl class="kv"><dt>今日已備／目前剩餘</dt><dd>${int(t.prepared)}／${int(s.stock.qty)} ${unitOf(s)}</dd><dt>今日報廢</dt><dd>${int(t.unsold)} ${unitOf(s)}，${money(t.waste)}</dd><dt>缺貨流失</dt><dd>${int(t.stockLost)} 筆</dd></dl>`;
-    if (s.businessId === 'convenience') return `<dl class="kv"><dt>目前商品庫存（成本）</dt><dd>${money(s.inventory)}</dd><dt>缺貨流失</dt><dd>${int(t.stockLost)} 筆</dd></dl>`;
+    if (S.retailBusiness(s.businessId)) return `<dl class="kv"><dt>目前商品庫存（成本）</dt><dd>${money(s.inventory)}</dd><dt>缺貨流失</dt><dd>${int(t.stockLost)} 筆</dd></dl>`;
     return '';
   }
 
@@ -376,10 +385,14 @@ ${s.shortage ? '<p class="note warn">有人離職，最忙的班少一人。</p>
     let controls = '';
     if (s.businessId === 'cafe') controls = `<p>此店有 ${op.seats} 個座位，內用平均占用 50 分鐘。座位由坪數決定，切換模式不另收建置費。</p>${opts('mode', [['takeaway', '外帶優先', '約 15% 內用，體驗分數 −3，座位限制較小'], ['balanced', '內外帶並重', '約 55% 內用，體驗分數不變'], ['dinein', '內用體驗', '約 85% 內用，體驗分數 +4，尖峰受座位周轉限制']])}`;
     else if (['bento', 'bakery'].includes(s.businessId)) controls = `<p>每天 10 點先付款備貨，一天只做一批，22 點後剩餘商品全數報廢。備貨與折扣調整不另收費；已備的數量不會變更。</p><label class="field">每日備貨（${b.unit}）<input type="number" min="40" max="600" step="20" value="${op.prep}" data-operation-input="prep"></label><button class="gbtn wide" data-act="operationApply:prep">設定下次備貨量</button><h4>18 點後清庫存</h4>${opts('markdown', (s.businessId === 'bento' ? [0, 15, 30] : [0, 20, 35]).map((n) => [String(n), n ? `降價 ${n}%` : '維持原價', '門市與外送同步折扣，降低每份收入']))}${operationsSummaryHtml(s, S.getShopToday(world, s.id))}`;
-    else if (s.businessId === 'convenience') controls = `<p>商品售出才列成本，進貨先付現金。每日開門前補至目標，買不起時只補可負擔的量。關店時剩餘商品成本五折回收。</p><label class="field">目標商品庫存（元）<input type="number" min="20000" max="300000" step="10000" value="${op.stockTarget}" data-operation-input="stockTarget"></label><button class="gbtn wide" data-act="operationApply:stockTarget">設定目標庫存</button><div class="sw"><span>每日自動補貨</span><button class="tg ${op.autoStock ? 'on' : ''}" data-act="operation:autoStock" aria-label="每日自動補貨" aria-pressed="${op.autoStock}"></button></div><button class="gbtn wide" data-act="restock">現在補貨至目標</button>${operationsSummaryHtml(s, S.getShopToday(world, s.id))}`;
+    else if (S.retailBusiness(s.businessId)) controls = `<p>商品售出才列成本，進貨先付現金。每日開門前補至目標，買不起時只補可負擔的量。關店時剩餘商品成本五折回收。</p><label class="field">目標商品庫存（元）<input type="number" min="${s.businessId === 'supermarket' ? 100000 : 20000}" max="${S.stockLimit(s)}" step="${s.businessId === 'supermarket' ? 100000 : 10000}" value="${op.stockTarget}" data-operation-input="stockTarget"></label><button class="gbtn wide" data-act="operationApply:stockTarget">設定目標庫存</button><div class="sw"><span>每日自動補貨</span><button class="tg ${op.autoStock ? 'on' : ''}" data-act="operation:autoStock" aria-label="每日自動補貨" aria-pressed="${op.autoStock}"></button></div><button class="gbtn wide" data-act="restock">現在補貨至目標</button>${operationsSummaryHtml(s, S.getShopToday(world, s.id))}`;
+    else if (s.businessId === 'restaurant') controls = `<p>承租 ${s.leasedPing} 坪，基本 ${op.seats} 席。廚房出餐和座位周轉共同限制產能。</p>${opts('mode', [['takeaway', '快速用餐', '平均 50 分鐘／客，體驗分數 −3'], ['balanced', '標準用餐', '平均 80 分鐘／客，體驗分數不變'], ['dinein', '精緻用餐', '平均 110 分鐘／客，體驗分數 +4']])}`;
+    else if (s.businessId === 'fitness') controls = `<p>承租 ${s.leasedPing} 坪，基本 ${op.stations} 個訓練站，教練時薪是一般員工的 1.8 倍。器材使用時間及每位教練的接待量共同限制產能。單次付費，售價在「產品」調整。</p>${opts('focus', [['open', '自由訓練', '平均使用 75 分鐘，每位員工最多接待 12 人／時'], ['coached', '教練指導', '平均使用 90 分鐘，每位教練接待 3 人／時，體驗 +6'], ['classes', '小班訓練', '平均使用 60 分鐘，每位教練接待 8 人／時，體驗 +2']])}`;
     else if (s.businessId === 'salon') controls = `<p>此店有 ${op.stations} 個工作站，技術人員時薪是一般員工的 1.5 倍。服務時間是全店平均值；熟客的店家記憶衰退速度減半。切換服務模式不另收費。</p>${opts('service', [['quick', '快速服務', '平均 35 分鐘／人，體驗分數 −6'], ['standard', '標準服務', '平均 55 分鐘／人，體驗分數不變'], ['premium', '精緻服務', '平均 80 分鐘／人，體驗分數 +6']])}`;
     else controls = '<p>現點現做，主要決策在售價、原料等級、外送與尖峰排班。先看每小時成交量，再調整各班人數；同業態擴店會分走原分店客源。</p>';
-    return `<h4>${b.model}</h4><p>${b.customer}</p><p class="note">${b.tradeoff}</p>${controls}<dl class="kv"><dt>目前每日供給上限</dt><dd>${int(analysis.capacityDaily)} ${b.unit}</dd><dt>每月固定成本</dt><dd>${money(analysis.fixedMonthly)}</dd><dt>門店損平需求</dt><dd>${analysis.breakEvenDaily == null ? '先累積成交資料' : int(analysis.breakEvenDaily) + ' ' + b.unit + '／天'}</dd></dl><p class="note">產能是供給上限，實際成交受客群、價格、口碑、排隊與庫存限制。新業態參數是遊戲設計假設。</p>`;
+    const upgrade = b.upgrades?.[s.assetLevel || 0];
+    const assets = b.upgrades ? `<div class="sec"><h4>設備升級・${s.assetLevel || 0}／${b.upgrades.length}</h4><p>目前設備維護 ${money(S.assetMonthly(s))}／月。</p>${upgrade ? `<p>${upgrade.name}：投入 ${money(upgrade.cost)}，供給設備上限為基本的 ${upgrade.factor} 倍，每月另加維護 ${money(upgrade.monthly)}。${s.businessId === 'supermarket' ? `庫存上限提高至 ${money(1000000 * upgrade.factor)}。` : ''}</p><button class="gbtn wide" data-act="upgradeShop" ${s.status !== 'open' || world.companies.player.cash < upgrade.cost ? 'disabled' : ''}>${s.status !== 'open' ? '開張後可升級' : world.companies.player.cash < upgrade.cost ? '資金不足' : '付費升級設備'}</button>` : '<p>設備已完整升級。</p>'}<p class="note">升級立即啟用，維護費從下個營業日按天累計。擴充不保證增加客源；先比較實際成交、流失與損平需求。</p></div>` : '';
+    return `<h4>${b.model}</h4><p>${b.customer}</p><p class="note">${b.tradeoff}</p>${controls}${assets}<dl class="kv"><dt>目前每日供給上限</dt><dd>${int(analysis.capacityDaily)} ${b.unit}</dd><dt>每月固定成本</dt><dd>${money(analysis.fixedMonthly)}</dd><dt>門店損平需求</dt><dd>${analysis.breakEvenDaily == null ? '先累積成交資料' : int(analysis.breakEvenDaily) + ' ' + b.unit + '／天'}</dd></dl><p class="note">產能是供給上限，實際成交受客群、價格、口碑、排隊與庫存限制。新業態參數是遊戲設計假設。</p>`;
   }
 
   function menuHtml(s) {
@@ -408,13 +421,13 @@ ${s.shortage ? '<p class="note warn">有人離職，最忙的班少一人。</p>
     const gr = Object.entries(V.menu.grades).map(([k, g]) => `<button class="opt ${s.grade === k ? 'on' : ''}" data-act="grade:${k}"><b><span>${k}品質</span><span class="num">品質 ${g.quality}</span></b><small>成本 ×${g.cost.toFixed(2)}${k === '平價' ? '，便宜但口碑吃虧' : k === '講究' ? '，貴但客人記得住' : ''}</small></button>`).join('');
     const raw = world.shops.find((x) => x.id === s.id);
     const promoUsed = raw && raw.promoUsed;
-    const biz = bizOf(s), refund = s.deposit + Math.round(biz.equipment * V.startup.equipmentRecovery);
+    const biz = bizOf(s), refund = s.deposit + Math.round((biz.equipment + (s.assetInvestment || 0)) * V.startup.equipmentRecovery);
     return `<div class="kv-h" style="margin-top:0">品質等級</div>${gr}
 ${biz.delivery ? `<div class="sw"><span>上外送平台</span><button class="tg ${s.delivery ? 'on' : ''}" data-act="deliv" aria-label="外送開關" aria-pressed="${s.delivery}"></button></div>
 <p class="note">抽成 ${V.delivery.commission}%，外送客人看平台上的星等和價格。</p>` : ''}
 <div class="sec"><h4>開幕半價體驗</h4><p class="note">開店前 ${V.awareness.openingPromoDays} 天，門市半價體驗，快速累積熟悉度。每家店只能用一次。</p>
 <button class="gbtn wide" data-act="promo" ${promoUsed ? 'disabled' : ''}>${promoUsed ? '已經用過' : s.status === 'renovating' ? '預約，開張當天開始' : '現在開始'}</button></div>
-<div class="sec"><h4>關店</h4><p class="note">退回押金 ${money(s.deposit)}，設備回收 ${wan(Math.round(biz.equipment * V.startup.equipmentRecovery))}（裝潢拿不回來）。便利商店剩餘商品以成本五折回收，其餘剩餘存貨報廢。</p>
+<div class="sec"><h4>關店</h4><p class="note">退回押金 ${money(s.deposit)}，設備回收 ${wan(Math.round((biz.equipment + (s.assetInvestment || 0)) * V.startup.equipmentRecovery))}（裝潢拿不回來）。便利商店與超市剩餘商品以成本五折回收，其餘剩餘存貨報廢。</p>
 <button class="gbtn danger wide" data-act="closeShop">關店並退租（共退 ${money(refund)}）</button></div>`;
   }
 
@@ -530,17 +543,18 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
     const b = e.target.closest('[data-act]'); if (!b || b.disabled) return;
     const [act, a1, a2] = b.dataset.act.split(':');
     const sh = panel === 'shop' ? playerShopAt(selLot) : null;
-    const res = (r) => { if (!r.ok) toast(r.reason, true); return r.ok; };
+    const res = (r) => { if (!r.ok) toast(r.reason, true); else save(); return r.ok; };
     if (act === 'close') closePanel();
     else if (act === 'gotoLoan') openPanel('loan');
     else if (act === 'business') { selectedBusiness = a1; renderSide(); }
     else if (act === 'operation' && sh) { const val = a1 === 'autoStock' ? !sh.operations.autoStock : a1 === 'markdown' ? +a2 : a2; if (res(S.setOperations(world, sh.id, { [a1]: val }))) { renderSide(); save(); } }
     else if (act === 'operationApply' && sh) { if (res(S.setOperations(world, sh.id, { [a1]: +$(`[data-operation-input="${a1}"]`).value }))) { renderSide(); save(); } }
     else if (act === 'restock' && sh) { if (res(S.restockShop(world, sh.id))) { renderSide(); updateHud(); save(); } }
+    else if (act === 'upgradeShop' && sh) { if (res(S.upgradeShop(world, sh.id))) { toast('設備升級完成，固定維護費與損平需求已更新。'); renderSide(); updateHud(); } }
     else if (act === 'rent') {
       const name = ($('#shop-name') || {}).value || '半糖日常';
       const r = S.openShop(world, selLot, { name: name.trim().slice(0, 10) || '半糖日常', color: S.businessOf(selectedBusiness).color, businessId: selectedBusiness, ownerWorks: !!$('#open-owner')?.checked });
-      if (res(r)) { toast(`租下了，簽約當天起算租金，${V.startup.renovationDays} 天後開張。`); syncShops(); labelDirty = hudDirty = true; shopTab = 'today'; openPanel('shop', selLot); updateTut(); save(); }
+      if (res(r)) { toast(`租下了，簽約當天起算租金，${S.businessOf(selectedBusiness).renovationDays} 天後開張。`); syncShops(); labelDirty = hudDirty = true; shopTab = 'today'; openPanel('shop', selLot); updateTut(); save(); }
     } else if (act === 'tab') { shopTab = a1; renderSide(); }
     else if (act === 'staff' && sh) { const st = [...sh.staff]; st[+a1] += +a2; if (res(S.setStaffing(world, sh.id, st))) renderSide(); }
     else if (act === 'ownerWork' && sh) { if (res(S.setOwnerWorks(world, sh.id, !sh.ownerWorks))) { renderSide(); save(); } }
@@ -593,8 +607,8 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
     if (r.id === 'open-owner') { $('#expansion-estimate').outerHTML = expansionEstimateHtml(r.checked); return; }
     if (r.type !== 'range') return;
     const sh = playerShopAt(selLot);
-    if (r.dataset.price && sh) { const x = S.setPrices(world, sh.id, { [r.dataset.price]: +r.value }); if (!x.ok) toast(x.reason, true); }
-    else if (r.dataset.markup && sh) { const x = S.setMarkup(world, sh.id, +r.value); if (!x.ok) toast(x.reason, true); }
+    if (r.dataset.price && sh) { const x = S.setPrices(world, sh.id, { [r.dataset.price]: +r.value }); if (!x.ok) toast(x.reason, true); else save(); }
+    else if (r.dataset.markup && sh) { const x = S.setMarkup(world, sh.id, +r.value); if (!x.ok) toast(x.reason, true); else save(); }
   });
 
   // ───────── 事件卡 ─────────
@@ -641,6 +655,7 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
     fastTarget = null;
     if (speed > 0) prevSpeed = speed;
     speed = n; if (n > 0) { prevSpeed = n; played = true; }
+    if (n === 0) save();
     updateSpeedBtns(); updateTut();
   }
   function startFastForward(period) {
@@ -753,6 +768,7 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
     if (hudDirty) { updateHud(); updateSpeedBtns(); renderEventOnce(); liveRefresh(); updateTut(); }
     if (labelDirty && now - lastLabelAt > 250) { updateLabels(); lastLabelAt = now; }
     if (world.status !== 'playing' && !overShown) showOver();
+    if (world.t !== savedT && now - lastSaveNow > 5000) save();
   }
   function renderEventOnce() {
     renderEvent();
@@ -780,15 +796,15 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
     const a = document.createElement('a'); a.href = url; a.download = `創業之城-結案分析-${report.endDate}.html`; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
   $('#over').addEventListener('click', (e) => {
-    if (e.target.closest('[data-act=again]')) { startFresh(); fullRefresh(); }
+    if (e.target.closest('[data-act=again]')) { saveBlocked = false; startFresh(); fullRefresh(); }
     else if (e.target.closest('[data-act=downloadCase]')) downloadCase();
     else if (e.target.closest('[data-act=caseReport]')) { $('#over').hidden = true; reportTab = 'case'; openReport(); }
   });
 
   // ───────── 彈出視窗 ─────────
-  function closeModal() {
-    modal = null; $('#report').hidden = true; $('#sources').hidden = true; $('#scrim').hidden = true; updateDock();
-    if (world.status !== 'playing') $('#over').hidden = false;
+  function closeModal(restoreResult = true) {
+    modal = null; $('#report').hidden = true; $('#sources').hidden = true; $('#saves').hidden = true; $('#scrim').hidden = true; updateDock();
+    if (restoreResult && world.status !== 'playing') $('#over').hidden = false;
   }
   $('#scrim').addEventListener('click', closeModal);
 
@@ -817,12 +833,12 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
   const tilesHtml = (tiles) => tiles.map((t) => `<div class="tile"><label>${t.label}${t.sub ? `<span class="mg">${t.sub}</span>` : ''}</label><div class="v num ${t.tone || ''}">${t.value}${t.stars ? `<span class="stars"><span class="bg">${icon.star.repeat(5)}</span><span class="fg" style="width:${(t.stars / 5) * 100}%">${icon.star.repeat(5)}</span></span>` : ''}</div>
     <div class="row">${t.d ? `<div class="d num ${t.d.up ? 'up' : 'down'}">${t.d.up ? '▲' : '▼'} ${t.d.text.replace(/^[+−]/, '')}<span>${t.cmp}</span></div>` : `<div class="d" style="color:var(--muted);font-weight:400">${t.empty || (t.spark || t.stars ? '' : '月結後才有')}</div>`}${t.spark ? spark(t.spark, t.tone === 'down' ? '#e66767' : '#4fd8a0') : ''}</div></div>`).join('');
 
-  const COST_ROWS = [['cogs', '原料／商品／耗材'], ['pack', '包材'], ['waste', '原料／商品報廢'], ['commission', '平台佣金'], ['wage', '人事（含勞健保、勞退）'], ['rent', '店租（含裝修期間）'], ['util', '水電'], ['pos', 'POS 與雜支'], ['cardFee', '支付手續費'], ['bizTax', '營業稅'], ['adCost', '社群廣告'], ['extraExpense', '網紅合作與事件支出'], ['chainCost', '連鎖管理費'], ['facilityCost', '後勤設施固定費'], ['researchExpense', '研發專案費'], ['stockWriteOff', '中央庫存損失'], ['loanInterest', '貸款利息'], ['incomeTax', '營所稅（年結入帳）']];
+  const COST_ROWS = [['cogs', '原料／商品／耗材'], ['pack', '包材'], ['waste', '原料／商品報廢'], ['commission', '平台佣金'], ['wage', '人事（含勞健保、勞退）'], ['rent', '店租（含裝修期間）'], ['util', '水電'], ['maintenance', '設備維護'], ['pos', 'POS 與雜支'], ['cardFee', '支付手續費'], ['bizTax', '營業稅'], ['adCost', '社群廣告'], ['extraExpense', '網紅合作與事件支出'], ['chainCost', '連鎖管理費'], ['facilityCost', '後勤設施固定費'], ['researchExpense', '研發專案費'], ['stockWriteOff', '中央庫存損失'], ['loanInterest', '貸款利息'], ['incomeTax', '營所稅（年結入帳）']];
   function financeHtml(rep) {
     const selected = rep.financials.find((r) => r.ym === reportMonth) || rep.current;
     const periods = [selected, ...rep.financials.slice().reverse().filter((r) => r.ym !== selected.ym).slice(0, 2)];
     const row = (name, key, profit = false) => `<tr><td class="nm">${name}</td>${periods.map((r) => `<td class="num ${profit ? r[key] < 0 ? 'down' : 'up' : ''}">${money(r[key], profit)}</td>`).join('')}</tr>`;
-    return `<div class="card ptable finance finance-detail"><h4>損益明細<select id="finance-period" aria-label="損益明細月份"><option value="current" ${reportMonth === 'current' ? 'selected' : ''}>本月至今</option>${rep.financials.slice().reverse().map((r) => `<option value="${r.ym}" ${reportMonth === r.ym ? 'selected' : ''}>${r.ym}</option>`).join('')}</select></h4><div class="tbl-scroll"><table><thead><tr><th>項目</th>${periods.map((r) => `<th>${r.ym}${r === rep.current ? ' 至今' : ''}</th>`).join('')}</tr></thead><tbody>${row('營收（門市＋外送標價）', 'turnover')}${COST_ROWS.map(([key, name]) => row(name, key)).join('')}${row('總成本', 'totalCost')}${row('淨利', 'netProfit', true)}<tr><td class="nm">淨利率</td>${periods.map((r) => `<td class="num ${r.netProfit < 0 ? 'down' : 'up'}">${r.netMargin == null ? '—' : pct(r.netMargin)}</td>`).join('')}</tr>${row('另列：償還貸款本金', 'loanPrincipal')}${row('另列：開店投入', 'shopInvestment')}${row('另列：後勤建置投入', 'facilityCapex')}${row('另列：中央進貨付款', 'stockPurchases')}${row('另列：資產回收現金', 'assetRecoveries')}</tbody></table></div><p class="note">本月成本隨遊戲時間累計，貸款利息按天估列。本金只影響現金，不扣淨利。裝潢、設備與押金在開店時付現，本版未計折舊。${rep.analysis.some((a) => a.ownerWorks) ? '老闆自己顧店的門店未另計老闆薪資。' : ''}${rep.current.incomplete || rep.financials.some((r) => r.incomplete) ? '舊存檔更新前未記錄部分利息、一次性支出與營所稅，受影響月份的淨利僅供參考。' : ''}</p></div>`;
+    return `<div class="card ptable finance finance-detail"><h4>損益明細<select id="finance-period" aria-label="損益明細月份"><option value="current" ${reportMonth === 'current' ? 'selected' : ''}>本月至今</option>${rep.financials.slice().reverse().map((r) => `<option value="${r.ym}" ${reportMonth === r.ym ? 'selected' : ''}>${r.ym}</option>`).join('')}</select></h4><div class="tbl-scroll"><table><thead><tr><th>項目</th>${periods.map((r) => `<th>${r.ym}${r === rep.current ? ' 至今' : ''}</th>`).join('')}</tr></thead><tbody>${row('營收（門市＋外送標價）', 'turnover')}${COST_ROWS.map(([key, name]) => row(name, key)).join('')}${row('總成本', 'totalCost')}${row('淨利', 'netProfit', true)}<tr><td class="nm">淨利率</td>${periods.map((r) => `<td class="num ${r.netProfit < 0 ? 'down' : 'up'}">${r.netMargin == null ? '—' : pct(r.netMargin)}</td>`).join('')}</tr>${row('另列：償還貸款本金', 'loanPrincipal')}${row('另列：開店與設備升級投入', 'shopInvestment')}${row('另列：後勤建置投入', 'facilityCapex')}${row('另列：中央進貨付款', 'stockPurchases')}${row('另列：資產回收現金', 'assetRecoveries')}</tbody></table></div><p class="note">本月成本隨遊戲時間累計，貸款利息按天估列。本金只影響現金，不扣淨利。裝潢、設備與押金在開店時付現，本版未計折舊。${rep.analysis.some((a) => a.ownerWorks) ? '老闆自己顧店的門店未另計老闆薪資。' : ''}${rep.current.incomplete || rep.financials.some((r) => r.incomplete) ? '舊存檔更新前未記錄部分利息、一次性支出與營所稅，受影響月份的淨利僅供參考。' : ''}</p></div>`;
   }
   function profitHistoryHtml(rep) {
     const periods = [rep.current, ...rep.financials.slice().reverse()];
@@ -848,7 +864,7 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
       if (a.breakEvenWithBrandDaily > a.capacityDaily) notes.push(`損平成交量已超過目前班表每日最多 ${int(a.capacityDaily)} ${a.unit}的產能。先降低固定成本或提高每單位剩餘金額，再評估加人。`);
       if (a.prepared) notes.push(`已備 ${int(a.prepared)} ${a.unit}，未售報廢 ${int(a.unsold)} ${a.unit}（${pct(a.unsold / a.prepared)}）。備貨上限目前每天 ${a.operations.prep} ${a.unit}。`);
       if (a.stockLost) notes.push(`缺貨已流失 ${int(a.stockLost)} 筆訂單，先檢查備貨或庫存資金。`);
-      if (a.businessId === 'convenience') notes.push(`商品庫存占用 ${money(a.inventory)}，目標 ${money(a.operations.stockTarget)}。${a.operations.autoStock ? '每日自動補貨，現金不足時只買得起部分庫存。' : '自動補貨已關閉。'}`);
+      if (S.retailBusiness(a.businessId)) notes.push(`商品庫存占用 ${money(a.inventory)}，目標 ${money(a.operations.stockTarget)}。${a.operations.autoStock ? '每日自動補貨，現金不足時只買得起部分庫存。' : '自動補貨已關閉。'}`);
       if (a.lostRate > 0.03 || a.avgWait > 12) notes.push(`流失客人占 ${pct(a.lostRate)}。查看每小時成交量，在忙的班增加人手，避免長時間排隊拖累評價。`);
       if (a.ownerWorks) notes.push('班表含老闆每天 12 小時的工作，淨利未另扣老闆薪資。');
       return `<article class="diagnosis"><h5>${esc(a.name)}・${S.businessOf(a.businessId).name}</h5><div class="diagnosis-stats"><span>實際日銷<b class="num">${a.pnl.cups ? int(a.dailyCups) + ' ' + a.unit : '—'}</b></span><span>門店損益兩平<b class="num">${a.breakEvenDaily == null ? '—' : int(a.breakEvenDaily) + ' ' + a.unit + '／天'}</b></span><span>含品牌費用損益兩平<b class="num">${a.breakEvenWithBrandDaily == null ? '—' : int(a.breakEvenWithBrandDaily) + ' ' + a.unit + '／天'}</b></span><span>每月固定成本<b class="num">${money(a.fixedMonthly)}</b></span></div><p class="note">${a.ym}${a.current ? ' 至今' : ''}，${a.sampleDays} 個營業日。損益兩平按目前班表及當期通路組合估算。廣告、管理、後勤、研發、一次性支出及利息平均分攤，每店 ${money(a.brandAllocation)}／月，未預估年結營所稅。${a.sampleDays < 7 ? '資料少於 7 天，先觀察。' : ''}</p>${notes.map((n) => `<p>${n}</p>`).join('')}<button class="gbtn" data-report-shop="${a.shopId}">查看門店與排班</button></article>`;
@@ -884,7 +900,7 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
     let body = '';
     const noData = '<div class="empty-note">第一次月結（每月 1 日）之後，這裡才會有數字。</div>';
     const revCard = () => `<div class="card"><h4>營收走勢<small>近 12 個月，依通路，單位：萬元</small></h4><div class="legend"><span><i style="background:#3987e5"></i>門市</span><span><i style="background:#d95926"></i>外送</span></div><div class="chart" id="c1">${rep.months.length ? '' : noData}</div></div>`;
-    const shareCard = () => `<div class="card"><h4>市占率<small>${world.multiBusiness ? '全市六業態營收' : '全市手搖飲杯數'}，近 12 個月</small></h4><div class="legend">${[['#199e70', world.companies.player.name], ['#e66767', '大吉茶行'], ['#9085e9', '青柚手作'], ['#8c86a6', '其他業者']].map(([cl, n]) => `<span><i class="ln" style="background:${cl}"></i>${esc(n)}</span>`).join('')}</div><div class="chart" id="c2">${rep.share.months.length > 1 ? '' : noData}</div></div>`;
+    const shareCard = () => `<div class="card"><h4>市占率<small>${world.multiBusiness ? '全市各業態營收' : '全市手搖飲杯數'}，近 12 個月</small></h4><div class="legend">${[['#199e70', world.companies.player.name], ['#e66767', '大吉茶行'], ['#9085e9', '青柚手作'], ['#8c86a6', '其他業者']].map(([cl, n]) => `<span><i class="ln" style="background:${cl}"></i>${esc(n)}</span>`).join('')}</div><div class="chart" id="c2">${rep.share.months.length > 1 ? '' : noData}</div></div>`;
     if (reportTab === 'all') body = `<div class="tiles">${tilesHtml(tiles)}</div>${profitHistoryHtml(rep)}${analysisHtml(rep)}<div class="cards">${revCard()}${shareCard()}</div>${productsHtml(rep, shops[0])}`;
     else if (reportTab === 'pl') body = `${financeHtml(rep)}${profitHistoryHtml(rep)}`;
     else if (reportTab === 'an') body = analysisHtml(rep);
@@ -918,7 +934,7 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
   });
   $('#report').addEventListener('change', (e) => { if (e.target.id === 'finance-period') { reportMonth = e.target.value; renderReport(); } });
   function openReport() {
-    closePanel(); modal = 'report'; $('#sources').hidden = true;
+    closePanel(); closeModal(false); modal = 'report'; $('#sources').hidden = true; $('#over').hidden = true;
     $('#report').hidden = false; $('#scrim').hidden = false; renderReport(); updateDock();
   }
 
@@ -930,7 +946,7 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
   const srcLinks = (ids) => ids.map((id) => { const s = srcById[id]; return s ? s.urls.map((u, i) => `<a href="${esc(u)}" target="_blank" rel="noopener noreferrer" title="${esc(s.title)}（${esc(s.date)}，可信度${esc(s.trust)}）">${id}${s.urls.length > 1 ? '-' + (i + 1) : ''}</a>`).join('') : ''; }).join('');
   let PARAMS = null;
   function renderSources() {
-    PARAMS = PARAMS || [...listParams(), ...Object.entries(S.BUSINESSES).flatMap(([id, b]) => ['renovation', 'equipment', 'firstStock', 'solo', 'worker', 'utility', 'packaging', 'waste', 'rate', 'delRate', 'wageMult', 'items', 'affinity', 'hours', 'defaults'].map((key) => ({ path: `businesses.${id}.${key}`, v: b[key], src: '暫定', note: `${b.name}的遊戲設計參數；金額與需求並非實際創業報價或業界統計。${b.tradeoff}` })))].map((p) => {
+    PARAMS = PARAMS || [...listParams(), ...Object.entries(S.BUSINESSES).flatMap(([id, b]) => ['renovation', 'equipment', 'firstStock', 'solo', 'worker', 'utility', 'packaging', 'waste', 'rate', 'delRate', 'wageMult', 'items', 'affinity', 'hours', 'defaults', 'minPing', 'renovationDays', 'upgrades'].filter((key) => b[key] != null).map((key) => ({ path: `businesses.${id}.${key}`, v: b[key], src: '暫定', note: `${b.name}的遊戲設計參數；金額與需求並非實際創業報價或業界統計。${b.tradeoff}` })))].map((p) => {
       const [tag, cls] = tagOf(p.src);
       const ids = /^S\d/.test(p.src) ? [p.src] : [...new Set(p.note.match(/S\d+[a-z]?/g) || [])].filter((x) => srcById[x]);
       return { ...p, tag, cls, ids, sec: p.path.split('.')[0] };
@@ -958,9 +974,69 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
   });
   $('#sources').addEventListener('input', (e) => { if (e.target.id === 'sc-q') { srcQuery = e.target.value; renderSources(); } });
   function openSources() {
-    closePanel(); modal = 'sources'; $('#report').hidden = true;
+    closePanel(); closeModal(false); modal = 'sources'; $('#report').hidden = true; $('#over').hidden = true;
     $('#sources').hidden = false; $('#scrim').hidden = false; renderSources(); updateDock();
   }
+
+  // ───────── 存檔、續玩與可攜式備份 ─────────
+  const savedTime = (date) => date ? new Date(date).toLocaleString('zh-TW', { hour12: false }) : '舊版存檔未記錄時間';
+  function updateSaveLabel() {
+    const label = $('#save-label'); label.textContent = saveError || saveBlocked ? '未存檔' : '存檔';
+    label.parentElement.title = saveError || (savedAt ? `上次保存：${savedTime(savedAt)}` : '存檔與備份');
+    label.parentElement.classList.toggle('save-failed', !!(saveError || saveBlocked));
+  }
+  function saveDescription(slot) {
+    if (!slot.ok) return slot.found ? '無法讀取' : '尚未保存';
+    const k = S.getKpi(slot.world);
+    return `${k.date} ${String(k.clock.hour).padStart(2, '0')}:00・現金 ${money(k.cash)}・${k.shops} 家店`;
+  }
+  function renderSaves() {
+    const manual = loadLocal(storage, MANUAL_KEY, false), backup = loadLocal(storage, BACKUP_KEY, false);
+    $('#saves').innerHTML = `<div class="rp-head"><h2>存檔與繼續遊戲</h2><button class="xbtn" data-save-act="close" aria-label="關閉存檔">${icon.close}</button></div><div class="rp-body"><div class="card"><h4>目前進度</h4><p>${esc(S.getKpi(world).date)}・現金 ${money(world.companies.player.cash)}</p><p id="save-status" class="note ${saveError || saveBlocked ? 'warn' : ''}" role="status">${esc(saveError || (savedAt ? `最近保存：${savedTime(savedAt)}` : savedT >= 0 ? '已讀取舊版存檔，未記錄保存時間。' : '尚未保存'))}</p><button class="gbtn primary wide" data-save-act="save">儲存目前進度（建立手動存檔）</button><p class="note">操作後、每日及遊戲推進期間自動保存；切換分頁或關掉網頁時再存一次。下次用同一瀏覽器開啟，會讀取最近的自動進度並暫停，按播放即可續玩。</p></div><div class="card"><h4>讀取保存的進度</h4><p>手動存檔：${esc(saveDescription(manual))}</p>${manual.ok ? `<p class="note">保存時間 ${esc(savedTime(manual.savedAt))}</p>` : ''}<button class="gbtn wide" data-save-act="manual" ${manual.ok ? '' : 'disabled'}>讀取手動存檔</button><p>上一份可讀備份：${esc(saveDescription(backup))}</p><button class="gbtn wide" data-save-act="backup" ${backup.ok ? '' : 'disabled'}>恢復上一份備份</button><p class="note">讀取會取代現在的遊戲進度；手動存檔保留到下一次手動儲存。</p></div><div class="card"><h4>下載與匯入備份</h4><button class="gbtn wide" data-save-act="download">下載目前進度 JSON</button><button class="gbtn wide" data-save-act="import">匯入 JSON 備份</button><input type="file" id="save-file" accept=".json,application/json" hidden>${saveBlocked ? '<button class="gbtn wide" data-save-act="raw">下載無法讀取的原始舊檔</button>' : ''}<p class="note">存檔放在這個裝置與瀏覽器，沒有雲端同步。清除網站資料、使用無痕模式或換裝置，可能無法讀到本機存檔。要帶走進度，先下載 JSON，再到另一台裝置匯入。</p></div></div>`;
+  }
+  function openSaves() { closePanel(); closeModal(false); modal = 'saves'; $('#over').hidden = true; $('#saves').hidden = $('#scrim').hidden = false; renderSaves(); updateDock(); }
+  function downloadSave(raw, suffix = '') {
+    const url = URL.createObjectURL(new Blob([raw], { type: 'application/json' })), a = document.createElement('a');
+    a.href = url; a.download = `創業之城-${S.getKpi(world).date}${suffix}.json`; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+  function restoreSave(slot) {
+    S.expandMap(slot.world, map, distances); S.syncBusinesses(slot.world);
+    world = slot.world; meta = slot.meta; saveBlocked = false; savedT = -1;
+    resetView(); tutOn = false; everSelected = played = true; fullRefresh(); save();
+    if (world.status !== 'playing') showOver();
+    toast('進度已讀取，按播放繼續。');
+  }
+  $('#saves').addEventListener('click', async (e) => {
+    const action = e.target.closest('[data-save-act]')?.dataset.saveAct; if (!action) return;
+    if (action === 'close') return closeModal();
+    if (action === 'download') return downloadSave(encodeSave(world, meta));
+    if (action === 'raw') { const raw = ls.get(SAVE_KEY); if (raw) downloadSave(raw, '-原始舊檔'); return; }
+    if (action === 'import') return $('#save-file').click();
+    if (action === 'save') {
+      if (saveBlocked && !await confirmBox('舊存檔無法讀取。建議先下載原始舊檔；現在保存會用目前進度取代它。', '保存目前進度')) return;
+      saveBlocked = false;
+      if (save()) {
+        const result = storeLocal(storage, encodeSave(world, meta), MANUAL_KEY);
+        toast(result.ok ? '目前進度已保存，關掉後可再繼續。' : '自動進度已保存，但手動存檔失敗，請下載 JSON 備份。', !result.ok);
+      }
+      renderSaves(); return;
+    }
+    const slot = loadLocal(storage, action === 'manual' ? MANUAL_KEY : BACKUP_KEY, false);
+    if (!slot.ok) { toast(slot.error || '沒有可讀取的存檔。', true); renderSaves(); return; }
+    if (await confirmBox(`要讀取 ${esc(saveDescription(slot))} 嗎？將取代現在的進度。`, '讀取進度')) restoreSave(slot);
+  });
+  $('#saves').addEventListener('change', async (e) => {
+    if (e.target.id !== 'save-file') return;
+    const file = e.target.files[0]; if (!file) return;
+    e.target.value = '';
+    let slot;
+    try { if (file.size > MAX_SAVE_BYTES) throw new Error(); slot = decodeSave(await file.text()); }
+    catch { toast('備份無法讀取或格式不符，目前進度保持原樣。', true); return; }
+    if (await confirmBox(`要匯入 ${esc(saveDescription({ ...slot, ok: true }))} 嗎？將取代現在的進度。`, '匯入進度')) restoreSave(slot);
+  });
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') save(); });
+  window.addEventListener('pagehide', save);
+  window.addEventListener('beforeunload', save);
 
   // ───────── 左側選單 ─────────
   $('#dock').addEventListener('click', async (e) => {
@@ -972,8 +1048,9 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
     else if (['warehouse', 'factory', 'lab'].includes(k)) (panel === k ? closePanel() : openPanel(k));
     else if (k === 'report') (modal === 'report' ? closeModal() : openReport());
     else if (k === 'sources') (modal === 'sources' ? closeModal() : openSources());
+    else if (k === 'saves') (modal === 'saves' ? closeModal() : openSaves());
     else if (k === 'new') {
-      if (await confirmBox('要重新開始嗎？目前的進度會被清掉。', '重新開始')) { startFresh(); fullRefresh(); }
+      if (await confirmBox('要重新開始嗎？目前的自動進度會被取代。手動存檔仍保留，也可先下載備份。', '重新開始')) { saveBlocked = false; startFresh(); fullRefresh(); }
     }
     updateDock();
   });
@@ -987,6 +1064,9 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
     hudDirty = false;
   }
   fullRefresh();
+  updateSaveLabel();
+  if (loadNotice) toast(loadNotice);
+  if (saveBlocked) toast(saveError, true);
   city.start();
   if (world.status !== 'playing') showOver();
   requestAnimationFrame(frameLoop);

@@ -16,11 +16,11 @@ function setup(id, cal) {
   return { w, shop, co: w.companies.player, lot };
 }
 
-test('六業態都有獨立開店投入、產品、單位與損平分析，沒有資金或未知業態不會扣款', () => {
-  assert.equal(Object.keys(S.BUSINESSES).length, 6);
+test('九業態都有獨立開店投入、產品、單位與損平分析，沒有資金或未知業態不會扣款', () => {
+  assert.equal(Object.keys(S.BUSINESSES).length, 9);
   for (const id of Object.keys(S.BUSINESSES)) {
     const { w, shop, lot } = setup(id), b = S.businessOf(id);
-    assert.equal(S.lotOpenCost(lot, id), b.renovation + b.equipment + b.firstStock + lot.deposit);
+    assert.equal(S.lotOpenCost(lot, id), b.renovation + b.equipment + b.firstStock + S.premises(lot, id).deposit);
     assert.deepEqual(Object.keys(shop.prices), Object.keys(b.items));
     runDays(w, 8);
     const a = S.getShopAnalysis(w, shop.id);
@@ -35,6 +35,76 @@ test('六業態都有獨立開店投入、產品、單位與損平分析，沒�
     assert.equal(S.openShop(w, spare.id, { businessId: 'missing' }).ok, false);
     assert.equal(S.serialize(w), before);
   }
+});
+
+test('大型業態按完整租賃坪數付租金與押金，裝修期和資金門檻確實提高', () => {
+  for (const id of ['restaurant', 'supermarket', 'fitness']) {
+    const { w, shop, co, lot } = setup(id), b = S.businessOf(id);
+    assert.equal(shop.leasedPing, b.minPing);
+    assert.equal(shop.rent, Math.round(lot.rent * b.minPing / lot.ping));
+    assert.equal(shop.deposit, Math.round(lot.deposit * b.minPing / lot.ping));
+    assert.equal(co.cash, 20000000 - S.lotOpenCost(lot, id));
+    shop.openAtT = b.renovationDays * 24;
+    assert.equal(S.upgradeShop(w, shop.id).ok, false);
+    runDays(w, b.renovationDays - 1);
+    assert.equal(shop.status, 'renovating'); assert.equal(shop.tot.walk + shop.tot.del, 0);
+    assert.ok(S.getShopHistory(w, shop.id).mtdPnL.rent > 0);
+    runDays(w, 2); assert.equal(shop.status, 'open');
+  }
+});
+
+test('設備升級花現金並增加產能及維護費；月帳、損平與關店回收含升級投入', () => {
+  for (const id of ['restaurant', 'supermarket', 'fitness']) {
+    const { w, shop, co } = setup(id, { r: 0, r_del: 0 });
+    shop.status = 'open'; shop.staff = [6, 6, 6]; co.cash += 20000000;
+    const cap = S.getShopAnalysis(w, shop.id).capacityDaily, fixed = S.getShopAnalysis(w, shop.id).fixedMonthly, cash = co.cash;
+    const upgrades = S.businessOf(id).upgrades;
+    assert.equal(S.upgradeShop(w, shop.id).ok, true);
+    assert.equal(co.cash, cash - upgrades[0].cost);
+    assert.ok(S.getShopAnalysis(w, shop.id).capacityDaily > cap);
+    assert.equal(S.getShopAnalysis(w, shop.id).fixedMonthly, fixed + upgrades[0].monthly);
+    assert.equal(S.upgradeShop(w, shop.id).ok, true);
+    assert.equal(shop.assetInvestment, upgrades[0].cost + upgrades[1].cost);
+    const before = S.serialize(w); assert.equal(S.upgradeShop(w, shop.id).ok, false); assert.equal(S.serialize(w), before);
+    runDays(w, 31); S.stepHour(w); const monthStartCash = co.cash;
+    runDays(w, 30); S.stepHour(w);
+    const row = S.getReport(w).financials.at(-1);
+    assert.equal(row.maintenance, S.assetMonthly(shop)); assert.equal(co.cash - monthStartCash, row.netProfit);
+    assert.equal(S.getFinalReport(w).totals.shopInvestment, S.businessOf(id).renovation + S.businessOf(id).equipment + S.businessOf(id).firstStock + shop.deposit + shop.assetInvestment);
+    assert.equal(S.deserialize(S.serialize(w)).shops[0].assetLevel, 2);
+    const result = S.closeShop(w, shop.id);
+    assert.equal(result.equipment, Math.round((S.businessOf(id).equipment + shop.assetInvestment) * S.V.startup.equipmentRecovery));
+  }
+});
+
+test('超市的庫存上限需升級設備，提高備貨不會免費取得存貨；成交、耗損與現金可對帳', () => {
+  const { w, shop, co } = setup('supermarket'); shop.status = 'open';
+  assert.equal(S.setOperations(w, shop.id, { stockTarget: 1200000 }).ok, false);
+  S.upgradeShop(w, shop.id);
+  assert.equal(S.setOperations(w, shop.id, { stockTarget: 1200000 }).ok, true);
+  const inv = shop.inv, cash = co.cash;
+  assert.equal(S.restockShop(w, shop.id).cost, 1200000 - inv);
+  assert.equal(co.cash, cash - (1200000 - inv));
+  runDays(w, 31); S.stepHour(w); const c0 = co.cash, i0 = shop.inv;
+  runDays(w, 30); S.stepHour(w); const row = S.getReport(w).financials.at(-1);
+  assert.ok(row.turnover > 0); assert.ok(row.waste > 0); assert.ok(row.stockPurchases > 0);
+  assert.equal(co.cash - c0, row.netProfit + i0 - shop.inv);
+  co.cash = 0; shop.inv = 0; runDays(w, 1);
+  assert.equal(shop.today.walk, 0); assert.ok(shop.mtd.stockLost > 0);
+});
+
+test('高資本服務模式會改變產能與體驗，擴充不憑空增加城市需求', () => {
+  const { w, shop } = setup('restaurant'); shop.status = 'open'; shop.staff = [6, 6, 6];
+  S.setOperations(w, shop.id, { mode: 'dinein' }); const slow = hourlyCapacity(shop, 6, 1), q = shop.quality;
+  S.setOperations(w, shop.id, { mode: 'takeaway' }); assert.ok(hourlyCapacity(shop, 6, 1) > slow); assert.ok(shop.quality < q);
+  const f = setup('fitness'); f.shop.status = 'open';
+  S.setOperations(f.w, f.shop.id, { focus: 'coached' }); const coached = hourlyCapacity(f.shop, 3, 1), fq = f.shop.quality;
+  S.setOperations(f.w, f.shop.id, { focus: 'open' }); assert.ok(hourlyCapacity(f.shop, 3, 1) > coached); assert.ok(f.shop.quality < fq);
+  const pool = S.getReport(f.w).market.sectors.find((s) => s.businessId === 'fitness').potentialDaily;
+  S.upgradeShop(f.w, f.shop.id);
+  assert.equal(S.getReport(f.w).market.sectors.find((s) => s.businessId === 'fitness').potentialDaily, pool);
+  const cash = f.co.cash; f.co.cash = 0; const before = S.serialize(f.w);
+  assert.equal(S.upgradeShop(f.w, f.shop.id).ok, false); assert.equal(S.serialize(f.w), before); f.co.cash = cash;
 });
 
 test('不同業態需求分開；加入髮廊不會把飲料客人分走，同業態仍有互搶客源', () => {
@@ -181,6 +251,19 @@ test('新局每個業態都有既有競爭者，競爭者會調整供給與排�
   assert.ok(salon.staff.every((n) => n <= salon.operations.stations));
   assert.ok(Object.values(w.companies).every((co) => Number.isFinite(co.cash)));
   assert.ok(w.shops.every((s) => Object.values(s.prices).every(Number.isFinite)));
+});
+
+test('六業態舊局補進高資本競爭者，原有帳目保留，重複同步不會重複開店', () => {
+  const w = S.createWorld({ mapData: FIXTURE.map, distances: FIXTURE.dist, multiBusiness: true, seed: 20261001 });
+  for (const id of ['restaurant', 'supermarket', 'fitness']) {
+    const s = w.shops.find((s) => s.businessId === id); w.lots.find((l) => l.id === s.lotId).shopId = null;
+    w.shops = w.shops.filter((s) => s.businessId !== id); delete w.companies[id];
+  }
+  const cash = w.companies.player.cash, rows = JSON.stringify(w.companies.player.rows), count = w.shops.length;
+  S.syncBusinesses(w); assert.equal(w.shops.length, count + 3);
+  assert.equal(w.companies.player.cash, cash); assert.equal(JSON.stringify(w.companies.player.rows), rows);
+  const after = S.serialize(w); S.syncBusinesses(w); assert.equal(S.serialize(w), after);
+  assert.ok(['restaurant', 'supermarket', 'fitness'].every((id) => w.companies[id].cash >= 2000000));
 });
 
 test('舊飲料存檔補齊業態欄位並保留原設定，仍可新增其他常見業態', () => {

@@ -1,0 +1,86 @@
+// 本機存檔與 JSON 備份共用格式；相容原本 { w, meta } 的存檔。
+import { deserialize, serialize, BUSINESSES } from './sim.js';
+export const SAVE_KEY = 'tycoon.save.v1';
+export const MANUAL_KEY = 'tycoon.save.manual.v1';
+export const BACKUP_KEY = SAVE_KEY + '.backup';
+export const MAX_SAVE_BYTES = 20 * 1024 * 1024;
+
+function validate(w) {
+  const bad = () => { throw new Error('存檔內容不完整或已損壞'); };
+  const array = (a, n) => Array.isArray(a) && (n == null || a.length === n);
+  const finite = (n) => typeof n === 'number' && Number.isFinite(n);
+  const safe = (v, depth = 0) => {
+    if (depth > 60 || typeof v === 'number' && !finite(v)) bad();
+    if (v && typeof v === 'object') for (const [k, x] of Object.entries(v)) { if (['__proto__', 'prototype', 'constructor'].includes(k)) bad(); safe(x, depth + 1); }
+  };
+  safe(w);
+  if (!w || w.v !== 1 || !Number.isInteger(w.t) || w.t < 0 || !Number.isInteger(w.seed) || !['playing', 'won', 'lost', 'bankrupt'].includes(w.status)) bad();
+  if (!array(w.bld) || !w.bld.length || !array(w.lots) || !w.lots.length || !array(w.shops) || !array(w.dM, w.bld.length * w.lots.length) || !array(w.ll, w.lots.length ** 2)) bad();
+  if (!w.companies?.player || !w.cal || !w.wages || !w.events || !array(w.events.list) || !array(w.eventLog) || !array(w.monthly)) bad();
+  if (!['r', 'r_del', 'c', 'c_del'].every((k) => finite(w.cal[k])) || !['basic', 'market', 'high'].every((k) => finite(w.wages[k]) && w.wages[k] > 0)) bad();
+  const lots = new Set(w.lots.map((l) => l.id)), ids = new Set(w.shops.map((s) => s.id));
+  if (lots.size !== w.lots.length || ids.size !== w.shops.length) bad();
+  for (const b of w.bld) if (!finite(b.pop) || b.pop < 0) bad();
+  for (const l of w.lots) if (!finite(l.ping) || l.ping <= 0 || !finite(l.rent) || !finite(l.deposit) || l.shopId && !ids.has(l.shopId)) bad();
+  for (const co of Object.values(w.companies)) {
+    if (!finite(co.cash) || !finite(co.awareness) || !co.cm || !array(co.rows) || !array(co.loans) || !array(co.day30) || !finite(co.adWan) || !finite(co.adDayUnits) || !finite(co.yearProfit)) bad();
+    for (const l of co.loans) if (!finite(l.balance) || l.balance < 0 || !finite(l.payment)) bad();
+    if (co.expansion && (!co.expansion.projects || !['factory', 'warehouse', 'lab'].every((k) => ['none', 'building', 'ready'].includes(co.expansion.facilities?.[k]?.status)) || !array(co.expansion.facilities.warehouse.orders))) bad();
+  }
+  for (const s of w.shops) {
+    const b = BUSINESSES[s.businessId || 'tea'];
+    if (!b || !lots.has(s.lotId) || !w.companies[s.company] || !['open', 'renovating', 'closed'].includes(s.status)) bad();
+    if (!array(s.staff, 3) || !s.staff.every((n) => Number.isInteger(n) && n >= 0 && n <= 6) || !array(s.F, w.bld.length) || !array(s.buyB, w.bld.length) || !array(s.days) || !array(s.history) || !array(s.hourEMA, 12) || !array(s.today?.hourly, 12) || !s.mtd || !s.promo || !s.shortage) bad();
+    if (!finite(s.inv) || s.inv < 0 || !finite(s.rent) || !Object.keys(b.items).every((k) => finite(s.prices?.[k]) && s.prices[k] > 0)) bad();
+    if (!['basic', 'market', 'high'].includes(s.wageLevel) || !['平價', '標準', '講究'].includes(s.grade) || !finite(s.openAtT) || !finite(s.Bw) || !finite(s.Bd) || !finite(s.waitMin)) bad();
+    if (!['walk', 'del', 'lost', 'storeRev', 'gmv', 'cogs', 'pack', 'wageMilli', 'openDays', 'rentDays'].every((k) => finite(s.mtd[k]))) bad();
+    if (s.assetLevel != null && (!Number.isInteger(s.assetLevel) || s.assetLevel < 0 || s.assetLevel > (b.upgrades?.length || 0))) bad();
+    if (s.operations) {
+      if (!finite(s.operations.seats) || !finite(s.operations.stations)) bad();
+      if (['cafe', 'restaurant'].includes(s.businessId) && !['takeaway', 'balanced', 'dinein'].includes(s.operations.mode)) bad();
+      if (s.businessId === 'salon' && !['quick', 'standard', 'premium'].includes(s.operations.service)) bad();
+      if (s.businessId === 'fitness' && !['open', 'coached', 'classes'].includes(s.operations.focus)) bad();
+      if (['bento', 'bakery'].includes(s.businessId) && (!finite(s.operations.prep) || !finite(s.operations.markdown))) bad();
+      if (['convenience', 'supermarket'].includes(s.businessId) && (!finite(s.operations.stockTarget) || typeof s.operations.autoStock !== 'boolean')) bad();
+    }
+  }
+}
+
+export function decodeSave(raw) {
+  if (typeof raw !== 'string' || raw.length > MAX_SAVE_BYTES) throw new Error('存檔檔案過大或格式不符');
+  const o = JSON.parse(raw);
+  if (!o || !o.w || o.format != null && (o.format !== 'tycoon' || o.version !== 1)) throw new Error('這不是支援的創業之城存檔');
+  const original = typeof o.w === 'string' ? JSON.parse(o.w) : o.w;
+  validate(original);
+  const world = deserialize(original);
+  const cashHist = o.meta?.cashHist;
+  const meta = { cashHist: Array.isArray(cashHist) && cashHist.every((a) => Array.isArray(a) && typeof a[0] === 'string' && Number.isFinite(a[1])) ? cashHist : [] };
+  return { world, meta, savedAt: typeof o.savedAt === 'string' && Number.isFinite(Date.parse(o.savedAt)) ? o.savedAt : null, raw };
+}
+export function encodeSave(world, meta, now = new Date()) {
+  return JSON.stringify({ format: 'tycoon', version: 1, savedAt: now.toISOString(), w: serialize(world), meta });
+}
+export function loadLocal(storage, key = SAVE_KEY, fallback = true) {
+  let raw;
+  try { raw = storage.getItem(key); } catch { return { ok: false, found: false, error: '瀏覽器不允許讀取本機存檔' }; }
+  if (raw) { try { return { ok: true, found: true, ...decodeSave(raw) }; } catch { /* 再試上一份可讀備份 */ } }
+  if (fallback && key === SAVE_KEY) {
+    const backup = loadLocal(storage, BACKUP_KEY, false);
+    if (backup.ok) return { ...backup, recovered: true };
+  }
+  return { ok: false, found: !!raw, raw, error: raw ? '存檔無法讀取，原始資料已保留。可匯入備份或另存新進度。' : null };
+}
+export function storeLocal(storage, raw, key = SAVE_KEY) {
+  let backedUp = false;
+  try {
+    decodeSave(raw);
+    if (key === SAVE_KEY) {
+      const old = loadLocal(storage, SAVE_KEY, false);
+      if (old.ok) { try { storage.setItem(BACKUP_KEY, old.raw); backedUp = true; } catch { /* 備份空間不足仍嘗試儲存目前進度 */ } }
+    }
+    storage.setItem(key, raw);
+    return { ok: true, savedAt: JSON.parse(raw).savedAt, backedUp };
+  } catch {
+    return { ok: false, error: '未存檔：本機空間不足或瀏覽器禁止儲存。請下載備份。' };
+  }
+}
