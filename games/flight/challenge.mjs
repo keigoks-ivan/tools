@@ -1,6 +1,6 @@
 // Landing challenge: level data, start states, wind, grading and progress. Pure logic (no DOM, no three.js).
 // Frame and units are physics.mjs': metres, m/s, local frame (-z = runway heading, +x = right of the runway heading).
-import { AIRCRAFT, RUNWAY, PROFILES, createFlightState, quaternionFromEuler } from './physics.mjs?v=20261007';
+import { AIRCRAFT, RUNWAY, PROFILES, createFlightState, quaternionFromEuler } from './physics.mjs?v=20261008';
 
 const KT = 1.943844, RAD = Math.PI / 180, TAU = Math.PI * 2;
 const GLIDE = Math.tan(RUNWAY.glideslope * RAD);
@@ -33,7 +33,8 @@ export const LIGHT_LEVELS = Object.freeze([
 ]);
 // The level list for an aircraft: 'jet' | 'light' | a flight state. Progress keys: 'flightChallenge' (jet), 'flightChallenge.light' (light).
 export const FIGHTER_LEVELS = Object.freeze(LEVELS.map(l => freeze({ ...l, aircraft: 'fighter', ...(l.id === 6 ? { descZh: '4 公里外高了 150 公尺，220 節。關後燃器、收油門，開減速板（B）。', descEn: '4 km out, 150 m high, 220 kt. Afterburner off, idle power and speed brakes (B).', start: start({ km: 4, above: 150, kt: 220, gear: false, flaps: 1 }) } : {}) })));
-export const levelsFor = x => ({ light: LIGHT_LEVELS, fighter: FIGHTER_LEVELS }[typeof x === 'string' ? x : x?.aircraft] || LEVELS);
+export const HORNET_LEVELS = Object.freeze(FIGHTER_LEVELS.map(l => freeze({ ...l, aircraft: 'hornet' })));
+export const levelsFor = x => ({ light: LIGHT_LEVELS, fighter: FIGHTER_LEVELS, hornet: HORNET_LEVELS }[typeof x === 'string' ? x : x?.aircraft] || LEVELS);
 export const levelById = (id, aircraft = 'jet') => levelsFor(aircraft).find(l => l.id === Number(id)) || null;
 export const nextLevel = (id, aircraft = 'jet') => levelsFor(aircraft).find(l => l.id === Number(id) + 1) || null;
 
@@ -50,7 +51,7 @@ export function createLevelState(level, aircraft = 'jet') {
   if (c.kt) {
     const tas = c.kt / KT / Math.sqrt(densityRatio(s.position.y)), gamma = -RUNWAY.glideslope * RAD;
     let aoa = 4.5 * RAD;
-    if (light || id === 'fighter') { // lift = weight at this speed: aoa from the light aero table (flap position c.flaps)
+    if (light || PROFILES[id].military) { // lift = weight at this speed: aoa from the light aero table (flap position c.flaps)
       const P = PROFILES[id], A = P.aero, rho = 1.225 * densityRatio(s.position.y), q = .5 * rho * tas * tas;
       aoa = ((P.emptyMass + P.initialFuel) * 9.80665 * Math.cos(gamma) / (q * P.wingArea) - A.cl0 - (A.flapTable ? A.flapTable.cl0[c.flaps] : A.flapCl0 * c.flaps / 3)) / A.slope;
     }

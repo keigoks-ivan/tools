@@ -1,15 +1,15 @@
 import { createAviationSurfaceKit } from './aviation-materials.js?v=20261005';
 
-// MQ-16: original, unarmed F-16-class single-seat mesh. Metres, nose -Z.
+// F-16C: original unarmed single-seat mesh. Metres, nose -Z.
 // The wheel contact plane is -2 m, matching PROFILES.fighter.gearHeight.
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const RAD = Math.PI / 180;
-function disposeTree(root, textures = []) {
+export function disposeTree(root, textures = []) {
   const geometries = new Set(), materials = new Set();
   root.traverse(o => { if (o.isMesh) { geometries.add(o.geometry); for (const m of Array.isArray(o.material) ? o.material : [o.material]) materials.add(m); } });
   geometries.forEach(g => g.dispose()); materials.forEach(m => m.dispose()); textures.forEach(t => t.dispose());
 }
-function kit(THREE, root) {
+export function kit(THREE, root) {
   const mesh = (g, m, p = [0, 0, 0], parent = root) => { const o = new THREE.Mesh(g, m); o.position.set(...p); o.castShadow = true; o.receiveShadow = true; parent.add(o); return o; };
   const box = (size, m, p, parent) => mesh(new THREE.BoxGeometry(...size), m, p, parent);
   const rod = (a, b, r, m, parent) => {
@@ -34,7 +34,7 @@ function kit(THREE, root) {
   return { mesh, box, rod, slab, loft };
 }
 export function createFighterAircraft(THREE) {
-  const group = new THREE.Group(); group.name = 'MQ-16 Peregrine';
+  const group = new THREE.Group(); group.name = 'F-16C Fighting Falcon';
   const K = kit(THREE, group), finish = createAviationSurfaceKit(THREE);
   const paint = finish.apply(new THREE.MeshStandardMaterial({ color: 0x899397, roughness: .56, metalness: .36 }), 'paint', { repeat: [3, 6], bumpScale: .009 });
   const lower = paint.clone(); lower.color.setHex(0xb0b5b4);
@@ -89,7 +89,7 @@ export function createFighterAircraft(THREE) {
   if (typeof document !== 'undefined') {
     const canvas = document.createElement('canvas'); canvas.width=256;canvas.height=384;
     const c=canvas.getContext('2d');
-    if(c) { c.fillStyle='#29383a';c.textAlign='center';c.font='bold 72px ui-monospace, monospace';c.fillText('MQ',128,100);c.font='bold 64px ui-monospace, monospace';c.fillText('016',128,188);c.fillRect(36,215,184,5);c.font='20px ui-monospace, monospace';c.fillText('PEREGRINE',128,255);
+    if(c) { c.fillStyle='#29383a';c.textAlign='center';c.font='bold 72px ui-monospace, monospace';c.fillText('F-16C',128,100);c.font='bold 64px ui-monospace, monospace';c.fillText('016',128,188);c.fillRect(36,215,184,5);c.font='20px ui-monospace, monospace';c.fillText('FIGHTING FALCON',128,255);
       const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;markingTextures.push(texture);
       const label=new THREE.MeshBasicMaterial({map:texture,transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-1});
       for(const sign of [-1,1]){const decal=K.mesh(new THREE.PlaneGeometry(1.0,1.45),label,[sign*.085,1.75,4.53]);decal.rotation.y=sign*Math.PI/2;decal.castShadow=false;}
@@ -133,7 +133,7 @@ export function createFighterAircraft(THREE) {
 // Cockpit is attached to the camera; HUD pitch ladder moves with world attitude,
 // while its flight-path marker uses velocity in aircraft body coordinates.
 export function createFighterCockpit(THREE, options = {}) {
-  const group = new THREE.Group(); group.name='MQ-16 single-seat cockpit'; group.group=group;
+  const group = new THREE.Group(); group.name=options.hornet ? 'F/A-18C Hornet cockpit' : 'F-16C single-seat cockpit'; group.group=group;
   const K=kit(THREE,group),finish=createAviationSurfaceKit(THREE),textures=[];
   const panel=finish.apply(new THREE.MeshStandardMaterial({color:0x30393b,emissive:0x101718,emissiveIntensity:.8,roughness:.72,metalness:.18}),'paint',{bumpScale:.003});
   const metal=new THREE.MeshStandardMaterial({color:0x616c6e,roughness:.4,metalness:.8});
@@ -152,7 +152,16 @@ export function createFighterCockpit(THREE, options = {}) {
   K.box([.43,.70,.21],cloth,[0,-.48,.50]);K.box([.45,.10,.50],cloth,[0,-.98,.35]);
   K.box([.32,.18,.16],black,[0,-.02,.47]);
   for(const sign of [-1,1]) K.rod([sign*.15,-.1,.35],[sign*.10,-.85,.19],.018,black);
-  const stick=K.rod([.54,-.76,.05],[.54,-.54,-.02],.028,black); K.box([.09,.11,.06],black,[.54,-.52,-.03]);
+  const stickX=options.hornet?0:.54;
+  const stick=K.rod([stickX,-.76,.05],[stickX,-.54,-.02],.028,black); K.box([.09,.11,.06],black,[stickX,-.52,-.03]);
+  if(options.hornet) {
+    // Hornet windshield arch, twin throttle handles and wider lower console.
+    K.rod([-.62,-.48,-1.48],[-.48,.50,-1.55],.024,panel);
+    K.rod([.62,-.48,-1.48],[.48,.50,-1.55],.024,panel);
+    const arch=K.mesh(new THREE.TorusGeometry(.48,.024,8,32,Math.PI),panel,[0,.50,-1.55]);arch.scale.y=.50;
+    K.box([.08,.05,.10],metal,[-.45,-.75,-.20]);
+    K.box([.35,.18,.05],black,[0,-.91,-1.32]);
+  }
   const throttle=K.box([.10,.05,.10],metal,[-.57,-.75,-.20]);
   // HUD combiner has a lightly tinted edge and no opaque background.
   const combiner=K.mesh(new THREE.PlaneGeometry(.88,.70),new THREE.MeshBasicMaterial({color:0x69d7a6,transparent:true,opacity:.025,depthWrite:false,side:THREE.DoubleSide}),[0,.015,-1.33]);
@@ -194,22 +203,23 @@ export function createFighterCockpit(THREE, options = {}) {
       const velocity=new THREE.Vector3(state.velocity?.x||0,state.velocity?.y||0,state.velocity?.z||0);
       const q=new THREE.Quaternion(state.quaternion?.x||0,state.quaternion?.y||0,state.quaternion?.z||0,state.quaternion?.w??1);velocity.applyQuaternion(q.invert());
       const front=-velocity.z;if(front>5){const x=512+clamp(Math.atan2(velocity.x,front)*630,-240,240),y=370-clamp(Math.atan2(velocity.y,front)*630,-195,195);c.beginPath();c.arc(x,y,12,0,Math.PI*2);c.stroke();line(x-31,y,x-12,y);line(x+12,y,x+31,y);line(x,y-12,x,y-27);}
-      const speed=Math.round((data.indicatedAirspeed||0)*1.943844),alt=Math.round(((data.altitude||0)+(options.altitudeOffset||0))*3.28084);
+      const speed=Math.round((data.indicatedAirspeed||0)*1.943844),alt=Math.round(((data.altitude||0)+(data.fieldElevation??options.altitudeOffset??0))*3.28084);
       c.strokeRect(35,323,135,57);c.strokeRect(835,323,160,57);text(String(speed),102,363,'center');text(alt.toLocaleString('en-US'),915,363,'center');
       text('IAS',102,308,'center');text('FT',915,308,'center');text(`M ${(data.mach||0).toFixed(2)}`,35,442);text(`${(data.gLoad??1).toFixed(1)} G`,35,480);text(`AOA ${(data.aoa||0).toFixed(1)}`,35,518);
       text(`${Math.round((data.verticalSpeed||0)*196.85)} FPM`,990,442,'right');text(`RAD ${Math.round((data.agl||0)*3.28084)}`,990,480,'right');
-      const heading=((data.heading||0)+(options.headingOffset||0)+360)%360;text(String(Math.round(heading)%360).padStart(3,'0'),512,92,'center');line(512,106,512,119);
+      const heading=((data.heading||0)+(data.headingOffset??options.headingOffset??0)+360)%360;text(String(Math.round(heading)%360).padStart(3,'0'),512,92,'center');line(512,106,512,119);
       for(let d=-30;d<=30;d+=10){const x=512+d*7;line(x,124,x,138);text(String(Math.round((heading+d+360)%360)).padStart(3,'0'),x,164,'center');}
       text(data.landingAssist?'ASSIST · LAND':state.autopilot?.enabled?'AP · HDG / ALT':'NAV · MANUAL',512,647,'center');text(state.gear?'GEAR DN':'GEAR UP',35,605);
+      if(options.hornet) text(state.arrested?`WIRE ${state.arrested.wire}`:state.hook?'HOOK DN':'HOOK UP',512,605,'center');
       text((state.afterburnerLevel||0)>.05?'AB LIT':state.afterburner?'AB ARMED':'MIL / DRY',990,605,'right');
       if(data.stallWarning||data.gLimitWarning){c.fillStyle='#ffbf70';text(data.stallWarning?'AOA / LOW SPEED':'G LIMIT',512,226,'center');}
       hud.texture.needsUpdate=true;
     }
-    if(upfront) { const c=upfront.ctx;c.fillStyle='#06100e';c.fillRect(0,0,384,256);c.fillStyle='#c4d8b2';c.font='27px ui-monospace, monospace';c.fillText('UFC  /  NAV',22,40);c.fillText(`HDG ${String(Math.round(((data.heading||0)+(options.headingOffset||0)+360)%360)).padStart(3,'0')}`,22,95);c.fillText(`SPD ${Math.round((data.indicatedAirspeed||0)*1.943844)}`,22,145);c.fillText(data.landingAssist?'ASSIST LAND':state.autopilot?.enabled?'AP ENGAGED':'MANUAL',22,205);upfront.texture.needsUpdate=true; }
+    if(upfront) { const c=upfront.ctx;c.fillStyle='#06100e';c.fillRect(0,0,384,256);c.fillStyle='#c4d8b2';c.font='27px ui-monospace, monospace';c.fillText('UFC  /  NAV',22,40);c.fillText(`HDG ${String(Math.round(((data.heading||0)+(data.headingOffset??options.headingOffset??0)+360)%360)).padStart(3,'0')}`,22,95);c.fillText(`SPD ${Math.round((data.indicatedAirspeed||0)*1.943844)}`,22,145);c.fillText(data.landingAssist?'ASSIST LAND':state.autopilot?.enabled?'AP ENGAGED':'MANUAL',22,205);upfront.texture.needsUpdate=true; }
     for(const {s,sign} of displays){const c=s.ctx;c.fillStyle='#05100e';c.fillRect(0,0,384,384);c.strokeStyle=c.fillStyle='#8ac9a0';c.lineWidth=2;c.font='24px ui-monospace, monospace';
       c.strokeRect(8,8,368,368);c.fillText(sign<0?'NAV / ILS':'ENGINE / STATUS',25,45);
       if(sign<0){c.beginPath();c.moveTo(192,80);c.lineTo(192,325);c.moveTo(90,270);c.lineTo(295,270);c.stroke();const off=clamp((data.localizer||0)*22,-100,100);c.strokeRect(175+off,165,34,90);c.fillText(`LOC ${(data.localizer||0).toFixed(1)}`,25,352);}
-      else{c.fillText(`N1 ${Math.round(data.engineN1||20)} %`,30,100);c.fillText(`FUEL ${Math.round(state.fuel||0)} KG`,30,150);c.fillText('UNARMED',30,205);c.fillText('FBW  +9 / -3 G',30,255);c.fillText('SPD BRK '+(state.spoilers?'EXT':'RET'),30,310);}s.texture.needsUpdate=true;
+      else{c.fillText(`${options.hornet?'L/R N1':'N1'} ${Math.round(data.engineN1||20)} %`,30,100);c.fillText(`FUEL ${Math.round(state.fuel||0)} KG`,30,150);c.fillText('UNARMED',30,205);c.fillText(options.hornet?'FBW +7.5 / -3 G':'FBW  +9 / -3 G',30,255);c.fillText('SPD BRK '+(state.spoilers?'EXT':'RET'),30,310);}s.texture.needsUpdate=true;
     }
   }
   group.update=update;group.dispose=()=>{disposeTree(group,textures);finish.dispose();};update();return group;

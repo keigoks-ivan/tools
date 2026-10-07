@@ -2,7 +2,7 @@
 // Frame and units are physics.mjs': metres, local frame (origin = runway 14 centre at field elevation, -z = runway heading 137.3 deg true,
 // +x = right). Ring altitudes are feet MSL (what the pilot reads on the altimeter); the physics state holds metres above the field.
 // Coordinates are whole metres / feet on purpose: dev/check_tours.py hashes them to prove that dev/tour_clearance.json matches this file.
-import { AIRCRAFT, PROFILES, RUNWAY, createFlightState, stepFlight, quaternionFromEuler } from './physics.mjs?v=20261007';
+import { AIRCRAFT, PROFILES, RUNWAY, createFlightState, stepFlight, quaternionFromEuler } from './physics.mjs?v=20261008';
 
 const FT = 3.28084, KT = 1.943844, RAD = Math.PI / 180;
 const freeze = o => Object.freeze(o);
@@ -75,8 +75,9 @@ export const LIGHT_TOURS = freeze([
   }),
 ]);
 export const FIGHTER_TOURS = Object.freeze(TOURS.map(t => freeze({ ...t, id: `fighter-${t.id}`, aircraft: 'fighter', startKt: PROFILES.fighter.tour.startKt })));
-export const toursFor = x => ({ light: LIGHT_TOURS, fighter: FIGHTER_TOURS }[typeof x === 'string' ? x : x?.aircraft] || TOURS);
-export const tourById = id => TOURS.find(t => t.id === id) || LIGHT_TOURS.find(t => t.id === id) || FIGHTER_TOURS.find(t => t.id === id) || null;
+export const HORNET_TOURS = Object.freeze(TOURS.map(t => freeze({ ...t, id: `hornet-${t.id}`, aircraft: 'hornet', startKt: PROFILES.hornet.tour.startKt })));
+export const toursFor = x => ({ light: LIGHT_TOURS, fighter: FIGHTER_TOURS, hornet: HORNET_TOURS }[typeof x === 'string' ? x : x?.aircraft] || TOURS);
+export const tourById = id => TOURS.find(t => t.id === id) || LIGHT_TOURS.find(t => t.id === id) || FIGHTER_TOURS.find(t => t.id === id) || HORNET_TOURS.find(t => t.id === id) || null;
 
 // ---- geometry ------------------------------------------------------------------------------------------------------
 export const bearing = (a, b) => Math.atan2(b.x - a.x, -(b.z - a.z)) / RAD; // local degrees, 0 = runway heading, clockwise

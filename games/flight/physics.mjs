@@ -1,5 +1,6 @@
+import { CARRIER, onCarrierDeck, crossedArrestingWire } from './carrier.mjs?v=20261008';
 import { AIRPORT } from './airport.mjs';
-import { PROFILES } from './profiles.mjs?v=20261007';
+import { PROFILES } from './profiles.mjs?v=20261008';
 
 // Aircraft models live in profiles.mjs. SI units; this is a simulation model, not aircraft certification data.
 // AIRCRAFT is the original twin-engine narrowbody (MQ-320) and keeps every key it always had; the light single (MQ-172) is PROFILES.light.
@@ -14,6 +15,8 @@ export const RUNWAY = Object.freeze({
   nearThreshold: AIRPORT.runway.lengthM / 2 - (AIRPORT.runway.displacedNearM || 0), farThreshold: -AIRPORT.runway.lengthM / 2, heading: 0,
   touchdownTarget: AIRPORT.runway.lengthM / 2 - (AIRPORT.runway.displacedNearM || 0) - AIRPORT.runway.touchdownZoneM, glideslope: AIRPORT.ils.glideslopeDeg,
 });
+
+export const runwayOf = state => state?.carrier ? CARRIER : RUNWAY;
 
 const G = 9.80665;
 const RAD = Math.PI / 180;
@@ -86,12 +89,13 @@ function atmosphere(altitude) {
 
 const speedOfSound = altitude => Math.sqrt(1.4 * 287.05 * Math.max(216.65, 288.15 - Math.max(0, altitude) * .0065));
 function fighterWaveDrag(P, speed, altitude) {
-  if (P.id !== 'fighter') return 0;
+  if (!P.military) return 0;
   const mach = speed / speedOfSound(altitude);
   return .035 * Math.exp(-Math.pow((mach - 1.05) / .19, 2)) + .012 * clamp((mach - .9) / .5, 0, 1);
 }
 
 function airState(state) {
+  const RUNWAY = runwayOf(state);
   const wind = state.wind;
   const relative = { x: state.velocity.x - wind.x, y: state.velocity.y - wind.y, z: state.velocity.z - wind.z };
   const body = inverseRotate(state.quaternion, relative);
@@ -137,19 +141,20 @@ function availableThrust(P, density, speed) {
 
 export function createFlightState(scenario = 'runway', aircraft = 'jet') {
   const P = PROFILES[aircraft] || PROFILES.jet, S = P.scenarios;
-  const approach = scenario === 'approach';
+  const carrier = scenario === 'carrier' && P.hasHook, RUNWAY = carrier ? CARRIER : runwayOf(null);
+  const approach = scenario === 'approach' || carrier;
   const cruise = scenario === 'cruise';
   const speed = approach ? S.approach.speed : cruise ? S.cruise.speed : 0;
   const glide = RUNWAY.glideslope * RAD;
   // The approach starts S.approach.km from the threshold exactly on the glidepath.
-  const altitude = approach ? P.gearHeight + (S.approach.km * 1000 + RUNWAY.nearThreshold - RUNWAY.touchdownTarget) * Math.tan(glide) : cruise ? S.cruise.altitude : P.gearHeight;
+  const altitude = approach ? P.gearHeight + ((carrier ? 4 : S.approach.km) * 1000 + RUNWAY.nearThreshold - RUNWAY.touchdownTarget) * Math.tan(glide) : cruise ? S.cruise.altitude : P.gearHeight;
   const gamma = approach ? -glide : 0;
   const pitch = approach ? S.approach.pitch * RAD : cruise ? S.cruise.pitch * RAD : 0;
   const gearDown = P.fixedGear || !cruise || S.cruise.gear;
   const state = {
     aircraft: P.id,
     scenario: approach ? 'approach' : cruise ? 'cruise' : 'runway',
-    position: { x: cruise ? S.cruise.x : 0, y: altitude, z: approach ? RUNWAY.nearThreshold + S.approach.km * 1000 : cruise ? S.cruise.z : RUNWAY.length / 2 - 180 },
+    position: { x: cruise ? S.cruise.x : 0, y: altitude, z: approach ? RUNWAY.nearThreshold + (carrier ? 4 : S.approach.km) * 1000 : cruise ? S.cruise.z : RUNWAY.length / 2 - 180 },
     velocity: { x: 0, y: speed * Math.sin(gamma), z: -speed * Math.cos(gamma) },
     quaternion: quaternionFromEuler(pitch), angularVelocity: { x: 0, y: 0, z: 0 },
     throttle: approach ? S.approach.throttle : cruise ? S.cruise.throttle : 0,
@@ -166,7 +171,13 @@ export function createFlightState(scenario = 'runway', aircraft = 'jet') {
     // Autopilot speed is indicated airspeed in m/s, matching the cockpit speed selector.
     autopilot: { enabled: false, heading: 0, altitude: approach ? altitude : cruise ? S.cruise.altitude : S.runway.apAltitude, speed: (speed || S.default.speed) * Math.sqrt(atmosphere(altitude + RUNWAY.fieldElevation) / 1.225) },
   };
-  if (P.id === 'fighter') { state.afterburner = false; state.afterburnerLevel = 0; }
+  if (carrier) {
+    state.carrier = true; state.scenario = 'carrier'; state.groundElevation = CARRIER.seaHeight;
+    state.velocity.z = -72 * Math.cos(glide); state.velocity.y = -72 * Math.sin(glide);
+    state.quaternion = quaternionFromEuler(4.5 * RAD); state.throttle = state.engine = .22;
+  }
+  if (P.hasHook) { state.hook = carrier; state.hookPosition = carrier ? 1 : 0; state.arrested = null; state.bolter = false; }
+  if (P.military) { state.afterburner = false; state.afterburnerLevel = 0; }
   return state;
 }
 
@@ -182,7 +193,7 @@ function crash(state, reason) {
 
 function trimAoA(P, state, qArea) {
   const S = P.sas;
-  if (P.id !== 'fighter') return (S.trimAoaBase + state.trim * S.trimAoaGain) * RAD;
+  if (!P.military) return (S.trimAoaBase + state.trim * S.trimAoaGain) * RAD;
   if (state.onGround) return 0;
   // Neutral fighter stick commands approximately 1 G; trim adds a small AoA bias.
   const cl0 = P.aero.cl0 + P.aero.flapCl0 * state.flapPosition / 3;
@@ -198,7 +209,7 @@ function autopilotControls(P, state, controls, air, angles, dt) {
   let verticalTarget = clamp(altitudeError * A.altGain, -A.vs, A.vs);
   const flightPath = Math.atan2(state.velocity.y, Math.hypot(state.velocity.x, state.velocity.z)) / RAD;
   const aero = coefficients(P, air.aoa, state.flapPosition, state.spoilers, state.position.y - state.groundElevation);
-  const drag = 0.5 * air.density * air.speed * air.speed * P.wingArea * (aero.drag + fighterWaveDrag(P, air.speed, state.position.y + RUNWAY.fieldElevation) + P.aero.cdGear * state.gearPosition);
+  const drag = 0.5 * air.density * air.speed * air.speed * P.wingArea * (aero.drag + fighterWaveDrag(P, air.speed, state.position.y + runwayOf(state).fieldElevation) + P.aero.cdGear * state.gearPosition);
   const climbThrust = (P.emptyMass + state.fuel) * G * state.velocity.y / Math.max(air.speed, A.minSpeed);
   const available = availableThrust(P, air.density, air.speed);
   // A power-limited aircraft cannot climb on demand: cap the commanded climb at the rate the spare thrust can sustain, so speed is protected.
@@ -220,12 +231,15 @@ function autopilotControls(P, state, controls, air, angles, dt) {
 }
 
 function advance(state, controls, dt) {
-  const P = profileOf(state), T = P.thrust, S = P.sas, GR = P.ground, CR = P.crash;
+  const P = profileOf(state), T = P.thrust, S = P.sas, GR = P.ground, CR = P.crash, RUNWAY = runwayOf(state);
+  const previousHookZ = state.position.z + CARRIER.hookAftM;
+  if (state.carrier && state.onGround && !onCarrierDeck(state.position)) state.onGround = false;
+  if (P.hasHook) state.hookPosition += clamp(Number(state.hook) - state.hookPosition, -dt / 1.5, dt / 1.5);
   const air = airState(state);
   const angles = attitude(state.quaternion);
   controls = autopilotControls(P, state, controls, air, angles, dt);
   state.throttle = controls.throttle;
-  if (P.id === 'fighter') {
+  if (P.military) {
     if (state.autopilot.enabled) state.afterburner = false;
     const target = state.afterburner && state.throttle >= .9 && state.engine > .85 && state.fuel > 0 ? 1 : 0;
     state.afterburnerLevel += (target - state.afterburnerLevel) * (1 - Math.exp(-dt / .45));
@@ -237,9 +251,10 @@ function advance(state, controls, dt) {
   state.fuel = Math.max(0, state.fuel - (T.fuelIdle + state.engine * T.fuelPerEngine + (state.afterburnerLevel || 0) * (T.afterburnerFuel || 0)) * dt);
   const mass = P.emptyMass + state.fuel;
   const qArea = 0.5 * air.density * air.speed * air.speed * P.wingArea;
-  const aero = coefficients(P, air.aoa, state.flapPosition, state.spoilers, state.position.y - state.groundElevation);
+  const groundSurface = state.carrier && onCarrierDeck(state.position) ? runwayOf(state).elevation : state.groundElevation;
+  const aero = coefficients(P, air.aoa, state.flapPosition, state.spoilers, state.position.y - groundSurface);
   let lift = qArea * aero.lift;
-  if (P.id === 'fighter') lift = clamp(lift, S.minG * mass * G, S.maxG * mass * G);
+  if (P.military) lift = clamp(lift, S.minG * mass * G, S.maxG * mass * G);
   const waveDrag = fighterWaveDrag(P, air.speed, state.position.y + RUNWAY.fieldElevation);
   const drag = qArea * (aero.drag + waveDrag + P.aero.cdGear * state.gearPosition + P.aero.betaDrag * Math.abs(air.beta));
   const direction = unit(air.body);
@@ -250,7 +265,7 @@ function advance(state, controls, dt) {
       ? propSigma(T, air.density) * state.engine * Math.max(0, P.maxThrust - T.speedSlope * air.speed) - (1 - state.engine) * T.idleDrag * qArea
       : P.maxThrust * state.engine * Math.pow(air.density / 1.225, T.lapseExp) * Math.max(T.floor, 1 - air.speed * T.slope);
   }
-  if (P.id === 'fighter' && state.fuel > 0) thrust += (T.afterburnerThrust - P.maxThrust) * state.afterburnerLevel * Math.pow(air.density / 1.225, T.lapseExp) * Math.max(T.floor, 1 - air.speed * T.slope);
+  if (P.military && state.fuel > 0) thrust += (T.afterburnerThrust - P.maxThrust) * state.afterburnerLevel * Math.pow(air.density / 1.225, T.lapseExp) * Math.max(T.floor, 1 - air.speed * T.slope);
   const bodyForce = {
     x: -drag * direction.x - qArea * air.beta * P.aero.sideForce,
     y: lift * liftDirection.y - drag * direction.y,
@@ -263,7 +278,7 @@ function advance(state, controls, dt) {
   // Stability augmentation damps angular rates while retaining AoA trim, stall and inertia.
   const targetAoA = trimAoA(P, state, qArea);
   let pitchRateTarget = controls.pitch * S.pitch + clamp((targetAoA - air.aoa) * S.aoaGain, -S.aoaLimit, S.aoaLimit);
-  if (P.id === 'fighter' && !state.onGround) {
+  if (P.military && !state.onGround) {
     // Approximate fly-by-wire envelope protection: progressively unload near G/AoA limits.
     const up = Math.min(clamp((S.maxG - state.gLoad) / 2, 0, 1), clamp((S.maxAoA - air.aoa / RAD) / 5, 0, 1));
     const down = clamp((state.gLoad - S.minG) / 1.5, 0, 1);
@@ -306,7 +321,7 @@ function advance(state, controls, dt) {
     if (angles.pitch < 0) omega.x += (-angles.pitch * RAD * 4 - omega.x) * (1 - Math.exp(-dt * 8));
     if (angles.pitch > CR.tailPitch && groundSpeed > CR.strikeSpeed) { crash(state, 'tail-strike'); return; }
     if (Math.abs(angles.roll) > CR.wingRoll && groundSpeed > CR.strikeSpeed) { crash(state, 'wing-strike'); return; }
-    if (force.y > mass * G * GR.liftOffForce && groundSpeed > GR.liftOffSpeed) {
+    if (!state.arrested && force.y > mass * G * GR.liftOffForce && groundSpeed > GR.liftOffSpeed) {
       state.onGround = false;
     } else {
       acceleration.y = 0;
@@ -316,6 +331,11 @@ function advance(state, controls, dt) {
     }
   }
 
+  if (state.arrested && state.onGround) {
+    const speed = Math.hypot(state.velocity.x, state.velocity.z), deceleration = Math.min(CARRIER.arrestDeceleration, speed / dt);
+    acceleration.x = speed > .001 ? -state.velocity.x / speed * deceleration : 0;
+    acceleration.z = speed > .001 ? -state.velocity.z / speed * deceleration : 0;
+  }
   state.velocity.x += acceleration.x * dt;
   state.velocity.y += acceleration.y * dt;
   state.velocity.z += acceleration.z * dt;
@@ -332,7 +352,8 @@ function advance(state, controls, dt) {
   }
 
   const onRunway = Math.abs(state.position.x) <= RUNWAY.width / 2 && Math.abs(state.position.z) <= RUNWAY.length / 2;
-  const contactHeight = (onRunway ? RUNWAY.elevation : state.groundElevation) + (state.gearPosition > 0.95 ? P.gearHeight : P.gear.bellyHeight);
+  const onDeck = state.carrier && onCarrierDeck(state.position);
+  const contactHeight = (onRunway || onDeck ? RUNWAY.elevation : state.groundElevation) + (state.gearPosition > 0.95 ? P.gearHeight : P.gear.bellyHeight);
   // Descending contact is a touchdown; rising terrain (not the runway) is hit regardless of vertical speed.
   const terrainHit = !onRunway && state.velocity.y > 0 && state.position.y < contactHeight - 0.05;
   if (!state.onGround && state.position.y <= contactHeight && (state.velocity.y <= 0 || terrainHit)) {
@@ -347,7 +368,7 @@ function advance(state, controls, dt) {
     if (terrainHit || state.touchdown.sinkRate > CR.impactSink || air.speed > CR.impactSpeed || landingAngles.pitch < -4) crash(state, 'ground-impact');
     else if (state.gearPosition < 0.95) crash(state, 'gear-up');
     else if (Math.abs(state.position.x) > RUNWAY.width / 2 || Math.abs(state.position.z) > RUNWAY.length / 2) crash(state, 'off-runway');
-    else if (state.touchdown.sinkRate > CR.hardSink) crash(state, 'hard-landing');
+    else if (state.touchdown.sinkRate > (state.carrier ? 7 : CR.hardSink)) crash(state, 'hard-landing');
     else if (Math.abs(landingAngles.roll) > CR.landingRoll) crash(state, 'wing-strike');
     else if (landingAngles.pitch > CR.landingPitch) crash(state, 'tail-strike');
     else if (Math.abs(state.touchdown.headingError) > CR.sideHeading) crash(state, 'side-load');
@@ -356,7 +377,13 @@ function advance(state, controls, dt) {
     state.angularVelocity.x *= 0.2;
     state.angularVelocity.z *= 0.2;
   }
-  if (state.onGround && state.position.z < RUNWAY.farThreshold - 60 && Math.hypot(state.velocity.x, state.velocity.z) > CR.overrunSpeed) crash(state, 'runway-overrun');
+  if (state.carrier && !state.crashed && !state.arrested) {
+    const hookZ = state.position.z + CARRIER.hookAftM;
+    const wire = crossedArrestingWire(state, previousHookZ, hookZ, wrapAngle(attitude(state.quaternion).heading));
+    if (wire !== null) { state.arrested = { wire, elapsed: state.elapsed, speed: Math.hypot(state.velocity.x, state.velocity.z), z: state.position.z }; state.afterburner = false; state.bolter = false; }
+    else if (state.onGround && hookZ < CARRIER.wires.at(-1)) state.bolter = true;
+  }
+  if (!state.carrier && state.onGround && state.position.z < RUNWAY.farThreshold - 60 && Math.hypot(state.velocity.x, state.velocity.z) > CR.overrunSpeed) crash(state, 'runway-overrun');
 }
 
 export function stepFlight(state, input = {}, dt = 1 / 120, environment = {}) {
@@ -365,13 +392,14 @@ export function stepFlight(state, input = {}, dt = 1 / 120, environment = {}) {
   // Bound interruption recovery; callers should use a fixed-step accumulator for elapsed real time.
   dt = Math.min(dt, 0.25);
   state.wind = copy(environment.wind || state.wind);
-  state.groundElevation = environment.groundElevation || 0;
+  state.groundElevation = state.carrier ? CARRIER.seaHeight : environment.groundElevation || 0;
+  if (P.hasHook) state.hook = input.hook ?? state.hook;
   state.flaps = clamp(Math.round(input.flaps ?? state.flaps), 0, 3);
   // Fixed gear and no spoilers on the light aircraft: those inputs are ignored.
   state.gear = P.fixedGear ? true : input.gear ?? state.gear;
   state.trim = clamp(input.trim ?? state.trim, -1, 1);
   state.spoilers = P.hasSpoilers ? input.spoilers ?? state.spoilers : false;
-  if (P.id === 'fighter') state.afterburner = input.afterburner ?? state.afterburner;
+  if (P.military) state.afterburner = input.afterburner ?? state.afterburner;
   state.brake = clamp(input.brake ?? 0, 0, 1);
   if (input.autopilot) Object.assign(state.autopilot, input.autopilot);
   const controls = {
@@ -387,11 +415,12 @@ export function stepFlight(state, input = {}, dt = 1 / 120, environment = {}) {
   return state;
 }
 
-export function getFlightData(state, runway = RUNWAY) {
+export function getFlightData(state, runway = runwayOf(state)) {
   const P = profileOf(state);
   const air = airState(state);
   const angles = attitude(state.quaternion);
-  const aero = coefficients(P, air.aoa, state.flapPosition, state.spoilers, state.position.y - state.groundElevation);
+  const groundSurface = state.carrier && onCarrierDeck(state.position) ? runwayOf(state).elevation : state.groundElevation;
+  const aero = coefficients(P, air.aoa, state.flapPosition, state.spoilers, state.position.y - groundSurface);
   const mass = P.emptyMass + state.fuel;
   const stallSpeed = Math.sqrt(2 * mass * G / (air.density * P.wingArea * aero.maxLift));
   const distance = state.position.z - runway.nearThreshold;
@@ -401,13 +430,13 @@ export function getFlightData(state, runway = RUNWAY) {
   const ilsValid = !state.onGround && !state.crashed && aligned && localizerDistance > 0;
   const gsValid = ilsValid && glideDistance > 0;
   const localizer = ilsValid ? Math.atan2(state.position.x, localizerDistance) / RAD : 0;
-  const glideslope = gsValid ? Math.atan2(state.position.y - P.gearHeight, glideDistance) / RAD - runway.glideslope : 0;
+  const glideslope = gsValid ? Math.atan2(state.position.y - runway.elevation - P.gearHeight, glideDistance) / RAD - runway.glideslope : 0;
   const running = state.fuel > 0 && !state.crashed;
   return {
-    ...(P.id === 'fighter' ? { mach: air.speed / speedOfSound(state.position.y + RUNWAY.fieldElevation), afterburnerLevel: state.afterburnerLevel, trimPitchRate: clamp((trimAoA(P, state, .5 * air.density * air.speed * air.speed * P.wingArea) - air.aoa) * P.sas.aoaGain, -P.sas.aoaLimit, P.sas.aoaLimit), gLimitWarning: state.gLoad > 8.5 || state.gLoad < -2.5 } : {}),
+    ...(P.military ? { mach: air.speed / speedOfSound(state.position.y + runway.fieldElevation), afterburnerLevel: state.afterburnerLevel, trimPitchRate: clamp((trimAoA(P, state, .5 * air.density * air.speed * air.speed * P.wingArea) - air.aoa) * P.sas.aoaGain, -P.sas.aoaLimit, P.sas.aoaLimit), gLimitWarning: state.gLoad > P.sas.maxG - .5 || state.gLoad < P.sas.minG + .5 } : {}),
     ...angles, airspeed: air.speed, indicatedAirspeed: air.speed * Math.sqrt(air.density / 1.225),
     groundSpeed: Math.hypot(state.velocity.x, state.velocity.z), altitude: state.position.y,
-    agl: state.position.y - state.groundElevation, verticalSpeed: state.velocity.y,
+    agl: state.position.y - (state.carrier ? runway.elevation : state.groundElevation), verticalSpeed: state.velocity.y,
     groundTrack: (Math.atan2(state.velocity.x, -state.velocity.z) / RAD + 360) % 360,
     aoa: air.aoa / RAD, sideslip: air.beta / RAD, gLoad: state.gLoad,
     stallSpeed, stallWarning: !state.onGround && (air.aoa > aero.stallAlpha - 2 * RAD || air.speed < stallSpeed * 1.08),
@@ -416,6 +445,7 @@ export function getFlightData(state, runway = RUNWAY) {
     engineN1: running ? 20 + state.engine * 80 : 0,
     // Synthetic RPM for the light aircraft's tachometer (fixed-pitch prop: the real value also depends on airspeed).
     ...(P.ui.rpm ? { engineRpm: running ? P.ui.rpm.idle + state.engine * (P.ui.rpm.max - P.ui.rpm.idle) : 0 } : {}),
+    ...(P.hasHook ? { hookPosition: state.hookPosition, arrested: state.arrested, bolter: state.bolter } : {}),
     distanceToThreshold: distance, localizer, glideslope,
     localizerDeviation: localizer, glideslopeDeviation: glideslope, ilsValid, gsValid,
     runwayRemaining: Math.max(0, state.position.z - runway.farThreshold),

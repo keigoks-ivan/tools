@@ -102,12 +102,12 @@ const light = {
   tour: { startKt: 100, bankDeg: 30, limits: { minLegM: 2000, maxTurnDeg: 75, maxClimbPct: 2, maxDescentPct: 4, minMinutes: 5, maxMinutes: 9, ringClearFt: 1000, legClearFt: 800, wallM: 600, flownWallM: 400, flownClearFt: 800, wallDropFt: 500 } },
 };
 
-// Fictional MQ-16: F-16-class dimensions and thrust; the aerodynamic/SAS model is tuned for this game.
+// F-16C dimensions and thrust; the aerodynamic/SAS model is tuned for this game.
 // Public reference: https://www.169fw.ang.af.mil/About/Fact-Sheets/Article/454065/f-16-fighting-falcon/
 // This is an unarmed flight model, not a reproduction of military flight-control software.
 const fighter = {
   ...jet,
-  id: 'fighter', name: 'MQ-16', nameZh: '游隼戰鬥機', nameEn: 'Peregrine', emptyMass: 8935, initialFuel: 2500,
+  id: 'fighter', name: 'F-16C', nameZh: '戰隼', nameEn: 'Fighting Falcon', military: true, emptyMass: 8935, initialFuel: 2500,
   wingArea: 27.9, span: 9.8, length: 15.06, chord: 3.2,
   maxThrust: 76500, gearHeight: 2, maxSpeed: 360, rotateSpeed: 72,
   inertia: { x: 78000, y: 92000, z: 18000 },
@@ -126,7 +126,7 @@ const fighter = {
     cruise: { altitude: 2400, speed: 200, pitch: 2.3, throttle: .21, flaps: 0, trim: 0, x: -1400, z: 6000, gear: false },
   },
   ui: {
-    ...jet.ui, label: 'MQ-16 · PEREGRINE', flightLabel: 'VIPER 01', engines: 1,
+    ...jet.ui, label: 'F-16C · FIGHTING FALCON', flightLabel: 'VIPER 01', engines: 1,
     apSpeed: { min: 145, max: 600, def: 300 },
     cameras: { cockpit: [0, .95, -3.6], wing: { pos: [4.6, 1.5, 4], look: [0, .2, -3] }, chase: { back: 29, side: 8, up: 8, lookAhead: 1 }, attract: [18, 9, 22] },
     warnings: { ...jet.ui.warnings, bankDeg: 55 }, score: { refKt: 155, tolKt: 15 },
@@ -136,4 +136,34 @@ const fighter = {
   tour: { ...jet.tour, startKt: 300, bankDeg: 35 },
 };
 
-export const PROFILES = deepFreeze({ jet, light, fighter });
+// F/A-18C Hornet (A-D family, not the larger E/F Super Hornet). Public dimensions/engine class:
+// https://www.navair.navy.mil/product/FA-18AD-Hornet . Aerodynamics and controllers are game approximations.
+const hornet = {
+  ...fighter,
+  id: 'hornet', name: 'F/A-18C', nameZh: '大黃蜂', nameEn: 'Hornet', hasHook: true,
+  emptyMass: 10455, initialFuel: 3000, wingArea: 37.2, span: 11.43, length: 17.07, chord: 3.5,
+  maxThrust: 98000, gearHeight: 2.2, maxSpeed: 330, rotateSpeed: 67,
+  inertia: { x: 125000, y: 142000, z: 34000 },
+  aero: { ...fighter.aero, slope: 4.6, cl0: .14, flapCl0: .52, cd0: .025, k: .075, flapCd: .038, groundEffect: .06 },
+  thrust: { ...fighter.thrust, afterburnerThrust: 158000, spoolUp: 2.1, spoolDown: 1.3, fuelIdle: .09, fuelPerEngine: 1.05, afterburnerFuel: 3.1 },
+  sas: { ...fighter.sas, pitch: .55, roll: 1.65, pitchK: 2.0, maxG: 7.5, minG: -3, maxAoA: 28 },
+  ap: { ...fighter.ap, bank: 30, vs: 16, rollGain: .022, rollDamp: .68 },
+  ground: { ...fighter.ground, liftOffSpeed: 50, brake: 4.0 },
+  crash: { ...fighter.crash, hardSink: 5.5, impactSink: 9, landingPitch: 16 },
+  scenarios: {
+    default: { speed: 160, apAltitude: 1800 },
+    runway: { flaps: 1, trim: 0, throttle: 0, apAltitude: 1800 },
+    approach: { km: 7, speed: 76, pitch: 4.2, throttle: .21, flaps: 3, trim: 0 },
+    cruise: { altitude: 2400, speed: 180, pitch: 2.4, throttle: .25, flaps: 0, trim: 0, x: -1400, z: 6000, gear: false },
+  },
+  ui: { ...fighter.ui, label: 'F/A-18C · HORNET', flightLabel: 'HORNET 01', engines: 2,
+    apSpeed: { min: 130, max: 550, def: 280 },
+    cameras: { cockpit: [0, 1.05, -4.5], wing: { pos: [5.1, 1.8, 4.5], look: [0, .2, -4] }, chase: { back: 32, side: 9, up: 9, lookAhead: 1 }, attract: [21, 10, 25] },
+    score: { refKt: 140, tolKt: 15 }, flapLabels: ['UP', 'AUTO', 'HALF', 'FULL'],
+  },
+  novice: { ...fighter.novice, rotateKt: 130, flapRetractKt: 180, approachSpeedKt: [130, 165], flareAglM: 10 },
+  challenge: { ...fighter.challenge, vrefKt: 140, flareAglM: 10 },
+  tour: { ...fighter.tour, startKt: 280, bankDeg: 30 },
+};
+
+export const PROFILES = deepFreeze({ jet, light, fighter, hornet });

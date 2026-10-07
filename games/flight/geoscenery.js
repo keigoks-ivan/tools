@@ -526,7 +526,7 @@ export function createGeoScenery(THREE, scene, config) {
     }
   }
   const ready = loadScenery().catch(error => { console.warn(error); terrainSettled = true; failed++; terrainDone(); notify(); });
-  return { ready, groundHeight, geographicPosition, status, setTour, ensureCountry, setQuality(value) {
+  return { ready, groundHeight, geographicPosition, status, setVisible(value) { group.visible = value; }, setTour, ensureCountry, setQuality(value) {
     quality = value === 'low' ? 'low' : value === 'high' ? 'high' : 'medium';
     visualUniforms.uTerrainQuality.value = quality === 'low' ? 0 : quality === 'high' ? 2 : 1;
     vegetation?.setQuality(quality);

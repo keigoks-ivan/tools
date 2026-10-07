@@ -7,8 +7,8 @@ const finite = (n, fallback = 0) => number(Number(n), fallback);
 export function flightAudioFrame(state = {}, data = {}, options = {}) {
   const profile = typeof options.aircraft === 'object' ? options.aircraft : null;
   const requested = profile?.id || options.aircraft || state.aircraft;
-  const id = requested === 'fighter' ? 'fighter' : requested === 'light' ? 'light' : 'jet';
-  const fighter = id === 'fighter', afterburner = fighter && !state.crashed && state.fuel !== 0 ? clamp(finite(state.afterburnerLevel), 0, 1) : 0;
+  const id = requested === 'hornet' ? 'hornet' : requested === 'fighter' ? 'fighter' : requested === 'light' ? 'light' : 'jet';
+  const fighter = id === 'fighter' || id === 'hornet', afterburner = fighter && !state.crashed && state.fuel !== 0 ? clamp(finite(state.afterburnerLevel), 0, 1) : 0;
   const light = id === 'light', cockpit = (options.view ?? 0) === 0;
   const running = state.fuel !== 0 && !state.crashed;
   const power = running ? clamp(finite(state.engine), 0, 1) : 0;
@@ -25,11 +25,11 @@ export function flightAudioFrame(state = {}, data = {}, options = {}) {
     else if (finite(data.agl, Infinity) < (warningProfile?.bankAgl ?? (light ? 80 : 100)) && Math.abs(finite(data.roll)) > (warningProfile?.bankDeg ?? (light ? 45 : 35))) warning = 'bank';
   }
   return {
-    id, light, cockpit, ...(fighter ? { fighter, afterburner } : {}), view: options.view ?? 0, power, n1, rpm, running,
+    id, light, cockpit, ...(fighter ? { fighter, afterburner, twin: id === 'hornet' } : {}), view: options.view ?? 0, power, n1, rpm, running,
     audible: Boolean(options.active && !options.paused && !state.crashed),
     engineLevel: cockpit ? (light ? 0.42 : fighter ? .42 : 0.30) : options.view === 2 ? 0.88 : 0.72,
     cabinCutoff: cockpit ? (light ? 1100 : fighter ? 1100 : 760) : 6800,
-    fanHz: (fighter ? 150 : 92) + 490 * Math.pow(n1, 1.35), coreHz: 34 + 71 * n1,
+    fanHz: (id === 'hornet' ? 125 : fighter ? 150 : 92) + 490 * Math.pow(n1, 1.35), coreHz: 34 + 71 * n1,
     firingHz: rpm / 30, propHz: rpm / 30,
     windGain: Math.min(0.11, Math.pow(speed / (light ? 65 : 155), 2.25) * (cockpit ? (light ? 0.045 : 0.020) : 0.09)) * turbulent,
     windHz: 650 + Math.min(1800, speed * (light ? 18 : 9)),
@@ -186,8 +186,8 @@ function buildSoundGraph(context) {
     smooth(jetCabin.frequency, frame.cabinCutoff, time, 0.18); smooth(lightCabin.frequency, frame.cabinCutoff, time, 0.18);
     for (let index = 0; index < jet.length; index++) {
       const voice = jet[index], detune = index ? 1.0041 : 0.9985;
-      const proximity = frame.fighter ? (index ? 0 : 1.65) : frame.view === 2 ? index ? 1.24 : 0.69 : 1;
-      if (voice.stereo.pan) smooth(voice.stereo.pan, frame.fighter ? 0 : (index ? 1 : -1) * (frame.cockpit ? 0.19 : 0.48), time);
+      const proximity = frame.fighter ? (frame.twin ? 1 : index ? 0 : 1.65) : frame.view === 2 ? index ? 1.24 : 0.69 : 1;
+      if (voice.stereo.pan) smooth(voice.stereo.pan, frame.fighter && !frame.twin ? 0 : (index ? 1 : -1) * (frame.cockpit ? 0.19 : 0.48), time);
       smooth(voice.fan.source.frequency, frame.fanHz * detune, time, 0.14);
       smooth(voice.core.source.frequency, frame.coreHz * detune, time, 0.14);
       smooth(voice.blade.source.frequency, (720 + 1970 * frame.n1) * detune, time, 0.14);
@@ -282,7 +282,7 @@ export async function renderFlightAudioPreview(OfflineAudioContext, options = {}
   const context = new OfflineAudioContext(2, Math.ceil(seconds * sampleRate), sampleRate);
   const graph = buildSoundGraph(context), power = clamp(finite(options.power, 0.7), 0, 1);
   const light = options.aircraft === 'light';
-  const state = { aircraft: options.aircraft === 'fighter' ? 'fighter' : light ? 'light' : 'jet', afterburnerLevel: clamp(finite(options.afterburner), 0, 1), engine: power, fuel: 100, onGround: options.onGround || false };
+  const state = { aircraft: options.aircraft === 'hornet' ? 'hornet' : options.aircraft === 'fighter' ? 'fighter' : light ? 'light' : 'jet', afterburnerLevel: clamp(finite(options.afterburner), 0, 1), engine: power, fuel: 100, onGround: options.onGround || false };
   const data = { indicatedAirspeed: finite(options.airspeed, light ? 48 : 115), groundSpeed: finite(options.groundSpeed), engineN1: 20 + power * 80, engineRpm: 700 + power * 2000 };
   const frame = flightAudioFrame(state, data, { ...options, active: true });
   graph.configure(frame, { gearMoving: options.gearMoving, flapsMoving: options.flapsMoving }, 0);

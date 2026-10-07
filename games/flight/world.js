@@ -242,7 +242,7 @@ export function createWorld(THREE, scene, options = {}) {
   }
   update(0, { position: { x: 0, y: 4, z: near - 180 } });
   architectureDetails.forEach(detail => { detail.visible = options.quality !== 'low'; });
-  return { runway, update, atmosphere: atmosphere.uniforms, setQuality(value) { atmosphere.setQuality(value); airportShadows.visible = value !== 'low'; architectureDetails.forEach(detail => { detail.visible = value !== 'low'; }); }, setGeographic(enabled) { landscape.visible = !enabled; }, dispose() {
+  return { runway, update, setVisible(value) { root.visible = value; }, atmosphere: atmosphere.uniforms, setQuality(value) { atmosphere.setQuality(value); airportShadows.visible = value !== 'low'; architectureDetails.forEach(detail => { detail.visible = value !== 'low'; }); }, setGeographic(enabled) { landscape.visible = !enabled; }, dispose() {
     scene.remove(root);
     atmosphere.dispose();
     geometries.forEach(value => value.dispose()); materials.forEach(value => value.dispose()); textures.forEach(value => value.dispose());

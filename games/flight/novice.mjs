@@ -1,6 +1,6 @@
 // Novice mode: pure logic (no DOM, no three.js). main.js feeds it the live state and shows the result.
 // Every function reads the same units as physics.mjs: metres, m/s, local frame (-z = runway heading), data.heading in local degrees.
-import { AIRCRAFT, RUNWAY, PROFILES } from './physics.mjs?v=20261007';
+import { AIRCRAFT, RUNWAY, PROFILES } from './physics.mjs?v=20261008';
 
 const KT = 1.943844, FT = 3.28084, RAD = Math.PI / 180;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -31,7 +31,7 @@ export const NOVICE_LIGHT = Object.freeze({
 });
 // The novice table for an aircraft: 'jet' | 'light' | a flight state (reads state.aircraft). Anything else is the jet.
 export const NOVICE_FIGHTER = Object.freeze({ ...NOVICE, ...PROFILES.fighter.novice, approachKt: PROFILES.fighter.novice.approachSpeedKt });
-export const noviceFor = x => ({ light: NOVICE_LIGHT, fighter: NOVICE_FIGHTER }[typeof x === 'string' ? x : x?.aircraft] || NOVICE);
+export const noviceFor = x => ({ light: NOVICE_LIGHT, fighter: NOVICE_FIGHTER, hornet: Object.freeze({ ...NOVICE, ...PROFILES.hornet.novice, approachKt: PROFILES.hornet.novice.approachSpeedKt }) }[typeof x === 'string' ? x : x?.aircraft] || NOVICE);
 
 // Same condition main.js mission() uses for the stabilised approach (routeIndex only matters for the takeoff scenario).
 export function approachActive(state, data, routeIndex = 0) {
