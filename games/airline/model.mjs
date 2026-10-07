@@ -254,7 +254,8 @@ export function crewQuote(s,type) {
   return {type,hours,monthly,fee:monthly*.5,trainingTurns,readyTurn:s.turn+trainingTurns};
 }
 export function crewAvailability(s,routes=s.routes) {
-  const hours=fleetHours(s,routes),legacy=Object.fromEntries(Object.keys(AIRCRAFT).map(t=>[t,fleetCount(s,t)]));
+  const hours=fleetHours(s,routes),legacyHours=s.crews?{}:fleetHours(s,s.routes);
+  const legacy=Object.fromEntries(Object.keys(AIRCRAFT).map(t=>[t,Math.max(fleetCount(s,t),Math.ceil((legacyHours[t]||0)/crewQuote(s,t).hours-1e-9))]));
   const crews=s.crews??legacy;
   return Object.fromEntries(modeOf(s).types.map(type=>{
     const q=crewQuote(s,type),ready=crews[type]||0,usedHours=hours[type]||0,required=Math.ceil(usedHours/q.hours-1e-9);
@@ -265,6 +266,8 @@ export function crewAvailability(s,routes=s.routes) {
 function ensureManagement(s) {
   if(!s.crews){
     s.crews={};for(const a of s.fleet)s.crews[a.type]=(s.crews[a.type]||0)+1;
+    const hours=fleetHours(s,s.routes);
+    for(const [type,n]of Object.entries(hours))s.crews[type]=Math.max(s.crews[type]||0,Math.ceil(n/crewQuote(s,type).hours-1e-9));
     // Honour deliveries already ordered under the old rules without an unexpected staffing lock.
     s.crewOrders=(s.fleetOrders||[]).map((o,i)=>({id:i+1,type:o.type,readyTurn:o.readyTurn,fee:0}));
   }

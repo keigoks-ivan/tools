@@ -106,3 +106,11 @@ test('cash movements reconcile order deposits, construction, staffing, operation
   s=M.applyDecisions(s,d).state;assert.ok(M.cashCommitments(s).future>M.cashCommitments(s).current);
   for(let i=0;i<4;i++){const out=settle(s);s=out.state;reconciles(out.report.company);near(out.report.company.commitments.current,M.cashCommitments(s).current);if(i===0){assert.ok(out.report.company.cashFlow.aircraft<0);assert.ok(out.report.company.cashFlow.staff<0);}if(i===3)assert.ok(out.report.company.cashFlow.debtPayments<0);}
 });
+test('legacy intensive schedules receive enough roster hours to preserve their committed flights',()=>{
+  const s=M.newGame();s.maintenance['MQ-320']='push';
+  s.routes=[{city:'NRT',type:'MQ-320',weekly:24,fare:'mid',age:2}];delete s.crews;delete s.crewOrders;
+  assert.equal(M.routeCapacity(s,s.routes).fits,true,'read-only legacy planning is staffed');
+  const restored=M.deserialize(M.serialize(s));assert.equal(restored.crews['MQ-320'],3);
+  assert.deepEqual(restored.routes,s.routes);assert.deepEqual(M.applyDecisions(restored,{routes:restored.routes}).errors,[]);
+  assert.equal(settle(restored).report.routes[0].weekly,24);
+});
