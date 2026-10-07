@@ -1,6 +1,7 @@
 /* 靜態遊戲場景與操作台；不使用持續動畫、模糊濾鏡或背景渲染。 */
 body[data-view=routes],body[data-view=manufacturing],body[data-view=technology]{overflow:auto;height:auto;min-height:100%;background:#e7efea;color:#193c48;--route-ink:#193c48;--route-muted:#57747a;--route-border:#c6d8d6;--route-accent:#e9a63b;--route-accent-soft:#fff0d0;--route-surface:#fbfdf8;--route-hud:#193f48;--route-shadow:#b3c8c7}
-body[data-view=technology]{background:#e8f0f4;--route-accent:#299d98;--route-accent-soft:#daf3ed;--route-hud:#243f60;--route-border:#c8d8e4;--route-shadow:#b8cbd9}
+body[data-view=manufacturing]{background:radial-gradient(ellipse at 12% 0%,#2c3b42,transparent 55%),#14232c;--route-accent:#eab452;--route-accent-soft:#fff0d0;--route-hud:#192c36;--route-border:#d4c3a2;--route-shadow:#a5977f;--route-surface:#fcf7ea}
+body[data-view=technology]{background:radial-gradient(ellipse at 80% 0%,#25414a,transparent 55%),#132330;--route-accent:#239b96;--route-accent-soft:#dbf3ec;--route-hud:#1b3442;--route-border:#bfcfc9;--route-shadow:#96afa9;--route-surface:#f4f9f3}
 body[data-view=routes]{background:radial-gradient(ellipse at 18% 0%,#d3ece3 0%,transparent 56%),linear-gradient(150deg,#edf3e9,#e3edf2)}
 body[data-view=routes] #stage,body[data-view=routes] #vignette,body[data-view=manufacturing] #stage,body[data-view=manufacturing] #vignette,body[data-view=technology] #stage,body[data-view=technology] #vignette{display:none}
 
@@ -51,7 +52,7 @@ body[data-view=routes] #stage,body[data-view=routes] #vignette,body[data-view=ma
 
 /* 遊戲 HUD 與操作台。 */
 .venture-shell{max-width:1600px;margin:auto;padding:18px 26px 20px;font-size:13px}
-.venture-top{display:flex;align-items:center;gap:21px;padding:16px 20px;border:1px solid #122e3780;border-bottom:4px solid #122e375c;border-radius:14px;background:var(--route-hud);color:#f7fbef;box-shadow:0 5px 0 #b8cecb5c}
+.venture-top{display:flex;align-items:center;gap:21px;padding:16px 20px;border:1px solid #6c7d79;border-top:3px solid var(--route-accent);border-bottom:4px solid #0a182080;border-radius:12px;background:var(--route-hud);color:#f7fbef;box-shadow:0 5px 14px #081b2340}
 .venture-back{display:inline-flex;align-items:center;min-height:34px;padding:7px 10px;border:1px solid #aec9c332;border-radius:7px;background:#ffffff09;color:#d2e5df;text-decoration:none;font-size:11px;white-space:nowrap}
 .venture-title{flex:1;min-width:0}
 .venture-title>span{display:block;font-size:8px;font-weight:750;letter-spacing:.14em;color:#b7d7ca}
@@ -78,13 +79,16 @@ body[data-view=routes] #stage,body[data-view=routes] #vignette,body[data-view=ma
 .venture-tile.bad strong,.bad-text{color:#bf4e42!important}
 .good-text{color:#21876c!important}
 .venture-nav{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin:0 0 18px}
-.venture-nav button{background:#eef5f0;color:#587780;border-bottom-width:2px;min-height:35px;padding:8px 12px;font-size:11px}
-.venture-nav button.on{background:var(--route-hud);color:#f3faef;border-color:var(--route-hud);border-bottom-color:#132d33}
+.venture-nav button{background:#213943;color:#c4d5d1;border-color:#47636a;border-bottom:2px solid #091b25;min-height:35px;padding:8px 12px;font-size:11px;box-shadow:inset 0 1px 0 #ffffff0c}
+.venture-nav button.on{background:var(--route-accent-soft);color:var(--route-ink);border-color:var(--route-accent);border-bottom-color:#947845}
+.venture-nav button:hover:not(:disabled){background:#32505a;color:#fff}
+.venture-nav button.on:hover:not(:disabled){background:var(--route-accent-soft);color:var(--route-ink)}
 .venture-nav [data-action=finance]{margin-left:auto}
 .venture-shell button.venture-mobile-adjust{display:none}
 .venture-notice{display:flex;align-items:center;gap:12px;padding:12px 15px;margin:15px 0;border:1px solid #9fcbb5;border-left:4px solid #419975;border-radius:8px;background:#e8f8eb;color:#315b4a;font-size:12px;line-height:1.7}
 .venture-notice.bad{background:#fff0df;color:#92512e;border-color:#e0b180;border-left-color:#d67c44}
 .venture-notice>button:last-child{margin-left:auto;min-height:29px;padding:4px 9px}
+.venture-notice[role=status]{position:sticky;top:8px;z-index:5;box-shadow:0 6px 20px #081e3055}
 .venture-event{display:flex;align-items:center;gap:14px;padding:18px 20px;margin-bottom:18px;border:2px solid #d1a44e;border-bottom:4px solid #b89448;border-radius:12px;background:#fff2ce;box-shadow:0 5px 0 #dac69540}
 .venture-event>div{flex:1;min-width:0}
 .venture-event span{font-size:10px;font-weight:750;letter-spacing:.04em;color:#ac7022}
@@ -99,24 +103,26 @@ body[data-view=technology] .venture-sidebar>.venture-section:first-child{backgro
 .venture-sidebar>.venture-section:first-child>h2:before{content:'';width:9px;height:9px;flex:none;background:var(--route-accent);border-radius:2px;box-shadow:0 0 0 4px var(--route-accent-soft)}
 
 /* 圖畫是完整主場景，標題和資源數字留在 HUD，不遮蓋場景。 */
-.venture-scene{position:relative;overflow:hidden;margin-bottom:20px;border:2px solid var(--route-border);border-bottom:4px solid var(--route-shadow);border-radius:15px;background:#e3efdc}
+.venture-scene{position:relative;overflow:hidden;margin-bottom:20px;border:1px solid #738887;border-top:3px solid var(--route-accent);border-bottom:4px solid #0a1720;border-radius:12px;background:#192c36;box-shadow:0 12px 26px #06182040}
 .technology-workspace .venture-scene{background:#dcebf0}
-.venture-scene-label{position:relative;inset:auto;width:auto;z-index:1;padding:14px 19px;background:var(--route-hud);border-bottom:2px solid #122f384d;color:#f5faec}
+.venture-scene-label{position:relative;inset:auto;width:auto;z-index:1;padding:12px 19px;background:var(--route-hud);border-bottom:1px solid #91a49842;color:#f5faec}
 .venture-scene-label>span{font-size:9px;letter-spacing:.1em;font-weight:750;color:#b6d2c6}
-.venture-scene-label h2{font-size:20px;font-weight:800;line-height:1.45;margin:6px 0 4px}
+.venture-scene-label h2{font-size:20px;font-weight:800;line-height:1.45;margin:4px 0 2px}
 .venture-scene-label p{font-size:10px;line-height:1.7;color:#c7ddd2;margin:0}
 .venture-scene>.route-scene-image,.venture-scene>svg{display:block;width:100%;height:auto;max-height:540px;min-height:0;object-fit:contain;margin:0;background:#e3efdc}
-.venture-scene-map{position:relative;overflow:hidden;min-width:0;background:#e3efdc}
-.technology-workspace .venture-scene-map{background:#dcebf0}
-.venture-scene-map>.route-scene-image,.venture-scene-map>svg{display:block;width:100%;height:auto;object-fit:contain;max-height:540px;margin:0}
-.venture-shell .scene-hotspot{position:absolute;z-index:2;display:flex;align-items:center;gap:7px;min-height:34px;padding:7px 10px;border:2px solid #fff4c5;border-bottom:4px solid #99743d;border-radius:9px;background:#fff9e8;color:#40554f;font-size:11px;font-weight:800;box-shadow:0 3px 8px #254a493b;transform:translate(-50%,-50%);white-space:nowrap}
-.venture-shell .scene-hotspot:hover:not(:disabled){background:#fff0b9;border-color:#ffe093}
-.scene-pin-number{display:grid;place-items:center;flex:none;width:25px;height:27px;border-radius:6px;background:#eac178;color:#614e2d;font-size:12px;font-weight:850;box-shadow:inset 0 1px 0 #fff7}
+.venture-scene-map{position:relative;overflow:hidden;min-width:0;background:#172c36;aspect-ratio:16/9}
+.technology-workspace .venture-scene-map{background:#1c3340}
+.venture-scene-map>.route-scene-image,.venture-scene-map>svg{display:block;width:100%;height:100%;object-fit:cover;max-height:none;margin:0}
+.venture-shell .scene-hotspot{position:absolute;z-index:2;display:flex;align-items:center;gap:7px;min-height:34px;padding:7px 10px;border:1px solid #f6d595;border-bottom:3px solid #986c36;border-radius:7px;background:#192e39f2;color:#fff3d5;font-size:11px;font-weight:800;box-shadow:0 4px 12px #07182488;transform:translate(-50%,-50%);white-space:nowrap;transition:background .15s,border-color .15s}
+.venture-shell .scene-hotspot:hover:not(:disabled){background:#2b454a;border-color:#ffe7a5;color:#fff8df}
+.scene-pin-number{display:grid;place-items:center;flex:none;width:25px;height:27px;border-radius:4px;background:#ecc278;color:#4f3e21;font-size:12px;font-weight:850;box-shadow:inset 0 1px 0 #fff7}
 .scene-hotspot>span:last-child{display:flex;flex-direction:column;gap:3px;text-align:left}
 .scene-hotspot b{font-size:11px;font-weight:800}
-.scene-hotspot small{font-size:9px;color:#728375;font-weight:550}
-.venture-shell .scene-hotspot.warn{border-color:#f2a567;border-bottom-color:#a66239;background:#fff0db}
-.scene-map-status{position:absolute;left:14px;top:13px;display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border:1px solid #bdd6c6;border-bottom:3px solid #97b7a9;border-radius:7px;background:#fffdf0ed;color:#396358;font-size:10px;font-weight:700;z-index:1}
+.scene-hotspot small{font-size:9px;color:#b4cdc5;font-weight:550}
+.venture-shell .scene-hotspot.warn{border-color:#ffb271;border-bottom-color:#8c4431;background:#58372bf5;color:#ffe7c6;box-shadow:0 0 0 3px #d7835022,0 4px 12px #07182488}
+.venture-shell .scene-hotspot.warn small{color:#f4c1a1}
+.scene-map-status{position:absolute;left:14px;top:auto;bottom:12px;display:inline-flex;align-items:center;gap:6px;padding:6px 9px;border:1px solid #91aba27a;border-radius:5px;background:#172e38ed;color:#d9e9dc;font-size:10px;font-weight:650;z-index:1}
+.scene-map-status:before{content:'';width:5px;height:5px;flex:none;background:var(--route-accent);border-radius:50%}
 .scene-objective,.venture-objective{display:flex;align-items:center;gap:15px;margin:0 0 18px;padding:15px 19px;border:1px solid #c4d6b7;border-left:5px solid var(--route-accent);border-bottom:3px solid #b7cbaa;border-radius:10px;background:#fffdf1;color:var(--route-ink)}
 .scene-objective h3,.venture-objective h2,.venture-objective h3{font-size:15px;font-weight:800;margin:3px 0 5px}
 .scene-objective p,.venture-objective p{font-size:11px;line-height:1.75;margin:0;color:var(--route-muted)}
@@ -171,7 +177,7 @@ body[data-view=technology] .venture-shell button.venture-primary{color:#fff;bord
 .venture-order-foot button{font-size:10px;padding:6px 9px;min-height:31px}
 .venture-empty{font-size:12px;line-height:1.85;padding:17px;color:var(--route-muted);background:#edf4ec;border:1px dashed #b6cdbc;border-radius:8px}
 .venture-bids{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
-.venture-bid{min-width:0;position:relative;padding:17px;border:1px solid #e0cba1;border-top:4px solid #e7b75e;border-bottom:3px solid #cfb786;border-radius:9px;background:#fffaf0}
+.venture-bid{display:flex;flex-direction:column;min-width:0;position:relative;padding:17px;border:1px solid #e0cba1;border-top:4px solid #e7b75e;border-bottom:3px solid #cfb786;border-radius:9px;background:#fffaf0}
 .venture-tag{display:inline-flex;align-items:center;font-size:9px;letter-spacing:.035em;font-weight:750;color:#92622b;background:#f9eac9;border:1px solid #e7cb93;border-radius:5px;padding:5px 7px}
 .venture-bid h3{font-size:16px;font-weight:800;margin:12px 0}
 .venture-bid>strong{display:block;font-size:21px;font-weight:800;color:#426150}
@@ -180,7 +186,8 @@ body[data-view=technology] .venture-shell button.venture-primary{color:#fff;bord
 .venture-bid p{font-size:10px;line-height:1.8;color:#89744e}
 .venture-bid-buttons{display:flex;gap:5px;margin-top:13px}
 .venture-bid-buttons button{flex:1;font-size:10px;min-height:33px;padding:7px 5px;border-color:#d5c29b;border-bottom-color:#c4a976;background:#fffdf7;white-space:nowrap}
-.venture-bid-buttons button:nth-child(2){background:#eec276;color:#5d4623;border-color:#d5b36a;border-bottom-color:#b99447}
+.venture-shell .venture-bid-buttons button.on{background:#eec276;color:#5d4623;border-color:#d5b36a;border-bottom-color:#b99447}
+.venture-shell .venture-bid-buttons button.on:hover:not(:disabled){background:#f5ce8d;border-color:#c9a25c}
 .venture-log{padding:0;list-style:none;margin:0}
 .venture-log li{display:flex;gap:17px;padding:11px 0;border-bottom:1px solid #d7e2d9;font-size:11px;line-height:1.75;color:#57766c}
 .venture-log li:last-child{border:0}
@@ -218,7 +225,7 @@ body[data-view=technology] .venture-shell button.venture-primary{color:#fff;bord
 .venture-lessons article>span{display:grid;place-items:center;flex:none;align-self:flex-start;min-width:31px;min-height:34px;border-radius:6px;background:var(--route-accent-soft);color:#7f713d;font-size:16px;font-weight:850}
 .venture-lessons h3{font-size:14px;font-weight:800;margin:3px 0 7px}
 .venture-lessons p{font-size:11px;line-height:1.9;color:#627d77;margin:0}
-.venture-footer{display:flex;justify-content:space-between;gap:18px;font-size:10px;line-height:1.8;color:#78918a;margin:13px 0}
+.venture-footer{display:flex;justify-content:space-between;gap:18px;font-size:10px;line-height:1.8;color:#9aafa9;margin:13px 0}
 .venture-shell dialog{width:min(450px,calc(100% - 32px));padding:24px;border:2px solid #acc6c6;border-bottom:5px solid #769b9d;border-radius:13px;background:#f9fcf1;color:var(--route-ink);box-shadow:0 20px 60px #183e4840}
 .venture-shell dialog::backdrop{background:#163e497f}
 .venture-shell dialog p{font-size:12px;line-height:1.85;color:#61827a}
@@ -227,7 +234,7 @@ body[data-view=technology] .venture-shell button.venture-primary{color:#fff;bord
 .venture-dialog-head button{font-size:18px;min-height:32px;padding:4px 9px}
 
 /* 同一套決策教練在門店使用深色面板，在新世界使用明亮操作卡。 */
-body[data-view] .venture-shell .business-coach,body[data-view] .venture-shell .decision-review{--coach-line:#c6d8cf;--coach-muted:#608177;--coach-accent:#468b76;background:#f9fcf3;border-color:#c6d8cf;border-bottom:3px solid #b4cbb9;border-radius:11px}
+body[data-view] .venture-shell .business-coach,body[data-view] .venture-shell .decision-review{--coach-line:#c6d8cf;--coach-muted:#608177;--coach-accent:#468b76;background:#f9fcf3;color:var(--route-ink);border-color:#c6d8cf;border-bottom:3px solid #b4cbb9;border-radius:11px}
 body[data-view=technology] .venture-shell .business-coach{--coach-line:#c6d8e4;--coach-muted:#5d7f88;--coach-accent:#3c8f92;background:#f8fcff}
 .venture-shell .coach-head>span{color:#3c8b70;font-weight:750}
 .venture-shell .coach-drivers article{background:#fffef8;border-color:#ccdbcf;border-bottom:2px solid #d5e2d4}
@@ -243,9 +250,77 @@ body[data-view=technology] .venture-shell .business-coach{--coach-line:#c6d8e4;-
 .venture-shell .coach-change b{color:#346657;font-weight:750}
 .venture-shell .decision-archive{background:#f2f7ed;border-color:#c5d8ca;color:#567b68}
 
+/* 旅程與抉擇卡把經營目標、取捨和進展留在操作場景。 */
+.venture-journey{margin:0 0 16px;padding:14px;border:1px solid #536d70;border-bottom:3px solid #071922;border-radius:9px;background:#1b323c;overflow:hidden;color:#d8e6df}
+.venture-journey .venture-board-heading{align-items:center;margin-bottom:11px}
+.venture-journey .venture-board-heading h2{font-size:14px;color:#ecedda;margin:0}
+.venture-journey .venture-board-heading>span{font-size:9px;color:#9eb8ad;letter-spacing:0}
+.journey-track{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+.venture-shell button.journey-step{position:relative;display:flex;align-items:center;gap:10px;min-width:0;padding:11px 10px;border:1px solid #456366;border-bottom:3px solid #0e252e;border-radius:6px;background:#253f49;text-align:left;box-shadow:none}
+.venture-shell button.journey-step:hover:not(:disabled){background:#345157;border-color:#8bada0}
+.journey-step>span:last-child{flex:1;min-width:0}
+.journey-number{display:grid;place-items:center;flex:none;width:28px;height:30px;border:1px solid #668080;border-bottom:3px solid #10242c;border-radius:6px;background:#304953;color:#a6bdb4;font-size:12px;font-weight:850}
+.journey-step b,.journey-step strong{display:block;font-size:11px;font-weight:750;line-height:1.5;color:#e1e8dc}
+.journey-step small,.journey-step p{display:block;font-size:9px;line-height:1.6;color:#8eaaa3;margin:3px 0 0;overflow-wrap:anywhere}
+.venture-shell button.journey-step.is-current{background:#394f4c;border-color:#a29d66;box-shadow:inset 0 3px 0 var(--route-accent)}
+.journey-step.is-current .journey-number{background:var(--route-accent-soft);border-color:var(--route-accent);color:#71603b;border-bottom-color:#9b8354}
+.journey-step.is-current b,.journey-step.is-current strong{color:#fff4cd}
+.venture-shell button.journey-step.is-done{background:#1d3e3d;border-color:#4d8172}
+.journey-step.is-done .journey-number{background:#327260;color:#dcf9dd;border-color:#71a28c;border-bottom-color:#154f44}
+.journey-progress{display:block;width:100%;height:4px;margin-top:8px;border-radius:3px;background:#152b33;overflow:hidden}
+.journey-progress>i{display:block;height:100%;background:var(--route-accent);border-radius:3px}
+.journey-step.is-done .journey-progress>i{background:#78b392}
+.venture-journey>p{font-size:9px;line-height:1.7;color:#8eaaa3;margin:10px 0 0}
+.venture-board-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin:0 0 15px}
+.venture-board-heading h2{font-size:20px;letter-spacing:.01em;margin:3px 0 6px}
+.venture-board-heading p{font-size:11px;color:var(--route-muted);line-height:1.7;margin:0}
+.venture-board-heading>span,.venture-board-heading>div>span{font-size:9px;letter-spacing:.1em;font-weight:750;color:#ac7f35}
+body[data-view=technology] .venture-board-heading>span,body[data-view=technology] .venture-board-heading>div>span{color:#398981}
+.venture-decision-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:14px 0}
+.venture-shell button.venture-choice{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:7px;padding:14px 12px;min-height:114px;border:1px solid #c9c8ad;border-bottom:4px solid #b4ad8d;border-radius:8px;background:#fffcf0;text-align:left;white-space:normal}
+.venture-choice>span,.venture-choice>small{font-size:9px;line-height:1.75;font-weight:500;color:#738372}
+.venture-choice .choice-icon{display:grid;place-items:center;width:27px;height:29px;border:1px solid #d3c28c;border-bottom:2px solid #c6ae72;border-radius:5px;background:#f4e7be;color:#a47731;font-size:19px;font-weight:800}
+body[data-view=technology] .venture-choice .choice-icon{border-color:#accbbb;background:#deefdf;color:#438773}
+.venture-choice b,.venture-choice strong{font-size:13px;line-height:1.5;font-weight:800;color:#335948}
+.venture-choice p{margin:0;font-size:10px;line-height:1.75;color:#617968}
+.venture-shell button.venture-choice.on{background:var(--route-accent-soft);border:2px solid var(--route-accent);border-bottom:4px solid #b09350;box-shadow:inset 0 1px 0 #ffffffaa}
+.venture-shell button.venture-choice.on:before{content:'●';position:absolute;right:9px;top:8px;color:#a77925;font-size:9px}
+body[data-view=technology] .venture-shell button.venture-choice.on{border-bottom-color:#528b76}
+body[data-view=technology] .venture-shell button.venture-choice.on:before{color:#29896d}
+.venture-shell button.venture-choice:hover:not(:disabled){background:#f4f3d9;border-color:#aeae89}
+.venture-shell button.venture-choice.on:hover:not(:disabled){background:var(--route-accent-soft);border-color:var(--route-accent)}
+.contract-profile{display:inline-flex;align-items:center;align-self:flex-start;gap:6px;padding:5px 8px;border:1px solid #d4b880;border-bottom:2px solid #c7a56a;border-radius:4px;background:#fff1c9;color:#8c652e;font-size:9px;font-weight:750;letter-spacing:.03em}
+.contract-profile.rush{background:#ffe7d2;border-color:#dda782;border-bottom-color:#c68c69;color:#aa623b}
+.contract-profile.precision{background:#e2f1e8;border-color:#9ec3ad;border-bottom-color:#8aad95;color:#4b8169}
+.contract-profile.bulk{background:#eee9d9;border-color:#c4bca2;border-bottom-color:#b0a286;color:#7b735c}
+.contract-risk{font-size:10px!important;line-height:1.7!important;color:#98744c!important;background:#f7edd4;border:1px solid #e4d4a7;border-left:3px solid #d5aa5b;border-radius:4px;padding:8px 10px;margin:11px 0!important}
+.contract-risk.bad,.contract-risk.danger{color:#ad543c!important;border-color:#e9c0a8;border-left-color:#d18964;background:#fff0e2}
+.contract-preview{padding:11px 12px;margin:11px 0;background:#f8f5e5;border:1px solid #dcd5b6;border-radius:6px;font-size:10px;color:#627661}
+.contract-preview dl,dl.contract-preview{margin:0;gap:8px 12px;font-size:10px}
+.contract-preview strong,.contract-preview b{color:#325845;font-weight:800}
+.contract-preview p{font-size:9px!important;line-height:1.65!important;margin:9px 0 0!important}
+.venture-bid .venture-bid-buttons{margin-top:auto;padding-top:12px}
+.venture-bid-buttons button{box-shadow:inset 0 1px 0 #fff9}
+.project-launch-options{display:grid;gap:7px;padding:11px;margin:8px 0 0;border:1px solid #b9d0ca;border-radius:6px;background:#edf5ed}
+.project-launch-options label,.project-launch-options>span{font-size:10px;font-weight:750;color:#467a68}
+.project-launch-options select{font-size:10px;padding:8px;min-height:35px;border-color:#afc9bb;background:#fcfff8}
+.project-launch-options p,.project-launch-options small{font-size:9px;line-height:1.7;color:#6e8a7b;margin:0}
+.venture-project [data-project-preview]{padding:11px;margin:11px 0;background:#eaf4ef;border:1px solid #bed6ca;border-left:3px solid #77ae9a;border-radius:5px}
+.venture-project [data-project-preview] dl{font-size:9px;margin:0;gap:8px 10px}
+.venture-project [data-project-preview] p{font-size:9px;line-height:1.7;margin:9px 0 0;color:#6b8a7b}
+.venture-debrief{margin:8px 0 20px;border:1px solid #526a6c;border-bottom:3px solid #0d222a;border-radius:9px;background:#1c343d;color:#cbdbd0;overflow:hidden}
+.venture-debrief>summary{padding:14px 17px;cursor:pointer;font-size:11px;font-weight:750;line-height:1.6;color:#c3d9cf}
+.venture-debrief>summary:hover{background:#28454b;color:#f5ffe8}
+.venture-debrief[open]>summary{border-bottom:1px solid #557373;color:#f2e3b9}
+.venture-debrief>.business-coach,.venture-debrief>.decision-archive{margin:13px}
+.venture-debrief .business-coach{box-shadow:none}
+
 @media(min-width:1600px){.venture-shell{padding:22px 34px}.venture-workspace{grid-template-columns:minmax(0,1fr) 330px}.venture-scene-label h2{font-size:23px}}
 @media(max-width:1150px){.route-home{padding:24px}.route-cards{gap:15px}.route-content{padding:18px}.route-card h2{font-size:24px}.route-world-name{padding:25px 13px 11px;gap:5px}.route-world-name>span{font-size:15px}.route-world-name>small{font-size:8px}.venture-shell{padding:15px 18px}.venture-top{gap:13px;flex-wrap:wrap;padding:15px 17px}.venture-back{font-size:10px}.venture-title h1{font-size:22px;gap:10px}.venture-title h1 small{font-size:10px;padding-left:10px}.venture-workspace{grid-template-columns:minmax(0,1fr) 280px;gap:16px}.venture-section{padding:17px}.venture-bids{grid-template-columns:1fr}.venture-product-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.venture-roadmap{grid-template-columns:1fr}.venture-time{margin-left:auto}}
 @media(max-width:900px){.route-intro h1>span{display:block;margin:10px 0 0;font-size:22px}.route-cards{grid-template-columns:1fr;gap:22px}.route-card{max-width:650px;width:100%;margin:auto}.route-art{aspect-ratio:1.95}.route-content{padding:22px 25px}.route-world-name>span{font-size:20px}.route-world-name>small{font-size:11px}.route-world-name{padding:35px 21px 17px}.route-card h2{font-size:28px}.route-intro{max-width:650px;margin:0 auto 30px}.route-topline{max-width:650px;margin:0 auto 30px}.route-foot{max-width:650px;margin:24px auto 0}.venture-top{gap:12px}.venture-back{width:100%;justify-content:center;background:#ffffff08;min-height:29px}.venture-title h1{font-size:22px}.venture-title{flex:1}.venture-date{font-size:13px}.venture-time{margin-left:0;width:100%;justify-content:space-between}.venture-time button{flex:1}.venture-shell .scene-hotspot{font-size:10px;gap:4px;padding:6px 8px;min-height:31px}.scene-hotspot small{font-size:8px}}
 @media(max-width:780px){.route-home{padding:22px 16px}.route-save-note{font-size:10px}.route-topline>a{font-size:11px}.route-intro h1{font-size:35px}.route-intro h1>span{font-size:20px}.route-intro p{font-size:12px}.route-game-rules{gap:6px}.route-game-rules>span{font-size:10px;padding:6px 8px}.route-foot{flex-direction:column;gap:4px}.venture-shell{padding:12px}.venture-capital{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:13px 0}.venture-tile{padding:12px 13px}.venture-tile strong{font-size:24px}.venture-tile small{font-size:9px}.venture-nav{gap:5px;margin-bottom:15px}.venture-nav button{padding:8px 9px;font-size:10px;min-height:35px}.venture-nav [data-action=finance]{margin:0}.venture-shell button.venture-mobile-adjust{display:inline-block}.venture-workspace{grid-template-columns:1fr;gap:0}.venture-sidebar{display:grid;grid-template-columns:1fr}.venture-scene-label{padding:13px 16px}.venture-scene-label h2{font-size:20px}.venture-process{gap:8px;padding:13px 14px}.venture-process strong{font-size:16px}.venture-process small{font-size:9px}.venture-process>span{font-size:15px}.venture-scene{border-radius:11px}.venture-bids{grid-template-columns:1fr 1fr}.venture-section-head{flex-wrap:wrap;align-items:flex-start}.venture-order-foot{flex-wrap:wrap}.venture-order-foot small{flex-basis:100%}.venture-funnel{grid-template-columns:repeat(2,minmax(0,1fr));gap:17px;padding:15px 5px}.venture-funnel>div{padding:0 12px}.venture-funnel>div:nth-child(2){border:0}.venture-funnel strong{font-size:21px}.venture-review-grid,.venture-lessons{grid-template-columns:1fr;gap:15px}.venture-event{flex-wrap:wrap;padding:15px}.venture-event>div{flex-basis:100%}.venture-event button{font-size:10px}.venture-footer{flex-direction:column;gap:4px}.venture-log li{gap:11px}.venture-notice{font-size:11px}.venture-table-scroll{margin:0 -4px}.scene-objective,.venture-objective{padding:13px 15px;gap:10px}.scene-objective h3,.venture-objective h2,.venture-objective h3{font-size:14px}.scene-map-status{left:10px;top:9px;font-size:9px;padding:5px 7px}}
 @media(max-width:480px){.route-world-number{left:12px;top:12px;font-size:9px;padding:5px 8px}.route-world-name>span{font-size:17px}.route-world-name>small{font-size:9px}.route-world-name{padding:29px 16px 13px}.route-content{padding:19px}.route-card h2{font-size:26px}.route-eyebrow{font-size:8px}.route-skills>span{font-size:9px}.venture-top{padding:13px;gap:11px}.venture-title h1{font-size:21px;gap:7px;flex-wrap:wrap}.venture-title h1 small{display:block;font-size:9px;padding-left:8px}.venture-title>span{font-size:7px}.venture-date{font-size:11px}.venture-date small{font-size:8px}.venture-time button{padding:7px 8px;min-height:34px;font-size:10px}.venture-bids{grid-template-columns:1fr}.venture-section{padding:15px}.venture-scene-label h2{font-size:19px}.venture-scene-label>span{font-size:8px}.venture-order-head{gap:10px}.venture-order-head h3{font-size:12px}.venture-order-head small{font-size:9px}.venture-process>span{display:none}.venture-process b{font-size:9px}.venture-process strong{font-size:15px}.venture-process{gap:7px;padding:12px}.venture-product-grid .venture-tile{padding:12px}.venture-report-intro h2{font-size:22px}.venture-shell .scene-hotspot{font-size:9px;border-width:1px;border-bottom-width:3px;min-height:29px;padding:5px 7px;gap:4px}.scene-pin-number{width:19px;height:22px;font-size:10px;border-radius:4px}.scene-hotspot b{font-size:9px}.scene-hotspot small{font-size:8px}.scene-map-status{font-size:8px;max-width:70%;line-height:1.5}.scene-objective,.venture-objective{flex-wrap:wrap}.venture-objective>div{flex-basis:calc(100% - 45px)}.venture-objective>button{margin-left:45px;font-size:10px}}
 @media(max-width:600px){.venture-top{padding:10px 12px;gap:8px}.venture-back{justify-content:flex-start;min-height:22px;padding:2px 0;border:0;background:none}.venture-title h1{margin-top:4px;font-size:20px}.venture-time{padding:4px}.venture-time button{min-height:31px;padding:6px 8px}.venture-capital{margin:11px 0;gap:7px}.venture-capital .venture-tile{padding:9px 11px;gap:4px}.venture-capital .venture-tile strong{font-size:22px}.venture-capital .venture-tile small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4;font-size:9px}.venture-nav{flex-wrap:nowrap;overflow-x:auto;max-width:100%;padding-bottom:6px;margin-bottom:12px;scrollbar-width:thin;scrollbar-color:#b6ccc3 transparent}.venture-nav button{flex:none;min-height:32px;padding:7px 9px}.venture-objective{position:relative;padding:10px 12px;gap:7px;margin-bottom:14px}.venture-objective .objective-badge{width:28px;height:30px;font-size:18px}.venture-objective>div{flex-basis:calc(100% - 37px)}.venture-objective h2{font-size:13px;margin:3px 0}.venture-objective p{font-size:10px;line-height:1.6}.venture-objective>div>span{font-size:8px}.venture-objective>button{min-height:28px;margin-left:35px;padding:5px 8px;font-size:9px}.venture-scene-label{padding:10px 14px}.venture-scene-label h2{font-size:18px;margin:5px 0 3px}.venture-scene-label p{font-size:9px}}
+@media(max-width:780px){.venture-shell button.journey-step{flex-direction:column;align-items:flex-start;gap:6px;padding:9px 8px}.journey-number{width:22px;height:24px;font-size:10px}.journey-step b,.journey-step strong{font-size:10px}.journey-step small,.journey-step p{font-size:8px}.journey-progress{margin-top:6px}.venture-decision-grid{gap:8px}.venture-choice b,.venture-choice strong{font-size:12px}.venture-board-heading h2{font-size:18px}.venture-debrief>summary{font-size:10px;padding:12px 14px}}
+@media(max-width:600px){.venture-shell{padding:10px}.venture-top{border-radius:9px}.venture-title>span{letter-spacing:.09em}.venture-capital .venture-tile{padding:8px 10px}.venture-capital .venture-tile strong{font-size:20px}.venture-capital .venture-tile>span{font-size:9px}.venture-capital .venture-tile small{font-size:8px}.venture-scene-label{padding:9px 12px}.venture-scene-label h2{font-size:16px;margin:4px 0 0}.venture-scene-label p{display:none}.scene-map-status{top:auto;bottom:9px;left:9px;padding:4px 6px;font-size:8px}.venture-process,.venture-funnel{padding:10px}.venture-funnel{gap:11px}.venture-funnel strong{font-size:19px}.venture-decision-grid{grid-template-columns:1fr}.venture-shell button.venture-choice{min-height:0;padding:12px}.venture-choice>span,.venture-choice>small{font-size:9px}.venture-journey{padding:11px;margin-bottom:12px}.venture-shell button.journey-step{padding:8px 6px}.journey-step small,.journey-step p{margin-top:2px}.venture-debrief>.business-coach,.venture-debrief>.decision-archive{margin:9px}}
+@media(prefers-reduced-motion:reduce){.venture-shell .scene-hotspot{transition:none}}

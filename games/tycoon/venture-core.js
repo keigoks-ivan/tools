@@ -2,7 +2,7 @@
 export const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
 export const END_DAY = 1096; // 2026-10-01 至 2029-10-01，包含 2028 閏日。
 export const COSTS = ['cogs', 'payroll', 'rent', 'cloud', 'marketing', 'research', 'energy', 'repair', 'penalty', 'interest', 'depreciation'];
-export const COST_NAMES = { cogs: '已售商品／報廢成本', payroll: '人事', rent: '租金與行政', cloud: '主機與支付成本', marketing: '獲客與業務', research: '研發與品管', energy: '能源', repair: '維修', penalty: '違約／退款', interest: '利息', depreciation: '設備折舊' };
+export const COST_NAMES = { cogs: '已售商品／報廢成本', payroll: '人事', rent: '租金與行政', cloud: '主機與支付成本', marketing: '獲客與業務', research: '研發與品管', energy: '能源', repair: '維修', penalty: '違約／退款／驗收', interest: '利息', depreciation: '設備折舊' };
 export function dateOf(day) {
   const d = new Date(Date.UTC(2026, 9, 1 + day));
   return { key: d.toISOString().slice(0, 10), month: d.toISOString().slice(0, 7), day: d.getUTCDate(), dim: new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth() + 1, 0)).getUTCDate() };

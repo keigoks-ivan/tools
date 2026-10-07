@@ -10,39 +10,130 @@ export const SUPPLIERS = {
   stable: { name: '穩定供應商', cost: 1, lead: 3, defects: .008 },
   express: { name: '急件供應商', cost: 1.22, lead: 1, defects: .005 },
 };
+export const PRODUCTION_MODES = {
+  balanced: { name: '穩定生產', description: '保留產能、良率與單件成本的平衡。', capacity: 1, defects: 0, energy: 1.5, wear: 1 },
+  batch: { name: '大批量快線', description: '產能 +18%，瑕疵 +1.2 個百分點；單件能源較低，磨損較快。', capacity: 1.18, defects: .012, energy: 1.25, wear: 1.18 },
+  precision: { name: '精密慢線', description: '產能 −18%，瑕疵 −2.2 個百分點；單件能源較高，磨損較慢。', capacity: .82, defects: -.022, energy: 2.1, wear: .75 },
+};
+const known = (catalog, id) => typeof id === 'string' && Object.hasOwn(catalog, id);
+const PROFILE_NAMES = {
+  packaging: { bulk: '通路整批包材', rush: '活動急件包材', precision: '精品印製包材' },
+  apparel: { bulk: '制服大貨', rush: '檔期急件', precision: '精品小批次' },
+  electronics: { bulk: '通路標準機', rush: '維修急件組裝', precision: '精密模組' },
+};
+const LEGACY_CONTRACT = { id: 'standard', name: '一般訂單', description: '沿用原合約的交期與付款條件。', lateRate: .02, lateCap: .2, graceDays: 7, cancelRate: .1, inspectionDays: 0, qualityTolerance: null, auditRate: 0, auditCap: 0 };
+export function contractProfiles(productId) {
+  if (!known(PRODUCTS, productId)) throw new Error('未知製造業態');
+  const names = PROFILE_NAMES[productId], tolerance = { packaging: .035, apparel: .025, electronics: .015 }[productId];
+  return {
+    bulk: { ...LEGACY_CONTRACT, id: 'bulk', name: names.bulk, description: '大批量、低單價；訂金少、帳期長，先確認原料周轉。', qtyFactor: 1.6, priceFactor: .92, minDays: 22, dayRange: 12, term: 45, depositRate: .15, lateRate: .012, lateCap: .18, graceDays: 10 },
+    rush: { ...LEGACY_CONTRACT, id: 'rush', name: names.rush, description: '報價高、回款快；交期短，逾期費與取消期限更嚴格。', qtyFactor: .75, priceFactor: 1.25, minDays: 7, dayRange: 5, term: 15, depositRate: .35, lateRate: .04, lateCap: .3, graceDays: 3, cancelRate: .15 },
+    precision: { ...LEGACY_CONTRACT, id: 'precision', name: names.precision, description: '高單價小批次；完成後再驗收一天，製程損失過高需付追加驗收費。', qtyFactor: .9, priceFactor: 1.16, minDays: 16, dayRange: 10, term: 30, depositRate: .25, inspectionDays: 1, qualityTolerance: tolerance, auditRate: 2.5, auditCap: .2 },
+  };
+}
+export function contractPolicy(w, order) {
+  const profiles = contractProfiles(w.productId), policy = known(profiles, order.profile) ? profiles[order.profile] : LEGACY_CONTRACT;
+  return { ...policy, cancelAfter: policy.graceDays, auditTolerance: policy.qualityTolerance };
+}
 export function createManufacturing(productId = 'packaging', seed = 20261007) {
-  if (!PRODUCTS[productId]) throw new Error('未知製造業態');
-  const p = PRODUCTS[productId], w = { v: 1, mode: 'manufacturing', productId, day: 0, rng: seed >>> 0, status: 'playing', co: company(p.capital), workers: 3, lines: 1, shift: 'normal', qc: 'standard', supplier: 'stable', wear: 0, reputation: .55, stock: { qty: 0, value: 0, defects: 0 }, shipments: [], orders: [], offers: [], receivables: [], maintenanceUntil: 0, expansion: null, shock: null, event: null, seq: 1, stats: { produced: 0, defects: 0, delivered: 0, late: 0, lostBids: 0, busyDays: 0 }, today: { produced: 0, defects: 0, utilization: 0 } };
+  if (!known(PRODUCTS, productId)) throw new Error('未知製造業態');
+  const p = PRODUCTS[productId], w = { v: 1, mode: 'manufacturing', productId, day: 0, rng: seed >>> 0, status: 'playing', co: company(p.capital), workers: 3, lines: 1, shift: 'normal', qc: 'standard', productionMode: 'balanced', supplier: 'stable', wear: 0, reputation: .55, stock: { qty: 0, value: 0, defects: 0 }, shipments: [], orders: [], offers: [], receivables: [], maintenanceUntil: 0, expansion: null, shock: null, event: null, seq: 1, stats: { produced: 0, defects: 0, delivered: 0, late: 0, lostBids: 0, busyDays: 0 }, today: { produced: 0, defects: 0, utilization: 0 } };
   spend(w, p.equipment, 'capex'); w.co.assets = p.equipment;
   note(w, '先比較訂單交期、原料到貨與周轉金，再投標。三年後結案。'); generateOffers(w);
   return w;
 }
 export function productionPlan(w) {
-  const p = PRODUCTS[w.productId], factor = w.shift === 'overtime' ? 1.4 : .85;
-  const capacity = w.day < w.maintenanceUntil ? 0 : Math.floor(p.capacity * Math.min(w.lines, w.workers / 3) * factor * (1 - w.wear * .45) * (w.qc === 'strict' ? .85 : 1));
-  const defects = clamp(.035 + w.stock.defects + w.wear * .13 + (w.shift === 'overtime' ? .035 : 0) - (w.qc === 'strict' ? .035 : 0), .006, .3);
+  const p = PRODUCTS[w.productId], mode = PRODUCTION_MODES[w.productionMode || 'balanced'], factor = w.shift === 'overtime' ? 1.4 : .85;
+  const capacity = w.day < w.maintenanceUntil ? 0 : Math.floor(p.capacity * Math.min(w.lines, w.workers / 3) * factor * mode.capacity * (1 - w.wear * .45) * (w.qc === 'strict' ? .85 : 1));
+  const defects = clamp(.035 + w.stock.defects + w.wear * .13 + (w.shift === 'overtime' ? .035 : 0) - (w.qc === 'strict' ? .035 : 0) + mode.defects, .006, .3);
   const fixed = p.wage * w.workers * (w.shift === 'overtime' ? 1.25 : 1) + p.rent * (.7 + .3 * w.lines) + (w.qc === 'strict' ? 18000 : 6000) + w.lines * 6000;
   const remaining = w.orders.reduce((n, o) => n + o.qty - o.produced, 0), materialCost = p.material * (w.shock && w.day < w.shock.until ? w.shock.cost : 1);
-  return { capacity, defects, fixed, remaining, backlogDays: capacity * (1 - defects) > 0 ? remaining / (capacity * (1 - defects)) : remaining ? Infinity : 0, materialCost, breakEven: p.price > materialCost / (1 - defects) + 1.5 ? Math.ceil(fixed / (p.price - materialCost / (1 - defects) - 1.5)) : null, payable: payable(w) };
+  return { capacity, defects, fixed, remaining, energyPerUnit: mode.energy, energyPerGood: mode.energy, wearFactor: mode.wear, backlogDays: capacity * (1 - defects) > 0 ? remaining / (capacity * (1 - defects)) : remaining ? Infinity : 0, materialCost, breakEven: p.price > materialCost / (1 - defects) + mode.energy ? Math.ceil(fixed / (p.price - materialCost / (1 - defects) - mode.energy)) : null, payable: payable(w) };
 }
 function generateOffers(w) {
   const p = PRODUCTS[w.productId], cycle = .9 + .18 * Math.sin(w.day / 90), count = 3 + (w.reputation > .7 ? 1 : 0);
   for (let i = 0; i < count; i++) {
-    const qty = Math.round(p.lot * (.6 + random(w) * .8) * cycle), days = 12 + Math.floor(random(w) * 16), price = Math.round(p.price * (.9 + random(w) * .2)), term = [15, 30, 45][Math.floor(random(w) * 3)];
-    w.offers.push({ id: 'bid-' + w.seq++, client: ['禾豐品牌', '青川通路', '星河採購', '遠山商務'][i], qty, due: w.day + days, price, term, expires: w.day + 7, depositRate: term === 45 ? .1 : .25 });
+    const profile = ['bulk', 'rush', 'precision'][i % 3], terms = contractProfiles(w.productId)[profile];
+    const qty = Math.round(p.lot * (.75 + random(w) * .5) * cycle * terms.qtyFactor), days = terms.minDays + Math.floor(random(w) * terms.dayRange), price = Math.round(p.price * (.96 + random(w) * .08) * terms.priceFactor);
+    w.offers.push({ id: 'bid-' + w.seq++, client: ['禾豐品牌', '青川通路', '星河採購', '遠山商務'][i], profile, qty, due: w.day + days, price, term: terms.term, expires: w.day + 7, depositRate: terms.depositRate });
   }
   w.offers = w.offers.slice(-12);
+}
+function materialBudget(w, priorGood, targetGood, productionMode) {
+  let prior = priorGood, remaining = targetGood, input = 0, cost = 0;
+  const sources = [w.stock, ...w.shipments.slice().sort((a, b) => a.arrival - b.arrival)], supplier = SUPPLIERS[w.supplier];
+  const newCost = productionPlan(w).materialCost * supplier.cost;
+  for (const s of [...sources, { qty: Infinity, defects: supplier.defects, unitCost: newCost }]) {
+    const plan = productionPlan({ ...w, productionMode, stock: { ...w.stock, defects: s.defects } }), yieldRate = 1 - plan.defects;
+    const skipped = Math.min(s.qty, prior / yieldRate), available = s.qty - skipped; prior = Math.max(0, prior - skipped * yieldRate);
+    const used = Math.min(available, remaining / yieldRate); input += used; cost += used * (s.unitCost ?? (s.qty ? s.value / s.qty : 0)); remaining = Math.max(0, remaining - used * yieldRate);
+  }
+  // 採購量用各批良率估算；多留一份整數原料，避免小數取整誤判可完成。
+  let allGood = priorGood + targetGood;
+  for (const s of sources) {
+    const defects = productionPlan({ ...w, productionMode, stock: { ...w.stock, defects: s.defects } }).defects;
+    allGood = Math.max(0, allGood - s.qty * (1 - defects));
+  }
+  const newDefects = productionPlan({ ...w, productionMode, stock: { ...w.stock, defects: supplier.defects } }).defects;
+  return { input: Math.ceil(input), cost, gap: Math.ceil(allGood / (1 - newDefects)) };
+}
+// 只讀排程：維持目前磨損、班制、原料良率；不抽樣，也不預先推進遊戲。
+export function manufacturingSchedule(w, { offer = null, productionMode = w.productionMode || 'balanced', includePurchase = false } = {}) {
+  const originals = [...w.orders, ...(offer && !w.orders.some(o => o.id === offer.id) ? [{ ...offer, produced: 0 }] : [])];
+  const orders = originals.map(o => { const policy = contractPolicy(w, o); return { id: o.id, client: o.client, due: o.due, remaining: o.qty - o.produced, finishDay: o.inspectionReady !== undefined ? Math.max(w.day, o.inspectionReady) : o.produced >= o.qty ? w.day + policy.inspectionDays : null, policy }; });
+  const stock = { ...w.stock }, shipments = w.shipments.map(s => ({ ...s }));
+  const gap = materialBudget(w, 0, orders.reduce((n, o) => n + o.remaining, 0), productionMode).gap;
+  if (includePurchase && gap) {
+    const supplier = SUPPLIERS[w.supplier]; shipments.push({ qty: gap, defects: supplier.defects, arrival: w.day + supplier.lead });
+  }
+  const last = Math.min(w.day + 90, Math.max(w.day, ...orders.map(o => o.due + o.policy.graceDays)));
+  for (let day = w.day; day <= last && orders.some(o => o.remaining > 1e-6); day++) {
+    for (const s of shipments.filter(s => s.arrival === day || day === w.day && s.arrival < day)) {
+      const total = stock.qty + s.qty; stock.defects = total ? (stock.defects * stock.qty + s.defects * s.qty) / total : 0; stock.qty = total;
+    }
+    const plan = productionPlan({ ...w, day, productionMode, stock, lines: w.lines + (w.expansion && day >= w.expansion.ready ? 1 : 0) });
+    let budget = Math.min(plan.capacity, stock.qty);
+    for (const o of orders) {
+      if (budget <= 0) break;
+      if (o.remaining <= 1e-6 || day > o.due + o.policy.graceDays) continue;
+      const input = Math.min(budget, o.remaining / (1 - plan.defects));
+      stock.qty -= input; budget -= input; o.remaining = Math.max(0, o.remaining - input * (1 - plan.defects));
+      if (o.remaining <= 1e-6) o.finishDay = day + o.policy.inspectionDays;
+    }
+  }
+  return orders.map(o => ({ ...o, finishDay: o.finishDay !== null && o.finishDay <= o.due + o.policy.graceDays ? o.finishDay : null, slackDays: o.finishDay === null || o.finishDay > o.due + o.policy.graceDays ? null : o.due - o.finishDay }));
+}
+export function manufacturingOrderPreview(w, offer, { factor = 1, productionMode = w.productionMode || 'balanced' } = {}) {
+  if (!offer || !known(PRODUCTION_MODES, productionMode) || ![.9, 1, 1.1].includes(factor)) return null;
+  const plan = productionPlan({ ...w, productionMode }), policy = contractPolicy(w, offer), supplier = SUPPLIERS[w.supplier];
+  const active = w.orders.some(o => o.id === offer.id), remaining = offer.qty - (active ? offer.produced : 0), price = Math.round(offer.price * factor), quote = active ? offer.quote : price * offer.qty;
+  const deposit = active ? offer.deposit : Math.round(quote * offer.depositRate);
+  const prior = active ? w.orders.slice(0, w.orders.findIndex(o => o.id === offer.id)) : w.orders;
+  const budget = materialBudget(w, prior.reduce((n, o) => n + o.qty - o.produced, 0), remaining, productionMode);
+  const requiredMaterial = budget.input, materialGap = budget.gap, materialCost = budget.cost, newMaterialCost = plan.materialCost * supplier.cost;
+  const schedule = manufacturingSchedule(w, { offer: active ? null : offer, productionMode, includePurchase: true }), target = schedule.find(o => o.id === offer.id);
+  const lateDays = target?.finishDay === null || target?.finishDay === undefined ? null : Math.max(0, target.finishDay - offer.due);
+  const estimatedLateFee = lateDays === null ? null : Math.round(quote * Math.min(policy.lateCap, lateDays * policy.lateRate));
+  const observedAttempts = offer.attempted || 0, observedScrap = offer.scrapped || 0;
+  const estimatedLoss = observedAttempts + requiredMaterial > 0 ? (observedScrap + requiredMaterial - remaining) / (observedAttempts + requiredMaterial) : 0;
+  const estimatedAuditFee = policy.qualityTolerance === null ? 0 : Math.round(quote * Math.min(policy.auditCap, Math.max(0, estimatedLoss - policy.qualityTolerance) * policy.auditRate));
+  const acceptanceChance = clamp(.6 + (w.reputation - .55) * .65 + (1 - factor) * 3 - Math.min(.25, plan.backlogDays / Math.max(1, offer.due - w.day) * .12), .1, .95);
+  return { productionMode, policy, price, quote, deposit, remaining, capacity: plan.capacity, goodCapacity: plan.capacity * (1 - plan.defects), defects: plan.defects, energyPerUnit: plan.energyPerUnit, requiredMaterial, materialGap, upfrontMaterial: Math.round(materialGap * newMaterialCost), materialCost, finishDay: target?.finishDay ?? null, slackDays: target?.slackDays ?? null, estimatedLateFee, estimatedAuditFee, estimatedContribution: quote - (active ? offer.cost : 0) - materialCost - remaining * plan.energyPerUnit - estimatedAuditFee - (estimatedLateFee || 0), acceptanceChance, cancellationFee: Math.round(quote * policy.cancelRate), assumptions: '估計維持目前人力、班制、磨損與順位，包含已排到貨、擴線、停機與合約驗收；假設立即補足缺料，未含未來磨損、抽樣波動、固定費與稅。' };
 }
 export function manufacturingAction(w, action, data = {}) {
   const fail = error => ({ ok: false, error });
   if (w.status !== 'playing') return fail('已結案，不能更改經營。');
   const p = PRODUCTS[w.productId];
   if (action === 'settings') {
-    if (!Number.isInteger(data.workers) || data.workers < 1 || data.workers > 30 || !['normal', 'overtime'].includes(data.shift) || !['standard', 'strict'].includes(data.qc) || !SUPPLIERS[data.supplier]) return fail('設定超出範圍。');
+    const productionMode = data.productionMode === undefined ? w.productionMode || 'balanced' : data.productionMode;
+    if (!Number.isInteger(data.workers) || data.workers < 1 || data.workers > 30 || !['normal', 'overtime'].includes(data.shift) || !['standard', 'strict'].includes(data.qc) || !known(SUPPLIERS, data.supplier) || !known(PRODUCTION_MODES, productionMode)) return fail('設定超出範圍。');
     const cost = Math.max(0, data.workers - w.workers) * 8000;
     if (w.co.cash < cost && cost > 0) return fail('現金不足支付每人 $8,000 招募訓練費。');
     if (cost) expense(w, 'research', cost, true);
-    w.workers = data.workers; w.shift = data.shift; w.qc = data.qc; w.supplier = data.supplier; note(w, '已調整人力、班制、品管與供應商。');
+    w.workers = data.workers; w.shift = data.shift; w.qc = data.qc; w.supplier = data.supplier; w.productionMode = productionMode; note(w, `已調整人力、班制、品管與供應商；採用${PRODUCTION_MODES[productionMode].name}。`);
+  } else if (action === 'productionMode') {
+    if (!known(PRODUCTION_MODES, data.id)) return fail('未知生產方式。');
+    w.productionMode = data.id; note(w, `改用${PRODUCTION_MODES[data.id].name}：${PRODUCTION_MODES[data.id].description}`);
   } else if (action === 'purchase') {
     if (!Number.isInteger(data.qty) || data.qty < 1 || data.qty > p.capacity * w.lines * 90 || w.shipments.length >= 20) return fail('單次採購 1 到現有產線 90 天用量，最多 20 批在途。');
     const supplier = SUPPLIERS[w.supplier], cost = Math.round(productionPlan(w).materialCost * supplier.cost * data.qty);
@@ -50,13 +141,13 @@ export function manufacturingAction(w, action, data = {}) {
     spend(w, cost, 'purchases'); w.shipments.push({ qty: data.qty, value: cost, defects: supplier.defects, arrival: w.day + supplier.lead }); note(w, `採購 ${data.qty} 份原料，${supplier.lead} 天後到貨。`);
   } else if (action === 'bid') {
     const o = w.offers.find(o => o.id === data.id);
-    if (!o || ![.9, 1, 1.1].includes(data.factor) || w.orders.length >= 12) return fail('投標已過期、報價不符或在製訂單已達 12 張。');
+    if (!o || o.expires <= w.day || ![.9, 1, 1.1].includes(data.factor) || w.orders.length >= 12) return fail('投標已過期、報價不符或在製訂單已達 12 張。');
     const price = Math.round(o.price * data.factor), plan = productionPlan(w), quote = price * o.qty;
     const chance = clamp(.6 + (w.reputation - .55) * .65 + (1 - data.factor) * 3 - Math.min(.25, plan.backlogDays / Math.max(1, o.due - w.day) * .12), .1, .95);
     w.offers = w.offers.filter(x => x !== o);
     if (random(w) > chance) { w.stats.lostBids++; note(w, `${o.client} 選擇了競爭廠商；低價或履約口碑會提高得標率。`); return { ok: true, message: '未得標，沒有收取訂金。' }; }
     const deposit = Math.round(quote * o.depositRate);
-    w.orders.push({ ...o, price, quote, deposit, produced: 0, cost: 0 }); receive(w, deposit); note(w, `${o.client} 得標：${o.qty} 件，收取訂金 $${deposit.toLocaleString()}，交貨後餘款 ${o.term} 天。`);
+    w.orders.push({ ...o, price, quote, deposit, produced: 0, cost: 0, attempted: 0, scrapped: 0 }); receive(w, deposit); note(w, `${o.client} 得標：${contractPolicy(w,o).name} ${o.qty} 件，收取訂金 $${deposit.toLocaleString()}，交貨後餘款 ${o.term} 天。`);
   } else if (action === 'priority') {
     const i = w.orders.findIndex(o => o.id === data.id);
     if (i < 0) return fail('訂單不存在。');
@@ -82,8 +173,9 @@ export function manufacturingAction(w, action, data = {}) {
   return { ok: true };
 }
 function cancelOrder(w, o) {
-  spend(w, o.deposit); expense(w, 'penalty', Math.round(o.quote * .1), true); expense(w, 'cogs', o.cost);
-  w.reputation = clamp(w.reputation - .08, .1, .95); w.stats.late++; w.orders = w.orders.filter(x => x !== o); note(w, `${o.client} 訂單取消：退訂金、10% 違約金，在製品認列損失。`);
+  const policy = contractPolicy(w, o);
+  spend(w, o.deposit); expense(w, 'penalty', Math.round(o.quote * policy.cancelRate), true); expense(w, 'cogs', o.cost);
+  w.reputation = clamp(w.reputation - .08, .1, .95); w.stats.late++; w.orders = w.orders.filter(x => x !== o); note(w, `${o.client} 訂單取消：退訂金、${Math.round(policy.cancelRate * 100)}% 違約金，在製品認列損失。`);
 }
 export function stepManufacturing(w) {
   if (w.status !== 'playing' || w.event) return false;
@@ -96,8 +188,8 @@ export function stepManufacturing(w) {
   for (const r of w.receivables.filter(r => r.due <= w.day)) { receive(w, r.amount); note(w, `收到 ${r.client} 尾款 $${r.amount.toLocaleString()}。`); }
   w.receivables = w.receivables.filter(r => r.due > w.day);
   if (w.expansion && w.day >= w.expansion.ready) { w.lines++; w.expansion = null; note(w, '新產線已可使用。'); }
-  for (const o of [...w.orders]) if (w.day > o.due + 7) cancelOrder(w, o);
-  const plan = productionPlan(w); let budget = Math.min(plan.capacity, w.stock.qty), produced = 0, defects = 0;
+  for (const o of [...w.orders]) if (w.day > o.due + contractPolicy(w, o).graceDays) cancelOrder(w, o);
+  const plan = productionPlan(w); let budget = Math.min(plan.capacity, w.stock.qty), produced = 0, defects = 0, delivered = 0, lateFees = 0, auditFees = 0;
   for (const o of [...w.orders]) {
     if (budget <= 0) break;
     const input = Math.min(budget, Math.ceil((o.qty - o.produced) / (1 - plan.defects)));
@@ -106,25 +198,32 @@ export function stepManufacturing(w) {
     // 瑕疵按比例加小幅種子擾動，小批量也有失敗風險；良品不超過契約數量。
     const bad = Math.min(input, Math.floor(input * plan.defects + random(w))), good = Math.min(o.qty - o.produced, input - bad), scrap = input - good;
     w.stock.qty -= input; w.stock.value -= cost; if (!w.stock.qty) w.stock.value = 0;
+    o.attempted = (o.attempted ?? o.produced) + input; o.scrapped = (o.scrapped || 0) + scrap;
     o.produced += good; o.cost += cost * good / input; expense(w, 'cogs', cost * scrap / input);
     budget -= input; produced += good; defects += scrap;
   }
   for (const o of [...w.orders]) {
     if (o.produced >= o.qty) {
-      const late = w.day > o.due, penalty = late ? Math.round(o.quote * Math.min(.2, (w.day - o.due) * .02)) : 0;
+      const policy = contractPolicy(w, o);
+      if (policy.inspectionDays && o.inspectionReady === undefined) { o.inspectionReady = w.day + policy.inspectionDays; note(w, `${o.client} 良品完成，進入一天合約驗收；驗收完才認列交貨收入。`); }
+      if (o.inspectionReady !== undefined && w.day < o.inspectionReady) continue;
+      const late = w.day > o.due, penalty = late ? Math.round(o.quote * Math.min(policy.lateCap, (w.day - o.due) * policy.lateRate)) : 0;
+      const lossRate = o.attempted ? o.scrapped / o.attempted : 0, audit = policy.qualityTolerance === null ? 0 : Math.round(o.quote * Math.min(policy.auditCap, Math.max(0, lossRate - policy.qualityTolerance) * policy.auditRate));
       co.ledger.revenue += o.quote; co.ledger.sales += o.qty; expense(w, 'cogs', o.cost); if (penalty) expense(w, 'penalty', penalty, true);
+      if (audit) { expense(w, 'penalty', audit, true); note(w, `${o.client} 製程損失 ${(lossRate * 100).toFixed(1)}% 高於合約 ${(policy.qualityTolerance * 100).toFixed(1)}% 門檻，追加驗收費 $${audit.toLocaleString()}；已交貨仍是良品。`); }
       w.receivables.push({ amount: o.quote - o.deposit, due: w.day + o.term, client: o.client }); w.orders = w.orders.filter(x => x !== o);
+      delivered++; lateFees += penalty; auditFees += audit;
       w.stats.delivered++; w.stats.late += late ? 1 : 0; w.reputation = clamp(w.reputation + (late ? -.06 : .025), .1, .95); note(w, `${o.client} 已交貨${late ? '（逾期，已付違約金）' : ''}，尾款列入應收。`);
-    } else if (w.day > o.due + 7) cancelOrder(w, o);
+    } else if (w.day > o.due + contractPolicy(w, o).graceDays) cancelOrder(w, o);
   }
   expense(w, 'payroll', p.wage * w.workers * (w.shift === 'overtime' ? 1.25 : 1) / dim);
   expense(w, 'rent', p.rent * (.7 + .3 * w.lines) / dim);
   expense(w, 'research', (w.qc === 'strict' ? 18000 : 6000) / dim);
-  expense(w, 'energy', w.lines * 6000 / dim + produced * 1.5);
+  expense(w, 'energy', w.lines * 6000 / dim + produced * plan.energyPerUnit);
   const depreciation = Math.min(co.assets, p.equipment * w.lines / 180 / dim); co.assets -= depreciation; expense(w, 'depreciation', depreciation);
-  w.wear = clamp(w.wear + (produced ? .004 * (w.shift === 'overtime' ? 1.7 : 1) : .0006), 0, 1);
+  w.wear = clamp(w.wear + (produced ? .004 * (w.shift === 'overtime' ? 1.7 : 1) * plan.wearFactor : .0006), 0, 1);
   w.stats.produced += produced; w.stats.defects += defects; w.stats.busyDays += produced > 0 ? 1 : 0;
-  w.today = { produced, defects, utilization: plan.capacity ? (produced + defects) / plan.capacity : 0 };
+  w.today = { produced, defects, utilization: plan.capacity ? (produced + defects) / plan.capacity : 0, delivered, lateFees, auditFees };
   w.offers = w.offers.filter(o => o.expires > w.day + 1);
   finishDay(w, w.today);
   if (w.status === 'playing' && w.day % 7 === 0) generateOffers(w);
@@ -134,8 +233,11 @@ export function stepManufacturing(w) {
 export function manufacturingValid(w) {
   const nn = n => typeof n === 'number' && Number.isFinite(n) && n >= 0, integer = n => Number.isInteger(n) && n >= 0;
   const calendarDay = n => integer(n) && n <= END_DAY + 365;
-  if (!commonValid(w) || w.mode !== 'manufacturing' || !PRODUCTS[w.productId] || !Number.isInteger(w.workers) || w.workers < 1 || w.workers > 30 || !Number.isInteger(w.lines) || w.lines < 1 || w.lines > 6 || !['normal', 'overtime'].includes(w.shift) || !['standard', 'strict'].includes(w.qc) || !SUPPLIERS[w.supplier] || !nn(w.wear) || w.wear > 1 || !nn(w.reputation) || w.reputation > 1 || !integer(w.seq) || !calendarDay(w.maintenanceUntil)) return false;
+  if (!commonValid(w) || w.mode !== 'manufacturing' || !known(PRODUCTS, w.productId) || !Number.isInteger(w.workers) || w.workers < 1 || w.workers > 30 || !Number.isInteger(w.lines) || w.lines < 1 || w.lines > 6 || !['normal', 'overtime'].includes(w.shift) || !['standard', 'strict'].includes(w.qc) || !known(SUPPLIERS, w.supplier) || w.productionMode !== undefined && !known(PRODUCTION_MODES, w.productionMode) || !nn(w.wear) || w.wear > 1 || !nn(w.reputation) || w.reputation > 1 || !integer(w.seq) || !calendarDay(w.maintenanceUntil)) return false;
   const arr = (a, max) => Array.isArray(a) && a.length <= max;
-  const offer = o => o && typeof o.id === 'string' && typeof o.client === 'string' && ['qty', 'due', 'price', 'term', 'expires'].every(k => integer(o[k])) && o.qty > 0 && o.price > 0 && calendarDay(o.due) && calendarDay(o.expires) && [15, 30, 45].includes(o.term) && [.1, .25].includes(o.depositRate);
-  return w.stock && integer(w.stock.qty) && nn(w.stock.value) && nn(w.stock.defects) && w.stock.defects <= .1 && arr(w.shipments, 20) && w.shipments.every(s => integer(s.qty) && s.qty > 0 && nn(s.value) && calendarDay(s.arrival) && nn(s.defects) && s.defects <= .1) && arr(w.orders, 12) && w.orders.every(o => offer(o) && integer(o.produced) && o.produced <= o.qty && nn(o.cost) && nn(o.quote) && nn(o.deposit) && o.deposit <= o.quote) && new Set(w.orders.map(o=>o.id)).size === w.orders.length && arr(w.offers, 12) && w.offers.every(offer) && arr(w.receivables, 100) && w.receivables.every(r => nn(r.amount) && calendarDay(r.due) && typeof r.client === 'string') && (!w.expansion || calendarDay(w.expansion.ready)) && (!w.shock || nn(w.shock.cost) && calendarDay(w.shock.until)) && (!w.event || typeof w.event.title === 'string' && typeof w.event.text === 'string') && w.stats && ['produced','defects','delivered','late','lostBids','busyDays'].every(k=>nn(w.stats[k])) && w.today && ['produced','defects','utilization'].every(k=>nn(w.today[k]));
+  const profiles = contractProfiles(w.productId);
+  const offer = o => o && typeof o.id === 'string' && typeof o.client === 'string' && ['qty', 'due', 'price', 'term', 'expires'].every(k => integer(o[k])) && o.qty > 0 && o.price > 0 && calendarDay(o.due) && calendarDay(o.expires) && [15, 30, 45].includes(o.term) && (o.profile === undefined ? [.1, .25].includes(o.depositRate) : known(profiles, o.profile) && o.depositRate === profiles[o.profile].depositRate && o.term === profiles[o.profile].term);
+  const progress = o => o.attempted === undefined && o.scrapped === undefined || integer(o.attempted) && integer(o.scrapped) && o.attempted >= o.produced && o.scrapped <= o.attempted && o.attempted - o.scrapped === o.produced;
+  const inspection = o => o.inspectionReady === undefined || o.profile === 'precision' && o.produced === o.qty && calendarDay(o.inspectionReady) && o.inspectionReady <= w.day + 1;
+  return w.stock && integer(w.stock.qty) && nn(w.stock.value) && nn(w.stock.defects) && w.stock.defects <= .1 && arr(w.shipments, 20) && w.shipments.every(s => integer(s.qty) && s.qty > 0 && nn(s.value) && calendarDay(s.arrival) && nn(s.defects) && s.defects <= .1) && arr(w.orders, 12) && w.orders.every(o => offer(o) && integer(o.produced) && o.produced <= o.qty && nn(o.cost) && nn(o.quote) && nn(o.deposit) && o.deposit <= o.quote && progress(o) && inspection(o)) && new Set(w.orders.map(o=>o.id)).size === w.orders.length && arr(w.offers, 12) && w.offers.every(offer) && arr(w.receivables, 100) && w.receivables.every(r => nn(r.amount) && calendarDay(r.due) && typeof r.client === 'string') && (!w.expansion || calendarDay(w.expansion.ready)) && (!w.shock || nn(w.shock.cost) && calendarDay(w.shock.until)) && (!w.event || typeof w.event.title === 'string' && typeof w.event.text === 'string') && w.stats && ['produced','defects','delivered','late','lostBids','busyDays'].every(k=>nn(w.stats[k])) && w.today && ['produced','defects','utilization'].every(k=>nn(w.today[k])) && ['delivered','lateFees','auditFees'].every(k=>w.today[k] === undefined || nn(w.today[k]));
 }
