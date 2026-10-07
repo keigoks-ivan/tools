@@ -1,4 +1,4 @@
-import {accessories,guests} from './looks.js?v=17';
+import {accessories,guests} from './looks.js?v=18';
 const lengths=[.52,.78,1],papers=['#fbe2ec','#ffe4d6','#fff0cf','#dff2f0','#e5e9fb','#ede5f8'];
 export function restoreInspiration(value){
  if(!value||!Array.isArray(value.colors)||value.colors.length<1||value.colors.length>2||new Set(value.colors).size!==value.colors.length||!value.colors.every(i=>Number.isInteger(i)&&i>=0&&i<6)||!lengths.includes(value.length)||!accessories.includes(value.accessory))return null;

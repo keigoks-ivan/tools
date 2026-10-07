@@ -1,4 +1,4 @@
-import {validSticker} from './play.js?v=17';
+import {validSticker} from './play.js?v=18';
 // Storage has a deadline. A locked/private IndexedDB must never trap the game on loading.
 export class SalonMemory {
  constructor(){this.db=null;this.persistent=false;this.photos=[];this.stickers=[];this.current=null;this.problem=false;this.ready=null;}

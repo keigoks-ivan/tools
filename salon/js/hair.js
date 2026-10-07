@@ -1,5 +1,5 @@
-import {guest,palette} from './data.js?v=17';
-import {HairGL,domeTris} from './hair-gl.js?v=17';
+import {guest,palette} from './data.js?v=18';
+import {HairGL,domeTris} from './hair-gl.js?v=18';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const mix=(a,b,t)=>a.map((v,i)=>v+(b[i]-v)*t);
 const css=(c,m=1)=>`rgb(${c.map(v=>Math.round(clamp(v*m,0,255))).join(',')})`;
