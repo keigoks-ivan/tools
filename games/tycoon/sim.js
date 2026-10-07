@@ -1425,7 +1425,7 @@ function endDay(world) {
     updateFamiliarity(world, s);
     const td = s.today;
     const cups = td.walk + td.del;
-    s.days.push({ cups, walk: td.walk, del: td.del, lost: td.lost, stockLost: td.stockLost, prepared: td.prepared, unsold: td.unsold, wait: td.waitCups ? td.waitSum / td.waitCups : 0, rev: td.rev });
+    s.days.push({ day: Math.floor(world.t / 24), cups, walk: td.walk, del: td.del, lost: td.lost, stockLost: td.stockLost, prepared: td.prepared, unsold: td.unsold, wait: td.waitCups ? td.waitSum / td.waitCups : 0, rev: td.rev });
     if (s.days.length > 130) s.days.shift();
     s.waitDay7.push(td.waitCups ? td.waitSum / td.waitCups : 0); if (s.waitDay7.length > 7) s.waitDay7.shift();
     for (let h = 0; h < NHOURS; h++) s.hourEMA[h] = s.hourEMA[h] * 0.93 + 0.07 * (td.hourly[h][0] + td.hourly[h][1]);

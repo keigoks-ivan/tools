@@ -3,6 +3,7 @@ import { deserialize, serialize, BUSINESSES } from './sim.js';
 import { stockLimit } from './businesses.js';
 import { MARKET_VERSION, districtOf } from './market.js';
 import { strategyValid, managerValid } from './strategy.js';
+import { learningValid } from './decision-learning.js';
 export const SAVE_KEY = 'tycoon.save.v1';
 export const MANUAL_KEY = 'tycoon.save.manual.v1';
 export const BACKUP_KEY = SAVE_KEY + '.backup';
@@ -85,6 +86,10 @@ export function decodeSave(raw) {
   const world = deserialize(original);
   const cashHist = o.meta?.cashHist;
   const meta = { cashHist: Array.isArray(cashHist) && cashHist.every((a) => Array.isArray(a) && typeof a[0] === 'string' && Number.isFinite(a[1])) ? cashHist : [] };
+  if (o.meta?.learning != null) {
+    if (!learningValid(o.meta.learning)) throw new Error('決策紀錄格式不符，原始存檔已保留');
+    meta.learning = o.meta.learning;
+  }
   return { world, meta, savedAt: typeof o.savedAt === 'string' && Number.isFinite(Date.parse(o.savedAt)) ? o.savedAt : null, raw };
 }
 export function encodeSave(world, meta, now = new Date()) {

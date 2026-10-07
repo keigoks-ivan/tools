@@ -1,5 +1,6 @@
 import { manufacturingValid } from './manufacturing.js';
 import { technologyValid } from './technology.js';
+import { learningValid } from './decision-learning.js';
 export const routeKey = mode => `tycoon.${mode}.save.v1`;
 export const MAX_BYTES = 2 * 1024 * 1024;
 const validMode = mode => ['manufacturing', 'technology'].includes(mode);
@@ -12,6 +13,7 @@ export function decodeVenture(raw, mode) {
     if (v && typeof v === 'object') for (const [k, x] of Object.entries(v)) { if (['__proto__', 'prototype', 'constructor'].includes(k)) throw new Error('存檔欄位不符。'); safe(x, depth + 1); }
   }
   safe(o);
+  if (o.world?.learning != null && !learningValid(o.world.learning)) throw new Error('決策紀錄格式不符，原始存檔已保留。');
   if (o.format !== 'tycoon-venture' || o.version !== 1 || o.mode !== mode || !(mode === 'manufacturing' ? manufacturingValid(o.world) : technologyValid(o.world))) throw new Error('存檔已損壞、路線不符或版本不支援。');
   return { world: o.world, savedAt: o.savedAt, raw };
 }

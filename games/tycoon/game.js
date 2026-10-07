@@ -10,6 +10,9 @@ import * as S from './sim.js';
 import { strategyEffects } from './strategy.js';
 import { caseReportHtml, caseReportDocument } from './case-report.js';
 import { SAVE_KEY, MANUAL_KEY, BACKUP_KEY, MAX_SAVE_BYTES, encodeSave, decodeSave, loadLocal, storeLocal } from './saves.js';
+import { storeCoach } from './store-coach.js';
+import { decisionSnapshot, recordDecision, decisionReviews, completeDecisions } from './decision-learning.js';
+import { coachHtml, decisionReviewsHtml } from './learning-view.js';
 
 const q = new URLSearchParams(location.search);
 if (q.get('view') === 'sandbox') {
@@ -440,6 +443,31 @@ ${s.shortage ? '<p class="note warn">有人離職，最忙的班少一人。</p>
     return '';
   }
 
+  function shopCoach(id) {
+    return storeCoach({ shop: world.shops.find(s => s.id === id), analysis: S.getShopAnalysis(world, id), review: S.getLearningReview(world, id), world });
+  }
+  function shopDecisionSnapshot(id) {
+    const s = world.shops.find(s => s.id === id);
+    const names = { seats: '座位', stations: '工作站', mode: '內外帶', service: '服務', focus: '訓練', prep: '備貨', markdown: '清貨折扣', stockTarget: '庫存目標', autoStock: '自動補貨', takeaway: '快速／外帶', balanced: '標準', dinein: '內用體驗', quick: '快速', standard: '標準', premium: '精緻', open: '自由', coached: '指導', classes: '小班' };
+    const settings = `售價 ${Object.entries(s.prices).map(([k,v])=>k+' '+v).join('/')}；班表 ${s.staff.join('/')}；老闆 ${s.ownerWorks ? '顧店' : '不顧店'}；薪資 ${WAGE[s.wageLevel]}；原料 ${s.grade}；外送 ${s.delivery ? '開' : '關'}／加價 ${s.markupPct}%；定位 ${S.PROFILES[s.strategy?.profile || 'balanced'].name}；主推 ${Object.entries(s.strategy?.weights || {}).map(([k,v])=>k+' '+v).join('/')}；營運 ${Object.entries(s.operations).map(([k,v])=>names[k]+' '+(typeof v === 'boolean' ? v ? '開' : '關' : names[v] || v)).join('/')}；促銷 ${s.promo.kind || '無'}／${s.promo.daysLeft} 天；設備 ${s.assetLevel || 0}；店長 ${S.MANAGERS[s.manager?.tier || 'none'].name}／目標 ${s.manager?.goal === 'service' ? '服務' : '獲利'}／排班 ${s.manager?.staffing ? '開' : '關'}／採購 ${s.manager?.purchasing ? '開' : '關'}／保留 ${s.manager?.reserveMonths || 0} 月`;
+    return decisionSnapshot(shopCoach(id), world.companies.player.cash, settings);
+  }
+  function rememberShopDecision(id, title, before) {
+    const s = world.shops.find(s => s.id === id), day = Math.floor(world.t / 24);
+    meta.learning = recordDecision(meta.learning, { scope: id, title, day, fromDay: day + 1, mode: 'stores', unit: bizOf(s).unit, businessId: s.businessId, before, after: shopDecisionSnapshot(id), rows: s.days });
+  }
+  function shopLearningHtml(id, compact = true) {
+    const s = world.shops.find(s => s.id === id);
+    return coachHtml(shopCoach(id), { compact }) + decisionReviewsHtml(decisionReviews(meta.learning, id, s.days), { compact });
+  }
+  function refreshShopLearning() {
+    const region = side.querySelector('[data-shop-learning]');
+    if (!region) return;
+    const id = region.dataset.shopLearning, open = new Set([...region.querySelectorAll('details[open]')].map(d => d.querySelector('summary')?.textContent));
+    region.innerHTML = shopLearningHtml(id);
+    for (const d of region.querySelectorAll('details')) if (open.has(d.querySelector('summary')?.textContent)) d.open = true;
+    const title = side.querySelector('.shop-coach-signal b'), coach = shopCoach(id); if (title && coach) title.textContent = coach.bottleneck.title;
+  }
   function operationsHtml(s) {
     const b = bizOf(s), op = s.operations, analysis = S.getShopAnalysis(world, s.id);
     const opts = (key, choices) => choices.map(([value, name, note]) => `<button class="opt ${String(op[key]) === String(value) ? 'on' : ''}" data-act="operation:${key}:${value}"><b>${name}</b><small>${note}</small></button>`).join('');
@@ -453,7 +481,7 @@ ${s.shortage ? '<p class="note warn">有人離職，最忙的班少一人。</p>
     else controls = '<p>現點現做，主要決策在售價、原料等級、外送與尖峰排班。先看每小時成交量，再調整各班人數；同業態擴店會分走原分店客源。</p>';
     const upgrade = b.upgrades?.[s.assetLevel || 0];
     const assets = b.upgrades ? `<div class="sec"><h4>設備升級・${s.assetLevel || 0}／${b.upgrades.length}</h4><p>目前設備維護 ${money(S.assetMonthly(s))}／月。</p>${upgrade ? `<p>${upgrade.name}：投入 ${money(upgrade.cost)}，供給設備上限為基本的 ${upgrade.factor} 倍，每月另加維護 ${money(upgrade.monthly)}。${s.businessId === 'supermarket' ? `庫存上限提高至 ${money(1000000 * upgrade.factor)}。` : ''}</p><button class="gbtn wide" data-act="upgradeShop" ${s.status !== 'open' || world.companies.player.cash < upgrade.cost ? 'disabled' : ''}>${s.status !== 'open' ? '開張後可升級' : world.companies.player.cash < upgrade.cost ? '資金不足' : '付費升級設備'}</button>` : '<p>設備已完整升級。</p>'}<p class="note">升級立即啟用，維護費從下個營業日按天累計。擴充不保證增加客源；先比較實際成交、流失與損平需求。</p></div>` : '';
-    return `${positioningHtml(s)}<h4>${b.model}</h4><p>${b.customer}</p><p class="note">${b.tradeoff}</p>${controls}${assets}<dl class="kv"><dt>目前每日供給上限</dt><dd>${int(analysis.capacityDaily)} ${b.unit}</dd><dt>每月固定成本</dt><dd>${money(analysis.fixedMonthly)}</dd><dt>門店損平需求</dt><dd>${analysis.breakEvenDaily == null ? '先累積成交資料' : int(analysis.breakEvenDaily) + ' ' + b.unit + '／天'}</dd></dl><p class="note">產能是供給上限，實際成交受客群、價格、口碑、排隊與庫存限制。新業態參數是遊戲設計假設。</p><button class="gbtn wide" data-act="learning">看這家店的經營取捨</button>${S.getLeaseInfo(world, s.id, { includeAnalysis: false }) ? '<button class="gbtn wide" data-act="tab:lease">查看租約與續租損平需求</button>' : ''}${s.businessId === 'convenience' ? convenienceGuideHtml(s, analysis) : ''}`;
+    return `<div class="shop-coach-signal"><span>目前經營瓶頸</span><b>${esc(shopCoach(s.id).bottleneck.title)}</b><button class="gbtn" data-act="learning">看關鍵因子 →</button></div>${positioningHtml(s)}<h4>${b.model}</h4><p>${b.customer}</p><p class="note">${b.tradeoff}</p>${controls}${assets}<dl class="kv"><dt>目前每日供給上限</dt><dd>${int(analysis.capacityDaily)} ${b.unit}</dd><dt>每月固定成本</dt><dd>${money(analysis.fixedMonthly)}</dd><dt>門店損平需求</dt><dd>${analysis.breakEvenDaily == null ? '先累積成交資料' : int(analysis.breakEvenDaily) + ' ' + b.unit + '／天'}</dd></dl><p class="note">產能是供給上限，實際成交受客群、價格、口碑、排隊與庫存限制。新業態參數是遊戲設計假設。</p><button class="gbtn wide" data-act="learning">看這家店的經營取捨</button>${S.getLeaseInfo(world, s.id, { includeAnalysis: false }) ? '<button class="gbtn wide" data-act="tab:lease">查看租約與續租損平需求</button>' : ''}${s.businessId === 'convenience' ? convenienceGuideHtml(s, analysis) : ''}<div data-shop-learning="${s.id}">${shopLearningHtml(s.id)}</div>`;
   }
 
   function positioningHtml(s) {
@@ -638,7 +666,9 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
     const b = e.target.closest('[data-act]'); if (!b || b.disabled) return;
     const [act, a1, a2] = b.dataset.act.split(':');
     const sh = panel === 'shop' ? playerShopAt(selLot) : null;
-    const res = (r) => { if (!r.ok) toast(r.reason, true); else { syncShops(); labelDirty = hudDirty = true; save(); } return r.ok; };
+    const decisionTitles = { operation: '調整業態營運', operationApply: '調整備貨／庫存目標', profile: '調整客群定位', mixApply: '調整商品組合', manager: '調整店長委任', restock: '補貨', upgradeShop: '設備升級', staff: '調整排班', ownerWork: '調整老闆工時', wage: '調整薪資', grade: '調整原料', deliv: '調整外送', promo: '啟動促銷' };
+    const beforeDecision = sh && decisionTitles[act] ? shopDecisionSnapshot(sh.id) : null;
+    const res = (r) => { if (!r.ok) toast(r.reason, true); else { if (beforeDecision) rememberShopDecision(sh.id, decisionTitles[act], beforeDecision); syncShops(); labelDirty = hudDirty = true; save(); } return r.ok; };
     if (act === 'close') closePanel();
     else if (act === 'shopMonthly' && sh) { reportShop = sh.id; reportMonth = 'current'; reportTab = 'pl'; openReport(); }
     else if (act === 'gotoLoan') openPanel('loan');
@@ -709,8 +739,12 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
     if (r.id === 'open-owner') { $('#expansion-estimate').outerHTML = expansionEstimateHtml(r.checked); return; }
     if (r.type !== 'range') return;
     const sh = playerShopAt(selLot);
-    if (r.dataset.price && sh) { const x = S.setPrices(world, sh.id, { [r.dataset.price]: +r.value }); if (!x.ok) toast(x.reason, true); else { syncShops(); save(); } }
-    else if (r.dataset.markup && sh) { const x = S.setMarkup(world, sh.id, +r.value); if (!x.ok) toast(x.reason, true); else save(); }
+    if ((r.dataset.price || r.dataset.markup) && sh) {
+      const before = shopDecisionSnapshot(sh.id);
+      const x = r.dataset.price ? S.setPrices(world, sh.id, { [r.dataset.price]: +r.value }) : S.setMarkup(world, sh.id, +r.value);
+      if (!x.ok) toast(x.reason, true);
+      else { rememberShopDecision(sh.id, r.dataset.price ? '調整售價' : '調整外送加價', before); syncShops(); save(); }
+    }
   });
 
   // ───────── 事件卡 ─────────
@@ -791,6 +825,8 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
     return f;
   }
   function newDay() {
+    if (meta.learning) meta.learning = completeDecisions(meta.learning, id => world.shops.find(s => s.id === id)?.days || []);
+    refreshShopLearning();
     const k = S.getKpi(world);
     if (k.clock.day === 1) {
       meta.cashHist.push([k.date.slice(0, 7), k.cash]);
@@ -897,8 +933,11 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
     $('#over').hidden = false;
     save();
   }
+  function decisionSummaryHtml() {
+    return world.shops.filter(s => s.company === 'player' && (meta.learning || []).some(r=>r.scope === s.id)).map(s=>`<div class="card"><h3>${esc(s.name)} · 決策觀察</h3>${decisionReviewsHtml(decisionReviews(meta.learning, s.id, s.days))}</div>`).join('');
+  }
   function downloadCase() {
-    const report = S.getFinalReport(world), url = URL.createObjectURL(new Blob([caseReportDocument(report)], { type: 'text/html;charset=utf-8' }));
+    const report = S.getFinalReport(world), url = URL.createObjectURL(new Blob([caseReportDocument(report, decisionSummaryHtml())], { type: 'text/html;charset=utf-8' }));
     const a = document.createElement('a'); a.href = url; a.download = `創業之城-結案分析-${report.endDate}.html`; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
   $('#over').addEventListener('click', (e) => {
@@ -1020,7 +1059,7 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
     const selected = shops.find((s) => s.id === reportShop);
     if (!selected) return `<div class="card"><h4>創業實戰檢視</h4><p>${reportShop ? '這家店已關閉，歷史結果可在月報明細比較。' : '從上方選一間分店，將它的定位、定價、庫存、人力與現金一起檢視。'}</p></div>`;
     const r = S.getLearningReview(world, selected.id);
-    return `<div class="card"><h4>創業實戰檢視<small>${esc(selected.name)}</small></h4><p>先看數字，再做選擇。這些是本店實際帳目與目前設定的取捨；可把本次判斷和下個月的結果對照。</p><dl class="kv"><dt>目前定位</dt><dd>${r.profile}</dd><dt>分析期營業日</dt><dd>${r.sampleDays} 天${r.sampleDays < 7 ? '・樣本仍少' : ''}</dd><dt>含品牌費用與老闆替代工資的損平</dt><dd>${r.economicBreakEven == null ? '尚無正的單筆貢獻' : int(r.economicBreakEven) + ' ' + unitOf(selected) + '／天'}</dd></dl><p class="note">老闆替代工資是評估工時的機會成本，未另外扣遊戲現金；實際報表仍沿用原帳目。</p><button class="gbtn" data-learning-edit="${selected.id}">調整這家店的經營</button></div><div class="learning-grid">${r.lessons.map((l) => `<div class="card"><h4>${esc(l.skill)}</h4><p class="learning-fact">${esc(l.fact)}</p><p>${esc(l.action)}</p></div>`).join('')}</div>`;
+    return `${shopLearningHtml(selected.id, false)}<div class="card"><h4>創業實戰檢視<small>${esc(selected.name)}</small></h4><p>先看數字，再做選擇。這些是本店實際帳目與目前設定的取捨；可把本次判斷和下個月的結果對照。</p><dl class="kv"><dt>目前定位</dt><dd>${r.profile}</dd><dt>分析期營業日</dt><dd>${r.sampleDays} 天${r.sampleDays < 7 ? '・樣本仍少' : ''}</dd><dt>含品牌費用與老闆替代工資的損平</dt><dd>${r.economicBreakEven == null ? '尚無正的單筆貢獻' : int(r.economicBreakEven) + ' ' + unitOf(selected) + '／天'}</dd></dl><p class="note">老闆替代工資是評估工時的機會成本，未另外扣遊戲現金；實際報表仍沿用原帳目。</p><button class="gbtn" data-learning-edit="${selected.id}">調整這家店的經營</button></div><div class="learning-grid">${r.lessons.map((l) => `<div class="card"><h4>${esc(l.skill)}</h4><p class="learning-fact">${esc(l.fact)}</p><p>${esc(l.action)}</p></div>`).join('')}</div>`;
   }
   function cashForecastHtml(f) {
     if (!f) return '<div class="card"><h4>現金預測</h4><p>本局已結束，可在「結案」查看實際成果。</p></div>';
@@ -1047,8 +1086,8 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
     else if (reportTab === 'pl') body = monthlyReportHtml();
     else if (reportTab === 'an') {
       forecast = S.getCashForecast(world);
-      body = `<div class="card"><h4>從近期結果到下一步決策</h4><p>分店選擇沿用上方範圍。以下診斷使用目前設定與近期成交；現金預測統一看整個品牌，因為分店共用資金。歷史月份的實際帳目在「經營總覽」與「月報明細」比較。</p></div>${analysisHtml(analysis)}${learningHtml()}${cashForecastHtml(forecast)}<details class="card"><summary>通路與品牌商品・近 12 個月</summary>${channelHtml(rep, rows)}${productsHtml(rep, shops[0])}<p class="note">通路與商品彙總以全品牌近 12 個月計算，不受分店與月份選擇影響。</p></details><details class="card"><summary>目前全城市場、連鎖與競爭</summary>${chainAnalysisHtml(rep)}${rivalsHtml()}<div class="cards">${revCard()}${shareCard()}</div></details>`;
-    } else body = `<button class="gbtn" data-act="downloadCase">下載${world.status === 'playing' ? '目前整局' : '結案'}分析報告</button>${caseReportHtml(S.getFinalReport(world))}`;
+      body = `<div class="card"><h4>從近期結果到下一步決策</h4><p>分店選擇沿用上方範圍。以下診斷使用目前設定與近期成交；現金預測統一看整個品牌，因為分店共用資金。歷史月份的實際帳目在「經營總覽」與「月報明細」比較。</p></div>${learningHtml()}<details class="card"><summary>其他經營指標與診斷</summary>${analysisHtml(analysis)}</details>${cashForecastHtml(forecast)}<details class="card"><summary>通路與品牌商品・近 12 個月</summary>${channelHtml(rep, rows)}${productsHtml(rep, shops[0])}<p class="note">通路與商品彙總以全品牌近 12 個月計算，不受分店與月份選擇影響。</p></details><details class="card"><summary>目前全城市場、連鎖與競爭</summary>${chainAnalysisHtml(rep)}${rivalsHtml()}<div class="cards">${revCard()}${shareCard()}</div></details>`;
+    } else body = `<button class="gbtn" data-act="downloadCase">下載${world.status === 'playing' ? '目前整局' : '結案'}分析報告</button>${caseReportHtml(S.getFinalReport(world))}${decisionSummaryHtml()}`;
     el.innerHTML = `<div class="rp-head"><h2>經營報表</h2><span class="sub num">${c.year} 年 ${c.month} 月 ${c.day} 日・${esc(world.companies.player.name)}</span>
       <div class="tabs">${tabs.map(([k, n]) => `<button data-rt="${k}" class="${reportTab === k ? 'on' : ''}">${n}</button>`).join('')}</div>
       <button class="xbtn" data-act="mclose" aria-label="關閉">${icon.close}</button></div><div class="rp-body">${reportTab === 'case' ? '' : reportScopeHtml(scope, selected)}${body}</div>`;
