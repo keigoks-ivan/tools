@@ -1,4 +1,4 @@
-import {rgb} from './looks.js?v=15';
+import {rgb} from './looks.js?v=17';
 function ellipse(c,x,y,rx,ry,color,a=0){c.fillStyle=color;c.beginPath();c.ellipse(x,y,rx,ry,a,0,Math.PI*2);c.fill()}
 function star(c,n,outer,inner){c.beginPath();for(let i=0;i<n*2;i++){const a=i*Math.PI/n-Math.PI/2,r=i%2?inner:outer;const x=Math.cos(a)*r,y=Math.sin(a)*r;i?c.lineTo(x,y):c.moveTo(x,y)}c.closePath();c.fill()}
 export function ornament(c,kind,x,y,size=44,color=0,angle=0){
@@ -11,7 +11,7 @@ export function ornament(c,kind,x,y,size=44,color=0,angle=0){
  if(kind==='butterfly'){for(const side of [-1,1]){ellipse(c,side*11,-7,13,17,g,side*.5);ellipse(c,side*10,12,10,10,g,-side*.5);ellipse(c,side*13,-9,5,8,'#fff0db99',side*.5)}ellipse(c,0,2,3,17,'#9d6480');c.beginPath();c.moveTo(-6,-23);c.quadraticCurveTo(0,-20,0,-10);c.quadraticCurveTo(0,-20,6,-23);c.stroke()}
  if(kind==='moon'){c.fillStyle='#f7cf76';c.beginPath();c.arc(0,0,22,.6,5.3);c.bezierCurveTo(-8,-8,-8,8,18,12);c.fill();c.stroke();c.translate(14,-10);c.fillStyle='#fff5c5';star(c,4,8,3)}
  if(kind==='crown'){c.fillStyle='#f5ce75';c.beginPath();c.moveTo(-22,15);c.lineTo(-26,-14);c.lineTo(-11,-3);c.lineTo(0,-23);c.lineTo(12,-3);c.lineTo(25,-14);c.lineTo(21,15);c.closePath();c.fill();c.stroke();c.fillStyle=rgb(color);star(c,5,7,3);c.fillStyle='#fff1ba';c.fillRect(-20,11,40,5)}
- if(kind==='pearls'){for(let i=0;i<7;i++){const x=(i-3)*7.5,y=-Math.cos((i-3)*.4)*7;const pearl=c.createRadialGradient(x-2,y-2,0,x,y,6);pearl.addColorStop(0,'#ffffff');pearl.addColorStop(.6,'#fff1e5');pearl.addColorStop(1,'#caa5bd');ellipse(c,x,y,5.6,5.6,pearl)}}
+ if(kind==='pearls'){for(let i=0;i<7;i++){const x=(i-3)*7.5,y=Math.cos((i-3)*.4)*7;const pearl=c.createRadialGradient(x-2,y-2,0,x,y,6);pearl.addColorStop(0,'#ffffff');pearl.addColorStop(.6,'#fff1e5');pearl.addColorStop(1,'#caa5bd');ellipse(c,x,y,5.6,5.6,pearl)}}
  c.restore();
 }
 // 髮飾工具：點空的地方放一個；拖著髮飾移動；碰一下（沒拖動）轉 45 度；最後碰過的髮飾旁邊有旋轉把手，拖著把手繞圈可轉到任何方向；拖到下面垃圾桶移除

@@ -1,4 +1,4 @@
-import {ornament} from '../ornaments.js?v=15';
+import {ornament} from '../ornaments.js?v=17';
 export function createTie(env){let drag=null,flash=null,checked='';
  const locate=p=>{const radius=env.tieRadius?.()??32;return env.hair.tieHandles().map(b=>({b,d:Math.hypot(b.x-p.x,b.y-p.y)})).filter(q=>q.d<radius).sort((a,b)=>a.d-b.d)[0]?.b;};
  return {

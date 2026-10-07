@@ -1,17 +1,21 @@
-import {StudioUI} from './studio.js?v=15';
-import {drawRoom,drawBody,drawFallbackFace} from './studio-art.js?v=15';
-import {guests,wishes} from './looks.js?v=15';
-import {SalonMemory} from './memory.js?v=15';
-import {ReplayUI} from './replay-ui.js?v=15';
-import {ornament,createDecorate} from './ornaments.js?v=15';
-import {createLayout,toWorld,inStage} from './layout.js?v=15';
-import {HairSystem,setHairTexture,setHairPlate} from './hair.js?v=15';
-import {guest,palette} from './data.js?v=15';
-import {createCut} from './tools/cut.js?v=15';
-import {createGrow} from './tools/grow.js?v=15';
-import {createColor} from './tools/color.js?v=15';
-import {createComb} from './tools/comb.js?v=15';
-import {createTie} from './tools/tie.js?v=15';
+import {StudioUI} from './studio.js?v=17';
+import {drawRoom,drawBody,drawFallbackFace} from './studio-art.js?v=17';
+import {guests,wishes} from './looks.js?v=17';
+import {SalonMemory} from './memory.js?v=17';
+import {ReplayUI} from './replay-ui.js?v=17';
+import {ornament,createDecorate} from './ornaments.js?v=17';
+import {createLayout,toWorld,inStage} from './layout.js?v=17';
+import {HairSystem,setHairTexture,setHairPlate} from './hair.js?v=17';
+import {guest,palette} from './data.js?v=17';
+import {createCut} from './tools/cut.js?v=17';
+import {createGrow} from './tools/grow.js?v=17';
+import {createColor} from './tools/color.js?v=17';
+import {createComb} from './tools/comb.js?v=17';
+import {createTie} from './tools/tie.js?v=17';
+import {checkWish} from './goals.js?v=17';
+import {surpriseWish,restoreInspiration,earnedSticker} from './play.js?v=17';
+import {FoamSystem} from './foam.js?v=17';
+import {createWash,createShape} from './tools/care.js?v=17';
 const canvas=document.getElementById('scene'),box=document.getElementById('game'),ctx=canvas.getContext('2d',{alpha:false});
 canvas.width=box.clientWidth;canvas.height=box.clientHeight;ctx.fillStyle='#fff2db';ctx.fillRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#efadc0';for(let i=0;i<5;i++){let a=i*Math.PI*2/5;ctx.beginPath();ctx.arc(canvas.width/2+Math.cos(a)*14,canvas.height/2+Math.sin(a)*14,11,0,Math.PI*2);ctx.fill()}ctx.fillStyle='#f9d37b';ctx.beginPath();ctx.arc(canvas.width/2,canvas.height/2,8,0,Math.PI*2);ctx.fill();
 // Artwork never blocks play. Missing or slow files use the vector portrait.
@@ -20,34 +24,38 @@ const loadImage=url=>new Promise(resolve=>{const im=new Image();im.onload=()=>re
 for(const [name,url] of Object.entries(guest.art))loadImage(url).then(im=>{if(im){artSets.get('cocoa')[name]=im;previews.clear();tieShots.clear()}});
 for(const g of guests.filter(g=>g.atlas))loadImage(g.atlas).then(atlas=>{if(!atlas)return;const set=artSets.get(g.id);['normal','blink','happy','surprise'].forEach((name,i)=>{const cell=document.createElement('canvas');cell.width=Math.round(atlas.width/2);cell.height=Math.round(atlas.height/2);cell.getContext('2d').drawImage(atlas,(i%2)*atlas.width/2,Math.floor(i/2)*atlas.height/2,atlas.width/2,atlas.height/2,0,0,cell.width,cell.height);set[name]=cell});previews.clear();tieShots.clear()});
 const memory=new SalonMemory(),memoryReady=memory.open();let touched=false;
-let currentGuest=guests[0],wishIndex=0;const ornaments=[],history=[],drafts={};let saveTimer;
+let currentGuest=guests[0],wishIndex=0,inspiration=null;const ornaments=[],history=[],drafts={};let saveTimer;
 const textureImage=new Image();textureImage.onload=()=>setHairTexture(textureImage);textureImage.src='./assets/art/hair-texture.webp';
 loadImage('./assets/art/hair-plate.webp').then(im=>{if(im)setHairPlate(im)});
 const env={hair:new HairSystem(),H:844,colorIndex:0,react};
-const tools={cut:createCut(env),grow:createGrow(env),color:createColor(env),comb:createComb(env),tie:createTie(env),decorate:createDecorate(env,ornaments,save)};env.ornament='bow';
+env.foam=new FoamSystem(env.hair);
+const tools={cut:createCut(env),grow:createGrow(env),color:createColor(env),comb:createComb(env),wash:createWash(env),rinse:createWash(env,true),curl:createShape(env),straight:createShape(env,false),tie:createTie(env),decorate:createDecorate(env,ornaments,save)};env.ornament='bow';
 
 let selected='cut',pointer=null,expression='normal',reactionUntil=0,nextExpression=null,blinkAt=performance.now()+4200,blinkUntil=0,last=performance.now(),headDx=0;
-function state(){return {version:1,guest:currentGuest.id,hair:env.hair.snapshot(),ornaments:structuredClone(ornaments),wish:wishIndex};}
+function currentWish(){return inspiration||wishes[wishIndex]}
+function state(){return {version:1,guest:currentGuest.id,hair:env.hair.snapshot(),foam:env.foam.snapshot(),ornaments:structuredClone(ornaments),wish:wishIndex,inspiration};}
 function bookmark(){touched=true;history.push(state());if(history.length>8)history.shift()}
 function save(){clearTimeout(saveTimer);saveTimer=setTimeout(()=>{drafts[currentGuest.id]=state();memory.draft({active:currentGuest.id,drafts})},350)}
-function editKey(snapshot){return JSON.stringify([snapshot.hair.strands.map(s=>[s.rest,s.tie,s.nodes.map(p=>[p.homeX,p.homeY,p.c])]),snapshot.ornaments])}
+function editKey(snapshot){return JSON.stringify([snapshot.hair.strands.map(s=>[s.rest,s.tie,s.nodes.map(p=>[p.homeX,p.homeY,p.c])]),snapshot.ornaments,snapshot.foam])}
 function stop(cancel=true){if(pointer){const old=pointer;pointer=null;if(!old.ui){tools[old.tool].onUp({cancel});if(editKey(old.before)!==editKey(state())){touched=true;history.push(old.before);if(history.length>8)history.shift();save()}}if(old.target.hasPointerCapture(old.id))old.target.releasePointerCapture(old.id)}}
 function restore(snapshot){
  const profile=guests.find(g=>g.id===snapshot?.guest);if(!profile)return false;
  stop();currentGuest=profile;art=artSets.get(profile.id)||artSets.get('cocoa');env.hair.reset(profile);
  if(!env.hair.restore(snapshot.hair))env.hair.reset(profile);
- ornaments.splice(0,ornaments.length,...(Array.isArray(snapshot.ornaments)?snapshot.ornaments.filter(a=>a&&['bow','flower','star','butterfly','heart','moon','crown','pearls'].includes(a.kind)&&Number.isFinite(a.x)&&Number.isFinite(a.y)&&Number.isFinite(a.angle)&&Number.isInteger(a.color)&&a.color>=0&&a.color<palette.length):[]));wishIndex=Number.isInteger(snapshot.wish)?Math.max(0,Math.min(wishes.length-1,snapshot.wish)):0;save();return true;
+ env.foam.restore(snapshot.foam);
+ ornaments.splice(0,ornaments.length,...(Array.isArray(snapshot.ornaments)?snapshot.ornaments.filter(a=>a&&['bow','flower','star','butterfly','heart','moon','crown','pearls'].includes(a.kind)&&Number.isFinite(a.x)&&Number.isFinite(a.y)&&Number.isFinite(a.angle)&&Number.isInteger(a.color)&&a.color>=0&&a.color<palette.length):[]));wishIndex=Number.isInteger(snapshot.wish)?Math.max(0,Math.min(wishes.length-1,snapshot.wish)):0;inspiration=restoreInspiration(snapshot.inspiration);save();return true;
 }
 function chooseGuest(id){
  if(id===currentGuest.id){stop();react('happy');return}
  touched=true;stop();drafts[currentGuest.id]=state();history.length=0;
- if(drafts[id])restore(drafts[id]);else{currentGuest=guests.find(g=>g.id===id)||guests[0];art=artSets.get(id)||artSets.get('cocoa');env.hair.reset(currentGuest);ornaments.length=0;wishIndex=(wishIndex+1)%wishes.length;save()}
+ if(drafts[id])restore(drafts[id]);else{currentGuest=guests.find(g=>g.id===id)||guests[0];art=artSets.get(id)||artSets.get('cocoa');env.hair.reset(currentGuest);env.foam.restore([]);ornaments.length=0;wishIndex=(wishIndex+1)%wishes.length;inspiration=null;save()}
  react('happy');
 }
 function photoCanvas(hair=env.hair,set=art,items=ornaments,expression='happy'){
- const c=document.createElement('canvas');c.width=640;c.height=860;const p=c.getContext('2d');p.scale(640/390,640/390);p.translate(0,-86.5);p.fillStyle='#e4efe7';p.fillRect(0,86.5,390,525);paintGuest(p,hair,set,expression,items,0);return c;
+ const c=document.createElement('canvas');c.width=640;c.height=860;const p=c.getContext('2d');p.scale(640/390,640/390);p.translate(0,-86.5);p.fillStyle='#e4efe7';p.fillRect(0,86.5,390,525);paintGuest(p,hair,set,expression,items,0);if(hair===env.hair)env.foam.draw(p,performance.now());return c;
 }
-function capture(){const image=photoCanvas().toDataURL('image/jpeg',.88);return {id:globalThis.crypto?.randomUUID?.()||Date.now().toString(36),created:Date.now(),image,state:state()}}
+function capture(){const image=photoCanvas().toDataURL('image/jpeg',.88),wish=currentWish();return {id:globalThis.crypto?.randomUUID?.()||Date.now().toString(36),created:Date.now(),image,state:state(),sticker:earnedSticker(currentGuest.id,wish,checkWish(env.hair,ornaments,wish))}}
+function newChallenge(options={}){stop();if(options.guest)chooseGuest(options.guest);else if(options.next)chooseGuest(guests[(guests.indexOf(currentGuest)+1+guests.length)%guests.length].id);const previous=currentWish();inspiration=surpriseWish(Math.random,previous,options.color);selected='color';env.colorIndex=inspiration.colors[0];touched=true;save();studio.free=false;studio.last=0;react('happy')}
 const previews=new Map();
 // 綁髮選單的預覽：拿目前這位客人現在的頭髮（長度、顏色都一樣）套上每一種綁法，拍一張頭部特寫。每格最多做一張，選單打開時重做。
 const tieShots=new Map();let tieBudget=0;
@@ -60,15 +68,16 @@ function tiePreview(mode){
  paintGuest(p,h,art,'happy',[],0);tieShots.set(mode,c);return c;
 }
 const replay=new ReplayUI({memory,guests:guests.filter(g=>artSets.has(g.id)),stop,react,save,capture,restore:s=>{bookmark();restore(s)},
- guestId:()=>currentGuest.id,wish:()=>wishIndex,selected:()=>selected,ornament:()=>env.ornament,color:()=>env.colorIndex,
- chooseGuest,chooseWish:i=>{touched=true;wishIndex=i;save()},chooseOrnament:kind=>{env.ornament=kind;selected='decorate'},
+ guestId:()=>currentGuest.id,wish:()=>wishIndex,currentWish,newChallenge,selected:()=>selected,ornament:()=>env.ornament,color:()=>env.colorIndex,
+ finishPhoto:photo=>photo.sticker?memory.collect(photo.sticker):false,
+ chooseGuest,chooseWish:i=>{touched=true;wishIndex=i;inspiration=null;save();studio.free=false},chooseOrnament:kind=>{env.ornament=kind;selected='decorate'},chooseCare:kind=>{stop();selected=kind},
  tiePreview,clearTiePreviews:()=>tieShots.clear(),tieMode:()=>env.hair.tieMode(),
  tie:mode=>{bookmark();const count=mode==='loose'?(env.hair.untie(),0):env.hair.tie(mode,env.colorIndex);if(!count&&mode!=='loose'){selected='grow';studio.notify('頭髮有點短，先用生髮水長長再綁。')}react('happy');save()},
  canUndo:()=>history.length>0,undo:()=>{const previous=history.pop();if(previous)restore(previous)},
- reset:()=>{bookmark();env.hair.reset(currentGuest);ornaments.length=0;react('happy');save()},
+ reset:()=>{bookmark();env.hair.reset(currentGuest);env.foam.restore([]);ornaments.length=0;react('happy');save()},
  preview:id=>{if(!previews.has(id)){const profile=guests.find(g=>g.id===id);previews.set(id,photoCanvas(new HairSystem(profile),artSets.get(id),[],'normal'))}return previews.get(id)}
 });
-const studio=new StudioUI({replay,stop,selected:()=>selected,colorIndex:()=>env.colorIndex,wish:()=>wishIndex,hair:()=>env.hair,items:()=>ornaments,canUndo:()=>history.length>0,problem:()=>memory.problem,guest:()=>currentGuest.id,celebrate:()=>{for(let i=0;i<60;i++)env.hair.particles.push({x:195,y:230,vx:(Math.random()-.5)*250,vy:-60-Math.random()*150,life:1+Math.random(),color:['#fff4ab','#eb9fb9','#a3c7b4'][i%3],size:2+Math.random()*3})},
+const studio=new StudioUI({replay,stop,selected:()=>selected,colorIndex:()=>env.colorIndex,wish:()=>wishIndex,currentWish,hair:()=>env.hair,items:()=>ornaments,canUndo:()=>history.length>0,problem:()=>memory.problem,guest:()=>currentGuest.id,celebrate:()=>{for(let i=0;i<60;i++)env.hair.particles.push({x:195,y:230,vx:(Math.random()-.5)*250,vy:-60-Math.random()*150,life:1+Math.random(),color:['#fff4ab','#eb9fb9','#a3c7b4'][i%3],size:2+Math.random()*3})},
  select:kind=>{stop();selected=kind;if(kind==='decorate')replay.open('accessories')},
  color:i=>{stop();env.colorIndex=i;if(selected!=='decorate'&&selected!=='tie')selected='color'},
  bindTieControl:(button,band=null)=>bindTieControl(button,band),
@@ -191,7 +200,8 @@ function render(now){const rawDt=(now-last)/1000,dt=Math.min(.034,rawDt);last=no
  ctx.save();ctx.beginPath();ctx.rect(layout.stage.x,layout.stage.y,layout.stage.w,layout.stage.h);ctx.clip();
  ctx.translate(layout.world.x,layout.world.y);ctx.scale(layout.world.scale,layout.world.scale);
  paintGuest(ctx,env.hair,art,show,ornaments,headDx);
- if(!studio.free&&!replay.mode&&selected==='cut'&&!env.hair.activeTies().length){const y=128+440*wishes[wishIndex].length*.92;ctx.save();ctx.strokeStyle='#fff9e9bb';ctx.lineWidth=1.5;ctx.setLineDash([5,5]);ctx.beginPath();ctx.moveTo(49,y);ctx.lineTo(341,y);ctx.stroke();ctx.fillStyle='#796483';ctx.font='9px system-ui';ctx.textAlign='center';ctx.fillText('✂',329,y-5);ctx.restore()}
+ env.foam.draw(ctx,now);
+ if(!studio.free&&!replay.mode&&selected==='cut'&&!env.hair.activeTies().length){const y=128+440*currentWish().length*.92;ctx.save();ctx.strokeStyle='#fff9e9bb';ctx.lineWidth=1.5;ctx.setLineDash([5,5]);ctx.beginPath();ctx.moveTo(49,y);ctx.lineTo(341,y);ctx.stroke();ctx.fillStyle='#796483';ctx.font='9px system-ui';ctx.textAlign='center';ctx.fillText('✂',329,y-5);ctx.restore()}
  env.hair.drawFallen(ctx);if(!replay.mode)tools[selected].drawOverlay(ctx);ctx.restore();
  replay.draw(ctx,layout,now);studio.draw(now);requestAnimationFrame(render)
 }

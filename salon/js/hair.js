@@ -1,5 +1,5 @@
-import {guest,palette} from './data.js?v=15';
-import {HairGL,domeTris} from './hair-gl.js?v=15';
+import {guest,palette} from './data.js?v=17';
+import {HairGL,domeTris} from './hair-gl.js?v=17';
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
 const mix=(a,b,t)=>a.map((v,i)=>v+(b[i]-v)*t);
 const css=(c,m=1)=>`rgb(${c.map(v=>Math.round(clamp(v*m,0,255))).join(',')})`;
@@ -179,6 +179,13 @@ export class HairSystem{
    for(let j=start;j<n.length;j++){if(pin[j]||(s.tie&&j<=s.tie.index))continue;n[j].x+=delta[j].x;n[j].y+=delta[j].y;}
    smoothBends(s,.16);this.relaxShape(s,20);s.styled=true;s.textureDirty=true;
   }return changed;
+ }
+ shape(p,curly=true,handled=new Set()){let count=0;
+  for(const s of this.strands){if(s.bang||s.tie?.fixed||handled.has(s.id)||!s.nodes.some(n=>Math.hypot(n.x-p.x,n.y-p.y)<45))continue;const n=s.nodes,start=Math.max(3,s.tie?.index??0,...(s.tie?.extra||[]).map(e=>e.i));if(n.length-start<3)continue;
+   handled.add(s.id);const angle=Math.atan2(n[start].x-n[start-1].x,n[start].y-n[start-1].y);let distance=0;
+   for(let j=start+1;j<n.length;j++){const length=s.rest[j-1];distance+=length;const t=Math.min(1,distance/85),wave=curly?.68*Math.sin(distance/36+s.group*.12)*t:0,turn=angle*(1-t)+wave;const a=n[j-1];n[j].x=a.x+Math.sin(turn)*length;n[j].y=a.y+Math.cos(turn)*length;}
+   s.groomed=true;s.styled=true;this.relaxShape(s,28);s.textureDirty=true;count++;
+  }return count;
  }
  relaxShape(s,iterations=20){
   const n=s.nodes;
