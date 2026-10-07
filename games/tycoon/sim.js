@@ -1787,6 +1787,25 @@ function companyPnL(world, co, row, di) {
   return { ym, ...pnl, adCost, extraExpense, facilityCost, chainCost, researchExpense, stockWriteOff, facilityCapex: source.facilityCapex || 0, stockPurchases: source.stockPurchases || 0, shopInvestment: source.shopInvestment || 0, assetRecoveries: source.assetRecoveries || 0, warehouseSavings: source.warehouseSavings || 0, factorySavings: source.factorySavings || 0, factoryCups: source.factoryCups || 0, loanInterest, incomeTax, loanPrincipal, totalCost, netProfit: pnl.turnover - totalCost, netMargin: pnl.turnover ? (pnl.turnover - totalCost) / pnl.turnover : null, incomplete: row ? !!row.reportingIncomplete || row.loanInterest == null || row.extraExpense == null : !!co.cm.reportingIncomplete || co.cm.extraExpense == null };
 }
 
+/** 月報沿用已結帳的門店歷史；同月關店的最後帳仍保留在原店。 */
+export function getMonthlyReport(world, shopId = null) {
+  const co = playerCo(world), di = world.status === 'playing' ? world.day || dateOf(Math.floor(world.t / 24)) : dateOf(Math.floor(world.t / 24)), ym = ymOf(di);
+  const rows = co.rows.slice(-48);
+  const shops = world.shops.filter((s) => s.owner === 'player').map((s) => {
+    const month = (key, current = false) => {
+      const parts = s.history.filter((h) => h.ym === key);
+      if (current && s.status !== 'closed') parts.push({ ...computePnL(world, s, di.dim), tradingDays: s.mtd.tradingDays, stockLost: s.mtd.stockLost });
+      const pnl = Object.fromEntries(PNL_SUM.map((k) => [k, parts.reduce((a, h) => a + (h[k] || 0), 0)]));
+      const tradingDays = parts.reduce((a, h) => a + (h.tradingDays || 0), 0);
+      return { ym: key, ...pnl, totalCost: pnl.turnover - pnl.profit, netProfit: pnl.profit, netMargin: pnl.turnover ? pnl.profit / pnl.turnover : null, tradingDays, daily: tradingDays ? pnl.cups / tradingDays : null, stockLost: parts.reduce((a, h) => a + (h.stockLost || 0), 0), partial: parts.some((h) => h.partial), active: parts.length > 0 };
+    };
+    return { id: s.id, name: s.name, lotId: s.lotId, status: s.status, businessId: s.businessId, unit: businessOf(s.businessId).unit, ownerWorks: !!s.ownerWorks, current: month(ym, true), financials: rows.map((r) => month(r.ym)) };
+  });
+  const shop = shopId == null ? null : shops.find((s) => s.id === shopId);
+  if (shopId != null && !shop) return null;
+  return { shopId, name: shop ? shop.name : co.name, unit: shop ? shop.unit : '成交單位', shops, analysis: shop ? [shop] : shops, current: shop ? shop.current : companyPnL(world, co, null, di), financials: shop ? shop.financials : rows.map((r) => companyPnL(world, co, r, di)) };
+}
+
 /** 門店診斷：按實際通路組合與每杯貢獻估算，不改變模擬狀態。 */
 export function getShopAnalysis(world, shopId) {
   const s = shopBy(world, shopId);

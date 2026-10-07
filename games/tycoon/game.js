@@ -90,6 +90,7 @@ async function main() {
 </header>
 <nav id="dock" class="panel" aria-label="建造選單">
   <div class="cap">建造</div>
+  <button data-dk="shops" aria-controls="my-shops" aria-expanded="true">${icon.shop}<span>我的店</span></button>
   <button data-dk="shop">${icon.shop}<span>開店</span></button>
   <button data-dk="factory">${icon.factory}<span>工廠</span></button>
   <button data-dk="warehouse">${icon.warehouse}<span>倉庫</span></button>
@@ -111,6 +112,7 @@ async function main() {
   <select id="map-district" aria-label="前往城市區域"><option value="all">選區域</option><option value="old">雲港舊城</option><option value="east">東城新區</option><option value="south">南城生活與商辦區</option><option value="tech">科技商辦生活圈</option><option value="campus">大學與新住宅區</option><option value="river">河岸家庭生活圈</option></select>
 </div>
 <div id="map-hint"><span class="desktop-hint">左鍵拖曳旋轉・右鍵或 Shift＋拖曳平移・滾輪縮放</span><span class="touch-hint">單指旋轉・雙指平移、旋轉與縮放</span></div>
+<aside id="my-shops" class="panel" aria-label="我的店列表"><div class="shop-list-head"><h3><b id="shop-list-title">我的店</b> <span id="my-shop-count" class="num">0</span></h3><button class="xbtn" data-shop-list-toggle aria-label="收合店面列表" aria-controls="my-shop-rows" aria-expanded="true">−</button></div><div id="shop-list-tabs" class="mini-tabs"><button data-shop-list-mode="my" class="on">我的店</button><button data-shop-list-mode="vacant">出租店面</button></div><div id="vacant-filters" hidden><label>業態<select id="vacant-business">${Object.entries(S.BUSINESSES).map(([id, b]) => `<option value="${id}">${b.name}</option>`).join('')}</select></label><label>區域<select id="vacant-district"><option value="all">全城</option>${V.market.districts.map((d) => `<option value="${d.id}">${d.name}</option>`).join('')}</select></label><label>排序<select id="vacant-sort"><option value="rent">月租低到高</option><option value="cost">開店資金低到高</option></select></label></div><div id="my-shop-rows"></div></aside>
 <aside id="side" class="panel" hidden></aside>
 <aside id="event" class="panel" hidden></aside>
 <div id="tut" class="panel" hidden></div>
@@ -161,6 +163,7 @@ async function main() {
   let saveBlocked = false, saveError = null, savedAt = null, savedT = -1, lastSaveNow = 0, saveWarned = false, loadNotice = null;
   let speed = 0, prevSpeed = 1, acc = 0, fastTarget = null, lastNow = performance.now();
   let panel = null, selLot = null, shopTab = 'today', modal = null, reportTab = 'all', reportMonth = 'current', srcFilter = '全部', srcQuery = '';
+  let shopListOpen = matchMedia('(min-width:761px)').matches, shopListMode = 'my', vacantDistrict = 'all', vacantSort = 'rent', reportShop = null;
   let everSelected = false, played = false, tutOn = ls.get(TUT_KEY) !== '1';
   let shown = {}, carry = {}, pendingSpawns = [], lastWeather = null, lastLabelAt = 0;
   let hudDirty = true, labelDirty = true, overShown = false, closeConfirm = false, activeEventId = null;
@@ -197,7 +200,7 @@ async function main() {
   function resetView() {
     for (const k of Object.keys(shown)) { city.setShop(k, null); city.setLabel(k, null); city.setQueue(k, 0); }
     shown = {}; carry = {}; pendingSpawns = [];
-    panel = null; selLot = null; modal = null; closeConfirm = false; overShown = false; activeEventId = null;
+    panel = null; selLot = null; modal = null; reportShop = null; reportMonth = 'current'; closeConfirm = false; overShown = false; activeEventId = null;
     speed = 0; fastTarget = null; acc = 0; hudDirty = labelDirty = true;
     $('#over').hidden = true;
     $('#report').hidden = $('#sources').hidden = $('#saves').hidden = $('#scrim').hidden = true;
@@ -244,8 +247,53 @@ async function main() {
     $('#h-wx').innerHTML = WX[lastWeather || k.weather] || WX.sunny;
     $('#h-wx').title = WXN[lastWeather || k.weather] || '';
     $('#co-name').textContent = k.company;
+    renderShopList();
     hudDirty = false;
   }
+  function renderShopList() {
+    const el = $('#my-shops'), body = $('#my-shop-rows'), shops = getShops('player'), mobile = matchMedia('(max-width:760px)').matches;
+    el.hidden = mobile && !shopListOpen; body.hidden = !shopListOpen;
+    $('#shop-list-tabs').hidden = !shopListOpen; $('#vacant-filters').hidden = !shopListOpen || shopListMode !== 'vacant';
+    $('#shop-list-title').textContent = shopListMode === 'my' ? '我的店' : '出租店面'; el.setAttribute('aria-label', shopListMode === 'my' ? '我的店列表' : '出租店面列表');
+    $$('[data-shop-list-mode]').forEach((b) => b.classList.toggle('on', b.dataset.shopListMode === shopListMode));
+    const freeLots = world.lots.filter((l) => !l.shopId);
+    $('#my-shop-count').textContent = shopListMode === 'my' ? shops.length : freeLots.filter((l) => vacantDistrict === 'all' || l.districtId === vacantDistrict).length + '／' + freeLots.length;
+    const toggle = $('[data-shop-list-toggle]'); toggle.textContent = shopListOpen ? '−' : '＋'; toggle.setAttribute('aria-expanded', String(shopListOpen)); toggle.setAttribute('aria-label', (shopListOpen ? '收合' : '展開') + $('#shop-list-title').textContent + '列表');
+    const dock = $('[data-dk="shops"]'); dock.setAttribute('aria-expanded', String(shopListOpen && shopListMode === 'my')); dock.classList.toggle('on', shopListOpen && shopListMode === 'my');
+    if (!shopListOpen) return;
+    let html;
+    if (shopListMode === 'vacant') {
+      $('#vacant-business').value = selectedBusiness; $('#vacant-district').value = vacantDistrict; $('#vacant-sort').value = vacantSort;
+      const lots = freeLots.filter((l) => vacantDistrict === 'all' || l.districtId === vacantDistrict).map((l) => ({ ...l, leased: S.premises(l, selectedBusiness), cost: S.lotOpenCost(l, selectedBusiness) })).sort((a, b) => (vacantSort === 'cost' ? a.cost - b.cost : a.leased.rent - b.leased.rent) || a.id.localeCompare(b.id));
+      html = lots.map((l) => `<button class="shop-list-row ${selLot === l.id && panel === 'lot' ? 'on' : ''}" data-vacant-lot="${l.id}"><span class="shop-list-icon" style="color:var(--gold)">${icon.shop}</span><span class="shop-list-info"><b>${l.id}・${ZONE_NAME[l.zone] || l.zone}</b><small>${esc(l.district || '原城市街區')}・承租 ${l.leased.ping} 坪</small><small>月租 ${money(l.leased.rent)}</small><small>開店需 ${money(l.cost)}${world.companies.player.cash < l.cost ? '・資金不足' : ''}</small></span></button>`).join('') || '<p class="note">這個區域沒有出租店面，換個區域看看。</p>';
+    } else html = shops.length ? shops.map((s) => {
+      const t = S.getShopToday(world, s.id), h = S.getShopHistory(world, s.id).mtdPnL;
+      const status = s.status === 'renovating' ? `裝修・${Math.max(1, Math.ceil((s.openAtT - world.t) / 24))} 天後開張` : `今天 ${int(t.cups)} ${unitOf(s)}`;
+      return `<button class="shop-list-row ${selLot === s.lotId && panel === 'shop' ? 'on' : ''}" data-my-shop="${s.id}" aria-pressed="${selLot === s.lotId && panel === 'shop'}"><span class="shop-list-icon" style="color:${bizOf(s).color}">${businessIcon(s.businessId)}</span><span class="shop-list-info"><b>${esc(s.name)}</b><small>${bizOf(s).name}・${s.lotId}</small><small>${status}</small><small>本月門店淨利 <strong class="num ${h.profit < 0 ? 'down' : 'up'}">${money(h.profit, true)}</strong></small></span></button>`;
+    }).join('') : '<p class="note">還沒有店。按「開店」篩選出租店面，租下第一家店。</p>';
+    if (body.dataset.html !== html) { body.innerHTML = html; body.dataset.html = html; }
+  }
+  function toggleShopList() {
+    shopListOpen = !shopListOpen;
+    if (shopListOpen && matchMedia('(max-width:760px)').matches) { closePanel(); if (modal) closeModal(); }
+    renderShopList();
+  }
+  $('#my-shops').addEventListener('click', (e) => {
+    if (e.target.closest('[data-shop-list-toggle]')) return toggleShopList();
+    const mode = e.target.closest('[data-shop-list-mode]');
+    if (mode) { shopListMode = mode.dataset.shopListMode; renderShopList(); return; }
+    const vacant = e.target.closest('[data-vacant-lot]');
+    if (vacant) { selectLot(vacant.dataset.vacantLot); return; }
+    const row = e.target.closest('[data-my-shop]'), s = row && getShops('player').find((s) => s.id === row.dataset.myShop);
+    if (s) { shopTab = 'op'; selectLot(s.lotId, 'op'); }
+  });
+  $('#vacant-filters').addEventListener('change', (e) => {
+    if (e.target.id === 'vacant-business') selectedBusiness = e.target.value;
+    else if (e.target.id === 'vacant-district') vacantDistrict = e.target.value;
+    else if (e.target.id === 'vacant-sort') vacantSort = e.target.value;
+    if (panel === 'lot') renderSide(); else renderShopList();
+  });
+  matchMedia('(min-width:761px)').addEventListener('change', (e) => { shopListOpen = e.matches; renderShopList(); });
   function updateSpeedBtns() {
     $$('.speed button').forEach((b) => b.classList.toggle('on', b.dataset.sp != null && +b.dataset.sp === speed && fastTarget == null));
     $$('.speed [data-fast]').forEach((b) => b.classList.toggle('on', fastTarget != null && b.dataset.fast === fastTarget.period));
@@ -253,7 +301,7 @@ async function main() {
     $('#h-ff').hidden = !(speed > 0 && (h < V.time.openHour || h >= V.time.closeHour));
   }
   function updateDock() {
-    const on = { shop: ['lot', 'shop', 'rival'].includes(panel), factory: panel === 'factory', warehouse: panel === 'warehouse', lab: panel === 'lab', ad: panel === 'ad', loan: panel === 'loan', report: modal === 'report', sources: modal === 'sources', saves: modal === 'saves' };
+    const on = { shops: shopListOpen && shopListMode === 'my', shop: shopListOpen && shopListMode === 'vacant' || ['lot', 'shop', 'rival'].includes(panel), factory: panel === 'factory', warehouse: panel === 'warehouse', lab: panel === 'lab', ad: panel === 'ad', loan: panel === 'loan', report: modal === 'report', sources: modal === 'sources', saves: modal === 'saves' };
     $$('#dock button[data-dk]').forEach((b) => b.classList.toggle('on', !!on[b.dataset.dk]));
   }
   function updateTicker() {
@@ -379,6 +427,7 @@ ${enough ? '<button class="gbtn primary wide" data-act="rent">租下開店</butt
 <dl class="kv"><dt>${bizOf(s).delivery ? '今天入帳（扣平台抽成）' : '今天入帳'}</dt><dd class="num">${money(t.revenue)}</dd><dt>本月至今淨利</dt><dd class="num ${h.mtdPnL.profit >= 0 ? '' : 'bad'}" style="${h.mtdPnL.profit < 0 ? 'color:var(--bad)' : ''}">${money(h.mtdPnL.profit, true)}</dd></dl>
 <p class="note">今天入帳尚未扣商品、耗材、薪資等營運費。${bizOf(s).delivery ? '月報的營收包含平台抽成，抽成另列成本。' : ''}</p>
 ${operationsSummaryHtml(s, t)}
+${s.businessId === 'convenience' ? convenienceGuideHtml(s) : ''}
 ${s.shortage ? '<p class="note warn">有人離職，最忙的班少一人。</p>' : ''}`;
   }
 
@@ -401,7 +450,17 @@ ${s.shortage ? '<p class="note warn">有人離職，最忙的班少一人。</p>
     else controls = '<p>現點現做，主要決策在售價、原料等級、外送與尖峰排班。先看每小時成交量，再調整各班人數；同業態擴店會分走原分店客源。</p>';
     const upgrade = b.upgrades?.[s.assetLevel || 0];
     const assets = b.upgrades ? `<div class="sec"><h4>設備升級・${s.assetLevel || 0}／${b.upgrades.length}</h4><p>目前設備維護 ${money(S.assetMonthly(s))}／月。</p>${upgrade ? `<p>${upgrade.name}：投入 ${money(upgrade.cost)}，供給設備上限為基本的 ${upgrade.factor} 倍，每月另加維護 ${money(upgrade.monthly)}。${s.businessId === 'supermarket' ? `庫存上限提高至 ${money(1000000 * upgrade.factor)}。` : ''}</p><button class="gbtn wide" data-act="upgradeShop" ${s.status !== 'open' || world.companies.player.cash < upgrade.cost ? 'disabled' : ''}>${s.status !== 'open' ? '開張後可升級' : world.companies.player.cash < upgrade.cost ? '資金不足' : '付費升級設備'}</button>` : '<p>設備已完整升級。</p>'}<p class="note">升級立即啟用，維護費從下個營業日按天累計。擴充不保證增加客源；先比較實際成交、流失與損平需求。</p></div>` : '';
-    return `<h4>${b.model}</h4><p>${b.customer}</p><p class="note">${b.tradeoff}</p>${controls}${assets}<dl class="kv"><dt>目前每日供給上限</dt><dd>${int(analysis.capacityDaily)} ${b.unit}</dd><dt>每月固定成本</dt><dd>${money(analysis.fixedMonthly)}</dd><dt>門店損平需求</dt><dd>${analysis.breakEvenDaily == null ? '先累積成交資料' : int(analysis.breakEvenDaily) + ' ' + b.unit + '／天'}</dd></dl><p class="note">產能是供給上限，實際成交受客群、價格、口碑、排隊與庫存限制。新業態參數是遊戲設計假設。</p>`;
+    return `<h4>${b.model}</h4><p>${b.customer}</p><p class="note">${b.tradeoff}</p>${controls}${assets}<dl class="kv"><dt>目前每日供給上限</dt><dd>${int(analysis.capacityDaily)} ${b.unit}</dd><dt>每月固定成本</dt><dd>${money(analysis.fixedMonthly)}</dd><dt>門店損平需求</dt><dd>${analysis.breakEvenDaily == null ? '先累積成交資料' : int(analysis.breakEvenDaily) + ' ' + b.unit + '／天'}</dd></dl><p class="note">產能是供給上限，實際成交受客群、價格、口碑、排隊與庫存限制。新業態參數是遊戲設計假設。</p>${s.businessId === 'convenience' ? convenienceGuideHtml(s, analysis) : ''}`;
+  }
+
+  function convenienceGuideHtml(s, analysis = S.getShopAnalysis(world, s.id)) {
+    const lot = S.getLotInfo(world, s.lotId, s.businessId), a = analysis;
+    const notes = [];
+    if (s.status === 'renovating') notes.push('裝修完成才會有交易，現在可先調整庫存、售價與班表。');
+    if (a.stockLost) notes.push(`這個分析期間缺貨流失 ${int(a.stockLost)} 筆。先開啟每日自動補貨、提高庫存目標，並確認手上現金足夠進貨。也可按「現在補貨至目標」。`);
+    if (a.lostRate > 0.03 || a.avgWait > 12) notes.push(`流失占 ${pct(a.lostRate)}、平均等候 ${a.avgWait.toFixed(1)} 分。先看「今天」的每小時成交，在忙的班增加人手；缺貨流失應先補貨。`);
+    if (!a.stockLost && a.lostRate <= 0.03 && a.avgWait <= 12) notes.push('目前未看到明顯的缺貨或排隊瓶頸。先觀察價格、口碑與客源；加人不會直接增加購買需求。');
+    return `<div class="sec convenience-guide"><h4>便利商店如何增加交易量</h4><dl class="kv"><dt>${lot.radius} 公尺內有效客源</dt><dd>${int(lot.catchmentPopulation)}</dd><dt>分析期日均成交／供給上限</dt><dd>${a.sampleDays ? int(a.dailyCups) : '尚無資料'}／${int(a.capacityDaily)} 筆</dd></dl><p class="note">成交資料：${a.ym}${a.current ? ' 至今' : ''}，${a.sampleDays} 個營業日。供給上限按目前班表估算。</p>${notes.map((n) => `<p>${n}</p>`).join('')}<p>此店只做門市。住宅、辦公與捷運附近較適合；同業太密會互搶，也與其他業態共用消費預算。開幕體驗和品牌廣告能提高熟悉度、知名度；售價與品質會影響選購和口碑。便利商店毛利較薄，降價後也要看淨利。</p><p class="note">基準速度下，單人每小時最多 ${S.BUSINESSES.convenience.solo} 筆，2 人 ${S.BUSINESSES.convenience.worker} 筆；實際還受缺工與庫存影響。便利商店目前沒有設備升級。</p><div class="row"><button class="gbtn" data-act="tab:menu">調售價</button><button class="gbtn" data-act="tab:staff">調班表</button><button class="gbtn" data-act="shopMonthly">看分店月報</button></div></div>`;
   }
 
   function menuHtml(s) {
@@ -500,16 +559,18 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
   }
 
   function renderSide() {
-    if (!panel) { side.hidden = true; updateDock(); return; }
+    if (!panel) { side.hidden = true; updateDock(); renderShopList(); return; }
     side.hidden = false;
     side.innerHTML = { lot: lotHtml, shop: shopHtml, rival: rivalHtml, loan: loanHtml, ad: adHtml, warehouse: () => facilityHtml('warehouse'), factory: () => facilityHtml('factory'), lab: () => facilityHtml('lab') }[panel]();
     $$('[data-repay-input]', side).forEach(updateRepayPreview);
     updateDock();
+    renderShopList();
   }
   function openPanel(kind, lotId) {
     if (modal) closeModal();
+    if (matchMedia('(max-width:760px)').matches) shopListOpen = false;
     panel = kind; if (lotId !== undefined) selLot = lotId;
-    renderSide(); labelDirty = true;
+    renderSide(); side.scrollTop = 0; labelDirty = true;
   }
   function closePanel() { panel = null; selLot = null; renderSide(); labelDirty = true; }
   function updateRepayPreview(input) {
@@ -533,13 +594,13 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
     if (f.status !== 'none') body += `<div class="sec"><button class="gbtn danger wide" data-act="facilityClose:${key}">${f.status === 'building' ? '取消建置' : '關閉設施'}</button><p class="note">施工取消回收建置費 50%；完工後關閉回收 20%。庫存按帳面成本 80% 回收，剩餘列報廢；在途付款全退。</p></div>`;
     return `${head(f.name, status)}<p class="note">開局即可建置，沒有店數或獲利門檻。位於市外，不占門店。以下費用與效益都是遊戲設計值。</p>${body}`;
   }
-  function selectLot(id) {
+  function selectLot(id, tab) {
     const l = S.getLots(world).find((x) => x.id === id);
     if (!l) return;
     everSelected = true;
     selLot = id;
     if (l.state === '空') { shopTab = 'today'; openPanel('lot', id); }
-    else if (l.state === '玩家') { if (panel !== 'shop') shopTab = 'today'; openPanel('shop', id); }
+    else if (l.state === '玩家') { if (tab) shopTab = tab; else if (panel !== 'shop') shopTab = 'today'; openPanel('shop', id); }
     else openPanel('rival', id);
     city.focusLot(id, 9);
     updateTut();
@@ -553,6 +614,7 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
     const sh = panel === 'shop' ? playerShopAt(selLot) : null;
     const res = (r) => { if (!r.ok) toast(r.reason, true); else { syncShops(); labelDirty = hudDirty = true; save(); } return r.ok; };
     if (act === 'close') closePanel();
+    else if (act === 'shopMonthly' && sh) { reportShop = sh.id; reportMonth = 'current'; reportTab = 'pl'; openReport(); }
     else if (act === 'gotoLoan') openPanel('loan');
     else if (act === 'business') { selectedBusiness = a1; renderSide(); }
     else if (act === 'operation' && sh) { const val = a1 === 'autoStock' ? !sh.operations.autoStock : a1 === 'markdown' ? +a2 : a2; if (res(S.setOperations(world, sh.id, { [a1]: val }))) { renderSide(); save(); } }
@@ -562,7 +624,7 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
     else if (act === 'rent') {
       const name = ($('#shop-name') || {}).value || '半糖日常';
       const r = S.openShop(world, selLot, { name: name.trim().slice(0, 10) || '半糖日常', color: S.businessOf(selectedBusiness).color, businessId: selectedBusiness, ownerWorks: !!$('#open-owner')?.checked });
-      if (res(r)) { toast(`租下了，簽約當天起算租金，${S.businessOf(selectedBusiness).renovationDays} 天後開張。`); syncShops(); labelDirty = hudDirty = true; shopTab = 'today'; openPanel('shop', selLot); updateTut(); save(); }
+      if (res(r)) { toast(`租下了，簽約當天起算租金，${S.businessOf(selectedBusiness).renovationDays} 天後開張。`); syncShops(); labelDirty = hudDirty = true; shopListMode = 'my'; shopTab = 'today'; openPanel('shop', selLot); updateTut(); save(); }
     } else if (act === 'tab') { shopTab = a1; renderSide(); }
     else if (act === 'staff' && sh) { const st = [...sh.staff]; st[+a1] += +a2; if (res(S.setStaffing(world, sh.id, st))) renderSide(); }
     else if (act === 'ownerWork' && sh) { if (res(S.setOwnerWorks(world, sh.id, !sh.ownerWorks))) { renderSide(); save(); } }
@@ -847,12 +909,23 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
   function financeHtml(rep) {
     const selected = rep.financials.find((r) => r.ym === reportMonth) || rep.current;
     const periods = [selected, ...rep.financials.slice().reverse().filter((r) => r.ym !== selected.ym).slice(0, 2)];
-    const row = (name, key, profit = false) => `<tr><td class="nm">${name}</td>${periods.map((r) => `<td class="num ${profit ? r[key] < 0 ? 'down' : 'up' : ''}">${money(r[key], profit)}</td>`).join('')}</tr>`;
-    return `<div class="card ptable finance finance-detail"><h4>損益明細<select id="finance-period" aria-label="損益明細月份"><option value="current" ${reportMonth === 'current' ? 'selected' : ''}>本月至今</option>${rep.financials.slice().reverse().map((r) => `<option value="${r.ym}" ${reportMonth === r.ym ? 'selected' : ''}>${r.ym}</option>`).join('')}</select></h4><div class="tbl-scroll"><table><thead><tr><th>項目</th>${periods.map((r) => `<th>${r.ym}${r === rep.current ? ' 至今' : ''}</th>`).join('')}</tr></thead><tbody>${row('營收（門市＋外送標價）', 'turnover')}${COST_ROWS.map(([key, name]) => row(name, key)).join('')}${row('總成本', 'totalCost')}${row('淨利', 'netProfit', true)}<tr><td class="nm">淨利率</td>${periods.map((r) => `<td class="num ${r.netProfit < 0 ? 'down' : 'up'}">${r.netMargin == null ? '—' : pct(r.netMargin)}</td>`).join('')}</tr>${row('另列：償還貸款本金', 'loanPrincipal')}${row('另列：開店與設備升級投入', 'shopInvestment')}${row('另列：後勤建置投入', 'facilityCapex')}${row('另列：中央與商品進貨付款', 'stockPurchases')}${row('另列：資產回收現金', 'assetRecoveries')}</tbody></table></div><p class="note">本月成本隨遊戲時間累計，貸款利息按天估列。本金只影響現金，不扣淨利。裝潢、設備與押金在開店時付現，本版未計折舊。${rep.analysis.some((a) => a.ownerWorks) ? '老闆自己顧店的門店未另計老闆薪資。' : ''}${rep.current.incomplete || rep.financials.some((r) => r.incomplete) ? '舊存檔更新前未記錄部分利息、一次性支出與營所稅，受影響月份的淨利僅供參考。' : ''}</p></div>`;
+    const row = (name, key, profit = false) => `<tr><td class="nm">${name}</td>${periods.map((r) => `<td class="num ${profit ? r[key] < 0 ? 'down' : 'up' : ''}">${money(r[key] || 0, profit)}</td>`).join('')}</tr>`;
+    return `<div class="card ptable finance finance-detail"><h4>損益明細<select id="finance-period" aria-label="損益明細月份"><option value="current" ${reportMonth === 'current' ? 'selected' : ''}>本月至今</option>${rep.financials.slice().reverse().map((r) => `<option value="${r.ym}" ${reportMonth === r.ym ? 'selected' : ''}>${r.ym}</option>`).join('')}</select></h4><div class="tbl-scroll"><table><thead><tr><th>項目</th>${periods.map((r) => `<th>${r.ym}${r === rep.current ? ' 至今' : ''}</th>`).join('')}</tr></thead><tbody>${row('營收（門市＋外送標價）', 'turnover')}${(rep.shopId ? COST_ROWS.slice(0, 11) : COST_ROWS).map(([key, name]) => row(name, key)).join('')}${row('總成本', 'totalCost')}${row(rep.shopId ? '門店淨利（未扣品牌費用）' : '淨利', 'netProfit', true)}<tr><td class="nm">淨利率</td>${periods.map((r) => `<td class="num ${r.netProfit < 0 ? 'down' : 'up'}">${r.netMargin == null ? '—' : pct(r.netMargin)}</td>`).join('')}</tr>${rep.shopId ? '' : row('另列：償還貸款本金', 'loanPrincipal') + row('另列：開店與設備升級投入', 'shopInvestment') + row('另列：後勤建置投入', 'facilityCapex') + row('另列：中央與商品進貨付款', 'stockPurchases') + row('另列：資產回收現金', 'assetRecoveries')}</tbody></table></div><p class="note">${rep.shopId ? '門店淨利扣商品、人事、租金等店內費用。廣告、連鎖管理、後勤、研發、利息與營所稅另列於整個品牌，不分攤到單店。' : '本月成本隨遊戲時間累計，貸款利息按天估列。本金只影響現金，不扣淨利。'}裝潢、設備與押金在開店時付現，本版未計折舊。${rep.analysis.some((a) => a.ownerWorks) ? '老闆自己顧店的門店未另計老闆薪資。' : ''}${rep.current.incomplete || rep.financials.some((r) => r.incomplete) ? '舊存檔更新前未記錄部分利息、一次性支出與營所稅，受影響月份的淨利僅供參考。' : ''}</p></div>`;
   }
   function profitHistoryHtml(rep) {
     const periods = [rep.current, ...rep.financials.slice().reverse()];
-    return `<div class="card ptable finance"><h4>每月損益<small>近 12 個月，含品牌費用</small></h4><div class="tbl-scroll"><table><thead><tr><th>月份</th><th>營收</th><th>總成本</th><th>淨利</th><th>淨利率</th></tr></thead><tbody>${periods.map((r, i) => `<tr><td class="nm">${r.ym}${i === 0 ? ' 至今' : r.incomplete ? '＊' : ''}</td><td class="num">${money(r.turnover)}</td><td class="num">${money(r.totalCost)}</td><td class="num ${r.netProfit < 0 ? 'down' : 'up'}">${money(r.netProfit, true)}</td><td class="num">${r.netMargin == null ? '—' : pct(r.netMargin)}</td></tr>`).join('')}</tbody></table></div>${rep.financials.some((r) => r.incomplete) ? '<p class="note">＊舊存檔缺少部分品牌費用，詳見損益明細。</p>' : ''}</div>`;
+    return `<div class="card ptable finance"><h4>每月損益<small>${rep.shops ? '保留近 48 個月' : '近 12 個月'}，${rep.shopId ? '門店淨利未扣品牌共同費用' : '含品牌費用'}</small></h4><div class="tbl-scroll"><table><thead><tr><th>月份</th><th>營收</th><th>總成本</th><th>淨利</th><th>淨利率</th><th>成交量${rep.shopId ? '（' + rep.unit + '）' : '（各業態單位合計）'}</th>${rep.shopId ? '<th>日均成交</th><th>流失量</th>' : ''}</tr></thead><tbody>${periods.map((r, i) => `<tr><td class="nm">${r.ym}${i === 0 ? ' 至今' : r.incomplete ? '＊' : ''}${rep.shopId && !r.active ? '・未營運' : r.partial ? '・部分月份' : ''}</td><td class="num">${money(r.turnover)}</td><td class="num">${money(r.totalCost)}</td><td class="num ${r.netProfit < 0 ? 'down' : 'up'}">${money(r.netProfit, true)}</td><td class="num">${r.netMargin == null ? '—' : pct(r.netMargin)}</td><td class="num">${int(r.cups)}</td>${rep.shopId ? `<td>${r.daily == null ? '—' : int(r.daily)}</td><td>${int(r.lost)}</td>` : ''}</tr>`).join('')}</tbody></table></div>${rep.financials.some((r) => r.incomplete) ? '<p class="note">＊舊存檔缺少部分品牌費用，詳見損益明細。</p>' : ''}</div>`;
+  }
+  function monthlyReportHtml() {
+    let rep = S.getMonthlyReport(world, reportShop);
+    if (!rep) { reportShop = null; rep = S.getMonthlyReport(world); }
+    if (reportMonth !== 'current' && !rep.financials.some((r) => r.ym === reportMonth)) reportMonth = 'current';
+    const selected = rep.financials.find((r) => r.ym === reportMonth) || rep.current;
+    const periodOf = (s) => reportMonth === 'current' ? s.current : s.financials.find((r) => r.ym === reportMonth);
+    const stores = rep.shops.filter((s) => periodOf(s)?.active);
+    const storeProfit = stores.reduce((a, s) => a + periodOf(s).netProfit, 0);
+    const summary = [{ label: '營收', value: money(selected.turnover) }, { label: '總成本', value: money(selected.totalCost) }, { label: rep.shopId ? '門店淨利' : '品牌淨利', value: money(selected.netProfit, true), tone: selected.netProfit < 0 ? 'down' : 'up' }, { label: rep.shopId ? `成交量（${rep.unit}）` : '成交量（各業態單位合計）', value: int(selected.cups) }].map((t) => ({ ...t, empty: selected.ym + (reportMonth === 'current' ? ' 至今' : '') }));
+    return `<div class="card monthly-scope"><div class="monthly-controls"><label>報表範圍<select id="report-shop"><option value="all">整個品牌</option>${rep.shops.map((s) => `<option value="${s.id}" ${reportShop === s.id ? 'selected' : ''}>${esc(s.name)}・${S.businessOf(s.businessId).name}・${s.lotId}${s.status === 'closed' ? '（已關店）' : ''}</option>`).join('')}</select></label><label>月份<select id="report-period"><option value="current" ${reportMonth === 'current' ? 'selected' : ''}>本月至今</option>${rep.financials.slice().reverse().map((r) => `<option value="${r.ym}" ${reportMonth === r.ym ? 'selected' : ''}>${r.ym}</option>`).join('')}</select></label></div><p class="note">${esc(rep.name)}・${selected.ym}${reportMonth === 'current' ? ' 至今' : ''}。${rep.shopId ? '門店淨利未扣品牌共同費用；未營運月份列零，日均成交按實際營業日計算。' : '品牌損益包含所有分店（含已關店）與共同費用。不同業態的成交單位合計僅作營運計量，不代表不重複顧客。'}</p></div><div class="tiles">${tilesHtml(summary)}</div>${rep.shopId ? '' : `<div class="card ptable finance"><h4>各分店・${selected.ym}${reportMonth === 'current' ? ' 至今' : ''}<small>點店名查看該分店各月明細</small></h4><div class="tbl-scroll"><table><thead><tr><th>分店／業態</th><th>營收</th><th>店內成本</th><th>門店淨利</th><th>成交量</th><th>日均成交</th><th>流失量</th></tr></thead><tbody>${stores.map((s) => { const r = periodOf(s); return `<tr><td><button class="report-shop-link" data-monthly-shop="${s.id}">${esc(s.name)}・${s.lotId}</button><small>${S.businessOf(s.businessId).name}${s.status === 'closed' ? '・已關店' : ''}${r.partial ? '・部分月份' : ''}</small></td><td>${money(r.turnover)}</td><td>${money(r.totalCost)}</td><td class="num ${r.netProfit < 0 ? 'down' : 'up'}">${money(r.netProfit, true)}</td><td>${int(r.cups)} ${s.unit}</td><td>${r.daily == null ? '—' : int(r.daily) + ' ' + s.unit}</td><td>${int(r.lost)} ${s.unit}</td></tr>`; }).join('')}</tbody></table></div>${stores.length ? '' : '<p class="note">這個月尚無分店帳目。</p>'}<dl class="kv"><dt>門店淨利合計</dt><dd>${money(storeProfit, true)}</dd><dt>減：品牌共同費用</dt><dd>${money(selected.totalCost - (selected.turnover - storeProfit))}</dd><dt>品牌淨利</dt><dd>${money(selected.netProfit, true)}</dd></dl><p class="note">共同費用包含品牌廣告、連鎖管理、後勤、研發、一次性支出、利息及年結營所稅。已關店的最後帳仍計入；更早月份的門店營業日若未記錄，日均成交顯示「—」。</p></div>`}${financeHtml(rep)}${profitHistoryHtml(rep)}`;
   }
   function chainAnalysisHtml(rep) {
     const m = rep.market, c = rep.current, savings = c.warehouseSavings + c.factorySavings;
@@ -907,13 +980,13 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
     const el = $('#report');
     const { rep, rows, tiles, shops } = reportData();
     const c = S.clockOf(world);
-    const tabs = [['all', '總覽'], ['pl', '損益'], ['an', '分析'], ['ch', '通路'], ['pr', '商品'], ['rv', '對手'], ['case', world.status === 'playing' ? '整局' : '結案']];
+    const tabs = [['all', '總覽'], ['pl', '月報'], ['an', '分析'], ['ch', '通路'], ['pr', '商品'], ['rv', '對手'], ['case', world.status === 'playing' ? '整局' : '結案']];
     let body = '';
     const noData = '<div class="empty-note">第一次月結（每月 1 日）之後，這裡才會有數字。</div>';
     const revCard = () => `<div class="card"><h4>營收走勢<small>近 12 個月，依通路，單位：萬元</small></h4><div class="legend"><span><i style="background:#3987e5"></i>門市</span><span><i style="background:#d95926"></i>外送</span></div><div class="chart" id="c1">${rep.months.length ? '' : noData}</div></div>`;
     const shareCard = () => `<div class="card"><h4>市占率<small>${world.multiBusiness ? '全市各業態營收' : '全市手搖飲杯數'}，近 12 個月</small></h4><div class="legend">${[['#199e70', world.companies.player.name], ['#e66767', '大吉茶行'], ['#9085e9', '青柚手作'], ['#8c86a6', '其他業者']].map(([cl, n]) => `<span><i class="ln" style="background:${cl}"></i>${esc(n)}</span>`).join('')}</div><div class="chart" id="c2">${rep.share.months.length > 1 ? '' : noData}</div></div>`;
     if (reportTab === 'all') body = `<div class="tiles">${tilesHtml(tiles)}</div>${profitHistoryHtml(rep)}${analysisHtml(rep)}<div class="cards">${revCard()}${shareCard()}</div>${productsHtml(rep, shops[0])}`;
-    else if (reportTab === 'pl') body = `${financeHtml(rep)}${profitHistoryHtml(rep)}`;
+    else if (reportTab === 'pl') body = monthlyReportHtml();
     else if (reportTab === 'an') body = analysisHtml(rep);
     else if (reportTab === 'ch') body = `<div class="cards" style="grid-template-columns:1fr">${revCard()}</div>${channelHtml(rep, rows)}`;
     else if (reportTab === 'pr') body = productsHtml(rep, shops[0]);
@@ -939,11 +1012,16 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
   $('#report').addEventListener('click', (e) => {
     if (e.target.closest('[data-act=mclose]')) return closeModal();
     if (e.target.closest('[data-act=downloadCase]')) return downloadCase();
+    const monthly = e.target.closest('[data-monthly-shop]');
+    if (monthly) { reportShop = monthly.dataset.monthlyShop; reportTab = 'pl'; renderReport(); return; }
     const shop = e.target.closest('[data-report-shop]');
     if (shop) { const s = getShops('player').find((s) => s.id === shop.dataset.reportShop); if (s) { closeModal(); shopTab = 'staff'; openPanel('shop', s.lotId); } return; }
     const b = e.target.closest('[data-rt]'); if (b) { reportTab = b.dataset.rt; renderReport(); }
   });
-  $('#report').addEventListener('change', (e) => { if (e.target.id === 'finance-period') { reportMonth = e.target.value; renderReport(); } });
+  $('#report').addEventListener('change', (e) => {
+    if (['finance-period', 'report-period'].includes(e.target.id)) { reportMonth = e.target.value; renderReport(); }
+    else if (e.target.id === 'report-shop') { reportShop = e.target.value === 'all' ? null : e.target.value; renderReport(); }
+  });
   function openReport() {
     closePanel(); closeModal(false); modal = 'report'; $('#sources').hidden = true; $('#over').hidden = true;
     $('#report').hidden = false; $('#scrim').hidden = false; renderReport(); updateDock();
@@ -1053,7 +1131,8 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
   $('#dock').addEventListener('click', async (e) => {
     const b = e.target.closest('[data-dk]'); if (!b) return;
     const k = b.dataset.dk;
-    if (k === 'shop') { if (modal) closeModal(); if (!['lot', 'shop', 'rival'].includes(panel)) { closePanel(); toast('點地圖上掛「招租」的空店面，就能租下開店。'); } }
+    if (k === 'shops') { if (shopListMode !== 'my') { shopListMode = 'my'; shopListOpen = false; } toggleShopList(); }
+    else if (k === 'shop') { shopListMode = 'vacant'; shopListOpen = false; toggleShopList(); }
     else if (k === 'ad') (panel === 'ad' ? closePanel() : openPanel('ad'));
     else if (k === 'loan') (panel === 'loan' ? closePanel() : openPanel('loan'));
     else if (['warehouse', 'factory', 'lab'].includes(k)) (panel === k ? closePanel() : openPanel(k));
