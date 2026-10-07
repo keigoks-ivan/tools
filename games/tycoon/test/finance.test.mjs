@@ -32,10 +32,12 @@ test('本月損益包含已關門店、已發生的一次性支出，HUD 與報�
   const before = getReport(w).current;
   assert.ok(before.adCost > 0); // 關掉廣告後仍保留已發生費用
   assert.equal(before.extraExpense, 30000);
+  const remainingStock = s.inv;
   closeShop(w, s.id);
   const after = getReport(w).current;
   assert.equal(after.turnover, before.turnover);
-  assert.equal(after.netProfit, before.netProfit);
+  assert.equal(after.waste - before.waste, remainingStock);
+  assert.equal(after.netProfit, before.netProfit - remainingStock + before.bizTax - after.bizTax);
   assert.equal(getKpi(w).monthNetProfit, after.netProfit);
   assert.equal(after.totalCost, costKeys.reduce((a, k) => a + after[k], 0));
 });

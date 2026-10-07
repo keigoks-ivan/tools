@@ -202,7 +202,9 @@ export function createShops(root, specs, { wetStd }) {
     const occ = !!l.owner;
     for (const k in defs) {
       const d = defs[k];
-      const vis = d.occOnly ? occ : d.vacOnly ? !occ : true;
+      let vis = d.occOnly ? occ : d.vacOnly ? !occ : true;
+      if (l.businessId && l.businessId !== 'tea' && ['menu', 'aframe'].includes(k)) vis = false;
+      if (l.businessId && !['tea', 'cafe'].includes(l.businessId) && ['cupw', 'cupb'].includes(k)) vis = false;
       d.im.setMatrixAt(l.i, vis ? l.B : ZERO); d.im.instanceMatrix.needsUpdate = true;
     }
     // 染色
@@ -226,7 +228,7 @@ export function createShops(root, specs, { wetStd }) {
     lots, byId,
     setShop(id, cfg) {
       const l = byId.get(id); if (!l) return false;
-      if (cfg) { l.owner = cfg.owner === 'player' ? 'player' : 'rival'; l.name = cfg.name ?? l.name ?? ''; l.color = cfg.color ?? (l.owner === 'player' ? '#1f9d5c' : '#c2413a'); }
+      if (cfg) { l.owner = cfg.owner === 'player' ? 'player' : 'rival'; l.name = cfg.name ?? l.name ?? ''; l.businessId = cfg.businessId || 'tea'; l.color = cfg.color ?? (l.owner === 'player' ? '#1f9d5c' : '#c2413a'); }
       else { l.owner = null; l.name = ''; l.color = null; }
       refresh(l); return true;
     },
