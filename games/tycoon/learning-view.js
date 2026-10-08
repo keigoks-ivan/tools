@@ -4,7 +4,7 @@ export const driverValue = (n, unit) => n == null || !Number.isFinite(n) ? '待�
 export function coachHtml(c, { compact = false } = {}) {
   if (!c) return '';
   const b = c.bottleneck, d = c.decision;
-  const driver = x => `<article><span>${esc(x.label)} <i>${x.type === 'observed' ? '實績' : x.type === 'state' ? '目前狀態' : '估算'}</i></span><strong>${esc(driverValue(x.value, x.unit))}</strong><small>${esc(x.basis)}</small><p>${esc(x.detail)}</p></article>`;
+  const driver = x => `<article><span>${esc(x.label)} <i>${x.type === 'observed' ? '實績' : x.type === 'state' ? '目前狀態' : '估算'}</i></span><strong>${esc(x.value == null && x.unavailable ? x.unavailable : driverValue(x.value, x.unit))}</strong><small>${esc(x.basis)}</small><p>${esc(x.detail)}</p></article>`;
   const shown = compact ? c.drivers.slice(0, 3) : c.drivers;
   return `<section class="business-coach" aria-label="業態關鍵因子"><div class="coach-head"><span>BUSINESS DRIVERS</span><h3>${esc(c.title || c.name)} · 經營關鍵</h3></div><div class="coach-formula"><b>${esc(c.formula.text)}</b><p>${esc(c.formula.detail)}</p></div><div class="coach-drivers">${shown.map(driver).join('')}</div><div class="coach-bottleneck ${esc(b.severity)}"><span>目前先處理</span><h4>${esc(b.title)}</h4><p>${esc(b.reason)}</p><h4>${esc(d.title)}</h4><p>${esc(d.action)}</p><p class="coach-tradeoff">代價與風險：${esc(d.tradeoff)}</p></div>${compact && c.drivers.length > 3 ? `<details><summary>更多關鍵因子（${c.drivers.length-3} 項）</summary><div class="coach-drivers">${c.drivers.slice(3).map(driver).join('')}</div></details>` : ''}<details><summary>指標與模型的範圍</summary>${c.assumptions.map(x => `<p>${esc(x)}</p>`).join('')}</details></section>`;
 }

@@ -1,0 +1,31 @@
+import assert from 'node:assert/strict';
+import { createRequire } from 'node:module';
+import { readFile } from 'node:fs/promises';
+import { ENTERPRISES, createEnterprise, enterpriseAction, enterpriseQuote } from '../enterprise.js';
+import { enterpriseCoach } from '../enterprise-coach.js';
+import { decodeVenture, encodeVenture, routeKey } from '../venture-saves.js';
+const {chromium}=createRequire(import.meta.url)(process.env.PLAYWRIGHT_MODULE||'playwright');
+const base=process.argv[2]||'http://127.0.0.1:8129',browser=await chromium.launch({headless:true});
+const world=p=>p.evaluate(()=>JSON.parse(JSON.stringify(window.__venture.world)));
+const state=p=>p.evaluate(()=>({world:JSON.stringify(window.__venture.world),storage:Object.fromEntries(Object.keys(localStorage).map(k=>[k,localStorage.getItem(k)]))}));
+const clean=w=>{const next=structuredClone(w);delete next.learning;return next;};
+try {
+  for(const width of [1440,390])for(const id of Object.keys(ENTERPRISES)) {
+    const context=await browser.newContext({viewport:{width,height:900},acceptDownloads:true,...(width===390?{isMobile:true,hasTouch:true}:{})}),page=await context.newPage(),errors=[],p=ENTERPRISES[id];page.on('pageerror',e=>errors.push(e.message));page.on('console',m=>{if(m.type()==='error')errors.push(m.text());});
+    try {
+      await page.goto(`${base}/games/tycoon/?mode=enterprise&business=${id}`);await page.waitForFunction(()=>window.__ready&&window.__venture);await page.locator('.route-scene-image').evaluate(e=>e.decode());
+      let initial=await state(page);assert.equal(await page.locator('.enterprise-driver-strip button').count(),3);await page.locator('.enterprise-driver-strip button').first().click();assert.equal(await page.locator('.enterprise-drawer .business-coach').count(),1);assert.ok((await page.locator('.coach-formula').innerText()).includes('損益'));assert.deepEqual(await state(page),initial,'learning navigation is read-only');
+      await page.locator('[data-view=settings]').first().click();const form=page.locator('[data-form=settings]');await form.locator('[name=policy]').selectOption('premium');await form.locator('[name=marketing]').fill(String(p.marketing*4));assert.deepEqual(await state(page),initial,'draft cannot spend, draw RNG or overwrite saves');assert.ok((await form.locator('[data-settings-preview]').innerText()).includes('調整前 → 草稿'));assert.ok((await form.locator('[data-settings-preview]').innerText()).includes(p.kind==='project'?'下一個 30 日周期':'需求'));await form.locator('button[type=submit]').click();let w=await world(page);assert.equal(w.policy,'premium');assert.equal(w.marketing,p.marketing*4);assert.equal(w.learning.length,1);assert.equal(w.learning[0].baseline.days,0);
+      if(p.kind==='project') {
+        await page.locator('[data-view=contracts]').first().click();await page.evaluate(()=>{window.__venture.world.rng=7;});const card=page.locator('[data-offer]').first(),before=await state(page);await card.locator('[name=quote]').selectOption('0.9');await card.locator('[name=terms]').selectOption('advance');assert.deepEqual(await state(page),before,'credit preview does not sign a contract');w=await world(page);const q=enterpriseQuote(w,w.offers[0],.9,'advance');assert.ok((await card.locator('[data-quote-preview]').innerText()).includes(`驗收後 ${q.term} 天`));const expected=structuredClone(w);enterpriseAction(expected,'bid',{id:w.offers[0].id,factor:.9,terms:'advance'});await card.locator('[data-action=bid]').click();assert.deepEqual(clean(await world(page)),clean(expected));assert.equal((await world(page)).orders[0].servicePolicy,'premium');
+      }
+      await page.locator('[data-action=day]').click();await page.evaluate(()=>window.__venture.advance(14));w=await world(page);assert.ok(w.learning.every(r=>r.completed?.days===7));const beforeReport=await state(page);await page.locator('[data-view=report]').first().click();assert.deepEqual(await state(page),beforeReport,'integrated report does not change results');assert.ok((await page.locator('.decision-review').innerText()).includes('七日觀察完成'));assert.ok((await page.locator('.business-coach').innerText()).includes(enterpriseCoach(w).drivers[0].label));const raw=await page.evaluate(key=>localStorage.getItem(key),routeKey('enterprise',id));assert.deepEqual(decodeVenture(raw,'enterprise').world,w);
+      const download=page.waitForEvent('download');await page.locator('[data-action=analysis]').click();const html=await readFile(await(await download).path(),'utf8');assert.ok(html.includes('七日觀察完成'));assert.ok(html.includes('當次設定變更'));assert.ok(html.includes('不能單獨證明因果'));
+      await page.reload();await page.waitForFunction(()=>window.__ready&&window.__venture);assert.deepEqual(await world(page),w);assert.equal(await page.evaluate(()=>window.__venture.state.ticking),false);assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);await page.locator('.enterprise-driver-strip button').first().click();await page.locator('.enterprise-drawer details').first().locator('summary').click();assert.deepEqual(await world(page),w);
+      await page.screenshot({path:`/private/tmp/tycoon-enterprise-learning-${id}-${width}.png`});assert.deepEqual(errors,[]);console.log(`PASS ${width} ${id}: visible key drivers, pure strategy/credit drafts, binding decisions, actual seven-day review, integrated report/export and exact saved resume`);
+    }finally {await context.close();}
+  }
+  for(const id of ['hotel','ecommerce','ai']) {
+    const context=await browser.newContext(),page=await context.newPage(),legacy=createEnterprise(id);delete legacy.policy;await page.addInitScript(({key,raw})=>localStorage.setItem(key,raw),{key:routeKey('enterprise',id),raw:encodeVenture(legacy)});await page.goto(`${base}/games/tycoon/?mode=enterprise&business=${id}`);await page.waitForFunction(()=>window.__ready&&window.__venture);assert.deepEqual(await world(page),legacy);await page.locator('.enterprise-driver-strip button').first().click();assert.deepEqual(await world(page),legacy);assert.equal(await page.locator('.business-coach').count(),1);console.log(`PASS legacy ${id}: existing game remains unchanged when viewing new learning tools`);await context.close();
+  }
+}finally {await browser.close();}
