@@ -80,7 +80,7 @@ export function industryEffects(w, day = w.day || 0) {
 export function industryDay(w, day, actual, notify = () => {}, withEvents = true) {
   if (!w.industry) return;
   const s = w.industry, a = s.policies, r = s.resources, p = INDUSTRIES[s.id];
-  const volume = Math.max(0, actual.volume || 0), miss = clamp((actual.lost || 0) / Math.max(1, volume + (actual.lost || 0))), waste = clamp((actual.unsold || 0) / Math.max(1, actual.prepared || 0)), bad = clamp((actual.defects || 0) / Math.max(1, (actual.produced || volume) + (actual.defects || 0))), load = clamp(actual.utilization || 0, 0, 2), orders = Math.min(8, actual.orders || 0), service = clamp(actual.serviceLoad || 0, 0, 2);
+  const volume = Math.max(0, actual.volume || 0), miss = clamp((actual.lost || 0) / Math.max(1, volume + (actual.lost || 0))), waste = clamp((actual.unsold || 0) / Math.max(1, actual.prepared || 0)), bad = clamp((actual.defects || 0) / Math.max(1, (actual.produced || volume) + (s.id==='ecommerce'?0:(actual.defects || 0)))), load = clamp(actual.utilization || 0, 0, 2), orders = Math.min(8, actual.orders || 0), service = clamp(actual.serviceLoad || 0, 0, 2);
   const served = volume > 0 ? 1 : 0, demandObserved = volume + (actual.lost || 0) > 0;
   const add = (key, n) => { r[key] = clamp(r[key] + n); }, follow = (key, target, rate = .15) => { r[key] = clamp(r[key] * (1 - rate) + clamp(target) * rate); };
   switch (s.id) {

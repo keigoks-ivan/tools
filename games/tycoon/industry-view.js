@@ -9,10 +9,12 @@ export function industrySettings(w) {
   return p.axes.map(a => a.name + '：' + a.options.find(o => o.id === s.policies[a.id]).name).join('／') + '；專屬改善 ' + (s.work ? s.work.elapsed + '/' + p.investment.days : '無');
 }
 export function industryDrivers(w) {
+  if(!w.industry)return [];
   const p = INDUSTRIES[industryId(w)], s = industryState(w);
   return p.resources.map(r => ({ id: 'industry-' + r.id, label: r.name, value: s.resources[r.id] * 100, unit: '%', type: 'state' }));
 }
 export function industryBoardHtml(w, { disabled = false, report = false, scene = '', shopId = '' } = {}) {
+  if(report&&!w.industry)return '<p>這份舊進度尚未啟用專屬劇本；本報表依原有營運模型分析，不列尚未發生的專屬能力與里程碑。</p>';
   const id = industryId(w), p = INDUSTRIES[id], s = industryState(w), e = industryEffects(w), end = disabled || report;
   const unit=industryVolumeUnit(id);
   const attr = `data-industry-shop="${esc(shopId)}"`;

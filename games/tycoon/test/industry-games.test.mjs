@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { INDUSTRIES, industryId, industryKey } from '../industry-catalog.js';
 import { enableIndustry, industryAction, industryState, industryEffects, industryValid, industryDay } from '../industry-sim.js';
-import { industryBoardHtml } from '../industry-view.js';
+import { industryBoardHtml, industryDrivers } from '../industry-view.js';
 import { createOwnerVenture, stepOwnerVenture } from '../owner-management.js';
 import { createEnterprise, enterpriseAction, stepEnterprise, enterpriseMetrics, enterpriseQuote } from '../enterprise.js';
 import { manufacturingAction, productionPlan } from '../manufacturing.js';
@@ -119,4 +119,12 @@ test('cash projection includes industry fixed fees and does not pay recorded imp
   const { E: EXP }=await import('../facilities.js');
   const run=shop=>projectCash({world:g.world,plans:[{shop,samples:7,walk:0,del:0,unit:0,price:0,plat:0,capacity:0,dailyWage:0,wasteRate:0}],dateOf:S._internals.dateOf,computePnL:S._internals.computePnL,newMTD:()=>Object.fromEntries(Object.keys(m).map(k=>[k,0])),monthlyFixed:()=>0,V:S.V,EXP,endDay:S._internals.END_DAY});
   const withFees=run(g.w),without=clone(g.w);delete without.industry;without.mtd.industryDayUnits=0;const plain=run(without);assert.equal(plain.endCash-withFees.endCash,36000,'six monthly policy fees are recorded');const noPaid=clone(without);noPaid.mtd.industryPaid=0;assert.equal(run(noPaid).endCash,plain.endCash,'already-paid project does not create a second cash payment');assert.deepEqual(g.world,before);
+});
+test('ecommerce return pressure uses returned items divided by actual gross shipments',()=>{
+  const {w}=make('ecommerce');let checked=false;
+  for(let day=0;day<30;day++){const before=w.industry.resources.returns;assert.equal(stepEnterprise(w),true);if(w.today.returns>0){assert.ok(w.today.sales>=w.today.returns);assert.ok(Math.abs(w.industry.resources.returns-(before*.85+w.today.returns/w.today.sales*.15))<1e-12);checked=true;break;}}
+  assert.equal(checked,true,'check the real refund path with actual stock and shipments');
+});
+test('legacy reports do not present inactive default abilities as actual results',()=>{
+  const w=createOwnerVenture('technology','saas'),before=clone(w);assert.deepEqual(industryDrivers(w),[]);assert.match(industryBoardHtml(w,{report:true}),/尚未啟用/);assert.ok(!industryBoardHtml(w,{report:true}).includes('industry-resources'));assert.match(industryBoardHtml(w),/data-industry-kind/);assert.deepEqual(w,before);
 });
