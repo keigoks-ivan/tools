@@ -1,4 +1,5 @@
 import { clamp, random, company, dateOf, note, spend, receive, expense, finishDay, commonValid, payable, END_DAY } from './venture-core.js';
+import { managementValid } from './manager-policy.js';
 
 export const PRODUCTS = {
   packaging: { name: '客製包材', description: '大量低單價，產能利用與原料議價是關鍵。', capital: 900000, equipment: 240000, capacity: 220, material: 10, price: 28, wage: 28000, rent: 18000, lot: 1100 },
@@ -224,7 +225,7 @@ function cancelOrder(w, o) {
   spend(w, o.deposit); expense(w, 'penalty', Math.round(o.quote * policy.cancelRate), true); expense(w, 'cogs', o.cost);
   w.reputation = clamp(w.reputation - .08, .1, .95); w.stats.late++; w.orders = w.orders.filter(x => x !== o); note(w, `${o.client} 訂單取消：退訂金、${Math.round(policy.cancelRate * 100)}% 違約金，在製品認列損失。`);
 }
-export function stepManufacturing(w) {
+export function stepManufacturing(w, beforeProduction = null) {
   if (w.status !== 'playing' || w.event) return false;
   const p = PRODUCTS[w.productId], co = w.co, dim = dateOf(w.day).dim;
   for (const s of w.shipments.filter(s => s.arrival <= w.day)) {
@@ -236,6 +237,7 @@ export function stepManufacturing(w) {
   w.receivables = w.receivables.filter(r => r.due > w.day);
   if (w.expansion && w.day >= w.expansion.ready) { w.lines++; w.expansion = null; note(w, '新產線已可使用。'); }
   for (const o of [...w.orders]) if (w.day > o.due + contractPolicy(w, o).graceDays) cancelOrder(w, o);
+  if (typeof beforeProduction === 'function') beforeProduction(w);
   w.orders = manufacturingQueue(w);
   const plan = productionPlan(w); let budget = Math.min(plan.capacity, w.stock.qty), produced = 0, defects = 0, delivered = 0, lateFees = 0, auditFees = 0;
   for (const o of [...w.orders]) {
@@ -283,6 +285,7 @@ export function stepManufacturing(w) {
 export function manufacturingValid(w) {
   const nn = n => typeof n === 'number' && Number.isFinite(n) && n >= 0, integer = n => Number.isInteger(n) && n >= 0;
   const calendarDay = n => integer(n) && n <= END_DAY + 365;
+  if (!managementValid(w)) return false;
   if (!commonValid(w) || w.mode !== 'manufacturing' || !known(PRODUCTS, w.productId) || !Number.isInteger(w.workers) || w.workers < 1 || w.workers > 30 || !Number.isInteger(w.lines) || w.lines < 1 || w.lines > 6 || !['normal', 'overtime'].includes(w.shift) || !['standard', 'strict'].includes(w.qc) || !known(SUPPLIERS, w.supplier) || w.productionMode !== undefined && !known(PRODUCTION_MODES, w.productionMode) || w.scheduleMode !== undefined && !['due', 'manual'].includes(w.scheduleMode) || !nn(w.wear) || w.wear > 1 || !nn(w.reputation) || w.reputation > 1 || !integer(w.seq) || !calendarDay(w.maintenanceUntil)) return false;
   const arr = (a, max) => Array.isArray(a) && a.length <= max;
   const profiles = contractProfiles(w.productId);

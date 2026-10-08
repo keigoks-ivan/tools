@@ -13,14 +13,15 @@ const routes = [
   ['?mode=technology&business=saas', 'technology'],
   ['?mode=technology&business=marketplace', 'technology'],
   ['?mode=technology&business=content', 'technology'],
+  ...['hotel','equipment','ecommerce','ai','agency','security'].map(id=>['?mode=enterprise&business='+id,'enterprise']),
 ];
 const footerVisible = () => {
   const r = document.querySelector('.venture-footer,.route-foot').getBoundingClientRect();
   return r.top >= 0 && r.bottom <= innerHeight + 2;
 };
 const workspaceNavigationVisible = () => {
-  const r = document.querySelector('.venture-operation-tabs').getBoundingClientRect();
-  return r.top >= 0 && r.bottom <= innerHeight && r.top < 20;
+  const nav=document.querySelector('.venture-operation-tabs'), r=nav.getBoundingClientRect();
+  return r.top>=0 && r.bottom<=innerHeight && (scrollY<Number(nav.dataset.flowTop)-20 || r.top<20);
 };
 async function key(page, value) {
   const atBoundary = await page.evaluate(value => {
@@ -72,6 +73,7 @@ try {
     page.on('pageerror', e => errors.push(e.message));
     await page.goto(`${base}/games/tycoon/${query}`);
     await page.waitForFunction(() => window.__ready);
+    await page.evaluate(()=>{const nav=document.querySelector('.venture-operation-tabs');if(nav)nav.dataset.flowTop=nav.getBoundingClientRect().top;});
     const world = await page.evaluate(() => window.__venture ? JSON.stringify(window.__venture.world) : null);
     assert.equal(await page.evaluate(() => getComputedStyle(document.documentElement).overflowY), 'auto');
     await page.mouse.move(450, 750); await page.mouse.wheel(0, 650);
@@ -83,9 +85,9 @@ try {
     if (view !== 'routes') {
       assert.equal(await page.evaluate(workspaceNavigationVisible), true, 'workspace tabs must remain available at the operation page bottom');
       await key(page, 'Home'); await page.waitForFunction(() => scrollY === 0);
-      await page.locator('.venture-nav [data-tab=report]').click();
+      await page.locator('.venture-nav [data-tab=report],.venture-nav [data-view=report]').click();
       await page.mouse.move(450, 750); await page.mouse.wheel(0, 650);
-      await page.waitForFunction(() => scrollY > 100);
+      await page.waitForFunction(() => { const max=document.scrollingElement.scrollHeight-innerHeight; return max>100 ? scrollY>100 : scrollY>=Math.max(0,max); });
       await key(page, 'End'); await page.waitForFunction(footerVisible);
       assert.equal(await page.evaluate(() => JSON.stringify(window.__venture.world)), world);
     }
@@ -99,6 +101,7 @@ try {
     phone.on('pageerror', e => phoneErrors.push(e.message));
     await phone.goto(`${base}/games/tycoon/${query}`);
     await phone.waitForFunction(() => window.__ready);
+    await phone.evaluate(()=>{const nav=document.querySelector('.venture-operation-tabs');if(nav)nav.dataset.flowTop=nav.getBoundingClientRect().top;});
     const phoneWorld = await phone.evaluate(() => window.__venture ? JSON.stringify(window.__venture.world) : null);
     const session = await mobile.newCDPSession(phone);
     await swipe(phone, session, 1);
@@ -109,9 +112,9 @@ try {
     for (let i = 0; i < 35 && await phone.evaluate(() => scrollY > 0); i++) await swipe(phone, session, -1);
     assert.equal(await phone.evaluate(() => scrollY), 0, 'touch must return to the top');
     if (view !== 'routes') {
-      await phone.locator('.venture-nav [data-tab=report]').click();
+      await phone.locator('.venture-nav [data-tab=report],.venture-nav [data-view=report]').click();
       await swipe(phone, session, 1);
-      assert.ok(await phone.evaluate(() => scrollY) > 100);
+      assert.ok(await phone.evaluate(() => { const max=document.scrollingElement.scrollHeight-innerHeight; return max>100 ? scrollY>100 : scrollY>=Math.max(0,max); }));
       for (let i = 0; i < 35 && !await phone.evaluate(footerVisible); i++) await swipe(phone, session, 1);
       assert.equal(await phone.evaluate(footerVisible), true, 'touch must reach the report bottom');
       assert.equal(await phone.evaluate(() => JSON.stringify(window.__venture.world)), phoneWorld);

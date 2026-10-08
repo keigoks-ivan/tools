@@ -284,7 +284,7 @@ async function presentation(page,requests,errors,business) {
   assert.equal(await image.count(),1,'operations screen must use a single static scene asset');
   await image.evaluate(e=>e.decode());
   assert.equal(await image.evaluate(e=>e.complete && e.naturalWidth>0),true);
-  const scenes=requests.filter(url=>/assets\/worlds\/.+\.webp/.test(url));
+  const scenes=requests.filter(url=>/assets\/worlds\/.+\.webp/.test(url) && !url.includes('operations-manager'));
   assert.ok(scenes.length>=1); assert.ok(scenes.every(url=>url.includes(business)),'the scene must match the selected business');
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true,'operations must not cause horizontal page overflow');
   assert.deepEqual(errors,[],'operations must not emit runtime, console or HTTP errors');
@@ -302,6 +302,10 @@ try {
         await page.waitForFunction(()=>window.__ready && window.__venture);
         assert.equal((await world(page))[mode==='manufacturing'?'productId':'modelId'],business);
         assert.equal((await state(page)).speed,0); assert.equal((await state(page)).ticking,false);
+        assert.equal((await world(page)).manager.enabled,true,'new games delegate daily operations by default');
+        await page.locator('.owner-authority summary').click();
+        await page.locator('[data-action=management][data-enabled=false]').click();
+        assert.equal((await world(page)).manager.enabled,false);
         const beforePanels=await immutableState(page); await panelVisibility(page,mode); await pure(page,beforePanels,'switching compact panels must preserve world, RNG, day and save');
         await navigation(page,mode); await fillDraft(page,mode,business);
         if(mode==='manufacturing') await factory(page); else await technology(page,business);

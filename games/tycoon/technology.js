@@ -1,4 +1,5 @@
 import { clamp, random, company, dateOf, note, expense, receive, finishDay, commonValid, payable, END_DAY } from './venture-core.js';
+import { managementValid } from './manager-policy.js';
 
 export const MODELS = {
   saas: { name: '訂閱軟體 SaaS', description: '付費訂閱，重點是轉換、續訂與客戶終身價值。', capital: 800000, setup: 80000, price: 499, cac: 55, market: 30000, initialUsers: 80, initialPaid: 12, ticket: 0, capacity: 600, supportCapacity: 1200, adCPM: 0 },
@@ -190,8 +191,9 @@ export function technologyAction(w, action, data = {}) {
   return { ok: true };
 }
 const stochastic = (w, n) => Math.floor(n) + (random(w) < n % 1 ? 1 : 0);
-export function stepTechnology(w) {
+export function stepTechnology(w, beforeOperations = null) {
   if (w.status !== 'playing' || w.event) return false;
+  if (typeof beforeOperations === 'function') beforeOperations(w);
   const p = MODELS[w.modelId], dim = dateOf(w.day).dim, m = technologyMetrics(w, { includeBreakEven: false }), spendDay = w.marketing / dim;
   const organic = (w.modelId === 'content' ? (12 + w.users * .004 * w.quality) * m.uptime : (2 + w.users * .0015 * w.reputation) * m.uptime) * m.organicMultiplier;
   const acquired = Math.min(Math.max(0, m.market - w.users), stochastic(w, spendDay / m.acquisitionCost + organic));
@@ -239,6 +241,7 @@ export function stepTechnology(w) {
 }
 export function technologyValid(w) {
   const nn = n => typeof n === 'number' && Number.isFinite(n) && n >= 0;
+  if (!managementValid(w)) return false;
   if (!commonValid(w) || w.mode !== 'technology' || typeof w.modelId !== 'string' || !Object.hasOwn(MODELS, w.modelId) || !Number.isInteger(w.users) || w.users < 0 || w.users > MODELS[w.modelId].market || !Number.isInteger(w.paying) || w.paying < 0 || w.paying > w.users || !['quality', 'retention', 'techDebt', 'reputation'].every(k => nn(w[k]) && w[k] <= 1) || !Number.isInteger(w.engineers) || w.engineers < 1 || w.engineers > 12 || !Number.isInteger(w.support) || w.support < 0 || w.support > 20 || !Number.isInteger(w.marketing) || w.marketing < 0 || w.marketing > 500000 || !Number.isInteger(w.cloudTier) || w.cloudTier < 0 || w.cloudTier > 5 || !nn(w.capacityBonus) || w.capacityBonus < 1 || w.capacityBonus > 3 || !['growth', 'balanced', 'stability'].includes(w.focus)) return false;
   if (w.strategy !== undefined && (typeof w.strategy !== 'string' || !Object.hasOwn(STRATEGIES[w.modelId], w.strategy)) || w.capabilities !== undefined && (!Array.isArray(w.capabilities) || w.capabilities.length > 2 || new Set(w.capabilities).size !== w.capabilities.length || w.capabilities.some(id => typeof id !== 'string' || !Object.hasOwn(PROJECTS, id) || PROJECTS[id].modelId !== w.modelId))) return false;
   const bounds = w.modelId === 'saas' ? [99, 1999] : w.modelId === 'marketplace' ? [2, 20] : [1, 6];
