@@ -22,12 +22,14 @@ export function enterpriseCoach(w) {
   const load=driver('serviceLoad','既有維運負載',m.serviceLoad*100,'%','estimate','已簽客戶先占每日能力；超過 100% 會產生服務短缺及補償，續約也是占用未來產能的決定。');
   const leads=driver('leads','下一輪新詢價數',p.kind==='project'?enterpriseLeads(w):null,'份／30日','estimate','業務開發投資影響每 30 日的新詢價；成長逐漸趨緩，上限六份。更多詢價不保證得標、獲利或準時交付。');
   const cash=driver('available','保留營運後可動用現金',m.available,'$','state','扣未付費用、授權的營運保留、下一次利息與還本、估計稅；應收尾款不能當現金支付薪資。');
+  const pricing=driver('priceValue','售價／估計客戶價值',m.valuePrice?w.price/m.valuePrice*100:null,'%','estimate',`目前品質與口碑對應的參考價值約 ${money(m.valuePrice||0)}；超過後成交明顯下降${p.kind==='commerce'?'、退貨與口碑風險提高':''}。這不是保證成交的建議售價。`);
+  const advertising=driver('adMarginalReturn','一萬元行銷加碼的貢獻／費用',m.adMarginalReturn,'倍','estimate',`月行銷 ${money(m.adFrom)} → ${money(m.adTo)}，固定品質、口碑及通路，有貨時新增成交的貢獻除以一萬元。低於一倍時加碼會減少利潤；已計人力容量，未計新增招聘、未來事件與稅。`);
   let drivers,formula;
   if(p.kind==='hotel') {
     drivers=[contribution,demand,driver('breakEvenOccupancy','含折舊利息的損平入住率',requiredOccupancy,'%','estimate','月固定費／每間夜貢獻，再除本月全部可售間夜；超過 100% 表示目前價格與成本無法靠滿房損平。','每間夜貢獻不為正'),capacity,driver('revpar','每間可售房收益 RevPAR',m.revpar,'$／日','estimate','房價 × 入住率；高房價若讓空房變多，RevPAR 可能下降。這是營收指標，仍須扣服務成本。'),driver('feeRate','通路佣金',m.feeRate*100,'%','state','平台可帶來較多客源，也按售價收較高佣金。比淨貢獻，不只比入住率。'),driver('quality','房務品質',w.quality*100,'%','state','維護預算逐日改善品質；低於 50% 有住宿補償，口碑需持續營運才能改變。'),cash];
     formula={text:'間夜 × 房價 − 備品、佣金、補償 − 房務工資與固定費 = 營運損益',detail:'房間每晚有容量上限；擴張先付現、增加房務與固定成本。當日貢獻的月化估計另含折舊與利息，月結才計稅。'};
   } else if(p.kind==='commerce') {
-    drivers=[contribution,driver('adPerSale','實際行銷費／每筆出貨',ratio(ad,sales),'$／件','observed','用七日實際行銷費除出貨件數。有機訂單也會稀釋平均值；它不等於每位新客的獲客成本。'),driver('returnRate','估計退貨率',m.returnRate*100,'%','estimate',`品質、通路與履約定位共同影響；退款付現會吃掉毛利。最近七日實際退貨率${sales>0&&returns!==null?' '+(returns/sales*100).toFixed(1)+'%':'尚無可用樣本'}。`),demand,driver('stockDays','在庫可供貨天數',ratio(w.stock.qty,Math.min(m.demand,m.capacity)),'日','state','只算已到貨可賣庫存；採購七天後到貨。在途不能立即出貨，備 30 天也會多占現金。','目前沒有可估銷量'),driver('stockCash','商品與在途占用資金',inventory,'$','state','採購先付款形成庫存，售出或報廢才認列商品成本；退回可售商品仍是資產。'),driver('breakEven','月損平出貨量',m.breakEven,'件／月','estimate',`月固定費含折舊與利息，除以每件貢獻；目前有效月容量約 ${Math.floor(monthlyCapacity)} 件，不代表有足夠訂單。`,'每件貢獻不為正'),cash];
+    drivers=[contribution,driver('adPerSale','實際行銷費／每筆出貨',ratio(ad,sales),'$／件','observed','用七日實際行銷費除出貨件數。有機訂單也會稀釋平均值；它不等於每位新客的獲客成本。'),driver('returnRate','估計退貨率',m.returnRate*100,'%','estimate',`品質、售價期待落差、通路與履約定位共同影響；退款付現會吃掉毛利。最近七日實際退貨率${sales>0&&returns!==null?' '+(returns/sales*100).toFixed(1)+'%':'尚無可用樣本'}。`),demand,driver('stockDays','在庫可供貨天數',ratio(w.stock.qty,Math.min(m.demand,m.capacity)),'日','state','只算已到貨可賣庫存；採購七天後到貨。在途不能立即出貨，備 30 天也會多占現金。','目前沒有可估銷量'),driver('stockCash','商品與在途占用資金',inventory,'$','state','採購先付款形成庫存，售出或報廢才認列商品成本；退回可售商品仍是資產。'),driver('breakEven','月損平出貨量',m.breakEven,'件／月','estimate',`月固定費含折舊與利息，除以每件貢獻；目前有效月容量約 ${Math.floor(monthlyCapacity)} 件，不代表有足夠訂單。`,'每件貢獻不為正'),cash];
     formula={text:'出貨金額 − 退款 − 已耗商品、物流與通路費 − 固定費 = 營運損益',detail:'每件貢獻尚未扣行銷與固定費；加廣告須比較新增成交和成本。庫存先占現金，出貨金額不是可花的利潤。'};
   } else {
     const specific={
@@ -39,17 +41,20 @@ export function enterpriseCoach(w) {
     drivers=[...specific,...(w.businessId==='agency'?[]:[margin]),leads,driver('bidChance','下一詢價參考價得標機會',q?q.chance*100:null,'%','estimate','價格、口碑、帳期及維運承諾共同影響；提高訂金會降低成交機會，放寬信用會拉長現金回收。','目前沒有待提案詢價'),driver('receivables','待收尾款',receivables,'$','state','已驗收案的尾款依各自帳期收回，尚未入帳不能支付當月費用。'),cash];
     formula={text:'驗收收入＋維運費 − 材料／交付費、工資、固定費與違約補償 = 營運損益',detail:'訂金增加現金，不是當日營收；驗收後尾款仍要等帳期。一次性交付保留產能，維運增加收入也增加持續責任。'};
   }
+  if(p.kind!=='project')drivers.push(pricing,advertising);
   let bottleneck,decision;
   if(w.status!=='playing'){bottleneck=issue('closed','回看這一局的經營結果','對照月報、現金與決策觀察，找出是單位經濟、履約或周轉先失去餘裕。','info');decision=next('檢討主要決策','比較最近三次調整前後的實績與各月費用。','七日樣本不能單獨證明因果，長專案還要等驗收及收款。','report');}
   else if(w.event){bottleneck=issue('event','先處理眼前的營運事件',w.event.title);decision=next('比較改善費與後續風險','改善會先付現；接受衝擊可能提高接下來 30 日成本或減少需求。','保留現金也需要承擔品質與客戶承諾。','brief');}
   else if(!m.available){bottleneck=issue('cash','現金保留已沒有餘裕',`可用現金 ${money(w.co.cash)}，營運與還款保留 ${money(m.reserve)}；未收尾款 ${money(receivables)}。`,'danger');decision=next('先安排周轉','對照收款日、庫存和月結支出，再決定預算、還款或借款。','削減現金保留不會取消已發生的費用；借款增加利息與本金支出。','team');}
   else if(p.kind!=='project'&&m.contribution<=0){bottleneck=issue('margin','成交越多，單位損失越大',`每${p.unit}估計貢獻 ${money(m.contribution)}，尚未支應固定費。`,'danger');decision=next('先修正單位經濟','試算價格、通路及服務定位的淨貢獻，再增加行銷。','提高價格可能降低需求；節省服務成本也會影響客源或退貨。');}
   else if(p.kind==='commerce'&&w.stock.qty===0){bottleneck=issue('stock','目前沒有可出貨庫存',w.shipments.length?`已付在途 ${w.shipments.reduce((n,s)=>n+s.qty,0)} 件，最早 ${dateOf(Math.min(...w.shipments.map(s=>s.arrival))).key} 到貨。`:'先推進一天，團隊才會依授權備貨；若預算不足，需求仍會流失。');decision=next('把廣告與到貨時間排在一起','檢查七日補貨期、備貨天數與可動用現金。','在沒貨時加廣告仍付行銷費；一次備太多會鎖住周轉金。','operations');}
+  else if(p.kind!=='project'&&w.price/m.valuePrice>1.25){bottleneck=issue('pricing','價格超出目前品質與口碑能支撐的價值',`售價約為估計客戶價值的 ${(w.price/m.valuePrice*100).toFixed(0)}%；提高廣告仍無法補回價格造成的低成交${p.kind==='commerce'?'與期待落差退貨':''}。`,'danger');decision=next('先驗證客戶願意付多少','在草稿比較較低售價的成交、單位貢獻與月損益，再用實際結果驗證。','降價會減少每筆毛利；品質與口碑需要逐日累積，不能靠一次拉滿預算取得。');}
   else if(p.kind==='project'&&m.serviceLoad>.8){bottleneck=issue('service','維運承諾正在擠壓新案',`已占有效能力 ${(m.serviceLoad*100).toFixed(1)}%；新案只能使用剩餘 ${m.freeCapacity.toFixed(1)} ${p.unit}／日。`,m.serviceLoad>1?'danger':'warning');decision=next('先核對續約與新案容量','比較一次性交付和加強維運，續約前確認人力與每日承諾。','不續約會失去收入；承諾更多維運也可能造成補償與交付延後。','operations');}
   else if(p.kind==='project'&&plan.issues.some(x=>x.includes('交期'))){bottleneck=issue('delivery','已接案的交期有風險','依目前有效能力、備料及驗收期，部分專案可能無法按約完成。','danger');decision=next('先守住已簽的交付','確認現有容量與團隊授權，暫緩新提案；擴張要等 21 日。','增員會增加固定薪資；取消要退訂金與付違約費。','operations');}
   else if(p.kind==='project'&&!w.orders.length){bottleneck=issue('orders','空團隊仍有固定成本',`每月固定支出 ${money(m.fixed)}，現有 ${w.offers.length} 份詢價。`);decision=next('用一張案子驗證報價與周轉','一起比較分攤後利潤、得標機會、訂金、交期與尾款帳期。','便宜與寬鬆信用可能較容易成交，但利潤和現金安全會下降。','contracts');}
   else if(p.kind==='hotel'&&(m.breakEven===null||m.breakEven>monthlyCapacity)){bottleneck=issue('capacity','目前有效容量不足以損平',`損平需 ${m.breakEven===null?'正的單位貢獻':m.breakEven+' 間夜／月'}，目前有效能力約 ${Math.floor(monthlyCapacity)} 間夜。`,'danger');decision=next('比較服務成本、房價與有效房務','先用價格和服務定位試算，再評估人力或擴張。','只增加房間仍要準備工資、固定費及足夠客源。');}
   else if(p.kind==='commerce'&&ratio(ad,sales)!==null&&ad/sales>=m.contribution){bottleneck=issue('advertising','廣告攤提已吃掉每件貢獻',`近七日每筆行銷費 ${money(ad/sales)}，目前每件貢獻約 ${money(m.contribution)}，尚未扣其他固定費。`,'danger');decision=next('先驗證廣告效率','小幅調整行銷，觀察實際出貨、退貨與每日營運損益。','減廣告可能降低訂單；只看出貨成長會忽略費用。');}
+  else if(p.kind!=='project'&&w.marketing>0&&m.adMarginalReturn<1){bottleneck=issue('ad-limit','行銷加碼的新增貢獻不夠付廣告費',`${money(m.adFrom)} → ${money(m.adTo)} 的一萬元加碼，在可供貨及目前容量下只估增 ${money(m.adMarginalReturn*10000)} 貢獻。`);decision=next('比較縮減廣告與解除瓶頸','降低預算並對照成交與淨利；如果容量已滿，先評估擴張成本。','廣告觸及有限客群、成長逐漸趨緩；增加費用不會同比增加成交，擴張也不能解決價格太高。');}
   else {bottleneck=issue('economics','用實際經營驗證下一步',p.kind==='project'?`本輪已完成約 ${produced===null?'尚無樣本':produced.toFixed(1)} ${p.unit}；檢查驗收與回款，再增加承諾。`:`每${p.unit}貢獻約 ${money(m.contribution)}；固定費仍需 ${money(m.accountingFixed)}／月。`,'info');decision=next('先聚焦一個取捨',p.kind==='project'?'比較新案條款或維運定位，再觀察七日交付與現金；長專案繼續追到驗收。':'小幅調整價格、行銷或服務定位，再看七日成交與損益。','季節、競爭、到貨與事件也會改變結果；改善估算不等於已經獲利。',p.kind==='project'?'contracts':'settings');}
   return {mode:'enterprise',businessId:w.businessId,name:p.name,formula,drivers,bottleneck,decision,assumptions:[policy.detail,'價格、容量及單位費用是教育用模擬參數。品質投資逐日改善，已簽條款與維運責任不回溯修改。','同條件月化估計不推進時間、不預先補貨或招人，也不預測未來客源、修改、事故與稅。','七日觀察使用完整營業日；缺少舊欄位的樣本保持未知。行銷費／成交不等於新客 CAC，驗收收入不等於收款。']};
 }
@@ -64,7 +69,7 @@ export function enterpriseDraft(w,data) {
   const test={...w,...data},before=enterpriseLearningSnapshot(w),after=enterpriseLearningSnapshot(test),changes=after.drivers.flatMap(d=>{const old=before.drivers.find(x=>x.id===d.id);return old&&Math.abs(old.value-d.value)>1e-8?[{...d,before:old.value,after:d.value}]:[];});
   const notes=[],p=ENTERPRISES[w.businessId];
   if(data.price!==w.price)notes.push(p.kind==='project'?'報價只影響新提案；價格提高會降低得標機會，已簽總價不變。':'價格改變每筆貢獻，也會影響客源需求；不是只調高營收。');
-  if(data.marketing!==w.marketing)notes.push(p.kind==='project'?'業務開發費先增加固定支出，詢價數在下一個 30 日周期才改變；不會立刻產生新營收。':'行銷費先增加固定支出；新增需求仍要有庫存、人力與有效容量才能成交。');
+  if(data.marketing!==w.marketing)notes.push(p.kind==='project'?'業務開發費先增加固定支出，詢價數在下一個 30 日周期才改變；不會立刻產生新營收。':'廣告觸及會逐漸飽和，新增客源越來越貴；先比較一萬元加碼的新增貢獻，再看庫存、人力與容量。');
   if(data.qualityBudget!==w.qualityBudget)notes.push('品質投資先產生費用，逐日改變品質與效率；這份即時草稿不會先把未來品質加上去。');
   if(data.channel!==w.channel)notes.push(p.kind==='project'?'新方向在下一輪詢價改變工作量、報價及驗收；已簽範圍不變。':'新通路會同時改變客源及佣金；平台成交較多也可能剩較少貢獻。');
   if((data.policy||w.policy||'standard')!==(w.policy||'standard'))notes.push(p.kind==='project'?'新的維運定位在新提案鎖定；已交付客戶與已簽專案仍按原承諾執行。':enterprisePolicy(test).detail);

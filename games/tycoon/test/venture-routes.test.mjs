@@ -75,7 +75,7 @@ test('科技：成長模式較快上線但留下技術債，專案不能疊加',
 });
 test('科技：不同業態使用不同容量與客服規模，內容廣告增加也提高流失',()=>{
   const a=createTechnology('saas'),b=createTechnology('marketplace'),c=createTechnology('content');assert.ok(technologyMetrics(b).capacity>technologyMetrics(a).capacity);assert.ok(technologyMetrics(c).capacity>technologyMetrics(b).capacity);
-  const before=technologyMetrics(c);ta(c,'settings',techSettings(c,{price:6}));assert.ok(technologyMetrics(c).churn>before.churn);assert.ok(technologyMetrics(c).monthlyUnit>before.monthlyUnit);
+  const before=technologyMetrics(c);ta(c,'settings',techSettings(c,{price:6}));assert.ok(technologyMetrics(c).churn>before.churn);assert.ok(technologyMetrics(c).monthlyUnit<before.monthlyUnit);
 });
 test('科技：有限市場與競爭令邊際獲客更貴，極限設定仍可存檔',()=>{
   for(const id of Object.keys(MODELS)) {

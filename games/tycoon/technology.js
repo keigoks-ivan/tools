@@ -1,5 +1,6 @@
 import { clamp, random, company, dateOf, note, expense, receive, finishDay, commonValid, payable, END_DAY } from './venture-core.js';
 import { managementValid } from './manager-policy.js';
+import { advertisingReach, priceAcceptance } from './market-response.js';
 
 export const MODELS = {
   saas: { name: '訂閱軟體 SaaS', description: '付費訂閱，重點是轉換、續訂與客戶終身價值。', capital: 800000, setup: 80000, price: 499, cac: 55, market: 30000, initialUsers: 80, initialPaid: 12, ticket: 0, capacity: 600, supportCapacity: 1200, adCPM: 0 },
@@ -79,18 +80,20 @@ const capacityOf = w => Math.round(MODELS[w.modelId].capacity * 2 ** w.cloudTier
 const uptimeBase = w => 1 - w.techDebt * .035 - (w.shock && w.day < w.shock.until ? w.shock.outage : 0);
 const uptimeOf = (w, users) => clamp(1 - Math.max(0, users / capacityOf(w) - .8) * .15 - w.techDebt * .035 - (w.shock && w.day < w.shock.until ? w.shock.outage : 0), .35, .999);
 const fixedOf = w => w.engineers * 45000 + w.support * 30000 + 6000 + 4500 * 2 ** w.cloudTier + w.marketing + technologyEffects(w).toolingCost;
+const transactionFactor = w => w.price<=8?Math.min(1.2,1+(8-w.price)*.035):Math.exp(-.09*(w.price-8)-.009*(w.price-8)**2);
+const visitFactor = w => 1/(1+.22*Math.max(0,w.price-2)**2);
 // 月貢獻與每日收入共用相同流量、支付和退款因子；不含固定人事與獲客費。
 export function technologyEconomics(w, { users = w.users, paying = w.paying, uptime = uptimeOf(w, users), dim = dateOf(w.day).dim } = {}) {
   const p = MODELS[w.modelId], fx = technologyEffects(w), capacity = capacityOf(w), load = users / capacity, paid = w.modelId === 'saas';
-  const transactionRate = .055 * (.6 + w.quality * .6) * Math.min(1, users / fx.liquidityTarget) * uptime * clamp(1 - (w.price - 8) * .035, .5, 1.2) * fx.transactionMultiplier;
+  const transactionRate = .055 * (.6 + w.quality * .6) * Math.min(1, users / fx.liquidityTarget) * uptime * transactionFactor(w) * fx.transactionMultiplier;
   const dailyTransactions = w.modelId === 'marketplace' ? users * transactionRate : 0;
-  const dailyVisits = w.modelId === 'content' ? users * (2 + w.quality * 3) * uptime * fx.visitMultiplier : 0;
+  const dailyVisits = w.modelId === 'content' ? users * (2 + w.quality * 3) * uptime * fx.visitMultiplier * visitFactor(w) : 0;
   const transactions = dailyTransactions * dim, visits = dailyVisits * dim;
   const revenue = paid ? paying * w.price * uptime : w.modelId === 'marketplace' ? transactions * p.ticket * w.price / 100 : visits * w.price * fx.adCPM / 1000;
   const userCost = fx.userCost, paymentRate = paid ? .035 : 0, refundRate = uptime < .9 ? (1 - uptime) * .25 : 0;
   const variable = users * userCost + revenue * paymentRate + transactions * fx.transactionCost, refunds = revenue * refundRate;
-  const monthlyUnit = paid ? w.price * uptime * (1 - paymentRate - refundRate) - userCost : w.modelId === 'marketplace' ? transactionRate * dim * (p.ticket * w.price / 100 * (1 - refundRate) - fx.transactionCost) - userCost : dim * (2 + w.quality * 3) * w.price * fx.adCPM / 1000 * uptime * fx.visitMultiplier * (1 - refundRate) - userCost;
-  return { ...fx, capacity, load, uptime, transactionRate, transactions, visits, dailyTransactions, dailyVisits, revenue, variable, refunds, contribution: revenue - variable - refunds, monthlyUnit, refundRate, userCost, paymentRate };
+  const monthlyUnit = paid ? w.price * uptime * (1 - paymentRate - refundRate) - userCost : w.modelId === 'marketplace' ? transactionRate * dim * (p.ticket * w.price / 100 * (1 - refundRate) - fx.transactionCost) - userCost : dim * (2 + w.quality * 3) * w.price * fx.adCPM / 1000 * uptime * fx.visitMultiplier * visitFactor(w) * (1 - refundRate) - userCost;
+  return { ...fx, monetizationFactor:w.modelId==='marketplace'?transactionFactor(w):w.modelId==='content'?visitFactor(w):1, capacity, load, uptime, transactionRate, transactions, visits, dailyTransactions, dailyVisits, revenue, variable, refunds, contribution: revenue - variable - refunds, monthlyUnit, refundRate, userCost, paymentRate };
 }
 const polyScale = (a, n) => a.map(x => x * n);
 const polyAdd = (a, b) => Array.from({ length: Math.max(a.length, b.length) }, (_, i) => (a[i] || 0) + (b[i] || 0));
@@ -120,9 +123,9 @@ function profitPolynomial(w, free, max, lo, hi, fixed) {
   if (w.modelId === 'saas') gross = polyScale(polyMultiply([0, max], up), w.price);
   else if (w.modelId === 'marketplace') {
     const liquidity = midUsers < fx.liquidityTarget ? polyScale(users, 1 / fx.liquidityTarget) : [1];
-    const trades = polyScale(polyMultiply(polyMultiply(users, liquidity), up), dim * .055 * (.6 + w.quality * .6) * clamp(1 - (w.price - 8) * .035, .5, 1.2) * fx.transactionMultiplier);
+    const trades = polyScale(polyMultiply(polyMultiply(users, liquidity), up), dim * .055 * (.6 + w.quality * .6) * transactionFactor(w) * fx.transactionMultiplier);
     gross = polyScale(trades, p.ticket * w.price / 100); costs = polyAdd(costs, polyScale(trades, fx.transactionCost));
-  } else gross = polyScale(polyMultiply(users, up), dim * (2 + w.quality * 3) * w.price * fx.adCPM / 1000 * fx.visitMultiplier);
+  } else gross = polyScale(polyMultiply(users, up), dim * (2 + w.quality * 3) * w.price * fx.adCPM / 1000 * fx.visitMultiplier * visitFactor(w));
   const keep = polyAdd([w.modelId === 'saas' ? .965 : 1], polyScale(refund, -1));
   return polyAdd(polyMultiply(gross, keep), polyAdd(polyScale(costs, -1), [-fixed]));
 }
@@ -152,11 +155,13 @@ export function technologyMetrics(w, { includeBreakEven = true } = {}) {
   const supportLoad = w.users / Math.max(1, w.support * e.supportCapacity), fit = clamp(w.quality * .7 + w.retention * .3, 0, 1);
   const friction = w.modelId === 'saas' ? Math.max(0, w.price / p.price - 1) * .08 : w.modelId === 'marketplace' ? Math.max(0, w.price - 8) * .006 : Math.max(0, w.price - 2) * .015;
   const paidChurn = clamp((.035 + (1 - fit) * .065 + (1 - uptime) * .7 + Math.max(0, supportLoad - 1) * .035 + friction) * e.churnMultiplier + e.churnAdd, .02, .45), activeChurn = Math.min(.5, paidChurn * 1.6), churn = w.modelId === 'saas' ? paidChurn : activeChurn;
-  const conversion = clamp((.07 + w.quality * .22 + w.retention * .1) * uptime * (w.modelId === 'saas' ? (p.price / w.price) ** .6 : 1) * e.conversionMultiplier, .01, .55);
+  const valuePrice=p.price*(.6+w.quality*.6+w.retention*.25+w.reputation*.15),acceptance=w.modelId==='saas'?priceAcceptance(w.price,p.price,valuePrice):1;
+  const conversion = clamp((.07 + w.quality * .22 + w.retention * .1) * uptime * acceptance * e.conversionMultiplier, 0, .55),freeConversion=.002*w.quality*e.oldFreeConversionMultiplier*acceptance;
   const competition = 1 + Math.min(.65, w.day / 1095 * .65), saturation = 1 + w.users / e.market * 2.5;
-  const acquisitionCost = p.cac * competition * saturation * (w.shock && w.day < w.shock.until ? w.shock.cac : 1) / (.8 + w.reputation * .4) * e.cacMultiplier;
+  const baseAcquisitionCost = p.cac * competition * saturation * (w.shock && w.day < w.shock.until ? w.shock.cac : 1) / (.8 + w.reputation * .4) * e.cacMultiplier;
+  const acquisitionCost=baseAcquisitionCost+w.marketing/(e.market*.04),paidAcquired=advertisingReach(w.marketing,baseAcquisitionCost,e.market*.04),adMarginalCost=baseAcquisitionCost*(1+w.marketing/(baseAcquisitionCost*e.market*.04))**2;
   const fixed = fixedOf(w);
-  return { ...e, supportLoad, churn, paidChurn, activeChurn, conversion, acquisitionCost, fixed, monthlyUnit, breakEven: includeBreakEven ? technologyBreakEven(w, fixed) : null, ltv: monthlyUnit > 0 ? monthlyUnit / churn : 0, payable: payable(w) };
+  return { ...e, valuePrice,priceAcceptance:acceptance,freeConversion,paidAcquired,adMarginalCost,baseAcquisitionCost,supportLoad, churn, paidChurn, activeChurn, conversion, acquisitionCost, fixed, monthlyUnit, breakEven: includeBreakEven ? technologyBreakEven(w, fixed) : null, ltv: monthlyUnit > 0 ? monthlyUnit / churn : 0, payable: payable(w) };
 }
 export function technologyAction(w, action, data = {}) {
   const fail = error => ({ ok: false, error });
@@ -196,9 +201,9 @@ export function stepTechnology(w, beforeOperations = null) {
   if (typeof beforeOperations === 'function') beforeOperations(w);
   const p = MODELS[w.modelId], dim = dateOf(w.day).dim, m = technologyMetrics(w, { includeBreakEven: false }), spendDay = w.marketing / dim;
   const organic = (w.modelId === 'content' ? (12 + w.users * .004 * w.quality) * m.uptime : (2 + w.users * .0015 * w.reputation) * m.uptime) * m.organicMultiplier;
-  const acquired = Math.min(Math.max(0, m.market - w.users), stochastic(w, spendDay / m.acquisitionCost + organic));
+  const acquired = Math.min(Math.max(0, m.market - w.users), stochastic(w, m.paidAcquired / dim + organic));
   const free = w.users - w.paying, lostFree = stochastic(w, free * m.activeChurn / dim), lostPaid = stochastic(w, w.paying * m.paidChurn / dim);
-  const converted = w.modelId === 'saas' ? Math.min(free - lostFree + acquired, stochastic(w, acquired * m.conversion + free * .002 * w.quality * m.oldFreeConversionMultiplier)) : 0;
+  const converted = w.modelId === 'saas' ? Math.min(free - lostFree + acquired, stochastic(w, acquired * m.conversion + free * m.freeConversion)) : 0;
   w.users = Math.max(0, w.users + acquired - lostFree - lostPaid); w.paying = Math.min(w.users, Math.max(0, w.paying + converted - lostPaid));
   const e = technologyEconomics(w, { uptime: m.uptime, dim });
   let revenue = 0, transactions = 0, visits = 0, gmv = 0;

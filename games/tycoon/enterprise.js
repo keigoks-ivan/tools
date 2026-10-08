@@ -1,5 +1,6 @@
 import { clamp, random, company, dateOf, note, spend, receive, expense, finishDay, commonValid, payable, profit, END_DAY } from './venture-core.js';
 import { management, managementAction, managementValid, managementRecord } from './manager-policy.js';
+import { advertisingReach, priceAcceptance } from './market-response.js';
 
 export const ENTERPRISES = {
   hotel: { name:'旅宿經營', category:'門店與資產', kind:'hotel', capital:4000000, setup:1800000, asset:true, wage:34000, rent:260000, staff:6, capacity:24, price:2600, cost:900, marketing:24000, qualityBudget:18000, autoBudget:160000, unit:'間夜', channelNames:['直訂與商務客','訂房平台與旅客'], factors:'房價、入住率、每房收益、平台佣金、房務品質', brief:'房間今晚沒賣掉就失去收入；旺季也要留得住服務品質。', expansion:800000 },
@@ -41,21 +42,29 @@ function generateOffers(w) {
   }
   w.offers=w.offers.slice(-6);
 }
+function consumerDemand(w,marketing=w.marketing) {
+  const p=ENTERPRISES[w.businessId],policy=enterprisePolicy(w),dim=dateOf(w.day).dim,shock=w.shock&&w.day<w.shock.until?w.shock.demand:1,competition=1+w.day/END_DAY*.45;
+  const valuePrice=p.price*(.6+w.quality*.6+w.reputation*.4),acceptance=priceAcceptance(w.price,p.price,valuePrice);
+  const reachLimit=p.kind==='hotel'?35:60*(.7+w.quality*.35+w.reputation*.35),paidReach=advertisingReach(marketing,p.kind==='hotel'?8000:75,reachLimit*(p.kind==='hotel'?1:dim))/(p.kind==='hotel'?1:dim);
+  const demand=(p.kind==='hotel'?10:4)+paidReach,season=p.kind==='hotel'?1+.25*Math.sin((w.day+25)/58):1+.12*Math.sin((w.day+25)/58);
+  return {valuePrice,priceAcceptance:acceptance,paidReach,demand:demand*season*(p.kind==='hotel'?.7+w.reputation*.6:.65+w.reputation*.7)*acceptance*(w.channel?(p.kind==='hotel'?1.28:1.35):p.kind==='hotel'?.88:1)*shock*policy.demand/competition};
+}
 export function enterpriseMetrics(w) {
-  const p=ENTERPRISES[w.businessId],policy=enterprisePolicy(w),dim=dateOf(w.day).dim,season=1+.25*Math.sin((w.day+25)/58),competition=1+w.day/END_DAY*.45,shock=w.shock&&w.day<w.shock.until?w.shock:{cost:1,demand:1};
+  const p=ENTERPRISES[w.businessId],policy=enterprisePolicy(w),dim=dateOf(w.day).dim,shock=w.shock&&w.day<w.shock.until?w.shock:{cost:1,demand:1};
   const serviceWork=w.clients.filter(c=>c.until>w.day).reduce((n,c)=>n+c.work,0), capacity=p.kind==='hotel'||p.kind==='commerce'?Math.min(w.capacity,w.staff*policy.perStaff):Math.min(w.capacity,w.staff*.85)*(.72+w.quality*.4);
-  const freeCapacity=Math.max(0,capacity-serviceWork),fixed=enterpriseFixed(w),defects=clamp(.02+(1-w.quality)*.06+w.wear*.06,.01,.2),priceRatio=w.price/p.price;
-  const demand=p.kind==='hotel'?Math.max(0,(10+w.marketing/8000)*season*(.7+w.reputation*.6)*Math.pow(priceRatio,-1.4)*(w.channel?1.28:.88)*shock.demand*policy.demand/competition):p.kind==='commerce'?Math.max(0,(4+w.marketing/dim/75)*(.65+w.reputation*.7)*Math.pow(priceRatio,-1.2)*(w.channel?1.35:1)*shock.demand*policy.demand/competition):0;
+  const freeCapacity=Math.max(0,capacity-serviceWork),fixed=enterpriseFixed(w),defects=clamp(.02+(1-w.quality)*.06+w.wear*.06,.01,.2);
+  const response=p.kind==='project'?null:consumerDemand(w),demand=response?.demand||0;
   const stockCost=w.stock.qty?w.stock.value/w.stock.qty:p.cost*shock.cost,feeRate=p.kind==='hotel'?(w.channel?.15:.025):(w.channel?.14:.045);
   const variable=p.kind==='hotel'?p.cost*shock.cost*policy.cost+feeRate*w.price:p.kind==='commerce'?stockCost+policy.handling+feeRate*w.price:p.cost*shock.cost;
-  const returnRate=p.kind==='commerce'?clamp(.035+(1-w.quality)*.14+(w.channel?.02:0)+policy.returns,.02,.25):0;
+  const returnRate=p.kind==='commerce'?clamp(.035+(1-w.quality)*.14+(w.channel?.02:0)+policy.returns+Math.max(0,w.price/response.valuePrice-1)*.1,.02,.4):0;
   const sold=p.kind==='hotel'?Math.min(demand,capacity):p.kind==='commerce'?Math.min(demand,capacity,w.stock.qty):0;
   const compensation=p.kind==='hotel'?w.price*Math.max(0,.5-w.quality)*.2:0;
   const contribution=p.kind==='hotel'?w.price-variable-compensation:p.kind==='commerce'?w.price*(1-returnRate)-variable+stockCost*returnRate*.5:null;
+  const adFrom=Math.min(w.marketing,490000),adTo=adFrom+10000,adMarginalReturn=response?(Math.min(capacity,consumerDemand(w,adTo).demand)-Math.min(capacity,consumerDemand(w,adFrom).demand))*dim*contribution/10000:null;
   const depreciation=Math.min(w.co.assets,p.setup/120),interest=Math.round(w.co.debt*.08/12),accountingFixed=fixed+depreciation+interest;
   const reserve=Math.ceil(payable(w)+fixed*enterpriseManagement(w).reserveMonths+Math.round(w.co.debt*.08/12)+Math.ceil(w.co.debt/24)+Math.max(0,profit(w.co.ledger)-w.co.taxLoss)*.2);
   const serviceLoad=capacity?serviceWork/capacity:Infinity;
-  return {fixed,accountingFixed,depreciation,interest,feeRate,compensation,stockCost,capacity,freeCapacity,serviceWork,serviceLoad,demand,sold,defects,returnRate,variable,contribution,monthlyResult:contribution===null?null:sold*contribution*dim-accountingFixed,breakEven:contribution>0?Math.ceil(accountingFixed/contribution):null,reserve,available:Math.max(0,Math.floor(w.co.cash-reserve)),unitCost:p.cost*shock.cost*(p.kind==='hotel'?policy.cost:1),occupancy:p.kind==='hotel'&&w.capacity?sold/w.capacity:0,revpar:p.kind==='hotel'&&w.capacity?sold*w.price/w.capacity:0};
+  return {...response,adFrom,adTo,adMarginalReturn,fixed,accountingFixed,depreciation,interest,feeRate,compensation,stockCost,capacity,freeCapacity,serviceWork,serviceLoad,demand,sold,defects,returnRate,variable,contribution,monthlyResult:contribution===null?null:sold*contribution*dim-accountingFixed,breakEven:contribution>0?Math.ceil(accountingFixed/contribution):null,reserve,available:Math.max(0,Math.floor(w.co.cash-reserve)),unitCost:p.cost*shock.cost*(p.kind==='hotel'?policy.cost:1),occupancy:p.kind==='hotel'&&w.capacity?sold/w.capacity:0,revpar:p.kind==='hotel'&&w.capacity?sold*w.price/w.capacity:0};
 }
 export function enterpriseQuote(w,o,factor=1,terms=o.terms||'standard') {
   const servicePolicy=o.servicePolicy||(o.progress===undefined?w.policy||'standard':'standard');
@@ -68,12 +77,12 @@ export function enterpriseQuote(w,o,factor=1,terms=o.terms||'standard') {
 }
 export function enterprisePlan(w) {
   const p=ENTERPRISES[w.businessId],m=enterpriseMetrics(w),a=enterpriseManagement(w),issues=[];
-  const pending=w.orders.reduce((n,o)=>n+Math.max(0,o.work-o.progress),0),policy=enterprisePolicy(w),targetStaff=p.kind==='hotel'?Math.ceil(w.capacity/policy.perStaff):p.kind==='commerce'?Math.ceil(m.demand/policy.perStaff):Math.ceil((Math.min(w.capacity,pending/14)+m.serviceWork)/.85);
+  const pending=w.orders.reduce((n,o)=>n+Math.max(0,o.work-o.progress),0),policy=enterprisePolicy(w),targetStaff=p.kind==='hotel'?Math.ceil(w.capacity/policy.perStaff):p.kind==='commerce'?Math.ceil(Math.min(w.capacity,m.demand)/policy.perStaff):Math.ceil((Math.min(w.capacity,pending/14)+m.serviceWork)/.85);
   const staff=Math.max(w.staff,Math.min(20,targetStaff)),hiring=(staff-w.staff)*12000,nextFixed=m.fixed+(staff-w.staff)*p.wage;
   const reserve=m.reserve+(nextFixed-m.fixed)*a.reserveMonths,canHire=nextFixed<=a.maxFixed&&hiring<=Math.min(a.remaining,Math.max(0,w.co.cash-reserve));
   if(staff>w.staff&&!canHire)issues.push('人力需求超出授權或現金保留，需調整預算或放慢擴張。');
   if(m.fixed>a.maxFixed)issues.push('固定月費已超過授權；團隊不會自行裁員或刪減老闆的投資。');
-  const days=p.kind==='commerce'?w.targetDays:14,needed=p.kind==='commerce'?Math.ceil(m.demand*days):w.businessId==='equipment'?Math.min(Math.ceil(pending/(1-m.defects)),Math.ceil(m.capacity*days)):0;
+  const days=p.kind==='commerce'?w.targetDays:14,needed=p.kind==='commerce'?Math.ceil(Math.min(m.demand,w.capacity,(canHire?staff:w.staff)*policy.perStaff)*days):w.businessId==='equipment'?Math.min(Math.ceil(pending/(1-m.defects)),Math.ceil(m.capacity*days)):0;
   const gap=Math.max(0,needed-w.stock.qty-w.shipments.reduce((n,x)=>n+x.qty,0)),allowance=Math.max(0,Math.min(a.remaining,Math.max(0,w.co.cash-(canHire?reserve:m.reserve)))-(canHire?hiring:0));
   const qty=w.shipments.length<20?Math.min(gap,Math.floor(allowance/m.unitCost)):0;
   if(gap>qty)issues.push('備貨受月預算或周轉金限制；缺貨與交期仍由公司承擔。');
@@ -81,6 +90,7 @@ export function enterprisePlan(w) {
   if(m.serviceLoad>.8)issues.push('既有維運客戶已占用多數產能；新案可能擠壓服務承諾。');
   if(w.businessId==='hotel'&&w.quality<.45)issues.push('房務品質偏低，房價與入住率可能承壓，請評估維護投資。');
   if(w.businessId==='ecommerce'&&m.returnRate>.12)issues.push('退貨率偏高，請改善商品品質與客戶期待；GMV 不代表淨收入。');
+  if(p.kind!=='project'&&w.marketing>0&&m.adMarginalReturn<1)issues.push('一萬元行銷加碼的估計新增貢獻低於廣告費；客群、定價或履約容量正在限制效益。');
   if(!m.available)issues.push('保留營運及還款現金後沒有餘裕，需老闆處理資金。');
   return {metrics:m,staff:canHire?staff:w.staff,hiring:canHire?hiring:0,qty,cost:Math.round(qty*m.unitCost),issues};
 }
@@ -155,6 +165,7 @@ export function stepEnterprise(w) {
   const dep=Math.min(w.co.assets,p.setup/120/dim);w.co.assets-=dep;expense(w,'depreciation',dep);
   w.quality=clamp(w.quality+w.qualityBudget/20000000-.0005-(m.serviceLoad>1?.001:0),.1,.95);w.wear=clamp(w.wear+(produced?.0015:.0003),0,1);
   if(p.kind!=='project')w.reputation=clamp(w.reputation+(w.quality>.65?.0005:-.0003)-(demand>sales?Math.min(.002,(demand-sales)*.0001):0),.1,.95);
+  if(p.kind==='commerce'&&sales)w.reputation=clamp(w.reputation-Math.max(0,returns/sales-.1)*.008,.1,.95);
   w.stats.sales+=sales;w.today={sales,demand,returns,produced,utilization:m.capacity?(p.kind==='project'?produced+m.serviceWork:sales)/m.capacity:0,revenue,missed:Math.max(0,demand-sales),marketingCost:w.marketing/dim,refunds:returns*w.price,delivered:w.stats.delivered-startDelivered,serviceLoad:m.serviceLoad,serviceRevenue:serviceReceipts,receipts:w.co.ledger.receipts-startReceipts,operatingResult:profit(w.co.ledger)-startProfit};
   w.offers=w.offers.filter(o=>o.expires>w.day+1);finishDay(w,w.today);
   w.today.cashChange=w.co.cash-startCash;w.co.daily.at(-1).cashChange=w.today.cashChange;

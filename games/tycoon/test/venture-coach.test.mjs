@@ -143,7 +143,7 @@ test('內容網站收入由瀏覽、廣告密度與 CPM 形成，過密也提高
   const w = createTechnology('content'), base = ventureCoach(w);
   assert.equal(base.metrics.paidCac,null); assert.equal(base.metrics.revenue,base.metrics.visits*w.price*MODELS.content.adCPM/1000);
   w.price = 5; const ads = ventureCoach(w);
-  assert.ok(ads.metrics.revenue > base.metrics.revenue); assert.ok(ads.metrics.activeChurn > base.metrics.activeChurn);
+  assert.ok(ads.metrics.revenue < base.metrics.revenue); assert.ok(ads.metrics.visits < base.metrics.visits); assert.ok(ads.metrics.activeChurn > base.metrics.activeChurn);
   assert.equal(d(ads,'churn').value,ads.metrics.activeChurn*100); assert.match(ads.decision.tradeoff,/技術債|流失|固定/);
 });
 

@@ -52,7 +52,7 @@ export function technologyDraft(w, data = {}) {
   const priceBounds = w.modelId === 'saas' ? [99, 1999] : w.modelId === 'marketplace' ? [2, 20] : [1, 6];
   if (!bounded(settings.engineers, 1, 12) || !bounded(settings.support, 0, 20) || !bounded(settings.marketing, 0, 500000) || !bounded(settings.price, ...priceBounds) || !bounded(settings.cloudTier, 0, 5) || !['growth', 'balanced', 'stability'].includes(settings.focus) || !known(STRATEGIES[w.modelId], settings.strategy)) return invalid('請完整填寫有效價格、獲客、人力、容量、工程重心與客群。');
   const hiring = (Math.max(0, settings.engineers - w.engineers) + Math.max(0, settings.support - w.support)) * 12000;
-  return comparison(w, settings, hiring, technologySnapshot(w), technologySnapshot(hiringWorld(w, settings, hiring)), ['固定目前活躍與付費人數，按目前品質、技術債、策略與已完成能力估計完整月份；沒有預先加入新客或扣掉流失。', '月成本包含人事、行政、基本主機、獲客、工具、使用量、支付、交易服務、估計退款與利息；月淨結果為稅前，招募與新研發費另計。', '主機與價格可改變目前規模的收入；工程重心影響後續維運與研發，不會立刻產生新收入。這是草稿比較，不是未來營收保證。']);
+  return comparison(w, settings, hiring, technologySnapshot(w), technologySnapshot(hiringWorld(w, settings, hiring)), ['固定目前活躍與付費人數，按目前品質、技術債、策略與已完成能力估計完整月份；沒有預先加入新客或扣掉流失。', '月成本包含人事、行政、基本主機、獲客、工具、使用量、支付、交易服務、估計退款與利息；月淨結果為稅前，招募與新研發費另計。', '加碼獲客的新增客源會趨緩；高收費可能提高眼前收入，卻減少後續成交或付費。密集廣告會直接減少瀏覽。工程投資影響後續品質，這不是未來營收保證。']);
 }
 export function manufacturingProcurement(w) {
   if (w?.mode !== 'manufacturing' || !known(PRODUCTS, w.productId) || !known(SUPPLIERS, w.supplier)) return { ok: false, canPurchase: false, reason: '製造營運狀態不符。' };
