@@ -1,3 +1,5 @@
+import { technologyEffects } from './technology.js';
+
 // 階段目標來自營運紀錄，不發放收入或限制經營選項。
 const step = (id, title, detail, value, target, unit) => ({ id, title, detail, value: Math.max(0, value), target, unit, progress: Math.max(0, Math.min(1, value / target)), complete: value >= target });
 export function ventureJourney(w, metrics = {}) {
@@ -11,10 +13,11 @@ export function ventureJourney(w, metrics = {}) {
       step('profit', '做出獲利月結', '含薪資、折舊、利息與稅的已結月淨利為正。', profitable, 1, '個月'),
     ];
   } else {
-    const target = { saas: 100, marketplace: 1500, content: 5000 }[w.modelId];
+    const densityTarget = Number.isFinite(metrics.liquidityTarget) && metrics.liquidityTarget > 0 ? metrics.liquidityTarget : technologyEffects(w).liquidityTarget;
+    const target = { saas: 100, marketplace: densityTarget, content: 5000 }[w.modelId];
     steps = [
       step('release', '完成第一次迭代', '選擇專案與發布方式，等待工程團隊完成。', w.stats.projectsCompleted ?? w.capabilities?.length ?? 0, 1, '次'),
-      step('customers', w.modelId === 'saas' ? '找到付費客群' : w.modelId === 'marketplace' ? '形成交易密度' : '建立回訪流量', w.modelId === 'saas' ? '累積一百位付費客戶，再檢查轉換與流失。' : w.modelId === 'marketplace' ? '達到一千五百位活躍者；仍須看實際成交。' : '達到五千位活躍者；廣告收入與體驗一起看。', w.modelId === 'saas' ? w.paying : w.users, target, '人'),
+      step('customers', w.modelId === 'saas' ? '找到付費客群' : w.modelId === 'marketplace' ? '形成交易密度' : '建立活躍客群', w.modelId === 'saas' ? '累積一百位付費客戶，再檢查轉換與流失。' : w.modelId === 'marketplace' ? `依目前客群與產品能力，達到 ${target.toLocaleString('zh-TW')} 位活躍者形成完整規模媒合；仍須看實際成交。` : '達到五千位活躍者；廣告收入與體驗一起看。', w.modelId === 'saas' ? w.paying : w.users, target, '人'),
       step('service', '接住成長', '完成十四個營運日；近十四日可用率至少 98%。', w.co.daily.length >= 14 && w.co.daily.slice(-14).every(d => d.uptime >= .98) && (metrics.supportLoad ?? 0) <= 1 ? 1 : 0, 1, '達標'),
       step('profit', '做出獲利月結', '含獲客、團隊、雲端與稅的已結月淨利為正。', profitable, 1, '個月'),
     ];

@@ -46,7 +46,7 @@ function manufacturingCoach(w) {
   const bottleneck = w.status !== 'playing' ? issue('closed', '已結案，回看經營取捨', 'info', '以下數字是結案當時的狀態與估計，不能再調整。')
     : w.event ? issue('event', '供應鏈事件待決', 'warning', '時間已暫停；先比較處理費與未來 45 天新採購的價差。')
     : f.available < 0 || procurementCost > Math.max(0, f.available) ? issue('cash', '先解決周轉金', 'danger', `現金扣未付費用、利息與還本後 ${money(f.available)}；已接訂單的估計缺料還需 ${money(procurementCost)}，應收 ${money(receivables)} 尚未入帳。`)
-    : risky ? issue('delivery', '目前排程有交期風險', 'danger', `${risky.client} 應在 ${dayText(risky.due)} 交貨；${risky.finishDay === null ? '目前供料計畫無法在合約取消期限前估到完成' : `沿目前順位與合約驗收估計 ${dayText(risky.finishDay)} 完成`}。`)
+    : risky ? issue('delivery', '目前排程有交期風險', 'danger', `${risky.client} 應在 ${dayText(risky.due)} 交貨；${risky.finishDay === null ? '沿目前供料與最多 90 日排程，尚未估到完成' : `沿目前順位與合約驗收估計 ${dayText(risky.finishDay)} 完成`}。`)
     : materialGap > 0 || remaining > 0 && w.stock.qty === 0 && !w.shipments.some(s => s.arrival <= w.day) ? issue('materials', '訂單在等原料', 'warning', `良品還差 ${count(remaining)} 件；在庫 ${count(w.stock.qty)} 份、在途 ${count(inTransitQty)} 份，按目前瑕疵率仍缺約 ${count(materialGap)} 份。`)
     : !w.orders.length ? issue('orders', '先補訂單，再談擴線', 'warning', `目前沒有待製訂單，每月仍需 ${money(m.fixed)} 固定現金支出；空產線不會自動帶來收入。`)
     : w.workers < w.lines * 3 ? issue('staffing', '人力限制了現有設備', 'warning', `${w.lines} 條線需 ${w.lines * 3} 人才能發揮容量，目前 ${w.workers} 人；先比較增員成本與已有訂單，不要直接再買設備。`)

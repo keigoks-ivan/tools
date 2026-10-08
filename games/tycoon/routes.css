@@ -325,3 +325,96 @@ body[data-view=technology] .venture-shell button.venture-choice.on:before{color:
 @media(max-width:780px){.venture-shell button.journey-step{flex-direction:column;align-items:flex-start;gap:6px;padding:9px 8px}.journey-number{width:22px;height:24px;font-size:10px}.journey-step b,.journey-step strong{font-size:10px}.journey-step small,.journey-step p{font-size:8px}.journey-progress{margin-top:6px}.venture-decision-grid{gap:8px}.venture-choice b,.venture-choice strong{font-size:12px}.venture-board-heading h2{font-size:18px}.venture-debrief>summary{font-size:10px;padding:12px 14px}}
 @media(max-width:600px){.venture-shell{padding:10px}.venture-top{border-radius:9px}.venture-title>span{letter-spacing:.09em}.venture-capital .venture-tile{padding:8px 10px}.venture-capital .venture-tile strong{font-size:20px}.venture-capital .venture-tile>span{font-size:9px}.venture-capital .venture-tile small{font-size:8px}.venture-scene-label{padding:9px 12px}.venture-scene-label h2{font-size:16px;margin:4px 0 0}.venture-scene-label p{display:none}.scene-map-status{top:auto;bottom:9px;left:9px;padding:4px 6px;font-size:8px}.venture-process,.venture-funnel{padding:10px}.venture-funnel{gap:11px}.venture-funnel strong{font-size:19px}.venture-decision-grid{grid-template-columns:1fr}.venture-shell button.venture-choice{min-height:0;padding:12px}.venture-choice>span,.venture-choice>small{font-size:9px}.venture-journey{padding:11px;margin-bottom:12px}.venture-shell button.journey-step{padding:8px 6px}.journey-step small,.journey-step p{margin-top:2px}.venture-debrief>.business-coach,.venture-debrief>.decision-archive{margin:9px}}
 @media(prefers-reduced-motion:reduce){.venture-shell .scene-hotspot{transition:none}}
+
+/* 指揮台先呈現操作順序，再進入場景與決策試算。 */
+.venture-command{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:22px;margin:0 0 12px;padding:14px 20px;border:1px solid #527278;border-top:3px solid var(--route-accent);border-bottom:4px solid #081c25;border-radius:12px;background:linear-gradient(120deg,#294750,#192f3b);color:#eff6e8;box-shadow:0 8px 20px #07182230}
+body[data-view=manufacturing] .venture-command{background:linear-gradient(120deg,#35464b,#202f39);border-color:#72786b;border-top-color:var(--route-accent)}
+.venture-command>div{min-width:0}
+.venture-command>div>span{display:block;font-size:9px;font-weight:750;line-height:1.4;letter-spacing:.12em;color:#b6cfc4}
+.venture-command h2{margin:5px 0 6px;font-size:21px;font-weight:850;line-height:1.4;letter-spacing:.01em;color:#fff6df}
+.venture-command p{max-width:730px;margin:0;color:#c8dcd3;font-size:11px;line-height:1.8}
+.command-variables{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;min-width:312px}
+.command-variable{display:flex;flex-direction:column;justify-content:center;gap:4px;min-width:0;padding:10px 12px;border:1px solid #759b9547;border-bottom:3px solid #0d2731;border-radius:8px;background:#102e3980}
+.command-variable>span{font-size:10px;font-weight:650;line-height:1.4;color:#b8d0c5}
+.command-variable strong{font-size:17px;font-weight:800;line-height:1.45;font-variant-numeric:tabular-nums;color:#fff0c7;overflow-wrap:anywhere}
+.command-variable small{font-size:9px;line-height:1.6;color:#a8c4b7}
+.venture-workflow{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:0 0 16px}
+.venture-shell button.workflow-step{position:relative;display:flex;align-items:flex-start;gap:10px;min-width:0;min-height:105px;padding:12px 13px;border:1px solid #bdcfc7;border-bottom:4px solid #8ea9a0;border-radius:9px;background:#f7faf1;text-align:left;box-shadow:inset 0 1px 0 #fff}
+.venture-shell button.workflow-step:after{content:'→';position:absolute;right:-11px;top:23px;z-index:1;display:grid;place-items:center;width:18px;height:23px;border-radius:5px;background:var(--route-hud);color:#b1c7b8;font-size:13px;font-weight:800}
+.venture-shell button.workflow-step:last-child:after{display:none}
+.workflow-step-index{display:grid;place-items:center;flex:none;width:33px;height:35px;border:1px solid #b6cbbd;border-bottom:3px solid #91b09b;border-radius:7px;background:#e2ede0;color:#497863;font-size:14px;font-weight:850}
+.workflow-step-content{display:flex;flex-direction:column;gap:6px;flex:1;min-width:0}
+.workflow-step-content b{font-size:13px;font-weight:800;line-height:1.5;color:#244c49}
+.workflow-step-content strong{font-size:17px;font-weight:850;line-height:1.4;color:#275a51;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.workflow-step-content small{font-size:10px;font-weight:450;line-height:1.7;color:#59736b;overflow-wrap:anywhere}
+.venture-shell button.workflow-step:hover:not(:disabled){background:#edf7e8;border-color:#79a99c}
+.venture-shell button.workflow-step.is-recommended{border:2px solid var(--route-accent);border-bottom:4px solid #a18c53;background:var(--route-accent-soft)}
+.workflow-step.is-recommended .workflow-step-index{background:#fae0a0;border-color:#d1b261;color:#76562e}
+body[data-view=technology] .venture-shell button.workflow-step.is-recommended{border-bottom-color:#3f827a}
+body[data-view=technology] .workflow-step.is-recommended .workflow-step-index{background:#bde8dc;border-color:#68b39f;color:#296a5d}
+.venture-shell button.workflow-step.is-alert{border-color:#cf9d77;border-bottom-color:#af7654;background:#fff0dc}
+.workflow-step.is-alert .workflow-step-index{border-color:#c99671;border-bottom-color:#ac7351;background:#f5d0ad;color:#8b4d2d}
+.workflow-step.is-alert .workflow-step-content strong{color:#9a4d31}
+.venture-shell .venture-objective{padding:13px 16px;border-color:#d3c18d;border-left-color:var(--route-accent);border-bottom-color:#ad9970;background:#fff5db}
+.venture-objective>div>span{display:block;line-height:1.4}
+.venture-objective h2{line-height:1.4}
+body[data-view=technology] .venture-shell .venture-objective{background:#eaf8ed;border-color:#b2d0bd;border-left-color:var(--route-accent);border-bottom-color:#87ac97}
+.venture-shell .venture-objective>button{width:auto;min-width:152px;min-height:42px;margin:0;background:var(--route-accent);border-color:#8b6c3d;border-bottom-color:#8c6937;color:#263b39;font-size:12px;font-weight:800}
+body[data-view=technology] .venture-shell .venture-objective>button{border-color:#24867d;border-bottom-color:#145e60;color:#fff}
+.venture-shell .venture-objective>button:hover:not(:disabled){background:var(--route-accent);filter:brightness(1.07)}
+.venture-workspace .venture-scene-map{height:clamp(230px,24vw,340px);aspect-ratio:auto}
+.venture-workspace .venture-scene-map>.route-scene-image{object-position:50% 52%}
+.venture-brief-note{margin:0 0 16px;padding:12px 15px;border:1px solid #647e7d;border-left:3px solid var(--route-accent);border-radius:7px;background:#213b43;color:#d1e3d7;font-size:11px;line-height:1.8}
+.venture-brief-note b,.venture-brief-note strong{color:#f0e0b0;font-weight:750}
+.venture-brief-note p{margin:0}
+.venture-draft{margin:15px 0;padding:13px 12px;border:1px solid #a4c8b5;border-top:3px solid #4e987b;border-radius:8px;background:#edf6e9;color:#315847}
+.draft-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 10px;font-size:12px;font-weight:800;color:#2d5e4d}
+.draft-heading h3,.draft-heading b,.draft-heading strong{margin:0;font-size:12px;font-weight:800;color:#2d5e4d}
+.draft-heading>span,.draft-heading>small{font-size:9px;color:#587c67;font-weight:600}
+.venture-draft>p{font-size:10px;line-height:1.75;margin:7px 0;color:#5a7966}
+.venture-draft dl{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:9px 10px;margin:11px 0 0;font-size:10px}
+.venture-draft dt{color:#557560;line-height:1.6}
+.venture-draft dd{line-height:1.6;color:#305d47;overflow-wrap:anywhere}
+.draft-value{display:flex;flex-direction:column;align-items:flex-end;gap:2px;font-variant-numeric:tabular-nums;font-weight:750}
+.draft-value>span{color:#6c8573;font-weight:450}
+.draft-value strong,.draft-value b{color:#2e7255;font-weight:850}
+.draft-value>b:before{content:'→ ';color:#7a9b85;font-weight:600}
+.venture-draft>small{display:block;margin-top:8px;font-size:9px;line-height:1.75;color:#55745e}
+.draft-assumptions{margin:10px 0 0;border:1px dashed #b4ccb4;border-radius:5px;background:#f5f9ee}
+.draft-assumptions>summary{padding:9px 10px;font-size:10px;line-height:1.6;color:#55775f;cursor:pointer}
+.draft-assumptions>summary:hover{background:#e8f2df;color:#345b46}
+.draft-assumptions>summary:focus-visible{outline:2px solid var(--route-accent);outline-offset:2px}
+.draft-assumptions[open]>summary{font-weight:750;color:#3c694f}
+.draft-assumptions>p{margin:0;padding:0 10px 10px;font-size:10px;line-height:1.85;color:#5b7865}
+.venture-draft .draft-warnings{margin:11px 0 0;padding:9px 10px;border:1px solid #dfb77c;border-left:3px solid #c9954c;border-radius:5px;background:#fff1d7;color:#8b5932;font-size:10px;line-height:1.75}
+.draft-warnings p{margin:0}
+.draft-warnings ul{margin:0;padding-left:15px}
+.draft-warnings li+li{margin-top:5px}
+.venture-supply-brief{position:relative;margin:0 0 16px;padding:18px 20px;border:1px solid #d3be8b;border-top:4px solid #c29a4e;border-bottom:3px solid #a69771;border-radius:10px;background:#fff7e2;color:#3e5d48}
+.venture-supply-brief h2{margin:0 0 10px;font-size:16px;font-weight:800;color:#415b40}
+.venture-supply-brief h3{margin:0 0 7px;font-size:13px;font-weight:800}
+.venture-supply-brief>b{display:block;font-size:12px;font-weight:800;line-height:1.7;color:#5d683e}
+.venture-supply-brief p{margin:8px 0;font-size:11px;line-height:1.8;color:#736c4b}
+.venture-supply-brief>small{display:block;margin-top:9px;font-size:9px;line-height:1.7;color:#7c7653}
+.venture-shell .venture-supply-brief>button{display:block;width:100%;min-width:0;min-height:39px;background:#f0db9f;border-color:#c4a961;border-bottom-color:#9a8247;color:#60512d;font-size:10px;line-height:1.6;white-space:normal}
+.venture-supply-brief dl{gap:9px 13px;margin:12px 0;font-size:11px}
+.venture-supply-brief dt{color:#7c7655}
+.venture-supply-brief dd{color:#4c6144;font-weight:800;overflow-wrap:anywhere}
+.supply-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:12px}
+.venture-shell .supply-actions button{min-height:39px;background:#f0db9f;border-color:#c4a961;border-bottom-color:#9a8247;color:#60512d;font-weight:800}
+.venture-shell .supply-actions button+button{background:#fffaf0;color:#627453;border-color:#c8ccaa;border-bottom-color:#a0ad83}
+.venture-shell .supply-actions button.venture-primary{flex:1;width:auto;min-width:180px;background:var(--route-accent);border-color:#8d773f;border-bottom-color:#8b6c37;color:#263b39;min-height:42px}
+body[data-view=technology] .venture-shell .supply-actions button.venture-primary{border-color:#2b8b80;border-bottom-color:#176368;color:#fff}
+.venture-cash-stages{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:15px 0}
+.venture-cash-stages>article,.venture-cash-stages>div{position:relative;display:flex;flex-direction:column;gap:7px;min-width:0;padding:15px 16px;border:1px solid #c7cfb5;border-top:3px solid #b5b58b;border-bottom:3px solid #a3b194;border-radius:8px;background:#f4f7e9}
+.venture-cash-stages>article:after,.venture-cash-stages>div:after{content:'→';position:absolute;right:-11px;top:17px;z-index:1;display:grid;place-items:center;width:18px;height:23px;border-radius:5px;background:var(--route-surface);color:#9ca874;font-size:13px;font-weight:850}
+.venture-cash-stages>:last-child:after{display:none}
+.venture-cash-stages>:last-child{border-top-color:#559980;background:#edf7e9}
+.venture-cash-stages span{font-size:10px;font-weight:750;line-height:1.6;color:#76805b}
+.venture-cash-stages strong,.venture-cash-stages h3{margin:0;font-size:22px;font-weight:850;line-height:1.4;color:#3d644b;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.venture-cash-stages small,.venture-cash-stages p{margin:0;font-size:10px;line-height:1.75;color:#65765b}
+
+@media(max-width:1150px){.venture-command{gap:18px;padding:18px 20px}.venture-command h2{font-size:21px}.command-variables{min-width:282px}.command-variable{padding:11px 12px}.command-variable strong{font-size:17px}.venture-shell button.workflow-step{gap:9px;padding:14px 12px;min-height:136px}.workflow-step-index{width:28px;height:31px;font-size:12px}.workflow-step-content b{font-size:12px}.workflow-step-content strong{font-size:15px}}
+@media(max-width:900px){.venture-command{grid-template-columns:1fr;gap:15px}.command-variables{min-width:0}.command-variable{padding:10px 13px}.venture-workflow{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.venture-shell button.workflow-step{min-height:112px;gap:12px}.venture-shell button.workflow-step:after{display:none}.workflow-step-index{width:31px;height:34px}.workflow-step-content strong{font-size:17px}}
+@media(max-width:780px){.venture-workspace .venture-scene-map{height:auto;aspect-ratio:16/9}.venture-workspace .venture-scene-map>.route-scene-image{object-position:center}.venture-command{padding:16px 17px;border-radius:10px}.venture-command h2{font-size:21px;margin:6px 0}.venture-command p{font-size:11px}.venture-cash-stages{gap:10px}.venture-cash-stages>article,.venture-cash-stages>div{padding:13px 12px}.venture-cash-stages strong{font-size:20px}.venture-draft{padding:14px}.venture-draft dl{font-size:11px}.draft-warnings{font-size:11px}.venture-supply-brief{padding:16px}}
+@media(max-width:600px){.venture-command{gap:12px;padding:14px;margin-bottom:10px}.venture-command h2{font-size:19px}.venture-command>div>span{font-size:8px;letter-spacing:.09em}.venture-command p{font-size:11px;line-height:1.75}.command-variables{gap:8px}.command-variable{padding:10px;gap:4px}.command-variable>span{font-size:9px}.command-variable strong{font-size:16px}.command-variable small{font-size:9px}.venture-workflow{gap:8px;margin-bottom:12px}.venture-shell button.workflow-step{min-height:125px;gap:8px;padding:12px 10px;flex-direction:column}.workflow-step-index{width:27px;height:29px;font-size:12px}.workflow-step-content{gap:5px}.workflow-step-content b{font-size:12px}.workflow-step-content strong{font-size:16px}.workflow-step-content small{font-size:10px;line-height:1.6}.venture-shell .venture-objective{padding:12px;gap:9px}.venture-shell .venture-objective>button{width:100%;min-height:40px;min-width:0;margin:4px 0 0;font-size:11px}.venture-shell .scene-hotspot:nth-of-type(1){transform:translate(-35%,-50%)}.venture-shell .scene-hotspot:nth-of-type(3){transform:translate(-65%,-50%)}.venture-brief-note{font-size:10px;padding:10px 12px;margin-bottom:12px}.venture-supply-brief{padding:14px}.supply-actions{gap:7px}.venture-shell .supply-actions button{flex:1;min-width:120px;font-size:10px}.venture-cash-stages{grid-template-columns:1fr;gap:8px}.venture-cash-stages>article,.venture-cash-stages>div{padding:12px 14px;gap:4px}.venture-cash-stages>article:after,.venture-cash-stages>div:after{display:none}.venture-cash-stages strong{font-size:21px}}

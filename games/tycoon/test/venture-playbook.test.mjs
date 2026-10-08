@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createManufacturing } from '../manufacturing.js';
-import { createTechnology } from '../technology.js';
+import { createTechnology, technologyMetrics } from '../technology.js';
 import { ventureJourney } from '../venture-playbook.js';
 
 test('階段目標只觀察營運，不改存檔、現金或亂數', () => {
@@ -40,4 +40,21 @@ test('舊存檔缺少研發次數仍可觀察新進度，客服超载不算達�
   w.stats.projectsCompleted=1; w.co.daily=Array.from({length:14},()=>({uptime:.999}));
   assert.equal(ventureJourney(w,{supportLoad:2}).steps[0].complete,true);
   assert.equal(ventureJourney(w,{supportLoad:2}).steps[2].complete,false);
+});
+test('平台階段密度跟著客群與已完成媒合能力，省略指標仍使用實際引擎門檻', () => {
+  const w=createTechnology('marketplace'); w.strategy='niche'; w.capabilities=['matching']; w.users=900;
+  const before=JSON.stringify(w), metrics=technologyMetrics(w,{includeBreakEven:false});
+  for (const supplied of [{},metrics]) {
+    const stage=ventureJourney(w,supplied).steps[1];
+    assert.equal(stage.target,840); assert.equal(stage.complete,true); assert.match(stage.detail,/840/);
+  }
+  assert.equal(JSON.stringify(w),before);
+  w.strategy='mass'; w.capabilities=[]; w.users=1500;
+  const stage=ventureJourney(w).steps[1];
+  assert.equal(stage.target,5000); assert.equal(stage.complete,false); assert.equal(stage.progress,.3);
+});
+test('內容客群階段不把活躍人數誤稱為已觀察回訪', () => {
+  const w=createTechnology('content'); w.users=5000;
+  const stage=ventureJourney(w).steps[1];
+  assert.equal(stage.title,'建立活躍客群'); assert.equal(stage.complete,true); assert.equal(w.co.daily.length,0);
 });
