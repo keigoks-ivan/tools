@@ -1,3 +1,4 @@
+import { industrySettings, industryDrivers } from './industry-view.js';
 import { ENTERPRISES, enterpriseMetrics, enterprisePlan, enterpriseQuote, enterpriseLeads, enterprisePolicy, enterpriseSettingsValid } from './enterprise.js';
 import { dateOf } from './venture-core.js';
 import { decisionSnapshot } from './decision-learning.js';
@@ -61,7 +62,7 @@ export function enterpriseCoach(w) {
 
 export function enterpriseLearningSnapshot(w) {
   const a=w.manager,settings=`價格 ${w.price}；行銷 ${w.marketing}／月；品質投資 ${w.qualityBudget}／月；通路 ${w.channel}；備貨 ${w.targetDays} 日；定位 ${w.policy||'standard'}；${w.staff} 人／容量 ${w.capacity}；${w.orders.length} 案／${w.offers.length} 詢價／未得標 ${w.stats.lostBids}；${w.clients.length} 維運／${w.shipments.length} 批在途；擴張 ${w.expansion?.ready??'無'}；負債 ${w.co.debt}；事件 ${w.event?.title||'無'}；衝擊 ${w.shock?.until??'無'}；代管 ${a.enabled}／預算 ${a.budget}／月費上限 ${a.maxFixed}／保留 ${a.reserveMonths} 月`;
-  return decisionSnapshot(enterpriseCoach(w),w.co.cash,settings);
+  const coach=enterpriseCoach(w);if(w.industry)coach.drivers.push(...industryDrivers(w));return decisionSnapshot(coach,w.co.cash,(w.industry?industrySettings(w)+'；':'')+settings);
 }
 
 export function enterpriseDraft(w,data) {

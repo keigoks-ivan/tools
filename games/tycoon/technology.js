@@ -1,4 +1,5 @@
 import { clamp, random, company, dateOf, note, expense, receive, finishDay, commonValid, payable, END_DAY } from './venture-core.js';
+import { industryEffects, industryDay, industryAction, industryValid } from './industry-sim.js';
 import { managementValid } from './manager-policy.js';
 import { advertisingReach, priceAcceptance } from './market-response.js';
 
@@ -57,17 +58,17 @@ export function technologyProjectPlan(w, id, release = w.project?.id === id ? w.
   return { ...p, id, text, days, fee: Math.round(p.fee * r.fee), debt, capacityGain, release, releaseName: r.name, estimatedDays: Math.max(0, Math.ceil((days - progress) / (w.engineers * (1 - maintenanceOf(w) * .7)))), completed: !!p.modelId && has(w, id) };
 }
 export function technologyEffects(w) {
-  const s = strategyOf(w);
+  const s = strategyOf(w), fx = industryEffects(w);
   return {
     strategy: w.strategy || 'general', strategyName: s.name, market: Math.round(MODELS[w.modelId].market * (s.market || 1)),
-    liquidityTarget: (s.liquidity || 2500) * (has(w, 'matching') ? .7 : 1), transactionMultiplier: (s.trades || 1) * (has(w, 'matching') ? 1.06 : 1),
-    conversionMultiplier: (s.conversion || 1) * (has(w, 'activation') ? 1.18 : 1), oldFreeConversionMultiplier: has(w, 'activation') ? 1.3 : 1,
-    organicMultiplier: (s.organic || 1) * (has(w, 'evergreen') ? 1.35 : 1), visitMultiplier: (s.visits || 1) * (has(w, 'evergreen') ? 1.1 : 1),
+    liquidityTarget: (s.liquidity || 2500) * (has(w, 'matching') ? .7 : 1), transactionMultiplier: fx.trades * (s.trades || 1) * (has(w, 'matching') ? 1.06 : 1),
+    conversionMultiplier: fx.conversion * (s.conversion || 1) * (has(w, 'activation') ? 1.18 : 1), oldFreeConversionMultiplier: fx.conversion * (has(w, 'activation') ? 1.3 : 1),
+    organicMultiplier: fx.organic * (s.organic || 1) * (has(w, 'evergreen') ? 1.35 : 1), visitMultiplier: fx.visits * (s.visits || 1) * (has(w, 'evergreen') ? 1.1 : 1),
     adCPM: MODELS[w.modelId].adCPM * (s.adCPM || 1) * (has(w, 'analytics') ? 1.2 : 1),
-    userCost: (w.modelId === 'saas' ? has(w, 'automation') ? 6 : 8 : .35) + (s.userCost || 0) + (has(w, 'analytics') ? .15 : 0),
-    transactionCost: has(w, 'trust') ? 5 : 4, toolingCost: has(w, 'automation') ? 3500 : 0,
+    userCost: (w.modelId === 'saas' ? has(w, 'automation') ? 6 : 8 : .35) + (s.userCost || 0) + (has(w, 'analytics') ? .15 : 0) + fx.userCost,
+    transactionCost: has(w, 'trust') ? 5 : 4, toolingCost: (has(w, 'automation') ? 3500 : 0) + fx.monthly,
     supportCapacity: MODELS[w.modelId].supportCapacity * (s.support || 1) * (has(w, 'automation') ? 1.35 : 1),
-    churnMultiplier: (s.churn || 1) * (has(w, 'trust') ? .88 : 1) * (has(w, 'analytics') ? .94 : 1), churnAdd: s.churnAdd || 0, cacMultiplier: s.cac || 1,
+    churnMultiplier: fx.churn * (s.churn || 1) * (has(w, 'trust') ? .88 : 1) * (has(w, 'analytics') ? .94 : 1), churnAdd: s.churnAdd || 0, cacMultiplier: s.cac || 1,
   };
 }
 export function createTechnology(modelId = 'saas', seed = 20261007) {
@@ -166,6 +167,7 @@ export function technologyMetrics(w, { includeBreakEven = true } = {}) {
 export function technologyAction(w, action, data = {}) {
   const fail = error => ({ ok: false, error });
   if (w.status !== 'playing') return fail('已結案，不能更改經營。');
+  if (action === 'industry') return industryAction(w,data,{playing:w.status==='playing',cash:w.co.cash,pay:n=>expense(w,'research',n,true),note:t=>note(w,t)});
   if (action === 'settings') {
     const bounds = w.modelId === 'saas' ? [99, 1999] : w.modelId === 'marketplace' ? [2, 20] : [1, 6];
     if (!Number.isInteger(data.engineers) || data.engineers < 1 || data.engineers > 12 || !Number.isInteger(data.support) || data.support < 0 || data.support > 20 || !Number.isInteger(data.marketing) || data.marketing < 0 || data.marketing > 500000 || !Number.isInteger(data.price) || data.price < bounds[0] || data.price > bounds[1] || !Number.isInteger(data.cloudTier) || data.cloudTier < 0 || data.cloudTier > 5 || !['growth', 'balanced', 'stability'].includes(data.focus) || data.strategy !== undefined && (typeof data.strategy !== 'string' || !Object.hasOwn(STRATEGIES[w.modelId], data.strategy))) return fail('設定超出範圍。');
@@ -186,6 +188,7 @@ export function technologyAction(w, action, data = {}) {
     if ((w.strategy || 'general') === data.id) return { ok: true, message: '目前已採用這項客群策略。' };
     w.strategy = data.id; note(w, `改採${strategyOf(w).name}：${strategyOf(w).text} 既有使用者保留，新的獲客受策略市場上限影響。`);
   } else if (action === 'event') {
+    if(w.event?.kind==='industry'){const r=industryAction(w,{kind:'event',choice:data.choice},{playing:w.status==='playing',cash:w.co.cash,pay:n=>expense(w,'repair',n,true),note:t=>note(w,t)});if(r.ok)w.event=null;return r;}
     if (!w.event || !['protect', 'accept'].includes(data.choice)) return fail('沒有待決事件。');
     if (data.choice === 'protect') {
       if (w.co.cash < 20000) return fail('遷移與稽核需要 $20,000。');
@@ -240,13 +243,15 @@ export function stepTechnology(w, beforeOperations = null) {
   }
   w.stats.acquired += acquired; w.stats.converted += converted; w.stats.churned += lostFree + lostPaid; w.stats.transactions += transactions; w.stats.gmv += gmv; w.stats.visits += visits;
   w.today = { acquired, converted, churned: lostFree + lostPaid, uptime: m.uptime, load: m.load, revenue, transactions, visits, acquisitionCost: m.acquisitionCost, completedProject };
-  finishDay(w, { ...w.today, users: w.users, paying: w.paying });
-  if (w.status === 'playing' && w.day % 90 === 0) { w.event = { title: '流量與雲端供應商調整', text: '未來 30 天廣告成本上漲，服務穩定性也受影響。花 $20,000 切換供應商與稽核，或保留現金接受較高獲客成本及較低可用率。' }; note(w, '網路營運決策待處理，時間已暫停。'); }
+  const industryEvent = industryDay(w,w.day,{volume:w.modelId==='saas'?converted:w.modelId==='marketplace'?transactions:visits,revenue,acquired,users:w.users,churn:lostFree+lostPaid,utilization:m.load,price:w.price,paidFraction:acquired?Math.min(1,m.paidAcquired/dim/acquired):0},t=>note(w,t));
+  if(industryEvent)w.event=industryEvent;
+  finishDay(w, { ...w.today, users: w.users, paying: w.paying, ...(w.industry ? { industry: { ...w.industry.resources } } : {}) });
+  if (w.status === 'playing' && !w.event && w.day % 90 === 0) { w.event = { title: '流量與雲端供應商調整', text: '未來 30 天廣告成本上漲，服務穩定性也受影響。花 $20,000 切換供應商與稽核，或保留現金接受較高獲客成本及較低可用率。' }; note(w, '網路營運決策待處理，時間已暫停。'); }
   return true;
 }
 export function technologyValid(w) {
   const nn = n => typeof n === 'number' && Number.isFinite(n) && n >= 0;
-  if (!managementValid(w)) return false;
+  if (!managementValid(w) || !industryValid(w?.industry,w?.modelId)) return false;
   if (!commonValid(w) || w.mode !== 'technology' || typeof w.modelId !== 'string' || !Object.hasOwn(MODELS, w.modelId) || !Number.isInteger(w.users) || w.users < 0 || w.users > MODELS[w.modelId].market || !Number.isInteger(w.paying) || w.paying < 0 || w.paying > w.users || !['quality', 'retention', 'techDebt', 'reputation'].every(k => nn(w[k]) && w[k] <= 1) || !Number.isInteger(w.engineers) || w.engineers < 1 || w.engineers > 12 || !Number.isInteger(w.support) || w.support < 0 || w.support > 20 || !Number.isInteger(w.marketing) || w.marketing < 0 || w.marketing > 500000 || !Number.isInteger(w.cloudTier) || w.cloudTier < 0 || w.cloudTier > 5 || !nn(w.capacityBonus) || w.capacityBonus < 1 || w.capacityBonus > 3 || !['growth', 'balanced', 'stability'].includes(w.focus)) return false;
   if (w.strategy !== undefined && (typeof w.strategy !== 'string' || !Object.hasOwn(STRATEGIES[w.modelId], w.strategy)) || w.capabilities !== undefined && (!Array.isArray(w.capabilities) || w.capabilities.length > 2 || new Set(w.capabilities).size !== w.capabilities.length || w.capabilities.some(id => typeof id !== 'string' || !Object.hasOwn(PROJECTS, id) || PROJECTS[id].modelId !== w.modelId))) return false;
   const bounds = w.modelId === 'saas' ? [99, 1999] : w.modelId === 'marketplace' ? [2, 20] : [1, 6];

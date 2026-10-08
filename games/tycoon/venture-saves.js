@@ -2,7 +2,8 @@ import { manufacturingValid } from './manufacturing.js';
 import { technologyValid } from './technology.js';
 import { learningValid } from './decision-learning.js';
 import { enterpriseValid } from './enterprise.js';
-export const routeKey = (mode, business = '') => `tycoon.${mode}${mode === 'enterprise' && business ? '.' + business : ''}.save.v1`;
+export const routeKey = (mode, business = '') => `tycoon.${mode}${business ? '.' + business : ''}.save.v1`;
+const businessOf = w => w.businessId || w.productId || w.modelId;
 export const MAX_BYTES = 2 * 1024 * 1024;
 const validMode = mode => ['manufacturing', 'technology', 'enterprise'].includes(mode);
 export function encodeVenture(world, now = new Date()) { return JSON.stringify({ format: 'tycoon-venture', version: 1, mode: world.mode, savedAt: now.toISOString(), world }); }
@@ -21,18 +22,23 @@ export function decodeVenture(raw, mode) {
 export function loadVenture(storage, mode, business = '') {
   let raw;
   try {
-    const read = raw => { const parsed=decodeVenture(raw,mode); if(mode==='enterprise' && business && parsed.world.businessId!==business) throw new Error('存檔業態不符。'); return parsed; };
+    const read = raw => { const parsed=decodeVenture(raw,mode); if(business && businessOf(parsed.world)!==business) throw new Error('存檔業態不符。'); return parsed; };
     raw = storage.getItem(routeKey(mode,business));
     if (raw) { try { return { ok: true, ...read(raw) }; } catch { /* 保留原檔，再試備份 */ } }
     const backup = storage.getItem(routeKey(mode,business) + '.backup');
     if (backup) { try { return { ok: true, recovered: true, ...read(backup) }; } catch { /* 保留損壞資料 */ } }
+    // 只在專屬欄位完全不存在時複製同業態舊路線進度；舊檔與損壞專屬檔都不覆蓋。
+    if (!raw && !backup && business && mode !== 'enterprise') {
+      const legacy = loadVenture(storage,mode);
+      if (legacy.ok && businessOf(legacy.world) === business) return { ...legacy, migrated: true };
+    }
     return { ok: false, found: !!(raw || backup), raw: raw || backup, error: raw || backup ? '此路線的存檔無法讀取，原檔已保留。請匯入備份或下載原檔後重開。' : null };
   } catch { return { ok: false, found: true, error: '瀏覽器禁止讀取存檔；不會覆蓋既有資料。' }; }
 }
-export function storeVenture(storage, world) {
+export function storeVenture(storage, world, business = '') {
   try {
     const raw = encodeVenture(world); decodeVenture(raw, world.mode);
-    const key = routeKey(world.mode,world.businessId), old = storage.getItem(key);
+    const key = routeKey(world.mode,business || world.businessId || (world.industry ? businessOf(world) : '')), old = storage.getItem(key);
     if (old) { try { decodeVenture(old, world.mode); storage.setItem(key + '.backup', old); } catch { /* 不用損壞主檔取代有效備份 */ } }
     storage.setItem(key, raw); return { ok: true, savedAt: JSON.parse(raw).savedAt };
   } catch { return { ok: false, error: '尚未存檔：本機空間不足或存檔檢查未通過。請下載備份。' }; }

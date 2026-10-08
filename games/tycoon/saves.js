@@ -1,13 +1,33 @@
 // 本機存檔與 JSON 備份共用格式；相容原本 { w, meta } 的存檔。
 import { deserialize, serialize, BUSINESSES } from './sim.js';
+import { zlibSync, unzlibSync, strToU8, strFromU8 } from '../../game/lib/addons/libs/fflate.module.js';
 import { stockLimit } from './businesses.js';
 import { MARKET_VERSION, districtOf } from './market.js';
 import { strategyValid, managerValid } from './strategy.js';
+import { industryValid } from './industry-sim.js';
 import { learningValid } from './decision-learning.js';
 export const SAVE_KEY = 'tycoon.save.v1';
 export const MANUAL_KEY = 'tycoon.save.manual.v1';
 export const BACKUP_KEY = SAVE_KEY + '.backup';
 export const MAX_SAVE_BYTES = 20 * 1024 * 1024;
+
+// 新城市的九個獨立存檔各自保留完整資料與上一份備份；下載仍使用原 JSON。
+function packLocal(raw) {
+  if (JSON.parse(raw).format === 'tycoon-local') return raw;
+  const bytes = strToU8(raw);
+  if (bytes.length > MAX_SAVE_BYTES) throw new Error('本機存檔過大');
+  const compressed = zlibSync(bytes, { level: 1 });
+  return JSON.stringify({ format: 'tycoon-local', version: 1, bytes: bytes.length, data: btoa(strFromU8(compressed, true)) });
+}
+function unpackLocal(raw) {
+  const o = JSON.parse(raw);
+  if (o?.format !== 'tycoon-local') return raw;
+  if (o.version !== 1 || !Number.isInteger(o.bytes) || o.bytes < 1 || o.bytes > MAX_SAVE_BYTES || typeof o.data !== 'string') throw new Error('本機存檔格式不符');
+  // 固定輸出上限，損壞壓縮資料不能無限配置記憶體。
+  const bytes = unzlibSync(strToU8(atob(o.data), true), { out: new Uint8Array(o.bytes) });
+  if (bytes.length !== o.bytes) throw new Error('本機存檔不完整');
+  return strFromU8(bytes);
+}
 
 function validate(w) {
   const bad = () => { throw new Error('存檔內容不完整或已損壞'); };
@@ -43,9 +63,10 @@ function validate(w) {
     for (const l of co.loans) if (!finite(l.balance) || l.balance < 0 || !finite(l.payment)) bad();
     if (co.expansion && (!co.expansion.projects || !['factory', 'warehouse', 'lab'].every((k) => ['none', 'building', 'ready'].includes(co.expansion.facilities?.[k]?.status)) || !array(co.expansion.facilities.warehouse.orders))) bad();
   }
+  if (w.campaignBusiness != null && (!Object.hasOwn(BUSINESSES,w.campaignBusiness) || !finite(w.campaignInitialCash) || w.campaignInitialCash <= 0 || w.shops.some(s=>s.owner==='player' && s.businessId!==w.campaignBusiness))) bad();
   for (const s of w.shops) {
     const b = BUSINESSES[s.businessId || 'tea'];
-    if (!b || !lots.has(s.lotId) || !w.companies[s.company] || !['open', 'renovating', 'closed'].includes(s.status)) bad();
+    if (!industryValid(s.industry,s.businessId||'tea') || !b || !lots.has(s.lotId) || !w.companies[s.company] || !['open', 'renovating', 'closed'].includes(s.status)) bad();
     if (!array(s.staff, 3) || !s.staff.every((n) => Number.isInteger(n) && n >= 1 && n <= 6) || !array(s.F, w.bld.length) || !array(s.buyB, w.bld.length) || !array(s.days) || !array(s.history) || !array(s.hourEMA, 12) || !array(s.today?.hourly, 12) || !s.mtd || !s.promo || !s.shortage) bad();
     if (!finite(s.inv) || s.inv < 0 || !finite(s.rent) || !Object.keys(b.items).every((k) => finite(s.prices?.[k]) && s.prices[k] > 0)) bad();
     if (!['basic', 'market', 'high'].includes(s.wageLevel) || !['平價', '標準', '講究'].includes(s.grade) || !finite(s.openAtT) || !finite(s.Bw) || !finite(s.Bd) || !finite(s.waitMin)) bad();
@@ -63,7 +84,7 @@ function validate(w) {
     if (s.stock?.mix && (!array(s.stock.mix, Object.keys(b.items).length) || s.stock.mix.some((n) => !finite(n) || n < 0) || Math.abs(s.stock.mix.reduce((a, n) => a + n, 0) - 1) > 1e-8)) bad();
     if (s.stock?.weights && !strategyValid(s, { profile: 'balanced', weights: s.stock.weights })) bad();
     if (s.stock?.grade != null && !['平價', '標準', '講究'].includes(s.stock.grade)) bad();
-    for (const k of ['strategyDayUnits', 'managerDayUnits']) if (s.mtd[k] != null && (!finite(s.mtd[k]) || s.mtd[k] < 0)) bad();
+    for (const k of ['strategyDayUnits', 'managerDayUnits', 'industryDayUnits', 'industryPaid']) if (s.mtd[k] != null && (!finite(s.mtd[k]) || s.mtd[k] < 0)) bad();
     if (s.status !== 'closed' && w.lots.find(l => l.id === s.lotId).shopId !== s.id) bad();
     if (s.operations) {
       if (!Number.isInteger(s.operations.seats) || s.operations.seats < 1 || !Number.isInteger(s.operations.stations) || s.operations.stations < 1) bad();
@@ -79,7 +100,7 @@ function validate(w) {
 
 export function decodeSave(raw) {
   if (typeof raw !== 'string' || raw.length > MAX_SAVE_BYTES) throw new Error('存檔檔案過大或格式不符');
-  const o = JSON.parse(raw);
+  const o = JSON.parse(unpackLocal(raw));
   if (!o || !o.w || o.format != null && (o.format !== 'tycoon' || o.version !== 1)) throw new Error('這不是支援的創業之城存檔');
   const original = typeof o.w === 'string' ? JSON.parse(o.w) : o.w;
   validate(original);
@@ -99,8 +120,8 @@ export function loadLocal(storage, key = SAVE_KEY, fallback = true) {
   let raw;
   try { raw = storage.getItem(key); } catch { return { ok: false, found: false, error: '瀏覽器不允許讀取本機存檔' }; }
   if (raw) { try { return { ok: true, found: true, ...decodeSave(raw) }; } catch { /* 再試上一份可讀備份 */ } }
-  if (fallback && key === SAVE_KEY) {
-    const backup = loadLocal(storage, BACKUP_KEY, false);
+  if (fallback) {
+    const backup = loadLocal(storage, key === SAVE_KEY ? BACKUP_KEY : key+'.backup', false);
     if (backup.ok) return { ...backup, recovered: true };
   }
   return { ok: false, found: !!raw, raw, error: raw ? '存檔無法讀取，原始資料已保留。可匯入備份或另存新進度。' : null };
@@ -108,13 +129,14 @@ export function loadLocal(storage, key = SAVE_KEY, fallback = true) {
 export function storeLocal(storage, raw, key = SAVE_KEY) {
   let backedUp = false;
   try {
-    decodeSave(raw);
-    if (key === SAVE_KEY) {
-      const old = loadLocal(storage, SAVE_KEY, false);
-      if (old.ok) { try { storage.setItem(BACKUP_KEY, old.raw); backedUp = true; } catch { /* 備份空間不足仍嘗試儲存目前進度 */ } }
+    const decoded = decodeSave(raw), compact = /^tycoon\.stores\.[^.]+\.save\.v1(?:\.manual)?$/.test(key);
+    const local = compact ? packLocal(raw) : raw;
+    {
+      const old = loadLocal(storage, key, false);
+      if (old.ok) { try { storage.setItem(key === SAVE_KEY ? BACKUP_KEY : key+'.backup', compact ? packLocal(old.raw) : old.raw); backedUp = true; } catch { /* 備份空間不足仍嘗試儲存目前進度 */ } }
     }
-    storage.setItem(key, raw);
-    return { ok: true, savedAt: JSON.parse(raw).savedAt, backedUp };
+    storage.setItem(key, local);
+    return { ok: true, savedAt: decoded.savedAt, backedUp };
   } catch {
     return { ok: false, error: '未存檔：本機空間不足或瀏覽器禁止儲存。請下載備份。' };
   }

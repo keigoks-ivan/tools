@@ -1,6 +1,7 @@
 // 只投影既有決策的現金收付，不前進遊戲、抽事件或預知對手行動。
 import { businessOf, freshBusiness, retailBusiness, assetMonthly } from './businesses.js';
 import { strategyEffects, managerOf, MANAGERS } from './strategy.js';
+import { industryEffects } from './industry-sim.js';
 
 export function projectCash({ world, plans, dateOf, computePnL, newMTD, monthlyFixed, V, EXP, endDay }, stress = false) {
   const co = structuredClone(world.companies.player), shops = plans.map((p) => ({ ...p, shop: structuredClone(p.shop), alive: true }));
@@ -26,7 +27,7 @@ export function projectCash({ world, plans, dateOf, computePnL, newMTD, monthlyF
   };
   const settle = (p, di, payDate = di) => {
     const s = p.shop, m = s.mtd, pnl = computePnL(world, s, di.dim);
-    const tax = pnl.bizTax, other = pnl.waste - (m.prepaidWaste || 0) + pnl.wage + pnl.rent + pnl.util + pnl.maintenance + pnl.pos + pnl.cardFee + pnl.strategyCost + pnl.managerCost;
+    const tax = pnl.bizTax, other = (pnl.industryCost || 0) - (m.industryPaid || 0) + pnl.waste - (m.prepaidWaste || 0) + pnl.wage + pnl.rent + pnl.util + pnl.maintenance + pnl.pos + pnl.cardFee + pnl.strategyCost + pnl.managerCost;
     pay(other, 'operatingPayments', payDate); pay(tax, 'tax', payDate); co.yearProfit += pnl.profit; s.mtd = newMTD();
   };
   const finishMonth = (di, payDate = di) => {
@@ -90,7 +91,7 @@ export function projectCash({ world, plans, dateOf, computePnL, newMTD, monthlyF
       if (!open) continue;
       if (!begun || s.status !== 'open') {
         m.openDays++; m.tradingDays++; m.maintenanceMilli = (m.maintenanceMilli || 0) + assetMonthly(s) * 1000;
-        m.strategyDayUnits = (m.strategyDayUnits || 0) + strategyEffects(s).monthly; m.managerDayUnits = (m.managerDayUnits || 0) + MANAGERS[managerOf(s).tier].monthly;
+        m.strategyDayUnits = (m.strategyDayUnits || 0) + strategyEffects(s).monthly; m.managerDayUnits = (m.managerDayUnits || 0) + MANAGERS[managerOf(s).tier].monthly; m.industryDayUnits = (m.industryDayUnits || 0) + industryEffects(s).monthly;
       }
       const manager = managerOf(s), reserve = manager.tier !== 'none' && manager.purchasing ? manager.reserveMonths * (shops.filter((x) => x.alive).reduce((a, x) => a + monthlyFixed(world, x.shop), 0) + Math.max(0, shops.filter((x) => x.alive && (x.shop.status === 'open' || t >= x.shop.openAtT)).length - 1) * EXP.chain.managementPerShop + co.adWan * 10000 + co.loans.reduce((a, l) => a + l.payment, 0) + Object.keys(EXP.facilities).reduce((a, k) => a + (facilityReady(k, t) ? EXP.facilities[k][exp.facilities[k].active ? 'monthly' : 'standby'] : 0), 0)) : 0;
       const ramp = p.samples >= 7 ? 1 : Math.min(1, 0.6 + Math.max(0, (t - s.openAtT) / 24) / 150);
@@ -116,6 +117,7 @@ export function projectCash({ world, plans, dateOf, computePnL, newMTD, monthlyF
       const revenue = walk * p.price * promo * markdown, gmv = del * p.plat * markdown;
       const commission = gmv * (V.delivery.commission + (co.platformBoost ? V.delivery.boostCommissionAdd : 0)) / 100;
       co.cash += revenue + gmv - commission; row.receipts += revenue + gmv - commission;
+      const riskFee=Math.round((revenue+gmv)*industryEffects(s).risk);if(riskFee){pay(riskFee,'operatingPayments',di);m.industryPaid=(m.industryPaid||0)+riskFee;}
       let cogs, waste;
       if (freshBusiness(s.businessId)) {
         cogs = preparedQty ? preparedValue * qty / preparedQty : 0; waste = preparedValue - cogs;

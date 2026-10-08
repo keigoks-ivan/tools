@@ -9,7 +9,10 @@ import { listParams } from './params.js';
 import * as S from './sim.js';
 import { strategyEffects } from './strategy.js';
 import { caseReportHtml, caseReportDocument } from './case-report.js';
-import { SAVE_KEY, MANUAL_KEY, BACKUP_KEY, MAX_SAVE_BYTES, encodeSave, decodeSave, loadLocal, storeLocal } from './saves.js';
+import { SAVE_KEY as LEGACY_SAVE_KEY, MANUAL_KEY as LEGACY_MANUAL_KEY, BACKUP_KEY as LEGACY_BACKUP_KEY, MAX_SAVE_BYTES, encodeSave, decodeSave as decodeCitySave, loadLocal as loadCityLocal, storeLocal as storeCityLocal } from './saves.js';
+import { industryKey } from './industry-catalog.js';
+import { enableIndustry } from './industry-sim.js';
+import { industryBoardHtml, industrySettings, industryDrivers } from './industry-view.js';
 import { storeCoach } from './store-coach.js';
 import { decisionSnapshot, recordDecision, decisionReviews, completeDecisions } from './decision-learning.js';
 import { coachHtml, decisionReviewsHtml } from './learning-view.js';
@@ -23,6 +26,11 @@ if (q.get('view') === 'sandbox') {
 
 async function main() {
   const V = S.V;
+  const campaignBusiness = Object.hasOwn(S.BUSINESSES,q.get('business')) ? q.get('business') : null;
+  const SAVE_KEY = campaignBusiness ? industryKey('stores',campaignBusiness) : LEGACY_SAVE_KEY, MANUAL_KEY=campaignBusiness?SAVE_KEY+'.manual':LEGACY_MANUAL_KEY, BACKUP_KEY=campaignBusiness?SAVE_KEY+'.backup':LEGACY_BACKUP_KEY;
+  function decodeSave(raw){const slot=decodeCitySave(raw);if((slot.world.campaignBusiness||null)!==campaignBusiness)throw new Error('存檔屬於其他業態或舊版城市，請先開啟相應劇本。');return slot;}
+  function loadLocal(storage,key=SAVE_KEY,fallback=true){const slot=loadCityLocal(storage,key,fallback);if(slot.ok&&(slot.world.campaignBusiness||null)!==campaignBusiness)return {ok:false,found:true,raw:slot.raw,error:'存檔業態不符，原始資料保留。'};return slot;}
+  const storeLocal=(storage,raw,key=SAVE_KEY)=>storeCityLocal(storage,raw,key);
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -42,8 +50,8 @@ async function main() {
   const WAGE = { basic: '基本', market: '市場', high: '高' };
   const WEEK = ['日', '一', '二', '三', '四', '五', '六'];
   const TUT_KEY = 'tycoon.tutorial.v1';
-  const COMPANY = '日常生活品牌';
-  let selectedBusiness = 'tea';
+  const COMPANY = campaignBusiness ? S.businessOf(campaignBusiness).name+'品牌' : '日常生活品牌';
+  let selectedBusiness = campaignBusiness || 'tea';
   const bizOf = (s) => S.businessOf(s.businessId);
   const unitOf = (s) => bizOf(s).unit;
   const PLAYER_COLOR = '#1f9d5c', RIVAL_COLOR = '#c2413a';
@@ -117,7 +125,7 @@ async function main() {
   <select id="map-district" aria-label="前往城市區域"><option value="all">選區域</option><option value="old">雲港舊城</option><option value="east">東城新區</option><option value="south">南城生活與商辦區</option><option value="tech">科技商辦生活圈</option><option value="campus">大學與新住宅區</option><option value="river">河岸家庭生活圈</option></select>
 </div>
 <div id="map-hint"><span class="desktop-hint">左鍵拖曳旋轉・右鍵或 Shift＋拖曳平移・滾輪縮放</span><span class="touch-hint">單指旋轉・雙指平移、旋轉與縮放</span></div>
-<aside id="my-shops" class="panel" aria-label="我的店列表"><div class="shop-list-head"><h3><b id="shop-list-title">我的店</b> <span id="my-shop-count" class="num">0</span></h3><button class="xbtn" data-shop-list-toggle aria-label="收合店面列表" aria-controls="my-shop-rows" aria-expanded="true">−</button></div><div id="shop-list-tabs" class="mini-tabs"><button data-shop-list-mode="my" class="on">我的店</button><button data-shop-list-mode="vacant">出租店面</button></div><div id="vacant-filters" hidden><label>業態<select id="vacant-business">${Object.entries(S.BUSINESSES).map(([id, b]) => `<option value="${id}">${b.name}</option>`).join('')}</select></label><label>區域<select id="vacant-district"><option value="all">全城</option>${V.market.districts.map((d) => `<option value="${d.id}">${d.name}</option>`).join('')}</select></label><label>排序<select id="vacant-sort"><option value="rent">月租低到高</option><option value="cost">開店資金低到高</option></select></label></div><div id="my-shop-rows"></div></aside>
+<aside id="my-shops" class="panel" aria-label="我的店列表"><div class="shop-list-head"><h3><b id="shop-list-title">我的店</b> <span id="my-shop-count" class="num">0</span></h3><button class="xbtn" data-shop-list-toggle aria-label="收合店面列表" aria-controls="my-shop-rows" aria-expanded="true">−</button></div><div id="shop-list-tabs" class="mini-tabs"><button data-shop-list-mode="my" class="on">我的店</button><button data-shop-list-mode="vacant">出租店面</button></div><div id="vacant-filters" hidden><label>業態<select id="vacant-business">${Object.entries(S.BUSINESSES).filter(([id])=>!campaignBusiness||id===campaignBusiness).map(([id, b]) => `<option value="${id}">${b.name}</option>`).join('')}</select></label><label>區域<select id="vacant-district"><option value="all">全城</option>${V.market.districts.map((d) => `<option value="${d.id}">${d.name}</option>`).join('')}</select></label><label>排序<select id="vacant-sort"><option value="rent">月租低到高</option><option value="cost">開店資金低到高</option></select></label></div><div id="my-shop-rows"></div></aside>
 <aside id="side" class="panel" hidden></aside>
 <aside id="event" class="panel" hidden></aside>
 <div id="tut" class="panel" hidden></div>
@@ -175,13 +183,14 @@ async function main() {
   const toastQ = [];
 
   function newWorld(seed) {
-    const w = S.createWorld({ mapData: map, distances, seed, playerName: COMPANY, multiBusiness: true });
+    const w = S.createWorld({ mapData: map, distances, seed, playerName: COMPANY, multiBusiness: true, campaignBusiness });
     return w;
   }
   function tryLoad() {
     const loaded = loadLocal(storage);
     if (!loaded.ok) { saveBlocked = loaded.found; saveError = loaded.error; return null; }
     S.expandMap(loaded.world, map, distances); S.syncBusinesses(loaded.world);
+
     meta = loaded.meta; savedAt = loaded.savedAt; savedT = loaded.world.t;
     loadNotice = loaded.recovered ? '已從上一份可讀備份恢復進度。' : '已讀取上次進度，按播放就能繼續。';
     return loaded.world;
@@ -291,7 +300,7 @@ async function main() {
     const vacant = e.target.closest('[data-vacant-lot]');
     if (vacant) { selectLot(vacant.dataset.vacantLot); return; }
     const row = e.target.closest('[data-my-shop]'), s = row && getShops('player').find((s) => s.id === row.dataset.myShop);
-    if (s) { shopTab = 'op'; selectLot(s.lotId, 'op'); }
+    if (s) { shopTab = campaignBusiness ? 'industry' : 'op'; selectLot(s.lotId, shopTab); }
   });
   $('#vacant-filters').addEventListener('change', (e) => {
     if (e.target.id === 'vacant-business') selectedBusiness = e.target.value;
@@ -374,7 +383,7 @@ async function main() {
   <dt>500 公尺內營業店</dt><dd class="num">${info.nearbyShops} 家</dd>
   ${world.market ? `<dt>生活圈／所得指數</dt><dd>${esc(info.district)}／${info.income.toFixed(2)}</dd><dt>${biz.name}商圈範圍</dt><dd>${info.radius} 公尺・${int(info.catchmentPopulation)} 有效客源</dd><dt>商圈共同日消費預算</dt><dd>${money(info.catchmentBudgetDaily)}</dd>` : ''}
 </dl>
-<div class="sec"><h4>選擇創業業態</h4><div class="business-grid">${Object.entries(S.BUSINESSES).map(([id, b]) => `<button class="opt ${selectedBusiness === id ? 'on' : ''}" data-act="business:${id}"><span class="business-mark" style="color:${b.color}">${businessIcon(id)}</span><b>${b.name}${b.minPing ? '・大額投資' : ''}</b><small>${wan(S.lotOpenCost(lot, id))} 起（含押金）</small></button>`).join('')}</div><p><b>${biz.model}</b>｜${biz.customer}</p><p class="note">${biz.tradeoff}</p>${biz.minPing ? `<p class="note">地圖標示租賃入口，此業態承租樓層合計 ${leased.ping} 坪；租金與押金按完整面積收取。開店後可付費升級設備，供給增加也會增加維護費。</p>` : ''}<p class="note">所有業態開局可選，只受資金限制。價格、成本、需求與產能是遊戲設計假設；可混合經營，也可專注同業態連鎖。</p></div>
+<div class="sec"><h4>選擇創業業態</h4><div class="business-grid">${Object.entries(S.BUSINESSES).filter(([id])=>!campaignBusiness||id===campaignBusiness).map(([id, b]) => `<button class="opt ${selectedBusiness === id ? 'on' : ''}" data-act="business:${id}"><span class="business-mark" style="color:${b.color}">${businessIcon(id)}</span><b>${b.name}${b.minPing ? '・大額投資' : ''}</b><small>${wan(S.lotOpenCost(lot, id))} 起（含押金）</small></button>`).join('')}</div><p><b>${biz.model}</b>｜${biz.customer}</p><p class="note">${biz.tradeoff}</p>${biz.minPing ? `<p class="note">地圖標示租賃入口，此業態承租樓層合計 ${leased.ping} 坪；租金與押金按完整面積收取。開店後可付費升級設備，供給增加也會增加維護費。</p>` : ''}<p class="note">${campaignBusiness?'此劇本專注 '+biz.name+' 與連鎖，其他業態各自保留進度。':'所有業態開局可選，只受資金限制，可混合或專注連鎖。'}價格、成本、需求與產能是遊戲設計假設。</p></div>
 ${expansionEstimateHtml(!ownerBusy)}
 <div class="kv-h">開店要花</div>
 <dl class="kv">
@@ -450,7 +459,7 @@ ${s.shortage ? '<p class="note warn">有人離職，最忙的班少一人。</p>
     const s = world.shops.find(s => s.id === id);
     const names = { seats: '座位', stations: '工作站', mode: '內外帶', service: '服務', focus: '訓練', prep: '備貨', markdown: '清貨折扣', stockTarget: '庫存目標', autoStock: '自動補貨', takeaway: '快速／外帶', balanced: '標準', dinein: '內用體驗', quick: '快速', standard: '標準', premium: '精緻', open: '自由', coached: '指導', classes: '小班' };
     const settings = `售價 ${Object.entries(s.prices).map(([k,v])=>k+' '+v).join('/')}；班表 ${s.staff.join('/')}；老闆 ${s.ownerWorks ? '顧店' : '不顧店'}；薪資 ${WAGE[s.wageLevel]}；原料 ${s.grade}；外送 ${s.delivery ? '開' : '關'}／加價 ${s.markupPct}%；定位 ${S.PROFILES[s.strategy?.profile || 'balanced'].name}；主推 ${Object.entries(s.strategy?.weights || {}).map(([k,v])=>k+' '+v).join('/')}；營運 ${Object.entries(s.operations).map(([k,v])=>names[k]+' '+(typeof v === 'boolean' ? v ? '開' : '關' : names[v] || v)).join('/')}；促銷 ${s.promo.kind || '無'}／${s.promo.daysLeft} 天；設備 ${s.assetLevel || 0}；店長 ${S.MANAGERS[s.manager?.tier || 'none'].name}／目標 ${s.manager?.goal === 'service' ? '服務' : '獲利'}／排班 ${s.manager?.staffing ? '開' : '關'}／採購 ${s.manager?.purchasing ? '開' : '關'}／保留 ${s.manager?.reserveMonths || 0} 月`;
-    return decisionSnapshot(shopCoach(id), world.companies.player.cash, settings);
+    const coach=shopCoach(id);coach.drivers.push(...industryDrivers(s));return decisionSnapshot(coach, world.companies.player.cash, industrySettings(s)+'；'+settings);
   }
   function rememberShopDecision(id, title, before) {
     const s = world.shops.find(s => s.id === id), day = Math.floor(world.t / 24);
@@ -557,8 +566,8 @@ ${fee ? `<p class="note">現在退租另付違約金 ${money(fee)}，以下回�
     if (!s) return '';
     const st = s.status === 'renovating' ? '<span class="zone s-reno">裝修中</span>' : '<span class="zone s-open">營業中</span>';
     const lot = world.lots.find((l) => l.id === s.lotId);
-    const tabs = [['today', '今天'], ['op', '經營'], ['menu', '產品'], ['staff', '排班'], ...(S.getLeaseInfo(world, s.id, { includeAnalysis: false }) ? [['lease', '租約']] : []), ['set', '設定']];
-    const body = { today: todayHtml, op: operationsHtml, menu: menuHtml, staff: staffHtml, lease: leaseHtml, set: settingHtml }[shopTab](s);
+    const tabs = [['industry','劇本'],['today', '今天'], ['op', '經營'], ['menu', '產品'], ['staff', '排班'], ...(S.getLeaseInfo(world, s.id, { includeAnalysis: false }) ? [['lease', '租約']] : []), ['set', '設定']];
+    const body = { industry: s=>industryBoardHtml(world.shops.find(x=>x.id===s.id),{shopId:s.id,disabled:world.status!=='playing'}), today: todayHtml, op: operationsHtml, menu: menuHtml, staff: staffHtml, lease: leaseHtml, set: settingHtml }[shopTab](s);
     return `${head(s.name, `${st}<span class="zone">${bizOf(s).name}</span>${zoneHtml(lot.zone)}${starHtml(s.star)}<span class="num" style="font-size:12px;margin-left:4px">${s.star.toFixed(1)}（${int(s.reviews)}）</span>`)}
 <div class="mini-tabs">${tabs.map(([k, n]) => `<button class="${shopTab === k ? 'on' : ''}" data-act="tab:${k}">${n}</button>`).join('')}</div>
 <div id="sd-body">${body}</div>`;
@@ -684,7 +693,7 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
     else if (act === 'rent') {
       const name = ($('#shop-name') || {}).value || '半糖日常';
       const r = S.openShop(world, selLot, { name: name.trim().slice(0, 10) || '半糖日常', color: S.businessOf(selectedBusiness).color, businessId: selectedBusiness, ownerWorks: !!$('#open-owner')?.checked });
-      if (res(r)) { toast(`租下了，簽約當天起算租金，${S.businessOf(selectedBusiness).renovationDays} 天後開張。`); syncShops(); labelDirty = hudDirty = true; shopListMode = 'my'; shopTab = 'today'; openPanel('shop', selLot); updateTut(); save(); }
+      if (res(r)) { const opened=world.shops.find(s=>s.lotId===selLot&&s.owner==='player'&&s.status!=='closed');enableIndustry(opened);S._internals.recalcShop(world,opened);toast(`租下了，簽約當天起算租金，${S.businessOf(selectedBusiness).renovationDays} 天後開張。`); syncShops(); labelDirty = hudDirty = true; shopListMode = 'my'; shopTab = campaignBusiness ? 'industry' : 'today'; openPanel('shop', selLot); updateTut(); save(); }
     } else if (act === 'tab') { shopTab = a1; renderSide(); }
     else if (act === 'staff' && sh) { const st = [...sh.staff]; st[+a1] += +a2; if (res(S.setStaffing(world, sh.id, st))) renderSide(); }
     else if (act === 'ownerWork' && sh) { if (res(S.setOwnerWorks(world, sh.id, !sh.ownerWorks))) { renderSide(); save(); } }
@@ -978,7 +987,7 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
   const tilesHtml = (tiles) => tiles.map((t) => `<div class="tile"><label>${t.label}${t.sub ? `<span class="mg">${t.sub}</span>` : ''}</label><div class="v num ${t.tone || ''}">${t.value}${t.stars ? `<span class="stars"><span class="bg">${icon.star.repeat(5)}</span><span class="fg" style="width:${(t.stars / 5) * 100}%">${icon.star.repeat(5)}</span></span>` : ''}</div>
     <div class="row">${t.d ? `<div class="d num ${t.d.up ? 'up' : 'down'}">${t.d.up ? '▲' : '▼'} ${t.d.text.replace(/^[+−]/, '')}<span>${t.cmp}</span></div>` : `<div class="d" style="color:var(--muted);font-weight:400">${t.empty || (t.spark || t.stars ? '' : '月結後才有')}</div>`}${t.spark ? spark(t.spark, t.tone === 'down' ? '#e66767' : '#4fd8a0') : ''}</div></div>`).join('');
 
-  const COST_ROWS = [['cogs', '原料／商品／耗材'], ['pack', '包材'], ['waste', '原料／商品報廢'], ['commission', '平台佣金'], ['wage', '人事（含勞健保、勞退）'], ['rent', '店租（含裝修期間）'], ['util', '水電'], ['maintenance', '設備維護'], ['pos', 'POS 與雜支'], ['cardFee', '支付手續費'], ['bizTax', '營業稅'], ['strategyCost', '定位與主推商品營運費'], ['managerCost', '店長委任費'], ['adCost', '社群廣告'], ['extraExpense', '招募交接、合作與事件支出'], ['chainCost', '連鎖管理費'], ['facilityCost', '後勤設施固定費'], ['researchExpense', '研發專案費'], ['stockWriteOff', '中央庫存損失'], ['loanInterest', '貸款利息'], ['incomeTax', '營所稅（年結入帳）']];
+  const COST_ROWS = [['industryCost','業態制度、改善與風險支出'],['cogs', '原料／商品／耗材'], ['pack', '包材'], ['waste', '原料／商品報廢'], ['commission', '平台佣金'], ['wage', '人事（含勞健保、勞退）'], ['rent', '店租（含裝修期間）'], ['util', '水電'], ['maintenance', '設備維護'], ['pos', 'POS 與雜支'], ['cardFee', '支付手續費'], ['bizTax', '營業稅'], ['strategyCost', '定位與主推商品營運費'], ['managerCost', '店長委任費'], ['adCost', '社群廣告'], ['extraExpense', '招募交接、合作與事件支出'], ['chainCost', '連鎖管理費'], ['facilityCost', '後勤設施固定費'], ['researchExpense', '研發專案費'], ['stockWriteOff', '中央庫存損失'], ['loanInterest', '貸款利息'], ['incomeTax', '營所稅（年結入帳）']];
   function financeHtml(rep) {
     const selected = rep.financials.find((r) => r.ym === reportMonth) || rep.current;
     const periods = [selected, ...rep.financials.slice().reverse().filter((r) => r.ym !== selected.ym).slice(0, 2)];
@@ -1090,7 +1099,7 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
     } else body = `<button class="gbtn" data-act="downloadCase">下載${world.status === 'playing' ? '目前整局' : '結案'}分析報告</button>${caseReportHtml(S.getFinalReport(world))}${decisionSummaryHtml()}`;
     el.innerHTML = `<div class="rp-head"><h2>經營報表</h2><span class="sub num">${c.year} 年 ${c.month} 月 ${c.day} 日・${esc(world.companies.player.name)}</span>
       <div class="tabs">${tabs.map(([k, n]) => `<button data-rt="${k}" class="${reportTab === k ? 'on' : ''}">${n}</button>`).join('')}</div>
-      <button class="xbtn" data-act="mclose" aria-label="關閉">${icon.close}</button></div><div class="rp-body">${reportTab === 'case' ? '' : reportScopeHtml(scope, selected)}${body}</div>`;
+      <button class="xbtn" data-act="mclose" aria-label="關閉">${icon.close}</button></div><div class="rp-body">${reportTab === 'case' ? '' : reportScopeHtml(scope, selected)}${body}${reportShop&&world.shops.find(s=>s.id===reportShop)?.industry?industryBoardHtml(world.shops.find(s=>s.id===reportShop),{report:true}):''}</div>`;
     const c1 = $('#c1'), c2 = $('#c2');
     if (forecast?.base.rows.length) {
       const series = [forecast.base, forecast.stress].map((r, i) => ({ name: i ? '壓力情境' : '目前經營', color: i ? '#ed8585' : '#34ca93', data: r.rows.map((m) => Math.round(m.endCash / 1000) / 10) }));
@@ -1248,6 +1257,8 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
     updateDock();
   });
   $('#tut').addEventListener('click', (e) => { if (e.target.closest('[data-act=skipTut]')) { tutOn = false; ls.set(TUT_KEY, '1'); updateTut(); } });
+
+  app.addEventListener('click',e=>{const b=e.target.closest('[data-industry-kind]');if(!b)return;const id=b.closest('[data-industry-shop]')?.dataset.industryShop;if(!id||saveBlocked)return;setSpeed(0);const before=shopDecisionSnapshot(id),r=S.storeIndustryAction(world,id,{kind:b.dataset.industryKind,axis:b.dataset.axis,value:b.dataset.value});if(!r.ok){toast(r.error||r.reason,true);return;}rememberShopDecision(id,'業態專屬決策',before);renderSide();updateHud();save();});
 
   // ───────── 整體刷新 ─────────
   function fullRefresh() {

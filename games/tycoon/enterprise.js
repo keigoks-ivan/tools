@@ -1,5 +1,6 @@
 import { clamp, random, company, dateOf, note, spend, receive, expense, finishDay, commonValid, payable, profit, END_DAY } from './venture-core.js';
 import { management, managementAction, managementValid, managementRecord } from './manager-policy.js';
+import { industryEffects, industryDay, industryAction, industryValid } from './industry-sim.js';
 import { advertisingReach, priceAcceptance } from './market-response.js';
 
 export const ENTERPRISES = {
@@ -19,7 +20,7 @@ export const ENTERPRISE_POLICIES = {
 export const ENTERPRISE_TERMS = {standard:{name:'標準帳期',deposit:0,days:0,chance:0},advance:{name:'提高訂金、縮短帳期',deposit:.15,days:-15,chance:-.1},credit:{name:'降低訂金、延長帳期',deposit:-.1,days:30,chance:.08}};
 export const enterprisePolicy = (w,id=w.policy||'standard') => ENTERPRISE_POLICIES[ENTERPRISES[w.businessId].kind][id];
 export function enterpriseTerms(w,id='standard') {const p=ENTERPRISES[w.businessId],t=typeof id==='string'&&Object.hasOwn(ENTERPRISE_TERMS,id)?ENTERPRISE_TERMS[id]:null;return t?{id,name:t.name,depositRate:clamp(p.depositRate+t.deposit,.1,.6),term:Math.max(0,p.term+t.days),chance:t.chance}:null;}
-export const enterpriseFixed = w => w.staff*ENTERPRISES[w.businessId].wage + ENTERPRISES[w.businessId].rent*(.6+.4*w.capacity/ENTERPRISES[w.businessId].capacity) + w.marketing + w.qualityBudget + w.capacity*(w.businessId==='hotel'?1200:800);
+export const enterpriseFixed = w => w.staff*ENTERPRISES[w.businessId].wage + ENTERPRISES[w.businessId].rent*(.6+.4*w.capacity/ENTERPRISES[w.businessId].capacity) + w.marketing + w.qualityBudget + w.capacity*(w.businessId==='hotel'?1200:800) + industryEffects(w).monthly;
 export const enterpriseManagement = w => management(w,enterpriseFixed(w));
 export const enterpriseManagementAction = (w,data) => managementAction(w,data,enterpriseFixed(w));
 export const enterpriseLeads = w => Math.min(6,1+Math.floor(2*Math.sqrt(w.marketing/ENTERPRISES[w.businessId].marketing)));
@@ -47,33 +48,34 @@ function consumerDemand(w,marketing=w.marketing) {
   const valuePrice=p.price*(.6+w.quality*.6+w.reputation*.4),acceptance=priceAcceptance(w.price,p.price,valuePrice);
   const reachLimit=p.kind==='hotel'?35:60*(.7+w.quality*.35+w.reputation*.35),paidReach=advertisingReach(marketing,p.kind==='hotel'?8000:75,reachLimit*(p.kind==='hotel'?1:dim))/(p.kind==='hotel'?1:dim);
   const demand=(p.kind==='hotel'?10:4)+paidReach,season=p.kind==='hotel'?1+.25*Math.sin((w.day+25)/58):1+.12*Math.sin((w.day+25)/58);
-  return {valuePrice,priceAcceptance:acceptance,paidReach,demand:demand*season*(p.kind==='hotel'?.7+w.reputation*.6:.65+w.reputation*.7)*acceptance*(w.channel?(p.kind==='hotel'?1.28:1.35):p.kind==='hotel'?.88:1)*shock*policy.demand/competition};
+  return {valuePrice,priceAcceptance:acceptance,paidReach,demand:demand*season*(p.kind==='hotel'?.7+w.reputation*.6:.65+w.reputation*.7)*acceptance*(w.channel?(p.kind==='hotel'?1.28:1.35):p.kind==='hotel'?.88:1)*shock*policy.demand*industryEffects(w).demand/competition};
 }
 export function enterpriseMetrics(w) {
   const p=ENTERPRISES[w.businessId],policy=enterprisePolicy(w),dim=dateOf(w.day).dim,shock=w.shock&&w.day<w.shock.until?w.shock:{cost:1,demand:1};
-  const serviceWork=w.clients.filter(c=>c.until>w.day).reduce((n,c)=>n+c.work,0), capacity=p.kind==='hotel'||p.kind==='commerce'?Math.min(w.capacity,w.staff*policy.perStaff):Math.min(w.capacity,w.staff*.85)*(.72+w.quality*.4);
-  const freeCapacity=Math.max(0,capacity-serviceWork),fixed=enterpriseFixed(w),defects=clamp(.02+(1-w.quality)*.06+w.wear*.06,.01,.2);
+  const fx=industryEffects(w);
+  const serviceWork=w.clients.filter(c=>c.until>w.day).reduce((n,c)=>n+c.work,0), capacity=(p.kind==='hotel'||p.kind==='commerce'?Math.min(w.capacity,w.staff*policy.perStaff):Math.min(w.capacity,w.staff*.85)*(.72+w.quality*.4)) * fx.capacity;
+  const freeCapacity=Math.max(0,capacity-serviceWork),fixed=enterpriseFixed(w),defects=clamp(.02+(1-w.quality)*.06+w.wear*.06+fx.defects,.01,.2);
   const response=p.kind==='project'?null:consumerDemand(w),demand=response?.demand||0;
-  const stockCost=w.stock.qty?w.stock.value/w.stock.qty:p.cost*shock.cost,feeRate=p.kind==='hotel'?(w.channel?.15:.025):(w.channel?.14:.045);
-  const variable=p.kind==='hotel'?p.cost*shock.cost*policy.cost+feeRate*w.price:p.kind==='commerce'?stockCost+policy.handling+feeRate*w.price:p.cost*shock.cost;
-  const returnRate=p.kind==='commerce'?clamp(.035+(1-w.quality)*.14+(w.channel?.02:0)+policy.returns+Math.max(0,w.price/response.valuePrice-1)*.1,.02,.4):0;
+  const stockCost=w.stock.qty?w.stock.value/w.stock.qty:p.cost*shock.cost*fx.cost,feeRate=p.kind==='hotel'?(w.channel?.15:.025):(w.channel?.14:.045);
+  const variable=p.kind==='hotel'?p.cost*shock.cost*fx.cost*policy.cost+feeRate*w.price:p.kind==='commerce'?stockCost+policy.handling+feeRate*w.price:p.cost*shock.cost*fx.cost;
+  const returnRate=p.kind==='commerce'?clamp(.035+(1-w.quality)*.14+(w.channel?.02:0)+policy.returns+Math.max(0,w.price/response.valuePrice-1)*.1+fx.defects,.02,.4):0;
   const sold=p.kind==='hotel'?Math.min(demand,capacity):p.kind==='commerce'?Math.min(demand,capacity,w.stock.qty):0;
-  const compensation=p.kind==='hotel'?w.price*Math.max(0,.5-w.quality)*.2:0;
+  const compensation=p.kind==='hotel'?w.price*(Math.max(0,.5-w.quality)*.2+fx.risk):0;
   const contribution=p.kind==='hotel'?w.price-variable-compensation:p.kind==='commerce'?w.price*(1-returnRate)-variable+stockCost*returnRate*.5:null;
   const adFrom=Math.min(w.marketing,490000),adTo=adFrom+10000,adMarginalReturn=response?(Math.min(capacity,consumerDemand(w,adTo).demand)-Math.min(capacity,consumerDemand(w,adFrom).demand))*dim*contribution/10000:null;
   const depreciation=Math.min(w.co.assets,p.setup/120),interest=Math.round(w.co.debt*.08/12),accountingFixed=fixed+depreciation+interest;
   const reserve=Math.ceil(payable(w)+fixed*enterpriseManagement(w).reserveMonths+Math.round(w.co.debt*.08/12)+Math.ceil(w.co.debt/24)+Math.max(0,profit(w.co.ledger)-w.co.taxLoss)*.2);
   const serviceLoad=capacity?serviceWork/capacity:Infinity;
-  return {...response,adFrom,adTo,adMarginalReturn,fixed,accountingFixed,depreciation,interest,feeRate,compensation,stockCost,capacity,freeCapacity,serviceWork,serviceLoad,demand,sold,defects,returnRate,variable,contribution,monthlyResult:contribution===null?null:sold*contribution*dim-accountingFixed,breakEven:contribution>0?Math.ceil(accountingFixed/contribution):null,reserve,available:Math.max(0,Math.floor(w.co.cash-reserve)),unitCost:p.cost*shock.cost*(p.kind==='hotel'?policy.cost:1),occupancy:p.kind==='hotel'&&w.capacity?sold/w.capacity:0,revpar:p.kind==='hotel'&&w.capacity?sold*w.price/w.capacity:0};
+  return {...response,adFrom,adTo,adMarginalReturn,fixed,accountingFixed,depreciation,interest,feeRate,compensation,stockCost,capacity,freeCapacity,serviceWork,serviceLoad,demand,sold,defects,returnRate,variable,contribution,monthlyResult:contribution===null?null:sold*contribution*dim-accountingFixed,breakEven:contribution>0?Math.ceil(accountingFixed/contribution):null,reserve,available:Math.max(0,Math.floor(w.co.cash-reserve)),unitCost:p.cost*shock.cost*fx.cost*(p.kind==='hotel'?policy.cost:1),occupancy:p.kind==='hotel'&&w.capacity?sold/w.capacity:0,revpar:p.kind==='hotel'&&w.capacity?sold*w.price/w.capacity:0};
 }
 export function enterpriseQuote(w,o,factor=1,terms=o.terms||'standard') {
   const servicePolicy=o.servicePolicy||(o.progress===undefined?w.policy||'standard':'standard');
   const p=ENTERPRISES[w.businessId],m=enterpriseMetrics(w),t=enterpriseTerms(w,terms),policy=enterprisePolicy(w,servicePolicy),quote=Math.round(o.quote*w.price/100*factor),deposit=Math.round(quote*t.depositRate),prior=w.orders.filter(x=>x.id!==o.id&&x.due<=o.due).reduce((n,x)=>n+Math.max(0,x.work-x.progress),0);
   const days=m.freeCapacity>0?Math.ceil((prior+o.work)/m.freeCapacity):null,material=p.kind==='project'&&w.businessId==='equipment'?Math.ceil(o.work/(1-m.defects)):o.work;
-  const variable=material*m.unitCost,allocated=m.freeCapacity>0?m.accountingFixed*o.work/m.freeCapacity/dateOf(w.day).dim:null,estimatedFinish=o.inspectionReady!=null?Math.max(w.day,o.inspectionReady):days===null?null:w.day+days-1+o.inspection+(w.businessId==='equipment'&&w.stock.qty<material?7:0),finish=estimatedFinish===null||estimatedFinish>=END_DAY?null:estimatedFinish;
+  const variable=material*m.unitCost,allocated=m.freeCapacity>0?m.accountingFixed*o.work/m.freeCapacity/dateOf(w.day).dim:null,estimatedFinish=o.inspectionReady!=null?Math.max(w.day,o.inspectionReady):days===null?null:w.day+days-1+o.inspection+industryEffects(w).inspection+(w.businessId==='equipment'&&w.stock.qty<material?7:0),finish=estimatedFinish===null||estimatedFinish>=END_DAY?null:estimatedFinish;
   const late=finish===null?null:Math.round(quote*Math.min(.2,Math.max(0,finish-o.due)*.015));
   const allowance=Math.min(m.available+deposit,enterpriseManagement(w).remaining),nearCash=w.businessId==='equipment'?Math.max(0,Math.min(material,Math.ceil(m.capacity*14))-w.stock.qty-w.shipments.reduce((n,x)=>n+x.qty,0))*m.unitCost:0;
-  return {quote,deposit,depositRate:t.depositRate,term:t.term,terms:t.id,servicePolicy,serviceFee:Math.round(quote*p.serviceRate*policy.fee),serviceWork:p.serviceWork*(o.scope?1.3:1)*policy.work,finish,days,variable,allocated,result:finish===null?null:quote-variable-allocated-late,late,shortage:Math.max(0,Math.ceil(nearCash-allowance)),chance:clamp(.58+(w.reputation-.5)*.6+(1-w.price/100*factor)*2+t.chance+policy.chance,.1,.9)};
+  return {quote,deposit,depositRate:t.depositRate,term:t.term,terms:t.id,servicePolicy,serviceFee:Math.round(quote*p.serviceRate*policy.fee),serviceWork:p.serviceWork*(o.scope?1.3:1)*policy.work,finish,days,variable,allocated,result:finish===null?null:quote-variable-allocated-late,late,shortage:Math.max(0,Math.ceil(nearCash-allowance)),chance:clamp(.58+(w.reputation-.5)*.6+(1-w.price/100*factor)*2+t.chance+policy.chance+industryEffects(w).bid,.1,.9)};
 }
 export function enterprisePlan(w) {
   const p=ENTERPRISES[w.businessId],m=enterpriseMetrics(w),a=enterpriseManagement(w),issues=[];
@@ -96,6 +98,7 @@ export function enterprisePlan(w) {
 }
 export function enterpriseAction(w,action,data={}) {
   const fail=error=>({ok:false,error}),p=ENTERPRISES[w.businessId]; if(w.status!=='playing')return fail('本局已結案。');
+  if(action==='industry')return industryAction(w,data,{playing:w.status==='playing',cash:w.co.cash,pay:n=>expense(w,'research',n,true),note:t=>note(w,t)});
   if(action==='management')return enterpriseManagementAction(w,data);
   if(action==='settings') {
     if(!enterpriseSettingsValid(w,data))return fail('請填寫有效收費、業務、品質與通路設定。');
@@ -114,6 +117,7 @@ export function enterpriseAction(w,action,data={}) {
     if(w.expansion||w.capacity>=(p.kind==='hotel'?100:p.kind==='commerce'?200:12)||w.co.cash<p.expansion)return fail('擴張中、已達規模上限或現金不足。');
     spend(w,p.expansion,'capex');w.co.assets+=p.expansion;w.expansion={ready:w.day+21,add:Math.min(p.kind==='hotel'?8:p.kind==='commerce'?20:2,(p.kind==='hotel'?100:p.kind==='commerce'?200:12)-w.capacity)};note(w,'擴張需 21 天；完成後固定成本和人力需求也會提高。');
   } else if(action==='event') {
+    if(w.event?.kind==='industry'){const r=industryAction(w,{kind:'event',choice:data.choice},{playing:w.status==='playing',cash:w.co.cash,pay:n=>expense(w,'repair',n,true),note:t=>note(w,t)});if(r.ok)w.event=null;return r;}
     if(!w.event||!['protect','accept'].includes(data.choice))return fail('沒有待決事件。');const cost=w.businessId==='equipment'?80000:40000;
     if(data.choice==='protect'){if(w.co.cash<cost)return fail('現金不足支付改善費。');expense(w,'repair',cost,true);w.quality=clamp(w.quality+.06,0,.95);w.shock={cost:1.05,demand:.98,until:w.day+30};note(w,'投入改善費，降低接下來 30 日的營運衝擊。');}else{w.shock={cost:1.2,demand:.8,until:w.day+30};w.reputation=clamp(w.reputation-.04,.1,.95);if(w.businessId==='security')w.quality=clamp(w.quality-.08,.1,.95);note(w,'保留現金，承擔成本、需求及口碑衝擊。');}w.event=null;
   } else return fail('未知經營操作。');return {ok:true};
@@ -136,7 +140,7 @@ export function stepEnterprise(w) {
   autoRun(w);const m=enterpriseMetrics(w);let sales=0,demand=0,returns=0,produced=0,revenue=0,serviceReceipts=0;
   if(p.kind==='hotel') {
     demand=count(w,m.demand);sales=Math.min(demand,Math.floor(m.capacity));revenue=sales*w.price;spend(w,sales*m.unitCost,'purchases');expense(w,'cogs',sales*m.unitCost);expense(w,'cloud',sales*w.price*(w.channel?.15:.025));
-    if(w.quality<.5)expense(w,'penalty',Math.round(revenue*(.5-w.quality)*.2),true);
+    if(m.compensation)expense(w,'penalty',Math.round(sales*m.compensation),true);
   } else if(p.kind==='commerce') {
     demand=count(w,m.demand);sales=Math.min(demand,Math.floor(m.capacity),w.stock.qty);returns=Math.min(sales,count(w,sales*m.returnRate));const recovered=Math.floor(returns*.5),used=sales-recovered,unit=w.stock.qty?w.stock.value/w.stock.qty:0;
     w.stock.qty-=used;w.stock.value-=unit*used;if(!w.stock.qty)w.stock.value=0;expense(w,'cogs',used*unit);revenue=sales*w.price;expense(w,'cloud',sales*(enterprisePolicy(w).handling+w.price*(w.channel?.14:.045)));if(returns)expense(w,'penalty',returns*w.price,true);
@@ -153,7 +157,7 @@ export function stepEnterprise(w) {
       o.progress+=work;produced+=work;
       if(o.progress+1e-6<o.work)continue;
       if(w.businessId==='agency'&&!o.revised&&o.scope&&random(w)>.35+w.quality*.5){o.work+=Math.ceil(o.work*.2);o.revised=true;note(w,`${o.client} 要求合約範圍內修改，工作量增加 20%，總價保持。`);continue;}
-      if(o.inspectionReady===null){o.inspectionReady=w.day+o.inspection;note(w,`${o.client} 進入 ${o.inspection} 日驗收。`);}if(w.day<o.inspectionReady)continue;
+      if(o.inspectionReady===null){o.inspectionReady=w.day+o.inspection+industryEffects(w).inspection;note(w,`${o.client} 進入 ${o.inspectionReady-w.day} 日驗收（含目前準備度的額外等待）。`);}if(w.day<o.inspectionReady)continue;
       revenue+=o.quote;sales+=o.work;expense(w,'cogs',o.cost);const late=Math.round(o.quote*Math.min(.2,Math.max(0,w.day-o.due)*.015));if(late)expense(w,'penalty',late,true);
       w.receivables.push({client:o.client,due:w.day+o.term,amount:o.quote-o.deposit});w.orders=w.orders.filter(x=>x!==o);w.stats.delivered++;w.reputation=clamp(w.reputation+(late?-.03:.025),.1,.95);
       const service=enterprisePolicy(w,o.servicePolicy||'standard');if(service.work&&w.clients.length<24)w.clients.push({id:o.id,client:o.client,fee:Math.round(o.quote*p.serviceRate*service.fee),work:p.serviceWork*(o.scope?1.3:1)*service.work,until:w.day+90});note(w,`${o.client} 驗收交付；尾款列應收${service.work?'，另有 90 日售後／維運服務承諾':'，一次性交付不另訂付費維運'}。`);
@@ -167,14 +171,19 @@ export function stepEnterprise(w) {
   if(p.kind!=='project')w.reputation=clamp(w.reputation+(w.quality>.65?.0005:-.0003)-(demand>sales?Math.min(.002,(demand-sales)*.0001):0),.1,.95);
   if(p.kind==='commerce'&&sales)w.reputation=clamp(w.reputation-Math.max(0,returns/sales-.1)*.008,.1,.95);
   w.stats.sales+=sales;w.today={sales,demand,returns,produced,utilization:m.capacity?(p.kind==='project'?produced+m.serviceWork:sales)/m.capacity:0,revenue,missed:Math.max(0,demand-sales),marketingCost:w.marketing/dim,refunds:returns*w.price,delivered:w.stats.delivered-startDelivered,serviceLoad:m.serviceLoad,serviceRevenue:serviceReceipts,receipts:w.co.ledger.receipts-startReceipts,operatingResult:profit(w.co.ledger)-startProfit};
-  w.offers=w.offers.filter(o=>o.expires>w.day+1);finishDay(w,w.today);
+  expense(w,'research',industryEffects(w).monthly/dim);
+  if(p.kind==='project')expense(w,'penalty',serviceReceipts*industryEffects(w).risk,true);
+  const industryEvent = industryDay(w,w.day,{...w.today,volume:p.kind==='project'?produced:sales,orders:w.orders.length,lost:Math.max(0,demand-sales),defects:returns,profit:profit(w.co.ledger)-startProfit},t=>note(w,t));
+  if(industryEvent)w.event=industryEvent;
+  w.today.operatingResult=profit(w.co.ledger)-startProfit;
+  w.offers=w.offers.filter(o=>o.expires>w.day+1);finishDay(w,{...w.today,...(w.industry?{industry:{...w.industry.resources}}:{})});
   w.today.cashChange=w.co.cash-startCash;w.co.daily.at(-1).cashChange=w.today.cashChange;
   if(w.status==='playing'&&w.day%30===0&&p.kind==='project')generateOffers(w);
-  if(w.status==='playing'&&w.day%90===0){w.event={title:({hotel:'旺季房務與訂房市場變動',equipment:'零組件報價與驗收要求提高',ecommerce:'通路競價與退貨壓力',ai:'模型供應商與資料品質變動',agency:'客戶預算與交付要求變動',security:'新威脅與監控服務壓力'})[w.businessId],text:'要投入改善費降低未來 30 日衝擊，或保留現金承擔成本、需求與口碑風險？'};note(w,'事件需要老闆決定，時間暫停。');}return true;
+  if(w.status==='playing'&&!w.event&&w.day%90===0){w.event={title:({hotel:'旺季房務與訂房市場變動',equipment:'零組件報價與驗收要求提高',ecommerce:'通路競價與退貨壓力',ai:'模型供應商與資料品質變動',agency:'客戶預算與交付要求變動',security:'新威脅與監控服務壓力'})[w.businessId],text:'要投入改善費降低未來 30 日衝擊，或保留現金承擔成本、需求與口碑風險？'};note(w,'事件需要老闆決定，時間暫停。');}return true;
 }
 export function enterpriseValid(w) {
   const nn=n=>typeof n==='number'&&Number.isFinite(n)&&n>=0,int=n=>Number.isInteger(n)&&n>=0,day=n=>int(n)&&n<=END_DAY+365,arr=(x,n)=>Array.isArray(x)&&x.length<=n;
-  if(!commonValid(w)||w.mode!=='enterprise'||!known(w.businessId)||!managementValid(w)||!w.manager||!Number.isInteger(w.staff)||w.staff<1||w.staff>20||!int(w.capacity)||w.capacity<1||w.capacity>200||!int(w.price)||!int(w.marketing)||w.marketing>500000||!int(w.qualityBudget)||w.qualityBudget>100000||![0,1].includes(w.channel)||![7,14,30].includes(w.targetDays)||!['quality','reputation','wear'].every(k=>nn(w[k])&&w[k]<=1)||!int(w.seq))return false;
+  if(!industryValid(w?.industry,w?.businessId)||!commonValid(w)||w.mode!=='enterprise'||!known(w.businessId)||!managementValid(w)||!w.manager||!Number.isInteger(w.staff)||w.staff<1||w.staff>20||!int(w.capacity)||w.capacity<1||w.capacity>200||!int(w.price)||!int(w.marketing)||w.marketing>500000||!int(w.qualityBudget)||w.qualityBudget>100000||![0,1].includes(w.channel)||![7,14,30].includes(w.targetDays)||!['quality','reputation','wear'].every(k=>nn(w[k])&&w[k]<=1)||!int(w.seq))return false;
   const p=ENTERPRISES[w.businessId],bounds=p.kind==='hotel'?[400,15000]:p.kind==='commerce'?[100,5000]:[80,140];if(w.price<bounds[0]||w.price>bounds[1])return false;
   const validPolicy=id=>id===undefined||typeof id==='string'&&Object.hasOwn(ENTERPRISE_POLICIES[p.kind],id);
   if(!validPolicy(w.policy))return false;

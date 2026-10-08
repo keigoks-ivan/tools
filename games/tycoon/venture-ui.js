@@ -2,6 +2,9 @@ import { dateOf, COSTS, COST_NAMES, profit, report, payable, financeAction } fro
 import { PRODUCTS, SUPPLIERS, PRODUCTION_MODES, contractProfiles, contractPolicy, manufacturingOrderPreview, manufacturingQueue, manufacturingSchedule, createManufacturing, manufacturingAction, productionPlan, stepManufacturing } from './manufacturing.js';
 import { MODELS, PROJECTS, STRATEGIES, RELEASES, technologyProjects, technologyProjectPlan, createTechnology, technologyAction, technologyMetrics, stepTechnology } from './technology.js';
 import { loadVenture, storeVenture, routeKey, encodeVenture, decodeVenture, MAX_BYTES } from './venture-saves.js';
+import { INDUSTRIES, industryId } from './industry-catalog.js';
+import { enableIndustry } from './industry-sim.js';
+import { industryBoardHtml, industrySettings, industryDrivers } from './industry-view.js';
 import { routeArt } from './route-art.js';
 import { ventureCoach } from './venture-coach.js';
 import { decisionSnapshot, recordDecision, decisionReviews, completeDecisions } from './decision-learning.js';
@@ -25,7 +28,7 @@ const SCENE_LABELS = { packaging: '紙材裁切與包裝線', apparel: '裁剪�
 export function startVenture(mode, business) {
   const industrial = mode === 'manufacturing', catalog = industrial ? PRODUCTS : MODELS;
   const validBusiness = Object.hasOwn(catalog,business) ? business : Object.keys(catalog)[0];
-  const make = id => createOwnerVenture(mode,id);
+  const make = id => enableIndustry(createOwnerVenture(mode,id));
   const step = stepOwnerVenture;
   function action(world,name,data) {
     if (name === 'management') return ownerManagementAction(world,data);
@@ -34,10 +37,13 @@ export function startVenture(mode, business) {
     return (industrial ? manufacturingAction : technologyAction)(world,name,data);
   }
   const storage = { getItem: k => localStorage.getItem(k), setItem: (k, v) => localStorage.setItem(k, v) };
-  const loaded = loadVenture(storage, mode);
-  let w = loaded.ok ? loaded.world : make(validBusiness), blocked = !loaded.ok && loaded.found, message = loaded.recovered ? '已從此路線的上次有效備份恢復。' : blocked ? loaded.error : '', badMessage = blocked, tab = 'operation', speed = 0, lastAt = performance.now(), accumulator = 0, ticker = null;
+  const legacy = business ? null : loadVenture(storage,mode);
+  const requested = legacy?.ok ? industryId(legacy.world) : validBusiness;
+  const loaded = !business && legacy?.found && !legacy.ok ? legacy : loadVenture(storage, mode, requested);
+  let w = loaded.ok ? loaded.world : make(requested), blocked = !loaded.ok && loaded.found, message = loaded.recovered ? '已從此路線的上次有效備份恢復。' : blocked ? loaded.error : '', badMessage = blocked, tab = 'operation', speed = 0, lastAt = performance.now(), accumulator = 0, ticker = null;
   const app = document.getElementById('app'); document.body.dataset.view = mode; document.getElementById('boot').hidden = true;
-  let operationPanel = industrial ? 'orders' : 'growth';
+  if (!blocked && (!loaded.ok || new URLSearchParams(location.search).get('scenario')==='1')) enableIndustry(w);
+  let operationPanel = new URLSearchParams(location.search).get('scenario') === '1' ? 'industry' : industrial ? 'orders' : 'growth';
   let contractBoard = industrial && w.offers.some(o=>o.profile==='supply') ? 'supply' : 'spot';
   document.title = (industrial ? '製造與工業' : '網路與科技') + '｜創業之城';
   let managerPreviewCache=null, orderPreviewCache=new Map();
@@ -45,7 +51,7 @@ export function startVenture(mode, business) {
   function orderPreview(o,factor=1) { const key=o.id+' / '+factor; if (!orderPreviewCache.has(key)) orderPreviewCache.set(key,factoryOrderReview(w,o,factor)); return orderPreviewCache.get(key); }
   function save() {
     if (blocked) return false;
-    const r = storeVenture(storage, w);
+    const r = storeVenture(storage, w, industryId(w));
     if (!r.ok) { message = r.error; badMessage = true; speed = 0; }
     return r.ok;
   }
@@ -59,13 +65,14 @@ export function startVenture(mode, business) {
   function learningSnapshot() {
     const settings = industrial ? `${w.workers} 人／${w.lines} 線；${w.shift === 'overtime' ? '加班' : '正常'}；${w.qc === 'strict' ? '嚴格' : '標準'}品管；${SUPPLIERS[w.supplier].name} / ${PRODUCTION_MODES[w.productionMode || 'balanced'].name}；${w.orders.length} 張訂單／${w.offers.length} 張詢價／累計未得標 ${w.stats.lostBids} 次；${w.shipments.length} 批在途；${w.expansion ? '擴線施工中' : '未擴線'}；保養至第 ${w.maintenanceUntil+1} 天；${(w.scheduleMode ?? 'due') === 'due' ? '交期自動排程' : '手動排程'}；訂單順位 ${manufacturingQueue(w).map(o=>o.id).join('/')}` : `價格／密度 ${w.price}；獲客 ${w.marketing}／月；工程 ${w.engineers} 人；客服 ${w.support} 人；主機第 ${w.cloudTier+1} 級；重心 ${({ growth: '開發', balanced: '平衡', stability: '維運' })[w.focus]}；客群 ${STRATEGIES[w.modelId][w.strategy || 'general'].name} / ${w.project ? PROJECTS[w.project.id].name+' / '+RELEASES[w.project.release || 'standard'].name : '無'}`;
     const m=ownerManagement(w);
-    return decisionSnapshot(ventureCoach(w), w.co.cash, settings+`；${m.enabled?'團隊代管':'自行管理'}；代管預算 ${m.budget}／固定月費上限 ${m.maxFixed}／現金保留 ${m.reserveMonths} 月／${m.priority}／允許加班 ${m.allowOvertime}`);
+    const coach=ventureCoach(w);coach.drivers.push(...industryDrivers(w));
+    return decisionSnapshot(coach, w.co.cash, industrySettings(w)+'；'+settings+`；${m.enabled?'團隊代管':'自行管理'}；代管預算 ${m.budget}／固定月費上限 ${m.maxFixed}／現金保留 ${m.reserveMonths} 月／${m.priority}／允許加班 ${m.allowOvertime}`);
   }
   function rememberDecision(title, before) {
     w.learning = recordDecision(w.learning, { scope: mode, title, day: w.day, fromDay: w.day, mode, businessId: industrial ? w.productId : w.modelId, before, after: learningSnapshot(), rows: w.co.daily });
   }
   function learningHtml(compact = true) {
-    return coachHtml(ventureCoach(w), { compact }) + decisionReviewsHtml(decisionReviews(w.learning, mode, w.co.daily), { compact });
+    return (!compact ? industryBoardHtml(w,{report:true}) : '') + coachHtml(ventureCoach(w), { compact }) + decisionReviewsHtml(decisionReviews(w.learning, mode, w.co.daily), { compact });
   }
   function scenePin(number, title, detail, target, x, y, warn = false, field = '') {
     if (ownerManagement(w).enabled && ['workers','qty','support','cloudTier','engineers'].includes(field)) { target='#owner-desk'; field=''; }
@@ -173,7 +180,7 @@ export function startVenture(mode, business) {
   const businessName = () => catalog[industrial ? w.productId : w.modelId].name;
   const done = () => w.status !== 'playing';
   function operationPanelsHtml() {
-    const panels = industrial ? [['orders','訂單與排程'],['production','備料與生產'],['cash','交貨與收款']] : [['growth','客群與成長'],['product','產品與維運'],['cash','資金與回顧']];
+    const panels = industrial ? [['industry','專屬劇本'],['orders','訂單與排程'],['production','備料與生產'],['cash','交貨與收款']] : [['industry','專屬劇本'],['growth','客群與成長'],['product','產品與維運'],['cash','資金與回顧']];
     return `<nav class="venture-operation-tabs" aria-label="營運工作區">${panels.map(([id,label],i)=>`<button data-action="operation-panel" data-panel="${id}" class="${operationPanel===id ? 'on' : ''}" aria-pressed="${operationPanel===id}"><span>0${i+1}</span>${label}</button>`).join('')}</nav>`;
   }
   function syncOperationPanel() {
@@ -198,7 +205,7 @@ export function startVenture(mode, business) {
     managerPreviewCache=null; orderPreviewCache=new Map();
     syncTicker();
     const l = w.co.ledger, active = !blocked && !done(), paused = speed === 0;
-    app.innerHTML = `<main class="venture-shell ${ownerManagement(w).enabled ? 'owner-shell' : ''}"><header class="venture-top"><a class="venture-back" href="./" data-action="routes">← 選經營路線</a><div class="venture-title"><span>${ownerManagement(w).enabled ? 'OWNER / 老闆指揮台' : industrial ? 'MANUFACTURING / OPERATIONS' : 'INTERNET / PRODUCT STUDIO'}</span><h1>${industrial ? '雲港製造' : '未來網路'} <small>${businessName()}</small></h1></div><div class="venture-date">${dateOf(w.day).key}<small>${done() ? (w.status === 'bankrupt' ? '資金不足結案' : '三年結案') : '第 ' + (w.day + 1) + ' 天 · ' + (paused ? '暫停' : speed + ' 日／秒')}</small></div><div class="venture-time"><button data-action="pause" aria-label="暫停" class="${paused ? 'on' : ''}">Ⅱ</button><button data-action="speed" data-value="1"${!active ? ' disabled' : ''} class="${speed === 1 ? 'on' : ''}">▶</button><button data-action="speed" data-value="8"${!active ? ' disabled' : ''} class="${speed === 8 ? 'on' : ''}">8×</button><button data-action="day"${!active ? ' disabled' : ''}>一天</button><button data-action="month"${!active ? ' disabled' : ''}>下月</button></div></header><div class="venture-capital">${tile('可用現金', money(w.co.cash), `本月尚待支付 ${money(payable(w))}`, w.co.cash < payable(w))}${tile('本月營收', money(l.revenue), '截至目前 · 依交貨／實際使用認列')}${tile('本月淨利', money(profit(l)), '含已發生費用與折舊，稅於月結認列', profit(l) < 0)}${tile(industrial ? '應收尾款' : '活躍使用者', industrial ? money(w.receivables.reduce((n,r)=>n+r.amount,0)) : num(w.users), industrial ? '已交貨，等待客戶帳期到期' : `市場 ${num(technologyMetrics(w,{includeBreakEven:false}).market)} 人，獲客會愈來愈貴`)}</div><nav class="venture-nav" aria-label="經營頁面"><button data-tab="operation" class="${tab === 'operation' ? 'on' : ''}">${industrial ? '工廠與訂單' : '產品與成長'}</button><button data-tab="report" class="${tab === 'report' ? 'on' : ''}">經營報表與分析</button><button data-action="settings" class="venture-mobile-adjust">調整經營</button><button data-action="finance">資金與還款</button><button data-action="download">下載存檔</button><button data-action="import">匯入存檔</button><button data-action="save">存檔</button><button data-action="new">另開新局</button></nav>${message ? `<div role="status" class="venture-notice ${badMessage ? 'bad' : ''}">${esc(message)}${blocked ? '<button data-action="raw">下載原始存檔</button>' : ''}<button data-action="dismiss" aria-label="關閉通知">×</button></div>` : ''}${blocked ? '<div class="venture-notice bad">此路線暫時不能推進或自動存檔；匯入有效備份或另開新局後才會恢復。</div>' : ''}${w.co.cash < 0 && !done() ? `<div class="venture-notice bad">現金不足已 ${w.co.insolventDays} 天，連續七天就會結案。請處理資金或縮減營運；借款仍需償還。</div>` : ''}${w.event ? `<section class="venture-event"><div><span>需要你的決定 · 時間暫停</span><h2>${esc(w.event.title)}</h2><p>${esc(w.event.text)}</p></div><button data-action="event" data-choice="${industrial ? 'buffer' : 'protect'}">${industrial ? '短約議價 $18,000' : '切換與稽核 $20,000'}</button><button data-action="event" data-choice="accept">保留現金，承受影響</button></section>` : ''}${done() ? '<div class="venture-notice">這局已結束。可查看整合報表、下載結案分析，或另開新局。</div>' : ''}${tab === 'operation' ? objectiveHtml() + operationPanelsHtml() + workflowHtml() + (industrial ? manufacturingPage() : technologyPage()) : reportPage()}<footer class="venture-footer"><span>每次操作及推進後自動存檔 · 切到背景暫停 · 此路線獨立進度</span><span>教育用模擬參數，非真實產業報價；稅以 20% 月結與累積虧損抵減簡化。</span></footer><input id="venture-file" type="file" accept="application/json,.json" hidden><dialog id="venture-dialog"></dialog></main>`;
+    app.innerHTML = `<main class="venture-shell ${ownerManagement(w).enabled ? 'owner-shell' : ''}"><header class="venture-top"><a class="venture-back" href="./" data-action="routes">← 選經營路線</a><div class="venture-title"><span>${ownerManagement(w).enabled ? 'OWNER / 老闆指揮台' : industrial ? 'MANUFACTURING / OPERATIONS' : 'INTERNET / PRODUCT STUDIO'}</span><h1>${industrial ? '雲港製造' : '未來網路'} <small>${businessName()}</small></h1></div><div class="venture-date">${dateOf(w.day).key}<small>${done() ? (w.status === 'bankrupt' ? '資金不足結案' : '三年結案') : '第 ' + (w.day + 1) + ' 天 · ' + (paused ? '暫停' : speed + ' 日／秒')}</small></div><div class="venture-time"><button data-action="pause" aria-label="暫停" class="${paused ? 'on' : ''}">Ⅱ</button><button data-action="speed" data-value="1"${!active ? ' disabled' : ''} class="${speed === 1 ? 'on' : ''}">▶</button><button data-action="speed" data-value="8"${!active ? ' disabled' : ''} class="${speed === 8 ? 'on' : ''}">8×</button><button data-action="day"${!active ? ' disabled' : ''}>一天</button><button data-action="month"${!active ? ' disabled' : ''}>下月</button></div></header><div class="venture-capital">${tile('可用現金', money(w.co.cash), `本月尚待支付 ${money(payable(w))}`, w.co.cash < payable(w))}${tile('本月營收', money(l.revenue), '截至目前 · 依交貨／實際使用認列')}${tile('本月淨利', money(profit(l)), '含已發生費用與折舊，稅於月結認列', profit(l) < 0)}${tile(industrial ? '應收尾款' : '活躍使用者', industrial ? money(w.receivables.reduce((n,r)=>n+r.amount,0)) : num(w.users), industrial ? '已交貨，等待客戶帳期到期' : `市場 ${num(technologyMetrics(w,{includeBreakEven:false}).market)} 人，獲客會愈來愈貴`)}</div><nav class="venture-nav" aria-label="經營頁面"><button data-tab="operation" class="${tab === 'operation' ? 'on' : ''}">${industrial ? '工廠與訂單' : '產品與成長'}</button><button data-tab="report" class="${tab === 'report' ? 'on' : ''}">經營報表與分析</button><button data-action="settings" class="venture-mobile-adjust">調整經營</button><button data-action="finance">資金與還款</button><button data-action="download">下載存檔</button><button data-action="import">匯入存檔</button><button data-action="save">存檔</button><button data-action="new">另開新局</button></nav>${message ? `<div role="status" class="venture-notice ${badMessage ? 'bad' : ''}">${esc(message)}${blocked ? '<button data-action="raw">下載原始存檔</button>' : ''}<button data-action="dismiss" aria-label="關閉通知">×</button></div>` : ''}${blocked ? '<div class="venture-notice bad">此路線暫時不能推進或自動存檔；匯入有效備份或另開新局後才會恢復。</div>' : ''}${w.co.cash < 0 && !done() ? `<div class="venture-notice bad">現金不足已 ${w.co.insolventDays} 天，連續七天就會結案。請處理資金或縮減營運；借款仍需償還。</div>` : ''}${w.event ? `<section class="venture-event"><div><span>需要你的決定 · 時間暫停</span><h2>${esc(w.event.title)}</h2><p>${esc(w.event.text)}${w.event.kind==='industry'?' 改善需七個營運日；期间能力保留 8%（科技增加維運費），完成後修復 18 點。不投入則該能力下降 15 點。':''}</p></div><button data-action="event" data-choice="${industrial ? 'buffer' : 'protect'}">${w.event.kind==='industry'?esc(w.event.protect)+' '+money(w.event.cost):industrial ? '短約議價 $18,000' : '切換與稽核 $20,000'}</button><button data-action="event" data-choice="accept">${w.event.kind==='industry'?esc(w.event.accept):'保留現金，承受影響'}</button></section>` : ''}${done() ? '<div class="venture-notice">這局已結束。可查看整合報表、下載結案分析，或另開新局。</div>' : ''}${tab === 'operation' ? (operationPanel==='industry'?'':objectiveHtml()) + operationPanelsHtml() + (operationPanel==='industry'?`<div data-operation-panel="industry">${industryBoardHtml(w,{disabled:!active,scene:routeArt(mode,false,industryId(w))})}<button class="venture-primary" data-action="operation-panel" data-panel="${industrial?'orders':'growth'}">${industrial?'比較合約與剩餘排程':'調整收費與獲客'} →</button></div>`:workflowHtml() + (industrial ? manufacturingPage() : technologyPage())) : reportPage()}<footer class="venture-footer"><span>每個業態獨立存檔 · 背景暫停 · 三年經營劇本</span><span>教育用模擬參數，非真實產業報價；稅以 20% 月結與累積虧損抵減簡化。</span></footer><input id="venture-file" type="file" accept="application/json,.json" hidden><dialog id="venture-dialog"></dialog></main>`;
     syncOperationPanel();
   }
   function journeyHtml() {
@@ -289,6 +296,8 @@ export function startVenture(mode, business) {
     d.innerHTML = `<form method="dialog" class="venture-dialog-head"><h2>資金與還款</h2><button aria-label="關閉">×</button></form><dl><dt>可用現金</dt><dd>${money(w.co.cash)}</dd><dt>剩餘本金</dt><dd>${money(w.co.debt)}</dd><dt>還可借款</dt><dd>${money(w.co.capital*1.5-w.co.debt)}</dd></dl><p>年息 8%。每月支付剩餘本金的 1/24 及利息，另可提前還款。利息為費用，本金只影響現金。</p><form data-form="finance">${field('金額（元）',input('amount',100000,1,w.co.capital*1.5))}<button name="financeAction" value="borrow" type="submit">借款</button><button name="financeAction" value="repay" type="submit">提前還款</button></form>`; d.showModal();
   }
   app.addEventListener('click', async e => {
+    const industry=e.target.closest('[data-industry-kind]');
+    if(industry){apply('industry',{kind:industry.dataset.industryKind,axis:industry.dataset.axis,value:industry.dataset.value});render();return;}
     const t = e.target.closest('[data-tab]'); if (t) { tab = t.dataset.tab; speed = 0; render(); return; }
     const b = e.target.closest('[data-action]'); if (!b) return;
     const name = b.dataset.action;
@@ -298,8 +307,8 @@ export function startVenture(mode, business) {
       return;
     }
     if (name === 'operation-panel') {
-      const panels=industrial ? ['orders','production','cash'] : ['growth','product','cash'];
-      if (panels.includes(b.dataset.panel)) { operationPanel=b.dataset.panel; syncOperationPanel(); app.querySelector('.venture-operation-tabs').scrollIntoView({block:'start'}); }
+      const panels=industrial ? ['industry','orders','production','cash'] : ['industry','growth','product','cash'];
+      if (panels.includes(b.dataset.panel)) { operationPanel=b.dataset.panel; render(); app.querySelector('.venture-operation-tabs').scrollIntoView({block:'start'}); }
       return;
     }
     if (name === 'scene') {
@@ -314,6 +323,7 @@ export function startVenture(mode, business) {
       return;
     }
     if (name === 'management') { apply(name,{enabled:b.dataset.enabled==='true'}); render(); return; }
+    if (name === 'settings' && operationPanel==='industry') { operationPanel=industrial?'orders':'growth';render(); }
     if (name === 'settings' && ownerManagement(w).enabled) { const target=app.querySelector('#owner-desk'); revealOperationTarget(target); target?.scrollIntoView({block:'start'}); return; }
     if (name === 'settings') { speed = 0; syncTicker(); const form=app.querySelector(`[data-form=${mode}]`); revealOperationTarget(form?.querySelector(industrial ? '[name=workers]' : '[name=price]') || form); form?.scrollIntoView({block:'start'}); return; }
     if (name === 'pause') speed = 0;
@@ -329,7 +339,7 @@ export function startVenture(mode, business) {
     else if (name === 'import') { speed = 0; syncTicker(); document.getElementById('venture-file').click(); return; }
     else if (name === 'new') {
       speed = 0; syncTicker(); const d = document.getElementById('venture-dialog');
-      d.innerHTML = `<form method="dialog" class="venture-dialog-head"><h2>另開${industrial?'製造':'網路'}新局</h2><button aria-label="關閉">×</button></form><p>會取代此路線的自動進度。請先下載存檔；其他兩條路線保持各自進度。</p><form data-form="new">${field('創業題目',select('business',Object.entries(catalog).map(([id,p])=>[id,p.name+'｜資本 '+money(p.capital)]),industrial?w.productId:w.modelId))}<button type="submit" class="venture-primary">確認另開新局</button></form>`; d.showModal(); return;
+      d.innerHTML = `<form method="dialog" class="venture-dialog-head"><h2>另開${industrial?'製造':'網路'}新局</h2><button aria-label="關閉">×</button></form><p>只會取代選定業態的進度；其他業態與舊版路線存檔保留。可先下載目前存檔。</p><form data-form="new">${field('目前經營業態',`<input name="business" type="hidden" value="${industryId(w)}"><b>${businessName()}</b>` )}<button type="submit" class="venture-primary">確認另開新局</button></form>`; d.showModal(); return;
     } else if (name === 'case') {
       const r = report(w), html = `<!doctype html><html lang="zh-Hant"><meta charset="utf-8"><meta name="robots" content="noindex"><title>${businessName()} 經營分析</title><style>body{max-width:900px;margin:40px auto;padding:24px;font:16px/1.8 system-ui;color:#192c38}h1,h2,h3{line-height:1.4}dl{display:grid;grid-template-columns:1fr 1fr}dd{text-align:right}table{width:100%;border-collapse:collapse}td,th{padding:8px;border-bottom:1px solid #ddd;text-align:right}td:first-child,th:first-child{text-align:left}</style><h1>${businessName()}｜${done()?'結案':'階段'}分析</h1><p>${dateOf(0).key} 至 ${dateOf(w.day).key}，${w.day} 天；${w.status==='bankrupt'?'現金連續七天不足。':done()?'三年經營完成。':'仍在經營。'}現金 ${money(w.co.cash)}，剩餘本金 ${money(w.co.debt)}。累積營收 ${money(r.totals.revenue)}、淨利 ${money(r.totals.net)}。</p><h2>每月損益</h2><table><tr><th>月份</th><th>營收</th><th>淨利</th><th>期末現金</th></tr>${r.rows.map(x=>`<tr><td>${x.month}${x.partial?' 至今':''}</td><td>${money(x.revenue)}</td><td>${money(x.net)}</td><td>${money(x.cashEnd)}</td></tr>`).join('')}</table><h2>業態關鍵因子與決策觀察</h2>${learningHtml(false)}<h2>經營取捨與診斷</h2>${lessons().map(([h,p])=>`<h3>${h}</h3><p>${esc(p)}</p>`).join('')}<h2>各月成本與現金對帳</h2>${r.rows.map(x=>`<h3>${x.month}${x.partial?' 至今':''}</h3>${monthDetail(x)}`).join('')}<p>教育用模擬，不代表真實產業報價。稅以 20% 月結及累積虧損抵減簡化；LTV 為當前條件估計，非保證回收。</p></html>`;
       download(html,`創業之城-${mode}-經營分析.html`,'text/html'); return;
@@ -344,7 +354,7 @@ export function startVenture(mode, business) {
   app.addEventListener('submit', e => {
     const form = e.target.closest('[data-form]'); if (!form) return; e.preventDefault(); speed = 0;
     const data = Object.fromEntries(new FormData(form));
-    if (form.dataset.form === 'new') { w = make(data.business); blocked = false; message = '此路線的新公司已成立。'; badMessage = false; tab = 'operation'; save(); }
+    if (form.dataset.form === 'new') { w = make(industryId(w)); blocked = false; message = '此路線的新公司已成立。'; badMessage = false; tab = 'operation'; save(); }
     else if (form.dataset.form === 'finance') {
       const before = learningSnapshot();
       const r = blocked ? {ok:false,error:'請先處理存檔問題。'} : financeAction(w,e.submitter?.value,Number(data.amount)); message = r.error || '已更新資金。'; badMessage = !r.ok; if (r.ok) { rememberDecision(e.submitter?.value === 'repay' ? '提前還款' : '借入資金', before); save(); }
@@ -370,6 +380,7 @@ export function startVenture(mode, business) {
     try {
       if (file.size > MAX_BYTES) throw new Error('存檔超過 2 MiB。');
       const incoming = decodeVenture(await file.text(),mode);
+      if(industryId(incoming.world)!==industryId(w))throw new Error('存檔屬於其他業態，請先切到相應劇本。');
       if (!confirm('匯入會取代這條路線的進度，請先下載目前存檔。確認匯入？')) return;
       w = incoming.world; blocked = false; message = '已匯入並保存此路線。'; badMessage = false; speed = 0; save();
     } catch (err) { message = err.message; badMessage = true; }
