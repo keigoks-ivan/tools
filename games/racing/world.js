@@ -1,14 +1,17 @@
 import * as THREE from 'three';
 import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
 import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
-import { TRACK } from './track.mjs';
-import { createWorldMaterials } from './world-materials.js?v=realism-5';
-import { addVegetation } from './world-vegetation.js?v=realism-5';
-import { addLandmarks } from './world-landmarks.js?v=realism-5';
-import { addRoadDetails } from './world-road.js?v=realism-5';
-import { CITY_THEMES, cityGroundLevel, addCityScenery } from './world-cities.js?v=cities-6';
-import { defaultSeason } from './seasons.mjs?v=city-drive-7';
-import { createSeasonWeather } from './weather.js?v=city-drive-7';
+import { TRACK } from './track.mjs?v=city-drive-11';
+import { createWorldMaterials } from './world-materials.js?v=city-drive-11';
+import { addVegetation } from './world-vegetation.js?v=city-drive-11';
+import { addLandmarks } from './world-landmarks.js?v=city-drive-11';
+import { addRoadDetails } from './world-road.js?v=city-drive-11';
+import { CITY_THEMES, cityGroundLevel, addCityScenery } from './world-cities.js?v=city-drive-11';
+import { defaultSeason } from './seasons.mjs?v=city-drive-11';
+import { createSeasonWeather } from './weather.js?v=city-drive-11';
+import { shadowFrame } from './lighting.mjs?v=city-drive-11';
+import { createTyreMarks } from './tyre-marks.js?v=city-drive-11';
+import { createCityBackdrop } from './world-city-backdrop.js?v=city-drive-11';
 
 const noise = new ImprovedNoise();
 const clamp = THREE.MathUtils.clamp;
@@ -92,13 +95,14 @@ export async function createWorld(renderer, { mobile = false, track = TRACK, sea
   scene.background = environment; scene.backgroundBlurriness = .015;
   scene.backgroundRotation.y = scene.environmentRotation.y = -1.8;
   scene.backgroundIntensity = canyon ? .9 : alpine ? 1.04 : .86;
-  scene.environmentIntensity = alpine ? .9 : canyon ? .78 : .72;
+  scene.environmentIntensity = skyFile === 'environment.hdr' ? 1.04 : canyon ? .78 : .76;
   const sunOffset = alpine ? new THREE.Vector3(-82, 95, 58) : canyon ? new THREE.Vector3(-93, 41, 81) : new THREE.Vector3(-26, 125, 22);
-  const hemisphere = new THREE.HemisphereLight(palette.hemisphere, palette.ground, .48); scene.add(hemisphere);
+  const hemisphere = new THREE.HemisphereLight(palette.hemisphere, palette.ground, .20); scene.add(hemisphere);
   const sun = new THREE.DirectionalLight(canyon ? '#fff0dc' : '#fff5e6', canyon ? 2.5 : 2.3); sun.castShadow = true;
   sun.shadow.mapSize.set(mobile ? 1024 : 2048, mobile ? 1024 : 2048);
-  Object.assign(sun.shadow.camera, { left: -48, right: 48, top: 48, bottom: -48, near: 1, far: 230 });
+  Object.assign(sun.shadow.camera, { left: -56, right: 56, top: 56, bottom: -56, near: 1, far: 1800 });
   sun.shadow.bias = -.00012; sun.shadow.normalBias = .025;
+  sun.shadow.autoUpdate = false;
   scene.add(sun, sun.target);
 
   const groundMat = city ? surfaceMaterials.concrete.clone() : surfaceMaterials.terrain;
@@ -138,9 +142,15 @@ export async function createWorld(renderer, { mobile = false, track = TRACK, sea
   }
   scene.add(roadStrip(track, -half, half, roadMat, track.samples.length, .035));
   const shoulder = surfaceMaterials.shoulder;
-  scene.add(roadStrip(track, -half - 1.4, -half, shoulder, undefined, .02), roadStrip(track, half, half + 1.4, shoulder, undefined, .02));
-  const lineMaterial = new THREE.MeshStandardMaterial({ color: '#e7e2d2', roughness: .9, side: THREE.DoubleSide });
-  scene.add(roadStrip(track, -half + .15, -half + .28, lineMaterial, undefined, .05), roadStrip(track, half - .28, half - .15, lineMaterial, undefined, .05));
+  if(city){
+    const verge = track.id === 'warwick' ? surfaceMaterials.concrete : roadMat;
+    const vergeHeight = track.id === 'warwick' ? .10 : .02;
+    scene.add(roadStrip(track,-track.wallOffset,-half,verge,undefined,vergeHeight),roadStrip(track,half,track.wallOffset,verge,undefined,vergeHeight));
+  }else{
+    scene.add(roadStrip(track, -half - 1.4, -half, shoulder, undefined, .02), roadStrip(track, half, half + 1.4, shoulder, undefined, .02));
+    const lineMaterial = new THREE.MeshStandardMaterial({ color: '#e7e2d2', roughness: .9, side: THREE.DoubleSide });
+    scene.add(roadStrip(track, -half + .15, -half + .28, lineMaterial, undefined, .05), roadStrip(track, half - .28, half - .15, lineMaterial, undefined, .05));
+  }
   addRoadDetails({ scene, track, mobile, materials: surfaceMaterials });
   const vegetation = city ? {} : addVegetation({ scene, track, mobile, groundHeight, materials: surfaceMaterials });
   const landmarks = city ? addCityScenery({ scene, track, mobile, groundHeight, materials: surfaceMaterials })
@@ -224,9 +234,9 @@ export async function createWorld(renderer, { mobile = false, track = TRACK, sea
   let waterNormals, waterMat, foamMat;
   if (theme === 'costa') {
     waterNormals = waterNormalTexture(mobile); waterNormals.anisotropy = Math.min(4, renderer.capabilities.getMaxAnisotropy());
-    waterMat = new THREE.ShaderMaterial({ uniforms: { time: { value: 0 }, cameraPos: { value: new THREE.Vector3() }, ripples: { value: waterNormals }, skyReflection: { value: environment }, sunDirection: { value: sunOffset.clone().normalize() } }, transparent: false,
+    waterMat = new THREE.ShaderMaterial({ uniforms: { time: { value: 0 }, cameraPos: { value: new THREE.Vector3() }, ripples: { value: waterNormals }, skyReflection: { value: environment }, sunDirection: { value: sunOffset.clone().normalize() }, sunStrength: { value: 1 }, sunColor: { value: sun.color.clone() }, fogColor: { value: scene.fog.color.clone() }, fogDensity: { value: scene.fog.density } }, transparent: false,
       vertexShader: 'varying vec3 vPos;void main(){vPos=(modelMatrix*vec4(position,1.)).xyz;gl_Position=projectionMatrix*viewMatrix*vec4(vPos,1.);}',
-      fragmentShader: `varying vec3 vPos;uniform float time;uniform vec3 cameraPos;uniform sampler2D ripples;uniform sampler2D skyReflection;uniform vec3 sunDirection;
+      fragmentShader: `varying vec3 vPos;uniform float time;uniform vec3 cameraPos;uniform sampler2D ripples;uniform sampler2D skyReflection;uniform vec3 sunDirection;uniform float sunStrength;uniform vec3 sunColor;uniform vec3 fogColor;uniform float fogDensity;
         void main(){vec2 p=vPos.xz;vec2 drift=vec2(time*.002,-time*.0013);
           vec2 broad=texture2D(ripples,p*.018+drift*.35).rg*2.-1.;
           vec2 medium=texture2D(ripples,p*.057+drift+broad*.09).rg*2.-1.;
@@ -238,8 +248,8 @@ export async function createWorld(renderer, { mobile = false, track = TRACK, sea
           vec2 skyUV=vec2(atan(reflected.z,reflected.x)*.159154943+.5,asin(clamp(reflected.y,-1.,1.))*.318309886+.5);
           vec3 skyColor=texture2D(skyReflection,skyUV).rgb;skyColor=skyColor/(vec3(1.)+skyColor*.32);
           vec3 col=mix(vec3(.016,.115,.155),skyColor*.64,fres);
-          vec3 l=sunDirection;float spec=pow(max(dot(reflect(-l,n),v),0.),110.);col+=vec3(.7,.59,.43)*spec*.32;
-          float fog=1.-exp(-distanceToCamera*.00055);col=mix(col,vec3(.43,.52,.53),fog);
+          vec3 l=sunDirection;float spec=pow(max(dot(reflect(-l,n),v),0.),110.);col+=sunColor*spec*.32*sunStrength;
+          float fog=1.-exp(-distanceToCamera*distanceToCamera*fogDensity*fogDensity);col=mix(col,fogColor,fog);
           gl_FragColor=vec4(col,1.);
           #include <tonemapping_fragment>
           #include <colorspace_fragment>
@@ -275,40 +285,56 @@ export async function createWorld(renderer, { mobile = false, track = TRACK, sea
   const finish = new THREE.Group(); finish.position.set(start.x, start.y + .06, start.z); finish.rotation.y = start.heading;
   for (let row = 0; row < 2; row++) for (let i = 0; i < 16; i++) {
     const tile = new THREE.Mesh(new THREE.PlaneGeometry(track.width / 16, .65), new THREE.MeshStandardMaterial({ color: (row + i) % 2 ? '#e7e2d5' : '#242725', roughness: .95 }));
-    tile.rotation.x = -Math.PI / 2; tile.position.set(-half + (i + .5) * track.width / 16, .01, row * .65); finish.add(tile);
+    tile.rotation.x = -Math.PI / 2; tile.position.set(-half + (i + .5) * track.width / 16, .01, row * .65); tile.receiveShadow = true; finish.add(tile);
   }
   scene.add(finish);
   const signs = new THREE.Group();
   const sponsorMap = signTexture(title, subtitle);
-  for (let s = 70; s < track.length; s += 160) {
+  for (let s = 70; !city && s < track.length; s += 160) {
     const a = track.sample(s), sign = new THREE.Mesh(new THREE.PlaneGeometry(4, 1), new THREE.MeshBasicMaterial({ map: sponsorMap, side: THREE.DoubleSide }));
     sign.position.set(a.x + a.nx * (half + 3.15), a.y + 1.3, a.z + a.nz * (half + 3.15)); sign.rotation.y = a.heading - Math.PI / 2; signs.add(sign);
     const pole = new THREE.Mesh(new THREE.CylinderGeometry(.035, .045, 1.6, 6), new THREE.MeshStandardMaterial({ color: '#989e97', metalness: .65, roughness: .6 }));
     pole.position.set(sign.position.x, a.y + .65, sign.position.z); pole.castShadow = true; signs.add(pole);
   }
   scene.add(signs);
-  const weather = createSeasonWeather({ scene, season, mobile, renderer, materials: surfaceMaterials, sun, hemisphere, groundHeight, resourcesOwnedByWorld: true });
+  const backdrop = await createCityBackdrop({ city: track.id, scene, mobile, season, resourcesOwnedByWorld: true });
+  const weather = createSeasonWeather({ scene, season, mobile, renderer, materials: { ...surfaceMaterials, seasonGround: groundMat }, sun, hemisphere, groundHeight, diffuseSky: skyFile === 'environment.hdr', resourcesOwnedByWorld: true });
+  if (waterMat) { waterMat.uniforms.sunStrength.value = sun.intensity / 2.3; waterMat.uniforms.sunColor.value.copy(sun.color); waterMat.uniforms.fogColor.value.copy(scene.fog.color); waterMat.uniforms.fogDensity.value = scene.fog.density; }
   let weatherTime = 0;
+  const tyreMarks = createTyreMarks({ scene, track, mobile, wet: season.wet, resourcesOwnedByWorld: true });
+  let shadowQuality = mobile ? 'medium' : 'high', shadowExtent = 56, lastShadowTime = -Infinity, lastShadowState = -1, shadowDirty = true;
   // Capture world-owned resources before the caller adds cars or ghosts.
   const geometries = new Set(), materials = new Set(surfaceMaterials.materials), textures = new Set([environment, ...surfaceMaterials.textures]), instances = new Set();
   scene.traverse(object => {
     if (object.isInstancedMesh) instances.add(object);
     if (object.geometry) geometries.add(object.geometry);
-    for (const material of Array.isArray(object.material) ? object.material : object.material ? [object.material] : []) {
+    for (const material of [...(Array.isArray(object.material) ? object.material : object.material ? [object.material] : []), object.customDepthMaterial, object.customDistanceMaterial].filter(Boolean)) {
       materials.add(material);
       for (const value of Object.values(material)) if (value?.isTexture && value !== env.texture) textures.add(value);
       for (const uniform of Object.values(material.uniforms || {})) if (uniform.value?.isTexture && uniform.value !== env.texture) textures.add(uniform.value);
     }
   });
   let disposed = false;
-  return { scene, groundHeight, update(state, elapsed, camera) {
+  return { scene, groundHeight, update(state, elapsed, camera, vehicle) {
     weather.update(state, Math.max(0, elapsed - weatherTime), camera); weatherTime = elapsed;
     if (waterMat) { waterMat.uniforms.time.value = elapsed; waterMat.uniforms.cameraPos.value.copy(camera.position); foamMat.uniforms.time.value = elapsed; }
     vegetation.update?.(state, elapsed); landmarks.update?.(state, elapsed);
-    sun.position.set(state.x + sunOffset.x, state.y + sunOffset.y, state.z + sunOffset.z); sun.target.position.set(state.x, state.y, state.z);
-  }, setQuality(level) { sun.shadow.mapSize.set(level === 'high' ? 2048 : 1024, level === 'high' ? 2048 : 1024); if (sun.shadow.map) { sun.shadow.map.dispose(); sun.shadow.map = null; } vegetation.setQuality?.(level); landmarks.setQuality?.(level); weather.setQuality(level); }, dispose() {
+    tyreMarks.update(state, vehicle);
+    if (shadowDirty || (state.elapsed !== lastShadowState && elapsed - lastShadowTime >= (shadowQuality === 'high' ? 1 / 60 : 1 / 30))) {
+      const frame = shadowFrame(state, sunOffset, { extent: shadowExtent, resolution: sun.shadow.mapSize.x });
+      sun.position.set(frame.light.x, frame.light.y, frame.light.z); sun.target.position.set(frame.target.x, frame.target.y, frame.target.z);
+      sun.shadow.needsUpdate = true; lastShadowTime = elapsed; lastShadowState = state.elapsed; shadowDirty = false;
+    }
+  }, setQuality(level) {
+    shadowQuality = level; shadowExtent = level === 'high' ? 72 : 56;
+    const size = level === 'high' ? 2048 : 1024;
+    if (sun.shadow.mapSize.x !== size && sun.shadow.map) { sun.shadow.map.dispose(); sun.shadow.map = null; }
+    sun.shadow.mapSize.set(size, size);
+    Object.assign(sun.shadow.camera, { left: -shadowExtent, right: shadowExtent, top: shadowExtent, bottom: -shadowExtent }); sun.shadow.camera.updateProjectionMatrix(); shadowDirty = true;
+    vegetation.setQuality?.(level); landmarks.setQuality?.(level); weather.setQuality(level);
+  }, dispose() {
     if (disposed) return; disposed = true;
-    weather.dispose();
+    weather.dispose(); tyreMarks.dispose(); backdrop?.dispose();
     instances.forEach(instance => instance.dispose());
     geometries.forEach(geometry => geometry.dispose()); materials.forEach(material => material.dispose()); textures.forEach(texture => texture.dispose());
     sun.shadow.map?.dispose(); sun.shadow.mapPass?.dispose(); env.dispose();

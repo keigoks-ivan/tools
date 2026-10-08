@@ -19,7 +19,7 @@ test('the original coastal export is preserved and all twenty-three circuits are
     assert.ok(Object.isFrozen(track.bounds));
     assert.ok(track.id && track.name && track.label && track.description && track.theme);
     assert.ok(track.length > 1500 && track.length < 3000);
-    assert.ok(track.width >= 11 && track.wallOffset > track.width / 2 + 3);
+    assert.ok(track.width >= (track.id === 'warwick' ? 7.4 : 11) && track.wallOffset > track.width / 2 + 3);
   }
 });
 

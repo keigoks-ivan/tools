@@ -29,8 +29,8 @@ const touch = (button, type, ...ids) => fire(button, type, {
 const pointer = (button, type, id, pointerType = 'mouse', buttonIndex = 0) => fire(button, type, {
   pointerId: id, pointerType, button: buttonIndex,
 });
-function fixture() {
-  const controls = Object.fromEntries(['left', 'right', 'throttle', 'brake'].map(name => [name, new Button()]));
+function fixture(handbrake = false) {
+  const controls = Object.fromEntries(['left', 'right', 'throttle', 'brake', ...(handbrake ? ['handbrake'] : [])].map(name => [name, new Button()]));
   const session = { driving: true, input: { steer: 0, throttle: 0, brake: 0 }, changes: [] };
   const handler = installTouchControls(controls, {
     canDrive: () => session.driving,
@@ -38,6 +38,22 @@ function fixture() {
   });
   return { controls, session, handler };
 }
+
+test('steering, throttle and rear handbrake remain independent through contact release and pause', () => {
+  const { controls, session, handler } = fixture(true);
+  touch(controls.throttle, 'touchstart', 1);
+  touch(controls.left, 'touchstart', 2);
+  touch(controls.handbrake, 'touchstart', 3);
+  assert.deepEqual(session.input, { steer: -1, throttle: 1, brake: 0, handbrake: 1 });
+  touch(controls.handbrake, 'touchend', 3);
+  assert.deepEqual(session.input, { steer: -1, throttle: 1, brake: 0, handbrake: 0 });
+  touch(controls.handbrake, 'touchstart', 4);
+  session.driving = false; handler.clear();
+  assert.deepEqual(session.input, { steer: 0, throttle: 0, brake: 0, handbrake: 0 });
+  assert.equal(controls.handbrake.attributes.get('aria-pressed'), 'false');
+  touch(controls.handbrake, 'touchstart', 5);
+  assert.equal(session.input.handbrake, 0, 'paused sessions reject a new handbrake finger');
+});
 
 test('two fingers can hold throttle and change steering without releasing the pedal', () => {
   const { controls, session } = fixture();

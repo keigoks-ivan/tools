@@ -84,7 +84,7 @@ test('rain changes only borrowed seasonal surfaces and light, then restores them
 
 test('winter reduces deciduous coverage with a shader restored on disposal', () => {
   const scene = new THREE.Scene(), map = new THREE.Texture(), mat = new THREE.MeshStandardMaterial({ map }); mat.name = 'city-foliage';
-  const geometry = new THREE.PlaneGeometry(); scene.add(new THREE.Mesh(geometry, mat));
+  const geometry = new THREE.PlaneGeometry(), mesh = new THREE.Mesh(geometry, mat); scene.add(mesh);
   const initialCompile = mat.onBeforeCompile, initialCache = mat.customProgramCacheKey;
   const weather = createSeasonWeather({ scene, season: getSeason('london', 'winter') });
   const shader = { uniforms: {}, vertexShader: '#include <common>\n#include <uv_vertex>', fragmentShader: '#include <common>\n#include <alphatest_fragment>' };
@@ -92,9 +92,65 @@ test('winter reduces deciduous coverage with a shader restored on disposal', () 
   assert.equal(shader.uniforms.seasonLeafCoverage.value, .44);
   assert.match(shader.vertexShader, /seasonLeafUv=uv/);
   assert.match(shader.fragmentShader, /seasonLeafCoverage\)discard/);
+  const depth = mesh.customDepthMaterial, depthShader = { uniforms: {}, vertexShader: THREE.ShaderLib.depth.vertexShader, fragmentShader: THREE.ShaderLib.depth.fragmentShader };
+  depth.onBeforeCompile(depthShader);
+  assert.equal(depthShader.uniforms.seasonLeafCoverage.value, .44, 'winter canopy shadow has the same missing leaves as the visible tree');
+  assert.match(depthShader.fragmentShader, /seasonLeafCoverage\)discard/);
+  let depthDisposals = 0; depth.addEventListener('dispose', () => depthDisposals++);
   weather.dispose();
+  assert.equal(depthDisposals, 1); assert.equal(mesh.customDepthMaterial, undefined);
   assert.equal(mat.onBeforeCompile, initialCompile); assert.equal(mat.customProgramCacheKey, initialCache);
   geometry.dispose(); mat.dispose(); map.dispose();
+});
+
+test('city cedar and cypress keep their evergreen treatment through autumn and restore on disposal', () => {
+  const scene = new THREE.Scene(), map = new THREE.Texture();
+  const mat = new THREE.MeshStandardMaterial({ color: '#799565', map }); mat.name = 'city-evergreen-foliage';
+  const geometry = new THREE.PlaneGeometry(), mesh = new THREE.Mesh(geometry, mat); scene.add(mesh);
+  const initial = mat.color.clone(), compile = mat.onBeforeCompile;
+  const season = getSeason('vancouver', 'autumn');
+  const weather = createSeasonWeather({ scene, season });
+  assert.ok(mat.color.equals(initial.clone().multiply(new THREE.Color(season.evergreen))));
+  assert.equal(mat.onBeforeCompile, compile, 'evergreen leaves do not acquire deciduous leaf loss');
+  assert.equal(mesh.customDepthMaterial, undefined);
+  weather.dispose(); assert.ok(mat.color.equals(initial));
+  geometry.dispose(); mat.dispose(); map.dispose();
+});
+
+test('snow covers scanned ground while preserving road paint, shader extensions and borrowed resources', () => {
+  const scene = new THREE.Scene(), map = new THREE.Texture();
+  const ground = new THREE.MeshStandardMaterial({ color: '#23251e', map, vertexColors: true });
+  const road = new THREE.MeshStandardMaterial({ color: '#626569', map });
+  const paving = new THREE.MeshStandardMaterial({ color: '#7c827f', map }); paving.userData.seasonGround = true;
+  const pavingGeometry = new THREE.PlaneGeometry(); scene.add(new THREE.Mesh(pavingGeometry, paving));
+  const pavingCompile = paving.onBeforeCompile;
+  const initialColor = ground.color.clone();
+  ground.onBeforeCompile = shader => { shader.uniforms.existingSurfaceDetail = { value: 1 }; };
+  ground.customProgramCacheKey = () => 'existing-ground-extension';
+  const initialCompile = ground.onBeforeCompile, initialCache = ground.customProgramCacheKey;
+  let disposals = 0;
+  ground.addEventListener('dispose', () => disposals++); map.addEventListener('dispose', () => disposals++);
+  const weather = createSeasonWeather({ scene, season: getSeason('alpine', 'winter'), materials: { terrain: ground, dryGrass: ground, seasonGround: ground, road } });
+  const shader = { uniforms: {}, vertexShader: THREE.ShaderLib.standard.vertexShader, fragmentShader: THREE.ShaderLib.standard.fragmentShader };
+  ground.onBeforeCompile(shader);
+  assert.equal(shader.uniforms.existingSurfaceDetail.value, 1);
+  assert.equal(shader.uniforms.seasonSnowAmount.value, .85);
+  assert.ok(shader.uniforms.seasonSnowColor.value.isColor);
+  assert.equal((shader.fragmentShader.match(/uniform float seasonSnowAmount/g) || []).length, 1, 'aliased ground receives one snow extension');
+  assert.match(shader.fragmentShader, /#include <color_fragment>[\s\S]*diffuseColor.rgb=mix/);
+  assert.match(shader.fragmentShader, /smoothstep\(.45,.90,seasonSnowSlope\)/);
+  assert.equal(ground.map, map); assert.equal(road.map, map);
+  assert.equal(road.customProgramCacheKey(), road.onBeforeCompile.toString(), 'cleared asphalt retains its original shader');
+  assert.equal(ground.customProgramCacheKey(), 'existing-ground-extension-season-ground-snow');
+  const pavingShader = { uniforms: {}, vertexShader: THREE.ShaderLib.standard.vertexShader, fragmentShader: THREE.ShaderLib.standard.fragmentShader };
+  paving.onBeforeCompile(pavingShader);
+  assert.equal(pavingShader.uniforms.seasonSnowAmount.value, .85, 'city pavements opt into slope-aware snow without changing road paint');
+  assert.match(pavingShader.fragmentShader, /seasonSnowSlope/);
+  weather.dispose(); weather.dispose();
+  assert.equal(disposals, 0); assert.equal(ground.onBeforeCompile, initialCompile); assert.equal(ground.customProgramCacheKey, initialCache);
+  assert.ok(ground.color.equals(initialColor));
+  assert.equal(paving.onBeforeCompile, pavingCompile);
+  pavingGeometry.dispose(); paving.dispose(); ground.dispose(); road.dispose(); map.dispose();
 });
 
 for (const mobile of [false, true]) {

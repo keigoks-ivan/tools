@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { TRACK } from './track.mjs';
+import { TRACK, TRACKS } from './track.mjs';
+import { VEHICLES } from './vehicles.mjs';
 import { createDrivingState, resetDriving, stepDriving } from './physics.mjs';
 
 const flat = {
@@ -52,9 +53,107 @@ test('power accelerates through automatic gears and braking stops the car', () =
   run(state, { brake: 1 }, 3);
   assert.ok(state.speed < beforeBraking * .3);
   assert.ok(state.longitudinalAccel < -7);
-  run(state, { brake: 1 }, 2);
+  for (let i = 0; i < 240 && state.speed > 0; i++) stepDriving(state, { brake: 1 }, 1 / 120, flat);
   assert.equal(state.speed, 0);
+  assert.equal(state.reverse, false, 'service braking stops before reverse can engage');
   assert.ok(state.braking > .99);
+});
+
+test('holding the brake at rest engages reverse and throttle returns to forward motion', () => {
+  const state = createDrivingState(flat);
+  run(state, { brake: 1 }, .25);
+  assert.equal(state.speed, 0);
+  assert.equal(state.reverse, false, 'a brief brake press cannot propel a stopped car');
+  run(state, { brake: 1 }, 2);
+  assert.equal(state.reverse, true);
+  assert.ok(state.vz < -2 && state.z < -2, 'the held pedal backs the car up');
+  assert.equal(state.braking, 0, 'reverse drive is separate from service braking');
+  run(state, {}, .2);
+  assert.equal(state.reverse, true, 'selected reverse gear remains visible while coasting');
+  assert.ok(state.vz < 0, 'releasing the pedal does not erase backward momentum');
+  run(state, { throttle: 1 }, 3);
+  assert.equal(state.reverse, false, 'throttle selects forward gear');
+  assert.ok(state.vz > 3, 'forward torque first arrests reverse motion, then pulls forward');
+});
+
+const barrierState = (track, vehicle, side, headingOffset, speed = 0) => {
+  const p = track.sample(track.length * .31), state = createDrivingState(track);
+  Object.assign(state, {
+    x: p.x + p.nx * side * ((track.wallOffset || track.width / 2 + 4.5) - .94),
+    z: p.z + p.nz * side * ((track.wallOffset || track.width / 2 + 4.5) - .94),
+    y: p.y, s: p.s, heading: p.heading + side * headingOffset,
+    _lastS: p.s,
+  });
+  state.vx = Math.sin(state.heading) * speed; state.vz = Math.cos(state.heading) * speed; state.speed = speed;
+  state._lastX = state.x; state._lastZ = state.z;
+  return state;
+};
+
+test('every car can reverse away from either head-on guardrail without resetting', () => {
+  const track = { ...flat, width: 12, wallOffset: 10.5 };
+  for (const vehicle of Object.values(VEHICLES)) for (const side of [-1, 1]) {
+    const state = barrierState(track, vehicle, side, Math.PI / 2, 14);
+    stepDriving(state, {}, 1 / 120, track, vehicle);
+    assert.ok(state.collision > .1, `${vehicle.id}: the setup causes a real impact`);
+    const heading = state.heading, initialOffset = side * state.x;
+    for (let i = 0; i < 240; i++) stepDriving(state, { brake: 1, steer: side * .45 }, 1 / 120, track, vehicle);
+    assert.ok(side * state.offset < initialOffset - 1.5, `${vehicle.id}/${side}: reverse clears the guardrail`);
+    assert.ok(side * (state.heading - heading) < -.1, 'reverse steering yaws opposite forward steering');
+    assert.ok(state.invalidLap, 'recovery cannot restore an invalid lap');
+    assert.equal(state.lap, 1);
+  }
+});
+
+test('guardrail contact accounts for each car body width and length at every approach angle', () => {
+  const track = { ...flat, width: 12, wallOffset: 10.5 };
+  for (const vehicle of [VEHICLES.porsche911gt3rs, VEHICLES.bmwX3, VEHICLES.lamborghiniRevuelto]) for (const side of [-1, 1]) for (let angle = 0; angle <= Math.PI / 2; angle += Math.PI / 12) {
+    const state = barrierState(track, vehicle, side, angle, 8);
+    stepDriving(state, {}, 1 / 120, track, vehicle);
+    const reach = Math.abs(Math.sin(state.heading)) * vehicle.dimensions.length / 2 + Math.abs(Math.cos(state.heading)) * vehicle.dimensions.width / 2;
+    assert.ok(Math.abs(state.x) + reach <= track.wallOffset - .049, `${vehicle.id}/${angle}: bumpers and flanks stay inside the guardrail`);
+  }
+});
+
+test('curved and inclined city guardrails allow reverse and glancing forward recovery on both sides', () => {
+  for (const track of [TRACKS.sanfrancisco, TRACKS.lisbon, TRACKS.warwick, TRACKS.hanoi]) for (const side of [-1, 1]) {
+    const reverse = barrierState(track, VEHICLES.bmwX3, side, Math.PI / 2);
+    const initialOffset = track.wallOffset - .94;
+    for (let i = 0; i < 240; i++) stepDriving(reverse, { brake: 1, steer: side * .45 }, 1 / 120, track, VEHICLES.bmwX3);
+    assert.ok(side * reverse.offset < initialOffset - 1.5, `${track.id}/${side}: reverse backs off the wall`);
+    assert.ok(reverse.speed > 1.5 && reverse.reverse);
+    const forward = barrierState(track, VEHICLES.bmwX3, side, .25, 10);
+    for (let i = 0; i < 180; i++) stepDriving(forward, { throttle: .35, steer: -side * .6 }, 1 / 120, track, VEHICLES.bmwX3);
+    assert.ok(forward.speed > 8, `${track.id}/${side}: forward steering preserves useful speed`);
+    assert.ok(side * forward.offset < initialOffset - .05, `${track.id}/${side}: steering moves off the barrier`);
+    assert.equal(forward.collision, 0, 'continued steering away does not keep colliding');
+  }
+});
+
+test('rear-wheel handbraking initiates a drift and releasing with countersteer recovers every car', () => {
+  for (const vehicle of Object.values(VEHICLES)) {
+    const baseline = createDrivingState(flat), drift = createDrivingState(flat);
+    baseline.vz = baseline.speed = drift.vz = drift.speed = 20;
+    for (let i = 0; i < 84; i++) {
+      stepDriving(baseline, { steer: .35, throttle: .15 }, 1 / 120, flat, vehicle);
+      stepDriving(drift, { steer: .35, throttle: .15, handbrake: 1 }, 1 / 120, flat, vehicle);
+    }
+    assert.ok(Math.abs(drift.rearSlip) > Math.abs(baseline.rearSlip) * 2, `${vehicle.id}: the rear tyres break traction`);
+    assert.ok(drift.yawRate > baseline.yawRate * 1.8, `${vehicle.id}: braking the rear axle creates oversteer`);
+    assert.ok(Math.abs(drift.slipAngle) > .3, `${vehicle.id}: the car travels at an angle to its heading`);
+    assert.equal(drift.reverse, false, 'handbraking never requests reverse');
+    const initialSlip = Math.abs(drift.slipAngle);
+    for (let i = 0; i < 240; i++) stepDriving(drift, {
+      steer: -Math.sign(drift.yawRate) * Math.min(.5, Math.abs(drift.yawRate) * .8), throttle: .25,
+    }, 1 / 120, flat, vehicle);
+    assert.ok(Math.abs(drift.slipAngle) < initialSlip * .15, `${vehicle.id}: countersteer restores traction`);
+    assert.ok(Math.abs(drift.yawRate) < .1, `${vehicle.id}: the yaw settles after release`);
+    assert.ok(drift.speed > 3 && Number.isFinite(drift.x) && Number.isFinite(drift.z));
+  }
+  const stopped = createDrivingState(flat);
+  run(stopped, { handbrake: 1, steer: 1 }, 2);
+  assert.equal(stopped.speed, 0);
+  assert.equal(stopped.yawRate, 0);
+  assert.equal(stopped.reverse, false);
 });
 
 test('high speed saturates tyre grip and widens the turn', () => {

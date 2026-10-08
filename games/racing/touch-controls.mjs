@@ -13,6 +13,7 @@ export function installTouchControls(controls, { canDrive, onChange }) {
       steer: Number(held.get('right').size > 0) - Number(held.get('left').size > 0),
       throttle: Number(held.get('throttle').size > 0),
       brake: Number(held.get('brake').size > 0),
+      ...(held.has('handbrake') ? { handbrake: Number(held.get('handbrake').size > 0) } : {}),
     });
   }
   function listen(button, type, handler) {

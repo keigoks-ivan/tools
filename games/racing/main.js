@@ -1,15 +1,16 @@
 import * as THREE from 'three';
-import { TRACK, TRACKS } from './track.mjs?v=city-drive-7';
-import { VEHICLES } from './vehicles.mjs';
-import { readLapRecord, writeLapRecord } from './records.mjs';
-import { createDrivingState, resetDriving, stepDriving } from './physics.mjs?v=city-drive-7';
-import { createCar } from './car.js?v=city-drive-7';
-import { createWorld } from './world.js?v=city-drive-7';
-import { installTouchControls } from './touch-controls.mjs';
-import { createTiltSteering } from './tilt-steering.mjs';
-import { createRacingAudio } from './audio.mjs?v=city-drive-7';
-import { createCockpit } from './cockpit.js?v=city-drive-7';
-import { getSeasons, getSeason, defaultSeason } from './seasons.mjs?v=city-drive-7';
+import { TRACK, TRACKS } from './track.mjs?v=city-drive-11';
+import { VEHICLES } from './vehicles.mjs?v=city-drive-11';
+import { readLapRecord, writeLapRecord } from './records.mjs?v=city-drive-11';
+import { createDrivingState, resetDriving, stepDriving } from './physics.mjs?v=city-drive-11';
+import { createCar } from './car.js?v=city-drive-11';
+import { createWorld } from './world.js?v=city-drive-11';
+import { installTouchControls } from './touch-controls.mjs?v=city-drive-11';
+import { createTiltSteering } from './tilt-steering.mjs?v=city-drive-11';
+import { createRacingAudio } from './audio.mjs?v=city-drive-11';
+import { createCockpit } from './cockpit.js?v=city-drive-11';
+import { getSeasons, getSeason, defaultSeason } from './seasons.mjs?v=city-drive-11';
+import { roadPose } from './road-pose.mjs?v=city-drive-11';
 
 const $ = id => document.getElementById(id);
 const clamp = THREE.MathUtils.clamp;
@@ -17,7 +18,7 @@ const mobile = matchMedia('(pointer: coarse), (max-height:540px) and (max-width:
 let track = TRACKS.taipei || TRACK, vehicle = VEHICLES.porsche911gt3rs || VEHICLES.ferrari458;
 let seasonId = '', season = defaultSeason(track), drivingVehicle = vehicle;
 const state = createDrivingState(track);
-const held = new Set(), touches = { steer: 0, throttle: 0, brake: 0 };
+const held = new Set(), touches = { steer: 0, throttle: 0, brake: 0, handbrake: 0 };
 const paints = { ivory: '#d9d6c6', graphite: '#465051', red: '#c93324' };
 let renderer, world, camera, cockpit, car, ghost, touchControls, tilt;
 let active = false, paused = false, ready = false, view = 0, elapsed = 0, last = 0, accumulator = 0, lastHUD = 0;
@@ -55,7 +56,7 @@ function toast(text) {
   toastTimer = setTimeout(() => { $('toast').hidden = true; }, 3600);
 }
 function clearInput() {
-  held.clear(); touches.steer = touches.throttle = touches.brake = 0;
+  held.clear(); touches.steer = touches.throttle = touches.brake = touches.handbrake = 0;
   touchControls?.clear();
   tilt?.recalibrate();
   $('tilt-wheel').style.transform = 'rotate(0deg)';
@@ -94,7 +95,7 @@ function prepareSelectionUI() {
   const text = document.createElement('p');
   text.textContent = '新增跑車依車廠尺寸與外形資料製作原創 3D 模型；操控參數為遊戲調校。城市依真實地標與街景特色製作，路線為競速改編布局。本遊戲為獨立作品。';
   const sources = document.createElement('p');
-  for (const [href, label] of [['./assets/PRODUCTION-CARS.md', '車款資料來源'], ['./assets/CITY-SOURCES.md', '城市與實景參考'], ['./assets/COCKPIT-REFERENCES.md', '駕駛艙參考'], ['./assets/SEASONS.md', '季節資料來源']]) {
+  for (const [href, label] of [['./assets/PRODUCTION-CARS.md', '車款資料來源'], ['./assets/CITY-SOURCES.md', '城市與實景參考'], ['./assets/CITY-PHOTO-SOURCES.md', '當地實景照片與授權'], ['./assets/COCKPIT-REFERENCES.md', '駕駛艙參考'], ['./assets/SEASONS.md', '季節資料來源']]) {
     const link = document.createElement('a'); link.href = href; link.target = '_blank'; link.rel = 'noopener noreferrer'; link.textContent = `${label} ↗`;
     sources.append(link, '　');
   }
@@ -138,7 +139,7 @@ async function changeSelection() {
   lapSamples = []; lastSample = 0; clearInput(); view = 0; accumulator = 0; last = 0;
   $('camera-button').setAttribute('aria-label', '切換鏡頭（C）');
   $('menu').hidden = false; $('hud').hidden = $('touch-controls').hidden = true; document.body.classList.remove('is-driving');
-  updateSelectionUI(); configureQuality(); updateCamera(1, true); world.update(state, elapsed, camera); updateHUD();
+  updateSelectionUI(); configureQuality(); updateCamera(1, true); world.update(state, elapsed, camera, vehicle); updateHUD();
   setPaused(false); setSelectionLoading(false); saveSettings();
   toast(`${track.label} · ${season.label} · ${vehicle.name} 已準備好。`);
 }
@@ -179,7 +180,7 @@ function startDriving(restart = false) {
   document.body.classList.add('is-driving'); setPaused(false);
   [...document.querySelectorAll('dialog')].forEach(d => { if (d.open) d.close(); });
   cameraPosition.copy(desiredPosition); updateCamera(1, true); $('start-button').blur();
-  toast(tilt?.enabled ? '左右傾斜手機轉向；按住油門或煞車。' : '直線上煞車，入彎後逐漸加速。');
+  toast(tilt?.enabled ? '傾斜手機轉向；手煞車甩尾，停下後持續按煞車可倒車。' : mobile ? '按手煞車甩尾；停下後持續按煞車可倒車。' : 'Space 手煞車甩尾；停下後持續按 S／↓ 可倒車。');
 }
 function resetOnTrack() {
   if (!active) return;
@@ -201,7 +202,8 @@ function closeDialog(id) {
 }
 function updateCamera(dt, snap = false) {
   if (!camera || !car) return;
-  forward.set(Math.sin(state.heading), 0, Math.cos(state.heading)); right.set(forward.z, 0, -forward.x);
+  const grade = roadPose(state.heading, state.roadHeading, state.roadSlope).grade;
+  forward.set(Math.sin(state.heading), (view === 1 || view === 3) ? grade : 0, Math.cos(state.heading)); right.set(forward.z, 0, -forward.x);
   const menuOpen = !$('menu').hidden;
   if (menuOpen) {
     const phase = Math.sin(elapsed * .13) * .08;
@@ -231,11 +233,11 @@ function updateCamera(dt, snap = false) {
 }
 function inputState(dt) {
   let steer = Number(held.has('KeyD') || held.has('ArrowRight')) - Number(held.has('KeyA') || held.has('ArrowLeft'));
-  let throttle = Number(held.has('KeyW') || held.has('ArrowUp')), brake = Number(held.has('KeyS') || held.has('ArrowDown') || held.has('Space'));
+  let throttle = Number(held.has('KeyW') || held.has('ArrowUp')), brake = Number(held.has('KeyS') || held.has('ArrowDown')), handbrake = Number(held.has('Space'));
   const pad = navigator.getGamepads?.()[0];
   if (pad) {
     if (Math.abs(pad.axes[0]) > .08) steer = pad.axes[0];
-    throttle = Math.max(throttle, pad.buttons[7]?.value || 0); brake = Math.max(brake, pad.buttons[6]?.value || 0);
+    throttle = Math.max(throttle, pad.buttons[7]?.value || 0); brake = Math.max(brake, pad.buttons[6]?.value || 0); handbrake = Math.max(handbrake, pad.buttons[1]?.value || 0);
     if (pad.buttons[3]?.pressed && !lastPadButtons[3]) cycleCamera();
     if (pad.buttons[9]?.pressed && !lastPadButtons[9] && active && $('menu').hidden && ![...document.querySelectorAll('dialog')].some(d => d.open)) setPaused(!paused);
     lastPadButtons = pad.buttons.map(b => b.pressed);
@@ -243,7 +245,7 @@ function inputState(dt) {
   const tiltInput = active && !paused ? (tilt?.sample(dt) || 0) : 0;
   $('tilt-wheel').style.transform = `rotate(${tiltInput * 45}deg)`;
   // Positive yaw turns toward +X; viewed along +Z, the driver's right is -X.
-  return { steer: -(touches.steer || steer || tiltInput), throttle: Math.max(throttle, touches.throttle), brake: Math.max(brake, touches.brake), stability: $('assist').checked };
+  return { steer: -(touches.steer || steer || tiltInput), throttle: Math.max(throttle, touches.throttle), brake: Math.max(brake, touches.brake), handbrake: Math.max(handbrake, touches.handbrake), stability: $('assist').checked };
 }
 function drawMap() {
   const canvas = $('track-map'), ctx = canvas.getContext('2d'), w = canvas.width, h = canvas.height;
@@ -281,10 +283,10 @@ function lapComplete() {
   lapSamples = [[0, state.x, state.y, state.z, state.heading, state.s]]; lastSample = 0; ghostCursor = 0; openDialog('result-dialog');
 }
 function updateHUD() {
-  $('speed-value').textContent = Math.round(state.speed * 3.6); $('gear-value').textContent = state.gear;
+  $('speed-value').textContent = Math.round(state.speed * 3.6); $('gear-value').textContent = state.reverse ? 'R' : state.gear;
   $('rpm-bar').style.width = `${clamp(state.rpm / vehicle.redline, 0, 1) * 100}%`;
   $('lap-value').textContent = String(state.lap).padStart(2, '0'); $('lap-time').textContent = formatTime(state.lapTime); $('best-time').textContent = formatTime(bestStored);
-  $('grip-value').textContent = state.collision > .1 ? '護欄接觸' : state.offTrack ? '路肩 · 低抓地' : state.slip > .65 ? '滑移' : season.snow ? '薄雪 · 低抓地' : season.wet >= .2 ? '濕地 · 注意煞車' : '正常';
+  $('grip-value').textContent = state.collision > .1 ? '護欄接觸' : state.reverse ? '倒車 · 油門切回前進' : state.handbrake > .15 && state.speed > 3 ? '手煞車 · 甩尾' : state.offTrack ? '路肩 · 低抓地' : state.slip > .65 ? '側滑 · 反打方向' : season.snow ? '薄雪 · 低抓地' : season.wet >= .2 ? '濕地 · 注意煞車' : '正常';
   $('grip-value').style.color = state.offTrack || state.slip > .65 ? '#f3bd72' : '';
   const previous = bestGhost.find(p => p[5] >= state.s);
   const delta = previous ? state.lapTime - previous[0] : null;
@@ -386,7 +388,7 @@ function installControls() {
   addEventListener('keyup', event => held.delete(event.code));
   addEventListener('blur', () => { clearInput(); if (active && $('menu').hidden) setPaused(true); });
   document.addEventListener('visibilitychange', () => { if (document.hidden) { clearInput(); if (active && $('menu').hidden) setPaused(true); } });
-  touchControls = installTouchControls({ left: $('steer-left'), right: $('steer-right'), throttle: $('throttle-button'), brake: $('brake-button') }, {
+  touchControls = installTouchControls({ left: $('steer-left'), right: $('steer-right'), throttle: $('throttle-button'), brake: $('brake-button'), handbrake: $('handbrake-button') }, {
     canDrive: () => active && !paused,
     onChange: input => Object.assign(touches, input),
   });
@@ -425,15 +427,19 @@ function frame(now) {
       }
     }
   }
-  car.group.position.set(state.x, state.y + .06, state.z); car.group.rotation.y = state.heading; car.update({ ...state, steerAngle: state.steeringAngle }, paused || !active ? 0 : dt);
+  const pose = roadPose(state.heading, state.roadHeading, state.roadSlope);
+  car.group.position.set(state.x, state.y + .06, state.z); car.group.rotation.set(pose.pitch, state.heading, pose.roll, 'YXZ'); car.update({ ...state, steerAngle: state.steeringAngle }, paused || !active ? 0 : dt);
   cockpit.group.visible = view === 3 && active && $('menu').hidden;
   car.group.visible = !cockpit.group.visible;
   cockpit.update(state, vehicle, track, paused || !active ? 0 : dt);
   if (ghost) {
     const p = ghostAt(state.lapTime); ghost.visible = !!p && active && $('menu').hidden && Math.hypot(p.x - state.x, p.z - state.z) > 3;
-    if (p) { ghost.position.set(p.x, p.y + .08, p.z); ghost.rotation.y = p.heading; }
+    if (p) {
+      const road = track.sample(p.s), slope = (track.sample(p.s + 2).y - track.sample(p.s - 2).y) / 4, pose = roadPose(p.heading, road.heading, slope);
+      ghost.position.set(p.x, p.y + .08, p.z); ghost.rotation.set(pose.pitch, p.heading, pose.roll, 'YXZ');
+    }
   }
-  updateCamera(dt); world.update(state, elapsed, camera); updateAudio();
+  updateCamera(dt); world.update(state, elapsed, camera, vehicle); updateAudio();
   if (now - lastHUD > 80) { updateHUD(); lastHUD = now; }
   renderer.render(world.scene, camera);
 }
@@ -457,7 +463,7 @@ async function boot() {
     }
     car.setPaint(paints[paint]); cockpit.setPaint(paints[paint]); world.scene.add(car.group, camera);
     createGhost(); car.group.position.set(state.x, state.y + .06, state.z); car.group.rotation.y = state.heading;
-    updateCamera(1, true); world.update(state, 0, camera); renderer.render(world.scene, camera);
+    updateCamera(1, true); world.update(state, 0, camera, vehicle); renderer.render(world.scene, camera);
     document.querySelectorAll('[data-paint]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.paint === paint)));
     installControls(); setSelectionLoading(false); state.rpm = vehicle.idle; updateSelectionUI(); updateHUD(); saveSettings();
     renderer.setAnimationLoop(frame);

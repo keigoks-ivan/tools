@@ -24,8 +24,8 @@ export function racingSoundProfile(vehicle = {}) {
 export function racingAudioFrame(state = {}, vehicle = {}) {
   const profile = racingSoundProfile(vehicle), idle = Math.max(500, finite(vehicle.idle, 950));
   const rpm = clamp(finite(state.rpm, idle), idle, Math.max(idle, finite(vehicle.redline, 9000)));
-  const throttle = unit(state.throttle), speed = clamp(finite(state.speed), 0, 130);
-  const slip = unit(state.slip), brake = unit(state.brake, unit(state.braking));
+  const throttle = state.reverse ? unit(state.brake) : unit(state.throttle), speed = clamp(finite(state.speed), 0, 130);
+  const slip = unit(state.slip), brake = Math.max(unit(state.brake, unit(state.braking)), unit(state.handbrake));
   const motion = clamp(speed / 13, 0, 1);
   return {
     profile, rpm, throttle, speed,

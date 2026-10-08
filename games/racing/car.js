@@ -1,8 +1,8 @@
 import * as THREE from './vendor/three.module.js';
 import { GLTFLoader } from './vendor/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from './vendor/addons/loaders/DRACOLoader.js';
-import { createExtraCar } from './cars-extra.js';
-import { createProductionCar } from './cars-production.js';
+import { createExtraCar } from './cars-extra.js?v=city-drive-11';
+import { createProductionCar } from './cars-production.js?v=city-drive-11';
 
 const asset = name => new URL(`./assets/${name}`, import.meta.url).href;
 const clamp = THREE.MathUtils.clamp;
@@ -82,9 +82,9 @@ export async function createCar({ renderer, mobile = false, vehicle = 'ferrari45
   const grain = grainTexture(64);
   const carbon = grainTexture(64, true);
   const paint = material(THREE.MeshPhysicalMaterial, {
-    color: '#cf382b', metalness: 0.4, roughness: 0.27,
-    clearcoat: 1, clearcoatRoughness: 0.1,
-    envMapIntensity: 1.08, bumpMap: grain, bumpScale: 0.00035,
+    color: '#cf382b', metalness: 0.16, roughness: 0.27,
+    clearcoat: 1, clearcoatRoughness: 0.065, ior: 1.5,
+    envMapIntensity: 1.16, bumpMap: grain, bumpScale: 0.00035,
   });
   const satinMetal = material(THREE.MeshStandardMaterial, {
     color: '#a8aaa9', metalness: 1, roughness: 0.25, envMapIntensity: 1,
@@ -115,11 +115,11 @@ export async function createCar({ renderer, mobile = false, vehicle = 'ferrari45
     clearcoat: 0.5, clearcoatRoughness: 0.28,
   });
   const glass = material(THREE.MeshPhysicalMaterial, {
-    color: '#a8bac3', metalness: 0.08, roughness: 0.055,
+    color: '#657a83', metalness: 0, roughness: 0.055,
     transparent: true, opacity: mobile ? 0.37 : 0.57,
-    transmission: mobile ? 0 : 0.25, thickness: 0.045,
-    ior: 1.46, clearcoat: 1, clearcoatRoughness: 0.04,
-    envMapIntensity: 0.9, depthWrite: false,
+    transmission: 0, thickness: 0,
+    ior: 1.52, clearcoat: 0.4, clearcoatRoughness: 0.025,
+    envMapIntensity: 1.15, depthWrite: false,
   });
   const rearLights = material(THREE.MeshPhysicalMaterial, {
     color: '#8b0905', metalness: 0.14, roughness: 0.22,
@@ -202,7 +202,7 @@ export async function createCar({ renderer, mobile = false, vehicle = 'ferrari45
   contactSource.dispose();
   textures.push(contactTexture);
   const contactMaterial = material(THREE.MeshBasicMaterial, {
-    map: contactTexture, transparent: true, opacity: 0.64,
+    map: contactTexture, transparent: true, opacity: 0.72,
     depthWrite: false, toneMapped: false,
     polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1,
   });
@@ -232,13 +232,13 @@ export async function createCar({ renderer, mobile = false, vehicle = 'ferrari45
     setPaint(color) {
       paint.color.set(color);
       const luminance = paint.color.r * 0.2126 + paint.color.g * 0.7152 + paint.color.b * 0.0722;
-      paint.metalness = luminance > 0.55 ? 0.18 : 0.4;
-      paint.roughness = luminance > 0.55 ? 0.29 : 0.27;
-      paint.clearcoatRoughness = luminance > 0.55 ? 0.12 : 0.1;
+      paint.metalness = luminance > 0.5 ? 0.08 : 0.16;
+      paint.roughness = luminance > 0.5 ? 0.30 : 0.27;
+      paint.clearcoatRoughness = 0.065;
     },
     update(state = {}, dt = 1 / 60) {
       const step = Math.min(Math.max(dt, 0), 0.1);
-      const speed = Number.isFinite(state.speed) ? state.speed : 0;
+      const speed = (Number.isFinite(state.speed) ? state.speed : 0) * (state.reverse ? -1 : 1);
       const targetSteer = Number.isFinite(state.steerAngle)
         ? clamp(state.steerAngle, -0.55, 0.55)
         : clamp(state.steering || 0, -1, 1) * 0.42;

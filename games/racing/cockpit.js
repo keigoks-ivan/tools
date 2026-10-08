@@ -20,15 +20,31 @@ export function createCockpit({ mobile = false } = {}) {
     texture.wrapS = texture.wrapT = THREE.RepeatWrapping; texture.repeat.set(7, 3);
     texture.colorSpace = normal ? THREE.NoColorSpace : THREE.SRGBColorSpace; textures.add(texture); return texture;
   }
-  const leather = material(THREE.MeshStandardMaterial, { color: '#465055', map: grainTexture(), normalMap: grainTexture(true), normalScale: new THREE.Vector2(.28, .28), roughness: .73 });
-  const rubber = material(THREE.MeshStandardMaterial, { color: '#0d1011', roughness: .94 });
-  const metal = material(THREE.MeshStandardMaterial, { color: '#697578', metalness: .85, roughness: .28 });
-  const trim = material(THREE.MeshStandardMaterial, { color: '#c5d1ce', metalness: .6, roughness: .32 });
+  function cabinMaterial(options) {
+    const mat = material(THREE.MeshStandardMaterial, { envMapIntensity: .42, fog: false, ...options });
+    mat.userData.cabinOcclusion = true;
+    mat.onBeforeCompile = shader => {
+      shader.vertexShader = shader.vertexShader.replace('#include <common>', '#include <common>\nattribute float cabinOcclusion;\nvarying float vCabinOcclusion;').replace('#include <begin_vertex>', '#include <begin_vertex>\nvCabinOcclusion = cabinOcclusion;');
+      shader.fragmentShader = shader.fragmentShader.replace('#include <common>', '#include <common>\nvarying float vCabinOcclusion;').replace('#include <aomap_fragment>', `#include <aomap_fragment>
+        reflectedLight.directDiffuse *= mix(.28, .86, vCabinOcclusion);
+        reflectedLight.directSpecular *= mix(.38, .92, vCabinOcclusion);
+        reflectedLight.indirectDiffuse *= vCabinOcclusion;
+        reflectedLight.indirectSpecular *= mix(.32, 1., vCabinOcclusion);
+      `);
+    };
+    mat.customProgramCacheKey = () => 'cockpit-window-occlusion-v1';
+    return mat;
+  }
+  const leather = cabinMaterial({ color: '#30393f', map: grainTexture(), normalMap: grainTexture(true), normalScale: new THREE.Vector2(.21, .21), roughness: .64 });
+  const fabric = cabinMaterial({ color: '#626d72', map: leather.map, normalMap: leather.normalMap, normalScale: new THREE.Vector2(.12, .12), roughness: .9, envMapIntensity: .24 });
+  const rubber = cabinMaterial({ color: '#121719', roughness: .92 });
+  const metal = cabinMaterial({ color: '#727d82', metalness: .82, roughness: .31 });
+  const trim = cabinMaterial({ color: '#a6b2b4', metalness: .72, roughness: .36 });
   const hoodPaint = material(THREE.MeshPhysicalMaterial, { color: '#c93324', metalness: .55, roughness: .24, clearcoat: 1 });
-  const stitch = material(THREE.MeshBasicMaterial, { color: '#6a7374' });
-  const accent = material(THREE.MeshStandardMaterial, { color: '#83968f', metalness: .65, roughness: .37 });
+  const stitch = material(THREE.MeshBasicMaterial, { color: '#536368', fog: false });
+  const accent = cabinMaterial({ color: '#65767c', metalness: .62, roughness: .43 });
   const ambient = material(THREE.MeshBasicMaterial, { color: '#c7a672', toneMapped: false });
-  const glove = material(THREE.MeshStandardMaterial, { color: '#b4babc', map: leather.map, normalMap: leather.normalMap, normalScale: new THREE.Vector2(.18, .18), roughness: .9 });
+  const glove = cabinMaterial({ color: '#252b31', map: leather.map, normalMap: leather.normalMap, normalScale: new THREE.Vector2(.16, .16), roughness: .91, envMapIntensity: .15 });
   function mesh(geometry, mat, parent = group) {
     geometries.add(geometry); const object = new THREE.Mesh(geometry, mat);
     object.frustumCulled = false; parent.add(object); return object;
@@ -56,7 +72,7 @@ export function createCockpit({ mobile = false } = {}) {
     dashPositions.setY(i, dashPositions.getY(i) + .025 * Math.cos(x * 2.5) - Math.abs(x) ** 3 * .045 + .02 * z);
     dashPositions.setZ(i, z - .07 * x * x);
   }
-  dashboard.computeVertexNormals(); const dash = mesh(dashboard, leather); dash.position.set(0, -.53, -1.02);
+  dashboard.computeVertexNormals(); const dash = mesh(dashboard, fabric); dash.position.set(0, -.53, -1.02);
   roundedBox(1.93, .12, .035, .035, rubber, 0, -.405, -.755);
   roundedBox(1.87, .028, .042, .011, accent, 0, -.421, -.733);
   box(1.78, .003, .005, ambient, 0, -.405, -.703);
@@ -64,9 +80,9 @@ export function createCockpit({ mobile = false } = {}) {
   mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(stitchPoints.map(p => new THREE.Vector3(...p))), 36, .0013, 4, false), stitch);
   roundedBox(.64, .23, .16, .055, rubber, -.17, -.160, -.92);
   for (const side of [-1, 1]) {
-    const pillar = beam([side * 1.06, -.64, -.84], [side * .75, .52, -1.20], .090, leather);
+    const pillar = beam([side * 1.06, -.64, -.84], [side * .94, 1.02, -1.26], .090, leather);
     pillar.geometry.scale(1, 1, .42);
-    beam([side * 1.035, -.46, -.89], [side * .737, .50, -1.198], .0024, stitch);
+    beam([side * 1.035, -.46, -.89], [side * .927, 1.00, -1.258], .0024, stitch);
     roundedBox(.20, .065, .045, .016, metal, side * .76, -.359, -.770);
     roundedBox(.174, .048, .047, .012, rubber, side * .76, -.359, -.761);
     for (let i = 0; i < 6; i++) box(.006, .038, .010, accent, side * .76 + (i - 2.5) * .026, -.359, -.732);
@@ -92,18 +108,18 @@ export function createCockpit({ mobile = false } = {}) {
     for (let i = -1; i <= 1; i++) box(.005, .006, .004, trim, side * .087, i * .008, .027, wheel);
     const hand = new THREE.Group(); hand.position.set(side * .158, -.003, .033); hand.rotation.z = -side * .10; wheel.add(hand);
     const palm = mesh(new THREE.SphereGeometry(1, 16, 10), glove, hand); palm.scale.set(.034, .057, .028);
-    for (let finger = 0; finger < 4; finger++) beam([side * -.022, -.031 + finger * .019, .026], [side * .021, -.035 + finger * .019, .023], .003, stitch, hand);
+    for (let finger = 0; finger < 4; finger++) beam([side * -.022, -.031 + finger * .019, .026], [side * .021, -.035 + finger * .019, .023], .0015, stitch, hand);
     beam([side * -.030, -.036, .015], [side * -.008, -.006, .031], .016, glove, hand);
     roundedBox(.064, .044, .028, .012, rubber, 0, -.060, 0, hand);
     beam([0, -.076, -.002], [-side * .015, -.19, .035], .045, leather, hand);
   }
   function screen(width, height, x, y, z, parent = group) {
-    const canvas = document.createElement('canvas'); canvas.width = mobile ? 512 : 768; canvas.height = Math.round(canvas.width * height / width);
+    const canvas = document.createElement('canvas'); canvas.width = width < .1 ? 128 : mobile ? 512 : 768; canvas.height = Math.round(canvas.width * height / width);
     const texture = new THREE.CanvasTexture(canvas); texture.colorSpace = THREE.SRGBColorSpace; textures.add(texture);
     const mat = material(THREE.MeshBasicMaterial, { map: texture, toneMapped: false });
     const display = mesh(new THREE.PlaneGeometry(width, height), mat, parent); display.position.set(x, y, z);
-    roundedBox(width + .019, height + .019, .012, Math.min(.012, height / 4), rubber, x, y, z - .010, parent);
-    return { canvas, texture, context: canvas.getContext('2d') };
+    const bezel = roundedBox(width + .019, height + .019, .012, Math.min(.012, height / 4), rubber, x, y, z - .010, parent);
+    return { canvas, texture, context: canvas.getContext('2d'), display, bezel };
   }
   const instruments = screen(.58, .177, -.17, -.142, -.828);
   const navigation = screen(.31, .184, .39, -.218, -.771);
@@ -119,7 +135,7 @@ export function createCockpit({ mobile = false } = {}) {
   beam([.07, .398, -.915], [.07, .475, -.99], .017, rubber);
   roundedBox(.38, .044, .078, .009, rubber, .39, -.387, -.734);
   for (let i = 0; i < 8; i++) box(.026, .025, .002, accent, .39 + (i - 3.5) * .043, -.387, -.692);
-  const movingParts = new Set([roundRim, wheelSeam, flatRim, curvedDisplay, mirror, mirrorFace, bonnet]);
+  const movingParts = new Set([roundRim, wheelSeam, flatRim, curvedDisplay, mirror, mirrorFace, bonnet, instruments.display, instruments.bezel, navigation.display, navigation.bezel]);
   function batch(parent, excludedGroups = new Set()) {
     group.updateMatrixWorld(true); const inverse = parent.matrixWorld.clone().invert(), batches = new Map();
     parent.traverse(node => {
@@ -140,6 +156,21 @@ export function createCockpit({ mobile = false } = {}) {
     }
   }
   batch(group, new Set([wheelPivot])); batch(wheel, new Set([porscheControls])); batch(porscheControls);
+  // Bake window exposure and contact occlusion once; cabin detail needs no extra shadow pass.
+  group.updateMatrixWorld(true);
+  const inverseCabin = group.matrixWorld.clone().invert(), point = new THREE.Vector3(), normal = new THREE.Vector3();
+  group.traverse(node => {
+    if (!node.isMesh || !node.material.userData.cabinOcclusion) return;
+    const transform = inverseCabin.clone().multiply(node.matrixWorld), normalTransform = new THREE.Matrix3().getNormalMatrix(transform);
+    const positions = node.geometry.attributes.position, normals = node.geometry.attributes.normal, values = new Float32Array(positions.count);
+    for (let i = 0; i < positions.count; i++) {
+      point.fromBufferAttribute(positions, i).applyMatrix4(transform); normal.fromBufferAttribute(normals, i).applyMatrix3(normalTransform).normalize();
+      const top = THREE.MathUtils.smoothstep(point.y, -.64, -.20), windscreen = THREE.MathUtils.smoothstep(-point.z, .73, 1.16), side = THREE.MathUtils.smoothstep(Math.abs(point.x), .43, .98);
+      const hoodContact = Math.exp(-(((point.y + .365) / .085) ** 2 + ((point.x + .17) / .42) ** 2 + ((point.z + .82) / .29) ** 2));
+      values[i] = THREE.MathUtils.clamp(.35 + top * .34 + windscreen * .11 + side * .10 + normal.y * .13 - hoodContact * .18, .25, .94);
+    }
+    node.geometry.setAttribute('cabinOcclusion', new THREE.BufferAttribute(values, 1));
+  });
   let lastReadout = '', lastVehicle = '', steering = 0, disposed = false;
   function drawInstruments(state, vehicle) {
     const { canvas, context: c, texture } = instruments, w = canvas.width, h = canvas.height;
@@ -171,7 +202,7 @@ export function createCockpit({ mobile = false } = {}) {
       c.fillStyle = '#edf2f1'; c.font = `500 ${h * .25}px Arial`; c.textAlign = 'center'; c.fillText(String(Math.round((state.speed || 0) * 3.6)), w * .50, h * .31);
       c.fillStyle = '#9badad'; c.font = `${h * .060}px Arial`; c.fillText('km/h', w * .50, h * .40);
     }
-    c.fillStyle = '#d8b16c'; c.font = `600 ${h * .13}px Arial`; c.textAlign = 'right'; c.fillText(String(state.gear || 1), w * .92, h * .24);
+    c.fillStyle = '#d8b16c'; c.font = `600 ${h * .13}px Arial`; c.textAlign = 'right'; c.fillText(state.reverse ? 'R' : String(state.gear || 1), w * .92, h * .24);
     c.textAlign = 'left'; c.font = `${h * .065}px Arial`; c.fillText(vehicle.shortName || vehicle.name, w * .04, h * .95);
     c.textAlign = 'right'; c.fillStyle = '#bfaa80'; c.fillText('SPORT  /  TIME ATTACK', w * .96, h * .95); texture.needsUpdate = true;
   }
@@ -191,7 +222,7 @@ export function createCockpit({ mobile = false } = {}) {
     update(state, vehicle, track, dt = 0) {
       if (!group.visible || disposed) return;
       steering = THREE.MathUtils.damp(steering, -(state.steeringAngle || 0) * 2.6, 12, dt); wheel.rotation.z = steering;
-      const key = `${Math.round(state.speed * 3.6)}:${state.gear}:${Math.floor(state.rpm / 150)}:${vehicle.id}`;
+      const key = `${Math.round(state.speed * 3.6)}:${state.reverse ? 'R' : state.gear}:${Math.floor(state.rpm / 150)}:${vehicle.id}`;
       if (key !== lastReadout) { drawInstruments(state, vehicle); lastReadout = key; }
       if (lastVehicle !== `${vehicle.id}:${track.id}`) {
         drawNavigation(track); const c = badge.context, canvas = badge.canvas;
@@ -199,6 +230,12 @@ export function createCockpit({ mobile = false } = {}) {
         c.font = `600 ${canvas.height * .43}px Arial`; c.fillText(vehicle.name.split(' ')[0].toUpperCase(), canvas.width / 2, canvas.height * .68, canvas.width * .92); badge.texture.needsUpdate = true;
         const suv = vehicle.id === 'bmwX3'; mirror.position.y = mirrorFace.position.y = suv ? .42 : .365; bonnet.scale.x = suv ? 1.1 : 1; lastVehicle = `${vehicle.id}:${track.id}`;
         flatRim.visible = curvedDisplay.visible = suv; roundRim.visible = wheelSeam.visible = !suv;
+        instruments.bezel.visible = navigation.bezel.visible = !suv;
+        instruments.display.position.set(suv ? -.22 : -.17, -.142, -.828);
+        instruments.display.scale.x = suv ? .66 / .58 : 1;
+        navigation.display.position.set(suv ? .32 : .39, suv ? -.142 : -.218, suv ? -.828 : -.771);
+        navigation.display.scale.set(suv ? .40 / .31 : 1, suv ? .177 / .184 : 1, 1);
+        curvedDisplay.position.set(-.02, -.142, -.854); curvedDisplay.scale.x = 1.04;
         porscheControls.visible = vehicle.id.startsWith('porsche'); ambient.color.set(suv ? '#e55565' : vehicle.id.startsWith('porsche') ? '#dfc660' : '#c7a672');
       }
     },

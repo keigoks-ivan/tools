@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#141614">
   <title>APEX · 世界競速</title>
   <meta name="description" content="駕駛市售跑車，探索台北、吉隆坡、神戶、倫敦與全球城市賽道。手機方向盤、原創熱血配樂、引擎音效與個人圈速挑戰。">
-  <link rel="stylesheet" href="./style.css?v=city-drive-7">
+  <link rel="stylesheet" href="./style.css?v=city-drive-11">
   <script type="importmap">{"imports":{"three":"./vendor/three.module.js","three/addons/":"./vendor/addons/"}}</script>
 </head>
 <body>
@@ -67,7 +67,7 @@
         </div>
         <p id="render-device" class="render-device" role="status">正在偵測繪圖裝置…</p>
       </div>
-      <p class="menu-controls keyboard-copy"><kbd>W A S D</kbd> 或方向鍵操控 <span>·</span> <kbd>R</kbd> 回到賽道</p>
+      <p class="menu-controls keyboard-copy"><kbd>W A S D</kbd> 或方向鍵操控 <span>·</span> <kbd>Space</kbd> 手煞車 <span>·</span> <kbd>R</kbd> 回到賽道</p>
       <p class="menu-controls touch-copy">橫握手機轉向 <span>·</span> 按住油門或煞車</p>
       <footer class="menu-footer"><a href="/games/" aria-label="返回遊戲機台">遊戲機台 ↗</a><button id="audio-settings-button" type="button">音效與配樂 ↗</button><button id="credits-button" type="button">製作資訊 ↗</button></footer>
     </section>
@@ -87,7 +87,7 @@
         <div class="speed-readout"><div class="gear-readout"><span>GEAR</span><b id="gear-value">1</b></div><b id="speed-value">0</b><span class="speed-unit">km/h</span></div>
         <div class="grip-readout"><span>輪胎狀態</span><b id="grip-value">正常</b></div>
       </div>
-      <p class="driving-shortcuts keyboard-copy"><kbd>C</kbd> 鏡頭 <span>·</span> <kbd>R</kbd> 回到賽道</p>
+      <p class="driving-shortcuts keyboard-copy"><kbd>C</kbd> 鏡頭 <span>·</span> <kbd>Space</kbd> 手煞車 <span>·</span> <kbd>R</kbd> 回到賽道</p>
     </section>
 
     <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
@@ -104,7 +104,7 @@
           <button id="tilt-calibrate" class="tilt-calibrate" type="button">回正校準</button>
         </div>
       </div>
-      <div class="pedals"><button id="brake-button" class="pedal brake-pedal" type="button" aria-label="按住煞車"><span class="pedal-lines" aria-hidden="true"></span><strong>煞車</strong></button><button id="throttle-button" class="pedal throttle-pedal" type="button" aria-label="按住油門"><span class="pedal-lines" aria-hidden="true"></span><strong>油門</strong></button></div>
+      <div class="pedals"><button id="handbrake-button" class="pedal handbrake-pedal" type="button" aria-label="按住手煞車甩尾" aria-pressed="false"><strong>手煞車</strong></button><button id="brake-button" class="pedal brake-pedal" type="button" aria-label="按住煞車，停下後持續按住可倒車"><span class="pedal-lines" aria-hidden="true"></span><strong>煞車／倒車</strong></button><button id="throttle-button" class="pedal throttle-pedal" type="button" aria-label="按住油門"><span class="pedal-lines" aria-hidden="true"></span><strong>油門</strong></button></div>
     </div>
 
     <dialog id="audio-dialog" class="audio-dialog" aria-labelledby="audio-title">
@@ -117,8 +117,8 @@
 
     <dialog id="help-dialog" class="help-dialog" aria-labelledby="help-title">
       <div class="dialog-heading"><div><span class="eyebrow">DRIVER'S GUIDE</span><h2 id="help-title">駕駛指南</h2></div><button id="close-help" class="close-button" type="button" aria-label="關閉操作說明">×</button></div>
-      <dl class="help-controls"><div><dt><kbd>W</kbd> <kbd>↑</kbd></dt><dd>加速</dd></div><div><dt><kbd>S</kbd> <kbd>↓</kbd></dt><dd>煞車</dd></div><div><dt><kbd>A D</kbd> <kbd>← →</kbd></dt><dd>轉向</dd></div><div><dt><kbd>R</kbd></dt><dd>回到賽道</dd></div><div><dt><kbd>C</kbd></dt><dd>切換鏡頭</dd></div><div><dt><kbd>P</kbd> / <kbd>M</kbd></dt><dd>暫停 / 聲音</dd></div></dl>
-      <p class="help-touch">手機：按「啟用手機方向盤」並允許感測器，橫握手機、保持平穩，再左右傾斜轉向；拇指可同時按住油門或煞車。直行時按「回正校準」，重新設定手持角度。若瀏覽器不支援感測器，可切回左／右按鈕。</p>
+      <dl class="help-controls"><div><dt><kbd>W</kbd> <kbd>↑</kbd></dt><dd>加速</dd></div><div><dt><kbd>S</kbd> <kbd>↓</kbd></dt><dd>煞車；停下後持續按住可倒車</dd></div><div><dt><kbd>A D</kbd> <kbd>← →</kbd></dt><dd>轉向</dd></div><div><dt><kbd>Space</kbd></dt><dd>手煞車甩尾</dd></div><div><dt><kbd>R</kbd></dt><dd>回到賽道</dd></div><div><dt><kbd>C</kbd></dt><dd>切換鏡頭</dd></div><div><dt><kbd>P</kbd> / <kbd>M</kbd></dt><dd>暫停 / 聲音</dd></div></dl>
+      <p class="help-touch">手機：按「啟用手機方向盤」並允許感測器，橫握手機、保持平穩，再左右傾斜轉向；拇指可同時按住油門或煞車。直行時按「回正校準」，重新設定手持角度。「手煞車」可讓後輪滑移；放開後反打方向回正。停下後持續按煞車可倒車，油門切回前進。若瀏覽器不支援感測器，可切回左／右按鈕。</p>
       <div class="driver-tip"><span class="eyebrow">第一圈，先熟悉賽道。</span><p>直線上煞車，入彎時鬆開油門；看見出彎方向後，再逐漸加速。</p></div>
     </dialog>
 
@@ -136,6 +136,6 @@
     </dialog>
     <noscript><p class="no-script">請開啟 JavaScript，以載入 3D 賽車遊戲。</p></noscript>
   </main>
-  <script type="module" src="./main.js?v=city-drive-7"></script>
+  <script type="module" src="./main.js?v=city-drive-11"></script>
 </body>
 </html>

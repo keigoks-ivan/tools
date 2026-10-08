@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
 import { TRACKS } from './track.mjs';
-import { CITY_THEMES, cityGroundLevel, addCityScenery } from './world-cities.js';
+import { CITY_THEMES, CITY_STREET_PROFILES, cityGroundLevel, addCityScenery } from './world-cities.js';
 
 const context = new Proxy({
   font: '16px Arial',
@@ -22,6 +22,18 @@ test('city terrain opens coast and river channels without lowering the driving c
   for (const city of CITY_THEMES) assert.equal(cityGroundLevel(city, TRACKS[city].spawn.x, TRACKS[city].spawn.z), 4.65);
 });
 
+test('all nineteen cities have independently authored street families and appropriate local scale', () => {
+  assert.deepEqual(Object.keys(CITY_STREET_PROFILES), CITY_THEMES);
+  assert.equal(new Set(Object.values(CITY_STREET_PROFILES).map(profile => profile.family)).size, 19);
+  assert.ok(CITY_STREET_PROFILES.hanoi.widths[1] <= 8 && CITY_STREET_PROFILES.hanoi.heights[1] <= 17, 'Old Quarter tube houses stay narrow and low');
+  assert.ok(CITY_STREET_PROFILES.warwick.heights[1] <= 11 && CITY_STREET_PROFILES.warwick.skyline[1] <= 13, 'Warwick stays a small historic town');
+  for (const city of ['paris', 'prague', 'newcastle', 'lisbon', 'marseille', 'nice']) assert.ok(CITY_STREET_PROFILES[city].skyline[1] <= 30, `${city}: the historic district has no generic high-rise grid`);
+  assert.equal(CITY_STREET_PROFILES.paris.roof, 'mansard');
+  assert.equal(CITY_STREET_PROFILES.goldcoast.family, 'surfers-balconies');
+  assert.equal(CITY_STREET_PROFILES.vancouver.family, 'coalharbor-ribbons');
+  assert.equal(CITY_STREET_PROFILES.newyork.family, 'manhattan-setbacks');
+});
+
 for (const city of CITY_THEMES) for (const mobile of [false, true]) {
   test(`${city} ${mobile ? 'mobile' : 'desktop'}: recognizable landmark geometry is finite and street structures clear the racing surface`, () => {
     const scene = new THREE.Scene(), track = TRACKS[city];
@@ -29,6 +41,12 @@ for (const city of CITY_THEMES) for (const mobile of [false, true]) {
     const built = addCityScenery({ scene, track, mobile, groundHeight: () => 4.65, materials: { concrete, shoulder, rock } });
     assert.ok(built.group.userData.landmarks.length >= 2);
     assert.ok(built.group.userData.buildings.length >= 65);
+    const profile = CITY_STREET_PROFILES[city];
+    for (const building of built.group.userData.buildings) {
+      assert.equal(building.family, profile.family);
+      const heights = building.near ? profile.heights : profile.skyline;
+      assert.ok(building.h >= heights[0] && building.h <= heights[1], 'every foreground and skyline building follows its city scale');
+    }
     assert.ok(built.group.children.length < 38, 'street detail is batched by material');
     let height = 0, vertices = 0, meshes = 0;
     scene.traverse(object => {
@@ -50,6 +68,13 @@ for (const city of CITY_THEMES) for (const mobile of [false, true]) {
     const requiredHeight = { taipei: 510, kualalumpur: 455, kobe: 110, london: 135 }[city];
     if (requiredHeight) assert.ok(height >= requiredHeight && height < 520, `landmark height ${height}`);
     else assert.ok(height > (city === 'hanoi' ? 30 : 40) && height < 550, `bounded recognizable skyline: ${height}`);
+    built.setQuality('medium');
+    assert.ok(built.group.children.some(mesh => mesh.castShadow), 'mobile quality retains architectural shadows');
+    for (const mesh of built.group.children) if (mesh.material.userData.cityRoadPaint || mesh.material.userData.cityWater || mesh.material.name === 'city-foliage') assert.equal(mesh.castShadow, false, 'paint, water and mobile foliage do not cast');
+    built.setQuality('high');
+    for (const mesh of built.group.children) if (mesh.material.name === 'city-foliage') assert.equal(mesh.castShadow, true, 'high quality adds foliage shadows');
+    built.setQuality('low');
+    assert.ok(built.group.children.every(mesh => !mesh.castShadow), 'low quality preserves the shadow draw budget');
     let disposed = 0;
     const resources = new Set([concrete, shoulder, rock]);
     scene.traverse(object => {

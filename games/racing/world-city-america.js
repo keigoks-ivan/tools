@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { createCityBuilder } from './world-city-kit.js';
-import { createCityWaterMaterial, addCityWaterPlane } from './world-city-australia.js';
+import { createCityBuilder } from './world-city-kit.js?v=city-drive-11';
+import { createCityWaterMaterial, addCityWaterPlane } from './world-city-australia.js?v=city-drive-11';
 
 const TAU = Math.PI * 2;
 
@@ -75,6 +75,17 @@ function canadaSailGeometry(width, length, mobile) {
   geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2)); geometry.setIndex(indices); geometry.computeVertexNormals(); return geometry;
 }
 
+function barrelCanopyGeometry(radius, length, mobile) {
+  const count = mobile ? 10 : 16, positions = [], uvs = [], indices = [];
+  for (let n = 0; n <= count; n++) for (const z of [-length / 2, length / 2]) {
+    const a = n / count * Math.PI;
+    positions.push(Math.cos(a) * radius, Math.sin(a) * radius, z); uvs.push(n / count, z > 0 ? 1 : 0);
+    if (z > 0 && n < count) { const k = n * 2; indices.push(k, k + 2, k + 1, k + 1, k + 2, k + 3); }
+  }
+  const geometry = new THREE.BufferGeometry(); geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+  geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2)); geometry.setIndex(indices); geometry.computeVertexNormals(); return geometry;
+}
+
 function mountainGeometry(seed, width, height, depth, mobile) {
   const segments = mobile ? 22 : 36, rows = mobile ? 14 : 22, positions = [], uvs = [], indices = [], colors = [];
   const forest = new THREE.Color('#587360'), rock = new THREE.Color('#a3afa4');
@@ -83,7 +94,9 @@ function mountainGeometry(seed, width, height, depth, mobile) {
     const radius = Math.hypot(x / (width * .52), z / (depth * .53));
     const ridge = Math.max(0, 1 - radius);
     const rough = 1 + .16 * Math.sin(col * 1.1 + seed) + .085 * Math.cos(row * 1.3 + col * .7);
-    const y = Math.pow(ridge, 1.3) * height * rough + Math.sin(col * .39 + row * .18) * 5 * ridge;
+    const peaks = .54 + .24 * Math.sin(col / segments * Math.PI * 3.1 + seed) + .22 * Math.sin(col / segments * Math.PI * 6.7 + seed * .4) ** 2;
+    const shoulder = Math.sin(row / rows * Math.PI) ** 1.35 * Math.sin(col / segments * Math.PI) ** .54;
+    const y = shoulder * height * peaks * rough + Math.sin(col * .39 + row * .18) * 5 * ridge;
     positions.push(x, y, z); uvs.push(x / 24, z / 24);
     const tint = forest.clone().lerp(rock, THREE.MathUtils.smoothstep(y / height, .52, 1));
     colors.push(tint.r, tint.g, tint.b);
@@ -182,6 +195,7 @@ export function addAmericanLandmarks(options) {
     paint.color.multiplyScalar(1.8);
     box(17, .95, width, stone, 0, .48, z); box(14.5, height, width - .35, paint, 0, height / 2 + .9, z);
     for (const y of [1.05, 5.2, 9.25, height + .8]) box(15.1, .28, width, trim, 0, y, z);
+    for (let y = 1.5; y < height; y += .43) box(.12, .045, width - .45, trim, -7.31, y, z);
     box(2.4, height - 2.1, width * .51, paint, -8, (height + .5) / 2, z - 1.1);
     for (const y of [3.3, 7.5, 11]) {
       box(.07, 2.4, width * .39, glass, -9.24, y, z - 1.1);
@@ -201,6 +215,11 @@ export function addAmericanLandmarks(options) {
     gable.setIndex([0, 2, 1]); bake(gable, paint);
     for (let i = -4; i <= 4; i++) box(.3, .18, .12, trim, -7.67, height + 1.06, z + i * width / 10);
     box(1.1, 2.6, .9, stone, 3.8, height + 4, z + 2.1);
+    for (const dz of [-width * .40, width * .40]) {
+      cylinder(.10, .12, 3.4, trim, -9.15, 2.65, z + dz, 7);
+      box(.35, .16, .35, trim, -9.15, 4.4, z + dz);
+    }
+    box(2.9, .22, width - .5, paint, -8.05, 4.65, z);
   }
 
   function taxi(x, z, yaw = 0) {
@@ -217,7 +236,20 @@ export function addAmericanLandmarks(options) {
     suspensionBridge({ x: 160, z: 510, span: 1280, sideSpan: 343, towerHeight: 227, deckHeight: 67, orange: true });
     const street = b.place(.026, 1, 52, 32, 95, 'San Francisco Painted Ladies');
     const colors = ['#b8bf9c', '#b7a69a', '#929f96', '#c2ad8f', '#b49696', '#9dabaf'];
-    for (let n = 0; n < 6; n++) victorianHouse(-32 + n * 12.4, colors[n], 10.5, 12.1 + n * .37);
+    for (let n = 0; n < 6; n++) {
+      const along = -32 + n * 12.4;
+      b.setFrame(street.x + Math.sin(street.yaw) * along, street.z + Math.cos(street.yaw) * along, street.yaw);
+      victorianHouse(0, colors[n], 10.5, 12.1 + n * .37);
+    }
+    b.setFrame(142, 174, -.07); b.reserve(142, 174, 55, 'San Francisco Transamerica tapered skyline');
+    const pyramidFacade = b.surface(options.materials.concrete, '#e0dccd', { map: empireFacadeMap(), roughness: .82 });
+    pyramidFacade.userData = { ...pyramidFacade.userData, surface: false };
+    const pyramid = new THREE.CylinderGeometry(4.3, 44, 210, 4, 1); pyramid.rotateY(Math.PI / 4);
+    const positions = pyramid.attributes.position, normals = pyramid.attributes.normal, uv = pyramid.attributes.uv;
+    for (let i = 0; i < positions.count; i++) uv.setXY(i, (Math.abs(normals.getX(i)) > .5 ? positions.getZ(i) : positions.getX(i)) / 4.4, (positions.getY(i) + 115) / 3.6);
+    bake(pyramid, pyramidFacade, 0, 115, 0); box(61, 10, 61, lightStone, 0, 5, 0);
+    for (const side of [-1, 1]) box(5, 101, 9, lightStone, side * 18.5, 77, 0);
+    cylinder(.18, 4.4, 40, trim, 0, 240, 0, 4, 0, Math.PI / 4);
     const point = track.sample(track.length * .078), offset = 26;
     const x = point.x + point.nx * offset, z = point.z + point.nz * offset;
     b.setFrame(x, z, point.heading); b.reserve(x, z, 15, 'San Francisco cable car stop');
@@ -284,8 +316,11 @@ export function addAmericanLandmarks(options) {
       { x: 40, z: 1000, h: 135, w: 61, d: 44 }, { x: 160, z: 870, h: 202, w: 48, d: 56 },
       { x: 360, z: 1160, h: 154, w: 76, d: 56 }, { x: 575, z: 765, h: 116, w: 56, d: 47 }].entries()) {
       b.setFrame(tower.x, tower.z, 0, 4.65);
-      if (n % 2) bake(empireSectionGeometry({ ...tower, bottom: 0, top: tower.h }), facade, 0, tower.h / 2, 0);
-      else box(tower.w, tower.h, tower.d, stone, 0, tower.h / 2, 0);
+      if (n % 2) for (const [scale, bottom, top] of [[1, 0, tower.h * .70], [.77, tower.h * .70, tower.h * .91], [.52, tower.h * .91, tower.h]]) {
+        const part = { w: tower.w * scale, d: tower.d * scale, bottom, top };
+        bake(empireSectionGeometry(part), facade, 0, (bottom + top) / 2, 0);
+        box(part.w + .9, .5, part.d + .9, lightStone, 0, top + .1, 0);
+      } else box(tower.w, tower.h, tower.d, stone, 0, tower.h / 2, 0);
       box(tower.w + 1.3, 1.8, tower.d + 1.3, lightStone, 0, tower.h, 0);
       for (let y = 5; n % 2 === 0 && y < tower.h - 2; y += mobile ? 8 : 4) {
         box(tower.w - 4, 1.65, .06, glass, 0, y, -tower.d / 2 - .05);
@@ -314,6 +349,11 @@ export function addAmericanLandmarks(options) {
         box(.055, .055, 4.2, dark, -11.7, y + 1.06, z - 2.3);
         beam([-11.9, y + .12, z - 4.1], [-11.9, y + 3.82, z -.5], .07, dark);
       }
+      if (n % 2 === 0) {
+        for (const x of [-1.2, 1.2]) for (const dz of [-1.2, 1.2]) beam([x, 17.8, z + dz], [x * .8, 19.1, z + dz * .8], .13, dark);
+        cylinder(1.6, 1.6, 3, timber, 0, 20.5, z, 12); bake(new THREE.ConeGeometry(1.85, .8, 12), dark, 0, 22.4, z);
+        for (const y of [19.25, 20.6, 21.9]) cylinder(1.63, 1.63, .07, steel, 0, y, z, 12);
+      }
     }
     const road = track.sample(track.length * .11);
     for (let n = 0; n < 3; n++) taxi(road.x + road.nx * 23, road.z + road.nz * 23 + n * 11, road.heading);
@@ -321,7 +361,6 @@ export function addAmericanLandmarks(options) {
     b.sign('FIFTH AVENUE', 'MANHATTAN', 8.6, .86, -11.24, 5.4, 3, '#314a3e');
   } else if (track.id === 'vancouver') {
     const white = b.material('#eeeeea', { roughness: .54, side: THREE.DoubleSide });
-    const forest = b.surface(options.materials.rock, '#ffffff', { vertexColors: true });
     b.setFrame(-485, 25, 0, 4.65); b.reserve(-485, 25, 148, 'Canada Place five sails');
     box(86, 7.7, 258, stone, 0, -2.84, 0); box(68, 9, 242, lightStone, 0, 4.5, 0);
     box(71, .55, 246, trim, 0, 9.3, 0);
@@ -338,12 +377,15 @@ export function addAmericanLandmarks(options) {
       for (const side of [-1, 1]) beam([side * 32.5, 15, z - 23.5], [0, 41, z + 23.5], .12, steel);
       for (const side of [-1, 1]) beam([side * 32.5, 9.5, z], [side * 32.5, 15, z], .24, trim);
     }
-    frontSign('CANADA PLACE', 'VANCOUVER WATERFRONT', 20, 2.3, 0, 7, -121.2, '#375767');
-    // The distant North Shore is one textured ridge rather than a forest of
-    // independently drawn trees, maintaining the harbour's skyline at low cost.
-    for (const ridge of [{ x: -180, z: 850, w: 840, h: 207, d: 400, seed: 7 }, { x: 480, z: 870, w: 700, h: 244, d: 430, seed: 14 }]) {
-      b.setFrame(ridge.x, ridge.z, 0, -1.5); bake(mountainGeometry(ridge.seed, ridge.w, ridge.h, ridge.d, mobile), forest);
+    const canopy = b.material('#4f8282', { roughness: .24, metalness: .3, side: THREE.DoubleSide });
+    for (let z = -108; z <= 108; z += 18) {
+      bake(barrelCanopyGeometry(4.2, 15.5, mobile), canopy, 34.7, 4.25, z);
+      for (const dz of [-7.8, 0, 7.8]) {
+        const arc = new THREE.TorusGeometry(4.25, .09, 4, 16, Math.PI); bake(arc, trim, 34.7, 4.25, z + dz);
+      }
+      for (const x of [30.5, 38.9]) box(.11, 4.25, .11, trim, x, 2.13, z - 7.8);
     }
+    frontSign('CANADA PLACE', 'VANCOUVER WATERFRONT', 20, 2.3, 0, 7, -121.2, '#375767');
     const station = b.place(.03, 1, 48, 36, 104, 'Vancouver Waterfront Station');
     const brick = b.surface(options.materials.concrete, '#995d47');
     box(31, 15.4, 101, brick, 0, 7.7, 0); box(33, .5, 104, lightStone, 0, 15.6, 0);

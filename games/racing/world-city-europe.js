@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { createCityBuilder } from './world-city-kit.js';
-import { createCityWaterMaterial, addCityWaterPlane } from './world-city-australia.js';
+import { createCityBuilder } from './world-city-kit.js?v=city-drive-11';
+import { createCityWaterMaterial, addCityWaterPlane } from './world-city-australia.js?v=city-drive-11';
 
 const TAU = Math.PI * 2;
 const EUROPEAN_CITIES = new Set(['paris', 'prague', 'newcastle', 'lisbon', 'marseille', 'nice', 'warwick']);
@@ -16,7 +16,7 @@ export function addEuropeanLandmarks(options) {
   const trim = b.material('#ede9d9', { roughness: .82 });
   const dark = b.material('#343c3d', { roughness: .58, metalness: .24 });
   const glass = b.material('#536c73', { roughness: .26, metalness: .28 });
-  let roofMaterial, roofTexture;
+  let roofMaterial, roofTexture, tileMaterial;
   function texture(width, height, paint) {
     const canvas = document.createElement('canvas'); canvas.width = width; canvas.height = height;
     paint(canvas.getContext('2d'), width, height);
@@ -51,8 +51,7 @@ export function addEuropeanLandmarks(options) {
   function box(w, h, d, mat, x = 0, y = h / 2, z = 0, ry = 0) {
     b.bake(mat.map && mat === stone ? metric(new THREE.BoxGeometry(w, h, d)) : new THREE.BoxGeometry(w, h, d), mat, x, y, z, 0, ry);
   }
-  function pitchedRoof(w, d, y, rise, x = 0, z = 0) {
-    const mat = roof();
+  function pitchedRoof(w, d, y, rise, x = 0, z = 0, mat = roof()) {
     // Pitched roof faces are real geometry; texture tiles follow roof pitch.
     const cross = new THREE.Shape(); cross.moveTo(-d / 2, 0); cross.lineTo(0, rise); cross.lineTo(d / 2, 0); cross.closePath();
     const geometry = new THREE.ExtrudeGeometry(cross, { depth: w, bevelEnabled: false, steps: 1 });
@@ -108,6 +107,23 @@ export function addEuropeanLandmarks(options) {
     const plaster = b.material(color, { roughness: .91 });
     box(w + 1, .5, d + 1, stone, 0, -.05, 0); box(w, h, d, plaster);
     windows(w, h, d, Math.round(h / 4.5), Math.round(w / 5.6), city === 'paris' || city === 'nice');
+    if (['prague', 'lisbon', 'marseille', 'nice'].includes(city)) {
+      const shutters = city === 'prague' || city === 'nice' ? dark : b.material('#778b7e', { roughness: .92 });
+      for (const face of [-1, 1]) for (let floor = 0; floor < Math.round(h / 4.5); floor++) for (let col = 0; col < Math.round(w / 5.6); col++) {
+        const xx = -w * .42 + col * w * .84 / Math.max(1, Math.round(w / 5.6) - 1), yy = 2.7 + floor * (h - 5) / Math.max(1, Math.round(h / 4.5) - 1), zz = face * (d / 2 + .2);
+        for (const edge of [-1, 1]) box(.43, 2.15, .13, shutters, xx + edge * .98, yy, zz);
+      }
+    }
+    if (city === 'lisbon') {
+      if (!tileMaterial) {
+        const map = texture(128, 128, (c, width, height) => {
+          c.fillStyle = '#e2e2ce'; c.fillRect(0, 0, width, height); c.strokeStyle = '#658da0'; c.lineWidth = 2;
+          for (let y = 0; y < height; y += 16) for (let x = 0; x < width; x += 16) { c.strokeRect(x, y, 16, 16); c.beginPath(); c.moveTo(x + 8, y + 2); c.lineTo(x + 14, y + 8); c.lineTo(x + 8, y + 14); c.lineTo(x + 2, y + 8); c.closePath(); c.stroke(); }
+        });
+        map.repeat.set(2, 1); tileMaterial = b.material('#ffffff', { map, roughness: .93 });
+      }
+      for (const face of [-1, 1]) box(w - .3, 2.5, .04, tileMaterial, 0, 1.8, face * (d / 2 + .015));
+    }
     for (let floor = 0; floor <= Math.floor(h / 4.5); floor++) cornice(w, d, 4.2 + floor * 4.35, floor === 0 ? stone : trim);
     if (mansard) {
       const height = 4.5, mat = roof();
@@ -119,7 +135,10 @@ export function addEuropeanLandmarks(options) {
         const x = i * 6.5; box(2.1, 2.45, 1.6, trim, x, h + 1.9, -d / 2 + .8); box(1.2, 1.7, .12, glass, x, h + 1.9, -d / 2 - .06);
         pitchedRoof(2.65, 2.5, h + 3.12, 1.1, x, -d / 2 + .55);
       }
-    } else pitchedRoof(w + 1, d + 1, h + .35, 4.4);
+    } else pitchedRoof(w + 1, d + 1, h + .35, city === 'newcastle' ? 3.3 : 4.4);
+    if (city === 'prague') {
+      for (const face of [-1, 1]) { box(w * .58, .4, .35, trim, 0, h + .7, face * (d / 2 + .13)); box(w * .4, .4, .35, trim, 0, h + 1.8, face * (d / 2 + .13)); box(w * .2, .4, .35, trim, 0, h + 2.9, face * (d / 2 + .13)); b.cylinder(.12, .24, 1.2, trim, 0, h + 3.7, face * (d / 2 + .1), 8); }
+    }
     for (let i = -1; i <= 1; i++) { box(1.3, 2.3, 1.1, stone, i * w * .24, h + 4.4, 0); b.cylinder(.19, .22, .6, dark, i * w * .24, h + 5.8, 0, 6); }
     if (label) b.sign(label, '', Math.min(w - 3, 16), 1.3, 0, 3.5, -d / 2 - .16, city === 'paris' ? '#333d42' : '#58695d');
   }
@@ -254,10 +273,10 @@ export function addEuropeanLandmarks(options) {
     // Castle district rises behind the red-roofed riverfront.
     b.setFrame(-125, 115, -.12); b.reserve(-125, 115, 93, 'Prague Castle and St Vitus skyline'); landmarkVista(-125, 115);
     box(152, 16, 66, stone, 0, 8, 0); pitchedRoof(155, 69, 16, 10);
-    box(34, 45, 64, stone, 0, 38.5, 0); pitchedRoof(38, 68, 61, 20);
+    box(34, 45, 64, stone, 0, 38.5, 0); pitchedRoof(38, 68, 61, 20, 0, 0, patina);
     for (const x of [-15, 15]) {
       box(12, 63, 13, stone, x, 47.5, -27);
-      b.cylinder(0, 9.4, 24, roof(), x, 91, -27, 4, 0, Math.PI / 4);
+      b.cylinder(0, 9.4, 24, patina, x, 91, -27, 4, 0, Math.PI / 4);
       for (let yy = 30; yy <= 74; yy += 12) box(9.5, 7, .16, glass, x, yy, -33.7);
       for (const side of [-1, 1]) b.beam([x + side * 4.4, 74, -33.9], [x, 79, -33.9], .4, trim);
     }
@@ -330,7 +349,7 @@ export function addEuropeanLandmarks(options) {
     }
     b.sign('THE GLASSHOUSE', 'INTERNATIONAL CENTRE FOR MUSIC', 51, 5, 0, 7, -32.2, '#536563');
     b.setFrame(0, 393, 0, 0); box(1300, 7.5, 5, stone, 0, 1.45, 0); box(1300, .3, 16, trim, 0, 5.45, -3); railing(1300, 5.6, 2.4, dark, 4);
-    for (const [f, color, title] of [[.08, '#a78970', 'QUAYSIDE'], [.19, '#bda98c', 'GREY STREET'], [.31, '#8e7767', 'NEWCASTLE UPON TYNE'], [.54, '#ad927b', 'BALTIC QUARTER'], [.68, '#b8a88e', 'TYNE & WEAR'], [.82, '#95745e', 'RIVERSIDE']]) rowBuilding(f, 1, color, 28, 24, 18, true, title);
+    for (const [f, color, title] of [[.08, '#a78970', 'QUAYSIDE'], [.19, '#bda98c', 'GREY STREET'], [.31, '#8e7767', 'NEWCASTLE UPON TYNE'], [.54, '#ad927b', 'BALTIC QUARTER'], [.68, '#b8a88e', 'TYNE & WEAR'], [.82, '#95745e', 'RIVERSIDE']]) rowBuilding(f, 1, color, 23, 22, 18, false, title);
     b.place(.46, -1, 85, 42, 25, 'Victorian quayside warehouse'); box(40, 30, 23, brick); windows(40, 30, 23, 6, 8); pitchedRoof(41, 24, 30, 5);
   } else if (city === 'lisbon') {
     const iron = b.material('#a44738', { metalness: .65, roughness: .57 });
@@ -398,7 +417,15 @@ export function addEuropeanLandmarks(options) {
     water(1500, 900, 0, -840, 2.7, '#4c8c9b');
     // Notre-Dame de la Garde's raised limestone outcrop, striped stone and gold crown.
     b.setFrame(-110, 155, -.18); b.reserve(-110, 155, 115, 'Notre-Dame de la Garde basilica'); landmarkVista(-143, 155);
-    b.sphere(112, 47, 77, stone, 0, -3, 0); box(91, 8, 53, stone, 0, 43, 0);
+    const limestone = b.surface(materials.rock, '#a8a18b', { roughness: .97 });
+    const outcrop = new THREE.PlaneGeometry(224, 154, mobile ? 20 : 30, mobile ? 14 : 20); outcrop.rotateX(-Math.PI / 2);
+    const positions = outcrop.attributes.position;
+    for (let i = 0; i < positions.count; i++) {
+      const x = positions.getX(i), z = positions.getZ(i), shoulder = Math.max(0, 1 - (x / 112) ** 2 - (z / 77) ** 2);
+      const ledges = 2.6 * Math.sin(x / 12 + z / 8) + 1.5 * Math.cos(x / 7 - z / 11);
+      positions.setY(i, Math.max(0, 44 * shoulder ** .62 + ledges * Math.sin(shoulder * Math.PI)));
+    }
+    outcrop.computeVertexNormals(); b.bake(metric(outcrop), limestone); box(91, 8, 53, stone, 0, 43, 0);
     box(59, 24, 24, stone, 5, 59, 0); box(16, 22, 29, stone, 36, 58, 0);
     for (let y = 48; y < 73; y += 3.2) box(59.4, .8, 24.4, bands, 5, y, 0);
     box(18, 38, 18, stone, -34, 66, 0); for (let y = 49; y < 86; y += 4.5) box(18.4, 1, 18.4, bands, -34, y, 0);
@@ -480,10 +507,10 @@ export function addEuropeanLandmarks(options) {
     for (let i = 0; i < 5; i++) { const x = (i - 2) * 20; box(18, 22 + i % 2 * 4, 29, b.material(['#d5a884', '#e2bc98', '#cba78b'][i % 3]), x, 11 + i % 2 * 2, 0); pitchedRoof(19, 30, 22 + i % 2 * 4, 5.5, x); }
   } else if (city === 'warwick') {
     const timber = b.material('#51463a', { roughness: .93 }), plaster = b.material('#e3dbc4', { roughness: .94 });
-    const lawn = b.material('#809275', { roughness: .97 });
+    const lawn = b.surface(materials.terrain, '#8ca36d', { roughness: .97, vertexColors: false }); lawn.userData.seasonGround = true;
     water(1700, 135, 0, -422.5, 2.6, '#768b7c');
     b.setFrame(-85, 115, -.05); b.reserve(-85, 115, 130, 'Warwick Castle — medieval courtyard and towers'); landmarkVista(-155, 65);
-    b.sphere(131, 11, 104, stone, 0, -4, 0); box(170, .7, 125, lawn, 0, 6.6, 0);
+    b.sphere(131, 11, 104, lawn, 0, -4, 0); box(170, .7, 125, lawn, 0, 6.6, 0);
     for (const side of [-1, 1]) {
       box(159, 16, 5, stone, 0, 15, side * 57);
       for (let x = -76; x <= 76; x += 3.9) box(2, 1.8, 5.2, stone, x, 23.9, side * 57);
@@ -531,7 +558,7 @@ export function addEuropeanLandmarks(options) {
   const setQuality = result.setQuality;
   result.setQuality = quality => {
     setQuality(quality);
-    result.group.children.forEach(mesh => { if (waterMaterials.has(mesh.material)) mesh.castShadow = false; });
+    result.group.children.forEach(mesh => { if (waterMaterials.has(mesh.material) || mesh.material.userData.seasonGround) mesh.castShadow = false; });
   };
   result.setQuality('medium');
   result.update = (_state, elapsed) => waterMaterials.forEach(mat => { if (mat.normalMap) mat.normalMap.offset.set(elapsed * .004, elapsed * .003); });

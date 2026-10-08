@@ -314,7 +314,7 @@ export const TRACKS = Object.freeze({
     anchors: [[-285, -195], [-285, -55], [-285, 100], [-230, 225], [-90, 290],
       [70, 285], [220, 200], [285, 50], [225, -60], [275, -175],
       [175, -270], [20, -315], [-135, -270], [-260, -275]],
-    height: phase => 8 + 1.8 * Math.sin(phase - .2), width: 14, wallOffset: 12,
+    height: phase => 8 + 1.8 * Math.sin(phase - .2), width: 7.4, wallOffset: 8.2,
   }),
 });
 

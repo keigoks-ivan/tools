@@ -1,7 +1,15 @@
 import * as THREE from 'three';
-import { createCityBuilder } from './world-city-kit.js';
+import { createCityBuilder } from './world-city-kit.js?v=city-drive-11';
 
 const TAU = Math.PI * 2;
+
+function shellPoint(width, length, height, u, v) {
+  const angle = 1.25, opening = Math.sin(u * angle) / Math.sin(angle), crown = Math.pow(Math.max(0, 1 - Math.abs(v)), .68);
+  const sweep = (1 - Math.cos(u * angle)) / (1 - Math.cos(angle));
+  return [width * .5 * v * opening + width * .085 * u * u,
+    1.1 + height * opening * crown,
+    (sweep - .5) * length - v * v * length * .57 * opening];
+}
 
 function shellGeometry(width, length, height, mobile) {
   const rows = mobile ? 18 : 28, columns = mobile ? 18 : 28, positions = [], uvs = [], indices = [];
@@ -9,11 +17,7 @@ function shellGeometry(width, length, height, mobile) {
     const u = row / rows;
     for (let column = 0; column <= columns; column++) {
       const v = column / columns * 2 - 1;
-      const taper = Math.max(.004, Math.pow(1 - u, .64));
-      const x = width * .5 * v * taper;
-      const y = 1.1 + height * (.3 + .7 * Math.sin(u * Math.PI * .5)) * (u + (1 - u) * Math.sqrt(Math.max(0, 1 - v * v)));
-      const z = (u - .5) * length + v * v * length * .14 * (1 - u);
-      positions.push(x, y, z); uvs.push(column / columns * 10, u * 18);
+      positions.push(...shellPoint(width, length, height, u, v)); uvs.push(column / columns * width / .96, u * Math.hypot(length, height) / .96);
       if (row < rows && column < columns) {
         const k = row * (columns + 1) + column;
         indices.push(k, k + 1, k + columns + 1, k + 1, k + columns + 2, k + columns + 1);
@@ -159,56 +163,61 @@ export function addAustralianLandmarks(options) {
     for (let n = 0; n < 7; n++) cylinder(.32, .32, .18, dark, -4.3 * scale, 1.4 * scale, (n - 3) * 2.8 * scale, 10, 0, 0, Math.PI / 2);
   }
 
+  function heritageFrontage(fraction, color, name, height = 13) {
+    const location = b.place(fraction, 1, 43, 28, 76, name), masonry = b.surface(options.materials.concrete, color);
+    for (let n = 0; n < 4; n++) {
+      const z = -28 + n * 18.7, h = height + n % 2 * 1.3;
+      box(24, h, 17.2, masonry, 0, h / 2, z);
+      for (const y of [1, 4.8, 8.7, h + .2]) box(24.6, .26, 17.7, lightStone, 0, y, z);
+      for (const zz of [-5.2, 0, 5.2]) for (const y of [3.1, 6.8, 10.6]) {
+        box(.12, 2.15, 1.8, glass, -12.07, y, z + zz);
+        box(.35, .2, 2.25, lightStone, -12.22, y - 1.14, z + zz);
+        for (const edge of [-1.02, 1.02]) box(.21, 2.44, .16, lightStone, -12.18, y, z + zz + edge);
+      }
+      for (const side of [-1, 1]) box(12.5, .2, 17.9, dark, side * 6.04, h + 1.7, z, 0, 0, side * .22);
+      box(1.4, 2.6, 1.5, masonry, 5, h + 2.2, z + 4);
+      box(3.2, .13, 17.7, timber, -13.5, 3.4, z, 0, 0, -.11);
+    }
+    return location;
+  }
+
   if (track.id === 'sydney') {
     const shell = b.material('#f5f2e7', { map: tileMap(), roughness: .37, side: THREE.DoubleSide, metalness: .025 });
     const rib = b.material('#d8d7c9', { roughness: .7 });
-    b.setFrame(-485, 25, 0, 4.65); b.reserve(-485, 25, 115, 'Sydney Opera House');
+    b.setFrame(-485, 25, .55, 4.65); b.reserve(-485, 25, 115, 'Sydney Opera House');
     box(100, 7.6, 194, stone, 0, -2.6, 10); box(88, 6.5, 157, lightStone, 0, 4.3, 12);
     box(78, .3, 165, stone, 0, 7.8, 11);
-    // Broad monumental stairs, two unequal halls and nested roof sails.
+    // Unequal halls have pointed glazed mouths and low rear convergences;
+    // the curved tiled roofs stay open like the photographed shell segments.
     for (let step = 0; step < 18; step++) box(78, .38, 2.8, lightStone, 0, step * .36 + .05, -95 + step * 2.35);
-    for (const hall of [{ x: -21, size: 1, z: 13 }, { x: 22, size: .79, z: 27 }]) {
-      for (const [index, sail] of [[0, [-35, 35, 36]], [1, [-8, 46, 47]], [2, [22, 53, 52]]]) {
+    for (const hall of [{ x: -21, size: 1, z: 13 }, { x: 22, size: .79, z: 24 }]) {
+      for (const sail of [[-35, 35, 28], [-8, 46, 41], [22, 53, 51]]) {
         const z = sail[0] * hall.size + hall.z, width = sail[1] * hall.size, height = sail[2] * hall.size;
-        bake(shellGeometry(width, 51 * hall.size, height, mobile), shell, hall.x, 7.7, z);
+        bake(shellGeometry(width, 51 * hall.size, height, mobile), shell, hall.x, 7.7, z, 0, Math.PI);
         for (const side of [-1, 1]) for (let line = 1; line <= (mobile ? 4 : 6); line++) {
           const v = line / ((mobile ? 4 : 6) + 1) * side;
-          const point = u => [hall.x + width * .5 * v * Math.max(.004, Math.pow(1 - u, .64)),
-            8.8 + height * (.3 + .7 * Math.sin(u * Math.PI * .5)) * (u + (1 - u) * Math.sqrt(1 - v * v)) + .07,
-            z + (u - .5) * 51 * hall.size + v * v * 51 * hall.size * .14 * (1 - u)];
+          const point = u => { const p = shellPoint(width, 51 * hall.size, height, u, v); return [hall.x - p[0], p[1] + 7.77, z - p[2]]; };
           for (let part = 0; part < 8; part++) beam(point(part / 8), point((part + 1) / 8), .095, rib);
         }
-        const front = z - 25.5 * hall.size;
-        const frontVertices = [], frontIndices = [];
+        const front = z - 25.5 * hall.size, baseZ = front + 51 * hall.size * .57, frontVertices = [], frontIndices = [];
         for (let section = 0; section <= 18; section++) {
-          const v = section / 9 - 1, x = hall.x + width * .5 * v, zz = front + v * v * 51 * hall.size * .14;
-          frontVertices.push(x, 8.8, zz, x, 8.8 + height * .3 * Math.sqrt(Math.max(0, 1 - v * v)), zz);
+          const v = section / 9 - 1, point = shellPoint(width, 51 * hall.size, height, 1, v), x = hall.x - point[0];
+          frontVertices.push(x, 8.8, baseZ + .08, x, point[1] + 7.7, z - point[2] + .08);
           if (section < 18) { const k = section * 2; frontIndices.push(k, k + 1, k + 2, k + 1, k + 3, k + 2); }
         }
         const frontGlass = new THREE.BufferGeometry(); frontGlass.setAttribute('position', new THREE.Float32BufferAttribute(frontVertices, 3)); frontGlass.setIndex(frontIndices); bake(frontGlass, glass);
         for (let col = -3; col <= 3; col++) {
-          const v = col / 4, x = hall.x + width * .5 * v, zz = front + v * v * 51 * hall.size * .14 - .04;
-          beam([x, 8.8, zz], [x, 8.8 + height * .3 * Math.sqrt(1 - v * v), zz], .14, dark);
+          const v = col / 4, point = shellPoint(width, 51 * hall.size, height, 1, v), x = hall.x - point[0];
+          beam([x, 8.8, baseZ + .01], [x, point[1] + 7.7, z - point[2] + .01], .14, dark);
         }
-        for (const side of [-1, 1]) {
-          const positions = [], indices = [], count = mobile ? 12 : 18;
-          const edge = u => [hall.x + side * (width * .5 * Math.max(.004, (1 - u) ** .64) + .055),
-            8.8 + height * (.3 + .7 * Math.sin(u * Math.PI / 2)) * u,
-            z + (u - .5) * 51 * hall.size + 51 * hall.size * .14 * (1 - u)];
-          for (let n = 0; n <= count; n++) {
-            const [x, y, zz] = edge(n / count); positions.push(x, 8.8, zz, x, y, zz);
-            if (n < count) {
-              const k = n * 2;
-              indices.push(...(side > 0 ? [k, k + 1, k + 2, k + 1, k + 3, k + 2] : [k, k + 2, k + 1, k + 1, k + 2, k + 3]));
-            }
-            if (n > 0 && n < count && n % 2 === 0) beam([x, 8.8, zz], [x, y, zz], .12, dark);
-          }
-          const glazing = new THREE.BufferGeometry(); glazing.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3)); glazing.setIndex(indices); bake(glazing, glass);
+        for (const y of [14, 22, 30, 38]) if (y < 8.8 + height) {
+          const halfSpan = width * .5 * (1 - ((y - 8.8) / height) ** (1 / .68)), horizontalZ = baseZ - (baseZ - front) * (y - 8.8) / height;
+          beam([hall.x - width * .085 - halfSpan, y, horizontalZ], [hall.x - width * .085 + halfSpan, y, horizontalZ], .14, dark);
         }
       }
       for (const rear of [{ z: 61, width: 43, length: 43, height: 37 }, { z: 78, width: 31, length: 28, height: 24 }]) {
         bake(shellGeometry(rear.width * hall.size, rear.length * hall.size, rear.height * hall.size, mobile), shell,
-          hall.x, 7.7, rear.z * hall.size + hall.z, 0, Math.PI);
+          hall.x, 7.7, rear.z * hall.size + hall.z);
       }
     }
     box(14, 4.4, 20, lightStone, 0, 9.7, 83);
@@ -243,6 +252,7 @@ export function addAustralianLandmarks(options) {
     box(11, .4, 58, timber, 0, 1.1, 0);
     for (const x of [-4.8, 4.8]) for (const z of [-24, -8, 8, 24]) cylinder(.24, .28, 5.3, dark, x, -.9, z, 8);
     box(2.5, .17, 6.5, timber, 0, 1.75, -31, -.22);
+    heritageFrontage(.018, '#b8a37f', 'The Rocks sandstone warehouse frontage');
   } else if (track.id === 'goldcoast') {
     const white = b.material('#e6e8db', { roughness: .53, metalness: .12 });
     const oceanGlass = b.material('#557e86', { roughness: .22, metalness: .48, envMapIntensity: .9 });
@@ -334,6 +344,17 @@ export function addAustralianLandmarks(options) {
     for (const color of [red, trim]) {
       const board = new THREE.CapsuleGeometry(.3, 2.6, 4, 8); board.scale(.8, 1, .11); bake(board, color, color === red ? -3.1 : -3.8, 1.65, .5, 0, 0, -.24);
     }
+    for (const [fraction, height, width] of [[.022, 112, 24], [.17, 86, 29], [.43, 146, 23]]) {
+      b.place(fraction, 1, 75, width + 8, 37, 'Gold Coast beachfront balcony tower');
+      box(width, height, 28, oceanGlass, 0, height / 2, 0);
+      box(width + 6, 5.1, 34, lightStone, 0, 2.55, 0);
+      for (let y = 7; y < height; y += 3.3) {
+        box(width + 1.8, .2, 30, white, 0, y, 0);
+        for (const side of [-1, 1]) box(1.7, .93, 28.8, oceanGlass, side * (width / 2 + .07), y + .53, 0);
+      }
+      for (const x of [-width * .31, width * .31]) box(.3, height, .35, white, x, height / 2, -14.08);
+      box(width * .59, 4.4, 16, white, 0, height + 2.2, 0);
+    }
   } else if (track.id === 'melbourne') {
     const yellow = b.surface(options.materials.concrete, '#b89650');
     yellow.color.setRGB(1.65, 1.15, .47);
@@ -421,6 +442,16 @@ export function addAustralianLandmarks(options) {
       box(2.7, .16, .51, timber, -24, .66, z); for (const x of [-25, -23]) box(.13, .65, .4, steel, x, .33, z);
     }
     quay(0, -378, 710, Math.PI / 2);
+    heritageFrontage(.017, '#a77551', 'Melbourne Flinders Lane Victorian frontage', 15.8);
+    // Low Southbank terraces and a river launch ground the ochre station in
+    // the Yarra streetscape without adding a second skyline of office slabs.
+    b.setFrame(120, -518, 0, 4.65); b.reserve(120, -518, 89, 'Melbourne Southbank river terrace');
+    box(174, 6, 38, redBrick, 0, 3, 0); box(176, .45, 40, cream, 0, 6.25, 0);
+    for (let x = -80; x <= 80; x += 8) { box(3.5, 3.6, .08, glass, x, 3.4, 19.07); box(.45, 5.8, .45, cream, x + 4, 3, 19.14); }
+    b.setFrame(78, -447, Math.PI / 2, -.5);
+    const hull = new THREE.CapsuleGeometry(.7, 6.5, 4, 12); hull.rotateX(Math.PI / 2); hull.scale(2.2, .8, 1.3); bake(hull, tramGreen, 0, .6, 0);
+    box(3.3, 1.7, 8.2, cream, 0, 1.7, -.3); box(3.5, .15, 9.2, tramGreen, 0, 2.63, -.3);
+    for (const side of [-1, 1]) box(.06, 1.08, 7.1, glass, side * 1.7, 1.86, -.3);
   }
   const result = b.finish();
   result.group.userData.landmarks = result.reserved.map(item => item.name);

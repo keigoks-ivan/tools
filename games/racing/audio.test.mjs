@@ -81,6 +81,15 @@ test('engine pitch follows RPM, grip loss produces tyre sound and high speed pro
   assert.ok(racingAudioFrame(frame({ offTrack: true }), car).roadGain > racingAudioFrame(frame(), car).roadGain * 4);
 });
 
+test('reverse pedal loads the engine and independent handbrake slip changes tyre sound', () => {
+  const coasting = racingAudioFrame(frame({ throttle: 0, brake: 1 }), car);
+  const reverse = racingAudioFrame(frame({ throttle: 0, brake: 1, reverse: true }), car);
+  assert.ok(reverse.engineGain > coasting.engineGain && reverse.intakeGain > coasting.intakeGain);
+  const sliding = frame({ throttle: 0, slip: .8, handbrake: 1 });
+  assert.ok(racingAudioFrame(sliding, car).tyreGain > racingAudioFrame({ ...sliding, handbrake: 0 }, car).tyreGain);
+  assert.equal(racingAudioFrame({ ...sliding, speed: 0 }, car).tyreGain, 0);
+});
+
 test('gesture unlock requests media playback before waiting for AudioContext resume', async () => {
   const f = fixture(); let resume;
   f.context.resume = () => new Promise(resolve => { resume = resolve; });

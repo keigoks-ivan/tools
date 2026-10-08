@@ -16,11 +16,37 @@ the surrounding streets and landmark placements are adapted for the game.
 - [Arup — Designing the Sydney Opera House](https://www.arup.com/projects/designing-the-sydney-opera-house/): the roof sails and glazed walls beneath them.
 - [Destination NSW — Sydney Harbour Bridge](https://www.sydney.com/destinations/sydney/sydney-city/sydney-harbour/sydney-harbour-bridge): the steel arch's 503-metre main span, stone pylons and harbour context.
 - [Transport for NSW — Ferry travel](https://transportnsw.info/travel-info/ways-to-get-around/ferry): green-and-cream harbour ferry and wharf context.
+- [The Rocks — Our story](https://www.therocks.com/our-story): sandstone buildings and historic shopfronts on the inland harbour frontage.
+- [The Rocks — Watersedge](https://www.therocks.com/eat-drink/watersedge): Campbell's Stores sandstone warehouse context.
 
 Photographs inspected as pixels on 8 October 2026:
 
 - [Destination NSW — Opera House and harbour closeup](https://www.sydney.com/sites/sydney/files/2023-05/118643%20-%20Aerial%20view%20of%20Sydney%20Harbour%20-%20Sydney%20-%20DNSW%20-%20sml.jpg): curved pointed shells, glazed triangular gaps, tile pattern, stone retaining wall and quay railing. The published asset filename says aerial, but the image is a harbour-side closeup; observations use the visible image.
 - [Destination NSW — Harbour Bridge photograph](https://www.sydney.com/sites/sydney/files/styles/landscape_1200x675/public/2023-04/177881%20-%20Sydney%20Harbour%20Bridge%20-%20DNSW.jpg?h=3f857e06&itok=i2AZdBOv): densely braced grey arch and vertical deck hangers above blue water.
+
+The Opera House roof now uses unequal pointed shell mouths, low rear convergences,
+curved tiled skins and opposing rear shells instead of closed rounded masses.
+Glazing sits inside the triangular mouths with dark mullions. The complex turns
+slightly toward the harbour approach so the white curved surfaces remain visible;
+the granite podium, steps and quay ground it at the water. A separate low sandstone
+warehouse frontage distinguishes The Rocks from the inland modern skyline. These
+are original approximations of the photographed forms, not surveyed building CAD.
+
+The 9 October street-camera comparison exposed overly vertical triangular mouths.
+The revised roof uses curved circular-meridian sweeps with a cantilevered tip and
+receding side footings, so the tiled surfaces overlap and show actual curvature.
+Glass and mullions incline underneath those tips instead of filling a vertical
+triangle. Three primary shells rise at different heights (28/41/51 m before the
+smaller hall scale), and the surrounding Rocks street mixes sandstone parapets
+with a smaller number of pitched roofs. This follows the viewed shell photographs
+and the official spherical-solution explanation; it is an original visual
+approximation, not the architect's exact common-sphere construction geometry.
+
+The common Australian street atlases are independently painted in
+`world-city-streetfronts.js`: Sydney has coursed sandstone/arch openings, Gold
+Coast has residential sliding doors and balcony rails, and Melbourne has warm
+Victorian masonry/arch bays. Ground shop entries, cornice/parapet geometry and
+street paving distinguish these scenes, rather than using one office atlas.
 
 ## Gold Coast
 
@@ -33,18 +59,29 @@ Photographs inspected as pixels on 8 October 2026:
 - [Q1 — Official resort photograph](https://www.q1.com.au/img/home_2.jpg): blue-green glazing, narrow white floor bands and a curved, pointed crown. The crown geometry was revised from a straight cone to a swept curved skin.
 - [Experience Gold Coast — Surfers Paradise Beach photograph](https://destinationgoldcoast.stylelabs.cloud/api/public/content/b66b3439c7ee4b70ba93586099343c72?v=c1408f81): broad pale sand, soft repeated surf bands and a distant continuous tower skyline. Beach slopes and broken foam bands follow these observed details.
 
+Three separate slim residential towers use blue-green glazing, white projecting
+floor bands, balcony rails and vertical fins. They complement Q1 along the inland
+side of the coast; pale sloped sand, surf lines and palms keep the ocean side open.
+
 ## Melbourne
 
 - [City of Melbourne — Flinders Street Railway Station](https://whatson.melbourne.vic.gov.au/things-to-do/flinders-street-railway-station): distinctive yellow facade, oxidised green copper dome, arched entrance, tower and clocks.
 - [Visit Victoria — Flinders Street Station](https://www.visitmelbourne.com/regions/melbourne/see-and-do/history-and-heritage/heritage-buildings/vv-flinders-street-station): the station's landmark clock frontage.
 - [Melbourne Tram Museum — M&MTB W Class No. 380](https://www.trammuseum.org.au/trams/mmtb380.htm): W-class drop-centre arrangement with central doors and timber window framing.
+- [City of Melbourne collection — North of the Yarra](https://citycollection.melbourne.vic.gov.au/north-of-the-yarra/): the river, Flinders Street Station, surrounding civic buildings, trams and river boats in the city's central setting.
 
 Photograph inspected as pixels on 8 October 2026:
 
 - [Tourism Australia — Flinders Street Station photograph](https://businessevents.australia.com/content/businessevents/en/resources/programs/culture-and-cuisine-in-melbourne/jcr%3Acontent/imagePortrait.adapt.740.medium.jpg), published on [Tourism Australia's Melbourne page](https://businessevents.australia.com/en/destinations/melbourne.html): ochre-yellow masonry, dark oxidised copper dome, dome ribs, triangular pediment clock, seven small entrance clocks and tram wires. The warm facade tint and entrance pediment were revised after inspecting this image.
 
+The station and green tram are surrounded by a warm Victorian warehouse frontage,
+a low red-brick river terrace and a small green-and-cream Yarra launch. These keep
+the racing foreground tied to Melbourne's river and heritage streets rather than
+repeating the Sydney or Gold Coast tower composition.
+
 These photographs are references only, downloaded temporarily for inspection;
-they are not included in game assets. The game water uses an original 128-pixel
+they are not included in this landmark module's assets. The separate licensed
+photo horizon has its own attribution in `city-photo-manifest.json`. The game water uses an original 128-pixel
 normal map, slowly drifting UVs and merged lightweight shore geometry.
 
 The architecture uses the active world's existing CC0 concrete and sand surface

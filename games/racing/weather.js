@@ -10,10 +10,10 @@ function random(seed = 5031) {
 // Attach before world resource capture when resourcesOwnedByWorld is true.
 // Only newly allocated precipitation geometry/material belong to this helper;
 // surface, foliage, fog and light references are borrowed and restored on dispose.
-export function createSeasonWeather({ scene, season, mobile = false, renderer, materials = {}, sun, hemisphere, groundHeight, camera, resourcesOwnedByWorld = false } = {}) {
+export function createSeasonWeather({ scene, season, mobile = false, renderer, materials = {}, sun, hemisphere, groundHeight, camera, diffuseSky = false, resourcesOwnedByWorld = false } = {}) {
   if (!scene?.isScene) throw new TypeError('Season weather requires a Three scene');
   const wet = clamp(finite(season?.wet), 0, 1), snow = clamp(finite(season?.snow), 0, 1), cloudy = season?.sky === 'cloudy';
-  const snapshots = new Map(), restoredLights = [], existingFog = scene.fog;
+  const snapshots = new Map(), restoredLights = [], depthSnapshots = [], leafDepthMaterials = new Set(), existingFog = scene.fog;
   const fogColor = existingFog?.color.clone(), fogDensity = existingFog?.density;
   const backgroundIntensity = scene.backgroundIntensity, environmentIntensity = scene.environmentIntensity;
   const frost = new THREE.Color('#edf1ee');
@@ -29,12 +29,39 @@ export function createSeasonWeather({ scene, season, mobile = false, renderer, m
     road.envMapIntensity = finite(road.envMapIntensity, .35) + wet * .9;
     if ('clearcoat' in road) { road.clearcoat = wet * .9; road.clearcoatRoughness = .14; }
   }
-  for (const mat of [materials.terrain, materials.dryGrass, materials.shoulder]) {
+  const snowGround = new Set([materials.terrain, materials.dryGrass, materials.shoulder, materials.seasonGround]);
+  scene.traverse(node => {
+    for (const mat of Array.isArray(node.material) ? node.material : [node.material]) if (mat?.userData.seasonGround) snowGround.add(mat);
+  });
+  for (const mat of snowGround) {
     if (!mat || snapshots.has(mat)) continue;
     snapshot(mat);
     if (snow) mat.color.lerp(frost, snow * .9);
     else if (season?.id === 'autumn' && mat.userData?.surface === 'sparse_grass') mat.color.multiply(new THREE.Color('#d8c293'));
     if (wet) mat.color.multiplyScalar(1 - wet * .09);
+    if (snow) {
+      const initial = snapshots.get(mat);
+      // Snow covers the dark scan instead of merely multiplying it by a pale tint.
+      mat.onBeforeCompile = function(shader, webglRenderer) {
+        initial.onBeforeCompile.call(this, shader, webglRenderer);
+        shader.uniforms.seasonSnowAmount = { value: snow };
+        shader.uniforms.seasonSnowColor = { value: frost.clone() };
+        shader.vertexShader = shader.vertexShader.replace('#include <common>', '#include <common>\nvarying vec3 seasonSnowWorld;varying float seasonSnowSlope;')
+          .replace('#include <begin_vertex>', '#include <begin_vertex>\nseasonSnowWorld=(modelMatrix*vec4(position,1.)).xyz;seasonSnowSlope=normalize(mat3(modelMatrix)*normal).y;');
+        shader.fragmentShader = shader.fragmentShader.replace('#include <common>', `#include <common>
+          varying vec3 seasonSnowWorld;varying float seasonSnowSlope;
+          uniform float seasonSnowAmount;uniform vec3 seasonSnowColor;
+          float seasonSnowHash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+          float seasonSnowNoise(vec2 p){vec2 i=floor(p),f=fract(p);f=f*f*(3.-2.*f);
+            return mix(mix(seasonSnowHash(i),seasonSnowHash(i+vec2(1.,0.)),f.x),mix(seasonSnowHash(i+vec2(0.,1.)),seasonSnowHash(i+vec2(1.,1.)),f.x),f.y);}`)
+          .replace('#include <color_fragment>', `#include <color_fragment>
+            float snowPatch=seasonSnowNoise(seasonSnowWorld.xz*.075)*.75+seasonSnowNoise(seasonSnowWorld.xz*.70)*.25;
+            float snowCover=smoothstep(.15,.48,seasonSnowAmount*1.35-snowPatch*.65)*smoothstep(.45,.90,seasonSnowSlope);
+            diffuseColor.rgb=mix(diffuseColor.rgb,seasonSnowColor*(.90+.10*snowPatch),snowCover);`);
+      };
+      mat.customProgramCacheKey = () => `${initial.customProgramCacheKey.call(mat)}-season-ground-snow`;
+      mat.needsUpdate = true;
+    }
   }
   const foliage = new Set(), evergreens = new Set();
   scene.traverse(node => {
@@ -42,7 +69,7 @@ export function createSeasonWeather({ scene, season, mobile = false, renderer, m
     for (const mat of Array.isArray(node.material) ? node.material : [node.material]) {
       if (!mat.color) continue;
       if (mat.name === 'city-foliage') foliage.add(mat);
-      else if (/branches and foliage|grass tufts/i.test(node.name)) evergreens.add(mat);
+      else if (mat.name === 'city-evergreen-foliage' || /branches and foliage|grass tufts/i.test(node.name)) evergreens.add(mat);
     }
   });
   for (const mat of foliage) {
@@ -59,6 +86,14 @@ export function createSeasonWeather({ scene, season, mobile = false, renderer, m
       };
       mat.customProgramCacheKey = () => `${initial.customProgramCacheKey.call(mat)}-season-leaf-coverage`;
       mat.needsUpdate = true;
+      const depth = new THREE.MeshDepthMaterial({ map: mat.map, alphaTest: mat.alphaTest, side: mat.side, depthPacking: THREE.RGBADepthPacking });
+      depth.onBeforeCompile = shader => {
+        shader.uniforms.seasonLeafCoverage = { value: coverage };
+        shader.vertexShader = shader.vertexShader.replace('#include <common>', '#include <common>\nvarying vec2 seasonLeafUv;').replace('#include <uv_vertex>', '#include <uv_vertex>\nseasonLeafUv=uv;');
+        shader.fragmentShader = shader.fragmentShader.replace('#include <common>', '#include <common>\nuniform float seasonLeafCoverage;varying vec2 seasonLeafUv;').replace('#include <alphatest_fragment>', '#include <alphatest_fragment>\nif(fract(sin(dot(floor(seasonLeafUv*32.),vec2(12.9898,78.233)))*43758.5453)>seasonLeafCoverage)discard;');
+      };
+      depth.customProgramCacheKey = () => 'season-leaf-depth-coverage'; leafDepthMaterials.add(depth);
+      scene.traverse(node => { if (node.isMesh && node.material === mat) { depthSnapshots.push({ node, material: node.customDepthMaterial }); node.customDepthMaterial = depth; } });
     }
   }
   for (const mat of evergreens) {
@@ -75,9 +110,9 @@ export function createSeasonWeather({ scene, season, mobile = false, renderer, m
   for (const light of [sun, hemisphere]) {
     if (!light?.isLight) continue;
     restoredLights.push({ light, color: light.color.clone(), intensity: light.intensity, ground: light.groundColor?.clone() });
-    light.color.set(cloudy ? '#e0e9f0' : season?.id === 'autumn' ? '#ffe4c8' : '#fff5e5');
-    light.intensity *= light === sun ? (cloudy ? .53 : season?.id === 'winter' ? .8 : 1) : (cloudy ? 1.42 : 1);
-    if (light.groundColor) light.groundColor.set(snow ? '#b2bfbd' : '#8b958c');
+    light.color.set(light === hemisphere ? '#d7e6f0' : cloudy || diffuseSky ? '#e0e9f0' : season?.id === 'autumn' ? '#ffe4c8' : '#fff5e5');
+    light.intensity *= light === sun ? (cloudy || diffuseSky ? .22 : season?.id === 'winter' ? .8 : 1) : (cloudy || diffuseSky ? 1.42 : 1);
+    if (light.groundColor) light.groundColor.set(snow ? '#b2bfbd' : '#727a70');
   }
 
   let points, geometry, material, elapsed = 0, disposed = false, activeCount = 0;
@@ -141,6 +176,8 @@ export function createSeasonWeather({ scene, season, mobile = false, renderer, m
       if (disposed) return; disposed = true;
       points?.removeFromParent();
       if (!resourcesOwnedByWorld) { geometry?.dispose(); material?.dispose(); }
+      for (const initial of depthSnapshots) initial.node.customDepthMaterial = initial.material;
+      if (!resourcesOwnedByWorld) leafDepthMaterials.forEach(value => value.dispose());
       for (const [mat, initial] of snapshots) {
         mat.color.copy(initial.color);
         for (const key of ['roughness', 'envMapIntensity', 'clearcoat', 'clearcoatRoughness', 'alphaTest']) if (initial[key] !== undefined) mat[key] = initial[key];

@@ -1,4 +1,37 @@
 import * as THREE from 'three';
+import { taipeiJunctionAt } from './world-city-taipei-streets.js?v=city-drive-11';
+import { CITY_ROAD_PROFILES } from './world-city-roadmarkings.js?v=city-drive-11';
+
+function addCityBarriers({scene,track,materials}) {
+  const taipei=track.id==='taipei',height=taipei?.56:.66;
+  const count=Math.ceil(track.length/4)*2;
+  const concrete=materials.concrete.clone();concrete.color.set('#cbc9bd');
+  let geometry;
+  if(taipei)geometry=new THREE.BoxGeometry(.42,height,3.65);
+  else{
+    const profile=new THREE.Shape();profile.moveTo(-.32,-.33);profile.lineTo(.32,-.33);profile.lineTo(.32,-.19);profile.lineTo(.12,.07);profile.lineTo(.10,.33);profile.lineTo(-.10,.33);profile.lineTo(-.12,.07);profile.lineTo(-.32,-.19);profile.closePath();
+    geometry=new THREE.ExtrudeGeometry(profile,{depth:3.65,bevelEnabled:false,steps:1});geometry.translate(0,0,-1.825);
+  }
+  const blocks=new THREE.InstancedMesh(geometry,concrete,count);
+  blocks.name=taipei?'taipei-short-concrete-race-barriers':`${track.id}-closed-street-barriers`;
+  const matrix=new THREE.Matrix4(),rotation=new THREE.Quaternion();
+  const position=new THREE.Vector3(),scale=new THREE.Vector3();let index=0;
+  for(let s=0;s<track.length;s+=4)for(const side of [-1,1]){
+    const a=track.sample(s),b=track.sample(Math.min(s+3.65,track.length)),middle=track.sample(s+1.825);
+    const junction=taipei?taipeiJunctionAt(track,middle.s,2):null;
+    const from=new THREE.Vector3(a.x+a.nx*track.wallOffset*side,a.y+height/2,a.z+a.nz*track.wallOffset*side);
+    const to=new THREE.Vector3(b.x+b.nx*track.wallOffset*side,b.y+height/2,b.z+b.nz*track.wallOffset*side);
+    const direction=to.clone().sub(from);
+    rotation.setFromEuler(new THREE.Euler(-Math.atan2(direction.y,Math.hypot(direction.x,direction.z)),Math.atan2(direction.x,direction.z),0,'YXZ'));
+    position.copy(from).add(to).multiplyScalar(.5);scale.set(1,1,direction.length()/3.65);
+    matrix.compose(position,rotation,scale);blocks.setMatrixAt(index,matrix);
+    // A closed racing route still needs visible blocks across the side-street
+    // entrances, at the same lateral boundary used by the driving simulation.
+    const entrance=junction&&(junction.cross||junction.side===side);
+    blocks.setColorAt(index++,new THREE.Color(entrance ? Math.floor(s/4)%2 ? '#9b3c32' : '#f0eee3' : '#d8d9d3'));
+  }
+  blocks.count=index;blocks.castShadow=blocks.receiveShadow=true;scene.add(blocks);
+}
 
 function railGeometry(length) {
   const profile = [[0, -.18], [.045, -.145], [.045, -.08], [-.045, 0], [.045, .08], [.045, .145], [0, .18]];
@@ -27,7 +60,9 @@ function rubberTexture() {
 }
 
 export function addRoadDetails({ scene, track, materials }) {
-  const half = track.width / 2, grandprix = track.theme === 'grandprix';
+  const half = track.width / 2, grandprix = track.theme === 'grandprix',city=Object.hasOwn(CITY_ROAD_PROFILES,track.id);
+  if(city)addCityBarriers({scene,track,materials});
+  if(!city){
   const steel = new THREE.MeshStandardMaterial({ color: '#929a96', metalness: .72, roughness: .5, side: THREE.DoubleSide, envMapIntensity: .7 });
   const count = Math.ceil(track.length / 6) * 2;
   const rails = new THREE.InstancedMesh(railGeometry(6.12), steel, grandprix ? count * 2 : count);
@@ -65,9 +100,10 @@ export function addRoadDetails({ scene, track, materials }) {
   for (const mesh of [posts, rails, reflectors, bolts, barrier].filter(Boolean)) {
     mesh.castShadow = mesh.receiveShadow = true; scene.add(mesh);
   }
+  }
 
   const positions = [], colors = [], uv = [], indices = [], red = new THREE.Color(grandprix ? '#2b7288' : '#a64b3d'), white = new THREE.Color('#ede9df');
-  for (let s = 0; s < track.length; s += 2) for (const side of [-1, 1]) {
+  for (let s = 0; !city && s < track.length; s += 2) for (const side of [-1, 1]) {
     const p = track.sample(s), q = track.sample(s + 2);
     if (Math.abs(p.curvature) < (grandprix ? .002 : .0035) || p.curvature * side < 0) continue;
     const color = Math.floor(s / 2) % 2 ? red : white, first = positions.length / 3;
@@ -81,7 +117,8 @@ export function addRoadDetails({ scene, track, materials }) {
   const curbGeo = new THREE.BufferGeometry(); curbGeo.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
   curbGeo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3)); curbGeo.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2)); curbGeo.setIndex(indices); curbGeo.computeVertexNormals();
   const curbMat = materials.concrete.clone(); curbMat.vertexColors = true; curbMat.side = THREE.DoubleSide;
-  const curbs = new THREE.Mesh(curbGeo, curbMat); curbs.receiveShadow = true; scene.add(curbs);
+  if(!city){const curbs = new THREE.Mesh(curbGeo, curbMat); curbs.receiveShadow = true; scene.add(curbs);}
+  else{curbGeo.dispose();curbMat.dispose();}
 
   const rubberPos = [], rubberUV = [], rubberIndices = [];
   const segments = track.samples.length;
@@ -96,6 +133,6 @@ export function addRoadDetails({ scene, track, materials }) {
   }
   const rubberGeo = new THREE.BufferGeometry(); rubberGeo.setAttribute('position', new THREE.Float32BufferAttribute(rubberPos, 3));
   rubberGeo.setAttribute('uv', new THREE.Float32BufferAttribute(rubberUV, 2)); rubberGeo.setIndex(rubberIndices); rubberGeo.computeVertexNormals();
-  const rubber = new THREE.Mesh(rubberGeo, new THREE.MeshStandardMaterial({ map: rubberTexture(), transparent: true, opacity: grandprix ? .5 : .24, roughness: 1, depthWrite: false, side: THREE.DoubleSide }));
+  const rubber = new THREE.Mesh(rubberGeo, new THREE.MeshStandardMaterial({ map: rubberTexture(), transparent: true, opacity: grandprix ? .5 : city ? .14 : .24, roughness: 1, depthWrite: false, side: THREE.DoubleSide }));
   rubber.receiveShadow = true; scene.add(rubber);
 }

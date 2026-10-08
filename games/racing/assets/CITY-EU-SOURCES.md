@@ -13,6 +13,7 @@ Architecture is generated only for the selected city and merged by material.
 ## Paris
 
 - [Eiffel Tower official figures](https://www.toureiffel.paris/en/the-monument/key-figures): 330 m total height; four feet on a 125 m square; observation decks at 57, 115 and 276 m. The model has open iron lattice, curved lower arches, tapered upper stages and a separate antenna.
+- [Eiffel Tower official gardens](https://www.toureiffel.paris/en/explore/gardens): the redeveloped gardens surround a separate esplanade, with planted observation areas, established trees and paths. The adapted circuit retains the tower's paved square while grass and plane-tree groups occupy its sides and the visible approach; their positions are authored for this circuit rather than a surveyed garden plan.
 - [City of Paris, its four triumphal arches](https://www.paris.fr/pages/a-la-decouverte-des-4-arcs-de-triomphe-parisiens-18800): the Arc de Triomphe reaches 50 m. An open vaulted arch, sculptural pier reliefs, attic frieze and roof cornice identify it in game.
 - [French Ministry of Armed Forces, Arc de Triomphe](https://www.cheminsdememoire.gouv.fr/fr/arc-de-triomphe): main opening dimensions informed the 14.5 m opening and 20.5 m arch crown. Mansard roof terraces, dormers, stone window surrounds and iron balconies distinguish nearby Paris streets.
 
@@ -49,6 +50,14 @@ Architecture is generated only for the selected city and merged by material.
 - [Historic England, Warwick Castle listing](https://historicengland.org.uk/listing/the-list/list-entry/1000386): sandstone bluff, River Avon, gardens, retaining walls and adjacent historic bridge setting inform the scenery.
 - [Warwickshire County Council, Castle Bridge](https://www.warwickshire.gov.uk/major-transport-construction-projects/a425004-castle-bridge-warwick): Castle Bridge crosses the Avon near the castle. The game's scenic stone bridge is separate from the racing road.
 - [Visit Warwick, official heritage and town guide](https://www.visitwarwick.co.uk/): half timbered medieval and Tudor town buildings inform the street models, including exposed structural timber, plaster infill, leaded windows and steep roofs.
+- [Warwick Castle official grounds and gardens](https://www.warwick-castle.com/explore/heritage/grounds-and-gardens/), specifically its [castle exterior photograph](https://www.warwick-castle.com/media/05dpy5zq/castle-main.jpg): the viewed green slope directly below the sandstone towers, broad outer lawns, crossing footpath and mature tree groups inform the castle's grass-covered bluff and surrounding ground. The reference image is not shipped in the game.
+
+The Warwick town circuit uses a 7.4 m driving surface with one lane in each
+direction and barriers 8.2 m from the centreline. This narrower closed-course
+layout follows the small-town scale visible in the Visit Warwick street
+photograph; these gameplay dimensions and the castle's relative location are
+adaptations, not measured widths of a named street. Physical and visible course
+boundaries remain aligned.
 
 ## Real-scene photo inspection
 
@@ -67,3 +76,41 @@ remain outside the shipped assets.
 Historic common streets use shorter, tightly framed facades beside the sidewalks,
 while modern city districts use taller glass towers and varied setbacks. Narrow
 view corridors preserve the landmark silhouettes from the starting straight.
+
+## Street-scale refinements from the inspected photographs
+
+- Paris: cream walls now occupy most of each bay rather than oversized reflective windows; real mansard/dormer geometry and balcony/cornice details remain.
+- Prague: narrower pastel buildings, small shuttered openings, warm red pitched roofs and stepped gable trim replace office-like window coverage. The St Vitus skyline's separate Gothic spires use patinated metal rather than the street houses' terracotta. The [Prague Castle cathedral guide](https://www.hrad.cz/en/prague-castle-for-visitors/objects-for-visitors/st.-vitus-cathedral-10330) distinguishes the cathedral from the adjacent palace roofs.
+- Newcastle: honey-stone and darker brick warehouse bays use slate pitched roofs rather than the Paris mansard form; the common foreground preserves a low quayside skyline.
+- Lisbon: regional street models now add original blue/white geometric azulejo panels and projecting shutters; common houses have narrower widths and lower hillside roof ranges.
+- Marseille: low port masonry and green-gray shutters share a terracotta roofscape; the separate striped basilica, fort and marina retain their individual silhouettes. The basilica's smooth placeholder mound was replaced after driving-view inspection with a broken limestone outcrop using the existing photographed rock surface, retaining its adapted circuit elevation.
+- Nice: pale Riviera walls, green shutters, balconies and palm/resort fixtures distinguish the common streets from Paris; the Negresco's photographed pink roof and curved corner remain separate geometry.
+- Warwick: small sandstone/Tudor bays, exposed timber, steep gables and tall oak crowns replace the larger repeated urban backdrop.
+
+The reference photographs above were visually re-inspected on 8 October 2026;
+all new facade/roof/furniture imagery in the game remains original procedural
+artwork. Generated texture pixels and geometry are not copied from those photos.
+
+The 9 October low-camera pass replaces the common small-brick fill with separate
+original city paintings: large limestone courses and iron rails in Paris, pastel
+stucco in Prague, quoined warehouses/honey stone in Newcastle, complete geometric
+azulejo in Lisbon, weathered louvred plaster in Marseille, arched pale French
+openings in Nice and mixed leaded timber/brick/stone in Warwick. Original shop
+interiors sit inside actual ground-floor reveals, with small bay-specific fascias
+and selective canopies. The reviewed Paris, Newcastle, Nice and Lord Leycester
+photographs distinguish these materials and openings; the game does not copy
+their imagery or reproduce each pictured street building.
+
+Prague has some filled front-facing gables; Warwick mixes such gables with its
+timber trim. New pavement paintings include sett layouts in Prague/Warwick and
+black/white wave mosaic in Lisbon. Paris and Warwick lawns now enter the
+landmark reservations instead of leaving concrete holes below the monuments;
+they extend into the low-camera approach, stop at sidewalks/buildings, preserve
+the tower esplanade and castle approach path, and add at most twelve candidate
+trees on desktop or eight on mobile using existing foliage batches. Warwick's
+castle bluff itself uses the shared grass scan instead of stone. Subtle vertex
+colour variation and shared grass/normal maps add ground detail without any
+new downloaded imagery. Regional
+road-edge paint, low race barriers and seasonal ground shading are separate
+common systems. Landmark geometry and geographic/photo horizons remain specific
+to their selected city, including previously corrected Marseille rock outcrops.
