@@ -20,7 +20,7 @@ function stock(w, qty = 5000, defects = .02) {
 
 for (const id of Object.keys(PRODUCTS)) test(`${id} 開局有三種不同的真實合約、相同種子可重現`, () => {
   const w = createManufacturing(id, 81), same = createManufacturing(id, 81), policies = contractProfiles(id);
-  assert.deepEqual(w, same); assert.deepEqual(w.offers.map(o => o.profile), ['bulk', 'rush', 'precision']);
+  assert.deepEqual(w, same); assert.deepEqual(w.offers.slice(0,3).map(o => o.profile), ['bulk', 'rush', 'precision']);
   assert.equal(w.offers[0].depositRate, .15); assert.equal(w.offers[1].depositRate, .35); assert.equal(w.offers[0].term, 45); assert.equal(w.offers[1].term, 15);
   assert.ok(w.offers[0].qty > w.offers[1].qty); assert.ok(w.offers[1].price > w.offers[0].price);
   assert.equal(policies.precision.inspectionDays, 1); assert.ok(manufacturingValid(w)); copy(w);

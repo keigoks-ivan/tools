@@ -1,5 +1,5 @@
 import { dateOf, payable } from './venture-core.js';
-import { PRODUCTS, SUPPLIERS, productionPlan, manufacturingSchedule, manufacturingOrderPreview } from './manufacturing.js';
+import { PRODUCTS, SUPPLIERS, productionPlan, manufacturingQueue, manufacturingSchedule, manufacturingOrderPreview } from './manufacturing.js';
 import { MODELS, technologyMetrics, technologyEconomics, technologyBreakEven, technologyProjectPlan } from './technology.js';
 
 const money = n => '$' + Math.round(n).toLocaleString('zh-TW');
@@ -22,7 +22,7 @@ function manufacturingCoach(w) {
   const made = daily.reduce((n,d) => n + d.produced, 0), scrapped = daily.reduce((n,d) => n + d.defects, 0);
   const defectRate = made + scrapped > 0 ? scrapped / (made + scrapped) : null;
   const orders = manufacturingSchedule(w).map(o => ({ ...o, late: o.finishDay === null || o.finishDay > o.due }));
-  const previews = w.orders.map(o => manufacturingOrderPreview(w, o)), remaining = w.orders.reduce((n,o) => n + o.qty - o.produced, 0);
+  const previews = manufacturingQueue(w).map(o => manufacturingOrderPreview(w, o)), remaining = w.orders.reduce((n,o) => n + o.qty - o.produced, 0);
   const requiredMaterial = previews.reduce((n,o) => n + o.requiredMaterial, 0), inTransitQty = w.shipments.reduce((n,s) => n + s.qty, 0);
   const materialGap = previews.at(-1)?.materialGap || 0, newMaterialCost = m.materialCost * supplier.cost;
   const purchasedSchedule = materialGap ? manufacturingSchedule(w, { includePurchase: true }) : orders;
@@ -58,7 +58,7 @@ function manufacturingCoach(w) {
     const raw = p.material * supplier.cost, threshold = Math.ceil(18000 / (raw * .17));
     next = decision('supplier-event', '估算議價是否能回本', `兩個方案相差 17% 新原料價格；以目前供應商，45 天採購超過約 ${count(threshold)} 份，$18,000 短約費才可能由價差抵回。`, '原有已付庫存不受漲價影響；少採購時，保留現金可能更有價值。');
   } else if (bottleneck.id === 'cash') next = decision('cash-plan', '先安排採購與月結現金', `估計缺料支出 ${money(procurementCost)}，已知尾款 ${money(receivables)}；先看收款日，再決定拆單採購或借款。取消全部未交貨訂單需退訂金 ${money(deposits)}，另依各合約付 ${money(cancellationFees)} 違約金。`, '借款增加每月利息與還本；接下高毛利、長帳期訂單也可能使現金先用完。');
-  else if (bottleneck.id === 'delivery') next = decision('delivery-plan', '比較排程、到料與加班', `最早危險訂單剩 ${Math.max(0, risky.due - w.day + 1)} 個生產日；目前日毛產能 ${count(m.capacity)}、估計良品 ${count(m.capacity * (1 - m.defects))}。把急單優先，並檢查 ${supplier.lead} 天到料是否來得及。`, '調整順位會延後其他訂單；加班提高工資 25% 並增加瑕疵，擴線須等 14 天。');
+  else if (bottleneck.id === 'delivery') next = decision('delivery-plan', '比較排程、到料與加班', `最早危險訂單剩 ${Math.max(0, risky.due - w.day + 1)} 個生產日；目前日毛產能 ${count(m.capacity)}、估計良品 ${count(m.capacity * (1 - m.defects))}。${(w.scheduleMode ?? 'due') === 'due' ? '已按剩餘交期自動排程' : '可改用剩餘交期自動排程'}，並檢查 ${supplier.lead} 天到料是否來得及。`, '調整順位會延後其他訂單；加班提高工資 25% 並增加瑕疵，擴線須等 14 天。');
   else if (bottleneck.id === 'materials') next = decision('purchase-plan', '只買已知交貨需要的原料', materialGap > 0 ? `估計補 ${count(materialGap)} 份約需 ${money(procurementCost)}，目前供應商 ${supplier.lead} 天到貨；先核對各訂單截止日。` : `已付在途 ${count(inTransitQty)} 份，最早 ${dayText(Math.min(...w.shipments.map(s => s.arrival)))} 到貨；急件費要與延遲違約金比較。`, '這是依目前瑕疵率估算，批次與磨損會改變用量；一次買太多會鎖住現金。');
   else if (bottleneck.id === 'orders') next = decision('bid-plan', '先試算一張訂單再投標', `現有 ${count(w.offers.length)} 張招標；月固定現金費用 ${money(m.fixed)}，參考價每件貢獻約 ${money(contributionPerUnit)}。比較售價、訂金、到期日與 ${supplier.lead} 天供料時間。`, '降價提高得標機會，但需更多交貨量才能支應固定成本；未得標不會收訂金。');
   else if (bottleneck.id === 'staffing') {

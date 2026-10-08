@@ -72,7 +72,7 @@ test('各供應商新料價影響損平與採購，已付庫存不被重估', ()
 });
 
 test('已付在途到料時間與原有排程次序決定交期風險', () => {
-  const w = createManufacturing(); const a = order(w,400,12), b = order(w,100,3);
+  const w = createManufacturing(); w.scheduleMode = 'manual'; const a = order(w,400,12), b = order(w,100,3);
   manufacturingAction(w,'purchase',{qty:1000}); w.shipments[0].arrival = 3;
   let c = ventureCoach(w); assert.equal(c.bottleneck.id,'delivery'); assert.equal(c.metrics.materialGap,0);
   assert.ok(c.metrics.orders.find(x => x.id === b.id).late);

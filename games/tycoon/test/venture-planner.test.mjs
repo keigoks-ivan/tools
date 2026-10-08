@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { manufacturingDraft, technologyDraft, manufacturingProcurement } from '../venture-planner.js';
-import { PRODUCTS, SUPPLIERS, createManufacturing, manufacturingAction, productionPlan, manufacturingOrderPreview, stepManufacturing } from '../manufacturing.js';
+import { PRODUCTS, SUPPLIERS, createManufacturing, manufacturingAction, productionPlan, manufacturingQueue, manufacturingOrderPreview, stepManufacturing } from '../manufacturing.js';
 import { MODELS, createTechnology, technologyAction, technologyMetrics, technologyEconomics, technologyProjectPlan } from '../technology.js';
 import { ventureCoach } from '../venture-coach.js';
 import { receive, spend, financeAction, dateOf } from '../venture-core.js';
@@ -116,6 +116,20 @@ test('總量足夠但晚到不另買同一批料，沒有訂單不推薦囤貨',
   const empty = manufacturingProcurement(createManufacturing()); assert.equal(empty.materialGap, 0); assert.equal(empty.recommendedQty, 0); assert.equal(empty.canPurchase, false); assert.match(empty.reason, /尚無已接訂單/);
   const w = createManufacturing(); const o = order(w, 100); o.due = 1; manufacturingAction(w, 'purchase', { qty: 200 }); w.shipments[0].arrival = 40;
   const p = manufacturingProcurement(w); assert.equal(p.materialGap, 0); assert.equal(p.recommendedQty, 0); assert.match(p.reason, /核對到貨與交期/);
+});
+
+test('舊檔原始順序不同於自動交期時，採購與診斷仍保留全部訂單缺口', () => {
+  const w = createManufacturing(); delete w.scheduleMode;
+  const later = order(w, 1200), urgent = order(w, 80); urgent.due = 20;
+  const before = JSON.stringify(w), queue = manufacturingQueue(w), previews = queue.map(o => manufacturingOrderPreview(w, o));
+  assert.deepEqual(queue.map(o=>o.id), [urgent.id, later.id]);
+  const p = manufacturingProcurement(w), c = ventureCoach(w);
+  assert.equal(p.materialGap, previews.at(-1).materialGap);
+  assert.ok(p.materialGap > manufacturingOrderPreview(w, w.orders.at(-1)).materialGap);
+  assert.equal(c.metrics.materialGap, p.materialGap);
+  assert.equal(p.requiredMaterial, previews.reduce((n,o)=>n+o.requiredMaterial,0));
+  assert.equal(JSON.stringify(w), before);
+  assert.deepEqual(copy(w).orders.map(o=>o.id), [later.id, urgent.id]);
 });
 
 test('補料受現有產線額定 90 日用量限制，不把加班或施工線算入上限', () => {

@@ -18,6 +18,10 @@ const footerVisible = () => {
   const r = document.querySelector('.venture-footer,.route-foot').getBoundingClientRect();
   return r.top >= 0 && r.bottom <= innerHeight + 2;
 };
+const workspaceNavigationVisible = () => {
+  const r = document.querySelector('.venture-operation-tabs').getBoundingClientRect();
+  return r.top >= 0 && r.bottom <= innerHeight && r.top < 20;
+};
 async function key(page, value) {
   const atBoundary = await page.evaluate(value => {
     const start = scrollY, bottom = document.scrollingElement.scrollHeight - innerHeight;
@@ -77,6 +81,7 @@ try {
     await key(page, 'PageDown'); await page.waitForFunction(() => scrollY > 100);
     await key(page, 'End'); await page.waitForFunction(footerVisible);
     if (view !== 'routes') {
+      assert.equal(await page.evaluate(workspaceNavigationVisible), true, 'workspace tabs must remain available at the operation page bottom');
       await key(page, 'Home'); await page.waitForFunction(() => scrollY === 0);
       await page.locator('.venture-nav [data-tab=report]').click();
       await page.mouse.move(450, 750); await page.mouse.wheel(0, 650);
@@ -100,6 +105,7 @@ try {
     assert.ok(await phone.evaluate(() => scrollY) > 100, 'native touch must move the page');
     for (let i = 0; i < 35 && !await phone.evaluate(footerVisible); i++) await swipe(phone, session, 1);
     assert.equal(await phone.evaluate(footerVisible), true, 'touch must reach the bottom');
+    if (view !== 'routes') assert.equal(await phone.evaluate(workspaceNavigationVisible), true, 'workspace tabs must remain available after native touch scroll');
     for (let i = 0; i < 35 && await phone.evaluate(() => scrollY > 0); i++) await swipe(phone, session, -1);
     assert.equal(await phone.evaluate(() => scrollY), 0, 'touch must return to the top');
     if (view !== 'routes') {

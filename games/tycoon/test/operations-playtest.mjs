@@ -29,8 +29,41 @@ async function sameEngine(page, expected, label) { assert.deepEqual(engineState(
 async function previewRows(page, selector) {
   return page.locator(selector).evaluate(e => Object.fromEntries([...e.querySelectorAll('dt')].map(dt => [dt.textContent, [...dt.nextElementSibling.children].map(c => c.textContent).filter(Boolean).join('|') || dt.nextElementSibling.textContent])));
 }
+async function reveal(page,selector) {
+  const target=page.locator(selector), panel=await target.evaluate(e=>e.closest('[data-operation-panel]')?.dataset.operationPanel);
+  if(panel && await target.evaluate(e=>e.closest('[data-operation-panel]').hidden)) await page.locator(`[data-action=operation-panel][data-panel=${panel.split(/\s+/)[0]}]`).click();
+  const board=await target.evaluate(e=>e.closest('[data-offer-board]')?.dataset.offerBoard);
+  if(board && await target.evaluate(e=>e.closest('[data-offer-board]').hidden)) await page.locator(`[data-action=contract-board][data-board=${board}]`).click();
+  const details=target.locator('xpath=ancestor-or-self::details');
+  for(let i=0;i<await details.count();i++) if(await details.nth(i).getAttribute('open')===null) await details.nth(i).locator('summary').first().click();
+}
+async function panelVisibility(page,mode) {
+  const buttons=page.locator('[data-action=operation-panel]');
+  assert.equal(await buttons.count(),3);
+  assert.deepEqual(await buttons.evaluateAll(items=>items.map(e=>e.dataset.panel)),mode==='manufacturing'?['orders','production','cash']:['growth','product','cash']);
+  if(mode==='manufacturing') {
+    assert.equal(await page.locator('#factory-orders').isVisible(),true);
+    assert.equal(await page.locator('[data-form=manufacturing]').isVisible(),false,'inactive production form must remain visually inaccessible');
+    await page.locator('[data-action=operation-panel][data-panel=production]').click();
+    assert.equal(await page.locator('[data-form=manufacturing]').isVisible(),true);
+    assert.equal(await page.locator('#factory-orders').isVisible(),false);
+    await page.locator('[data-action=operation-panel][data-panel=orders]').click();
+  } else {
+    assert.equal(await page.locator('[data-form=technology]').isVisible(),true);
+    assert.equal(await page.locator('[data-form=technology] [name=price]').isVisible(),true);
+    assert.equal(await page.locator('[data-form=technology] [name=cloudTier]').isVisible(),false,'capacity control must be clustered in the product panel');
+    assert.equal(await page.locator('#product-projects').isVisible(),false,'inactive project workboard must remain visually inaccessible');
+    await page.locator('[data-action=operation-panel][data-panel=product]').click();
+    assert.equal(await page.locator('#product-projects').isVisible(),true);
+    assert.equal(await page.locator('[data-form=technology]').isVisible(),true,'one draft form must stay shared by the growth and product panels');
+    assert.equal(await page.locator('[data-form=technology] [name=price]').isVisible(),false);
+    assert.equal(await page.locator('[data-form=technology] [name=cloudTier]').isVisible(),true);
+    await page.locator('[data-action=operation-panel][data-panel=growth]').click();
+  }
+}
 async function visibleTarget(page, selector, field) {
   assert.equal(await page.locator(selector).evaluate(e => { const r = e.getBoundingClientRect(); return r.top < innerHeight && r.bottom > 0; }), true, `${selector} must be visible after its navigation button`);
+  assert.equal(await page.locator(selector).evaluate(e=>!e.closest('[data-operation-panel]')?.hidden),true,'workflow must reveal the panel holding its destination');
   if (field) assert.equal(await page.evaluate(() => document.activeElement.name), field, 'navigation must focus the named control');
 }
 async function navigation(page, mode) {
@@ -39,6 +72,7 @@ async function navigation(page, mode) {
   const expected = mode === 'manufacturing' ? ['orders','materials','production','cash'] : ['customers','product','growth','service'];
   assert.deepEqual(await buttons.evaluateAll(items => items.map(e => e.dataset.workflow)), expected);
   for (let i = 0; i < 4; i++) {
+    await reveal(page,`.venture-workflow [data-workflow=${expected[i]}]`);
     const b = buttons.nth(i), destination = await b.evaluate(e => ({ target: e.dataset.target, field: e.dataset.field }));
     await b.click(); await visibleTarget(page, destination.target, destination.field);
     await pure(page, before, 'workflow navigation cannot spend, draw RNG, save or advance');
@@ -51,9 +85,11 @@ async function navigation(page, mode) {
   await pure(page, before, 'objective navigation must preserve the simulation and save');
 }
 async function fillDraft(page, mode, business) {
+  await reveal(page,`[data-form=${mode}]`);
   const w = await world(page), before = await immutableState(page), form = page.locator(`[data-form=${mode}]`);
   const data = mode === 'manufacturing' ? { workers: 4, shift: 'overtime', qc: 'strict', supplier: 'express' } : { price: business === 'saas' ? 599 : business === 'marketplace' ? 9 : 3, marketing: 22000, engineers: 2, support: 2, cloudTier: 1, focus: 'growth' };
   for (const [key, value] of Object.entries(data)) {
+    await reveal(page,`[data-form=${mode}] [name=${key}]`);
     const control = form.locator(`[name=${key}]`);
     if (await control.evaluate(e => e.tagName === 'SELECT')) { await control.focus(); await control.selectOption(String(value)); }
     else await control.fill(String(value));
@@ -61,6 +97,7 @@ async function fillDraft(page, mode, business) {
     assert.equal(await control.inputValue(), String(value), 'live preview must keep the current draft');
     await pure(page, before, 'editing a draft cannot alter world, RNG, day or any localStorage key');
   }
+  for(const [key,value] of Object.entries(data)) assert.equal(await form.locator(`[name=${key}]`).inputValue(),String(value),'switching variable clusters must preserve every unsubmitted draft field');
   await page.waitForTimeout(350);
   await pure(page, before, 'a paused draft must remain unchanged after a timer interval');
   const plan = mode === 'manufacturing' ? manufacturingDraft(w,data) : technologyDraft(w,data);
@@ -99,6 +136,7 @@ async function factory(page) {
   // Fix only this isolated browser's RNG so the UI low-price bid certainly wins.
   await page.evaluate(() => { window.__venture.world.rng=1; });
   let w = await world(page); const offer = w.offers[0], beforeQuote = await immutableState(page), quote = page.locator(`[data-offer="${offer.id}"] [name=quote]`);
+  await reveal(page,`[data-offer="${offer.id}"] [name=quote]`);
   await quote.focus(); await quote.selectOption('0.9');
   assert.equal(await page.evaluate(() => document.activeElement.name),'quote');
   await pure(page,beforeQuote,'quote preview cannot consume a bid or change the game');
@@ -110,6 +148,7 @@ async function factory(page) {
   await sameEngine(page,expected,'UI bid must create the exact priced order and deposit');
   w=await world(page); assert.equal(w.co.ledger.revenue,0,'an unfulfilled deposit is not revenue');
   const supply=manufacturingProcurement(w), beforeFill=await immutableState(page);
+  await reveal(page,'[data-action=fill-materials]');
   await page.locator('[data-action=fill-materials]').click();
   await pure(page,beforeFill,'fill-materials must only prefill; it must never buy or save');
   assert.equal(await page.locator('[data-form=purchase] [name=qty]').inputValue(),String(supply.recommendedQty));
@@ -124,6 +163,7 @@ async function factory(page) {
   assert.equal(purchased.co.cash,w.co.cash-supply.recommendedCost);
   assert.equal(purchased.co.ledger.cogs,w.co.ledger.cogs,'buying inventory must not immediately expense the entire purchase');
   const observed=clone(purchased); for(let i=0;i<7;i++) assert.equal(stepManufacturing(observed),true);
+  await reveal(page,'#venture-observation');
   await page.locator('#venture-observation [data-action=week]').click();
   await sameEngine(page,observed,'seven UI observation days must match shipment arrival and production accounting');
   assert.equal(observed.shipments.length,0,'express materials must have arrived during the observation');
@@ -133,6 +173,7 @@ async function factory(page) {
 }
 async function technology(page,business) {
   const strategy={saas:'teams',marketplace:'niche',content:'search'}[business];
+  await reveal(page,`[data-action=strategy][data-strategy=${strategy}]`);
   let w=await world(page), expected=clone(w);
   assert.equal(technologyAction(expected,'strategy',{id:strategy}).ok,true);
   await page.locator(`[data-action=strategy][data-strategy=${strategy}]`).click();
@@ -141,6 +182,7 @@ async function technology(page,business) {
   const strategyText=await page.locator(`[data-action=strategy][data-strategy=${strategy}]`).innerText();
   assert.ok(strategyText.includes(money(metrics.acquisitionCost))); assert.ok(strategyText.includes(number(metrics.market)));
   w=await world(page); const id={saas:'activation',marketplace:'matching',content:'evergreen'}[business];
+  await reveal(page,`[data-project=${id}] [name=release]`);
   const card=page.locator(`[data-project=${id}]`), before=await immutableState(page);
   for(const release of ['rush','pilot']) {
     await card.locator('[name=release]').focus(); await card.locator('[name=release]').selectOption(release);
@@ -157,6 +199,7 @@ async function technology(page,business) {
   await sameEngine(page,expected,'starting a chosen release must pay exactly its quoted fee and save its release');
   assert.equal((await world(page)).co.cash,w.co.cash-plan.fee);
   assert.equal(await page.locator('.venture-project.active').count(),1);
+  await reveal(page,'[data-form=technology] [name=focus]');
   const running=await world(page), beforeFocus=await immutableState(page), focus=page.locator('[data-form=technology] [name=focus]');
   await focus.focus(); await focus.selectOption('stability');
   const draft=technologyDraft(running,{focus:'stability'}), draftRows=await previewRows(page,'[data-form=technology] [data-settings-preview]');
@@ -166,12 +209,14 @@ async function technology(page,business) {
   await pure(page,beforeFocus,'active-project ETA preview must not alter project progress or saved release');
   await focus.selectOption('growth');
   const observed=clone(expected); for(let i=0;i<7;i++) assert.equal(stepTechnology(observed),true);
+  await reveal(page,'#venture-observation');
   await page.locator('#venture-observation [data-action=week]').click();
   await sameEngine(page,observed,'seven UI days must use the real strategy and release development schedule');
   assert.ok((await world(page)).learning.some(r=>r.completed?.days===7));
   // Continue through real UI observation buttons, then verify the sector capability is earned.
   while(observed.project) {
     for(let i=0;i<7;i++) assert.equal(stepTechnology(observed),true);
+    await reveal(page,'#venture-observation');
     await page.locator('#venture-observation [data-action=week]').click();
     await sameEngine(page,observed,'later observation must apply completed capability on the actual engine day');
   }
@@ -194,6 +239,7 @@ async function clockControls(page,mode) {
   const expected=await world(page); assert.equal((mode==='manufacturing'?stepManufacturing:stepTechnology)(expected),true);
   await page.locator('.venture-time [data-action=day]').click();
   await sameEngine(page,expected,'one-day control must advance exactly one complete engine day');
+  await reveal(page,`[data-form=${mode}] [name=${mode==='technology'?'price':'workers'}]`);
   const before=await immutableState(page);
   // Dispatch the speed click and input focus in one task, before a timer can fire.
   await page.evaluate(mode=>{
@@ -256,13 +302,14 @@ try {
         await page.waitForFunction(()=>window.__ready && window.__venture);
         assert.equal((await world(page))[mode==='manufacturing'?'productId':'modelId'],business);
         assert.equal((await state(page)).speed,0); assert.equal((await state(page)).ticking,false);
+        const beforePanels=await immutableState(page); await panelVisibility(page,mode); await pure(page,beforePanels,'switching compact panels must preserve world, RNG, day and save');
         await navigation(page,mode); await fillDraft(page,mode,business);
         if(mode==='manufacturing') await factory(page); else await technology(page,business);
         await clockControls(page,mode); await reportAndResume(page,mode);
         if(mode==='manufacturing') await unknownContractForecast(page);
         await presentation(page,requests,errors,business);
         console.log(`PASS ${size.name} ${business}: workflow, focused pure draft, engine costs, operational decisions, seven-day report and save resume`);
-      } catch(error) { console.error(`FAIL ${size.name} ${business}`); throw error; }
+      } catch(error) { console.error(`FAIL ${size.name} ${business}`,errors); throw error; }
       finally { await context.close(); }
     }
   }

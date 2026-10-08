@@ -3,6 +3,7 @@ html:has(>body[data-view=routes],>body[data-view=manufacturing],>body[data-view=
 body[data-view=routes],body[data-view=manufacturing],body[data-view=technology]{overflow:auto;height:auto;min-height:100%;background:#e7efea;color:#193c48;--route-ink:#193c48;--route-muted:#57747a;--route-border:#c6d8d6;--route-accent:#e9a63b;--route-accent-soft:#fff0d0;--route-surface:#fbfdf8;--route-hud:#193f48;--route-shadow:#b3c8c7}
 body[data-view=manufacturing]{background:radial-gradient(ellipse at 12% 0%,#2c3b42,transparent 55%),#14232c;--route-accent:#eab452;--route-accent-soft:#fff0d0;--route-hud:#192c36;--route-border:#d4c3a2;--route-shadow:#a5977f;--route-surface:#fcf7ea}
 body[data-view=technology]{background:radial-gradient(ellipse at 80% 0%,#25414a,transparent 55%),#132330;--route-accent:#239b96;--route-accent-soft:#dbf3ec;--route-hud:#1b3442;--route-border:#bfcfc9;--route-shadow:#96afa9;--route-surface:#f4f9f3}
+body[data-view=manufacturing],body[data-view=technology]{overflow:visible}
 body[data-view=routes]{background:radial-gradient(ellipse at 18% 0%,#d3ece3 0%,transparent 56%),linear-gradient(150deg,#edf3e9,#e3edf2)}
 body[data-view=routes] #stage,body[data-view=routes] #vignette,body[data-view=manufacturing] #stage,body[data-view=manufacturing] #vignette,body[data-view=technology] #stage,body[data-view=technology] #vignette{display:none}
 
@@ -70,6 +71,37 @@ body[data-view=routes] #stage,body[data-view=routes] #vignette,body[data-view=ma
 .venture-time button{min-width:34px;padding:7px 10px;border-color:#537079;border-bottom-color:#102a33;background:#365c64;color:#e4f2e9;box-shadow:inset 0 1px 0 #ffffff13;white-space:nowrap}
 .venture-time button:hover:not(:disabled){background:#4a7177;border-color:#98b8b3}
 .venture-shell button.on{background:var(--route-accent-soft);color:var(--route-ink);border-color:var(--route-accent)}
+.venture-shell [hidden]{display:none!important}
+.venture-operation-tabs{display:flex;gap:8px;position:sticky;top:8px;z-index:8;padding:8px;margin:12px 0;background:var(--route-hud);border:1px solid var(--route-border);border-radius:10px;box-shadow:0 4px 10px #102b3020;scroll-margin-top:8px}
+.venture-operation-tabs button{flex:1;min-height:42px}
+.venture-operation-tabs button>span{margin-right:8px;font-size:10px;opacity:.6}
+.venture-workspace.venture-workspace-wide{grid-template-columns:minmax(0,1fr)}
+.venture-workspace-wide .venture-bids{grid-template-columns:repeat(3,minmax(0,1fr))}
+@media(max-width:900px){.venture-workspace-wide .venture-bids{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.venture-workspace-wide .venture-bids{grid-template-columns:1fr}}
+.venture-scheduling{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 12px}
+.venture-contract-details{margin:12px 0;border:1px solid var(--route-border);border-radius:6px;background:#ffffff75;padding:10px}
+.venture-contract-details>summary{font-size:11px;font-weight:650;cursor:pointer;color:var(--route-ink)}
+.venture-contract-details[open]>summary{margin-bottom:14px}
+.contract-profile.supply{background:#dce9f5;color:#395b85;border-color:#a8bfd7}
+.venture-deliveries{display:grid;gap:8px;margin-bottom:15px}
+.venture-deliveries>div{display:flex;flex-direction:column;gap:4px;padding:9px;background:#edf3f8;border-left:3px solid #8da9c0;border-radius:4px;font-size:11px}
+.venture-deliveries span,.venture-deliveries small{font-size:10px;line-height:1.7}
+.draft-summary{display:grid;gap:7px;margin-bottom:12px}
+.draft-summary>div{display:flex;justify-content:space-between;gap:12px;align-items:center;font-size:10px;line-height:1.6}
+.draft-summary b{font-size:14px;font-variant-numeric:tabular-nums;text-align:right}
+.draft-comparison{border-top:1px solid var(--route-border);padding-top:9px}
+.draft-comparison>summary{font-size:10px;font-weight:650;cursor:pointer}
+.draft-comparison dl{margin-top:12px}
+.venture-brief{margin-bottom:10px;border:1px solid var(--route-border);border-radius:8px;background:var(--route-surface)}
+.venture-brief>summary{padding:11px 15px;cursor:pointer;font-size:11px;color:var(--route-muted)}
+.venture-brief .venture-command{margin:0;border:0;border-radius:0 0 8px 8px}
+.venture-shell .venture-workflow .workflow-step{min-height:70px;padding:10px 12px;gap:9px}
+.venture-workflow .workflow-step-content{gap:4px}
+.venture-workflow .workflow-step-content strong{font-size:14px}
+.venture-workflow .workflow-step-content small{display:none}
+.venture-shell [data-operation-panel],.venture-shell [data-form],.venture-shell input,.venture-shell select{scroll-margin-top:84px}
+@media(max-width:600px){.venture-operation-tabs{gap:5px;padding:5px;top:5px}.venture-operation-tabs button{padding:9px 5px;font-size:10px;min-height:40px}.venture-operation-tabs button>span{display:none}.venture-shell .venture-workflow .workflow-step{min-height:62px;flex-direction:row;padding:9px;gap:6px}.venture-workflow .workflow-step-content strong{font-size:12px}.venture-workflow .workflow-step-index{display:none}}
 .venture-time button.on{background:#efb94c;color:#233a39;border-color:#f3d78f;border-bottom-color:#9c7029;box-shadow:inset 0 1px 0 #fff5}
 .venture-capital{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px;margin:16px 0}
 .venture-tile{display:flex;flex-direction:column;gap:6px;min-width:0;padding:14px 17px;background:var(--route-surface);border:1px solid var(--route-border);border-bottom:3px solid var(--route-shadow);border-radius:10px}

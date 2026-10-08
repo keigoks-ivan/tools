@@ -1,5 +1,5 @@
 import { dateOf } from './venture-core.js';
-import { PRODUCTS, SUPPLIERS, PRODUCTION_MODES, productionPlan, manufacturingOrderPreview } from './manufacturing.js';
+import { PRODUCTS, SUPPLIERS, PRODUCTION_MODES, productionPlan, manufacturingQueue, manufacturingOrderPreview } from './manufacturing.js';
 import { MODELS, STRATEGIES, technologyMetrics, technologyEconomics, technologyProjectPlan } from './technology.js';
 import { ventureCoach } from './venture-coach.js';
 
@@ -56,7 +56,7 @@ export function technologyDraft(w, data = {}) {
 }
 export function manufacturingProcurement(w) {
   if (w?.mode !== 'manufacturing' || !known(PRODUCTS, w.productId) || !known(SUPPLIERS, w.supplier)) return { ok: false, canPurchase: false, reason: '製造營運狀態不符。' };
-  const previews = w.orders.map(o => manufacturingOrderPreview(w, o)), plan = productionPlan(w), supplier = SUPPLIERS[w.supplier];
+  const previews = manufacturingQueue(w).map(o => manufacturingOrderPreview(w, o)), plan = productionPlan(w), supplier = SUPPLIERS[w.supplier];
   const remaining = w.orders.reduce((n, o) => n + o.qty - o.produced, 0), requiredMaterial = previews.reduce((n, o) => n + o.requiredMaterial, 0), materialGap = previews.at(-1)?.materialGap || 0;
   const stockQty = w.stock.qty, inTransitQty = w.shipments.reduce((n, s) => n + s.qty, 0), unitCost = plan.materialCost * supplier.cost, maxQty = PRODUCTS[w.productId].capacity * w.lines * 90;
   const shipmentSlots = Math.max(0, 20 - w.shipments.length), affordableQty = affordableQuantity(w.co.cash, unitCost, maxQty);
