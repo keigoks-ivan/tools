@@ -1,0 +1,9 @@
+# Cockpit visual references
+
+The cockpit is original real-time geometry, informed by viewed manufacturer photography on 2026-10-08. It is a game reconstruction rather than a manufacturer CAD interior. Reference photographs are not redistributed as game assets.
+
+- [BMW Group: new BMW X3 M50 xDrive studio interior, June 2024](https://www.press.bmwgroup.com/global/photo/detail/P90555205/der-neue-bmw-x3-m50-xdrive-studio-06/2024). The viewed photo shows a connected wide digital display, flat-base steering wheel, red center marker, textured dashboard, red/blue interaction lighting and thin horizontal trim. These guided the X3 display housing, hexagonal instrument graphics, flat wheel and accent lighting.
+- [Porsche: 911 GT3 RS official model gallery](https://www.porsche.com/international/models/911/911-gt3-rs/911-gt3-rs/). The viewed close-up steering-wheel photograph shows the central tachometer, suede-like rim, yellow top marker, paddle shifters and four circular mode controls. These guided the Porsche instrument layout and wheel details.
+- The same Porsche gallery's driver photograph guided original unbranded gloves, grip position and cuff geometry. Dashboard leather grain and normal maps are generated at 128×128 locally; digital instruments/navigation use small dynamic canvases. No additional image downloads are needed for the cockpit.
+
+All vehicles share the compact driving-space mesh with selected visual variations. Steering, speed, RPM, gear and circuit navigation are live game values; mirror styling uses environment reflections rather than a second camera render.

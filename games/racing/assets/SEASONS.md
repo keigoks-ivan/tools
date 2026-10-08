@@ -1,0 +1,47 @@
+# Seasonal rendering and climate references
+
+Checked 2026-10-08. `../seasons.mjs` supplies **representative playable conditions**, not live weather, weather forecasts, measured surface temperatures or monthly climate averages. `temperature` is an illustrative ambient temperature in °C. Wetness, snow coverage, grip and vegetation colors are original game presets. Climate information guides broad seasonal choices; the numerical game values are not a transcription of official climate tables.
+
+Every city retains its existing modeled architecture and closed-course street layout. Seasons change light/fog, borrowed asphalt roughness/reflection, vegetation tint and, where appropriate, light snow on terrain/road shoulders. No additional photographs or downloadable weather assets are used. The new rain and snow particles and leaf-coverage shader are original procedural artwork in `../weather.js`.
+
+## Climate choices
+
+| Circuits | Seasonal selection | Interpretation |
+| --- | --- | --- |
+| Kuala Lumpur, Bangkok | Dry / wet | Tropical temperatures and evergreen vegetation. Dry means relatively less rain, not an absence of rainfall. Two gameplay options simplify the regional monsoon calendars; Thailand also has a hot/cool distinction, and Malaysia has regional/monsoon rainfall differences. No snow. |
+| Taipei, Hanoi | Four seasons | Hotter humid summers, cooler winters and evergreen vegetation. Winter street scenes remain free of snow. Taipei winter rain is consistent with northeast-monsoon exposure; Hanoi's cooler northern-Vietnam winter is represented without snow. |
+| Kobe | Four seasons | Warm summers and a cool harbor winter. Rare snow can occur in the region; the selected harbor winter scene does not depict persistent snow cover. |
+| London, Newcastle, Warwick, Paris | Four seasons | Cooler, often wet winters and autumn foliage. These presets use rain/cloud rather than permanent snow. This is a rendering choice, not a claim that these cities never receive snow. |
+| Lisbon, Marseille, Nice, fictional Capo Azzurro | Four seasons | Mediterranean-style warm/dry summer, mild winter and autumn rain. Much of the coastal vegetation stays green. These sea-level street presets do not add snow. |
+| Sydney, Gold Coast, Melbourne | Four seasons | Southern-hemisphere months: spring September–November, summer December–February, autumn March–May and winter June–August. Their coastal city circuits do not acquire snowy winter streets. Gold Coast stays warmer and evergreen; Melbourne has a cooler/wetter winter preset. |
+| San Francisco | Four seasons | Mild coastal temperatures, a cooler wet winter and no snowy streets. A clear summer race is one selected day's condition; the city also experiences summer marine stratus/fog and varied microclimates. |
+| New York, Prague | Four seasons | Winter selects a snowfall episode, with reduced grip and light snowy shoulders. It does not imply that every winter day has snow. |
+| Vancouver | Four seasons | Winter selects an occasional cold/snow episode. The description explicitly notes that the harbor's usual winter pattern is predominantly rain; snow coverage is lighter than the Alpine preset. |
+| Fictional Alpine Pass | Four seasons | A high-mountain winter snowfall scenario with evergreen pine vegetation. No specific town, altitude or measured climate station is claimed. |
+| Fictional Red Rock Run | Four seasons | An original dry canyon setting with warmer summer and cooler winter, sparse scrub and no snow. No specific desert's climate is claimed. |
+| Fictional Apex International | Four seasons | Generic temperate track presets, winter rain/cloud and no persistent snow cover. No geographic climate station is claimed. |
+
+## Primary references
+
+- **Malaysian Meteorological Department**: [rainfall-distribution research](https://www.met.gov.my/data/research/researchpapers/2020/RP01_2020.pdf), which describes near-equatorial temperatures, humidity, substantial rain and regional monsoon differences. This supports a tropical evergreen interpretation, not a universal two-season calendar for every Malaysian location.
+- **Thai Meteorological Department**: [climate charts](https://www.tmd.go.th/en/ClimateChart) and [Thailand's seasons](https://www.tmd.go.th/info/%E0%B8%A4%E0%B8%94%E0%B8%81%E0%B8%B2%E0%B8%A5%E0%B8%82%E0%B8%AD%E0%B8%87%E0%B8%9B%E0%B8%A3%E0%B8%B0%E0%B9%80%E0%B8%97%E0%B8%A8%E0%B9%84%E0%B8%97%E0%B8%A2). Wet/dry gameplay aggregates the hot, cool and rainy periods.
+- **Taiwan Central Weather Administration**: [seasonal climate, winter](https://climate.cwa.gov.tw/SeasonalClimate?subpage=Winter), describing the northeast monsoon and northern/northeastern Taiwan's winter rainfall exposure.
+- **Japan Meteorological Agency**: [Kobe 1991–2020 normals](https://www.data.jma.go.jp/stats/etrn/view/nml_sfc_ym.php?block_no=47770&prec_no=63&view=p1), with mild coastal winter temperatures and limited snow accumulation. The game depicts the harbor, not a snowy Rokko mountain summit.
+- **Australian Bureau of Meteorology**: [seasons and solstices](https://www.bom.gov.au/news-and-media/solstices-equinoxes-and-the-seasons), which defines the opposite southern seasonal months and distinguishes tropical wet/dry calendars from four-season temperate calendars. The game preserves those months for all three Australian circuits.
+- **UK Met Office**: [UK climate overview](https://www.metoffice.gov.uk/binaries/content/assets/metofficegovuk/pdf/research/climate-science/climate-observations-projections-and-impacts/uk.pdf), covering maritime influences, rainfall and regional temperature differences. The British city presets choose cool wet street conditions.
+- **Météo-France**: [French climate types](https://meteofrance.com/changement-climatique/le-climat-en-france-hexagonale-et-corse), distinguishing Mediterranean mild winters, hot summers and irregular rainfall from the Paris basin's modified oceanic climate. Those broad differences guide the Nice/Marseille versus Paris presets.
+- **Portuguese Institute for Sea and Atmosphere (IPMA)**: [Lisbon/Geofísico 1991–2020 climate normals](https://www.ipma.pt/opencms/bin/file.data/climate-normal/cn_91-20_LISBOA_GEOFISICO.pdf), used to check mild winter versus warm summer coastal conditions. Source: IPMA; the displayed in-game temperatures are illustrative conditions, not values extracted from this sheet.
+- **US National Weather Service**: [San Francisco climate data](https://www.weather.gov/mtr/sfd_climate) and [published climate overview](https://www.weather.gov/media/mtr/climate/SFD_CLIMATE.pdf), describing the city's mild coastal winter, seasonal rain, summer stratus and rare snowfall. The older overview supplies qualitative context; current normals remain available through the NWS climate-data page.
+- **US National Weather Service, New York**: [local climatological data](https://www.weather.gov/okx/LocalClimatologicalData), including Central Park monthly snowfall normals and seasonal reports. The New York winter preset represents one plausible snow event, not the year's average condition.
+- **Environment and Climate Change Canada**: [1991–2020 climate normals](https://www.climate.weather.gc.ca/climate_normals/index_e.html), including Vancouver International Airport temperature, rainfall and snowfall data. The winter preset distinguishes occasional coastal snow from persistent high-mountain snow.
+- **Czech Hydrometeorological Institute**: [Praha/Ruzyně snow station](https://hydro.chmi.cz/hpps/snh/objekt/2800647), showing official snow monitoring for the Prague area. The game uses a selected winter snow condition, not a live reading of that station.
+
+## Runtime and ownership
+
+`getSeasons(track)`, `getSeason(track, id)` and `defaultSeason(track)` accept a track object or ID and return frozen presets. The default is summer, or relative dry season in the two tropical presets. Unknown IDs fall back to the circuit's default; unknown tracks use the generic temperate preset. Dates are not inferred from the user's clock.
+
+`createSeasonWeather({ scene, season, mobile, renderer, materials, sun, hemisphere, groundHeight, camera, resourcesOwnedByWorld })` returns `update(state, deltaSeconds, camera)`, `setQuality(level)` and `dispose()`. It borrows surface/foliage materials and lighting without disposing them. Named `city-foliage` receives the seasonal tint and a stable UV mask reduces winter deciduous coverage; the separate green traffic-light material remains unchanged. Pine, cypress, olive and scrub vegetation use restrained evergreen tinting.
+
+Precipitation uses at most one Points draw, no textures, no network requests, a maximum of 350 particles on mobile or 700 on desktop, and lower particle counts for medium/low quality. The volume follows the actual view camera and recycles above a sampled local ground plane. It is a bounded visual effect, not simulated hydrology, precipitation accumulation or windshield droplets.
+
+When created before world resource capture with `resourcesOwnedByWorld: true`, the world's existing captured sets own the precipitation geometry/material. Weather disposal removes the Points object and restores borrowed scene state without disposing those world-owned GPU resources. In standalone use, the weather helper owns and disposes its precipitation resources once. `../seasons.test.mjs` checks climate constraints, reversed southern months, bounded grip, finite particles, resource cost, camera following, shader restoration and both ownership modes.

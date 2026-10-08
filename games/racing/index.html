@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="robots" content="noindex">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#141614">
+  <title>APEX · 世界競速</title>
+  <meta name="description" content="駕駛市售跑車，探索台北、吉隆坡、神戶、倫敦與全球城市賽道。手機方向盤、原創熱血配樂、引擎音效與個人圈速挑戰。">
+  <link rel="stylesheet" href="./style.css?v=city-drive-7">
+  <script type="importmap">{"imports":{"three":"./vendor/three.module.js","three/addons/":"./vendor/addons/"}}</script>
+</head>
+<body>
+  <main id="game" aria-label="APEX 世界競速">
+    <div id="view" aria-label="即時 3D 賽車畫面"></div>
+    <div class="scene-shade" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <button id="brand-button" class="brand" type="button" aria-label="返回主選單">
+        <svg class="brand-mark" viewBox="0 0 32 28" aria-hidden="true"><path d="M1 27 15.5 1 31 27H23L15.5 13 8 27Z" fill="currentColor"/><path d="m13 25 3-5 3 5Z" fill="currentColor"/></svg>
+        <span>APEX<small>世界競速</small></span>
+      </button>
+      <span class="session-label" id="session-label">COSTA · TIME ATTACK</span>
+      <nav class="top-actions" aria-label="遊戲控制">
+        <button id="camera-button" type="button" aria-label="切換鏡頭（C）" title="切換鏡頭 · C"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h4l2-3h4l2 3h4v13H4Z"/><circle cx="12" cy="13" r="4"/></svg><span>鏡頭</span></button>
+        <button id="sound-button" type="button" aria-label="切換聲音（M）" aria-pressed="true" title="切換聲音 · M"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10h4l5-4v12l-5-4H4Z M17 8c3 2 3 6 0 8"/></svg><span>聲音</span></button>
+        <button id="pause-button" type="button" aria-label="暫停（P）" aria-pressed="false" title="暫停 · P"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14"/></svg><span>暫停</span></button>
+        <button id="help-button" type="button" aria-label="操作說明" title="操作說明"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9 9a3 3 0 0 1 6 0c0 2-3 2-3 4M12 16v1"/></svg><span>操作</span></button>
+        <button id="menu-button" type="button" aria-label="開啟選單" title="選單"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg><span>選單</span></button>
+      </nav>
+    </header>
+
+    <section id="menu" class="menu" aria-labelledby="menu-title">
+      <div class="menu-intro">
+        <div class="eyebrow"><span class="live-dot"></span> DRIVING EXPERIENCE</div>
+        <h1 id="menu-title">APEX<span>世界競速</span></h1>
+        <p class="intro-copy">選一條賽道，找出你的下一個煞車點。</p>
+      </div>
+      <div class="track-card">
+        <div class="track-heading"><span class="eyebrow">CHOOSE YOUR DRIVE</span><span class="track-number">TIME ATTACK</span></div>
+        <h2><b id="track-name">COSTA</b> <span id="track-label">海岸環線</span></h2>
+        <div class="race-selectors">
+          <label for="track-select"><span>選擇賽道</span><select id="track-select" aria-describedby="track-description" disabled><option value="costa">海岸環線</option></select></label>
+          <label for="car-select"><span>選擇車款</span><select id="car-select" aria-describedby="car-description" disabled><option value="ferrari458">Ferrari 458</option></select></label>
+          <label for="season-select" class="season-setting"><span>季節與天候</span><select id="season-select" aria-describedby="season-description" disabled><option value="summer">夏季</option></select></label>
+        </div>
+        <p id="season-description" class="selection-description season-description"></p>
+        <p id="track-description" class="selection-description">海岸彎道與高速直線，熟悉入彎節奏。</p>
+        <div class="track-meta"><span id="car-name">Ferrari 458</span><i aria-hidden="true"></i><span>計時練習</span></div>
+        <p id="car-description" class="selection-description car-description">中置引擎跑車，敏捷轉向。</p>
+        <p class="selection-note">賽道、車款與季節分開記錄最佳圈速。</p>
+      </div>
+      <div class="tilt-setup touch-copy"><button id="tilt-enable" class="tilt-button" type="button" aria-pressed="false">啟用手機方向盤</button><span id="tilt-setup-status" role="status">橫握手機，左右傾斜轉向</span></div>
+      <button id="start-button" class="primary-button start-button" type="button" disabled><span id="start-label">正在準備…</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M13 5l7 7-7 7"/></svg></button>
+      <div class="menu-settings">
+        <fieldset class="paint-picker">
+          <legend>車身塗裝</legend>
+          <div class="paint-options">
+            <button type="button" data-paint="ivory" style="--paint-color:#ddd9c9" aria-label="珍珠白塗裝" aria-pressed="true"><i></i><span>珍珠白</span></button>
+            <button type="button" data-paint="graphite" style="--paint-color:#4b5358" aria-label="石墨灰塗裝" aria-pressed="false"><i></i><span>石墨灰</span></button>
+            <button type="button" data-paint="red" style="--paint-color:#9a302d" aria-label="競速紅塗裝" aria-pressed="false"><i></i><span>競速紅</span></button>
+          </div>
+        </fieldset>
+        <div class="settings-row">
+          <label class="quality-setting" for="quality"><span>畫質</span><select id="quality" aria-label="畫質"><option value="auto" selected>依 GPU 自動</option><option value="high">高</option><option value="medium">標準</option><option value="low">效能優先</option></select></label>
+          <label class="assist-setting" for="assist"><span>駕駛輔助</span><input type="checkbox" id="assist" aria-label="駕駛輔助" checked><i aria-hidden="true"></i></label>
+        </div>
+        <p id="render-device" class="render-device" role="status">正在偵測繪圖裝置…</p>
+      </div>
+      <p class="menu-controls keyboard-copy"><kbd>W A S D</kbd> 或方向鍵操控 <span>·</span> <kbd>R</kbd> 回到賽道</p>
+      <p class="menu-controls touch-copy">橫握手機轉向 <span>·</span> 按住油門或煞車</p>
+      <footer class="menu-footer"><a href="/games/" aria-label="返回遊戲機台">遊戲機台 ↗</a><button id="audio-settings-button" type="button">音效與配樂 ↗</button><button id="credits-button" type="button">製作資訊 ↗</button></footer>
+    </section>
+
+    <div class="scene-caption" aria-hidden="true"><span class="caption-line"></span><span><b id="scene-track-name">COSTA</b><small id="scene-track-label">海岸環線 / 計時練習</small></span></div>
+    <div id="loading" class="loading" role="status" aria-live="polite"><span class="loader-ring" aria-hidden="true"></span><span id="loading-label">正在準備賽道與跑車…</span></div>
+
+    <section id="hud" class="hud" aria-label="駕駛儀表" hidden>
+      <div class="timing-panel">
+        <div class="lap-row"><span>圈次 <b id="lap-value">01</b></span><span class="timing-label">CURRENT LAP</span></div>
+        <div id="lap-time" class="lap-time">00:00.000</div>
+        <div class="best-row"><span>最佳 <b id="best-time">—</b></span><span id="delta-value" class="delta-value">—</span></div>
+      </div>
+      <div class="map-panel"><canvas id="track-map" width="240" height="200" aria-label="海岸環線地圖與車輛位置"></canvas><span id="map-label">COSTA / 海岸環線</span></div>
+      <div class="speedometer">
+        <div class="rpm-track" aria-label="引擎轉速"><i id="rpm-bar"></i></div>
+        <div class="speed-readout"><div class="gear-readout"><span>GEAR</span><b id="gear-value">1</b></div><b id="speed-value">0</b><span class="speed-unit">km/h</span></div>
+        <div class="grip-readout"><span>輪胎狀態</span><b id="grip-value">正常</b></div>
+      </div>
+      <p class="driving-shortcuts keyboard-copy"><kbd>C</kbd> 鏡頭 <span>·</span> <kbd>R</kbd> 回到賽道</p>
+    </section>
+
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+    <div id="pause-overlay" class="pause-overlay" hidden><div><span class="eyebrow">TAKE A BREATH</span><h2>已暫停</h2><button id="resume-button" class="primary-button" type="button">繼續駕駛 <span aria-hidden="true">→</span></button><p>按 <kbd>P</kbd> 也能繼續</p></div></div>
+
+    <div id="touch-controls" class="touch-controls" aria-label="觸控駕駛控制" hidden>
+      <div class="steering-control">
+        <button id="tilt-toggle" class="tilt-button tilt-toggle" type="button" aria-pressed="false">手機方向盤</button>
+        <span class="touch-label">按住轉向</span>
+        <div id="steer-pad" class="steer-pad" role="group" aria-label="轉向按鈕"><button id="steer-left" class="steer-button" type="button" aria-label="按住左轉" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg><span>左</span></button><button id="steer-right" class="steer-button" type="button" aria-label="按住右轉" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg><span>右</span></button></div>
+        <div id="tilt-panel" class="tilt-panel" hidden>
+          <svg id="tilt-wheel" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="26"/><circle cx="32" cy="32" r="7"/><path d="M6 29h18m16 0h18M29 39l-3 18m9-18 3 18"/></svg>
+          <span id="tilt-status" role="status">方向盤已啟用</span>
+          <button id="tilt-calibrate" class="tilt-calibrate" type="button">回正校準</button>
+        </div>
+      </div>
+      <div class="pedals"><button id="brake-button" class="pedal brake-pedal" type="button" aria-label="按住煞車"><span class="pedal-lines" aria-hidden="true"></span><strong>煞車</strong></button><button id="throttle-button" class="pedal throttle-pedal" type="button" aria-label="按住油門"><span class="pedal-lines" aria-hidden="true"></span><strong>油門</strong></button></div>
+    </div>
+
+    <dialog id="audio-dialog" class="audio-dialog" aria-labelledby="audio-title">
+      <div class="dialog-heading"><div><span class="eyebrow">THE SOUND OF SPEED</span><h2 id="audio-title">音效與配樂</h2></div><button id="close-audio" class="close-button" type="button" aria-label="關閉音訊設定">×</button></div>
+      <label class="audio-master assist-setting" for="audio-enabled"><span>開啟聲音</span><input type="checkbox" id="audio-enabled" checked><i aria-hidden="true"></i></label>
+      <label class="audio-level" for="effects-volume"><span>引擎與賽道音效 <output id="effects-level" for="effects-volume">80%</output></span><input id="effects-volume" type="range" min="0" max="100" step="5" value="80"></label>
+      <label class="audio-level" for="music-volume"><span>熱血配樂 <output id="music-level" for="music-volume">55%</output></span><input id="music-volume" type="range" min="0" max="100" step="5" value="55"></label>
+      <p class="audio-copy">原創電子搖滾配樂，搭配隨轉速變化的引擎聲、換檔、輪胎滑移與護欄碰撞音效。點「開始駕駛」啟動聲音；暫停時同步安靜。</p>
+    </dialog>
+
+    <dialog id="help-dialog" class="help-dialog" aria-labelledby="help-title">
+      <div class="dialog-heading"><div><span class="eyebrow">DRIVER'S GUIDE</span><h2 id="help-title">駕駛指南</h2></div><button id="close-help" class="close-button" type="button" aria-label="關閉操作說明">×</button></div>
+      <dl class="help-controls"><div><dt><kbd>W</kbd> <kbd>↑</kbd></dt><dd>加速</dd></div><div><dt><kbd>S</kbd> <kbd>↓</kbd></dt><dd>煞車</dd></div><div><dt><kbd>A D</kbd> <kbd>← →</kbd></dt><dd>轉向</dd></div><div><dt><kbd>R</kbd></dt><dd>回到賽道</dd></div><div><dt><kbd>C</kbd></dt><dd>切換鏡頭</dd></div><div><dt><kbd>P</kbd> / <kbd>M</kbd></dt><dd>暫停 / 聲音</dd></div></dl>
+      <p class="help-touch">手機：按「啟用手機方向盤」並允許感測器，橫握手機、保持平穩，再左右傾斜轉向；拇指可同時按住油門或煞車。直行時按「回正校準」，重新設定手持角度。若瀏覽器不支援感測器，可切回左／右按鈕。</p>
+      <div class="driver-tip"><span class="eyebrow">第一圈，先熟悉賽道。</span><p>直線上煞車，入彎時鬆開油門；看見出彎方向後，再逐漸加速。</p></div>
+    </dialog>
+
+    <dialog id="result-dialog" class="result-dialog" aria-labelledby="result-title">
+      <div class="dialog-heading"><div><span class="eyebrow">LAP COMPLETE</span><h2 id="result-title">完成一圈</h2></div><button id="result-close" class="close-button" type="button" aria-label="關閉圈速成績">×</button></div>
+      <p id="result-status" class="result-status">海岸環線 · 計時練習</p><div id="result-time" class="result-time">—</div><p class="result-best-label">個人最佳 <b id="result-best">—</b></p><button id="restart-button" class="primary-button" type="button">再跑一圈 <span aria-hidden="true">→</span></button>
+    </dialog>
+    <dialog id="credits-dialog" class="credits-dialog" aria-labelledby="credits-title">
+      <div class="dialog-heading"><div><span class="eyebrow">BEHIND THE DRIVE</span><h2 id="credits-title">製作資訊</h2></div><button id="close-credits" class="close-button" type="button" aria-label="關閉製作資訊">×</button></div>
+      <div class="credit-item"><h3>車輛模型</h3><p><a href="https://sketchfab.com/models/57bf6cc56931426e87494f554df1dab6" target="_blank" rel="noopener noreferrer">Ferrari458 · vicent091036 ↗</a></p><p>依 <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a> 授權使用；材質與動畫經調整。</p></div>
+      <div id="vehicle-credits"></div>
+      <div class="credit-item"><h3>場景材質與天空</h3><p><a href="https://polyhaven.com/license" target="_blank" rel="noopener noreferrer">Poly Haven · CC0 ↗</a>：攝影瀝青、草地、砂土、岩石與混凝土材質；Greg Zaal、Jarod Guest 的純天空 HDR。賽道、地形、植被與建築由程式生成。</p></div>
+      <div class="credit-item"><h3>原創聲音</h3><p>電子搖滾賽車配樂與引擎、輪胎、風聲、換檔、碰撞音效為本遊戲製作。<a href="./assets/AUDIO-CREDITS.md" target="_blank" rel="noopener noreferrer">製作資料 ↗</a></p></div>
+      <div class="credit-item"><h3>即時 3D 技術</h3><p><a href="https://github.com/mrdoob/three.js/blob/dev/LICENSE" target="_blank" rel="noopener noreferrer">Three.js · MIT</a><span class="credit-divider">/</span><a href="https://github.com/google/draco/blob/main/LICENSE" target="_blank" rel="noopener noreferrer">Draco · Apache 2.0</a></p></div>
+    </dialog>
+    <noscript><p class="no-script">請開啟 JavaScript，以載入 3D 賽車遊戲。</p></noscript>
+  </main>
+  <script type="module" src="./main.js?v=city-drive-7"></script>
+</body>
+</html>
