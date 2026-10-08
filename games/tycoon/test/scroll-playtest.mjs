@@ -19,8 +19,36 @@ const footerVisible = () => {
   return r.top >= 0 && r.bottom <= innerHeight + 2;
 };
 async function key(page, value) {
-  await page.keyboard.press(value);
-  await page.waitForTimeout(300);
+  const atBoundary = await page.evaluate(value => {
+    const start = scrollY, bottom = document.scrollingElement.scrollHeight - innerHeight;
+    const boundary = value === 'Home' ? start === 0 : start >= bottom;
+    const state = window.__scrollTestKey = { value, start, started: false, moved: false, done: false };
+    state.keydown = e => { if (e.key === value) state.started = true; };
+    state.scroll = () => {
+      if (state.started && (value === 'Home' ? scrollY < start : scrollY > start)) state.moved = true;
+    };
+    state.end = () => {
+      const reached = value === 'Home' ? scrollY === 0 : value === 'End'
+        ? scrollY >= document.scrollingElement.scrollHeight - innerHeight : scrollY > start;
+      if (state.started && state.moved && reached) state.done = true;
+    };
+    document.addEventListener('keydown', state.keydown, true);
+    document.addEventListener('scroll', state.scroll);
+    document.addEventListener('scrollend', state.end);
+    return boundary;
+  }, value);
+  try {
+    await page.keyboard.press(value);
+    if (!atBoundary) await page.waitForFunction(() => window.__scrollTestKey.done);
+  } finally {
+    await page.evaluate(() => {
+      const state = window.__scrollTestKey;
+      document.removeEventListener('keydown', state.keydown, true);
+      document.removeEventListener('scroll', state.scroll);
+      document.removeEventListener('scrollend', state.end);
+      delete window.__scrollTestKey;
+    });
+  }
 }
 async function swipe(page, session, direction) {
   const { width, height } = page.viewportSize(), x = Math.round(width / 2);
