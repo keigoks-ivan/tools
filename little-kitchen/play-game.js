@@ -1,8 +1,8 @@
 import {foods,fresh,restore} from './model.js?v=7';
 import {createNarrator} from './voice.js?v=7';
-import {hitPiece,tossFood,addLiquid} from './simulation.js?v=7';
-import {createPlay,shelves,friends,ingredients,chop,moveBoard,pour,season,stir,tick,describe,feed,clearPlace} from './play-state.js?v=10';
-import {createArt,asset,view,toFood,onFood} from './play-art.js?v=10';
+import {hitPiece,tossFood,addLiquid} from './simulation.js?v=11';
+import {createPlay,shelves,friends,ingredients,chop,moveBoard,pour,season,stir,tick,describe,feed,clearPlace} from './play-state.js?v=11';
+import {createArt,asset,view,toFood,onFood} from './play-art.js?v=11';
 const root=document.getElementById('play'),s=createPlay(),icon=body=>`<svg viewBox="0 0 40 40" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
 const icons={chef:icon('<path d="M9 30V16a7 7 0 0 1 2-13 8 8 0 0 1 15 0 7 7 0 0 1 4 13v14zM9 26h21M12 34h15"/>'),hand:icon('<path d="M13 20V9q0-5 5-4 3 1 3 5v9q5-3 6 2 5-1 6 4v5q-1 7-10 7h-5q-8-4-12-13-2-5 2-5l5 5"/>'),sound:icon('<path d="M5 15h7l9-8v26l-9-8H5zM27 14q7 6 0 12M31 8q12 12 0 24"/>'),mute:icon('<path d="M5 15h7l9-8v26l-9-8H5zM28 15l8 10m0-10-8 10"/>'),gear:icon('<circle cx="20" cy="20" r="6"/><path d="M15 5h10l2 5 5 2 4 8-4 5-2 7-10 4-5-4-7-2-4-10 4-5 2-7z"/>'),clear:icon('<path d="M9 10h22M16 6h8M12 10l2 25h12l2-25M18 16v12m5-12v12"/>')};
 const spiceIcon=key=>key==='lemon'?'<svg viewBox="0 0 70 90" aria-hidden="true"><path d="M12 66q3-37 34-43l15 22q-12 31-41 29Z" fill="#efcf57" stroke="#c5a548" stroke-width="3"/><path d="M17 62q6-23 28-32l11 16q-13 21-34 23Z" fill="#ffe79a"/><path d="M21 59l25-26m-20 30 23-22" stroke="#fff5ce" stroke-width="3"/></svg>':`<svg viewBox="0 0 70 90" aria-hidden="true"><path d="M21 26h29l9 52H12Z" fill="${key==='salt'?'#fff3dc':'#b9875b'}" stroke="#9c8465" stroke-width="3"/><path d="M21 26V17q15-14 29 0v9Z" fill="#afbeb1" stroke="#788e7c" stroke-width="3"/><circle cx="28" cy="18" r="2" fill="#fff5df"/><circle cx="42" cy="18" r="2" fill="#fff5df"/><path d="M29 54h13" stroke="${key==='salt'?'#b9ae8a':'#654a35'}" stroke-width="4"/></svg>`;

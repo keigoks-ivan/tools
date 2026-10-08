@@ -1,5 +1,5 @@
 import {foods} from './model.js?v=7';
-import {createWorkshop,addFood,cutFood,transferToCooker,plateFood,stepWorkshop,pushFood,area,polygon} from './simulation.js?v=7';
+import {createWorkshop,addFood,cutFood,transferToCooker,plateFood,stepWorkshop,pushFood,area,polygon} from './simulation.js?v=11';
 
 export const shelves=[['tomato','egg','carrot','broccoli','potato','corn'],['strawberry','banana','apple','orange','cucumber','pepper'],['fish','chicken','shrimp','tofu','onion','mushroom'],['milk','flour','rice','bread','cheese','seaweed']];
 export const friends=[{id:'bear',name:'小熊',likes:['strawberry','banana','milk','flour'],color:'#c18b5b'},{id:'bunny',name:'小兔',likes:['carrot','broccoli','corn','apple'],color:'#c7bd9c'}];
@@ -13,7 +13,7 @@ export function ingredients(s,id,target=s.station==='stove'?s.method:s.station==
   if(!Object.hasOwn(foods,id)||!['board','pan','pot','blender','plate'].includes(target))return false;
   if(s.board.length+Object.values(s.vessels).reduce((n,v)=>n+v.length,0)+s.plate.length>=72)return false;
   const station=s.station,method=s.method,p=addFood(s,id);if(!p)return false;
-  p.mixed=0;p.browned=0;
+  p.mixed=0;p.browned=0;p.preparation=target==='plate'?'raw':target;
   if(target!=='board'){
     if(target==='plate'){s.board=s.board.filter(q=>q.uid!==p.uid);s.plate.push(p);s.plateMethod??='raw';placePlate(s);}
     else{s.method=target;transferToCooker(s,p.uid);s.method=method;}
@@ -25,9 +25,16 @@ export function moveBoard(s,target,uid=null){
   if(!['pan','pot','blender','plate'].includes(target))return 0;
   const moving=s.board.filter(p=>uid===null||p.uid===uid);if(!moving.length)return 0;
   if(target==='plate'){const ids=new Set(moving.map(p=>p.uid));s.board=s.board.filter(p=>!ids.has(p.uid));s.plate.push(...moving);s.plateMethod??='raw';placePlate(s);return moving.length;}
+  for(const p of moving)p.preparation=target;
   const old=s.method;s.method=target;const n=transferToCooker(s,uid);s.method=old;return n;
 }
-function placePlate(s){s.plate.forEach((p,i)=>{p.x=350+Math.cos(i*2.4)*(25+i%4*26);p.y=245+Math.sin(i*2.4)*(18+i%3*24);p.scale=Math.min(p.scale,.82);p.vx=p.vy=p.spin=0;});}
+function fitPiece(p,rx,ry){
+  const cos=Math.cos(p.angle),sin=Math.sin(p.angle),extent=Math.max(...p.poly.map(v=>Math.hypot((v.x*cos-v.y*sin)*p.scale/rx,(v.x*sin+v.y*cos)*p.scale/ry)));
+  if(extent>.84)p.scale*=.84/extent;
+  const room=1-Math.min(extent,.84),dx=p.x-350,dy=p.y-245,d=Math.hypot(dx/rx,dy/ry);
+  if(d>room){p.x=350+dx*room/d;p.y=245+dy*room/d;}
+}
+function placePlate(s){s.plate.forEach((p,i)=>{p.x=350+Math.cos(i*2.4)*(25+i%4*26);p.y=245+Math.sin(i*2.4)*(18+i%3*24);p.scale=Math.min(p.scale,.82);p.vx=p.vy=p.spin=0;fitPiece(p,165*.82,165*.57);});}
 export function pour(s,method=s.method){
   if(!s.vessels[method]?.length)return false;
   const old=s.method;s.method=method;const already=s.plate.length,previous={...s.plateSpices};
@@ -43,6 +50,8 @@ export function season(s,key){
 export function stir(s,a,b){pushFood(s,a,b);const d=Math.hypot(a.x-b.x,a.y-b.y);for(const p of s.vessels[s.method])if(p.id==='egg'&&Math.hypot(p.x-b.x,p.y-b.y)<165)p.mixed=clamp((p.mixed||0)+d/1200);}
 export function tick(s,dt){
   dt=clamp(dt,0,.05);stepWorkshop(s,dt);s.chew=Math.max(0,s.chew-dt);
+  // Account for the whole piece, so a large egg or cutlet stays inside the photographed pan opening.
+  for(const method of ['pan','pot'])for(const p of s.vessels[method])fitPiece(p,...(method==='pan'?[175*.92,175*.66]:[195*.70,195*.43]));
   for(const method of ['pan','pot'])if(s.heat[method])for(const p of s.vessels[method])if(p.cooked>=.98&&method==='pan')p.browned=clamp((p.browned||0)+dt*s.heat[method]/32);
 }
 export function describe(pieces,method='raw',spices={}){
