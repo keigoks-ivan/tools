@@ -94,8 +94,8 @@ module keeps its own shadow policy. Only the selected scene is generated.
 The playable start views were inspected individually, with audio muted. Taipei's
 near street now mixes recessed windows in concrete wall bays with newer glass
 frontage, while Kuala Lumpur includes rounded shafts and silver floor bands at
-street scale. London and Newcastle use two shallow projecting cornices rather
-than thick dark bands on every floor. The Kobe museum's lattice follows opposite
+street scale. London and Newcastle now place projecting cornices and window sills on
+physical storeys, rather than adding trims unrelated to the painted windows. The Kobe museum's lattice follows opposite
 high corners of an asymmetric saddle, rather than a repeated U-shaped trough.
 Kobe's obsolete close mountain mound was removed: the separately credited real
 Mt Maya photograph and distant geographic silhouette now establish the north
@@ -133,11 +133,12 @@ desktop / 256×128 mobile storefront texture and 256×256 / 128×128 paving
 texture. All store interiors share one material batch; no remote street textures
 or large new model downloads are required. Three shared 128×512 desktop / 64×256
 mobile vertical-sign maps add 0.197 million / 0.049 million pixels. The final
-Taipei city scenery occupies 37 merged material batches on both tiers, within
-the existing fewer-than-38 city-scene budget; the full geometry tests also check
-road clearance and material disposal. Node geometry construction with mocked
-canvas paint is 0.24 s desktop / 0.16 s mobile on the development machine; this
-is not a real mobile GPU or browser startup benchmark.
+Taipei city scenery now occupies 39 desktop / 40 mobile merged material batches,
+including one shared physical-facade wall atlas and one additional phone upper
+surface batch that reuses the same map. The full geometry tests check
+road clearance, material disposal and the 300,000-triangle mobile architecture
+limit. Mocked-canvas Node construction is not a real mobile GPU or browser
+startup benchmark; the current scene counts are in the matrix below.
 
 ## Ground-view street comparison and junctions, 9 October 2026
 
@@ -177,7 +178,7 @@ store signs now describe original fictional local businesses.
 | City | Changes in this pass |
 | --- | --- |
 | Kuala Lumpur | Office glazing mixed with concrete shade bays; mapped rounded shafts, floor bands following taper, small circular roof caps; curb-side tropical trees and KLCC-area planting. |
-| London | Fine brick versus larger stone, seven-row tall sash texture, white/black small street plaques, four British shop interiors, deep door reveals and downpipes; fewer roof pavilions and projecting balconies. |
+| London | Fine brick versus larger stone, actual recessed sash bays on 3.45 m architectural storeys, pale lower shop floors, white/black street plaques, four British shop interiors, door reveals and downpipes; selected first-floor iron balconies and modest roof pavilions. |
 | Sydney | Coursed sandstone and arched sash openings distinguish The Rocks from CBD glazing; mixed flat/parapet/pitched roofs; revised overlapping swept shell surfaces and inclined Opera House glazing. |
 | Gold Coast | Residential sliding-door and glass-balcony atlases replace office grids; full-height balcony slabs remain; duplicate small projecting balconies removed; broader curved pinnate palm foliage. |
 | Melbourne | Victorian brick/ashlar, arch openings and pilasters; geometric parapet piers and pediments; separate shop bays and original brick paving. |
@@ -231,30 +232,31 @@ so timing is deliberately not presented as a real-device startup benchmark.
 
 | City | Common batches | All architectural batches | Triangles | Generated texture MP |
 | --- | ---: | ---: | ---: | ---: |
-| taipei | 38/38 | 38/38 | 299,814/264,375 | 5.77/1.49 |
-| kualalumpur | 32/32 | 32/32 | 191,854/142,933 | 5.64/1.46 |
-| kobe | 33/33 | 42/42 | 142,912/120,175 | 6.37/1.65 |
-| london | 34/34 | 34/34 | 127,752/111,278 | 6.50/1.93 |
-| sydney | 28/28 | 41/41 | 153,077/118,928 | 5.59/1.52 |
-| goldcoast | 30/30 | 47/47 | 196,318/158,452 | 5.85/1.47 |
-| melbourne | 29/29 | 46/46 | 108,692/92,087 | 6.36/1.76 |
-| paris | 29/29 | 45/45 | 298,014/268,871 | 6.49/1.82 |
-| prague | 29/29 | 49/49 | 138,893/120,972 | 6.56/1.87 |
-| newcastle | 30/30 | 53/53 | 215,343/184,174 | 6.66/1.90 |
-| bangkok | 30/30 | 51/51 | 268,189/243,572 | 6.69/1.78 |
-| sanfrancisco | 25/25 | 44/44 | 237,963/186,756 | 4.67/1.29 |
-| newyork | 29/29 | 42/42 | 253,019/217,723 | 5.69/1.56 |
-| vancouver | 30/30 | 46/46 | 223,612/162,904 | 5.62/1.47 |
-| hanoi | 29/29 | 50/50 | 295,811/262,717 | 6.52/1.75 |
-| lisbon | 29/29 | 54/54 | 141,174/121,355 | 7.43/2.10 |
-| marseille | 29/29 | 52/52 | 195,246/151,279 | 6.50/1.84 |
-| nice | 31/31 | 61/61 | 227,255/182,148 | 6.59/1.84 |
-| warwick | 29/29 | 43/43 | 148,744/103,631 | 6.73/1.84 |
+| taipei | 39/40 | 39/40 | 345,422/270,929 | 6.16/1.59 |
+| kualalumpur | 33/34 | 33/34 | 198,824/144,615 | 6.03/1.56 |
+| kobe | 34/35 | 43/44 | 178,634/126,367 | 6.77/1.75 |
+| london | 35/36 | 35/36 | 179,546/131,648 | 6.90/2.03 |
+| sydney | 29/30 | 42/43 | 169,133/125,804 | 5.98/1.62 |
+| goldcoast | 31/32 | 48/49 | 220,828/166,392 | 6.24/1.57 |
+| melbourne | 30/31 | 47/48 | 127,434/97,357 | 6.75/1.86 |
+| paris | 29/30 | 45/46 | 431,244/297,513 | 6.88/1.92 |
+| prague | 29/30 | 49/50 | 181,255/133,924 | 6.95/1.97 |
+| newcastle | 31/32 | 54/55 | 236,949/174,218 | 7.05/2.00 |
+| bangkok | 31/32 | 52/53 | 289,891/257,366 | 7.09/1.88 |
+| sanfrancisco | 26/27 | 45/46 | 279,071/213,018 | 5.07/1.39 |
+| newyork | 30/31 | 43/44 | 346,467/222,283 | 6.08/1.65 |
+| vancouver | 31/32 | 47/48 | 233,654/166,294 | 6.01/1.57 |
+| hanoi | 30/31 | 51/52 | 323,663/282,467 | 6.92/1.85 |
+| lisbon | 29/30 | 54/55 | 178,320/134,875 | 7.83/2.20 |
+| marseille | 30/31 | 53/54 | 249,450/162,941 | 6.89/1.93 |
+| nice | 32/33 | 62/63 | 272,479/190,294 | 6.98/1.93 |
+| warwick | 30/30 | 44/44 | 152,368/109,191 | 7.12/1.94 |
 
-The common scene peaks at 38 merged material batches on both tiers; all
-architectural batches peak at 61. Mobile road and retail-sign maps are now
+The common scene peaks at 39 desktop / 40 mobile merged material batches; all
+architectural batches peak at 62 desktop / 63 mobile. Mobile architecture peaks at 297,513 triangles
+in Paris, below the 300,000 limit. Mobile road and retail-sign maps are now
 512×128 instead of 1024×256, while facade dimensions retain their earlier
-mobile reduction. The largest mobile generated-map total is 2.10 million pixels.
+mobile reduction. The largest mobile generated-map total is 2.20 million pixels.
 The Taipei junction ground/brick maps add only selected-scene canvas assets.
 Thin low-cost palm pinnate blades and layered conifer cards replace many
 cylindrical leaf beams and filled cone crowns.
@@ -274,3 +276,86 @@ water-side checks and primary geography references are recorded in
 [CITY-DISTRICTS.md](CITY-DISTRICTS.md). No additional surface-photo download
 is introduced. Geometry/resource checks and muted native screenshots remain
 separate from any claim of photorealism or measured mobile performance.
+
+
+## Physical street facade pass, 9 October 2026
+
+Actual quiet game views of Taipei, London, Newcastle and Paris were compared
+with ground-view photographs. Their previous opaque Box fronts and painted
+windows were visibly flat; several old lintels were placed independently of the
+painted window grid. The new near-street fronts have cut-away window openings,
+four actual jamb faces, glazing 0.16–0.31 m behind the masonry, sash/aluminium
+frames and projecting stone sills. Room glazing has deterministic warm/cool
+and brightness variation, with partial cream or grey-green blinds at different
+lowered heights; all reuse the same glass/white batches. Brick, stone, tile and glazing use metalness
+zero. The existing scanned ground and shared shadow system remain separate.
+
+- London: [Warwick Way, Pimlico, original Geograph photograph via Commons](https://commons.wikimedia.org/wiki/File:Warwick_Way,_Pimlico_-_geograph.org.uk_-_4336106.jpg), Chris Whippet, [original photographer submission](https://www.geograph.org.uk/photo/4336106), inspected as pixels on 9 October. Narrow three-window terraces, brick upper floors, pale stucco lower walls, smaller attic windows and first-floor iron balconies informed the bay proportions and lower/upper distinction. The blocked Westminster council PDF was not visually inspected and is not claimed as a viewed reference.
+- Newcastle: [Live Theatre's own Quayside photograph](https://www.live.org.uk/sites/default/files/styles/original/public/images/Live_Works_Quayside.jpg?itok=zYv2f4w8), inspected again on 9 October. Separate three-storey brick, taller sandstone and modern pier facades have tall recessed windows and deep lower entrances; the original window-grid-independent black bands have been removed.
+- Paris upper floors: [Rue Halevy windows and mansard dormers](https://commons.wikimedia.org/wiki/File:Paris_windows_and_dormer_windows,_haussmannian_facade.jpg), Vania Teofilo, own work, 21 November 2006, CC BY-SA 3.0. The viewed tall windows, deep jambs, projecting stone sills and two separate iron balcony bands inform the original physical façade.
+- Paris doorway: [135 Boulevard Haussmann entrance](https://commons.wikimedia.org/wiki/File:135_Boulevard_Haussmann,_Paris_(01).jpg), inspected as a close entrance view. It informs stone joints, inset doors and projecting lintels; it is not used to infer the number or spacing of upper floors.
+- Taipei: the Xinyi/Anhe and Anhe shop ground views listed above inform fine tile and brick walls, smaller mixed-height openings, exposed slab edges, aluminium frames and the deep arcade below the upper floors.
+
+No pixels from these reference photographs are shipped. The selected city
+allocates one original six-variant masonry atlas, 768×512 desktop / 384×256
+mobile, adding 0.393 / 0.098 million pixels. The wall skin adds at most one
+merged material batch on desktop; the phone adds another upper-surface batch
+that shares the same map without another texture allocation. Only ordinary occupied near-street plots receive the new window skin;
+modern towers and the open parks/waterfronts keep their prior district policy.
+Desktop fronts have physical windows throughout, while the phone retains
+physical detail on its first two complete upper storeys. Above them a two-
+triangle face per building uses the same bay/floor grid and wall tile, with
+original procedural windows, frames, room colours and blinds. Glass/window
+frames have separately masked roughness of .22 / .55; masonry remains .94.
+Antialiased window edges keep the narrow sash lines stable. This allocation is intentional: a phone scene remains below
+300,000 architectural triangles without introducing network model downloads.
+Window geometry, original atlases and unused per-scene materials follow the
+existing scene disposal path. Raycaster tests verify that a ray through a window
+first reaches the recessed glass rather than an opaque original Box front;
+other tests check floor/bay scale, the phone cut boundary and every city's
+geometry/material/disposal/mobile budget.
+
+
+The quiet native phone near views of Taipei and Paris were checked again after
+the upper-surface correction. Window columns, floor boundaries and wall
+palettes no longer switch to a differently scaled original facade atlas above
+the second upper storey. Native WebGL compilation completed without errors.
+Desktop near views of Taipei, London, Newcastle and Paris were also inspected
+against the source photographs. This is a visible depth/proportion improvement,
+not a claim that a generic circuit has become a measured replica or a full
+photogrammetric city. The final 69 tests cover all nineteen cities on both
+tiers, original European landmarks, district gaps, clipped ground, material
+disposal, real window ray hits, room variation and upper-grid continuity.
+
+
+## Broadleaf canopy refinement after native street review
+
+The quiet 57-view street review exposed large 4–5 m crossed foliage panels
+that looked like segmented paper fans in Warwick, Melbourne and Lisbon.
+Broadleaf crowns now use smaller, non-coplanar leaf clusters with independent
+orientation and depth, softly curved normals and restrained diffuse colour
+variation. Seven desktop / five mobile branch clusters hold eight / six small
+leaf cards each. The city species/profile, trunk, existing original foliage
+map and merged material batch remain shared; palm and conifer geometry are
+unchanged. This is original inexpensive foliage geometry, not a new tree
+photograph, model download or material batch.
+
+The complete 38-scene before/after audit keeps every building footprint,
+district-ground position hash, texture count/pixel total and material-batch
+count unchanged. The local canopy seed deliberately preserves the old shared
+random consumption so a tree detail cannot move a neighbouring plot or lawn.
+Actual geometry saves 44 desktop / 22 mobile triangles per broadleaf tree:
+Warwick saves 2,684 / 748, Melbourne 1,672 / 374 and Lisbon 1,100 / 220.
+The nineteen scenes collectively save 19,008 desktop / 4,774 mobile triangles.
+The existing geometry/material/road-clearance/disposal suite passes all 69
+tests, including a new maximum 3.5 m foliage-card edge check. The matrix above
+includes these final smaller crowns; phone architecture peaks at 297,513
+triangles. No framerate or photorealistic vegetation claim is inferred from
+these geometry counts.
+
+
+After the final canopy revision, quiet native route-40% views of Warwick,
+Melbourne and Lisbon were inspected again. The large segmented paper fans
+were absent; the smaller intersecting leaf clusters retain readable crown
+depth and the unchanged city layout. The physical/cheap phone upper-window
+alignment and its shared-map resource limits described above remain intact.

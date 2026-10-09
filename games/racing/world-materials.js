@@ -1,4 +1,6 @@
 import * as THREE from 'three';
+import { CITY_ROAD_PROFILES } from './world-city-roadmarkings.js?v=city-drive-14';
+import { installAsphaltWear } from './road-surface.mjs?v=city-drive-14';
 
 // Mesh UVs are in metres. Repetition follows the photographed surface size.
 const surfaces = {
@@ -10,7 +12,7 @@ const surfaces = {
   concrete_wall_004: { tileSize: 2, normal: .22, color: '#c0b9aa' },
 };
 
-export async function createWorldMaterials(renderer, { mobile = false, theme = 'costa' } = {}) {
+export async function createWorldMaterials(renderer, { mobile = false, theme = 'costa', roadWidth = 16, lanesPerDirection = 1, trackLength = 1800 } = {}) {
   const loader = new THREE.TextureLoader(), textures = new Set(), materials = new Set();
   const anisotropy = Math.min(mobile ? 4 : 8, renderer.capabilities.getMaxAnisotropy());
   function loadMap(id, channel) {
@@ -56,6 +58,9 @@ export async function createWorldMaterials(renderer, { mobile = false, theme = '
   ]);
   // Normalize the dark source scan to dry asphalt's low, neutral reflectance.
   if (road.map) road.color.setRGB(1.7, 2, 2.15);
+  const city = Object.hasOwn(CITY_ROAD_PROFILES, theme);
+  installAsphaltWear(road, { roadWidth, lanesPerDirection, trackLength, city });
+  if (city) concrete.color.set('#b1b6b3');
   if (theme === 'canyon') rock.color.set('#d1a27b');
   if (theme === 'alpine' || theme === 'grandprix') terrain.color.set('#c2d3c0');
   let disposed = false;

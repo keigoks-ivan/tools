@@ -1,6 +1,34 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { shadowFrame } from './lighting.mjs';
+import { shadowFrame, sunlightProfile } from './lighting.mjs';
+import { readFile } from 'node:fs/promises';
+import { RGBELoader } from './vendor/addons/loaders/RGBELoader.js';
+import { FloatType } from './vendor/three.module.js';
+
+test('clear daylight shadows align with the sun in the shipped HDR pixels', async () => {
+  for (const options of [{ city: true }, { canyon: true }, {}]) {
+    const profile = sunlightProfile(options);
+    const bytes = await readFile(new URL(`./assets/${profile.skyFile}`, import.meta.url));
+    const hdr = new RGBELoader().setDataType(FloatType).parse(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength));
+    let peak = 0, pixel = 0;
+    for (let i = 0; i < hdr.data.length; i += 4) {
+      const luminance = hdr.data[i] * .2126 + hdr.data[i + 1] * .7152 + hdr.data[i + 2] * .0722;
+      if (luminance > peak) { peak = luminance; pixel = i / 4; }
+    }
+    assert.ok(peak > 10000, 'the clear HDR includes a direct sun');
+    const latitude = Math.PI / 2 - (Math.floor(pixel / hdr.width) + .5) / hdr.height * Math.PI;
+    const longitude = (pixel % hdr.width + .5) / hdr.width * Math.PI * 2 - Math.PI - profile.skyRotation;
+    const photographed = { x: Math.cos(latitude) * Math.cos(longitude), y: Math.sin(latitude), z: Math.cos(latitude) * Math.sin(longitude) };
+    const length = Math.hypot(profile.sunOffset.x, profile.sunOffset.y, profile.sunOffset.z);
+    const dot = Object.keys(photographed).reduce((sum, axis) => sum + photographed[axis] * profile.sunOffset[axis] / length, 0);
+    assert.ok(Math.acos(Math.min(1, dot)) < Math.PI / 180, 'rendered sunlight differs from the sky by less than one degree');
+  }
+});
+
+test('rainy cities and alpine seasons retain the overcast environment', () => {
+  assert.equal(sunlightProfile({ city: true, cloudy: true }).skyFile, 'environment.hdr');
+  assert.equal(sunlightProfile({ alpine: true }).skyFile, 'environment.hdr');
+});
 
 test('shadow window snaps in the light plane and retains the HDR sunlight direction', () => {
   for (const direction of [{ x: -26, y: 125, z: 22 }, { x: -93, y: 41, z: 81 }, { x: -82, y: 95, z: 58 }]) {

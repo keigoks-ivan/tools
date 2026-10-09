@@ -1,9 +1,10 @@
 import * as THREE from './vendor/three.module.js';
 import { mergeGeometries, mergeVertices } from './vendor/addons/utils/BufferGeometryUtils.js';
-import { VEHICLES, PRODUCTION_CAR_DIMENSIONS } from './vehicles.mjs?v=city-drive-13';
-import { addVehicleTailLights } from './vehicle-taillights.js?v=city-drive-13';
-import { addVehicleRearDetails, REAR_DETAIL_PROFILES } from './vehicle-rear-details.js?v=city-drive-13';
-import { createBMWX3 } from './cars-bmw-x3.js?v=city-drive-13';
+import { VEHICLES, PRODUCTION_CAR_DIMENSIONS } from './vehicles.mjs?v=city-drive-14';
+import { addVehicleTailLights } from './vehicle-taillights.js?v=city-drive-14';
+import { addVehicleRearDetails, REAR_DETAIL_PROFILES } from './vehicle-rear-details.js?v=city-drive-14';
+import { createBMWX3 } from './cars-bmw-x3.js?v=city-drive-14';
+import { loftGeometry, projectedNormals, surfaceNormal, weldSurfaceNormals } from './vehicle-body-surfaces.js?v=city-drive-14';
 
 const clamp = THREE.MathUtils.clamp;
 const mix = THREE.MathUtils.lerp;
@@ -11,9 +12,9 @@ const mix = THREE.MathUtils.lerp;
 // Sections are [fraction of half-length, fraction of half-width, shoulder height, hood height].
 const profiles = {
   porsche911gt3rs: {
-    body: [[-1,.86,.76,.80],[-.86,.96,.85,.90],[-.55,1,.91,.94],[-.30,.92,.89,.87],[0,.86,.85,.81],[.32,.94,.88,.78],[.55,1,.96,.73],[.81,.96,.90,.66],[1,.84,.67,.61]],
-    cabin: [[-.69,.44,.92],[-.50,.57,1.10],[-.29,.66,1.28],[-.07,.67,1.322],[.18,.65,1.30],[.34,.62,1.16],[.51,.60,.91]],
-    roof: [-.32,.24], frontOverhang: 1.03, radius: .35025, radii: [.35025,.3672], rimRadii: [.254,.2667], track: [1.630,1.582], wheelWidth: [.275,.335], spokes: 10, rounded: true, doorSculpt: .072, rearPillar: .50, color: '#d9dadd',
+    body: [[-1,.86,.83,.80],[-.86,.96,.90,.83],[-.55,1,.935,.85],[-.30,.92,.87,.80],[0,.89,.845,.78],[.32,.93,.90,.73],[.55,1,.965,.705],[.81,.97,.92,.65],[1,.85,.71,.61]],
+    cabin: [[-.69,.33,.86],[-.59,.42,.955],[-.46,.52,1.115],[-.34,.59,1.238],[-.20,.635,1.306],[-.03,.65,1.322],[.12,.64,1.288],[.26,.615,1.171],[.43,.590,.895]],
+    roof: [-.31,.18], frontOverhang: 1.03, radius: .35025, radii: [.35025,.3672], rimRadii: [.254,.2667], track: [1.630,1.582], wheelWidth: [.275,.335], spokes: 10, rounded: true, doorSculpt: .072, rearPillar: .50, color: '#d9dadd',
   },
   lamborghiniRevuelto: {
     body: [[-1,.82,.84,.85],[-.82,.98,.85,.86],[-.59,1,.91,.88],[-.30,.88,.79,.78],[0,.83,.73,.74],[.32,.95,.83,.68],[.59,.99,.87,.57],[.84,.95,.66,.52],[1,.85,.51,.45]],
@@ -21,8 +22,8 @@ const profiles = {
     roof: [-.22,.23], frontOverhang: 1.105, radius: .34675, radii: [.34675,.3702], rimRadii: [.254,.2667], wheelWidth: [.265,.345], spokes: 5, splitAngle: .23, wheelColor: '#293239', angular: true, doorSculpt: .13, rearPillar: .68, color: '#e87722',
   },
   ferrari296Speciale: {
-    body: [[-1,.78,.81,.84],[-.83,.96,.91,.95],[-.58,1,.90,.92],[-.32,.91,.80,.81],[0,.89,.78,.74],[.31,.94,.84,.65],[.59,.98,.86,.58],[.84,.95,.70,.54],[1,.83,.54,.46]],
-    cabin: [[-.43,.38,.89],[-.28,.57,1.09],[-.13,.63,1.17],[.09,.64,1.181],[.26,.62,1.13],[.43,.60,.95],[.55,.60,.81]],
+    body: [[-1,.86,.89,.84],[-.83,.98,.97,.95],[-.58,1,.98,.90],[-.32,.94,.88,.78],[0,.90,.81,.74],[.31,.94,.89,.65],[.59,.99,.94,.58],[.84,.97,.81,.57],[1,.86,.69,.58]],
+    cabin: [[-.42,.38,.88],[-.31,.50,1.00],[-.22,.59,1.10],[-.12,.62,1.162],[.02,.64,1.181],[.15,.635,1.162],[.26,.62,1.12],[.43,.60,.95],[.55,.60,.81]],
     roof: [-.21,.24], frontOverhang: 1.01, radius: .33975, radii: [.33975,.36075], rimRadii: [.254,.254], track: [1.665,1.632], wheelWidth: [.245,.305], spokes: 5, splitAngle: .16, rounded: true, doorSculpt: .125, rearPillar: .56, color: '#c72d26',
   },
   mclaren750s: {
@@ -41,8 +42,8 @@ const profiles = {
     roof: [-.19,.21], frontOverhang: 1.01, radius: .3365, radii: [.3365,.35295], rimRadii: [.254,.2667], wheelWidth: [.275,.345], spokes: 5, singleSpokes: true, wheelColor: '#3b444d', angular: true, doorSculpt: .13, rearPillar: .66, color: '#c1c3ca',
   },
   bmwM4: {
-    body: [[-1,.89,.87,.92],[-.81,.97,.94,.99],[-.61,1,.99,1.00],[-.30,.96,.94,.94],[0,.94,.94,.91],[.31,.97,.96,.88],[.59,1,.97,.83],[.84,.98,.87,.78],[1,.89,.76,.71]],
-    cabin: [[-.59,.51,.985],[-.42,.64,1.30],[-.14,.69,1.397],[.19,.69,1.38],[.45,.67,1.02]],
+    body: [[-1,.93,.93,.92],[-.81,.985,1.01,.99],[-.61,1,1.045,1.00],[-.30,.96,.995,.94],[0,.94,.995,.94],[.31,.97,1.00,.92],[.59,1,.985,.91],[.84,.98,.965,.88],[1,.955,.915,.845]],
+    cabin: [[-.59,.51,.985],[-.42,.62,1.265],[-.33,.66,1.315],[-.18,.685,1.385],[-.03,.69,1.397],[.13,.685,1.375],[.26,.675,1.30],[.45,.67,1.02]],
     roof: [-.33,.20], frontOverhang: .867, radius: .33755, radii: [.33755,.3395], rimRadii: [.2413,.254], wheelWidth: [.275,.285], spokes: 10, wheelColor: '#293239', doorSculpt: .058, rearPillar: .57, color: '#879785',
   },
   nissanZ: {
@@ -141,16 +142,18 @@ function batchStatic(parent) {
     const geometry = node.geometry.clone().applyMatrix4(node.matrix);
     if(!node.material.map)geometry.deleteAttribute('uv');
     if (!geometry.index) geometry.setIndex(Array.from({ length: geometry.attributes.position.count }, (_, i) => i));
-    if (!batches.has(node.material)) batches.set(node.material, []);
-    batches.get(node.material).push({ node, geometry });
+    const key=`${node.material.uuid}:${node.castShadow}:${node.receiveShadow}`;
+    if (!batches.has(key)) batches.set(key, []);
+    batches.get(key).push({ node, geometry });
   }
-  for (const [material, parts] of batches) {
+  for (const parts of batches.values()) {
+    const material=parts[0].node.material;
     if (parts.length > 1) {
       const geometry = mergeGeometries(parts.map(item => item.geometry));
       if (geometry) {
         const mesh = new THREE.Mesh(geometry, material);
         mesh.name = `${parent.name}-${material.name}`;
-        mesh.castShadow = !material.transparent; mesh.receiveShadow = !material.transparent;
+        mesh.castShadow = parts[0].node.castShadow; mesh.receiveShadow = parts[0].node.receiveShadow;
         parent.add(mesh);
         for (const item of parts) { parent.remove(item.node); item.node.geometry.dispose(); }
       }
@@ -227,38 +230,47 @@ export function createProductionCar({ mobile = false, vehicle = 'porsche911gt3rs
   const axleRadius=axle=>shape.radii?.[axle===frontZ?0:1]||shape.radius;
   const porscheOptics=vehicle==='porsche911gt3rs'||vehicle==='porsche911turboS';
   const cornerRadius=shape.angular?.10:vehicle==='bmwX3'?.09:.19;
-  const endWeight = z => clamp((Math.abs(z/halfLength)-.82)/.18,0,1)**2;
+  const endWeight = z => clamp((Math.abs(z/halfLength)-.62)/.38,0,1)**2;
   const shoulderInset=z=>vehicle==='bmwX3'?.045*Math.sin(clamp((z+halfLength)/length,0,1)*Math.PI)**2:0;
+  const roofEdge=shape.angular?.78:.74;
   const bonnetHeight = (x,z) => {
-    const [w,edge,center]=sectionAt(shape.body,z/halfLength),u=clamp(x/(w*halfWidth),-1,1);
-    const bulge=shape.rounded?Math.max(0,.024*(Math.exp(-(((Math.abs(u)-.79)/.13)**2))-Math.exp(-((.21/.13)**2)))):0;
-    const eye=vehicle==='mclaren750s'?clamp(1-((Math.abs(x)-.67)/.22)**2-((z-(halfLength-.43))/.29)**2,0,1)*.047:0;
-    const surface=mix(center,edge,Math.abs(u)**(shape.angular?1.15:2.2))+bulge-eye;
+    const [w,edge,center]=sectionAt(shape.body,z/halfLength),u=clamp(Math.abs(x)/(w*halfWidth),0,1),rollStart=shape.angular?.84:.76,rollDepth=shape.angular?.030:shape.rounded?.073:.052;
+    const inner=mix(center,edge,Math.min(u/rollStart,1)**(shape.angular?1.25:2.25)),r=clamp((u-rollStart)/(1-rollStart),0,1);
+    let surface=inner-rollDepth*(1-Math.sqrt(Math.max(0,1-r*r)));
+    if(vehicle==='mclaren750s')surface-=clamp(1-((Math.abs(x)-.67)/.22)**2-((z-(halfLength-.43))/.29)**2,0,1)*.047;
+    if(vehicle==='ferrari296Speciale'){
+      const eyeBank=clamp(1-(Math.abs(Math.abs(x)-.685)/.25)**4,0,1)*clamp(1-(Math.abs(z-(halfLength-.27))/.30)**4,0,1),ref=clamp(.685/(w*halfWidth)/rollStart,0,1);surface=mix(surface,mix(center,edge,ref**2.25)-.010,eyeBank*.85);
+      const basin=clamp(1-(Math.abs(x)/.54)**4,0,1)*clamp(1-((z+1.32)/.68)**4,0,1);
+      surface-=.048*basin;
+    }
+    if(vehicle==='bmwM4')surface+=.018*Math.exp(-(((Math.abs(x)-.32)/.065)**2))*Math.sin(clamp((z-.20)/(halfLength-.25),0,1)*Math.PI)**2;
     if(!porscheOptics)return surface;
-    // The round lenses look forwards from a flattened fender pad. Following
-    // the full transverse fender bank turned the near lens away from the driver.
-    const lensBank=clamp(1-(Math.abs(Math.abs(x)-.66)/.30)**4,0,1)*clamp(1-(Math.abs(z-(halfLength-.376))/.35)**4,0,1);
-    const ref=clamp(.66/(w*halfWidth),0,1),refBulge=shape.rounded?Math.max(0,.024*(Math.exp(-(((ref-.79)/.13)**2))-Math.exp(-((.21/.13)**2)))):0;
-    return mix(surface,mix(center,edge,ref**(shape.angular?1.15:2.2))+refBulge,lensBank);
+    // Each upright 911 optic sits in its own fender depression; the surrounding
+    // shoulder keeps its curved bank instead of flattening the whole bonnet.
+    const bank=clamp(1-(Math.abs(Math.abs(x)-.66)/.21)**4,0,1)*clamp(1-(Math.abs(z-(halfLength-.376))/.25)**4,0,1);
+    const ref=clamp(.66/(w*halfWidth)/rollStart,0,1),pad=mix(center,edge,ref**2.25)-.014;
+    return mix(surface,pad,bank*.84);
   };
   const sideSurfaceX = (side,z,y) => {
-    const [w,rawTop]=sectionAt(shape.body,z/halfLength),top=porscheOptics||vehicle==='bmwX3'?bonnetHeight(w*halfWidth-shoulderInset(z),z):rawTop,t=clamp((top-y)/(top-floor),0,1),waist=Math.sin(clamp((z-rearZ)/(frontZ-rearZ),0,1)*Math.PI)**2;
-    const folds=vehicle==='bmwX3'?(.25+.75*waist)*(-.047*Math.exp(-(((y-.91)/.17)**2))+.021*Math.exp(-(((y-.57)/.10)**2))):0;
-    const shoulderRoll=-shoulderInset(z)*Math.exp(-(((top-y)/.105)**2));
-    return side*(w*halfWidth+(shape.rounded?.038:.012)*Math.sin(Math.PI*t)-.035*t*t-shape.doorSculpt*waist*Math.sin(Math.PI*t)**1.5+folds+shoulderRoll+.005);
+    const [w]=sectionAt(shape.body,z/halfLength),top=bonnetHeight(w*halfWidth,z),t=clamp((top-y)/(top-floor),0,1),waist=Math.sin(clamp((z-rearZ)/(frontZ-rearZ),0,1)*Math.PI)**2;
+    const shoulder=shape.angular?.012:.025,lower=.037*t*t;
+    const door=shape.doorSculpt*waist*Math.sin(Math.PI*t)**2;
+    const rocker=waist*(shape.angular?.019:.019)*Math.exp(-(((t-.82)/.14)**2));
+    const intake=vehicle==='ferrari296Speciale'?.052*clamp(1-((z+.62)/.29)**2-((y-.72)/.18)**2,0,1)**2:vehicle==='porsche911gt3rs'?.030*clamp(1-((z-rearZ-.43)/.22)**2-((y-.73)/.19)**2,0,1)**2:0;
+    return side*(w*halfWidth+shoulder*Math.sin(Math.PI*t)**2-lower-door+rocker-intake);
   };
   function surfaceOptic(x,z,rx,rz,mat,name,offset=.014) {
-    const verts=[],face=[],segments=mobile?16:24,rings=3;
+    const verts=[],face=[],parameters=[],segments=mobile?16:24,rings=3;
     for(let i=0;i<=rings;i++)for(let j=0;j<=segments;j++){
       const angle=j/segments*Math.PI*2,px=x+Math.cos(angle)*rx*i/rings,pz=z+Math.sin(angle)*rz*i/rings;
-      verts.push(px,bonnetHeight(px,pz)+offset+.018*(1-(i/rings)**2)-baseY,pz);
+      verts.push(px,bonnetHeight(px,pz)+offset+.008*(1-(i/rings)**2)-baseY,pz);parameters.push([px,pz]);
       if(i&&j){const a=i*(segments+1)+j,b=a-1,c=a-segments-1,d=c-1;face.push(a,c,b,b,c,d);}
     }
-    return mesh(geometryFrom(verts,face.flatMap((_,i,a)=>i%3===0?[a[i],a[i+2],a[i+1]]:[])),mat,chassis,name);
+    return mesh(projectedNormals(geometryFrom(verts,face.flatMap((_,i,a)=>i%3===0?[a[i],a[i+2],a[i+1]]:[])),parameters,(x,z)=>[x,bonnetHeight(x,z),z],new THREE.Vector3(0,1,0)),mat,chassis,name);
   }
   function surfaceLine(points,radius,mat,name) {
     const segments=Math.max(8,points.length*(mobile?3:5)),plan=new THREE.CatmullRomCurve3(points.map(([x,,z])=>new THREE.Vector3(x,0,z)),false,'centripetal');
-    const curve=new THREE.CatmullRomCurve3(plan.getPoints(segments).map(({x,z})=>new THREE.Vector3(x,bonnetHeight(x,z)+.034-baseY,z)),false,'centripetal');
+    const curve=new THREE.CatmullRomCurve3(plan.getPoints(segments).map(({x,z})=>new THREE.Vector3(x,bonnetHeight(x,z)+(porscheOptics?.019:.022)-baseY,z)),false,'centripetal');
     return mesh(new THREE.TubeGeometry(curve,segments,radius,mobile?5:7,false),mat,chassis,name);
   }
   function refineSurfaceGeometry(flat,edge){
@@ -292,16 +304,16 @@ export function createProductionCar({ mobile = false, vehicle = 'porsche911gt3rs
   function surfaceOutline(points,mat,name,offset=.020){
     const outline=new THREE.Shape(),last=points.at(-1),first=points[0];outline.moveTo(mix(last[0],first[0],.5),mix(last[1],first[1],.5));
     for(let i=0;i<points.length;i++){const a=points[i],b=points[(i+1)%points.length];outline.quadraticCurveTo(a[0],a[1],mix(a[0],b[0],.5),mix(a[1],b[1],.5));}
-    outline.closePath();const geometry=curvedPatchGeometry(outline,name),position=geometry.attributes.position;
-    for(let i=0;i<position.count;i++){const x=position.getX(i),z=position.getY(i);position.setXYZ(i,x,bonnetHeight(x,z)+offset-baseY,z);}
+    outline.closePath();const geometry=curvedPatchGeometry(outline,name),position=geometry.attributes.position,parameters=[];
+    for(let i=0;i<position.count;i++){const x=position.getX(i),z=position.getY(i);parameters.push([x,z]);position.setXYZ(i,x,bonnetHeight(x,z)+offset-baseY,z);}
     const indices=Array.from(geometry.index.array);geometry.setIndex(indices.flatMap((_,i,a)=>i%3===0?[a[i],a[i+2],a[i+1]]:[]));
-    geometry.computeVertexNormals();return mesh(geometry,mat,chassis,name);
+    projectedNormals(geometry,parameters,(x,z)=>[x,bonnetHeight(x,z),z],new THREE.Vector3(0,1,0));return mesh(geometry,mat,chassis,name);
   }
   function bodyPatch(points,mat,name,offset=.016){
     const outline=new THREE.Shape();outline.moveTo(...points[0]);for(const p of points.slice(1))outline.lineTo(...p);outline.closePath();
-    const geometry=curvedPatchGeometry(outline,name),position=geometry.attributes.position;
-    for(let i=0;i<position.count;i++){const x=position.getX(i),z=position.getY(i);position.setXYZ(i,x,bonnetHeight(x,z)+offset-baseY,z);}
-    const indices=Array.from(geometry.index.array);geometry.setIndex(indices.flatMap((_,i,a)=>i%3===0?[a[i],a[i+2],a[i+1]]:[]));geometry.computeVertexNormals();
+    const geometry=curvedPatchGeometry(outline,name),position=geometry.attributes.position,parameters=[];
+    for(let i=0;i<position.count;i++){const x=position.getX(i),z=position.getY(i);parameters.push([x,z]);position.setXYZ(i,x,bonnetHeight(x,z)+offset-baseY,z);}
+    const indices=Array.from(geometry.index.array);geometry.setIndex(indices.flatMap((_,i,a)=>i%3===0?[a[i],a[i+2],a[i+1]]:[]));projectedNormals(geometry,parameters,(x,z)=>[x,bonnetHeight(x,z),z],new THREE.Vector3(0,1,0));
     return mesh(geometry,mat,chassis,name);
   }
   function frontOutline(points,mat,name,round=true){
@@ -332,49 +344,38 @@ export function createProductionCar({ mobile = false, vehicle = 'porsche911gt3rs
   const bumperFloor = direction => vehicle==='bmwX3'?(direction<0?.31:.34):floor + (direction < 0 && shape.rounded ? .085 : 0);
   const bumperTuck = (direction,u,t) => (shape.rounded ? .13 : .055)*Math.abs(u)**2*Math.sin(Math.PI*t) + (direction < 0 ? .075 : .035)*t*t;
   const cabinPoint = (q,u,offset=0) => {
-    const z=q*halfLength,[w,peak]=sectionAt(shape.cabin,q),x=u*w,bottom=vehicle==='bmwX3'?shoulder(z)+.018:bonnetHeight(x,z)+.018;
-    // A gently crowned roof rolls into steep side windows. The previous half
-    // ellipse made every windscreen look like a continuous bubble canopy.
-    const crown=(1-Math.abs(u)**(vehicle==='bmwX3'?8:shape.angular?8:midEngine?8:5))**(vehicle==='bmwX3'?.32:shape.angular?.48:midEngine?.48:.42);
-    const doubleBubble=vehicle==='lamborghiniRevuelto'?.012*Math.sin(u*Math.PI)**2:0;
-    const closure=vehicle==='bmwX3'?0:Math.max(clamp(1-(q-shape.cabin[0][0])/.055,0,1),clamp(1-(shape.cabin.at(-1)[0]-q)/.055,0,1))**2;
-    return [x,mix(bottom+(Math.max(peak,bottom+.006)-bottom)*crown+doubleBubble,bonnetHeight(x,z)+.010,closure)+offset,z];
+    const z=q*halfLength,[w,peak]=sectionAt(shape.cabin,q),a=clamp(Math.abs(u),0,1),x=u*w,bottom=bonnetHeight(x,z)+.018;
+    const roofCrown=peak-.015*Math.min(a/roofEdge,1)**2;
+    const sideSlope=clamp((a-roofEdge)/(1-roofEdge),0,1),sideY=mix(peak-.015,bottom,sideSlope)+.006*Math.sin(Math.PI*sideSlope);
+    const y=a<=roofEdge?roofCrown:sideY;
+    const closure=Math.max(clamp(1-(q-shape.cabin[0][0])/.055,0,1),clamp(1-(shape.cabin.at(-1)[0]-q)/.055,0,1))**2;
+    return [x,mix(Math.max(y,bottom+.006),bonnetHeight(x,z)+.010,closure)+offset,z];
   };
   // Flowing fenders and hood are lofted independently from the cabin. Real arches
   // leave empty space above tyres instead of painting dark circles onto a box.
-  const vertices = [], indices = [], rows = vehicle==='bmwX3'?(mobile?15:27):(mobile?23:39), stations = mobile ? 80 : 128;
-  for (let i = 0; i <= stations; i++) {
-    const z = -halfLength + i/stations*length, [w] = sectionAt(shape.body,z/halfLength);
-    for (let j = 0; j < rows; j++) {
-      const u = j/(rows-1)*2-1;
-      const x=u*(w*halfWidth-shoulderInset(z));
-      vertices.push(x, bonnetHeight(x,z)-baseY, z-Math.sign(z)*cornerRadius*Math.abs(u)**3*endWeight(z));
-      const cabinOpening=shape.open&&z>shape.opening[0]*halfLength&&z<shape.opening[1]*halfLength&&Math.abs(u)<.64;
-      if (i && j && !cabinOpening) { const a=i*rows+j,b=a-1,c=a-rows,d=c-1; indices.push(a,c,b,b,c,d); }
-    }
-  }
-  mesh(geometryFrom(vertices,indices),paint,chassis,`${vehicle}-body-sculpture`);
+  const rows=mobile?23:39,stations=mobile?80:128,sideRows=mobile?7:8,longitudinalSurfaceRows=[];
+  const topProject=(z,u)=>{
+    const [w]=sectionAt(shape.body,z/halfLength),x=u*w*halfWidth;
+    return [x,bonnetHeight(x,z),z-Math.sign(z)*cornerRadius*Math.abs(u)**3*endWeight(z)];
+  };
+  const topGeometry=loftGeometry(stations,rows-1,(a,b)=>topProject(mix(-halfLength,halfLength,a),b*2-1),new THREE.Vector3(0,1,0),baseY,(a,b)=>!(shape.open&&mix(-1,1,a)>shape.opening[0]&&mix(-1,1,a)<shape.opening[1]&&Math.abs(b*2-1)<.64));
+  mesh(topGeometry,paint,chassis,`${vehicle}-body-sculpture`);
+  const sideLower=z=>{
+    let lower=mix(floor,bumperFloor(Math.sign(z)),endWeight(z));
+    for(const axle of [frontZ,rearZ]){const radius=axleRadius(axle),d=Math.abs(z-axle),r=radius+.047;if(d<r)lower=Math.max(lower,radius+Math.sqrt(r*r-d*d));}
+    const [w]=sectionAt(shape.body,z/halfLength);return Math.min(bonnetHeight(w*halfWidth,z)-.004,lower);
+  };
+  const sideProject=(side,z,y)=>{
+    const [w]=sectionAt(shape.body,z/halfLength),top=bonnetHeight(w*halfWidth,z),lower=sideLower(z),t=clamp((top-y)/(top-lower),0,1);
+    return [sideSurfaceX(side,z,y),y,z-Math.sign(z)*(cornerRadius+bumperTuck(Math.sign(z),1,t))*endWeight(z)];
+  };
   for (const side of [-1,1]) {
-    const verts = [], face = [], sideRows=vehicle==='bmwX3'?(mobile?10:12):(mobile?7:8);
-    for (let i=0;i<=stations;i++) {
-      const z=-halfLength+i/stations*length, [w,rawTop]=sectionAt(shape.body,z/halfLength),top=porscheOptics||vehicle==='bmwX3'?bonnetHeight(w*halfWidth-shoulderInset(z),z):rawTop;
-      const end=endWeight(z);
-      let lower=mix(floor,bumperFloor(Math.sign(z)),end);
-      for (const axle of [frontZ,rearZ]) {
-        const radius=axleRadius(axle),d=Math.abs(z-axle),r=radius+.047;
-        if(d<r) lower=Math.max(lower,radius+(vehicle==='bmwX3'?r*(1-(d/r)**2.35)**(1/2.35):Math.sqrt(r*r-d*d)));
-      }
-      lower=Math.min(top-.004,lower);
-      for(let j=0;j<=sideRows;j++){
-        const t=j/sideRows,roll=shape.rounded?.038*Math.sin(Math.PI*t):.012*Math.sin(Math.PI*t);
-        const waist=Math.sin(clamp((z-rearZ)/(frontZ-rearZ),0,1)*Math.PI)**2;
-        const x=j===0?w*halfWidth-shoulderInset(z):sideSurfaceX(1,z,mix(top,lower,t))-.005;
-        const endZ=z-Math.sign(z)*(cornerRadius+bumperTuck(Math.sign(z),1,t))*end;
-        verts.push(side*x,mix(top,lower,t)-baseY,endZ);
-        if(i&&j){const a=i*(sideRows+1)+j,b=a-1,c=a-sideRows-1,d=c-1;face.push(a,c,b,b,c,d);}
-      }
-    }
-    mesh(geometryFrom(verts,side>0?face:face.flatMap((_,i,a)=>i%3===0?[a[i],a[i+2],a[i+1]]:[])),paint,chassis,'wheel-arch-side');
+    const geometry=loftGeometry(stations,sideRows,(a,b)=>{const z=mix(-halfLength,halfLength,a),[w]=sectionAt(shape.body,z/halfLength),y=mix(bonnetHeight(w*halfWidth,z),sideLower(z),b);return sideProject(side,z,y);},new THREE.Vector3(side,0,0),baseY);
+    // The arch cutout changes the grid spacing, not the underlying panel normals.
+    const parameters=[];for(let i=0;i<=stations;i++)for(let j=0;j<=sideRows;j++){const z=mix(-halfLength,halfLength,i/stations),[w]=sectionAt(shape.body,z/halfLength);parameters.push([z,mix(bonnetHeight(w*halfWidth,z),sideLower(z),j/sideRows)]);}
+    projectedNormals(geometry,parameters,(z,y)=>sideProject(side,z,y),new THREE.Vector3(side,0,0));
+    if(inspectParts)for(let j=0;j<=sideRows;j++)longitudinalSurfaceRows.push(Array.from({length:stations+1},(_,i)=>geometry.attributes.position.getZ(i*(sideRows+1)+j)));
+    mesh(geometry,paint,chassis,'wheel-arch-side');
     box(.065,.045,wheelbase-2*(shape.radius+.047)-.08,carbon,side*(halfWidth*.94),floor+.008,(frontZ+rearZ)/2,'lower-side-skirt');
     const mirrorZ=shape.cabin.at(-1)[0]*halfLength-.10;
     const mirrorHeight=shape.mirrorHeight||1.015;
@@ -396,16 +397,17 @@ export function createProductionCar({ mobile = false, vehicle = 'porsche911gt3rs
   // Rounded shoulders wrap into a recessed lower bumper instead of ending in a
   // vertical painted slab. Angular supercars retain their sharper creases.
   for (const direction of [-1,1]) {
-    const z=direction*halfLength,[w,edge,center]=sectionAt(shape.body,direction),verts=[],face=[],bands=mobile?10:16;
-    for(let i=0;i<=bands;i++)for(let j=0;j<rows;j++){
-      const u=j/(rows-1)*2-1,t=i/bands,top=bonnetHeight(u*w*halfWidth,z);
-      const lower=bumperFloor(direction)+.025*(1-u*u),roll=shape.rounded?.038*Math.sin(Math.PI*t):.012*Math.sin(Math.PI*t);
-      const y=mix(top,lower,t),plate=REAR_DETAIL_PROFILES[vehicle]?.plate;
-      const plateInset=direction>0?0:vehicle==='bmwX3'?.055*clamp(1-(Math.abs(u*w*halfWidth)/.63)**6,0,1)*clamp(1-(Math.abs(y-.725)/.165)**4,0,1):plate?.026*clamp(1-(Math.abs(u*w*halfWidth)/(plate[1]/2+.07))**6,0,1)*clamp(1-(Math.abs(y-plate[0])/(plate[2]/2+.055))**4,0,1):0;
-      verts.push(u*(w*halfWidth+roll-.035*t*t),y-baseY,z-direction*(cornerRadius*Math.abs(u)**3+bumperTuck(direction,u,t)+plateInset));
-      if(i&&j){const a=i*rows+j,b=a-1,c=a-rows,d=c-1;face.push(a,c,b,b,c,d);}
-    }
-    mesh(geometryFrom(verts,direction>0?face:face.flatMap((_,i,a)=>i%3===0?[a[i],a[i+2],a[i+1]]:[])),paint,chassis,direction>0?'front-fascia':'rear-fascia');
+    const z=direction*halfLength,[w]=sectionAt(shape.body,direction),bands=sideRows;
+    const capProject=(u,t)=>{
+      const top=bonnetHeight(u*w*halfWidth,z),lower=bumperFloor(direction),y=mix(top,lower,t),plate=REAR_DETAIL_PROFILES[vehicle]?.plate;
+      const plateInset=direction>0?0:plate?.026*clamp(1-(Math.abs(u*w*halfWidth)/(plate[1]/2+.07))**6,0,1)*clamp(1-(Math.abs(y-plate[0])/(plate[2]/2+.055))**4,0,1):0;
+      const px=u*Math.abs(sideSurfaceX(1,z,mix(bonnetHeight(w*halfWidth,z),lower,t)));
+      const mouth=direction>0&&vehicle==='ferrari296Speciale'?.052*clamp(1-(px/.80)**8,0,1)*clamp(1-((y-.405)/.125)**6,0,1):direction>0&&vehicle==='bmwM4'?.048*clamp(1-((Math.abs(px)-.225)/.205)**8,0,1)*clamp(1-((y-.595)/.305)**8,0,1):0;
+      return [px,y,z-direction*(cornerRadius*Math.abs(u)**3+bumperTuck(direction,u,t)+plateInset+mouth)];
+    };
+    const geometry=loftGeometry(rows-1,bands,(a,b)=>capProject(a*2-1,b),new THREE.Vector3(0,0,direction),baseY);
+    const normals=geometry.attributes.normal;for(let j=0;j<rows;j++)for(let i=0;i<=bands;i++){const u=j/(rows-1)*2-1,t=i/bands,index=j*(bands+1)+i,n=new THREE.Vector3().fromBufferAttribute(normals,index),topN=surfaceNormal(topProject,z,u,new THREE.Vector3(0,1,0));if(t<.25)n.lerp(topN,1-t/.25);if(Math.abs(u)>.82){const point=capProject(u,t),sideN=surfaceNormal((a,b)=>sideProject(Math.sign(u),a,b),z,point[1],new THREE.Vector3(Math.sign(u),0,0));n.lerp(sideN,(Math.abs(u)-.82)/.18);}n.normalize();normals.setXYZ(index,n.x,n.y,n.z);}
+    mesh(geometry,paint,chassis,direction>0?'front-fascia':'rear-fascia');
     const lip=[];
     for(let i=0;i<=12;i++){const u=i/6-1;lip.push([u*(w*halfWidth-.040),bumperFloor(direction)+.025*(1-u*u)+.008,z-direction*(cornerRadius*Math.abs(u)**3+bumperTuck(direction,u,.98)-.012)]);}
     line(lip,.023,carbon,'bumper-lower-aero');
@@ -414,9 +416,9 @@ export function createProductionCar({ mobile = false, vehicle = 'porsche911gt3rs
   // Weld only the continuous shell. Separate body panels previously carried
   // incompatible shoulder normals, so even rounded cars shaded like a box.
   const shellParts=chassis.children.filter(node=>node.name.endsWith('-body-sculpture')||['wheel-arch-side','front-fascia','rear-fascia'].includes(node.name));
-  const shellSources=shellParts.map(node=>{const geometry=node.geometry.clone();geometry.deleteAttribute('normal');return geometry;});
-  const joined=mergeGeometries(shellSources),shell=mergeVertices(joined,.005);shell.computeVertexNormals();
-  const bodyShell=mesh(shell,paint,chassis,`${vehicle}-continuous-body-shell`);
+  const shellSources=shellParts.map(node=>{return node.geometry.clone();});
+  const joined=weldSurfaceNormals(mergeGeometries(shellSources)),shell=mergeVertices(joined,.0001);
+  const bodyShell=mesh(shell,paint,chassis,`${vehicle}-continuous-body-shell`);if(inspectParts)bodyShell.userData.longitudinalSurfaceRows=longitudinalSurfaceRows;
   const attachmentSurfaces=new Map(),attachmentRay=new THREE.Raycaster(),attachmentDirection=new THREE.Vector3();
   for(const direction of [-1,1]){
     const source=bodyShell.geometry,position=source.attributes.position,index=source.index,subset=[];
@@ -455,14 +457,15 @@ export function createProductionCar({ mobile = false, vehicle = 'porsche911gt3rs
   }
   // Curved windscreens, framed side glass and separate opaque roof retain the
   // rear engine deck or long hood specific to each layout.
-  const cabinVertices=[],cabinIndices=[],privacyIndices=[],sideFrameIndices=[],cabinRows=shape.angular?(mobile?16:20):24,cabinSteps=mobile?32:52;
+  const cabinVertices=[],cabinIndices=[],privacyIndices=[],sideFrameIndices=[],cabinRows=shape.angular?(mobile?16:20):24,cabinSteps=mobile?32:52,cabinParameters=[];
+  const sideCells=shape.angular?3:4,transverse=j=>j<=sideCells?mix(-1,-roofEdge,j/sideCells):j>=cabinRows-sideCells?mix(roofEdge,1,(j-cabinRows+sideCells)/sideCells):mix(-roofEdge,roofEdge,(j-sideCells)/(cabinRows-2*sideCells));
   const cabinMin=shape.cabin[0][0],cabinMax=shape.cabin.at(-1)[0];
   for(let i=0;i<=cabinSteps;i++){
     const q=mix(cabinMin,cabinMax,i/cabinSteps);
     for(let j=0;j<=cabinRows;j++){
-      const [x,y,z]=cabinPoint(q,j/cabinRows*2-1);
+      const u=transverse(j),[x,y,z]=cabinPoint(q,u);cabinParameters.push([q,u]);
       cabinVertices.push(x,y-baseY,z);
-      if(i&&j){const a=i*(cabinRows+1)+j,b=a-1,c=a-cabinRows-1,d=c-1;
+      if(i&&j){const midQ=mix(cabinMin,cabinMax,(i-.5)/cabinSteps),midU=mix(transverse(j-1),u,.5);if(!shape.open&&mix(cabinMin,cabinMax,(i-1)/cabinSteps)>=shape.roof[0]&&q<=shape.roof[1]&&Math.abs(midU)<roofEdge)continue;const a=i*(cabinRows+1)+j,b=a-1,c=a-cabinRows-1,d=c-1;
         const sideFrame=vehicle==='bmwX3'&&q>-.835&&Math.abs((j-.5)/cabinRows*2-1)>.89;
         (sideFrame?sideFrameIndices:vehicle==='bmwX3'?q<-.035?privacyIndices:cabinIndices:!shape.open&&q<shape.roof[0]?privacyIndices:cabinIndices).push(a,c,b,b,c,d);
       }
@@ -470,23 +473,23 @@ export function createProductionCar({ mobile = false, vehicle = 'porsche911gt3rs
   }
   const x3ExteriorGlass=vehicle==='bmwX3'?material('x3-front-exterior-glass',THREE.MeshPhysicalMaterial,{color:'#344650',metalness:0,roughness:.07,clearcoat:1,clearcoatRoughness:.025,ior:1.52,envMapIntensity:1.25,side:THREE.DoubleSide}):null;
   const exteriorGlass=vehicle==='bmwX3'?x3ExteriorGlass:material('coupe-exterior-glass',THREE.MeshPhysicalMaterial,{color:'#354a55',metalness:0,roughness:.06,ior:1.52,clearcoat:1,clearcoatRoughness:.025,envMapIntensity:1.2,transparent:true,opacity:.89,depthWrite:true,side:THREE.DoubleSide});
-  mesh(geometryFrom(cabinVertices,cabinIndices),exteriorGlass,chassis,'model-specific-greenhouse');
+  mesh(projectedNormals(geometryFrom(cabinVertices,cabinIndices),cabinParameters,cabinPoint,new THREE.Vector3(0,1,0)),exteriorGlass,chassis,'model-specific-greenhouse');
   if(sideFrameIndices.length)mesh(geometryFrom(cabinVertices,sideFrameIndices),paint,chassis,'x3-shaped-window-surround');
   let x3PrivacyGlass;
   if(privacyIndices.length){
     x3PrivacyGlass=material(vehicle==='bmwX3'?'x3-rear-privacy-glass':'coupe-rear-privacy-glass',THREE.MeshPhysicalMaterial,{color:vehicle==='bmwX3'?'#11191d':'#1c2c34',metalness:0,roughness:.07,clearcoat:1,clearcoatRoughness:.025,ior:1.52,envMapIntensity:1.2,side:THREE.DoubleSide});
-    mesh(geometryFrom(cabinVertices,privacyIndices),x3PrivacyGlass,chassis,vehicle==='bmwX3'?'x3-rear-privacy-glazing':'coupe-rear-privacy-glazing');
+    mesh(projectedNormals(geometryFrom(cabinVertices,privacyIndices),cabinParameters,cabinPoint,new THREE.Vector3(0,1,0)),x3PrivacyGlass,chassis,vehicle==='bmwX3'?'x3-rear-privacy-glazing':'coupe-rear-privacy-glazing');
   }
-  const roofVerts=[],roofIndices=[],roofSteps=24,roofRows=16,roofEdge=vehicle==='bmwX3'?.91:shape.angular?.78:.74;
+  const roofVerts=[],roofIndices=[],roofSteps=24,roofRows=16,roofParameters=[];
   for(let i=0;i<=roofSteps;i++){
     const q=mix(...shape.roof,i/roofSteps);
     for(let j=0;j<=roofRows;j++){
-      const [x,y,z]=cabinPoint(q,(j/roofRows*2-1)*roofEdge,.009);
+      const u=(j/roofRows*2-1)*roofEdge,[x,y,z]=cabinPoint(q,u,.009);roofParameters.push([q,u]);
       roofVerts.push(x,y-baseY,z);
       if(i&&j){const a=i*(roofRows+1)+j,b=a-1,c=a-roofRows-1,d=c-1;roofIndices.push(a,c,b,b,c,d);}
     }
   }
-  if(!shape.open)mesh(geometryFrom(roofVerts,roofIndices),['bmwM4','nissanZ','hondaPrelude','mclaren750s'].includes(vehicle)?carbon:paint,chassis,'opaque-coupe-roof');
+  if(!shape.open)mesh(projectedNormals(geometryFrom(roofVerts,roofIndices),roofParameters,cabinPoint,new THREE.Vector3(0,1,0)),['bmwM4','nissanZ','hondaPrelude','mclaren750s'].includes(vehicle)?carbon:paint,chassis,'opaque-coupe-roof');
   if(!shape.open){
     const cabinTrim=material('visible-cabin-trim',THREE.MeshStandardMaterial,{color:'#171c1f',roughness:.91});
     const seatY=vehicle==='bmwX3'?1.30:height-.26,seatZ=mix(shape.roof[0],shape.roof[1],.46)*halfLength;
@@ -512,17 +515,25 @@ export function createProductionCar({ mobile = false, vehicle = 'porsche911gt3rs
   // A real painted C-pillar separates side glass from the tapered rear window.
   // Tube-only pillars left a single wide black canopy on every coupe.
   if(!shape.open)for(const side of [-1,1]){
-    const verts=[],face=[],steps=mobile?10:16,columns=8;
+    const verts=[],face=[],parameters=[],steps=mobile?10:16,columns=8;
     for(let i=0;i<=steps;i++){
-      const t=i/steps,q=mix(cabinMin,shape.roof[0]+.035,t),inner=mix(shape.rearPillar,roofEdge,t);
-      const outer=quarterWindow&&t>.35?mix(inner,1,1-(t-.35)/.65*.78):1;
+      const t=i/steps,q=mix(cabinMin,shape.roof[0]+(vehicle==='ferrari296Speciale'?.065:.035),t),inner=mix(vehicle==='ferrari296Speciale'?.48:shape.rearPillar,roofEdge,t);
+      const outer=vehicle==='porsche911gt3rs'?roofEdge:quarterWindow&&t>.35?mix(inner,1,1-(t-.35)/.65*.78):1;
       for(let j=0;j<=columns;j++){
-        const [x,y,z]=cabinPoint(q,side*mix(inner,outer,j/columns),.014);
+        const u=side*mix(inner,outer,j/columns),[x,y,z]=cabinPoint(q,u,.014);parameters.push([q,u]);
         verts.push(x,y-baseY,z);
         if(i&&j){const a=i*(columns+1)+j,b=a-1,c=a-columns-1,d=c-1;face.push(a,c,b,b,c,d);}
       }
     }
-    mesh(geometryFrom(verts,face),paint,chassis,'swept-painted-c-pillar');
+    mesh(projectedNormals(geometryFrom(verts,face),parameters,cabinPoint,new THREE.Vector3(0,1,0)),paint,chassis,'swept-painted-c-pillar');
+  }
+  if(vehicle==='porsche911gt3rs')for(const side of [-1,1]){
+    const min=cabinMin+.012,max=shape.roof[0]+.065,outline=new THREE.Shape();outline.moveTo(min,roofEdge);outline.lineTo(max,roofEdge);outline.lineTo(max,1);outline.lineTo(min,1);outline.closePath();
+    const quarter=[[-1.22,.914],[-1.16,.99],[-1.025,1.079],[-.85,1.191],[-.60,1.218],[-.572,.924],[-.95,.906]],hole=new THREE.Path();
+    for(let i=0;i<quarter.length;i++){const[z,y]=quarter[i],q=z/halfLength;let a=roofEdge,b=1;for(let j=0;j<14;j++){const u=(a+b)/2;if(cabinPoint(q,side*u)[1]>y)a=u;else b=u;}const point=[q,(a+b)/2];if(i===0)hole.moveTo(...point);else hole.lineTo(...point);}hole.closePath();outline.holes.push(hole);
+    const geometry=refineSurfaceGeometry(new THREE.ShapeGeometry(outline),mobile?.052:.035),p=geometry.attributes.position,parameters=[];
+    for(let i=0;i<p.count;i++){const q=p.getX(i),u=side*p.getY(i),point=cabinPoint(q,u,.020);parameters.push([q,u]);p.setXYZ(i,point[0],point[1]-baseY,point[2]);}
+    projectedNormals(geometry,parameters,cabinPoint,new THREE.Vector3(side,0,0));const frame=mesh(geometry,paint,chassis,'911-curved-quarter-window-surround');frame.castShadow=false;
   }
   for(const side of [-1,1]){
     const lower=shape.cabin.map(([q])=>cabinPoint(q,side,.006));
@@ -572,25 +583,24 @@ export function createProductionCar({ mobile = false, vehicle = 'porsche911gt3rs
   if(vehicle==='porsche911gt3rs'){
     signatures.push('round-headlamps','double-swan-neck-wing','hood-s-ducts','full-width-rear-light');
     for(const side of [-1,1]){
-      surfaceOptic(side*.66,front-.37,.165,.225,black,'911-headlamp-housing');
-      surfaceOptic(side*.66,front-.37,.145,.202,glass,'911-clear-headlamp-lens',.018);
+      surfaceOptic(side*.66,front-.37,.165,.225,black,'911-headlamp-housing',.009);
+      surfaceOptic(side*.66,front-.37,.145,.202,glass,'911-clear-headlamp-lens',.013);
       const ring=[];for(let i=0;i<=32;i++){const a=i/32*Math.PI*2;ring.push([side*.66+Math.cos(a)*.143,0,front-.37+Math.sin(a)*.195]);}
       surfaceLine(ring,.008,frontLight,'911-round-headlight');
-      for(const x of [-.047,.047])for(const z of [-.067,.067])surfaceOptic(side*.66+x,front-.37+z,.021,.028,frontLight,'911-four-led-projector',.039);
+      for(const x of [-.047,.047])for(const z of [-.067,.067])surfaceOptic(side*.66+x,front-.37+z,.021,.028,frontLight,'911-four-led-projector',.026);
       box(.43,.14,.04,black,side*.56,.41,front+.005,'front-cooling-intake');
       panel([[side*.14,bonnetHeight(side*.14,.71)+.01,.71],[side*.31,bonnetHeight(side*.31,1.40)+.01,1.40],[side*.56,bonnetHeight(side*.56,1.37)+.01,1.37],[side*.45,bonnetHeight(side*.45,.76)+.01,.76]],carbon,'hood-air-exit');
       for(let i=0;i<5;i++){const z=frontZ-.18+i*.067;box(.18,.012,.032,carbon,side*.76,bonnetHeight(side*.76,z)+.012,z,'front-fender-louvre');}
       panel([[side*.80,.40,frontZ-.37],[side*.84,.78,frontZ-.47],[side*.79,.79,frontZ-.65],[side*.77,.40,frontZ-.54]],black,'gt3-front-wheel-air-exit');
       line([[side*.77,.39,frontZ-.36],[side*.84,.78,frontZ-.46]],.022,carbon,'gt3-front-wheel-air-blade');
       line([[side*.62,.91,rearZ-.24],[side*.63,1.40,rearZ-.01],[side*.63,1.48,rearZ-.35]],.027,carbon,'swan-neck-wing-support');
-      box(.023,.22,.48,carbon,side*.95,1.42,rearZ-.38,'wing-endplate');
+      const plate=new THREE.Shape();plate.moveTo(-.25,1.35);plate.lineTo(.14,1.35);plate.quadraticCurveTo(.25,1.37,.25,1.43);plate.lineTo(.20,1.495);plate.quadraticCurveTo(.17,1.52,.10,1.52);plate.lineTo(-.18,1.495);plate.quadraticCurveTo(-.25,1.485,-.25,1.43);plate.closePath();const end=new THREE.ExtrudeGeometry(plate,{depth:.014,bevelEnabled:true,bevelSegments:1,steps:1,bevelSize:.003,bevelThickness:.003,curveSegments:3}),pos=end.attributes.position;for(let i=0;i<pos.count;i++){const z=pos.getX(i)+rearZ-.38,y=pos.getY(i);pos.setXYZ(i,side*(.95+pos.getZ(i)-.007),y-baseY,z);}end.computeVertexNormals();if(!end.index)end.setIndex(Array.from({length:pos.count},(_,i)=>i));mesh(end,carbon,chassis,'wing-endplate');
       exhaust(side*.085,.39,rear-.015,.049);
       panel([[side*.28,.59,rear-.012],[side*.69,.57,rear+.012],[side*.78,.42,rear+.032],[side*.30,.43,rear+.018]],black,'911-recessed-bumper-vent');
       line([[side*.31,.46,rear-.055],[side*.57,.455,rear-.049],[side*.70,.46,rear-.040]],.009,rearLight,'911-lower-reflector');
-      panel([[side*.88,.54,rearZ+.31],[side*.91,.82,rearZ+.44],[side*.88,.88,rearZ+.57],[side*.80,.56,rearZ+.47]],black,'gt3-rear-quarter-air-exit');
+      sideOutline([[rearZ+.59,.83],[rearZ+.52,.872],[rearZ+.34,.853],[rearZ+.28,.786],[rearZ+.36,.59],[rearZ+.46,.63]],side,black,'gt3-rear-quarter-air-exit');
     }
-    box(1.86,.045,.47,carbon,0,1.42,rearZ-.39,'gt3-rs-upper-wing');
-    box(1.78,.035,.29,carbon,0,1.30,rearZ-.33,'gt3-rs-lower-wing');
+    for(const [span,depth,y,z,name]of [[1.86,.47,1.42,rearZ-.39,'gt3-rs-upper-wing'],[1.78,.29,1.30,rearZ-.33,'gt3-rs-lower-wing']]){const verts=[],faces=[],section=[[-.50,-.009],[-.41,.013],[-.12,.024],[.28,.014],[.50,.006],[.47,-.004],[.08,-.016],[-.35,-.018]];for(let i=0;i<=8;i++)for(const [q,dy]of section){const u=i/8*2-1;verts.push(u*span/2,y+dy+.014*u*u-baseY,z+q*depth);}for(let i=1;i<=8;i++)for(let j=0;j<8;j++){const a=i*8+j,b=i*8+(j+1)%8,c=a-8,d=b-8;faces.push(a,c,b,b,c,d);}for(let i=1;i<7;i++)faces.push(0,i+1,i,64,64+i,65+i);mesh(geometryFrom(verts,faces),carbon,chassis,name);}
     const tail=[[-.79,.785,rear+.235],[-.43,.757,rear-.017],[0,.765,rear-.024],[.43,.757,rear-.017],[.79,.785,rear+.235]];
     line(tail,.036,black,'911-recessed-lamp-housing');
     line(tail.map(([x,y,z])=>[x,y+.007,z-.047]),.010,rearLight,'911-light-bar');
@@ -625,24 +635,27 @@ export function createProductionCar({ mobile = false, vehicle = 'porsche911gt3rs
     signatures.push('gamma-rear-wings','suspended-front-splitter','high-central-exhaust','ferrari-bridge-tail-lights');
     panel([[-.80,.64,rear+.10],[.80,.64,rear+.10],[.81,.84,rear+.12],[-.81,.84,rear+.12]],black,'296-rear-recessed-lamp-band');
     panel([[-.77,.29,rear+.09],[.77,.29,rear+.09],[.71,.58,rear+.07],[-.71,.58,rear+.07]],carbon,'296-deep-rear-diffuser');
+    frontOutline([[-.78,.342],[-.66,.517],[-.16,.479],[0,.448],[.16,.479],[.66,.517],[.78,.342],[.48,.312],[-.48,.312]],black,'296-front-intake',false);
     for(const side of [-1,1]){
-      surfaceOutline([[side*.40,front-.17],[side*.69,front-.54],[side*.81,front-.62],[side*.78,front-.42],[side*.57,front-.17]],black,'296-swept-headlamp-housing');
-      surfaceLine([[side*.42,0,front-.24],[side*.66,0,front-.43],[side*.79,0,front-.60]],.008,frontLight,'296-led-blade');
-      for(const x of [.60,.70])surfaceOptic(side*x,front-.31-(x-.60)*.9,.016,.020,frontLight,'296-optical-projector',.034);
-      panel([[side*.16,.31,front+.005],[side*.77,.35,front-.10],[side*.63,.49,front-.07],[side*.22,.44,front+.015]],black,'296-front-intake');
-      box(.58,.026,.24,carbon,side*.45,.27,front-.10,'suspended-splitter');
+      const eye=[[.47,.656],[.57,.692],[.84,.703],[.83,.659],[.69,.640],[.48,.643]];
+      frontOutline(eye.map(([x,y])=>[side*x,y]),black,'296-front-headlamp-housing',false);
+      frontOutline(eye.map(([x,y])=>[side*mix(.65,x,.94),mix(.671,y,.80)]),glass,'296-front-headlamp-housing-lens',false);
+      frontOutline([[.49,.663],[.60,.681],[.825,.688],[.824,.683],[.60,.676],[.49,.658]].map(([x,y])=>[side*x,y]),frontLight,'296-front-headlamp-housing-led',false);
+      for(const x of [.65,.75])frontOutline([[x-.014,.654],[x+.014,.655],[x+.014,.671],[x-.014,.670]].map(([px,y])=>[side*px,y]),frontLight,'296-front-headlamp-housing-projector',false);
+      const splitter=box(.69,.020,.19,carbon,side*.385,.315,front-.082,'suspended-splitter');splitter.rotation.y=side*-.11;
       box(.028,.09,.05,carbon,side*.58,.34,front-.11,'splitter-support');
-      sideOutline([[-.32,.53],[-.67,.60],[-.85,.81],[-.61,.85],[-.40,.68]],side,black,'296-compact-oval-inlet');
+      const inlet=[[-.32,.60],[-.46,.76],[-.68,.846],[-.84,.80],[-.79,.65],[-.56,.55]];sideOutline(inlet,side,black,'296-compact-oval-inlet');
+      line(inlet.slice(0,4).map(([z,y])=>[sideSurfaceX(side,z,y)+side*.003,y,z]),.0035,paint,'296-sculpted-inlet-lip');
       for(const x of [.49,.72])ellipsoid(side*x,.798,rear-.025+cornerRadius*(x/.77)**3,.112,.032,.022,rearLight,'296-paired-capsule-tail-light');
-      const wing=box(.35,.037,.24,paint,side*.71,.985,rear+.25,'gamma-wing');wing.rotation.z=side*-.09;
-      box(.022,.069,.24,paint,side*.88,.965,rear+.25,'gamma-wing-tip');
+      const wingGeometry=loftGeometry(8,4,(a,b)=>{const x=side*mix(.56,.90,a),z=mix(rear+.18,rear+.47,b);return[x,bonnetHeight(x,z)+.014+.027*b,z];},new THREE.Vector3(0,1,0),baseY);mesh(wingGeometry,paint,chassis,'gamma-wing');
+      const outer=side*.90;line([[outer,bonnetHeight(outer,rear+.18)+.012,rear+.18],[outer,bonnetHeight(outer,rear+.47)+.045,rear+.47]],.012,paint,'gamma-wing-tip');
       for(let i=0;i<3;i++)surfaceOutline([[side*.48,front-.82-i*.12],[side*.68,front-.82-i*.12],[side*.68,front-.87-i*.12],[side*.48,front-.87-i*.12]],black,'296-bonnet-air-exit');
     }
     ovalExhaust(.575,rear-.025,.180,.056,'296-central-oval-exhaust');
     const engineWindow=[[-.40,-.65],[-.59,-1.03],[-.53,-1.60],[-.30,-1.91],[0,-1.97],[.30,-1.91],[.53,-1.60],[.59,-1.03],[.40,-.65]];
     surfaceOutline(engineWindow,black,'296-engine-bay-recess',.009);
     for(let i=0;i<4;i++){const z=-1.06-i*.12;box(.40,.017,.045,alloy,0,bonnetHeight(0,z)+.023,z,'engine-cover-detail');}
-    surfaceOutline(engineWindow,glass,'296-rear-engine-glass',.049);
+    surfaceOutline(engineWindow,glass,'296-rear-engine-glass',.031);
     box(.39,.10,.017,black,0,.405,rear-.027,'296-rear-number-plate');
   }else if(vehicle==='mclaren750s'){
     signatures.push('deep-eye-socket-headlamps','teardrop-greenhouse','single-oval-high-exhaust','active-airbrake');
@@ -707,8 +720,9 @@ export function createProductionCar({ mobile = false, vehicle = 'porsche911gt3rs
   }else if(vehicle==='bmwM4'){
     signatures.push('vertical-twin-kidney-grille','carbon-four-seat-roof','double-led-optics','quad-outboard-exhausts');
     for(const side of [-1,1]){
-      panel([[side*.06,.30,front+.035],[side*.34,.32,front+.03],[side*.36,.65,front+.02],[side*.095,.67,front+.026]],black,'m4-tall-kidney');
-      for(let i=0;i<5;i++)box(.24,.012,.013,carbon,side*.205,.36+i*.052,front+.043,'kidney-grille-bar');
+      frontOutline([[side*.047,.295],[side*.323,.302],[side*.414,.781],[side*.381,.838],[side*.065,.834]],black,'m4-tall-kidney',false);
+      frontRing([[side*.047,.295],[side*.323,.302],[side*.414,.781],[side*.381,.838],[side*.065,.834]],carbon,'m4-kidney-frame');
+      for(let i=0;i<6;i++)box(.275,.020,.016,carbon,side*.215,.355+i*.078,front+.043,'kidney-grille-bar');
       const eye=[[.415,.787],[.59,.835],[.85,.834],[.866,.754],[.66,.733],[.454,.749]];
       frontOutline(eye.map(([x,y])=>[side*x,y]),black,'m4-front-headlamp-housing',false);
       frontOutline(eye.map(([x,y])=>[side*x,y]),glass,'m4-front-headlamp-housing-lens',false);
@@ -1086,7 +1100,9 @@ export function createProductionCar({ mobile = false, vehicle = 'porsche911gt3rs
       transformed.z=depth(transformed.x,transformed.y)+(transformed.z-center.z)*.08;
       position.setXYZ(i,transformed.x,transformed.y,transformed.z);
     }
-    position.needsUpdate=true;item.geometry.computeVertexNormals();item.position.set(0,0,0);item.rotation.set(0,0,0);item.scale.set(1,1,1);
+    position.needsUpdate=true;const parameters=[];for(let i=0;i<position.count;i++)parameters.push(sideDetail?[position.getZ(i),position.getY(i)+baseY]:[position.getX(i),position.getY(i)]);
+    projectedNormals(item.geometry,parameters,sideDetail?(z,y)=>[sideSurfaceX(Math.sign(center.x)||1,z,y),y,z]:(x,y)=>[x,y,depth(x,y)],sideDetail?new THREE.Vector3(Math.sign(center.x)||1,0,0):new THREE.Vector3(0,0,direction));
+    if(/headlamp|optic|lens|kidney|grille|front-intake/.test(item.name))item.castShadow=false;item.receiveShadow=true;item.position.set(0,0,0);item.rotation.set(0,0,0);item.scale.set(1,1,1);item.geometry.computeBoundingBox();item.geometry.computeBoundingSphere();
   }
   const finCount=midEngine||porscheOptics?7:['bmwX3','amgSL63','hondaPrelude','mazdaMX5','nissanZ','toyotaGR86'].includes(vehicle)?0:4;
   for(let i=0;i<finCount;i++){

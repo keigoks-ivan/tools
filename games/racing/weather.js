@@ -23,10 +23,13 @@ export function createSeasonWeather({ scene, season, mobile = false, renderer, m
   }
   const road = materials.road;
   if (road) {
+    const cityAsphalt = road.userData?.asphaltWear?.cityCompaction === true;
     snapshot(road);
     road.color.multiplyScalar(1 - wet * .29);
-    road.roughness = Math.max(.19, finite(road.roughness, 1) * (1 - wet * .76));
-    road.envMapIntensity = finite(road.envMapIntensity, .35) + wet * .9;
+    // Damp city aggregate keeps a broad, rough reflection. A fully smooth
+    // sheet would mirror the bright sky across the entire street surface.
+    road.roughness = Math.max(cityAsphalt ? .5 : .19, finite(road.roughness, 1) * (1 - wet * (cityAsphalt ? .32 : .76)));
+    road.envMapIntensity = finite(road.envMapIntensity, .35) + wet * (cityAsphalt ? .28 : .9);
     if ('clearcoat' in road) { road.clearcoat = wet * .9; road.clearcoatRoughness = .14; }
   }
   const snowGround = new Set([materials.terrain, materials.dryGrass, materials.shoulder, materials.seasonGround]);

@@ -17,6 +17,8 @@ The side shell has independent shoulder roll, door waist, sill and rounded squar
 
 End-cap boundaries use the same three-dimensional edge vertices as the adjoining side/top grids. This fixes the triangular openings caused by separately projecting subdivided cap edges around a tight corner. The painted front cap is explicitly symmetric so hole triangulation cannot fill one outer air curtain while leaving the other open. Surface normals come from the underlying continuous curves rather than sparse triangle averages.
 
+The later body-surface pass replaces the upper shoulder's flat-ended roll with a circular curve and joins the actual top/side normals across a narrow 45 mm belt band. This removes the hard bright seam without changing the G45's long SUV roof, glazing or wheel-arch positions. A 12 mm lower-door inset makes the rocker transition clearer. Neither refinement adds triangles, materials or textures.
+
 | Selected model | Triangles | Batched meshes | Materials | Generated textures |
 | --- | ---: | ---: | ---: | ---: |
 | Desktop | 98,931 | 36 | 19 | 2 |
@@ -28,6 +30,8 @@ The constructor creates only the selected car. Static meshes merge by material, 
 
 ## Verification
 
-`node --test games/racing/cars-bmw-x3.test.mjs` passes 11 tests covering both quality levels: real concave waist and shoulder roll, deep plate recess, glass bounds, physical lamp wrap, symmetric open front air curtains, rear-quarter closure from both sides, plate UV/first-hit visibility, four tyre-contact patches, steering/reverse wheel spin/suspension/brake/paint behaviour, finite geometry, resource budgets and idempotent disposal.
+`node --test games/racing/cars-bmw-x3.test.mjs` passes 12 tests covering both quality levels: real concave waist and shoulder roll, agreement between actual top/side belt normals, deep plate recess, glass bounds, physical lamp wrap, symmetric open front air curtains, rear-quarter closure from both sides, plate UV/first-hit visibility, four tyre-contact patches, steering/reverse wheel spin/suspension/brake/paint behaviour, finite geometry, resource budgets and idempotent disposal.
 
 Silent native-browser review used a fresh `cars-bmw-x3.js?x3-body=13` entry. Six desktop angles were saved as `/private/tmp/x3-g45-final-{front,rear,front-direct,rear-direct,side,top}.png`, plus the same six with `final-white-` and three mobile-LOD views with `final-phone-{front,rear,side}.png`. They are actual browser-rendered screenshots, with body shadows enabled; no reference-photo texture or generated mock render substitutes for the model.
+
+The shoulder refinement has an additional six-angle before/after comparison at `/private/tmp/car-body-compare12-bmwX3.jpg`, with original native screenshots at `/private/tmp/car-body-after12-bmwX3-{front,rear,front-direct,rear-direct,side,top}.png` and mobile geometry at `/private/tmp/car-body-after12-mobile-bmwX3-{front,rear,side}.png`. The comparison uses the same white paint, lighting and camera positions; the change is deliberately limited to shoulder continuity and door curvature.

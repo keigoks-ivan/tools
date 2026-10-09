@@ -114,3 +114,40 @@ new downloaded imagery. Regional
 road-edge paint, low race barriers and seasonal ground shading are separate
 common systems. Landmark geometry and geographic/photo horizons remain specific
 to their selected city, including previously corrected Marseille rock outcrops.
+
+
+## Physical street-depth comparison, 9 October 2026
+
+The repeated Box face/painted windows of the quiet game views were compared
+again with Newcastle's Live Theatre photograph and these original Paris views:
+[135 Boulevard Haussmann entrance](https://commons.wikimedia.org/wiki/File:135_Boulevard_Haussmann,_Paris_(01).jpg)
+and [Rue Halevy upper windows and dormers](https://commons.wikimedia.org/wiki/File:Paris_windows_and_dormer_windows,_haussmannian_facade.jpg)
+(Vania Teofilo, own work, 21 November 2006, CC BY-SA 3.0). The entrance photograph
+shows deep doors, pale joints and projecting lintels; it does not establish
+upper-storey dimensions. The complete upper view shows tall windows, recessed
+jambs, projecting stone sills, two separated iron balcony bands and slate
+mansard dormers. These photographs remain reference only, outside runtime assets.
+
+Newcastle and Paris now cut the street-facing wall where each physical window
+opens, rather than projecting a dark frame over an opaque wall atlas. Glazing
+is 0.30 / 0.31 m behind the brick or stone face; physically shaded reveals and
+stone sills give the near view depth. Window glass varies in brightness and
+warm/cool tint and selected rooms have partly lowered cream or grey-green
+blinds. London also follows the viewed [Warwick Way original photograph](https://www.geograph.org.uk/photo/4336106)
+by Chris Whippet: narrow sash bays, pale lower walls, brick upper storeys,
+smaller attic openings and first-upper-floor iron balconies. The council PDF
+was blocked and is not claimed as a viewed visual reference.
+
+Other historic cities preserve their own coloured plaster, tile, timber or
+brick surface palette and profile, including Lisbon's original azulejo and
+Warwick's exposed timber. Shared physical window profiles do not fill the
+open riverbank, coast, garden or castle districts. Desktop near fronts receive
+full physical upper windows; the phone retains the first two complete upper
+storeys and uses a cheap original procedural upper surface on the same
+bay/floor grid and wall palette. This upper batch shares the masonry atlas,
+with window versus wall roughness masks and antialiased sash lines; it does not
+introduce another texture download. The measured matrix
+in CITY-SOURCES.md counts all architectural modules and places the largest
+phone scene at 297,513 triangles; it excludes terrain, road, vehicles, horizon
+photos and render passes. This is an architecture budget, not a measured
+real-device framerate or a claim of photorealism.

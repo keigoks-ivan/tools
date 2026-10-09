@@ -40,8 +40,8 @@ function sideX(z, y) {
   const shoulder = stationValue(sideStations, z, 1), belt = beltHeight(z);
   const wheelBulge = Math.max(gaussian(z, BMW_X3_RUNNING_GEAR.frontZ, .57), gaussian(z, BMW_X3_RUNNING_GEAR.rearZ, .61));
   const waist=.028+.075*gaussian(y,.75,.25)-.022*gaussian(y,1.06,.13);
-  const shoulderRoll=.066*smooth((y-belt+.125)/.125);
-  const shell=shoulder-waist*(1-wheelBulge*.92)-shoulderRoll-.013*gaussian(z,-.05,.9)*gaussian(y,.72,.21);
+  const shoulderT=clamp((y-belt+.125)/.125,0,1),shoulderRoll=.066*(1-Math.sqrt(Math.max(0,1-shoulderT*shoulderT)));
+  const shell=shoulder-waist*(1-wheelBulge*.92)-shoulderRoll-.013*gaussian(z,-.05,.9)*gaussian(y,.72,.21)-.012*gaussian(z,-.05,.9)*gaussian(y,.52,.10);
   if(z>2.02){
     const frontWidth=stationValue([[.285,.802],[.322,.886],[.495,.935],[.910,.940],[1.167,.922]],y,1);
     return mix(shell,frontWidth,smooth((z-2.02)/.3575));
@@ -174,6 +174,18 @@ function gridGeometry(columns,rows,project,direction) {
   }
   const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(vertices,3));geometry.setAttribute('normal',new THREE.Float32BufferAttribute(normals,3));geometry.setIndex(faces);return geometry;
 }
+function joinShoulderNormals(geometry, sidePanel) {
+  const position=geometry.attributes.position,normals=geometry.attributes.normal;
+  for(let i=0;i<position.count;i++){
+    const z=position.getZ(i);if(Math.abs(z)>1.65)continue;
+    const width=sideX(z,beltHeight(z)),distance=sidePanel?beltHeight(z)-(position.getY(i)+baseY):width-Math.abs(position.getX(i));
+    if(distance<-.00001||distance>.045)continue;
+    const slope=(beltHeight(z+.0001)-beltHeight(z-.0001))/.0002,target=new THREE.Vector3(0,1,-slope).normalize(),normal=new THREE.Vector3().fromBufferAttribute(normals,i).lerp(target,1-smooth(distance/.045)).normalize();
+    normals.setXYZ(i,normal.x,normal.y,normal.z);
+  }
+  return geometry;
+}
+
 function mirroredFrontGeometry(geometry) {
   const position=geometry.getAttribute('position'),normal=geometry.getAttribute('normal'),indices=geometry.index.array,vertices=[],normals=[];
   const vertex=i=>({p:[position.getX(i),position.getY(i),position.getZ(i)],n:[normal.getX(i),normal.getY(i),normal.getZ(i)]});
@@ -247,9 +259,9 @@ export function createBMWX3({ mobile=false, inspectParts=false }={}) {
     const endX=(u*2-1)*sideX(halfLength,beltHeight(halfLength)),endY=bonnetHeight(endX,halfLength),endpoint=frontPoint(endX,endY);
     return[x,bonnetHeight(x,z)+.004,z-(halfLength-endpoint[2])*smooth((z-1.62)/.7575)];
   },new THREE.Vector3(0,1,0)),paint,chassis,'g45-compound-bonnet');
-  mesh(gridGeometry(mobile?12:18,mobile?20:32,(u,v)=>{const z=mix(-halfLength,.98,v),w=sideX(z,beltHeight(z)),across=Math.sin((u-.5)*Math.PI),x=across*w,y=bodyTop(x,z),endX=across*sideX(-halfLength,beltHeight(-halfLength)),endY=bodyTop(endX,-halfLength);return[x,y,z+smooth((-z-1.68)/.6975)*(rearPoint(endX,endY)[2]+halfLength)];},new THREE.Vector3(0,1,0)),paint,chassis,'g45-under-greenhouse-shoulder');
+  mesh(joinShoulderNormals(gridGeometry(mobile?12:18,mobile?20:32,(u,v)=>{const z=mix(-halfLength,.98,v),w=sideX(z,beltHeight(z)),across=Math.sin((u-.5)*Math.PI),x=across*w,y=bodyTop(x,z),endX=across*sideX(-halfLength,beltHeight(-halfLength)),endY=bodyTop(endX,-halfLength);return[x,y,z+smooth((-z-1.68)/.6975)*(rearPoint(endX,endY)[2]+halfLength)];},new THREE.Vector3(0,1,0)),false),paint,chassis,'g45-under-greenhouse-shoulder');
   for(const side of[-1,1]) {
-    mesh(gridGeometry(mobile?80:112,mobile?15:24,(u,v)=>{const z=mix(-halfLength,halfLength,u),y=mix(lowerSide(z),beltHeight(z),Math.sin(v*Math.PI/2)),x=side*sideX(z,y),front=smooth((z-1.62)/.7575),rear=smooth((-z-1.68)/.6975);return[x,y,z-front*(halfLength-frontPoint(frontWidth(y),y)[2])+rear*(rearPoint(rearWidth(y),y)[2]+halfLength)];},new THREE.Vector3(side,0,0)),paint,chassis,`g45-${side>0?'right':'left'}-sculpted-body`);
+    mesh(joinShoulderNormals(gridGeometry(mobile?80:112,mobile?15:24,(u,v)=>{const z=mix(-halfLength,halfLength,u),y=mix(lowerSide(z),beltHeight(z),Math.sin(v*Math.PI/2)),x=side*sideX(z,y),front=smooth((z-1.62)/.7575),rear=smooth((-z-1.68)/.6975);return[x,y,z-front*(halfLength-frontPoint(frontWidth(y),y)[2])+rear*(rearPoint(rearWidth(y),y)[2]+halfLength)];},new THREE.Vector3(side,0,0)),true),paint,chassis,`g45-${side>0?'right':'left'}-sculpted-body`);
     for(const [axle,r]of[[BMW_X3_RUNNING_GEAR.frontZ,BMW_X3_RUNNING_GEAR.frontRadius],[BMW_X3_RUNNING_GEAR.rearZ,BMW_X3_RUNNING_GEAR.rearRadius]]){
       const arch=[];for(let i=0;i<=56;i++){const z=axle+mix(-.445,.445,i/56),y=archHeight(z,axle);arch.push([z,y]);}
       mesh(gridGeometry(mobile?40:56,3,(u,v)=>{const z=axle+mix(-.445,.445,u),y=archHeight(z,axle);return[side*(sideX(z,y)-.008*v),y+v*.023,z];},new THREE.Vector3(side,0,0)),paint,chassis,'g45-rounded-square-arch-bevel');

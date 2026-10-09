@@ -14,7 +14,8 @@ globalThis.document={createElement:()=>({width:0,height:0,getContext:()=>({fillR
 test('Taipei shows closed-course blocks at the physical boundary without motorway rails or racing curbs',()=>{
   const scene=new THREE.Scene(),track=TRACKS.taipei,concrete=new THREE.MeshStandardMaterial();
   addRoadDetails({scene,track,materials:{concrete}});
-  assert.equal(scene.children.length,2,'one instanced barrier batch and one faint road-wear mesh');
+  assert.equal(scene.children.length,3,'one barrier batch, one raised pavement curb and one faint road-wear mesh');
+  assert.ok(scene.getObjectByName('taipei-bevelled-street-curbs'));
   const blocks=scene.getObjectByName('taipei-short-concrete-race-barriers');
   assert.ok(blocks?.isInstancedMesh);
   const matrix=new THREE.Matrix4(),position=new THREE.Vector3();
@@ -42,7 +43,8 @@ test('the original scenic roads retain their rail and corner-curb construction',
 
 for(const id of ['kualalumpur','kobe','london','sydney','goldcoast','melbourne','paris','prague','newcastle','bangkok','sanfrancisco','newyork','vancouver','hanoi','lisbon','marseille','nice','warwick'])test(`${id}: street barriers match collisions and local road grade`,()=>{
   const scene=new THREE.Scene(),track=TRACKS[id],concrete=new THREE.MeshStandardMaterial();addRoadDetails({scene,track,materials:{concrete}});
-  assert.equal(scene.children.length,2);const blocks=scene.getObjectByName(`${id}-closed-street-barriers`);assert.ok(blocks?.isInstancedMesh);
+  assert.equal(scene.children.length,3);const blocks=scene.getObjectByName(`${id}-closed-street-barriers`);assert.ok(blocks?.isInstancedMesh);
+  assert.ok(scene.getObjectByName(`${id}-bevelled-street-curbs`));
   const matrix=new THREE.Matrix4(),position=new THREE.Vector3(),forward=new THREE.Vector3();
   for(let i=0;i<blocks.count;i++){
     blocks.getMatrixAt(i,matrix);assert.ok(matrix.elements.every(Number.isFinite));position.setFromMatrixPosition(matrix);

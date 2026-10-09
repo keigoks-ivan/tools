@@ -17,6 +17,7 @@ for(const id of Object.keys(CITY_ROAD_PROFILES))test(`${id}: regional paint foll
     const p=geometry.attributes.position,n=geometry.attributes.normal;assert.equal(p.count,n.count);
     for(let i=0;i<p.count;i++){
       const near=track.nearest(p.getX(i),p.getZ(i));assert.ok(Number.isFinite(p.getY(i)));assert.ok(Math.abs(p.getY(i)-near.y-.064)<.065,`${id} road grade`);
+      assert.ok(near.distance<=track.width/2+.07,`${id}: painted lanes stay on asphalt rather than the pavement`);
       if(mat===yellow){if(near.distance<.5)yellowCentre++;if(near.distance>track.width*.35)yellowEdge++;}
     }
     assert.ok(Array.from(n.array).every(Number.isFinite));geometry.dispose();
@@ -24,4 +25,10 @@ for(const id of Object.keys(CITY_ROAD_PROFILES))test(`${id}: regional paint foll
   assert.ok(bytes<1200000,'street paint geometry stays within a small selected-track allocation');
   if(CITY_ROAD_PROFILES[id].centre.includes('yellow'))assert.ok(yellowCentre>0);
   if(CITY_ROAD_PROFILES[id].edge==='double-yellow'){assert.ok(yellowEdge>0);assert.equal(yellowCentre,0,'UK yellow kerb paint must not become an American yellow centre line');}
+});
+
+test('regional lane allocation leaves usable road lanes on narrowed town streets',()=>{
+  for(const [id,profile]of Object.entries(CITY_ROAD_PROFILES)){
+    assert.ok(TRACKS[id].width/(profile.lanes*2)>=2.8,`${id}: lanes retain room for production cars`);
+  }
 });

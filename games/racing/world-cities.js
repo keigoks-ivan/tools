@@ -1,13 +1,14 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { addExtraCityLandmarks } from './world-cities-extra.js?v=city-drive-13';
-import { createCityWaterMaterial } from './world-city-australia.js?v=city-drive-13';
-import { paintTaipeiFacade, paintTaipeiStorefront, paintTaipeiPaving } from './world-city-taipei-facades.js?v=city-drive-13';
-import { getTaipeiJunctions, taipeiJunctionAt, taipeiStreetAt, addTaipeiStreetDetails, paintTaipeiCornerFacade, paintTaipeiJunctionPaving } from './world-city-taipei-streets.js?v=city-drive-13';
-import { CITY_ROAD_PROFILES, addCityRoadMarkings } from './world-city-roadmarkings.js?v=city-drive-13';
-import { CITY_STREETFRONT_CITIES, HERITAGE_SHOP_CITIES, paintCityStreetfront, paintHeritageShopfront, paintCityPaving } from './world-city-streetfronts.js?v=city-drive-13';
-import { CITY_DISTRICT_PLANS, cityDistrictAt, cityDistrictForPoint } from './world-city-districts.mjs?v=city-drive-13';
-import { clipGroundTriangle } from './world-city-ground.mjs?v=city-drive-13';
+import { addExtraCityLandmarks } from './world-cities-extra.js?v=city-drive-14';
+import { createCityWaterMaterial } from './world-city-australia.js?v=city-drive-14';
+import { paintTaipeiFacade, paintTaipeiStorefront, paintTaipeiPaving } from './world-city-taipei-facades.js?v=city-drive-14';
+import { getTaipeiJunctions, taipeiJunctionAt, taipeiStreetAt, addTaipeiStreetDetails, paintTaipeiCornerFacade, paintTaipeiJunctionPaving } from './world-city-taipei-streets.js?v=city-drive-14';
+import { CITY_ROAD_PROFILES, addCityRoadMarkings } from './world-city-roadmarkings.js?v=city-drive-14';
+import { CITY_STREETFRONT_CITIES, HERITAGE_SHOP_CITIES, paintCityStreetfront, paintHeritageShopfront, paintCityPaving } from './world-city-streetfronts.js?v=city-drive-14';
+import { CITY_DISTRICT_PLANS, cityDistrictAt, cityDistrictForPoint } from './world-city-districts.mjs?v=city-drive-14';
+import { clipGroundTriangle } from './world-city-ground.mjs?v=city-drive-14';
+import { CITY_FACADE_DEPTH_PROFILES, paintCityDepthWall, createFacadeDepth, cutFacadeFront, configureFacadeUpperMaterial } from './world-city-facade-depth.js?v=city-drive-14';
 
 export const CITY_THEMES = Object.freeze(['taipei', 'kualalumpur', 'kobe', 'london', 'sydney', 'goldcoast', 'melbourne', 'paris', 'prague', 'newcastle', 'bangkok', 'sanfrancisco', 'newyork', 'vancouver', 'hanoi', 'lisbon', 'marseille', 'nice', 'warwick']);
 // Street-scale architecture is authored per location, not a shared tower grid.
@@ -190,9 +191,9 @@ export function addCityScenery({ scene, track, mobile = false, groundHeight, gro
   else if (CITY_STREETFRONT_CITIES.includes(city)) { paving.color.set('#ffffff'); paving.map = canvasMap(mobile ? 128 : 256, mobile ? 128 : 256, (c, w, h) => paintCityPaving(c, w, h, city)); }
   const charcoal = material('#404b4c', { metalness: .35, roughness: .5 });
   const steel = material('#bec7c5', { metalness: .78, roughness: .35 });
-  const glass = material(city === 'taipei' ? '#4c8987' : city === 'kualalumpur' ? '#728087' : '#678a96', { metalness: .32, roughness: .18 });
-  const darkGlass = material('#384d56', { metalness: .35, roughness: .24 });
-  const white = material('#eeeee0', { roughness: .55 });
+  const glass = material(city === 'taipei' ? '#4c8987' : city === 'kualalumpur' ? '#728087' : '#678a96', { metalness: 0, roughness: .18 });
+  const darkGlass = material('#52676b', { metalness: 0, roughness: .22, vertexColors: true });
+  const white = material('#eeeee0', { roughness: .55, vertexColors: true });
   const gold = material('#bfa15a', { metalness: .7, roughness: .45 });
   const red = material('#b23229', { roughness: .5, metalness: .18 });
   const roof = material('#535d60', { roughness: .7 });
@@ -207,7 +208,7 @@ export function addCityScenery({ scene, track, mobile = false, groundHeight, gro
       c.beginPath(); c.ellipse((x * .47 + .5) * size, (y * .47 + .5) * size, ['cedar', 'cypress'].includes(street.trees) ? .9 : 2.3 + paint() * 1.3, ['cedar', 'cypress'].includes(street.trees) ? 4.8 : 4 + paint() * 3, paint() * Math.PI, 0, TAU); c.fill();
     }
   });
-  const leaf = material('#c0cead', { map: foliageMap, alphaTest: .28, side: THREE.DoubleSide, roughness: .96 });
+  const leaf = material('#c0cead', { map: foliageMap, alphaTest: .28, side: THREE.DoubleSide, roughness: .96, vertexColors: true });
   if (['taipei', 'kualalumpur'].includes(city)) { leaf.emissive.set('#31531f'); leaf.emissiveIntensity = .1; }
   leaf.name = ['cedar', 'cypress'].includes(street.trees) ? 'city-evergreen-foliage' : 'city-foliage';
   const signalGreen = material('#4b9d70', { emissive: '#287349', emissiveIntensity: .5 });
@@ -232,8 +233,11 @@ export function addCityScenery({ scene, track, mobile = false, groundHeight, gro
       }
     });
   }
-  const windowMaterials = Array.from({ length: 6 }, (_, i) => material('#ffffff', { map: facadeMap(city, i, mobile), metalness: city === 'taipei' ? i < 4 ? .03 : .22 : i % 2 ? .13 : .06, roughness: city === 'taipei' ? i < 4 ? .91 : .30 : historic ? .86 : .5 }));
-  const taipeiStorefront = city === 'taipei' ? material('#ffffff', { map: canvasMap(mobile ? 256 : 512, mobile ? 128 : 256, paintTaipeiStorefront), roughness: .32, metalness: .14 }) : null;
+  const windowMaterials = Array.from({ length: 6 }, (_, i) => material('#ffffff', { map: facadeMap(city, i, mobile), metalness: 0, roughness: city === 'taipei' ? i < 4 ? .91 : .30 : historic ? .86 : .5 }));
+  const depthWall = material('#ffffff', { map: canvasMap(mobile ? 384 : 768, mobile ? 256 : 512, (c, w, h) => paintCityDepthWall(c, w, h, city, street.palette)), metalness: 0, roughness: .94 });
+  depthWall.name = 'city-facade-masonry'; depthWall.map.anisotropy = mobile ? 2 : 4;
+  let upperFacade;
+  const taipeiStorefront = city === 'taipei' ? material('#ffffff', { map: canvasMap(mobile ? 256 : 512, mobile ? 128 : 256, paintTaipeiStorefront), roughness: .32, metalness: 0 }) : null;
   const heritageStorefront = HERITAGE_SHOP_CITIES.includes(city) ? material('#ffffff', { map: canvasMap(mobile ? 512 : 1024, mobile ? 256 : 512, (c, w, h) => paintHeritageShopfront(c, w, h, city)), roughness: .63 }) : null;
   const taipeiWhitePaint = city === 'taipei' ? material('#e9e8df', { roughness: .97, side: THREE.DoubleSide }) : null;
   if (taipeiWhitePaint) taipeiWhitePaint.userData.cityRoadPaint = true;
@@ -247,6 +251,7 @@ export function addCityScenery({ scene, track, mobile = false, groundHeight, gro
   for (const value of windowMaterials) value.map.anisotropy = mobile ? 2 : 4;
   function bake(geometry, mat, x = 0, y = 0, z = 0, rx = 0, ry = 0, rz = 0, metric = false, tint = null) {
     if (!geometry.index) geometry.setIndex(Array.from({ length: geometry.attributes.position.count }, (_, i) => i));
+    if (mat.vertexColors && !geometry.attributes.color) geometry.setAttribute('color', new THREE.Float32BufferAttribute(new Float32Array(geometry.attributes.position.count * 3).fill(1), 3));
     rotation.setFromEuler(new THREE.Euler(rx, ry, rz)); position.set(x, y, z);
     geometry.applyMatrix4(new THREE.Matrix4().compose(position, rotation, scale)); geometry.applyMatrix4(frame);
     if (metric && geometry.attributes.uv) {
@@ -293,12 +298,30 @@ export function addCityScenery({ scene, track, mobile = false, groundHeight, gro
   function cornice(w, d, y, mat = stone, depth = .35) {
     for (const side of [-1, 1]) { box(w + depth * 2, .35, depth, mat, 0, y, side * (d + depth) / 2); box(depth, .35, d, mat, side * (w + depth) / 2, y, 0); }
   }
-  function facade(w, h, d, mat, x = 0, y = h / 2, z = 0) {
+  function facade(w, h, d, mat, x = 0, y = h / 2, z = 0, physical = null) {
     const geo = new THREE.BoxGeometry(w, h, d), uv = geo.attributes.uv;
     const values = [d, d, w, w, w, w];
     for (let face = 0; face < 6; face++) for (let vertex = 0; vertex < 4; vertex++) {
       const id = face * 4 + vertex, frontage = city === 'hanoi' ? 6.5 : city === 'warwick' ? 12 : city === 'sanfrancisco' ? 11 : city === 'bangkok' ? 8 : 16;
       uv.setXY(id, uv.getX(id) * values[face] / frontage, uv.getY(id) * (face === 2 || face === 3 ? d / 22 : h / (mat.userData.taipeiCorner ? 33 : city === 'taipei' ? 21 : city === 'warwick' ? 10 : city === 'hanoi' || city === 'bangkok' ? 15 : 25)));
+    }
+    if (physical) {
+      const detail = createFacadeDepth({ city, index: physical.index, width: w, height: h, depth: d, mobile, bottom: physical.bottom || 0 });
+      cutFacadeFront(geo, w, h, d, detail.bottom, mobile ? h : detail.top);
+      const profile = CITY_FACADE_DEPTH_PROFILES[city], frameMat = profile.frame === 'metal' ? steel : profile.frame === 'timber' ? bark : white;
+      for (const [role, geometry] of Object.entries(detail.geometries)) {
+        if (!geometry.index.count) { geometry.dispose(); continue; }
+        if (role === 'upper' && !upperFacade) {
+          upperFacade = surface(depthWall, '#ffffff'); upperFacade.name = 'city-upper-facade';
+          configureFacadeUpperMaterial(upperFacade, { city, glassColor: darkGlass.color, frameColor: frameMat.color });
+        }
+        const value = role === 'wall' ? depthWall : role === 'glass' ? darkGlass : role === 'frame' ? frameMat : role === 'shutters' ? roof : role === 'blinds' ? white : role === 'upper' ? upperFacade : stone;
+        bake(geometry, value, x, y - h / 2, z);
+      }
+      const record = physical.record;
+      record.physicalWindows = (record.physicalWindows || 0) + detail.windows.length;
+      record.physicalWindowFloors = detail.physicalFloors; record.windowRecess = detail.recess; record.windowBayWidth = w / detail.columns;
+      record.windowFloorHeight = detail.floorHeight;
     }
     bake(geo, mat, x, y, z);
   }
@@ -357,11 +380,31 @@ export function addCityScenery({ scene, track, mobile = false, groundHeight, gro
       }
       bake(new THREE.PlaneGeometry(height * .18, height * .22), leaf, 0, height * .96, 0);
     } else {
-      for (let i = 0; i < (mobile ? 7 : 10); i++) {
-        const angle = rand() * TAU, radius = (1.2 + rand() * 1.7) * (['banyan', 'oak', 'plane'].includes(street.trees) ? 1.35 : 1), y = height * (.58 + rand() * .33);
-        const x = Math.cos(angle) * radius, z = Math.sin(angle) * radius;
-        beam([0, height * .43, 0], [x, y, z], .15, bark);
-        for (let card = 0; card < 3; card++) bake(new THREE.PlaneGeometry(4 + rand() * .9, 4.5 + rand() * .8), leaf, x, y, z, (rand() - .5) * .7, card / 3 * Math.PI + angle, (rand() - .5) * .5);
+      // Preserve the surrounding plot/ground random sequence: the old canopy
+      // consumed 15 samples per branch, including its three large paper faces.
+      for (let sample = 0; sample < (mobile ? 7 : 10) * 15; sample++) rand();
+      const canopy = random(Math.imul(Math.round(x * 10), 73856093) ^ Math.imul(Math.round(z * 10), 19349663) ^ Math.round(height * 100));
+      const crownScale = Math.max(.72, Math.min(1.3, height / 12)), broad = ['banyan', 'oak', 'plane'].includes(street.trees), gum = street.trees === 'gum';
+      for (let branch = 0; branch < (mobile ? 5 : 7); branch++) {
+        const angle = branch / (mobile ? 5 : 7) * TAU + canopy() * .75, radius = (.9 + canopy() * 1.6) * crownScale * (broad ? 1.18 : .94);
+        const xx = Math.cos(angle) * radius, zz = Math.sin(angle) * radius, y = height * (.63 + canopy() * .24);
+        beam([0, height * .43, 0], [xx, y - .25, zz], .15, bark);
+        for (let card = 0; card < (mobile ? 6 : 8); card++) {
+          const width = (1.45 + canopy() * .8) * crownScale * (gum ? .8 : 1), h = (1.3 + canopy() * .85) * crownScale * (gum ? 1.18 : 1);
+          const geometry = new THREE.PlaneGeometry(width, h), p = geometry.attributes.position, normals = geometry.attributes.normal, colors = [];
+          const tone = .71 + canopy() * .20;
+          for (let vertex = 0; vertex < p.count; vertex++) {
+            // Small non-coplanar leaf clusters have depth; curved normals avoid
+            // lighting an entire spherical paper segment as one bright panel.
+            p.setZ(vertex, (canopy() - .5) * width * .20);
+            const normal = new THREE.Vector3(p.getX(vertex) / width * .8, p.getY(vertex) / h * .45, 1).normalize();
+            normals.setXYZ(vertex, normal.x, normal.y, normal.z);
+            const shade = tone * (vertex < 2 ? 1 : .9); colors.push(shade * .95, shade, shade * .93);
+          }
+          geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+          bake(geometry, leaf, xx + (canopy() - .5) * width * .9, y + (canopy() - .5) * h * .8, zz + (canopy() - .5) * width * .9,
+            (canopy() - .5) * 1.7, canopy() * TAU, (canopy() - .5) * .9);
+        }
       }
     }
     if (!inGround && !['oak', 'cypress', 'gum'].includes(street.trees)) box(2.2, .45, 2.2, stone, 0, .225, 0);
@@ -598,13 +641,15 @@ export function addCityScenery({ scene, track, mobile = false, groundHeight, gro
     if (cityGroundLevel(city, x, z) < 4 || !clearFootprint(x, z, w, d, yaw, 3)) return false;
     const placedDistrict = cityDistrictForPoint(track, x, z), localDistrict = district || placedDistrict;
     if (near && placedDistrict.density === 0) return false;
-    setFrame(x, z, yaw); footprints.push({ x, z, w, h, d, yaw, near, family: street.family, district: localDistrict.district, frontage: localDistrict.frontage, districtHeights: localDistrict.heights, districtDensity: localDistrict.density });
-    box(w + 2, .7, d + 2, stone, 0, -.05, 0);
+    const footprint = { x, z, w, h, d, yaw, near, family: street.family, district: localDistrict.district, frontage: localDistrict.frontage, districtHeights: localDistrict.heights, districtDensity: localDistrict.density };
+    setFrame(x, z, yaw); footprints.push(footprint);
+    box(w + 1, .22, d + 1, stone, 0, -.045, 0);
     box(w + 4, .07, d + 4, paving, 0, .035, 0);
     const modernSkyline = district?.facades === 'modern' || !near && ['sydney', 'melbourne', 'bangkok', 'newyork'].includes(city);
     const mat = city === 'taipei' && wrapSide && index === 2 ? taipeiCornerFacade : windowMaterials[modernSkyline ? 3 + index % 3 : ['sydney', 'melbourne', 'bangkok', 'newyork'].includes(city) ? index % 3 : index % 6];
     const towerProfile = ['klcc-rounded', 'manhattan-setbacks', 'victorian-laneways', 'rocks-sandstone', 'thai-shophouse'].includes(street.family) && h > 50 ? index % 4 : 0;
     const roundedKL = street.family === 'klcc-rounded' && h > 35 && index % 3 === 0;
+    const physical = near && !modernSkyline && !roundedKL && h <= 55 && !(city === 'taipei' && index % 6 >= 4) ? { index, record: footprint } : null;
     if (roundedKL) {
       for (const [top, bottom, hh, yy] of [[w * .39, w * .46, h * .84, h * .42], [w * .25, w * .35, h * .16, h * .92]]) {
         const geo = new THREE.CylinderGeometry(top, bottom, hh, mobile ? 16 : 24), uv = geo.attributes.uv;
@@ -632,15 +677,15 @@ export function addCityScenery({ scene, track, mobile = false, groundHeight, gro
           facade(w * .82, h - setback, d * .83, mat, 0, (h + setback) / 2);
           cornice(w, d, setback + .1, stone, .25);
         } else if (index % 6 === 3) {
-          facade(w * .84, h - 4.35, d, mat, 0, (h + 4.35) / 2);
-          facade(w * .16, h * .67 - 4.35, d * .85, mat, w * .42, (h * .67 + 4.35) / 2, d * .075);
-        } else facade(w, h - 4.35, d, mat, 0, (h + 4.35) / 2);
+          facade(w * .84, h - 4.35, d, mat, 0, (h + 4.35) / 2, 0, physical);
+          facade(w * .16, h * .67 - 4.35, d * .85, mat, w * .42, (h * .67 + 4.35) / 2, d * .075, physical);
+        } else facade(w, h - 4.35, d, mat, 0, (h + 4.35) / 2, 0, physical);
         box(w - (wrapSide ? 3 : 0), 4.35, d - 3, stone, wrapSide ? -wrapSide * 1.5 : 0, 2.175, 1.5);
       } else if (near && ['london', 'sydney', 'kualalumpur', 'goldcoast', 'melbourne', 'newyork', 'vancouver', 'paris', 'prague', 'newcastle', 'lisbon', 'marseille', 'nice', 'warwick'].includes(city)) {
         const ground = city === 'goldcoast' ? 4.7 : 3.9;
-        facade(w, h - ground, d, mat, 0, (h + ground) / 2);
+        facade(w, h - ground, d, mat, 0, (h + ground) / 2, 0, physical);
         box(w, ground, d - 1.1, stone, 0, ground / 2, .55);
-      } else facade(w, h, d, mat);
+      } else facade(w, h, d, mat, 0, h / 2, 0, physical ? { ...physical, bottom: 3.9 } : null);
       cornice(city === 'taipei' && near && index % 6 >= 3 ? w * (index % 6 === 3 ? .84 : .82) : w, city === 'taipei' && near && index % 6 >= 4 ? d * .83 : d, h + .3, stone, .45);
     }
     const heritageRoof = !modernSkyline && ['mansard', 'slate', 'tile', 'gable'].includes(street.roof)
@@ -824,7 +869,19 @@ export function addCityScenery({ scene, track, mobile = false, groundHeight, gro
       }
       panel(Math.min(city === 'goldcoast' ? 9 : 14, w - 3), ['london', 'sydney', 'goldcoast'].includes(city) ? .75 : 1.2, shopSigns[index % shopSigns.length], 0, city === 'goldcoast' ? 3.85 : 3.45, -d / 2 - .2, Math.PI);
       }
-      for (let level = 1; level < Math.min(6, h / 5); level++) {
+      if (physical && ['london', 'newcastle', 'paris'].includes(city)) {
+        const ground = 3.9, floors = Math.max(1, Math.round((h - ground) / CITY_FACADE_DEPTH_PROFILES[city].floor)), floorHeight = (h - ground) / floors;
+        for (let level = 0; level < floors; level++) {
+          const y = ground + level * floorHeight;
+          if (city === 'paris' && level > 0 || level === 1) box(w + .2, .14, .28, stone, 0, y, -d / 2 - .06);
+          if (city === 'paris' && (level === 1 || level === floors - 1) || city === 'london' && level === 0 && index % 3 !== 1) {
+            box(w - .2, .15, .72, stone, 0, y + .03, -d / 2 - .28);
+            box(w - .3, .055, .06, charcoal, 0, y + .86, -d / 2 - .63);
+            for (let xx = -w / 2 + .22; xx < w / 2 - .1; xx += mobile ? .6 : .42) box(.03, .76, .04, charcoal, xx, y + .46, -d / 2 - .63);
+          }
+        }
+      }
+      for (let level = 1; !physical && level < Math.min(6, h / 5); level++) {
         const y = 5.5 + level * 3.4;
         if (['london', 'newcastle', 'paris'].includes(city)) {
           if (city === 'paris' || level === 1 || level === 4) box(w + .5, .18, city === 'paris' ? .7 : .32, stone, 0, y, -d / 2 -.12);

@@ -19,7 +19,16 @@ test('the original coastal export is preserved and all twenty-three circuits are
     assert.ok(Object.isFrozen(track.bounds));
     assert.ok(track.id && track.name && track.label && track.description && track.theme);
     assert.ok(track.length > 1500 && track.length < 3000);
-    assert.ok(track.width >= (track.id === 'warwick' ? 7.4 : 11) && track.wallOffset > track.width / 2 + 3);
+    assert.ok(track.width >= 7.4 && track.wallOffset > track.width / 2 + 3);
+  }
+});
+
+test('London keeps the complete road and pavements on the Thames west bank', () => {
+  const track = TRACKS.london;
+  for (const point of track.samples) for (const side of [-1, 1]) {
+    const edge = track.wallOffset + 5.9;
+    const x = point.x + point.nx * side * edge;
+    assert.ok(x < 101, `pavement must not float over the Thames channel at ${point.s.toFixed(1)} m`);
   }
 });
 

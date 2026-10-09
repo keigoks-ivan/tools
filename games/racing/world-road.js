@@ -1,6 +1,96 @@
 import * as THREE from 'three';
-import { taipeiJunctionAt } from './world-city-taipei-streets.js?v=city-drive-13';
-import { CITY_ROAD_PROFILES } from './world-city-roadmarkings.js?v=city-drive-13';
+import { taipeiJunctionAt } from './world-city-taipei-streets.js?v=city-drive-14';
+import { CITY_ROAD_PROFILES } from './world-city-roadmarkings.js?v=city-drive-14';
+import { installCurbJoints } from './road-surface.mjs?v=city-drive-14';
+
+// The five visible profile faces run from asphalt level to a 140 mm raised
+// top. The lower outside edge finishes inside the existing pavement surface.
+const cityCurbProfile = [[0, .035], [0, .145], [.025, .175], [.29, .175], [.32, .145], [.32, .095]];
+
+export function createCityCurbGeometry(track, { mobile = false } = {}) {
+  const segments = Math.min(mobile ? 390 : 780, Math.ceil(track.length / (mobile ? 6.5 : 3.3)));
+  const positions = [], colors = [], uv = [], indices = [], half = track.width / 2, arc = [0];
+  // Spend the same fixed vertex budget on short bend spans and longer straight
+  // spans. The two offset edges need more samples than the centreline on bends.
+  const cumulative = [0], spacing = track.length / track.samples.length;
+  for (let i = 0; i < track.samples.length; i++) {
+    const curvature = Math.abs(track.sample((i + .5) * spacing).curvature);
+    const weight = Math.sqrt(1 / (mobile ? 12 : 6) ** 2 + curvature * (1 + half * curvature) / (8 * .035));
+    cumulative.push(cumulative[i] + spacing * weight);
+  }
+  let cursor = 0;
+  const points = Array.from({ length: segments }, (_, i) => {
+    const target = i / segments * cumulative.at(-1);
+    while (cumulative[cursor + 1] < target) cursor++;
+    const t = (target - cumulative[cursor]) / (cumulative[cursor + 1] - cumulative[cursor]);
+    return track.sample((cursor + t) * spacing);
+  });
+  for (let i = 1; i < cityCurbProfile.length; i++) arc.push(arc[i - 1] + Math.hypot(cityCurbProfile[i][0] - cityCurbProfile[i - 1][0], cityCurbProfile[i][1] - cityCurbProfile[i - 1][1]));
+  let maxOutwardCorrection = 0;
+  function vertex(p, radius, profile, s) {
+    const [offset, height] = cityCurbProfile[profile], shade = .97 + Math.sin(s / 21) * .02 + Math.sin(s / 3.7) * .01;
+    const r = radius + Math.sign(radius) * offset;
+    positions.push(p.x + p.nx * r, p.y + height, p.z + p.nz * r);
+    colors.push(shade, shade, shade); uv.push(arc[profile], s);
+    return positions.length / 3 - 1;
+  }
+  function triangle(a, b, c, direction) {
+    const point = index => new THREE.Vector3(...positions.slice(index * 3, index * 3 + 3));
+    const origin = point(a), normal = point(b).sub(origin).cross(point(c).sub(origin));
+    if (normal.dot(direction) < 0) indices.push(a, c, b); else indices.push(a, b, c);
+  }
+  for (const side of [-1, 1]) {
+    const radii = new Float64Array(segments).fill(half + .028);
+    // A long offset chord on an outside bend can cut into the asphalt. Move
+    // only those shared vertices outward, once during selected-world creation.
+    for (let pass = 0; pass < 3; pass++) for (let i = 0; i < segments; i++) {
+      const next = (i + 1) % segments, p = points[i], q = points[next]; let correction = 0;
+      for (const t of [.25, .5, .75]) {
+        const x = THREE.MathUtils.lerp(p.x + p.nx * side * radii[i], q.x + q.nx * side * radii[next], t);
+        const z = THREE.MathUtils.lerp(p.z + p.nz * side * radii[i], q.z + q.nz * side * radii[next], t);
+        correction = Math.max(correction, half + .020 - side * track.nearest(x, z, p.s).offset);
+      }
+      if (correction > 0) { radii[i] += correction + .003; radii[next] += correction + .003; }
+    }
+    const active = points.map((p, i) => {
+      const end = i === segments - 1 ? track.length : points[i + 1].s;
+      const junction = track.id === 'taipei' ? taipeiJunctionAt(track, (p.s + end) / 2, .5) : null;
+      return !(junction && (junction.cross || junction.side === side));
+    });
+    for (let i = 0; i < segments; i++) {
+      if (!active[i]) continue;
+      const next = (i + 1) % segments, p = points[i], q = points[next], s = p.s, end = next ? q.s : track.length;
+      maxOutwardCorrection = Math.max(maxOutwardCorrection, radii[i] - half - .028, radii[next] - half - .028);
+      for (let face = 0; face < cityCurbProfile.length - 1; face++) {
+        const dr = cityCurbProfile[face + 1][0] - cityCurbProfile[face][0], dy = cityCurbProfile[face + 1][1] - cityCurbProfile[face][1];
+        const normal = new THREE.Vector3(-p.nx * side * dy, dr, -p.nz * side * dy);
+        const a = vertex(p, side * radii[i], face, s), b = vertex(q, side * radii[next], face, end);
+        const c = vertex(p, side * radii[i], face + 1, s), d = vertex(q, side * radii[next], face + 1, end);
+        triangle(a, b, c, normal); triangle(c, b, d, normal);
+      }
+      for (const [atStart, at, point, distance, metres] of [[true, (i - 1 + segments) % segments, p, radii[i], s], [false, next, q, radii[next], end]]) {
+        if (active[at]) continue;
+        const cap = cityCurbProfile.map((_, profile) => vertex(point, side * distance, profile, metres));
+        const normal = new THREE.Vector3(Math.sin(point.heading), 0, Math.cos(point.heading)).multiplyScalar(atStart ? -1 : 1);
+        for (let face = 1; face < cap.length - 1; face++) triangle(cap[0], cap[face], cap[face + 1], normal);
+      }
+    }
+  }
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3)); geometry.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+  geometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3)); geometry.setIndex(indices); geometry.computeVertexNormals();
+  geometry.userData = { cityCurb: true, segments, maxOutwardCorrection, profile: cityCurbProfile, metreUV: true };
+  return geometry;
+}
+
+function addCityCurbs({ scene, track, materials, mobile }) {
+  const concrete = materials.concrete.clone(); concrete.color.set('#b1b6b3');
+  concrete.vertexColors = true; concrete.side = THREE.FrontSide; concrete.roughness = .91; concrete.envMapIntensity = .3;
+  concrete.normalScale?.multiplyScalar(.65); concrete.userData.seasonGround = true;
+  installCurbJoints(concrete, track.length);
+  const curbs = new THREE.Mesh(createCityCurbGeometry(track, { mobile }), concrete);
+  curbs.name = `${track.id}-bevelled-street-curbs`; curbs.receiveShadow = true; scene.add(curbs);
+}
 
 function addCityBarriers({scene,track,materials}) {
   const taipei=track.id==='taipei',height=taipei?.56:.66;
@@ -59,9 +149,10 @@ function rubberTexture() {
   map.wrapS = map.wrapT = THREE.RepeatWrapping; return map;
 }
 
-export function addRoadDetails({ scene, track, materials }) {
+export function addRoadDetails({ scene, track, materials, mobile = false }) {
   const half = track.width / 2, grandprix = track.theme === 'grandprix',city=Object.hasOwn(CITY_ROAD_PROFILES,track.id);
   if(city)addCityBarriers({scene,track,materials});
+  if(city)addCityCurbs({scene,track,materials,mobile});
   if(!city){
   const steel = new THREE.MeshStandardMaterial({ color: '#929a96', metalness: .72, roughness: .5, side: THREE.DoubleSide, envMapIntensity: .7 });
   const count = Math.ceil(track.length / 6) * 2;

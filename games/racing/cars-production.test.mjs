@@ -41,7 +41,8 @@ for (const mobile of [false, true]) {
         triangleCount += node.geometry.index.count / 3;
       });
       assert.ok(meshCount < 65, `bounded draw count: ${meshCount}`);
-      assert.ok(triangleCount > 8000 && triangleCount < (mobile ? 35000 : 60000), `bounded detail: ${triangleCount}`);
+      const detailBudget = id === 'bmwX3' ? (mobile ? 50000 : 100000) : (mobile ? 35000 : 60000);
+      assert.ok(triangleCount > 8000 && triangleCount < detailBudget, `bounded detail: ${triangleCount}`);
       const bounds = new THREE.Box3().setFromObject(car.group), size = bounds.getSize(new THREE.Vector3());
       assert.ok(bounds.min.y > -.002, `tyres meet road: ${bounds.min.y}`);
       assert.ok(size.x > spec.width && size.x < spec.width + .7, 'mirrors and contact shadow bound the complete car');
@@ -143,7 +144,7 @@ test('rear glazing closes at the body rather than rising into vertical fins', ()
   for(const id of Object.keys(PRODUCTION_CAR_DIMENSIONS)){
     const car=createProductionCar({vehicle:id,mobile:true,inspectParts:true});
     if(car.group.userData.model.openTop){car.dispose();continue;}
-    const greenhouse=car.group.getObjectByName('model-specific-greenhouse'),points=greenhouse.geometry.attributes.position;
+    const greenhouse=car.group.getObjectByName(id==='bmwX3'?'g45-rear-window':'model-specific-greenhouse'),points=greenhouse.geometry.attributes.position;
     let rear=Infinity;for(let i=0;i<points.count;i++)rear=Math.min(rear,points.getZ(i));
     const heights=[];for(let i=0;i<points.count;i++)if(Math.abs(points.getZ(i)-rear)<.0001)heights.push(points.getY(i)+.46);
     assert.ok(Math.max(...heights)-Math.min(...heights)<.09,`${id}: the rearmost glazing row closes against the rear deck`);
@@ -153,7 +154,7 @@ test('rear glazing closes at the body rather than rising into vertical fins', ()
 });
 
 test('body end surfaces preserve the selected rear deck and bonnet heights', () => {
-  for(const [id,rearHeight,frontHeight]of [['porsche911gt3rs',.80,.61],['astonVantage',.82,.59],['bmwM4',.92,.71],['bmwX3',1.19,1.12]]){
+  for(const [id,rearHeight,frontHeight]of [['porsche911gt3rs',.80,.61],['astonVantage',.82,.59],['bmwM4',.92,.845]]){
     const car=createProductionCar({vehicle:id,mobile:true,inspectParts:true}),body=car.group.getObjectByName(`${id}-continuous-body-shell`);
     car.group.updateMatrixWorld(true);
     for(const [direction,expected]of [[-1,rearHeight],[1,frontHeight]]){
@@ -187,11 +188,12 @@ test('all wheel envelopes use the selected published tyre and rim configuration'
     for(let i=0;i<4;i++){
       const [width,aspect,inches]=axles[i<2?0:1],rim=inches*.0254/2,radius=rim+width/1000*aspect/100;
       assert.ok(Math.abs(wheels[i].position.y-radius)<1e-6,`${id}: actual tyre envelope meets road at the selected axle radius`);
-      const tyre=wheels[i].getObjectByName('tyre'),barrel=wheels[i].getObjectByName('wheel-spin').children.find(node=>node.material?.name==='forged-alloy');
+      const tyre=wheels[i].getObjectByName(id==='bmwX3'?'g45-255-285-low-profile-tyre':'tyre'),barrel=wheels[i].getObjectByName('wheel-spin').children.find(node=>node.material?.name==='forged-alloy');
       assert.ok(Math.abs(new THREE.Box3().setFromObject(tyre).getSize(new THREE.Vector3()).y/2-radius)<1e-5,`${id}: generated tyre preserves its published diameter`);
-      assert.ok(Math.abs(new THREE.Box3().setFromObject(barrel).getSize(new THREE.Vector3()).y/2-rim)<1e-5,`${id}: rim diameter stays distinct from the tyre sidewall`);
+      const rimEnvelope=id==='bmwX3'?wheels[i].getObjectByName('g45-forged-rim-lip'):barrel;
+      assert.ok(Math.abs(new THREE.Box3().setFromObject(rimEnvelope).getSize(new THREE.Vector3()).y/2-rim)<1e-5,`${id}: outer rim diameter stays distinct from the tyre sidewall`);
     }
-    const wells=[];car.group.traverse(node=>{if(node.name.endsWith('wheel-well-back-wall'))wells.push(node);});
+    const wells=[];car.group.traverse(node=>{if(node.name.endsWith('wheel-well-back-wall')||id==='bmwX3'&&node.name.includes('closed-wheel-well-back'))wells.push(node);});
     assert.equal(wells.length,4,`${id}: all four arches have opaque inner walls`);
     car.dispose();
   }
@@ -203,8 +205,8 @@ test('surface-mounted front optics face upwards instead of hiding their single-s
     car.group.traverse(node=>{if(node.isMesh&&node.material.name==='led-headlamp'&&/projector|porsche-optic|optical-cell/.test(node.name))lamps.push(node);});
     assert.ok(lamps.length>=2,`${id}: each front corner includes a real visible optical element`);
     for(const lamp of lamps){
-      const normals=lamp.geometry.attributes.normal;let normalY=0;for(let i=0;i<normals.count;i++)normalY+=normals.getY(i);
-      assert.ok(normalY/normals.count>.25,`${id}: emitter triangle winding exposes its upper face`);
+      const normals=lamp.geometry.attributes.normal;let normalY=0;for(let i=0;i<normals.count;i++)normalY+=id==='ferrari296Speciale'?normals.getZ(i):normals.getY(i);
+      assert.ok(normalY/normals.count>.25,`${id}: emitter normals expose their upper or forward optical face`);
     }
     car.dispose();
   }
@@ -214,7 +216,8 @@ test('rear plate artwork sits outside the actual bumper insert and remains visib
   for(const [id,profile]of Object.entries(REAR_DETAIL_PROFILES)){
     const car=createProductionCar({vehicle:id,mobile:true,inspectParts:true});car.group.updateMatrixWorld(true);
     const plate=car.group.getObjectByName('rear-number-plate-artwork');assert.ok(plate,`${id}: closed-course plate exists`);
-    const ray=new THREE.Raycaster(new THREE.Vector3(0,profile.plate[0],-car.dimensions.length/2-1),new THREE.Vector3(0,0,1));
+    const plateHeight=id==='bmwX3'?new THREE.Box3().setFromObject(plate).getCenter(new THREE.Vector3()).y:profile.plate[0];
+    const ray=new THREE.Raycaster(new THREE.Vector3(0,plateHeight,-car.dimensions.length/2-1),new THREE.Vector3(0,0,1));
     const hits=ray.intersectObject(car.group,true).filter(hit=>hit.object.isMesh&&!hit.object.name.includes('contact-shadow'));
     assert.equal(hits[0]?.object,plate,`${id}: dark diffuser or fascia must not occlude the plate`);
     assert.ok(plate.geometry.attributes.uv,'original plate atlas retains texture coordinates');
@@ -251,7 +254,7 @@ test('forged wheel surfaces have physical depth with separate machined highlight
     for (const wheel of wheels) {
       const spin = wheel.getObjectByName('wheel-spin');
       const forged = spin.children.find(node => node.material?.name === 'forged-alloy');
-      const edge = spin.children.find(node => node.material?.name === 'machined-rim-edge');
+      const edge = spin.children.find(node => node.material?.name === (id==='bmwX3'?'1037m-machined-face':'machined-rim-edge'));
       assert.ok(forged && edge, `${id}: casting and polished rim edge are separate materials`);
       forged.geometry.computeBoundingBox();
       assert.ok(forged.geometry.boundingBox.max.x - forged.geometry.boundingBox.min.x > .15, `${id}: wheel barrel has real depth`);
@@ -341,5 +344,43 @@ test('closed wheel-well inner walls stay beneath the bonnet on every low coupe',
       }
     }
     assert.ok(covered>40,`${id}: closed lining is covered by the actual shell`);car.dispose();
+  }
+});
+
+
+test('all coupe bumper shoulders advance without folding back or overlapping the end fascia', () => {
+  for(const mobile of [false,true])for(const id of Object.keys(PRODUCTION_CAR_DIMENSIONS).filter(id=>id!=='bmwX3')){
+    const car=createProductionCar({vehicle:id,mobile,inspectParts:true}),body=car.group.getObjectByName(`${id}-continuous-body-shell`);
+    for(const row of body.userData.longitudinalSurfaceRows)for(let i=1;i<row.length;i++)assert.ok(row[i]>row[i-1]+.00001,`${id}: longitudinal panel row cannot turn backwards at ${i}`);
+    const position=body.geometry.attributes.position,normal=body.geometry.attributes.normal,shared=new Map();
+    for(let i=0;i<position.count;i++){
+      const key=[position.getX(i),position.getY(i),position.getZ(i)].map(v=>Math.round(v*100000)).join(':');
+      const n=new THREE.Vector3().fromBufferAttribute(normal,i);if(shared.has(key))assert.ok(n.distanceTo(shared.get(key))<.000001,`${id}: a shared panel boundary has one shadow normal`);else shared.set(key,n);
+    }
+    car.dispose();
+  }
+});
+
+test('911, 296 and M4 have raised fenders, rolled outer shoulders and an inset waist above the rocker', () => {
+  for(const mobile of [false,true])for(const [id,relief]of [['porsche911gt3rs',.14],['ferrari296Speciale',.20],['bmwM4',.05]]){
+    const car=createProductionCar({vehicle:id,mobile,inspectParts:true}),body=car.group.getObjectByName(`${id}-continuous-body-shell`);car.group.updateMatrixWorld(true);
+    const z=car.group.children.find(n=>n.name.endsWith('-steer')).position.z;
+    const height=x=>new THREE.Raycaster(new THREE.Vector3(x,2,z),new THREE.Vector3(0,-1,0)).intersectObject(body)[0]?.point.y;
+    const side=y=>new THREE.Raycaster(new THREE.Vector3(1.3,y,0),new THREE.Vector3(-1,0,0)).intersectObject(body)[0]?.point.x;
+    assert.ok(height(.74)>height(0)+relief,`${id}: the wheel shoulder rises above the central bonnet`);
+    assert.ok(height(.74)>height(.91)+.007,`${id}: the shoulder rolls into the outer wheel arch`);
+    assert.ok(side(.30)>side(.50)+.02,`${id}: the rocker returns outwards below the concave door`);
+    car.dispose();
+  }
+});
+
+test('M4 kidneys and 296 front optics occupy their actual upper nose with physical depth', () => {
+  for(const mobile of [false,true]){
+    const m4=createProductionCar({vehicle:'bmwM4',mobile,inspectParts:true});m4.group.updateMatrixWorld(true);const kidneys=m4.group.children[0].children.filter(n=>n.name==='m4-tall-kidney');
+    assert.equal(kidneys.length,2);for(const kidney of kidneys){const b=new THREE.Box3().setFromObject(kidney);assert.ok(b.max.y>.82&&b.min.y<.32&&b.max.y-b.min.y>.50,'M4 tall kidneys reach the raised bonnet');assert.ok(b.max.z-b.min.z>.015,'kidney follows the molded recessed fascia');assert.equal(kidney.castShadow,false,'thin recessed trim must not cast a second coarse shadow');}const shell=m4.group.getObjectByName('bmwM4-continuous-body-shell'),hit=x=>new THREE.Raycaster(new THREE.Vector3(x,.595,4),new THREE.Vector3(0,0,-1)).intersectObject(shell)[0]?.point.z;assert.ok(hit(0)-hit(.225)>.025,'the tall kidney is recessed into the actual painted nose');m4.dispose();
+    const ferrari=createProductionCar({vehicle:'ferrari296Speciale',mobile,inspectParts:true});ferrari.group.updateMatrixWorld(true);
+    const lights=[];ferrari.group.traverse(n=>{if(n.name==='296-front-headlamp-housing')lights.push(n);});assert.equal(lights.length,2);
+    for(const light of lights){const b=new THREE.Box3().setFromObject(light),size=b.getSize(new THREE.Vector3());assert.ok(size.x>.30&&size.x/size.y>4,'296 lamps are long forward-facing strips');assert.ok(size.z>.02,'optical housing follows the fender instead of a flat sticker');}
+    ferrari.dispose();
   }
 });

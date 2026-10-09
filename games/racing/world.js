@@ -1,18 +1,19 @@
 import * as THREE from 'three';
 import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
 import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
-import { TRACK } from './track.mjs?v=city-drive-13';
-import { createWorldMaterials } from './world-materials.js?v=city-drive-13';
-import { addVegetation } from './world-vegetation.js?v=city-drive-13';
-import { addLandmarks } from './world-landmarks.js?v=city-drive-13';
-import { addRoadDetails } from './world-road.js?v=city-drive-13';
-import { CITY_THEMES, cityGroundLevel, addCityScenery } from './world-cities.js?v=city-drive-13';
-import { defaultSeason } from './seasons.mjs?v=city-drive-13';
-import { createSeasonWeather } from './weather.js?v=city-drive-13';
-import { shadowFrame } from './lighting.mjs?v=city-drive-13';
-import { createTyreMarks } from './tyre-marks.js?v=city-drive-13';
-import { createCityBackdrop } from './world-city-backdrop.js?v=city-drive-13';
-import { createTerrainHeightSampler } from './world-terrain.mjs?v=city-drive-13';
+import { TRACK } from './track.mjs?v=city-drive-14';
+import { createWorldMaterials } from './world-materials.js?v=city-drive-14';
+import { addVegetation } from './world-vegetation.js?v=city-drive-14';
+import { addLandmarks } from './world-landmarks.js?v=city-drive-14';
+import { addRoadDetails } from './world-road.js?v=city-drive-14';
+import { CITY_THEMES, cityGroundLevel, addCityScenery } from './world-cities.js?v=city-drive-14';
+import { defaultSeason } from './seasons.mjs?v=city-drive-14';
+import { createSeasonWeather } from './weather.js?v=city-drive-14';
+import { shadowFrame, sunlightProfile } from './lighting.mjs?v=city-drive-14';
+import { createTyreMarks } from './tyre-marks.js?v=city-drive-14';
+import { createCityBackdrop } from './world-city-backdrop.js?v=city-drive-14';
+import { createTerrainHeightSampler } from './world-terrain.mjs?v=city-drive-14';
+import { CITY_ROAD_PROFILES } from './world-city-roadmarkings.js?v=city-drive-14';
 
 const noise = new ImprovedNoise();
 const clamp = THREE.MathUtils.clamp;
@@ -81,9 +82,10 @@ export async function createWorld(renderer, { mobile = false, track = TRACK, sea
       : grandprix ? { fog: '#becbc7', grass: '#718c65', rock: '#c4b59a', sun: '#ffead0', hemisphere: '#d8eaf0', ground: '#8b896c' }
         : { fog: '#b3beb9', grass: '#8a9470', rock: '#b0a28a', sun: '#ffe1b0', hemisphere: '#d6ebef', ground: '#948366' };
   const scene = new THREE.Scene(); scene.fog = new THREE.FogExp2(palette.fog, city ? .00032 : alpine ? .00065 : canyon ? .00048 : .00052);
-  const skyFile = season.sky === 'cloudy' || alpine ? 'environment.hdr' : canyon ? 'environment-desert.hdr' : 'environment-coast.hdr';
+  const daylight = sunlightProfile({ city, alpine, canyon, cloudy: season.sky === 'cloudy' });
+  const skyFile = daylight.skyFile;
   const loaded = await Promise.allSettled([
-    createWorldMaterials(renderer, { mobile, theme }),
+    createWorldMaterials(renderer, { mobile, theme, roadWidth: track.width, lanesPerDirection: CITY_ROAD_PROFILES[track.id]?.lanes ?? 1, trackLength: track.length }),
     new RGBELoader().loadAsync(new URL(`./assets/${skyFile}`, import.meta.url).href),
   ]);
   if (loaded.some(result => result.status === 'rejected')) {
@@ -94,12 +96,12 @@ export async function createWorld(renderer, { mobile = false, track = TRACK, sea
   environment.mapping = THREE.EquirectangularReflectionMapping;
   const pmrem = new THREE.PMREMGenerator(renderer); const env = pmrem.fromEquirectangular(environment); scene.environment = env.texture; pmrem.dispose();
   scene.background = environment; scene.backgroundBlurriness = .015;
-  scene.backgroundRotation.y = scene.environmentRotation.y = -1.8;
+  scene.backgroundRotation.y = scene.environmentRotation.y = daylight.skyRotation;
   scene.backgroundIntensity = canyon ? .9 : alpine ? 1.04 : .86;
-  scene.environmentIntensity = skyFile === 'environment.hdr' ? 1.04 : canyon ? .78 : .76;
-  const sunOffset = alpine ? new THREE.Vector3(-82, 95, 58) : canyon ? new THREE.Vector3(-93, 41, 81) : new THREE.Vector3(-26, 125, 22);
-  const hemisphere = new THREE.HemisphereLight(palette.hemisphere, palette.ground, .20); scene.add(hemisphere);
-  const sun = new THREE.DirectionalLight(canyon ? '#fff0dc' : '#fff5e6', canyon ? 2.5 : 2.3); sun.castShadow = true;
+  scene.environmentIntensity = skyFile === 'environment.hdr' ? 1.04 : city ? 1.06 : canyon ? .78 : .76;
+  const sunOffset = new THREE.Vector3(daylight.sunOffset.x, daylight.sunOffset.y, daylight.sunOffset.z);
+  const hemisphere = new THREE.HemisphereLight(palette.hemisphere, palette.ground, city ? .24 : .20); scene.add(hemisphere);
+  const sun = new THREE.DirectionalLight(canyon ? '#fff0dc' : '#fff5e6', canyon ? 2.5 : city ? 1.85 : 2.3); sun.castShadow = true;
   sun.shadow.mapSize.set(mobile ? 1024 : 2048, mobile ? 1024 : 2048);
   Object.assign(sun.shadow.camera, { left: -56, right: 56, top: 56, bottom: -56, near: 1, far: 1800 });
   sun.shadow.bias = -.00012; sun.shadow.normalBias = .025;
@@ -107,7 +109,7 @@ export async function createWorld(renderer, { mobile = false, track = TRACK, sea
   scene.add(sun, sun.target);
 
   const groundMat = city ? surfaceMaterials.concrete.clone() : surfaceMaterials.terrain;
-  if (city) groundMat.color.set('#aaa99b');
+  if (city) groundMat.color.set('#868b87');
   function groundHeight(x, z, nearest = track.nearest(x, z)) {
     const inland = Math.max(0, x - 10);
     const cityLevel = city ? cityGroundLevel(theme, x, z) : 0;

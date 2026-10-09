@@ -1,3 +1,15 @@
+export function sunlightProfile({ city = false, alpine = false, canyon = false, cloudy = false } = {}) {
+  const skyFile = cloudy || alpine ? 'environment.hdr' : city || canyon ? 'environment-desert.hdr' : 'environment-coast.hdr';
+  return {
+    skyFile,
+    skyRotation: -1.8,
+    // Overcast skies use a weak directional fill; the clear skies have a photographed sun.
+    sunOffset: alpine ? { x: -82, y: 95, z: 58 }
+      : skyFile === 'environment-desert.hdr' ? { x: -93, y: 41, z: 81 }
+        : { x: -26, y: 125, z: 22 },
+  };
+}
+
 // Preserve the photographed HDR sun directions; move only the shadow window.
 export function shadowFrame(position, direction, { extent = 56, resolution = 1024, distance = 1200, lookAhead = 14 } = {}) {
   const length = Math.hypot(direction.x, direction.y, direction.z);
