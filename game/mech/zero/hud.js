@@ -14,7 +14,7 @@ export class HUD {
     this.banner = null;     // 章節標題
     this.prompt = null;
     this.obj = null;        // 目標 {p: Vector3, text}
-    this.foes = [];         // 尋敵提示 {p: 搜索區域中心, h: 標在多高, search}
+    this.foes = [];         // 尋敵提示 {p: 搜索區域／殘敵即時位置, h: 標記高度, search, exact}
     this.pins = [];         // 任務標記：要炸的目標、要撿的東西 {p, h}
     this.notes = [];
     this.resize(); addEventListener('resize', () => this.resize());
@@ -92,7 +92,7 @@ export class HUD {
     // ---- 目標標記
     if (this.obj && !vm.scoped) this._objective(W, H, G);
     // ---- 搜索區域（畫面外貼邊用箭頭指方向）
-    if (!vm.scoped) for (const f of this.foes) { const p = f.p.clone(); p.y += f.h; this._pin(W, H, p, P.pos.distanceTo(f.p), f.search ? AM : RD, 7, false, f.search ? '搜索區域' : ''); }
+    if (!vm.scoped) for (const f of this.foes) { const p = f.p.clone(); p.y += f.h; this._pin(W, H, p, P.pos.distanceTo(f.p), f.search ? AM : RD, f.exact ? 10 : 7, !!f.exact, f.label || (f.search ? '搜索區域' : '')); }
     if (!vm.scoped && G.field?.waypoint()) { const w = G.field.waypoint(); this._pin(W, H, w.p, P.pos.distanceTo(w.p), '#ceadff', 10, true, w.name); }
     if (!vm.scoped) for (const f of this.pins) { const p = f.p.clone(); p.y += f.h; this._pin(W, H, p, P.pos.distanceTo(f.p), AM, 8, true); }
     // ---- 地上的手榴彈（敵人掉的）：15 m 內、還帶得下才標
@@ -157,12 +157,14 @@ export class HUD {
     x.beginPath();x.arc(0,0,r,0,Math.PI*2);x.fill();x.stroke();
     x.strokeStyle='rgba(127,243,255,.15)';x.beginPath();x.arc(0,0,r*.5,0,Math.PI*2);x.moveTo(-r,0);x.lineTo(r,0);x.moveTo(0,-r);x.lineTo(0,r);x.stroke();
     x.save();x.beginPath();x.arc(0,0,r-2,0,Math.PI*2);x.clip();
-    const plot=(p,col,hollow=false,size=3)=>{const dx=p.x-origin.x,dz=p.z-origin.z;let px=(-dx*Math.cos(yaw)+dz*Math.sin(yaw))*r/90,py=-(dx*Math.sin(yaw)+dz*Math.cos(yaw))*r/90;const L=Math.hypot(px,py),edge=r-size-3;if(L>edge){px*=edge/L;py*=edge/L;}x.beginPath();x.arc(px,py,size,0,Math.PI*2);x.fillStyle=x.strokeStyle=col;hollow?x.stroke():x.fill();};
+    const plot=(p,col,hollow=false,size=3)=>{const dx=p.x-origin.x,dz=p.z-origin.z;let px=(-dx*Math.cos(yaw)+dz*Math.sin(yaw))*r/90,py=-(dx*Math.sin(yaw)+dz*Math.cos(yaw))*r/90;const L=Math.hypot(px,py),edge=r-size-3;if(L>edge){px*=edge/L;py*=edge/L;}x.beginPath();x.arc(px,py,size,0,Math.PI*2);x.fillStyle=x.strokeStyle=col;hollow?x.stroke():x.fill();return {px,py};};
+    const exactIds=new Set((G.cleanupTargets||[]).map(c=>c.id).filter(id=>id!==undefined));
     for(const area of G.contacts.search||[]){x.globalAlpha=.55;plot(area.p,AM,true,Math.max(6,area.radius*r/90));}
-    for(const c of G.contacts.items.values()){x.globalAlpha=c.fresh?1:.8;plot(c.p,c.fresh?RD:AM,!c.fresh);}
+    for(const [id,c] of G.contacts.items){if(exactIds.has(id))continue;x.globalAlpha=c.fresh?1:.8;plot(c.p,c.fresh?RD:AM,!c.fresh);}
+    for(const c of G.cleanupTargets||[]){x.globalAlpha=1;const {px,py}=plot(c.p,RD,false,4.5);if(Math.abs(c.altitude)>1.5){x.textAlign='center';x.font='600 10px Rajdhani,sans-serif';x.fillText(c.altitude>0?'▲':'▼',px,py-7);}}
     x.globalAlpha=1;const w=G.field?.waypoint();if(w)plot(w.p,'#ceadff',true,5);if(G.scout.active)plot(G.player.pos,CY);x.restore();
     x.fillStyle=CY;x.beginPath();x.moveTo(0,-5);x.lineTo(4,4);x.lineTo(0,2);x.lineTo(-4,4);x.closePath();x.fill();
-    x.shadowColor='rgba(0,0,0,.9)';x.shadowBlur=4;x.textAlign='center';x.font='500 11px "Noto Sans TC",sans-serif';x.fillStyle=CY;x.fillText(`已發現 ${G.contacts.items.size} 名 · 90 m`,0,-r-9);x.fillStyle='#c3b99f';x.fillText('黃點：最後目擊',0,r+15);x.fillText('黃圈：搜索區域',0,r+30);
+    x.shadowColor='rgba(0,0,0,.9)';x.shadowBlur=4;x.textAlign='center';x.font='500 11px "Noto Sans TC",sans-serif';x.fillStyle=CY;x.fillText(G.cleanupTargets?.length?`殘敵定位 ${G.cleanupTargets.length} 名 · 90 m`:`已發現 ${G.contacts.items.size} 名 · 90 m`,0,-r-9);x.fillStyle='#c3b99f';x.fillText('黃點：最後目擊',0,r+15);x.fillText(G.cleanupTargets?.length?'紅點：即時位置 ▲高 ▼低':'黃圈：搜索區域',0,r+30);
     x.textAlign='left';x.fillText(G.scout.destroyed ? `無人機整備 ${Math.ceil(G.scout.cooldown)} 秒` : `[N] 偵察無人機 ${Math.ceil(G.scout.battery/45*100)}%`,-r,r+49);x.restore();
   }
   _scout(W, H, G) {

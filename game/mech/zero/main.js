@@ -11,6 +11,7 @@ import { qualityLevel, pixelRatio, FrameGate } from '../runtime.js';
 import { collectMissionItem, syncMissionProps } from './mission-props.mjs';
 import { ScenicMusic } from '../scenic-music.mjs';
 import { VehicleOps } from './vehicle-ops.mjs';
+import { cleanupTargets } from './cleanup.mjs';
 
 // 本篇的 env.js 用相對路徑 './assets/' 讀天空、HDR、城市貼圖：
 //   前傳有縮小的 webp 版（assets/env/，遠景看不出差別、下載少 12 MB）；沒有的才去本篇資料夾拿
@@ -589,9 +590,11 @@ function updateEncounters() {
     for (const [w, t, now] of S.LINES.mech.slice(0, -1)) hud.say(w, t, 3.4, now); audio.radio('in');
   }
 }
-// 久未交火時提供粗略搜索區域；目擊記錄仍只更新看得到的敵人。
+// 最後 1～2 名必要殘敵即時定位；較大的敵群保留粗略搜索，目擊記錄照常遵守視線。
 function updateFoes() {
   hud.foes.length = 0; G.contacts.search.length = 0; G.objSub = '';
+  G.cleanupTargets = cleanupTargets(active, player);
+  hud.foes.push(...G.cleanupTargets);
   const a = active[0]; if (!a) return;
   const E = a.E, left = a.list.filter((e) => !e.dead), sub = [];
   if(a.operation)sub.push(a.operation.status);
@@ -605,7 +608,9 @@ function updateFoes() {
   if (left.length < a.n) { a.n = left.length; a.t0 = G.t; }   // 有人倒下也算「剛打到」
   if (!left.length) return;
   const quiet = G.t - Math.max(a.t0, G.lastHit);
-  if (!E.operation?.bypass && ((left.length <= 3 && quiet > 6) || quiet > 20)) {
+  if (G.cleanupTargets.length) {
+    G.objSub += '　紅色標記：殘敵即時位置與樓層';
+  } else if (!E.operation?.bypass && !(E.stealth && !a.spotted) && ((left.length <= 3 && quiet > 6) || quiet > 20)) {
     G.contacts.searchAreas(left);
     for (const area of G.contacts.search) hud.foes.push({ p: area.p, h: 2.2, search: true });
     G.objSub += '　搜索黃圈區域';

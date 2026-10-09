@@ -1,0 +1,73 @@
+// Tactical rhythm changes positions and teamwork, never enemy health or damage.
+export const BATTLE_TACTICS={
+  pass:{flank:13,line:18,support:26,sniper:31,sight:78,cycle:[9,8,9,5]},
+  city:{flank:8,line:14,support:20,sniper:25,sight:54,cycle:[7,7,9,5]},
+  forest:{flank:15,line:17,support:23,sniper:29,sight:63,cycle:[8,8,11,5]},
+  dam:{flank:9,line:19,support:27,sniper:34,sight:82,cycle:[10,9,9,6]},
+  airfield:{flank:16,line:20,support:28,sniper:35,sight:88,cycle:[9,9,11,6]},
+  underground:{flank:6,line:11,support:17,sniper:22,sight:44,cycle:[7,6,8,5]},
+  rail:{flank:10,line:15,support:22,sniper:28,sight:66,cycle:[8,8,10,5]},
+};
+const PHASES=['advance','suppress','flank','regroup'];
+export class TacticalDirector {
+  constructor(){this.wave=0;this.epoch=0;this.key='';this.phase='advance';this.sceneId='pass';this.profile=BATTLE_TACTICS.pass;this.side=1;}
+  update(time,wave,operation,mapKind='pass'){
+    this.sceneId=operation?.sceneId||operation?.scenario?.id||operation?.scene||(typeof operation==='string'?operation:mapKind)||'pass';
+    this.profile=BATTLE_TACTICS[this.sceneId]||BATTLE_TACTICS.pass;
+    const seed=Number.isFinite(operation?.seed)?operation.seed:0,key=`${this.sceneId}:${operation?.variantId||''}:${seed}`;
+    wave=Math.max(1,Math.floor(Number(wave)||1));
+    if(wave!==this.wave||key!==this.key){this.wave=wave;this.key=key;this.epoch=time;}
+    const durations=this.profile.cycle,period=durations.reduce((a,b)=>a+b,0);
+    let offset=Math.max(0,time-this.epoch)%period,index=0;
+    while(index<durations.length-1&&offset>=durations[index])offset-=durations[index++];
+    this.phase=PHASES[index];this.progress=offset/durations[index];this.side=((Math.abs(seed)+wave)%2)?1:-1;
+    return this;
+  }
+}
+
+// Navigation's node grid is an art-independent input. Every graph edge is checked
+// against the physical infantry capsule, including thin walls between grid nodes.
+export class PhysicalRoutes {
+  constructor(nav,clear){
+    this.nav=nav;this.clear=clear;this.nodes=nav.nodes;this.edges=this.nodes.map(()=>[]);this.components=new Int32Array(this.nodes.length).fill(-1);
+    for(let i=0;i<this.nodes.length;i++){
+      const a=this.nodes[i];if(a.blocked||!clear(a,a))continue;
+      const x=i%nav.width,z=Math.floor(i/nav.width);
+      for(const [dx,dz]of [[1,0],[0,1]]){
+        const xx=x+dx,zz=z+dz;if(xx>=nav.width||zz>=nav.height)continue;
+        const j=zz*nav.width+xx,b=this.nodes[j];
+        if(b.blocked||!clear(b,b)||Math.abs(b.y-a.y)>1.1||!clear(a,b))continue;
+        this.edges[i].push(j);this.edges[j].push(i);
+      }
+    }
+    let component=0;
+    for(let i=0;i<this.nodes.length;i++){
+      if(this.components[i]>=0||this.nodes[i].blocked||!clear(this.nodes[i],this.nodes[i]))continue;
+      const queue=[i];this.components[i]=component;
+      for(let k=0;k<queue.length;k++)for(const j of this.edges[queue[k]])if(this.components[j]<0){this.components[j]=component;queue.push(j);}
+      component++;
+    }
+  }
+  nearest(p,component=null,visible=false){
+    let best=-1,distance=Infinity;
+    for(let i=0;i<this.nodes.length;i++){
+      if(this.components[i]<0||(component!=null&&this.components[i]!==component))continue;
+      const n=this.nodes[i],d=(n.x-p.x)**2+(n.z-p.z)**2;
+      if(d<distance&&(!visible||this.clear(p,n))){distance=d;best=i;}
+    }
+    return best;
+  }
+  route(from,to){
+    const start=this.nearest(from,null,true);if(start<0)return [];
+    const end=this.nearest(to,this.components[start]);if(end<0||end===start)return [];
+    const open=new Set([start]),cost=new Map([[start,0]]),previous=new Map(),closed=new Set(),goal=this.nodes[end];
+    while(open.size){
+      let current=-1,best=Infinity;
+      for(const i of open){const n=this.nodes[i],f=cost.get(i)+Math.hypot(n.x-goal.x,n.z-goal.z);if(f<best){best=f;current=i;}}
+      if(current===end){const path=[];while(current!==start){path.push(this.nodes[current]);current=previous.get(current);}return path.reverse();}
+      open.delete(current);closed.add(current);
+      for(const next of this.edges[current]){if(closed.has(next))continue;const g=cost.get(current)+this.nav.cell;if(g<(cost.get(next)??Infinity)){cost.set(next,g);previous.set(next,current);open.add(next);}}
+    }
+    return [];
+  }
+}

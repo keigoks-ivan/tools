@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#111a20">
+<title>鋼鐵黃昏：灰線 · IRON DUSK GREYLINE</title>
+<meta name="description" content="獨立步兵攻防遊戲。七座戰場、守衛戰與衝鋒戰，沿用鋼鐵黃昏系列的第一人稱操作。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./style.css?v=1">
+<script type="importmap">{"imports":{"three":"../lib/three.module.js","three/addons/":"../lib/addons/"}}</script>
+</head>
+<body>
+<canvas id="gl" aria-label="3D battlefield"></canvas><canvas id="hud" aria-hidden="true"></canvas>
+<div id="loading" role="status"><span>IRON DUSK / GREYLINE</span><p id="status">正在載入步兵裝備 · Loading infantry equipment</p><div><i id="loadProgress"></i></div></div>
+<main id="menu" class="screen" hidden>
+  <header class="top"><a href="/games/">← <span data-t="lobby">遊戲大廳</span></a><span class="serial">IRON DUSK / INFANTRY DIVISION</span><div><button id="language">EN</button><button class="fullscreen" data-t="fullscreen">全螢幕</button></div></header>
+  <div class="menu-body">
+    <section class="hero"><div class="eyebrow"><i></i><span data-t="standalone">鋼鐵黃昏・獨立步兵篇</span></div><h1>GREY<span>LINE</span><small>灰 線</small></h1><p data-t="tagline">機甲離開之後，防線由我們守住。</p><div class="hero-detail"><span>07 <b data-t="battlefields">座戰場</b></span><span>02 <b data-t="operations">種作戰</b></span><span>01 <b data-t="squad">支小隊</b></span></div></section>
+    <section class="selection" aria-labelledby="selectionTitle"><div class="section-title"><h2 id="selectionTitle" data-t="choose">選擇戰場</h2><span>OPERATIONS / 01—07</span></div><div id="scenarios" class="scenario-grid"></div></section>
+    <section class="briefing"><div class="brief-copy"><span id="sceneCode" class="eyebrow"></span><h2 id="sceneName"></h2><p id="sceneBrief"></p><div class="operation-intel"><p id="operationBrief"></p><p id="bonusBrief"></p><small id="campaignProgress"></small></div><p id="best" class="best"></p></div><div class="deployment"><div class="mode-row" role="group" aria-label="Operation"><button data-mode="defend"><b data-t="defend">守衛戰</b><small data-t="defendShort">抵擋四波攻擊</small></button><button data-mode="assault"><b data-t="assault">衝鋒戰</b><small data-t="assaultShort">依序奪下三座據點</small></button></div><div class="operation-row"><label for="operation" data-t="operationPlan">作戰方案</label><select id="operation"></select><small data-t="reshuffle">每次部署重新編排敵軍與攻勢方向</small></div><div class="difficulty-row"><label for="difficulty" data-t="difficulty">難度</label><select id="difficulty"><option value="recruit">新兵 / Recruit</option><option value="regular">標準 / Regular</option><option value="veteran">老兵 / Veteran</option></select><button id="settingsOpen" data-t="settings">操作與設定</button></div><button id="deploy" class="primary"><span data-t="deploy">開始作戰</span><span>→</span></button></div></section>
+    <footer class="menu-foot"><span data-t="desktop">建議鍵盤＋滑鼠遊玩，亦提供觸控操作</span><span data-t="cleanup">最後兩名敵人自動定位・不用繞地圖找人</span></footer>
+  </div>
+</main>
+<div id="pause" class="screen overlay" hidden><section class="panel"><span class="eyebrow">FIELD SETTINGS</span><h2 data-t="settings">操作與設定</h2><div class="settings-grid">
+  <label><span data-t="quality">畫質</span><select id="quality"><option value="0">低 / Low</option><option value="1">中 / Medium</option><option value="2">高 / High</option></select></label>
+  <label><span data-t="sensitivity">滑鼠靈敏度</span><input id="sensitivity" type="range" min="0.3" max="2.5" step="0.05" value="1"></label>
+  <label><span data-t="volume">音效音量</span><input id="volume" type="range" min="0" max="1" step="0.05" value="0.8"></label>
+  <label><span data-t="music">音樂音量</span><input id="music" type="range" min="0" max="1" step="0.05" value="0.7"></label>
+</div><div class="controls"><p><b>WASD</b><span data-t="move">移動</span><b>SHIFT</b><span data-t="run">跑步／狙擊屏息</span></p><p><b data-t="mouse">滑鼠</b><span data-t="aim">左鍵開火・右鍵瞄準</span><b>C / CTRL</b><span data-t="crouch">蹲下</span></p><p><b>SPACE</b><span data-t="jump">跳躍</span><b>R</b><span data-t="reload">換彈</span></p><p><b>1 / 2 / 3 · Q</b><span data-t="weapons">長槍／手槍／衝鋒槍</span><b>G</b><span data-t="grenade">手榴彈</span></p><p><b>E</b><span data-t="interact">按住佔領／補給</span><b>M · ESC</b><span data-t="mapPause">戰術地圖／暫停</span></p><p><b>F</b><span data-t="squadCommands">小隊：跟隨／原地掩護／推進</span></p></div><div class="panel-actions"><button id="resume" class="primary" data-t="resume">返回</button><button id="quit" data-t="quit">返回戰場選單</button><button class="fullscreen" data-t="fullscreen">全螢幕</button></div></section></div>
+<div id="tactical" class="screen overlay" hidden><section class="panel map-panel"><span class="eyebrow">TACTICAL OVERVIEW</span><h2 data-t="tactical">戰術地圖</h2><canvas id="mapCanvas" width="660" height="620"></canvas><p data-t="mapLegend">青色：小隊　琥珀：目標　紅色：目視敵軍／最後殘敵</p><button id="mapClose" class="primary" data-t="back">返回戰場 · M</button></section></div>
+<div id="result" class="screen overlay" hidden><section class="panel result-panel"><span id="resultCode" class="eyebrow"></span><h2 id="resultTitle"></h2><p id="resultReason"></p><p id="resultMedal" class="award"></p><div id="resultStats"></div><p id="resultDetails"></p><div class="panel-actions"><button id="retry" class="primary" data-t="retry">再次作戰</button><button id="resultMenu" data-t="chooseAnother">選擇其他戰場</button></div></section></div>
+<div id="playButtons" hidden><button id="squadButton">F / <span data-t="command">小隊</span></button><button id="mapButton">M / <span data-t="tactical">戰術地圖</span></button><button id="pauseButton">Ⅱ</button></div>
+<div id="touch" hidden>
+  <div id="tLook" class="look"></div><div id="tPad" class="pad"><i></i></div>
+  <button id="tFire" class="tb fire" data-t="fire">射擊</button><button id="tMsl" class="tb ads" data-t="ads">瞄準</button>
+  <button id="tBoost" class="tb run" data-t="sprint">跑</button><button id="tJump" class="tb jump" data-t="jump">跳</button>
+  <button id="tSaber" class="tb reload" data-t="reload">換彈</button><button id="tCannon" class="tb swap" data-t="swap">換槍</button>
+  <button id="tOd" class="tb crouch" data-t="crouch">蹲</button><button id="tLock" class="tb interact" data-t="interactShort">操作</button><button id="tNade" class="tb nade" data-t="grenade">手榴彈</button>
+</div>
+<script type="module" src="./main.js?v=1"></script>
+</body></html>
