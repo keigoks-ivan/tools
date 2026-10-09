@@ -1,6 +1,8 @@
-import { CIV_UNITS, TECHNOLOGIES } from './civilization.mjs?v=20261009i';
-import { BUILDING_BALANCE } from './balance.mjs?v=20261009i';
-import { createRouteSearch } from './navigation.mjs?v=20261009i';
+import { CIV_UNITS, TECHNOLOGIES } from './civilization.mjs?v=20261009j';
+import { BUILDING_BALANCE } from './balance.mjs?v=20261009j';
+import { createRouteSearch } from './navigation.mjs?v=20261009j';
+import { smoothPath, segmentClear, pathGoalTail } from './motion.mjs?v=20261009j';
+import { AI_PROFILES, updateAI } from './ai.mjs?v=20261009j';
 export const clone = value => JSON.parse(JSON.stringify(value));
 export const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 export const RICH_RESOURCE_AMOUNTS = { wood: 5000, food: 10000, gold: 20000, stone: 20000 };
@@ -111,7 +113,7 @@ export function enrichMapResources(map) {
   return map;
 }
 export function defaultProject() {
-  return { version: 1, name: '我的王國', map: generateMap(), units: clone(CIV_UNITS), rules: { population: 500, enemyPopulation: 200, starting: 2000, playerStartingResources: { wood: 2000, food: 2000, gold: 2000, stone: 2000 }, ai: 'normal', aiAlliance: true, startingBase: 'town', fog: true, speed: 1, startAge: 4, victory: 'conquest', hotkeys: 'definitive' } };
+  return { version: 1, name: '我的王國', map: generateMap(), units: clone(CIV_UNITS), rules: { population: 500, enemyPopulation: 300, starting: 20000, freePlayerPopulation:true, enemyPopulationVersion:1, aiEconomyVersion:1, playerEconomyVersion:1, playerStartingResources: { wood: 200000, food: 200000, gold: 200000, stone: 200000 }, ai: 'normal', aiAlliance: true, startingBase: 'town', fog: true, speed: 1, startAge: 4, victory: 'conquest', hotkeys: 'definitive' } };
 }
 export function validateProject(value) {
   if (!value || value.version !== 1) throw new Error('這不是支援的王國工坊檔案。');
@@ -126,11 +128,11 @@ export function validateProject(value) {
   for (const u of p.units) {
     if (typeof u.id !== 'string' || !/^[a-z0-9_-]{1,80}$/.test(u.id) || ids.has(u.id)) throw new Error('兵種代碼不正確或重複。');
     ids.add(u.id);
-    if (!['worker', 'melee', 'ranged', 'healer'].includes(u.role)) throw new Error('兵種角色不支援。');
-    if (!['worker', 'soldier', 'archer', 'knight', 'mage', 'beast', 'siege'].includes(u.look)) throw new Error('兵種外觀不支援。');
-    if (u.building && !['town', 'barracks', 'archery', 'stable', 'siege', 'monastery', 'castle'].includes(u.building) || u.age !== undefined && (!Number.isInteger(u.age) || u.age < 0 || u.age > 3) || u.wood !== undefined && (!Number.isFinite(u.wood) || u.wood < 0 || u.wood > 1000)) throw new Error('兵種生產設定不正確。');
+    if (!['worker', 'melee', 'ranged', 'healer', 'trader'].includes(u.role)) throw new Error('兵種角色不支援。');
+    if (!['worker', 'soldier', 'archer', 'knight', 'mage', 'beast', 'siege', 'cart'].includes(u.look)) throw new Error('兵種外觀不支援。');
+    if (u.building && !['town', 'barracks', 'archery', 'stable', 'siege', 'monastery', 'castle', 'market'].includes(u.building) || u.age !== undefined && (!Number.isInteger(u.age) || u.age < 0 || u.age > 3) || u.wood !== undefined && (!Number.isFinite(u.wood) || u.wood < 0 || u.wood > 1000)) throw new Error('兵種生產設定不正確。');
     if (u.upgrades && (!Array.isArray(u.upgrades) || u.upgrades.length > 10 || u.upgrades.some(v => !TECHNOLOGIES.some(t => t.id === v.tech) || Object.keys(v).some(k => !['tech', 'name', 'hp', 'attack', 'armor', 'pierceArmor', 'range', 'minRange', 'speed', 'cooldown', 'time', 'food', 'gold', 'wood', 'attackType', 'buildingBonus', 'cavalryBonus', 'archerBonus'].includes(k)) || ['hp', 'attack', 'armor', 'pierceArmor', 'range'].some(k => v[k] !== undefined && (!Number.isFinite(v[k]) || v[k] < -5 || v[k] > 10000))))) throw new Error('兵種科技升級設定不正確。');
-    for (const [key, lo, hi] of [['hp', 10, 10000], ['attack', 0, 500], ['armor', -5, 100], ['range', .5, 20], ['speed', 0.5, 6], ['cooldown', 0.2, 15], ['food', 0, 1000], ['gold', 0, 1000], ['time', 1, 120]]) {
+    for (const [key, lo, hi] of [['hp', 10, 10000], ['attack', 0, 500], ['armor', -5, 100], ['range', .5, u.hero?100:20], ['speed', 0.5, 6], ['cooldown', 0.2, 15], ['food', 0, 1000], ['gold', 0, 1000], ['time', 1, 120]]) {
       if (!Number.isFinite(u[key]) || u[key] < lo || u[key] > hi) throw new Error(`「${u.name}」的 ${key} 超出範圍。`);
     }
     if (u.pierceArmor !== undefined && (!Number.isFinite(u.pierceArmor) || u.pierceArmor < 0 || u.pierceArmor > 250)) throw new Error('遠程護甲必須介於 0–250。');
@@ -146,12 +148,15 @@ export function validateProject(value) {
       if (placed.has(point.unitId) || positions.has(point.y * n + point.x)) throw new Error('英雄出生位置不能重複或重疊。'); placed.add(point.unitId); positions.add(point.y * n + point.x);
     }
   }
-  if (!p.rules || !Number.isInteger(p.rules.population) || p.rules.population < 50 || p.rules.population > 2000 || !Number.isFinite(p.rules.starting) || p.rules.starting < 0 || p.rules.starting > 10000 || !['off', 'calm', 'normal', 'hard'].includes(p.rules.ai) || p.rules.aiAlliance !== undefined && typeof p.rules.aiAlliance !== 'boolean' || p.rules.startingBase !== undefined && !['town', 'full'].includes(p.rules.startingBase)) throw new Error('對戰規則不正確。');
+  if (!p.rules || !Number.isInteger(p.rules.population) || p.rules.population < 50 || p.rules.population > 2000 || !Number.isFinite(p.rules.starting) || p.rules.starting < 0 || p.rules.starting > 1000000 || !['off', 'calm', 'normal', 'hard'].includes(p.rules.ai) || p.rules.aiAlliance !== undefined && typeof p.rules.aiAlliance !== 'boolean' || p.rules.startingBase !== undefined && !['town', 'full'].includes(p.rules.startingBase)) throw new Error('對戰規則不正確。');
   if (p.rules.enemyPopulation !== undefined && (!Number.isInteger(p.rules.enemyPopulation) || p.rules.enemyPopulation < 50 || p.rules.enemyPopulation > 2000)) throw new Error('每個敵人的人口上限必須介於 50–2,000。');
-  p.rules.enemyPopulation ??= 200;
+  p.rules.enemyPopulation ??= 300;
   p.rules.fog = Boolean(p.rules.fog); p.rules.speed = clamp(Number(p.rules.speed) || 1, 0.5, 2);
   p.rules.aiAlliance = true;
   p.rules.startingBase = p.rules.startingBase ?? 'town';
+  if(p.rules.freePlayerPopulation!==undefined&&typeof p.rules.freePlayerPopulation!=='boolean')throw new Error('人口容量設定不正確。');
+  p.rules.freePlayerPopulation ??= true;
+  if(!p.units.some(u=>u.id==='trade-cart')&&p.units.length<40)p.units.push(clone(CIV_UNITS.find(u=>u.id==='trade-cart')));
   p.rules.startAge = Number.isInteger(p.rules.startAge) ? clamp(p.rules.startAge, 0, 4) : 4;
   p.rules.victory = p.rules.victory ?? 'conquest';
   p.rules.hotkeys = p.rules.hotkeys ?? 'definitive';
@@ -179,11 +184,12 @@ export function findPath(start, goal, size, blocked, radius = 0) {
   // Most gathering trips and open-ground orders need no search or grid allocation.
   const direct = [], ax = clamp(Math.round(start.x),0,size-1), ay = clamp(Math.round(start.y),0,size-1), dx = Math.round(goal.x)-ax, dy = Math.round(goal.y)-ay, steps = Math.max(Math.abs(dx),Math.abs(dy));
   let previous = {x:ax,y:ay};
-  if (goalDistance(previous,goal)<=radius+.01) return direct;
+  const tailFrom=point=>pathGoalTail(point,goal,size,blocked,radius,goalDistance);
+  let tail=tailFrom(previous);if(tail)return [...direct,...tail];
   for(let i=1;i<=steps;i++) {
     const point={x:Math.round(ax+dx*i/steps),y:Math.round(ay+dy*i/steps)};
     if(point.x<0||point.y<0||point.x>=size||point.y>=size||blocked(point.x,point.y)||point.x!==previous.x&&point.y!==previous.y&&(blocked(point.x,previous.y)||blocked(previous.x,point.y)))break;
-    direct.push(point);if(goalDistance(point,goal)<=radius+.01)return direct;previous=point;
+    direct.push(point);tail=tailFrom(point);if(tail)return [...direct,...tail];previous=point;
   }
   if (size > 128) {
     const dx = goal.x - start.x, dy = goal.y - start.y, d = Math.hypot(dx, dy), fraction = Math.min(1, 45 / Math.max(1, d));
@@ -209,7 +215,7 @@ export function findPath(start, goal, size, blocked, radius = 0) {
   while (heap.length) {
     const { id } = pop(); if (done[id]) continue; done[id] = 1;
     const x = id % size, y = Math.floor(id / size);
-    if (goalDistance({ x, y }, destination) <= radius + 0.01) { end = id; break; }
+    tail=tailFrom({x,y});if(tail){end=id;break;}
     for (const [dx, dy] of dirs) {
       const nx = x + dx, ny = y + dy, ni = ny * size + nx;
       if (nx < 0 || ny < 0 || nx >= size || ny >= size || done[ni] || blocked(nx, ny)) continue;
@@ -221,7 +227,7 @@ export function findPath(start, goal, size, blocked, radius = 0) {
   }
   if (end < 0) return null;
   const path = []; while (end !== initial) { path.push({ x: end % size, y: Math.floor(end / size) }); end = prev[end]; }
-  return path.reverse();
+  return [...path.reverse(),...tail];
 }
 export class World {
   constructor(project) {
@@ -229,13 +235,13 @@ export class World {
     this.teams = this.map.spawns.length; this.ages = Array(this.teams).fill(Math.min(3, this.project.rules.startAge));
     this.researched = Array.from({ length: this.teams }, () => new Set(this.project.rules.startAge === 4 ? TECHNOLOGIES.map(t => t.id) : ['feudal', 'castle-age', 'imperial'].slice(0, this.ages[0])));
     this.stocks = Array.from({ length: this.teams }, (_, team) => team === 0 ? clone(this.project.rules.playerStartingResources) : Object.fromEntries(['wood','food','gold','stone'].map(r=>[r,this.project.rules.starting])));
-    this.amounts = {};
+    this.amounts = {};this.tradeEarned=Array(this.teams).fill(0);
     this.visible = new Uint8Array(this.map.size ** 2); this.explored = new Uint8Array(this.map.size ** 2); this.blockedCells = new Set(); this.occupiedCells = new Map(); this.spatial = new Map(); this.entities = new Map(); this.aiTimer = 0; this.visionTimer = 0; this.pathBudget = 0;
     for (let team = 0; team < this.teams; team++) {
       const townSite = this.nearestBuildingSite('town', this.map.spawns[team], true); if (!townSite) { this.deploymentErrors.push(`${team === 0 ? '我方' : 'AI ' + team}出生點附近需要可放置 4×4 市鎮中心與可行走出口的空地。`); continue; } const s = townSite, town = this.addBuilding('town', team, s.x, s.y, true);
       const layoutScale = 2, deploymentPoint = (type, dx, dy) => this.nearestBuildingSite(type, { x: s.x + Math.round(dx * layoutScale), y: s.y + Math.round(dy * layoutScale) }, true, 1);
       if (this.project.rules.startingBase === 'full') { const b = deploymentPoint('barracks', 2, -1); if (b) this.addBuilding('barracks', team, b.x, b.y, true); }
-      const worker = this.project.units.find(u => u.role === 'worker' && !u.hero), soldiers = this.project.units.filter(u => u.role !== 'worker' && !u.hero && (u.age || 0) <= this.ages[team]);
+      const worker = this.project.units.find(u => u.role === 'worker' && !u.hero), soldiers = this.project.units.filter(u => !['worker','trader'].includes(u.role) && !u.hero && (u.age || 0) <= this.ages[team]);
       for (let i = 0; i < 3; i++) this.spawn(worker.id, team, this.nearestOpen({ x: s.x - 1 + i, y: s.y + 1 }));
       const scout = soldiers.find(u => u.id === 'scout') || soldiers[0]; if (scout) this.spawn(scout.id, team, this.nearestOpen({ x: s.x - 4, y: s.y - 4 }));
       if (this.project.rules.startingBase === 'full') {
@@ -259,7 +265,7 @@ export class World {
   isAlly(teamA, teamB) { return teamA === teamB || this.project.rules.aiAlliance && teamA > 0 && teamB > 0; }
   saveState() {
     const state={version:1,project:clone(this.project),researched:this.researched.map(set=>[...set]),explored:[]};
-    for (const key of ['map','units','buildings','stocks','amounts','ages','time','nextId','events','effects','corpses','aiTimer','result']) state[key]=clone(this[key]);
+    for (const key of ['map','units','buildings','stocks','amounts','ages','time','nextId','events','effects','corpses','aiTimer','result','tradeEarned']) state[key]=clone(this[key]);
     for (let i=0;i<this.explored.length;i++) if (this.explored[i]) state.explored.push(i);
     return state;
   }
@@ -271,7 +277,7 @@ export class World {
     for (const e of [...data.units,...data.buildings]) {
       if (!['unit','building'].includes(e.kind)||!Number.isInteger(e.id)||e.id<1||ids.has(e.id)||!Number.isInteger(e.team)||e.team<0||e.team>=teams||!Number.isFinite(e.hp)||!Number.isFinite(e.x)||!Number.isFinite(e.y)||e.x<0||e.y<0||e.x>=map.size||e.y>=map.size||e.kind==='building'&&!BUILDINGS[e.type]||e.kind==='unit'&&!project.units.some(u=>u.id===e.blueprint?.id)) throw new Error('戰役單位資料不正確。'); ids.add(e.id);
     }
-    const world=new World(project); world.map=map; world.modCache=null;
+    const world=new World(project);world.tradeEarned=clone(data.tradeEarned||Array(teams).fill(0)); world.map=map; world.modCache=null;
     for (const key of ['units','buildings','stocks','amounts','ages','time','events','effects','corpses','aiTimer','result']) world[key]=clone(data[key]);
     world.researched=data.researched.map(values=>new Set(values)); world.nextId=Math.max(data.nextId||1,...[...ids].map(id=>id+1));
     world.entities=new Map([...world.units,...world.buildings].map(e=>[e.id,e])); world.blockedCells.clear(); world.occupiedCells.clear();
@@ -280,10 +286,12 @@ export class World {
     world.visible.fill(0);world.fullVision=false;world.visionCells=new Set();world.updateVision();world.deploymentErrors=[];return world;
   }
   isEnemy(teamA, teamB) { return Number.isInteger(teamA)&&Number.isInteger(teamB)&&!this.isAlly(teamA, teamB); }
+  isMilitary(unit) { return unit?.kind==='unit'&&!['worker','trader'].includes(unit.blueprint.role); }
   isIdle(unit) { return unit?.kind==='unit'&&unit.hp>0&&!unit.garrison&&!unit.order&&!unit.autoTarget&&!unit.combatReturning&&!(unit.packLeft>0); }
   tile(x, y) { return tileType(this.map, Math.round(x), Math.round(y)); }
   amountAt(x, y) { const i = y * this.map.size + x; return this.amounts[i] ?? (RESOURCE[this.tile(x, y)] ? this.map.resourceAmounts[RESOURCE[this.tile(x, y)]] : 0); }
   age(team) { return this.ages[team]; }
+  aiBoost(team) { return team>0?AI_PROFILES[this.project.rules.ai]:AI_PROFILES.off; }
   modifiers(team) { if (this.modCache?.[team]) return this.modCache[team]; const mods = { carry: 1, workerSpeed: 1, cavalrySpeed: 1, healerSpeed: 1, trainSpeed: 1, buildingHp: 1, gather: { wood: 1, food: 1, gold: 1, stone: 1 } }; for (const t of TECHNOLOGIES) if (this.researched[team].has(t.id)) for (const [key, value] of Object.entries(t.effect)) { if (key === 'gather') mods.gather[value] *= t.effect.factor; else if (['carry', 'workerSpeed', 'cavalrySpeed', 'healerSpeed', 'trainSpeed', 'buildingHp'].includes(key)) mods[key] *= value; else if (typeof value === 'boolean') mods[key] = value; else if (typeof value === 'number' && !['age', 'factor'].includes(key)) mods[key] = (mods[key] || 0) + value; } (this.modCache ||= {})[team] = mods; return mods; }
   effectiveBlueprint(id, team) {
     const original = this.project.units.find(u => u.id === id); if (!original) return null; const bp = clone(original); if (bp.hero) return bp;
@@ -360,7 +368,8 @@ export class World {
     this.units.push(u); this.entities.set(u.id, u); return u;
   }
   population(team) { return this.units.filter(u => u.team === team && u.hp > 0).length; }
-  capacity(team) { return Math.min(team === 0 ? this.project.rules.population : this.project.rules.enemyPopulation ?? 200, this.buildings.reduce((a, b) => a + (b.team === team && b.hp > 0 && b.progress === 1 ? BUILDINGS[b.type].pop : 0), 0)); }
+  populationLimit(team) {return team===0?this.project.rules.population:this.project.rules.enemyPopulation??300;}
+  capacity(team) { if(team===0&&this.project.rules.freePlayerPopulation)return this.project.rules.population;return Math.min(team === 0 ? this.project.rules.population : this.project.rules.enemyPopulation ?? 300, this.buildings.reduce((a, b) => a + (b.team === team && b.hp > 0 && b.progress === 1 ? BUILDINGS[b.type].pop : 0), 0)); }
   entity(id) { const e = this.entities.get(id); return e && e.hp > 0 ? e : null; }
   canPay(team, cost) { return Object.entries(cost).every(([k, v]) => this.stocks[team][k] >= v); }
   pay(team, cost) { for (const [k, v] of Object.entries(cost)) this.stocks[team][k] -= v; }
@@ -407,6 +416,8 @@ export class World {
       if (order.type==='repair'&&target.hp>=target.maxHp&&!queued) return '這棟建築不需要修理。';
       if (order.type==='deliver'&&!BUILDINGS[target.type].dropoff?.includes(u.carrying)&&u.carried) return '這棟建築不收這種資源。';
     }
+    if(order.type==='trade'&&(u.blueprint.role!=='trader'||!target||target.kind!=='building'||target.type!=='market'||target.progress<1||target.team===u.team||this.entity(order.home)?.type!=='market'||this.entity(order.home)?.team!==u.team||this.entity(order.home)?.progress<1))return '商隊需要另一個勢力已完成的市集作為貿易目標。';
+    if(order.type==='attack'&&u.blueprint.role==='trader')return '商隊只能移動或貿易，無法攻擊。';
     if (order.type==='gather'&&order.target) {
       if (!target||target.kind!=='building'||target.type!=='farm'||target.team!==u.team||target.progress<1) return '請選擇已完成的我方農田。';
       if (!queued&&this.farmWorker(target,u.id)) return '這座農田已有村民耕作。';
@@ -450,17 +461,21 @@ export class World {
     for (const id of ids) { const u = this.entity(id); if (!u || u.kind !== 'unit' || u.garrison) continue;
       const reason=this.commandReason(u,order,queued);if(reason){error=reason;continue;}
       if(queued&&order&&(u.queued.length>=40||u.order?.type==='patrol'&&order.type==='patrol'&&u.order.points.length>=40)){error='指令佇列已滿。';continue;}accepted++;
+      if(!queued&&order?.type==='trade'&&u.order?.type==='trade'&&u.order.home===order.home&&u.order.target===order.target){if(u.failed){u.path=[];u.pathGoal=null;u.repath=0;u.failed=false;this.routeSearches?.delete(u.id);}continue;}
+      if(!queued&&!u.failed&&order?.target&&order.type==='deliver'&&u.order?.type==='deliver'&&u.order.target===order.target)continue;
       if(!queued&&!u.failed&&order?.target&&['attack','convert','heal','garrison'].includes(order.type)&&u.order?.type===order.type&&u.order.target===order.target){u.queued=[];continue;}
-      if (queued && u.order?.type === 'patrol' && order?.type === 'patrol') { if (u.order.points.length < 40) u.order.points.push({ x: order.x, y: order.y }); }
-      else if (queued && order && u.order) { if (u.queued.length < 40) u.queued.push(clone(order)); }
-      else { u.order = clone(order); u.queued = []; this.resetOrder(u); }
+      const task=order?.type==='deliver'&&order.resume===undefined?{...order,resume:clone(u.order?.type==='deliver'?u.order.resume||null:['gather','build','repair'].includes(u.order?.type)?u.order:null)}:order;
+      if (queued && u.order?.type === 'patrol' && task?.type === 'patrol') { if (u.order.points.length < 40) u.order.points.push({ x: task.x, y: task.y }); }
+      else if (queued && task && u.order) { if (u.queued.length < 40) u.queued.push(clone(task)); }
+      else { const pending=task?.type==='deliver'&&task.resume?u.queued:[];u.order = clone(task); u.queued = pending; this.resetOrder(u); }
     }
     return accepted?null:error;
   }
   resetOrder(u) {
     this.routeSearches?.delete(u.id);
     u.waitingDropoff = false;
-    u.waitingResources = false;
+    u.waitingResources = false;u.waitingPopulation=false;
+    u.working = null; u.moving = false; u.attackAnimation = 0;
     u.path = []; u.pathGoal = null; u.repath = 0; u.work = 0; u.autoTarget = null; u.combatOrigin = null; u.combatReturning = false; u.autoTimer = 0; u.failed = false;
     if (u.order?.type === 'patrol' && !u.order.points) { u.order.origin = { x: u.x, y: u.y }; u.order.points = [clone(u.order.origin), { x: u.order.x, y: u.order.y }]; u.order.pointIndex = 1; u.order.direction = 1; }
   }
@@ -589,16 +604,28 @@ export class World {
         }
       }
       if (search?.finished) this.routeSearches.delete(u.id);
-      if (path !== undefined) { const initial={x:Math.round(u.x),y:Math.round(u.y)}; u.path=path?.length===0&&!this.blocked(initial.x,initial.y)?[initial]:path||[];u.repath=path?0:1.5;u.failed=!path; }
+      if (path !== undefined) { const initial={x:Math.round(u.x),y:Math.round(u.y)}; u.path=path?.length===0&&!this.blocked(initial.x,initial.y)?[initial]:smoothPath(u,path,(x,y)=>this.blocked(x,y))||[];u.repath=path?0:1.5;u.failed=!path; }
       u.pathGoal = {x:goal.x,y:goal.y,radius};
     }
     if (!u.path.length) return false;
-    const p = u.path[0]; if (this.blocked(p.x, p.y)) { u.path = []; u.repath = 0; return false; }
-    const dd = distance(u, p), step = (goal === u.order && u.order.speed || u.blueprint.speed) * dt;
-    if (dd <= step) { u.x = p.x; u.y = p.y; u.path.shift(); } else { u.x += (p.x - u.x) * step / dd; u.y += (p.y - u.y) * step / dd; }
+    let step = (goal === u.order && u.order.speed || u.blueprint.speed) * dt;
+    while(u.path.length&&step>.00001) {
+      const p=u.path[0];if(this.blocked(p.x,p.y)){u.path=[];u.repath=0;return false;}
+      const dd=distance(u,p),travel=Math.min(dd,step);
+      const next=dd>.00001?{x:u.x+(p.x-u.x)*travel/dd,y:u.y+(p.y-u.y)*travel/dd}:p;
+      if(!segmentClear(u,next,(x,y)=>this.blocked(x,y))){u.path=[];u.repath=0;this.routeSearches?.delete(u.id);return false;}
+      if(dd>.00001){u.facing={x:p.x-u.x,y:p.y-u.y};u.moving=true;u.moveDistance=(u.moveDistance||0)+travel;}
+      if(dd<=step){u.x=p.x;u.y=p.y;u.path.shift();step-=dd;}
+      else{u.x+=(p.x-u.x)*step/dd;u.y+=(p.y-u.y)*step/dd;step=0;}
+    }
     return false;
   }
+  workPose(u, activity, point, dt) {
+    u.working=activity;u.workPhase=((u.workPhase||0)+dt)%1.05;
+    u.facing={x:point.x-u.x,y:point.y-u.y};u.moving=false;
+  }
   autoAllowed(u, target) {
+    if(u.team===0&&u.blueprint.hero&&!this.isVisible(target))return false;
     if (u.blueprint.role === 'healer' ? !this.isAlly(u.team, target.team) : !this.isEnemy(u.team, target.team)) return false;
     if (u.stance === 'stand' && goalDistance(u, target) > u.blueprint.range) return false;
     if (u.stance === 'defensive' && goalDistance(u.combatOrigin || u, target) > 3 + u.blueprint.range) return false;
@@ -641,18 +668,19 @@ export class World {
     return !(u.packLeft > 0);
   }
   tick(dt) {
-    if (this.result) return; this.time += dt; this.pathBudget = this.map.size > 128 ? 4 : 12; this.pathDeadline=performance.now()+3; this.updateSpatial();
+    if (this.result) return; this.time += dt; this.pathBudget = this.map.size > 128 ? 24 : 48; this.pathDeadline=performance.now()+3; this.updateSpatial();
     for (const u of this.units) if (u.hp > 0 && u.blueprint.hero) u.hp = Math.min(u.maxHp, u.hp + u.blueprint.regen * dt);
     for (const b of this.buildings) if (b.hp > 0) {
       b.cooldown = Math.max(0, b.cooldown - dt);
-      if (b.research) { b.research.left -= dt; if (b.research.left <= 0) { this.completeResearch(b.team, b.research.id); b.research = null; } }
+      if (b.research) { b.research.left -= dt * this.aiBoost(b.team).train; if (b.research.left <= 0) { this.completeResearch(b.team, b.research.id); b.research = null; } }
       if (!b.research && b.progress === 1 && b.queue.length && this.population(b.team) < this.capacity(b.team)) {
-        const q = b.queue[0]; q.left = Math.max(0, q.left - dt * (this.project.units.find(u => u.id === q.unitId)?.role === "worker" ? 1 : this.modifiers(b.team).trainSpeed));
-        if (q.left <= 0) { const exit = this.buildingExit(b); if (exit) { const u = this.spawn(q.unitId, b.team, exit); b.queue.shift(); if (u && b.rally) this.command([u.id], b.rally); } }
+        const q = b.queue[0]; q.left = Math.max(0, q.left - dt * this.aiBoost(b.team).train * (this.project.units.find(u => u.id === q.unitId)?.role === "worker" ? 1 : this.modifiers(b.team).trainSpeed));
+        if (q.left <= 0) { const exit = this.buildingExit(b); if (exit) { const u = this.spawn(q.unitId, b.team, exit); b.queue.shift(); if(u?.blueprint.role==='trader'){if(b.rally?.target&&this.entity(b.rally.target)?.type==='market')this.startTrade(u,b.rally.target);else this.startTrade(u);}else if (u && b.rally) this.command([u.id], b.rally); } }
       }
       const spec = BUILDINGS[b.type], m=this.modifiers(b.team), attack = b.type==='town'&&!b.garrisoned.length?0:(spec.attack||0)+(spec.attack?(m.rangedAttack||0):0),range=(spec.range||6)+(b.type==='town'?0:m.rangedRange||0); if (b.progress === 1 && attack) { const target = this.nearby(b, range, b.team); if (target) this.strike(b, target, attack, range, 2); }
     }
     for (const u of this.units) if (u.hp > 0 && !u.garrison) {
+      u.moving=false;u.working=null;u.waitingPopulation=false;
       u.cooldown = Math.max(0, u.cooldown - dt); u.attackAnimation = Math.max(0, u.attackAnimation - dt); u.hitAnimation = Math.max(0, u.hitAnimation - dt); u.autoTimer -= dt;
       const bp = u.blueprint;
       if (bp.canConvert) u.faith = Math.min(100, (u.faith ?? 100) + dt * 100 / 62);
@@ -668,7 +696,7 @@ export class World {
       if (u.autoTimer <= 0) {
         u.autoTimer = 0.6;
         if (eligible && u.stance !== 'passive' && !u.autoTarget) {
-          const t = bp.role === 'healer' ? this.nearby(u, 6, u.team, true, target => this.autoAllowed(u, target)) : bp.role !== 'worker' ? this.nearby(u, u.stance === 'stand' ? bp.range : 6, u.team, false, target => this.autoAllowed(u, target)) : null;
+          const t = bp.role === 'healer' ? this.nearby(u, 6, u.team, true, target => this.autoAllowed(u, target)) : !['worker','trader'].includes(bp.role) ? this.nearby(u, u.stance === 'stand' ? bp.range : bp.hero?Math.max(6,bp.range):6, u.team, false, target => this.autoAllowed(u, target)) : null;
           if (t) { u.autoTarget = t.id; u.combatOrigin ||= { x: u.x, y: u.y }; }
         }
       }
@@ -711,11 +739,20 @@ export class World {
         if(!farm&&u.failed&&u.repath<=dt&&this.pathBudget>0&&performance.now()<this.pathDeadline){this.pathBudget--;const next=this.gatherTarget(u,o,true);if(next&&(next.x!==o.x||next.y!==o.y)){u.order={type:'gather',...next,resource:type};this.resetOrder(u);continue;}}
         if (this.walk(u, point, farm ? .7 : 1.5, dt)) {
           if (u.carrying && u.carrying !== type) u.carried = 0;
-          const rate = farm ? .32 : {wood:.39,food:.33,gold:.38,stone:.36}[type], take = Math.min(capacity - u.carried, remaining, rate * dt * this.modifiers(u.team).gather[type]);
+          const rate = farm ? .32 : {wood:.39,food:.33,gold:.38,stone:.36}[type], take = Math.min(capacity - u.carried, remaining, rate * dt * this.modifiers(u.team).gather[type] * this.aiBoost(u.team).gather);
           if (farm) farm.foodRemaining -= take; else this.amounts[i] = remaining - take;
-          u.carried += take; u.carrying = type; u.attackAnimation = .55;
+          u.carried += take; u.carrying = type; if(take>0)this.workPose(u,type,point,dt);
           if (u.carried >= capacity - .001 || remaining - take <= .001) this.deliver(u, o);
           if (!farm && remaining - take <= .001) setTile(this.map, point.x, point.y, 'grass');
+        }
+      } else if(o.type==='trade'&&bp.role==='trader') {
+        const home=this.entity(o.home),target=this.entity(o.target);
+        if(!home||!target||home.type!=='market'||target.type!=='market'||home.progress<1||target.progress<1||home.team!==u.team||target.team===u.team){this.finish(u);continue;}
+        const destination=o.leg==='return'?home:target;
+        if(this.walk(u,destination,1.6,dt)){
+          if(o.leg==='return'){this.stocks[u.team].gold+=o.cargo||0;this.tradeEarned||=Array(this.teams).fill(0);this.tradeEarned[u.team]+=o.cargo||0;o.cargo=0;o.leg='outbound';if(u.queued.length){this.finish(u);continue;}}
+          else{o.cargo=Math.max(8,Math.round(distance(home,target)**2*.012*this.aiBoost(u.team).trade));o.leg='return';}
+          u.path=[];u.pathGoal=null;u.repath=0;
         }
       } else if (o.type === 'deliver') {
         const b = this.entity(o.target);
@@ -723,16 +760,16 @@ export class World {
           if (!this.deliver(u, o.resume, o.target)) { u.order = o.resume || {type:'waitDropoff',resume:null}; this.resetOrder(u); }
         } else if (this.walk(u, b, 1.6, dt)) { this.depositCarried(u); if (o.resume) { u.order = o.resume; this.resetOrder(u); } else this.finish(u); }
       } else if (o.type === 'waitDropoff') { u.work += dt; if (u.work >= 1) { u.work = 0; this.deliver(u, o.resume); } }
-      else if (o.type === 'build' && bp.role === 'worker') { const b = this.entity(o.target); if (!b || b.kind !== 'building' || b.team !== u.team) this.finish(u); else if (b.progress === 1) this.finishConstruction(u, b); else if (this.walk(u, b, 1.6, dt)) { const before = b.progress; b.progress = Math.min(1, b.progress + dt / BUILDINGS[b.type].time); b.hp = Math.min(b.maxHp, b.hp + (b.progress - before) * (b.maxHp - 40)); u.attackAnimation = .55; if (b.progress === 1) { if (b.team === 0) this.note(`${BUILDINGS[b.type].name}完工。`, b); this.finishConstruction(u, b); } } }
+      else if (o.type === 'build' && bp.role === 'worker') { const b = this.entity(o.target); if (!b || b.kind !== 'building' || b.team !== u.team) this.finish(u); else if (b.progress === 1) this.finishConstruction(u, b); else if (this.walk(u, b, 1.6, dt)) { const before = b.progress; b.progress = Math.min(1, b.progress + dt * this.aiBoost(u.team).build / BUILDINGS[b.type].time); b.hp = Math.min(b.maxHp, b.hp + (b.progress - before) * (b.maxHp - 40)); this.workPose(u,'build',b,dt); if (b.progress === 1) { if (b.team === 0) this.note(`${BUILDINGS[b.type].name}完工。`, b); this.finishConstruction(u, b); } } }
       else if (o.type === 'heal' && bp.role === 'healer') { const t = this.entity(o.target); if (!t || !this.isAlly(t.team, u.team)) this.finish(u); else if (this.walk(u, t, bp.range, dt) && u.cooldown <= 0) { t.hp = Math.min(t.maxHp, t.hp + bp.attack); u.cooldown = bp.cooldown; u.attackAnimation = .55; this.effects.push({ type: 'heal', x: t.x, y: t.y, age: 0 }); } }
       else if (o.type === 'patrol') { if (this.walk(u, o, .3, dt)) { const last = o.points.length - 1; if (o.pointIndex === last && distance(o.points[0], o.points[last]) < .3) o.pointIndex = 1; else { if (o.pointIndex === last) o.direction = -1; if (o.pointIndex === 0) o.direction = 1; o.pointIndex += o.direction; } Object.assign(o, o.points[o.pointIndex]); u.path = []; u.pathGoal = null; u.repath = 0; } }
       else if (o.type === 'follow' || o.type === 'guard') { const t = this.entity(o.target); if (!t || o.type === 'guard' && !this.isAlly(t.team, u.team) || t.id === u.id) this.finish(u); else this.walk(u, t, o.type === 'follow' ? 5 : 2.5, dt); }
-      else if (o.type === 'repair' && bp.role === 'worker') { const b = this.entity(o.target); if (!b || b.kind !== 'building' || b.team !== u.team || b.progress < 1 || b.hp >= b.maxHp) this.finish(u); else if (this.walk(u, b, 1.5, dt)) { u.waitingResources=this.stocks[u.team].wood<=0; if(u.waitingResources) continue; b.hp = Math.min(b.maxHp, b.hp + dt * 35); this.stocks[u.team].wood = Math.max(0, this.stocks[u.team].wood - dt * 2); u.attackAnimation = .55; } }
+      else if (o.type === 'repair' && bp.role === 'worker') { const b = this.entity(o.target); if (!b || b.kind !== 'building' || b.team !== u.team || b.progress < 1 || b.hp >= b.maxHp) this.finish(u); else if (this.walk(u, b, 1.5, dt)) { u.waitingResources=this.stocks[u.team].wood<=0; if(u.waitingResources) continue; b.hp = Math.min(b.maxHp, b.hp + dt * 35); this.stocks[u.team].wood = Math.max(0, this.stocks[u.team].wood - dt * 2); this.workPose(u,'repair',b,dt); } }
       else if (o.type === 'garrison') { const b = this.entity(o.target); if (!b || b.kind !== 'building' || b.progress < 1 || b.team !== u.team || !BUILDINGS[b.type].garrison || b.garrisoned.length >= BUILDINGS[b.type].garrison) this.finish(u); else if (this.walk(u, b, 1.5, dt)) { if (BUILDINGS[b.type].dropoff?.includes(u.carrying)) this.depositCarried(u); b.garrisoned.push(u.id); u.garrison = b.id; u.x = b.x; u.y = b.y; this.finish(u); } }
-      else if (o.type === 'convert' && bp.canConvert) { const t = this.entity(o.target); if (!t || !this.isEnemy(t.team, u.team) || t.kind !== 'unit' || t.blueprint.hero) this.finish(u); else if (!t.garrison && (u.faith ?? 100) >= 99.99 && this.walk(u, t, bp.range, dt)) { u.work += dt; u.attackAnimation = .55; if (u.work > (this.researched[t.team].has('faith') ? 12 : 6)) { t.team = u.team; this.command([t.id], null); u.faith = 0; this.finish(u); } } }
+      else if (o.type === 'convert' && bp.canConvert) { const t = this.entity(o.target); if (!t || !this.isEnemy(t.team, u.team) || t.kind !== 'unit' || t.blueprint.hero) this.finish(u); else if (!t.garrison && (u.faith ?? 100) >= 99.99 && this.walk(u, t, bp.range, dt)) { u.work += dt; u.attackAnimation = .55; if (u.work > (this.researched[t.team].has('faith') ? 12 : 6)) { if(this.population(u.team)>=this.populationLimit(u.team)){u.waitingPopulation=true;continue;}t.team = u.team; this.command([t.id], null); u.faith = 0; this.finish(u); } } }
     }
     this.aiTimer += dt;
-    if (this.project.rules.ai !== 'off' && this.aiTimer > (this.project.rules.ai === 'hard' ? 6 : 10) / (this.teams-1)) { this.aiTimer = 0; this.aiNextTeam=1+(this.aiNextTeam||0)%(this.teams-1); this.updateAI(this.aiNextTeam); }
+    if (this.project.rules.ai !== 'off' && this.aiTimer > .75 / (this.teams-1)) { this.aiTimer = 0; this.aiNextTeam=1+(this.aiNextTeam||0)%(this.teams-1); this.updateAI(this.aiNextTeam); }
     if (this.routeSearches) for (const id of this.routeSearches.keys()) if (!this.entity(id)) this.routeSearches.delete(id);
     for (const e of this.effects) e.age += dt; this.effects = this.effects.filter(e => e.age < 0.5).slice(-200);
     for (const u of this.units) if (u.hp <= 0 && !u.garrison) this.corpses.push({ ...u, age: 0 });
@@ -760,22 +797,15 @@ export class World {
     }
   }
   trade(team, resource, buy) { const price = buy ? 130 : 70; if (buy) { if (this.stocks[team].gold < price) return '黃金不足。'; this.stocks[team].gold -= price; this.stocks[team][resource] += 100; } else { if (this.stocks[team][resource] < 100) return '資源不足。'; this.stocks[team][resource] -= 100; this.stocks[team].gold += price; } return null; }
-  updateAI(team) {
-    const army = this.units.filter(u => u.team === team && u.hp > 0 && !u.garrison && u.blueprint.role !== 'worker'), workers = this.units.filter(u => u.team === team && u.hp > 0 && !u.garrison && u.blueprint.role === 'worker');
-    const town = this.buildings.find(b => b.team === team && b.type === 'town' && b.hp > 0), origin = town || workers[0] || this.buildings.find(b => b.team === team);
-    const cap = this.project.rules.enemyPopulation ?? 200, workerLimit = Math.min(24, Math.floor(cap / 3)), armyLimit = Math.max(0, cap - workerLimit);
-    if (town && workers.length < workerLimit && town.queue.length < 2) this.train(town.id, this.project.units.find(u => u.role === 'worker' && !u.hero).id);
-    for (const type of ['barracks', team === 1 ? 'archery' : 'stable', 'siege']) { const b = this.buildings.find(b => b.team === team && b.type === type && b.progress === 1); const soldiers = this.availableUnits(team, type); if (b && b.queue.length < 2 && soldiers.length && army.length < armyLimit) this.train(b.id, soldiers[Math.floor(this.time / 10) % soldiers.length].id); }
-    for (const u of workers) if (!u.order || u.failed) { const resource = ['food', 'wood', 'gold', 'stone'][u.id % 4], r = this.closestResource(u, resource); if (r) this.command([u.id], { type: 'gather', ...r }); else if (resource === 'food') { const farm = this.buildings.find(b => b.team === team && b.type === 'farm' && !this.farmWorker(b)); if (farm) this.command([u.id], { type: 'gather', target: farm.id }); } }
-    let worker = workers.find(u => u.order?.type !== 'build');
-    if (worker && origin && !town && !this.buildings.some(b => b.team === team && b.type === 'town')) { const p = this.nearestBuildingSite('town', origin, true, 1); if (p && !this.build([worker.id], 'town', p.x, p.y)) worker = null; }
-    if (worker && origin && this.capacity(team) < cap && this.capacity(team) - this.population(team) < 8 && !this.buildings.some(b => b.team === team && b.type === 'house' && b.progress < 1)) { const p = this.nearestBuildingSite('house', { x: origin.x + 9 + Math.floor(this.time / 40) % 7, y: origin.y + 3 }, true, 1); if (p && !this.build([worker.id], 'house', p.x, p.y)) worker = null; }
-    if (worker && origin) for (const type of ['barracks', 'lumber', 'mill', 'mining', 'archery', 'stable', 'blacksmith', 'market', 'siege', 'monastery', 'castle', 'university']) if ((BUILDINGS[type].age || 0) <= this.ages[team] && !this.buildings.some(b => b.team === team && b.type === type)) { const p = this.nearestBuildingSite(type, { x: origin.x - 10 + Math.floor(this.time / 15) % 20, y: origin.y - 9 }, true, 1); if (p) this.build([worker.id], type, p.x, p.y); break; }
-    for (const b of this.buildings.filter(b => b.team === team && b.progress === 1 && !b.research)) { const t = this.availableTech(team, b.type).find(t => this.canPay(team, t.cost)&&this.ageRequirements(team,t.id)); if (t) this.research(b.id, t.id); }
-    if (this.project.rules.ai !== 'calm' && this.time > (this.project.rules.ai === 'hard' ? 40 : 70) + team * 10 && (army.length >= 8 || !town || this.time > 180)) {
-      const targets = [...this.buildings, ...this.units].filter(e => e.hp > 0 && !e.garrison && this.isEnemy(team, e.team));
-      const focus = origin || army[0], target = focus && targets.sort((a,b)=>(a.type==='town'?-1000:0)+goalDistance(focus,a)-((b.type==='town'?-1000:0)+goalDistance(focus,b)))[0];
-      if (target) for (const u of army) if (!u.order || u.failed || !this.entity(u.order.target) && u.order.type === 'attack') this.command([u.id], {type:'attack',target:target.id});
-    }
+  tradePartner(team, home) {
+    return this.buildings.filter(b=>b.type==='market'&&b.team!==team&&b.hp>0&&b.progress===1)
+      .sort((a,b)=>Number(this.isAlly(team,b.team))-Number(this.isAlly(team,a.team))||distance(home,b)-distance(home,a))[0]||null;
   }
+  startTrade(u, targetId=null, queued=false) {
+    const home=this.buildings.filter(b=>b.team===u.team&&b.type==='market'&&b.hp>0&&b.progress===1).sort((a,b)=>distance(u,a)-distance(u,b))[0];
+    const target=targetId?this.entity(targetId):home&&this.tradePartner(u.team,home);
+    if(!home||!target)return '需要我方市集及另一個勢力已完成的市集。';
+    return this.command([u.id],{type:'trade',home:home.id,target:target.id,leg:'outbound',cargo:0},queued);
+  }
+  updateAI(team) { return updateAI(this,team); }
 }

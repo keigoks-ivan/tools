@@ -1,8 +1,9 @@
-import { UNIT_BALANCE, UPGRADE_BALANCE, TECH_BALANCE } from './balance.mjs?v=20261009i';
+import { UNIT_BALANCE, UPGRADE_BALANCE, TECH_BALANCE } from './balance.mjs?v=20261009j';
 export const CIVILIZATION = { name: '河谷王國', description: '西歐中世紀文明 · 四時代陸戰體系', ages: ['黑暗時代', '封建時代', '城堡時代', '帝王時代', '後帝王時代'] };
 const unit = (id, name, role, look, hp, attack, armor, range, speed, food, gold, building, age, extra = {}) => ({ id, name, role, look, hp, attack, armor, range, speed, cooldown: 1.5, food, gold, time: 12, color: '#669db6', image: '', building, age, ...extra });
 export const CIV_UNITS = [
   unit('villager', '村民', 'worker', 'worker', 40, 3, 0, 1.1, 2.1, 50, 0, 'town', 0, { hotkey: 'c', time: 10 }),
+  unit('trade-cart', '貿易商隊', 'trader', 'cart', 70, 0, 0, .5, 1, 0, 50, 'market', 1, {family:'economic',wood:100,time:50}),
   unit('swordsman', '民兵', 'melee', 'soldier', 45, 4, 0, 1.1, 2.2, 60, 20, 'barracks', 0, { family: 'infantry', hotkey: 's', upgrades: [{ tech: 'man-at-arms', name: '裝甲步兵', hp: 55, attack: 6, armor: 1 }, { tech: 'longsword', name: '長劍兵', hp: 70, attack: 9, armor: 1 }, { tech: 'twohand', name: '雙手劍兵', hp: 85, attack: 12, armor: 1 }, { tech: 'champion', name: '冠軍劍士', hp: 100, attack: 15, armor: 2 }] }),
   unit('spearman', '長槍兵', 'melee', 'soldier', 45, 3, 0, 1.5, 2.3, 35, 0, 'barracks', 1, { family: 'infantry', hotkey: 'e', bonus: 'cavalry', upgrades: [{ tech: 'pikeman', name: '重裝長槍兵', hp: 60, attack: 5, armor: 1 }, { tech: 'halberdier', name: '戟兵', hp: 70, attack: 6, armor: 2 }] }),
   unit('archer', '弓箭手', 'ranged', 'archer', 35, 4, 0, 4, 2.2, 0, 45, 'archery', 1, { family: 'archer', wood: 25, hotkey: 'a', upgrades: [{ tech: 'crossbow', name: '弩兵', hp: 45, attack: 5, range: 5 }, { tech: 'arbalest', name: '強弩兵', hp: 50, attack: 6, range: 5 }] }),

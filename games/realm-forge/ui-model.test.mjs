@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { World, defaultProject, generateMap, validateProject } from './core.mjs';
-import { actionReason, placementFeedback, productionStatus, selectionGroups, combatOrderHint } from './ui-model.mjs';
+import { actionReason, actionDescription, placementFeedback, productionStatus, selectionGroups, combatOrderHint, workerOrderHint } from './ui-model.mjs';
 
 const sandbox=()=>{const p=defaultProject();p.rules.ai='off';return new World(p);};
 test('new worlds use a compact rich map while saved custom sizes are retained',()=>{
@@ -48,13 +48,44 @@ test('watch towers stay locked until Feudal in both the command panel and actual
   assert.equal(actionReason(w,{id:'build:tower'},[]),'');assert.equal(w.build([worker.id],'tower',site.x,site.y),null);
 });
 test('production feedback allows queues at capacity and explains why progress waits',()=>{
-  const w=sandbox(),town=w.buildings.find(b=>b.team===0&&b.type==='town');
+  const p=defaultProject();p.rules.ai='off';p.rules.freePlayerPopulation=false;
+  const w=new World(p),town=w.buildings.find(b=>b.team===0&&b.type==='town');
   assert.equal(w.train(town.id,'villager'),null);const q=town.queue[0];q.left=q.time/2;
   assert.equal(productionStatus(w,town,q).percent,50);
   while(w.population(0)<w.capacity(0))w.spawn('villager',0,{x:town.x+4,y:town.y+4});
   assert.match(productionStatus(w,town,q).label,/先蓋住宅/);
   town.research={id:'loom',left:2,time:25};assert.match(productionStatus(w,town,q).label,/等待研發/);
   assert.equal(productionStatus(w,town,town.research,true).blocked,false);
+});
+test('full starting population distinguishes the actual limit from the optional housing rule',()=>{
+  const p=defaultProject();p.rules.ai='off';p.rules.population=50;
+  const w=new World(p),town=w.buildings.find(b=>b.team===0&&b.type==='town');
+  while(w.population(0)<50)w.spawn('villager',0,{x:town.x+4,y:town.y+4});
+  assert.equal(w.capacity(0),50);assert.equal(w.train(town.id,'villager'),null);
+  assert.equal(productionStatus(w,town,town.queue[0]).label,'已達人口上限');
+});
+test('worker feedback exposes load capacity and the work resumed after a manual deposit',()=>{
+  const w=sandbox(),worker=w.units.find(u=>u.team===0&&u.blueprint.role==='worker'),town=w.buildings.find(b=>b.team===0&&b.type==='town'),tree=w.closestResource(worker,'wood');
+  assert.equal(w.command([worker.id],{type:'gather',...tree}),null);
+  worker.carried=12.6;worker.carrying='wood';worker.working='wood';
+  const capacity=Math.round(10*w.modifiers(0).carry);
+  assert.match(workerOrderHint(w,worker),new RegExp(`砍樹 · 搬運 12 / ${capacity} 木材 · 滿載後自動卸貨`));
+  assert.equal(w.command([worker.id],{type:'deliver',target:town.id}),null);
+  assert.match(combatOrderHint(w,worker),/卸貨後繼續砍樹/);
+  assert.match(actionDescription(w,{id:'dropoff'}),/返回原本的採集、建造或修理/);
+  worker.failed=true;assert.equal(combatOrderHint(w,worker),'無法到達目標');
+});
+test('the trade action explains missing markets and becomes usable when another realm completes one',()=>{
+  const w=sandbox(),town=w.buildings.find(b=>b.team===0&&b.type==='town'),enemyTown=w.buildings.find(b=>b.team===1&&b.type==='town');
+  assert.match(actionReason(w,{id:'start-trade'},[]),/我方市集/);
+  const point=w.nearestBuildingSite('market',{x:town.x+7,y:town.y+5}),home=w.addBuilding('market',0,point.x,point.y,true);
+  assert.match(actionReason(w,{id:'start-trade'},[]),/另一個勢力/);
+  const targetPoint=w.nearestBuildingSite('market',{x:enemyTown.x+7,y:enemyTown.y+5}),target=w.addBuilding('market',1,targetPoint.x,targetPoint.y,true);
+  const cart=w.spawn('trade-cart',0,w.buildingExit(home));
+  assert.equal(actionReason(w,{id:'start-trade'},[cart]),'');
+  assert.equal(w.startTrade(cart,target.id),null);assert.match(combatOrderHint(w,cart),/前往貿易市集/);
+  cart.order.leg='return';cart.order.cargo=34;assert.match(combatOrderHint(w,cart),/運送 34 黃金/);
+  assert.equal(w.isMilitary(cart),false);
 });
 test('selection type filters keep teams and buildings distinct and include every selected id',()=>{
   const w=sandbox(),entities=[...w.units,...w.buildings],groups=selectionGroups(entities);

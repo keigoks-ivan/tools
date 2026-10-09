@@ -1,10 +1,10 @@
-import { CLASSIC_BUILD_KEYS } from './civilization.mjs?v=20261009i';
+import { CLASSIC_BUILD_KEYS } from './civilization.mjs?v=20261009j';
 
 export const GRID_BUILD_KEYS = {
   economy: { q: 'house', w: 'mill', e: 'mining', r: 'lumber', t: 'dock', a: 'farm', s: 'blacksmith', d: 'market', f: 'monastery', g: 'university', z: 'town', x: 'wonder' },
   military: { q: 'barracks', w: 'archery', e: 'stable', r: 'siege', a: 'outpost', d: 'wall', f: 'tower', z: 'gate', c: 'castle' },
 };
-const GRID_UNITS = { town: ['villager'], barracks: ['swordsman', 'spearman'], archery: ['archer', 'skirmisher'], stable: ['scout', 'knight'], siege: ['ram', 'mangonel'], monastery: ['monk'], castle: ['longbow', 'trebuchet'] };
+const GRID_UNITS = { town: ['villager'], market: ['trade-cart'], barracks: ['swordsman', 'spearman'], archery: ['archer', 'skirmisher'], stable: ['scout', 'knight'], siege: ['ram', 'mangonel'], monastery: ['monk'], castle: ['longbow', 'trebuchet'] };
 export const GO_TO_BUILDINGS = { h:'town', b:'barracks', a:'archery', l:'stable', k:'siege', v:'castle', y:'monastery', u:'university', m:'market', s:'blacksmith', i:'mill', z:'lumber', c:'mining' };
 export const GRID_COMMANDS = { g:'stop', q:'patrol', w:'guard', e:'follow', r:'attack-move', t:'garrison', a:'stance:aggressive', s:'stance:defensive', d:'stance:stand', f:'stance:passive', z:'formation:line', x:'formation:box', c:'formation:spread', v:'formation:flank' };
 const GRID_TECH = { feudal:'z', 'castle-age':'z', imperial:'z', loom:'a', wheelbarrow:'s', handcart:'s', 'double-axe':'q', bowsaw:'q', 'two-saw':'q', 'gold-mining':'q', 'gold-shaft':'q', 'stone-mining':'w', 'horse-collar':'q', 'heavy-plow':'q', 'crop-rotation':'q', 'man-at-arms':'a', longsword:'a', twohand:'a', champion:'a', pikeman:'s', halberdier:'s', crossbow:'a', arbalest:'a', 'elite-skirm':'s', 'light-cavalry':'a', hussar:'a', cavalier:'s', paladin:'s', 'capped-ram':'a', 'siege-ram':'a', onager:'s', 'siege-onager':'s', 'elite-longbow':'a', bloodlines:'z', husbandry:'x', masonry:'q', ballistics:'r', chemistry:'t', conscription:'c', faith:'s', sanctity:'a', fervor:'r' };
@@ -24,10 +24,12 @@ export function eventKey(event) {
 }
 export function orderHint(unit) {
   if (unit.garrison) return '駐軍中';
+  if(unit.waitingPopulation)return '人口已滿，等待名額後完成招降';
   if (unit.waitingResources) return '木材不足，等待修理';
   if (unit.waitingDropoff) return '等待卸貨點';
   if (unit.packLeft > 0) return `${unit.packed ? '打包' : '展開'}中 · ${Math.ceil(unit.packLeft)} 秒`;
   if (unit.failed) return '無法到達目標';
+  if (unit.order?.type==='trade') return `${unit.order.leg==='return'?`運送 ${unit.order.cargo||0} 黃金 · 返回我方市集`:'前往貿易市集'}${unit.queued?.length?` · 等待 ${unit.queued.length} 道指令`:''}`;
   const labels = { waitDropoff: '等待卸貨點', autoScout: '自動偵察', attackGround: '攻擊地面', move: '移動', attackMove: '攻擊移動', attack: '攻擊', gather: '採集', deliver: '運送資源', build: '建造', repair: '修理', heal: '治療', patrol: '巡邏', guard: '守衛', follow: '跟隨', garrison: '進駐', convert: '招降' };
   return `${labels[unit.order?.type] || '閒置'}${unit.queued?.length ? ` · 等待 ${unit.queued.length} 道指令` : ''}`;
 }

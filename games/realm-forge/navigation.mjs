@@ -1,3 +1,4 @@
+import { pathGoalTail } from './motion.mjs?v=20261009j';
 // Incremental fallback for routes whose detour leaves the local pathfinding window.
 // A search owns at most 50,000 visited cells and yields between small batches.
 export function createRouteSearch(start, goal, size, blocked, goalDistance, radius) {
@@ -14,10 +15,11 @@ export function createRouteSearch(start, goal, size, blocked, goalDistance, radi
       for(let count=0;heap.length&&done.size<50000&&count<limit;count++) {
         const {id}=pop();if(done.has(id))continue;done.add(id);
         const x=id%size,y=Math.floor(id/size),node=nodes.get(id);
-        if(goalDistance({x,y},goal)<=radius+.01) {
+        const tail=pathGoalTail({x,y},goal,size,blocked,radius,goalDistance);
+        if(tail) {
           const path=[];let cursor=id;
           while(cursor!==initial) {path.push({x:cursor%size,y:Math.floor(cursor/size)});cursor=nodes.get(cursor).previous;}
-          this.finished=true;return path.reverse();
+          this.finished=true;return [...path.reverse(),...tail];
         }
         for(const [dx,dy] of directions) {
           const nx=x+dx,ny=y+dy,next=ny*size+nx;

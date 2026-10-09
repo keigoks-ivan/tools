@@ -50,3 +50,13 @@ body[data-mode=play] #hud-minimap .minimap-wrap{margin-top:24px}body[data-mode=p
 body[data-mode=play] .map-controls #fit,body[data-mode=play] .map-controls #reset-view{width:auto;padding:4px 7px;font-size:10px}
 /* Clear enemy intent while preserving the normal map-selection cursor. */
 #map[data-command-target="attack"]{cursor:crosshair}.target-hint{position:absolute;left:14px;bottom:48px;z-index:5;max-width:calc(100% - 28px);padding:8px 12px;background:#271f1eef;color:#ffc4b3;border:1px solid #df826a8a;border-radius:4px;font-size:12px;pointer-events:none}.target-hint[hidden]{display:none}
+
+/* Optional empty-ground camera drag and a visible attack cursor. */
+.map-controls{align-items:center;max-width:calc(100% - 24px);white-space:nowrap}
+.map-controls #drag-view{width:auto;min-width:44px;flex:0 0 auto;padding:5px 9px;font-size:11px;white-space:nowrap;writing-mode:horizontal-tb;border-left:1px solid var(--line)}
+.map-controls #drag-view.active{color:#f3da92;background:#b897332b}
+.map-controls #drag-view[hidden]{display:none}
+#map[data-command-cursor="attack"]{cursor:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2232%22%20height%3D%2232%22%20viewBox%3D%220%200%2032%2032%22%3E%3Cpath%20d%3D%22M3%202L9%205L23%2019L19%2023L5%209Z%22%20fill%3D%22%23e6eff5%22%20stroke%3D%22%2318303c%22%20stroke-width%3D%221.5%22%2F%3E%3Cpath%20d%3D%22M4%204L20%2020%22%20stroke%3D%22%23fff%22%20stroke-width%3D%221.4%22%2F%3E%3Cpath%20d%3D%22M21%2021L28%2028%22%20stroke%3D%22%23704328%22%20stroke-width%3D%224%22%2F%3E%3Cpath%20d%3D%22M16%2025L25%2016%22%20stroke%3D%22%23e9c36c%22%20stroke-width%3D%223%22%2F%3E%3Ccircle%20cx%3D%2229%22%20cy%3D%2229%22%20r%3D%222%22%20fill%3D%22%23e9c36c%22%20stroke%3D%22%2349382c%22%2F%3E%3C%2Fsvg%3E") 3 2,crosshair}
+#map.camera-dragging{cursor:grabbing}
+#minimap{touch-action:none}
+@media(max-width:700px){body[data-mode=play] .map-controls #drag-view{min-width:0;font-size:9px;padding:5px 6px}}

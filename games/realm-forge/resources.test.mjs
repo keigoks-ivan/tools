@@ -1,6 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { World, defaultProject, validateProject, generateMap, tileType, RESOURCE, enrichMapResources, RICH_RESOURCE_AMOUNTS } from './core.mjs';
+import { upgradeDefaultUnits } from './project-upgrades.mjs';
+
+test('a fresh match gives the player 200,000 of each resource and every enemy 20,000',()=>{
+  const w=new World(defaultProject());
+  assert.deepEqual(w.stocks[0],{wood:200000,food:200000,gold:200000,stone:200000});
+  for(let team=1;team<w.teams;team++)assert.deepEqual(w.stocks[team],{wood:20000,food:20000,gold:20000,stone:20000});
+});
 
 test('four player starting stocks are independent of every AI kingdom',()=>{
   const p=defaultProject(); p.rules.playerStartingResources={wood:12345,food:0,gold:67890,stone:456}; p.rules.starting=3000;
@@ -15,6 +22,40 @@ test('old projects retain their player stocks and adopt the Definitive controls'
   const next=validateProject(p);
   assert.deepEqual(next.rules.playerStartingResources,{wood:750,food:750,gold:750,stone:750});
   assert.equal(next.rules.hotkeys,'definitive'); assert.deepEqual(next.map.resourceAmounts,RICH_RESOURCE_AMOUNTS);
+});
+test('legacy project economy upgrades once and later custom starting resources survive',()=>{
+  const p=defaultProject();delete p.rules.playerEconomyVersion;delete p.rules.aiEconomyVersion;
+  p.rules.starting=2000;p.rules.playerStartingResources={wood:1000,food:250000,gold:2000,stone:0};
+  const next=validateProject(p);
+  assert.equal(upgradeDefaultUnits(next),true);
+  assert.deepEqual(next.rules.playerStartingResources,{wood:200000,food:250000,gold:200000,stone:200000});
+  assert.equal(next.rules.starting,20000);
+  assert.equal(next.rules.playerEconomyVersion,1);assert.equal(next.rules.aiEconomyVersion,1);
+  next.rules.playerStartingResources={wood:12,food:0,gold:345,stone:678};next.rules.starting=750;
+  const reopened=validateProject(JSON.parse(JSON.stringify(next)));
+  assert.equal(upgradeDefaultUnits(reopened),false);
+  assert.deepEqual(reopened.rules.playerStartingResources,next.rules.playerStartingResources);
+  assert.equal(reopened.rules.starting,750);
+  assert.deepEqual(p.rules.playerStartingResources,{wood:1000,food:250000,gold:2000,stone:0});
+});
+test('versioned customized projects keep small stocks while accepting rich enemy settings',()=>{
+  const p=defaultProject();p.rules.playerStartingResources={wood:1,food:2,gold:3,stone:4};p.rules.starting=1000000;
+  const next=validateProject(p);upgradeDefaultUnits(next);
+  assert.deepEqual(next.rules.playerStartingResources,p.rules.playerStartingResources);
+  assert.equal(next.rules.starting,1000000);
+  const invalid=defaultProject();invalid.rules.starting=1000001;assert.throws(()=>validateProject(invalid));
+});
+test('legacy default enemy cap upgrades to 300 once and a later 200-person choice is preserved',()=>{
+  const p=defaultProject();delete p.rules.enemyPopulationVersion;p.rules.enemyPopulation=200;
+  const next=validateProject(p);assert.equal(upgradeDefaultUnits(next),true);
+  assert.equal(next.rules.enemyPopulation,300);assert.equal(next.rules.enemyPopulationVersion,1);
+  next.rules.enemyPopulation=200;
+  const reopened=validateProject(JSON.parse(JSON.stringify(next)));
+  assert.equal(upgradeDefaultUnits(reopened),false);assert.equal(reopened.rules.enemyPopulation,200);
+  for(const customCap of [50,500]){
+    const custom=defaultProject();delete custom.rules.enemyPopulationVersion;custom.rules.enemyPopulation=customCap;
+    upgradeDefaultUnits(custom);assert.equal(custom.rules.enemyPopulation,customCap);assert.equal(custom.rules.enemyPopulationVersion,1);
+  }
 });
 test('every generated kingdom has abundant deposits of all four resources',()=>{
   for(const size of [64,128,256,1280,2048]) for(const seed of [7,42]) {

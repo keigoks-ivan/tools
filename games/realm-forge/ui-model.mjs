@@ -1,14 +1,27 @@
-import { BUILDINGS, buildingDistance } from './core.mjs?v=20261009i';
-import { CIVILIZATION, TECHNOLOGIES } from './civilization.mjs?v=20261009i';
-import { orderHint } from './controls.mjs?v=20261009i';
+import { BUILDINGS, RESOURCE, buildingDistance } from './core.mjs?v=20261009j';
+import { CIVILIZATION, TECHNOLOGIES } from './civilization.mjs?v=20261009j';
+import { orderHint } from './controls.mjs?v=20261009j';
 
 export function combatOrderHint(world,unit) {
   if(unit.garrison||unit.failed||unit.packLeft>0||!unit.blueprint)return orderHint(unit);
+  if(unit.blueprint.role==='worker'&&unit.order?.type!=='attack')return workerOrderHint(world,unit);
   const target=world.entity(unit.order?.type==='attack'?unit.order.target:!unit.order||['attackMove','patrol','guard'].includes(unit.order.type)?unit.autoTarget:null);
   if(!target||!world.isEnemy(unit.team,target.team))return orderHint(unit);
   const d=target.kind==='building'?buildingDistance(unit,target):Math.hypot(unit.x-target.x,unit.y-target.y);
   const name=world.isVisible(target)?`${target.team?'AI '+target.team:'我方'} ${target.kind==='building'?BUILDINGS[target.type].name:target.blueprint.name}`:'敵方目標';
   return `${d>unit.blueprint.range+.03?'前往攻擊':'攻擊中'} ${name}${unit.queued.length?' · 等待 '+unit.queued.length+' 道指令':''}`;
+}
+
+export function workerOrderHint(world,unit) {
+  if(unit.garrison||unit.failed||unit.waitingResources||unit.waitingDropoff)return orderHint(unit);
+  const order=unit.order,job=order?.type==='deliver'||order?.type==='waitDropoff'?order.resume:order;
+  const resource=unit.carrying||job?.resource||(job?.type==='gather'?(job.target?'food':RESOURCE[world.tile(job.x,job.y)]):null);
+  const activity=job?.type==='gather'&&job.target?'耕作':{wood:'砍樹',food:'採集食物',gold:'採金',stone:'採石'}[resource]||'採集';
+  const capacity=Math.round(10*world.modifiers(unit.team).carry),load=resource?`搬運 ${Math.floor((unit.carried||0)+1e-6)} / ${capacity} ${RESOURCE_NAMES[resource]}`:'';
+  const pending=unit.queued?.length?` · 等待 ${unit.queued.length} 道指令`:'';
+  if(order?.type==='gather')return `${unit.moving?'前往':''}${activity}${load?' · '+load:''} · 滿載後自動卸貨${pending}`;
+  if(order?.type==='deliver')return `運送資源${load?' · '+load:''}${job?` · 卸貨後繼續${job.type==='gather'?activity:job.type==='build'?'建造':job.type==='repair'?'修理':'工作'}`:''}${pending}`;
+  return `${orderHint(unit)}${unit.carried>0&&load?' · '+load:''}`;
 }
 
 export const RESOURCE_NAMES = { wood:'木材', food:'食物', gold:'黃金', stone:'石材' };
@@ -44,6 +57,11 @@ export function actionReason(world, action, selected) {
   }
   if(action.id==='shelter'&&!world.shelterBuildings(0).length)return '沒有已完成且有空位的庇護建築';
   if(action.id==='repair'&&!world.buildings.some(b=>b.team===0&&b.hp>0&&b.progress===1&&b.hp<b.maxHp))return '目前沒有受損的我方建築';
+  if(action.id==='start-trade') {
+    const home=world.buildings.find(b=>b.team===0&&b.type==='market'&&b.hp>0&&b.progress===1);
+    if(!home)return '先完成我方市集';
+    if(!world.tradePartner(0,home))return '需要另一個勢力已完成的市集';
+  }
   return '';
 }
 export function placementFeedback(world, type, point) {
@@ -56,7 +74,7 @@ export function placementFeedback(world, type, point) {
 export function productionStatus(world, building, item, research=false) {
   const percent = Math.max(0,Math.min(100,Math.round((1-item.left/item.time)*100)));
   if (!research && building.research) return {percent,blocked:true,label:'等待研發完成'};
-  if (!research && world.population(building.team)>=world.capacity(building.team)) return {percent,blocked:true,label:world.capacity(building.team)>=world.project.rules.population?'已達人口上限':'人口不足 · 先蓋住宅'};
+  if (!research && world.population(building.team)>=world.capacity(building.team)) return {percent,blocked:true,label:world.capacity(building.team)>=(building.team===0?world.project.rules.population:world.project.rules.enemyPopulation)?'已達人口上限':'人口不足 · 先蓋住宅'};
   if (!research && item.left<=0) return {percent,blocked:true,label:'出口被擋住'};
   return {percent,blocked:false,label:`${percent}% · 剩 ${Math.ceil(item.left)} 秒`};
 }
@@ -73,7 +91,8 @@ export const COMMAND_DESCRIPTIONS = {
   'build-menu':'開啟經濟建築；按 Q 再按 Q 建住宅。', 'military-menu':'開啟軍事建築；先蓋兵營，再建馬廄或射箭場。',
   stop:'停止目前工作並清除排程。', patrol:'左鍵指定巡邏終點，沿途迎擊敵人。', guard:'左鍵選擇要保護的我方單位。', follow:'左鍵選擇跟隨的單位。',
   'attack-move':'左鍵指定目的地，沿途自動迎擊。', garrison:'左鍵選擇可進駐的我方建築。', repair:'左鍵選擇受損的我方建築；修理會消耗資源。',
-  dropoff:'將攜帶的資源送回最近的收集建築。', shelter:'尋找附近的我方建築避難。', 'auto-scout':'自動探索未知區域。', convert:'左鍵選擇敵方單位進行招降。',
+  dropoff:'將攜帶的資源送回最近的收集建築，卸貨後自動返回原本的採集、建造或修理工作。', shelter:'尋找附近的我方建築避難。', 'auto-scout':'自動探索未知區域。', convert:'左鍵選擇敵方單位進行招降。',
+  'start-trade':'往返我方市集與另一個勢力的市集賺取黃金。右鍵另一座市集可指定貿易路線。',
   heal:'左鍵選擇受傷的我方單位。', rally:'左鍵點地面或資源；新訓練的單位會前往這裡。', 'attack-ground':'左鍵指定砲擊位置；範圍攻擊也會傷到友軍。',
   pack:'打包後可移動，展開後可攻擊。', ungarrison:'派出目前選取建築內的駐軍。', 'town-bell':'召回村民避難；再次按下恢復工作。'
 };

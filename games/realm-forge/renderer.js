@@ -1,13 +1,13 @@
-import { clamp, tileType, BUILDINGS, buildingBounds } from './core.mjs?v=20261009i';
-import { TEAM_COLORS, TEAM_LIGHT, imageFor, unitArt, animationArt, worldArt, drawSprite, recoloredArt } from './art.mjs?v=20261009i';
+import { clamp, tileType, BUILDINGS, buildingBounds } from './core.mjs?v=20261009j';
+import { TEAM_COLORS, TEAM_LIGHT, imageFor, unitArt, animationArt, worldArt, drawSprite, recoloredArt } from './art.mjs?v=20261009j';
+import { animationPose, facingDirection } from './motion.mjs?v=20261009j';
 export function wheelZoomFactor(deltaY, deltaMode = 0, height = 600) {
   const pixels = deltaY * (deltaMode === 1 ? 16 : deltaMode === 2 ? height : 1);
   return Math.exp(-clamp(pixels, -80, 80) * .001);
 }
 export const COLORS = { grass: '#597c4b', water: '#396b70', forest: '#42633e', gold: '#67754c', stone: '#667458', food: '#68834f', sand: '#a19a6e', road: '#9d8f63' };
-export const SYMBOLS = { worker: '♟', soldier: '⚔', archer: '➶', knight: '♞', mage: '✦', beast: '♜', siege: '⚙', town: '♜', house: '⌂', barracks: '⚑', tower: '♖', mill: '✣', lumber: '♣', mining: '◆', farm: '▤', archery: '➶', stable: '♞', blacksmith: '⚒', market: '⚖', monastery: '✚', castle: '♜', university: '▥', wall: '▥', gate: 'Π', outpost: '⚑' };
-const directions = new WeakMap();
-const UNIT_HEIGHT = { worker: 32, soldier: 35, archer: 33, knight: 46, mage: 34, beast: 36, siege: 38 };
+export const SYMBOLS = { worker: '♟', soldier: '⚔', archer: '➶', knight: '♞', mage: '✦', beast: '♜', siege: '⚙', cart:'⚖', town: '♜', house: '⌂', barracks: '⚑', tower: '♖', mill: '✣', lumber: '♣', mining: '◆', farm: '▤', archery: '➶', stable: '♞', blacksmith: '⚒', market: '⚖', monastery: '✚', castle: '♜', university: '▥', wall: '▥', gate: 'Π', outpost: '⚑' };
+const UNIT_HEIGHT = { worker: 32, soldier: 35, archer: 33, knight: 46, mage: 34, beast: 36, siege: 38, cart:32 };
 const ATTACK_SCALE = { worker: 1.21, soldier: 1.18, archer: 1.02, knight: .86 };
 const SIEGE_HEIGHT = { ram: 27, mangonel: 30, trebuchet: 48, 'trebuchet-packed': 25 };
 const SIEGE_WIDTH = { ram: 42, mangonel: 41, trebuchet: 42, 'trebuchet-packed': 44 };
@@ -65,10 +65,16 @@ function buildingHit(b, px, py, scale, x, y) {
   return alphaHit(art, dx, dy, width, height, bottom, pad);
 }
 function facing(u) {
-  if (Number.isInteger(u.facing) && u.facing >= 0 && u.facing < 4) return u.facing;
-  const target = u.path?.[0], vector = typeof u.facing === 'object' ? u.facing : target ? { x: target.x - u.x, y: target.y - u.y } : null;
-  if (vector && Math.abs(vector.x) + Math.abs(vector.y) > .01) { const sx = vector.x - vector.y, sy = vector.x + vector.y; directions.set(u, sy >= 0 ? (sx >= 0 ? 0 : 1) : (sx < 0 ? 2 : 3)); }
-  return directions.get(u) ?? 0;
+  return facingDirection(u);
+}
+function drawGait(c, art, width, height, phase, mounted) {
+  const cut=mounted ? .8 : .66,iw=art.naturalWidth,ih=art.naturalHeight,top=ih*cut,step=Math.sin(phase*Math.PI*2);
+  c.drawImage(art,0,0,iw,top,-width/2,-height+1,width,height*cut);
+  for(let side=0;side<2;side++) {
+    const lift=Math.max(0,step*(side?1:-1))*(mounted?1.2:1.5),h=height*(1-cut)-lift;
+    c.drawImage(art,side*iw/2,top,iw/2,ih-top,-width/2+side*width/2,-height*(1-cut)+1,width/2,h);
+  }
+  return true;
 }
 export function unitHeight(u) {
   const bp = u.blueprint, engine = ['ram', 'mangonel', 'trebuchet'].includes(bp.engine || bp.id) ? bp.engine || bp.id : 'mangonel';
@@ -80,45 +86,57 @@ function polygon(c, points, fill, stroke = null) { c.beginPath(); points.forEach
 function ellipse(c, x, y, rx, ry, fill) { c.beginPath(); c.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2); c.fillStyle = fill; c.fill(); }
 function line(c, points, color, width = 1) { c.beginPath(); points.forEach(([x, y], i) => i ? c.lineTo(x, y) : c.moveTo(x, y)); c.strokeStyle = color; c.lineWidth = width; c.stroke(); }
 export function drawUnit(c, u, x, y, size = 1, time = 0, selected = false) {
-  const bp = u.blueprint, team = TEAM_COLORS[u.team % 4], moving = Boolean(u.path?.length), bob = moving ? Math.sin(time * 11 + u.id) * .35 : 0;
+  const bp = u.blueprint, pose=animationPose(u),team = TEAM_COLORS[u.team % 4], moving = pose.moving, bob = moving ? Math.sin(pose.phase*Math.PI*4)*.2 : 0;
   c.save(); c.translate(x, y); c.scale(size, size);
-  const mounted = bp.look === 'knight', heavy = mounted || bp.look === 'siege';
+  const mounted = bp.look === 'knight', heavy = mounted || ['siege','cart'].includes(bp.look);
   ellipse(c, 3, 1, heavy ? 11 : 5, heavy ? 3.5 : 2.2, '#18251845');
   ellipse(c, 0, .5, heavy ? 7 : 3, heavy ? 2 : 1.2, '#18251858');
   if (selected || bp.hero) { c.strokeStyle = bp.hero ? '#edd48ddd' : TEAM_LIGHT[u.team % 4]; c.lineWidth = bp.hero ? 1.5 : 1.3; c.beginPath(); c.ellipse(0, 0, heavy ? 16 : 10, heavy ? 6 : 4, 0, 0, Math.PI * 2); c.stroke(); }
   const direction = facing(u), custom = bp.image ? imageFor(bp.image) : null;
-  const attackPhase = u.attackAnimation > 0 ? Math.sin((1 - u.attackAnimation / .55) * Math.PI) : 0;
+  const attackPhase = pose.state==='attack'?Math.sin(pose.phase*Math.PI):0;
   if (attackPhase) c.translate((direction === 0 || direction === 3 ? 1 : -1) * attackPhase * 1.5, -attackPhase * .4);
   if (u.hitAnimation > 0) c.filter = 'brightness(1.7)';
   const engine = ['ram', 'mangonel', 'trebuchet'].includes(bp.engine || bp.id) ? bp.engine || bp.id : 'mangonel', machine = engine === 'trebuchet' && u.packed ? 'trebuchet-packed' : engine;
   const height = unitHeight(u);
   let drawn = custom ? drawSprite(c, custom, 0, 1 + bob, height * .82, height) : false;
   if (!drawn && !custom) {
-    const state = u.attackAnimation > 0 ? 'attack' : moving ? 'walk' : null;
+    const state = pose.state;
     const customColor = bp.customColor === true, rasterTeam = customColor ? 0 : u.team;
-    const frame = state === 'attack' ? clamp(Math.floor((.55 - u.attackAnimation) / .55 * 4), 0, 3) : Math.floor(time * 8 + u.id * .17) % 4;
-    const animated = state ? animationArt(bp.look, state, frame, rasterTeam) : null;
+    const frame = pose.frame;
+    const rearGait=state==='walk'&&direction>=2;
+    const animated = state&&!rearGait ? animationArt(bp.look, state, frame, rasterTeam) : null;
     const sprite = animated?.complete && animated.naturalWidth ? animated : unitArt(bp.look, direction, rasterTeam, engine, Boolean(u.packed));
     c.save(); if (bp.look === 'siege' || bp.look === 'mage' ? direction === 1 || direction === 3 : sprite === animated && (direction === 1 || direction === 2)) c.scale(-1, 1);
     const frameHeight = height * (sprite === animated && state === 'attack' ? ATTACK_SCALE[bp.look] ?? 1 : 1);
-    if (sprite?.naturalWidth) { const width = Math.min(frameHeight * sprite.naturalWidth / sprite.naturalHeight, bp.look === 'siege' ? SIEGE_WIDTH[machine] : Infinity); drawn = drawSprite(c, customColor ? recoloredArt(sprite, bp.color) : sprite, 0, 1 + bob, width, width * sprite.naturalHeight / sprite.naturalWidth); }
+    if (sprite?.naturalWidth) { const width = Math.min(frameHeight * sprite.naturalWidth / sprite.naturalHeight, bp.look === 'siege' ? SIEGE_WIDTH[machine] : Infinity),art=customColor ? recoloredArt(sprite, bp.color) : sprite; drawn=rearGait&&['worker','soldier','archer','knight'].includes(bp.look)?drawGait(c,art,width,height,pose.phase,mounted):drawSprite(c,art,0,1+bob,width,width*sprite.naturalHeight/sprite.naturalWidth); }
     c.restore();
   }
   if (!drawn) {
     c.save(); c.translate(0, bob); c.scale(height / (mounted ? 39 : bp.look === 'siege' ? 42 : 35), height / (mounted ? 39 : bp.look === 'siege' ? 42 : 35));
-    const leg = moving ? Math.sin(time * 13 + u.id) * 2.5 : 0;
+    const leg = moving ? Math.sin(pose.phase * Math.PI * 2) * 2.5 : 0;
     if (bp.look === 'knight') {
       ellipse(c, -1, -9, 11, 5, '#79634d'); polygon(c, [[7, -10], [8, -22], [13, -20], [16, -13], [11, -6]], '#887055');
       line(c, [[-7, -7], [-8 + leg, 0]], '#382e24', 3); line(c, [[5, -7], [7 - leg, 0]], '#382e24', 3);
       polygon(c, [[-5, -19], [4, -19], [5, -9], [-5, -9]], team); ellipse(c, 0, -24, 4, 5, '#ccd0c4'); line(c, [[4, -18], [14, -33]], '#b1aa88', 2);
     } else if (bp.look === 'beast') {
       ellipse(c, 0, -11, 10, 7, bp.color); ellipse(c, 8 + attackPhase * 3, -16 + attackPhase * 2, 5, 5, bp.color); line(c, [[-6, -7], [-8 + leg, 0]], '#39423a', 3); line(c, [[5, -6], [7 - leg, 0]], '#39423a', 3); polygon(c, [[10, -20], [14, -26], [13, -17]], '#ded9be');
+    } else if (bp.look === 'cart') {
+      c.save(); if(direction===1||direction===2)c.scale(-1,1);
+      ellipse(c, -10, -9, 7, 4, '#8d7151'); polygon(c,[[-15,-11],[-15,-18],[-20,-19],[-22,-13],[-16,-7]],'#9e805c');
+      line(c,[[-13,-6],[-15+leg,0]],'#4e3d29',2);line(c,[[-6,-6],[-7-leg,0]],'#4e3d29',2);
+      line(c,[[-5,-9],[8,-6]],'#b09162',2);polygon(c,[[0,-12],[12,-17],[21,-10],[9,-4]],'#bd965e','#5d452c');
+      polygon(c,[[0,-12],[0,-18],[11,-23],[12,-17]],team);polygon(c,[[12,-17],[11,-23],[21,-16],[21,-10]],'#927148');
+      ellipse(c,4,-3,4,4,'#3f3427');ellipse(c,18,-5,4,4,'#3f3427');
+      const wheel=(u.moveDistance||0)*5;
+      for(const [wx,wy] of [[4,-3],[18,-5]])line(c,[[wx-Math.cos(wheel)*3,wy-Math.sin(wheel)*3],[wx+Math.cos(wheel)*3,wy+Math.sin(wheel)*3]],'#d4b279');
+      if(u.order?.cargo>0){c.fillStyle='#e9c45d';c.fillRect(5,-22,7,4);}
+      c.restore();
     } else if (bp.look === 'siege') {
       polygon(c, [[-17, -10], [-4, -18], [18, -9], [4, 0]], '#926c3f', '#423729');
       line(c, [[-10, -9], [2, u.packed ? -16 : -32], [12, -9]], '#b69a67', 4);
       c.save(); c.translate(2, u.packed ? -15 : -29); c.rotate(attackPhase * 1.2); line(c, [[0, 0], [-11, -9]], '#b49a6d', 3); ellipse(c, -11, -9, 3, 2, '#433c29'); c.restore();
       ellipse(c, -11, -1, 5, 5, '#342d22'); ellipse(c, 10, 3, 5, 5, '#342d22'); ellipse(c, -11, -1, 2, 2, '#9d865c'); ellipse(c, 10, 3, 2, 2, '#9d865c');
-      const wheel = moving ? time * 8 : 0;
+      const wheel = (u.moveDistance||0)*5;
       for (const [wx, wy] of [[-11, -1], [10, 3]]) line(c, [[wx - Math.cos(wheel) * 4, wy - Math.sin(wheel) * 4], [wx + Math.cos(wheel) * 4, wy + Math.sin(wheel) * 4]], '#ad9365', 1);
       if (attackPhase > .6) ellipse(c, 15, -25, 3 + attackPhase * 2, 2, '#f2dca799');
       polygon(c, [[-9, -12], [-2, -16], [5, -11], [-2, -7]], team);
@@ -134,7 +152,10 @@ export function drawUnit(c, u, x, y, size = 1, time = 0, selected = false) {
     }
     c.restore();
   }
-  if (u.carried > 0) { c.fillStyle = '#bd9b62'; c.fillRect(-8, -16 + bob, 5, 6); }
+  if (u.carried > 0) {
+    c.fillStyle = u.carrying==='gold'?'#e3c063':u.carrying==='stone'?'#adb4ab':'#bd9b62';c.fillRect(-8,-16+bob,5,6);
+    if(u.carrying==='wood')line(c,[[-9,-14+bob],[-2,-14+bob]],'#704c29',2);
+  }
   if (bp.hero) { polygon(c, [[0, -height - 8], [1.4, -height - 5], [4, -height - 5], [2, -height - 3], [2.8, -height - 1], [0, -height - 2.5], [-2.8, -height - 1], [-2, -height - 3], [-4, -height - 5], [-1.4, -height - 5]], '#e9cb82', '#6e5027'); }
   if (u.hp > 0 && (selected || u.hp < u.maxHp)) health(c, u.hp, u.maxHp, 0, -height - (bp.hero ? 12 : 5), heavy ? 23 : 19, u.team);
   c.restore();
@@ -337,7 +358,7 @@ export class Renderer {
   heroHit(x, y, world) {
     for (const hero of editorHeroes(this.project, world).sort((a, b) => b.x + b.y - a.x - a.y)) {
       const p = this.screen(hero.x, hero.y);
-      if (this.zoom < .18 ? Math.hypot(x - p.x, y - p.y) <= 10 : Math.abs(x - p.x) < (['knight', 'siege'].includes(hero.blueprint.look) ? 14 : 9) * this.zoom + 4 && y <= p.y + 6 && y >= p.y - (unitHeight(hero) + 10) * this.zoom - 4) return hero;
+      if (this.zoom < .18 ? Math.hypot(x - p.x, y - p.y) <= 10 : Math.abs(x - p.x) < (['knight', 'siege', 'cart'].includes(hero.blueprint.look) ? 14 : 9) * this.zoom + 4 && y <= p.y + 6 && y >= p.y - (unitHeight(hero) + 10) * this.zoom - 4) return hero;
     }
     return null;
   }
@@ -360,7 +381,7 @@ export class Renderer {
     let best=null,depth=-Infinity;
     for (const e of [...world.units,...world.buildings]) { if(unitsOnly&&e.kind!=='unit'||enemiesOnly&&e.team===0||e.hp<=0||e.garrison||fog&&!world.isVisible(e)||e.x+e.y<=depth)continue;
       const p=this.screen(e.x,e.y);
-      const hit=this.zoom<.18?Math.hypot(x-p.x,y-p.y)<(e.kind==='building'?6:6):e.kind==='building'?buildingHit(e,p.x,p.y,this.zoom,x,y):Math.abs(x-p.x)<(['knight','siege'].includes(e.blueprint?.look)?21:14)*this.zoom+6&&y<p.y+7&&y>p.y-unitHeight(e)*this.zoom-6;
+      const hit=this.zoom<.18?Math.hypot(x-p.x,y-p.y)<(e.kind==='building'?6:6):e.kind==='building'?buildingHit(e,p.x,p.y,this.zoom,x,y):Math.abs(x-p.x)<(['knight','siege','cart'].includes(e.blueprint?.look)?21:14)*this.zoom+6&&y<p.y+7&&y>p.y-unitHeight(e)*this.zoom-6;
       if(hit){best=e;depth=e.x+e.y;}
     }
     return best;
@@ -385,7 +406,13 @@ export class Renderer {
       if(target.kind==='building')polygon(c,footprintPolygon(target.type).map(([x,y])=>[p.x+x*this.zoom,p.y+y*this.zoom]),'#d34c3410','#f28b78');
       else{c.beginPath();c.ellipse(p.x,p.y,16*this.zoom,6*this.zoom,0,0,Math.PI*2);c.stroke();}
       const height=target.kind==='building'?buildingSize(target).height-buildingSize(target).bottom:unitHeight(target);
-      health(c,target.hp,target.maxHp,p.x,p.y-(height+7)*this.zoom,Math.max(26,30*this.zoom),target.team);c.restore();
+      health(c,target.hp,target.maxHp,p.x,p.y-(height+7)*this.zoom,Math.max(26,30*this.zoom),target.team);
+      if(this.hoverAttack&&hovered?.id===target.id) {
+        c.translate(p.x,p.y-(height+7)*this.zoom-22);
+        polygon(c,[[-6,7],[-3,10],[10,-3],[11,-12],[3,-10]],'#eef0d5','#34413a');
+        line(c,[[-8,4],[0,12]],'#d5a860',3);line(c,[[-4,8],[-10,14]],'#825538',4);line(c,[[-2,4],[8,-7]],'#bbc8b5');
+      }
+      c.restore();
     }
   }
   render(project, world, ui, time) {

@@ -18,6 +18,11 @@ test('Definitive archer and skirmisher production matches the official grid', ()
   assert.equal(productionKey('definitive', CIV_UNITS.find(u => u.id === 'archer')), 'q');
   assert.equal(productionKey('definitive', CIV_UNITS.find(u => u.id === 'skirmisher')), 'w');
 });
+test('market Q trains a trade cart and trade orders show the returning gold cargo',()=>{
+  assert.equal(productionKey('definitive',CIV_UNITS.find(u=>u.id==='trade-cart')),'q');
+  assert.equal(orderHint({order:{type:'trade',leg:'outbound',cargo:0},queued:[]}),'前往貿易市集');
+  assert.equal(orderHint({order:{type:'trade',leg:'return',cargo:34},queued:[]}),'運送 34 黃金 · 返回我方市集');
+});
 test('order feedback distinguishes idle, queued and unreachable commands', () => {
   assert.equal(orderHint({ order: null, queued: [] }), '閒置');
   assert.equal(orderHint({ order: { type: 'build' }, queued: [{}, {}] }), '建造 · 等待 2 道指令');
