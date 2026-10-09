@@ -1,5 +1,5 @@
-import { clamp, tileType, BUILDINGS, buildingBounds } from './core.mjs?v=20261009c';
-import { TEAM_COLORS, TEAM_LIGHT, imageFor, unitArt, animationArt, worldArt, drawSprite, recoloredArt } from './art.mjs?v=20261009c';
+import { clamp, tileType, BUILDINGS, buildingBounds } from './core.mjs?v=20261009d';
+import { TEAM_COLORS, TEAM_LIGHT, imageFor, unitArt, animationArt, worldArt, drawSprite, recoloredArt } from './art.mjs?v=20261009d';
 export const COLORS = { grass: '#597c4b', water: '#396b70', forest: '#42633e', gold: '#67754c', stone: '#667458', food: '#68834f', sand: '#a19a6e', road: '#9d8f63' };
 export const SYMBOLS = { worker: '♟', soldier: '⚔', archer: '➶', knight: '♞', mage: '✦', beast: '♜', siege: '⚙', town: '♜', house: '⌂', barracks: '⚑', tower: '♖', mill: '✣', lumber: '♣', mining: '◆', farm: '▤', archery: '➶', stable: '♞', blacksmith: '⚒', market: '⚖', monastery: '✚', castle: '♜', university: '▥', wall: '▥', gate: 'Π', outpost: '⚑' };
 const directions = new WeakMap();
@@ -70,18 +70,18 @@ function unitHeight(u) {
   const bp = u.blueprint, engine = ['ram', 'mangonel', 'trebuchet'].includes(bp.engine || bp.id) ? bp.engine || bp.id : 'mangonel';
   return bp.look === 'siege' ? SIEGE_HEIGHT[engine === 'trebuchet' && u.packed ? 'trebuchet-packed' : engine] : UNIT_HEIGHT[bp.look] ?? 25;
 }
-function health(c, hp, maxHp, x, y, width, team) { c.fillStyle = '#17221b'; c.fillRect(x - width / 2, y, width, 3); c.fillStyle = TEAM_LIGHT[team % 3]; c.fillRect(x - width / 2, y, width * clamp(hp / maxHp, 0, 1), 3); }
+function health(c, hp, maxHp, x, y, width, team) { c.fillStyle = '#17221b'; c.fillRect(x - width / 2, y, width, 3); c.fillStyle = TEAM_LIGHT[team % 4]; c.fillRect(x - width / 2, y, width * clamp(hp / maxHp, 0, 1), 3); }
 const texture = (x, y) => { const a = Math.sin(x * 47.31 + y * 79.77) * 48345.3; return a - Math.floor(a); };
 function polygon(c, points, fill, stroke = null) { c.beginPath(); points.forEach(([x, y], i) => i ? c.lineTo(x, y) : c.moveTo(x, y)); c.closePath(); if (fill) { c.fillStyle = fill; c.fill(); } if (stroke) { c.strokeStyle = stroke; c.stroke(); } }
 function ellipse(c, x, y, rx, ry, fill) { c.beginPath(); c.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2); c.fillStyle = fill; c.fill(); }
 function line(c, points, color, width = 1) { c.beginPath(); points.forEach(([x, y], i) => i ? c.lineTo(x, y) : c.moveTo(x, y)); c.strokeStyle = color; c.lineWidth = width; c.stroke(); }
 export function drawUnit(c, u, x, y, size = 1, time = 0, selected = false) {
-  const bp = u.blueprint, team = TEAM_COLORS[u.team % 3], moving = Boolean(u.path?.length), bob = moving ? Math.sin(time * 11 + u.id) * .35 : 0;
+  const bp = u.blueprint, team = TEAM_COLORS[u.team % 4], moving = Boolean(u.path?.length), bob = moving ? Math.sin(time * 11 + u.id) * .35 : 0;
   c.save(); c.translate(x, y); c.scale(size, size);
   const mounted = bp.look === 'knight', heavy = mounted || bp.look === 'siege';
   ellipse(c, 3, 1, heavy ? 11 : 5, heavy ? 3.5 : 2.2, '#18251845');
   ellipse(c, 0, .5, heavy ? 7 : 3, heavy ? 2 : 1.2, '#18251858');
-  if (selected || bp.hero) { c.strokeStyle = bp.hero ? '#d5bc7dc9' : TEAM_LIGHT[u.team % 3] + 'bd'; c.lineWidth = bp.hero ? 1.1 : .8; c.beginPath(); c.ellipse(0, 0, heavy ? 12 : 6.5, heavy ? 5 : 3, 0, 0, Math.PI * 2); c.stroke(); }
+  if (selected || bp.hero) { c.strokeStyle = bp.hero ? '#d5bc7dc9' : TEAM_LIGHT[u.team % 4] + 'bd'; c.lineWidth = bp.hero ? 1.1 : .8; c.beginPath(); c.ellipse(0, 0, heavy ? 12 : 6.5, heavy ? 5 : 3, 0, 0, Math.PI * 2); c.stroke(); }
   const direction = facing(u), custom = bp.image ? imageFor(bp.image) : null;
   const attackPhase = u.attackAnimation > 0 ? Math.sin((1 - u.attackAnimation / .55) * Math.PI) : 0;
   if (attackPhase) c.translate((direction === 0 || direction === 3 ? 1 : -1) * attackPhase * 1.5, -attackPhase * .4);
@@ -154,16 +154,16 @@ function building(c, b, x, y, scale, selected) {
   const { art, width, height, bottom } = buildingSize(b);
   if (b.progress >= 1 && art?.complete && art.naturalWidth) {
     c.save(); c.translate(x, y); c.scale(scale, scale);
-    if (selected) polygon(c, footprintPolygon(b.type), '#a4d2ff14', TEAM_LIGHT[b.team % 3]);
+    if (selected) polygon(c, footprintPolygon(b.type), '#a4d2ff14', TEAM_LIGHT[b.team % 4]);
     drawSprite(c, art, 0, bottom, width, height);
-    if (b.type === 'farm') { line(c, [[25, 5], [25, -18]], '#91724d', 1.5); polygon(c, [[25, -18], [36, -14], [25, -10]], TEAM_COLORS[b.team % 3]); }
+    if (b.type === 'farm') { line(c, [[25, 5], [25, -18]], '#91724d', 1.5); polygon(c, [[25, -18], [36, -14], [25, -10]], TEAM_COLORS[b.team % 4]); }
     if (selected || b.hp < b.maxHp) health(c, b.hp, b.maxHp, 0, bottom - height - 6, Math.min(width * .7, 55), b.team);
     c.restore(); return;
   }
   vectorBuilding(c, b, x, y, scale, selected);
 }
 function vectorBuilding(c, b, x, y, scale, selected) {
-  const team = TEAM_COLORS[b.team % 3]; c.save(); c.translate(x, y); c.scale(scale, scale);
+  const team = TEAM_COLORS[b.team % 4]; c.save(); c.translate(x, y); c.scale(scale, scale);
   if (selected) polygon(c, footprintPolygon(b.type), '#85cab71b', '#9bd3b8');
   ellipse(c, 8, 4, 35, 12, '#16220e60');
   if (b.progress < 1) { const base = footprintPolygon(b.type); polygon(c, base, '#9b9671', '#c0b78e'); for (const [px, py] of base) line(c, [[px, py], [px, py - 35]], '#b8a078', 2); line(c, base.map(([px, py]) => [px, py - 35]), '#826741', 2); c.fillStyle = '#293828'; c.fillRect(-22, -48, 44, 4); c.fillStyle = '#d7b77b'; c.fillRect(-22, -48, 44 * b.progress, 4); c.restore(); return; }
@@ -177,7 +177,7 @@ function vectorBuilding(c, b, x, y, scale, selected) {
     line(c, [[0, -height - 10], [0, -height - 31]], '#bea470', 2); polygon(c, [[0, -height - 31], [16, -height - 28], [0, -height - 21]], team);
   } else {
     polygon(c, [[-width - 4, -height], [-7, -height - 17], [width + 5, -height - 4], [0, -height + width / 2 + 3]], team, '#213b2b');
-    polygon(c, [[-width - 4, -height], [-7, -height - 17], [0, -height + width / 2 + 3]], TEAM_LIGHT[b.team % 3]);
+    polygon(c, [[-width - 4, -height], [-7, -height - 17], [0, -height + width / 2 + 3]], TEAM_LIGHT[b.team % 4]);
     for (let i = 0; i < 4; i++) line(c, [[-width + i * 6, -height - i * 3], [-width + i * 6 + 21, -height + 9 - i * 2]], '#19332330');
     if (b.type === 'town') { polygon(c, [[-8, -height - 18], [1, -height - 23], [10, -height - 18], [1, -height - 13]], '#ceb98e'); polygon(c, [[-8, -height - 18], [-8, -height - 35], [1, -height - 30], [1, -height - 13]], '#c7c09f'); polygon(c, [[1, -height - 30], [10, -height - 35], [10, -height - 18], [1, -height - 13]], '#9aa18a'); polygon(c, [[-12, -height - 35], [1, -height - 44], [14, -height - 35], [1, -height - 28]], team); }
     if (b.type === 'barracks') { line(c, [[23, 0], [23, -48]], '#bfa172', 2); polygon(c, [[23, -48], [41, -45], [23, -34]], team); }
@@ -197,7 +197,7 @@ function vectorBuilding(c, b, x, y, scale, selected) {
   if (b.type === 'siege') { ellipse(c, 24, 5, 8, 8, '#82693e'); ellipse(c, 24, 5, 5, 5, '#2e392e'); line(c, [[-24, 2], [-13, -15], [1, 7]], '#9d8053', 3); }
   if (b.type === 'university') { polygon(c, [[-3, -46], [1, -53], [6, -46], [1, -42]], '#c9bc94'); line(c, [[1, -51], [1, -63]], '#ddc99e', 1.5); c.fillStyle = '#d5bd7c'; c.fillRect(-17, -18, 8, 7); c.fillRect(8, -22, 6, 7); }
   if (b.type === 'farm') { for (let i = 0; i < 6; i++) line(c, [[-28 + i * 5, 3 - i * 2], [-2 + i * 5, 15 - i * 2]], '#c1a45d', 3); }
-  if (selected || b.hp < b.maxHp) { c.fillStyle = '#19281c'; c.fillRect(-25, -height - 51, 50, 4); c.fillStyle = TEAM_LIGHT[b.team % 3]; c.fillRect(-25, -height - 51, 50 * clamp(b.hp / b.maxHp, 0, 1), 4); }
+  if (selected || b.hp < b.maxHp) { c.fillStyle = '#19281c'; c.fillRect(-25, -height - 51, 50, 4); c.fillStyle = TEAM_LIGHT[b.team % 4]; c.fillRect(-25, -height - 51, 50 * clamp(b.hp / b.maxHp, 0, 1), 4); }
   c.restore();
 }
 const grassImage = imageFor('assets/grass-v2.webp');
@@ -422,7 +422,7 @@ export class Renderer {
         for (let y = top; y <= bottom; y++) for (let x = left; x <= right; x++) { const key = `${x}:${y}`; if (!canopyBuckets.has(key)) canopyBuckets.set(key, []); canopyBuckets.get(key).push(e); }
       } }
       else if (e.corpse) { c.save(); c.globalAlpha = Math.max(0, 1 - (e.age ?? 0) / 2); c.translate(p.x, p.y); c.scale(this.zoom, this.zoom); c.rotate(-.65); drawUnit(c, e, 0, 0, 1, 0, false); c.restore(); }
-      else if (overview) { if (e.editorHero) heroMarker(c, p.x, p.y, ui.heroSelected === e.unitId, e.editorValid); else ellipse(c, p.x, p.y, e.kind === 'building' ? 3 : 1.8, e.kind === 'building' ? 2 : 1.2, TEAM_COLORS[e.team % 3]); }
+      else if (overview) { if (e.editorHero) heroMarker(c, p.x, p.y, ui.heroSelected === e.unitId, e.editorValid); else ellipse(c, p.x, p.y, e.kind === 'building' ? 3 : 1.8, e.kind === 'building' ? 2 : 1.2, TEAM_COLORS[e.team % 4]); }
       else if (e.kind === 'building') { building(c, e, p.x, p.y, this.zoom, ui.selected.has(e.id)); if (e.rally && ui.selected.has(e.id)) { const r = this.screen(e.rally.x ?? world.entity(e.rally.target)?.x ?? e.x, e.rally.y ?? world.entity(e.rally.target)?.y ?? e.y); line(c, [[p.x, p.y], [r.x, r.y]], '#d7b77b66', 1); line(c, [[r.x, r.y], [r.x, r.y - 20]], '#ddc494', 1.5); polygon(c, [[r.x, r.y - 20], [r.x + 12, r.y - 17], [r.x, r.y - 12]], '#d7b77b'); } }
       else { drawUnit(c, e, p.x, p.y, this.zoom, time, e.editorHero ? ui.heroSelected === e.unitId : ui.selected.has(e.id)); if (e.editorHero && !e.editorValid) { c.strokeStyle = '#e78576'; c.lineWidth = 1.5; c.beginPath(); c.ellipse(p.x, p.y, Math.max(9, 15 * this.zoom), Math.max(4, 6 * this.zoom), 0, 0, Math.PI * 2); c.stroke(); } }
     }
@@ -432,7 +432,7 @@ export class Renderer {
       if (candidates.some(e => { if (e.x + e.y <= u.x + u.y) return false; const q = this.screen(e.x, e.y), s = resourceSize(e); return alphaHit(s.art, (p.x - q.x) / this.zoom, (p.y - q.y) / this.zoom - head, s.width, s.height, s.bottom); })) selectedForestOutline(c, u, p, this.zoom);
     }
     if (placedHeroes) for (const hero of entities) heroLabel(c, hero, this.screen(hero.x, hero.y), ui.heroSelected === hero.unitId, overview);
-    if (ui.mode === 'map') for (let team = 0; team < map.spawns.length; team++) { const s = map.spawns[team], p = this.screen(s.x, s.y); ellipse(c, p.x, p.y, tw * 1.2, th * 1.2, TEAM_COLORS[team % 3] + '55'); line(c, [[p.x, p.y], [p.x, p.y - 42]], '#e0d8b5', 2); polygon(c, [[p.x, p.y - 42], [p.x + 24, p.y - 36], [p.x, p.y - 26]], TEAM_COLORS[team % 3]); c.fillStyle = '#eee4c8'; c.font = '11px sans-serif'; c.fillText(team ? 'AI ' + team + (project.rules.aiAlliance ? ' · 敵方聯盟' : ' 出生點') : '我方出生點', p.x + 6, p.y - 50); }
+    if (ui.mode === 'map') for (let team = 0; team < map.spawns.length; team++) { const s = map.spawns[team], p = this.screen(s.x, s.y); ellipse(c, p.x, p.y, tw * 1.2, th * 1.2, TEAM_COLORS[team % 4] + '55'); line(c, [[p.x, p.y], [p.x, p.y - 42]], '#e0d8b5', 2); polygon(c, [[p.x, p.y - 42], [p.x + 24, p.y - 36], [p.x, p.y - 26]], TEAM_COLORS[team % 4]); c.fillStyle = '#eee4c8'; c.font = '11px sans-serif'; c.fillText(team ? 'AI ' + team + (project.rules.aiAlliance ? ' · 敵方聯盟' : ' 出生點') : '我方出生點', p.x + 6, p.y - 50); }
     for (const e of world.effects) { if (fog && !world.isVisible(e) && !world.isVisible({ x: e.tx ?? e.x, y: e.ty ?? e.y })) continue; const p = this.screen(e.x, e.y), q = this.screen(e.tx ?? e.x, e.ty ?? e.y), alpha = 1 - e.age / .5; c.save(); c.globalAlpha = alpha;
       if (e.type === 'arrow') { const f = Math.min(1, e.age / .25); const x = p.x + (q.x - p.x) * f, y = p.y + (q.y - p.y) * f - 20 * this.zoom - Math.sin(f * Math.PI) * 20 * this.zoom; line(c, [[x - 7, y + 2], [x, y]], '#f3d19a', 1.5); }
       else if (e.type === 'heal') { c.fillStyle = '#a5e7ba'; c.font = '16px sans-serif'; c.fillText('+', p.x, p.y - 25 - e.age * 20); }
@@ -466,7 +466,7 @@ export class Renderer {
     for (let y = 0; y < samples; y++) for (let x = 0; x < samples; x++) { const tx = Math.min(n - 1, Math.floor((x + .5) * step)), ty = Math.min(n - 1, Math.floor((y + .5) * step)), i = ty * n + tx; g.fillStyle = fog && !world.explored[i] ? '#18261e' : COLORS[tileType(map, tx, ty)]; g.globalAlpha = fog && !world.visible[i] ? .6 : 1; g.fillRect(x, y, 1, 1); }
     c.save(); c.translate(width / 2, 4); c.transform(rx / samples, ry / samples, -rx / samples, ry / samples, 0, 0); c.drawImage(this.miniTerrain, 0, 0); c.restore();
     c.save(); c.beginPath(); c.moveTo(width / 2, 4); c.lineTo(width - 4, height / 2); c.lineTo(width / 2, height - 4); c.lineTo(4, height / 2); c.closePath(); c.clip();
-    for (const e of placedHeroes ?? [...world.units, ...world.buildings]) if (e.hp > 0 && !e.garrison && (!fog || world.isVisible(e))) { const [x, y] = point(e); if (e.editorHero) heroMarker(c, x, y, e.unitId === heroSelected, e.editorValid, 3.5); else { c.fillStyle = TEAM_COLORS[e.team % 3]; c.fillRect(x - 1, y - 1, e.kind === 'building' ? 3 : 2, e.kind === 'building' ? 3 : 2); } }
+    for (const e of placedHeroes ?? [...world.units, ...world.buildings]) if (e.hp > 0 && !e.garrison && (!fog || world.isVisible(e))) { const [x, y] = point(e); if (e.editorHero) heroMarker(c, x, y, e.unitId === heroSelected, e.editorValid, 3.5); else { c.fillStyle = TEAM_COLORS[e.team % 4]; c.fillRect(x - 1, y - 1, e.kind === 'building' ? 3 : 2, e.kind === 'building' ? 3 : 2); } }
     const corners = [[0, 0], [this.width, 0], [this.width, this.height], [0, this.height]].map(([x, y]) => this.world(x, y)); line(c, [...corners, corners[0]].map(point), '#f1dfb8a6'); c.restore();
     polygon(c, [[width / 2, 4], [width - 4, height / 2], [width / 2, height - 4], [4, height / 2]], null, '#b6a67b59');
   }

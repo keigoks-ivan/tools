@@ -1,5 +1,5 @@
-export const TEAM_COLORS = ['#559de3', '#d55645', '#e4bd50'];
-export const TEAM_LIGHT = ['#a4d2ff', '#ffb4a4', '#ffe09a'];
+export const TEAM_COLORS = ['#559de3', '#d55645', '#e4bd50', '#b778d7'];
+export const TEAM_LIGHT = ['#a4d2ff', '#ffb4a4', '#ffe09a', '#e2b9fa'];
 const cache = new Map();
 const colorCache = new Map(), sourcePixels = new WeakMap();
 const worldTeams = new Set(['town', 'barracks', 'house', 'tower', 'mill', 'archery', 'stable', 'castle', 'blacksmith', 'siege', 'monastery', 'market', 'university', 'lumber', 'mining', 'gate', 'outpost']);
@@ -13,6 +13,7 @@ export function imageFor(src) {
   return cache.get(src);
 }
 export function unitArt(look, direction, team, engine = 'mangonel', packed = false) {
+  if (team === 3) return recoloredArt(unitArt(look, direction, 0, engine, packed), TEAM_COLORS[3]);
   if (look === 'mage' || look === 'siege') {
     const machine = ['ram', 'mangonel', 'trebuchet'].includes(engine) ? engine : 'mangonel';
     const name = look === 'mage' ? 'monk' : machine === 'trebuchet' && packed ? 'trebuchet-packed' : machine;
@@ -22,10 +23,12 @@ export function unitArt(look, direction, team, engine = 'mangonel', packed = fal
   return imageFor(`assets/sprites/idle-v2-${look}-${direction}-${team % 3}.webp`);
 }
 export function animationArt(look, state, frame, team) {
+  if (team === 3) return recoloredArt(animationArt(look, state, frame, 0), TEAM_COLORS[3]);
   if (!unitLooks.has(look)) return null;
   return imageFor(`assets/sprites/${state}-v2-${look}-${frame}-${team % 3}.webp`);
 }
 export function worldArt(type, team = 0) {
+  if (team === 3 && worldTeams.has(type)) return recoloredArt(worldArt(type, 0), TEAM_COLORS[3]);
   if (!worldLooks.has(type)) return null;
   return imageFor(`assets/sprites/${environmentSprites[type] ?? type}${worldTeams.has(type) ? `-${team % 3}` : ''}.webp`);
 }
@@ -51,6 +54,7 @@ export function recoloredArt(img, color) {
     }
   }
   c.putImageData(pixels, 0, 0); colorCache.set(key, canvas);
+  canvas.complete = true; canvas.naturalWidth = canvas.width; canvas.naturalHeight = canvas.height;
   if (colorCache.size > 256) colorCache.delete(colorCache.keys().next().value);
   return canvas;
 }

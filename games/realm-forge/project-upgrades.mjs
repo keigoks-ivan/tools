@@ -1,7 +1,57 @@
-import { clone, generateMap, tileType } from './core.mjs?v=20261009c';
+import { clone, generateMap, tileType, setTile, enrichMapResources } from './core.mjs?v=20261009d';
+import { CIV_UNITS } from './civilization.mjs?v=20261009d';
+import { LEGACY_UNIT_STATS } from './balance.mjs?v=20261009d';
 
 const WALKABLE = new Set(['grass', 'road', 'sand']);
 const INITIAL_RESOURCES = [[-5, 0, 'forest'], [-5, 1, 'forest'], [-5, 2, 'forest'], [0, 6, 'food'], [1, 6, 'food'], [6, 0, 'gold'], [6, 1, 'stone']];
+
+export function upgradeDefaultUnits(project) {
+  let changed = false;
+  for (const u of project.units) {
+    const old = LEGACY_UNIT_STATS[u.id], current = CIV_UNITS.find(bp => bp.id === u.id);
+    if (old && current && Object.entries(old).every(([key, value]) => u[key] === value)) {
+      const { name, color, image, customColor } = u, upgrades = u.upgrades;
+      Object.assign(u, clone(current), { name, color, image, customColor });
+      if (upgrades?.length === 0) u.upgrades = [];
+      changed = true;
+    }
+  }
+  return changed;
+}
+
+export function preserveCustomStats(original, draft) {
+  if (original && ['name','hp','attack','armor','pierceArmor','range','speed','cooldown','time','food','wood','gold'].some(key => draft[key] !== (original[key] ?? (key === 'pierceArmor' ? original.armor : 0)))) draft.upgrades = [];
+  if (original && draft.color !== original.color) draft.customColor = true;
+  return draft;
+}
+
+export function setEnemyCount(project, count) {
+  if (!Number.isInteger(count) || count < 1 || count > 3) throw new Error('敵人數量可選 1–3 個。');
+  const map = clone(project.map);
+  if (map.spawns.length > count + 1) map.spawns.length = count + 1;
+  const n = map.size, near = Math.round(n * .22), far = Math.round(n * .78);
+  const targets = [{x:far,y:near},{x:far,y:far},{x:near,y:near},{x:near,y:far}];
+  while (map.spawns.length < count + 1) {
+    const target = targets.find(p => map.spawns.every(s => Math.hypot(p.x-s.x,p.y-s.y) >= 12));
+    if (!target) throw new Error('這張地圖沒有足夠空間放置更多敵人，請先放大地圖。');
+    map.spawns.push(target);
+    for (let dy=-12;dy<=12;dy++) for (let dx=-12;dx<=12;dx++) {
+      const x=target.x+dx,y=target.y+dy;
+      if (x>=1&&y>=1&&x<n-1&&y<n-1&&Math.hypot(dx,dy)<13) setTile(map,x,y,'grass');
+    }
+    // Connect an added kingdom to an existing kingdom without breaking water crossings.
+    const other=map.spawns.slice(0,-1).sort((a,b)=>Math.hypot(a.x-target.x,a.y-target.y)-Math.hypot(b.x-target.x,b.y-target.y))[0];
+    const steps=Math.max(Math.abs(other.x-target.x),Math.abs(other.y-target.y));
+    for(let i=0;i<=steps;i++) for(let offset=-1;offset<=1;offset++) {
+      const x=Math.round(target.x+(other.x-target.x)*i/(steps||1)),y=Math.round(target.y+(other.y-target.y)*i/(steps||1))+offset;
+      if(x>=1&&y>=1&&x<n-1&&y<n-1&&tileType(map,x,y)!=='water') setTile(map,x,y,'road');
+    }
+    enrichMapResources(map);
+  }
+  if (['雙河谷地','三王國河谷','四王國河谷'].includes(map.name)) map.name=['雙河谷地','三王國河谷','四王國河谷'][count-1];
+  map.enemyCount = count;
+  return map;
+}
 
 export function upgradeLegacyMap(project) {
   const map = project?.map, n = map?.size;

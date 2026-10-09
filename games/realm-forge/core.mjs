@@ -1,4 +1,6 @@
-import { CIV_UNITS, TECHNOLOGIES } from './civilization.mjs?v=20261009c';
+import { CIV_UNITS, TECHNOLOGIES } from './civilization.mjs?v=20261009d';
+import { BUILDING_BALANCE } from './balance.mjs?v=20261009d';
+import { createRouteSearch } from './navigation.mjs?v=20261009d';
 export const clone = value => JSON.parse(JSON.stringify(value));
 export const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 export const RICH_RESOURCE_AMOUNTS = { wood: 5000, food: 10000, gold: 20000, stone: 20000 };
@@ -26,6 +28,9 @@ export const BUILDINGS = {
   outpost: { name: '哨站', hp: 500, cost: { wood: 25, stone: 5 }, time: 8, pop: 0 },
 };
 BUILDINGS.town.dropoff = ['food', 'wood', 'gold', 'stone']; BUILDINGS.town.garrison = 15; BUILDINGS.tower.garrison = 5;
+for (const [id, stats] of Object.entries(BUILDING_BALANCE)) Object.assign(BUILDINGS[id], stats);
+BUILDINGS.farm.requires = 'mill'; BUILDINGS.archery.requires = 'barracks'; BUILDINGS.stable.requires = 'barracks'; BUILDINGS.siege.requires = 'blacksmith'; BUILDINGS.market.requires = 'mill';
+Object.assign(BUILDINGS.town, {attack:5,range:6}); Object.assign(BUILDINGS.tower,{attack:5,range:8}); Object.assign(BUILDINGS.castle,{attack:11,range:8});
 for (const [type, spec] of Object.entries(BUILDINGS)) spec.footprint = ['town', 'castle', 'university', 'market'].includes(type) ? [4, 4] : ['barracks', 'stable', 'archery', 'siege', 'monastery', 'blacksmith', 'farm'].includes(type) ? [3, 3] : ['house', 'mill', 'lumber', 'mining'].includes(type) ? [2, 2] : type === 'gate' ? [3, 1] : [1, 1];
 export function buildingBounds(type, inputX, inputY) {
   const [width, height] = BUILDINGS[type].footprint, x = Math.round(inputX) - (width % 2 ? 0 : .5), y = Math.round(inputY) - (height % 2 ? 0 : .5), minX = x - (width - 1) / 2, minY = y - (height - 1) / 2;
@@ -106,7 +111,7 @@ export function enrichMapResources(map) {
   return map;
 }
 export function defaultProject() {
-  return { version: 1, name: '我的王國', map: generateMap(), units: clone(CIV_UNITS), rules: { population: 500, starting: 2000, playerStartingResources: { wood: 2000, food: 2000, gold: 2000, stone: 2000 }, ai: 'normal', aiAlliance: true, startingBase: 'town', fog: true, speed: 1, startAge: 4, victory: 'conquest', hotkeys: 'definitive' } };
+  return { version: 1, name: '我的王國', map: generateMap(), units: clone(CIV_UNITS), rules: { population: 500, enemyPopulation: 200, starting: 2000, playerStartingResources: { wood: 2000, food: 2000, gold: 2000, stone: 2000 }, ai: 'normal', aiAlliance: true, startingBase: 'town', fog: true, speed: 1, startAge: 4, victory: 'conquest', hotkeys: 'definitive' } };
 }
 export function validateProject(value) {
   if (!value || value.version !== 1) throw new Error('這不是支援的王國工坊檔案。');
@@ -124,10 +129,11 @@ export function validateProject(value) {
     if (!['worker', 'melee', 'ranged', 'healer'].includes(u.role)) throw new Error('兵種角色不支援。');
     if (!['worker', 'soldier', 'archer', 'knight', 'mage', 'beast', 'siege'].includes(u.look)) throw new Error('兵種外觀不支援。');
     if (u.building && !['town', 'barracks', 'archery', 'stable', 'siege', 'monastery', 'castle'].includes(u.building) || u.age !== undefined && (!Number.isInteger(u.age) || u.age < 0 || u.age > 3) || u.wood !== undefined && (!Number.isFinite(u.wood) || u.wood < 0 || u.wood > 1000)) throw new Error('兵種生產設定不正確。');
-    if (u.upgrades && (!Array.isArray(u.upgrades) || u.upgrades.length > 10 || u.upgrades.some(v => !TECHNOLOGIES.some(t => t.id === v.tech) || Object.keys(v).some(k => !['tech', 'name', 'hp', 'attack', 'armor', 'range'].includes(k)) || ['hp', 'attack', 'armor', 'range'].some(k => v[k] !== undefined && (!Number.isFinite(v[k]) || v[k] < 0 || v[k] > 10000))))) throw new Error('兵種科技升級設定不正確。');
-    for (const [key, lo, hi] of [['hp', 10, 10000], ['attack', 0, 500], ['armor', 0, 100], ['range', 1, 12], ['speed', 0.5, 6], ['cooldown', 0.2, 5], ['food', 0, 1000], ['gold', 0, 1000], ['time', 1, 60]]) {
+    if (u.upgrades && (!Array.isArray(u.upgrades) || u.upgrades.length > 10 || u.upgrades.some(v => !TECHNOLOGIES.some(t => t.id === v.tech) || Object.keys(v).some(k => !['tech', 'name', 'hp', 'attack', 'armor', 'pierceArmor', 'range', 'minRange', 'speed', 'cooldown', 'time', 'food', 'gold', 'wood', 'attackType', 'buildingBonus', 'cavalryBonus', 'archerBonus'].includes(k)) || ['hp', 'attack', 'armor', 'pierceArmor', 'range'].some(k => v[k] !== undefined && (!Number.isFinite(v[k]) || v[k] < -5 || v[k] > 10000))))) throw new Error('兵種科技升級設定不正確。');
+    for (const [key, lo, hi] of [['hp', 10, 10000], ['attack', 0, 500], ['armor', -5, 100], ['range', .5, 20], ['speed', 0.5, 6], ['cooldown', 0.2, 15], ['food', 0, 1000], ['gold', 0, 1000], ['time', 1, 120]]) {
       if (!Number.isFinite(u[key]) || u[key] < lo || u[key] > hi) throw new Error(`「${u.name}」的 ${key} 超出範圍。`);
     }
+    if (u.pierceArmor !== undefined && (!Number.isFinite(u.pierceArmor) || u.pierceArmor < 0 || u.pierceArmor > 250)) throw new Error('遠程護甲必須介於 0–250。');
     if (u.regen !== undefined && (!Number.isFinite(u.regen) || u.regen < 0 || u.regen > 100)) throw new Error(`「${u.name}」的每秒回血必須介於 0–100。`); u.regen = u.regen ?? (u.hero ? 1 : 0);
     if (typeof u.name !== 'string' || !u.name.trim() || u.name.length > 24 || !/^#[a-f\d]{6}$/i.test(u.color)) throw new Error('兵種名稱或顏色不正確。');
     if (typeof u.image !== 'string' || (u.image && (!/^data:image\/(png|webp|jpeg);base64,[a-zA-Z0-9+/=]+$/.test(u.image) || u.image.length > 400000))) throw new Error('兵種圖片必須是小型 PNG、JPEG 或 WebP 圖片。');
@@ -141,8 +147,10 @@ export function validateProject(value) {
     }
   }
   if (!p.rules || !Number.isInteger(p.rules.population) || p.rules.population < 50 || p.rules.population > 2000 || !Number.isFinite(p.rules.starting) || p.rules.starting < 0 || p.rules.starting > 10000 || !['off', 'calm', 'normal', 'hard'].includes(p.rules.ai) || p.rules.aiAlliance !== undefined && typeof p.rules.aiAlliance !== 'boolean' || p.rules.startingBase !== undefined && !['town', 'full'].includes(p.rules.startingBase)) throw new Error('對戰規則不正確。');
+  if (p.rules.enemyPopulation !== undefined && (!Number.isInteger(p.rules.enemyPopulation) || p.rules.enemyPopulation < 50 || p.rules.enemyPopulation > 2000)) throw new Error('每個敵人的人口上限必須介於 50–2,000。');
+  p.rules.enemyPopulation ??= 200;
   p.rules.fog = Boolean(p.rules.fog); p.rules.speed = clamp(Number(p.rules.speed) || 1, 0.5, 2);
-  p.rules.aiAlliance = p.rules.aiAlliance ?? true;
+  p.rules.aiAlliance = true;
   p.rules.startingBase = p.rules.startingBase ?? 'town';
   p.rules.startAge = Number.isInteger(p.rules.startAge) ? clamp(p.rules.startAge, 0, 4) : 4;
   p.rules.victory = p.rules.victory ?? 'conquest';
@@ -168,6 +176,15 @@ const routeDistance = (p, points) => {
   return best;
 };
 export function findPath(start, goal, size, blocked, radius = 0) {
+  // Most gathering trips and open-ground orders need no search or grid allocation.
+  const direct = [], ax = clamp(Math.round(start.x),0,size-1), ay = clamp(Math.round(start.y),0,size-1), dx = Math.round(goal.x)-ax, dy = Math.round(goal.y)-ay, steps = Math.max(Math.abs(dx),Math.abs(dy));
+  let previous = {x:ax,y:ay};
+  if (goalDistance(previous,goal)<=radius+.01) return direct;
+  for(let i=1;i<=steps;i++) {
+    const point={x:Math.round(ax+dx*i/steps),y:Math.round(ay+dy*i/steps)};
+    if(point.x<0||point.y<0||point.x>=size||point.y>=size||blocked(point.x,point.y)||point.x!==previous.x&&point.y!==previous.y&&(blocked(point.x,previous.y)||blocked(previous.x,point.y)))break;
+    direct.push(point);if(goalDistance(point,goal)<=radius+.01)return direct;previous=point;
+  }
   if (size > 128) {
     const dx = goal.x - start.x, dy = goal.y - start.y, d = Math.hypot(dx, dy), fraction = Math.min(1, 45 / Math.max(1, d));
     let target = { x: Math.round(start.x + dx * fraction), y: Math.round(start.y + dy * fraction) };
@@ -272,23 +289,29 @@ export class World {
   effectiveBlueprint(id, team) {
     const original = this.project.units.find(u => u.id === id); if (!original) return null; const bp = clone(original); if (bp.hero) return bp;
     for (const upgrade of bp.upgrades || []) if (this.researched[team].has(upgrade.tech)) Object.assign(bp, upgrade);
-    const m = this.modifiers(team); bp.armor += m.armor || 0;
-    if (bp.role === 'worker') { bp.hp += m.workerHp || 0; bp.armor += m.workerArmor || 0; bp.speed *= m.workerSpeed; }
-    else if (bp.role === 'melee') bp.attack += m.meleeAttack || 0;
-    else if (bp.role === 'ranged') { bp.attack += m.rangedAttack || 0; if (bp.family !== 'siege') bp.range += m.rangedRange || 0; }
+    const m = this.modifiers(team); bp.pierceArmor ??= bp.armor;
+    if (bp.role === 'worker') { bp.hp += m.workerHp || 0; bp.armor += m.workerArmor || 0; bp.pierceArmor += m.workerPierceArmor || 0; bp.speed *= m.workerSpeed; }
+    else if (['infantry', 'cavalry'].includes(bp.family) || !bp.family && bp.role === 'melee') bp.attack += m.meleeAttack || 0;
+    else if (bp.family === 'archer' || !bp.family && bp.role === 'ranged') { bp.attack += m.rangedAttack || 0; bp.range += m.rangedRange || 0; }
+    if (['infantry', 'archer', 'cavalry'].includes(bp.family)) { bp.armor += m[`${bp.family}Armor`] || 0; bp.pierceArmor += m[`${bp.family}PierceArmor`] || 0; }
     if (bp.family === 'cavalry') { bp.hp += m.cavalryHp || 0; bp.speed *= m.cavalrySpeed; }
     if (bp.role === 'healer') { bp.hp += m.healerHp || 0; bp.speed *= m.healerSpeed; } return bp;
   }
   availableUnits(team, type) { return this.project.units.filter(u => (u.hero ? type === 'castle' && team === 0 : (u.building || (u.role === 'worker' ? 'town' : 'barracks')) === type) && (u.age || 0) <= this.ages[team]).map(u => this.effectiveBlueprint(u.id, team)); }
+  ageRequirements(team, techId) {
+    const types = new Set(this.buildings.filter(b=>b.team===team&&b.hp>0&&b.progress===1).map(b=>b.type));
+    const options = {feudal:['mill','lumber','mining','barracks'],'castle-age':['archery','stable','blacksmith','market'],imperial:['siege','monastery','university']}[techId];
+    return !options || techId==='imperial'&&types.has('castle') || options.filter(type=>types.has(type)).length>=2;
+  }
   availableTech(team, type) { return TECHNOLOGIES.filter(t => t.building === type && t.age <= this.ages[team] && !this.researched[team].has(t.id) && t.requires.every(id => this.researched[team].has(id)) && !this.buildings.some(b => b.team === team && b.research?.id === t.id)); }
-  research(buildingId, techId) { const b = this.entity(buildingId), tech = TECHNOLOGIES.find(t => t.id === techId); if (!b || b.kind !== 'building' || b.progress < 1 || b.research || !this.availableTech(b.team, b.type).some(t => t.id === techId)) return '目前無法研發這項科技。'; if (!this.canPay(b.team, tech.cost)) return '研發資源不足。'; this.pay(b.team, tech.cost); b.research = { id: techId, left: tech.time, time: tech.time }; return null; }
+  research(buildingId, techId) { const b = this.entity(buildingId), tech = TECHNOLOGIES.find(t => t.id === techId); if (!b || b.kind !== 'building' || b.progress < 1 || b.research || !this.availableTech(b.team, b.type).some(t => t.id === techId)) return '目前無法研發這項科技。'; if (!this.ageRequirements(b.team,techId)) return '升級時代需要先完成兩種當前時代建築；帝王時代也可使用一座城堡。'; if (!this.canPay(b.team, tech.cost)) return '研發資源不足。'; this.pay(b.team, tech.cost); b.research = { id: techId, left: tech.time, time: tech.time }; return null; }
   cancelResearch(buildingId) {
     const b = this.entity(buildingId), tech = TECHNOLOGIES.find(t => t.id === b?.research?.id);
     if (!b || !tech) return '目前沒有正在研發的科技。';
     for (const [resource, amount] of Object.entries(tech.cost)) this.stocks[b.team][resource] += amount;
     b.research = null; return null;
   }
-  completeResearch(team, id) { const tech = TECHNOLOGIES.find(t => t.id === id); this.researched[team].add(id); if (this.modCache) delete this.modCache[team]; if (tech.effect.age !== undefined) this.ages[team] = tech.effect.age; for (const u of this.units) if (u.team === team) { const ratio = u.hp / u.maxHp; u.blueprint = this.effectiveBlueprint(u.blueprint.id, team); u.maxHp = u.blueprint.hp; u.hp = Math.max(1, ratio * u.maxHp); } if (tech.effect.buildingHp) for (const b of this.buildings) if (b.team === team) { const ratio = b.hp / b.maxHp; b.maxHp = BUILDINGS[b.type].hp * this.modifiers(team).buildingHp; b.hp = ratio * b.maxHp; } if (team === 0) this.note(`${tech.name}研發完成。`); }
+  completeResearch(team, id) { const tech = TECHNOLOGIES.find(t => t.id === id); this.researched[team].add(id); if (this.modCache) delete this.modCache[team]; if (tech.effect.age !== undefined) this.ages[team] = tech.effect.age; for (const u of this.units) if (u.team === team) { const ratio = u.hp / u.maxHp; u.blueprint = this.effectiveBlueprint(u.blueprint.id, team); u.maxHp = u.blueprint.hp; u.hp = Math.max(1, ratio * u.maxHp); } if (tech.effect.buildingHp) for (const b of this.buildings) if (b.team === team) { const ratio = b.hp / b.maxHp; b.maxHp = Math.round(BUILDINGS[b.type].hp * this.modifiers(team).buildingHp); b.hp = ratio * b.maxHp; } if (team === 0) this.note(`${tech.name}研發完成。`); }
   blocked(x, y) { x = Math.round(x); y = Math.round(y); return !['grass', 'sand', 'road'].includes(this.tile(x, y)) || this.blockedCells.has(y * this.map.size + x); }
   canPlaceHero(unitId, x, y) { const n = this.map.size; return this.project.units.some(u => u.id === unitId && u.hero === true) && Number.isInteger(x) && Number.isInteger(y) && x >= 0 && y >= 0 && x < n && y < n && !this.blocked(x, y) && !this.occupiedCells.has(y * n + x) && !(this.map.heroPlacements || []).some(p => p.unitId !== unitId && p.x === x && p.y === y); }
   canPlaceBuilding(type, x, y) {
@@ -319,8 +342,8 @@ export class World {
   }
   addBuilding(type, team, x, y, complete = false) {
     if (!this.canPlaceBuilding(type, x, y)) return null; const bounds = buildingBounds(type, x, y); x = bounds.x; y = bounds.y;
-    const spec = BUILDINGS[type], hp = spec.hp * this.modifiers(team).buildingHp, b = { id: this.nextId++, kind: 'building', type, team, x, y, hp: complete ? hp : 40, maxHp: hp, progress: complete ? 1 : 0, queue: [], rally: null, cooldown: 0 };
-    b.garrisoned = []; if (type === 'farm') b.foodRemaining = 250 + (this.modifiers(team).farmFood || 0);
+    const spec = BUILDINGS[type], hp = Math.round(spec.hp * this.modifiers(team).buildingHp), b = { id: this.nextId++, kind: 'building', type, team, x, y, hp: complete ? hp : 40, maxHp: hp, progress: complete ? 1 : 0, queue: [], rally: null, cooldown: 0 };
+    b.garrisoned = []; if (type === 'farm') b.foodRemaining = 175 + (this.modifiers(team).farmFood || 0);
     this.buildings.push(b); this.entities.set(b.id, b);
     for (let by = bounds.minY; by <= bounds.maxY; by++) for (let bx = bounds.minX; bx <= bounds.maxX; bx++) { const key = by * this.map.size + bx; this.occupiedCells.set(key, b.id); if (type !== 'farm' && type !== 'gate') this.blockedCells.add(key); }
     if (type !== 'farm' && type !== 'gate') for (const u of this.units) if (!u.garrison && this.blocked(u.x, u.y)) { const p = this.nearestOpen(u); if (p) Object.assign(u, p); u.path = []; u.pathGoal = null; u.repath = 0; }
@@ -338,25 +361,26 @@ export class World {
     this.units.push(u); this.entities.set(u.id, u); return u;
   }
   population(team) { return this.units.filter(u => u.team === team && u.hp > 0).length; }
-  capacity(team) { return Math.min(this.project.rules.population, this.buildings.reduce((a, b) => a + (b.team === team && b.hp > 0 && b.progress === 1 ? BUILDINGS[b.type].pop : 0), 0)); }
+  capacity(team) { return Math.min(team === 0 ? this.project.rules.population : this.project.rules.enemyPopulation ?? 200, this.buildings.reduce((a, b) => a + (b.team === team && b.hp > 0 && b.progress === 1 ? BUILDINGS[b.type].pop : 0), 0)); }
   entity(id) { const e = this.entities.get(id); return e && e.hp > 0 ? e : null; }
   canPay(team, cost) { return Object.entries(cost).every(([k, v]) => this.stocks[team][k] >= v); }
   pay(team, cost) { for (const [k, v] of Object.entries(cost)) this.stocks[team][k] -= v; }
   train(buildingId, unitId) {
-    const b = this.entity(buildingId), bp = this.project.units.find(u => u.id === unitId);
+    const b = this.entity(buildingId), bp = b && this.effectiveBlueprint(unitId, b.team);
     if (!b || b.kind !== 'building' || b.progress < 1 || !bp || !this.availableUnits(b.team, b.type).some(u => u.id === unitId)) return '這棟建築無法訓練這個兵種。';
     if (bp.hero && (this.units.some(u => u.team === b.team && u.blueprint.id === bp.id) || this.buildings.some(x => x.team === b.team && x.queue.some(q => q.unitId === bp.id)))) return '這位英雄已在戰場或訓練中。';
     if (b.queue.length >= 30) return '訓練佇列已滿。';
     const cost = { food: bp.food, gold: bp.gold, wood: bp.wood || 0 }; if (!this.canPay(b.team, cost)) return '生產資源不足。';
-    this.pay(b.team, cost); b.queue.push({ unitId, left: bp.time, time: bp.time }); return null;
+    this.pay(b.team, cost); b.queue.push({ unitId, left: bp.time, time: bp.time, cost: clone(cost) }); return null;
   }
-  cancelTrain(buildingId, index) { const b = this.entity(buildingId); const q = b?.queue?.splice(index, 1)[0]; if (q) { const u = this.project.units.find(u => u.id === q.unitId); this.stocks[b.team].food += u.food; this.stocks[b.team].gold += u.gold; this.stocks[b.team].wood += u.wood || 0; } }
+  cancelTrain(buildingId, index) { const b = this.entity(buildingId); const q = b?.queue?.splice(index, 1)[0]; if (q) { const u = this.project.units.find(u => u.id === q.unitId), cost=q.cost||{food:u.food,gold:u.gold,wood:u.wood||0}; for(const [resource,amount] of Object.entries(cost)) this.stocks[b.team][resource]+=amount; } }
   build(workerIds, type, x, y, queued = false) {
     const worker = this.units.find(u => workerIds.includes(u.id) && u.blueprint.role === 'worker' && u.hp > 0 && !u.garrison);
     if (!worker) return '請先選取村民。';
     const spec = BUILDINGS[type]; if (!this.canPlaceBuilding(type, x, y)) return '建築的完整占地需要放在空地。';
     const bounds = buildingBounds(type, x, y); x = bounds.x; y = bounds.y;
     if ((spec.age || 0) > this.ages[worker.team]) return '需要先升至下一個時代。';
+    if (!this.buildRequirements(worker.team,type)) return `需要先完成${BUILDINGS[spec.requires].name}。`;
     if (!this.canPay(worker.team, spec.cost)) return '建造資源不足。';
     const target = { kind: 'building', type, x, y }; if (!['farm', 'gate'].includes(type) && !this.buildingExit(target) || !findPath(worker, target, this.map.size, (a, b) => this.blocked(a, b) || !['farm', 'gate'].includes(type) && a >= bounds.minX && a <= bounds.maxX && b >= bounds.minY && b <= bounds.maxY, 1.5)) return '村民無法到達這裡。';
     this.pay(worker.team, spec.cost); const b = this.addBuilding(type, worker.team, x, y);
@@ -372,19 +396,53 @@ export class World {
     }
     return {count,error:steps>40?'一次最多排程 41 段城牆。':null};
   }
+  buildRequirements(team, type) { const prerequisite=BUILDINGS[type]?.requires;return !prerequisite || this.buildings.some(b=>b.team===team&&b.type===prerequisite&&b.hp>0&&b.progress===1); }
   command(ids, order, queued = false) {
     if (order && ['move', 'attackMove', 'patrol'].includes(order.type) && this.blocked(order.x, order.y)) { const p = this.nearestOpen(order); if (!p) return; order = { ...order, ...p }; }
-    for (const id of ids) { const u = this.entity(id); if (!u || u.kind !== 'unit') continue;
+    for (const id of ids) { const u = this.entity(id); if (!u || u.kind !== 'unit' || u.garrison) continue;
       if (queued && u.order?.type === 'patrol' && order?.type === 'patrol') { if (u.order.points.length < 40) u.order.points.push({ x: order.x, y: order.y }); }
       else if (queued && order && u.order) { if (u.queued.length < 40) u.queued.push(clone(order)); }
       else { u.order = clone(order); u.queued = []; this.resetOrder(u); }
     }
   }
   resetOrder(u) {
+    this.routeSearches?.delete(u.id);
+    u.waitingDropoff = false;
     u.path = []; u.pathGoal = null; u.repath = 0; u.work = 0; u.autoTarget = null; u.combatOrigin = null; u.combatReturning = false; u.autoTimer = 0; u.failed = false;
     if (u.order?.type === 'patrol' && !u.order.points) { u.order.origin = { x: u.x, y: u.y }; u.order.points = [clone(u.order.origin), { x: u.order.x, y: u.order.y }]; u.order.pointIndex = 1; u.order.direction = 1; }
   }
   finish(u) { u.order = u.queued.shift() || null; this.resetOrder(u); }
+  nearestDropoff(u, type = u.carrying, exclude = null) {
+    const sites = this.buildings.filter(b => b.team === u.team && b.progress === 1 && b.hp > 0 && BUILDINGS[b.type].dropoff?.includes(type) && b.id !== exclude).sort((a, b) => goalDistance(u, a) - goalDistance(u, b));
+    return sites.find(b => findPath(u, b, this.map.size, (x, y) => this.blocked(x, y), 1.6)) || null;
+  }
+  deliver(u, resume = null, exclude = null) {
+    const site = this.nearestDropoff(u, u.carrying, exclude);
+    if (!site) {u.waitingDropoff = true;return false;}
+    u.order = { type: 'deliver', target: site.id, resume: clone(resume) }; this.resetOrder(u); return true;
+  }
+  deleteEntity(id) {
+    const e = this.entity(id); if (!e) return;
+    if (e.kind === 'building' && e.progress < 1) for (const [resource, amount] of Object.entries(BUILDINGS[e.type].cost)) this.stocks[e.team][resource] += amount * Math.max(0, 1 - e.progress);
+    e.hp = 0;
+  }
+  pack(u, packed) {
+    if (!u.blueprint.packed || u.packed === packed) return;
+    u.packFrom = u.packed; u.packed = packed; u.packLeft = u.blueprint.packTime || 5; u.path = []; u.pathGoal = null;
+  }
+  reformFormation(ids, formation) {
+    const units = ids.map(id => this.entity(id)).filter(u => u?.kind === 'unit' && !u.garrison);
+    if (units.length < 2) return;
+    const moving = units.filter(u => ['move', 'attackMove'].includes(u.order?.type));
+    const point = moving.length ? { x: moving.reduce((s, u) => s + u.order.x, 0) / moving.length, y: moving.reduce((s, u) => s + u.order.y, 0) / moving.length } : { x: units.reduce((s, u) => s + u.x, 0) / units.length, y: units.reduce((s, u) => s + u.y, 0) / units.length };
+    const orders = new Map(units.map(u => [u.id, { current: clone(u.order), queue: clone(u.queued) }]));
+    this.moveFormation(ids, point, formation, false, moving.some(u => u.order.type === 'attackMove'));
+    for (const u of units) {
+      const previous = orders.get(u.id); u.formation = formation;
+      if (previous.current && !['move', 'attackMove'].includes(previous.current.type)) { u.order = previous.current; this.resetOrder(u); }
+      u.queued = previous.queue;
+    }
+  }
   farmWorker(farm, exceptId = null) {
     return this.units.find(u => u.id !== exceptId && u.hp > 0 && !u.garrison && u.team === farm.team && (u.order?.type === 'gather' && u.order.target === farm.id || u.order?.type === 'deliver' && u.order.resume?.target === farm.id));
   }
@@ -462,9 +520,24 @@ export class World {
   isVisible(e) { return e.team === 0 || Boolean(this.visible[clamp(Math.round(e.y), 0, this.map.size - 1) * this.map.size + clamp(Math.round(e.x), 0, this.map.size - 1)]); }
   walk(u, goal, radius, dt) {
     if (goalDistance(u, goal) <= radius + 0.03) return true;
-    if (u.pathGoal && (distance(u.pathGoal, goal) > .75 || u.pathGoal.radius !== radius)) { u.path = []; u.repath = 0; }
+    if (u.pathGoal && (distance(u.pathGoal, goal) > (distance(u,goal)>64?8:.75) || u.pathGoal.radius !== radius)) { u.path = []; u.repath = 0; this.routeSearches?.delete(u.id); }
     u.repath -= dt;
-    if (!u.path.length && u.repath <= 0 && this.pathBudget > 0) { this.pathBudget--; const path = findPath(u, goal, this.map.size, (x, y) => this.blocked(x, y), radius), initial = { x: Math.round(u.x), y: Math.round(u.y) }; u.path = path?.length === 0 && !this.blocked(initial.x, initial.y) ? [initial] : path || []; u.pathGoal = { x: goal.x, y: goal.y, radius }; u.repath = path ? 0 : 1.5; if (!path) u.failed = true; else u.failed = false; }
+    if (!u.path.length && u.repath <= 0 && this.pathBudget > 0 && performance.now() < this.pathDeadline) {
+      this.pathBudget--;
+      this.routeSearches ||= new Map();
+      let search = this.routeSearches.get(u.id), path;
+      if (search) path = search.step();
+      else {
+        path = findPath(u, goal, this.map.size, (x,y) => this.blocked(x,y), radius);
+        if (!path && this.map.size > 128 && this.routeSearches.size < 8) {
+          search = createRouteSearch(u, goal, this.map.size, (x,y) => this.blocked(x,y), goalDistance, radius);
+          this.routeSearches.set(u.id, search); path = search.step();
+        }
+      }
+      if (search?.finished) this.routeSearches.delete(u.id);
+      if (path !== undefined) { const initial={x:Math.round(u.x),y:Math.round(u.y)}; u.path=path?.length===0&&!this.blocked(initial.x,initial.y)?[initial]:path||[];u.repath=path?0:1.5;u.failed=!path; }
+      u.pathGoal = {x:goal.x,y:goal.y,radius};
+    }
     if (!u.path.length) return false;
     const p = u.path[0]; if (this.blocked(p.x, p.y)) { u.path = []; u.repath = 0; return false; }
     const dd = distance(u, p), step = (goal === u.order && u.order.speed || u.blueprint.speed) * dt;
@@ -482,31 +555,54 @@ export class World {
   strike(e, target, attack, range, cooldown) {
     if (e.cooldown > 0 || !this.isEnemy(e.team, target.team)) return;
     if (e.blueprint?.role === 'ranged' && e.blueprint.family !== 'siege' && target.path?.length && !this.modifiers(e.team).accuracy && ((e.shots = (e.shots || 0) + 1) % 3 === 0)) { e.cooldown = cooldown; e.attackAnimation = .55; e.facing = { x: target.x - e.x, y: target.y - e.y }; this.effects.push({ type: 'arrow', x: e.x, y: e.y, tx: target.x + .8, ty: target.y, age: 0, team: e.team }); return; }
-    const armor = target.blueprint?.armor || 0, bp = e.blueprint; let damage = Math.max(1, attack - armor);
-    if (bp?.bonus === 'building' && target.kind === 'building') damage += bp.id === 'trebuchet' ? 180 : 45;
-    if (bp?.bonus === 'cavalry' && target.blueprint?.family === 'cavalry') damage += 25;
-    if (bp?.bonus === 'archer' && target.blueprint?.family === 'archer') damage += 8;
+    const bp = e.blueprint, damage = this.damage(e, target, attack) * (e.kind === 'building' ? this.projectileCount(e) : 1);
     target.hp -= damage; target.hitAnimation = .25; e.cooldown = cooldown; e.attackAnimation = .55;
     e.facing = { x: target.x - e.x, y: target.y - e.y };
     if (target.team === 0 && this.time - (this.lastAlert ?? -10) > 10) { this.lastAlert = this.time; this.note('我方遭到攻擊。Home 可移到戰鬥位置。', target); }
-    if (bp?.splash) for (const u of this.units) if (this.isEnemy(u.team, e.team) && u.id !== target.id && distance(u, target) < bp.splash) { u.hp -= damage * .45; u.hitAnimation = .25; }
+    if (bp?.splash) for (const u of this.units) if (!u.garrison && u.hp > 0 && u.id !== e.id && u.id !== target.id && distance(u, target) < bp.splash) { u.hp -= this.damage(e, u, attack) * (1 - distance(u, target) / bp.splash); u.hitAnimation = .25; }
     this.effects.push({ type: bp?.family === 'siege' && range > 2 ? 'rock' : range > 2 ? 'arrow' : 'hit', x: e.x, y: e.y, tx: target.x, ty: target.y, age: 0, team: e.team });
   }
+  projectileCount(b) { return Math.min(b.type==='castle'?10:b.type==='town'?10:5,(b.type==='castle'?5:1)+Math.floor((b.garrisoned?.length||0)/2)); }
+  damage(attacker, target, attack = attacker.blueprint?.attack || 0) {
+    const bp = attacker.blueprint, defense = target.blueprint || BUILDINGS[target.type], pierce = (bp?.attackType || (bp?.role === 'ranged' && bp.family !== 'siege' ? 'pierce' : 'melee')) === 'pierce' || attacker.kind === 'building';
+    const armor = pierce && target.blueprint?.packed && (target.packLeft > 0 ? target.packFrom : target.packed) ? 150 : pierce ? defense?.pierceArmor ?? defense?.armor ?? 0 : defense?.armor ?? 0;
+    let damage = Math.max(1, attack - armor);
+    if (target.kind === 'building') damage += bp?.buildingBonus ?? (bp?.bonus === 'building' ? 45 : 0);
+    if (target.blueprint?.family === 'cavalry') damage += bp?.cavalryBonus ?? (bp?.bonus === 'cavalry' ? 25 : 0);
+    if (target.blueprint?.family === 'archer') damage += bp?.archerBonus ?? (bp?.bonus === 'archer' ? 8 : 0);
+    return damage;
+  }
+  attackReady(u, target, dt) {
+    const bp = u.blueprint, d = goalDistance(u, target);
+    if (d < (bp.minRange || 0)) {
+      if (u.stance !== 'stand') { const length = distance(u, target) || 1, retreat = this.nearestOpen({ x: u.x + (u.x - target.x || 1) / length * (bp.minRange + 1), y: u.y + (u.y - target.y) / length * (bp.minRange + 1) }); if (retreat) this.walk(u, retreat, .2, dt); }
+      return false;
+    }
+    if (d > bp.range) {
+      if (u.stance === 'stand' && u.autoTarget) return false;
+      if (bp.packed && !u.packed) { this.pack(u, true); return false; }
+      return this.walk(u, target, bp.range, dt);
+    }
+    if (bp.packed && u.packed) { this.pack(u, false); return false; }
+    return !(u.packLeft > 0);
+  }
   tick(dt) {
-    if (this.result) return; this.time += dt; this.pathBudget = this.map.size > 128 ? 4 : 12; this.updateSpatial();
+    if (this.result) return; this.time += dt; this.pathBudget = this.map.size > 128 ? 4 : 12; this.pathDeadline=performance.now()+3; this.updateSpatial();
     for (const u of this.units) if (u.hp > 0 && u.blueprint.hero) u.hp = Math.min(u.maxHp, u.hp + u.blueprint.regen * dt);
     for (const b of this.buildings) if (b.hp > 0) {
       b.cooldown = Math.max(0, b.cooldown - dt);
       if (b.research) { b.research.left -= dt; if (b.research.left <= 0) { this.completeResearch(b.team, b.research.id); b.research = null; } }
       if (!b.research && b.progress === 1 && b.queue.length && this.population(b.team) < this.capacity(b.team)) {
-        const q = b.queue[0]; q.left = Math.max(0, q.left - dt * this.modifiers(b.team).trainSpeed);
+        const q = b.queue[0]; q.left = Math.max(0, q.left - dt * (this.project.units.find(u => u.id === q.unitId)?.role === "worker" ? 1 : this.modifiers(b.team).trainSpeed));
         if (q.left <= 0) { const exit = this.buildingExit(b); if (exit) { const u = this.spawn(q.unitId, b.team, exit); b.queue.shift(); if (u && b.rally) this.command([u.id], b.rally); } }
       }
-      const spec = BUILDINGS[b.type], attack = spec.attack || (b.type === 'town' && b.garrisoned.length ? b.garrisoned.length * 3 : 0); if (b.progress === 1 && attack) { const target = this.nearby(b, spec.range || 6, b.team); if (target) this.strike(b, target, attack, spec.range || 6, 1.8); }
+      const spec = BUILDINGS[b.type], m=this.modifiers(b.team), attack = b.type==='town'&&!b.garrisoned.length?0:(spec.attack||0)+(spec.attack?(m.rangedAttack||0):0),range=(spec.range||6)+(b.type==='town'?0:m.rangedRange||0); if (b.progress === 1 && attack) { const target = this.nearby(b, range, b.team); if (target) this.strike(b, target, attack, range, 2); }
     }
     for (const u of this.units) if (u.hp > 0 && !u.garrison) {
       u.cooldown = Math.max(0, u.cooldown - dt); u.attackAnimation = Math.max(0, u.attackAnimation - dt); u.hitAnimation = Math.max(0, u.hitAnimation - dt); u.autoTimer -= dt;
       const bp = u.blueprint;
+      if (bp.canConvert) u.faith = Math.min(100, (u.faith ?? 100) + dt * 100 / 62);
+      if (u.packLeft > 0) { u.packLeft = Math.max(0, u.packLeft - dt); continue; }
       const eligible = !u.order || ['attackMove', 'patrol', 'guard'].includes(u.order.type);
       if (u.combatReturning) { if (this.walk(u, u.combatOrigin, .2, dt)) { u.combatReturning = false; u.combatOrigin = null; u.path = []; u.pathGoal = null; u.autoTimer = 0; } else continue; }
       const previous = this.entity(u.autoTarget);
@@ -525,7 +621,7 @@ export class World {
       let o = u.order, auto = this.entity(u.autoTarget);
       if (eligible && auto && auto.hp > 0 && u.stance !== 'passive') {
         if (bp.role === 'healer' && this.isAlly(auto.team, u.team)) { if (this.walk(u, auto, bp.range, dt) && u.cooldown <= 0) { auto.hp = Math.min(auto.maxHp, auto.hp + bp.attack); u.cooldown = bp.cooldown; u.attackAnimation = .55; this.effects.push({ type: 'heal', x: auto.x, y: auto.y, age: 0 }); } }
-        else { if (bp.packed && goalDistance(u, auto) <= bp.range) u.packed = false; if ((!bp.packed || !u.packed) && (u.stance === 'stand' ? goalDistance(u, auto) <= bp.range : this.walk(u, auto, bp.range, dt))) this.strike(u, auto, bp.attack, bp.range, bp.cooldown); }
+        else if (this.attackReady(u, auto, dt)) this.strike(u, auto, bp.attack, bp.range, bp.cooldown);
         if (!(u.stance === 'stand' && o?.type === 'patrol')) continue;
       }
       if (!o) continue;
@@ -537,31 +633,51 @@ export class World {
           o.goal=goal; u.path=[]; u.pathGoal=null; u.repath=0; u.failed=false;
         }
         if (o.goal) this.walk(u,o.goal,.3,dt);
-      } else if (o.type === 'attackGround' && bp.splash) {
-        if (bp.packed) u.packed=false;
-        if (this.walk(u,o,bp.range,dt)&&u.cooldown<=0) {
-          for (const target of [...this.units,...this.buildings]) if (target.id!==u.id&&target.hp>0&&goalDistance(target,o)<=bp.splash) { target.hp-=Math.max(1,bp.attack-(target.blueprint?.armor||0)); target.hitAnimation=.25; }
-          u.cooldown=bp.cooldown; u.attackAnimation=.55; this.effects.push({type:'arrow',x:u.x,y:u.y,tx:o.x,ty:o.y,age:0,team:u.team});
+      } else if (o.type === 'attackGround' && (bp.attackGround || bp.splash)) {
+        if (this.attackReady(u, o, dt) && u.cooldown <= 0) {
+          for (const target of [...this.units, ...this.buildings]) if (!target.garrison && target.id !== u.id && target.hp > 0 && goalDistance(target, o) <= (bp.splash || .3)) { target.hp -= this.damage(u, target); target.hitAnimation = .25; }
+          u.cooldown = bp.cooldown; u.attackAnimation = .55; this.effects.push({type:'rock',x:u.x,y:u.y,tx:o.x,ty:o.y,age:0,team:u.team});
         }
-      } else if (o.type === 'move' || o.type === 'attackMove') { if (bp.packed && !u.packed) u.packed = true; if (this.walk(u, o, 0.2, dt)) this.finish(u); }
+      } else if (o.type === 'move' || o.type === 'attackMove') { if (bp.packed && !u.packed) { this.pack(u, true); continue; } if (this.walk(u, o, 0.2, dt)) this.finish(u); }
       else if (o.type === 'attack') {
-        const target = this.entity(o.target); if (!target || !this.isEnemy(u.team, target.team)) this.finish(u); else if (bp.packed && u.packed && goalDistance(u, target) <= bp.range) { u.packed = false; u.path = []; } else if (this.walk(u, target, bp.range, dt)) this.strike(u, target, bp.attack, bp.range, bp.cooldown);
+        const target = this.entity(o.target); if (!target || target.garrison || !this.isEnemy(u.team, target.team)) this.finish(u); else if (this.attackReady(u, target, dt)) this.strike(u, target, bp.attack, bp.range, bp.cooldown);
       } else if (o.type === 'gather' && bp.role === 'worker') {
-        const farm = o.target ? this.entity(o.target) : null, point = farm || o, i = point.y * this.map.size + point.x, type = farm?.type === 'farm' ? 'food' : RESOURCE[this.tile(o.x, o.y)], remaining = farm ? farm.foodRemaining : this.amountAt(o.x, o.y);
+        const farm = o.target ? this.entity(o.target) : null;
+        if (o.target && !farm) { if (u.carried && this.deliver(u)) continue; this.finish(u); continue; }
+        const point = farm || o, i = point.y * this.map.size + point.x, type = farm?.type === 'farm' ? 'food' : RESOURCE[this.tile(o.x, o.y)], remaining = farm ? farm.foodRemaining : this.amountAt(o.x, o.y);
         if (farm && (farm.team !== u.team || this.farmWorker(farm, u.id)?.id < u.id)) { this.finish(u); continue; }
-        if (!type || remaining <= 0) { if (farm && this.canPay(u.team, { wood: 60 })) { this.pay(u.team, { wood: 60 }); farm.foodRemaining = 250 + (this.modifiers(u.team).farmFood || 0); } else { const next = this.closestResource(u, u.carrying); if (next && !u.queued.length) { u.order = { type: 'gather', ...next }; u.path = []; u.repath = 0; } else this.finish(u); } continue; }
-        if (this.walk(u, point, farm ? .7 : 1.5, dt)) { u.work += dt * this.modifiers(u.team).gather[type]; if (u.work >= 1) { if (u.carrying && u.carrying !== type) u.carried = 0; const take = Math.min(6, remaining); if (farm) farm.foodRemaining -= take; else this.amounts[i] = remaining - take; u.carried += take; u.carrying = type; u.work -= 1; u.attackAnimation = .55; if (u.carried >= 24 * this.modifiers(u.team).carry || remaining - take <= 0) { const town = this.buildings.filter(b => b.team === u.team && BUILDINGS[b.type].dropoff?.includes(type) && b.progress === 1 && b.hp > 0).sort((a, b) => distance(u, a) - distance(u, b))[0]; if (town) { u.order = { type: 'deliver', target: town.id, resume: clone(o) }; u.path = []; u.repath = 0; } } if (!farm && remaining - take <= 0) setTile(this.map, point.x, point.y, 'grass'); } }
-      } else if (o.type === 'deliver') { const b = this.entity(o.target); if (!b || b.team !== u.team || !BUILDINGS[b.type].dropoff?.includes(u.carrying)) this.finish(u); else if (this.walk(u, b, 1.6, dt)) { this.stocks[u.team][u.carrying] += u.carried; u.carried = 0; if (o.resume) { u.order = o.resume; this.resetOrder(u); } else this.finish(u); } }
+        const capacity = 10 * this.modifiers(u.team).carry;
+        if (u.carried >= capacity - .001 && (!type || u.carrying === type)) { u.work += dt; if (u.work >= 1) { u.work = 0; this.deliver(u, o); } continue; }
+        if (!type || remaining <= 0) {
+          if (u.carried && this.deliver(u, o)) continue;
+          if (farm && this.canPay(u.team, { wood: 60 })) { this.pay(u.team, { wood: 60 }); farm.foodRemaining = 175 + (this.modifiers(u.team).farmFood || 0); }
+          else { const next = this.closestResource(u, u.carrying); if (next && !u.queued.length) { u.order = { type: 'gather', ...next }; this.resetOrder(u); } else this.finish(u); } continue;
+        }
+        if (this.walk(u, point, farm ? .7 : 1.5, dt)) {
+          if (u.carrying && u.carrying !== type) u.carried = 0;
+          const rate = farm ? .32 : {wood:.39,food:.33,gold:.38,stone:.36}[type], take = Math.min(capacity - u.carried, remaining, rate * dt * this.modifiers(u.team).gather[type]);
+          if (farm) farm.foodRemaining -= take; else this.amounts[i] = remaining - take;
+          u.carried += take; u.carrying = type; u.attackAnimation = .55;
+          if (u.carried >= capacity - .001 || remaining - take <= .001) this.deliver(u, o);
+          if (!farm && remaining - take <= .001) setTile(this.map, point.x, point.y, 'grass');
+        }
+      } else if (o.type === 'deliver') {
+        const b = this.entity(o.target);
+        if (!b || b.team !== u.team || b.progress < 1 || !BUILDINGS[b.type].dropoff?.includes(u.carrying) || u.failed) {
+          if (!this.deliver(u, o.resume, o.target)) { u.order = o.resume || {type:'waitDropoff',resume:null}; this.resetOrder(u); }
+        } else if (this.walk(u, b, 1.6, dt)) { this.depositCarried(u); if (o.resume) { u.order = o.resume; this.resetOrder(u); } else this.finish(u); }
+      } else if (o.type === 'waitDropoff') { u.work += dt; if (u.work >= 1) { u.work = 0; this.deliver(u, o.resume); } }
       else if (o.type === 'build' && bp.role === 'worker') { const b = this.entity(o.target); if (!b || b.team !== u.team) this.finish(u); else if (b.progress === 1) this.finishConstruction(u, b); else if (this.walk(u, b, 1.6, dt)) { const before = b.progress; b.progress = Math.min(1, b.progress + dt / BUILDINGS[b.type].time); b.hp = Math.min(b.maxHp, b.hp + (b.progress - before) * (b.maxHp - 40)); u.attackAnimation = .55; if (b.progress === 1) { if (b.team === 0) this.note(`${BUILDINGS[b.type].name}完工。`, b); this.finishConstruction(u, b); } } }
-      else if (o.type === 'heal') { const t = this.entity(o.target); if (!t || !this.isAlly(t.team, u.team)) this.finish(u); else if (this.walk(u, t, bp.range, dt) && u.cooldown <= 0) { t.hp = Math.min(t.maxHp, t.hp + bp.attack); u.cooldown = bp.cooldown; u.attackAnimation = .55; this.effects.push({ type: 'heal', x: t.x, y: t.y, age: 0 }); } }
+      else if (o.type === 'heal' && bp.role === 'healer') { const t = this.entity(o.target); if (!t || !this.isAlly(t.team, u.team)) this.finish(u); else if (this.walk(u, t, bp.range, dt) && u.cooldown <= 0) { t.hp = Math.min(t.maxHp, t.hp + bp.attack); u.cooldown = bp.cooldown; u.attackAnimation = .55; this.effects.push({ type: 'heal', x: t.x, y: t.y, age: 0 }); } }
       else if (o.type === 'patrol') { if (this.walk(u, o, .3, dt)) { const last = o.points.length - 1; if (o.pointIndex === last && distance(o.points[0], o.points[last]) < .3) o.pointIndex = 1; else { if (o.pointIndex === last) o.direction = -1; if (o.pointIndex === 0) o.direction = 1; o.pointIndex += o.direction; } Object.assign(o, o.points[o.pointIndex]); u.path = []; u.pathGoal = null; u.repath = 0; } }
       else if (o.type === 'follow' || o.type === 'guard') { const t = this.entity(o.target); if (!t || o.type === 'guard' && !this.isAlly(t.team, u.team) || t.id === u.id) this.finish(u); else this.walk(u, t, o.type === 'follow' ? 5 : 2.5, dt); }
       else if (o.type === 'repair' && bp.role === 'worker') { const b = this.entity(o.target); if (!b || b.team !== u.team || b.hp >= b.maxHp) this.finish(u); else if (this.walk(u, b, 1.5, dt) && this.stocks[u.team].wood > 0) { b.hp = Math.min(b.maxHp, b.hp + dt * 35); this.stocks[u.team].wood = Math.max(0, this.stocks[u.team].wood - dt * 2); u.attackAnimation = .55; } }
       else if (o.type === 'garrison') { const b = this.entity(o.target); if (!b || b.team !== u.team || !BUILDINGS[b.type].garrison || b.garrisoned.length >= BUILDINGS[b.type].garrison) this.finish(u); else if (this.walk(u, b, 1.5, dt)) { if (BUILDINGS[b.type].dropoff?.includes(u.carrying)) this.depositCarried(u); b.garrisoned.push(u.id); u.garrison = b.id; u.x = b.x; u.y = b.y; this.finish(u); } }
-      else if (o.type === 'convert' && bp.canConvert) { const t = this.entity(o.target); if (!t || !this.isEnemy(t.team, u.team) || t.kind !== 'unit' || t.blueprint.hero) this.finish(u); else if (this.walk(u, t, bp.range, dt)) { u.work += dt; u.attackAnimation = .55; if (u.work > (this.researched[t.team].has('faith') ? 12 : 6)) { t.team = u.team; t.order = null; t.autoTarget = null; this.finish(u); } } }
+      else if (o.type === 'convert' && bp.canConvert) { const t = this.entity(o.target); if (!t || !this.isEnemy(t.team, u.team) || t.kind !== 'unit' || t.blueprint.hero) this.finish(u); else if (!t.garrison && (u.faith ?? 100) >= 99.99 && this.walk(u, t, bp.range, dt)) { u.work += dt; u.attackAnimation = .55; if (u.work > (this.researched[t.team].has('faith') ? 12 : 6)) { t.team = u.team; this.command([t.id], null); u.faith = 0; this.finish(u); } } }
     }
     this.aiTimer += dt;
-    if (this.project.rules.ai !== 'off' && this.aiTimer > (this.project.rules.ai === 'hard' ? 6 : 10)) { this.aiTimer = 0; for (let team = 1; team < this.teams; team++) this.updateAI(team); }
+    if (this.project.rules.ai !== 'off' && this.aiTimer > (this.project.rules.ai === 'hard' ? 6 : 10) / (this.teams-1)) { this.aiTimer = 0; this.aiNextTeam=1+(this.aiNextTeam||0)%(this.teams-1); this.updateAI(this.aiNextTeam); }
+    if (this.routeSearches) for (const id of this.routeSearches.keys()) if (!this.entity(id)) this.routeSearches.delete(id);
     for (const e of this.effects) e.age += dt; this.effects = this.effects.filter(e => e.age < 0.5).slice(-200);
     for (const u of this.units) if (u.hp <= 0 && !u.garrison) this.corpses.push({ ...u, age: 0 });
     for (const corpse of this.corpses) corpse.age += dt; this.corpses = this.corpses.filter(c => c.age < 2).slice(-120);
@@ -574,18 +690,36 @@ export class World {
     this.visionTimer += dt; if (this.visionTimer > 0.35) { this.visionTimer = 0; this.updateVision(); }
   }
   ungarrison(id) { const b = this.entity(id); if (!b || b.kind !== 'building') return; const exit = this.buildingExit(b); if (!exit) return; for (const uid of b.garrisoned) { const u = this.entity(uid); if (u) { u.garrison = null; Object.assign(u, exit); if (b.rally) this.command([u.id], b.rally); } } b.garrisoned = []; }
-  townBell(team) { const workers = this.units.filter(u => u.team === team && u.blueprint.role === 'worker'); if (workers.some(u => u.garrison || u.order?.type === 'garrison')) { for (const b of this.buildings.filter(b => b.team === team)) this.ungarrison(b.id); for (const u of workers) { if (u.bellResume) this.command([u.id], u.bellResume); u.bellResume = null; } } else { const buildings = this.buildings.filter(b => b.team === team && BUILDINGS[b.type].garrison && b.progress === 1); for (const u of workers) { const b = buildings.slice().sort((a, b) => distance(u, a) - distance(u, b))[0]; if (b) { u.bellResume = clone(u.order); this.command([u.id], { type: 'garrison', target: b.id }); } } } }
+  townBell(team) {
+    const workers = this.units.filter(u=>u.team===team&&u.hp>0&&u.blueprint.role==='worker');
+    if (workers.some(u=>u.bellSheltered)) {
+      for(const b of this.buildings.filter(b=>b.team===team))this.ungarrison(b.id);
+      for(const u of workers.filter(u=>u.bellSheltered)) { this.command([u.id],u.bellResume);u.queued=u.bellQueued||[];delete u.bellResume;delete u.bellQueued;delete u.bellSheltered; }
+    } else {
+      const buildings = this.buildings.filter(b=>b.team===team&&BUILDINGS[b.type].garrison&&b.progress===1), reserved=new Map(buildings.map(b=>[b.id,b.garrisoned.length+workers.filter(u=>u.order?.type==='garrison'&&u.order.target===b.id).length]));
+      for(const u of workers.filter(u=>!u.garrison)) {
+        const b=buildings.filter(b=>reserved.get(b.id)<BUILDINGS[b.type].garrison).sort((a,b)=>goalDistance(u,a)-goalDistance(u,b))[0];
+        if(b) {u.bellResume=clone(u.order);u.bellQueued=clone(u.queued);u.bellSheltered=true;reserved.set(b.id,reserved.get(b.id)+1);this.command([u.id],{type:'garrison',target:b.id});}
+      }
+    }
+  }
   trade(team, resource, buy) { const price = buy ? 130 : 70; if (buy) { if (this.stocks[team].gold < price) return '黃金不足。'; this.stocks[team].gold -= price; this.stocks[team][resource] += 100; } else { if (this.stocks[team][resource] < 100) return '資源不足。'; this.stocks[team][resource] -= 100; this.stocks[team].gold += price; } return null; }
   updateAI(team) {
-    const army = this.units.filter(u => u.team === team && u.blueprint.role !== 'worker'), workers = this.units.filter(u => u.team === team && u.blueprint.role === 'worker');
-    const town = this.buildings.find(b => b.team === team && b.type === 'town' && b.hp > 0); if (!town) return;
-    if (workers.length < 24 && town.queue.length < 2) this.train(town.id, this.project.units.find(u => u.role === 'worker' && !u.hero).id);
-    for (const type of ['barracks', team === 1 ? 'archery' : 'stable', 'siege']) { const b = this.buildings.find(b => b.team === team && b.type === type); const soldiers = this.availableUnits(team, type); if (b && b.queue.length < 2 && soldiers.length && army.length < (this.project.rules.ai === 'hard' ? 160 : 80)) this.train(b.id, soldiers[Math.floor(this.time / 10) % soldiers.length].id); }
-    for (const u of workers) if (!u.order) { const resource = ['food', 'wood', 'gold', 'stone'][u.id % 4], r = this.closestResource(u, resource); if (r) this.command([u.id], { type: 'gather', ...r }); else if (resource === 'food') { const farm = this.buildings.find(b => b.team === team && b.type === 'farm'); if (farm) this.command([u.id], { type: 'gather', target: farm.id }); } }
+    const army = this.units.filter(u => u.team === team && u.hp > 0 && !u.garrison && u.blueprint.role !== 'worker'), workers = this.units.filter(u => u.team === team && u.hp > 0 && !u.garrison && u.blueprint.role === 'worker');
+    const town = this.buildings.find(b => b.team === team && b.type === 'town' && b.hp > 0), origin = town || workers[0] || this.buildings.find(b => b.team === team);
+    const cap = this.project.rules.enemyPopulation ?? 200, workerLimit = Math.min(24, Math.floor(cap / 3)), armyLimit = Math.max(0, cap - workerLimit);
+    if (town && workers.length < workerLimit && town.queue.length < 2) this.train(town.id, this.project.units.find(u => u.role === 'worker' && !u.hero).id);
+    for (const type of ['barracks', team === 1 ? 'archery' : 'stable', 'siege']) { const b = this.buildings.find(b => b.team === team && b.type === type && b.progress === 1); const soldiers = this.availableUnits(team, type); if (b && b.queue.length < 2 && soldiers.length && army.length < armyLimit) this.train(b.id, soldiers[Math.floor(this.time / 10) % soldiers.length].id); }
+    for (const u of workers) if (!u.order || u.failed) { const resource = ['food', 'wood', 'gold', 'stone'][u.id % 4], r = this.closestResource(u, resource); if (r) this.command([u.id], { type: 'gather', ...r }); else if (resource === 'food') { const farm = this.buildings.find(b => b.team === team && b.type === 'farm' && !this.farmWorker(b)); if (farm) this.command([u.id], { type: 'gather', target: farm.id }); } }
     let worker = workers.find(u => u.order?.type !== 'build');
-    if (worker && this.capacity(team) - this.population(team) < 8 && !this.buildings.some(b => b.team === team && b.type === 'house' && b.progress < 1)) { const p = this.nearestBuildingSite('house', { x: town.x + 9 + Math.floor(this.time / 40) % 7, y: town.y + 3 }); if (p && !this.build([worker.id], 'house', p.x, p.y)) worker = null; }
-    if (worker) for (const type of ['barracks', 'lumber', 'mill', 'mining', 'archery', 'stable', 'blacksmith', 'market', 'siege', 'monastery', 'castle', 'university']) if ((BUILDINGS[type].age || 0) <= this.ages[team] && !this.buildings.some(b => b.team === team && b.type === type)) { const p = this.nearestBuildingSite(type, { x: town.x - 10 + Math.floor(this.time / 15) % 20, y: town.y - 9 }); if (p) this.build([worker.id], type, p.x, p.y); break; }
-    for (const b of this.buildings.filter(b => b.team === team && !b.research)) { const t = this.availableTech(team, b.type).find(t => this.canPay(team, t.cost)); if (t) this.research(b.id, t.id); }
-    if (this.project.rules.ai !== 'calm' && this.time > (this.project.rules.ai === 'hard' ? 40 : 70) + team * 10) { const target = this.buildings.find(b => b.team === 0 && b.type === 'town' && this.isEnemy(team, b.team)), point = target && this.buildingExit(target); if (point && army.length >= 8) for (const u of army) if (!u.order) this.command([u.id], { type: 'attackMove', ...point }); }
+    if (worker && origin && !town && !this.buildings.some(b => b.team === team && b.type === 'town')) { const p = this.nearestBuildingSite('town', origin, true, 1); if (p && !this.build([worker.id], 'town', p.x, p.y)) worker = null; }
+    if (worker && origin && this.capacity(team) < cap && this.capacity(team) - this.population(team) < 8 && !this.buildings.some(b => b.team === team && b.type === 'house' && b.progress < 1)) { const p = this.nearestBuildingSite('house', { x: origin.x + 9 + Math.floor(this.time / 40) % 7, y: origin.y + 3 }, true, 1); if (p && !this.build([worker.id], 'house', p.x, p.y)) worker = null; }
+    if (worker && origin) for (const type of ['barracks', 'lumber', 'mill', 'mining', 'archery', 'stable', 'blacksmith', 'market', 'siege', 'monastery', 'castle', 'university']) if ((BUILDINGS[type].age || 0) <= this.ages[team] && !this.buildings.some(b => b.team === team && b.type === type)) { const p = this.nearestBuildingSite(type, { x: origin.x - 10 + Math.floor(this.time / 15) % 20, y: origin.y - 9 }, true, 1); if (p) this.build([worker.id], type, p.x, p.y); break; }
+    for (const b of this.buildings.filter(b => b.team === team && b.progress === 1 && !b.research)) { const t = this.availableTech(team, b.type).find(t => this.canPay(team, t.cost)&&this.ageRequirements(team,t.id)); if (t) this.research(b.id, t.id); }
+    if (this.project.rules.ai !== 'calm' && this.time > (this.project.rules.ai === 'hard' ? 40 : 70) + team * 10 && (army.length >= 8 || !town || this.time > 180)) {
+      const targets = [...this.buildings, ...this.units].filter(e => e.hp > 0 && !e.garrison && this.isEnemy(team, e.team));
+      const focus = origin || army[0], target = focus && targets.sort((a,b)=>(a.type==='town'?-1000:0)+goalDistance(focus,a)-((b.type==='town'?-1000:0)+goalDistance(focus,b)))[0];
+      if (target) for (const u of army) if (!u.order || u.failed || !this.entity(u.order.target) && u.order.type === 'attack') this.command([u.id], {type:'attack',target:target.id});
+    }
   }
 }

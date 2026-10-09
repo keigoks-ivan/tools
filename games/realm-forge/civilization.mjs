@@ -1,4 +1,5 @@
-export const CIVILIZATION = { name: '河谷王國', description: '西歐中世紀文明 · 完整四時代陸戰體系', ages: ['黑暗時代', '封建時代', '城堡時代', '帝王時代', '後帝王時代'] };
+import { UNIT_BALANCE, UPGRADE_BALANCE, TECH_BALANCE } from './balance.mjs?v=20261009d';
+export const CIVILIZATION = { name: '河谷王國', description: '西歐中世紀文明 · 四時代陸戰體系', ages: ['黑暗時代', '封建時代', '城堡時代', '帝王時代', '後帝王時代'] };
 const unit = (id, name, role, look, hp, attack, armor, range, speed, food, gold, building, age, extra = {}) => ({ id, name, role, look, hp, attack, armor, range, speed, cooldown: 1.5, food, gold, time: 12, color: '#669db6', image: '', building, age, ...extra });
 export const CIV_UNITS = [
   unit('villager', '村民', 'worker', 'worker', 40, 3, 0, 1.1, 2.1, 50, 0, 'town', 0, { hotkey: 'c', time: 10 }),
@@ -36,7 +37,7 @@ export const TECHNOLOGIES = [
   tech('bloodlines', '血統', 'stable', 1, { food: 150, gold: 100 }, { cavalryHp: 20 }),
   tech('husbandry', '畜牧', 'stable', 2, { food: 150 }, { cavalrySpeed: 1.1 }),
   tech('ballistics', '彈道學', 'university', 2, { wood: 300, gold: 175 }, { accuracy: true }),
-  tech('masonry', '磚石建築', 'university', 2, { food: 150, wood: 175 }, { buildingHp: 1.2 }),
+  tech('masonry', '磚石建築', 'university', 2, { food: 150, wood: 175 }, { buildingHp: 1.1 }),
   tech('chemistry', '化學', 'university', 3, { food: 300, gold: 200 }, { rangedAttack: 1 }),
   tech('conscription', '徵兵', 'castle', 3, { food: 150, gold: 150 }, { trainSpeed: 1.33 }),
   tech('faith', '信仰', 'monastery', 3, { food: 750, gold: 1000 }, { conversionResist: true }),
@@ -44,5 +45,20 @@ export const TECHNOLOGIES = [
   tech('fervor', '熱情', 'monastery', 2, { gold: 140 }, { healerSpeed: 1.15 }),
 ];
 export const CLASSIC_BUILD_KEYS = { n: 'town', e: 'house', i: 'mill', f: 'farm', z: 'lumber', g: 'mining', b: 'barracks', a: 'archery', l: 'stable', s: 'blacksmith', m: 'market', y: 'monastery', u: 'university', k: 'siege', v: 'castle', t: 'tower', w: 'wall', '/': 'gate', q: 'outpost' };
+for (const bp of CIV_UNITS) {
+  Object.assign(bp, UNIT_BALANCE[bp.id]);
+  for (const upgrade of bp.upgrades || []) Object.assign(upgrade, UPGRADE_BALANCE[upgrade.tech]);
+}
+for (const [family, names] of [['archer', ['布甲', '皮甲', '環甲']], ['cavalry', ['鱗甲馬鎧', '鎖子甲馬鎧', '板甲馬鎧']]]) for (let level = 1; level <= 3; level++) {
+  const id = `${family}-armor-${level}`;
+  TECHNOLOGIES.push(tech(id, names[level - 1], 'blacksmith', level, {}, { [`${family}Armor`]: 1, [`${family}PierceArmor`]: level === 3 ? 2 : 1 }, level > 1 ? [`${family}-armor-${level - 1}`] : []));
+}
+for (const t of TECHNOLOGIES) {
+  Object.assign(t, TECH_BALANCE[t.id]);
+  if (t.id.startsWith('armor-')) t.effect = { infantryArmor: 1, infantryPierceArmor: t.id === 'armor-3' ? 2 : 1 };
+}
+TECHNOLOGIES.find(t => t.id === 'loom').effect.workerPierceArmor = 2;
+TECHNOLOGIES.find(t => t.id === 'wheelbarrow').effect.carry = 1.25;
+TECHNOLOGIES.find(t => t.id === 'handcart').effect.carry = 2;
 export const STANCES = { aggressive: '積極進攻', defensive: '防禦姿態', stand: '原地防守', passive: '不還擊' };
 export const FORMATIONS = { line: '線形', box: '方陣', spread: '散開', flank: '分隊' };

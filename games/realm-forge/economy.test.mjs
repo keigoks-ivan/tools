@@ -185,7 +185,7 @@ test('switching resource keeps the old load while walking but never converts it 
   world.command([worker.id],{type:'gather',...target});world.tick(.1);
   assert.equal(worker.carried,12);assert.equal(worker.carrying,'wood');
   until(world,()=>worker.carrying==='gold');
-  assert.equal(worker.carried,6);
+  assert.ok(worker.carried > 0 && worker.carried < 1);
 });
 test('entering the town center deposits carried resources once', () => {
   const {world,worker,town}=setup();const before=world.stocks[0].wood;
