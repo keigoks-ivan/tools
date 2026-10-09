@@ -57,6 +57,19 @@ test('legacy default enemy cap upgrades to 300 once and a later 200-person choic
     upgradeDefaultUnits(custom);assert.equal(custom.rules.enemyPopulation,customCap);assert.equal(custom.rules.enemyPopulationVersion,1);
   }
 });
+test('only the legacy default player cap migrates to 300 and a later 500-person choice survives',()=>{
+  const p=defaultProject();delete p.rules.playerPopulationVersion;p.rules.population=500;
+  const next=validateProject(p);assert.equal(upgradeDefaultUnits(next),true);
+  assert.equal(next.rules.population,300);assert.equal(next.rules.playerPopulationVersion,1);
+  next.rules.population=500;
+  const reopened=validateProject(JSON.parse(JSON.stringify(next)));
+  assert.equal(upgradeDefaultUnits(reopened),false);assert.equal(reopened.rules.population,500);
+  for(const customCap of [50,300,750,2000]){
+    const custom=defaultProject();delete custom.rules.playerPopulationVersion;custom.rules.population=customCap;
+    assert.equal(upgradeDefaultUnits(custom),true);
+    assert.equal(custom.rules.population,customCap);assert.equal(custom.rules.playerPopulationVersion,1);
+  }
+});
 test('every generated kingdom has abundant deposits of all four resources',()=>{
   for(const size of [64,128,256,1280,2048]) for(const seed of [7,42]) {
     const map=generateMap(size,seed), w=new World({...defaultProject(),map});

@@ -64,7 +64,7 @@ test('three allied AIs reach their population caps, trade and replace military l
   for (const e of [...w.units, ...w.buildings].filter(e => e.team === 0)) {
     e.hp = e.maxHp = 1e9;
     // Prevent conversions of this artificial defender from changing the role mix.
-    if (e.kind === 'unit') { e.blueprint.hero = true; e.blueprint.regen = 0; }
+    if (e.kind === 'unit') { e.blueprint.hero = true; e.blueprint.regen = 0; e.stance = 'passive'; }
   }
   const started = performance.now(), reached = {};
   simulate(w, 900, () => {
@@ -72,8 +72,8 @@ test('three allied AIs reach their population caps, trade and replace military l
       assert.ok(w.population(team) <= p.rules.enemyPopulation);
       if (w.population(team) === p.rules.enemyPopulation && !reached[team]) reached[team] = Math.round(w.time);
     }
-    for (const u of w.units.filter(u => u.team > 0 && ['attack', 'convert'].includes(u.order?.type))) {
-      const target = w.entity(u.order.target);
+    for (const u of w.units.filter(u => u.team > 0 && ['attack', 'attackMove', 'convert'].includes(u.order?.type))) {
+      const target = w.entity(u.order.target || u.order.aiObjective);
       if (target) assert.equal(target.team, 0, 'Allied enemies must never become direct attack targets');
     }
   });
@@ -105,7 +105,7 @@ test('calm AI grows to the cap without issuing offensive orders', () => {
   simulate(w, 1000);
   assert.equal(w.population(1), p.rules.enemyPopulation);
   assert.equal(w.units.filter(u => u.team === 1 && isArmy(u)).length, 220);
-  assert.equal(w.units.some(u => u.team === 1 && ['attack', 'convert'].includes(u.order?.type)), false);
+  assert.equal(w.units.some(u => u.team === 1 && ['attack', 'attackMove', 'convert'].includes(u.order?.type)), false);
 });
 
 test('AI monks heal allies, then escort soldiers instead of attacking buildings', () => {
@@ -118,8 +118,8 @@ test('AI monks heal allies, then escort soldiers instead of attacking buildings'
   ally.hp = ally.maxHp;
   w.updateAI(1);
   assert.equal(monk.order?.type, 'guard'); assert.equal(monk.order.target, soldier.id);
-  assert.equal(soldier.order?.type, 'attack');
-  assert.equal(w.entity(soldier.order.target)?.kind, 'building');
+  assert.equal(soldier.order?.type, 'attackMove');
+  assert.equal(w.entity(soldier.order.aiObjective)?.kind, 'building');
 });
 
 test('AI monks convert nearby enemy units only when faith is ready', () => {

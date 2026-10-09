@@ -91,11 +91,11 @@ test('monks must recover faith after conversion',()=>{
 test('AI continues fighting and trains survivors after its town center is destroyed',()=>{
   const w=setup(),town=w.buildings.find(b=>b.team===1),p=w.nearestBuildingSite('barracks',{x:town.x-8,y:town.y+8});const barracks=w.addBuilding('barracks',1,p.x,p.y,true);
   const soldier=w.units.find(u=>u.team===1&&u.blueprint.role!=='worker');town.hp=0;w.time=200;w.tick(.05);w.project.rules.ai='normal';w.updateAI(1);
-  assert.equal(soldier.order?.type,'attack');assert.ok(barracks.queue.length);assert.ok(w.entity(soldier.order.target));
+  assert.equal(soldier.order?.type,'attackMove');assert.ok(barracks.queue.length);assert.ok(w.entity(soldier.order.aiObjective));
 });
 test('AI changes its target after destroying the player town center',()=>{
   const w=setup();const town=w.buildings.find(b=>b.team===0),soldier=w.units.find(u=>u.team===1&&u.blueprint.role!=='worker');town.hp=0;w.time=200;w.tick(.05);w.project.rules.ai='normal';w.updateAI(1);
-  assert.equal(soldier.order?.type,'attack');assert.notEqual(soldier.order.target,town.id);assert.equal(w.entity(soldier.order.target).team,0);
+  assert.equal(soldier.order?.type,'attackMove');assert.notEqual(soldier.order.aiObjective,town.id);assert.equal(w.entity(soldier.order.aiObjective).team,0);
 });
 test('cancelling a foundation refunds the unused cost once',()=>{
   const w=setup(),worker=w.units.find(u=>u.team===0);const site=w.nearestBuildingSite('house',{x:worker.x+5,y:worker.y+5});const before=w.stocks[0].wood;

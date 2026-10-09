@@ -1,12 +1,13 @@
-import { clone, generateMap, tileType, setTile, enrichMapResources } from './core.mjs?v=20261009k';
-import { CIV_UNITS } from './civilization.mjs?v=20261009k';
-import { LEGACY_UNIT_STATS } from './balance.mjs?v=20261009k';
+import { clone, generateMap, tileType, setTile, enrichMapResources } from './core.mjs?v=20261009l';
+import { CIV_UNITS } from './civilization.mjs?v=20261009l';
+import { LEGACY_UNIT_STATS } from './balance.mjs?v=20261009l';
 
 const WALKABLE = new Set(['grass', 'road', 'sand']);
 const INITIAL_RESOURCES = [[-5, 0, 'forest'], [-5, 1, 'forest'], [-5, 2, 'forest'], [0, 6, 'food'], [1, 6, 'food'], [6, 0, 'gold'], [6, 1, 'stone']];
 
 export function upgradeDefaultUnits(project) {
   let changed = false;
+  if(!project.rules.playerPopulationVersion){if(project.rules.population===500)project.rules.population=300;project.rules.playerPopulationVersion=1;changed=true;}
   if(!project.rules.enemyPopulationVersion){if(project.rules.enemyPopulation===200)project.rules.enemyPopulation=300;project.rules.enemyPopulationVersion=1;changed=true;}
   if(!project.rules.playerEconomyVersion){for(const r of ['wood','food','gold','stone'])project.rules.playerStartingResources[r]=Math.max(200000,project.rules.playerStartingResources[r]);project.rules.playerEconomyVersion=1;changed=true;}
   if(!project.rules.aiEconomyVersion){project.rules.starting=Math.max(20000,project.rules.starting);project.rules.aiEconomyVersion=1;changed=true;}

@@ -1,8 +1,8 @@
-import { CIV_UNITS, TECHNOLOGIES } from './civilization.mjs?v=20261009k';
-import { BUILDING_BALANCE } from './balance.mjs?v=20261009k';
-import { createRouteSearch } from './navigation.mjs?v=20261009k';
-import { smoothPath, segmentClear, pathGoalTail } from './motion.mjs?v=20261009k';
-import { AI_PROFILES, updateAI } from './ai.mjs?v=20261009k';
+import { CIV_UNITS, TECHNOLOGIES } from './civilization.mjs?v=20261009l';
+import { BUILDING_BALANCE } from './balance.mjs?v=20261009l';
+import { createRouteSearch } from './navigation.mjs?v=20261009l';
+import { smoothPath, segmentClear, pathGoalTail } from './motion.mjs?v=20261009l';
+import { AI_PROFILES, updateAI } from './ai.mjs?v=20261009l';
 export const clone = value => JSON.parse(JSON.stringify(value));
 export const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 export const RICH_RESOURCE_AMOUNTS = { wood: 5000, food: 10000, gold: 20000, stone: 20000 };
@@ -120,7 +120,7 @@ export function enrichMapResources(map) {
   return map;
 }
 export function defaultProject() {
-  return { version: 1, name: '我的王國', map: generateMap(), units: clone(CIV_UNITS), rules: { population: 500, enemyPopulation: 300, starting: 20000, freePlayerPopulation:true, enemyPopulationVersion:1, aiEconomyVersion:1, playerEconomyVersion:1, playerStartingResources: { wood: 200000, food: 200000, gold: 200000, stone: 200000 }, ai: 'normal', aiAlliance: true, startingBase: 'town', fog: true, speed: 1, startAge: 4, victory: 'conquest', hotkeys: 'definitive' } };
+  return { version: 1, name: '我的王國', map: generateMap(), units: clone(CIV_UNITS), rules: { population: 300, enemyPopulation: 300, starting: 20000, freePlayerPopulation:true, playerPopulationVersion:1, enemyPopulationVersion:1, aiEconomyVersion:1, playerEconomyVersion:1, playerStartingResources: { wood: 200000, food: 200000, gold: 200000, stone: 200000 }, ai: 'normal', aiAlliance: true, startingBase: 'town', fog: true, speed: 1, startAge: 4, victory: 'conquest', hotkeys: 'definitive' } };
 }
 export function validateProject(value) {
   if (!value || value.version !== 1) throw new Error('這不是支援的王國工坊檔案。');
@@ -731,6 +731,7 @@ export class World {
     u.facing={x:point.x-u.x,y:point.y-u.y};u.moving=false;
   }
   autoAllowed(u, target) {
+    if (!target || target.hp <= 0 || target.garrison) return false;
     if(u.team===0&&u.blueprint.hero&&!this.isVisible(target))return false;
     if (u.blueprint.role === 'healer' ? !this.isAlly(u.team, target.team) : !this.isEnemy(u.team, target.team)) return false;
     if (u.stance === 'stand' && goalDistance(u, target) > u.blueprint.range) return false;
@@ -739,14 +740,29 @@ export class World {
     if (u.order?.type === 'patrol' && routeDistance(target, u.order.points) > 6) return false;
     return true;
   }
+  canAutoCombat(u) {
+    return !u.order || ['attackMove','patrol','guard'].includes(u.order.type) || u.team > 0 && u.order.type === 'attack' && this.entity(u.order.target)?.kind === 'building';
+  }
+  retaliate(victim, attacker) {
+    if (!attacker || !this.isEnemy(victim.team,attacker.team)) return;
+    victim.recentAttacker=attacker.id;victim.recentAttackAt=this.time;
+    if (victim.kind!=='unit' || victim.hp<=0 || victim.garrison || victim.stance==='passive' || ['worker','trader','healer'].includes(victim.blueprint.role) || !this.canAutoCombat(victim) || !this.autoAllowed(victim,attacker)) return;
+    const previous=this.entity(victim.autoTarget);
+    if (previous?.id===attacker.id) return;
+    // Finish a nearby combat opponent instead of changing targets on every hit.
+    if (previous?.kind==='unit' && this.isMilitary(previous) && this.autoAllowed(victim,previous) && goalDistance(victim,previous)<=Math.max(3,victim.blueprint.range+1) && goalDistance(victim,attacker)>=goalDistance(victim,previous)*.65) return;
+    victim.autoTarget=attacker.id;victim.autoTimer=.6;victim.combatOrigin ||= {x:victim.x,y:victim.y};victim.combatReturning=false;
+    victim.path=[];victim.pathGoal=null;victim.repath=0;victim.failed=false;this.routeSearches?.delete(victim.id);
+  }
   strike(e, target, attack, range, cooldown) {
     if (e.cooldown > 0 || !this.isEnemy(e.team, target.team)) return;
     if (e.blueprint?.role === 'ranged' && e.blueprint.family !== 'siege' && target.path?.length && !this.modifiers(e.team).accuracy && ((e.shots = (e.shots || 0) + 1) % 3 === 0)) { e.cooldown = cooldown; e.attackAnimation = .55; e.facing = { x: target.x - e.x, y: target.y - e.y }; this.effects.push({ type: 'arrow', x: e.x, y: e.y, tx: target.x + .8, ty: target.y, age: 0, team: e.team }); return; }
     const bp = e.blueprint, damage = this.damage(e, target, attack) * (e.kind === 'building' ? this.projectileCount(e) : 1);
     target.hp -= damage; target.hitAnimation = .25; e.cooldown = cooldown; e.attackAnimation = .55;
+    this.retaliate(target,e);
     e.facing = { x: target.x - e.x, y: target.y - e.y };
     if (target.team === 0 && this.time - (this.lastAlert ?? -10) > 10) { this.lastAlert = this.time; this.note('我方遭到攻擊。Home 可移到戰鬥位置。', target); }
-    if (bp?.splash) for (const u of this.units) if (!u.garrison && u.hp > 0 && u.id !== e.id && u.id !== target.id && distance(u, target) < bp.splash) { u.hp -= this.damage(e, u, attack) * (1 - distance(u, target) / bp.splash); u.hitAnimation = .25; }
+    if (bp?.splash) for (const u of this.units) if (!u.garrison && u.hp > 0 && u.id !== e.id && u.id !== target.id && distance(u, target) < bp.splash) { u.hp -= this.damage(e, u, attack) * (1 - distance(u, target) / bp.splash); u.hitAnimation = .25; this.retaliate(u,e); }
     this.effects.push({ type: bp?.family === 'siege' && range > 2 ? 'rock' : range > 2 ? 'arrow' : 'hit', x: e.x, y: e.y, tx: target.x, ty: target.y, age: 0, team: e.team });
   }
   projectileCount(b) { return Math.min(b.type==='castle'?10:b.type==='town'?10:5,(b.type==='castle'?5:1)+Math.floor((b.garrisoned?.length||0)/2)); }
@@ -791,11 +807,11 @@ export class World {
       const bp = u.blueprint;
       if (bp.canConvert) u.faith = Math.min(100, (u.faith ?? 100) + dt * 100 / 62);
       if (u.packLeft > 0) { u.packLeft = Math.max(0, u.packLeft - dt); continue; }
-      const eligible = !u.order || ['attackMove', 'patrol', 'guard'].includes(u.order.type);
+      const eligible = this.canAutoCombat(u);
       if (u.combatReturning) { if (this.walk(u, u.combatOrigin, .2, dt)) { u.combatReturning = false; u.combatOrigin = null; u.path = []; u.pathGoal = null; u.autoTimer = 0; } else continue; }
       const previous = this.entity(u.autoTarget);
       if (eligible && u.autoTarget && (!previous || !this.autoAllowed(u, previous) || bp.role === 'healer' && previous.hp >= previous.maxHp)) {
-        u.autoTarget = null; u.path = []; u.pathGoal = null; u.repath = 0;
+        u.autoTarget = null; u.path = []; u.pathGoal = null; u.repath = 0;this.routeSearches?.delete(u.id);
         if (u.stance === 'defensive' && u.combatOrigin && distance(u, u.combatOrigin) > .2) { u.combatReturning = true; continue; }
         u.combatOrigin = null;
       }
@@ -823,7 +839,7 @@ export class World {
         if (o.goal) this.walk(u,o.goal,.3,dt);
       } else if (o.type === 'attackGround' && (bp.attackGround || bp.splash)) {
         if (this.attackReady(u, o, dt) && u.cooldown <= 0) {
-          for (const target of [...this.units, ...this.buildings]) if (!target.garrison && target.id !== u.id && target.hp > 0 && goalDistance(target, o) <= (bp.splash || .3)) { target.hp -= this.damage(u, target); target.hitAnimation = .25; }
+          for (const target of [...this.units, ...this.buildings]) if (!target.garrison && target.id !== u.id && target.hp > 0 && goalDistance(target, o) <= (bp.splash || .3)) { target.hp -= this.damage(u, target); target.hitAnimation = .25; this.retaliate(target,u); }
           u.cooldown = bp.cooldown; u.attackAnimation = .55; this.effects.push({type:'rock',x:u.x,y:u.y,tx:o.x,ty:o.y,age:0,team:u.team});
         }
       } else if (o.type === 'move' || o.type === 'attackMove') { if (bp.packed && !u.packed) { this.pack(u, true); continue; } if (this.walk(u, o, 0.2, dt)) this.finish(u); }

@@ -1,4 +1,4 @@
-import { CLASSIC_BUILD_KEYS } from './civilization.mjs?v=20261009k';
+import { CLASSIC_BUILD_KEYS } from './civilization.mjs?v=20261009l';
 
 export const GRID_BUILD_KEYS = {
   economy: { q: 'house', w: 'mill', e: 'mining', r: 'lumber', t: 'dock', a: 'farm', s: 'blacksmith', d: 'market', f: 'monastery', g: 'university', z: 'town', x: 'wonder' },
@@ -29,7 +29,10 @@ export function orderHint(unit) {
   if (unit.waitingDropoff) return '等待卸貨點';
   if (unit.packLeft > 0) return `${unit.packed ? '打包' : '展開'}中 · ${Math.ceil(unit.packLeft)} 秒`;
   if (unit.failed) return '無法到達目標';
+  if (unit.aiRetreat) return '傷兵撤回安全位置 · 等待治療或重整';
+  if (unit.aiKite) return '遠程部隊拉開距離';
   if (unit.order?.type==='trade') return `${unit.order.leg==='return'?`運送 ${unit.order.cargo||0} 黃金 · 返回我方市集`:'前往貿易市集'}${unit.queued?.length?` · 等待 ${unit.queued.length} 道指令`:''}`;
   const labels = { waitDropoff: '等待卸貨點', autoScout: '自動偵察', attackGround: '攻擊地面', move: '移動', attackMove: '攻擊移動', attack: '攻擊', gather: '採集', deliver: '運送資源', build: '建造', repair: '修理', heal: '治療', patrol: '巡邏', guard: '守衛', follow: '跟隨', garrison: '進駐', convert: '招降' };
-  return `${labels[unit.order?.type] || '閒置'}${unit.queued?.length ? ` · 等待 ${unit.queued.length} 道指令` : ''}`;
+  const tactic={flank:'騎兵側翼迂迴',rally:'集結援軍',escort:'攻城部隊跟隨主軍',intercept:'支援附近交戰',siege:'攻城部隊攻擊建築'}[unit.order?.aiTactic];
+  return `${tactic || labels[unit.order?.type] || '閒置'}${unit.queued?.length ? ` · 等待 ${unit.queued.length} 道指令` : ''}`;
 }

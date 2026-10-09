@@ -1,4 +1,4 @@
-import { pathGoalTail } from './motion.mjs?v=20261009k';
+import { pathGoalTail } from './motion.mjs?v=20261009l';
 // Incremental fallback for routes whose detour leaves the local pathfinding window.
 // A search owns at most 50,000 visited cells and yields between small batches.
 export function createRouteSearch(start, goal, size, blocked, goalDistance, radius) {

@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {World,defaultProject,heroPlacementKey,buildingPlacementKey,setTile,buildingBounds} from './core.mjs';
-import {Renderer} from './renderer.js';
+import {Renderer,unitHeight} from './renderer.js';
 
 function setup() {
   const p=defaultProject();p.map.tiles.fill('grass');p.rules.ai='off';
@@ -26,4 +26,15 @@ test('editor buildings remain selectable at normalized centers even when terrain
   assert.deepEqual(picked.map(e=>e.buildingPlacementKey),p.map.buildingPlacements.map(buildingPlacementKey));
   assert.equal(picked[0].editorValid,false);
   assert.equal(picked[1].editorValid,true);
+});
+
+test('enlarged custom infantry and cavalry heroes can be picked at the visible image edge',()=>{
+  for(const look of ['soldier','knight']){
+    const p=setup(),bp=p.units.find(u=>u.id==='editor-hero');bp.look=look;bp.image='data:image/png;base64,test';
+    const w=new World(p),r=view(p),point=p.map.heroPlacements[0],screen=r.screen(point.x,point.y);
+    const hero=w.units.find(u=>u.heroPlacementKey===heroPlacementKey(point)),edge=unitHeight(hero)*.41-1;
+    assert.equal(r.heroHit(screen.x+edge,screen.y-12,w)?.heroPlacementKey,heroPlacementKey(point));
+    assert.equal(r.hit(screen.x+edge,screen.y-12,w,false)?.id,hero.id);
+    assert.equal(r.heroHit(screen.x+edge+10,screen.y-12,w),null);
+  }
 });

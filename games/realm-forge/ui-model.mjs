@@ -1,11 +1,11 @@
-import { BUILDINGS, RESOURCE, buildingDistance } from './core.mjs?v=20261009k';
-import { CIVILIZATION, TECHNOLOGIES } from './civilization.mjs?v=20261009k';
-import { orderHint } from './controls.mjs?v=20261009k';
+import { BUILDINGS, RESOURCE, buildingDistance } from './core.mjs?v=20261009l';
+import { CIVILIZATION, TECHNOLOGIES } from './civilization.mjs?v=20261009l';
+import { orderHint } from './controls.mjs?v=20261009l';
 
 export function combatOrderHint(world,unit) {
   if(unit.garrison||unit.failed||unit.packLeft>0||!unit.blueprint)return orderHint(unit);
   if(unit.blueprint.role==='worker'&&unit.order?.type!=='attack')return workerOrderHint(world,unit);
-  const target=world.entity(unit.order?.type==='attack'?unit.order.target:!unit.order||['attackMove','patrol','guard'].includes(unit.order.type)?unit.autoTarget:null);
+  const target=world.entity(unit.autoTarget && world.canAutoCombat(unit) ? unit.autoTarget : unit.order?.type==='attack'?unit.order.target:!unit.order||['attackMove','patrol','guard'].includes(unit.order.type)?unit.autoTarget:null);
   if(!target||!world.isEnemy(unit.team,target.team))return orderHint(unit);
   const d=target.kind==='building'?buildingDistance(unit,target):Math.hypot(unit.x-target.x,unit.y-target.y);
   const name=world.isVisible(target)?`${target.team?'AI '+target.team:'我方'} ${target.kind==='building'?BUILDINGS[target.type].name:target.blueprint.name}`:'敵方目標';

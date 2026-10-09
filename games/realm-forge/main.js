@@ -1,23 +1,28 @@
-import { World, BUILDINGS, TILE_NAMES, RESOURCE, DEFAULT_UNITS, clone, clamp, defaultProject, validateProject, generateMap, enrichMapResources, findPath, tileType, setTile, buildingBounds, heroPlacementKey, buildingPlacementKey } from './core.mjs?v=20261009k';
-import { CIVILIZATION, TECHNOLOGIES, STANCES, FORMATIONS } from './civilization.mjs?v=20261009k';
-import { Renderer, COLORS, SYMBOLS, drawUnit, wheelZoomFactor } from './renderer.js?v=20261009k';
-import { artReady } from './art.mjs?v=20261009k';
-import { upgradeLegacyMap, upgradeDefaultUnits, setEnemyCount, spreadStartingPositions } from './project-upgrades.mjs?v=20261009k';
-import { buildKeys, productionKey, menuKey, orderHint, technologyKey, commandKey, eventKey, GO_TO_BUILDINGS } from './controls.mjs?v=20261009k';
-import { actionReason, actionDescription, buildReason, placementFeedback, productionStatus, selectionGroups, combatOrderHint, heroPlacementFeedback, mapBuildingPlacementFeedback, editorWallLine } from './ui-model.mjs?v=20261009k';
-import { leftDragMode, crossedDragThreshold } from './interaction.mjs?v=20261009k';
+import { World, BUILDINGS, TILE_NAMES, RESOURCE, DEFAULT_UNITS, clone, clamp, defaultProject, validateProject, generateMap, enrichMapResources, findPath, tileType, setTile, buildingBounds, heroPlacementKey, buildingPlacementKey } from './core.mjs?v=20261009l';
+import { CIVILIZATION, TECHNOLOGIES, STANCES, FORMATIONS } from './civilization.mjs?v=20261009l';
+import { Renderer, COLORS, SYMBOLS, drawUnit, wheelZoomFactor } from './renderer.js?v=20261009l';
+import { artReady } from './art.mjs?v=20261009l';
+import { upgradeLegacyMap, upgradeDefaultUnits, setEnemyCount, spreadStartingPositions } from './project-upgrades.mjs?v=20261009l';
+import { buildKeys, productionKey, menuKey, orderHint, technologyKey, commandKey, eventKey, GO_TO_BUILDINGS } from './controls.mjs?v=20261009l';
+import { actionReason, actionDescription, buildReason, placementFeedback, productionStatus, selectionGroups, combatOrderHint, heroPlacementFeedback, mapBuildingPlacementFeedback, editorWallLine } from './ui-model.mjs?v=20261009l';
+import { leftDragMode, crossedDragThreshold } from './interaction.mjs?v=20261009l';
+import { applyContextCommand, selectionAfterClick, readControlPreferences, applySelectionStance } from './player-interaction.mjs?v=20261009l';
+import { layoutActions } from './action-layout.mjs?v=20261009l';
 const $ = id => document.getElementById(id);
 const markupCache = new Map();
 function html(id, markup) { if (markupCache.get(id)!==markup) { $(id).innerHTML=markup; markupCache.set(id,markup); } }
 const escape = value => String(value).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
 const STORAGE = 'realm-forge-project-v1';
 const BATTLE_STORAGE='realm-forge-battle-v1';
+const CONTROL_STORAGE='realm-forge-input-v1';
+let controlPreferences=readControlPreferences(null);
+try {controlPreferences=readControlPreferences(localStorage.getItem(CONTROL_STORAGE));}catch {}
 let project = validateProject(defaultProject()), storageError = '', mapUpgraded = false;
 try { const saved = localStorage.getItem(STORAGE); if (saved) { project = validateProject(JSON.parse(saved)); mapUpgraded = upgradeLegacyMap(project); } } catch { storageError = '儲存檔無法讀取，已載入預設王國。'; }
 mapUpgraded = upgradeDefaultUnits(project) || mapUpgraded;
 project.rules.hotkeys = 'definitive';
 let world = new World(project), editId = project.units[0].id, uploadedImage = null;
-const ui = { mode: 'map', started: false, paused: true, selected: new Set(), placement: null, attackMove: false, orderMode: null, formation: 'line', buildMenu: false, buildPage: 'economy', extendedTooltips:true, leftDragPan:true, brush: 'grass', brushSize: 1, spawnBrush: null, heroBrush: null, heroSelected: null, heroPlacementSelected:null, heroMoveKey:null, heroBatchSize:1, mapBuildingBrush:null, mapBuildingTeam:0, mapBuildingSelected:null, mapBuildingMoveKey:null, groups: {}, dirty: false };
+const ui = { mode: 'map', started: false, paused: true, selected: new Set(), placement: null, attackMove: false, orderMode: null, formation: 'line', buildMenu: false, buildPage: 'economy', extendedTooltips:true, leftDragPan:controlPreferences.leftDragPan, brush: 'grass', brushSize: 1, spawnBrush: null, heroBrush: null, heroSelected: null, heroPlacementSelected:null, heroMoveKey:null, heroBatchSize:1, mapBuildingBrush:null, mapBuildingTeam:0, mapBuildingSelected:null, mapBuildingMoveKey:null, groups: {}, dirty: false };
 const renderer = new Renderer($('map'), $('minimap')); renderer.project = project; renderer.fit(project.map);
 let lastRender=0, simulationLag=0;
 let pointer = null, minimapPointer = null, pointerPos = null, keys = new Set(), undo = [], lastTick = performance.now(), lastHud = 0, toastTimer = 0, frameTime = 0, fps = 60, groupPressed = { key: '', time: 0 }, actions = [];
@@ -110,7 +115,7 @@ function switchMode(mode) {
 function selectedEntities() { return [...ui.selected].map(id => world.entity(id)).filter(Boolean); }
 function opponentLabel() { const count = project.map.spawns.length - 1; return project.rules.aiAlliance && count > 1 ? `${count} 個 AI 結盟對抗我方` : `對抗 ${count} 個 AI 王國`; }
 function ownEntities() { return selectedEntities().filter(e => e.team === 0 && !e.garrison); }
-function select(ids, append = false, toggle = true) { if (!append) ui.selected.clear(); for (const id of ids) { if (append && toggle && ui.selected.has(id)) ui.selected.delete(id); else ui.selected.add(id); } ui.buildMenu = false; ui.placement=null; ui.orderMode=null; ui.attackMove=false; $('selection-info').parentElement.scrollTop=0; updateHud(true); }
+function select(ids, append = false, toggle = true) { ui.selected=selectionAfterClick(world,ui.selected,ids,{append,toggle}); ui.buildMenu = false; ui.placement=null; ui.orderMode=null; ui.attackMove=false; $('selection-info').parentElement.scrollTop=0; updateHud(true); }
 function pruneHeroPlacements(map, units = project.units) { const ids = new Set(units.filter(u=>u.hero).map(u=>u.id)); map.heroPlacements = (map.heroPlacements || []).filter(p=>ids.has(p.unitId)); }
 function clearEditorTools(clearSelection=true) {
   ui.spawnBrush=null;ui.heroBrush=null;ui.heroMoveKey=null;ui.mapBuildingBrush=null;ui.mapBuildingMoveKey=null;
@@ -195,7 +200,7 @@ function renderSidebar() {
   if (ui.mode === 'play') {
     $('sidebar').innerHTML = '';
   } else if (ui.mode === 'map') {
-    $('sidebar').innerHTML = `<div class="panel-head"><div class="eyebrow">DESIGN BEFORE YOU CONQUER</div><h2>地圖與資源設計</h2><p>${project.map.size.toLocaleString()} × ${project.map.size.toLocaleString()} 格 · 自然地景與真實資源。</p></div>${renderHeroPanel()}${renderMapBuildingPanel()}<div class="panel-section"><div class="section-label">我的起始資源</div><p class="muted">只調整我方。敵方各項起始資源為 ${project.rules.starting.toLocaleString()}，不受這裡的設定影響。</p><div class="row">${Object.entries({wood:"木材",food:"食物",gold:"黃金",stone:"石頭"}).map(([r,label])=>`<label>${label}<input aria-label="我的起始${label}" data-player-resource="${r}" type="number" min="0" max="1000000" step="1" required value="${project.rules.playerStartingResources[r]}"></label>`).join("")}</div></div><div class="panel-section"><div class="section-label">地圖資源存量 · 雙方共享</div><p class="muted">每格：木材 ${project.map.resourceAmounts.wood.toLocaleString()}、食物 ${project.map.resourceAmounts.food.toLocaleString()}、黃金／石頭各 ${project.map.resourceAmounts.gold.toLocaleString()}。敵方可正常採集。新河谷已為各出生點配置四種資源。</p><button data-action="enrich-resources" class="wide">為所有出生點補上大量資源</button></div><div class="panel-section"><label>地圖名稱<input id="map-title" maxlength="40" value="${escape(project.map.name)}"></label><div class="section-label">地形與可採集資源</div><div class="brush-grid">${Object.entries(TILE_NAMES).map(([key, name]) => `<button class="brush ${ui.brush === key && ui.spawnBrush === null && !ui.heroBrush && !ui.mapBuildingBrush ? 'active' : ''}" data-brush="${key}"><i style="background:${COLORS[key]}"></i>${name}</button>`).join('')}</div><label>筆刷大小<select id="brush-size"><option value="1">1 格 · 精細</option><option value="2">3 × 3</option><option value="3">5 × 5</option><option value="6">11 × 11</option><option value="11">21 × 21</option></select></label></div><div class="panel-section"><div class="section-label">${project.map.spawns.length} 個王國出生點</div><div class="spawn-buttons">${project.map.spawns.map((_,i)=>`<button data-spawn="${i}" class="${ui.spawnBrush===i?'active':''}">⚑ ${i===0?'我方':'AI '+i+(project.rules.aiAlliance?' · 聯盟':'')}</button>`).join('')}</div><p class="muted">選擇王國，再點空地移動出生點。敵人數量可在「對戰設定」選擇 1–3 個，敵方全部結盟。</p><div class="row"><button data-action="view-spawn">查看我方 ⌖</button><button data-action="spread-spawns">分散出生點</button></div></div><div class="panel-section"><div class="section-label">地圖模板</div><label>世界格數<select id="map-size">${[64,128,256,512,1280,1536,2048].map(n=>`<option value="${n}" ${n===project.map.size?'selected':''}>${n.toLocaleString()} × ${n.toLocaleString()} ${n===128?'· 預設小地圖':n===1280?'· 超大世界':''}</option>`).join('')}</select></label><button data-action="compact-map" class="wide">建立 128 × 128 小河谷</button><div class="row"><button data-action="random-map">自然河谷</button><button data-action="blank-map">草原背景</button></div><div class="form-actions"><button data-action="undo" ${undo.length?'':'disabled'}>↶ 復原筆刷</button><button data-action="hero-workshop">創造英雄 ♞</button></div><button data-action="test-map" class="primary wide" style="margin-top:12px">完成地圖，開始對戰 ▶</button></div>`;
+    $('sidebar').innerHTML = `<div class="panel-head"><div class="eyebrow">DESIGN BEFORE YOU CONQUER</div><h2>地圖與資源設計</h2><p>${project.map.size.toLocaleString()} × ${project.map.size.toLocaleString()} 格 · 自然地景與真實資源。</p></div><div class="panel-section"><div class="section-label">AI 對手</div><label>對手數量<select id="map-enemy-count" aria-label="AI 對手數量">${[1,2,3].map(n=>`<option value="${n}" ${n===project.map.spawns.length-1?'selected':''}>${n} 個 AI 對手${n>1?' · 全部結盟':''}</option>`).join('')}</select></label><p class="muted">敵方全部結盟對抗我方。更改人數會保留既有地圖；減少對手會移除離開王國的預放建築，可按復原恢復。</p><button data-action="map-rules" class="wide">調整人口、時代與 AI 難度</button></div>${renderHeroPanel()}${renderMapBuildingPanel()}<div class="panel-section"><div class="section-label">我的起始資源</div><p class="muted">只調整我方。敵方各項起始資源為 ${project.rules.starting.toLocaleString()}，不受這裡的設定影響。</p><div class="row">${Object.entries({wood:"木材",food:"食物",gold:"黃金",stone:"石頭"}).map(([r,label])=>`<label>${label}<input aria-label="我的起始${label}" data-player-resource="${r}" type="number" min="0" max="1000000" step="1" required value="${project.rules.playerStartingResources[r]}"></label>`).join("")}</div></div><div class="panel-section"><div class="section-label">地圖資源存量 · 雙方共享</div><p class="muted">每格：木材 ${project.map.resourceAmounts.wood.toLocaleString()}、食物 ${project.map.resourceAmounts.food.toLocaleString()}、黃金／石頭各 ${project.map.resourceAmounts.gold.toLocaleString()}。敵方可正常採集。新河谷已為各出生點配置四種資源。</p><button data-action="enrich-resources" class="wide">為所有出生點補上大量資源</button></div><div class="panel-section"><label>地圖名稱<input id="map-title" maxlength="40" value="${escape(project.map.name)}"></label><div class="section-label">地形與可採集資源</div><div class="brush-grid">${Object.entries(TILE_NAMES).map(([key, name]) => `<button class="brush ${ui.brush === key && ui.spawnBrush === null && !ui.heroBrush && !ui.mapBuildingBrush ? 'active' : ''}" data-brush="${key}"><i style="background:${COLORS[key]}"></i>${name}</button>`).join('')}</div><label>筆刷大小<select id="brush-size"><option value="1">1 格 · 精細</option><option value="2">3 × 3</option><option value="3">5 × 5</option><option value="6">11 × 11</option><option value="11">21 × 21</option></select></label></div><div class="panel-section"><div class="section-label">${project.map.spawns.length} 個王國出生點</div><div class="spawn-buttons">${project.map.spawns.map((_,i)=>`<button data-spawn="${i}" class="${ui.spawnBrush===i?'active':''}">⚑ ${i===0?'我方':'AI '+i+(project.rules.aiAlliance?' · 聯盟':'')}</button>`).join('')}</div><p class="muted">選擇王國，再點空地移動出生點。上方可直接調整 1–3 個 AI 對手。</p><div class="row"><button data-action="view-spawn">查看我方 ⌖</button><button data-action="spread-spawns">分散出生點</button></div></div><div class="panel-section"><div class="section-label">地圖模板</div><label>世界格數<select id="map-size">${[64,128,256,512,1280,1536,2048].map(n=>`<option value="${n}" ${n===project.map.size?'selected':''}>${n.toLocaleString()} × ${n.toLocaleString()} ${n===128?'· 預設小地圖':n===1280?'· 超大世界':''}</option>`).join('')}</select></label><button data-action="compact-map" class="wide">建立 128 × 128 小河谷</button><div class="row"><button data-action="random-map">自然河谷</button><button data-action="blank-map">草原背景</button></div><div class="form-actions"><button data-action="undo" ${undo.length?'':'disabled'}>↶ 復原筆刷</button><button data-action="hero-workshop">創造英雄 ♞</button></div><button data-action="test-map" class="primary wide" style="margin-top:12px">完成地圖，開始對戰 ▶</button></div>`;
     $('brush-size').value = ui.brushSize;
   } else renderUnitsPanel();
 }
@@ -356,10 +361,10 @@ function renderSelection() {
   const groups=selectionGroups(list);
   const attacking=own.filter(u=>u.kind==='unit'&&(u.order?.type==='attack'||u.autoTarget&&world.isEnemy(u.team,world.entity(u.autoTarget)?.team)));
   const name = list.length > 1 ? groups.length===1?`${groups[0].name} × ${list.length}`:`已選取 ${list.length} 個單位／建築` : e ? e.kind === 'building' ? BUILDINGS[e.type].name : e.blueprint.name : ui.mode === 'map' ? '地圖筆刷' : '等待你的指揮';
-  const subtitle = list.length > 1 ? attacking.length?`${attacking.length} 名部隊 · ${combatOrderHint(world,attacking[0])}${ui.paused?' · 已暫停':''}`:'點類別篩選 · Shift 點頭像移除 · Ctrl＋數字編組' : e ? `${e.team === 0 ? '我方' : 'AI '+e.team} · ${Math.ceil(e.hp-1e-6)} / ${Math.round(e.maxHp)} 生命${e.blueprint ? ` · ${combatOrderHint(world,e)}${ui.paused ? ' · 已暫停' : ''}` : ''}` : ui.mode === 'map' ? `目前：${ui.spawnBrush === null ? TILE_NAMES[ui.brush] : ui.spawnBrush === 0 ? '我方出生點' : 'AI 出生點'}` : '先左鍵選取村民或士兵，再右鍵下指令';
+  const subtitle = list.length > 1 ? attacking.length?`${attacking.length} 名部隊 · ${combatOrderHint(world,attacking[0])}${ui.paused?' · 已暫停':''}`:'點類別篩選 · Shift 點類別／頭像移除 · Ctrl＋數字編組' : e ? `${e.team === 0 ? '我方' : 'AI '+e.team} · ${Math.ceil(e.hp-1e-6)} / ${Math.round(e.maxHp)} 生命${e.blueprint ? ` · ${combatOrderHint(world,e)}${ui.paused ? ' · 已暫停' : ''}` : ''}` : ui.mode === 'map' ? `目前：${ui.spawnBrush === null ? TILE_NAMES[ui.brush] : ui.spawnBrush === 0 ? '我方出生點' : 'AI 出生點'}` : '先左鍵選取村民或士兵，再右鍵下指令';
   const symbol = e ? SYMBOLS[e.kind === 'building' ? e.type : e.blueprint.look] || '⌂' : ui.mode === 'map' ? '▧' : '♜';
   const portrait = e && portraitSource(e);
-  html('selection-info', `<div class="portrait">${portrait ? `<img src="${escape(portrait)}" alt="">` : symbol}</div><div class="selection-copy"><strong>${escape(name)}</strong><small>${escape(subtitle)}</small>${e && list.length === 1 ? `<div class="health-meter"><i style="width:${clamp(e.hp / e.maxHp * 100, 0, 100)}%"></i></div>` : ''}${e?.blueprint && list.length === 1 ? `<div class="unit-stats">${e.blueprint.role==='trader'?`<span>本趟收入 ${e.order?.cargo||0} 金</span><span>往返市集貿易</span>`:`<span>⚔ ${e.blueprint.attack}</span><span title="近戰／遠程護甲">護甲 ${e.blueprint.armor} / ${e.blueprint.pierceArmor??e.blueprint.armor}</span><span>射程 ${Number(e.blueprint.range.toFixed(2))}</span>`}<span>速度 ${Number(e.blueprint.speed.toFixed(2))}</span>${e.blueprint.hero?`<span>回血 ${e.blueprint.regen??1}/秒</span>`:''}</div>` : ''}</div>${list.length>1?`<div class="selection-groups">${groups.map(g=>`<button data-select-group="${escape(g.key)}" title="只選取${escape(g.name)}">${escape(g.name)} <b>${g.ids.length}</b></button>`).join('')}</div><div class="unit-selection">${list.slice(0,24).map(u=>{const src=portraitSource(u);return `<button data-select="${u.id}" title="${escape(u.kind==='building'?BUILDINGS[u.type].name:u.blueprint.name)} · ${Math.ceil(u.hp)}/${u.maxHp}">${src?`<img src="${escape(src)}" alt="">`:SYMBOLS[u.blueprint?.look]||'♟'}<i style="width:${clamp(u.hp/u.maxHp*100,0,100)}%"></i></button>`;}).join('')}${list.length>24?`<span>＋${list.length-24}</span>`:''}</div>`:''}`);
+  html('selection-info', `<div class="portrait">${portrait ? `<img src="${escape(portrait)}" alt="">` : symbol}</div><div class="selection-copy"><strong>${escape(name)}</strong><small>${escape(subtitle)}</small>${e && list.length === 1 ? `<div class="health-meter"><i style="width:${clamp(e.hp / e.maxHp * 100, 0, 100)}%"></i></div>` : ''}${e?.blueprint && list.length === 1 ? `<div class="unit-stats">${e.blueprint.role==='trader'?`<span>本趟收入 ${e.order?.cargo||0} 金</span><span>往返市集貿易</span>`:`<span>⚔ ${e.blueprint.attack}</span><span title="近戰／遠程護甲">護甲 ${e.blueprint.armor} / ${e.blueprint.pierceArmor??e.blueprint.armor}</span><span>射程 ${Number(e.blueprint.range.toFixed(2))}</span>`}<span>速度 ${Number(e.blueprint.speed.toFixed(2))}</span>${e.blueprint.hero?`<span>回血 ${e.blueprint.regen??1}/秒</span>`:''}</div>` : ''}</div>${list.length>1?`<div class="selection-groups">${groups.map(g=>`<button data-select-group="${escape(g.key)}" title="只選取${escape(g.name)}；Shift 點擊移除此類別">${escape(g.name)} <b>${g.ids.length}</b></button>`).join('')}</div><div class="unit-selection">${list.slice(0,24).map(u=>{const src=portraitSource(u);return `<button data-select="${u.id}" title="${escape(u.kind==='building'?BUILDINGS[u.type].name:u.blueprint.name)} · ${Math.ceil(u.hp)}/${u.maxHp}">${src?`<img src="${escape(src)}" alt="">`:SYMBOLS[u.blueprint?.look]||'♟'}<i style="width:${clamp(u.hp/u.maxHp*100,0,100)}%"></i></button>`;}).join('')}${list.length>24?`<span>＋${list.length-24}</span>`:''}</div>`:''}`);
   if (ui.mode === 'map') { html('command-actions','<span class="muted">左鍵畫地形 · Ctrl＋Z 復原 · 中鍵拖曳視角</span>'); return; }
   const buildings = own.filter(e=>e.kind==='building');
   if (buildings.length && buildings.length===own.length) {
@@ -393,7 +398,8 @@ function renderSelection() {
     }
   }
   for (const a of actions) { a.reason=actionReason(world,a,own); a.disabled=Boolean(a.reason); }
-  html('command-actions',actions.length ? actions.map(a=>`<button class="action ${a.disabled?'unavailable':''} ${a.active || ui.placement && a.id===`build:${ui.placement}`||ui.orderMode===a.id||ui.attackMove&&a.id==='attack-move'?'active':''}" style="${a.key&&'qwertasdfgzxcvb'.includes(a.key.toLowerCase())?`grid-column:${'qwertasdfgzxcvb'.indexOf(a.key.toLowerCase())%5+1};grid-row:${Math.floor('qwertasdfgzxcvb'.indexOf(a.key.toLowerCase())/5)+1}`:''}" data-command="${escape(a.id)}" aria-disabled="${a.disabled}" aria-describedby="action-tooltip" title="${escape(a.label)}${a.key?' · '+a.key:''}${a.cost?' · '+escape(a.cost):''}"><kbd>${escape((a.key||'').toUpperCase())}</kbd><span class="symbol">${a.image?`<img src="${escape(a.image)}" alt="">`:a.symbol}</span><span class="label">${escape(a.label)}</span><span class="cost">${escape(a.cost||'')}</span></button>`).join('') : `<span class="muted">${e?.garrison?'駐軍中。選取所在建築，按 G 撤出。':'左鍵選取村民採集、建造；選取城鎮中心後按 Q 訓練村民。'}</span>`);
+  actions=layoutActions(actions);
+  html('command-actions',actions.length ? actions.map(a=>`<button class="action ${a.disabled?'unavailable':''} ${a.active || ui.placement && a.id===`build:${ui.placement}`||ui.orderMode===a.id||ui.attackMove&&a.id==='attack-move'?'active':''}" style="grid-column:${a.column};grid-row:${a.row}" data-command="${escape(a.id)}" aria-disabled="${a.disabled}" aria-describedby="action-tooltip" title="${escape(a.label)}${a.key?' · '+a.key:''}${a.cost?' · '+escape(a.cost):''}"><kbd>${escape((a.key||'').toUpperCase())}</kbd><span class="symbol">${a.image?`<img src="${escape(a.image)}" alt="">`:a.symbol}</span><span class="label">${escape(a.label)}</span><span class="cost">${escape(a.cost||'')}</span></button>`).join('') : `<span class="muted">${e?.garrison?'駐軍中。選取所在建築，按 G 撤出。':'左鍵選取村民採集、建造；選取城鎮中心後按 Q 訓練村民。'}</span>`);
 
 }
 function runAction(id, shift = false) {
@@ -416,7 +422,7 @@ function runAction(id, shift = false) {
   else if(id==='start-trade') { let sent=0,error='沒有可開始貿易的商隊。';for(const u of units.filter(u=>u.blueprint.role==='trader')){const reason=world.startTrade(u,null,shift);if(reason)error=reason;else sent++;}if(!sent)toast(error); }
   else if (id==='attack-move') { ui.attackMove=true; ui.placement=null; ui.orderMode=null; toast('左鍵點地面，部隊會沿途迎擊。'); }
   else if (['patrol','guard','follow','repair','garrison','convert','rally','attack-ground','heal'].includes(id)) { ui.orderMode=id; ui.attackMove=false; ui.placement=null; toast(`${{patrol:'巡邏：點地面',guard:'守衛：點我方單位',follow:'跟隨：點單位',repair:'修理：點我方建築',garrison:'進駐：點城鎮中心、箭塔或城堡',convert:'招降：點敵方單位',rally:'集結點：點地面或資源', 'attack-ground':'攻擊地面：點目標位置',heal:'治療：點我方單位'}[id]}。`); }
-  else if (id.startsWith('stance:')) { for (const u of units.filter(u=>world.isMilitary(u))) { u.stance=id.slice(7); u.autoTarget=null; u.combatOrigin=null; u.combatReturning=false; u.path=[]; u.pathGoal=null; u.repath=0; } }
+  else if (id.startsWith('stance:')) { applySelectionStance(world,units,id.slice(7));toast(`部隊姿態：${STANCES[id.slice(7)]}。`); }
   else if (id.startsWith('formation:')) { ui.formation=id.slice(10); world.reformFormation(units.map(u=>u.id),ui.formation); }
   else if (id==='pack') for (const u of units.filter(u=>u.blueprint.packed)) { world.command([u.id],null); world.pack(u,!u.packed); }
   else if (id==='ungarrison') for (const b of buildings) world.ungarrison(b.id);
@@ -440,51 +446,13 @@ function issueAt(pos, shift = false, attackMove = false, forceGarrison = false, 
   return issueCommand(p,target,shift,attackMove,forceGarrison,forceMove);
 }
 function issueCommand(p, target, shift = false, attackMove = false, forceGarrison = false, forceMove = false) {
-  p={x:Math.round(p.x),y:Math.round(p.y)};
-  const n=project.map.size; if (p.x<0||p.y<0||p.x>=n||p.y>=n) return false;
-  const own=ownEntities(), units=own.filter(e=>e.kind==='unit'&&!e.garrison);
-  if (!own.length) { toast('先左鍵選取自己的村民或士兵，再右鍵下指令；按 . 可選取閒置村民。'); return false; }
-  let error=null,sent=false;
-  const send=(ids,order)=>{const result=world.command(ids,order,shift);if(result)error=result;else sent=true;};
-  const mode=forceGarrison?'garrison':ui.orderMode;
-  if (forceMove) { moveFormation(units,p,shift,false); for (const b of own.filter(e=>e.kind==='building')) b.rally={type:'move',...p}; }
-  else if (own.every(e=>e.kind==='building')) { for (const b of own) b.rally=target?.team>0?{type:'attack',target:target.id}:target?.type==='farm'?{type:'gather',target:target.id}:RESOURCE[world.tile(p.x,p.y)]?{type:'gather',...p,resource:RESOURCE[world.tile(p.x,p.y)]}:{type:'move',...p}; toast('集結點已設定。'); }
-  else if (mode) {
-    if (mode==='attack-ground') send(units.filter(u=>u.blueprint.attackGround||u.blueprint.splash).map(u=>u.id),{type:'attackGround',...p});
-    else if (mode==='patrol') send(units.filter(u=>world.isMilitary(u)).map(e=>e.id),{type:'patrol',...p});
-    else if (target) send(units.filter(u=>mode==='repair'?u.blueprint.role==='worker':mode==='convert'?u.blueprint.canConvert:mode==='heal'?u.blueprint.role==='healer':mode==='garrison'?u.blueprint.role!=='trader':true).map(e=>e.id),{type:mode,target:target.id});
-    else { toast('請點選有效目標。'); return false; }
-  } else if (target?.team>0&&!attackMove) {
-    for (const u of units) {
-      if(u.blueprint.role==='trader') {
-        if(target.kind==='building'&&target.type==='market'){const result=world.startTrade(u,target.id,shift);if(result)error=result;else sent=true;}
-        else error='商隊無法攻擊；右鍵其他勢力的市集開始貿易。';
-      } else send([u.id],{type:u.blueprint.canConvert&&target.kind==='unit'?'convert':'attack',target:target.id});
-    }
-  } else if (target?.team===0&&target.kind==='building'&&units.some(u=>u.blueprint.role==='worker')&&!attackMove) {
-    const type=target.progress<1?'build':target.type==='farm'?'gather':target.hp<target.maxHp?'repair':null;
-    const workers=units.filter(e=>e.blueprint.role==='worker');
-    if (type==='gather') {
-      const farm=workers.find(u=>!world.farmWorker(target,u.id));
-      if (farm) send([farm.id],{type:'gather',target:target.id}); else { toast('這座農田已有村民耕作。每座農田只供一名村民使用。'); return false; }
-    } else if (type) send(workers.map(e=>e.id),{type,target:target.id});
-    else if (workers.some(u=>u.carried&&BUILDINGS[target.type].dropoff?.includes(u.carrying))) {
-      for (const u of workers.filter(u=>u.carried&&BUILDINGS[target.type].dropoff?.includes(u.carrying))) send([u.id],{type:'deliver',target:target.id});
-    }
-    else moveFormation(units,p,shift,false);
-  } else if (target?.team===0&&target.kind==='unit'&&units.some(u=>u.blueprint.role==='healer')&&!attackMove) send(units.filter(u=>u.blueprint.role==='healer').map(u=>u.id),{type:'heal',target:target.id});
-  else if (['forest','food','gold','stone'].includes(world.tile(p.x,p.y))&&units.some(e=>e.blueprint.role==='worker')&&!attackMove) send(units.filter(e=>e.blueprint.role==='worker').map(e=>e.id),{type:'gather',...p});
-  else moveFormation(units,p,shift,attackMove);
-  if(error&&!sent){toast(error);updateHud(true);return false;}
-  renderer.marker={...p,attack:attackMove||target?.team>0&&units.some(u=>u.blueprint.role!=='trader'),time:frameTime}; updateHud(true);
-  if (!ui.started || ui.paused) toast(!ui.started ? '指令已設定；按「開始」後執行。' : '指令已設定，目前對戰暫停；按 F3 或「繼續」執行。');
+  const result=applyContextCommand(world,ownEntities(),{...p,target},{shift,attackMove,forceGarrison,forceMove,mode:ui.orderMode,formation:ui.formation});
+  if(!result.sent){toast(result.errors[0]||'沒有可執行這項指令的單位。');updateHud(true);return false;}
+  renderer.marker={x:Math.round(p.x),y:Math.round(p.y),attack:result.attack,time:frameTime};
+  updateHud(true);
+  const waiting=!ui.started?'；按「開始」後執行':ui.paused?'；目前暫停，按 F3 繼續':'';
+  toast(`${shift?'已加入排程 · ':''}${result.summary}${waiting}${result.errors.length?' · '+result.errors.join(' '):''}`);
   return true;
-}
-function moveFormation(units,p,shift,attackMove) {
-  if(attackMove&&units.some(u=>u.blueprint.role==='trader')) {
-    world.moveFormation(units.filter(u=>u.blueprint.role!=='trader').map(u=>u.id),p,ui.formation,shift,true);
-    world.moveFormation(units.filter(u=>u.blueprint.role==='trader').map(u=>u.id),p,ui.formation,shift,false);
-  } else world.moveFormation(units.map(u=>u.id),p,ui.formation,shift,attackMove);
 }
 function centerSelection() { const es=selectedEntities(); if (es.length) renderer.center({x:es.reduce((v,e)=>v+e.x,0)/es.length,y:es.reduce((v,e)=>v+e.y,0)/es.length}); }
 let eventCursor=0;
@@ -561,6 +529,7 @@ $('map').addEventListener('pointermove', e => {
   if(!pointer&&performance.now()-(renderer.hintTime||0)>70){renderer.hintTime=performance.now();updatePointerHint();}
 });
 $('map').addEventListener('pointerup', e => {
+  if(!pointer||pointer.id!==e.pointerId)return;
   const pos = position(e);
   if(pointer?.type==='mapWall'){const point=renderer.tileAt(pos.x,pos.y);for(const cell of editorWallLine(pointer.last,point))appendMapWall(cell);finishMapWall();}
   else if (pointer?.type === 'wall') { const result=world.buildWall(ownEntities().map(u=>u.id),pointer.start,renderer.tileAt(pos.x,pos.y),pointer.shift); if (result.error) toast(result.error); if (!pointer.shift) { ui.placement=null; ui.buildMenu=false; } updateHud(true); }
@@ -631,7 +600,7 @@ $('minimap').addEventListener('pointercancel',()=>{minimapPointer=null;});
 $('zoom-out').onclick = () => zoom(1/1.1); $('zoom-in').onclick = () => zoom(1.1);
 $('fit').onclick = () => { if (!renderer.restoreView()) renderer.fit(project.map); keys.clear(); pointerPos = null; updateCameraControls(); };
 $('reset-view').onclick = resetCamera;
-$('drag-view').onclick=()=>{ui.leftDragPan=!ui.leftDragPan;updateCameraControls();$('map').focus({preventScroll:true});};
+$('drag-view').onclick=()=>{ui.leftDragPan=!ui.leftDragPan;try{localStorage.setItem(CONTROL_STORAGE,JSON.stringify({leftDragPan:ui.leftDragPan}));}catch{}updateCameraControls();$('map').focus({preventScroll:true});toast(ui.leftDragPan?'已開啟空地左拖移動視角；Shift 拖曳或從單位開始拖曳可框選。':'已切換一般左鍵框選；可用方向鍵、邊緣或小地圖移動視角。');};
 $('fullscreen-button').onclick = toggleFullscreen;
 document.querySelectorAll('.tab').forEach(b => b.onclick = () => switchMode(b.dataset.mode));
 $('start').onclick = startBattle; $('reset-battle').onclick = () => { previewReset(); toast('已重新部署，準備開始新戰役。'); }; $('play-again').onclick = () => { previewReset(); startBattle(); };
@@ -663,7 +632,7 @@ document.querySelector('.command-pane').addEventListener('focusin',e=>{ const b=
 document.querySelector('.command-pane').addEventListener('focusout',()=>{hoveredAction=null;refreshActionTooltip();});
 $('selection-info').addEventListener('click',e=>{
   const group=e.target.closest('[data-select-group]');
-  if(group) { const g=selectionGroups(selectedEntities()).find(g=>g.key===group.dataset.selectGroup); if(g) select(g.ids); $('map').focus({preventScroll:true});return; }
+  if(group) { const g=selectionGroups(selectedEntities()).find(g=>g.key===group.dataset.selectGroup); if(g) select(e.shiftKey?[...ui.selected].filter(id=>!g.ids.includes(id)):g.ids); $('map').focus({preventScroll:true});return; }
   const unit=e.target.closest('[data-select]');
   if(unit) { if(e.shiftKey) ui.selected.delete(Number(unit.dataset.select)); else select([Number(unit.dataset.select)]);updateHud(true);$('map').focus({preventScroll:true}); }
 });
@@ -683,6 +652,7 @@ $('sidebar').addEventListener('click', e => {
   else if (b.dataset.heroPlace) beginHeroPlacement(b.dataset.heroPlace);
   else if (b.dataset.heroView) { clearEditorTools();ui.heroSelected=b.dataset.heroView;renderer.restoreView();renderer.zoom=Math.max(renderer.zoom,.9);renderer.center(project.map.heroPlacements?.find(p=>p.unitId===ui.heroSelected)||project.map.spawns[0]);renderSidebar();updateHud(true); }
   else if (b.dataset.group) recallGroup(b.dataset.group, e.shiftKey);
+  else if (b.dataset.action === 'map-rules') openRules();
   else if (b.dataset.unit) { editId = b.dataset.unit; renderUnitsPanel(); }
   else if (b.dataset.action === 'enrich-resources') { pushUndo(); enrichMapResources(project.map); markDirty(); previewReset(); renderSidebar(); toast('各王國出生點都已補上大量森林、食物、金礦與石礦。'); }
   else if (b.dataset.action === 'compact-map') { $('map-size').value=128; changeMap(false); toast('已建立 128 × 128 小河谷；可按復原恢復原地圖。'); }
@@ -722,6 +692,13 @@ $('sidebar').addEventListener('input', e => {
 });
 $('sidebar').addEventListener('submit', e => { if (e.target.id === 'unit-form') { e.preventDefault(); saveUnit(); } });
 $('sidebar').addEventListener('change', async e => {
+  if(e.target.id==='map-enemy-count') {
+    if(!validResourceInputs()){e.target.value=project.map.spawns.length-1;return;}
+    const count=Number(e.target.value);if(count===project.map.spawns.length-1)return;
+    try {const next=clone(project);next.rules.aiAlliance=true;next.map=setEnemyCount(next,count);const validated=validateProject(next);pushUndo();project=validated;clearEditorTools();markDirty();rebuildMapPreview();toast(`已設定 ${count} 個 AI 對手${count>1?'，敵方全部結盟':''}；原地圖已保留。`);}
+    catch(err){toast(err.message);renderSidebar();}
+    return;
+  }
   if(e.target.id==='hero-batch-size'){ui.heroBatchSize=Number(e.target.value);renderSidebar();updateHud(true);return;}
   if(e.target.id==='map-building-team'){const team=Number(e.target.value);if(ui.mapBuildingMoveKey)clearEditorTools(false);ui.mapBuildingTeam=team;renderSidebar();updateHud(true);return;}
   if (e.target.id !== 'unit-image') return; const file = e.target.files[0], form = $('unit-form'), currentEditId = editId; if (!file) return;

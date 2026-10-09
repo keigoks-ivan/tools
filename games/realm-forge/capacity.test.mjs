@@ -10,11 +10,11 @@ function setup(freePlayerPopulation=true) {
 function run(w,seconds){for(let i=0;i<seconds*10;i++)w.tick(.1);}
 function house(w,team,point){const site=w.nearestBuildingSite('house',point,true);assert.ok(site);const b=w.addBuilding('house',team,site.x,site.y,true);assert.ok(b);return b;}
 
-test('default player capacity is the full 500 and housing still limits every enemy',()=>{
+test('default player capacity is the full 300 and housing still limits every enemy',()=>{
   const w=setup();assert.equal(w.buildings.some(b=>b.type==='house'),false);
-  assert.equal(w.capacity(0),500);assert.equal(w.project.rules.enemyPopulation,300);
+  assert.equal(w.capacity(0),300);assert.equal(w.project.rules.enemyPopulation,300);
   for(let team=1;team<w.teams;team++)assert.equal(w.capacity(team),5);
-  const b=house(w,0,{x:8,y:8});assert.equal(w.capacity(0),500);b.hp=0;assert.equal(w.capacity(0),500);
+  const b=house(w,0,{x:8,y:8});assert.equal(w.capacity(0),300);b.hp=0;assert.equal(w.capacity(0),300);
 });
 test('player training crosses the initial town capacity while enemy training waits for a house',()=>{
   const w=setup(),towns=[0,1].map(team=>w.buildings.find(b=>b.team===team&&b.type==='town'));
@@ -45,14 +45,14 @@ test('free housing never permits training above the configured population cap',(
 });
 test('enemy housing and training respect the independent default 300-person cap',()=>{
   const w=setup();for(let i=0;i<65;i++)house(w,1,{x:5+(i%10)*5,y:5+Math.floor(i/10)*5});
-  assert.equal(w.capacity(1),300);assert.equal(w.capacity(0),500);
+  assert.equal(w.capacity(1),300);assert.equal(w.capacity(0),300);
   const town=w.buildings.find(b=>b.team===1&&b.type==='town');
   while(w.population(1)<300)w.spawn('villager',1,{x:town.x+5,y:town.y+5});
   assert.equal(w.train(town.id,'villager'),null);const left=town.queue[0].left;run(w,30);
   assert.equal(w.population(1),300);assert.equal(town.queue[0].left,left);
   w.units.find(u=>u.team===1).hp=0;run(w,30);
   assert.equal(w.population(1),300);assert.equal(town.queue.length,0);
-  w.project.rules.enemyPopulation=200;assert.equal(w.capacity(1),200);assert.equal(w.capacity(0),500);
+  w.project.rules.enemyPopulation=200;assert.equal(w.capacity(1),200);assert.equal(w.capacity(0),300);
 });
 test('missing enemy cap adopts 300 while an explicit 200-person setting survives validation',()=>{
   const p=defaultProject();delete p.rules.enemyPopulation;

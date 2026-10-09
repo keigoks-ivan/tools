@@ -1,4 +1,6 @@
-import { BUILDINGS, RESOURCE } from './core.mjs?v=20261009k';
+import { BUILDINGS, RESOURCE } from './core.mjs?v=20261009l';
+import { directAICombat } from './ai-combat.mjs?v=20261009l';
+import { strategicOrders } from './ai-strategy.mjs?v=20261009l';
 
 export const AI_PROFILES = {
   off: { gather: 1, build: 1, train: 1, trade: 1 },
@@ -150,9 +152,9 @@ export function updateAI(w, team) {
     if (tech) w.research(b.id, tech.id);
   }
   const enemies = [...w.buildings, ...w.units].filter(e => e.hp > 0 && !e.garrison && w.isEnemy(team, e.team));
-  const threats = enemies.filter(e => distance(e, origin) < 18), targets = threats.length ? threats : enemies;
+  const threats = enemies.filter(e => distance(e, origin) < 18), targets = enemies;
   const target = targets.sort((a, b) => (a.type === 'town' ? -200 : 0) + distance(a, origin) - ((b.type === 'town' ? -200 : 0) + distance(b, origin)))[0];
   const attacking = w.project.rules.ai !== 'calm' && target && (threats.length || army.length >= 6 || !town || w.time > 120);
   directHealers(w, army, enemies, attacking);
-  if (attacking) for (const u of army.filter(u => u.blueprint.role !== 'healer')) if (!u.order || u.failed || u.order.type === 'attack' && !w.entity(u.order.target)) w.command([u.id], { type: 'attack', target: target.id });
+  directAICombat(w, team, army, origin, enemies, target, attacking, attacking ? strategicOrders(w, team, army, target) : new Map());
 }
