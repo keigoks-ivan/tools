@@ -27,6 +27,13 @@ test('changing enemy count preserves retained spawns and ordinary edited terrain
   p.map=setEnemyCount(p,3);assert.deepEqual(p.map.spawns.slice(0,3),original);assert.equal(p.map.tiles[130],'gold');
   p.map=setEnemyCount(p,1);assert.equal(p.map.spawns.length,2);assert.deepEqual(p.map.spawns[0],original[0]);
 });
+test('reducing enemies retains player and active enemy buildings and removes departed owners',()=>{
+  const p=defaultProject();p.map=setEnemyCount(p,3);
+  p.map.buildingPlacements=[{id:'own',type:'castle',team:0,x:8,y:8},{id:'ally',type:'tower',team:1,x:12,y:8},{id:'departed',type:'wall',team:3,x:15,y:8}];
+  p.map=setEnemyCount(p,1);
+  assert.deepEqual(p.map.buildingPlacements.map(b=>b.id),['own','ally']);
+  assert.equal(new World(p).teams,2);
+});
 test('enemy population is separate from the player and counts units in training',()=>{
   const w=setup();w.project.rules.population=500;w.project.rules.enemyPopulation=50;
   for(let team=0;team<w.teams;team++)for(let i=0;i<12;i++)w.addBuilding('house',team,3+i*4,3+team*6,true);

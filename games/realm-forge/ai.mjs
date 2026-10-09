@@ -1,4 +1,4 @@
-import { BUILDINGS, RESOURCE } from './core.mjs?v=20261009j';
+import { BUILDINGS, RESOURCE } from './core.mjs?v=20261009k';
 
 export const AI_PROFILES = {
   off: { gather: 1, build: 1, train: 1, trade: 1 },

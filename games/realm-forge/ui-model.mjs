@@ -1,6 +1,6 @@
-import { BUILDINGS, RESOURCE, buildingDistance } from './core.mjs?v=20261009j';
-import { CIVILIZATION, TECHNOLOGIES } from './civilization.mjs?v=20261009j';
-import { orderHint } from './controls.mjs?v=20261009j';
+import { BUILDINGS, RESOURCE, buildingDistance } from './core.mjs?v=20261009k';
+import { CIVILIZATION, TECHNOLOGIES } from './civilization.mjs?v=20261009k';
+import { orderHint } from './controls.mjs?v=20261009k';
 
 export function combatOrderHint(world,unit) {
   if(unit.garrison||unit.failed||unit.packLeft>0||!unit.blueprint)return orderHint(unit);
@@ -39,7 +39,6 @@ export function actionReason(world, action, selected) {
   if (kind === 'build') return buildReason(world,id);
   if (kind === 'train') {
     const bp = world.effectiveBlueprint(id,0), buildings = selected.filter(b=>b.kind==='building'&&b.progress===1&&world.availableUnits(0,b.type).some(u=>u.id===id));
-    if (bp.hero && (world.units.some(u=>u.team===0&&u.blueprint.id===id)||world.buildings.some(b=>b.team===0&&b.queue.some(q=>q.unitId===id)))) return '這位英雄已在戰場或訓練中';
     if (!buildings.some(b=>b.queue.length<30)) return '訓練佇列已滿';
     return resourceShortage(world.stocks[0],{food:bp.food,gold:bp.gold,wood:bp.wood||0});
   }
@@ -70,6 +69,20 @@ export function placementFeedback(world, type, point) {
   if (!point) return { valid:true, reason:'移到空地，左鍵放置' };
   if (!world.canPlaceBuilding(type,point.x,point.y)) return { valid:false, reason:'占地被擋住，請移到空地' };
   return { valid:true, reason:'左鍵放置 · Shift 連續建造' };
+}
+export function heroPlacementFeedback(world,unitId,point,count=1,ignoreKey=null) {
+  const positions=world.planHeroPlacement(unitId,point,count,ignoreKey),full=positions.length===count;
+  return {positions,valid:positions.length>0,reason:full?'':!ignoreKey&&world.population(0)>=world.project.rules.population?'我方人口已達上限，請提高人口上限或刪除部分預放英雄。':`可放 ${positions.length} / ${count} 名：人口餘額或附近空地不足。`};
+}
+export function mapBuildingPlacementFeedback(world,type,point,ignoreKey=null) {
+  const valid=world.canPlaceMapBuilding(type,point.x,point.y,ignoreKey);
+  return {valid,reason:valid?'':'占地被擋住或地形不合，請移到空地。'};
+}
+export function editorWallLine(start,end) {
+  if(start.x>end.x||start.x===end.x&&start.y>end.y)return editorWallLine(end,start).reverse();
+  let x=Math.round(start.x),y=Math.round(start.y);const tx=Math.round(end.x),ty=Math.round(end.y),dx=Math.abs(tx-x),dy=Math.abs(ty-y),sx=x<tx?1:-1,sy=y<ty?1:-1,cells=[];let error=dx-dy;
+  while(true){cells.push({x,y});if(x===tx&&y===ty)break;const next=2*error;if(next>-dy){error-=dy;x+=sx;}if(next<dx){error+=dx;y+=sy;}}
+  return cells;
 }
 export function productionStatus(world, building, item, research=false) {
   const percent = Math.max(0,Math.min(100,Math.round((1-item.left/item.time)*100)));

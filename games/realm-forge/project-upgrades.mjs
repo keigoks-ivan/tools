@@ -1,6 +1,6 @@
-import { clone, generateMap, tileType, setTile, enrichMapResources } from './core.mjs?v=20261009j';
-import { CIV_UNITS } from './civilization.mjs?v=20261009j';
-import { LEGACY_UNIT_STATS } from './balance.mjs?v=20261009j';
+import { clone, generateMap, tileType, setTile, enrichMapResources } from './core.mjs?v=20261009k';
+import { CIV_UNITS } from './civilization.mjs?v=20261009k';
+import { LEGACY_UNIT_STATS } from './balance.mjs?v=20261009k';
 
 const WALKABLE = new Set(['grass', 'road', 'sand']);
 const INITIAL_RESOURCES = [[-5, 0, 'forest'], [-5, 1, 'forest'], [-5, 2, 'forest'], [0, 6, 'food'], [1, 6, 'food'], [6, 0, 'gold'], [6, 1, 'stone']];
@@ -32,6 +32,7 @@ export function setEnemyCount(project, count) {
   if (!Number.isInteger(count) || count < 1 || count > 3) throw new Error('敵人數量可選 1–3 個。');
   const map = clone(project.map);
   if (map.spawns.length > count + 1) map.spawns.length = count + 1;
+  if (map.buildingPlacements) map.buildingPlacements = map.buildingPlacements.filter(p=>p.team<=count);
   const n = map.size, near = Math.round(n * .22), far = Math.round(n * .78);
   const targets = [{x:far,y:near},{x:far,y:far},{x:near,y:near},{x:near,y:far}];
   while (map.spawns.length < count + 1) {

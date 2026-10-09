@@ -1,8 +1,8 @@
-import { CIV_UNITS, TECHNOLOGIES } from './civilization.mjs?v=20261009j';
-import { BUILDING_BALANCE } from './balance.mjs?v=20261009j';
-import { createRouteSearch } from './navigation.mjs?v=20261009j';
-import { smoothPath, segmentClear, pathGoalTail } from './motion.mjs?v=20261009j';
-import { AI_PROFILES, updateAI } from './ai.mjs?v=20261009j';
+import { CIV_UNITS, TECHNOLOGIES } from './civilization.mjs?v=20261009k';
+import { BUILDING_BALANCE } from './balance.mjs?v=20261009k';
+import { createRouteSearch } from './navigation.mjs?v=20261009k';
+import { smoothPath, segmentClear, pathGoalTail } from './motion.mjs?v=20261009k';
+import { AI_PROFILES, updateAI } from './ai.mjs?v=20261009k';
 export const clone = value => JSON.parse(JSON.stringify(value));
 export const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 export const RICH_RESOURCE_AMOUNTS = { wood: 5000, food: 10000, gold: 20000, stone: 20000 };
@@ -38,6 +38,8 @@ export function buildingBounds(type, inputX, inputY) {
   const [width, height] = BUILDINGS[type].footprint, x = Math.round(inputX) - (width % 2 ? 0 : .5), y = Math.round(inputY) - (height % 2 ? 0 : .5), minX = x - (width - 1) / 2, minY = y - (height - 1) / 2;
   return { x, y, minX, maxX: minX + width - 1, minY, maxY: minY + height - 1, width, height };
 }
+export const heroPlacementKey = p => p.id || `${p.unitId}:${p.x}:${p.y}`;
+export const buildingPlacementKey = p => p.id || `${p.team}:${p.type}:${p.x}:${p.y}`;
 export function buildingDistance(point, building) {
   const bounds = buildingBounds(building.type, building.x, building.y);
   return Math.hypot(Math.max(bounds.minX - .5 - point.x, 0, point.x - bounds.maxX - .5), Math.max(bounds.minY - .5 - point.y, 0, point.y - bounds.maxY - .5));
@@ -103,11 +105,16 @@ export function generateMap(size = 128, seed = 7) {
 }
 export function enrichMapResources(map) {
   map.resourceAmounts = clone(RICH_RESOURCE_AMOUNTS);
+  const protectedCells = new Set((map.heroPlacements || []).map(p => p.y * map.size + p.x));
+  for (const p of map.buildingPlacements || []) if (BUILDINGS[p.type]) {
+    const b = buildingBounds(p.type, p.x, p.y);
+    for (let y = b.minY; y <= b.maxY; y++) for (let x = b.minX; x <= b.maxX; x++) protectedCells.add(y * map.size + x);
+  }
   // Every kingdom gets the same reserves, with gaps between deposits and its town.
   for (const spawn of map.spawns) for (const [dx, dy, type] of [[-8,0,'forest'],[0,8,'food'],[8,0,'gold'],[0,-8,'stone']]) {
     for (let y=-1;y<=1;y++) for (let x=-1;x<=1;x++) {
       const tx=clamp(spawn.x+dx+x,1,map.size-2),ty=clamp(spawn.y+dy+y,1,map.size-2);
-      if (Math.hypot(tx-spawn.x,ty-spawn.y)>=5 && tileType(map,tx,ty)!=='water') setTile(map,tx,ty,type);
+      if (!protectedCells.has(ty * map.size + tx) && Math.hypot(tx-spawn.x,ty-spawn.y)>=5 && tileType(map,tx,ty)!=='water') setTile(map,tx,ty,type);
     }
   }
   return map;
@@ -140,12 +147,26 @@ export function validateProject(value) {
     if (typeof u.name !== 'string' || !u.name.trim() || u.name.length > 24 || !/^#[a-f\d]{6}$/i.test(u.color)) throw new Error('兵種名稱或顏色不正確。');
     if (typeof u.image !== 'string' || (u.image && (!/^data:image\/(png|webp|jpeg);base64,[a-zA-Z0-9+/=]+$/.test(u.image) || u.image.length > 400000))) throw new Error('兵種圖片必須是小型 PNG、JPEG 或 WebP 圖片。');
   }
+  const placementIds = new Set();
+  const validatePlacementId = point => {
+    if (point.id === undefined) return;
+    if (typeof point.id !== 'string' || !point.id.trim() || point.id.length > 160 || placementIds.has(point.id)) throw new Error('地圖預放物件的 id 必須是唯一且非空的字串。');
+    placementIds.add(point.id);
+  };
+  const validPlacementPoint = point => Number.isInteger(point.x) && Number.isInteger(point.y) && point.x >= 0 && point.y >= 0 && point.x < n && point.y < n;
   if (p.map.heroPlacements !== undefined) {
-    if (!Array.isArray(p.map.heroPlacements) || p.map.heroPlacements.length > p.units.length) throw new Error('英雄出生位置格式不正確。');
-    const placed = new Set(), positions = new Set(); for (const point of p.map.heroPlacements) {
+    if (!Array.isArray(p.map.heroPlacements) || p.map.heroPlacements.length > 5000) throw new Error('英雄出生位置格式不正確，最多 5,000 份。');
+    for (const point of p.map.heroPlacements) {
       if (!point || !p.units.some(u => u.id === point.unitId && u.hero === true)) throw new Error('英雄出生位置必須對應現有的玩家英雄。');
-      if (!Number.isInteger(point.x) || !Number.isInteger(point.y) || point.x < 0 || point.y < 0 || point.x >= n || point.y >= n) throw new Error('英雄出生位置必須是地圖內的整數格。');
-      if (placed.has(point.unitId) || positions.has(point.y * n + point.x)) throw new Error('英雄出生位置不能重複或重疊。'); placed.add(point.unitId); positions.add(point.y * n + point.x);
+      if (!validPlacementPoint(point)) throw new Error('英雄出生位置必須是地圖內的整數格。');
+      validatePlacementId(point);
+    }
+  }
+  if (p.map.buildingPlacements !== undefined) {
+    if (!Array.isArray(p.map.buildingPlacements) || p.map.buildingPlacements.length > 5000) throw new Error('地圖預放建築格式不正確，最多 5,000 棟。');
+    for (const point of p.map.buildingPlacements) {
+      if (!point || !Object.hasOwn(BUILDINGS, point.type) || !Number.isInteger(point.team) || point.team < 0 || point.team >= p.map.spawns.length || !validPlacementPoint(point)) throw new Error('地圖預放建築需要有效類型、王國與地圖內整數位置。');
+      validatePlacementId(point);
     }
   }
   if (!p.rules || !Number.isInteger(p.rules.population) || p.rules.population < 50 || p.rules.population > 2000 || !Number.isFinite(p.rules.starting) || p.rules.starting < 0 || p.rules.starting > 1000000 || !['off', 'calm', 'normal', 'hard'].includes(p.rules.ai) || p.rules.aiAlliance !== undefined && typeof p.rules.aiAlliance !== 'boolean' || p.rules.startingBase !== undefined && !['town', 'full'].includes(p.rules.startingBase)) throw new Error('對戰規則不正確。');
@@ -237,8 +258,26 @@ export class World {
     this.stocks = Array.from({ length: this.teams }, (_, team) => team === 0 ? clone(this.project.rules.playerStartingResources) : Object.fromEntries(['wood','food','gold','stone'].map(r=>[r,this.project.rules.starting])));
     this.amounts = {};this.tradeEarned=Array(this.teams).fill(0);
     this.visible = new Uint8Array(this.map.size ** 2); this.explored = new Uint8Array(this.map.size ** 2); this.blockedCells = new Set(); this.occupiedCells = new Map(); this.spatial = new Map(); this.entities = new Map(); this.aiTimer = 0; this.visionTimer = 0; this.pathBudget = 0;
+    const deployedBuildingKeys = new Set();
+    for (const placement of this.map.buildingPlacements || []) {
+      const key = buildingPlacementKey(placement);
+      if (deployedBuildingKeys.has(key) || !this.canPlaceMapBuilding(placement.type, placement.x, placement.y, key)) {
+        this.deploymentErrors.push(`預放${BUILDINGS[placement.type].name}（${placement.x}, ${placement.y}）與地形、建築或英雄重疊，請調整位置。`);
+        continue;
+      }
+      const building = this.addBuilding(placement.type, placement.team, placement.x, placement.y, true);
+      if (building) { building.buildingPlacementKey = key; deployedBuildingKeys.add(key); }
+      else this.deploymentErrors.push(`預放${BUILDINGS[placement.type].name}（${placement.x}, ${placement.y}）無法部署，請調整位置。`);
+    }
+    this.deployingInitialBase = true;
     for (let team = 0; team < this.teams; team++) {
-      const townSite = this.nearestBuildingSite('town', this.map.spawns[team], true); if (!townSite) { this.deploymentErrors.push(`${team === 0 ? '我方' : 'AI ' + team}出生點附近需要可放置 4×4 市鎮中心與可行走出口的空地。`); continue; } const s = townSite, town = this.addBuilding('town', team, s.x, s.y, true);
+      let town = this.buildings.find(b => b.team === team && b.type === 'town');
+      if (!town) {
+        const townSite = this.nearestBuildingSite('town', this.map.spawns[team], true);
+        if (!townSite) { this.deploymentErrors.push(`${team === 0 ? '我方' : 'AI ' + team}出生點附近需要可放置 4×4 市鎮中心與可行走出口的空地。`); continue; }
+        town = this.addBuilding('town', team, townSite.x, townSite.y, true);
+      }
+      const s = town;
       const layoutScale = 2, deploymentPoint = (type, dx, dy) => this.nearestBuildingSite(type, { x: s.x + Math.round(dx * layoutScale), y: s.y + Math.round(dy * layoutScale) }, true, 1);
       if (this.project.rules.startingBase === 'full') { const b = deploymentPoint('barracks', 2, -1); if (b) this.addBuilding('barracks', team, b.x, b.y, true); }
       const worker = this.project.units.find(u => u.role === 'worker' && !u.hero), soldiers = this.project.units.filter(u => !['worker','trader'].includes(u.role) && !u.hero && (u.age || 0) <= this.ages[team]);
@@ -253,10 +292,28 @@ export class World {
       const exit = this.buildingExit(town); if (!exit) this.deploymentErrors.push(`${team === 0 ? '我方' : 'AI ' + team}市鎮中心需要至少一格可行走的出口。`);
       else for (const u of this.units.filter(u => u.team === team)) if (!findPath(u, town, this.map.size, (x, y) => this.blocked(x, y), 1.6)) Object.assign(u, exit);
     }
-    const playerTown = this.buildings.find(b => b.team === 0 && b.type === 'town'); for (const hero of this.project.units.filter(u => u.hero)) {
-      const placement = this.map.heroPlacements?.find(p => p.unitId === hero.id);
-      if (placement) { if (this.canPlaceHero(hero.id, placement.x, placement.y)) this.spawn(hero.id, 0, placement); else this.deploymentErrors.push(`英雄「${hero.name}」的出生位置（${placement.x}, ${placement.y}）被地形、建築或其他英雄占用，請重新放到空地。`); }
-      else if (playerTown) { const u = this.spawn(hero.id, 0, { x: playerTown.x, y: playerTown.y + 3 }), exit = this.buildingExit(playerTown); if (u && exit && !findPath(u, playerTown, this.map.size, (x, y) => this.blocked(x, y), 1.6)) Object.assign(u, exit); }
+    this.deployingInitialBase = false;
+    const playerTown = this.buildings.find(b => b.team === 0 && b.type === 'town'), deployedHeroKeys = new Set();
+    for (const hero of this.project.units.filter(u => u.hero)) {
+      const placements = (this.map.heroPlacements || []).filter(p => p.unitId === hero.id);
+      if (placements.length) for (const placement of placements) {
+        const key = heroPlacementKey(placement);
+        if (this.population(0) >= this.populationLimit(0)) {
+          this.deploymentErrors.push(`英雄「${hero.name}」無法登場：我方已達 ${this.populationLimit(0)} 人口上限。`);
+          continue;
+        }
+        if (!deployedHeroKeys.has(key) && this.canPlaceHero(hero.id, placement.x, placement.y, key)) {
+          const unit = this.spawn(hero.id, 0, placement);
+          if (unit) { unit.heroPlacementKey = key; deployedHeroKeys.add(key); }
+        } else this.deploymentErrors.push(`英雄「${hero.name}」的出生位置（${placement.x}, ${placement.y}）被地形、建築或其他人物占用，請重新放到空地。`);
+      }
+      else if (playerTown && this.population(0) < this.populationLimit(0)) {
+        const position = this.planHeroPlacement(hero.id, { x: playerTown.x, y: playerTown.y + 3 }, 2)[0];
+        if (position) {
+          const unit = this.spawn(hero.id, 0, position);
+          if (unit) unit.heroAutoPlacement = true;
+        } else this.deploymentErrors.push(`英雄「${hero.name}」的市鎮附近沒有可用空地。`);
+      } else this.deploymentErrors.push(`英雄「${hero.name}」無法登場：缺少我方市鎮或人口已滿。`);
     }
     if (project.rules.ai !== 'off') for (const u of this.units.filter(u => u.team > 0 && u.blueprint.role === 'worker')) { const r = this.closestResource(u, ['food', 'wood', 'gold', 'stone'][u.id % 4]); if (r) this.command([u.id], { type: 'gather', ...r }); }
     this.updateSpatial(); this.updateVision(); this.note(this.deploymentErrors[0] || '王國已部署。選村民，右鍵資源開始採集。', this.map.spawns[0]);
@@ -320,11 +377,61 @@ export class World {
   }
   completeResearch(team, id) { const tech = TECHNOLOGIES.find(t => t.id === id); this.researched[team].add(id); if (this.modCache) delete this.modCache[team]; if (tech.effect.age !== undefined) this.ages[team] = tech.effect.age; for (const u of this.units) if (u.team === team) { const ratio = u.hp / u.maxHp; u.blueprint = this.effectiveBlueprint(u.blueprint.id, team); u.maxHp = u.blueprint.hp; u.hp = Math.max(1, ratio * u.maxHp); } if (tech.effect.buildingHp) for (const b of this.buildings) if (b.team === team) { const ratio = b.hp / b.maxHp; b.maxHp = Math.round(BUILDINGS[b.type].hp * this.modifiers(team).buildingHp); b.hp = ratio * b.maxHp; } if (team === 0) this.note(`${tech.name}研發完成。`); }
   blocked(x, y) { x = Math.round(x); y = Math.round(y); return !['grass', 'sand', 'road'].includes(this.tile(x, y)) || this.blockedCells.has(y * this.map.size + x); }
-  canPlaceHero(unitId, x, y) { const n = this.map.size; return this.project.units.some(u => u.id === unitId && u.hero === true) && Number.isInteger(x) && Number.isInteger(y) && x >= 0 && y >= 0 && x < n && y < n && !this.blocked(x, y) && !this.occupiedCells.has(y * n + x) && !(this.map.heroPlacements || []).some(p => p.unitId !== unitId && p.x === x && p.y === y); }
+  placementCells() {
+    const buildings = this.map.buildingPlacements ||= [], heroes = this.map.heroPlacements ||= [], revision = this.map.revision || 0;
+    let cache = this.mapPlacementCells;
+    if (!cache || cache.buildingsRef !== buildings || cache.heroesRef !== heroes || cache.revision !== revision || buildings.length < cache.buildingCount || heroes.length < cache.heroCount) {
+      cache = this.mapPlacementCells = { buildings: new Map(), heroes: new Map(), buildingsRef: buildings, heroesRef: heroes, revision, buildingCount: 0, heroCount: 0 };
+    }
+    const add = (map, cell, key) => { const list = map.get(cell) || []; list.push(key); map.set(cell, list); };
+    for (; cache.buildingCount < buildings.length; cache.buildingCount++) {
+      const placement = buildings[cache.buildingCount], bounds = buildingBounds(placement.type, placement.x, placement.y), key = buildingPlacementKey(placement);
+      for (let y = bounds.minY; y <= bounds.maxY; y++) for (let x = bounds.minX; x <= bounds.maxX; x++) add(cache.buildings, y * this.map.size + x, key);
+    }
+    for (; cache.heroCount < heroes.length; cache.heroCount++) { const p = heroes[cache.heroCount]; add(cache.heroes, p.y * this.map.size + p.x, heroPlacementKey(p)); }
+    return cache;
+  }
+  canPlaceHero(unitId, x, y, ignorePlacementKey = null) {
+    const n = this.map.size;
+    if (!this.project.units.some(u => u.id === unitId && u.hero === true) || !Number.isInteger(x) || !Number.isInteger(y) || x < 0 || y < 0 || x >= n || y >= n || !['grass', 'sand', 'road'].includes(this.tile(x, y))) return false;
+    const cell = y * n + x, occupied = this.entities.get(this.occupiedCells.get(cell));
+    if (occupied && occupied.hp > 0) return false;
+    const planned = this.placementCells();
+    if (planned.buildings.has(cell) || (planned.heroes.get(cell) || []).some(key => key !== ignorePlacementKey)) return false;
+    const replacingAuto = !(this.map.heroPlacements || []).some(p => p.unitId === unitId);
+    return !this.units.some(u => u.team >= 0 && u.hp > 0 && !u.garrison && u.heroPlacementKey !== ignorePlacementKey && !(replacingAuto && u.heroAutoPlacement && u.blueprint.id === unitId) && Math.hypot(u.x - x, u.y - y) < .65);
+  }
+  planHeroPlacement(unitId, point, count = 1, ignorePlacementKey = null) {
+    if (!this.project.units.some(u => u.id === unitId && u.hero === true) || !Number.isFinite(point?.x) || !Number.isFinite(point?.y) || !Number.isInteger(count) || count < 1) return [];
+    const placements = this.map.heroPlacements || [], implicit = this.project.units.filter(u => u.hero && !placements.some(p => p.unitId === u.id)).length;
+    const otherUnits = this.units.filter(u => u.team === 0 && u.hp > 0 && !u.heroPlacementKey && !u.heroAutoPlacement).length;
+    const reserved = Math.max(this.population(0), otherUnits + placements.length + implicit);
+    const credit = ignorePlacementKey && placements.some(p => heroPlacementKey(p) === ignorePlacementKey) || !placements.some(p => p.unitId === unitId) ? 1 : 0;
+    const available = Math.max(0, this.populationLimit(0) - reserved + credit), limit = Math.min(count, available, 5000 - placements.length + (ignorePlacementKey ? 1 : 0));
+    const result = [], n = this.map.size, origin = { x: clamp(Math.round(point.x), 0, n - 1), y: clamp(Math.round(point.y), 0, n - 1) };
+    if (count === 1) return limit > 0 && this.canPlaceHero(unitId, origin.x, origin.y, ignorePlacementKey) ? [origin] : [];
+    for (let r = 0; r <= Math.min(n - 1, 12) && result.length < limit; r++) for (let dy = -r; dy <= r && result.length < limit; dy++) for (let dx = -r; dx <= r && result.length < limit; dx++) {
+      if (r && Math.abs(dx) !== r && Math.abs(dy) !== r) continue;
+      const x = origin.x + dx, y = origin.y + dy;
+      if (this.canPlaceHero(unitId, x, y, ignorePlacementKey)) result.push({ x, y });
+    }
+    return result;
+  }
+  canPlaceMapBuilding(type, x, y, ignorePlacementKey = null) {
+    if (!Object.hasOwn(BUILDINGS, type) || !Number.isInteger(x) || !Number.isInteger(y)) return false;
+    const bounds = buildingBounds(type, x, y), n = this.map.size;
+    if (bounds.minX < 0 || bounds.minY < 0 || bounds.maxX >= n || bounds.maxY >= n) return false;
+    const planned = this.placementCells();
+    for (let by = bounds.minY; by <= bounds.maxY; by++) for (let bx = bounds.minX; bx <= bounds.maxX; bx++) {
+      const cell = by * n + bx, existing = this.entities.get(this.occupiedCells.get(cell));
+      if (!['grass', 'sand', 'road'].includes(this.tile(bx, by)) || existing && existing.hp > 0 && existing.buildingPlacementKey !== ignorePlacementKey || (planned.buildings.get(cell) || []).some(key => key !== ignorePlacementKey) || planned.heroes.has(cell)) return false;
+    }
+    return !this.units.some(u => u.hp > 0 && !u.garrison && u.blueprint.hero && u.x >= bounds.minX - .5 && u.x <= bounds.maxX + .5 && u.y >= bounds.minY - .5 && u.y <= bounds.maxY + .5);
+  }
   canPlaceBuilding(type, x, y) {
     if (!BUILDINGS[type] || !Number.isFinite(x) || !Number.isFinite(y)) return false; const bounds = buildingBounds(type, x, y), n = this.map.size;
     if (bounds.minX < 0 || bounds.minY < 0 || bounds.maxX >= n || bounds.maxY >= n) return false;
-    for (let by = bounds.minY; by <= bounds.maxY; by++) for (let bx = bounds.minX; bx <= bounds.maxX; bx++) if (!['grass', 'sand', 'road'].includes(this.tile(bx, by)) || this.occupiedCells.has(by * n + bx)) return false;
+    for (let by = bounds.minY; by <= bounds.maxY; by++) for (let bx = bounds.minX; bx <= bounds.maxX; bx++) if (!['grass', 'sand', 'road'].includes(this.tile(bx, by)) || this.occupiedCells.has(by * n + bx) || this.deployingInitialBase && this.placementCells().heroes.has(by * n + bx)) return false;
     return true;
   }
   nearestBuildingSite(type, point, requireExit = false, clearance = 0) {
@@ -343,7 +450,7 @@ export class World {
     const n = this.map.size; for (let r = 0; r < n; r++) for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) {
       if (r && Math.abs(dx) !== r && Math.abs(dy) !== r) continue;
       const x = clamp(Math.round(p.x) + dx, 0, n - 1), y = clamp(Math.round(p.y) + dy, 0, n - 1);
-      if (!this.blocked(x, y)) return { x, y };
+      if (!this.blocked(x, y) && (!this.deployingInitialBase || !this.placementCells().heroes.has(y * n + x) && !this.units.some(u => u.hp > 0 && !u.garrison && Math.hypot(u.x - x, u.y - y) < .65))) return { x, y };
     }
     return null;
   }
@@ -362,7 +469,7 @@ export class World {
     return null;
   }
   spawn(id, team, p) {
-    const blueprint = this.effectiveBlueprint(id, team); if (!blueprint || !p || blueprint.hero && team !== 0) return null;
+    const blueprint = this.effectiveBlueprint(id, team); if (!blueprint || !p || blueprint.hero && (team !== 0 || this.population(team) >= this.populationLimit(team))) return null;
     p = this.nearestOpen(p); if (!p) return null;
     const u = { id: this.nextId++, kind: 'unit', team, blueprint, x: p.x, y: p.y, hp: blueprint.hp, maxHp: blueprint.hp, order: null, queued: [], path: [], repath: 0, cooldown: 0, autoTimer: (this.nextId % 10) / 10, carried: 0, carrying: null, work: 0, stance: 'aggressive', attackAnimation: 0, hitAnimation: 0, packed: Boolean(blueprint.packed) };
     this.units.push(u); this.entities.set(u.id, u); return u;
@@ -376,7 +483,6 @@ export class World {
   train(buildingId, unitId) {
     const b = this.entity(buildingId), bp = b && this.effectiveBlueprint(unitId, b.team);
     if (!b || b.kind !== 'building' || b.progress < 1 || !bp || !this.availableUnits(b.team, b.type).some(u => u.id === unitId)) return '這棟建築無法訓練這個兵種。';
-    if (bp.hero && (this.units.some(u => u.team === b.team && u.blueprint.id === bp.id) || this.buildings.some(x => x.team === b.team && x.queue.some(q => q.unitId === bp.id)))) return '這位英雄已在戰場或訓練中。';
     if (b.queue.length >= 30) return '訓練佇列已滿。';
     const cost = { food: bp.food, gold: bp.gold, wood: bp.wood || 0 }; if (!this.canPay(b.team, cost)) return '生產資源不足。';
     this.pay(b.team, cost); b.queue.push({ unitId, left: bp.time, time: bp.time, cost: clone(cost) }); return null;

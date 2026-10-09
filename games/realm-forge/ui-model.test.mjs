@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { World, defaultProject, generateMap, validateProject } from './core.mjs';
-import { actionReason, actionDescription, placementFeedback, productionStatus, selectionGroups, combatOrderHint, workerOrderHint } from './ui-model.mjs';
+import { actionReason, actionDescription, placementFeedback, productionStatus, selectionGroups, combatOrderHint, workerOrderHint, heroPlacementFeedback, mapBuildingPlacementFeedback, editorWallLine } from './ui-model.mjs';
 
 const sandbox=()=>{const p=defaultProject();p.rules.ai='off';return new World(p);};
 test('new worlds use a compact rich map while saved custom sizes are retained',()=>{
@@ -104,4 +104,29 @@ test('attack feedback does not disclose a target lost behind fog and preserves u
   const w=sandbox(),a=w.units.find(u=>u.team===0),t=w.units.find(u=>u.team===1);w.command([a.id],{type:'attack',target:t.id});
   assert.equal(w.isVisible(t),false);assert.match(combatOrderHint(w,a),/敵方目標/);assert.doesNotMatch(combatOrderHint(w,a),/AI 1/);
   a.failed=true;assert.equal(combatOrderHint(w,a),'無法到達目標');
+});
+test('hero batch feedback reports partial capacity instead of silently placing only one',()=>{
+  const p=defaultProject();p.rules.ai='off';p.rules.population=50;p.map.tiles.fill('grass');
+  p.units.push({...structuredClone(p.units.find(u=>u.id==='scout')),id:'test-hero',name:'測試英雄',hero:true,building:'castle',age:0});
+  const w=new World(p),town=w.buildings.find(b=>b.team===0&&b.type==='town');
+  while(w.population(0)<49)w.spawn('villager',0,{x:town.x+5,y:town.y+5});
+  const feedback=heroPlacementFeedback(w,'test-hero',{x:40,y:40},5);
+  assert.equal(feedback.positions.length,2);assert.equal(feedback.valid,true);assert.match(feedback.reason,/可放 2 \/ 5 名/);
+  assert.equal(new Set(feedback.positions.map(p=>`${p.x}:${p.y}`)).size,2);
+});
+test('free map building feedback ignores age and resources but rejects occupied footprints',()=>{
+  const p=defaultProject();p.rules.ai='off';p.rules.startAge=0;p.map.tiles.fill('grass');
+  const w=new World(p);w.stocks[0]={wood:0,food:0,gold:0,stone:0};
+  const site=w.nearestBuildingSite('castle',{x:40,y:40}),point={x:Math.floor(site.x),y:Math.floor(site.y)};
+  assert.equal(mapBuildingPlacementFeedback(w,'castle',point).valid,true);assert.ok(placementFeedback(w,'castle',point).reason);
+  const building=w.addBuilding('castle',0,point.x,point.y,true);assert.ok(building);
+  assert.equal(mapBuildingPlacementFeedback(w,'castle',point).valid,false);assert.deepEqual(w.stocks[0],{wood:0,food:0,gold:0,stone:0});
+});
+test('wall stroke interpolation covers rapid drags with connected cells in either direction',()=>{
+  for(const end of [{x:18,y:4},{x:4,y:18},{x:-8,y:-5}]){
+    const start={x:4,y:4},cells=editorWallLine(start,end);assert.deepEqual(cells[0],start);assert.deepEqual(cells.at(-1),end);
+    assert.equal(cells.length,Math.max(Math.abs(end.x-start.x),Math.abs(end.y-start.y))+1);
+    for(let i=1;i<cells.length;i++)assert.equal(Math.max(Math.abs(cells[i].x-cells[i-1].x),Math.abs(cells[i].y-cells[i-1].y)),1);
+    assert.deepEqual(editorWallLine(end,start),cells.slice().reverse());
+  }
 });
