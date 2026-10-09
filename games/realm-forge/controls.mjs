@@ -1,4 +1,4 @@
-import { CLASSIC_BUILD_KEYS } from './civilization.mjs?v=20261009b';
+import { CLASSIC_BUILD_KEYS } from './civilization.mjs?v=20261009c';
 
 export const GRID_BUILD_KEYS = {
   economy: { q: 'house', w: 'mill', e: 'mining', r: 'lumber', t: 'dock', a: 'farm', s: 'blacksmith', d: 'market', f: 'monastery', g: 'university', z: 'town', x: 'wonder' },
@@ -23,6 +23,7 @@ export function eventKey(event) {
   return ({Period:'.',Comma:',',Slash:'/'})[event.code] || event.key.toLowerCase();
 }
 export function orderHint(unit) {
+  if (unit.garrison) return '駐軍中';
   if (unit.failed) return '無法到達目標';
   const labels = { autoScout: '自動偵察', attackGround: '攻擊地面', move: '移動', attackMove: '攻擊移動', attack: '攻擊', gather: '採集', deliver: '運送資源', build: '建造', repair: '修理', heal: '治療', patrol: '巡邏', guard: '守衛', follow: '跟隨', garrison: '進駐', convert: '招降' };
   return `${labels[unit.order?.type] || '閒置'}${unit.queued?.length ? ` · 等待 ${unit.queued.length} 道指令` : ''}`;

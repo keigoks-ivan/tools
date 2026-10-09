@@ -160,3 +160,46 @@ test('dragged wall foundations retain every segment in the construction queue',(
   until(world,()=>world.buildings.filter(b=>b.type==='wall').every(b=>b.progress===1));
   assert.equal(world.buildings.filter(b=>b.type==='wall'&&b.progress===1).length,4);
 });
+
+test('a new command or stop clears an obsolete unreachable warning', () => {
+  const {world,worker}=setup();worker.failed=true;
+  world.command([worker.id],{type:'move',x:worker.x+3,y:worker.y});
+  assert.equal(worker.failed,false);
+  worker.failed=true;world.command([worker.id],null);
+  assert.equal(worker.failed,false);
+});
+test('any completed drop site or farm deposits builders carried resources in their original type', () => {
+  for (const type of ['lumber','mining','mill','farm']) {
+    const {world,worker}=setup();const before=world.stocks[0].gold;
+    worker.carried=12;worker.carrying='gold';
+    const b=world.addBuilding(type,0,worker.x+5,worker.y+3);
+    world.command([worker.id],{type:'build',target:b.id});
+    until(world,()=>b.progress===1);
+    assert.equal(world.stocks[0].gold,before+12,type);
+    assert.equal(worker.carried,0,type);
+  }
+});
+test('switching resource keeps the old load while walking but never converts it into the new resource', () => {
+  const {world,worker}=setup(); const target={x:worker.x+5,y:worker.y+3};setTile(world.map,target.x,target.y,'gold');
+  worker.carried=12;worker.carrying='wood';
+  world.command([worker.id],{type:'gather',...target});world.tick(.1);
+  assert.equal(worker.carried,12);assert.equal(worker.carrying,'wood');
+  until(world,()=>worker.carrying==='gold');
+  assert.equal(worker.carried,6);
+});
+test('entering the town center deposits carried resources once', () => {
+  const {world,worker,town}=setup();const before=world.stocks[0].wood;
+  worker.carried=18;worker.carrying='wood';
+  world.command([worker.id],{type:'garrison',target:town.id});
+  until(world,()=>worker.garrison===town.id);
+  assert.equal(world.stocks[0].wood,before+18);assert.equal(worker.carried,0);
+  world.ungarrison(town.id);for(let i=0;i<10;i++)world.tick(.1);
+  assert.equal(world.stocks[0].wood,before+18);
+});
+test('a garrisoned villager cannot place foundations or spend construction resources', () => {
+  const {world,worker,town}=setup();world.command([worker.id],{type:'garrison',target:town.id});
+  until(world,()=>worker.garrison===town.id);
+  const before=world.stocks[0].wood,count=world.buildings.length;
+  assert.equal(world.build([worker.id],'house',town.x+8,town.y+8),'請先選取村民。');
+  assert.equal(world.stocks[0].wood,before);assert.equal(world.buildings.length,count);
+});

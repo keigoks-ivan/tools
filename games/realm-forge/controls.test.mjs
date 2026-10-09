@@ -22,6 +22,7 @@ test('order feedback distinguishes idle, queued and unreachable commands', () =>
   assert.equal(orderHint({ order: null, queued: [] }), '閒置');
   assert.equal(orderHint({ order: { type: 'build' }, queued: [{}, {}] }), '建造 · 等待 2 道指令');
   assert.equal(orderHint({ failed: true }), '無法到達目標');
+  assert.equal(orderHint({ garrison: 1, order: null }), '駐軍中');
 });
 
 test('modified punctuation and numbers retain the underlying command key',async()=>{

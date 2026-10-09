@@ -1,5 +1,5 @@
-import { clamp, tileType, BUILDINGS, buildingBounds } from './core.mjs?v=20261009b';
-import { TEAM_COLORS, TEAM_LIGHT, imageFor, unitArt, animationArt, worldArt, drawSprite, recoloredArt } from './art.mjs?v=20261009b';
+import { clamp, tileType, BUILDINGS, buildingBounds } from './core.mjs?v=20261009c';
+import { TEAM_COLORS, TEAM_LIGHT, imageFor, unitArt, animationArt, worldArt, drawSprite, recoloredArt } from './art.mjs?v=20261009c';
 export const COLORS = { grass: '#597c4b', water: '#396b70', forest: '#42633e', gold: '#67754c', stone: '#667458', food: '#68834f', sand: '#a19a6e', road: '#9d8f63' };
 export const SYMBOLS = { worker: '♟', soldier: '⚔', archer: '➶', knight: '♞', mage: '✦', beast: '♜', siege: '⚙', town: '♜', house: '⌂', barracks: '⚑', tower: '♖', mill: '✣', lumber: '♣', mining: '◆', farm: '▤', archery: '➶', stable: '♞', blacksmith: '⚒', market: '⚖', monastery: '✚', castle: '♜', university: '▥', wall: '▥', gate: 'Π', outpost: '⚑' };
 const directions = new WeakMap();
