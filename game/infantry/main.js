@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 import { Input } from '../mech/input.js?v=2';
-import { Pilot } from '../mech/zero/player.js';
+import { Pilot } from '../mech/zero/player.js?v=2';
 import { HumanKit } from '../mech/zero/human.js';
 import { ViewModel } from '../mech/zero/viewmodel.js?v=2';
 import { FXL } from '../mech/zero/fxl.js?v=2';
@@ -12,9 +12,10 @@ import { Post } from '../mech/post.js';
 import { pixelRatio, qualityLevel, FrameGate } from '../mech/runtime.js';
 import { buildBattlefield, addSigns } from './map.js?v=2';
 import { addBattlefieldArt } from './art.js';
-import { SCENARIOS, MODES, DIFFICULTIES, Mission, selection } from './scenarios.mjs';
-import { InfantryHUD } from './hud.js?v=2';
-import { Combat } from './combat.js?v=2';
+import { SCENARIOS, MODES, DIFFICULTIES, Mission, selection } from './scenarios.mjs?v=2';
+import { InfantryHUD } from './hud.js?v=3';
+import { Combat } from './combat.js?v=4';
+import { captureThreat, resupplyBlocked, resupplyVitals } from './battle-rules.mjs';
 import { operationFor } from './operations.mjs';
 import { evaluateSortie, recordSortie } from './medals.mjs';
 
@@ -46,6 +47,7 @@ function renderMenu(){
   for(const b of document.querySelectorAll('[data-mode]'))b.setAttribute('aria-pressed',b.dataset.mode===choice.mode);
   $('operation').innerHTML=[0,1,2].map(i=>`<option value="${i}">${operationFor(choice.scene,sortieSeed,i).name[language]}</option>`).join('');$('operation').value=variantIndex;
   const op=operationFor(choice.scene,sortieSeed,variantIndex),goal=(op.bonusGoalByMode?.[choice.mode]||op.bonusGoal)[language];
+  $('difficultyBrief').textContent=DIFFICULTIES[choice.difficulty].brief[language].replace('{supply}',Math.round(DIFFICULTIES[choice.difficulty].supplyCooldown*op.supplyMultiplier));
   $('operationBrief').textContent=op.brief[language];$('bonusBrief').textContent=text(`額外任務：${goal} · 完成 +750 分`,`BONUS: ${goal} · +750 points`);
   const records=read('records',{}),record=records[`${choice.scene}.${choice.mode}.${choice.difficulty}.${variantIndex}`];
   let clears=0,gold=0;for(const scene of SCENARIOS)for(const variant of [0,1,2]){const r=records[`${scene.id}.${choice.mode}.${choice.difficulty}.${variant}`];if(r?.wins)clears++;if(r?.medal==='gold')gold++;}
@@ -95,13 +97,13 @@ function rebuild(){
   scene.background=choice.scene==='underground'?new THREE.Color(0x141c26):sky;scene.fog=new THREE.FogExp2(choice.scene==='underground'?0x162630:SCENARIOS.find(s=>s.id===choice.scene).fog,fogDensity[choice.scene]);
   fx?.setFog(scene.fog.color,scene.fog.density);
   scene.environmentIntensity=choice.scene==='underground'?.45:1;vScene.environmentIntensity=.5;
-  player=new Pilot(map.solid);player.reset(new THREE.Vector3(0,map.ground(0,-29),-29),0);
+  player=new Pilot(map.solid,DIFFICULTIES[choice.difficulty]);player.reset(new THREE.Vector3(0,map.ground(0,-29),-29),0);
   player.onStep=speed=>audio?.step(choice.scene==='forest'?'dirt':'concrete',speed);player.onLand=k=>{audio.land(k);vm.land(k);};player.onShieldBreak=()=>audio.shieldBreak();player.onRecharge=()=>audio.shieldRecharge();
   camera.position.set(12,6+map.ground(12,-32),-32);camera.lookAt(-5,3+map.ground(-5,20),20);map.beacon.visible=false;
 }
 function start(){
   combat?.clear();fx.clear();hud.resetBattle();clearGrenades();sortieSeed=(sortieSeed+Math.floor(Math.random()*65535)+1)>>>0;mission=new Mission({...choice,operation:operationFor(choice.scene,sortieSeed,variantIndex)});spawnCounter=0;stageSpawns=0;lastSpawnStage=-1;telemetry={shots:0,hits:0,grenadeKills:0,supplyUses:0};squadCommand={mode:'follow'};playTime=0;hurt=shieldHurt=0;crouch=false;nades=3;cleanup=false;supplyProgress=supplyCooldown=0;
-  const p=map.starts[choice.mode];player.reset(new THREE.Vector3(p.x,p.y,p.z),0);player.stam=player.stepPh=0;
+  const p=map.starts[choice.mode];player.setRecovery(mission.rules);player.reset(new THREE.Vector3(p.x,p.y,p.z),0);player.stam=player.stepPh=0;
   vm.refill();vm.cur='smg';for(const [k,g]of Object.entries(vm.g))g.visible=k==='smg';vm.ads=0;vm.scoped=false;vm.lastTrigger=false;vm.cd=0;vm.reloadT=vm.swapT=vm.nadeT=-1;vm.swapTo=null;vm.kick.set(0,0,0);vm.kickV.set(0,0,0);vm.rot.set(0,0,0);vm.rotV.set(0,0,0);vm.resetHandling();
   combat=new Combat({scene,map,kit,audio,fx,player,difficulty:DIFFICULTIES[choice.difficulty],onPlayerHurt:playerHurt,onKill:()=>{mission.kills++;}});combat.spawnSquad(p);
   audio.unlock();audio.setPaused(false);audio.music('battle',{stage:1});state='play';input.enabled=true;input.reset();for(const id of ['menu','pause','result','tactical'])$(id).hidden=true;$('playButtons').hidden=false;$('touch').hidden=!input.touch.on;
@@ -189,20 +191,25 @@ function tick(dt){
   if(squadCommand.mode==='advance')squadCommand.target=mission.target;
   combat.update(dt,{mode:choice.mode,target:mission.target,cleanup,time:playTime,wave:choice.mode==='defend'?mission.wave:mission.objective+1,operation:mission.operation,squadCommand});updateGrenades(dt);
   const target=mission.target,near=Math.hypot(player.pos.x-target.x,player.pos.z-target.z)<4.5&&Math.abs(player.pos.y-map.ground(target.x,target.z))<1.5;
-  const contested=combat.enemies.some(e=>!e.dead&&Math.hypot(e.pos.x-target.x,e.pos.z-target.z)<11);
+  const sector={...target,y:map.ground(target.x,target.z)},sectorEye=new THREE.Vector3(sector.x,sector.y+1.5,sector.z);
+  const contested=captureThreat(combat.enemies,sector,{pending:mission.pending,hurtT:player.hurtT,visible:e=>map.solid.sees(e.s.headPos(new THREE.Vector3()),sectorEye)});
   const pressure=choice.mode==='defend'?combat.enemies.filter(e=>!e.dead&&Math.hypot(e.pos.x-target.x,e.pos.z-target.z)<6).length:0;
   const interact=K.has('KeyE')||K.has('Tlock');prompt='';
-  if(choice.mode==='assault'&&near)prompt=contested?text('敵軍仍在據點附近・先清除紅色標記','Sector contested · clear nearby hostiles'):text(`按住 E 佔領據點 · ${Math.floor(mission.capture/mission.rules.capture*100)}%`,`HOLD E TO CAPTURE · ${Math.floor(mission.capture/mission.rules.capture*100)}%`);
-  supplyCooldown=Math.max(0,supplyCooldown-dt);const supplyNear=Math.hypot(player.pos.x-map.supply.x,player.pos.z-map.supply.z)<2.3;
-  if(supplyNear){prompt=supplyCooldown>0?text(`補給整備 ${Math.ceil(supplyCooldown)} 秒`,`RESUPPLY IN ${Math.ceil(supplyCooldown)}s`):text('按住 E 補給生命、護盾與手榴彈','HOLD E TO RESTORE VITALS, SHIELD & GRENADES');if(interact&&supplyCooldown===0){supplyProgress+=dt;if(supplyProgress>=1.5){refill();telemetry.supplyUses++;supplyProgress=0;supplyCooldown=25*mission.operation.supplyMultiplier;}}else supplyProgress=0;}else supplyProgress=0;
+  if(choice.mode==='assault'&&near)prompt=contested?mission.pending>0?text('敵軍正在增援・先守住據點','Reinforcements incoming · hold the sector'):player.hurtT<2.5?text('先脫離火力，再佔領據點','Break contact before capturing'):text('據點遭敵軍控制・清除守軍與火線','Sector contested · clear defenders and firing lanes'):text(`按住 E 佔領據點 · ${Math.floor(mission.capture/mission.rules.capture*100)}%`,`HOLD E TO CAPTURE · ${Math.floor(mission.capture/mission.rules.capture*100)}%`);
+  supplyCooldown=Math.max(0,supplyCooldown-dt);const supplyNear=Math.hypot(player.pos.x-map.supply.x,player.pos.z-map.supply.z)<2.3&&Math.abs(player.pos.y-map.supply.y)<1.5;
+  if(supplyNear){
+    const blocked=resupplyBlocked(player,combat.enemies,e=>map.solid.sees(player.eye,e.s.headPos(new THREE.Vector3())));
+    prompt=supplyCooldown>0?text(`補給整備 ${Math.ceil(supplyCooldown)} 秒`,`RESUPPLY IN ${Math.ceil(supplyCooldown)}s`):blocked?text('補給中斷・先脫離火力並清除附近敵軍','Resupply blocked · break contact and clear nearby hostiles'):text(`按住 E 補給 · ${Math.floor(supplyProgress/mission.rules.supplyUseTime*100)}%`,`HOLD E TO RESUPPLY · ${Math.floor(supplyProgress/mission.rules.supplyUseTime*100)}%`);
+    if(interact&&supplyCooldown===0&&!blocked){supplyProgress+=dt;if(supplyProgress>=mission.rules.supplyUseTime){refill();telemetry.supplyUses++;supplyProgress=0;supplyCooldown=mission.rules.supplyCooldown*mission.operation.supplyMultiplier;}}else supplyProgress=0;
+  }else supplyProgress=0;
   const events=mission.update(dt,{alive:combat.enemies.filter(e=>!e.dead).length,pressure,near,contested,interact:interact&&!supplyNear,dead:player.dead});
-  for(const event of events){if(event==='spawn')spawn();if(event==='resupply'){refill();note('據點安全・小隊整備完成','Sector secure · squad resupplied');}if(event==='wave')note(`第 ${mission.wave} 波敵軍來襲`,`Enemy wave ${mission.wave} incoming`);if(event==='objective')note('小隊前進・奪下下一座據點','Squad advancing · secure the next sector');if(event==='won'||event==='lost'){finish();return;}}
+  for(const event of events){if(event==='spawn')spawn();if(event==='resupply'){refill(true);note('小隊整備・少量醫療與護盾補充','Squad regrouped · limited medical and shield supplies');}if(event==='reinforce')note('敵軍增援・守住側翼','Enemy reinforcements · watch the flanks');if(event==='wave')note(`第 ${mission.wave} 波敵軍來襲`,`Enemy wave ${mission.wave} incoming`);if(event==='objective')note('小隊前進・奪下下一座據點','Squad advancing · secure the next sector');if(event==='won'||event==='lost'){finish();return;}}
   const t=mission.target;map.beacon.visible=true;map.beacon.position.set(t.x,map.ground(t.x,t.z)+.03,t.z);
   playTime+=dt;noticeT=Math.max(0,noticeT-dt);hurt=Math.max(0,hurt-dt*2);shieldHurt=Math.max(0,shieldHurt-dt*4);audio.setListener(player.eye,player.fwd());audio.setIntensity(clamp(living.length/10,0,1));
   post.u.damage.value=hurt;post.u.danger.value=player.hp<30?.55:0;post.u.speed.value=player.sprintK*.5;
   input.endFrame();
 }
-function refill(){player.hp=100;player.shield=60;vm.refill();nades=Math.max(3,nades);audio.radio('in');}
+function refill(field=false){const restored=resupplyVitals({hp:player.hp,shield:player.shield,nades},mission.rules,field);player.hp=restored.hp;player.shield=restored.shield;nades=restored.nades;vm.refill();audio.radio('in');}
 function updateSquadButton(){const labels={follow:text('跟隨','FOLLOW'),hold:text('掩護','HOLD'),advance:text('推進','ADVANCE')};$('squadButton').textContent=`F / ${labels[squadCommand.mode]}`;}
 function commandSquad(){const modes=['follow','hold','advance'],mode=modes[(modes.indexOf(squadCommand.mode)+1)%3];squadCommand={mode,target:mode==='hold'?{x:player.pos.x,z:player.pos.z}:mission.target};updateSquadButton();audio.radio('in');const labels={follow:['小隊跟隨・保持交叉掩護','Squad following · covering both flanks'],hold:['小隊原地掩護・你可以繞側翼','Squad holding · take a flanking route'],advance:['小隊推進・向作戰目標移動','Squad advancing · moving toward the objective']};note(...labels[mode]);}
 function drawTactical(){

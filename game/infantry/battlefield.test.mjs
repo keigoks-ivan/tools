@@ -39,6 +39,6 @@ test('defense needs all four waves cleared, including every scheduled reinforcem
 test('capture requires proximity, a clear sector and holding E; death always fails immediately',()=>{
   const m=new Mission({mode:'assault',difficulty:'recruit'});for(let i=0;i<80;i++)m.update(.1,{near:true,interact:true,contested:true});assert.equal(m.capture,0);
   for(let i=0;i<80;i++)m.update(.1,{near:true,interact:false});assert.equal(m.capture,0);
-  for(let stage=0;stage<3;stage++){const expected=stage+1;while(m.objective<expected)m.update(.1,{near:true,interact:true,contested:false});}assert.equal(m.status,'won');
+  for(let stage=0;stage<3;stage++){m.update(0);while(m.pending)m.spawned();const expected=stage+1;while(m.objective<expected)m.update(.1,{near:true,interact:true,contested:false});}assert.equal(m.status,'won');
   const lost=new Mission({mode:'assault'});assert.deepEqual(lost.update(.1,{near:true,interact:true,dead:true}),['lost']);assert.equal(lost.status,'lost');
 });

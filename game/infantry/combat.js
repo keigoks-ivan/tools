@@ -4,8 +4,8 @@ import * as THREE from 'three';
 import { Soldier, lerpAngle } from '../mech/zero/human.js';
 import { Trooper } from '../mech/zero/ai.js';
 import { makeEnemyRifle } from '../mech/zero/guns.js';
-import { allyInLane, segmentBox } from '../mech/tactics.js';
-import { TacticalDirector, PhysicalRoutes } from './combat-tactics.mjs';
+import { allyInLane } from '../mech/tactics.js';
+import { TacticalDirector, PhysicalRoutes, aiMultiplier, sweptDiscBox } from './combat-tactics.mjs?v=3';
 
 const clamp = THREE.MathUtils.clamp;
 const random = (a,b) => a + Math.random() * (b-a);
@@ -46,13 +46,16 @@ export class InfantryActor {
     this.s.root.rotation.y=this.s.bodyYaw;combat.scene.add(this.s.root,this.s.weapon);
     this.hp=this.hp0=this.T.hp;this.dead=false;this.barT=0;this.guard=!!def.guard;
     this.home=this.pos.clone();this.lastSeen=this.pos.clone();this.lastContact=-99;
+    this.guardAnchor=def.guard&&typeof def.guard==='object'?combat._safePoint(def.guard,this.pos):this.home.clone();
     this.target=null;this.sees=false;this.senseT=random(0,.18);this.goal=this.pos.clone();
     this.path=[];this.pathT=0;this.pathGoal=this.pos.clone();this.planT=random(0,.3);this.aimT=0;
     this.ammo=this.T.mag;this.burst=0;this.shotT=random(.1,.4);this.restT=.5;
     this.suppression=0;this.stagger=0;this.stagV=new THREE.Vector3();this.hitFlash=0;this.phase='advance';this.phaseT=random(1,2);this.cover=null;
     this.stuckT=0;this.progressPos=this.pos.clone();this.lastProgress=0;this.searchT=0;this.stepPhase=0;
     this.deathAge=0;this.contactRadioT=0;this.formationIndex=def.formationIndex||0;
-    this.intent='advance';this.station=null;this.stationContact=this.pos.clone();this.stationUntil=0;this.laneBlocked=0;
+    this.intent='advance';this.station=null;this.stationContact=this.pos.clone();this.stationUntil=0;this.laneBlocked=0;this.laneReplanAt=0;
+    this.firePressure=0;this.lastShotTime=-99;this.staggerReadyAt=0;
+    this.boundPhase='move';this.boundT=.45;this.flankGoal=null;this.flankUntil=0;this.flankContact=this.pos.clone();
     if(this.type==='sniper'){
       this.laser=new THREE.Line(new THREE.BufferGeometry().setFromPoints([UP,UP]),LASER_MAT);
       this.laser.visible=false;this.laser.frustumCulled=false;combat.scene.add(this.laser);
@@ -66,8 +69,11 @@ export class InfantryActor {
     const armor=this.T.armor&&part!=='head';if(armor)damage*=this.T.armor;
     this.hp=Math.max(0,this.hp-damage);this.barT=2.6;this.hitFlash=.15;this.lastHitKind=armor?'armor':part==='head'?'head':'hit';this.suppression=Math.min(2,this.suppression+.8);
     this.s.impact(dir,clamp(damage/75,.25,1.3),part==='head');this.s.flash(!!armor);
-    if(damage>20){this.stagger=this.type==='heavy'?.12:.27;this.stagV.copy(dir).setY(0).normalize().multiplyScalar(this.type==='heavy'?1:2.4);}
-    this.aimT=0;this.burst=0;
+    // Every hit still animates. A rapid SMG burst cannot endlessly restart the
+    // physical stagger or erase a nearly completed aim/burst on every frame.
+    const hardStagger=damage>20&&this.combat.time>=(this.staggerReadyAt??0);
+    if(hardStagger){this.stagger=this.type==='heavy'?.12:.27;this.staggerReadyAt=this.combat.time+.7;this.stagV.copy(dir).setY(0).normalize().multiplyScalar(this.type==='heavy'?1:2.4);}
+    this.aimT=Math.max(0,this.aimT-Math.min(.045,damage/1000));
     if(!this.friendly){this.lastSeen.copy(this.combat.player.pos);this.lastContact=this.combat.time;this.pathT=0;}
     if(this.hp<=0){
       this.dead=true;this.deathAge=0;this.s.vel.multiplyScalar(.4);
@@ -77,7 +83,7 @@ export class InfantryActor {
       if(!this.friendly)this.combat.onKill?.(this);
       return true;
     }
-    if(this.cover){this.phase='hide';this.phaseT=.8;}
+    if(this.cover&&hardStagger){this.phaseT=Math.max(this.phase==='hide'?this.phaseT:0,.35);this.phase='hide';}
     return false;
   }
   dispose() {
@@ -148,6 +154,7 @@ export class Combat {
     if(actor===this.player)return out.copy(actor.pos).add(new THREE.Vector3(0,(actor.eyeH??1.58)*.74,0));
     return actor.s.chestPos(out);
   }
+  _factor(a,key){return aiMultiplier(this.difficulty,key,a?.friendly);}
   _sense(a) {
     const candidates=a.friendly?this.enemies:[this.player,...this.allies],eye=this._eye(a);
     let target=null,score=Infinity;
@@ -157,11 +164,12 @@ export class Combat {
       if(d>range*range||d>score||!this.map.solid.sees(eye,this._aimPoint(p)))continue;
       target=p;score=d*(p===this.player?.8:1);
     }
+    if(target!==a.target){a.aimT=0;a.burst=0;a.glint=false;a.planT=0;a.firePressure=0;}
     a.sees=!!target;a.target=target;
     if(target){a.lastSeen.copy(target.pos);a.lastContact=this.time;a.searchT=0;
       if(!a.friendly&&this.time>a.contactRadioT){
-        a.contactRadioT=this.time+1.4;
-        for(const mate of this.enemies)if(mate!==a&&!mate.dead&&mate.pos.distanceToSquared(a.pos)<38*38){mate.lastSeen.copy(a.lastSeen);mate.lastContact=this.time;}
+        a.contactRadioT=this.time+1.4*this._factor(a,'planInterval');
+        for(const mate of this.enemies)if(mate!==a&&!mate.dead&&!mate.sees&&mate.pos.distanceToSquared(a.pos)<38*38){mate.lastSeen.copy(a.lastSeen);mate.lastContact=this.time;}
       }
     }
   }
@@ -176,7 +184,7 @@ export class Combat {
     const y=Math.min(from.y,to.y),boxes=[];
     for(const b of solid.near((from.x+to.x)/2,(from.z+to.z)/2,Math.hypot(to.x-from.x,to.z-from.z)/2+r,boxes)){
       if(b.noMove||b.ramp||b.y1<=y+.48||b.y0>=y+1.75)continue;
-      if(segmentBox(from.x,from.z,to.x,to.z,b,r))return false;
+      if(sweptDiscBox(from,to,b,r))return false;
     }
     const b=this.map.bounds;if(to.x<b.x0+r||to.x>b.x1-r||to.z<b.z0+r||to.z>b.z1-r)return false;
     return Math.abs(ground(to.x,to.z)-ground(from.x,from.z))<1.1;
@@ -244,20 +252,33 @@ export class Combat {
       // Radio marks the last attackers for the HUD. Their AI advances along real paths.
       a.guard=false;a.cover=null;a.goal.copy(this._safePoint(this.player.pos,a.pos));a.phase='advance';a.intent='pressure';a.pathT=0;return;
     }
+    // Capturing a sector requires dislodging its defenders. The original guard
+    // anchor survives visual contact rather than being replaced by a player orbit.
+    if(this.mode==='assault'&&a.guard&&(a.type==='line'||a.type==='heavy')){
+      const anchor=this._safePoint(a.guardAnchor||a.home,a.pos),radius=a.type==='heavy'?9:7;
+      const point=a.sees&&target?this._stationGoal(a,contact,a.T.range,anchor,radius):this._safePoint({x:anchor.x+a.side*3,z:anchor.z+(a.id%3-1)*2},a.pos);
+      a.goal.copy(point.distanceTo(anchor)<=radius?point:anchor);a.cover=point.protected?point:null;a.intent='guard';
+      if(!a.sees)a.phase='advance';return;
+    }
+    // A third of the mobile infantry actually reaches the defended evacuation
+    // point. The others establish the firing lanes that cover that advance.
+    if(this.mode==='defend'&&(a.type==='line'||a.type==='flank')&&a.id%3===0){
+      const point=this._safePoint({x:this.objective.x+a.side*2,z:this.objective.z+(a.id%2?2:-2)},a.pos);
+      a.goal.copy(point.distanceTo(this.objective)<=4?point:this._safePoint(this.objective,a.pos));a.cover=null;a.intent='breakthrough';
+      if(a.s.reloadT<0)a.phase='advance';return;
+    }
     if(!a.sees&&dtSeen>8){a.guard=false;a.cover=null;a.goal.copy(this._safePoint(this.objective,a.pos));a.phase='advance';a.intent='advance';return;}
-    if(!a.sees&&dtSeen<8){
+    if(!a.sees&&dtSeen<=8){
       a.cover=null;
       if(a.pos.distanceToSquared(contact)>3*3)a.goal.copy(this._safePoint(contact,a.pos));
       else{const angle=a.id*2.39996+Math.floor(a.searchT/3)*a.side;const p={x:contact.x+Math.sin(angle)*5,z:contact.z+Math.cos(angle)*5};a.goal.copy(this._safePoint(p,a.pos));}
       a.phase='advance';a.intent='search';return;
     }
     const dist=a.pos.distanceTo(target.pos),profile=this.director.profile,phase=this.tacticalPhase;
-    // Assault posts may reposition near their home; they do not become stationary forever.
-    if(a.guard&&dist<42&&this.time-a.lastContact>1){a.goal.copy(a.home);a.cover=null;a.intent='hold';return;}
     if(a.type==='support'||a.type==='sniper'){
       const ideal=a.type==='support'?profile.support:profile.sniper;
-      const stale=!a.station||a.stationUntil<this.time||a.stationContact?.distanceTo(contact)>6||a.laneBlocked>.8||a.suppression>1.3;
-      if(stale){a.station=this._stationGoal(a,contact,ideal);a.stationContact=contact.clone();a.stationUntil=this.time+(a.type==='sniper'?9:7);a.laneBlocked=0;}
+      const stale=!a.station||a.stationUntil<this.time||a.stationContact?.distanceTo(contact)>6||a.laneBlocked>.8*this._factor(a,'planInterval')||a.suppression>1.3;
+      if(stale){a.station=this._stationGoal(a,contact,ideal);a.stationContact=contact.clone();a.stationUntil=this.time+Math.max(4,(a.type==='sniper'?9:7)*this._factor(a,'planInterval'));a.laneBlocked=0;}
       a.goal.copy(a.station);a.cover=a.station.protected?a.station:null;a.intent=a.pos.distanceTo(a.goal)>1?'relocate':'suppress';
       if(phase==='regroup'&&a.cover&&a.s.reloadT>=0){a.phase='hide';a.phaseT=Math.max(a.phaseT,.5);}return;
     }
@@ -266,25 +287,32 @@ export class Combat {
       a.cover=null;a.goal.copy(this._safePoint({x:contact.x+dx/L*ideal,z:contact.z+dz/L*ideal},a.pos));a.intent='pressure';return;
     }
     if(a.type==='flank'&&dist>9&&dist<45){
+      // Commit to one flank lane long enough to arrive and fire. Recomputing the
+      // angle from the moving soldier every plan made flankers circle endlessly.
+      if(a.flankGoal&&this.time<a.flankUntil&&a.flankContact.distanceTo(contact)<6&&a.laneBlocked<.8*this._factor(a,'planInterval')){
+        a.goal.copy(a.flankGoal);a.cover=null;a.phase=a.pos.distanceTo(a.goal)>.9?'advance':'aim';a.intent=a.phase==='aim'?'crossfire':'flank';return;
+      }
       const flankers=this.enemies.filter(e=>!e.dead&&e!==a&&e.type==='flank'&&e.side===a.side);
       const canPush=!flankers.some(e=>e.id<a.id&&e.phase==='advance');
-      const support=this.enemies.some(e=>!e.dead&&e!==a&&e.sees&&e.role!=='flank'&&(e.burst>0||e.aimT>.4));
+      const support=this.enemies.some(e=>!e.dead&&e!==a&&e.sees&&e.target===target&&e.role!=='flank'&&e.type!=='sniper'&&(e.firePressure||0)>=1.4/this._factor(a,'tacticalTempo'));
       const activeSide=a.side===this.director.side||this.director.progress>.4;
-      if(canPush&&(phase==='flank'&&activeSide||support&&phase==='advance')){
+      if(canPush&&(phase==='flank'&&activeSide||support&&phase!=='regroup')){
         const angle=Math.atan2(a.pos.x-contact.x,a.pos.z-contact.z),forward=phase==='flank'?10:16;
         const point={x:contact.x+Math.sin(angle)*forward+Math.cos(angle)*profile.flank*a.side,z:contact.z+Math.cos(angle)*forward-Math.sin(angle)*profile.flank*a.side};
-        a.cover=null;a.goal.copy(this._safePoint(point,a.pos));a.phase='advance';a.intent='flank';return;
+        a.flankGoal=this._safePoint(point,a.pos);a.flankContact=contact.clone();a.flankUntil=this.time+8+a.pos.distanceTo(a.flankGoal)/a.T.run;
+        a.cover=null;a.goal.copy(a.flankGoal);a.phase='advance';a.intent='flank';return;
       }
     }
     const ideal=profile.line+(phase==='advance'?-4:phase==='regroup'?4:0);
     a.cover=this._coverGoal(a,contact,ideal);
     if(a.cover){a.goal.copy(a.cover);a.intent='cover';return;}
-    if(dist>ideal+4||dist<7||phase==='regroup')a.goal.copy(this._stationGoal(a,contact,ideal));else a.goal.copy(a.pos);
-    a.intent=phase==='suppress'?'suppress':phase==='regroup'?'regroup':'advance';
+    const blocked=a.laneBlocked>.35*this._factor(a,'planInterval');
+    if(dist>ideal+4||dist<7||phase==='regroup'||blocked)a.goal.copy(this._stationGoal(a,contact,ideal));else a.goal.copy(a.pos);
+    a.intent=blocked?'relocate':phase==='suppress'?'suppress':phase==='regroup'?'regroup':'advance';
   }
   _route(a) {
     if(a.pathT>0&&a.pathGoal.distanceToSquared(a.goal)<9)return;
-    a.pathT=this.cleanup?.55:1.2+((a.id%3)*.1);a.pathGoal.copy(a.goal);
+    a.pathT=(this.cleanup?.55:1.2+((a.id%3)*.1))*this._factor(a,'planInterval');a.pathGoal.copy(a.goal);
     if(this._clearSegment(a.pos,a.goal)){a.path=[a.goal.clone()];return;}
     a.path=this._routes().route(a.pos,a.goal).map(n=>new THREE.Vector3(n.x,n.y??this.map.ground(n.x,n.z),n.z));
     const start=this.map.nav.nodes[this._routes().nearest(a.pos,null,true)];
@@ -292,8 +320,17 @@ export class Combat {
   }
   _move(a,dt) {
     const s=a.s,T=a.T,distance=Math.hypot(a.goal.x-a.pos.x,a.goal.z-a.pos.z);
+    const bounding=!a.friendly&&!this.cleanup&&a.sees&&distance>7&&['line','flank','support'].includes(a.type)&&a.phase!=='hide'&&s.reloadT<0&&a.stagger<=0;
+    if(bounding){
+      a.boundT=(a.boundT??.45)-dt;
+      if(a.boundT<=0){
+        a.boundPhase=a.boundPhase==='fire'?'move':'fire';
+        a.boundT=a.boundPhase==='fire'?Math.max(1.1,Math.min(T.aim,1.3)*this._factor(a,'reaction')+.85):Math.max(.65,1.1*this._factor(a,'planInterval'));
+      }
+    }else{a.boundPhase='move';a.boundT=.45;}
+    const firePause=bounding&&a.boundPhase==='fire';
     let movement=new THREE.Vector3();
-    if(distance>.7&&a.phase!=='hide'&&a.stagger<=0){
+    if(distance>.7&&a.phase!=='hide'&&a.stagger<=0&&!firePause){
       this._route(a);
       while(a.path.length&&Math.hypot(a.path[0].x-a.pos.x,a.path[0].z-a.pos.z)<.42)a.path.shift();
       let next=a.path[0];
@@ -321,25 +358,26 @@ export class Combat {
     }
     if(a.stagV){if(a.stagger>0)a.stagV.multiplyScalar(Math.exp(-dt*10));else a.stagV.set(0,0,0);}
     s.vel.copy(a.pos).sub(before).multiplyScalar(1/Math.max(dt,.001));
-    if(distance>1.2){
+    if(distance>1.2&&!firePause){
       a.stuckT+=dt;
-      if(a.stuckT>=1){
+      if(a.stuckT>=Math.max(.45,this._factor(a,'planInterval'))){
         const progress=a.pos.distanceTo(a.progressPos);a.stuckT=0;a.progressPos.copy(a.pos);
         if(progress<.22){a.pathT=0;a.planT=0;a.cover=null;a.phase='advance';a.lastProgress+=1;
           // Try an adjacent reachable grid point to separate from a crowded waypoint.
           const nearby=this.map.nav.nodes.filter(n=>!n.blocked&&Math.hypot(n.x-a.pos.x,n.z-a.pos.z)>1&&Math.hypot(n.x-a.pos.x,n.z-a.pos.z)<3.5&&this._clearSegment(a.pos,n));
           nearby.sort((p,q)=>Math.hypot(p.x-a.goal.x,p.z-a.goal.z)-Math.hypot(q.x-a.goal.x,q.z-a.goal.z));
-          if(nearby.length){const n=nearby[a.lastProgress%Math.min(2,nearby.length)];a.path=[new THREE.Vector3(n.x,n.y,n.z),...a.path];a.pathT=.5;}
+          if(nearby.length){const n=nearby[a.lastProgress%Math.min(2,nearby.length)];a.path=[new THREE.Vector3(n.x,n.y,n.z),...a.path];a.pathT=.5*this._factor(a,'planInterval');}
         }else a.lastProgress=0;
       }
     }else{a.stuckT=0;a.progressPos.copy(a.pos);}
     const moving=s.vel.lengthSq()>.3;
     const aim=a.target?this._aimPoint(a.target):a.lastContact>this.time-8?a.lastSeen.clone().add(new THREE.Vector3(0,1.1,0)):a.goal.clone().add(new THREE.Vector3(0,1.1,0));
     const to=aim.sub(a.pos),yaw=Math.atan2(to.x,to.z);
-    s.aimYaw=lerpAngle(s.aimYaw,yaw,1-Math.exp(-dt*7));
-    s.aimPitch=THREE.MathUtils.damp(s.aimPitch,Math.atan2(to.y-1.35,Math.max(.5,Math.hypot(to.x,to.z))),8,dt);
+    const reaction=this._factor(a,'reaction');
+    s.aimYaw=lerpAngle(s.aimYaw,yaw,1-Math.exp(-dt*Math.min(12,7/reaction)));
+    s.aimPitch=THREE.MathUtils.damp(s.aimPitch,Math.atan2(to.y-1.35,Math.max(.5,Math.hypot(to.x,to.z))),Math.min(12,8/reaction),dt);
     s.yaw=moving?Math.atan2(s.vel.x,s.vel.z):s.aimYaw;
-    s.mode=a.sees&&(!moving||distance<7||a.type==='heavy')?'aim':moving?'run':'patrol';
+    s.mode=a.sees&&(!moving||distance<7||a.type==='heavy'||firePause||a.stagger>0)?'aim':moving?'run':'patrol';
     s.crouchT=a.phase==='hide'||(a.cover&&distance<1&&a.type!=='heavy'&&(!a.sees||a.suppression>.4))?1:0;
     s.lean=a.cover&&a.phase==='aim'?a.side*.2:0;
     a.stepPhase+=dt*Math.hypot(s.vel.x,s.vel.z)/1.5;
@@ -349,32 +387,44 @@ export class Combat {
   _shootActor(a,dt) {
     const s=a.s,T=a.T;
     a.shotT-=dt;a.restT-=dt;
+    a.firePressure=Math.max(0,(a.firePressure||0)-dt*.5);
     if(a.laser)a.laser.visible=false;
-    if(s.reloadT>=0||a.stagger>0||!a.target||a.target.dead||!a.sees||s.mode!=='aim'||a.phase==='hide'){
-      a.aimT=Math.max(0,a.aimT-dt*3);a.burst=0;return;
+    if(s.reloadT>=0||!a.target||a.target.dead||!a.sees||s.mode!=='aim'){
+      a.aimT=Math.max(0,a.aimT-dt*3);a.burst=0;a.firePressure=Math.max(0,a.firePressure-dt*.7);return;
     }
+    if(a.stagger>0||a.phase==='hide'){a.firePressure=Math.max(0,a.firePressure-dt*.7);return;}
     const from=s.muzzle(new THREE.Vector3()),point=this._aimPoint(a.target);
     const team=a.friendly?this.allies:this.enemies;
     const blocked=allyInLane(from,point,team,a,.4,1.85)||(a.friendly&&allyInLane(from,point,[this.player],null,.4,(this.player.eyeH??1.58)+.15));
-    if(blocked||!this.map.solid.sees(from,point)){a.aimT=0;a.burst=0;a.laneBlocked=(a.laneBlocked||0)+dt;return;}
+    if(blocked||!this.map.solid.sees(from,point)){
+      a.aimT=0;a.burst=0;a.laneBlocked=(a.laneBlocked||0)+dt;
+      if(!a.friendly&&a.laneBlocked>=.3*this._factor(a,'planInterval')&&this.time>=(a.laneReplanAt??0)){
+        a.planT=0;a.pathT=0;a.laneReplanAt=this.time+Math.max(.25,.55*this._factor(a,'planInterval'));
+      }
+      return;
+    }
     a.laneBlocked=Math.max(0,(a.laneBlocked||0)-dt*2);
     a.aimT+=dt;
+    if(!a.friendly&&this.time-(a.lastShotTime??-99)<.8)a.firePressure=Math.min(4,a.firePressure+dt*1.5);
     if(a.laser&&a.aimT>0){
       const p=a.laser.geometry.attributes.position;p.setXYZ(0,from.x,from.y,from.z);p.setXYZ(1,point.x,point.y,point.z);p.needsUpdate=true;a.laser.visible=true;
       if(!a.glint){this.audio?.sniperGlint?.(from);a.glint=true;}
     }
-    if(a.burst===0&&a.aimT>=T.aim&&a.restT<=0&&s.aimW>.84){a.burst=Math.min(a.ammo,T.burst);a.glint=false;}
+    const aimDelay=a.friendly?T.aim:Math.max(a.type==='sniper'?1.05:a.type==='heavy'?.5:.35,T.aim*this._factor(a,'reaction'));
+    const aimYaw=Math.atan2(a.target.pos.x-a.pos.x,a.target.pos.z-a.pos.z),aligned=Math.abs(Math.atan2(Math.sin(aimYaw-s.aimYaw),Math.cos(aimYaw-s.aimYaw)))<(a.type==='sniper'?.08:.2);
+    if(a.burst===0&&a.aimT>=aimDelay&&a.restT<=0&&s.aimW>.84&&aligned){a.burst=Math.min(a.ammo,T.burst);a.glint=false;}
     if(a.burst<=0||a.shotT>0)return;
     const dist=from.distanceTo(point),targetVel=a.target===this.player?this.player.vel:a.target.s.vel;
     point.addScaledVector(targetVel,dist/T.speed*.35);
-    const dir=point.sub(from).normalize(),spread=T.spread*(a.suppression>.5?1.4:1)*(a.target===this.player&&this.player.sprintK>.4?1.5:1);
+    const dir=point.sub(from).normalize(),spread=T.spread*this._factor(a,'accuracy')*(a.suppression>.5?1.4:1)*(a.target===this.player&&this.player.sprintK>.4?1.5:1);
     dir.x+=random(-spread,spread);dir.y+=random(-spread*.6,spread*.6);dir.z+=random(-spread,spread);dir.normalize();
     this._bolt(from,dir,T.speed,T.damage*(a.friendly?1:this.difficulty.damage??1),a);
+    a.lastShotTime=this.time;
     s.recoil=1;a.burst--;a.ammo--;a.shotT=T.gap*random(.9,1.13);
     this.audio?.enemyShot?.(from,T.gun==='sniper'?'sniper':T.gun==='heavy'?'heavy':'rifle');
     if(this.fx?.muzzle)this.fx.muzzle(from,dir,a.friendly?[.5,2.2,3.8]:[3.8,.46,.13],T.gun==='sniper');
     else this.flashes.push({p:from.clone(),t:.055,size:T.gun==='sniper'?.14:.1,color:a.friendly?blue:red});
-    if(a.burst===0){a.aimT=0;a.restT=random(.65,1.1);if(a.cover){a.phase='hide';a.phaseT=random(.45,.85);}}
+    if(a.burst===0){a.aimT=0;a.restT=Math.max(.38,random(.65,1.1)*this._factor(a,'burstRest'));if(a.cover){a.phase='hide';a.phaseT=Math.max(.28,random(.45,.85)*this._factor(a,'burstRest'));}}
     if(a.ammo<=0){a.ammo=T.mag;s.reloadT=0;a.burst=0;a.aimT=0;a.restT=1.75;if(a.cover){a.phase='hide';a.phaseT=1.75;}}
   }
   _bolt(p,dir,speed,damage,from) {
@@ -458,7 +508,7 @@ export class Combat {
     dt=clamp(Number.isFinite(dt)?dt:0,0,.1);if(!dt)return;
     this.time=Number.isFinite(time)?time:this.time+dt;this.mode=mode;this.cleanup=!!cleanup;
     if(target)this.objective.set(target.x,this.map.ground(target.x,target.z),target.z);
-    const previousPhase=this.tacticalPhase;this.director.update(this.time,wave,operation,this.map.kind);this.tacticalPhase=this.director.phase;
+    const previousPhase=this.tacticalPhase;this.director.update(this.time,wave,operation,this.map.kind,aiMultiplier(this.difficulty,'tacticalTempo'));this.tacticalPhase=this.director.phase;
     if(previousPhase!==this.tacticalPhase)for(const a of this.enemies)a.planT=0;
     if(squadCommand){
       const commandMode=['follow','hold','advance'].includes(squadCommand.mode)?squadCommand.mode:'follow',position=squadCommand.target;
@@ -473,9 +523,9 @@ export class Combat {
       if(a.dead){a.deathAge+=dt;if(a.deathAge<6)a.s.update(dt);if(a.deathAge>18)a.fade?.((a.deathAge-18)/2);continue;}
       a.barT=Math.max(0,a.barT-dt);a.hitFlash=Math.max(0,(a.hitFlash||0)-dt);a.stagger=Math.max(0,a.stagger-dt);a.suppression=Math.max(0,a.suppression-dt*.35);
       a.senseT-=dt;a.planT-=dt;a.pathT-=dt;a.phaseT-=dt;a.searchT+=dt;
-      if(a.senseT<=0){a.senseT=.18+(a.id%3)*.012;this._sense(a);}
+      if(a.senseT<=0){a.senseT=(.18+(a.id%3)*.012)*this._factor(a,'reaction');this._sense(a);}
       if(a.phaseT<=0){a.phase=a.phase==='hide'?'aim':'advance';a.phaseT=random(1.2,2.5);}
-      if(a.planT<=0){a.planT=.9+(a.id%4)*.1;this._plan(a);}
+      if(a.planT<=0){a.planT=(.9+(a.id%4)*.1)*this._factor(a,'planInterval');this._plan(a);}
       this._move(a,dt);this._shootActor(a,dt);
     }
     this._projectiles(dt);this._drawFX(dt);

@@ -27,9 +27,33 @@ export const MODES = {
   defend: { zh: '守衛戰', en: 'Hold the Line' }, assault: { zh: '衝鋒戰', en: 'Breakthrough' },
 };
 export const DIFFICULTIES = {
-  recruit: { name: { zh: '新兵', en: 'Recruit' }, damage: .65, count: .75, capture: 4 },
-  regular: { name: { zh: '標準', en: 'Regular' }, damage: 1, count: 1, capture: 6 },
-  veteran: { name: { zh: '老兵', en: 'Veteran' }, damage: 1.35, count: 1.2, capture: 8 },
+  recruit: {
+    name: { zh: '新兵', en: 'Recruit' },
+    brief: { zh: '適合熟悉掩體與小隊。脫離火力 4.8 秒後恢復護盾，補給站整備 {supply} 秒；後續波次仍會加強。', en: 'Learn cover and squad commands. Shield recovery begins after 4.8 seconds out of fire; supply stations need {supply} seconds to reset. Later waves still intensify.' },
+    damage: .8, count: .9, capture: 4.5, spawnMultiplier: 1, reinforceMultiplier: 1,
+    integrityRepair: 6, supplyCooldown: 28, supplyUseTime: 1.5, supplyHeal: 100, supplyShield: 60,
+    healthFloor: 40, healthRate: 6,
+    shieldDelay: 4.8, shieldRate: 26, fieldHeal: 18, fieldShield: 35, reinforcementBatches: 2,
+    reaction: 1.2, accuracy: 1.15, burstRest: 1.2, planInterval: 1.12, tacticalTempo: .9,
+  },
+  regular: {
+    name: { zh: '標準', en: 'Regular' },
+    brief: { zh: '更密集的攻勢與有限補給。脫離火力 6.5 秒後恢復護盾，補給站整備 {supply} 秒；波間只修補少量防線。', en: 'Denser attacks and limited supplies. Shield recovery begins after 6.5 seconds out of fire; supply stations reset in {supply} seconds. Only a little line integrity returns between waves.' },
+    damage: 1.15, count: 1.25, capture: 7, spawnMultiplier: .84, reinforceMultiplier: .8,
+    integrityRepair: 3, supplyCooldown: 40, supplyUseTime: 2.2, supplyHeal: 45, supplyShield: 35,
+    healthFloor: 30, healthRate: 4,
+    shieldDelay: 6.5, shieldRate: 17, fieldHeal: 10, fieldShield: 20, reinforcementBatches: 3,
+    reaction: .82, accuracy: .82, burstRest: .78, planInterval: .8, tacticalTempo: 1.12,
+  },
+  veteran: {
+    name: { zh: '老兵', en: 'Veteran' },
+    brief: { zh: '管控補給、側翼與隊友才能守住防線。脫離火力 8 秒後恢復護盾，補給站整備 {supply} 秒；防線不自動修復。', en: 'Manage supplies, flanks and your squad. Shield recovery begins after 8 seconds out of fire; supply stations need {supply} seconds to reset. Line integrity never repairs automatically.' },
+    damage: 1.5, count: 1.6, capture: 9, spawnMultiplier: .68, reinforceMultiplier: .62,
+    integrityRepair: 0, supplyCooldown: 55, supplyUseTime: 3, supplyHeal: 30, supplyShield: 20,
+    healthFloor: 20, healthRate: 2,
+    shieldDelay: 8, shieldRate: 11, fieldHeal: 5, fieldShield: 10, reinforcementBatches: 4,
+    reaction: .68, accuracy: .66, burstRest: .58, planInterval: .62, tacticalTempo: 1.3,
+  },
 };
 export function selection(raw = {}) {
   return { scene: SCENARIOS.some(s => s.id === raw.scene) ? raw.scene : 'pass',
@@ -38,6 +62,12 @@ export function selection(raw = {}) {
 }
 
 // Pure mission state. The renderer supplies actual living enemies and interaction state.
+const DEFENSE_COUNTS = [7, 10, 14, 18];
+const ASSAULT_COUNTS = [8, 11, 14];
+const REINFORCEMENT_COUNTS = [3, 4, 5];
+const DEFENSE_PACE = [1, .94, .88, .82];
+const ASSAULT_PACE = [1, .88, .76];
+const REINFORCEMENT_PACE = [1, .9, .82];
 export class Mission {
   constructor(options) {
     Object.assign(this, selection(options));
@@ -46,12 +76,15 @@ export class Mission {
     this.rules.count *= this.operation.countMultiplier || 1;
     this.rules.capture *= this.operation.captureMultiplier || 1;
     this.waveCount = 4;
-    this.reinforceInterval = this.operation.reinforceInterval || 28;
+    this.baseSpawnInterval = (this.operation.spawnInterval || 1.15) * this.rules.spawnMultiplier;
+    this.baseReinforceInterval = (this.operation.reinforceInterval || 28) * this.rules.reinforceMultiplier;
+    this.spawnInterval = this.baseSpawnInterval; this.reinforceInterval = this.baseReinforceInterval;
     this.scenario = SCENARIOS.find(s => s.id === this.scene);
     this.time = 0; this.wave = 0; this.phase = 'prepare'; this.delay = 6;
     this.pending = 0; this.spawnIn = 0; this.integrity = 100;
     this.objective = 0; this.capture = 0; this.status = 'playing'; this.kills = 0;
     this.stageStarted = false; this.reinforceIn = this.reinforceInterval;
+    this.reinforcementsLeft = this.rules.reinforcementBatches; this.reinforcementsClosed = false;
   }
   get target() { return this.mode === 'defend' ? { x:0,z:-39,name:this.scenario.hold } : this.scenario.targets[this.objective]; }
   update(dt, { alive = 0, pressure = 0, near = false, contested = false, interact = false, dead = false } = {}) {
@@ -64,17 +97,38 @@ export class Mission {
       if (this.integrity <= 0) { this.status = 'lost'; return ['lost']; }
       if (this.phase === 'prepare') {
         this.delay -= dt;
-        if (this.delay <= 0) { this.wave++; this.phase = 'battle'; this.pending = Math.round((5+this.wave*2)*this.rules.count); this.spawnIn = 0; events.push('wave'); }
+        if (this.delay <= 0) {
+          this.wave++; this.phase = 'battle'; this.pending = Math.round(DEFENSE_COUNTS[this.wave-1]*this.rules.count);
+          this.spawnInterval = this.baseSpawnInterval*DEFENSE_PACE[this.wave-1]; this.spawnIn = 0; events.push('wave');
+        }
       } else if (this.pending === 0 && alive === 0) {
         if (this.wave >= this.waveCount) { this.status = 'won'; events.push('won'); }
-        else { this.phase = 'prepare'; this.delay = 10; this.integrity = Math.min(100,this.integrity+8); events.push('resupply'); }
+        else { this.phase = 'prepare'; this.delay = 10; this.integrity = Math.min(100,this.integrity+this.rules.integrityRepair); events.push('resupply'); }
       }
     } else {
-      if (!this.stageStarted) { this.pending = Math.round(7*this.rules.count); this.stageStarted = true; events.push('objective'); }
-      this.reinforceIn -= dt;
-      if (this.reinforceIn <= 0) { if (alive < 10) this.pending += Math.round(3*this.rules.count); this.reinforceIn = this.reinforceInterval; }
-      if (near && !contested && interact) this.capture += dt;
-      else if (!near) this.capture = Math.max(0,this.capture-dt*.5);
+      if (!this.stageStarted) {
+        this.pending = Math.round(ASSAULT_COUNTS[this.objective]*this.rules.count); this.stageStarted = true;
+        this.spawnInterval = this.baseSpawnInterval*ASSAULT_PACE[this.objective]; this.spawnIn = 0;
+        this.reinforceInterval = this.baseReinforceInterval*REINFORCEMENT_PACE[this.objective]; this.reinforceIn = this.reinforceInterval;
+        this.reinforcementsLeft = this.rules.reinforcementBatches; this.reinforcementsClosed = false; events.push('objective');
+      }
+      // A cleared queue and the last two defenders are a stable cleanup phase.
+      // Reinforcements never appear while the player is following their precise markers.
+      if (this.pending === 0 && alive <= 2) { this.reinforcementsClosed = true; this.reinforcementsLeft = 0; }
+      if (!this.reinforcementsClosed && this.reinforcementsLeft > 0) {
+        this.reinforceIn -= dt;
+        if (this.reinforceIn <= 0) {
+          // Finish the previous queue first; crowded sectors cannot accumulate hidden armies.
+          if (this.pending === 0 && alive < 10) {
+            this.pending = Math.round(REINFORCEMENT_COUNTS[this.objective]*this.rules.count);
+            this.reinforcementsLeft--; events.push('reinforce');
+          }
+          this.reinforceIn = this.reinforceInterval;
+        }
+      }
+      if (near && !contested && interact && this.pending === 0) this.capture += dt;
+      else if (!near) this.capture = Math.max(0,this.capture-dt);
+      else if (contested) this.capture = Math.max(0,this.capture-dt*.5);
       if (this.capture >= this.rules.capture) {
         this.objective++; this.capture = 0;
         if (this.objective >= this.scenario.targets.length) { this.status = 'won'; events.push('won'); }
@@ -85,5 +139,5 @@ export class Mission {
     if (this.status === 'playing' && this.pending > 0 && this.spawnIn <= 0 && alive < 14) events.push('spawn');
     return events;
   }
-  spawned() { if (this.pending > 0) { this.pending--; this.spawnIn = this.operation.spawnInterval || 1.15; } }
+  spawned() { if (this.pending > 0) { this.pending--; this.spawnIn = this.spawnInterval; } }
 }

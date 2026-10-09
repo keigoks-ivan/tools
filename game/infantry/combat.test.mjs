@@ -3,25 +3,46 @@ import assert from 'node:assert/strict';
 import * as THREE from 'three';
 import { Combat, InfantryActor } from './combat.js';
 import { Navigation } from './navigation.mjs';
-import { Solid } from '../mech/zero/kit.js';
-import { TacticalDirector, BATTLE_TACTICS } from './combat-tactics.mjs';
+import { Solid, SURFACES } from '../mech/zero/kit.js';
+import { TacticalDirector, BATTLE_TACTICS, aiMultiplier } from './combat-tactics.mjs';
+import { DIFFICULTIES, SCENARIOS } from './scenarios.mjs';
+import { WEAPONS } from '../mech/zero/viewmodel.js';
+import { Pilot, P } from '../mech/zero/player.js';
+import { buildBattlefield } from './map.js';
 
 const V=(x=0,y=0,z=0)=>new THREE.Vector3(x,y,z);
+function assertCapsuleClear(map,p){const moved=p.clone();map.solid.pushOut(moved,P.r,p.y,p.y+1.7,P.step);assert(p.distanceTo(moved)<1.1e-5,'infantry capsule penetrated physical cover');}
 function world(boxes=[],bounds={x0:-24,x1:24,z0:-30,z1:30}) {
   const solid=new Solid();for(const b of boxes)solid.add({...b});const ground=()=>0;
   return {solid,bounds,ground,nav:new Navigation(solid,bounds,ground),cover:[]};
 }
-function fixture(map=world()) {
+function fixture(map=world(),difficulty={damage:1}) {
   const player={pos:V(0,0,-22),vel:V(),eyeH:1.58,dead:false};const hurts=[],kills=[];
-  const combat=new Combat({scene:new THREE.Scene(),map,player,kit:{},audio:{},onPlayerHurt:(...args)=>hurts.push(args),onKill:a=>kills.push(a),difficulty:{damage:1}});
+  const combat=new Combat({scene:new THREE.Scene(),map,player,kit:{},audio:{},onPlayerHurt:(...args)=>hurts.push(args),onKill:a=>kills.push(a),difficulty});
   return {combat,player,hurts,kills};
 }
 function actor(combat,p,id=1,type='line') {
   // Locomotion is tested separately from the already-shared captured animation system.
   const a={id,type,role:type,side:id%2?1:-1,pos:p.clone(),hp:100,hp0:100,dead:false,friendly:false,T:{run:4.6,walk:1.65,range:19,aim:99},guard:true,
-    home:p.clone(),lastSeen:p.clone(),lastContact:-99,target:null,sees:false,senseT:0,goal:p.clone(),path:[],pathT:0,pathGoal:p.clone(),planT:0,aimT:0,ammo:24,burst:0,shotT:0,restT:0,suppression:0,stagger:0,phase:'advance',phaseT:1,cover:null,stuckT:0,progressPos:p.clone(),lastProgress:0,searchT:0,stepPhase:0,barT:0,contactRadioT:0,deathAge:0};
+    home:p.clone(),lastSeen:p.clone(),lastContact:-99,target:null,sees:false,senseT:0,goal:p.clone(),path:[],pathT:0,pathGoal:p.clone(),planT:0,aimT:0,ammo:24,burst:0,shotT:0,restT:0,suppression:0,stagger:0,phase:'advance',phaseT:1,cover:null,stuckT:0,progressPos:p.clone(),lastProgress:0,searchT:0,stepPhase:0,barT:0,contactRadioT:0,deathAge:0,
+    laneBlocked:0,firePressure:0,lastShotTime:-99,flankGoal:null,flankUntil:0,flankContact:p.clone(),boundPhase:'move',boundT:.45,staggerReadyAt:0};
   a.s={pos:a.pos,vel:V(),yaw:Math.PI,aimYaw:Math.PI,aimPitch:0,mode:'patrol',crouchT:0,reloadT:-1,aimW:0,update:()=>{},headPos:out=>out.copy(a.pos).add(V(0,1.55,0)),chestPos:out=>out.copy(a.pos).add(V(0,1.2,0)),muzzle:out=>out.copy(a.pos).add(V(0,1.4,-.5))};
   a.hitTest=()=>null;a.damage=d=>{a.hp-=d;return a.hp<=0;};a.dispose=()=>{};return a;
+}
+function gunner(combat,p=V(0,0,-10),type='line',friendly=false,id=1){
+  const a=actor(combat,p,id,type);a.guard=false;a.friendly=friendly;a.T={...a.T,aim:type==='sniper'?1.3:.55,burst:type==='sniper'?1:3,gap:type==='sniper'?1.4:.2,damage:type==='sniper'?34:7,speed:78,spread:type==='sniper'?.009:.04,mag:240};
+  a.target=combat.player;a.sees=true;a.lastSeen.copy(combat.player.pos);a.lastContact=0;a.s.mode='aim';a.s.aimW=1;a.s.runW=0;a.ammo=240;
+  a.s.update=dt=>{a.s.aimW=THREE.MathUtils.damp(a.s.aimW,a.s.mode==='aim'?1:0,7,dt);a.s.runW=THREE.MathUtils.damp(a.s.runW,a.s.mode==='run'?1:0,6,dt);if(a.s.reloadT>=0){a.s.reloadT+=dt;if(a.s.reloadT>1.6)a.s.reloadT=-1;}};
+  return a;
+}
+function fixedRandom(value,fn){const old=Math.random;Math.random=()=>value;try{return fn();}finally{Math.random=old;}}
+function firingSample(difficulty,{fps=60,type='line',friendly=false,seconds=10}={}){
+  return fixedRandom(.5,()=>{
+    const {combat}=fixture(world(),difficulty),a=gunner(combat,V(0,0,-10),type,friendly),shots=[];
+    combat._bolt=(_p,dir,_speed,damage)=>shots.push({time:combat.time,dir:dir.clone(),damage});
+    for(let i=0;i<seconds*fps;i++){combat.time+=1/fps;a.s.update(1/fps);combat._shootActor(a,1/fps);}
+    combat.clear();return shots;
+  });
 }
 test('last two attackers navigate around a long wall and guards advance without teleporting',()=>{
   const map=world([{x0:-14,x1:14,z0:-2,z1:2,y0:0,y1:4}]);const {combat,player}=fixture(map);
@@ -31,7 +52,7 @@ test('last two attackers navigate around a long wall and guards advance without 
     combat.update(dt,{mode:'defend',target:{x:0,z:-25},cleanup:true});
     combat.enemies.forEach((a,i)=>{
       assert(a.pos.distanceTo(previous[i])<=4.6*dt+.00001,'cleanup movement exceeded walking/running speed');
-      assert(!(a.pos.x>-14.34&&a.pos.x<14.34&&a.pos.z>-2.34&&a.pos.z<2.34),'walked through the wall');
+      assertCapsuleClear(map,a.pos);
       assert(!a.dead);previous[i].copy(a.pos);
     });
   }
@@ -131,7 +152,7 @@ test('advance command leads the squad around an obstacle without teleporting',()
   const map=world([{x0:-12,x1:12,z0:-2,z1:2,y0:0,y1:4}]);const {combat}=fixture(map),a=actor(combat,V(0,0,-24),20);a.friendly=true;a.formationIndex=1;combat.allies=[a];
   const command={mode:'advance',target:{x:0,z:20}},previous=a.pos.clone();
   for(let frame=0;frame<600;frame++){
-    combat.update(1/30,{squadCommand:command});assert(a.pos.distanceTo(previous)<4.6/30+.00001);assert(!(a.pos.x>-12.34&&a.pos.x<12.34&&a.pos.z>-2.34&&a.pos.z<2.34));previous.copy(a.pos);
+    combat.update(1/30,{squadCommand:command});assert(a.pos.distanceTo(previous)<4.6/30+.00001);assertCapsuleClear(map,a.pos);previous.copy(a.pos);
   }
   assert(a.pos.z>0,'advancing squad stalled behind obstacle');assert.equal(combat.squadMode,'advance');combat.clear();
 });
@@ -189,4 +210,158 @@ test('corpse fade owns only material clones and preserves shared soldier, rifle 
   soldier.material.addEventListener('dispose',()=>clonesDisposed++);a.fade(1);assert.equal(soldier.material.opacity,0);assert.equal(shared.opacity,.8);a.dispose();
   assert.equal(clonesDisposed,1);assert.equal(skeletonDisposed,1);assert.equal(sharedDisposed,0);assert.equal(textureDisposed,0);assert.equal(geometryDisposed,0);
   shared.dispose();texture.dispose();geometry.dispose();
+});
+
+test('difficulty changes enemy acquisition and sustained fire while allied output stays constant',()=>{
+  const samples=Object.values(DIFFICULTIES).map(d=>firingSample(d));
+  assert(samples[0][0].time>samples[1][0].time&&samples[1][0].time>samples[2][0].time,'aim reaction did not scale');
+  assert(samples[0][0].time>=.55*DIFFICULTIES.recruit.reaction);assert(samples[2][0].time>=.35);
+  assert(samples[1].length>=samples[0].length+3,'regular did not apply sustained pressure');
+  assert(samples[2].length>=samples[1].length+3,'veteran did not shorten firing gaps');
+  for(let i=0;i<samples.length;i++)assert.equal(samples[i][0].damage,7*Object.values(DIFFICULTIES)[i].damage,'damage was multiplied more than once');
+  const allySamples=Object.values(DIFFICULTIES).map(d=>firingSample(d,{friendly:true}));
+  assert.deepEqual(allySamples[0],allySamples[1]);assert.deepEqual(allySamples[1],allySamples[2]);assert.equal(allySamples[0][0].damage,7);
+  const at30=firingSample(DIFFICULTIES.veteran,{fps:30}),at120=firingSample(DIFFICULTIES.veteran,{fps:120});
+  assert(Math.abs(at30[0].time-at120[0].time)<1/30);assert(Math.abs(at30.length-at120.length)<=2,'fire cadence varied materially with frame rate');
+});
+test('sniper retains at least a full second of warning and a soldier cannot fire before its pose faces the target',()=>{
+  const shots=firingSample(DIFFICULTIES.veteran,{type:'sniper',seconds:5});assert(shots.length>0);assert(shots[0].time>=1.05);
+  const {combat}=fixture(world(),DIFFICULTIES.veteran),a=gunner(combat);a.s.aimYaw=Math.PI/2;
+  for(let i=0;i<100;i++){combat.time+=.01;combat._shootActor(a,.01);}assert.equal(combat.bolts.length,0,'shot while visibly aiming sideways');
+  a.s.aimYaw=Math.PI;a.s.aimW=.7;combat._shootActor(a,.01);assert.equal(combat.bolts.length,0,'shot before the rifle was raised');
+  a.s.aimW=1;combat._shootActor(a,.01);assert.equal(combat.bolts.length,1);combat.clear();
+});
+test('veteran accuracy improves real projectile direction without overriding sprint or incoming-fire penalties',()=>{
+  const directions=Object.values(DIFFICULTIES).map(d=>fixedRandom(1,()=>{
+    const {combat}=fixture(world(),d),a=gunner(combat),from=a.s.muzzle(V()),base=combat._aimPoint(combat.player).sub(from).normalize();
+    a.aimT=2;combat._shootActor(a,.01);const shot=combat.bolts[0];assert(shot);const error=1-shot.dir.dot(base);
+    combat.clear();return error;
+  }));
+  assert(directions[0]>directions[1]&&directions[1]>directions[2]);
+  const plain=fixedRandom(1,()=>{
+    const {combat,player}=fixture(world(),DIFFICULTIES.veteran),a=gunner(combat),from=a.s.muzzle(V()),base=combat._aimPoint(player).sub(from).normalize();a.aimT=2;
+    combat._shootActor(a,.01);const error=1-combat.bolts[0].dir.dot(base);combat.bolts.length=0;a.burst=0;a.shotT=a.restT=0;a.aimT=2;a.suppression=2;player.sprintK=1;
+    combat._shootActor(a,.01);assert(1-combat.bolts[0].dir.dot(base)>error*2);combat.clear();return error;
+  });assert(plain>0);
+});
+test('target switches restart the warning and enemies still refuse blocked sight or allied firing lanes',()=>{
+  const {combat,player}=fixture(world(),DIFFICULTIES.veteran),a=gunner(combat,V(0,0,0)),mate=actor(combat,V(0,0,-10),2);
+  a.target=mate;a.aimT=2;a.burst=3;combat.enemies=[a,mate];combat._sense(a);
+  assert.equal(a.target,player);assert.equal(a.aimT,0);assert.equal(a.burst,0);
+  a.planT=2;a.pathT=2;
+  for(let i=0;i<25;i++){combat.time+=.01;combat._shootActor(a,.01);}assert.equal(combat.bolts.length,0);assert.equal(a.planT,0);assert.equal(a.pathT,0);
+  combat._plan(a);assert.equal(a.intent,'relocate');assert(Math.abs(a.goal.x)>1,'blocked rifleman did not open another lane');
+  const graph=combat._routes();assert.equal(graph.components[graph.nearest(a.goal)],graph.components[graph.nearest(a.pos,null,true)]);
+  a.target=null;a.sees=false;a.lastContact=combat.time-8;assert.doesNotThrow(()=>combat._plan(a));assert.equal(a.intent,'search','contact expiry dropped into a missing target');combat.clear();
+  const behindWall=fixture(world([{x0:-5,x1:5,z0:-5,z1:-4,y0:0,y1:4}]),DIFFICULTIES.veteran),b=gunner(behindWall.combat,V(0,0,0));b.aimT=2;
+  behindWall.combat._shootActor(b,.1);assert.equal(behindWall.combat.bolts.length,0);behindWall.combat.clear();
+});
+test('rapid SMG hits retain every impact but cannot permanently reset aim or extend physical stagger',()=>{
+  fixedRandom(.5,()=>{
+    const {combat}=fixture(world(),DIFFICULTIES.regular),a=gunner(combat),impacts=[],staggerTimes=[],shots=[];a.combat=combat;a.hp=a.hp0=10000;a.stagV=V();a.cover={};
+    a.s.impact=()=>impacts.push(combat.time);a.s.flash=()=>{};a.damage=InfantryActor.prototype.damage.bind(a);combat._bolt=()=>shots.push(combat.time);
+    let nextHit=0,previousCooldown=0;
+    for(let frame=0;frame<240;frame++){
+      const dt=1/60;combat.time+=dt;a.stagger=Math.max(0,a.stagger-dt);a.phaseT-=dt;
+      if(a.phase==='hide'&&a.phaseT<=0){a.phase='aim';a.phaseT=2;}
+      if(combat.time>=nextHit){a.damage(WEAPONS.smg.dmg,V(0,0,1));nextHit+=WEAPONS.smg.rof;if(a.staggerReadyAt!==previousCooldown){staggerTimes.push(combat.time);previousCooldown=a.staggerReadyAt;}}
+      a.s.update(dt);combat._shootActor(a,dt);
+    }
+    assert(impacts.length>=44,'lost repeated hit animation');assert(staggerTimes.length<=6);
+    for(let i=1;i<staggerTimes.length;i++)assert(staggerTimes[i]-staggerTimes[i-1]>=.7-1e-9);
+    assert(shots.length>0,'continuous SMG hits permanently disabled return fire');assert.equal(a.dead,false);combat.clear();
+  });
+});
+test('advancing infantry alternates physical bounds and visible aiming bursts instead of running silently to its goal',()=>{
+  fixedRandom(.5,()=>{
+    const {combat}=fixture(world(),DIFFICULTIES.regular),a=gunner(combat,V(0,0,18),'line',false,3),shots=[],phases=new Set();combat.enemies=[a];
+    combat._bolt=()=>shots.push({mode:a.s.mode,weight:a.s.aimW,speed:a.s.vel.length()});const start=a.pos.clone();
+    for(let frame=0;frame<600;frame++){combat.update(1/60,{target:{x:0,z:-26}});phases.add(a.boundPhase);}
+    assert(phases.has('move')&&phases.has('fire'));assert(a.pos.distanceTo(start)>5);assert(shots.length>=3,'advancing unit offered no suppressive fire');
+    for(const shot of shots){assert.equal(shot.mode,'aim');assert(shot.weight>.84);assert(shot.speed<a.T.walk,'fired at running speed');}
+    assert.equal(a.intent,'breakthrough');combat.clear();
+  });
+});
+test('suppression comes from actual firing and permits a committed flank even during the suppress phase',()=>{
+  fixedRandom(.5,()=>{
+    const {combat,player}=fixture(world(),DIFFICULTIES.regular),support=gunner(combat,V(0,0,8),'support',false,4),flanker=gunner(combat,V(4,0,10),'flank',false,1);combat.enemies=[support,flanker];
+    support.s.aimW=0;
+    for(let i=0;i<180;i++){combat.time+=1/60;combat._shootActor(support,1/60);}assert.equal(support.firePressure,0,'unraised weapon counted as suppression');
+    support.s.aimW=1;
+    for(let i=0;i<180;i++){combat.time+=1/60;combat._shootActor(support,1/60);}assert(support.firePressure>1.4/DIFFICULTIES.regular.tacticalTempo);
+    combat.director.update(combat.time,1,{sceneId:'city'});combat.tacticalPhase='suppress';combat._plan(flanker);assert.equal(flanker.intent,'flank');const committed=flanker.goal.clone();
+    flanker.pos.add(V(.8,0,-.4));combat.time+=.5;combat._plan(flanker);assert(flanker.goal.equals(committed),'flank destination drifted every plan');
+    flanker.pos.copy(committed);combat._plan(flanker);assert.equal(flanker.intent,'crossfire');assert.equal(flanker.phase,'aim');assert(flanker.goal.equals(committed));
+    const graph=combat._routes();assert.equal(graph.components[graph.nearest(flanker.goal)],graph.components[graph.nearest(player.pos,null,true)]);combat.clear();
+  });
+});
+test('breakthrough riflemen and flankers physically reach the defended objective while support covers from range',()=>{
+  const map=world([{x0:-12,x1:12,z0:-2,z1:2,y0:0,y1:4}]),{combat}=fixture(map,DIFFICULTIES.veteran);
+  const line=actor(combat,V(-5,0,18),3),flank=actor(combat,V(7,0,20),6,'flank'),support=actor(combat,V(12,0,22),4,'support');combat.enemies=[line,flank,support];
+  const previous=combat.enemies.map(a=>a.pos.clone()),target={x:0,z:-25};
+  for(let frame=0;frame<1800;frame++){
+    combat.update(1/30,{mode:'defend',target,operation:{sceneId:'city'}});
+    combat.enemies.forEach((a,i)=>{assert(a.pos.distanceTo(previous[i])<=a.T.run/30+.00001);assertCapsuleClear(map,a.pos);previous[i].copy(a.pos);});
+  }
+  for(const a of [line,flank]){assert.equal(a.intent,'breakthrough');assert(a.pos.distanceTo(V(0,0,-25))<4,'mobile infantry never threatened the evacuation point');assert(!a.dead);}
+  assert(support.pos.distanceTo(V(0,0,-25))>10,'support abandoned its firing station');combat.clear();
+});
+test('assault riflemen and heavy guards remain anchored to their sector with contact and cleanup overrides the post',()=>{
+  const {combat,player}=fixture(world(),DIFFICULTIES.veteran),anchor=V(0,0,-5),line=actor(combat,V(0,0,12),1),heavy=actor(combat,V(8,0,12),2,'heavy');combat.enemies=[line,heavy];
+  for(const a of combat.enemies){a.guard=true;a.guardAnchor=anchor.clone();}
+  for(let frame=0;frame<900;frame++)combat.update(1/30,{mode:'assault',target:anchor});
+  player.pos.set(20,0,20);
+  for(let frame=0;frame<900;frame++)combat.update(1/30,{mode:'assault',target:anchor});
+  assert(line.pos.distanceTo(anchor)<=7.7);assert(heavy.pos.distanceTo(anchor)<=9.7);
+  for(const a of combat.enemies){assert.equal(a.intent,'guard');a.target=null;a.sees=false;a.lastContact=-99;combat._plan(a);assert(a.goal.distanceTo(anchor)<=9);}
+  combat.update(1/30,{mode:'assault',target:anchor,cleanup:true});
+  for(const a of combat.enemies){assert.equal(a.guard,false);assert.equal(a.intent,'pressure');assert(a.goal.distanceTo(player.pos)<2);}
+  for(let frame=0;frame<600;frame++)combat.update(1/30,{mode:'assault',target:anchor,cleanup:true});
+  for(const a of combat.enemies)assert(a.pos.distanceTo(player.pos)<2);combat.clear();
+});
+test('veteran replans and tactical phases accelerate without deleting regroup or complete reload windows',()=>{
+  const director=new TacticalDirector(),operation={sceneId:'pass'};director.update(0,1,operation,'pass',DIFFICULTIES.veteran.tacticalTempo);
+  assert.equal(director.update(9/DIFFICULTIES.veteran.tacticalTempo+.001,1,operation,'pass',DIFFICULTIES.veteran.tacticalTempo).phase,'suppress');
+  assert.equal(director.update(26/DIFFICULTIES.veteran.tacticalTempo+.001,1,operation,'pass',DIFFICULTIES.veteran.tacticalTempo).phase,'regroup');
+  assert.equal(director.update(31/DIFFICULTIES.veteran.tacticalTempo+.001,1,operation,'pass',DIFFICULTIES.veteran.tacticalTempo).phase,'advance');
+  for(const difficulty of Object.values(DIFFICULTIES)){
+    const {combat}=fixture(world(),difficulty),a=gunner(combat,V(0,0,8));combat.enemies=[a];combat.update(1/60);assert(Math.abs(a.senseT-.192*difficulty.reaction)<1e-9);assert(Math.abs(a.planT-difficulty.planInterval)<1e-9);combat.clear();
+  }
+  fixedRandom(0,()=>{
+    const {combat}=fixture(world(),DIFFICULTIES.veteran),a=gunner(combat);a.T.burst=1;a.aimT=2;combat._shootActor(a,.01);assert.equal(a.restT,.38);
+    a.T.mag=3;a.ammo=1;a.shotT=a.restT=0;a.aimT=2;combat._shootActor(a,.01);assert.equal(a.s.reloadT,0);assert.equal(a.restT,1.75);const before=combat.bolts.length;
+    for(let i=0;i<96;i++){a.s.update(1/60);combat._shootActor(a,1/60);}assert.equal(combat.bolts.length,before,'difficulty skipped the captured reload animation');combat.clear();
+  });
+  assert.equal(aiMultiplier({reaction:NaN},'reaction'),1);assert.equal(aiMultiplier(DIFFICULTIES.veteran,'accuracy',true),1);
+});
+
+for(const scenario of SCENARIOS)test(`${scenario.id}: real Pilot at supply-crate faces and rounded corners keeps enemy spawns connected`,()=>{
+  const scene=new THREE.Scene(),materials=Object.fromEntries([...SURFACES,'rock','asphalt','grass'].map(k=>[k,new THREE.MeshStandardMaterial({vertexColors:true})]));
+  const map=buildBattlefield(scene,materials,scenario),player=new Pilot(map.solid),start=map.starts.defend;
+  player.reset(V(start.x,start.y,start.z),0);
+  const combat=new Combat({scene,map,player,kit:{},audio:{}}),graph=combat._routes(),startNode=graph.nearest(player.pos,null,true),component=graph.components[startNode];assert(component>=0);
+  // The exact live-game route that crashed on first-wave spawn while holding E.
+  for(const [seconds,mx,my] of [[2.2,0,-1],[1.1,1,0],[2.6,0,0]])for(let frame=0;frame<Math.round(seconds*60);frame++)player.update(1/60,{mx,my,lookX:0,lookY:0,jump:false,sprint:false,crouch:false,ads:false});
+  const box=map.solid.list.find(b=>Math.abs((b.x0+b.x1)/2-map.supply.x)<.01&&Math.abs((b.z0+b.z1)/2-map.supply.z)<.01&&Math.abs(b.y1-b.y0-.9)<.01);assert(box);
+  const assertSpawn=()=>{
+    const moved=player.pos.clone();map.solid.pushOut(moved,P.r,player.pos.y,player.pos.y+player.eyeH+P.head,P.step);assert(player.pos.distanceTo(moved)<1e-7,'probe was not a legal Pilot position');
+    const node=graph.nearest(player.pos,null,true);assert(node>=0,`lost player component at ${player.pos.toArray()}`);assert.equal(graph.components[node],component);
+    for(const wanted of map.spawns){const spawn=combat._spawnPosition(wanted),index=graph.nearest(spawn,null,true);assert(index>=0);assert.equal(graph.components[index],component);assert(combat._clearSegment(spawn,spawn));assert(graph.route(spawn,map.nav.nodes[node]).length>0,'spawn cannot reach player-side anchor');}
+  };
+  assertSpawn();assert(Math.hypot(player.pos.x-map.supply.x,player.pos.z-map.supply.z)<2.3,'replayed route missed the supply interaction area');
+  const x=(box.x0+box.x1)/2,z=(box.z0+box.z1)/2,d=P.r/Math.sqrt(2);
+  const positions=[[box.x0-P.r,z],[box.x1+P.r,z],[x,box.z0-P.r],[x,box.z1+P.r]];
+  for(const [xx,sx] of [[box.x0,-1],[box.x1,1]])for(const [zz,sz] of [[box.z0,-1],[box.z1,1]])positions.push([xx+sx*d,zz+sz*d]);
+  for(const [px,pz] of positions){player.reset(V(px,map.ground(px,pz),pz),0);player.update(1/60,{mx:0,my:0,lookX:0,lookY:0,jump:false,sprint:false,crouch:false,ads:false});assertSpawn();}
+  combat.clear();map.dispose();for(const material of Object.values(materials))material.dispose();
+});
+test('legal contact still cannot connect spawns across a sealed thin wall or admit an embedded player',()=>{
+  const map=world([{x0:-.05,x1:.05,z0:-31,z1:31,y0:0,y1:4}]),{combat,player}=fixture(map);
+  for(const side of [-1,1]){
+    player.pos.set(side*(.05+P.r),0,-10);const before=player.pos.clone();map.solid.pushOut(before,P.r,0,P.stand+P.head,P.step);assert(player.pos.distanceTo(before)<1e-9);
+    const spawn=combat._spawnPosition({x:-side*15,z:20});assert(Math.sign(spawn.x)===side,'touch epsilon jumped into the opposite component');
+    assert.equal(combat._clearSegment(player.pos,V(-player.pos.x,0,-10)),false,'swept circle passed through a thin wall');
+    const penetrated=player.pos.clone().add(V(-side*.001,0,0));assert.equal(combat._clearSegment(penetrated,penetrated),false,'tolerance admitted actual penetration');
+  }
+  player.pos.set(0,0,-10);assert.throws(()=>combat._spawnPosition({x:15,z:20}),/no accessible infantry spawn/,'invalid player positions must not choose an arbitrary island');combat.clear();
 });

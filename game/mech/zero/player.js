@@ -10,8 +10,9 @@ export const P = {
 };
 
 export class Pilot {
-  constructor(solid) {
+  constructor(solid, recovery = {}) {
     this.solid = solid;
+    this.setRecovery(recovery);
     this.pos = new THREE.Vector3();
     this.vel = new THREE.Vector3();
     this.yaw = 0; this.pitch = 0;
@@ -23,6 +24,11 @@ export class Pilot {
     this.moveK = 0;    // 移動速度 0..1（給晃動、準心擴散）
     this.stam = 0;     // 喘（衝刺累積）
     this.frozen = false;
+  }
+  // Each game can tune recovery without changing the series movement or defaults.
+  setRecovery(profile = {}) {
+    const value = (key, fallback) => Number.isFinite(profile[key]) && profile[key] >= 0 ? profile[key] : fallback;
+    this.recovery = { shieldDelay: value('shieldDelay', P.regen), shieldRate: value('shieldRate', P.shieldRate), healthFloor: Math.min(P.hp, value('healthFloor', 40)), healthRate: value('healthRate', 6) };
   }
   reset(p, yaw) {
     this.pos.copy(p); this.vel.set(0, 0, 0); this.yaw = yaw; this.pitch = 0;
@@ -94,9 +100,9 @@ export class Pilot {
     this.stam = clamp(this.stam + (this.sprint ? dt * 0.12 : -dt * 0.18), 0, 1);
     // 護盾回充
     this.hurtT += dt;
-    if (this.hurtT > P.regen && !this.dead) {
-      if (this.shield < P.shield) { if (this.shield <= 0 && this.onRecharge) this.onRecharge(); this.shield = Math.min(P.shield, this.shield + P.shieldRate * dt); }
-      if (this.hp < 40) this.hp = Math.min(40, this.hp + 6 * dt);   // 重傷慢慢回到 40
+    if (this.hurtT > this.recovery.shieldDelay && !this.dead) {
+      if (this.shield < P.shield) { if (this.shield <= 0 && this.onRecharge) this.onRecharge(); this.shield = Math.min(P.shield, this.shield + this.recovery.shieldRate * dt); }
+      if (this.hp < this.recovery.healthFloor) this.hp = Math.min(this.recovery.healthFloor, this.hp + this.recovery.healthRate * dt);
     }
   }
 

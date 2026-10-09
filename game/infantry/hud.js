@@ -134,7 +134,7 @@ export class InfantryHUD extends HUD {
     if(!vm.scoped){const target=M.target,p=new THREE.Vector3(target.x,G.map.ground(target.x,target.z)+1.5,target.z);this._pin(W,H,p,P.pos.distanceTo(p),'#d7b27b',11,true,target.name[language]);}
     this._cleanupInfo(W,H,G,contacts,language);
     const pad=W<650?16:30;
-    x.fillStyle='#d7b27b';x.font='600 12px Rajdhani,sans-serif';x.fillText(M.scenario.code+' / '+word(M.mode==='defend'?'守衛戰':'衝鋒戰',M.mode==='defend'?'DEFENSE':'ASSAULT'),pad,34);
+    x.fillStyle='#d7b27b';x.font='600 12px Rajdhani,sans-serif';x.fillText(M.scenario.code+' / '+word(M.mode==='defend'?'守衛戰':'衝鋒戰',M.mode==='defend'?'DEFENSE':'ASSAULT')+' / '+(M.rules.name?.[language]||M.difficulty),pad,34);
     x.fillStyle='#eff1e9';x.font='500 15px "Noto Sans TC",sans-serif';x.fillText(M.target.name[language],pad,59);
     x.font='500 12px "Noto Sans TC",sans-serif';x.fillStyle='#bec9c5';
     const alive=G.enemies.filter(e=>!e.dead).length;

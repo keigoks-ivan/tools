@@ -1,3 +1,22 @@
+import { segmentBox } from '../mech/tactics.js';
+
+// The player and infantry have circular feet. A square-expanded AABB wrongly
+// rejects legal contact at a box face or its rounded corner. Test the whole
+// swept disc analytically, allowing only a 10-micrometre contact tolerance.
+export function sweptDiscBox(from,to,box,r=.34){
+  r=Math.max(0,r-1e-5);
+  if(!segmentBox(from.x,from.z,to.x,to.z,box,r))return false;
+  if(segmentBox(from.x,from.z,to.x,to.z,box,0))return true;
+  const pointBox=p=>Math.max(box.x0-p.x,0,p.x-box.x1)**2+Math.max(box.z0-p.z,0,p.z-box.z1)**2;
+  let distance=Math.min(pointBox(from),pointBox(to));
+  const dx=to.x-from.x,dz=to.z-from.z,length=dx*dx+dz*dz;
+  for(const x of [box.x0,box.x1])for(const z of [box.z0,box.z1]){
+    const t=length>1e-12?Math.max(0,Math.min(1,((x-from.x)*dx+(z-from.z)*dz)/length)):0;
+    distance=Math.min(distance,(x-from.x-dx*t)**2+(z-from.z-dz*t)**2);
+  }
+  return distance<r*r;
+}
+
 // Tactical rhythm changes positions and teamwork, never enemy health or damage.
 export const BATTLE_TACTICS={
   pass:{flank:13,line:18,support:26,sniper:31,sight:78,cycle:[9,8,9,5]},
@@ -9,16 +28,23 @@ export const BATTLE_TACTICS={
   rail:{flank:10,line:15,support:22,sniper:28,sight:66,cycle:[8,8,10,5]},
 };
 const PHASES=['advance','suppress','flank','regroup'];
+// Preset values live in DIFFICULTIES. Missing/invalid values retain legacy timing;
+// friendly soldiers do not inherit the selected enemy difficulty.
+export function aiMultiplier(difficulty,key,friendly=false){
+  const value=difficulty?.[key];
+  return friendly||!Number.isFinite(value)?1:Math.max(.35,Math.min(2,value));
+}
 export class TacticalDirector {
   constructor(){this.wave=0;this.epoch=0;this.key='';this.phase='advance';this.sceneId='pass';this.profile=BATTLE_TACTICS.pass;this.side=1;}
-  update(time,wave,operation,mapKind='pass'){
+  update(time,wave,operation,mapKind='pass',tempo=1){
     this.sceneId=operation?.sceneId||operation?.scenario?.id||operation?.scene||(typeof operation==='string'?operation:mapKind)||'pass';
     this.profile=BATTLE_TACTICS[this.sceneId]||BATTLE_TACTICS.pass;
     const seed=Number.isFinite(operation?.seed)?operation.seed:0,key=`${this.sceneId}:${operation?.variantId||''}:${seed}`;
     wave=Math.max(1,Math.floor(Number(wave)||1));
     if(wave!==this.wave||key!==this.key){this.wave=wave;this.key=key;this.epoch=time;}
     const durations=this.profile.cycle,period=durations.reduce((a,b)=>a+b,0);
-    let offset=Math.max(0,time-this.epoch)%period,index=0;
+    tempo=Number.isFinite(tempo)?Math.max(.35,Math.min(2,tempo)):1;
+    let offset=(Math.max(0,time-this.epoch)*tempo)%period,index=0;
     while(index<durations.length-1&&offset>=durations[index])offset-=durations[index++];
     this.phase=PHASES[index];this.progress=offset/durations[index];this.side=((Math.abs(seed)+wave)%2)?1:-1;
     return this;
