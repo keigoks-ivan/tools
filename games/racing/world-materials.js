@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { CITY_ROAD_PROFILES } from './world-city-roadmarkings.js?v=city-drive-16';
-import { installAsphaltWear } from './road-surface.mjs?v=city-drive-16';
+import { CITY_ROAD_PROFILES } from './world-city-roadmarkings.js?v=city-drive-17';
+import { installAsphaltWear } from './road-surface.mjs?v=city-drive-17';
 
 // Mesh UVs are in metres. Repetition follows the photographed surface size.
 const surfaces = {

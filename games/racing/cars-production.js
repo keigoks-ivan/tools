@@ -1,10 +1,10 @@
 import * as THREE from './vendor/three.module.js';
 import { mergeGeometries, mergeVertices } from './vendor/addons/utils/BufferGeometryUtils.js';
-import { VEHICLES, PRODUCTION_CAR_DIMENSIONS } from './vehicles.mjs?v=city-drive-16';
-import { addVehicleTailLights } from './vehicle-taillights.js?v=city-drive-16';
-import { addVehicleRearDetails, REAR_DETAIL_PROFILES } from './vehicle-rear-details.js?v=city-drive-16';
-import { createBMWX3 } from './cars-bmw-x3.js?v=city-drive-16';
-import { loftGeometry, projectedNormals, surfaceNormal, weldSurfaceNormals } from './vehicle-body-surfaces.js?v=city-drive-16';
+import { VEHICLES, PRODUCTION_CAR_DIMENSIONS } from './vehicles.mjs?v=city-drive-17';
+import { addVehicleTailLights } from './vehicle-taillights.js?v=city-drive-17';
+import { addVehicleRearDetails, REAR_DETAIL_PROFILES } from './vehicle-rear-details.js?v=city-drive-17';
+import { createBMWX3 } from './cars-bmw-x3.js?v=city-drive-17';
+import { loftGeometry, projectedNormals, surfaceNormal, weldSurfaceNormals } from './vehicle-body-surfaces.js?v=city-drive-17';
 
 const clamp = THREE.MathUtils.clamp;
 const mix = THREE.MathUtils.lerp;

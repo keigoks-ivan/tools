@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { createCityBuilder } from './world-city-kit.js?v=city-drive-16';
-import { cityDistrictAt, cityDistrictForPoint } from './world-city-districts.mjs?v=city-drive-16';
+import { createCityBuilder } from './world-city-kit.js?v=city-drive-17';
+import { cityDistrictAt, cityDistrictForPoint } from './world-city-districts.mjs?v=city-drive-17';
 
 // Kaigan-dori's masonry offices sit alongside the separately authored port monuments.
 export function addKobeStreets(options) {

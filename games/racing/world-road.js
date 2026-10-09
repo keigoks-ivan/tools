@@ -1,8 +1,8 @@
 import * as THREE from 'three';
-import { urbanJunctionAt } from './world-city-urban-details.js?v=city-drive-16';
-import { taipeiJunctionAt } from './world-city-taipei-streets.js?v=city-drive-16';
-import { CITY_ROAD_PROFILES } from './world-city-roadmarkings.js?v=city-drive-16';
-import { installCurbJoints } from './road-surface.mjs?v=city-drive-16';
+import { urbanJunctionAt } from './world-city-urban-details.js?v=city-drive-17';
+import { taipeiJunctionAt } from './world-city-taipei-streets.js?v=city-drive-17';
+import { CITY_ROAD_PROFILES } from './world-city-roadmarkings.js?v=city-drive-17';
+import { installCurbJoints } from './road-surface.mjs?v=city-drive-17';
 
 // The five visible profile faces run from asphalt level to a 140 mm raised
 // top. The lower outside edge finishes inside the existing pavement surface.

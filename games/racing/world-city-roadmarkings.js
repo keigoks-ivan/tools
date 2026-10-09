@@ -4,7 +4,7 @@ import * as THREE from 'three';
 // are not a surveyed reconstruction of every street's traffic restrictions.
 export const CITY_ROAD_PROFILES = Object.freeze({
   taipei: { centre: 'double-yellow', lanes: 2 },
-  kualalumpur: { centre: 'broken-white', lanes: 3 },
+  kualalumpur: { centre: 'broken-white', lanes: 2 },
   kobe: { centre: 'single-yellow', lanes: 2 },
   london: { centre: 'broken-white', lanes: 2, edge: 'double-yellow' },
   sydney: { centre: 'double-white', lanes: 2 },
@@ -15,7 +15,7 @@ export const CITY_ROAD_PROFILES = Object.freeze({
   newcastle: { centre: 'broken-white', lanes: 1, edge: 'double-yellow' },
   bangkok: { centre: 'double-yellow', lanes: 2 },
   sanfrancisco: { centre: 'double-yellow', lanes: 1 },
-  newyork: { centre: 'double-yellow', lanes: 3 },
+  newyork: { centre: 'double-yellow', lanes: 2 },
   vancouver: { centre: 'double-yellow', lanes: 2 },
   hanoi: { centre: 'single-yellow', lanes: 1 },
   lisbon: { centre: 'broken-white', lanes: 1 },

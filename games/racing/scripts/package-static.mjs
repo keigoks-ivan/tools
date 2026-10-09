@@ -27,6 +27,7 @@ const entries = [
   'world-cities.js',
   'world-city-districts.mjs',
   'world-city-massing.mjs',
+  'world-city-design.mjs',
   'world-city-ground.mjs',
   'world-city-taipei-facades.js',
   'world-city-facade-depth.js',

@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { createCityBuilder } from './world-city-kit.js?v=city-drive-16';
+import { createCityBuilder } from './world-city-kit.js?v=city-drive-17';
 
 const TAU = Math.PI * 2;
 

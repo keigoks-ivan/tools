@@ -1,5 +1,6 @@
 // Metre-scale plot composition for adapted city circuits. Neighbouring plots
 // vary by address and block, rather than repeating a four-building sequence.
+import { CITY_DESIGN_PROFILES } from './world-city-design.mjs?v=city-drive-17';
 const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
 function hash(city, block, side, salt = 0) {
   let seed = 2166136261;
@@ -20,10 +21,14 @@ export function streetMassing(city, district, s, side, index) {
   const height = clamp(4.2 + Math.round((low + (high - low) * mix - 4.2) / floor) * floor, low, high);
   const mixedTaipei = city === 'taipei' && !tower && a > .76 && height > 24;
   const facade = city === 'taipei' ? tower || mixedTaipei ? 4 + (b > .5 ? 1 : 0) : Math.floor(b * 4 + a * 3) % 4 : index + Math.floor(b * 17);
+  const podium = tower && height > 38 && CITY_DESIGN_PROFILES[city]?.tower && a > .22;
   return {
     height, facade,
     setback: tower ? b * 5 : heritage ? b * 1.7 : b < .4 ? 0 : 1.1 + b * 2.5,
     upperSetback: city === 'taipei' && height > 22 && a > .34 && a < .72,
     inset: .68 + b * .19,
+    podiumHeight: podium ? Math.min(height * .25, 4.2 + Math.round(1 + b * 2) * 3.5) : 0,
+    towerInset: .70 + b * .17, towerDepth: .76 + a * .13,
+    roofScale: city === 'taipei' ? 1 : .88 + a * .28,
   };
 }

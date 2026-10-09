@@ -1,5 +1,5 @@
-import { TRACK } from './track.mjs?v=city-drive-16';
-import { VEHICLES } from './vehicles.mjs?v=city-drive-16';
+import { TRACK } from './track.mjs?v=city-drive-17';
+import { VEHICLES } from './vehicles.mjs?v=city-drive-17';
 
 const G = 9.80665, TAU = Math.PI * 2;
 const clamp = (value, lo, hi) => Math.max(lo, Math.min(hi, value));

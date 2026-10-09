@@ -1,10 +1,10 @@
 import * as THREE from 'three';
-import { createCityBuilder } from './world-city-kit.js?v=city-drive-16';
-import { addAustralianLandmarks, createCityWaterMaterial, addCityWaterPlane } from './world-city-australia.js?v=city-drive-16';
-import { addAmericanLandmarks } from './world-city-america.js?v=city-drive-16';
-import { addEuropeanLandmarks } from './world-city-europe.js?v=city-drive-16';
-import { addKobeStreets } from './world-city-kobe-streets.js?v=city-drive-16';
-import { cityDistrictAt, cityDistrictForPoint } from './world-city-districts.mjs?v=city-drive-16';
+import { createCityBuilder } from './world-city-kit.js?v=city-drive-17';
+import { addAustralianLandmarks, createCityWaterMaterial, addCityWaterPlane } from './world-city-australia.js?v=city-drive-17';
+import { addAmericanLandmarks } from './world-city-america.js?v=city-drive-17';
+import { addEuropeanLandmarks } from './world-city-europe.js?v=city-drive-17';
+import { addKobeStreets } from './world-city-kobe-streets.js?v=city-drive-17';
+import { cityDistrictAt, cityDistrictForPoint } from './world-city-districts.mjs?v=city-drive-17';
 
 function streetAtlas(b, city, mobile) {
   const canvas = document.createElement('canvas'); canvas.width = canvas.height = mobile ? 512 : 1024;
@@ -297,7 +297,9 @@ function addAsianLandmarks(options) {
         const [a, r] = tiers[i], [next, top] = tiers[i + 1], height = (next - a) * h;
         b.cylinder(top * h, r * h, height, porcelain, x, (a + next) * h / 2, z, 12);
         b.cylinder(r * h + .6, r * h + .9, .6, stone, x, a * h + .3, z, 12);
-        const count = mobile ? 12 : 20;
+        // These ornaments are across the river. Keep the full stepped prang
+        // silhouette and ceramic skin; phone detail follows projected size.
+        const count = mobile ? h < 40 ? 6 : 8 : 20;
         for (let j = 0; j < count; j++) {
           const angle = j / count * Math.PI * 2, radius = r * h;
           b.box(.4, .7, .35, j % 3 ? gold : red, x + Math.sin(angle) * radius, a * h + 1.1, z + Math.cos(angle) * radius, 0, angle);
