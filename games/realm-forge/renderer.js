@@ -1,5 +1,5 @@
-import { clamp, tileType, BUILDINGS, buildingBounds } from './core.mjs';
-import { TEAM_COLORS, TEAM_LIGHT, imageFor, unitArt, animationArt, worldArt, drawSprite, recoloredArt } from './art.mjs';
+import { clamp, tileType, BUILDINGS, buildingBounds } from './core.mjs?v=20261009';
+import { TEAM_COLORS, TEAM_LIGHT, imageFor, unitArt, animationArt, worldArt, drawSprite, recoloredArt } from './art.mjs?v=20261009';
 export const COLORS = { grass: '#597c4b', water: '#396b70', forest: '#42633e', gold: '#67754c', stone: '#667458', food: '#68834f', sand: '#a19a6e', road: '#9d8f63' };
 export const SYMBOLS = { worker: '♟', soldier: '⚔', archer: '➶', knight: '♞', mage: '✦', beast: '♜', siege: '⚙', town: '♜', house: '⌂', barracks: '⚑', tower: '♖', mill: '✣', lumber: '♣', mining: '◆', farm: '▤', archery: '➶', stable: '♞', blacksmith: '⚒', market: '⚖', monastery: '✚', castle: '♜', university: '▥', wall: '▥', gate: 'Π', outpost: '⚑' };
 const directions = new WeakMap();
@@ -200,7 +200,7 @@ function vectorBuilding(c, b, x, y, scale, selected) {
   if (selected || b.hp < b.maxHp) { c.fillStyle = '#19281c'; c.fillRect(-25, -height - 51, 50, 4); c.fillStyle = TEAM_LIGHT[b.team % 3]; c.fillRect(-25, -height - 51, 50 * clamp(b.hp / b.maxHp, 0, 1), 4); }
   c.restore();
 }
-const grassImage = imageFor('assets/grass-v2.png');
+const grassImage = imageFor('assets/grass-v2.webp');
 const groundTextures = [];
 function prepareGround() {
   if (groundTextures.length || !grassImage?.complete || !grassImage.naturalWidth) return groundTextures;
@@ -331,8 +331,8 @@ export class Renderer {
     const a = (normalizedX * width - width / 2) / rx, b = (normalizedY * height - 4) / ry, n = this.project.map.size - 1;
     return { x: clamp((a + b) / 2, 0, 1) * n, y: clamp((b - a) / 2, 0, 1) * n };
   }
-  hit(x, y, world, fog) {
-    const entities = [...world.units, ...world.buildings].filter(e => e.hp > 0 && !e.garrison && (!fog || world.isVisible(e))).sort((a, b) => (b.x + b.y) - (a.x + a.y));
+  hit(x, y, world, fog, unitsOnly = false) {
+    const entities = [...world.units, ...world.buildings].filter(e => (!unitsOnly || e.kind==='unit') && e.hp > 0 && !e.garrison && (!fog || world.isVisible(e))).sort((a, b) => (b.x + b.y) - (a.x + a.y));
     for (const e of entities) { const p = this.screen(e.x, e.y); if (this.zoom < .18) { if (Math.hypot(x - p.x, y - p.y) < (e.kind === 'building' ? 6 : 4)) return e; continue; }
       if (e.kind === 'building') { if (buildingHit(e, p.x, p.y, this.zoom, x, y)) return e; }
       else if (Math.abs(x - p.x) < (['knight', 'siege'].includes(e.blueprint?.look) ? 14 : 9) * this.zoom + 4 && y < p.y + 5 && y > p.y - unitHeight(e) * this.zoom - 4) return e;

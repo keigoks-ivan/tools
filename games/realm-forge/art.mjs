@@ -8,7 +8,7 @@ const environmentSprites = { oak: 'tree-oak-0', 'oak-alt': 'tree-oak-1', pine: '
 const unitLooks = new Set(['worker', 'soldier', 'archer', 'knight']);
 export function imageFor(src) {
   if (!cache.has(src) && typeof Image !== 'undefined') {
-    const img = new Image(); img.assetSource = src; img.src = src; cache.set(src, img);
+    const img = new Image(); img.assetSource = src; img.decoding = 'async'; img.src = src; cache.set(src, img);
   }
   return cache.get(src);
 }
@@ -54,12 +54,5 @@ export function recoloredArt(img, color) {
   if (colorCache.size > 256) colorCache.delete(colorCache.keys().next().value);
   return canvas;
 }
-const loaded = [];
-if (typeof Image !== 'undefined') {
-  for (const name of worldLooks) for (let team = 0; team < (worldTeams.has(name) ? 3 : 1); team++) loaded.push(worldArt(name, team));
-  for (const look of unitLooks) for (let direction = 0; direction < 4; direction++) for (let team = 0; team < 3; team++) loaded.push(unitArt(look, direction, team));
-  for (const look of ['mage', 'siege']) for (const engine of look === 'mage' ? ['monk'] : ['ram', 'mangonel', 'trebuchet', 'trebuchet-packed']) for (let direction = 0; direction < 2; direction++) for (let team = 0; team < 3; team++) loaded.push(unitArt(look, direction * 2, team, engine === 'trebuchet-packed' ? 'trebuchet' : engine, engine === 'trebuchet-packed'));
-  for (const state of ['walk', 'attack']) for (const look of unitLooks) for (let frame = 0; frame < 4; frame++) for (let team = 0; team < 3; team++) loaded.push(animationArt(look, state, frame, team));
-  loaded.push(imageFor('assets/grass-v2.png'));
-}
-export const artReady = Promise.all(loaded.map(img => img.complete ? Promise.resolve() : new Promise(resolve => { img.onload = resolve; img.onerror = resolve; })));
+// Sprites load when visible or requested by a command panel.
+export const artReady = Promise.resolve();
