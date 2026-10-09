@@ -1,16 +1,17 @@
 import * as THREE from 'three';
-import { TRACK, TRACKS } from './track.mjs?v=city-drive-14';
-import { VEHICLES } from './vehicles.mjs?v=city-drive-14';
-import { readLapRecord, writeLapRecord } from './records.mjs?v=city-drive-14';
-import { createDrivingState, resetDriving, stepDriving } from './physics.mjs?v=city-drive-14';
-import { createCar } from './car.js?v=city-drive-14';
-import { createWorld } from './world.js?v=city-drive-14';
-import { installTouchControls } from './touch-controls.mjs?v=city-drive-14';
-import { createTiltSteering } from './tilt-steering.mjs?v=city-drive-14';
-import { createRacingAudio } from './audio.mjs?v=city-drive-14';
-import { createCockpit } from './cockpit.js?v=city-drive-14';
-import { getSeasons, getSeason, defaultSeason } from './seasons.mjs?v=city-drive-14';
-import { roadPose } from './road-pose.mjs?v=city-drive-14';
+import { createRenderPipeline } from './render-pipeline.js?v=city-drive-15';
+import { TRACK, TRACKS } from './track.mjs?v=city-drive-15';
+import { VEHICLES } from './vehicles.mjs?v=city-drive-15';
+import { readLapRecord, writeLapRecord, lapRecordTrackId } from './records.mjs?v=city-drive-15';
+import { createDrivingState, resetDriving, stepDriving } from './physics.mjs?v=city-drive-15';
+import { createCar } from './car.js?v=city-drive-15';
+import { createWorld } from './world.js?v=city-drive-15';
+import { installTouchControls } from './touch-controls.mjs?v=city-drive-15';
+import { createTiltSteering } from './tilt-steering.mjs?v=city-drive-15';
+import { createRacingAudio } from './audio.mjs?v=city-drive-15';
+import { createCockpit } from './cockpit.js?v=city-drive-15';
+import { getSeasons, getSeason, defaultSeason } from './seasons.mjs?v=city-drive-15';
+import { roadPose } from './road-pose.mjs?v=city-drive-15';
 
 const $ = id => document.getElementById(id);
 const clamp = THREE.MathUtils.clamp;
@@ -20,7 +21,7 @@ let seasonId = '', season = defaultSeason(track), drivingVehicle = vehicle;
 const state = createDrivingState(track);
 const held = new Set(), touches = { steer: 0, throttle: 0, brake: 0, handbrake: 0 };
 const paints = { ivory: '#d9d6c6', graphite: '#465051', red: '#c93324' };
-let renderer, world, camera, cockpit, car, ghost, touchControls, tilt;
+let renderer, renderPipeline, world, camera, cockpit, car, ghost, touchControls, tilt;
 let active = false, paused = false, ready = false, view = 0, elapsed = 0, last = 0, accumulator = 0, lastHUD = 0;
 let sound = true, musicVolume = .55, effectsVolume = .8, audio, toastTimer, lastPadButtons = [], averageFrame = 16, quality = 'medium';
 let lapSamples = [], bestGhost = [], ghostCursor = 0, lastSample = 0, bestStored = null, paint = 'red';
@@ -40,7 +41,7 @@ try {
 } catch {}
 season = getSeason(track, seasonId); drivingVehicle = { ...vehicle, grip: vehicle.grip * season.grip };
 resetDriving(state, track); loadRecord();
-function recordTrackId() { return season.id === defaultSeason(track).id ? track.id : `${track.id}.${season.id}`; }
+function recordTrackId() { return lapRecordTrackId(track, season.id, defaultSeason(track).id); }
 function loadRecord() {
   bestStored = null; bestGhost = []; ghostCursor = 0;
   try { const saved = readLapRecord(localStorage, recordTrackId(), vehicle.id); bestStored = saved.best; bestGhost = saved.ghost; } catch {}
@@ -151,12 +152,12 @@ function configureQuality() {
   const limited = mobile || renderer.capabilities.maxTextureSize < 8192 || (navigator.deviceMemory && navigator.deviceMemory <= 4);
   quality = automatic ? (software ? 'low' : limited ? 'medium' : 'high') : $('quality').value;
   renderer.setPixelRatio(Math.min(devicePixelRatio || 1, software && automatic ? .85 : quality === 'high' ? 1.65 : quality === 'medium' ? 1.2 : .8));
-  renderer.shadowMap.enabled = quality !== 'low'; world?.setQuality(quality); resize(); saveSettings();
+  renderer.shadowMap.enabled = quality !== 'low'; world?.setQuality(quality); renderPipeline?.setQuality(quality); resize(); saveSettings();
   $('render-device').textContent = `${software ? '軟體繪圖' : 'GPU · WebGL 2'} · ${automatic ? '自動畫質' : { high: '高畫質', medium: '標準畫質', low: '效能優先' }[quality]}`;
 }
 function resize() {
   if (!renderer) return;
-  renderer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight); renderPipeline?.resize(innerWidth * renderer.getPixelRatio(), innerHeight * renderer.getPixelRatio()); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix();
 }
 function setPaused(next) {
   paused = !!next; clearInput(); accumulator = 0;
@@ -441,13 +442,14 @@ function frame(now) {
   }
   updateCamera(dt); world.update(state, elapsed, camera, vehicle); updateAudio();
   if (now - lastHUD > 80) { updateHUD(); lastHUD = now; }
-  renderer.render(world.scene, camera);
+  renderPipeline.render(world.scene, camera, state.y);
 }
 async function boot() {
   prepareSelectionUI();
   try {
     renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
     renderer.outputColorSpace = THREE.SRGBColorSpace; renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = .92; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderPipeline = createRenderPipeline(renderer, { mobile });
     renderer.domElement.setAttribute('aria-label', '海岸環線即時 3D 畫面'); $('view').appendChild(renderer.domElement);
     camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, .05, 4200);
     cockpit = createCockpit({ mobile }); camera.add(cockpit.group);
@@ -463,7 +465,7 @@ async function boot() {
     }
     car.setPaint(paints[paint]); cockpit.setPaint(paints[paint]); world.scene.add(car.group, camera);
     createGhost(); car.group.position.set(state.x, state.y + .06, state.z); car.group.rotation.y = state.heading;
-    updateCamera(1, true); world.update(state, 0, camera, vehicle); renderer.render(world.scene, camera);
+    updateCamera(1, true); world.update(state, 0, camera, vehicle); renderPipeline.render(world.scene, camera, state.y);
     document.querySelectorAll('[data-paint]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.paint === paint)));
     installControls(); setSelectionLoading(false); state.rpm = vehicle.idle; updateSelectionUI(); updateHUD(); saveSettings();
     renderer.setAnimationLoop(frame);

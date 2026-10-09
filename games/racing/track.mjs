@@ -22,7 +22,7 @@ function pointOnSpline(anchors, segment, t) {
   return { x: at(0), z: at(1) };
 }
 
-function buildTrack({ id, name, label, description, anchors, height, width = 12, wallOffset = 10.5 }) {
+function buildTrack({ id, name, label, description, anchors, height, width = 12, wallOffset = 10.5, layoutVersion = 1 }) {
   const dense = [{ ...pointOnSpline(anchors, 0, 0), s: 0 }];
   let length = 0;
   for (let segment = 0; segment < anchors.length; segment++) {
@@ -122,7 +122,7 @@ function buildTrack({ id, name, label, description, anchors, height, width = 12,
     minZ: Math.min(...samples.map(p => p.z)), maxZ: Math.max(...samples.map(p => p.z)),
   });
   return Object.freeze({
-    id, name, label, description, theme: id, length, width, shoulderWidth: 2,
+    id, name, label, description, theme: id, length, width, shoulderWidth: 2, layoutVersion,
     wallOffset, spacing, bounds, spawn: Object.freeze(spawn),
     samples: Object.freeze(samples.map(Object.freeze)), sample, nearest,
   });
@@ -165,10 +165,11 @@ export const TRACKS = Object.freeze({
     width: 15, wallOffset: 13,
   }),
   taipei: buildTrack({
-    id: 'taipei', name: 'Taipei Xinyi', label: '台北・信義大道',
-    description: '台北 101、信義街廓與象山天際線；依城市景觀改編的封閉街道賽道。',
+    id: 'taipei', layoutVersion: 2, name: 'Taipei Xinyi', label: '台北・信義大道',
+    description: '台北 101、騎樓商街與象山天際線；大道直線接信義街廓連續彎的改編封閉賽道。',
     anchors: [[-325, -255], [-325, -90], [-325, 80], [-305, 260], [-170, 335],
-      [5, 335], [175, 315], [305, 225], [325, 70], [275, -70], [315, -240],
+      [5, 335], [185, 335], [305, 260], [320, 150], [285, 65],
+      [210, 5], [225, -85], [310, -150], [315, -240],
       [195, -325], [20, -325], [-165, -325], [-295, -325]],
     height: phase => 5 + .18 * Math.sin(phase), width: 18, wallOffset: 14,
   }),
@@ -181,10 +182,11 @@ export const TRACKS = Object.freeze({
     height: phase => 5 + .4 * Math.sin(phase + .3), width: 17, wallOffset: 13.5,
   }),
   kobe: buildTrack({
-    id: 'kobe', name: 'Kobe Meriken Harbor', label: '神戶・港灣大道',
-    description: '紅色港塔、海洋博物館與六甲山景；依港灣景觀改編的封閉街道賽道。',
+    id: 'kobe', layoutVersion: 2, name: 'Kobe Meriken Harbor', label: '神戶・港灣大道',
+    description: '紅色港塔、海洋博物館與六甲山景；港邊巡航接商業街區複合彎的改編封閉賽道。',
     anchors: [[-325, -240], [-325, -70], [-325, 100], [-275, 255], [-145, 320],
-      [25, 335], [205, 285], [315, 175], [330, 5], [290, -145],
+      [25, 335], [190, 325], [285, 250], [275, 135], [195, 60],
+      [200, -35], [310, -115], [290, -195],
       [185, -280], [20, -325], [-150, -310], [-290, -300]],
     height: phase => 5 + .22 * Math.sin(phase + .6), width: 13, wallOffset: 10.5,
   }),
@@ -222,10 +224,11 @@ export const TRACKS = Object.freeze({
     height: phase => 5 + .35 * Math.sin(phase + .8), width: 16, wallOffset: 12,
   }),
   paris: buildTrack({
-    id: 'paris', name: 'Paris Seine', label: '巴黎・塞納河畔',
-    description: '艾菲爾鐵塔、石砌街廓與塞納河岸；依巴黎景觀改編的封閉街道賽道。',
+    id: 'paris', layoutVersion: 2, name: 'Paris Seine', label: '巴黎・塞納河畔',
+    description: '艾菲爾鐵塔、咖啡座與石砌街廓；林蔭大道接街口連續彎與塞納河岸的改編封閉賽道。',
     anchors: [[-335, -245], [-335, -75], [-335, 95], [-290, 260], [-140, 330],
-      [25, 345], [180, 305], [315, 195], [340, 30], [280, -100],
+      [25, 345], [175, 345], [270, 285], [275, 175], [215, 100],
+      [245, 10], [335, -45], [300, -145],
       [185, -270], [20, -335], [-150, -320], [-305, -310]],
     height: phase => 5 + .3 * Math.sin(phase - .2), width: 12, wallOffset: 10,
   }),
@@ -254,19 +257,20 @@ export const TRACKS = Object.freeze({
     height: phase => 5 + .18 * Math.sin(phase + .2), width: 12.8, wallOffset: 10.4,
   }),
   sanfrancisco: buildTrack({
-    id: 'sanfrancisco', name: 'San Francisco Pacific', label: '舊金山・太平洋山城',
+    id: 'sanfrancisco', layoutVersion: 2, name: 'San Francisco Pacific', label: '舊金山・太平洋山城',
     description: '金門大橋、彩色維多利亞住宅與起伏坡道；依山城景觀改編的封閉賽道。',
     anchors: [[-330, -250], [-330, -80], [-330, 100], [-295, 290], [-110, 370],
       [95, 345], [240, 240], [325, 95], [260, -20], [350, -140],
       [275, -305], [105, -350], [-40, -290], [-205, -365], [-305, -335]],
-    height: phase => 22 + 8 * Math.sin(phase - .3) + 4 * Math.sin(phase * 2 + .6), width: 11, wallOffset: 9.5,
+    height: phase => 24 + 12 * Math.sin(phase - .3) + 5 * Math.sin(phase * 2 + .6), width: 11, wallOffset: 9.5,
   }),
   newyork: buildTrack({
-    id: 'newyork', name: 'New York Manhattan', label: '紐約・曼哈頓街廓',
+    id: 'newyork', layoutVersion: 2, name: 'New York Manhattan', label: '紐約・曼哈頓街廓',
     description: '布魯克林大橋、帝國大廈與黃牌計程車；長直線接街口重煞車的改編封閉賽道。',
     anchors: [[-335, -310], [-335, -120], [-335, 100], [-335, 290], [-275, 350],
       [-95, 350], [110, 350], [280, 330], [335, 255], [335, 70],
-      [285, 10], [335, -85], [335, -260], [250, -350], [50, -350], [-150, -350], [-270, -400], [-335, -395]],
+      [280, 25], [175, 25], [125, -45], [175, -115],
+      [280, -115], [335, -185], [335, -260], [250, -350], [50, -350], [-150, -350], [-270, -400], [-335, -395]],
     height: phase => 5 + .22 * Math.sin(phase), width: 18, wallOffset: 13,
   }),
   vancouver: buildTrack({
@@ -286,12 +290,13 @@ export const TRACKS = Object.freeze({
     height: phase => 5 + .15 * Math.sin(phase), width: 9, wallOffset: 8.5,
   }),
   lisbon: buildTrack({
-    id: 'lisbon', name: 'Lisbon Tagus Hills', label: '里斯本・特茹山城',
+    id: 'lisbon', layoutVersion: 2, name: 'Lisbon Tagus Hills', label: '里斯本・特茹山城',
     description: '貝倫塔、紅色大橋、黃電車與瓷磚街景；高低起伏的河岸改編封閉賽道。',
     anchors: [[-325, -230], [-325, -65], [-325, 105], [-270, 260], [-125, 330],
-      [60, 300], [200, 210], [310, 100], [265, -25], [345, -125],
+      [60, 300], [215, 245], [310, 140], [280, 55], [195, 5],
+      [205, -75], [315, -130],
       [260, -275], [115, -335], [-30, -280], [-190, -330], [-300, -315]],
-    height: phase => 14 + 5.5 * Math.sin(phase - .6) + 2 * Math.sin(phase * 2), width: 9, wallOffset: 8.5,
+    height: phase => 17 + 8 * Math.sin(phase - .6) + 3 * Math.sin(phase * 2), width: 9, wallOffset: 8.5,
   }),
   marseille: buildTrack({
     id: 'marseille', name: 'Marseille Vieux Port', label: '馬賽・舊港',

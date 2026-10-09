@@ -1,14 +1,16 @@
 import * as THREE from 'three';
+import { configureCityGlazing, configureCurtainWall } from './world-city-surfaces.js?v=city-drive-15';
+import { addCityUrbanDetails, urbanJunctionAt } from './world-city-urban-details.js?v=city-drive-15';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { addExtraCityLandmarks } from './world-cities-extra.js?v=city-drive-14';
-import { createCityWaterMaterial } from './world-city-australia.js?v=city-drive-14';
-import { paintTaipeiFacade, paintTaipeiStorefront, paintTaipeiPaving } from './world-city-taipei-facades.js?v=city-drive-14';
-import { getTaipeiJunctions, taipeiJunctionAt, taipeiStreetAt, addTaipeiStreetDetails, paintTaipeiCornerFacade, paintTaipeiJunctionPaving } from './world-city-taipei-streets.js?v=city-drive-14';
-import { CITY_ROAD_PROFILES, addCityRoadMarkings } from './world-city-roadmarkings.js?v=city-drive-14';
-import { CITY_STREETFRONT_CITIES, HERITAGE_SHOP_CITIES, paintCityStreetfront, paintHeritageShopfront, paintCityPaving } from './world-city-streetfronts.js?v=city-drive-14';
-import { CITY_DISTRICT_PLANS, cityDistrictAt, cityDistrictForPoint } from './world-city-districts.mjs?v=city-drive-14';
-import { clipGroundTriangle } from './world-city-ground.mjs?v=city-drive-14';
-import { CITY_FACADE_DEPTH_PROFILES, paintCityDepthWall, createFacadeDepth, cutFacadeFront, configureFacadeUpperMaterial } from './world-city-facade-depth.js?v=city-drive-14';
+import { addExtraCityLandmarks } from './world-cities-extra.js?v=city-drive-15';
+import { createCityWaterMaterial } from './world-city-australia.js?v=city-drive-15';
+import { paintTaipeiFacade, paintTaipeiStorefront, paintTaipeiPaving } from './world-city-taipei-facades.js?v=city-drive-15';
+import { getTaipeiJunctions, taipeiJunctionAt, taipeiStreetAt, addTaipeiStreetDetails, paintTaipeiCornerFacade, paintTaipeiJunctionPaving } from './world-city-taipei-streets.js?v=city-drive-15';
+import { CITY_ROAD_PROFILES, addCityRoadMarkings } from './world-city-roadmarkings.js?v=city-drive-15';
+import { CITY_STREETFRONT_CITIES, HERITAGE_SHOP_CITIES, paintCityStreetfront, paintHeritageShopfront, paintCityPaving } from './world-city-streetfronts.js?v=city-drive-15';
+import { CITY_DISTRICT_PLANS, cityDistrictAt, cityDistrictForPoint } from './world-city-districts.mjs?v=city-drive-15';
+import { clipGroundTriangle } from './world-city-ground.mjs?v=city-drive-15';
+import { CITY_FACADE_DEPTH_PROFILES, paintCityDepthWall, createFacadeDepth, cutFacadeFront, configureFacadeUpperMaterial } from './world-city-facade-depth.js?v=city-drive-15';
 
 export const CITY_THEMES = Object.freeze(['taipei', 'kualalumpur', 'kobe', 'london', 'sydney', 'goldcoast', 'melbourne', 'paris', 'prague', 'newcastle', 'bangkok', 'sanfrancisco', 'newyork', 'vancouver', 'hanoi', 'lisbon', 'marseille', 'nice', 'warwick']);
 // Street-scale architecture is authored per location, not a shared tower grid.
@@ -193,6 +195,7 @@ export function addCityScenery({ scene, track, mobile = false, groundHeight, gro
   const steel = material('#bec7c5', { metalness: .78, roughness: .35 });
   const glass = material(city === 'taipei' ? '#4c8987' : city === 'kualalumpur' ? '#728087' : '#678a96', { metalness: 0, roughness: .18 });
   const darkGlass = material('#52676b', { metalness: 0, roughness: .22, vertexColors: true });
+  configureCityGlazing(darkGlass);
   const white = material('#eeeee0', { roughness: .55, vertexColors: true });
   const gold = material('#bfa15a', { metalness: .7, roughness: .45 });
   const red = material('#b23229', { roughness: .5, metalness: .18 });
@@ -234,6 +237,9 @@ export function addCityScenery({ scene, track, mobile = false, groundHeight, gro
     });
   }
   const windowMaterials = Array.from({ length: 6 }, (_, i) => material('#ffffff', { map: facadeMap(city, i, mobile), metalness: 0, roughness: city === 'taipei' ? i < 4 ? .91 : .30 : historic ? .86 : .5 }));
+  windowMaterials.forEach((mat, index) => {
+    if (['kualalumpur', 'vancouver', 'goldcoast'].includes(city) || index >= 4 && city === 'taipei' || index >= 3 && ['sydney', 'melbourne', 'bangkok', 'newyork'].includes(city)) configureCurtainWall(mat, index);
+  });
   const depthWall = material('#ffffff', { map: canvasMap(mobile ? 384 : 768, mobile ? 256 : 512, (c, w, h) => paintCityDepthWall(c, w, h, city, street.palette)), metalness: 0, roughness: .94 });
   depthWall.name = 'city-facade-masonry'; depthWall.map.anisotropy = mobile ? 2 : 4;
   let upperFacade;
@@ -267,7 +273,7 @@ export function addCityScenery({ scene, track, mobile = false, groundHeight, gro
     if (!batches.has(mat)) batches.set(mat, []); batches.get(mat).push(geometry);
   }
   function box(w, h, d, mat, x, y, z, rx = 0, ry = 0, rz = 0, tint = null) { bake(new THREE.BoxGeometry(w, h, d), mat, x, y, z, rx, ry, rz, !!mat.map && !windowMaterials.includes(mat), tint); }
-  function cylinder(top, bottom, h, mat, x, y, z, segments = 16, rx = 0, ry = 0, rz = 0) { bake(new THREE.CylinderGeometry(top, bottom, h, segments), mat, x, y, z, rx, ry, rz); }
+  function cylinder(top, bottom, h, mat, x, y, z, segments = 16, rx = 0, ry = 0, rz = 0) { bake(new THREE.CylinderGeometry(top, bottom, h, mobile && Math.max(top, bottom) < .6 ? Math.min(segments, 6) : segments), mat, x, y, z, rx, ry, rz); }
   function beam(a, b, width, mat = steel) {
     const start = new THREE.Vector3(...a), end = new THREE.Vector3(...b), direction = end.clone().sub(start), middle = start.clone().add(end).multiplyScalar(.5);
     const geo = new THREE.CylinderGeometry(width / 2, width / 2, direction.length(), mobile ? 5 : 8);
@@ -637,11 +643,12 @@ export function addCityScenery({ scene, track, mobile = false, groundHeight, gro
     }
     frame = previous; taipeiScooters++;
   }
-  function building(x, z, w, h, d, yaw, index, near = false, wrapSide = 0, district = null) {
+  function building(x, z, w, h, d, yaw, index, near = false, wrapSide = 0, district = null, infill = false) {
     if (cityGroundLevel(city, x, z) < 4 || !clearFootprint(x, z, w, d, yaw, 3)) return false;
+    if (city !== 'taipei' && urbanJunctionAt(track, track.nearest(x, z).s, Math.min(w, d) / 2 + 2) && track.nearest(x, z).distance < 65) return false;
     const placedDistrict = cityDistrictForPoint(track, x, z), localDistrict = district || placedDistrict;
     if (near && placedDistrict.density === 0) return false;
-    const footprint = { x, z, w, h, d, yaw, near, family: street.family, district: localDistrict.district, frontage: localDistrict.frontage, districtHeights: localDistrict.heights, districtDensity: localDistrict.density };
+    const footprint = { x, z, w, h, d, yaw, near, layer: infill ? 'neighbourhood' : near ? 'frontage' : 'skyline', family: street.family, district: localDistrict.district, frontage: localDistrict.frontage, districtHeights: localDistrict.heights, districtDensity: localDistrict.density };
     setFrame(x, z, yaw); footprints.push(footprint);
     box(w + 1, .22, d + 1, stone, 0, -.045, 0);
     box(w + 4, .07, d + 4, paving, 0, .035, 0);
@@ -877,7 +884,7 @@ export function addCityScenery({ scene, track, mobile = false, groundHeight, gro
           if (city === 'paris' && (level === 1 || level === floors - 1) || city === 'london' && level === 0 && index % 3 !== 1) {
             box(w - .2, .15, .72, stone, 0, y + .03, -d / 2 - .28);
             box(w - .3, .055, .06, charcoal, 0, y + .86, -d / 2 - .63);
-            for (let xx = -w / 2 + .22; xx < w / 2 - .1; xx += mobile ? .6 : .42) box(.03, .76, .04, charcoal, xx, y + .46, -d / 2 - .63);
+            for (let xx = -w / 2 + .22; xx < w / 2 - .1; xx += mobile ? 1.05 : .42) box(.03, .76, .04, charcoal, xx, y + .46, -d / 2 - .63);
           }
         }
       }
@@ -933,6 +940,22 @@ export function addCityScenery({ scene, track, mobile = false, groundHeight, gro
     const height = range(street.skyline), width = range(street.widths) * (height > 50 ? 1.28 : 1), depth = range(street.depths);
     const yaw = street.sector === 'blocks' ? Math.round(near.heading / (Math.PI / 2)) * Math.PI / 2 : near.heading + Math.PI / 2;
     building(xx, zz, width, height, depth, yaw, Math.floor(rand() * 6), false, 0, district);
+  }
+
+  // Occupied blocks continue behind the racing frontage; the open shores and
+  // landmark reservations still govern every plot. This creates parallax and
+  // closes the empty gaps that previously exposed a bare concrete plain.
+  for (const side of mobile ? [] : [-1, 1]) for (let s = 35, index = 0; s < track.length; s += mobile ? 72 : 46, index++) {
+    const district = cityDistrictAt(track, s, side);
+    if (!district.density || ['garden', 'park', 'woodland', 'cliff', 'beach', 'quay', 'port'].includes(district.frontage)) continue;
+    for (let row = 1; row <= (mobile ? 1 : 2); row++) {
+      const p = track.sample(s + row * 14), d = range(street.depths), w = range(district.widths || street.widths);
+      const offset = track.wallOffset + district.setback + street.depths[1] + 14 + row * (d + 13);
+      const x = p.x + p.nx * side * offset, z = p.z + p.nz * side * offset, yaw = p.heading + (side > 0 ? Math.PI / 2 : -Math.PI / 2);
+      if (footprints.some(b => Math.hypot(b.x - x, b.z - z) < (Math.hypot(w, d) + Math.hypot(b.w, b.d)) * .46)) continue;
+      const h = range(district.heights);
+      building(x, z, w, h, d, yaw, city === 'taipei' ? index % 4 : index % 6, false, 0, district, true);
+    }
   }
 
   const districtSurfaces = new Map();
@@ -1082,8 +1105,8 @@ export function addCityScenery({ scene, track, mobile = false, groundHeight, gro
 
   // Continuous raised sidewalks, correctly spaced lamps, bilingual route signs and closed-course crosswalks.
   for (let s = 0; s < track.length; s += 8) for (const side of [-1, 1]) {
-    const junction = city === 'taipei' ? taipeiJunctionAt(track, s + 4, 4) : null;
-    if (junction && (junction.cross || junction.side === side)) continue;
+    const junction = city === 'taipei' ? taipeiJunctionAt(track, s + 4, 4) : urbanJunctionAt(track, s + 4, 4);
+    if (junction && (junction.cross || junction.side === side || junction.sides?.includes(side))) continue;
     const p = track.sample(s), q = track.sample(s + 8), from = new THREE.Vector3(p.x + p.nx * side * (track.wallOffset + 3.2), p.y - .05, p.z + p.nz * side * (track.wallOffset + 3.2));
     const to = new THREE.Vector3(q.x + q.nx * side * (track.wallOffset + 3.2), q.y - .05, q.z + q.nz * side * (track.wallOffset + 3.2));
     const dir = to.clone().sub(from), middle = to.add(from).multiplyScalar(.5);
@@ -1196,12 +1219,13 @@ export function addCityScenery({ scene, track, mobile = false, groundHeight, gro
     const mesh = new THREE.Mesh(geometry, mat); mesh.name = `${city}-architecture`; mesh.castShadow = mat !== leaf && !mat.userData.cityRoadPaint && !mat.userData.cityRoadSurface && !mat.userData.seasonGround && !mat.transparent && !mat.userData.cityWater; mesh.receiveShadow = true;
     group.add(mesh); shadowMeshes.push(mesh);
   }
+  const urban = addCityUrbanDetails({ scene, track, mobile, groundHeight, groundSurfaceHeight, materials, buildings: footprints, reserved, cityGroundLevel });
   // Unused materials have no world traversal owner and are cleaned immediately.
   for (const mat of ownedMaterials) if (!batches.has(mat)) { mat.map?.dispose(); mat.dispose(); }
   group.userData.landmarks = reserved.map(({ name }) => name); group.userData.buildings = footprints; group.userData.streetProfile = street; group.userData.districtPlan = CITY_DISTRICT_PLANS[city];
   if (city === 'taipei') { group.userData.junctions = getTaipeiJunctions(track); group.userData.parkedScooters = taipeiScooters; group.userData.parkedTaxis = taipeiTaxis; }
   return { group, update(state, elapsed) { extra.update?.(state, elapsed); cityWater?.normalMap.offset.set(elapsed * .004, elapsed * .003); }, setQuality(level) {
-    extra.setQuality?.(level);
+    extra.setQuality?.(level); urban.setQuality?.(level);
     for (const mesh of shadowMeshes) mesh.castShadow = level !== 'low' && !mesh.material.transparent && !mesh.material.userData.cityRoadPaint && !mesh.material.userData.cityRoadSurface && !mesh.material.userData.seasonGround && !mesh.material.userData.cityWater && (mesh.material !== leaf || level === 'high');
   } };
 }

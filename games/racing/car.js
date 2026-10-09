@@ -1,8 +1,8 @@
 import * as THREE from './vendor/three.module.js';
 import { GLTFLoader } from './vendor/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from './vendor/addons/loaders/DRACOLoader.js';
-import { createExtraCar } from './cars-extra.js?v=city-drive-14';
-import { createProductionCar } from './cars-production.js?v=city-drive-14';
+import { createExtraCar } from './cars-extra.js?v=city-drive-15';
+import { createProductionCar } from './cars-production.js?v=city-drive-15';
 
 const asset = name => new URL(`./assets/${name}`, import.meta.url).href;
 const clamp = THREE.MathUtils.clamp;

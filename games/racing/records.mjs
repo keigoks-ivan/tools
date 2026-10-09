@@ -17,3 +17,9 @@ export function readLapRecord(storage, trackId, vehicleId) {
 export function writeLapRecord(storage, trackId, vehicleId, best, ghost) {
   try { storage.setItem(recordKey(trackId, vehicleId), JSON.stringify({ best, ghost })); } catch {}
 }
+
+// Preserve old records while avoiding comparisons/ghosts from another geometry.
+export function lapRecordTrackId(track, seasonId, defaultSeasonId) {
+  const route = track.layoutVersion > 1 ? `${track.id}.route${track.layoutVersion}` : track.id;
+  return seasonId === defaultSeasonId ? route : `${route}.${seasonId}`;
+}

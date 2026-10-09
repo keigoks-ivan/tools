@@ -6,18 +6,18 @@ const up = new THREE.Vector3(0, 1, 0);
 // Architectural details are baked into a handful of material batches per city.
 export function createCityBuilder({ scene, track, mobile = false, groundHeight, materials }) {
   const group = new THREE.Group(); group.name = `${track.id}-landmark-details`; scene.add(group);
-  const batches = new Map(), reserved = [], shadowMeshes = [], cache = new Map();
+  const batches = new Map(), reserved = [], shadowMeshes = [], cache = new Map(), ownedMaterials = new Set();
   let frame = new THREE.Matrix4();
   const scale = new THREE.Vector3(1, 1, 1);
   function material(color, options = {}) {
     const key = options.map ? null : `${color}:${JSON.stringify(options)}`;
     if (key && cache.has(key)) return cache.get(key);
     const value = new THREE.MeshStandardMaterial({ color, roughness: .78, ...options });
-    if (key) cache.set(key, value); return value;
+    ownedMaterials.add(value); if (key) cache.set(key, value); return value;
   }
   function surface(base, color, options = {}) {
     const value = base?.clone() || new THREE.MeshStandardMaterial();
-    value.color.set(color); Object.assign(value, { roughness: .9 }, options); return value;
+    value.color.set(color); Object.assign(value, { roughness: .9 }, options); ownedMaterials.add(value); return value;
   }
   function setFrame(x, z, yaw = 0, y = groundHeight(x, z)) {
     frame = new THREE.Matrix4().compose(new THREE.Vector3(x, y, z), new THREE.Quaternion().setFromAxisAngle(up, yaw), scale);
@@ -58,7 +58,7 @@ export function createCityBuilder({ scene, track, mobile = false, groundHeight, 
   }
   function box(w, h, d, mat, x, y, z, rx = 0, ry = 0, rz = 0) { bake(new THREE.BoxGeometry(w, h, d), mat, x, y, z, rx, ry, rz); }
   function cylinder(top, bottom, h, mat, x, y, z, segments = 16, rx = 0, ry = 0, rz = 0) {
-    bake(new THREE.CylinderGeometry(top, bottom, h, segments), mat, x, y, z, rx, ry, rz);
+    bake(new THREE.CylinderGeometry(top, bottom, h, mobile && Math.max(top, bottom) < .6 ? Math.min(segments, 6) : segments), mat, x, y, z, rx, ry, rz);
   }
   function beam(a, b, width, mat) {
     const start = new THREE.Vector3(...a), end = new THREE.Vector3(...b), direction = end.clone().sub(start);
@@ -91,6 +91,7 @@ export function createCityBuilder({ scene, track, mobile = false, groundHeight, 
       mesh.name = `${track.id}-architecture-${group.children.length}`; group.add(mesh);
       shadowMeshes.push(mesh);
     }
+    for (const mat of ownedMaterials) if (!batches.has(mat)) mat.dispose();
     return { group, reserved, shadowMeshes, setQuality(quality) { shadowMeshes.forEach(mesh => { mesh.castShadow = quality !== 'low'; }); } };
   }
   return { group, materials, material, surface, setFrame, place, reserve, bake, box, cylinder, beam, sphere, sign, finish };

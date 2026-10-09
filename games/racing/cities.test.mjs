@@ -8,6 +8,7 @@ import { cityDistrictForPoint } from './world-city-districts.mjs';
 const context = new Proxy({
   font: '16px Arial',
   measureText(text) { return { width: text.length * (parseFloat(this.font.match(/[\d.]+px/)?.[0]) || 16) * .55 }; },
+  createRadialGradient: () => ({ addColorStop() {} }),
   createLinearGradient: () => ({ addColorStop() {} }),
   createImageData: (width, height) => ({ data: new Uint8ClampedArray(width * height * 4) }),
 }, { get: (target, key) => target[key] || (() => {}) });
@@ -66,7 +67,7 @@ for (const city of CITY_THEMES) for (const mobile of [false, true]) {
     const profile = CITY_STREET_PROFILES[city];
     for (const building of built.group.userData.buildings) {
       assert.equal(building.family, profile.family);
-      const heights = building.near ? building.districtHeights || profile.heights : profile.skyline;
+      const heights = building.near || building.layer === 'neighbourhood' ? building.districtHeights || profile.heights : profile.skyline;
       assert.ok(building.h >= heights[0] && building.h <= heights[1], 'every foreground and skyline building follows its city scale');
       if (building.near) {
         assert.ok(building.districtDensity > 0, 'open districts contain no newly generated street buildings');
@@ -110,7 +111,7 @@ for (const city of CITY_THEMES) for (const mobile of [false, true]) {
         assert.ok(Number.isFinite(x) && Number.isFinite(y) && Number.isFinite(z));
         height = Math.max(height, y); vertices++;
         if (object.material.userData.cityRoadPaint) assert.ok(Math.abs(y - track.nearest(x, z).y) < .7, 'markings follow the local elevated road surface');
-        else if (y > 7 && y < 30 && !object.material.userData.cityWater) assert.ok(track.nearest(x, z).distance > track.width / 2 + .5, `${object.name}: structure intrudes on road at ${x}, ${y}, ${z}`);
+        else if (y > 7 && y < 30 && !object.material.userData.cityWater && !object.material.userData.ground) assert.ok(track.nearest(x, z).distance > track.width / 2 + .5, `${object.name}: structure intrudes on road at ${x}, ${y}, ${z}`);
       }
     });
     assert.ok(vertices > 15000);

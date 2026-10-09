@@ -1,7 +1,8 @@
 import * as THREE from 'three';
-import { taipeiJunctionAt } from './world-city-taipei-streets.js?v=city-drive-14';
-import { CITY_ROAD_PROFILES } from './world-city-roadmarkings.js?v=city-drive-14';
-import { installCurbJoints } from './road-surface.mjs?v=city-drive-14';
+import { urbanJunctionAt } from './world-city-urban-details.js?v=city-drive-15';
+import { taipeiJunctionAt } from './world-city-taipei-streets.js?v=city-drive-15';
+import { CITY_ROAD_PROFILES } from './world-city-roadmarkings.js?v=city-drive-15';
+import { installCurbJoints } from './road-surface.mjs?v=city-drive-15';
 
 // The five visible profile faces run from asphalt level to a 140 mm raised
 // top. The lower outside edge finishes inside the existing pavement surface.
@@ -54,8 +55,8 @@ export function createCityCurbGeometry(track, { mobile = false } = {}) {
     }
     const active = points.map((p, i) => {
       const end = i === segments - 1 ? track.length : points[i + 1].s;
-      const junction = track.id === 'taipei' ? taipeiJunctionAt(track, (p.s + end) / 2, .5) : null;
-      return !(junction && (junction.cross || junction.side === side));
+      const junction = track.id === 'taipei' ? taipeiJunctionAt(track, (p.s + end) / 2, .5) : urbanJunctionAt(track, (p.s + end) / 2, .5);
+      return !(junction && (junction.cross || junction.side === side || junction.sides?.includes(side)));
     });
     for (let i = 0; i < segments; i++) {
       if (!active[i]) continue;

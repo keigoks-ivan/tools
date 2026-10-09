@@ -44,3 +44,17 @@ test('unavailable browser storage leaves the game playable', () => {
   assert.deepEqual(readLapRecord(store, 'costa', 'ferrari458'), { best: null, ghost: [] });
   assert.doesNotThrow(() => writeLapRecord(store, 'costa', 'ferrari458', 70, ghost));
 });
+
+test('a new circuit geometry cannot load or overwrite an old lap and ghost', async () => {
+  const { lapRecordTrackId } = await import('./records.mjs');
+  const values = new Map(), storage = { getItem: key => values.get(key) ?? null, setItem: (key, value) => values.set(key, value) };
+  const old = { id: 'taipei', layoutVersion: 1 }, revised = { ...old, layoutVersion: 2 };
+  const original = lapRecordTrackId(old, 'summer', 'summer'), next = lapRecordTrackId(revised, 'summer', 'summer');
+  writeLapRecord(storage, original, 'porsche911gt3rs', 70, [[0, 0, 5, 0, 0, 0]]);
+  assert.equal(readLapRecord(storage, next, 'porsche911gt3rs').best, null);
+  writeLapRecord(storage, next, 'porsche911gt3rs', 82, []);
+  assert.equal(readLapRecord(storage, original, 'porsche911gt3rs').best, 70);
+  assert.equal(readLapRecord(storage, next, 'porsche911gt3rs').best, 82);
+  assert.equal(lapRecordTrackId(revised, 'winter', 'summer'), 'taipei.route2.winter');
+  assert.equal(lapRecordTrackId({ id: 'costa' }, 'summer', 'summer'), 'costa');
+});
