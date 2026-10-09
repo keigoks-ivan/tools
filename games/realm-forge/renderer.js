@@ -283,6 +283,24 @@ function resource(c, e, p, scale) {
   }
   c.restore();
 }
+function editorHeroes(project, world) {
+  return (project.map.heroPlacements ?? []).flatMap(p => {
+    const blueprint = project.units.find(u => u.id === p.unitId && u.hero); if (!blueprint) return [];
+    const actual = world.units.find(u => u.team === 0 && u.blueprint.id === p.unitId);
+    return [{ ...actual, id: actual?.id ?? `editor-hero:${p.unitId}`, unitId: p.unitId, kind: 'unit', team: 0, blueprint, x: p.x, y: p.y, hp: actual?.hp > 0 ? actual.hp : blueprint.hp, maxHp: actual?.maxHp ?? blueprint.hp, path: [], attackAnimation: 0, hitAnimation: 0, garrison: null, editorHero: true, editorValid: world.canPlaceHero?.(p.unitId, p.x, p.y) ?? false }];
+  });
+}
+function heroMarker(c, x, y, selected, valid = true, radius = 6) {
+  const color = valid ? '#e5c47b' : '#ef8b7d';
+  if (selected) { c.strokeStyle = color; c.lineWidth = 1.4; c.beginPath(); c.arc(x, y, radius + 3, 0, Math.PI * 2); c.stroke(); }
+  polygon(c, Array.from({ length: 10 }, (_, i) => { const a = i * Math.PI / 5 - Math.PI / 2, r = i % 2 ? radius * .44 : radius; return [x + Math.cos(a) * r, y + Math.sin(a) * r]; }), color, '#302918');
+}
+function heroLabel(c, hero, p, selected, overview) {
+  if (!selected && !overview && hero.editorValid) return;
+  const text = hero.blueprint.name + (hero.editorValid ? '' : ' · 位置需調整');
+  c.save(); c.font = '11px sans-serif'; c.textAlign = 'center'; const width = c.measureText(text).width + 12, y = p.y + (overview ? 12 : 15);
+  c.fillStyle = '#101c16dd'; c.fillRect(p.x - width / 2, y - 10, width, 16); c.fillStyle = hero.editorValid ? '#ead6a5' : '#ffb5a6'; c.fillText(text, p.x, y + 2); c.restore();
+}
 export class Renderer {
   constructor(canvas, minimap) { this.canvas = canvas; this.c = canvas.getContext('2d'); this.minimap = minimap; this.mc = minimap.getContext('2d'); this.width = 1000; this.height = 600; this.zoom = 1; this.pan = { x: 0, y: 0 }; this.tileW = 42; this.tileH = 21; this.project = null; this.hover = null; this.drag = null; this.marker = null; this.miniTime = -Infinity; this.terrainCanvas = null; this.terrainTime = -Infinity; this.terrainKey = ''; this.terrainMap = null; this.terrainDecorations = []; this.resize(); }
   resize() { const r = this.canvas.getBoundingClientRect(), dpr = Math.min(window.devicePixelRatio || 1, 2); this.width = r.width; this.height = r.height; this.canvas.width = r.width * dpr; this.canvas.height = r.height * dpr; this.dpr = dpr; this.terrainCanvas = null; }
@@ -291,6 +309,13 @@ export class Renderer {
   screen(x, y) { const n = this.project.map.size; return { x: this.width / 2 + this.pan.x + (x - y) * this.tileW / 2 * this.zoom, y: this.height / 2 + this.pan.y + (x + y - n + 1) * this.tileH / 2 * this.zoom }; }
   world(x, y) { const a = (x - this.width / 2 - this.pan.x) / (this.tileW / 2 * this.zoom), b = (y - this.height / 2 - this.pan.y) / (this.tileH / 2 * this.zoom) + this.project.map.size - 1; return { x: (a + b) / 2, y: (b - a) / 2 }; }
   tileAt(x, y) { const p = this.world(x, y); return { x: Math.round(p.x), y: Math.round(p.y) }; }
+  heroHit(x, y, world) {
+    for (const hero of editorHeroes(this.project, world).sort((a, b) => b.x + b.y - a.x - a.y)) {
+      const p = this.screen(hero.x, hero.y);
+      if (this.zoom < .18 ? Math.hypot(x - p.x, y - p.y) <= 10 : Math.abs(x - p.x) < (['knight', 'siege'].includes(hero.blueprint.look) ? 14 : 9) * this.zoom + 4 && y <= p.y + 6 && y >= p.y - (unitHeight(hero) + 10) * this.zoom - 4) return hero;
+    }
+    return null;
+  }
   resourceHit(screenX, screenY, world, fog) {
     if (this.zoom < .18 || this.drawnResourceMap !== world.map) return null;
     for (let k = (this.drawnResources?.length ?? 0) - 1; k >= 0; k--) {
@@ -379,7 +404,13 @@ export class Renderer {
       this.terrainDecorations = decorations; this.terrainMap = map; this.terrainKey = terrainKey; this.terrainTime = time;
     }
     c.drawImage(this.terrainCanvas, 0, 0, this.width, this.height);
-    const entities = ui.mode === 'map' ? [] : [...world.buildings, ...world.units].filter(e => { if (e.hp <= 0 || e.garrison || fog && !world.isVisible(e)) return false; const p = this.screen(e.x, e.y); return p.x >= -marginX && p.x <= this.width + marginX && p.y >= -90 && p.y <= this.height + marginY; });
+    if (ui.mode === 'map' && ui.heroBrush) for (const b of world.buildings) {
+      const bounds = buildingBounds(b.type, b.x, b.y), p = this.screen(bounds.x, bounds.y); if (p.x < -marginX || p.x > this.width + marginX || p.y < -90 || p.y > this.height + marginY) continue;
+      polygon(c, footprintPolygon(b.type).map(([x, y]) => [p.x + x * this.zoom, p.y + y * this.zoom]), null, '#d7bc8666');
+      c.save(); c.font = '10px sans-serif'; c.textAlign = 'center'; c.fillStyle = '#e4cf9cad'; c.fillText(BUILDINGS[b.type].name + '預定地', p.x, p.y + 12); c.restore();
+    }
+    const placedHeroes = ui.mode === 'map' ? editorHeroes(project, world) : null;
+    const entities = (placedHeroes ?? [...world.buildings, ...world.units]).filter(e => { if (e.hp <= 0 || e.garrison || fog && !world.isVisible(e)) return false; const p = this.screen(e.x, e.y); return p.x >= -marginX && p.x <= this.width + marginX && p.y >= -90 && p.y <= this.height + marginY; });
     if (!overview) for (const e of decorations) resourceGround(c, e, this.screen(e.x, e.y), this.zoom);
     if (!overview) for (const e of entities) if (e.kind === 'building') buildingGround(c, e, this.screen(e.x, e.y), this.zoom);
     const corpses = ui.mode === 'map' ? [] : (world.corpses ?? []).filter(e => !fog || world.isVisible(e)).map(e => ({ ...e, corpse: true }));
@@ -391,15 +422,16 @@ export class Renderer {
         for (let y = top; y <= bottom; y++) for (let x = left; x <= right; x++) { const key = `${x}:${y}`; if (!canopyBuckets.has(key)) canopyBuckets.set(key, []); canopyBuckets.get(key).push(e); }
       } }
       else if (e.corpse) { c.save(); c.globalAlpha = Math.max(0, 1 - (e.age ?? 0) / 2); c.translate(p.x, p.y); c.scale(this.zoom, this.zoom); c.rotate(-.65); drawUnit(c, e, 0, 0, 1, 0, false); c.restore(); }
-      else if (overview) { ellipse(c, p.x, p.y, e.kind === 'building' ? 3 : 1.8, e.kind === 'building' ? 2 : 1.2, TEAM_COLORS[e.team % 3]); }
+      else if (overview) { if (e.editorHero) heroMarker(c, p.x, p.y, ui.heroSelected === e.unitId, e.editorValid); else ellipse(c, p.x, p.y, e.kind === 'building' ? 3 : 1.8, e.kind === 'building' ? 2 : 1.2, TEAM_COLORS[e.team % 3]); }
       else if (e.kind === 'building') { building(c, e, p.x, p.y, this.zoom, ui.selected.has(e.id)); if (e.rally && ui.selected.has(e.id)) { const r = this.screen(e.rally.x ?? world.entity(e.rally.target)?.x ?? e.x, e.rally.y ?? world.entity(e.rally.target)?.y ?? e.y); line(c, [[p.x, p.y], [r.x, r.y]], '#d7b77b66', 1); line(c, [[r.x, r.y], [r.x, r.y - 20]], '#ddc494', 1.5); polygon(c, [[r.x, r.y - 20], [r.x + 12, r.y - 17], [r.x, r.y - 12]], '#d7b77b'); } }
-      else drawUnit(c, e, p.x, p.y, this.zoom, time, ui.selected.has(e.id));
+      else { drawUnit(c, e, p.x, p.y, this.zoom, time, e.editorHero ? ui.heroSelected === e.unitId : ui.selected.has(e.id)); if (e.editorHero && !e.editorValid) { c.strokeStyle = '#e78576'; c.lineWidth = 1.5; c.beginPath(); c.ellipse(p.x, p.y, Math.max(9, 15 * this.zoom), Math.max(4, 6 * this.zoom), 0, 0, Math.PI * 2); c.stroke(); } }
     }
-    if (!overview) for (const u of entities) if (u.kind === 'unit' && ui.selected.has(u.id)) {
+    if (!overview) for (const u of entities) if (u.kind === 'unit' && (u.editorHero ? ui.heroSelected === u.unitId : ui.selected.has(u.id))) {
       const p = this.screen(u.x, u.y), head = (UNIT_HEIGHT[u.blueprint.look] ?? 25) * .55;
       const candidates = canopyBuckets.get(`${Math.floor(p.x / 64)}:${Math.floor((p.y - head * this.zoom) / 64)}`) ?? [];
       if (candidates.some(e => { if (e.x + e.y <= u.x + u.y) return false; const q = this.screen(e.x, e.y), s = resourceSize(e); return alphaHit(s.art, (p.x - q.x) / this.zoom, (p.y - q.y) / this.zoom - head, s.width, s.height, s.bottom); })) selectedForestOutline(c, u, p, this.zoom);
     }
+    if (placedHeroes) for (const hero of entities) heroLabel(c, hero, this.screen(hero.x, hero.y), ui.heroSelected === hero.unitId, overview);
     if (ui.mode === 'map') for (let team = 0; team < map.spawns.length; team++) { const s = map.spawns[team], p = this.screen(s.x, s.y); ellipse(c, p.x, p.y, tw * 1.2, th * 1.2, TEAM_COLORS[team % 3] + '55'); line(c, [[p.x, p.y], [p.x, p.y - 42]], '#e0d8b5', 2); polygon(c, [[p.x, p.y - 42], [p.x + 24, p.y - 36], [p.x, p.y - 26]], TEAM_COLORS[team % 3]); c.fillStyle = '#eee4c8'; c.font = '11px sans-serif'; c.fillText(team ? 'AI ' + team + (project.rules.aiAlliance ? ' · 敵方聯盟' : ' 出生點') : '我方出生點', p.x + 6, p.y - 50); }
     for (const e of world.effects) { if (fog && !world.isVisible(e) && !world.isVisible({ x: e.tx ?? e.x, y: e.ty ?? e.y })) continue; const p = this.screen(e.x, e.y), q = this.screen(e.tx ?? e.x, e.ty ?? e.y), alpha = 1 - e.age / .5; c.save(); c.globalAlpha = alpha;
       if (e.type === 'arrow') { const f = Math.min(1, e.age / .25); const x = p.x + (q.x - p.x) * f, y = p.y + (q.y - p.y) * f - 20 * this.zoom - Math.sin(f * Math.PI) * 20 * this.zoom; line(c, [[x - 7, y + 2], [x, y]], '#f3d19a', 1.5); }
@@ -407,7 +439,15 @@ export class Renderer {
       else { c.strokeStyle = '#ffdf9c'; c.lineWidth = 1.5; c.beginPath(); c.arc(q.x, q.y - 15 * this.zoom, 4 + e.age * 12, 0, Math.PI * 2); c.stroke(); } c.restore();
     }
     if (fog && !overview && this.fogCanvas) c.drawImage(this.fogCanvas, 0, 0, this.width, this.height);
-    if (this.hover && (ui.mode === 'map' || ui.placement)) { const h = this.hover; if (h.x >= 0 && h.x < n && h.y >= 0 && h.y < n) {
+    if (this.hover && ui.mode === 'map' && ui.heroBrush) {
+      const blueprint = project.units.find(u => u.id === ui.heroBrush && u.hero), h = this.hover;
+      if (blueprint) {
+        const p = this.screen(h.x, h.y), valid = world.canPlaceHero?.(ui.heroBrush, h.x, h.y) ?? false, color = valid ? '#9bc7a7' : '#e58d81', gx = Math.max(8, tw), gy = Math.max(4, th);
+        polygon(c, [[p.x, p.y - gy], [p.x + gx, p.y], [p.x, p.y + gy], [p.x - gx, p.y]], valid ? '#84c99d45' : '#df786d45', color);
+        c.save(); c.globalAlpha = .6; drawUnit(c, { id: 0, blueprint, team: 0, hp: blueprint.hp, maxHp: blueprint.hp, path: [] }, p.x, p.y, Math.max(.45, this.zoom), time, false); c.restore();
+        c.save(); c.font = '11px sans-serif'; c.textAlign = 'center'; c.fillStyle = color; c.fillText(valid ? blueprint.name + ' · 點擊放置' : '位置需調整', p.x, p.y + Math.max(17, gy + 12)); c.restore();
+      }
+    } else if (this.hover && (ui.mode === 'map' || ui.placement)) { const h = this.hover; if (h.x >= 0 && h.x < n && h.y >= 0 && h.y < n) {
       const bounds = ui.placement ? buildingBounds(ui.placement, h.x, h.y) : h, p = this.screen(bounds.x, bounds.y), valid = !ui.placement || world.canPlaceBuilding(ui.placement, h.x, h.y);
       const base = ui.placement ? footprintPolygon(ui.placement).map(([x, y]) => [p.x + x * this.zoom, p.y + y * this.zoom]) : [[p.x, p.y - th], [p.x + tw, p.y], [p.x, p.y + th], [p.x - tw, p.y]];
       polygon(c, base, valid ? '#e0c79345' : '#e06a6545', valid ? '#e5c484' : '#e89985');
@@ -415,9 +455,9 @@ export class Renderer {
     } }
     if (this.drag) { const { start, end } = this.drag; c.fillStyle = '#93c5b221'; c.fillRect(start.x, start.y, end.x - start.x, end.y - start.y); c.strokeStyle = '#b5d8ba'; c.lineWidth = 1; c.strokeRect(start.x, start.y, end.x - start.x, end.y - start.y); }
     if (this.marker && time - this.marker.time < 0.7) { const p = this.screen(this.marker.x, this.marker.y); c.strokeStyle = this.marker.attack ? '#e8a184' : '#d9c087'; c.lineWidth = 1.4; c.beginPath(); c.ellipse(p.x, p.y, (8 + (time - this.marker.time) * 15) * this.zoom, (4 + (time - this.marker.time) * 8) * this.zoom, 0, 0, Math.PI * 2); c.stroke(); }
-    if (time - this.miniTime >= .12) { this.renderMini(map, world, fog); this.miniTime = time; }
+    if (time - this.miniTime >= .12) { this.renderMini(map, world, fog, placedHeroes, ui.heroSelected); this.miniTime = time; }
   }
-  renderMini(map, world, fog) {
+  renderMini(map, world, fog, placedHeroes = null, heroSelected = null) {
     const c = this.mc, width = this.minimap.width, height = this.minimap.height, rx = width / 2 - 4, ry = height / 2 - 4, n = map.size;
     const point = p => [width / 2 + (p.x - p.y) / (n - 1) * rx, 4 + (p.x + p.y) / (n - 1) * ry];
     c.clearRect(0, 0, width, height); const samples = Math.min(n, 164), step = n / samples;
@@ -426,7 +466,7 @@ export class Renderer {
     for (let y = 0; y < samples; y++) for (let x = 0; x < samples; x++) { const tx = Math.min(n - 1, Math.floor((x + .5) * step)), ty = Math.min(n - 1, Math.floor((y + .5) * step)), i = ty * n + tx; g.fillStyle = fog && !world.explored[i] ? '#18261e' : COLORS[tileType(map, tx, ty)]; g.globalAlpha = fog && !world.visible[i] ? .6 : 1; g.fillRect(x, y, 1, 1); }
     c.save(); c.translate(width / 2, 4); c.transform(rx / samples, ry / samples, -rx / samples, ry / samples, 0, 0); c.drawImage(this.miniTerrain, 0, 0); c.restore();
     c.save(); c.beginPath(); c.moveTo(width / 2, 4); c.lineTo(width - 4, height / 2); c.lineTo(width / 2, height - 4); c.lineTo(4, height / 2); c.closePath(); c.clip();
-    for (const e of [...world.units, ...world.buildings]) if (e.hp > 0 && !e.garrison && (!fog || world.isVisible(e))) { const [x, y] = point(e); c.fillStyle = TEAM_COLORS[e.team % 3]; c.fillRect(x - 1, y - 1, e.kind === 'building' ? 3 : 2, e.kind === 'building' ? 3 : 2); }
+    for (const e of placedHeroes ?? [...world.units, ...world.buildings]) if (e.hp > 0 && !e.garrison && (!fog || world.isVisible(e))) { const [x, y] = point(e); if (e.editorHero) heroMarker(c, x, y, e.unitId === heroSelected, e.editorValid, 3.5); else { c.fillStyle = TEAM_COLORS[e.team % 3]; c.fillRect(x - 1, y - 1, e.kind === 'building' ? 3 : 2, e.kind === 'building' ? 3 : 2); } }
     const corners = [[0, 0], [this.width, 0], [this.width, this.height], [0, this.height]].map(([x, y]) => this.world(x, y)); line(c, [...corners, corners[0]].map(point), '#f1dfb8a6'); c.restore();
     polygon(c, [[width / 2, 4], [width - 4, height / 2], [width / 2, height - 4], [4, height / 2]], null, '#b6a67b59');
   }
