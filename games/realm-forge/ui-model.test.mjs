@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { World, defaultProject, generateMap, validateProject } from './core.mjs';
-import { actionReason, placementFeedback, productionStatus, selectionGroups } from './ui-model.mjs';
+import { actionReason, placementFeedback, productionStatus, selectionGroups, combatOrderHint } from './ui-model.mjs';
 
 const sandbox=()=>{const p=defaultProject();p.rules.ai='off';return new World(p);};
 test('new worlds use a compact rich map while saved custom sizes are retained',()=>{
@@ -61,4 +61,16 @@ test('selection type filters keep teams and buildings distinct and include every
   assert.equal(groups.reduce((n,g)=>n+g.ids.length,0),entities.length);
   const playerWorkers=groups.find(g=>g.key==='0:unit:villager');assert.equal(playerWorkers.ids.length,3);
   assert.ok(groups.some(g=>g.key==='1:unit:villager'));assert.ok(groups.some(g=>g.key==='0:building:town'));
+});
+
+test('attack feedback distinguishes pursuit from firing and identifies an automatically acquired enemy',()=>{
+  const w=sandbox(),a=w.units.find(u=>u.team===0&&u.blueprint.role!=='worker'),t=w.units.find(u=>u.team===1);
+  w.setFog(false);w.command([a.id],{type:'attack',target:t.id});assert.match(combatOrderHint(w,a),/前往攻擊 AI 1/);
+  a.x=t.x-.5;a.y=t.y;assert.match(combatOrderHint(w,a),/攻擊中 AI 1/);
+  w.command([a.id],null);a.autoTarget=t.id;assert.match(combatOrderHint(w,a),/攻擊中 AI 1/);
+});
+test('attack feedback does not disclose a target lost behind fog and preserves unreachable warnings',()=>{
+  const w=sandbox(),a=w.units.find(u=>u.team===0),t=w.units.find(u=>u.team===1);w.command([a.id],{type:'attack',target:t.id});
+  assert.equal(w.isVisible(t),false);assert.match(combatOrderHint(w,a),/敵方目標/);assert.doesNotMatch(combatOrderHint(w,a),/AI 1/);
+  a.failed=true;assert.equal(combatOrderHint(w,a),'無法到達目標');
 });

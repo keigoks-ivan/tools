@@ -153,3 +153,29 @@ test('fast direct paths still avoid diagonal corners and stop at the edge of a b
   const w=setup(),town=w.buildings.find(b=>b.team===0);const approach=findPath({x:town.x+8,y:town.y},town,w.map.size,(x,y)=>w.blocked(x,y),1.6);
   assert.ok(approach);for(const p of approach)assert.equal(w.blocked(p.x,p.y),false);
 });
+
+test('one attack command routes into actual range of a fractional moving target beside an obstacle',()=>{
+  const w=setup(0),archer=w.spawn('archer',0,{x:16,y:20}),target=w.spawn('villager',1,{x:20,y:20});
+  Object.assign(target,{x:20.4,y:20.4});setTile(w.map,17,20,'water');
+  assert.equal(w.command([archer.id],{type:'attack',target:target.id}),null);
+  until(w,()=>target.hp<target.maxHp,10);assert.ok(Math.hypot(archer.x-target.x,archer.y-target.y)<=archer.blueprint.range+.03);
+});
+test('repeating an attack preserves pursuit while a different enemy replaces the target',()=>{
+  const w=setup(0),scout=w.spawn('scout',0,{x:16,y:20}),target=w.spawn('villager',1,{x:24,y:20}),next=w.spawn('villager',1,{x:24,y:22});
+  w.command([scout.id],{type:'attack',target:target.id});w.tick(.1);assert.ok(scout.path.length);
+  const path=scout.path,goal=scout.pathGoal;w.command([scout.id],{type:'move',x:30,y:30},true);
+  w.command([scout.id],{type:'attack',target:target.id});assert.equal(scout.path,path);assert.equal(scout.pathGoal,goal);assert.equal(scout.queued.length,0);
+  w.command([scout.id],{type:'attack',target:next.id});assert.equal(scout.order.target,next.id);assert.equal(scout.path.length,0);
+  until(w,()=>next.hp<next.maxHp,15);
+});
+test('repeating a conversion target keeps progress instead of restarting the conversion',()=>{
+  const w=setup(2),monk=w.spawn('monk',0,{x:16,y:20}),target=w.spawn('scout',1,{x:20,y:20});
+  w.command([monk.id],{type:'convert',target:target.id});w.tick(2);const work=monk.work;assert.ok(work>0);
+  w.command([monk.id],{type:'convert',target:target.id});assert.equal(monk.work,work);until(w,()=>target.team===0,10);
+});
+test('automatically fighting units are busy and become idle after their target disappears',()=>{
+  const w=setup(0),scout=w.spawn('scout',0,{x:16,y:20}),target=w.spawn('villager',1,{x:16.5,y:20});
+  scout.stance='aggressive';assert.equal(w.isIdle(scout),true);until(w,()=>scout.autoTarget===target.id,2);
+  assert.equal(scout.autoTarget,target.id);assert.equal(w.isIdle(scout),false);
+  target.hp=0;scout.stance='passive';w.tick(.1);assert.equal(w.isIdle(scout),true);
+});

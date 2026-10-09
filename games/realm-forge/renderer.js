@@ -1,5 +1,5 @@
-import { clamp, tileType, BUILDINGS, buildingBounds } from './core.mjs?v=20261009h';
-import { TEAM_COLORS, TEAM_LIGHT, imageFor, unitArt, animationArt, worldArt, drawSprite, recoloredArt } from './art.mjs?v=20261009h';
+import { clamp, tileType, BUILDINGS, buildingBounds } from './core.mjs?v=20261009i';
+import { TEAM_COLORS, TEAM_LIGHT, imageFor, unitArt, animationArt, worldArt, drawSprite, recoloredArt } from './art.mjs?v=20261009i';
 export function wheelZoomFactor(deltaY, deltaMode = 0, height = 600) {
   const pixels = deltaY * (deltaMode === 1 ? 16 : deltaMode === 2 ? height : 1);
   return Math.exp(-clamp(pixels, -80, 80) * .001);
@@ -7,10 +7,10 @@ export function wheelZoomFactor(deltaY, deltaMode = 0, height = 600) {
 export const COLORS = { grass: '#597c4b', water: '#396b70', forest: '#42633e', gold: '#67754c', stone: '#667458', food: '#68834f', sand: '#a19a6e', road: '#9d8f63' };
 export const SYMBOLS = { worker: '♟', soldier: '⚔', archer: '➶', knight: '♞', mage: '✦', beast: '♜', siege: '⚙', town: '♜', house: '⌂', barracks: '⚑', tower: '♖', mill: '✣', lumber: '♣', mining: '◆', farm: '▤', archery: '➶', stable: '♞', blacksmith: '⚒', market: '⚖', monastery: '✚', castle: '♜', university: '▥', wall: '▥', gate: 'Π', outpost: '⚑' };
 const directions = new WeakMap();
-const UNIT_HEIGHT = { worker: 22, soldier: 25, archer: 23, knight: 34, mage: 24, beast: 25, siege: 28 };
+const UNIT_HEIGHT = { worker: 32, soldier: 35, archer: 33, knight: 46, mage: 34, beast: 36, siege: 38 };
 const ATTACK_SCALE = { worker: 1.21, soldier: 1.18, archer: 1.02, knight: .86 };
-const SIEGE_HEIGHT = { ram: 19, mangonel: 21, trebuchet: 36, 'trebuchet-packed': 17 };
-const SIEGE_WIDTH = { ram: 30, mangonel: 29, trebuchet: 30, 'trebuchet-packed': 32 };
+const SIEGE_HEIGHT = { ram: 27, mangonel: 30, trebuchet: 48, 'trebuchet-packed': 25 };
+const SIEGE_WIDTH = { ram: 42, mangonel: 41, trebuchet: 42, 'trebuchet-packed': 44 };
 const BUILDING_WIDTH = { town: 200, house: 92, barracks: 150, tower: 65, mill: 90, farm: 128, wall: 42, castle: 190, gate: 92, market: 182, university: 188, monastery: 145, lumber: 90, mining: 90, outpost: 45, archery: 144, stable: 150, blacksmith: 138, siege: 150 };
 const BUILDING_HEIGHT = { town: 135, house: 68, barracks: 100, tower: 116, mill: 96, farm: 65, wall: 42, castle: 158, gate: 82, market: 116, university: 136, monastery: 140, lumber: 72, mining: 70, outpost: 84, archery: 92, stable: 98, blacksmith: 100, siege: 100 };
 const spriteHitMasks = new WeakMap();
@@ -61,7 +61,7 @@ function buildingHit(b, px, py, scale, x, y) {
   if (b.progress < 1) { const [w, h] = BUILDINGS[b.type].footprint; return [0, 17.5, 35].some(rise => Math.abs((dx / 21 + (dy + rise) / 10.5) / 2) <= w / 2 && Math.abs(((dy + rise) / 10.5 - dx / 21) / 2) <= h / 2); }
   if (Math.abs(dx) > width / 2 + 4 / scale || dy < bottom - height - 4 / scale || dy > bottom + 4 / scale) return false;
   if (!art?.naturalWidth || b.progress < 1) return true;
-  const pad = Math.min(8, 3 / scale * art.naturalWidth / width);
+  const pad = Math.min(14, 5 / scale * art.naturalWidth / width);
   return alphaHit(art, dx, dy, width, height, bottom, pad);
 }
 function facing(u) {
@@ -70,7 +70,7 @@ function facing(u) {
   if (vector && Math.abs(vector.x) + Math.abs(vector.y) > .01) { const sx = vector.x - vector.y, sy = vector.x + vector.y; directions.set(u, sy >= 0 ? (sx >= 0 ? 0 : 1) : (sx < 0 ? 2 : 3)); }
   return directions.get(u) ?? 0;
 }
-function unitHeight(u) {
+export function unitHeight(u) {
   const bp = u.blueprint, engine = ['ram', 'mangonel', 'trebuchet'].includes(bp.engine || bp.id) ? bp.engine || bp.id : 'mangonel';
   return bp.look === 'siege' ? SIEGE_HEIGHT[engine === 'trebuchet' && u.packed ? 'trebuchet-packed' : engine] : UNIT_HEIGHT[bp.look] ?? 25;
 }
@@ -85,7 +85,7 @@ export function drawUnit(c, u, x, y, size = 1, time = 0, selected = false) {
   const mounted = bp.look === 'knight', heavy = mounted || bp.look === 'siege';
   ellipse(c, 3, 1, heavy ? 11 : 5, heavy ? 3.5 : 2.2, '#18251845');
   ellipse(c, 0, .5, heavy ? 7 : 3, heavy ? 2 : 1.2, '#18251858');
-  if (selected || bp.hero) { c.strokeStyle = bp.hero ? '#d5bc7dc9' : TEAM_LIGHT[u.team % 4] + 'bd'; c.lineWidth = bp.hero ? 1.1 : .8; c.beginPath(); c.ellipse(0, 0, heavy ? 12 : 6.5, heavy ? 5 : 3, 0, 0, Math.PI * 2); c.stroke(); }
+  if (selected || bp.hero) { c.strokeStyle = bp.hero ? '#edd48ddd' : TEAM_LIGHT[u.team % 4]; c.lineWidth = bp.hero ? 1.5 : 1.3; c.beginPath(); c.ellipse(0, 0, heavy ? 16 : 10, heavy ? 6 : 4, 0, 0, Math.PI * 2); c.stroke(); }
   const direction = facing(u), custom = bp.image ? imageFor(bp.image) : null;
   const attackPhase = u.attackAnimation > 0 ? Math.sin((1 - u.attackAnimation / .55) * Math.PI) : 0;
   if (attackPhase) c.translate((direction === 0 || direction === 3 ? 1 : -1) * attackPhase * 1.5, -attackPhase * .4);
@@ -258,7 +258,7 @@ function resourceGround(c, e, p, scale) {
   const width = treeSize(e.v).width * 1.25; c.save(); c.globalAlpha = e.visible ? 1 : .35; c.drawImage(forestShadow, p.x - width * scale / 2, p.y - width * scale * .16, width * scale, width * scale * .38); c.restore();
 }
 function selectedForestOutline(c, u, p, scale) {
-  const height = UNIT_HEIGHT[u.blueprint.look] ?? 25, art = u.blueprint.image ? imageFor(u.blueprint.image) : unitArt(u.blueprint.look, facing(u), u.team);
+  const height = unitHeight(u), art = u.blueprint.image ? imageFor(u.blueprint.image) : unitArt(u.blueprint.look, facing(u), u.team);
   if (!art?.naturalWidth) return;
   const width = height * art.naturalWidth / art.naturalHeight, key = `${art.assetSource ?? art.src}:${height}`;
   if (!unitOutlines.has(key)) {
@@ -356,13 +356,37 @@ export class Renderer {
     const a = (normalizedX * width - width / 2) / rx, b = (normalizedY * height - 4) / ry, n = this.project.map.size - 1;
     return { x: clamp((a + b) / 2, 0, 1) * n, y: clamp((b - a) / 2, 0, 1) * n };
   }
-  hit(x, y, world, fog, unitsOnly = false) {
-    const entities = [...world.units, ...world.buildings].filter(e => (!unitsOnly || e.kind==='unit') && e.hp > 0 && !e.garrison && (!fog || world.isVisible(e))).sort((a, b) => (b.x + b.y) - (a.x + a.y));
-    for (const e of entities) { const p = this.screen(e.x, e.y); if (this.zoom < .18) { if (Math.hypot(x - p.x, y - p.y) < (e.kind === 'building' ? 6 : 4)) return e; continue; }
-      if (e.kind === 'building') { if (buildingHit(e, p.x, p.y, this.zoom, x, y)) return e; }
-      else if (Math.abs(x - p.x) < (['knight', 'siege'].includes(e.blueprint?.look) ? 14 : 9) * this.zoom + 4 && y < p.y + 5 && y > p.y - unitHeight(e) * this.zoom - 4) return e;
+  hit(x, y, world, fog, unitsOnly = false, enemiesOnly = false) {
+    let best=null,depth=-Infinity;
+    for (const e of [...world.units,...world.buildings]) { if(unitsOnly&&e.kind!=='unit'||enemiesOnly&&e.team===0||e.hp<=0||e.garrison||fog&&!world.isVisible(e)||e.x+e.y<=depth)continue;
+      const p=this.screen(e.x,e.y);
+      const hit=this.zoom<.18?Math.hypot(x-p.x,y-p.y)<(e.kind==='building'?6:6):e.kind==='building'?buildingHit(e,p.x,p.y,this.zoom,x,y):Math.abs(x-p.x)<(['knight','siege'].includes(e.blueprint?.look)?21:14)*this.zoom+6&&y<p.y+7&&y>p.y-unitHeight(e)*this.zoom-6;
+      if(hit){best=e;depth=e.x+e.y;}
     }
-    return null;
+    return best;
+  }
+  commandHit(x,y,world,fog,selected) {
+    const target=this.hit(x,y,world,fog);
+    return target?.kind==='unit'&&target.team===0&&selected.has(target.id)?this.hit(x,y,world,fog,true,true)||target:target;
+  }
+  commandFeedback(world,ui) {
+    const c=this.c,targets=new Map();let paths=0;
+    for(const id of ui.selected){const u=world.entity(id);if(!u||u.kind!=='unit'||u.team!==0||u.garrison)continue;
+      const target=world.entity(u.order?.type==='attack'?u.order.target:u.autoTarget);
+      if(!target||target.hp<=0||!world.isEnemy(u.team,target.team)||!world.isVisible(target))continue;
+      if(targets.size<16)targets.set(target.id,target);
+      if(paths++>=8)continue;
+      const points=[u,...(u.path||[]).filter((p,i,a)=>i%5===0||i===a.length-1),target].map(p=>{const s=this.screen(p.x,p.y);return[s.x,s.y];});
+      c.save();c.setLineDash([5,7]);line(c,points,'#ee97885c',1);c.restore();
+    }
+    const hovered=world.entity(this.hoverTarget);if(hovered&&hovered.hp>0&&!hovered.garrison&&world.isVisible(hovered))targets.set(hovered.id,hovered);
+    for(const target of targets.values()) {
+      const p=this.screen(target.x,target.y);c.save();c.strokeStyle='#f28b78';c.lineWidth=1.8;
+      if(target.kind==='building')polygon(c,footprintPolygon(target.type).map(([x,y])=>[p.x+x*this.zoom,p.y+y*this.zoom]),'#d34c3410','#f28b78');
+      else{c.beginPath();c.ellipse(p.x,p.y,16*this.zoom,6*this.zoom,0,0,Math.PI*2);c.stroke();}
+      const height=target.kind==='building'?buildingSize(target).height-buildingSize(target).bottom:unitHeight(target);
+      health(c,target.hp,target.maxHp,p.x,p.y-(height+7)*this.zoom,Math.max(26,30*this.zoom),target.team);c.restore();
+    }
   }
   render(project, world, ui, time) {
     this.project = project; const c = this.c, n = project.map.size, map = ui.mode === 'map' ? project.map : world.map, fog = ui.mode === 'play' && ui.started && project.rules.fog;
@@ -451,12 +475,14 @@ export class Renderer {
       else if (e.kind === 'building') { building(c, e, p.x, p.y, this.zoom, ui.selected.has(e.id)); if (e.rally && ui.selected.has(e.id)) { const r = this.screen(e.rally.x ?? world.entity(e.rally.target)?.x ?? e.x, e.rally.y ?? world.entity(e.rally.target)?.y ?? e.y); line(c, [[p.x, p.y], [r.x, r.y]], '#d7b77b66', 1); line(c, [[r.x, r.y], [r.x, r.y - 20]], '#ddc494', 1.5); polygon(c, [[r.x, r.y - 20], [r.x + 12, r.y - 17], [r.x, r.y - 12]], '#d7b77b'); } }
       else { drawUnit(c, e, p.x, p.y, this.zoom, time, e.editorHero ? ui.heroSelected === e.unitId : ui.selected.has(e.id)); if (e.editorHero && !e.editorValid) { c.strokeStyle = '#e78576'; c.lineWidth = 1.5; c.beginPath(); c.ellipse(p.x, p.y, Math.max(9, 15 * this.zoom), Math.max(4, 6 * this.zoom), 0, 0, Math.PI * 2); c.stroke(); } }
     }
+    const buildingFrames=!overview?entities.filter(e=>e.kind==='building').map(e=>({e,p:this.screen(e.x,e.y)})):[];
     if (!overview) for (const u of entities) if (u.kind === 'unit' && (u.editorHero ? ui.heroSelected === u.unitId : ui.selected.has(u.id))) {
-      const p = this.screen(u.x, u.y), head = (UNIT_HEIGHT[u.blueprint.look] ?? 25) * .55;
+      const p = this.screen(u.x, u.y), head = unitHeight(u) * .55;
       const candidates = canopyBuckets.get(`${Math.floor(p.x / 64)}:${Math.floor((p.y - head * this.zoom) / 64)}`) ?? [];
-      if (candidates.some(e => { if (e.x + e.y <= u.x + u.y) return false; const q = this.screen(e.x, e.y), s = resourceSize(e); return alphaHit(s.art, (p.x - q.x) / this.zoom, (p.y - q.y) / this.zoom - head, s.width, s.height, s.bottom); })) selectedForestOutline(c, u, p, this.zoom);
+      if (candidates.some(e => { if (e.x + e.y <= u.x + u.y) return false; const q = this.screen(e.x, e.y), s = resourceSize(e); return alphaHit(s.art, (p.x - q.x) / this.zoom, (p.y - q.y) / this.zoom - head, s.width, s.height, s.bottom); })||buildingFrames.some(({e,p:q})=>e.x+e.y>u.x+u.y&&buildingHit(e,q.x,q.y,this.zoom,p.x,p.y-head*this.zoom))) selectedForestOutline(c, u, p, this.zoom);
     }
     if (placedHeroes) for (const hero of entities) heroLabel(c, hero, this.screen(hero.x, hero.y), ui.heroSelected === hero.unitId, overview);
+    if(!overview&&ui.mode==='play')this.commandFeedback(world,ui);
     if (ui.mode === 'map') for (let team = 0; team < map.spawns.length; team++) { const s = map.spawns[team], p = this.screen(s.x, s.y); ellipse(c, p.x, p.y, tw * 1.2, th * 1.2, TEAM_COLORS[team % 4] + '55'); line(c, [[p.x, p.y], [p.x, p.y - 42]], '#e0d8b5', 2); polygon(c, [[p.x, p.y - 42], [p.x + 24, p.y - 36], [p.x, p.y - 26]], TEAM_COLORS[team % 4]); c.fillStyle = '#eee4c8'; c.font = '11px sans-serif'; c.fillText(team ? 'AI ' + team + (project.rules.aiAlliance ? ' · 敵方聯盟' : ' 出生點') : '我方出生點', p.x + 6, p.y - 50); }
     for (const e of world.effects) { if (fog && !world.isVisible(e) && !world.isVisible({ x: e.tx ?? e.x, y: e.ty ?? e.y })) continue; const p = this.screen(e.x, e.y), q = this.screen(e.tx ?? e.x, e.ty ?? e.y), alpha = 1 - e.age / .5; c.save(); c.globalAlpha = alpha;
       if (e.type === 'arrow') { const f = Math.min(1, e.age / .25); const x = p.x + (q.x - p.x) * f, y = p.y + (q.y - p.y) * f - 20 * this.zoom - Math.sin(f * Math.PI) * 20 * this.zoom; line(c, [[x - 7, y + 2], [x, y]], '#f3d19a', 1.5); }

@@ -1,5 +1,15 @@
-import { BUILDINGS } from './core.mjs?v=20261009h';
-import { CIVILIZATION, TECHNOLOGIES } from './civilization.mjs?v=20261009h';
+import { BUILDINGS, buildingDistance } from './core.mjs?v=20261009i';
+import { CIVILIZATION, TECHNOLOGIES } from './civilization.mjs?v=20261009i';
+import { orderHint } from './controls.mjs?v=20261009i';
+
+export function combatOrderHint(world,unit) {
+  if(unit.garrison||unit.failed||unit.packLeft>0||!unit.blueprint)return orderHint(unit);
+  const target=world.entity(unit.order?.type==='attack'?unit.order.target:!unit.order||['attackMove','patrol','guard'].includes(unit.order.type)?unit.autoTarget:null);
+  if(!target||!world.isEnemy(unit.team,target.team))return orderHint(unit);
+  const d=target.kind==='building'?buildingDistance(unit,target):Math.hypot(unit.x-target.x,unit.y-target.y);
+  const name=world.isVisible(target)?`${target.team?'AI '+target.team:'我方'} ${target.kind==='building'?BUILDINGS[target.type].name:target.blueprint.name}`:'敵方目標';
+  return `${d>unit.blueprint.range+.03?'前往攻擊':'攻擊中'} ${name}${unit.queued.length?' · 等待 '+unit.queued.length+' 道指令':''}`;
+}
 
 export const RESOURCE_NAMES = { wood:'木材', food:'食物', gold:'黃金', stone:'石材' };
 export function resourceShortage(stocks, cost) {

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { World, defaultProject, generateMap, BUILDINGS } from './core.mjs';
+import { World, defaultProject, generateMap, BUILDINGS, setTile } from './core.mjs';
 import { actionReason } from './ui-model.mjs';
 import { orderHint } from './controls.mjs';
 
@@ -24,6 +24,26 @@ test('an old gather order aimed inside a resource cluster recovers without anoth
   const {w,worker}=setup(false),spawn=w.map.spawns[0],before=w.stocks[0].wood;
   worker.order={type:'gather',x:spawn.x-8,y:spawn.y};w.resetOrder(worker);
   until(w,()=>w.stocks[0].wood>before);
+});
+for (const restore of [false,true]) test(`exhausted wood resumes the same resource after delivery${restore?' and a saved-game restore':''}`,()=>{
+  const initial=setup();let w=initial.w,worker=initial.worker;
+  const start={x:Math.round(initial.town.x)+7,y:Math.round(initial.town.y)},wood={x:start.x+5,y:start.y},food={x:start.x-2,y:start.y+2};
+  for(const [point,tile] of [[start,'forest'],[wood,'forest'],[food,'food']])setTile(w.map,point.x,point.y,tile);
+  w.amounts[start.y*w.map.size+start.x]=.04;worker.x=start.x-1;worker.y=start.y;
+  const before=w.stocks[0].wood;assert.equal(w.command([worker.id],{type:'gather',...start}),null);
+  until(w,()=>worker.order?.type==='deliver'&&w.tile(start.x,start.y)==='grass',20);
+  if(restore){const id=worker.id;w=World.fromState(w.saveState());worker=w.entity(id);}
+  until(w,()=>worker.order?.type==='gather'&&worker.order.x===wood.x&&worker.order.y===wood.y,30);
+  assert.ok(w.stocks[0].wood>before);assert.equal(worker.order.resource,'wood');
+  until(w,()=>worker.carrying==='wood'&&worker.carried>0,30);assert.equal(w.tile(food.x,food.y),'food');
+});
+test('a newly trained villager keeps a wood rally assignment when its original tree was exhausted',()=>{
+  const {w,town}=setup(),wood={x:Math.round(town.x)+8,y:Math.round(town.y)};
+  setTile(w.map,wood.x,wood.y,'forest');setTile(w.map,Math.round(town.x)+5,Math.round(town.y)+2,'food');
+  town.rally={type:'gather',x:wood.x-2,y:wood.y,resource:'wood'};
+  const initialIds=new Set(w.units.map(u=>u.id));assert.equal(w.train(town.id,'villager'),null);
+  until(w,()=>w.units.some(u=>u.team===0&&!initialIds.has(u.id)&&u.carrying==='wood'&&u.carried>0),90);
+  const trained=w.units.find(u=>u.team===0&&!initialIds.has(u.id));assert.equal(trained.order.resource,'wood');
 });
 test('invalid worker targets explain the problem and preserve the previous command',()=>{
   const {w,worker}=setup(),scout=w.units.find(u=>u.team===0&&u.blueprint.id==='scout');

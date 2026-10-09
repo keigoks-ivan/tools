@@ -1,4 +1,4 @@
-import { CLASSIC_BUILD_KEYS } from './civilization.mjs?v=20261009h';
+import { CLASSIC_BUILD_KEYS } from './civilization.mjs?v=20261009i';
 
 export const GRID_BUILD_KEYS = {
   economy: { q: 'house', w: 'mill', e: 'mining', r: 'lumber', t: 'dock', a: 'farm', s: 'blacksmith', d: 'market', f: 'monastery', g: 'university', z: 'town', x: 'wonder' },

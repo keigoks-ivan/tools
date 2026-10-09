@@ -1,6 +1,6 @@
-import { CIV_UNITS, TECHNOLOGIES } from './civilization.mjs?v=20261009h';
-import { BUILDING_BALANCE } from './balance.mjs?v=20261009h';
-import { createRouteSearch } from './navigation.mjs?v=20261009h';
+import { CIV_UNITS, TECHNOLOGIES } from './civilization.mjs?v=20261009i';
+import { BUILDING_BALANCE } from './balance.mjs?v=20261009i';
+import { createRouteSearch } from './navigation.mjs?v=20261009i';
 export const clone = value => JSON.parse(JSON.stringify(value));
 export const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 export const RICH_RESOURCE_AMOUNTS = { wood: 5000, food: 10000, gold: 20000, stone: 20000 };
@@ -198,11 +198,10 @@ export function findPath(start, goal, size, blocked, radius = 0) {
     return path?.map(p => ({ x: p.x + ox, y: p.y + oy })) || null;
   }
   const sx = clamp(Math.round(start.x), 0, size - 1), sy = clamp(Math.round(start.y), 0, size - 1);
-  const gx = clamp(Math.round(goal.x), 0, size - 1), gy = clamp(Math.round(goal.y), 0, size - 1);
   const initial = sy * size + sx, total = size * size;
   const prev = new Int32Array(total).fill(-1), score = new Float32Array(total).fill(Infinity);
   const done = new Uint8Array(total), heap = [];
-  const destination = goal.kind === 'building' ? goal : { x: gx, y: gy }, heuristic = (x, y) => Math.max(0, goalDistance({ x, y }, destination) - radius);
+  const destination = goal, heuristic = (x, y) => Math.max(0, goalDistance({ x, y }, destination) - radius);
   const push = node => { heap.push(node); let i = heap.length - 1; while (i) { const parent = (i - 1) >> 1; if (heap[parent].f <= node.f) break; heap[i] = heap[parent]; i = parent; } heap[i] = node; };
   const pop = () => { const first = heap[0], last = heap.pop(); if (heap.length) { let i = 0; while (i * 2 + 1 < heap.length) { let c = i * 2 + 1; if (c + 1 < heap.length && heap[c + 1].f < heap[c].f) c++; if (heap[c].f >= last.f) break; heap[i] = heap[c]; i = c; } heap[i] = last; } return first; };
   score[initial] = 0; push({ id: initial, f: heuristic(sx, sy) }); let end = -1;
@@ -280,7 +279,8 @@ export class World {
     world.explored.fill(data.fullExploration?1:0); for (const i of data.explored||[]) if (Number.isInteger(i)&&i>=0&&i<world.explored.length)world.explored[i]=1;
     world.visible.fill(0);world.fullVision=false;world.visionCells=new Set();world.updateVision();world.deploymentErrors=[];return world;
   }
-  isEnemy(teamA, teamB) { return !this.isAlly(teamA, teamB); }
+  isEnemy(teamA, teamB) { return Number.isInteger(teamA)&&Number.isInteger(teamB)&&!this.isAlly(teamA, teamB); }
+  isIdle(unit) { return unit?.kind==='unit'&&unit.hp>0&&!unit.garrison&&!unit.order&&!unit.autoTarget&&!unit.combatReturning&&!(unit.packLeft>0); }
   tile(x, y) { return tileType(this.map, Math.round(x), Math.round(y)); }
   amountAt(x, y) { const i = y * this.map.size + x; return this.amounts[i] ?? (RESOURCE[this.tile(x, y)] ? this.map.resourceAmounts[RESOURCE[this.tile(x, y)]] : 0); }
   age(team) { return this.ages[team]; }
@@ -445,11 +445,12 @@ export class World {
   }
   command(ids, order, queued = false) {
     if (order && ['move', 'attackMove', 'patrol'].includes(order.type) && this.blocked(order.x, order.y)) { const p = this.nearestOpen(order); if (!p) return '目的地附近沒有可行走空地。'; order = { ...order, ...p }; }
-    if(order?.type==='gather'&&!order.target){const worker=ids.map(id=>this.entity(id)).find(u=>u?.blueprint?.role==='worker'&&!u.garrison);if(worker){const target=this.gatherTarget(worker,order);if(target)order={...order,...target};}}
+    if(order?.type==='gather'&&!order.target){const worker=ids.map(id=>this.entity(id)).find(u=>u?.blueprint?.role==='worker'&&!u.garrison);if(worker){const target=this.gatherTarget(worker,order);if(target)order={...order,...target,resource:RESOURCE[this.tile(target.x,target.y)]||order.resource};}}
     let accepted=0,error='沒有可接受這項指令的單位。';
     for (const id of ids) { const u = this.entity(id); if (!u || u.kind !== 'unit' || u.garrison) continue;
       const reason=this.commandReason(u,order,queued);if(reason){error=reason;continue;}
       if(queued&&order&&(u.queued.length>=40||u.order?.type==='patrol'&&order.type==='patrol'&&u.order.points.length>=40)){error='指令佇列已滿。';continue;}accepted++;
+      if(!queued&&!u.failed&&order?.target&&['attack','convert','heal','garrison'].includes(order.type)&&u.order?.type===order.type&&u.order.target===order.target){u.queued=[];continue;}
       if (queued && u.order?.type === 'patrol' && order?.type === 'patrol') { if (u.order.points.length < 40) u.order.points.push({ x: order.x, y: order.y }); }
       else if (queued && order && u.order) { if (u.queued.length < 40) u.queued.push(clone(order)); }
       else { u.order = clone(order); u.queued = []; this.resetOrder(u); }
@@ -697,16 +698,17 @@ export class World {
       } else if (o.type === 'gather' && bp.role === 'worker') {
         const farm = o.target ? this.entity(o.target) : null;
         if (o.target && (!farm||farm.kind!=='building'||farm.type!=='farm')) { if (u.carried && this.deliver(u)) continue; this.finish(u); continue; }
-        const point = farm || o, i = point.y * this.map.size + point.x, type = farm?.type === 'farm' ? 'food' : RESOURCE[this.tile(o.x, o.y)], remaining = farm ? farm.foodRemaining : this.amountAt(o.x, o.y);
+        const point = farm || o, i = point.y * this.map.size + point.x, type = farm?.type === 'farm' ? 'food' : RESOURCE[this.tile(o.x, o.y)] || o.resource || u.carrying, remaining = farm ? farm.foodRemaining : this.amountAt(o.x, o.y);
+        if (!farm && type) o.resource = type;
         if (farm && (farm.team !== u.team || this.farmWorker(farm, u.id)?.id < u.id)) { this.finish(u); continue; }
         const capacity = 10 * this.modifiers(u.team).carry;
         if (u.carried >= capacity - .001 && (!type || u.carrying === type)) { u.work += dt; if (u.work >= 1) { u.work = 0; this.deliver(u, o); } continue; }
         if (!type || remaining <= 0) {
           if (u.carried && this.deliver(u, o)) continue;
           if (farm && this.canPay(u.team, { wood: 60 })) { this.pay(u.team, { wood: 60 }); farm.foodRemaining = 175 + (this.modifiers(u.team).farmFood || 0); }
-          else { const next = this.closestResource(u, u.carrying); if (next && !u.queued.length) { u.order = { type: 'gather', ...next }; this.resetOrder(u); } else this.finish(u); } continue;
+          else { const next = type && this.closestResource(u, type); if (next && !u.queued.length) { u.order = { type: 'gather', ...next, resource:type }; this.resetOrder(u); } else this.finish(u); } continue;
         }
-        if(!farm&&u.failed&&u.repath<=dt&&this.pathBudget>0&&performance.now()<this.pathDeadline){this.pathBudget--;const next=this.gatherTarget(u,o,true);if(next&&(next.x!==o.x||next.y!==o.y)){u.order={type:'gather',...next};this.resetOrder(u);continue;}}
+        if(!farm&&u.failed&&u.repath<=dt&&this.pathBudget>0&&performance.now()<this.pathDeadline){this.pathBudget--;const next=this.gatherTarget(u,o,true);if(next&&(next.x!==o.x||next.y!==o.y)){u.order={type:'gather',...next,resource:type};this.resetOrder(u);continue;}}
         if (this.walk(u, point, farm ? .7 : 1.5, dt)) {
           if (u.carrying && u.carrying !== type) u.carried = 0;
           const rate = farm ? .32 : {wood:.39,food:.33,gold:.38,stone:.36}[type], take = Math.min(capacity - u.carried, remaining, rate * dt * this.modifiers(u.team).gather[type]);
