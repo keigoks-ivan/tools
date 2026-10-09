@@ -167,7 +167,7 @@ class Decals {
     this.mesh.count = Math.min(this.max, this.mesh.count + 1);
     this.mesh.instanceMatrix.needsUpdate = true;
   }
-  clear() { this.mesh.count = 0; this.i = 0; }
+  clear() { this.mesh.count = 0; this.i = 0; this.hot.length = 0; }
 }
 
 export class FXL {
@@ -233,7 +233,14 @@ export class FXL {
   puff(p, color = [0.5, 0.48, 0.45], s = 1) {
     this.smoke.add({ p: p.clone(), v: new THREE.Vector3(rr(-0.5, 0.5), rr(0.2, 0.6), rr(-0.5, 0.5)), t: 0, life: rr(1, 2), s0: 0.2 * s, s1: rr(0.8, 1.3) * s, a: 0.4, c: new THREE.Color(...color), rot: rr(0, 6), rise: 0.2 });
   }
-  clear() { this.sparks.length = 0; this.beams.length = 0; this.smoke.list.length = 0; this.glow.list.length = 0; this.decals.clear(); }
+  clear() {
+    this.sparks.length = this.beams.length = this.bolts.length = 0;
+    this.streak.begin(); this.streak.end();
+    for (const p of [this.smoke, this.glow]) { p.list.length = 0; p.mesh.geometry.instanceCount = 0; }
+    this.decals.clear();
+    for (const L of this.lights) { L.l.intensity = 0; L.t = L.life = L.I = 0; }
+    this.li = 0;
+  }
 
   update(dt, floorAt) {
     const S = this.streak; S.begin();
@@ -258,7 +265,10 @@ export class FXL {
       s.v.y -= s.grav * dt;
       _w.copy(s.p);
       s.p.addScaledVector(s.v, dt);
-      if (floorAt && s.p.y < 0.02) { s.p.y = 0.02; s.v.y = Math.abs(s.v.y) * 0.3; s.v.x *= 0.5; s.v.z *= 0.5; }
+      if (floorAt) {
+        const floor = typeof floorAt === 'function' ? floorAt(s.p.x, s.p.z) + 0.02 : 0.02;
+        if (s.p.y < floor) { s.p.y = floor; s.v.y = Math.abs(s.v.y) * 0.3; s.v.x *= 0.5; s.v.z *= 0.5; }
+      }
       const u = s.t / s.life, cool = 1 - u;
       _v.copy(s.p).addScaledVector(s.v, -0.018);
       S.push(_v, s.p, s.w, s.c[0] * cool, s.c[1] * cool * cool, s.c[2] * cool * cool, cool);

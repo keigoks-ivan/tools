@@ -3,6 +3,7 @@
 import * as THREE from 'three';
 import { Arms } from './human.js';
 import { makeRifle, makePistol, makeSMG } from './guns.js';
+import { HANDLING_PROFILES, ResponsiveHandling } from './handling.mjs';
 
 const clamp = THREE.MathUtils.clamp, lerp = THREE.MathUtils.lerp;
 const ease = (t) => t * t * (3 - 2 * t);
@@ -18,7 +19,7 @@ export const WEAPONS = {
 };
 
 export class ViewModel {
-  constructor(kit, vScene, audio, fx) {
+  constructor(kit, vScene, audio, fx, { responsive = false } = {}) {
     this.vScene = vScene; this.audio = audio; this.fx = fx;
     this.arms = new Arms(kit);
     vScene.add(this.arms.root);
@@ -38,6 +39,7 @@ export class ViewModel {
     this.breath = 1; this.holding = false;    // 屏息：最多 3 秒
     this.lastTrigger = false;
     this.inspectT = -1;
+    this.setHandlingProfile(responsive?'responsive':'classic');
     // 視角場景的燈：太陽（方向每幀跟著鏡頭轉）＋天光
     this.sun = new THREE.DirectionalLight(0xffc89a, 1.6); this.sun.position.set(1, 1, 1);
     this.hemi = new THREE.HemisphereLight(0x8fa6c8, 0x3a3028, 0.6);
@@ -47,6 +49,12 @@ export class ViewModel {
   get W() { return WEAPONS[this.cur]; }
   get model() { return this.g[this.cur]; }
   get busy() { return this.reloadT >= 0 || this.swapT >= 0 || this.nadeT >= 0; }
+  setHandlingProfile(profile='classic') {
+    if(!Object.hasOwn(HANDLING_PROFILES,profile))throw new TypeError('Unknown weapon handling profile');
+    this.handlingProfile=HANDLING_PROFILES[profile];this.handling=profile==='responsive'?new ResponsiveHandling():null;
+    return this;
+  }
+  resetHandling(){this.handling?.reset();this.sway.set(0,0);this.sprintK=0;this.landK=0;this.bobT=0;}
 
   swap(to) {
     if (!to) { const order = Object.keys(WEAPONS); to = order[(order.indexOf(this.cur) + 1) % order.length]; }
@@ -68,14 +76,15 @@ export class ViewModel {
 
   // c：{fire, ads, reload, swap, swapTo, hold}；p：玩家；回傳這幀開的槍（或 null）
   update(dt, c, p, look) {
+    const handling=this.handlingProfile||HANDLING_PROFILES.classic;
     this.t += dt;
     let shot = null;
     // ---- 換槍
     if (c.swapTo) this.swap(c.swapTo); else if (c.swap) this.swap();
     if (this.swapT >= 0) {
       this.swapT += dt;
-      if (this.swapT >= 0.24 && this.swapTo) { this.g[this.cur].visible = false; this.cur = this.swapTo; this.swapTo = null; this.g[this.cur].visible = true; this.audio.swap(); }
-      if (this.swapT >= 0.58) this.swapT = -1;
+      if (this.swapT >= handling.swapOut && this.swapTo) { this.g[this.cur].visible = false; this.cur = this.swapTo; this.swapTo = null; this.g[this.cur].visible = true; this.audio.swap(); }
+      if (this.swapT >= handling.swapDuration) this.swapT = -1;
     }
     const W = this.W;
     // ---- 丟手榴彈
@@ -86,7 +95,7 @@ export class ViewModel {
     if (this.reloadT >= 0) this._reloadStep(dt);
     // ---- 舉槍
     this.adsWant = c.ads && !this.busy && p.sprintK < 0.5;
-    this.ads = clamp(this.ads + (this.adsWant ? dt / 0.2 : -dt / 0.16), 0, 1);
+    this.ads = clamp(this.ads + (this.adsWant ? dt / handling.adsIn : -dt / handling.adsOut), 0, 1);
     const wasScoped = this.scoped;
     this.scoped = this.cur === 'rifle' && this.ads > 0.92;
     if (this.scoped !== wasScoped) this.audio.scope(this.scoped);
@@ -121,6 +130,7 @@ export class ViewModel {
           this.heat = Math.min(1.2, this.heat + 0.25 * k);
         }
         this.flashT = 0.05;
+        this.handling?.fired(this.cur);
         if (this.ammo[this.cur] === 0) { const fired = this.cur; setTimeout(() => this.cur === fired && this.ammo[fired] === 0 && !this.busy && this.reload(), 250); }
       }
     }
@@ -130,12 +140,13 @@ export class ViewModel {
     spring(this.kick, this.kickV, 180, 16);
     spring(this.rot, this.rotV, 160, 13);
     // ---- 晃動：滑鼠轉動的延遲感＋走路擺動＋呼吸
-    const adsK = 1 - this.ads * 0.85;
+    const adsK = 1 - this.ads * (this.handling?0.95:0.85);
     this.sway.x = lerp(this.sway.x, clamp(-look.x * 1.6, -0.12, 0.12), 1 - Math.exp(-dt * 10));
     this.sway.y = lerp(this.sway.y, clamp(look.y * 1.6, -0.1, 0.1), 1 - Math.exp(-dt * 10));
-    const sp = p.grounded ? p.moveK : 0;
+    this.handling?.update(dt,{x:look.x,y:look.y,move:p.moveK,grounded:p.grounded});
+    const sp = this.handling?this.handling.moveWeight:p.grounded ? p.moveK : 0;
     this.bobT += dt * (5.2 + p.sprintK * 3.3) * Math.min(1, sp);
-    this.sprintK = lerp(this.sprintK, p.sprintK, 1 - Math.exp(-dt * 8));
+    this.sprintK = lerp(this.sprintK, p.sprintK, 1 - Math.exp(-dt * (p.sprintK>this.sprintK?handling.sprintIn:handling.sprintOut)));
     this.landK *= Math.exp(-dt * 7);
     this.flashT = (this.flashT || 0) - dt;
     this._pose(dt, sp, adsK);
@@ -163,6 +174,7 @@ export class ViewModel {
 
   // 槍的位置（鏡頭座標）
   _pose(dt, sp, adsK) {
+    const handling=this.handlingProfile||HANDLING_PROFILES.classic,motion=this.handling?.pose(this.ads,this.busy);
     const M = this.model, ud = M.userData, rifle = this.cur === 'rifle';
     // 腰射位置、舉槍位置
     const hip = rifle ? new THREE.Vector3(0.17, -0.205, 0.15) : this.cur === 'smg' ? new THREE.Vector3(0.17, -0.205, -0.1) : new THREE.Vector3(0.17, -0.19, -0.4);
@@ -179,8 +191,12 @@ export class ViewModel {
     const br = 1 - (this.holding ? 0.9 : 0);
     pos.y += Math.sin(this.t * 1.6) * 0.0035 * adsK * br; pos.x += Math.sin(this.t * 0.8) * 0.002 * adsK * br;
     // 滑鼠延遲
-    pos.x += this.sway.x * 0.06 * adsK; pos.y += this.sway.y * 0.05 * adsK;
-    rot.y += this.sway.x * 0.35 * adsK; rot.x += this.sway.y * 0.3 * adsK;
+    if(motion){
+      pos.x+=motion.side;pos.y+=motion.vertical;rot.y+=motion.yaw;rot.x+=motion.pitch;rot.z+=motion.yaw*.07;
+    }else{
+      pos.x += this.sway.x * 0.06 * adsK; pos.y += this.sway.y * 0.05 * adsK;
+      rot.y += this.sway.x * 0.35 * adsK; rot.x += this.sway.y * 0.3 * adsK;
+    }
     // 跑步：槍斜抱、往下
     const sk = this.sprintK;
     if (sk > 0.001) {
@@ -191,10 +207,15 @@ export class ViewModel {
     // 落地
     pos.y -= this.landK * 0.045; rot.x -= this.landK * 0.07; pos.z += this.landK * 0.018;
     // 後座
-    pos.z += this.kick.z * 0.04 * (1 - this.ads * 0.5); pos.y += this.kick.y * 0.01;
-    rot.x += this.rot.x * 0.02; rot.z += this.rot.z * 0.02; rot.y += this.rot.y * 0.02;
+    if(motion){
+      // Immediate visible weapon kick, followed by a clean return; the aim ray stays exact.
+      pos.z+=motion.back;pos.y+=motion.back*.12;rot.x-=motion.lift;rot.z+=motion.roll;
+    }else{
+      pos.z += this.kick.z * 0.04 * (1 - this.ads * 0.5); pos.y += this.kick.y * 0.01;
+      rot.x += this.rot.x * 0.02; rot.z += this.rot.z * 0.02; rot.y += this.rot.y * 0.02;
+    }
     // 換槍：放下再舉起
-    if (this.swapT >= 0) { const u = this.swapT < 0.24 ? ease(this.swapT / 0.24) : 1 - ease((this.swapT - 0.24) / 0.34); pos.y -= 0.35 * u; rot.x -= 0.9 * u; }
+    if (this.swapT >= 0) { const u = this.swapT < handling.swapOut ? ease(this.swapT / handling.swapOut) : 1 - ease((this.swapT - handling.swapOut) / (handling.swapDuration-handling.swapOut)); pos.y -= handling.swapDrop * u; rot.x -= handling.swapTilt * u; }
     // 丟手榴彈：槍往右下壓開，出手後舉回來
     if (this.nadeT >= 0) { const u = this.nadeT < 0.2 ? ease(this.nadeT / 0.2) : 1 - ease((this.nadeT - 0.2) / 0.42); pos.y -= 0.28 * u; pos.x += 0.06 * u; rot.x -= 0.55 * u; rot.z -= 0.35 * u; }
     // 換彈：槍往左下翻轉

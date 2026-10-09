@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
-import { Combat } from './combat.js';
+import { Combat, InfantryActor } from './combat.js';
 import { Navigation } from './navigation.mjs';
 import { Solid } from '../mech/zero/kit.js';
 import { TacticalDirector, BATTLE_TACTICS } from './combat-tactics.mjs';
@@ -144,4 +144,49 @@ test('a squad command aimed at a disconnected region resolves to the reachable s
 test('a full enemy roster rejects additional spawns without incrementing actor IDs',()=>{
   const {combat}=fixture();combat.enemies=Array.from({length:14},(_,i)=>actor(combat,V(i-7,0,15),i+1));
   const before=combat.nextId;assert.equal(combat.spawnEnemy({x:0,z:22}),null);assert.equal(combat.nextId,before);assert.equal(combat.enemies.length,14);combat.clear();
+});
+test('series impact classification preserves heavy armor, absolute head damage and captured reactions',()=>{
+  const {combat,kills}=fixture(),impacts=[],flashes=[],deaths=[],sounds=[],beams=[],muzzles=[];
+  combat.fx={impact:(...args)=>impacts.push(args),beam:(...args)=>beams.push(args),muzzle:(...args)=>muzzles.push(args)};
+  combat.audio={hit:(...args)=>sounds.push(args)};
+  const a=actor(combat,V(0,0,12),1,'heavy');a.combat=combat;a.T.armor=.72;a.hp=a.hp0=280;a.stagV=V();
+  a.s.impact=(...args)=>flashes.push(['motion',...args]);a.s.flash=armor=>flashes.push(['flash',armor]);a.s.die=(...args)=>deaths.push(args);
+  a.damage=InfantryActor.prototype.damage.bind(a);let part='chest';a.hitTest=(_o,_d,max)=>!a.dead&&max>12?{t:12,part}:null;combat.enemies=[a];
+  const origin=V(0,1.6,0),dir=V(0,0,1),muzzle=V(.25,1.25,.9),feedback={weapon:'rifle',muzzle};
+  let hit=combat.shoot(origin,dir,{dmg:40,head:100},feedback);
+  assert.equal(a.hp,280-40*.72);assert.equal(hit.armored,true);assert.equal(hit.markerKind,'armor');assert.equal(hit.impactKind,'armor');
+  assert.equal(a.lastHitKind,'armor');assert.equal(a.hitFlash,.15);assert.equal(a.stagger,.12);assert.equal(a.stagV.z,1);
+  assert.deepEqual(flashes.at(-1),['flash',true]);assert.equal(impacts[0][2],'armor');assert.deepEqual(impacts[0][3],[2.4,2.8,3.4]);
+  assert(beams[0][0].equals(muzzle));assert(beams[0][1].equals(hit.point));assert.equal(beams[0][2],'rifle');assert(muzzles[0][0].equals(muzzle));
+  assert.equal(hit.audioHandled,true);assert.equal(sounds[0][1],'armor');assert(sounds[0][0].equals(V(0,1.6,3)));assert(origin.equals(V(0,1.6,0)));
+  part='head';const before=a.hp;hit=combat.shoot(origin,dir,{dmg:40,head:100},feedback);
+  assert.equal(a.hp,before-100);assert.equal(hit.armored,false);assert.equal(hit.markerKind,'head');assert.equal(hit.impactKind,'body');
+  assert.equal(sounds.at(-1)[1],'head');assert.deepEqual(flashes.at(-1),['flash',false]);assert.equal(impacts.at(-1)[2],'body');assert.deepEqual(impacts.at(-1)[3],[4,2.4,.9]);
+  hit=combat.shoot(origin,dir,{dmg:40,head:180},feedback);assert.equal(a.hp,0);assert.equal(hit.killed,true);assert.equal(hit.markerKind,'kill');assert.equal(deaths.length,1);assert.equal(deaths[0][2],'head');assert.equal(kills.length,1);
+  combat.clear();
+});
+test('surface effects use the actual wall material and misses produce no hit feedback',()=>{
+  const {combat}=fixture(world([{x0:-2,x1:2,z0:4,z1:5,y0:0,y1:4,mat:'corr'}])),impacts=[],sounds=[];
+  combat.fx={impact:(...args)=>impacts.push(args)};combat.audio={hit:(...args)=>sounds.push(args)};
+  const hit=combat.shoot(V(0,1.4,0),V(0,0,1),{range:40});assert.equal(hit.impactKind,'metal');assert.equal(hit.markerKind,null);assert.equal(hit.armored,false);
+  assert.equal(impacts.length,1);assert.equal(impacts[0][2],'metal');assert(impacts[0][1].z<0);assert.equal(sounds[0][1],'metal');assert(sounds[0][0].equals(hit.point));
+  const miss=combat.shoot(V(0,1.4,0),V(1,0,0),{range:10});assert.equal(miss.impactKind,null);assert.equal(miss.markerKind,null);assert.equal(miss.audioHandled,false);assert.equal(impacts.length,1);assert.equal(sounds.length,1);
+  combat.clear();
+});
+test('hit recoil visibly moves in open space and cannot push a soldier through a nearby wall',()=>{
+  const {combat}=fixture(world([{x0:-2,x1:2,z0:.8,z1:1.2,y0:0,y1:4}])),a=actor(combat,V(0,0,.3));a.stagger=.27;a.stagV=V(0,0,2.4);combat.enemies=[a];
+  combat._move(a,.1);assert(a.pos.z>.3,'impact had no physical response');assert(a.pos.z<=.46,'impact crossed the collision margin');assert(a.stagV.z<2.4);
+  a.pos.set(5,0,0);a.goal.copy(a.pos);a.stagV.set(0,0,2.4);a.s.vel.set(0,0,0);combat._move(a,.1);assert(Math.abs(a.pos.z-.24)<1e-10);assert(a.s.vel.length()<=2.4+.00001);
+  combat.clear();
+});
+test('corpse fade owns only material clones and preserves shared soldier, rifle and texture resources',()=>{
+  const shared=new THREE.MeshStandardMaterial({color:0x445566,opacity:.8}),texture=new THREE.Texture(),geometry=new THREE.BoxGeometry();shared.map=texture;
+  const soldier=new THREE.Mesh(geometry,shared),weapon=new THREE.Mesh(geometry,shared),root=new THREE.Group();root.add(soldier,weapon);
+  let sharedDisposed=0,textureDisposed=0,geometryDisposed=0,clonesDisposed=0,skeletonDisposed=0;
+  shared.addEventListener('dispose',()=>sharedDisposed++);texture.addEventListener('dispose',()=>textureDisposed++);geometry.addEventListener('dispose',()=>geometryDisposed++);
+  const a=Object.create(InfantryActor.prototype);a.dead=true;a.s={root,weapon,model:root,mixer:{stopAllAction:()=>{},uncacheRoot:()=>{}},meshes:[{skeleton:{dispose:()=>skeletonDisposed++}}]};
+  a.fade(.5);assert.equal(a.fadeMaterials.size,1);assert.notEqual(soldier.material,shared);assert.equal(weapon.material,soldier.material);assert.equal(soldier.material.map,texture);assert.equal(soldier.material.opacity,.4);assert.equal(shared.opacity,.8);assert.equal(shared.transparent,false);
+  soldier.material.addEventListener('dispose',()=>clonesDisposed++);a.fade(1);assert.equal(soldier.material.opacity,0);assert.equal(shared.opacity,.8);a.dispose();
+  assert.equal(clonesDisposed,1);assert.equal(skeletonDisposed,1);assert.equal(sharedDisposed,0);assert.equal(textureDisposed,0);assert.equal(geometryDisposed,0);
+  shared.dispose();texture.dispose();geometry.dispose();
 });

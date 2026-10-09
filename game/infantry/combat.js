@@ -26,12 +26,14 @@ const TRACE_GEO=new THREE.CylinderGeometry(.018,.018,1,4);
 const SPARK_GEO=new THREE.IcosahedronGeometry(.035,0);
 const FLASH_GEO=new THREE.IcosahedronGeometry(1,0);
 const red=new THREE.Color(3.8,.46,.13),blue=new THREE.Color(.24,2.8,3.6),gold=new THREE.Color(4.2,2.25,.7);
+const IMPACT_COLORS={body:[3.4,1.3,.45],head:[4,2.4,.9],armor:[2.4,2.8,3.4],concrete:[1.2,2.2,3.5],metal:[1.2,2.2,3.5],glass:[1.1,2.5,3.5]};
+const surfaceKind=mat=>/metal|rust|corr|olive/.test(mat||'')?'metal':mat==='glass'?'glass':'concrete';
 const TRACE_MAT=new THREE.MeshBasicMaterial({color:0xffffff,vertexColors:true,toneMapped:true,blending:THREE.AdditiveBlending,transparent:true,opacity:.9,depthWrite:false});
-const SPARK_MAT=new THREE.MeshBasicMaterial({color:gold,toneMapped:true,blending:THREE.AdditiveBlending,transparent:true,opacity:.8,depthWrite:false});
+const SPARK_MAT=new THREE.MeshBasicMaterial({color:0xffffff,vertexColors:true,toneMapped:true,blending:THREE.AdditiveBlending,transparent:true,opacity:.8,depthWrite:false});
 const FRIEND_GLOW=new THREE.MeshBasicMaterial({color:blue,toneMapped:true});
 const LASER_MAT=new THREE.LineBasicMaterial({color:0xff5137,transparent:true,opacity:.38,blending:THREE.AdditiveBlending,depthWrite:false});
 
-class InfantryActor {
+export class InfantryActor {
   constructor(combat,def,friendly=false) {
     this.combat=combat;this.id=combat.nextId++;this.friendly=friendly;
     const requested=TYPE_ALIAS[def.type]||def.type;
@@ -47,7 +49,7 @@ class InfantryActor {
     this.target=null;this.sees=false;this.senseT=random(0,.18);this.goal=this.pos.clone();
     this.path=[];this.pathT=0;this.pathGoal=this.pos.clone();this.planT=random(0,.3);this.aimT=0;
     this.ammo=this.T.mag;this.burst=0;this.shotT=random(.1,.4);this.restT=.5;
-    this.suppression=0;this.stagger=0;this.phase='advance';this.phaseT=random(1,2);this.cover=null;
+    this.suppression=0;this.stagger=0;this.stagV=new THREE.Vector3();this.hitFlash=0;this.phase='advance';this.phaseT=random(1,2);this.cover=null;
     this.stuckT=0;this.progressPos=this.pos.clone();this.lastProgress=0;this.searchT=0;this.stepPhase=0;
     this.deathAge=0;this.contactRadioT=0;this.formationIndex=def.formationIndex||0;
     this.intent='advance';this.station=null;this.stationContact=this.pos.clone();this.stationUntil=0;this.laneBlocked=0;
@@ -62,9 +64,9 @@ class InfantryActor {
   damage(damage,dir,part='chest') {
     if(this.dead||!Number.isFinite(damage)||damage<=0)return false;
     const armor=this.T.armor&&part!=='head';if(armor)damage*=this.T.armor;
-    this.hp=Math.max(0,this.hp-damage);this.barT=2.6;this.suppression=Math.min(2,this.suppression+.8);
+    this.hp=Math.max(0,this.hp-damage);this.barT=2.6;this.hitFlash=.15;this.lastHitKind=armor?'armor':part==='head'?'head':'hit';this.suppression=Math.min(2,this.suppression+.8);
     this.s.impact(dir,clamp(damage/75,.25,1.3),part==='head');this.s.flash(!!armor);
-    if(damage>20)this.stagger=this.type==='heavy'?.12:.27;
+    if(damage>20){this.stagger=this.type==='heavy'?.12:.27;this.stagV.copy(dir).setY(0).normalize().multiplyScalar(this.type==='heavy'?1:2.4);}
     this.aimT=0;this.burst=0;
     if(!this.friendly){this.lastSeen.copy(this.combat.player.pos);this.lastContact=this.combat.time;this.pathT=0;}
     if(this.hp<=0){
@@ -84,12 +86,28 @@ class InfantryActor {
     // Skeleton bone textures belong to this clone. Mesh, material and rifle caches do not.
     for(const m of this.s.meshes)m.skeleton?.dispose();
     if(this.laser){this.laser.removeFromParent();this.laser.geometry.dispose();}
+    for(const material of this.fadeMaterials?.values()||[])material.dispose();
+  }
+  fade(amount) {
+    if(!this.dead||amount<=0)return;
+    if(!this.fadeMaterials){
+      this.fadeMaterials=new Map();
+      const fadeMaterial=original=>{
+        if(this.fadeMaterials.has(original))return this.fadeMaterials.get(original);
+        const material=original.clone();material.onBeforeCompile=original.onBeforeCompile;material.customProgramCacheKey=original.customProgramCacheKey;
+        material.transparent=true;material.depthWrite=false;material.userData.infantryFadeOpacity=original.opacity;
+        this.fadeMaterials.set(original,material);return material;
+      };
+      const meshes=new Set();
+      for(const root of [this.s.root,this.s.weapon])root?.traverse(o=>{if(!o.isMesh||meshes.has(o))return;meshes.add(o);o.material=Array.isArray(o.material)?o.material.map(fadeMaterial):fadeMaterial(o.material);o.castShadow=false;});
+    }
+    for(const material of this.fadeMaterials.values())material.opacity=material.userData.infantryFadeOpacity*(1-clamp(amount,0,1));
   }
 }
 
 export class Combat {
-  constructor({scene,map,kit,audio,player,onPlayerHurt,onKill,difficulty={damage:1}}) {
-    Object.assign(this,{scene,map,kit,audio,player,onPlayerHurt,onKill,difficulty});
+  constructor({scene,map,kit,audio,fx=null,player,onPlayerHurt,onKill,difficulty={damage:1}}) {
+    Object.assign(this,{scene,map,kit,audio,fx,player,onPlayerHurt,onKill,difficulty});
     this.enemies=[];this.allies=[];this.bolts=[];this.sparks=[];this.flashes=[];this.nextId=1;this.time=0;
     this.mode='defend';this.objective=new THREE.Vector3(0,0,-39);this.cleanup=false;
     this.director=new TacticalDirector();this.tacticalPhase='advance';this.squadMode='follow';this.squadCommand={mode:'follow',target:null};this.routes=null;
@@ -290,7 +308,9 @@ export class Combat {
         movement.normalize().multiplyScalar(slowPressure?T.walk:a.sees&&distance<7?T.walk:T.run*(a.suppression>.8?.75:1));
       }
     }
-    const before=a.pos.clone(),velocity=s.vel.clone().lerp(movement,1-Math.exp(-dt*8));
+    // Series hit recoil is a short physical step, checked against the same walls as walking.
+    const recoiling=a.stagger>0&&a.stagV?.lengthSq()>1e-5;
+    const before=a.pos.clone(),velocity=recoiling?a.stagV.clone():s.vel.clone().lerp(movement,1-Math.exp(-dt*8));
     const steps=Math.max(1,Math.ceil(velocity.length()*dt/.16));
     for(let i=0;i<steps;i++){
       const next=a.pos.clone().addScaledVector(velocity,dt/steps);next.y=this.map.solid.floorAt(next.x,next.z,a.pos.y+.5);
@@ -299,6 +319,7 @@ export class Combat {
       const z=next.clone();z.x=a.pos.x;z.y=this.map.solid.floorAt(z.x,z.z,a.pos.y+.5);
       if(this._clearSegment(a.pos,x))a.pos.copy(x);else if(this._clearSegment(a.pos,z))a.pos.copy(z);else{a.pathT=0;break;}
     }
+    if(a.stagV){if(a.stagger>0)a.stagV.multiplyScalar(Math.exp(-dt*10));else a.stagV.set(0,0,0);}
     s.vel.copy(a.pos).sub(before).multiplyScalar(1/Math.max(dt,.001));
     if(distance>1.2){
       a.stuckT+=dt;
@@ -351,7 +372,8 @@ export class Combat {
     this._bolt(from,dir,T.speed,T.damage*(a.friendly?1:this.difficulty.damage??1),a);
     s.recoil=1;a.burst--;a.ammo--;a.shotT=T.gap*random(.9,1.13);
     this.audio?.enemyShot?.(from,T.gun==='sniper'?'sniper':T.gun==='heavy'?'heavy':'rifle');
-    this.flashes.push({p:from.clone(),t:.055,size:T.gun==='sniper'?.14:.1,color:a.friendly?blue:red});
+    if(this.fx?.muzzle)this.fx.muzzle(from,dir,a.friendly?[.5,2.2,3.8]:[3.8,.46,.13],T.gun==='sniper');
+    else this.flashes.push({p:from.clone(),t:.055,size:T.gun==='sniper'?.14:.1,color:a.friendly?blue:red});
     if(a.burst===0){a.aimT=0;a.restT=random(.65,1.1);if(a.cover){a.phase='hide';a.phaseT=random(.45,.85);}}
     if(a.ammo<=0){a.ammo=T.mag;s.reloadT=0;a.burst=0;a.aimT=0;a.restT=1.75;if(a.cover){a.phase='hide';a.phaseT=1.75;}}
   }
@@ -375,9 +397,11 @@ export class Combat {
       if(actor){
         if(actor===this.player){if(!b.from.friendly)this.onPlayerHurt?.(b.damage,b.from.pos);}
         else if(actor.friendly!==b.from.friendly){actor.damage(b.damage*(part==='head'?1.6:part==='limb'?.75:1),b.dir,part);}
-        this._impact(end,actor.friendly===b.from.friendly?false:true);this.bolts.splice(i,1);continue;
+        const armored=!!(actor.T?.armor&&part!=='head'),kind=armored?'armor':'body';
+        this._impact(end,kind,b.dir.clone().negate(),b.from.type==='sniper'?.85:.55,actor===this.player?[4,.6,.3]:IMPACT_COLORS[armored?'armor':part==='head'?'head':'body']);
+        this.bolts.splice(i,1);continue;
       }
-      if(wall){this._impact(end);this.audio?.impact?.(end,wall.mat==='metal'?'metal':'stone');this.bolts.splice(i,1);continue;}
+      if(wall){const kind=surfaceKind(wall.mat);this._impact(end,kind,wall.n,.55,[4,.7,.3]);this.audio?.hit?.(end,kind);this.bolts.splice(i,1);continue;}
       if(!b.whizzed&&!b.from.friendly){
         const ear=this._eye(this.player),along=clamp(ear.clone().sub(b.p).dot(b.dir),0,L),near=b.p.clone().addScaledVector(b.dir,along);
         if(ear.distanceToSquared(near)<1.4*1.4){this.audio?.whiz?.(near);b.whizzed=true;}
@@ -385,17 +409,40 @@ export class Combat {
       b.p.copy(end);b.left-=L;if(b.left<=0)this.bolts.splice(i,1);
     }
   }
-  _impact(p,body=false) {
-    for(let i=0;i<(body?3:5)&&this.sparks.length<MAX_SPARKS;i++)this.sparks.push({p:p.clone(),v:new THREE.Vector3(random(-1.8,1.8),random(.4,2.4),random(-1.8,1.8)),t:random(.13,.32)});
+  _impact(p,kind='concrete',normal=UP,scale=1,color=IMPACT_COLORS[kind]||IMPACT_COLORS.concrete) {
+    if(this.fx?.impact){this.fx.impact(p,normal,kind,color,scale);return;}
+    const count=Math.round((kind==='armor'||kind==='metal'?14:9)*scale),c=new THREE.Color(...color);
+    for(let i=0;i<count&&this.sparks.length<MAX_SPARKS;i++){
+      const v=new THREE.Vector3(random(-1,1),random(-1,1),random(-1,1)).normalize().addScaledVector(normal,1.3).normalize().multiplyScalar(random(2,6)*scale);
+      this.sparks.push({p:p.clone(),v,t:random(.18,.4),color:c});
+    }
   }
-  shoot(origin,dir,weapon={}) {
+  shoot(origin,dir,weapon={},feedback={}) {
     const range=weapon.range??110,wall=this.map.solid.ray(origin,dir,range);let t=wall?.t??range,actor=null,part=null;
     for(const a of [...this.enemies,...this.allies]){const h=a.hitTest(origin,dir,t);if(h){t=h.t;actor=a;part=h.part;}}
     let killed=false;
     // Iron Dusk's WEAPONS stores head/limb as absolute damage, not multipliers.
     if(actor){const base=weapon.dmg??40,d=part==='head'?(weapon.head??base*2):part==='limb'?(weapon.limb??base*.75):base;killed=actor.damage(d*(actor.friendly?.12:1),dir,part);}
-    if(actor||wall)this._impact(origin.clone().addScaledVector(dir,t),!!actor);
-    return {t,actor,part,killed,wall:actor?null:wall};
+    const point=origin.clone().addScaledVector(dir,t),normal=actor?dir.clone().negate():wall?.n?.clone()||dir.clone().negate();
+    const armored=!!(actor?.T?.armor&&part!=='head'),impactKind=actor?(armored?'armor':'body'):wall?surfaceKind(wall.mat):null;
+    const markerKind=actor?(killed?'kill':part==='head'?'head':armored?'armor':'hit'):null;
+    const rifle=feedback.weapon==='rifle',scale=rifle?1.25:.85;
+    // Draw from the actual weapon muzzle. Ray tests continue to use the eye for aiming.
+    if(feedback.muzzle){
+      this.fx?.beam?.(feedback.muzzle,point,rifle?'rifle':'pistol');
+      this.fx?.muzzle?.(feedback.muzzle,dir,rifle?[.6,2.6,4.2]:[.5,2.2,3.8],rifle);
+      if(!this.fx?.muzzle)this.flashes.push({p:feedback.muzzle.clone(),t:.055,size:rifle?.14:.1,color:blue});
+    }
+    let audioHandled=false;
+    if(impactKind){
+      const color=actor?IMPACT_COLORS[armored?'armor':part==='head'?'head':'body']:IMPACT_COLORS[impactKind];
+      this._impact(point,impactKind,normal,actor?scale*(armored?1.2:part==='head'?1.4:1):rifle?1.1:.6,color);
+      if(this.audio?.hit){
+        const sound=actor?part==='head'?'head':armored?'armor':'body':impactKind;
+        this.audio.hit(actor?origin.clone().addScaledVector(dir,Math.min(t,3)):point,sound);audioHandled=true;
+      }
+    }
+    return {t,actor,part,killed,wall:actor?null:wall,point,normal,armored,impactKind,markerKind,audioHandled};
   }
   explode(pos,radius=8) {
     const center=pos.clone();center.y+=.12;
@@ -405,7 +452,7 @@ export class Combat {
     }
     const point=this._aimPoint(this.player),distance=point.distanceTo(center);
     if(distance<radius&&!this.player.dead&&this.map.solid.sees(center,point))this.onPlayerHurt?.(75*(1-distance/radius),center);
-    this._impact(center);
+    if(this.fx?.explode)this.fx.explode(center,radius/8);else this._impact(center,'metal',UP,1.6,[3,1.3,.4]);
   }
   update(dt,{mode=this.mode,target=this.objective,cleanup=false,time,wave=1,operation=null,squadCommand=null}={}) {
     dt=clamp(Number.isFinite(dt)?dt:0,0,.1);if(!dt)return;
@@ -423,8 +470,8 @@ export class Combat {
       }
     }
     for(const a of [...this.enemies,...this.allies]){
-      if(a.dead){a.deathAge+=dt;if(a.deathAge<6)a.s.update(dt);continue;}
-      a.barT=Math.max(0,a.barT-dt);a.stagger=Math.max(0,a.stagger-dt);a.suppression=Math.max(0,a.suppression-dt*.35);
+      if(a.dead){a.deathAge+=dt;if(a.deathAge<6)a.s.update(dt);if(a.deathAge>18)a.fade?.((a.deathAge-18)/2);continue;}
+      a.barT=Math.max(0,a.barT-dt);a.hitFlash=Math.max(0,(a.hitFlash||0)-dt);a.stagger=Math.max(0,a.stagger-dt);a.suppression=Math.max(0,a.suppression-dt*.35);
       a.senseT-=dt;a.planT-=dt;a.pathT-=dt;a.phaseT-=dt;a.searchT+=dt;
       if(a.senseT<=0){a.senseT=.18+(a.id%3)*.012;this._sense(a);}
       if(a.phaseT<=0){a.phase=a.phase==='hide'?'aim':'advance';a.phaseT=random(1.2,2.5);}
@@ -444,8 +491,8 @@ export class Combat {
     this.traces.count=this.bolts.length;this.traces.instanceMatrix.needsUpdate=true;if(this.traces.instanceColor)this.traces.instanceColor.needsUpdate=true;
     for(let i=this.sparks.length-1;i>=0;i--){const p=this.sparks[i];p.t-=dt;p.v.y-=dt*5;p.p.addScaledVector(p.v,dt);if(p.t<=0)this.sparks.splice(i,1);}
     this._rotation.identity();
-    for(let i=0;i<this.sparks.length;i++){const p=this.sparks[i];this._scale.setScalar(Math.min(1,p.t*8));this._matrix.compose(p.p,this._rotation,this._scale);this.sparkMesh.setMatrixAt(i,this._matrix);}
-    this.sparkMesh.count=this.sparks.length;this.sparkMesh.instanceMatrix.needsUpdate=true;
+    for(let i=0;i<this.sparks.length;i++){const p=this.sparks[i];this._scale.setScalar(Math.min(1,p.t*8));this._matrix.compose(p.p,this._rotation,this._scale);this.sparkMesh.setMatrixAt(i,this._matrix);this.sparkMesh.setColorAt(i,p.color||gold);}
+    this.sparkMesh.count=this.sparks.length;this.sparkMesh.instanceMatrix.needsUpdate=true;if(this.sparkMesh.instanceColor)this.sparkMesh.instanceColor.needsUpdate=true;
     for(let i=this.flashes.length-1;i>=0;i--)if((this.flashes[i].t-=dt)<=0)this.flashes.splice(i,1);
     for(let i=0;i<Math.min(32,this.flashes.length);i++){const f=this.flashes[i];this._scale.set(f.size,f.size*.55,f.size*1.8);this._matrix.compose(f.p,this._rotation,this._scale);this.flashMesh.setMatrixAt(i,this._matrix);this.flashMesh.setColorAt(i,f.color);}
     this.flashMesh.count=Math.min(32,this.flashes.length);this.flashMesh.instanceMatrix.needsUpdate=true;if(this.flashMesh.instanceColor)this.flashMesh.instanceColor.needsUpdate=true;
@@ -454,6 +501,8 @@ export class Combat {
     for(const a of [...this.enemies,...this.allies])a.dispose();this.enemies.length=this.allies.length=this.bolts.length=this.sparks.length=this.flashes.length=0;
     // Instancing buffers are per battle; the underlying geometries/materials remain cached.
     if(this.fxRoot){this.fxRoot.removeFromParent();this.traces.dispose();this.sparkMesh.dispose();this.flashMesh.dispose();this.fxRoot=null;}
+    // The caller owns FXL and its materials; clearing only resets this battle's particles.
+    this.fx?.clear?.();
   }
 }
 
