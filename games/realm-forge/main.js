@@ -1,6 +1,6 @@
 import { World, BUILDINGS, TILE_NAMES, DEFAULT_UNITS, clone, clamp, defaultProject, validateProject, generateMap, enrichMapResources, findPath, tileType, setTile, buildingBounds } from './core.mjs?v=20261009d';
 import { CIVILIZATION, TECHNOLOGIES, STANCES, FORMATIONS } from './civilization.mjs?v=20261009d';
-import { Renderer, COLORS, SYMBOLS, drawUnit } from './renderer.js?v=20261009d';
+import { Renderer, COLORS, SYMBOLS, drawUnit, wheelZoomFactor } from './renderer.js?v=20261009f';
 import { artReady } from './art.mjs?v=20261009d';
 import { upgradeLegacyMap, upgradeDefaultUnits, setEnemyCount, spreadStartingPositions } from './project-upgrades.mjs?v=20261009d';
 import { buildKeys, productionKey, menuKey, orderHint, technologyKey, commandKey, eventKey, GO_TO_BUILDINGS } from './controls.mjs?v=20261009d';
@@ -56,7 +56,7 @@ async function toggleFullscreen() {
 }
 for (const name of ['fullscreenchange','webkitfullscreenchange']) document.addEventListener(name, syncFullscreen);
 function markDirty() { ui.dirty = true; $('save-status').textContent = '尚未儲存'; }
-function previewReset() { world = new World(project); ui.started = false; ui.paused = true; ui.selected.clear(); ui.groups = {}; ui.placement = null; ui.heroBrush = null; ui.heroSelected = null; ui.attackMove = false; ui.orderMode = null; ui.buildMenu = false; $('result').hidden = true; renderer.project = project; updateHud(true); if (world.deploymentErrors?.length) toast(world.deploymentErrors[0]); }
+function previewReset() { renderer.restoreView(); world = new World(project); ui.started = false; ui.paused = true; ui.selected.clear(); ui.groups = {}; ui.placement = null; ui.heroBrush = null; ui.heroSelected = null; ui.attackMove = false; ui.orderMode = null; ui.buildMenu = false; $('result').hidden = true; renderer.project = project; updateHud(true); if (world.deploymentErrors?.length) toast(world.deploymentErrors[0]); }
 function validResourceInputs() { const input=[...document.querySelectorAll('[data-player-resource]')].find(el=>!el.checkValidity()); if (input) { input.reportValidity(); toast('我方起始資源請輸入 0–1,000,000 的整數。'); return false; } return true; }
 function commitProject() {
   if (!validResourceInputs()) return;
@@ -98,7 +98,7 @@ function switchMode(mode) {
   const copy = { play: ['親自指揮你的王國。', `決定版預設操控 · ${CIVILIZATION.ages[project.rules.startAge]} · ${opponentLabel()}`], map: ['先打造世界，再踏上戰場。', `${project.map.size.toLocaleString()} × ${project.map.size.toLocaleString()} 格世界。設計地景、資源與出生點，完成後直接開戰。`], units: ['創造你自己的英雄。', '自由設定攻擊、防禦、生命與外觀，帶著英雄進入你的地圖。'] };
   $('page-title').textContent = copy[mode][0]; $('page-description').textContent = copy[mode][1];
   $('canvas-tip').innerHTML = mode === 'map' ? '<kbd>左鍵拖曳</kbd> 畫地形 <span>·</span> <kbd>中鍵</kbd> 移動畫面' : '<kbd>左鍵</kbd> 選取 <span>·</span> <kbd>右鍵</kbd> 下指令 <span>·</span> <kbd>滾輪</kbd> 縮放';
-  if (mode === 'map') { renderer.project = project; renderer.zoom = .9; renderer.center(project.map.spawns[0]); }
+  if (mode === 'map') { renderer.restoreView(); renderer.project = project; renderer.zoom = .9; renderer.center(project.map.spawns[0]); }
   renderSidebar(); renderer.resize();
   if (mode === 'play') { if (!ui.started) renderer.center(world.buildings.find(b=>b.team===0&&b.type==='town') || project.map.spawns[0]); $('map').focus({preventScroll:true}); }
   updateHud(true);
@@ -166,6 +166,7 @@ function saveUnit() {
   try { project = validateProject(next); for (const map of undo) pruneHeroPlacements(map); unitDrafts.delete(editId); editId = u.id; markDirty(); previewReset(); renderUnitsPanel(); toast(`「${u.name}」已套用${u.hero?'，可以放到地圖。':'，下一場可以訓練。'}`); return project.units.find(bp=>bp.id===u.id); } catch (e) { toast(e.message); return null; }
 }
 function updateHud(force = false) {
+  updateCameraControls();
   if (ui.mode === 'map') $('page-description').textContent = `${project.map.size.toLocaleString()} × ${project.map.size.toLocaleString()} 格世界。設計地景、資源與出生點，完成後直接開戰。`;
   else if (ui.mode === 'play') $('page-description').textContent = `決定版預設操控 · ${CIVILIZATION.ages[project.rules.startAge]} · ${opponentLabel()}`;
   for (const k of ['wood', 'food', 'gold', 'stone']) $(`res-${k}`).textContent = Math.floor(world.stocks[0][k]).toLocaleString();
@@ -351,7 +352,7 @@ $('map').addEventListener('contextmenu', e => e.preventDefault());
 $('map').addEventListener('pointerdown', e => {
   $('map').focus({ preventScroll: true }); const pos = position(e); pointerPos = pos;
   if (e.button === 1 && ui.mode === 'play') { centerEvent(); e.preventDefault(); return; }
-  if (e.button === 1 || e.button === 0 && e.altKey && ui.mode!=='play') { pointer = { type: 'pan', start: pos, pan: { ...renderer.pan }, id: e.pointerId }; e.preventDefault(); }
+  if (e.button === 1 || e.button === 0 && e.altKey && ui.mode!=='play') { renderer.restoreView(); pointer = { type: 'pan', start: pos, pan: { ...renderer.pan }, id: e.pointerId }; e.preventDefault(); }
   else if (e.button === 2 || e.button === 0 && e.ctrlKey && /Mac/.test(navigator.platform)) { e.preventDefault(); if (ui.mode === 'map' && ui.heroBrush) cancelHeroPlacement(); else if (ui.mode === 'play') { if (ui.placement || ui.attackMove || ui.orderMode) { cancelTargeting(); updateHud(true); toast('已取消放置或指定目標；再次右鍵可下指令。'); } else issueAt(pos, e.shiftKey, false, e.altKey, e.button===2&&e.ctrlKey); } }
   else if (e.button === 0) {
     if (ui.mode === 'map') {
@@ -368,7 +369,7 @@ $('map').addEventListener('pointerdown', e => {
 });
 $('map').addEventListener('pointermove', e => {
   const pos = position(e); pointerPos = pos; renderer.hover = renderer.tileAt(pos.x, pos.y);
-  if (pointer?.type === 'pan') renderer.pan = { x: pointer.pan.x + pos.x - pointer.start.x, y: pointer.pan.y + pos.y - pointer.start.y };
+  if (pointer?.type === 'pan') {renderer.pan = { x: pointer.pan.x + pos.x - pointer.start.x, y: pointer.pan.y + pos.y - pointer.start.y }; renderer.constrainView();}
   else if (pointer?.type === 'paint') { const p = renderer.tileAt(pos.x, pos.y), len = Math.max(Math.abs(p.x - paintLast.x), Math.abs(p.y - paintLast.y)); if (ui.spawnBrush === null) { for (let i = 1; i <= len; i++) paint({ x: Math.round(paintLast.x + (p.x - paintLast.x) * i / len), y: Math.round(paintLast.y + (p.y - paintLast.y) * i / len) }); } paintLast = p; }
   else if (pointer?.type === 'select') { pointer.end = pos; if (Math.hypot(pos.x - pointer.start.x, pos.y - pointer.start.y) > 5) renderer.drag = { start: pointer.start, end: pos }; }
 });
@@ -394,8 +395,22 @@ $('map').addEventListener('dblclick', e => {
   const pool = hit.kind === 'unit' ? world.units : world.buildings;
   const ids = pool.filter(u => { const p = renderer.screen(u.x, u.y); return u.team === 0 && !u.garrison && (hit.kind === 'unit' ? u.blueprint.id === hit.blueprint.id : u.type === hit.type) && p.x >= 0 && p.x <= renderer.width && p.y >= 0 && p.y <= renderer.height; }).map(u => u.id); select(ids, e.shiftKey, false);
 });
-function zoom(factor, pos = { x: renderer.width / 2, y: renderer.height / 2 }) { const before = renderer.world(pos.x, pos.y); renderer.zoom = clamp(renderer.zoom * factor, .005, 3); const after = renderer.screen(before.x, before.y); renderer.pan.x += pos.x - after.x; renderer.pan.y += pos.y - after.y; }
-$('map').addEventListener('wheel', e => { e.preventDefault(); zoom(e.deltaY < 0 ? 1.12 : 1 / 1.12, position(e)); }, { passive: false });
+function updateCameraControls() {
+  const overview = Boolean(renderer.overviewView);
+  $('fit').textContent = overview ? '↶ 返回' : '全圖';
+  $('fit').title = overview ? '返回查看全圖之前的視角' : '查看整張地圖；再按一次返回';
+  $('fit').setAttribute('aria-label', overview ? '返回原本視角' : '查看全圖');
+  $('zoom-status').textContent = `${Math.round(renderer.zoom * 100)}%`;
+  $('zoom-out').disabled = !overview && renderer.zoom <= (ui.mode === 'play' ? .55 : .15) + .00001;
+  $('zoom-in').disabled = !overview && renderer.zoom >= (ui.mode === 'play' ? 1.8 : 2.5) - .00001;
+}
+function zoom(factor) { renderer.zoomBy(factor, ui.mode === 'play' ? .55 : .15, ui.mode === 'play' ? 1.8 : 2.5); pointerPos = null; updateCameraControls(); }
+function resetCamera() {
+  const base = world.buildings.find(b=>b.team===0&&b.type==='town'&&b.hp>0) || project.map.spawns[0];
+  renderer.overviewView = null; renderer.zoom = ui.mode === 'play' ? 1.1 : .9; renderer.center(base);
+  keys.clear(); pointerPos = null; updateCameraControls(); $('map').focus({preventScroll:true});
+}
+$('map').addEventListener('wheel', e => { e.preventDefault(); if (e.deltaY) zoom(wheelZoomFactor(e.deltaY,e.deltaMode,renderer.height)); }, { passive: false });
 $('minimap').addEventListener('contextmenu',e=>e.preventDefault());
 $('minimap').addEventListener('pointerdown', e => {
   const r=$('minimap').getBoundingClientRect(), p=renderer.minimapPoint((e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height);
@@ -409,7 +424,9 @@ $('minimap').addEventListener('pointerdown', e => {
     if (!e.shiftKey) { ui.attackMove=false;ui.orderMode=null; } updateHud(true);
   } else if (e.button===0) renderer.center(p);
 });
-$('zoom-out').onclick = () => zoom(.8); $('zoom-in').onclick = () => zoom(1.25); $('fit').onclick = () => renderer.fit(project.map);
+$('zoom-out').onclick = () => zoom(1/1.1); $('zoom-in').onclick = () => zoom(1.1);
+$('fit').onclick = () => { if (!renderer.restoreView()) renderer.fit(project.map); keys.clear(); pointerPos = null; updateCameraControls(); };
+$('reset-view').onclick = resetCamera;
 $('fullscreen-button').onclick = toggleFullscreen;
 document.querySelectorAll('.tab').forEach(b => b.onclick = () => switchMode(b.dataset.mode));
 $('start').onclick = startBattle; $('reset-battle').onclick = () => { previewReset(); toast('已重新部署，準備開始新戰役。'); }; $('play-again').onclick = () => { previewReset(); startBattle(); };
@@ -438,14 +455,14 @@ $('sidebar').addEventListener('click', e => {
   if (b.dataset.brush) { ui.brush = b.dataset.brush; ui.spawnBrush = null; ui.heroBrush = null; ui.heroSelected = null; renderSidebar(); updateHud(true); }
   else if (b.dataset.spawn !== undefined) { ui.spawnBrush = Number(b.dataset.spawn); ui.heroBrush = null; ui.heroSelected = null; renderSidebar(); updateHud(true); }
   else if (b.dataset.heroPlace) beginHeroPlacement(b.dataset.heroPlace);
-  else if (b.dataset.heroView) { ui.heroSelected = b.dataset.heroView; ui.heroBrush = null; ui.spawnBrush = null; renderer.center(project.map.heroPlacements?.find(p=>p.unitId===ui.heroSelected) || project.map.spawns[0]); renderer.zoom=Math.max(renderer.zoom,.9); renderSidebar(); updateHud(true); }
+  else if (b.dataset.heroView) { ui.heroSelected = b.dataset.heroView; ui.heroBrush = null; ui.spawnBrush = null; renderer.restoreView(); renderer.zoom=Math.max(renderer.zoom,.9); renderer.center(project.map.heroPlacements?.find(p=>p.unitId===ui.heroSelected) || project.map.spawns[0]); renderSidebar(); updateHud(true); }
   else if (b.dataset.group) recallGroup(b.dataset.group, e.shiftKey);
   else if (b.dataset.unit) { editId = b.dataset.unit; renderUnitsPanel(); }
   else if (b.dataset.action === 'enrich-resources') { pushUndo(); enrichMapResources(project.map); markDirty(); previewReset(); renderSidebar(); toast('各王國出生點都已補上大量森林、食物、金礦與石礦。'); }
   else if (b.dataset.action === 'random-map') changeMap(false);
   else if (b.dataset.action === 'blank-map') changeMap(true);
   else if (b.dataset.action === 'undo') { if (undo.length) { const size = project.map.size; project.map = undo.pop(); pruneHeroPlacements(project.map); markDirty(); previewReset(); if (size !== project.map.size) renderer.fit(project.map); renderSidebar(); } }
-  else if (b.dataset.action === 'view-spawn') { renderer.zoom=.9; renderer.center(project.map.spawns[0]); }
+  else if (b.dataset.action === 'view-spawn') { renderer.restoreView(); renderer.zoom=.9; renderer.center(project.map.spawns[0]); }
   else if (b.dataset.action === 'spread-spawns') { try { const map = spreadStartingPositions(project); pushUndo(); project.map = map; markDirty(); previewReset(); renderer.project=project; renderer.zoom=.9; renderer.center(project.map.spawns[0]); renderSidebar(); toast('各勢力的出生點已分散，原有地景保留。'); } catch (err) { toast(err.message); } }
   else if (b.dataset.action === 'hero-workshop') newUnit(true);
   else if (b.dataset.action === 'place-hero') { const u=saveUnit(); if (u?.hero) beginHeroPlacement(u.id); }
@@ -523,10 +540,9 @@ function frame(now) {
   const dt = Math.min((now - lastTick) / 1000, .1); lastTick = now; frameTime = now / 1000;
   if (ui.started && !ui.paused && ui.mode === 'play') { simulationLag=Math.min(.15,simulationLag+dt); let steps=0; while(simulationLag>=.05&&steps++<2) { world.tick(.05*project.rules.speed);simulationLag-=.05; } } else simulationLag=0;
   const step = 450 * dt; if (!document.querySelector('dialog[open]') && document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'SELECT') {
-    if (keys.has('arrowleft') || pointerPos && pointerPos.x < 12 && !pointer) renderer.pan.x += step;
-    if (keys.has('arrowright') || pointerPos && pointerPos.x > renderer.width - 12 && !pointer) renderer.pan.x -= step;
-    if (keys.has('arrowup') || pointerPos && pointerPos.y < 12 && !pointer) renderer.pan.y += step;
-    if (keys.has('arrowdown') || pointerPos && pointerPos.y > renderer.height - 12 && !pointer) renderer.pan.y -= step;
+    const dx = Number(keys.has('arrowleft') || Boolean(pointerPos && pointerPos.x < 12 && !pointer)) - Number(keys.has('arrowright') || Boolean(pointerPos && pointerPos.x > renderer.width - 12 && !pointer));
+    const dy = Number(keys.has('arrowup') || Boolean(pointerPos && pointerPos.y < 12 && !pointer)) - Number(keys.has('arrowdown') || Boolean(pointerPos && pointerPos.y > renderer.height - 12 && !pointer));
+    if (dx || dy) { renderer.restoreView(); renderer.pan.x += dx * step; renderer.pan.y += dy * step; renderer.constrainView(); }
   }
   if (!document.hidden && now-lastRender >= (ui.started&&!ui.paused&&ui.mode==='play' ? world.units.length>600?1000/30:world.units.length>300?1000/45:1000/60 : 50)) { fps=fps*.9+Math.min(240,1000/Math.max(1,now-lastRender))*.1; renderer.render(project, world, ui, frameTime); lastRender=now; }
   if (now - lastHud > 250) { lastHud = now; updateHud(); if (ui.showScore) updateScore(); $('performance').textContent = `${Math.round(fps)} FPS · 場上 ${world.units.length} 人 · ${opponentLabel()}`; }

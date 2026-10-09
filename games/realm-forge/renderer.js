@@ -1,5 +1,9 @@
 import { clamp, tileType, BUILDINGS, buildingBounds } from './core.mjs?v=20261009d';
 import { TEAM_COLORS, TEAM_LIGHT, imageFor, unitArt, animationArt, worldArt, drawSprite, recoloredArt } from './art.mjs?v=20261009d';
+export function wheelZoomFactor(deltaY, deltaMode = 0, height = 600) {
+  const pixels = deltaY * (deltaMode === 1 ? 16 : deltaMode === 2 ? height : 1);
+  return Math.exp(-clamp(pixels, -80, 80) * .001);
+}
 export const COLORS = { grass: '#597c4b', water: '#396b70', forest: '#42633e', gold: '#67754c', stone: '#667458', food: '#68834f', sand: '#a19a6e', road: '#9d8f63' };
 export const SYMBOLS = { worker: '♟', soldier: '⚔', archer: '➶', knight: '♞', mage: '✦', beast: '♜', siege: '⚙', town: '♜', house: '⌂', barracks: '⚑', tower: '♖', mill: '✣', lumber: '♣', mining: '◆', farm: '▤', archery: '➶', stable: '♞', blacksmith: '⚒', market: '⚖', monastery: '✚', castle: '♜', university: '▥', wall: '▥', gate: 'Π', outpost: '⚑' };
 const directions = new WeakMap();
@@ -304,8 +308,29 @@ function heroLabel(c, hero, p, selected, overview) {
 export class Renderer {
   constructor(canvas, minimap) { this.canvas = canvas; this.c = canvas.getContext('2d'); this.minimap = minimap; this.mc = minimap.getContext('2d'); this.width = 1000; this.height = 600; this.zoom = 1; this.pan = { x: 0, y: 0 }; this.tileW = 42; this.tileH = 21; this.project = null; this.hover = null; this.drag = null; this.marker = null; this.miniTime = -Infinity; this.terrainCanvas = null; this.terrainTime = -Infinity; this.terrainKey = ''; this.terrainMap = null; this.terrainDecorations = []; this.resize(); }
   resize() { const r = this.canvas.getBoundingClientRect(), dpr = Math.min(window.devicePixelRatio || 1, 2); this.width = r.width; this.height = r.height; this.canvas.width = r.width * dpr; this.canvas.height = r.height * dpr; this.dpr = dpr; this.terrainCanvas = null; }
-  fit(map) { this.zoom = Math.min((this.width - 90) / (map.size * this.tileW), (this.height - 80) / (map.size * this.tileH)); this.zoom = clamp(this.zoom, 0.005, 2.5); this.pan = { x: 0, y: 14 }; }
-  center(p) { this.pan.x = -(p.x - p.y) * this.tileW / 2 * this.zoom; this.pan.y = -(p.x + p.y - this.project.map.size + 1) * this.tileH / 2 * this.zoom; }
+  fit(map) {
+    this.overviewView ??= {zoom:this.zoom, center:this.world(this.width / 2, this.height / 2)};
+    this.zoom = clamp(Math.min((this.width - 90) / (map.size * this.tileW), (this.height - 80) / (map.size * this.tileH)), .005, 2.5);
+    this.pan = {x:0, y:14};
+  }
+  restoreView() {
+    if (!this.overviewView) return false;
+    const view = this.overviewView; this.overviewView = null; this.zoom = view.zoom; this.center(view.center); return true;
+  }
+  zoomBy(factor, minimum = .55, maximum = 1.8) {
+    this.restoreView();
+    const next = clamp(this.zoom * factor, minimum, maximum), ratio = next / this.zoom;
+    this.pan = {x:this.pan.x * ratio, y:this.pan.y * ratio}; this.zoom = next; this.constrainView();
+  }
+  constrainView() {
+    if (this.overviewView) return;
+    const p = this.world(this.width / 2, this.height / 2), n = this.project.map.size - 1;
+    if (p.x < 0 || p.y < 0 || p.x > n || p.y > n) this.center({x:clamp(p.x,0,n), y:clamp(p.y,0,n)});
+  }
+  center(p) {
+    if (this.overviewView) {this.zoom = this.overviewView.zoom; this.overviewView = null;}
+    this.pan.x = -(p.x - p.y) * this.tileW / 2 * this.zoom; this.pan.y = -(p.x + p.y - this.project.map.size + 1) * this.tileH / 2 * this.zoom;
+  }
   screen(x, y) { const n = this.project.map.size; return { x: this.width / 2 + this.pan.x + (x - y) * this.tileW / 2 * this.zoom, y: this.height / 2 + this.pan.y + (x + y - n + 1) * this.tileH / 2 * this.zoom }; }
   world(x, y) { const a = (x - this.width / 2 - this.pan.x) / (this.tileW / 2 * this.zoom), b = (y - this.height / 2 - this.pan.y) / (this.tileH / 2 * this.zoom) + this.project.map.size - 1; return { x: (a + b) / 2, y: (b - a) / 2 }; }
   tileAt(x, y) { const p = this.world(x, y); return { x: Math.round(p.x), y: Math.round(p.y) }; }
