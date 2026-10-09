@@ -1,4 +1,4 @@
-import { CIV_UNITS, TECHNOLOGIES } from './civilization.mjs?v=20261009';
+import { CIV_UNITS, TECHNOLOGIES } from './civilization.mjs?v=20261009b';
 export const clone = value => JSON.parse(JSON.stringify(value));
 export const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 export const RICH_RESOURCE_AMOUNTS = { wood: 5000, food: 10000, gold: 20000, stone: 20000 };
@@ -226,6 +226,29 @@ export class World {
   }
   note(text, point = null) { this.events.unshift({ text, time: this.time, ...(point ? { x: point.x, y: point.y } : {}) }); this.events.length = Math.min(8, this.events.length); }
   isAlly(teamA, teamB) { return teamA === teamB || this.project.rules.aiAlliance && teamA > 0 && teamB > 0; }
+  saveState() {
+    const state={version:1,project:clone(this.project),researched:this.researched.map(set=>[...set]),explored:[]};
+    for (const key of ['map','units','buildings','stocks','amounts','ages','time','nextId','events','effects','corpses','aiTimer','result']) state[key]=clone(this[key]);
+    if (!this.project.rules.fog) state.fullExploration=true;
+    else for (let i=0;i<this.explored.length;i++) if (this.explored[i]) state.explored.push(i);
+    return state;
+  }
+  static fromState(data) {
+    if (data?.version!==1 || !Array.isArray(data.units) || !Array.isArray(data.buildings) || data.units.length>8000 || data.buildings.length>20000 || !Number.isFinite(data.time) || data.time<0) throw new Error('戰役存檔格式不正確。');
+    const project=validateProject(data.project), map=validateProject({...project,map:data.map}).map, teams=map.spawns.length;
+    if (!Array.isArray(data.stocks)||data.stocks.length!==teams||!Array.isArray(data.researched)||data.researched.length!==teams||!Array.isArray(data.ages)||data.ages.length!==teams) throw new Error('戰役勢力資料不正確。');
+    const ids=new Set();
+    for (const e of [...data.units,...data.buildings]) {
+      if (!['unit','building'].includes(e.kind)||!Number.isInteger(e.id)||e.id<1||ids.has(e.id)||!Number.isInteger(e.team)||e.team<0||e.team>=teams||!Number.isFinite(e.hp)||!Number.isFinite(e.x)||!Number.isFinite(e.y)||e.x<0||e.y<0||e.x>=map.size||e.y>=map.size||e.kind==='building'&&!BUILDINGS[e.type]||e.kind==='unit'&&!project.units.some(u=>u.id===e.blueprint?.id)) throw new Error('戰役單位資料不正確。'); ids.add(e.id);
+    }
+    const world=new World(project); world.map=map; world.modCache=null;
+    for (const key of ['units','buildings','stocks','amounts','ages','time','events','effects','corpses','aiTimer','result']) world[key]=clone(data[key]);
+    world.researched=data.researched.map(values=>new Set(values)); world.nextId=Math.max(data.nextId||1,...[...ids].map(id=>id+1));
+    world.entities=new Map([...world.units,...world.buildings].map(e=>[e.id,e])); world.blockedCells.clear(); world.occupiedCells.clear();
+    for (const b of world.buildings) { const bounds=buildingBounds(b.type,b.x,b.y); for (let y=bounds.minY;y<=bounds.maxY;y++) for (let x=bounds.minX;x<=bounds.maxX;x++) {const key=y*map.size+x;world.occupiedCells.set(key,b.id);if (!['farm','gate'].includes(b.type))world.blockedCells.add(key);} }
+    world.explored.fill(data.fullExploration?1:0); for (const i of data.explored||[]) if (Number.isInteger(i)&&i>=0&&i<world.explored.length)world.explored[i]=1;
+    world.visible.fill(0);world.fullVision=false;world.visionCells=new Set();world.updateVision();world.deploymentErrors=[];return world;
+  }
   isEnemy(teamA, teamB) { return !this.isAlly(teamA, teamB); }
   tile(x, y) { return tileType(this.map, Math.round(x), Math.round(y)); }
   amountAt(x, y) { const i = y * this.map.size + x; return this.amounts[i] ?? (RESOURCE[this.tile(x, y)] ? this.map.resourceAmounts[RESOURCE[this.tile(x, y)]] : 0); }

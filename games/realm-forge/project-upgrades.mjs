@@ -1,4 +1,4 @@
-import { clone, generateMap, tileType } from './core.mjs?v=20261009';
+import { clone, generateMap, tileType } from './core.mjs?v=20261009b';
 
 const WALKABLE = new Set(['grass', 'road', 'sand']);
 const INITIAL_RESOURCES = [[-5, 0, 'forest'], [-5, 1, 'forest'], [-5, 2, 'forest'], [0, 6, 'food'], [1, 6, 'food'], [6, 0, 'gold'], [6, 1, 'stone']];
