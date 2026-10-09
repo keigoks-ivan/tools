@@ -1,17 +1,18 @@
 import * as THREE from 'three';
 import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
 import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
-import { TRACK } from './track.mjs?v=city-drive-11';
-import { createWorldMaterials } from './world-materials.js?v=city-drive-11';
-import { addVegetation } from './world-vegetation.js?v=city-drive-11';
-import { addLandmarks } from './world-landmarks.js?v=city-drive-11';
-import { addRoadDetails } from './world-road.js?v=city-drive-11';
-import { CITY_THEMES, cityGroundLevel, addCityScenery } from './world-cities.js?v=city-drive-11';
-import { defaultSeason } from './seasons.mjs?v=city-drive-11';
-import { createSeasonWeather } from './weather.js?v=city-drive-11';
-import { shadowFrame } from './lighting.mjs?v=city-drive-11';
-import { createTyreMarks } from './tyre-marks.js?v=city-drive-11';
-import { createCityBackdrop } from './world-city-backdrop.js?v=city-drive-11';
+import { TRACK } from './track.mjs?v=city-drive-13';
+import { createWorldMaterials } from './world-materials.js?v=city-drive-13';
+import { addVegetation } from './world-vegetation.js?v=city-drive-13';
+import { addLandmarks } from './world-landmarks.js?v=city-drive-13';
+import { addRoadDetails } from './world-road.js?v=city-drive-13';
+import { CITY_THEMES, cityGroundLevel, addCityScenery } from './world-cities.js?v=city-drive-13';
+import { defaultSeason } from './seasons.mjs?v=city-drive-13';
+import { createSeasonWeather } from './weather.js?v=city-drive-13';
+import { shadowFrame } from './lighting.mjs?v=city-drive-13';
+import { createTyreMarks } from './tyre-marks.js?v=city-drive-13';
+import { createCityBackdrop } from './world-city-backdrop.js?v=city-drive-13';
+import { createTerrainHeightSampler } from './world-terrain.mjs?v=city-drive-13';
 
 const noise = new ImprovedNoise();
 const clamp = THREE.MathUtils.clamp;
@@ -133,6 +134,9 @@ export async function createWorld(renderer, { mobile = false, track = TRACK, sea
   }
   terrain.setAttribute('color', new THREE.BufferAttribute(colors, 3)); terrain.computeVertexNormals();
   const ground = new THREE.Mesh(terrain, groundMat); ground.receiveShadow = true; scene.add(ground);
+  const sampleTerrainHeight = city ? createTerrainHeightSampler(terrain) : null;
+  const groundSurfaceHeight = city ? (x, z) => sampleTerrainHeight(x, z) ?? groundHeight(x, z) : groundHeight;
+  if (city) groundSurfaceHeight.grid = sampleTerrainHeight.grid;
 
   const roadMat = surfaceMaterials.road;
   const half = track.width / 2;
@@ -143,9 +147,8 @@ export async function createWorld(renderer, { mobile = false, track = TRACK, sea
   scene.add(roadStrip(track, -half, half, roadMat, track.samples.length, .035));
   const shoulder = surfaceMaterials.shoulder;
   if(city){
-    const verge = track.id === 'warwick' ? surfaceMaterials.concrete : roadMat;
-    const vergeHeight = track.id === 'warwick' ? .10 : .02;
-    scene.add(roadStrip(track,-track.wallOffset,-half,verge,undefined,vergeHeight),roadStrip(track,half,track.wallOffset,verge,undefined,vergeHeight));
+    const verge = surfaceMaterials.concrete;
+    scene.add(roadStrip(track,-track.wallOffset,-half,verge,undefined,.10),roadStrip(track,half,track.wallOffset,verge,undefined,.10));
   }else{
     scene.add(roadStrip(track, -half - 1.4, -half, shoulder, undefined, .02), roadStrip(track, half, half + 1.4, shoulder, undefined, .02));
     const lineMaterial = new THREE.MeshStandardMaterial({ color: '#e7e2d2', roughness: .9, side: THREE.DoubleSide });
@@ -153,7 +156,7 @@ export async function createWorld(renderer, { mobile = false, track = TRACK, sea
   }
   addRoadDetails({ scene, track, mobile, materials: surfaceMaterials });
   const vegetation = city ? {} : addVegetation({ scene, track, mobile, groundHeight, materials: surfaceMaterials });
-  const landmarks = city ? addCityScenery({ scene, track, mobile, groundHeight, materials: surfaceMaterials })
+  const landmarks = city ? addCityScenery({ scene, track, mobile, groundHeight, groundSurfaceHeight, materials: surfaceMaterials })
     : addLandmarks({ scene, track, mobile, groundHeight, materials: surfaceMaterials });
   const rand = random(744), bounds = track.bounds;
 

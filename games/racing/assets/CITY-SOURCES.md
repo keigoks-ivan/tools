@@ -231,30 +231,46 @@ so timing is deliberately not presented as a real-device startup benchmark.
 
 | City | Common batches | All architectural batches | Triangles | Generated texture MP |
 | --- | ---: | ---: | ---: | ---: |
-| taipei | 37/37 | 37/37 | 480,300/405,784 | 5.77/1.49 |
-| kualalumpur | 31/31 | 31/31 | 295,094/237,098 | 5.57/1.39 |
-| kobe | 32/32 | 41/41 | 162,444/143,854 | 6.37/1.65 |
-| london | 33/33 | 33/33 | 137,356/126,148 | 6.50/1.93 |
-| sydney | 27/27 | 40/40 | 163,860/131,804 | 5.59/1.52 |
-| goldcoast | 28/28 | 45/45 | 261,792/239,146 | 5.85/1.47 |
-| melbourne | 28/28 | 45/45 | 131,333/125,747 | 6.36/1.76 |
-| paris | 29/29 | 51/51 | 328,712/311,190 | 6.75/1.92 |
-| prague | 28/28 | 48/48 | 167,406/154,888 | 6.56/1.87 |
-| newcastle | 29/29 | 52/52 | 239,112/213,406 | 6.66/1.90 |
-| bangkok | 29/29 | 50/50 | 379,558/357,240 | 6.69/1.78 |
-| sanfrancisco | 23/23 | 42/42 | 265,920/222,504 | 4.67/1.29 |
-| newyork | 28/28 | 41/41 | 280,984/246,616 | 5.69/1.56 |
-| vancouver | 29/29 | 45/45 | 235,224/215,696 | 5.62/1.47 |
-| hanoi | 28/28 | 49/49 | 376,326/357,628 | 6.52/1.75 |
-| lisbon | 28/28 | 53/53 | 160,078/149,004 | 7.43/2.10 |
-| marseille | 28/28 | 55/55 | 212,426/178,240 | 6.67/1.90 |
-| nice | 28/28 | 58/58 | 238,406/202,684 | 6.59/1.84 |
-| warwick | 29/29 | 46/46 | 191,996/159,376 | 7.29/1.98 |
+| taipei | 38/38 | 38/38 | 299,814/264,375 | 5.77/1.49 |
+| kualalumpur | 32/32 | 32/32 | 191,854/142,933 | 5.64/1.46 |
+| kobe | 33/33 | 42/42 | 142,912/120,175 | 6.37/1.65 |
+| london | 34/34 | 34/34 | 127,752/111,278 | 6.50/1.93 |
+| sydney | 28/28 | 41/41 | 153,077/118,928 | 5.59/1.52 |
+| goldcoast | 30/30 | 47/47 | 196,318/158,452 | 5.85/1.47 |
+| melbourne | 29/29 | 46/46 | 108,692/92,087 | 6.36/1.76 |
+| paris | 29/29 | 45/45 | 298,014/268,871 | 6.49/1.82 |
+| prague | 29/29 | 49/49 | 138,893/120,972 | 6.56/1.87 |
+| newcastle | 30/30 | 53/53 | 215,343/184,174 | 6.66/1.90 |
+| bangkok | 30/30 | 51/51 | 268,189/243,572 | 6.69/1.78 |
+| sanfrancisco | 25/25 | 44/44 | 237,963/186,756 | 4.67/1.29 |
+| newyork | 29/29 | 42/42 | 253,019/217,723 | 5.69/1.56 |
+| vancouver | 30/30 | 46/46 | 223,612/162,904 | 5.62/1.47 |
+| hanoi | 29/29 | 50/50 | 295,811/262,717 | 6.52/1.75 |
+| lisbon | 29/29 | 54/54 | 141,174/121,355 | 7.43/2.10 |
+| marseille | 29/29 | 52/52 | 195,246/151,279 | 6.50/1.84 |
+| nice | 31/31 | 61/61 | 227,255/182,148 | 6.59/1.84 |
+| warwick | 29/29 | 43/43 | 148,744/103,631 | 6.73/1.84 |
 
-The common scene stays below 38 merged material batches on both tiers; all
-architectural batches peak at 58. Mobile road and retail-sign maps are now
+The common scene peaks at 38 merged material batches on both tiers; all
+architectural batches peak at 61. Mobile road and retail-sign maps are now
 512×128 instead of 1024×256, while facade dimensions retain their earlier
 mobile reduction. The largest mobile generated-map total is 2.10 million pixels.
 The Taipei junction ground/brick maps add only selected-scene canvas assets.
 Thin low-cost palm pinnate blades and layered conifer cards replace many
 cylindrical leaf beams and filled cone crowns.
+
+
+## Along-route district pass
+
+The latest matrix uses the actual 64×64 / 48×48 rendered-ground sampler and
+includes the terrain-diagonal clipping of the new ground bands. Each city now
+has four or five asymmetric sections rather than one repeated two-sided
+street strip. Open parks, harbour quays, riverbanks, beaches and forests vary
+the foreground ground, tree density, furniture and sightlines alongside the
+built streets. Spacing, building heights and setbacks also change by section.
+Named heritage landmarks remain distinct; generic special street rows and
+backstreets cannot refill the open sections. The researched plan, physical
+water-side checks and primary geography references are recorded in
+[CITY-DISTRICTS.md](CITY-DISTRICTS.md). No additional surface-photo download
+is introduced. Geometry/resource checks and muted native screenshots remain
+separate from any claim of photorealism or measured mobile performance.

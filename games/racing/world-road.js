@@ -1,6 +1,6 @@
 import * as THREE from 'three';
-import { taipeiJunctionAt } from './world-city-taipei-streets.js?v=city-drive-11';
-import { CITY_ROAD_PROFILES } from './world-city-roadmarkings.js?v=city-drive-11';
+import { taipeiJunctionAt } from './world-city-taipei-streets.js?v=city-drive-13';
+import { CITY_ROAD_PROFILES } from './world-city-roadmarkings.js?v=city-drive-13';
 
 function addCityBarriers({scene,track,materials}) {
   const taipei=track.id==='taipei',height=taipei?.56:.66;

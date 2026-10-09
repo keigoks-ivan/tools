@@ -1,6 +1,7 @@
 import * as THREE from 'three';
-import { createCityBuilder } from './world-city-kit.js?v=city-drive-11';
-import { createCityWaterMaterial, addCityWaterPlane } from './world-city-australia.js?v=city-drive-11';
+import { createCityBuilder } from './world-city-kit.js?v=city-drive-13';
+import { createCityWaterMaterial, addCityWaterPlane } from './world-city-australia.js?v=city-drive-13';
+import { cityDistrictAt, cityDistrictForPoint } from './world-city-districts.mjs?v=city-drive-13';
 
 const TAU = Math.PI * 2;
 const EUROPEAN_CITIES = new Set(['paris', 'prague', 'newcastle', 'lisbon', 'marseille', 'nice', 'warwick']);
@@ -102,7 +103,9 @@ export function addEuropeanLandmarks(options) {
     }
   }
   function rowBuilding(fraction, side, color, w = 26, h = 23, d = 16, mansard = false, label = '') {
+    if (cityDistrictAt(track, fraction * track.length, side)?.density === 0) return;
     const placed = b.place(fraction, side, track.wallOffset + 40, d + 6, w + 6, label || 'historic street facade');
+    if (cityDistrictForPoint(track, placed.x, placed.z)?.density === 0) return;
     b.setFrame(placed.x, placed.z, placed.yaw + side * Math.PI / 2);
     const plaster = b.material(color, { roughness: .91 });
     box(w + 1, .5, d + 1, stone, 0, -.05, 0); box(w, h, d, plaster);
@@ -350,7 +353,7 @@ export function addEuropeanLandmarks(options) {
     b.sign('THE GLASSHOUSE', 'INTERNATIONAL CENTRE FOR MUSIC', 51, 5, 0, 7, -32.2, '#536563');
     b.setFrame(0, 393, 0, 0); box(1300, 7.5, 5, stone, 0, 1.45, 0); box(1300, .3, 16, trim, 0, 5.45, -3); railing(1300, 5.6, 2.4, dark, 4);
     for (const [f, color, title] of [[.08, '#a78970', 'QUAYSIDE'], [.19, '#bda98c', 'GREY STREET'], [.31, '#8e7767', 'NEWCASTLE UPON TYNE'], [.54, '#ad927b', 'BALTIC QUARTER'], [.68, '#b8a88e', 'TYNE & WEAR'], [.82, '#95745e', 'RIVERSIDE']]) rowBuilding(f, 1, color, 23, 22, 18, false, title);
-    b.place(.46, -1, 85, 42, 25, 'Victorian quayside warehouse'); box(40, 30, 23, brick); windows(40, 30, 23, 6, 8); pitchedRoof(41, 24, 30, 5);
+    b.place(.46, 1, 85, 42, 25, 'Victorian quayside warehouse'); box(40, 30, 23, brick); windows(40, 30, 23, 6, 8); pitchedRoof(41, 24, 30, 5);
   } else if (city === 'lisbon') {
     const iron = b.material('#a44738', { metalness: .65, roughness: .57 });
     const yellow = b.material('#d5ad4c', { roughness: .67 });
@@ -540,7 +543,9 @@ export function addEuropeanLandmarks(options) {
     for (const side of [-1, 1]) { box(108, 1.1, .7, stone, 0, 14.3, side * 5); for (let x = -50; x < 50; x += 4) box(.5, 1.2, .95, trim, x, 14.4, side * 5); }
     b.reserve(150, -454, 60, 'Castle Bridge over the River Avon');
     for (const fraction of [.08, .21, .39, .6, .76, .9]) {
-      b.place(fraction, 1, track.wallOffset + 29, 25, 17, 'Warwick timber-framed town house');
+      if (cityDistrictAt(track, fraction * track.length, 1)?.density === 0) continue;
+      const placed = b.place(fraction, 1, track.wallOffset + 29, 25, 17, 'Warwick timber-framed town house');
+      if (cityDistrictForPoint(track, placed.x, placed.z)?.density === 0) continue;
       box(23, 13, 15, plaster); pitchedRoof(25, 17, 13, 7);
       for (const side of [-1, 1]) {
         for (let x = -11; x <= 11; x += 3.67) box(.28, 13, .22, timber, x, 6.5, side * 7.6);

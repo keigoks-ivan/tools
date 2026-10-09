@@ -1,8 +1,9 @@
 import * as THREE from './vendor/three.module.js';
 import { mergeGeometries, mergeVertices } from './vendor/addons/utils/BufferGeometryUtils.js';
-import { VEHICLES, PRODUCTION_CAR_DIMENSIONS } from './vehicles.mjs?v=city-drive-11';
-import { addVehicleTailLights } from './vehicle-taillights.js?v=city-drive-11';
-import { addVehicleRearDetails, REAR_DETAIL_PROFILES } from './vehicle-rear-details.js?v=city-drive-11';
+import { VEHICLES, PRODUCTION_CAR_DIMENSIONS } from './vehicles.mjs?v=city-drive-13';
+import { addVehicleTailLights } from './vehicle-taillights.js?v=city-drive-13';
+import { addVehicleRearDetails, REAR_DETAIL_PROFILES } from './vehicle-rear-details.js?v=city-drive-13';
+import { createBMWX3 } from './cars-bmw-x3.js?v=city-drive-13';
 
 const clamp = THREE.MathUtils.clamp;
 const mix = THREE.MathUtils.lerp;
@@ -159,6 +160,7 @@ function batchStatic(parent) {
 }
 
 export function createProductionCar({ mobile = false, vehicle = 'porsche911gt3rs', inspectParts = false } = {}) {
+  if (vehicle === 'bmwX3') return createBMWX3({ mobile, inspectParts });
   const shape = profiles[vehicle], spec = PRODUCTION_CAR_DIMENSIONS[vehicle], preset = VEHICLES[vehicle];
   if (!shape || !spec) throw new RangeError(`Unknown production car: ${vehicle}`);
   const { length, width, height, wheelbase } = spec;

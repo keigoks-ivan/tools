@@ -186,15 +186,16 @@ export const TRACKS = Object.freeze({
     anchors: [[-325, -240], [-325, -70], [-325, 100], [-275, 255], [-145, 320],
       [25, 335], [205, 285], [315, 175], [330, 5], [290, -145],
       [185, -280], [20, -325], [-150, -310], [-290, -300]],
-    height: phase => 5 + .22 * Math.sin(phase + .6), width: 16, wallOffset: 13,
+    height: phase => 5 + .22 * Math.sin(phase + .6), width: 13, wallOffset: 10.5,
   }),
   london: buildTrack({
     id: 'london', name: 'London Westminster', label: '倫敦・西敏河岸',
     description: '大笨鐘、國會大廈與泰晤士河岸；依城市景觀改編的封閉街道賽道。',
+    // The Thames occupies x=101..357; the full driving corridor stays on its west bank.
     anchors: [[-325, -230], [-325, -65], [-325, 110], [-285, 270], [-145, 335],
-      [25, 330], [185, 285], [310, 175], [330, 15], [275, -120],
-      [170, -285], [10, -330], [-160, -315], [-290, -305]],
-    height: phase => 5 + .2 * Math.sin(phase - .4), width: 16, wallOffset: 13,
+      [25, 330], [65, 285], [75, 175], [75, 15], [70, -120],
+      [55, -285], [10, -330], [-160, -315], [-290, -305]],
+    height: phase => 5 + .2 * Math.sin(phase - .4), width: 12, wallOffset: 10,
   }),
   sydney: buildTrack({
     id: 'sydney', name: 'Sydney Harbour', label: '雪梨・港灣巡航',
@@ -202,7 +203,7 @@ export const TRACKS = Object.freeze({
     anchors: [[-340, -245], [-340, -80], [-335, 95], [-290, 250], [-155, 325],
       [20, 340], [185, 305], [315, 190], [330, 30], [240, -80], [270, -235],
       [155, -325], [-20, -345], [-190, -320], [-305, -315]],
-    height: phase => 5 + 1.2 * Math.sin(phase + .2), width: 17, wallOffset: 13.5,
+    height: phase => 5 + 1.2 * Math.sin(phase + .2), width: 12.8, wallOffset: 10.4,
   }),
   goldcoast: buildTrack({
     id: 'goldcoast', name: 'Gold Coast Surfers', label: '黃金海岸・衝浪天堂',
@@ -210,7 +211,7 @@ export const TRACKS = Object.freeze({
     anchors: [[-290, -240], [-290, -100], [-290, 85], [-270, 265], [-160, 340],
       [15, 345], [185, 305], [290, 205], [305, 40], [250, -105],
       [275, -235], [135, -330], [-35, -340], [-160, -335], [-290, -340]],
-    height: phase => 5 + .15 * Math.sin(phase), width: 17, wallOffset: 13.5,
+    height: phase => 5 + .15 * Math.sin(phase), width: 15, wallOffset: 11.5,
   }),
   melbourne: buildTrack({
     id: 'melbourne', name: 'Melbourne Yarra', label: '墨爾本・雅拉河岸',
@@ -218,7 +219,7 @@ export const TRACKS = Object.freeze({
     anchors: [[-340, -230], [-340, -60], [-340, 110], [-275, 265], [-145, 330],
       [15, 345], [180, 295], [310, 190], [335, 35], [285, -90],
       [190, -260], [35, -335], [-135, -310], [-295, -300]],
-    height: phase => 5 + .35 * Math.sin(phase + .8), width: 18, wallOffset: 14,
+    height: phase => 5 + .35 * Math.sin(phase + .8), width: 16, wallOffset: 12,
   }),
   paris: buildTrack({
     id: 'paris', name: 'Paris Seine', label: '巴黎・塞納河畔',
@@ -226,7 +227,7 @@ export const TRACKS = Object.freeze({
     anchors: [[-335, -245], [-335, -75], [-335, 95], [-290, 260], [-140, 330],
       [25, 345], [180, 305], [315, 195], [340, 30], [280, -100],
       [185, -270], [20, -335], [-150, -320], [-305, -310]],
-    height: phase => 5 + .3 * Math.sin(phase - .2), width: 17, wallOffset: 13.5,
+    height: phase => 5 + .3 * Math.sin(phase - .2), width: 12, wallOffset: 10,
   }),
   prague: buildTrack({
     id: 'prague', name: 'Prague Vltava', label: '布拉格・伏爾塔瓦',
@@ -234,7 +235,7 @@ export const TRACKS = Object.freeze({
     anchors: [[-320, -245], [-320, -70], [-320, 105], [-265, 255], [-140, 325],
       [20, 340], [175, 290], [300, 185], [325, 35], [265, -100],
       [185, -265], [20, -325], [-155, -305], [-280, -315]],
-    height: phase => 5 + .75 * Math.sin(phase + .3), width: 15, wallOffset: 12.5,
+    height: phase => 5 + .75 * Math.sin(phase + .3), width: 9.8, wallOffset: 8.9,
   }),
   newcastle: buildTrack({
     id: 'newcastle', name: 'Newcastle Quayside', label: '紐卡索・泰恩河岸',
@@ -242,7 +243,7 @@ export const TRACKS = Object.freeze({
     anchors: [[-340, -250], [-340, -80], [-340, 90], [-295, 250], [-160, 330],
       [10, 345], [185, 290], [315, 180], [330, 15], [260, -120],
       [165, -275], [0, -335], [-170, -320], [-305, -310]],
-    height: phase => 5 + 1.5 * Math.sin(phase - .4), width: 16, wallOffset: 13,
+    height: phase => 5 + 1.5 * Math.sin(phase - .4), width: 10.8, wallOffset: 9.4,
   }),
   bangkok: buildTrack({
     id: 'bangkok', name: 'Bangkok Chao Phraya', label: '曼谷・昭披耶河',
@@ -250,7 +251,7 @@ export const TRACKS = Object.freeze({
     anchors: [[-330, -230], [-330, -60], [-330, 120], [-275, 270], [-135, 340],
       [25, 335], [185, 285], [315, 175], [335, 15], [290, -110],
       [195, -270], [30, -340], [-145, -320], [-290, -300]],
-    height: phase => 5 + .18 * Math.sin(phase + .2), width: 18, wallOffset: 14,
+    height: phase => 5 + .18 * Math.sin(phase + .2), width: 12.8, wallOffset: 10.4,
   }),
   sanfrancisco: buildTrack({
     id: 'sanfrancisco', name: 'San Francisco Pacific', label: '舊金山・太平洋山城',
@@ -258,7 +259,7 @@ export const TRACKS = Object.freeze({
     anchors: [[-330, -250], [-330, -80], [-330, 100], [-295, 290], [-110, 370],
       [95, 345], [240, 240], [325, 95], [260, -20], [350, -140],
       [275, -305], [105, -350], [-40, -290], [-205, -365], [-305, -335]],
-    height: phase => 22 + 8 * Math.sin(phase - .3) + 4 * Math.sin(phase * 2 + .6), width: 16, wallOffset: 13,
+    height: phase => 22 + 8 * Math.sin(phase - .3) + 4 * Math.sin(phase * 2 + .6), width: 11, wallOffset: 9.5,
   }),
   newyork: buildTrack({
     id: 'newyork', name: 'New York Manhattan', label: '紐約・曼哈頓街廓',
@@ -266,7 +267,7 @@ export const TRACKS = Object.freeze({
     anchors: [[-335, -310], [-335, -120], [-335, 100], [-335, 290], [-275, 350],
       [-95, 350], [110, 350], [280, 330], [335, 255], [335, 70],
       [285, 10], [335, -85], [335, -260], [250, -350], [50, -350], [-150, -350], [-270, -400], [-335, -395]],
-    height: phase => 5 + .22 * Math.sin(phase), width: 19, wallOffset: 15,
+    height: phase => 5 + .22 * Math.sin(phase), width: 18, wallOffset: 13,
   }),
   vancouver: buildTrack({
     id: 'vancouver', name: 'Vancouver Coal Harbour', label: '溫哥華・煤港海灣',
@@ -274,7 +275,7 @@ export const TRACKS = Object.freeze({
     anchors: [[-330, -230], [-330, -70], [-330, 105], [-280, 260], [-115, 335],
       [85, 330], [260, 245], [330, 80], [270, -55], [330, -160],
       [200, -300], [20, -350], [-120, -310], [-330, -325]],
-    height: phase => 6 + .55 * Math.sin(phase + .5), width: 17, wallOffset: 13.5,
+    height: phase => 6 + .55 * Math.sin(phase + .5), width: 14, wallOffset: 11,
   }),
   hanoi: buildTrack({
     id: 'hanoi', name: 'Hanoi Hoan Kiem', label: '河內・還劍湖',
@@ -282,7 +283,7 @@ export const TRACKS = Object.freeze({
     anchors: [[-280, -195], [-280, -55], [-280, 90], [-240, 220], [-100, 275],
       [70, 260], [205, 175], [265, 70], [210, -15], [285, -120],
       [180, -250], [30, -285], [-115, -245], [-255, -275]],
-    height: phase => 5 + .15 * Math.sin(phase), width: 13.5, wallOffset: 11.5,
+    height: phase => 5 + .15 * Math.sin(phase), width: 9, wallOffset: 8.5,
   }),
   lisbon: buildTrack({
     id: 'lisbon', name: 'Lisbon Tagus Hills', label: '里斯本・特茹山城',
@@ -290,7 +291,7 @@ export const TRACKS = Object.freeze({
     anchors: [[-325, -230], [-325, -65], [-325, 105], [-270, 260], [-125, 330],
       [60, 300], [200, 210], [310, 100], [265, -25], [345, -125],
       [260, -275], [115, -335], [-30, -280], [-190, -330], [-300, -315]],
-    height: phase => 14 + 5.5 * Math.sin(phase - .6) + 2 * Math.sin(phase * 2), width: 16, wallOffset: 13,
+    height: phase => 14 + 5.5 * Math.sin(phase - .6) + 2 * Math.sin(phase * 2), width: 9, wallOffset: 8.5,
   }),
   marseille: buildTrack({
     id: 'marseille', name: 'Marseille Vieux Port', label: '馬賽・舊港',
@@ -298,7 +299,7 @@ export const TRACKS = Object.freeze({
     anchors: [[-320, -225], [-320, -60], [-320, 105], [-250, 270], [-90, 330],
       [100, 315], [265, 245], [340, 100], [320, -70], [235, -140],
       [265, -270], [120, -340], [-55, -340], [-190, -295], [-320, -320]],
-    height: phase => 7 + 1.7 * Math.sin(phase + .4), width: 17, wallOffset: 13.5,
+    height: phase => 7 + 1.7 * Math.sin(phase + .4), width: 11, wallOffset: 9.5,
   }),
   nice: buildTrack({
     id: 'nice', name: 'Nice Promenade', label: '尼斯・蔚藍海濱',
@@ -306,7 +307,7 @@ export const TRACKS = Object.freeze({
     anchors: [[-305, -300], [-305, -110], [-305, 105], [-305, 315], [-195, 365],
       [-10, 360], [175, 295], [285, 180], [260, 30], [320, -105],
       [240, -270], [100, -365], [-85, -350], [-260, -375]],
-    height: phase => 5 + .2 * Math.sin(phase), width: 18, wallOffset: 14,
+    height: phase => 5 + .2 * Math.sin(phase), width: 14, wallOffset: 11,
   }),
   warwick: buildTrack({
     id: 'warwick', name: 'Warwick Castle Run', label: '華威・城堡河畔',

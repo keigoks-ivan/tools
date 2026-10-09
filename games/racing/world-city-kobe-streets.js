@@ -1,5 +1,6 @@
 import * as THREE from 'three';
-import { createCityBuilder } from './world-city-kit.js?v=city-drive-11';
+import { createCityBuilder } from './world-city-kit.js?v=city-drive-13';
+import { cityDistrictAt, cityDistrictForPoint } from './world-city-districts.mjs?v=city-drive-13';
 
 // Kaigan-dori's masonry offices sit alongside the separately authored port monuments.
 export function addKobeStreets(options) {
@@ -44,15 +45,17 @@ export function addKobeStreets(options) {
     b.bake(geometry, atlas, x, y, z, 0, yaw);
   }
   const footprints = [];
-  function place(s, side, width, depth, name) {
+  function place(s, side, width, depth, name, heritage = false) {
+    if (!heritage && cityDistrictAt(track, s, side)?.density === 0) return null;
     const p = track.sample(s), yaw = p.heading + side * Math.PI / 2, c = Math.cos(yaw), sn = Math.sin(yaw);
     for (let attempt = 0; attempt < 12; attempt++) {
       const offset = track.wallOffset + depth / 2 + 7 + attempt * 3;
       const x = p.x + p.nx * side * offset, z = p.z + p.nz * side * offset;
+      if (!heritage && cityDistrictForPoint(track, x, z)?.density === 0) continue;
       if (z < -345) continue;
       const blocked = track.samples.some(q => { const dx = q.x - x, dz = q.z - z; return Math.abs(dx * c - dz * sn) < width / 2 + track.wallOffset + 3 && Math.abs(dx * sn + dz * c) < depth / 2 + track.wallOffset + 3; });
       if (blocked || footprints.some(q => Math.hypot(q.x - x, q.z - z) < (q.width + width) / 2 + 6)) continue;
-      const entry = { x, z, yaw, width, depth, name }; footprints.push(entry); b.reserve(x, z, Math.hypot(width, depth) / 2 + 5, name);
+      const entry = { x, z, yaw, width, depth, name, heritage }; footprints.push(entry); b.reserve(x, z, Math.hypot(width, depth) / 2 + 5, name);
       b.setFrame(x, z, yaw, Math.max(groundHeight(x, z), p.y - .12)); return entry;
     }
     return null;
@@ -67,7 +70,7 @@ export function addKobeStreets(options) {
     shape.absarc(-width / 2 + radius, depth / 2 - radius, radius, Math.PI, Math.PI / 2, true); shape.lineTo(width / 2, depth / 2); shape.closePath();
     const geometry = new THREE.ExtrudeGeometry(shape, { depth: height, bevelEnabled: false, curveSegments: mobile ? 12 : 20 }); geometry.rotateX(-Math.PI / 2); b.bake(geometry, material, 0, y, 0);
   }
-  if (place(73, -1, 34, 23, 'Kaigan-dori Mitsui OSK masonry office')) {
+  if (place(73, -1, 34, 23, 'Kaigan-dori Mitsui OSK masonry office', true)) {
     const w = 29, d = 18, front = -d / 2;
     b.box(w + 2, .22, d + 8, paving, 0, .05, -2.0);
     roundedOffice(w, d, 5.0, 0, stone); roundedOffice(w, d, 18.4, 5.0, clay); roundedOffice(w, d, 3.5, 23.45, cream);
@@ -97,7 +100,7 @@ export function addKobeStreets(options) {
     b.box(2.35, 2.9, .21, dark, cornerX - 2.78, 1.6, cornerZ - 2.78, 0, -Math.PI * .75);
     for (const x of [-6.0, 1.1, 8.2]) { b.cylinder(.37, .37, .10, stone, x, 21.50, front - .20, 14, Math.PI / 2); b.cylinder(.20, .20, .13, clay, x, 21.50, front - .25, 10, Math.PI / 2); }
   }
-  if (place(174, 1, 28, 19, 'Kaigan-dori Chartered Building')) {
+  if (place(174, 1, 28, 19, 'Kaigan-dori Chartered Building', true)) {
     const w = 24, d = 14, front = -d / 2;
     b.box(w + 2, .22, d + 7, paving, 0, .05, -1.5);
     b.box(w, 9.4, d - 1.5, cream, 0, 4.7, .75); b.box(w, 7.1, d, cream, 0, 13.25, 0);
@@ -135,6 +138,7 @@ export function addKobeStreets(options) {
   for (const lot of footprints.slice(0, 4)) {
     const width = lot.width + 6, depth = 9, distance = (lot.depth + depth) / 2 + 4.0;
     const x = lot.x + Math.sin(lot.yaw) * distance, z = lot.z + Math.cos(lot.yaw) * distance, c = Math.cos(lot.yaw), sn = Math.sin(lot.yaw);
+    if (cityDistrictForPoint(track, x, z)?.density === 0) continue;
     if (track.samples.some(q => { const dx = q.x - x, dz = q.z - z; return Math.abs(dx * c - dz * sn) < width / 2 + track.wallOffset + 3 && Math.abs(dx * sn + dz * c) < depth / 2 + track.wallOffset + 3; })) continue;
     const p = track.sample(track.nearest(x, z).s); b.setFrame(x, z, lot.yaw, Math.max(groundHeight(x, z), p.y - .12)); b.reserve(x, z, Math.hypot(width, depth) / 2 + 3, 'Kobe masonry-office backstreet');
     backstreets.push({ x, z, yaw: lot.yaw, width, depth }); b.box(width + 2, .13, 15, paving, 0, .01, -2.8);

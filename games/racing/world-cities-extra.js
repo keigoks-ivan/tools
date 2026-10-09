@@ -1,9 +1,10 @@
 import * as THREE from 'three';
-import { createCityBuilder } from './world-city-kit.js?v=city-drive-11';
-import { addAustralianLandmarks, createCityWaterMaterial, addCityWaterPlane } from './world-city-australia.js?v=city-drive-11';
-import { addAmericanLandmarks } from './world-city-america.js?v=city-drive-11';
-import { addEuropeanLandmarks } from './world-city-europe.js?v=city-drive-11';
-import { addKobeStreets } from './world-city-kobe-streets.js?v=city-drive-11';
+import { createCityBuilder } from './world-city-kit.js?v=city-drive-13';
+import { addAustralianLandmarks, createCityWaterMaterial, addCityWaterPlane } from './world-city-australia.js?v=city-drive-13';
+import { addAmericanLandmarks } from './world-city-america.js?v=city-drive-13';
+import { addEuropeanLandmarks } from './world-city-europe.js?v=city-drive-13';
+import { addKobeStreets } from './world-city-kobe-streets.js?v=city-drive-13';
+import { cityDistrictAt, cityDistrictForPoint } from './world-city-districts.mjs?v=city-drive-13';
 
 function streetAtlas(b, city, mobile) {
   const canvas = document.createElement('canvas'); canvas.width = canvas.height = mobile ? 512 : 1024;
@@ -90,13 +91,15 @@ function addAsianStreets(b, options, shared) {
     b.bake(geometry, atlas, x, y, z, rx, ry);
   }
   function pose(s, side, width, depth, name, clearance = 6) {
+    if (cityDistrictAt(track, s, side)?.density === 0) return null;
     const p = track.sample(s), yaw = p.heading + side * Math.PI / 2;
     const c = Math.cos(yaw), sn = Math.sin(yaw);
     for (let attempt = 0; attempt < 8; attempt++) {
       const distance = track.wallOffset + depth / 2 + clearance + attempt * 3;
       const x = p.x + p.nx * side * distance, z = p.z + p.nz * side * distance;
+      if (cityDistrictForPoint(track, x, z)?.density === 0) continue;
       if (hanoi && Math.hypot(x, z) < 209) continue;
-      if (!hanoi && (z < -375 || Math.hypot(x + 65, z - 45) < 124)) continue;
+      if (!hanoi && z < -375) continue;
       const blocked = track.samples.some(q => { const dx = q.x - x, dz = q.z - z; return Math.abs(dx * c - dz * sn) < width / 2 + track.wallOffset + 2 && Math.abs(dx * sn + dz * c) < depth / 2 + 4 + track.wallOffset; });
       if (blocked || occupied.some(q => Math.hypot(x - q.x, z - q.z) < (width + q.width) / 2 + 4)) continue;
       const entry = { x, z, yaw, width, depth, name }; occupied.push(entry); footprints.push(entry); b.reserve(x, z, Math.hypot(width, depth) / 2 + 5, name); b.setFrame(x, z, yaw, Math.max(groundHeight(x, z), p.y - .15)); return entry;
@@ -206,7 +209,8 @@ function addAsianStreets(b, options, shared) {
   for (const lot of occupied) {
     const width = lot.width + 8, depth = 7.0, distance = (lot.depth + depth) / 2 + 4.5;
     const x = lot.x + Math.sin(lot.yaw) * distance, z = lot.z + Math.cos(lot.yaw) * distance, c = Math.cos(lot.yaw), sn = Math.sin(lot.yaw);
-    if (hanoi && Math.hypot(x, z) < 210 || !hanoi && (z < -376 || Math.hypot(x + 65, z - 45) < 121)) continue;
+    if (cityDistrictForPoint(track, x, z)?.density === 0) continue;
+    if (hanoi && Math.hypot(x, z) < 210 || !hanoi && z < -376) continue;
     const blocked = track.samples.some(q => { const dx = q.x - x, dz = q.z - z; return Math.abs(dx * c - dz * sn) < width / 2 + track.wallOffset + 3 && Math.abs(dx * sn + dz * c) < depth / 2 + track.wallOffset + 3; });
     if (blocked) continue;
     const p = track.sample(track.nearest(x, z).s); b.setFrame(x, z, lot.yaw, Math.max(groundHeight(x, z), p.y - .15)); b.reserve(x, z, Math.hypot(width, depth) / 2 + 3, 'Backstreet service courtyard');
@@ -283,7 +287,9 @@ function addAsianLandmarks(options) {
       b.box(3.1, .16, 15.5, red, 0, .75, -.5); b.box(2.6, .18, 14.5, hull, 0, .87, -.5);
       b.beam([0, .7, -7.2], [0, .12, -12], .15, dark);
     }
-    b.setFrame(-65, 45); b.reserve(-65, 45, 104, 'Wat Arun temple precinct');
+    // The adapted river runs east-west here: place the entire Thonburi temple
+    // precinct on its dry opposite bank, with the landing facing the water.
+    b.setFrame(-65, -735, Math.PI); b.reserve(-65, -735, 104, 'Wat Arun temple precinct');
     b.box(100, 1.2, 110, stone, 0, .6, 0);
     function prang(x, z, h) {
       const tiers = [[0, .20], [.06, .18], [.15, .14], [.25, .12], [.36, .10], [.48, .078], [.62, .056], [.78, .035], [.91, .016]];
@@ -307,8 +313,8 @@ function addAsianLandmarks(options) {
       b.box(100, 1.1, .45, white, 0, 1.75, side * 55);
       for (let x = -48; x <= 48; x += 6) { b.box(.75, 2.2, .75, white, x, 1.7, side * 55); tierRoof(1.1, 1.1, 2.8, x, side * 55, red); }
     }
-    b.box(10, .5, 22, stone, 0, 1.4, -66);
-    templeHall(26, 42, 140, 5, true); b.reserve(75, 50, 36, 'Wat Arun ceremonial hall');
+    b.box(10, .5, 52, stone, 0, 1.4, -81);
+    templeHall(26, 42, 140, 5, true); b.reserve(-205, -740, 36, 'Wat Arun ceremonial hall');
     b.sign('วัดอรุณ', 'WAT ARUN · TEMPLE OF DAWN', 22, 4, 0, 4, -55.7, '#635343');
     b.place(.34, 1, 86, 26, 28, 'Bangkok golden chedi'); b.cylinder(12, 15, 3, white, 0, 1.5, 0, 12);
     for (let tier = 0; tier < 10; tier++) b.cylinder(8.5 - tier * .7, 10 - tier * .7, 1.2, gold, 0, 4 + tier * 1.2, 0, 24);

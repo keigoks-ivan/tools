@@ -7,20 +7,20 @@ export const CITY_ROAD_PROFILES = Object.freeze({
   kualalumpur: { centre: 'broken-white', lanes: 3 },
   kobe: { centre: 'single-yellow', lanes: 2 },
   london: { centre: 'broken-white', lanes: 2, edge: 'double-yellow' },
-  sydney: { centre: 'double-white', lanes: 3 },
-  goldcoast: { centre: 'broken-white', lanes: 3 },
-  melbourne: { centre: 'broken-white', lanes: 3 },
-  paris: { centre: 'broken-white', lanes: 3 },
-  prague: { centre: 'broken-white', lanes: 2 },
-  newcastle: { centre: 'broken-white', lanes: 2, edge: 'double-yellow' },
-  bangkok: { centre: 'double-yellow', lanes: 3 },
-  sanfrancisco: { centre: 'double-yellow', lanes: 2 },
+  sydney: { centre: 'double-white', lanes: 2 },
+  goldcoast: { centre: 'broken-white', lanes: 2 },
+  melbourne: { centre: 'broken-white', lanes: 2 },
+  paris: { centre: 'broken-white', lanes: 2 },
+  prague: { centre: 'broken-white', lanes: 1 },
+  newcastle: { centre: 'broken-white', lanes: 1, edge: 'double-yellow' },
+  bangkok: { centre: 'double-yellow', lanes: 2 },
+  sanfrancisco: { centre: 'double-yellow', lanes: 1 },
   newyork: { centre: 'double-yellow', lanes: 3 },
-  vancouver: { centre: 'double-yellow', lanes: 3 },
-  hanoi: { centre: 'single-yellow', lanes: 2 },
-  lisbon: { centre: 'broken-white', lanes: 2 },
-  marseille: { centre: 'broken-white', lanes: 3 },
-  nice: { centre: 'broken-white', lanes: 3 },
+  vancouver: { centre: 'double-yellow', lanes: 2 },
+  hanoi: { centre: 'single-yellow', lanes: 1 },
+  lisbon: { centre: 'broken-white', lanes: 1 },
+  marseille: { centre: 'broken-white', lanes: 1 },
+  nice: { centre: 'broken-white', lanes: 2 },
   warwick: { centre: 'broken-white', lanes: 1, edge: 'double-yellow' },
 });
 
@@ -50,8 +50,8 @@ export function addCityRoadMarkings({track,bake,setFrame,white,yellow}) {
   }
   for(const side of [-1,1]){
     for(let lane=1;lane<profile.lanes;lane++)for(let s=3;s<track.length;s+=12)stripe(s,Math.min(s+3,track.length),side*half*lane/profile.lanes,.12,white);
-    if(track.id!=='warwick')stripe(0,track.length,side*(half-.22),.12,white);
-    if(profile.edge==='double-yellow')for(const edge of track.id==='warwick'?[half-.50,half-.24]:[track.wallOffset-.72,track.wallOffset-.46])stripe(0,track.length,side*edge,.10,yellow);
+    if(profile.edge!=='double-yellow')stripe(0,track.length,side*(half-.22),.12,white);
+    if(profile.edge==='double-yellow')for(const edge of [half-.50,half-.24])stripe(0,track.length,side*edge,.10,yellow);
   }
   return {triangles};
 }

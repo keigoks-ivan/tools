@@ -57,3 +57,21 @@ Each Bangkok/Hanoi primary shop-house block has a separately checked low-rise re
 Only the selected city is constructed. The complete extra-landmark module, including the pre-existing heroes, uses 21 material draw batches for Bangkok/Hanoi and 9 for Kobe. Geometry counts after the rear-street refinement are Bangkok 88,216 desktop / 73,476 mobile triangles; Hanoi 81,112 / 70,196; Kobe 14,090 / 13,482. The new rear streets reuse the existing material and atlas batches and add no network requests. Kobe's one local atlas is 1024×512 desktop / 512×256 mobile. These are implementation budgets, not measured frame-rate claims.
 
 The six desktop/mobile city geometry tests passed after the final rear-street change: finite vertices and indices, racing-surface clearance, bounded material batches and resource disposal. The preceding native visual pass inspected all three cities at the starting and near-street views, including the continuous rounded Mitsui corner; the final unified-cache native pass is performed during integration.
+
+## Along-route placement refinement, 9 October 2026
+
+The subsequent district pass filters ordinary shop/coffee rows and service
+backstreets out of open lake, temple-garden and harbour-park sections, including
+their actual nearest route-side placement. Kobe's named Mitsui OSK and
+Chartered masonry landmarks remain explicit heritage exceptions; their
+ordinary rear offices do not repopulate the park. The earlier geometry counts
+above describe the preceding street-detail pass; CITY-SOURCES.md now records
+the full scene with the district layout.
+
+[The Tourism Authority of Thailand's Wat Arun description](https://www.tourismthailand.org/Attraction/phraprang-wat-arun-ratchawararam-ratchawora-mahawi)
+places the temple on the Thonburi bank opposite Wat Pho. The game now places
+the entire original prang precinct and ceremonial hall on the dry opposite
+side of its existing Chao Phraya channel, with the river-facing landing
+aligned to that shore. The temple geometry remains clear of the river water;
+the authored landing reaches its edge. These coordinates adapt the real
+bank relationship to the closed racing layout and do not claim a 1:1 survey.

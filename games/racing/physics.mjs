@@ -1,5 +1,5 @@
-import { TRACK } from './track.mjs?v=city-drive-11';
-import { VEHICLES } from './vehicles.mjs?v=city-drive-11';
+import { TRACK } from './track.mjs?v=city-drive-13';
+import { VEHICLES } from './vehicles.mjs?v=city-drive-13';
 
 const G = 9.80665, TAU = Math.PI * 2;
 const clamp = (value, lo, hi) => Math.max(lo, Math.min(hi, value));
@@ -161,9 +161,14 @@ function advance(state, input, dt, track, CAR) {
 
   let road = track.nearest(state.x, state.z, roadBefore.s);
   const halfWidth = (CAR.dimensions?.width || 1.94) / 2, halfLength = (CAR.dimensions?.length || 4.53) / 2;
-  const radius = Math.abs(newSin * road.nx + newCos * road.nz) * halfLength
-    + Math.abs(newCos * road.nx - newSin * road.nz) * halfWidth;
-  const wall = (track.wallOffset || track.width / 2 + 4.5) - radius - .05;
+  const forwardNormal = Math.abs(newSin * road.nx + newCos * road.nz);
+  const sideNormal = Math.abs(newCos * road.nx - newSin * road.nz);
+  const radius = forwardNormal * halfLength + sideNormal * halfWidth;
+  const alongRadius = sideNormal * halfLength + forwardNormal * halfWidth;
+  // Front/rear corners reach beyond the centre tangent on a curved guardrail.
+  // This small sagitta allowance preserves straight-road contact without extra road queries.
+  const bendAllowance = .5 * Math.abs(road.curvature || 0) * alongRadius ** 2;
+  const wall = (track.wallOffset || track.width / 2 + 4.5) - radius - bendAllowance - .05;
   state.collision = Math.max(0, state.collision - dt * 2.5);
   if (Math.abs(road.offset) > wall) {
     const side = Math.sign(road.offset), correction = road.offset - side * wall;

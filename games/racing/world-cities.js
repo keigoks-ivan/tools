@@ -1,11 +1,13 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { addExtraCityLandmarks } from './world-cities-extra.js?v=city-drive-11';
-import { createCityWaterMaterial } from './world-city-australia.js?v=city-drive-11';
-import { paintTaipeiFacade, paintTaipeiStorefront, paintTaipeiPaving } from './world-city-taipei-facades.js?v=city-drive-11';
-import { getTaipeiJunctions, taipeiJunctionAt, taipeiStreetAt, addTaipeiStreetDetails, paintTaipeiCornerFacade, paintTaipeiJunctionPaving } from './world-city-taipei-streets.js?v=city-drive-11';
-import { CITY_ROAD_PROFILES, addCityRoadMarkings } from './world-city-roadmarkings.js?v=city-drive-11';
-import { CITY_STREETFRONT_CITIES, HERITAGE_SHOP_CITIES, paintCityStreetfront, paintHeritageShopfront, paintCityPaving } from './world-city-streetfronts.js?v=city-drive-11';
+import { addExtraCityLandmarks } from './world-cities-extra.js?v=city-drive-13';
+import { createCityWaterMaterial } from './world-city-australia.js?v=city-drive-13';
+import { paintTaipeiFacade, paintTaipeiStorefront, paintTaipeiPaving } from './world-city-taipei-facades.js?v=city-drive-13';
+import { getTaipeiJunctions, taipeiJunctionAt, taipeiStreetAt, addTaipeiStreetDetails, paintTaipeiCornerFacade, paintTaipeiJunctionPaving } from './world-city-taipei-streets.js?v=city-drive-13';
+import { CITY_ROAD_PROFILES, addCityRoadMarkings } from './world-city-roadmarkings.js?v=city-drive-13';
+import { CITY_STREETFRONT_CITIES, HERITAGE_SHOP_CITIES, paintCityStreetfront, paintHeritageShopfront, paintCityPaving } from './world-city-streetfronts.js?v=city-drive-13';
+import { CITY_DISTRICT_PLANS, cityDistrictAt, cityDistrictForPoint } from './world-city-districts.mjs?v=city-drive-13';
+import { clipGroundTriangle } from './world-city-ground.mjs?v=city-drive-13';
 
 export const CITY_THEMES = Object.freeze(['taipei', 'kualalumpur', 'kobe', 'london', 'sydney', 'goldcoast', 'melbourne', 'paris', 'prague', 'newcastle', 'bangkok', 'sanfrancisco', 'newyork', 'vancouver', 'hanoi', 'lisbon', 'marseille', 'nice', 'warwick']);
 // Street-scale architecture is authored per location, not a shared tower grid.
@@ -167,7 +169,7 @@ function clockMap() {
 
 // Landmark heights follow official references. Street layouts are closed-course adaptations.
 // Static architectural parts share material batches, including all window mullions and trusses.
-export function addCityScenery({ scene, track, mobile = false, groundHeight, materials }) {
+export function addCityScenery({ scene, track, mobile = false, groundHeight, groundSurfaceHeight = groundHeight, materials }) {
   const city = track.theme, rand = random(8053 + CITY_THEMES.indexOf(city) * 331);
   const street = CITY_STREET_PROFILES[city], range = values => values[0] + rand() * (values[1] - values[0]);
   const batches = new Map(), ownedMaterials = new Set(), reserved = [], footprints = [], shadowMeshes = [];
@@ -321,7 +323,7 @@ export function addCityScenery({ scene, track, mobile = false, groundHeight, mat
     const geometry = new THREE.ExtrudeGeometry(shape, { depth: w + 1, bevelEnabled: false, curveSegments: 1 });
     geometry.rotateY(Math.PI / 2); geometry.translate(-(w + 1) / 2, y, 0); bake(geometry, roof, 0, 0, 0, 0, 0, 0, true);
   }
-  function tree(x, z, height = 9, palm = false) {
+  function tree(x, z, height = 9, palm = false, inGround = false) {
     setFrame(x, z); cylinder(.16, .29, height * (palm ? .89 : .69), bark, 0, height * (palm ? .445 : .345), 0, 7);
     if (palm) {
       const vertices = [], uvs = [], crown = height * .91;
@@ -362,7 +364,7 @@ export function addCityScenery({ scene, track, mobile = false, groundHeight, mat
         for (let card = 0; card < 3; card++) bake(new THREE.PlaneGeometry(4 + rand() * .9, 4.5 + rand() * .8), leaf, x, y, z, (rand() - .5) * .7, card / 3 * Math.PI + angle, (rand() - .5) * .5);
       }
     }
-    if (!['oak', 'cypress', 'gum'].includes(street.trees)) box(2.2, .45, 2.2, stone, 0, .225, 0);
+    if (!inGround && !['oak', 'cypress', 'gum'].includes(street.trees)) box(2.2, .45, 2.2, stone, 0, .225, 0);
   }
 
   if (city === 'taipei') {
@@ -592,15 +594,17 @@ export function addCityScenery({ scene, track, mobile = false, groundHeight, mat
     }
     frame = previous; taipeiScooters++;
   }
-  function building(x, z, w, h, d, yaw, index, near = false, wrapSide = 0) {
+  function building(x, z, w, h, d, yaw, index, near = false, wrapSide = 0, district = null) {
     if (cityGroundLevel(city, x, z) < 4 || !clearFootprint(x, z, w, d, yaw, 3)) return false;
-    setFrame(x, z, yaw); footprints.push({ x, z, w, h, d, yaw, near, family: street.family });
+    const placedDistrict = cityDistrictForPoint(track, x, z), localDistrict = district || placedDistrict;
+    if (near && placedDistrict.density === 0) return false;
+    setFrame(x, z, yaw); footprints.push({ x, z, w, h, d, yaw, near, family: street.family, district: localDistrict.district, frontage: localDistrict.frontage, districtHeights: localDistrict.heights, districtDensity: localDistrict.density });
     box(w + 2, .7, d + 2, stone, 0, -.05, 0);
     box(w + 4, .07, d + 4, paving, 0, .035, 0);
-    const modernSkyline = !near && ['sydney', 'melbourne', 'bangkok', 'newyork'].includes(city);
+    const modernSkyline = district?.facades === 'modern' || !near && ['sydney', 'melbourne', 'bangkok', 'newyork'].includes(city);
     const mat = city === 'taipei' && wrapSide && index === 2 ? taipeiCornerFacade : windowMaterials[modernSkyline ? 3 + index % 3 : ['sydney', 'melbourne', 'bangkok', 'newyork'].includes(city) ? index % 3 : index % 6];
     const towerProfile = ['klcc-rounded', 'manhattan-setbacks', 'victorian-laneways', 'rocks-sandstone', 'thai-shophouse'].includes(street.family) && h > 50 ? index % 4 : 0;
-    const roundedKL = street.family === 'klcc-rounded' && index % 3 === 0;
+    const roundedKL = street.family === 'klcc-rounded' && h > 35 && index % 3 === 0;
     if (roundedKL) {
       for (const [top, bottom, hh, yy] of [[w * .39, w * .46, h * .84, h * .42], [w * .25, w * .35, h * .16, h * .92]]) {
         const geo = new THREE.CylinderGeometry(top, bottom, hh, mobile ? 16 : 24), uv = geo.attributes.uv;
@@ -673,7 +677,7 @@ export function addCityScenery({ scene, track, mobile = false, groundHeight, mat
       }
       for (const xx of [-w * .36, w * .36]) box(.55, h, d + .25, band, xx, h / 2, 0);
     }
-    if (near && city === 'melbourne') {
+    if (near && city === 'melbourne' && !modernSkyline) {
       box(w + .5, .7, .85, stone, 0, h + .8, -d / 2 - .1);
       for (let xx = -w / 2 + .45; xx < w / 2; xx += 4.3) { box(.65, 1.4, .85, stone, xx, h + 1.15, -d / 2 - .1); box(.85, .18, 1, stone, xx, h + 1.9, -d / 2 - .1); }
       if (index % 3 !== 1) {
@@ -709,14 +713,14 @@ export function addCityScenery({ scene, track, mobile = false, groundHeight, mat
       box(w - .5, .5, d - .5, stone, 0, h + .6, 0);
     }
     if (city === 'newyork') {
-      if (near) {
+      if (near && !modernSkyline) {
         for (let floor = 7; floor < Math.min(h, 35); floor += 3.7) {
           box(3.4, .13, 1.15, charcoal, -w * .23, floor, -d / 2 - .59);
           for (const xx of [-w * .23 - 1.6, -w * .23 + 1.6]) box(.065, .9, .06, charcoal, xx, floor + .45, -d / 2 - 1.12);
           beam([-w * .23 - 1.5, floor, -d / 2 - 1.08], [-w * .23 + 1.5, floor - 3.7, -d / 2 - 1.08], .13, charcoal);
         }
       }
-      if (index % 3 === 0) { cylinder(1.6, 1.6, 3.1, bark, 0, h + 3.2, 0, 12); cylinder(0, 1.8, .7, roof, 0, h + 5.1, 0, 12); for (const xx of [-1, 1]) box(.16, 2.1, .16, steel, xx, h + 1.9, 0); }
+      if (!modernSkyline && index % 3 === 0) { cylinder(1.6, 1.6, 3.1, bark, 0, h + 3.2, 0, 12); cylinder(0, 1.8, .7, roof, 0, h + 5.1, 0, 12); for (const xx of [-1, 1]) box(.16, 2.1, .16, steel, xx, h + 1.9, 0); }
     }
     if (near) {
       if (city === 'taipei') {
@@ -834,14 +838,19 @@ export function addCityScenery({ scene, track, mobile = false, groundHeight, mat
     }
     return true;
   }
-  for (let s = city === 'taipei' ? 18 : 25, index = 0; s < track.length; s += street.spacing, index++) for (const side of [-1, 1]) {
-    if (city === 'taipei' && Math.abs(s - getTaipeiJunctions(track)[0].s) < 41) continue;
-    const p = track.sample(s), w = range(street.widths), d = range(street.depths);
-    const offset = track.wallOffset + 7 + d * .5 + (city === 'taipei' ? (index % 4) * .42 : 0);
-    const x = p.x + p.nx * offset * side, z = p.z + p.nz * offset * side;
-    const yaw = p.heading + (side > 0 ? Math.PI / 2 : -Math.PI / 2);
-    const height = city === 'taipei' ? 13 + 3.3 * (index % 11 === 6 ? 9 : Math.floor(rand() * 6)) : range(street.heights);
-    building(x, z, w, height, d, yaw, city === 'taipei' ? Math.floor(rand() * 42) : index + (side > 0 ? 1 : 0), true);
+  for (const side of [-1, 1]) {
+    let cursor = city === 'taipei' ? 18 : 25, index = 0;
+    while (cursor < track.length) {
+      const district = cityDistrictAt(track, cursor, side), w = range(district.widths || street.widths), d = range(district.depths || street.depths);
+      const s = cursor + w / 2, advance = Math.max(w + (district.gap ?? 2), district.spacing) * (.94 + rand() * .12);
+      cursor += advance; index++;
+      if (district.density === 0 || rand() > district.density || s >= district.to * track.length - w / 2) continue;
+      if (city === 'taipei' && Math.abs(s - getTaipeiJunctions(track)[0].s) < 41) continue;
+      const p = track.sample(s), offset = track.wallOffset + district.setback + d * .5;
+      const x = p.x + p.nx * offset * side, z = p.z + p.nz * offset * side, yaw = p.heading + (side > 0 ? Math.PI / 2 : -Math.PI / 2);
+      const height = range(district.heights), variant = city === 'taipei' ? district.facades === 'modern' ? 4 + index % 2 : index % 4 : index + (side > 0 ? 1 : 0);
+      building(x, z, w, height, d, yaw, variant, true, 0, district);
+    }
   }
   if (city === 'taipei') {
     const junction = getTaipeiJunctions(track)[0], p = junction.center;
@@ -862,9 +871,114 @@ export function addCityScenery({ scene, track, mobile = false, groundHeight, mat
       || (street.sector === 'north' && zz < -100) || (street.sector === 'south' && zz > 280)) continue;
     if (xx > -265 && xx < 260 && zz > -265 && zz < 270) continue;
     if (street.sector === 'village' && Math.abs(xx) + Math.abs(zz) > 940) continue;
+    const district = cityDistrictForPoint(track, xx, zz);
+    if (rand() > district.skylineDensity || district.density === 0 && near.distance < district.groundWidth + 150) continue;
     const height = range(street.skyline), width = range(street.widths) * (height > 50 ? 1.28 : 1), depth = range(street.depths);
     const yaw = street.sector === 'blocks' ? Math.round(near.heading / (Math.PI / 2)) * Math.PI / 2 : near.heading + Math.PI / 2;
-    building(xx, zz, width, height, depth, yaw, Math.floor(rand() * 6));
+    building(xx, zz, width, height, depth, yaw, Math.floor(rand() * 6), false, 0, district);
+  }
+
+  const districtSurfaces = new Map();
+  function districtSurface(kind) {
+    if (kind === 'paving') return paving;
+    if (kind === 'rock') return materials.rock;
+    if (!districtSurfaces.has(kind)) {
+      const base = kind === 'grass' ? materials.terrain : materials.shoulder;
+      const tint = kind === 'grass' ? '#8ca36d' : kind === 'pebble' ? '#aaa99d' : '#e0d3b3';
+      const mat = base ? surface(base, tint, { vertexColors: true, side: THREE.FrontSide }) : material(tint, { vertexColors: true, roughness: 1, side: THREE.FrontSide });
+      // The sparse-grass scan includes dark, dry soil. Normalize its linear
+      // reflectance instead of multiplying it by another dark olive tint.
+      if (kind === 'grass' && mat.map) {
+        const dry = ['goldcoast', 'lisbon', 'marseille', 'nice', 'sanfrancisco'].includes(city);
+        const tropical = ['taipei', 'kualalumpur', 'bangkok', 'hanoi'].includes(city);
+        mat.color.setRGB(...(dry ? [1.15, 1.8, 1.35] : tropical ? [.95, 2.25, 1.45] : [.95, 2.15, 1.6]));
+      }
+      mat.userData.seasonGround = true; mat.userData.cityDistrictGround = true; districtSurfaces.set(kind, mat);
+    }
+    return districtSurfaces.get(kind);
+  }
+  const groundPieces = new Map(), districtStep = mobile ? 24 : 16;
+  function groundTriangles(points) {
+    return [[points[0], points[1], points[2]], [points[0], points[2], points[3]]].flatMap(triangle => clipGroundTriangle(triangle, groundSurfaceHeight.grid));
+  }
+  for (let s = 0; s < track.length; s += districtStep) for (const side of [-1, 1]) {
+    const district = cityDistrictAt(track, s + districtStep / 2, side);
+    if (!district.ground || district.groundWidth <= 0) continue;
+    const p = track.sample(s), q = track.sample(Math.min(s + districtStep, track.length)), start = track.wallOffset + 5.9;
+    const mat = districtSurface(district.ground), bands = Math.ceil(district.groundWidth / (mobile ? 24 : 16));
+    if (!groundPieces.has(mat)) groundPieces.set(mat, { vertices: [], uvs: [], colors: [] });
+    const mesh = groundPieces.get(mat);
+    for (let band = 0; band < bands; band++) {
+      const lo = start + band * district.groundWidth / bands, hi = start + (band + 1) * district.groundWidth / bands;
+      const points = [[p.x + p.nx * side * lo, p.z + p.nz * side * lo], [q.x + q.nx * side * lo, q.z + q.nz * side * lo], [q.x + q.nx * side * hi, q.z + q.nz * side * hi], [p.x + p.nx * side * hi, p.z + p.nz * side * hi]];
+      if (points.some(([x, z]) => cityGroundLevel(city, x, z) < (district.ground === 'sand' || district.ground === 'pebble' ? 0 : 4) || track.nearest(x, z).distance < track.wallOffset + 5.2)) continue;
+      const mx = points.reduce((v, point) => v + point[0], 0) / 4, mz = points.reduce((v, point) => v + point[1], 0) / 4;
+      if (footprints.some(b => {
+        const dx = mx - b.x, dz = mz - b.z, lx = dx * Math.cos(b.yaw) - dz * Math.sin(b.yaw), lz = dx * Math.sin(b.yaw) + dz * Math.cos(b.yaw);
+        return Math.abs(lx) < b.w / 2 + 2 && Math.abs(lz) < b.d / 2 + 2;
+      })) continue;
+      if (city === 'paris') {
+        const dx = mx + 155, dz = mz - 155, lx = dx * Math.cos(-.15) - dz * Math.sin(-.15), lz = dx * Math.sin(-.15) + dz * Math.cos(-.15);
+        if (Math.abs(lx) < 70 && Math.abs(lz) < 70) continue;
+      }
+      // Mirrored sides and tight inner bends can invert an offset cell. Test
+      // each triangle's actual orientation rather than assuming a side order.
+      for (const triangle of groundTriangles(points)) {
+        const [a, b, c] = triangle;
+        const ny = (b[1] - a[1]) * (c[0] - a[0]) - (b[0] - a[0]) * (c[1] - a[1]);
+        if (Math.abs(ny) < .01) continue;
+        const order = ny > 0 ? triangle : [triangle[0], triangle[2], triangle[1]];
+        for (const [x, z] of order) {
+          const shade = Math.sin(x / 19) * Math.cos(z / 23) * .035;
+          mesh.vertices.push(x, Math.max(groundHeight(x, z), groundSurfaceHeight(x, z)) + .048, z); mesh.uvs.push(x, z);
+          if (mat.vertexColors) mesh.colors.push(.95 + shade, 1 + shade, .92 + shade);
+        }
+      }
+    }
+  }
+  frame.identity();
+  for (const [mat, mesh] of groundPieces) if (mesh.vertices.length) {
+    const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(mesh.vertices, 3)); geo.setAttribute('uv', new THREE.Float32BufferAttribute(mesh.uvs, 2));
+    if (mat.vertexColors) geo.setAttribute('color', new THREE.Float32BufferAttribute(mesh.colors, 3));
+    geo.computeVertexNormals(); bake(geo, mat);
+  }
+
+  // Local waterfront furniture follows actual existing water edges. These
+  // districts never create another river or fill a bridge's channel with land.
+  for (let s = 38, index = 0; s < track.length; s += mobile ? 93 : 67, index++) for (const side of [-1, 1]) {
+    const district = cityDistrictAt(track, s, side), p = track.sample(s);
+    if (!district.ground || district.density > 0 || cityGroundLevel(city, p.x, p.z) < 4) continue;
+    if (district.trees > 0) for (let row = 0; row < (district.frontage === 'woodland' && !mobile ? 3 : 1); row++) {
+      if (rand() > district.trees) continue;
+      const offset = track.wallOffset + 15 + row * 16, x = p.x + p.nx * offset * side, z = p.z + p.nz * offset * side;
+      if (cityGroundLevel(city, x, z) < 4 || track.nearest(x, z).distance < track.wallOffset + 10 || reserved.some(item => Math.hypot(x - item.x, z - item.z) < item.radius + 5)) continue;
+      tree(x, z, range(street.treeHeight), street.trees === 'palm' || street.trees === 'tropical' && index % 2 === 0, true);
+    }
+    if (!district.furniture) continue;
+    const offset = track.wallOffset + 8.1, x = p.x + p.nx * offset * side, z = p.z + p.nz * offset * side;
+    if (cityGroundLevel(city, x, z) < 4 || track.nearest(x, z).distance < track.wallOffset + 6) continue;
+    setFrame(x, z, p.heading);
+    if (district.furniture === 'port') {
+      cylinder(.18, .26, .68, charcoal, 0, .34, 0, 8); cylinder(.28, .28, .1, charcoal, 0, .72, 0, 8);
+      if (city === 'kobe' && index % 3 === 0) { box(2.45, 2.55, 6.1, index % 2 ? red : white, side * 8, 1.27, 0); for (let rib = -2.6; rib < 3; rib += .55) box(2.49, 2.48, .045, steel, side * 8, 1.27, rib); }
+    } else if (['quay', 'lake', 'promenade', 'garden', 'park'].includes(district.furniture)) {
+      box(2.4, .16, .65, district.furniture === 'promenade' ? glass : bark, 0, .57, 0); box(2.4, .55, .10, district.furniture === 'promenade' ? glass : bark, 0, .96, side * .3);
+      for (const xx of [-.86, .86]) { box(.12, .56, .50, charcoal, xx, .28, 0); box(.08, .76, .08, charcoal, xx, .85, side * .29); }
+    }
+    if (['quay', 'lake', 'port'].includes(district.furniture)) {
+      let shore = null;
+      for (let distance = track.wallOffset + 7; distance <= Math.min(190, track.wallOffset + district.groundWidth + 24); distance += 4) {
+        const xx = p.x + p.nx * distance * side, zz = p.z + p.nz * distance * side;
+        if (cityGroundLevel(city, xx, zz) < 0) { shore = distance - 3; break; }
+      }
+      if (shore !== null && shore > track.wallOffset + 10) {
+        const xx = p.x + p.nx * shore * side, zz = p.z + p.nz * shore * side;
+        setFrame(xx, zz, p.heading);
+        box(.65, .85, 32, stone, 0, .42, 0); box(.92, .15, 32.2, paving, 0, .91, 0);
+        for (const along of [-14, -7, 0, 7, 14]) cylinder(.035, .045, .83, charcoal, 0, 1.38, along, 6);
+        box(.05, .05, 31, charcoal, 0, 1.76, 0);
+      }
+    }
   }
 
   const landscapedGround = { kualalumpur: { x: 100, z: -20, radius: 135 }, paris: { x: -155, z: 65, radius: 185, depth: 375 }, warwick: { x: -85, z: 65, radius: 250, depth: 350 } }[city];
@@ -885,13 +999,17 @@ export function addCityScenery({ scene, track, mobile = false, groundHeight, mat
         const dx = mx + 155, dz = mz - 155, lx = dx * Math.cos(-.15) - dz * Math.sin(-.15), lz = dx * Math.sin(-.15) + dz * Math.cos(-.15);
         if (Math.abs(lx) < 70 && Math.abs(lz) < 70 || Math.abs(mx + 155) < 5 || Math.abs(mz - 155) < 5) continue; // Esplanade and garden paths.
       } else if (city === 'warwick' && Math.abs(mz + 12) < 4 && mx > -232 && mx < -88) continue; // Castle approach path.
-      for (const index of [0, 2, 1, 0, 3, 2]) {
-        const [px, pz] = points[index], shade = Math.sin(px / 19) * Math.cos(pz / 23) * .04 + Math.sin((px + pz) / 7) * .012;
-        vertices.push(px, groundHeight(px, pz) + .045, pz); uvs.push(px, pz); colors.push(.94 + shade, 1 + shade, .91 + shade);
+      for (const [a, b, c] of groundTriangles(points)) {
+        const ny = (b[1] - a[1]) * (c[0] - a[0]) - (b[0] - a[0]) * (c[1] - a[1]);
+        if (Math.abs(ny) < .01) continue;
+        for (const [px, pz] of ny > 0 ? [a, b, c] : [a, c, b]) {
+          const shade = Math.sin(px / 19) * Math.cos(pz / 23) * .04 + Math.sin((px + pz) / 7) * .012;
+          vertices.push(px, Math.max(groundHeight(px, pz), groundSurfaceHeight(px, pz)) + .045, pz); uvs.push(px, pz); colors.push(.94 + shade, 1 + shade, .91 + shade);
+        }
       }
     }
     if (vertices.length) {
-      const turf = materials.terrain ? surface(materials.terrain, monumentGarden ? '#8ca36d' : '#b3c0a1', { vertexColors: true }) : material(monumentGarden ? '#769252' : '#889d72', { roughness: 1, vertexColors: true }); turf.userData.seasonGround = true;
+      const turf = districtSurface('grass');
       frame.identity(); const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3)); geo.setAttribute('uv', new THREE.Float32BufferAttribute(uvs, 2)); geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3)); geo.computeVertexNormals(); bake(geo, turf);
     }
     if (monumentGarden) {
@@ -916,6 +1034,8 @@ export function addCityScenery({ scene, track, mobile = false, groundHeight, mat
   }
   for (let s = 18, index = 0; s < track.length; s += city === 'hanoi' ? 37 : city === 'warwick' ? 53 : 45, index++) for (const side of [-1, 1]) {
     if (city === 'taipei' && taipeiJunctionAt(track, s, 4)) continue;
+    const district = cityDistrictAt(track, s, side);
+    if (['woodland', 'cliff'].includes(district.frontage) && index % 2) continue;
     roadFrame(s, side, track.wallOffset + 3.5);
     const lantern = ['lantern', 'oldquarter'].includes(street.lamps), lampHeight = lantern ? city === 'warwick' ? 4.7 : 6.2 : street.lamps === 'resort' ? 6.7 : 8.5;
     cylinder(.07, .13, lampHeight, charcoal, 0, lampHeight / 2, 0, 7);
@@ -934,7 +1054,7 @@ export function addCityScenery({ scene, track, mobile = false, groundHeight, mat
       panel(w, h, mat, Math.sin(yaw) * .004, y, .05, yaw);
       panel(w, h, mat, -Math.sin(yaw) * .004, y, .05, yaw + Math.PI);
     }
-    if (index % street.treeEvery === 0 || city === 'taipei') {
+    if (rand() < district.trees && (!mobile || index % 2 === 0)) {
       const p = track.sample(s + 14), treeOffset = city === 'taipei' ? 3.8 : city === 'kualalumpur' ? 4.5 : 7.4, x = p.x + p.nx * (track.wallOffset + treeOffset) * side, z = p.z + p.nz * (track.wallOffset + treeOffset) * side;
       const overlapsBuilding = footprints.some(b => {
         if (!['taipei', 'kualalumpur'].includes(city)) return Math.hypot(x - b.x, z - b.z) < Math.hypot(b.w, b.d) * .53;
@@ -1021,7 +1141,7 @@ export function addCityScenery({ scene, track, mobile = false, groundHeight, mat
   }
   // Unused materials have no world traversal owner and are cleaned immediately.
   for (const mat of ownedMaterials) if (!batches.has(mat)) { mat.map?.dispose(); mat.dispose(); }
-  group.userData.landmarks = reserved.map(({ name }) => name); group.userData.buildings = footprints; group.userData.streetProfile = street;
+  group.userData.landmarks = reserved.map(({ name }) => name); group.userData.buildings = footprints; group.userData.streetProfile = street; group.userData.districtPlan = CITY_DISTRICT_PLANS[city];
   if (city === 'taipei') { group.userData.junctions = getTaipeiJunctions(track); group.userData.parkedScooters = taipeiScooters; group.userData.parkedTaxis = taipeiTaxis; }
   return { group, update(state, elapsed) { extra.update?.(state, elapsed); cityWater?.normalMap.offset.set(elapsed * .004, elapsed * .003); }, setQuality(level) {
     extra.setQuality?.(level);
