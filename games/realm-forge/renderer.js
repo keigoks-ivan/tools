@@ -1,5 +1,5 @@
-import { clamp, tileType, BUILDINGS, buildingBounds } from './core.mjs?v=20261009d';
-import { TEAM_COLORS, TEAM_LIGHT, imageFor, unitArt, animationArt, worldArt, drawSprite, recoloredArt } from './art.mjs?v=20261009d';
+import { clamp, tileType, BUILDINGS, buildingBounds } from './core.mjs?v=20261009g';
+import { TEAM_COLORS, TEAM_LIGHT, imageFor, unitArt, animationArt, worldArt, drawSprite, recoloredArt } from './art.mjs?v=20261009g';
 export function wheelZoomFactor(deltaY, deltaMode = 0, height = 600) {
   const pixels = deltaY * (deltaMode === 1 ? 16 : deltaMode === 2 ? height : 1);
   return Math.exp(-clamp(pixels, -80, 80) * .001);
@@ -473,7 +473,7 @@ export class Renderer {
         c.save(); c.font = '11px sans-serif'; c.textAlign = 'center'; c.fillStyle = color; c.fillText(valid ? blueprint.name + ' · 點擊放置' : '位置需調整', p.x, p.y + Math.max(17, gy + 12)); c.restore();
       }
     } else if (this.hover && (ui.mode === 'map' || ui.placement)) { const h = this.hover; if (h.x >= 0 && h.x < n && h.y >= 0 && h.y < n) {
-      const bounds = ui.placement ? buildingBounds(ui.placement, h.x, h.y) : h, p = this.screen(bounds.x, bounds.y), valid = !ui.placement || world.canPlaceBuilding(ui.placement, h.x, h.y);
+      const bounds = ui.placement ? buildingBounds(ui.placement, h.x, h.y) : h, p = this.screen(bounds.x, bounds.y), valid = !ui.placement || world.canPlaceBuilding(ui.placement, h.x, h.y) && world.buildRequirements(0,ui.placement) && world.canPay(0,BUILDINGS[ui.placement].cost) && (BUILDINGS[ui.placement].age||0)<=world.age(0);
       const base = ui.placement ? footprintPolygon(ui.placement).map(([x, y]) => [p.x + x * this.zoom, p.y + y * this.zoom]) : [[p.x, p.y - th], [p.x + tw, p.y], [p.x, p.y + th], [p.x - tw, p.y]];
       polygon(c, base, valid ? '#e0c79345' : '#e06a6545', valid ? '#e5c484' : '#e89985');
       if (ui.placement) { c.save(); c.globalAlpha = .6; building(c, { type: ui.placement, team: 0, progress: 1, hp: 1, maxHp: 1 }, p.x, p.y, this.zoom, false); c.restore(); }

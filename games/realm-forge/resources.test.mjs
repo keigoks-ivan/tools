@@ -35,7 +35,7 @@ test('AI workers can collect and deposit map resources without player stocks',()
   assert.ok(w.stocks[1].wood>before);assert.equal(w.stocks[0].wood,0);
 });
 test('enriching edited maps supplies both teams and keeps the town site clear',()=>{
-  const p=defaultProject();p.map.template='grass';p.map.patches={};enrichMapResources(p.map);
+  const p=defaultProject();p.map=generateMap(1280);p.map.template='grass';p.map.patches={};enrichMapResources(p.map);
   const w=new World(p);assert.deepEqual(w.deploymentErrors,[]);
   for(const spawn of p.map.spawns) assert.equal(tileType(p.map,spawn.x,spawn.y),'grass');
 });

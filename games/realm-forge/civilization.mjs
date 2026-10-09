@@ -1,4 +1,4 @@
-import { UNIT_BALANCE, UPGRADE_BALANCE, TECH_BALANCE } from './balance.mjs?v=20261009d';
+import { UNIT_BALANCE, UPGRADE_BALANCE, TECH_BALANCE } from './balance.mjs?v=20261009g';
 export const CIVILIZATION = { name: '河谷王國', description: '西歐中世紀文明 · 四時代陸戰體系', ages: ['黑暗時代', '封建時代', '城堡時代', '帝王時代', '後帝王時代'] };
 const unit = (id, name, role, look, hp, attack, armor, range, speed, food, gold, building, age, extra = {}) => ({ id, name, role, look, hp, attack, armor, range, speed, cooldown: 1.5, food, gold, time: 12, color: '#669db6', image: '', building, age, ...extra });
 export const CIV_UNITS = [

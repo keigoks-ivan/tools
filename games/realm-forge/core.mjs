@@ -1,6 +1,6 @@
-import { CIV_UNITS, TECHNOLOGIES } from './civilization.mjs?v=20261009d';
-import { BUILDING_BALANCE } from './balance.mjs?v=20261009d';
-import { createRouteSearch } from './navigation.mjs?v=20261009d';
+import { CIV_UNITS, TECHNOLOGIES } from './civilization.mjs?v=20261009g';
+import { BUILDING_BALANCE } from './balance.mjs?v=20261009g';
+import { createRouteSearch } from './navigation.mjs?v=20261009g';
 export const clone = value => JSON.parse(JSON.stringify(value));
 export const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 export const RICH_RESOURCE_AMOUNTS = { wood: 5000, food: 10000, gold: 20000, stone: 20000 };
@@ -10,7 +10,7 @@ export const BUILDINGS = {
   town: { name: '城鎮中心', hp: 2400, cost: { wood: 275, stone: 100 }, time: 100, pop: 5 },
   house: { name: '住宅', hp: 550, cost: { wood: 25 }, time: 25, pop: 5 },
   barracks: { name: '兵營', hp: 850, cost: { wood: 120 }, time: 12, pop: 0 },
-  tower: { name: '箭塔', hp: 800, cost: { wood: 80, stone: 100 }, time: 14, pop: 0, attack: 15, range: 6 },
+  tower: { name: '箭塔', hp: 800, cost: { wood: 80, stone: 100 }, time: 14, pop: 0, attack: 15, range: 6, age: 1 },
   archery: { name: '射箭場', hp: 1400, cost: { wood: 175 }, time: 14, pop: 0, age: 1 },
   stable: { name: '馬廄', hp: 1400, cost: { wood: 175 }, time: 14, pop: 0, age: 1 },
   siege: { name: '攻城器製造所', hp: 1800, cost: { wood: 200 }, time: 18, pop: 0, age: 2 },
@@ -58,7 +58,7 @@ export function tileType(map, x, y) {
   return v < .20 ? 'forest' : v > .97 ? 'stone' : v > .93 ? 'gold' : v > .89 ? 'food' : 'grass';
 }
 export function setTile(map, x, y, type) { const i = y * map.size + x; if (map.tiles) map.tiles[i] = type; else (map.patches ||= {})[i] = type; map.revision = (map.revision || 0) + 1; }
-export function generateMap(size = 1280, seed = 7) {
+export function generateMap(size = 128, seed = 7) {
   if (size > 128) {
     const near = Math.round(size * .22), far = Math.round(size * .78);
     const map = { size, seed, name: '無盡河谷', tiles: null, patches: {}, template: 'river', spawns: [{ x: near, y: far }, { x: far, y: near }, { x: far, y: far }] };
@@ -261,8 +261,7 @@ export class World {
   saveState() {
     const state={version:1,project:clone(this.project),researched:this.researched.map(set=>[...set]),explored:[]};
     for (const key of ['map','units','buildings','stocks','amounts','ages','time','nextId','events','effects','corpses','aiTimer','result']) state[key]=clone(this[key]);
-    if (!this.project.rules.fog) state.fullExploration=true;
-    else for (let i=0;i<this.explored.length;i++) if (this.explored[i]) state.explored.push(i);
+    for (let i=0;i<this.explored.length;i++) if (this.explored[i]) state.explored.push(i);
     return state;
   }
   static fromState(data) {
@@ -509,13 +508,14 @@ export class World {
     }
     return best;
   }
+  setFog(enabled) { this.project.rules.fog = Boolean(enabled); this.updateVision(); }
   updateVision() {
     const n = this.map.size;
-    if (!this.project.rules.fog) { if (!this.fullVision) { this.visible.fill(1); this.explored.fill(1); this.fullVision=true; } return; }
-    if (this.fullVision) { this.visible.fill(0); this.fullVision=false; }
-    for (const i of this.visionCells || []) this.visible[i]=0;
+    if (this.project.rules.fog && this.fullVision) { this.visible.fill(0); this.fullVision=false; }
+    if (!this.fullVision) for (const i of this.visionCells || []) this.visible[i]=0;
     this.visionCells=new Set();
     for (const e of [...this.units, ...this.buildings]) if (e.team === 0 && e.hp > 0 && !e.garrison) { const r = e.kind === 'building' ? 7 : 5, x0 = Math.round(e.x), y0 = Math.round(e.y); for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) { const x = x0 + dx, y = y0 + dy; if (x >= 0 && y >= 0 && x < n && y < n && dx * dx + dy * dy <= r * r) { const i=y*n+x; this.visible[i]=1; this.explored[i]=1; this.visionCells.add(i); } } }
+    if (!this.project.rules.fog && !this.fullVision) { this.visible.fill(1); this.fullVision=true; }
   }
   isVisible(e) { return e.team === 0 || Boolean(this.visible[clamp(Math.round(e.y), 0, this.map.size - 1) * this.map.size + clamp(Math.round(e.x), 0, this.map.size - 1)]); }
   walk(u, goal, radius, dt) {
