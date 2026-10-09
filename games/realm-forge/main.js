@@ -21,6 +21,40 @@ let draftsDirty = false, paintLast = null;
 const unitDrafts = new Map();
 function toast(message) { $('toast').textContent = message; $('toast').hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => $('toast').hidden = true, 3200); }
 function timeLabel(seconds) { return `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(Math.floor(seconds % 60)).padStart(2, '0')}`; }
+let fullscreenFallback = false, fullscreenBusy = false;
+function fullscreenElement() { return document.fullscreenElement || document.webkitFullscreenElement; }
+function syncFullscreen() {
+  const active = Boolean(fullscreenElement() || fullscreenFallback), button = $('fullscreen-button');
+  document.body.classList.toggle('fullscreen-mode', active);
+  button.textContent = active ? '⛶ 退出' : '⛶ 全螢幕';
+  button.setAttribute('aria-label', active ? '退出全螢幕' : '全螢幕');
+  button.setAttribute('aria-pressed', String(active));
+  button.title = `${active ? '退出全螢幕 · Esc' : '全螢幕'} · Alt＋Enter`;
+  keys.clear(); pointerPos = null; renderer.resize();
+  if (!document.querySelector('dialog[open]')) $('map').focus({preventScroll:true});
+}
+async function toggleFullscreen() {
+  if (fullscreenBusy) return;
+  fullscreenBusy = true;
+  try {
+    if (fullscreenElement()) {
+      await (document.exitFullscreen || document.webkitExitFullscreen).call(document);
+    } else if (fullscreenFallback) {
+      fullscreenFallback = false;
+    } else {
+      const root = document.documentElement, request = root.requestFullscreen || root.webkitRequestFullscreen;
+      try {
+        if (!request) throw new Error('Fullscreen is unavailable');
+        await request.call(root, {navigationUI:'hide'});
+      } catch {
+        fullscreenFallback = true;
+        toast('此瀏覽器未開放系統全螢幕，已放大遊戲畫面；按 Esc 可退出。');
+      }
+    }
+  } catch { toast('無法退出全螢幕，請按 Esc。'); }
+  finally { fullscreenBusy = false; syncFullscreen(); }
+}
+for (const name of ['fullscreenchange','webkitfullscreenchange']) document.addEventListener(name, syncFullscreen);
 function markDirty() { ui.dirty = true; $('save-status').textContent = '尚未儲存'; }
 function previewReset() { world = new World(project); ui.started = false; ui.paused = true; ui.selected.clear(); ui.groups = {}; ui.placement = null; ui.heroBrush = null; ui.heroSelected = null; ui.attackMove = false; ui.orderMode = null; ui.buildMenu = false; $('result').hidden = true; renderer.project = project; updateHud(true); if (world.deploymentErrors?.length) toast(world.deploymentErrors[0]); }
 function validResourceInputs() { const input=[...document.querySelectorAll('[data-player-resource]')].find(el=>!el.checkValidity()); if (input) { input.reportValidity(); toast('我方起始資源請輸入 0–1,000,000 的整數。'); return false; } return true; }
@@ -376,6 +410,7 @@ $('minimap').addEventListener('pointerdown', e => {
   } else if (e.button===0) renderer.center(p);
 });
 $('zoom-out').onclick = () => zoom(.8); $('zoom-in').onclick = () => zoom(1.25); $('fit').onclick = () => renderer.fit(project.map);
+$('fullscreen-button').onclick = toggleFullscreen;
 document.querySelectorAll('.tab').forEach(b => b.onclick = () => switchMode(b.dataset.mode));
 $('start').onclick = startBattle; $('reset-battle').onclick = () => { previewReset(); toast('已重新部署，準備開始新戰役。'); }; $('play-again').onclick = () => { previewReset(); startBattle(); };
 $('battle-toggle').onclick = startBattle;
@@ -436,8 +471,9 @@ $('sidebar').addEventListener('change', async e => {
 window.addEventListener('keydown', e => {
   if (e.target.matches('input, select, textarea')||document.querySelector('dialog[open]')) return;
   const k=eventKey(e);
+  if (e.altKey && k==='enter') { e.preventDefault(); if (!e.repeat) toggleFullscreen(); return; }
   if (['arrowup','arrowdown','arrowleft','arrowright'].includes(k)) { e.preventDefault(); keys.add(k); return; }
-  if (k==='escape') { if (ui.mode==='map' && ui.heroBrush) cancelHeroPlacement(); cancelTargeting(); updateHud(true); return; }
+  if (k==='escape') { if (fullscreenFallback) { fullscreenFallback=false; syncFullscreen(); } if (ui.mode==='map' && ui.heroBrush) cancelHeroPlacement(); cancelTargeting(); updateHud(true); return; }
   if (k==='f1') { e.preventDefault(); ui.extendedTooltips=!ui.extendedTooltips; updateHud(true); toast(`詳細提示已${ui.extendedTooltips?'開啟':'關閉'}。`); return; }
   if (k==='f2') { e.preventDefault(); saveBattle(); return; }
   if (k==='f5') { e.preventDefault(); openTechTree(); return; }
