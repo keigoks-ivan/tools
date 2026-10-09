@@ -77,7 +77,7 @@ export function addTaipeiStreetDetails({ track, setFrame, box, cylinder, beam, p
   }
   for (let s = 3; s < track.length; s += 10) {
     if (taipeiJunctionAt(track, s, 7)) continue;
-    for (const offset of [-6, -3, 3, 6]) stripe(s, offset, .12, 4, white);
+    for (const offset of [-half / 2, half / 2]) stripe(s, offset, .12, 4, white);
   }
   for (let s = 2; s < track.length; s += 4) {
     if (taipeiJunctionAt(track, s, 2)) continue;

@@ -115,7 +115,7 @@ export function createSeasonWeather({ scene, season, mobile = false, renderer, m
     restoredLights.push({ light, color: light.color.clone(), intensity: light.intensity, ground: light.groundColor?.clone() });
     light.color.set(light === hemisphere ? '#d7e6f0' : cloudy || diffuseSky ? '#e0e9f0' : season?.id === 'autumn' ? '#ffe4c8' : '#fff5e5');
     light.intensity *= light === sun ? (cloudy || diffuseSky ? .22 : season?.id === 'winter' ? .8 : 1) : (cloudy || diffuseSky ? 1.42 : 1);
-    if (light.groundColor) light.groundColor.set(snow ? '#b2bfbd' : '#727a70');
+    if (light.groundColor) light.groundColor.set(snow ? '#b2bfbd' : light.userData.cityDaylight ? '#a49b8c' : '#727a70');
   }
 
   let points, geometry, material, elapsed = 0, disposed = false, activeCount = 0;

@@ -1,17 +1,17 @@
 import * as THREE from 'three';
-import { createRenderPipeline } from './render-pipeline.js?v=city-drive-15';
-import { TRACK, TRACKS } from './track.mjs?v=city-drive-15';
-import { VEHICLES } from './vehicles.mjs?v=city-drive-15';
-import { readLapRecord, writeLapRecord, lapRecordTrackId } from './records.mjs?v=city-drive-15';
-import { createDrivingState, resetDriving, stepDriving } from './physics.mjs?v=city-drive-15';
-import { createCar } from './car.js?v=city-drive-15';
-import { createWorld } from './world.js?v=city-drive-15';
-import { installTouchControls } from './touch-controls.mjs?v=city-drive-15';
-import { createTiltSteering } from './tilt-steering.mjs?v=city-drive-15';
-import { createRacingAudio } from './audio.mjs?v=city-drive-15';
-import { createCockpit } from './cockpit.js?v=city-drive-15';
-import { getSeasons, getSeason, defaultSeason } from './seasons.mjs?v=city-drive-15';
-import { roadPose } from './road-pose.mjs?v=city-drive-15';
+import { createRenderPipeline } from './render-pipeline.js?v=city-drive-16';
+import { TRACK, TRACKS } from './track.mjs?v=city-drive-16';
+import { VEHICLES } from './vehicles.mjs?v=city-drive-16';
+import { readLapRecord, writeLapRecord, lapRecordTrackId } from './records.mjs?v=city-drive-16';
+import { createDrivingState, resetDriving, stepDriving } from './physics.mjs?v=city-drive-16';
+import { createCar } from './car.js?v=city-drive-16';
+import { createWorld } from './world.js?v=city-drive-16';
+import { installTouchControls } from './touch-controls.mjs?v=city-drive-16';
+import { createTiltSteering } from './tilt-steering.mjs?v=city-drive-16';
+import { createRacingAudio } from './audio.mjs?v=city-drive-16';
+import { createCockpit } from './cockpit.js?v=city-drive-16';
+import { getSeasons, getSeason, defaultSeason } from './seasons.mjs?v=city-drive-16';
+import { roadPose } from './road-pose.mjs?v=city-drive-16';
 
 const $ = id => document.getElementById(id);
 const clamp = THREE.MathUtils.clamp;
@@ -112,6 +112,15 @@ function clearGhost() {
   const materials = new Set(); ghost.traverse(node => { if (node.isMesh) materials.add(node.material); });
   materials.forEach(material => material.dispose()); ghost = null;
 }
+function setCarCityReflections() {
+  car.group.traverse(node => {
+    for (const mat of Array.isArray(node.material) ? node.material : [node.material]) {
+      if (!mat?.isMeshPhysicalMaterial || !mat.clearcoat) continue;
+      mat.userData.skyEnvMapIntensity ??= mat.envMapIntensity;
+      mat.envMap = world.reflections || null; mat.envMapIntensity = world.reflections ? .85 : mat.userData.skyEnvMapIntensity; mat.needsUpdate = true;
+    }
+  });
+}
 async function changeSelection() {
   if (!ready) return;
   const nextTrack = TRACKS[$('track-select').value], nextVehicle = VEHICLES[$('car-select').value];
@@ -134,6 +143,7 @@ async function changeSelection() {
   world = results[0].value; car = results[1].value; track = nextTrack; vehicle = nextVehicle;
   season = nextSeason; drivingVehicle = { ...vehicle, grip: vehicle.grip * season.grip };
   world.scene.add(car.group, camera); car.setPaint(paints[paint]); cockpit?.setPaint(paints[paint]);
+  setCarCityReflections();
   if (previousWorld !== world) previousWorld.dispose();
   if (previousCar !== car) previousCar.dispose();
   active = false; resetDriving(state, track); state.rpm = vehicle.idle; loadRecord(); createGhost();
@@ -429,7 +439,7 @@ function frame(now) {
     }
   }
   const pose = roadPose(state.heading, state.roadHeading, state.roadSlope);
-  car.group.position.set(state.x, state.y + .06, state.z); car.group.rotation.set(pose.pitch, state.heading, pose.roll, 'YXZ'); car.update({ ...state, steerAngle: state.steeringAngle }, paused || !active ? 0 : dt);
+  car.group.position.set(state.x, state.y + .04, state.z); car.group.rotation.set(pose.pitch, state.heading, pose.roll, 'YXZ'); car.update({ ...state, steerAngle: state.steeringAngle }, paused || !active ? 0 : dt);
   cockpit.group.visible = view === 3 && active && $('menu').hidden;
   car.group.visible = !cockpit.group.visible;
   cockpit.update(state, vehicle, track, paused || !active ? 0 : dt);
@@ -464,7 +474,8 @@ async function boot() {
       toast('車輛模型未完成載入，已改用 Porsche 911 GT3 RS；也可以重新選車。');
     }
     car.setPaint(paints[paint]); cockpit.setPaint(paints[paint]); world.scene.add(car.group, camera);
-    createGhost(); car.group.position.set(state.x, state.y + .06, state.z); car.group.rotation.y = state.heading;
+    setCarCityReflections();
+    createGhost(); car.group.position.set(state.x, state.y + .04, state.z); car.group.rotation.y = state.heading;
     updateCamera(1, true); world.update(state, 0, camera, vehicle); renderPipeline.render(world.scene, camera, state.y);
     document.querySelectorAll('[data-paint]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.paint === paint)));
     installControls(); setSelectionLoading(false); state.rpm = vehicle.idle; updateSelectionUI(); updateHUD(); saveSettings();

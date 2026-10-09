@@ -1,6 +1,7 @@
 // Standard-lit architectural glazing: actual environment reflections remain
 // view-dependent; original procedural room interiors sit behind the panes.
 export function configureCityGlazing(material) {
+  material.userData.urbanGlazing = true;
   material.roughness = .19; material.metalness = 0;
   material.onBeforeCompile = shader => {
     shader.vertexShader = shader.vertexShader.replace('#include <common>', '#include <common>\nvarying vec2 urbanPaneUv;')
@@ -23,6 +24,7 @@ export function configureCityGlazing(material) {
 }
 
 export function configureCurtainWall(material, variant = 0) {
+  material.userData.urbanGlazing = true;
   material.roughness = .25; material.metalness = 0;
   material.onBeforeCompile = shader => {
     shader.uniforms.urbanFacadeVariant = { value: variant };
@@ -38,7 +40,7 @@ export function configureCurtainWall(material, variant = 0) {
       float glassMask = smoothstep(.035-aa.x,.035+aa.x,pane.x) * (1.-smoothstep(.965-aa.x,.965+aa.x,pane.x));
       glassMask *= smoothstep(.10-aa.y,.10+aa.y,pane.y) * (1.-smoothstep(.90-aa.y,.90+aa.y,pane.y));
       float roomSeed = urbanHash(floor(grid));
-      vec3 glassTone = mix(vec3(.19,.30,.34),vec3(.39,.48,.49),roomSeed);
+      vec3 glassTone = mix(vec3(.16,.23,.25),vec3(.24,.31,.33),roomSeed);
       glassTone *= .78 + smoothstep(.12,.85,pane.y) * .24;
       float blinds = step(.77,roomSeed) * step(.63,pane.y);
       glassTone = mix(glassTone,vec3(.53,.53,.45),blinds*.56);

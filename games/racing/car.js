@@ -1,8 +1,8 @@
 import * as THREE from './vendor/three.module.js';
 import { GLTFLoader } from './vendor/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from './vendor/addons/loaders/DRACOLoader.js';
-import { createExtraCar } from './cars-extra.js?v=city-drive-15';
-import { createProductionCar } from './cars-production.js?v=city-drive-15';
+import { createExtraCar } from './cars-extra.js?v=city-drive-16';
+import { createProductionCar } from './cars-production.js?v=city-drive-16';
 
 const asset = name => new URL(`./assets/${name}`, import.meta.url).href;
 const clamp = THREE.MathUtils.clamp;
@@ -202,15 +202,15 @@ export async function createCar({ renderer, mobile = false, vehicle = 'ferrari45
   contactSource.dispose();
   textures.push(contactTexture);
   const contactMaterial = material(THREE.MeshBasicMaterial, {
-    map: contactTexture, transparent: true, opacity: 0.72,
+    map: contactTexture, transparent: true, opacity: 0.84,
     depthWrite: false, toneMapped: false,
     polygonOffset: true, polygonOffsetFactor: -1, polygonOffsetUnits: -1,
   });
   const contact = new THREE.Mesh(new THREE.PlaneGeometry(2.62, 5.2), contactMaterial);
   contact.name = 'contact-shadow';
   contact.rotation.x = -Math.PI / 2;
-  contact.position.y = 0.008;
-  contact.renderOrder = 1;
+  contact.position.y = 0.045;
+  contact.renderOrder = 2;
   group.add(contact);
 
   const spinRotation = new THREE.Quaternion();

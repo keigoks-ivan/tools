@@ -1,10 +1,10 @@
 import * as THREE from 'three';
-import { createCityBuilder } from './world-city-kit.js?v=city-drive-15';
-import { addAustralianLandmarks, createCityWaterMaterial, addCityWaterPlane } from './world-city-australia.js?v=city-drive-15';
-import { addAmericanLandmarks } from './world-city-america.js?v=city-drive-15';
-import { addEuropeanLandmarks } from './world-city-europe.js?v=city-drive-15';
-import { addKobeStreets } from './world-city-kobe-streets.js?v=city-drive-15';
-import { cityDistrictAt, cityDistrictForPoint } from './world-city-districts.mjs?v=city-drive-15';
+import { createCityBuilder } from './world-city-kit.js?v=city-drive-16';
+import { addAustralianLandmarks, createCityWaterMaterial, addCityWaterPlane } from './world-city-australia.js?v=city-drive-16';
+import { addAmericanLandmarks } from './world-city-america.js?v=city-drive-16';
+import { addEuropeanLandmarks } from './world-city-europe.js?v=city-drive-16';
+import { addKobeStreets } from './world-city-kobe-streets.js?v=city-drive-16';
+import { cityDistrictAt, cityDistrictForPoint } from './world-city-districts.mjs?v=city-drive-16';
 
 function streetAtlas(b, city, mobile) {
   const canvas = document.createElement('canvas'); canvas.width = canvas.height = mobile ? 512 : 1024;

@@ -165,13 +165,13 @@ export const TRACKS = Object.freeze({
     width: 15, wallOffset: 13,
   }),
   taipei: buildTrack({
-    id: 'taipei', layoutVersion: 2, name: 'Taipei Xinyi', label: '台北・信義大道',
+    id: 'taipei', layoutVersion: 3, name: 'Taipei Xinyi', label: '台北・信義大道',
     description: '台北 101、騎樓商街與象山天際線；大道直線接信義街廓連續彎的改編封閉賽道。',
     anchors: [[-325, -255], [-325, -90], [-325, 80], [-305, 260], [-170, 335],
       [5, 335], [185, 335], [305, 260], [320, 150], [285, 65],
       [210, 5], [225, -85], [310, -150], [315, -240],
       [195, -325], [20, -325], [-165, -325], [-295, -325]],
-    height: phase => 5 + .18 * Math.sin(phase), width: 18, wallOffset: 14,
+    height: phase => 5 + .18 * Math.sin(phase), width: 14, wallOffset: 10.5,
   }),
   kualalumpur: buildTrack({
     id: 'kualalumpur', name: 'Kuala Lumpur KLCC', label: '吉隆坡・KLCC',

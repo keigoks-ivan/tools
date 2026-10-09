@@ -20,10 +20,10 @@ const plan = rows => Object.freeze(rows.map(([from, id, outer, inner], index) =>
 
 export const CITY_DISTRICT_PLANS = Object.freeze({
   taipei: plan([
-    [0, 'xinyi-anhe-arcades', street('apartment-shops', 'arcade', 22, 6, [13, 42], { gap: 1, widths: [10, 20] }), street('civic-arcades', 'arcade', 30, 8, [16, 40], { density: .85 })],
+    [0, 'xinyi-anhe-arcades', street('apartment-shops', 'arcade', 23, 3.8, [11.4, 43], { gap: 1.4, widths: [10, 21], trees: .6 }), street('civic-arcades', 'arcade', 32, 4.4, [14.8, 54], { density: .9, widths: [13, 25], trees: .55 })],
     [.23, 'daan-green-streets', street('park-neighbourhood', 'arcade', 37, 12, [13, 23], { density: .65 }), open('park-front', 'park', 70, { trees: .85 })],
     [.44, 'xinyi-commercial-centre', street('business-towers', 'tower', 78, 19, [48, 110], { density: .85, facades: 'modern', widths: [25, 37], ground: 'grass', groundWidth: 17 }), street('office-court', 'tower', 90, 26, [36, 92], { density: .7, facades: 'modern', ground: 'grass', groundWidth: 24 })],
-    [.72, 'tonghua-residential-lanes', street('older-apartments', 'arcade', 19, 5.5, [13, 26], { gap: 1, widths: [8, 16] }), street('mixed-apartments', 'arcade', 25, 7, [16, 32], { widths: [10, 18] })],
+    [.72, 'tonghua-residential-lanes', street('older-apartments', 'arcade', 21, 3.8, [11.4, 26], { gap: 1.2, widths: [8, 16] }), street('mixed-apartments', 'arcade', 27, 4.8, [14.8, 34], { widths: [10, 19] })],
   ]),
   kualalumpur: plan([
     [0, 'klcc-park-avenue', street('park-edge-towers', 'tower', 104, 24, [58, 132], { density: .75, facades: 'modern', widths: [24, 35], ground: 'grass', groundWidth: 21 }), open('tropical-park', 'park', 116, { trees: .95 })],

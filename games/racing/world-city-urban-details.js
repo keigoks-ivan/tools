@@ -1,7 +1,7 @@
 import * as THREE from 'three';
-import { createCityBuilder } from './world-city-kit.js?v=city-drive-15';
-import { cityDistrictAt } from './world-city-districts.mjs?v=city-drive-15';
-import { clipGroundTriangle } from './world-city-ground.mjs?v=city-drive-15';
+import { createCityBuilder } from './world-city-kit.js?v=city-drive-16';
+import { cityDistrictAt } from './world-city-districts.mjs?v=city-drive-16';
+import { clipGroundTriangle } from './world-city-ground.mjs?v=city-drive-16';
 
 // Street furniture and activity follow local architectural families. All artwork
 // is original geometry/canvas work; only the selected city allocates resources.

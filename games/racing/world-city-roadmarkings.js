@@ -3,7 +3,7 @@ import * as THREE from 'three';
 // Regional visual conventions applied to adapted, closed racing routes. These
 // are not a surveyed reconstruction of every street's traffic restrictions.
 export const CITY_ROAD_PROFILES = Object.freeze({
-  taipei: { centre: 'double-yellow', lanes: 3 },
+  taipei: { centre: 'double-yellow', lanes: 2 },
   kualalumpur: { centre: 'broken-white', lanes: 3 },
   kobe: { centre: 'single-yellow', lanes: 2 },
   london: { centre: 'broken-white', lanes: 2, edge: 'double-yellow' },

@@ -1,8 +1,8 @@
 import * as THREE from 'three';
-import { urbanJunctionAt } from './world-city-urban-details.js?v=city-drive-15';
-import { taipeiJunctionAt } from './world-city-taipei-streets.js?v=city-drive-15';
-import { CITY_ROAD_PROFILES } from './world-city-roadmarkings.js?v=city-drive-15';
-import { installCurbJoints } from './road-surface.mjs?v=city-drive-15';
+import { urbanJunctionAt } from './world-city-urban-details.js?v=city-drive-16';
+import { taipeiJunctionAt } from './world-city-taipei-streets.js?v=city-drive-16';
+import { CITY_ROAD_PROFILES } from './world-city-roadmarkings.js?v=city-drive-16';
+import { installCurbJoints } from './road-surface.mjs?v=city-drive-16';
 
 // The five visible profile faces run from asphalt level to a 140 mm raised
 // top. The lower outside edge finishes inside the existing pavement surface.
@@ -11,6 +11,7 @@ const cityCurbProfile = [[0, .035], [0, .145], [.025, .175], [.29, .175], [.32, 
 export function createCityCurbGeometry(track, { mobile = false } = {}) {
   const segments = Math.min(mobile ? 390 : 780, Math.ceil(track.length / (mobile ? 6.5 : 3.3)));
   const positions = [], colors = [], uv = [], indices = [], half = track.width / 2, arc = [0];
+  const curbPaint = new THREE.Color('#bd5148');
   // Spend the same fixed vertex budget on short bend spans and longer straight
   // spans. The two offset edges need more samples than the centreline on bends.
   const cumulative = [0], spacing = track.length / track.samples.length;
@@ -32,7 +33,8 @@ export function createCityCurbGeometry(track, { mobile = false } = {}) {
     const [offset, height] = cityCurbProfile[profile], shade = .97 + Math.sin(s / 21) * .02 + Math.sin(s / 3.7) * .01;
     const r = radius + Math.sign(radius) * offset;
     positions.push(p.x + p.nx * r, p.y + height, p.z + p.nz * r);
-    colors.push(shade, shade, shade); uv.push(arc[profile], s);
+    const redCurb = track.id === 'taipei' && Math.floor(s / 70) % 4 !== 3;
+    colors.push(shade * (redCurb ? curbPaint.r : 1), shade * (redCurb ? curbPaint.g : 1), shade * (redCurb ? curbPaint.b : 1)); uv.push(arc[profile], s);
     return positions.length / 3 - 1;
   }
   function triangle(a, b, c, direction) {

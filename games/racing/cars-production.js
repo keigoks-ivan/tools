@@ -1,10 +1,10 @@
 import * as THREE from './vendor/three.module.js';
 import { mergeGeometries, mergeVertices } from './vendor/addons/utils/BufferGeometryUtils.js';
-import { VEHICLES, PRODUCTION_CAR_DIMENSIONS } from './vehicles.mjs?v=city-drive-15';
-import { addVehicleTailLights } from './vehicle-taillights.js?v=city-drive-15';
-import { addVehicleRearDetails, REAR_DETAIL_PROFILES } from './vehicle-rear-details.js?v=city-drive-15';
-import { createBMWX3 } from './cars-bmw-x3.js?v=city-drive-15';
-import { loftGeometry, projectedNormals, surfaceNormal, weldSurfaceNormals } from './vehicle-body-surfaces.js?v=city-drive-15';
+import { VEHICLES, PRODUCTION_CAR_DIMENSIONS } from './vehicles.mjs?v=city-drive-16';
+import { addVehicleTailLights } from './vehicle-taillights.js?v=city-drive-16';
+import { addVehicleRearDetails, REAR_DETAIL_PROFILES } from './vehicle-rear-details.js?v=city-drive-16';
+import { createBMWX3 } from './cars-bmw-x3.js?v=city-drive-16';
+import { loftGeometry, projectedNormals, surfaceNormal, weldSurfaceNormals } from './vehicle-body-surfaces.js?v=city-drive-16';
 
 const clamp = THREE.MathUtils.clamp;
 const mix = THREE.MathUtils.lerp;
@@ -1194,7 +1194,7 @@ export function createProductionCar({ mobile = false, vehicle = 'porsche911gt3rs
   const data=new Uint8Array(64*128*4);
   for(let y=0;y<128;y++)for(let x=0;x<64;x++){
     const px=(x/63-.5)*shadowWidth,pz=(.5-y/127)*shadowLength,index=(y*64+x)*4;
-    const body=.42*Math.exp(-((px/(width*.36))**4+(pz/(length*.41))**4)*1.5);
+    const body=.60*Math.exp(-((Math.max(0,Math.abs(px)-width*.44)/.22)**2+(Math.max(0,Math.abs(pz)-length*.47)/.22)**2)*2);
     let darkness=body;
     for(const [z,frontAxle] of [[frontZ,true],[rearZ,false]])for(const side of [-1,1]){
       const tyreWidth=shape.wheelWidth[frontAxle?0:1],wheelX=side*(shape.track?shape.track[frontAxle?0:1]/2:halfWidth-tyreWidth*.5+.006);
@@ -1206,7 +1206,7 @@ export function createProductionCar({ mobile = false, vehicle = 'porsche911gt3rs
   }
   const shadowTexture=new THREE.DataTexture(data,64,128);shadowTexture.needsUpdate=true;shadowTexture.minFilter=shadowTexture.magFilter=THREE.LinearFilter;textures.add(shadowTexture);
   const shadowMat=material('contact-shadow',THREE.MeshBasicMaterial,{map:shadowTexture,transparent:true,depthWrite:false,toneMapped:false,polygonOffset:true,polygonOffsetFactor:-1,polygonOffsetUnits:-1});
-  const shadow=mesh(new THREE.PlaneGeometry(shadowWidth,shadowLength),shadowMat,group,'contact-shadow');shadow.rotation.x=-Math.PI/2;shadow.position.y=.008;shadow.renderOrder=1;shadow.castShadow=shadow.receiveShadow=false;
+  const shadow=mesh(new THREE.PlaneGeometry(shadowWidth,shadowLength),shadowMat,group,'contact-shadow');shadow.rotation.x=-Math.PI/2;shadow.position.y=.045;shadow.renderOrder=2;shadow.castShadow=shadow.receiveShadow=false;
   if(!inspectParts)batchStatic(chassis);
   let triangles=0;group.traverse(node=>{if(node.isMesh)triangles+=(node.geometry.index?.count||node.geometry.attributes.position.count)/3;});
   group.userData.model={name:preset.name,author:'APEX project',license:'Original procedural game artwork',source:preset.source,...spec,openTop:!!shape.open,wheelRadius:shape.radius,triangles:Math.round(triangles),signatures};
