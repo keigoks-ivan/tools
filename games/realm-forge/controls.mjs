@@ -1,4 +1,4 @@
-import { CLASSIC_BUILD_KEYS } from './civilization.mjs?v=20261009g';
+import { CLASSIC_BUILD_KEYS } from './civilization.mjs?v=20261009h';
 
 export const GRID_BUILD_KEYS = {
   economy: { q: 'house', w: 'mill', e: 'mining', r: 'lumber', t: 'dock', a: 'farm', s: 'blacksmith', d: 'market', f: 'monastery', g: 'university', z: 'town', x: 'wonder' },
@@ -24,6 +24,7 @@ export function eventKey(event) {
 }
 export function orderHint(unit) {
   if (unit.garrison) return '駐軍中';
+  if (unit.waitingResources) return '木材不足，等待修理';
   if (unit.waitingDropoff) return '等待卸貨點';
   if (unit.packLeft > 0) return `${unit.packed ? '打包' : '展開'}中 · ${Math.ceil(unit.packLeft)} 秒`;
   if (unit.failed) return '無法到達目標';

@@ -1,10 +1,10 @@
-import { World, BUILDINGS, TILE_NAMES, DEFAULT_UNITS, clone, clamp, defaultProject, validateProject, generateMap, enrichMapResources, findPath, tileType, setTile, buildingBounds } from './core.mjs?v=20261009g';
-import { CIVILIZATION, TECHNOLOGIES, STANCES, FORMATIONS } from './civilization.mjs?v=20261009g';
-import { Renderer, COLORS, SYMBOLS, drawUnit, wheelZoomFactor } from './renderer.js?v=20261009g';
-import { artReady } from './art.mjs?v=20261009g';
-import { upgradeLegacyMap, upgradeDefaultUnits, setEnemyCount, spreadStartingPositions } from './project-upgrades.mjs?v=20261009g';
-import { buildKeys, productionKey, menuKey, orderHint, technologyKey, commandKey, eventKey, GO_TO_BUILDINGS } from './controls.mjs?v=20261009g';
-import { actionReason, actionDescription, buildReason, placementFeedback, productionStatus, selectionGroups } from './ui-model.mjs?v=20261009g';
+import { World, BUILDINGS, TILE_NAMES, DEFAULT_UNITS, clone, clamp, defaultProject, validateProject, generateMap, enrichMapResources, findPath, tileType, setTile, buildingBounds } from './core.mjs?v=20261009h';
+import { CIVILIZATION, TECHNOLOGIES, STANCES, FORMATIONS } from './civilization.mjs?v=20261009h';
+import { Renderer, COLORS, SYMBOLS, drawUnit, wheelZoomFactor } from './renderer.js?v=20261009h';
+import { artReady } from './art.mjs?v=20261009h';
+import { upgradeLegacyMap, upgradeDefaultUnits, setEnemyCount, spreadStartingPositions } from './project-upgrades.mjs?v=20261009h';
+import { buildKeys, productionKey, menuKey, orderHint, technologyKey, commandKey, eventKey, GO_TO_BUILDINGS } from './controls.mjs?v=20261009h';
+import { actionReason, actionDescription, buildReason, placementFeedback, productionStatus, selectionGroups } from './ui-model.mjs?v=20261009h';
 const $ = id => document.getElementById(id);
 const markupCache = new Map();
 function html(id, markup) { if (markupCache.get(id)!==markup) { $(id).innerHTML=markup; markupCache.set(id,markup); } }
@@ -109,7 +109,7 @@ function switchMode(mode) {
 function selectedEntities() { return [...ui.selected].map(id => world.entity(id)).filter(Boolean); }
 function opponentLabel() { const count = project.map.spawns.length - 1; return project.rules.aiAlliance && count > 1 ? `${count} 個 AI 結盟對抗我方` : `對抗 ${count} 個 AI 王國`; }
 function ownEntities() { return selectedEntities().filter(e => e.team === 0 && !e.garrison); }
-function select(ids, append = false, toggle = true) { if (!append) ui.selected.clear(); for (const id of ids) { if (append && toggle && ui.selected.has(id)) ui.selected.delete(id); else ui.selected.add(id); } ui.buildMenu = false; ui.placement=null; ui.orderMode=null; ui.attackMove=false; updateHud(true); }
+function select(ids, append = false, toggle = true) { if (!append) ui.selected.clear(); for (const id of ids) { if (append && toggle && ui.selected.has(id)) ui.selected.delete(id); else ui.selected.add(id); } ui.buildMenu = false; ui.placement=null; ui.orderMode=null; ui.attackMove=false; $('selection-info').parentElement.scrollTop=0; updateHud(true); }
 function pruneHeroPlacements(map, units = project.units) { const ids = new Set(units.filter(u=>u.hero).map(u=>u.id)); map.heroPlacements = (map.heroPlacements || []).filter(p=>ids.has(p.unitId)); }
 function renderHeroPanel() {
   const heroes = project.units.filter(u=>u.hero), active = heroes.find(u=>u.id===ui.heroBrush);
@@ -327,8 +327,8 @@ function runAction(id, shift = false) {
   else if (id.startsWith('build:')) { ui.placement=id.slice(6); ui.attackMove=false; ui.orderMode=null; toast(ui.placement==='wall'?'左鍵拖曳放置一整段城牆；Shift 可接續排程。':`左鍵放置${BUILDINGS[ui.placement].name}；Shift 可連續放置。`); }
   else if (id==='build-menu'||id==='military-menu') { ui.buildMenu=true; ui.buildPage=id==='build-menu'?'economy':'military'; ui.placement=null; ui.orderMode=null; }
   else if (id==='build-back') { ui.buildMenu=false; ui.placement=null; }
-  else if (id==='dropoff') { for (const u of units.filter(u=>u.carried)) { const b=world.nearestDropoff(u); if (b) world.command([u.id],{type:'deliver',target:b.id,resume:u.order?.type==='gather'?clone(u.order):null},shift); } }
-  else if (id==='shelter') { for (const u of units) { const b=world.buildings.filter(b=>b.team===0&&b.progress===1&&BUILDINGS[b.type].garrison).sort((a,b)=>Math.hypot(a.x-u.x,a.y-u.y)-Math.hypot(b.x-u.x,b.y-u.y))[0]; if (b) world.command([u.id],{type:'garrison',target:b.id},shift); } }
+  else if (id==='dropoff') { let sent=0,error='沒有可到達且收取這種資源的卸貨建築。';for(const u of units.filter(u=>u.carried)){const b=world.nearestDropoff(u);if(b){const reason=world.command([u.id],{type:'deliver',target:b.id,resume:u.order?.type==='gather'?clone(u.order):null},shift);if(reason)error=reason;else sent++;}}if(!sent)toast(error); }
+  else if (id==='shelter') { const error=world.seekShelter(units.map(u=>u.id),shift);if(error)toast(error); }
   else if (id==='auto-scout') world.command(units.filter(u=>u.blueprint.id==='scout').map(u=>u.id),{type:'autoScout'});
   else if (id==='stop') { world.command(units.map(e=>e.id),null); cancelTargeting(); }
   else if (id==='attack-move') { ui.attackMove=true; ui.placement=null; ui.orderMode=null; toast('左鍵點地面，部隊會沿途迎擊。'); }
@@ -352,39 +352,43 @@ function issueAt(pos, shift = false, attackMove = false, forceGarrison = false, 
   const target=forceMove?null:renderer.hit(pos.x,pos.y,world,ui.started&&project.rules.fog);
   const resource=!forceMove&&!target&&!ui.orderMode&&!forceGarrison&&!attackMove?renderer.resourceHit(pos.x,pos.y,world,ui.started&&project.rules.fog):null;
   if (resource) p={x:resource.x,y:resource.y};
-  issueCommand(p,target,shift,attackMove,forceGarrison,forceMove);
+  return issueCommand(p,target,shift,attackMove,forceGarrison,forceMove);
 }
 function issueCommand(p, target, shift = false, attackMove = false, forceGarrison = false, forceMove = false) {
   p={x:Math.round(p.x),y:Math.round(p.y)};
-  const n=project.map.size; if (p.x<0||p.y<0||p.x>=n||p.y>=n) return;
+  const n=project.map.size; if (p.x<0||p.y<0||p.x>=n||p.y>=n) return false;
   const own=ownEntities(), units=own.filter(e=>e.kind==='unit'&&!e.garrison);
-  if (!own.length) { toast('先左鍵選取自己的村民或士兵，再右鍵下指令；按 . 可選取閒置村民。'); return; }
+  if (!own.length) { toast('先左鍵選取自己的村民或士兵，再右鍵下指令；按 . 可選取閒置村民。'); return false; }
+  let error=null,sent=false;
+  const send=(ids,order)=>{const result=world.command(ids,order,shift);if(result)error=result;else sent=true;};
   const mode=forceGarrison?'garrison':ui.orderMode;
   if (forceMove) { moveFormation(units,p,shift,false); for (const b of own.filter(e=>e.kind==='building')) b.rally={type:'move',...p}; }
   else if (own.every(e=>e.kind==='building')) { for (const b of own) b.rally=target?.team>0?{type:'attack',target:target.id}:target?.type==='farm'?{type:'gather',target:target.id}:['forest','food','gold','stone'].includes(world.tile(p.x,p.y))?{type:'gather',...p}:{type:'move',...p}; toast('集結點已設定。'); }
   else if (mode) {
-    if (mode==='attack-ground') world.command(units.filter(u=>u.blueprint.attackGround||u.blueprint.splash).map(u=>u.id),{type:'attackGround',...p},shift);
-    else if (mode==='patrol') world.command(units.map(e=>e.id),{type:'patrol',...p},shift);
-    else if (target) world.command(units.filter(u=>mode==='repair'?u.blueprint.role==='worker':mode==='convert'?u.blueprint.canConvert:mode==='heal'?u.blueprint.role==='healer':true).map(e=>e.id),{type:mode,target:target.id},shift);
-    else { toast('請點選有效目標。'); return; }
+    if (mode==='attack-ground') send(units.filter(u=>u.blueprint.attackGround||u.blueprint.splash).map(u=>u.id),{type:'attackGround',...p});
+    else if (mode==='patrol') send(units.map(e=>e.id),{type:'patrol',...p});
+    else if (target) send(units.filter(u=>mode==='repair'?u.blueprint.role==='worker':mode==='convert'?u.blueprint.canConvert:mode==='heal'?u.blueprint.role==='healer':true).map(e=>e.id),{type:mode,target:target.id});
+    else { toast('請點選有效目標。'); return false; }
   } else if (target?.team>0&&!attackMove) {
-    for (const u of units) world.command([u.id],{type:u.blueprint.canConvert&&target.kind==='unit'?'convert':'attack',target:target.id},shift);
+    for (const u of units) send([u.id],{type:u.blueprint.canConvert&&target.kind==='unit'?'convert':'attack',target:target.id});
   } else if (target?.team===0&&target.kind==='building'&&units.some(u=>u.blueprint.role==='worker')&&!attackMove) {
     const type=target.progress<1?'build':target.type==='farm'?'gather':target.hp<target.maxHp?'repair':null;
     const workers=units.filter(e=>e.blueprint.role==='worker');
     if (type==='gather') {
       const farm=workers.find(u=>!world.farmWorker(target,u.id));
-      if (farm) world.command([farm.id],{type:'gather',target:target.id},shift); else { toast('這座農田已有村民耕作。每座農田只供一名村民使用。'); return; }
-    } else if (type) world.command(workers.map(e=>e.id),{type,target:target.id},shift);
+      if (farm) send([farm.id],{type:'gather',target:target.id}); else { toast('這座農田已有村民耕作。每座農田只供一名村民使用。'); return false; }
+    } else if (type) send(workers.map(e=>e.id),{type,target:target.id});
     else if (workers.some(u=>u.carried&&BUILDINGS[target.type].dropoff?.includes(u.carrying))) {
-      for (const u of workers.filter(u=>u.carried&&BUILDINGS[target.type].dropoff?.includes(u.carrying))) world.command([u.id],{type:'deliver',target:target.id},shift);
+      for (const u of workers.filter(u=>u.carried&&BUILDINGS[target.type].dropoff?.includes(u.carrying))) send([u.id],{type:'deliver',target:target.id});
     }
     else moveFormation(units,p,shift,false);
-  } else if (target?.team===0&&target.kind==='unit'&&units.some(u=>u.blueprint.role==='healer')&&!attackMove) world.command(units.filter(u=>u.blueprint.role==='healer').map(u=>u.id),{type:'heal',target:target.id},shift);
-  else if (['forest','food','gold','stone'].includes(world.tile(p.x,p.y))&&units.some(e=>e.blueprint.role==='worker')&&!attackMove) world.command(units.filter(e=>e.blueprint.role==='worker').map(e=>e.id),{type:'gather',...p},shift);
+  } else if (target?.team===0&&target.kind==='unit'&&units.some(u=>u.blueprint.role==='healer')&&!attackMove) send(units.filter(u=>u.blueprint.role==='healer').map(u=>u.id),{type:'heal',target:target.id});
+  else if (['forest','food','gold','stone'].includes(world.tile(p.x,p.y))&&units.some(e=>e.blueprint.role==='worker')&&!attackMove) send(units.filter(e=>e.blueprint.role==='worker').map(e=>e.id),{type:'gather',...p});
   else moveFormation(units,p,shift,attackMove);
+  if(error&&!sent){toast(error);updateHud(true);return false;}
   renderer.marker={...p,attack:attackMove||target?.team>0,time:frameTime}; updateHud(true);
   if (!ui.started || ui.paused) toast(!ui.started ? '指令已設定；按「開始」後執行。' : '指令已設定，目前對戰暫停；按 F3 或「繼續」執行。');
+  return true;
 }
 function moveFormation(units,p,shift,attackMove) {
   world.moveFormation(units.map(u=>u.id),p,ui.formation,shift,attackMove);
@@ -434,8 +438,8 @@ $('map').addEventListener('pointerdown', e => {
     }
     else if (ui.mode === 'play' && ui.placement==='wall') { pointer={type:'wall',start:renderer.tileAt(pos.x,pos.y),shift:e.shiftKey,id:e.pointerId}; }
     else if (ui.mode === 'play' && ui.placement) { const p = renderer.tileAt(pos.x, pos.y), err = world.build(ownEntities().map(e => e.id), ui.placement, p.x, p.y, e.shiftKey); if (err) toast(err); else { if (!e.shiftKey) { ui.placement = null; ui.buildMenu=false; } if (!ui.started) toast('地基已放置，開始對戰後村民會動工。'); } updateHud(true); }
-    else if (ui.mode === 'play' && ui.attackMove) { issueAt(pos, e.shiftKey, true); ui.attackMove = false; updateHud(true); }
-    else if (ui.mode === 'play' && ui.orderMode) { issueAt(pos, e.shiftKey); if (!e.shiftKey) ui.orderMode = null; updateHud(true); }
+    else if (ui.mode === 'play' && ui.attackMove) { if(issueAt(pos,e.shiftKey,true)) ui.attackMove=false; updateHud(true); }
+    else if (ui.mode === 'play' && ui.orderMode) { if(issueAt(pos,e.shiftKey)&&!e.shiftKey) ui.orderMode=null; updateHud(true); }
     else pointer = { type: 'select', start: pos, end: pos, shift: e.shiftKey, unitsOnly:e.altKey, militaryOnly:e.ctrlKey, id: e.pointerId };
   }
   if (pointer) $('map').setPointerCapture(e.pointerId);
@@ -493,8 +497,8 @@ $('minimap').addEventListener('pointerdown', e => {
     if (right&&(ui.placement||ui.attackMove||ui.orderMode)) { cancelTargeting(); updateHud(true); return; }
     const forceMove=right&&e.button===2&&e.ctrlKey;
     const target=forceMove?null:world.units.filter(u=>!u.garrison&&world.isVisible(u)&&Math.hypot(u.x-p.x,u.y-p.y)<.8).sort((a,b)=>Math.hypot(a.x-p.x,a.y-p.y)-Math.hypot(b.x-p.x,b.y-p.y))[0]||world.buildings.find(b=>{ const a=buildingBounds(b.type,b.x,b.y);return b.hp>0&&world.isVisible(b)&&p.x>=a.minX-.5&&p.x<=a.maxX+.5&&p.y>=a.minY-.5&&p.y<=a.maxY+.5; });
-    issueCommand(p,target,e.shiftKey,ui.attackMove,right&&e.altKey,forceMove);
-    if (!e.shiftKey) { ui.attackMove=false;ui.orderMode=null; } updateHud(true);
+    const applied=issueCommand(p,target,e.shiftKey,ui.attackMove,right&&e.altKey,forceMove);
+    if (applied&&!e.shiftKey) { ui.attackMove=false;ui.orderMode=null; } updateHud(true);
   } else if (e.button===0) renderer.center(p);
 });
 $('zoom-out').onclick = () => zoom(1/1.1); $('zoom-in').onclick = () => zoom(1.1);

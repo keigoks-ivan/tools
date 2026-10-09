@@ -1,5 +1,5 @@
-import { BUILDINGS } from './core.mjs?v=20261009g';
-import { CIVILIZATION, TECHNOLOGIES } from './civilization.mjs?v=20261009g';
+import { BUILDINGS } from './core.mjs?v=20261009h';
+import { CIVILIZATION, TECHNOLOGIES } from './civilization.mjs?v=20261009h';
 
 export const RESOURCE_NAMES = { wood:'木材', food:'食物', gold:'黃金', stone:'石材' };
 export function resourceShortage(stocks, cost) {
@@ -27,6 +27,13 @@ export function actionReason(world, action, selected) {
     return resourceShortage(world.stocks[0],tech.cost);
   }
   if (action.id==='ungarrison' && !selected.some(b=>b.garrisoned?.length)) return '建築內沒有駐軍';
+  if (action.id==='dropoff') {
+    const carrying=selected.filter(u=>u.blueprint?.role==='worker'&&u.carried>0);
+    if(!carrying.length)return '村民目前沒有攜帶資源';
+    if(!carrying.some(u=>world.buildings.some(b=>b.team===0&&b.hp>0&&b.progress===1&&BUILDINGS[b.type].dropoff?.includes(u.carrying))))return '先完成能收取這種資源的建築';
+  }
+  if(action.id==='shelter'&&!world.shelterBuildings(0).length)return '沒有已完成且有空位的庇護建築';
+  if(action.id==='repair'&&!world.buildings.some(b=>b.team===0&&b.hp>0&&b.progress===1&&b.hp<b.maxHp))return '目前沒有受損的我方建築';
   return '';
 }
 export function placementFeedback(world, type, point) {

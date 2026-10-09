@@ -1,6 +1,6 @@
-import { CIV_UNITS, TECHNOLOGIES } from './civilization.mjs?v=20261009g';
-import { BUILDING_BALANCE } from './balance.mjs?v=20261009g';
-import { createRouteSearch } from './navigation.mjs?v=20261009g';
+import { CIV_UNITS, TECHNOLOGIES } from './civilization.mjs?v=20261009h';
+import { BUILDING_BALANCE } from './balance.mjs?v=20261009h';
+import { createRouteSearch } from './navigation.mjs?v=20261009h';
 export const clone = value => JSON.parse(JSON.stringify(value));
 export const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 export const RICH_RESOURCE_AMOUNTS = { wood: 5000, food: 10000, gold: 20000, stone: 20000 };
@@ -396,17 +396,70 @@ export class World {
     return {count,error:steps>40?'一次最多排程 41 段城牆。':null};
   }
   buildRequirements(team, type) { const prerequisite=BUILDINGS[type]?.requires;return !prerequisite || this.buildings.some(b=>b.team===team&&b.type===prerequisite&&b.hp>0&&b.progress===1); }
+  commandReason(u, order, queued=false) {
+    if (!order) return '';
+    const target=order.target?this.entity(order.target):null,worker=u.blueprint.role==='worker';
+    if (['build','repair','gather','deliver'].includes(order.type)&&!worker) return '這項工作需要村民。';
+    if (['build','repair','deliver','garrison'].includes(order.type)) {
+      if (!target||target.kind!=='building'||target.team!==u.team) return order.type==='garrison'?'請選擇可進駐的我方建築。':'請選擇有效的我方建築。';
+      if (order.type!=='build'&&target.progress<1) return '先完成這棟建築。';
+      if (order.type==='garrison'&&(!BUILDINGS[target.type].garrison||target.garrisoned.length>=BUILDINGS[target.type].garrison)) return BUILDINGS[target.type].garrison?'這棟建築的駐軍已滿。':'這棟建築不能進駐。';
+      if (order.type==='repair'&&target.hp>=target.maxHp&&!queued) return '這棟建築不需要修理。';
+      if (order.type==='deliver'&&!BUILDINGS[target.type].dropoff?.includes(u.carrying)&&u.carried) return '這棟建築不收這種資源。';
+    }
+    if (order.type==='gather'&&order.target) {
+      if (!target||target.kind!=='building'||target.type!=='farm'||target.team!==u.team||target.progress<1) return '請選擇已完成的我方農田。';
+      if (!queued&&this.farmWorker(target,u.id)) return '這座農田已有村民耕作。';
+    }
+    if (order.type==='heal'&&(u.blueprint.role!=='healer'||!target||target.kind!=='unit'||!this.isAlly(u.team,target.team))) return '治療需要僧侶與我方受傷單位。';
+    if (order.type==='convert'&&(!u.blueprint.canConvert||!target||target.kind!=='unit'||!this.isEnemy(u.team,target.team)||target.blueprint.hero)) return '請用僧侶選擇可招降的敵方單位。';
+    return '';
+  }
+  gatherTarget(u, point, checkPath=false) {
+    const type=this.tile(point.x,point.y);
+    const access=p=>[-1,0,1].some(dy=>[-1,0,1].some(dx=>(dx||dy)&&!this.blocked(p.x+dx,p.y+dy)));
+    if (!RESOURCE[type]||access(point)&&!checkPath) return point;
+    const cells=[{x:point.x,y:point.y}],seen=new Set([point.y*this.map.size+point.x]),candidates=[];
+    for(let i=0;i<cells.length&&i<512&&candidates.length<32;i++) {
+      const p=cells[i];if(access(p)&&this.amountAt(p.x,p.y)>0)candidates.push(p);
+      for(const [dx,dy] of [[-1,0],[1,0],[0,-1],[0,1]]) {const x=p.x+dx,y=p.y+dy,key=y*this.map.size+x;if(x>=0&&y>=0&&x<this.map.size&&y<this.map.size&&!seen.has(key)&&this.tile(x,y)===type){seen.add(key);cells.push({x,y});}}
+    }
+    candidates.sort((a,b)=>distance(u,a)+distance(point,a)*.1-distance(u,b)-distance(point,b)*.1);
+    return candidates.slice(0,12).find(p=>findPath(u,p,this.map.size,(x,y)=>this.blocked(x,y),1.5))||null;
+  }
+  garrisonReservations() {
+    const incoming=new Map();for(const u of this.units)if(u.hp>0&&!u.garrison)for(const target of new Set([u.order,...u.queued].filter(o=>o?.type==='garrison').map(o=>o.target)))incoming.set(target,(incoming.get(target)||0)+1);
+    return incoming;
+  }
+  shelterBuildings(team,incoming=this.garrisonReservations()) {
+    return this.buildings.filter(b=>b.team===team&&b.hp>0&&b.progress===1&&BUILDINGS[b.type].garrison>b.garrisoned.length+(incoming.get(b.id)||0));
+  }
+  seekShelter(ids,queued=false) {
+    let sent=0,missed=0,error='沒有可到達且有空位的庇護建築。';const incoming=this.garrisonReservations();
+    for(const id of ids){const u=this.entity(id);if(!u||u.kind!=='unit'||u.garrison)continue;
+      const b=this.shelterBuildings(u.team,incoming).sort((a,b)=>goalDistance(u,a)-goalDistance(u,b)).find(b=>findPath(u,b,this.map.size,(x,y)=>this.blocked(x,y),1.5));
+      if(b){const reason=this.command([id],{type:'garrison',target:b.id},queued);if(reason){error=reason;missed++;}else{incoming.set(b.id,(incoming.get(b.id)||0)+1);sent++;}}else missed++;
+    }
+    if(sent&&missed)this.note(`${missed} 名單位尚無可用庇護空間。`);
+    return sent?null:error;
+  }
   command(ids, order, queued = false) {
-    if (order && ['move', 'attackMove', 'patrol'].includes(order.type) && this.blocked(order.x, order.y)) { const p = this.nearestOpen(order); if (!p) return; order = { ...order, ...p }; }
+    if (order && ['move', 'attackMove', 'patrol'].includes(order.type) && this.blocked(order.x, order.y)) { const p = this.nearestOpen(order); if (!p) return '目的地附近沒有可行走空地。'; order = { ...order, ...p }; }
+    if(order?.type==='gather'&&!order.target){const worker=ids.map(id=>this.entity(id)).find(u=>u?.blueprint?.role==='worker'&&!u.garrison);if(worker){const target=this.gatherTarget(worker,order);if(target)order={...order,...target};}}
+    let accepted=0,error='沒有可接受這項指令的單位。';
     for (const id of ids) { const u = this.entity(id); if (!u || u.kind !== 'unit' || u.garrison) continue;
+      const reason=this.commandReason(u,order,queued);if(reason){error=reason;continue;}
+      if(queued&&order&&(u.queued.length>=40||u.order?.type==='patrol'&&order.type==='patrol'&&u.order.points.length>=40)){error='指令佇列已滿。';continue;}accepted++;
       if (queued && u.order?.type === 'patrol' && order?.type === 'patrol') { if (u.order.points.length < 40) u.order.points.push({ x: order.x, y: order.y }); }
       else if (queued && order && u.order) { if (u.queued.length < 40) u.queued.push(clone(order)); }
       else { u.order = clone(order); u.queued = []; this.resetOrder(u); }
     }
+    return accepted?null:error;
   }
   resetOrder(u) {
     this.routeSearches?.delete(u.id);
     u.waitingDropoff = false;
+    u.waitingResources = false;
     u.path = []; u.pathGoal = null; u.repath = 0; u.work = 0; u.autoTarget = null; u.combatOrigin = null; u.combatReturning = false; u.autoTimer = 0; u.failed = false;
     if (u.order?.type === 'patrol' && !u.order.points) { u.order.origin = { x: u.x, y: u.y }; u.order.points = [clone(u.order.origin), { x: u.order.x, y: u.order.y }]; u.order.pointIndex = 1; u.order.direction = 1; }
   }
@@ -643,7 +696,7 @@ export class World {
         const target = this.entity(o.target); if (!target || target.garrison || !this.isEnemy(u.team, target.team)) this.finish(u); else if (this.attackReady(u, target, dt)) this.strike(u, target, bp.attack, bp.range, bp.cooldown);
       } else if (o.type === 'gather' && bp.role === 'worker') {
         const farm = o.target ? this.entity(o.target) : null;
-        if (o.target && !farm) { if (u.carried && this.deliver(u)) continue; this.finish(u); continue; }
+        if (o.target && (!farm||farm.kind!=='building'||farm.type!=='farm')) { if (u.carried && this.deliver(u)) continue; this.finish(u); continue; }
         const point = farm || o, i = point.y * this.map.size + point.x, type = farm?.type === 'farm' ? 'food' : RESOURCE[this.tile(o.x, o.y)], remaining = farm ? farm.foodRemaining : this.amountAt(o.x, o.y);
         if (farm && (farm.team !== u.team || this.farmWorker(farm, u.id)?.id < u.id)) { this.finish(u); continue; }
         const capacity = 10 * this.modifiers(u.team).carry;
@@ -653,6 +706,7 @@ export class World {
           if (farm && this.canPay(u.team, { wood: 60 })) { this.pay(u.team, { wood: 60 }); farm.foodRemaining = 175 + (this.modifiers(u.team).farmFood || 0); }
           else { const next = this.closestResource(u, u.carrying); if (next && !u.queued.length) { u.order = { type: 'gather', ...next }; this.resetOrder(u); } else this.finish(u); } continue;
         }
+        if(!farm&&u.failed&&u.repath<=dt&&this.pathBudget>0&&performance.now()<this.pathDeadline){this.pathBudget--;const next=this.gatherTarget(u,o,true);if(next&&(next.x!==o.x||next.y!==o.y)){u.order={type:'gather',...next};this.resetOrder(u);continue;}}
         if (this.walk(u, point, farm ? .7 : 1.5, dt)) {
           if (u.carrying && u.carrying !== type) u.carried = 0;
           const rate = farm ? .32 : {wood:.39,food:.33,gold:.38,stone:.36}[type], take = Math.min(capacity - u.carried, remaining, rate * dt * this.modifiers(u.team).gather[type]);
@@ -663,16 +717,16 @@ export class World {
         }
       } else if (o.type === 'deliver') {
         const b = this.entity(o.target);
-        if (!b || b.team !== u.team || b.progress < 1 || !BUILDINGS[b.type].dropoff?.includes(u.carrying) || u.failed) {
+        if (!b || b.kind !== 'building' || b.team !== u.team || b.progress < 1 || !BUILDINGS[b.type].dropoff?.includes(u.carrying) || u.failed) {
           if (!this.deliver(u, o.resume, o.target)) { u.order = o.resume || {type:'waitDropoff',resume:null}; this.resetOrder(u); }
         } else if (this.walk(u, b, 1.6, dt)) { this.depositCarried(u); if (o.resume) { u.order = o.resume; this.resetOrder(u); } else this.finish(u); }
       } else if (o.type === 'waitDropoff') { u.work += dt; if (u.work >= 1) { u.work = 0; this.deliver(u, o.resume); } }
-      else if (o.type === 'build' && bp.role === 'worker') { const b = this.entity(o.target); if (!b || b.team !== u.team) this.finish(u); else if (b.progress === 1) this.finishConstruction(u, b); else if (this.walk(u, b, 1.6, dt)) { const before = b.progress; b.progress = Math.min(1, b.progress + dt / BUILDINGS[b.type].time); b.hp = Math.min(b.maxHp, b.hp + (b.progress - before) * (b.maxHp - 40)); u.attackAnimation = .55; if (b.progress === 1) { if (b.team === 0) this.note(`${BUILDINGS[b.type].name}完工。`, b); this.finishConstruction(u, b); } } }
+      else if (o.type === 'build' && bp.role === 'worker') { const b = this.entity(o.target); if (!b || b.kind !== 'building' || b.team !== u.team) this.finish(u); else if (b.progress === 1) this.finishConstruction(u, b); else if (this.walk(u, b, 1.6, dt)) { const before = b.progress; b.progress = Math.min(1, b.progress + dt / BUILDINGS[b.type].time); b.hp = Math.min(b.maxHp, b.hp + (b.progress - before) * (b.maxHp - 40)); u.attackAnimation = .55; if (b.progress === 1) { if (b.team === 0) this.note(`${BUILDINGS[b.type].name}完工。`, b); this.finishConstruction(u, b); } } }
       else if (o.type === 'heal' && bp.role === 'healer') { const t = this.entity(o.target); if (!t || !this.isAlly(t.team, u.team)) this.finish(u); else if (this.walk(u, t, bp.range, dt) && u.cooldown <= 0) { t.hp = Math.min(t.maxHp, t.hp + bp.attack); u.cooldown = bp.cooldown; u.attackAnimation = .55; this.effects.push({ type: 'heal', x: t.x, y: t.y, age: 0 }); } }
       else if (o.type === 'patrol') { if (this.walk(u, o, .3, dt)) { const last = o.points.length - 1; if (o.pointIndex === last && distance(o.points[0], o.points[last]) < .3) o.pointIndex = 1; else { if (o.pointIndex === last) o.direction = -1; if (o.pointIndex === 0) o.direction = 1; o.pointIndex += o.direction; } Object.assign(o, o.points[o.pointIndex]); u.path = []; u.pathGoal = null; u.repath = 0; } }
       else if (o.type === 'follow' || o.type === 'guard') { const t = this.entity(o.target); if (!t || o.type === 'guard' && !this.isAlly(t.team, u.team) || t.id === u.id) this.finish(u); else this.walk(u, t, o.type === 'follow' ? 5 : 2.5, dt); }
-      else if (o.type === 'repair' && bp.role === 'worker') { const b = this.entity(o.target); if (!b || b.team !== u.team || b.hp >= b.maxHp) this.finish(u); else if (this.walk(u, b, 1.5, dt) && this.stocks[u.team].wood > 0) { b.hp = Math.min(b.maxHp, b.hp + dt * 35); this.stocks[u.team].wood = Math.max(0, this.stocks[u.team].wood - dt * 2); u.attackAnimation = .55; } }
-      else if (o.type === 'garrison') { const b = this.entity(o.target); if (!b || b.team !== u.team || !BUILDINGS[b.type].garrison || b.garrisoned.length >= BUILDINGS[b.type].garrison) this.finish(u); else if (this.walk(u, b, 1.5, dt)) { if (BUILDINGS[b.type].dropoff?.includes(u.carrying)) this.depositCarried(u); b.garrisoned.push(u.id); u.garrison = b.id; u.x = b.x; u.y = b.y; this.finish(u); } }
+      else if (o.type === 'repair' && bp.role === 'worker') { const b = this.entity(o.target); if (!b || b.kind !== 'building' || b.team !== u.team || b.progress < 1 || b.hp >= b.maxHp) this.finish(u); else if (this.walk(u, b, 1.5, dt)) { u.waitingResources=this.stocks[u.team].wood<=0; if(u.waitingResources) continue; b.hp = Math.min(b.maxHp, b.hp + dt * 35); this.stocks[u.team].wood = Math.max(0, this.stocks[u.team].wood - dt * 2); u.attackAnimation = .55; } }
+      else if (o.type === 'garrison') { const b = this.entity(o.target); if (!b || b.kind !== 'building' || b.progress < 1 || b.team !== u.team || !BUILDINGS[b.type].garrison || b.garrisoned.length >= BUILDINGS[b.type].garrison) this.finish(u); else if (this.walk(u, b, 1.5, dt)) { if (BUILDINGS[b.type].dropoff?.includes(u.carrying)) this.depositCarried(u); b.garrisoned.push(u.id); u.garrison = b.id; u.x = b.x; u.y = b.y; this.finish(u); } }
       else if (o.type === 'convert' && bp.canConvert) { const t = this.entity(o.target); if (!t || !this.isEnemy(t.team, u.team) || t.kind !== 'unit' || t.blueprint.hero) this.finish(u); else if (!t.garrison && (u.faith ?? 100) >= 99.99 && this.walk(u, t, bp.range, dt)) { u.work += dt; u.attackAnimation = .55; if (u.work > (this.researched[t.team].has('faith') ? 12 : 6)) { t.team = u.team; this.command([t.id], null); u.faith = 0; this.finish(u); } } }
     }
     this.aiTimer += dt;
