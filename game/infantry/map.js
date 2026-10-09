@@ -16,6 +16,17 @@ export function buildBattlefield(scene, materials, scenario) {
   paint.userData.tile=3;paint.userData.noCast=true;ownedMaterials.add(paint);
   const glass=new THREE.MeshStandardMaterial({color:0x253b45,roughness:.2,metalness:.18,vertexColors:true});glass.userData.tile=3;ownedMaterials.add(glass);
   const mats={...materials,paint,glass};
+  // Painted equipment reflects through its coating rather than behaving like
+  // bare steel. Keep the photographs, normals, roughness and weathering shared;
+  // only these scene-owned material instances change their metallic response.
+  for(const [key,metalness]of [['metal',.12],['corr',.08],['rust',.2]]){
+    const original=materials[key],coated=original.clone();
+    coated.name='infantry-coated-'+key;
+    coated.onBeforeCompile=original.onBeforeCompile;
+    coated.customProgramCacheKey=original.customProgramCacheKey;
+    coated.metalnessMap=null;coated.metalness=metalness;
+    mats[key]=coated;ownedMaterials.add(coated);
+  }
   const b=new Builder(mats,solid);
   const ground=(x,z)=>id==='dam'?clamp((z-3)/35,0,1)*5.6:id==='pass'?clamp((z+30)/88,0,1)*5.4:id==='city'?clamp((z+15)/70,0,1)*2.6:id==='forest'?Math.max(0,.24*Math.sin(z*.09)+.16*Math.sin(x*.18+z*.05)+.12):0;
   const floorAt=solid.floorAt.bind(solid),ray=solid.ray.bind(solid);

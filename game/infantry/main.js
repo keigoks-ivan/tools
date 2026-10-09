@@ -9,7 +9,7 @@ import { loadSurfaces } from '../mech/zero/kit.js';
 import { Models } from '../mech/zero/models.js';
 import { Post } from '../mech/post.js';
 import { pixelRatio, qualityLevel, FrameGate } from '../mech/runtime.js';
-import { buildBattlefield, addSigns } from './map.js';
+import { buildBattlefield, addSigns } from './map.js?v=2';
 import { addBattlefieldArt } from './art.js';
 import { SCENARIOS, MODES, DIFFICULTIES, Mission, selection } from './scenarios.mjs';
 import { InfantryHUD } from './hud.js';
@@ -25,29 +25,22 @@ let language=read('language','zh')==='en'?'en':'zh',choice=selection(read('selec
 let variantIndex=clamp(Math.floor(Number(read('operation',0))||0),0,2),sortieSeed=Date.now()>>>0;
 const words={
   lobby:['遊戲大廳','Games lobby'],fullscreen:['全螢幕','Fullscreen'],standalone:['鋼鐵黃昏・獨立步兵篇','IRON DUSK / STANDALONE INFANTRY'],tagline:['機甲離開之後，防線由我們守住。','When the mechs leave, we hold the line.'],
-  battlefields:['座戰場','BATTLEFIELDS'],operations:['種作戰','OPERATIONS'],squad:['支小隊','SQUAD'],choose:['選擇戰場','CHOOSE YOUR BATTLEFIELD'],defend:['守衛戰','Hold the line'],assault:['衝鋒戰','Breakthrough'],defendShort:['抵擋四波攻擊','Survive four enemy waves'],assaultShort:['依序奪下三座據點','Secure three sectors'],
+  battlefields:['座戰場','BATTLEFIELDS'],operations:['種作戰','OPERATIONS'],squad:['支小隊','SQUAD'],choose:['選擇戰場','CHOOSE YOUR BATTLEFIELD'],selectedBattlefield:['目前戰場','SELECTED BATTLEFIELD'],defend:['守衛戰','Hold the line'],assault:['衝鋒戰','Breakthrough'],defendShort:['抵擋四波攻擊','Survive four enemy waves'],assaultShort:['依序奪下三座據點','Secure three sectors'],
   difficulty:['難度','Difficulty'],settings:['操作與設定','Controls & settings'],deploy:['開始作戰','DEPLOY SQUAD'],desktop:['建議鍵盤＋滑鼠遊玩，亦提供觸控操作','Keyboard + mouse recommended · Touch controls included'],cleanup:['最後兩名敵人自動定位・不用繞地圖找人','The final two enemies are tracked automatically'],
   quality:['畫質','Graphics'],sensitivity:['滑鼠靈敏度','Mouse sensitivity'],volume:['音效音量','Effects volume'],music:['音樂音量','Music volume'],move:['移動','Move'],run:['跑步／狙擊屏息','Sprint / hold breath'],mouse:['滑鼠','MOUSE'],aim:['左鍵開火・右鍵瞄準','Left: fire · Right: aim'],crouch:['蹲下','Crouch'],jump:['跳躍','Jump'],reload:['換彈','Reload'],weapons:['長槍／手槍／衝鋒槍','Rifle / pistol / SMG'],grenade:['手榴彈','Grenade'],interact:['按住佔領／補給','Hold to capture / resupply'],mapPause:['戰術地圖／暫停','Map / pause'],resume:['返回','Back'],quit:['返回戰場選單','Battlefield selection'],tactical:['戰術地圖','Tactical map'],mapLegend:['青色：小隊　琥珀：目標　紅色：目視敵軍／最後殘敵','Cyan: squad · Gold: objective · Red: visible enemies / last survivors'],back:['返回戰場 · M','Back to battle · M'],retry:['再次作戰','Deploy again'],chooseAnother:['選擇其他戰場','Another battlefield'],fire:['射擊','Fire'],ads:['瞄準','Aim'],sprint:['跑','Run'],swap:['換槍','Swap'],interactShort:['操作','Use'],
   operationPlan:['作戰方案','Operation plan'],reshuffle:['每次部署重新編排敵軍與攻勢方向','Each deployment reshuffles enemy formations and attack lanes'],squadCommands:['小隊：跟隨／原地掩護／推進','Squad: follow / hold position / advance'],command:['小隊','Squad'],
 };
 const text=(zh,en)=>language==='zh'?zh:en;
 function translate(){document.documentElement.lang=language==='zh'?'zh-Hant':'en';for(const el of document.querySelectorAll('[data-t]'))el.textContent=words[el.dataset.t][language==='zh'?0:1];$('language').textContent=language==='zh'?'EN':'中文';}
-function illustration(id){
-  const common='<path d="M0 94L150 94" stroke="#75918d" opacity=".5"/><path d="M12 112L72 73 100 73 150 105" fill="none" stroke="#d7b27b" opacity=".45"/>';
-  const shapes={
-    pass:'<path d="M-10 90L26 22 58 69 90 12 158 91" fill="#788d82" opacity=".7"/><path d="M54 96L61 65Q77 45 92 65L106 96" fill="#344852" stroke="#b6c2a2"/><path d="M67 95V74Q77 62 86 74V95" fill="#1c2b34"/>',
-    city:'<path d="M12 94V47H44V26H69V94M91 94V18H123V53H144V94" fill="#718580" opacity=".65"/><path d="M18 57H36M18 70H36M50 37H62M50 51H62M98 33H116M98 47H116M98 62H116M129 64H139" stroke="#afbfaa" stroke-width="4"/>',
-    forest:'<path d="M3 93L27 44 18 45 32 17 48 47 39 47 62 93M57 95L77 52 69 52 83 28 96 53 90 53 111 95M96 94L119 47 108 47 128 12 147 48 138 48 162 94" fill="#76927c" opacity=".8"/><path d="M32 60V98M83 66V100M128 58V96" stroke="#c0b491" stroke-width="3"/>',
-    dam:'<path d="M0 72L150 72V107H0" fill="#7091a0" opacity=".3"/><path d="M15 96L29 40 137 40 150 96" fill="#759091"/><path d="M44 40L35 96M67 40L65 96M92 40L95 96M116 40L125 96" stroke="#344b55" stroke-width="9"/><path d="M26 34H145" stroke="#c0c8ad" stroke-width="3"/>',
-    airfield:'<path d="M16 95V73Q44 29 73 73V95" fill="#6d8685"/><path d="M29 95V75Q44 49 60 75V95" fill="#263c47"/><path d="M108 18L112 95M94 48H130L125 27H98Z" fill="#95aba0"/><path d="M84 84L107 77 123 78 146 84 123 85 117 95 110 95 106 84Z" fill="#c0b994"/>',
-    underground:'<path d="M0 25H155V33H0M18 33V98M139 33V98" stroke="#78939a" stroke-width="7"/><path d="M32 52H63V96H32M79 63H117V96H79" fill="#637f82"/><path d="M45 35V61M94 35V71" stroke="#c2a790" stroke-width="8"/><path d="M72 33V21H111" stroke="#8aa7ab" stroke-width="4" fill="none"/>',
-    rail:'<path d="M8 92V63H67V92M80 92V43H141V92" fill="#738b88"/><path d="M17 70V88M27 70V88M37 70V88M47 70V88M57 70V88M89 52V88M99 52V88M109 52V88M119 52V88M129 52V88" stroke="#354c56" stroke-width="3"/><path d="M17 95L1 116M52 95L48 116M106 93L139 116" stroke="#c8b894" stroke-width="2"/><path d="M7 18H139M17 18V51M131 18V33" stroke="#aac0b2" stroke-width="3"/>',
-  };
-  return `<svg viewBox="0 0 155 118" aria-hidden="true">${shapes[id]}${common}</svg>`;
-}
+const briefingImage=id=>`./assets/briefing/${id}.webp?v=2`;
 function renderMenu(){
-  translate();$('scenarios').innerHTML=SCENARIOS.map((s,i)=>`<button class="scenario" data-scene="${s.id}" aria-pressed="${s.id===choice.scene}"><span class="index">0${i+1}</span>${illustration(s.id)}<strong>${s.name[language]}</strong><small>${s.code.split(' / ')[1]}</small></button>`).join('');
+  const focusedScene=document.activeElement?.closest('[data-scene]')?.dataset.scene;
+  translate();$('scenarios').innerHTML=SCENARIOS.map((s,i)=>`<button class="scenario" data-scene="${s.id}" aria-pressed="${s.id===choice.scene}" style="--scene-accent:${s.color}"><img class="scenario-image" src="${briefingImage(s.id)}" alt="" width="1672" height="941" loading="${s.id===choice.scene?'eager':'lazy'}" decoding="async"><span class="index">0${i+1}</span><span class="scenario-state" aria-hidden="true">✓</span><span class="scenario-copy"><strong>${s.name[language]}</strong><small>${s.code.split(' / ')[1]}</small></span></button>`).join('');
+  if(focusedScene)$('scenarios').querySelector(`[data-scene="${focusedScene}"]`)?.focus({preventScroll:true});
   const s=SCENARIOS.find(s=>s.id===choice.scene);document.documentElement.style.setProperty('--gold',s.color);
+  $('menu').style.setProperty('--scene-accent',s.color);
+  if($('heroSceneImage').getAttribute('src')!==briefingImage(s.id))$('heroSceneImage').src=briefingImage(s.id);
+  $('heroSceneName').textContent=s.name[language];$('heroSceneCode').textContent=s.code;
   $('sceneCode').textContent=s.code;$('sceneName').textContent=s.name[language];$('sceneBrief').textContent=s.brief[language];$('difficulty').value=choice.difficulty;
   for(const b of document.querySelectorAll('[data-mode]'))b.setAttribute('aria-pressed',b.dataset.mode===choice.mode);
   $('operation').innerHTML=[0,1,2].map(i=>`<option value="${i}">${operationFor(choice.scene,sortieSeed,i).name[language]}</option>`).join('');$('operation').value=variantIndex;
@@ -73,14 +66,14 @@ async function initialize(){
   scene=new THREE.Scene();camera=new THREE.PerspectiveCamera(72,innerWidth/innerHeight,.05,800);camera.rotation.order='YXZ';
   vScene=new THREE.Scene();vCamera=new THREE.PerspectiveCamera(54,innerWidth/innerHeight,.01,10);
   let loaded=0;const progress=()=>{$('loadProgress').style.width=Math.min(95,5+(++loaded)*1.5)+'%';};
-  const tex=new THREE.TextureLoader();
+  const tex=new THREE.TextureLoader(),aniso=Math.min(8,renderer.capabilities.getMaxAnisotropy());
   async function surface(name,stem,color,tile){
     const base='../mech/zero/assets/env/';const [map,normalMap,arm]=await Promise.all([tex.loadAsync(base+stem+'_diff.webp'),tex.loadAsync(base+stem+'_nor.webp'),name==='rock'?Promise.resolve(null):tex.loadAsync(base+stem+'_arm.webp')]);
-    for(const t of [map,normalMap,arm].filter(Boolean)){t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=4;}map.colorSpace=THREE.SRGBColorSpace;
+    for(const t of [map,normalMap,arm].filter(Boolean)){t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=aniso;}map.colorSpace=THREE.SRGBColorSpace;
     const material=new THREE.MeshStandardMaterial({map,normalMap,roughnessMap:arm,color,roughness:1,vertexColors:true});material.normalScale.setScalar(.6);material.userData.tile=tile;progress();return material;
   }
   [materials,models,kit,sky,environment]=await Promise.all([
-    loadSurfaces(renderer,progress),Models.load(progress,4),HumanKit.load('../mech/zero/assets/soldier.glb').then(k=>{progress();return k;}),
+    loadSurfaces(renderer,progress),Models.load(progress,aniso),HumanKit.load('../mech/zero/assets/soldier.glb').then(k=>{progress();return k;}),
     tex.loadAsync('../mech/zero/assets/env/sky.webp').then(t=>{t.colorSpace=THREE.SRGBColorSpace;t.mapping=THREE.EquirectangularReflectionMapping;progress();return t;}),
     new RGBELoader().loadAsync('../mech/assets/env.hdr').then(hdr=>{const pmrem=new THREE.PMREMGenerator(renderer),target=pmrem.fromEquirectangular(hdr);hdr.dispose();pmrem.dispose();progress();return target.texture;}),
   ]);
@@ -96,7 +89,8 @@ async function initialize(){
 function applyQuality(sun){renderer.setPixelRatio(pixelRatio(innerWidth,innerHeight,devicePixelRatio,settings.quality));renderer.setSize(innerWidth,innerHeight);post.setQuality(settings.quality);post.setSize(innerWidth,innerHeight);post.gtao.enabled=settings.quality>0;post.bloom.enabled=settings.quality>0;sun.shadow.mapSize.setScalar(settings.quality===2?2048:1024);sun.shadow.map?.dispose();sun.shadow.map=null;renderer.shadowMap.enabled=settings.quality>0;}
 function rebuild(){
   combat?.clear();map?.dispose();map=buildBattlefield(scene,materials,SCENARIOS.find(s=>s.id===choice.scene));addSigns(map,language);addBattlefieldArt(map,models,choice.scene);
-  scene.background=choice.scene==='underground'?new THREE.Color(0x141c26):sky;scene.fog=new THREE.FogExp2(choice.scene==='underground'?0x162630:SCENARIOS.find(s=>s.id===choice.scene).fog,choice.scene==='underground'?.018:.0065);
+  const fogDensity={pass:.0048,city:.0045,forest:.0065,dam:.0048,airfield:.0038,underground:.018,rail:.0045};
+  scene.background=choice.scene==='underground'?new THREE.Color(0x141c26):sky;scene.fog=new THREE.FogExp2(choice.scene==='underground'?0x162630:SCENARIOS.find(s=>s.id===choice.scene).fog,fogDensity[choice.scene]);
   scene.environmentIntensity=choice.scene==='underground'?.45:1;vScene.environmentIntensity=.5;
   player=new Pilot(map.solid);player.reset(new THREE.Vector3(0,map.ground(0,-29),-29),0);
   player.onStep=speed=>audio?.step(choice.scene==='forest'?'dirt':'concrete',speed);player.onLand=k=>{audio.land(k);vm.land(k);};player.onShieldBreak=()=>audio.shieldBreak();player.onRecharge=()=>audio.shieldRecharge();
