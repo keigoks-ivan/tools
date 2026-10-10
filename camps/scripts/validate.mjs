@@ -42,6 +42,7 @@ for (const g of programs) {
   for (const l of g.location_ids || []) if (!Lc.has(l)) err(g.id, `unknown location ${l}`);
   if (g.age_min != null && g.age_max != null && g.age_min > g.age_max) err(g.id, `age_min > age_max`);
   if (!(g.sources || []).length) warn(g.id, 'program has no sources');
+  for (const k of ['staffing', 'facilities']) if (g[k] != null && typeof g[k] !== 'string') err(g.id, `${k} ${g[k]}`);
 }
 
 for (const s of sessions) {

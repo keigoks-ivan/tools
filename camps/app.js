@@ -23,6 +23,7 @@ const citiesOf = (it) => [...new Set((it.locs || []).map((l) => cityZh(l.city)))
 const awayRank = (it) => (it.locs?.some((l) => KL.includes(l.city)) ? 0 : 1);
 const klFirst = (list) => [...list].sort((a, b) => awayRank(a) - awayRank(b));
 const FORMATS = { day: '日營', residential: '住宿營', family_with_parent: '親子同行', parent_optional: '家長可同行' };
+const VENUES = { school: '學校校園', centre: '機構教室', hotel: '飯店', outdoor: '戶外場地', other: '其他場地' };
 const CATEGORIES = {
   english: '英語', stem: '科學／STEM', arts: '藝術', sport: '運動', multi_activity: '綜合活動',
   outdoor: '戶外', residential: '住宿', leadership: '領導力', family: '親子', travel: '遊學旅行', short_term_enrolment: '學校插班', other_language: '其他語言',
@@ -168,6 +169,23 @@ function confBadge(c) {
   return `<span class="badge ${cls}">可信度 ${t}</span>`;
 }
 
+// what the operator says about venue, groups and staff, and safety; each a list of escaped lines
+function venueParts(it) {
+  const types = [...new Set(it.locs.map((l) => VENUES[l.venue_type]).filter(Boolean))];
+  return [types.join('、'), it.program.facilities && esc(it.program.facilities)].filter(Boolean);
+}
+
+function staffParts(p) {
+  return [p.staff_ratio && `師生比 ${esc(p.staff_ratio)}`, p.class_size_avg && `平均每班 ${esc(p.class_size_avg)} 人`,
+    p.class_size_max && `每班最多 ${esc(p.class_size_max)} 人`, p.staffing && esc(p.staffing)].filter(Boolean);
+}
+
+function safetyParts(p) {
+  const s = p.safety || {};
+  return [s.first_aid && `急救：${esc(s.first_aid)}`, s.insurance === true && '有保險', s.cctv === true && '有監視器',
+    s.notes && esc(s.notes)].filter(Boolean);
+}
+
 function kidsLine(it) {
   return it.kids.map((k) => {
     const mark = { yes: '✓', no: '✗ 不符', maybe: '？生日當月', unknown: '？' }[k.fit];
@@ -298,8 +316,9 @@ function detailsBlock(it) {
     ${p.notes || it.session.notes ? `<h4>說明</h4><p>${esc(p.notes)} ${esc(it.session.notes)}</p>` : ''}
     ${inc.length || notInc.length || p.excludes?.length ? `<h4>包含／不含</h4><p>${inc.length ? `含：${inc.join('、')}` : ''}${notInc.length || p.excludes?.length ? `<br>不含：${[...notInc, ...(p.excludes || [])].map(esc).join('、')}` : ''}</p>` : ''}
     ${p.requirements?.length ? `<h4>要求</h4><ul>${p.requirements.map((r) => `<li>${esc(r)}</li>`).join('')}</ul>` : ''}
-    ${p.staff_ratio || p.class_size_max ? `<h4>師生比與班級</h4><p>${esc(p.staff_ratio || '')}${p.class_size_max ? ` 每班最多 ${esc(p.class_size_max)} 人` : ''}</p>` : ''}
-    ${p.safety?.notes ? `<h4>安全</h4><p>${esc(p.safety.notes)}</p>` : ''}
+    ${p.facilities ? `<h4>場地設施</h4><p>${esc(p.facilities)}</p>` : ''}
+    ${staffParts(p).length ? `<h4>分組與師資</h4><p>${staffParts(p).join('<br>')}</p>` : ''}
+    ${safetyParts(p).length ? `<h4>安全</h4><p>${safetyParts(p).join('<br>')}</p>` : ''}
     ${bookRows.length ? `<h4>報名</h4><ul>${bookRows.map(([k, v]) => `<li>${k}：${v}</li>`).join('')}</ul>` : ''}
     ${conflictsBlock(it)}
     ${sourcesBlock(it)}
@@ -467,10 +486,13 @@ function openCompare() {
     ['狀態', (it) => `${STATUS[it.session.date_status]}，可信度 ${CONF[it.session.confidence]?.[0] || '?'}`],
     ['日期', datesLine],
     ['地點', (it) => it.locs.map((l) => esc(l.name)).join('<br>') || '未公布'],
+    ['場地', (it) => venueParts(it).join('<br>') || '未公布'],
     ['年齡', (it) => `${it.program.age_min ?? '?'}–${it.program.age_max ?? '?'} 歲<br>${kidsLine(it)}`],
     ['形式', (it) => FORMATS[it.program.format] || esc(it.program.format)],
     ['時間', (it) => (it.program.hours?.start ? `${esc(it.program.hours.start)}–${esc(it.program.hours.end || '?')}` : '未公布')],
     ['午餐', (it) => ({ true: '含', false: '不含' }[it.program.includes?.lunch] || '未公布')],
+    ['分組與師資', (it) => staffParts(it.program).join('<br>') || '未公布'],
+    ['安全', (it) => safetyParts(it.program).join('<br>') || '未公布'],
     ['價格', (it) => priceLine(it.session, it.kids.filter((k) => k.fit !== 'no').length)],
     ['評價', (it) => reviewSummary(reviewsOf(it))],
     ['警示', (it) => (it.warnings || []).map((w) => esc(w.text)).join('<br>')],

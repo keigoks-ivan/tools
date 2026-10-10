@@ -84,13 +84,15 @@ confidence：`high`＝tier 1–2 且是目標年；`medium`＝tier 3，或 tier 
  "age_min":null, "age_max":null, "age_rule":"at_start_date|in_calendar_year|null",
  "format":"day|residential|family_with_parent|parent_optional",
  "hours":{"start":null,"end":null,"days":null},
- "class_size_max":null, "class_size_avg":null, "staff_ratio":null,
+ "class_size_max":null, "class_size_avg":null, "staff_ratio":null, "staffing":null, "facilities":null,
  "includes":{"lunch":null,"snacks":null,"materials":null,"accommodation":null,"airport_transfer":null,"insurance":null,"tshirt":null},
  "excludes":[], "requirements":[],
  "booking":{"url":null,"deadline":null,"payment_terms":null,"refund_policy":null,"flex_ticket":null,"sibling_discount":null},
  "location_ids":[], "safety":{"first_aid":null,"cctv":null,"insurance":null,"notes":null},
  "notes":"", "sources":[]}
 ```
+`staffing`：官方對分組、帶班人員、老師背景的說法（例：依年齡分小組、受過訓練的指導員），沒有數字也照寫，官方題目在但答案空白就寫空白。`facilities`：上課用到的場地和設施（例：用校園的運動場、泳池），只寫官方寫的。兩欄都要附 sources，fields 填 staffing、facilities。
+
 
 ### location
 ```json

@@ -274,8 +274,30 @@ def patch_from_prices(db):
                                       f"2026 農曆年營（同為 9:00～16:00）{txt}／週，只供參考，沒拿來算。")
 
 
+def patch_staffing_facilities(db):
+    """Chrome 2026-10-10：Arrowhead GIS 2027-02 訂位頁、Newtonshow 冬季營頁與 FAQ 的場地、分組、師資、安全。"""
+    url = "https://arrowheadskills.com/booking/gis-camp-2027-02-08/"
+    for pid in ("arrowhead-multi-activity", "arrowhead-multi-sport"):
+        p = db["programs"].get(pid)
+        if not p:
+            continue
+        p["facilities"] = "用 Garden International School 的校園設施：運動場地、創作空間，有泳池時會用。"
+        p["staffing"] = "受過訓練的 Arrowhead 指導員帶，依年齡分小組；每組人數和師生比沒寫。"
+        p["sources"].append({"url": url, "tier": 1, "accessed": TODAY, "fields": ["facilities", "staffing", "safety"],
+                             "quote": "Use of school facilities (sports areas, creative spaces, pools where available)"})
+    p = db["programs"].get("newtonshow-winter")
+    if p:
+        p["facilities"] = "官網沒寫教室設備。吉隆坡兩處都在大樓裡的單位：Menara Mutiara Bangsar 16 樓、Wisma Chuang 1205 室。"
+        p["staffing"] = "官網寫依年齡分組、小組上課，沒有人數；FAQ 的「每組幾個孩子」「老師經驗」兩題，答案是空白（2026-10-10 讀）。"
+        p["safety"]["notes"] = "FAQ 的「營隊安全嗎」一題，答案是空白（2026-10-10 讀）。"
+        p["sources"].append({"url": "https://newtonshow.my/faq", "tier": 1, "accessed": TODAY, "fields": ["staffing", "safety"],
+                             "quote": "How many children are in each group?（答案空白）"})
+        p["sources"].append({"url": "https://newtonshow.my/winter-camp", "tier": 1, "accessed": TODAY, "fields": ["staffing"],
+                             "quote": "Children join in age groups"})
+
+
 PATCHES = [patch_erican, patch_embassy, patch_raffles_2027, patch_official_pages, patch_stem_academy, patch_klik,
-           patch_from_prices]
+           patch_from_prices, patch_staffing_facilities]
 
 # Brief rule: tier 4-5 only -> confidence low. These domains are aggregators.
 PLATFORM_HOSTS = {
