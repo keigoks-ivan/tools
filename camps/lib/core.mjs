@@ -146,6 +146,26 @@ export function defaultQty(price, span, holidayDays = 0) {
 
 // Tax is added only when the operator says the price excludes it. The rate comes
 // from the note ("+ 8% SST"); null means excluded but no rate given.
+// Mon–Fri weeks of a run that fall in [from, to], each clipped to the run.
+export function runWeeks(run, from, to) {
+  if (!run) return [];
+  return weeksIn(from, to)
+    .map((w) => ({ mon: w.mon, start: w.mon > run.start ? w.mon : run.start, end: w.fri < run.end ? w.fri : run.end }))
+    .filter((w) => w.start <= w.end && weekdaysIn(w.start, w.end) > 0);
+}
+
+// Price units for attending only the picked weeks. holidayDays: weekday holidays inside them.
+export function weeksQty(price, weeks, holidayDays = 0) {
+  if (!weeks.length) return 0;
+  switch (price?.basis) {
+    case 'per_camp': case 'per_session': return 1;
+    case 'per_day': return Math.max(0, weeks.reduce((n, w) => n + weekdaysIn(w.start, w.end), 0) - holidayDays);
+    case 'per_week': return weeks.length;
+    case 'per_2weeks': return weeks.length / 2;
+    default: return null;
+  }
+}
+
 export function taxRate(price) {
   if (price?.tax_included !== false) return 0;
   const m = String(price.tax_note || '').match(/(\d+(?:\.\d+)?)\s*%\s*(?:SST|Sales|Service|Tax|銷售稅|服務稅|稅)/i);

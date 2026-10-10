@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   overlaps, weeksIn, sessionSpan, ageAt, kidFit, perWeekEquiv, toTWD, mondayOf, addYears,
-  defaultQty, taxRate, lineCost,
+  defaultQty, taxRate, lineCost, runWeeks, weeksQty,
 } from '../lib/core.mjs';
 
 test('date overlap is inclusive at both ends', () => {
@@ -81,4 +81,21 @@ test('estimate: tax only when excluded, rate read from the note', () => {
   assert.equal(c.base, 3190);
   assert.equal(Math.round(c.tax * 100) / 100, 255.2);
   assert.equal(lineCost({ amount: null }, 5, 2), null);
+});
+
+test('picked weeks: run clipped to the search dates, units per basis', () => {
+  // Newtonshow runs 11/23–1/29; the search is 1/17–2/8, so only two weeks are on offer
+  const long = runWeeks({ start: '2026-11-23', end: '2027-01-29' }, '2027-01-17', '2027-02-08');
+  assert.deepEqual(long.map((w) => w.mon), ['2027-01-18', '2027-01-25']);
+  // a short week keeps its real days
+  const short = runWeeks({ start: '2026-12-21', end: '2026-12-24' }, '2026-12-14', '2027-01-08');
+  assert.deepEqual(short, [{ mon: '2026-12-21', start: '2026-12-21', end: '2026-12-24' }]);
+  assert.equal(weeksQty({ basis: 'per_day' }, short), 4);
+  assert.equal(weeksQty({ basis: 'per_day' }, [...short, ...long], 1), 13);
+  assert.equal(weeksQty({ basis: 'per_week' }, long), 2);
+  assert.equal(weeksQty({ basis: 'per_2weeks' }, [...long, ...short]), 1.5);
+  assert.equal(weeksQty({ basis: 'per_camp' }, long), 1);
+  assert.equal(weeksQty({ basis: 'per_week' }, []), 0);
+  assert.equal(weeksQty({ basis: null }, long), null);
+  assert.deepEqual(runWeeks(null, '2027-01-17', '2027-02-08'), []);
 });
