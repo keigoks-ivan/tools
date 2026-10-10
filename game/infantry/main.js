@@ -18,6 +18,8 @@ import { Combat } from './combat.js?v=4';
 import { captureThreat, resupplyBlocked, resupplyVitals } from './battle-rules.mjs';
 import { operationFor } from './operations.mjs';
 import { evaluateSortie, recordSortie } from './medals.mjs';
+import { storyFor, StorySession, mergeStoryProgress, speakerName } from './story.mjs';
+import { StoryBook } from './story-ui.js';
 
 const $=id=>document.getElementById(id),clamp=THREE.MathUtils.clamp;
 const mutedTest=new URLSearchParams(location.search).has('mute');
@@ -31,6 +33,7 @@ const words={
   difficulty:['難度','Difficulty'],settings:['操作與設定','Controls & settings'],deploy:['開始作戰','DEPLOY SQUAD'],desktop:['建議鍵盤＋滑鼠遊玩，亦提供觸控操作','Keyboard + mouse recommended · Touch controls included'],cleanup:['最後兩名敵人自動定位・不用繞地圖找人','The final two enemies are tracked automatically'],
   quality:['畫質','Graphics'],sensitivity:['滑鼠靈敏度','Mouse sensitivity'],volume:['音效音量','Effects volume'],music:['音樂音量','Music volume'],move:['移動','Move'],run:['跑步／狙擊屏息','Sprint / hold breath'],mouse:['滑鼠','MOUSE'],aim:['左鍵開火・右鍵瞄準','Left: fire · Right: aim'],crouch:['蹲下','Crouch'],jump:['跳躍','Jump'],reload:['換彈','Reload'],weapons:['長槍／手槍／衝鋒槍','Rifle / pistol / SMG'],grenade:['手榴彈','Grenade'],interact:['按住佔領／補給','Hold to capture / resupply'],mapPause:['戰術地圖／暫停','Map / pause'],resume:['返回','Back'],quit:['返回戰場選單','Battlefield selection'],tactical:['戰術地圖','Tactical map'],mapLegend:['青色：小隊　琥珀：目標　紅色：目視敵軍／最後殘敵','Cyan: squad · Gold: objective · Red: visible enemies / last survivors'],back:['返回戰場 · M','Back to battle · M'],retry:['再次作戰','Deploy again'],chooseAnother:['選擇其他戰場','Another battlefield'],fire:['射擊','Fire'],ads:['瞄準','Aim'],sprint:['跑','Run'],swap:['換槍','Swap'],interactShort:['操作','Use'],
   operationPlan:['作戰方案','Operation plan'],reshuffle:['每次部署重新編排敵軍與攻勢方向','Each deployment reshuffles enemy formations and attack lanes'],squadCommands:['小隊：跟隨／原地掩護／推進','Squad: follow / hold position / advance'],command:['小隊','Squad'],
+  storyRead:['閱讀完整戰役','Read the campaign'],storyJournal:['戰役檔案','Campaign journal'],storyHint:['戰前背景・人物・分階段通訊・不同結局','Background · People · Frontline radio · Epilogues'],storyKey:['戰役檔案／回看通訊','Campaign journal / radio history'],storyResult:['閱讀戰後紀錄','Read the epilogue'],
 };
 const text=(zh,en)=>language==='zh'?zh:en;
 function translate(){document.documentElement.lang=language==='zh'?'zh-Hant':'en';for(const el of document.querySelectorAll('[data-t]'))el.textContent=words[el.dataset.t][language==='zh'?0:1];$('language').textContent=language==='zh'?'EN':'中文';}
@@ -44,6 +47,7 @@ function renderMenu(){
   if($('heroSceneImage').getAttribute('src')!==briefingImage(s.id))$('heroSceneImage').src=briefingImage(s.id);
   $('heroSceneName').textContent=s.name[language];$('heroSceneCode').textContent=s.code;
   $('sceneCode').textContent=s.code;$('sceneName').textContent=s.name[language];$('sceneBrief').textContent=s.brief[language];$('difficulty').value=choice.difficulty;
+  const story=storyFor(choice.scene);$('storyTeaserTitle').textContent=story.title[language];$('storyTeaserDeck').textContent=story.deck[language];
   for(const b of document.querySelectorAll('[data-mode]'))b.setAttribute('aria-pressed',b.dataset.mode===choice.mode);
   $('operation').innerHTML=[0,1,2].map(i=>`<option value="${i}">${operationFor(choice.scene,sortieSeed,i).name[language]}</option>`).join('');$('operation').value=variantIndex;
   const op=operationFor(choice.scene,sortieSeed,variantIndex),goal=(op.bonusGoalByMode?.[choice.mode]||op.bonusGoal)[language];
@@ -61,8 +65,25 @@ let renderer,scene,camera,vScene,vCamera,post,kit,materials,models,sky,environme
 let state='loading',crouch=false,lastTime=0,playTime=0,nades=3,grenades=[],prompt='',notice='',noticeT=0,hurt=0,shieldHurt=0,cleanup=false;
 let settingsFrom='menu',supplyProgress=0,supplyCooldown=0,spawnCounter=0;
 let telemetry={},squadCommand={mode:'follow'},stageSpawns=0,lastSpawnStage=-1;
+let storySession=null,storyBook,storyOrigin='menu',radioKey='',lastAward=null;
 const gate=new FrameGate(),lights=[];
 function note(zh,en){notice=text(zh,en);noticeT=4;}
+function storySpeakers(){return new Set(['command','local',...(combat?.allies||[]).filter(a=>!a.dead).map(a=>['lin','shen','chen'][a.formationIndex])]);}
+function recordStory(event){if(storySession?.recordMission(event,mission,storySpeakers()))write('storyProgress',mergeStoryProgress(read('storyProgress',{}),storySession));}
+function updateRadio(dt){
+  const line=storySession?.update(dt,language,storySpeakers()),key=line?.key||'';if(key===radioKey)return;radioKey=key;
+  $('radioCaption').hidden=!line;if(line){$('radioSpeaker').textContent=speakerName(storyFor(choice.scene),line.speaker,language);$('radioText').textContent=line.text[language];}
+}
+function openStory(tab='background'){
+  if(!['menu','play','result'].includes(state))return;
+  storyOrigin=state;
+  if(state==='play')pause('story');else state='story';
+  $('radioCaption').hidden=true;
+  storyBook.open({scene:choice.scene,mode:choice.mode,variant:variantIndex,language,progress:read('storyProgress',{}),session:storySession,tab});
+}
+function closeStory(){
+  storyBook.close();if(storyOrigin==='play'){state='story';radioKey='';resume();}else state=storyOrigin;
+}
 function failure(error){console.error('[greyline]',error);$('loading').hidden=false;$('status').textContent=text('載入失敗。請重新整理後再試；瀏覽器需要支援 WebGL 2。','Loading failed. Refresh and use a browser with WebGL 2 support.');$('loadProgress').style.width='100%';}
 async function initialize(){
   renderer=new THREE.WebGLRenderer({canvas:$('gl'),antialias:false,powerPreference:'high-performance'});renderer.setSize(innerWidth,innerHeight);renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.12;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
@@ -86,6 +107,7 @@ async function initialize(){
   for(let i=0;i<3;i++){const l=new THREE.PointLight(0xffd5a1,18,16,2);scene.add(l);lights.push(l);}
   post=new Post(renderer,scene,camera,vScene,vCamera);post.gtao.updateGtaoMaterial({radius:.9,distanceExponent:1.5,thickness:.8,scale:1.1,distanceFallOff:1});post.gtao.updatePdMaterial({radius:4,rings:2,samples:12});post.u.vignette.value=.2;post.u.grain.value=.012;
   audio=new ZeroAudio();audio.setVolume(mutedTest?0:settings.volume);audio.setMusicVolume(mutedTest?0:settings.music);input=new Input($('gl'),{mouseFallback:true});input.sens=settings.sensitivity;hud=new InfantryHUD($('hud'),camera);fx=new FXL(scene);
+  storyBook=new StoryBook($('story'),{onClose:closeStory,onLanguage:()=>{language=language==='zh'?'en':'zh';write('language',language);translate();storyBook.setLanguage(language);radioKey='';if(storyOrigin==='menu')renderMenu();if(storyOrigin==='result')renderResult();if(storyOrigin==='play')updateSquadButton();}});
   input.onMouseModeChange=mode=>{$('gl').dataset.mouseMode=mode;if(mode==='fallback'&&state==='play')note('滑鼠瞄準・游標靠邊可持續轉向','Mouse aim · Move to edges to keep turning');};
   rebuild();vm=new ViewModel(kit,vScene,audio,fx,{responsive:true});vm.holder.visible=false;vm.arms.root.visible=false;
   applyQuality(sun);bindControls(sun);$('loading').hidden=true;$('menu').hidden=false;state='menu';renderMenu();requestAnimationFrame(frame);
@@ -103,29 +125,41 @@ function rebuild(){
 }
 function start(){
   combat?.clear();fx.clear();hud.resetBattle();clearGrenades();sortieSeed=(sortieSeed+Math.floor(Math.random()*65535)+1)>>>0;mission=new Mission({...choice,operation:operationFor(choice.scene,sortieSeed,variantIndex)});spawnCounter=0;stageSpawns=0;lastSpawnStage=-1;telemetry={shots:0,hits:0,grenadeKills:0,supplyUses:0};squadCommand={mode:'follow'};playTime=0;hurt=shieldHurt=0;crouch=false;nades=3;cleanup=false;supplyProgress=supplyCooldown=0;
+  storySession=new StorySession(choice.scene,choice.mode);radioKey='';$('radioCaption').hidden=true;
   const p=map.starts[choice.mode];player.setRecovery(mission.rules);player.reset(new THREE.Vector3(p.x,p.y,p.z),0);player.stam=player.stepPh=0;
   vm.refill();vm.cur='smg';for(const [k,g]of Object.entries(vm.g))g.visible=k==='smg';vm.ads=0;vm.scoped=false;vm.lastTrigger=false;vm.cd=0;vm.reloadT=vm.swapT=vm.nadeT=-1;vm.swapTo=null;vm.kick.set(0,0,0);vm.kickV.set(0,0,0);vm.rot.set(0,0,0);vm.rotV.set(0,0,0);vm.resetHandling();
   combat=new Combat({scene,map,kit,audio,fx,player,difficulty:DIFFICULTIES[choice.difficulty],onPlayerHurt:playerHurt,onKill:()=>{mission.kills++;}});combat.spawnSquad(p);
+  recordStory('deploy');
   audio.unlock();audio.setPaused(false);audio.music('battle',{stage:1});state='play';input.enabled=true;input.reset();for(const id of ['menu','pause','result','tactical'])$(id).hidden=true;$('playButtons').hidden=false;$('touch').hidden=!input.touch.on;
   if(!input.touch.on)input.lock();note(`作戰：${mission.operation.name.zh} · F 下達小隊指令`,`OPERATION: ${mission.operation.name.en} · F commands your squad`);write('selection',choice);updateSquadButton();
 }
 function pause(next='paused'){
   if(state!=='play')return;state=next;input.enabled=false;input.reset();input.unlock();audio.setPaused(true);$('touch').hidden=true;
+  $('radioCaption').hidden=true;
+  if(next==='story')return;
   if(next==='tactical'){$('tactical').hidden=false;drawTactical();}else{settingsFrom='play';$('pause').hidden=false;$('quit').hidden=false;$('resume').textContent=text('繼續作戰','Resume battle');}
 }
 function resume(){if(settingsFrom==='menu'&&state==='settings'){state='menu';$('pause').hidden=true;return;}
-  $('pause').hidden=true;$('tactical').hidden=true;state='play';input.enabled=true;input.reset();audio.unlock();audio.setPaused(false);$('touch').hidden=!input.touch.on;if(!input.touch.on)input.lock();}
-function menu(){state='menu';input.enabled=false;input.unlock();input.reset();audio.setPaused(true);combat?.clear();fx.clear();clearGrenades();mission=null;for(const id of ['result','pause','tactical','playButtons','touch'])$(id).hidden=true;$('menu').hidden=false;vm.holder.visible=vm.arms.root.visible=false;map.beacon.visible=false;camera.position.set(12,6+map.ground(12,-32),-32);camera.lookAt(-5,3+map.ground(-5,20),20);renderMenu();}
-function finish(){
-  state='result';input.enabled=false;input.reset();input.unlock();audio.setPaused(true);$('touch').hidden=true;$('playButtons').hidden=true;$('result').hidden=false;
-  telemetry.alliesAlive=combat.allies.filter(a=>!a.dead).length;const award=evaluateSortie(mission,telemetry,mission.operation),{won,score}=award;
-  $('resultCode').textContent=`${mission.scenario.code} / ${MODES[choice.mode][language]}`;$('resultTitle').textContent=won?text('防線仍在','MISSION COMPLETE'):text('防線失守','MISSION FAILED');
-  $('resultReason').textContent=won?choice.mode==='defend'?text('撤離線守住了。最後一支車隊已安全通過。','The line held. The last convoy has passed safely.'):text('三座據點已奪回，補給線重新接通。','All three sectors secured. The supply line is open.'):player.dead?text('小隊失去帶隊士兵。重新部署再試一次。','The squad lost its leader. Redeploy to try again.'):text('敵軍突破撤離線。靠近前線掩體阻止推進。','The evacuation line was overrun. Stop the advance from forward cover.');
+  $('pause').hidden=true;$('tactical').hidden=true;radioKey='';state='play';input.enabled=true;input.reset();audio.unlock();audio.setPaused(false);$('touch').hidden=!input.touch.on;if(!input.touch.on)input.lock();}
+function menu(){state='menu';input.enabled=false;input.unlock();input.reset();audio.setPaused(true);combat?.clear();fx.clear();clearGrenades();mission=null;storySession=null;for(const id of ['result','pause','tactical','playButtons','touch','story','radioCaption'])$(id).hidden=true;$('menu').hidden=false;vm.holder.visible=vm.arms.root.visible=false;map.beacon.visible=false;camera.position.set(12,6+map.ground(12,-32),-32);camera.lookAt(-5,3+map.ground(-5,20),20);renderMenu();}
+function renderEnding(){
+  const entry=storySession?.ending;if(!entry)return;
+  $('endingTitle').textContent=entry.title[language];$('endingBody').replaceChildren(...entry.paragraphs.map(paragraph=>{const p=document.createElement('p');p.textContent=paragraph[language];return p;}));
+}
+function renderResult(){
+  const award=lastAward,{won,score}=award;renderEnding();
+  $('resultCode').textContent=`${mission.scenario.code} / ${MODES[choice.mode][language]}`;$('resultTitle').textContent=won?text(choice.mode==='defend'?'防線仍在':'據點已奪回','MISSION COMPLETE'):text('作戰未完成','MISSION FAILED');
+  $('resultReason').textContent=won?choice.mode==='defend'?text('四波攻勢已解除，防線仍在。後方已收到作戰確認。','All four attacks cleared. The line held, and command received confirmation.'):text('三座據點已奪回，通路重新接通。','All three sectors secured. The route is open.'):player.dead?text('小隊失去帶隊士兵。重新部署再試一次。','The squad lost its leader. Redeploy to try again.'):text('敵軍突破防線。靠近前線掩體阻止推進。','The defense was overrun. Stop the advance from forward cover.');
   $('resultStats').innerHTML=`<div>${score}<small>${text('作戰分數','SCORE')}</small></div><div>${mission.kills}<small>${text('擊倒敵軍','HOSTILES DOWN')}</small></div><div>${formatTime(mission.time)}<small>${text('作戰時間','TIME')}</small></div>`;
   const medals={gold:text('金章','GOLD'),silver:text('銀章','SILVER'),bronze:text('銅章','BRONZE')},goal=(mission.operation.bonusGoalByMode?.[choice.mode]||mission.operation.bonusGoal)[language];
   $('resultMedal').textContent=won?`${medals[award.medal]} · ${award.bonus?text('額外任務完成 +750','BONUS COMPLETE +750'):text('額外任務未完成','BONUS INCOMPLETE')} · ${goal}`:text('重新部署會出現不同敵軍編隊；試著換側翼或下達小隊指令。','Redeploy for a new formation. Try another flank or command your squad.');
   $('resultDetails').textContent=text(`小隊存活 ${telemetry.alliesAlive}/3 · 命中率 ${Math.round(award.accuracy*100)}% · 手榴彈擊倒 ${telemetry.grenadeKills}`,`SQUAD ${telemetry.alliesAlive}/3 · ACCURACY ${Math.round(award.accuracy*100)}% · GRENADE KILLS ${telemetry.grenadeKills}`);
-  if(won)write('records',recordSortie(read('records',{}),`${choice.scene}.${choice.mode}.${choice.difficulty}.${variantIndex}`,mission,award));
+}
+function finish(){
+  state='result';input.enabled=false;input.reset();input.unlock();audio.setPaused(true);$('touch').hidden=true;$('playButtons').hidden=true;$('result').hidden=false;
+  telemetry.alliesAlive=combat.allies.filter(a=>!a.dead).length;lastAward=evaluateSortie(mission,telemetry,mission.operation);
+  storySession.ending=storySession.finish(mission,telemetry);write('storyProgress',mergeStoryProgress(read('storyProgress',{}),storySession));$('radioCaption').hidden=true;renderResult();
+  if(lastAward.won)write('records',recordSortie(read('records',{}),`${choice.scene}.${choice.mode}.${choice.difficulty}.${variantIndex}`,mission,lastAward));
 }
 function bindControls(sun){
   $('scenarios').addEventListener('click',e=>{const b=e.target.closest('[data-scene]');if(!b)return;choice.scene=b.dataset.scene;write('selection',choice);rebuild();renderMenu();});
@@ -135,11 +169,12 @@ function bindControls(sun){
   $('language').onclick=()=>{language=language==='zh'?'en':'zh';write('language',language);rebuild();renderMenu();};
   $('deploy').onclick=start;$('retry').onclick=start;$('resultMenu').onclick=menu;$('quit').onclick=menu;$('resume').onclick=resume;$('mapClose').onclick=resume;$('pauseButton').onclick=()=>pause();$('mapButton').onclick=()=>pause('tactical');
   $('squadButton').onclick=()=>{if(state==='play')commandSquad();};
+  $('storyOpen').onclick=()=>openStory();$('journalButton').onclick=()=>openStory('radio');$('resultStory').onclick=()=>openStory('ending');
   $('settingsOpen').onclick=()=>{settingsFrom='menu';state='settings';$('pause').hidden=false;$('quit').hidden=true;$('resume').textContent=text('返回','Back');};
   for(const key of Object.keys(settings)){const el=$(key);el.value=mutedTest&&(key==='volume'||key==='music')?0:settings[key];el.oninput=()=>{settings[key]=Number(el.value);write(key,settings[key]);if(key==='quality')applyQuality(sun);if(key==='sensitivity')input.sens=settings[key];if(key==='volume')audio.setVolume(mutedTest?0:settings[key]);if(key==='music')audio.setMusicVolume(mutedTest?0:settings[key]);};}
   for(const b of document.querySelectorAll('.fullscreen'))b.onclick=()=>{const p=document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen?.();p?.catch?.(()=>note('瀏覽器未開放全螢幕','Fullscreen is unavailable in this browser'));};
   input.onLockChange=locked=>{if(!locked&&state==='play'&&!input.touch.on)pause();};
-  addEventListener('keydown',e=>{if(state==='tactical'&&(e.code==='KeyM'||e.code==='Escape')){e.preventDefault();resume();}else if(state==='paused'&&e.code==='Escape')resume();});
+  addEventListener('keydown',e=>{if(e.repeat)return;if(state==='story'&&(e.code==='Escape'||e.code==='KeyJ')){e.preventDefault();closeStory();}else if(state==='tactical'&&(e.code==='KeyM'||e.code==='Escape')){e.preventDefault();resume();}else if(state==='paused'&&e.code==='Escape')resume();else if(['menu','result'].includes(state)&&e.code==='KeyJ'){e.preventDefault();openStory(state==='result'?'ending':'background');}});
   document.addEventListener('visibilitychange',()=>{if(document.hidden&&state==='play')pause();});addEventListener('blur',()=>{if(state==='play')pause();});
   addEventListener('resize',()=>{renderer.setPixelRatio(pixelRatio(innerWidth,innerHeight,devicePixelRatio,settings.quality));renderer.setSize(innerWidth,innerHeight);camera.aspect=vCamera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();vCamera.updateProjectionMatrix();post.setSize(innerWidth,innerHeight);});
 }
@@ -177,6 +212,7 @@ function updateGrenades(dt){
 }
 function tick(dt){
   const c=input.state(dt),K=input.keys;if(c.pause){pause();input.endFrame();return;}if(input.pressed('KeyM')){pause('tactical');input.endFrame();return;}
+  if(input.pressed('KeyJ')){openStory('radio');input.endFrame();return;}
   if(input.pressed('KeyF'))commandSquad();
   if(input.pressed('KeyC')||input.pressed('Tod'))crouch=!crouch;const run=K.has('ShiftLeft')||K.has('ShiftRight')||K.has('Tboost');if(run&&c.my>.3)crouch=false;
   const ads=K.has('M2')||K.has('Tmsl'),lookK=vm.scoped?vm.W.fov/72:1-vm.ads*.3;
@@ -188,6 +224,7 @@ function tick(dt){
   camera.fov=THREE.MathUtils.lerp(72,vm.W.fov,vm.cur==='rifle'?(vm.scoped?1:vm.ads*.2):vm.ads)+player.sprintK*4;camera.updateProjectionMatrix();camera.updateMatrixWorld();if(shot)shoot(shot);if(vm.nadeGo)throwGrenade();
   vm.light(camera,new THREE.Vector3(-.4,.8,-.3).normalize(),null,choice.scene==='underground'||!!map.solid.ray(player.eye,new THREE.Vector3(-.4,.8,-.3).normalize(),80),dt);
   const living=combat.enemies.filter(e=>!e.dead);cleanup=living.length>0&&living.length<=2&&mission.pending===0;
+  if(cleanup)recordStory('cleanup');
   if(squadCommand.mode==='advance')squadCommand.target=mission.target;
   combat.update(dt,{mode:choice.mode,target:mission.target,cleanup,time:playTime,wave:choice.mode==='defend'?mission.wave:mission.objective+1,operation:mission.operation,squadCommand});updateGrenades(dt);
   const target=mission.target,near=Math.hypot(player.pos.x-target.x,player.pos.z-target.z)<4.5&&Math.abs(player.pos.y-map.ground(target.x,target.z))<1.5;
@@ -203,9 +240,10 @@ function tick(dt){
     if(interact&&supplyCooldown===0&&!blocked){supplyProgress+=dt;if(supplyProgress>=mission.rules.supplyUseTime){refill();telemetry.supplyUses++;supplyProgress=0;supplyCooldown=mission.rules.supplyCooldown*mission.operation.supplyMultiplier;}}else supplyProgress=0;
   }else supplyProgress=0;
   const events=mission.update(dt,{alive:combat.enemies.filter(e=>!e.dead).length,pressure,near,contested,interact:interact&&!supplyNear,dead:player.dead});
-  for(const event of events){if(event==='spawn')spawn();if(event==='resupply'){refill(true);note('小隊整備・少量醫療與護盾補充','Squad regrouped · limited medical and shield supplies');}if(event==='reinforce')note('敵軍增援・守住側翼','Enemy reinforcements · watch the flanks');if(event==='wave')note(`第 ${mission.wave} 波敵軍來襲`,`Enemy wave ${mission.wave} incoming`);if(event==='objective')note('小隊前進・奪下下一座據點','Squad advancing · secure the next sector');if(event==='won'||event==='lost'){finish();return;}}
+  for(const event of events){if(event==='spawn')spawn();if(event==='resupply'){refill(true);recordStory('resupply');note('小隊整備・少量醫療與護盾補充','Squad regrouped · limited medical and shield supplies');}if(event==='reinforce')note('敵軍增援・守住側翼','Enemy reinforcements · watch the flanks');if(event==='wave'){recordStory('wave');note(`第 ${mission.wave} 波敵軍來襲`,`Enemy wave ${mission.wave} incoming`);}if(event==='objective'){recordStory('objective');note('小隊前進・奪下下一座據點','Squad advancing · secure the next sector');}if(event==='won'||event==='lost'){finish();return;}}
   const t=mission.target;map.beacon.visible=true;map.beacon.position.set(t.x,map.ground(t.x,t.z)+.03,t.z);
   playTime+=dt;noticeT=Math.max(0,noticeT-dt);hurt=Math.max(0,hurt-dt*2);shieldHurt=Math.max(0,shieldHurt-dt*4);audio.setListener(player.eye,player.fwd());audio.setIntensity(clamp(living.length/10,0,1));
+  updateRadio(dt);
   post.u.damage.value=hurt;post.u.danger.value=player.hp<30?.55:0;post.u.speed.value=player.sprintK*.5;
   input.endFrame();
 }
