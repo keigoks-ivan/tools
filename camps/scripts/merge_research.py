@@ -122,7 +122,124 @@ def patch_embassy(db):
                          "quote": "Accommodation in 4* hotel / Meals (three times a day) / Transfers: Airport – Hotel – Airport"})
 
 
-PATCHES = [patch_erican, patch_embassy]
+def patch_raffles_2027(db):
+    """2026-10-10 讀 COEI 宣傳冊原檔（韓文）：2027 冬季四梯價格。只有代理商來源，維持 low。"""
+    url = "https://www.coei.com/include/program/camp/brochure/49_my_jhr_raffles.pdf"
+    deadlines = {"2027-01-11": "2026-12-11", "2027-01-25": "2026-12-28", "2027-02-01": "2027-01-01", "2027-02-08": "2027-01-08"}
+    for s in db["sessions"].values():
+        if s["program_id"] != "raffles-winter-camp" or s["start_date"] not in deadlines or s["price"]["amount"] is not None:
+            continue
+        s["price"].update({"amount": 8400, "currency": "MYR", "basis": "per_2weeks", "source_url": url,
+                           "early_bird": {"amount": 7400, "deadline": deadlines[s["start_date"]],
+                                          "condition": "開營前至少 1 個月全額付清，減 MYR 1,000"}})
+        s["notes"] = (s["notes"].replace("價格未公布。", "")
+                      .replace("只有代理商 raffles-iao.com（tier 5）寫日期", "日期只見於代理商 raffles-iao.com 和 COEI（都是 tier 5）")
+                      + " 價格只見於韓國代理商 COEI 的 2027 宣傳冊："
+                      "走讀 MYR 8,400／兩週，含午餐和 T 恤，週末活動不含；住宿 MYR 10,000／兩週，限 8 歲以上。"
+                      "宣傳冊同樣列出四梯，第 2、3 梯課程主題不同，重疊一週應是刻意安排。").strip()
+    p = db["programs"].get("raffles-winter-camp")
+    if p:
+        p["sources"].append({"url": url, "tier": 5, "accessed": TODAY, "fields": ["price", "dates", "age_min", "age_max"],
+                             "quote": "NON-BOARDING 8,400 MYR / 2주 세션 기준"})
+    for c in db["conflicts"]:
+        if c["entity_id"] == "raffles-winter-camp-ras-20270125" and c["field"] == "dates":
+            c["values"].append({"value": "同樣是 Camp 2 1/25～2/5、Camp 3 2/1～2/12，兩梯課程主題不同", "source_url": url, "tier": 5})
+            c["note"] = "兩個代理商來源日期一致，重疊應是刻意安排；學校官網仍未公布，需向學校確認。"
+
+
+def patch_official_pages(db):
+    """Chrome 2026-10-10：Erican 官網冬令營頁、EMS 官網。"""
+    p = db["programs"].get("erican-yl-general")
+    if p:
+        p["sources"].append({"url": "https://www.erican.edu.my/winter-camp/", "tier": 1, "accessed": TODAY, "fields": [],
+                             "quote": "WINTER CAMP - 2027"})
+        p["notes"] = (p["notes"] + " 官網有「Winter Camp – 2027」頁，但只有標題和付款說明，沒寫日期、年齡、價格（2026-10-10 讀）。").strip()
+    e = db["providers"].get("ems")
+    if e:
+        e["notes"] = (e["notes"] + " 2026-10-10 官網只顯示 WordPress 錯誤頁，讀不到內容。").strip()
+
+
+def patch_stem_academy(db):
+    """Chrome 2026-10-10：Bookwhen 活動頁（PJ 校區）的時間、價格、含午餐；海報讀圖。"""
+    url = "https://bookwhen.com/stemacademymy"
+    camps = {
+        "stem-academy-winter-science-engineering": ("2026-12-18", 880, 580, None,
+            "Bookwhen 票種標 Early Bird RM580，截止日沒寫；海報只寫 RM880",
+            "Winter Science & Engineering December STEM Camp 2026 (Early Bird) RM580.00"),
+        "stem-academy-christmas-slime": ("2026-12-23", 600, 580, "2026-11-15",
+            "海報寫 11 月 15 日前報名", "Register by 15th November to get early bird price"),
+    }
+    for pid, (end, amt, eb, eb_dl, eb_cond, quote) in camps.items():
+        p = db["programs"].get(pid)
+        if not p:
+            continue
+        p["hours"].update({"start": "10:00", "end": "16:00"})
+        p["includes"].update({"lunch": True, "materials": True, "snacks": False})
+        p["booking"]["sibling_discount"] = "手足價 RM560／人"
+        p["sources"].append({"url": url, "tier": 1, "accessed": TODAY, "fields": ["price", "hours", "includes"], "quote": quote})
+        for s in db["sessions"].values():
+            if s["program_id"] == pid and s["location_id"] == "loc-stem-academy-pj" and s["price"]["amount"] is None:
+                s["end_date"] = end
+                s["price"].update({"amount": amt, "currency": "MYR", "basis": "per_camp", "source_url": url,
+                                   "early_bird": {"amount": eb, "deadline": eb_dl, "condition": eb_cond}})
+                s["notes"] = ("10:00～16:00，含午餐和教材，點心自備。年齡沒寫；同機構 10 月萬聖節營海報寫 6～12 歲。"
+                              "新山 Sunway Iskandar 校區同日也開。")
+    s = db["sessions"].get("stem-academy-winter-science-engineering-stem-academy-pj-20261214")
+    if s:
+        s["confidence"] = "low"
+        s["notes"] += " 價格有矛盾：海報 RM880，Bookwhen 早鳥票 RM580，報名前要問清楚。"
+        db["conflicts"].append({"entity_id": s["id"], "field": "price",
+                                "values": [{"value": "RM880／人（活動頁海報）", "source_url": url, "tier": 1},
+                                           {"value": "Early Bird RM580／人（Bookwhen 票種）", "source_url": url, "tier": 1}],
+                                "note": "5 天營的早鳥票跟 3 天營同價，可能是票種沿用；需向機構確認。", "_batch": "chrome-verify-3"})
+
+
+def patch_klik(db):
+    """Chrome 2026-10-10：KLIK 官網 Winter Schooling 頁與聯絡頁。"""
+    url = "https://www.klkidsclub.com.my/winter-schooling/"
+    contact = "https://www.klkidsclub.com.my/contact/"
+    pv, p = db["providers"].get("klik"), db["programs"].get("klik-holiday")
+    if not (pv and p):
+        return
+    pv["website"] = "https://www.klkidsclub.com.my"
+    pv["contact"].update({"email": "info.klkidsclub@gmail.com", "phone": "+603-2141 2153"})
+    pv["notes"] = "幼兒園，在大使館區 Jalan U Thant。官網 2026-10-10 用 Chrome 讀到。"
+    pv["sources"].append({"url": contact, "tier": 1, "accessed": TODAY, "fields": ["address", "phone"],
+                          "quote": "Address: 16A, Jalan U thant, 55000, Kuala Lumpur"})
+    db["locations"]["loc-klik-u-thant"] = {
+        "id": "loc-klik-u-thant", "name": "KL International Kidsclub", "address": "16A, Jalan U Thant, 55000 Kuala Lumpur",
+        "city": "Kuala Lumpur", "state": "Kuala Lumpur", "country": "MY", "lat": None, "lng": None, "venue_type": "school",
+        "transport_notes": None, "notes": "", "verified_at": TODAY,
+        "sources": [{"url": contact, "tier": 1, "accessed": TODAY, "fields": ["address"], "quote": "16A, Jalan U thant, 55000"}]}
+    p["name"] = "KLIK Winter Schooling Program"
+    p["category"] = ["short_term_enrolment"]
+    p["language_of_instruction"] = ["English"]
+    p["hours"].update({"start": "08:45", "end": "15:00"})
+    p["location_ids"] = ["loc-klik-u-thant"]
+    p["booking"]["url"] = url
+    p["notes"] = ("這是到學校跟班上課，不是假期營。官網寫 1～2 月開放，可報 1～4 週，全天跟著幼兒園課表上課，"
+                  "英語輔導課可選。官網列的最近一期是 2025-01-02～01-24；2027 年日期和學費沒寫。")
+    p["sources"].append({"url": url, "tier": 1, "accessed": TODAY, "fields": ["age_min", "age_max", "hours", "dates"],
+                         "quote": "1 ~ 4 weeks Program for children / Age: 3~7 years / Available during Jan/Feb"})
+    for s in db["sessions"].values():
+        if s["program_id"] == "klik-holiday":
+            s["location_id"] = "loc-klik-u-thant"
+            s["min_duration_weeks"] = 1
+    w = db["sessions"].get("klik-holiday-unknown-tbd-2027w")
+    if w:
+        w["notes"] = "官網寫每年 1～2 月開放、可報 1～4 週；2027 年日期沒公布。"
+    db["sessions"]["klik-holiday-klik-u-thant-20250102"] = {
+        "id": "klik-holiday-klik-u-thant-20250102", "program_id": "klik-holiday", "location_id": "loc-klik-u-thant",
+        "start_date": "2025-01-02", "end_date": "2025-01-24", "weekday_pattern": "Mon-Fri",
+        "date_status": "confirmed_other_year", "year": 2025, "season": "other",
+        "price": {"amount": None, "currency": "MYR", "basis": None, "tax_included": None, "tax_note": None, "source_url": None,
+                  "early_bird": {"amount": None, "deadline": None, "condition": None}},
+        "min_duration_weeks": 1, "flexible_start": None, "spots_status": None,
+        "source_url": url, "verified_at": TODAY, "evidence_quote": "Jan 2 , 2025 – Jan 24, 2025 , 8.45 am ~ 3.00 pm",
+        "confidence": "medium", "estimate_basis": None, "notes": "官網列的最近一期，學費沒寫。", "_batches": ["chrome-verify-3"]}
+
+
+PATCHES = [patch_erican, patch_embassy, patch_raffles_2027, patch_official_pages, patch_stem_academy, patch_klik]
 
 # Brief rule: tier 4-5 only -> confidence low. These domains are aggregators.
 PLATFORM_HOSTS = {
