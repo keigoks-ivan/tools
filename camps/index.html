@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>馬來西亞寒暑假營隊查詢</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="hero">
+  <svg class="hero-art" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 9l10-5 10 5-10 5zM6 11v5c3 2 9 2 12 0v-5M22 9v6"/></svg>
+  <div class="hero-inner">
+    <a class="back" href="/home.html">← InvestMQuest 工具箱</a>
+    <div class="hero-eyebrow">MALAYSIA HOLIDAY CAMPS</div>
+    <h1 class="hero-h1">馬來西亞寒暑假營隊查詢</h1>
+    <p class="hero-sub">輸入日期、孩子出生年月和城市，列出能報的梯次。每筆都附來源和查證日期；日期沒公布的，跟確認的分開放。</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <form id="q" class="panel" autocomplete="off">
+    <div class="row">
+      <label class="field"><span>開始</span><input type="date" name="start" required></label>
+      <label class="field"><span>結束</span><input type="date" name="end" required></label>
+      <div class="presets" id="presets"></div>
+    </div>
+    <p class="hint" id="tw-hint"></p>
+
+    <fieldset>
+      <legend>孩子（出生年月）</legend>
+      <div id="kids"></div>
+      <button type="button" class="ghost" id="add-kid">＋ 加一位</button>
+    </fieldset>
+
+    <fieldset>
+      <legend>城市</legend>
+      <div class="chips" id="cities"></div>
+    </fieldset>
+
+    <fieldset>
+      <legend>找機構或學校（選填）</legend>
+      <input class="kw" type="search" name="kw" placeholder="例：ISKL、Erican、Newtonshow" aria-label="機構或學校名稱">
+    </fieldset>
+
+    <details class="adv">
+      <summary>進階篩選</summary>
+      <div class="adv-grid">
+        <label class="field"><span>每位孩子每週預算上限（台幣）</span><input type="number" name="budget" min="0" step="500" placeholder="不限"></label>
+        <div class="field"><span>形式</span><div class="chips" id="formats"></div></div>
+        <div class="field"><span>類型</span><div class="chips" id="categories"></div></div>
+        <div class="field"><span>其他</span>
+          <div class="chips">
+            <label class="chip"><input type="checkbox" name="lunch"><span>含午餐</span></label>
+            <label class="chip"><input type="checkbox" name="flexible"><span>可彈性選週</span></label>
+            <label class="chip"><input type="checkbox" name="noParent"><span>不需家長陪同</span></label>
+            <label class="chip"><input type="checkbox" name="mandarin"><span>有華語授課</span></label>
+          </div>
+        </div>
+      </div>
+      <p class="hint">預算是把各種計價（每天、每兩週、每梯）換成每週約略金額來比，卡片上仍顯示原本的計價方式。沒有價格的梯次不會被篩掉。</p>
+    </details>
+  </form>
+
+  <div id="status" class="status">載入資料中…</div>
+  <section id="summary"></section>
+  <section id="weeks"></section>
+  <section id="results"></section>
+</main>
+
+<div id="tray" class="tray" hidden>
+  <span id="tray-n"></span>
+  <button type="button" id="tray-open">並排比較</button>
+  <button type="button" class="ghost" id="tray-clear">清除</button>
+</div>
+<dialog id="cmp"><div id="cmp-body"></div><form method="dialog"><button>關閉</button></form></dialog>
+
+<footer class="wrap foot" id="foot"></footer>
+<script type="module" src="app.js"></script>
+</body>
+</html>
