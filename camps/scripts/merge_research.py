@@ -30,6 +30,7 @@ CONFLICT_ENTITY = {
     "loc-epsom／loc-epsom-college-enstek": "loc-epsom",
     "loc-direct-english-kl": "loc-directenglish-kl",
     "alice-smith-camp-beaumont": "camp-beaumont-active",
+    "camp-beaumont-active-iskl": "camp-beaumont-active",
 }
 # conflicts about leads that are not in the dataset (Little Steps article, Red Rescue)
 CONFLICT_DROP = {"little-steps-year-end", "red-rescue-lifesaving-camp"}
@@ -283,6 +284,8 @@ def main():
             prov_of.setdefault(lid, g["provider_id"])
     for r in db["reviews"]:
         h = host(r.get("url"))
+        if r["platform"].startswith("blog_"):  # e.g. blog_kl_with_kids: one platform, the page shows the host
+            r["platform"] = "blog"
         if r["platform"] == "other":
             for dom, plat in PLATFORM_HOSTS.items():
                 if h == dom or h.endswith("." + dom):
@@ -296,9 +299,16 @@ def main():
                 hl["author_type"] = "staff"
             log["review_operator_hosted"] += 1
 
+    # reviews of places that are only leads (not in the dataset) stay in the research file
+    known = set(db["providers"]) | set(db["programs"]) | set(db["locations"]) | set(db["sessions"])
+    for r in [r for r in db["reviews"] if r["entity_id"] not in known]:
+        log["reviews_for_leads_skipped"] += 1
+        print("  review skipped (entity is a lead):", r["id"])
+    db["reviews"] = [r for r in db["reviews"] if r["entity_id"] in known]
+
     groups = {}
     for r in db["reviews"]:
-        groups.setdefault((r["entity_id"], r["platform"], r["url"] if r["platform"] == "other" else ""), []).append(r)
+        groups.setdefault((r["entity_id"], r["platform"], r["url"] if r["platform"] in ("other", "blog") else ""), []).append(r)
     merged = []
     for rs in groups.values():
         rs.sort(key=review_weight, reverse=True)

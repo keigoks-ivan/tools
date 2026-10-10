@@ -51,7 +51,8 @@ function fmtD(s, year = false) {
   const wd = WD[new Date(Date.UTC(y, m - 1, d)).getUTCDay()];
   return `${year ? y + '/' : ''}${m}/${d}（${wd}）`;
 }
-const platName = (r) => (r.platform === 'other' && r.url ? (r.url.match(/^https?:\/\/(?:www\.)?([^/]+)/)?.[1] || '其他') : PLATFORM[r.platform] || r.platform);
+const hostOf = (u) => u?.match(/^https?:\/\/(?:www\.)?([^/]+)/)?.[1];
+const platName = (r) => (r.platform === 'other' ? hostOf(r.url) || '其他' : r.platform === 'blog' && hostOf(r.url) ? `部落格 ${hostOf(r.url)}` : PLATFORM[r.platform] || r.platform);
 const AUTHOR = { staff: '業者自述', editorial: '聚合站編輯', agent: '代理商刊登' };
 const cardId = (it) => 'c-' + `${it.program.id}--${it.session.location_id || 'x'}`.replace(/[^a-z0-9-]/gi, '-');
 
