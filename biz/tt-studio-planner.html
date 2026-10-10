@@ -43,6 +43,16 @@ ul,ol{margin:10px 0 18px 22px;color:var(--ink-2)} li{margin-bottom:7px}
 .num{font-family:"JetBrains Mono",monospace;text-align:right;white-space:nowrap}
 .pos{color:var(--green);font-weight:600}.neg{color:var(--red);font-weight:600}
 .tbl a{color:var(--blue)}
+.qcalc{margin-top:32px;max-width:880px;background:var(--paper);color:var(--ink);padding:18px 22px 16px;border-left:5px solid var(--rust)}
+.qcalc .q-label{font-size:12px;letter-spacing:.12em;color:var(--rust);margin-bottom:10px;font-weight:700}
+.qcalc .q-in{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.qcalc label{display:flex;flex-direction:column;gap:5px;font-size:13.5px;color:var(--ink-2)}
+.qcalc input{width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid var(--line);background:#fff;font-family:"JetBrains Mono",monospace;font-size:16px;text-align:right;color:var(--ink)}
+.qcalc input:focus{outline:2px solid var(--rust-soft);border-color:var(--rust-soft)}
+.qcalc .q-out{margin-top:14px;font-size:15px;line-height:1.8}
+.qcalc .q-out b{font-family:"JetBrains Mono",monospace;color:var(--rust)}
+.qcalc .q-note{font-size:12.5px;color:var(--slate);margin-top:4px}
+@media(max-width:640px){.qcalc .q-in{grid-template-columns:1fr}}
 .quick{margin-top:32px;max-width:880px;border:1px solid rgba(245,239,230,.2);padding:18px 22px 10px}
 .quick .q-label{font-size:12px;letter-spacing:.12em;color:var(--rust-soft);margin-bottom:8px}
 .quick ol{margin:0 0 8px 20px;color:var(--cream)} .quick li{margin-bottom:8px;line-height:1.7;opacity:.92}
@@ -88,6 +98,17 @@ fieldset input:focus,fieldset select:focus{outline:2px solid var(--rust-soft);bo
     <div class="kicker">INVESTMQUEST RESEARCH ／ 開館試算 ／ 互動版</div>
     <h1 class="title">桌球教室<br>開館試算</h1>
     <p class="subtitle">你現在按小時租桌教課，想自己開一間教室嗎？這頁把「繼續租桌」和三種開館方式放在一起比，算出開館要準備多少錢、要有多少學生才划算。預設數字是一位在台北租桌、每週教 40 小時的教練，請換成你自己的數字。</p>
+    <div class="qcalc">
+      <div class="q-label">馬上試算：你現在租桌教課，一年賺多少</div>
+      <div class="q-in">
+        <label>場館時租（每小時付場館）<input type="number" data-sync="labFee" step="10" min="0" inputmode="numeric"></label>
+        <label>每週教幾小時<input type="number" data-sync="weeklyHrs" step="1" min="0" inputmode="numeric"></label>
+        <label>每小時收學生多少<input type="number" data-sync="labPrice" step="50" min="0" inputmode="numeric"></label>
+        <label>一年教幾週（扣掉過年和休假）<input type="number" data-sync="weeks" step="1" min="0" inputmode="numeric"></label>
+        <label>對照：當受雇教練每小時實拿<input type="number" data-sync="lkTake" step="10" min="0" inputmode="numeric"></label>
+      </div>
+      <div class="q-out" id="q-out"></div>
+    </div>
     <div class="meta">
       <div><div class="lbl">繼續租桌（每年）</div><div class="val" id="m-lab">—</div></div>
       <div><div class="lbl">小教室 第 3 年</div><div class="val" id="m-s1">—</div></div>
@@ -608,6 +629,9 @@ function calc(){
   const {H,lab,S1,S2,S3,st,stp,L5,T,labNet,fixed1,be}=model(p);
 
   // hero
+  document.querySelectorAll('[data-sync]').forEach(e=>{if(e!==document.activeElement)e.value=$(e.dataset.sync).value;});
+  $('q-out').innerHTML=`每小時實拿 <b>${f0(labNet)}</b> 元（收學生 ${f0(p.labPrice)} − 場館 ${f0(p.labFee)}）<br>一年教 <b>${f0(H)}</b> 小時，一年賺 <b>${w(lab[0])}</b>，平均每月 <b>${w(lab[0]/12)}</b><br>同樣時數當受雇教練一年 ${w(H*p.lkTake)}，租桌${lab[0]>=H*p.lkTake?'多':'少'} <b>${w(Math.abs(lab[0]-H*p.lkTake))}</b>`+
+    `<div class="q-note">這五格和第 02 章是同一組數字，改哪邊都一樣。下面四格是開館和租桌的比較。</div>`;
   $('m-lab').textContent=w(lab[2]);
   ['m-s1','m-s2','m-s3'].forEach((id,i)=>{$(id).textContent=w([S1,S2,S3][i][2].inc);});
 
@@ -942,6 +966,7 @@ function calc(){
     `<li>${allNeg?'建議先做不用花錢的事：漲價、談桌租、帶徒弟。一年後把真實數字填進來，再決定要不要開。':'開館前，先確認第 09 章的條件都成立，再去找場地。'}</li></ol>`;
 }
 document.addEventListener('DOMContentLoaded',()=>{load();calc();
+  document.querySelectorAll('[data-sync]').forEach(e=>e.addEventListener('input',()=>{$(e.dataset.sync).value=e.value;}));
   document.querySelectorAll('input,select').forEach(e=>e.addEventListener('input',calc));
   $('reset').addEventListener('click',()=>{load();calc();});});
 </script>
