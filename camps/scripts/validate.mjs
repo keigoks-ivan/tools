@@ -59,6 +59,7 @@ for (const s of sessions) {
     if (!ENUM.basis.includes(pr.basis)) err(s.id, `price amount without valid basis (${pr.basis})`);
     if (!fx.rates[pr.currency]) err(s.id, `currency ${pr.currency} has no fx rate`);
     if (!(pr.amount > 0)) err(s.id, `price amount ${pr.amount}`);
+    if (pr.from != null && typeof pr.from !== 'boolean') err(s.id, `price.from ${pr.from}`);
   }
 }
 

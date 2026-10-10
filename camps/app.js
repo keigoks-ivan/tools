@@ -180,14 +180,15 @@ function priceLine(s, nKids) {
   if (!p || p.amount == null) return '未公布';
   const basis = BASIS[p.basis] || '計價方式未註明';
   const twd = toTWD(p.amount, p.currency, db.fx);
-  let t = `${esc(p.currency)} ${fmtN(p.amount)}／${basis}${twd ? `（約 NT$${fmtN(twd)}）` : ''}`;
+  const from = p.from ? ' 起' : ''; // the source only gives the lowest option
+  let t = `${esc(p.currency)} ${fmtN(p.amount)}${from}／${basis}${twd ? `（約 NT$${fmtN(twd)}${from}）` : ''}`;
   if (p.tax_included === true) t += '，含稅';
   if (p.tax_included === false) t += '，未含稅';
   if (p.tax_note) t += `<br><small class="quote">${esc(p.tax_note)}</small>`;
   if (nKids > 1) {
     const tot = p.amount * nKids;
     const tt = toTWD(tot, p.currency, db.fx);
-    t += `<br>${nKids} 位合計 ${esc(p.currency)} ${fmtN(tot)}／${basis}${tt ? `（約 NT$${fmtN(tt)}）` : ''}，未計手足優惠`;
+    t += `<br>${nKids} 位合計${p.from ? '至少' : ''} ${esc(p.currency)} ${fmtN(tot)}／${basis}${tt ? `（約 NT$${fmtN(tt)}）` : ''}，未計手足優惠`;
   }
   const eb = p.early_bird;
   if (eb?.amount != null) t += `<br>早鳥 ${esc(p.currency)} ${fmtN(eb.amount)}${eb.deadline ? `，${esc(eb.deadline)} 前` : ''}`;
@@ -424,7 +425,7 @@ function render(q) {
       const id = cardId(x);
       lastCards.set(id, x);
       const pr = x.session.price;
-      return `<li>${esc(x.provider.name_en)}：${esc(x.program.name)}${x.locs?.[0] ? `（${esc(x.locs[0].name)}，${esc(cityZh(x.locs[0].city))}）` : ''}${pr?.amount != null ? `，${money(pr.currency, pr.amount)}／${BASIS[pr.basis] || '?'}` : ''}　<a href="${esc(x.session.source_url)}" target="_blank" rel="noopener">查證頁</a><label class="cmp-box"><input type="checkbox" data-cmp="${id}" ${picked.has(id) ? 'checked' : ''}>選取</label></li>`;
+      return `<li>${esc(x.provider.name_en)}：${esc(x.program.name)}${x.locs?.[0] ? `（${esc(x.locs[0].name)}，${esc(cityZh(x.locs[0].city))}）` : ''}${pr?.amount != null ? `，${money(pr.currency, pr.amount)}${pr.from ? ' 起' : ''}／${BASIS[pr.basis] || '?'}` : ''}　<a href="${esc(x.session.source_url)}" target="_blank" rel="noopener">查證頁</a><label class="cmp-box"><input type="checkbox" data-cmp="${id}" ${picked.has(id) ? 'checked' : ''}>選取</label></li>`;
     }).join('')}</ul></details>` : '');
   updateTray();
 }
@@ -539,13 +540,14 @@ function estLine(id) {
   const c = lineCost(price, p.qty, p.kids.size);
   if (!c) return { id, html: '單價或數量是空的，沒算進總額', c: null };
   const twd = toTWD(c.total, pr.currency, db.fx);
-  let html = `${money(pr.currency, p.amount)}／${BASIS[pr.basis] || '?'} × ${p.qty} ${UNIT[pr.basis] || '單位'} × ${p.kids.size} 位`;
+  const atLeast = pr.from && p.amount === pr.amount; // a from-price the parent hasn't replaced
+  let html = `${atLeast ? '起價 ' : ''}${money(pr.currency, p.amount)}／${BASIS[pr.basis] || '?'} × ${p.qty} ${UNIT[pr.basis] || '單位'} × ${p.kids.size} 位`;
   if (c.tax) html += ` ＝ ${money(pr.currency, c.base)}，加 ${Math.round(taxRate(pr) * 100)}% 稅 ${money(pr.currency, c.tax)}`;
-  html += ` ＝ <b>${money(pr.currency, c.total)}</b>${twd ? `（約 NT$${fmtN(twd)}）` : ''}`;
+  html += ` ＝ <b>${atLeast ? '至少 ' : ''}${money(pr.currency, c.total)}</b>${twd ? `（約 NT$${fmtN(twd)}）` : ''}`;
   if (p.amount !== pr.amount) html += `<br><small>單價是你改的，業者公布的是 ${money(pr.currency, pr.amount)}</small>`;
   const min = p.it.session.min_duration_weeks;
   if (p.kind === 'rolling' && min > 1 && p.weeks.size < min) html += `<br><small class="warn-txt">這個營最少要報 ${min} 週</small>`;
-  return { id, html, c, twd, cur: pr.currency };
+  return { id, html, c, twd, cur: pr.currency, atLeast };
 }
 
 function estNotes(p) {
@@ -553,6 +555,7 @@ function estNotes(p) {
   const s = it.session;
   const pr = s.price || {};
   const notes = [];
+  if (pr.amount != null && pr.from) notes.push('業者只寫起價（from），實際價格可能更高；問到實價可以直接改單價');
   if (pr.amount != null && s.date_status === 'confirmed_other_year') notes.push(`這是 ${s.year} 年的價格，2027 可能調整`);
   if (pr.amount != null && s.date_status === 'pattern_estimated') notes.push('價格取自往年，2027 可能調整');
   if (p.kind === 'undated') notes.push(`2027 日期未公布：勾你打算去的週，數量照週次算；不勾就先算 ${p.qty0} ${UNIT[pr.basis] || '單位'}${p.qtyGuess0 ? '' : '（往年一梯）'}`);
@@ -678,8 +681,10 @@ function updateEstimate() {
   $('#est-plan').innerHTML = planHtml(kidNames, table);
   const warns = [...clashes];
   if (missing.length) warns.push(`${missing.length} 項沒算進總額（價格未公布、沒勾孩子或沒勾週次）：${missing.join('、')}`);
+  const low = lines.filter((x) => x.c && x.atLeast).map((x) => esc(shortName(picked.get(x.id).it)));
+  if (low.length) warns.push(`${low.length} 項用的是業者寫的起價，實際可能更高，所以合計是最低金額：${[...new Set(low)].join('、')}`);
   const fx = db.fx;
-  $('#est-total').innerHTML = `<div class="est-sum"><span>合計約</span><b>NT$${fmtN(twd)}</b></div>
+  $('#est-total').innerHTML = `<div class="est-sum"><span>合計${low.length ? '至少' : ''}約</span><b>NT$${fmtN(twd)}</b></div>
     <div class="est-cur">${Object.entries(byCur).map(([c, n]) => money(c, n)).join(' ＋ ') || '—'}</div>
     ${kidNames.length > 1 ? `<div class="est-kids">${kidNames.filter((k) => perKid.has(k)).map((k) => `${esc(k)} 約 NT$${fmtN(perKid.get(k))}`).join('｜')}</div>` : ''}
     ${warns.length ? `<ul class="warns">${warns.map((w) => `<li>${w}</li>`).join('')}</ul>` : ''}

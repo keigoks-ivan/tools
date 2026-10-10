@@ -106,11 +106,14 @@ confidence：`high`＝tier 1–2 且是目標年；`medium`＝tier 3，或 tier 
  "year":null, "season":"winter_2026_27|spring_2027|summer_2027|other",
  "price":{"amount":null,"currency":"MYR","basis":"per_week|per_day|per_session|per_2weeks|per_camp|null",
           "tax_included":null,"tax_note":null,"source_url":null,
+          "from":null,
           "early_bird":{"amount":null,"deadline":null,"condition":null}},
  "min_duration_weeks":null, "flexible_start":null, "spots_status":null,
  "source_url":"", "verified_at":"2026-10-10", "evidence_quote":"",
  "confidence":"high|medium|low", "estimate_basis":null, "notes":""}
 ```
+`price.from`：來源寫 from、starting from、「起」時填 true，表示 amount 是最低選項，不是一般價格；其他情況填 null。
+
 `source_url` 與 `verified_at` **必填**（即使 date_status 是 unknown，也填你查證「查不到」的那一頁）。
 
 ### conflicts / not_found / leads

@@ -239,7 +239,43 @@ def patch_klik(db):
         "confidence": "medium", "estimate_basis": None, "notes": "官網列的最近一期，學費沒寫。", "_batches": ["chrome-verify-3"]}
 
 
-PATCHES = [patch_erican, patch_embassy, patch_raffles_2027, patch_official_pages, patch_stem_academy, patch_klik]
+FROM_PRICES = [  # source says "from" / "starting from": the amount is the lowest option, not the usual price
+    "aquabubs-holiday-swim-camp-united-point-tbd-2027w",
+    "camp-beaumont-active-alice-smith-primary-20260324",
+    "camp-beaumont-english-in-action-day-bskl-20260720", "camp-beaumont-english-in-action-day-mcm-20260727",
+    "camp-beaumont-parkour-alice-smith-primary-20261214", "camp-beaumont-parkour-alice-smith-primary-20261221",
+    "camp-beaumont-parkour-alice-smith-primary-20261228",
+    "camp-beaumont-steam-alice-smith-primary-20260706-magic", "camp-beaumont-steam-alice-smith-primary-20260720-active",
+    "camp-beaumont-steam-alice-smith-primary-20260803-magic",
+    "laliga-professional-camp-enstek-20260628", "laliga-professional-camp-enstek-20261019",
+    "laliga-professional-camp-enstek-20261213", "laliga-showcase-camp-enstek-20260706",
+    "laliga-taster-camp-enstek-20260505", "laliga-taster-camp-enstek-20260609",
+    "mouratoglou-junior-tennis-camps-enstek-tbd-2027w",
+    "newtonshow-winter-bangsar-20261123", "newtonshow-winter-bukit-bintang-20261123",
+    "newtonshow-winter-jb-20261123", "newtonshow-winter-penang-20261123",
+]
+
+
+def patch_from_prices(db):
+    """起價標記；Newtonshow 冬季營附往年分區價（Chrome 2026-10-10 讀官網 2026 農曆年營存檔）。"""
+    for s in db["sessions"].values():
+        if s["id"] in FROM_PRICES and s["price"]["amount"] is not None:
+            s["price"]["from"] = True
+    url = "https://web.archive.org/web/20260411104300/https://www.newtonshow.my/cny-holiday-camp/"
+    p = db["programs"].get("newtonshow-winter")
+    if p:
+        p["sources"].append({"url": url, "tier": 1, "accessed": TODAY, "fields": [],
+                             "quote": "5 days Mon-Fri 9am – 4pm MYR 1199 (Kuala Lumpur)* 750 (Penang, Johor)*"})
+    past = {"bangsar": "吉隆坡 RM1,199", "bukit-bintang": "吉隆坡 RM1,199", "jb": "新山 RM750", "penang": "檳城 RM750"}
+    for loc, txt in past.items():
+        s = db["sessions"].get(f"newtonshow-winter-{loc}-20261123")
+        if s:
+            s["price"]["tax_note"] = (f"官網只寫起價，沒說 600 是哪個地點、全日或半日，也沒說含稅與否。"
+                                      f"2026 農曆年營（同為 9:00～16:00）{txt}／週，只供參考，沒拿來算。")
+
+
+PATCHES = [patch_erican, patch_embassy, patch_raffles_2027, patch_official_pages, patch_stem_academy, patch_klik,
+           patch_from_prices]
 
 # Brief rule: tier 4-5 only -> confidence low. These domains are aggregators.
 PLATFORM_HOSTS = {
