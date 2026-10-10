@@ -100,3 +100,22 @@ test('shield-only impacts use a cyan vignette and break notice, while health imp
   shield.G.player.shield=0;shield.hud.drawBattle(1/60,shield.G,'en');assert(shield.x.texts.some(t=>t.text==='SHIELD BROKEN'));
   const health=fixture();health.G.hurt=.8;health.hud.drawBattle(1/60,health.G,'zh');assert(health.x.fills.some(r=>r.color?.stops?.some(s=>s.color.startsWith('rgba(210,40,25,'))));
 });
+test('recon reveals living radar positions through cover without revealing health bars',()=>{
+  const f=fixture({enemies:[actor({hp:30,barT:2.6}),actor({id:2,z:18,dead:true,hp:0,deathAge:1})]});
+  f.G.map.solid.add({x0:-3,x1:3,y0:0,y1:3,z0:5,z1:6});
+  const contacts=bars(f);assert.equal(enemyLabels(f).length,0);
+  f.hud._infantryRadar(f.W,f.H,f.G,contacts,'en');
+  const redDots=()=>f.x.fills.filter(r=>r.color==='#ff4a4a'&&r.path?.some(p=>p.arc));assert.equal(redDots().length,0);
+  f.x.fills=[];f.G.intelActive=true;f.hud._infantryRadar(f.W,f.H,f.G,contacts,'en');
+  assert.equal(redDots().length,1);assert(f.x.texts.some(t=>t.text==='RECON INTEL'));
+  f.hud._enemyBars(f.W,f.H,contacts,'en');assert.equal(enemyLabels(f).length,0);
+  f.x.fills=[];f.G.intelActive=false;f.hud._infantryRadar(f.W,f.H,f.G,contacts,'en');assert.equal(redDots().length,0);
+});
+test('optional task remains marked independently of enemies and vanishes after completion',()=>{
+  const f=fixture({enemies:[]}),pins=[];f.hud._pin=(...args)=>pins.push(args);
+  f.G.fieldTask={site:{x:10,y:0,z:15},completed:false,progress:1,ratio:1/3,definition:{name:{zh:'備援電台',en:'Backup radio'}}};
+  f.hud.drawBattle(1/60,f.G,'en');assert(pins.some(p=>p.at(-1)==='SIDE · Backup radio'));
+  assert(f.x.strokes.some(s=>s.rect?.[2]===10&&s.color==='#7ff3ff'));
+  pins.length=0;f.x.strokes=[];f.G.fieldTask.completed=true;f.hud.drawBattle(1/60,f.G,'en');
+  assert(!pins.some(p=>p.at(-1)==='SIDE · Backup radio'));assert(!f.x.strokes.some(s=>s.rect?.[2]===10&&s.color==='#7ff3ff'));
+});
