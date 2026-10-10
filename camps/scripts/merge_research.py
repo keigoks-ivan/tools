@@ -33,7 +33,12 @@ CONFLICT_ENTITY = {
     "camp-beaumont-active-iskl": "camp-beaumont-active",
 }
 # conflicts about leads that are not in the dataset (Little Steps article, Red Rescue)
-CONFLICT_DROP = {"little-steps-year-end", "red-rescue-lifesaving-camp"}
+CONFLICT_DROP = {"little-steps-year-end", "red-rescue-lifesaving-camp",
+                 # th-aggregators: 2026 vs 2027 dates of Regent's, which its own note says is not a conflict
+                 "regents-international-school-bangkok-th-winter-camp-2027",
+                 # th-study-tour: IH Bangkok price (2025 vs 2026 is a price rise) and Saturday classes vs
+                 # holiday camps (two products on one page); the official page read in Chrome settles both
+                 "ih-bangkok-kids-camp"}
 
 DROPS = {
     "kensington-camps-holiday-tbd-2027s":
@@ -296,8 +301,112 @@ def patch_staffing_facilities(db):
                              "quote": "Children join in age groups"})
 
 
+REGENTS_PRICE_IMG = "https://www.nordangliaeducation.com/risb-bangkok/-/media/risb-bangkok/outstanding-experience/p2-768x768.png"
+
+
+def drop_entities(db, providers=(), programs=(), sessions=()):
+    programs = set(programs) | {g for g, x in db["programs"].items() if x["provider_id"] in providers}
+    for pid in providers:
+        db["providers"].pop(pid, None)
+    for g in programs:
+        db["programs"].pop(g, None)
+    for s in [s for s, x in db["sessions"].items() if s in sessions or x["program_id"] in programs]:
+        db["sessions"].pop(s)
+
+
+def patch_thailand(db):
+    # The same camp built twice under different ids. Keep the batch the camp was assigned to,
+    # except Let's Asia: th-aggregators read the years on the page ("Xmas 2026", "New Year Camp 2026"),
+    # th-bkk-camps did not.
+    drop_entities(db, providers=["international-house-bangkok-th"],  # th-study-tour's ih-bangkok-th has the official page
+                  programs=["green-group-agency-th-new-year-festive-week",  # th-bkk-camps has it as a 12/28 session
+                            "green-group-agency-th-winter-english-camp-boarding", "lets-asia-th-fun-camp"],
+                  sessions=["green-group-agency-th-winter-day-camp-played-20261207",
+                            "green-group-agency-th-winter-english-school-played-20270111",
+                            "bangkok-dolphins-th-holiday-camp-racquet-club-20270215"])
+    for c in db["conflicts"]:
+        if c["entity_id"] == "lets-asia-th-fun-camp":
+            c["entity_id"] = "lets-asia-th-holiday-camp"
+    # the 9,500 vs 8,500 one is last year's price on Edarabia, not a conflict
+    db["conflicts"] = [c for c in db["conflicts"] if not (c["entity_id"] == "lets-asia-th-holiday-camp" and c["field"] == "price")]
+    g = db["programs"].get("lets-asia-th-holiday-camp")
+    if g:
+        g["notes"] = (g.get("notes") or "") + "校車另付：素坤逸區每週 1,750、每日 400 泰銖，其他地區更貴（官網）。"
+
+    # Thailand Climbing: the booking pages read in Chrome 2026-10-10
+    db["gaps"].append({
+        "name": "Thailand Climbing（Chiang Mai Rock Climbing Adventures）兒童攀岩營", "url": "https://thailandclimbing.rezdy.com/catalog/520610/camps",
+        "what_missing": "三個 5 天營都在訂位系統上，但都顯示「no availability」，沒有梯次日期：室內攀岩半日 9:00～12:00 ฿6,995、"
+                        "戶外攀岩全日 8:30～17:00 ฿19,995、冒險技能營 ฿24,995（8～12、13～18 歲）。介紹寫的是暑假。",
+        "kind": "not_found", "_batch": "main-chrome"})
+
+    # th-bkk-schools and th-aggregators both built Regent's; keep th-bkk-schools (its assigned batch,
+    # plus the 2026 reference session and the 1 teacher + 1 TA detail)
+    dup = "regents-international-school-bangkok-th"
+    drop_programs = {g for g, x in db["programs"].items() if x["provider_id"] == dup}
+    db["providers"].pop(dup, None)
+    for g in drop_programs:
+        db["programs"].pop(g)
+    for s in [s for s, x in db["sessions"].items() if x["program_id"] in drop_programs]:
+        db["sessions"].pop(s)
+
+    # Thai literacy: the agent tagged it "language" too, which maps to English
+    g = db["programs"].get("bangkok-prep-thai-literacy")
+    if g:
+        g["category"] = ["other_language"]
+
+    # Regent's Winter Camp 2027 prices: only in the pricing image, read in Chrome 2026-10-10
+    s = db["sessions"].get("regents-english-winter-camp-regents-boarding-20270111")
+    if s:
+        s["price"].update({
+            "amount": 29900, "currency": "THB", "basis": "per_week", "source_url": REGENTS_PRICE_IMG,
+            "tax_note": "官網價格圖：1 週 29,900、2 週 49,900、3 週 69,900、4 週 89,900、5 週 109,900、6 週 129,900 泰銖。"
+                        "報多週比較便宜，用 1 週單價估多週會偏高。校車另列一行：1～2 週 8,000、3 週 10,000、4 週 16,000、"
+                        "5～6 週 18,000，頁面沒說是否必選。",
+        })
+        s["min_duration_weeks"] = 1
+        s["notes"] = ("價格表有 1 到 6 週的選項，可以只報 1 週；哪幾週可以選，頁面沒寫。9/30 前付款 8 折的早鳥已截止。"
+                      "每日上課時間沒寫（10 月營是 9:00～14:30，不能直接套用）。")
+        s.setdefault("sources", []).append({
+            "url": REGENTS_PRICE_IMG, "tier": 1, "accessed": TODAY, "fields": ["price"],
+            "quote": "Winter Camp 2027 … 1 WEEK Tuition fees 29,900 THB … 3 WEEKS 69,900 THB"})
+        prog = db["programs"]["regents-english-winter-camp"]
+        prog["notes"] = ("2027 年寒假營 1/11～2/19，共六週，涵蓋 1/17～2/8 全段。對外開放，非本校生可報。"
+                         "價格在官網的價格圖裡（Chrome 讀圖，2026-10-10）。")
+        prog["class_size_max"] = 25
+
+    # IH Bangkok immersion camps: the official kids page read in Chrome 2026-10-10
+    ih = "https://ihbangkok.com/english-courses/english-for-kids/"
+    ih_quote = "Immersion Camps … 19 Jan 2026 to 27 Feb 2026 … Start any Monday … 1 WEEK 1 child 16,950 THB"
+    ih_tiers = ("官網價：1 週 16,950、2 週 32,000，之後每加 1 週 15,950 泰銖；兄弟姊妹或團體報名每人每週少 500。"
+                "用 1 週單價估多週會略高。")
+    g = db["programs"].get("ih-bangkok-kids-camp")
+    if g:
+        g["name"] = "IH Bangkok Immersion Camps（兒童英語營）"
+        g["hours"] = {"start": "09:00", "end": "15:15", "days": "Mon-Fri"}
+        g["class_size_max"] = 12
+        g["notes"] = ("給外國孩子的語言學校營隊，依劍橋兒童英語分級（Starters、Movers、Flyers），任何程度都收。"
+                      "寒假、暑假開營，每週一都能開始，可報 1～10 週。週六另有常態班，是另一個課程。官網沒寫含不含午餐。")
+        for sid in ("ih-bangkok-kids-camp-ihbangkok-20260119", "ih-bangkok-kids-camp-ihbangkok-20260615",
+                    "ih-bangkok-kids-camp-ihbangkok-tbd-2027w"):
+            s = db["sessions"].get(sid)
+            if not s:
+                continue
+            s["price"].update({"amount": 16950, "currency": "THB", "basis": "per_week", "source_url": ih, "tax_note": ih_tiers})
+            s.update({"source_url": ih, "verified_at": TODAY, "flexible_start": True, "min_duration_weeks": 1})
+            if s["date_status"] == "confirmed_other_year":
+                s["confidence"] = "high"
+                s["evidence_quote"] = ih_quote if sid.endswith("0119") else "15 Jun 2026 to 21 Aug 2026 … Start any Monday"
+            else:
+                # official page, dates still estimated: the date status already says so
+                s["confidence"] = "medium"
+                s["estimate_basis"] = ("官網：2026 年寒假 1/19～2/27、暑假 6/15～8/21；2025 年寒假 1/20～2/21（languagecourse.net 簡章）。"
+                                       "2027 年寒假日期未公布。")
+            s.setdefault("sources", []).append({"url": ih, "tier": 1, "accessed": TODAY, "fields": ["dates", "price"], "quote": ih_quote})
+
+
 PATCHES = [patch_erican, patch_embassy, patch_raffles_2027, patch_official_pages, patch_stem_academy, patch_klik,
-           patch_from_prices, patch_staffing_facilities]
+           patch_from_prices, patch_staffing_facilities, patch_thailand]
 
 # Brief rule: tier 4-5 only -> confidence low. These domains are aggregators.
 PLATFORM_HOSTS = {
@@ -332,14 +441,20 @@ CATEGORY_MAP = {
     "schooling": "short_term_enrolment",
     "swimming": "sport", "safety": "sport", "sailing": "sport", "outdoor_adventure": "outdoor",
     "engineering": "stem", "cultural": "travel",
-    "french": "other_language", "other_language": "other_language",
+    "french": "other_language", "other_language": "other_language", "nature": "outdoor",
+    "robotics": "stem", "design": "arts", "multi_sport": "sport", "family_camp": "family", "thai": "other_language",
+    "basketball": "sport", "after_school": "multi_activity",
 }
+# format or provider type, not what the camp teaches (format and provider.type already carry these)
+DROP_CATEGORIES = {"day_camp", "school_own_camp", "academic", "weekend", "language_class"}
 LANGUAGE_MAP = {"en": "English", "English": "English", "Mandarin": "Mandarin", "zh": "Mandarin"}
 
 
 def normalize_program(p, log):
     cats = []
     for c in p.get("category") or []:
+        if c in DROP_CATEGORIES:
+            continue
         n = CATEGORY_MAP.get(c)
         if n is None:
             log["unmapped_category:" + c] += 1

@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   overlaps, weeksIn, sessionSpan, ageAt, kidFit, perWeekEquiv, toTWD, mondayOf, addYears,
-  defaultQty, taxRate, lineCost, runWeeks, weeksQty,
+  defaultQty, taxRate, lineCost, runWeeks, weeksQty, holidaysIn,
 } from '../lib/core.mjs';
 
 test('date overlap is inclusive at both ends', () => {
@@ -98,4 +98,21 @@ test('picked weeks: run clipped to the search dates, units per basis', () => {
   assert.equal(weeksQty({ basis: 'per_week' }, []), 0);
   assert.equal(weeksQty({ basis: null }, long), null);
   assert.deepEqual(runWeeks(null, '2027-01-17', '2027-02-08'), []);
+});
+
+test('holidays: each location gets its own country, weekends dropped', () => {
+  const db = { holidays: [
+    { country: 'MY', kind: 'public', date_start: '2027-02-08', date_end: '2027-02-08', name_zh: '農曆新年' },
+    { country: 'TH', kind: 'public', date_start: '2027-01-01', date_end: '2027-01-01', name_zh: '元旦' },
+    { country: 'TH', kind: 'replacement', date_start: '2027-02-22', date_end: '2027-02-22', name_zh: '萬佛節(補假)' },
+    { country: 'TH', kind: 'public', date_start: '2027-01-02', date_end: '2027-01-02', name_zh: '週六' },
+    { country: 'TW', kind: 'school_break', date_start: '2027-01-20', date_end: '2027-02-10', name_zh: '寒假' },
+  ] };
+  const bkk = [{ country: 'TH', city: 'Bangkok', state: 'Bangkok' }];
+  const kl = [{ country: 'MY', city: 'Kuala Lumpur', state: 'Kuala Lumpur' }];
+  const names = (hs) => hs.map((h) => h.name_zh);
+  assert.deepEqual(names(holidaysIn(db, '2026-12-28', '2027-02-26', bkk)), ['元旦', '萬佛節(補假)']);
+  assert.deepEqual(names(holidaysIn(db, '2026-12-28', '2027-02-26', kl)), ['農曆新年']);
+  // a location saved before the country field existed counts as Malaysia
+  assert.deepEqual(names(holidaysIn(db, '2027-02-08', '2027-02-12', [{ city: 'Penang', state: 'Penang' }])), ['農曆新年']);
 });

@@ -18,13 +18,14 @@ TODAY = sys.argv[1] if len(sys.argv) > 1 else date.today().isoformat()
 
 CITIES = ["Kuala Lumpur", "Petaling Jaya", "Subang Jaya", "Puchong", "Shah Alam", "Selangor-other",
           "Negeri Sembilan", "Penang", "Johor Bahru", "Kota Kinabalu", "Perak", "Melaka",
-          "Langkawi", "Kuching", "other", "unknown"]
+          "Langkawi", "Kuching", "Bangkok", "Chiang Mai", "other", "unknown"]
 KL_METRO = {"Kuala Lumpur", "Petaling Jaya", "Subang Jaya", "Puchong", "Shah Alam", "Selangor-other"}
 WINDOWS = {
     "寒假 2026/27": (date(2026, 11, 23), date(2027, 2, 28)),
     "暑假 2027": (date(2027, 6, 7), date(2027, 8, 29)),
 }
-ACCEPT = {"cities": KL_METRO, "start": date(2027, 1, 17), "end": date(2027, 2, 8), "ages": (6, 10)}
+ACCEPT = {"start": date(2027, 1, 17), "end": date(2027, 2, 8), "ages": (6, 10),
+          "areas": [("大吉隆坡", KL_METRO), ("曼谷", {"Bangkok"}), ("清邁", {"Chiang Mai"})]}
 
 
 def load(name):
@@ -127,35 +128,36 @@ def main():
             out.append(f"| {c} | " + " | ".join(str(ref[c][k] or "·") for k in cols) + " |")
     out.append("")
 
-    # --- acceptance case
+    # --- acceptance case, once per area
     lo_age, hi_age = ACCEPT["ages"]
-    out += [f"## 驗收案例：大吉隆坡，{ACCEPT['start']} 至 {ACCEPT['end']}，{lo_age} 歲＋{hi_age} 歲", ""]
-    for w in mondays(ACCEPT["start"], ACCEPT["end"]):
-        we = w + timedelta(days=4)
-        if we < ACCEPT["start"]:
-            continue
-        rows = []
-        for s in sessions:
-            if s["date_status"] not in ("confirmed_target_year", "confirmed_other_year"):
+    for area_zh, area in ACCEPT["areas"]:
+        out += [f"## 驗收案例：{area_zh}，{ACCEPT['start']} 至 {ACCEPT['end']}，{lo_age} 歲＋{hi_age} 歲", ""]
+        for w in mondays(ACCEPT["start"], ACCEPT["end"]):
+            we = w + timedelta(days=4)
+            if we < ACCEPT["start"]:
                 continue
-            if not (cities_of(s) & ACCEPT["cities"]):
-                continue
-            p = programs[s["program_id"]]
-            fits = [k for k in ACCEPT["ages"]
-                    if (p["age_min"] is None or p["age_min"] <= k) and (p["age_max"] is None or k <= p["age_max"])]
-            if not fits:
-                continue
-            if s["date_status"] == "confirmed_target_year" and overlaps(s, w, we):
-                loc = locations.get(s.get("location_id") or "", {}).get("name", "地點未定")
-                rows.append(f"  - {p['name']} @ {loc}（{s['start_date']}～{s['end_date'] or '滾動開課'}，可信度 {s['confidence']}，"
-                            f"適合 {'、'.join(map(str, fits))} 歲）")
-        official = [r for r in rows if "可信度 low" not in r]
-        out.append(f"- {w:%m/%d} 那週：" + ("**空窗**（沒有官方或中信心以上的梯次）" if not official else f"{len(official)} 個官方梯次"))
-        out += rows
-    est = sorted({programs[s["program_id"]]["name"] for s in sessions
-                  if s["date_status"] == "pattern_estimated" and s["season"] == "winter_2026_27"
-                  and cities_of(s) & ACCEPT["cities"]})
-    out += [f"- 同區間還有 {len(est)} 個課程只有推估（日期未公布）：" + "、".join(est), ""]
+            rows = []
+            for s in sessions:
+                if s["date_status"] not in ("confirmed_target_year", "confirmed_other_year"):
+                    continue
+                if not (cities_of(s) & area):
+                    continue
+                p = programs[s["program_id"]]
+                fits = [k for k in ACCEPT["ages"]
+                        if (p["age_min"] is None or p["age_min"] <= k) and (p["age_max"] is None or k <= p["age_max"])]
+                if not fits:
+                    continue
+                if s["date_status"] == "confirmed_target_year" and overlaps(s, w, we):
+                    loc = locations.get(s.get("location_id") or "", {}).get("name", "地點未定")
+                    rows.append(f"  - {p['name']} @ {loc}（{s['start_date']}～{s['end_date'] or '滾動開課'}，可信度 {s['confidence']}，"
+                                f"適合 {'、'.join(map(str, fits))} 歲）")
+            official = [r for r in rows if "可信度 low" not in r]
+            out.append(f"- {w:%m/%d} 那週：" + ("**空窗**（沒有官方或中信心以上的梯次）" if not official else f"{len(official)} 個官方梯次"))
+            out += rows
+        est = sorted({programs[s["program_id"]]["name"] for s in sessions
+                      if s["date_status"] == "pattern_estimated" and s["season"] == "winter_2026_27"
+                      and cities_of(s) & area})
+        out += [f"- 同區間還有 {len(est)} 個課程只有推估（日期未公布）：" + "、".join(est), ""]
 
     # --- providers without 2027 dates
     has_target = {programs[s["program_id"]]["provider_id"] for s in sessions if s["date_status"] == "confirmed_target_year"}

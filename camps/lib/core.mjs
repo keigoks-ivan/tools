@@ -22,6 +22,9 @@ export const CITY_REGION = {
 
 const SOLID = new Set(['high', 'medium']);
 
+export const COUNTRY_ZH = { MY: '馬來西亞', TH: '泰國' };
+const countriesOf = (locs) => new Set(locs.map((l) => l.country || 'MY'));
+
 // ---------- dates
 
 export function toDate(s) {
@@ -211,12 +214,12 @@ function isWeekend(s) {
   return d === 0 || d === 6;
 }
 
-// MY holidays that close a Mon–Fri camp: federal, plus state holidays for the
-// given regions. Weekend days are dropped; one entry per date.
-export function weekdayHolidays(db, start, end, regions) {
+// Holidays that close a Mon–Fri camp in the given countries: national, plus
+// state holidays for the given regions. Weekend days are dropped; one entry per date.
+export function weekdayHolidays(db, start, end, regions, countries = new Set(['MY'])) {
   const seen = new Set();
   return db.holidays.filter((h) => {
-    if (h.country !== 'MY' || !['public', 'replacement', 'state'].includes(h.kind)) return false;
+    if (!countries.has(h.country) || !['public', 'replacement', 'state'].includes(h.kind)) return false;
     if (h.region && !regions.has(h.region)) return false;
     if (!overlaps(h.date_start, h.date_end, start, end)) return false;
     if (isWeekend(h.date_start) || seen.has(h.date_start)) return false;
@@ -226,7 +229,7 @@ export function weekdayHolidays(db, start, end, regions) {
 }
 
 export function holidaysIn(db, start, end, locs) {
-  return weekdayHolidays(db, start, end, new Set(locs.map((l) => STATE_REGION[l.state]).filter(Boolean)));
+  return weekdayHolidays(db, start, end, new Set(locs.map((l) => STATE_REGION[l.state]).filter(Boolean)), countriesOf(locs));
 }
 
 // ---------- search
@@ -259,7 +262,8 @@ function warningsFor(db, s, program, span, locs, kids) {
     const hs = holidaysIn(db, span.start, span.end, locs);
     if (hs.length) {
       const list = hs.map((h) => `${h.date_start.slice(5).replace('-', '/')} ${h.name_zh || h.name_en}${h.status === 'estimated' ? '（推算）' : ''}`);
-      w.push({ code: 'holiday', text: `遇到馬來西亞公假，可能停課：${list.join('、')}` });
+      const where = [...countriesOf(locs)].map((c) => COUNTRY_ZH[c] || c).join('、');
+      w.push({ code: 'holiday', text: `遇到${where}公假，可能停課：${list.join('、')}` });
     }
   }
   if (kids.some((k) => k.fit === 'unknown')) w.push({ code: 'age_unknown', text: '年齡限制未公布' });
@@ -416,7 +420,7 @@ export function weekView(db, q, items) {
       }
       return { kid, solid, weak, gap: solid.length === 0 };
     });
-    const holidays = weekdayHolidays(db, mon, fri, regions);
+    const holidays = weekdayHolidays(db, mon, fri, regions, new Set([q.country || 'MY']));
     return { mon, fri, perKid, holidays };
   });
 }

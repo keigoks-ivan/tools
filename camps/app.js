@@ -2,7 +2,8 @@ import { buildDb, search, toTWD, kidFit, sessionSpan, holidaysIn, defaultQty, ta
 
 const FILES = ['providers', 'programs', 'locations', 'sessions', 'reviews', 'conflicts', 'holidays', 'fx'];
 const KL = ['Kuala Lumpur', 'Petaling Jaya', 'Subang Jaya', 'Puchong', 'Shah Alam', 'Selangor-other'];
-const CITY_CHIPS = [
+// city chips per country: [key, label, data cities, hover note]
+const COUNTRY_CHIPS = { MY: [
   ['kl', '大吉隆坡', KL, '含 PJ、Subang、Puchong、Shah Alam'],
   ['nsn', '森美蘭', ['Negeri Sembilan']],
   ['png', '檳城', ['Penang']],
@@ -10,18 +11,27 @@ const CITY_CHIPS = [
   ['kk', '亞庇', ['Kota Kinabalu']],
   ['lgk', '浮羅交怡', ['Langkawi']],
   ['oth', '其他', ['other', 'Perak', 'Melaka', 'Kuching'], '怡保、紅土坎、彭亨、馬六甲等，以及資料裡其他沒歸類的城市'],
-];
+], TH: [
+  ['bkk', '曼谷', ['Bangkok'], '含暖武里、北欖府 Bangna 一帶'],
+  ['cnx', '清邁', ['Chiang Mai'], '含湄林（Mae Rim）、杭東等清邁府'],
+] };
+const COUNTRIES = { MY: '馬來西亞', TH: '泰國' };
+// base area per country: its cards sort first and its badge is plain. Thailand has no single base.
+const HOME = { MY: KL, TH: [] };
+const HOME_ZH = { MY: '大吉隆坡', TH: null };
+let country = 'MY'; // country of the current search
 // same set as SOLID in lib/core.mjs (week view); kept local so a cached old core.mjs can't break the import
 const SOLID = new Set(['high', 'medium']);
 // card badge and sort order: Klang Valley first, then everywhere else
 const CITY_ZH = {
   'Johor Bahru': '新山', 'Kota Kinabalu': '亞庇', Penang: '檳城', Langkawi: '浮羅交怡', 'Negeri Sembilan': '森美蘭',
   Perak: '霹靂', Ipoh: '怡保', Lumut: '紅土坎', Pahang: '彭亨', Melaka: '馬六甲', Kuching: '古晉',
+  Bangkok: '曼谷', 'Chiang Mai': '清邁',
 };
 const cityZh = (c) => (KL.includes(c) ? '大吉隆坡' : CITY_ZH[c] || '其他地區');
 const citiesOf = (it) => [...new Set((it.locs || []).map((l) => cityZh(l.city)))];
-const awayRank = (it) => (it.locs?.some((l) => KL.includes(l.city)) ? 0 : 1);
-const klFirst = (list) => [...list].sort((a, b) => awayRank(a) - awayRank(b));
+const awayRank = (it) => (!HOME[country].length || it.locs?.some((l) => HOME[country].includes(l.city)) ? 0 : 1);
+const homeFirst = (list) => [...list].sort((a, b) => awayRank(a) - awayRank(b));
 const FORMATS = { day: '日營', residential: '住宿營', family_with_parent: '親子同行', parent_optional: '家長可同行' };
 const VENUES = { school: '學校校園', centre: '機構教室', hotel: '飯店', outdoor: '戶外場地', other: '其他場地' };
 const CATEGORIES = {
@@ -42,7 +52,7 @@ const THEMES = {
   facilities: '環境設施', admin: '行政溝通', value: '價格與退費', classmates: '同學組成', accommodation: '住宿', transport: '交通', other: '其他',
 };
 const DEFAULT_Q = {
-  start: '2027-01-17', end: '2027-02-08', cities: CITY_CHIPS.map((c) => c[0]),
+  start: '2027-01-17', end: '2027-02-08', country: 'MY', cities: COUNTRY_CHIPS.MY.map((c) => c[0]),
   kids: [{ name: '孩子 1', birth: '2016-05' }, { name: '孩子 2', birth: '2020-05' }],
   filters: {},
 };
@@ -114,8 +124,11 @@ function renderForm(q) {
   f.start.value = q.start;
   f.end.value = q.end;
   $('#kids').innerHTML = q.kids.map(kidRow).join('');
-  $('#cities').innerHTML = CITY_CHIPS.map(([k, label, , note]) =>
-    `<label class="chip" title="${esc(note || '')}"><input type="checkbox" name="city" value="${k}" ${q.cities.includes(k) ? 'checked' : ''}><span>${label}</span></label>`).join('');
+  const c = COUNTRIES[q.country] ? q.country : 'MY';
+  $('#countries').innerHTML = Object.entries(COUNTRIES).map(([k, label]) =>
+    `<label class="chip"><input type="radio" name="country" value="${k}" ${k === c ? 'checked' : ''}><span>${label}</span></label>`).join('');
+  const own = q.cities.filter((k) => COUNTRY_CHIPS[c].some((x) => x[0] === k));
+  renderCities(c, own.length ? own : null);
   $('#formats').innerHTML = Object.entries(FORMATS).map(([k, v]) =>
     `<label class="chip"><input type="checkbox" name="format" value="${k}" ${q.filters.formats?.includes(k) ? 'checked' : ''}><span>${v}</span></label>`).join('');
   $('#categories').innerHTML = Object.entries(CATEGORIES).map(([k, v]) =>
@@ -136,6 +149,12 @@ function renderForm(q) {
     : '';
 }
 
+// picked: chip keys to tick; null ticks every city of the country
+function renderCities(c, picked) {
+  $('#cities').innerHTML = COUNTRY_CHIPS[c].map(([k, label, , note]) =>
+    `<label class="chip" title="${esc(note || '')}"><input type="checkbox" name="city" value="${k}" ${!picked || picked.includes(k) ? 'checked' : ''}><span>${label}</span></label>`).join('');
+}
+
 function readForm() {
   const f = $('#q');
   const kids = [...document.querySelectorAll('.kid')].map((el, i) => ({
@@ -144,7 +163,7 @@ function readForm() {
   }));
   const vals = (n) => [...f.querySelectorAll(`[name=${n}]:checked`)].map((x) => x.value);
   return {
-    start: f.start.value, end: f.end.value, kids, cities: vals('city'), kw: f.kw.value.trim(),
+    start: f.start.value, end: f.end.value, kids, country: f.country.value || 'MY', cities: vals('city'), kw: f.kw.value.trim(),
     filters: {
       formats: vals('format'), categories: vals('category'),
       budgetTWD: Number(f.budget.value) || null,
@@ -156,9 +175,10 @@ function readForm() {
 
 function toSearchQuery(q) {
   // 「其他」also takes any city the chips don't name (Ipoh, Lumut, Pahang…), so new data never drops out
-  const named = new Set(CITY_CHIPS.flatMap((c) => c[2]));
-  const rest = [...new Set(Object.values(db.locations).map((l) => l.city))].filter((c) => !named.has(c));
-  const cities = q.cities.flatMap((k) => [...(CITY_CHIPS.find((c) => c[0] === k)?.[2] || []), ...(k === 'oth' ? rest : [])]);
+  const chips = COUNTRY_CHIPS[q.country] || COUNTRY_CHIPS.MY;
+  const named = new Set(chips.flatMap((c) => c[2]));
+  const rest = [...new Set(Object.values(db.locations).filter((l) => (l.country || 'MY') === q.country).map((l) => l.city))].filter((c) => !named.has(c));
+  const cities = q.cities.flatMap((k) => [...(chips.find((c) => c[0] === k)?.[2] || []), ...(k === 'oth' ? rest : [])]);
   return { ...q, cities };
 }
 
@@ -348,7 +368,7 @@ function card(it) {
   return `<article class="card ${it.group}" id="${id}">
     <div class="card-h"><div><h3>${esc(p.name)}</h3><div class="prov">${esc(it.provider.name_en)}${it.provider.name_zh ? `・${esc(it.provider.name_zh)}` : ''}${venueNote(it)}</div></div>
       ${it.group === 'unknown' ? '' : `<label class="cmp-box"><input type="checkbox" data-cmp="${id}" ${picked.has(id) ? 'checked' : ''}>選取</label>`}</div>
-    <div class="badges">${citiesOf(it).map((c) => `<span class="badge city ${c === '大吉隆坡' ? '' : 'away'}">${esc(c)}</span>`).join('')}${confBadge(s.confidence)}<span class="badge ${it.group === 'estimated' ? 'est' : ''}">${STATUS[s.date_status]}</span>
+    <div class="badges">${citiesOf(it).map((c) => `<span class="badge city ${HOME_ZH[country] && c !== HOME_ZH[country] ? 'away' : ''}">${esc(c)}</span>`).join('')}${confBadge(s.confidence)}<span class="badge ${it.group === 'estimated' ? 'est' : ''}">${STATUS[s.date_status]}</span>
       <span class="badge">${FORMATS[p.format] || esc(p.format)}</span>${p.category.slice(0, 3).map((c) => `<span class="badge">${CATEGORIES[c] || esc(c)}</span>`).join('')}</div>
     <dl class="facts">
       <dt>日期</dt><dd>${datesLine(it)}</dd>
@@ -365,6 +385,8 @@ function card(it) {
 
 function weekTable(r) {
   const short = (t) => t.replace(/\s*\(.*\)|（.*）/g, '').trim();
+  // long names end on a whole word, without a dangling "for" or "of"
+  const clip = (t) => (t.length <= 40 ? t : `${t.slice(0, t.lastIndexOf(' ', 40)).replace(/\s+(for|of|and|the|&|at|in)$/i, '')}…`);
   const uniq = (list) => [...new Map(list.map((x) => [cardId(x), x])).values()];
   // one chip per provider (branches, intakes, programs); agent packages merge on the school they
   // sell, because two agents often sell the same school
@@ -381,9 +403,9 @@ function weekTable(r) {
   };
   const chip = ([k, items], weak) => {
     const it = items[0];
-    let t = short(k.startsWith('loc:') ? it.locs[0]?.name || it.provider.name_en : it.provider.name_en).slice(0, 40);
+    let t = clip(short(k.startsWith('loc:') ? it.locs[0]?.name || it.provider.name_en : it.provider.name_en));
     const cities = [...new Set(items.flatMap(citiesOf))];
-    if (cities.length === 1 && cities[0] !== '大吉隆坡') t += `・${cities[0]}`;
+    if (cities.length === 1 && cities[0] !== HOME_ZH[country]) t += `・${cities[0]}`;
     if (items.length > 1) t += ` ×${items.length}`;
     const tip = items.map((x) => `${x.provider.name_en}：${x.program.name}（${x.locs[0]?.name || '地點未公布'}，${citiesOf(x).join('、') || '城市未知'}）`).join('\n');
     return `<a class="opt ${weak ? 'weak' : ''}" href="#${cardId(it)}" title="${esc(tip)}">${esc(t)}</a>`;
@@ -397,11 +419,12 @@ function weekTable(r) {
     return `<td data-k="${esc(k.kid.name)}">${k.gap ? '<span class="gap">空窗</span> ' : ''}${solid.map((g) => chip(g, false)).join('')}${more}</td>`;
   }).join('')}</tr>`).join('');
   return `<h2>週視圖</h2><p class="group-note">實心標籤是可信度高或中的梯次。可信度低的（只有聚合站或代理商來源）收在「另有幾個可信度低的選項」裡，不算填補空窗。
-    同一機構的分校和梯次、代理商賣的同一所學校，合併成一個標籤：×2 表示有兩個選項，滑鼠移上去看明細，點標籤跳到卡片。外地的標籤後面加城市。橘字是馬來西亞平日公假。</p>
+    同一機構的分校和梯次、代理商賣的同一所學校，合併成一個標籤：×2 表示有兩個選項，滑鼠移上去看明細，點標籤跳到卡片。${country === 'MY' ? '外地的標籤' : '標籤'}後面加城市。橘字是${COUNTRIES[country]}平日公假。</p>
     <table class="weeks"><thead>${head}</thead><tbody>${rows}</tbody></table>`;
 }
 
 function render(q) {
+  country = COUNTRIES[q.country] ? q.country : 'MY';
   const sq = toSearchQuery(q);
   if (!sq.kids.length || !sq.start || !sq.end || sq.start > sq.end) {
     $('#status').textContent = '請填日期（開始不能晚於結束）並至少加一位孩子。';
@@ -426,7 +449,7 @@ function render(q) {
     <div class="stat"><b>${r.estimated.length}</b><small>推測或需詢問</small></div>
     <div class="stat ${gapWeeks ? 'bad' : ''}"><b>${gapWeeks}</b><small>有孩子空窗的週數</small></div></div>`;
   $('#weeks').innerHTML = r.weeks.length ? weekTable(r) : '';
-  const cards = (items) => `<div class="cards">${klFirst(items).map(card).join('') || '<p class="group-note">沒有符合的梯次。</p>'}</div>`;
+  const cards = (items) => `<div class="cards">${homeFirst(items).map(card).join('') || '<p class="group-note">沒有符合的梯次。</p>'}</div>`;
   const section = (title, note, items) => `<h2>${title}（${items.length}）</h2><p class="group-note">${note}</p>${cards(items)}`;
   // dated groups: sources the camp stands behind first, aggregator/agent-only after
   const split = (title, note, items) => {
@@ -436,11 +459,11 @@ function render(q) {
       <h3 class="subhead">可信度高或中：官方來源，或與官方一致（${solid.length}）</h3>${solid.length ? cards(solid) : '<p class="group-note">沒有。</p>'}
       <h3 class="subhead weak">可信度低：只有聚合站或代理商寫，或來源互相矛盾，報名前要向機構確認（${weak.length}）</h3>${weak.length ? cards(weak) : '<p class="group-note">沒有。</p>'}`;
   };
-  $('#results').innerHTML = '<p class="pick-hint">勾卡片右上角的「選取」，可以估算費用，或並排比較 2–4 個。每組裡大吉隆坡的排前面，外地的排後面。</p>' +
+  $('#results').innerHTML = `<p class="pick-hint">勾卡片右上角的「選取」，可以估算費用，或並排比較 2–4 個。${country === 'MY' ? '每組裡大吉隆坡的排前面，外地的排後面。' : ''}</p>` +
     split('① 日期已有來源，完全在區間內', '2027（或 2026/27 冬季）的日期有人寫出來了，整個梯次落在你選的日期內。', r.full) +
     split('② 日期已有來源，部分在區間內', '日期有人寫出來了，但有一段在你選的日期外；可只報區間內的週次，或跟其他梯次接起來。', r.partial) +
     section('③ 日期未公布，依往年推測', '這些營往年在這段時間開過，但 2027 日期還沒公布。卡片上的日期是往年的，報名前要問機構。', r.estimated) +
-    (r.unknown.length ? `<details class="more"><summary>還有 ${r.unknown.length} 筆這段期間查不到日期（點開）</summary><ul>${klFirst(r.unknown).map((x) => {
+    (r.unknown.length ? `<details class="more"><summary>還有 ${r.unknown.length} 筆這段期間查不到日期（點開）</summary><ul>${homeFirst(r.unknown).map((x) => {
       const id = cardId(x);
       lastCards.set(id, x);
       const pr = x.session.price;
@@ -749,6 +772,8 @@ async function main() {
   renderForm(savedQuery());
   footer();
   const f = $('#q');
+  // runs before the form's change handler, so the new country's cities are ticked when run() reads the form
+  $('#countries').addEventListener('change', () => renderCities(f.country.value, null));
   f.addEventListener('change', run);
   f.addEventListener('input', (e) => { if (['budget', 'name', 'kw'].includes(e.target.name)) run(); });
   f.addEventListener('submit', (e) => { e.preventDefault(); run(); });
