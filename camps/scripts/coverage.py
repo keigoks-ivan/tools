@@ -29,6 +29,8 @@ ACCEPT = {"start": date(2027, 1, 17), "end": date(2027, 2, 8), "ages": (6, 10),
           "areas": [("大吉隆坡", KL_METRO), ("曼谷", {"Bangkok"}), ("清邁", {"Chiang Mai"}),
                     ("東京", {"Tokyo"}), ("大阪", {"Osaka"}), ("京都", {"Kyoto"}), ("神戶", {"Kobe"}),
                     ("福岡", {"Fukuoka"}), ("沖繩", {"Okinawa"})]}
+# Japan summer ask: Taiwan's summer break, kids born 2016-05 and 2020-05
+SUMMER = {"start": date(2027, 7, 1), "end": date(2027, 8, 31), "ages": (7, 11), "areas": ACCEPT["areas"][3:]}
 
 
 def load(name):
@@ -161,6 +163,45 @@ def main():
                       if s["date_status"] == "pattern_estimated" and s["season"] == "winter_2026_27"
                       and cities_of(s) & area})
         out += [f"- 同區間還有 {len(est)} 個課程只有推估（日期未公布）：" + "、".join(est), ""]
+
+    # --- summer acceptance (Japan): 2027 dates are rarely out yet, so last summer's runs are listed too
+    lo_age, hi_age = SUMMER["ages"]
+    for area_zh, area in SUMMER["areas"]:
+        out += [f"## 暑假驗收：{area_zh}，{SUMMER['start']} 至 {SUMMER['end']}，{lo_age} 歲＋{hi_age} 歲", ""]
+        rows = defaultdict(list)
+        for s in sessions:
+            if not (cities_of(s) & area):
+                continue
+            p = programs[s["program_id"]]
+            fits = [k for k in SUMMER["ages"]
+                    if (p["age_min"] is None or p["age_min"] <= k) and (p["age_max"] is None or k <= p["age_max"])]
+            if not fits:
+                continue
+            sa = d(s["start_date"])
+            if s["date_status"] == "confirmed_target_year" and overlaps(s, SUMMER["start"], SUMMER["end"]):
+                kind = "2027 年已公布"
+            elif s["date_status"] == "confirmed_other_year" and sa and sa.month in (6, 7, 8) and sa.year in (2025, 2026) \
+                    and overlaps(s, SUMMER["start"].replace(year=sa.year), SUMMER["end"].replace(year=sa.year)):
+                kind = f"只有 {sa.year} 年的日期"
+            elif s["date_status"] in ("pattern_estimated", "unknown") and s["season"] == "summer_2027":
+                kind = "2027 年日期未公布"
+            else:
+                continue
+            when = f"{s['start_date']}～{s['end_date'] or '滾動開課'}" if sa else "日期未定"
+            ages = "年齡未公布" if p["age_min"] is None and p["age_max"] is None else f"適合 {'、'.join(map(str, fits))} 歲"
+            rows[kind].append((f"{providers[p['provider_id']]['name_en']}：{p['name']}", f"{when}，可信度 {s['confidence']}，{ages}"))
+        for kind in ("2027 年已公布", "只有 2026 年的日期", "只有 2025 年的日期", "2027 年日期未公布"):
+            names = sorted({n for n, _ in rows[kind]})
+            out.append(f"- {kind}：{len(names)} 個課程")
+            if kind != "2027 年日期未公布":
+                seen = set()
+                for n, info in sorted(rows[kind]):
+                    if n not in seen:
+                        seen.add(n)
+                        out.append(f"  - {n}（{info}）")
+            elif names:
+                out.append("  - " + "、".join(names))
+        out.append("")
 
     # --- providers without 2027 dates
     has_target = {programs[s["program_id"]]["provider_id"] for s in sessions if s["date_status"] == "confirmed_target_year"}

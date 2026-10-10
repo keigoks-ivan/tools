@@ -19,6 +19,9 @@ TODAY = "2026-10-10"
 SKIP_FILES = {"holidays.json", "chrome-verify.json"}
 # reviews-locations carries the most complete location records
 LOCATION_PRIORITY = ["reviews-locations"]
+# The Japan summer sweep wrote existing entities as partial objects (id plus the fields it added).
+# Those batches merge last: they fill empty fields, add their notes and locations, and report differing values.
+SUPPLEMENT_PREFIX = "jp-summer-"
 
 ALIASES = {
     # same campus, two ids (intl-kl vs specialty)
@@ -597,8 +600,92 @@ def patch_japan(db):
             db["sessions"][sid] = s
 
 
+LTL_SUMMER = "https://ltl-school.com/summer-camps/"
+
+
+def patch_japan_summer(db):
+    # Laurus was built by two summer batches under two provider ids; the Shiba one has the campus and booking rules
+    g = db["programs"].get("laurus-international-school-of-science-jp-summer-school")
+    if g:
+        g["provider_id"] = "laurus-international-school-jp"
+    drop_entities(db, providers=["laurus-international-school-of-science-jp"],
+                  programs=["laurus-summer-programs",
+                            "rugby-school-japan-jp-residential-camp"],  # search snippet only: no campus, age or price
+                  sessions=["coto-academy-jp-kids-summer-jp-coto-minato-tbd-2026s",  # the 2026 run is now dated
+                            "ltl-school-jp-kids-day-camp-jp-ltl-kanda-20260601"])  # third-party start, no end; 2027 is on the official page
+
+    # TIS Summer Programme is the international school on tokyois.com, not the kindergarten and after-school chain on tokyois-kg-as.com
+    if "tis-summer-programme" in db["programs"]:
+        db["providers"]["tokyo-international-school-jp"] = {
+            "id": "tokyo-international-school-jp", "name_en": "Tokyo International School", "name_zh": "東京國際學校",
+            "type": "international_school_hosted", "country": "JP", "website": "https://tokyois.com/",
+            "contact": {"email": None, "phone": None, "whatsapp": None}, "accreditation": [], "founded_year": None,
+            "notes": "港區的國際學校。官網寫 2026 年不辦暑期方案，2027 年預計在新的 Takanawa Gateway 校區恢復。"
+                     "和 tokyois-kg-as.com 的幼稚園、課後學校（Seasonal School）是不同網站，分開列。",
+            "sources": [{"url": "https://tokyois.com/summer-school", "tier": 1, "accessed": TODAY, "fields": ["notes"],
+                         "quote": "we will not be offering the TIS Summer Programme in 2026"}],
+            "_batches": ["main"]}
+        db["programs"]["tis-summer-programme"]["provider_id"] = "tokyo-international-school-jp"
+
+    # summer school pages that only say "summer camp": same topic tag as the other school-run summer schools
+    for pid in ("columbia-international-school-jp-summer-program", "giis-tokyo-summer-camp", "st-marys-summer-school",
+                "tis-summer-programme"):
+        if pid in db["programs"]:
+            db["programs"][pid]["category"] = ["multi_activity"]
+    # pages that give Japanese school grades only; in July a 小N child is N+5 or N+6
+    grades = {"aoba-bbt-global-jp-osaka-english-camp": (9, 13, "小 4～國一"),
+              "crystalward-english-camp": (6, 12, "小 1～6"),
+              "tuj-jp-kyoto-elementary-kokunai-ryugaku": (10, 12, "小 5～6"),
+              "u-gaku-jp-english-camp-osaka": (6, 15, "小學生和國中生")}
+    for pid, (lo, hi, grade) in grades.items():
+        g = db["programs"].get(pid)
+        if g and g.get("age_min") is None and g.get("age_max") is None:
+            g.update({"age_min": lo, "age_max": hi})
+            g["notes"] = (g.get("notes") or "") + f"官網只寫年級（{grade}），年齡 {lo}～{hi} 歲是依日本學制換算，7 月時小 N 是 N+5 或 N+6 歲。"
+    for c in db["conflicts"]:
+        if c["entity_id"] == "nishimachi-summer-programs":
+            c["entity_id"] = "nishimachi-summer-care"
+        if c["entity_id"] == "ltl-school-jp-kids-day-camp" and c["field"] == "age":
+            c["note"] += "暑期營頁面寫「For 7 to 11-year-olds」（2026-10-10 讀取）。"
+    # the 72,000 / 147,000 figures were search snippets; the JPY price list on the official site is read below
+    db["conflicts"] = [c for c in db["conflicts"]
+                       if not (c["entity_id"] == "ltl-school-jp-kids-day-camp" and c["field"] == "price_per_week")]
+
+    # LTL summer: 2027 start dates and the JPY price list are in pop-ups on the official site, read in Chrome.
+    # Tokyo and Osaka run the same Kids Day Camp at the same price.
+    g = db["programs"].get("ltl-school-jp-kids-day-camp")
+    if not g:
+        return
+    db["locations"]["loc-jp-ltl-osaka"] = {
+        "id": "loc-jp-ltl-osaka", "name": "LTL Japanese School Osaka", "address": "4F, 1-1-10 Nipponbashinishi, Naniwa, Osaka",
+        "city": "Osaka", "state": "Osaka", "country": "JP", "lat": None, "lng": None, "venue_type": "centre",
+        "transport_notes": None,
+        "sources": [{"url": LTL_SUMMER, "tier": 1, "accessed": TODAY, "fields": ["address"],
+                     "quote": "4F, 1-1-10 Nipponbashinishi, Naniwa, Osaka"}],
+        "_batches": ["main-chrome"]}
+    if "loc-jp-ltl-osaka" not in g["location_ids"]:
+        g["location_ids"].append("loc-jp-ltl-osaka")
+    db["providers"][g["provider_id"]]["name_en"] = "LTL Japanese Language School (Tokyo, Osaka)"
+    g["name"] = "LTL Kids Day Camp (Tokyo winter and summer, Osaka summer)"
+    g.setdefault("sources", []).append({"url": LTL_SUMMER, "tier": 1, "accessed": TODAY, "fields": ["age", "dates", "price"],
+                                        "quote": "For 7 to 11-year-olds"})
+    tiers = ("稅別沒寫。官網日圓價：1 週 161,700、2 週 314,600、3 週 458,700、4 週 595,100、5 週 723,800、"
+             "6 週 847,000、7 週 962,500、8 週 1,073,600 日圓，報多週比較便宜，用 1 週單價估多週會偏高。")
+    for lid, tag in (("loc-jp-ltl-kanda", "jp-ltl-kanda"), ("loc-jp-ltl-osaka", "jp-ltl-osaka")):
+        sid = f"ltl-school-jp-kids-day-camp-{tag}-20270531"
+        price = {"amount": 161700, "currency": "JPY", "basis": "per_week", "tax_included": None, "tax_note": tiers,
+                 "source_url": LTL_SUMMER, "from": None, "early_bird": {"amount": None, "deadline": None, "condition": None}}
+        s = week_session(sid, "ltl-school-jp-kids-day-camp", lid, "2027-05-31", "2027-08-13", "summer_2027", price, LTL_SUMMER,
+                         "2027 BOOKINGS OPEN；START DATES 2027 年 5/31 起每週一，最後一梯 8/9（官網彈出視窗）",
+                         "每週一開課，最後一梯 8/9 開始、8/13 結束，可報 1～8 週。完全沒學過日語的孩子只能在 5/31、6/14、6/28、"
+                         "7/12、7/26、8/9 開始，台灣暑假裡是 7/12 和 7/26 兩個起點。官網的美元價註明只供參考，這裡用日圓價。")
+        s.update({"flexible_start": True, "sources": [{"url": LTL_SUMMER, "tier": 1, "accessed": TODAY, "fields": ["dates", "price"],
+                                                        "quote": "Kids Day Camp … 1 week ¥161,700"}]})
+        db["sessions"][sid] = s
+
+
 PATCHES = [patch_erican, patch_embassy, patch_raffles_2027, patch_official_pages, patch_stem_academy, patch_klik,
-           patch_from_prices, patch_staffing_facilities, patch_thailand, patch_japan]
+           patch_from_prices, patch_staffing_facilities, patch_thailand, patch_japan, patch_japan_summer]
 
 # Brief rule: tier 4-5 only -> confidence low. These domains are aggregators.
 PLATFORM_HOSTS = {
@@ -640,11 +727,13 @@ CATEGORY_MAP = {
     "english_immersion": "english", "english_after_school": "english", "bilingual": "english", "language_camp": "english",
     "writing": "english", "seasonal_camp": "multi_activity", "summer_school": "multi_activity", "overnight_nature": "outdoor",
     "family_program": "family",
+    "english_camp": "english", "family_stay": "family", "homestay": "residential", "performing_arts": "arts",
 }
 # format or provider type, not what the camp teaches (format and provider.type already carry these)
 DROP_CATEGORIES = {"day_camp", "school_own_camp", "academic", "weekend", "language_class",
                    "weekend_club", "school_holiday", "public_school", "day", "short_term_course",
-                   "winter_camp", "spring_camp", "summer_camp", "weekday_class", "weekend_class"}
+                   "winter_camp", "spring_camp", "summer_camp", "weekday_class", "weekend_class",
+                   "summer", "school_hosted"}
 LANGUAGE_MAP = {"en": "English", "English": "English", "Mandarin": "Mandarin", "zh": "Mandarin"}
 
 
@@ -694,6 +783,43 @@ def merge_sources(a, b):
             seen.add(key)
 
 
+SUPPLEMENT_DIFFS = []  # (batch, kind, id, field, kept, offered): reviewed by hand, corrected in patch_japan_summer
+
+
+def supplement(cur, x, b, kind, log):
+    """A partial object from a supplement batch: add its notes and locations, record values that differ."""
+    note = (x.get("notes") or "").strip()
+    if note and note not in (cur.get("notes") or ""):
+        cur["notes"] = ((cur.get("notes") or "") + note).strip()
+        log["supplement_notes_added"] += 1
+    if kind == "programs":
+        for lid in x.get("location_ids") or []:
+            if lid not in cur.setdefault("location_ids", []):
+                cur["location_ids"].append(lid)
+    for k, v in x.items():
+        if k.startswith("_") or k in ("id", "notes", "sources", "location_ids", "verified_at"):
+            continue
+        if cur.get(k) not in (None, "", []) and v not in (None, "", []) and cur[k] != v:
+            SUPPLEMENT_DIFFS.append((b, kind, x["id"], k, cur[k], v))
+
+
+def absorb(cur, x, b, kind, log):
+    # a later batch with a stronger source (e.g. the official brochure) takes over the evidence
+    rank = {"low": 0, "medium": 1, "high": 2}
+    if kind == "sessions" and rank.get(x.get("confidence"), 0) > rank.get(cur.get("confidence"), 0):
+        if (cur.get("price") or {}).get("amount") is not None and not cur["price"].get("source_url"):
+            cur["price"]["source_url"] = cur["source_url"]  # the price still comes from the old source
+        for k in ("source_url", "evidence_quote", "confidence", "verified_at"):
+            cur[k] = x[k]
+        log["session_upgraded"] += 1
+    if b.startswith(SUPPLEMENT_PREFIX):
+        supplement(cur, x, b, kind, log)
+    fill(cur, x)
+    merge_sources(cur.setdefault("sources", []), x.get("sources") or [])
+    cur["_batches"].append(b)
+    log[f"merged_{kind}"] += 1
+
+
 def main():
     batches = {}
     for f in sorted(glob.glob(os.path.join(RESEARCH, "*.json"))):
@@ -701,7 +827,7 @@ def main():
         if name in SKIP_FILES:
             continue
         batches[name[:-5]] = json.load(open(f))
-    order = sorted(batches, key=lambda b: (b not in LOCATION_PRIORITY, b))
+    order = sorted(batches, key=lambda b: (b not in LOCATION_PRIORITY, b.startswith(SUPPLEMENT_PREFIX), b))
 
     db = {"providers": {}, "programs": {}, "locations": {}, "sessions": {},
           "reviews": [], "conflicts": [], "gaps": [], "links": []}
@@ -721,6 +847,12 @@ def main():
                     if x["id"] in DROPS:
                         log["dropped"] += 1
                         continue
+                    if "program_id" not in x:  # a partial session: only adds to one that exists
+                        if x["id"] not in db["sessions"]:
+                            log["partial_session_without_base"] += 1
+                            print("  partial session without base:", b, x["id"])
+                            continue
+                        x["program_id"] = db["sessions"][x["id"]]["program_id"]
                     x["location_id"] = alias(x.get("location_id"))
                     cid = canonical_session_id(x)
                     if cid != x["id"]:
@@ -733,18 +865,7 @@ def main():
                     x["_batches"] = [b]
                     db[kind][x["id"]] = x
                 else:
-                    # a later batch with a stronger source (e.g. the official brochure) takes over the evidence
-                    rank = {"low": 0, "medium": 1, "high": 2}
-                    if kind == "sessions" and rank.get(x.get("confidence"), 0) > rank.get(cur.get("confidence"), 0):
-                        if (cur.get("price") or {}).get("amount") is not None and not cur["price"].get("source_url"):
-                            cur["price"]["source_url"] = cur["source_url"]  # the price still comes from the old source
-                        for k in ("source_url", "evidence_quote", "confidence", "verified_at"):
-                            cur[k] = x[k]
-                        log["session_upgraded"] += 1
-                    fill(cur, x)
-                    merge_sources(cur.setdefault("sources", []), x.get("sources") or [])
-                    cur["_batches"].append(b)
-                    log[f"merged_{kind}"] += 1
+                    absorb(cur, x, b, kind, log)
         for r in d.get("reviews", []):
             db["reviews"].append({**r, "_batch": b})
         for c in d.get("conflicts", []):
@@ -755,6 +876,22 @@ def main():
             db["gaps"].append({**g, "kind_lead": g.get("kind"), "kind": "lead", "_batch": b})
         for l in d.get("program_location_links", []):
             db["links"].append({**l, "location_id": alias(l["location_id"]), "_batch": b})
+
+    # the summer sweep rebuilt some past runs under its own ids: fold each into the run that was already there
+    # (same program and start date, same location or one of them without a location)
+    for sid, x in list(db["sessions"].items()):
+        if not x["_batches"][0].startswith(SUPPLEMENT_PREFIX) or not x.get("start_date"):
+            continue
+        same = [y for y in db["sessions"].values()
+                if not y["_batches"][0].startswith(SUPPLEMENT_PREFIX)
+                and (y["program_id"], y.get("start_date")) == (x["program_id"], x["start_date"])
+                and (y.get("location_id") == x.get("location_id") or None in (y.get("location_id"), x.get("location_id")))]
+        if len(same) == 1:
+            absorb(same[0], x, x["_batches"][0], "sessions", log)
+            del db["sessions"][sid]
+            log["supplement_session_folded"] += 1
+        elif len(same) > 1:
+            print("  ambiguous rebuilt session:", sid, [y["id"] for y in same])
 
     for kind, items in SEED_ADDITIONS.items():
         for x in items:
@@ -883,6 +1020,8 @@ def main():
     json.dump({k: hol[k] for k in ("accessed", "holidays", "conflicts", "not_found") if k in hol},
               open(os.path.join(OUT, "holidays.json"), "w"), ensure_ascii=False, indent=1)
 
+    json.dump([dict(zip(("batch", "kind", "id", "field", "kept", "offered"), d)) for d in SUPPLEMENT_DIFFS],
+              open(os.path.join(RESEARCH, "..", "reports", "supplement-diffs.json"), "w"), ensure_ascii=False, indent=1)
     print({k: len(db[k]) for k in db})
     print(dict(log))
     print("date_status", dict(Counter(s["date_status"] for s in db["sessions"].values())))

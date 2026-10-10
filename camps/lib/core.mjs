@@ -310,7 +310,8 @@ export function search(db, q) {
     confirmedKeys.add(`${s.program_id}|${s.location_id}|${s.season}`);
     if (!overlaps(span.start, span.end, q.start, q.end)) continue;
     if (!inCities(locs, q.cities)) continue;
-    const kids = kidsFor(program, q.kids, span.start);
+    // a rolling start that opened before the chosen dates: the child joins on the first chosen day
+    const kids = kidsFor(program, q.kids, s.flexible_start && span.start < q.start ? q.start : span.start);
     if (!kids.some((k) => k.fit !== 'no')) continue;
     if (!passesFilters(db, s, program, span, q.filters, q.kids.length)) continue;
     const item = { session: s, program, provider, locs, span, kids, warnings: warningsFor(db, s, program, span, locs, kids) };
