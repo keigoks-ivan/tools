@@ -237,6 +237,14 @@ def main():
                     x["_batches"] = [b]
                     db[kind][x["id"]] = x
                 else:
+                    # a later batch with a stronger source (e.g. the official brochure) takes over the evidence
+                    rank = {"low": 0, "medium": 1, "high": 2}
+                    if kind == "sessions" and rank.get(x.get("confidence"), 0) > rank.get(cur.get("confidence"), 0):
+                        if (cur.get("price") or {}).get("amount") is not None and not cur["price"].get("source_url"):
+                            cur["price"]["source_url"] = cur["source_url"]  # the price still comes from the old source
+                        for k in ("source_url", "evidence_quote", "confidence", "verified_at"):
+                            cur[k] = x[k]
+                        log["session_upgraded"] += 1
                     fill(cur, x)
                     merge_sources(cur.setdefault("sources", []), x.get("sources") or [])
                     cur["_batches"].append(b)

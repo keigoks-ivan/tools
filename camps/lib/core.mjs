@@ -121,6 +121,45 @@ export function toTWD(amount, currency, fx) {
   return r == null || amount == null ? null : Math.round(amount * r);
 }
 
+// ---------- cost estimate
+
+export const UNIT = { per_day: '天', per_week: '週', per_2weeks: '期（兩週）', per_camp: '梯', per_session: '梯' };
+
+function weekdaysIn(start, end) {
+  let n = 0;
+  for (let d = start; d <= end; d = addDays(d, 1)) if (!isWeekend(d)) n += 1;
+  return n;
+}
+
+// Price units for signing up to the whole session. Day rates count Mon–Fri
+// minus weekday holidays inside the span. null when the session has no dates.
+export function defaultQty(price, span, holidayDays = 0) {
+  switch (price?.basis) {
+    case 'per_camp':
+    case 'per_session': return 1;
+    case 'per_day': return span ? Math.max(1, weekdaysIn(span.start, span.end) - holidayDays) : null;
+    case 'per_week': return span ? weeksOf(span) : null;
+    case 'per_2weeks': return span ? Math.ceil(weeksOf(span) / 2) : null;
+    default: return null;
+  }
+}
+
+// Tax is added only when the operator says the price excludes it. The rate comes
+// from the note ("+ 8% SST"); null means excluded but no rate given.
+export function taxRate(price) {
+  if (price?.tax_included !== false) return 0;
+  const m = String(price.tax_note || '').match(/(\d+(?:\.\d+)?)\s*%\s*(?:SST|Sales|Service|Tax|銷售稅|服務稅|稅)/i);
+  return m ? Number(m[1]) / 100 : null;
+}
+
+export function lineCost(price, qty, nKids) {
+  if (price?.amount == null || !qty || !nKids) return null;
+  const base = price.amount * qty * nKids;
+  const rate = taxRate(price);
+  const tax = rate ? base * rate : 0;
+  return { base, tax, total: base + tax, taxUnknown: rate === null };
+}
+
 // ---------- db
 
 export function buildDb(raw) {

@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   overlaps, weeksIn, sessionSpan, ageAt, kidFit, perWeekEquiv, toTWD, mondayOf, addYears,
+  defaultQty, taxRate, lineCost,
 } from '../lib/core.mjs';
 
 test('date overlap is inclusive at both ends', () => {
@@ -54,4 +55,30 @@ test('price: weekly equivalent per basis and TWD conversion', () => {
   assert.equal(toTWD(600, 'MYR', fx), 4500);
   assert.equal(toTWD(600, 'SGD', fx), null);
   assert.equal(addYears('2026-01-19', 1), '2027-01-19');
+});
+
+test('estimate: whole-session quantity per price basis', () => {
+  const wk = { start: '2026-12-14', end: '2026-12-18' };
+  const short = { start: '2026-12-21', end: '2026-12-24' };
+  assert.equal(defaultQty({ basis: 'per_day' }, wk), 5);
+  assert.equal(defaultQty({ basis: 'per_day' }, short), 4);
+  assert.equal(defaultQty({ basis: 'per_day' }, wk, 1), 4); // a weekday holiday inside the week
+  assert.equal(defaultQty({ basis: 'per_week' }, { start: '2027-01-18', end: '2027-01-29' }), 2);
+  assert.equal(defaultQty({ basis: 'per_2weeks' }, { start: '2027-01-18', end: '2027-02-12' }), 2);
+  assert.equal(defaultQty({ basis: 'per_camp' }, null), 1);
+  assert.equal(defaultQty({ basis: 'per_week' }, null), null);
+  assert.equal(defaultQty({ basis: null }, wk), null);
+});
+
+test('estimate: tax only when excluded, rate read from the note', () => {
+  assert.equal(taxRate({ tax_included: false, tax_note: '每日 MYR 191.40，另加 8% Sales Tax' }), 0.08);
+  assert.equal(taxRate({ tax_included: false, tax_note: 'Prices from RM 1,595 + 8% SST per child' }), 0.08);
+  assert.equal(taxRate({ tax_included: false, tax_note: 'RM1,400 + SST；頁面標 Sale! 但無折扣價' }), null);
+  assert.equal(taxRate({ tax_included: false, tax_note: '原價 RM4,999，頁面標 20% 折扣價' }), null);
+  assert.equal(taxRate({ tax_included: null, tax_note: '頁面註明 6% SST 另計' }), 0);
+  assert.equal(taxRate({ tax_included: true, tax_note: '含 6% SST' }), 0);
+  const c = lineCost({ amount: 319, tax_included: false, tax_note: '另加 8% 銷售稅' }, 5, 2);
+  assert.equal(c.base, 3190);
+  assert.equal(Math.round(c.tax * 100) / 100, 255.2);
+  assert.equal(lineCost({ amount: null }, 5, 2), null);
 });

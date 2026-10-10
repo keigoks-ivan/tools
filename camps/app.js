@@ -1,4 +1,4 @@
-import { buildDb, search, toTWD, kidFit, sessionSpan } from './lib/core.mjs';
+import { buildDb, search, toTWD, kidFit, sessionSpan, holidaysIn, defaultQty, taxRate, lineCost, UNIT } from './lib/core.mjs';
 
 const FILES = ['providers', 'programs', 'locations', 'sessions', 'reviews', 'conflicts', 'holidays', 'fx'];
 const KL = ['Kuala Lumpur', 'Petaling Jaya', 'Subang Jaya', 'Puchong', 'Shah Alam', 'Selangor-other'];
@@ -39,7 +39,8 @@ const STORE = 'camps-query-v1';
 let db;
 let raw;
 let lastCards = new Map();
-const compare = new Set();
+// cards the parent ticked: id -> { it, kids: Set of kid indexes, qty }. Kept across searches.
+const picked = new Map();
 
 const $ = (s, el = document) => el.querySelector(s);
 const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -54,7 +55,8 @@ function fmtD(s, year = false) {
 const hostOf = (u) => u?.match(/^https?:\/\/(?:www\.)?([^/]+)/)?.[1];
 const platName = (r) => (r.platform === 'other' ? hostOf(r.url) || '其他' : r.platform === 'blog' && hostOf(r.url) ? `部落格 ${hostOf(r.url)}` : PLATFORM[r.platform] || r.platform);
 const AUTHOR = { staff: '業者自述', editorial: '聚合站編輯', agent: '代理商刊登' };
-const cardId = (it) => 'c-' + `${it.program.id}--${it.session.location_id || 'x'}`.replace(/[^a-z0-9-]/gi, '-');
+// one card per program+location, plus the start date for single dated sessions (several weeks of one camp)
+const cardId = (it) => 'c-' + `${it.program.id}--${it.session.location_id || 'x'}${it.span && !it.span.derived ? `--${it.span.start}` : ''}`.replace(/[^a-z0-9-]/gi, '-');
 
 // ---------- load
 
@@ -304,7 +306,7 @@ function card(it) {
   const age = `${p.age_min ?? '?'}–${p.age_max ?? '?'} 歲`;
   return `<article class="card ${it.group}" id="${id}">
     <div class="card-h"><div><h3>${esc(p.name)}</h3><div class="prov">${esc(it.provider.name_en)}${it.provider.name_zh ? `・${esc(it.provider.name_zh)}` : ''}${venueNote(it)}</div></div>
-      ${it.group === 'unknown' ? '' : `<label class="cmp-box"><input type="checkbox" data-cmp="${id}" ${compare.has(id) ? 'checked' : ''}>比較</label>`}</div>
+      ${it.group === 'unknown' ? '' : `<label class="cmp-box"><input type="checkbox" data-cmp="${id}" ${picked.has(id) ? 'checked' : ''}>選取</label>`}</div>
     <div class="badges">${confBadge(s.confidence)}<span class="badge ${it.group === 'estimated' ? 'est' : ''}">${STATUS[s.date_status]}</span>
       <span class="badge">${FORMATS[p.format] || esc(p.format)}</span>${p.category.slice(0, 3).map((c) => `<span class="badge">${CATEGORIES[c] || esc(c)}</span>`).join('')}</div>
     <dl class="facts">
@@ -376,7 +378,7 @@ function render(q) {
   $('#weeks').innerHTML = r.weeks.length ? weekTable(r) : '';
   const section = (title, note, items) => `<h2>${title}（${items.length}）</h2><p class="group-note">${note}</p>
     <div class="cards">${items.map(card).join('') || '<p class="group-note">沒有符合的梯次。</p>'}</div>`;
-  $('#results').innerHTML =
+  $('#results').innerHTML = '<p class="pick-hint">勾卡片右上角的「選取」，可以估算費用，或並排比較 2–4 個。</p>' +
     section('① 已確認，日期完全在區間內', '2027（或 2026/27 冬季）日期已公布，整個梯次落在你選的日期內。', r.full) +
     section('② 已確認，部分在區間內', '日期已公布，但有一段在你選的日期外；可只報區間內的週次，或跟其他梯次接起來。', r.partial) +
     section('③ 日期未公布，依往年推測', '這些營往年在這段時間開過，但 2027 日期還沒公布。卡片上的日期是往年的，報名前要問機構。', r.estimated) +
@@ -402,17 +404,20 @@ function elsewhere(kw, sq) {
   return `這段日期或城市沒有符合的梯次。資料裡有：<ul>${[...hits].slice(0, 8).map(([k, w]) => `<li>${esc(k)}：${[...w].map(esc).join('、')}</li>`).join('')}</ul>`;
 }
 
-// ---------- compare
+// ---------- picked cards: compare and cost estimate
 
 function updateTray() {
-  for (const id of [...compare]) if (!lastCards.has(id)) compare.delete(id);
-  $('#tray').hidden = compare.size === 0;
-  $('#tray-n').textContent = `已選 ${compare.size}／4`;
-  $('#tray-open').disabled = compare.size < 2;
+  // cards from an earlier search stay picked; refresh the ones shown again
+  for (const [id, p] of picked) if (lastCards.has(id)) p.it = lastCards.get(id);
+  const n = picked.size;
+  $('#tray').hidden = n === 0;
+  $('#tray-n').textContent = `已選 ${n} 個`;
+  $('#tray-open').disabled = n < 2 || n > 4;
+  $('#tray-open').title = n > 4 ? '並排比較最多 4 個' : '';
 }
 
 function openCompare() {
-  const items = [...compare].map((id) => lastCards.get(id)).filter(Boolean);
+  const items = [...picked.values()].map((p) => p.it);
   const rows = [
     ['機構', (it) => esc(it.provider.name_en)],
     ['營隊', (it) => esc(it.program.name)],
@@ -430,6 +435,119 @@ function openCompare() {
   $('#cmp-body').innerHTML = `<div class="cmp-scroll"><table class="cmp">${rows.map(([k, fn]) =>
     `<tr><th>${k}</th>${items.map((it) => `<td>${fn(it)}</td>`).join('')}</tr>`).join('')}</table></div>`;
   $('#cmp').showModal();
+}
+
+// Dates the estimate is based on: this year's span, else the latest past run.
+function estSpan(it) {
+  if (it.span) return { span: it.span, past: false };
+  const s = it.past?.length ? it.past[0] : it.session;
+  const span = sessionSpan(s);
+  return { span, past: !!span };
+}
+
+function pickDefaults(it) {
+  const { span } = estSpan(it);
+  const qty = defaultQty(it.session.price, span, span ? holidaysIn(db, span.start, span.end, it.locs).length : 0);
+  return { kids: new Set(it.kids.map((k, i) => (k.fit === 'no' ? -1 : i)).filter((i) => i >= 0)), qty: qty ?? 1, qtyGuess: qty == null };
+}
+
+const money = (cur, n) => `${esc(cur)} ${fmtN(n)}`;
+
+function estLine(id) {
+  const p = picked.get(id);
+  const { it } = p;
+  const pr = it.session.price;
+  const c = lineCost(pr, p.qty, p.kids.size);
+  if (pr?.amount == null) return { id, html: '價格未公布，沒算進總額', c: null };
+  if (!p.kids.size) return { id, html: '沒有勾孩子，沒算進總額', c: null };
+  const unit = UNIT[pr.basis] || '單位';
+  const twd = toTWD(c.total, pr.currency, db.fx);
+  let html = `${money(pr.currency, pr.amount)}／${BASIS[pr.basis] || '?'} × ${p.qty} ${unit} × ${p.kids.size} 位`;
+  if (c.tax) html += ` ＝ ${money(pr.currency, c.base)}，加 ${Math.round(taxRate(pr) * 100)}% 稅 ${money(pr.currency, c.tax)}`;
+  html += ` ＝ <b>${money(pr.currency, c.total)}</b>${twd ? `（約 NT$${fmtN(twd)}）` : ''}`;
+  return { id, html, c, twd, cur: pr.currency };
+}
+
+function estNotes(it, qtyGuess) {
+  const s = it.session;
+  const pr = s.price || {};
+  const notes = [];
+  if (s.date_status !== 'confirmed_target_year' && pr.amount != null) notes.push(`這是 ${s.year || '往年'} 年的價格，2027 可能調整`);
+  if (qtyGuess && pr.amount != null) notes.push(`日期未公布，${UNIT[pr.basis] || '數量'}數先填 1，請自己改`);
+  if (it.past?.length > 1) notes.push(`往年開過 ${it.past.length} 個梯次，這裡先算第一個`);
+  if (it.intakes?.length > 1) notes.push(`開課日可以自己選，這裡用 ${fmtD(it.span.start)} 那梯估`);
+  if (taxRate(pr) === null) notes.push('業者寫另外加稅，但沒寫稅率，沒算進去');
+  if (pr.tax_included == null && pr.amount != null) notes.push('沒寫是否含稅');
+  if (it.program.includes?.lunch === false) notes.push('不含午餐');
+  if (pr.early_bird?.amount != null) notes.push(`有早鳥價 ${money(pr.currency, pr.early_bird.amount)}，沒套用（條件見卡片）`);
+  if (pr.tax_note) notes.push(`價格附註：${esc(pr.tax_note.length > 90 ? `${pr.tax_note.slice(0, 90)}…` : pr.tax_note)}`);
+  return notes;
+}
+
+function openEstimate() {
+  const items = [...picked.entries()];
+  $('#cmp-body').innerHTML = `<h2 class="est-title">費用估算（大概金額）</h2>
+    <p class="hint">數量預設是報整個梯次；孩子和天數、週數可以自己改，總額會跟著變。價格用業者公布的原價，只在業者寫明稅率時加稅。</p>
+    ${items.map(([id, p]) => {
+      const { it } = p;
+      const { span, past } = estSpan(it);
+      const pr = it.session.price || {};
+      const when = span ? `${past ? '往年 ' : ''}${fmtD(span.start, true)}～${fmtD(span.end)}` : '日期未公布';
+      const step = pr.basis === 'per_2weeks' ? 0.5 : 1;
+      return `<section class="est-item" data-id="${id}">
+        <div class="est-h"><b>${esc(it.program.name)}</b><span class="prov">${esc(it.provider.name_en)}${it.locs[0] ? `・${esc(it.locs[0].name)}` : ''}</span>
+          <button type="button" class="ghost est-del" data-del="${id}" aria-label="移除">移除</button></div>
+        <div class="est-meta">${when}・${STATUS[it.session.date_status]}</div>
+        <div class="est-ctl"><span class="chips">${it.kids.map((k, i) => `<label class="chip"><input type="checkbox" data-k="${i}" ${p.kids.has(i) ? 'checked' : ''} ${k.fit === 'no' ? 'disabled' : ''}><span>${esc(k.name)}（${k.age} 歲）${k.fit === 'no' ? ' 年齡不符' : ''}</span></label>`).join('')}</span>
+          ${pr.amount != null && UNIT[pr.basis] ? `<label class="qty">數量 <input type="number" min="${step}" step="${step}" value="${p.qty}" data-q> ${UNIT[pr.basis]}</label>` : ''}</div>
+        <div class="est-calc"></div>
+        ${(() => { const n = estNotes(it, p.qtyGuess); return n.length ? `<ul class="est-notes">${n.map((x) => `<li>${x}</li>`).join('')}</ul>` : ''; })()}
+      </section>`;
+    }).join('')}
+    <div id="est-total" class="est-total"></div>`;
+  updateEstimate();
+  if (!$('#cmp').open) $('#cmp').showModal();
+}
+
+function updateEstimate() {
+  const lines = [...picked.keys()].map(estLine);
+  for (const l of lines) {
+    const el = $(`.est-item[data-id="${l.id}"] .est-calc`);
+    if (el) el.innerHTML = l.html;
+  }
+  const byCur = {};
+  let twd = 0;
+  const perKid = new Map();
+  const kidsNow = readForm().kids;
+  for (const l of lines.filter((x) => x.c)) {
+    byCur[l.cur] = (byCur[l.cur] || 0) + l.c.total;
+    twd += l.twd || 0;
+    const p = picked.get(l.id);
+    for (const i of p.kids) {
+      const name = p.it.kids[i]?.name ?? `孩子 ${i + 1}`;
+      perKid.set(name, (perKid.get(name) || 0) + (l.twd || 0) / p.kids.size);
+    }
+  }
+  const missing = lines.filter((x) => !x.c).map((x) => { const { it } = picked.get(x.id); return `${esc(it.provider.name_en)} ${esc(it.program.name)}${it.locs[0] ? `（${esc(it.locs[0].name)}）` : ''}`; });
+  const warns = [];
+  if (missing.length) warns.push(`${missing.length} 項沒算進總額（價格未公布或沒勾孩子）：${missing.join('、')}`);
+  // same kid in two camps on the same days
+  const dated = [...picked.values()].filter((p) => p.it.span);
+  for (let a = 0; a < dated.length; a += 1) {
+    for (let b = a + 1; b < dated.length; b += 1) {
+      const A = dated[a];
+      const B = dated[b];
+      if (A.it.span.start > B.it.span.end || B.it.span.start > A.it.span.end) continue;
+      const both = [...A.kids].filter((i) => B.kids.has(i)).map((i) => A.it.kids[i]?.name).filter(Boolean);
+      if (both.length) warns.push(`${both.map(esc).join('、')}：${esc(A.it.provider.name_en)} 和 ${esc(B.it.provider.name_en)} 的日期重疊`);
+    }
+  }
+  const fx = db.fx;
+  $('#est-total').innerHTML = `<div class="est-sum"><span>合計約</span><b>NT$${fmtN(twd)}</b></div>
+    <div class="est-cur">${Object.entries(byCur).map(([c, n]) => money(c, n)).join(' ＋ ') || '—'}</div>
+    ${perKid.size > 1 || kidsNow.length > 1 ? `<div class="est-kids">${[...perKid].sort((a, b) => kidsNow.findIndex((k) => k.name === a[0]) - kidsNow.findIndex((k) => k.name === b[0])).map(([k, n]) => `${esc(k)} 約 NT$${fmtN(n)}`).join('｜')}</div>` : ''}
+    ${warns.length ? `<ul class="warns">${warns.map((w) => `<li>${w}</li>`).join('')}</ul>` : ''}
+    <p class="hint">不含機票、家長住宿、當地交通、報名費、手足優惠和早鳥折扣；日營不含住宿。匯率 1 MYR ≈ ${fx.rates.MYR} TWD、1 USD ≈ ${fx.rates.USD} TWD（${esc(fx.asof.MYR)}）。</p>`;
 }
 
 // ---------- wiring
@@ -494,14 +612,36 @@ async function main() {
   $('#results').addEventListener('change', (e) => {
     const id = e.target.dataset?.cmp;
     if (!id) return;
-    if (e.target.checked) {
-      if (compare.size >= 4) { e.target.checked = false; return; }
-      compare.add(id);
-    } else compare.delete(id);
+    if (e.target.checked) picked.set(id, { it: lastCards.get(id), ...pickDefaults(lastCards.get(id)) });
+    else picked.delete(id);
     updateTray();
   });
   $('#tray-open').addEventListener('click', openCompare);
-  $('#tray-clear').addEventListener('click', () => { compare.clear(); run(); });
+  $('#tray-est').addEventListener('click', openEstimate);
+  $('#tray-clear').addEventListener('click', () => { picked.clear(); run(); });
+  $('#cmp-body').addEventListener('input', (e) => {
+    const sec = e.target.closest('.est-item');
+    if (!sec) return;
+    const p = picked.get(sec.dataset.id);
+    if (e.target.dataset.k != null) {
+      const i = Number(e.target.dataset.k);
+      if (e.target.checked) p.kids.add(i); else p.kids.delete(i);
+    }
+    if (e.target.dataset.q != null) {
+      const v = Number(e.target.value);
+      if (v > 0) { p.qty = v; p.qtyGuess = false; }
+    }
+    updateEstimate();
+  });
+  $('#cmp-body').addEventListener('click', (e) => {
+    const id = e.target.dataset?.del;
+    if (!id) return;
+    picked.delete(id);
+    const box = document.querySelector(`[data-cmp="${id}"]`);
+    if (box) box.checked = false;
+    updateTray();
+    if (picked.size) openEstimate(); else $('#cmp').close();
+  });
   run();
 }
 
