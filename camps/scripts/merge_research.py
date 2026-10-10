@@ -153,6 +153,11 @@ CATEGORY_MAP = {
     "residential": "residential", "overnight": "residential", "residential_option": "residential",
     "leadership": "leadership", "public_speaking": "leadership",
     "family": "family", "travel": "travel", "agent_package": "travel",
+    "short_term_enrolment": "short_term_enrolment", "short_term_enrollment": "short_term_enrolment",
+    "schooling": "short_term_enrolment",
+    "swimming": "sport", "safety": "sport", "sailing": "sport", "outdoor_adventure": "outdoor",
+    "engineering": "stem", "cultural": "travel",
+    "french": "other_language", "other_language": "other_language",
 }
 LANGUAGE_MAP = {"en": "English", "English": "English", "Mandarin": "Mandarin", "zh": "Mandarin"}
 

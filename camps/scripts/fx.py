@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fetch MYR/USD -> TWD rates from Yahoo Finance (yfinance) into camps/data/fx.json."""
+"""Fetch MYR/USD/SGD/KRW -> TWD rates from Yahoo Finance (yfinance) into camps/data/fx.json."""
 import json
 import os
 from datetime import datetime, timezone
@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 import yfinance as yf
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-PAIRS = {"MYR": "MYRTWD=X", "USD": "USDTWD=X"}
+PAIRS = {"MYR": "MYRTWD=X", "USD": "USDTWD=X", "SGD": "SGDTWD=X", "KRW": "KRWTWD=X"}
 
 
 def main():

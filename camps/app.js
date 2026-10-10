@@ -14,7 +14,7 @@ const CITY_CHIPS = [
 const FORMATS = { day: '日營', residential: '住宿營', family_with_parent: '親子同行', parent_optional: '家長可同行' };
 const CATEGORIES = {
   english: '英語', stem: '科學／STEM', arts: '藝術', sport: '運動', multi_activity: '綜合活動',
-  outdoor: '戶外', residential: '住宿', leadership: '領導力', family: '親子', travel: '遊學旅行',
+  outdoor: '戶外', residential: '住宿', leadership: '領導力', family: '親子', travel: '遊學旅行', short_term_enrolment: '學校插班', other_language: '其他語言',
 };
 const BASIS = { per_week: '每週', per_2weeks: '每兩週', per_day: '每天', per_camp: '每梯', per_session: '每次' };
 const STATUS = { confirmed_target_year: '日期已公布', confirmed_other_year: '往年日期', pattern_estimated: '推估', unknown: '查不到日期' };
@@ -645,7 +645,7 @@ function updateEstimate() {
     <div class="est-cur">${Object.entries(byCur).map(([c, n]) => money(c, n)).join(' ＋ ') || '—'}</div>
     ${kidNames.length > 1 ? `<div class="est-kids">${kidNames.filter((k) => perKid.has(k)).map((k) => `${esc(k)} 約 NT$${fmtN(perKid.get(k))}`).join('｜')}</div>` : ''}
     ${warns.length ? `<ul class="warns">${warns.map((w) => `<li>${w}</li>`).join('')}</ul>` : ''}
-    <p class="hint">不含機票、家長住宿、當地交通、報名費、手足優惠和早鳥折扣；日營不含住宿。匯率 1 MYR ≈ ${fx.rates.MYR} TWD、1 USD ≈ ${fx.rates.USD} TWD（${esc(fx.asof.MYR)}）。</p>`;
+    <p class="hint">不含機票、家長住宿、當地交通、報名費、手足優惠和早鳥折扣；日營不含住宿。匯率 ${(Object.keys(byCur).length ? Object.keys(byCur) : ['MYR']).map((c) => `1 ${c} ≈ ${fx.rates[c] ?? '?'} TWD`).join('、')}（${esc(fx.asof.MYR)}）。</p>`;
 }
 
 // ---------- wiring
@@ -669,7 +669,7 @@ function run() {
 function footer() {
   const latest = raw.sessions.reduce((m, s) => (s.verified_at > m ? s.verified_at : m), '');
   const fx = db.fx;
-  $('#foot').innerHTML = `資料查證到 ${esc(latest)}。匯率：1 MYR ≈ ${fx.rates.MYR} TWD、1 USD ≈ ${fx.rates.USD} TWD（${esc(fx.source)}，${esc(fx.asof.MYR)}）。<br>
+  $('#foot').innerHTML = `資料查證到 ${esc(latest)}。匯率：${Object.keys(fx.rates).filter((c) => c !== 'TWD').map((c) => `1 ${c} ≈ ${fx.rates[c]} TWD`).join('、')}（${esc(fx.source)}，${esc(fx.asof.MYR)}）。<br>
     可信度：高＝官方訂位頁或簡章且是 2027 的日期；中＝營隊官方社群，或聚合站資料與官方不矛盾；低＝只有聚合站或代理商來源，或來源互相矛盾。<br>
     發現資料有誤，把卡片「詳細資料」裡的梯次編號告訴維護者即可。`;
 }

@@ -17,7 +17,7 @@ const ENUM = {
   season: ['winter_2026_27', 'spring_2027', 'summer_2027', 'other'],
   basis: ['per_week', 'per_2weeks', 'per_day', 'per_camp', 'per_session'],
   format: ['day', 'residential', 'family_with_parent', 'parent_optional'],
-  category: ['english', 'sport', 'stem', 'arts', 'multi_activity', 'outdoor', 'residential', 'leadership', 'family', 'travel'],
+  category: ['english', 'sport', 'stem', 'arts', 'multi_activity', 'outdoor', 'residential', 'leadership', 'family', 'travel', 'short_term_enrolment', 'other_language'],
 };
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
 const URL_RE = /^(https?:\/\/|seed:\/\/)/;
