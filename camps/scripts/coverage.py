@@ -18,14 +18,17 @@ TODAY = sys.argv[1] if len(sys.argv) > 1 else date.today().isoformat()
 
 CITIES = ["Kuala Lumpur", "Petaling Jaya", "Subang Jaya", "Puchong", "Shah Alam", "Selangor-other",
           "Negeri Sembilan", "Penang", "Johor Bahru", "Kota Kinabalu", "Perak", "Melaka",
-          "Langkawi", "Kuching", "Bangkok", "Chiang Mai", "other", "unknown"]
+          "Langkawi", "Kuching", "Bangkok", "Chiang Mai",
+          "Tokyo", "Osaka", "Kyoto", "Kobe", "Fukuoka", "Okinawa", "other", "unknown"]
 KL_METRO = {"Kuala Lumpur", "Petaling Jaya", "Subang Jaya", "Puchong", "Shah Alam", "Selangor-other"}
 WINDOWS = {
     "寒假 2026/27": (date(2026, 11, 23), date(2027, 2, 28)),
     "暑假 2027": (date(2027, 6, 7), date(2027, 8, 29)),
 }
 ACCEPT = {"start": date(2027, 1, 17), "end": date(2027, 2, 8), "ages": (6, 10),
-          "areas": [("大吉隆坡", KL_METRO), ("曼谷", {"Bangkok"}), ("清邁", {"Chiang Mai"})]}
+          "areas": [("大吉隆坡", KL_METRO), ("曼谷", {"Bangkok"}), ("清邁", {"Chiang Mai"}),
+                    ("東京", {"Tokyo"}), ("大阪", {"Osaka"}), ("京都", {"Kyoto"}), ("神戶", {"Kobe"}),
+                    ("福岡", {"Fukuoka"}), ("沖繩", {"Okinawa"})]}
 
 
 def load(name):

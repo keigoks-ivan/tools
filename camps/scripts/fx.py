@@ -8,7 +8,7 @@ import yfinance as yf
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PAIRS = {"MYR": "MYRTWD=X", "THB": "THBTWD=X", "USD": "USDTWD=X", "SGD": "SGDTWD=X", "KRW": "KRWTWD=X",
-         "CNY": "CNYTWD=X", "JPY": "JPYTWD=X"}
+         "CNY": "CNYTWD=X", "JPY": "JPYTWD=X", "HKD": "HKDTWD=X"}
 
 
 def main():

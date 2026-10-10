@@ -22,7 +22,7 @@ export const CITY_REGION = {
 
 const SOLID = new Set(['high', 'medium']);
 
-export const COUNTRY_ZH = { MY: '馬來西亞', TH: '泰國' };
+export const COUNTRY_ZH = { MY: '馬來西亞', TH: '泰國', JP: '日本' };
 const countriesOf = (locs) => new Set(locs.map((l) => l.country || 'MY'));
 
 // ---------- dates

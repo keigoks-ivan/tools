@@ -405,8 +405,200 @@ def patch_thailand(db):
             s.setdefault("sources", []).append({"url": ih, "tier": 1, "accessed": TODAY, "fields": ["dates", "price"], "quote": ih_quote})
 
 
+OIS_PAGE = "https://ois.ac.jp/short-term-program/"
+OIS_IMG = "https://ois.ac.jp/wp-content/uploads/2026/"
+OIS_PRICE_IMG = OIS_IMG + "04/スクリーンショット-2026-04-14-150819.png"
+OIS_CAL_K_IMG = OIS_IMG + "09/スクリーンショット-2026-09-18-120042.png"
+OIS_CAL_E_IMG = OIS_IMG + "09/スクリーンショット-2026-09-18-120110.png"
+ELEV8 = "https://www.elev8.co.jp/winter-camp"
+LTL = "https://wintercampjapan.com/"
+
+
+ENGLISH_CLASS = ["english"]  # notes: an English class or English-themed camp
+JP_SCHOOL_CATEGORIES = {
+    "kis-jp-saturday-school": ENGLISH_CLASS, "oyis-jp-saturday-school": ENGLISH_CLASS,
+    "oyis-jp-spring-intensive": ENGLISH_CLASS, "oyis-jp-summer-intensive": ENGLISH_CLASS, "oyis-jp-winter-intensive": ENGLISH_CLASS,
+    "smis-jp-english-kids-summer": ENGLISH_CLASS, "sis-summer-school": ENGLISH_CLASS,
+    "st-marys-summer-adventure": ["english", "multi_activity"],  # games, sport, crafts and cooking in English
+    "canacad-jp-summer-experience": ["multi_activity", "stem"],  # robotics, woodwork, Japan discovery
+    "giis-tokyo-winter-bootcamp": ["arts"],  # art and storytelling groups
+    "aoba-summer-school": ["multi_activity"], "asij-summer-day-camp": ["multi_activity"], "asij-summer-passport": ["multi_activity"],
+    "canacad-jp-summer-discovery": ["multi_activity"], "cis-tokyo-summer-school": ["multi_activity"],
+    "horizon-summer-school": ["multi_activity"], "issh-summer-wonder": ["multi_activity"], "kis-jp-summer-camp": ["multi_activity"],
+    "laurus-winter-camp": ["multi_activity"], "nishimachi-summer-care": ["multi_activity"], "owis-jp-summer-camp": ["multi_activity"],
+    "owis-jp-winter-camp": ["multi_activity"], "saint-maur-summer-school": ["multi_activity"],
+    "smis-jp-summer-school": ["multi_activity"], "tis-seasonal-school": ["multi_activity"],
+    "tokyo-west-winter-school": ["multi_activity"], "yis-summer-school": ["multi_activity"],
+}
+
+
+def week_session(sid,program_id, location_id, mon, fri, season, price, source_url, quote, notes):
+    return {"id": sid, "program_id": program_id, "location_id": location_id, "start_date": mon, "end_date": fri,
+            "weekday_pattern": "Mon-Fri", "date_status": "confirmed_target_year", "year": int(mon[:4]), "season": season,
+            "price": price, "min_duration_weeks": 1, "flexible_start": False, "spots_status": None,
+            "source_url": source_url, "verified_at": TODAY, "evidence_quote": quote, "confidence": "high",
+            "estimate_basis": None, "notes": notes, "_batches": ["main-chrome"]}
+
+
+def patch_japan(db):
+    # The same camp built by two or three batches. Keep the version from the batch that had the most detail,
+    # then write in what was read in Chrome on 2026-10-10.
+    drop_entities(db, providers=["ltl-japanese-school-jp"],  # same school as ltl-school-jp; its only session was USD
+                  programs=["ayla-camp-ayla", "ayla-camp", "ust-summer-school", "ois-short-term-program"])
+    coto_old = "coto-academy-kids-winter-japanese"
+    past = db["sessions"].pop("coto-academy-kids-winter-japanese-azabujuban-20260126", None)
+    drop_entities(db, programs=[coto_old])
+    if past:  # last winter's run stays as evidence on the kept program
+        past.update({"id": "coto-academy-jp-kids-winter-20260126", "program_id": "coto-academy-jp-kids-winter",
+                     "location_id": "loc-jp-coto-minato"})
+        db["sessions"][past["id"]] = past
+    for s in [s for s, x in db["sessions"].items() if x.get("location_id") == "loc-jp-fukuoka-board-of-education"]:
+        db["sessions"].pop(s)  # the jp-fukuoka batch has the same rolling 仮入学 with the city page
+    for lid in ("loc-jp-coto-azabujuban", "loc-jp-fukuoka-board-of-education"):
+        db["locations"].pop(lid, None)
+        for g in db["programs"].values():
+            if lid in g.get("location_ids", []):
+                g["location_ids"].remove(lid)
+    for r in db["reviews"]:
+        if r["entity_id"] == "ltl-japanese-school-jp":
+            r["entity_id"] = "ltl-school-jp"
+
+    # conflicts: Ayla's age one was filed twice; Coto's price and dates ones were old-page leftovers
+    # (the 45,000 price was only a search snippet); Elev8's 5:1 vs 3:1 are both on the official page
+    db["conflicts"] = [c for c in db["conflicts"] if not (
+        c["entity_id"] in ("ayla-camp", "coto-academy-kids-winter-japanese-azabujuban-20270118")
+        or (c["entity_id"] == "coto-academy-jp-kids-winter" and c["field"] in ("price_per_week_1w", "dates"))
+        or (c["entity_id"] == "elev8-holiday-camp" and c["field"] == "staff_ratio"))]
+    for c in db["conflicts"]:
+        if c["entity_id"] == "ayla-camp-ayla":
+            c["entity_id"] = "ayla-international-school-jp-seasonal-camp"
+
+    # school-run holiday programs the batches tagged only as "school_own_camp" / "summer_camp": the topic from their notes
+    for pid, cats in JP_SCHOOL_CATEGORIES.items():
+        if pid in db["programs"]:
+            db["programs"][pid]["category"] = cats
+
+    g = db["programs"].get("ayla-international-school-jp-seasonal-camp")
+    if g:
+        g["category"] = ["multi_activity"]
+        g["notes"] = g["notes"].replace("這是課後托育或幼兒園的短期利用，不是假期營。", "白金台的國際幼兒園自辦的季節營，按日或按週報名。")
+
+    # Elev8: the official page title carries the year
+    elev8_quote = "Tokyo Autumn & Winter Camps for Kids 2026/27"
+    g = db["programs"].get("elev8-holiday-camp")
+    if g:
+        g["staffing"] = "官網寫每位老師最多帶 5 名學生，通常大約 3 名。"
+        g["notes"] = ("全日營，每天自己選模組：程式、數學（以英語授課）、英語、日語（給非母語學生）。孩子要聽得懂基本英語。"
+                      "每週三是全天校外教學。費用含課程、校外教學、午餐、點心和飲料。"
+                      "有人帶隊的接送從廣尾、澀谷、橫濱、港未來、人形町、銀座、新宿、東京車站出發（07:45～08:30），不另收費。"
+                      "早上 7:30 起、晚上到 19:00 的延托每小時 2,000 日圓。官網頁面標題寫 2026/27。")
+        g.setdefault("sources", []).append({"url": ELEV8, "tier": 1, "accessed": TODAY, "fields": ["dates", "price", "staffing"],
+                                            "quote": elev8_quote})
+    elev8 = [x for x in db["sessions"].values() if x["program_id"] == "elev8-holiday-camp"]
+    for x in elev8:
+        x["notes"] = x["notes"].replace("年份是依 Edarabia 的 2026/27 標示推定，官網表格沒標年份。", "")
+        x.update({"confidence": "high", "source_url": ELEV8, "evidence_quote": elev8_quote, "verified_at": TODAY})
+    if elev8:
+        for mon, fri, note in (("2026-11-09", "2026-11-13", "秋季營週。"),
+                               ("2026-11-23", "2026-11-27", "秋季營週。11/23 是日本國定假日（勤労感謝の日），官網照樣列這一週，當天有沒有開要問。")):
+            sid = f"elev8-holiday-camp-roppongi-{mon.replace('-', '')}"
+            db["sessions"][sid] = week_session(
+                sid, "elev8-holiday-camp", "loc-jp-elev8-roppongi", mon, fri, "winter_2026_27", dict(elev8[0]["price"]),
+                ELEV8, elev8_quote, note + "每天 23,000 日圓，訂滿 5 天九五折（皆未含稅）。可以只報單日。")
+            db["sessions"][sid]["flexible_start"] = True
+            db["sessions"][sid]["min_duration_weeks"] = None
+
+    # Coto: the winter page read in Chrome; the old-page conflicts are gone
+    coto = "https://cotoacademy.com/kids-winter-course-landing-page/"
+    s = next((x for x in db["sessions"].values()
+              if x["program_id"] == "coto-academy-jp-kids-winter" and x.get("start_date") == "2027-01-18"), None)
+    if s:
+        s["price"]["tax_note"] = "稅別沒寫。官網：1 週 52,800、2 週 102,000、3 週 144,000 日圓，報多週比較便宜，用 1 週單價估多週會偏高。"
+        s.update({"confidence": "high", "verified_at": TODAY,
+                  "notes": "三週 2027-01-18 至 02-05，每週一到週五 13:10～16:00，每週可單獨報名。初級、進階分班，每班最多 8 人。"
+                           "8 歲以上才收，10 歲的孩子可報，6 歲的不能。"})
+        s.setdefault("sources", []).append({"url": coto, "tier": 1, "accessed": TODAY, "fields": ["dates", "price"],
+                                            "quote": "January 18 - February 5, 2027 … 1 WEEK ¥52,800"})
+
+    # LTL: start dates and the JPY price list are in pop-ups on the official site, read in Chrome
+    ltl_quote = "Kids Day Camp … 1 week ¥161,700"
+    g = db["programs"].get("ltl-school-jp-kids-day-camp")
+    if g:
+        g["class_size_max"] = 12
+        g["notes"] = ("日語授課。早上 09:00～13:00 上日語課，午餐後 14:00～18:00 是活動，每週 20 小時日語課。平均每班 5～8 人，最多 12 人。"
+                      "同一頁還有半日營（7～17 歲）、青少年日間營、寄宿家庭、宿舍等營型，是不同方案。")
+        g.setdefault("sources", []).append({"url": LTL, "tier": 1, "accessed": TODAY, "fields": ["dates", "price", "class_size"],
+                                            "quote": ltl_quote})
+    s = next((x for x in db["sessions"].values() if x["program_id"] == "ltl-school-jp-kids-day-camp"), None)
+    if s:
+        s["price"].update({"amount": 161700, "currency": "JPY", "basis": "per_week", "from": None, "tax_included": None,
+                           "source_url": LTL,
+                           "tax_note": "稅別沒寫。官網日圓價：1 週 161,700、2 週 314,600、3 週 458,700、4 週 595,100 日圓，"
+                                       "報多週比較便宜，用 1 週單價估多週會偏高。"})
+        s.update({"start_date": "2026-12-07", "end_date": "2027-01-22", "confidence": "high", "source_url": LTL,
+                  "verified_at": TODAY, "flexible_start": True, "min_duration_weeks": 1,
+                  "evidence_quote": "START DATES：2026 年 12/7、12/14、12/21、12/28，2027 年 1/4、1/11、1/18（官網彈出視窗）",
+                  "notes": "每週一開課，最後一梯 1/18 開始、1/22 結束。完全沒學過日語的孩子只能在 12/7 或 1/4 開始，"
+                           "1/18 那週只收已經有日語程度的孩子。官網的美元價註明只供參考，這裡用日圓價。"
+                           "同頁其他營型 1 週：半日營 82,800、青少年日間營 140,800、寄宿家庭 230,500、宿舍 250,800 日圓。"})
+        s.setdefault("sources", []).append({"url": LTL, "tier": 1, "accessed": TODAY, "fields": ["dates", "price"], "quote": ltl_quote})
+
+    # OIS short-term enrolment: the weeks and prices are images on the official page, read in Chrome.
+    # Kindergarten (Naha) and elementary (Nanjo) take visitors in different weeks, so they are two programs.
+    ois_src = [{"url": OIS_PAGE, "tier": 1, "accessed": TODAY, "fields": ["age", "requirements", "booking"],
+                "quote": "黄色で色付けされた週が受け入れ可能な週"},
+               {"url": OIS_PRICE_IMG, "tier": 1, "accessed": TODAY, "fields": ["price"], "quote": "表示価格は全て税込価格"}]
+    common = ("這是到學校跟班上課，不是假期營。直接進一般班級，學校沒有另設給外語生的英語班。"
+              "孩子要已經在用英語學習，能用英語或日語溝通。學校沒有宿舍，家長要同住，或在沖繩有監護人。"
+              "流程是線上面談、錄取、付款、說明會。報名費 30,000 日圓不退，餐費和校車另計。開課後不退費。")
+    base = {"provider_id": "ois-okinawa-jp", "category": ["short_term_enrolment"], "language_of_instruction": ["English", "Japanese"],
+            "age_rule": None, "format": "day", "hours": {"start": None, "end": None, "days": "Mon-Fri"},
+            "class_size_max": None, "class_size_avg": None, "staff_ratio": None, "staffing": None, "facilities": None,
+            "includes": {"lunch": False, "snacks": None, "materials": None, "accommodation": False, "airport_transfer": None,
+                         "insurance": None, "tshirt": None},
+            "excludes": ["報名費 30,000 日圓（不退）", "餐費、校車另計", "沒有宿舍"],
+            "booking": {"url": OIS_PAGE, "deadline": None, "payment_terms": "銀行轉帳或信用卡", "refund_policy": "開課後不退費",
+                        "flex_ticket": None, "sibling_discount": None},
+            "safety": {"first_aid": None, "cctv": None, "insurance": None, "notes": None}, "_batches": ["main-chrome"]}
+    kinder = dict(base, id="ois-short-term-kindergarten", name="OIS 短期體驗入學（幼稚部，那霸校區）",
+                  age_min=5, age_max=6, location_ids=["loc-jp-ois-naha"],
+                  requirements=["幼稚部收 5、6 歲", "能用英語或日語溝通", "線上面談錄取後才付款"],
+                  sources=ois_src + [{"url": OIS_CAL_K_IMG, "tier": 1, "accessed": TODAY, "fields": ["dates"], "quote": "Pre-K 2026-27 calendar"}],
+                  notes=common + "幼稚部在那霸校區（098-835-1851）。2026-27 學年可收的週只有 2026 年 10/19、10/26、11/9、11/16、11/30 "
+                                 "開始的五週，2027 年 1～2 月沒有。日曆上 1/25～29 那週標成綠色，頁面沒有圖例，要問學校。")
+    elem = dict(base, id="ois-short-term-elementary", name="OIS 短期體驗入學（初等部，南城校區）",
+                age_min=7, age_max=10, location_ids=["loc-jp-ois-nanjo"],
+                requirements=["初等部收 2～4 年級，1 年級和 5 年級要先問", "能用英語或日語溝通", "線上面談錄取後才付款"],
+                sources=ois_src + [{"url": OIS_CAL_E_IMG, "tier": 1, "accessed": TODAY, "fields": ["dates"], "quote": "Elementary G1-5 2026-27 calendar"}],
+                notes=common + "初等部在南城校區（098-948-7711）。2026-27 學年可收的週：2026 年 10/19、10/26、11/9、11/16 開始的四週，"
+                               "2027 年 2/1～5 和 3/8～12。頁面寫「2～4 年生」，沒說用日本還是美國學制：2016 年 5 月生的孩子"
+                               "依日本學制是小 4，可以收；依美國學制是 G5，要先問。2020 年 5 月生的孩子依美國學制算 G1，也要先問。")
+    for g in (kinder, elem):
+        db["programs"][g["id"]] = g
+
+    def ois_price(amount, tiers):
+        return {"amount": amount, "currency": "JPY", "basis": "per_week", "tax_included": True,
+                "tax_note": f"税込。{tiers}多週的每週價比 1 週高，用 1 週單價估多週會偏低。", "source_url": OIS_PRICE_IMG,
+                "from": None, "early_bird": {"amount": None, "deadline": None, "condition": None}}
+    weeks = {
+        kinder["id"]: ("loc-jp-ois-naha", "naha", OIS_CAL_K_IMG, ois_price(28000, "1 週 28,000、2 週 69,000、3 週 109,000、1 個月 140,000 日圓。"),
+                       [("2026-11-09", "2026-11-13"), ("2026-11-16", "2026-11-20"), ("2026-11-30", "2026-12-04")]),
+        elem["id"]: ("loc-jp-ois-nanjo", "nanjo", OIS_CAL_E_IMG, ois_price(44000, "1 週 44,000、2 週 96,000、3 週 147,000、1 個月 186,000 日圓。"),
+                     [("2026-11-09", "2026-11-13"), ("2026-11-16", "2026-11-20"), ("2027-02-01", "2027-02-05"), ("2027-03-08", "2027-03-12")]),
+    }
+    for pid, (lid, tag, cal, price, spans) in weeks.items():
+        for mon, fri in spans:
+            sid = f"{pid}-{tag}-{mon.replace('-', '')}"
+            s = week_session(sid, pid, lid, mon, fri, "spring_2027" if mon >= "2027-03" else "winter_2026_27", dict(price),
+                             OIS_PAGE, "黄色で色付けされた週が受け入れ可能な週",
+                             "官網日曆圖的黃色週（可收的週）。1 週是週一到週五，不足 1 週不按日折算。")
+            s["sources"] = [{"url": cal, "tier": 1, "accessed": TODAY, "fields": ["dates"], "quote": "黄色で色付けされた週"},
+                            {"url": OIS_PRICE_IMG, "tier": 1, "accessed": TODAY, "fields": ["price"], "quote": "表示価格は全て税込価格"}]
+            db["sessions"][sid] = s
+
+
 PATCHES = [patch_erican, patch_embassy, patch_raffles_2027, patch_official_pages, patch_stem_academy, patch_klik,
-           patch_from_prices, patch_staffing_facilities, patch_thailand]
+           patch_from_prices, patch_staffing_facilities, patch_thailand, patch_japan]
 
 # Brief rule: tier 4-5 only -> confidence low. These domains are aggregators.
 PLATFORM_HOSTS = {
@@ -444,18 +636,27 @@ CATEGORY_MAP = {
     "french": "other_language", "other_language": "other_language", "nature": "outdoor",
     "robotics": "stem", "design": "arts", "multi_sport": "sport", "family_camp": "family", "thai": "other_language",
     "basketball": "sport", "after_school": "multi_activity",
+    "japanese_language": "other_language", "language_japanese": "other_language", "language_english": "english",
+    "english_immersion": "english", "english_after_school": "english", "bilingual": "english", "language_camp": "english",
+    "writing": "english", "seasonal_camp": "multi_activity", "summer_school": "multi_activity", "overnight_nature": "outdoor",
+    "family_program": "family",
 }
 # format or provider type, not what the camp teaches (format and provider.type already carry these)
-DROP_CATEGORIES = {"day_camp", "school_own_camp", "academic", "weekend", "language_class"}
+DROP_CATEGORIES = {"day_camp", "school_own_camp", "academic", "weekend", "language_class",
+                   "weekend_club", "school_holiday", "public_school", "day", "short_term_course",
+                   "winter_camp", "spring_camp", "summer_camp", "weekday_class", "weekend_class"}
 LANGUAGE_MAP = {"en": "English", "English": "English", "Mandarin": "Mandarin", "zh": "Mandarin"}
 
 
 def normalize_program(p, log):
     cats = []
-    for c in p.get("category") or []:
+    raw = p.get("category") or []
+    # bare "language" means English, unless the program is tagged with another language (Japanese, Thai, French)
+    other = any(CATEGORY_MAP.get(c) == "other_language" for c in raw)
+    for c in raw:
         if c in DROP_CATEGORIES:
             continue
-        n = CATEGORY_MAP.get(c)
+        n = "other_language" if c == "language" and other else CATEGORY_MAP.get(c)
         if n is None:
             log["unmapped_category:" + c] += 1
             n = c

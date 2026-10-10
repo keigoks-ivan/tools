@@ -14,11 +14,18 @@ const COUNTRY_CHIPS = { MY: [
 ], TH: [
   ['bkk', '曼谷', ['Bangkok'], '含暖武里、北欖府 Bangna 一帶'],
   ['cnx', '清邁', ['Chiang Mai'], '含湄林（Mae Rim）、杭東等清邁府'],
+], JP: [
+  ['tyo', '東京', ['Tokyo'], '含橫濱、川崎、千葉、埼玉'],
+  ['osa', '大阪', ['Osaka']],
+  ['kyo', '京都', ['Kyoto']],
+  ['kob', '神戶', ['Kobe'], '含蘆屋、西宮等阪神一帶'],
+  ['fuk', '福岡', ['Fukuoka']],
+  ['oka', '沖繩', ['Okinawa'], '沖繩本島'],
 ] };
-const COUNTRIES = { MY: '馬來西亞', TH: '泰國' };
-// base area per country: its cards sort first and its badge is plain. Thailand has no single base.
-const HOME = { MY: KL, TH: [] };
-const HOME_ZH = { MY: '大吉隆坡', TH: null };
+const COUNTRIES = { MY: '馬來西亞', TH: '泰國', JP: '日本' };
+// base area per country: its cards sort first and its badge is plain. Thailand and Japan have no single base.
+const HOME = { MY: KL, TH: [], JP: [] };
+const HOME_ZH = { MY: '大吉隆坡', TH: null, JP: null };
 let country = 'MY'; // country of the current search
 // same set as SOLID in lib/core.mjs (week view); kept local so a cached old core.mjs can't break the import
 const SOLID = new Set(['high', 'medium']);
@@ -27,12 +34,17 @@ const CITY_ZH = {
   'Johor Bahru': '新山', 'Kota Kinabalu': '亞庇', Penang: '檳城', Langkawi: '浮羅交怡', 'Negeri Sembilan': '森美蘭',
   Perak: '霹靂', Ipoh: '怡保', Lumut: '紅土坎', Pahang: '彭亨', Melaka: '馬六甲', Kuching: '古晉',
   Bangkok: '曼谷', 'Chiang Mai': '清邁',
+  Tokyo: '東京', Osaka: '大阪', Kyoto: '京都', Kobe: '神戶', Fukuoka: '福岡', Okinawa: '沖繩',
 };
 const cityZh = (c) => (KL.includes(c) ? '大吉隆坡' : CITY_ZH[c] || '其他地區');
 const citiesOf = (it) => [...new Set((it.locs || []).map((l) => cityZh(l.city)))];
 const awayRank = (it) => (!HOME[country].length || it.locs?.some((l) => HOME[country].includes(l.city)) ? 0 : 1);
 const homeFirst = (list) => [...list].sort((a, b) => awayRank(a) - awayRank(b));
 const FORMATS = { day: '日營', residential: '住宿營', family_with_parent: '親子同行', parent_optional: '家長可同行' };
+const LANG_ZH = { English: '英語', Japanese: '日語', Mandarin: '華語', French: '法語', ko: '韓語', Korean: '韓語', Thai: '泰語' };
+// shown only when teaching is not English-only; no English at all gets the orange style
+const langBadge = (langs = []) => (!langs.length || (langs.length === 1 && langs[0] === 'English') ? ''
+  : `<span class="badge ${langs.includes('English') ? '' : 'lang-x'}">${langs.map((l) => LANG_ZH[l] || esc(l)).join('、')}授課</span>`);
 const VENUES = { school: '學校校園', centre: '機構教室', hotel: '飯店', outdoor: '戶外場地', other: '其他場地' };
 const CATEGORIES = {
   english: '英語', stem: '科學／STEM', arts: '藝術', sport: '運動', multi_activity: '綜合活動',
@@ -369,7 +381,7 @@ function card(it) {
     <div class="card-h"><div><h3>${esc(p.name)}</h3><div class="prov">${esc(it.provider.name_en)}${it.provider.name_zh ? `・${esc(it.provider.name_zh)}` : ''}${venueNote(it)}</div></div>
       ${it.group === 'unknown' ? '' : `<label class="cmp-box"><input type="checkbox" data-cmp="${id}" ${picked.has(id) ? 'checked' : ''}>選取</label>`}</div>
     <div class="badges">${citiesOf(it).map((c) => `<span class="badge city ${HOME_ZH[country] && c !== HOME_ZH[country] ? 'away' : ''}">${esc(c)}</span>`).join('')}${confBadge(s.confidence)}<span class="badge ${it.group === 'estimated' ? 'est' : ''}">${STATUS[s.date_status]}</span>
-      <span class="badge">${FORMATS[p.format] || esc(p.format)}</span>${p.category.slice(0, 3).map((c) => `<span class="badge">${CATEGORIES[c] || esc(c)}</span>`).join('')}</div>
+      ${langBadge(p.language_of_instruction)}<span class="badge">${FORMATS[p.format] || esc(p.format)}</span>${p.category.slice(0, 3).map((c) => `<span class="badge">${CATEGORIES[c] || esc(c)}</span>`).join('')}</div>
     <dl class="facts">
       <dt>日期</dt><dd>${datesLine(it)}</dd>
       <dt>地點</dt><dd>${locLine(it.locs)}</dd>
@@ -512,6 +524,7 @@ function openCompare() {
     ['場地', (it) => venueParts(it).join('<br>') || '未公布'],
     ['年齡', (it) => `${it.program.age_min ?? '?'}–${it.program.age_max ?? '?'} 歲<br>${kidsLine(it)}`],
     ['形式', (it) => FORMATS[it.program.format] || esc(it.program.format)],
+    ['上課語言', (it) => (it.program.language_of_instruction || []).map((l) => LANG_ZH[l] || esc(l)).join('、') || '未公布'],
     ['時間', (it) => (it.program.hours?.start ? `${esc(it.program.hours.start)}–${esc(it.program.hours.end || '?')}` : '未公布')],
     ['午餐', (it) => ({ true: '含', false: '不含' }[it.program.includes?.lunch] || '未公布')],
     ['分組與師資', (it) => staffParts(it.program).join('<br>') || '未公布'],

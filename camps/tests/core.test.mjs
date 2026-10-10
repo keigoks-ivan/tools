@@ -107,12 +107,14 @@ test('holidays: each location gets its own country, weekends dropped', () => {
     { country: 'TH', kind: 'replacement', date_start: '2027-02-22', date_end: '2027-02-22', name_zh: '萬佛節(補假)' },
     { country: 'TH', kind: 'public', date_start: '2027-01-02', date_end: '2027-01-02', name_zh: '週六' },
     { country: 'TW', kind: 'school_break', date_start: '2027-01-20', date_end: '2027-02-10', name_zh: '寒假' },
+    { country: 'JP', kind: 'public', date_start: '2027-02-11', date_end: '2027-02-11', name_zh: '建国記念の日' },
   ] };
   const bkk = [{ country: 'TH', city: 'Bangkok', state: 'Bangkok' }];
   const kl = [{ country: 'MY', city: 'Kuala Lumpur', state: 'Kuala Lumpur' }];
   const names = (hs) => hs.map((h) => h.name_zh);
   assert.deepEqual(names(holidaysIn(db, '2026-12-28', '2027-02-26', bkk)), ['元旦', '萬佛節(補假)']);
   assert.deepEqual(names(holidaysIn(db, '2026-12-28', '2027-02-26', kl)), ['農曆新年']);
+  assert.deepEqual(names(holidaysIn(db, '2027-02-08', '2027-02-12', [{ country: 'JP', city: 'Tokyo', state: 'Tokyo' }])), ['建国記念の日']);
   // a location saved before the country field existed counts as Malaysia
   assert.deepEqual(names(holidaysIn(db, '2027-02-08', '2027-02-12', [{ city: 'Penang', state: 'Penang' }])), ['農曆新年']);
 });
