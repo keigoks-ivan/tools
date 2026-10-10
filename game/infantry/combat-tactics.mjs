@@ -34,6 +34,43 @@ export function aiMultiplier(difficulty,key,friendly=false){
   const value=difficulty?.[key];
   return friendly||!Number.isFinite(value)?1:Math.max(.35,Math.min(2,value));
 }
+
+// One maneuvering soldier per side leaves the rest of that group available to
+// cover the movement. A rifleman fills an empty flank role; guards use a short
+// local counterpush instead of abandoning their own sector.
+export function maneuverLeader(actors,side,{guard=false,defend=false,target=null,anchor=null,time=0,planInterval=1}={}){
+  const distance=(a,b)=>Math.hypot(a.x-b.x,a.z-b.z);
+  const visible=a=>a.sees&&a.target&&!a.target.dead;
+  const blocked=a=>(a.laneBlocked||0)>=.8*planInterval;
+  const group=actors.filter(a=>{
+    if(a.dead||a.friendly||a.side!==side)return false;
+    if(guard){
+      if(!a.guard||!['line','heavy'].includes(a.type))return false;
+      if(anchor&&distance(a.guardAnchor||a.home||a.pos,anchor)>7)return false;
+    }else if(a.guard&&a.type!=='flank'||!['line','flank'].includes(a.type)||defend&&a.id%3===0)return false;
+    return true;
+  });
+  // Reserve the lane before filtering by the caller's target. Two soldiers
+  // shooting different squadmates still share one physical approach lane.
+  const reservations=group.filter(a=>visible(a)&&!blocked(a)&&(guard
+    ?a.intent==='counterpush'&&time<(a.counterUntil||0)&&(!anchor||distance(a.target.pos,anchor)<14)
+    :a.flankGoal&&['flank','crossfire'].includes(a.intent)&&time<(a.flankUntil||0)&&a.flankContact&&distance(a.flankContact,a.target.pos)<6));
+  if(reservations.length){reservations.sort((a,b)=>a.id-b.id);return reservations[0];}
+  const candidates=group.filter(a=>visible(a)&&!blocked(a)&&(!target||a.target===target||distance(a.target.pos,target.pos)<=6)
+    &&(guard||distance(a.pos,a.target.pos)>9&&distance(a.pos,a.target.pos)<45));
+  candidates.sort((a,b)=>{
+    const priority=a=>guard?(a.type==='line'?0:1):(a.type==='flank'?0:1);
+    return priority(a)-priority(b)||a.id-b.id;
+  });
+  return candidates[0]||null;
+}
+
+export function coveringFire(actors,actor,time,tempo=1){
+  if(!actor.target?.pos)return false;
+  return actors.some(mate=>mate!==actor&&!mate.dead&&!mate.friendly&&mate.sees&&mate.target&&mate.type!=='flank'&&mate.type!=='sniper'
+    &&(mate.target===actor.target||Math.hypot(mate.target.pos.x-actor.target.pos.x,mate.target.pos.z-actor.target.pos.z)<=6)
+    &&time-(mate.lastShotTime??-99)<1.1&&(mate.firePressure||0)>=1.2/Math.max(.35,tempo));
+}
 export class TacticalDirector {
   constructor(){this.wave=0;this.epoch=0;this.key='';this.phase='advance';this.sceneId='pass';this.profile=BATTLE_TACTICS.pass;this.side=1;}
   update(time,wave,operation,mapKind='pass',tempo=1){

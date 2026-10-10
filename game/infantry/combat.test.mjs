@@ -4,7 +4,7 @@ import * as THREE from 'three';
 import { Combat, InfantryActor } from './combat.js';
 import { Navigation } from './navigation.mjs';
 import { Solid, SURFACES } from '../mech/zero/kit.js';
-import { TacticalDirector, BATTLE_TACTICS, aiMultiplier } from './combat-tactics.mjs';
+import { TacticalDirector, BATTLE_TACTICS, aiMultiplier, maneuverLeader, coveringFire } from './combat-tactics.mjs';
 import { DIFFICULTIES, SCENARIOS } from './scenarios.mjs';
 import { WEAPONS } from '../mech/zero/viewmodel.js';
 import { Pilot, P } from '../mech/zero/player.js';
@@ -364,4 +364,191 @@ test('legal contact still cannot connect spawns across a sealed thin wall or adm
     const penetrated=player.pos.clone().add(V(-side*.001,0,0));assert.equal(combat._clearSegment(penetrated,penetrated),false,'tolerance admitted actual penetration');
   }
   player.pos.set(0,0,-10);assert.throws(()=>combat._spawnPosition({x:15,z:20}),/no accessible infantry spawn/,'invalid player positions must not choose an arbitrary island');combat.clear();
+});
+
+test('small visible target changes preserve enemy aim, while a clear new threat, death or occlusion replaces it',()=>{
+  const {combat,player}=fixture(world(),DIFFICULTIES.regular),a=gunner(combat),ally=actor(combat,V(0,0,-20.7),20);ally.friendly=true;
+  combat.enemies=[a];combat.allies=[ally];a.aimT=.4;a.burst=2;
+  for(let i=0;i<60;i++){
+    ally.pos.z=-20.7+Math.sin(i*.3)*.15;combat._sense(a);
+    assert.equal(a.target,player,'small squad movement restarted the warning');assert.equal(a.aimT,.4);assert.equal(a.burst,2);
+  }
+  ally.pos.z=-15;combat._sense(a);assert.equal(a.target,ally);assert.equal(a.aimT,0);assert.equal(a.burst,0);
+  ally.dead=true;combat._sense(a);assert.equal(a.target,player,'retention kept a dead target');
+  ally.dead=false;ally.pos.z=-20.7;combat.map.solid.add({x0:-2,x1:2,z0:-19,z1:-18,y0:0,y1:4});
+  // Both original targets are behind the wall: inertia must not preserve either.
+  combat._sense(a);assert.equal(a.target,null);assert.equal(a.sees,false);
+  ally.pos.z=-15;combat._sense(a);assert.equal(a.target,ally,'a visible replacement was ignored behind target inertia');combat.clear();
+});
+
+test('actual covering fire recruits one rifleman per side when flankers are absent and holds that commitment',()=>{
+  fixedRandom(.5,()=>{
+    const {combat}=fixture(world(),DIFFICULTIES.regular),support=gunner(combat,V(0,0,0),'support',false,4);
+    const right=gunner(combat,V(6,0,2),'line',false,1),extra=gunner(combat,V(10,0,4),'line',false,5),left=gunner(combat,V(-6,0,2),'line',false,2);
+    combat.enemies=[support,right,extra,left];combat.tacticalPhase='suppress';support.s.aimW=0;
+    for(let i=0;i<120;i++){combat.time+=1/60;combat._shootActor(support,1/60);}
+    assert.equal(coveringFire(combat.enemies,right,combat.time,1.25),false);combat._plan(right);assert.notEqual(right.intent,'flank','an unraised rifle falsely covered a maneuver');
+    support.s.aimW=1;
+    for(let i=0;i<180;i++){combat.time+=1/60;combat._shootActor(support,1/60);}
+    assert(coveringFire(combat.enemies,right,combat.time,1.25));
+    for(const a of [right,extra,left])combat._plan(a);
+    assert.equal(right.intent,'flank');assert.equal(left.intent,'flank');assert.notEqual(extra.intent,'flank');
+    for(const side of [-1,1])assert.equal(combat.enemies.filter(a=>a.side===side&&a.intent==='flank').length,1);
+    const goal=right.goal.clone(),newFlanker=gunner(combat,V(12,0,5),'flank',false,7);combat.enemies.push(newFlanker);
+    combat._plan(newFlanker);combat._plan(right);
+    assert.equal(maneuverLeader(combat.enemies,1,{defend:true,target:combat.player}),right,'new arrivals interrupted an already moving flank');
+    assert.notEqual(newFlanker.intent,'flank');assert(right.goal.equals(goal));
+    for(const a of [right,left]){
+      assertCapsuleClear(combat.map,a.goal);const graph=combat._routes();assert.equal(graph.components[graph.nearest(a.goal)],graph.components[graph.nearest(a.pos,null,true)]);
+    }
+    support.lastShotTime=combat.time-2;assert.equal(coveringFire(combat.enemies,right,combat.time,1.25),false,'stale pressure counted as live covering fire');combat.clear();
+  });
+});
+
+test('reinforcements and changing targets cannot assign a second mobile soldier to an occupied flank',()=>{
+  const {combat,player}=fixture(),line=gunner(combat,V(7,0,3),'line',false,1),flank=gunner(combat,V(9,0,4),'flank',false,5),other=gunner(combat,V(-8,0,4),'flank',false,2);
+  line.intent='flank';line.flankGoal=V(18,0,-10);line.flankContact.copy(player.pos);line.flankUntil=10;
+  assert.equal(maneuverLeader([line,flank,other],1,{defend:true,target:player,time:5}),line,'reinforcements preempted an active physical lane');
+  line.target=null;line.sees=false;combat._releaseManeuver(line);assert.equal(line.flankGoal,null);
+  assert.equal(maneuverLeader([line,flank,other],1,{defend:true,target:player,time:5}),flank,'lost contact did not release the lane');
+  line.dead=true;assert.equal(maneuverLeader([line,flank,other],1,{defend:true,target:player}),flank);
+  assert.equal(maneuverLeader([line,flank,other],-1,{defend:true,target:player}),other);combat.clear();
+});
+
+test('local guard counterpushes approach a contested sector without abandoning it or dispatching a whole side',()=>{
+  fixedRandom(.5,()=>{
+    const {combat,player}=fixture(world(),DIFFICULTIES.veteran),anchor=V(0,0,-5);player.pos.set(0,0,-4);
+    const guards=[gunner(combat,V(2,0,2),'line',false,1),gunner(combat,V(-2,0,2),'line',false,2),gunner(combat,V(5,0,1),'heavy',false,3),gunner(combat,V(7,0,0),'line',false,5)];
+    combat.enemies=guards;
+    for(const a of guards){a.guard=true;a.guardAnchor=anchor.clone();combat._sense(a);}
+    for(let i=0;i<360;i++){
+      combat.update(1/60,{mode:'assault',target:anchor,operation:{sceneId:'city'}});
+      for(const side of [-1,1])assert(guards.filter(a=>a.side===side&&a.intent==='counterpush').length<=1,'guard side charged as an entire group');
+      for(const a of guards){assertCapsuleClear(combat.map,a.pos);assert(a.goal.distanceTo(anchor)<=(a.type==='heavy'?9:7));}
+    }
+    assert.equal(guards[0].intent,'counterpush');assert.equal(guards[1].intent,'counterpush');
+    for(const a of guards.slice(0,2))assert(a.pos.distanceTo(anchor)<4,'guards left a close capture unopposed');
+    assert.equal(guards[2].intent,'guard');assert.equal(guards[3].intent,'guard');
+    combat.update(1/60,{mode:'assault',target:anchor,cleanup:true});
+    for(const a of guards){assert.equal(a.guard,false);assert.equal(a.intent,'pressure');}combat.clear();
+  });
+});
+
+test('the extra rifleman flank physically advances around cover and preserves the projectile and pose rules',()=>{
+  fixedRandom(.5,()=>{
+    const map=world([{x0:-12,x1:12,z0:-2,z1:2,y0:0,y1:4}]),{combat}=fixture(map,DIFFICULTIES.regular);
+    const support=gunner(combat,V(0,0,-8),'support',false,4),right=gunner(combat,V(20,0,12),'line',false,1),extra=gunner(combat,V(22,0,14),'line',false,5);
+    support.station=support.pos.clone();support.stationContact=combat.player.pos.clone();support.stationUntil=100;
+    combat.enemies=[support,right,extra];const first=right.pos.clone(),previous=right.pos.clone(),shots=[],intents=new Set();
+    const original=combat._bolt.bind(combat);combat._bolt=(p,dir,speed,dmg,from)=>{shots.push({mode:from.s.mode,weight:from.s.aimW});original(p,dir,speed,dmg,from);};
+    for(let i=0;i<480;i++){
+      combat.update(1/60,{mode:'defend',target:{x:0,z:-25},operation:{sceneId:'pass'}});intents.add(right.intent);
+      assertCapsuleClear(map,right.pos);assert(right.pos.distanceTo(previous)<=right.T.run/60+1e-5);previous.copy(right.pos);
+      assert(combat.enemies.filter(a=>a.side===1&&a.intent==='flank').length<=1);
+    }
+    assert(intents.has('flank'),'the squad never used its extra maneuver role');assert(right.pos.distanceTo(first)>6,'assigned flank remained a paper-only plan');
+    assert(shots.length>0);for(const shot of shots){assert.equal(shot.mode,'aim');assert(shot.weight>.84);}
+    combat.clear();
+  });
+});
+
+test('enemy tactical tempo resists sustained hit control while friendly stagger and hit feedback remain unchanged',()=>{
+  const samples=[];
+  for(const tempo of [1,1.25,1.45])fixedRandom(.5,()=>{
+    const {combat}=fixture(world(),{damage:1,tacticalTempo:tempo}),a=gunner(combat),shots=[],impacts=[];a.combat=combat;a.hp=a.hp0=10000;a.stagV=V();a.cover={};
+    a.s.impact=()=>impacts.push(combat.time);a.s.flash=()=>{};a.damage=InfantryActor.prototype.damage.bind(a);combat._bolt=()=>shots.push(combat.time);
+    a.aimT=1;a.damage(40,V(0,0,1));assert(Math.abs(a.stagger-Math.max(.17,.27/tempo))<1e-9);assert(Math.abs(a.staggerReadyAt-.7*tempo)<1e-9);
+    let nextHit=.09,staggerTime=0;
+    for(let i=0;i<480;i++){
+      const dt=1/60;combat.time+=dt;a.stagger=Math.max(0,a.stagger-dt);a.phaseT-=dt;
+      if(a.phase==='hide'&&a.phaseT<=0){a.phase='aim';a.phaseT=2;}
+      if(combat.time>=nextHit){a.damage(26,V(0,0,1));nextHit+=.09;}
+      if(a.stagger>0)staggerTime+=dt;
+      a.s.update(dt);combat._shootActor(a,dt);
+    }
+    assert(impacts.length>=88,'resistance suppressed individual hit animation');samples.push({shots:shots.length,staggerTime});combat.clear();
+    const friendly=fixture(world(),{damage:1,tacticalTempo:tempo}),ally=gunner(friendly.combat,V(0,0,-10),'ally',true);ally.combat=friendly.combat;ally.stagV=V();ally.s.impact=()=>{};ally.s.flash=()=>{};ally.aimT=1;
+    InfantryActor.prototype.damage.call(ally,40,V(0,0,1));assert.equal(ally.stagger,.27);assert.equal(ally.staggerReadyAt,.7);assert.equal(ally.aimT,.96);friendly.combat.clear();
+  });
+  assert(samples[1].shots>samples[0].shots,`standard remained permanently controllable: ${JSON.stringify(samples)}`);
+  assert(samples[2].shots>=samples[1].shots&&samples[2].staggerTime<samples[1].staggerTime,`veteran did not spend less time in physical stagger: ${JSON.stringify(samples)}`);
+});
+
+test('30/60/120fps enemy bursts keep actual projectile times within one frame of the intended cadence',()=>{
+  const results=[30,60,120].map(fps=>({fps,shots:firingSample(DIFFICULTIES.veteran,{fps,seconds:10})}));
+  for(const {fps,shots} of results){
+    for(let start=0;start+2<shots.length;start+=3){
+      for(let i=1;i<3;i++){
+        const expected=shots[start].time+i*.2*1.015,error=shots[start+i].time-expected;
+        assert(error>=-1e-8&&error<=1/fps+1e-8,`burst timer accumulated ${error}s delay at ${fps}fps`);
+      }
+    }
+  }
+  const counts=results.map(r=>r.shots.length);assert(Math.max(...counts)-Math.min(...counts)<=2,`frame rate changed sustained fire: ${counts}`);
+});
+
+test('large frame updates preserve first-shot and sniper warnings, complete reloads, and never emit several bullets at once',()=>{
+  fixedRandom(.5,()=>{
+    for(const type of ['line','sniper']){
+      const {combat}=fixture(world(),DIFFICULTIES.veteran),a=gunner(combat,V(0,0,-10),type),shots=[];a.senseT=a.planT=100;combat.enemies=[a];
+      combat._bolt=()=>shots.push(combat.time);a.ammo=1;
+      for(let frame=0;frame<60;frame++){
+        const count=shots.length;combat.update(.9);assert(shots.length-count<=1,'timer overrun released multiple projectiles in one frame');
+      }
+      const warning=type==='sniper'?1.05:.35;
+      assert(shots.length>=2);assert(shots[0]>=warning-1e-8,'a clamped large frame bypassed the visible aim warning');
+      assert(shots[1]-shots[0]>=1.6+warning-1e-8,'timer carry skipped reload or the next raising action');
+      combat.clear();
+    }
+  });
+});
+
+test('an ongoing enemy burst still waits for its rifle to face and rise toward the visible target',()=>{
+  const {combat}=fixture(world(),DIFFICULTIES.veteran),a=gunner(combat);a.aimT=2;a.burst=2;
+  a.s.aimYaw=Math.PI/2;combat._shootActor(a,.1);assert.equal(combat.bolts.length,0);assert.equal(a.burst,2);
+  a.s.aimYaw=Math.PI;a.s.aimW=.7;combat._shootActor(a,.1);assert.equal(combat.bolts.length,0);
+  a.s.aimW=1;combat._shootActor(a,.1);assert.equal(combat.bolts.length,1);assert.equal(a.burst,1);combat.clear();
+});
+
+test('an occupied side lane stays reserved across different visible targets and releases on expiry, obstruction or lost contact',()=>{
+  const {combat,player}=fixture(),first=gunner(combat,V(8,0,0),'line',false,1),next=gunner(combat,V(12,0,2),'flank',false,5),ally=actor(combat,V(15,0,-22),20);ally.friendly=true;
+  next.target=ally;next.lastSeen.copy(ally.pos);const group=[first,next];combat.enemies=group;
+  const reserve=()=>{first.sees=true;first.target=player;first.intent='flank';first.flankGoal=V(18,0,-10);first.flankContact.copy(player.pos);first.flankUntil=10;first.laneBlocked=0;};
+  reserve();combat.time=5;
+  assert.equal(maneuverLeader(group,1,{target:player,time:5}),first);
+  assert.equal(maneuverLeader(group,1,{target:ally,time:5}),first,'a different target created a second same-side reservation');
+  for(const reason of ['expired','blocked','lost','shifted']){
+    reserve();combat.time=5;
+    if(reason==='expired')combat.time=11;
+    if(reason==='blocked')first.laneBlocked=1;
+    if(reason==='lost'){first.sees=false;first.target=null;}
+    if(reason==='shifted')first.flankContact.add(V(9,0,0));
+    combat._releaseManeuver(first);assert.equal(first.flankGoal,null,reason+' did not clear the obsolete movement');
+    assert.equal(maneuverLeader(group,1,{target:ally,time:combat.time}),next,reason+' kept the next flanker from taking the slot');
+  }
+  combat.clear();
+});
+
+test('guard reservations share a sector across different targets and release when the leader loses sight',()=>{
+  const {combat,player}=fixture(),anchor=V(0,0,-5),first=gunner(combat,V(2,0,-2),'line',false,1),next=gunner(combat,V(4,0,-1),'line',false,5),ally=actor(combat,V(8,0,-6),20);player.pos.set(-5,0,-6);ally.friendly=true;
+  first.target=player;next.target=ally;
+  for(const a of [first,next]){a.guard=true;a.guardAnchor=anchor.clone();}
+  first.intent='counterpush';first.counterUntil=10;combat.time=5;
+  const options={guard:true,anchor,time:5};
+  assert.equal(maneuverLeader([first,next],1,{...options,target:player}),first);
+  assert.equal(maneuverLeader([first,next],1,{...options,target:ally}),first,'a squadmate in the same sector created another counterpush');
+  first.sees=false;first.target=null;combat._releaseManeuver(first);assert.equal(first.intent,'guard');
+  assert.equal(maneuverLeader([first,next],1,{...options,target:ally}),next,'a guard without a target held the sector slot');
+  combat.clear();
+});
+
+test('assault spawn guard metadata anchors riflemen but keeps dedicated flankers available to maneuver',()=>{
+  const {combat}=fixture(world(),DIFFICULTIES.veteran),line=gunner(combat,V(4,0,4),'line',false,1),flank=gunner(combat,V(8,0,6),'flank',false,5);
+  // main supplies the active objective as guard metadata to every assault role.
+  for(const a of [line,flank]){a.guard=true;a.guardAnchor=V(0,0,-5);}
+  combat.mode='assault';combat.enemies=[line,flank];combat.tacticalPhase='flank';combat.director.side=1;combat.director.progress=.5;
+  combat._plan(line);combat._plan(flank);
+  assert.equal(line.intent,'guard');assert.equal(flank.intent,'flank','assault metadata disabled the dedicated flank role');
+  assert(line.goal.distanceTo(line.guardAnchor)<=7);assertCapsuleClear(combat.map,flank.goal);
+  const routes=combat._routes();assert.equal(routes.components[routes.nearest(flank.goal)],routes.components[routes.nearest(flank.pos,null,true)]);combat.clear();
 });

@@ -29,30 +29,30 @@ export const MODES = {
 export const DIFFICULTIES = {
   recruit: {
     name: { zh: '新兵', en: 'Recruit' },
-    brief: { zh: '適合熟悉掩體與小隊。脫離火力 4.8 秒後恢復護盾，補給站整備 {supply} 秒；後續波次仍會加強。', en: 'Learn cover and squad commands. Shield recovery begins after 4.8 seconds out of fire; supply stations need {supply} seconds to reset. Later waves still intensify.' },
-    damage: .8, count: .9, capture: 4.5, spawnMultiplier: 1, reinforceMultiplier: 1,
-    integrityRepair: 6, supplyCooldown: 28, supplyUseTime: 1.5, supplyHeal: 100, supplyShield: 60,
-    healthFloor: 40, healthRate: 6,
-    shieldDelay: 4.8, shieldRate: 26, fieldHeal: 18, fieldShield: 35, reinforcementBatches: 2,
-    reaction: 1.2, accuracy: 1.15, burstRest: 1.2, planInterval: 1.12, tacticalTempo: .9,
+    brief: { zh: '敵軍總數增加、進場更快，但掩體與小隊仍給你整備機會。脫離火力 5.2 秒後恢復護盾，補給站整備 {supply} 秒；補給可恢復 85 生命，波間只修補少量防線。', en: 'More enemies deploy faster, while cover and squad tactics still leave room to learn. Shield recovery begins after 5.2 seconds out of fire; supply stations reset in {supply} seconds and restore 85 health. Only a little line integrity returns between waves.' },
+    damage: .9, count: 1.05, capture: 4.5, spawnMultiplier: .92, reinforceMultiplier: .94,
+    integrityRepair: 4, supplyCooldown: 32, supplyUseTime: 1.8, supplyHeal: 85, supplyShield: 50,
+    healthFloor: 35, healthRate: 5,
+    shieldDelay: 5.2, shieldRate: 24, fieldHeal: 15, fieldShield: 30, reinforcementBatches: 2,
+    reaction: 1.1, accuracy: 1.05, burstRest: 1.1, planInterval: 1, tacticalTempo: 1,
   },
   regular: {
     name: { zh: '標準', en: 'Regular' },
-    brief: { zh: '更密集的攻勢與有限補給。脫離火力 6.5 秒後恢復護盾，補給站整備 {supply} 秒；波間只修補少量防線。', en: 'Denser attacks and limited supplies. Shield recovery begins after 6.5 seconds out of fire; supply stations reset in {supply} seconds. Only a little line integrity returns between waves.' },
-    damage: 1.15, count: 1.25, capture: 7, spawnMultiplier: .84, reinforceMultiplier: .8,
-    integrityRepair: 3, supplyCooldown: 40, supplyUseTime: 2.2, supplyHeal: 45, supplyShield: 35,
-    healthFloor: 30, healthRate: 4,
-    shieldDelay: 6.5, shieldRate: 17, fieldHeal: 10, fieldShield: 20, reinforcementBatches: 3,
-    reaction: .82, accuracy: .82, burstRest: .78, planInterval: .8, tacticalTempo: 1.12,
+    brief: { zh: '更多敵軍從主路與側翼快速接續進攻，補給必須提前規劃。脫離火力 7.5 秒後恢復護盾，補給站整備 {supply} 秒；每次僅恢復 35 生命，波間防線只修補 1%。', en: 'More enemies rapidly follow up through the main approach and flanks; plan resupply early. Shield recovery begins after 7.5 seconds out of fire; stations reset in {supply} seconds and restore only 35 health. Just 1% line integrity returns between waves.' },
+    damage: 1.25, count: 1.55, capture: 7, spawnMultiplier: .70, reinforceMultiplier: .67,
+    integrityRepair: 1, supplyCooldown: 48, supplyUseTime: 2.6, supplyHeal: 35, supplyShield: 30,
+    healthFloor: 25, healthRate: 3,
+    shieldDelay: 7.5, shieldRate: 14, fieldHeal: 8, fieldShield: 16, reinforcementBatches: 3,
+    reaction: .76, accuracy: .76, burstRest: .68, planInterval: .70, tacticalTempo: 1.25,
   },
   veteran: {
     name: { zh: '老兵', en: 'Veteran' },
-    brief: { zh: '管控補給、側翼與隊友才能守住防線。脫離火力 8 秒後恢復護盾，補給站整備 {supply} 秒；防線不自動修復。', en: 'Manage supplies, flanks and your squad. Shield recovery begins after 8 seconds out of fire; supply stations need {supply} seconds to reset. Line integrity never repairs automatically.' },
-    damage: 1.5, count: 1.6, capture: 9, spawnMultiplier: .68, reinforceMultiplier: .62,
-    integrityRepair: 0, supplyCooldown: 55, supplyUseTime: 3, supplyHeal: 30, supplyShield: 20,
-    healthFloor: 20, healthRate: 2,
-    shieldDelay: 8, shieldRate: 11, fieldHeal: 5, fieldShield: 10, reinforcementBatches: 4,
-    reaction: .68, accuracy: .66, burstRest: .58, planInterval: .62, tacticalTempo: 1.3,
+    brief: { zh: '高密度攻勢與短暫火力空檔考驗掩體換位。脫離火力 9 秒後恢復護盾，補給站整備 {supply} 秒；每次僅恢復 22 生命，防線不自動修復。', en: 'Dense attacks and brief firing gaps demand cover changes. Shield recovery begins after 9 seconds out of fire; supply stations reset in {supply} seconds and restore only 22 health. Line integrity never repairs automatically.' },
+    damage: 1.55, count: 1.95, capture: 9, spawnMultiplier: .56, reinforceMultiplier: .50,
+    integrityRepair: 0, supplyCooldown: 65, supplyUseTime: 3.4, supplyHeal: 22, supplyShield: 15,
+    healthFloor: 15, healthRate: 1.5,
+    shieldDelay: 9, shieldRate: 9, fieldHeal: 4, fieldShield: 8, reinforcementBatches: 4,
+    reaction: .62, accuracy: .60, burstRest: .50, planInterval: .54, tacticalTempo: 1.45,
   },
 };
 export function selection(raw = {}) {
@@ -68,16 +68,44 @@ const REINFORCEMENT_COUNTS = [3, 4, 5];
 const DEFENSE_PACE = [1, .94, .88, .82];
 const ASSAULT_PACE = [1, .88, .76];
 const REINFORCEMENT_PACE = [1, .9, .82];
+function effectiveMissionPlan(difficulty, operation = {}) {
+  operation = operation && typeof operation === 'object' ? operation : {};
+  const positive = (value,fallback) => Number.isFinite(value) && value > 0 ? value : fallback;
+  const rules = { ...DIFFICULTIES[difficulty] };
+  rules.count *= positive(operation.countMultiplier,1);
+  rules.capture *= positive(operation.captureMultiplier,1);
+  return { rules,
+    baseSpawnInterval: positive(operation.spawnInterval,1.15) * rules.spawnMultiplier,
+    baseReinforceInterval: positive(operation.reinforceInterval,28) * rules.reinforceMultiplier,
+  };
+}
+function stagePressure(mode, index, plan) {
+  const defend = mode === 'defend';
+  const reinforcementBatch = defend ? 0 : Math.round(REINFORCEMENT_COUNTS[index] * plan.rules.count);
+  const maxBatches = defend ? 0 : plan.rules.reinforcementBatches;
+  return { stage:index+1,
+    initial:Math.round((defend ? DEFENSE_COUNTS : ASSAULT_COUNTS)[index] * plan.rules.count),
+    spawnInterval:plan.baseSpawnInterval * (defend ? DEFENSE_PACE : ASSAULT_PACE)[index],
+    reinforcementInterval:defend ? null : plan.baseReinforceInterval * REINFORCEMENT_PACE[index],
+    reinforcementBatch,maxBatches,maxReinforcements:reinforcementBatch*maxBatches,
+  };
+}
+// Initial forces are guaranteed arrival queues. Assault reinforcements are an
+// upper bound, not promised arrivals: cleanup can close the remaining budget.
+export function missionPressurePreview(choice = {}, operation = {}) {
+  const selected = selection(choice || {}),plan = effectiveMissionPlan(selected.difficulty,operation);
+  const stages = (selected.mode === 'defend' ? DEFENSE_COUNTS : ASSAULT_COUNTS).map((_,index)=>stagePressure(selected.mode,index,plan));
+  const initialCounts = stages.map(stage=>stage.initial),totalInitial = initialCounts.reduce((a,b)=>a+b,0);
+  const maxReinforcements = stages.reduce((sum,stage)=>sum+stage.maxReinforcements,0);
+  return {mode:selected.mode,difficulty:selected.difficulty,initialCounts,totalInitial,maxReinforcements,
+    totalMaximum:totalInitial+maxReinforcements,stages};
+}
 export class Mission {
   constructor(options) {
     Object.assign(this, selection(options));
     this.operation = options.operation || {};
-    this.rules = { ...DIFFICULTIES[this.difficulty] };
-    this.rules.count *= this.operation.countMultiplier || 1;
-    this.rules.capture *= this.operation.captureMultiplier || 1;
+    Object.assign(this, effectiveMissionPlan(this.difficulty,this.operation));
     this.waveCount = 4;
-    this.baseSpawnInterval = (this.operation.spawnInterval || 1.15) * this.rules.spawnMultiplier;
-    this.baseReinforceInterval = (this.operation.reinforceInterval || 28) * this.rules.reinforceMultiplier;
     this.spawnInterval = this.baseSpawnInterval; this.reinforceInterval = this.baseReinforceInterval;
     this.scenario = SCENARIOS.find(s => s.id === this.scene);
     this.time = 0; this.wave = 0; this.phase = 'prepare'; this.delay = 6;
@@ -98,8 +126,8 @@ export class Mission {
       if (this.phase === 'prepare') {
         this.delay -= dt;
         if (this.delay <= 0) {
-          this.wave++; this.phase = 'battle'; this.pending = Math.round(DEFENSE_COUNTS[this.wave-1]*this.rules.count);
-          this.spawnInterval = this.baseSpawnInterval*DEFENSE_PACE[this.wave-1]; this.spawnIn = 0; events.push('wave');
+          this.wave++; this.phase = 'battle'; const stage=stagePressure(this.mode,this.wave-1,this);
+          this.pending=stage.initial;this.spawnInterval=stage.spawnInterval;this.spawnIn = 0; events.push('wave');
         }
       } else if (this.pending === 0 && alive === 0) {
         if (this.wave >= this.waveCount) { this.status = 'won'; events.push('won'); }
@@ -107,10 +135,11 @@ export class Mission {
       }
     } else {
       if (!this.stageStarted) {
-        this.pending = Math.round(ASSAULT_COUNTS[this.objective]*this.rules.count); this.stageStarted = true;
-        this.spawnInterval = this.baseSpawnInterval*ASSAULT_PACE[this.objective]; this.spawnIn = 0;
-        this.reinforceInterval = this.baseReinforceInterval*REINFORCEMENT_PACE[this.objective]; this.reinforceIn = this.reinforceInterval;
-        this.reinforcementsLeft = this.rules.reinforcementBatches; this.reinforcementsClosed = false; events.push('objective');
+        const stage=stagePressure(this.mode,this.objective,this);
+        this.pending=stage.initial;this.stageStarted = true;
+        this.spawnInterval=stage.spawnInterval;this.spawnIn = 0;
+        this.reinforceInterval=stage.reinforcementInterval;this.reinforceIn = this.reinforceInterval;
+        this.reinforcementsLeft=stage.maxBatches;this.reinforcementsClosed = false; events.push('objective');
       }
       // A cleared queue and the last two defenders are a stable cleanup phase.
       // Reinforcements never appear while the player is following their precise markers.
@@ -120,7 +149,7 @@ export class Mission {
         if (this.reinforceIn <= 0) {
           // Finish the previous queue first; crowded sectors cannot accumulate hidden armies.
           if (this.pending === 0 && alive < 10) {
-            this.pending = Math.round(REINFORCEMENT_COUNTS[this.objective]*this.rules.count);
+            this.pending=stagePressure(this.mode,this.objective,this).reinforcementBatch;
             this.reinforcementsLeft--; events.push('reinforce');
           }
           this.reinforceIn = this.reinforceInterval;

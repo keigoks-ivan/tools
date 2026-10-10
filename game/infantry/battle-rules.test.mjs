@@ -34,9 +34,9 @@ test('resupply cannot complete through damage or nearby visible enemies, but cov
 });
 test('field regrouping preserves injuries; stations restore bounded amounts and one grenade',()=>{
   const vitals={hp:25,shield:0,nades:0};
-  assert.deepEqual(resupplyVitals(vitals,DIFFICULTIES.regular,true),{hp:35,shield:20,nades:1});
-  assert.deepEqual(resupplyVitals(vitals,DIFFICULTIES.regular),{hp:70,shield:35,nades:1});
-  assert.deepEqual(resupplyVitals(vitals,DIFFICULTIES.veteran),{hp:55,shield:20,nades:1});
+  assert.deepEqual(resupplyVitals(vitals,DIFFICULTIES.regular,true),{hp:33,shield:16,nades:1});
+  assert.deepEqual(resupplyVitals(vitals,DIFFICULTIES.regular),{hp:60,shield:30,nades:1});
+  assert.deepEqual(resupplyVitals(vitals,DIFFICULTIES.veteran),{hp:47,shield:15,nades:1});
   assert.deepEqual(resupplyVitals({hp:95,shield:55,nades:3},DIFFICULTIES.recruit),{hp:100,shield:60,nades:3});
 });
 test('classic series recovery stays unchanged and infantry profiles are per player',()=>{
@@ -46,7 +46,7 @@ test('classic series recovery stays unchanged and infantry profiles are per play
   assert(classic.shield>20);assert.equal(veteran.shield,0);
   assert.equal(P.regen,4.2);assert.equal(P.shieldRate,30);
   classic.reset(new THREE.Vector3(),0);assert.equal(classic.recovery.shieldDelay,4.2);
-  veteran.reset(new THREE.Vector3(),0);assert.equal(veteran.recovery.shieldDelay,8);
+  veteran.reset(new THREE.Vector3(),0);assert.equal(veteran.recovery.shieldDelay,9);
 });
 test('all three infantry shield profiles delay, recharge and bound health consistently across frame rates',()=>{
   for(const rules of Object.values(DIFFICULTIES))for(const fps of [30,60,120]){
@@ -59,9 +59,9 @@ test('all three infantry shield profiles delay, recharge and bound health consis
   }
 });
 test('a fresh hit restarts delayed recharge and changing difficulty does not change movement',()=>{
-  const player=new Pilot(new Solid(),DIFFICULTIES.regular);player.damage(60);advance(player,7);
-  assert(player.shield>0);player.damage(1);const shield=player.shield;advance(player,6);assert.equal(player.shield,shield);
-  player.setRecovery(DIFFICULTIES.veteran);assert.equal(player.recovery.shieldDelay,8);
+  const player=new Pilot(new Solid(),DIFFICULTIES.regular);player.damage(60);advance(player,8);
+  assert(player.shield>0);player.damage(1);const shield=player.shield;advance(player,7);assert.equal(player.shield,shield);
+  player.setRecovery(DIFFICULTIES.veteran);assert.equal(player.recovery.shieldDelay,9);
   const classic=new Pilot(new Solid());player.reset(new THREE.Vector3(),0);classic.reset(new THREE.Vector3(),0);
   for(let i=0;i<120;i++){player.update(1/60,{...controls,my:1,sprint:true});classic.update(1/60,{...controls,my:1,sprint:true});}
   assert(player.pos.equals(classic.pos));assert.equal(player.moveK,classic.moveK);

@@ -12,9 +12,9 @@ import { Post } from '../mech/post.js';
 import { pixelRatio, qualityLevel, FrameGate } from '../mech/runtime.js';
 import { buildBattlefield, addSigns } from './map.js?v=2';
 import { addBattlefieldArt } from './art.js';
-import { SCENARIOS, MODES, DIFFICULTIES, Mission, selection } from './scenarios.mjs?v=2';
+import { SCENARIOS, MODES, DIFFICULTIES, Mission, selection, missionPressurePreview } from './scenarios.mjs?v=3';
 import { InfantryHUD } from './hud.js?v=4';
-import { Combat } from './combat.js?v=4';
+import { Combat } from './combat.js?v=5';
 import { captureThreat, resupplyBlocked, resupplyVitals } from './battle-rules.mjs';
 import { operationFor } from './operations.mjs';
 import { evaluateSortie, recordSortie } from './medals.mjs';
@@ -43,6 +43,7 @@ const words={
   operationPlan:['作戰方案','Operation plan'],reshuffle:['重編戰況更換編隊；再次作戰保留原戰況','Reroll for a new formation; retry keeps the same conditions'],squadCommands:['小隊：跟隨／原地掩護／推進','Squad: follow / hold position / advance'],command:['小隊','Squad'],
   storyRead:['閱讀完整戰役','Read the campaign'],storyJournal:['戰役檔案','Campaign journal'],storyHint:['戰前背景・人物・分階段通訊・不同結局','Background · People · Frontline radio · Epilogues'],storyKey:['戰役檔案／回看通訊','Campaign journal / radio history'],storyResult:['閱讀戰後紀錄','Read the epilogue'],
   sortie:['出擊規則','Sortie rules'],reroll:['重編戰況','Reroll'],support:['戰術支援','Tactical support'],supportRule:['每場 2 次 · V 呼叫 · 支線可增加 1 次','Two charges per sortie · Press V · Relay task adds one charge'],career:['勤務紀錄與挑戰','Service record & challenges'],
+  pressure:['敵軍部署','ENEMY DEPLOYMENT'],
 };
 const text=(zh,en)=>language==='zh'?zh:en;
 function translate(){document.documentElement.lang=language==='zh'?'zh-Hant':'en';for(const el of document.querySelectorAll('[data-t]'))el.textContent=words[el.dataset.t][language==='zh'?0:1];$('language').textContent=language==='zh'?'EN':'中文';}
@@ -71,6 +72,14 @@ function renderMenu(){
   $('operation').innerHTML=[0,1,2].map(i=>`<option value="${i}">${operationFor(choice.scene,sortieSeed,i).name[language]}</option>`).join('');$('operation').value=variantIndex;
   const op=plan.operation,goal=(op.bonusGoalByMode?.[choice.mode]||op.bonusGoal)[language];
   $('difficultyBrief').textContent=DIFFICULTIES[choice.difficulty].brief[language].replace('{supply}',Math.round(DIFFICULTIES[choice.difficulty].supplyCooldown*op.supplyMultiplier));
+  const pressure=missionPressurePreview(choice,op);
+  $('pressureTotal').textContent=choice.mode==='defend'?text(`四波共 ${pressure.totalInitial} 人`,`${pressure.totalInitial} enemies · Four waves`):text(`初始守軍共 ${pressure.totalInitial} 人`,`${pressure.totalInitial} initial defenders`);
+  $('pressureStages').replaceChildren(...pressure.stages.map(stage=>{
+    const cell=document.createElement('div'),label=document.createElement('span'),count=document.createElement('strong');
+    label.textContent=choice.mode==='defend'?text(`第 ${stage.stage} 波`,`WAVE ${stage.stage}`):text(`據點 ${stage.stage}`,`SECTOR ${stage.stage}`);
+    count.textContent=text(`${stage.initial} 人`,`${stage.initial}`);cell.append(label,count);return cell;
+  }));
+  $('pressureDetail').textContent=choice.mode==='defend'?text('後續攻勢逐波加快；守住撤離口，避免敵軍突破防線。','Later waves arrive faster. Protect the evacuation point and prevent a breach.'):text(`每個據點最多 ${pressure.stages[0].maxBatches} 批增援，三個據點合計最多 ${pressure.maxReinforcements} 人。剩最後兩名守軍時停止增援。`,`Up to ${pressure.stages[0].maxBatches} reinforcement batches per sector, at most ${pressure.maxReinforcements} extra enemies across all three. Reinforcements stop at the final two defenders.`);
   $('operationBrief').textContent=op.brief[language];$('bonusBrief').textContent=text(`額外任務：${goal} · 完成 +750 分`,`BONUS: ${goal} · +750 points`);
   const records=read('records',{}),record=records[`${choice.scene}.${choice.mode}.${choice.difficulty}.${variantIndex}`];
   let clears=0,gold=0;for(const scene of SCENARIOS)for(const variant of [0,1,2]){const r=records[`${scene.id}.${choice.mode}.${choice.difficulty}.${variant}`];if(r?.wins)clears++;if(r?.medal==='gold')gold++;}
