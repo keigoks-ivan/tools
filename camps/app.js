@@ -9,8 +9,19 @@ const CITY_CHIPS = [
   ['jb', '新山', ['Johor Bahru']],
   ['kk', '亞庇', ['Kota Kinabalu']],
   ['lgk', '浮羅交怡', ['Langkawi']],
-  ['oth', '其他', ['other', 'Perak', 'Melaka', 'Kuching']],
+  ['oth', '其他', ['other', 'Perak', 'Melaka', 'Kuching'], '怡保、紅土坎、彭亨、馬六甲等，以及資料裡其他沒歸類的城市'],
 ];
+// same set as SOLID in lib/core.mjs (week view); kept local so a cached old core.mjs can't break the import
+const SOLID = new Set(['high', 'medium']);
+// card badge and sort order: Klang Valley first, then everywhere else
+const CITY_ZH = {
+  'Johor Bahru': '新山', 'Kota Kinabalu': '亞庇', Penang: '檳城', Langkawi: '浮羅交怡', 'Negeri Sembilan': '森美蘭',
+  Perak: '霹靂', Ipoh: '怡保', Lumut: '紅土坎', Pahang: '彭亨', Melaka: '馬六甲', Kuching: '古晉',
+};
+const cityZh = (c) => (KL.includes(c) ? '大吉隆坡' : CITY_ZH[c] || '其他地區');
+const citiesOf = (it) => [...new Set((it.locs || []).map((l) => cityZh(l.city)))];
+const awayRank = (it) => (it.locs?.some((l) => KL.includes(l.city)) ? 0 : 1);
+const klFirst = (list) => [...list].sort((a, b) => awayRank(a) - awayRank(b));
 const FORMATS = { day: '日營', residential: '住宿營', family_with_parent: '親子同行', parent_optional: '家長可同行' };
 const CATEGORIES = {
   english: '英語', stem: '科學／STEM', arts: '藝術', sport: '運動', multi_activity: '綜合活動',
@@ -30,11 +41,12 @@ const THEMES = {
   facilities: '環境設施', admin: '行政溝通', value: '價格與退費', classmates: '同學組成', accommodation: '住宿', transport: '交通', other: '其他',
 };
 const DEFAULT_Q = {
-  start: '2027-01-17', end: '2027-02-08', cities: ['kl'],
+  start: '2027-01-17', end: '2027-02-08', cities: CITY_CHIPS.map((c) => c[0]),
   kids: [{ name: '孩子 1', birth: '2016-05' }, { name: '孩子 2', birth: '2020-05' }],
   filters: {},
 };
-const STORE = 'camps-query-v1';
+const STORE = 'camps-query-v2';
+const OLD_STORE = 'camps-query-v1'; // defaulted to KL only
 
 let db;
 let raw;
@@ -72,7 +84,13 @@ async function load() {
 // ---------- form
 
 function savedQuery() {
-  try { return { ...DEFAULT_Q, ...JSON.parse(localStorage.getItem(STORE) || '{}') }; } catch { return DEFAULT_Q; }
+  try {
+    const cur = localStorage.getItem(STORE);
+    if (cur) return { ...DEFAULT_Q, ...JSON.parse(cur) };
+    // keep an old saved query's kids and dates, but start from all cities
+    const { cities, ...old } = JSON.parse(localStorage.getItem(OLD_STORE) || '{}');
+    return { ...DEFAULT_Q, ...old };
+  } catch { return DEFAULT_Q; }
 }
 
 function kidRow(k, i) {
@@ -136,7 +154,10 @@ function readForm() {
 }
 
 function toSearchQuery(q) {
-  const cities = q.cities.flatMap((k) => CITY_CHIPS.find((c) => c[0] === k)?.[2] || []);
+  // 「其他」also takes any city the chips don't name (Ipoh, Lumut, Pahang…), so new data never drops out
+  const named = new Set(CITY_CHIPS.flatMap((c) => c[2]));
+  const rest = [...new Set(Object.values(db.locations).map((l) => l.city))].filter((c) => !named.has(c));
+  const cities = q.cities.flatMap((k) => [...(CITY_CHIPS.find((c) => c[0] === k)?.[2] || []), ...(k === 'oth' ? rest : [])]);
   return { ...q, cities };
 }
 
@@ -307,7 +328,7 @@ function card(it) {
   return `<article class="card ${it.group}" id="${id}">
     <div class="card-h"><div><h3>${esc(p.name)}</h3><div class="prov">${esc(it.provider.name_en)}${it.provider.name_zh ? `・${esc(it.provider.name_zh)}` : ''}${venueNote(it)}</div></div>
       ${it.group === 'unknown' ? '' : `<label class="cmp-box"><input type="checkbox" data-cmp="${id}" ${picked.has(id) ? 'checked' : ''}>選取</label>`}</div>
-    <div class="badges">${confBadge(s.confidence)}<span class="badge ${it.group === 'estimated' ? 'est' : ''}">${STATUS[s.date_status]}</span>
+    <div class="badges">${citiesOf(it).map((c) => `<span class="badge city ${c === '大吉隆坡' ? '' : 'away'}">${esc(c)}</span>`).join('')}${confBadge(s.confidence)}<span class="badge ${it.group === 'estimated' ? 'est' : ''}">${STATUS[s.date_status]}</span>
       <span class="badge">${FORMATS[p.format] || esc(p.format)}</span>${p.category.slice(0, 3).map((c) => `<span class="badge">${CATEGORIES[c] || esc(c)}</span>`).join('')}</div>
     <dl class="facts">
       <dt>日期</dt><dd>${datesLine(it)}</dd>
@@ -324,32 +345,39 @@ function card(it) {
 
 function weekTable(r) {
   const short = (t) => t.replace(/\s*\(.*\)|（.*）/g, '').trim();
-  // same provider twice in a cell -> add the program or location to tell them apart
-  const labels = (list) => {
-    const n = {};
-    for (const it of list) n[it.provider.id] = (n[it.provider.id] || 0) + 1;
-    return list.map((it) => {
-      let t = short(it.provider.name_en);
-      if (n[it.provider.id] > 1) {
-        const twin = list.find((x) => x !== it && x.provider.id === it.provider.id);
-        const loc = short(it.locs[0]?.name || '');
-        if (twin.program.id !== it.program.id) t += '・' + short(it.program.name);
-        else if (loc.toLowerCase().startsWith(t.split(' ')[0].toLowerCase())) t = loc;
-        else t += '・' + loc;
-      }
-      return [it, esc(t.slice(0, 48))];
-    });
-  };
-  const chips = (list, weak) => labels(list).map(([it, t]) => `<a class="opt ${weak ? 'weak' : ''}" href="#${cardId(it)}">${t}</a>`).join('');
   const uniq = (list) => [...new Map(list.map((x) => [cardId(x), x])).values()];
+  // one chip per provider (branches, intakes, programs); agent packages merge on the school they
+  // sell, because two agents often sell the same school
+  const keyOf = (it) => (it.provider.type === 'agent_package' && it.session.location_id ? `loc:${it.session.location_id}` : `prov:${it.provider.id}`);
+  const merge = (list, skip = new Set()) => {
+    const g = new Map();
+    for (const it of uniq(list)) {
+      const k = keyOf(it);
+      if (skip.has(k)) continue;
+      if (!g.has(k)) g.set(k, []);
+      g.get(k).push(it);
+    }
+    return [...g].sort(([, a], [, b]) => Math.min(...a.map(awayRank)) - Math.min(...b.map(awayRank)));
+  };
+  const chip = ([k, items], weak) => {
+    const it = items[0];
+    let t = short(k.startsWith('loc:') ? it.locs[0]?.name || it.provider.name_en : it.provider.name_en).slice(0, 40);
+    const cities = [...new Set(items.flatMap(citiesOf))];
+    if (cities.length === 1 && cities[0] !== '大吉隆坡') t += `・${cities[0]}`;
+    if (items.length > 1) t += ` ×${items.length}`;
+    const tip = items.map((x) => `${x.provider.name_en}：${x.program.name}（${x.locs[0]?.name || '地點未公布'}，${citiesOf(x).join('、') || '城市未知'}）`).join('\n');
+    return `<a class="opt ${weak ? 'weak' : ''}" href="#${cardId(it)}" title="${esc(tip)}">${esc(t)}</a>`;
+  };
   const head = `<tr><th>週</th>${r.weeks[0]?.perKid.map((k) => `<th>${esc(k.kid.name)}</th>`).join('') || ''}</tr>`;
   const rows = r.weeks.map((w) => `<tr><td class="wk">${fmtD(w.mon)}～${fmtD(w.fri)}${w.holidays.map((h) =>
     `<span class="hol">${fmtD(h.date_start)} ${esc(h.name_zh || h.name_en)}${h.status === 'estimated' ? '（推算）' : ''}</span>`).join('')}</td>${w.perKid.map((k) => {
-    const solid = uniq(k.solid);
-    const weak = uniq(k.weak);
-    return `<td data-k="${esc(k.kid.name)}">${k.gap ? '<span class="gap">空窗</span> ' : ''}${chips(solid, false)}${chips(weak, true)}</td>`;
+    const solid = merge(k.solid);
+    const weak = merge(k.weak, new Set(solid.map(([key]) => key)));
+    const more = weak.length ? `<details class="weakmore"><summary>另有 ${weak.length} 個可信度低的選項</summary>${weak.map((g) => chip(g, true)).join('')}</details>` : '';
+    return `<td data-k="${esc(k.kid.name)}">${k.gap ? '<span class="gap">空窗</span> ' : ''}${solid.map((g) => chip(g, false)).join('')}${more}</td>`;
   }).join('')}</tr>`).join('');
-  return `<h2>週視圖</h2><p class="group-note">實心＝官方或中可信度以上的梯次；虛線＝只有聚合站或代理商來源，不算填補空窗。橘字是馬來西亞平日公假。</p>
+  return `<h2>週視圖</h2><p class="group-note">實心標籤是可信度高或中的梯次。可信度低的（只有聚合站或代理商來源）收在「另有幾個可信度低的選項」裡，不算填補空窗。
+    同一機構的分校和梯次、代理商賣的同一所學校，合併成一個標籤：×2 表示有兩個選項，滑鼠移上去看明細，點標籤跳到卡片。外地的標籤後面加城市。橘字是馬來西亞平日公假。</p>
     <table class="weeks"><thead>${head}</thead><tbody>${rows}</tbody></table>`;
 }
 
@@ -370,23 +398,33 @@ function render(q) {
     $('#status').innerHTML = `名稱篩選「${esc(q.kw)}」：結果只列名稱或上課場地含這個字的梯次，上方統計和週視圖仍是全部。` +
       (n ? '' : `<br>${elsewhere(kw, sq)}`);
   }
+  const solidOf = (list) => list.filter((it) => SOLID.has(it.session.confidence));
+  const statNote = (list) => `其中 ${solidOf(list).length} 筆可信度高或中`;
   $('#summary').innerHTML = `<div class="summary">
-    <div class="stat"><b>${r.full.length}</b><small>已確認、完全在區間內</small></div>
-    <div class="stat"><b>${r.partial.length}</b><small>已確認、部分在區間內</small></div>
+    <div class="stat"><b>${r.full.length}</b><small>有日期、完全在區間內<br>${statNote(r.full)}</small></div>
+    <div class="stat"><b>${r.partial.length}</b><small>有日期、部分在區間內<br>${statNote(r.partial)}</small></div>
     <div class="stat"><b>${r.estimated.length}</b><small>推測或需詢問</small></div>
     <div class="stat ${gapWeeks ? 'bad' : ''}"><b>${gapWeeks}</b><small>有孩子空窗的週數</small></div></div>`;
   $('#weeks').innerHTML = r.weeks.length ? weekTable(r) : '';
-  const section = (title, note, items) => `<h2>${title}（${items.length}）</h2><p class="group-note">${note}</p>
-    <div class="cards">${items.map(card).join('') || '<p class="group-note">沒有符合的梯次。</p>'}</div>`;
-  $('#results').innerHTML = '<p class="pick-hint">勾卡片右上角的「選取」，可以估算費用，或並排比較 2–4 個。</p>' +
-    section('① 已確認，日期完全在區間內', '2027（或 2026/27 冬季）日期已公布，整個梯次落在你選的日期內。', r.full) +
-    section('② 已確認，部分在區間內', '日期已公布，但有一段在你選的日期外；可只報區間內的週次，或跟其他梯次接起來。', r.partial) +
+  const cards = (items) => `<div class="cards">${klFirst(items).map(card).join('') || '<p class="group-note">沒有符合的梯次。</p>'}</div>`;
+  const section = (title, note, items) => `<h2>${title}（${items.length}）</h2><p class="group-note">${note}</p>${cards(items)}`;
+  // dated groups: sources the camp stands behind first, aggregator/agent-only after
+  const split = (title, note, items) => {
+    const solid = solidOf(items);
+    const weak = items.filter((it) => !solid.includes(it));
+    return `<h2>${title}（${items.length}）</h2><p class="group-note">${note}</p>
+      <h3 class="subhead">可信度高或中：官方來源，或與官方一致（${solid.length}）</h3>${solid.length ? cards(solid) : '<p class="group-note">沒有。</p>'}
+      <h3 class="subhead weak">可信度低：只有聚合站或代理商寫，或來源互相矛盾，報名前要向機構確認（${weak.length}）</h3>${weak.length ? cards(weak) : '<p class="group-note">沒有。</p>'}`;
+  };
+  $('#results').innerHTML = '<p class="pick-hint">勾卡片右上角的「選取」，可以估算費用，或並排比較 2–4 個。每組裡大吉隆坡的排前面，外地的排後面。</p>' +
+    split('① 日期已有來源，完全在區間內', '2027（或 2026/27 冬季）的日期有人寫出來了，整個梯次落在你選的日期內。', r.full) +
+    split('② 日期已有來源，部分在區間內', '日期有人寫出來了，但有一段在你選的日期外；可只報區間內的週次，或跟其他梯次接起來。', r.partial) +
     section('③ 日期未公布，依往年推測', '這些營往年在這段時間開過，但 2027 日期還沒公布。卡片上的日期是往年的，報名前要問機構。', r.estimated) +
-    (r.unknown.length ? `<details class="more"><summary>還有 ${r.unknown.length} 筆這段期間查不到日期（點開）</summary><ul>${r.unknown.map((x) => {
+    (r.unknown.length ? `<details class="more"><summary>還有 ${r.unknown.length} 筆這段期間查不到日期（點開）</summary><ul>${klFirst(r.unknown).map((x) => {
       const id = cardId(x);
       lastCards.set(id, x);
       const pr = x.session.price;
-      return `<li>${esc(x.provider.name_en)}：${esc(x.program.name)}${x.locs?.[0] ? `（${esc(x.locs[0].name)}）` : ''}${pr?.amount != null ? `，${money(pr.currency, pr.amount)}／${BASIS[pr.basis] || '?'}` : ''}　<a href="${esc(x.session.source_url)}" target="_blank" rel="noopener">查證頁</a><label class="cmp-box"><input type="checkbox" data-cmp="${id}" ${picked.has(id) ? 'checked' : ''}>選取</label></li>`;
+      return `<li>${esc(x.provider.name_en)}：${esc(x.program.name)}${x.locs?.[0] ? `（${esc(x.locs[0].name)}，${esc(cityZh(x.locs[0].city))}）` : ''}${pr?.amount != null ? `，${money(pr.currency, pr.amount)}／${BASIS[pr.basis] || '?'}` : ''}　<a href="${esc(x.session.source_url)}" target="_blank" rel="noopener">查證頁</a><label class="cmp-box"><input type="checkbox" data-cmp="${id}" ${picked.has(id) ? 'checked' : ''}>選取</label></li>`;
     }).join('')}</ul></details>` : '');
   updateTray();
 }
