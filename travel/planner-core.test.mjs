@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {PRESETS,schedule,validRoute,ageFit,evidence,commuteHours,quotedBudget,routeWarnings} from './planner-core.mjs';
+import {PRESETS,presetForStops,schedule,validRoute,ageFit,evidence,commuteHours,quotedBudget,routeWarnings} from './planner-core.mjs';
 import {joinCampData} from './camp-options.mjs';
 import {readFileSync} from 'node:fs';
 test('all nine presets preserve the fixed week, total 22 nights and Feb 8 checkout',()=>{
@@ -12,3 +12,9 @@ test('official season and aggregator weekly dates are not confirmed bookings',()
 test('blank budget items stay missing, quoted zero stays zero; split dates count correctly',()=>{const legs=schedule([{id:'p',city:'pen',nights:7},{id:'s',city:'resort',nights:8}]);assert.deepEqual(quotedBudget(legs,{fixed:500,p:600,s:''},{flights:0,camps:''}),{total:7700,missing:2});});
 test('commute accounts for parent returning to hotel and selected day count',()=>{assert.equal(commuteHours(30,3,false),3);assert.equal(commuteHours(30,5,true),10);});
 test('every curated camp joins existing database; younger child excluded from Active',()=>{const raw=Object.fromEntries(['programs','providers','locations','sessions'].map(f=>[f,JSON.parse(readFileSync(new URL(`../camps/data/${f}.json`,import.meta.url)))]));const camps=joinCampData(raw);assert.equal(camps.length,11);for(const c of camps){assert.ok(c.programData,c.id);assert.ok(c.locationData,c.id);assert.ok(c.providerData,c.id);}assert.equal(ageFit(camps.find(c=>c.id==='beaumont-active').programData,6),'no');assert.equal(camps.find(c=>c.id==='ace').status,'aggregator');});
+
+test('current preset follows actual route after applying, restoring, or editing stops',()=>{
+ for(const [id,,rows] of PRESETS){const stops=rows.map(([city,nights],i)=>({id:`saved-${i}`,city,nights,hotel:'user-choice'}));assert.equal(presetForStops(stops),id);assert.equal(presetForStops(JSON.parse(JSON.stringify(stops))),id);}
+ assert.equal(presetForStops([{city:'pen',nights:8},{city:'resort',nights:7}]),'');
+ assert.equal(presetForStops([{city:'pen',nights:7},{city:'resort',nights:8}].reverse()),'reverse');
+});

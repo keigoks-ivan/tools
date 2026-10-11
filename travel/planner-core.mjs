@@ -25,6 +25,7 @@ export const PRESETS=[
  ['buffer','檳城＋沙巴＋回吉隆坡',[['pen',6],['resort',8],['kl',1]]],
  ['ipoh-sabah','怡保＋吉隆坡轉接＋沙巴',[['ipoh',3],['kl',1],['resort',11]]]
 ];
+export function presetForStops(stops){return PRESETS.find(([, ,rows])=>rows.length===stops.length&&rows.every(([city,nights],i)=>stops[i].city===city&&stops[i].nights===nights))?.[0]||'';}
 export function routeWarnings(legs){const warnings=[];const total=legs.reduce((n,s)=>n+s.nights,0);if(total!==22)warnings.push(`目前 ${total} 晚，需調整為 22 晚；差 ${Math.abs(22-total)} 晚。每日表暫停產生。`);
  for(let i=1;i<legs.length;i++){const s=legs[i],prev=legs[i-1];if(s.city==='ipoh'&&s.nights<3)warnings.push('怡保少於 3 晚：樂園與移動日可能擠在一起。');if(s.city==='pen'&&s.nights<5)warnings.push('檳城少於 5 晚：從主要景點中挑 2 個，保留雨天。');if(s.city==='mountain'&&s.nights<2)warnings.push('昆達山建議至少 2 晚，避免連續山路移動。');if(['kk','resort','mountain'].includes(s.city)&&prev.city==='ipoh'||s.city==='ipoh'&&['kk','resort','mountain'].includes(prev.city))warnings.push('怡保與沙巴間需比對經吉隆坡的交通；本頁沒有假設怡保直飛亞庇。');if(s.start>='2027-02-05'&&s.start<END)warnings.push(`${s.start} 更換住宿：接近農曆年，接送與餐飲須預先確認。`);}
  const pen=legs.find(s=>s.city==='pen');if(pen&&pen.start>'2027-01-28')warnings.push('檳城在 1/29 之後才入住：會錯過已公告至 1/29 的 Newtonshow 冬季營。');
