@@ -323,19 +323,34 @@ export function search(db, q) {
   }
 
   // pass 2: other-year and estimated sessions -> one card per program+location
+  const shiftedOf = (s) => {
+    const span = sessionSpan(s);
+    if (!span) return null;
+    for (const dy of [1, 2, 3]) {
+      const a = addYears(span.start, dy);
+      const b = addYears(span.end, dy);
+      if (overlaps(a, b, q.start, q.end)) return { start: a, end: b, dy };
+    }
+    return null;
+  };
+  const pastDy = new Map();
+  // past dates outside the chosen dates, by program+location+season, shown on an estimate that has nothing else
+  const pastOut = new Map();
   for (const s of db.sessions) {
     if (s.date_status !== 'confirmed_other_year' && s.date_status !== 'pattern_estimated') continue;
+    const key = `${s.program_id}|${s.location_id}`;
     let season = s.season;
     let shifted = null;
     if (s.date_status === 'confirmed_other_year') {
-      const span = sessionSpan(s);
-      if (!span) continue;
-      for (const dy of [1, 2]) {
-        const a = addYears(span.start, dy);
-        const b = addYears(span.end, dy);
-        if (overlaps(a, b, q.start, q.end)) { shifted = { start: a, end: b }; break; }
+      shifted = shiftedOf(s);
+      if (!shifted) {
+        const span = sessionSpan(s);
+        for (const dy of span ? [1, 2, 3] : []) {
+          const k = `${key}|${seasonOf(addYears(span.start, dy))}`;
+          pastOut.set(k, [...(pastOut.get(k) || []), s]);
+        }
+        continue;
       }
-      if (!shifted) continue;
       season = seasonOf(shifted.start);
     } else if (!rangeSeasons.has(season)) continue;
     if (confirmedKeys.has(`${s.program_id}|${s.location_id}|${season}`)) continue;
@@ -345,20 +360,24 @@ export function search(db, q) {
     const kids = kidsFor(program, q.kids, ageDate);
     if (!kids.some((k) => k.fit !== 'no')) continue;
     if (!passesFilters(db, s, program, sessionSpan(s), q.filters, q.kids.length)) continue;
-    const key = `${s.program_id}|${s.location_id}`;
     if (!estimated.has(key)) {
       estimated.set(key, { session: s, program, provider, locs, kids, past: [], estimates: [], group: 'estimated', warnings: [] });
     }
     const e = estimated.get(key);
-    if (s.date_status === 'confirmed_other_year') e.past.push(s);
-    else e.estimates.push(s);
+    if (s.date_status === 'confirmed_other_year') {
+      e.past.push(s);
+      pastDy.set(s.id, shifted.dy);
+    } else e.estimates.push(s);
   }
-  for (const e of estimated.values()) {
+  for (const [key, e] of estimated) {
+    const outside = !e.past.length && [...new Set(e.estimates.flatMap((x) => pastOut.get(`${key}|${x.season}`) || []))];
+    if (outside?.length) e.past = outside;
     e.past.sort((a, b) => a.start_date.localeCompare(b.start_date));
-    // the card shows the most informative session: a past dated one, else the estimate
-    e.session = e.past[0] || e.estimates[0];
+    // the card shows the most informative session: a recent past dated one, else the estimate
+    e.session = e.past.find((p) => pastDy.get(p.id) <= 2) || e.past[0] || e.estimates[0];
     e.warnings = warningsFor(db, e.session, e.program, null, e.locs, e.kids);
-    if (!e.past.length) e.warnings.unshift({ code: 'estimated', text: '日期未公布，依往年推估' });
+    if (outside?.length) e.warnings.unshift({ code: 'past_outside', text: '往年同一季的日期不在你選的日期內' });
+    else if (!e.past.length) e.warnings.unshift({ code: 'estimated', text: '日期未公布，依往年推估' });
   }
 
   // pass 3: nothing known, but the season overlaps

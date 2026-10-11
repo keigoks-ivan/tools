@@ -474,7 +474,7 @@ function render(q) {
   $('#results').innerHTML = `<p class="pick-hint">勾卡片右上角的「選取」，可以估算費用，或並排比較 2–4 個。${country === 'MY' ? '每組裡大吉隆坡的排前面，外地的排後面。' : ''}</p>` +
     split('① 日期已有來源，完全在區間內', '2027（或 2026/27 冬季）的日期有人寫出來了，整個梯次落在你選的日期內。', r.full) +
     split('② 日期已有來源，部分在區間內', '日期有人寫出來了，但有一段在你選的日期外；可只報區間內的週次，或跟其他梯次接起來。', r.partial) +
-    section('③ 日期未公布，依往年推測', '這些營往年在這段時間開過，但 2027 日期還沒公布。卡片上的日期是往年的，報名前要問機構。', r.estimated) +
+    section('③ 日期未公布，依往年推測', '這些營往年在這一季開過，但 2027 日期還沒公布。卡片上的日期是往年的；標「往年同一季的日期不在你選的日期內」的，去年開在你選的日期外。報名前要問機構。', r.estimated) +
     (r.unknown.length ? `<details class="more"><summary>還有 ${r.unknown.length} 筆這段期間查不到日期（點開）</summary><ul>${homeFirst(r.unknown).map((x) => {
       const id = cardId(x);
       lastCards.set(id, x);
