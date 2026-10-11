@@ -1,0 +1,25 @@
+import {evidence} from './planner-core.mjs';
+// Curated interpretations of the shared camps database, checked 2026-10-11.
+// A dated season is deliberately not promoted to a confirmed campus booking.
+const N='https://newtonshow.my/winter-camp',F='https://learningfresh.org/holiday-camps/fresh-english-school-holiday-camp';
+export const CAMP_PROFILES=[
+ {id:'newton-bb',program:'newtonshow-winter',location:'loc-newtonshow-bukit-bintang',title:'Newtonshow · Bukit Bintang',city:'kl',status:'season',hours:'09:00–16:00（08:30 可送達）',flex:true,price:'RM600／週起；校區、主題與單日價格待報價',summary:'科學、手作或綜合活動；依年齡分組。材料、午餐與兩次點心已列入。',detail:'官方冬季窗口 2026/11/23–2027/1/29；1/18–22 的校區開班、主題及名額未確認。可問單日、2–3 天或整週；1/22 開課另問。',url:N},
+ {id:'newton-bangsar',program:'newtonshow-winter',location:'loc-newtonshow-bangsar',title:'Newtonshow · Bangsar',city:'kl',status:'season',hours:'09:00–16:00（08:30 可送達）',flex:true,price:'RM600／週起；非本家庭總報價',summary:'相同冬季系列，校區位於大樓 16 樓。與市中心住宿的接送需先實測。',detail:'季期涵蓋旅行，但不能推定每校區每週三個主題都開。教室照片、每組人數、廁所與接送流程需要補資料。',url:N},
+ {id:'fresh-klcc',program:'learning-fresh-camp',location:'loc-learningfresh-klcc',title:'Learning Fresh · KLCC',city:'kl',status:'unknown',hours:'半日 09:30–13:30；全日至 15:30；延長至 17:30',flex:false,price:'半日 RM950／週；全日 RM1,275；延長 RM1,450',summary:'英語、戲劇與合作活動；年齡 4–16。KLCC 校區列為住宿接送優先比較。',detail:'2026/27 學年彈性週方案，未列 1/18 當週校區開班。另有申請 RM100＋註冊 RM200；午餐選配 RM25／日，是否按每人收費須確認。Intensive 7+ 不適用 6 歲。',url:F},
+ {id:'fresh-mk',program:'learning-fresh-camp',location:'loc-learningfresh-mont-kiara',title:'Learning Fresh · Mont Kiara',city:'kl',status:'unknown',hours:'半日 09:30–13:30；全日至 15:30；延長至 17:30',flex:false,price:'官網方案 RM950／週起；校區實際報價待確認',summary:'適合偏英語學習的家庭；與 KLCC 校區比較接送及教室環境。',detail:'目前首頁列三校區，但沒有指定日期梯次。半日、全日、延長日不能混成一個價；2–3 天是否可購買需另問。',url:F},
+ {id:'fresh-dh',program:'learning-fresh-camp',location:'loc-learningfresh-damansara-heights',title:'Learning Fresh · Damansara Heights',city:'kl',status:'unknown',hours:'半日 09:30–13:30；全日至 15:30；延長至 17:30',flex:false,price:'官網方案 RM950／週起，另有一次性費用',summary:'第三個英語營校區候選，適合比較實際教室環境後再選。',detail:'1/18 週開課、假日政策、分組與完整收費仍需校區回覆。住宿在 KLCC 時不要直接假設每天很近。',url:F},
+ {id:'aquabubs',program:'aquabubs-holiday-swim-camp',location:'loc-aquabubs-united-point',title:'Aquabubs · 游泳短營',city:'kl',status:'unknown',hours:'時段待確認；2／3／4 天套裝',flex:true,price:'2 天 RM300／3 天 RM400／4 天 RM500',summary:'4–10 歲，10 歲在上限；官網涵蓋不同泳力。',detail:'官網稱學校假期開辦，沒有 2027/1/18 梯次。需確認年齡計算、時段、泳力分組與接送；浮潛等延伸項目另計。套裝不換算成可任選單日價。',url:'https://www.aquabubs.com/holiday-camp'},
+ {id:'ace',program:'ace-kids-english',location:'loc-ace-kl',title:'ACE · Kids English',city:'kl',status:'aggregator',hours:'聚合站列少量課時；完整時段待校方確認',flex:false,price:'聚合站週費與註冊費有不同數字，先取得完整報價',summary:'6–12 歲，兩位孩子符合列出的範圍；Mont Kiara。',detail:'資料庫的 1/18–22 是聚合站週開課推算，非校方公告。不可當成已確認冬令營或全日照顧。',url:'https://www.languagecourse.net/school-ace-language-centre-kuala-lumpur.php3'},
+ {id:'awesome',program:'awesome-kids-english',location:'loc-awesome-kl',title:'Awesome Academy · Kids English',city:'kl',status:'aggregator',hours:'聚合站列 20 堂／週；接送時段待確認',flex:false,price:'聚合站週費 RM594／625 有落差；另有學校費',summary:'5–14 歲候選；英文程度分班與位置待校方確認。',detail:'1/18–22 同樣為聚合站推算，沒有官方指定梯次。新生費、材料、午餐及實際授課時數需要完整報價。',url:'https://www.languagecourse.net/school-awesome-academy-kuala-lumpur.php3'},
+ {id:'beaumont-active',program:'camp-beaumont-active',location:'loc-alice-smith-primary',title:'Camp Beaumont · Active',city:'kl',status:'outside',hours:'09:00–15:00（既有方案）',flex:false,price:'既有季價不套用到 1/18；待 2027 報價',summary:'8–12 歲；10 歲可比較，6 歲不能選 Active。',detail:'已見的吉隆坡冬季梯次在 2026 年 12 月，沒有 1/18 週。若日後開班，可搭配 Magic 同校區不同組；英文要求、餐點與全週購買政策先確認。',url:'https://booknow.campbeaumont.asia'},
+ {id:'beaumont-magic',program:'camp-beaumont-magic',location:'loc-alice-smith-primary',title:'Camp Beaumont · Magic',city:'kl',status:'outside',hours:'09:00–15:00（既有方案）',flex:false,price:'指定旅行週無報價',summary:'5–7 歲；6 歲可比較，10 歲不能選 Magic。',detail:'日期不符合目前固定吉隆坡週，僅保留候補。兄弟姊妹即使同校區仍屬不同年齡組，需確認時間一致。',url:'https://booknow.campbeaumont.asia'},
+ {id:'newton-pen',program:'newtonshow-winter',location:'loc-newtonshow-penang',title:'Newtonshow · 檳城延伸',city:'pen',status:'season',hours:'09:00–16:00',flex:true,price:'RM600／週起，檳城實際費用另問',summary:'可把 1/25–29 留給檳城短營或營隊＋公寓慢住。',detail:'官方季期到 1/29，若先沙巴再檳城可能錯過。校區當週與位子待確認；目前每日表僅自動排吉隆坡營隊，檳城可在每日備註規劃。',url:N}
+];
+export const STATUS={season:'官方季期涵蓋・當週待確認',week:'當週日期紀錄・位子待確認',unknown:'官方課程候選・當週未公布',aggregator:'聚合站推算・非官方梯次',outside:'已見日期不符・只列候補'};
+export function joinCampData(raw){return CAMP_PROFILES.map(c=>{
+ const programData=raw.programs.find(p=>p.id===c.program),sessions=raw.sessions.filter(s=>s.program_id===c.program&&s.location_id===c.location);
+ const dateEvidence=sessions.map(s=>evidence(s,c.city==='pen'?'2027-01-25':'2027-01-18',c.city==='pen'?'2027-01-29':'2027-01-22'));
+ // Aggregator candidates stay conservative even if their database date flag says confirmed.
+ const status=c.status==='aggregator'?'aggregator':dateEvidence.includes('week')?'week':dateEvidence.includes('season')?'season':c.status;
+ return {...c,status,dateEvidence,programData,locationData:raw.locations.find(l=>l.id===c.location),sessions,providerData:raw.providers.find(p=>p.id===programData?.provider_id)};
+ });}
