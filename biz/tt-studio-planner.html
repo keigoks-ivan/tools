@@ -148,12 +148,12 @@ fieldset input:focus,fieldset select:focus{outline:2px solid var(--rust-soft);bo
       </fieldset>
       <fieldset><legend>小教室：1 位教練 × 1 張桌</legend>
         <label>坪數<input type="number" id="s1Ping" step="1"></label>
-        <label>每月其他開銷<input type="number" id="s1Other" step="1000"></label>
+        <label>每月其他開銷（水電冷氣、清潔、保險、記帳、行銷）<input type="number" id="s1Other" step="1000"></label>
         <label>裝修和設備（分 5 年攤）<input type="number" id="s1Capex" step="10000"></label>
       </fieldset>
       <fieldset><legend>雙教練：2 位教練 × 2 張桌</legend>
         <label>坪數<input type="number" id="s2Ping" step="1"></label>
-        <label>每月其他開銷<input type="number" id="s2Other" step="1000"></label>
+        <label>每月其他開銷（水電冷氣、清潔、保險、記帳、行銷）<input type="number" id="s2Other" step="1000"></label>
         <label>裝修和設備（分 5 年攤）<input type="number" id="s2Capex" step="10000"></label>
         <label>另一位教練每週教幾小時<input type="number" id="bWeekly" step="1"></label>
         <label>另一位教練每小時收<input type="number" id="bPrice" step="10"></label>
@@ -164,7 +164,7 @@ fieldset input:focus,fieldset select:focus{outline:2px solid var(--rust-soft);bo
       <fieldset><legend>多桌館：租桌給別的教練＋帶徒弟</legend>
         <label>桌數<input type="number" id="s3Tables" step="1" min="2"></label>
         <label>坪數<input type="number" id="s3Ping" step="1"></label>
-        <label>每月其他開銷<input type="number" id="s3Other" step="1000"></label>
+        <label>每月其他開銷（水電冷氣、清潔、保險、記帳、行銷）<input type="number" id="s3Other" step="1000"></label>
         <label>裝修和設備（分 5 年攤）<input type="number" id="s3Capex" step="10000"></label>
         <label>每張出租桌每週租出幾小時<input type="number" id="rentHrs" step="1"></label>
         <label>桌租每小時收多少<input type="number" id="rentRate" step="10"></label>
@@ -177,9 +177,22 @@ fieldset input:focus,fieldset select:focus{outline:2px solid var(--rust-soft);bo
         <label>投資人要的年報酬（%）<input type="number" id="invReturn" step="1"></label>
         <label>家裡每月生活費<input type="number" id="livingCost" step="5000" min="0"></label>
       </fieldset>
+      <fieldset><legend>開館的隱藏成本（三種方式共用）</legend>
+        <label>房租另外加稅（%）<input type="number" id="rentTax" step="1" min="0"></label>
+        <label>第 4 年起房租漲（%）<input type="number" id="rentUp" step="1"></label>
+        <label>押金幾個月<input type="number" id="depMo" step="1" min="0"></label>
+        <label>公設比（%）<input type="number" id="shareRatio" step="5" min="0" max="90"></label>
+        <label>室內裝修許可、消防、建築師<input type="number" id="permitCost" step="10000" min="0"></label>
+        <label>仲介費（幾個月房租）<input type="number" id="agentMo" step="0.5" min="0"></label>
+        <label>裝修期間白付的房租（幾個月）<input type="number" id="fitMo" step="0.5" min="0"></label>
+        <label>招牌、預約系統、門禁、監視器、開幕宣傳<input type="number" id="launchCost" step="10000" min="0"></label>
+        <label>刷卡和線上付款手續費（%）<input type="number" id="payFee" step="0.5" min="0"></label>
+        <label>退租時還原的費用<input type="number" id="restoreCost" step="10000" min="0"></label>
+        <label>你每週管館幾小時（排課、客服、打掃、修東西）<input type="number" id="mgmtHrs" step="1" min="0"></label>
+      </fieldset>
     </div>
     <button id="reset" type="button">恢復預設值</button>
-    <p class="note" style="margin-top:14px">試算的規則：你的課量第 1 年等於「跟你走的學生」比例，第 2 年補回一半，第 3 年起滿檔。另一位教練和徒弟的課量，第 1、2 年是上軌道後的 40%、75%。出租時數第 1、2 年是 50%、80%。房租第 4 年起漲 3%。「每月其他開銷」包括水電、行銷、記帳、耗材、清潔、保險、系統和雜支。所有收入都是稅前。</p>
+    <p class="note" style="margin-top:14px">試算的規則：你的課量第 1 年等於「跟你走的學生」比例，第 2 年補回一半，第 3 年起滿檔。另一位教練和徒弟的課量，第 1、2 年是上軌道後的 40%、75%。出租時數第 1、2 年是 50%、80%。「每月其他開銷」包括水電冷氣、行銷、記帳、耗材、清潔、保險和系統。房租稅、裝修許可、仲介費、裝修期間的房租、招牌和開幕宣傳，在「開館的隱藏成本」另外填：一次付的錢算進開館要準備的錢，也和裝修一樣分 5 年攤進每年成本。刷卡手續費從所有收進來的錢扣。所有收入都是稅前；開館後營業稅、所得稅和健保怎麼算，每個人不同，請問記帳士。房租稅：刊登價寫「未稅」、房東是公司，通常加 5%；房東是個人、要你負擔扣繳和二代健保，約加 12%。</p>
   </div>
 </section>
 
@@ -188,6 +201,7 @@ fieldset input:focus,fieldset select:focus{outline:2px solid var(--rust-soft);bo
     <div class="section-head"><div class="section-num">03</div><div><div class="section-title">開館和租桌比一比</div><div class="section-sub">看開館第 3 年（上軌道後）和 5 年加起來</div></div></div>
     <div id="verdict"></div>
     <div class="tbl-wrap"><table class="tbl" id="t-summary"></table></div>
+    <div id="summary-mgmt"></div>
     <p class="note">哪些數字最影響結果，看第 05 章。課變少了怎麼辦，看第 06 章。不只靠自己教課的做法，看第 07 章。要準備多少錢、錢從哪來，看第 08 章。要多少學生才划算，看第 09 章。</p>
     <h3>5 年加起來的收入</h3>
     <div id="bars" class="bars"></div>
@@ -437,15 +451,15 @@ fieldset input:focus,fieldset select:focus{outline:2px solid var(--rust-soft);bo
     <div class="section-head"><div class="section-num">08</div><div><div class="section-title">要準備多少錢、錢從哪來</div><div class="section-sub">開館的錢、看不到的代價、要不要找投資人</div></div></div>
     <h3>開館前要準備的錢</h3>
     <div class="tbl-wrap"><table class="tbl" id="t-capex"></table></div>
-    <p class="note">「裝修和設備」是總數，球桌、減震地板、冷氣、燈光、擋板要各自找廠商報價。週轉金是 4 個月的房租加開銷，讓你撐到學生回來。</p>
+    <p class="note">「裝修和設備」是總數，球桌、減震地板、冷氣、燈光、擋板要各自找廠商報價。週轉金是 4 個月的房租加開銷，讓你撐到學生回來。房租都已經加上房租稅。裝修許可、招牌宣傳和退租還原的預設值是粗估，請找建築師和廠商報價。</p>
     <h3>看不到的代價</h3>
     <div class="tbl-wrap"><table class="tbl" id="t-hidden"></table></div>
     <p class="note">房租簽了就要付。中途收掉，押金可能拿不回來，還可能要賠違約金，看合約怎麼寫。</p>
-    <div class="box warn"><div class="label">這頁還沒算、要另外問價錢的</div><ul>
-      <li>商辦改成運動教室的變更使用、建築師費用</li>
-      <li>仲介費</li>
-      <li>退租時恢復原狀的費用</li>
-      <li>裝修期間的房租（可以跟房東談免租期）</li>
+    <div class="box warn"><div class="label">這頁還沒算、要另外問的</div><ul>
+      <li>開館後的營業稅、所得稅和健保：每個人不同，請問記帳士</li>
+      <li>學生預繳、還沒上完的課：收掉時要退錢</li>
+      <li>租約的個人保證：很多房東要老闆個人擔保，店收了債還在</li>
+      <li>裝修期間的房租可以跟房東談免租期，談到就把「裝修期間白付的房租」填 0</li>
     </ul></div>
     <h3>要不要找投資人</h3>
     <div id="inv-lead"></div>
@@ -530,7 +544,9 @@ fieldset input:focus,fieldset select:focus{outline:2px solid var(--rust-soft);bo
         <li>樓板噪音：要鋪減震地板，也先了解樓下是誰。</li>
         <li>晚上和週末的冷氣：商辦的中央空調常在下班後關掉，要自己裝冷氣。</li>
         <li>屋內高度：最好 3 公尺以上。</li>
+        <li>真正能用的坪數：商辦的權狀坪數含公設，帶捲尺去量。</li>
       </ul>
+      <div id="space-check"></div>
     </div>
   </div>
 </section>
@@ -578,7 +594,7 @@ fieldset input:focus,fieldset select:focus{outline:2px solid var(--rust-soft);bo
 <script>const D={labPrice:900,labFee:200,weeklyHrs:40,weeks:48,lkTake:450,studioPrice:1000,follow1:90,priceUp:3,otherInc:80000,ppp:1400,
 s1Ping:25,s1Other:27000,s1Capex:450000,s2Ping:40,s2Other:39500,s2Capex:665000,bWeekly:24,bPrice:910,bMode:'split',bShare:50,bFee:200,
 s3Tables:4,s3Ping:55,s3Other:44500,s3Capex:1050000,rentHrs:30,rentRate:200,jrWeekly:0,jrPrice:900,jrShare:50,
-Ltables:4,Lping:55,Lppp:1400,Lother:58000,Lcapex:2500000,Lweeks:50,Lpeak:45,Loff:39,LpeakU:70,LoffU:20,Lmisc:150000,LmixC:45,LmixW:20,LpW:300,LmixP:25,LpP:450,LmixG:10,LpG:500,leaseYrs:3,invReturn:8,livingCost:0,
+Ltables:4,Lping:55,Lppp:1400,Lother:58000,Lcapex:2500000,Lweeks:50,Lpeak:45,Loff:39,LpeakU:70,LoffU:20,Lmisc:150000,LmixC:45,LmixW:20,LpW:300,LmixP:25,LpP:450,LmixG:10,LpG:500,leaseYrs:3,invReturn:8,livingCost:0,rentTax:5,rentUp:3,depMo:3,shareRatio:35,permitCost:150000,agentMo:0.5,fitMo:1,launchCost:60000,payFee:2,restoreCost:150000,mgmtHrs:5,
 gH:6,gN:4,gP:350,gT:2,cpN:2,cpS:20,cpFee:4500,cpCost:55,cpH:20,srN:1,srFee:2400,srH:3,
 tmN:2,tmH:15,tmP:1000,tmCut:15,tmMgmt:4,schN:3,schP:2,schW:16,schRate:600,schPay:400,schMgmt:2,
 eqN:30,eqSpend:5000,eqM:22,eqH:1,ssT:3,ssH:20,ssP:200,ssWk:50,ssRent:28000,ssOther:15000,ssCap:400000,ssMgmt:3,
@@ -594,39 +610,45 @@ const sg=n=>(n>=0?'+':'')+w(n);
 function model(p){
   const H=p.weeklyHrs*p.weeks, f1=Math.min(p.follow1,100)/100, up=p.priceUp/100;
   const rA=[f1,(f1+1)/2,1,1,1], rB=[.4,.75,1,1,1], rR=[.5,.8,1,1,1];
-  const pf=[1,1,1,1+up,1+up], rf=[1,1,1,1.03,1.03];
+  const ru=1+p.rentUp/100, rt=1+p.rentTax/100, fr=p.payFee/100;
+  const pf=[1,1,1,1+up,1+up], rf=[1,1,1,ru,ru].map(x=>x*rt);
+  // 一次付的開館費（裝修許可、仲介、裝修期間房租、招牌宣傳），和裝修一樣分 5 年攤
+  const once=ping=>p.permitCost+(p.agentMo+p.fitMo)*ping*p.ppp*rt+p.launchCost;
   const lab=[0,1,2,3,4].map(y=>H*(p.labPrice*pf[y]-p.labFee));
   const S1=[],S2=[],S3=[];
   for(let y=0;y<5;y++){
     const hA=H*rA[y], aRev=hA*p.studioPrice*pf[y], oth=p.otherInc*rA[y];
     // S1 小教室
-    {const rent=p.s1Ping*p.ppp*12*rf[y], other=p.s1Other*12, dep=p.s1Capex/5;
-     const inc=aRev+oth-rent-other-dep; S1.push({hA,aRev,oth,rent,other,dep,inc});}
+    {const rent=p.s1Ping*p.ppp*12*rf[y], other=p.s1Other*12, dep=(p.s1Capex+once(p.s1Ping))/5, fee=(aRev+oth)*fr;
+     const inc=aRev+oth-fee-rent-other-dep; S1.push({hA,aRev,oth,fee,rent,other,dep,inc});}
     // S2 雙教練
     {const hB=p.bWeekly*p.weeks*rB[y]; let bRev,toB;
      if(p.bMode==='split'){bRev=hB*p.bPrice*pf[y]; toB=bRev*p.bShare/100;} else {bRev=hB*p.bFee; toB=0;}
-     const rent=p.s2Ping*p.ppp*12*rf[y], other=p.s2Other*12, dep=p.s2Capex/5;
-     const inc=aRev+oth+bRev-toB-rent-other-dep; S2.push({hA,aRev,oth,hB,bRev,toB,rent,other,dep,inc});}
+     const rent=p.s2Ping*p.ppp*12*rf[y], other=p.s2Other*12, dep=(p.s2Capex+once(p.s2Ping))/5, fee=(aRev+oth+bRev)*fr;
+     const inc=aRev+oth+bRev-toB-fee-rent-other-dep; S2.push({hA,aRev,oth,hB,bRev,toB,fee,rent,other,dep,inc});}
     // S3 多桌館
     {const jrH=p.jrWeekly*p.weeks*rB[y], jrRev=jrH*p.jrPrice*pf[y], toJr=jrRev*p.jrShare/100;
      const rentable=Math.max(0,(Math.max(p.s3Tables,1)-1)*p.rentHrs*p.weeks*rR[y]-jrH), rentRev=rentable*p.rentRate;
-     const rent=p.s3Ping*p.ppp*12*rf[y], other=p.s3Other*12, dep=p.s3Capex/5;
-     const inc=aRev+oth+jrRev-toJr+rentRev-rent-other-dep; S3.push({hA,aRev,oth,jrH,jrRev,toJr,rentable,rentRev,rent,other,dep,inc});}
+     const rent=p.s3Ping*p.ppp*12*rf[y], other=p.s3Other*12, dep=(p.s3Capex+once(p.s3Ping))/5, fee=(aRev+oth+jrRev+rentRev)*fr;
+     const inc=aRev+oth+jrRev-toJr+rentRev-fee-rent-other-dep; S3.push({hA,aRev,oth,jrH,jrRev,toJr,rentable,rentRev,fee,rent,other,dep,inc});}
   }
-  // 開館要準備的錢 = 裝修設備 + 押金 2 個月 + 週轉金 4 個月（房租＋開銷）+ 雜支
-  const start=(ping,oth,cap)=>{const mr=ping*p.ppp; return {cap,dep:2*mr,res:4*(mr+oth),misc:20000,mr};};
+  // 開館要準備的錢 = 裝修設備 + 押金 + 週轉金 4 個月（房租＋開銷）+ 裝修許可 + 仲介費 + 裝修期間房租 + 招牌宣傳
+  const start=(ping,oth,cap)=>{const mr=ping*p.ppp*rt; return {cap,dep:p.depMo*mr,res:4*(mr+oth),permit:p.permitCost,agent:p.agentMo*mr,fit:p.fitMo*mr,misc:p.launchCost,mr};};
   const stp=[start(p.s1Ping,p.s1Other,p.s1Capex),start(p.s2Ping,p.s2Other,p.s2Capex),start(p.s3Ping,p.s3Other,p.s3Capex)];
-  const st=stp.map(x=>x.cap+x.dep+x.res+x.misc);
+  const st=stp.map(x=>x.cap+x.dep+x.res+x.permit+x.agent+x.fit+x.misc);
   const sum=a=>a.reduce((s,x)=>s+(x.inc!==undefined?x.inc:x),0);
   const L5=sum(lab), T=[S1,S2,S3].map(s=>sum(s));
   const labNet=p.labPrice-p.labFee;
-  const fixed1=p.s1Ping*p.ppp*12+p.s1Other*12+p.s1Capex/5;
-  const be=H>0?labNet+(fixed1-p.otherInc)/H:0;
-  return {H,lab,S1,S2,S3,st,stp,L5,T,labNet,fixed1,be};
+  const fixed1=p.s1Ping*p.ppp*12*rt+p.s1Other*12+(p.s1Capex+once(p.s1Ping))/5;
+  // 小教室上軌道後一年收入（hr 小時、每小時收 pr），和打平要收的每小時學費
+  const s1At=(hr,pr)=>(hr*pr+p.otherInc)*(1-fr)-fixed1;
+  const beAt=hr=>hr>0&&fr<1?(hr*labNet+fixed1)/((1-fr)*hr)-p.otherInc/hr:0;
+  const be=beAt(H);
+  return {H,lab,S1,S2,S3,st,stp,L5,T,labNet,fixed1,be,s1At,beAt};
 }
 function calc(){
   const p={};for(const k in D)p[k]=g(k);
-  const {H,lab,S1,S2,S3,st,stp,L5,T,labNet,fixed1,be}=model(p);
+  const {H,lab,S1,S2,S3,st,stp,L5,T,labNet,fixed1,be,s1At,beAt}=model(p);
 
   // hero
   document.querySelectorAll('[data-sync]').forEach(e=>{if(e!==document.activeElement)e.value=$(e.dataset.sync).value;});
@@ -636,12 +658,15 @@ function calc(){
   ['m-s1','m-s2','m-s3'].forEach((id,i)=>{$(id).textContent=w([S1,S2,S3][i][2].inc);});
 
   // 開館和租桌比一比
+  const fh=v=>Number.isInteger(v)?f0(v):v.toFixed(1);
   const names=['小教室（1 桌）','雙教練（2 桌）',`多桌館（${f0(p.s3Tables)} 桌）`];
-  let h='<tr><th>方式</th><th class="num">要準備的錢</th><th class="num">第 1 年收入</th><th class="num">第 3 年收入</th><th class="num">第 3 年每月</th><th class="num">第 3 年比租桌</th><th class="num">5 年加起來</th><th class="num">5 年比租桌</th></tr>';
-  h+=`<tr class="total"><td>繼續租桌（現在）</td><td class="num">0</td><td class="num">${f0(lab[0])}</td><td class="num">${f0(lab[2])}</td><td class="num">${w(lab[2]/12)}</td><td class="num">—</td><td class="num">${f0(L5)}</td><td class="num">—</td></tr>`;
+  let h='<tr><th>方式</th><th class="num">要準備的錢</th><th class="num">第 1 年收入</th><th class="num">第 3 年收入</th><th class="num">第 3 年每月</th><th class="num">第 3 年比租桌</th><th class="num">5 年加起來</th><th class="num">5 年比租桌</th><th class="num">第 3 年每小時真正賺</th></tr>';
+  const mH=H+Math.max(p.mgmtHrs,0)*p.weeks, perH=x=>mH>0?f0(x/mH):'—';
+  h+=`<tr class="total"><td>繼續租桌（現在）</td><td class="num">0</td><td class="num">${f0(lab[0])}</td><td class="num">${f0(lab[2])}</td><td class="num">${w(lab[2]/12)}</td><td class="num">—</td><td class="num">${f0(L5)}</td><td class="num">—</td><td class="num">${H>0?f0(lab[2]/H):'—'}</td></tr>`;
   [S1,S2,S3].forEach((s,i)=>{const d3=s[2].inc-lab[2], d5=T[i]-L5;
-    h+=`<tr><td>${names[i]}</td><td class="num">${f0(st[i])}</td><td class="num ${cls(s[0].inc)}">${f0(s[0].inc)}</td><td class="num">${f0(s[2].inc)}</td><td class="num">${w(s[2].inc/12)}</td><td class="num ${cls(d3)}">${sg(d3)}</td><td class="num">${f0(T[i])}</td><td class="num ${cls(d5)}">${sg(d5)}</td></tr>`;});
+    h+=`<tr><td>${names[i]}</td><td class="num">${f0(st[i])}</td><td class="num ${cls(s[0].inc)}">${f0(s[0].inc)}</td><td class="num">${f0(s[2].inc)}</td><td class="num">${w(s[2].inc/12)}</td><td class="num ${cls(d3)}">${sg(d3)}</td><td class="num">${f0(T[i])}</td><td class="num ${cls(d5)}">${sg(d5)}</td><td class="num">${perH(s[2].inc)}</td></tr>`;});
   $('t-summary').innerHTML=h;
+  $('summary-mgmt').innerHTML=`<p class="note">「每小時真正賺」＝一年收入 ÷ 一年花的時間。開館要多算你每週管館 ${fh(p.mgmtHrs)} 小時（排課、客服、打掃、修東西），這些時間不能教課。</p>`;
 
   const best=[0,1,2].reduce((b,i)=>T[i]>T[b]?i:b,0);
   let v='';
@@ -667,7 +692,7 @@ function calc(){
 
   // 附錄：同樣的課量
   let t='<tr><th>一年教幾小時</th><th class="num">繼續租桌</th><th class="num">當受雇教練</th><th class="num">小教室（每小時收 '+f0(p.studioPrice)+'）</th><th class="num">小教室（每小時收 '+f0(p.labPrice)+'）</th><th class="num">開館每小時至少要收</th></tr>';
-  [.7,.85,1,1.1].forEach(q=>{const hr=H*q, lb=hr*labNet, s=hr*p.studioPrice+p.otherInc-fixed1, s9=hr*p.labPrice+p.otherInc-fixed1, b=hr>0?labNet+(fixed1-p.otherInc)/hr:0;
+  [.7,.85,1,1.1].forEach(q=>{const hr=H*q, lb=hr*labNet, s=s1At(hr,p.studioPrice), s9=s1At(hr,p.labPrice), b=beAt(hr);
     t+=`<tr class="${q===1?'total':''}"><td>${f0(hr)}（現在的 ${Math.round(q*100)}%）</td><td class="num">${f0(lb)}</td><td class="num">${f0(hr*p.lkTake)}</td><td class="num ${s>=lb?'pos':'neg'}">${f0(s)}</td><td class="num ${s9>=lb?'pos':'neg'}">${f0(s9)}</td><td class="num">${f0(b)}</td></tr>`;});
   $('t-hours').innerHTML=t;
 
@@ -675,7 +700,7 @@ function calc(){
   const prices=[p.labPrice,p.studioPrice,p.studioPrice+100,p.studioPrice+200];
   let gtab='<tr><th>一年教幾小時 ＼ 每小時收</th>'+prices.map(x=>`<th class="num">${f0(x)}</th>`).join('')+'</tr>';
   [.7,.85,1,1.1].forEach(q=>{const hr=H*q, lb=hr*labNet;
-    gtab+=`<tr><td>${f0(hr)}</td>`+prices.map(pr=>{const s=hr*pr+p.otherInc-fixed1; return `<td class="num ${s>=lb?'pos':'neg'}">${w(s)}</td>`;}).join('')+'</tr>';});
+    gtab+=`<tr><td>${f0(hr)}</td>`+prices.map(pr=>{const s=s1At(hr,pr); return `<td class="num ${s>=lb?'pos':'neg'}">${w(s)}</td>`;}).join('')+'</tr>';});
   $('t-grid').innerHTML=gtab;
 
   // ===== 你租桌的場館 =====
@@ -788,14 +813,16 @@ function calc(){
     ['其他教練','你認識幾位需要租桌的教練？幾位願意先答應來租？每週幾小時、每小時付多少？',['rentHrs','rentRate']],
     ['場地','看過哪些地點？多少坪？每坪月租（含管理費）多少？商辦可以做運動教室嗎？',['ppp','s1Ping']],
     ['場地','裝修、球桌、減震地板、冷氣要花多少？每月水電、清潔、保險要多少？',['s1Capex','s1Other']],
-    ['場地','租約能簽幾年？裝修期間能不能免租？提前解約要賠多少？',['leaseYrs']],
+    ['場地','房東是個人還是公司？房租含不含稅？公設比多少？帶捲尺量過，真正能用幾坪？',['rentTax','shareRatio']],
+    ['場地','建築師怎麼說：要不要申請室內裝修許可、改消防？要花多少？退租要還原到什麼程度？',['permitCost','restoreCost']],
+    ['場地','租約能簽幾年？押金幾個月？裝修期間能不能免租？提前解約要賠多少？',['leaseYrs','depMo','fitMo']],
     ['錢','你自己能拿出多少錢？家裡每月生活開銷多少？最多能接受賠掉多少？',['livingCost']],
     ['錢','有沒有教練願意一起出錢合夥，並答應固定來教課或租桌？',['rentHrs']],
     ['其他收入','營隊、比賽、賣球具，一年大概能賺多少？',['otherInc']],
     ['現在的場館','你跟現在的場館有沒有約定？例如不能在附近開館、不能帶走學生？',[]],
     ['現在的場館','場館願不願意降桌租、給包月、固定好時段，或讓你入股？',['labFee']],
     ['身體',`每週教 ${f0(p.weeklyHrs)} 小時，你還能撐幾年？受過傷嗎？`,[]],
-    ['未來','你想一直親手教，還是願意花時間帶教練、管理、經營？',[]],
+    ['未來','你想一直親手教，還是願意花時間帶教練、管理、經營？',['mgmtHrs']],
     ['未來','附近有幾所學校、公司或社區據點，有桌球社團或課程的需求？',['schN']],
     ['未來','學生願不願意付費，請你遠距看他的影片給建議？一份多少錢？',['aiP']]];
   let it='<tr><th>主題</th><th>問題</th><th>對應的數字（預設）</th><th class="num">影響大小</th></tr>';
@@ -808,11 +835,14 @@ function calc(){
 
   // ===== 要準備多少錢、錢從哪來 =====
   const SS=[S1,S2,S3];
-  let ct='<tr><th>方式</th><th class="num">裝修和設備</th><th class="num">押金（2 個月房租）</th><th class="num">撐 4 個月的週轉金</th><th class="num">雜支</th><th class="num">合計</th></tr>';
-  stp.forEach((x,i)=>{ct+=`<tr><td>${names[i]}</td><td class="num">${f0(x.cap)}</td><td class="num">${f0(x.dep)}</td><td class="num">${f0(x.res)}</td><td class="num">${f0(x.misc)}</td><td class="num"><strong>${f0(st[i])}</strong></td></tr>`;});
+  let ct=`<tr><th>方式</th><th class="num">裝修和設備</th><th class="num">押金（${fh(p.depMo)} 個月房租）</th><th class="num">撐 4 個月的週轉金</th><th class="num">裝修許可、消防</th><th class="num">仲介費</th><th class="num">裝修期間房租</th><th class="num">招牌、系統、宣傳</th><th class="num">合計</th></tr>`;
+  stp.forEach((x,i)=>{ct+=`<tr><td>${names[i]}</td><td class="num">${f0(x.cap)}</td><td class="num">${f0(x.dep)}</td><td class="num">${f0(x.res)}</td><td class="num">${f0(x.permit)}</td><td class="num">${f0(x.agent)}</td><td class="num">${f0(x.fit)}</td><td class="num">${f0(x.misc)}</td><td class="num"><strong>${f0(st[i])}</strong></td></tr>`;});
   $('t-capex').innerHTML=ct;
+  const use=Math.max(1-p.shareRatio/100,0), sp=[[names[0],p.s1Ping,1],[names[1],p.s2Ping,2],[names[2],p.s3Ping,Math.max(p.s3Tables,1)]]
+    .map(([n,pg,t])=>{const per=pg*use/t; return `${n}：${f0(pg)} 坪 × ${f0(use*100)}% ÷ ${f0(t)} 桌 ＝ 每張桌約 ${per.toFixed(1)} 坪${per<10?'，<strong>偏擠</strong>':''}`;});
+  $('space-check').innerHTML=`<p class="note">以你的數字，扣掉公設 ${f0(p.shareRatio)}% 後：${sp.join('；')}。常見的建議是每張桌至少約 8 × 4 公尺（約 10 坪）；正式比賽要 14 × 7 公尺。</p>`;
   const ly=Math.max(Math.round(p.leaseYrs),0);
-  const leaseRent=x=>{let t=0;for(let y=0;y<ly;y++)t+=x.mr*12*(y<3?1:1.03);return t;};
+  const ru=1+p.rentUp/100, leaseRent=x=>{let t=0;for(let y=0;y<ly;y++)t+=x.mr*12*(y<3?1:ru);return t;};
   let hd=`<tr><th>方式</th><th class="num">要準備的錢</th><th class="num">頭兩年比租桌</th><th class="num">簽 ${f0(ly)} 年約，房租總共</th></tr>`;
   stp.forEach((x,i)=>{const d2=SS[i][0].inc-lab[0]+SS[i][1].inc-lab[1]; hd+=`<tr><td>${names[i]}</td><td class="num">${f0(st[i])}</td><td class="num ${cls(d2)}">${sg(d2)}</td><td class="num">${f0(leaseRent(x))}</td></tr>`;});
   $('t-hidden').innerHTML=hd;
@@ -833,7 +863,6 @@ function calc(){
   $('inv-verdict').innerHTML=`<div class="callout"><div class="label">建議</div><div class="text">${allNeg?'現在先不要找投資人。先在現在的場館確認：有幾位教練真的會來租桌、徒弟能排到多少課。確認以後，如果要開多桌館，用自己的錢、創業貸款，加上一位合夥教練。':`以你的數字，${names[best]} 5 年比租桌多 ${w(gaps5[best])}。要找投資人，先把你的薪水算清楚，再用借款或營收分成，不要一開始就給股份。`}</div></div>`;
 
   // ===== 要多少錢、多少學生才划算 =====
-  const fh=v=>Number.isInteger(v)?f0(v):v.toFixed(1);
   // 二分法找最小門檻（條件隨數字單調）；lo 已做到回傳 lo，hi 還做不到回傳 null
   const bis=(key,lo,hi,prec,test)=>{const t=v=>test(model({...p,[key]:v}));
     if(t(lo))return lo; if(!t(hi))return null;
@@ -849,11 +878,11 @@ function calc(){
   const nT=Math.max(p.s3Tables-1,0), hv=v=>v===null?'做不到':fh(v), tot=v=>v===null?'做不到':`約 ${f0(nT*v)} 小時`;
 
   const mo=Math.max(p.livingCost,0)*3;
-  const worst=x=>{let t=x.cap+x.dep;for(let y=1;y<ly;y++)t+=x.mr*12*(y<3?1:1.03);return t;};
+  const worst=x=>{let t=x.cap+x.dep+x.permit+x.agent+x.fit+x.misc+p.restoreCost;for(let y=1;y<ly;y++)t+=x.mr*12*(y<3?1:ru);return t;};
   let mt='<tr><th>方式</th><th class="num">開館當下要拿出來</th><th class="num">家裡預備金（3 個月生活費）</th><th class="num">合計</th><th class="num">最壞情況：開一年就收</th></tr>';
   stp.forEach((x,i)=>{mt+=`<tr><td>${names[i]}</td><td class="num">${f0(st[i])}</td><td class="num">${mo?f0(mo):'未填'}</td><td class="num"><strong>${f0(st[i]+mo)}</strong></td><td class="num">${f0(worst(x))}</td></tr>`;});
   $('t-money').innerHTML=mt;
-  $('money-note').innerHTML=`<p class="note">最壞情況：簽 ${f0(ly)} 年約，開一年就收掉。裝修拿不回來、押金被扣，${ly>1?`還要付剩下 ${f0(ly-1)} 年的房租`:'租約剛好到期'}。租約能提前解約或轉租的話，會少很多。${mo?'':'家裡每月生活費還沒填（第 02 章），預備金先算 0。'}這筆預備金是給你受傷、沒收入的時候用的。</p>`;
+  $('money-note').innerHTML=`<p class="note">最壞情況：簽 ${f0(ly)} 年約，開一年就收掉。裝修和其他開館費拿不回來、押金被扣、要付 ${f0(p.restoreCost)} 元把場地還原，${ly>1?`還要付剩下 ${f0(ly-1)} 年的房租`:'租約剛好到期'}。租約能提前解約或轉租的話，會少很多。${mo?'':'家裡每月生活費還沒填（第 02 章），預備金先算 0。'}這筆預備金是給你受傷、沒收入的時候用的。</p>`;
 
   const cv=(v,t)=>v===null?'做不到':`<span class="${t.cur>=v?'pos':''}">${fh(v)}${t.u}</span>`;
   let cl='<tr><th>方式</th><th>要做到什麼</th><th class="num">預設</th><th class="num">第 3 年追上租桌</th><th class="num">5 年加起來追上</th></tr>';
@@ -908,7 +937,7 @@ function calc(){
   const mixCalc=(base,on,cut)=>{
     const S=base?SS[base-1][2]:null, rate=base?p.studioPrice:labNet, c=Math.min(Math.max(cut,0),p.weeklyHrs);
     let own=base?S.aRev+S.oth:labNet*H, oth2=0, cap=0, fixed=0, up=base?st[base-1]:0, hrs=p.weeklyHrs-c;
-    if(base){fixed=S.rent+S.other+S.dep;
+    if(base){fixed=S.rent+S.other+S.dep+S.fee;
       if(base===2)oth2+=S.bRev-S.toB;
       if(base===3){oth2+=S.jrRev-S.toJr; cap+=S.rentRev;}
       if(on.e||on.c)own-=S.oth;}   // 開館試算的「其他收入」已含營隊、球具，勾了就不重複算
