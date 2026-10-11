@@ -1,4 +1,4 @@
-import {START,END,CITIES,PRESETS,presetForStops,addDays,daysBetween,schedule,validRoute,ageFit,commuteHours,quotedBudget,routeWarnings} from './planner-core.mjs';
+import {START,END,CITIES,PRESETS,presetForStops,addDays,daysBetween,schedule,validRoute,ageFit,commuteHours,quotedBudget,routeWarnings} from './planner-core.mjs?v=3';
 import {tripHotels,tripPlaces} from './research-data.mjs';
 import {joinCampData,STATUS} from './camp-options.mjs';
 const $=s=>document.querySelector(s), E=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
