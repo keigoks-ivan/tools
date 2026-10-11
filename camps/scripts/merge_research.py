@@ -684,8 +684,107 @@ def patch_japan_summer(db):
         db["sessions"][sid] = s
 
 
+def patch_japan_summer_followups(db):
+    # ASIJ: the 2026 official brochure now carries the weekly fees, so the price source moves off the third-party page
+    asij_e = "https://drive.google.com/file/d/103yLvjqVfBcCa3fnASifOj0EG2NjleEy/preview"
+    for s in db["sessions"].values():
+        if s["program_id"] != "asij-summer-day-camp" or not (s["price"] or {}).get("amount"):
+            continue
+        if "eleschool-compass" in (s["price"].get("source_url") or ""):
+            s["price"]["source_url"] = asij_e
+            s["price"]["tax_note"] = "簡章沒寫稅，費用稱為 Registration Fee"
+            s["notes"] = (s.get("notes") or "").replace("價格網頁沒寫。", "").replace("價格只見於 eleschool-compass，官網沒列。", "價格取自官方簡章。")
+    g = db["programs"].get("asij-summer-day-camp")
+    if g:
+        g["notes"] = (g.get("notes") or "").replace(
+            "官網沒寫價格，價格來自日本留學媒體 eleschool-compass（2026 年 5 月資料）。", ""
+        ).replace("官網寫此營是少數開放給就讀日本學校孩子的方案，但沒明寫外校生資格，需向 daycamp@asij.ac.jp 確認。",
+                  "官方簡章明寫調布一般班收就讀日本小學的孩子（含國際學校）。")
+        g["sources"] = [x for x in g["sources"] if "eleschool-compass" not in x["url"]]
+        # Terms Article 1.7: the regular programme and Roppongi take Japan residents only; families abroad can only take
+        # the International Student Program at Chofu, which has its own fee and two sessions, so it becomes its own programme
+        g["name"] = "Summer Day Camp 一般班（調布，限住日本）"
+        g["age_rule"] = None  # age_rule only takes rule codes; the grade table stays in the notes
+        g["requirements"] = ["限住在日本的申請者（簡章條款第 1 條第 7 項）；住在海外的孩子只能報調布的國際學生班"]
+        g["notes"] = ("英語授課。2026 年官方簡章（Drive 英日文版，2026-10-11 讀）寫明調布一般班與六本木只收住在日本的申請者，"
+                      "人在海外的家庭只能報調布的國際學生班，另列一筆。調布一般班收小 1～小 6，9:30～15:30，92,000 日圓／梯（5 天），"
+                      "在校內餐廳吃午餐；校車 5 天來回 6,000 日圓，課後托育 15:30～17:30 另計 28,000 日圓。"
+                      "六本木收年中到小 1，8:30～14:30，86,000 日圓／梯，含教材和營 T 恤，午餐盒選購 6,000 日圓／5 天。"
+                      "年級依日本學年（4 月 2 日起算），不看海外年級。簡章把費用寫成「報名費」，沒寫稅。2026 年一般報名 4/15 截止，7/6 只剩候補。")
+        # the two campuses take different grades, and age fit is per programme, so Roppongi gets its own
+        rop = json.loads(json.dumps(g))
+        rop.update({"id": "asij-summer-day-camp-roppongi", "name": "Summer Day Camp 六本木（年中～小 1，限住日本）",
+                    "age_min": 4, "age_max": 7, "location_ids": ["loc-jp-asij-roppongi"],
+                    "hours": {"start": "8:30", "end": "14:30", "days": "Mon-Fri"}})
+        db["programs"][rop["id"]] = rop
+        g.update({"age_min": 6, "age_max": 12, "location_ids": ["loc-jp-asij-chofu"],
+                  "hours": {"start": "9:30", "end": "15:30", "days": "Mon-Fri"}})
+        for s in db["sessions"].values():
+            if s["program_id"] == g["id"] and s.get("location_id") == "loc-jp-asij-roppongi":
+                s["program_id"] = rop["id"]
+        isp = json.loads(json.dumps(g))
+        isp.update({
+            "id": "asij-summer-day-camp-isp", "name": "Summer Day Camp 國際學生班 ISP（調布，海外家庭報這班）",
+            "age_min": 6, "age_max": 12, "location_ids": ["loc-jp-asij-chofu"],
+            "hours": {"start": "9:30", "end": "15:30", "days": "Mon-Fri"},
+            "requirements": ["住在日本以外的孩子；住在日本的也能報，但優先錄取住在海外的",
+                             "要出示涵蓋營期的海外旅遊保險證明，有日本國民健康保險的免",
+                             "小 1～小 6，年級依日本學年（4 月 2 日起算）"],
+            "booking": {"url": None, "deadline": None, "payment_terms": None, "refund_policy": None,
+                        "flex_ticket": None, "sibling_discount": None},
+            "notes": ("2026 年新開的班，給住在海外、來日本短住的孩子。一般班的英語課換成每天兩堂日本文化課，"
+                      "學日語、日本歌和手作，第 5 天辦模擬夏日祭；其他活動、午餐、點心、校車和課後托育都跟調布一般班一樣。"
+                      "2026 年只開 7/20～7/24 和 7/27～7/31 兩梯，9:30～15:30，126,000 日圓／梯（5 天），簡章沒寫稅。"
+                      "年齡 6～12 歲是依日本學年換算，簡章只寫年級與出生日期。2027 年未公布。"),
+            "sources": [{"url": asij_e, "tier": 2, "accessed": "2026-10-11", "fields": ["age", "dates", "price", "requirements"],
+                         "quote": "ISP is designated for residents that reside outside of Japan."}],
+            "_batches": ["main-chrome"],
+        })
+        db["programs"][isp["id"]] = isp
+        for mon, fri, tag in (("2026-07-20", "2026-07-24", "A"), ("2026-07-27", "2026-07-31", "B")):
+            price = {"amount": 126000, "currency": "JPY", "basis": "per_week", "tax_included": None,
+                     "tax_note": "簡章沒寫稅，費用稱為 Registration Fee", "source_url": asij_e, "from": None,
+                     "early_bird": {"amount": None, "deadline": None, "condition": None}}
+            s = week_session(f"asij-summer-day-camp-isp-{mon.replace('-', '')}", isp["id"], "loc-jp-asij-chofu", mon, fri,
+                             "other", price, asij_e, f"ISP Session {tag}: {mon[5:]}–{fri[5:]} · Registration Fee: ¥126,000",
+                             "2026 年梯次，調布國際學生班，小 1～小 6。2027 年未公布。")
+            s.update({"date_status": "confirmed_other_year", "min_duration_weeks": None, "flexible_start": None,
+                      "verified_at": "2026-10-11", "sources": []})
+            db["sessions"][s["id"]] = s
+        for s in db["sessions"].values():  # the regular Chofu sessions carried the ISP fee in their notes
+            if s["program_id"] == "asij-summer-day-camp" and "國際班 126,000" in (s.get("notes") or ""):
+                s["notes"] = "2026 年梯次，調布一般班，小 1～小 6，限住在日本的申請者。92,000 日圓／5 天，簡章沒寫稅，校車另計。"
+            elif s["program_id"] == rop["id"]:
+                s["notes"] = (s.get("notes") or "").replace("價格只見於 eleschool-compass。", "價格取自官方簡章第 5 頁，限住在日本的申請者。")
+
+    # OYIS: the 2026 PDF was read in full, so the "price not found" sentence is stale (48,000 yen week has 4 days; all prices exclude tax)
+    for s in db["sessions"].values():
+        if s["program_id"] == "oyis-jp-summer-intensive" and s["year"] == 2026:
+            s["notes"] = (s.get("notes") or "").replace("2026 年梯次，日期取自搜尋摘要（官網頁面讀到的只有「七八月共四週」），價格查不到。",
+                                                       "日期與價格取自官方 PDF。")
+            if s["start_date"] == "2026-07-21" and "假日" not in s["notes"]:
+                s["notes"] += "這週只有 4 天（7/20 是假日），所以 48,000 日圓，其他週 5 天 60,000 日圓，價格都不含稅。"
+
+    # TUJ Kyoto: the Kyoto page (not the Tokyo course page) gives 38,000 yen tax included; the 2026 run replaces the "fee not found" line
+    tuj = "https://www.tuj.ac.jp/jp/aep/kyoto/programs/es-summer-college"
+    t = db["sessions"].get("tuj-jp-kyoto-elementary-kokunai-ryugaku-jp-tuj-kyoto-20260803")
+    if t:
+        t["price"].update({"amount": 38000, "currency": "JPY", "basis": "per_camp", "tax_included": True, "source_url": tuj})
+        t["notes"] = (t.get("notes") or "").replace(
+            "京都版費用查不到；東京同名課程是 34,500 日圓（税込、含教材、午餐自備），僅供參考，不可直接套用。",
+            "費用 38,000 日圓（税込，含教材，午餐自備），取自京都官網。官網寫英語授課，沒有單獨寫要不要日語。")
+        t["sources"] = (t.get("sources") or []) + [{"url": tuj, "tier": 1, "accessed": "2026-10-11", "fields": ["price"],
+                                                    "quote": "38,000円（消費税込）"}]
+    # Meiko Kids e now has a representative Tokyo-area location, so the "no location" line is stale
+    m = db["programs"].get("meiko-kids-e-jp-summer-school")
+    if m:
+        m["notes"] = (m.get("notes") or "").replace(
+            "沒有標縣市，我沒有證據把它們全數認定在東京，所以不建地點，要主線程查證。",
+            "官網另有縣市篩選：東京 3 校、神奈川 4 校，其餘 2 校在栃木和和歌山，不在六地範圍。")
+
+
 PATCHES = [patch_erican, patch_embassy, patch_raffles_2027, patch_official_pages, patch_stem_academy, patch_klik,
-           patch_from_prices, patch_staffing_facilities, patch_thailand, patch_japan, patch_japan_summer]
+           patch_from_prices, patch_staffing_facilities, patch_thailand, patch_japan, patch_japan_summer, patch_japan_summer_followups]
 
 # Brief rule: tier 4-5 only -> confidence low. These domains are aggregators.
 PLATFORM_HOSTS = {
