@@ -1,4 +1,4 @@
-import {tripPlaces} from './research-data.mjs?v=8';
+import {tripPlaces} from './research-data.mjs?v=9';
 export const START='2027-01-17', END='2027-02-08', KL_END='2027-01-24';
 export const CITIES={kl:'吉隆坡',ipoh:'怡保',pen:'檳城',penres:'檳城渡假村（Teluk Bahang／Batu Ferringhi）',kk:'亞庇市區',resort:'亞庇近郊渡假村'};
 export const CITY_SHORT={...CITIES,penres:'檳城渡假村'};
