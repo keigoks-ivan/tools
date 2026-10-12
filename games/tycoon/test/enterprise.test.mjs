@@ -67,3 +67,7 @@ test('new saves reject invalid fields and manager budgets without damaging unrel
  for(const id of Object.keys(ENTERPRISES))for(const data of [{staff:0},{capacity:10000},{stock:{qty:-1,value:0}},{price:NaN},{clients:[{id:'x',client:'x',fee:1,work:1,until:99999}]}]){const w=createEnterprise(id);Object.assign(w,data);assert.equal(enterpriseValid(w),false);assert.throws(()=>decodeVenture(encodeVenture(w),'enterprise'));}
  assert.equal(enterpriseValid(null),false);
 });
+test('agency: finished project waiting for acceptance is delivered late, not cancelled',()=>{
+ const w=createEnterprise('agency');const {o}=bid(w);const x=w.orders[0];x.progress=x.work;x.revised=true;x.inspectionReady=o.due+8;w.day=o.due+8;
+ stepEnterprise(w);identity(w);assert.equal(w.stats.cancelled,0);assert.equal(w.stats.delivered,1);assert.equal(w.orders.length,0);assert.equal(enterpriseValid(w),true);
+});

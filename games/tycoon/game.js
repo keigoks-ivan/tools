@@ -84,7 +84,7 @@ async function main() {
   app.innerHTML = `
 <header id="topbar" class="panel">
   <div class="brand"><div class="logo">${icon.shop.replace('currentColor', '#fff')}</div><div><b id="co-name">${COMPANY}</b><small>創業之城・雲港市</small></div></div>
-  <div class="stat"><span class="ic">${icon.coin}</span><div><label>現金</label><strong class="num" id="h-cash"></strong></div></div>
+  <div class="stat"><span class="ic">${icon.coin}</span><div><label>現金</label><strong class="num" id="h-cash"></strong><small class="num" id="h-cash-net"></small></div></div>
   <div class="stat"><span class="ic">${icon.trend}</span><div><label>本月淨利</label><strong class="num" id="h-net"></strong></div></div>
   <div class="stat"><span class="ic">${icon.value}</span><div><label id="share-label">全城市占率</label><strong class="num" id="h-share"></strong></div></div>
   <div class="spacer"></div>
@@ -253,6 +253,7 @@ async function main() {
   function updateHud() {
     const k = S.getKpi(world);
     $('#h-cash').textContent = wan(k.cash);
+    $('#h-cash-net').textContent = `扣月底應付後 ${wan(k.cash - k.payable)}`;
     const net = $('#h-net'); net.textContent = wan(k.monthNetProfit, true);
     net.className = 'num ' + (k.monthNetProfit >= 0 ? 'up' : 'down');
     $('#h-share').textContent = pct(k.marketShare); $('#share-label').textContent = world.multiBusiness ? '全城營收市占' : '飲料杯數市占';
@@ -567,7 +568,7 @@ ${fee ? `<p class="note">現在退租另付違約金 ${money(fee)}，以下回�
     const st = s.status === 'renovating' ? '<span class="zone s-reno">裝修中</span>' : '<span class="zone s-open">營業中</span>';
     const lot = world.lots.find((l) => l.id === s.lotId);
     const tabs = [['industry','劇本'],['today', '今天'], ['op', '經營'], ['menu', '產品'], ['staff', '排班'], ...(S.getLeaseInfo(world, s.id, { includeAnalysis: false }) ? [['lease', '租約']] : []), ['set', '設定']];
-    const body = { industry: s=>industryBoardHtml(world.shops.find(x=>x.id===s.id),{shopId:s.id,disabled:world.status!=='playing'}), today: todayHtml, op: operationsHtml, menu: menuHtml, staff: staffHtml, lease: leaseHtml, set: settingHtml }[shopTab](s);
+    const body = { industry: s=>industryBoardHtml(world.shops.find(x=>x.id===s.id),{shopId:s.id,disabled:world.status!=='playing',progress:S.campaignProgress(world)}), today: todayHtml, op: operationsHtml, menu: menuHtml, staff: staffHtml, lease: leaseHtml, set: settingHtml }[shopTab](s);
     return `${head(s.name, `${st}<span class="zone">${bizOf(s).name}</span>${zoneHtml(lot.zone)}${starHtml(s.star)}<span class="num" style="font-size:12px;margin-left:4px">${s.star.toFixed(1)}（${int(s.reviews)}）</span>`)}
 <div class="mini-tabs">${tabs.map(([k, n]) => `<button class="${shopTab === k ? 'on' : ''}" data-act="tab:${k}">${n}</button>`).join('')}</div>
 <div id="sd-body">${body}</div>`;

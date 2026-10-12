@@ -128,7 +128,7 @@ function autoRun(w) {
   if(!enterpriseManagement(w).enabled)return;
   if(w.manager.month!==dateOf(w.day).month){w.manager.month=dateOf(w.day).month;w.manager.spent=0;}
   const p=enterprisePlan(w);
-  if(p.hiring){expense(w,'research',p.hiring,true);w.staff=p.staff;managementRecord(w,`團隊招聘至 ${w.staff} 人。`,p.hiring);}
+  if(p.hiring){expense(w,'research',p.hiring,true);const oldStaff=w.staff;w.staff=p.staff;managementRecord(w,`團隊招聘：${oldStaff}→${w.staff} 人。`,p.hiring);}
   if(p.qty){spend(w,p.cost,'purchases');w.shipments.push({qty:p.qty,value:p.cost,arrival:w.day+7});managementRecord(w,`按需求採購 ${p.qty} 份，七天後到貨。`,p.cost);}
 }
 export function stepEnterprise(w) {
@@ -136,7 +136,8 @@ export function stepEnterprise(w) {
   for(const s of w.shipments.filter(x=>x.arrival<=w.day)){w.stock.qty+=s.qty;w.stock.value+=s.value;}w.shipments=w.shipments.filter(x=>x.arrival>w.day);
   for(const r of w.receivables.filter(x=>x.due<=w.day))receive(w,r.amount);w.receivables=w.receivables.filter(x=>x.due>w.day);
   if(w.expansion&&w.expansion.ready<=w.day){w.capacity+=w.expansion.add;w.expansion=null;note(w,'新增容量已開放，團隊將在授權內安排人力。');}
-  for(const o of [...w.orders])if(w.day>o.due+7)cancel(w,o);
+  // 已做完、在等驗收的專案不算逾期取消，遲交罰款在驗收時另計。
+  for(const o of [...w.orders])if(w.day>o.due+7&&o.progress+1e-6<o.work)cancel(w,o);
   autoRun(w);const m=enterpriseMetrics(w);let sales=0,demand=0,returns=0,produced=0,revenue=0,serviceReceipts=0;
   if(p.kind==='hotel') {
     demand=count(w,m.demand);sales=Math.min(demand,Math.floor(m.capacity));revenue=sales*w.price;spend(w,sales*m.unitCost,'purchases');expense(w,'cogs',sales*m.unitCost);expense(w,'cloud',sales*w.price*(w.channel?.15:.025));

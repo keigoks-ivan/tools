@@ -4,6 +4,7 @@ import { INDUSTRIES, industryId, industryKey } from '../industry-catalog.js';
 import { enableIndustry, industryAction, industryState, industryEffects, industryValid, industryDay } from '../industry-sim.js';
 import { industryBoardHtml, industryDrivers } from '../industry-view.js';
 import { createOwnerVenture, stepOwnerVenture } from '../owner-management.js';
+import { managementNotes } from '../manager-policy.js';
 import { createEnterprise, enterpriseAction, stepEnterprise, enterpriseMetrics, enterpriseQuote } from '../enterprise.js';
 import { manufacturingAction, productionPlan } from '../manufacturing.js';
 import { technologyAction, technologyMetrics, technologyEconomics, technologyBreakEven } from '../technology.js';
@@ -127,4 +128,41 @@ test('ecommerce return pressure uses returned items divided by actual gross ship
 });
 test('legacy reports do not present inactive default abilities as actual results',()=>{
   const w=createOwnerVenture('technology','saas'),before=clone(w);assert.deepEqual(industryDrivers(w),[]);assert.match(industryBoardHtml(w,{report:true}),/尚未啟用/);assert.ok(!industryBoardHtml(w,{report:true}).includes('industry-resources'));assert.match(industryBoardHtml(w),/data-industry-kind/);assert.deepEqual(w,before);
+});
+test('customer loss penalty is capped so a busy salon can still build regulars',()=>{
+  const {w}=make('salon');w.industry.policies.skill='specialist';w.industry.policies.booking='deposit';
+  for(let day=0;day<400;day++)industryDay(w,day,{volume:20,lost:80,revenue:1,utilization:1},()=>{},false);
+  assert.ok(w.industry.resources.loyalty>=.6,'loyalty reaches the milestone target even when 80% of walk-ins leave');
+});
+test('campaign progress ignores the annual income tax booked in the December row',()=>{
+  const g=make('tea'),co=g.world.companies.player;g.w.industry.milestones=[0,1,2];g.w.status='open';
+  assert.deepEqual(S.campaignProgress(g.world),{milestones:3,months:0,profitMonths:0,cashOk:true,ok:false});
+  for(const [ym,tax] of [['2026-10',0],['2026-11',0],['2026-12',0]]){g.w.history.push({ym,turnover:1000,profit:500});co.rows.push({ym,adCost:0,incomeTax:tax});}
+  co.rows.at(-1).incomeTax=2000;
+  const cp=S.campaignProgress(g.world);assert.equal(cp.profitMonths,3,'December counts as profitable before tax');assert.equal(cp.ok,true);
+});
+test('milk, cold and delivery events only reach shops they apply to',()=>{
+  const kinds=id=>{const g=make(id);g.advance(1095);return new Set([...g.world.events.list,...g.world.eventLog].map(e=>e.kind));};
+  const salon=kinds('salon');for(const k of ['milk','cold','platform'])assert.ok(!salon.has(k),`salon never gets ${k} events`);
+  const tea=kinds('tea');for(const k of ['milk','cold'])assert.ok(tea.has(k),`tea still gets ${k} events`);
+});
+test('store industry event options state their cost and effect up front',()=>{
+  const g=make('salon');g.advance(40);const ev=g.world.events.list.find(e=>e.kind==='industry');assert.ok(ev);
+  assert.match(ev.choices[0].label,/7 天產能 −8%/);assert.match(ev.choices[1].label,/免費；該能力 −15 點/);
+});
+test('cash payable shown to the player equals the month-end deduction',()=>{
+  const g=make('salon'),co=g.world.companies.player;let checked=0;
+  for(let i=0;i<24*70;i++){const before=S.getKpi(g.world);S.stepHour(g.world);const drop=before.cash-co.cash;if(drop>20000){assert.equal(drop,before.payable);checked++;}}
+  assert.ok(checked>=2,'two month-end settlements were compared');
+});
+test('automatic manager changes are announced with before and after values',()=>{
+  const g=make('tea');S.setManager(g.world,g.w.id,{tier:'assistant',staffing:true,purchasing:false});g.advance(60);
+  const ev=g.world.events.list.find(e=>e.kind==='info'&&/店長調整/.test(e.title));assert.ok(ev,'store manager change raises a notice');assert.match(ev.title,/\d→\d 人/);
+  const a={text:'a'},b={text:'b'},t={manager:{log:[b,a]}};
+  assert.deepEqual(managementNotes(t,null),['a','b']);assert.deepEqual(managementNotes(t,a),['b']);assert.deepEqual(managementNotes(t,b),[]);
+});
+test('marketplace seller development stops near the 50% target instead of overshooting',()=>{
+  const {w}=make('marketplace');w.industry.policies.side='sellers';
+  for(let day=0;day<400;day++)industryDay(w,day,{volume:10,revenue:1,users:1000,acquired:0},()=>{},false);
+  assert.ok(w.industry.resources.supply>=.49&&w.industry.resources.supply<=.51,String(w.industry.resources.supply));
 });

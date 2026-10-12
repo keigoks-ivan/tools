@@ -1,6 +1,6 @@
 import { dateOf, payable, profit } from './venture-core.js';
 import { management, managementAction, managementRecord } from './manager-policy.js';
-import { PRODUCTS, SUPPLIERS, createManufacturing, productionPlan, manufacturingQueue, manufacturingDeliveries, manufacturingSchedule, manufacturingOrderPreview, manufacturingAction, stepManufacturing } from './manufacturing.js';
+import { PRODUCTS, SUPPLIERS, PRODUCTION_MODES, createManufacturing, productionPlan, manufacturingQueue, manufacturingDeliveries, manufacturingSchedule, manufacturingOrderPreview, manufacturingAction, stepManufacturing } from './manufacturing.js';
 import { MODELS, createTechnology, technologyMetrics, technologyAction, stepTechnology } from './technology.js';
 
 const fixedOf = w => w.mode === 'manufacturing' ? productionPlan(w).fixed : technologyMetrics(w, { includeBreakEven: false }).fixed;
@@ -102,6 +102,8 @@ export function technologyManagerPlan(w) {
   return { settings, metrics, guard, hiring, issues };
 }
 
+const SETTING_LABELS = { workers: ['人數', v => v + ' 人'], shift: ['班別', v => v === 'normal' ? '正常班' : '加班'], qc: ['品管', v => v === 'strict' ? '嚴格' : '標準'], supplier: ['供應商', v => SUPPLIERS[v]?.name ?? v], productionMode: ['製程', v => PRODUCTION_MODES[v]?.name ?? v], engineers: ['工程師', v => v + ' 位'], support: ['客服', v => v + ' 位'], cloudTier: ['主機', v => '第 ' + (v + 1) + ' 級'], focus: ['重心', v => ({ stability: '維運', growth: '開發' })[v] || '平衡'] };
+const changeText = (w, settings) => Object.entries(settings).filter(([k, v]) => SETTING_LABELS[k] && (w[k] ?? 'balanced') !== v).map(([k, v]) => `${SETTING_LABELS[k][0]} ${SETTING_LABELS[k][1](w[k] ?? 'balanced')}→${SETTING_LABELS[k][1](v)}`).join('、') || '收費或行銷預算';
 function autoAction(w, action, data, text) {
   const before = w.co.cash, r = w.mode === 'manufacturing' ? manufacturingAction(w,action,data) : technologyAction(w,action,data);
   if (r.ok) managementRecord(w,text,Math.max(0,before-w.co.cash));
@@ -110,7 +112,7 @@ function autoAction(w, action, data, text) {
 function runFactoryManager(w) {
   if (!ownerManagement(w).enabled) return;
   const p = factoryManagerPlan(w);
-  if (p.canAdjust && differs(w,p.settings)) autoAction(w,'settings',p.settings,`經理調整 ${p.settings.workers} 人、${p.settings.shift==='normal'?'正常班':'加班'}與製程／供應商。`);
+  if (p.canAdjust && differs(w,p.settings)) autoAction(w,'settings',p.settings,`經理調整：${changeText(w,p.settings)}。`);
   if (w.scheduleMode !== 'due') autoAction(w,'scheduling',{mode:'due'},'經理按剩餘交期安排生產。');
   if (p.qty) autoAction(w,'purchase',{qty:p.qty},`經理分批採購 ${p.qty} 份原料，${SUPPLIERS[p.settings.supplier].lead} 天到貨。`);
   if (p.maintain) autoAction(w,'maintain',{},'經理利用交期餘裕安排兩天保養。');
@@ -118,7 +120,7 @@ function runFactoryManager(w) {
 function runTechnologyManager(w) {
   if (!ownerManagement(w).enabled) return;
   const p = technologyManagerPlan(w);
-  if (differs(w,p.settings)) autoAction(w,'settings',p.settings,`團隊安排 ${p.settings.engineers} 位工程師、${p.settings.support} 位客服、主機第 ${p.settings.cloudTier+1} 級及${p.settings.focus==='stability'?'維運':p.settings.focus==='growth'?'開發':'平衡'}重心。`);
+  if (differs(w,p.settings)) autoAction(w,'settings',p.settings,`團隊調整：${changeText(w,p.settings)}。`);
 }
 export function stepOwnerVenture(w) {
   return w.mode === 'manufacturing' ? stepManufacturing(w,runFactoryManager) : stepTechnology(w,runTechnologyManager);

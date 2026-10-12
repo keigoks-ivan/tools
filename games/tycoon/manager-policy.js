@@ -27,3 +27,9 @@ export function managementRecord(w, text, amount = 0) {
   if (m.month !== dateOf(w.day).month) { m.month = dateOf(w.day).month; m.spent = 0; }
   m.spent += amount; m.log.unshift({ day: w.day, text, amount }); m.log.length = Math.min(24, m.log.length);
 }
+
+// 代管剛自行做的調整（log 最新在前）；seen 為上次已看過的最新一筆，回傳之後新增的文字。
+export function managementNotes(w, seen) {
+  const log = w.manager?.log || [], i = seen ? log.indexOf(seen) : log.length;
+  return log.slice(0, i < 0 ? log.length : i).map(x => x.text).reverse();
+}

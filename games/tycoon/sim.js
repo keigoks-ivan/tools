@@ -553,7 +553,7 @@ function managerReview(world, s) {
     }
   }
   m.lastReviewT = world.t; m.note = `依近 ${recent.length} 天日均 ${Math.round(mean)} 筆、流失 ${Math.round(lost)} 筆：${changes.join('；') || '維持設定'}。${m.purchasing ? `補貨保留 ${m.reserveMonths} 個月固定支出。` : '未委任採購，補貨按你的原設定執行。'}`;
-  if (changes.length) logEvt(world, 'manager', `「${s.name}」${m.note}`);
+  if (changes.length) pushEvent(world, { kind: 'info', title: `「${s.name}」店長調整：${changes.join('；')}`, text: m.note, choices: [] });
   recalcShop(world, s);
 }
 function replenishShop(world, s, target, delegated = false) {
@@ -1355,13 +1355,13 @@ function startDay(world) {
     settleMonth(world, dateOf(idx - 1));
     if (di.m === 1) yearEnd(world, di);
     if (world.status !== 'playing') return;
+    if (world.campaignBusiness && idx < END_DAY) { const cp = campaignProgress(world); if (cp.ok) { world.status = 'won'; world.endReason = `${businessOf(world.campaignBusiness).name}三年挑戰：完成業態里程碑，最近三月獲利，提前過關`; return; } }
   }
   // 目標日
   if (idx >= END_DAY) {
     if (world.campaignBusiness) {
-      const shops=world.shops.filter(s=>s.owner==='player'&&s.status==='open'), months=getMonthlyReport(world).financials.slice(-3);
-      const mastered=shops.some(s=>s.industry?.milestones.length===3), profitable=months.length===3&&months.every(m=>m.netProfit>0);
-      world.status=mastered&&profitable&&playerCo(world).cash>0?'won':'lost';
+      const cp=campaignProgress(world), mastered=cp.milestones===3, profitable=cp.profitMonths===3&&cp.months===3;
+      world.status=mastered&&profitable&&cp.cashOk?'won':'lost';
       world.endReason=`${businessOf(world.campaignBusiness).name}三年挑戰：${mastered?'完成業態里程碑':'尚未完成業態里程碑'}，${profitable?'最近三月獲利':'最近三月尚未穩定獲利'}`;
       return;
     }
@@ -1457,7 +1457,7 @@ function endDay(world) {
       const fee=Math.round(td.rev*industryEffects(s).risk);
       world.companies[s.company].cash-=fee;s.mtd.industryPaid=(s.mtd.industryPaid||0)+fee;
       const event=industryDay(s,Math.floor(world.t/24),{volume:cups,utilization:cups/Math.max(1,dailyCapacity(world,s)),lost:td.lost,prepared:td.prepared,unsold:td.unsold,revenue:td.rev,shops:getShops(world,'player').filter(x=>x.businessId===s.businessId).length},t=>logEvt(world,'decision',s.name+'：'+t),getShops(world,'player').find(x=>x.status==='open'&&x.businessId===s.businessId)?.id===s.id);
-      if(event)pushEvent(world,{kind:'industry',title:s.name+'：'+event.title,text:event.text+' 改善需七個營運日，期間能力保留 8%。',shopId:s.id,deadlineT:world.t+10*24,choices:[{key:'A',label:event.protect+'（'+event.cost.toLocaleString()+' 元）'},{key:'B',label:event.accept}]});
+      if(event)pushEvent(world,{kind:'industry',title:s.name+'：'+event.title,text:event.text+' 這類情境每月都會再出現。',shopId:s.id,deadlineT:world.t+10*24,choices:[{key:'A',label:event.protect+'（付 '+event.cost.toLocaleString()+' 元；7 天產能 −8%，之後該能力 +18 點）'},{key:'B',label:event.accept+'（免費；該能力 −15 點）'}]});
       recalcShop(world,s);
     }
     s.days.push({ day: Math.floor(world.t / 24), cups, walk: td.walk, del: td.del, lost: td.lost, stockLost: td.stockLost, prepared: td.prepared, unsold: td.unsold, wait: td.waitCups ? td.waitSum / td.waitCups : 0, rev: td.rev });
@@ -1471,11 +1471,12 @@ function endDay(world) {
 
 function dayEvents(world, di) {
   const idx = di.idx, dm = world.day, sc = world.sched;
+  const hasTea = liveShops(world).some((s) => s.owner === 'player' && s.businessId === 'tea'), hasDelivery = liveShops(world).some((s) => s.owner === 'player' && s.delivery);
   // 颱風
   const ty = sc.typhoon;
   if (ty) {
     if (idx === ty.dayIdx - 1 && !ty.eventId) {
-      const e = pushEvent(world, { kind: 'typhoon', title: '颱風明天登陸', text: '氣象署發布颱風警報。今天大家會囤貨，客人增加；明天停班停課，門市客人幾乎歸零。', deadlineT: (idx + 1) * 24, choices: [{ key: 'A', label: '照常開外送（外送訂單 ×1.6，但有 10% 機率被罵）', cost: 0 }, { key: 'B', label: '全面停業一天', cost: 0 }] });
+      const e = pushEvent(world, { kind: 'typhoon', title: '颱風明天登陸', text: '氣象署發布颱風警報。今天大家會囤貨，客人增加；明天停班停課，門市客人幾乎歸零。', deadlineT: (idx + 1) * 24, choices: [{ key: 'A', label: hasDelivery ? '照常開外送（外送訂單 ×1.6，但有 10% 機率被罵）' : '照常營業', cost: 0 }, { key: 'B', label: '全面停業一天', cost: 0 }] });
       ty.eventId = e.id;
     }
     if (idx === ty.dayIdx - 1) { dm.walkW *= V.events.typhoonEveWalkMult; dm.eveBoost = true; }
@@ -1484,7 +1485,7 @@ function dayEvents(world, di) {
       const ev = world.events.list.find((e) => e.id === ty.eventId);
       if (ev && ev.status === 'pending') applyChoice(world, ev, 'A', true);
       if (ty.choice === 'B') dm.closeAllPlayer = true;
-      else if (stream(world.seed, T.SCOLD, idx)() < V.events.typhoonScoldProb) {
+      else if (stream(world.seed, T.SCOLD, idx)() < V.events.typhoonScoldProb && hasDelivery) {
         for (const s of world.shops) if (s.owner === 'player' && s.status === 'open') { s.revCnt += V.events.typhoonScoldStars; s.revSum += V.events.typhoonScoldStars; }
         pushEvent(world, { kind: 'info', title: '颱風天叫外送員出門，被罵了', text: `網路上有人批評，每家店多了 ${V.events.typhoonScoldStars} 則 1 星評價。`, choices: [] });
       }
@@ -1495,8 +1496,8 @@ function dayEvents(world, di) {
   const cd = sc.cold;
   if (cd) {
     if (idx === cd.start - 1 && !cd.eventId) {
-      const e = pushEvent(world, { kind: 'cold', title: `寒流來襲，預計 ${cd.len} 天`, text: `明天起 ${cd.len} 天氣溫驟降，冷飲客人會少四分之一。`, deadlineT: (idx + 1) * 24, choices: [{ key: 'A', label: `推熱飲（花 ${V.events.coldHotDrinkCost.toLocaleString()} 元，跌幅減半）`, cost: V.events.coldHotDrinkCost }, { key: 'B', label: '不動', cost: 0 }] });
-      cd.eventId = e.id;
+      if (hasTea) { const e = pushEvent(world, { kind: 'cold', title: `寒流來襲，預計 ${cd.len} 天`, text: `明天起 ${cd.len} 天氣溫驟降，冷飲客人會少四分之一。`, deadlineT: (idx + 1) * 24, choices: [{ key: 'A', label: `推熱飲（花 ${V.events.coldHotDrinkCost.toLocaleString()} 元，跌幅減半）`, cost: V.events.coldHotDrinkCost }, { key: 'B', label: '不動', cost: 0 }] });
+      cd.eventId = e.id; }
     }
     if (idx >= cd.start && idx < cd.start + cd.len) { dm.coldWalkFactor = cd.hot ? V.events.coldHotDrinkWalkMult : V.events.coldWalkMult; dm.walkW *= dm.coldWalkFactor; }
     if (idx >= cd.start + cd.len) sc.cold = null;
@@ -1519,6 +1520,7 @@ function weeklyChecks(world, di) {
 function monthStart(world, di) {
   const idx = di.idx, sc = world.sched;
   const ev = V.events;
+  const hasTea = liveShops(world).some((s) => s.owner === 'player' && s.businessId === 'tea'), hasDelivery = liveShops(world).some((s) => s.owner === 'player' && s.delivery);
   const r = (tag, k = 0) => stream(world.seed, T.MON, idx, tag, k);
   const exp = playerCo(world).expansion;
   if (ready(exp, 'factory') && exp.facilities.factory.active && stream(world.seed, T.BATCH, idx)() < EXP.chain.batchProb * (exp.projects.fresh ? 0.5 : 1)) {
@@ -1540,9 +1542,9 @@ function monthStart(world, di) {
     world.milkYears[di.y] = true;
     world.milkPct = Math.round((world.milkPct * ev.milkCostMult * 100)) / 100;
     world.milkPct = Math.round(world.milkPct);
-    pushEvent(world, { kind: 'milk', title: '鮮奶漲價', text: `鮮奶批價上漲，鮮奶茶原料成本加 ${Math.round((ev.milkCostMult - 1) * 100)}%。`, deadlineT: world.t + ev.milkRespondDays * 24, choices: [{ key: 'A', label: `鮮奶茶漲 ${ev.milkPriceUp} 元`, cost: 0 }, { key: 'B', label: '自行吸收', cost: 0 }] });
+    if (hasTea) pushEvent(world, { kind: 'milk', title: '鮮奶漲價', text: `鮮奶批價上漲，鮮奶茶原料成本加 ${Math.round((ev.milkCostMult - 1) * 100)}%。`, deadlineT: world.t + ev.milkRespondDays * 24, choices: [{ key: 'A', label: `鮮奶茶漲 ${ev.milkPriceUp} 元`, cost: 0 }, { key: 'B', label: '自行吸收', cost: 0 }] });
   }
-  if (idx >= 90 && idx - sc.platformAt >= 365 && r(4)() < ev.platformProbMonthly) {
+  if (idx >= 90 && idx - sc.platformAt >= 365 && r(4)() < ev.platformProbMonthly && hasDelivery) {
     sc.platformAt = idx;
     pushEvent(world, { kind: 'platform', title: '外送平台推出付費曝光方案', text: `「隨送」推出付費排序：抽成再加 ${V.delivery.boostCommissionAdd} 個百分點，換平台上的知名度 +${V.delivery.boostAware}。可以隨時退出。`, deadlineT: world.t + ev.platformRespondDays * 24, choices: [{ key: 'A', label: '加入', cost: 0 }, { key: 'B', label: '不加入', cost: 0 }] });
   }
@@ -2041,11 +2043,24 @@ export function marketShare30(world) {
   for (const k of Object.keys(sums)) out[k] = tot ? sums[k] / tot : 0;
   return out;
 }
+/** 本月已累計、月底才會從現金扣掉的款項（門店成本、廣告、設施、貸款本息）；與 settleShop／settleMonth 實際扣款一致。 */
+export function monthPayable(world) {
+  const co = playerCo(world), di = world.day || dateOf(world.t / 24), dim = di.dim;
+  let due = 0;
+  for (const s of liveShops(world)) {
+    const m = s.mtd; if (s.owner !== 'player' || (m.rentDays === 0 && m.walk + m.del === 0 && m.openDays === 0 && !m.wasteMilli)) continue;
+    const p = computePnL(world, s, dim);
+    due += p.industryCost - (m.industryPaid || 0) + p.waste - (m.prepaidWaste || 0) + p.wage + p.rent + p.util + p.maintenance + p.pos + p.cardFee + p.bizTax + p.strategyCost + p.managerCost;
+  }
+  due += Math.floor((co.adDayUnits * 10000) / dim) + Math.floor((co.cm.facilityDayUnits || 0) / dim) + Math.floor((co.cm.chainDayUnits || 0) / dim) + (co.cm.earlyInterest || 0);
+  for (const l of co.loans) if (l.left > 0) due += l.left === 1 ? l.balance + Math.round((l.balance * V.loan.rate) / 12) : l.payment;
+  return due;
+}
 export function getKpi(world) {
   const co = playerCo(world), di = world.day || dateOf(world.t / 24);
   const mtd = companyPnL(world, co, null, di).netProfit;
   const sh = marketShare30(world);
-  return { company: co.name, cash: co.cash, monthNetProfit: mtd, marketShare: sh[PLAYER], date: di.key, clock: clockOf(world), weather: di.weather || 'sunny', status: world.status, endReason: world.endReason, awareness: co.awareness, loanBalance: co.loans.reduce((a, l) => a + l.balance, 0), shops: world.shops.filter((s) => s.owner === 'player' && s.status !== 'closed').length };
+  return { company: co.name, cash: co.cash, monthNetProfit: mtd, marketShare: sh[PLAYER], date: di.key, clock: clockOf(world), weather: di.weather || 'sunny', status: world.status, endReason: world.endReason, awareness: co.awareness, loanBalance: co.loans.reduce((a, l) => a + l.balance, 0), payable: monthPayable(world), shops: world.shops.filter((s) => s.owner === 'player' && s.status !== 'closed').length };
 }
 export function getLots(world) {
   return world.lots.map((l) => {
@@ -2121,6 +2136,14 @@ function companyPnL(world, co, row, di) {
   const loanPrincipal = (row ? row.loanPrincipal || 0 : 0) + (source.earlyPrincipal || 0);
   const totalCost = pnl.turnover - pnl.profit + adCost + extraExpense + facilityCost + chainCost + researchExpense + stockWriteOff + loanInterest + incomeTax;
   return { ym, ...pnl, adCost, extraExpense, facilityCost, chainCost, researchExpense, stockWriteOff, facilityCapex: source.facilityCapex || 0, stockPurchases: source.stockPurchases || 0, shopInvestment: source.shopInvestment || 0, assetRecoveries: source.assetRecoveries || 0, warehouseSavings: source.warehouseSavings || 0, factorySavings: source.factorySavings || 0, factoryCups: source.factoryCups || 0, loanInterest, incomeTax, loanPrincipal, totalCost, netProfit: pnl.turnover - totalCost, netMargin: pnl.turnover ? (pnl.turnover - totalCost) / pnl.turnover : null, incomplete: row ? !!row.reportingIncomplete || row.loanInterest == null || row.extraExpense == null : !!co.cm.reportingIncomplete || co.cm.extraExpense == null };
+}
+
+/** 門店三年挑戰的過關進度：月獲利不含年度營所稅（12 月帳含全年稅，會誤判成虧損）。 */
+export function campaignProgress(world) {
+  const shops = world.shops.filter((s) => s.owner === 'player' && s.status === 'open'), co = playerCo(world), di = dateOf(Math.floor(world.t / 24));
+  const rows = co.rows.slice(-3).map((r) => companyPnL(world, co, r, di)), milestones = Math.max(0, ...shops.map((s) => s.industry?.milestones.length || 0));
+  const profitMonths = rows.filter((m) => m.netProfit + m.incomeTax > 0).length, cashOk = co.cash > 0;
+  return { milestones, months: rows.length, profitMonths, cashOk, ok: milestones === 3 && rows.length === 3 && profitMonths === 3 && cashOk };
 }
 
 /** 月報沿用已結帳的門店歷史；同月關店的最後帳仍保留在原店。 */
