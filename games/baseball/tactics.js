@@ -59,11 +59,11 @@ const TACTICS={
         h+=`<button class="ss-tr" data-t="phgo" data-v="${id}"><b>${nameOf(id)}<small>${{R:'右打',L:'左打',S:'兩打'}[br.bats]||''}</small></b><span>打擊 ${grade(br.meet)}　力量 ${grade(br.power)}　${s?`對${pr.hand==='L'?'左':'右'}投 OPS ${s[2].toFixed(3).replace(/^0/,'')}`:''}</span><span class="ss-abl">${abTags(br.ab)}</span></button>`; }
       h+=row('main','', '返回', '');
     } else if(view==='pc'){
-      const f=fielding(g), st=typeof SEASON!=='undefined'&&g.season?SEASON.st:null;
+      const f=fielding(g), st=g.campaign?.st;
       h+=`<div class="ss-th">牛棚<small>現任 ${nameOf(f.pitcher)}・${f.pc[f.pitcher]||0} 球</small></div>`;
       const list=f.T.bullpen.concat(f.T.rotation).filter(id=>id!==f.pitcher && !f.usedPen.includes(id) && !(f.T.rotation.includes(id)&&id!==f.T.rotation[0]&&false));
       for(const id of f.T.bullpen.filter(id=>id!==f.pitcher)){
-        const pr=pit(id), tired=f.usedPen.includes(id), rest=st&&st.lastP&&st.lastP[id]===st.day-1;
+        const pr=pit(id), tired=f.usedPen.includes(id), rest=st&&st.lastP&&st.lastP[id]===(st.pitchGames?.[f.abbr]??st.day)-1;
         h+=`<button class="ss-tr${tired?' dis':''}" data-t="${tired?'':'pcgo'}" data-v="${id}"><b>${nameOf(id)}<small>${pr.hand==='L'?'左投':'右投'}${rest?'・昨天有投':''}${tired?'・已退場':''}</small></b><span>${pr.kmh} km/h　控球 ${grade(pr.control)}　體力 ${grade(pr.stamina)}　防禦率 ${PLAYERS[id]?.p?.era||'-.--'}</span><span class="ss-abl">${abTags(pr.ab)}</span></button>`;
       }
       h+=row('main','', '返回', '');

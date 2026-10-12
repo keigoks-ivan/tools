@@ -18,8 +18,11 @@ const reg=(v,n,lg,k)=>v==null?lg:(v*n+lg*k)/(n+k);
 
 /* ---------- 能力值（公式公開） ---------- */
 const RCACHE={};
+// 經營模式只提供名單與養成後的能力；原始 MLB 能力與判定公式共用。
+let LEAGUE_CTX=null;
+const leagueProfile=(kind,r)=>LEAGUE_CTX&&LEAGUE_CTX[kind]?LEAGUE_CTX[kind](r):r;
 function bat(pid){
-  if(RCACHE['b'+pid]) return RCACHE['b'+pid];
+  if(RCACHE['b'+pid]) return leagueProfile('batter',RCACHE['b'+pid]);
   const P=PLAYERS[pid]||{}, h=P.h||{pa:0}, n=h.pa||0;
   const avg=reg(h.avg,n,LG.avg,200), slg=reg(h.slg,n,LG.slg,200), kp=reg(n?h.k/n:null,n,LG.kp,150);
   const maxEV=h.maxEV||LG.maxEV-2, sprint=h.sprint||LG.sprint-0.5;
@@ -33,11 +36,11 @@ function bat(pid){
     sprint, hp1b:h.hp1b||(LG.hp1b-(sprint-LG.sprint)*0.12),
     szTop:P.szTop||3.4, szBot:P.szBot||1.6, bats:P.bats||'R'};
   r.ab=batAbilities(r); r.has=k=>r.ab.some(a=>a.k===k);
-  return RCACHE['b'+pid]=r;
+  RCACHE['b'+pid]=r; return leagueProfile('batter',r);
 }
 const DEFAULT_PITCHES=[{t:'FF',name:'四縫線速球',mph:93.5,use:.55,whiff:.2,px:-0.6,pz:1.3},{t:'SL',name:'滑球',mph:85,use:.3,whiff:.33,px:0.4,pz:0.1},{t:'CH',name:'變速球',mph:85,use:.15,whiff:.3,px:-1.1,pz:0.5}];
 function pit(pid){
-  if(RCACHE['p'+pid]) return RCACHE['p'+pid];
+  if(RCACHE['p'+pid]) return leagueProfile('pitcher',RCACHE['p'+pid]);
   const P=PLAYERS[pid]||{}, s=P.p||{bf:0}, bf=s.bf||0, outs=s.outs||0, ip=outs/3;
   const bb9=reg(ip?s.bb/ip*9:null,ip,LG.bb9,25), k9=reg(ip?s.k/ip*9:null,ip,LG.k9,25);
   let pitches=(s.pitches&&s.pitches.length?s.pitches:DEFAULT_PITCHES).filter(p=>p.use>=0.02);
@@ -54,7 +57,7 @@ function pit(pid){
     limit:starter?Math.round(55+stamina*0.6):Math.round(18+stamina*0.4),
     brk:pitches.filter(p=>p!==fb).map(p=>({t:p.t,name:p.name,lv:levels[p.t],px:p.px,pz:p.pz}))};
   r.perStart=perStart; r.maxMph=maxMph-2.2; r.ab=pitAbilities(r); r.has=k=>r.ab.some(a=>a.k===k);
-  return RCACHE['p'+pid]=r;
+  RCACHE['p'+pid]=r; return leagueProfile('pitcher',r);
 }
 
 /* =========================================================
@@ -436,8 +439,9 @@ function advance(bases,outs,res,batterId){
    一場比賽
    ========================================================= */
 const TEAM=abbr=>TEAMS.find(t=>t.abbr===abbr);
-function newGame(awayAbbr,homeAbbr,userAbbr,spAway,spHome){
-  const mk=(abbr,sp)=>{ const T=TEAM(abbr); return {abbr,T,lineup:T.lineup.map(l=>({...l})),idx:0,pitcher:sp||T.rotation[0],
+function newGame(awayAbbr,homeAbbr,userAbbr,spAway,spHome,league){
+  LEAGUE_CTX=league||null;
+  const mk=(abbr,sp)=>{ const T=league?league.team(abbr):TEAM(abbr); return {abbr,T,lineup:T.lineup.map(l=>({...l})),idx:0,pitcher:sp||T.rotation[0],
     usedPen:[],line:[],runs:0,hits:0,pc:{},inningRuns:0}; };
   const g={away:mk(awayAbbr,spAway),home:mk(homeAbbr,spHome),user:userAbbr,inning:1,half:'top',outs:0,bases:[null,null,null],
           balls:0,strikes:0,over:false,log:[],pbp:[]};

@@ -18,20 +18,20 @@ const log5=(b,p,lg)=>{ const x=b*p/lg, y=(1-b)*(1-p)/(1-lg); return x/(x+y); };
 const QLG={k:.225,bb:.085,hr:.030,babip:.291};
 const QCACHE={};
 function qBat(id){
-  if(QCACHE['b'+id]) return QCACHE['b'+id];
+  if(QCACHE['b'+id]) return leagueProfile('quickBatter',{id,...QCACHE['b'+id]});
   const h=(PLAYERS[id]||{}).h||{pa:0}, n=h.pa||0, R=(v,lg)=>reg(v,n,lg,150);
   const ab=Math.max(1,n-(h.bb||0)), H=(h.avg||0)*ab, TB=(h.slg||0)*ab, hr=h.hr||0;
   const xb=Math.max(0,TB-H-3*hr), bip=Math.max(1,ab-(h.k||0)-hr);
   const r={k:R(n?h.k/n:null,QLG.k), bb:R(n?h.bb/n:null,QLG.bb), hr:R(n?hr/n:null,QLG.hr),
     babip:R(n?Math.max(0,H-hr)/bip:null,QLG.babip), xbr:n?clamp(xb/Math.max(1,H-hr)/1.15,0.05,0.5):0.2};
-  return QCACHE['b'+id]=r;
+  QCACHE['b'+id]=r; return leagueProfile('quickBatter',{id,...r});
 }
 function qPit(id){
-  if(QCACHE['p'+id]) return QCACHE['p'+id];
+  if(QCACHE['p'+id]) return leagueProfile('quickPitcher',{id,...QCACHE['p'+id]});
   const s=(PLAYERS[id]||{}).p||{bf:0}, n=s.bf||0, R=(v,lg)=>reg(v,n,lg,150), era=parseFloat(s.era)||LG.era;
   const r={k:R(n?s.k/n:null,QLG.k), bb:R(n?s.bb/n:null,QLG.bb), hr:R(n?s.hr/n:null,QLG.hr),
     babip:QLG.babip*clamp(Math.pow(reg(era,(s.outs||0)/3,LG.era,40)/LG.era,0.35),0.85,1.15)};
-  return QCACHE['p'+id]=r;
+  QCACHE['p'+id]=r; return leagueProfile('quickPitcher',{id,...r});
 }
 function quickPA(g){
   const b=qBat(curBatter(g)), p=qPit(curPitcher(g)), f=fielding(g);
@@ -51,8 +51,8 @@ function quickPA(g){
   return {kind:'OUT',text:'飛球出局',air:true,dist:rnd(120,390),phi};
 }
 // 快速模擬一場（含電腦戰術）。回傳比賽物件（pbp 可累計個人成績）
-function quickGame(away,home,spA,spH){
-  const g=newGame(away,home,null,spA,spH); restPen(g);
+function quickGame(away,home,spA,spH,campaign){
+  const g=newGame(away,home,null,spA,spH,campaign?.context()); g.campaign=campaign; g.postseason=campaign?.st.phase==='playoffs'; restPen(g);
   let guard=0;
   while(!g.over && guard++<400){
     maybeChangePitcher(g);
@@ -66,16 +66,16 @@ function quickGame(away,home,spA,spH){
   return g;
 }
 // 完整引擎模擬一場（玩家隊伍「模擬這場」用）
-function fullSimGame(away,home,spA,spH){
-  const g=newGame(away,home,null,spA,spH); restPen(g); let guard=0;
+function fullSimGame(away,home,spA,spH,campaign){
+  const g=newGame(away,home,null,spA,spH,campaign?.context()); g.campaign=campaign; g.postseason=campaign?.st.phase==='playoffs'; restPen(g); let guard=0;
   while(!g.over && guard++<400){ maybeChangePitcher(g); const r=simTacticPA(g,null); if(r.tactic==='steal') continue; applyResult(g,r.res,r.pre); }
   return g;
 }
 
 // 牛棚休息：球季中前一天投過的中繼，今天不排（先放進 usedPen）
 function restPen(g){
-  const st=SEASON.st; if(!st||!st.lastP) return;
-  for(const t of [g.away,g.home]) t.usedPen=t.T.bullpen.filter(id=>st.lastP[id]===st.day-1);
+  const st=g.campaign?.st; if(!st||!st.lastP) return;
+  for(const t of [g.away,g.home]){ const day=st.pitchGames?.[t.abbr]??st.day; t.usedPen=t.T.bullpen.filter(id=>st.lastP[id]===day-1); }
 }
 /* ---------- 成績累計 ---------- */
 const STAT0=()=>({g:0,pa:0,ab:0,h:0,d:0,t:0,hr:0,rbi:0,bb:0,k:0,sb:0,cs:0,bf:0,outs:0,er:0,pk:0,pbb:0,ph:0,phr:0,w:0,l:0,gp:0});
@@ -96,61 +96,103 @@ function addGameStats(stats,g){
 }
 const fmtAvg=(h,ab)=>ab?(h/ab).toFixed(3).replace(/^0/,''):'.000';
 const fmtEra=(er,outs)=>outs?(er*27/outs).toFixed(2):'-.--';
+function campaignStats(g,id){
+  const S=g.campaign,st=S?.st; if(!st) return null;
+  const source=g.postseason&&st.format===12?st.poStats:st.stats, base=source?.[id]||STAT0();
+  if(g.campaignRecorded) return base;
+  const current={}; addGameStats(current,g); const p=current[id]||STAT0();
+  return Object.fromEntries(Object.keys(base).map(k=>[k,base[k]+(p[k]||0)]));
+}
+
+// 遊戲賽程：輪轉配對、三連戰、第二循環主客互換；存檔後不重抽。
+function seasonCalendar(games,year=2026){
+  const clubs=TEAMS.map(t=>t.abbr).sort(), ring=clubs.slice();
+  const shift=(year-2026)%29; for(let n=0;n<shift;n++) ring.splice(1,0,ring.pop());
+  const rounds=[];
+  for(let r=0;r<29;r++){
+    const pairs=[];
+    for(let i=0;i<15;i++){ const a=ring[i],b=ring[29-i]; pairs.push((i===0?r:i)%2?[a,b]:[b,a]); }
+    rounds.push(pairs); ring.splice(1,0,ring.pop());
+  }
+  return Array.from({length:games},(_,d)=>{ const series=Math.floor(d/3), reverse=Math.floor(series/29)%2;
+    return rounds[series%29].map(p=>reverse?[p[1],p[0]]:p.slice()); });
+}
+function seriesMatch(s,format){
+  const n=s.wins[0]+s.wins[1]; let high=n%2===0;
+  if(format===12) high=s.round===0|| (s.bestOf===7?[0,1,5,6]:s.bestOf===5?[0,1,4]:[0,2]).includes(n);
+  return {away:s.teams[high?1:0],home:s.teams[high?0:1]};
+}
 
 /* =========================================================
    球季
    ========================================================= */
 const SEASON={
   KEY:'pawa_season_v1', st:null,
-  load(){ this.st=ssStore.get(this.KEY,null); return this.st; },
-  save(){ if(this.st) ssStore.set(this.KEY,this.st); },
+  load(){ this.st=ssStore.get(this.KEY,null); if(this.st&&(!TEAM(this.st.user)||!this.st.rec||!this.st.stats)) this.st=null; return this.st; },
+  save(){ if(this.st) this.saveOK=ssStore.set(this.KEY,this.st); return this.saveOK; },
+  context(){ return null; },
+  team(abbr){ return TEAM(abbr); },
+  playoffStats(){ return this.st.format===12?(this.st.poStats||(this.st.poStats={})):this.st.stats; },
   clear(){ this.st=null; try{ localStorage.removeItem(this.KEY); }catch(e){} },
-  start(user,games){
+  start(user,games,year=2026){
     const rec={}; TEAMS.forEach(t=>rec[t.abbr]={w:0,l:0,rs:0,ra:0,gp:0});
-    this.st={v:1,user,games,day:0,rec,stats:{},log:[],phase:'regular',po:null,rot:{},userWins:0,userGames:0,streak:0};
+    this.st={v:2,user,games,year,format:12,calendar:seasonCalendar(games,year),results:[],pitchGames:{},day:0,rec,stats:{},poStats:{},log:[],phase:'regular',po:null,rot:{},userWins:0,userGames:0,streak:0};
     this.save(); return this.st;
   },
-  // 當天賽程：30 隊隨機兩兩配對（用天數當種子，重新整理也一樣）
+  // 舊存檔沿用原本每天的配對，新球季讀取已保存的三連戰。
   pairings(day){
+    if(this.st.calendar) return this.st.calendar[day]||[];
     const ab=TEAMS.map(t=>t.abbr); let s=(day+1)*2654435761%4294967296;
     const rnd2=()=>((s=(s*1664525+1013904223)%4294967296)/4294967296);
     for(let i=ab.length-1;i>0;i--){ const j=Math.floor(rnd2()*(i+1)); [ab[i],ab[j]]=[ab[j],ab[i]]; }
     const out=[]; for(let i=0;i<ab.length;i+=2) out.push(rnd2()<0.5?[ab[i],ab[i+1]]:[ab[i+1],ab[i]]);
     return out;
   },
-  nextSP(abbr){ const T=TEAM(abbr), i=this.st.rot[abbr]||0; return T.rotation[i%T.rotation.length]; },
+  nextSP(abbr){ const T=this.team(abbr), i=this.st.rot[abbr]||0; return T.rotation[i%T.rotation.length]; },
   bumpRot(abbr){ this.st.rot[abbr]=(this.st.rot[abbr]||0)+1; },
   userGame(){
     const st=this.st; if(!st) return null;
     if(st.phase==='regular'){ if(st.day>=st.games) return null; const p=this.pairings(st.day).find(x=>x.includes(st.user)); return {away:p[0],home:p[1],spA:this.nextSP(p[0]),spH:this.nextSP(p[1]),label:`例行賽第 ${st.day+1} 場`}; }
     if(st.phase==='playoffs'){ const s=this.curSeries(); if(!s||!s.teams.includes(st.user)) return null;
-      const n=s.wins[0]+s.wins[1], home=(n%2===0)?s.teams[0]:s.teams[1], away=s.teams.find(t=>t!==home);
+      const n=s.wins[0]+s.wins[1], {away,home}=seriesMatch(s,st.format);
       return {away,home,spA:this.nextSP(away),spH:this.nextSP(home),label:`${s.name}　第 ${n+1} 戰（${s.bestOf} 戰 ${Math.ceil(s.bestOf/2)} 勝）`}; }
     return null;
   },
   record(g,away,home){
     const st=this.st, a=g.away.runs, h=g.home.runs, ra=st.rec[away], rh=st.rec[home];
+    this.markPitchers(g);
     ra.rs+=a; ra.ra+=h; rh.rs+=h; rh.ra+=a; ra.gp++; rh.gp++;
     if(a>h){ ra.w++; rh.l++; } else { rh.w++; ra.l++; }
     addGameStats(st.stats,g); this.bumpRot(away); this.bumpRot(home);
-    st.lastP=st.lastP||{}; for(const e of g.pbp) st.lastP[e.pitcher]=st.day;
+  },
+  markPitchers(g){
+    const st=this.st; st.lastP=st.lastP||{}; st.pitchGames=st.pitchGames||{};
+    for(const t of [g.away,g.home]){ const n=st.pitchGames[t.abbr]??st.rec[t.abbr].gp;
+      for(const e of g.pbp) if(e.team!==t.abbr) st.lastP[e.pitcher]=n;
+      st.pitchGames[t.abbr]=n+1;
+    }
   },
   // 玩家隊伍的比賽結束（親自打或模擬）：記錄、模擬同一天其他比賽、推進
   finishUserGame(g,played){
+    if(g.campaignRecorded||!g.over) return null;
+    g.campaignRecorded=true;
     const st=this.st, away=g.away.abbr, home=g.home.abbr, won=(g.away.runs>g.home.runs)===(away===st.user);
+    const phase=st.phase, day=st.day, label=this.userGame()?.label||'季後賽';
+    st.results=st.results||[]; st.results.push({day,phase,label,away,home,a:g.away.runs,h:g.home.runs,played});
     if(st.phase==='regular'){
       this.record(g,away,home);
-      for(const [a2,h2] of this.pairings(st.day)){ if(a2===away&&h2===home) continue; const q=quickGame(a2,h2,this.nextSP(a2),this.nextSP(h2)); this.record(q,a2,h2); }
+      for(const [a2,h2] of this.pairings(st.day)){ if(a2===away&&h2===home) continue; const q=quickGame(a2,h2,this.nextSP(a2),this.nextSP(h2),this); this.record(q,a2,h2); }
       st.day++;
-    } else if(st.phase==='playoffs'){ addGameStats(st.stats,g); this.bumpRot(away); this.bumpRot(home); this.seriesResult(g.away.runs>g.home.runs?away:home); }
+    } else if(st.phase==='playoffs'){ addGameStats(this.playoffStats(),g); this.markPitchers(g); this.bumpRot(away); this.bumpRot(home); this.seriesResult(g.away.runs>g.home.runs?away:home); }
     st.userGames++; if(won){ st.userWins++; st.streak=Math.max(1,st.streak+1); } else st.streak=Math.min(-1,st.streak-1);
-    st.log.unshift(`${st.phase==='regular'?'例行賽':'季後賽'}｜${TEAM(away).zh} ${g.away.runs}：${g.home.runs} ${TEAM(home).zh}${played?'':'（模擬）'}`);
+    st.log.unshift(`${phase==='regular'?'例行賽':'季後賽'}｜${TEAM(away).zh} ${g.away.runs}：${g.home.runs} ${TEAM(home).zh}${played?'':'（模擬）'}`);
     st.log=st.log.slice(0,40);
     if(st.phase==='regular' && st.day>=st.games) this.startPlayoffs();
+    if(this.onResult) this.onResult(g,won,{day,phase});
     this.save(); ACH.onSeasonGame(won,this);
     return won;
   },
-  simUserGame(){ const u=this.userGame(); if(!u) return null; const g=fullSimGame(u.away,u.home,u.spA,u.spH); this.finishUserGame(g,false); return g; },
+  simUserGame(){ const u=this.userGame(); if(!u) return null; const g=fullSimGame(u.away,u.home,u.spA,u.spH,this); if(!g.over) throw new Error('比賽尚未結束，沒有更新球季。請重新模擬這場。'); this.finishUserGame(g,false); return g; },
   // 模擬好幾天（非同步，避免卡住畫面）
   async simDays(n,onProgress){
     for(let i=0;i<n && this.st.phase==='regular' && this.userGame();i++){ this.simUserGame(); if(onProgress) onProgress(i+1,n); await new Promise(r=>setTimeout(r,0)); }
@@ -166,6 +208,18 @@ const SEASON={
   /* ---------- 季後賽：每聯盟戰績前三名，第一種子輪空 ---------- */
   startPlayoffs(){
     const st=this.st, seeds={};
+    if(st.format===12){
+      const rank=(a,b)=>{ const x=st.rec[a],y=st.rec[b]; return y.w-x.w||(y.rs-y.ra)-(x.rs-x.ra)||a.localeCompare(b); };
+      for(const L of ['AL','NL']){
+        const winners=Object.entries(SS_DIV).filter(([d])=>d.startsWith(L)).map(([,t])=>t.slice().sort(rank)[0]).sort(rank);
+        const wild=TEAMS.map(t=>t.abbr).filter(a=>SS_LEAGUE(a)===L&&!winners.includes(a)).sort(rank).slice(0,3);
+        seeds[L]=winners.concat(wild);
+      }
+      const bo=st.games>=162?[3,5,7,7]:st.games>=30?[3,3,5,5]:[1,1,3,3];
+      st.phase='playoffs'; st.po={seeds,bo,round:0,series:[],done:[],champ:null};
+      for(const L of ['AL','NL']) for(const [i,j,slot] of [[2,5,1],[3,4,0]]) st.po.series.push({name:`${L==='AL'?'美':'國'}聯外卡戰`,teams:[seeds[L][i],seeds[L][j]],wins:[0,0],bestOf:bo[0],L,slot,round:0});
+      ACH.check('playoffs',seeds.AL.concat(seeds.NL).includes(st.user)); this.advancePlayoffs(); return;
+    }
     for(const L of ['AL','NL']){
       seeds[L]=TEAMS.map(t=>t.abbr).filter(a=>SS_LEAGUE(a)===L).sort((x,y)=>{const a=st.rec[x],b=st.rec[y]; return (b.w/(b.w+b.l||1))-(a.w/(a.w+a.l||1))||b.rs-b.ra-(a.rs-a.ra);}).slice(0,3);
     }
@@ -189,11 +243,21 @@ const SEASON={
     while(guard++<50){
       const open=po.series.filter(s=>!s.winner);
       const cpu=open.find(s=>!s.teams.includes(st.user));
-      if(cpu){ while(!cpu.winner){ const n=cpu.wins[0]+cpu.wins[1], home=n%2===0?cpu.teams[0]:cpu.teams[1], away=cpu.teams.find(t=>t!==home);
-          const q=quickGame(away,home,this.nextSP(away),this.nextSP(home)); addGameStats(st.stats,q); this.bumpRot(away); this.bumpRot(home);
+      if(cpu){ while(!cpu.winner){ const {away,home}=seriesMatch(cpu,st.format);
+          const q=quickGame(away,home,this.nextSP(away),this.nextSP(home),this); addGameStats(this.playoffStats(),q); this.markPitchers(q); this.bumpRot(away); this.bumpRot(home);
           const w=q.away.runs>q.home.runs?away:home; cpu.wins[cpu.teams.indexOf(w)]++; if(Math.max(...cpu.wins)>=Math.ceil(cpu.bestOf/2)) cpu.winner=cpu.teams[cpu.wins[0]>cpu.wins[1]?0:1]; }
         continue; }
       if(open.length) return;   // 剩玩家的系列賽，等玩家打
+      if(st.format===12){
+        if(po.round===3){ po.champ=po.series[0].winner; po.done.push(...po.series); po.series=[]; st.phase='done'; ACH.check('champ',po.champ===st.user); return; }
+        const old=po.series; po.done.push(...old); po.round++;
+        const make=(name,teams,L,slot)=>({name,teams,wins:[0,0],bestOf:po.bo[po.round],L,slot,round:po.round});
+        const higher=(teams,L)=>teams.slice().sort((a,b)=>po.seeds[L].indexOf(a)-po.seeds[L].indexOf(b));
+        if(po.round===1) po.series=['AL','NL'].flatMap(L=>[0,1].map(slot=>make(`${L==='AL'?'美':'國'}聯分區賽`,[po.seeds[L][slot],old.find(s=>s.L===L&&s.slot===slot).winner],L,slot)));
+        else if(po.round===2) po.series=['AL','NL'].map(L=>make(`${L==='AL'?'美':'國'}聯冠軍賽`,higher(old.filter(s=>s.L===L).map(s=>s.winner),L),L,0));
+        else { const teams=old.map(s=>s.winner).sort((a,b)=>st.rec[b].w-st.rec[a].w||(st.rec[b].rs-st.rec[b].ra)-(st.rec[a].rs-st.rec[a].ra)); po.series=[make('世界大賽',teams,'WS',0)]; }
+        continue;
+      }
       // 這一輪全部結束 → 排下一輪
       const W=L=>po.series.find(s=>s.L===L).winner;
       if(po.round===2){ po.champ=po.series[0].winner; po.done.push(...po.series); po.series=[]; st.phase='done'; ACH.check('champ',po.champ===st.user); return; }
@@ -204,7 +268,7 @@ const SEASON={
   },
   leaders(){
     const st=this.st, tg=Math.max(1,Math.max(...Object.values(st.rec).map(r=>r.gp))), list=Object.entries(st.stats);
-    const nm=id=>`${nameOf(id)}<small>${(TEAMS.find(t=>t.lineup.some(l=>l.id==id)||t.rotation.includes(+id)||t.bullpen.includes(+id)||t.bench.includes(+id))||{}).abbr||''}</small>`;
+    const nm=id=>`${nameOf(id)}<small>${(TEAMS.map(t=>this.team(t.abbr)).find(t=>t.lineup.some(l=>l.id==id)||t.rotation.includes(+id)||t.bullpen.includes(+id)||t.bench.includes(+id))||{}).abbr||''}</small>`;
     const top=(f,fmt,filter,asc)=>list.filter(([id,s])=>filter(s)).sort((a,b)=>asc?f(a[1])-f(b[1]):f(b[1])-f(a[1])).slice(0,5).map(([id,s])=>({n:nm(id),v:fmt(s)}));
     const qPA=s=>s.pa>=Math.max(15,tg*3.1), qIP=s=>s.outs>=Math.max(15,tg*3);   // 規定打席 3.1／場、規定投球局數 1／場（大聯盟規定）
     return {
@@ -285,25 +349,34 @@ const SSUI={
   init(){
     if(this.inited||typeof document==='undefined') return; this.inited=true;
     SEASON.load();
+    if(typeof FRANCHISE!=='undefined') FRANCHISE.load();
     const card=document.querySelector('#intro .tcard'), logo=card.querySelector('.logo');
     const tabs=document.createElement('div'); tabs.className='ss-tabs'; tabs.id='ssTabs';
-    tabs.innerHTML=[['single','單場比賽'],['season','球季模式'],['records','紀錄'],['ach','成就']].map(([k,n])=>`<button data-k="${k}">${n}</button>`).join('');
+    tabs.innerHTML=[['single','單場比賽'],['season','季賽模式'],['franchise','球團經營'],['records','紀錄'],['ach','成就']].map(([k,n])=>`<button data-k="${k}">${n}</button>`).join('');
     logo.after(tabs);
     const root=document.createElement('div'); root.id='ssRoot'; root.className='ss-root'; tabs.after(root);
     tabs.addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) this.show(b.dataset.k); });
-    root.addEventListener('click',e=>{ const b=e.target.closest('[data-a]'); if(b) this.act(b.dataset.a,b.dataset.v); });
-    this.show(SEASON.st&&SEASON.st.phase!=='done'?'season':'single');
+    root.addEventListener('click',e=>{ const f=e.target.closest('[data-f]'); if(f){ FRUI.act(f.dataset.f,f.dataset.v); return; } const b=e.target.closest('[data-a]'); if(b) this.act(b.dataset.a,b.dataset.v); });
+    root.addEventListener('change',e=>{ if(e.target.dataset.fc) FRUI.change(e.target.dataset.fc,e.target.value); });
+    const last=ssStore.get('pawa_menu_mode',null);
+    this.show(last==='franchise'&&FRANCHISE.st?'franchise':SEASON.st&&SEASON.st.phase!=='done'?'season':'single');
   },
   show(k){
+    if(this.simming||typeof FRUI!=='undefined'&&FRUI.busy) return;
+    LEAGUE_CTX=k==='franchise'&&FRANCHISE.st?FRANCHISE.context:null;
+    ssStore.set('pawa_menu_mode',k);
     this.tab=k; const card=document.querySelector('#intro .tcard');
     card.classList.toggle('ss-mode',k!=='single');
     document.querySelectorAll('#ssTabs button').forEach(b=>b.classList.toggle('on',b.dataset.k===k));
     this.render();
+    card.scrollTop=0;
   },
   render(){
     const root=document.getElementById('ssRoot'); if(!root) return;
     if(this.tab==='single'){ root.innerHTML=''; return; }
-    root.innerHTML=this.tab==='season'?this.seasonHTML():this.tab==='records'?this.recordsHTML():this.achHTML();
+    root.innerHTML=this.tab==='franchise'?FRUI.html():this.tab==='season'?this.seasonHTML():this.tab==='records'?this.recordsHTML():this.achHTML();
+    const busy=this.simming||typeof FRUI!=='undefined'&&FRUI.busy; root.setAttribute('aria-busy',String(busy));
+    if(busy) root.querySelectorAll('button,select').forEach(e=>e.disabled=true);
   },
   chip(a){ const T=TEAM(a); return `<span class="ss-chip" style="background:${T.colors[0]};color:${T.colors[1]==='#000000'?'#fff':T.colors[1]}">${a}</span>`; },
   seasonHTML(){
@@ -311,7 +384,7 @@ const SSUI={
     if(!st){
       const sel=this.newTeam||'DET', n=this.newGames||30;
       return `<div class="ss-pane"><div class="ss-h">開一個新球季</div>
-        <div class="ss-sub">選一支球隊打例行賽，季末各聯盟戰績前三名打季後賽。其他球隊的比賽會自動模擬。</div>
+        <div class="ss-sub">從 30 隊選一隊，親自比賽或交給電腦模擬。新球季採三連戰賽程，各聯盟三支分區冠軍與三支外卡晉級季後賽。</div>
         <div class="ss-grid">${TEAMS.slice().sort((a,b)=>a.zh.localeCompare(b.zh,'zh-Hant')).map(t=>`<button data-a="pick" data-v="${t.abbr}" class="${t.abbr===sel?'on':''}" style="--tc:${t.colors[0]}">${t.abbr}<small>${t.zh}</small></button>`).join('')}</div>
         <div class="ss-row"><span>場數</span>${[10,30,162].map(x=>`<button data-a="games" data-v="${x}" class="ss-seg${x===n?' on':''}">${x} 場</button>`).join('')}</div>
         <button class="go ss-go" data-a="start">開始球季</button></div>`;
@@ -320,6 +393,8 @@ const SSUI={
     let h=`<div class="ss-pane"><div class="ss-top">${this.chip(u)}<b>${TEAM(u).zh}</b><span class="ss-wl">${r.w} 勝 ${r.l} 敗</span>
       <span class="ss-ph">${st.phase==='regular'?`例行賽 ${st.day}／${st.games} 場`:st.phase==='playoffs'?'季後賽':'球季結束'}</span>
       <button class="ss-mini" data-a="reset">${this.confirmReset?'再按一次確認放棄':'放棄球季'}</button></div>`;
+    if(SEASON.saveOK===false) h+='<div class="fr-notice">瀏覽器無法保存進度；目前仍可遊玩，關閉頁面後可能遺失。</div>';
+    if(this.error) h+=`<div class="fr-notice" role="alert">${this.error}</div>`;
     if(st.phase==='done'){ const c=st.po.champ; h+=`<div class="ss-champ">${this.chip(c)}<b>${TEAM(c).zh}</b> 贏得世界大賽${c===u?'，你是冠軍！':''}</div><button class="go ss-go" data-a="restart">開新球季</button>`; }
     else if(next){
       const sp=(id)=>`${nameOf(id)}<small>${pit(id).hand==='L'?'左投':'右投'}・防禦率 ${PLAYERS[id]?.p?.era||'-.--'}</small>${abTags(pit(id).ab)}`;
@@ -330,20 +405,28 @@ const SSUI={
         ${this.simming?'<div class="ss-prog" id="ssProg">模擬中……</div>':''}</div>`;
     } else if(st.phase==='playoffs'){ h+=`<div class="ss-next"><div class="ss-nl">你的球隊這一輪沒有比賽（或已被淘汰）。</div><button class="ss-btn" data-a="poall">模擬到季後賽結束</button></div>`; }
     if(st.po) h+=this.bracketHTML();
+    h+=this.scheduleHTML(SEASON);
     h+=`<div class="ss-cols"><div>${this.standHTML()}</div><div>${this.leadersHTML()}<div class="ss-log"><div class="ss-h2">最近比賽</div>${st.log.slice(0,8).map(x=>`<div>${x}</div>`).join('')||'<div>還沒有比賽。</div>'}</div></div></div></div>`;
     return h;
   },
-  standHTML(){
-    const S=SEASON.standings(), u=SEASON.st.user;
+  standHTML(campaign=SEASON){
+    const S=campaign.standings(), u=campaign.st.user;
     return `<div class="ss-h2">排名</div>`+Object.entries(S).map(([d,rows])=>`<table class="ss-tb"><tr><th>${d}</th><th>勝</th><th>敗</th><th>勝率</th><th>勝差</th></tr>${rows.map(r=>`<tr class="${r.a===u?'me':''}"><td>${this.chip(r.a)} ${TEAM(r.a).zh}</td><td>${r.w}</td><td>${r.l}</td><td>${(r.w+r.l?r.w/(r.w+r.l):0).toFixed(3).replace(/^0/,'')}</td><td>${r.gb?r.gb.toFixed(1):'—'}</td></tr>`).join('')}</table>`).join('');
   },
-  leadersHTML(){
-    const L=SEASON.leaders();
-    return `<div class="ss-h2">個人排行</div><div class="ss-lead">${Object.entries(L).map(([k,v])=>`<div class="ss-lb"><div class="ss-lt">${k}</div>${v.map((x,i)=>`<div><span>${i+1}</span>${x.n}<b>${x.v}</b></div>`).join('')||'<div>—</div>'}</div>`).join('')}</div>`;
+  leadersHTML(campaign=SEASON){
+    const L=campaign.leaders();
+    return `<div class="ss-h2">例行賽個人排行</div><div class="ss-lead">${Object.entries(L).map(([k,v])=>`<div class="ss-lb"><div class="ss-lt">${k}</div>${v.map((x,i)=>`<div><span>${i+1}</span>${x.n}<b>${x.v}</b></div>`).join('')||'<div>—</div>'}</div>`).join('')}</div>`;
   },
-  bracketHTML(){
-    const po=SEASON.st.po, all=po.done.concat(po.series);
+  bracketHTML(campaign=SEASON){
+    const po=campaign.st.po, all=po.done.concat(po.series);
     return `<div class="ss-h2">季後賽</div><div class="ss-br">${all.map(s=>`<div class="ss-sr${s.winner?' fin':''}"><div class="ss-sn">${s.name}<small>${s.bestOf} 戰 ${Math.ceil(s.bestOf/2)} 勝</small></div>${s.teams.map((t,i)=>`<div class="${s.winner===t?'w':''}">${this.chip(t)} ${TEAM(t).zh}<b>${s.wins[i]}</b></div>`).join('')}</div>`).join('')}</div>`;
+  },
+  scheduleHTML(campaign=SEASON){
+    const st=campaign.st, start=Math.min(Math.max(0,st.day-3),Math.max(0,st.games-10));
+    const page=campaign===SEASON?(this.schedulePage??Math.floor(start/10)):FRUI.schedulePage??Math.floor(start/10);
+    const from=clamp(page*10,0,Math.floor((st.games-1)/10)*10), prefix=campaign===SEASON?'data-a="schedule"':'data-f="schedule"';
+    const results=st.results||[];
+    return `<div class="ss-h2">賽程與結果 <small>第 ${from+1}–${Math.min(from+10,st.games)} 場</small></div><div class="fr-table"><table class="ss-tb"><tr><th>場次</th><th>對手</th><th>主客場</th><th>結果</th></tr>${Array.from({length:Math.min(10,st.games-from)},(_,i)=>{ const d=from+i,p=campaign.pairings(d).find(x=>x.includes(st.user)),r=results.find(x=>x.phase==='regular'&&x.day===d); if(!p) return ''; const home=p[1]===st.user,opp=p[home?0:1],won=r&&(r.a>r.h)===(r.away===st.user); return `<tr class="${d===st.day?'me':''}"><td>${d+1}${d===st.day?'・下一場':''}</td><td>${this.chip(opp)} ${TEAM(opp).zh}</td><td>${home?'主場':'客場'}</td><td>${r?`${won?'勝':'敗'} ${home?r.h:r.a}：${home?r.a:r.h}`:d<st.day?'已完成':'待賽'}</td></tr>`; }).join('')}</table></div><div class="fr-pages"><button class="ss-seg" ${prefix} data-v="${page-1}" ${from===0?'disabled':''}>上一頁</button><button class="ss-seg" ${prefix} data-v="${page+1}" ${from+10>=st.games?'disabled':''}>下一頁</button><small>${st.calendar?'遊戲產生的三連戰賽程':'沿用舊存檔賽程'}・同戰績以淨得分排序</small></div>`;
   },
   recordsHTML(){
     const d=ME.get(), b=d.bat, p=d.pit;
@@ -366,16 +449,21 @@ const SSUI={
   async act(a,v){
     if(this.simming) return;
     const st=SEASON.st;
+    this.error='';
+    if(a==='schedule'){ this.schedulePage=+v; return this.render(); }
     if(a==='pick'){ this.newTeam=v; return this.render(); }
     if(a==='games'){ this.newGames=+v; return this.render(); }
-    if(a==='start'){ SEASON.start(this.newTeam||'DET',this.newGames||30); return this.render(); }
+    if(a==='start'){ this.schedulePage=null; SEASON.start(this.newTeam||'DET',this.newGames||30); this.render(); document.querySelector('#intro .tcard').scrollTop=0; return; }
     if(a==='restart'){ SEASON.clear(); return this.render(); }
     if(a==='reset'){ if(!this.confirmReset){ this.confirmReset=true; this.render(); setTimeout(()=>{ this.confirmReset=false; this.render(); },3000); return; } this.confirmReset=false; SEASON.clear(); return this.render(); }
     if(a==='play'){ const u=SEASON.userGame(); if(!u) return; document.getElementById('intro').classList.add('hide'); startGame(u.away,u.home,st.user,u.spA,u.spH,{season:true}); return; }
-    if(a==='sim1'){ SEASON.simUserGame(); return this.render(); }
-    if(a==='sim7'||a==='simall'){ this.simming=true; this.render(); const n=a==='sim7'?7:st.games-st.day;
-      await SEASON.simDays(n,(i,nn)=>{ const el=document.getElementById('ssProg'); if(el) el.textContent=`模擬中……${i}／${nn}`; });
-      this.simming=false; return this.render(); }
-    if(a==='poall'){ SEASON.advancePlayoffs(); while(SEASON.st.phase==='playoffs' && SEASON.userGame()) SEASON.simUserGame(); SEASON.save(); return this.render(); }
+    if(['sim1','sim7','simall','poall'].includes(a)){
+      this.simming=true; this.render();
+      try{ await new Promise(r=>setTimeout(r,30));
+        if(a==='sim1') SEASON.simUserGame();
+        else if(a==='poall'){ while(SEASON.st.phase==='playoffs'&&SEASON.userGame()){ SEASON.simUserGame(); await new Promise(r=>setTimeout(r,0)); } }
+        else await SEASON.simDays(a==='sim7'?7:st.games-st.day,(i,nn)=>{ const el=document.getElementById('ssProg'); if(el) el.textContent=`模擬中……${i}／${nn}`; });
+      }catch(e){ this.error=e.message; }finally{ this.simming=false; LEAGUE_CTX=null; this.render(); } return;
+    }
   }
 };

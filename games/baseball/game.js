@@ -523,7 +523,9 @@ function setBanner(pid,isP){
   const P=PLAYERS[pid]||{}, team=isP?fielding(GM):batting(GM);
   $('bChip').outerHTML=chipHTML(team.abbr,true,'bChip');
   $('bNum').textContent=P.num||''; $('bName').textContent=dispName(pid);
-  if(isP){ const s=P.p||{}; $('bannerStats').textContent=`防禦率 ${s.era||'-.--'}　${s.ip||0} 局　${s.k||0} 次三振　最快 ${pit(pid).kmh} km/h`; }
+  const seasonStat=campaignStats(GM,pid);
+  if(seasonStat){ const s=seasonStat; $('bannerStats').textContent=isP?`防禦率 ${fmtEra(s.er,s.outs)}　${Math.floor(s.outs/3)}.${s.outs%3} 局　${s.pk} 次三振　最快 ${pit(pid).kmh} km/h`:`打擊率 ${fmtAvg(s.h,s.ab)}　全壘打 ${s.hr}　長打率 ${fmtAvg(s.h+s.d+s.t*2+s.hr*3,s.ab)}`; }
+  else if(isP){ const s=P.p||{}; $('bannerStats').textContent=`防禦率 ${s.era||'-.--'}　${s.ip||0} 局　${s.k||0} 次三振　最快 ${pit(pid).kmh} km/h`; }
   else { const h=P.h||{}; $('bannerStats').textContent=h.pa?`打擊率 ${fmt3(h.avg)}　全壘打 ${h.hr}　長打率 ${fmt3(h.slg)}`:'本季沒有打擊紀錄'; }
 }
 let bannerTimer=0;
@@ -546,7 +548,8 @@ function setPanels(){
   const g=GM, bid=curBatter(g), br=bat(bid), t=batting(g), l=t.lineup[t.idx%9], h=(PLAYERS[bid]||{}).h||{};
   $('bOrd').textContent=(t.idx%9)+1; $('bNm').textContent=dispName(bid); $('bPos').textContent=POS_ZH[l.pos]||l.pos;
   $('batLine').innerHTML=`<span>彈道<span class="traj">${br.traj}</span></span><span>打擊${gl(br.meet)}</span><span>力量${gl(br.power)}</span><span>跑速${gl(br.speed)}</span>`;
-  $('batStat').textContent=h.pa?`本季　打擊率 ${fmt3(h.avg)}　全壘打 ${h.hr}　上壘率 ${fmt3(h.obp)}`:'本季沒有打擊紀錄';
+  const seasonStat=campaignStats(g,bid);
+  $('batStat').textContent=seasonStat?`${g.postseason?'季後賽':'本季'}　打擊率 ${fmtAvg(seasonStat.h,seasonStat.ab)}　全壘打 ${seasonStat.hr}　上壘率 ${fmtAvg(seasonStat.h+seasonStat.bb,seasonStat.pa)}`:h.pa?`本季　打擊率 ${fmt3(h.avg)}　全壘打 ${h.hr}　上壘率 ${fmt3(h.obp)}`:'本季沒有打擊紀錄';
   if(typeof abTags==='function'){ let e=$('bAbl'); if(!e){ e=document.createElement('div'); e.id='bAbl'; e.className='ss-abl ss-hud'; $('batStat').after(e); } e.innerHTML=abTags(br.ab); }
   const f=fielding(g), pid=f.pitcher, pr=pit(pid), pc=f.pc[pid]||0, left=clamp(100-pc/pr.limit*100,3,100);
   $('pNm').textContent=dispName(pid); const role=pid===f.T.rotation[0]||f.usedPen.length===0?'先發':pid===f.T.bullpen[0]?'終結':'中繼';
@@ -625,8 +628,9 @@ function resetPlayers(){
 // 開新的一場
 function startGame(away,home,user,spA,spH,opts){
   SFX.unlock(); SFX.setActive(true); SFX.play('start');
-  GM=newGame(away,home,user,spA,spH); GM.season=!!(opts&&opts.season);
-  if(GM.season&&typeof restPen==='function') restPen(GM);
+  const campaign=opts?.campaign||(opts?.season?SEASON:null);
+  GM=newGame(away,home,user,spA,spH,campaign?.context()); GM.season=!!campaign; GM.franchise=!!opts?.franchise; GM.campaign=campaign; GM.postseason=campaign?.st.phase==='playoffs';
+  if(campaign&&typeof restPen==='function') restPen(GM);
   if(typeof ACH!=='undefined') ACH.newGame(GM);
   setBoardText(`${TEAM(away).zh} vs ${TEAM(home).zh}`, TEAM(home).venue);
   if(typeof setBoardLineups==='function') setBoardLineups(TEAM(away).abbr,GM.away.lineup.map(l=>nameOf(l.id)),TEAM(home).abbr,GM.home.lineup.map(l=>nameOf(l.id)));
@@ -721,6 +725,7 @@ function showLineScore(then){
 }
 function endGame(){
   const g=GM, a=g.away, h=g.home, win=a.runs>h.runs?a:h, userWon=win.abbr===g.user;
+  if(g.resultShown) return; g.resultShown=true;
   if(typeof TACTICS!=='undefined') TACTICS.close(false);
   G.state='result';
   SFX.play('end'); SFX.setActive(false);
@@ -730,9 +735,9 @@ function endGame(){
   $('rLog').innerHTML=lineScoreHTML()+`<div class="hl"><div class="hlT">得分過程</div>${sc.length?sc.map(p=>`<div class="e"><span class="in">${p.inning} 局${p.half==='top'?'上':'下'}</span><span>${nameOf(p.batter)}：${p.text.replace(/，得 \d+ 分/,'')}</span><span class="rn">+${p.runs}</span></div>`).join(''):'<div class="none">雙方都沒有得分。</div>'}</div>`;
   $('rTot').textContent=`安打：${a.T.zh} ${a.hits} 支，${h.T.zh} ${h.hits} 支`;
   if(typeof ACH!=='undefined') ACH.onGameEnd(g);
-  if(g.season && typeof SEASON!=='undefined' && SEASON.st){ SEASON.finishUserGame(g,true); const st=SEASON.st;
+  if(g.campaign?.st){ g.campaign.finishUserGame(g,true); const st=g.campaign.st;
     $('rTot').textContent+=`　｜　${st.phase==='regular'?`例行賽 ${st.day}／${st.games} 場，${st.rec[st.user].w} 勝 ${st.rec[st.user].l} 敗`:st.phase==='playoffs'?'季後賽進行中':'球季結束'}`; }
-  $('again').textContent=g.season?'回球季':'同樣兩隊再一場';
+  $('again').textContent=g.franchise?'回球團':g.season?'回季賽':'同樣兩隊再一場';
   dispatchEvent(new CustomEvent('game:end',{detail:{away:a.abbr,home:h.abbr,awayRuns:a.runs,homeRuns:h.runs,user:g.user,season:g.season,inning:g.inning}}));
   $('result').classList.remove('hide');
 }
@@ -1168,7 +1173,7 @@ $('start').onclick=()=>{
   const spA=SEL.userHome?SEL.spOpp:SEL.spUser, spH=SEL.userHome?SEL.spUser:SEL.spOpp;
   startGame(away,home,SEL.user,spA,spH);
 };
-$('again').onclick=()=>{ $('result').classList.add('hide'); if(GM&&GM.season&&typeof SSUI!=='undefined'){ $('intro').classList.remove('hide'); G.state='intro'; SFX.setActive(false); FX.reset(); $('contactReadout').classList.remove('show'); SSUI.show('season'); return; } $('start').onclick(); };
+$('again').onclick=()=>{ $('result').classList.add('hide'); if(GM&&GM.season&&typeof SSUI!=='undefined'){ $('intro').classList.remove('hide'); G.state='intro'; SFX.setActive(false); FX.reset(); $('contactReadout').classList.remove('show'); SSUI.show(GM.franchise?'franchise':'season'); return; } $('start').onclick(); };
 $('toMenu').onclick=()=>{ $('result').classList.add('hide'); $('intro').classList.remove('hide'); G.state='intro'; SFX.setActive(false); FX.reset(); $('contactReadout').classList.remove('show'); if(typeof SSUI!=='undefined') SSUI.render(); };
 document.querySelector('.tcard').addEventListener('click',e=>{ if(e.target.closest('button')&&e.target.closest('button').id!=='start') SFX.play('select'); });
 
