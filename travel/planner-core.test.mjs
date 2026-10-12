@@ -109,3 +109,66 @@ test('brief without camps ends on the Sabah AirAsia flight and uses the plane fo
  assert.ok(items.every(i=>!/營隊/.test(i.main)));assert.match(items.find(i=>i.travel&&i.from>1&&i.to<23).main,/吉隆坡 ✈ 亞庇市區（直飛）/);
  assert.equal(briefItems(briefRows('pen',false)).at(-1).sub,'CI732 15:20 起飛');
 });
+
+// ---- page regions and generated booking checklist ----
+import {routeRegions,matchesRegions,hotelRegion,bookingList} from './planner-core.mjs';
+import {chosenTransport,suggestedTransfers} from './travel-context.mjs';
+import {tripHotels} from './research-data.mjs';
+const stopsOf=id=>PRESETS.find(p=>p[0]===id)[2].map(([city,nights],i)=>({id:`r${i}`,city,nights}));
+test('routeRegions lists the regions of every stay and always includes Kuala Lumpur',()=>{
+ assert.deepEqual(routeRegions(stopsOf('klpenkl')),['kl','penang']);
+ assert.deepEqual(routeRegions(stopsOf('klsabahkl')),['kl','sabah']);
+ assert.deepEqual(routeRegions(stopsOf('land')),['kl','penang','ipoh']);
+ assert.deepEqual(routeRegions(stopsOf('all')),['kl','penang','ipoh','sabah']);
+ assert.deepEqual(routeRegions(stopsOf('ipoh-sabah')),['kl','ipoh','sabah']);
+ assert.deepEqual(routeRegions([{city:'kl',nights:15}]),['kl']);
+});
+test('matchesRegions: untagged content is always shown, tagged content needs one shared region',()=>{
+ assert.equal(matchesRegions('',['kl']),true);assert.equal(matchesRegions(undefined,['kl']),true);assert.equal(matchesRegions(null,[]),true);
+ assert.equal(matchesRegions('sabah',['kl','penang']),false);
+ assert.equal(matchesRegions('sabah',['kl','sabah']),true);
+ assert.equal(matchesRegions('penang ipoh',['kl','ipoh']),true);
+ assert.equal(matchesRegions('  penang   ipoh ',['kl','sabah']),false);
+ assert.equal(matchesRegions('kl',['kl']),true);
+});
+test('hotelRegion follows the hotel id prefix and covers every hotel',()=>{
+ assert.deepEqual(tripHotels.map(h=>hotelRegion(h.id)).filter(r=>!r),[]);
+ assert.equal(hotelRegion('pen-angsana'),'penang');assert.equal(hotelRegion('kk-magellan'),'sabah');assert.equal(hotelRegion('ipoh-ac'),'ipoh');assert.equal(hotelRegion('kl-element'),'kl');
+});
+const defaultHotelOf={kl:'kl-mea',ipoh:'ipoh-ac',pen:'pen-mea',penres:'pen-angsana',kk:'kk-marriott',resort:'kk-magellan'};
+function bookingFor(id,camps=['Newtonshow · Bukit Bintang','Newtonshow · Bukit Bintang'],campDays=3){
+ const stops=stopsOf(id).map(s=>({...s,hotel:defaultHotelOf[s.city]})),legs=schedule(stops),transfers=suggestedTransfers(legs);
+ const moves=legs.slice(1).map((l,i)=>chosenTransport(legs[i],l,transfers));
+ return bookingList({stops,fixedHotel:'kl-mea',hotels:tripHotels,moves,camps,campDays});
+}
+test('booking checklist for the default route matches the former hand-written list',()=>{
+ const items=bookingFor('klpenkl'),text=items.join('；');
+ assert.match(items[0],/^華航機票（問兒童 5 折期限）/);assert.match(items[0],/去程 CI721/);assert.match(items[0],/回程 CI722/);
+ assert.ok(items.includes('吉隆坡行政公寓 1/17–1/24 與 2/4–2/8（確認兩房）'));
+ assert.ok(items.includes('檳城行政公寓 1/24–1/31（確認 king＋兩張單人床的兩房）'));
+ assert.ok(items.includes('Angsana 1/31–2/4（兩房海景套房）'));
+ assert.ok(items.includes('用 WhatsApp 詢問 Newtonshow'));
+ assert.ok(items.some(i=>/^兩段 Alphard 報價（1\/24 吉隆坡→檳城、2\/4 檳城渡假村→吉隆坡）$/.test(i)),text);
+ assert.ok(!/亞庇|Magellan|AK1510/.test(text));
+});
+test('booking checklist follows the route: Sabah stays, domestic flights and the return flight change',()=>{
+ const items=bookingFor('klsabahkl'),text=items.join('；');
+ assert.ok(items.includes('吉隆坡行政公寓 1/17–1/24 與 2/4–2/8（確認兩房）'));
+ assert.ok(items.some(i=>/^亞庇萬豪酒店 1\/24–1\/31（/.test(i)),text);
+ assert.ok(items.some(i=>/^Magellan 渡假村（Sutera Harbour） 1\/31–2\/4（/.test(i)),text);
+ assert.ok(items.some(i=>/境內線機票/.test(i)&&/1\/24 吉隆坡→亞庇市區/.test(i)&&/2\/4 亞庇近郊渡假村→吉隆坡/.test(i)),text);
+ assert.ok(!/檳城|Angsana|Alphard/.test(text.replace(/用 WhatsApp[^；]*/,'')),text);
+ const sabahLast=bookingFor('reverse')[0];
+ assert.match(sabahLast,/回程 CI732 檳城→台北/);
+ assert.match(bookingFor('sabah')[0],/回程 AirAsia AK1510 亞庇→台北/);
+ assert.match(bookingList({stops:[{id:'a',city:'pen',nights:12,hotel:'pen-mea'},{id:'b',city:'ipoh',nights:3,hotel:'ipoh-ac'}],fixedHotel:'kl-mea',hotels:tripHotels,moves:[null,null]})[0],/怡保沒有國際線/);
+ assert.match(bookingFor('land')[0],/回程 CI732 檳城→台北/);
+});
+test('booking checklist lists camps only when camp days are planned, and marks unchosen long moves',()=>{
+ assert.ok(!bookingFor('klpenkl',[],3).some(i=>/Newtonshow|詢問/.test(i)));
+ assert.ok(!bookingFor('klpenkl',['Newtonshow · Bukit Bintang'],0).some(i=>/Newtonshow/.test(i)));
+ assert.ok(bookingFor('klpenkl',['Learning Fresh · KLCC'],3).includes('向 Learning Fresh 詢問當週開班與報價'));
+ const stops=[{id:'a',city:'ipoh',nights:3,hotel:''},{id:'b',city:'kl',nights:12,hotel:'kl-mea'}];
+ const list=bookingList({stops,fixedHotel:'kl-mea',hotels:tripHotels,moves:[null,null],camps:[],campDays:0});
+ assert.ok(list.includes('1/24 吉隆坡→怡保 交通方式待選'));assert.ok(list.some(i=>/^怡保住宿 1\/24–1\/27（住宿待選/.test(i)));
+});

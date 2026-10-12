@@ -135,3 +135,64 @@ export function briefHead(stops,rows){
  const feature=[schedule(stops).map(l=>`${CITY_SHORT[l.city]} ${l.nights} 晚`).join('・'),camp?`營隊 ${camp} 天`:'',fest?`春節在${CITY_SHORT[fest.city]}`:''].filter(Boolean).join('；');
  return {title:`${preset?preset[1]:'自訂路線'}｜${rows.length} 天 ${nights} 夜`,feature};
 }
+
+// ---- Page regions: which parts of the research apply to the route currently planned ----
+// Content tags use four regions: kl, penang (pen + penres), ipoh, sabah (kk + resort). Kuala Lumpur is always in the route.
+export const REGIONS=['kl','penang','ipoh','sabah'];
+export const REGION_OF={kl:'kl',pen:'penang',penres:'penang',ipoh:'ipoh',kk:'sabah',resort:'sabah'};
+export function routeRegions(stops){
+ const set=new Set(['kl']);
+ for(const leg of schedule(stops||[])){const r=REGION_OF[leg.city];if(r)set.add(r);}
+ return REGIONS.filter(r=>set.has(r));
+}
+// tag: space separated regions; no tag means the element is always shown.
+export function matchesRegions(tag,regions){
+ const tags=String(tag??'').split(/\s+/).filter(Boolean);
+ return tags.length===0||tags.some(t=>regions.includes(t));
+}
+export function hotelRegion(id){const p=String(id||'').split('-')[0];return p==='kl'?'kl':p==='pen'?'penang':p==='ipoh'?'ipoh':p==='kk'?'sabah':'';}
+
+// ---- Booking checklist generated from the current plan ----
+const ROOM_HINT={'kl-mea':['吉隆坡行政公寓','確認兩房'],'pen-mea':['檳城行政公寓','確認 king＋兩張單人床的兩房'],'pen-angsana':['Angsana','兩房海景套房']};
+const MOVE_TEXT={alphard:'Alphard 報價',rail:'ETS 買票與兩端接送',flight:'境內線機票',coach:'長途巴士報價',ferry:'ETS＋渡輪＋檳島接送',connection:'轉機機票','via-kl':'回吉隆坡轉飛亞庇'};
+const moveShort=label=>String(label||'').split('＋')[0].replace(/^Toyota /,'');
+const countWord=n=>n===2?'兩段':`${n} 段`;
+function flightLine(last){
+ const code=flightShort(returnPlan(last),false).replace(/\s*\d{2}:\d{2}.*$/,'');// e.g. "CI722", "AirAsia AK1510"
+ const way=last==='kl'?`回程 ${code} 吉隆坡→台北`
+  :last==='pen'||last==='penres'?`回程 ${code} 檳城→台北（機票買多點進出：台北→吉隆坡、檳城→台北）`
+  :last==='ipoh'?`回程 ${code}（怡保沒有國際線，需回吉隆坡搭乘）`
+  :`回程 ${code} 亞庇→台北（與華航分票，行李與選位另購），或 2/7 先飛回吉隆坡再搭 CI722`;
+ return `華航機票（問兒童 5 折期限）：去程 CI721 台北→吉隆坡；${way}`;
+}
+// legs: from schedule(stops); hotels: tripHotels-like records; moves[i]: chosen transport ({id,label}) for the move into legs[i+1], or null.
+// camps: titles of the camps assigned to the children; campDays: number of camp days planned.
+export function bookingList({stops,fixedHotel,hotels=[],moves=[],camps=[],campDays=0}){
+ const legs=schedule(stops).map(l=>({...l,hotel:l.fixed?fixedHotel:l.hotel}));
+ const items=[flightLine(legs.at(-1).city)];
+ const groups=new Map();
+ for(const l of legs){
+  const h=hotels.find(x=>x.id===l.hotel),key=h?h.id:`?${l.city}`;
+  if(!groups.has(key))groups.set(key,{h,city:l.city,ranges:[]});
+  groups.get(key).ranges.push(`${mdLabel(l.start)}–${mdLabel(l.end)}`);
+ }
+ for(const g of groups.values()){
+  const hint=g.h&&ROOM_HINT[g.h.id],name=hint?hint[0]:g.h?(g.h.short||g.h.name):`${CITY_SHORT[g.city]}住宿`;
+  items.push(`${name} ${g.ranges.join(' 與 ')}（${hint?hint[1]:g.h?'確認家庭房型與床位':'住宿待選，先決定館別'}）`);
+ }
+ const byMove=new Map(),local=[],pending=[];
+ legs.slice(1).forEach((l,i)=>{
+  const prev=legs[i],m=moves[i],text=`${mdLabel(l.start)} ${CITY_SHORT[prev.city]}→${CITY_SHORT[l.city]}`,same=REGION_OF[prev.city]===REGION_OF[l.city];
+  if(!m){if(!same)pending.push(`${text} 交通方式待選`);return;}
+  if(same){local.push(`${text} 同區換館接送（${moveShort(m.label)}）`);return;}
+  if(!byMove.has(m.id))byMove.set(m.id,{label:m.label,texts:[]});
+  byMove.get(m.id).texts.push(text);
+ });
+ for(const [id,g] of byMove){const name=MOVE_TEXT[id]||`${moveShort(g.label)} 確認`;items.push(`${countWord(g.texts.length)}${/^[A-Za-z]/.test(name)?' ':''}${name}（${g.texts.join('、')}）`);}
+ items.push(...local,...pending);
+ if(campDays>0){
+  const brands=[...new Set(camps.filter(Boolean).map(t=>String(t).split(' · ')[0]))];
+  for(const b of brands)items.push(/Newtonshow/i.test(b)?'用 WhatsApp 詢問 Newtonshow':`向 ${b} 詢問當週開班與報價`);
+ }
+ return items;
+}

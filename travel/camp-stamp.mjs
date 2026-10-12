@@ -12,4 +12,6 @@ export function campStampCity(location){
  const where=`${location?.city||''} ${location?.state||''}`;
  return /Kuala Lumpur/i.test(where)?'kl':/Penang|Pulau Pinang/i.test(where)?'pen':'';
 }
+// Page region of a camp (kl / penang), judged from the shared location data; falls back to the curated city.
+export function campRegion(location,fallback=''){const c=campStampCity(location)||fallback;return c==='pen'?'penang':c==='kl'?'kl':'';}
 export const campStampMarkup=c=>{const city=campStampCity(c.locationData),t=campStampText(c.programData);return `<span class="camp-stamp"${city?` data-city="${city}"`:''} aria-hidden="true">${t}</span>`;};

@@ -246,3 +246,29 @@ table{background:none}
 .camp-card:nth-child(2n) .camp-stamp{transform:rotate(-7deg)}
 @media(max-width:650px){.camp-card h3{padding-right:64px}.camp-stamp{top:10px;right:10px;min-width:48px;max-width:62px;height:48px;font-size:12px;padding:0 4px}}
 @media print{.nearby-tag{font-size:10px;top:6px;left:2px;transform:none}.camp-stamp{display:none!important}.camp-card h3{padding-right:0}}
+
+/* Route-aware page: what does not apply to the planned route is hidden; "show all" keeps it and labels it with a tape. */
+[data-regions][hidden]{display:none!important}
+.off-route{position:relative}
+.off-route::before{display:none}
+body.show-all .off-route::before{content:"不在目前路線";display:block;position:absolute;top:-9px;right:12px;z-index:3;width:max-content;padding:2px 10px 1px;font-family:var(--hand);font-size:12px;font-weight:400;line-height:1.5;color:var(--ink);background-color:rgba(243,182,189,.9);background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.38) 0 5px,transparent 5px 10px);border-radius:2px;transform:rotate(2deg);box-shadow:0 1px 2px rgba(90,70,30,.25)}
+body.show-all section.off-route::before{top:30px}
+body.show-all tr.off-route{position:static}
+body.show-all tr.off-route::before{content:none}
+body.show-all tr.off-route>:first-child::before,body.show-all span.off-route::before{content:"不在目前路線";display:inline-block;position:static;margin-right:8px;transform:rotate(-1deg);padding:0 8px;font-family:var(--hand);font-size:11px;line-height:1.5;color:var(--ink);background-color:rgba(243,182,189,.9);border-radius:2px}
+body.show-all span.off-route::before{margin-right:4px}
+.map .dot.dim{opacity:.3;filter:grayscale(1)}
+.hotel-card{position:relative}
+.pick-tag{position:absolute;top:-11px;left:14px;z-index:3;padding:2px 11px 1px;font-family:var(--hand);font-size:12px;line-height:1.5;color:var(--ink);background-color:rgba(168,220,197,.95);background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.38) 0 5px,transparent 5px 10px);border-radius:2px;transform:rotate(-3deg);box-shadow:0 1px 2px rgba(90,70,30,.25)}
+.toolbar a.sub{background:var(--card);font-size:11px;font-weight:400}
+.fold{margin-top:18px;padding:14px 20px;background:var(--card-2);border:1px solid var(--line);border-radius:6px}
+.fold>summary{font-family:var(--hand);font-size:16px;font-weight:700}
+.fold[open]>summary{margin-bottom:14px}
+.fold .plan-panel{margin-top:0}
+.research-toggle{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin:6px 0 18px}
+.research-toggle button{padding:8px 15px;background:var(--card);border:1.5px solid #bfae85;border-radius:6px;color:var(--ink);font-size:13px}
+.research-toggle button[aria-pressed=true]{background:var(--green);color:#fff;border-color:var(--green)}
+.research-toggle .small{font-size:12px}
+tr.is-last-stop>td{background:#fff6dc;font-weight:650}
+tr.is-last-stop>td:first-child{box-shadow:inset 4px 0 0 var(--stamp-red)}
+@media print{.research-toggle{display:none}.fold{background:#fff;padding:8px 0;border:0}.pick-tag{transform:none}body.show-all .off-route::before{transform:none}}
