@@ -1,5 +1,5 @@
 export const START='2027-01-17', END='2027-02-08', KL_END='2027-01-24';
-export const CITIES={kl:'吉隆坡',ipoh:'怡保',pen:'檳城',kk:'亞庇市區',resort:'沙巴渡假村',mountain:'昆達山'};
+export const CITIES={kl:'吉隆坡',ipoh:'怡保',pen:'檳城',kk:'亞庇市區',resort:'亞庇近郊渡假村'};
 export const addDays=(date,n)=>new Date(Date.parse(date+'T00:00:00Z')+n*86400000).toISOString().slice(0,10);
 export const daysBetween=(a,b)=>(Date.parse(b+'T00:00:00Z')-Date.parse(a+'T00:00:00Z'))/86400000;
 export function schedule(stops){let start=KL_END;return [{city:'kl',nights:7,start:START,end:KL_END,fixed:true},...stops.map(s=>{const end=addDays(start,s.nights);const row={...s,start,end};start=end;return row;})];}
@@ -19,14 +19,21 @@ export const PRESETS=[
  ['land','怡保＋檳城・陸路慢遊',[['ipoh',3],['pen',12]]],
  ['all','怡保＋檳城＋沙巴',[['ipoh',3],['pen',6],['resort',6]]],
  ['pen','檳城長住・少搬行李',[['pen',15]]],
- ['sabah','沙巴慢住・市區＋渡假村',[['kk',4],['resort',11]]],
+ ['sabah','吉隆坡＋亞庇・市區＋渡假村',[['kk',4],['resort',11]]],
  ['reverse','先沙巴・檳城回台北',[['resort',8],['pen',7]]],
- ['mountain','檳城＋沙巴山海',[['pen',6],['kk',2],['mountain',2],['resort',5]]],
  ['buffer','檳城＋沙巴＋回吉隆坡',[['pen',6],['resort',8],['kl',1]]],
  ['ipoh-sabah','怡保＋吉隆坡轉接＋沙巴',[['ipoh',3],['kl',1],['resort',11]]]
 ];
 export function presetForStops(stops){return PRESETS.find(([, ,rows])=>rows.length===stops.length&&rows.every(([city,nights],i)=>stops[i].city===city&&stops[i].nights===nights))?.[0]||'';}
 export function routeWarnings(legs){const warnings=[];const total=legs.reduce((n,s)=>n+s.nights,0);if(total!==22)warnings.push(`目前 ${total} 晚，需調整為 22 晚；差 ${Math.abs(22-total)} 晚。每日表暫停產生。`);
- for(let i=1;i<legs.length;i++){const s=legs[i],prev=legs[i-1];if(s.city==='ipoh'&&s.nights<3)warnings.push('怡保少於 3 晚：樂園與移動日可能擠在一起。');if(s.city==='pen'&&s.nights<5)warnings.push('檳城少於 5 晚：從主要景點中挑 2 個，保留雨天。');if(s.city==='mountain'&&s.nights<2)warnings.push('昆達山建議至少 2 晚，避免連續山路移動。');if(['kk','resort','mountain'].includes(s.city)&&prev.city==='ipoh'||s.city==='ipoh'&&['kk','resort','mountain'].includes(prev.city))warnings.push('怡保與沙巴間需比對經吉隆坡的交通；本頁沒有假設怡保直飛亞庇。');if(s.start>='2027-02-05'&&s.start<END)warnings.push(`${s.start} 更換住宿：接近農曆年，接送與餐飲須預先確認。`);}
+ for(let i=1;i<legs.length;i++){const s=legs[i],prev=legs[i-1];if(s.city==='ipoh'&&s.nights<3)warnings.push('怡保少於 3 晚：樂園與移動日可能擠在一起。');if(s.city==='pen'&&s.nights<5)warnings.push('檳城少於 5 晚：從主要景點中挑 2 個，保留雨天。');if(['kk','resort'].includes(s.city)&&prev.city==='ipoh'||s.city==='ipoh'&&['kk','resort'].includes(prev.city))warnings.push('怡保與沙巴間需比對經吉隆坡的交通；本頁沒有假設怡保直飛亞庇。');if(s.start>='2027-02-05'&&s.start<END)warnings.push(`${s.start} 更換住宿：接近農曆年，接送與餐飲須預先確認。`);}
  const pen=legs.find(s=>s.city==='pen');if(pen&&pen.start>'2027-01-28')warnings.push('檳城在 1/29 之後才入住：會錯過已公告至 1/29 的 Newtonshow 冬季營。');
- if(legs.filter(s=>s.city!=='kl').length>=4)warnings.push('吉隆坡之後至少 4 次入住：若孩子不喜歡搬行李，可刪掉山區或拆館。');return [...new Set(warnings)];}
+ if(legs.filter(s=>s.city!=='kl').length>=4)warnings.push('吉隆坡之後至少 4 次入住：若孩子不喜歡搬行李，可減少拆館。');return [...new Set(warnings)];}
+
+// Keep dates and private notes when older plans include destinations now out of scope.
+export function restrictSabahScope(plan){
+ if(!plan||!Array.isArray(plan.stops))return plan;
+ const rates={...plan.rates};let changed=false;
+ const stops=plan.stops.map(s=>{if(s.city==='mountain'){changed=true;delete rates[s.id];return {...s,city:'kk',hotel:''};}if(s.hotel==='kk-rasa'){changed=true;delete rates[s.id];return {...s,hotel:''};}return {...s};});
+ return {...plan,stops,rates,scopeAdjusted:changed||Boolean(plan.scopeAdjusted)};
+}

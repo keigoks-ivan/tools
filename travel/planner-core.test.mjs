@@ -1,9 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {PRESETS,presetForStops,schedule,validRoute,ageFit,evidence,commuteHours,quotedBudget,routeWarnings} from './planner-core.mjs';
+import {PRESETS,presetForStops,schedule,validRoute,ageFit,evidence,commuteHours,quotedBudget,routeWarnings,restrictSabahScope} from './planner-core.mjs';
 import {joinCampData} from './camp-options.mjs';
 import {readFileSync} from 'node:fs';
-test('all nine presets preserve the fixed week, total 22 nights and Feb 8 checkout',()=>{
+test('all supported presets preserve the fixed week, total 22 nights and Feb 8 checkout',()=>{
  for(const [id,,rows] of PRESETS){const stops=rows.map(([city,nights],i)=>({id:String(i),city,nights}));assert.equal(validRoute(stops),true,id);const legs=schedule(stops);assert.equal(legs[0].start,'2027-01-17');assert.equal(legs[0].end,'2027-01-24');assert.equal(legs.at(-1).end,'2027-02-08',id);assert.equal(legs.reduce((n,s)=>n+s.nights,0),22);}
 });
 test('excess nights are reported, not silently truncated',()=>{const stops=[{city:'pen',nights:10},{city:'resort',nights:8}];assert.equal(validRoute(stops),false);assert.equal(schedule(stops).at(-1).end,'2027-02-11');assert.match(routeWarnings(schedule(stops))[0],/25 晚/);});
@@ -17,4 +17,9 @@ test('current preset follows actual route after applying, restoring, or editing 
  for(const [id,,rows] of PRESETS){const stops=rows.map(([city,nights],i)=>({id:`saved-${i}`,city,nights,hotel:'user-choice'}));assert.equal(presetForStops(stops),id);assert.equal(presetForStops(JSON.parse(JSON.stringify(stops))),id);}
  assert.equal(presetForStops([{city:'pen',nights:8},{city:'resort',nights:7}]),'');
  assert.equal(presetForStops([{city:'pen',nights:7},{city:'resort',nights:8}].reverse()),'reverse');
+});
+
+test('old far-away Sabah choices keep nights and notes but require nearby hotel requotes',()=>{
+ const old={stops:[{id:'m',city:'mountain',nights:2,hotel:''},{id:'r',city:'resort',nights:5,hotel:'kk-rasa'},{id:'p',city:'pen',nights:8,hotel:'pen-mea'}],rates:{m:100,r:200,p:300,fixed:500},notes:{'2027-01-31':'keep my note'},transfers:{'pen:resort:r':'flight'}};
+ const updated=restrictSabahScope(old);assert.equal(updated.stops.reduce((n,s)=>n+s.nights,0),15);assert.equal(updated.stops[0].city,'kk');assert.equal(updated.stops[1].hotel,'');assert.deepEqual(updated.rates,{p:300,fixed:500});assert.deepEqual(updated.notes,old.notes);assert.equal(old.stops[0].city,'mountain');assert.equal(updated.scopeAdjusted,true);assert.deepEqual(restrictSabahScope(updated),updated);
 });

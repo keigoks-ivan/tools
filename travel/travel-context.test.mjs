@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {CITIES,PRESETS,schedule} from './planner-core.mjs';
 import {transportOptions,transferKey,chosenTransport,routeAssessment} from './travel-context.mjs';
 test('cross-sea journeys never offer an all-road charter, in either direction',()=>{
- for(const mainland of ['kl','ipoh','pen'])for(const sabah of ['kk','resort','mountain'])for(const [a,b] of [[mainland,sabah],[sabah,mainland]]){
+ for(const mainland of ['kl','ipoh','pen'])for(const sabah of ['kk','resort'])for(const [a,b] of [[mainland,sabah],[sabah,mainland]]){
   const options=transportOptions(a,b);assert.ok(options.length);assert.ok(options.every(o=>o.id!=='alphard'&&o.id!=='rail'&&o.id!=='ferry'));
  }
 });
@@ -19,9 +19,9 @@ test('a saved transport follows its leg but cannot leak into a changed origin or
  assert.equal(chosenTransport(previous,leg),null);
  assert.equal(chosenTransport(previous,leg,{[transferKey(previous,leg)]:'unsupported'}),null);
 });
-test('environment assessment responds to the chosen resort and mountain stop',()=>{
- assert.ok(routeAssessment([{city:'resort',hotel:'kk-rasa',nights:5}]).some(s=>s.includes('Tuaran')));
- assert.ok(routeAssessment([{city:'resort',hotel:'kk-tanjung',nights:5}]).some(s=>s.includes('工程')));
- assert.ok(routeAssessment([{city:'mountain',nights:2}]).some(s=>s.includes('山路')));
+test('environment assessment responds to the chosen nearby resort',()=>{
+ assert.ok(routeAssessment([{city:'resort',hotel:'kk-magellan',nights:5}]).some(s=>s.includes('泳池')));
+ assert.ok(routeAssessment([{city:'resort',hotel:'kk-tanjung',nights:5}]).some(s=>/施工|工程/.test(s)&&s.includes('2027/7')));
+
  assert.ok(routeAssessment([{city:'pen',nights:15}]).every(s=>!s.includes('工程')));
 });
