@@ -71,3 +71,17 @@ test('agency: finished project waiting for acceptance is delivered late, not can
  const w=createEnterprise('agency');const {o}=bid(w);const x=w.orders[0];x.progress=x.work;x.revised=true;x.inspectionReady=o.due+8;w.day=o.due+8;
  stepEnterprise(w);identity(w);assert.equal(w.stats.cancelled,0);assert.equal(w.stats.delivered,1);assert.equal(w.orders.length,0);assert.equal(enterpriseValid(w),true);
 });
+test('fix4: project team never hires past the capacity ceiling, even with many service clients',()=>{
+ const w=createEnterprise('ai');w.manager.maxFixed=5000000;w.manager.budget=2000000;w.clients=[{id:'c',client:'x',fee:1,work:2.4,until:w.day+90}];w.orders.push({id:'o',client:'x',work:42,progress:0,quote:1,deposit:0,due:w.day+60,term:0,inspection:0,inspectionReady:null,cost:0});
+ const plan=enterprisePlan(w);assert.ok(plan.staff<=Math.ceil(w.capacity/.85),`staff ${plan.staff}`);
+});
+test('fix4: team pauses hiring when trailing three-month revenue is below the new fixed cost',()=>{
+ const w=createEnterprise('ai');w.manager.maxFixed=5000000;w.manager.budget=2000000;w.orders.push({id:'o',client:'x',work:42,progress:0,quote:1,deposit:0,due:w.day+60,term:0,inspection:0,inspectionReady:null,cost:0});
+ assert.ok(enterprisePlan(w).hiring>0,'baseline hires');
+ w.co.history.push(...[0,1,2].map(()=>({revenue:0})));const plan=enterprisePlan(w);assert.equal(plan.hiring,0);assert.ok(plan.issues.some(x=>x.includes('暫不增聘')));
+});
+test('fix4: ecommerce restocks a minimum week of demand when cash is below the reserve but above half a month of fixed cost, and warns when it cannot',()=>{
+ const w=createEnterprise('ecommerce');w.manager.reserveMonths=3;const m0=enterpriseMetrics(w);spend(w,w.co.cash-m0.fixed*1.2);
+ const plan=enterprisePlan(w);assert.ok(plan.qty>0,'minimum restock');assert.ok(plan.cost<=w.co.cash);
+ const t=createEnterprise('ecommerce');spend(t,t.co.cash-10000);const p2=enterprisePlan(t);assert.equal(p2.qty,0);assert.ok(p2.issues.some(x=>x.includes('庫存加在途只夠')),'stock-out warning');
+});

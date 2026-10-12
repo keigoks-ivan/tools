@@ -165,3 +165,10 @@ test('結案與待決事件不會建議跳過，實際新增觀察不冒充付�
   w.event = {title:'供應商事件',text:'測試'}; assert.equal(ventureCoach(w).bottleneck.id,'event');
   w.status = 'finished'; assert.equal(ventureCoach(w).bottleneck.id,'closed');
 });
+
+test('fix4: packaging break-even driver compares normal and overtime shifts', () => {
+  const c = ventureCoach(createManufacturing('packaging', 1));
+  const t = d(c, 'breakEven').text || d(c, 'breakEven').explanation || JSON.stringify(d(c, 'breakEven'));
+  assert.match(t, /正常班月良品約/); assert.match(t, /加班月良品約/); assert.match(t, /加班才有賺頭/);
+  const a = ventureCoach(createManufacturing('apparel', 1)); assert.doesNotMatch(JSON.stringify(d(a, 'breakEven')), /班別比較/);
+});

@@ -7,9 +7,9 @@ export const ENTERPRISES = {
   hotel: { name:'旅宿經營', category:'門店與資產', kind:'hotel', capital:4000000, setup:1800000, asset:true, wage:34000, rent:260000, staff:6, capacity:24, price:2600, cost:900, marketing:24000, qualityBudget:18000, autoBudget:160000, unit:'間夜', channelNames:['直訂與商務客','訂房平台與旅客'], factors:'房價、入住率、每房收益、平台佣金、房務品質', brief:'房間今晚沒賣掉就失去收入；旺季也要留得住服務品質。', expansion:800000 },
   equipment: { name:'工業設備製造', category:'製造與工業', kind:'project', capital:12000000, setup:5000000, asset:true, wage:48000, rent:140000, staff:4, capacity:4, price:100, cost:9000, work:80, quote:2200000, marketing:40000, qualityBudget:32000, autoBudget:1500000, unit:'工程單位', term:60, depositRate:.25, inspection:3, serviceRate:.025, serviceWork:.25, channelNames:['標準設備','客製整合'], factors:'長約報價、零組件周轉、產能、驗收、售後保固', brief:'訂金未必付得完零組件；設備驗收後，尾款還要等 60 天。', expansion:2200000 },
   ecommerce: { name:'電商自有品牌', category:'品牌與零售', kind:'commerce', capital:1200000, setup:180000, asset:false, wage:32000, rent:28000, staff:2, capacity:40, price:850, cost:330, marketing:26000, qualityBudget:9000, autoBudget:360000, unit:'件', channelNames:['品牌官網','電商平台'], factors:'定價、獲客成本、庫存週轉、缺貨、退貨、通路費', brief:'廣告不等於訂單，訂單不等於利潤；庫存先占用現金，退貨還會吃掉毛利。', expansion:180000 },
-  ai: { name:'企業 AI 服務', category:'網路與科技', kind:'project', capital:1800000, setup:200000, asset:false, wage:60000, rent:30000, staff:3, capacity:3, price:100, cost:5500, work:36, quote:400000, marketing:28000, qualityBudget:16000, autoBudget:180000, unit:'工程人日', term:45, depositRate:.3, inspection:2, serviceRate:.1, serviceWork:.4, channelNames:['標準雲端方案','私有資料整合'], factors:'企業銷售、算力成本、資料驗證、交付、維運續約', brief:'導入案要驗證資料與效果，交付後仍要支付推論及維運成本。', expansion:260000 },
+  ai: { name:'企業 AI 服務', category:'網路與科技', kind:'project', capital:1800000, setup:200000, asset:false, wage:60000, rent:30000, staff:3, capacity:3, price:100, cost:5500, work:36, quote:500000, marketing:28000, qualityBudget:16000, autoBudget:180000, unit:'工程人日', term:45, depositRate:.3, inspection:2, serviceRate:.1, serviceWork:.4, channelNames:['標準雲端方案','私有資料整合'], factors:'企業銷售、算力成本、資料驗證、交付、維運續約', brief:'導入案要驗證資料與效果，交付後仍要支付推論及維運成本。', expansion:260000 },
   agency: { name:'數位代理商', category:'網路與服務', kind:'project', capital:1000000, setup:120000, asset:false, wage:42000, rent:20000, staff:3, capacity:3, price:100, cost:800, work:35, quote:230000, marketing:18000, qualityBudget:8000, autoBudget:120000, unit:'專案人日', term:30, depositRate:.35, inspection:1, serviceRate:.08, serviceWork:.2, channelNames:['明確範圍交付','客製深度服務'], factors:'專案毛利、人力利用、修改次數、交期、客戶集中', brief:'固定總價的專案，多一次修改就多占用人力；不能只看接案金額。', expansion:150000 },
-  security: { name:'資安服務公司', category:'網路與科技', kind:'project', capital:2400000, setup:400000, asset:false, wage:70000, rent:35000, staff:3, capacity:3, price:100, cost:2200, work:45, quote:550000, marketing:28000, qualityBudget:22000, autoBudget:240000, unit:'專業人日', term:45, depositRate:.25, inspection:2, serviceRate:.15, serviceWork:.6, channelNames:['稽核與檢測','監控與應變'], factors:'專業人才、稽核交付、監控負載、SLA、事故責任', brief:'專案之外還要守住既有客戶；新案接太多，監控服務也會承受風險。', expansion:300000 },
+  security: { name:'資安服務公司', category:'網路與科技', kind:'project', capital:2400000, setup:400000, asset:false, wage:70000, rent:35000, staff:3, capacity:3, price:100, cost:2200, work:45, quote:550000, marketing:28000, qualityBudget:22000, autoBudget:240000, unit:'專業人日', term:45, depositRate:.25, inspection:2, serviceRate:.15, serviceWork:.45, channelNames:['稽核與檢測','監控與應變'], factors:'專業人才、稽核交付、監控負載、SLA、事故責任', brief:'專案之外還要守住既有客戶；新案接太多，監控服務也會承受風險。', expansion:300000 },
 };
 const known = id => typeof id==='string' && Object.hasOwn(ENTERPRISES,id);
 export const ENTERPRISE_POLICIES = {
@@ -79,18 +79,22 @@ export function enterpriseQuote(w,o,factor=1,terms=o.terms||'standard') {
 }
 export function enterprisePlan(w) {
   const p=ENTERPRISES[w.businessId],m=enterpriseMetrics(w),a=enterpriseManagement(w),issues=[];
-  const pending=w.orders.reduce((n,o)=>n+Math.max(0,o.work-o.progress),0),policy=enterprisePolicy(w),targetStaff=p.kind==='hotel'?Math.ceil(w.capacity/policy.perStaff):p.kind==='commerce'?Math.ceil(Math.min(w.capacity,m.demand)/policy.perStaff):Math.ceil((Math.min(w.capacity,pending/14)+m.serviceWork)/.85);
-  const staff=Math.max(w.staff,Math.min(20,targetStaff)),hiring=(staff-w.staff)*12000,nextFixed=m.fixed+(staff-w.staff)*p.wage;
+  const pending=w.orders.reduce((n,o)=>n+Math.max(0,o.work-o.progress),0),policy=enterprisePolicy(w),targetStaff=p.kind==='hotel'?Math.ceil(w.capacity/policy.perStaff):p.kind==='commerce'?Math.ceil(Math.min(w.capacity,m.demand)/policy.perStaff):Math.ceil(Math.min(w.capacity,Math.min(w.capacity,pending/14)+m.serviceWork)/.85);
+  const want=Math.max(w.staff,Math.min(20,targetStaff)),recent=w.co.history.slice(-3),weak=want>w.staff&&recent.length===3&&recent.reduce((n,r)=>n+r.revenue,0)/3<m.fixed+(want-w.staff)*p.wage,staff=weak?w.staff:want,hiring=(staff-w.staff)*12000,nextFixed=m.fixed+(staff-w.staff)*p.wage;
+  if(weak)issues.push('近三個月平均營收低於增聘後的固定月費，團隊暫不增聘。');
   const reserve=m.reserve+(nextFixed-m.fixed)*a.reserveMonths,canHire=nextFixed<=a.maxFixed&&hiring<=Math.min(a.remaining,Math.max(0,w.co.cash-reserve));
   if(staff>w.staff&&!canHire)issues.push('人力需求超出授權或現金保留，需調整預算或放慢擴張。');
   if(m.fixed>a.maxFixed)issues.push('固定月費已超過授權；團隊不會自行裁員或刪減老闆的投資。');
   const days=p.kind==='commerce'?w.targetDays:14,needed=p.kind==='commerce'?Math.ceil(Math.min(m.demand,w.capacity,(canHire?staff:w.staff)*policy.perStaff)*days):w.businessId==='equipment'?Math.min(Math.ceil(pending/(1-m.defects)),Math.ceil(m.capacity*days)):0;
   const gap=Math.max(0,needed-w.stock.qty-w.shipments.reduce((n,x)=>n+x.qty,0)),allowance=Math.max(0,Math.min(a.remaining,Math.max(0,w.co.cash-(canHire?reserve:m.reserve)))-(canHire?hiring:0));
-  const qty=w.shipments.length<20?Math.min(gap,Math.floor(allowance/m.unitCost)):0;
+  const inbound=w.stock.qty+w.shipments.reduce((n,x)=>n+x.qty,0),daily=p.kind==='commerce'?Math.min(m.demand,w.capacity):0,floorQty=daily>0?Math.max(0,Math.min(Math.ceil(daily*7)-inbound,Math.floor(Math.min(a.remaining,Math.max(0,w.co.cash-m.fixed*.5))/m.unitCost))):0;
+  const qty=w.shipments.length<20?Math.min(gap,Math.max(floorQty,Math.floor(allowance/m.unitCost))):0;
   if(gap>qty)issues.push('備貨受月預算或周轉金限制；缺貨與交期仍由公司承擔。');
+  if(daily>0&&inbound+qty<daily*7)issues.push(`庫存加在途只夠約 ${Math.floor((inbound+qty)/daily)} 天，補不到貨；賣完就沒有營收，請注資或調高備貨預算。`);
   if(w.orders.some(o=>{const q=enterpriseQuote(w,{...o,work:Math.max(0,o.work-o.progress),quote:o.quote*100/w.price});return q.finish===null||q.finish>o.due;}))issues.push('已接專案有交期風險；請評估人力、產能或取消代價。');
   if(m.serviceLoad>.8)issues.push('既有維運客戶已占用多數產能；新案可能擠壓服務承諾。');
   if(w.businessId==='hotel'&&w.quality<.45)issues.push('房務品質偏低，房價與入住率可能承壓，請評估維護投資。');
+  if(w.businessId==='ecommerce'&&w.quality<.65&&w.reputation<.4)issues.push('品質低於 65%，口碑會持續下滑、客源跟著減少；提高品質預算才能止跌。');
   if(w.businessId==='ecommerce'&&m.returnRate>.12)issues.push('退貨率偏高，請改善商品品質與客戶期待；GMV 不代表淨收入。');
   if(p.kind!=='project'&&w.marketing>0&&m.adMarginalReturn<1)issues.push('一萬元行銷加碼的估計新增貢獻低於廣告費；客群、定價或履約容量正在限制效益。');
   if(!m.available)issues.push('保留營運及還款現金後沒有餘裕，需老闆處理資金。');

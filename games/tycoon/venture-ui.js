@@ -296,8 +296,8 @@ export function startVenture(mode, business) {
     const url = URL.createObjectURL(new Blob([raw], { type })), a = document.createElement('a'); a.href = url; a.download = name; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000);
   }
   function financeDialog() {
-    const d = document.getElementById('venture-dialog'); speed = 0; syncTicker();
-    d.innerHTML = `<form method="dialog" class="venture-dialog-head"><h2>資金與還款</h2><button aria-label="關閉">×</button></form><dl><dt>可用現金</dt><dd>${money(w.co.cash)}</dd><dt>剩餘本金</dt><dd>${money(w.co.debt)}</dd><dt>還可借款</dt><dd>${money(w.co.capital*1.5-w.co.debt)}</dd></dl><p>年息 8%。每月支付剩餘本金的 1/24 及利息，另可提前還款。利息為費用，本金只影響現金。</p><form data-form="finance">${field('金額（元）',input('amount',100000,1,w.co.capital*1.5))}<button name="financeAction" value="borrow" type="submit">借款</button><button name="financeAction" value="repay" type="submit">提前還款</button></form>`; d.showModal();
+    const d = document.getElementById('venture-dialog'); speed = 0; syncTicker(); const pay = Math.ceil(w.co.debt/24)+Math.round(w.co.debt*.08/12);
+    d.innerHTML = `<form method="dialog" class="venture-dialog-head"><h2>資金與還款</h2><button aria-label="關閉">×</button></form><dl><dt>可用現金</dt><dd>${money(w.co.cash)}</dd><dt>剩餘本金</dt><dd>${money(w.co.debt)}</dd><dt>還可借款</dt><dd>${money(w.co.capital*1.5-w.co.debt)}</dd><dt>目前每月還款</dt><dd>${money(pay)}</dd></dl><p>每多借 10 萬，首月多還約 ${money(Math.ceil(100000/24)+Math.round(100000*.08/12))}。借款不會讓月虧變少，只是把還款往後推。</p><p>年息 8%。每月支付剩餘本金的 1/24 及利息，另可提前還款。利息為費用，本金只影響現金。</p><form data-form="finance">${field('金額（元）',input('amount',100000,1,w.co.capital*1.5))}<button name="financeAction" value="borrow" type="submit">借款</button><button name="financeAction" value="repay" type="submit">提前還款</button></form>`; d.showModal();
   }
   app.addEventListener('click', async e => {
     const industry=e.target.closest('[data-industry-kind]');

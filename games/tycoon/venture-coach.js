@@ -43,6 +43,8 @@ function manufacturingCoach(w) {
   const contributionPerUnit = p.price - newMaterialCost / (1 - referenceDefects) - m.energyPerGood;
   const depreciation = Math.min(w.co.assets, p.equipment * w.lines / 180), fixedWithDebt = m.fixed + depreciation + f.interest;
   const breakEven = contributionPerUnit > 0 ? Math.ceil(fixedWithDebt / contributionPerUnit) : null;
+  const shiftRows = w.productId === 'packaging' ? ['normal', 'overtime'].map(sh => { const sp = productionPlan({ ...w, shift: sh, stock: { ...w.stock, defects: supplier.defects } }), c = p.price - newMaterialCost / (1 - sp.defects) - sp.energyPerGood; return { sh, good: Math.floor(sp.capacity * (1 - sp.defects) * dim), be: c > 0 ? Math.ceil((sp.fixed + depreciation + f.interest) / c) : null }; }) : [];
+  const shiftText = shiftRows.length ? ` 班別比較：${shiftRows.map(r => `${r.sh === 'normal' ? '正常班' : '加班'}月良品約 ${count(r.good)} 件、損平需 ${r.be === null ? '無法損平' : count(r.be) + ' 件'}`).join('；')}。${shiftRows.map(r => r.be !== null && r.good >= r.be * 1.1 ? (r.sh === 'normal' ? '正常班' : '加班') : '').filter(Boolean).join('、') || '兩種班別都不夠'}${shiftRows.some(r => r.be !== null && r.good >= r.be * 1.1) ? '才有賺頭；加班瑕疵與磨損較高。' : '，先降固定費或提高報價。'}` : '';
   const bottleneck = w.status !== 'playing' ? issue('closed', '已結案，回看經營取捨', 'info', '以下數字是結案當時的狀態與估計，不能再調整。')
     : w.event ? issue('event', '供應鏈事件待決', 'warning', '時間已暫停；先比較處理費與未來 45 天新採購的價差。')
     : f.available < 0 || procurementCost > Math.max(0, f.available) ? issue('cash', '先解決周轉金', 'danger', `現金扣未付費用、利息與還本後 ${money(f.available)}；已接訂單的估計缺料還需 ${money(procurementCost)}，應收 ${money(receivables)} 尚未入帳。`)
@@ -75,7 +77,7 @@ function manufacturingCoach(w) {
     driver('deliveryRisk', '現有供料計畫交期風險／未確定', orders.filter(o => o.late).length, '張', 'estimate', '沿目前順位、已知到貨、施工與合約驗收；排程最多 90 日，未估到完工不代表已發生違約。磨損凍結，未計新採購與隨機瑕疵。'),
     driver('receivables', '已交貨未收尾款', receivables, '$', 'state', '已認列收入，須到收款日才能使用。'),
     driver('quotedContribution', '待履約契約估計貢獻', quotedContribution, '$', 'estimate', '假設立即補料並交貨：合約額扣在製、各批剩餘原料、生產方式能源與預估驗收／逾期費；過去已認列報廢不重扣，取消與固定費另計。'),
-    driver('breakEven', '參考價估計月損平交貨量', breakEven, '件／月', 'estimate', `以目前供應商新料價與新料瑕疵、現有磨損／品管、固定費、折舊與利息計；未含稅與違約。新料估計瑕疵 ${pct(referenceDefects)}，日能力折月約 ${count(goodMonthCapacity)} 件。`),
+    driver('breakEven', '參考價估計月損平交貨量', breakEven, '件／月', 'estimate', `以目前供應商新料價與新料瑕疵、現有磨損／品管、固定費、折舊與利息計；未含稅與違約。新料估計瑕疵 ${pct(referenceDefects)}，日能力折月約 ${count(goodMonthCapacity)} 件。${shiftText}`),
   ], decision: next, tradeoffs: [{ title: emphasis[0], text: emphasis[1] }, { title: '便宜原料不一定是便宜交貨', text: '低價供應商便宜 12%，但七天到料且瑕疵較高；急件供應商一天到料但貴 22%。缺料、報廢和違約都可能吃掉價差。' }], finance: f, metrics: { remaining, requiredMaterial, materialGap, procurementCost, inventoryValue, wip, receivables, deposits, quote, quotedContribution, contributionPerUnit, referenceDefects, breakEven, goodMonthCapacity, cancellationFees, estimatedAuditFees, estimatedLateFees, energyPerGood: m.energyPerGood, orders }, assumptions: ['排程最多估未來 90 日，按現有順位、已知訂單、已付原料與合約驗收／取消期限；不預知後續中標、事故、磨損變化或隨機瑕疵。', '契約貢獻依各批已付料價與良率，不足用目前供應商新料價；假設立即補足缺料並交貨，已計估計驗收／逾期費，未計取消與過去已認列報廢。', '損平用目前供應商新料瑕疵與選定生產方式的單件能源；眼前生產顯示現有庫存良率，兩者不是同一批原料。', f.detail] };
 }
 
