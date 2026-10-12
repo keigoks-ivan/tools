@@ -1,4 +1,5 @@
-import {tripRoutes,tripHotels,tripPlaces} from './research-data.mjs';
+import {hotelContextMarkup} from './travel-context-view.mjs?v=1';
+import {tripRoutes,tripHotels,tripPlaces} from './research-data.mjs?v=3';
 const esc = value => String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const official = (url,label='官方資料 ↗') => `<a href="${esc(url)}" target="_blank" rel="noopener">${label}</a>`;
 const dateLabel = date => `${Number(date.slice(5,7))}/${Number(date.slice(8,10))}`;
@@ -14,7 +15,7 @@ function showRoute(id){
 let hotelFilter='all';
 function showHotels(){
   const hotels=tripHotels.filter(h=>hotelFilter==='all'||hotelFilter==='kitchen'&&h.kitchen||hotelFilter==='marriott'&&h.brand||hotelFilter==='sabah'&&h.sabah);
-  document.querySelector('#hotel-grid').innerHTML=hotels.map(h=>`<article class="hotel-card"><span class="city">${esc(h.city)}</span><h3>${esc(h.name)}</h3><div class="badges">${h.tags.map(tag=>`<span class="badge ${h.warning?'warning':''}">${esc(tag)}</span>`).join('')}</div><p class="verdict">${esc(h.verdict)}</p><ul>${h.facts.map(f=>`<li>${esc(f)}</li>`).join('')}</ul><p><b>尚待確認：</b>${esc(h.check)}</p><div class="hotel-actions"><span>${official(h.url)}${h.extra?`<br>${official(h.extra,'官方交通 ↗')}`:''}</span><button type="button" class="save" data-save="${h.id}" aria-pressed="${saved.hotels.includes(h.id)}" aria-label="收藏 ${esc(h.name)}">${saved.hotels.includes(h.id)?'已收藏 ✓':'收藏 ＋'}</button></div></article>`).join('');
+  document.querySelector('#hotel-grid').innerHTML=hotels.map(h=>`<article class="hotel-card"><span class="city">${esc(h.city)}</span><h3>${esc(h.name)}</h3><div class="badges">${h.tags.map(tag=>`<span class="badge ${h.warning?'warning':''}">${esc(tag)}</span>`).join('')}</div><p class="verdict">${esc(h.verdict)}</p><ul>${h.facts.map(f=>`<li>${esc(f)}</li>`).join('')}</ul>${hotelContextMarkup(h)}<p><b>尚待確認：</b>${esc(h.check)}</p><div class="hotel-actions"><span>${official(h.url)}${h.extra?`<br>${official(h.extra,'官方交通 ↗')}`:''}</span><button type="button" class="save" data-save="${h.id}" aria-pressed="${saved.hotels.includes(h.id)}" aria-label="收藏 ${esc(h.name)}">${saved.hotels.includes(h.id)?'已收藏 ✓':'收藏 ＋'}</button></div></article>`).join('');
 }
 showRoute(saved.route);showHotels();
 document.querySelector('#place-grid').innerHTML=tripPlaces.map(p=>`<article class="place-card"><h3>${esc(p.city)}</h3>${p.items.map(([name,desc,url])=>`<div class="attraction"><strong>${esc(name)}</strong><p>${esc(desc)}</p>${official(url)}</div>`).join('')}</article>`).join('');
