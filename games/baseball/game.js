@@ -552,7 +552,7 @@ function setPanels(){
   $('batStat').textContent=seasonStat?`${g.postseason?'季後賽':'本季'}　打擊率 ${fmtAvg(seasonStat.h,seasonStat.ab)}　全壘打 ${seasonStat.hr}　上壘率 ${fmtAvg(seasonStat.h+seasonStat.bb,seasonStat.pa)}`:h.pa?`本季　打擊率 ${fmt3(h.avg)}　全壘打 ${h.hr}　上壘率 ${fmt3(h.obp)}`:'本季沒有打擊紀錄';
   if(typeof abTags==='function'){ let e=$('bAbl'); if(!e){ e=document.createElement('div'); e.id='bAbl'; e.className='ss-abl ss-hud'; $('batStat').after(e); } e.innerHTML=abTags(br.ab); }
   const f=fielding(g), pid=f.pitcher, pr=pit(pid), pc=f.pc[pid]||0, left=clamp(100-pc/pr.limit*100,3,100);
-  $('pNm').textContent=dispName(pid); const role=pid===f.T.rotation[0]||f.usedPen.length===0?'先發':pid===f.T.bullpen[0]?'終結':'中繼';
+  $('pNm').textContent=dispName(pid); const role=f.T.rotation.includes(pid)?'先發':pid===f.T.bullpen[0]?'終結':'中繼';
   $('pRole').textContent=(f.abbr===g.user?'我方':'對手')+'・'+role; $('pRole').title=f.T.zh+'投手';
   $('pitLine').innerHTML=`<span class="kmhv">${pr.kmh}<small>km/h</small></span><span>控球${gl(pr.control)}</span><span>體力${gl(pr.stamina)}</span>`;
   if(typeof abTags==='function'){ let e=$('pAbl'); if(!e){ e=document.createElement('div'); e.id='pAbl'; e.className='ss-abl ss-hud'; $('pitLine').after(e); } e.innerHTML=abTags(pr.ab); }

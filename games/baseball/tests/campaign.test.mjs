@@ -116,3 +116,54 @@ test('storage failure is reported while gameplay remains usable',()=>{
   assert.equal(r.run('FRANCHISE.saveOK'),false); assert.equal(r.run('FRANCHISE.season.st.day'),1);
   assert.ok(r.run('FRUI.html().includes("無法保存")'));
 });
+test('standings and playoff seeds resolve tied records in the same order',()=>{
+  const r=runtime(); r.run("SEASON.start('DET',10); for(const t of TEAMS) SEASON.st.rec[t.abbr]={w:5,l:5,gp:10,rs:40,ra:40}; SEASON.st.rec.MIN.rs=100;");
+  const first=r.run('SEASON.standings().AL中區[0].a'); r.run('SEASON.startPlayoffs();');
+  assert.equal(first,'MIN'); assert.equal(first,r.run('SEASON.st.po.seeds.AL.find(a=>SS_DIV.AL中區.includes(a))'));
+});
+test('new short seasons give every club the same home dates without altering saved calendars',()=>{
+  const r=runtime();
+  for(const year of [2026,2027,2054]) for(const games of [10,30]){
+    const calendar=r.json(`seasonCalendar(${games},${year})`),homes=new Map();
+    assert.equal(calendar.length,games);
+    for(const day of calendar){ assert.equal(new Set(day.flat()).size,30); for(const [,home] of day) homes.set(home,(homes.get(home)||0)+1); }
+    assert.ok([...homes.values()].every(n=>n===games/2));
+  }
+  r.run("SEASON.start('DET',10); const saved=JSON.stringify(SEASON.st.calendar); SEASON.save(); SEASON.load();");
+  assert.equal(r.run('JSON.stringify(SEASON.st.calendar)===saved'),true);
+});
+test('the automatic schedule page includes the next fixture on each page boundary',()=>{
+  const r=runtime(); r.run("SEASON.start('DET',30); SEASON.st.day=10;");
+  assert.match(r.run('SSUI.scheduleHTML()'),/11・下一場/);
+  r.run('SEASON.st.day=20;'); assert.match(r.run('SSUI.scheduleHTML()'),/21・下一場/);
+});
+test('new-year and new-club views do not retain postseason or another club market filters',async()=>{
+  const r=runtime(); r.run("document={querySelector:()=>({scrollTop:0}),getElementById:()=>null}; FRANCHISE.start('DET',10); FRUI.statView='po'; FRANCHISE.season.st.phase='done'; FRANCHISE.nextYear();");
+  assert.ok(!r.run("FRUI.league().includes('我方季後賽')"));
+  r.run("FRUI.marketTeam='LAD'; FRUI.newTeam='LAD'; FRUI.newGames=10; FRUI.statView='po'; FRUI.benchSlots={123:8};"); await r.run("FRUI.act('start','')");
+  assert.equal(r.run('FRUI.marketTeam'),''); assert.equal(r.run('FRUI.statView'),'reg'); assert.equal(r.run('Object.keys(FRUI.benchSlots).length'),0);
+});
+test('incomplete saves cannot crash menus or overwrite the original data during load',()=>{
+  const r=runtime(); r.run("FRANCHISE.start('DET',10); const broken=JSON.parse(JSON.stringify(FRANCHISE.st)); delete broken.clubs.DET.rotation; localStorage.setItem(FRANCHISE.KEY,JSON.stringify(broken));");
+  const original=r.storage.get('pawa_franchise_v1'); assert.doesNotThrow(()=>r.run('FRANCHISE.load()'));
+  assert.equal(r.run('FRANCHISE.st'),null); assert.equal(r.storage.get('pawa_franchise_v1'),original); assert.ok(r.run('FRUI.html().includes("存檔")'));
+  r.run("SEASON.start('DET',10); const brokenSeason=JSON.parse(JSON.stringify(SEASON.st)); delete brokenSeason.rec.DET; localStorage.setItem(SEASON.KEY,JSON.stringify(brokenSeason));");
+  const seasonOriginal=r.storage.get('pawa_season_v1'); assert.doesNotThrow(()=>r.run('SEASON.load()'));
+  assert.equal(r.run('SEASON.st'),null); assert.equal(r.storage.get('pawa_season_v1'),seasonOriginal); assert.ok(r.run('SSUI.seasonHTML().includes("存檔格式")'));
+  r.run("SEASON.start('DET',10); SEASON.st.stats={123:null}; SEASON.save();"); assert.doesNotThrow(()=>r.run('SEASON.load()')); assert.equal(r.run('SEASON.st'),null);
+  r.run("FRANCHISE.start('DET',10); FRANCHISE.st.history=[{year:2026,champ:'missing',w:5,l:5}]; FRANCHISE.save();"); assert.doesNotThrow(()=>r.run('FRANCHISE.load()')); assert.equal(r.run('FRANCHISE.st'),null);
+});
+test('training cannot charge for stamina already at the ability cap',()=>{
+  const r=runtime(); r.run("const club=TEAMS.find(t=>t.rotation.concat(t.bullpen).some(id=>frBase('pit',id).stamina===100)); FRANCHISE.start(club.abbr,162); const capped=FRANCHISE.team(club.abbr).rotation.concat(FRANCHISE.team(club.abbr).bullpen).find(id=>frBase('pit',id).stamina===100),money=FRANCHISE.st.cash;");
+  assert.match(r.run("FRANCHISE.train(capped,'stamina')"),/100/); assert.equal(r.run('FRANCHISE.st.cash'),r.run('money')); assert.equal(r.run('FRANCHISE.st.dev[capped]'),undefined);
+});
+test('reliever stamina training adds less endurance than the same gain for a starter',()=>{
+  const r=runtime(); r.run("FRANCHISE.start('DET',162); const T=FRANCHISE.team('DET'),sp=T.rotation.find(id=>frBase('pit',id).starter&&frBase('pit',id).stamina<88),rp=T.bullpen.find(id=>!frBase('pit',id).starter&&frBase('pit',id).stamina<88); const spLimit=frBase('pit',sp).limit,rpLimit=frBase('pit',rp).limit; FRANCHISE.st.facilities.training=3; for(let n=0;n<4;n++){ FRANCHISE.season.st.day=n*7; FRANCHISE.train(sp,'stamina'); FRANCHISE.train(rp,'stamina'); } LEAGUE_CTX=FRANCHISE.context;");
+  assert.ok(r.run('pit(rp).limit-rpLimit<pit(sp).limit-spLimit'));
+});
+test('HUD shows later rotation pitchers as starters when relievers are resting',()=>{
+  const r=runtime(),source=fs.readFileSync(new URL('game.js',root),'utf8');
+  r.run("const nodes={}; const $=id=>nodes[id]||(nodes[id]={style:{},classList:{toggle(){}},after(){}}); const POS_ZH={}; const dispName=nameOf,gl=grade,fmt3=n=>String(n); const C={}; function setHeatPanel(){}; const GM=newGame('DET','LAD','DET',null,TEAM('LAD').rotation[1]); GM.home.usedPen=[TEAM('LAD').bullpen[0]];");
+  r.run(source.slice(source.indexOf('function setPanels(){'),source.indexOf('\nfunction say(',source.indexOf('function setPanels(){')))); r.run('setPanels();');
+  assert.equal(r.run("nodes.pRole.textContent"),'對手・先發');
+});

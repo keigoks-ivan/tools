@@ -2,11 +2,12 @@
 const frEsc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const FRUI={
   tab:'overview',busy:false,message:'',confirmReset:false,marketPage:0,
+  resetViews(){ Object.assign(this,{tab:'overview',offer:null,trainee:null,pending:null,marketTeam:'',marketPage:0,benchSlots:{},statView:'reg',schedulePage:null}); },
   button(a,v,label,disabled=false,cls='ss-btn'){ return `<button class="${cls}" data-f="${a}" data-v="${v}" ${disabled?'disabled':''}>${label}</button>`; },
   teamGrid(){ const team=this.newTeam||'DET'; return `<div class="ss-grid">${TEAMS.slice().sort((a,b)=>a.zh.localeCompare(b.zh,'zh-Hant')).map(t=>`<button data-f="pick" data-v="${t.abbr}" class="${t.abbr===team?'on':''}" style="--tc:${t.colors[0]}">${t.abbr}<small>${t.zh}</small></button>`).join('')}</div>`; },
   html(){
     const s=FRANCHISE.st;
-    if(!s) return `<div class="ss-pane fr-pane"><div class="fr-hero"><div><span class="fr-eyebrow">FRANCHISE MODE</span><h2>打造你的冠軍球團</h2><p>從第一張打序，到下一座冠軍獎盃。</p></div><span class="fr-emblem">GM</span></div><div class="fr-features"><div><b>掌握陣容</b><span>打序、板凳、先發輪值與牛棚</span></div><div><b>經營球團</b><span>薪資、主場收入、交易與設施</span></div><div><b>培養主力</b><span>訓練成果帶入每一場實際比賽</span></div></div><div class="ss-h2">選擇球團</div>${this.teamGrid()}<div class="ss-row"><span>每季場數</span>${[10,30,162].map(n=>this.button('games',n,n+' 場',false,'ss-seg'+(n===(this.newGames||30)?' on':''))).join('')}</div><p class="ss-sub">季賽、球團經營各有獨立存檔。經營模式可跨季延續名單、資金與養成。金額使用遊戲球團幣；賽程由遊戲產生。</p>${this.button('start','', '接任總經理　▶',false,'go ss-go')}</div>`;
+    if(!s) return `<div class="ss-pane fr-pane">${FRANCHISE.loadError?'<div class="fr-notice" role="alert">球團存檔格式不完整，原始存檔仍保留。可切換其他模式；接任新球團會覆蓋這份存檔。</div>':''}<div class="fr-hero"><div><span class="fr-eyebrow">FRANCHISE MODE</span><h2>打造你的冠軍球團</h2><p>從第一張打序，到下一座冠軍獎盃。</p></div><span class="fr-emblem">GM</span></div><div class="fr-features"><div><b>掌握陣容</b><span>打序、板凳、先發輪值與牛棚</span></div><div><b>經營球團</b><span>薪資、主場收入、交易與設施</span></div><div><b>培養主力</b><span>訓練成果帶入每一場實際比賽</span></div></div><div class="ss-h2">選擇球團</div>${this.teamGrid()}<div class="ss-row"><span>每季場數</span>${[10,30,162].map(n=>this.button('games',n,n+' 場',false,'ss-seg'+(n===(this.newGames||30)?' on':''))).join('')}</div><p class="ss-sub">季賽、球團經營各有獨立存檔。經營模式可跨季延續名單、資金與養成。金額使用遊戲球團幣；賽程由遊戲產生。</p>${this.button('start','', '接任總經理　▶',false,'go ss-go')}</div>`;
     LEAGUE_CTX=FRANCHISE.context;
     const S=FRANCHISE.season,st=S.st,T=S.team(st.user),r=st.rec[st.user];
     const nav=[['overview','球團總覽'],['roster','陣容編成'],['market','交易市場'],['training','球員養成'],['finance','財務設施'],['league','賽程・成績']];
@@ -75,7 +76,7 @@ const FRUI={
     return h;
   },
   league(){
-    const S=FRANCHISE.season,st=S.st,s=FRANCHISE.st,T=S.team(st.user),post=this.statView==='po',stats=post?S.playoffStats():st.stats;
+    const S=FRANCHISE.season,st=S.st,s=FRANCHISE.st,T=S.team(st.user),post=this.statView==='po'&&!!st.po,stats=post?S.playoffStats():st.stats;
     let h=st.po?SSUI.bracketHTML(S):''; h+=SSUI.scheduleHTML(S)+`<div class="ss-cols"><div>${SSUI.standHTML(S)}</div><div>${SSUI.leadersHTML(S)}</div></div>`;
     h+=`<div class="fr-pages">${this.button('statsView','reg','例行賽成績',false,'ss-seg'+(!post?' on':''))}${st.po?this.button('statsView','po','季後賽成績',false,'ss-seg'+(post?' on':'')):''}</div><div class="ss-h2">我方${post?'季後賽':'例行賽'}打擊成績</div><div class="fr-table"><table class="ss-tb"><tr><th>球員</th><th>打數</th><th>安打</th><th>全壘打</th><th>打點</th><th>打擊率</th></tr>${T.lineup.map(l=>l.id).concat(T.bench).filter(id=>stats[id]?.pa).map(id=>{ const p=stats[id];return `<tr><td>${frEsc(nameOf(id))}</td><td>${p.ab}</td><td>${p.h}</td><td>${p.hr}</td><td>${p.rbi}</td><td>${fmtAvg(p.h,p.ab)}</td></tr>`; }).join('')||'<tr><td colspan="6">球季尚未開打。</td></tr>'}</table></div>`;
     h+=`<div class="ss-h2">我方${post?'季後賽':'例行賽'}投球成績</div><div class="fr-table"><table class="ss-tb"><tr><th>球員</th><th>局數</th><th>勝</th><th>敗</th><th>三振</th><th>防禦率</th></tr>${T.rotation.concat(T.bullpen).filter(id=>stats[id]?.bf).map(id=>{ const p=stats[id];return `<tr><td>${frEsc(nameOf(id))}</td><td>${Math.floor(p.outs/3)}.${p.outs%3}</td><td>${p.w}</td><td>${p.l}</td><td>${p.pk}</td><td>${fmtEra(p.er,p.outs)}</td></tr>`; }).join('')||'<tr><td colspan="6">球季尚未開打。</td></tr>'}</table></div>`;
@@ -94,7 +95,7 @@ const FRUI={
     if(this.busy) return; this.message=''; const F=FRANCHISE,S=F.season;
     if(a==='pick') this.newTeam=v;
     else if(a==='games') this.newGames=+v;
-    else if(a==='start'){ F.start(this.newTeam||'DET',this.newGames||30); this.tab='overview'; this.schedulePage=null; }
+    else if(a==='start'){ F.start(this.newTeam||'DET',this.newGames||30); this.resetViews(); }
     else if(a==='tab'){ this.tab=v; this.pending=null; document.querySelector('#intro .tcard').scrollTop=0; }
     else if(a==='schedule') this.schedulePage=+v;
     else if(a==='statsView') this.statView=v;
@@ -107,10 +108,10 @@ const FRUI={
     else if(a==='promote'){ const id=+v,T=S.team(S.st.user),slots=T.lineup.map((l,i)=>({l,i})).filter(({l})=>frCanPlay(id,l.pos)); this.message=F.promote(id,this.benchSlots?.[id]??slots[0]?.i)||'先發名單已更新。'; }
     else if(a==='train') this.message=F.train(this.trainee,v)||'訓練完成，下場比賽立即使用養成後能力。';
     else if(a==='upgrade') this.message=F.upgrade(v)||'設施升級完成。';
-    else if(a==='nextYear'){ this.message=F.nextYear(); this.schedulePage=null; this.tab='overview'; }
+    else if(a==='nextYear'){ this.message=F.nextYear(); this.schedulePage=null; this.statView='reg'; this.tab='overview'; }
     else if(a==='reset'){
       if(!this.confirmReset){ this.confirmReset=true; SSUI.render(); setTimeout(()=>{ this.confirmReset=false; if(SSUI.tab==='franchise') SSUI.render(); },4000); return; }
-      F.clear(); LEAGUE_CTX=null; this.confirmReset=false; this.offer=null; this.trainee=null; this.tab='overview';
+      F.clear(); LEAGUE_CTX=null; this.confirmReset=false; this.resetViews();
     } else if(a==='play'){
       const u=S.userGame(); if(!u) return; document.getElementById('intro').classList.add('hide'); startGame(u.away,u.home,S.st.user,u.spA,u.spH,{campaign:S,franchise:true}); return;
     } else if(['sim1','sim7','simall'].includes(a)){

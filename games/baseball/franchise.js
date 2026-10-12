@@ -15,7 +15,16 @@ const FRANCHISE={
   KEY:'pawa_franchise_v1',st:null,revision:0,cache:{},saveOK:true,
   load(){
     const s=ssStore.get(this.KEY,null);
-    if(s&&s.v===1&&TEAM(s.season?.user)&&s.season.rec&&TEAMS.every(t=>s.clubs?.[t.abbr]?.lineup.length===9&&s.clubs[t.abbr].rotation.length&&s.clubs[t.abbr].bullpen.length)){
+    const object=v=>v&&typeof v==='object'&&!Array.isArray(v);
+    const valid=s&&s.v===1&&seasonSaveValid(s.season)&&Number.isFinite(s.cash)&&Number.isFinite(s.fans)&&Number.isFinite(s.income)&&Number.isFinite(s.expenses)&&Number.isInteger(s.year)
+      &&object(s.dev)&&Object.entries(s.dev).every(([id,d])=>PLAYERS[id]&&object(d)&&Object.entries(d).every(([k,n])=>FR_SKILLS[k]&&Number.isInteger(n)&&n>=0&&n<=12))
+      &&object(s.trained)&&Object.values(s.trained).every(n=>Number.isInteger(n)&&n>=0)
+      &&Array.isArray(s.ledger)&&s.ledger.every(l=>l&&Number.isFinite(l.amount)&&typeof l.label==='string')&&Array.isArray(s.news)&&s.news.every(n=>typeof n==='string')
+      &&Array.isArray(s.history)&&s.history.every(h=>h&&TEAM(h.champ)&&Number.isInteger(h.year)&&Number.isFinite(h.w)&&Number.isFinite(h.l))
+      &&['stadium','training'].every(k=>Number.isInteger(s.facilities?.[k])&&s.facilities[k]>=0&&s.facilities[k]<=3)
+      &&TEAMS.every(t=>{ const c=s.clubs?.[t.abbr]; return c&&Array.isArray(c.lineup)&&c.lineup.length===9&&c.lineup.every(l=>l&&PLAYERS[l.id]&&FR_POS[l.pos])&&['bench','rotation','bullpen'].every(k=>Array.isArray(c[k])&&c[k].every(id=>PLAYERS[id]))&&c.rotation.length&&c.bullpen.length; });
+    this.st=null; this.season.st=null; this.loadError=!!s&&!valid;
+    if(valid){
       this.st=s; this.season.st=s.season; this.invalidate();
     }
     return this.st;
@@ -23,6 +32,7 @@ const FRANCHISE={
   save(){ if(this.st){ this.st.season=this.season.st; this.saveOK=ssStore.set(this.KEY,this.st); } return this.saveOK; },
   clear(){ this.st=null; this.season.st=null; this.invalidate(); try{ localStorage.removeItem(this.KEY); }catch(e){} },
   start(user,games){
+    this.loadError=false;
     const clubs={}; for(const t of TEAMS) clubs[t.abbr]={lineup:t.lineup.map(l=>({...l})),bench:t.bench.filter(id=>!t.lineup.some(l=>l.id===id)),rotation:t.rotation.slice(),bullpen:t.bullpen.filter(id=>!t.rotation.includes(id))};
     this.st={v:1,year:2026,season:null,clubs,dev:{},trained:{},cash:0,fans:50,facilities:{stadium:0,training:0},ledger:[],news:[],history:[],income:0,expenses:0};
     this.season.start(user,games,this.st.year); this.st.cash=Math.round(this.payroll()*.65+30); this.invalidate();
@@ -98,8 +108,10 @@ const FRANCHISE={
     if(!(hitter&&P.h&&['meet','power','speed'].includes(skill)||pitcher&&P.p&&['control','stamina','velo'].includes(skill))) return {error:'這位球員沒有這項訓練。'};
     const d=s.dev[id]||{},level=d[skill]||0,at=s.trained[id];
     if(level>=12) return {error:'這項養成已達上限 +12。'};
+    const ceiling=skill==='velo'?12:Math.min(12,100-frBase(pitcher&&['control','stamina'].includes(skill)?'pit':'bat',id)[skill]);
+    if(level>=ceiling) return {error:'這項能力已達 100，無須再付費訓練。'};
     if(at!=null&&S.day-at<7) return {error:'同一球員每 7 場可訓練一次；再打 '+(7-S.day+at)+' 場。'};
-    const cost=Math.round(1.2*(1+level*.12)/(1+s.facilities.training*.12)*10)/10, gain=Math.min(s.facilities.training===3?3:2,12-level);
+    const cost=Math.round(1.2*(1+level*.12)/(1+s.facilities.training*.12)*10)/10, gain=Math.min(s.facilities.training===3?3:2,ceiling-level);
     return {cost,gain};
   },
   train(id,skill){
@@ -120,8 +132,8 @@ const FRANCHISE={
   },
   pitcher(r){
     const d=this.st.dev[r.id]; if(!d) return r; const key='p'+r.id; if(this.cache[key]) return this.cache[key];
-    const c=d.control||0,s=d.stamina||0,v=(d.velo||0)*.15;
-    return this.cache[key]={...r,control:clamp(r.control+c,1,100),stamina:clamp(r.stamina+s,1,100),limit:r.limit+Math.round(s*.6),kmh:Math.round(r.kmh+v*1.609),maxMph:r.maxMph+v,pitches:r.pitches.map(p=>({...p,mph:p.mph+v}))};
+    const c=d.control||0,s=d.stamina||0,v=(d.velo||0)*.15,stamina=clamp(r.stamina+s,1,100);
+    return this.cache[key]={...r,control:clamp(r.control+c,1,100),stamina,limit:Math.round((r.starter?55:18)+stamina*(r.starter?.6:.4)),kmh:Math.round(r.kmh+v*1.609),maxMph:r.maxMph+v,pitches:r.pitches.map(p=>({...p,mph:p.mph+v}))};
   },
   quickBatter(r){ const d=this.st.dev[r.id]||{}; return {...r,k:r.k*(1-(d.meet||0)*.006),babip:clamp(r.babip+(d.meet||0)*.001,0,1),hr:r.hr*(1+(d.power||0)*.012)}; },
   quickPitcher(r){ const d=this.st.dev[r.id]||{}; return {...r,bb:r.bb*(1-(d.control||0)*.012),k:r.k*(1+(d.velo||0)*.008)}; }

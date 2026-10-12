@@ -11,6 +11,20 @@ const ssStore={
   get(k,d){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } },
   set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); return true; }catch(e){ return false; } }
 };
+function seasonSaveValid(s){
+  const object=v=>v&&typeof v==='object'&&!Array.isArray(v);
+  if(!s||!TEAM(s.user)||![10,30,162].includes(s.games)||!Number.isInteger(s.day)||s.day<0||s.day>s.games||!['regular','playoffs','done'].includes(s.phase)||!object(s.stats)||!object(s.rot)||!Array.isArray(s.log)||!s.log.every(x=>typeof x==='string')) return false;
+  if(!Object.values(s.rot).every(n=>Number.isInteger(n)&&n>=0)||![s.stats,s.poStats||{}].every(a=>object(a)&&Object.values(a).every(p=>object(p)&&Object.keys(STAT0()).every(k=>Number.isFinite(p[k])&&p[k]>=0)))) return false;
+  if(s.results&&(!Array.isArray(s.results)||!s.results.every(r=>r&&TEAM(r.away)&&TEAM(r.home)&&Number.isInteger(r.day)&&Number.isFinite(r.a)&&Number.isFinite(r.h)))) return false;
+  if(!TEAMS.every(t=>{ const r=s.rec?.[t.abbr]; return r&&['w','l','rs','ra','gp'].every(k=>Number.isFinite(r[k])&&r[k]>=0); })) return false;
+  if(s.calendar&&(!Array.isArray(s.calendar)||s.calendar.length!==s.games||!s.calendar.every(d=>Array.isArray(d)&&d.length===15&&d.every(p=>Array.isArray(p)&&p.length===2&&p.every(a=>TEAM(a)))&&new Set(d.flat()).size===30))) return false;
+  if(s.phase!=='regular'){
+    const p=s.po,rounds=s.format===12?4:3; if(!p||!Array.isArray(p.series)||!Array.isArray(p.done)||!Array.isArray(p.bo)||p.bo.length!==rounds||!p.bo.every(n=>[1,3,5,7].includes(n))||!Number.isInteger(p.round)||p.round<0||p.round>=rounds||!['AL','NL'].every(L=>Array.isArray(p.seeds?.[L])&&p.seeds[L].length===(s.format===12?6:3)&&p.seeds[L].every(a=>TEAM(a)))) return false;
+    if(!p.series.concat(p.done).every(x=>x&&Array.isArray(x.teams)&&x.teams.length===2&&x.teams.every(a=>TEAM(a))&&Array.isArray(x.wins)&&x.wins.length===2&&x.wins.every(n=>Number.isInteger(n)&&n>=0)&&[1,3,5,7].includes(x.bestOf))) return false;
+    if(s.phase==='done'&&!TEAM(p.champ)) return false;
+  }
+  return true;
+}
 
 /* ---------- 快速模擬：一個打席 ---------- */
 // log5：打者與投手各自的機率，相對聯盟平均合成（Bill James 公式）
@@ -104,7 +118,7 @@ function campaignStats(g,id){
   return Object.fromEntries(Object.keys(base).map(k=>[k,base[k]+(p[k]||0)]));
 }
 
-// 遊戲賽程：輪轉配對、三連戰、第二循環主客互換；存檔後不重抽。
+// 遊戲賽程：輪轉配對；短球季主客各半，完整球季三連戰。存檔後不重抽。
 function seasonCalendar(games,year=2026){
   const clubs=TEAMS.map(t=>t.abbr).sort(), ring=clubs.slice();
   const shift=(year-2026)%29; for(let n=0;n<shift;n++) ring.splice(1,0,ring.pop());
@@ -113,6 +127,19 @@ function seasonCalendar(games,year=2026){
     const pairs=[];
     for(let i=0;i<15;i++){ const a=ring[i],b=ring[29-i]; pairs.push((i===0?r:i)%2?[a,b]:[b,a]); }
     rounds.push(pairs); ring.splice(1,0,ring.pop());
+  }
+  if(games===10||games===30){
+    // 偶數輪的配對圖沿閉合路徑定主客，每隊的主場系列賽數相同。
+    const balance=(first,count)=>{
+      const adj=Object.fromEntries(clubs.map(a=>[a,[]]));
+      for(const pairs of rounds.slice(first,first+count)) for(const pair of pairs){ const e={pair,a:pair[0],b:pair[1],used:false}; adj[e.a].push(e); adj[e.b].push(e); }
+      for(const club of clubs){ const stack=[club]; while(stack.length){ const a=stack[stack.length-1],e=adj[a].pop(); if(!e){ stack.pop(); continue; } if(e.used) continue;
+        e.used=true; const b=e.a===a?e.b:e.a; e.pair[0]=a; e.pair[1]=b; stack.push(b);
+      } }
+    };
+    const lengths=games===10?[3,3,2,2]:Array(10).fill(3);
+    if(games===10){ balance(0,2); balance(2,2); } else balance(0,10);
+    return lengths.flatMap((n,r)=>Array.from({length:n},()=>rounds[r].map(p=>p.slice())));
   }
   return Array.from({length:games},(_,d)=>{ const series=Math.floor(d/3), reverse=Math.floor(series/29)%2;
     return rounds[series%29].map(p=>reverse?[p[1],p[0]]:p.slice()); });
@@ -128,13 +155,14 @@ function seriesMatch(s,format){
    ========================================================= */
 const SEASON={
   KEY:'pawa_season_v1', st:null,
-  load(){ this.st=ssStore.get(this.KEY,null); if(this.st&&(!TEAM(this.st.user)||!this.st.rec||!this.st.stats)) this.st=null; return this.st; },
+  load(){ const s=ssStore.get(this.KEY,null); this.loadError=!!s&&!seasonSaveValid(s); this.st=this.loadError?null:s; return this.st; },
   save(){ if(this.st) this.saveOK=ssStore.set(this.KEY,this.st); return this.saveOK; },
   context(){ return null; },
   team(abbr){ return TEAM(abbr); },
   playoffStats(){ return this.st.format===12?(this.st.poStats||(this.st.poStats={})):this.st.stats; },
   clear(){ this.st=null; try{ localStorage.removeItem(this.KEY); }catch(e){} },
   start(user,games,year=2026){
+    this.loadError=false;
     const rec={}; TEAMS.forEach(t=>rec[t.abbr]={w:0,l:0,rs:0,ra:0,gp:0});
     this.st={v:2,user,games,year,format:12,calendar:seasonCalendar(games,year),results:[],pitchGames:{},day:0,rec,stats:{},poStats:{},log:[],phase:'regular',po:null,rot:{},userWins:0,userGames:0,streak:0};
     this.save(); return this.st;
@@ -200,7 +228,7 @@ const SEASON={
   standings(){
     const st=this.st, out={};
     for(const [d,teams] of Object.entries(SS_DIV)){
-      const rows=teams.map(a=>({a,...st.rec[a]})).sort((x,y)=>(y.w-y.l)-(x.w-x.l)||y.w-x.w);
+      const rows=teams.map(a=>({a,...st.rec[a]})).sort((x,y)=>(y.w-y.l)-(x.w-x.l)||y.w-x.w||(y.rs-y.ra)-(x.rs-x.ra)||x.a.localeCompare(y.a));
       const lead=rows[0]; rows.forEach(r=>r.gb=((lead.w-r.w)+(r.l-lead.l))/2); out[d]=rows;
     }
     return out;
@@ -359,7 +387,7 @@ const SSUI={
     root.addEventListener('click',e=>{ const f=e.target.closest('[data-f]'); if(f){ FRUI.act(f.dataset.f,f.dataset.v); return; } const b=e.target.closest('[data-a]'); if(b) this.act(b.dataset.a,b.dataset.v); });
     root.addEventListener('change',e=>{ if(e.target.dataset.fc) FRUI.change(e.target.dataset.fc,e.target.value); });
     const last=ssStore.get('pawa_menu_mode',null);
-    this.show(last==='franchise'&&FRANCHISE.st?'franchise':SEASON.st&&SEASON.st.phase!=='done'?'season':'single');
+    this.show(['single','season','franchise','records','ach'].includes(last)?last:SEASON.st&&SEASON.st.phase!=='done'?'season':'single');
   },
   show(k){
     if(this.simming||typeof FRUI!=='undefined'&&FRUI.busy) return;
@@ -383,8 +411,8 @@ const SSUI={
     const st=SEASON.st;
     if(!st){
       const sel=this.newTeam||'DET', n=this.newGames||30;
-      return `<div class="ss-pane"><div class="ss-h">開一個新球季</div>
-        <div class="ss-sub">從 30 隊選一隊，親自比賽或交給電腦模擬。新球季採三連戰賽程，各聯盟三支分區冠軍與三支外卡晉級季後賽。</div>
+      return `<div class="ss-pane">${SEASON.loadError?'<div class="fr-notice" role="alert">存檔格式不完整，原始存檔仍保留。可切換其他模式；開始新球季會覆蓋這份存檔。</div>':''}<div class="ss-h">開一個新球季</div>
+        <div class="ss-sub">從 30 隊選一隊，親自比賽或交給電腦模擬。主客場各半；10 場採 3、3、2、2 場系列賽，30／162 場採三連戰。各聯盟三支分區冠軍與三支外卡晉級季後賽。</div>
         <div class="ss-grid">${TEAMS.slice().sort((a,b)=>a.zh.localeCompare(b.zh,'zh-Hant')).map(t=>`<button data-a="pick" data-v="${t.abbr}" class="${t.abbr===sel?'on':''}" style="--tc:${t.colors[0]}">${t.abbr}<small>${t.zh}</small></button>`).join('')}</div>
         <div class="ss-row"><span>場數</span>${[10,30,162].map(x=>`<button data-a="games" data-v="${x}" class="ss-seg${x===n?' on':''}">${x} 場</button>`).join('')}</div>
         <button class="go ss-go" data-a="start">開始球季</button></div>`;
@@ -422,11 +450,11 @@ const SSUI={
     return `<div class="ss-h2">季後賽</div><div class="ss-br">${all.map(s=>`<div class="ss-sr${s.winner?' fin':''}"><div class="ss-sn">${s.name}<small>${s.bestOf} 戰 ${Math.ceil(s.bestOf/2)} 勝</small></div>${s.teams.map((t,i)=>`<div class="${s.winner===t?'w':''}">${this.chip(t)} ${TEAM(t).zh}<b>${s.wins[i]}</b></div>`).join('')}</div>`).join('')}</div>`;
   },
   scheduleHTML(campaign=SEASON){
-    const st=campaign.st, start=Math.min(Math.max(0,st.day-3),Math.max(0,st.games-10));
+    const st=campaign.st, start=Math.min(st.day,st.games-1);
     const page=campaign===SEASON?(this.schedulePage??Math.floor(start/10)):FRUI.schedulePage??Math.floor(start/10);
     const from=clamp(page*10,0,Math.floor((st.games-1)/10)*10), prefix=campaign===SEASON?'data-a="schedule"':'data-f="schedule"';
     const results=st.results||[];
-    return `<div class="ss-h2">賽程與結果 <small>第 ${from+1}–${Math.min(from+10,st.games)} 場</small></div><div class="fr-table"><table class="ss-tb"><tr><th>場次</th><th>對手</th><th>主客場</th><th>結果</th></tr>${Array.from({length:Math.min(10,st.games-from)},(_,i)=>{ const d=from+i,p=campaign.pairings(d).find(x=>x.includes(st.user)),r=results.find(x=>x.phase==='regular'&&x.day===d); if(!p) return ''; const home=p[1]===st.user,opp=p[home?0:1],won=r&&(r.a>r.h)===(r.away===st.user); return `<tr class="${d===st.day?'me':''}"><td>${d+1}${d===st.day?'・下一場':''}</td><td>${this.chip(opp)} ${TEAM(opp).zh}</td><td>${home?'主場':'客場'}</td><td>${r?`${won?'勝':'敗'} ${home?r.h:r.a}：${home?r.a:r.h}`:d<st.day?'已完成':'待賽'}</td></tr>`; }).join('')}</table></div><div class="fr-pages"><button class="ss-seg" ${prefix} data-v="${page-1}" ${from===0?'disabled':''}>上一頁</button><button class="ss-seg" ${prefix} data-v="${page+1}" ${from+10>=st.games?'disabled':''}>下一頁</button><small>${st.calendar?'遊戲產生的三連戰賽程':'沿用舊存檔賽程'}・同戰績以淨得分排序</small></div>`;
+    return `<div class="ss-h2">賽程與結果 <small>第 ${from+1}–${Math.min(from+10,st.games)} 場</small></div><div class="fr-table"><table class="ss-tb"><tr><th>場次</th><th>對手</th><th>主客場</th><th>結果</th></tr>${Array.from({length:Math.min(10,st.games-from)},(_,i)=>{ const d=from+i,p=campaign.pairings(d).find(x=>x.includes(st.user)),r=results.find(x=>x.phase==='regular'&&x.day===d); if(!p) return ''; const home=p[1]===st.user,opp=p[home?0:1],won=r&&(r.a>r.h)===(r.away===st.user); return `<tr class="${d===st.day?'me':''}"><td>${d+1}${d===st.day?'・下一場':''}</td><td>${this.chip(opp)} ${TEAM(opp).zh}</td><td>${home?'主場':'客場'}</td><td>${r?`${won?'勝':'敗'} ${home?r.h:r.a}：${home?r.a:r.h}`:d<st.day?'已完成':'待賽'}</td></tr>`; }).join('')}</table></div><div class="fr-pages"><button class="ss-seg" ${prefix} data-v="${page-1}" ${from===0?'disabled':''}>上一頁</button><button class="ss-seg" ${prefix} data-v="${page+1}" ${from+10>=st.games?'disabled':''}>下一頁</button><small>${st.calendar?'遊戲產生的系列賽賽程':'沿用舊存檔賽程'}・同戰績以淨得分排序</small></div>`;
   },
   recordsHTML(){
     const d=ME.get(), b=d.bat, p=d.pit;
