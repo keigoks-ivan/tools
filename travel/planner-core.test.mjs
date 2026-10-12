@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {CITIES,PRESETS,presetForStops,schedule,validRoute,ageFit,evidence,commuteHours,quotedBudget,routeWarnings,restrictSabahScope,planDays,returnPlan,ACT} from './planner-core.mjs';
+import {CITIES,PRESETS,presetForStops,schedule,validRoute,ageFit,evidence,commuteHours,quotedBudget,routeWarnings,restrictSabahScope,planDays,returnPlan,ACT,briefItems,briefHead} from './planner-core.mjs';
 import {tripRoutes} from './research-data.mjs';
 import {joinCampData} from './camp-options.mjs';
 import {readFileSync} from 'node:fs';
@@ -81,4 +81,31 @@ test('return flight text follows the last stop',()=>{
  assert.match(last('reverse').flight,/多點進出/);
  assert.match(returnPlan('ipoh'),/沒有國際線.*CI722/);assert.match(returnPlan('penres'),/CI732/);
  assert.match(last('land').title,/檳城 → 台北・回程/);assert.match(last('klpenkl').title,/吉隆坡 → 台北・回程/);
+});
+
+// ---- agency-style brief ----
+const briefRows=(id,camp=true)=>planDays({stops:preset(id),attendingCount:camp?campWeek:()=>0}).map(d=>({...d,leg:d.idx,hotel:`住宿${d.idx}`,camps:camp&&campWeek(d.date)?['Newtonshow 冬季營','Newtonshow 冬季營']:[],move:d.travel&&d.i>0&&d.i<22?{id:d.city==='kk'||d.prev==='kk'?'flight':'alphard',label:d.city==='kk'||d.prev==='kk'?'直飛＋兩端接送':'Toyota Alphard＋中文司機'}:null}));
+test('brief merges quiet days inside one stay and keeps move days on their own line',()=>{
+ const items=briefItems(briefRows('klpenkl'));
+ assert.equal(items.length,19);
+ assert.deepEqual(items.map(i=>i.days),['D1','D2–4','D5','D6','D7','D8','D9','D10','D11','D12','D13–14','D15','D16','D17','D18','D19','D20','D21–22','D23']);
+ assert.equal(items[1].main,'營隊：Newtonshow 冬季營');assert.equal(items[1].date,'1/18–20');assert.equal(items[4].date,'1/23 六');assert.equal(items[10].date,'1/29–30');
+ assert.match(items[3].main,/（大寶森節）/);assert.match(items[16].main,/（除夕）/);assert.match(items[17].main,/（春節）/);
+ assert.deepEqual(items.map((it,k)=>it.stay?k:-1).filter(k=>k>=0),[0,5,11,15]);
+ assert.equal(items[0].stay,'住宿0');assert.equal(items[0].sub,'CI721 13:25 抵達');assert.equal(items[5].main,'吉隆坡 🚐 檳城（Alphard）');
+ assert.equal(items[11].main,'檳城 🚐 檳城渡假村（Alphard）');assert.equal(items[18].main,'吉隆坡 ✈ 台北');assert.equal(items[18].sub,'CI722 14:35 起飛');assert.equal(items[18].stay,null);
+ assert.doesNotMatch(JSON.stringify(items),/undefined|NaN|\[object/);
+});
+test('brief header names the route, counts nights and summarises stays and camp days',()=>{
+ const rows=briefRows('klpenkl'),h=briefHead(preset('klpenkl'),rows);
+ assert.equal(h.title,'吉隆坡＋檳城＋回吉隆坡｜23 天 22 夜');
+ assert.equal(h.feature,'吉隆坡 7 晚・檳城 7 晚・檳城渡假村 4 晚・吉隆坡 4 晚；營隊 3 天；春節在吉隆坡');
+ assert.equal(briefHead([{city:'pen',nights:8},{city:'resort',nights:7}],rows).title.startsWith('自訂路線'),true);
+ assert.doesNotMatch(briefHead(preset('sabah'),briefRows('sabah',false)).feature,/營隊/);
+});
+test('brief without camps ends on the Sabah AirAsia flight and uses the plane for the Sabah hop',()=>{
+ const items=briefItems(briefRows('sabah',false));
+ assert.match(items.at(-1).sub,/AK1510/);assert.equal(items.at(-1).sub,'AirAsia AK1510 08:40 起飛');
+ assert.ok(items.every(i=>!/營隊/.test(i.main)));assert.match(items.find(i=>i.travel&&i.from>1&&i.to<23).main,/吉隆坡 ✈ 亞庇市區（直飛）/);
+ assert.equal(briefItems(briefRows('pen',false)).at(-1).sub,'CI732 15:20 起飛');
 });

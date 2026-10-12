@@ -1,5 +1,5 @@
-import {hotelContextMarkup} from './travel-context-view.mjs?v=5';
-import {tripRoutes,tripHotels,tripPlaces,tripImages} from './research-data.mjs?v=7';
+import {hotelContextMarkup} from './travel-context-view.mjs?v=6';
+import {tripRoutes,tripHotels,tripPlaces,tripImages} from './research-data.mjs?v=8';
 const esc = value => String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const official = (url,label='官方資料 ↗') => `<a href="${esc(url)}" target="_blank" rel="noopener">${label}</a>`;
 const dateLabel = date => `${Number(date.slice(5,7))}/${Number(date.slice(8,10))}`;

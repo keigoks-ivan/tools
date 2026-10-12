@@ -1,5 +1,5 @@
 import {cityContext,hotelContext,charterCandidates,CLIMATE_URL,CONTEXT_DATE,transportOptions,transferKey,chosenTransport,routeAssessment} from './travel-context.mjs?v=4';
-import {CITIES,schedule} from './planner-core.mjs?v=6';
+import {CITIES,schedule} from './planner-core.mjs?v=7';
 const E=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const link=(url,label)=>`<a href="${E(url)}" ${url.startsWith("#")?"":"target=\"_blank\" rel=\"noopener\""}>${E(label)} ↗</a>`;
 const fmt=d=>`${+d.slice(5,7)}/${+d.slice(8,10)}`;

@@ -1,4 +1,4 @@
-import {tripPlaces} from './research-data.mjs?v=7';
+import {tripPlaces} from './research-data.mjs?v=8';
 export const START='2027-01-17', END='2027-02-08', KL_END='2027-01-24';
 export const CITIES={kl:'吉隆坡',ipoh:'怡保',pen:'檳城',penres:'檳城渡假村（Teluk Bahang／Batu Ferringhi）',kk:'亞庇市區',resort:'亞庇近郊渡假村'};
 export const CITY_SHORT={...CITIES,penres:'檳城渡假村'};
@@ -96,4 +96,42 @@ export function planDays({stops,pace='easy',activities={},attendingCount=()=>0})
   const title=d.travel?(d.i===0?'台北 → 吉隆坡・抵達與入住':d.i===22?`${CITY_SHORT[d.city]} → 台北・回程`:`${CITY_SHORT[d.prev]} → ${CITY_SHORT[d.city]}・移動日`):n?`${n===2?'兩位孩子':'一位孩子'}營隊日・假設排入`:item[1];
   return {...d,item,title,holiday:holidayFor(d.date),closure:!d.travel&&closed?.dow.includes(dow(d.date))?closed.text:'',flight:d.i===0?OUTBOUND:d.i===22?returnPlan(d.city):''};
  });
+}
+
+// ---- Agency-style brief: merge the daily rows into short itinerary lines ----
+export const HOLIDAY_SHORT={'2027-01-22':'大寶森節','2027-02-05':'除夕','2027-02-06':'春節','2027-02-07':'春節'};
+const mdLabel=d=>`${+d.slice(5,7)}/${+d.slice(8,10)}`;
+const WEEK=['日','一','二','三','四','五','六'];
+export function flightShort(text,arrive){
+ const m=/\b([A-Z]{2}\d{3,4})\b[^→\n]*?(\d{2}:\d{2})→\D*?(\d{2}:\d{2})/.exec(text||'');
+ if(!m)return text||'';
+ const code=m[1].startsWith('AK')?`AirAsia ${m[1]}`:m[1];
+ return arrive?`${code} ${m[3]} 抵達`:`${code} ${m[2]} 起飛`;
+}
+const moveMark=id=>id==='flight'||id==='connection'?'✈':id==='rail'?'🚆':'🚐';
+const moveName=label=>String(label||'').split('＋')[0].replace(/^Toyota /,'');
+// rows need: date, leg (stay index), city, prev, travel, title, holiday, flight, hotel, camps (titles), move ({id,label}).
+export function briefItems(rows){
+ const last=rows.length-1,out=[];
+ rows.forEach((r,i)=>{
+  const hol=r.holiday?HOLIDAY_SHORT[r.date]||'':'';
+  let main,sub='',stay=null;
+  if(i===0){main=`台北 ✈ ${CITY_SHORT[r.city]}`;sub=flightShort(r.flight,true);stay=r.hotelShort||r.hotel;}
+  else if(i===last){main=`${CITY_SHORT[r.city]} ✈ 台北`;sub=flightShort(r.flight,false);}
+  else if(r.travel){const tag=[r.move&&moveName(r.move.label),hol].filter(Boolean).join('・');main=`${CITY_SHORT[r.prev]} ${moveMark(r.move?.id)} ${CITY_SHORT[r.city]}${tag?`（${tag}）`:''}`;stay=r.hotelShort||r.hotel;}
+  else{const names=[...new Set(r.camps||[])];main=names.length?`營隊：${names.join('／')}`:r.title;if(hol)main+=`（${hol}）`;}
+  const prev=out.at(-1);
+  if(!r.travel&&prev&&!prev.travel&&prev.leg===r.leg&&prev.main===main){prev.to=i+1;prev.end=r.date;return;}
+  out.push({from:i+1,to:i+1,start:r.date,end:r.date,leg:r.leg,travel:Boolean(r.travel),main,sub,stay});
+ });
+ return out.map(({leg,...it})=>{
+  const a=it.start,b=it.end,single=it.from===it.to;
+  return {...it,days:single?`D${it.from}`:`D${it.from}–${it.to}`,date:single?`${mdLabel(a)} ${WEEK[new Date(a+'T00:00:00Z').getUTCDay()]}`:a.slice(5,7)===b.slice(5,7)?`${mdLabel(a)}–${+b.slice(8,10)}`:`${mdLabel(a)}–${mdLabel(b)}`};
+ });
+}
+export function briefHead(stops,rows){
+ const preset=PRESETS.find(p=>p[0]===presetForStops(stops)),nights=Math.max(rows.length-1,0);
+ const camp=rows.filter(r=>r.camps?.length).length,fest=rows.find(r=>r.date==='2027-02-06');
+ const feature=[schedule(stops).map(l=>`${CITY_SHORT[l.city]} ${l.nights} 晚`).join('・'),camp?`營隊 ${camp} 天`:'',fest?`春節在${CITY_SHORT[fest.city]}`:''].filter(Boolean).join('；');
+ return {title:`${preset?preset[1]:'自訂路線'}｜${rows.length} 天 ${nights} 夜`,feature};
 }
