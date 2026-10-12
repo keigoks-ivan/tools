@@ -1,7 +1,7 @@
-import {transportOptions,chosenTransport,routeAssessment} from './travel-context.mjs?v=2';
-import {renderResearchContext,renderJourneyContext,transportSummary} from './travel-context-view.mjs?v=2';
+import {transportOptions,chosenTransport,routeAssessment} from './travel-context.mjs?v=3';
+import {renderResearchContext,renderJourneyContext,transportSummary} from './travel-context-view.mjs?v=3';
 import {START,END,CITIES,PRESETS,presetForStops,addDays,daysBetween,schedule,validRoute,ageFit,commuteHours,quotedBudget,routeWarnings,restrictSabahScope} from './planner-core.mjs?v=4';
-import {tripHotels,tripPlaces} from './research-data.mjs?v=4';
+import {tripHotels,tripPlaces} from './research-data.mjs?v=5';
 import {joinCampData,STATUS} from './camp-options.mjs';
 const $=s=>document.querySelector(s), E=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const link=(url,text)=>`<a href="${E(url)}" target="_blank" rel="noopener">${E(text)} ↗</a>`;
@@ -20,7 +20,7 @@ try{const stored=restrictSabahScope(JSON.parse(localStorage.getItem(KEY)));if(st
  state.campDays=Array.isArray(stored.campDays)?stored.campDays.filter(d=>d>='2027-01-18'&&d<='2027-01-22'):[];
 }}catch{}
 function persist(){try{localStorage.setItem(KEY,JSON.stringify(state));$('#planner-message').textContent='已儲存在此瀏覽器。';}catch{$('#planner-message').textContent='瀏覽器無法儲存，請下載方案 JSON 留存。';}}
-function hotelsFor(city){return tripHotels.filter(h=>city==='kl'?h.id.startsWith('kl-'):city==='ipoh'?h.id.startsWith('ipoh-'):city==='pen'?h.id.startsWith('pen-'):city==='kk'?['kk-sheraton','kk-marriott'].includes(h.id):city==='resort'?['kk-magellan','kk-pacific','kk-tanjung'].includes(h.id):false);}
+function hotelsFor(city){return tripHotels.filter(h=>city==='kl'?h.id.startsWith('kl-'):city==='ipoh'?h.id.startsWith('ipoh-'):city==='pen'?h.id.startsWith('pen-'):city==='kk'?['kk-sheraton','kk-marriott','kk-hyatt-centric'].includes(h.id):city==='resort'?['kk-magellan','kk-pacific','kk-tanjung'].includes(h.id):false);}
 function hotelOptions(city,value){return `<option value="">住宿待選</option>`+hotelsFor(city).map(h=>`<option value="${h.id}" ${h.id===value?'selected':''}>${E(h.name)}${h.brand?'・萬豪':'・非萬豪'}${h.kitchen?'・廚房':''}</option>`).join('');}
 function selectedHotel(leg){return tripHotels.find(h=>h.id===(leg.fixed?state.fixedHotel:leg.hotel));}
 function transport(a,b){return '可比較：'+transportOptions(a,b).map(o=>o.label).join('／')+'；班次與車源待確認。';}
