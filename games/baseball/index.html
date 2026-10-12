@@ -7,8 +7,8 @@
 <title>MLB 實況野球風</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@500;700;900&family=Rubik:ital,wght@0,600;0,800;0,900;1,800;1,900&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=49">
-<link rel="stylesheet" href="franchise.css?v=49">
+<link rel="stylesheet" href="style.css?v=50">
+<link rel="stylesheet" href="franchise.css?v=50">
 </head>
 <body>
 <canvas id="game"></canvas>
@@ -79,6 +79,13 @@
 <div class="screen title" id="intro">
   <div class="tcard">
     <div class="logo"><span class="l1">MLB 2026</span><span class="l2">實況野球風</span><span class="l3">30 隊真實名單・九局比賽</span></div>
+    <section class="batting-settings" id="battingSettings" aria-label="打擊設定">
+      <div class="batting-options"><strong>打擊設定</strong>
+        <div class="seg" id="diffSel" aria-label="比賽難度"><button data-d="easy" aria-pressed="false">簡單</button><button data-d="normal" class="on" aria-pressed="true">普通</button><button data-d="hard" aria-pressed="false">困難</button></div>
+        <label class="aim-assist"><input id="aimAssist" type="checkbox" checked>輕度瞄準輔助 <span id="assistStatus">開</span></label>
+      </div>
+      <p id="battingHint">游標放大、來球更從容。輔助只微調擦邊附近的位置。</p>
+    </section>
     <div class="duo">
       <div class="side you">
         <div class="sideHd"><span class="who">你的球隊</span><span id="hdUser"></span></div>
@@ -100,7 +107,6 @@
     </div>
     <div class="bar">
       <div class="seg" id="homeSel"><button data-h="0" class="on">客隊・先攻</button><button data-h="1">主隊・後攻</button></div>
-      <div class="seg" id="diffSel"><button data-d="easy">簡單</button><button data-d="normal" class="on">普通</button><button data-d="hard">困難</button></div>
       <button class="go" id="start">PLAY BALL</button>
     </div>
     <div class="note">進攻時你打擊，防守時你投球，守備和跑壘交給電腦。手機可一指拖曳瞄準，另一指同時按揮棒或強振。數據來自 MLB Stats API、Baseball Savant（截至 2026-10-03）。<br><span id="dateNote"></span></div>
@@ -119,16 +125,16 @@
 </div>
 
 <script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.166.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.166.0/examples/jsm/"}}</script>
-<script src="audio.js?v=49"></script>
-<script src="assets/pawa_parts.js?v=49"></script>
-<script src="assets/teams.js?v=49"></script>
-<script src="assets/hotzones.js?v=49"></script>
-<script src="assets/mocap.js?v=49"></script>
-<script src="logic.js?v=49"></script>
-<script src="season.js?v=49"></script>
-<script src="franchise.js?v=49"></script>
-<script src="franchise-ui.js?v=49"></script>
-<script src="tactics.js?v=49"></script>
+<script src="audio.js?v=50"></script>
+<script src="assets/pawa_parts.js?v=50"></script>
+<script src="assets/teams.js?v=50"></script>
+<script src="assets/hotzones.js?v=50"></script>
+<script src="assets/mocap.js?v=50"></script>
+<script src="logic.js?v=50"></script>
+<script src="season.js?v=50"></script>
+<script src="franchise.js?v=50"></script>
+<script src="franchise-ui.js?v=50"></script>
+<script src="tactics.js?v=50"></script>
 <script type="module">
 import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
@@ -141,7 +147,7 @@ window.THREE=THREE; window.X3={RoomEnvironment,EffectComposer,RenderPass,BokehPa
 const bin=Uint8Array.from(atob(window.PAWA_GLB),c=>c.charCodeAt(0));
 // 依序載入：模型 → stadium.js → game.js
 const load=src=>new Promise((ok,ng)=>{ const s=document.createElement('script'); s.src=src; s.onload=ok; s.onerror=ng; document.body.appendChild(s); });
-new GLTFLoader().parse(bin.buffer,'',async g=>{ window.PAWA=g.scene; await load('stadium.js?v=49'); await load('effects.js?v=49'); await load('faces.js?v=49'); await load('game.js?v=49'); await load('feel.js?v=49'); },e=>console.error(e));
+new GLTFLoader().parse(bin.buffer,'',async g=>{ window.PAWA=g.scene; await load('stadium.js?v=50'); await load('effects.js?v=50'); await load('faces.js?v=50'); await load('game.js?v=50'); await load('feel.js?v=50'); },e=>console.error(e));
 </script>
 </body>
 </html>

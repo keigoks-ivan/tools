@@ -382,7 +382,7 @@ const SSUI={
     const tabs=document.createElement('div'); tabs.className='ss-tabs'; tabs.id='ssTabs';
     tabs.innerHTML=[['single','單場比賽'],['season','季賽模式'],['franchise','球團經營'],['records','紀錄'],['ach','成就']].map(([k,n])=>`<button data-k="${k}">${n}</button>`).join('');
     logo.after(tabs);
-    const root=document.createElement('div'); root.id='ssRoot'; root.className='ss-root'; tabs.after(root);
+    const root=document.createElement('div'); root.id='ssRoot'; root.className='ss-root'; (card.querySelector('#battingSettings')||tabs).after(root);
     tabs.addEventListener('click',e=>{ const b=e.target.closest('button'); if(b) this.show(b.dataset.k); });
     root.addEventListener('click',e=>{ const f=e.target.closest('[data-f]'); if(f){ FRUI.act(f.dataset.f,f.dataset.v); return; } const b=e.target.closest('[data-a]'); if(b) this.act(b.dataset.a,b.dataset.v); });
     root.addEventListener('change',e=>{ if(e.target.dataset.fc) FRUI.change(e.target.dataset.fc,e.target.value); });
@@ -394,6 +394,7 @@ const SSUI={
     LEAGUE_CTX=k==='franchise'&&FRANCHISE.st?FRANCHISE.context:null;
     ssStore.set('pawa_menu_mode',k);
     this.tab=k; const card=document.querySelector('#intro .tcard');
+    const settings=document.getElementById('battingSettings'); if(settings) settings.hidden=['records','ach'].includes(k);
     card.classList.toggle('ss-mode',k!=='single');
     document.querySelectorAll('#ssTabs button').forEach(b=>b.classList.toggle('on',b.dataset.k===k));
     this.render();

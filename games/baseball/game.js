@@ -658,6 +658,7 @@ function afterCloseup(){
   if(G.mode==='pitch'){ G.state='aim'; G.tgt={x:0.3,y:2.2}; } else { G.state='ready'; G.waitUntil=G.t+0.8; }
 }
 function startWindup(P){
+  if(G.mode==='bat') P={...P,T:P.T*BATTING.flight};
   G.abN++; G.pitch=P; G.windT=0; G.state='windup'; G.swing=null; G.decide=null;
   G.planted=false; FX.resetTrail();
   const f=fielding(GM); f.pc[f.pitcher]=(f.pc[f.pitcher]||0)+1;
@@ -970,6 +971,7 @@ function update(dt){
         const bpos=pitchPos(G.pitch,1,G.rel);
         if(G.mode==='bat'){
           const bb=contact(br,BSIDE,{x:bpos.x,y:bpos.y},G.cur,G.t-(G.relT+G.pitch.T),G.swing.mode);
+          if(bb?.aim.assisted){ G.cur.x=bb.aim.x; G.cur.y=bb.aim.y; }
           window.FEEL&&FEEL.onSwing(bb,G.t-(G.relT+G.pitch.T),G.swing.mode,bpos);
           if(bb){ C.swingClip=G.swing.mode==='power'?'hitHR':'hitSingle'; startPlay(bb,{x:bpos.x,y:bpos.y,z:0}); }
         } else if(G.decide && !G.decide.whiff){
@@ -990,7 +992,8 @@ function update(dt){
       placeGlove(C.catcher,new THREE.Vector3(received.x,Math.max(.52,received.y),received.z),ease((u-.8)/(catchU-.8)));
       if(u>=catchU) glovePocket(C.catcher,ball.position);
     }
-    if(u>=1.065){
+    // 玩家保留完整晚揮容錯，避免捕手收球提前截斷擊球判定。
+    if(G.mode==='bat'?G.t-G.relT>=battingDeadline(G.pitch):u>=1.065){
       SFX.play('mitt');
       if(!G.swing && window.FEEL) FEEL.edgeCall(br,end);
       if(G.swing) endPitch('whiff'); else endPitch(isStrikeFor(br,end.x,end.y)?'strike':'ball');
@@ -1165,7 +1168,16 @@ function refreshSelect(){
   $('dateNote').textContent=`打序取自兩隊最後一場例行賽（${TEAM(SEL.user).lineupDate.slice(5).replace('-','/')}、${TEAM(SEL.opp).lineupDate.slice(5).replace('-','/')}），名字右邊兩個字母是打擊和力量。`;
 }
 $('homeSel').querySelectorAll('button').forEach(b=>b.onclick=()=>{ SEL.userHome=b.dataset.h==='1'; refreshSelect(); });
-document.querySelectorAll('#diffSel button').forEach(b=>b.onclick=()=>{ document.querySelectorAll('#diffSel button').forEach(x=>x.classList.remove('on')); b.classList.add('on'); diff=DIFF[b.dataset.d]; });
+function syncBattingSettings(save=false){
+  const saved=!save||ssStore.set(BATTING.KEY,BATTING.settings());
+  document.querySelectorAll('#diffSel button').forEach(b=>{ const on=diff===DIFF[b.dataset.d]; b.classList.toggle('on',on); b.setAttribute('aria-pressed',String(on)); });
+  $('aimAssist').checked=BATTING.assist; $('assistStatus').textContent=BATTING.assist?'開':'關';
+  $('battingHint').textContent=`${diff.label}：擊球時機 ±${Math.round(battingWindow()*1000)} 毫秒。游標放大 15%，來球時間增加 10%。${BATTING.assist?'輔助只微調擦邊附近的位置，仍須自己瞄準與揮棒。':'瞄準輔助已關閉，位置完全由你控制。'}${saved?'':' 設定暫時只適用本次遊戲，瀏覽器無法保存。'}`;
+}
+BATTING.load(ssStore.get(BATTING.KEY,null));
+document.querySelectorAll('#diffSel button').forEach(b=>b.onclick=()=>{ diff=DIFF[b.dataset.d]; syncBattingSettings(true); });
+$('aimAssist').onchange=e=>{ BATTING.assist=e.target.checked; syncBattingSettings(true); };
+syncBattingSettings();
 $('start').onclick=()=>{
   $('start').blur();
   $('intro').classList.add('hide');

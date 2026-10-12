@@ -94,7 +94,7 @@ body.fx-replaying .panels,body.fx-replaying .contact-readout,body.fx-replaying .
 
   /* ---------- 打擊回饋 ---------- */
   function onSwing(bb,dt,mode,ball){
-    const win=diff.win, t=dt/win;
+    const win=battingWindow(), t=dt/win;
     if(!bb){
       rawPlay('whiff');
       if(dt<-win) pop('太早了','#9be7ff',ball.x,ball.y+0.7,0);

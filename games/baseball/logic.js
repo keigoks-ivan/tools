@@ -151,6 +151,18 @@ const DIFF = {
   hard:  {slow:1.25, win:0.085,cur:0.85, label:'困難'}
 };
 let diff = DIFF.normal;
+// 玩家打擊的操作容錯；電腦打席與球員能力公式沿用原設定。
+const BATTING={
+  KEY:'pawa_batting_v1',assist:true,cursor:1.15,timing:145/105,flight:1.10,
+  load(p){
+    const valid=p&&p.v===1;
+    diff=valid&&Object.hasOwn(DIFF,p.difficulty)?DIFF[p.difficulty]:DIFF.normal;
+    this.assist=valid&&typeof p.assist==='boolean'?p.assist:true;
+  },
+  settings(){ return {v:1,difficulty:Object.keys(DIFF).find(k=>DIFF[k]===diff)||'normal',assist:this.assist}; }
+};
+const battingWindow=()=>diff.win*BATTING.timing;
+const battingDeadline=P=>P.T+battingWindow();
 const PLATE_HALF = 0.708, BALL_R = 0.121;
 const K_DRAG=0.0016, LIFT=0.0003, FENCE_H=8;
 const fenceDist = phi => 400 - 70*Math.pow(Math.min(Math.abs(phi),45)/45,1.5);
@@ -254,14 +266,21 @@ function batterDecide(P,br,pr,balls,strikes){
 /* ---------- 玩家打擊：游標與時機 ---------- */
 function cursorSize(br,mode){
   const pr=typeof GM!=='undefined'&&GM?pit(curPitcher(GM)):null, M=pr&&br.has?abMods(br,pr):{cursor:1};
-  const base = (0.40 + br.meet*0.0045)*diff.cur*M.cursor, k = mode==='power'?0.68:1;
+  const base = (0.40 + br.meet*0.0045)*diff.cur*M.cursor*BATTING.cursor, k = mode==='power'?0.68:1;
   return {rx:base*k, ry:base*k*0.78};
+}
+function assistAim(ball,cur,rx,ry){
+  const dx=ball.x-cur.x,dy=ball.y-cur.y,dn=Math.hypot(dx/rx,dy/ry);
+  if(!BATTING.assist||dn<=.85||dn>1.24) return {...cur,assisted:false};
+  const pull=Math.min(.16,dn-.85)/dn;
+  return {x:cur.x+dx*pull,y:cur.y+dy*pull,assisted:true};
 }
 function contact(br,side,ball,cur,dt,mode){
   const {rx,ry}=cursorSize(br,mode);
-  const dx=ball.x-cur.x, dy=ball.y-cur.y, dn=Math.hypot(dx/rx,dy/ry);
-  if(Math.abs(dt)>diff.win || dn>1.08) return null;
-  const tim = dt/diff.win;                       // -1 太早 … +1 太晚
+  const aim=assistAim(ball,cur,rx,ry),win=battingWindow();
+  const dx=ball.x-aim.x, dy=ball.y-aim.y, dn=Math.hypot(dx/rx,dy/ry);
+  if(Math.abs(dt)>win || dn>1.08) return null;
+  const tim = dt/win;                            // -1 太早 … +1 太晚
   let q = 1 - 0.55*Math.pow(dn,1.5) - 0.35*tim*tim;
   const maxEV = (98 + br.power*0.22)*(mode==='power'?1.04:0.97);
   const pr=typeof GM!=='undefined'&&GM?pit(curPitcher(GM)):null, M=pr&&br.has?abMods(br,pr):{ev:0,la:0};
@@ -269,7 +288,7 @@ function contact(br,side,ball,cur,dt,mode){
   let la = 10 + (dy/ry)*42 + (br.traj-2)*4 + gauss()*5;
   let spray = -side*tim*44 + (dx/rx)*8 + gauss()*6;  // 太晚 → 推向反方向
   if(dn>0.9 && Math.random()<0.55){ spray = (Math.random()<.5?-1:1)*rnd(70,140); la = rnd(-5,60); ev*=0.7; }
-  return {ev:clamp(ev,30,118), la:clamp(la,-60,80), spray, q, dn, tim};
+  return {ev:clamp(ev,30,118), la:clamp(la,-60,80), spray, q, dn, tim,aim};
 }
 
 /* =========================================================
