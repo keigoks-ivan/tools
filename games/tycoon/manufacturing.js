@@ -3,7 +3,7 @@ import { industryEffects, industryDay, industryAction, industryValid } from './i
 import { managementValid } from './manager-policy.js';
 
 export const PRODUCTS = {
-  packaging: { name: '客製包材', description: '大量低單價，產能利用與原料議價是關鍵。', capital: 900000, equipment: 240000, capacity: 220, material: 10, price: 32, wage: 28000, rent: 18000, lot: 1100 },
+  packaging: { name: '客製包材', description: '大量低單價，產能利用與原料議價是關鍵。', capital: 900000, equipment: 240000, capacity: 220, material: 10, price: 34, wage: 28000, rent: 18000, lot: 1100 },
   apparel: { name: '服飾代工', description: '中量訂單，交期、熟練度與品質取捨。', capital: 1500000, equipment: 600000, capacity: 50, material: 90, price: 240, wage: 32000, rent: 28000, lot: 300 },
   electronics: { name: '小型電子組裝', description: '高原料與設備門檻，瑕疵和應收款更傷周轉。', capital: 3500000, equipment: 1400000, capacity: 16, material: 650, price: 1600, wage: 36000, rent: 38000, lot: 100 },
 };
