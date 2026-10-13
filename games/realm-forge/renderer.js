@@ -3,6 +3,8 @@ import { TEAM_COLORS, TEAM_LIGHT, imageFor, unitArt, animationArt, worldArt, dra
 import { animationPose, facingDirection } from './motion.mjs?v=20261009l';
 import { gaitBob, drawWalkingSprite } from './gait.mjs?v=20261009l';
 import { commandWaypoints } from './command-feedback.mjs?v=20261009l';
+import { steppedZoom } from './camera-steps.mjs?v=20261009l';
+import { FxState, ARROW_FLIGHT, ROCK_FLIGHT, STUCK_LIFE, corpsePose, ruinAlpha } from './fx.mjs?v=20261009l';
 export function wheelZoomFactor(deltaY, deltaMode = 0, height = 600) {
   const pixels = deltaY * (deltaMode === 1 ? 16 : deltaMode === 2 ? height : 1);
   return Math.exp(-clamp(pixels, -80, 80) * .001);
@@ -81,13 +83,26 @@ const texture = (x, y) => { const a = Math.sin(x * 47.31 + y * 79.77) * 48345.3;
 function polygon(c, points, fill, stroke = null) { c.beginPath(); points.forEach(([x, y], i) => i ? c.lineTo(x, y) : c.moveTo(x, y)); c.closePath(); if (fill) { c.fillStyle = fill; c.fill(); } if (stroke) { c.strokeStyle = stroke; c.stroke(); } }
 function ellipse(c, x, y, rx, ry, fill) { c.beginPath(); c.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2); c.fillStyle = fill; c.fill(); }
 function line(c, points, color, width = 1) { c.beginPath(); points.forEach(([x, y], i) => i ? c.lineTo(x, y) : c.moveTo(x, y)); c.strokeStyle = color; c.lineWidth = width; c.stroke(); }
+// Bold team-coloured ring with a white edge; px is the canvas scale compensation so the stroke stays readable when zoomed out.
+function selectionRing(c, rx, ry, color, px = 1) {
+  c.save(); c.lineJoin = 'round';
+  for (const [stroke, width] of [['#ffffffe6', 4.2], [color, 2.4]]) { c.strokeStyle = stroke; c.lineWidth = width * px; c.beginPath(); c.ellipse(0, 0, rx, ry, 0, 0, Math.PI * 2); c.stroke(); }
+  c.restore();
+}
+function selectionDiamond(c, type, team, scale) {
+  const points = footprintPolygon(type); polygon(c, points, '#ffffff12');
+  c.save(); c.lineJoin = 'round';
+  for (const [stroke, width] of [['#ffffffe6', 4.4], [TEAM_LIGHT[team % 4], 2.6]]) { c.strokeStyle = stroke; c.lineWidth = width / scale; c.beginPath(); points.forEach(([x, y], i) => i ? c.lineTo(x, y) : c.moveTo(x, y)); c.closePath(); c.stroke(); }
+  c.restore();
+}
 export function drawUnit(c, u, x, y, size = 1, time = 0, selected = false) {
   const bp = u.blueprint, pose=animationPose(u),team = TEAM_COLORS[u.team % 4], moving = pose.moving, bob = moving ? gaitBob(bp.look,pose.phase) : 0;
   c.save(); c.translate(x, y); c.scale(size, size);
   const mounted = bp.look === 'knight', heavy = mounted || ['siege','cart'].includes(bp.look);
   ellipse(c, 3, 1, heavy ? 11 : 5, heavy ? 3.5 : 2.2, '#18251845');
   ellipse(c, 0, .5, heavy ? 7 : 3, heavy ? 2 : 1.2, '#18251858');
-  if (selected || bp.hero) { c.strokeStyle = bp.hero ? '#edd48ddd' : TEAM_LIGHT[u.team % 4]; c.lineWidth = bp.hero ? 1.5 : 1.3; c.beginPath(); c.ellipse(0, 0, heavy ? 16 : 10, heavy ? 6 : 4, 0, 0, Math.PI * 2); c.stroke(); }
+  if (selected) selectionRing(c, heavy ? 17 : 12, heavy ? 6.8 : 4.8, bp.hero ? '#edd48d' : TEAM_LIGHT[u.team % 4], 1 / size);
+  else if (bp.hero) { c.strokeStyle = '#edd48ddd'; c.lineWidth = 1.5; c.beginPath(); c.ellipse(0, 0, heavy ? 16 : 10, heavy ? 6 : 4, 0, 0, Math.PI * 2); c.stroke(); }
   const direction = facing(u), custom = bp.image ? imageFor(bp.image) : null;
   const attackPhase = pose.state==='attack'?Math.sin(pose.phase*Math.PI):0;
   if (attackPhase) c.translate((direction === 0 || direction === 3 ? 1 : -1) * attackPhase * 1.5, -attackPhase * .4);
@@ -187,11 +202,54 @@ function tree(c, x, y, variation, small = false) {
   polygon(c, [[0, -46], [-16, -17], [-7, -19], [-19, -9], [0, -4]], '#315e3a');
   polygon(c, [[0, -43], [3, -27], [-11, -21]], '#50783d'); line(c, [[-14, -12], [-3, -9]], '#68804650'); c.restore();
 }
+// Construction reads as four stages: 0 foundation, 1 timber frame, 2 half-built walls, 3 finishing. The finished sprite is revealed from the ground up.
+export function constructionStage(progress) { return progress < .25 ? 0 : progress < .5 ? 1 : progress < .8 ? 2 : 3; }
+export function constructionReveal(progress) { return clamp((progress - .22) / .74, 0, 1); }
+const silhouettes = new WeakMap();
+function silhouette(art) {
+  if (!silhouettes.has(art)) { const canvas = document.createElement('canvas'); canvas.width = art.naturalWidth; canvas.height = art.naturalHeight; const s = canvas.getContext('2d'); s.drawImage(art, 0, 0); s.globalCompositeOperation = 'source-in'; s.fillStyle = '#1d140b'; s.fillRect(0, 0, canvas.width, canvas.height); silhouettes.set(art, canvas); }
+  return silhouettes.get(art);
+}
+// Posts rise from each footprint corner to a common roof line (or stub height when no roof line is given).
+function scaffoldTop(corner, topY, stub) { return topY === null ? corner[1] - stub : topY; }
+function scaffoldPosts(c, corners, topY, front, stub = 7) {
+  const cy = corners.reduce((a, [, y]) => a + y, 0) / corners.length;
+  for (const corner of corners) if ((corner[1] > cy + .5) === front) { const top = scaffoldTop(corner, topY, stub); line(c, [corner, [corner[0], top]], '#2a1d10', 3.6); line(c, [corner, [corner[0], top]], '#b58d56', 2.2); }
+}
+function scaffoldRails(c, corners, topY, share, front) {
+  const cy = corners.reduce((a, [, y]) => a + y, 0) / corners.length, ring = corners.map(([px, py]) => [px, py + (topY - py) * share]);
+  for (let i = 0; i < 4; i++) { const a = corners[i], d = corners[(i + 1) % 4]; if (((a[1] + d[1]) / 2 > cy + .5) !== front) continue; line(c, [ring[i], ring[(i + 1) % 4]], '#2a1d10', 3); line(c, [ring[i], ring[(i + 1) % 4]], '#c49d63', 1.7); }
+}
+function constructionSite(c, b, art, width, height, bottom, selected, scale) {
+  const stage = constructionStage(b.progress), reveal = constructionReveal(b.progress), corners = footprintPolygon(b.type);
+  polygon(c, corners, stage === 0 ? '#86795a' : '#7c7052', '#4b3f2a');
+  polygon(c, corners.map(([px, py]) => [px * .8, py * .8]), '#a29673');
+  for (let i = 0; i < 6; i++) { const t = texture(b.id + i, stage); ellipse(c, (t - .5) * corners[1][0] * 1.4, (texture(i, b.id) - .5) * corners[2][1] * 1.2, 2.6, 1.4, i % 2 ? '#5d5441' : '#bdb391'); }
+  if (selected) selectionDiamond(c, b.type, b.team, scale);
+  const topY = stage === 0 ? null : bottom - height * (stage === 1 ? .55 : stage === 2 ? .82 : .96), scaffolded = b.progress < .94;
+  if (scaffolded) { scaffoldPosts(c, corners, topY, false); if (stage > 0) scaffoldRails(c, corners, topY, .55, false); }
+  if (art?.complete && art.naturalWidth && reveal > 0) {
+    const visible = Math.max(2, height * reveal);
+    c.save(); c.beginPath(); c.rect(-width / 2 - 2, bottom - visible, width + 4, visible + 6); c.clip();
+    drawSprite(c, art, 0, bottom, width, height);
+    c.globalAlpha = .62 * (1 - reveal) + .12; drawSprite(c, silhouette(art), 0, bottom, width, height); c.globalAlpha = 1;
+    c.restore();
+    if (reveal < 1) { const edge = bottom - visible; line(c, [[-width * .3, edge + 3], [width * .3, edge + 3]], '#5b4326', 3); line(c, [[-width * .3, edge + 2], [width * .3, edge + 2]], '#c9a566', 1.4); }
+  }
+  if (scaffolded) { scaffoldPosts(c, corners, topY, true); if (stage > 0) scaffoldRails(c, corners, topY, .55, true); if (stage >= 2) scaffoldRails(c, corners, topY, .95, true); }
+  const barY = bottom - height - 8;
+  c.fillStyle = '#1d2a20'; c.fillRect(-23, barY, 46, 5); c.fillStyle = '#e0bd6d'; c.fillRect(-22, barY + 1, 44 * clamp(b.progress, 0, 1), 3);
+}
 function building(c, b, x, y, scale, selected) {
   const { art, width, height, bottom } = buildingSize(b);
+  if (b.progress < 1 && art?.complete && art.naturalWidth) {
+    c.save(); c.translate(x, y); c.scale(scale, scale); constructionSite(c, b, art, width, height, bottom, selected, scale);
+    if (selected) health(c, b.hp, b.maxHp, 0, bottom - height - 20, Math.min(width * .7, 55), b.team);
+    c.restore(); return;
+  }
   if (b.progress >= 1 && art?.complete && art.naturalWidth) {
     c.save(); c.translate(x, y); c.scale(scale, scale);
-    if (selected) polygon(c, footprintPolygon(b.type), '#a4d2ff14', TEAM_LIGHT[b.team % 4]);
+    if (selected) selectionDiamond(c, b.type, b.team, scale);
     drawSprite(c, art, 0, bottom, width, height);
     if (b.type === 'farm') { line(c, [[25, 5], [25, -18]], '#91724d', 1.5); polygon(c, [[25, -18], [36, -14], [25, -10]], TEAM_COLORS[b.team % 4]); }
     if (selected || b.hp < b.maxHp) health(c, b.hp, b.maxHp, 0, bottom - height - 6, Math.min(width * .7, 55), b.team);
@@ -201,7 +259,7 @@ function building(c, b, x, y, scale, selected) {
 }
 function vectorBuilding(c, b, x, y, scale, selected) {
   const team = TEAM_COLORS[b.team % 4]; c.save(); c.translate(x, y); c.scale(scale, scale);
-  if (selected) polygon(c, footprintPolygon(b.type), '#85cab71b', '#9bd3b8');
+  if (selected) selectionDiamond(c, b.type, b.team, scale);
   ellipse(c, 8, 4, 35, 12, '#16220e60');
   if (b.progress < 1) { const base = footprintPolygon(b.type); polygon(c, base, '#9b9671', '#c0b78e'); for (const [px, py] of base) line(c, [[px, py], [px, py - 35]], '#b8a078', 2); line(c, base.map(([px, py]) => [px, py - 35]), '#826741', 2); c.fillStyle = '#293828'; c.fillRect(-22, -48, 44, 4); c.fillStyle = '#d7b77b'; c.fillRect(-22, -48, 44 * b.progress, 4); c.restore(); return; }
   const fortified = ['tower', 'castle', 'gate', 'wall'].includes(b.type);
@@ -304,7 +362,7 @@ function selectedForestOutline(c, u, p, scale) {
   const outline = unitOutlines.get(key); c.save(); c.globalAlpha = .72; c.drawImage(outline, p.x - (width / 2 + 3) * scale, p.y - (height + 2) * scale, outline.width * scale, outline.height * scale); c.restore();
 }
 function resource(c, e, p, scale) {
-  c.save(); c.translate(p.x, p.y); c.scale(scale, scale); if (!e.visible) c.globalAlpha = .32;
+  c.save(); c.translate(p.x, p.y); c.scale(scale, scale); if (!e.visible) c.globalAlpha = .9;
   if (e.t === 'forest') {
     tree(c, 0, 0, e.v);
   } else if (e.t === 'wild') {
@@ -352,7 +410,7 @@ function heroLabel(c, hero, p, selected, overview) {
   c.fillStyle = '#101c16dd'; c.fillRect(p.x - width / 2, y - 10, width, 16); c.fillStyle = hero.editorValid ? '#ead6a5' : '#ffb5a6'; c.fillText(text, p.x, y + 2); c.restore();
 }
 export class Renderer {
-  constructor(canvas, minimap) { this.canvas = canvas; this.c = canvas.getContext('2d'); this.minimap = minimap; this.mc = minimap.getContext('2d'); this.width = 1000; this.height = 600; this.zoom = 1; this.pan = { x: 0, y: 0 }; this.tileW = 42; this.tileH = 21; this.project = null; this.hover = null; this.drag = null; this.marker = null; this.miniTime = -Infinity; this.terrainCanvas = null; this.terrainTime = -Infinity; this.terrainKey = ''; this.terrainMap = null; this.terrainDecorations = []; this.resize(); }
+  constructor(canvas, minimap) { this.canvas = canvas; this.c = canvas.getContext('2d'); this.minimap = minimap; this.mc = minimap.getContext('2d'); this.width = 1000; this.height = 600; this.zoom = 1; this.pan = { x: 0, y: 0 }; this.tileW = 42; this.tileH = 21; this.project = null; this.hover = null; this.drag = null; this.marker = null; this.miniTime = -Infinity; this.terrainCanvas = null; this.terrainTime = -Infinity; this.terrainKey = ''; this.terrainMap = null; this.terrainDecorations = []; this.fx = new FxState(); this.resize(); }
   resize() { const r = this.canvas.getBoundingClientRect(), dpr = Math.min(window.devicePixelRatio || 1, 2); this.width = r.width; this.height = r.height; this.canvas.width = r.width * dpr; this.canvas.height = r.height * dpr; this.dpr = dpr; this.terrainCanvas = null; }
   fit(map) {
     this.overviewView ??= {zoom:this.zoom, center:this.world(this.width / 2, this.height / 2)};
@@ -367,6 +425,9 @@ export class Renderer {
     this.restoreView();
     const next = clamp(this.zoom * factor, minimum, maximum), ratio = next / this.zoom;
     this.pan = {x:this.pan.x * ratio, y:this.pan.y * ratio}; this.zoom = next; this.constrainView();
+  }
+  zoomStep(dir) {
+    const next = steppedZoom(this.zoom, dir); if (Math.abs(next - this.zoom) > 1e-6) this.zoomBy(next / this.zoom, next, next);
   }
   constrainView() {
     if (this.overviewView) return;
@@ -417,6 +478,102 @@ export class Renderer {
       if(hit){best=e;depth=e.x+e.y;}
     }
     return best;
+  }
+  drawArrow(c, p, q, f) {
+    const z = this.zoom, arc = 20 * z, lift = 20 * z, x = p.x + (q.x - p.x) * f, y = p.y + (q.y - p.y) * f - lift - Math.sin(f * Math.PI) * arc;
+    const angle = Math.atan2(q.y - p.y - Math.cos(f * Math.PI) * Math.PI * arc, q.x - p.x), length = Math.max(12, 17 * z);
+    c.save(); ellipse(c, p.x + (q.x - p.x) * f, p.y + (q.y - p.y) * f, 3 * z, 1.2 * z, '#10180f40');
+    c.translate(x, y); c.rotate(angle); c.lineCap = 'round';
+    line(c, [[-length, 0], [0, 0]], '#22160b', 3.4); line(c, [[-length, 0], [0, 0]], '#d2a766', 1.9);
+    polygon(c, [[-1, -2.6], [5, 0], [-1, 2.6]], '#eef1f1', '#27302f');
+    polygon(c, [[-length - 1, 0], [-length + 4, -3], [-length + 6, 0], [-length + 4, 3]], '#f1ead7', '#5a4a33');
+    c.restore();
+  }
+  drawRock(c, p, q, f) {
+    const z = this.zoom, gx = p.x + (q.x - p.x) * f, gy = p.y + (q.y - p.y) * f, lift = Math.sin(f * Math.PI) * 74 * z + 16 * z * (1 - f), radius = 3.6 * z + 1.2;
+    c.save(); ellipse(c, gx, gy, (4.5 - lift * .02) * z + 1, (1.9 - lift * .008) * z + .5, '#10180f55');
+    for (let k = 3; k >= 1; k--) { const ff = Math.max(0, f - k * .045); ellipse(c, p.x + (q.x - p.x) * ff, p.y + (q.y - p.y) * ff - Math.sin(ff * Math.PI) * 74 * z - 16 * z * (1 - ff), radius * (1 - k * .18), radius * (1 - k * .18), `#8a857a${(60 - k * 15).toString(16).padStart(2, '0')}`); }
+    ellipse(c, gx, gy - lift, radius, radius, '#5f5d56'); ellipse(c, gx - radius * .25, gy - lift - radius * .3, radius * .55, radius * .45, '#9a978b'); c.restore();
+  }
+  drawStuckArrows(c, world, fog, time) {
+    const z = this.zoom, n = world.map.size;
+    for (const s of this.fx.stuck) {
+      if (fog && !world.visible[clamp(Math.round(s.y), 0, n - 1) * n + clamp(Math.round(s.x), 0, n - 1)]) continue;
+      const age = time - s.born, q = this.screen(s.x, s.y), fade = age > STUCK_LIFE - .6 ? (STUCK_LIFE - age) / .6 : 1, h = Math.max(9, 12 * z), lean = (s.tilt + .35) * h * .5;
+      c.save(); c.globalAlpha = Math.max(0, fade); c.lineCap = 'round';
+      line(c, [[q.x, q.y], [q.x + lean, q.y - h]], '#22160b', 3); line(c, [[q.x, q.y], [q.x + lean, q.y - h]], '#d2a766', 1.6);
+      polygon(c, [[q.x + lean, q.y - h], [q.x + lean - 2.4, q.y - h - 4], [q.x + lean + .5, q.y - h - 2.5], [q.x + lean + 2.6, q.y - h - 4.2]], '#f1ead7', '#5a4a33'); c.restore();
+    }
+  }
+  drawParticles(c) {
+    const z = this.zoom, w = this.width, h = this.height;
+    c.save();
+    for (const p of this.fx.particles) {
+      const t = p.age / p.life, s = this.screen(p.wx, p.wy), x = s.x, y = s.y - p.z * z;
+      if (x < -40 || x > w + 40 || y < -70 || y > h + 40) continue;
+      if (p.type === 'smoke') { c.globalAlpha = .5 * (1 - t) * Math.min(1, t * 8); ellipse(c, x, y, p.size * (.6 + t * 1.3) * z, p.size * (.6 + t * 1.3) * z * .85, '#45443f'); }
+      else if (p.type === 'dust') { c.globalAlpha = .55 * (1 - t); ellipse(c, x, y, p.size * (.5 + t) * z, p.size * (.5 + t) * z * .6, '#b5a47c'); }
+      else if (p.type === 'flame') { const flick = .85 + .3 * Math.sin(p.age * 38 + p.size * 9), r = p.size * (1 - t * .65) * z * flick; c.globalAlpha = .9 * (1 - t * .5); ellipse(c, x, y, r * .8, r * 1.3, '#f2641c'); c.globalAlpha = .95 * (1 - t); ellipse(c, x, y + r * .15, r * .45, r * .8, '#ffd24a'); }
+      else if (p.type === 'ember') { c.globalAlpha = 1 - t; ellipse(c, x, y, 1.5 * z + .5, 1.5 * z + .5, '#ffb347'); }
+      else if (p.type === 'spark') { const vx = (p.vx - p.vy) * this.tileW / 2, vy = (p.vx + p.vy) * this.tileH / 2 - p.vz, m = Math.hypot(vx, vy) || 1; c.globalAlpha = 1 - t; line(c, [[x, y], [x - vx / m * 4 * Math.max(.8, z), y - vy / m * 4 * Math.max(.8, z)]], '#ffe9a0', 1.5); }
+      else if (p.type === 'chip') { c.globalAlpha = 1 - t * t; c.fillStyle = '#5b5148'; c.fillRect(x - 1, y - 1, 2.4 * Math.max(.8, z), 2 * Math.max(.8, z)); }
+    }
+    c.restore();
+  }
+  drawRuin(c, e, p, time) {
+    const age = time - e.born, alpha = ruinAlpha(age); if (alpha <= 0) return;
+    const { art, width, height, bottom } = buildingSize(e), corners = footprintPolygon(e.type), seed = e.id * 1.7;
+    c.save(); c.globalAlpha = alpha; c.translate(p.x, p.y); c.scale(this.zoom, this.zoom);
+    polygon(c, corners, '#35291f', '#1f1812');
+    const at = (u, v) => [corners[0][0] + (corners[1][0] - corners[0][0]) * u + (corners[3][0] - corners[0][0]) * v, corners[0][1] + (corners[1][1] - corners[0][1]) * u + (corners[3][1] - corners[0][1]) * v];
+    for (let i = 0; i < 16; i++) { const [sx, sy] = at(.08 + texture(seed + i, 1) * .84, .08 + texture(seed + i, 2) * .84), k = texture(seed + i, 3); ellipse(c, sx, sy + 1, 2.6 + k * 3.4, 1.3 + k * 1.7, '#241b13'); ellipse(c, sx, sy, 2.4 + k * 3.2, 1.2 + k * 1.6, k > .5 ? '#7a7264' : '#5f584b'); }
+    if (art?.complete && art.naturalWidth) {
+      const keep = height * .26; c.save(); c.beginPath(); c.moveTo(-width / 2, bottom + 4);
+      for (let i = 0; i <= 12; i++) c.lineTo(-width / 2 + width * i / 12, bottom - keep * (.25 + texture(seed + i, 5) * .75) * (i % 2 ? 1 : .6));
+      c.lineTo(width / 2, bottom + 4); c.closePath(); c.clip();
+      drawSprite(c, art, 0, bottom, width, height); c.globalAlpha = alpha * .66; drawSprite(c, silhouette(art), 0, bottom, width, height); c.restore();
+    }
+    for (let i = 0; i < 6; i++) { const [bx, by] = at(.15 + texture(seed + i, 7) * .7, .15 + texture(seed + i, 8) * .7), len = 6 + texture(seed + i, 9) * 9, a = texture(seed + i, 10) * Math.PI; line(c, [[bx, by], [bx + Math.cos(a) * len, by + Math.sin(a) * len * .5 - 2]], '#2c1e12', 3); line(c, [[bx, by - 1], [bx + Math.cos(a) * len, by + Math.sin(a) * len * .5 - 3]], '#6a4d2f', 1.5); }
+    if (age < 9) for (let i = 0; i < 4; i++) { const [ex, ey] = at(.2 + texture(seed + i, 11) * .6, .2 + texture(seed + i, 12) * .6); c.globalAlpha = alpha * (1 - age / 9) * (.5 + .5 * Math.sin(time * 9 + i * 2)); ellipse(c, ex, ey - 1, 2.2, 1.2, '#ff7a1c'); }
+    c.restore();
+  }
+  // AoE2-style order marker: rings contract onto the destination; green = move, yellow = work, red = attack.
+  drawMarker(c, m, time) {
+    const t = (time - m.time) / .7; if (t < 0 || t >= 1) return;
+    const p = this.screen(m.x, m.y), ease = 1 - (1 - t) ** 2, color = m.kind === 'attack' || m.attack ? '#ff7d62' : m.kind === 'work' ? '#f4d46e' : '#8fe58f';
+    const radius = (30 - 22 * ease) * this.zoom, alpha = t < .12 ? t / .12 : 1 - Math.max(0, t - .5) / .5;
+    c.save(); c.translate(p.x, p.y); c.globalAlpha = alpha; c.lineCap = 'round';
+    for (const [stroke, width, scale] of [['#10201acc', 4.2, 1], [color, 2.2, 1], ['#ffffffcc', 1.2, .55]]) {
+      c.strokeStyle = stroke; c.lineWidth = width; c.beginPath(); c.ellipse(0, 0, radius * scale, radius * scale * .5, 0, 0, Math.PI * 2); c.stroke();
+    }
+    c.fillStyle = color; c.strokeStyle = '#10201acc'; c.lineWidth = 1;
+    for (let k = 0; k < 4; k++) {
+      const a = k * Math.PI / 2 + Math.PI / 4, ox = Math.cos(a) * (radius + 6 * this.zoom), oy = Math.sin(a) * (radius + 6 * this.zoom) * .5, ix = Math.cos(a) * radius * .72, iy = Math.sin(a) * radius * .72 * .5;
+      c.beginPath(); c.moveTo(ox, oy); c.lineTo((ox + ix) / 2 - Math.sin(a) * 3, (oy + iy) / 2 + Math.cos(a) * 1.5); c.lineTo(ix, iy); c.lineTo((ox + ix) / 2 + Math.sin(a) * 3, (oy + iy) / 2 - Math.cos(a) * 1.5); c.closePath(); c.fill(); c.stroke();
+    }
+    c.restore();
+  }
+  // Short double blink on whatever the last right-click was aimed at.
+  flashing(e, time) {
+    const m = this.marker; if (!m || !m.flash) return false;
+    const t = time - m.time; if (t < 0 || t > .5 || (t % .2) > .11) return false;
+    return m.targetId !== undefined ? e.id === m.targetId : e.sourceX === m.x && e.sourceY === m.y && e.t === m.flash;
+  }
+  // Enemy buildings stay on the map as last seen while their tile is explored but out of sight.
+  updateGhosts(world) {
+    const n = world.map.size, ghosts = this.ghosts?.world === world.map ? this.ghosts : (this.ghosts = { world: world.map, seen: new Map() });
+    const alive = new Set();
+    for (const b of world.buildings) if (b.team !== 0 && b.hp > 0) {
+      alive.add(b.id);
+      if (world.isVisible(b)) ghosts.seen.set(b.id, { id: b.id, kind: 'building', ghost: true, type: b.type, team: b.team, x: b.x, y: b.y, hp: b.hp, maxHp: b.maxHp, progress: b.progress });
+    }
+    const out = [];
+    for (const [id, g] of ghosts.seen) {
+      const i = clamp(Math.round(g.y), 0, n - 1) * n + clamp(Math.round(g.x), 0, n - 1);
+      if (world.visible[i]) { if (!alive.has(id)) ghosts.seen.delete(id); continue; }
+      out.push(g);
+    }
+    return out;
   }
   commandHit(x,y,world,fog,selected) {
     const target=this.hit(x,y,world,fog);
@@ -531,21 +688,32 @@ export class Renderer {
     }
     const placedHeroes = ui.mode === 'map' ? editorHeroes(project, world) : null;
     const mapEntities = placedHeroes ? [...editorBuildings(project,world),...placedHeroes] : null;
-    const entities = (mapEntities ?? [...world.buildings, ...world.units]).filter(e => { if (e.hp <= 0 || e.garrison || fog && !world.isVisible(e)) return false; const p = this.screen(e.x, e.y); return p.x >= -marginX && p.x <= this.width + marginX && p.y >= -90 && p.y <= this.height + marginY; });
+    const ghosts = fog && !overview ? this.updateGhosts(world) : [];
+    const entities = (mapEntities ?? [...world.buildings, ...world.units, ...ghosts]).filter(e => { if (e.hp <= 0 || e.garrison || fog && !e.ghost && !world.isVisible(e)) return false; const p = this.screen(e.x, e.y); return p.x >= -marginX && p.x <= this.width + marginX && p.y >= -90 && p.y <= this.height + marginY; });
+    if (this.fxWorld !== world) { this.fx.reset(); this.fxWorld = world; }
+    if (ui.mode === 'play') {
+      const fx = this.fx, tileIndex = s => clamp(Math.round(s.y), 0, n - 1) * n + clamp(Math.round(s.x), 0, n - 1), dt = fx.update(time);
+      fx.observeEffects(world.effects, time); fx.observeBuildings(world, s => !fog || world.visible[tileIndex(s)], time);
+      if (!overview) for (const e of entities) if (e.kind === 'building' && !e.ghost && e.progress >= 1 && e.hp <= e.maxHp * .5) fx.emitDamage(e, buildingSize(e), dt);
+    }
     if (!overview) for (const e of decorations) resourceGround(c, e, this.screen(e.x, e.y), this.zoom);
     if (!overview) for (const e of entities) if (e.kind === 'building') buildingGround(c, e, this.screen(e.x, e.y), this.zoom);
     const corpses = ui.mode === 'map' ? [] : (world.corpses ?? []).filter(e => !fog || world.isVisible(e)).map(e => ({ ...e, corpse: true }));
-    const items = [...decorations.map(d => ({ ...d, kind: 'decoration' })), ...corpses, ...entities].sort((a, b) => a.x + a.y - b.x - b.y);
+    const ruins = ui.mode === 'map' || overview ? [] : [...this.fx.ruins.values()].filter(s => !fog || world.explored[clamp(Math.round(s.y), 0, n - 1) * n + clamp(Math.round(s.x), 0, n - 1)]).map(s => ({ ...s, kind: 'ruin', ruin: true }));
+    const items = [...decorations.map(d => ({ ...d, kind: 'decoration' })), ...ruins, ...corpses, ...entities].sort((a, b) => a.x + a.y - b.x - b.y);
     this.drawnResources = []; this.drawnResourceMap = map; const canopyBuckets = new Map();
     for (const e of items) { const p = this.screen(e.x, e.y); if (p.x < -marginX || p.x > this.width + marginX || p.y < -90 || p.y > this.height + marginY) continue;
+      const flash = this.flashing(e, time); if (flash) { c.save(); c.filter = 'brightness(2.2) saturate(.55)'; }
       if (e.kind === 'decoration') { resource(c, e, p, this.zoom); if (e.t !== 'wild') this.drawnResources.push(e); if (e.t === 'forest') {
         const s = resourceSize(e), left = Math.floor((p.x - s.width * this.zoom / 2) / 64), right = Math.floor((p.x + s.width * this.zoom / 2) / 64), top = Math.floor((p.y - s.height * this.zoom) / 64), bottom = Math.floor(p.y / 64);
         for (let y = top; y <= bottom; y++) for (let x = left; x <= right; x++) { const key = `${x}:${y}`; if (!canopyBuckets.has(key)) canopyBuckets.set(key, []); canopyBuckets.get(key).push(e); }
       } }
-      else if (e.corpse) { c.save(); c.globalAlpha = Math.max(0, 1 - (e.age ?? 0) / 2); c.translate(p.x, p.y); c.scale(this.zoom, this.zoom); c.rotate(-.65); drawUnit(c, e, 0, 0, 1, 0, false); c.restore(); }
+      else if (e.corpse) { const pose = corpsePose(e.age ?? 0); c.save(); c.globalAlpha = pose.alpha; c.translate(p.x, p.y); c.scale(this.zoom, this.zoom); c.rotate(-pose.angle * (e.id % 2 ? 1 : -1)); c.scale(1, pose.squash); drawUnit(c, { ...e, hitAnimation: 0, attackAnimation: 0, path: [], order: null }, 0, 0, 1, 0, false); c.restore(); }
+      else if (e.ruin) this.drawRuin(c, e, p, time);
       else if (overview) { if (e.editorHero) heroMarker(c, p.x, p.y, editorHeroSelected(e,ui), e.editorValid); else ellipse(c, p.x, p.y, e.kind === 'building' ? 3 : 1.8, e.kind === 'building' ? 2 : 1.2, e.editorBuilding && !e.editorValid ? '#ef8b7d' : TEAM_COLORS[e.team % 4]); }
       else if (e.kind === 'building') { building(c, e, p.x, p.y, this.zoom, e.editorBuilding ? ui.mapBuildingSelected === e.buildingPlacementKey : ui.selected.has(e.id)); if (e.editorBuilding && !e.editorValid) polygon(c,footprintPolygon(e.type).map(([x,y])=>[p.x+x*this.zoom,p.y+y*this.zoom]),'#e5786720','#ef8b7d'); if (e.rally && ui.selected.has(e.id)) { const r = this.screen(e.rally.x ?? world.entity(e.rally.target)?.x ?? e.x, e.rally.y ?? world.entity(e.rally.target)?.y ?? e.y); line(c, [[p.x, p.y], [r.x, r.y]], '#d7b77b66', 1); line(c, [[r.x, r.y], [r.x, r.y - 20]], '#ddc494', 1.5); polygon(c, [[r.x, r.y - 20], [r.x + 12, r.y - 17], [r.x, r.y - 12]], '#d7b77b'); } }
       else { drawUnit(c, e, p.x, p.y, this.zoom, time, e.editorHero ? editorHeroSelected(e,ui) : ui.selected.has(e.id)); if (e.editorHero && !e.editorValid) { c.strokeStyle = '#e78576'; c.lineWidth = 1.5; c.beginPath(); c.ellipse(p.x, p.y, Math.max(9, 15 * this.zoom), Math.max(4, 6 * this.zoom), 0, 0, Math.PI * 2); c.stroke(); } }
+      if (flash) c.restore();
     }
     const buildingFrames=!overview?entities.filter(e=>e.kind==='building').map(e=>({e,p:this.screen(e.x,e.y)})):[];
     if (!overview) for (const u of entities) if (u.kind === 'unit' && (u.editorHero ? editorHeroSelected(u,ui) : ui.selected.has(u.id))) {
@@ -559,11 +727,16 @@ export class Renderer {
     }
     if(!overview&&ui.mode==='play')this.commandFeedback(world,ui);
     if (ui.mode === 'map') for (let team = 0; team < map.spawns.length; team++) { const s = map.spawns[team], p = this.screen(s.x, s.y); ellipse(c, p.x, p.y, tw * 1.2, th * 1.2, TEAM_COLORS[team % 4] + '55'); line(c, [[p.x, p.y], [p.x, p.y - 42]], '#e0d8b5', 2); polygon(c, [[p.x, p.y - 42], [p.x + 24, p.y - 36], [p.x, p.y - 26]], TEAM_COLORS[team % 4]); c.fillStyle = '#eee4c8'; c.font = '11px sans-serif'; c.fillText(team ? 'AI ' + team + (project.rules.aiAlliance ? ' · 敵方聯盟' : ' 出生點') : '我方出生點', p.x + 6, p.y - 50); }
-    for (const e of world.effects) { if (fog && !world.isVisible(e) && !world.isVisible({ x: e.tx ?? e.x, y: e.ty ?? e.y })) continue; const p = this.screen(e.x, e.y), q = this.screen(e.tx ?? e.x, e.ty ?? e.y), alpha = 1 - e.age / .5; c.save(); c.globalAlpha = alpha;
-      if (e.type === 'arrow') { const f = Math.min(1, e.age / .25); const x = p.x + (q.x - p.x) * f, y = p.y + (q.y - p.y) * f - 20 * this.zoom - Math.sin(f * Math.PI) * 20 * this.zoom; line(c, [[x - 7, y + 2], [x, y]], '#f3d19a', 1.5); }
-      else if (e.type === 'heal') { c.fillStyle = '#a5e7ba'; c.font = '16px sans-serif'; c.fillText('+', p.x, p.y - 25 - e.age * 20); }
-      else { c.strokeStyle = '#ffdf9c'; c.lineWidth = 1.5; c.beginPath(); c.arc(q.x, q.y - 15 * this.zoom, 4 + e.age * 12, 0, Math.PI * 2); c.stroke(); } c.restore();
+    if (!overview && ui.mode === 'play') this.drawParticles(c);
+    for (const e of world.effects) { if (fog && !world.isVisible(e) && !world.isVisible({ x: e.tx ?? e.x, y: e.ty ?? e.y })) continue; const p = this.screen(e.x, e.y), q = this.screen(e.tx ?? e.x, e.ty ?? e.y);
+      if (e.type === 'arrow') { if (e.age < ARROW_FLIGHT) this.drawArrow(c, p, q, e.age / ARROW_FLIGHT); }
+      else if (e.type === 'rock') { if (e.age < ROCK_FLIGHT) this.drawRock(c, p, q, e.age / ROCK_FLIGHT); }
+      else if (e.type === 'heal') { c.save(); c.globalAlpha = 1 - e.age / .5; c.fillStyle = '#a5e7ba'; c.font = '16px sans-serif'; c.fillText('+', p.x, p.y - 25 - e.age * 20); c.restore(); }
+      else if (e.age < .14) { const k = 1 - e.age / .14, cx = q.x, cy = q.y - 16 * this.zoom, reach = (4 + 9 * (1 - k)) * Math.max(.8, this.zoom); c.save(); c.globalAlpha = k; c.lineCap = 'round';
+        for (let a = 0; a < 6; a++) { const ang = a * Math.PI / 3 + e.x * 3, inner = reach * .45; line(c, [[cx + Math.cos(ang) * inner, cy + Math.sin(ang) * inner * .7], [cx + Math.cos(ang) * reach, cy + Math.sin(ang) * reach * .7]], a % 2 ? '#fff4c2' : '#ffd36b', 1.8); }
+        c.restore(); }
     }
+    if (!overview) this.drawStuckArrows(c, world, fog, time);
     if (fog && !overview && this.fogCanvas) c.drawImage(this.fogCanvas, 0, 0, this.width, this.height);
     if (this.hover && ui.mode === 'map' && ui.heroBrush) {
       const blueprint = project.units.find(u => u.id === ui.heroBrush && u.hero), h = this.hover;
@@ -587,7 +760,7 @@ export class Renderer {
       if (ui.placement) { c.save(); c.globalAlpha = .6; building(c, { type: ui.placement, team: 0, progress: 1, hp: 1, maxHp: 1 }, p.x, p.y, this.zoom, false); c.restore(); }
     } }
     if (this.drag) { const { start, end } = this.drag; c.fillStyle = '#93c5b221'; c.fillRect(start.x, start.y, end.x - start.x, end.y - start.y); c.strokeStyle = '#b5d8ba'; c.lineWidth = 1; c.strokeRect(start.x, start.y, end.x - start.x, end.y - start.y); }
-    if (this.marker && time - this.marker.time < 0.7) { const p = this.screen(this.marker.x, this.marker.y); c.strokeStyle = this.marker.attack ? '#e8a184' : '#d9c087'; c.lineWidth = 1.4; c.beginPath(); c.ellipse(p.x, p.y, (8 + (time - this.marker.time) * 15) * this.zoom, (4 + (time - this.marker.time) * 8) * this.zoom, 0, 0, Math.PI * 2); c.stroke(); }
+    if (this.marker && !overview) this.drawMarker(c, this.marker, time);
     if (time - this.miniTime >= .12) { this.renderMini(map, world, fog, mapEntities, ui); this.miniTime = time; }
   }
   renderMini(map, world, fog, mapEntities = null, ui = {}) {

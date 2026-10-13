@@ -16,7 +16,7 @@ test('battle saves restore stocks, completed and unfinished buildings, orders an
 test('battle saves preserve harvested amounts and exploration without allocating a full JSON grid',()=>{
  const p=defaultProject();p.rules.ai='off';const w=new World(p);const point=w.closestResource(w.units.find(u=>u.team===0),'wood'),i=point.y*w.map.size+point.x;
  w.amounts[i]=123;const saved=w.saveState(),restored=World.fromState(saved);
- assert.equal(restored.amountAt(point.x,point.y),123);assert.ok(saved.explored.length<1000);assert.deepEqual(restored.explored,w.explored);
+ assert.equal(restored.amountAt(point.x,point.y),123);assert.ok(saved.explored.length<3000);assert.deepEqual(restored.explored,w.explored);
 });
 test('a damaged or duplicate-entity battle save cannot be loaded',()=>{
  assert.throws(()=>World.fromState(null));const saved=new World(defaultProject()).saveState();saved.units.push(saved.units[0]);assert.throws(()=>World.fromState(saved),/單位/);

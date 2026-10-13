@@ -305,6 +305,13 @@ export function findPath(start, goal, size, blocked, radius = 0) {
   const path = []; while (end !== initial) { path.push({ x: end % size, y: Math.floor(end / size) }); end = prev[end]; }
   return [...path.reverse(),...tail];
 }
+// Line of sight in tiles. A town centre sees far enough that the opening base is not a dark pit; scouts see further than the rest.
+export const BUILDING_VISION = { town: 13, castle: 11, tower: 9, outpost: 9, university: 7, monastery: 7, wall: 3, gate: 4, farm: 4, house: 5 };
+export function visionRadius(e) {
+  if (e.kind === 'building') return BUILDING_VISION[e.type] ?? 6;
+  return e.blueprint?.vision ?? (e.blueprint?.id === 'scout' ? 9 : e.blueprint?.family === 'siege' ? 4 : 6);
+}
+export const START_EXPLORED_RADIUS = 19;
 export class World {
   constructor(project) {
     this.project = validateProject(project); this.map = clone(this.project.map); this.units = []; this.buildings = []; this.nextId = 1; this.time = 0; this.events = []; this.effects = []; this.corpses = []; this.result = null; this.deploymentErrors = [];
@@ -372,7 +379,7 @@ export class World {
     }
     if (project.rules.ai !== 'off' && !this.aiFair) for (const u of this.units.filter(u => u.team > 0 && u.blueprint.role === 'worker')) { const r = this.closestResource(u, ['food', 'wood', 'gold', 'stone'][u.id % 4]); if (r) this.command([u.id], { type: 'gather', ...r }); }
     if (this.aiFair) initAIKnowledge(this);
-    this.updateSpatial(); this.updateVision(); this.note(this.deploymentErrors[0] || '王國已部署。選村民，右鍵資源開始採集。', this.map.spawns[0]);
+    this.updateSpatial(); this.updateVision(); this.exploreAround(this.map.spawns[0], START_EXPLORED_RADIUS); this.note(this.deploymentErrors[0] || '王國已部署。選村民，右鍵資源開始採集。', this.map.spawns[0]);
   }
   note(text, point = null) { this.events.unshift({ text, time: this.time, ...(point ? { x: point.x, y: point.y } : {}) }); this.events.length = Math.min(8, this.events.length); }
   isAlly(teamA, teamB) { return teamA === teamB || this.project.rules.aiAlliance && teamA > 0 && teamB > 0; }
@@ -742,12 +749,16 @@ export class World {
     return best;
   }
   setFog(enabled) { this.project.rules.fog = Boolean(enabled); this.updateVision(); }
+  exploreAround(p, r) {
+    const n = this.map.size, x0 = Math.round(p.x), y0 = Math.round(p.y);
+    for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) { const x = x0 + dx, y = y0 + dy; if (x >= 0 && y >= 0 && x < n && y < n && dx * dx + dy * dy <= r * r) this.explored[y * n + x] = 1; }
+  }
   updateVision() {
     const n = this.map.size;
     if (this.project.rules.fog && this.fullVision) { this.visible.fill(0); this.fullVision=false; }
     if (!this.fullVision) for (const i of this.visionCells || []) this.visible[i]=0;
     this.visionCells=new Set();
-    for (const e of [...this.units, ...this.buildings]) if (e.team === 0 && e.hp > 0 && !e.garrison) { const r = e.kind === 'building' ? 7 : 5, x0 = Math.round(e.x), y0 = Math.round(e.y); for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) { const x = x0 + dx, y = y0 + dy; if (x >= 0 && y >= 0 && x < n && y < n && dx * dx + dy * dy <= r * r) { const i=y*n+x; this.visible[i]=1; this.explored[i]=1; this.visionCells.add(i); } } }
+    for (const e of [...this.units, ...this.buildings]) if (e.team === 0 && e.hp > 0 && !e.garrison) { const r = visionRadius(e), x0 = Math.round(e.x), y0 = Math.round(e.y); for (let dy = -r; dy <= r; dy++) for (let dx = -r; dx <= r; dx++) { const x = x0 + dx, y = y0 + dy; if (x >= 0 && y >= 0 && x < n && y < n && dx * dx + dy * dy <= r * r) { const i=y*n+x; this.visible[i]=1; this.explored[i]=1; this.visionCells.add(i); } } }
     if (!this.project.rules.fog && !this.fullVision) { this.visible.fill(1); this.fullVision=true; }
   }
   isVisible(e) { return e.team === 0 || Boolean(this.visible[clamp(Math.round(e.y), 0, this.map.size - 1) * this.map.size + clamp(Math.round(e.x), 0, this.map.size - 1)]); }

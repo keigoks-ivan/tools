@@ -126,3 +126,16 @@ test('changing stance clears the old automatic pursuit search and resumes the or
   w.tick(.05);assert.equal(soldier.autoTarget,null);assert.equal(soldier.order.type,'attackMove');assert.ok(soldier.moving);
   assert.deepEqual(soldier.pathGoal,{x:40,y:30,radius:.2});
 });
+
+test('a plain click on an enemy unit or building selects it for inspection, and orders on it report their kind',()=>{
+  const w=setup(),mine=unit(w),foe=unit(w,'swordsman',1,24,20),barracks=building(w,'barracks',45,25,1);
+  for(const enemy of [foe,barracks]) {
+    const selection=selectionAfterClick(w,new Set([mine.id]),[enemy.id]);
+    assert.deepEqual([...selection],[enemy.id]);
+  }
+  const attack=click(w,[mine],{x:foe.x,y:foe.y,target:foe});
+  assert.equal(attack.attack,true);assert.ok(attack.types.includes('attack'));
+  const move=click(w,[mine],{x:30,y:30});assert.deepEqual(move.types,['move']);
+  const worker=unit(w,'villager',0,21,21);setTile(w.map,40,40,'forest');
+  assert.ok(click(w,[worker],{x:40,y:40}).types.includes('gather'));
+});
