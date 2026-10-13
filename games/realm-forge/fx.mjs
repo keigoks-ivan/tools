@@ -1,6 +1,6 @@
 // Visual-only effects state (particles, stuck arrows, ruins). It never touches the simulation, and every list has a hard cap.
 export const ARROW_FLIGHT = .25, ROCK_FLIGHT = .35;
-export const LIMITS = { particles: 360, stuck: 48, ruins: 40, perBuilding: 40 };
+export const LIMITS = { particles: 360, stuck: 48, ruins: 40, perBuilding: 64, reserve: 70 };
 export const STUCK_LIFE = 2.4, RUIN_LIFE = 24, RUIN_FADE = 4;
 
 // 0 healthy, 1 smoking (at or below half hp), 2 burning (at or below a quarter).
@@ -15,7 +15,30 @@ export function corpsePose(age, life = 2) {
 }
 export function ruinAlpha(age) { return age >= RUIN_LIFE ? 0 : age > RUIN_LIFE - RUIN_FADE ? (RUIN_LIFE - age) / RUIN_FADE : 1; }
 
+// What a damaged building shows, by remaining hp ratio: smoke columns, fire spots (drawn on the sprite, not as particles), embers.
+// Halved hp: one or two smoke columns. A quarter: two to four fires and thick smoke. A tenth or less: many big fires.
+export function damageProfile(ratio) {
+  if (!(ratio > 0) || ratio > .5) return { smoke: 0, flames: 0, scale: 0, rate: 0, embers: 0, dark: 0 };
+  if (ratio > .35) return { smoke: 1, flames: 0, scale: 0, rate: 1.7, embers: 0, dark: .35 };
+  if (ratio > .25) return { smoke: 2, flames: 0, scale: 0, rate: 2.1, embers: 0, dark: .5 };
+  if (ratio > .18) return { smoke: 3, flames: 2, scale: 1.15, rate: 2.6, embers: 1.5, dark: .7 };
+  if (ratio > .12) return { smoke: 3, flames: 3, scale: 1.25, rate: 2.8, embers: 2, dark: .75 };
+  if (ratio > .1) return { smoke: 4, flames: 4, scale: 1.35, rate: 3, embers: 2.5, dark: .8 };
+  if (ratio > .05) return { smoke: 5, flames: 6, scale: 1.5, rate: 3.2, embers: 3.5, dark: .9 };
+  return { smoke: 5, flames: 8, scale: 1.7, rate: 3.4, embers: 5, dark: 1 };
+}
 const hash = (a, b = 0) => { const s = Math.sin(a * 127.1 + b * 311.7) * 43758.5453; return s - Math.floor(s); };
+
+// Stable positions on the sprite (dx from the centre, up from the base, both in sprite pixels). Golden-ratio spacing keeps the first n spots unchanged as n grows.
+const spread = (id, i, salt) => ((i * .618034 + hash(id, salt)) % 1) - .5;
+export function fireSpots(id, count, size) {
+  return Array.from({ length: count }, (_, i) => ({ dx: spread(id, i, 1) * size.width * .56, up: size.height * (.14 + hash(id, i * 7 + 2) * .5), phase: hash(id, i * 7 + 3) * 10, flip: hash(id, i * 7 + 4) < .5, size: .8 + hash(id, i * 7 + 5) * .4 }));
+}
+export function smokeSpots(id, count, size) {
+  return Array.from({ length: count }, (_, i) => ({ dx: spread(id, i, 9) * size.width * .5, up: size.height * (.5 + hash(id, i * 7 + 12) * .35), phase: hash(id, i * 7 + 13) * 10 }));
+}
+// Screen offset (sprite pixels) to world offset: moving along the tile diagonal shifts only x on screen.
+const spotWorld = (b, spot, size) => ({ wx: b.x + spot.dx / 42, wy: b.y - spot.dx / 42, z: spot.up - (size.bottom ?? 0) });
 
 export class FxState {
   constructor() { this.rand = Math.random; this.reset(); }
@@ -55,17 +78,26 @@ export class FxState {
       for (let k = 0; k < 14; k++) this.spawn({ type: 'smoke', wx: s.x + (this.rand() - .5) * 2, wy: s.y + (this.rand() - .5) * 2, z: 6 + this.rand() * 20, vz: 12 + this.rand() * 14, vx: (this.rand() - .5) * .3, vy: (this.rand() - .5) * .2, life: 1.6 + this.rand() * 1.2, size: 8 + this.rand() * 8 });
     }
   }
-  // Smoke at half health, flames and embers at a quarter. size = { width, height } of the sprite in sprite pixels.
+  // Smoke columns from half health; from a quarter the renderer also paints fires on the sprite and this adds rising embers. size = { width, height, bottom } of the sprite in sprite pixels.
   emitDamage(b, size, dt) {
-    const stage = damageStage(b.hp, b.maxHp); if (!stage) { this.carry.delete(b.id); return; }
-    const carry = this.carry.get(b.id) ?? { smoke: this.rand(), fire: this.rand() }; this.carry.set(b.id, carry);
-    carry.smoke += dt * (stage === 2 ? 7 : 4); carry.fire += dt * (stage === 2 ? 15 : 0);
-    const owned = () => this.particles.reduce((n, p) => n + (p.owner === b.id), 0);
-    let budget = LIMITS.perBuilding - owned();
-    const spread = Math.min(.9, .25 + size.width / 260);
-    while (carry.smoke >= 1 && budget > 0) { carry.smoke--; budget--; this.spawn({ owner: b.id, type: 'smoke', wx: b.x + (this.rand() - .5) * spread * 2, wy: b.y + (this.rand() - .5) * spread * 2, z: size.height * (.35 + this.rand() * .35), vz: 14 + this.rand() * 10, vx: .12 + this.rand() * .16, vy: -.06, life: 1.5 + this.rand() * 1.1, size: 6 + this.rand() * 5 }); }
-    while (carry.fire >= 1 && budget > 0) { carry.fire--; budget--; this.spawn({ owner: b.id, type: this.rand() < .2 ? 'ember' : 'flame', wx: b.x + (this.rand() - .5) * spread * 2, wy: b.y + (this.rand() - .5) * spread * 2, z: size.height * (.12 + this.rand() * .45), vz: 16 + this.rand() * 14, vx: (this.rand() - .5) * .1, vy: (this.rand() - .5) * .1, life: .45 + this.rand() * .35, size: 4 + this.rand() * 4 }); }
-    carry.smoke = Math.min(carry.smoke, 2); carry.fire = Math.min(carry.fire, 2);
+    const profile = damageProfile(b.hp / b.maxHp); if (!profile.smoke) { this.carry.delete(b.id); return; }
+    const carry = this.carry.get(b.id) ?? { smoke: [], ember: this.rand() }; this.carry.set(b.id, carry);
+    let budget = LIMITS.perBuilding - this.particles.reduce((n, p) => n + (p.owner === b.id), 0);
+    const room = () => budget > 0 && this.particles.length < LIMITS.particles - LIMITS.reserve;
+    smokeSpots(b.id, profile.smoke, size).forEach((spot, i) => {
+      carry.smoke[i] = (carry.smoke[i] ?? this.rand()) + dt * profile.rate;
+      while (carry.smoke[i] >= 1 && room()) {
+        carry.smoke[i]--; budget--; const at = spotWorld(b, spot, size);
+        this.spawn({ owner: b.id, type: 'smoke', ...at, wx: at.wx + (this.rand() - .5) * .25, z: at.z + (this.rand() - .5) * 4, vz: 24 + this.rand() * 16, vx: .22 + this.rand() * .2, vy: -.1 + this.rand() * .06, life: 2.2 + this.rand() * 1.2, size: 9 + this.rand() * 5, dark: profile.dark, seed: this.rand() * 6.28 });
+      }
+      carry.smoke[i] = Math.min(carry.smoke[i], 2);
+    });
+    carry.smoke.length = profile.smoke;
+    if (profile.embers) {
+      carry.ember += dt * profile.embers; const spots = fireSpots(b.id, profile.flames, size);
+      while (carry.ember >= 1 && room()) { carry.ember--; budget--; const spot = spots[Math.floor(this.rand() * spots.length)], at = spotWorld(b, spot, size); this.spawn({ owner: b.id, type: 'ember', ...at, z: at.z + 8, vz: 26 + this.rand() * 26, vx: (this.rand() - .3) * .5, vy: (this.rand() - .5) * .3, life: .8 + this.rand() * .7, size: 1 + this.rand() }); }
+      carry.ember = Math.min(carry.ember, 2);
+    }
   }
   update(time) {
     const dt = this.last === null ? 0 : Math.min(.1, Math.max(0, time - this.last)); this.last = time; this.dt = dt; this.time = time;

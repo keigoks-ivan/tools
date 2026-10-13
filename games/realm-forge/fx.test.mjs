@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { FxState, LIMITS, damageStage, corpsePose, ruinAlpha, ARROW_FLIGHT, ROCK_FLIGHT, STUCK_LIFE, RUIN_LIFE } from './fx.mjs';
+import { FxState, LIMITS, damageStage, damageProfile, fireSpots, smokeSpots, corpsePose, ruinAlpha, ARROW_FLIGHT, ROCK_FLIGHT, STUCK_LIFE, RUIN_LIFE } from './fx.mjs';
 import { constructionStage, constructionReveal } from './renderer.js';
 
 const seeded = () => { let s = 7; return () => (s = (s * 16807) % 2147483647) / 2147483647; };
@@ -16,12 +16,12 @@ test('buildings smoke at half health and burn at a quarter', () => {
   assert.equal(damageStage(0, 100), 0);
 });
 
-test('smoking buildings emit smoke only; burning ones add flames, and a healthy building emits nothing', () => {
+test('smoking buildings emit smoke only; burning ones add embers, and a healthy building emits nothing', () => {
   const fx = state(), size = { width: 100, height: 80 };
   const kinds = b => { const f = state(); for (let i = 0; i < 60; i++) { f.emitDamage(b, size, .05); f.update(i * .05); } return new Set(f.particles.map(p => p.type)); };
   assert.deepEqual([...kinds({ id: 1, x: 5, y: 5, hp: 40, maxHp: 100 })], ['smoke']);
   const burning = kinds({ id: 2, x: 5, y: 5, hp: 10, maxHp: 100 });
-  assert.ok(burning.has('smoke') && burning.has('flame'));
+  assert.ok(burning.has('smoke') && burning.has('ember') && !burning.has('flame'), 'fires are painted on the sprite, particles are smoke and embers');
   fx.emitDamage({ id: 3, x: 1, y: 1, hp: 100, maxHp: 100 }, size, 1); assert.equal(fx.particles.length, 0);
 });
 
@@ -80,4 +80,38 @@ test('construction runs through four stages and reveals the building from the gr
   assert.equal(constructionReveal(.1), 0);
   let last = 0; for (let p = 0; p <= 1; p += .05) { const r = constructionReveal(p); assert.ok(r >= last); last = r; }
   assert.equal(constructionReveal(1), 1);
+});
+
+test('the four construction stages differ clearly in how much of the building is up', () => {
+  const [s0, s1, s2, s3] = [.12, .38, .65, .9].map(constructionReveal);
+  assert.equal(s0, 0, 'foundation only');
+  assert.ok(s1 > .25 && s1 < .45, 'low walls');
+  assert.ok(s2 > .6 && s2 < .8, 'most walls up, roof still open');
+  assert.ok(s3 > .9 && s3 < 1, 'nearly finished');
+  assert.ok(s1 - s0 > .25 && s2 - s1 > .25 && s3 - s2 > .2, 'every stage adds a visible chunk');
+  for (const p of [.249, .499, .799]) assert.ok(constructionReveal(p + .002) - constructionReveal(p) < .2 + 1e-9);
+});
+
+test('fire grows with damage: one or two smoke columns at half, two to four fires at a quarter, many at a tenth', () => {
+  assert.equal(damageProfile(.6).smoke, 0);
+  const half = damageProfile(.45), third = damageProfile(.3), quarter = damageProfile(.25), low = damageProfile(.15), tenth = damageProfile(.1), dying = damageProfile(.04);
+  assert.ok(half.smoke >= 1 && half.smoke <= 2 && half.flames === 0 && third.smoke <= 2 && third.flames === 0);
+  assert.ok(quarter.flames >= 2 && quarter.flames <= 4 && low.flames <= 4 && low.flames >= quarter.flames);
+  assert.ok(tenth.flames > 4 && dying.flames >= tenth.flames && dying.scale > quarter.scale && dying.smoke >= quarter.smoke);
+  let flames = 0, smoke = 0; for (let r = .5; r > 0; r -= .01) { const p = damageProfile(r); assert.ok(p.flames >= flames && p.smoke >= smoke); flames = p.flames; smoke = p.smoke; }
+  const size = { width: 100, height: 80 }, a = fireSpots(7, 3, size), b = fireSpots(7, 8, size);
+  assert.deepEqual(b.slice(0, 3), a, 'adding fires never moves the existing ones');
+  assert.deepEqual(smokeSpots(7, 2, size), smokeSpots(7, 5, size).slice(0, 2));
+  for (const s of b) assert.ok(Math.abs(s.dx) <= size.width * .3 && s.up >= 0 && s.up <= size.height);
+});
+
+test('a heavily burning building spreads smoke over several columns and stays within its particle budget', () => {
+  const fx = state(), size = { width: 150, height: 100, bottom: 27 }, b = { id: 9, x: 10, y: 10, hp: 20, maxHp: 1000 };
+  const xs = new Set(); let peak = 0;
+  for (let i = 0; i < 200; i++) { fx.emitDamage(b, size, .05); fx.update(i * .05); peak = Math.max(peak, fx.particles.length); for (const p of fx.particles) if (p.type === 'smoke') xs.add(Math.round((p.wx - p.wy) * 21 / 8)); }
+  assert.ok(peak <= LIMITS.perBuilding && peak >= 15, `peak ${peak}`);
+  assert.ok(xs.size >= 4, 'smoke rises from different places on the roof');
+  const crowded = state(); for (let i = 0; i < LIMITS.particles; i++) crowded.spawn({ type: 'dust', wx: 0, wy: 0, life: 9, size: 2 });
+  const before = crowded.particles.length; crowded.particles.length = LIMITS.particles - 10; crowded.emitDamage(b, size, 1); assert.ok(crowded.particles.length <= LIMITS.particles - LIMITS.reserve + 0 || crowded.particles.length === LIMITS.particles - 10, 'fire leaves room for combat effects');
+  assert.ok(before > 0);
 });
