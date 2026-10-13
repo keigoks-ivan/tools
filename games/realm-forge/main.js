@@ -11,6 +11,8 @@ import { applyContextCommand, selectionAfterClick, readControlPreferences, apply
 import { layoutActions } from './action-layout.mjs?v=20261009l';
 import { cursorCss, contextCursor } from './cursors.mjs?v=20261009l';
 import { ZOOM_BASE, ZOOM_STEPS, zoomPercent, createWheelStepper, edgeScrollDirection } from './camera-steps.mjs?v=20261009l';
+import { createAudio } from './audio.mjs?v=20261009l';
+import { createObserver } from './audio-events.mjs?v=20261009l';
 const $ = id => document.getElementById(id);
 const markupCache = new Map();
 function html(id, markup) { if (markupCache.get(id)!==markup) { $(id).innerHTML=markup; markupCache.set(id,markup); } }
@@ -120,7 +122,7 @@ function switchMode(mode) {
 function selectedEntities() { return [...ui.selected].map(id => world.entity(id)).filter(Boolean); }
 function opponentLabel() { const count = project.map.spawns.length - 1; return project.rules.aiAlliance && count > 1 ? `${count} 個 AI 結盟對抗我方` : `對抗 ${count} 個 AI 王國`; }
 function ownEntities() { return selectedEntities().filter(e => e.team === 0 && !e.garrison); }
-function select(ids, append = false, toggle = true) { ui.selected=selectionAfterClick(world,ui.selected,ids,{append,toggle}); ui.buildMenu = false; ui.placement=null; ui.orderMode=null; ui.attackMove=false; $('selection-info').parentElement.scrollTop=0; updateHud(true); }
+function select(ids, append = false, toggle = true) { ui.selected=selectionAfterClick(world,ui.selected,ids,{append,toggle}); ui.buildMenu = false; ui.placement=null; ui.orderMode=null; ui.attackMove=false; $('selection-info').parentElement.scrollTop=0; updateHud(true); selectionVoice('select'); }
 function pruneHeroPlacements(map, units = project.units) { const ids = new Set(units.filter(u=>u.hero).map(u=>u.id)); map.heroPlacements = (map.heroPlacements || []).filter(p=>ids.has(p.unitId)); }
 function clearEditorTools(clearSelection=true) {
   ui.spawnBrush=null;ui.heroBrush=null;ui.heroMoveKey=null;ui.mapBuildingBrush=null;ui.mapBuildingMoveKey=null;
@@ -465,6 +467,7 @@ function issueCommand(p, target, shift = false, attackMove = false, forceGarriso
   const worked=['gather','build','repair','deliver','heal'].some(t=>result.types?.includes(t)),resourceType=!target&&worked?world.tile(Math.round(p.x),Math.round(p.y)):null;
   renderer.marker={x:Math.round(p.x),y:Math.round(p.y),attack:result.attack,kind:result.attack?'attack':worked?'work':'move',time:frameTime,
     flash:target&&(result.attack||worked)?true:RESOURCE[resourceType]?resourceType:null,targetId:target&&(result.attack||worked)?target.id:undefined};
+  selectionVoice('command');
   updateHud(true);
   const waiting=!ui.started?'；按「開始」後執行':ui.paused?'；目前暫停，按 F3 繼續':'';
   toast(`${shift?'已加入排程 · ':''}${result.summary}${waiting}${result.errors.length?' · '+result.errors.join(' '):''}`);
@@ -814,9 +817,32 @@ for (const type of ['keydown','keyup']) window.addEventListener(type, e => { if 
 window.addEventListener('blur', () => { altDown=false; windowPointer=null; keys.clear(); pointerPos = null; if(pointer?.type==='mapWall')finishMapWall(); pointer=null;minimapPointer=null;renderer.drag=null;$('map').classList.remove('camera-dragging');updatePointerHint();if (ui.started) { ui.paused = true; updateHud(true); } });
 document.addEventListener('visibilitychange', () => { if (document.hidden && ui.started) { ui.paused = true; updateHud(true); } });
 new ResizeObserver(() => renderer.resize()).observe($('canvas-wrap'));
+// Sound: the observer turns world changes into events; the audio engine only plays them.
+const audio = createAudio({ storage: (()=>{ try { return localStorage; } catch { return null; } })() }), observeAudio = createObserver();
+function audioListener() {
+  const w = renderer.width, h = renderer.height, c = renderer.world(w / 2, h / 2);
+  return { x: c.x, y: c.y, radius: Math.max(...[[0,0],[w,0],[0,h],[w,h]].map(([x,y]) => { const p = renderer.world(x, y); return Math.hypot(p.x - c.x, p.y - c.y); })) };
+}
+function audioFrame(dt) {
+  const playing = ui.started && !ui.paused && ui.mode === 'play';
+  if (playing) audio.handle(observeAudio(world), audioListener());
+  audio.tick(dt, playing);
+}
+function selectionVoice(kind) { if (ui.mode !== 'play') return; const unit = ownEntities().find(e => e.kind === 'unit'); if (unit) audio.voice(unit, kind); }
+for (const type of ['pointerdown', 'keydown']) window.addEventListener(type, () => audio.unlock(), { capture: true, passive: true });
+function syncAudioControls() {
+  const { volume, muted, ambient } = audio.settings;
+  $('volume').value = Math.round(volume * 100); $('mute').setAttribute('aria-pressed', String(muted)); $('mute').textContent = muted ? '取消靜音' : '靜音';
+  $('ambient').setAttribute('aria-pressed', String(ambient)); $('ambient').textContent = ambient ? '環境音：開' : '環境音：關';
+}
+$('volume').addEventListener('input', e => { audio.setVolume(Number(e.target.value) / 100); if (audio.settings.muted && Number(e.target.value) > 0) audio.setMuted(false); syncAudioControls(); });
+$('mute').addEventListener('click', () => { audio.toggleMuted(); syncAudioControls(); });
+$('ambient').addEventListener('click', () => { audio.setAmbient(!audio.settings.ambient); syncAudioControls(); });
+syncAudioControls();
 function frame(now) {
   const dt = Math.min((now - lastTick) / 1000, .1); lastTick = now; frameTime = now / 1000;
   if (ui.started && !ui.paused && ui.mode === 'play') { simulationLag=Math.min(.15,simulationLag+dt); let steps=0; while(simulationLag>=.05&&steps++<2) { world.tick(.05*project.rules.speed);simulationLag-=.05; } } else simulationLag=0;
+  audioFrame(dt);
   const step = 450 * dt; if (!document.querySelector('dialog[open]') && document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'SELECT') {
     const edge = pointer ? { dx: 0, dy: 0 } : ui.mode === 'play' ? edgeScrollDirection(windowPointer, { width: document.documentElement.clientWidth, height: window.innerHeight }) : edgeScrollDirection(pointerPos, { width: renderer.width, height: renderer.height }, 11);
     const dx = Number(keys.has('arrowleft')) - Number(keys.has('arrowright')) + edge.dx, dy = Number(keys.has('arrowup')) - Number(keys.has('arrowdown')) + edge.dy;
