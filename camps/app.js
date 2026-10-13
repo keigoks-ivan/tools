@@ -1,4 +1,4 @@
-import { buildDb, search, toTWD, kidFit, sessionSpan, holidaysIn, defaultQty, taxRate, lineCost, UNIT, runWeeks, weeksQty, weeksIn, mondayOf, addDays } from './lib/core.mjs';
+import { buildDb, search, toTWD, perWeekEquiv, kidFit, sessionSpan, holidaysIn, defaultQty, taxRate, lineCost, UNIT, runWeeks, weeksQty, weeksIn, mondayOf, addDays } from './lib/core.mjs';
 
 const FILES = ['providers', 'programs', 'locations', 'sessions', 'reviews', 'conflicts', 'holidays', 'fx'];
 const KL = ['Kuala Lumpur', 'Petaling Jaya', 'Subang Jaya', 'Puchong', 'Shah Alam', 'Selangor-other'];
@@ -25,7 +25,8 @@ const COUNTRY_CHIPS = { MY: [
 const COUNTRIES = { MY: '馬來西亞', TH: '泰國', JP: '日本' };
 const FLAG = { MY: '🇲🇾', TH: '🇹🇭', JP: '🇯🇵' };
 // kid colour dot, same colour in the form and the week view
-const kidDot = (i) => `<b class="kid-dot k${i % 5}">${i + 1}</b>`;
+const AV = ['🦊', '🐼', '🐨', '🐰', '🐯'];
+const kidAv = (i) => `<b class="kid-av k${i % 5}">${AV[i % 5]}</b>`;
 // base area per country: its cards sort first and its badge is plain. Thailand and Japan have no single base.
 const HOME = { MY: KL, TH: [], JP: [] };
 const HOME_ZH = { MY: '大吉隆坡', TH: null, JP: null };
@@ -56,6 +57,11 @@ const CATEGORIES = {
 const CAT_IC = {
   english: '🔤', stem: '🔬', arts: '🎨', sport: '⚽', multi_activity: '🎪', outdoor: '🌳', residential: '🏕️',
   leadership: '🧭', family: '👨‍👩‍👧', travel: '✈️', short_term_enrolment: '🏫', other_language: '🗣️',
+};
+// card top colour by first category
+const CAT_COLOR = {
+  english: 'sky', stem: 'violet', arts: 'pink', sport: 'green', multi_activity: 'sun', outdoor: 'green', residential: 'orange',
+  leadership: 'sun', family: 'pink', travel: 'sky', short_term_enrolment: 'indigo', other_language: 'indigo',
 };
 const BASIS = { per_week: '每週', per_2weeks: '每兩週', per_day: '每天', per_camp: '每梯', per_session: '每次' };
 const STATUS = { confirmed_target_year: '日期已公布', confirmed_other_year: '往年日期', pattern_estimated: '推估', unknown: '查不到日期' };
@@ -130,7 +136,7 @@ function kidRow(k, i) {
   const months = [];
   for (let m = 1; m <= 12; m++) months.push(`<option value="${String(m).padStart(2, '0')}" ${m === Number(bm) ? 'selected' : ''}>${m} 月</option>`);
   return `<div class="kid" data-i="${i}">
-    ${kidDot(i)}<input name="name" value="${esc(k.name)}" aria-label="名字">
+    ${kidAv(i)}<input name="name" value="${esc(k.name)}" aria-label="名字">
     <select name="by" aria-label="出生年">${years.join('')}</select>
     <select name="bm" aria-label="出生月">${months.join('')}</select>
     <span class="age"></span>
@@ -228,7 +234,7 @@ function safetyParts(p) {
 function kidsLine(it) {
   return it.kids.map((k, i) => {
     const mark = { yes: '✓', no: '✗ 不符', maybe: '？生日當月', unknown: '？' }[k.fit];
-    return `<span class="kfit ${k.fit} kc${i % 5}">${esc(k.name)}（${k.age} 歲）${mark}</span>`;
+    return `<span class="kfit ${k.fit}">${AV[i % 5]} ${esc(k.name)}（${k.age} 歲）${mark}</span>`;
   }).join('');
 }
 
@@ -375,41 +381,166 @@ function venueNote(it) {
 const haystack = (it) => [it.provider.name_en, it.provider.name_zh, it.program.name, ...(it.locs || []).map((l) => l.name)]
   .filter(Boolean).join(' ').toLowerCase();
 
-function card(it) {
+// ---------- results: one card per organisation, sessions inside
+
+// traffic light per session: dated and official → green, dated but aggregator/agent only → yellow, undated → gray
+const lightOf = (it) => (it.group === 'estimated' ? 'gray' : SOLID.has(it.session.confidence) ? 'green' : 'yellow');
+const LIGHT = { green: ['🟢', '官方日期', '可信度高或中'], yellow: ['🟡', '要先問', '只有聚合站或代理商寫'], gray: ['⚪', '推測', '2027 日期未公布，依往年'] };
+const LIGHT_RANK = { green: 0, yellow: 1, gray: 2 };
+const shownLights = new Set(['green', 'yellow']);
+let sortBy = 'rec';
+let lastR = null;
+// one chip / card per provider (branches, intakes, programs); agent packages group on the school they
+// sell, because two agents often sell the same school
+const keyOf = (it) => (it.provider.type === 'agent_package' && it.session.location_id ? `loc:${it.session.location_id}` : `prov:${it.provider.id}`);
+// per-child weekly price in TWD, for sorting and the big number on cards
+const weekTWD = (it) => { const v = perWeekEquiv(it.session.price, it.span); return v == null ? null : toTWD(v, it.session.price.currency, db.fx); };
+const minOf = (xs) => { const v = xs.filter((x) => x != null); return v.length ? Math.min(...v) : null; };
+const startOf = (it) => it.span?.start || it.past?.find((x) => x.start_date)?.start_date || '9999';
+
+function shortDates(it) {
+  if (it.group === 'estimated') {
+    const p0 = it.past?.find((x) => x.start_date && x.end_date);
+    return p0 ? `往年 ${md(p0.start_date)}–${md(p0.end_date)}` : '日期未公布';
+  }
+  if (it.intakes) return `${it.intakes.length} 個開課日，${md(it.intakes[0].span.start)} 起`;
+  return it.span ? `${md(it.span.start)}–${md(it.span.end)}` : '日期未公布';
+}
+
+// the full facts of one session, shown when its row opens
+function sessionBody(it) {
   const p = it.program;
   const s = it.session;
-  const id = cardId(it);
-  lastCards.set(id, it);
   const nKids = it.kids.filter((k) => k.fit !== 'no').length;
   const hours = p.hours?.start ? `${esc(p.hours.start)}–${esc(p.hours.end || '?')}${p.hours.days ? `，${esc(p.hours.days)}` : ''}` : '未公布';
   const lunch = p.includes?.lunch === true ? '含午餐' : p.includes?.lunch === false ? '不含午餐' : '午餐未公布';
-  const age = `${p.age_min ?? '?'}–${p.age_max ?? '?'} 歲`;
-  return `<article class="card ${it.group}" id="${id}">
-    <div class="card-h"><div><h3>${esc(p.name)}</h3><div class="prov">${esc(it.provider.name_en)}${it.provider.name_zh ? `・${esc(it.provider.name_zh)}` : ''}${venueNote(it)}</div></div>
-      ${it.group === 'unknown' ? '' : `<label class="cmp-box"><input type="checkbox" data-cmp="${id}" ${picked.has(id) ? 'checked' : ''}>選取</label>`}</div>
-    <div class="badges">${citiesOf(it).map((c) => `<span class="badge city ${HOME_ZH[country] && c !== HOME_ZH[country] ? 'away' : ''}">${esc(c)}</span>`).join('')}${confBadge(s.confidence)}<span class="badge ${it.group === 'estimated' ? 'est' : ''}">${STATUS[s.date_status]}</span>
-      ${langBadge(p.language_of_instruction)}<span class="badge">${FORMATS[p.format] || esc(p.format)}</span>${p.category.slice(0, 3).map((c) => `<span class="badge cat">${CAT_IC[c] ? CAT_IC[c] + ' ' : ''}${CATEGORIES[c] || esc(c)}</span>`).join('')}</div>
+  return `<div class="badges">${confBadge(s.confidence)}<span class="badge ${it.group === 'estimated' ? 'est' : ''}">${STATUS[s.date_status]}</span>${langBadge(p.language_of_instruction)}</div>
     <dl class="facts">
       <dt>📅 日期</dt><dd>${datesLine(it)}</dd>
       <dt>📍 地點</dt><dd>${locLine(it.locs)}</dd>
-      <dt>🧒 年齡</dt><dd>${age}<br>${kidsLine(it)}</dd>
+      <dt>🧒 年齡</dt><dd>${p.age_min ?? '?'}–${p.age_max ?? '?'} 歲<br>${kidsLine(it)}</dd>
       <dt>⏰ 時間</dt><dd>${hours}，${lunch}</dd>
       <dt>💰 價格</dt><dd class="price">${priceLine(s, nKids)}</dd>
       <dt>⭐ 評價</dt><dd class="rev">${reviewSummary(reviewsOf(it))}</dd>
     </dl>
     ${it.warnings?.length ? `<ul class="warns">${it.warnings.map((w) => `<li class="w-${w.code}">${esc(w.text)}</li>`).join('')}</ul>` : ''}
-    ${detailsBlock(it)}
+    ${detailsBlock(it)}`;
+}
+
+function sessionRow(it, open) {
+  const id = cardId(it);
+  lastCards.set(id, it);
+  const l = lightOf(it);
+  const w = weekTWD(it);
+  const place = it.locs[0] ? `${esc(it.locs[0].name)}${citiesOf(it)[0] && !HOME[country].includes(it.locs[0].city) ? `・${esc(citiesOf(it)[0])}` : ''}` : '地點未公布';
+  return `<div class="srow l-${l}" id="${id}"><details ${open ? 'open' : ''}><summary>
+      <span class="s-l" title="${LIGHT[l][1]}">${LIGHT[l][0]}</span><span class="s-d">${shortDates(it)}</span>
+      <span class="s-p">${place}${it.programs > 1 ? `<br><small>${esc(it.program.name)}</small>` : ''}</span><span class="s-w">${w != null ? `NT$${fmtN(w)}` : ''}</span></summary>
+      <div class="s-body">${sessionBody(it)}</div></details>
+    ${it.group === 'unknown' ? '' : `<label class="cmp-box"><input type="checkbox" data-cmp="${id}" ${picked.has(id) ? 'checked' : ''}>選取</label>`}</div>`;
+}
+
+function orgCard(items) {
+  const it0 = items[0];
+  const p = it0.program;
+  const agent = it0.provider.type === 'agent_package';
+  const progNames = [...new Set(items.map((x) => x.program.name))];
+  for (const x of items) x.programs = progNames.length;
+  const title = agent ? it0.locs[0]?.name || it0.program.name : `${it0.provider.name_en}${it0.provider.name_zh ? `・${it0.provider.name_zh}` : ''}`;
+  const sub = agent ? `${esc(it0.program.name)}<br>代理：${esc(it0.provider.name_en)}` : progNames.slice(0, 2).map(esc).join('／') + (progNames.length > 2 ? ` 等 ${progNames.length} 個課程` : '');
+  const cities = [...new Set(items.flatMap(citiesOf))];
+  const cat = p.category[0];
+  const prices = items.map(weekTWD);
+  const low = minOf(prices);
+  const varies = low != null && (prices.some((x) => x !== low) || items.some((x) => x.session.price?.from));
+  const kidFitAll = it0.kids.map((k, i) => {
+    const f = items.map((x) => x.kids[i]?.fit);
+    const v = f.every((x) => x === 'yes') ? 'yes' : f.every((x) => x === 'no') ? 'no' : 'maybe';
+    return `<span class="kf ${v}" title="${esc(k.name)}（${k.age} 歲）">${kidAv(i)}${{ yes: '✓', no: '✗', maybe: '?' }[v]}</span>`;
+  }).join('');
+  const best = lightOf(it0);
+  const revs = reviewsOf(it0).filter((x) => x.rating != null);
+  const rate = revs.length ? Math.max(...revs.map((x) => x.rating)) : null;
+  const nWarn = new Set(items.flatMap((x) => (x.warnings || []).map((w) => w.text))).size;
+  const groups = new Set(items.map((x) => x.group));
+  const fmt = new Set(items.map((x) => FORMATS[x.program.format]).filter(Boolean));
+  const tags = [groups.has('full') ? '<span class="tag in">整段在區間內</span>' : groups.has('partial') ? '<span class="tag part">部分週次在區間內</span>' : '',
+    p.includes?.lunch === true ? '<span class="tag">🍱 含午餐</span>' : '', ...[...fmt].map((f) => `<span class="tag">${f}</span>`),
+    langBadge(p.language_of_instruction),
+    ...cities.map((c) => `<span class="tag city ${HOME_ZH[country] && c !== HOME_ZH[country] ? 'away' : ''}">📍${esc(c)}</span>`)].join('');
+  return `<article class="card org c-${CAT_COLOR[cat] || 'x'}">
+    <div class="org-top"><span class="org-ic">${CAT_IC[cat] || '🎒'}</span><span class="pill p-${best}">${LIGHT[best][0]} ${LIGHT[best][1]}</span></div>
+    <div class="org-body">
+      <h3>${esc(title)}</h3><div class="prov">${sub}</div>
+      <div class="big3">
+        <div><small>日期</small><b>${items.length === 1 ? shortDates(it0) : `${items.length} 個梯次`}</b></div>
+        <div><small>每週每人</small><b>${low != null ? `NT$${fmtN(low)}${varies ? '<i>起</i>' : ''}` : '未公布'}</b></div>
+        <div><small>孩子</small><b>${kidFitAll}</b></div>
+      </div>
+      <div class="tags">${tags}</div>
+      <div class="org-meta">${nWarn ? `<span class="warnn">⚠ ${nWarn} 個提醒，展開看</span>` : '<span></span>'}${rate ? `<span>⭐ ${rate}</span>` : '<span class="mut">沒有評分</span>'}</div>
+      <div class="sessions">${items.map((x) => sessionRow(x, false)).join('')}</div>
+    </div>
   </article>`;
+}
+
+function renderResults() {
+  const r = lastR;
+  if (!r) return;
+  const pool = [...r.full, ...r.partial, ...r.estimated];
+  const n = { green: 0, yellow: 0, gray: 0 };
+  for (const it of pool) n[lightOf(it)]++;
+  const orgs = new Map();
+  for (const it of pool) {
+    if (!shownLights.has(lightOf(it))) continue;
+    const k = keyOf(it);
+    if (!orgs.has(k)) orgs.set(k, []);
+    orgs.get(k).push(it);
+  }
+  const list = [...orgs.values()].map((items) => items.sort((a, b) => LIGHT_RANK[lightOf(a)] - LIGHT_RANK[lightOf(b)] || awayRank(a) - awayRank(b) || startOf(a).localeCompare(startOf(b))));
+  const price = (items) => minOf(items.map(weekTWD)) ?? 1e12;
+  const cmp = {
+    rec: (a, b) => LIGHT_RANK[lightOf(a[0])] - LIGHT_RANK[lightOf(b[0])] || Math.min(...a.map(awayRank)) - Math.min(...b.map(awayRank)) || price(a) - price(b),
+    price: (a, b) => price(a) - price(b),
+    date: (a, b) => startOf(a[0]).localeCompare(startOf(b[0])),
+  }[sortBy];
+  list.sort(cmp);
+  lastCards = new Map();
+  $('#bar').innerHTML = `<div class="lights">${Object.entries(LIGHT).map(([k, [ic, t, d]]) =>
+    `<button type="button" class="light l-${k} ${shownLights.has(k) ? 'on' : ''}" data-light="${k}" aria-pressed="${shownLights.has(k)}" title="${d}"><span>${ic} ${t}</span><b>${n[k]}</b></button>`).join('')}</div>
+    <label class="sort">排序<select id="sort">${[['rec', '推薦'], ['price', '價格低到高'], ['date', '日期早到晚']].map(([k, v]) => `<option value="${k}" ${k === sortBy ? 'selected' : ''}>${v}</option>`).join('')}</select></label>`;
+  const nSess = list.reduce((s, x) => s + x.length, 0);
+  $('#results').innerHTML = `<p class="pick-hint">${list.length} 個機構、${nSess} 個梯次。每張卡下方一行是一個梯次，點開看地址、時間、價格明細和來源；勾「選取」可以估算費用，或並排比較 2–4 個。</p>
+    <div class="cards">${list.map(orgCard).join('') || '<p class="group-note">勾選的燈號裡沒有梯次，點上面的燈號打開其他類。</p>'}</div>` +
+    (r.unknown.length ? `<details class="more unknown-list"><summary>還有 ${r.unknown.length} 筆這段期間查不到日期（點開）</summary><ul>${homeFirst(r.unknown).map((x) => {
+      const id = cardId(x);
+      lastCards.set(id, x);
+      const pr = x.session.price;
+      return `<li>${esc(x.provider.name_en)}：${esc(x.program.name)}${x.locs?.[0] ? `（${esc(x.locs[0].name)}，${esc(cityZh(x.locs[0].city))}）` : ''}${pr?.amount != null ? `，${money(pr.currency, pr.amount)}${pr.from ? ' 起' : ''}／${BASIS[pr.basis] || '?'}` : ''}　<a href="${esc(x.session.source_url)}" target="_blank" rel="noopener">查證頁</a><label class="cmp-box"><input type="checkbox" data-cmp="${id}" ${picked.has(id) ? 'checked' : ''}>選取</label></li>`;
+    }).join('')}</ul></details>` : '');
+  updateTray();
+}
+
+// jump from the week view to a session row: turn its light on if needed, open it, scroll to it
+function openSession(id) {
+  let el = document.getElementById(id);
+  if (!el && lastR) {
+    const it = [...lastR.full, ...lastR.partial, ...lastR.estimated].find((x) => cardId(x) === id);
+    if (it) { shownLights.add(lightOf(it)); renderResults(); el = document.getElementById(id); }
+  }
+  if (!el) return;
+  el.querySelector('details').open = true;
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  el.classList.remove('flash');
+  void el.offsetWidth;
+  el.classList.add('flash');
 }
 
 function weekTable(r) {
   const short = (t) => t.replace(/\s*\(.*\)|（.*）/g, '').trim();
   // long names end on a whole word, without a dangling "for" or "of"
-  const clip = (t) => (t.length <= 40 ? t : `${t.slice(0, t.lastIndexOf(' ', 40)).replace(/\s+(for|of|and|the|&|at|in)$/i, '')}…`);
+  const clip = (t) => (t.length <= 30 ? t : `${t.slice(0, t.lastIndexOf(' ', 30)).replace(/\s+(for|of|and|the|&|at|in)$/i, '')}…`);
   const uniq = (list) => [...new Map(list.map((x) => [cardId(x), x])).values()];
-  // one chip per provider (branches, intakes, programs); agent packages merge on the school they
-  // sell, because two agents often sell the same school
-  const keyOf = (it) => (it.provider.type === 'agent_package' && it.session.location_id ? `loc:${it.session.location_id}` : `prov:${it.provider.id}`);
   const merge = (list, skip = new Set()) => {
     const g = new Map();
     for (const it of uniq(list)) {
@@ -418,7 +549,8 @@ function weekTable(r) {
       if (!g.has(k)) g.set(k, []);
       g.get(k).push(it);
     }
-    return [...g].sort(([, a], [, b]) => Math.min(...a.map(awayRank)) - Math.min(...b.map(awayRank)));
+    const price = ([, xs]) => minOf(xs.map(weekTWD)) ?? 1e12;
+    return [...g].sort((a, b) => Math.min(...a[1].map(awayRank)) - Math.min(...b[1].map(awayRank)) || price(a) - price(b));
   };
   const chip = ([k, items], weak) => {
     const it = items[0];
@@ -426,76 +558,56 @@ function weekTable(r) {
     const cities = [...new Set(items.flatMap(citiesOf))];
     if (cities.length === 1 && cities[0] !== HOME_ZH[country]) t += `・${cities[0]}`;
     if (items.length > 1) t += ` ×${items.length}`;
+    const w = minOf(items.map(weekTWD));
     const tip = items.map((x) => `${x.provider.name_en}：${x.program.name}（${x.locs[0]?.name || '地點未公布'}，${citiesOf(x).join('、') || '城市未知'}）`).join('\n');
-    return `<a class="opt ${weak ? 'weak' : ''}" href="#${cardId(it)}" title="${esc(tip)}">${esc(t)}</a>`;
+    return `<a class="opt ${weak ? 'weak' : ''}" href="#${cardId(it)}" data-go="${cardId(it)}" title="${esc(tip)}"><span>${esc(t)}</span>${w != null ? `<small>NT$${fmtN(w)}/週</small>` : ''}</a>`;
   };
-  const head = `<tr><th>週</th>${r.weeks[0]?.perKid.map((k, i) => `<th>${kidDot(i)}${esc(k.kid.name)}</th>`).join('') || ''}</tr>`;
-  const rows = r.weeks.map((w) => `<tr><td class="wk">${fmtD(w.mon)}～${fmtD(w.fri)}${w.holidays.map((h) =>
-    `<span class="hol">${fmtD(h.date_start)} ${esc(h.name_zh || h.name_en)}${h.status === 'estimated' ? '（推算）' : ''}</span>`).join('')}</td>${w.perKid.map((k, i) => {
+  const head = `<tr><th>週</th>${r.weeks[0]?.perKid.map((k, i) => `<th>${kidAv(i)} ${esc(k.kid.name)}</th>`).join('') || ''}</tr>`;
+  const rows = r.weeks.map((w) => `<tr><td class="wk"><b>${fmtD(w.mon)}</b><span class="wk-to">～${fmtD(w.fri)}</span>${w.holidays.map((h) =>
+    `<span class="hol">📌 ${fmtD(h.date_start)} ${esc(h.name_zh || h.name_en)}${h.status === 'estimated' ? '（推算）' : ''}</span>`).join('')}</td>${w.perKid.map((k) => {
     const solid = merge(k.solid);
     const weak = merge(k.weak, new Set(solid.map(([key]) => key)));
-    const more = weak.length ? `<details class="weakmore"><summary>另有 ${weak.length} 個可信度低的選項</summary>${weak.map((g) => chip(g, true)).join('')}</details>` : '';
-    return `<td data-k="${esc(k.kid.name)}" class="kc${i % 5}">${k.gap ? '<span class="gap">空窗</span> ' : ''}${solid.map((g) => chip(g, false)).join('')}${more}</td>`;
+    const more = weak.length ? `<details class="weakmore"><summary>${k.gap ? '' : '另有 '}${weak.length} 個要先問</summary>${weak.map((g) => chip(g, true)).join('')}</details>` : '';
+    return `<td data-k="${esc(k.kid.name)}" class="${k.gap ? 'is-gap' : 'is-ok'}">${k.gap ? '<span class="gap">空窗</span>' : ''}${solid.map((g) => chip(g, false)).join('')}${more}</td>`;
   }).join('')}</tr>`).join('');
-  return `<h2 class="sec-h" id="sec-weeks"><span class="sec-ic">🗓️</span>週視圖<small>每週每位孩子能報哪些營</small></h2>
-    <div class="legend"><span><a class="opt">機構名</a>可信度高或中</span><span><a class="opt weak">機構名</a>可信度低，收在「另有幾個」裡，不算填補空窗</span>
-      <span><span class="gap">空窗</span>這週沒有可信的選項</span><span><b class="hol-key">橘字</b>${COUNTRIES[country]}平日公假</span></div>
-    <p class="group-note">同一機構的分校和梯次、代理商賣的同一所學校，合併成一個標籤：×2 表示有兩個選項，滑鼠移上去看明細，點標籤跳到卡片。${country === 'MY' ? '外地的標籤' : '標籤'}後面加城市。</p>
-    <table class="weeks"><thead>${head}</thead><tbody>${rows}</tbody></table>`;
+  return `<h2 class="sec-h" id="sec-weeks"><span class="sec-ic">🗓️</span>週視圖<small>每週每位孩子能報哪些營，標籤上是每週每人價格，點標籤跳到那一梯</small></h2>
+    <div class="legend"><span><span class="lg ok"></span>有官方日期的營</span><span><span class="lg gap"></span>空窗：這週沒有官方日期的營（「要先問」的不算）</span><span>📌 ${COUNTRIES[country]}平日公假</span></div>
+    <div class="weeks-scroll"><table class="weeks"><thead>${head}</thead><tbody>${rows}</tbody></table></div>
+    <p class="group-note">同一機構的分校和梯次、代理商賣的同一所學校，合併成一個標籤，×2 表示有兩個選項，價格取最低的。${country === 'MY' ? '外地的標籤' : '標籤'}後面加城市。</p>`;
+}
+
+function qSummary(q) {
+  const n = q.kids.length;
+  const cityN = q.cities.length === COUNTRY_CHIPS[q.country]?.length ? '全部城市' : `${q.cities.length} 個城市`;
+  return `<b>${md(q.start)}–${md(q.end)}</b>・${n} 位孩子・${FLAG[q.country]} ${COUNTRIES[q.country]}（${cityN}）`;
 }
 
 function render(q) {
   country = COUNTRIES[q.country] ? q.country : 'MY';
   const sq = toSearchQuery(q);
+  $('#qsum-t').innerHTML = qSummary(q);
   if (!sq.kids.length || !sq.start || !sq.end || sq.start > sq.end) {
     $('#status').textContent = '請填日期（開始不能晚於結束）並至少加一位孩子。';
     return;
   }
   const r = search(db, sq);
-  lastCards = new Map();
   const gapWeeks = r.weeks.filter((w) => w.perKid.some((k) => k.gap)).length;
   $('#status').innerHTML = '';
   const kw = (q.kw || '').toLowerCase();
   if (kw) {
     for (const g of ['full', 'partial', 'estimated', 'unknown']) r[g] = r[g].filter((it) => haystack(it).includes(kw));
     const n = r.full.length + r.partial.length + r.estimated.length + r.unknown.length;
-    $('#status').innerHTML = `名稱篩選「${esc(q.kw)}」：結果只列名稱或上課場地含這個字的梯次，上方統計和週視圖仍是全部。` +
+    $('#status').innerHTML = `名稱篩選「${esc(q.kw)}」：結果只列名稱或上課場地含這個字的梯次，週視圖仍是全部。` +
       (n ? '' : `<br>${elsewhere(kw, sq)}`);
   }
-  const solidOf = (list) => list.filter((it) => SOLID.has(it.session.confidence));
-  const statNote = (list) => `其中 ${solidOf(list).length} 筆可信度高或中`;
-  $('#summary').innerHTML = `<div class="summary">
-    <a class="stat s-full" href="#sec-full"><span class="stat-ic">✅</span><b>${r.full.length}</b><small>有日期、完全在區間內<br>${statNote(r.full)}</small></a>
-    <a class="stat s-partial" href="#sec-partial"><span class="stat-ic">🧩</span><b>${r.partial.length}</b><small>有日期、部分在區間內<br>${statNote(r.partial)}</small></a>
-    <a class="stat s-est" href="#sec-est"><span class="stat-ic">🔮</span><b>${r.estimated.length}</b><small>推測或需詢問</small></a>
-    <a class="stat s-gap ${gapWeeks ? 'bad' : 'ok'}" href="#sec-weeks"><span class="stat-ic">${gapWeeks ? '⚠️' : '🎉'}</span><b>${gapWeeks}</b><small>有孩子空窗的週數</small></a></div>`;
-  const jump = $('#jump'); // absent in a cached older index.html
-  if (jump) jump.hidden = false;
-  if (jump) jump.innerHTML = `${r.weeks.length ? '<a href="#sec-weeks">🗓️ 週視圖</a>' : ''}<a href="#sec-full">✅ 完全在區間內 <b>${r.full.length}</b></a><a href="#sec-partial">🧩 部分在區間內 <b>${r.partial.length}</b></a><a href="#sec-est">🔮 推測 <b>${r.estimated.length}</b></a><a href="#q" class="jump-top">↑ 改條件</a>`;
+  const all = [...r.full, ...r.partial, ...r.estimated];
+  const nOrg = new Set(all.map(keyOf)).size;
+  $('#summary').innerHTML = `<div class="headline"><div><h2>${md(q.start)}–${md(q.end)}，${FLAG[country]} ${COUNTRIES[country]}找到 <em>${all.length}</em> 個梯次</h2>
+    <p>來自 ${nOrg} 個機構。🟢 ${all.filter((x) => lightOf(x) === 'green').length} 個有官方日期、🟡 ${all.filter((x) => lightOf(x) === 'yellow').length} 個要先問、⚪ ${all.filter((x) => lightOf(x) === 'gray').length} 個依往年推測。</p></div>
+    <a class="gapflag ${gapWeeks ? 'bad' : 'ok'}" href="#sec-weeks">${gapWeeks ? `⚠️ ${gapWeeks} 週有孩子空窗` : '🎉 每週都有官方日期的營'}</a></div>`;
   $('#weeks').innerHTML = r.weeks.length ? weekTable(r) : '';
-  const cards = (items) => `<div class="cards">${homeFirst(items).map(card).join('') || '<p class="group-note">沒有符合的梯次。</p>'}</div>`;
-  const head = (key, ic, title, n, note) => `<div class="sec-band b-${key}" id="sec-${key}"><span class="sec-ic">${ic}</span><div><h2>${title}<span class="n">${n}</span></h2><p>${note}</p></div></div>`;
-  const section = (key, ic, title, note, items) => `${head(key, ic, title, items.length, note)}${cards(items)}`;
-  // dated groups: sources the camp stands behind first, aggregator/agent-only after
-  const split = (key, ic, title, note, items) => {
-    const solid = solidOf(items);
-    const weak = items.filter((it) => !solid.includes(it));
-    return `${head(key, ic, title, items.length, note)}
-      ${solid.length ? `<h3 class="subhead">👍 可信度高或中：官方來源，或與官方一致（${solid.length}）</h3>${cards(solid)}` : ''}
-      ${weak.length ? `<h3 class="subhead weak">🔍 可信度低：只有聚合站或代理商寫，或來源互相矛盾（${weak.length}）<small>${solid.length ? '' : '這組沒有官方來源的梯次。'}報名前要向機構確認</small></h3>${cards(weak)}` : ''}
-      ${items.length ? '' : '<p class="group-note">沒有符合的梯次。</p>'}`;
-  };
-  $('#results').innerHTML = `<p class="pick-hint">勾卡片右上角的「選取」，可以估算費用，或並排比較 2–4 個。${country === 'MY' ? '每組裡大吉隆坡的排前面，外地的排後面。' : ''}</p>` +
-    split('full', '✅', '日期已有來源，完全在區間內', '2027（或 2026/27 冬季）的日期有人寫出來了，整個梯次落在你選的日期內。', r.full) +
-    split('partial', '🧩', '日期已有來源，部分在區間內', '日期有人寫出來了，但有一段在你選的日期外；可只報區間內的週次，或跟其他梯次接起來。', r.partial) +
-    section('est', '🔮', '日期未公布，依往年推測', '這些營往年在這一季開過，但 2027 日期還沒公布。卡片上的日期是往年的；標「往年同一季的日期不在你選的日期內」的，去年開在你選的日期外。報名前要問機構。', r.estimated) +
-    (r.unknown.length ? `<details class="more"><summary>還有 ${r.unknown.length} 筆這段期間查不到日期（點開）</summary><ul>${homeFirst(r.unknown).map((x) => {
-      const id = cardId(x);
-      lastCards.set(id, x);
-      const pr = x.session.price;
-      return `<li>${esc(x.provider.name_en)}：${esc(x.program.name)}${x.locs?.[0] ? `（${esc(x.locs[0].name)}，${esc(cityZh(x.locs[0].city))}）` : ''}${pr?.amount != null ? `，${money(pr.currency, pr.amount)}${pr.from ? ' 起' : ''}／${BASIS[pr.basis] || '?'}` : ''}　<a href="${esc(x.session.source_url)}" target="_blank" rel="noopener">查證頁</a><label class="cmp-box"><input type="checkbox" data-cmp="${id}" ${picked.has(id) ? 'checked' : ''}>選取</label></li>`;
-    }).join('')}</ul></details>` : '');
-  updateTray();
+  lastR = r;
+  renderResults();
 }
 
 // where a name shows up when it has nothing in the chosen dates / cities
@@ -830,6 +942,29 @@ async function main() {
     f.start.value = e.target.dataset.a;
     f.end.value = e.target.dataset.b;
     run();
+  });
+  $('#bar').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-light]');
+    if (!b) return;
+    const k = b.dataset.light;
+    if (shownLights.has(k)) shownLights.delete(k); else shownLights.add(k);
+    renderResults();
+  });
+  $('#bar').addEventListener('change', (e) => {
+    if (e.target.id !== 'sort') return;
+    sortBy = e.target.value;
+    renderResults();
+  });
+  $('#weeks').addEventListener('click', (e) => {
+    const a = e.target.closest('[data-go]');
+    if (!a) return;
+    e.preventDefault();
+    openSession(a.dataset.go);
+  });
+  $('#qsum').addEventListener('click', () => {
+    const side = $('#side');
+    side.classList.toggle('collapsed');
+    $('#qsum').setAttribute('aria-expanded', String(!side.classList.contains('collapsed')));
   });
   $('#results').addEventListener('change', (e) => {
     const id = e.target.dataset?.cmp;
