@@ -305,7 +305,7 @@ function selectedForestOutline(c, u, p, scale) {
   const outline = unitOutlines.get(key); c.save(); c.globalAlpha = .72; c.drawImage(outline, p.x - (width / 2 + 3) * scale, p.y - (height + 2) * scale, outline.width * scale, outline.height * scale); c.restore();
 }
 function resource(c, e, p, scale) {
-  c.save(); c.translate(p.x, p.y); c.scale(scale, scale); if (!e.visible) c.globalAlpha = .32;
+  c.save(); c.translate(p.x, p.y); c.scale(scale, scale); if (!e.visible) c.globalAlpha = .9;
   if (e.t === 'forest') {
     tree(c, 0, 0, e.v);
   } else if (e.t === 'wild') {
@@ -422,6 +422,22 @@ export class Renderer {
     }
     return best;
   }
+  // Enemy buildings stay on the map as last seen while their tile is explored but out of sight.
+  updateGhosts(world) {
+    const n = world.map.size, ghosts = this.ghosts?.world === world.map ? this.ghosts : (this.ghosts = { world: world.map, seen: new Map() });
+    const alive = new Set();
+    for (const b of world.buildings) if (b.team !== 0 && b.hp > 0) {
+      alive.add(b.id);
+      if (world.isVisible(b)) ghosts.seen.set(b.id, { id: b.id, kind: 'building', ghost: true, type: b.type, team: b.team, x: b.x, y: b.y, hp: b.hp, maxHp: b.maxHp, progress: b.progress });
+    }
+    const out = [];
+    for (const [id, g] of ghosts.seen) {
+      const i = clamp(Math.round(g.y), 0, n - 1) * n + clamp(Math.round(g.x), 0, n - 1);
+      if (world.visible[i]) { if (!alive.has(id)) ghosts.seen.delete(id); continue; }
+      out.push(g);
+    }
+    return out;
+  }
   commandHit(x,y,world,fog,selected) {
     const target=this.hit(x,y,world,fog);
     return target?.kind==='unit'&&target.team===0&&selected.has(target.id)?this.hit(x,y,world,fog,true,true)||target:target;
@@ -535,7 +551,8 @@ export class Renderer {
     }
     const placedHeroes = ui.mode === 'map' ? editorHeroes(project, world) : null;
     const mapEntities = placedHeroes ? [...editorBuildings(project,world),...placedHeroes] : null;
-    const entities = (mapEntities ?? [...world.buildings, ...world.units]).filter(e => { if (e.hp <= 0 || e.garrison || fog && !world.isVisible(e)) return false; const p = this.screen(e.x, e.y); return p.x >= -marginX && p.x <= this.width + marginX && p.y >= -90 && p.y <= this.height + marginY; });
+    const ghosts = fog && !overview ? this.updateGhosts(world) : [];
+    const entities = (mapEntities ?? [...world.buildings, ...world.units, ...ghosts]).filter(e => { if (e.hp <= 0 || e.garrison || fog && !e.ghost && !world.isVisible(e)) return false; const p = this.screen(e.x, e.y); return p.x >= -marginX && p.x <= this.width + marginX && p.y >= -90 && p.y <= this.height + marginY; });
     if (!overview) for (const e of decorations) resourceGround(c, e, this.screen(e.x, e.y), this.zoom);
     if (!overview) for (const e of entities) if (e.kind === 'building') buildingGround(c, e, this.screen(e.x, e.y), this.zoom);
     const corpses = ui.mode === 'map' ? [] : (world.corpses ?? []).filter(e => !fog || world.isVisible(e)).map(e => ({ ...e, corpse: true }));
