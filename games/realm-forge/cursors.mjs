@@ -1,4 +1,4 @@
-import { BUILDINGS, RESOURCE } from './core.mjs?v=20261009l';
+import { BUILDINGS, RESOURCE } from './core.mjs?v=20261013a';
 
 // Hand-drawn context cursors: a small arrow (hotspot 2,2) plus a glyph in the lower-right corner.
 const ARROW = '<path d="M2 2V20L6.6 15.8L9.8 22.6L13 21.1L9.9 14.4H16Z" fill="#f4f1e4" stroke="#1b2a22" stroke-width="1.4" stroke-linejoin="round"/>';

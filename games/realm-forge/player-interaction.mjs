@@ -1,4 +1,4 @@
-import { BUILDINGS, RESOURCE } from './core.mjs?v=20261009l';
+import { BUILDINGS, RESOURCE } from './core.mjs?v=20261013a';
 
 export function selectionAfterClick(world,current,incoming,{append=false,toggle=true}={}) {
   const valid=id=>{const e=world.entity(id);return e&&e.hp>0&&!e.garrison;};

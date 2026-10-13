@@ -1,6 +1,6 @@
-import { BUILDINGS, RESOURCE } from './core.mjs?v=20261009l';
-import { directAICombat } from './ai-combat.mjs?v=20261009l';
-import { strategicOrders } from './ai-strategy.mjs?v=20261009l';
+import { BUILDINGS, RESOURCE } from './core.mjs?v=20261013a';
+import { directAICombat } from './ai-combat.mjs?v=20261013a';
+import { strategicOrders } from './ai-strategy.mjs?v=20261013a';
 
 // Decision plans of the fair levels. Legacy levels have no plan and keep the original behaviour.
 // ageUpWorkers / ageUpAt are indexed by the current age (dark, feudal, castle): the AI clicks the next age

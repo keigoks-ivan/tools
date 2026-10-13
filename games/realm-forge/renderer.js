@@ -1,10 +1,10 @@
-import { clamp, tileType, BUILDINGS, buildingBounds, heroPlacementKey, buildingPlacementKey } from './core.mjs?v=20261009l';
-import { TEAM_COLORS, TEAM_LIGHT, imageFor, unitArt, animationArt, worldArt, drawSprite, recoloredArt } from './art.mjs?v=20261009l';
-import { animationPose, facingDirection } from './motion.mjs?v=20261009l';
-import { gaitBob, drawWalkingSprite } from './gait.mjs?v=20261009l';
-import { commandWaypoints } from './command-feedback.mjs?v=20261009l';
-import { steppedZoom } from './camera-steps.mjs?v=20261009l';
-import { FxState, ARROW_FLIGHT, ROCK_FLIGHT, STUCK_LIFE, corpsePose, ruinAlpha, damageProfile, fireSpots } from './fx.mjs?v=20261009l';
+import { clamp, tileType, BUILDINGS, buildingBounds, heroPlacementKey, buildingPlacementKey } from './core.mjs?v=20261013a';
+import { TEAM_COLORS, TEAM_LIGHT, imageFor, unitArt, animationArt, worldArt, drawSprite, recoloredArt } from './art.mjs?v=20261013a';
+import { animationPose, facingDirection } from './motion.mjs?v=20261013a';
+import { gaitBob, drawWalkingSprite } from './gait.mjs?v=20261013a';
+import { commandWaypoints } from './command-feedback.mjs?v=20261013a';
+import { steppedZoom } from './camera-steps.mjs?v=20261013a';
+import { FxState, ARROW_FLIGHT, ROCK_FLIGHT, STUCK_LIFE, corpsePose, ruinAlpha, damageProfile, fireSpots } from './fx.mjs?v=20261013a';
 export function wheelZoomFactor(deltaY, deltaMode = 0, height = 600) {
   const pixels = deltaY * (deltaMode === 1 ? 16 : deltaMode === 2 ? height : 1);
   return Math.exp(-clamp(pixels, -80, 80) * .001);

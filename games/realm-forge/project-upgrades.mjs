@@ -1,6 +1,6 @@
-import { clone, generateMap, generateStandardMap, defaultProject, newProject, validateProject, tileType, setTile, enrichMapResources } from './core.mjs?v=20261009l';
-import { CIV_UNITS } from './civilization.mjs?v=20261009l';
-import { LEGACY_UNIT_STATS } from './balance.mjs?v=20261009l';
+import { clone, generateMap, generateStandardMap, defaultProject, newProject, validateProject, tileType, setTile, enrichMapResources } from './core.mjs?v=20261013a';
+import { CIV_UNITS } from './civilization.mjs?v=20261013a';
+import { LEGACY_UNIT_STATS } from './balance.mjs?v=20261013a';
 
 const WALKABLE = new Set(['grass', 'road', 'sand']);
 const INITIAL_RESOURCES = [[-5, 0, 'forest'], [-5, 1, 'forest'], [-5, 2, 'forest'], [0, 6, 'food'], [1, 6, 'food'], [6, 0, 'gold'], [6, 1, 'stone']];

@@ -3,9 +3,9 @@
 // recordings have decoded, if a file fails to load, and for sounds with no recording.
 // Policy lives in audio-mixer.mjs, the world diffing in audio-events.mjs, the sample table
 // in audio-samples.mjs; this file only knows how to make noise.
-import { createMixer } from './audio-mixer.mjs?v=20261009l';
-import { unitClass } from './audio-events.mjs?v=20261009l';
-import { sampleIds, allSampleIds, SAMPLE_EXTENSION } from './audio-samples.mjs?v=20261009l';
+import { createMixer } from './audio-mixer.mjs?v=20261013a';
+import { unitClass } from './audio-events.mjs?v=20261013a';
+import { sampleIds, allSampleIds, SAMPLE_EXTENSION } from './audio-samples.mjs?v=20261013a';
 
 export const AUDIO_STORAGE = 'realm-forge-audio-v1';
 export const DEFAULT_SETTINGS = { volume: .7, muted: false, ambient: true };

@@ -1,9 +1,9 @@
-import { CIV_UNITS, TECHNOLOGIES } from './civilization.mjs?v=20261009l';
-import { BUILDING_BALANCE } from './balance.mjs?v=20261009l';
-import { createRouteSearch } from './navigation.mjs?v=20261009l';
-import { smoothPath, segmentClear, pathGoalTail } from './motion.mjs?v=20261009l';
-import { AI_PROFILES, updateAI, initAIKnowledge } from './ai.mjs?v=20261009l';
-import { separateUnits, unitRadius } from './crowd.mjs?v=20261009l';
+import { CIV_UNITS, TECHNOLOGIES } from './civilization.mjs?v=20261013a';
+import { BUILDING_BALANCE } from './balance.mjs?v=20261013a';
+import { createRouteSearch } from './navigation.mjs?v=20261013a';
+import { smoothPath, segmentClear, pathGoalTail } from './motion.mjs?v=20261013a';
+import { AI_PROFILES, updateAI, initAIKnowledge } from './ai.mjs?v=20261013a';
+import { separateUnits, unitRadius } from './crowd.mjs?v=20261013a';
 export const clone = value => JSON.parse(JSON.stringify(value));
 export const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 export const RICH_RESOURCE_AMOUNTS = { wood: 5000, food: 10000, gold: 20000, stone: 20000 };

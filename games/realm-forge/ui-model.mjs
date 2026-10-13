@@ -1,7 +1,7 @@
-import { BUILDINGS, RESOURCE, buildingDistance, rulePreset, STANDARD_MAP_SIZE } from './core.mjs?v=20261009l';
-import { AI_LEVELS } from './ai.mjs?v=20261009l';
-import { CIVILIZATION, TECHNOLOGIES } from './civilization.mjs?v=20261009l';
-import { orderHint } from './controls.mjs?v=20261009l';
+import { BUILDINGS, RESOURCE, buildingDistance, rulePreset, STANDARD_MAP_SIZE } from './core.mjs?v=20261013a';
+import { AI_LEVELS } from './ai.mjs?v=20261013a';
+import { CIVILIZATION, TECHNOLOGIES } from './civilization.mjs?v=20261013a';
+import { orderHint } from './controls.mjs?v=20261013a';
 
 export function combatOrderHint(world,unit) {
   if(unit.garrison||unit.failed||unit.packLeft>0||!unit.blueprint)return orderHint(unit);

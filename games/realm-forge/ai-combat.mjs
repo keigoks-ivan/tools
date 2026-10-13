@@ -1,4 +1,4 @@
-import { BUILDINGS, buildingDistance } from './core.mjs?v=20261009l';
+import { BUILDINGS, buildingDistance } from './core.mjs?v=20261013a';
 
 const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 const fighter = e => e.kind === 'unit' && !['worker', 'trader', 'healer'].includes(e.blueprint.role);
