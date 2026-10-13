@@ -7,9 +7,9 @@ import { strategicOrders } from './ai-strategy.mjs?v=20261009l';
 // only with that many villagers and not before that game time. armyAfterWorkers holds soldier production
 // back until the economy stands; attackArmy is the fighter count that launches an attack.
 const PLAN = {
-  easy: { think: 3, workers: .6, ageUpWorkers: [22, 30, 36], ageUpAt: [780, 1500, 2400], armyAfterWorkers: 24, darkArmy: 4, attackArmy: 18, attackAge: 1, retreatArmy: 6, tactics: false },
-  standard: { think: 1.5, workers: 1, ageUpWorkers: [14, 30, 45], ageUpAt: [0, 900, 1500], armyAfterWorkers: 14, darkArmy: 6, attackArmy: 10, attackAge: 1, retreatArmy: 5, tactics: true },
-  challenging: { think: 1.5, workers: 1, ageUpWorkers: [14, 26, 40], ageUpAt: [0, 780, 1200], armyAfterWorkers: 12, darkArmy: 10, attackArmy: 8, attackAge: 1, retreatArmy: 4, tactics: true },
+  easy: { think: 3, workers: .6, ageUpWorkers: [22, 32, 36], ageUpAt: [780, 1500, 2400], armyAfterWorkers: 24, darkArmy: 4, attackArmy: 18, attackAge: 1, retreatArmy: 6, tactics: false },
+  standard: { think: 1.5, workers: 1, ageUpWorkers: [20, 50, 60], ageUpAt: [0, 1100, 1700], armyAfterWorkers: 20, darkArmy: 6, attackArmy: 10, attackAge: 1, retreatArmy: 5, tactics: true },
+  challenging: { think: 1.5, workers: 1, ageUpWorkers: [17, 44, 56], ageUpAt: [0, 1000, 1500], armyAfterWorkers: 16, darkArmy: 10, attackArmy: 8, attackAge: 1, retreatArmy: 4, tactics: true },
 };
 // Fair levels (easy, standard, challenging) never exceed 1x. insane and the three legacy levels multiply rates: they cheat.
 export const AI_PROFILES = {
@@ -192,7 +192,8 @@ export function updateAI(w, team) {
   // Fair levels: next age click, and the food it needs. The AI waits for villagers and game time, then saves up.
   const ageTech = plan && ['feudal', 'castle-age', 'imperial'][age] && w.availableTech(team, 'town').find(t => t.id === ['feudal', 'castle-age', 'imperial'][age]);
   const ageDue = Boolean(ageTech) && workers.length >= plan.ageUpWorkers[age] && w.time >= plan.ageUpAt[age] && w.ageRequirements(team, ageTech.id);
-  const saving = ageDue && !w.canPay(team, ageTech.cost);
+  // Held from the moment the age is due until the research starts, so the food is never spent on villagers in between.
+  const saving = ageDue;
   const holdArmy = Boolean(plan) && !threats.length && (workers.length < plan.armyAfterWorkers || saving || age === 0 && plannedArmy >= plan.darkArmy);
   // Recover a damaged army before purchasing more civilians. Startup villagers
   // can still grow the economy until production and a substantial population exist.
@@ -268,7 +269,7 @@ export function updateAI(w, team) {
           if (room && spare < Math.min(20, 5 + Math.floor(w.population(team) / 8))) priorities.push('house');
           if (age >= 1 && !count('barracks')) priorities.push('barracks');
           // A second town centre doubles villager output; it comes before the cheaper buildings so they cannot starve it.
-          if (age >= 1 && workers.length >= (count('town') < 2 ? 14 : 35) && count('town') < Math.min(3, Math.ceil(workerLimit / 24))) priorities.push('town');
+          if (workers.length >= (count('town') < 2 ? 12 : 35) && (age >= 1 || count('town') < 2) && count('town') < Math.min(3, Math.ceil(workerLimit / 24))) priorities.push('town');
           for (const type of ['mill', 'lumber']) if (!count(type)) priorities.push(type);
           // Berries out of reach of any mill: a second mill is cheaper than farms (no wood for reseeding).
           if (count('mill') && count('mill') < 2 && !usableResource(w, team, origin, 'food')) { const patch = campSite(w, team, origin, 'food'); if (patch && distance(patch, origin) < 30) priorities.push('mill'); }
@@ -335,18 +336,34 @@ function directExplorers(w, team, soldiers, known, threats, origin) {
   while (current.length < slots && riders.length) current.push(riders.shift());
   if (!current.length && !baseKnown) { const foot = soldiers.filter(u => u.blueprint.role !== 'healer' && u.blueprint.family !== 'siege'); if (foot.length >= 4) current.push(foot[0]); }
   for (const u of current.splice(slots)) { delete u.aiExplorer; u.stance = 'aggressive'; }
-  const n = w.map.size;
-  for (const u of current) {
+  const n = w.map.size, edge = v => clamp(Math.round(v), 4, n - 5);
+  current.forEach((u, index) => {
     u.aiExplorer = true; u.stance = 'passive';
-    if (u.order && !u.failed && u.order.type === 'move') continue;
-    // Visit the best coarse grid point nobody has seen yet, so the sweep covers the map instead of hugging an edge.
-    let goal = null, best = Infinity;
-    for (let y = 6; y < n - 3; y += 10) for (let x = 6; x < n - 3; x += 10) {
-      if (w.aiExplored[y * n + x]) continue;
-      const g = { x, y }, d = distance(u, g), score = d - .6 * distance(origin, g) + current.reduce((sum, o) => o === u ? sum : sum - .5 * Math.min(40, distance(o.order?.type === 'move' ? o.order : o, g)), 0);
-      if (d > 4 && score < best && !w.blocked(x, y)) { best = score; goal = g; }
+    if (u.order && !u.failed && u.order.type === 'move') return;
+    // Route: first a loop around home (its own resources and the nearby ground), then the map centre and the far side,
+    // which is where a rival usually starts on a symmetric map; after that the nearest unseen ground.
+    if (!u.aiRoute) {
+      u.aiRoute = [];
+      if (index === 0) for (let k = 0; k < 6; k++) { const a = Math.PI * 2 * k / 6; u.aiRoute.push({ x: edge(origin.x + Math.cos(a) * 30), y: edge(origin.y + Math.sin(a) * 30) }); }
+      const centre = { x: n / 2, y: n / 2 }, far = { x: edge(n - origin.x), y: edge(n - origin.y) };
+      u.aiRoute.push(...(index === 0 ? [centre, far] : [far, { x: edge(n - origin.x), y: edge(origin.y) }, { x: edge(origin.x), y: edge(n - origin.y) }]));
+      if (index === 0) { // start the loop at the point nearest to where the scout stands
+        const ring = u.aiRoute.splice(0, 6), start = ring.reduce((best, p, i) => distance(u, p) < distance(u, ring[best]) ? i : best, 0);
+        u.aiRoute.unshift(...ring.slice(start), ...ring.slice(0, start));
+      }
+    }
+    let goal = null;
+    while (u.aiRoute.length && !goal) { const p = u.aiRoute.shift(), spot = w.nearestOpen(p); if (spot && !w.aiExplored[spot.y * n + spot.x]) goal = spot; }
+    if (!goal) {
+      // Visit the best coarse grid point nobody has seen yet, so the sweep covers the map instead of hugging an edge.
+      let best = Infinity;
+      for (let y = 6; y < n - 3; y += 10) for (let x = 6; x < n - 3; x += 10) {
+        if (w.aiExplored[y * n + x]) continue;
+        const g = { x, y }, d = distance(u, g), score = d - .6 * distance(origin, g) + current.reduce((sum, o) => o === u ? sum : sum - .5 * Math.min(40, distance(o.order?.type === 'move' ? o.order : o, g)), 0);
+        if (d > 4 && score < best && !w.blocked(x, y)) { best = score; goal = g; }
+      }
     }
     if (goal) w.command([u.id], { type: 'move', ...goal });
-  }
+  });
   return current;
 }

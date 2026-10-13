@@ -208,18 +208,19 @@ test('standard AI develops: houses, farms, villagers, feudal age, soldiers and a
   const p = newProject(); const w = new World(p);
   const town = w.buildings.find(b => b.team === 0); town.hp = town.maxHp = 1e7;
   const snap = {};
-  for (let i = 0; i < 18 * 600; i++) {
+  for (let i = 0; i < 20 * 600; i++) {
     w.tick(.1);
     if ((i + 1) % 3000 === 0) snap[(i + 1) / 600] = { workers: w.units.filter(u => u.team === 1 && u.blueprint.role === 'worker').length, age: w.age(1) };
   }
   const ai = w.buildings.filter(b => b.team === 1 && b.progress === 1).map(b => b.type), has = t => ai.includes(t);
   assert.ok(has('house') && has('mill') && has('lumber') && has('farm') && has('barracks'), ai.join());
   assert.ok(snap[5].workers >= 9, `5 min villagers ${snap[5].workers}`);
-  assert.ok(snap[10].workers >= 13, `10 min villagers ${snap[10].workers}`);
+  assert.ok(snap[10].workers >= 18, `10 min villagers ${snap[10].workers}`);
+  assert.ok(snap[20].workers >= 45, `20 min villagers ${snap[20].workers}`);
   const stats = w.aiStats[1];
   assert.equal(snap[10].age, 0, 'still dark age at 10 minutes');
-  assert.ok(stats.ageUpAt[0] >= 540 && stats.ageUpAt[0] <= 840, `feudal at ${stats.ageUpAt[0]}s`);
-  assert.ok(stats.foundEnemyAt > 0 && stats.foundEnemyAt < 1100, 'its scout found the human town');
+  assert.ok(stats.ageUpAt[0] >= 540 && stats.ageUpAt[0] <= 780, `feudal at ${stats.ageUpAt[0]}s`);
+  assert.ok(stats.foundEnemyAt > 0 && stats.foundEnemyAt < 300, `its scout found the human town after ${stats.foundEnemyAt}s`);
   assert.ok(w.units.filter(u => u.team === 1 && u.blueprint.role !== 'worker').length >= 8, 'a standing army');
   assert.ok(stats.firstAttackAt === null || stats.firstAttackAt > stats.ageUpAt[0], 'first attack comes after the feudal age');
   assert.ok(w.stocks[1].wood >= 0 && w.stocks[1].food >= 0);
