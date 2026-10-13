@@ -2,7 +2,8 @@
 <meta charset="utf-8"><title>audio selftest</title>
 <pre id="out">running</pre>
 <script type="module">
-import { RECIPES, renderRecipe, makeNoise } from './audio.mjs';
+import { RECIPES, renderRecipe, makeNoise, playSample } from './audio.mjs';
+import { allSampleIds, SAMPLE_EXTENSION } from './audio-samples.mjs';
 const out = document.getElementById('out'), rate = 44100, results = [];
 const cases = [];
 for (const name of Object.keys(RECIPES)) {
@@ -19,7 +20,19 @@ try {
     for (let i = 0; i < data.length; i++) { const v = data[i]; if (!Number.isFinite(v)) nan = true; peak = Math.max(peak, Math.abs(v)); sum += v * v; if (Math.abs(v) > .001) last = i; }
     results.push({ label, peak: +peak.toFixed(4), rms: +Math.sqrt(sum / data.length).toFixed(5), tail: +(last / rate).toFixed(2), nan });
   }
-  out.textContent = 'RESULT ' + JSON.stringify(results);
+  // recorded samples: must decode, be audible, and stay under 1.0 at the engine's loudest random jitter and base gain
+  const samples = [];
+  for (const id of allSampleIds()) {
+    const res = await fetch(`./assets/audio/${id}.${SAMPLE_EXTENSION}`), status = res.status;
+    if (!res.ok) { samples.push({ id, status }); continue; }
+    const ctx = new OfflineAudioContext(1, rate * 4, rate), buffer = await ctx.decodeAudioData(await res.arrayBuffer());
+    const gain = ctx.createGain(); gain.gain.value = 1.12 * 0.85; /* loudest random jitter x the loudest mixer base gain */ gain.connect(ctx.destination);
+    playSample(ctx, buffer, gain, .01, 1.07);
+    const data = (await ctx.startRendering()).getChannelData(0);
+    let peak = 0, sum = 0, nan = false; for (const v of data) { if (!Number.isFinite(v)) nan = true; peak = Math.max(peak, Math.abs(v)); sum += v * v; }
+    samples.push({ id, status, duration: +buffer.duration.toFixed(2), channels: buffer.numberOfChannels, peak: +peak.toFixed(3), rms: +Math.sqrt(sum / data.length).toFixed(5), nan });
+  }
+  out.textContent = 'RESULT ' + JSON.stringify({ results, samples });
 } catch (e) { out.textContent = 'ERROR ' + e.message; }
 document.title = 'done';
 </script>

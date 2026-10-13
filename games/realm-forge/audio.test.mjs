@@ -4,6 +4,10 @@ import { World, defaultProject, generateMap } from './core.mjs';
 import { createObserver, unitClass } from './audio-events.mjs';
 import { createMixer, spatial, SOUNDS, CATEGORIES, ALERT, VOICE } from './audio-mixer.mjs';
 import { createAudio, loadSettings, AUDIO_STORAGE, RECIPES } from './audio.mjs';
+import { sampleIds, allSampleIds, SAMPLE_SETS, VOICE_SETS, DEATH_SETS, SAMPLE_EXTENSION } from './audio-samples.mjs';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 function setup({ fog = false, startAge = 4, plain = true } = {}) {
   const p = defaultProject(); p.map = generateMap(64); if (plain) { if (p.map.tiles) p.map.tiles.fill('grass'); else { p.map.template = 'grass'; p.map.patches = {}; } }
@@ -178,7 +182,7 @@ test('voices: no bombardment from one unit, cycling variants, one voice at a tim
 const memoryStorage = (initial) => { const m = new Map(initial ? [[AUDIO_STORAGE, initial]] : []); return { getItem: k => m.get(k) ?? null, setItem: (k, v) => m.set(k, v), m }; };
 function fakeContext(counter) {
   const node = () => new Proxy(function () {}, {
-    get: (_, key) => key === 'state' ? counter.state : key === 'sampleRate' ? 44100 : key === 'currentTime' ? 0 : key === 'start' ? () => { counter.started++; } : key === 'value' ? 0 : node(),
+    get: (_, key) => key === 'state' ? counter.state : key === 'sampleRate' ? 44100 : key === 'currentTime' ? 0 : key === 'start' ? () => { counter.started++; } : key === 'playbackRate' ? (counter.rate = (counter.rate || 0) + 1, node()) : key === 'decodeAudioData' ? (ab, ok) => { counter.decoded = (counter.decoded || 0) + 1; ok({ duration: .3 }); } : key === 'value' ? 0 : node(),
     apply: () => node(), set: () => true,
   });
   return class { constructor() { counter.created++; return node(); } };
@@ -198,7 +202,7 @@ test('settings: defaults to sound on, persists, survives corrupt or throwing sto
 
 test('engine stays silent until unlocked by a gesture and honours mute and zero volume', () => {
   const counter = { created: 0, started: 0, state: 'suspended' };
-  const audio = createAudio({ storage: memoryStorage(), AudioContextClass: fakeContext(counter), now: () => 1 });
+  const audio = createAudio({ storage: memoryStorage(), AudioContextClass: fakeContext(counter), now: () => 1, fetchImpl: null });
   const listener = { x: 50, y: 50, radius: 20 }, hit = [{ kind: 'sword', x: 50, y: 50 }];
   audio.handle(hit, listener); assert.equal(counter.created, 0, 'no AudioContext before a gesture'); assert.equal(counter.started, 0);
   audio.unlock(); assert.equal(counter.created, 1); audio.unlock(); assert.equal(counter.created, 1);
@@ -208,4 +212,63 @@ test('engine stays silent until unlocked by a gesture and honours mute and zero 
   const after = counter.started; audio.setMuted(true); audio.handle([{ kind: 'sword', x: 50, y: 50 }], listener); audio.voice({ id: 1, blueprint: { role: 'worker' } });
   assert.equal(counter.started, after, 'muted');
   audio.setMuted(false); audio.setVolume(0); audio.handle([{ kind: 'sword', x: 50, y: 50 }], listener); assert.equal(counter.started, after, 'volume 0');
+});
+
+// ---- recorded samples -----------------------------------------------------------------
+const audioDir = path.join(path.dirname(fileURLToPath(import.meta.url)), 'assets', 'audio');
+
+test('every referenced sample ships, is small, and is credited in LICENSE.txt', () => {
+  const ids = allSampleIds(), license = fs.readFileSync(path.join(audioDir, 'LICENSE.txt'), 'utf8');
+  assert.equal(new Set(ids).size, ids.length);
+  let total = 0;
+  for (const id of ids) {
+    const file = path.join(audioDir, `${id}.${SAMPLE_EXTENSION}`), size = fs.statSync(file).size; total += size;
+    assert.ok(size > 500 && size < 60 * 1024, `${id} is ${size} bytes`);
+    assert.ok(license.includes(id), `${id} missing from LICENSE.txt`);
+  }
+  assert.ok(total < 3 * 1024 * 1024, `total ${total}`);
+  const onDisk = fs.readdirSync(audioDir).filter(f => f.endsWith('.' + SAMPLE_EXTENSION)).map(f => f.replace(/\.[^.]+$/, ''));
+  assert.deepEqual(onDisk.sort(), [...ids].sort(), 'no orphan or missing files');
+  assert.ok(/CC0/.test(license) && /publicdomain\/zero/.test(license));
+});
+
+test('sample tables only name known sounds and unit classes', () => {
+  for (const name of Object.keys(SAMPLE_SETS)) assert.ok(SOUNDS[name], `${name} is not a mixer sound`);
+  assert.deepEqual(sampleIds('voice', { unitClass: 'monk', kind: 'select' }), null, 'monks stay synthesised');
+  assert.equal(sampleIds('voice', { unitClass: 'cavalry', kind: 'command' }), VOICE_SETS.cavalry.command);
+  assert.equal(sampleIds('death', { unit: 'cavalry' }), DEATH_SETS.cavalry);
+  assert.equal(sampleIds('death', { unit: 'monk' }), DEATH_SETS.infantry, 'unknown classes fall back to infantry');
+  assert.equal(sampleIds('farm'), null);
+});
+
+test('engine plays decoded recordings, synthesises while they load, and survives download failures', async () => {
+  const settle = async (audio) => { for (let i = 0; i < 200 && !audio.sampleStatus().ready; i++) await new Promise(r => setImmediate(r)); };
+  const ok = { ok: true, arrayBuffer: async () => new ArrayBuffer(8) };
+  const make = fetchImpl => { const counter = { created: 0, started: 0, state: 'running' }; return { counter, audio: createAudio({ storage: memoryStorage(), AudioContextClass: fakeContext(counter), now: () => 1, fetchImpl, sampleBase: 'http://x/a/' }) }; };
+  const L = { x: 50, y: 50, radius: 20 };
+  { // loaded
+    const urls = [], { counter, audio } = make(async url => { urls.push(url); return ok; });
+    audio.unlock(); await settle(audio);
+    assert.equal(audio.sampleStatus().loaded, allSampleIds().length); assert.equal(audio.sampleStatus().failed, 0);
+    assert.ok(urls.every(u => u.startsWith('http://x/a/') && u.endsWith('.mp3')) && urls.length === allSampleIds().length);
+    counter.rate = 0; audio.handle([{ kind: 'sword', x: 50, y: 50 }], L); assert.equal(counter.rate, 1, 'sword uses a recording');
+    counter.rate = 0; audio.handle([{ kind: 'farm', x: 50, y: 50 }], L); assert.equal(counter.rate, 0, 'farm has no recording, stays synthesised');
+    counter.rate = 0; audio.voice({ id: 1, blueprint: { role: 'melee', look: 'knight', family: 'cavalry' } }); assert.equal(counter.rate, 1, 'cavalry voice is a recording');
+    counter.rate = 0; audio.voice({ id: 2, blueprint: { role: 'healer' } }); assert.equal(counter.rate, 0, 'monk voice is synthesised');
+  }
+  { // not loaded yet: synth fallback
+    const { counter, audio } = make(() => new Promise(() => {})); audio.unlock();
+    const before = counter.started; counter.rate = 0; audio.handle([{ kind: 'sword', x: 50, y: 50 }], L);
+    assert.equal(counter.rate, 0); assert.ok(counter.started > before, 'synth fallback plays while samples load');
+  }
+  { // every download fails
+    const { counter, audio } = make(async () => ({ ok: false, status: 404 })); audio.unlock(); await settle(audio);
+    assert.equal(audio.sampleStatus().failed, allSampleIds().length);
+    const before = counter.started; counter.rate = 0; audio.handle([{ kind: 'chop', x: 50, y: 50 }], L);
+    assert.equal(counter.rate, 0); assert.ok(counter.started > before);
+  }
+  { // fetch itself throws
+    const { audio } = make(async () => { throw new Error('offline'); }); audio.unlock(); await settle(audio);
+    assert.equal(audio.sampleStatus().loaded, 0);
+  }
 });

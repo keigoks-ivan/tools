@@ -1,8 +1,11 @@
-// Realm Forge sound: every effect is synthesised with Web Audio (no sample files,
-// so there is nothing to license). Policy lives in audio-mixer.mjs, the world
-// diffing in audio-events.mjs; this file only knows how to make noise.
+// Realm Forge sound: CC0 recordings (assets/audio, fetched after the first user gesture) are
+// the main source; every effect also has a Web Audio synthesised recipe, used until the
+// recordings have decoded, if a file fails to load, and for sounds with no recording.
+// Policy lives in audio-mixer.mjs, the world diffing in audio-events.mjs, the sample table
+// in audio-samples.mjs; this file only knows how to make noise.
 import { createMixer } from './audio-mixer.mjs?v=20261009l';
 import { unitClass } from './audio-events.mjs?v=20261009l';
+import { sampleIds, allSampleIds, SAMPLE_EXTENSION } from './audio-samples.mjs?v=20261009l';
 
 export const AUDIO_STORAGE = 'realm-forge-audio-v1';
 export const DEFAULT_SETTINGS = { volume: .7, muted: false, ambient: true };
@@ -113,6 +116,11 @@ export function renderRecipe(ctx, noise, dest, name, t, opts = {}) {
   RECIPES[name](R, t, { pitch: 1, variant: 0, kind: 'select', unitClass: 'infantry', ...opts });
 }
 
+// Recorded (CC0) sample playback; shared by the live player and the self-test.
+export function playSample(ctx, buffer, dest, t, pitch = 1) {
+  const src = ctx.createBufferSource(); src.buffer = buffer; src.playbackRate.value = pitch; src.connect(dest); src.start(t); return src;
+}
+
 // ---- engine ------------------------------------------------------------------
 const clamp01 = v => Math.min(1, Math.max(0, Number.isFinite(v) ? v : 0));
 export function loadSettings(storage) {
@@ -120,20 +128,38 @@ export function loadSettings(storage) {
   return { ...DEFAULT_SETTINGS };
 }
 
-export function createAudio({ storage = null, AudioContextClass = globalThis.AudioContext || globalThis.webkitAudioContext, now = () => performance.now() / 1000 } = {}) {
+export function createAudio({ storage = null, AudioContextClass = globalThis.AudioContext || globalThis.webkitAudioContext, now = () => performance.now() / 1000,
+  fetchImpl = globalThis.fetch?.bind(globalThis), sampleBase = new URL('./assets/audio/', import.meta.url).href } = {}) {
   const settings = loadSettings(storage);
-  let ctx = null, master = null, noise = null, ambientGain = null, birdTimer = 3;
+  let ctx = null, master = null, noise = null, ambientGain = null, birdTimer = 3, loadStarted = false;
+  const buffers = new Map(), failed = new Set(), lastPick = new Map();
   const save = () => { try { storage?.setItem(AUDIO_STORAGE, JSON.stringify(settings)); } catch {} };
-  const level = () => (settings.muted ? 0 : settings.volume ** 2);
+  const level = () => (settings.muted ? 0 : settings.volume ** 1.5 * 1.4);
   const applyLevel = () => { if (master) master.gain.setTargetAtTime(level(), ctx.currentTime, .02); };
   const ready = () => Boolean(ctx && ctx.state === 'running' && level() > 0);
 
+  // Picks a decoded recording for this request (never the same take twice in a row); null means synthesise.
+  function pickSample(name, o) {
+    const ready = (sampleIds(name, o) || []).filter(id => buffers.has(id)); if (!ready.length) return null;
+    const key = name === 'voice' ? `${o.unitClass}:${o.kind}` : name === 'death' ? `death:${o.unit}` : name;
+    let i = name === 'voice' ? (o.variant || 0) % ready.length : Math.floor(Math.random() * ready.length);
+    if (ready.length > 1 && ready[i] === lastPick.get(key)) i = (i + 1) % ready.length;
+    lastPick.set(key, ready[i]); return buffers.get(ready[i]);
+  }
+  // Fetched and decoded after the first user gesture, a few at a time; failures just leave the synth fallback in place.
+  async function loadSamples() {
+    if (loadStarted || !fetchImpl) return; loadStarted = true;
+    const queue = allSampleIds(), decode = ab => new Promise((res, rej) => { const p = ctx.decodeAudioData(ab, res, rej); p?.then?.(res, rej); });
+    const worker = async () => { for (let id; (id = queue.shift());) { try { const r = await fetchImpl(`${sampleBase}${id}.${SAMPLE_EXTENSION}`); if (!r.ok) throw new Error(r.status); buffers.set(id, await decode(await r.arrayBuffer())); } catch { failed.add(id); } } };
+    await Promise.all([worker(), worker(), worker(), worker()]);
+  }
   function start(name, o) {
     const t = ctx.currentTime + (o.delay || 0) + .005, g = ctx.createGain(); g.gain.value = o.gain ?? 1;
     let tail = g;
     if (ctx.createStereoPanner) { const p = ctx.createStereoPanner(); p.pan.value = o.pan || 0; g.connect(p); tail = p; }
     tail.connect(master);
-    renderRecipe(ctx, noise, g, name, t, o);
+    const buffer = pickSample(name, o);
+    if (buffer) { g.gain.value *= .88 + Math.random() * .24; playSample(ctx, buffer, g, t, o.pitch || 1); } else renderRecipe(ctx, noise, g, name, t, o);
     return { stop() { try { g.gain.cancelScheduledValues(ctx.currentTime); g.gain.setTargetAtTime(0, ctx.currentTime, .015); } catch {} } };
   }
   const mixer = createMixer({ play: (name, o) => (ready() ? start(name, o) : null), now });
@@ -159,8 +185,9 @@ export function createAudio({ storage = null, AudioContextClass = globalThis.Aud
   return {
     settings, mixer,
     // Must run inside a user gesture (pointerdown/keydown); safe to call repeatedly.
-    unlock() { try { if (!ctx && AudioContextClass) build(); if (ctx && ctx.state !== 'running') ctx.resume?.(); } catch { /* audio is optional */ } },
+    unlock() { try { if (!ctx && AudioContextClass) build(); if (ctx && ctx.state !== 'running') ctx.resume?.(); if (ctx) loadSamples(); } catch { /* audio is optional */ } },
     get unlocked() { return Boolean(ctx); },
+    sampleStatus() { return { loaded: buffers.size, failed: failed.size, total: allSampleIds().length, ready: loadStarted && buffers.size + failed.size === allSampleIds().length }; },
     setVolume(v) { settings.volume = clamp01(v); save(); applyLevel(); },
     setMuted(m) { settings.muted = Boolean(m); save(); applyLevel(); },
     toggleMuted() { this.setMuted(!settings.muted); return settings.muted; },

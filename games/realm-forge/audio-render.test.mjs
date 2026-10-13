@@ -46,10 +46,10 @@ async function renderInChrome() {
   }
 }
 
-test('every synthesised effect renders audible, finite and below clipping', { skip: !chrome && 'Chrome not found', timeout: 60000 }, async () => {
+test('every synthesised effect and every recorded sample renders audible, finite and below clipping', { skip: !chrome && 'Chrome not found', timeout: 60000 }, async () => {
   const text = await renderInChrome();
   assert.ok(text.startsWith('RESULT '), text);
-  const results = JSON.parse(text.slice(7));
+  const { results, samples } = JSON.parse(text.slice(7));
   assert.ok(results.length >= 40);
   const labels = new Set(results.map(r => r.label.split(':')[0]));
   for (const name of ['voice', 'chop', 'mine', 'hammer', 'farm', 'sword', 'death', 'arrow-shoot', 'arrow-hit', 'rock-shoot', 'rock-land', 'heal', 'building-complete', 'building-collapse', 'trained', 'tech', 'age-up', 'alert']) assert.ok(labels.has(name), `missing ${name}`);
@@ -59,5 +59,14 @@ test('every synthesised effect renders audible, finite and below clipping', { sk
     assert.ok(r.rms > .002, `${r.label} near silent (rms ${r.rms})`);
     assert.ok(r.peak < .95, `${r.label} clips (peak ${r.peak})`);
     assert.ok(r.tail < 2.9, `${r.label} rings past the render window (${r.tail}s)`);
+  }
+  assert.ok(samples.length >= 60);
+  for (const r of samples) {
+    assert.equal(r.status, 200, `${r.id} did not load`);
+    assert.equal(r.nan, false, `${r.id} has NaN`);
+    assert.ok(r.duration > .05 && r.duration < 3.5, `${r.id} duration ${r.duration}`);
+    assert.ok(r.peak > .1, `${r.id} too quiet (peak ${r.peak})`);
+    assert.ok(r.rms > .004, `${r.id} near silent (rms ${r.rms})`);
+    assert.ok(r.peak < .98, `${r.id} clips at loudest random pitch and gain (peak ${r.peak})`);
   }
 });
