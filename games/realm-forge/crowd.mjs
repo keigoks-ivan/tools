@@ -7,7 +7,8 @@ export function unitRadius(bp) {
   return bp.hero && r < .38 ? .38 : r;
 }
 // How easily a unit gives way: idle bodies yield fully, marching ones steer around, units at work hold their post.
-const TRIES = [[1, 1], [1, 0], [0, 1], [.5, .5]], YIELD_IDLE = 1, YIELD_MOVING = .15, YIELD_HOLD = .35, MAX_PUSH = .3;
+// Villagers on their way to work or to a drop-off slip past one another (as in AoE2); only soldiers and idle crowds collide hard.
+const ECONOMY = new Set(['gather', 'deliver', 'build']), TRIES = [[1, 1], [1, 0], [0, 1], [.5, .5]], YIELD_IDLE = 1, YIELD_MOVING = .15, YIELD_HOLD = .35, MAX_PUSH = .3;
 
 // Direction an idle body moves when a marcher with heading (hx, hy) bumps it from direction (nx, ny): mostly sideways.
 function sidestep(hx, hy, nx, ny, id) {
@@ -21,9 +22,9 @@ export function separateUnits(w, dt, goalDistance) {
   if (!g || g.size !== size) g = w.crowd = { size, head: new Int32Array(size * size).fill(-1), cap: 0 };
   if (g.cap < total) {
     g.cap = total + 256;
-    Object.assign(g, { list: new Array(g.cap), next: new Int32Array(g.cap), cell: new Int32Array(g.cap), px: new Float64Array(g.cap), py: new Float64Array(g.cap), rad: new Float64Array(g.cap), hx: new Float64Array(g.cap), hy: new Float64Array(g.cap), give: new Float64Array(g.cap), ax: new Float64Array(g.cap), ay: new Float64Array(g.cap) });
+    Object.assign(g, { list: new Array(g.cap), next: new Int32Array(g.cap), cell: new Int32Array(g.cap), px: new Float64Array(g.cap), py: new Float64Array(g.cap), rad: new Float64Array(g.cap), hx: new Float64Array(g.cap), hy: new Float64Array(g.cap), give: new Float64Array(g.cap), ax: new Float64Array(g.cap), ay: new Float64Array(g.cap), eco: new Uint8Array(g.cap) });
   }
-  const { head, next, cell, px, py, rad, hx, hy, give, ax, ay, list } = g, holds = w.holds, tick = w.tickNo;
+  const { head, next, cell, px, py, rad, hx, hy, give, ax, ay, eco, list } = g, holds = w.holds, tick = w.tickNo;
   let m = 0;
   for (let i = 0; i < total; i++) {
     const u = units[i]; if (u.hp <= 0 || u.garrison) continue;
@@ -32,6 +33,7 @@ export function separateUnits(w, dt, goalDistance) {
     const f = u.moving && u.facing, fl = f && typeof f === 'object' ? Math.hypot(f.x, f.y) : 0;
     hx[m] = fl > 1e-5 ? f.x / fl : 0; hy[m] = fl > 1e-5 ? f.y / fl : 0;
     list[m] = u; px[m] = u.x; py[m] = u.y; rad[m] = r; ax[m] = 0; ay[m] = 0; cell[m] = c;
+    eco[m] = u.moving && u.blueprint.role === 'worker' && ECONOMY.has(u.order?.type) ? 1 : 0;
     give[m] = (u.holdAt === tick ? YIELD_HOLD : u.moving ? YIELD_MOVING : YIELD_IDLE) * Math.min(1, .3 / r);
     next[m] = head[c]; head[c] = m; m++;
   }
@@ -44,6 +46,7 @@ export function separateUnits(w, dt, goalDistance) {
     ax[k] += vx; ay[k] += vy;
   };
   const pair = (i, j) => {
+    if (eco[i] && eco[j]) return;
     const dx = px[j] - px[i], rs = rad[i] + rad[j]; if (dx >= rs || dx <= -rs) return;
     const dy = py[j] - py[i]; if (dy >= rs || dy <= -rs) return;
     const d2 = dx * dx + dy * dy; if (d2 >= rs * rs) return;
@@ -56,6 +59,9 @@ export function separateUnits(w, dt, goalDistance) {
     if (hx[i] || hy[i]) { if (!(hx[j] || hy[j])) [jx, jy] = sidestep(hx[i], hy[i], nx, ny, list[j].id); }
     else if (hx[j] || hy[j]) [ix, iy] = sidestep(hx[j], hy[j], -nx, -ny, list[i].id);
     shove(i, j, -ix * overlap * si, -iy * overlap * si); shove(j, i, jx * overlap * sj, jy * overlap * sj); touched = true;
+    // Two marchers meeting head-on would just shove each other back along the line between them and stay locked
+    // (worst against a wall); each also steers to its own right, so they file past one another.
+    if ((hx[i] || hy[i]) && (hx[j] || hy[j]) && hx[i] * hx[j] + hy[i] * hy[j] < -.3) { shove(i, j, -hy[i] * overlap * si * .6, hx[i] * overlap * si * .6); shove(j, i, -hy[j] * overlap * sj * .6, hx[j] * overlap * sj * .6); }
   };
   for (let i = 0; i < m; i++) {
     const c = cell[i], cx = c % size;

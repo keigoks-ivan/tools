@@ -106,6 +106,28 @@ test('workers pushed by neighbours keep working within reach of a tree', () => {
   for (const u of workers) { assert.ok(u.order?.type === 'gather' || u.order?.type === 'deliver', `villager lost its job (${u.order?.type})`); assert.ok(wasWorking.get(u.id) > 20, 'every villager got a turn at the tree'); }
 });
 
+test('two marchers meeting head-on against a wall pass each other instead of locking', () => {
+  const w = arena(); assert.ok(w.addBuilding('town', 0, 30, 30, true));
+  const a = w.spawn('villager', 0, { x: 28.3, y: 32 }), b = w.spawn('villager', 0, { x: 28.7, y: 32 });
+  w.command([a.id], { type: 'move', x: 36, y: 32 }); w.command([b.id], { type: 'move', x: 22, y: 32 });
+  run(w, 12);
+  assert.ok(a.x > 35 && b.x < 23, `they never got past each other (${a.x.toFixed(1)}, ${b.x.toFixed(1)})`);
+});
+
+test('villagers carrying wood, berries and gold keep at least 97% of their pace with separation on', () => {
+  const rate = on => {
+    const w = arena(); for (const [x, y, wd, ht, t] of [[38, 20, 3, 12, 'forest'], [20, 40, 2, 3, 'food'], [40, 40, 2, 2, 'gold']]) for (let j = y; j < y + ht; j++) for (let i = x; i < x + wd; i++) { setTile(w.map, i, j, t); w.blockedCells.add(j * 64 + i); }
+    w.addBuilding('lumber', 0, 36, 26, true); w.addBuilding('mill', 0, 24, 41, true); w.addBuilding('mining', 0, 38, 41, true); w.addBuilding('town', 0, 30, 30, true);
+    const spots = [[38, 24], [20, 41], [40, 40], [38, 28]];
+    for (let i = 0; i < 24; i++) { const u = w.spawn('villager', 0, { x: 26 + i % 6, y: 26 + Math.floor(i / 6) * 1.5 }); w.command([u.id], { type: 'gather', x: spots[i % 4][0], y: spots[i % 4][1] }); }
+    for (const r of ['wood', 'food', 'gold', 'stone']) w.stocks[0][r] = 0;
+    for (let i = 0; i < 2400; i++) { if (!on) w.sepSkips = -1e12; w.tick(.1); }
+    return w.stocks[0].wood + w.stocks[0].food + w.stocks[0].gold;
+  };
+  const off = rate(false), on = rate(true);
+  assert.ok(off > 1000 && on >= off * .97, `with separation ${on} vs ${off} without`);
+});
+
 test('nobody is shoved into water, forest or a wall of buildings', () => {
   const w = arena();
   for (let y = 0; y < 64; y++) { setTile(w.map, 33, y, 'water'); setTile(w.map, 34, y, 'forest'); }

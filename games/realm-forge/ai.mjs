@@ -63,7 +63,7 @@ function buildNext(w, team, workers, sites, origin, priorities, plan = null) {
     // At most four synchronous path checks per planning pass keeps a crowded
     // base from turning an inaccessible site into an unbounded frame cost.
     for (let i = 0; i < Math.min(2, centers.length); i++) {
-      const center = centers[(attempt + i) % centers.length];
+      const center = plan && ['lumber', 'mill', 'mining'].includes(type) ? centers[i] : centers[(attempt + i) % centers.length];
       const point = w.nearestBuildingSite(type, center, true, 1);
       if (!point) continue;
       const builders = [...pool].sort((a, b) => distance(a, point) - distance(b, point));

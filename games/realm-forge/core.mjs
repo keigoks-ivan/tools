@@ -974,10 +974,11 @@ export class World {
       else if (o.type === 'garrison') { const b = this.entity(o.target); if (!b || b.kind !== 'building' || b.progress < 1 || b.team !== u.team || !BUILDINGS[b.type].garrison || b.garrisoned.length >= BUILDINGS[b.type].garrison) this.finish(u); else if (this.walk(u, b, 1.5, dt)) { if (BUILDINGS[b.type].dropoff?.includes(u.carrying)) this.depositCarried(u); b.garrisoned.push(u.id); u.garrison = b.id; u.x = b.x; u.y = b.y; this.finish(u); } }
       else if (o.type === 'convert' && bp.canConvert) { const t = this.entity(o.target); if (!t || !this.isEnemy(t.team, u.team) || t.kind !== 'unit' || t.blueprint.hero) this.finish(u); else if (!t.garrison && (u.faith ?? 100) >= 99.99 && this.walk(u, t, bp.range, dt)) { u.work += dt; u.attackAnimation = .55; if (u.work > (this.researched[t.team].has('faith') ? 12 : 6)) { if(this.population(u.team)>=this.populationLimit(u.team)){u.waitingPopulation=true;continue;}t.team = u.team; this.command([t.id], null); u.faith = 0; this.finish(u); } } }
     }
-    // Separation is soft. Big armies are resolved every other tick, and a tick that already spent over 1.5 ms
-    // (path searches, a big fight) lets it wait; it never waits more than 4 ticks.
+    // Separation is soft. Big armies are resolved every other tick, and for them a tick that already spent over 1.5 ms
+    // (path searches, a big fight) lets it wait; it never waits more than 4 ticks. Up to 300 units it runs every tick, so
+    // small games play out the same on a fast or a slow machine.
     this.sepSkips++;
-    if (this.sepSkips >= (this.units.length > 300 ? 2 : 1) && (performance.now() - this.pathDeadline < -1.5 || this.sepSkips >= 5)) { separateUnits(this, Math.min(.2, dt * this.sepSkips), goalDistance); this.sepSkips = 0; }
+    if (this.sepSkips >= (this.units.length > 300 ? 2 : 1) && (this.units.length <= 300 || performance.now() - this.pathDeadline < -1.5 || this.sepSkips >= 5)) { separateUnits(this, Math.min(.2, dt * this.sepSkips), goalDistance); this.sepSkips = 0; }
     this.aiTimer += dt;
     if (this.project.rules.ai !== 'off' && this.aiTimer > .75 / (this.teams-1)) { this.aiTimer = 0; this.aiNextTeam=1+(this.aiNextTeam||0)%(this.teams-1); this.updateAI(this.aiNextTeam); }
     if (this.routeSearches) for (const id of this.routeSearches.keys()) if (!this.entity(id)) this.routeSearches.delete(id);
