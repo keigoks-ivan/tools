@@ -1,4 +1,4 @@
-import { buildDb, search, toTWD, perWeekEquiv, kidFit, sessionSpan, holidaysIn, defaultQty, taxRate, lineCost, UNIT, runWeeks, weeksQty, weeksIn, mondayOf, addDays } from './lib/core.mjs';
+import { buildDb, search, toTWD, perWeekEquiv, kidFit, sessionSpan, holidaysIn, defaultQty, taxRate, lineCost, UNIT, runWeeks, weeksQty, weeksIn, mondayOf, addDays, overlaps } from './lib/core.mjs';
 
 const FILES = ['providers', 'programs', 'locations', 'sessions', 'reviews', 'conflicts', 'holidays', 'fx'];
 const KL = ['Kuala Lumpur', 'Petaling Jaya', 'Subang Jaya', 'Puchong', 'Shah Alam', 'Selangor-other'];
@@ -317,7 +317,7 @@ function datesLine(it) {
   if (it.group === 'estimated') {
     const past = it.past.map((p) => `${fmtD(p.start_date, true)}～${fmtD(p.end_date)}`);
     const basis = it.estimates.map((e) => e.estimate_basis).filter(Boolean);
-    return (past.length ? `往年：${past.join('、')}` : '') + (basis.length ? `${past.length ? '<br>' : ''}<small class="quote">推估依據：${esc(basis[0])}</small>` : '') || '日期未公布';
+    return '這一季的日期還沒公布。' + (past.length ? `<br>往年：${past.join('、')}` : '') + (basis.length ? `${past.length ? '<br>' : ''}<small class="quote">推估依據：${esc(basis[0])}</small>` : '') || '日期未公布';
   }
   if (it.group === 'unknown') return '日期未公布';
   if (it.intakes) {
@@ -385,9 +385,11 @@ const haystack = (it) => [it.provider.name_en, it.provider.name_zh, it.program.n
 
 // traffic light per session: dated and official → green, dated but aggregator/agent only → yellow, undated → gray
 const lightOf = (it) => (it.group === 'estimated' ? 'gray' : SOLID.has(it.session.confidence) ? 'green' : 'yellow');
-const LIGHT = { green: ['🟢', '官方日期', '可信度高或中'], yellow: ['🟡', '要先問', '只有聚合站或代理商寫'], gray: ['⚪', '推測', '2027 日期未公布，依往年'] };
+const LIGHT = { green: ['🟢', '官方日期', '可信度高或中'], yellow: ['🟡', '要先問', '只有聚合站或代理商寫'], gray: ['⚪', '照往年推測', '這一季的日期還沒公布，日期和價格是往年的'] };
 const LIGHT_RANK = { green: 0, yellow: 1, gray: 2 };
 const shownLights = new Set(['green', 'yellow']);
+let lightsTouched = false; // once the parent clicks a light, stop choosing the default for them
+let useLastYear = true; // week view: place undated camps on last year's week
 let sortBy = 'rec';
 let lastR = null;
 // one chip / card per provider (branches, intakes, programs); agent packages group on the school they
@@ -401,7 +403,7 @@ const startOf = (it) => it.span?.start || it.past?.find((x) => x.start_date)?.st
 function shortDates(it) {
   if (it.group === 'estimated') {
     const p0 = it.past?.find((x) => x.start_date && x.end_date);
-    return p0 ? `往年 ${md(p0.start_date)}–${md(p0.end_date)}` : '日期未公布';
+    return p0 ? `${p0.start_date.slice(0, 4)} 年 ${md(p0.start_date)}–${md(p0.end_date)}` : '日期未公布';
   }
   if (it.intakes) return `${it.intakes.length} 個開課日，${md(it.intakes[0].span.start)} 起`;
   return it.span ? `${md(it.span.start)}–${md(it.span.end)}` : '日期未公布';
@@ -435,7 +437,7 @@ function sessionRow(it, open) {
   const place = it.locs[0] ? `${esc(it.locs[0].name)}${citiesOf(it)[0] && !HOME[country].includes(it.locs[0].city) ? `・${esc(citiesOf(it)[0])}` : ''}` : '地點未公布';
   return `<div class="srow l-${l}" id="${id}"><details ${open ? 'open' : ''}><summary>
       <span class="s-l" title="${LIGHT[l][1]}">${LIGHT[l][0]}</span><span class="s-d">${shortDates(it)}</span>
-      <span class="s-p">${place}${it.programs > 1 ? `<br><small>${esc(it.program.name)}</small>` : ''}</span><span class="s-w">${w != null ? `NT$${fmtN(w)}` : ''}</span></summary>
+      <span class="s-p">${place}${it.programs > 1 ? `<br><small>${esc(it.program.name)}</small>` : ''}</span><span class="s-w">${w != null ? `NT$${fmtN(w)}${l === 'gray' && it.session.year ? `<small class="py">${it.session.year} 年價</small>` : ''}` : ''}</span></summary>
       <div class="s-body">${sessionBody(it)}</div></details>
     ${it.group === 'unknown' ? '' : `<label class="cmp-box"><input type="checkbox" data-cmp="${id}" ${picked.has(id) ? 'checked' : ''}>選取</label>`}</div>`;
 }
@@ -459,6 +461,7 @@ function orgCard(items) {
     return `<span class="kf ${v}" title="${esc(k.name)}（${k.age} 歲）">${kidAv(i)}${{ yes: '✓', no: '✗', maybe: '?' }[v]}</span>`;
   }).join('');
   const best = lightOf(it0);
+  const allGray = items.every((x) => lightOf(x) === 'gray');
   const revs = reviewsOf(it0).filter((x) => x.rating != null);
   const rate = revs.length ? Math.max(...revs.map((x) => x.rating)) : null;
   const nWarn = new Set(items.flatMap((x) => (x.warnings || []).map((w) => w.text))).size;
@@ -473,8 +476,8 @@ function orgCard(items) {
     <div class="org-body">
       <h3>${esc(title)}</h3><div class="prov">${sub}</div>
       <div class="big3">
-        <div><small>日期</small><b>${items.length === 1 ? shortDates(it0) : `${items.length} 個梯次`}</b></div>
-        <div><small>每週每人</small><b>${low != null ? `NT$${fmtN(low)}${varies ? '<i>起</i>' : ''}` : '未公布'}</b></div>
+        <div><small>${allGray ? '往年日期' : '日期'}</small><b>${items.length === 1 ? shortDates(it0) : `${items.length} 個梯次`}</b></div>
+        <div><small>每週每人${allGray && low != null ? '（往年價）' : ''}</small><b>${low != null ? `NT$${fmtN(low)}${varies ? '<i>起</i>' : ''}` : '未公布'}</b></div>
         <div><small>孩子</small><b>${kidFitAll}</b></div>
       </div>
       <div class="tags">${tags}</div>
@@ -536,7 +539,30 @@ function openSession(id) {
   el.classList.add('flash');
 }
 
-function weekTable(r) {
+// an undated camp placed on this year's calendar by last year's dates: whole weeks (364 days) so the weekday stays
+function lastYearSpan(it, q) {
+  if (it.warnings?.some((w) => w.code === 'past_outside')) return null;
+  for (const p of it.past || []) {
+    const sp = sessionSpan(p);
+    if (!sp) continue;
+    for (const dy of [1, 2, 3]) {
+      const a = addDays(sp.start, 364 * dy);
+      const b = addDays(sp.end, 364 * dy);
+      if (overlaps(a, b, q.start, q.end)) return { start: a, end: b, year: p.start_date.slice(0, 4) };
+    }
+  }
+  return null;
+}
+
+// per week and kid: undated camps that ran in this week last time
+function lastYearWeeks(r, q, estAll) {
+  const placed = estAll.map((it) => ({ it, ly: lastYearSpan(it, q) })).filter((x) => x.ly);
+  return r.weeks.map((w) => w.perKid.map((k, i) => placed
+    .filter(({ it, ly }) => overlaps(ly.start, ly.end, w.mon, w.fri) && it.kids[i]?.fit !== 'no')
+    .map(({ it, ly }) => Object.assign(it, { ly }))));
+}
+
+function weekTable(r, ly) {
   const short = (t) => t.replace(/\s*\(.*\)|（.*）/g, '').trim();
   // long names end on a whole word, without a dangling "for" or "of"
   const clip = (t) => (t.length <= 30 ? t : `${t.slice(0, t.lastIndexOf(' ', 30)).replace(/\s+(for|of|and|the|&|at|in)$/i, '')}…`);
@@ -560,18 +586,27 @@ function weekTable(r) {
     if (items.length > 1) t += ` ×${items.length}`;
     const w = minOf(items.map(weekTWD));
     const tip = items.map((x) => `${x.provider.name_en}：${x.program.name}（${x.locs[0]?.name || '地點未公布'}，${citiesOf(x).join('、') || '城市未知'}）`).join('\n');
-    return `<a class="opt ${weak ? 'weak' : ''}" href="#${cardId(it)}" data-go="${cardId(it)}" title="${esc(tip)}"><span>${esc(t)}</span>${w != null ? `<small>NT$${fmtN(w)}/週</small>` : ''}</a>`;
+    const kind = weak === 'ly' ? 'ly' : weak ? 'weak' : '';
+    const sub = kind === 'ly' ? `照 ${it.ly.year} 年${w != null ? `・NT$${fmtN(w)}` : ''}` : w != null ? `NT$${fmtN(w)}/週` : '';
+    return `<a class="opt ${kind}" href="#${cardId(it)}" data-go="${cardId(it)}" title="${esc(tip)}"><span>${esc(t)}</span>${sub ? `<small>${sub}</small>` : ''}</a>`;
   };
+  const LY_MAX = 3;
   const head = `<tr><th>週</th>${r.weeks[0]?.perKid.map((k, i) => `<th>${kidAv(i)} ${esc(k.kid.name)}</th>`).join('') || ''}</tr>`;
-  const rows = r.weeks.map((w) => `<tr><td class="wk"><b>${fmtD(w.mon)}</b><span class="wk-to">～${fmtD(w.fri)}</span>${w.holidays.map((h) =>
-    `<span class="hol">📌 ${fmtD(h.date_start)} ${esc(h.name_zh || h.name_en)}${h.status === 'estimated' ? '（推算）' : ''}</span>`).join('')}</td>${w.perKid.map((k) => {
+  const rows = r.weeks.map((w, wi) => `<tr><td class="wk"><b>${fmtD(w.mon)}</b><span class="wk-to">～${fmtD(w.fri)}</span>${w.holidays.map((h) =>
+    `<span class="hol">📌 ${fmtD(h.date_start)} ${esc(h.name_zh || h.name_en)}${h.status === 'estimated' ? '（推算）' : ''}</span>`).join('')}</td>${w.perKid.map((k, i) => {
     const solid = merge(k.solid);
     const weak = merge(k.weak, new Set(solid.map(([key]) => key)));
+    const last = useLastYear ? merge(ly[wi][i], new Set([...solid, ...weak].map(([key]) => key))) : [];
     const more = weak.length ? `<details class="weakmore"><summary>${k.gap ? '' : '另有 '}${weak.length} 個要先問</summary>${weak.map((g) => chip(g, true)).join('')}</details>` : '';
-    return `<td data-k="${esc(k.kid.name)}" class="${k.gap ? 'is-gap' : 'is-ok'}">${k.gap ? '<span class="gap">空窗</span>' : ''}${solid.map((g) => chip(g, false)).join('')}${more}</td>`;
+    const lyHtml = last.length ? last.slice(0, LY_MAX).map((g) => chip(g, 'ly')).join('') +
+      (last.length > LY_MAX ? `<details class="weakmore"><summary>再 ${last.length - LY_MAX} 個照往年排</summary>${last.slice(LY_MAX).map((g) => chip(g, 'ly')).join('')}</details>` : '') : '';
+    const cls = !k.gap ? 'is-ok' : last.length ? 'is-ly' : 'is-gap';
+    const flag = !k.gap ? '' : last.length ? `<span class="gap ly">${w.mon.slice(0, 4)} 未公布</span>` : '<span class="gap">空窗</span>';
+    return `<td data-k="${esc(k.kid.name)}" class="${cls}">${flag}${solid.map((g) => chip(g, false)).join('')}${lyHtml}${more}</td>`;
   }).join('')}</tr>`).join('');
   return `<h2 class="sec-h" id="sec-weeks"><span class="sec-ic">🗓️</span>週視圖<small>每週每位孩子能報哪些營，標籤上是每週每人價格，點標籤跳到那一梯</small></h2>
-    <div class="legend"><span><span class="lg ok"></span>有官方日期的營</span><span><span class="lg gap"></span>空窗：這週沒有官方日期的營（「要先問」的不算）</span><span>📌 ${COUNTRIES[country]}平日公假</span></div>
+    <div class="legend"><span><span class="lg ok"></span>有官方日期的營</span>${useLastYear ? '<span><span class="lg ly"></span>還沒公布日期，照往年同一週先排</span>' : ''}<span><span class="lg gap"></span>空窗：這週沒有官方日期的營${useLastYear ? '，往年也沒有' : ''}（「要先問」的不算）</span><span>📌 ${COUNTRIES[country]}平日公假</span></div>
+    ${ly.some((wk) => wk.some((x) => x.length)) || !useLastYear ? `<label class="ly-switch"><input type="checkbox" id="use-ly" ${useLastYear ? 'checked' : ''}>日期還沒公布的營，先照往年同一週排進來（灰色虛線標籤，往年日期換到今年同一個星期幾）</label>` : ''}
     <div class="weeks-scroll"><table class="weeks"><thead>${head}</thead><tbody>${rows}</tbody></table></div>
     <p class="group-note">同一機構的分校和梯次、代理商賣的同一所學校，合併成一個標籤，×2 表示有兩個選項，價格取最低的。${country === 'MY' ? '外地的標籤' : '標籤'}後面加城市。</p>`;
 }
@@ -591,7 +626,11 @@ function render(q) {
     return;
   }
   const r = search(db, sq);
-  const gapWeeks = r.weeks.filter((w) => w.perKid.some((k) => k.gap)).length;
+  const estAll = r.estimated; // before the name filter, like the week view
+  const ly = lastYearWeeks(r, sq, estAll);
+  const gapOf = (wi) => r.weeks[wi].perKid.map((k, i) => k.gap && !(useLastYear && ly[wi][i].length));
+  const gapWeeks = r.weeks.filter((w, wi) => gapOf(wi).some(Boolean)).length;
+  const lyWeeks = useLastYear ? r.weeks.filter((w, wi) => w.perKid.some((k, i) => k.gap && ly[wi][i].length)).length : 0;
   $('#status').innerHTML = '';
   const kw = (q.kw || '').toLowerCase();
   if (kw) {
@@ -602,10 +641,19 @@ function render(q) {
   }
   const all = [...r.full, ...r.partial, ...r.estimated];
   const nOrg = new Set(all.map(keyOf)).size;
+  const nGray = all.filter((x) => lightOf(x) === 'gray').length;
+  const nDated = all.length - nGray;
+  // mostly undated (summer before the camps publish): show the estimates by default and say so up top
+  const mostlyPast = nGray > nDated;
+  if (!lightsTouched) { if (mostlyPast) shownLights.add('gray'); else shownLights.delete('gray'); }
+  const flag = gapWeeks ? `⚠️ ${gapWeeks} 週有孩子空窗` : lyWeeks ? `🗓️ ${lyWeeks} 週只有往年日期可排` : '🎉 每週都有官方日期的營';
   $('#summary').innerHTML = `<div class="headline"><div><h2>${md(q.start)}–${md(q.end)}，${FLAG[country]} ${COUNTRIES[country]}找到 <em>${all.length}</em> 個梯次</h2>
-    <p>來自 ${nOrg} 個機構。🟢 ${all.filter((x) => lightOf(x) === 'green').length} 個有官方日期、🟡 ${all.filter((x) => lightOf(x) === 'yellow').length} 個要先問、⚪ ${all.filter((x) => lightOf(x) === 'gray').length} 個依往年推測。</p></div>
-    <a class="gapflag ${gapWeeks ? 'bad' : 'ok'}" href="#sec-weeks">${gapWeeks ? `⚠️ ${gapWeeks} 週有孩子空窗` : '🎉 每週都有官方日期的營'}</a></div>`;
-  $('#weeks').innerHTML = r.weeks.length ? weekTable(r) : '';
+    <p>來自 ${nOrg} 個機構。🟢 ${all.filter((x) => lightOf(x) === 'green').length} 個有官方日期、🟡 ${all.filter((x) => lightOf(x) === 'yellow').length} 個要先問、⚪ ${nGray} 個照往年推測。</p></div>
+    <a class="gapflag ${gapWeeks ? 'bad' : lyWeeks ? 'mid' : 'ok'}" href="#sec-weeks">${flag}</a></div>
+    ${mostlyPast ? `<div class="past-note"><b>這段期間的營隊，大多還沒公布今年的日期。</b>
+      <p>${all.length} 個梯次裡，${nDated} 個有今年日期，${nGray} 個還沒有。還沒有的先照往年的日期排，週視圖用灰色虛線標出，價格也是往年的。</p>
+      <p>報名前要再向機構確認日期和價格。資料查證到 ${esc(latestVerified())}。</p></div>` : ''}`;
+  $('#weeks').innerHTML = r.weeks.length ? weekTable(r, ly) : '';
   lastR = r;
   renderResults();
 }
@@ -899,8 +947,10 @@ function run() {
   render(q);
 }
 
+const latestVerified = () => raw.sessions.reduce((m, s) => (s.verified_at > m ? s.verified_at : m), '');
+
 function footer() {
-  const latest = raw.sessions.reduce((m, s) => (s.verified_at > m ? s.verified_at : m), '');
+  const latest = latestVerified();
   const fx = db.fx;
   $('#foot').innerHTML = `資料查證到 ${esc(latest)}。匯率：${Object.keys(fx.rates).filter((c) => c !== 'TWD').map((c) => `1 ${c} ≈ ${fx.rates[c]} TWD`).join('、')}（${esc(fx.source)}，${esc(fx.asof.MYR)}）。<br>
     可信度：高＝官方訂位頁或簡章且是 2027 的日期；中＝營隊官方社群，或聚合站資料與官方不矛盾；低＝只有聚合站或代理商來源，或來源互相矛盾。<br>
@@ -947,6 +997,7 @@ async function main() {
     const b = e.target.closest('[data-light]');
     if (!b) return;
     const k = b.dataset.light;
+    lightsTouched = true;
     if (shownLights.has(k)) shownLights.delete(k); else shownLights.add(k);
     renderResults();
   });
@@ -954,6 +1005,11 @@ async function main() {
     if (e.target.id !== 'sort') return;
     sortBy = e.target.value;
     renderResults();
+  });
+  $('#weeks').addEventListener('change', (e) => {
+    if (e.target.id !== 'use-ly') return;
+    useLastYear = e.target.checked;
+    run();
   });
   $('#weeks').addEventListener('click', (e) => {
     const a = e.target.closest('[data-go]');
