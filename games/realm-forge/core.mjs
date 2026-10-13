@@ -3,6 +3,7 @@ import { BUILDING_BALANCE } from './balance.mjs?v=20261009l';
 import { createRouteSearch } from './navigation.mjs?v=20261009l';
 import { smoothPath, segmentClear, pathGoalTail } from './motion.mjs?v=20261009l';
 import { AI_PROFILES, updateAI, initAIKnowledge } from './ai.mjs?v=20261009l';
+import { separateUnits, unitRadius } from './crowd.mjs?v=20261009l';
 export const clone = value => JSON.parse(JSON.stringify(value));
 export const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 export const RICH_RESOURCE_AMOUNTS = { wood: 5000, food: 10000, gold: 20000, stone: 20000 };
@@ -319,7 +320,7 @@ export class World {
     this.researched = Array.from({ length: this.teams }, () => new Set(this.project.rules.startAge === 4 ? TECHNOLOGIES.map(t => t.id) : ['feudal', 'castle-age', 'imperial'].slice(0, this.ages[0])));
     this.stocks = Array.from({ length: this.teams }, (_, team) => team === 0 ? clone(this.project.rules.playerStartingResources) : clone(this.project.rules.aiStartingResources || Object.fromEntries(['wood','food','gold','stone'].map(r=>[r,this.project.rules.starting]))));
     this.amounts = {};this.tradeEarned=Array(this.teams).fill(0);
-    this.visible = new Uint8Array(this.map.size ** 2); this.explored = new Uint8Array(this.map.size ** 2); this.aiFair = this.project.rules.aiVision === 'fair' && this.project.rules.ai !== 'off'; this.blockedCells = new Set(); this.occupiedCells = new Map(); this.spatial = new Map(); this.entities = new Map(); this.aiTimer = 0; this.visionTimer = 0; this.pathBudget = 0;
+    this.visible = new Uint8Array(this.map.size ** 2); this.explored = new Uint8Array(this.map.size ** 2); this.aiFair = this.project.rules.aiVision === 'fair' && this.project.rules.ai !== 'off'; this.blockedCells = new Set(); this.occupiedCells = new Map(); this.spatial = new Map(); this.entities = new Map(); this.aiTimer = 0; this.visionTimer = 0; this.pathBudget = 0; this.holds = new Map(); this.tickNo = 0; this.sepSkips = 0;
     const deployedBuildingKeys = new Set();
     for (const placement of this.map.buildingPlacements || []) {
       const key = buildingPlacementKey(placement);
@@ -536,7 +537,7 @@ export class World {
   spawn(id, team, p) {
     const blueprint = this.effectiveBlueprint(id, team); if (!blueprint || !p || blueprint.hero && (team !== 0 || this.population(team) >= this.populationLimit(team))) return null;
     p = this.nearestOpen(p); if (!p) return null;
-    const u = { id: this.nextId++, kind: 'unit', team, blueprint, x: p.x, y: p.y, hp: blueprint.hp, maxHp: blueprint.hp, order: null, queued: [], path: [], repath: 0, cooldown: 0, autoTimer: (this.nextId % 10) / 10, carried: 0, carrying: null, work: 0, stance: 'aggressive', attackAnimation: 0, hitAnimation: 0, packed: Boolean(blueprint.packed) };
+    const u = { id: this.nextId++, kind: 'unit', team, blueprint, x: p.x, y: p.y, hp: blueprint.hp, maxHp: blueprint.hp, order: null, queued: [], path: [], repath: 0, cooldown: 0, autoTimer: (this.nextId % 10) / 10, carried: 0, carrying: null, work: 0, stance: 'aggressive', attackAnimation: 0, hitAnimation: 0, packed: Boolean(blueprint.packed), radius: unitRadius(blueprint), holdAt: -1, crowdAt: -1, stall: 0, stallX: null, stallY: null };
     this.units.push(u); this.entities.set(u.id, u); return u;
   }
   population(team) { return this.units.filter(u => u.team === team && u.hp > 0).length; }
@@ -763,7 +764,7 @@ export class World {
   }
   isVisible(e) { return e.team === 0 || Boolean(this.visible[clamp(Math.round(e.y), 0, this.map.size - 1) * this.map.size + clamp(Math.round(e.x), 0, this.map.size - 1)]); }
   walk(u, goal, radius, dt) {
-    if (goalDistance(u, goal) <= radius + 0.03) return true;
+    if (goalDistance(u, goal) <= radius + 0.03) { if (radius > .35) { this.holds.set(u.id, { goal, radius }); u.holdAt = this.tickNo; } return true; }
     if (u.pathGoal && (distance(u.pathGoal, goal) > (distance(u,goal)>64?8:.75) || u.pathGoal.radius !== radius)) { u.path = []; u.repath = 0; this.routeSearches?.delete(u.id); }
     u.repath -= dt;
     if (!u.path.length && u.repath <= 0 && this.pathBudget > 0 && performance.now() < this.pathDeadline) {
@@ -787,12 +788,25 @@ export class World {
     while(u.path.length&&step>.00001) {
       const p=u.path[0];if(this.blocked(p.x,p.y)){u.path=[];u.repath=0;return false;}
       const dd=distance(u,p),travel=Math.min(dd,step);
+      // Jostled by neighbours, a marcher counts an intermediate waypoint as reached when close, so two units never fight over one point.
+      if(u.path.length>1&&dd<.5&&u.crowdAt===this.tickNo-1){u.path.shift();continue;}
       const next=dd>.00001?{x:u.x+(p.x-u.x)*travel/dd,y:u.y+(p.y-u.y)*travel/dd}:p;
       if(!segmentClear(u,next,(x,y)=>this.blocked(x,y))){u.path=[];u.repath=0;this.routeSearches?.delete(u.id);return false;}
       if(dd>.00001){u.facing={x:p.x-u.x,y:p.y-u.y};u.moving=true;u.moveDistance=(u.moveDistance||0)+travel;}
       if(dd<=step){u.x=p.x;u.y=p.y;u.path.shift();step-=dd;}
       else{u.x+=(p.x-u.x)*step/dd;u.y+=(p.y-u.y)*step/dd;step=0;}
     }
+    return false;
+  }
+  // A marcher that keeps being shoved back by units already standing at the destination settles where it is.
+  crowdStalled(u, o, dt) {
+    const px = u.stallX, py = u.stallY; u.stallX = u.x; u.stallY = u.y;
+    if (px == null || !u.moving) return false;
+    if (Math.hypot(u.x - px, u.y - py) > (o.speed || u.blueprint.speed) * dt * .3) { u.stall = 0; return false; }
+    u.stall = (u.stall || 0) + dt;
+    if (u.stall < .5 || distance(u, o) >= 3 + Math.min(u.stall, 5)) return false;
+    const gx = Math.floor(o.x / 4), gy = Math.floor(o.y / 4);
+    for (let y = gy - 1; y <= gy + 1; y++) for (let x = gx - 1; x <= gx + 1; x++) for (const e of this.spatial.get(`${x},${y}`) || []) if (e.kind === 'unit' && e !== u && !e.moving && distance(e, o) < 1.5) return true;
     return false;
   }
   workPose(u, activity, point, dt) {
@@ -856,10 +870,11 @@ export class World {
       return this.walk(u, target, bp.range, dt);
     }
     if (bp.packed && u.packed) { this.pack(u, false); return false; }
+    this.holds.set(u.id, { goal: target, radius: bp.range }); u.holdAt = this.tickNo;
     return !(u.packLeft > 0);
   }
   tick(dt) {
-    if (this.result) return; this.time += dt; this.pathBudget = this.map.size > 128 ? 24 : 48; this.pathDeadline=performance.now()+3; this.updateSpatial();
+    if (this.result) return; this.time += dt; this.pathBudget = this.map.size > 128 ? 24 : 48; this.pathDeadline=performance.now()+3; this.holds.clear(); this.tickNo++; this.updateSpatial();
     for (const u of this.units) if (u.hp > 0 && u.blueprint.hero) u.hp = Math.min(u.maxHp, u.hp + u.blueprint.regen * dt);
     for (const b of this.buildings) if (b.hp > 0) {
       b.cooldown = Math.max(0, b.cooldown - dt);
@@ -911,7 +926,7 @@ export class World {
           for (const target of [...this.units, ...this.buildings]) if (!target.garrison && target.id !== u.id && target.hp > 0 && goalDistance(target, o) <= (bp.splash || .3)) { target.hp -= this.damage(u, target); target.hitAnimation = .25; this.retaliate(target,u); }
           u.cooldown = bp.cooldown; u.attackAnimation = .55; this.effects.push({type:'rock',x:u.x,y:u.y,tx:o.x,ty:o.y,age:0,team:u.team});
         }
-      } else if (o.type === 'move' || o.type === 'attackMove') { if (bp.packed && !u.packed) { this.pack(u, true); continue; } if (this.walk(u, o, 0.2, dt)) this.finish(u); }
+      } else if (o.type === 'move' || o.type === 'attackMove') { if (bp.packed && !u.packed) { this.pack(u, true); continue; } if (this.walk(u, o, 0.2, dt) || this.crowdStalled(u, o, dt)) this.finish(u); }
       else if (o.type === 'attack') {
         const target = this.entity(o.target); if (!target || target.garrison || !this.isEnemy(u.team, target.team)) this.finish(u); else if (this.attackReady(u, target, dt)) this.strike(u, target, bp.attack, bp.range, bp.cooldown);
       } else if (o.type === 'gather' && bp.role === 'worker') {
@@ -959,6 +974,10 @@ export class World {
       else if (o.type === 'garrison') { const b = this.entity(o.target); if (!b || b.kind !== 'building' || b.progress < 1 || b.team !== u.team || !BUILDINGS[b.type].garrison || b.garrisoned.length >= BUILDINGS[b.type].garrison) this.finish(u); else if (this.walk(u, b, 1.5, dt)) { if (BUILDINGS[b.type].dropoff?.includes(u.carrying)) this.depositCarried(u); b.garrisoned.push(u.id); u.garrison = b.id; u.x = b.x; u.y = b.y; this.finish(u); } }
       else if (o.type === 'convert' && bp.canConvert) { const t = this.entity(o.target); if (!t || !this.isEnemy(t.team, u.team) || t.kind !== 'unit' || t.blueprint.hero) this.finish(u); else if (!t.garrison && (u.faith ?? 100) >= 99.99 && this.walk(u, t, bp.range, dt)) { u.work += dt; u.attackAnimation = .55; if (u.work > (this.researched[t.team].has('faith') ? 12 : 6)) { if(this.population(u.team)>=this.populationLimit(u.team)){u.waitingPopulation=true;continue;}t.team = u.team; this.command([t.id], null); u.faith = 0; this.finish(u); } } }
     }
+    // Separation is soft. Big armies are resolved every other tick, and a tick that already spent over 1.5 ms
+    // (path searches, a big fight) lets it wait; it never waits more than 4 ticks.
+    this.sepSkips++;
+    if (this.sepSkips >= (this.units.length > 300 ? 2 : 1) && (performance.now() - this.pathDeadline < -1.5 || this.sepSkips >= 5)) { separateUnits(this, Math.min(.2, dt * this.sepSkips), goalDistance); this.sepSkips = 0; }
     this.aiTimer += dt;
     if (this.project.rules.ai !== 'off' && this.aiTimer > .75 / (this.teams-1)) { this.aiTimer = 0; this.aiNextTeam=1+(this.aiNextTeam||0)%(this.teams-1); this.updateAI(this.aiNextTeam); }
     if (this.routeSearches) for (const id of this.routeSearches.keys()) if (!this.entity(id)) this.routeSearches.delete(id);
