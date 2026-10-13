@@ -76,3 +76,13 @@ const fx=JSON.parse(readFileSync(new URL('./fixtures/city-market.json',import.me
 for(const id of Object.keys(S.BUSINESSES))test(`${id}: store pricing and supply cannot create an unlimited local consumer market`,()=>{
   const w=S.createWorld({mapData:fx.map,distances:fx.dist,seed:7,noRivals:true,multiBusiness:true});w.companies.player.cash=20000000;w.companies.player.awareness=.95;const lot=w.lots.find(l=>l.districtId==='tech'),opened=S.openShop(w,lot.id,{businessId:id});assert.ok(opened.ok);const s=w.shops.find(s=>s.id===opened.shopId);s.status='open';s.openAtT=0;s.openedT=0;const initial=S.getMarketAnalysis(w),reference=structuredClone(s.prices);assert.ok(S.setPrices(w,s.id,Object.fromEntries(Object.keys(reference).map(k=>[k,priceBounds(id,k).max]))).ok);const priced=S.getMarketAnalysis(w);assert.equal(priced.budgetDaily,initial.budgetDaily);assert.equal(priced.population,initial.population);assert.ok(priced.sectors.find(g=>g.businessId===id).typicalOrders<=initial.sectors.find(g=>g.businessId===id).typicalOrders);assert.ok(S.setSocialAd(w,S.V.awareness.socialMaxWan).ok);assert.equal(S.getMarketAnalysis(w).budgetDaily,initial.budgetDaily);assert.ok(S.getShopAnalysis(w,s.id).capacityDaily>0);
 });
+test('ecommerce: 預設品質預算足以維持品質，只調高售價的新手也能撐過三年', () => {
+  const w0 = createEnterprise('ecommerce', 7);
+  assert.ok(w0.qualityBudget / 20000000 > .0005, '品質預算每日增幅須高於每日自然折損，否則品質永遠低於 65%、口碑只降不升');
+  for (const seed of [7, 42, 20261008]) {
+    const w = createEnterprise('ecommerce', seed); w.price = 1190; w.manager.maxFixed = 800000;
+    const net = run(w, 1095, stepEnterprise);
+    assert.equal(w.status, 'playing'); assert.equal(w.day, 1095);
+    assert.ok(w.reputation > .5, '口碑不應在預設設定下持續下滑'); assert.ok(net > 0);
+  }
+});
