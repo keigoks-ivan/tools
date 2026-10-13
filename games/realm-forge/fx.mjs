@@ -16,23 +16,23 @@ export function corpsePose(age, life = 2) {
 export function ruinAlpha(age) { return age >= RUIN_LIFE ? 0 : age > RUIN_LIFE - RUIN_FADE ? (RUIN_LIFE - age) / RUIN_FADE : 1; }
 
 // What a damaged building shows, by remaining hp ratio: smoke columns, fire spots (drawn on the sprite, not as particles), embers.
-// Halved hp: one or two smoke columns. A quarter: two to four fires and thick smoke. A tenth or less: many big fires.
+// Halved hp: one or two smoke columns. A quarter: two to four fires and thick smoke. A tenth or less: many small fires and dense dark smoke.
 export function damageProfile(ratio) {
   if (!(ratio > 0) || ratio > .5) return { smoke: 0, flames: 0, scale: 0, rate: 0, embers: 0, dark: 0 };
-  if (ratio > .35) return { smoke: 1, flames: 0, scale: 0, rate: 1.7, embers: 0, dark: .35 };
-  if (ratio > .25) return { smoke: 2, flames: 0, scale: 0, rate: 2.1, embers: 0, dark: .5 };
-  if (ratio > .18) return { smoke: 3, flames: 2, scale: 1.15, rate: 2.6, embers: 1.5, dark: .7 };
-  if (ratio > .12) return { smoke: 3, flames: 3, scale: 1.25, rate: 2.8, embers: 2, dark: .75 };
-  if (ratio > .1) return { smoke: 4, flames: 4, scale: 1.35, rate: 3, embers: 2.5, dark: .8 };
-  if (ratio > .05) return { smoke: 5, flames: 6, scale: 1.5, rate: 3.2, embers: 3.5, dark: .9 };
-  return { smoke: 5, flames: 8, scale: 1.7, rate: 3.4, embers: 5, dark: 1 };
+  if (ratio > .35) return { smoke: 1, flames: 0, scale: 0, rate: 2, embers: 0, dark: .55 };
+  if (ratio > .25) return { smoke: 2, flames: 0, scale: 0, rate: 2.2, embers: 0, dark: .65 };
+  if (ratio > .18) return { smoke: 3, flames: 2, scale: 1.15, rate: 2.3, embers: 1.5, dark: .78 };
+  if (ratio > .12) return { smoke: 3, flames: 3, scale: 1.2, rate: 2.4, embers: 2, dark: .85 };
+  if (ratio > .1) return { smoke: 4, flames: 5, scale: 1.2, rate: 2.5, embers: 2.5, dark: .9 };
+  if (ratio > .05) return { smoke: 5, flames: 7, scale: 1.2, rate: 2.5, embers: 3.5, dark: .95 };
+  return { smoke: 5, flames: 9, scale: 1.25, rate: 2.6, embers: 5, dark: 1 };
 }
 const hash = (a, b = 0) => { const s = Math.sin(a * 127.1 + b * 311.7) * 43758.5453; return s - Math.floor(s); };
 
 // Stable positions on the sprite (dx from the centre, up from the base, both in sprite pixels). Golden-ratio spacing keeps the first n spots unchanged as n grows.
 const spread = (id, i, salt) => ((i * .618034 + hash(id, salt)) % 1) - .5;
 export function fireSpots(id, count, size) {
-  return Array.from({ length: count }, (_, i) => ({ dx: spread(id, i, 1) * size.width * .56, up: size.height * (.14 + hash(id, i * 7 + 2) * .5), phase: hash(id, i * 7 + 3) * 10, flip: hash(id, i * 7 + 4) < .5, size: .8 + hash(id, i * 7 + 5) * .4 }));
+  return Array.from({ length: count }, (_, i) => ({ dx: spread(id, i, 1) * size.width * .6, up: size.height * (.1 + hash(id, i * 7 + 2) * .68), phase: hash(id, i * 7 + 3) * 10, flip: hash(id, i * 7 + 4) < .5, size: .8 + hash(id, i * 7 + 5) * .4 }));
 }
 export function smokeSpots(id, count, size) {
   return Array.from({ length: count }, (_, i) => ({ dx: spread(id, i, 9) * size.width * .5, up: size.height * (.5 + hash(id, i * 7 + 12) * .35), phase: hash(id, i * 7 + 13) * 10 }));
@@ -88,7 +88,7 @@ export class FxState {
       carry.smoke[i] = (carry.smoke[i] ?? this.rand()) + dt * profile.rate;
       while (carry.smoke[i] >= 1 && room()) {
         carry.smoke[i]--; budget--; const at = spotWorld(b, spot, size);
-        this.spawn({ owner: b.id, type: 'smoke', ...at, wx: at.wx + (this.rand() - .5) * .25, z: at.z + (this.rand() - .5) * 4, vz: 24 + this.rand() * 16, vx: .22 + this.rand() * .2, vy: -.1 + this.rand() * .06, life: 2.2 + this.rand() * 1.2, size: 9 + this.rand() * 5, dark: profile.dark, seed: this.rand() * 6.28 });
+        this.spawn({ owner: b.id, type: 'smoke', ...at, wx: at.wx + (this.rand() - .5) * .25, z: at.z + (this.rand() - .5) * 4, vz: 46 + this.rand() * 20, vx: .2 + this.rand() * .2, vy: -.1 + this.rand() * .06, life: 3.6 + this.rand() * 1.4, size: 11 + this.rand() * 6, dark: profile.dark, seed: this.rand() * 6.28 });
       }
       carry.smoke[i] = Math.min(carry.smoke[i], 2);
     });

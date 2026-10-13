@@ -326,7 +326,7 @@ function flameCanvas(k) {
     g.beginPath(); g.moveTo(x0 - bw / 2, by);
     g.bezierCurveTo(x0 - bw / 2 - 3, by - th * .38, x0 + bend * .25 - bw * .22, by - th * .66, tx, by - th);
     g.bezierCurveTo(x0 + bend * .45 + bw * .3, by - th * .62, x0 + bw / 2 + 3, by - th * .32, x0 + bw / 2, by);
-    g.closePath(); g.fillStyle = grad; g.fill();
+    g.closePath(); g.fillStyle = grad; g.shadowColor = 'rgba(255,120,30,.75)'; g.shadowBlur = 5; g.fill(); g.shadowBlur = 0;
   };
   const sway = Math.sin(ph) * 6, sway2 = Math.sin(ph + 2.1) * 5, sway3 = Math.sin(ph + 4.2) * 5, lift = Math.cos(ph * 2) * 4;
   tongue(20, 17, 52 + lift, -4 + sway2, 'rgba(200,40,10,0)', '#e0521a');
@@ -348,8 +348,8 @@ function flameSet() {
 function smokeSprite(dark) {
   const key = dark ? 'dark' : 'light'; smokeSprites ??= {};
   if (!smokeSprites[key]) {
-    const canvas = document.createElement('canvas'); canvas.width = canvas.height = 64; const g = canvas.getContext('2d'), rg = g.createRadialGradient(28, 28, 2, 32, 32, 31), rgb = dark ? '30,28,26' : '104,101,95';
-    rg.addColorStop(0, `rgba(${rgb},.95)`); rg.addColorStop(.55, `rgba(${rgb},.55)`); rg.addColorStop(1, `rgba(${rgb},0)`); g.fillStyle = rg; g.fillRect(0, 0, 64, 64); smokeSprites[key] = canvas;
+    const canvas = document.createElement('canvas'); canvas.width = canvas.height = 64; const g = canvas.getContext('2d'), rg = g.createRadialGradient(28, 28, 2, 32, 32, 31), rgb = dark ? '16,15,14' : '84,82,78';
+    rg.addColorStop(0, `rgba(${rgb},1)`); rg.addColorStop(.6, `rgba(${rgb},.7)`); rg.addColorStop(1, `rgba(${rgb},0)`); g.fillStyle = rg; g.fillRect(0, 0, 64, 64); smokeSprites[key] = canvas;
   }
   return smokeSprites[key];
 }
@@ -362,7 +362,7 @@ function drawFlames(c, b, size) {
   c.restore();
   for (const spot of spots) {
     const k = Math.floor(clock * 12 + spot.phase * 2.3) % FLAME_FRAMES, w = base * profile.scale * spot.size * (.92 + .12 * Math.sin(clock * 17 + spot.phase)), h = w * 1.65 * (.9 + .2 * Math.sin(clock * 13 + spot.phase * 2));
-    c.save(); c.translate(spot.dx, spot.y); c.scale(spot.flip ? -1 : 1, 1); c.transform(1, 0, Math.sin(clock * 4.2 + spot.phase) * .12, 1, 0, 0); c.drawImage(frames[k], -w / 2, -h, w, h); c.restore();
+    c.save(); c.globalAlpha = .84; c.translate(spot.dx, spot.y); c.scale(spot.flip ? -1 : 1, 1); c.transform(1, 0, Math.sin(clock * 4.2 + spot.phase) * .12, 1, 0, 0); c.drawImage(frames[k], -w / 2, -h, w, h); c.restore();
   }
 }
 function building(c, b, x, y, scale, selected) {
@@ -637,7 +637,7 @@ export class Renderer {
     for (const p of this.fx.particles) {
       const t = p.age / p.life, s = this.screen(p.wx, p.wy), x = s.x, y = s.y - p.z * z;
       if (x < -40 || x > w + 40 || y < -70 || y > h + 40) continue;
-      if (p.type === 'smoke') { const grow = p.size * (.55 + t * 1.9) * z, wobble = Math.sin(p.age * 2.2 + (p.seed ?? 0)) * 3 * z * t, sprite = smokeSprite(p.dark === undefined ? t < .35 : t < .2 + p.dark * .5); c.globalAlpha = (p.dark === undefined ? .55 : .5 + .22 * p.dark) * (1 - t) * Math.min(1, t * 6); c.drawImage(sprite, x + wobble - grow, y - grow, grow * 2, grow * 2); }
+      if (p.type === 'smoke') { const grow = p.size * (.6 + t * 2.6) * z, wobble = Math.sin(p.age * 2.2 + (p.seed ?? 0)) * 6 * z * t, sprite = smokeSprite(p.dark === undefined ? t < .35 : t < .3 + p.dark * .45); c.globalAlpha = (p.dark === undefined ? .55 : .62 + .33 * p.dark) * Math.pow(1 - t, 1.25) * Math.min(1, t * 6); c.drawImage(sprite, x + wobble - grow, y - grow, grow * 2, grow * 2); }
       else if (p.type === 'dust') { c.globalAlpha = .55 * (1 - t); ellipse(c, x, y, p.size * (.5 + t) * z, p.size * (.5 + t) * z * .6, '#b5a47c'); }
       else if (p.type === 'ember') { c.globalAlpha = (1 - t) * (.6 + .4 * Math.sin(p.age * 40)); ellipse(c, x, y, p.size * z * .9 + .4, p.size * z * .9 + .4, t < .5 ? '#ffd36a' : '#ff8a2a'); }
       else if (p.type === 'spark') { const vx = (p.vx - p.vy) * this.tileW / 2, vy = (p.vx + p.vy) * this.tileH / 2 - p.vz, m = Math.hypot(vx, vy) || 1; c.globalAlpha = 1 - t; line(c, [[x, y], [x - vx / m * 4 * Math.max(.8, z), y - vy / m * 4 * Math.max(.8, z)]], '#ffe9a0', 1.5); }
