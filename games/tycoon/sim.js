@@ -9,7 +9,7 @@
 import { P, unwrap } from './params.js';
 import { E as EXP, FACILITY_KEYS, newExpansion, ready, effects } from './facilities.js';
 import { createIndustry, industryEffects, industryDay, industryAction } from './industry-sim.js';
-import { BUSINESSES, businessOf, freshBusiness, retailBusiness, premises, assetMonthly, stockLimit, priceBounds, initialOperations, experience, hourlyCapacity } from './businesses.js';
+import { BUSINESSES, ADVANCED_GOALS, businessOf, freshBusiness, retailBusiness, premises, assetMonthly, stockLimit, priceBounds, initialOperations, experience, hourlyCapacity } from './businesses.js';
 import { MARKET_VERSION, configureMarket, districtAt, districtOf, updatePopulation, incomeOf, reach, deliveryReach, shareWallet, marketDistricts, walletAt } from './market.js';
 import { PROFILES, MANAGERS, strategyOf, managerOf, strategyEffects, customerFit, strategyValid, managerValid } from './strategy.js';
 import { projectCash } from './forecast.js';
@@ -1032,6 +1032,13 @@ function applyChoice(world, ev, key, auto) {
     logEvt(world, 'decision', `${ev.title}：${ev.choices.find((c) => c.key === ev.choice).label}${auto ? '（到期自動套用）' : ''}`);
     return r;
   }
+  if (ev.kind === 'campaign') {
+    ev.status = 'resolved'; ev.choice = key; ev.auto = auto;
+    logEvt(world, 'decision', `${ev.title}：${ev.choices.find((c) => c.key === key).label}${auto ? '（到期自動套用）' : ''}`);
+    if (key === 'A') { world.status = 'won'; world.endReason = `${businessOf(world.campaignBusiness).name}三年挑戰：完成業態里程碑，最近三月獲利，結算過關`; }
+    else world.campaignCleared = { t: world.t, date: dateOf(Math.floor(world.t / 24)).key, netWorth: campaignNetWorth(world), goal: ADVANCED_GOALS[world.campaignBusiness] };
+    return okRes();
+  }
   if(ev.kind==='industry'){const r=storeIndustryAction(world,ev.shopId,{kind:'event',choice:key==='A'?'protect':'accept'});if(!r.ok)return r;ev.status='resolved';ev.choice=key;return okRes();}
   const co = playerCo(world);
   const cost = ev.choices.find((c) => c.key === key).cost || 0;
@@ -1066,7 +1073,7 @@ function applyChoice(world, ev, key, auto) {
 }
 /** 到期仍未回應的事件，套用預設（不動作）選項。 */
 function expireEvents(world) {
-  const defaults = { industry:'B', typhoon: 'A', cold: 'B', milk: 'B', platform: 'B', flame: 'B', batch: 'B', lease: 'A' };
+  const defaults = { campaign: 'A', industry:'B', typhoon: 'A', cold: 'B', milk: 'B', platform: 'B', flame: 'B', batch: 'B', lease: 'A' };
   for (const ev of world.events.list)
     if (ev.status === 'pending' && ev.deadlineT != null && world.t >= ev.deadlineT) applyChoice(world, ev, defaults[ev.kind], true);
 }
@@ -1355,11 +1362,12 @@ function startDay(world) {
     settleMonth(world, dateOf(idx - 1));
     if (di.m === 1) yearEnd(world, di);
     if (world.status !== 'playing') return;
-    if (world.campaignBusiness && idx < END_DAY) { const cp = campaignProgress(world); if (cp.ok) { world.status = 'won'; world.endReason = `${businessOf(world.campaignBusiness).name}三年挑戰：完成業態里程碑，最近三月獲利，提前過關`; return; } }
+    if (world.campaignBusiness && idx < END_DAY && !world.campaignCleared && !world.campaignOffered) { const cp = campaignProgress(world); if (cp.ok) offerCampaignClear(world); }
   }
   // 目標日
   if (idx >= END_DAY) {
     if (world.campaignBusiness) {
+      if (world.campaignCleared) { finishCleared(world); return; }
       const cp=campaignProgress(world), mastered=cp.milestones===3, profitable=cp.profitMonths===3&&cp.months===3;
       world.status=mastered&&profitable&&cp.cashOk?'won':'lost';
       world.endReason=`${businessOf(world.campaignBusiness).name}三年挑戰：${mastered?'完成業態里程碑':'尚未完成業態里程碑'}，${profitable?'最近三月獲利':'最近三月尚未穩定獲利'}`;
@@ -1665,7 +1673,8 @@ function settleMonth(world, prev) {
     const need = Math.ceil(-pc.cash / V.loan.unit) * V.loan.unit;
     const draw = Math.min(room, need);
     if (draw > 0) { addLoan(pc, 'working', draw); logEvt(world, 'loan', `月結現金為負，自動動用週轉貸款 ${draw.toLocaleString()} 元`); }
-    if (pc.cash < 0) { world.status = 'bankrupt'; world.endReason = '月結現金為負，週轉額度也用完了'; logEvt(world, 'bankrupt', world.endReason); }
+    if (pc.cash < 0 && world.campaignCleared) { logEvt(world, 'bankrupt', '月結現金為負，週轉額度也用完了'); finishCleared(world, '現金耗盡'); }
+    else if (pc.cash < 0) { world.status = 'bankrupt'; world.endReason = '月結現金為負，週轉額度也用完了'; logEvt(world, 'bankrupt', world.endReason); }
   }
 }
 
@@ -2139,6 +2148,26 @@ function companyPnL(world, co, row, di) {
 }
 
 /** 門店三年挑戰的過關進度：月獲利不含年度營所稅（12 月帳含全年稅，會誤判成虧損）。 */
+const wanText = (n) => (n < 0 ? '−' : '') + '$' + (Math.abs(n) / 10000).toLocaleString('zh-TW', { maximumFractionDigits: 1 }) + ' 萬';
+/** 淨值 = 現金 − 貸款餘額；店內設備、押金和庫存不另估價，與電腦玩家回測的淨值同一算法。 */
+export function campaignNetWorth(world) { const co = playerCo(world); return Math.round(co.cash - co.loans.reduce((a, l) => a + l.balance, 0)); }
+/** 過關後繼續挑戰的狀態；沒有選擇繼續（含舊存檔）回傳 cleared:false。 */
+export function campaignAdvanced(world) {
+  const goal = ADVANCED_GOALS[world.campaignBusiness];
+  return { cleared: !!world.campaignCleared, goal, netWorth: campaignNetWorth(world) };
+}
+function offerCampaignClear(world) {
+  const name = businessOf(world.campaignBusiness).name, goal = ADVANCED_GOALS[world.campaignBusiness], days = 15;
+  world.campaignOffered = true;
+  pushEvent(world, { kind: 'campaign', title: `${name}三年挑戰：過關條件達成`, text: `三個里程碑完成，最近三個月都獲利，現金足夠。可以現在結算過關，也可以繼續經營到 ${dateOf(END_DAY).y} 年 ${dateOf(END_DAY).m} 月 ${dateOf(END_DAY).d} 日，挑戰進階目標：期末淨值 ${wanText(goal)}（現金減貸款）。選繼續也已經算過關，之後不會變成失敗。${days} 天內不選，預設結算過關。`, deadlineT: world.t + days * 24, choices: [{ key: 'A', label: '結算過關（現在結束）', cost: 0 }, { key: 'B', label: `繼續挑戰進階目標（期末淨值 ${wanText(goal)}）`, cost: 0 }] });
+}
+/** 已過關後到期或現金耗盡：結局一律是過關，只分進階目標有沒有達成。 */
+function finishCleared(world, why = '') {
+  const cc = world.campaignCleared, nw = campaignNetWorth(world), goal = cc.goal, met = nw >= goal;
+  Object.assign(cc, { endNetWorth: nw, goalMet: met });
+  world.status = 'won';
+  world.endReason = `${businessOf(world.campaignBusiness).name}三年挑戰：過關，${why ? why + '，' : ''}` + (met ? `進階目標達成（期末淨值 ${wanText(nw)}，目標 ${wanText(goal)}）` : `進階目標未達成（期末淨值 ${wanText(nw)}，差 ${wanText(goal - nw)}）`);
+}
 export function campaignProgress(world) {
   const shops = world.shops.filter((s) => s.owner === 'player' && s.status === 'open'), co = playerCo(world), di = dateOf(Math.floor(world.t / 24));
   const rows = co.rows.slice(-3).map((r) => companyPnL(world, co, r, di)), milestones = Math.max(0, ...shops.map((s) => s.industry?.milestones.length || 0));

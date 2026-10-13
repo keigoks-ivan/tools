@@ -37,3 +37,10 @@ export function hourlyCapacity(s, n, speed) {
   const dineShare = { takeaway: 0.15, balanced: 0.55, dinein: 0.85 }[op.mode];
   return Math.min(production, Math.floor(op.seats * 60 / 50 / dineShare));
 }
+
+/**
+ * 門店三年挑戰過關後，繼續挑戰的進階目標：期末淨值（現金減貸款，元）。
+ * 手搖飲、便利商店、餐廳、超市、健身：電腦玩家最好打法三十六個月期末淨值中位數的 70%，取整到百萬。
+ * 便當：只有一局 AI 實測（約 1,529 萬）的 70%。咖啡、烘焙、髮廊：沒有打法穩定賺錢，暫以起始資金（保本）為目標，待實測再調。
+ */
+export const ADVANCED_GOALS = { tea: 19000000, cafe: 3000000, bento: 10000000, bakery: 3000000, convenience: 12000000, salon: 2000000, restaurant: 36000000, supermarket: 80000000, fitness: 38000000 };

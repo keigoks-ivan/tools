@@ -63,6 +63,7 @@ function validate(w) {
     for (const l of co.loans) if (!finite(l.balance) || l.balance < 0 || !finite(l.payment)) bad();
     if (co.expansion && (!co.expansion.projects || !['factory', 'warehouse', 'lab'].every((k) => ['none', 'building', 'ready'].includes(co.expansion.facilities?.[k]?.status)) || !array(co.expansion.facilities.warehouse.orders))) bad();
   }
+  if (w.campaignCleared != null && (w.campaignBusiness == null || !finite(w.campaignCleared.t) || !finite(w.campaignCleared.goal))) bad();
   if (w.campaignBusiness != null && (!Object.hasOwn(BUSINESSES,w.campaignBusiness) || !finite(w.campaignInitialCash) || w.campaignInitialCash <= 0 || w.shops.some(s=>s.owner==='player' && s.businessId!==w.campaignBusiness))) bad();
   for (const s of w.shops) {
     const b = BUSINESSES[s.businessId || 'tea'];

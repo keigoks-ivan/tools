@@ -568,7 +568,7 @@ ${fee ? `<p class="note">現在退租另付違約金 ${money(fee)}，以下回�
     const st = s.status === 'renovating' ? '<span class="zone s-reno">裝修中</span>' : '<span class="zone s-open">營業中</span>';
     const lot = world.lots.find((l) => l.id === s.lotId);
     const tabs = [['industry','劇本'],['today', '今天'], ['op', '經營'], ['menu', '產品'], ['staff', '排班'], ...(S.getLeaseInfo(world, s.id, { includeAnalysis: false }) ? [['lease', '租約']] : []), ['set', '設定']];
-    const body = { industry: s=>industryBoardHtml(world.shops.find(x=>x.id===s.id),{shopId:s.id,disabled:world.status!=='playing',progress:S.campaignProgress(world)}), today: todayHtml, op: operationsHtml, menu: menuHtml, staff: staffHtml, lease: leaseHtml, set: settingHtml }[shopTab](s);
+    const body = { industry: s=>industryBoardHtml(world.shops.find(x=>x.id===s.id),{shopId:s.id,disabled:world.status!=='playing',progress:S.campaignProgress(world),advanced:S.campaignAdvanced(world)}), today: todayHtml, op: operationsHtml, menu: menuHtml, staff: staffHtml, lease: leaseHtml, set: settingHtml }[shopTab](s);
     return `${head(s.name, `${st}<span class="zone">${bizOf(s).name}</span>${zoneHtml(lot.zone)}${starHtml(s.star)}<span class="num" style="font-size:12px;margin-left:4px">${s.star.toFixed(1)}（${int(s.reviews)}）</span>`)}
 <div class="mini-tabs">${tabs.map(([k, n]) => `<button class="${shopTab === k ? 'on' : ''}" data-act="tab:${k}">${n}</button>`).join('')}</div>
 <div id="sd-body">${body}</div>`;
@@ -762,7 +762,7 @@ ${offer ? `<div class="sec"><h4>外送平台曝光方案</h4><div class="sw" sty
   const EV_META = {
     typhoon: ['世界大事', icon.bolt, ''], cold: ['世界大事', icon.bolt, ''], milk: ['成本', icon.tariff, ''],
     platform: ['外送平台', icon.ad, 'gold'], flame: ['口碑', icon.bolt, ''], batch: ['連鎖供料', icon.factory, ''],
-    lease: ['租約到期', icon.shop, 'gold'],
+    lease: ['租約到期', icon.shop, 'gold'], campaign: ['三年挑戰', icon.bolt, 'gold'],
   };
   function renderEvent() {
     const ev = S.getEvents(world).pending.filter((e) => e.choices && e.choices.length)[0];
