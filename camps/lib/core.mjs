@@ -57,6 +57,7 @@ export function overlaps(a0, a1, b0, b1) {
 // Mon–Fri weeks touching [start, end]
 export function weeksIn(start, end) {
   const out = [];
+  if (!start || !end || start > end) return out;
   for (let m = mondayOf(start); m <= end; m = addDays(m, 7)) {
     const fri = addDays(m, 4);
     if (fri >= start) out.push({ mon: m, fri });
@@ -75,8 +76,15 @@ export function sessionSpan(s) {
 
 // ---------- age
 
-// birth is 'YYYY-MM'. Day of birth is unknown, so when the session starts in the
-// birth month we take the younger age and flag it as borderline.
+// birth is 'YYYY-MM'. Day of birth is unknown, so the age in whole months is either
+// M or M-1 (M = month difference); we take the younger and flag it as borderline
+// when that changes the answer. Limits are compared in months, so 1.5 and 2.5 work.
+export function monthsDiff(birth, dateStr) {
+  const [by, bm] = birth.split('-').map(Number);
+  const [y, m] = dateStr.split('-').map(Number);
+  return (y - by) * 12 + (m - bm);
+}
+
 export function ageAt(birth, dateStr, rule = 'at_start_date') {
   const [by, bm] = birth.split('-').map(Number);
   const [y, m] = dateStr.split('-').map(Number);
@@ -85,15 +93,47 @@ export function ageAt(birth, dateStr, rule = 'at_start_date') {
   return { age: y - by - passed, borderline: m === bm };
 }
 
+// age in months as [youngest, oldest] the child can be on that date
+function monthRange(birth, dateStr, rule) {
+  if (rule === 'in_calendar_year') {
+    const a = Number(dateStr.slice(0, 4)) - Number(birth.slice(0, 4));
+    return [a * 12, a * 12];
+  }
+  const M = monthsDiff(birth, dateStr);
+  return [M - 1, M];
+}
+
 export function kidFit(program, birth, dateStr) {
-  const { age, borderline } = ageAt(birth, dateStr, program.age_rule || 'at_start_date');
+  const rule = program.age_rule || 'at_start_date';
+  const M = rule === 'in_calendar_year' ? monthRange(birth, dateStr, rule)[1] : monthsDiff(birth, dateStr);
+  const { age } = ageAt(birth, dateStr, rule);
+  // the date is before the birth month: the child is not born yet
+  if (M < 0) return { age: 0, fit: 'no', notBorn: true };
+  const shownAge = Math.max(0, age);
   const lo = program.age_min;
   const hi = program.age_max;
-  if (lo == null && hi == null) return { age, fit: 'unknown' };
-  const inRange = (a) => (lo == null || a >= lo) && (hi == null || a <= hi);
-  const fit = inRange(age);
-  if (borderline && inRange(age + 1) !== fit) return { age, fit: 'maybe' };
-  return { age, fit: fit ? 'yes' : 'no' };
+  if (lo == null && hi == null) return { age: shownAge, fit: 'unknown' };
+  // hi is a whole year ("up to 12") = until the 13th birthday; a fractional hi counts through that month
+  const inRange = (mo) => (lo == null || mo >= lo * 12) && (hi == null || mo < (Number.isInteger(hi) ? (hi + 1) * 12 : hi * 12 + 1));
+  const [young, old] = monthRange(birth, dateStr, rule);
+  const a = inRange(young);
+  const b = inRange(old);
+  if (a !== b) return { age: shownAge, fit: 'maybe' };
+  return { age: shownAge, fit: a ? 'yes' : 'no' };
+}
+
+// Fit over a stretch of dates when the exact start is unknown: the kid counts as
+// "maybe" if the answer differs between the first and last day.
+export function kidFitRange(program, birth, from, to) {
+  const a = kidFit(program, birth, from);
+  if (!to || to <= from) return a;
+  const b = kidFit(program, birth, to);
+  return a.fit === b.fit ? a : { ...a, fit: 'maybe' };
+}
+
+const FIT_RANK = { yes: 3, maybe: 2, unknown: 1, no: 0 };
+export function betterFit(a, b) {
+  return (FIT_RANK[b.fit] ?? 0) > (FIT_RANK[a.fit] ?? 0) ? b : a;
 }
 
 // ---------- price
@@ -169,10 +209,27 @@ export function weeksQty(price, weeks, holidayDays = 0) {
   }
 }
 
+// A percentage counts as the tax rate when a tax word sits right next to it:
+// after it ("8% Malaysia Service Tax", "10% 消費稅") or before it ("VAT 7%").
+// The window stops at the next digit or punctuation, so "20% 折扣價 + 8% SST"
+// reads 8%, and a discount percentage is never taken for tax.
+const TAX_WORD = /VAT|GST|SST|\btax\b|[稅税]/i;
+export function taxRateOf(note) {
+  const text = String(note || '');
+  const re = /(\d+(?:\.\d+)?)\s*%/g;
+  let m;
+  while ((m = re.exec(text))) {
+    const stop = /[\d,，、；;。:：]/;
+    const after = text.slice(m.index + m[0].length).split(stop)[0].slice(0, 22);
+    const before = text.slice(0, m.index).replace(/[\s(（]+$/, '').split(stop).pop().slice(-12);
+    if (TAX_WORD.test(after) || TAX_WORD.test(before)) return Number(m[1]) / 100;
+  }
+  return null;
+}
+
 export function taxRate(price) {
   if (price?.tax_included !== false) return 0;
-  const m = String(price.tax_note || '').match(/(\d+(?:\.\d+)?)\s*%\s*(?:SST|Sales|Service|Tax|銷售稅|服務稅|稅)/i);
-  return m ? Number(m[1]) / 100 : null;
+  return taxRateOf(price.tax_note);
 }
 
 export function lineCost(price, qty, nKids) {
@@ -272,13 +329,26 @@ function warningsFor(db, s, program, span, locs, kids) {
   return w;
 }
 
-function kidsFor(program, kids, dateStr) {
-  return kids.map((k) => ({ ...kidFit(program, k.birth, dateStr), name: k.name }));
+export function kidsFor(program, kids, dateStr, endStr) {
+  return kids.map((k) => ({ ...kidFitRange(program, k.birth, dateStr, endStr), name: k.name, id: k.id }));
 }
 
-function inCities(locs, cities) {
-  if (!cities?.length) return true;
-  return locs.some((l) => cities.includes(l.city));
+// Per kid, the best fit across several lists of per-kid fits (yes > maybe > unknown > no).
+export function mergeKids(lists) {
+  return lists[0].map((k, i) => lists.reduce((best, l) => betterFit(best, l[i]), k));
+}
+
+// Where a session may be shown: location country (and city when the parent picked some).
+// An empty city list means the whole country. A session with no location at all is kept
+// only when the provider's country matches and no city was picked, because its city can't be checked.
+function inScope(locs, provider, q) {
+  const country = q.country;
+  const cities = q.cities;
+  if (locs.length) {
+    return locs.some((l) => (!country || (l.country || 'MY') === country) && (!cities?.length || cities.includes(l.city)));
+  }
+  if (cities?.length) return false;
+  return !country || (provider?.country || 'MY') === country;
 }
 
 function seasonOf(dateStr) {
@@ -286,7 +356,19 @@ function seasonOf(dateStr) {
   return null;
 }
 
-// q = {start, end, kids:[{name, birth:'YYYY-MM'}], cities:[...], filters:{...}}
+// A past span moved `dy` years on, by whole weeks so the weekday stays. Of the two whole-week
+// shifts around the calendar-year date, the one closest to it that overlaps the range wins.
+export function weekShiftSpan(span, dy, q) {
+  const D = Math.round((toDate(addYears(span.start, dy)) - toDate(span.start)) / 864e5);
+  const hits = [...new Set([Math.floor(D / 7), Math.ceil(D / 7)])].map((n) => n * 7)
+    .map((days) => ({ days, start: addDays(span.start, days), end: addDays(span.end, days) }))
+    .filter((c) => overlaps(c.start, c.end, q.start, q.end))
+    .sort((x, y) => Math.abs(x.days - D) - Math.abs(y.days - D) || x.days - y.days);
+  return hits[0] || null;
+}
+
+// q = {start, end, country, kids:[{id, name, birth:'YYYY-MM'}], cities:[...], filters:{...}}
+// country limits results to that country; an empty cities list means the whole country.
 export function search(db, q) {
   const full = [];
   const partial = [];
@@ -309,7 +391,7 @@ export function search(db, q) {
     const span = sessionSpan(s);
     confirmedKeys.add(`${s.program_id}|${s.location_id}|${s.season}`);
     if (!overlaps(span.start, span.end, q.start, q.end)) continue;
-    if (!inCities(locs, q.cities)) continue;
+    if (!inScope(locs, provider, q)) continue;
     // a rolling start that opened before the chosen dates: the child joins on the first chosen day
     const kids = kidsFor(program, q.kids, s.flexible_start && span.start < q.start ? q.start : span.start);
     if (!kids.some((k) => k.fit !== 'no')) continue;
@@ -355,26 +437,50 @@ export function search(db, q) {
     } else if (!rangeSeasons.has(season)) continue;
     if (confirmedKeys.has(`${s.program_id}|${s.location_id}|${season}`)) continue;
     const { program, provider, locs } = base(s);
-    if (!inCities(locs, q.cities)) continue;
-    const ageDate = shifted ? (shifted.start > q.start ? shifted.start : q.start) : q.start;
-    const kids = kidsFor(program, q.kids, ageDate);
+    if (!inScope(locs, provider, q)) continue;
+    // no exact start: the kid counts as "maybe" when the fit differs between the first and last possible day
+    const kids = shifted
+      ? kidsFor(program, q.kids, shifted.start > q.start ? shifted.start : q.start, shifted.end < q.end ? shifted.end : q.end)
+      : kidsFor(program, q.kids, q.start, q.end);
     if (!kids.some((k) => k.fit !== 'no')) continue;
     if (!passesFilters(db, s, program, sessionSpan(s), q.filters, q.kids.length)) continue;
     if (!estimated.has(key)) {
       estimated.set(key, { session: s, program, provider, locs, kids, past: [], estimates: [], group: 'estimated', warnings: [] });
     }
     const e = estimated.get(key);
+    // per kid, the best fit over all the card's sessions, so the mark doesn't depend on the other kids searched
+    e.kids = mergeKids([e.kids, kids]);
     if (s.date_status === 'confirmed_other_year') {
       e.past.push(s);
       pastDy.set(s.id, shifted.dy);
     } else e.estimates.push(s);
   }
+  const qYear = Number(q.start.slice(0, 4));
   for (const [key, e] of estimated) {
-    const outside = !e.past.length && [...new Set(e.estimates.flatMap((x) => pastOut.get(`${key}|${x.season}`) || []))];
+    const outside = !e.past.length && [...new Set(e.estimates.flatMap((x) => pastOut.get(`${key}|${x.season}`) || []))]
+      .filter((p) => passesFilters(db, p, e.program, sessionSpan(p), q.filters, q.kids.length));
     if (outside?.length) e.past = outside;
     e.past.sort((a, b) => a.start_date.localeCompare(b.start_date));
-    // the card shows the most informative session: a recent past dated one, else the estimate
-    e.session = e.past.find((p) => pastDy.get(p.id) <= 2) || e.past[0] || e.estimates[0];
+    // most recent past year first; inside a year, the earliest session
+    const recent = [...e.past].sort((a, b) => b.start_date.slice(0, 4).localeCompare(a.start_date.slice(0, 4)) || a.start_date.localeCompare(b.start_date));
+    e.placed = null;
+    if (!outside?.length) {
+      for (const p of recent) {
+        const sp = sessionSpan(p);
+        for (const dy of sp ? [1, 2, 3] : []) {
+          const hit = weekShiftSpan(sp, dy, q);
+          if (hit) { e.placed = { start: hit.start, end: hit.end, year: p.start_date.slice(0, 4), session: p }; break; }
+        }
+        if (e.placed) break;
+      }
+    }
+    // the card shows the session its week-view chip is placed from, else the most recent past one, else the estimate
+    e.session = e.placed?.session || recent[0] || e.estimates[0];
+    // where this card sits on this year's calendar, for sorting by date
+    const sp = sessionSpan(e.session);
+    e.sortStart = e.placed?.start
+      || (sp ? addYears(sp.start, pastDy.get(e.session.id) ?? Math.max(0, qYear - Number(sp.start.slice(0, 4))))
+        : SEASON_SPAN[e.session.season]?.[0] || '9999');
     e.warnings = warningsFor(db, e.session, e.program, null, e.locs, e.kids);
     if (outside?.length) e.warnings.unshift({ code: 'past_outside', text: '往年同一季的日期不在你選的日期內' });
     else if (!e.past.length) e.warnings.unshift({ code: 'estimated', text: '日期未公布，依往年推估' });
@@ -385,9 +491,10 @@ export function search(db, q) {
   for (const s of db.sessions) {
     if (s.date_status !== 'unknown' || !rangeSeasons.has(s.season) || shown.has(s.program_id)) continue;
     const { program, provider, locs } = base(s);
-    if (!inCities(locs, q.cities)) continue;
-    const kids = kidsFor(program, q.kids, q.start);
+    if (!inScope(locs, provider, q)) continue;
+    const kids = kidsFor(program, q.kids, q.start, q.end);
     if (!kids.some((k) => k.fit !== 'no')) continue;
+    if (!passesFilters(db, s, program, null, q.filters, q.kids.length)) continue;
     unknown.push({ session: s, program, provider, locs, kids, group: 'unknown' });
   }
 
@@ -417,7 +524,8 @@ function cardsOf(items) {
     list.sort((a, b) => a.span.start.localeCompare(b.span.start));
     const anyFull = list.some((x) => x.group === 'full');
     const head = list.find((x) => x.group === 'full') || list[0];
-    const card = { ...head, intakes: list, group: anyFull ? 'full' : 'partial',
+    // per kid, the best fit over every intake
+    const card = { ...head, intakes: list, group: anyFull ? 'full' : 'partial', kids: mergeKids(list.map((x) => x.kids)),
       warnings: head.warnings.filter((w) => w.code !== 'partial') };
     (anyFull ? full : partial).push(card);
   }

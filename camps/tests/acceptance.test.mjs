@@ -56,3 +56,31 @@ test('kids outside the age range are not offered the session', () => {
   const sport = confirmed.find((x) => x.program.id === 'arrowhead-multi-sport');
   if (sport) assert.deepEqual(sport.kids.map((k) => k.fit), ['yes', 'no']);
 });
+
+test('an estimated card shows the same fit for a kid whoever else is searched', () => {
+  const kid = { id: 'x', name: 'X', birth: '2021-02' };
+  const alone = search(db, { ...q, kids: [kid] });
+  const withOthers = search(db, { ...q, kids: [q.kids[0], kid] });
+  const key = (e) => `${e.program.id}|${e.session.location_id}`;
+  const other = new Map(withOthers.estimated.map((e) => [key(e), e]));
+  let n = 0;
+  for (const e of alone.estimated) {
+    const o = other.get(key(e));
+    if (!o) continue;
+    n += 1;
+    assert.equal(o.kids[1].fit, e.kids[0].fit, key(e));
+  }
+  assert.ok(n > 10, `compared ${n} cards`);
+});
+
+test('an estimated card is placed from the session it shows, preferring the latest past year', () => {
+  for (const e of r.estimated) {
+    if (!e.placed) continue;
+    assert.equal(e.placed.session, e.session);
+    assert.equal(e.placed.year, e.session.start_date.slice(0, 4));
+    const years = e.past.map((p) => p.start_date.slice(0, 4));
+    // no later year could have been used instead unless it has no whole-week shift into the range
+    assert.ok(years.includes(e.placed.year));
+  }
+  assert.ok(r.estimated.some((e) => e.placed));
+});
