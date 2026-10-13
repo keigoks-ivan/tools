@@ -1,4 +1,4 @@
-import { buildDb, search, toTWD, perWeekEquiv, kidFit, sessionSpan, holidaysIn, defaultQty, taxRate, lineCost, UNIT, runWeeks, weeksQty, weeksIn, mondayOf, addDays, overlaps } from './lib/core.mjs';
+import { buildDb, search, toTWD, perWeekEquiv, kidFit, kidsFor, sessionSpan, holidaysIn, defaultQty, taxRate, lineCost, UNIT, runWeeks, weeksQty, weeksIn, mondayOf, addDays, overlaps } from './lib/core.mjs';
 
 const FILES = ['providers', 'programs', 'locations', 'sessions', 'reviews', 'conflicts', 'holidays', 'fx'];
 const KL = ['Kuala Lumpur', 'Petaling Jaya', 'Subang Jaya', 'Puchong', 'Shah Alam', 'Selangor-other'];
@@ -25,8 +25,8 @@ const COUNTRY_CHIPS = { MY: [
 const COUNTRIES = { MY: '馬來西亞', TH: '泰國', JP: '日本' };
 const FLAG = { MY: '🇲🇾', TH: '🇹🇭', JP: '🇯🇵' };
 // kid colour dot, same colour in the form and the week view
-const AV = ['🦊', '🐼', '🐨', '🐰', '🐯'];
-const kidAv = (i) => `<b class="kid-av k${i % 5}">${AV[i % 5]}</b>`;
+const AV = ['🦊', '🐼', '🐨', '🐰', '🐯', '🦁', '🐸', '🐙', '🦉', '🐧'];
+const kidAv = (i) => `<b class="kid-av k${i % AV.length}">${AV[i % AV.length]}</b>`;
 // base area per country: its cards sort first and its badge is plain. Thailand and Japan have no single base.
 const HOME = { MY: KL, TH: [], JP: [] };
 const HOME_ZH = { MY: '大吉隆坡', TH: null, JP: null };
@@ -76,6 +76,15 @@ const THEMES = {
   teachers: '師資', curriculum: '課程內容', kids_experience: '孩子感受', safety_care: '安全與照顧', food: '餐食',
   facilities: '環境設施', admin: '行政溝通', value: '價格與退費', classmates: '同學組成', accommodation: '住宿', transport: '交通', other: '其他',
 };
+// dates the page accepts: the data runs 2023–2027 and estimates move up to three years on
+const DATE_MIN = '2024-01-01';
+const DATE_MAX = '2030-12-31';
+const MAX_DAYS = 400;
+const BIRTH_YEARS = [2006, 2025];
+// kids carry a stable id, so picks, the schedule and costs don't depend on list position or on names
+let kidSeq = 0;
+const newKidId = () => `k${++kidSeq}`;
+const freeKidName = (taken) => { for (let n = 1; ; n += 1) if (!taken.includes(`孩子 ${n}`)) return `孩子 ${n}`; };
 const DEFAULT_Q = {
   start: '2027-01-17', end: '2027-02-08', country: 'MY', cities: COUNTRY_CHIPS.MY.map((c) => c[0]),
   kids: [{ name: '孩子 1', birth: '2016-05' }, { name: '孩子 2', birth: '2020-05' }],
@@ -102,9 +111,30 @@ function fmtD(s, year = false) {
 }
 const hostOf = (u) => u?.match(/^https?:\/\/(?:www\.)?([^/]+)/)?.[1];
 const platName = (r) => (r.platform === 'other' ? hostOf(r.url) || '其他' : r.platform === 'blog' && hostOf(r.url) ? `部落格 ${hostOf(r.url)}` : PLATFORM[r.platform] || r.platform);
+// source tier, in plain words (1 is the strongest)
+const TIER = { 1: '官方訂位頁', 2: '官方簡章', 3: '官方社群', 4: '聚合站或媒體', 5: '代理商或部落格' };
+const tierZh = (t) => TIER[t] || `第 ${t} 級`;
+// what a source backs up; a key not listed here is shown as written
+const FIELD_ZH = {
+  price: '價格', age: '年齡', ages: '年齡', age_min: '年齡下限', age_max: '年齡上限', age_rule: '年齡算法', dates: '日期', start_date: '開始日', end_date: '結束日',
+  start_dates: '開始日', period: '期間', pattern: '日期規律', schedule: '時程', season: '季節', summer: '暑假', summer_2026: '2026 暑假', summer_programme_2023: '2023 暑期課程',
+  winter_camp: '寒假營', 'winter dates': '寒假日期', start_rule: '開課規則', min_duration_weeks: '最短週數', min_weeks: '最短週數', duration: '營期長度',
+  hours: '上課時間', address: '地址', location: '地點', locations: '地點', venue: '場地', venues: '場地', campus: '校區', campuses: '校區', branch: '分校',
+  branches: '分校', area: '地區', eligibility: '報名資格', grades: '年級', includes: '包含項目', excludes: '不含項目', lunch: '午餐', language: '授課語言',
+  name: '名稱', staffing: '師資', staff: '師資', staff_ratio: '師生比', ratio: '師生比', class_size: '班級人數', class_size_max: '每班上限', group_size: '分組人數',
+  contact: '聯絡方式', phone: '電話', website: '網站', facilities: '設施', facility: '設施', requirements: '報名要求', booking: '報名', registration: '報名',
+  deadline: '截止日', refund: '退費', cancel: '取消規定', policy: '規定', payment: '付款', fees: '費用', cost: '費用', price_range: '價格範圍', discount: '折扣',
+  format: '營隊形式', accommodation: '住宿', transport: '交通', pickup: '接送', bus: '校車', airport: '機場接送', distance: '距離', capacity: '名額', status: '狀態',
+  existence: '機構是否仍在營運', listing: '刊登內容', program: '課程', programs: '課程', camps: '營隊', lessons: '課堂', activities: '活動', events: '活動', packs: '套裝方案',
+  structure: '課程架構', safety: '安全', insurance: '保險', flex: '彈性選週', open_to_external: '外部學生可報', external: '外部學生', public_holiday: '公假', type: '類型',
+  identity: '機構身分', provider: '機構', operator: '營運單位', organizer: '主辦單位', process: '流程', notes: '備註', note: '備註',
+};
+const fieldsZh = (fields) => [...new Set((fields || []).map((f) => FIELD_ZH[f] || f))];
 const AUTHOR = { staff: '業者自述', editorial: '聚合站編輯', agent: '代理商刊登' };
-// one card per program+location, plus the start date for single dated sessions (several weeks of one camp)
-const cardId = (it) => 'c-' + `${it.program.id}--${it.session.location_id || 'x'}${it.span && !it.span.derived ? `--${it.span.start}` : ''}${it.group === 'unknown' ? '--tbd' : ''}`.replace(/[^a-z0-9-]/gi, '-');
+// Rolling intakes and the estimate of a program+location share one card, so they share an id.
+// Every other row is one session, and sessions can share a start date, so its id carries the session id.
+const cardId = (it) => 'c-' + `${it.program.id}--${it.session.location_id || 'x'}${
+  it.group === 'estimated' ? '--est' : it.group === 'unknown' || (it.span && !it.span.derived) ? `--${it.session.id}` : ''}`.replace(/[^a-z0-9-]/gi, '-');
 
 // ---------- load
 
@@ -119,23 +149,72 @@ async function load() {
 
 // ---------- form
 
+const validDate = (v) => typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v) && new Date(`${v}T00:00:00Z`).toISOString().slice(0, 10) === v;
+const daysBetween = (a, b) => Math.round((Date.parse(`${b}T00:00:00Z`) - Date.parse(`${a}T00:00:00Z`)) / 864e5) + 1;
+
+// what is wrong with the dates, or null. short goes in the summary bar, long in the status line
+function dateProblem(q) {
+  if (!validDate(q.start) || !validDate(q.end)) return { short: '請填日期', long: '請填開始和結束日期。' };
+  if (q.start > q.end) return { short: '日期有誤', long: '結束日不能早於開始日。' };
+  if (q.start < DATE_MIN || q.end > DATE_MAX) return { short: '日期有誤', long: `日期請選 ${DATE_MIN.slice(0, 4)} 到 ${DATE_MAX.slice(0, 4)} 年之間。` };
+  if (daysBetween(q.start, q.end) > MAX_DAYS) return { short: '日期有誤', long: `日期範圍太長，最多 ${MAX_DAYS} 天（約 13 個月），請縮短。` };
+  return null;
+}
+
+// a saved query is only trusted field by field; anything of the wrong type falls back to its default
+function sanitizeQuery(raw) {
+  const r = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
+  const f = r.filters && typeof r.filters === 'object' && !Array.isArray(r.filters) ? r.filters : {};
+  const datesOk = !dateProblem(r);
+  const country = COUNTRIES[r.country] ? r.country : DEFAULT_Q.country;
+  const chipKeys = Object.values(COUNTRY_CHIPS).flat().map((c) => c[0]);
+  const list = (v, allowed) => (Array.isArray(v) ? v.filter((x) => typeof x === 'string' && allowed.includes(x)) : []);
+  const kidOk = (k) => {
+    const m = k && typeof k.birth === 'string' && k.birth.match(/^(\d{4})-(\d{2})$/);
+    return !!m && Number(m[1]) >= BIRTH_YEARS[0] && Number(m[1]) <= BIRTH_YEARS[1] && Number(m[2]) >= 1 && Number(m[2]) <= 12;
+  };
+  let kids = Array.isArray(r.kids) ? r.kids.filter(kidOk) : null;
+  if (!kids || (!kids.length && r.kids.length)) kids = DEFAULT_Q.kids;
+  const names = [];
+  kids = kids.map((k) => {
+    const name = typeof k.name === 'string' && k.name.trim() ? k.name.trim().slice(0, 30) : freeKidName(names);
+    names.push(name);
+    return { id: newKidId(), name, birth: k.birth };
+  });
+  const budget = Number(f.budgetTWD);
+  return {
+    start: datesOk ? r.start : DEFAULT_Q.start,
+    end: datesOk ? r.end : DEFAULT_Q.end,
+    country,
+    cities: Array.isArray(r.cities) ? list(r.cities, chipKeys) : DEFAULT_Q.cities,
+    kids,
+    kw: typeof r.kw === 'string' ? r.kw : '',
+    filters: {
+      formats: list(f.formats, Object.keys(FORMATS)),
+      categories: list(f.categories, Object.keys(CATEGORIES)),
+      budgetTWD: Number.isFinite(budget) && budget > 0 ? budget : null,
+      lunch: f.lunch === true, flexible: f.flexible === true, noParent: f.noParent === true,
+      languages: list(f.languages, ['Mandarin']),
+    },
+  };
+}
+
 function savedQuery() {
-  try {
-    const cur = localStorage.getItem(STORE);
-    if (cur) return { ...DEFAULT_Q, ...JSON.parse(cur) };
-    // keep an old saved query's kids and dates, but start from all cities
-    const { cities, ...old } = JSON.parse(localStorage.getItem(OLD_STORE) || '{}');
-    return { ...DEFAULT_Q, ...old };
-  } catch { return DEFAULT_Q; }
+  const read = (key) => { try { return JSON.parse(localStorage.getItem(key)); } catch { return null; } };
+  const cur = read(STORE);
+  if (cur) return sanitizeQuery(cur);
+  // keep an old saved query's kids and dates, but start from all cities
+  const old = read(OLD_STORE);
+  return sanitizeQuery(old && typeof old === 'object' ? { ...old, cities: undefined } : null);
 }
 
 function kidRow(k, i) {
   const [by, bm] = (k.birth || '2018-01').split('-');
   const years = [];
-  for (let y = 2025; y >= 2006; y--) years.push(`<option ${String(y) === by ? 'selected' : ''}>${y}</option>`);
+  for (let y = BIRTH_YEARS[1]; y >= BIRTH_YEARS[0]; y--) years.push(`<option ${String(y) === by ? 'selected' : ''}>${y}</option>`);
   const months = [];
   for (let m = 1; m <= 12; m++) months.push(`<option value="${String(m).padStart(2, '0')}" ${m === Number(bm) ? 'selected' : ''}>${m} 月</option>`);
-  return `<div class="kid" data-i="${i}">
+  return `<div class="kid" data-i="${i}" data-id="${esc(k.id)}">
     ${kidAv(i)}<input name="name" value="${esc(k.name)}" aria-label="名字">
     <select name="by" aria-label="出生年">${years.join('')}</select>
     <select name="bm" aria-label="出生月">${months.join('')}</select>
@@ -146,6 +225,7 @@ function kidRow(k, i) {
 
 function renderForm(q) {
   const f = $('#q');
+  f.start.min = DATE_MIN; f.start.max = DATE_MAX; f.end.min = DATE_MIN; f.end.max = DATE_MAX;
   f.start.value = q.start;
   f.end.value = q.end;
   $('#kids').innerHTML = q.kids.map(kidRow).join('');
@@ -182,16 +262,20 @@ function renderCities(c, picked) {
 
 function readForm() {
   const f = $('#q');
-  const kids = [...document.querySelectorAll('.kid')].map((el, i) => ({
-    name: el.querySelector('[name=name]').value.trim() || `孩子 ${i + 1}`,
-    birth: `${el.querySelector('[name=by]').value}-${el.querySelector('[name=bm]').value}`,
-  }));
+  const rows = [...document.querySelectorAll('.kid')];
+  const typed = rows.map((el) => el.querySelector('[name=name]').value.trim());
+  const taken = typed.filter(Boolean);
+  const kids = rows.map((el, i) => {
+    const name = typed[i] || freeKidName(taken);
+    if (!typed[i]) taken.push(name);
+    return { id: el.dataset.id, name, birth: `${el.querySelector('[name=by]').value}-${el.querySelector('[name=bm]').value}` };
+  });
   const vals = (n) => [...f.querySelectorAll(`[name=${n}]:checked`)].map((x) => x.value);
   return {
     start: f.start.value, end: f.end.value, kids, country: f.country.value || 'MY', cities: vals('city'), kw: f.kw.value.trim(),
     filters: {
       formats: vals('format'), categories: vals('category'),
-      budgetTWD: Number(f.budget.value) || null,
+      budgetTWD: Number(f.budget.value) > 0 ? Number(f.budget.value) : null,
       lunch: f.lunch.checked, flexible: f.flexible.checked, noParent: f.noParent.checked,
       languages: f.mandarin.checked ? ['Mandarin'] : [],
     },
@@ -203,7 +287,10 @@ function toSearchQuery(q) {
   const chips = COUNTRY_CHIPS[q.country] || COUNTRY_CHIPS.MY;
   const named = new Set(chips.flatMap((c) => c[2]));
   const rest = [...new Set(Object.values(db.locations).filter((l) => (l.country || 'MY') === q.country).map((l) => l.city))].filter((c) => !named.has(c));
-  const cities = q.cities.flatMap((k) => [...(chips.find((c) => c[0] === k)?.[2] || []), ...(k === 'oth' ? rest : [])]);
+  // every city ticked, or none, means the whole country: no city list, so camps with no known location stay in
+  const own = q.cities.filter((k) => chips.some((c) => c[0] === k));
+  const cities = own.length && own.length < chips.length
+    ? own.flatMap((k) => [...(chips.find((c) => c[0] === k)?.[2] || []), ...(k === 'oth' ? rest : [])]) : [];
   return { ...q, cities };
 }
 
@@ -234,7 +321,7 @@ function safetyParts(p) {
 function kidsLine(it) {
   return it.kids.map((k, i) => {
     const mark = { yes: '✓', no: '✗ 不符', maybe: '？生日當月', unknown: '？' }[k.fit];
-    return `<span class="kfit ${k.fit}">${AV[i % 5]} ${esc(k.name)}（${k.age} 歲）${mark}</span>`;
+    return `<span class="kfit ${k.fit}">${AV[i % AV.length]} ${esc(k.name)}（${k.notBorn ? '還沒出生' : `${k.age} 歲`}）${mark}</span>`;
   }).join('');
 }
 
@@ -315,7 +402,7 @@ function reviewThemes(revs) {
 function datesLine(it) {
   const s = it.session;
   if (it.group === 'estimated') {
-    const past = it.past.map((p) => `${fmtD(p.start_date, true)}～${fmtD(p.end_date)}`);
+    const past = it.past.map((p) => (p.end_date ? `${fmtD(p.start_date, true)}～${fmtD(p.end_date)}` : `${fmtD(p.start_date, true)}起，結束日未公布`));
     const basis = it.estimates.map((e) => e.estimate_basis).filter(Boolean);
     return '這一季的日期還沒公布。' + (past.length ? `<br>往年：${past.join('、')}` : '') + (basis.length ? `${past.length ? '<br>' : ''}<small class="quote">推估依據：${esc(basis[0])}</small>` : '') || '日期未公布';
   }
@@ -334,7 +421,7 @@ function sourcesBlock(it) {
   const rows = [`<li><a class="src" href="${esc(s.source_url)}" target="_blank" rel="noopener">${esc(s.source_url)}</a>（梯次來源，查證 ${esc(s.verified_at)}）${s.evidence_quote ? `<br><span class="quote">「${esc(s.evidence_quote)}」</span>` : ''}</li>`];
   for (const src of [...(it.program.sources || []), ...(it.provider.sources || [])].slice(0, 6)) {
     if (!src.url || src.url === s.source_url) continue;
-    rows.push(`<li><a class="src" href="${esc(src.url)}" target="_blank" rel="noopener">${esc(src.url)}</a>（第 ${esc(src.tier)} 級${src.fields?.length ? `，${esc(src.fields.join('、'))}` : ''}）${src.quote ? `<br><span class="quote">「${esc(src.quote)}」</span>` : ''}</li>`);
+    rows.push(`<li><a class="src" href="${esc(src.url)}" target="_blank" rel="noopener">${esc(src.url)}</a>（${esc(tierZh(src.tier))}${src.fields?.length ? `，${fieldsZh(src.fields).map(esc).join('、')}` : ''}）${src.quote ? `<br><span class="quote">「${esc(src.quote)}」</span>` : ''}</li>`);
   }
   return `<h4>來源</h4><ul>${rows.join('')}</ul>`;
 }
@@ -342,8 +429,8 @@ function sourcesBlock(it) {
 function conflictsBlock(it) {
   const list = [it.session.id, it.program.id, it.provider.id].flatMap((i) => db.conflicts[i] || []);
   if (!list.length) return '';
-  return `<h4>來源說法不一</h4><ul>${list.map((c) => `<li>${esc(c.field)}：${(c.values || []).map((v) =>
-    `${esc(v.value)}（<a href="${esc(v.source_url)}" target="_blank" rel="noopener">第 ${esc(v.tier)} 級</a>）`).join(' vs ')}${c.note ? `<br><small class="quote">${esc(c.note)}</small>` : ''}</li>`).join('')}</ul>`;
+  return `<h4>來源說法不一</h4><ul>${list.map((c) => `<li>${esc(FIELD_ZH[c.field] || c.field)}：${(c.values || []).map((v) =>
+    `${esc(v.value)}（<a href="${esc(v.source_url)}" target="_blank" rel="noopener">${esc(tierZh(v.tier))}</a>）`).join(' vs ')}${c.note ? `<br><small class="quote">${esc(c.note)}</small>` : ''}</li>`).join('')}</ul>`;
 }
 
 function detailsBlock(it) {
@@ -391,19 +478,25 @@ const shownLights = new Set(['green', 'yellow']);
 let lightsTouched = false; // once the parent clicks a light, stop choosing the default for them
 let useLastYear = true; // week view: place undated camps on last year's week
 let sortBy = 'rec';
-let lastR = null;
+let lastR = null; // results after the name filter
+let lastRAll = null; // results before it, so a week chip can find a row the name filter hides
 // one chip / card per provider (branches, intakes, programs); agent packages group on the school they
 // sell, because two agents often sell the same school
 const keyOf = (it) => (it.provider.type === 'agent_package' && it.session.location_id ? `loc:${it.session.location_id}` : `prov:${it.provider.id}`);
 // per-child weekly price in TWD, for sorting and the big number on cards
-const weekTWD = (it) => { const v = perWeekEquiv(it.session.price, it.span); return v == null ? null : toTWD(v, it.session.price.currency, db.fx); };
+// An undated card has no span of its own: its price is spread over the length of the session it shows,
+// the same span the budget filter in core uses.
+const spanFor = (it) => it.span || sessionSpan(it.session);
+const weekTWD = (it) => { const v = perWeekEquiv(it.session.price, spanFor(it)); return v == null ? null : toTWD(v, it.session.price.currency, db.fx); };
 const minOf = (xs) => { const v = xs.filter((x) => x != null); return v.length ? Math.min(...v) : null; };
-const startOf = (it) => it.span?.start || it.past?.find((x) => x.start_date)?.start_date || '9999';
+// sort key: dated cards by their start, undated ones by where they sit on this year's calendar
+const startOf = (it) => it.span?.start || it.sortStart || '9999';
 
 function shortDates(it) {
   if (it.group === 'estimated') {
-    const p0 = it.past?.find((x) => x.start_date && x.end_date);
-    return p0 ? `${p0.start_date.slice(0, 4)} 年 ${md(p0.start_date)}–${md(p0.end_date)}` : '日期未公布';
+    const p0 = it.session.date_status === 'confirmed_other_year' && it.session.start_date ? it.session : it.past?.find((x) => x.start_date);
+    if (!p0) return '日期未公布';
+    return `${p0.start_date.slice(0, 4)} 年 ${md(p0.start_date)}${p0.end_date ? `–${md(p0.end_date)}` : ' 起'}`;
   }
   if (it.intakes) return `${it.intakes.length} 個開課日，${md(it.intakes[0].span.start)} 起`;
   return it.span ? `${md(it.span.start)}–${md(it.span.end)}` : '日期未公布';
@@ -434,10 +527,12 @@ function sessionRow(it, open) {
   lastCards.set(id, it);
   const l = lightOf(it);
   const w = weekTWD(it);
+  // a card that mixes programs or agents says which one each row is
+  const sub = [it.programs > 1 && esc(it.program.name), it.mixedAgents && `代理：${esc(it.provider.name_en)}`].filter(Boolean).join('・');
   const place = it.locs[0] ? `${esc(it.locs[0].name)}${citiesOf(it)[0] && !HOME[country].includes(it.locs[0].city) ? `・${esc(citiesOf(it)[0])}` : ''}` : '地點未公布';
-  return `<div class="srow l-${l}" id="${id}"><details ${open ? 'open' : ''}><summary>
+  return `<div class="srow l-${l}" id="${id}" data-start="${startOf(it)}"><details ${open ? 'open' : ''}><summary>
       <span class="s-l" title="${LIGHT[l][1]}">${LIGHT[l][0]}</span><span class="s-d">${shortDates(it)}</span>
-      <span class="s-p">${place}${it.programs > 1 ? `<br><small>${esc(it.program.name)}</small>` : ''}</span><span class="s-w">${w != null ? `NT$${fmtN(w)}${l === 'gray' && it.session.year ? `<small class="py">${it.session.year} 年價</small>` : ''}` : ''}</span></summary>
+      <span class="s-p">${place}${sub ? `<br><small>${sub}</small>` : ''}</span><span class="s-w">${w != null ? `NT$${fmtN(w)}${l === 'gray' && it.session.year ? `<small class="py">${it.session.year} 年價</small>` : ''}` : ''}</span></summary>
       <div class="s-body">${sessionBody(it)}</div></details>
     ${it.group === 'unknown' ? '' : `<label class="cmp-box"><input type="checkbox" data-cmp="${id}" ${picked.has(id) ? 'checked' : ''}>選取</label>`}</div>`;
 }
@@ -447,18 +542,28 @@ function orgCard(items) {
   const p = it0.program;
   const agent = it0.provider.type === 'agent_package';
   const progNames = [...new Set(items.map((x) => x.program.name))];
-  for (const x of items) x.programs = progNames.length;
+  const agentNames = [...new Set(items.filter((x) => x.provider.type === 'agent_package').map((x) => x.provider.name_en))];
+  for (const x of items) { x.programs = progNames.length; x.mixedAgents = agentNames.length > 1; }
   const title = agent ? it0.locs[0]?.name || it0.program.name : `${it0.provider.name_en}${it0.provider.name_zh ? `・${it0.provider.name_zh}` : ''}`;
-  const sub = agent ? `${esc(it0.program.name)}<br>代理：${esc(it0.provider.name_en)}` : progNames.slice(0, 2).map(esc).join('／') + (progNames.length > 2 ? ` 等 ${progNames.length} 個課程` : '');
+  const sub = agent ? `${esc(it0.program.name)}<br>代理：${agentNames.map(esc).join('、')}` : progNames.slice(0, 2).map(esc).join('／') + (progNames.length > 2 ? ` 等 ${progNames.length} 個課程` : '');
   const cities = [...new Set(items.flatMap(citiesOf))];
   const cat = p.category[0];
   const prices = items.map(weekTWD);
   const low = minOf(prices);
   const varies = low != null && (prices.some((x) => x !== low) || items.some((x) => x.session.price?.from));
+  const KF = {
+    yes: ['✓', '所有梯次都符合'], no: ['✗', '所有梯次都不符'], part: ['部分', '部分梯次符合，部分不符'],
+    maybe: ['△', '孩子生日在開營當月，年齡差一歲可能不符'], unknown: ['?', '年齡限制未公布'],
+  };
   const kidFitAll = it0.kids.map((k, i) => {
-    const f = items.map((x) => x.kids[i]?.fit);
-    const v = f.every((x) => x === 'yes') ? 'yes' : f.every((x) => x === 'no') ? 'no' : 'maybe';
-    return `<span class="kf ${v}" title="${esc(k.name)}（${k.age} 歲）">${kidAv(i)}${{ yes: '✓', no: '✗', maybe: '?' }[v]}</span>`;
+    const kf = items.map((x) => x.kids[i]).filter(Boolean);
+    const set = new Set(kf.map((x) => x.fit));
+    const v = set.size === 1 ? [...set][0] : set.has('no') ? 'part' : set.has('unknown') ? 'unknown' : 'maybe';
+    const ages = kf.map((x) => x.age);
+    const lo = Math.min(...ages);
+    const hi = Math.max(...ages);
+    const ageT = kf.every((x) => x.notBorn) ? '還沒出生' : lo === hi ? `${lo} 歲` : `${lo}–${hi} 歲`;
+    return `<span class="kf ${v}" title="${esc(k.name)}（${ageT}）：${KF[v][1]}">${kidAv(i)}${KF[v][0]}</span>`;
   }).join('');
   const best = lightOf(it0);
   const allGray = items.every((x) => lightOf(x) === 'gray');
@@ -478,7 +583,7 @@ function orgCard(items) {
       <div class="big3">
         <div><small>${allGray ? '往年日期' : '日期'}</small><b>${items.length === 1 ? shortDates(it0) : `${items.length} 個梯次`}</b></div>
         <div><small>每週每人${allGray && low != null ? '（往年價）' : ''}</small><b>${low != null ? `NT$${fmtN(low)}${varies ? '<i>起</i>' : ''}` : '未公布'}</b></div>
-        <div><small>孩子</small><b>${kidFitAll}</b></div>
+        <div><small>孩子</small><b class="kfs">${kidFitAll}</b></div>
       </div>
       <div class="tags">${tags}</div>
       <div class="org-meta">${nWarn ? `<span class="warnn">⚠ ${nWarn} 個提醒，展開看</span>` : '<span></span>'}${rate ? `<span>⭐ ${rate}</span>` : '<span class="mut">沒有評分</span>'}</div>
@@ -490,6 +595,9 @@ function orgCard(items) {
 function renderResults() {
   const r = lastR;
   if (!r) return;
+  // rows the parent opened stay open when the list is drawn again
+  const openRows = new Set([...document.querySelectorAll('#results .srow')].filter((el) => el.querySelector('details').open).map((el) => el.id));
+  const unknownOpen = !!$('#results .unknown-list')?.open;
   const pool = [...r.full, ...r.partial, ...r.estimated];
   const n = { green: 0, yellow: 0, gray: 0 };
   for (const it of pool) n[lightOf(it)]++;
@@ -502,10 +610,12 @@ function renderResults() {
   }
   const list = [...orgs.values()].map((items) => items.sort((a, b) => LIGHT_RANK[lightOf(a)] - LIGHT_RANK[lightOf(b)] || awayRank(a) - awayRank(b) || startOf(a).localeCompare(startOf(b))));
   const price = (items) => minOf(items.map(weekTWD)) ?? 1e12;
+  // a card sorts by the earliest start among all its rows
+  const first = (items) => items.map(startOf).reduce((m, x) => (x < m ? x : m));
   const cmp = {
     rec: (a, b) => LIGHT_RANK[lightOf(a[0])] - LIGHT_RANK[lightOf(b[0])] || Math.min(...a.map(awayRank)) - Math.min(...b.map(awayRank)) || price(a) - price(b),
     price: (a, b) => price(a) - price(b),
-    date: (a, b) => startOf(a[0]).localeCompare(startOf(b[0])),
+    date: (a, b) => first(a).localeCompare(first(b)),
   }[sortBy];
   list.sort(cmp);
   lastCards = new Map();
@@ -513,23 +623,38 @@ function renderResults() {
     `<button type="button" class="light l-${k} ${shownLights.has(k) ? 'on' : ''}" data-light="${k}" aria-pressed="${shownLights.has(k)}" title="${d}"><span>${ic} ${t}</span><b>${n[k]}</b></button>`).join('')}</div>
     <label class="sort">排序<select id="sort">${[['rec', '推薦'], ['price', '價格低到高'], ['date', '日期早到晚']].map(([k, v]) => `<option value="${k}" ${k === sortBy ? 'selected' : ''}>${v}</option>`).join('')}</select></label>`;
   const nSess = list.reduce((s, x) => s + x.length, 0);
+  const hidden = Object.keys(n).filter((k) => !shownLights.has(k)).reduce((t, k) => t + n[k], 0);
+  const empty = hidden ? '勾選的燈號裡沒有梯次，點上面的燈號打開其他類。' : '沒有符合的梯次。可以放寬條件：換日期、多選幾個城市，或取消進階篩選和名稱。';
   $('#results').innerHTML = `<p class="pick-hint">${list.length} 個機構、${nSess} 個梯次。每張卡下方一行是一個梯次，點開看地址、時間、價格明細和來源；勾「選取」可以估算費用，或並排比較 2–4 個。</p>
-    <div class="cards">${list.map(orgCard).join('') || '<p class="group-note">勾選的燈號裡沒有梯次，點上面的燈號打開其他類。</p>'}</div>` +
-    (r.unknown.length ? `<details class="more unknown-list"><summary>還有 ${r.unknown.length} 筆這段期間查不到日期（點開）</summary><ul>${homeFirst(r.unknown).map((x) => {
+    ${list.length ? '<p class="kf-legend">孩子欄：✓ 全部梯次符合，✗ 全部不符，部分 ＝ 只有部分梯次符合，△ ＝ 生日在開營當月，? ＝ 年齡限制未公布。</p>' : ''}
+    <div class="cards">${list.map(orgCard).join('') || `<p class="group-note">${empty}</p>`}</div>` +
+    (r.unknown.length ? `<details class="more unknown-list" ${unknownOpen ? 'open' : ''}><summary>還有 ${r.unknown.length} 筆這段期間查不到日期（點開）</summary><ul>${homeFirst(r.unknown).map((x) => {
       const id = cardId(x);
       lastCards.set(id, x);
       const pr = x.session.price;
       return `<li>${esc(x.provider.name_en)}：${esc(x.program.name)}${x.locs?.[0] ? `（${esc(x.locs[0].name)}，${esc(cityZh(x.locs[0].city))}）` : ''}${pr?.amount != null ? `，${money(pr.currency, pr.amount)}${pr.from ? ' 起' : ''}／${BASIS[pr.basis] || '?'}` : ''}　<a href="${esc(x.session.source_url)}" target="_blank" rel="noopener">查證頁</a><label class="cmp-box"><input type="checkbox" data-cmp="${id}" ${picked.has(id) ? 'checked' : ''}>選取</label></li>`;
     }).join('')}</ul></details>` : '');
+  for (const id of openRows) { const d = document.getElementById(id)?.querySelector('details'); if (d) d.open = true; }
   updateTray();
 }
 
-// jump from the week view to a session row: turn its light on if needed, open it, scroll to it
+const itemsOf = (r) => [...r.full, ...r.partial, ...r.estimated];
+
+// jump from the week view to a session row: turn its light on and clear a name filter if either hides it, open it, scroll to it
 function openSession(id) {
   let el = document.getElementById(id);
-  if (!el && lastR) {
-    const it = [...lastR.full, ...lastR.partial, ...lastR.estimated].find((x) => cardId(x) === id);
-    if (it) { shownLights.add(lightOf(it)); renderResults(); el = document.getElementById(id); }
+  if (!el && lastRAll) {
+    const it = itemsOf(lastRAll).find((x) => cardId(x) === id);
+    if (it) {
+      lightsTouched = true;
+      shownLights.add(lightOf(it));
+      const f = $('#q');
+      if (f.kw.value.trim() && !itemsOf(lastR).some((x) => cardId(x) === id)) {
+        f.kw.value = '';
+        run({ force: true });
+      } else renderResults();
+      el = document.getElementById(id);
+    }
   }
   if (!el) return;
   el.querySelector('details').open = true;
@@ -539,45 +664,41 @@ function openSession(id) {
   el.classList.add('flash');
 }
 
-// an undated camp placed on this year's calendar by last year's dates: whole weeks (364 days) so the weekday stays
-function lastYearSpan(it, q) {
-  if (it.warnings?.some((w) => w.code === 'past_outside')) return null;
-  for (const p of it.past || []) {
-    const sp = sessionSpan(p);
-    if (!sp) continue;
-    for (const dy of [1, 2, 3]) {
-      const a = addDays(sp.start, 364 * dy);
-      const b = addDays(sp.end, 364 * dy);
-      if (overlaps(a, b, q.start, q.end)) return { start: a, end: b, year: p.start_date.slice(0, 4) };
-    }
-  }
-  return null;
-}
-
-// per week and kid: undated camps that ran in this week last time
-function lastYearWeeks(r, q, estAll) {
-  const placed = estAll.map((it) => ({ it, ly: lastYearSpan(it, q) })).filter((x) => x.ly);
+// per week and kid: undated camps that ran in this week last time (placed in core, see weekShiftSpan)
+function lastYearWeeks(r, estAll) {
+  const placed = estAll.filter((it) => it.placed).map((it) => ({ it, ly: it.placed }));
   return r.weeks.map((w) => w.perKid.map((k, i) => placed
     .filter(({ it, ly }) => overlaps(ly.start, ly.end, w.mon, w.fri) && it.kids[i]?.fit !== 'no')
-    .map(({ it, ly }) => Object.assign(it, { ly }))));
+    .map(({ it }) => it)));
 }
 
-function weekTable(r, ly) {
+// one chip per provider (branches, intakes, programs); agent packages group on the school they sell
+function mergeChips(list, skip = new Set()) {
+  const g = new Map();
+  for (const it of new Map(list.map((x) => [cardId(x), x])).values()) {
+    const k = keyOf(it);
+    if (skip.has(k)) continue;
+    if (!g.has(k)) g.set(k, []);
+    g.get(k).push(it);
+  }
+  const price = ([, xs]) => minOf(xs.map(weekTWD)) ?? 1e12;
+  return [...g].sort((a, b) => Math.min(...a[1].map(awayRank)) - Math.min(...b[1].map(awayRank)) || price(a) - price(b));
+}
+
+// What each week-by-kid cell shows. The headline counts gaps from these same lists, so it can't disagree with the table.
+function weekCells(r, ly) {
+  return r.weeks.map((w, wi) => w.perKid.map((k, i) => {
+    const solid = mergeChips(k.solid);
+    const weak = mergeChips(k.weak, new Set(solid.map(([key]) => key)));
+    const last = useLastYear ? mergeChips(ly[wi][i], new Set([...solid, ...weak].map(([key]) => key))) : [];
+    return { solid, weak, last, gap: k.gap };
+  }));
+}
+
+function weekTable(r, cells) {
   const short = (t) => t.replace(/\s*\(.*\)|（.*）/g, '').trim();
   // long names end on a whole word, without a dangling "for" or "of"
   const clip = (t) => (t.length <= 30 ? t : `${t.slice(0, t.lastIndexOf(' ', 30)).replace(/\s+(for|of|and|the|&|at|in)$/i, '')}…`);
-  const uniq = (list) => [...new Map(list.map((x) => [cardId(x), x])).values()];
-  const merge = (list, skip = new Set()) => {
-    const g = new Map();
-    for (const it of uniq(list)) {
-      const k = keyOf(it);
-      if (skip.has(k)) continue;
-      if (!g.has(k)) g.set(k, []);
-      g.get(k).push(it);
-    }
-    const price = ([, xs]) => minOf(xs.map(weekTWD)) ?? 1e12;
-    return [...g].sort((a, b) => Math.min(...a[1].map(awayRank)) - Math.min(...b[1].map(awayRank)) || price(a) - price(b));
-  };
   const chip = ([k, items], weak) => {
     const it = items[0];
     let t = clip(short(k.startsWith('loc:') ? it.locs[0]?.name || it.provider.name_en : it.provider.name_en));
@@ -587,50 +708,79 @@ function weekTable(r, ly) {
     const w = minOf(items.map(weekTWD));
     const tip = items.map((x) => `${x.provider.name_en}：${x.program.name}（${x.locs[0]?.name || '地點未公布'}，${citiesOf(x).join('、') || '城市未知'}）`).join('\n');
     const kind = weak === 'ly' ? 'ly' : weak ? 'weak' : '';
-    const sub = kind === 'ly' ? `照 ${it.ly.year} 年${w != null ? `・NT$${fmtN(w)}` : ''}` : w != null ? `NT$${fmtN(w)}/週` : '';
+    const sub = kind === 'ly' ? `照 ${it.placed.year} 年${w != null ? `・NT$${fmtN(w)}` : ''}` : w != null ? `NT$${fmtN(w)}/週` : '';
     return `<a class="opt ${kind}" href="#${cardId(it)}" data-go="${cardId(it)}" title="${esc(tip)}"><span>${esc(t)}</span>${sub ? `<small>${sub}</small>` : ''}</a>`;
   };
   const LY_MAX = 3;
   const head = `<tr><th>週</th>${r.weeks[0]?.perKid.map((k, i) => `<th>${kidAv(i)} ${esc(k.kid.name)}</th>`).join('') || ''}</tr>`;
   const rows = r.weeks.map((w, wi) => `<tr><td class="wk"><b>${fmtD(w.mon)}</b><span class="wk-to">～${fmtD(w.fri)}</span>${w.holidays.map((h) =>
     `<span class="hol">📌 ${fmtD(h.date_start)} ${esc(h.name_zh || h.name_en)}${h.status === 'estimated' ? '（推算）' : ''}</span>`).join('')}</td>${w.perKid.map((k, i) => {
-    const solid = merge(k.solid);
-    const weak = merge(k.weak, new Set(solid.map(([key]) => key)));
-    const last = useLastYear ? merge(ly[wi][i], new Set([...solid, ...weak].map(([key]) => key))) : [];
+    const { solid, weak, last } = cells[wi][i];
     const more = weak.length ? `<details class="weakmore"><summary>${k.gap ? '' : '另有 '}${weak.length} 個要先問</summary>${weak.map((g) => chip(g, true)).join('')}</details>` : '';
     const lyHtml = last.length ? last.slice(0, LY_MAX).map((g) => chip(g, 'ly')).join('') +
       (last.length > LY_MAX ? `<details class="weakmore"><summary>再 ${last.length - LY_MAX} 個照往年排</summary>${last.slice(LY_MAX).map((g) => chip(g, 'ly')).join('')}</details>` : '') : '';
     const cls = !k.gap ? 'is-ok' : last.length ? 'is-ly' : 'is-gap';
     const flag = !k.gap ? '' : last.length ? `<span class="gap ly">${w.mon.slice(0, 4)} 未公布</span>` : '<span class="gap">空窗</span>';
-    return `<td data-k="${esc(k.kid.name)}" class="${cls}">${flag}${solid.map((g) => chip(g, false)).join('')}${lyHtml}${more}</td>`;
+    return `<td data-k="${esc(k.kid.name)}" data-kid="${esc(k.kid.id)}" class="${cls}">${flag}${solid.map((g) => chip(g, false)).join('')}${lyHtml}${more}</td>`;
   }).join('')}</tr>`).join('');
+  const anyLy = cells.some((wk) => wk.some((c) => c.last.length));
   return `<h2 class="sec-h" id="sec-weeks"><span class="sec-ic">🗓️</span>週視圖<small>每週每位孩子能報哪些營，標籤上是每週每人價格，點標籤跳到那一梯</small></h2>
     <div class="legend"><span><span class="lg ok"></span>有官方日期的營</span>${useLastYear ? '<span><span class="lg ly"></span>還沒公布日期，照往年同一週先排</span>' : ''}<span><span class="lg gap"></span>空窗：這週沒有官方日期的營${useLastYear ? '，往年也沒有' : ''}（「要先問」的不算）</span><span>📌 ${COUNTRIES[country]}平日公假</span></div>
-    ${ly.some((wk) => wk.some((x) => x.length)) || !useLastYear ? `<label class="ly-switch"><input type="checkbox" id="use-ly" ${useLastYear ? 'checked' : ''}>日期還沒公布的營，先照往年同一週排進來（灰色虛線標籤，往年日期換到今年同一個星期幾）</label>` : ''}
+    ${anyLy || !useLastYear ? `<label class="ly-switch"><input type="checkbox" id="use-ly" ${useLastYear ? 'checked' : ''}>日期還沒公布的營，先照往年同一週排進來（灰色虛線標籤，往年日期換到今年同一個星期幾）</label>` : ''}
     <div class="weeks-scroll"><table class="weeks"><thead>${head}</thead><tbody>${rows}</tbody></table></div>
     <p class="group-note">同一機構的分校和梯次、代理商賣的同一所學校，合併成一個標籤，×2 表示有兩個選項，價格取最低的。${country === 'MY' ? '外地的標籤' : '標籤'}後面加城市。</p>`;
 }
 
-function qSummary(q) {
-  const n = q.kids.length;
-  const cityN = q.cities.length === COUNTRY_CHIPS[q.country]?.length ? '全部城市' : `${q.cities.length} 個城市`;
-  return `<b>${md(q.start)}–${md(q.end)}</b>・${n} 位孩子・${FLAG[q.country]} ${COUNTRIES[q.country]}（${cityN}）`;
+const yr = (d) => d.slice(0, 4);
+// 「2027 年 1/17–2/8」, or both years when the range crosses one
+function rangeLabel(a, b) {
+  return yr(a) === yr(b) ? `${yr(a)} 年 ${md(a)}–${md(b)}` : `${yr(a)} 年 ${md(a)}–${yr(b)} 年 ${md(b)}`;
+}
+const yearsLabel = (a, b) => (yr(a) === yr(b) ? `${yr(a)} 年` : `${yr(a)}–${yr(b)} 年`);
+
+function filterCount(q) {
+  const f = q.filters || {};
+  return [q.kw, f.formats?.length, f.categories?.length, f.budgetTWD, f.lunch, f.flexible, f.noParent, f.languages?.length].filter(Boolean).length;
 }
 
-function render(q) {
+function qSummary(q, problem) {
+  const n = q.kids.length;
+  const total = COUNTRY_CHIPS[q.country]?.length;
+  const cityN = !q.cities.length || q.cities.length === total ? '全部城市' : `${q.cities.length} 個城市`;
+  const nf = filterCount(q);
+  return `<b>${problem ? problem.short : rangeLabel(q.start, q.end)}</b>・${n ? `${n} 位孩子` : '還沒加孩子'}・${FLAG[q.country]} ${COUNTRIES[q.country]}（${cityN}）${nf ? `・已篩選 ${nf} 項` : ''}`;
+}
+
+// nothing to search: say why and drop the old results instead of leaving them on screen
+function showProblem(msg) {
+  lastR = null;
+  lastRAll = null;
+  lastCards = new Map();
+  $('#summary').innerHTML = '';
+  $('#weeks').innerHTML = '';
+  $('#bar').innerHTML = '';
+  $('#results').innerHTML = '';
+  $('#sec-camps').hidden = true;
+  $('#status').textContent = msg;
+  updateTray();
+}
+
+function render(q, problem) {
   country = COUNTRIES[q.country] ? q.country : 'MY';
-  const sq = toSearchQuery(q);
-  $('#qsum-t').innerHTML = qSummary(q);
-  if (!sq.kids.length || !sq.start || !sq.end || sq.start > sq.end) {
-    $('#status').textContent = '請填日期（開始不能晚於結束）並至少加一位孩子。';
+  $('#qsum-t').innerHTML = qSummary(q, problem);
+  if (problem || !q.kids.length) {
+    showProblem(problem ? problem.long : '請至少加一位孩子。');
     return;
   }
+  $('#sec-camps').hidden = false;
+  const sq = toSearchQuery(q);
   const r = search(db, sq);
   const estAll = r.estimated; // before the name filter, like the week view
-  const ly = lastYearWeeks(r, sq, estAll);
-  const gapOf = (wi) => r.weeks[wi].perKid.map((k, i) => k.gap && !(useLastYear && ly[wi][i].length));
-  const gapWeeks = r.weeks.filter((w, wi) => gapOf(wi).some(Boolean)).length;
-  const lyWeeks = useLastYear ? r.weeks.filter((w, wi) => w.perKid.some((k, i) => k.gap && ly[wi][i].length)).length : 0;
+  lastRAll = { full: r.full, partial: r.partial, estimated: r.estimated, unknown: r.unknown };
+  const ly = lastYearWeeks(r, estAll);
+  const cells = weekCells(r, ly);
+  const gapWeeks = cells.filter((row) => row.some((c) => c.gap && !c.last.length)).length;
+  const lyWeeks = cells.filter((row) => row.some((c) => c.gap && c.last.length)).length;
   $('#status').innerHTML = '';
   const kw = (q.kw || '').toLowerCase();
   if (kw) {
@@ -646,14 +796,19 @@ function render(q) {
   // mostly undated (summer before the camps publish): show the estimates by default and say so up top
   const mostlyPast = nGray > nDated;
   if (!lightsTouched) { if (mostlyPast) shownLights.add('gray'); else shownLights.delete('gray'); }
-  const flag = gapWeeks ? `⚠️ ${gapWeeks} 週有孩子空窗` : lyWeeks ? `🗓️ ${lyWeeks} 週只有往年日期可排` : '🎉 每週都有官方日期的營';
-  $('#summary').innerHTML = `<div class="headline"><div><h2>${md(q.start)}–${md(q.end)}，${FLAG[country]} ${COUNTRIES[country]}找到 <em>${all.length}</em> 個梯次</h2>
+  const isPast = q.end < new Date().toISOString().slice(0, 10);
+  const [flag, flagCls] = !r.weeks.length ? ['這段期間只有週末，沒有平日可排', 'mid']
+    : isPast ? ['🕘 這段期間已經過去，沒有可查的資料', 'mid']
+      : !(lastRAll.full.length + lastRAll.partial.length + lastRAll.estimated.length) ? ['這段期間查不到梯次，無法判斷空窗', 'mid']
+        : gapWeeks ? [`⚠️ ${gapWeeks} 週有孩子空窗`, 'bad'] : lyWeeks ? [`🗓️ ${lyWeeks} 週只有往年日期可排`, 'mid'] : ['🎉 每週都有官方日期的營', 'ok'];
+  const years = yearsLabel(q.start, q.end);
+  $('#summary').innerHTML = `<div class="headline"><div><h2>${rangeLabel(q.start, q.end)}，${FLAG[country]} ${COUNTRIES[country]}找到 <em>${all.length}</em> 個梯次</h2>
     <p>來自 ${nOrg} 個機構。🟢 ${all.filter((x) => lightOf(x) === 'green').length} 個有官方日期、🟡 ${all.filter((x) => lightOf(x) === 'yellow').length} 個要先問、⚪ ${nGray} 個照往年推測。</p></div>
-    <a class="gapflag ${gapWeeks ? 'bad' : lyWeeks ? 'mid' : 'ok'}" href="#sec-weeks">${flag}</a></div>
-    ${mostlyPast ? `<div class="past-note"><b>這段期間的營隊，大多還沒公布今年的日期。</b>
-      <p>${all.length} 個梯次裡，${nDated} 個有今年日期，${nGray} 個還沒有。還沒有的先照往年的日期排，週視圖用灰色虛線標出，價格也是往年的。</p>
+    <a class="gapflag ${flagCls}" href="#sec-weeks">${flag}</a></div>
+    ${mostlyPast ? `<div class="past-note"><b>這段期間的營隊，大多還沒公布 ${years}的日期。</b>
+      <p>${all.length} 個梯次裡，${nDated} 個有 ${years}的日期，${nGray} 個還沒有。還沒有的先照往年的日期排，週視圖用灰色虛線標出，價格也是往年的。</p>
       <p>報名前要再向機構確認日期和價格。資料查證到 ${esc(latestVerified())}。</p></div>` : ''}`;
-  $('#weeks').innerHTML = r.weeks.length ? weekTable(r, ly) : '';
+  $('#weeks').innerHTML = r.weeks.length ? weekTable(r, cells) : '';
   lastR = r;
   renderResults();
 }
@@ -677,12 +832,29 @@ function elsewhere(kw, sq) {
 
 // ---------- picked cards: compare and cost estimate
 
+// Revalidate the picks against the kids and dates on the form now. A card shown again is refreshed from
+// the new results; one that is not (another country, other dates) gets its kids re-fitted. Kids who no
+// longer fit, or who were removed, drop out of the pick.
+function refreshPicks() {
+  if (!picked.size) return;
+  const q = readForm();
+  const win = dateProblem(q) ? null : { start: q.start, end: q.end };
+  for (const [id, p] of picked) {
+    if (lastCards.has(id)) p.it = lastCards.get(id);
+    else if (win) {
+      const it = p.it;
+      it.kids = it.span && !it.intakes ? kidsFor(it.program, q.kids, it.span.start) : kidsFor(it.program, q.kids, it.span?.start || win.start, it.span?.end || win.end);
+    }
+    p.kids = new Set([...p.kids].filter((kid) => p.it.kids.some((k) => k.id === kid && k.fit !== 'no')));
+  }
+}
+
 function updateTray() {
-  // cards from an earlier search stay picked; refresh the ones shown again
-  for (const [id, p] of picked) if (lastCards.has(id)) p.it = lastCards.get(id);
+  refreshPicks();
   const n = picked.size;
+  const stale = [...picked.keys()].filter((id) => !lastCards.has(id)).length;
   $('#tray').hidden = n === 0;
-  $('#tray-n').textContent = `已選 ${n} 個`;
+  $('#tray-n').textContent = `已選 ${n} 個${stale ? `（${stale} 個不在目前結果）` : ''}`;
   $('#tray-open').disabled = n < 2 || n > 4;
   $('#tray-open').title = n > 4 ? '並排比較最多 4 個' : '';
 }
@@ -715,14 +887,14 @@ function openCompare() {
 // Dates the estimate is based on: this year's span, else the latest past run.
 function estSpan(it) {
   if (it.span) return { span: it.span, past: false };
-  const s = it.past?.length ? it.past[0] : it.session;
-  const span = sessionSpan(s);
+  const span = sessionSpan(it.session);
   return { span, past: !!span };
 }
 
 const PER_WHOLE = new Set(['per_camp', 'per_session']);
 const md = (d) => `${Number(d.slice(5, 7))}/${Number(d.slice(8))}`;
-const searchWin = () => { const q = readForm(); return { start: q.start, end: q.end }; };
+// the dates on the form; empty when they can't be searched (no weeks come out of empty dates)
+const searchWin = () => { const q = readForm(); return dateProblem(q) ? { start: '', end: '' } : { start: q.start, end: q.end }; };
 
 // Weeks a parent can tick: the camp's weeks inside the search dates. A whole-camp
 // price fixes the weeks; cards without 2027 dates offer every week of the search.
@@ -753,7 +925,7 @@ function pickDefaults(it) {
   const q0 = defaultQty(it.session.price, span, span ? holidaysIn(db, span.start, span.end, it.locs).length : 0);
   const p = {
     it, kind, weeks: new Map(chosen.map((w) => [w.mon, w])), amount: it.session.price?.amount ?? null,
-    kids: new Set(it.kids.map((k, i) => (k.fit === 'no' ? -1 : i)).filter((i) => i >= 0)),
+    kids: new Set(it.kids.filter((k) => k.fit !== 'no').map((k) => k.id)),
     qty0: q0 ?? 1, qtyGuess0: q0 == null,
   };
   return Object.assign(p, autoQty(p));
@@ -830,10 +1002,10 @@ function openEstimate() {
         : span ? `${past ? '往年 ' : ''}${fmtD(span.start, true)}～${fmtD(span.end)}` : '日期未公布';
       const step = pr.basis === 'per_2weeks' ? 0.5 : 1;
       return `<section class="est-item" data-id="${id}">
-        <div class="est-h"><b>${esc(it.program.name)}</b><span class="prov">${esc(it.provider.name_en)}${it.locs[0] ? `・${esc(it.locs[0].name)}` : ''}</span>
+        <div class="est-h"><b>${esc(it.program.name)}</b><span class="prov">${esc(it.provider.name_en)}${it.locs[0] ? `・${esc(it.locs[0].name)}` : ''}${lastCards.has(id) ? '' : '（不在目前結果）'}</span>
           <button type="button" class="ghost est-del" data-del="${id}" aria-label="移除">移除</button></div>
         <div class="est-meta">${when}・${STATUS[it.session.date_status]}</div>
-        <div class="est-ctl"><span class="lbl">孩子</span><span class="chips">${it.kids.map((k, i) => `<label class="chip sm"><input type="checkbox" data-k="${i}" ${p.kids.has(i) ? 'checked' : ''} ${k.fit === 'no' ? 'disabled' : ''}><span>${esc(k.name)}（${k.age} 歲）${k.fit === 'no' ? ' 年齡不符' : ''}</span></label>`).join('')}</span></div>
+        <div class="est-ctl"><span class="lbl">孩子</span><span class="chips">${it.kids.map((k) => `<label class="chip sm"><input type="checkbox" data-k="${esc(k.id)}" ${p.kids.has(k.id) ? 'checked' : ''} ${k.fit === 'no' ? 'disabled' : ''}><span>${esc(k.name)}（${k.notBorn ? '還沒出生' : `${k.age} 歲`}）${k.fit === 'no' ? ' 年齡不符' : ''}</span></label>`).join('')}</span></div>
         <div class="est-ctl"><span class="lbl">週次</span><span class="chips">${weekChips(p)}</span></div>
         ${pr.amount != null && UNIT[pr.basis] ? `<div class="est-ctl"><label class="qty">單價 <input type="number" min="0" step="1" value="${p.amount}" data-a> ${esc(pr.currency)}／${BASIS[pr.basis]}</label>
           <label class="qty">數量 <input type="number" min="0" step="${step}" value="${p.qty}" data-q> ${UNIT[pr.basis]}</label></div>` : ''}
@@ -848,14 +1020,14 @@ function openEstimate() {
 }
 
 // Week-by-kid schedule of the picked camps, and clashes (same kid, same days).
-function planOf(kidNames) {
+function planOf(kidList) {
   const win = searchWin();
   const rows = new Map(weeksIn(win.start, win.end).map((w) => [w.mon, []]));
   for (const p of picked.values()) for (const m of p.weeks.keys()) if (!rows.has(m)) rows.set(m, []);
   const clashes = [];
   const table = [...rows.keys()].sort().map((mon) => {
-    const cells = kidNames.map((name) => {
-      const here = [...picked.values()].filter((p) => p.weeks.has(mon) && [...p.kids].some((i) => p.it.kids[i]?.name === name));
+    const cells = kidList.map(({ id: kidId, name }) => {
+      const here = [...picked.values()].filter((p) => p.weeks.has(mon) && p.kids.has(kidId));
       let clash = false;
       for (let a = 0; a < here.length; a += 1) {
         for (let b = a + 1; b < here.length; b += 1) {
@@ -874,7 +1046,7 @@ function planOf(kidNames) {
   return { table, clashes };
 }
 
-function planHtml(kidNames, table) {
+function planHtml(kidList, table) {
   if (!table.some((r) => r.cells.some((c) => c.here.length))) return '';
   // the venue name alone when it already carries the brand (Newtonshow Bangsar), else brand plus venue
   const label = (p) => {
@@ -883,7 +1055,7 @@ function planHtml(kidNames, table) {
     const own = loc && loc.split(' ')[0] === brand.split(' ')[0];
     return `<span class="plan-opt" title="${esc(p.it.provider.name_en)}・${esc(p.it.program.name)}">${esc(own ? loc : brand)}${loc && !own ? `<small>${esc(loc)}</small>` : ''}${p.kind === 'undated' ? '<small>日期未定</small>' : ''}</span>`;
   };
-  return `<h3 class="est-sub">排程</h3><div class="cmp-scroll"><table class="weeks plan"><thead><tr><th>週</th>${kidNames.map((n) => `<th>${esc(n)}</th>`).join('')}</tr></thead><tbody>
+  return `<h3 class="est-sub">排程</h3><div class="cmp-scroll"><table class="weeks plan"><thead><tr><th>週</th>${kidList.map((k) => `<th>${esc(k.name)}</th>`).join('')}</tr></thead><tbody>
     ${table.map((r) => `<tr><td class="wk">${md(r.mon)}～${md(addDays(r.mon, 4))}</td>${r.cells.map((c) => `<td class="${c.clash ? 'clash' : ''}">${c.here.length ? c.here.map(label).join('') : '<span class="gap">空</span>'}</td>`).join('')}</tr>`).join('')}
   </tbody></table></div>`;
 }
@@ -897,20 +1069,16 @@ function updateEstimate() {
   const byCur = {};
   let twd = 0;
   const perKid = new Map();
-  const kidNames = readForm().kids.map((k) => k.name);
-  for (const p of picked.values()) for (const i of p.kids) { const n = p.it.kids[i]?.name; if (n && !kidNames.includes(n)) kidNames.push(n); }
+  const kidList = readForm().kids;
   for (const l of lines.filter((x) => x.c)) {
     byCur[l.cur] = (byCur[l.cur] || 0) + l.c.total;
     twd += l.twd || 0;
     const p = picked.get(l.id);
-    for (const i of p.kids) {
-      const name = p.it.kids[i]?.name ?? `孩子 ${i + 1}`;
-      perKid.set(name, (perKid.get(name) || 0) + (l.twd || 0) / p.kids.size);
-    }
+    for (const kid of p.kids) perKid.set(kid, (perKid.get(kid) || 0) + (l.twd || 0) / p.kids.size);
   }
   const missing = lines.filter((x) => !x.c).map((x) => { const { it } = picked.get(x.id); return `${esc(it.provider.name_en)} ${esc(it.program.name)}${it.locs[0] ? `（${esc(it.locs[0].name)}）` : ''}`; });
-  const { table, clashes } = planOf(kidNames);
-  $('#est-plan').innerHTML = planHtml(kidNames, table);
+  const { table, clashes } = planOf(kidList);
+  $('#est-plan').innerHTML = planHtml(kidList, table);
   const warns = [...clashes];
   if (missing.length) warns.push(`${missing.length} 項沒算進總額（價格未公布、沒勾孩子或沒勾週次）：${missing.join('、')}`);
   const low = lines.filter((x) => x.c && x.atLeast).map((x) => esc(shortName(picked.get(x.id).it)));
@@ -918,7 +1086,7 @@ function updateEstimate() {
   const fx = db.fx;
   $('#est-total').innerHTML = `<div class="est-sum"><span>合計${low.length ? '至少' : ''}約</span><b>NT$${fmtN(twd)}</b></div>
     <div class="est-cur">${Object.entries(byCur).map(([c, n]) => money(c, n)).join(' ＋ ') || '—'}</div>
-    ${kidNames.length > 1 ? `<div class="est-kids">${kidNames.filter((k) => perKid.has(k)).map((k) => `${esc(k)} 約 NT$${fmtN(perKid.get(k))}`).join('｜')}</div>` : ''}
+    ${kidList.length > 1 ? `<div class="est-kids">${kidList.filter((k) => perKid.has(k.id)).map((k) => `${esc(k.name)} 約 NT$${fmtN(perKid.get(k.id))}`).join('｜')}</div>` : ''}
     ${warns.length ? `<ul class="warns">${warns.map((w) => `<li>${w}</li>`).join('')}</ul>` : ''}
     <p class="hint">不含機票、家長住宿、當地交通、報名費、手足優惠和早鳥折扣；日營不含住宿。匯率 ${(Object.keys(byCur).length ? Object.keys(byCur) : ['MYR']).map((c) => `1 ${c} ≈ ${fx.rates[c] ?? '?'} TWD`).join('、')}（${esc(fx.asof.MYR)}）。</p>`;
 }
@@ -929,8 +1097,9 @@ function refreshAges() {
   const f = $('#q');
   for (const el of document.querySelectorAll('.kid')) {
     const birth = `${el.querySelector('[name=by]').value}-${el.querySelector('[name=bm]').value}`;
-    const { age } = kidFit({ age_min: null, age_max: null }, birth, f.start.value || '2027-01-17');
-    el.querySelector('.age').textContent = `開始日時約 ${age} 歲`;
+    if (!validDate(f.start.value)) { el.querySelector('.age').textContent = ''; continue; }
+    const { age, notBorn } = kidFit({ age_min: null, age_max: null }, birth, f.start.value);
+    el.querySelector('.age').textContent = notBorn ? '開始日時還沒出生' : `開始日時約 ${age} 歲`;
   }
 }
 
@@ -939,12 +1108,23 @@ function markPreset() {
   for (const b of document.querySelectorAll('#presets .preset')) b.classList.toggle('on', b.dataset.a === f.start.value && b.dataset.b === f.end.value);
 }
 
-function run() {
+let lastKey = null; // the query last drawn
+let lastScope = null; // dates and country of that query
+// force: draw again even though the form is unchanged (a view switch, clearing the picks)
+function run({ force = false } = {}) {
   const q = readForm();
   markPreset();
-  localStorage.setItem(STORE, JSON.stringify(q));
   refreshAges();
-  render(q);
+  // blur fires a change event after the input event already ran; drawing twice would swallow the click that caused the blur
+  const key = JSON.stringify(q);
+  if (!force && key === lastKey) return;
+  lastKey = key;
+  // a new season or country: pick the default lights again
+  const scope = `${q.start}|${q.end}|${q.country}`;
+  if (scope !== lastScope) { lightsTouched = false; lastScope = scope; }
+  const problem = dateProblem(q);
+  if (!problem && q.kids.length) localStorage.setItem(STORE, JSON.stringify(q));
+  render(q, problem);
 }
 
 const latestVerified = () => raw.sessions.reduce((m, s) => (s.verified_at > m ? s.verified_at : m), '');
@@ -975,7 +1155,7 @@ async function main() {
   f.addEventListener('submit', (e) => { e.preventDefault(); run(); });
   $('#add-kid').addEventListener('click', () => {
     const q = readForm();
-    q.kids.push({ name: `孩子 ${q.kids.length + 1}`, birth: '2018-01' });
+    q.kids.push({ id: newKidId(), name: freeKidName(q.kids.map((k) => k.name)), birth: '2018-01' });
     $('#kids').innerHTML = q.kids.map(kidRow).join('');
     run();
   });
@@ -1009,7 +1189,7 @@ async function main() {
   $('#weeks').addEventListener('change', (e) => {
     if (e.target.id !== 'use-ly') return;
     useLastYear = e.target.checked;
-    run();
+    run({ force: true });
   });
   $('#weeks').addEventListener('click', (e) => {
     const a = e.target.closest('[data-go]');
@@ -1031,14 +1211,14 @@ async function main() {
   });
   $('#tray-open').addEventListener('click', openCompare);
   $('#tray-est').addEventListener('click', openEstimate);
-  $('#tray-clear').addEventListener('click', () => { picked.clear(); run(); });
+  $('#tray-clear').addEventListener('click', () => { picked.clear(); run({ force: true }); });
   $('#cmp-body').addEventListener('input', (e) => {
     const sec = e.target.closest('.est-item');
     if (!sec) return;
     const p = picked.get(sec.dataset.id);
     if (e.target.dataset.k != null) {
-      const i = Number(e.target.dataset.k);
-      if (e.target.checked) p.kids.add(i); else p.kids.delete(i);
+      const kid = e.target.dataset.k;
+      if (e.target.checked) p.kids.add(kid); else p.kids.delete(kid);
     }
     if (e.target.dataset.w != null) {
       const { w: mon, ws: start, we: end } = e.target.dataset;
