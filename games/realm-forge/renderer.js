@@ -3,6 +3,7 @@ import { TEAM_COLORS, TEAM_LIGHT, imageFor, unitArt, animationArt, worldArt, dra
 import { animationPose, facingDirection } from './motion.mjs?v=20261009l';
 import { gaitBob, drawWalkingSprite } from './gait.mjs?v=20261009l';
 import { commandWaypoints } from './command-feedback.mjs?v=20261009l';
+import { steppedZoom } from './camera-steps.mjs?v=20261009l';
 export function wheelZoomFactor(deltaY, deltaMode = 0, height = 600) {
   const pixels = deltaY * (deltaMode === 1 ? 16 : deltaMode === 2 ? height : 1);
   return Math.exp(-clamp(pixels, -80, 80) * .001);
@@ -367,6 +368,9 @@ export class Renderer {
     this.restoreView();
     const next = clamp(this.zoom * factor, minimum, maximum), ratio = next / this.zoom;
     this.pan = {x:this.pan.x * ratio, y:this.pan.y * ratio}; this.zoom = next; this.constrainView();
+  }
+  zoomStep(dir) {
+    const next = steppedZoom(this.zoom, dir); if (Math.abs(next - this.zoom) > 1e-6) this.zoomBy(next / this.zoom, next, next);
   }
   constrainView() {
     if (this.overviewView) return;

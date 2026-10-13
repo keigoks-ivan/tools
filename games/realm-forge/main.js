@@ -8,6 +8,8 @@ import { actionReason, actionDescription, buildReason, placementFeedback, produc
 import { leftDragMode, crossedDragThreshold } from './interaction.mjs?v=20261009l';
 import { applyContextCommand, selectionAfterClick, readControlPreferences, applySelectionStance } from './player-interaction.mjs?v=20261009l';
 import { layoutActions } from './action-layout.mjs?v=20261009l';
+import { cursorCss, contextCursor } from './cursors.mjs?v=20261009l';
+import { ZOOM_BASE, ZOOM_STEPS, zoomPercent, createWheelStepper, edgeScrollDirection } from './camera-steps.mjs?v=20261009l';
 const $ = id => document.getElementById(id);
 const markupCache = new Map();
 function html(id, markup) { if (markupCache.get(id)!==markup) { $(id).innerHTML=markup; markupCache.set(id,markup); } }
@@ -90,7 +92,7 @@ function startBattle() {
       const a = project.map.spawns[0];
       world = new World(project); if (world.deploymentErrors?.length) throw new Error(world.deploymentErrors[0]); const town = world.buildings.find(b=>b.team===0&&b.type==='town') || a;
       if (project.map.size <= 128) for (const b of world.buildings.filter(b=>b.type==='town'&&b.team!==0)) if (!findPath(town, b, project.map.size, (x, y) => !['grass', 'sand', 'road'].includes(tileType(project.map, x, y)), 1.5)) throw new Error('出生點之間沒有可行走的通路，請在地圖編輯器開一條道路。');
-      ui.selected.clear(); ui.groups = {}; ui.started = true; renderer.center(town); renderer.zoom = Math.max(renderer.zoom, 1.1); renderer.center(town);
+      ui.selected.clear(); ui.groups = {}; ui.started = true; renderer.center(town); renderer.zoom = ZOOM_BASE; renderer.center(town);
     } catch (e) { toast(e.message); return; }
   }
   ui.paused = !ui.paused; $('map').focus({ preventScroll: true }); updateHud(true);
@@ -263,6 +265,15 @@ function updateHud(force = false) {
 
 }
 const RESOURCE_LABELS = { wood: '木', food: '食', gold: '金', stone: '石' };
+document.head.append(Object.assign(document.createElement('style'),{textContent:cursorCss()}));
+function pointerCursor(units) {
+  if (ui.mode!=='play'||pointer||minimapPointer!==null) return '';
+  const fog=ui.started&&project.rules.fog,mine=units.filter(u=>u.hp>0);
+  const target=pointerPos&&mine.length&&!ui.placement?(ui.orderMode||altDown?renderer.hit(pointerPos.x,pointerPos.y,world,fog):renderer.commandHit(pointerPos.x,pointerPos.y,world,fog,ui.selected)):null;
+  const resource=pointerPos&&!target&&!ui.orderMode&&!ui.placement&&mine.some(u=>u.blueprint.role==='worker')?renderer.resourceHit(pointerPos.x,pointerPos.y,world,fog)?.type:null;
+  return contextCursor(world,{units:mine,target,resource,alt:altDown,placement:ui.placement,orderMode:ui.orderMode,attackMove:ui.attackMove});
+}
+let altDown=false, windowPointer=null;
 function updatePointerHint() {
   const own=ownEntities(),target=pointerPos&&!pointer&&minimapPointer===null&&ui.mode==='play'&&!ui.placement&&!ui.orderMode&&!ui.attackMove&&own.length?renderer.commandHit(pointerPos.x,pointerPos.y,world,ui.started&&project.rules.fog,ui.selected):null;
   const enemy=target&&world.isEnemy(0,target.team)?target:null,units=own.filter(e=>e.kind==='unit'&&!e.garrison);
@@ -273,7 +284,7 @@ function updatePointerHint() {
   renderer.hoverTarget=enemy?.id||null;
   renderer.hoverAttack=canAttack;
   $('map').dataset.commandTarget=canAttack?'attack':'';
-  $('map').dataset.commandCursor=canAttack?'attack':canConvert?'convert':tradeTarget?'trade':canHeal?'heal':'';
+  $('map').dataset.commandCursor=pointerCursor(units);
   const description=canAttack?tradeTarget?'⚔ 右鍵：部隊攻擊／商隊貿易':'⚔ 右鍵攻擊':canConvert?'✧ 右鍵招降':tradeTarget?'⇄ 右鍵開始貿易':canHeal?'✚ 右鍵治療':enemy&&!units.length?'⚑ 右鍵設定集結點':null;
   $('target-hint').hidden=!description;
   if(description)$('target-hint').textContent=`${description} · ${target.team?'AI '+target.team:'我方'} ${target.kind==='building'?BUILDINGS[target.type].name:target.blueprint.name}`;
@@ -557,21 +568,31 @@ function updateCameraControls() {
   $('fit').textContent = overview ? '↶ 返回' : '全圖';
   $('fit').title = overview ? '返回查看全圖之前的視角' : '查看整張地圖；再按一次返回';
   $('fit').setAttribute('aria-label', overview ? '返回原本視角' : '查看全圖');
-  $('zoom-status').textContent = `${Math.round(renderer.zoom * 100)}%`;
-  $('zoom-out').disabled = !overview && renderer.zoom <= (ui.mode === 'play' ? .55 : .15) + .00001;
-  $('zoom-in').disabled = !overview && renderer.zoom >= (ui.mode === 'play' ? 1.8 : 2.5) - .00001;
+  $('zoom-status').textContent = `${ui.mode === 'play' ? zoomPercent(renderer.zoom) : Math.round(renderer.zoom * 100)}%`;
+  $('zoom-out').disabled = !overview && renderer.zoom <= (ui.mode === 'play' ? ZOOM_STEPS[0] : .15) + .00001;
+  $('zoom-in').disabled = !overview && renderer.zoom >= (ui.mode === 'play' ? ZOOM_STEPS.at(-1) : 2.5) - .00001;
   const drag=$('drag-view');drag.hidden=ui.mode!=='play';drag.setAttribute('aria-pressed',String(ui.leftDragPan));drag.classList.toggle('active',ui.leftDragPan);
   drag.title=ui.leftDragPan?'已開啟：左鍵拖曳空地移動視角；Shift＋左鍵拖曳框選。點此關閉。':'已關閉：左鍵拖曳框選。點此開啟空地拖曳視角。';
   $('map').setAttribute('aria-label',ui.mode==='map'?'地圖編輯。左鍵拖曳畫地形，中鍵拖曳移動畫面。':ui.mode==='play'?`等角戰場。左鍵選取，${ui.leftDragPan?'左鍵拖曳空地移動畫面，Shift 加左鍵拖曳框選':'左鍵拖曳框選'}。右鍵移動、採集或攻擊。方向鍵移動畫面。`:'兵種部署預覽。左鍵選取，方向鍵移動畫面。');
   if(ui.mode==='play')$('canvas-tip').innerHTML=ui.leftDragPan?'<kbd>左鍵拖空地</kbd> 移動畫面 <span>·</span> <kbd>Shift＋拖曳</kbd> 框選 <span>·</span> <kbd>右鍵</kbd> 下指令':'<kbd>左鍵拖曳</kbd> 框選 <span>·</span> <kbd>右鍵</kbd> 下指令 <span>·</span> <kbd>滾輪</kbd> 縮放';
 }
-function zoom(factor) { renderer.zoomBy(factor, ui.mode === 'play' ? .55 : .15, ui.mode === 'play' ? 1.8 : 2.5); pointerPos = null; updateCameraControls(); }
+function zoom(factor) {
+  if (ui.mode === 'play' && !renderer.overviewView) renderer.zoomStep(factor > 1 ? 1 : -1);
+  else renderer.zoomBy(factor, ui.mode === 'play' ? ZOOM_STEPS[0] : .15, ui.mode === 'play' ? ZOOM_STEPS.at(-1) : 2.5);
+  pointerPos = null; updateCameraControls();
+}
 function resetCamera() {
   const base = world.buildings.find(b=>b.team===0&&b.type==='town'&&b.hp>0) || project.map.spawns[0];
-  renderer.overviewView = null; renderer.zoom = ui.mode === 'play' ? 1.1 : .9; renderer.center(base);
+  renderer.overviewView = null; renderer.zoom = ui.mode === 'play' ? ZOOM_BASE : .9; renderer.center(base);
   keys.clear(); pointerPos = null; updateCameraControls(); $('map').focus({preventScroll:true});
 }
-$('map').addEventListener('wheel', e => { e.preventDefault(); if (e.deltaY) zoom(wheelZoomFactor(e.deltaY,e.deltaMode,renderer.height)); }, { passive: false });
+const wheelStepper = createWheelStepper();
+$('map').addEventListener('wheel', e => {
+  e.preventDefault(); if (!e.deltaY) return;
+  if (ui.mode !== 'play') { zoom(wheelZoomFactor(e.deltaY,e.deltaMode,renderer.height)); return; }
+  const dir = wheelStepper(e.deltaY * (e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? renderer.height : 1), e.timeStamp);
+  if (dir) zoom(dir > 0 ? 2 : .5);
+}, { passive: false });
 $('minimap').addEventListener('contextmenu',e=>e.preventDefault());
 function minimapPosition(e) {
   const r=$('minimap').getBoundingClientRect();return renderer.minimapPoint((e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height);
@@ -597,7 +618,7 @@ $('minimap').addEventListener('pointermove',e=>{
 });
 $('minimap').addEventListener('pointerup',e=>{if(minimapPointer===e.pointerId){minimapPointer=null;if($('minimap').hasPointerCapture(e.pointerId))$('minimap').releasePointerCapture(e.pointerId);$('map').focus({preventScroll:true});}});
 $('minimap').addEventListener('pointercancel',()=>{minimapPointer=null;});
-$('zoom-out').onclick = () => zoom(1/1.1); $('zoom-in').onclick = () => zoom(1.1);
+$('zoom-out').onclick = () => zoom(ui.mode === 'play' ? .5 : 1/1.1); $('zoom-in').onclick = () => zoom(ui.mode === 'play' ? 2 : 1.1);
 $('fit').onclick = () => { if (!renderer.restoreView()) renderer.fit(project.map); keys.clear(); pointerPos = null; updateCameraControls(); };
 $('reset-view').onclick = resetCamera;
 $('drag-view').onclick=()=>{ui.leftDragPan=!ui.leftDragPan;try{localStorage.setItem(CONTROL_STORAGE,JSON.stringify({leftDragPan:ui.leftDragPan}));}catch{}updateCameraControls();$('map').focus({preventScroll:true});toast(ui.leftDragPan?'已開啟空地左拖移動視角；Shift 拖曳或從單位開始拖曳可框選。':'已切換一般左鍵框選；可用方向鍵、邊緣或小地圖移動視角。');};
@@ -754,15 +775,18 @@ window.addEventListener('keydown', e => {
 });
 function updateScore() { let panel=$('score-panel'); if (!panel) { panel=document.createElement('div'); panel.id='score-panel'; panel.className='score-panel'; $('canvas-wrap').append(panel); } panel.hidden=!ui.showScore; if (ui.showScore) panel.innerHTML=Array.from({length:world.teams},(_,i)=>`<div style="color:${['#78b9dc','#e69e8d','#dfcb81','#d9a5ed'][i]||'#fff'}">${i===0?'我方王國':'AI 王國 '+i+(project.rules.aiAlliance&&world.teams>2?' · 敵方聯盟':'')} <b>${Math.round(world.population(i)*20+world.buildings.filter(b=>b.team===i).length*50+world.researched[i].size*15)}</b></div>`).join(''); }
 window.addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
-window.addEventListener('blur', () => { keys.clear(); pointerPos = null; if(pointer?.type==='mapWall')finishMapWall(); pointer=null;minimapPointer=null;renderer.drag=null;$('map').classList.remove('camera-dragging');updatePointerHint();if (ui.started) { ui.paused = true; updateHud(true); } });
+window.addEventListener('pointermove', e => { windowPointer = e.pointerType === 'mouse' ? { x: e.clientX, y: e.clientY } : null; }, true);
+document.documentElement.addEventListener('mouseleave', () => { windowPointer = null; });
+for (const type of ['keydown','keyup']) window.addEventListener(type, e => { if (altDown!==e.altKey) { altDown=e.altKey; updatePointerHint(); } });
+window.addEventListener('blur', () => { altDown=false; keys.clear(); pointerPos = null; if(pointer?.type==='mapWall')finishMapWall(); pointer=null;minimapPointer=null;renderer.drag=null;$('map').classList.remove('camera-dragging');updatePointerHint();if (ui.started) { ui.paused = true; updateHud(true); } });
 document.addEventListener('visibilitychange', () => { if (document.hidden && ui.started) { ui.paused = true; updateHud(true); } });
 new ResizeObserver(() => renderer.resize()).observe($('canvas-wrap'));
 function frame(now) {
   const dt = Math.min((now - lastTick) / 1000, .1); lastTick = now; frameTime = now / 1000;
   if (ui.started && !ui.paused && ui.mode === 'play') { simulationLag=Math.min(.15,simulationLag+dt); let steps=0; while(simulationLag>=.05&&steps++<2) { world.tick(.05*project.rules.speed);simulationLag-=.05; } } else simulationLag=0;
   const step = 450 * dt; if (!document.querySelector('dialog[open]') && document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'SELECT') {
-    const dx = Number(keys.has('arrowleft') || Boolean(pointerPos && pointerPos.x < 12 && !pointer)) - Number(keys.has('arrowright') || Boolean(pointerPos && pointerPos.x > renderer.width - 12 && !pointer));
-    const dy = Number(keys.has('arrowup') || Boolean(pointerPos && pointerPos.y < 12 && !pointer)) - Number(keys.has('arrowdown') || Boolean(pointerPos && pointerPos.y > renderer.height - 12 && !pointer));
+    const edge = pointer ? { dx: 0, dy: 0 } : ui.mode === 'play' ? edgeScrollDirection(windowPointer, { width: document.documentElement.clientWidth, height: window.innerHeight }) : edgeScrollDirection(pointerPos, { width: renderer.width, height: renderer.height }, 11);
+    const dx = Number(keys.has('arrowleft')) - Number(keys.has('arrowright')) + edge.dx, dy = Number(keys.has('arrowup')) - Number(keys.has('arrowdown')) + edge.dy;
     if (dx || dy) { renderer.restoreView(); renderer.pan.x += dx * step; renderer.pan.y += dy * step; renderer.constrainView(); }
   }
   if (!document.hidden && now-lastRender >= (ui.started&&!ui.paused&&ui.mode==='play' ? world.units.length>600?1000/30:world.units.length>300?1000/45:1000/60 : 50)) { fps=fps*.9+Math.min(240,1000/Math.max(1,now-lastRender))*.1; renderer.render(project, world, ui, frameTime); lastRender=now; }
@@ -771,3 +795,4 @@ function frame(now) {
 }
 artReady.then(() => { if ($('unit-form')) drawPreview(readUnitForm()); });
 switchMode('map'); updateHud(true); requestAnimationFrame(frame); if (storageError) toast(storageError); else if (world.deploymentErrors?.length) toast(world.deploymentErrors[0]); else if (mapUpgraded) { markDirty(); toast('預設兵種與舊地圖設定已更新。請儲存新版設定。'); }
+if (new URLSearchParams(location.search).has('rfdebug')) window.__rf = { get world() { return world; }, get project() { return project; }, ui, renderer, issueCommand: (...a) => issueCommand(...a), updatePointerHint: () => updatePointerHint() };
