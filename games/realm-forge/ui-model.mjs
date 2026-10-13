@@ -1,4 +1,5 @@
-import { BUILDINGS, RESOURCE, buildingDistance } from './core.mjs?v=20261009l';
+import { BUILDINGS, RESOURCE, buildingDistance, rulePreset, STANDARD_MAP_SIZE } from './core.mjs?v=20261009l';
+import { AI_LEVELS } from './ai.mjs?v=20261009l';
 import { CIVILIZATION, TECHNOLOGIES } from './civilization.mjs?v=20261009l';
 import { orderHint } from './controls.mjs?v=20261009l';
 
@@ -118,4 +119,13 @@ export function actionDescription(world, action) {
   if (kind==='stance') return '設定部隊自動迎敵與追擊的方式。';
   if (kind==='trade') return '交易每次 100 資源；Shift 一次交易 5 次。';
   return COMMAND_DESCRIPTIONS[action.id] || '';
+}
+
+/** One readable paragraph with the numbers of an opening, for the settings dialog. */
+export function presetSummary(preset) {
+  const r = rulePreset(preset), res = o => `食物 ${o.food.toLocaleString()}、木材 ${o.wood.toLocaleString()}、黃金 ${o.gold.toLocaleString()}、石頭 ${o.stone.toLocaleString()}`;
+  const ai = r.aiStartingResources || { food: r.starting, wood: r.starting, gold: r.starting, stone: r.starting }, level = AI_LEVELS[r.ai];
+  const pop = r.freePlayerPopulation ? `我方免蓋房子，人口上限 ${r.population}` : `人口靠市鎮中心 +5 與住宅 +5，上限 ${r.population}`;
+  const map = preset === 'standard' ? `地圖 ${STANDARD_MAP_SIZE} × ${STANDARD_MAP_SIZE} 格、出生點約相距 ${Math.round(STANDARD_MAP_SIZE * .52)} 格` : '地圖 128 × 128 格、三王國';
+  return `${['黑暗時代', '封建時代', '城堡時代', '帝王時代', '後帝王時代'][r.startAge]}開局 · 我方 ${res(r.playerStartingResources)} · 敵方 ${res(ai)} · ${pop} · 一座市鎮中心、3 村民、1 斥候 · ${map} · 電腦對手「${level.name}」（${level.note}）`;
 }

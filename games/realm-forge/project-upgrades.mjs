@@ -1,4 +1,4 @@
-import { clone, generateMap, tileType, setTile, enrichMapResources } from './core.mjs?v=20261009l';
+import { clone, generateMap, generateStandardMap, defaultProject, newProject, validateProject, tileType, setTile, enrichMapResources } from './core.mjs?v=20261009l';
 import { CIV_UNITS } from './civilization.mjs?v=20261009l';
 import { LEGACY_UNIT_STATS } from './balance.mjs?v=20261009l';
 
@@ -29,8 +29,30 @@ export function preserveCustomStats(original, draft) {
   return draft;
 }
 
+const same = (a, b) => a === b || a && b && typeof a === 'object' && typeof b === 'object' && Array.isArray(a) === Array.isArray(b) && Object.keys(a).length === Object.keys(b).length && Object.keys(a).every(key => Object.hasOwn(b, key) && same(a[key], b[key]));
+/**
+ * Projects saved before the standard opening existed switch to it only when nothing was ever changed:
+ * no preset was ever chosen, and the saved name, map, units and rules still equal the old built-in
+ * default. Anything the player edited (even one number) or a preset they picked keeps its rules.
+ */
+export function adoptStandardOpening(project) {
+  const old = validateProject(defaultProject()), strip = rules => { const { preset, aiVision, ...rest } = rules; return rest; };
+  if (project.rules.preset !== undefined || project.name !== old.name || !same(project.map, old.map) || !same(project.units, old.units) || !same(strip(project.rules), strip(old.rules))) return false;
+  const fresh = newProject();
+  project.map = fresh.map; project.rules = fresh.rules;
+  return true;
+}
+
 export function setEnemyCount(project, count) {
   if (!Number.isInteger(count) || count < 1 || count > 3) throw new Error('敵人數量可選 1–3 個。');
+  if (project.map.generator === 'standard') {
+    // Standard maps are laid out for their player count, so a new count means a new layout (terrain edits are not kept).
+    if (project.map.spawns.length === count + 1) return { ...clone(project.map), enemyCount: count };
+    const map = generateStandardMap(project.map.size, project.map.seed, count + 1);
+    for (const key of ['heroPlacements', 'buildingPlacements']) if (project.map[key]) map[key] = clone(project.map[key]).filter(p => (p.team ?? 0) <= count);
+    map.name = project.map.name; map.enemyCount = count;
+    return map;
+  }
   const map = clone(project.map);
   if (map.spawns.length > count + 1) map.spawns.length = count + 1;
   if (map.buildingPlacements) map.buildingPlacements = map.buildingPlacements.filter(p=>p.team<=count);

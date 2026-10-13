@@ -2,7 +2,7 @@ import { CIV_UNITS, TECHNOLOGIES } from './civilization.mjs?v=20261009l';
 import { BUILDING_BALANCE } from './balance.mjs?v=20261009l';
 import { createRouteSearch } from './navigation.mjs?v=20261009l';
 import { smoothPath, segmentClear, pathGoalTail } from './motion.mjs?v=20261009l';
-import { AI_PROFILES, updateAI } from './ai.mjs?v=20261009l';
+import { AI_PROFILES, updateAI, initAIKnowledge } from './ai.mjs?v=20261009l';
 export const clone = value => JSON.parse(JSON.stringify(value));
 export const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 export const RICH_RESOURCE_AMOUNTS = { wood: 5000, food: 10000, gold: 20000, stone: 20000 };
@@ -119,8 +119,58 @@ export function enrichMapResources(map) {
   }
   return map;
 }
+// ---- Standard opening (AoE2 pacing) ----------------------------------------
+// Tile-level amounts: a tree/bush/mine is one tile, so these mirror AoE2 per-object stocks.
+export const STANDARD_MAP_SIZE = 168;
+export const STANDARD_RESOURCE_AMOUNTS = { wood: 100, food: 200, gold: 800, stone: 350 };
+export const STANDARD_START = { food: 200, wood: 200, gold: 100, stone: 200 };
+const mulberry32 = seed => () => { seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+// 2-4 kingdoms; about 0.5 x map width apart, which is roughly AoE2 "medium" spacing.
+export function standardSpawns(size, players) {
+  const at = (fx, fy) => ({ x: Math.round(size * fx), y: Math.round(size * fy) });
+  return players <= 2 ? [at(.28, .64), at(.72, .36)] : players === 3 ? [at(.26, .68), at(.74, .68), at(.5, .26)] : [at(.27, .73), at(.73, .27), at(.73, .73), at(.27, .27)];
+}
+// Same start for every kingdom, offsets from the town centre: [type, x, y, w, h] rectangles or ['forest', cx, cy, rx, ry] ellipses.
+const STANDARD_START_LAYOUT = [
+  ['forest', -6, -1, 1, 1], ['forest', -6, 1, 1, 1], ['forest', 5, -6, 1, 1], ['forest', 7, 5, 1, 1],
+  ['food', -2, 9, 3, 2], ['food', -16, 8, 3, 2],
+  ['gold', 10, -4, 2, 2], ['stone', 9, 6, 2, 2], ['gold', 17, -13, 2, 2], ['stone', -18, 13, 2, 2],
+  ['ellipse', -13, -4, 3.5, 5], ['ellipse', 3, -19, 6, 3.5],
+];
+export function generateStandardMap(size = STANDARD_MAP_SIZE, seed = 7, players = 2) {
+  const rand = mulberry32(seed), spawns = standardSpawns(size, players), tiles = Array(size * size).fill('grass');
+  const put = (x, y, t) => { x = Math.round(x); y = Math.round(y); if (x >= 1 && y >= 1 && x < size - 1 && y < size - 1) tiles[y * size + x] = t; };
+  const ellipse = (cx, cy, rx, ry, t, fill = 1) => { for (let y = Math.floor(cy - ry); y <= Math.ceil(cy + ry); y++) for (let x = Math.floor(cx - rx); x <= Math.ceil(cx + rx); x++) if (((x - cx) / rx) ** 2 + ((y - cy) / ry) ** 2 <= 1 && rand() < fill) put(x, y, t); };
+  const rect = (x0, y0, w, h, t) => { for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) put(x0 + x, y0 + y, t); };
+  const farFromSpawns = (x, y, d) => spawns.every(s => Math.hypot(s.x - x, s.y - y) >= d);
+  // Neutral forests and resource patches live outside every kingdom's start area.
+  for (let tries = 0, made = 0; made < Math.round(size * size / 1800) && tries < 400; tries++) {
+    const cx = 6 + rand() * (size - 12), cy = 6 + rand() * (size - 12);
+    if (farFromSpawns(cx, cy, 30)) { ellipse(cx, cy, 2.5 + rand() * 4, 2 + rand() * 3.5, 'forest', .88); made++; }
+  }
+  for (const [type, count, w, h] of [['gold', 3, 2, 2], ['stone', 2, 2, 2], ['food', 3, 3, 2]]) {
+    for (let tries = 0, made = 0; made < count && tries < 300; tries++) {
+      const x = 8 + Math.floor(rand() * (size - 20)), y = 8 + Math.floor(rand() * (size - 20));
+      if (farFromSpawns(x, y, 34)) { rect(x, y, w, h, type); made++; }
+    }
+  }
+  for (const s of spawns) {
+    for (let y = -26; y <= 26; y++) for (let x = -26; x <= 26; x++) if (Math.hypot(x, y) <= 26) put(s.x + x, s.y + y, 'grass');
+    for (const [type, a, b, c, d] of STANDARD_START_LAYOUT) type === 'ellipse' ? ellipse(s.x + a, s.y + b, c, d, 'forest') : rect(s.x + a, s.y + b, c, d, type);
+  }
+  return { size, seed, name: '標準開局草原', tiles, spawns, generator: 'standard', resourceAmounts: clone(STANDARD_RESOURCE_AMOUNTS), revision: 1 };
+}
+const SANDBOX_RULES = () => ({ preset: 'sandbox', population: 300, enemyPopulation: 300, starting: 20000, freePlayerPopulation: true, playerPopulationVersion: 1, enemyPopulationVersion: 1, aiEconomyVersion: 1, playerEconomyVersion: 1, playerStartingResources: { wood: 200000, food: 200000, gold: 200000, stone: 200000 }, ai: 'normal', aiAlliance: true, startingBase: 'town', fog: true, speed: 1, startAge: 4, victory: 'conquest', hotkeys: 'definitive' });
+const STANDARD_RULES = () => ({ preset: 'standard', population: 200, enemyPopulation: 200, starting: STANDARD_START.food, aiStartingResources: clone(STANDARD_START), freePlayerPopulation: false, playerPopulationVersion: 1, enemyPopulationVersion: 1, aiEconomyVersion: 1, playerEconomyVersion: 1, playerStartingResources: clone(STANDARD_START), ai: 'standard', aiVision: 'fair', aiAlliance: true, startingBase: 'town', fog: true, speed: 1, startAge: 0, victory: 'conquest', hotkeys: 'definitive' });
+/** Rules shown in the settings dialog for each opening. */
+export const rulePreset = preset => preset === 'standard' ? STANDARD_RULES() : SANDBOX_RULES();
+/** New projects start from the standard opening (1v1 by default). */
+export function newProject(enemies = 1, seed = 7) {
+  return { version: 1, name: '我的王國', map: generateStandardMap(STANDARD_MAP_SIZE, seed, enemies + 1), units: clone(CIV_UNITS), rules: STANDARD_RULES() };
+}
+/** The pre-standard defaults, kept as the sandbox preset (200k resources, free population, 3 kingdoms). */
 export function defaultProject() {
-  return { version: 1, name: '我的王國', map: generateMap(), units: clone(CIV_UNITS), rules: { population: 300, enemyPopulation: 300, starting: 20000, freePlayerPopulation:true, playerPopulationVersion:1, enemyPopulationVersion:1, aiEconomyVersion:1, playerEconomyVersion:1, playerStartingResources: { wood: 200000, food: 200000, gold: 200000, stone: 200000 }, ai: 'normal', aiAlliance: true, startingBase: 'town', fog: true, speed: 1, startAge: 4, victory: 'conquest', hotkeys: 'definitive' } };
+  return { version: 1, name: '我的王國', map: generateMap(), units: clone(CIV_UNITS), rules: SANDBOX_RULES() };
 }
 export function validateProject(value) {
   if (!value || value.version !== 1) throw new Error('這不是支援的王國工坊檔案。');
@@ -169,7 +219,7 @@ export function validateProject(value) {
       validatePlacementId(point);
     }
   }
-  if (!p.rules || !Number.isInteger(p.rules.population) || p.rules.population < 50 || p.rules.population > 2000 || !Number.isFinite(p.rules.starting) || p.rules.starting < 0 || p.rules.starting > 1000000 || !['off', 'calm', 'normal', 'hard'].includes(p.rules.ai) || p.rules.aiAlliance !== undefined && typeof p.rules.aiAlliance !== 'boolean' || p.rules.startingBase !== undefined && !['town', 'full'].includes(p.rules.startingBase)) throw new Error('對戰規則不正確。');
+  if (!p.rules || !Number.isInteger(p.rules.population) || p.rules.population < 50 || p.rules.population > 2000 || !Number.isFinite(p.rules.starting) || p.rules.starting < 0 || p.rules.starting > 1000000 || !Object.hasOwn(AI_PROFILES, p.rules.ai) || p.rules.aiAlliance !== undefined && typeof p.rules.aiAlliance !== 'boolean' || p.rules.startingBase !== undefined && !['town', 'full'].includes(p.rules.startingBase)) throw new Error('對戰規則不正確。');
   if (p.rules.enemyPopulation !== undefined && (!Number.isInteger(p.rules.enemyPopulation) || p.rules.enemyPopulation < 50 || p.rules.enemyPopulation > 2000)) throw new Error('每個敵人的人口上限必須介於 50–2,000。');
   p.rules.enemyPopulation ??= 300;
   p.rules.fog = Boolean(p.rules.fog); p.rules.speed = clamp(Number(p.rules.speed) || 1, 0.5, 2);
@@ -179,6 +229,11 @@ export function validateProject(value) {
   p.rules.freePlayerPopulation ??= true;
   if(!p.units.some(u=>u.id==='trade-cart')&&p.units.length<40)p.units.push(clone(CIV_UNITS.find(u=>u.id==='trade-cart')));
   p.rules.startAge = Number.isInteger(p.rules.startAge) ? clamp(p.rules.startAge, 0, 4) : 4;
+  // Saves written before the standard opening existed have neither field. They keep their rules (no preset label,
+  // all-seeing AI); a missing preset is also what marks a save that adoptStandardOpening may still convert.
+  p.rules.aiVision ??= 'full';
+  if (p.rules.preset !== undefined && !['standard', 'sandbox'].includes(p.rules.preset) || !['fair', 'full'].includes(p.rules.aiVision)) throw new Error('開局模式或 AI 視野設定不正確。');
+  if (p.rules.aiStartingResources !== undefined && !['wood', 'food', 'gold', 'stone'].every(r => Number.isInteger(p.rules.aiStartingResources?.[r]) && p.rules.aiStartingResources[r] >= 0 && p.rules.aiStartingResources[r] <= 1000000)) throw new Error('敵方起始資源必須是 0–1,000,000 的整數。');
   p.rules.victory = p.rules.victory ?? 'conquest';
   p.rules.hotkeys = p.rules.hotkeys ?? 'definitive';
   p.rules.playerStartingResources ??= Object.fromEntries(['wood','food','gold','stone'].map(r=>[r,p.rules.starting]));
@@ -255,9 +310,9 @@ export class World {
     this.project = validateProject(project); this.map = clone(this.project.map); this.units = []; this.buildings = []; this.nextId = 1; this.time = 0; this.events = []; this.effects = []; this.corpses = []; this.result = null; this.deploymentErrors = [];
     this.teams = this.map.spawns.length; this.ages = Array(this.teams).fill(Math.min(3, this.project.rules.startAge));
     this.researched = Array.from({ length: this.teams }, () => new Set(this.project.rules.startAge === 4 ? TECHNOLOGIES.map(t => t.id) : ['feudal', 'castle-age', 'imperial'].slice(0, this.ages[0])));
-    this.stocks = Array.from({ length: this.teams }, (_, team) => team === 0 ? clone(this.project.rules.playerStartingResources) : Object.fromEntries(['wood','food','gold','stone'].map(r=>[r,this.project.rules.starting])));
+    this.stocks = Array.from({ length: this.teams }, (_, team) => team === 0 ? clone(this.project.rules.playerStartingResources) : clone(this.project.rules.aiStartingResources || Object.fromEntries(['wood','food','gold','stone'].map(r=>[r,this.project.rules.starting]))));
     this.amounts = {};this.tradeEarned=Array(this.teams).fill(0);
-    this.visible = new Uint8Array(this.map.size ** 2); this.explored = new Uint8Array(this.map.size ** 2); this.blockedCells = new Set(); this.occupiedCells = new Map(); this.spatial = new Map(); this.entities = new Map(); this.aiTimer = 0; this.visionTimer = 0; this.pathBudget = 0;
+    this.visible = new Uint8Array(this.map.size ** 2); this.explored = new Uint8Array(this.map.size ** 2); this.aiFair = this.project.rules.aiVision === 'fair' && this.project.rules.ai !== 'off'; this.blockedCells = new Set(); this.occupiedCells = new Map(); this.spatial = new Map(); this.entities = new Map(); this.aiTimer = 0; this.visionTimer = 0; this.pathBudget = 0;
     const deployedBuildingKeys = new Set();
     for (const placement of this.map.buildingPlacements || []) {
       const key = buildingPlacementKey(placement);
@@ -315,7 +370,8 @@ export class World {
         } else this.deploymentErrors.push(`英雄「${hero.name}」的市鎮附近沒有可用空地。`);
       } else this.deploymentErrors.push(`英雄「${hero.name}」無法登場：缺少我方市鎮或人口已滿。`);
     }
-    if (project.rules.ai !== 'off') for (const u of this.units.filter(u => u.team > 0 && u.blueprint.role === 'worker')) { const r = this.closestResource(u, ['food', 'wood', 'gold', 'stone'][u.id % 4]); if (r) this.command([u.id], { type: 'gather', ...r }); }
+    if (project.rules.ai !== 'off' && !this.aiFair) for (const u of this.units.filter(u => u.team > 0 && u.blueprint.role === 'worker')) { const r = this.closestResource(u, ['food', 'wood', 'gold', 'stone'][u.id % 4]); if (r) this.command([u.id], { type: 'gather', ...r }); }
+    if (this.aiFair) initAIKnowledge(this);
     this.updateSpatial(); this.updateVision(); this.note(this.deploymentErrors[0] || '王國已部署。選村民，右鍵資源開始採集。', this.map.spawns[0]);
   }
   note(text, point = null) { this.events.unshift({ text, time: this.time, ...(point ? { x: point.x, y: point.y } : {}) }); this.events.length = Math.min(8, this.events.length); }
@@ -324,6 +380,7 @@ export class World {
     const state={version:1,project:clone(this.project),researched:this.researched.map(set=>[...set]),explored:[]};
     for (const key of ['map','units','buildings','stocks','amounts','ages','time','nextId','events','effects','corpses','aiTimer','result','tradeEarned']) state[key]=clone(this[key]);
     for (let i=0;i<this.explored.length;i++) if (this.explored[i]) state.explored.push(i);
+    if (this.aiFair) { state.aiExplored=[]; for (let i=0;i<this.aiExplored.length;i++) if (this.aiExplored[i]) state.aiExplored.push(i); state.aiRemembered=[...this.aiRemembered]; state.aiStats=clone(this.aiStats||{}); }
     return state;
   }
   static fromState(data) {
@@ -340,6 +397,7 @@ export class World {
     world.entities=new Map([...world.units,...world.buildings].map(e=>[e.id,e])); world.blockedCells.clear(); world.occupiedCells.clear();
     for (const b of world.buildings) { const bounds=buildingBounds(b.type,b.x,b.y); for (let y=bounds.minY;y<=bounds.maxY;y++) for (let x=bounds.minX;x<=bounds.maxX;x++) {const key=y*map.size+x;world.occupiedCells.set(key,b.id);if (!['farm','gate'].includes(b.type))world.blockedCells.add(key);} }
     world.explored.fill(data.fullExploration?1:0); for (const i of data.explored||[]) if (Number.isInteger(i)&&i>=0&&i<world.explored.length)world.explored[i]=1;
+    if (world.aiFair && Array.isArray(data.aiExplored)) { for (const i of data.aiExplored) if (Number.isInteger(i)&&i>=0&&i<world.aiExplored.length) world.aiExplored[i]=1; world.aiExploredCount=world.aiExplored.reduce((n,v)=>n+v,0); world.aiRemembered=new Set((data.aiRemembered||[]).filter(Number.isInteger)); world.aiStats=clone(data.aiStats||{}); }
     world.visible.fill(0);world.fullVision=false;world.visionCells=new Set();world.updateVision();world.deploymentErrors=[];return world;
   }
   isEnemy(teamA, teamB) { return Number.isInteger(teamA)&&Number.isInteger(teamB)&&!this.isAlly(teamA, teamB); }
@@ -667,7 +725,7 @@ export class World {
   }
   closestResource(u, type = null) {
     let best = null, d = Infinity, n = this.map.size;
-    const r = Math.min(n, 55); for (let y = Math.max(0, Math.round(u.y) - r); y <= Math.min(n - 1, Math.round(u.y) + r); y++) for (let x = Math.max(0, Math.round(u.x) - r); x <= Math.min(n - 1, Math.round(u.x) + r); x++) if (this.amountAt(x, y) > 0 && (!type || RESOURCE[this.tile(x, y)] === type)) { const p = { x, y }, dd = distance(u, p); if (dd < d) { d = dd; best = p; } }
+    const r = Math.min(n, 55); for (let y = Math.max(0, Math.round(u.y) - r); y <= Math.min(n - 1, Math.round(u.y) + r); y++) for (let x = Math.max(0, Math.round(u.x) - r); x <= Math.min(n - 1, Math.round(u.x) + r); x++) if (this.amountAt(x, y) > 0 && (!type || RESOURCE[this.tile(x, y)] === type) && !(this.aiFair && u.team > 0 && !this.aiExplored[y * n + x])) { const p = { x, y }, dd = distance(u, p); if (dd < d) { d = dd; best = p; } }
     return best;
   }
   updateSpatial() {
@@ -833,7 +891,7 @@ export class World {
         if (!o.goal || goalDistance(u,o.goal)<.4 || u.failed) {
           const radius=18+(u.scoutStep||0)%5*8; u.scoutStep=(u.scoutStep||0)+1;
           let goal=null;
-          for (let i=0;i<16;i++) { const angle=(u.scoutStep+i)*2.39996, p={x:clamp(Math.round(u.x+Math.cos(angle)*radius),1,this.map.size-2),y:clamp(Math.round(u.y+Math.sin(angle)*radius),1,this.map.size-2)}; if (!this.blocked(p.x,p.y)&&(!this.explored[p.y*this.map.size+p.x]||i===15)) { goal=p; break; } }
+          for (let i=0;i<16;i++) { const angle=(u.scoutStep+i)*2.39996, p={x:clamp(Math.round(u.x+Math.cos(angle)*radius),1,this.map.size-2),y:clamp(Math.round(u.y+Math.sin(angle)*radius),1,this.map.size-2)}; if (!this.blocked(p.x,p.y)&&(!(u.team>0&&this.aiFair?this.aiExplored:this.explored)[p.y*this.map.size+p.x]||i===15)) { goal=p; break; } }
           o.goal=goal; u.path=[]; u.pathGoal=null; u.repath=0; u.failed=false;
         }
         if (o.goal) this.walk(u,o.goal,.3,dt);

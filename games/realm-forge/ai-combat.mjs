@@ -64,14 +64,15 @@ function tacticalMove(w, u, point, stateKey, state, marker) {
   return true;
 }
 
-export function directAICombat(w, team, army, origin, enemies, objective, attacking, suggestions = new Map()) {
+// micro=false (easy level): no retreats, kiting or raid response; units just attack-move to the objective.
+export function directAICombat(w, team, army, origin, enemies, objective, attacking, suggestions = new Map(), micro = true) {
   if (!attacking || ['off', 'calm'].includes(w.project.rules.ai)) return;
   w.aiCombatPlans ||= {};
   if (w.time - (w.aiCombatPlans[team] ?? -10) < 1) return;
   w.aiCombatPlans[team] = w.time;
   const fighters = army.filter(u => u.blueprint.role !== 'healer'), local = spatial(w), allies = [...w.units, ...w.buildings].filter(e => e.hp > 0 && !e.garrison && w.isAlly(team, e.team));
   const held = new Set();
-  for (const u of fighters) {
+  for (const u of micro ? fighters : []) {
     if (u.aiRetreat) {
       held.add(u.id);
       if (u.hp >= u.maxHp * .6) { const state = u.aiRetreat; delete u.aiRetreat; restore(w, u, state, objective, suggestions); }
@@ -111,7 +112,7 @@ export function directAICombat(w, team, army, origin, enemies, objective, attack
     }
   }
   // A small local response covers a raid without ordering the whole army home.
-  const raids = allies.filter(e => w.time - (e.recentAttackAt ?? -100) < 4).map(e => ({ victim: e, attacker: w.entity(e.recentAttacker) })).filter(r => enemyAlive(w, team, r.attacker)).sort((a, b) => rank(a.attacker) - rank(b.attacker));
+  const raids = !micro ? [] : allies.filter(e => w.time - (e.recentAttackAt ?? -100) < 4).map(e => ({ victim: e, attacker: w.entity(e.recentAttacker) })).filter(r => enemyAlive(w, team, r.attacker)).sort((a, b) => rank(a.attacker) - rank(b.attacker));
   let supportBudget = Math.min(6, Math.max(1, Math.ceil(fighters.length / 4)));
   for (const raid of raids) {
     const support = fighters.filter(u => !held.has(u.id) && !activeFight(w, u) && distance(u, raid.attacker) <= 12 && distance(u, raid.victim) <= 12).sort((a, b) => distance(a, raid.attacker) - distance(b, raid.attacker));
