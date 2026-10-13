@@ -874,7 +874,7 @@ export class World {
     return !(u.packLeft > 0);
   }
   tick(dt) {
-    if (this.result) return; this.time += dt; this.pathBudget = this.map.size > 128 ? 24 : 48; this.pathDeadline=performance.now()+3; this.holds.clear(); this.tickNo++; this.updateSpatial();
+    if (this.result) return; this.time += dt; this.pathBudget = this.map.size > 128 ? 24 : 48; this.pathDeadline=this.unboundedPathing?Infinity:performance.now()+3; this.holds.clear(); this.tickNo++; this.updateSpatial();
     for (const u of this.units) if (u.hp > 0 && u.blueprint.hero) u.hp = Math.min(u.maxHp, u.hp + u.blueprint.regen * dt);
     for (const b of this.buildings) if (b.hp > 0) {
       b.cooldown = Math.max(0, b.cooldown - dt);

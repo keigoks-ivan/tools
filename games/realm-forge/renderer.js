@@ -603,6 +603,8 @@ export class Renderer {
       const hit=this.zoom<.18?Math.hypot(x-p.x,y-p.y)<6:e.kind==='building'?buildingHit(e,p.x,p.y,this.zoom,x,y):Math.abs(x-p.x)<unitHitHalfWidth(e)*this.zoom+6&&y<p.y+7&&y>p.y-unitHeight(e)*this.zoom-6;
       if(hit){best=e;depth=e.x+e.y;}
     }
+    // Farms lie flat under the units working on them, so a unit drawn over a farm wins the click.
+    if(best?.type==='farm'&&!unitsOnly){ const unit=this.hit(x,y,world,fog,true,enemiesOnly); if(unit)return unit; }
     return best;
   }
   drawArrow(c, p, q, f) {

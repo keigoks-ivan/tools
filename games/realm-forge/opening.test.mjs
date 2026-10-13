@@ -206,6 +206,7 @@ test('the fair AI sends a scout out and stands its soldiers down from exploring 
 
 test('standard AI develops: houses, farms, villagers, feudal age, soldiers and a first attack', () => {
   const p = newProject(); const w = new World(p);
+  w.unboundedPathing = true; // load-independent pathing so the run is deterministic
   const town = w.buildings.find(b => b.team === 0); town.hp = town.maxHp = 1e7;
   const snap = {};
   for (let i = 0; i < 20 * 600; i++) {

@@ -4,6 +4,8 @@ const [level = 'standard', minutes = '20', seed = '7'] = process.argv.slice(2);
 export function simulate({ level = 'standard', minutes = 20, seed = 7, report = [5, 10, 15, 20], log = () => {} } = {}) {
   const p = newProject(1, seed); p.rules.ai = level;
   const w = new World(p), rows = [];
+  // Headless runs ignore the 3 ms per-tick pathing deadline so results do not depend on machine load.
+  w.unboundedPathing = true;
   // The idle human town cannot fall, so the AI keeps its objective for the whole run.
   for (const b of w.buildings) if (b.team === 0) { b.hp = b.maxHp = 1e7; }
   const count = (team, f) => w.units.filter(u => u.team === team && u.hp > 0 && f(u)).length;

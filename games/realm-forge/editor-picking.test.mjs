@@ -38,3 +38,13 @@ test('enlarged custom infantry and cavalry heroes can be picked at the visible i
     assert.equal(r.heroHit(screen.x+edge+10,screen.y-12,w),null);
   }
 });
+
+test('a villager standing on the far half of a farm is picked instead of the farm',()=>{
+  const p=defaultProject();p.map.tiles.fill('grass');p.rules.ai='off';p.map.buildingPlacements=[{id:'field',type:'farm',team:0,x:30,y:30}];
+  const w=new World(p),r=view(p),farm=w.buildings.find(b=>b.type==='farm'),worker=w.units.find(u=>u.team===0&&u.blueprint.role==='worker');
+  assert.ok(farm&&worker);worker.x=farm.x-.8;worker.y=farm.y-.8;
+  const screen=r.screen(worker.x,worker.y);
+  assert.equal(r.hit(screen.x,screen.y-10,w,false)?.id,worker.id);
+  const empty=r.screen(farm.x+.6,farm.y+.6);
+  assert.equal(r.hit(empty.x,empty.y,w,false)?.id,farm.id);
+});
