@@ -4,7 +4,7 @@ import { animationPose, facingDirection } from './motion.mjs?v=20261009l';
 import { gaitBob, drawWalkingSprite } from './gait.mjs?v=20261009l';
 import { commandWaypoints } from './command-feedback.mjs?v=20261009l';
 import { steppedZoom } from './camera-steps.mjs?v=20261009l';
-import { FxState, ARROW_FLIGHT, ROCK_FLIGHT, STUCK_LIFE, corpsePose, ruinAlpha } from './fx.mjs?v=20261009l';
+import { FxState, ARROW_FLIGHT, ROCK_FLIGHT, STUCK_LIFE, corpsePose, ruinAlpha, damageProfile, fireSpots } from './fx.mjs?v=20261009l';
 export function wheelZoomFactor(deltaY, deltaMode = 0, height = 600) {
   const pixels = deltaY * (deltaMode === 1 ? 16 : deltaMode === 2 ? height : 1);
   return Math.exp(-clamp(pixels, -80, 80) * .001);
@@ -202,13 +202,33 @@ function tree(c, x, y, variation, small = false) {
   polygon(c, [[0, -46], [-16, -17], [-7, -19], [-19, -9], [0, -4]], '#315e3a');
   polygon(c, [[0, -43], [3, -27], [-11, -21]], '#50783d'); line(c, [[-14, -12], [-3, -9]], '#68804650'); c.restore();
 }
-// Construction reads as four stages: 0 foundation, 1 timber frame, 2 half-built walls, 3 finishing. The finished sprite is revealed from the ground up.
+// Construction reads as four clearly different stages: 0 foundation with stacked materials, 1 low walls and scaffolding, 2 most of the walls with a bare roof frame, 3 finished building with a little scaffolding left.
+// The finished sprite is revealed from the ground up with a mask; no extra art is needed.
 export function constructionStage(progress) { return progress < .25 ? 0 : progress < .5 ? 1 : progress < .8 ? 2 : 3; }
-export function constructionReveal(progress) { return clamp((progress - .22) / .74, 0, 1); }
-const silhouettes = new WeakMap();
+export function constructionReveal(progress) {
+  const p = clamp(progress, 0, 1);
+  return p < .25 ? 0 : p < .5 ? .18 + (p - .25) / .25 * .32 : p < .8 ? .5 + (p - .5) / .3 * .38 : .88 + (p - .8) / .2 * .12;
+}
+const silhouettes = new WeakMap(), roofFrames = new WeakMap();
 function silhouette(art) {
   if (!silhouettes.has(art)) { const canvas = document.createElement('canvas'); canvas.width = art.naturalWidth; canvas.height = art.naturalHeight; const s = canvas.getContext('2d'); s.drawImage(art, 0, 0); s.globalCompositeOperation = 'source-in'; s.fillStyle = '#1d140b'; s.fillRect(0, 0, canvas.width, canvas.height); silhouettes.set(art, canvas); }
   return silhouettes.get(art);
+}
+// The unfinished top of a building: its outline plus crossing timbers, cut out of the finished sprite's shape.
+function roofFrame(art, width) {
+  if (!roofFrames.has(art)) {
+    const w = art.naturalWidth, h = art.naturalHeight, k = w / width, canvas = document.createElement('canvas'); canvas.width = w; canvas.height = h;
+    const g = canvas.getContext('2d'), grid = document.createElement('canvas'); grid.width = w; grid.height = h; const q = grid.getContext('2d');
+    q.strokeStyle = '#000'; q.lineWidth = 2.4 * k; q.beginPath();
+    for (let o = -h; o < w + h; o += 11 * k) { q.moveTo(o, 0); q.lineTo(o + h, h); q.moveTo(o + h, 0); q.lineTo(o, h); }
+    q.stroke(); q.lineWidth = 3 * k; q.beginPath(); for (let y = 6 * k; y < h; y += 22 * k) { q.moveTo(0, y); q.lineTo(w, y); } q.stroke();
+    g.drawImage(silhouette(art), 0, 0); g.globalCompositeOperation = 'destination-in'; g.drawImage(grid, 0, 0);
+    g.globalCompositeOperation = 'source-over'; const edge = document.createElement('canvas'); edge.width = w; edge.height = h; const e = edge.getContext('2d'), d = 2.4 * k;
+    e.drawImage(silhouette(art), 0, 0); e.globalCompositeOperation = 'destination-out'; for (const [ox, oy] of [[d, 0], [-d, 0], [0, d], [0, -d]]) e.drawImage(silhouette(art), ox, oy);
+    g.drawImage(edge, 0, 0); g.globalCompositeOperation = 'source-atop'; g.fillStyle = '#a77d46'; g.fillRect(0, 0, w, h);
+    roofFrames.set(art, canvas);
+  }
+  return roofFrames.get(art);
 }
 // Posts rise from each footprint corner to a common roof line (or stub height when no roof line is given).
 function scaffoldTop(corner, topY, stub) { return topY === null ? corner[1] - stub : topY; }
@@ -220,25 +240,130 @@ function scaffoldRails(c, corners, topY, share, front) {
   const cy = corners.reduce((a, [, y]) => a + y, 0) / corners.length, ring = corners.map(([px, py]) => [px, py + (topY - py) * share]);
   for (let i = 0; i < 4; i++) { const a = corners[i], d = corners[(i + 1) % 4]; if (((a[1] + d[1]) / 2 > cy + .5) !== front) continue; line(c, [ring[i], ring[(i + 1) % 4]], '#2a1d10', 3); line(c, [ring[i], ring[(i + 1) % 4]], '#c49d63', 1.7); }
 }
+// Diagonal braces between two rail levels on the two front faces.
+function scaffoldBraces(c, corners, topY, low, high) {
+  const cy = corners.reduce((a, [, y]) => a + y, 0) / corners.length, at = (p, share) => [p[0], p[1] + (topY - p[1]) * share];
+  for (let i = 0; i < 4; i++) { const a = corners[i], d = corners[(i + 1) % 4]; if ((a[1] + d[1]) / 2 <= cy + .5) continue; line(c, [at(a, low), at(d, high)], '#2a1d10', 2.6); line(c, [at(a, low), at(d, high)], '#a9824c', 1.3); }
+}
+// A leaning ladder for the last stage.
+function ladder(c, x, y, h) {
+  for (const o of [-3, 3]) line(c, [[x + o, y], [x + o + 5, y - h]], '#2a1d10', 2.6);
+  for (const o of [-3, 3]) line(c, [[x + o, y], [x + o + 5, y - h]], '#b58d56', 1.4);
+  for (let r = 1; r < 6; r++) line(c, [[x - 3 + r * .8, y - h * r / 6], [x + 3 + r * .8, y - h * r / 6]], '#d0a96c', 1.4);
+}
+function logPile(c, x, y, rows) {
+  for (let r = 0; r < rows; r++) for (let i = 0; i <= rows - 1 - r; i++) {
+    const lx = x + (i - (rows - 1 - r) / 2) * 6.4, ly = y - r * 3.7;
+    c.fillStyle = r % 2 ? '#7d5530' : '#946539'; c.fillRect(lx - 6, ly - 2.6, 12, 4.2);
+    ellipse(c, lx + 5.2, ly - .5, 1.5, 1.9, '#dcb27a'); line(c, [[lx - 5, ly - 1.2], [lx + 3, ly - 1.2]], '#b98a53', .8);
+  }
+}
+function stonePile(c, x, y, count, seed) {
+  for (let i = 0; i < count; i++) { const sx = x + (texture(seed, i) - .5) * 15, sy = y + (texture(i, seed) - .5) * 5 - (i > 2 ? 3.5 : 0), r = 3.2 + texture(seed + i, 2) * 2.2; ellipse(c, sx, sy + 1.2, r + .6, r * .55 + .6, '#2e2a21'); ellipse(c, sx, sy, r, r * .66, i % 2 ? '#8d8a7e' : '#a8a597'); ellipse(c, sx - r * .25, sy - r * .22, r * .5, r * .32, '#cbc8ba'); }
+}
+function planks(c, x, y, count) {
+  for (let i = 0; i < count; i++) { const py = y - i * 2.3; polygon(c, [[x - 11, py], [x + 9, py - 4], [x + 11, py - 2.5], [x - 9, py + 1.5]], i % 2 ? '#b99259' : '#cfa86c', '#5a4126'); }
+}
+// Materials lying around the site; the pile of stones, logs and planks shrinks as the building goes up.
+function siteMaterials(c, corners, stage, seed, front) {
+  const [top, right, bottom, left] = corners, lerp = (a, b, t) => [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+  const leftFront = lerp(left, bottom, .5), rightFront = lerp(bottom, right, .5);
+  if (front) {
+    if (stage === 0) { logPile(c, leftFront[0] - 15, leftFront[1] + 5, 3); stonePile(c, rightFront[0] + 16, rightFront[1] + 5, 6, seed); planks(c, bottom[0] - 4, bottom[1] + 11, 3); }
+    else if (stage === 1) { logPile(c, leftFront[0] - 14, leftFront[1] + 5, 2); stonePile(c, rightFront[0] + 15, rightFront[1] + 5, 3, seed); planks(c, bottom[0] + 2, bottom[1] + 10, 2); }
+    else if (stage === 2) { planks(c, leftFront[0] - 13, leftFront[1] + 6, 3); stonePile(c, rightFront[0] + 14, rightFront[1] + 5, 2, seed); }
+    else planks(c, rightFront[0] + 12, rightFront[1] + 6, 1);
+  } else if (stage === 0) { const mid = lerp(top, bottom, .5); for (let i = 0; i < 4; i++) ellipse(c, mid[0] + (texture(seed, i) - .5) * 30, mid[1] + (texture(i, seed) - .5) * 12, 3.4, 1.9, i % 2 ? '#a9a395' : '#8a8576'); }
+}
+function foundation(c, corners, progress, stage, seed) {
+  const at = (u, v) => [corners[0][0] + (corners[1][0] - corners[0][0]) * u + (corners[3][0] - corners[0][0]) * v, corners[0][1] + (corners[1][1] - corners[0][1]) * u + (corners[3][1] - corners[0][1]) * v];
+  polygon(c, corners, '#5d4f37', '#32281a');
+  const inset = corners.map(([px, py]) => [px * .9, py * .9]); polygon(c, inset, '#7e7254');
+  const n = 5, laid = stage === 0 ? Math.floor(clamp(progress / .22, 0, 1) * n * n) : n * n, order = [...Array(n * n).keys()].sort((a, b) => texture(seed, a) - texture(seed, b));
+  for (let k = 0; k < laid; k++) { const i = order[k], u = (i % n + .5) / n, v = (Math.floor(i / n) + .5) / n, [x, y] = at(u, v); polygon(c, [[x, y - 3.6], [x + 6.2, y], [x, y + 3.6], [x - 6.2, y]], k % 3 ? '#aaa183' : '#bdb394', '#6d6249'); }
+}
 function constructionSite(c, b, art, width, height, bottom, selected, scale) {
   const stage = constructionStage(b.progress), reveal = constructionReveal(b.progress), corners = footprintPolygon(b.type);
-  polygon(c, corners, stage === 0 ? '#86795a' : '#7c7052', '#4b3f2a');
-  polygon(c, corners.map(([px, py]) => [px * .8, py * .8]), '#a29673');
-  for (let i = 0; i < 6; i++) { const t = texture(b.id + i, stage); ellipse(c, (t - .5) * corners[1][0] * 1.4, (texture(i, b.id) - .5) * corners[2][1] * 1.2, 2.6, 1.4, i % 2 ? '#5d5441' : '#bdb391'); }
+  foundation(c, corners, b.progress, stage, b.id);
+  siteMaterials(c, corners, stage, b.id, false);
   if (selected) selectionDiamond(c, b.type, b.team, scale);
-  const topY = stage === 0 ? null : bottom - height * (stage === 1 ? .55 : stage === 2 ? .82 : .96), scaffolded = b.progress < .94;
-  if (scaffolded) { scaffoldPosts(c, corners, topY, false); if (stage > 0) scaffoldRails(c, corners, topY, .55, false); }
+  const cut = bottom - height * reveal, scaffolded = b.progress < .97;
+  // Stage 1 scaffolds climb just above the new walls; stage 2 frames reach the roof line; stage 3 keeps only a few posts.
+  const topY = stage === 0 ? null : stage === 1 ? bottom - height * Math.min(1, reveal + .22) : stage === 2 ? bottom - height * Math.min(1, reveal + .1) : bottom - height * .6;
+  if (scaffolded) { scaffoldPosts(c, corners, topY, false); if (stage === 1 || stage === 2) { scaffoldRails(c, corners, topY, .5, false); if (stage === 2) scaffoldRails(c, corners, topY, .98, false); } else if (stage === 3) scaffoldRails(c, corners, topY, .95, false); }
   if (art?.complete && art.naturalWidth && reveal > 0) {
     const visible = Math.max(2, height * reveal);
+    // Above the finished part: a faint outline at stage 1, a bare timber frame at stage 2, the last bit of frame at stage 3.
+    if (reveal < 1) {
+      c.save(); c.beginPath(); c.rect(-width / 2 - 2, bottom - height - 4, width + 4, height - visible + 4); c.clip();
+      c.globalAlpha = stage === 1 ? .12 : .3; drawSprite(c, silhouette(art), 0, bottom, width, height);
+      if (stage >= 2) { c.globalAlpha = .95; drawSprite(c, roofFrame(art, width), 0, bottom, width, height); }
+      c.restore();
+    }
     c.save(); c.beginPath(); c.rect(-width / 2 - 2, bottom - visible, width + 4, visible + 6); c.clip();
     drawSprite(c, art, 0, bottom, width, height);
-    c.globalAlpha = .62 * (1 - reveal) + .12; drawSprite(c, silhouette(art), 0, bottom, width, height); c.globalAlpha = 1;
+    c.globalAlpha = .5 * (1 - reveal) + .06; drawSprite(c, silhouette(art), 0, bottom, width, height); c.globalAlpha = 1;
     c.restore();
-    if (reveal < 1) { const edge = bottom - visible; line(c, [[-width * .3, edge + 3], [width * .3, edge + 3]], '#5b4326', 3); line(c, [[-width * .3, edge + 2], [width * .3, edge + 2]], '#c9a566', 1.4); }
+    if (reveal < 1) { line(c, [[-width * .3, cut + 3], [width * .3, cut + 3]], '#5b4326', 3); line(c, [[-width * .3, cut + 2], [width * .3, cut + 2]], '#c9a566', 1.4); }
   }
-  if (scaffolded) { scaffoldPosts(c, corners, topY, true); if (stage > 0) scaffoldRails(c, corners, topY, .55, true); if (stage >= 2) scaffoldRails(c, corners, topY, .95, true); }
+  siteMaterials(c, corners, stage, b.id, true);
+  if (scaffolded) {
+    if (stage === 3) { scaffoldPosts(c, corners, topY, true); ladder(c, corners[3][0] * .5 + corners[2][0] * .5 - 6, corners[3][1] * .5 + corners[2][1] * .5 + 2, height * .5); }
+    else { scaffoldPosts(c, corners, topY, true); if (stage > 0) { scaffoldRails(c, corners, topY, .5, true); scaffoldRails(c, corners, topY, .98, true); scaffoldBraces(c, corners, topY, .5, .98); } if (stage === 2) scaffoldRails(c, corners, topY, .75, true); }
+  }
   const barY = bottom - height - 8;
   c.fillStyle = '#1d2a20'; c.fillRect(-23, barY, 46, 5); c.fillStyle = '#e0bd6d'; c.fillRect(-22, barY + 1, 44 * clamp(b.progress, 0, 1), 3);
+}
+// Fire on a damaged building: a few cached flame sprites (outer orange, inner yellow, bright base) that flicker, drawn on top of the building sprite.
+let fireClock = 0;
+const FLAME_FRAMES = 6;
+let flameSprites = null, smokeSprites = null;
+function flameCanvas(k) {
+  const w = 64, h = 96, by = h - 6, canvas = document.createElement('canvas'); canvas.width = w; canvas.height = h; const g = canvas.getContext('2d'), ph = k / FLAME_FRAMES * Math.PI * 2;
+  // A tongue is a pointed teardrop with an S-bend; each layer is a smaller, hotter tongue on top of the last.
+  const tongue = (x0, bw, th, bend, top, bottom) => {
+    const tx = x0 + bend, grad = g.createLinearGradient(0, by - th, 0, by); grad.addColorStop(0, top); grad.addColorStop(1, bottom);
+    g.beginPath(); g.moveTo(x0 - bw / 2, by);
+    g.bezierCurveTo(x0 - bw / 2 - 3, by - th * .38, x0 + bend * .25 - bw * .22, by - th * .66, tx, by - th);
+    g.bezierCurveTo(x0 + bend * .45 + bw * .3, by - th * .62, x0 + bw / 2 + 3, by - th * .32, x0 + bw / 2, by);
+    g.closePath(); g.fillStyle = grad; g.shadowColor = 'rgba(255,120,30,.75)'; g.shadowBlur = 5; g.fill(); g.shadowBlur = 0;
+  };
+  const sway = Math.sin(ph) * 6, sway2 = Math.sin(ph + 2.1) * 5, sway3 = Math.sin(ph + 4.2) * 5, lift = Math.cos(ph * 2) * 4;
+  tongue(20, 17, 52 + lift, -4 + sway2, 'rgba(200,40,10,0)', '#e0521a');
+  tongue(45, 18, 58 - lift, 5 + sway3, 'rgba(200,40,10,0)', '#e55a1a');
+  tongue(32, 30, 86 + lift * .7, sway, 'rgba(196,36,10,0)', '#f0701c');
+  tongue(32, 22, 66 - lift * .5, sway * .8, 'rgba(250,150,30,0)', '#f9a226');
+  tongue(32, 13, 44 + lift * .5, sway * .55, 'rgba(255,225,110,0)', '#ffe27a');
+  const base = g.createRadialGradient(32, by - 2, 1, 32, by - 2, 17); base.addColorStop(0, 'rgba(255,250,215,.95)'); base.addColorStop(.5, 'rgba(255,205,80,.6)'); base.addColorStop(1, 'rgba(255,150,30,0)'); g.fillStyle = base; g.fillRect(8, by - 22, 48, 26);
+  return canvas;
+}
+function flameSet() {
+  if (!flameSprites) {
+    const glow = document.createElement('canvas'); glow.width = glow.height = 64; const g = glow.getContext('2d'), rg = g.createRadialGradient(32, 32, 2, 32, 32, 32);
+    rg.addColorStop(0, 'rgba(255,170,60,.7)'); rg.addColorStop(.5, 'rgba(255,110,20,.25)'); rg.addColorStop(1, 'rgba(255,90,10,0)'); g.fillStyle = rg; g.fillRect(0, 0, 64, 64);
+    flameSprites = { frames: Array.from({ length: FLAME_FRAMES }, (_, k) => flameCanvas(k)), glow };
+  }
+  return flameSprites;
+}
+function smokeSprite(dark) {
+  const key = dark ? 'dark' : 'light'; smokeSprites ??= {};
+  if (!smokeSprites[key]) {
+    const canvas = document.createElement('canvas'); canvas.width = canvas.height = 64; const g = canvas.getContext('2d'), rg = g.createRadialGradient(28, 28, 2, 32, 32, 31), rgb = dark ? '16,15,14' : '84,82,78';
+    rg.addColorStop(0, `rgba(${rgb},1)`); rg.addColorStop(.6, `rgba(${rgb},.7)`); rg.addColorStop(1, `rgba(${rgb},0)`); g.fillStyle = rg; g.fillRect(0, 0, 64, 64); smokeSprites[key] = canvas;
+  }
+  return smokeSprites[key];
+}
+function drawFlames(c, b, size) {
+  const profile = damageProfile(b.hp / b.maxHp); if (!profile.flames || b.ghost) return;
+  const { frames, glow } = flameSet(), clock = fireClock, base = clamp(size.width * .2, 18, 38);
+  const spots = fireSpots(b.id, profile.flames, size).map(spot => ({ ...spot, y: size.bottom - spot.up })).sort((p, q) => p.y - q.y);
+  c.save(); c.globalCompositeOperation = 'lighter';
+  for (const spot of spots) { const flick = .85 + .15 * Math.sin(clock * 21 + spot.phase * 3), gw = base * 2.6 * profile.scale * spot.size; c.globalAlpha = .55 * flick; c.drawImage(glow, spot.dx - gw / 2, spot.y - gw * .62, gw, gw); }
+  c.restore();
+  for (const spot of spots) {
+    const k = Math.floor(clock * 12 + spot.phase * 2.3) % FLAME_FRAMES, w = base * profile.scale * spot.size * (.92 + .12 * Math.sin(clock * 17 + spot.phase)), h = w * 1.65 * (.9 + .2 * Math.sin(clock * 13 + spot.phase * 2));
+    c.save(); c.globalAlpha = .84; c.translate(spot.dx, spot.y); c.scale(spot.flip ? -1 : 1, 1); c.transform(1, 0, Math.sin(clock * 4.2 + spot.phase) * .12, 1, 0, 0); c.drawImage(frames[k], -w / 2, -h, w, h); c.restore();
+  }
 }
 function building(c, b, x, y, scale, selected) {
   const { art, width, height, bottom } = buildingSize(b);
@@ -251,6 +376,7 @@ function building(c, b, x, y, scale, selected) {
     c.save(); c.translate(x, y); c.scale(scale, scale);
     if (selected) selectionDiamond(c, b.type, b.team, scale);
     drawSprite(c, art, 0, bottom, width, height);
+    if (b.hp <= b.maxHp * .25) drawFlames(c, b, { width, height, bottom });
     if (b.type === 'farm') { line(c, [[25, 5], [25, -18]], '#91724d', 1.5); polygon(c, [[25, -18], [36, -14], [25, -10]], TEAM_COLORS[b.team % 4]); }
     if (selected || b.hp < b.maxHp) health(c, b.hp, b.maxHp, 0, bottom - height - 6, Math.min(width * .7, 55), b.team);
     c.restore(); return;
@@ -511,10 +637,9 @@ export class Renderer {
     for (const p of this.fx.particles) {
       const t = p.age / p.life, s = this.screen(p.wx, p.wy), x = s.x, y = s.y - p.z * z;
       if (x < -40 || x > w + 40 || y < -70 || y > h + 40) continue;
-      if (p.type === 'smoke') { c.globalAlpha = .5 * (1 - t) * Math.min(1, t * 8); ellipse(c, x, y, p.size * (.6 + t * 1.3) * z, p.size * (.6 + t * 1.3) * z * .85, '#45443f'); }
+      if (p.type === 'smoke') { const grow = p.size * (.6 + t * 2.6) * z, wobble = Math.sin(p.age * 2.2 + (p.seed ?? 0)) * 6 * z * t, sprite = smokeSprite(p.dark === undefined ? t < .35 : t < .3 + p.dark * .45); c.globalAlpha = (p.dark === undefined ? .55 : .62 + .33 * p.dark) * Math.pow(1 - t, 1.25) * Math.min(1, t * 6); c.drawImage(sprite, x + wobble - grow, y - grow, grow * 2, grow * 2); }
       else if (p.type === 'dust') { c.globalAlpha = .55 * (1 - t); ellipse(c, x, y, p.size * (.5 + t) * z, p.size * (.5 + t) * z * .6, '#b5a47c'); }
-      else if (p.type === 'flame') { const flick = .85 + .3 * Math.sin(p.age * 38 + p.size * 9), r = p.size * (1 - t * .65) * z * flick; c.globalAlpha = .9 * (1 - t * .5); ellipse(c, x, y, r * .8, r * 1.3, '#f2641c'); c.globalAlpha = .95 * (1 - t); ellipse(c, x, y + r * .15, r * .45, r * .8, '#ffd24a'); }
-      else if (p.type === 'ember') { c.globalAlpha = 1 - t; ellipse(c, x, y, 1.5 * z + .5, 1.5 * z + .5, '#ffb347'); }
+      else if (p.type === 'ember') { c.globalAlpha = (1 - t) * (.6 + .4 * Math.sin(p.age * 40)); ellipse(c, x, y, p.size * z * .9 + .4, p.size * z * .9 + .4, t < .5 ? '#ffd36a' : '#ff8a2a'); }
       else if (p.type === 'spark') { const vx = (p.vx - p.vy) * this.tileW / 2, vy = (p.vx + p.vy) * this.tileH / 2 - p.vz, m = Math.hypot(vx, vy) || 1; c.globalAlpha = 1 - t; line(c, [[x, y], [x - vx / m * 4 * Math.max(.8, z), y - vy / m * 4 * Math.max(.8, z)]], '#ffe9a0', 1.5); }
       else if (p.type === 'chip') { c.globalAlpha = 1 - t * t; c.fillStyle = '#5b5148'; c.fillRect(x - 1, y - 1, 2.4 * Math.max(.8, z), 2 * Math.max(.8, z)); }
     }
@@ -617,7 +742,7 @@ export class Renderer {
     }
   }
   render(project, world, ui, time) {
-    this.project = project; const c = this.c, n = project.map.size, map = ui.mode === 'map' ? project.map : world.map, fog = ui.mode === 'play' && ui.started && project.rules.fog;
+    fireClock = time; this.project = project; const c = this.c, n = project.map.size, map = ui.mode === 'map' ? project.map : world.map, fog = ui.mode === 'play' && ui.started && project.rules.fog;
     c.setTransform(this.dpr, 0, 0, this.dpr, 0, 0); c.clearRect(0, 0, this.width, this.height);
     const bg = c.createRadialGradient(this.width / 2, this.height / 2, 0, this.width / 2, this.height / 2, this.width * 0.6); bg.addColorStop(0, '#243b2a'); bg.addColorStop(1, '#10221d'); c.fillStyle = bg; c.fillRect(0, 0, this.width, this.height);
     const tw = this.tileW / 2 * this.zoom, th = this.tileH / 2 * this.zoom, textures = prepareGround(), overview = this.zoom < .18;
