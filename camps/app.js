@@ -473,6 +473,8 @@ let lastR = null; // results after the name filter
 let lastRAll = null; // results before it, so a week chip can find a row the name filter hides
 // one chip / card per provider (branches, intakes, programs); agent packages group on the school they
 // sell, because two agents often sell the same school
+// agent name without the English note in brackets: 「MEC Academy & Training Centre」
+const agentShort = (pv) => (pv.name_zh || pv.name_en || '').replace(/\s*\([^)]*\)\s*$/, '');
 const keyOf = (it) => (it.provider.type === 'agent_package' && it.session.location_id ? `loc:${it.session.location_id}` : `prov:${it.provider.id}`);
 // per-child weekly price in TWD, for sorting and the big number on cards
 // An undated card has no span of its own: its price is spread over the length of the session it shows,
@@ -522,7 +524,7 @@ function sessionRow(it, open) {
   const l = lightOf(it);
   const w = weekTWD(it);
   // a card that mixes programs or agents says which one each row is
-  const sub = [it.programs > 1 && esc(it.program.name), it.mixedAgents && `代理：${esc(it.provider.name_en)}`].filter(Boolean).join('・');
+  const sub = [it.programs > 1 && esc(it.program.name), it.mixedAgents && `代理：${esc(agentShort(it.provider))}`].filter(Boolean).join('・');
   const place = it.locs[0] ? `${esc(it.locs[0].name)}${citiesOf(it)[0] && !HOME[country].includes(it.locs[0].city) ? `・${esc(citiesOf(it)[0])}` : ''}` : '地點未公布';
   return `<div class="srow l-${l}" id="${id}" data-start="${startOf(it)}"><details ${open ? 'open' : ''}><summary>
       <i class="dot d-${l}" title="${LIGHT[l][1]}"></i><span class="s-d">${shortDates(it)}</span>
@@ -535,7 +537,7 @@ function orgCard(items) {
   const p = it0.program;
   const agent = it0.provider.type === 'agent_package';
   const progNames = [...new Set(items.map((x) => x.program.name))];
-  const agentNames = [...new Set(items.filter((x) => x.provider.type === 'agent_package').map((x) => x.provider.name_en))];
+  const agentNames = [...new Set(items.filter((x) => x.provider.type === 'agent_package').map((x) => agentShort(x.provider)))];
   for (const x of items) { x.programs = progNames.length; x.mixedAgents = agentNames.length > 1; }
   const title = agent ? it0.locs[0]?.name || it0.program.name : `${it0.provider.name_en}${it0.provider.name_zh ? `・${it0.provider.name_zh}` : ''}`;
   const sub = agent ? `<div class="prov">${esc(it0.program.name)}<br>代理：${agentNames.map(esc).join('、')}</div>` : '';
