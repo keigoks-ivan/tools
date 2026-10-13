@@ -1,0 +1,25 @@
+<!doctype html>
+<meta charset="utf-8"><title>audio selftest</title>
+<pre id="out">running</pre>
+<script type="module">
+import { RECIPES, renderRecipe, makeNoise } from './audio.mjs';
+const out = document.getElementById('out'), rate = 44100, results = [];
+const cases = [];
+for (const name of Object.keys(RECIPES)) {
+  if (name === 'voice') { for (const unitClass of ['villager','infantry','archer','cavalry','monk','siege','hero']) for (const kind of ['select','command']) for (const variant of [0,1,2]) cases.push([name, { unitClass, kind, variant }, `voice:${unitClass}:${kind}:${variant}`]); }
+  else if (name === 'death') { cases.push([name, {}, 'death'], [name, { unit: 'cavalry' }, 'death:cavalry']); }
+  else cases.push([name, {}, name]);
+}
+try {
+  for (const [name, opts, label] of cases) {
+    const ctx = new OfflineAudioContext(1, rate * 3, rate), noise = makeNoise(ctx);
+    renderRecipe(ctx, noise, ctx.destination, name, .01, opts);
+    const data = (await ctx.startRendering()).getChannelData(0);
+    let peak = 0, sum = 0, last = 0, nan = false;
+    for (let i = 0; i < data.length; i++) { const v = data[i]; if (!Number.isFinite(v)) nan = true; peak = Math.max(peak, Math.abs(v)); sum += v * v; if (Math.abs(v) > .001) last = i; }
+    results.push({ label, peak: +peak.toFixed(4), rms: +Math.sqrt(sum / data.length).toFixed(5), tail: +(last / rate).toFixed(2), nan });
+  }
+  out.textContent = 'RESULT ' + JSON.stringify(results);
+} catch (e) { out.textContent = 'ERROR ' + e.message; }
+document.title = 'done';
+</script>
