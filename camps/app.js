@@ -54,15 +54,6 @@ const CATEGORIES = {
   english: '英語', stem: '科學／STEM', arts: '藝術', sport: '運動', multi_activity: '綜合活動',
   outdoor: '戶外', residential: '住宿', leadership: '領導力', family: '親子', travel: '遊學旅行', short_term_enrolment: '學校插班', other_language: '其他語言',
 };
-const CAT_IC = {
-  english: '🔤', stem: '🔬', arts: '🎨', sport: '⚽', multi_activity: '🎪', outdoor: '🌳', residential: '🏕️',
-  leadership: '🧭', family: '👨‍👩‍👧', travel: '✈️', short_term_enrolment: '🏫', other_language: '🗣️',
-};
-// card top colour by first category
-const CAT_COLOR = {
-  english: 'sky', stem: 'violet', arts: 'pink', sport: 'green', multi_activity: 'sun', outdoor: 'green', residential: 'orange',
-  leadership: 'sun', family: 'pink', travel: 'sky', short_term_enrolment: 'indigo', other_language: 'indigo',
-};
 const BASIS = { per_week: '每週', per_2weeks: '每兩週', per_day: '每天', per_camp: '每梯', per_session: '每次' };
 const STATUS = { confirmed_target_year: '日期已公布', confirmed_other_year: '往年日期', pattern_estimated: '推估', unknown: '查不到日期' };
 const CONF = { high: ['高', 'hi'], medium: ['中', 'mid'], low: ['低', 'lo'] };
@@ -522,6 +513,9 @@ function sessionBody(it) {
     ${detailsBlock(it)}`;
 }
 
+// the "add to estimate" toggle: a label around the checkbox, so the tray and picks work off the checkbox's change event
+const addToggle = (id, extra = '') => `<label class="add-est${extra}"><input type="checkbox" data-cmp="${id}" ${picked.has(id) ? 'checked' : ''}><span class="a-off">＋ 加入試算</span><span class="a-on">✓ 已加入試算</span></label>`;
+
 function sessionRow(it, open) {
   const id = cardId(it);
   lastCards.set(id, it);
@@ -531,10 +525,9 @@ function sessionRow(it, open) {
   const sub = [it.programs > 1 && esc(it.program.name), it.mixedAgents && `代理：${esc(it.provider.name_en)}`].filter(Boolean).join('・');
   const place = it.locs[0] ? `${esc(it.locs[0].name)}${citiesOf(it)[0] && !HOME[country].includes(it.locs[0].city) ? `・${esc(citiesOf(it)[0])}` : ''}` : '地點未公布';
   return `<div class="srow l-${l}" id="${id}" data-start="${startOf(it)}"><details ${open ? 'open' : ''}><summary>
-      <span class="s-l" title="${LIGHT[l][1]}">${LIGHT[l][0]}</span><span class="s-d">${shortDates(it)}</span>
-      <span class="s-p">${place}${sub ? `<br><small>${sub}</small>` : ''}</span><span class="s-w">${w != null ? `NT$${fmtN(w)}${l === 'gray' && it.session.year ? `<small class="py">${it.session.year} 年價</small>` : ''}` : ''}</span></summary>
-      <div class="s-body">${sessionBody(it)}</div></details>
-    ${it.group === 'unknown' ? '' : `<label class="cmp-box"><input type="checkbox" data-cmp="${id}" ${picked.has(id) ? 'checked' : ''}>選取</label>`}</div>`;
+      <i class="dot d-${l}" title="${LIGHT[l][1]}"></i><span class="s-d">${shortDates(it)}</span>
+      <span class="s-p"><span>${place}</span>${sub ? `<small>${sub}</small>` : ''}</span><span class="s-w">${w != null ? `NT$${fmtN(w)}${l === 'gray' && it.session.year ? `<small class="py">${it.session.year} 年價</small>` : ''}` : ''}</span></summary>
+      <div class="s-body">${it.group === 'unknown' ? '' : addToggle(id)}${sessionBody(it)}</div></details></div>`;
 }
 
 function orgCard(items) {
@@ -545,9 +538,7 @@ function orgCard(items) {
   const agentNames = [...new Set(items.filter((x) => x.provider.type === 'agent_package').map((x) => x.provider.name_en))];
   for (const x of items) { x.programs = progNames.length; x.mixedAgents = agentNames.length > 1; }
   const title = agent ? it0.locs[0]?.name || it0.program.name : `${it0.provider.name_en}${it0.provider.name_zh ? `・${it0.provider.name_zh}` : ''}`;
-  const sub = agent ? `${esc(it0.program.name)}<br>代理：${agentNames.map(esc).join('、')}` : progNames.slice(0, 2).map(esc).join('／') + (progNames.length > 2 ? ` 等 ${progNames.length} 個課程` : '');
-  const cities = [...new Set(items.flatMap(citiesOf))];
-  const cat = p.category[0];
+  const sub = agent ? `<div class="prov">${esc(it0.program.name)}<br>代理：${agentNames.map(esc).join('、')}</div>` : '';
   const prices = items.map(weekTWD);
   const low = minOf(prices);
   const varies = low != null && (prices.some((x) => x !== low) || items.some((x) => x.session.price?.from));
@@ -567,28 +558,25 @@ function orgCard(items) {
   }).join('');
   const best = lightOf(it0);
   const allGray = items.every((x) => lightOf(x) === 'gray');
-  const revs = reviewsOf(it0).filter((x) => x.rating != null);
-  const rate = revs.length ? Math.max(...revs.map((x) => x.rating)) : null;
   const nWarn = new Set(items.flatMap((x) => (x.warnings || []).map((w) => w.text))).size;
-  const groups = new Set(items.map((x) => x.group));
-  const fmt = new Set(items.map((x) => FORMATS[x.program.format]).filter(Boolean));
-  const tags = [groups.has('full') ? '<span class="tag in">整段在區間內</span>' : groups.has('partial') ? '<span class="tag part">部分週次在區間內</span>' : '',
-    p.includes?.lunch === true ? '<span class="tag">🍱 含午餐</span>' : '', ...[...fmt].map((f) => `<span class="tag">${f}</span>`),
-    langBadge(p.language_of_instruction),
-    ...cities.map((c) => `<span class="tag city ${HOME_ZH[country] && c !== HOME_ZH[country] ? 'away' : ''}">📍${esc(c)}</span>`)].join('');
-  return `<article class="card org c-${CAT_COLOR[cat] || 'x'}">
-    <div class="org-top"><span class="org-ic">${CAT_IC[cat] || '🎒'}</span><span class="pill p-${best}">${LIGHT[best][0]} ${LIGHT[best][1]}</span></div>
-    <div class="org-body">
-      <h3>${esc(title)}</h3><div class="prov">${sub}</div>
-      <div class="big3">
-        <div><small>${allGray ? '往年日期' : '日期'}</small><b>${items.length === 1 ? shortDates(it0) : `${items.length} 個梯次`}</b></div>
-        <div><small>每週每人${allGray && low != null ? '（往年價）' : ''}</small><b>${low != null ? `NT$${fmtN(low)}${varies ? '<i>起</i>' : ''}` : '未公布'}</b></div>
-        <div><small>孩子</small><b class="kfs">${kidFitAll}</b></div>
-      </div>
-      <div class="tags">${tags}</div>
-      <div class="org-meta">${nWarn ? `<span class="warnn">⚠ ${nWarn} 個提醒，展開看</span>` : '<span></span>'}${rate ? `<span>⭐ ${rate}</span>` : '<span class="mut">沒有評分</span>'}</div>
-      <div class="sessions">${items.map((x) => sessionRow(x, false)).join('')}</div>
-    </div>
+  // outside home: the city; at home: the venue. A city we have no name for falls back to the venue too.
+  const places = [...new Set(items.map((x) => {
+    const city = citiesOf(x)[0];
+    const away = city && !HOME[country].includes(x.locs?.[0]?.city);
+    return away && city !== '其他地區' ? city : x.locs?.[0]?.name || city || '';
+  }).filter(Boolean))];
+  const where = places.length > 1 ? `${places.length} 個地點` : places[0] || '地點未公布';
+  const when = items.length === 1 ? shortDates(it0) : `${shortDates(items[0]).replace(/^\d{4} 年 /, '')} 等 ${items.length} 梯`;
+  const priceTxt = low != null ? `每週 NT$${fmtN(low)}${varies ? ' 起' : ''}${allGray ? '（往年價）' : ''}` : '價格未公布';
+  const tags = [p.includes?.lunch === true ? '<span class="tag">🍱 午餐</span>' : '', langBadge(p.language_of_instruction)].filter(Boolean).slice(0, 2).join('');
+  const one = items.length === 1;
+  const warn = nWarn ? ' <span class="o2-warn" title="展開後有注意事項">⚠</span>' : '';
+  return `<article class="card org2 b-${best}">
+    <div class="o2-head"><div class="o2-ttl"><h3>${esc(title)}</h3>${sub}</div><span class="o2-kids">${kidFitAll}</span></div>
+    <div class="o2-line">${esc(when)}・${esc(where)}・<b>${priceTxt}</b></div>
+    ${tags ? `<div class="o2-tags">${tags}</div>` : ''}
+    <details class="o2-more${one ? ' one' : ''}" data-org="${esc(keyOf(it0))}"><summary><span class="o2-ar">▸</span> ${one ? '看細節' : `看 ${items.length} 個梯次`}${warn}</summary>
+      <div class="sessions">${items.map((x) => sessionRow(x, one)).join('')}</div></details>
   </article>`;
 }
 
@@ -597,6 +585,7 @@ function renderResults() {
   if (!r) return;
   // rows the parent opened stay open when the list is drawn again
   const openRows = new Set([...document.querySelectorAll('#results .srow')].filter((el) => el.querySelector('details').open).map((el) => el.id));
+  const openOrgs = new Set([...document.querySelectorAll('#results .o2-more')].filter((d) => d.open).map((d) => d.dataset.org));
   const unknownOpen = !!$('#results .unknown-list')?.open;
   const pool = [...r.full, ...r.partial, ...r.estimated];
   const n = { green: 0, yellow: 0, gray: 0 };
@@ -619,21 +608,24 @@ function renderResults() {
   }[sortBy];
   list.sort(cmp);
   lastCards = new Map();
-  $('#bar').innerHTML = `<div class="lights">${Object.entries(LIGHT).map(([k, [ic, t, d]]) =>
-    `<button type="button" class="light l-${k} ${shownLights.has(k) ? 'on' : ''}" data-light="${k}" aria-pressed="${shownLights.has(k)}" title="${d}"><span>${ic} ${t}</span><b>${n[k]}</b></button>`).join('')}</div>
-    <label class="sort">排序<select id="sort">${[['rec', '推薦'], ['price', '價格低到高'], ['date', '日期早到晚']].map(([k, v]) => `<option value="${k}" ${k === sortBy ? 'selected' : ''}>${v}</option>`).join('')}</select></label>`;
-  const nSess = list.reduce((s, x) => s + x.length, 0);
+  const grayOn = shownLights.has('gray');
+  $('#bar').innerHTML = `<div class="show2"><span class="lbl">顯示</span>
+      <button type="button" class="opt2 ${grayOn ? '' : 'on'}" data-show="dated" aria-pressed="${!grayOn}">有日期的 <b>${n.green + n.yellow}</b></button>
+      <button type="button" class="opt2 ${grayOn ? 'on' : ''}" data-show="all" aria-pressed="${grayOn}">加上照往年推測的 <b>+${n.gray}</b></button></div>
+    <div class="sort2"><span class="lbl">排序</span>${[['rec', '推薦'], ['price', '最便宜'], ['date', '最早']].map(([k, v]) =>
+    `<button type="button" class="${k === sortBy ? 'on' : ''}" data-sort="${k}" aria-pressed="${k === sortBy}">${v}</button>`).join('')}</div>
+    <div class="legend2"><i class="dot d-green"></i>官方日期 <i class="dot d-yellow"></i>要先問 <i class="dot d-gray"></i>照往年推測</div>`;
   const hidden = Object.keys(n).filter((k) => !shownLights.has(k)).reduce((t, k) => t + n[k], 0);
-  const empty = hidden ? '勾選的燈號裡沒有梯次，點上面的燈號打開其他類。' : '沒有符合的梯次。可以放寬條件：換日期、多選幾個城市，或取消進階篩選和名稱。';
-  $('#results').innerHTML = `<p class="pick-hint">${list.length} 個機構、${nSess} 個梯次。每張卡下方一行是一個梯次，點開看地址、時間、價格明細和來源；勾「選取」可以估算費用，或並排比較 2–4 個。</p>
-    ${list.length ? '<p class="kf-legend">孩子欄：✓ 全部梯次符合，✗ 全部不符，部分 ＝ 只有部分梯次符合，△ ＝ 生日在開營當月，? ＝ 年齡限制未公布。</p>' : ''}
+  const empty = hidden ? '有日期的梯次裡沒有符合的，點上面「加上照往年推測的」看日期還沒公布的。' : '沒有符合的梯次。可以放寬條件：換日期、多選幾個城市，或取消進階篩選和名稱。';
+  $('#results').innerHTML = `${list.length ? '<p class="kf-legend">孩子：✓ 符合，✗ 不符，部分 ＝ 只有部分梯次符合，△ ＝ 生日在開營當月，? ＝ 年齡未公布。</p>' : ''}
     <div class="cards">${list.map(orgCard).join('') || `<p class="group-note">${empty}</p>`}</div>` +
     (r.unknown.length ? `<details class="more unknown-list" ${unknownOpen ? 'open' : ''}><summary>還有 ${r.unknown.length} 筆這段期間查不到日期（點開）</summary><ul>${homeFirst(r.unknown).map((x) => {
       const id = cardId(x);
       lastCards.set(id, x);
       const pr = x.session.price;
-      return `<li>${esc(x.provider.name_en)}：${esc(x.program.name)}${x.locs?.[0] ? `（${esc(x.locs[0].name)}，${esc(cityZh(x.locs[0].city))}）` : ''}${pr?.amount != null ? `，${money(pr.currency, pr.amount)}${pr.from ? ' 起' : ''}／${BASIS[pr.basis] || '?'}` : ''}　<a href="${esc(x.session.source_url)}" target="_blank" rel="noopener">查證頁</a><label class="cmp-box"><input type="checkbox" data-cmp="${id}" ${picked.has(id) ? 'checked' : ''}>選取</label></li>`;
+      return `<li>${esc(x.provider.name_en)}：${esc(x.program.name)}${x.locs?.[0] ? `（${esc(x.locs[0].name)}，${esc(cityZh(x.locs[0].city))}）` : ''}${pr?.amount != null ? `，${money(pr.currency, pr.amount)}${pr.from ? ' 起' : ''}／${BASIS[pr.basis] || '?'}` : ''}　<a href="${esc(x.session.source_url)}" target="_blank" rel="noopener">查證頁</a>${addToggle(id, ' sm')}</li>`;
     }).join('')}</ul></details>` : '');
+  for (const d of document.querySelectorAll('#results .o2-more')) if (openOrgs.has(d.dataset.org)) d.open = true;
   for (const id of openRows) { const d = document.getElementById(id)?.querySelector('details'); if (d) d.open = true; }
   updateTray();
 }
@@ -657,6 +649,8 @@ function openSession(id) {
     }
   }
   if (!el) return;
+  const more = el.closest('.o2-more');
+  if (more) more.open = true;
   el.querySelector('details').open = true;
   el.scrollIntoView({ behavior: 'smooth', block: 'center' });
   el.classList.remove('flash');
@@ -811,6 +805,7 @@ function render(q, problem) {
   $('#weeks').innerHTML = r.weeks.length ? weekTable(r, cells) : '';
   lastR = r;
   renderResults();
+  maybeTour();
 }
 
 // where a name shows up when it has nothing in the chosen dates / cities
@@ -1137,6 +1132,102 @@ function footer() {
     發現資料有誤，把卡片「詳細資料」裡的梯次編號告訴維護者即可。`;
 }
 
+// ---------- first-visit tour
+
+const TOUR_KEY = 'camps-tour-v1';
+const TOUR = [
+  [() => (getComputedStyle($('#qsum')).display !== 'none' && $('#side').classList.contains('collapsed') ? '#qsum' : '#side'), '① 先填條件', '填日期、每個孩子的出生年月，再選城市。改了會馬上重新找。'],
+  [() => '#weeks', '② 看每週有沒有營', '每一格是那一週、那個孩子能去的營。實色＝有日期，灰色虛線＝照往年推測，紅色斜線＝這週沒有營。點格子裡的營會跳到它的卡片。'],
+  [() => '#results .card', '③ 一家機構一張卡', '左邊色條是日期可不可靠：綠＝官方公布，黃＝只有代理商或聚合站寫，要先問，灰＝今年還沒公布，照往年推測。'],
+  [() => '#results .srow', '④ 點開梯次，加入試算', '展開後看地址、時間、價格明細和來源。按「加入試算」算總費用，選 2–4 個可以並排比較。'],
+];
+let tourEnd = null; // set while a tour is open; calling it closes the tour
+let tourAutoDone = false;
+
+const tourDone = () => { try { localStorage.setItem(TOUR_KEY, '1'); } catch { /* private mode: it will show again */ } };
+
+function startTour() {
+  if (tourEnd) tourEnd();
+  const steps = TOUR.map(([sel, h, t]) => ({ el: $(sel()), h, t })).filter((s) => s.el && (s.el.getBoundingClientRect().height > 0 || s.el.closest('.o2-more'))); // a row inside a closed wrapper has no height yet
+  if (!steps.length) return;
+  const dim = document.createElement('div');
+  dim.className = 'tour-dim';
+  const pop = document.createElement('div');
+  pop.className = 'tour-pop';
+  pop.setAttribute('role', 'dialog');
+  pop.setAttribute('aria-label', '使用說明');
+  document.body.append(dim, pop);
+  let i = 0;
+  let lifted = null;
+
+  const clear = () => { lifted?.classList.remove('tour-on', 'tour-lift'); lifted = null; };
+  const place = () => {
+    if (!lifted) return;
+    const r = lifted.getBoundingClientRect();
+    const vw = document.documentElement.clientWidth;
+    const vh = innerHeight;
+    const w = pop.offsetWidth;
+    const h = pop.offsetHeight;
+    const gap = 12;
+    const clamp = (v, lo, hi) => Math.min(Math.max(v, lo), Math.max(lo, hi));
+    let top;
+    let left = clamp(r.left, gap, vw - w - gap);
+    if (r.bottom + gap + h <= vh) top = r.bottom + gap;
+    else if (r.top - gap - h >= 0) top = r.top - gap - h;
+    else if (r.right + gap + w <= vw) { left = r.right + gap; top = clamp(r.top, gap, vh - h - gap); }
+    else top = vh - h - gap; // the target fills the screen: sit over its lower part
+    pop.style.top = `${top}px`;
+    pop.style.left = `${left}px`;
+  };
+  const show = () => {
+    clear();
+    const { el, h, t } = steps[i];
+    if (el.classList.contains('srow')) { // the add-to-estimate button sits in the opened row
+      const more = el.closest('.o2-more');
+      if (more) more.open = true;
+      el.querySelector('details').open = true;
+    }
+    el.classList.add('tour-on');
+    if (getComputedStyle(el).position === 'static') el.classList.add('tour-lift');
+    lifted = el;
+    el.scrollIntoView({ block: el.getBoundingClientRect().height < innerHeight * 0.7 ? 'center' : 'start', behavior: 'instant' });
+    const last = i === steps.length - 1;
+    pop.innerHTML = `<small>${i + 1} / ${steps.length}</small><h4>${h}</h4><p>${t}</p><div class="tour-btns"><button type="button" class="t-skip">跳過</button><button type="button" class="t-next">${last ? '開始用' : '下一步'}</button></div>`;
+    pop.querySelector('.t-skip').onclick = end;
+    pop.querySelector('.t-next').onclick = () => { if (last) end(); else { i += 1; show(); } };
+    place();
+    pop.querySelector('.t-next').focus({ preventScroll: true });
+  };
+  let raf = 0;
+  const onMove = () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(place); };
+  const onKey = (e) => { if (e.key === 'Escape') { e.preventDefault(); end(); } };
+  function end() {
+    clear();
+    cancelAnimationFrame(raf);
+    dim.remove();
+    pop.remove();
+    removeEventListener('resize', onMove);
+    removeEventListener('scroll', onMove);
+    document.removeEventListener('keydown', onKey);
+    tourEnd = null;
+    tourDone();
+  }
+  tourEnd = end;
+  addEventListener('resize', onMove);
+  addEventListener('scroll', onMove, { passive: true });
+  document.addEventListener('keydown', onKey);
+  show();
+}
+
+// once, after the first results are drawn
+function maybeTour() {
+  if (tourAutoDone) return;
+  tourAutoDone = true;
+  let seen = false;
+  try { seen = !!localStorage.getItem(TOUR_KEY); } catch { seen = true; }
+  if (!seen) setTimeout(startTour, 400);
+}
+
 async function main() {
   try {
     await load();
@@ -1174,16 +1265,14 @@ async function main() {
     run();
   });
   $('#bar').addEventListener('click', (e) => {
-    const b = e.target.closest('[data-light]');
+    const st = e.target.closest('[data-sort]');
+    if (st) { sortBy = st.dataset.sort; renderResults(); return; }
+    const b = e.target.closest('[data-show]');
     if (!b) return;
-    const k = b.dataset.light;
     lightsTouched = true;
-    if (shownLights.has(k)) shownLights.delete(k); else shownLights.add(k);
-    renderResults();
-  });
-  $('#bar').addEventListener('change', (e) => {
-    if (e.target.id !== 'sort') return;
-    sortBy = e.target.value;
+    shownLights.add('green');
+    shownLights.add('yellow');
+    if (b.dataset.show === 'all') shownLights.add('gray'); else shownLights.delete('gray');
     renderResults();
   });
   $('#weeks').addEventListener('change', (e) => {
@@ -1197,6 +1286,7 @@ async function main() {
     e.preventDefault();
     openSession(a.dataset.go);
   });
+  $('#help').addEventListener('click', startTour);
   $('#qsum').addEventListener('click', () => {
     const side = $('#side');
     side.classList.toggle('collapsed');
