@@ -62,7 +62,7 @@ export function applyContextCommand(world,selection,point,{shift=false,attackMov
     }
     if(buildings.length&&!producers.length)fail('請選取已完成的生產建築來設定集結點。');
   };
-  const result=()=>({sent:accepted.size,errors,summary:[...counts].map(([type,count])=>`${count} ${type==='rally'?'棟建築':'名單位'}${LABELS[type]||type}`).join(' · '),attack:attackMove||Boolean(target&&world.isEnemy(0,target.team)&&counts.has('attack'))});
+  const result=()=>({sent:accepted.size,errors,types:[...counts.keys()],summary:[...counts].map(([type,count])=>`${count} ${type==='rally'?'棟建築':'名單位'}${LABELS[type]||type}`).join(' · '),attack:attackMove||Boolean(target&&world.isEnemy(0,target.team)&&counts.has('attack'))});
   if(!own.length){fail('先左鍵選取自己的村民或士兵，再右鍵下指令；按 . 可選取閒置村民。');return result();}
   mode=forceGarrison?'garrison':mode;
   if(mode==='rally'||!units.length){rally();return result();}

@@ -459,7 +459,9 @@ function issueAt(pos, shift = false, attackMove = false, forceGarrison = false, 
 function issueCommand(p, target, shift = false, attackMove = false, forceGarrison = false, forceMove = false) {
   const result=applyContextCommand(world,ownEntities(),{...p,target},{shift,attackMove,forceGarrison,forceMove,mode:ui.orderMode,formation:ui.formation});
   if(!result.sent){toast(result.errors[0]||'沒有可執行這項指令的單位。');updateHud(true);return false;}
-  renderer.marker={x:Math.round(p.x),y:Math.round(p.y),attack:result.attack,time:frameTime};
+  const worked=['gather','build','repair','deliver','heal'].some(t=>result.types?.includes(t)),resourceType=!target&&worked?world.tile(Math.round(p.x),Math.round(p.y)):null;
+  renderer.marker={x:Math.round(p.x),y:Math.round(p.y),attack:result.attack,kind:result.attack?'attack':worked?'work':'move',time:frameTime,
+    flash:target&&(result.attack||worked)?true:RESOURCE[resourceType]?resourceType:null,targetId:target&&(result.attack||worked)?target.id:undefined};
   updateHud(true);
   const waiting=!ui.started?'；按「開始」後執行':ui.paused?'；目前暫停，按 F3 繼續':'';
   toast(`${shift?'已加入排程 · ':''}${result.summary}${waiting}${result.errors.length?' · '+result.errors.join(' '):''}`);
@@ -778,7 +780,7 @@ window.addEventListener('keyup', e => keys.delete(e.key.toLowerCase()));
 window.addEventListener('pointermove', e => { windowPointer = e.pointerType === 'mouse' ? { x: e.clientX, y: e.clientY } : null; }, true);
 document.documentElement.addEventListener('mouseleave', () => { windowPointer = null; });
 for (const type of ['keydown','keyup']) window.addEventListener(type, e => { if (altDown!==e.altKey) { altDown=e.altKey; updatePointerHint(); } });
-window.addEventListener('blur', () => { altDown=false; keys.clear(); pointerPos = null; if(pointer?.type==='mapWall')finishMapWall(); pointer=null;minimapPointer=null;renderer.drag=null;$('map').classList.remove('camera-dragging');updatePointerHint();if (ui.started) { ui.paused = true; updateHud(true); } });
+window.addEventListener('blur', () => { altDown=false; windowPointer=null; keys.clear(); pointerPos = null; if(pointer?.type==='mapWall')finishMapWall(); pointer=null;minimapPointer=null;renderer.drag=null;$('map').classList.remove('camera-dragging');updatePointerHint();if (ui.started) { ui.paused = true; updateHud(true); } });
 document.addEventListener('visibilitychange', () => { if (document.hidden && ui.started) { ui.paused = true; updateHud(true); } });
 new ResizeObserver(() => renderer.resize()).observe($('canvas-wrap'));
 function frame(now) {
