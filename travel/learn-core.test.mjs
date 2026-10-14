@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {PRESETS,planDays} from './planner-core.mjs?v=8';
-import {tripRoutes} from './research-data.mjs?v=9';
+import {PRESETS,planDays} from './planner-core.mjs?v=9';
+import {tripRoutes} from './research-data.mjs?v=10';
 import {tripLearn} from './learn-data.mjs?v=1';
 import {assignLearn,routeTopics,extraTopics} from './learn-core.mjs?v=2';
 

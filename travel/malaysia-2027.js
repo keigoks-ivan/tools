@@ -1,8 +1,8 @@
-import {hotelContextMarkup} from './travel-context-view.mjs?v=7';
-import {CITY_SHORT,REGION_OF,hotelRegion} from './planner-core.mjs?v=8';
+import {hotelContextMarkup} from './travel-context-view.mjs?v=8';
+import {CITY_SHORT,REGION_OF,hotelRegion} from './planner-core.mjs?v=9';
 import './route-filter.mjs?v=2';
 import {cityCardsMarkup} from './learn-view.mjs?v=3';
-import {tripRoutes,tripHotels,tripPlaces,tripImages} from './research-data.mjs?v=9';
+import {tripRoutes,tripHotels,tripPlaces,tripImages} from './research-data.mjs?v=10';
 const esc = value => String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const official = (url,label='官方資料 ↗') => `<a href="${esc(url)}" target="_blank" rel="noopener">${label}</a>`;
 const dateLabel = date => `${Number(date.slice(5,7))}/${Number(date.slice(8,10))}`;
@@ -33,7 +33,7 @@ function showRoute(id){
 }
 let hotelFilter='all';
 function showHotels(){
-  const hotels=tripHotels.filter(h=>hotelFilter==='all'||hotelFilter==='kitchen'&&h.kitchen||hotelFilter==='marriott'&&h.brand||hotelFilter==='sabah'&&h.sabah);
+  const hotels=tripHotels.filter(h=>hotelFilter==='all'||hotelFilter==='kitchen'&&h.kitchen||hotelFilter==='marriott'&&h.brand||hotelFilter==='gha'&&h.gha||hotelFilter==='sabah'&&h.sabah);
   // Hotels picked in the planner come first.
   const rank=h=>{const i=latest.hotels.indexOf(h.id);return i<0?Infinity:i;}; hotels.sort((a,b)=>rank(a)-rank(b));
   document.querySelector('#hotel-grid').innerHTML=hotels.map(h=>`<article class="hotel-card" data-city="${cityKey(h.city)}" data-regions="${hotelRegion(h.id)}">${latest.hotels.includes(h.id)?'<span class="pick-tag">目前選用</span>':''}${h.img?`<figure class="shot">${tripImages[h.img]?.nearby?'<span class="nearby-tag">周邊環境</span>':''}${img(h.img,'hotel-photo')}<figcaption>${credit(h.img)}</figcaption></figure>`:''}<span class="city">${esc(h.city)}</span><h3>${esc(h.name)}</h3><div class="badges">${h.tags.map(tag=>`<span class="badge ${h.warning?'warning':''}">${esc(tag)}</span>`).join('')}</div><p class="verdict">${esc(h.verdict)}</p><ul>${h.facts.map(f=>`<li>${esc(f)}</li>`).join('')}</ul>${hotelContextMarkup(h)}<p><b>尚待確認：</b>${esc(h.check)}</p><div class="hotel-actions"><span><a class="gallery-btn" href="${esc(h.gallery)}" target="_blank" rel="noopener">${esc(h.galleryLabel||'看官方相簿')} ↗</a><br>${official(h.url,h.urlLabel?`${esc(h.urlLabel)} ↗`:undefined)}${h.extra?`<br>${official(h.extra,'官方交通 ↗')}`:''}${h.sources?`<br>${h.sources.map(([label,url])=>official(url,`${esc(label)} ↗`)).join(' · ')}`:''}</span><button type="button" class="save" data-save="${h.id}" aria-pressed="${saved.hotels.includes(h.id)}" aria-label="收藏 ${esc(h.name)}">${saved.hotels.includes(h.id)?'已收藏 ✓':'收藏 ＋'}</button></div></article>`).join('');

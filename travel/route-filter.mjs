@@ -2,7 +2,7 @@
 // planner.mjs publishes the route as body[data-regions] and a `travel-plan-change` event; every element carrying
 // data-regions="kl penang ipoh sabah" (any subset) is hidden unless it shares a region with the route.
 // "Show all research" keeps everything visible and labels what is off the route.
-import {matchesRegions,REGION_OF} from './planner-core.mjs?v=8';
+import {matchesRegions,REGION_OF} from './planner-core.mjs?v=9';
 const KEY='imq-travel-my2027-v1',CIRCLED='①②③④⑤⑥⑦⑧⑨';
 const split=text=>String(text||'').split(/\s+/).filter(Boolean);
 let regions=split(document.body.dataset.regions).length?split(document.body.dataset.regions):['kl','penang'],lastRegion='kl';

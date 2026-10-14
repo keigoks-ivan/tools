@@ -1,5 +1,5 @@
-import {cityContext,hotelContext,charterCandidates,CLIMATE_URL,CONTEXT_DATE,transportOptions,transferKey,chosenTransport,routeAssessment} from './travel-context.mjs?v=4';
-import {CITIES,REGION_OF,schedule} from './planner-core.mjs?v=8';
+import {cityContext,hotelContext,charterCandidates,CLIMATE_URL,CONTEXT_DATE,transportOptions,transferKey,chosenTransport,routeAssessment} from './travel-context.mjs?v=5';
+import {CITIES,REGION_OF,schedule} from './planner-core.mjs?v=9';
 const E=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const link=(url,label)=>`<a href="${E(url)}" ${url.startsWith("#")?"":"target=\"_blank\" rel=\"noopener\""}>${E(label)} ↗</a>`;
 // Which part of the trip each charter company serves; the section itself only shows for routes with a road leg.
