@@ -7,7 +7,7 @@ set -e
 REMOTE_USER="investmq"
 REMOTE_HOST="85.187.128.56"
 REMOTE_PATH="/home/investmq/public_html/myproperty"
-LOCAL_PATH="/Users/ivanchang/malaysia-property/"
+LOCAL_PATH="$HOME/malaysia-property/"
 SSH_KEY="$HOME/.ssh/a2hosting_key"
 SSH_OPTS="-i ${SSH_KEY} -o ConnectTimeout=10 -o BatchMode=yes"
 

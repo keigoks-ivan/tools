@@ -7,11 +7,12 @@ epub_organize.py — 依 catalog.json 把 Kobo Drive 匯入資料夾的 EPUB 分
   1_國家 Nations / 2_城市 Cities / 3_經濟金融 Economy & Finance
   4_文明主題 Civilization & Themes / 5_運動 Sports
 """
-import os, json, shutil
+import glob, os, json, shutil
 
 ROOT  = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-DRIVE = ("/Users/ivanchang/Library/CloudStorage/GoogleDrive-keigoks@gmail.com/"
-         "我的雲端硬碟/Rakuten Kobo/html匯入")
+_GDRIVE = (os.environ.get("GDRIVE_ROOT")
+           or (sorted(glob.glob(os.path.expanduser("~/Library/CloudStorage/GoogleDrive-*"))) or [""])[0])
+DRIVE = os.path.join(_GDRIVE, "我的雲端硬碟/Rakuten Kobo/html匯入")
 
 F_NATION = "1_國家 Nations"
 F_CITY   = "2_城市 Cities"

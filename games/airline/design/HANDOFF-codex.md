@@ -1,7 +1,7 @@
 # Handoff: 天青航空 SKYGLAZE airline game, v2 redesign
 
 For: Codex (or any coding agent) taking over the redesign of the airline management game.
-Repo: `github.com/keigoks-ivan/tools` (local checkout `/Users/ivanchang/tools`). Game folder: `games/airline/`.
+Repo: `github.com/keigoks-ivan/tools` (local checkout `~/tools`). Game folder: `games/airline/`.
 Live: https://tools.investmquest.com/games/airline/ (GitHub Pages; a push to `main` is live in about 1–2 minutes).
 Written 2026-10-05 by Claude Code (coordinator session). The current version is live and works; this document hands over the next step.
 
@@ -118,7 +118,7 @@ Commits: `1eba8a3` (game), `bd4a0ee` (hero art from the 3D jet). About 3,000 lin
 
 ## 5. Repo rules (important: other agents work in this repo at the same time)
 
-- Read `/Users/ivanchang/tools/CLAUDE.md`.
+- Read `~/tools/CLAUDE.md`.
   - Every new HTML page needs `<meta name="robots" content="noindex">` right after `<meta charset>`.
   - **Never run `build.py`.**
   - Don't touch other sites or games.
@@ -149,10 +149,10 @@ Commits: `1eba8a3` (game), `bd4a0ee` (hero art from the 3D jet). About 3,000 lin
 
 ## 7. How to verify (what "done" means for each milestone)
 
-1. `cd /Users/ivanchang/tools && node --test games/airline/model.test.mjs` passes, plus any new tests (keep the calibration bands).
+1. `cd ~/tools && node --test games/airline/model.test.mjs` passes, plus any new tests (keep the calibration bands).
 2. Use a headless browser check in an **isolated** browser, not the owner's Chrome profile:
    - Python Playwright: `p.chromium.launch(channel="chrome", headless=True, args=["--use-angle=swiftshader","--enable-unsafe-swiftshader"])` with a fresh context.
-   - Serve with `python3 -m http.server <port> --directory /Users/ivanchang/tools`.
+   - Serve with `python3 -m http.server <port> --directory ~/tools`.
    - Check 390×844, 844×390, 1280×800 and the dark scheme. There must be no console or page errors (a favicon 404 from the bare dev server is fine) and no horizontal overflow.
    - Scripted playthroughs: a sensible 一年 game from Taipei, a 十年 game from Singapore, and one deliberately bad game. They should end roughly at a profit, mixed, and a clear loss, with reasons that explain why.
 3. Measure performance: frame time on the main screen with all routes active, and the asset bytes downloaded before first interaction.

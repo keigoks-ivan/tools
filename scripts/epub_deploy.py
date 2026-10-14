@@ -7,14 +7,15 @@ epub_deploy.py — 把建好的 EPUB 派送到三處：
   3) Kobo Google Drive 匯入資料夾   ← 直接同步到 Kobo
 驗證每個 EPUB 為合規 XML 後才派送。
 """
-import os, sys, json, shutil, zipfile
+import glob, os, sys, json, shutil, zipfile
 import xml.dom.minidom as M
 
 ROOT  = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 EPUB  = os.path.join(ROOT, "dist", "epub")
 SITE  = os.path.join(ROOT, "history", "epub")
-DRIVE = ("/Users/ivanchang/Library/CloudStorage/GoogleDrive-keigoks@gmail.com/"
-         "我的雲端硬碟/Rakuten Kobo/html匯入")
+_GDRIVE = (os.environ.get("GDRIVE_ROOT")
+           or (sorted(glob.glob(os.path.expanduser("~/Library/CloudStorage/GoogleDrive-*"))) or [""])[0])
+DRIVE = os.path.join(_GDRIVE, "我的雲端硬碟/Rakuten Kobo/html匯入")
 
 def validate(path):
     z = zipfile.ZipFile(path)

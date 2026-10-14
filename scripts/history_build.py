@@ -20,13 +20,14 @@ history_build.py — 歷史板塊建置腳本（catalog 驅動，冪等可重跑
 用法:  python3 scripts/history_build.py            # 匯入新篇 + 重建 catalog（不覆蓋既有檔）
        python3 scripts/history_build.py --check    # 只報告：已有/待匯入/來源缺，不寫檔
 """
-import json, os, re, shutil, sys
+import glob, json, os, re, shutil, sys
 
 # ---- 路徑 ----
 REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 HISTORY_DIR = os.path.join(REPO, "history")
-SRC_ROOT = ("/Users/ivanchang/Library/CloudStorage/GoogleDrive-keigoks@gmail.com/"
-            "我的雲端硬碟/001投資/產業claude分析/歷史")
+_GDRIVE = (os.environ.get("GDRIVE_ROOT")
+           or (sorted(glob.glob(os.path.expanduser("~/Library/CloudStorage/GoogleDrive-*"))) or [""])[0])
+SRC_ROOT = os.path.join(_GDRIVE, "我的雲端硬碟/001投資/產業claude分析/歷史")
 
 # ---- 分類顯示順序與標籤 ----
 CATS = [

@@ -1,5 +1,5 @@
 """創業之城 第 1 步自動試玩（headless chromium）。
-用法：python3 test/playtest.py [--shots]    先在 /Users/ivanchang/tools 開 http.server。
+用法：python3 test/playtest.py [--shots]    先在 repo 根目錄開 http.server。
 流程：新遊戲 → 點空店面 → 借青創貸款 → 開店 → 改價格和排班 → 快轉 → 營業畫面 → 報表 → 事件卡 → 數字來源 → 重新整理確認存檔 → 手機版。
 全程 console 不能有錯誤。"""
 import sys, os, json, time, subprocess, socket
@@ -7,7 +7,7 @@ from playwright.sync_api import sync_playwright
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, '..', 'design', 'step1-play')
-ROOT = '/Users/ivanchang/tools'
+ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
 os.makedirs(OUT, exist_ok=True)
 
 def free_port():

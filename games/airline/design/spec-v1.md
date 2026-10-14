@@ -5,7 +5,7 @@ Goal (user): a simplified airline management browser game; after one play-throug
 ## Identity
 - Airline: 「天青航空」 TIANQING — named after Ru-ware celadon「雨過天青雲破處」. Palette: pale celadon ~#A9C8C2, deep celadon ~#4E7F78, ink ~#2F4F4A, warm off-white ~#F6F3EC, accent for warnings: muted cinnabar ~#B5533C. Elegant serif CJK headings ("Noto Serif TC", "Songti TC", "PMingLiU", serif), clean sans for numbers. Calm, refined, not cartoonish.
 - Same company as the flight-sim game (/games/flight/, its aircraft are being repainted in this livery). Aircraft names follow the flight sim's fictional MQ family.
-- Location: games/airline/ (new folder; site rules in /Users/ivanchang/tools/CLAUDE.md — every HTML page needs `<meta name="robots" content="noindex">` after `<meta charset>`). Bilingual like the flight game: every string via tr(zh, en), Chinese default.
+- Location: games/airline/ (new folder; site rules in ~/tools/CLAUDE.md — every HTML page needs `<meta name="robots" content="noindex">` after `<meta charset>`). Bilingual like the flight game: every string via tr(zh, en), Chinese default.
 
 ## Modes (both selectable at start)
 - 「一年」 (Mode A): 12 turns, 1 turn = 1 month, ~20–30 min. 3 aircraft types, 1 rival, ~8 scripted events. Month 6: one decision 「要不要改走廉價路線？」 (LCC vs full-service: seat density, fares, ancillary, service cost) — the clearest LCC lesson.

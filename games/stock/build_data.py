@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """從 盤感 LAB 的原始資料產生新手版用的還原權息日線。只讀來源，不改來源。"""
 import json, os
-SRC = "/Users/ivanchang/financial-analysis-bot/docs/simulation/data/stocks"
+SRC = os.path.expanduser("~/financial-analysis-bot/docs/simulation/data/stocks")
 OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 SYMS = ["2330.TW", "2317.TW", "2454.TW", "2412.TW", "SPY", "QQQ", "AAPL", "NVDA", "MSFT", "KO", "TSLA"]
 KEEP = 2520       # 最多保留最近約 10 年

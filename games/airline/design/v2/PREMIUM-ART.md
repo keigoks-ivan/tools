@@ -1,6 +1,6 @@
 # SKYGLAZE v22 — colourful game artwork
 
-Generated on 2026-10-06 using **built-in OpenAI imagegen**, in generate mode. No CLI, API key, stock photographs, manufacturer models or third-party airline marks. Production files are local WebP re-encodings of the selected outputs; aircraft/facility alpha is preserved. Original PNGs remain in `/Users/ivanchang/.codex/generated_images/01a10bbf-ec35-7531-98ed-0a265201a3da/`.
+Generated on 2026-10-06 using **built-in OpenAI imagegen**, in generate mode. No CLI, API key, stock photographs, manufacturer models or third-party airline marks. Production files are local WebP re-encodings of the selected outputs; aircraft/facility alpha is preserved. Original PNGs remain in `~/.codex/generated_images/01a10bbf-ec35-7531-98ed-0a265201a3da/`.
 
 | Production asset | Purpose | Dimensions | Bytes |
 |---|---|---|---|
