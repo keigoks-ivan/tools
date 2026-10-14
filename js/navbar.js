@@ -33,10 +33,10 @@ var MARKETS = [
   {k:'ie',flag:'🇮🇪',en:'Ireland',zh:'愛爾蘭',base:'/ie/',
     cities:[{f:'dublin.html',en:'Dublin',zh:'都柏林'},{f:'cork.html',en:'Cork',zh:'科克'}]},
   /* Archived markets (data as of 2026-10, not updated): report + macro only, no city pages */
-  {k:'ae',flag:'🇦🇪',en:'UAE',zh:'阿聯',base:'/ae/',secs:['report.html','macro.html'],cities:[]},
-  {k:'tr',flag:'🇹🇷',en:'Türkiye',zh:'土耳其',base:'/tr/',secs:['report.html','macro.html'],cities:[]},
-  {k:'gr',flag:'🇬🇷',en:'Greece',zh:'希臘',base:'/gr/',secs:['report.html','macro.html'],cities:[]},
-  {k:'ph',flag:'🇵🇭',en:'Philippines',zh:'菲律賓',base:'/ph/',secs:['report.html','macro.html'],cities:[]}
+  {k:'ae',arc:true,flag:'🇦🇪',en:'UAE',zh:'阿聯',base:'/ae/',secs:['report.html','macro.html'],cities:[]},
+  {k:'tr',arc:true,flag:'🇹🇷',en:'Türkiye',zh:'土耳其',base:'/tr/',secs:['report.html','macro.html'],cities:[]},
+  {k:'gr',arc:true,flag:'🇬🇷',en:'Greece',zh:'希臘',base:'/gr/',secs:['report.html','macro.html'],cities:[]},
+  {k:'ph',arc:true,flag:'🇵🇭',en:'Philippines',zh:'菲律賓',base:'/ph/',secs:['report.html','macro.html'],cities:[]}
 ];
 function secsOf(m){return m.secs?SECTIONS.filter(function(s){return m.secs.indexOf(s.f)!==-1;}):SECTIONS;}
 
@@ -60,14 +60,15 @@ var ZONES = [
         {href:'/demo/',en:'Guided Tour',zh:'使用導覽'},
         {href:'/playbook.html',en:'Playbook',zh:'手冊'},
         {href:'/methodology.html',en:'Methodology',zh:'方法論'}]},
-      {en:'Cross-Market',zh:'跨國比較',links:[
+      {en:'Cross-Market & Cycle',zh:'跨國比較與週期',links:[
         {href:'/global/quadrant.html',en:'Four-Quadrant Model',zh:'四象限模型'},
-        {href:'/global/compass.html',en:'Other Markets Compass',zh:'其他市場羅盤'},
-        {href:'/carry-heatmap.html',en:'Carry Heatmap',zh:'利差熱力圖'},
-        {href:'/visa.html',en:'Visa Map',zh:'簽證地圖'},
-        {href:'/global/visa.html',en:'Residency by Property (49)',zh:'購屋居留制度（49 套）'},
-        {href:'/global/residency.html',en:'Residency Finder',zh:'居留制度挑選'},
-        {href:'/compass/',en:'Housing Cycle Compass v4',zh:'房產週期羅盤 v4'}]},
+        {href:'/compass/',en:'Cycle Compass v4 (59 markets, archived)',zh:'週期羅盤 v4（59 市場，存檔）'},
+        {href:'/global/compass.html',en:'Risk Compass (US, TW, JP, AU)',zh:'風險羅盤（美台日澳）'},
+        {href:'/carry-heatmap.html',en:'Carry Heatmap',zh:'利差熱力圖'}]},
+      {en:'Residency & Visa',zh:'居留與簽證',links:[
+        {href:'/visa.html',en:'Visa Map (Apr 2026)',zh:'簽證地圖（2026 年 4 月版）'},
+        {href:'/global/visa.html',en:'Residency by Property, 49 programmes (archived)',zh:'購屋居留制度 49 套（存檔）'},
+        {href:'/global/residency.html',en:'Residency Finder, five questions (archived)',zh:'居留制度挑選，五題（存檔）'}]},
       {en:'Pick a City',zh:'挑城市',links:[
         {href:'/tools/compare.html',en:'City Compare',zh:'城市比較'},
         {href:'/tools/yield-spread.html',en:'Yield Spread',zh:'利差工具'},
@@ -190,6 +191,7 @@ var flagsHtml = MARKETS.map(function(m){
     '<a class="'+cls+'" href="'+m.base+'report.html">'+
       '<span class="imq-flag-emoji">'+m.flag+'</span>'+
       '<span class="imq-flag-name">'+spanBL(m.en,m.zh)+'</span>'+
+      (m.arc?'<span class="imq-flag-arc">'+spanBL('archived','存檔')+'</span>':'')+
     '</a>'+
     '<div class="imq-dd">'+
       '<div class="imq-dd-section"><div class="imq-dd-title">'+spanBL('Sections','頁面')+'</div>'+sectionsHtml+'</div>'+
@@ -284,6 +286,7 @@ var css = ''+
 '.imq-flags::-webkit-scrollbar{display:none}'+
 '.imq-flag-wrap{position:relative;flex-shrink:0}'+
 '.imq-flag{display:inline-flex;align-items:center;gap:6px;padding:8px 11px;font-size:12.5px;font-weight:500;color:rgba(255,255,255,.7)!important;text-decoration:none!important;border-radius:5px;transition:all .15s;white-space:nowrap;border-bottom:2px solid transparent}'+
+'.imq-flag-arc{font-size:10px;padding:0 5px;border-radius:999px;background:rgba(245,158,11,.22);color:#fbd98a}'+
 '.imq-flag:hover{color:#fff!important;background:rgba(255,255,255,.06);text-decoration:none!important}'+
 '.imq-flag.on{color:#fff!important;background:rgba(59,130,246,.18);font-weight:600;border-bottom-color:#3b82f6}'+
 '.imq-flag-emoji{font-size:15px;line-height:1}'+
