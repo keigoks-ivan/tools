@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Philippines — Macro × Property | Philippines</title>
+<meta name="description" content="Philippine macro analysis built for property: a forty-year rate series, the 2026 inflation shock, the remittance channel, the capital's broken mortgage market, and one equation that reads the housing market. Updated October 2026.">
+<meta name="color-scheme" content="light">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,600&family=IBM+Plex+Mono:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="../css/kl-theme.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<style>
+/* macro page — depth + robust CJK spacing */
+.wrap{max-width:900px;margin:0 auto;padding:30px 20px 10px}
+body.zh{font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif}
+.wrap, .wrap p, .wrap li, .lede, .pt li, .col li, .src, .cat li, .narr-p, .concept p, .prop-take p{line-height:2.0}
+
+.pg-head{margin-bottom:22px}
+.pg-title{font-family:'Playfair Display','Noto Serif TC',serif;font-weight:700;color:var(--navy);font-size:26px;letter-spacing:-.01em;margin:0 0 10px;line-height:1.3}
+.pg-badges{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+.snap{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:22px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px 12px;box-shadow:var(--shadow-sm);display:flex;flex-direction:column;gap:4px;min-width:0}
+.stat-lbl{font-size:10.5px;font-weight:600;letter-spacing:.04em;color:var(--gold-deep);text-transform:uppercase;line-height:1.45}
+body.zh .stat-lbl{text-transform:none;letter-spacing:0}
+.stat-num{font-family:'IBM Plex Mono','JetBrains Mono',monospace;font-size:21px;font-weight:700;color:var(--navy);line-height:1.2}
+.stat-tag{font-size:10.5px;font-weight:600;line-height:1.5}
+.t-green{color:#15803d}.t-orange{color:#a16207}.t-red{color:#b91c1c}.t-blue{color:#1d4ed8}
+
+.lede{background:linear-gradient(135deg,#0d2244 0%,#173564 100%);color:#fff;border-radius:14px;padding:20px 24px;margin-bottom:32px;font-size:14px;box-shadow:var(--shadow-md)}
+.lede b{color:var(--gold-light);font-weight:600}
+.lede a{color:var(--gold-light);font-weight:600}
+.lede .lk{display:block;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--gold-light);margin-bottom:8px}
+
+.blk{margin-bottom:34px}
+.blk h2{font-family:'Playfair Display','Noto Serif TC',serif;font-weight:600;color:var(--navy);font-size:18px;margin:0 0 4px;line-height:1.35}
+.blk .sub{font-size:12px;color:var(--muted);margin:0 0 14px;line-height:1.6}
+.chartbox{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 10px 10px;box-shadow:var(--shadow-sm);margin-bottom:16px}
+.chartbox .ch{height:300px;width:100%}
+.chartbox .kick{font-size:9.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold-deep);margin:2px 6px 8px}
+body.zh .chartbox .kick{text-transform:none;letter-spacing:.02em}
+.fnote{font-size:11px;color:var(--muted);line-height:1.85;margin:-6px 4px 16px}
+.pt{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.pt li{position:relative;padding-left:18px;font-size:13px;color:var(--text-soft)}
+.pt li::before{content:'';position:absolute;left:0;top:13px;width:6px;height:6px;border-radius:50%;background:var(--gold)}
+.pt li b{color:var(--navy);font-weight:600}
+.pt li.warn::before{background:#b91c1c}.pt li.good::before{background:#15803d}
+
+.sec-rule{display:flex;align-items:center;gap:12px;margin:40px 0 18px}
+.sec-rule h2{font-family:'Playfair Display','Noto Serif TC',serif;font-weight:700;color:var(--navy);font-size:21px;margin:0;white-space:nowrap;line-height:1.3}
+.sec-rule::after{content:'';flex:1;height:1px;background:var(--gold-line)}
+
+.pull{font-family:'Playfair Display','Noto Serif TC',serif;font-size:17px;line-height:1.7;color:var(--navy);border-left:3px solid var(--gold);padding:3px 0 3px 16px;margin:0 0 18px;font-weight:600}
+.narr-p{font-size:13.5px;color:var(--text-soft);margin:0 0 16px}
+.narr-p b{color:var(--navy);font-weight:600}
+.narr-p a{color:var(--gold-deep);font-weight:600}
+.mrow{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:2px 0 24px}
+.m{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 10px;min-width:0}
+.m .mn{font-family:'IBM Plex Mono',monospace;font-size:17px;font-weight:700;color:var(--navy);line-height:1.2}
+.m .ml{font-size:10px;color:var(--muted);line-height:1.55;margin-top:4px}
+.m .mn.neg{color:#b91c1c}.m .mn.pos{color:#15803d}.m .mn.gold{color:var(--gold-deep)}
+.concept{background:var(--bg-section);border:1px solid var(--gold-soft);border-radius:12px;padding:16px 20px;margin:2px 0 24px}
+.concept h4{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold-deep);margin:0 0 8px}
+body.zh .concept h4{text-transform:none;letter-spacing:.02em}
+.concept p{font-size:12.5px;color:var(--text-soft);margin:0 0 8px}
+.concept p:last-child{margin-bottom:0}
+.concept p b{color:var(--navy);font-weight:600}
+.concept p.g b{color:#15803d}.concept p.r b{color:#b91c1c}
+.prop-take{background:linear-gradient(135deg,#0d2244,#173564);color:#fff;border-radius:14px;padding:18px 22px;margin:6px 0 30px;box-shadow:var(--shadow-md)}
+.prop-take .pk{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-light);margin-bottom:8px;display:block}
+body.zh .prop-take .pk{text-transform:none;letter-spacing:.02em}
+.prop-take p{margin:0 0 10px;font-size:13.5px;color:rgba(255,255,255,.9)}
+.prop-take p:last-child{margin-bottom:0}
+.prop-take b{color:var(--gold-light)}
+.prop-take a{color:var(--gold-light);font-weight:600}
+
+/* system map */
+.sysmap{background:var(--bg-section);border:1px solid var(--gold-soft);border-radius:14px;padding:20px 16px;margin:4px 0 14px}
+.sys-flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:7px;justify-content:center}
+.sys-chip{flex:1 1 130px;min-width:120px;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:9px 11px;box-shadow:var(--shadow-sm)}
+.sys-chip.root{border-left:3px solid var(--gold)}
+.sys-chip b{display:block;font-size:11.5px;color:var(--navy);font-weight:700;line-height:1.4}
+.sys-chip i{display:block;font-style:normal;font-size:10px;color:var(--muted);line-height:1.5;margin-top:3px}
+.sys-arrow{display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--gold-deep);font-size:14px;font-weight:700;white-space:nowrap}
+.sys-arrow em{font-style:normal;font-size:9px;font-weight:600;color:var(--muted);line-height:1.2}
+.sys-out{margin-top:11px;background:linear-gradient(135deg,#0d2244,#173564);color:#fff;border-radius:10px;padding:12px 15px;font-size:12.5px;line-height:1.7}
+.sys-out b{color:var(--gold-light)}
+.sys-fb{margin-top:9px;position:relative;border:1px dashed var(--gold);border-radius:10px;padding:9px 13px;font-size:11.5px;color:var(--text-soft);line-height:1.65}
+.sys-fb b{color:var(--navy);font-weight:600}
+.sys-fb .lp{font-weight:700;color:var(--gold-deep);margin-right:4px}
+@media(max-width:680px){.sys-arrow{flex-basis:100%;transform:rotate(90deg);font-size:12px;margin:1px 0}.sys-arrow em{display:none}.sys-chip{flex:1 1 44%}}
+
+.cat{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:16px}
+.cat .c{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--gold);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow-sm)}
+.cat .c h4{font-size:12px;font-weight:700;color:var(--navy);margin:0 0 6px;line-height:1.4}
+.cat .c p{font-size:12px;color:var(--muted);margin:0;line-height:1.85}
+.cat .c p b{color:var(--navy);font-weight:600}
+
+/* timeline */
+.tl{list-style:none;margin:6px 0 22px;padding:0 0 0 4px;display:grid;gap:0}
+.tl li{position:relative;padding:0 0 16px 26px;border-left:2px solid var(--gold-soft);font-size:12.5px;color:var(--text-soft);line-height:1.9}
+.tl li:last-child{border-left-color:transparent;padding-bottom:0}
+.tl li::before{content:'';position:absolute;left:-6px;top:9px;width:10px;height:10px;border-radius:50%;background:var(--gold);border:2px solid var(--bg-primary)}
+.tl li.hard::before{background:#b91c1c}
+.tl li .yr{font-family:'IBM Plex Mono',monospace;font-weight:700;color:var(--navy);margin-right:8px;font-size:12px}
+.tl li b{color:var(--navy);font-weight:600}
+
+/* equation */
+.eq{background:linear-gradient(135deg,#0d2244,#173564);color:#fff;border-radius:14px;padding:22px 24px;margin:6px 0 20px;box-shadow:var(--shadow-md);text-align:center}
+.eq .ef{font-family:'IBM Plex Mono',monospace;font-size:15px;font-weight:600;line-height:2.1;color:var(--gold-light);letter-spacing:.01em}
+.eq .en{font-size:11.5px;color:rgba(255,255,255,.72);margin-top:10px;line-height:1.8}
+.eqv{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:2px 0 24px}
+.eqv .v{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:13px 15px;box-shadow:var(--shadow-sm)}
+.eqv .v h5{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700;color:var(--gold-deep);margin:0 0 5px}
+.eqv .v p{font-size:11.5px;color:var(--text-soft);margin:0;line-height:1.85}
+.eqv .v p b{color:var(--navy);font-weight:600}
+.eqv .v.neg{border-left:3px solid #b91c1c}
+.eqv .v.pos{border-left:3px solid #15803d}
+.eqv .v.mid{border-left:3px solid var(--gold)}
+
+.mtbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:2px 0 10px}
+.mtbl{min-width:680px;width:100%;border-collapse:separate;border-spacing:0;background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden;box-shadow:var(--shadow-sm)}
+.mtbl th{font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--gold-deep);text-align:left;padding:10px 14px;border-bottom:2px solid var(--gold-soft);background:var(--bg-section)}
+body.zh .mtbl th{text-transform:none;letter-spacing:0}
+.mtbl td{font-size:12px;color:var(--text-soft);padding:11px 14px;border-bottom:1px solid var(--border-soft);vertical-align:top;line-height:1.85}
+.mtbl tr:last-child td{border-bottom:none}
+.mtbl td.who{font-weight:700;color:var(--navy);white-space:nowrap}
+.mtbl td b{color:var(--navy);font-weight:600}
+
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:32px}
+.col{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px;box-shadow:var(--shadow-sm)}
+.col.up{border-top:3px solid #15803d}.col.dn{border-top:3px solid #b91c1c}
+.col h3{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin:0 0 10px}
+body.zh .col h3{text-transform:none;letter-spacing:.02em}
+.col.up h3{color:#15803d}.col.dn h3{color:#b91c1c}
+.col ul{list-style:none;margin:0;padding:0;display:grid;gap:9px}
+.col li{font-size:12.5px;color:var(--text-soft);padding-left:15px;position:relative}
+.col li::before{content:'';position:absolute;left:0;top:12px;width:5px;height:5px;border-radius:50%}
+.col.up li::before{background:#15803d}.col.dn li::before{background:#b91c1c}
+
+.watch{background:var(--gold-bg);border:1px solid var(--gold-soft);border-radius:14px;padding:18px 22px;margin-bottom:26px}
+.watch h3{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--gold-deep);margin:0 0 10px}
+body.zh .watch h3{text-transform:none;letter-spacing:.02em}
+.watch ul{list-style:none;margin:0;padding:0;display:grid;gap:9px}
+.watch li{font-size:12.5px;color:var(--text-soft);padding-left:16px;position:relative;line-height:1.95}
+.watch li::before{content:'▸';position:absolute;left:0;top:0;color:var(--gold-deep);font-size:11px;line-height:1.95}
+.watch li b{color:var(--navy);font-weight:600}
+
+.src{font-size:11px;color:var(--muted);background:var(--bg-soft);border:1px solid var(--border-soft);border-radius:10px;padding:12px 16px;margin-bottom:8px}
+.src a{color:var(--gold-deep)}
+
+/* data-credibility tiering */
+.tier{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:6px 0 14px}
+.tier .t{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:13px 15px;box-shadow:var(--shadow-sm)}
+.tier .t.a{border-top:3px solid #15803d}
+.tier .t.b{border-top:3px solid var(--gold)}
+.tier .t.c{border-top:3px solid #b91c1c}
+.tier .t h5{font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;margin:0 0 6px}
+body.zh .tier .t h5{text-transform:none;letter-spacing:.02em}
+.tier .t.a h5{color:#15803d}.tier .t.b h5{color:var(--gold-deep)}.tier .t.c h5{color:#b91c1c}
+.tier .t p{font-size:11.5px;line-height:1.85;color:var(--text-soft);margin:0}
+.tier .t p b{color:var(--navy);font-weight:600}
+@media(max-width:760px){.tier{grid-template-columns:1fr}}
+
+@media(max-width:760px){.snap{grid-template-columns:repeat(3,1fr)}.mrow{grid-template-columns:repeat(2,1fr)}.cols,.cat,.eqv{grid-template-columns:1fr}.pg-title{font-size:22px}.sec-rule h2{font-size:18px;white-space:normal}.eq .ef{font-size:12.5px}}
+@media(max-width:440px){.snap,.mrow{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<div id="nav-root"></div>
+<div class="imq-archive-note" style="max-width:1100px;margin:14px auto 0;padding:9px 16px;background:#fff8e6;border:1px solid #f0d9a0;border-radius:8px;font-size:12.5px;color:#7a5a12;line-height:1.7"><span class="lang-en">Data as of October 2026. This page is archived and no longer updated regularly.</span><span class="lang-zh" style="display:none">資料截至 2026 年 10 月，之後不再定期更新。</span></div>
+
+
+<main class="wrap">
+
+  <div class="pg-head">
+    <h1 class="pg-title">
+      <span class="lang-en">Philippines — Macro × Property</span>
+      <span class="lang-zh" style="display:none">菲律賓 · 總經 × 房產</span>
+    </h1>
+    <div class="pg-badges">
+      <span class="kpi-badge badge-orange"><span class="lang-en">Policy rate 5.00%, rising</span><span class="lang-zh" style="display:none">政策利率 5.00%，回升中</span></span>
+      <span class="kpi-badge badge-red"><span class="lang-en">CPI 7.2% (Sep 2026)</span><span class="lang-zh" style="display:none">CPI 年增 7.2%（2026 年 9 月）</span></span>
+      <span class="kpi-badge badge-green"><span class="lang-en">Population still growing</span><span class="lang-zh" style="display:none">人口仍在成長</span></span>
+      <span class="kpi-badge badge-orange"><span class="lang-en">Updated Oct 2026</span><span class="lang-zh" style="display:none">更新至 2026 年 10 月</span></span>
+    </div>
+  </div>
+
+  <div class="snap">
+    <div class="stat"><div class="stat-lbl"><span class="lang-en">Policy rate</span><span class="lang-zh" style="display:none">政策利率</span></div><div class="stat-num">5.00%</div><div class="stat-tag t-orange"><span class="lang-en">up from 4.25% in Feb 2026</span><span class="lang-zh" style="display:none">自 2026 年 2 月的 4.25% 回升</span></div></div>
+    <div class="stat"><div class="stat-lbl"><span class="lang-en">Headline CPI</span><span class="lang-zh" style="display:none">CPI 年增</span></div><div class="stat-num">7.2%</div><div class="stat-tag t-red"><span class="lang-en">2.42% in Feb 2026</span><span class="lang-zh" style="display:none">2026 年 2 月為 2.42%</span></div></div>
+    <div class="stat"><div class="stat-lbl"><span class="lang-en">Real policy rate</span><span class="lang-zh" style="display:none">實質政策利率</span></div><div class="stat-num">−2.20%</div><div class="stat-tag t-red"><span class="lang-en">derived · Sep 2026 · +4.30% in Jul 2025</span><span class="lang-zh" style="display:none">推導值 · 2026 年 9 月 · 2025 年 7 月為 +4.30%</span></div></div>
+    <div class="stat"><div class="stat-lbl"><span class="lang-en">External debt</span><span class="lang-zh" style="display:none">外債占 GDP</span></div><div class="stat-num">30.3%</div><div class="stat-tag t-green"><span class="lang-en">of GDP · 85.9% in 1986</span><span class="lang-zh" style="display:none">1986 年為 85.9%</span></div></div>
+    <div class="stat"><div class="stat-lbl"><span class="lang-en">OFW remittances</span><span class="lang-zh" style="display:none">海外菲人匯款</span></div><div class="stat-num">$39.6b</div><div class="stat-tag t-green"><span class="lang-en">2025 · up in 19 of 20 years</span><span class="lang-zh" style="display:none">2025 · 20 次年度變動中 19 次成長</span></div></div>
+    <div class="stat"><div class="stat-lbl"><span class="lang-en">PHP per USD</span><span class="lang-zh" style="display:none">披索兌美元</span></div><div class="stat-num">62.90</div><div class="stat-tag t-red"><span class="lang-en">8 Oct 2026 close · 40.65 in Jan 2013</span><span class="lang-zh" style="display:none">2026 年 10 月 8 日收盤 · 2013 年 1 月為 40.65</span></div></div>
+  </div>
+
+  <div class="lede">
+    <span class="lk"><span class="lang-en">Bottom line</span><span class="lang-zh" style="display:none">總結</span></span>
+    <span class="lang-en">The Philippines is the mirror image of the ageing ASEAN economies. The population is still growing, real income per head has compounded faster in each successive decade — 2.84% in the 2000s, 3.03% in the 2010s, <b>4.91% from 2020 to 2025</b> — and the external balance sheet has been rebuilt from an 85.9%-of-GDP debt crisis in 1986 to 30.3% in 2025. None of the structural decline that defines Thailand is present here. Growth has slowed in 2026, to 2.8% in the first quarter and 2.3% in the second.<br><br>The problem is elsewhere, and it is specific. Bank lending against Metro Manila residential property broke in 2020 and has not been repaired. Approved mortgage counts in the capital fell from <b>21,925 in 2019 to 11,041 in 2025</b>, a decline of 49.6%, while the rest of the country rose 15.8% over the same period. The second quarter of 2026 printed 2,967 in the capital, 11% above a year earlier and still under half the 2019 peak of 6,494. The past-due ratio on residential real-estate loans doubled from 5.74% at end-2019 to 12.20% at end-2020 and, six years later, is still 8.83% against a 2013–2017 baseline near 3.4%. Commercial-property delinquency is 2.81%, about a third of the residential ratio. <b>The damage is concentrated in one place: residential credit in the capital.</b><br><br>Two things fill the gap and both are cash rather than credit. Remittances reached <b>US$39.6 billion in 2025</b> and grew 2.3% in January–July 2026. Because the peso lost a third of its value against the dollar over thirteen years, the same dollars now buy far more Philippine property than they did. The second is foreign capital, which the 1987 Constitution confines to condominium units under a 40% collective ceiling. Neither channel runs through a loan officer, which is why the market has not cleared through price. The 2026 backdrop is less friendly to both: the BSP has raised its policy rate three times to 5.00%, September inflation is 7.2%, and the peso closed at a record low of 62.90 on 8 October. Those mechanics are tested against the transaction data in the companion <a href="/ph/report.html">Metro Manila Property Market Report</a>.</span>
+    <span class="lang-zh" style="display:none">菲律賓與東協的高齡化經濟體正好相反。人口仍在成長。實質人均所得的年均複合成長率逐個十年加快：2000 年代 2.84%、2010 年代 3.03%、<b>2020 到 2025 年 4.91%</b>。對外資產負債表也已重建，外債占 GDP 的比重從 1986 年債務危機時的 85.9%，降到 2025 年的 30.3%。界定泰國處境的各種結構性衰退，這裡都沒有。2026 年成長放慢，第一季 2.8%，第二季 2.3%。<br><br>問題在別處，而且範圍明確。針對大馬尼拉住宅的銀行貸款在 2020 年斷掉，之後沒有修復。首都的房貸核准件數從 <b>2019 年的 21,925 件降到 2025 年的 11,041 件</b>，減少 49.6%，同期全國其餘地區增加 15.8%。2026 年第二季首都核准 2,967 件，比一年前多 11%，仍不到 2019 年高點 6,494 件的一半。住宅不動產放款的逾期率，從 2019 年底的 5.74% 倍增到 2020 年底的 12.20%。六年後仍有 8.83%，2013 到 2017 年的基線約 3.4%。商用不動產放款的逾期率是 2.81%，約為住宅的三分之一。<b>劣化集中在一個地方：首都的住宅授信。</b><br><br>填補缺口的有兩項來源，都是現金，不是貸款。匯款 <b>2025 年達 396 億美元</b>，2026 年 1 到 7 月又增加 2.3%。披索十三年來對美元貶值三分之一，同樣的美元現在能買到的菲律賓房地產多很多。第二項是外國資金，1987 年憲法把它限制在公寓單位，並受 40% 的集體上限約束。兩項資金都不經過放款人員，所以市場沒有靠價格出清。2026 年的環境對這兩項都不友善：菲律賓央行（BSP）三度升息到 5.00%，9 月通膨 7.2%，披索 10 月 8 日收 62.90，創收盤新低。這些機制與成交資料的對照，見<a href="/ph/report.html">《大馬尼拉住宅市場報告》</a>。</span>
+  </div>
+
+  <!-- PART 1 -->
+  <div class="sec-rule"><h2><span class="lang-en">Part 1 · The Cycle</span><span class="lang-zh" style="display:none">週期篇 · 我們在哪裡</span></h2></div>
+
+  <div class="blk">
+    <h2><span class="lang-en">The low of this easing cycle was February 2026, and it has already passed</span><span class="lang-zh" style="display:none">本輪寬鬆的低點是 2026 年 2 月，已經過去</span></h2>
+    <p class="sub"><span class="lang-en">BSP overnight reverse repurchase rate, annual mean with the within-year high and low · 1986–2026 · Bangko Sentral ng Pilipinas</span><span class="lang-zh" style="display:none">菲律賓央行隔夜附賣回利率，年平均與年內高低 · 1986–2026 · 菲律賓央行</span></p>
+    <div class="chartbox"><div class="kick"><span class="lang-en">Forty years of policy rates</span><span class="lang-zh" style="display:none">四十年的政策利率</span></div><div id="cPolicy" class="ch"></div></div>
+    <p class="fnote"><span class="lang-en">Computed by the author from the BSP daily policy-rate file downsampled to month-end (479 monthly observations, January 1986 to September 2026). The band is the highest and lowest month-end value within each calendar year; 2026 covers January to September. The August and September 2026 values are the 27 August decision as reported by the press, not the BSP file. Two regime breaks apply: the interest-rate corridor was adopted on 3 June 2016 and the target RRP became the primary policy rate on 8 September 2023. Values before 2002 are auction-clearing rates and the within-year dispersion reflects the market mechanism as much as the policy stance.</span><span class="lang-zh" style="display:none">由作者依菲律賓央行日頻政策利率檔案，降頻為月底值計算（479 個月度觀察值，1986 年 1 月到 2026 年 9 月）。帶狀區間是各曆年內月底值的最高與最低，2026 年涵蓋 1 到 9 月。2026 年 8 月與 9 月的數值取自媒體報導的 8 月 27 日決議，不是央行檔案。序列有兩處制度轉換：2016 年 6 月 3 日採行利率走廊，2023 年 9 月 8 日改以目標附賣回利率（RRP）為主要政策利率。2002 年以前的利率由標售形成，年內離散度同時反映市場機制與政策立場。</span></p>
+    <ul class="pt">
+      <li><span class="lang-en">The series peaks at an annual mean of <b>13.78% in 1998</b> and 13.62% in 1989, with single months at 27.5% in September 1989 and 25.0% in 1995. It falls to an annual mean of <b>2.00% in 2021</b>, the lowest reading in the forty-year record, then rises to 6.31% in 2024 as the global tightening cycle passes through.</span><span class="lang-zh" style="display:none">序列高點是 <b>1998 年的年平均 13.78%</b> 和 1989 年的 13.62%，單月最高是 1989 年 9 月的 27.5% 與 1995 年的 25.0%。2021 年降到 <b>年平均 2.00%</b>，為四十年紀錄最低。2024 年隨全球緊縮循環升到 6.31%。</span></li>
+      <li><span class="lang-en">The within-year band collapses after 2002. From 1986 to 2001 the average spread between the highest and lowest month in a year was several percentage points; from 2002 onward it is under one point in most years and exactly zero in 2004, 2006, 2010, 2013, 2015, 2017 and 2021. <b>What changed was the mechanism, not the stance.</b> Long regressions run straight through that break.</span><span class="lang-zh" style="display:none">年內帶寬在 2002 年後收斂。1986 到 2001 年，年內最高與最低月份的差距有數個百分點。2002 年起多數年份低於 1 個百分點，2004、2006、2010、2013、2015、2017 與 2021 年更是零。<b>改變的是利率形成機制，不是政策立場。</b>橫跨這個斷點的長期回歸會直接失效。</span></li>
+      <li class="warn"><span class="lang-en">The current cycle is the operative fact. The rate peaked at <b>6.50% in October 2023</b>, was cut in nine steps to <b>4.25% in February 2026</b>, and has since been raised three times: to 4.50% in April, to 4.75% in June and to <b>5.00% on 27 August 2026</b>. Anyone underwriting Philippine property on an assumption of continued easing is underwriting a cycle that turned eight months ago.</span><span class="lang-zh" style="display:none">當前的循環是可以據以操作的事實。政策利率在 <b>2023 年 10 月見頂 6.50%</b>，分九次降到 <b>2026 年 2 月的 4.25%</b>。之後三度升息：4 月到 4.50%，6 月到 4.75%，2026 年 8 月 27 日到 5.00%。以持續寬鬆為前提買菲律賓房地產的人，依據的是一個八個月前就已轉向的循環。</span></li>
+    </ul>
+  </div>
+
+  <div class="blk">
+    <h2><span class="lang-en">An inflation shock in 2026 turned the real policy rate negative, and September is back at the April level</span><span class="lang-zh" style="display:none">2026 年的通膨衝擊使實質政策利率轉負，9 月又回到 4 月的水準</span></h2>
+    <p class="sub"><span class="lang-en">Headline CPI year-on-year, nominal policy rate and the implied real policy rate · 2014–2026, monthly to September · PSA via BSP, PSA releases via press for July–September, and BSP</span><span class="lang-zh" style="display:none">CPI 年增率、名目政策利率與隱含實質政策利率 · 2014–2026 月頻，到 9 月 · PSA 經央行轉載，7 到 9 月為媒體轉述的 PSA 發布，另加菲律賓央行</span></p>
+    <div class="chartbox"><div class="kick"><span class="lang-en">The real rate, not the nominal one</span><span class="lang-zh" style="display:none">看實質利率，不看名目利率</span></div><div id="cRealRate" class="ch"></div></div>
+    <p class="fnote"><span class="lang-en">The real policy rate is <b>derived</b>: month-end policy rate minus headline CPI year-on-year, computed by the author. Headline CPI is the 2018-based national index (PSA, transcribed by BSP); year-on-year change computed from the index level. July to September 2026 use the year-on-year rates in the PSA releases as relayed by the press (6.2%, 6.1% and 7.2%, one decimal place), because the index levels were not obtained. This is an ex-post real rate on a headline measure and is not the market-implied real rate. A government bond yield curve would be the better risk-free anchor; that series was not obtainable this round, which is noted in the credibility tiers below.</span><span class="lang-zh" style="display:none">實質政策利率是<b>推導值</b>：月底政策利率減 CPI 年增率，由作者計算。CPI 用 2018 基期的全國指數（PSA 編製，央行轉載），年增率由指數水準算出。2026 年 7 到 9 月沒有取得指數水準，改用媒體轉述的 PSA 發布年增率（6.2%、6.1%、7.2%，小數一位）。這是以總指數計算的事後實質利率，不是市場隱含的實質利率。無風險利率較好的錨是公債殖利率曲線，這個序列本輪沒有取得，已列入頁末的可信度分層。</span></p>
+    <p class="narr-p"><span class="lang-en">Philippine headline inflation ran at <b>2.42% in February 2026</b>, then 4.07% in March and <b>7.23% in April</b>. It eased to 6.36% in June, 6.2% in July and 6.1% in August, then rose again to <b>7.2% in September</b>. The move is both level and base: the national index rose from 131.2 to 136.5 between February and April 2026, while the comparison months of April to June 2025 were themselves falling. The government attributes the September rise mainly to food supply disruptions from bad weather and higher global oil prices (press report). Against a policy rate of 4.25% to 5.00% through that window, the derived real policy rate moved from <b>+4.30% in July 2025 to −2.73% in April 2026</b>, a swing of seven points in nine months, and stood at −2.20% in September. The BSP expects average headline inflation above its 4% tolerance ceiling in both 2026 and 2027. We regard this as the single most consequential macro fact for Philippine property in 2026, and it cuts both ways: a negative real rate is favourable to a hard asset held without leverage, and it is also the reason the central bank stopped cutting and has since raised rates three times.</span><span class="lang-zh" style="display:none">菲律賓的 CPI 年增率 <b>2026 年 2 月為 2.42%</b>，3 月 4.07%，<b>4 月 7.23%</b>。之後降到 6 月 6.36%、7 月 6.2%、8 月 6.1%，9 月再升到 7.2%。這個變動同時來自水準與基期：全國指數在 2026 年 2 月到 4 月之間，從 131.2 升到 136.5，而作為比較基期的 2025 年 4 到 6 月，本身是下降的。政府把 9 月的上升，主要歸因於天候不佳造成的糧食供給中斷，以及國際油價上漲（媒體報導）。這段期間政策利率在 4.25% 到 5.00% 之間，推導的實質政策利率從 2025 年 7 月的 +4.30% 降到 2026 年 4 月的 −2.73%，九個月變動七個百分點。到 9 月是 −2.20%。央行預期 2026 與 2027 年的平均通膨，都高於它 4% 的容忍上限。我們認為這是 2026 年菲律賓房地產最重要的單一總體事實，而且作用有兩面：負實質利率對無槓桿持有的實體資產有利，也是央行停止降息、之後三度升息的原因。</span></p>
+    <div class="concept">
+      <h4><span class="lang-en">The 2022 precedent sets the expected duration</span><span class="lang-zh" style="display:none">2022 年的前例決定了持續多久</span></h4>
+      <p><span class="lang-en">This is not the first negative real rate in the series. Inflation peaked at <b>8.68% in January 2023</b> and the real policy rate bottomed at <b>−3.59% in June 2022</b>. The response was 450 basis points of tightening between May 2022 and October 2023, and the real rate did not return to positive territory until 2023. <b>The relevant question for a buyer is therefore not whether the negative real rate helps, but how long the central bank permits it to persist</b>, and the observable answer from the previous episode is roughly eighteen months. The 2026 cycle has so far raised the rate by 75 basis points.</span><span class="lang-zh" style="display:none">這不是序列中第一次出現負實質利率。通膨在 <b>2023 年 1 月見頂 8.68%</b>，實質政策利率在 <b>2022 年 6 月觸底 −3.59%</b>。當時央行的回應，是 2022 年 5 月到 2023 年 10 月累計緊縮 450 個基點，實質利率到 2023 年才轉正。對買方來說，關鍵不在負實質利率有沒有幫助，而在央行容許它持續多久。依前一輪的實際經驗，約十八個月。2026 年這一輪到目前為止升息 75 個基點。</span></p>
+    </div>
+  </div>
+
+  <div class="blk">
+    <h2><span class="lang-en">Nominal prices tripled, real purchasing power rose 70%, and in dollars less than that</span><span class="lang-zh" style="display:none">名目房價漲了兩倍，實質購買力漲七成，以美元計更少</span></h2>
+    <p class="sub"><span class="lang-en">BIS residential property price index for Makati, nominal and real, plus a US-dollar restatement · 2008Q1–2026Q1 · BIS via FRED (QPHN628BIS, QPHR628BIS), 2010 = 100</span><span class="lang-zh" style="display:none">BIS 馬卡蒂住宅價格指數，名目與實質，另附美元計價重述 · 2008Q1–2026Q1 · BIS 經 FRED 取得（QPHN628BIS、QPHR628BIS），2010 = 100</span></p>
+    <div class="chartbox"><div class="kick"><span class="lang-en">Three lenses on the same asset</span><span class="lang-zh" style="display:none">同一資產的三種計價</span></div><div id="cHpi" class="ch"></div></div>
+    <p class="fnote"><span class="lang-en">The nominal and real indices are BIS series retrieved from FRED and are not transformed. The BIS reference-city series for the Philippines is titled Makati. The US-dollar line is <b>derived</b> by the author: nominal index divided by the month-end PHP/USD rate for the first month of each quarter, rebased to 2013Q1 = 100 because the exchange-rate series held here begins in January 2013. It is shown on the same axis as the indices and is not an official series.</span><span class="lang-zh" style="display:none">名目與實質指數是從 FRED 取得的 BIS 序列，未經任何轉換。BIS 對菲律賓採用的參考城市序列，名稱是馬卡蒂。美元計價線是作者的<b>推導值</b>：名目指數除以各季第一個月的月底披索兌美元匯率，並重設為 2013Q1 = 100，因為本檔的匯率序列從 2013 年 1 月開始。它和指數共用縱軸，不是官方序列。</span></p>
+    <ul class="pt">
+      <li><span class="lang-en">Over the full eighteen years the nominal index rose from <b>95.8 to 306.0</b>, a gain of 219.4% and a compound rate of 6.66% a year. The real index, deflated by consumer prices, rose from <b>107.8 to 183.4</b>, a gain of 70.0% and a compound rate of 2.99%. <b>More than half of the headline appreciation is the price level, not the asset.</b></span><span class="lang-zh" style="display:none">十八年間，名目指數從 <b>95.8 升到 306.0</b>，累計上漲 219.4%，年複合 6.66%。經消費者物價平減的實質指數，從 <b>107.8 升到 183.4</b>，累計上漲 70.0%，年複合 2.99%。表面漲幅超過一半來自物價水準，不是資產本身。</span></li>
+      <li class="warn"><span class="lang-en">The real index went sideways for three full years. It reached <b>150.6 in 2016Q2</b> and stood at <b>150.9 in 2019Q2</b>, a change of 0.2%, while the nominal index rose 11.1% over the same twelve quarters. The trough within that stretch was 143.1 in 2018Q3. A holder reading only the nominal line during those three years would have recorded a gain that did not exist in purchasing power.</span><span class="lang-zh" style="display:none">實質指數曾整整橫盤三年：<b>2016Q2 為 150.6</b>，<b>2019Q2 為 150.9</b>，只變動 0.2%。同一段十二季，名目指數上漲 11.1%。期間低點是 2018Q3 的 143.1。這三年只看名目曲線的持有人，記下的漲幅在購買力上並不存在。</span></li>
+      <li><span class="lang-en">In dollars the record is weaker again. Rebased to 2013Q1, the derived dollar index reaches <b>174.0 by 2026Q1</b>, a gain of 74.0% and a compound rate of 4.35%, against 152.1% and 7.37% for the same period measured in nominal pesos. <b>The currency took roughly three percentage points a year off a foreign holder's return</b>, and it did so without any change in the underlying asset.</span><span class="lang-zh" style="display:none">以美元計，紀錄更弱。以 2013Q1 為基期，推導的美元指數到 <b>2026Q1 為 174.0</b>，累計上漲 74.0%，年複合 4.35%。同期以名目披索計是 152.1% 與 7.37%。<b>匯率每年約侵蝕外國持有人三個百分點的報酬</b>，而且與標的資產本身的變動無關。</span></li>
+    </ul>
+  </div>
+
+  <div class="blk">
+    <h2><span class="lang-en">The policy rate travelled 450 basis points; the mortgage rate travelled 156</span><span class="lang-zh" style="display:none">政策利率走了 450 個基點，房貸利率只走了 156 個</span></h2>
+    <p class="sub"><span class="lang-en">Effective rates on new housing loans, high and low, against the policy rate · January 2020 – October 2025, monthly · BSP monthly lending rates by type</span><span class="lang-zh" style="display:none">新承作住宅貸款的有效利率高低區間，對照政策利率 · 2020 年 1 月–2025 年 10 月 月頻 · 菲律賓央行分類別月頻放款利率</span></p>
+    <div class="chartbox"><div class="kick"><span class="lang-en">Transmission, measured</span><span class="lang-zh" style="display:none">傳導效果的量化</span></div><div id="cMortgage" class="ch"></div></div>
+    <ul class="pt">
+      <li><span class="lang-en">Across the seventy months held here the policy rate ranged from <b>2.00% to 6.50%</b>, a span of 450 basis points. The effective low rate on new housing loans ranged from <b>6.16% to 7.72%</b>, a span of 156 basis points; the effective high rate ranged from 8.27% to 10.21%, a span of 194. <b>The banking spread absorbed roughly two-thirds of every policy move.</b></span><span class="lang-zh" style="display:none">在本檔涵蓋的七十個月內，政策利率的區間是 <b>2.00% 到 6.50%</b>，跨度 450 個基點。新承作住宅貸款的有效低利率，區間是 <b>6.16% 到 7.72%</b>，跨度 156 個基點。有效高利率的區間是 8.27% 到 10.21%，跨度 194 個基點。約三分之二的政策利率變動被銀行利差吸收。</span></li>
+      <li class="warn"><span class="lang-en">The implication is that a household applying for a mortgage in the Philippines faces a borrowing cost that is close to constant regardless of the policy stance. In January 2021, with the policy rate at 2.00%, the effective low rate was 6.69%; in October 2025, with the policy rate at 4.75%, it was 7.17%. <b>A 275-basis-point difference in policy produced 48 basis points at the borrower.</b></span><span class="lang-zh" style="display:none">這代表在菲律賓申請房貸的家庭，面對的借款成本幾乎不隨政策立場變動。2021 年 1 月政策利率 2.00%，有效低利率是 6.69%。2025 年 10 月政策利率 4.75%，有效低利率是 7.17%。<b>政策利率差 275 個基點，借款人這端只差 48 個基點。</b></span></li>
+      <li><span class="lang-en">The BSP series also carries a second category, <b>contracts to sell</b>, which is the rate at which banks discount developer instalment receivables. Rates for that channel are published; the amounts are not. Developer-financed instalment sales are therefore a demand channel of unknown size in this market, and no figure on this page attempts to quantify it.</span><span class="lang-zh" style="display:none">央行的這組資料另有第二個類別：<b>Contracts to Sell</b>，也就是銀行貼現開發商分期應收帳款的利率。這個管道的利率有公布，金額沒有。開發商自己提供分期融資，因此是本市場中規模不明的需求管道。本頁沒有用任何數字去估計它。</span></li>
+    </ul>
+  </div>
+
+  <div class="blk">
+    <h2><span class="lang-en">Approved mortgages in the capital halved while the rest of the country grew</span><span class="lang-zh" style="display:none">首都的房貸核准件數腰斬，其餘地區同期成長</span></h2>
+    <p class="sub"><span class="lang-en">Approved residential loan applications, count, NCR against all areas outside NCR · 2019Q1–2026Q2 · BSP RPPI publication, Table 2</span><span class="lang-zh" style="display:none">房貸核准申請件數，首都區（NCR）對照首都區以外全區 · 2019Q1–2026Q2 · 菲律賓央行 RPPI 出版品附表 2</span></p>
+    <div class="chartbox"><div class="kick"><span class="lang-en">Where the credit went</span><span class="lang-zh" style="display:none">授信流向何處</span></div><div id="cLoans" class="ch"></div></div>
+    <p class="fnote"><span class="lang-en">Counts of approved applications, not amounts. This is the only credit-side series available with an NCR breakdown, and it measures transaction activity rather than credit stock or leverage. Annual totals cited in the text are the sum of the four quarters and are computed by the author.</span><span class="lang-zh" style="display:none">這裡是核准申請的件數，不是金額。這是本輪唯一有首都區分項的信貸相關序列，衡量的是交易活躍度，不是信貸存量或槓桿。內文引用的年度合計，是四個季度加總，由作者計算。</span></p>
+    <ul class="pt">
+      <li class="warn"><span class="lang-en">NCR approvals fell from <b>21,925 in 2019 to 11,041 in 2025</b>, a decline of 49.6%. Outside NCR they rose from <b>25,856 to 29,953</b>, a gain of 15.8%. Nationally the count fell 14.2%, from 47,781 to 40,994. The national figure conceals two opposite markets.</span><span class="lang-zh" style="display:none">首都區的核准件數，從 <b>2019 年的 21,925 件降到 2025 年的 11,041 件</b>，減少 49.6%。首都區以外從 <b>25,856 件增加到 29,953 件</b>，增加 15.8%。全國合計減少 14.2%，從 47,781 件降到 40,994 件。全國數字掩蓋了兩個方向相反的市場。</span></li>
+      <li><span class="lang-en">The composition explains why this matters for foreign capital. Condominium units were <b>87.2% of NCR approvals in 2019 and 87.3% in 2025</b>. NCR is the condominium market, condominium is the only title a foreign buyer may hold, and it is the NCR series that halved. <b>The credit channel contracted precisely where the foreign-accessible product sits.</b></span><span class="lang-zh" style="display:none">結構組成說明這件事對外國資金的意義。公寓單位占首都區核准件數的比重，<b>2019 年是 87.2%，2025 年是 87.3%</b>。首都區就是公寓市場，公寓是外國買方唯一能持有的產權形式，腰斬的又正是首都區的序列。<b>授信萎縮，正好發生在外國人可以買的那一類產品上。</b></span></li>
+      <li><span class="lang-en">The most recent observation, <b>2,967 approvals in 2026Q2</b>, is 11% above the 2025Q2 figure of 2,672. It sits inside the 2,435 to 3,069 band of the previous five quarters and remains under half the 2019Q4 peak of 6,494. One quarter is not a recovery: no sustained rise is visible in the series as at the second quarter of 2026.</span><span class="lang-zh" style="display:none">最新一期 <b>2026Q2 為 2,967 件</b>，比 2025Q2 的 2,672 件多 11%。它落在前五季 2,435 到 3,069 件的區間內，仍不到 2019Q4 高點 6,494 件的一半。單一季度不能算復甦。到 2026 年第二季，序列中看不到持續上升。</span></li>
+    </ul>
+  </div>
+
+  <!-- PART 2 -->
+  <div class="sec-rule"><h2><span class="lang-en">Part 2 · The Structural Economy</span><span class="lang-zh" style="display:none">經濟結構篇 · 為什麼這影響房價</span></h2></div>
+
+  <p class="pull"><span class="lang-en">Thailand's income line flattened and its population turned. The Philippine income line rose faster in each decade to 2025 and its population is still growing, although quarterly GDP growth slowed to 2.8% in the first quarter of 2026 and 2.3% in the second. The constraint here is the plumbing between the two.</span><span class="lang-zh" style="display:none">泰國的所得曲線趨平，人口轉為減少。菲律賓的所得曲線到 2025 年逐個十年加快，人口仍在成長，但 2026 年的季度 GDP 成長放慢，第一季 2.8%，第二季 2.3%。這裡的限制，在所得與購屋之間的資金管道。</span></p>
+
+  <div class="blk">
+    <h2><span class="lang-en">Per-capita income took twenty-two years to regain its 1982 level, then accelerated each decade</span><span class="lang-zh" style="display:none">人均所得花了二十二年才收復 1982 年的水準，之後逐個十年加快</span></h2>
+    <p class="sub"><span class="lang-en">Real GDP per capita in constant 2010 US dollars · 1960–2025 · World Bank via FRED (NYGDPPCAPKDPHL)</span><span class="lang-zh" style="display:none">實質人均 GDP，2010 年不變價美元 · 1960–2025 · 世界銀行經 FRED 取得（NYGDPPCAPKDPHL）</span></p>
+    <div class="chartbox"><div class="kick"><span class="lang-en">The lost two decades</span><span class="lang-zh" style="display:none">失落的二十年</span></div><div id="cGdpPc" class="ch"></div></div>
+    <div class="chartbox"><div class="kick"><span class="lang-en">Compound annual growth by period</span><span class="lang-zh" style="display:none">分期年均複合成長率</span></div><div id="cDecade" class="ch"></div></div>
+    <p class="fnote"><span class="lang-en">Period growth rates are <b>derived</b>: compound annual growth of real GDP per capita computed by the author from the World Bank series. The 1982–1993 and 2020–2025 bars are event periods rather than decades.</span><span class="lang-zh" style="display:none">各期成長率是<b>推導值</b>：由作者依世界銀行序列，計算實質人均 GDP 的年均複合成長率。1982–1993 與 2020–2025 兩根是事件期間，不是十年期。</span></p>
+    <ul class="pt">
+      <li class="warn"><span class="lang-en">Real GDP per capita peaked at <b>US$1,898 in 1982</b>, fell to US$1,538 by 1985, and did not regain the 1982 level until <b>2004</b>. That is twenty-two years without a rise in average living standards, and it maps directly onto the external debt crisis analysed below. Compound growth over 1982 to 1993 was <b>−1.43% a year</b>.</span><span class="lang-zh" style="display:none">實質人均 GDP 在 <b>1982 年見頂 1,898 美元</b>，1985 年降到 1,538 美元，直到 <b>2004 年</b>才回到 1982 年的水準。這是二十二年平均生活水準沒有提升，與下面分析的外債危機直接對應。1982 到 1993 年的年均複合成長率是 −1.43%。</span></li>
+      <li class="good"><span class="lang-en">Since then each period has been faster than the last: <b>2.84% in the 2000s, 3.03% in the 2010s and 4.91% from 2020 to 2025</b>. Real GDP per capita reached US$4,066 in 2025. This is the opposite shape to the Thai record, where the fastest decade preceded 1997 and nothing since has matched it. Growth then slowed in 2026: GDP rose 2.8% in the first quarter and 2.3% in the second, with investment down 9.2% on a sharp fall in public construction (PSA figures relayed by Philstar).</span><span class="lang-zh" style="display:none">之後各期一期比一期快：<b>2000 年代 2.84%、2010 年代 3.03%、2020 到 2025 年 4.91%</b>。2025 年實質人均 GDP 為 4,066 美元。這和泰國的紀錄相反：泰國最快的十年在 1997 年之前，之後再沒有重現。2026 年成長放慢：GDP 第一季成長 2.8%，第二季 2.3%，投資年減 9.2%，主因是公共營建大幅下降（PSA 數字，Philstar 轉述）。</span></li>
+      <li><span class="lang-en">Income growth of this shape does create buyers, but the page cannot say at what price level. <b>The Philippines has one round of household income data in this dataset and no historical series</b>: the 2023 Family Income and Expenditure Survey. Average annual family income was <b>PHP 353,000 nationally, PHP 514,000 in NCR and PHP 800,000 in Makati</b>, the highest of any geography in the survey. A single cross-section cannot establish a trend, so real GDP per capita is used here as the income proxy throughout.</span><span class="lang-zh" style="display:none">這種形狀的所得成長確實會創造買方，但本頁說不出對應的價格水準。<b>本資料集只有一輪家庭所得調查，沒有歷史序列</b>，也就是 2023 年的家庭所得與支出調查（FIES）。平均家庭年所得是<b>全國 35.3 萬披索、首都區 51.4 萬披索、馬卡蒂 80.0 萬披索</b>，馬卡蒂是調查中所有地理單位的最高值。單一截面建立不了趨勢，所以本頁全篇用實質人均 GDP 代表所得。</span></li>
+    </ul>
+    <div class="mrow">
+      <div class="m"><div class="mn">₱353k</div><div class="ml"><span class="lang-en">Average family income, Philippines, FIES 2023</span><span class="lang-zh" style="display:none">全國平均家庭年所得，FIES 2023</span></div></div>
+      <div class="m"><div class="mn gold">₱514k</div><div class="ml"><span class="lang-en">Average family income, NCR, FIES 2023</span><span class="lang-zh" style="display:none">首都區平均家庭年所得，FIES 2023</span></div></div>
+      <div class="m"><div class="mn pos">₱800k</div><div class="ml"><span class="lang-en">Average family income, Makati — highest in the survey</span><span class="lang-zh" style="display:none">馬卡蒂平均家庭年所得，調查中最高</span></div></div>
+      <div class="m"><div class="mn">25.0%</div><div class="ml"><span class="lang-en">NCR income less expenditure, derived from FIES 2023</span><span class="lang-zh" style="display:none">首都區所得減支出占比，依 FIES 2023 推導</span></div></div>
+    </div>
+  </div>
+
+  <div class="blk">
+    <h2><span class="lang-en">The nation is still growing; the capital is growing at six-tenths the national rate</span><span class="lang-zh" style="display:none">全國仍在成長，首都的成長率只有全國的六成</span></h2>
+    <p class="sub"><span class="lang-en">Total population, 1950–2023 annual estimates, with NCR at the census years · World Bank and UN via FRED (POPTTLPHA148NRUG); PSA censuses of 2000, 2010, 2015 and 2020</span><span class="lang-zh" style="display:none">總人口，1950–2023 年頻推估，另附普查年份的首都區 · 世界銀行與聯合國經 FRED 取得（POPTTLPHA148NRUG）；PSA 2000、2010、2015、2020 年普查</span></p>
+    <div class="chartbox"><div class="kick"><span class="lang-en">National line, capital points</span><span class="lang-zh" style="display:none">全國曲線與首都普查點</span></div><div id="cPop" class="ch"></div></div>
+    <p class="fnote"><span class="lang-en">The NCR series is plotted only at the four census years and is read on the right axis. Censuses are conducted at five-year intervals and this page does not interpolate the intervening years. Growth rates in the text are compound annual rates between census years, computed by the author.</span><span class="lang-zh" style="display:none">首都區序列只標在四個普查年份，讀取右軸。普查每五年一次，本頁不內插中間的年份。內文的成長率，是普查年份之間的年均複合成長率，由作者計算。</span></p>
+    <ul class="pt">
+      <li class="good"><span class="lang-en">National population rose from <b>20.6 million in 1950 to 114.9 million in 2023</b>. Between the 2015 and 2020 censuses it compounded at <b>1.55% a year</b>. No cohort ahead of the first-time-buyer age band is shrinking, which is the single largest structural difference between this market and Thailand.</span><span class="lang-zh" style="display:none">全國人口從 <b>1950 年的 2,059 萬增加到 2023 年的 1 億 1,489 萬</b>。2015 到 2020 年兩次普查之間，年均複合成長率是 <b>1.55%</b>。首購年齡層之前的各世代都沒有縮減，這是本市場與泰國之間最大的結構性差異。</span></li>
+      <li class="warn"><span class="lang-en">NCR grew at <b>1.79% a year over 2000–2010, 1.67% over 2010–2015 and 0.93% over 2015–2020</b>. Its share of the national population fell from <b>12.98% in 2000 to 12.37% in 2020</b>. The capital is not where the demographic growth is going, and the mortgage-approval series in Part 1 shows the same geography from the credit side.</span><span class="lang-zh" style="display:none">首都區的年均複合成長率，<b>2000 到 2010 年是 1.79%，2010 到 2015 年是 1.67%，2015 到 2020 年是 0.93%</b>。它占全國人口的比重，從 <b>2000 年的 12.98% 降到 2020 年的 12.37%</b>。人口成長沒有流向首都，第一部的房貸核准序列，從信貸端呈現同樣的地理分布。</span></li>
+      <li><span class="lang-en">Household size gives the demand unit. At the 2020 census the average household was <b>4.12 persons nationally, 3.83 in NCR and 3.35 in Makati</b>. Smaller households in the capital mean NCR forms more households per head of population than the country does, which partially offsets the slower headcount growth and is the demographic argument for the small-unit product.</span><span class="lang-zh" style="display:none">家戶規模決定需求單位。依 2020 年普查，平均每戶人數是<b>全國 4.12 人、首都區 3.83 人、馬卡蒂 3.35 人</b>。首都的家戶較小，代表首都區每單位人口形成的家戶數，高於全國。這部分抵銷了較慢的人口成長，也是小坪數產品的人口論據。</span></li>
+    </ul>
+  </div>
+
+  <div class="blk">
+    <h2><span class="lang-en">Remittances grew 56% in dollars and 111% in pesos over the same thirteen years</span><span class="lang-zh" style="display:none">同一個十三年，匯款以美元計成長 56%，以披索計成長 111%</span></h2>
+    <p class="sub"><span class="lang-en">Personal remittances of overseas Filipinos, annual · 2005–2025 · Bangko Sentral ng Pilipinas; peso restatement from 2013 only</span><span class="lang-zh" style="display:none">海外菲律賓人個人匯款，年度 · 2005–2025 · 菲律賓央行；披索計價僅自 2013 年起</span></p>
+    <div class="chartbox"><div class="kick"><span class="lang-en">The channel that does not need a loan officer</span><span class="lang-zh" style="display:none">不需要放款人員的管道</span></div><div id="cRemit" class="ch"></div></div>
+    <p class="fnote"><span class="lang-en">Annual totals are the sum of the twelve monthly observations, computed by the author from the BSP series. The peso line is <b>derived</b>: each month's dollar figure multiplied by that month's average PHP/USD rate, then summed; it begins in 2013 because the exchange-rate series held here begins in January 2013. BSP's own definition of personal remittances explicitly includes capital transfers for the construction of dwellings, which is the documentary basis for treating this series as a housing-demand variable.</span><span class="lang-zh" style="display:none">年度合計是十二個月度觀察值的加總，由作者依央行序列計算。披索線是<b>推導值</b>：各月美元金額乘以該月平均披索兌美元匯率，再加總。它從 2013 年開始，因為本檔的匯率序列從 2013 年 1 月起。央行對個人匯款的官方定義，明文把「用於興建住宅的資本移轉」列為構成項之一。這是把本序列當作住宅需求變數的文件依據。</span></p>
+    <ul class="pt">
+      <li class="good"><span class="lang-en">Personal remittances rose in 19 of the 20 annual changes in the twenty-one years held here, from <b>US$13.1 billion in 2005 to US$39.6 billion in 2025</b>. The one decline, in the pandemic year 2020, was <b>0.82%</b>, not a collapse. Through the first seven months of 2026 the flow was US$22.73 billion, 2.3% above the same months of 2025.</span><span class="lang-zh" style="display:none">本檔涵蓋的 21 年、20 次年度變動中，個人匯款有 19 次成長，從 <b>2005 年的 131 億美元增加到 2025 年的 396 億美元</b>。唯一一次下降在疫情年 2020 年，<b>減少 0.82%</b>，並非驟降。2026 年前七個月的流入是 227.3 億美元，比 2025 年同期高 2.3%。</span></li>
+      <li><span class="lang-en">Measured in pesos the growth is roughly double. From 2013 to 2025 the flow rose <b>56.2% in dollars and 111% in pesos</b>, from PHP 1.08 trillion to PHP 2.28 trillion, because the peso depreciated across the period. <b>Peso weakness is a transfer from the foreign asset holder to the remittance-funded domestic buyer</b>, and both effects appear in the same exchange-rate series.</span><span class="lang-zh" style="display:none">以披索計，成長幅度約為兩倍。2013 到 2025 年，這筆流入<b>以美元計成長 56.2%，以披索計成長 111%</b>，從 1.08 兆披索增加到 2.28 兆披索，原因是期間內披索貶值。<b>披索走弱，等於把價值從外國資產持有人移轉給靠匯款買房的本地買方</b>，兩種效果來自同一條匯率序列。</span></li>
+      <li class="warn"><span class="lang-en">The share of the economy is falling even as the level rises. Against the GDP figures in the BSP external-debt table, personal remittances were <b>12.19% of GDP in 2005, 9.24% in 2015 and 8.13% in 2025</b>. The absolute flow is a support; the relative weight is not increasing, so this channel does not scale with the market. Colliers, citing a BSP survey, reports that remittance-receiving households cut the share of income they allocate to real estate from 17% to 14% in the first quarter of 2026 (second-hand).</span><span class="lang-zh" style="display:none">水準值上升的同時，它占經濟的比重在下降。以央行外債表的 GDP 為分母，個人匯款占 GDP 的比重，<b>2005 年 12.19%、2015 年 9.24%、2025 年 8.13%</b>。絕對流入是一項支撐，相對權重沒有擴大，所以這個管道不會隨市場規模同步放大。Colliers 引用央行調查指出，領匯款家庭配置在房地產的所得比重，2026 年第一季從 17% 降到 14%（二手轉述）。</span></li>
+    </ul>
+  </div>
+
+  <div class="blk">
+    <h2><span class="lang-en">External debt fell from 85.9% of GDP to 22.3%, and has been rising since 2019</span><span class="lang-zh" style="display:none">外債占 GDP 從 85.9% 降到 22.3%，2019 年起回升</span></h2>
+    <p class="sub"><span class="lang-en">External debt as a share of GDP, and gross international reserves as a share of total external debt · 1985–2025 · BSP selected external debt ratios</span><span class="lang-zh" style="display:none">外債占 GDP 的比率，與國際準備占外債總額的覆蓋率 · 1985–2025 · 菲律賓央行外債比率選輯</span></p>
+    <div class="chartbox"><div class="kick"><span class="lang-en">Forty years of external balance sheet</span><span class="lang-zh" style="display:none">四十年的對外資產負債表</span></div><div id="cExtDebt" class="ch"></div></div>
+    <p class="fnote"><span class="lang-en">The debt-to-GDP ratio is published by BSP. The reserve-coverage line is <b>derived</b>: gross international reserves divided by total external debt, computed by the author from the same table. The 2025 figure is preliminary in the source.</span><span class="lang-zh" style="display:none">外債占 GDP 比率是央行的發布值。準備覆蓋率是<b>推導值</b>：國際準備除以外債總額，由作者依同一張表計算。2025 年在來源中標示為初步值。</span></p>
+    <p class="narr-p"><span class="lang-en">The ratio peaked at <b>85.9% of GDP in 1986</b>, in the year the country was in default negotiation, and reached its low at <b>22.3% in 2017</b>. Reserve coverage over the same span went from <b>4.1% of total external debt in 1985 to 105.0% in 2019</b>, meaning the central bank held more reserves than the country owed abroad. That is the single most consequential structural improvement in the Philippine macro record, and it is the reason the currency episodes of the past decade have been depreciations rather than crises. Since 2019 the direction has reversed: external debt reached <b>30.3% of GDP in 2025</b> and reserve coverage fell to <b>75.1%</b>. Neither figure is at a stress level and the debt-service burden is 2.70% of GDP. But the trend that ran for thirty-three years stopped running in 2019, and a foreign buyer holding a peso asset is exposed to that reversal through the exchange rate before it appears anywhere else. At end-September 2026 gross international reserves were US$99.996 billion, the lowest since September 2023 and 4.6% below August, still covering 6.3 months of imports (BSP figures relayed by the Manila Times).</span><span class="lang-zh" style="display:none">這個比率在 <b>1986 年見頂 85.9%</b>，當年該國正在協商債務重整。它在 <b>2017 年降到低點 22.3%</b>。同期準備覆蓋率從 1985 年占外債總額的 4.1%，升到 2019 年的 105.0%，也就是央行持有的準備高於全國的對外負債。這是菲律賓總體紀錄中最重要的單一結構性改善，也是過去十年的匯率事件只表現為貶值、沒有演變成危機的原因。2019 年起方向反轉：外債在 2025 年升到 GDP 的 30.3%，準備覆蓋率降到 75.1%。兩項數字都沒到壓力水準，償債負擔也只占 GDP 的 2.70%。但延續 33 年的趨勢在 2019 年停下來。持有披索資產的外國買方，會先經由匯率感受到這個反轉，其他管道要晚一些。2026 年 9 月底，國際準備是 999.96 億美元，為 2023 年 9 月以來最低，比 8 月少 4.6%，仍可支應 6.3 個月的進口（央行數字，Manila Times 轉述）。</span></p>
+  </div>
+
+  <div class="blk">
+    <h2><span class="lang-en">There is no comparable household-leverage series for the Philippines, and the substitute has crashed twice</span><span class="lang-zh" style="display:none">菲律賓沒有可比的家庭槓桿序列，替代序列曾兩度崩跌</span></h2>
+    <p class="sub"><span class="lang-en">Private credit by deposit money banks and other financial institutions as a share of GDP · 1960–2021 · IMF Global Financial Development Database via FRED (DDDI12PHA156NWDB)</span><span class="lang-zh" style="display:none">存款貨幣銀行與其他金融機構的民間信用占 GDP 比率 · 1960–2021 · IMF 全球金融發展資料庫，經 FRED 取得（DDDI12PHA156NWDB）</span></p>
+    <div class="chartbox"><div class="kick"><span class="lang-en">Credit penetration, two full cycles</span><span class="lang-zh" style="display:none">信用滲透率的兩輪完整循環</span></div><div id="cPrivCredit" class="ch"></div></div>
+    <div class="concept">
+      <h4><span class="lang-en">What is missing, and why it cannot be filled</span><span class="lang-zh" style="display:none">缺少什麼，以及為什麼補不上</span></h4>
+      <p class="r"><span class="lang-en">Every other market on this site is analysed with the BIS credit-to-households series, which is the standard cross-country measure of household leverage. <b>The Philippines is not in that database.</b> The two candidate identifiers, QPHHAM770A and QPHPAM770A, both return no series; this was confirmed against the FRED search interface and is a coverage gap at BIS, not a retrieval failure. There is therefore <b>no internationally comparable household-leverage figure on this page</b>, and no equivalent of the 84.8% Malaysia or 87.5% Thailand readings. The debt discussion here is built from two substitutes: the IMF private-credit ratio above, which includes corporate borrowing and is therefore not a household measure, and the BSP real-estate exposure of the banking system in the next section, which is a lender-side rather than a borrower-side view. <b>Any statement about Philippine household leverage on any website, including this one, is an estimate.</b></span><span class="lang-zh" style="display:none">本站其他市場，都用 BIS 的家庭信用占 GDP 序列分析，這是比較各國家庭槓桿的標準口徑。<b>菲律賓不在那個資料庫裡。</b>兩個候選代碼 QPHHAM770A 與 QPHPAM770A 都查無序列。這點已對照 FRED 搜尋介面確認，是 BIS 的涵蓋缺口，不是取數失敗。所以<b>本頁沒有具國際可比性的家庭槓桿數字</b>，也沒有對應馬來西亞 84.8%、泰國 87.5% 的讀數。本頁的債務論述用兩項替代序列：上方的 IMF 民間信用比率，含企業借款，因此不是家庭口徑。以及下一節的銀行體系不動產曝險，是貸放端的視角，不是借款端的視角。任何網站對菲律賓家庭槓桿的說法，包括本站，都是估計值。</span></p>
+    </div>
+    <ul class="pt">
+      <li><span class="lang-en">The substitute series records two complete boom-and-bust cycles. Private credit reached <b>45.4% of GDP in 1983</b> and fell to <b>19.5% by 1990</b>. It recovered to <b>54.4% in 1997</b> and fell to <b>28.3% by 2010</b>. On both occasions the ratio lost more than half its level and took roughly two decades to recover.</span><span class="lang-zh" style="display:none">替代序列記錄了兩輪完整的擴張與收縮。民間信用在 <b>1983 年達 GDP 的 45.4%</b>，<b>1990 年降到 19.5%</b>。之後回升到 1997 年的 54.4%，2010 年降到 28.3%。兩次都損失一半以上的水準，各花約二十年才恢復。</span></li>
+      <li class="warn"><span class="lang-en">The series ends at <b>70.7% in 2021</b>, with the peak of 71.8% in 2020 — the highest reading in the sixty-two-year record and roughly 30% above the 1997 level that preceded the last contraction. <b>Philippine banking has only just, and only recently, exceeded the credit penetration it reached before each of its two previous credit contractions.</b> The series is not updated past 2021 in this dataset.</span><span class="lang-zh" style="display:none">序列止於 <b>2021 年的 70.7%</b>，高點是 2020 年的 71.8%，為六十二年紀錄中的最高，比上一輪收縮前的 1997 年水準高約 30%。<b>菲律賓的銀行體系，直到最近才首次超過前兩輪信用收縮之前達到的滲透率。</b>本資料集的這條序列沒有更新到 2021 年之後。</span></li>
+    </ul>
+  </div>
+
+  <div class="blk">
+    <h2><span class="lang-en">Residential loan delinquency doubled in 2020 and has not returned to baseline six years later</span><span class="lang-zh" style="display:none">住宅放款逾期率在 2020 年倍增，六年後仍沒有回到基線</span></h2>
+    <p class="sub"><span class="lang-en">Philippine banking system real-estate exposure: residential loan balances and past-due ratios, residential against commercial · 2013Q1–2026Q1 · Bangko Sentral ng Pilipinas</span><span class="lang-zh" style="display:none">菲律賓銀行體系的不動產曝險：住宅放款餘額與逾期率，住宅對照商用 · 2013Q1–2026Q1 · 菲律賓央行</span></p>
+    <div class="chartbox"><div class="kick"><span class="lang-en">Where the damage sits</span><span class="lang-zh" style="display:none">劣化落在哪裡</span></div><div id="cRee" class="ch"></div></div>
+    <p class="fnote"><span class="lang-en">Bank Proper and Trust Department, Philippine banking system, national level. There is no NCR breakdown in this series. Past-due ratios are published by BSP and are not derived here.</span><span class="lang-zh" style="display:none">涵蓋銀行本體與信託部門，為菲律賓銀行體系的全國層級。本序列沒有首都區分項。逾期率是央行發布值，不是本頁推導。</span></p>
+    <ul class="pt">
+      <li class="warn"><span class="lang-en">The residential past-due ratio ran between <b>3.3% and 3.6% from 2013 through 2017</b>, stepped up to 5.74% by end-2019, then reached <b>12.20% at end-2020</b>. It has fallen every year since and stood at <b>8.83% in 2026Q1</b>, which is still roughly two and a half times the pre-2018 baseline. Gross non-performing loans on residential exposure were 6.13% of the residential book in the same quarter.</span><span class="lang-zh" style="display:none">住宅逾期率在 <b>2013 到 2017 年介於 3.3% 到 3.6%</b>，2019 年底升到 5.74%，<b>2020 年底達 12.20%</b>。之後逐年下降，2026Q1 為 8.83%，仍約為 2018 年以前基線的兩倍半。同一季，住宅類的不良貸款總額占住宅放款餘額 6.13%。</span></li>
+      <li><span class="lang-en">The commercial book behaved differently. Commercial past-due ran <b>2.81% in 2013Q4, fell to 1.10% by 2019, peaked at 2.95% in 2021Q3, eased to 2.19% by 2025Q4 and was 2.81% in 2026Q1</b>. Since 2021Q1 it has stayed between 2.19% and 2.95%, close to a third of the residential ratio. <b>The residential book is the one that did not come down.</b> A shock that hit both sides of a banking system and left one side about three times worse than the other is not a macro shock; it is a segment problem.</span><span class="lang-zh" style="display:none">商用類的表現不同。商用逾期率 <b>2013Q4 為 2.81%，2019 年降到 1.10%，2021Q3 見頂 2.95%，2025Q4 降到 2.19%，2026Q1 為 2.81%</b>。2021Q1 以來，它一直落在 2.19% 到 2.95%，約為住宅的三分之一。<b>沒有降下來的是住宅類。</b>一個衝擊同時打到銀行體系兩側，卻讓其中一側的情況比另一側差三倍左右，這是特定分部的問題，不是總體衝擊。</span></li>
+      <li><span class="lang-en">The stock kept growing through all of it. Residential real-estate loans rose from <b>PHP 281 billion in 2013Q1 to PHP 1,229 billion in 2026Q1</b>, a fourfold increase. Banks continued to lend into a book whose delinquency rate never normalised, which is the condition under which underwriting standards tighten at the application stage rather than at the balance-sheet stage — and the halved NCR approval count in Part 1 is what that looks like from the applicant's side.</span><span class="lang-zh" style="display:none">整段期間存量持續成長。銀行的住宅不動產放款，從 <b>2013Q1 的 2,810 億披索，增加到 2026Q1 的 1 兆 2,290 億披索</b>，成為四倍。銀行持續對一個逾期率從未正常化的貸放組合承作新案。在這種條件下，緊縮發生在申請審核階段，不在資產負債表階段。第一部中腰斬的首都區核准件數，就是從申請人端看到的同一件事。</span></li>
+    </ul>
+  </div>
+
+  <div class="blk">
+    <h2><span class="lang-en">The peso lost a third of its value while the real effective rate returned to where it started</span><span class="lang-zh" style="display:none">披索貶值三分之一，實質有效匯率卻回到起點</span></h2>
+    <p class="sub"><span class="lang-en">PHP per USD, month-end · 2013–2026 · BSP; BIS real and nominal broad effective exchange rates, 2020 = 100 · 1994–2026 · BIS via FRED (RBPHBIS, NBPHBIS)</span><span class="lang-zh" style="display:none">披索兌美元月底值 · 2013–2026 · 菲律賓央行；BIS 實質與名目廣義有效匯率，2020 = 100 · 1994–2026 · BIS 經 FRED 取得（RBPHBIS、NBPHBIS）</span></p>
+    <div class="chartbox"><div class="kick"><span class="lang-en">The bilateral rate</span><span class="lang-zh" style="display:none">雙邊匯率</span></div><div id="cFx" class="ch"></div></div>
+    <div class="chartbox"><div class="kick"><span class="lang-en">Real and nominal effective rates</span><span class="lang-zh" style="display:none">實質與名目有效匯率</span></div><div id="cReer" class="ch"></div></div>
+    <p class="fnote"><span class="lang-en">The bilateral chart uses an inverted axis, so a rising line is a stronger peso. The effective-rate indices are BIS series retrieved from FRED and are not transformed; a rising line is a stronger peso against the trade-weighted basket.</span><span class="lang-zh" style="display:none">雙邊匯率圖的縱軸反轉，所以線往上代表披索走強。有效匯率指數是從 FRED 取得的 BIS 序列，未經轉換，線往上代表披索相對貿易加權籃子走強。</span></p>
+    <ul class="pt">
+      <li class="warn"><span class="lang-en">The peso went from <b>40.65 per dollar at end-January 2013 to 61.23 at end-June 2026</b>, a loss of 33.6% of its dollar value over thirteen and a half years, with the weakest month-end reading of 61.65 in May 2026. The move has been one-directional: there is no year in the series in which the peso recovered its level of five years earlier. The daily close then reached a record low of 62.90 on 8 October 2026, after 62.86 on 14 September (press report of the Bankers Association of the Philippines close).</span><span class="lang-zh" style="display:none">披索從 <b>2013 年 1 月底的每美元 40.65，貶到 2026 年 6 月底的 61.23</b>，十三年半流失 33.6% 的美元價值，月底最弱讀數是 2026 年 5 月的 61.65。這個變動是單向的：序列中沒有任何一年，披索回到五年前的水準。之後日收盤價在 9 月 14 日創下 62.86，10 月 8 日再創下 62.90 的新低（媒體轉述菲律賓銀行公會收盤價）。</span></li>
+      <li><span class="lang-en">The effective rates tell the opposite story. The real effective rate was <b>86.2 in January 1994, bottomed at 64.1 in February 2004, peaked at 105.0 in March 2024 and stood at 97.9 in July 2026</b>. The nominal effective rate fell from 179.4 at its December 1994 peak to 88.5. <b>The peso is weak in dollars and roughly fair against its trading partners</b>, because the difference is inflation. That distinction determines whether a currency move is a discount for a foreign buyer or simply a repricing.</span><span class="lang-zh" style="display:none">有效匯率呈現相反的圖像。實質有效匯率 <b>1994 年 1 月是 86.2，2004 年 2 月觸底 64.1，2024 年 3 月見頂 105.0，2026 年 7 月是 97.9</b>。名目有效匯率從 1994 年 12 月高點 179.4 降到 88.5。<b>披索對美元偏弱，對貿易夥伴則大致持平</b>，兩者的差額就是通膨。這個區分決定匯率變動對外國買方是折價，還是單純的重新定價。</span></li>
+      <li><span class="lang-en">For an investor the operative reading is that peso weakness is <b>not</b> a discount on Philippine assets in real terms. It is compensation for a higher inflation rate. Entering at 61 pesos rather than 41 does not buy a cheaper asset; it buys the same asset in a currency that is expected to keep losing nominal value at the inflation differential.</span><span class="lang-zh" style="display:none">對投資人來說，披索走弱在實質上<b>不是</b>菲律賓資產的折價，而是較高通膨的補償。以 61 披索而不是 41 披索進場，買到的不是比較便宜的資產，而是用一個預期依通膨差持續損失名目價值的貨幣，買同一項資產。</span></li>
+    </ul>
+    <div class="concept">
+      <h4><span class="lang-en">Two further gaps in the supply-side data</span><span class="lang-zh" style="display:none">供給側資料的另外兩項缺口</span></h4>
+      <p><span class="lang-en">Two variables that would normally appear in a structural section are absent. <b>There is no construction cost index for the Philippines in this dataset</b>, so this page cannot state whether developer margins are compressing or expanding, and it does not attempt to infer the answer from permit values. <b>There is also no government bond yield curve</b>: the Bureau of the Treasury and PDS Group publish through front-end applications that could not be read this round, so the policy rate stands in as the risk-free anchor throughout. Both gaps limit what the model in Part 4 can claim about supply and about discount rates.</span><span class="lang-zh" style="display:none">結構篇通常涵蓋的兩項變數，這裡沒有。<b>本資料集沒有菲律賓的營建成本指數</b>，所以本頁無法說明發展商毛利在壓縮還是擴張，也不用建照造價去反推這個結論。<b>也沒有政府公債殖利率曲線</b>：財政部與 PDS Group 都用前端應用程式發布，本輪讀不到，所以全篇用政策利率作為無風險利率的錨。這兩項缺口限制了第四部模型能對供給與折現率提出的主張。</span></p>
+    </div>
+  </div>
+
+  <div class="blk">
+    <h2><span class="lang-en">Three loops, and only one of them runs through the banking system</span><span class="lang-zh" style="display:none">三道迴圈，只有一道經過銀行體系</span></h2>
+    <div class="sysmap">
+      <div class="sys-flow">
+        <div class="sys-chip root"><b><span class="lang-en">Labour export</span><span class="lang-zh" style="display:none">勞動力輸出</span></b><i><span class="lang-en">US$39.6bn in 2025</span><span class="lang-zh" style="display:none">2025 年 396 億美元</span></i></div>
+        <div class="sys-arrow">→<em><span class="lang-en">cash, not credit</span><span class="lang-zh" style="display:none">是現金，不是授信</span></em></div>
+        <div class="sys-chip"><b><span class="lang-en">Household cash</span><span class="lang-zh" style="display:none">家庭現金</span></b><i><span class="lang-en">amplified 111% in pesos since 2013</span><span class="lang-zh" style="display:none">2013 年起以披索計放大 111%</span></i></div>
+        <div class="sys-arrow">→<em><span class="lang-en">bypasses banks</span><span class="lang-zh" style="display:none">繞過銀行</span></em></div>
+        <div class="sys-chip"><b><span class="lang-en">Property purchase</span><span class="lang-zh" style="display:none">房產購置</span></b><i><span class="lang-en">no credit-bureau test</span><span class="lang-zh" style="display:none">不經聯徵檢核</span></i></div>
+        <div class="sys-arrow">→<em><span class="lang-en">no leverage created</span><span class="lang-zh" style="display:none">不產生槓桿</span></em></div>
+        <div class="sys-chip"><b><span class="lang-en">Shallow credit stock</span><span class="lang-zh" style="display:none">信用存量淺</span></b><i><span class="lang-en">no BIS household series exists</span><span class="lang-zh" style="display:none">沒有 BIS 家庭信用序列</span></i></div>
+      </div>
+      <div class="sys-out"><span class="lang-en"><b>Output:</b> a housing market in which a large part of demand never enters the banking data at all. Neither the policy rate nor the delinquency ratio observes it, which is why the price index has held while the approval count halved.</span><span class="lang-zh" style="display:none"><b>結果：</b>需求有相當大一部分，完全沒有進入銀行體系的統計。政策利率與逾期率都看不到這一部分，所以核准件數腰斬了，價格指數仍然守住。</span></div>
+      <div class="sys-fb"><span class="lp"><span class="lang-en">Loop 1</span><span class="lang-zh" style="display:none">迴圈 1</span></span><span class="lang-en"><b>Peso weakness → larger peso remittances → domestic demand support → higher inflation → further peso weakness.</b> The currency channel is self-reinforcing on the domestic side and self-defeating for the foreign holder, and both effects come from the same series.</span><span class="lang-zh" style="display:none"><b>披索走弱 → 匯款的披索金額放大 → 內需獲得支撐 → 通膨上升 → 披索續弱。</b>這個匯率管道對國內端會自我強化，對外國持有人則會自我抵銷，兩種效果來自同一條序列。</span></div>
+      <div class="sys-fb"><span class="lp"><span class="lang-en">Loop 2</span><span class="lang-zh" style="display:none">迴圈 2</span></span><span class="lang-en"><b>Residential delinquency → tighter approval standards → fewer NCR mortgages → thinner resale market → weaker recovery on the existing book → delinquency persists.</b> The 8.83% past-due ratio and the 49.6% fall in NCR approvals are two readings of one loop.</span><span class="lang-zh" style="display:none"><b>住宅逾期率 → 審核標準收緊 → 首都區房貸件數減少 → 二手市場變淺 → 既有貸款的回收率降低 → 逾期率延續。</b>8.83% 的逾期率，與首都區核准件數 49.6% 的減幅，是同一個迴圈的兩項讀數。</span></div>
+      <div class="sys-fb"><span class="lp"><span class="lang-en">Loop 3</span><span class="lang-zh" style="display:none">迴圈 3</span></span><span class="lang-en"><b>Constitutional ownership limit → foreign demand confined to condominium → concentration in NCR → the one product whose credit channel broke.</b> Analysed in Part 3.</span><span class="lang-zh" style="display:none"><b>憲法層級的持有限制 → 外資需求限縮於公寓 → 集中在首都區 → 正是授信管道中斷的那項產品。</b>詳見第三部。</span></div>
+    </div>
+  </div>
+
+  <!-- PART 3 -->
+  <div class="sec-rule"><h2><span class="lang-en">Part 3 · The Politics — Who Sets the Rules</span><span class="lang-zh" style="display:none">政治篇 · 規則由誰制定</span></h2></div>
+
+  <p class="pull"><span class="lang-en">In Thailand the foreign-ownership limit is a statute, so a parliament could move it. In the Philippines it is a constitutional article, so nothing short of amending the constitution can.</span><span class="lang-zh" style="display:none">在泰國，外資持有上限訂在法律，國會就能修改。在菲律賓，這個限制是憲法條文，不修憲就動不了。</span></p>
+
+  <div class="blk">
+    <h2><span class="lang-en">The foreign-ownership limit is constitutional, which places it beyond both administration and legislation</span><span class="lang-zh" style="display:none">外資持有限制的位階在憲法，行政與立法都動不了</span></h2>
+    <div class="cat">
+      <div class="c"><h4><span class="lang-en">The 1987 Constitution, Article XII, Sections 7 and 8</span><span class="lang-zh" style="display:none">1987 年憲法第十二條第 7、8 項</span></h4><p><span class="lang-en">Section 7 prohibits the transfer of private land to anyone not qualified to acquire public land, that is, to any individual who is not a Philippine citizen or any corporation that is not at least 60% Filipino-owned, with succession the only exception. Section 8 creates a narrow further exception for natural-born citizens who have lost their citizenship. <b>The restriction on land is therefore in the constitutional text, not in a statute.</b></span><span class="lang-zh" style="display:none">第 7 項禁止把私有土地移轉給沒有資格取得公地的人，也就是不具菲律賓籍的個人，或菲律賓籍持股不到 60% 的法人，繼承是唯一例外。第 8 項為喪失國籍的天生公民另設一項範圍很窄的例外。<b>土地限制因此寫在憲法本文，不在法律。</b></span></p></div>
+      <div class="c"><h4><span class="lang-en">The Condominium Act, RA 4726, Section 5</span><span class="lang-zh" style="display:none">公寓法（RA 4726）第 5 條</span></h4><p><span class="lang-en">The 40% ceiling operates at the level of the <b>condominium corporation</b> that holds the common areas, not at the level of the individual unit transaction. That legal structure is why a foreign buyer can hold a condominium certificate of title at all. Section 5 makes any transfer that would take the corporation past the ceiling <b>void</b>, not merely refusable.</span><span class="lang-zh" style="display:none">40% 上限作用在持有共有部分的<b>公寓公司</b>層級，不在個別單位交易層級。這個法律結構，讓外國買方有可能持有公寓所有權狀（CCT）。第 5 條規定，會使公司外資比例超過上限的移轉一律<b>無效</b>，不只是可以拒絕。</span></p></div>
+      <div class="c"><h4><span class="lang-en">How the 40% is counted, RA 4726 Section 6(c)</span><span class="lang-zh" style="display:none">40% 的計算基礎，RA 4726 第 6(c) 條</span></h4><p><span class="lang-en">The statutory default is one equal share per unit, that is, a headcount of units rather than a floor-area weighting. The section expressly permits the master deed to provide otherwise, and floor-area weighting is understood to be the common commercial practice. <b>This page treats the statutory default as verified and the practice as unverified</b>, because no case-by-case check of master deeds was performed.</span><span class="lang-zh" style="display:none">法定預設是每單位一等分，按戶數計，不按樓地板面積加權。該條明文允許主契約另訂，一般理解以樓地板面積加權是常見的業界做法。<b>本頁把法定預設列為已驗證，把實務做法列為未驗證</b>，因為沒有逐案查核主契約。</span></p></div>
+      <div class="c"><h4><span class="lang-en">Two separate long-lease regimes</span><span class="lang-zh" style="display:none">兩套互不相同的長期租地制度</span></h4><p><span class="lang-en">Presidential Decree 471 of 1974 allows a general foreign lessee <b>25 years renewable for 25</b>, fifty in total, for any purpose. Republic Act 7652 of 1993, as amended by Republic Act 12252 of September 2025, allows an aggregate lease of up to <b>ninety-nine years</b>, but only for approved and registered investments in industrial estates, export processing, agro-industry or tourism projects; residential use is not on the list. <b>An individual buying a home falls under the first, not the second</b>, and the two are frequently conflated.</span><span class="lang-zh" style="display:none">1974 年第 471 號總統令（PD 471）允許一般外國承租人租用<b>25 年，可續約 25 年</b>，合計 50 年，不限用途。1993 年投資人租賃法（RA 7652）經 2025 年 9 月的 RA 12252 修正後，租期合計最長 <b>99 年</b>，但只適用於工業區、加工出口、農工企業或觀光專案中，經核准並登記的投資，住宅用途不在範圍內。個人買房適用前者，不適用後者，兩者常被混為一談。</span></p></div>
+    </div>
+    <p class="narr-p"><span class="lang-en">The practical consequence is that the entire liberalisation channel available in Thailand does not exist here. A Thai government could raise the condominium quota to 75% with an act of parliament, which is why the proposal recurs there and why every valuation that assumed it has been wrong. In the Philippines the 40% ceiling on condominium corporations exists because the corporation holds land, and the 60% Filipino floor on land-holding corporations is in Article XII. <b>Raising the condominium ceiling requires a constitutional amendment, not a bill.</b> For an investor the correct posture is therefore not to monitor legislative sentiment but to price the current article and treat any change as outside the investable horizon.</span><span class="lang-zh" style="display:none">實務結果是：泰國有的整條自由化管道，這裡不存在。泰國政府可以用國會立法把公寓配額提高到 75%，所以這個提案在當地反覆出現，所有把它當假設的估值也都被證明錯了。在菲律賓，公寓公司的 40% 上限之所以存在，是因為公司持有土地，而持有土地的法人要有 60% 菲律賓籍持股，這條規定在第十二條。<b>提高公寓上限要修憲，不是立法。</b>所以對投資人，正確的立場不是追蹤立法動向，而是用現行憲法條文定價，並把任何變動視為可投資期間以外的事。</span></p>
+  </div>
+
+  <div class="blk">
+    <h2><span class="lang-en">Offshore gaming was closed by executive order on a dated legal deadline, and the impact has no continuous series</span><span class="lang-zh" style="display:none">離岸博弈由行政命令依明確的法定期限關閉，衝擊沒有連續序列</span></h2>
+    <ul class="tl">
+      <li><span class="yr">2024-07-22</span><span class="lang-en">The President announces a complete ban on Philippine Offshore Gaming Operators in the State of the Nation Address, citing rising criminality.</span><span class="lang-zh" style="display:none">總統在國情咨文宣布全面禁止離岸博弈業者（POGO），理由是犯罪率上升。</span></li>
+      <li class="hard"><span class="yr">2024-11-05</span><span class="lang-en"><b>Executive Order No. 74</b> is signed, ordering the immediate ban of offshore gaming operations. Its legal basis is Section 10 of Presidential Decree 1869 as amended by RA 9487. <b>Section 2(d) sets a statutory deadline: all such operations shall completely cease, including the winding up of their affairs, on 31 December 2024 or earlier.</b> Section 4(b) directs the housing department to work with enforcement to ensure such operations no longer occupy subdivisions and condominiums. Section 6 urges private lessors to waive termination penalties.</span><span class="lang-zh" style="display:none">簽署<b>第 74 號行政命令</b>，命令立即禁止離岸博弈業務，法源是第 1869 號總統令第 10 條（經 RA 9487 修正）。<b>第 2(d) 條訂有法定期限：所有相關業務須在 2024 年 12 月 31 日或之前完全停止營運並完成清算。</b>第 4(b) 條要求住宅部門會同執法單位，確保這類業務不再進駐分區住宅與公寓。第 6 條呼籲民間出租方豁免終止契約的違約金。</span></li>
+      <li class="hard"><span class="yr">2025-10-23</span><span class="lang-en">The <b>Anti-POGO Act of 2025</b> is signed, raising the ban from an executive order to statute and making it permanent.</span><span class="lang-zh" style="display:none">簽署 <b>2025 年《反 POGO 法》</b>，把禁令從行政命令提升到法律位階，並永久化。</span></li>
+      <li><span class="yr">2026-04-22</span><span class="lang-en">An inter-agency standard operating procedure implementing Executive Order 74 and the Anti-POGO Act is signed at Malacañang, led by the Executive Secretary, to prevent operators returning under new names (press report of 23 April 2026).</span><span class="lang-zh" style="display:none">行政部門在總統府簽署跨部會標準作業程序，執行第 74 號行政命令與《反 POGO 法》，由行政秘書領銜，目的是防止業者換名稱重返（2026 年 4 月 23 日媒體報導）。</span></li>
+      <li><span class="yr">2026-08</span><span class="lang-en">The implementing rules and regulations of the Anti-POGO Act are signed at Malacañang (Daily Tribune, 14 August 2026; second-hand, exact signing date not given).</span><span class="lang-zh" style="display:none">總統府簽署《反 POGO 法》的施行細則（Daily Tribune，2026 年 8 月 14 日報導；二手，未載明簽署日期）。</span></li>
+    </ul>
+    <div class="concept">
+      <h4><span class="lang-en">What can and cannot be said about the impact</span><span class="lang-zh" style="display:none">關於衝擊，能說與不能說的部分</span></h4>
+      <p><span class="lang-en"><b>Can be said.</b> The legal chain is documented to the day, from a single source of first-instance legal text. An entire tenant class was ordered out of leased residential space by a dated deadline. Colliers reports Metro Manila vacancy at <b>23.9% at end-2024, 24.7% at end-2025</b> and forecasts 25.6% for end-2026, and describes Bay Area vacancy as remaining above 50% at end-2025, attributing this to the exit of gaming-related tenants. Press coverage of its second-quarter 2026 report gives 24.9% for Metro Manila and nearly 60% for the Bay Area.</span><span class="lang-zh" style="display:none"><b>能說的部分。</b>法律鏈條有逐日可查的一手法規文本。一整類承租人，依明確的期限被命令退出承租的住宅空間。Colliers 報告大馬尼拉空置率為 <b>2024 年底 23.9%、2025 年底 24.7%</b>，預測 2026 年底 25.6%。它對 Bay Area 的描述是 2025 年底維持在 50% 以上，並把原因歸於博弈相關承租人退場。第二季報告的媒體報導是大馬尼拉 24.9%、Bay Area 接近 60%。</span></p>
+      <p class="r"><span class="lang-en"><b>Cannot be said.</b> There is no quarterly vacancy series for the affected submarket covering the years before the ban, so there is no baseline against which to measure the shock. This page therefore states the <b>direction</b> of the effect and does not state its magnitude, its turning quarter, or any rent impact. The Colliers figures are a single private source without a published methodology. Its unsold-inventory numbers come in two scopes, total and ready-for-occupancy, that differ by a factor of 2.4 to 2.8, as the companion market report sets out. <b>No causal quantification of the offshore-gaming exit appears anywhere on this page.</b></span><span class="lang-zh" style="display:none"><b>不能說的部分。</b>受影響的次市場沒有涵蓋禁令前年份的逐季空置率序列，所以沒有可以衡量衝擊的基準線。本頁因此只說明這個效果的<b>方向</b>，不說明它的幅度、轉折季度或租金影響。Colliers 的數字來自民間單一來源，方法論沒有公開。它的未售存量有全部與現房兩種範圍，相差 2.4 到 2.8 倍，對照的市場報告已有說明。本頁沒有任何對離岸博弈退場的因果量化。</span></p>
+    </div>
+  </div>
+
+  <div class="blk">
+    <h2><span class="lang-en">What needs an order was done in months; what needs an amendment has not begun</span><span class="lang-zh" style="display:none">要靠命令的幾個月內完成，要靠修憲的還沒開始</span></h2>
+    <div class="prop-take">
+      <span class="pk"><span class="lang-en">Three tradeable political rules</span><span class="lang-zh" style="display:none">三條可交易的政治規律</span></span>
+      <p><span class="lang-en"><b>One — price the constitutional article, not the reform debate.</b> The condominium ceiling is downstream of Article XII. Charter change has been discussed in Philippine politics for decades without altering the economic provisions. A valuation that assumes a higher foreign quota is assuming a constitutional amendment, and should be labelled as such rather than as policy risk.</span><span class="lang-zh" style="display:none"><b>其一，以憲法條文定價，不以改革討論定價。</b>公寓上限是第十二條的下游規定。修憲在菲律賓政治中已討論數十年，經濟條款從未變動。把更高的外資配額放進假設的估值，其實是在假設一次修憲，應該照實標示，不要列為政策風險。</span></p>
+      <p><span class="lang-en"><b>Two — the executive can remove a tenant class faster than any market can reprice.</b> Executive Order 74 was signed on 5 November 2024 with a compliance deadline of 31 December 2024. That is fifty-six days between signature and mandatory closure. Any rental underwriting that depends on a single identifiable tenant category should be stress-tested against an eight-week exit, because that is the observed administrative speed in this jurisdiction.</span><span class="lang-zh" style="display:none"><b>其二，行政部門移除一類承租人的速度，快過任何市場的重新定價。</b>第 74 號行政命令 2024 年 11 月 5 日簽署，遵循期限是 2024 年 12 月 31 日，從簽署到強制關閉只隔 56 天。凡是依賴單一可辨識承租類別的租金承作，都應以八週退場做壓力測試，因為這是這個轄區已經看到的行政速度。</span></p>
+      <p><span class="lang-en"><b>Three — the binding constraint here is a bank's credit committee, not a ministry.</b> The variables that moved this market between 2019 and 2026 were the approval count and the delinquency ratio, neither of which is set by policy. Political monitoring has a low yield in the Philippines relative to Thailand, where an immigration order changed the foreign-buyer threshold overnight. <b>Watch the BSP quarterly releases, not the legislative calendar.</b></span><span class="lang-zh" style="display:none"><b>其三，這個市場的實質約束來自銀行的授信委員會，不是部會。</b>2019 到 2026 年間推動本市場的變數，是核准件數與逾期率，兩者都不是政策設定的。相對泰國，一道移民命令就能一夜之間改變外資買方門檻，追蹤菲律賓的政治動向，邊際效益偏低。<b>該追蹤的是菲律賓央行的季度發布，不是立法議程。</b></span></p>
+    </div>
+  </div>
+
+  <!-- PART 4 -->
+  <div class="sec-rule"><h2><span class="lang-en">Part 4 · The Model</span><span class="lang-zh" style="display:none">總合模型 · 單一方程式</span></h2></div>
+
+  <div class="blk">
+    <h2><span class="lang-en">One equation</span><span class="lang-zh" style="display:none">一條方程式</span></h2>
+    <div class="eq">
+      <div class="ef">Δ P<sub>real</sub> ≈ ƒ( <span style="color:#fff">R × E</span> ) + <span style="color:#fff">C</span> − <span style="color:#fff">S</span> − <span style="color:#fff">r</span></div>
+      <div class="en"><span class="lang-en">R = remittance inflow in dollars · E = the peso conversion · C = the domestic credit channel · S = standing supply · r = the real policy rate. Every term maps to a published series, and four of the five are charted above.</span><span class="lang-zh" style="display:none">R＝以美元計的匯款流入 · E＝披索換匯 · C＝本地授信管道 · S＝在售存量 · r＝實質政策利率。每一項都對應一條已發布的序列，其中四項已在上方成圖。</span></div>
+    </div>
+    <div class="eqv">
+      <div class="v pos"><h5>R × E — external cash</h5><p><span class="lang-en">US$39.6bn in 2025, up in 19 of the 20 annual changes held (2020 alone fell, by 0.82%). Converted at the average monthly rate, the peso value rose <b>111% between 2013 and 2025</b> against 56% in dollars. January–July 2026 is up 2.3% in dollars. Not intermediated by any bank. <b>Positive, and amplified by exactly the currency move that hurts the foreign holder.</b></span><span class="lang-zh" style="display:none">2025 年 396 億美元，20 次年度變動中有 19 次成長（只有 2020 年減少 0.82%）。以各月平均匯率換算，披索金額在 <b>2013 到 2025 年成長 111%</b>，同期以美元計為 56%。2026 年 1 到 7 月以美元計再增加 2.3%。不經任何銀行中介。<b>正向，而且放大它的，正是傷害外國持有人的那個匯率變動。</b></span></p></div>
+      <div class="v neg"><h5>C — domestic credit channel</h5><p><span class="lang-en">NCR approvals down <b>49.6% from 2019 to 2025</b>, 87% of them condominium. Residential past-due at <b>8.83%</b> against a 3.4% pre-2018 baseline; commercial at 2.81%, about a third of that. Mortgage rates moved 156bp against 450bp of policy. <b>Negative, structural, and concentrated in the capital.</b></span><span class="lang-zh" style="display:none">首都區核准件數<b>從 2019 到 2025 年減少 49.6%</b>，其中 87% 是公寓。住宅逾期率 <b>8.83%</b>，2018 年以前的基線是 3.4%。商用是 2.81%，約為住宅的三分之一。房貸利率變動 156 個基點，同期政策利率變動 450 個基點。負向，屬結構性，集中在首都。</span></p></div>
+      <div class="v neg"><h5>S — standing supply</h5><p><span class="lang-en">Metro Manila vacancy <b>23.9% at end-2024 and 24.7% at end-2025</b>, 24.9% in the second quarter of 2026 (press), forecast 25.6% for end-2026 and 23.9% for 2027. <b>Second-tier data</b>: private sources without published methodology; vacancy comes from one firm, and the two firms' unsold-inventory totals (about 80,000 and 82,900) are close. <b>Negative, magnitude uncertain.</b></span><span class="lang-zh" style="display:none">大馬尼拉空置率 <b>2024 年底 23.9%、2025 年底 24.7%</b>，2026 年第二季 24.9%（媒體），預測 2026 年底 25.6%、2027 年 23.9%。<b>第二層資料</b>：民間來源，方法論未公開。空置率只有一家，兩家的未售總量（約 80,000 與 82,900 戶）接近。負向，幅度不確定。</span></p></div>
+      <div class="v mid"><h5>r — real policy rate</h5><p><span class="lang-en">Derived: <b>−2.20% in September 2026</b>, from +4.30% fourteen months earlier. A negative real rate favours an unlevered hard asset. The precedent of 2022 gave −3.59% followed by 450bp of tightening within eighteen months. <b>Currently favourable, and explicitly temporary.</b></span><span class="lang-zh" style="display:none">推導值：<b>2026 年 9 月為 −2.20%</b>，十四個月前是 +4.30%。負實質利率對無槓桿持有的實體資產有利。2022 年的前例是 −3.59%，之後十八個月內累計緊縮 450 個基點。<b>目前有利，而且明確是暫時的。</b></span></p></div>
+    </div>
+  </div>
+
+  <div class="blk">
+    <h2><span class="lang-en">The conclusions live in the interactions</span><span class="lang-zh" style="display:none">關鍵結論在交互作用裡</span></h2>
+    <ul class="pt">
+      <li><span class="lang-en"><b>E enters twice with opposite signs.</b> A weaker peso raises R × E for the domestic remittance buyer and lowers the dollar value of the same asset for the foreign holder. Between 2013Q1 and 2026Q1 the nominal index rose 152.1% in pesos and 74.0% in dollars; over the same period peso remittances rose roughly twice as fast as dollar remittances. <b>The two parties to the same transaction read the currency in opposite directions</b>, which is why domestic and foreign demand have not turned together.</span><span class="lang-zh" style="display:none"><b>E 以相反的符號進入方程式兩次。</b>披索走弱，使本地匯款買方的 R × E 變大，同時降低外國持有人所持同一項資產的美元價值。2013Q1 到 2026Q1，名目指數以披索計上漲 152.1%，以美元計上漲 74.0%。同期以披索計的匯款，成長速度約為以美元計的兩倍。<b>同一筆交易的兩方，對匯率的解讀方向相反</b>，這就是本地與外資需求沒有同步反轉的原因。</span></li>
+      <li class="warn"><span class="lang-en"><b>C × product mix is the binding interaction.</b> Condominium is 87% of NCR approvals and is the only title a foreign buyer may hold. The credit channel that halved is therefore the same channel that finances the foreign-accessible product's domestic resale market. <b>A foreign buyer's exit price depends on a Filipino borrower's mortgage approval</b>, and that approval count is at half its 2019 level.</span><span class="lang-zh" style="display:none"><b>C × 產品結構是有約束力的交互作用。</b>公寓占首都區核准件數 87%，也是外國買方唯一能持有的產權形式。所以腰斬的授信管道，同時是為外資可買產品的本地二手市場提供融資的管道。<b>外國買方的出場價格，取決於本地借款人的房貸核准</b>，而核准件數只有 2019 年水準的一半不到。</span></li>
+      <li><span class="lang-en"><b>R × S is why the market has not cleared through price.</b> Vacancy near 25% would normally force nominal price declines. It has not, because remittance-funded cash demand does not require the credit channel to function and is not disciplined by a valuation. <b>High vacancy and a rising nominal index can coexist</b> for as long as the cash channel holds, and the real index in Part 1 shows what that combination produces: three years of flat purchasing power under a rising headline number.</span><span class="lang-zh" style="display:none"><b>R × S 說明市場為什麼沒有靠價格出清。</b>接近 25% 的空置率，通常會逼出名目價格下跌，這裡沒有發生。原因是匯款支撐的現金需求，不需要授信管道運作，也不受鑑價約束。<b>高空置率和上升的名目指數可以並存</b>，只要現金管道撐得住。第一部的實質指數已經顯示這個組合的結果：表面數字上升，購買力卻三年持平。</span></li>
+      <li class="good"><span class="lang-en"><b>r × leverage separates the two buyer types cleanly.</b> A negative real policy rate is favourable to a hard asset, but the Philippine borrower cannot access it: mortgage rates moved 48 basis points while policy moved 275. <b>The negative real rate accrues almost entirely to the unlevered cash buyer</b>, and it is the one term in the equation that the central bank has already begun to withdraw.</span><span class="lang-zh" style="display:none"><b>r × 槓桿把兩類買方清楚分開。</b>負的實質政策利率對實體資產有利，但菲律賓的借款人拿不到：政策利率變動 275 個基點的期間，房貸利率只變動 48 個基點。<b>負實質利率的好處，幾乎全部歸無槓桿的現金買方</b>，而且央行已經開始收回方程式中這一項。</span></li>
+    </ul>
+  </div>
+
+  <div class="blk">
+    <h2><span class="lang-en">The model's output — who, what, when</span><span class="lang-zh" style="display:none">模型輸出：誰、買什麼、什麼時候</span></h2>
+    <div class="mtbl-wrap">
+      <table class="mtbl">
+        <thead><tr>
+          <th><span class="lang-en">Who</span><span class="lang-zh" style="display:none">誰</span></th>
+          <th><span class="lang-en">What the model says</span><span class="lang-zh" style="display:none">模型怎麼說</span></th>
+          <th><span class="lang-en">Window</span><span class="lang-zh" style="display:none">時窗</span></th>
+        </tr></thead>
+        <tbody>
+          <tr><td class="who"><span class="lang-en">Unlevered foreign buyer</span><span class="lang-zh" style="display:none">無槓桿外國買方</span></td><td><span class="lang-en">The equation supports this profile only on a rental-income basis, never on appreciation. In dollars the asset compounded at <b>4.35% a year since 2013</b> against 7.37% in pesos, and the exit depends on a domestic credit channel running at half its 2019 volume. <b>Underwrite the yield, assume a flat dollar capital line, and treat the 40% ceiling as permanent.</b></span><span class="lang-zh" style="display:none">方程式只在租金收益的基礎上支持這類買方，不支持以增值為基礎。以美元計，這項資產<b>自 2013 年起年複合 4.35%</b>，以披索計是 7.37%，而出場取決於量能只有 2019 年一半的本地授信管道。<b>以收益率承作，資本利得假設為美元持平，並把 40% 上限視為永久。</b></span></td><td><span class="lang-en">Selective</span><span class="lang-zh" style="display:none">選擇性</span></td></tr>
+          <tr><td class="who"><span class="lang-en">Levered domestic buyer</span><span class="lang-zh" style="display:none">使用槓桿的本地買方</span></td><td><span class="lang-en">Faces an effective rate of <b>7.17% to 8.80%</b> that barely responds to policy, into a market where nominal income growth is real but the approval rate in the capital has halved. <b>The borrowing cost is close to policy-invariant, so waiting for rate cuts is not a strategy here.</b></span><span class="lang-zh" style="display:none">面對 <b>7.17% 到 8.80%</b> 的有效利率，這個利率幾乎不隨政策變動。所處市場的名目所得成長是真的，但首都的核准率已經腰斬。<b>借款成本幾乎與政策無關，所以等降息在這裡不是策略。</b></span></td><td><span class="lang-en">Rate is not the variable</span><span class="lang-zh" style="display:none">利率不是變數</span></td></tr>
+          <tr><td class="who"><span class="lang-en">Remittance-funded cash buyer</span><span class="lang-zh" style="display:none">靠匯款的現金買方</span></td><td><span class="lang-en">The only profile every term of the equation favours. Bypasses the broken credit channel, is amplified by peso weakness, and captures the negative real rate in full. <b>This cohort, not the mortgage market, is what has held the nominal price index.</b></span><span class="lang-zh" style="display:none">方程式各項都對這一型有利的，只有這一型。它繞過中斷的授信管道，被披索走弱放大，並完整取得負實質利率的好處。<b>撐住名目價格指數的是這群人，不是房貸市場。</b></span></td><td><span class="lang-en">Structural</span><span class="lang-zh" style="display:none">結構性</span></td></tr>
+          <tr><td class="who"><span class="lang-en">Developer / land buyer</span><span class="lang-zh" style="display:none">發展商／土地買方</span></td><td><span class="lang-en">Vacancy near 25% against a halved capital-market approval count. <b>No construction cost index exists in this dataset</b>, so margin direction cannot be established here and this page declines to state one. The observable signal is NCR permit activity, which fell 7.3% in 2025.</span><span class="lang-zh" style="display:none">空置率接近 25%，對照腰斬的首都核准件數。<b>本資料集沒有營建成本指數</b>，所以無法在這裡建立毛利方向，本頁也不作陳述。可以觀察的訊號是首都區建照活動，2025 年減少 7.3%。</span></td><td><span class="lang-en">Insufficient data</span><span class="lang-zh" style="display:none">資料不足</span></td></tr>
+          <tr><td class="who"><span class="lang-en">Distressed-asset buyer</span><span class="lang-zh" style="display:none">不良資產買方</span></td><td><span class="lang-en">Residential past-due at 8.83% and gross NPLs at 6.13% of a PHP 1.23 trillion book, six years without normalising, against 2.81% past due on the commercial book. <b>The stock of impaired residential exposure is the clearest observable opportunity in the equation</b>, and it requires local execution capacity.</span><span class="lang-zh" style="display:none">住宅逾期率 8.83%，不良貸款占 6.13%，貸放組合 1.23 兆披索，六年沒有正常化，商用類逾期率則為 2.81%。<b>受損住宅曝險的存量，是方程式中最明確、看得到的機會</b>，但需要本地的執行能力。</span></td><td><span class="lang-en">Now, with local capacity</span><span class="lang-zh" style="display:none">現在，需要本地能力</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="blk">
+    <h2><span class="lang-en">How this model dies</span><span class="lang-zh" style="display:none">模型在什麼條件下失效</span></h2>
+    <div class="cols">
+      <div class="col up">
+        <h3><span class="lang-en">Falsified to the upside if</span><span class="lang-zh" style="display:none">若出現以下情形，向上證偽</span></h3>
+        <ul>
+          <li><span class="lang-en">NCR approved mortgage counts exceed <b>4,000 in a single quarter</b> for four consecutive quarters, against 2,967 in 2026Q2. This would break the central claim that the capital's credit channel remains closed. <b>Source: BSP RPPI publication, Table 2, quarterly.</b></span><span class="lang-zh" style="display:none">首都區房貸核准件數連續四季<b>單季超過 4,000 件</b>（2026Q2 為 2,967 件）。這會推翻「首都的授信管道仍然關閉」的核心主張。<b>來源：菲律賓央行 RPPI 出版品附表 2，季頻。</b></span></li>
+          <li><span class="lang-en">The residential past-due ratio falls below <b>6%</b> and holds for two consecutive quarters, against 8.83% in 2026Q1. This would falsify the claim that the 2020 credit damage is structural rather than cyclical. <b>Source: BSP real-estate exposure, quarterly.</b></span><span class="lang-zh" style="display:none">住宅逾期比率跌破 <b>6%</b>，並連續兩季維持（2026Q1 為 8.83%）。這會推翻「2020 年的信用劣化屬結構性，不是循環性」的主張。<b>來源：菲律賓央行不動產曝險表，季頻。</b></span></li>
+          <li><span class="lang-en">The BIS real index for Makati exceeds its <b>2025Q2 high of 189.3</b> for four consecutive quarters, against 183.4 in 2026Q1. This would falsify the claim that real prices are range-bound while the credit channel is impaired. <b>Source: FRED QPHR628BIS, quarterly.</b></span><span class="lang-zh" style="display:none">BIS 馬卡蒂實質指數連續四季高於 <b>2025 年第二季高點 189.3</b>（2026Q1 為 183.4）。這會推翻「授信管道受損期間，實質價格在區間內波動」的主張。<b>來源：FRED QPHR628BIS，季頻。</b></span></li>
+          <li><span class="lang-en">Headline CPI returns below <b>4%</b> and the derived real policy rate turns positive without the policy rate exceeding 5.00%. This would falsify the reading that the 2026 inflation shock forces a full tightening cycle. Today the policy rate is 5.00% and September CPI is 7.2%, so one more hike would rule this condition out. <b>Source: PSA CPI and BSP policy rate, monthly.</b></span><span class="lang-zh" style="display:none">CPI 年增率回落到 <b>4%</b> 以下，推導的實質政策利率轉正，同時政策利率沒有超過 5.00%。這會推翻「2026 年的通膨衝擊迫使央行走完一輪完整緊縮」的判讀。現在政策利率已經是 5.00%，9 月 CPI 是 7.2%，再升息一次，這個條件就不可能成立。<b>來源：PSA CPI 與菲律賓央行政策利率，月頻。</b></span></li>
+        </ul>
+      </div>
+      <div class="col dn">
+        <h3><span class="lang-en">Falsified to the downside if</span><span class="lang-zh" style="display:none">若出現以下情形，向下證偽</span></h3>
+        <ul>
+          <li><span class="lang-en">The residential past-due ratio moves back above <b>10%</b>, its 2020–2021 range. The distressed-stock scenario becomes the base case and the R × E cash channel stops being sufficient to hold the nominal index. <b>Source: BSP real-estate exposure, quarterly.</b></span><span class="lang-zh" style="display:none">住宅逾期比率回升到 <b>10%</b> 以上，也就是 2020 到 2021 年的區間。不良存量情境會成為基準情境，R × E 的現金管道也不再足以支撐名目指數。<b>來源：菲律賓央行不動產曝險表，季頻。</b></span></li>
+          <li><span class="lang-en">Personal remittances record two consecutive full-year declines. The only full-year decline in the twenty-one years held here was 0.82% in 2020, and it reversed the following year. This removes the one positive term in the equation. <b>Source: BSP remittance series, monthly.</b></span><span class="lang-zh" style="display:none">個人匯款連續兩年出現全年度衰退。本檔涵蓋的 21 年中，唯一一次全年度衰退是 2020 年的 0.82%，隔年就回升。這會移除方程式中唯一的正向項。<b>來源：菲律賓央行匯款序列，月頻。</b></span></li>
+          <li><span class="lang-en">The peso breaks <b>65 per dollar</b> at month-end, against 61.23 in June 2026 (62.90 on the 8 October daily close), while the BIS real effective rate falls below 95 (97.9 in July 2026). That combination would indicate the depreciation is no longer only an inflation differential, and it re-rates every dollar-denominated return on this page. <b>Source: BSP peso-dollar and FRED RBPHBIS, monthly.</b></span><span class="lang-zh" style="display:none">披索月底值跌破<b>每美元 65</b>（2026 年 6 月為 61.23，10 月 8 日日收盤為 62.90），同時 BIS 實質有效匯率跌破 95（2026 年 7 月為 97.9）。這個組合代表貶值不再只是通膨差，並使本頁所有以美元計價的報酬重新定價。<b>來源：菲律賓央行披索兌美元與 FRED RBPHBIS，月頻。</b></span></li>
+          <li><span class="lang-en">External debt exceeds <b>35% of GDP</b> or reserve coverage falls below <b>65%</b> of total external debt, against 30.3% and 75.1% in 2025. This confirms the post-2019 reversal is a trend rather than a pause, and it is the channel through which a currency episode would become a credit episode. End-September 2026 reserves of US$99.996 billion are the lowest since 2023, but the 2026 coverage ratio cannot be computed until the year's external debt is published. <b>Source: BSP external debt ratios, annual.</b></span><span class="lang-zh" style="display:none">外債超過 <b>GDP 的 35%</b>，或準備覆蓋率跌破外債總額的 <b>65%</b>（2025 年分別是 30.3% 與 75.1%）。這會確認 2019 年後的反轉是趨勢，不是暫停，也是匯率事件轉成信用事件的傳導管道。2026 年 9 月底的準備 999.96 億美元，為 2023 年以來最低，但要等 2026 年外債數字公布，才算得出當年的覆蓋率。來源：菲律賓央行外債比率表，年頻。</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ANSWER -->
+  <div class="sec-rule"><h2><span class="lang-en">The Answer — Where, What, When</span><span class="lang-zh" style="display:none">結論篇 · 區位、產品、時點</span></h2></div>
+
+  <div class="blk">
+    <h2><span class="lang-en">Locations: the capital is where the credit broke, and it is also the only place a foreigner can buy</span><span class="lang-zh" style="display:none">區位：授信中斷的地方就是首都，也是外國人唯一能買的地方</span></h2>
+    <p class="narr-p"><span class="lang-en">The geographic split in this dataset is unusually clean. Mortgage approvals outside NCR rose <b>15.8% between 2019 and 2025</b> while NCR fell 49.6%; national population compounded at 1.55% a year over the last census interval while NCR managed 0.93% and lost share. On both the credit and the demographic reading, the growth is in the provinces. <b>But the constitutional structure sends foreign capital in the opposite direction.</b> A foreign buyer may hold a condominium unit and may not hold land, and condominium supply outside the capital is thin, so the product that is legally available and the geography that is economically growing do not overlap. The correct posture is not to resolve that contradiction but to state it: a foreign position in Philippine residential property is a position in NCR condominium, and NCR condominium is the segment whose domestic financing channel is running at half its 2019 volume. Anyone who is not constrained by the ownership rules — a Filipino citizen or a former natural-born citizen under Article XII Section 8 — faces a materially different opportunity set from the one this page describes.</span><span class="lang-zh" style="display:none">本資料集的地理分野很清楚。2019 到 2025 年，首都區以外的房貸核准件數<b>增加 15.8%</b>，首都區減少 49.6%。最近一個普查間隔內，全國人口年均複合成長 1.55%，首都區是 0.93%，占比下降。無論從信貸端或人口端看，成長都在地方。<b>但憲法結構把外國資金導向相反的方向。</b>外國買方可以持有公寓單位，不能持有土地，首都以外的公寓供給很薄。所以法律上買得到的產品，和經濟上在成長的地理，兩者不重疊。正確的立場不是解決這個矛盾，而是把它講清楚：外資在菲律賓住宅的部位，就是首都區公寓的部位，而首都區公寓正是本地融資管道量能只剩 2019 年一半不到的那一塊。不受持有規則約束的人，也就是菲律賓公民，或第十二條第 8 項所指的原天生公民，面對的機會，和本頁描述的有實質差異。</span></p>
+  </div>
+
+  <div class="blk">
+    <h2><span class="lang-en">Products: rank by whether the exit buyer needs a mortgage</span><span class="lang-zh" style="display:none">產品：依出場買方是否需要房貸排序</span></h2>
+    <p class="narr-p"><span class="lang-en">The ranking principle in this market is not quality and not location. It is whether the eventual resale requires a bank to approve someone. A unit that will be resold to a remittance-funded cash buyer sits behind a channel that grew 111% in peso terms between 2013 and 2025 and has fallen in only one of the twenty-one years held, by 0.82% in 2020. A unit that will be resold to a mortgage applicant sits behind a channel that halved in the capital and carries an 8.83% past-due ratio. <b>The same building can contain both.</b> Average household size gives the practical filter: 3.83 persons in NCR and 3.35 in Makati, against 4.12 nationally, which is the demographic case for the smaller unit rather than the family-sized one. On leasehold structures, the applicable regime for an individual is Presidential Decree 471 at twenty-five years renewable for twenty-five, not the investor lease under RA 7652, which as amended runs to ninety-nine years, and the two are routinely conflated in marketing material. Verifying which regime a specific arrangement falls under is a legal question that precedes any pricing question.</span><span class="lang-zh" style="display:none">這個市場的排序原則，不是品質，也不是區位，而是未來轉售時要不要銀行批准某個人。轉售給靠匯款買房的現金買方的單位，背後的管道在 2013 到 2025 年以披索計成長 111%，21 年資料中只有 2020 年減少一次，幅度 0.82%。轉售給房貸申請人的單位，背後的管道在首都腰斬，逾期率是 8.83%。<b>同一棟大樓可以同時包含兩者。</b>平均家戶規模提供實務上的篩選：首都區 3.83 人、馬卡蒂 3.35 人，全國 4.12 人，這是偏向小坪數、不偏向家庭房型的人口論據。租賃制度方面，適用於個人的是 PD 471，25 年，可續約 25 年，不是 RA 7652 的投資人租賃（修正後最長 99 年），行銷資料常把兩者混用。確認特定安排適用哪一套制度是法律問題，順序在任何定價問題之前。</span></p>
+  </div>
+
+  <div class="blk">
+    <h2><span class="lang-en">Timing: three clocks, and the fastest one has already turned</span><span class="lang-zh" style="display:none">時機：三個時鐘，最快的那個已經反轉</span></h2>
+    <div class="cat">
+      <div class="c"><h4><span class="lang-en">Fast clock — the real policy rate, months</span><span class="lang-zh" style="display:none">快時鐘：實質政策利率，以月計</span></h4><p><span class="lang-en">CPI went from 2.42% to 7.23% in two months and the derived real rate from +4.30% to −2.73% in nine. The policy rate has been raised three times, in April, June and August 2026, and September CPI of 7.2% put the real rate back at −2.20%. <b>The 2022 precedent resolved in roughly eighteen months</b>, which places the observable checkpoint in late 2027.</span><span class="lang-zh" style="display:none">CPI 年增率兩個月內從 2.42% 升到 7.23%，推導的實質利率九個月內從 +4.30% 降到 −2.73%。政策利率已在 2026 年 4 月、6 月、8 月三度調升，9 月 CPI 7.2%，使實質利率回到 −2.20%。<b>2022 年的前例約十八個月完成</b>，可觀察的檢核點因此落在 2027 年底。</span></p></div>
+      <div class="c"><h4><span class="lang-en">Medium clock — the residential loan book, two to four years</span><span class="lang-zh" style="display:none">中時鐘：住宅貸放組合，二到四年</span></h4><p><span class="lang-en">The past-due ratio has fallen every year since 2020 and is still at 8.83%. At the observed rate of improvement it reaches the pre-2018 baseline no earlier than the end of the decade. <b>This is the clock that determines when the capital's approval count can recover</b>, and it is the one to track quarterly.</span><span class="lang-zh" style="display:none">逾期率從 2020 年起逐年下降，現在仍是 8.83%。依已觀察到的改善速度，要回到 2018 年以前的基線，不會早於本十年結束。<b>這個時鐘決定首都的核准件數何時能回升</b>，應該逐季追蹤。</span></p></div>
+      <div class="c"><h4><span class="lang-en">Slow clock — the constitution, indefinite</span><span class="lang-zh" style="display:none">慢時鐘：憲法，沒有期限</span></h4><p><span class="lang-en">The 40% ceiling is downstream of Article XII and cannot be moved by an administration or a legislature. <b>There is no date on this clock</b>, and any model that assumes one is assuming a constitutional amendment. Price the current article.</span><span class="lang-zh" style="display:none">40% 上限是第十二條的下游規定，行政部門與立法機關都動不了。<b>這個時鐘沒有日期</b>，任何替它設定日期的模型，其實是在假設一次修憲。應該用現行條文定價。</span></p></div>
+      <div class="c"><h4><span class="lang-en">The currency runs across all three</span><span class="lang-zh" style="display:none">匯率變數橫跨以上三者</span></h4><p><span class="lang-en">The peso lost 33.6% of its dollar value over thirteen years, a drag of roughly three points a year on a foreign holder's return, while the real effective rate ended where it began. <b>For a cross-border position this is the first-order variable</b>, and it is also the term that amplifies domestic remittance demand.</span><span class="lang-zh" style="display:none">披索十三年損失 33.6% 的美元價值，對外國持有人的報酬，每年約拖累三個百分點，而實質有效匯率回到了起點。<b>對跨境部位，這是第一階變數</b>，也是放大國內匯款需求的變數。</span></p></div>
+    </div>
+  </div>
+
+  <div class="cols">
+    <div class="col up">
+      <h3><span class="lang-en">Tailwinds</span><span class="lang-zh" style="display:none">順風</span></h3>
+      <ul>
+        <li><span class="lang-en">Real GDP per capita compounding at <b>4.91% from 2020 to 2025</b>, the fastest period since the 1970s and faster in each successive decade, although quarterly GDP growth slowed to 2.3% in the second quarter of 2026.</span><span class="lang-zh" style="display:none">實質人均 GDP <b>2020 到 2025 年年均複合成長 4.91%</b>，是 1970 年代以來最快，而且逐個十年加快。但 2026 年第二季的 GDP 成長放慢到 2.3%。</span></li>
+        <li><span class="lang-en">Population still growing at <b>1.55% a year</b> across the last census interval, with no cohort ahead of first-buyer age shrinking.</span><span class="lang-zh" style="display:none">最近一個普查間隔內，人口仍<b>年均成長 1.55%</b>，首購年齡層之前的各世代都沒有縮減。</span></li>
+        <li><span class="lang-en">Personal remittances at <b>US$39.6bn in 2025</b>, up in 19 of the last 20 years, and worth 111% more in pesos than in 2013.</span><span class="lang-zh" style="display:none">個人匯款 <b>2025 年 396 億美元</b>，20 次年度變動中有 19 次成長，以披索計比 2013 年高 111%。</span></li>
+        <li><span class="lang-en">External debt at <b>30.3% of GDP</b> against 85.9% in 1986, with reserve coverage at 75.1% and debt service at 2.70% of GDP. Gross reserves fell to US$99.996 billion in September 2026, the lowest since 2023.</span><span class="lang-zh" style="display:none">外債占 GDP <b>30.3%</b>，1986 年是 85.9%。準備覆蓋率 75.1%，償債負擔占 GDP 2.70%。國際準備 2026 年 9 月降到 999.96 億美元，為 2023 年以來最低。</span></li>
+        <li><span class="lang-en">A negative real policy rate of <b>−2.20%</b> in September 2026 that accrues in full to the unlevered holder.</span><span class="lang-zh" style="display:none">2026 年 9 月實質政策利率為 <b>−2.20%</b>，好處完整歸於無槓桿的持有人。</span></li>
+      </ul>
+    </div>
+    <div class="col dn">
+      <h3><span class="lang-en">Risks</span><span class="lang-zh" style="display:none">風險</span></h3>
+      <ul>
+        <li><span class="lang-en">NCR mortgage approvals down <b>49.6% from 2019 to 2025</b>, with no sustained recovery visible as at 2026Q2 (2,967 in the latest quarter).</span><span class="lang-zh" style="display:none">首都區房貸核准件數<b>從 2019 到 2025 年減少 49.6%</b>，到 2026Q2 看不到持續復甦（最新一季 2,967 件）。</span></li>
+        <li><span class="lang-en">Residential past-due at <b>8.83%</b> against a 3.4% pre-2018 baseline, six years without normalising, against 2.81% for commercial.</span><span class="lang-zh" style="display:none">住宅逾期率 <b>8.83%</b>，2018 年以前基線是 3.4%，六年沒有正常化，商用類為 2.81%。</span></li>
+        <li><span class="lang-en">Headline CPI at <b>7.2%</b> in September and a policy rate already raised three times; the previous episode drew 450bp of tightening.</span><span class="lang-zh" style="display:none">9 月 CPI 年增 <b>7.2%</b>，政策利率已三度調升。前一輪類似事件引發累計 450 個基點的緊縮。</span></li>
+        <li><span class="lang-en">The peso at <b>62.90</b> on 8 October, a record low and down more than a third since 2013, with the real effective rate showing no undervaluation to reverse it.</span><span class="lang-zh" style="display:none">披索 10 月 8 日收 <b>62.90</b>，創收盤新低，較 2013 年貶值超過三分之一。實質有效匯率沒有顯示可供回補的低估。</span></li>
+        <li><span class="lang-en">Metro Manila vacancy at <b>24.9%</b> in the second quarter of 2026 on second-tier data, with a foreign quota that is constitutional and therefore not negotiable.</span><span class="lang-zh" style="display:none">大馬尼拉空置率 2026 年第二季 <b>24.9%</b>（第二層資料），外資配額的位階在憲法，沒有協商空間。</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="blk">
+    <h2><span class="lang-en">Which numbers on this page carry weight</span><span class="lang-zh" style="display:none">本頁哪些數字撐得住</span></h2>
+    <p class="sub"><span class="lang-en">Not every figure here is equally reliable. Three tiers, so a reader can tell which numbers to act on.</span><span class="lang-zh" style="display:none">本頁的數字，可信度並不一致。我們分成三層，讓讀者判斷哪些可以據以決策。</span></p>
+    <div class="tier">
+      <div class="t a">
+        <h5><span class="lang-en">Tier 1 · Primary statistics</span><span class="lang-zh" style="display:none">第一層 · 原始統計</span></h5>
+        <p><span class="lang-en">Published by a statistical authority and parsed from the source file. <b>BSP policy rate 1986–2026 (to July from the BSP file), headline CPI 2013–2026 (to June), peso-dollar 2013–2026 (to June), personal remittances 2005–2026 (to July), banking-system real-estate exposure 2013–2026 (to 1Q26), approved loan counts 2019–2026 (to 2Q26), external debt ratios 1985–2025; PSA censuses of 2000, 2010, 2015 and 2020 and the FIES 2023 round; BIS house prices and effective exchange rates, World Bank GDP per capita and population, and the IMF private-credit ratio, all via FRED.</b> The RPPI parse was cross-checked against the BSP Q4 2025 release and matched to one decimal on all three geographies. Use these for decisions.</span><span class="lang-zh" style="display:none">由統計機關發布，並從原始檔案解析。<b>菲律賓央行政策利率 1986–2026（央行檔案到 7 月）、CPI 2013–2026（到 6 月）、披索兌美元 2013–2026（到 6 月）、個人匯款 2005–2026（到 7 月）、銀行體系不動產曝險 2013–2026（到 2026Q1）、房貸核准件數 2019–2026（到 2026Q2）、外債比率 1985–2025；PSA 2000／2010／2015／2020 年普查與 FIES 2023；BIS 房價與有效匯率、世界銀行人均 GDP 與人口、IMF 民間信用比率，都經 FRED 取得。</b>RPPI 的解析結果已與央行 2025 年第四季發布稿交叉核對，三個地理層級都吻合到小數點後一位。可據以決策。</span></p>
+      </div>
+      <div class="t b">
+        <h5><span class="lang-en">Tier 2 · Official or industry figures, reported second-hand</span><span class="lang-zh" style="display:none">第二層 · 官方或業界數字，二手轉述</span></h5>
+        <p><span class="lang-en">Produced by an official or private body but obtained through a summary rather than the original dataset. <b>Colliers Metro Manila vacancy and Bay Area commentary; Leechiu unsold inventory and rents; the PSA building-permit narrative figures for NCR 2025, including the 7.3% fall in approved constructions; and press-relayed official figures dated after the last primary release: the 27 August policy-rate decision, July to September CPI, second-quarter GDP, end-September reserves and the 8 October peso close.</b> The Colliers methodology is not published. Its unsold-inventory figures come in two scopes, total and ready-for-occupancy, that differ by a factor of 2.4 to 2.8, and the total is close to Leechiu's. Directionally reliable; treat the precise value as approximate.</span><span class="lang-zh" style="display:none">由官方或民間機構產生，但是經摘要取得，不是原始資料集。<b>Colliers 的大馬尼拉空置率與 Bay Area 評述、Leechiu 的未售存量與租金、PSA 建照統計 2025 年首都區的敘述性數字（含核准建案數年減 7.3%），以及晚於最近一次一手發布、由媒體轉述的官方數字：8 月 27 日的政策利率決議、7 到 9 月的 CPI、第二季 GDP、9 月底國際準備與 10 月 8 日的披索收盤價。</b>Colliers 的方法論沒有公開。它的未售存量有全部與現房兩種範圍，相差 2.4 到 2.8 倍，其中全部的數字與 Leechiu 的接近。方向可信，精確值視為近似。</span></p>
+      </div>
+      <div class="t c">
+        <h5><span class="lang-en">Tier 3 · Derived or estimated</span><span class="lang-zh" style="display:none">第三層 · 推導或估計</span></h5>
+        <p><span class="lang-en">Computed by the author from published series. <b>The real policy rate (policy rate minus CPI year-on-year); the US-dollar house-price restatement; period compound growth rates; annual remittance totals and their peso restatement and share of GDP; reserve coverage of external debt; the within-year policy-rate band; household size and savings share from census and FIES levels; and the equation, loop diagram and falsification conditions, which are an analytical framework rather than data.</b> All are marked in the chart footnotes. <b>Also in this tier by absence: there is no BIS household-leverage series for the Philippines, no construction cost index and no government bond yield curve in this dataset, so any statement on household leverage, developer margins or discount rates is an estimate.</b> Do not quote these as observations.</span><span class="lang-zh" style="display:none">由作者依已發布序列計算。<b>實質政策利率（政策利率減 CPI 年增）；美元計價的房價重述；分期年均複合成長率；匯款年度合計、其披索換算與占 GDP 比重；國際準備對外債的覆蓋率；政策利率的年內帶寬；由普查與 FIES 水準值推導的家戶規模與儲蓄比率；以及方程式、迴圈圖與可證偽條件，這些是分析框架，不是資料。</b>上述都已在圖說標示。<b>另有因缺席而列入本層的：本資料集沒有菲律賓的 BIS 家庭槓桿序列、營建成本指數和政府公債殖利率曲線，所以任何關於家庭槓桿、發展商毛利或折現率的陳述，都是估計值。</b>不應當作實績引用。</span></p>
+      </div>
+    </div>
+  </div>
+
+  <div class="watch">
+    <h3><span class="lang-en">What to watch</span><span class="lang-zh" style="display:none">觀察重點</span></h3>
+    <ul>
+      <li><b><span class="lang-en">NCR approved mortgage counts, quarterly.</span><span class="lang-zh" style="display:none">首都區房貸核准件數，季頻。</span></b><span class="lang-en"> The single highest-information series in this market. Four quarters above 4,000 rewrites the model; a move below 2,000 brings the distress scenario forward. The latest reading is 2,967 (2Q26).</span><span class="lang-zh" style="display:none"> 本市場資訊量最高的單一序列。連續四季高於 4,000 件，模型要改寫。跌破 2,000 件，壓力情境就提前。最新讀數 2,967 件（2026Q2）。</span></li>
+      <li><b><span class="lang-en">Residential past-due ratio versus commercial.</span><span class="lang-zh" style="display:none">住宅逾期率對照商用類。</span></b><span class="lang-en"> The gap is the whole diagnosis: 8.83% against 2.81% in 2026Q1. Convergence in either direction is the signal.</span><span class="lang-zh" style="display:none"> 兩者的差距就是全部診斷：2026Q1 為 8.83% 對 2.81%。任一方向的收斂，都是訊號。</span></li>
+      <li><b><span class="lang-en">Headline CPI against the policy rate.</span><span class="lang-zh" style="display:none">CPI 年增對照政策利率。</span></b><span class="lang-en"> The market responds to the real rate. September CPI of 7.2% against a policy rate of 5.00% gives a real rate of −2.20%, as deep as April. The next Monetary Board meeting is listed for 22 October (second-hand calendar).</span><span class="lang-zh" style="display:none"> 市場反應的是實質利率。9 月 CPI 7.2%、政策利率 5.00%，實質利率 −2.20%，和 4 月一樣深。下次貨幣委員會會議排在 10 月 22 日（二手轉載的行事曆）。</span></li>
+      <li><b><span class="lang-en">Monthly personal remittances.</span><span class="lang-zh" style="display:none">月頻個人匯款。</span></b><span class="lang-en"> Nineteen increases in twenty annual changes; the one decline was 0.82% in 2020. January–July 2026 is up 2.3%. Two consecutive annual declines remove the only positive term in the equation.</span><span class="lang-zh" style="display:none"> 20 次年度變動中有 19 次成長，唯一的下降是 2020 年的 0.82%。2026 年 1 到 7 月增加 2.3%。連續兩年年度衰退，就會移除方程式中唯一的正向項。</span></li>
+      <li><b><span class="lang-en">PHP per USD and the BIS real effective rate together.</span><span class="lang-zh" style="display:none">披索兌美元與 BIS 實質有效匯率併同觀察。</span></b><span class="lang-en"> A weaker peso with a stable real effective rate is an inflation differential. A weaker peso with a falling real effective rate is something else, and it re-rates every dollar return on this page.</span><span class="lang-zh" style="display:none"> 披索走弱、實質有效匯率持平，是通膨差。披索走弱、實質有效匯率同步下跌，性質不同，會使本頁所有美元計價的報酬重新定價。</span></li>
+      <li><b><span class="lang-en">External debt and reserve coverage, annually.</span><span class="lang-zh" style="display:none">外債與準備覆蓋率，年頻。</span></b><span class="lang-en"> The thirty-three-year deleveraging stopped in 2019. Whether that is a pause or a trend is answerable only in this series. End-September 2026 reserves of US$99.996 billion are the lowest since 2023.</span><span class="lang-zh" style="display:none"> 延續 33 年的去槓桿在 2019 年停止。那是暫停還是趨勢，只有這個序列能回答。2026 年 9 月底的國際準備是 999.96 億美元，為 2023 年以來最低。</span></li>
+      <li><b><span class="lang-en">Any constitutional amendment process reaching a ratification vote.</span><span class="lang-zh" style="display:none">是否有修憲程序進入複決投票。</span></b><span class="lang-en"> Not a proposal, not a committee stage. Until then the 40% ceiling is a constant, not a variable.</span><span class="lang-zh" style="display:none"> 判準是進入複決投票，不是提案或委員會審查階段。在那之前，40% 上限是常數，不是變數。</span></li>
+    </ul>
+  </div>
+
+  <div class="src">
+    <span class="lang-en"><b>Sources.</b> Bangko Sentral ng Pilipinas: policy rate series 1986–2026, headline CPI transcription of PSA data, peso-dollar rates, personal and cash remittances, real-estate exposure of the Philippine banking system, monthly lending rates by type, the Residential Property Price Index and its Table 2 loan counts, and selected external debt ratios. Philippine Statistics Authority: 2018-based CPI, censuses of 2000, 2010, 2015 and 2020 and the 2023 Family Income and Expenditure Survey, retrieved through the OpenSTAT PX-Web API; private building construction statistics for NCR 2025. BIS residential property prices for Makati, nominal and real, and broad effective exchange rates; World Bank real GDP per capita and total population; IMF Global Financial Development Database private credit — all retrieved via FRED (QPHN628BIS, QPHR628BIS, RBPHBIS, NBPHBIS, NYGDPPCAPKDPHL, POPTTLPHA148NRUG, DDDI12PHA156NWDB). The BIS credit-to-households and credit-to-private-non-financial-sector series do not exist for the Philippines; identifiers QPHHAM770A and QPHPAM770A were tested and return no series. Legal texts: 1987 Constitution Article XII Sections 7 and 8; Republic Act 4726 Sections 5 and 6(c); Presidential Decree 471 of 1974; Republic Act 7652 of 1993 as amended by Republic Act 12252 of 2025; Executive Order No. 74 of 5 November 2024 and its Section 2(d) deadline; the Anti-POGO Act of 2025. Colliers Philippines residential market reports for vacancy. Press reports (second-hand): GMA News, Philstar, Manila Bulletin, Daily Tribune and Manila Times for the 27 August 2026 policy-rate decision, July to September 2026 CPI, second-quarter 2026 GDP, end-September 2026 reserves, the 8 October 2026 peso close, the 2026 Anti-POGO procedures, and the Colliers and Leechiu second-quarter 2026 figures. Figures marked as derived are computed by the author from the series above and noted in the chart footnotes. The equation, loop diagram and falsification conditions are the author's analytical framework and are not attributed to any source above.</span>
+    <span class="lang-zh" style="display:none"><b>資料來源。</b>菲律賓央行：政策利率序列 1986–2026、PSA 資料的 CPI 轉載、披索兌美元匯率、個人與現金匯款、菲律賓銀行體系不動產曝險、分類別月頻放款利率、住宅價格指數（RPPI）與其附表 2 的房貸件數，以及外債比率選輯。菲律賓統計局（PSA）：2018 基期 CPI、2000／2010／2015／2020 年人口普查與 2023 年家庭所得與支出調查（經 OpenSTAT PX-Web API 取得），以及首都區 2025 年民間建築工程統計。BIS 馬卡蒂住宅價格指數（名目與實質）與廣義有效匯率；世界銀行實質人均 GDP 與總人口；IMF 全球金融發展資料庫民間信用，都經 FRED 取得（QPHN628BIS、QPHR628BIS、RBPHBIS、NBPHBIS、NYGDPPCAPKDPHL、POPTTLPHA148NRUG、DDDI12PHA156NWDB）。菲律賓沒有 BIS 的家庭信用與民間非金融部門信用序列，代碼 QPHHAM770A 與 QPHPAM770A 實測都查無序列。法規文本：1987 年憲法第十二條第 7、8 項；共和國第 4726 號法第 5 條與第 6(c) 條；1974 年第 471 號總統令；1993 年第 7652 號共和國法及其修正法（2025 年第 12252 號共和國法）；2024 年 11 月 5 日第 74 號行政命令及其第 2(d) 條期限；2025 年《反 POGO 法》。空置率引自 Colliers Philippines 住宅市場報告。媒體報導（二手）：GMA 新聞、Philstar、Manila Bulletin、Daily Tribune 與 Manila Times，提供 2026 年 8 月 27 日的政策利率決議、2026 年 7 到 9 月 CPI、第二季 GDP、9 月底國際準備、10 月 8 日披索收盤價、2026 年反 POGO 作業程序，以及 Colliers 與 Leechiu 的 2026 年第二季數字。標示為推導的數字，由作者依上述序列計算，並在圖說註明。方程式、迴圈圖與可證偽條件是作者的分析框架，不歸屬於上述任何來源。</span>
+  </div>
+
+
+
+
+
+</main>
+
+<footer class="footer">
+  <div class="footer-ornament" aria-hidden="true">
+    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+  </div>
+  <p class="footer-disclaimer">
+    <span class="lang-en"><strong>Independent analysis for reference only</strong> — not investment advice. Sources: BSP · PSA · BIS · World Bank · IMF · Colliers. A project by InvestMQuest.</span>
+    <span class="lang-zh"><strong>獨立分析參考</strong>，不構成投資建議。資料來源：菲律賓央行 · PSA · BIS · 世界銀行 · IMF · Colliers。InvestMQuest 製作。</span>
+  </p>
+</footer>
+
+<script>
+var C = {navy:'#0d2244',navyMid:'#234a86',gold:'#b8924a',goldHi:'#cda85f',goldLight:'#d4b576',
+         green:'#15803d',amber:'#a16207',red:'#b91c1c',blue:'#1d4ed8',muted:'#6b7a92',
+         grid:'#ece5d4',track:'#e5dfd0',text:'#0c1521'};
+var FONT = "Inter, 'Noto Sans TC', sans-serif";
+function ax(o){return Object.assign({color:C.muted,fontFamily:FONT,fontSize:11},o||{});}
+function lg(a,b){return new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:a},{offset:1,color:b}]);}
+function lgh(a,b){return new echarts.graphic.LinearGradient(0,0,1,0,[{offset:0,color:a},{offset:1,color:b}]);}
+var goldBar = {color:lg(C.goldHi,C.gold),borderRadius:[5,5,0,0]};
+var navyBar = {color:lg(C.navyMid,C.navy),borderRadius:[5,5,0,0]};
+var goldBarH = {color:lgh(C.gold,C.goldHi),borderRadius:[0,5,5,0]};
+var navyBarH = {color:lgh(C.navy,C.navyMid),borderRadius:[0,5,5,0]};
+var baseTip = {trigger:'axis',backgroundColor:'#fff',borderColor:C.track,borderWidth:1,padding:[8,11],
+               textStyle:{color:C.navy,fontSize:11,fontFamily:FONT},
+               extraCssText:'box-shadow:0 8px 24px rgba(13,34,68,.10);border-radius:8px'};
+var baseLegend = {top:0,right:4,itemWidth:9,itemHeight:9,itemGap:14,icon:'roundRect',textStyle:ax({fontSize:10.5})};
+function catAxis(d,o){return Object.assign({type:'category',data:d,boundaryGap:true,axisLine:{lineStyle:{color:C.track}},axisTick:{show:false},axisLabel:ax({fontSize:10})},o||{});}
+function valAxis(o){return Object.assign({type:'value',axisLine:{show:false},axisTick:{show:false},splitLine:{lineStyle:{color:C.grid,type:'dashed'}},axisLabel:ax()},o||{});}
+function lbl(o){return Object.assign({show:true,color:C.navy,fontFamily:FONT,fontSize:10,fontWeight:600},o||{});}
+
+var POLY_K=["1986","1987","1988","1989","1990","1991","1992","1993","1994","1995","1996","1997","1998","1999","2000","2001","2002","2003","2004","2005","2006","2007","2008","2009","2010","2011","2012","2013","2014","2015","2016","2017","2018","2019","2020","2021","2022","2023","2024","2025","2026"];
+var POLY_M=[9.25,7.35,8.86,13.62,11.91,8.12,10.51,11.28,10.43,11.3,11.91,12.6,13.78,10.01,10.79,9.35,7.06,6.88,6.75,7.08,7.5,6.62,5.46,4.31,4.0,4.38,3.85,3.5,3.71,4.0,3.42,3.0,3.73,4.4,2.65,2.0,3.23,6.23,6.31,5.23,4.61];
+var POLY_LO=[5.0,5.0,5.0,8.0,4.12,4.5,4.5,9.12,8.0,7.25,10.25,9.9,13.0,8.75,8.75,7.75,7.0,6.75,6.75,6.75,7.5,5.25,5.0,4.0,4.0,4.0,3.5,3.5,3.5,4.0,3.0,3.0,3.0,4.0,2.0,2.0,2.0,5.5,5.75,4.5,4.25];
+var POLY_HI=[15.0,13.0,22.0,27.5,21.56,16.5,15.5,13.0,12.5,25.0,14.0,20.0,16.0,12.88,15.0,12.0,7.5,7.0,6.75,7.5,7.5,7.5,6.0,5.0,4.0,4.5,4.25,3.5,4.0,4.0,4.0,3.0,4.75,4.75,4.0,2.0,5.5,6.5,6.5,5.75,5.0];
+var RR_K=["2014-01","2014-02","2014-03","2014-04","2014-05","2014-06","2014-07","2014-08","2014-09","2014-10","2014-11","2014-12","2015-01","2015-02","2015-03","2015-04","2015-05","2015-06","2015-07","2015-08","2015-09","2015-10","2015-11","2015-12","2016-01","2016-02","2016-03","2016-04","2016-05","2016-06","2016-07","2016-08","2016-09","2016-10","2016-11","2016-12","2017-01","2017-02","2017-03","2017-04","2017-05","2017-06","2017-07","2017-08","2017-09","2017-10","2017-11","2017-12","2018-01","2018-02","2018-03","2018-04","2018-05","2018-06","2018-07","2018-08","2018-09","2018-10","2018-11","2018-12","2019-01","2019-02","2019-03","2019-04","2019-05","2019-06","2019-07","2019-08","2019-09","2019-10","2019-11","2019-12","2020-01","2020-02","2020-03","2020-04","2020-05","2020-06","2020-07","2020-08","2020-09","2020-10","2020-11","2020-12","2021-01","2021-02","2021-03","2021-04","2021-05","2021-06","2021-07","2021-08","2021-09","2021-10","2021-11","2021-12","2022-01","2022-02","2022-03","2022-04","2022-05","2022-06","2022-07","2022-08","2022-09","2022-10","2022-11","2022-12","2023-01","2023-02","2023-03","2023-04","2023-05","2023-06","2023-07","2023-08","2023-09","2023-10","2023-11","2023-12","2024-01","2024-02","2024-03","2024-04","2024-05","2024-06","2024-07","2024-08","2024-09","2024-10","2024-11","2024-12","2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07","2026-08","2026-09"];
+var RR_CPI=[3.75,3.64,3.54,3.63,4.03,3.81,4.19,4.18,3.87,3.68,2.98,1.91,1.52,1.52,1.52,1.42,0.94,0.56,0.19,0.0,-0.37,-0.19,0.28,0.75,0.75,0.47,0.56,0.65,0.94,1.31,1.31,1.31,1.68,1.78,2.05,2.23,2.51,3.07,3.07,3.16,2.87,2.49,2.4,2.58,3.04,3.12,3.01,2.91,3.37,3.74,4.27,4.31,4.62,5.04,5.79,6.55,6.93,6.85,6.07,5.17,4.42,3.78,3.35,3.24,3.23,2.72,2.2,1.38,0.49,0.59,1.18,2.37,2.96,2.46,2.16,1.76,1.57,2.25,2.44,2.24,2.24,2.33,3.0,3.28,3.73,4.23,4.14,4.14,4.14,3.74,3.72,4.39,4.19,3.99,3.67,3.08,3.04,3.04,3.97,4.9,5.37,6.09,6.43,6.31,6.86,7.67,7.99,8.05,8.68,8.59,7.64,6.61,6.15,5.4,4.66,5.33,6.08,4.92,4.12,3.94,2.8,3.38,3.72,3.8,3.89,3.72,4.37,3.35,1.94,2.26,2.5,2.9,2.88,2.07,1.75,1.43,1.27,1.35,0.95,1.5,1.74,1.66,1.5,1.8,2.02,2.42,4.07,7.23,6.76,6.36,6.2,6.1,7.2];
+var RR_POL=[3.5,3.5,3.5,3.5,3.5,3.5,3.75,3.75,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,4.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.0,3.25,3.5,3.5,4.0,4.5,4.5,4.75,4.75,4.75,4.75,4.75,4.75,4.5,4.5,4.5,4.25,4.0,4.0,4.0,4.0,4.0,3.75,3.25,2.75,2.75,2.25,2.25,2.25,2.25,2.25,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.25,2.5,3.25,3.75,4.25,4.25,5.0,5.5,5.5,6.0,6.25,6.25,6.25,6.25,6.25,6.25,6.25,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.25,6.25,6.0,6.0,5.75,5.75,5.75,5.75,5.5,5.5,5.25,5.25,5.0,5.0,4.75,4.75,4.5,4.5,4.25,4.25,4.5,4.5,4.75,4.75,5.0,5.0];
+var RR_REAL=[-0.25,-0.14,-0.04,-0.13,-0.53,-0.31,-0.44,-0.43,0.13,0.32,1.02,2.09,2.48,2.48,2.48,2.58,3.06,3.44,3.81,4.0,4.37,4.19,3.72,3.25,3.25,3.53,3.44,3.35,3.06,1.69,1.69,1.69,1.32,1.22,0.95,0.77,0.49,-0.07,-0.07,-0.16,0.13,0.51,0.6,0.42,-0.04,-0.12,-0.01,0.09,-0.37,-0.74,-1.27,-1.31,-1.37,-1.54,-2.29,-2.55,-2.43,-2.35,-1.32,-0.42,0.33,0.97,1.4,1.51,1.27,1.78,2.3,2.87,3.51,3.41,2.82,1.63,1.04,1.29,1.09,0.99,1.18,-0.0,-0.19,0.01,0.01,-0.08,-1.0,-1.28,-1.73,-2.23,-2.14,-2.14,-2.14,-1.74,-1.72,-2.39,-2.19,-1.99,-1.67,-1.08,-1.04,-1.04,-1.97,-2.9,-3.12,-3.59,-3.18,-2.56,-2.61,-3.42,-2.99,-2.55,-3.18,-2.59,-1.39,-0.36,0.1,0.85,1.59,0.92,0.17,1.58,2.38,2.56,3.7,3.12,2.78,2.7,2.61,2.78,2.13,2.9,4.31,3.74,3.5,2.85,2.87,3.68,4.0,4.07,4.23,3.9,4.3,3.5,3.26,3.09,3.25,2.7,2.48,1.83,0.18,-2.73,-2.26,-1.61,-1.45,-1.1,-2.2];
+var HP_K=["2008Q1","2008Q2","2008Q3","2008Q4","2009Q1","2009Q2","2009Q3","2009Q4","2010Q1","2010Q2","2010Q3","2010Q4","2011Q1","2011Q2","2011Q3","2011Q4","2012Q1","2012Q2","2012Q3","2012Q4","2013Q1","2013Q2","2013Q3","2013Q4","2014Q1","2014Q2","2014Q3","2014Q4","2015Q1","2015Q2","2015Q3","2015Q4","2016Q1","2016Q2","2016Q3","2016Q4","2017Q1","2017Q2","2017Q3","2017Q4","2018Q1","2018Q2","2018Q3","2018Q4","2019Q1","2019Q2","2019Q3","2019Q4","2020Q1","2020Q2","2020Q3","2020Q4","2021Q1","2021Q2","2021Q3","2021Q4","2022Q1","2022Q2","2022Q3","2022Q4","2023Q1","2023Q2","2023Q3","2023Q4","2024Q1","2024Q2","2024Q3","2024Q4","2025Q1","2025Q2","2025Q3","2025Q4","2026Q1"];
+var HP_NOM=[95.8,100.8,101.1,100.9,100.2,100.2,98.9,98.4,98.4,99.3,100.8,101.5,102.4,105.2,106.3,108.3,113.1,114.5,115.1,117.0,121.4,125.7,130.0,134.4,137.7,141.1,144.4,147.8,151.5,155.2,158.9,162.6,168.1,175.6,172.4,174.9,179.3,175.9,175.5,184.5,182.5,183.9,183.3,185.5,188.1,195.2,196.1,201.8,202.6,212.0,208.5,209.7,210.9,217.1,219.0,223.0,230.1,238.0,249.4,251.9,253.4,263.0,267.8,259.9,272.2,283.8,288.1,285.3,292.8,305.2,293.5,289.8,306.0];
+var HP_REAL=[107.8,109.6,106.8,107.0,105.4,104.4,102.3,100.7,99.6,99.7,100.4,100.3,99.2,100.6,101.1,102.3,106.1,106.4,105.8,107.3,110.7,114.1,117.0,119.6,121.2,123.4,124.9,127.9,131.4,134.4,137.5,140.4,144.8,150.6,147.0,148.0,150.2,146.8,145.8,151.6,147.3,146.6,143.1,143.7,146.2,150.9,151.0,154.2,153.6,161.0,157.0,155.8,153.7,158.4,158.3,159.9,162.2,164.7,169.3,167.4,164.9,171.6,172.5,165.6,171.5,178.4,179.8,177.3,180.4,189.3,180.7,177.1,183.4];
+var HP_USD=[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,100.0,102.3,100.4,104.2,102.2,106.3,111.4,110.3,115.0,117.5,116.6,116.1,117.7,125.8,122.6,120.7,120.6,118.6,116.2,119.3,118.9,118.6,115.3,115.9,120.4,125.5,128.8,132.4,133.3,140.4,141.9,145.1,146.8,150.3,145.7,147.1,150.3,152.9,149.9,144.7,155.6,158.1,163.5,153.0,161.8,164.8,164.5,164.1,168.0,181.7,171.6,164.5,174.0];
+var MR_K=["2020-01","2020-02","2020-03","2020-04","2020-05","2020-06","2020-07","2020-08","2020-09","2020-10","2020-11","2020-12","2021-01","2021-02","2021-03","2021-04","2021-05","2021-06","2021-07","2021-08","2021-09","2021-10","2021-11","2021-12","2022-01","2022-02","2022-03","2022-04","2022-05","2022-06","2022-07","2022-08","2022-09","2022-10","2022-11","2022-12","2023-01","2023-02","2023-03","2023-04","2023-05","2023-06","2023-07","2023-08","2023-09","2023-10","2023-11","2023-12","2024-01","2024-02","2024-03","2024-04","2024-05","2024-06","2024-07","2024-08","2024-09","2024-10","2024-11","2024-12","2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10"];
+var MR_LO=[6.84,6.78,6.98,7.02,6.53,6.77,6.93,6.57,6.61,6.56,6.58,6.7,6.69,6.73,6.54,6.42,6.45,6.4,6.33,6.4,6.41,6.29,6.36,6.31,6.4,6.34,6.36,6.16,6.28,6.33,6.17,6.38,6.24,6.84,6.63,7.15,7.09,7.2,7.35,7.37,7.45,7.43,7.49,7.32,7.18,7.21,7.23,7.28,7.72,7.37,7.36,7.48,7.35,7.4,7.61,7.37,7.4,7.14,7.18,7.16,7.25,7.29,7.1,7.21,7.27,7.24,7.28,7.37,7.38,7.17];
+var MR_HI=[10.21,10.1,9.29,8.77,9.0,9.1,9.03,8.73,8.99,9.1,9.05,9.14,8.96,8.9,8.78,8.81,9.32,8.79,9.44,9.04,8.69,8.86,9.09,8.63,8.45,8.41,8.53,8.27,8.6,8.42,8.35,8.98,8.72,8.96,8.85,9.55,9.18,9.01,9.33,9.69,9.29,9.46,9.61,9.29,9.29,9.21,9.77,9.12,9.59,9.4,9.27,9.68,9.2,10.12,9.76,9.31,9.55,9.15,9.7,8.88,8.66,9.25,9.25,9.0,8.94,8.69,8.89,8.91,9.01,8.8];
+var MR_POL=[4.0,3.75,3.25,2.75,2.75,2.25,2.25,2.25,2.25,2.25,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.0,2.25,2.5,3.25,3.75,4.25,4.25,5.0,5.5,5.5,6.0,6.25,6.25,6.25,6.25,6.25,6.25,6.25,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.5,6.25,6.25,6.0,6.0,5.75,5.75,5.75,5.75,5.5,5.5,5.25,5.25,5.0,5.0,4.75];
+var LN_K=["2019Q1","2019Q2","2019Q3","2019Q4","2020Q1","2020Q2","2020Q3","2020Q4","2021Q1","2021Q2","2021Q3","2021Q4","2022Q1","2022Q2","2022Q3","2022Q4","2023Q1","2023Q2","2023Q3","2023Q4","2024Q1","2024Q2","2024Q3","2024Q4","2025Q1","2025Q2","2025Q3","2025Q4","2026Q1","2026Q2"];
+var LN_NCR=[4490,4525,6416,6494,5107,2393,3435,4632,3988,3581,3672,4648,2681,2783,3612,2879,2478,2445,3277,3621,2388,2422,2648,3658,2435,2672,2865,3069,2620,2967];
+var LN_AON=[6067,5997,6767,7025,5222,1693,3952,6923,4244,4401,6190,6957,5377,5365,6123,6547,6153,5992,7042,8183,6676,5742,6110,7700,6453,6695,8047,8758,6383,6688];
+var GDP_K=["1960","1961","1962","1963","1964","1965","1966","1967","1968","1969","1970","1971","1972","1973","1974","1975","1976","1977","1978","1979","1980","1981","1982","1983","1984","1985","1986","1987","1988","1989","1990","1991","1992","1993","1994","1995","1996","1997","1998","1999","2000","2001","2002","2003","2004","2005","2006","2007","2008","2009","2010","2011","2012","2013","2014","2015","2016","2017","2018","2019","2020","2021","2022","2023","2024","2025"];
+var GDP_V=[1124.0,1151.0,1169.0,1212.0,1215.0,1241.0,1258.0,1285.0,1312.0,1335.0,1349.0,1388.0,1431.0,1522.0,1540.0,1587.0,1684.0,1731.0,1772.0,1822.0,1868.0,1882.0,1898.0,1879.0,1697.0,1538.0,1551.0,1577.0,1638.0,1696.0,1704.0,1656.0,1624.0,1620.0,1655.0,1694.0,1752.0,1800.0,1747.0,1759.0,1793.0,1808.0,1837.0,1893.0,1978.0,2038.0,2110.0,2209.0,2265.0,2257.0,2373.0,2417.0,2534.0,2654.0,2777.0,2910.0,3076.0,3247.0,3411.0,3576.0,3199.0,3351.0,3578.0,3745.0,3926.0,4066.0];
+var POP_K=["1950","1951","1952","1953","1954","1955","1956","1957","1958","1959","1960","1961","1962","1963","1964","1965","1966","1967","1968","1969","1970","1971","1972","1973","1974","1975","1976","1977","1978","1979","1980","1981","1982","1983","1984","1985","1986","1987","1988","1989","1990","1991","1992","1993","1994","1995","1996","1997","1998","1999","2000","2001","2002","2003","2004","2005","2006","2007","2008","2009","2010","2011","2012","2013","2014","2015","2016","2017","2018","2019","2020","2021","2022","2023"];
+var POP_V=[20.59,21.22,21.87,22.53,23.22,23.93,24.66,25.41,26.18,26.98,27.8,28.66,29.55,30.48,31.43,32.42,33.43,34.46,35.5,36.55,37.62,38.52,39.41,40.29,41.17,42.12,43.2,44.37,45.58,46.81,48.04,49.31,50.7,52.19,53.73,55.21,56.65,58.16,59.74,61.27,62.85,64.38,65.93,67.53,69.02,70.55,72.19,73.91,75.79,77.75,79.63,81.4,83.07,84.73,86.39,88.02,89.51,91.08,92.7,94.38,96.34,98.25,100.18,102.08,103.77,105.31,106.74,108.12,109.47,110.8,112.08,113.1,113.96,114.89];
+var POP_NCR=[null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,9.93,null,null,null,null,null,null,null,null,null,11.86,null,null,null,null,12.88,null,null,null,null,13.48,null,null,null];
+var RM_K=["2005","2006","2007","2008","2009","2010","2011","2012","2013","2014","2015","2016","2017","2018","2019","2020","2021","2022","2023","2024","2025"];
+var RM_USD=[13.09,14.99,15.85,18.06,19.08,20.56,21.92,23.35,25.37,27.27,28.31,29.71,31.29,32.21,33.47,33.19,34.88,36.14,37.21,38.34,39.62];
+var RM_PHP=[null,null,null,null,null,null,null,null,1.08,1.21,1.29,1.41,1.58,1.7,1.73,1.65,1.72,1.97,2.07,2.2,2.28];
+var ED_K=["1985","1986","1987","1988","1989","1990","1991","1992","1993","1994","1995","1996","1997","1998","1999","2000","2001","2002","2003","2004","2005","2006","2007","2008","2009","2010","2011","2012","2013","2014","2015","2016","2017","2018","2019","2020","2021","2022","2023","2024","2025"];
+var ED_GDP=[75.5,85.9,80.9,67.9,59.2,56.4,58.1,51.2,56.2,51.3,44.7,42.3,45.8,62.2,59.7,61.4,65.9,63.8,66.1,57.9,57.3,48.1,42.6,36.0,36.8,35.3,32.3,30.5,27.6,26.1,25.3,23.5,22.3,22.8,22.2,27.2,27.0,27.5,28.7,29.8,30.3];
+var ED_COV=[4.1,8.6,6.6,7.2,8.3,7.2,15.0,17.3,17.0,19.0,20.6,29.4,20.4,23.4,29.4,29.3,30.1,30.4,29.6,29.5,30.0,37.4,50.7,57.6,68.3,84.8,99.6,104.9,106.0,102.4,104.1,107.9,111.6,100.3,105.0,111.8,102.2,86.4,82.7,77.2,75.1];
+var PC_K=["1960","1961","1962","1963","1964","1965","1966","1967","1968","1969","1970","1971","1972","1973","1974","1975","1976","1977","1978","1979","1980","1981","1982","1983","1984","1985","1986","1987","1988","1989","1990","1991","1992","1993","1994","1995","1996","1997","1998","1999","2000","2001","2002","2003","2004","2005","2006","2007","2008","2009","2010","2011","2012","2013","2014","2015","2016","2017","2018","2019","2020","2021"];
+var PC_V=[14.3,18.5,19.7,21.3,23.2,22.2,22.5,25.4,25.6,25.4,25.3,25.2,26.7,27.1,27.3,27.9,29.5,31.5,34.2,36.2,37.2,40.2,41.1,45.4,30.9,23.7,15.3,16.3,16.5,17.9,19.5,18.8,21.9,28.0,31.5,39.5,48.0,54.4,46.7,41.7,39.7,36.3,33.7,31.9,31.0,27.9,27.6,26.6,27.9,27.9,28.3,30.5,31.9,34.3,37.6,39.9,42.9,62.3,63.3,64.8,71.8,70.7];
+var RE_K=["2013Q1","2013Q2","2013Q3","2013Q4","2014Q1","2014Q2","2014Q3","2014Q4","2015Q1","2015Q2","2015Q3","2015Q4","2016Q1","2016Q2","2016Q3","2016Q4","2017Q1","2017Q2","2017Q3","2017Q4","2018Q1","2018Q2","2018Q3","2018Q4","2019Q1","2019Q2","2019Q3","2019Q4","2020Q1","2020Q2","2020Q3","2020Q4","2021Q1","2021Q2","2021Q3","2021Q4","2022Q1","2022Q2","2022Q3","2022Q4","2023Q1","2023Q2","2023Q3","2023Q4","2024Q1","2024Q2","2024Q3","2024Q4","2025Q1","2025Q2","2025Q3","2025Q4","2026Q1"];
+var RE_RES=[281.0,296.0,308.0,322.0,328.0,351.0,384.0,400.0,413.0,411.0,427.0,446.0,462.0,481.0,506.0,530.0,542.0,561.0,586.0,608.0,624.0,645.0,649.0,676.0,700.0,714.0,734.0,764.0,761.0,788.0,816.0,834.0,841.0,850.0,860.0,896.0,909.0,920.0,933.0,945.0,950.0,958.0,987.0,1008.0,1022.0,1043.0,1066.0,1105.0,1134.0,1160.0,1188.0,1205.0,1229.0];
+var RE_PDR=[3.85,3.44,3.58,3.27,3.44,3.55,3.31,3.49,3.85,3.6,3.49,3.48,3.55,3.5,3.37,3.33,3.44,3.52,3.47,3.44,5.11,5.3,5.31,5.89,5.75,6.1,6.07,5.74,7.03,8.3,13.73,12.2,12.88,12.54,12.52,12.04,11.9,11.02,10.2,9.94,10.05,9.87,9.66,9.45,9.18,9.38,9.84,9.03,9.49,9.36,9.29,8.98,8.83];
+var RE_PDC=[3.69,3.64,3.74,2.81,2.72,2.52,2.6,2.54,2.31,1.96,2.02,1.85,1.7,1.63,1.51,1.4,1.52,1.37,1.17,1.08,1.24,1.46,1.54,1.23,1.23,1.36,1.28,1.1,1.29,2.02,2.24,2.15,2.81,2.91,2.95,2.61,2.85,2.52,2.62,2.33,2.35,2.27,2.39,2.31,2.53,2.49,2.43,2.21,2.29,2.52,2.53,2.19,2.81];
+var FX_K=["2013-01","2013-02","2013-03","2013-04","2013-05","2013-06","2013-07","2013-08","2013-09","2013-10","2013-11","2013-12","2014-01","2014-02","2014-03","2014-04","2014-05","2014-06","2014-07","2014-08","2014-09","2014-10","2014-11","2014-12","2015-01","2015-02","2015-03","2015-04","2015-05","2015-06","2015-07","2015-08","2015-09","2015-10","2015-11","2015-12","2016-01","2016-02","2016-03","2016-04","2016-05","2016-06","2016-07","2016-08","2016-09","2016-10","2016-11","2016-12","2017-01","2017-02","2017-03","2017-04","2017-05","2017-06","2017-07","2017-08","2017-09","2017-10","2017-11","2017-12","2018-01","2018-02","2018-03","2018-04","2018-05","2018-06","2018-07","2018-08","2018-09","2018-10","2018-11","2018-12","2019-01","2019-02","2019-03","2019-04","2019-05","2019-06","2019-07","2019-08","2019-09","2019-10","2019-11","2019-12","2020-01","2020-02","2020-03","2020-04","2020-05","2020-06","2020-07","2020-08","2020-09","2020-10","2020-11","2020-12","2021-01","2021-02","2021-03","2021-04","2021-05","2021-06","2021-07","2021-08","2021-09","2021-10","2021-11","2021-12","2022-01","2022-02","2022-03","2022-04","2022-05","2022-06","2022-07","2022-08","2022-09","2022-10","2022-11","2022-12","2023-01","2023-02","2023-03","2023-04","2023-05","2023-06","2023-07","2023-08","2023-09","2023-10","2023-11","2023-12","2024-01","2024-02","2024-03","2024-04","2024-05","2024-06","2024-07","2024-08","2024-09","2024-10","2024-11","2024-12","2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-03","2026-04","2026-05","2026-06"];
+var FX_V=[40.65,40.74,40.94,41.16,42.38,43.31,43.4,44.63,43.31,43.18,43.74,44.41,45.16,44.66,45.0,44.46,43.93,43.78,43.42,43.65,44.97,44.88,44.92,44.62,44.13,44.09,44.8,44.25,44.65,45.2,45.62,46.7,46.93,46.89,47.07,47.17,47.82,47.56,46.11,46.77,46.77,46.96,47.09,46.47,48.26,48.52,49.78,49.81,49.81,50.27,50.19,49.7,49.87,50.47,50.58,51.17,51.07,51.8,50.37,49.92,51.42,52.03,52.21,51.97,52.69,53.52,53.26,53.43,54.25,53.61,52.61,52.72,52.35,52.01,52.78,52.11,52.26,51.36,51.01,52.34,52.04,51.03,50.8,50.74,50.9,50.94,51.04,50.59,50.73,49.85,49.22,48.62,48.47,48.4,48.1,48.04,48.12,48.64,48.47,48.39,47.9,48.54,50.34,50.04,50.96,50.77,50.46,50.77,51.27,51.29,51.96,52.16,52.24,55.02,55.72,56.24,58.91,58.29,56.8,56.12,54.55,55.31,54.43,55.74,56.26,55.36,54.85,56.7,56.96,56.9,55.33,55.57,56.34,56.19,56.28,57.7,58.62,58.87,58.65,56.29,55.89,58.25,58.69,58.01,58.36,57.9,57.38,56.25,55.7,56.58,57.31,57.09,58.04,59.0,58.79,58.8,58.89,57.55,60.74,61.51,61.65,61.23];
+var XR_K=["1994-01","1994-02","1994-03","1994-04","1994-05","1994-06","1994-07","1994-08","1994-09","1994-10","1994-11","1994-12","1995-01","1995-02","1995-03","1995-04","1995-05","1995-06","1995-07","1995-08","1995-09","1995-10","1995-11","1995-12","1996-01","1996-02","1996-03","1996-04","1996-05","1996-06","1996-07","1996-08","1996-09","1996-10","1996-11","1996-12","1997-01","1997-02","1997-03","1997-04","1997-05","1997-06","1997-07","1997-08","1997-09","1997-10","1997-11","1997-12","1998-01","1998-02","1998-03","1998-04","1998-05","1998-06","1998-07","1998-08","1998-09","1998-10","1998-11","1998-12","1999-01","1999-02","1999-03","1999-04","1999-05","1999-06","1999-07","1999-08","1999-09","1999-10","1999-11","1999-12","2000-01","2000-02","2000-03","2000-04","2000-05","2000-06","2000-07","2000-08","2000-09","2000-10","2000-11","2000-12","2001-01","2001-02","2001-03","2001-04","2001-05","2001-06","2001-07","2001-08","2001-09","2001-10","2001-11","2001-12","2002-01","2002-02","2002-03","2002-04","2002-05","2002-06","2002-07","2002-08","2002-09","2002-10","2002-11","2002-12","2003-01","2003-02","2003-03","2003-04","2003-05","2003-06","2003-07","2003-08","2003-09","2003-10","2003-11","2003-12","2004-01","2004-02","2004-03","2004-04","2004-05","2004-06","2004-07","2004-08","2004-09","2004-10","2004-11","2004-12","2005-01","2005-02","2005-03","2005-04","2005-05","2005-06","2005-07","2005-08","2005-09","2005-10","2005-11","2005-12","2006-01","2006-02","2006-03","2006-04","2006-05","2006-06","2006-07","2006-08","2006-09","2006-10","2006-11","2006-12","2007-01","2007-02","2007-03","2007-04","2007-05","2007-06","2007-07","2007-08","2007-09","2007-10","2007-11","2007-12","2008-01","2008-02","2008-03","2008-04","2008-05","2008-06","2008-07","2008-08","2008-09","2008-10","2008-11","2008-12","2009-01","2009-02","2009-03","2009-04","2009-05","2009-06","2009-07","2009-08","2009-09","2009-10","2009-11","2009-12","2010-01","2010-02","2010-03","2010-04","2010-05","2010-06","2010-07","2010-08","2010-09","2010-10","2010-11","2010-12","2011-01","2011-02","2011-03","2011-04","2011-05","2011-06","2011-07","2011-08","2011-09","2011-10","2011-11","2011-12","2012-01","2012-02","2012-03","2012-04","2012-05","2012-06","2012-07","2012-08","2012-09","2012-10","2012-11","2012-12","2013-01","2013-02","2013-03","2013-04","2013-05","2013-06","2013-07","2013-08","2013-09","2013-10","2013-11","2013-12","2014-01","2014-02","2014-03","2014-04","2014-05","2014-06","2014-07","2014-08","2014-09","2014-10","2014-11","2014-12","2015-01","2015-02","2015-03","2015-04","2015-05","2015-06","2015-07","2015-08","2015-09","2015-10","2015-11","2015-12","2016-01","2016-02","2016-03","2016-04","2016-05","2016-06","2016-07","2016-08","2016-09","2016-10","2016-11","2016-12","2017-01","2017-02","2017-03","2017-04","2017-05","2017-06","2017-07","2017-08","2017-09","2017-10","2017-11","2017-12","2018-01","2018-02","2018-03","2018-04","2018-05","2018-06","2018-07","2018-08","2018-09","2018-10","2018-11","2018-12","2019-01","2019-02","2019-03","2019-04","2019-05","2019-06","2019-07","2019-08","2019-09","2019-10","2019-11","2019-12","2020-01","2020-02","2020-03","2020-04","2020-05","2020-06","2020-07","2020-08","2020-09","2020-10","2020-11","2020-12","2021-01","2021-02","2021-03","2021-04","2021-05","2021-06","2021-07","2021-08","2021-09","2021-10","2021-11","2021-12","2022-01","2022-02","2022-03","2022-04","2022-05","2022-06","2022-07","2022-08","2022-09","2022-10","2022-11","2022-12","2023-01","2023-02","2023-03","2023-04","2023-05","2023-06","2023-07","2023-08","2023-09","2023-10","2023-11","2023-12","2024-01","2024-02","2024-03","2024-04","2024-05","2024-06","2024-07","2024-08","2024-09","2024-10","2024-11","2024-12","2025-01","2025-02","2025-03","2025-04","2025-05","2025-06","2025-07","2025-08","2025-09","2025-10","2025-11","2025-12","2026-01","2026-02","2026-03","2026-04","2026-05","2026-06","2026-07"];
+var XR_R=[86.2,86.0,85.2,84.9,86.5,86.3,87.3,87.9,88.6,89.9,94.0,95.3,94.4,93.0,87.4,84.3,85.5,86.4,88.2,90.7,92.6,92.1,92.0,92.1,95.7,96.0,96.0,96.3,96.5,97.5,97.8,97.8,97.9,98.6,98.2,99.5,101.6,103.6,104.5,104.5,103.1,103.4,100.0,96.4,87.9,83.5,85.5,83.5,75.9,79.2,82.4,83.6,83.3,84.0,81.4,80.1,76.9,75.3,81.7,82.8,85.6,85.8,86.6,87.6,88.7,89.2,88.2,84.6,82.0,81.5,81.5,80.9,83.9,84.9,83.8,83.4,83.6,81.3,79.0,78.8,77.5,74.5,73.5,74.0,73.6,77.8,78.5,76.5,76.0,75.5,73.9,74.6,75.0,75.1,75.5,76.6,78.4,78.7,78.7,78.2,78.6,76.7,75.3,74.2,74.0,73.5,72.1,71.8,70.4,70.0,69.4,71.9,70.8,70.3,70.2,68.8,67.8,66.6,66.1,65.5,65.0,64.1,64.6,65.0,66.2,66.3,67.0,67.7,67.2,66.3,65.3,65.2,66.4,67.4,67.4,68.2,68.7,69.0,69.2,68.7,68.6,70.3,73.0,74.3,74.7,76.6,77.4,76.2,73.5,73.5,74.9,76.2,77.8,78.9,78.4,78.3,80.2,80.6,79.6,80.3,82.0,83.5,84.1,82.7,82.1,84.3,85.1,89.1,90.7,90.3,87.5,87.0,85.9,84.5,83.7,85.7,83.6,83.3,83.2,83.6,86.0,87.2,86.6,86.1,85.5,84.4,83.8,82.8,82.2,83.5,83.0,85.0,85.8,86.0,86.9,89.3,88.5,88.0,86.7,88.0,88.8,87.8,88.3,88.4,87.0,88.5,88.2,88.0,87.5,87.3,88.0,88.0,88.1,88.4,89.1,88.8,89.0,89.9,90.2,91.0,91.0,92.8,94.8,94.2,93.7,94.0,95.2,95.2,96.9,97.7,98.5,97.9,98.1,94.8,94.8,93.2,93.7,94.0,94.2,94.2,93.2,93.1,93.0,93.0,94.6,95.2,96.2,95.9,96.3,95.7,97.3,99.2,100.7,101.9,102.0,101.6,100.6,100.4,100.8,100.0,99.0,99.2,99.4,99.5,99.7,97.8,98.6,97.7,97.7,98.2,97.2,97.0,95.2,94.6,95.3,96.5,96.2,94.9,94.3,94.6,94.2,93.3,91.8,90.1,89.8,89.9,91.0,91.4,89.9,86.9,87.0,87.7,88.8,88.6,90.2,91.6,91.1,91.9,94.0,93.0,92.8,92.7,92.3,93.5,93.8,94.3,95.5,94.4,94.7,95.5,96.6,96.8,96.4,97.2,98.3,100.5,100.5,100.3,101.3,101.3,101.3,101.0,101.2,100.8,101.1,100.5,101.2,101.3,101.6,101.3,98.8,99.1,98.5,97.8,98.9,99.3,98.1,97.3,97.1,99.1,100.7,99.3,97.3,97.8,97.7,98.5,99.5,100.0,100.2,101.0,101.8,99.6,100.0,101.2,102.4,101.9,103.2,103.7,104.5,103.5,103.9,104.4,105.0,104.1,102.5,101.3,102.0,101.8,101.6,100.5,100.8,102.6,103.7,103.0,103.2,102.8,103.1,100.8,99.9,100.4,99.8,98.6,98.5,98.6,98.5,99.0,99.2,99.7,97.2,98.1,97.9];
+var XR_N=[160.5,159.4,159.4,159.6,162.4,162.5,163.0,164.3,165.8,168.6,176.6,179.4,175.6,171.9,161.7,156.4,158.2,158.9,161.1,164.8,166.3,165.6,165.1,165.4,167.5,167.8,167.8,168.5,168.7,169.7,169.7,169.0,169.8,170.8,170.2,171.4,173.6,176.8,177.5,178.7,176.1,174.7,168.6,162.1,148.1,140.2,142.5,138.7,124.7,128.7,133.1,134.9,133.1,132.2,127.7,125.2,120.4,118.0,126.5,128.1,129.8,130.2,131.8,134.0,135.8,135.3,133.6,128.3,124.3,123.2,122.9,121.9,122.5,123.9,122.5,121.8,122.0,118.4,114.4,113.9,112.4,107.5,105.0,104.9,103.8,109.3,110.5,108.1,107.5,105.9,103.0,103.9,104.5,104.5,104.5,105.7,108.0,108.6,108.4,108.2,108.7,105.8,103.3,101.7,101.6,101.0,99.2,98.6,97.0,96.1,95.5,98.8,97.2,95.6,95.3,93.5,92.5,90.8,90.1,89.0,87.9,86.8,87.4,88.0,89.5,88.5,88.4,89.0,88.1,87.2,85.3,84.5,85.4,86.9,87.2,88.0,88.3,88.0,87.8,87.0,87.0,89.0,91.6,93.0,93.0,94.9,95.8,94.5,91.3,90.8,92.3,93.8,95.9,96.9,96.2,96.1,97.9,98.8,97.8,98.9,101.0,102.5,102.9,101.3,100.8,103.8,104.8,109.1,109.8,109.8,105.8,104.3,102.3,99.7,98.0,99.8,97.5,97.3,96.5,96.8,98.8,99.9,99.2,98.3,97.6,95.9,95.0,94.2,93.2,94.5,93.5,95.5,96.3,96.6,97.5,99.9,99.2,98.2,96.6,97.8,98.9,98.4,98.3,98.2,96.6,97.5,97.2,97.0,96.5,95.7,96.7,96.9,97.1,97.2,97.6,97.5,97.5,98.7,99.2,99.7,99.8,101.1,103.0,101.9,101.7,102.2,103.3,103.6,105.2,106.4,107.2,106.4,106.7,102.7,102.5,101.0,101.4,101.6,101.4,100.7,99.4,99.5,99.6,99.8,101.3,101.7,102.2,101.8,102.2,101.7,103.4,105.6,106.9,108.5,109.0,108.5,107.8,107.6,107.9,107.2,106.5,106.6,106.2,106.3,106.1,104.9,105.8,104.7,104.5,104.9,103.6,103.5,101.7,101.1,101.3,102.3,102.0,100.3,99.7,99.8,99.5,98.7,96.9,95.2,94.6,94.6,95.3,95.9,93.6,90.3,89.8,90.2,91.3,90.8,91.8,92.7,91.6,92.4,94.6,94.1,93.6,94.0,93.6,94.7,95.1,95.7,96.6,95.7,96.2,97.0,98.0,97.7,97.0,98.5,99.3,100.9,100.7,100.3,101.1,101.4,101.4,100.7,99.8,98.9,98.5,98.3,99.2,99.5,99.8,99.5,96.8,96.8,96.7,96.2,97.2,97.5,95.7,95.5,95.4,97.1,98.6,96.9,94.6,94.9,94.8,95.0,95.1,95.4,94.4,95.4,96.5,94.8,95.1,96.3,97.7,96.5,96.9,97.8,98.1,97.2,97.0,97.8,98.1,97.5,96.0,95.0,95.3,95.3,95.4,94.3,94.1,95.5,96.1,95.9,96.4,96.5,96.9,94.8,93.9,93.9,93.5,92.5,92.2,91.7,90.8,91.7,90.7,89.3,87.6,88.7,88.5];
+
+var allCharts = [];
+function mk(id){var el=document.getElementById(id); if(!el) return null; var c=echarts.init(el); allCharts.push(c); return c;}
+
+function initAllCharts(lang){
+  allCharts.forEach(function(c){ if(c) c.dispose(); });
+  allCharts = [];
+  var zh = lang === 'zh';
+  var L = function(en,cn){ return zh ? cn : en; };
+
+  /* 1 · Policy rate, annual mean with within-year band */
+  (function(){ var c=mk('cPolicy'); if(!c) return;
+    c.setOption({
+      tooltip:Object.assign({},baseTip,{valueFormatter:function(v){return v===null?'—':v.toFixed(2)+'%';}}),
+      legend:Object.assign({},baseLegend,{data:[L('Within-year high','年內最高'),L('Within-year low','年內最低'),L('Annual mean','年平均')]}),
+      grid:{left:8,right:16,top:30,bottom:6,containLabel:true},
+      xAxis:catAxis(POLY_K,{boundaryGap:false,axisLabel:ax({fontSize:9,interval:4})}),
+      yAxis:valAxis({min:0,max:30,axisLabel:ax({formatter:'{value}%'})}),
+      series:[
+        {name:L('Within-year high','年內最高'),type:'line',data:POLY_HI,symbol:'none',smooth:false,
+         lineStyle:{color:'rgba(184,146,74,.45)',width:1.2},itemStyle:{color:C.gold}},
+        {name:L('Within-year low','年內最低'),type:'line',data:POLY_LO,symbol:'none',smooth:false,
+         lineStyle:{color:'rgba(184,146,74,.45)',width:1.2},itemStyle:{color:C.gold}},
+        {name:L('Annual mean','年平均'),type:'line',data:POLY_M,symbol:'none',smooth:false,
+         lineStyle:{color:C.navy,width:3},itemStyle:{color:C.navy},
+         areaStyle:{color:lg('rgba(35,74,134,.14)','rgba(35,74,134,0)')},
+         markPoint:{symbol:'circle',symbolSize:9,itemStyle:{color:C.red},
+           label:{show:true,position:'top',color:C.red,fontFamily:FONT,fontSize:9.5,fontWeight:700,formatter:function(p){return p.data.txt;}},
+           data:[{coord:['1998',13.78],txt:L('1998 mean 13.78','1998 年平均 13.78')},
+                 {coord:['2021',2.00],txt:L('2021 mean 2.00','2021 年平均 2.00')}]},
+         markLine:{silent:true,symbol:'none',data:[
+           {xAxis:'2002',lineStyle:{color:C.muted,type:'dashed',width:1.2},
+            label:{formatter:L('band collapses after 2002','2002 年後帶寬收斂'),color:C.muted,fontFamily:FONT,fontSize:9,position:'insideEndTop'}},
+           {xAxis:'2016',lineStyle:{color:C.green,type:'dashed',width:1.2},
+            label:{formatter:L('rate corridor, Jun 2016','利率走廊，2016 年 6 月'),color:C.green,fontFamily:FONT,fontSize:9,position:'insideEndBottom'}}
+         ]}}
+      ]
+    });
+  })();
+
+  /* 2 · Real policy rate */
+  (function(){ var c=mk('cRealRate'); if(!c) return;
+    c.setOption({
+      tooltip:Object.assign({},baseTip,{valueFormatter:function(v){return v===null?'—':v.toFixed(2)+'%';}}),
+      legend:Object.assign({},baseLegend,{data:[L('Headline CPI yoy','CPI 年增'),L('Policy rate','政策利率'),L('Real policy rate (derived)','實質政策利率（推導）')]}),
+      grid:{left:8,right:16,top:30,bottom:6,containLabel:true},
+      xAxis:catAxis(RR_K,{boundaryGap:false,axisLabel:ax({fontSize:9,interval:17})}),
+      yAxis:valAxis({min:-5,max:10,axisLabel:ax({formatter:'{value}%'})}),
+      series:[
+        {name:L('Headline CPI yoy','CPI 年增'),type:'line',data:RR_CPI,symbol:'none',smooth:true,
+         lineStyle:{color:C.amber,width:2},itemStyle:{color:C.amber}},
+        {name:L('Policy rate','政策利率'),type:'line',data:RR_POL,symbol:'none',step:'end',
+         lineStyle:{color:C.navy,width:2,type:'dashed'},itemStyle:{color:C.navy}},
+        {name:L('Real policy rate (derived)','實質政策利率（推導）'),type:'line',data:RR_REAL,symbol:'none',smooth:true,
+         lineStyle:{color:C.red,width:3},itemStyle:{color:C.red},
+         areaStyle:{color:lg('rgba(185,28,28,.14)','rgba(185,28,28,0)')},
+         markLine:{silent:true,symbol:'none',data:[
+           {yAxis:0,lineStyle:{color:C.muted,type:'solid',width:1.2},
+            label:{formatter:L('zero real rate','實質利率為零'),color:C.muted,fontFamily:FONT,fontSize:9,position:'insideStartTop'}}
+         ]},
+         markPoint:{symbol:'circle',symbolSize:9,itemStyle:{color:C.red},
+           label:{show:true,position:'bottom',color:C.red,fontFamily:FONT,fontSize:9.5,fontWeight:700,formatter:function(p){return p.data.txt;}},
+           data:[{coord:['2022-06',-3.59],txt:L('Jun 2022 −3.59','2022 年 6 月 −3.59')},
+                 {coord:['2026-04',-2.73],txt:L('Apr 2026 −2.73','2026 年 4 月 −2.73')},
+                 {coord:['2026-09',-2.2],txt:L('Sep 2026 −2.20','2026 年 9 月 −2.20')}]}}
+      ]
+    });
+  })();
+
+  /* 3 · House price index, three lenses */
+  (function(){ var c=mk('cHpi'); if(!c) return;
+    c.setOption({
+      tooltip:Object.assign({},baseTip,{valueFormatter:function(v){return v===null?'—':v.toFixed(1);}}),
+      legend:Object.assign({},baseLegend,{data:[L('Nominal, 2010=100','名目，2010=100'),L('Real, CPI-deflated','實質，經 CPI 平減'),L('In US dollars (derived, 2013Q1=100)','美元計價（推導，2013Q1=100）')]}),
+      grid:{left:8,right:16,top:30,bottom:6,containLabel:true},
+      xAxis:catAxis(HP_K,{boundaryGap:false,axisLabel:ax({fontSize:9,interval:7})}),
+      yAxis:valAxis({min:80,max:330,axisLabel:ax()}),
+      series:[
+        {name:L('Nominal, 2010=100','名目，2010=100'),type:'line',data:HP_NOM,symbol:'none',smooth:true,
+         lineStyle:{color:C.navy,width:3},itemStyle:{color:C.navy},
+         areaStyle:{color:lg('rgba(35,74,134,.14)','rgba(35,74,134,0)')}},
+        {name:L('Real, CPI-deflated','實質，經 CPI 平減'),type:'line',data:HP_REAL,symbol:'none',smooth:true,
+         lineStyle:{color:C.gold,width:3},itemStyle:{color:C.gold},
+         markPoint:{symbol:'circle',symbolSize:9,itemStyle:{color:C.red},
+           label:{show:true,position:'bottom',color:C.red,fontFamily:FONT,fontSize:9.5,fontWeight:700,formatter:function(p){return p.data.txt;}},
+           data:[{coord:['2016Q2',150.6],txt:L('2016Q2 150.6','2016Q2 150.6')},
+                 {coord:['2019Q2',150.9],txt:L('2019Q2 150.9','2019Q2 150.9')}]}},
+        {name:L('In US dollars (derived, 2013Q1=100)','美元計價（推導，2013Q1=100）'),type:'line',data:HP_USD,symbol:'none',smooth:true,connectNulls:false,
+         lineStyle:{color:C.red,width:2,type:'dashed'},itemStyle:{color:C.red}}
+      ]
+    });
+  })();
+
+  /* 4 · Mortgage rates vs policy */
+  (function(){ var c=mk('cMortgage'); if(!c) return;
+    c.setOption({
+      tooltip:Object.assign({},baseTip,{valueFormatter:function(v){return v===null?'—':v.toFixed(2)+'%';}}),
+      legend:Object.assign({},baseLegend,{data:[L('Housing loan, effective high','住宅貸款有效利率上緣'),L('Housing loan, effective low','住宅貸款有效利率下緣'),L('Policy rate','政策利率')]}),
+      grid:{left:8,right:16,top:30,bottom:6,containLabel:true},
+      xAxis:catAxis(MR_K,{boundaryGap:false,axisLabel:ax({fontSize:9,interval:11})}),
+      yAxis:valAxis({min:0,max:12,axisLabel:ax({formatter:'{value}%'})}),
+      series:[
+        {name:L('Housing loan, effective high','住宅貸款有效利率上緣'),type:'line',data:MR_HI,symbol:'none',smooth:true,
+         lineStyle:{color:C.gold,width:2.4},itemStyle:{color:C.gold}},
+        {name:L('Housing loan, effective low','住宅貸款有效利率下緣'),type:'line',data:MR_LO,symbol:'none',smooth:true,
+         lineStyle:{color:C.goldHi,width:2.4},itemStyle:{color:C.goldHi},
+         areaStyle:{color:lg('rgba(184,146,74,.14)','rgba(184,146,74,0)')}},
+        {name:L('Policy rate','政策利率'),type:'line',data:MR_POL,symbol:'none',step:'end',
+         lineStyle:{color:C.navy,width:3},itemStyle:{color:C.navy}}
+      ]
+    });
+  })();
+
+  /* 5 · Approved loan counts, NCR vs outside NCR */
+  (function(){ var c=mk('cLoans'); if(!c) return;
+    c.setOption({
+      tooltip:Object.assign({},baseTip,{valueFormatter:function(v){return v===null?'—':v.toLocaleString();}}),
+      legend:Object.assign({},baseLegend,{data:[L('NCR','NCR'),L('All areas outside NCR','NCR 以外全區')]}),
+      grid:{left:8,right:16,top:30,bottom:6,containLabel:true},
+      xAxis:catAxis(LN_K,{axisLabel:ax({fontSize:9,interval:3})}),
+      yAxis:valAxis({axisLabel:ax({formatter:function(v){return (v/1000)+'k';}})}),
+      series:[
+        {name:L('NCR','NCR'),type:'line',data:LN_NCR,symbol:'circle',symbolSize:5,smooth:false,
+         lineStyle:{color:C.red,width:3},itemStyle:{color:C.red},
+         areaStyle:{color:lg('rgba(185,28,28,.14)','rgba(185,28,28,0)')},
+         markLine:{silent:true,symbol:'none',data:[{yAxis:6494,lineStyle:{color:C.muted,type:'dashed',width:1.2},
+           label:{formatter:L('NCR peak 6,494 (2019Q4)','NCR 高點 6,494（2019Q4）'),color:C.muted,fontFamily:FONT,fontSize:9,position:'insideStartTop'}}]}},
+        {name:L('All areas outside NCR','NCR 以外全區'),type:'line',data:LN_AON,symbol:'circle',symbolSize:5,smooth:false,
+         lineStyle:{color:C.navy,width:3},itemStyle:{color:C.navy}}
+      ]
+    });
+  })();
+
+  /* 6 · Real GDP per capita */
+  (function(){ var c=mk('cGdpPc'); if(!c) return;
+    c.setOption({
+      tooltip:Object.assign({},baseTip,{valueFormatter:function(v){return v===null?'—':'US$'+v.toLocaleString();}}),
+      grid:{left:8,right:16,top:24,bottom:6,containLabel:true},
+      xAxis:catAxis(GDP_K,{boundaryGap:false,axisLabel:ax({fontSize:9,interval:9})}),
+      yAxis:valAxis({min:1000,max:4400,axisLabel:ax({formatter:function(v){return '$'+(v/1000).toFixed(1)+'k';}})}),
+      series:[{type:'line',data:GDP_V,symbol:'none',smooth:true,
+        lineStyle:{color:C.navy,width:3},itemStyle:{color:C.navy},
+        areaStyle:{color:lg('rgba(35,74,134,.16)','rgba(35,74,134,0)')},
+        markPoint:{symbol:'circle',symbolSize:9,itemStyle:{color:C.red},
+          label:{show:true,position:'top',color:C.red,fontFamily:FONT,fontSize:9.5,fontWeight:700,formatter:function(p){return p.data.txt;}},
+          data:[{coord:['1982',1898],txt:L('1982 peak $1,898','1982 高點 $1,898')},
+                {coord:['2004',1978],txt:L('regained in 2004','2004 年收復')}]},
+        markLine:{silent:true,symbol:'none',data:[{yAxis:1898,lineStyle:{color:C.red,type:'dashed',width:1.3},
+          label:{formatter:L('22 years to regain the 1982 level','花 22 年才回到 1982 年水準'),color:C.red,fontFamily:FONT,fontSize:9,position:'insideStartBottom'}}]}}]
+    });
+  })();
+
+  /* 6b · Period compound growth */
+  (function(){ var c=mk('cDecade'); if(!c) return;
+    var cats=['1960s','1970s',L('1982–93','1982–93'),'1980s','1990s','2000s','2010s',L('2020–25','2020–25')];
+    var v=[1.84,3.31,-1.43,-0.91,0.51,2.84,3.03,4.91];
+    c.setOption({
+      tooltip:Object.assign({},baseTip,{trigger:'item',valueFormatter:function(v){return v.toFixed(2)+'%';}}),
+      grid:{left:8,right:14,top:22,bottom:6,containLabel:true},
+      xAxis:catAxis(cats,{axisLabel:ax({fontSize:9.5,interval:0})}),
+      yAxis:valAxis({min:-2,max:6,axisLabel:ax({formatter:'{value}%'})}),
+      series:[{type:'bar',
+        data:v.map(function(x,i){return {value:x,itemStyle:x<0?{color:lg('#d97a6c',C.red),borderRadius:[0,0,5,5]}
+          :(i===7?{color:lg(C.green,'#0f5f2d'),borderRadius:[5,5,0,0]}:navyBar)};}),
+        barMaxWidth:44,
+        label:lbl({position:'top',formatter:function(p){return p.value.toFixed(2)+'%';},fontSize:9.5})}]
+    });
+  })();
+
+  /* 7 · Population */
+  (function(){ var c=mk('cPop'); if(!c) return;
+    c.setOption({
+      tooltip:Object.assign({},baseTip,{valueFormatter:function(v){return v===null?'—':v.toFixed(1)+'m';}}),
+      legend:Object.assign({},baseLegend,{data:[L('Philippines','全國'),L('NCR, census years','NCR，普查年')]}),
+      grid:{left:8,right:16,top:30,bottom:6,containLabel:true},
+      xAxis:catAxis(POP_K,{boundaryGap:false,axisLabel:ax({fontSize:9,interval:9})}),
+      yAxis:[valAxis({min:0,max:130,axisLabel:ax({formatter:'{value}m'})}),
+             valAxis({min:8,max:16,position:'right',splitLine:{show:false},axisLabel:ax({formatter:'{value}m'})})],
+      series:[
+        {name:L('Philippines','全國'),type:'line',data:POP_V,symbol:'none',smooth:true,
+         lineStyle:{color:C.navy,width:3},itemStyle:{color:C.navy},
+         areaStyle:{color:lg('rgba(35,74,134,.16)','rgba(35,74,134,0)')}},
+        {name:L('NCR, census years','NCR，普查年'),type:'line',yAxisIndex:1,data:POP_NCR,connectNulls:true,
+         symbol:'circle',symbolSize:8,lineStyle:{color:C.gold,width:2.5,type:'dashed'},itemStyle:{color:C.gold},
+         label:lbl({show:true,position:'top',color:C.gold,fontSize:9.5,formatter:function(p){return p.value===null?'':p.value.toFixed(1);}})}
+      ]
+    });
+  })();
+
+  /* 8 · Remittances */
+  (function(){ var c=mk('cRemit'); if(!c) return;
+    c.setOption({
+      tooltip:baseTip,
+      legend:Object.assign({},baseLegend,{data:[L('US$ billion','十億美元'),L('PHP trillion (derived)','兆披索（推導）')]}),
+      grid:{left:8,right:16,top:30,bottom:6,containLabel:true},
+      xAxis:catAxis(RM_K,{axisLabel:ax({fontSize:9,interval:2})}),
+      yAxis:[valAxis({min:0,max:45,axisLabel:ax({formatter:'${value}b'})}),
+             valAxis({min:0,max:2.6,position:'right',splitLine:{show:false},axisLabel:ax({formatter:'₱{value}tn'})})],
+      series:[
+        {name:L('US$ billion','十億美元'),type:'bar',data:RM_USD,itemStyle:navyBar,barMaxWidth:22,
+         tooltip:{valueFormatter:function(v){return 'US$'+v.toFixed(1)+'b';}}},
+        {name:L('PHP trillion (derived)','兆披索（推導）'),type:'line',yAxisIndex:1,data:RM_PHP,connectNulls:false,
+         symbol:'circle',symbolSize:5,lineStyle:{color:C.gold,width:3},itemStyle:{color:C.gold},
+         tooltip:{valueFormatter:function(v){return v===null?'—':'PHP '+v.toFixed(2)+'tn';}}}
+      ]
+    });
+  })();
+
+  /* 9 · External debt */
+  (function(){ var c=mk('cExtDebt'); if(!c) return;
+    c.setOption({
+      tooltip:Object.assign({},baseTip,{valueFormatter:function(v){return v===null?'—':v.toFixed(1)+'%';}}),
+      legend:Object.assign({},baseLegend,{data:[L('External debt / GDP','外債佔 GDP'),L('Reserves / external debt (derived)','準備對外債覆蓋率（推導）')]}),
+      grid:{left:8,right:16,top:30,bottom:6,containLabel:true},
+      xAxis:catAxis(ED_K,{boundaryGap:false,axisLabel:ax({fontSize:9,interval:4})}),
+      yAxis:valAxis({min:0,max:120,axisLabel:ax({formatter:'{value}%'})}),
+      series:[
+        {name:L('External debt / GDP','外債佔 GDP'),type:'line',data:ED_GDP,symbol:'none',smooth:true,
+         lineStyle:{color:C.navy,width:3},itemStyle:{color:C.navy},
+         areaStyle:{color:lg('rgba(35,74,134,.16)','rgba(35,74,134,0)')},
+         markPoint:{symbol:'circle',symbolSize:9,itemStyle:{color:C.red},
+           label:{show:true,position:'top',color:C.red,fontFamily:FONT,fontSize:9.5,fontWeight:700,formatter:function(p){return p.data.txt;}},
+           data:[{coord:['1986',85.9],txt:L('1986 peak 85.9','1986 高點 85.9')},
+                 {coord:['2017',22.3],txt:L('2017 low 22.3','2017 低點 22.3')}]}},
+        {name:L('Reserves / external debt (derived)','準備對外債覆蓋率（推導）'),type:'line',data:ED_COV,symbol:'none',smooth:true,
+         lineStyle:{color:C.gold,width:2.6},itemStyle:{color:C.gold},
+         markLine:{silent:true,symbol:'none',data:[{yAxis:100,lineStyle:{color:C.green,type:'dashed',width:1.2},
+           label:{formatter:L('full cover','完全覆蓋'),color:C.green,fontFamily:FONT,fontSize:9,position:'insideEndTop'}}]}}
+      ]
+    });
+  })();
+
+  /* 10 · Private credit to GDP */
+  (function(){ var c=mk('cPrivCredit'); if(!c) return;
+    c.setOption({
+      tooltip:Object.assign({},baseTip,{valueFormatter:function(v){return v===null?'—':v.toFixed(1)+'%';}}),
+      grid:{left:8,right:16,top:24,bottom:6,containLabel:true},
+      xAxis:catAxis(PC_K,{boundaryGap:false,axisLabel:ax({fontSize:9,interval:9})}),
+      yAxis:valAxis({min:10,max:85,axisLabel:ax({formatter:'{value}%'})}),
+      series:[{type:'line',data:PC_V,symbol:'none',smooth:true,
+        lineStyle:{color:C.navy,width:3},itemStyle:{color:C.navy},
+        areaStyle:{color:lg('rgba(35,74,134,.16)','rgba(35,74,134,0)')},
+        markPoint:{symbol:'circle',symbolSize:9,itemStyle:{color:C.red},
+          label:{show:true,position:'top',color:C.red,fontFamily:FONT,fontSize:9.5,fontWeight:700,formatter:function(p){return p.data.txt;}},
+          data:[{coord:['1983',45.4],txt:L('1983 peak 45.4','1983 高點 45.4')},
+                {coord:['1997',54.4],txt:L('1997 peak 54.4','1997 高點 54.4')},
+                {coord:['2020',71.8],txt:L('2020 peak 71.8','2020 高點 71.8')}]},
+        markLine:{silent:true,symbol:'none',data:[
+          {yAxis:19.5,lineStyle:{color:C.muted,type:'dashed',width:1.2},
+           label:{formatter:L('1990 trough 19.5','1990 谷底 19.5'),color:C.muted,fontFamily:FONT,fontSize:9,position:'insideStartBottom'}},
+          {yAxis:28.3,lineStyle:{color:C.muted,type:'dashed',width:1.2},
+           label:{formatter:L('2010 trough 28.3','2010 谷底 28.3'),color:C.muted,fontFamily:FONT,fontSize:9,position:'insideEndBottom'}}
+        ]}}]
+    });
+  })();
+
+  /* 11 · Real estate exposure */
+  (function(){ var c=mk('cRee'); if(!c) return;
+    c.setOption({
+      tooltip:baseTip,
+      legend:Object.assign({},baseLegend,{data:[L('Residential loan balance','住宅放款餘額'),L('Residential past due','住宅逾期率'),L('Commercial past due','商用逾期率')]}),
+      grid:{left:8,right:16,top:30,bottom:6,containLabel:true},
+      xAxis:catAxis(RE_K,{axisLabel:ax({fontSize:9,interval:7})}),
+      yAxis:[valAxis({min:0,max:1500,axisLabel:ax({formatter:function(v){return '₱'+(v/1000).toFixed(1)+'tn';}})}),
+             valAxis({min:0,max:14,position:'right',splitLine:{show:false},axisLabel:ax({formatter:'{value}%'})})],
+      series:[
+        {name:L('Residential loan balance','住宅放款餘額'),type:'bar',data:RE_RES,itemStyle:{color:'rgba(35,74,134,.28)',borderRadius:[3,3,0,0]},barMaxWidth:12,
+         tooltip:{valueFormatter:function(v){return 'PHP '+v.toLocaleString()+'bn';}}},
+        {name:L('Residential past due','住宅逾期率'),type:'line',yAxisIndex:1,data:RE_PDR,symbol:'none',smooth:true,
+         lineStyle:{color:C.red,width:3},itemStyle:{color:C.red},
+         tooltip:{valueFormatter:function(v){return v.toFixed(2)+'%';}},
+         markPoint:{symbol:'circle',symbolSize:9,itemStyle:{color:C.red},
+           label:{show:true,position:'top',color:C.red,fontFamily:FONT,fontSize:9.5,fontWeight:700,formatter:function(p){return p.data.txt;}},
+           data:[{coord:['2020Q4',12.20],txt:L('2020Q4 12.20%','2020Q4 12.20%')}]},
+         markLine:{silent:true,symbol:'none',data:[{yAxis:3.4,lineStyle:{color:C.green,type:'dashed',width:1.3},
+           label:{formatter:L('2013–17 baseline ≈3.4%','2013–17 基線 ≈3.4%'),color:C.green,fontFamily:FONT,fontSize:9,position:'insideStartBottom'}}]}},
+        {name:L('Commercial past due','商用逾期率'),type:'line',yAxisIndex:1,data:RE_PDC,symbol:'none',smooth:true,
+         lineStyle:{color:C.gold,width:2.4},itemStyle:{color:C.gold},
+         tooltip:{valueFormatter:function(v){return v.toFixed(2)+'%';}}}
+      ]
+    });
+  })();
+
+  /* 12 · Peso */
+  (function(){ var c=mk('cFx'); if(!c) return;
+    c.setOption({
+      tooltip:Object.assign({},baseTip,{valueFormatter:function(v){return v===null?'—':v.toFixed(2);}}),
+      grid:{left:8,right:16,top:24,bottom:6,containLabel:true},
+      xAxis:catAxis(FX_K,{boundaryGap:false,axisLabel:ax({fontSize:9,interval:17})}),
+      yAxis:valAxis({min:38,max:64,inverse:true,axisLabel:ax()}),
+      series:[{type:'line',data:FX_V,symbol:'none',smooth:false,
+        lineStyle:{color:C.gold,width:2.8},itemStyle:{color:C.gold},
+        areaStyle:{color:lg('rgba(184,146,74,.16)','rgba(184,146,74,0)')},
+        markLine:{silent:true,symbol:'none',data:[
+          {yAxis:40.65,lineStyle:{color:C.muted,type:'dashed',width:1.2},
+           label:{formatter:L('Jan 2013: 40.65','2013 年 1 月：40.65'),color:C.muted,fontFamily:FONT,fontSize:9,position:'insideStartTop'}},
+          {yAxis:61.23,lineStyle:{color:C.red,type:'dashed',width:1.2},
+           label:{formatter:L('Jun 2026: 61.23','2026 年 6 月：61.23'),color:C.red,fontFamily:FONT,fontSize:9,position:'insideEndBottom'}}
+        ]}}]
+    });
+  })();
+
+  /* 13 · Effective exchange rates */
+  (function(){ var c=mk('cReer'); if(!c) return;
+    c.setOption({
+      tooltip:Object.assign({},baseTip,{valueFormatter:function(v){return v===null?'—':v.toFixed(1);}}),
+      legend:Object.assign({},baseLegend,{data:[L('Real effective, 2020=100','實質有效，2020=100'),L('Nominal effective, 2020=100','名目有效，2020=100')]}),
+      grid:{left:8,right:16,top:30,bottom:6,containLabel:true},
+      xAxis:catAxis(XR_K,{boundaryGap:false,axisLabel:ax({fontSize:9,interval:47})}),
+      yAxis:valAxis({min:55,max:190,axisLabel:ax()}),
+      series:[
+        {name:L('Real effective, 2020=100','實質有效，2020=100'),type:'line',data:XR_R,symbol:'none',smooth:true,
+         lineStyle:{color:C.navy,width:3},itemStyle:{color:C.navy},
+         markLine:{silent:true,symbol:'none',data:[{yAxis:100,lineStyle:{color:C.muted,type:'dashed',width:1.2},
+           label:{formatter:L('2020 base','2020 基期'),color:C.muted,fontFamily:FONT,fontSize:9,position:'insideEndTop'}}]},
+         markPoint:{symbol:'circle',symbolSize:9,itemStyle:{color:C.red},
+           label:{show:true,position:'bottom',color:C.red,fontFamily:FONT,fontSize:9.5,fontWeight:700,formatter:function(p){return p.data.txt;}},
+           data:[{coord:['2004-02',64.1],txt:L('Feb 2004 low 64.1','2004 年 2 月低點 64.1')}]}},
+        {name:L('Nominal effective, 2020=100','名目有效，2020=100'),type:'line',data:XR_N,symbol:'none',smooth:true,
+         lineStyle:{color:C.gold,width:2.4},itemStyle:{color:C.gold}}
+      ]
+    });
+  })();
+
+}
+
+/* language + UI */
+function setLang(lang){
+  document.body.classList.toggle('zh', lang==='zh');
+  document.querySelectorAll('.lang-en').forEach(function(e){e.style.display=lang==='en'?'':'none';});
+  document.querySelectorAll('.lang-zh').forEach(function(e){e.style.display=lang==='zh'?'':'none';});
+  document.querySelectorAll('.lang-btn').forEach(function(b){b.classList.toggle('active',b.dataset.lang===lang);});
+  try{localStorage.setItem('lang',lang);}catch(e){}
+  initAllCharts(lang);
+}
+
+window.addEventListener('load', function(){
+  document.querySelectorAll('.lang-btn').forEach(function(b){
+    b.addEventListener('click', function(){ setLang(b.dataset.lang); });
+  });
+  var lang='en';
+  try{ lang = localStorage.getItem('lang') || 'en'; }catch(e){}
+  setLang(lang);
+});
+window.addEventListener('resize', function(){ allCharts.forEach(function(c){ if(c) c.resize(); }); });
+</script>
+<script src="/js/navbar.js"></script>
+</body>
+</html>

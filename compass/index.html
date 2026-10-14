@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Housing Cycle Position</title>
+<meta name="description" content="Where 59 housing markets sit in the price cycle today: six stages from real house price growth and distance from the all-time high, with the three years that followed each stage in the past.">
+<meta name="color-scheme" content="light">
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,600&family=IBM+Plex+Mono:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+<link rel="stylesheet" href="/css/kl-theme.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<style>
+.lang-zh{display:none}
+body.zh .lang-en{display:none}
+body.zh .lang-zh{display:inline}
+body.zh{font-family:'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif}
+body.zh h1,body.zh h2,body.zh h3,body.zh .serif{font-family:'Noto Serif TC','Playfair Display',serif}
+a{color:inherit}
+.cp{max-width:980px;margin:0 auto;padding:26px 20px 8px}
+.cp h1,.cp h2,.cp h3{font-family:'Playfair Display','Noto Serif TC',serif;color:var(--navy)}
+.cp h1.cp-kick,body.zh .cp h1.cp-kick{font-family:Inter,'Noto Sans TC',sans-serif;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-deep);margin:0 0 12px}
+body.zh .cp-kick{letter-spacing:.2em;text-transform:none}
+.cp-pick{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 18px}
+.cp-pick label{font-size:12.5px;font-weight:700;color:var(--muted);margin-right:2px}
+.cp-pick input,.cp-pick select{font:inherit;font-size:14px;color:var(--navy);background:#fff;border:1px solid var(--border);border-radius:8px;padding:8px 11px;min-height:40px}
+.cp-pick input{width:210px;max-width:100%}
+.cp-pick select{min-width:230px;max-width:100%;font-weight:600}
+.cp-pick input:focus,.cp-pick select:focus{outline:2px solid var(--gold);outline-offset:1px}
+.cp-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:26px 28px 22px}
+.cp-name{font-family:'Playfair Display','Noto Serif TC',serif;font-size:22px;font-weight:700;color:var(--navy);margin:0 0 6px;line-height:1.3}
+.cp-stagerow{display:flex;align-items:center;gap:14px;margin:0 0 8px}
+.cp-swatch{flex:0 0 auto;width:14px;align-self:stretch;min-height:58px;border-radius:4px}
+.cp-stage{font-family:'Playfair Display','Noto Serif TC',serif;font-size:56px;line-height:1.1;font-weight:700;color:var(--navy);letter-spacing:-.01em;margin:0}
+body.zh .cp-stage{font-size:60px;letter-spacing:.02em}
+.cp-sent{font-size:16.5px;line-height:1.8;color:var(--text-soft);margin:0 0 20px;max-width:640px}
+.cp-nums{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:0 0 16px}
+.cp-num{background:var(--bg-soft);border:1px solid var(--border-soft);border-radius:10px;padding:13px 15px}
+.cp-num .l{font-size:12.5px;font-weight:700;color:var(--muted);margin:0 0 3px}
+.cp-num .v{font-family:'IBM Plex Mono',monospace;font-size:28px;font-weight:700;color:var(--navy);line-height:1.2;margin:0}
+.cp-num .v small{font-family:Inter,'Noto Sans TC',sans-serif;font-size:15px;font-weight:600;margin-left:3px}
+.cp-num .s{font-size:12px;color:var(--muted);margin:3px 0 0}
+.cp-through{font-size:13px;line-height:1.7;color:var(--muted);margin:0}
+.cp-through a{color:var(--gold-deep);text-decoration:underline}
+.cp-sec{margin:34px 0 0}
+.cp-sec h2{font-size:21px;line-height:1.4;margin:0 0 4px}
+.cp-cap{font-size:13.5px;line-height:1.7;color:var(--muted);margin:0 0 14px}
+.cp-ringbox{display:flex;justify-content:center}
+.cp-ring{width:100%;max-width:500px;height:auto;display:block}
+.cp-ring text{font-family:Inter,'Noto Sans TC',sans-serif}
+.cp-ring .rn{font-size:17px;font-weight:700}
+body:not(.zh) .cp-ring .rn{font-size:15px}
+.cp-ring .rd{font-size:12px;font-weight:500}
+.cp-ring .rt{font-size:11px;font-weight:700;letter-spacing:.08em}
+.cp-ring .rc{font-size:13px;font-weight:600;fill:#6b7a92}
+.cp-ringlist{display:none;list-style:none;margin:10px 0 0;padding:0;font-size:13px;line-height:1.7;color:var(--text-soft)}
+.cp-ringlist li{padding:4px 0;border-top:1px solid var(--border-soft)}
+.cp-ringlist li.cur{font-weight:700;color:var(--navy)}
+.cp-ringlist i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:8px;vertical-align:-1px}
+.cp-chartbox{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:12px 10px 8px}
+#cpChart{width:100%;height:340px}
+.cp-legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12.5px;color:var(--text-soft);margin:8px 6px 4px}
+.cp-legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-2px}
+.cp-legend i.none{background:#fff;border:1px dashed #9aa6b8}
+.cp-rec p{font-size:15px;line-height:1.95;color:var(--text-soft);margin:0 0 12px;max-width:760px}
+.cp-rec p.aside{color:var(--muted);font-size:13.5px}
+.cp-tw{width:100%;border-collapse:collapse;font-size:13px;line-height:1.6;margin:8px 0 6px}
+.cp-tw th,.cp-tw td{border:1px solid var(--border);padding:7px 10px;text-align:left;color:var(--text-soft)}
+.cp-tw th{background:var(--bg-soft);color:var(--navy);font-weight:700}
+.cp-tw td.n,.cp-tw th.n{text-align:right;font-variant-numeric:tabular-nums}
+.cp-tw tr.cur td{background:var(--gold-bg);color:var(--navy);font-weight:700}
+.cp-note{font-size:12.5px;line-height:1.7;color:var(--muted);margin:2px 0 0}
+.cp-tools{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}
+.cp-chip{font:inherit;font-size:12.5px;font-weight:600;color:var(--text-soft);background:#fff;border:1px solid var(--border);border-radius:999px;padding:6px 12px;cursor:pointer;min-height:34px}
+.cp-chip:hover{border-color:var(--gold)}
+.cp-chip[aria-pressed="true"]{background:var(--navy);border-color:var(--navy);color:#fff}
+.cp-chip i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:6px}
+.cp-all{width:100%;border-collapse:collapse;font-size:13.5px;line-height:1.5}
+.cp-all th,.cp-all td{border-bottom:1px solid var(--border-soft);padding:8px 10px;text-align:left;color:var(--text-soft);white-space:nowrap}
+.cp-all th{background:var(--bg-soft);color:var(--navy);font-weight:700;position:sticky;top:0}
+.cp-all th button{font:inherit;font-weight:700;color:inherit;background:none;border:0;padding:0;cursor:pointer;text-align:left}
+.cp-all th button:hover{color:var(--gold-deep)}
+.cp-all td.n,.cp-all th.n{text-align:right;font-variant-numeric:tabular-nums}
+.cp-all th.n button{text-align:right}
+.cp-all tr.cur td{background:var(--gold-bg)}
+.cp-all .lk{font:inherit;font-weight:700;color:var(--navy);background:none;border:0;padding:0;cursor:pointer;text-decoration:underline;text-decoration-color:var(--gold-light);text-underline-offset:3px}
+.cp-all .lk:hover{color:var(--gold-deep)}
+.cp-all i.dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:7px}
+.cp-all .tag{font-size:11px;font-weight:700;color:var(--gold-deep);background:var(--gold-bg);border-radius:4px;padding:1px 6px;margin-left:6px}
+.cp-scroll{overflow-x:auto;border:1px solid var(--border);border-radius:10px;background:#fff;max-height:640px;overflow-y:auto}
+.cp-count{font-size:12.5px;color:var(--muted);margin:8px 2px 0}
+details.cp-app{margin:34px 0 0;border:1px solid var(--border);border-radius:12px;background:#fff}
+details.cp-app>summary{cursor:pointer;list-style:none;padding:16px 20px;font-family:'Playfair Display','Noto Serif TC',serif;font-size:18px;font-weight:700;color:var(--navy);display:flex;justify-content:space-between;align-items:center;gap:12px}
+details.cp-app>summary::-webkit-details-marker{display:none}
+details.cp-app>summary::after{content:'+';font-family:Inter,sans-serif;font-size:22px;color:var(--gold-deep);line-height:1}
+details.cp-app[open]>summary::after{content:'\2212'}
+.cp-appbody{padding:0 22px 12px}
+.cp-appbody h3{font-size:16.5px;margin:22px 0 6px}
+.cp-appbody p,.cp-appbody li{font-size:14.5px;line-height:1.9;color:var(--text-soft);margin:0 0 9px}
+.cp-appbody ul{margin:0 0 10px;padding-left:22px}
+.cp-appbody a{color:var(--gold-deep);text-decoration:underline}
+.cp-appbody table{width:100%;border-collapse:collapse;margin:6px 0 12px;font-size:13px;line-height:1.7}
+.cp-appbody th,.cp-appbody td{border:1px solid var(--border);padding:7px 10px;text-align:left;color:var(--text-soft);vertical-align:top}
+.cp-appbody th{background:var(--bg-soft);color:var(--navy);font-weight:700}
+.cp-appbody .tbl-wrap{overflow-x:auto}
+.cp-fail{padding:30px 10px;text-align:center;font-size:14px;color:var(--muted)}
+@media(max-width:760px){
+  .cp{padding:18px 14px 6px}
+  .cp-card{padding:20px 16px 16px}
+  .cp-stage{font-size:42px}
+  body.zh .cp-stage{font-size:46px}
+  .cp-swatch{min-height:46px}
+  .cp-nums{grid-template-columns:1fr}
+  .cp-num{display:grid;grid-template-columns:1fr auto;column-gap:10px;align-items:baseline}
+  .cp-num .l{grid-column:1}.cp-num .v{grid-column:2;grid-row:1/3;font-size:24px}.cp-num .s{grid-column:1}
+  #cpChart{height:290px}
+  .cp-pick input,.cp-pick select{width:100%;min-width:0}
+}
+@media(max-width:560px){
+  .cp-ring .rd{display:none}
+  .cp-ringlist{display:block}
+}
+</style>
+</head>
+<body>
+
+<div id="nav-root"></div>
+<div class="imq-archive-note" style="max-width:1100px;margin:14px auto 0;padding:9px 16px;background:#fff8e6;border:1px solid #f0d9a0;border-radius:8px;font-size:12.5px;color:#7a5a12;line-height:1.7"><span class="lang-en">Static snapshot. Latest BIS data: 2026 Q2 (fetched October 2026). Not updated automatically after this date.</span><span class="lang-zh" style="display:none">靜態快照：BIS 最新資料為 2026 年第二季（2026 年 10 月取得），之後不再自動更新。</span></div>
+
+<script>try{if(localStorage.getItem('lang')==='zh'){document.body.classList.add('zh');document.documentElement.lang='zh-Hant';}}catch(e){}</script>
+
+<main class="cp">
+<h1 class="cp-kick"><span class="lang-en">Housing cycle position</span><span class="lang-zh">房產週期位置</span></h1>
+
+<div class="cp-pick">
+  <label for="cpSel"><span class="lang-en">Market</span><span class="lang-zh">市場</span></label>
+  <input id="cpQ" type="search" autocomplete="off" aria-label="Search markets" placeholder="">
+  <select id="cpSel" aria-label="Market"></select>
+</div>
+
+<noscript><p class="cp-fail"><span class="lang-en">This page needs JavaScript.</span><span class="lang-zh">這個頁面需要開啟 JavaScript。</span></p></noscript>
+
+<section class="cp-card" id="cpHero" aria-live="polite">
+  <p class="cp-fail" id="cpLoading"><span class="lang-en">Loading…</span><span class="lang-zh">載入中…</span></p>
+</section>
+
+<section class="cp-sec" id="cpRingSec">
+  <h2><span class="lang-en">The six stages of the cycle</span><span class="lang-zh">週期的六個階段</span></h2>
+  <p class="cp-cap"><span class="lang-en">Stages run in cycle order, clockwise. The lit one is where this market is now.</span><span class="lang-zh">依週期順序，順時針排列，亮起的是目前所在。</span></p>
+  <div class="cp-ringbox" id="cpRing"></div>
+  <ul class="cp-ringlist" id="cpRingList"></ul>
+</section>
+
+<section class="cp-sec" id="cpChartSec">
+  <h2><span class="lang-en">Real house prices and the stage of each quarter</span><span class="lang-zh">實質房價與各季階段</span></h2>
+  <p class="cp-cap"><span class="lang-en">The line is the house price index after inflation. The background colour is the stage of each quarter.</span><span class="lang-zh">折線是扣掉物價後的房價指數，背景色是每一季的階段。</span></p>
+  <div class="cp-chartbox">
+    <div id="cpChart" role="img"></div>
+    <div class="cp-legend" id="cpLegend"></div>
+  </div>
+</section>
+
+<section class="cp-sec cp-rec" id="cpRecSec">
+  <h2><span class="lang-en">The three years that followed this stage in the past</span><span class="lang-zh">過去處在這個階段之後三年</span></h2>
+  <div id="cpRec"></div>
+  <div id="cpPool"></div>
+</section>
+
+<section class="cp-sec" id="cpAllSec">
+  <h2><span class="lang-en">All <span id="cpN">59</span> markets</span><span class="lang-zh">全市場一覽</span></h2>
+  <p class="cp-cap"><span class="lang-en">Filter by stage, click a column to sort, click a market to switch the view above.</span><span class="lang-zh">可依階段篩選、點欄位排序，點市場名稱會切換上方的內容。</span></p>
+  <div class="cp-tools" id="cpTools"></div>
+  <div class="cp-scroll"><table class="cp-all" id="cpAll"></table></div>
+  <p class="cp-count" id="cpCount"></p>
+</section>
+
+<details class="cp-app" id="cpApp">
+<summary><span class="lang-en">Appendix: how stages are set, how they were tested, what is not promised</span><span class="lang-zh">附錄：階段怎麼判斷、怎麼檢定、不承諾什麼</span></summary>
+<div class="cp-appbody">
+
+<h3><span class="lang-en">How a stage is set</span><span class="lang-zh">階段怎麼判斷</span></h3>
+<p><span class="lang-en">Each market is judged on one series only: the real house price index, which is the price index after removing consumer price inflation. Two numbers are taken from it.</span><span class="lang-zh">每個市場只用一條序列判斷：實質房價指數，也就是扣掉消費者物價之後的房價指數。從裡面算兩個量。</span></p>
+<ul>
+<li><span class="lang-en"><b>Trend:</b> the change versus four quarters earlier, which is the real house price growth over the past year.</span><span class="lang-zh"><b>趨勢：</b>本季對四季前的漲跌，也就是過去一年的實質房價年增率。</span></li>
+<li><span class="lang-en"><b>Position:</b> how far this quarter sits below the highest point since the series began. In a quarter that sets a new high, the distance is zero.</span><span class="lang-zh"><b>位置：</b>本季離「這個市場有資料以來的最高點」多遠。創下新高的那一季，距離是 0。</span></li>
+</ul>
+<p><span class="lang-en">The two numbers place the market in one of six cells. The cells do not overlap and cover every case.</span><span class="lang-zh">兩個量對照下表，落進六格之一。六格互不重疊，涵蓋所有情況。</span></p>
+<div class="tbl-wrap"><table>
+<thead><tr><th><span class="lang-en">Stage</span><span class="lang-zh">階段</span></th><th><span class="lang-en">Distance below the high</span><span class="lang-zh">離高點</span></th><th><span class="lang-en">Real growth over a year</span><span class="lang-zh">年增率</span></th></tr></thead>
+<tbody>
+<tr><td><span class="lang-en">Peak, rising</span><span class="lang-zh">高點續漲</span></td><td><span class="lang-en">Within 5%</span><span class="lang-zh">5% 以內</span></td><td><span class="lang-en">Up 2% or more</span><span class="lang-zh">年增 2% 以上</span></td></tr>
+<tr><td><span class="lang-en">Peak, stalling</span><span class="lang-zh">高檔停滯</span></td><td><span class="lang-en">Within 5%</span><span class="lang-zh">5% 以內</span></td><td><span class="lang-en">Up less than 2% (a small fall counts)</span><span class="lang-zh">年增不到 2%（含小跌）</span></td></tr>
+<tr><td><span class="lang-en">Pulling back</span><span class="lang-zh">回檔中</span></td><td><span class="lang-en">5% to 15% below</span><span class="lang-zh">低於高點 5% 到 15%</span></td><td><span class="lang-en">Down 2% or more</span><span class="lang-zh">年減 2% 以上</span></td></tr>
+<tr><td><span class="lang-en">Deep correction</span><span class="lang-zh">深度修正</span></td><td><span class="lang-en">15% or more below</span><span class="lang-zh">低於高點 15% 以上</span></td><td><span class="lang-en">Down 2% or more</span><span class="lang-zh">年減 2% 以上</span></td></tr>
+<tr><td><span class="lang-en">Flat at the low</span><span class="lang-zh">低檔持平</span></td><td><span class="lang-en">5% or more below</span><span class="lang-zh">低於高點 5% 以上</span></td><td><span class="lang-en">Between down 2% and up 2%</span><span class="lang-zh">介於年減 2% 與年增 2% 之間</span></td></tr>
+<tr><td><span class="lang-en">Recovering</span><span class="lang-zh">修復上漲</span></td><td><span class="lang-en">5% or more below</span><span class="lang-zh">低於高點 5% 以上</span></td><td><span class="lang-en">Up 2% or more</span><span class="lang-zh">年增 2% 以上</span></td></tr>
+</tbody></table></div>
+<p><span class="lang-en">A value exactly on a threshold goes to the "within" or "or more" side. The first 20 quarters of each series are not classified, because the high point means little that early. "Quarters in the stage" counts consecutive quarters in the same stage. The thresholds were fixed before any result was seen and have not been changed. Credit, interest rates, supply and valuation play no part in the stage; they are background only.</span><span class="lang-zh">恰好等於門檻的數值，歸入「以內」或「以上」那一側。每條序列開始後的前 20 季不判斷階段，因為那麼早的最高點沒有意義。「持續幾季」是連續處在同一階段的季數。門檻在看到任何結果之前就定好，之後沒有改過。信貸、利率、供給、估值不參與判斷，只當背景資料。</span></p>
+
+<h3><span class="lang-en">How the stages were tested</span><span class="lang-zh">怎麼檢定</span></h3>
+<p><span class="lang-en">Two claims were written down before the data were downloaded. Only the 43 test markets count towards pass or fail: every other BIS country with at least 80 quarters of data, picked by rule and not by hand. The United States, Japan, Australia, Malaysia, Thailand and Greece were looked at while the rules were being designed, so they are reported but do not count.</span><span class="lang-zh">兩個假設在抓資料之前就先寫定。只有 43 個檢定市場的結果算通過與否：BIS 其餘國家裡至少有 80 季資料的，名單依規則產生，不是手挑。美國、日本、澳洲、馬來西亞、泰國、希臘在設計規則時看過，只報告結果，不算通過。</span></p>
+<p><span class="lang-en"><b>Test one: do the three years after a rising stage beat those after a falling stage?</b> It compares "Peak, rising" plus "Recovering" with "Pulling back" plus "Deep correction", on real price change over the next three years. It uses the whole history of each of the 43 markets. For each market the median of the two groups is taken, then the gap. Of the 38 markets with at least 8 quarters in both groups, 34 had the rising group ahead, and the median gap was 13.3 percentage points. Redrawing the markets 10,000 times puts 90% of the results between 9.8 and 17.8 points, a range that does not touch zero (a confidence interval). The pass rule, set in advance, was that two thirds of markets favour the rising group and the range excludes zero. Both held.</span><span class="lang-zh"><b>檢定一：上漲階段之後三年，是不是比下跌階段好？</b>比的是「高點續漲＋修復上漲」和「回檔中＋深度修正」之後三年的實質房價漲跌。用的是 43 個市場的全部歷史：每個市場各算兩組的中位數，再看差距。兩組各有至少 8 季的有 38 個市場，其中 34 個是上漲組較好，差距的中位數是 13.3 個百分點。把市場重抽 1 萬次，90% 的結果落在 9.8 到 17.8 個百分點之間，沒有碰到 0（這個範圍叫信賴區間）。事先訂的通過條件是三分之二以上的市場上漲組較好，而且這個範圍不含 0，兩條都達到。</span></p>
+<p><span class="lang-en">Using only quarters from 2010 onward, 20 of 24 markets favoured the rising group, with a gap of 9.3 points and a range of 2.8 to 14.9. The result holds. It also holds under all four alternative threshold settings (trend at 1% and 3%, position at 3% and 10%, position at 10% and 20%). In the 6 markets seen during design, 5 point the same way, with a gap of 10.8 points.</span><span class="lang-zh">只看起點在 2010 年以後的季度，24 個市場裡有 20 個上漲組較好，差距 9.3 個百分點，範圍是 2.8 到 14.9，仍然成立。四種門檻改法（趨勢改 1% 和 3%，位置改 3%／10% 和 10%／20%）結果也都成立。設計時看過的 6 個市場裡，5 個方向相同，差距 10.8 個百分點。</span></p>
+<p><span class="lang-en"><b>Test two: after the rise stops near the high, are the next three years more likely to end lower?</b> It compares "Peak, stalling" plus "Pulling back" with "Peak, rising", on the share of quarters in which real prices were lower three years later. It uses the whole history of the 32 markets with at least 8 quarters in each group and at least one fall. The pooled odds ratio, which is the odds of a fall (chance of a fall divided by chance of no fall) in the first group divided by the same odds in the second, is 2.56, and 27 of the 32 markets point the same way. The pass rule was at least 2, with at least 60% of markets in the same direction. Both held, so the full sample passes.</span><span class="lang-zh"><b>檢定二：漲勢在高點附近停下之後，三年後房價下跌的機會是不是比較高？</b>比的是「高檔停滯＋回檔中」和「高點續漲」，看三年後實質房價比當時低的季數占多少。用的是兩組各有至少 8 季、而且至少有 1 季下跌的 32 個市場的全部歷史。合併的勝算比是 2.56：前一組的下跌勝算（下跌的機率除以不下跌的機率），除以後一組同樣的勝算。32 個市場裡有 27 個方向相同。事先訂的通過條件是至少 2，而且 60% 以上的市場方向相同，兩條都達到，全樣本通過。</span></p>
+<p><span class="lang-en">The result is not stable. Using only quarters from 2010 onward, the odds ratio falls to 1.42 and only 8 of 16 markets point the same way, so it does not pass. With the position thresholds set at 3% and 10%, the odds ratio is 1.95 and it does not pass; the other three settings pass. In the 6 markets seen during design the odds ratio is 1.56, which does not pass. The second claim therefore rests on data from before 2010.</span><span class="lang-zh">這個結果不穩。只看起點在 2010 年以後的季度，勝算比降到 1.42，16 個市場裡只有 8 個方向相同，沒有通過。位置門檻換成 3%／10% 時，勝算比是 1.95，沒有通過；其他三種改法通過。設計時看過的 6 個市場，勝算比 1.56，沒有通過。所以檢定二只靠 2010 年以前的資料撐住。</span></p>
+
+<h3><span class="lang-en">What is not promised</span><span class="lang-zh">不承諾什麼</span></h3>
+<ul>
+<li><span class="lang-en"><b>No forecast for any single market.</b> The numbers are the pooled past record of 43 markets. They are not an expectation for one market.</span><span class="lang-zh"><b>不預測個別市場。</b>這裡的數字是 43 個市場過去合併的紀錄，不是某一個市場的預期。</span></li>
+<li><span class="lang-en"><b>Quarters overlap.</b> Each three-year window overlaps its neighbours, so adjacent quarters describe the same stretch of price moves and the number of quarters is not the number of independent observations. The ranges above are therefore drawn by resampling whole markets, not single quarters.</span><span class="lang-zh"><b>季數互相重疊。</b>三年的區間彼此重疊，相鄰的季度講的是同一段漲跌，所以季數不等於獨立的觀察次數。上面的範圍因此是以整個市場為單位重抽出來的，不是把每一季當成獨立樣本。</span></li>
+<li><span class="lang-en"><b>The data are one to two quarters late.</b> The latest BIS figures usually run one to two quarters behind today. The stage shown is the stage of the latest quarter available, not of today.</span><span class="lang-zh"><b>資料晚一到兩季。</b>BIS 的最新一期通常比今天晚一到兩季。頁面顯示的是最新一期的階段，不是今天的。</span></li>
+<li><span class="lang-en"><b>No forward result yet.</b> The stage of each market in its latest quarter has been saved and frozen. When the data for the first quarter of 2029 arrive, each will be compared with the actual three-year change. If rising stages have not done better than falling stages, the statement above that they do is withdrawn.</span><span class="lang-zh"><b>前瞻驗證還沒有結果。</b>各市場最新一期的階段已經存檔凍結，等 2029 年第一季的資料出來，再逐一對照實際的三年漲跌。若上漲階段沒有比下跌階段好，上面「上漲階段比下跌階段好」的說法就收回。</span></li>
+<li><span class="lang-en"><b>Two sources differ.</b> Taiwan is not in the BIS database. It uses the Sinyi house price index divided by the consumer price index, calculated here, and is not part of the test. The BIS database no longer carries the UAE, so the version archived by FRED is used, which stops at the first quarter of 2024.</span><span class="lang-zh"><b>兩個市場的來源不同。</b>台灣不在 BIS 資料庫，用信義房價指數除以消費者物價指數自算，不進檢定。BIS 現行資料庫已經沒有阿聯，改用 FRED 保存的版本，停在 2024 年第一季。</span></li>
+</ul>
+<p><span class="lang-en">This page organises public data and is not investment advice. See the <a href="https://myproperty.investmquest.com/legal/disclaimer">Disclaimer</a>. How the scorecards work is on the <a href="https://myproperty.investmquest.com/methodology/">scoring method page</a>. Data: <a href="https://stats.bis.org/api/v1/data/WS_SPP/Q..R.628?format=csv" rel="noopener">BIS residential property price statistics</a> (real index, 2010 = 100).</span><span class="lang-zh">本頁整理公開資料，不構成投資建議，詳見<a href="https://myproperty.investmquest.com/legal/disclaimer">免責聲明</a>。評分卡的方法見<a href="https://myproperty.investmquest.com/methodology/">評分方法說明</a>。資料來源：<a href="https://stats.bis.org/api/v1/data/WS_SPP/Q..R.628?format=csv" rel="noopener">BIS 住宅價格資料庫</a>（實質指數，2010 年 = 100）。</span></p>
+
+</div>
+</details>
+</main>
+
+<footer class="footer">
+  <div class="footer-ornament" aria-hidden="true">
+    <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+  </div>
+  <p class="footer-disclaimer">
+    <span class="lang-en"><strong>Independent analysis for reference only</strong> — not investment advice. A project by InvestMQuest.</span>
+    <span class="lang-zh"><strong>獨立分析參考</strong>，不構成投資建議。InvestMQuest 製作。</span>
+  </p>
+  <p class="footer-legal" style="margin-top:10px"><a href="https://myproperty.investmquest.com/legal/privacy"><span class="lang-en">Privacy Policy</span><span class="lang-zh">隱私政策</span></a> · <a href="https://myproperty.investmquest.com/legal/terms"><span class="lang-en">Terms of Use</span><span class="lang-zh">使用條款</span></a> · <a href="https://myproperty.investmquest.com/legal/disclaimer"><span class="lang-en">Disclaimer</span><span class="lang-zh">免責聲明</span></a></p>
+</footer>
+
+<script id="cp-text">
+/* Text builders: pure functions, no DOM. The page script below and the offline length check both call these. */
+var CT=(function(){
+'use strict';
+var MINUS='−';
+var QZH=['','一','二','三','四'];
+
+function pct(x,nd,signed){
+  var k=Math.pow(10,nd),v=Math.round(Math.abs(x)*100*k)/k;
+  if(v===0)return (nd?(0).toFixed(nd):'0')+'%';
+  return (x<0?MINUS:(signed?'+':''))+v.toFixed(nd)+'%';
+}
+function bp(b,nd,signed){return pct(b/10000,nd,signed);}
+function pp(x){return (Math.round(Math.abs(x)*1000)/10).toFixed(1);}
+function qz(q){var m=/^(\d{4})Q([1-4])$/.exec(q);return m[1]+' 年第'+QZH[+m[2]]+'季';}
+function qe(q){var m=/^(\d{4})Q([1-4])$/.exec(q);return 'Q'+m[2]+' '+m[1];}
+function stageOf(stages,key){for(var i=0;i<stages.length;i++)if(stages[i].key===key)return stages[i];return null;}
+
+var S={
+  sent:{
+    peak_up:{zh:'價格在歷史高點附近，而且一年還漲 2% 以上。',en:'Prices sit near their all-time high and are still rising 2% or more a year.'},
+    peak_stall:{zh:'價格還在歷史高點附近，但一年漲不到 2%，甚至小跌。',en:'Prices are still near their all-time high, but have gained less than 2% over the past year, or slipped.'},
+    pullback:{zh:'價格已從高點回落 5% 到 15%，一年還在跌 2% 以上。',en:'Prices have fallen 5% to 15% from their high and are still down 2% or more over the past year.'},
+    deep_correction:{zh:'價格比高點低 15% 以上，一年還在跌 2% 以上。',en:'Prices are 15% or more below their high and still down 2% or more over the past year.'},
+    base:{zh:'價格比高點低 5% 以上，一年的漲跌都在 2% 以內。',en:'Prices are 5% or more below their high, moving less than 2% in either direction over the past year.'},
+    recovery:{zh:'價格仍比高點低 5% 以上，但一年已經漲了 2% 以上。',en:'Prices are still 5% or more below their high, but have gained 2% or more over the past year.'}
+  },
+  ringDef:{
+    peak_up:{zh:['距高點 5% 內','年增 2% 以上'],en:['Within 5% of high','Up 2%+ a year']},
+    peak_stall:{zh:['距高點 5% 內','年增不到 2%'],en:['Within 5% of high','Up under 2%']},
+    pullback:{zh:['低於高點 5% 到 15%','年減 2% 以上'],en:['5-15% below high','Down 2%+ a year']},
+    deep_correction:{zh:['低於高點 15% 以上','年減 2% 以上'],en:['15%+ below high','Down 2%+ a year']},
+    base:{zh:['低於高點 5% 以上','漲跌都在 2% 內'],en:['5%+ below high','Within \u00b12%']},
+    recovery:{zh:['低於高點 5% 以上','年增 2% 以上'],en:['5%+ below high','Up 2%+ a year']}
+  },
+  lab:{
+    r:{zh:'實質房價年增率',en:'Real price growth, 1 year'},
+    d:{zh:'距歷史高點',en:'Below all-time high'},
+    run:{zh:'這個階段已持續',en:'Quarters in this stage'}
+  },
+  now:{zh:'目前',en:'NOW'},
+  cycle:{zh:'一個完整週期',en:'One full cycle'},
+  none:{zh:'未判斷（前 20 季）',en:'Not classified (first 20 quarters)'},
+  hi:{zh:'歷史高點',en:'All-time high'},
+  idx:{zh:'指數',en:'Index'},
+  stg:{zh:'階段',en:'Stage'}
+};
+
+function hero(m,stages){
+  var st=stageOf(stages,m.stage);
+  var nums=[];
+  nums.push({k:'r',label:S.lab.r,value:bp(m.r_bp,1,true),
+    sub:{zh:'本季對四季前',en:'This quarter vs four quarters earlier'}});
+  if(m.d_bp===0){
+    nums.push({k:'d',label:S.lab.d,value:'0%',sub:{zh:'目前就是高點',en:'At the high now'}});
+  }else{
+    nums.push({k:'d',label:S.lab.d,value:bp(m.d_bp,1,true),
+      sub:{zh:'高點在 '+qz(m.peak_q),en:'High was in '+qe(m.peak_q)}});
+  }
+  nums.push({k:'run',label:S.lab.run,value:String(m.run_q),unitZh:'季',unitEn:m.run_q===1?'qtr':'qtrs',
+    sub:{zh:'自 '+qz(m.since_q)+'起',en:'Since '+qe(m.since_q)}});
+  var th;
+  if(m.source==='SINYI/CPI'){
+    th={zh:'信義房價指數除以消費者物價指數，資料截至 '+qz(m.data_through)+'。不在 BIS，不進檢定。',
+        en:'Sinyi house price index divided by CPI, through '+qe(m.data_through)+'. Not in BIS, not part of the test.'};
+  }else if(m.stale&&m.source==='FRED'){
+    th={zh:'資料停在 '+qz(m.data_through)+'（{src} 保存的 BIS 資料），已落後 '+m.quarters_behind+' 季。',
+        en:'Data stop at '+qe(m.data_through)+' (BIS series archived by {src}), '+m.quarters_behind+' quarters behind.'};
+  }else if(m.stale){
+    th={zh:'{src} 資料停在 '+qz(m.data_through)+'，已落後 '+m.quarters_behind+' 季。',
+        en:'{src} data stop at '+qe(m.data_through)+', '+m.quarters_behind+' quarters behind.'};
+  }else{
+    th={zh:'{src} 資料截至 '+qz(m.data_through)+'。',en:'{src} data through '+qe(m.data_through)+'.'};
+  }
+  return {name:{zh:m.name_zh,en:m.name_en},stage:{zh:st.zh,en:st.en},sentence:S.sent[m.stage],nums:nums,through:th};
+}
+
+function record(m,stages,pooled){
+  var st=stageOf(stages,m.stage),N=pooled.n_test_markets,ev=pooled.evidence;
+  var nz=m.name_zh,ne=m.name_en,sz=st.zh,se=st.en;
+  var paras=[],d=m.dist&&m.dist[m.stage];
+  if(!m.dist){
+    if(m.code==='TW')paras.push({k:'own',zh:'台灣不在 BIS 資料庫，不進檢定，沒有各階段之後三年的紀錄。',
+      en:'Taiwan is not in the BIS database and is not part of the test, so there is no three-year record by stage.'});
+    else paras.push({k:'own',zh:nz+'的資料不到 80 季，沒有列入檢定，也沒有各階段之後三年的紀錄。',
+      en:ne+' has fewer than 80 quarters of data, is not part of the test and has no three-year record by stage.'});
+  }else if(d.n===0){
+    paras.push({k:'own',zh:nz+'沒有處在'+sz+'、且之後三年結果已經出來的季度。樣本太少，不列數字。',
+      en:ne+' has no quarter in "'+se+'" with a known three-year outcome. Too few to show numbers.'});
+  }else if(d.n<8){
+    paras.push({k:'own',zh:nz+'只有 '+d.n+' 季處在'+sz+'，且之後三年的結果已經出來。樣本太少，不列數字。',
+      en:ne+' has only '+d.n+' quarters in "'+se+'" with a known three-year outcome. Too few to show numbers.'});
+  }else{
+    paras.push({k:'own',
+      zh:nz+'過去有 '+d.n+' 季處在'+sz+'，且之後三年的結果已經出來。這些季度之後三年，實質房價漲跌的中位數是 '+pct(d.median,1,true)+'。最差的四分之一在 '+pct(d.p25,1,true)+' 以下，最好的四分之一在 '+pct(d.p75,1,true)+' 以上。三年後房價比當時低的季度占 '+pct(d.loss_share,0,false)+'。',
+      en:ne+' spent '+d.n+' quarters in "'+se+'" with the next three years already known. Median real price change over those three years: '+pct(d.median,1,true)+'. The worst 25% of cases were '+pct(d.p25,1,true)+' or lower and the best 25% were '+pct(d.p75,1,true)+' or higher. In '+pct(d.loss_share,0,false)+' of the quarters, prices were lower three years later.'});
+  }
+  if(m.group==='design')paras.push({k:'note',
+    zh:nz+'是設計規則時看過的 6 個市場之一，不計入下面 '+N+' 個檢定市場。',
+    en:ne+' is one of the 6 markets examined while the rules were designed, and is not counted among the '+N+' test markets below.'});
+  var row=null;
+  for(var i=0;i<pooled.stages.length;i++)if(pooled.stages[i].stage===m.stage)row=pooled.stages[i];
+  paras.push({k:'pool',
+    zh:N+' 個檢定市場裡，有 '+row.n_markets+' 個至少 8 季處在'+sz+'。它們之後三年漲跌的中位數是 '+pct(row.median,1,true)+'。全部季度合計，三年後房價比當時低的占 '+pct(row.loss_share,0,false)+'。',
+    en:'Among the '+N+' test markets, '+row.n_markets+' had at least 8 quarters in "'+se+'". Their median three-year change was '+pct(row.median,1,true)+'. Counting every quarter together, prices were lower three years later in '+pct(row.loss_share,0,false)+' of them.'});
+  var a=ev.rising_vs_falling.full,b=ev.rising_vs_falling.post2010;
+  paras.push({k:'rise',
+    zh:'上漲階段（高點續漲、修復上漲）之後三年，歷史上比下跌階段（回檔中、深度修正）好。兩組各有至少 8 季的 '+a.n_qualified+' 個市場裡，'+a.n_up_better+' 個是上漲階段較好，各市場差距的中位數是 '+pp(a.median_diff)+' 個百分點。只看起點在 2010 年以後的季度，'+b.n_qualified+' 個裡有 '+b.n_up_better+' 個，差距 '+pp(b.median_diff)+' 個百分點，結論不變。',
+    en:'The three years after a rising stage (Peak, rising; Recovering) have been better than after a falling stage (Pulling back; Deep correction). Of the '+a.n_qualified+' markets with at least 8 quarters in both groups, '+a.n_up_better+' show it, with a median gap of '+pp(a.median_diff)+' percentage points. Counting only quarters from 2010 onward, '+b.n_up_better+' of '+b.n_qualified+' do, with a gap of '+pp(b.median_diff)+' points. The result holds.'});
+  if(m.stage==='peak_up'||m.stage==='peak_stall'||m.stage==='pullback'){
+    var c=ev.stall_vs_peak.full,e=ev.stall_vs_peak.post2010;
+    paras.push({k:'stall',
+      zh:'高檔停滯與回檔中之後三年，房價下跌的機會歷史上比高點續漲高。符合條件的 '+c.n_qualified+' 個市場裡，'+c.n_same_direction+' 個是這個方向，通過檢定。但只看起點在 2010 年以後的季度，'+e.n_qualified+' 個市場裡只有 '+e.n_same_direction+' 個，沒有通過。',
+      en:'After "Peak, stalling" and "Pulling back", prices have been more likely to be lower three years on than after "Peak, rising". Of the '+c.n_qualified+' qualifying markets, '+c.n_same_direction+' show it, and it passes the test. Counting only quarters from 2010 onward, just '+e.n_same_direction+' of '+e.n_qualified+' do, and it does not pass.'});
+  }
+  for(var j=0;j<paras.length;j++){
+    if(paras[j].zh.indexOf('中位數')>=0){
+      paras[j].zh=paras[j].zh.replace('中位數','中位數（排在正中間的值）');
+      paras[j].en=paras[j].en.replace('Median','Median (the middle value)').replace('median','median (the middle value)');
+      break;
+    }
+  }
+  return {paras:paras,row:row};
+}
+
+return {pct:pct,bp:bp,pp:pp,qz:qz,qe:qe,stageOf:stageOf,S:S,hero:hero,record:record};
+})();
+</script>
+
+<script>
+(function(){
+'use strict';
+var COLORS=['#008300','#eda100','#e34948','#6250d6','#e87ba4','#2a78d6'];
+var INK='#0d2244';
+var DATA=null,LANG='en',CUR=null,SORT={key:'name',dir:1},FILTER=null,chart=null;
+var $=function(id){return document.getElementById(id);};
+
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function bi(o){return '<span class="lang-en">'+esc(o.en)+'</span><span class="lang-zh">'+esc(o.zh)+'</span>';}
+function biRaw(o){return '<span class="lang-en">'+o.en+'</span><span class="lang-zh">'+o.zh+'</span>';}
+function L(o){return LANG==='zh'?o.zh:o.en;}
+function rgba(hex,a){var n=parseInt(hex.slice(1),16);return 'rgba('+(n>>16&255)+','+(n>>8&255)+','+(n&255)+','+a+')';}
+function mix(hex,t){var n=parseInt(hex.slice(1),16),r=n>>16&255,g=n>>8&255,b=n&255;
+  function f(c){return Math.round(c+(255-c)*t);}return 'rgb('+f(r)+','+f(g)+','+f(b)+')';}
+function lum(hex){var n=parseInt(hex.slice(1),16);
+  function f(c){c/=255;return c<=0.03928?c/12.92:Math.pow((c+0.055)/1.055,2.4);}
+  return 0.2126*f(n>>16&255)+0.7152*f(n>>8&255)+0.0722*f(n&255);}
+function onColor(hex){var l=lum(hex);return (1.05/(l+0.05))>((l+0.05)/(0.017+0.05))?'#ffffff':INK;}
+function stageIdx(key){for(var i=0;i<DATA.stages.length;i++)if(DATA.stages[i].key===key)return i;return -1;}
+function mkt(code){for(var i=0;i<DATA.markets.length;i++)if(DATA.markets[i].code===code)return DATA.markets[i];return null;}
+function nm(m){return LANG==='zh'?m.name_zh:m.name_en;}
+
+/* ---------- market picker ---------- */
+function buildSelect(){
+  var sel=$('cpSel'),q=($('cpQ').value||'').trim().toLowerCase(),html='',any=false;
+  DATA.regions.forEach(function(r){
+    var ms=DATA.markets.filter(function(m){
+      if(m.region!==r.key)return false;
+      if(!q)return true;
+      return (m.name_zh+' '+m.name_en+' '+m.code).toLowerCase().indexOf(q)>=0 || m.code===CUR.code;
+    });
+    ms.sort(function(a,b){return nm(a).localeCompare(nm(b),LANG==='zh'?'zh-Hant':'en');});
+    if(!ms.length)return;
+    any=true;
+    html+='<optgroup label="'+esc(L(r))+'">'+ms.map(function(m){
+      var st=CT.stageOf(DATA.stages,m.stage);
+      return '<option value="'+m.code+'"'+(m.code===CUR.code?' selected':'')+'>'+esc(nm(m))+' · '+esc(L(st))+'</option>';
+    }).join('')+'</optgroup>';
+  });
+  sel.innerHTML=html;
+  sel.value=CUR.code;
+}
+function matches(q){
+  q=q.trim().toLowerCase();if(!q)return [];
+  return DATA.markets.filter(function(m){return (m.name_zh+' '+m.name_en+' '+m.code).toLowerCase().indexOf(q)>=0;});
+}
+
+/* ---------- hero ---------- */
+function srcLink(m,text){
+  if(!m.source_url)return esc(text);
+  return '<a href="'+esc(m.source_url)+'" rel="noopener">'+esc(text)+'</a>';
+}
+function renderHero(){
+  var m=CUR,h=CT.hero(m,DATA.stages),si=stageIdx(m.stage),c=COLORS[si];
+  var src=m.source==='FRED'?'FRED':'BIS';
+  function thr(t){return esc(t).replace('{src}',function(){return srcLink(m,src);});}
+  var nums=h.nums.map(function(n){
+    var unit=n.unitZh?'<small><span class="lang-en">'+esc(n.unitEn)+'</span><span class="lang-zh">'+esc(n.unitZh)+'</span></small>':'';
+    return '<div class="cp-num"><p class="l">'+bi(n.label)+'</p><p class="v">'+esc(n.value)+unit+'</p><p class="s">'+bi(n.sub)+'</p></div>';
+  }).join('');
+  $('cpHero').innerHTML=
+    '<p class="cp-name">'+bi(h.name)+'</p>'+
+    '<div class="cp-stagerow"><span class="cp-swatch" style="background:'+c+'"></span><p class="cp-stage">'+bi(h.stage)+'</p></div>'+
+    '<p class="cp-sent">'+bi(h.sentence)+'</p>'+
+    '<div class="cp-nums">'+nums+'</div>'+
+    '<p class="cp-through">'+biRaw({en:thr(h.through.en),zh:thr(h.through.zh)})+'</p>';
+}
+
+/* ---------- ring ---------- */
+function sector(cx,cy,ro,ri,a0,a1){
+  var r=Math.PI/180;
+  function P(rad,a){return [cx+rad*Math.cos(a*r),cy+rad*Math.sin(a*r)];}
+  var p1=P(ro,a0),p2=P(ro,a1),p3=P(ri,a1),p4=P(ri,a0);
+  function f(p){return p[0].toFixed(1)+' '+p[1].toFixed(1);}
+  return 'M'+f(p1)+' A'+ro+' '+ro+' 0 0 1 '+f(p2)+' L'+f(p3)+' A'+ri+' '+ri+' 0 0 0 '+f(p4)+' Z';
+}
+function renderRing(){
+  var cx=250,cy=250,ro=235,ri=104,rm=(ro+ri)/2,out='',cur=stageIdx(CUR.stage),list='';
+  DATA.stages.forEach(function(st,i){
+    var mid=-90+60*i,col=COLORS[i],isCur=i===cur;
+    var fill=isCur?col:mix(col,0.86),tc=isCur?onColor(col):INK;
+    var d=CT.S.ringDef[st.key],lines=LANG==='zh'?d.zh:d.en;
+    var x=cx+rm*Math.cos(mid*Math.PI/180),y=cy+rm*Math.sin(mid*Math.PI/180);
+    var o=isCur?[-26,-7,12,27]:[-5,14,29],X=x.toFixed(1);
+    out+='<g><title>'+esc(L(st))+' \u2014 '+esc(lines.join(', '))+'</title>'+
+      '<path d="'+sector(cx,cy,ro,ri,mid-29,mid+29)+'" fill="'+fill+'" stroke="'+col+'" stroke-width="'+(isCur?3:1.5)+'"/>';
+    if(isCur)out+='<text class="rt" x="'+X+'" y="'+(y+o[0]).toFixed(1)+'" text-anchor="middle" fill="'+tc+'">'+esc(L(CT.S.now))+'</text>';
+    var k=isCur?1:0;
+    out+='<text class="rn" x="'+X+'" y="'+(y+o[k]).toFixed(1)+'" text-anchor="middle" fill="'+tc+'">'+esc(L(st))+'</text>'+
+      '<text class="rd" x="'+X+'" y="'+(y+o[k+1]).toFixed(1)+'" text-anchor="middle" fill="'+tc+'">'+esc(lines[0])+'</text>'+
+      '<text class="rd" x="'+X+'" y="'+(y+o[k+2]).toFixed(1)+'" text-anchor="middle" fill="'+tc+'">'+esc(lines[1])+'</text></g>';
+    list+='<li'+(isCur?' class="cur"':'')+'><i style="background:'+col+'"></i>'+esc(L(st))+(LANG==='zh'?'：':': ')+esc(lines.join(LANG==='zh'?'，':', '))+'</li>';
+  });
+  out+='<text class="rc" x="'+cx+'" y="'+(cy-4)+'" text-anchor="middle" style="font-size:30px">&#8635;</text>'+
+       '<text class="rc" x="'+cx+'" y="'+(cy+22)+'" text-anchor="middle">'+esc(L(CT.S.cycle))+'</text>';
+  var label=L({zh:'六階段週期圖，目前階段：',en:'Six-stage cycle chart, current stage: '})+L(CT.stageOf(DATA.stages,CUR.stage));
+  $('cpRing').innerHTML='<svg class="cp-ring" viewBox="0 0 500 500" role="img" aria-label="'+esc(label)+'">'+out+'</svg>';
+  $('cpRingList').innerHTML=list;
+}
+
+/* ---------- long-run chart ---------- */
+function renderLegend(){
+  $('cpLegend').innerHTML=DATA.stages.map(function(st,i){
+    return '<span><i style="background:'+rgba(COLORS[i],0.22)+';border:2px solid '+COLORS[i]+'"></i>'+esc(L(st))+'</span>';
+  }).join('')+'<span><i class="none"></i>'+esc(L(CT.S.none))+'</span>';
+}
+function renderChart(){
+  var el=$('cpChart'),m=CUR;
+  if(chart){chart.dispose();chart=null;}
+  if(typeof echarts==='undefined'){
+    el.innerHTML='<p class="cp-fail">'+bi({en:'The chart could not be loaded. The table below has the same stages.',zh:'圖表載入失敗，下方表格有同樣的階段資料。'})+'</p>';
+    return;
+  }
+  el.innerHTML='';
+  var q=m.q,v=m.v,s=m.s,n=q.length,areas=[],i=0;
+  while(i<n){
+    if(s[i]<0){i++;continue;}
+    var j=i;while(j+1<n&&s[j+1]===s[i])j++;
+    var end=(j+1<n)?q[j+1]:q[j];
+    areas.push([{xAxis:q[i],itemStyle:{color:rgba(COLORS[s[i]],0.22)}},{xAxis:end}]);
+    i=j+1;
+  }
+  var years=parseInt(q[n-1].slice(0,4),10)-parseInt(q[0].slice(0,4),10),step=years>45?10:5;
+  var pk=v.indexOf(Math.max.apply(null,v));
+  var peakV=Math.max.apply(null,v);
+  chart=echarts.init(el);
+  chart.setOption({
+    animation:false,
+    grid:{left:6,right:18,top:18,bottom:24,containLabel:true},
+    tooltip:{trigger:'axis',backgroundColor:'#fff',borderColor:'#ccd9e8',borderWidth:1,
+      textStyle:{color:INK,fontSize:12,fontFamily:'Inter, Noto Sans TC, sans-serif'},
+      axisPointer:{type:'line',lineStyle:{color:'#6b7a92',width:1}},
+      formatter:function(ps){
+        var k=ps[0].dataIndex,si=s[k],qq=q[k];
+        var stName=si<0?L(CT.S.none):L(DATA.stages[si]);
+        var col=si<0?'#9aa6b8':COLORS[si];
+        return '<div style="font-weight:600;margin-bottom:3px">'+esc(LANG==='zh'?CT.qz(qq):CT.qe(qq))+'</div>'+
+          '<div>'+esc(L(CT.S.idx))+' <b style="font-size:14px">'+v[k].toFixed(1)+'</b></div>'+
+          '<div style="margin-top:2px"><span style="display:inline-block;width:12px;height:3px;background:'+col+';margin-right:6px;vertical-align:middle"></span>'+esc(L(CT.S.stg))+' '+esc(stName)+'</div>';
+      }},
+    xAxis:{type:'category',data:q,boundaryGap:false,
+      axisLine:{lineStyle:{color:'#ccd9e8'}},axisTick:{show:false},
+      axisLabel:{color:'#6b7a92',fontSize:11,interval:function(idx,val){return /Q1$/.test(val)&&(parseInt(val.slice(0,4),10)%step===0);},
+        formatter:function(val){return val.slice(0,4);}}},
+    yAxis:{type:'value',scale:true,axisLine:{show:false},axisTick:{show:false},
+      axisLabel:{color:'#6b7a92',fontSize:11,formatter:function(x){return Math.round(x);}},
+      splitLine:{lineStyle:{color:'#e8eef5'}}},
+    series:[{type:'line',data:v,showSymbol:false,symbol:'circle',symbolSize:6,smooth:false,
+      lineStyle:{color:INK,width:2},itemStyle:{color:INK},z:3,
+      markArea:{silent:true,data:areas},
+      markLine:{silent:true,symbol:'none',animation:false,lineStyle:{type:'dashed',color:'#6b7a92',width:1},
+        label:{show:true,position:'insideStartTop',color:'#6b7a92',fontSize:11,formatter:function(){return L(CT.S.hi);}},
+        data:[{yAxis:peakV}]},
+      markPoint:{silent:true,symbol:'circle',symbolSize:9,itemStyle:{color:INK,borderColor:'#fff',borderWidth:2},label:{show:false},
+        data:[{coord:[q[n-1],v[n-1]]}]}}]
+  });
+  el.setAttribute('aria-label',L({en:'Line chart of the real house price index for '+m.name_en+', shaded by stage.',zh:'折線圖：'+m.name_zh+'的實質房價指數，背景依階段上色。'}));
+}
+
+/* ---------- record ---------- */
+function renderRecord(){
+  var r=CT.record(CUR,DATA.stages,DATA.pooled);
+  $('cpRec').innerHTML=r.paras.map(function(p){return '<p'+(p.k==='note'?' class="aside"':'')+'>'+bi(p)+'</p>';}).join('');
+  var cur=CUR.stage,rows=DATA.pooled.stages.map(function(x){
+    var st=CT.stageOf(DATA.stages,x.stage);
+    return '<tr'+(x.stage===cur?' class="cur"':'')+'><td>'+bi(st)+'</td><td class="n">'+x.n_markets+'</td><td class="n">'+CT.pct(x.median,1,true)+'</td><td class="n">'+CT.pct(x.loss_share,0,false)+'</td></tr>';
+  }).join('');
+  $('cpPool').innerHTML=
+    '<div class="tbl-wrap" style="overflow-x:auto"><table class="cp-tw"><thead><tr>'+
+    '<th>'+bi({en:'Stage',zh:'階段'})+'</th>'+
+    '<th class="n">'+bi({en:'Markets with 8+ quarters',zh:'至少 8 季的市場數'})+'</th>'+
+    '<th class="n">'+bi({en:'Median change over next 3 years',zh:'之後三年實質漲跌'})+'</th>'+
+    '<th class="n">'+bi({en:'Share lower after 3 years',zh:'三年後比當時低的比例'})+'</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
+    '<p class="cp-note">'+bi({en:'The 43 test markets, pooled. Change = median of each market’s median. Share lower = all quarters counted together. Three-year windows overlap, so quarters are not independent observations.',
+      zh:'43 個檢定市場合併。漲跌是各市場中位數再取中位數；比例是全部季度合計。三年的區間互相重疊，季數不是獨立樣本。'})+'</p>';
+}
+
+/* ---------- all-markets table ---------- */
+function sortVal(m,key){
+  switch(key){
+    case 'name':return nm(m);
+    case 'stage':return stageIdx(m.stage);
+    case 'r':return m.r_bp;
+    case 'd':return m.d_bp;
+    case 'run':return m.run_q;
+    case 'through':return m.data_through;
+  }
+}
+function renderTools(){
+  var all=DATA.markets.length;
+  var chips='<button type="button" class="cp-chip" data-f="" aria-pressed="'+(FILTER===null)+'">'+esc(L({en:'All',zh:'全部'}))+' '+all+'</button>';
+  DATA.stages.forEach(function(st,i){
+    var c=DATA.markets.filter(function(m){return m.stage===st.key;}).length;
+    chips+='<button type="button" class="cp-chip" data-f="'+st.key+'" aria-pressed="'+(FILTER===st.key)+'"><i style="background:'+COLORS[i]+'"></i>'+esc(L(st))+' '+c+'</button>';
+  });
+  $('cpTools').innerHTML=chips;
+}
+function renderTable(){
+  var cols=[['name',{en:'Market',zh:'市場'},''],['stage',{en:'Stage',zh:'階段'},''],['r',{en:'Growth, 1 year',zh:'年增率'},'n'],
+    ['d',{en:'Below high',zh:'距高點'},'n'],['run',{en:'Quarters',zh:'持續季數'},'n'],['through',{en:'Data through',zh:'資料截至'},'']];
+  var ms=DATA.markets.filter(function(m){return FILTER===null||m.stage===FILTER;});
+  var loc=LANG==='zh'?'zh-Hant':'en';
+  ms.sort(function(a,b){
+    var x=sortVal(a,SORT.key),y=sortVal(b,SORT.key),c;
+    if(typeof x==='string')c=x.localeCompare(y,loc);else c=x-y;
+    if(c===0)c=nm(a).localeCompare(nm(b),loc);
+    return c*SORT.dir;
+  });
+  var head='<thead><tr>'+cols.map(function(c){
+    var on=SORT.key===c[0];
+    return '<th class="'+c[2]+'" aria-sort="'+(on?(SORT.dir>0?'ascending':'descending'):'none')+'"><button type="button" data-s="'+c[0]+'">'+bi(c[1])+(on?(SORT.dir>0?' ▲':' ▼'):'')+'</button></th>';
+  }).join('')+'</tr></thead>';
+  var body='<tbody>'+ms.map(function(m){
+    var si=stageIdx(m.stage),st=DATA.stages[si];
+    var tag='';
+    if(m.code==='TW')tag='<span class="tag">'+bi({en:'not BIS',zh:'非 BIS'})+'</span>';
+    if(m.stale)tag='<span class="tag">'+bi({en:'stale',zh:'停更'})+'</span>';
+    return '<tr'+(m.code===CUR.code?' class="cur"':'')+'><td><button type="button" class="lk" data-code="'+m.code+'">'+bi({en:m.name_en,zh:m.name_zh})+'</button></td>'+
+      '<td><i class="dot" style="background:'+COLORS[si]+'"></i>'+bi(st)+'</td>'+
+      '<td class="n">'+CT.bp(m.r_bp,1,true)+'</td><td class="n">'+(m.d_bp===0?'0%':CT.bp(m.d_bp,1,true))+'</td><td class="n">'+m.run_q+'</td>'+
+      '<td>'+m.data_through.replace('Q',' Q')+tag+'</td></tr>';
+  }).join('')+'</tbody>';
+  $('cpAll').innerHTML=head+body;
+  $('cpCount').innerHTML=bi({en:ms.length+' of '+DATA.markets.length+' markets. Taiwan uses the Sinyi index, not BIS; the UAE series has stopped.',
+    zh:'顯示 '+ms.length+' 個，共 '+DATA.markets.length+' 個市場。台灣用信義房價指數，不在 BIS；阿聯的資料已停更。'});
+}
+
+/* ---------- control ---------- */
+function setTitle(){document.title=LANG==='zh'?'房產週期位置':'Housing Cycle Position';}
+function renderAll(){
+  if(!DATA||!CUR)return;
+  $('cpQ').placeholder=LANG==='zh'?'搜尋市場，例如 日本、Japan、JP':'Search, e.g. Japan, 日本, JP';
+  $('cpQ').setAttribute('aria-label',LANG==='zh'?'搜尋市場':'Search markets');
+  $('cpSel').setAttribute('aria-label',LANG==='zh'?'選擇市場':'Choose a market');
+  $('cpN').textContent=DATA.markets.length;
+  buildSelect();renderHero();renderRing();renderLegend();renderChart();renderRecord();renderTools();renderTable();setTitle();
+}
+function setMarket(code,opts){
+  var m=mkt(code);if(!m)return;
+  CUR=m;
+  try{if(!opts||opts.url!==false){history.replaceState(null,'','?m='+code);}}catch(e){}
+  renderAll();
+  if(opts&&opts.scroll){try{window.scrollTo({top:0,behavior:'smooth'});}catch(e){window.scrollTo(0,0);}}
+}
+window.setLang=function(lang){
+  LANG=lang==='zh'?'zh':'en';
+  document.body.classList.toggle('zh',LANG==='zh');
+  document.documentElement.lang=LANG==='zh'?'zh-Hant':'en';
+  try{localStorage.setItem('lang',LANG);}catch(e){}
+  renderAll();
+};
+window.addEventListener('resize',function(){if(chart)chart.resize();});
+
+function bind(){
+  $('cpSel').addEventListener('change',function(){setMarket(this.value);});
+  $('cpQ').addEventListener('input',function(){buildSelect();});
+  $('cpQ').addEventListener('keydown',function(e){
+    if(e.key==='Enter'){var r=matches(this.value);if(r.length){this.value='';setMarket(r[0].code);}e.preventDefault();}
+  });
+  $('cpTools').addEventListener('click',function(e){
+    var b=e.target.closest('button[data-f]');if(!b)return;
+    FILTER=b.getAttribute('data-f')||null;renderTools();renderTable();
+  });
+  $('cpAll').addEventListener('click',function(e){
+    var s=e.target.closest('button[data-s]');
+    if(s){var k=s.getAttribute('data-s');if(SORT.key===k)SORT.dir=-SORT.dir;else{SORT.key=k;SORT.dir=1;}renderTable();return;}
+    var c=e.target.closest('button[data-code]');
+    if(c)setMarket(c.getAttribute('data-code'),{scroll:true});
+  });
+}
+
+function start(){
+  try{LANG=localStorage.getItem('lang')==='zh'?'zh':'en';}catch(e){LANG='en';}
+  document.body.classList.toggle('zh',LANG==='zh');
+  document.documentElement.lang=LANG==='zh'?'zh-Hant':'en';
+  var xhr=new XMLHttpRequest();
+  xhr.open('GET','/data/compass-v4/page.json');
+  xhr.onload=function(){
+    if(xhr.status<200||xhr.status>=300){fail();return;}
+    try{DATA=JSON.parse(xhr.responseText);}catch(e){fail();return;}
+    var code=(new URLSearchParams(location.search).get('m')||'MY').toUpperCase();
+    CUR=mkt(code)||mkt('MY');
+    bind();
+    setMarket(CUR.code,{url:mkt(code)?false:true});
+  };
+  xhr.onerror=fail;
+  xhr.send();
+}
+function fail(){$('cpHero').innerHTML='<p class="cp-fail">'+bi({en:'The data could not be loaded. Please try again later.',zh:'資料載入失敗，請稍後再試。'})+'</p>';}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start);else start();
+})();
+</script>
+<script src="/js/navbar.js"></script>
+</body>
+</html>

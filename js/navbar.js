@@ -31,8 +31,14 @@ var MARKETS = [
   {k:'ca',flag:'🇨🇦',en:'Canada',zh:'加拿大',base:'/ca/',
     cities:[{f:'toronto.html',en:'Toronto',zh:'多倫多'},{f:'vancouver.html',en:'Vancouver',zh:'溫哥華'}]},
   {k:'ie',flag:'🇮🇪',en:'Ireland',zh:'愛爾蘭',base:'/ie/',
-    cities:[{f:'dublin.html',en:'Dublin',zh:'都柏林'},{f:'cork.html',en:'Cork',zh:'科克'}]}
+    cities:[{f:'dublin.html',en:'Dublin',zh:'都柏林'},{f:'cork.html',en:'Cork',zh:'科克'}]},
+  /* Archived markets (data as of 2026-10, not updated): report + macro only, no city pages */
+  {k:'ae',flag:'🇦🇪',en:'UAE',zh:'阿聯',base:'/ae/',secs:['report.html','macro.html'],cities:[]},
+  {k:'tr',flag:'🇹🇷',en:'Türkiye',zh:'土耳其',base:'/tr/',secs:['report.html','macro.html'],cities:[]},
+  {k:'gr',flag:'🇬🇷',en:'Greece',zh:'希臘',base:'/gr/',secs:['report.html','macro.html'],cities:[]},
+  {k:'ph',flag:'🇵🇭',en:'Philippines',zh:'菲律賓',base:'/ph/',secs:['report.html','macro.html'],cities:[]}
 ];
+function secsOf(m){return m.secs?SECTIONS.filter(function(s){return m.secs.indexOf(s.f)!==-1;}):SECTIONS;}
 
 var SECTIONS = [
   {f:'index.html',en:'Overview',zh:'市場總覽'},
@@ -58,7 +64,10 @@ var ZONES = [
         {href:'/global/quadrant.html',en:'Four-Quadrant Model',zh:'四象限模型'},
         {href:'/global/compass.html',en:'Other Markets Compass',zh:'其他市場羅盤'},
         {href:'/carry-heatmap.html',en:'Carry Heatmap',zh:'利差熱力圖'},
-        {href:'/visa.html',en:'Visa Map',zh:'簽證地圖'}]},
+        {href:'/visa.html',en:'Visa Map',zh:'簽證地圖'},
+        {href:'/global/visa.html',en:'Residency by Property (49)',zh:'購屋居留制度（49 套）'},
+        {href:'/global/residency.html',en:'Residency Finder',zh:'居留制度挑選'},
+        {href:'/compass/',en:'Housing Cycle Compass v4',zh:'房產週期羅盤 v4'}]},
       {en:'Pick a City',zh:'挑城市',links:[
         {href:'/tools/compare.html',en:'City Compare',zh:'城市比較'},
         {href:'/tools/yield-spread.html',en:'Yield Spread',zh:'利差工具'},
@@ -171,7 +180,7 @@ var zonesHtml = ZONES.map(function(z){
 /* Row 2: market flags with hover dropdowns (Property pages only) */
 var flagsHtml = MARKETS.map(function(m){
   var cls = 'imq-flag'+(m.k===activeMarket?' on':'');
-  var sectionsHtml = SECTIONS.map(function(s){
+  var sectionsHtml = secsOf(m).map(function(s){
     return '<a class="imq-dd-link" href="'+m.base+s.f+'">'+spanBL(s.en,s.zh)+'</a>';
   }).join('');
   var citiesHtml = m.cities.map(function(ct){
@@ -184,7 +193,7 @@ var flagsHtml = MARKETS.map(function(m){
     '</a>'+
     '<div class="imq-dd">'+
       '<div class="imq-dd-section"><div class="imq-dd-title">'+spanBL('Sections','頁面')+'</div>'+sectionsHtml+'</div>'+
-      '<div class="imq-dd-section"><div class="imq-dd-title">'+spanBL('Cities','城市')+'</div>'+citiesHtml+'</div>'+
+      (m.cities.length?'<div class="imq-dd-section"><div class="imq-dd-title">'+spanBL('Cities','城市')+'</div>'+citiesHtml+'</div>':'')+
     '</div>'+
   '</div>';
 }).join('');
@@ -195,7 +204,7 @@ if (showMarkets && activeMarket) {
   var activeMk = MARKETS.filter(function(m){return m.k===activeMarket;})[0];
   if (activeMk) {
     var activeFile = fileSeg;
-    var secLinks = SECTIONS.map(function(s){
+    var secLinks = secsOf(activeMk).map(function(s){
       var href = activeMk.base + s.f;
       var isOn = (s.f === activeFile);
       return '<a class="imq-sub-link'+(isOn?' on':'')+'" href="'+href+'">'+spanBL(s.en,s.zh)+'</a>';
@@ -207,7 +216,7 @@ if (showMarkets && activeMarket) {
     }).join('');
     subnavHtml = '<div class="imq-row3">'+
       '<div class="imq-sub-label"><span class="imq-flag-emoji">'+activeMk.flag+'</span><span class="imq-sub-mk">'+spanBL(activeMk.en,activeMk.zh)+'</span></div>'+
-      '<div class="imq-sub-links">'+secLinks+'<span class="imq-sub-sep">·</span>'+cityLinks+'</div>'+
+      '<div class="imq-sub-links">'+secLinks+(activeMk.cities.length?'<span class="imq-sub-sep">·</span>'+cityLinks:'')+'</div>'+
     '</div>';
   }
 }
