@@ -34,6 +34,13 @@
 /_headers            ← Cloudflare Pages 格式的 header（網站在 GitHub Pages，目前不生效）
 ```
 
+## 不放在這個 repo 的頁面（2026-10-14 搬出）
+這個 repo 是公開的，網站也會原樣公開所有檔案。含家人或個人規劃的頁面不放這裡：
+- 營隊查詢（原 `camps/`）、馬來西亞親子旅行（原 `travel/`）、桌球教室開館試算（原 `biz/`）
+  → 原始檔在私人 repo `keigoks-ivan/family-pages`（本機 `~/family-pages`），
+  發布到分享站（私人 repo `keigoks-ivan/share-site`，亂碼網址，不掛首頁與 navbar）。
+- **不要把這三頁加回 tools**，也不要在首頁或 navbar 連到它們。要改就到 `~/family-pages` 改，再用 `~/share-site/share.py --root ~/family-pages <資料夾>` 重新發布。
+
 ## 每個市場的標準頁面
 - index.html（市場總覽 Dashboard）
 - supply.html（供給分析）
