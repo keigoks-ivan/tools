@@ -1,6 +1,6 @@
 /* InvestMQuest toolbox — shared navbar (dark gradient, site-wide)
    Drop a <div id="nav-root"></div> on any page and load this script.
-   Row 1: logo + five zone dropdowns (Property, Reading, Kids, Games, Other) + language.
+   Row 1: logo + four zone dropdowns (Property, Reading, Kids, Games) + language.
    Row 2/3 (Property pages only): market flags with hover dropdowns + current-market sub-nav.
    Auto-detects the active zone / link from location.pathname. */
 (function(){
@@ -109,8 +109,6 @@ var ZONES = [
     {href:'/game/violet-edge/',en:'Violet Edge',zh:'紫刃夜行'},
     {href:'/game/mech/',en:'Iron Dusk (Mech)',zh:'鋼鐵黃昏'}]}],
     more:{href:'/games/',en:'All games →',zh:'全部遊戲 →',exact:true}},
-  {k:'other',en:'Other',zh:'其他',groups:[{links:[
-    {href:'/biz/tt-studio-planner.html',en:'Table Tennis Studio Planner',zh:'桌球教室開館試算'}]}]}
 ];
 
 /* ---------- detect active ---------- */
@@ -132,7 +130,6 @@ if (path === '/home.html') activeZone = null;
 else if (firstSeg === 'history' || path === '/solo-co.html' || path === '/marketing.html' || path === '/solo-co' || path === '/marketing') activeZone = 'reading';
 else if (firstSeg === 'education' || firstSeg === 'salon' || firstSeg === 'little-kitchen') activeZone = 'kids';
 else if (firstSeg === 'games' || firstSeg === 'game') activeZone = 'games';
-else if (firstSeg === 'biz') activeZone = 'other';
 var showMarkets = (activeZone === 'property');
 
 /* Current-page match for menu links: exact, or folder link containing the current page. */
