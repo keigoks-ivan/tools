@@ -1,3 +1,4 @@
+import {EXT_RESOURCES,EXT_FACTS,EXT_OPPORTUNITIES,EXT_SOURCES,EXT_RULES,EXT_COVERAGE} from './extensions-data.mjs?v=20261024-11';
 const resource=(id,label,group,extra={})=>({id,label,group,...extra});
 export const RESOURCES=[
   resource('amex-platinum-charge','運通簽帳白金卡','信用卡'),resource('amex-eva-platinum-card','長榮運通簽帳白金卡','信用卡'),resource('amex-gold-current','運通耀金卡','信用卡'),resource('amex-eva-gold-card','長榮運通簽帳金卡','信用卡'),resource('amex-platinum-credit','運通信用白金卡','信用卡'),resource('amex-regent','運通晶華珍饌白金卡','信用卡'),resource('amex-charge','運通簽帳卡','信用卡'),
@@ -88,3 +89,21 @@ export const NETWORK_COVERAGE_UPDATES={
   'air-cathay':{research_status:'partial_sources_found',source_ids:['network-cathay-mr'],note:'僅補到台灣Amex轉點航空端互核；完整亞洲萬里通兌票與其他入口仍待查。'},
   'other-hotel-challenges':{research_status:'partial_sources_found',source_ids:['tree-sas-scandic','tree-scandic-sas','tree-choice-status','tree-rj-terms'],note:'SAS範例逐段保留待核與來源排除；不代表所有品牌挑戰已普查。'}
 };
+RESOURCES.find(item=>item.id==='mb-platinum').label='萬豪白金以上（尚未細分）';
+RESOURCES.push(...EXT_RESOURCES);
+FACTS.push(...EXT_FACTS);
+OPPORTUNITIES.push(...EXT_OPPORTUNITIES);
+for(const source of EXT_SOURCES){
+  const index=NETWORK_SOURCES.findIndex(item=>item.id===source.id);
+  if(index<0)NETWORK_SOURCES.push(source);else NETWORK_SOURCES[index]=source;
+}
+NETWORK_RULES.push(...EXT_RULES);
+NETWORK_COVERAGE.push(...EXT_COVERAGE);
+Object.assign(NETWORK_COVERAGE.find(item=>item.id==='marriott-jal-partnership'),{name:'JAL×萬豪分級會籍合作',research_status:'selected_fields_verified_gaps_remain',source_ids:['partner-jal-main','partner-jal-terms','network-jal-faq'],rule_ids:['R077','R075'],note:'JAL及萬豪兩側條款已讀，海外會員可參與；MEA等排除與各等級年度次數已列。仍須同名帳戶核准，來源接受及本人年度權益另核。'});
+Object.assign(NETWORK_RULES.find(item=>item.id==='R069'),{source_ids:['network-mb-terms','stay-mb-enc','stay-mea-old'],missing:['MEA正常ENC採2026/2/12起1晚1 ENC；舊品牌頁仍有差異。不能套作特定挑戰認列。']});
+Object.assign(NETWORK_COVERAGE_UPDATES,{
+  'hyatt-corporate-challenge':{research_status:'selected_fields_verified_gaps_remain',source_ids:['stay-hyatt-corporate'],rule_ids:['R084'],note:'2026完整企業優惠已讀，真實公司及本人資格未驗。'},
+  'hyatt-partner-challenge':{research_status:'partial_sources_found',source_ids:['stay-hyatt-aeroplan','partner-ap-hyatt'],rule_ids:['R083','R085'],note:'Hyatt×Aeroplan雙向挑戰已補；其他合作仍待查。'},
+  'ihg-visa-challenge':{research_status:'selected_fields_verified_gaps_remain',source_ids:['stay-ihg-visa'],rule_ids:['R086'],note:'已讀完整五頁PDF；現期市場未含台灣，其他活動不可泛化。'},
+  'cube-family':{research_status:'selected_fields_verified_gaps_remain',source_ids:['cube-details','cube-2027-full'],rule_ids:['R078','R079'],note:'已補18出口、卡別／年度及單位，夥伴端未全部互核。'}
+});

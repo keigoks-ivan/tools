@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {RESOURCES,OPPORTUNITIES,NETWORK_RULES,NETWORK_SOURCES,NETWORK_COVERAGE} from './network-data.mjs';
-import {TREES} from './tree-data.mjs';
+import {TREES,TREE_SOURCES} from './tree-data.mjs';
 import {cleanNetworkState,effectiveResources,selectedResources,evaluateOpportunity,relatedViews,traceResources,coverageSummary} from './network-core.mjs';
 import {RULE_FIELD_LABELS} from './fields.mjs';
 import {readFile} from 'node:fs/promises';
@@ -74,13 +74,13 @@ test('new research records retain unresolved sources, asset distinctions and cov
   assert.equal(NETWORK_RULES.find(item=>item.id==='R071').values.bank_reward_points_are_status_points,false);
   assert.equal(NETWORK_RULES.find(item=>item.id==='R072').values.reverse_cancels_transfer,false);
   const sourceIds=new Set(NETWORK_SOURCES.map(item=>item.id));assert.ok(sourceIds.has('network-mb-spend'));
-  assert.equal(NETWORK_COVERAGE.find(item=>item.id==='marriott-jal-partnership').research_status,'queued');
+  assert.equal(NETWORK_COVERAGE.find(item=>item.id==='marriott-jal-partnership').research_status,'selected_fields_verified_gaps_remain');
   const summary=coverageSummary({coverage:NETWORK_COVERAGE},OPPORTUNITIES,TREES);assert.equal(summary.mapped,OPPORTUNITIES.length);assert.ok(summary.queued>0);
 });
 
 test('every new research value has a Chinese label and valid source reference',async()=>{
   const data=JSON.parse(await readFile(new URL('./data.json',import.meta.url),'utf8'));
-  const sources=new Set([...data.sources,...NETWORK_SOURCES].map(item=>item.id));
+  const sources=new Set([...data.sources,...TREE_SOURCES,...NETWORK_SOURCES].map(item=>item.id));
   for(const rule of NETWORK_RULES){for(const id of rule.source_ids)assert.ok(sources.has(id),id);for(const key of Object.keys(rule.values))assert.ok(RULE_FIELD_LABELS[key],key);}
   for(const source of NETWORK_SOURCES)assert.equal(new URL(source.url).protocol,'https:');
 });

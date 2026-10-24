@@ -1,5 +1,5 @@
-import {RESOURCES,FACTS} from './network-data.mjs?v=20261024-10';
-import {traceTree} from './tree-core.mjs?v=20261024-10';
+import {RESOURCES,FACTS} from './network-data.mjs?v=20261024-11';
+import {traceTree} from './tree-core.mjs?v=20261024-11';
 const resourceMap=new Map(RESOURCES.map(item=>[item.id,item]));
 export function cleanNetworkState(value={}){
   const resources=[...new Set((Array.isArray(value.resources)?value.resources:[]).filter(id=>resourceMap.has(id)))];
@@ -25,21 +25,29 @@ export function selectedResources(saved,profile={}){
 export function effectiveResources(saved,profile={}){
   const result=selectedResources(saved,profile);
   if(['ctbc-ci-priority','ctbc-ci-precious','ctbc-marriott-priority','ctbc-marriott-infinite','ctbc-marriott-priority-limited'].some(id=>result.has(id)))result.add('visa-infinite');
+  if(['mb-platinum-exact','mb-titanium','mb-ambassador'].some(id=>result.has(id)))result.add('mb-platinum');
+  if(['jal-base','jal-crystal','jal-sapphire','jal-premier','jal-diamond','jal-metal'].some(id=>result.has(id)))result.add('jal-account');
   return result;
 }
 export function effectiveFacts(saved,profile={}){
   const facts={marriottSource:profile.provenance,partnerUsed:profile.linked,otherSqChallenge:profile.otherChallenge,hiltonUsed:profile.hiltonMatched};
   return {...facts,...cleanNetworkState(saved).facts};
 }
-export function evaluateOpportunity(op,resources,facts={}){
+export function evaluateOpportunity(op,resources,facts={},today=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Taipei',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())){
   const missing=[],blocked=[];const label=id=>resourceMap.get(id)?.label||id;
   for(const id of op.all||[])if(!resources.has(id))missing.push('需 '+label(id));
   if(op.any?.length&&!op.any.some(id=>resources.has(id)))missing.push('需其中一項：'+op.any.map(label).join('／'));
   for(const group of op.allGroups||[])if(!group.some(id=>resources.has(id)))missing.push('另需其中一項：'+group.map(label).join('／'));
   for(const id of op.forbidden||[])if(resources.has(id))blocked.push('已持有'+label(id)+'，不適用此分支');
-  for(const item of op.conditions||[]){const value=facts[item.fact];if(!value||value==='unknown')missing.push('待確認：'+item.label);else if(!item.allowed.includes(value))blocked.push('未符合：'+item.label);}
-  const state=op.research==='closed'?'closed':blocked.length?'blocked':missing.length?'missing':op.research==='lead'?'lead':op.research==='conflict'?'conflict':'connected';
-  return {state,missing,blocked,label:{closed:'本梯次新件截止',blocked:'已填條件不適用',missing:'還缺起點／條件',lead:'關鍵條件待核',conflict:'官方範圍有差異',connected:'起點與已填條件相符'}[state]};
+  for(const item of op.conditions||[]){
+    if(item.whenAny?.length&&!item.whenAny.some(id=>resources.has(id)))continue;
+    if(item.unlessAny?.some(id=>resources.has(id)))continue;
+    const value=facts[item.fact];if(!value||value==='unknown')missing.push('待確認：'+item.label);else if(!item.allowed.includes(value))blocked.push('未符合：'+item.label);
+  }
+  const state=op.research==='closed'||(op.valid_until&&today>op.valid_until)?'closed':op.valid_from&&today<op.valid_from?'scheduled':blocked.length?'blocked':missing.length?'missing':op.research==='lead'?'lead':op.research==='conflict'?'conflict':'connected';
+  if(op.valid_from&&today<op.valid_from)missing.unshift('此版本尚未生效：'+op.valid_from);
+  if(op.valid_until&&today>op.valid_until)blocked.unshift('此版本／登錄梯次已於'+op.valid_until+'截止');
+  return {state,missing,blocked,label:{closed:'此版本／梯次已截止',scheduled:'已公告，尚未生效',blocked:'已填條件不適用',missing:'還缺起點／條件',lead:'關鍵條件待核',conflict:'官方範圍有差異',connected:'起點與已填條件相符'}[state]};
 }
 export function traceResources(tree,resources,target=null){
   const starts=tree.nodes.filter(node=>[...(node.resources||[]),...(node.start_resources||[])].some(id=>resources.has(id))).map(node=>node.id),nodes=new Set(),edges=new Set();

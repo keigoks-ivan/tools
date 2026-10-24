@@ -1,5 +1,6 @@
 const node=(id,x,y,title,subtitle,resources,opportunity_id,rule_ids,requirements,cost,timing,status='pending',extra={})=>({id,x,y,title,subtitle,resources,opportunity_id,rule_ids,requirements,cost,timing,status,kind:'酒店會籍',outcome:subtitle,...extra});
 const edge=(id,from,to,status='pending',label='條件與來源須核對',extra={})=>({id,from,to,status,label,...extra});
+export {node as networkNode,edge as networkEdge};
 const mrStarts=['amex-mr','amex-platinum-charge','amex-gold-current','amex-platinum-credit','amex-regent','amex-charge'];
 const note='圖上的資源與其他子圖共用。跨圖銜接仍須核對來源、一次性資格與每一步條件；已填資源不代表申請核准。';
 export const EXTRA_TREES=[

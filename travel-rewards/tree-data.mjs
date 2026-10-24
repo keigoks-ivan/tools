@@ -1,4 +1,5 @@
-import {EXTRA_TREES,RESOURCE_BINDINGS,OP_BINDINGS} from './network-views.mjs?v=20261024-10';
+import {EXTRA_TREES,RESOURCE_BINDINGS,OP_BINDINGS} from './network-views.mjs?v=20261024-11';
+import {PARTNER_TREES,STAY_BINDINGS} from './partner-views.mjs?v=20261024-11';
 const checked='2026-10-24';
 const source=(id,publisher,url,access,note)=>({id,publisher,url,access,note,checked_on:checked,kind:'official',ownership_group:new URL(url).hostname});
 
@@ -17,6 +18,7 @@ export const TREE_SOURCES=[
 ];
 
 export const TREE_STATUS={
+  scheduled:{label:'已公告，尚未生效',short:'未來版本',tone:'scheduled'},
   start:{label:'先確認資源',short:'起點',tone:'start'},
   verified:{label:'這一段規則已查',short:'官方規則',tone:'verified'},
   pending:{label:'須核准／待核',short:'待核關卡',tone:'pending'},
@@ -82,12 +84,18 @@ const BASE_TREES=[
   }
 ];
 
-export const TREES=[...BASE_TREES,...EXTRA_TREES];
+const sqTree=BASE_TREES.find(item=>item.id==='marriott-sq');
+sqTree.height=850;
+sqTree.nodes.push({id:'sq-silver-source',x:40,y:690,title:'新航菁英銀卡',subtitle:'萬豪目前須無高階會籍',kind:'航空會籍',status:'start',outcome:'可檢查3晚萬豪銀卡分支',resources:['sq-silver'],requirements:['萬豪目前無任何Elite等級；先比較未來一次性合作的啟用順序。'],cost:'已持有新航銀卡；新增住宿另計。',timing:'登錄後六個月。',rule_ids:['R076']},{id:'sq-silver-mb',x:400,y:690,title:'萬豪銀卡挑戰',subtitle:'六個月內3晚合格付費實住',kind:'酒店挑戰',status:'verified',outcome:'依合作取得萬豪Silver，不是Gold或Platinum',resources:['mb-silver'],opportunity_id:'N025',requirements:['新航正式Elite Silver及萬豪無Elite；本人付費合格實住。','點數、點現、免費住宿獎勵排除；MEA仍待個別確認。'],cost:'只計新增合格住宿與交通。',timing:'登錄六個月，核發效期依合作條款。',rule_ids:['R076']});
+sqTree.edges.push({id:'sqs-mbs',from:'sq-silver-source',to:'sq-silver-mb',label:'3晚合格付費實住',status:'verified'});
+export const TREES=[...BASE_TREES,...EXTRA_TREES,...PARTNER_TREES];
 for(const graph of TREES){
   graph.goals??=graph.id==='ci-card'?['status','flight']:['status'];
   for(const item of graph.nodes){
     item.resources??=RESOURCE_BINDINGS[graph.id]?.[item.id]||[];
     item.opportunity_id??=OP_BINDINGS[graph.id]?.[item.id]||null;
+    item.stay_policy??=STAY_BINDINGS[graph.id]?.[item.id];
+    if(item.resources.some(id=>['mb-platinum-exact','mb-titanium','mb-ambassador'].includes(id)))item.bridge_resources=[...new Set([...(item.bridge_resources||[]),'mb-platinum'])];
     if(graph.id==='ci-card'&&['ci-priority','ci-precious'].includes(item.id))item.bridge_resources=['visa-infinite'];
   }
 }

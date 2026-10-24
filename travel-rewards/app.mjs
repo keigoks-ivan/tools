@@ -1,9 +1,10 @@
-import {DEFAULT_PROFILE,evaluateRoute,routeStartingPoint,partitionPlanRoutes,redemptionValue,challengeCost,cardFee,nonNegative} from './core.mjs?v=20261024-10';
-import {ROUTES,CARD_EN,ASSETS,RULE_EN} from './content.mjs?v=20261024-10';
-import {localizeRuleValues} from './fields.mjs?v=20261024-10';
-import {mountTree} from './tree.mjs?v=20261024-10';
-import {TREE_SOURCES} from './tree-data.mjs?v=20261024-10';
-import {NETWORK_SOURCES,NETWORK_RULES,NETWORK_COVERAGE,NETWORK_COVERAGE_UPDATES} from './network-data.mjs?v=20261024-10';
+import {DEFAULT_PROFILE,evaluateRoute,routeStartingPoint,partitionPlanRoutes,redemptionValue,challengeCost,cardFee,nonNegative} from './core.mjs?v=20261024-11';
+import {ROUTES,CARD_EN,ASSETS,RULE_EN} from './content.mjs?v=20261024-11';
+import {localizeRuleValues} from './fields.mjs?v=20261024-11';
+import {mountTree} from './tree.mjs?v=20261024-11';
+import {TREE_SOURCES} from './tree-data.mjs?v=20261024-11';
+import {NETWORK_SOURCES,NETWORK_RULES,NETWORK_COVERAGE,NETWORK_COVERAGE_UPDATES} from './network-data.mjs?v=20261024-11';
+import {stayNodeSummary} from './stay.mjs?v=20261024-11';
 
 const $=selector=>document.querySelector(selector);
 const $$=selector=>[...document.querySelectorAll(selector)];
@@ -138,7 +139,7 @@ function routeDialog(route,trigger){
   const missing=raw?.missing||routeRules(route).flatMap(rule=>rule.missing);
   const assessment=evaluation.blockers.length?evaluation.blockers:evaluation.pending;
   const start=routeStartingPoint(route,state.profile),origin='<p class="route-origin">'+esc(start.connected?'你已填的起點：'+start.label:'目前接不上：'+start.reason)+'</p>';
-  showDialog('<h2 id="dialog-title">'+esc(text(route.name))+'</h2><p class="route-target">'+esc(text(route.target))+'</p>'+origin+'<div class="card-top"><span class="tag '+stateClass(evaluation.state)+'">'+esc(text(states[evaluation.state]))+'</span><span class="evidence-label">'+esc(text(route.evidence))+'</span></div><p class="dialog-lede">'+esc(text(route.summary))+'</p><ol class="route-steps">'+route.steps.map((step,i)=>'<li><b>步驟 '+(i+1)+'</b>'+esc(text(step))+'</li>').join('')+'</ol><div class="detail-grid"><section class="detail-section"><h3>'+t('你的條件判斷','Your condition check')+'</h3><ul>'+(assessment.length?assessment.map(reason=>'<li>'+esc(text(reason))+'</li>').join(''):'<li>'+t('已填條件未發現明確排除；仍須核對完整條款與個別帳戶。','No explicit exclusion found from entered conditions; full terms and account approval still need checking.')+'</li>')+'</ul></section><section class="detail-section tradeoffs"><h3>'+t('時間與新增成本','Timing and incremental cost')+'</h3><p>'+esc(text(route.time))+'</p><p>'+esc(text(route.cost))+'</p><p>'+t('任何獎勵機位、升等空位與飯店房型，都未在這裡確認可訂。','No award seat, upgrade inventory or hotel room is confirmed bookable here.')+'</p></section></div><section class="dialog-section"><h3>'+t('限制與未完成的查核','Limits and unresolved checks')+'</h3>'+originalNotes([...restrictions,...missing])+'</section><section class="dialog-section"><h3>'+t('逐條依據與官方來源','Rule-by-rule evidence and sources')+'</h3>'+ruleDetails(routeRules(route))+'</section>'+(route.id==='P009'?'<p><button type="button" class="button" data-open-tree="sas-chain">打開完整SAS路線樹與支線 ↗</button></p>':'')+'<div class="route-actions"><button class="button secondary '+(selected?'selected':'')+'" type="button" data-compare-route="'+route.id+'" aria-pressed="'+selected+'">'+(selected?t('✓ 已加入比較','✓ Comparing'):t('＋ 加入比較','＋ Compare'))+'</button><button class="button secondary" type="button" data-route-link="'+route.id+'">'+t('複製這條路線連結','Copy route link')+'</button><button class="text-button" type="button" data-open-calc>'+t('計算這次的新增成本 →','Calculate incremental cost →')+'</button></div>',trigger);
+  showDialog('<h2 id="dialog-title">'+esc(text(route.name))+'</h2><p class="route-target">'+esc(text(route.target))+'</p>'+origin+'<div class="card-top"><span class="tag '+stateClass(evaluation.state)+'">'+esc(text(states[evaluation.state]))+'</span><span class="evidence-label">'+esc(text(route.evidence))+'</span></div><p class="dialog-lede">'+esc(text(route.summary))+'</p>'+stayNodeSummary(({P006:'mb-sq',P007:'hilton',P008:'mb-public'})[route.id],data.sources)+'<ol class="route-steps">'+route.steps.map((step,i)=>'<li><b>步驟 '+(i+1)+'</b>'+esc(text(step))+'</li>').join('')+'</ol><div class="detail-grid"><section class="detail-section"><h3>'+t('你的條件判斷','Your condition check')+'</h3><ul>'+(assessment.length?assessment.map(reason=>'<li>'+esc(text(reason))+'</li>').join(''):'<li>'+t('已填條件未發現明確排除；仍須核對完整條款與個別帳戶。','No explicit exclusion found from entered conditions; full terms and account approval still need checking.')+'</li>')+'</ul></section><section class="detail-section tradeoffs"><h3>'+t('時間與新增成本','Timing and incremental cost')+'</h3><p>'+esc(text(route.time))+'</p><p>'+esc(text(route.cost))+'</p><p>'+t('任何獎勵機位、升等空位與飯店房型，都未在這裡確認可訂。','No award seat, upgrade inventory or hotel room is confirmed bookable here.')+'</p></section></div><section class="dialog-section"><h3>'+t('限制與未完成的查核','Limits and unresolved checks')+'</h3>'+originalNotes([...restrictions,...missing])+'</section><section class="dialog-section"><h3>'+t('逐條依據與官方來源','Rule-by-rule evidence and sources')+'</h3>'+ruleDetails(routeRules(route))+'</section>'+(route.id==='P009'?'<p><button type="button" class="button" data-open-tree="sas-chain">打開完整SAS路線樹與支線 ↗</button></p>':'')+'<div class="route-actions"><button class="button secondary '+(selected?'selected':'')+'" type="button" data-compare-route="'+route.id+'" aria-pressed="'+selected+'">'+(selected?t('✓ 已加入比較','✓ Comparing'):t('＋ 加入比較','＋ Compare'))+'</button><button class="button secondary" type="button" data-route-link="'+route.id+'">'+t('複製這條路線連結','Copy route link')+'</button><button class="text-button" type="button" data-open-calc>'+t('計算這次的新增成本 →','Calculate incremental cost →')+'</button></div>',trigger);
 }
 function cardDialog(card,trigger){
   const rules=card.rule_ids.map(id=>ruleMap.get(id)).filter(Boolean),selected=state.cardCompare.includes(card.id);
@@ -209,7 +210,7 @@ function bindEvents(){
     if(button.hasAttribute('data-show-coverage')){setView('library');$('#library-kind').value='coverage';renderLibrary();return;}
     if(button.dataset.view){setView(button.dataset.view);return;}
     if(button.dataset.exploreMode){setExploreMode(button.dataset.exploreMode);return;}
-    if(button.dataset.openTree){openTree(button.dataset.openTree,button.dataset.openNode||null);return;}
+    if(button.dataset.openTree){openTree(button.dataset.openTree,button.dataset.openNode||null);if(button.hasAttribute('data-scroll-cube'))document.querySelector('[data-cube-panel]')?.scrollIntoView({block:'start'});return;}
     if(button.dataset.goal){state.goal=button.dataset.goal;save();renderPlan();return;}
     if(button.dataset.route){routeDialog(routeMap.get(button.dataset.route),button);return;}
     if(button.dataset.card){cardDialog(cardMap.get(button.dataset.card),button);return;}
@@ -249,7 +250,7 @@ function openHash(){
 }
 async function init(){
   try{
-    const response=await fetch('./data.json?v=20261024-10');if(!response.ok)throw new Error('Research HTTP '+response.status);data=await response.json();
+    const response=await fetch('./data.json?v=20261024-11');if(!response.ok)throw new Error('Research HTTP '+response.status);data=await response.json();
     data.sources=[...new Map([...data.sources,...TREE_SOURCES,...NETWORK_SOURCES].map(source=>[source.id,source])).values()];
     data.rules=[...data.rules,...NETWORK_RULES];data.coverage=[...data.coverage,...NETWORK_COVERAGE].map(item=>{const update=NETWORK_COVERAGE_UPDATES[item.id];return update?{...item,...update,source_ids:[...new Set([...item.source_ids,...(update.source_ids||[])])],rule_ids:[...new Set([...item.rule_ids,...(update.rule_ids||[])])]}:item;});
     ruleMap=new Map(data.rules.map(rule=>[rule.id,rule]));sourceMap=new Map(data.sources.map(source=>[source.id,source]));cardMap=new Map(data.cards.map(card=>[card.id,card]));routeMap=new Map(ROUTES.map(route=>[route.id,route]));
