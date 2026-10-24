@@ -6,6 +6,15 @@
 (function(){
 'use strict';
 
+/* ---------- large-screen widening (js/wide.js, next to this file) ---------- */
+(function(){
+  var me = document.currentScript;
+  if (!me || !me.src) return;
+  var s = document.createElement('script');
+  s.src = me.src.replace(/navbar\.js(\?.*)?$/, 'wide.js');
+  document.head.appendChild(s);
+})();
+
 /* ---------- market metadata ---------- */
 var MARKETS = [
   {k:'my',flag:'🇲🇾',en:'Malaysia',zh:'馬來西亞',base:'/my/',
