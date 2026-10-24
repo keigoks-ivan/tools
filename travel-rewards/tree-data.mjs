@@ -1,3 +1,4 @@
+import {EXTRA_TREES,RESOURCE_BINDINGS,OP_BINDINGS} from './network-views.mjs?v=20261024-9';
 const checked='2026-10-24';
 const source=(id,publisher,url,access,note)=>({id,publisher,url,access,note,checked_on:checked,kind:'official',ownership_group:new URL(url).hostname});
 
@@ -16,15 +17,16 @@ export const TREE_SOURCES=[
 ];
 
 export const TREE_STATUS={
-  start:{label:'先確認卡別',short:'起點',tone:'start'},
+  start:{label:'先確認資源',short:'起點',tone:'start'},
   verified:{label:'這一段規則已查',short:'官方規則',tone:'verified'},
   pending:{label:'須核准／待核',short:'待核關卡',tone:'pending'},
   blocked:{label:'台灣未列適用地區',short:'地區限制',tone:'blocked'},
   excluded:{label:'串接來源遭條款排除',short:'來源排除',tone:'blocked'},
+  closed:{label:'本梯次新件已截止',short:'新件截止',tone:'historical'},
   historical:{label:'只有歷史公告',short:'當期待核',tone:'historical'}
 };
 
-export const TREES=[
+const BASE_TREES=[
   {
     id:'sas-chain',name:'從信用卡到 SAS',description:'卡組織禮遇 → 酒店會籍 → 航空會籍；保留 Choice、土航與約旦分支。',width:1280,height:670,
     note:'依社群文章摘錄整理，原文網址與發表日期待補。箭頭表示候選串接；每一段須各自符合條件；約旦現行條款排除串接配對來源，不能把整串當作三大聯盟保證路線。',
@@ -79,3 +81,13 @@ export const TREES=[
     edges:[{id:'cip-miles',from:'ci-priority',to:'ci-miles',label:'基本18元／點',status:'verified'},{id:'cic-miles',from:'ci-precious',to:'ci-miles',label:'基本20元／點',status:'verified'},{id:'cis-miles',from:'ci-signature',to:'ci-miles',label:'基本30元／點',status:'verified'},{id:'cip-gold',from:'ci-priority',to:'ci-gold',label:'首次資格另核',status:'pending'},{id:'cic-gold',from:'ci-precious',to:'ci-gold',label:'首次資格另核',status:'pending'},{id:'miles-award',from:'ci-miles',to:'ci-award',label:'查空位＋稅費',status:'pending'}]
   }
 ];
+
+export const TREES=[...BASE_TREES,...EXTRA_TREES];
+for(const graph of TREES){
+  graph.goals??=graph.id==='ci-card'?['status','flight']:['status'];
+  for(const item of graph.nodes){
+    item.resources??=RESOURCE_BINDINGS[graph.id]?.[item.id]||[];
+    item.opportunity_id??=OP_BINDINGS[graph.id]?.[item.id]||null;
+    if(graph.id==='ci-card'&&['ci-priority','ci-precious'].includes(item.id))item.bridge_resources=['visa-infinite'];
+  }
+}

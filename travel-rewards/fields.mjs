@@ -1,5 +1,7 @@
 // 查核資料保留原始欄位；只有呈現給讀者的標籤轉為繁體中文。
 export const RULE_FIELD_LABELS={
+  application_required:'須另提出申請',us_address_excluded:'不受理美國地址',priority_platinum_spend_twd:'鼎尊正卡白金所需年度合格消費（新台幣）',infinite_gold_spend_twd:'一般無限正卡金卡所需年度合格消費（新台幣）',calendar_year:'是否依曆年計算',gold_enc:'正常金卡所需合格房晚額度',platinum_enc:'正常白金所需合格房晚額度',all_brands_one_night_one_enc:'所有品牌均一實住晚計一資格房晚',minimum_months_since_previous_link:'距前次航空連結最低月數',bank_reward_points_are_status_points:'銀行獎勵點數可計升等／保級',all_to_avios_in:'轉往Avios所需ALL點數',all_to_avios_out:'可得Avios',avios_to_all_in:'轉往ALL所需Avios',avios_to_all_out:'可得ALL獎勵點數',reverse_cancels_transfer:'可反向取消原轉點',all_partners_same_ratio:'所有航空夥伴比例相同',all_partners_same_bonus:'所有航空夥伴加碼相同',traveller_ratio:'旅人積分對酒店點數比例',premier_ratio_in:'卓越紅利每酒店點所需點數',minimum_traveller_input:'旅人積分最低轉出點數',increment:'轉點增量',
+
   Emerald:'華航翡翠卡',Gold:'金卡',Paragon:'華航晶鑽卡',
   accor_describes_convert_from:'雅高頁面所述起轉點數',account_link_required:'須連結帳戶',actual_quota_remaining:'實際剩餘名額',
   additional:'額外回饋',additional_spend_twd:'額外消費門檻（新台幣）',advertised_best_twd_domestic:'廣告最優國內消費比例（新台幣／哩）',advertised_best_twd_foreign:'廣告最優海外消費比例（新台幣／哩）',advertised_welcome_voucher_face_twd:'廣告迎新券面額（新台幣）',

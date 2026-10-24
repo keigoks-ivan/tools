@@ -2,13 +2,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
 import {TREES,TREE_SOURCES,TREE_STATUS} from './tree-data.mjs';
+import {NETWORK_SOURCES,NETWORK_RULES} from './network-data.mjs';
 import {traceTree,validateTree,treePosition} from './tree-core.mjs';
 const data=JSON.parse(await readFile(new URL('./data.json',import.meta.url),'utf8'));
 const sas=TREES.find(tree=>tree.id==='sas-chain');
 
 test('all trees have unique nodes, valid directed edges and no cycles',()=>{
-  const sources=new Set([...data.sources,...TREE_SOURCES].map(source=>source.id));
-  const rules=new Set(data.rules.map(rule=>rule.id));
+  const sources=new Set([...data.sources,...TREE_SOURCES,...NETWORK_SOURCES].map(source=>source.id));
+  const rules=new Set([...data.rules,...NETWORK_RULES].map(rule=>rule.id));
   for(const tree of TREES){
     assert.equal(validateTree(tree),true);
     for(const node of tree.nodes){

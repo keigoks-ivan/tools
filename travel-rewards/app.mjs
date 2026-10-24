@@ -1,8 +1,9 @@
-import {DEFAULT_PROFILE,evaluateRoute,routeStartingPoint,partitionPlanRoutes,redemptionValue,challengeCost,cardFee,nonNegative} from './core.mjs?v=20261024-5';
-import {ROUTES,CARD_EN,ASSETS,RULE_EN} from './content.mjs?v=20261024-5';
-import {localizeRuleValues} from './fields.mjs?v=20261024-5';
-import {mountTree} from './tree.mjs?v=20261024-5';
-import {TREE_SOURCES} from './tree-data.mjs?v=20261024-5';
+import {DEFAULT_PROFILE,evaluateRoute,routeStartingPoint,partitionPlanRoutes,redemptionValue,challengeCost,cardFee,nonNegative} from './core.mjs?v=20261024-9';
+import {ROUTES,CARD_EN,ASSETS,RULE_EN} from './content.mjs?v=20261024-9';
+import {localizeRuleValues} from './fields.mjs?v=20261024-9';
+import {mountTree} from './tree.mjs?v=20261024-9';
+import {TREE_SOURCES} from './tree-data.mjs?v=20261024-9';
+import {NETWORK_SOURCES,NETWORK_RULES,NETWORK_COVERAGE,NETWORK_COVERAGE_UPDATES} from './network-data.mjs?v=20261024-9';
 
 const $=selector=>document.querySelector(selector);
 const $$=selector=>[...document.querySelectorAll(selector)];
@@ -62,7 +63,7 @@ function renderPlan(){
   $$('.status-field').forEach(el=>el.hidden=state.goal!=='status');
   $$('.flight-field').forEach(el=>el.hidden=state.goal!=='flight');
   $('#ci-status-fields').hidden=state.goal!=='status'||state.profile.card!=='ci';
-  $('#plan-tree-entry').hidden=state.goal!=='status';
+  $('#plan-tree-entry').hidden=false;$('#plan-tree-entry button').dataset.openTree={status:'sas-chain',flight:'points-air',hotel:'points-hotel'}[state.goal];
   treeUI?.updateProfile();
   $('#cabin').value=state.cabin;
   $('#results-title').textContent={flight:'從現有點數找兌票路線',status:'從現有卡片與會籍出發',hotel:'從現有點數找飯店轉點路線'}[state.goal];
@@ -191,8 +192,8 @@ function setExploreMode(mode){
   const map=mode==='tree';$('#tree-explorer').hidden=!map;$('#explore-catalog').hidden=map;
   $$('[data-explore-mode]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.exploreMode===mode)));
 }
-function openTree(id='sas-chain'){
-  if($('#detail-dialog').open)$('#detail-dialog').close();setView('explore',false);setExploreMode('tree');treeUI.open({treeId:id});history.replaceState(null,'','#tree='+id);
+function openTree(id='sas-chain',target=null){
+  if($('#detail-dialog').open)$('#detail-dialog').close();setView('explore',false);setExploreMode('tree');treeUI.open({treeId:id,target},!!target);const params=new URLSearchParams({tree:id});if(target)params.set('node',target);history.replaceState(null,'','#'+params.toString());
 }
 function setView(view,updateHash=true){
   if(!views.includes(view))view='plan';
@@ -205,9 +206,10 @@ function renderAll(){applyLanguage();renderPlan();renderExplore();renderCards();
 function bindEvents(){
   document.addEventListener('click',event=>{
     const button=event.target.closest('button');if(!button)return;
+    if(button.hasAttribute('data-show-coverage')){setView('library');$('#library-kind').value='coverage';renderLibrary();return;}
     if(button.dataset.view){setView(button.dataset.view);return;}
     if(button.dataset.exploreMode){setExploreMode(button.dataset.exploreMode);return;}
-    if(button.dataset.openTree){openTree(button.dataset.openTree);return;}
+    if(button.dataset.openTree){openTree(button.dataset.openTree,button.dataset.openNode||null);return;}
     if(button.dataset.goal){state.goal=button.dataset.goal;save();renderPlan();return;}
     if(button.dataset.route){routeDialog(routeMap.get(button.dataset.route),button);return;}
     if(button.dataset.card){cardDialog(cardMap.get(button.dataset.card),button);return;}
@@ -247,8 +249,9 @@ function openHash(){
 }
 async function init(){
   try{
-    const response=await fetch('./data.json?v=20261024-5');if(!response.ok)throw new Error('Research HTTP '+response.status);data=await response.json();
-    data.sources=[...new Map([...data.sources,...TREE_SOURCES].map(source=>[source.id,source])).values()];
+    const response=await fetch('./data.json?v=20261024-9');if(!response.ok)throw new Error('Research HTTP '+response.status);data=await response.json();
+    data.sources=[...new Map([...data.sources,...TREE_SOURCES,...NETWORK_SOURCES].map(source=>[source.id,source])).values()];
+    data.rules=[...data.rules,...NETWORK_RULES];data.coverage=[...data.coverage,...NETWORK_COVERAGE].map(item=>{const update=NETWORK_COVERAGE_UPDATES[item.id];return update?{...item,...update,source_ids:[...new Set([...item.source_ids,...(update.source_ids||[])])],rule_ids:[...new Set([...item.rule_ids,...(update.rule_ids||[])])]}:item;});
     ruleMap=new Map(data.rules.map(rule=>[rule.id,rule]));sourceMap=new Map(data.sources.map(source=>[source.id,source]));cardMap=new Map(data.cards.map(card=>[card.id,card]));routeMap=new Map(ROUTES.map(route=>[route.id,route]));
     for(const [key,value]of Object.entries(state.profile)){const el=$('#profile-form').elements.namedItem(key);if(el.tagName==='SELECT'&&!el.classList.contains('yes-no')){if([...el.options].some(option=>option.value===value))el.value=value;else state.profile[key]='unknown';}else if(el.type==='number'){el.value=nonNegative(value)===null?'':value;state.profile[key]=el.value;}}
     treeUI=mountTree($('#tree-explorer'),{data,getProfile:()=>state.profile,inspect:(html,trigger)=>showDialog(html,trigger,true),onChange:({treeId,start,target})=>{const params=new URLSearchParams({tree:treeId});if(start!=='all')params.set('start',start);if(target)params.set('node',target);history.replaceState(null,'','#'+params.toString());}});
