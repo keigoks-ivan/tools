@@ -1,6 +1,6 @@
 /* InvestMQuest toolbox — shared navbar (dark gradient, site-wide)
    Drop a <div id="nav-root"></div> on any page and load this script.
-   Row 1: logo + four zone dropdowns (Property, Reading, Kids, Games) + language.
+   Row 1: logo + five zone dropdowns (Property, Reading, Travel, Kids, Games) + language.
    Row 2/3 (Property pages only): market flags with hover dropdowns + current-market sub-nav.
    Auto-detects the active zone / link from location.pathname. */
 (function(){
@@ -94,6 +94,12 @@ var ZONES = [
     {href:'/history/',en:'History',zh:'歷史'},
     {href:'/solo-co.html',en:'Solo Company Cases',zh:'一人公司範例庫'},
     {href:'/marketing.html',en:'Learn Marketing',zh:'學行銷'}]}]},
+  {k:'travel',en:'Travel',zh:'里程與旅遊',groups:[{links:[
+    {href:'/travel-rewards/',en:'Reward Routes',zh:'里程路線'},
+    {href:'/travel-rewards/#cards',en:'Compare Cards',zh:'信用卡比較'},
+    {href:'/travel-rewards/#explore',en:'Status & Challenges',zh:'會籍與挑戰'},
+    {href:'/travel-rewards/#calculators',en:'Cost Calculators',zh:'兌換成本試算'},
+    {href:'/travel-rewards/#library',en:'Research & Sources',zh:'資料與來源'}]}]},
   {k:'kids',en:'Kids',zh:'小孩',groups:[{links:[
     {href:'/education/zhuyin/',en:'Zhuyin (Bopomofo)',zh:'注音'},
     {href:'/education/sight-words/',en:'English Sight Words',zh:'英文 Sight Words'},
@@ -130,6 +136,7 @@ if (path === '/home.html') activeZone = null;
 else if (firstSeg === 'history' || path === '/solo-co.html' || path === '/marketing.html' || path === '/solo-co' || path === '/marketing') activeZone = 'reading';
 else if (firstSeg === 'education' || firstSeg === 'salon' || firstSeg === 'little-kitchen') activeZone = 'kids';
 else if (firstSeg === 'games' || firstSeg === 'game') activeZone = 'games';
+else if (firstSeg === 'travel-rewards') activeZone = 'travel';
 var showMarkets = (activeZone === 'property');
 
 /* Current-page match for menu links: exact, or folder link containing the current page. */
