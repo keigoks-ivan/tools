@@ -1,8 +1,8 @@
-import {TREES,TREE_STATUS} from './tree-data.mjs?v=20261024-9';
-import {traceTree,treePosition,validateTree} from './tree-core.mjs?v=20261024-9';
+import {TREES,TREE_STATUS} from './tree-data.mjs?v=20261024-10';
+import {traceTree,treePosition,validateTree} from './tree-core.mjs?v=20261024-10';
 
-import {RESOURCES,FACTS,OPPORTUNITIES} from './network-data.mjs?v=20261024-9';
-import {cleanNetworkState,selectedResources,effectiveResources,effectiveFacts,evaluateOpportunity,traceResources,relatedViews,coverageSummary} from './network-core.mjs?v=20261024-9';
+import {RESOURCES,FACTS,OPPORTUNITIES} from './network-data.mjs?v=20261024-10';
+import {cleanNetworkState,selectedResources,effectiveResources,effectiveFacts,evaluateOpportunity,traceResources,relatedViews,coverageSummary} from './network-core.mjs?v=20261024-10';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const W=194,H=112;
@@ -34,6 +34,7 @@ export function mountTree(root,{data,inspect,onChange,getProfile}){
   }
   function edgePath(edge){
     const graph=tree(),from=graph.nodes.find(n=>n.id===edge.from),to=graph.nodes.find(n=>n.id===edge.to);
+    if(Number.isFinite(edge.viaX))return 'M '+(from.x+W)+' '+(from.y+H/2)+' H '+edge.viaX+' V '+(to.y+H/2)+' H '+to.x;
     if(edge.side==='right'){
       const x=from.x+W,y=from.y+H/2,endY=to.y+H/2,bend=graph.width-26;
       return 'M '+x+' '+y+' C '+bend+' '+y+' '+bend+' '+endY+' '+(to.x+W)+' '+endY;

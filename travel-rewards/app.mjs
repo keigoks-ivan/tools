@@ -1,9 +1,9 @@
-import {DEFAULT_PROFILE,evaluateRoute,routeStartingPoint,partitionPlanRoutes,redemptionValue,challengeCost,cardFee,nonNegative} from './core.mjs?v=20261024-9';
-import {ROUTES,CARD_EN,ASSETS,RULE_EN} from './content.mjs?v=20261024-9';
-import {localizeRuleValues} from './fields.mjs?v=20261024-9';
-import {mountTree} from './tree.mjs?v=20261024-9';
-import {TREE_SOURCES} from './tree-data.mjs?v=20261024-9';
-import {NETWORK_SOURCES,NETWORK_RULES,NETWORK_COVERAGE,NETWORK_COVERAGE_UPDATES} from './network-data.mjs?v=20261024-9';
+import {DEFAULT_PROFILE,evaluateRoute,routeStartingPoint,partitionPlanRoutes,redemptionValue,challengeCost,cardFee,nonNegative} from './core.mjs?v=20261024-10';
+import {ROUTES,CARD_EN,ASSETS,RULE_EN} from './content.mjs?v=20261024-10';
+import {localizeRuleValues} from './fields.mjs?v=20261024-10';
+import {mountTree} from './tree.mjs?v=20261024-10';
+import {TREE_SOURCES} from './tree-data.mjs?v=20261024-10';
+import {NETWORK_SOURCES,NETWORK_RULES,NETWORK_COVERAGE,NETWORK_COVERAGE_UPDATES} from './network-data.mjs?v=20261024-10';
 
 const $=selector=>document.querySelector(selector);
 const $$=selector=>[...document.querySelectorAll(selector)];
@@ -249,7 +249,7 @@ function openHash(){
 }
 async function init(){
   try{
-    const response=await fetch('./data.json?v=20261024-9');if(!response.ok)throw new Error('Research HTTP '+response.status);data=await response.json();
+    const response=await fetch('./data.json?v=20261024-10');if(!response.ok)throw new Error('Research HTTP '+response.status);data=await response.json();
     data.sources=[...new Map([...data.sources,...TREE_SOURCES,...NETWORK_SOURCES].map(source=>[source.id,source])).values()];
     data.rules=[...data.rules,...NETWORK_RULES];data.coverage=[...data.coverage,...NETWORK_COVERAGE].map(item=>{const update=NETWORK_COVERAGE_UPDATES[item.id];return update?{...item,...update,source_ids:[...new Set([...item.source_ids,...(update.source_ids||[])])],rule_ids:[...new Set([...item.rule_ids,...(update.rule_ids||[])])]}:item;});
     ruleMap=new Map(data.rules.map(rule=>[rule.id,rule]));sourceMap=new Map(data.sources.map(source=>[source.id,source]));cardMap=new Map(data.cards.map(card=>[card.id,card]));routeMap=new Map(ROUTES.map(route=>[route.id,route]));

@@ -1,5 +1,5 @@
 const node=(id,x,y,title,subtitle,resources,opportunity_id,rule_ids,requirements,cost,timing,status='pending',extra={})=>({id,x,y,title,subtitle,resources,opportunity_id,rule_ids,requirements,cost,timing,status,kind:'酒店會籍',outcome:subtitle,...extra});
-const edge=(id,from,to,status='pending',label='條件與來源須核對')=>({id,from,to,status,label});
+const edge=(id,from,to,status='pending',label='條件與來源須核對',extra={})=>({id,from,to,status,label,...extra});
 const mrStarts=['amex-mr','amex-platinum-charge','amex-gold-current','amex-platinum-credit','amex-regent','amex-charge'];
 const note='圖上的資源與其他子圖共用。跨圖銜接仍須核對來源、一次性資格與每一步條件；已填資源不代表申請核准。';
 export const EXTRA_TREES=[
@@ -19,9 +19,9 @@ export const EXTRA_TREES=[
     node('mb-limited',20,470,'萬豪鼎尊限量版','原梯次新件收件已截止',['ctbc-marriott-priority-limited'],'P010',['R056','R057'],['原案首年白金；10/15收件截止不能用10/31核卡期限替代。','既有持卡者依原核准條款；未達150萬元次年起Gold。'],'首年36,000元；次年22,000元。','不列為目前可新申請。','closed',{kind:'信用卡'}),
     node('mb-card-gold',350,30,'萬豪金卡','鼎尊開卡禮遇需完成啟用',['mb-gold'],null,['R056','R060'],['取得正式會籍後可查看新航Gold來源分支；新航仍須核准。','先比較一次性合作的登錄順序。'],'依原卡費用。','以銀行與酒店實際核准為準。'),
     node('mb-card-silver',350,250,'萬豪銀卡','不能直接參加新航Gold分支',['mb-silver'],null,['R056','R060'],['萬豪Silver不適用合作贈新航Silver／Gold。','點數與房晚仍可依各規則累積，不直接變成Gold。'],'依原卡費用。','不自動視為Gold。'),
-    node('mb-spend-gold',700,250,'消費升萬豪金卡','一般無限正卡滿100萬元',['mb-gold'],'N002',['R068'],['僅一般無限正卡；每信用卡年度合格消費滿100萬元。','核卡後12個月與每信用卡年度起迄須核對，不用曆年代替。'],'既有支出不重複計成本，新增湊額與放棄回饋另算。','達標後30工作日內更新，效期至少一年。'),
-    node('mb-spend-platinum',700,470,'消費升萬豪白金','鼎尊正卡滿150萬元',['mb-platinum'],'N001',['R068'],['鼎尊正卡每信用卡年度合格消費滿150萬元。','一般鼎尊與已持有限量版依各自續年條款；不能把其他卡消費直接合併。'],'新增湊額與機會成本另算，不把150萬元全當會籍售價。','信用卡年度；達標後30工作日、至少一年。')
-  ],edges:[edge('mbp-gold','mb-priority','mb-card-gold','verified'),edge('mbi-silver','mb-infinite','mb-card-silver','verified'),edge('mbi-spend','mb-infinite','mb-spend-gold','pending','只限一般無限卡'),edge('mbp-spend','mb-priority','mb-spend-platinum'),edge('mbl-spend','mb-limited','mb-spend-platinum','pending','已持卡者依續年條件')]},
+    node('mb-spend-gold',700,360,'消費升萬豪金卡','一般無限正卡滿100萬元',['mb-gold'],'N002',['R068'],['僅一般無限正卡；每信用卡年度合格消費滿100萬元。','核卡後12個月與每信用卡年度起迄須核對，不用曆年代替。'],'既有支出不重複計成本，新增湊額與放棄回饋另算。','達標後30工作日內更新，效期至少一年。'),
+    node('mb-spend-platinum',700,140,'消費升萬豪白金','鼎尊正卡滿150萬元',['mb-platinum'],'N001',['R068'],['鼎尊正卡每信用卡年度合格消費滿150萬元。','一般鼎尊與已持有限量版依各自續年條款；不能把其他卡消費直接合併。'],'新增湊額與機會成本另算，不把150萬元全當會籍售價。','信用卡年度；達標後30工作日、至少一年。')
+  ],edges:[edge('mbp-gold','mb-priority','mb-card-gold','verified'),edge('mbi-silver','mb-infinite','mb-card-silver','verified'),edge('mbi-spend','mb-infinite','mb-spend-gold','pending','只限一般無限卡',{viaX:260}),edge('mbp-spend','mb-priority','mb-spend-platinum','pending','鼎尊正卡年度150萬',{viaX:260}),edge('mbl-spend','mb-limited','mb-spend-platinum','pending','已持卡者依續年條件',{viaX:295})]},
   {id:'marriott-entry',name:'萬豪挑戰與正常累積',goals:['status'],width:1100,height:700,description:'正常25／50資格房晚、一般客服、企業定向與新航合作，是不同入口。',note,nodes:[
     node('mb-public',20,30,'一般客服挑戰','八／十六晚僅為待核線索',[],'P008',['R031'],['尚無確認所有台灣會員可報名的正式公開條款。','先取得本人帳戶書面核准、精確起迄、合格住宿與效期。'],'未核准前不為固定晚數安排額外支出。','三個月／當月加三個月不可混用。','pending',{kind:'酒店挑戰'}),
     node('mb-corporate',20,250,'企業／定向挑戰','須真實公司或邀請資格',[],'N004',['R032'],['公開可見連結不代表人人可參加。','公司、邀請、房晚、試用來源、起迄與保級條件待核。'],'依真正適用方案。','未取得完整適用條款。','pending',{kind:'酒店挑戰'}),

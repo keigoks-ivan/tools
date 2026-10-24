@@ -84,3 +84,15 @@ test('every new research value has a Chinese label and valid source reference',a
   for(const rule of NETWORK_RULES){for(const id of rule.source_ids)assert.ok(sources.has(id),id);for(const key of Object.keys(rule.values))assert.ok(RULE_FIELD_LABELS[key],key);}
   for(const source of NETWORK_SOURCES)assert.equal(new URL(source.url).protocol,'https:');
 });
+
+test('Marriott card upgrade connectors never pass through unrelated status nodes',()=>{
+  const tree=TREES.find(item=>item.id==='marriott-card');
+  for(const edge of tree.edges.filter(item=>Number.isFinite(item.viaX))){
+    const from=tree.nodes.find(item=>item.id===edge.from),to=tree.nodes.find(item=>item.id===edge.to),startY=from.y+56,endY=to.y+56;
+    for(const node of tree.nodes.filter(item=>![edge.from,edge.to].includes(item.id))){
+      const horizontal=(a,b,y)=>y>node.y&&y<node.y+112&&Math.max(a,b)>node.x&&Math.min(a,b)<node.x+194;
+      const vertical=edge.viaX>node.x&&edge.viaX<node.x+194&&Math.max(startY,endY)>node.y&&Math.min(startY,endY)<node.y+112;
+      assert.ok(!horizontal(from.x+194,edge.viaX,startY)&&!horizontal(edge.viaX,to.x,endY)&&!vertical,edge.id+' crosses '+node.id);
+    }
+  }
+});
