@@ -3,7 +3,7 @@ const source=(id,publisher,url,access,note)=>({id,publisher,url,access,note,chec
 
 export const TREE_SOURCES=[
   source('tree-visa-gha','Visa 台灣','https://www.visa.com.tw/zh_tw/visa-offers-and-perks/gha-discovery/173472?cardProduct=42&paymentType=9','live_browser_terms','即時頁面已讀：無限卡對應鈦金，御璽／白金對應白金；優惠至2027-12-31。仍需以合格卡片通過官方入口驗證。'),
-  source('tree-mc-gha','Mastercard 亞太','https://origin-apac.mastercard.com/en-ap/offers/GHA_DISCOVERY?Oid=202111090004&issuerId=201808088888&productId=202004160026','official_search_excerpt_only','官方索引有列台灣及指定卡等；開啟本文僅取得選卡外框，未讀到完整個別卡片條款。不能視為已驗證持卡資格或精確會籍版本。'),
+  source('tree-mc-gha','Mastercard 亞太','https://origin-apac.mastercard.com/en-ap/offers/GHA_DISCOVERY?Oid=202111090004&issuerId=201808088888&productId=202004160026','live_browser_terms','完整活動本文與條款已讀：台灣指定卡可用，World Legend／世界之極對應鈦金，世界卡對應白金；活動至2026-12-31。實際卡片仍須驗證，入住與退房須出示合格同名卡。'),
   source('tree-mc-wyndham','Mastercard 亞太','https://origin-apac.mastercard.com/en-ap/offers/Wyndham_Hotels___Resorts_%28Wyndham_Rewards%29?Oid=201912180093&issuerId=201810190031&productId=201810200234','official_search_excerpt_only','官方索引列世界之極可申請鑽卡及台灣發卡市場；本文僅取得選卡外框。個別卡片、活動期限與核准條件待完整條款確認。'),
   source('bw-match','Best Western','https://www.bestwestern.com/en_US/best-western-rewards/status-match.html','page_body','官方配對頁已讀。北美以外會員列bwr.service@bestwestern.com；等級由品牌審核，不能保證GHA或Wyndham來源必配精選鑽石。'),
   source('tree-choice-status','Choice Privileges','https://www.choicehotels.com/en-uk/choice-privileges/benefits/status-match','page_body','公開活動列美國、加拿大、歐洲、加勒比海、拉丁美洲及墨西哥會員；台灣未列。頁面另列澳紐聯絡方式，不能據此推定台灣居民適用。'),
@@ -30,8 +30,8 @@ export const TREES=[
     note:'依社群文章摘錄整理，原文網址與發表日期待補。箭頭表示候選串接；每一段須各自符合條件；約旦現行條款排除串接配對來源，不能把整串當作三大聯盟保證路線。',
     nodes:[
       {id:'visa',x:24,y:90,title:'Visa 無限卡',subtitle:'先確認實際卡等',kind:'信用卡',status:'start',outcome:'可檢查 Visa 的 GHA 會籍禮遇',requirements:['不是所有Visa卡都配鈦金；無限卡與御璽／白金卡的目標等級不同。','華航聯名卡也要再確認卡別，不能只看聯名品牌。'],cost:'依原信用卡年費；不要把既有年費重算成這次新增支出。',timing:'先通過Visa官方卡片資格驗證，再登錄會籍。',source_ids:['tree-visa-gha']},
-      {id:'mastercard',x:24,y:290,title:'Mastercard',subtitle:'世界之極等指定卡等',kind:'信用卡',status:'start',outcome:'GHA 或 Wyndham 的候選卡組織禮遇',requirements:['需確認發卡市場、實際卡等及完整當期條款。','官方索引有活動線索，但選卡前未取得完整卡別條款。'],cost:'依實際卡年費與活動費用，不預設免費或所有卡適用。',timing:'個別卡片方案與期限待核。',source_ids:['tree-mc-gha','tree-mc-wyndham']},
-      {id:'gha',x:260,y:110,title:'GHA 鈦金',subtitle:'由合格卡片申請',kind:'酒店會籍',status:'pending',outcome:'取得正式核准的GHA會籍後，才有後續配對來源',claim:'文章提到經由Visa白金秘書取得GHA鈦金。',verdict:'秘書服務名稱不能用來判定卡等。目前Visa台灣頁列無限卡配鈦金、御璽／白金卡配白金，須看實際卡片。',requirements:['Visa無限卡規則已讀；仍須卡片驗證並完成官方登錄。','Mastercard分支的精確方案、卡別與等級待驗，不直接套用Visa條款。'],cost:'Visa頁列免費會籍配對；信用卡年費另按實際卡別。',timing:'Visa當期優惠至2027-12-31；贈送等級效期依加入年及後一曆年規則。',source_ids:['tree-visa-gha','tree-mc-gha']},
+      {id:'mastercard',x:24,y:290,title:'Mastercard',subtitle:'世界之極等指定卡等',kind:'信用卡',status:'start',outcome:'GHA指定卡等規則已讀，Wyndham分支仍待核',requirements:['GHA當期活動列台灣指定卡：World Legend／世界之極配鈦金，世界卡配白金，白金／鈦金卡配金卡。','實際卡片須通過入口驗證；Wyndham分支尚未取得完整卡別條款。'],cost:'GHA會籍配對列免費；信用卡年費與Wyndham方案另外核對。',timing:'GHA活動至2026-12-31；Wyndham個別方案與期限待核。',source_ids:['tree-mc-gha','tree-mc-wyndham']},
+      {id:'gha',x:260,y:110,title:'GHA 鈦金',subtitle:'由合格卡片申請',kind:'酒店會籍',status:'pending',outcome:'取得正式核准的GHA會籍後，才有後續配對來源',claim:'文章提到經由Visa白金秘書取得GHA鈦金。',verdict:'秘書服務名稱不能用來判定卡等。目前Visa台灣頁列無限卡配鈦金、御璽／白金卡配白金，須看實際卡片。',requirements:['Visa無限卡規則已讀；仍須卡片驗證並完成官方登錄。','Mastercard世界之極等合格卡對應鈦金；入住與退房須出示合格同名Mastercard。'],cost:'Visa及Mastercard頁均列免費會籍配對；信用卡年費另按實際卡別。',timing:'Visa優惠至2027-12-31，Mastercard至2026-12-31；會籍效期依加入年及後一曆年規則。',source_ids:['tree-visa-gha','tree-mc-gha']},
       {id:'wyndham',x:260,y:340,title:'Wyndham 鑽卡',subtitle:'Mastercard 候選分支',kind:'酒店會籍',status:'pending',outcome:'須先確認實際獲發鑽卡，才能當作下一段來源',requirements:['官方索引列世界之極及台灣發卡市場，但未取得個別卡號的完整活動條款。','活動次數、期限、既有會籍與實際核准結果待驗。'],cost:'索引描述為贈送快升；完整費用及限制待核。',timing:'以實際當期入口及核准通知為準。',source_ids:['tree-mc-wyndham']},
       {id:'bw',x:496,y:210,title:'Best Western',subtitle:'目標：鑽石／精選鑽石',kind:'酒店配對',status:'pending',outcome:'BW核准的等級，不保證一定為精選鑽石',claim:'文章以GHA鈦金或Wyndham鑽卡配對BW黑鑽／鑽卡。',verdict:'官方有免費配對機制，但對應等級由BW審核；下一段若要求精選鑽石，拿到較低等級不能視為同樣接通。',requirements:['提出其他酒店高階會籍與姓名一致的有效證明。','台灣屬北美以外，官方頁列聯絡信箱為 bwr.service@bestwestern.com。','取得書面核准與實際等級，再評估Choice或Scandic。'],cost:'官方配對程序免費；不代送申請或個人證件。',timing:'依品牌審核；來源及BW會籍效期須分別保存。',source_ids:['bw-match']},
       {id:'choice',x:732,y:20,title:'Choice 白金',subtitle:'BW 旁支，非必經',kind:'額外酒店會籍',status:'blocked',outcome:'保留文章中的支線，不列為台灣居民可直接使用',requirements:['公開活動適用地區未列台灣。','即使住在其他適用地區，是否接受BW來源、配對到哪級仍由品牌核准。','Choice分支不是接到SAS的必要步驟。'],cost:'不在台灣適用性未明時安排額外住宿或申請費。',timing:'公開配對有終身次數與效期規則；當期適用性先核對。',source_ids:['tree-choice-status','tree-choice-rules']},
@@ -42,7 +42,7 @@ export const TREES=[
     ],
     edges:[
       {id:'visa-gha',from:'visa',to:'gha',status:'verified',label:'卡等驗證＋登錄'},
-      {id:'mc-gha',from:'mastercard',to:'gha',status:'pending',label:'卡片方案待驗'},
+      {id:'mc-gha',from:'mastercard',to:'gha',status:'verified',label:'指定卡等＋驗證'},
       {id:'mc-wyndham',from:'mastercard',to:'wyndham',status:'pending',label:'贈卡資格待驗'},
       {id:'gha-bw',from:'gha',to:'bw',status:'pending',label:'等級須核准'},
       {id:'wyndham-bw',from:'wyndham',to:'bw',status:'pending',label:'等級須核准'},

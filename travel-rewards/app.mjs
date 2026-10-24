@@ -1,8 +1,8 @@
-import {DEFAULT_PROFILE,evaluateRoute,routeStartingPoint,partitionPlanRoutes,redemptionValue,challengeCost,cardFee,nonNegative} from './core.mjs?v=20261024-4';
-import {ROUTES,CARD_EN,ASSETS,RULE_EN} from './content.mjs?v=20261024-4';
-import {localizeRuleValues} from './fields.mjs?v=20261024-4';
-import {mountTree} from './tree.mjs?v=20261024-4';
-import {TREE_SOURCES} from './tree-data.mjs?v=20261024-4';
+import {DEFAULT_PROFILE,evaluateRoute,routeStartingPoint,partitionPlanRoutes,redemptionValue,challengeCost,cardFee,nonNegative} from './core.mjs?v=20261024-5';
+import {ROUTES,CARD_EN,ASSETS,RULE_EN} from './content.mjs?v=20261024-5';
+import {localizeRuleValues} from './fields.mjs?v=20261024-5';
+import {mountTree} from './tree.mjs?v=20261024-5';
+import {TREE_SOURCES} from './tree-data.mjs?v=20261024-5';
 
 const $=selector=>document.querySelector(selector);
 const $$=selector=>[...document.querySelectorAll(selector)];
@@ -247,7 +247,7 @@ function openHash(){
 }
 async function init(){
   try{
-    const response=await fetch('./data.json?v=20261024-4');if(!response.ok)throw new Error('Research HTTP '+response.status);data=await response.json();
+    const response=await fetch('./data.json?v=20261024-5');if(!response.ok)throw new Error('Research HTTP '+response.status);data=await response.json();
     data.sources=[...new Map([...data.sources,...TREE_SOURCES].map(source=>[source.id,source])).values()];
     ruleMap=new Map(data.rules.map(rule=>[rule.id,rule]));sourceMap=new Map(data.sources.map(source=>[source.id,source]));cardMap=new Map(data.cards.map(card=>[card.id,card]));routeMap=new Map(ROUTES.map(route=>[route.id,route]));
     for(const [key,value]of Object.entries(state.profile)){const el=$('#profile-form').elements.namedItem(key);if(el.tagName==='SELECT'&&!el.classList.contains('yes-no')){if([...el.options].some(option=>option.value===value))el.value=value;else state.profile[key]='unknown';}else if(el.type==='number'){el.value=nonNegative(value)===null?'':value;state.profile[key]=el.value;}}

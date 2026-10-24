@@ -1,5 +1,5 @@
-import {TREES,TREE_STATUS} from './tree-data.mjs?v=20261024-4';
-import {traceTree,treePosition,validateTree} from './tree-core.mjs?v=20261024-4';
+import {TREES,TREE_STATUS} from './tree-data.mjs?v=20261024-5';
+import {traceTree,treePosition,validateTree} from './tree-core.mjs?v=20261024-5';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const W=194,H=112;
