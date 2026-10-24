@@ -1,6 +1,6 @@
-import {DEFAULT_PROFILE,evaluateRoute,redemptionValue,challengeCost,cardFee,nonNegative} from './core.mjs';
-import {ROUTES,CARD_EN,ASSETS,RULE_EN} from './content.mjs';
-import {localizeRuleValues} from './fields.mjs';
+import {DEFAULT_PROFILE,evaluateRoute,routeStartingPoint,partitionPlanRoutes,redemptionValue,challengeCost,cardFee,nonNegative} from './core.mjs?v=20261024-2';
+import {ROUTES,CARD_EN,ASSETS,RULE_EN} from './content.mjs?v=20261024-2';
+import {localizeRuleValues} from './fields.mjs?v=20261024-2';
 
 const $=selector=>document.querySelector(selector);
 const $$=selector=>[...document.querySelectorAll(selector)];
@@ -49,31 +49,42 @@ function ruleStatus(rule){
   if(/lead|unconfirmed|unpublished|scope_expansion|research_scope/.test(rule.type+' '+rule.evidence_status)) return [t('線索／資格待核','Lead / eligibility pending'),'warn'];
   return [t('選定規則已查','Selected terms checked'),'neutral'];
 }
-function routeCard(route){
-  const evaluation=evaluate(route), reason=evaluation.blockers[0]||evaluation.pending[0];
-  const selected=state.routeCompare.includes(route.id);
-  return '<article class="route-card '+evaluation.state+'"><div class="card-top"><span class="tag '+stateClass(evaluation.state)+'">'+esc(text(states[evaluation.state]))+'</span><span class="evidence-label">'+esc(text(route.evidence))+'</span></div><h3>'+esc(text(route.name))+'</h3><p class="route-target">'+esc(text(route.target))+'</p><p class="route-summary">'+esc(text(route.summary))+'</p><dl class="route-stats"><div><dt>'+t('時間與節奏','Timing')+'</dt><dd>'+esc(text(route.time))+'</dd></div><div><dt>'+t('成本基礎','Cost basis')+'</dt><dd>'+esc(text(route.cost))+'</dd></div></dl>'+(reason?'<p class="route-reason '+(evaluation.blockers.length?'blocked':'')+'">'+esc(text(reason))+'</p>':'')+'<div class="route-actions"><button type="button" class="button" data-route="'+route.id+'">'+t('看步驟與限制','Steps & conditions')+' ↗</button><button type="button" class="button secondary '+(selected?'selected':'')+'" data-compare-route="'+route.id+'" aria-pressed="'+selected+'">'+(selected?t('✓ 已加入比較','✓ Comparing'):t('＋ 加入比較','＋ Compare'))+'</button></div></article>';
+function routeCard(route,context={}){
+  const evaluation=evaluate(route), reason=context.reason||evaluation.blockers[0]||evaluation.pending[0];
+  const selected=state.routeCompare.includes(route.id),start=routeStartingPoint(route,state.profile);
+  const origin=start.connected?'<p class="route-origin">你已填的起點：'+esc(start.label)+'</p>':'';
+  return '<article class="route-card '+evaluation.state+'"><div class="card-top"><span class="tag '+stateClass(evaluation.state)+'">'+esc(text(states[evaluation.state]))+'</span><span class="evidence-label">'+esc(text(route.evidence))+'</span></div>'+origin+'<h3>'+esc(text(route.name))+'</h3><p class="route-target">'+esc(text(route.target))+'</p><p class="route-summary">'+esc(text(route.summary))+'</p><dl class="route-stats"><div><dt>'+t('時間與節奏','Timing')+'</dt><dd>'+esc(text(route.time))+'</dd></div><div><dt>'+t('成本基礎','Cost basis')+'</dt><dd>'+esc(text(route.cost))+'</dd></div></dl>'+(reason?'<p class="route-reason '+(evaluation.blockers.length?'blocked':'')+'">'+esc(text(reason))+'</p>':'')+'<div class="route-actions"><button type="button" class="button" data-route="'+route.id+'">'+t('看步驟與限制','Steps & conditions')+' ↗</button><button type="button" class="button secondary '+(selected?'selected':'')+'" data-compare-route="'+route.id+'" aria-pressed="'+selected+'">'+(selected?t('✓ 已加入比較','✓ Comparing'):t('＋ 加入比較','＋ Compare'))+'</button></div></article>';
 }
 function renderPlan(){
   $$('[data-goal]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.goal===state.goal)));
   $$('.status-field').forEach(el=>el.hidden=state.goal!=='status');
   $$('.flight-field').forEach(el=>el.hidden=state.goal!=='flight');
+  $('#ci-status-fields').hidden=state.goal!=='status'||state.profile.card!=='ci';
   $('#cabin').value=state.cabin;
-  $('#results-title').textContent=text({flight:['先看兌換路徑，再選累積工具','Find a redemption path, then choose how to earn'],status:['先看資格，再決定登錄順序','Check eligibility before choosing an order'],hotel:['比較實際住宿，再決定轉點','Compare actual stays before transferring']}[state.goal]);
+  $('#results-title').textContent={flight:'從現有點數找兌票路線',status:'從現有卡片與會籍出發',hotel:'從現有點數找飯店轉點路線'}[state.goal];
   $('#plan-context').textContent=state.goal==='status'?t('會籍來源與已用過的挑戰，可能改變可走的分支。','Status provenance and past challenges can change the available branch.'):state.goal==='hotel'?t('同一份銀行點數只能分配一次；轉點比例不能直接當住宿價值。','Bank points can only be allocated once. A transfer ratio is not a hotel valuation.'):t('目前提供累積與兌換路徑比較；航線、日期、人數與實際空位仍需查詢。','This release compares earning and redemption paths; routes, dates, travelers and seats still need checking.');
+  if(state.goal==='status'&&state.profile.card==='ci')$('#plan-context').textContent=state.profile.ciTier==='signature'?'華航商務御璽卡沒有這項贈金卡禮遇，可切換到「換機票與升等」看累哩兌票。若另持其他會籍，請填入後再判斷。':'你選的是華航聯名卡，先確認它本身的華夏金卡禮遇。華航金卡不能當作新航金卡；若另有新航或萬豪會籍，請填入後再判斷。';
+  if(state.goal==='status'&&state.profile.card==='ci'&&(state.profile.krisflyer==='gold'||['gold','platinum'].includes(state.profile.marriott)))$('#plan-context').textContent='華航卡與你另外填寫的航空／飯店會籍分開判斷。每條路線會標出實際使用的起點；不會把華航金卡當作新航或萬豪會籍。';
   $('#cabin-note').textContent=state.cabin==='upgrade'?t('升等仍須確認適用現金票與空位。','An eligible paid fare and upgrade inventory are still required.'):t('艙等用於規劃目標，未連接即時獎勵機位。','Cabin records your goal; live award inventory is not connected.');
   let routes=ROUTES.filter(route=>route.goals.includes(state.goal));
   const rank={candidate:0,unknown:1,conflict:2,lead:3,blocked:4,closed:5};
   routes.sort((a,b)=>rank[evaluate(a).state]-rank[evaluate(b).state] || (state.cabin==='upgrade'&&state.goal==='flight'?(a.id==='P003'?-1:b.id==='P003'?1:0):0));
-  if(!$('#include-blocked').checked) routes=routes.filter(route=>!['blocked','closed','lead'].includes(evaluate(route).state));
-  $('#plan-count').textContent=t(number(routes.length)+'條路線',number(routes.length)+' routes');
-  $('#plan-routes').innerHTML=routes.length?routes.map(routeCard).join(''):'<div class="empty">'+t('目前條件下沒有可顯示的路線。可展開其他路線，或調整起始條件。','No routes match this display. Include other routes or adjust your conditions.')+'</div>';
+  const groups=partitionPlanRoutes(routes,state.profile,currentAsOf());
+  $('#plan-count').textContent='起點已對上 '+number(groups.ready.length+groups.pending.length)+'條';
+  $('#plan-ready-heading').hidden=!groups.ready.length;
+  $('#plan-routes').innerHTML=groups.ready.map(route=>routeCard(route)).join('');
+  $('#plan-pending').hidden=!groups.pending.length;
+  $('#plan-pending-routes').innerHTML=groups.pending.map(route=>routeCard(route)).join('');
+  $('#plan-empty').hidden=!!(groups.ready.length+groups.pending.length);
+  $('#plan-other').hidden=!groups.other.length;
+  $('#plan-other-summary').textContent='查看其他起點、目前不適用或待核的路線（'+groups.other.length+'）';
+  $('#plan-other-routes').innerHTML=groups.other.map(route=>{const start=routeStartingPoint(route,state.profile);return routeCard(route,start.connected?{}:{reason:['目前接不上：'+start.reason,'']});}).join('');
 }
 function renderExplore(){
   const query=$('#route-search').value.trim().toLocaleLowerCase(),goal=$('#explore-goal').value;
   const routes=ROUTES.filter(route=>(goal==='all'||route.goals.includes(goal))&&JSON.stringify([route.name,route.target,route.tags,route.summary]).toLocaleLowerCase().includes(query));
   $('#explore-count').textContent=t(number(routes.length)+'條候選路線；資格沿用你的規劃條件。',number(routes.length)+' candidate routes; eligibility uses your planning conditions.');
-  $('#explore-routes').innerHTML=routes.length?routes.map(routeCard).join(''):'<div class="empty">'+t('沒有符合的路線，試試其他品牌或關鍵字。','No routes found. Try another program or keyword.')+'</div>';
+  $('#explore-routes').innerHTML=routes.length?routes.map(route=>routeCard(route)).join(''):'<div class="empty">'+t('沒有符合的路線，試試其他品牌或關鍵字。','No routes found. Try another program or keyword.')+'</div>';
 }
 function cardName(card){return card.name;}
 function feeText(card){
@@ -121,7 +132,8 @@ function routeDialog(route,trigger){
   const restrictions=raw?.constraints||routeRules(route).flatMap(rule=>rule.missing).slice(0,3);
   const missing=raw?.missing||routeRules(route).flatMap(rule=>rule.missing);
   const assessment=evaluation.blockers.length?evaluation.blockers:evaluation.pending;
-  showDialog('<h2 id="dialog-title">'+esc(text(route.name))+'</h2><p class="route-target">'+esc(text(route.target))+'</p><div class="card-top"><span class="tag '+stateClass(evaluation.state)+'">'+esc(text(states[evaluation.state]))+'</span><span class="evidence-label">'+esc(text(route.evidence))+'</span></div><p class="dialog-lede">'+esc(text(route.summary))+'</p><ol class="route-steps">'+route.steps.map((step,i)=>'<li><b>步驟 '+(i+1)+'</b>'+esc(text(step))+'</li>').join('')+'</ol><div class="detail-grid"><section class="detail-section"><h3>'+t('你的條件判斷','Your condition check')+'</h3><ul>'+(assessment.length?assessment.map(reason=>'<li>'+esc(text(reason))+'</li>').join(''):'<li>'+t('已填條件未發現明確排除；仍須核對完整條款與個別帳戶。','No explicit exclusion found from entered conditions; full terms and account approval still need checking.')+'</li>')+'</ul></section><section class="detail-section tradeoffs"><h3>'+t('時間與新增成本','Timing and incremental cost')+'</h3><p>'+esc(text(route.time))+'</p><p>'+esc(text(route.cost))+'</p><p>'+t('任何獎勵機位、升等空位與飯店房型，都未在這裡確認可訂。','No award seat, upgrade inventory or hotel room is confirmed bookable here.')+'</p></section></div><section class="dialog-section"><h3>'+t('限制與未完成的查核','Limits and unresolved checks')+'</h3>'+originalNotes([...restrictions,...missing])+'</section><section class="dialog-section"><h3>'+t('逐條依據與官方來源','Rule-by-rule evidence and sources')+'</h3>'+ruleDetails(routeRules(route))+'</section><div class="route-actions"><button class="button secondary '+(selected?'selected':'')+'" type="button" data-compare-route="'+route.id+'" aria-pressed="'+selected+'">'+(selected?t('✓ 已加入比較','✓ Comparing'):t('＋ 加入比較','＋ Compare'))+'</button><button class="button secondary" type="button" data-route-link="'+route.id+'">'+t('複製這條路線連結','Copy route link')+'</button><button class="text-button" type="button" data-open-calc>'+t('計算這次的新增成本 →','Calculate incremental cost →')+'</button></div>',trigger);
+  const start=routeStartingPoint(route,state.profile),origin='<p class="route-origin">'+esc(start.connected?'你已填的起點：'+start.label:'目前接不上：'+start.reason)+'</p>';
+  showDialog('<h2 id="dialog-title">'+esc(text(route.name))+'</h2><p class="route-target">'+esc(text(route.target))+'</p>'+origin+'<div class="card-top"><span class="tag '+stateClass(evaluation.state)+'">'+esc(text(states[evaluation.state]))+'</span><span class="evidence-label">'+esc(text(route.evidence))+'</span></div><p class="dialog-lede">'+esc(text(route.summary))+'</p><ol class="route-steps">'+route.steps.map((step,i)=>'<li><b>步驟 '+(i+1)+'</b>'+esc(text(step))+'</li>').join('')+'</ol><div class="detail-grid"><section class="detail-section"><h3>'+t('你的條件判斷','Your condition check')+'</h3><ul>'+(assessment.length?assessment.map(reason=>'<li>'+esc(text(reason))+'</li>').join(''):'<li>'+t('已填條件未發現明確排除；仍須核對完整條款與個別帳戶。','No explicit exclusion found from entered conditions; full terms and account approval still need checking.')+'</li>')+'</ul></section><section class="detail-section tradeoffs"><h3>'+t('時間與新增成本','Timing and incremental cost')+'</h3><p>'+esc(text(route.time))+'</p><p>'+esc(text(route.cost))+'</p><p>'+t('任何獎勵機位、升等空位與飯店房型，都未在這裡確認可訂。','No award seat, upgrade inventory or hotel room is confirmed bookable here.')+'</p></section></div><section class="dialog-section"><h3>'+t('限制與未完成的查核','Limits and unresolved checks')+'</h3>'+originalNotes([...restrictions,...missing])+'</section><section class="dialog-section"><h3>'+t('逐條依據與官方來源','Rule-by-rule evidence and sources')+'</h3>'+ruleDetails(routeRules(route))+'</section><div class="route-actions"><button class="button secondary '+(selected?'selected':'')+'" type="button" data-compare-route="'+route.id+'" aria-pressed="'+selected+'">'+(selected?t('✓ 已加入比較','✓ Comparing'):t('＋ 加入比較','＋ Compare'))+'</button><button class="button secondary" type="button" data-route-link="'+route.id+'">'+t('複製這條路線連結','Copy route link')+'</button><button class="text-button" type="button" data-open-calc>'+t('計算這次的新增成本 →','Calculate incremental cost →')+'</button></div>',trigger);
 }
 function cardDialog(card,trigger){
   const rules=card.rule_ids.map(id=>ruleMap.get(id)).filter(Boolean),selected=state.cardCompare.includes(card.id);
@@ -202,7 +214,6 @@ function bindEvents(){
   $('#profile-form').addEventListener('submit',event=>event.preventDefault());
   $('#clear-profile').addEventListener('click',()=>{state.profile={...DEFAULT_PROFILE};for(const [key,value]of Object.entries(state.profile))$('#profile-form').elements.namedItem(key).value=value;save();renderAll();toast(t('已清除本工具的規劃條件。','Planning conditions cleared.'));});
   $('#cabin').addEventListener('change',event=>{state.cabin=event.target.value;save();renderPlan();});
-  $('#include-blocked').addEventListener('change',renderPlan);
   ['route-search','explore-goal'].forEach(id=>$('#'+id).addEventListener(id==='route-search'?'input':'change',renderExplore));
   ['card-search','card-issuer','card-asset'].forEach(id=>$('#'+id).addEventListener(id==='card-search'?'input':'change',renderCards));
   ['library-search','library-kind'].forEach(id=>$('#'+id).addEventListener(id==='library-search'?'input':'change',renderLibrary));
@@ -221,7 +232,7 @@ function openHash(){
 }
 async function init(){
   try{
-    const response=await fetch('./data.json?v=20261024-1');if(!response.ok)throw new Error('Research HTTP '+response.status);data=await response.json();
+    const response=await fetch('./data.json?v=20261024-2');if(!response.ok)throw new Error('Research HTTP '+response.status);data=await response.json();
     ruleMap=new Map(data.rules.map(rule=>[rule.id,rule]));sourceMap=new Map(data.sources.map(source=>[source.id,source]));cardMap=new Map(data.cards.map(card=>[card.id,card]));routeMap=new Map(ROUTES.map(route=>[route.id,route]));
     for(const [key,value]of Object.entries(state.profile)){const el=$('#profile-form').elements.namedItem(key);if(el.tagName==='SELECT'&&!el.classList.contains('yes-no')){if([...el.options].some(option=>option.value===value))el.value=value;else state.profile[key]='unknown';}else if(el.type==='number'){el.value=nonNegative(value)===null?'':value;state.profile[key]=el.value;}}
     bindEvents();renderAll();openHash();$('#app').hidden=false;$('#loading').hidden=true;

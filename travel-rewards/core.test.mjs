@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-import {DEFAULT_PROFILE,evaluateRoute,redemptionValue,challengeCost,cardFee,eligibleTransfer} from './core.mjs';
+import {DEFAULT_PROFILE,evaluateRoute,routeStartingPoint,partitionPlanRoutes,redemptionValue,challengeCost,cardFee,eligibleTransfer} from './core.mjs';
 import {ROUTES,RULE_EN,CARD_EN} from './content.mjs';
 const data=JSON.parse(await readFile(new URL('./data.json',import.meta.url),'utf8'));
 const route=id=>ROUTES.find(item=>item.id===id);
@@ -9,6 +9,54 @@ const profile=patch=>({...DEFAULT_PROFILE,...patch});
 const eligible={marriott:'platinum',krisflyer:'member',provenance:'earned',linked:'no',otherChallenge:'no'};
 
 test('unknown status never counts as verified eligibility',()=>{assert.equal(evaluateRoute(route('P005'),profile({})).state,'unknown');});
+test('a China Airlines card alone does not connect to a KrisFlyer status route',()=>{
+  const p=profile({card:'ci',marriott:'none',krisflyer:'unknown'});
+  const groups=partitionPlanRoutes(ROUTES.filter(r=>r.goals.includes('status')),p);
+  assert.deepEqual(groups.ready,[]);
+  assert.deepEqual(groups.pending.map(r=>r.id),['P013']);
+  assert.ok(groups.other.some(r=>r.id==='P006'));
+  assert.equal(routeStartingPoint(route('P006'),p).connected,false);
+});
+test('unknown or insufficient source status never enters the personal plan',()=>{
+  for(const krisflyer of ['unknown','member','silver']){
+    const groups=partitionPlanRoutes([route('P006')],profile({card:'ci',marriott:'none',krisflyer}));
+    assert.equal(groups.ready.length+groups.pending.length,0);
+  }
+  const empty=partitionPlanRoutes(ROUTES,profile({}));
+  assert.equal(empty.ready.length+empty.pending.length,0);
+});
+test('independently entered KrisFlyer Gold can connect regardless of card brand',()=>{
+  const p=profile({card:'ci',marriott:'none',krisflyer:'gold',linked:'no',otherChallenge:'no'});
+  assert.deepEqual(partitionPlanRoutes([route('P006')],p).ready.map(r=>r.id),['P006']);
+  assert.equal(partitionPlanRoutes([route('P006')],profile({...p,linked:'unknown'})).pending.length,1);
+});
+test('China Airlines status benefit distinguishes card tier and supplementary eligibility',()=>{
+  const p=profile({card:'ci',ciTier:'priority',ciRole:'first-supplementary',ciGoldUsed:'no'});
+  assert.equal(evaluateRoute(route('P013'),p).state,'unknown');
+  assert.equal(evaluateRoute(route('P013'),{...p,ciTier:'precious'}).state,'blocked');
+  assert.equal(evaluateRoute(route('P013'),{...p,ciTier:'signature'}).state,'blocked');
+  assert.equal(evaluateRoute(route('P013'),{...p,ciGoldUsed:'yes'}).state,'blocked');
+  assert.equal(evaluateRoute(route('P013'),p,'2027-01-01').state,'closed');
+});
+test('exploration and shared route details also retain missing resource checks',()=>{
+  const p=profile({card:'ci'});
+  assert.equal(evaluateRoute(route('P001'),p).state,'blocked');
+  assert.equal(evaluateRoute(route('P011'),p).state,'unknown');
+  assert.equal(evaluateRoute(route('H003'),p).state,'blocked');
+  assert.equal(evaluateRoute(route('P001'),profile({card:'other'})).state,'unknown');
+});
+test('existing unrelated cards cannot supply EVA certificates or Amex MR',()=>{
+  const p=profile({card:'ci',annualSpend:'1200000'});
+  assert.equal(evaluateRoute(route('P003'),p).state,'blocked');
+  const groups=partitionPlanRoutes([route('P003'),route('H001'),route('H002')],p);
+  assert.equal(groups.ready.length+groups.pending.length,0);
+  assert.equal(routeStartingPoint(route('H001'),profile({card:'amex-eva-plat'})).connected,false);
+});
+test('conflicted, blocked and closed routes stay outside the connected plan',()=>{
+  const groups=partitionPlanRoutes([route('P005'),route('P007'),route('P010')],profile({...eligible,provenance:'trial',hilton:'base',hiltonMatched:'no'}));
+  assert.equal(groups.ready.length+groups.pending.length,0);
+  assert.equal(groups.other.length,3);
+});
 test('Marriott Gold cannot enter the Platinum-to-Gold branch',()=>{const e=evaluateRoute(route('P005'),profile({...eligible,marriott:'gold'}));assert.equal(e.state,'blocked');assert.ok(e.blockers.some(pair=>pair[1].includes('Platinum')));});
 test('Platinum with known prerequisites remains a candidate, not a guaranteed approval',()=>{assert.equal(evaluateRoute(route('P005'),profile(eligible)).state,'candidate');});
 test('trial status is excluded even when the tier is high enough',()=>{assert.equal(evaluateRoute(route('P005'),profile({...eligible,provenance:'trial'})).state,'blocked');});
