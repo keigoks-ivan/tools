@@ -1,13 +1,15 @@
-import {DEFAULT_PROFILE,evaluateRoute,routeStartingPoint,partitionPlanRoutes,redemptionValue,challengeCost,cardFee,nonNegative} from './core.mjs?v=20261024-2';
-import {ROUTES,CARD_EN,ASSETS,RULE_EN} from './content.mjs?v=20261024-2';
-import {localizeRuleValues} from './fields.mjs?v=20261024-2';
+import {DEFAULT_PROFILE,evaluateRoute,routeStartingPoint,partitionPlanRoutes,redemptionValue,challengeCost,cardFee,nonNegative} from './core.mjs?v=20261024-4';
+import {ROUTES,CARD_EN,ASSETS,RULE_EN} from './content.mjs?v=20261024-4';
+import {localizeRuleValues} from './fields.mjs?v=20261024-4';
+import {mountTree} from './tree.mjs?v=20261024-4';
+import {TREE_SOURCES} from './tree-data.mjs?v=20261024-4';
 
 const $=selector=>document.querySelector(selector);
 const $$=selector=>[...document.querySelectorAll(selector)];
 const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const STORE='imq-reward-routes-v1';
 const views=['plan','explore','cards','calculators','library'];
-let data, ruleMap, sourceMap, cardMap, routeMap, toastTimer, lastDialogTrigger;
+let data, ruleMap, sourceMap, cardMap, routeMap, toastTimer, lastDialogTrigger, treeUI;
 const state={view:'plan',goal:'flight',profile:{...DEFAULT_PROFILE},cabin:'economy',routeCompare:[],cardCompare:[]};
 try{
   const saved=JSON.parse(localStorage.getItem(STORE)||'null');
@@ -60,6 +62,8 @@ function renderPlan(){
   $$('.status-field').forEach(el=>el.hidden=state.goal!=='status');
   $$('.flight-field').forEach(el=>el.hidden=state.goal!=='flight');
   $('#ci-status-fields').hidden=state.goal!=='status'||state.profile.card!=='ci';
+  $('#plan-tree-entry').hidden=state.goal!=='status';
+  treeUI?.updateProfile();
   $('#cabin').value=state.cabin;
   $('#results-title').textContent={flight:'從現有點數找兌票路線',status:'從現有卡片與會籍出發',hotel:'從現有點數找飯店轉點路線'}[state.goal];
   $('#plan-context').textContent=state.goal==='status'?t('會籍來源與已用過的挑戰，可能改變可走的分支。','Status provenance and past challenges can change the available branch.'):state.goal==='hotel'?t('同一份銀行點數只能分配一次；轉點比例不能直接當住宿價值。','Bank points can only be allocated once. A transfer ratio is not a hotel valuation.'):t('目前提供累積與兌換路徑比較；航線、日期、人數與實際空位仍需查詢。','This release compares earning and redemption paths; routes, dates, travelers and seats still need checking.');
@@ -125,7 +129,7 @@ function renderLibrary(){
   $('#library-list').innerHTML='<p class="small muted">'+t(number(rows.length)+'筆結果；同機構多頁不算獨立機構互證。',number(rows.length)+' results. Multiple pages from one institution are not independent counterpart verification.')+'</p>'+(rows.length?rows.join(''):'<div class="empty">'+t('沒有符合的資料。','No results found.')+'</div>');
 }
 function accessText(access){return /live_browser/.test(access)?t('已讀即時頁面與可見條款','Live page and visible terms read'):/pdf_text/.test(access)?t('已擷取PDF文字','PDF text extracted'):/failed|stale|conflict/.test(access)?t('擷取或時效差異，詳見註記','Access/freshness issue; see note'):/body/.test(access)?t('已讀本文','Page body read'):t('索引／摘要線索','Indexed excerpt / lead');}
-function showDialog(html,trigger){lastDialogTrigger=trigger||document.activeElement;$('#dialog-content').innerHTML=html;const dialog=$('#detail-dialog');if(!dialog.open)dialog.showModal();dialog.scrollTop=0;$('#close-dialog').focus();}
+function showDialog(html,trigger,tree=false){lastDialogTrigger=trigger||document.activeElement;$('#dialog-content').innerHTML=html;const dialog=$('#detail-dialog');dialog.classList.toggle('tree-detail-dialog',tree);if(!dialog.open)dialog.showModal();dialog.scrollTop=0;$('#close-dialog').focus();}
 function ruleDetails(rules){return rules.map(rule=>'<div class="rule-inline"><div class="card-top">'+knownEvidence(rule)+'<span class="evidence-label">'+esc(rule.id)+' · '+esc(rule.checked_on)+'</span></div><p>'+esc(t(rule.summary,RULE_EN[rule.id]||rule.summary))+'</p>'+links(rule.source_ids.map(id=>sourceMap.get(id)).filter(Boolean))+'</div>').join('');}
 function routeDialog(route,trigger){
   const evaluation=evaluate(route),raw=data.pathways.find(p=>p.id===route.id),selected=state.routeCompare.includes(route.id);
@@ -133,7 +137,7 @@ function routeDialog(route,trigger){
   const missing=raw?.missing||routeRules(route).flatMap(rule=>rule.missing);
   const assessment=evaluation.blockers.length?evaluation.blockers:evaluation.pending;
   const start=routeStartingPoint(route,state.profile),origin='<p class="route-origin">'+esc(start.connected?'你已填的起點：'+start.label:'目前接不上：'+start.reason)+'</p>';
-  showDialog('<h2 id="dialog-title">'+esc(text(route.name))+'</h2><p class="route-target">'+esc(text(route.target))+'</p>'+origin+'<div class="card-top"><span class="tag '+stateClass(evaluation.state)+'">'+esc(text(states[evaluation.state]))+'</span><span class="evidence-label">'+esc(text(route.evidence))+'</span></div><p class="dialog-lede">'+esc(text(route.summary))+'</p><ol class="route-steps">'+route.steps.map((step,i)=>'<li><b>步驟 '+(i+1)+'</b>'+esc(text(step))+'</li>').join('')+'</ol><div class="detail-grid"><section class="detail-section"><h3>'+t('你的條件判斷','Your condition check')+'</h3><ul>'+(assessment.length?assessment.map(reason=>'<li>'+esc(text(reason))+'</li>').join(''):'<li>'+t('已填條件未發現明確排除；仍須核對完整條款與個別帳戶。','No explicit exclusion found from entered conditions; full terms and account approval still need checking.')+'</li>')+'</ul></section><section class="detail-section tradeoffs"><h3>'+t('時間與新增成本','Timing and incremental cost')+'</h3><p>'+esc(text(route.time))+'</p><p>'+esc(text(route.cost))+'</p><p>'+t('任何獎勵機位、升等空位與飯店房型，都未在這裡確認可訂。','No award seat, upgrade inventory or hotel room is confirmed bookable here.')+'</p></section></div><section class="dialog-section"><h3>'+t('限制與未完成的查核','Limits and unresolved checks')+'</h3>'+originalNotes([...restrictions,...missing])+'</section><section class="dialog-section"><h3>'+t('逐條依據與官方來源','Rule-by-rule evidence and sources')+'</h3>'+ruleDetails(routeRules(route))+'</section><div class="route-actions"><button class="button secondary '+(selected?'selected':'')+'" type="button" data-compare-route="'+route.id+'" aria-pressed="'+selected+'">'+(selected?t('✓ 已加入比較','✓ Comparing'):t('＋ 加入比較','＋ Compare'))+'</button><button class="button secondary" type="button" data-route-link="'+route.id+'">'+t('複製這條路線連結','Copy route link')+'</button><button class="text-button" type="button" data-open-calc>'+t('計算這次的新增成本 →','Calculate incremental cost →')+'</button></div>',trigger);
+  showDialog('<h2 id="dialog-title">'+esc(text(route.name))+'</h2><p class="route-target">'+esc(text(route.target))+'</p>'+origin+'<div class="card-top"><span class="tag '+stateClass(evaluation.state)+'">'+esc(text(states[evaluation.state]))+'</span><span class="evidence-label">'+esc(text(route.evidence))+'</span></div><p class="dialog-lede">'+esc(text(route.summary))+'</p><ol class="route-steps">'+route.steps.map((step,i)=>'<li><b>步驟 '+(i+1)+'</b>'+esc(text(step))+'</li>').join('')+'</ol><div class="detail-grid"><section class="detail-section"><h3>'+t('你的條件判斷','Your condition check')+'</h3><ul>'+(assessment.length?assessment.map(reason=>'<li>'+esc(text(reason))+'</li>').join(''):'<li>'+t('已填條件未發現明確排除；仍須核對完整條款與個別帳戶。','No explicit exclusion found from entered conditions; full terms and account approval still need checking.')+'</li>')+'</ul></section><section class="detail-section tradeoffs"><h3>'+t('時間與新增成本','Timing and incremental cost')+'</h3><p>'+esc(text(route.time))+'</p><p>'+esc(text(route.cost))+'</p><p>'+t('任何獎勵機位、升等空位與飯店房型，都未在這裡確認可訂。','No award seat, upgrade inventory or hotel room is confirmed bookable here.')+'</p></section></div><section class="dialog-section"><h3>'+t('限制與未完成的查核','Limits and unresolved checks')+'</h3>'+originalNotes([...restrictions,...missing])+'</section><section class="dialog-section"><h3>'+t('逐條依據與官方來源','Rule-by-rule evidence and sources')+'</h3>'+ruleDetails(routeRules(route))+'</section>'+(route.id==='P009'?'<p><button type="button" class="button" data-open-tree="sas-chain">打開完整SAS路線樹與支線 ↗</button></p>':'')+'<div class="route-actions"><button class="button secondary '+(selected?'selected':'')+'" type="button" data-compare-route="'+route.id+'" aria-pressed="'+selected+'">'+(selected?t('✓ 已加入比較','✓ Comparing'):t('＋ 加入比較','＋ Compare'))+'</button><button class="button secondary" type="button" data-route-link="'+route.id+'">'+t('複製這條路線連結','Copy route link')+'</button><button class="text-button" type="button" data-open-calc>'+t('計算這次的新增成本 →','Calculate incremental cost →')+'</button></div>',trigger);
 }
 function cardDialog(card,trigger){
   const rules=card.rule_ids.map(id=>ruleMap.get(id)).filter(Boolean),selected=state.cardCompare.includes(card.id);
@@ -183,6 +187,13 @@ function renderCalculators(){
   cost.classList.toggle('negative',challenge?.net<0);
   cost.innerHTML=challenge?'<div class="metric"><span>'+t('為這次挑戰新增支出','Incremental challenge cost')+'</span><strong>'+money(challenge.total)+'</strong></div><div class="metric"><span>'+t('你的禮遇估值－新增支出','Your benefit value minus extra cost')+'</span><strong>'+money(challenge.net)+'</strong></div>':'<p>'+t('請填完整非負數字；晚數須為整數。','Enter nonnegative values in all fields; nights must be a whole number.')+'</p>';
 }
+function setExploreMode(mode){
+  const map=mode==='tree';$('#tree-explorer').hidden=!map;$('#explore-catalog').hidden=map;
+  $$('[data-explore-mode]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.exploreMode===mode)));
+}
+function openTree(id='sas-chain'){
+  if($('#detail-dialog').open)$('#detail-dialog').close();setView('explore',false);setExploreMode('tree');treeUI.open({treeId:id});history.replaceState(null,'','#tree='+id);
+}
 function setView(view,updateHash=true){
   if(!views.includes(view))view='plan';
   state.view=view;
@@ -195,6 +206,8 @@ function bindEvents(){
   document.addEventListener('click',event=>{
     const button=event.target.closest('button');if(!button)return;
     if(button.dataset.view){setView(button.dataset.view);return;}
+    if(button.dataset.exploreMode){setExploreMode(button.dataset.exploreMode);return;}
+    if(button.dataset.openTree){openTree(button.dataset.openTree);return;}
     if(button.dataset.goal){state.goal=button.dataset.goal;save();renderPlan();return;}
     if(button.dataset.route){routeDialog(routeMap.get(button.dataset.route),button);return;}
     if(button.dataset.card){cardDialog(cardMap.get(button.dataset.card),button);return;}
@@ -227,14 +240,18 @@ function bindEvents(){
 }
 function openHash(){
   const hash=location.hash.slice(1);
+  if(hash==='main')return;
+  if(hash.startsWith('tree=')){const params=new URLSearchParams(hash);setView('explore',false);setExploreMode('tree');treeUI.open({treeId:params.get('tree'),start:params.get('start')||'all',target:params.get('node')},!!params.get('node'));return;}
   if(hash.startsWith('route=')){const route=routeMap.get(hash.slice(6));setView('explore',false);if(route)routeDialog(route);return;}
-  setView(hash||'plan',false);
+  setView(hash||'explore',false);
 }
 async function init(){
   try{
-    const response=await fetch('./data.json?v=20261024-2');if(!response.ok)throw new Error('Research HTTP '+response.status);data=await response.json();
+    const response=await fetch('./data.json?v=20261024-4');if(!response.ok)throw new Error('Research HTTP '+response.status);data=await response.json();
+    data.sources=[...new Map([...data.sources,...TREE_SOURCES].map(source=>[source.id,source])).values()];
     ruleMap=new Map(data.rules.map(rule=>[rule.id,rule]));sourceMap=new Map(data.sources.map(source=>[source.id,source]));cardMap=new Map(data.cards.map(card=>[card.id,card]));routeMap=new Map(ROUTES.map(route=>[route.id,route]));
     for(const [key,value]of Object.entries(state.profile)){const el=$('#profile-form').elements.namedItem(key);if(el.tagName==='SELECT'&&!el.classList.contains('yes-no')){if([...el.options].some(option=>option.value===value))el.value=value;else state.profile[key]='unknown';}else if(el.type==='number'){el.value=nonNegative(value)===null?'':value;state.profile[key]=el.value;}}
+    treeUI=mountTree($('#tree-explorer'),{data,getProfile:()=>state.profile,inspect:(html,trigger)=>showDialog(html,trigger,true),onChange:({treeId,start,target})=>{const params=new URLSearchParams({tree:treeId});if(start!=='all')params.set('start',start);if(target)params.set('node',target);history.replaceState(null,'','#'+params.toString());}});
     bindEvents();renderAll();openHash();$('#app').hidden=false;$('#loading').hidden=true;
   }catch(error){console.error('Reward Routes failed to initialize',error);$('#loading').hidden=true;$('#load-error').hidden=false;}
 }
