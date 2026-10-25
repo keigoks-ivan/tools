@@ -54,9 +54,10 @@ test('Marriott spend upgrades keep card tier and qualifying spend together',()=>
   assert.equal(check('N001',['ctbc-marriott-priority-limited'],{mbSpend150:'yes'}).state,'connected');
 });
 test('Qatar cannot use a recent competing ALL link as eligible',()=>{
-  assert.equal(check('P011',['all-account','qatar-account'],{allOtherLinked:'recent'}).state,'blocked');
-  assert.equal(check('P011',['all-account'],{allOtherLinked:'no'}).state,'missing');
-  assert.equal(check('P011',['all-account','qatar-account'],{allOtherLinked:'old'}).state,'connected');
+  assert.equal(check('P011',['all-account','qatar-account'],{allPartner:'flying-blue',allLinkAge:'recent'}).state,'blocked');
+  assert.equal(check('P011',['all-account'],{allPartner:'qatar'}).state,'missing');
+  assert.equal(check('P011',['all-account','qatar-account'],{allPartner:'flying-blue',allLinkAge:'old'}).state,'missing');
+  assert.equal(check('P011',['all-account','qatar-account'],{allPartner:'qatar'}).state,'connected');
 });
 test('shared resources create explicit cross-map exits without inventing airline status',()=>{
   const ci=TREES.find(tree=>tree.id==='ci-card');

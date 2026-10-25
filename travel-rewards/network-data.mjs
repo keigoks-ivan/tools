@@ -1,4 +1,5 @@
-import {EXT_RESOURCES,EXT_FACTS,EXT_OPPORTUNITIES,EXT_SOURCES,EXT_RULES,EXT_COVERAGE} from './extensions-data.mjs?v=20261024-11';
+import {EXT_RESOURCES,EXT_FACTS,EXT_OPPORTUNITIES,EXT_SOURCES,EXT_RULES,EXT_COVERAGE} from './extensions-data.mjs?v=20261025-12';
+import {HOTEL_RESOURCES,HOTEL_FACTS,HOTEL_OPPORTUNITIES,HOTEL_SOURCES,HOTEL_RULES,HOTEL_COVERAGE} from './hotel-partners-data.mjs?v=20261025-12';
 const resource=(id,label,group,extra={})=>({id,label,group,...extra});
 export const RESOURCES=[
   resource('amex-platinum-charge','運通簽帳白金卡','信用卡'),resource('amex-eva-platinum-card','長榮運通簽帳白金卡','信用卡'),resource('amex-gold-current','運通耀金卡','信用卡'),resource('amex-eva-gold-card','長榮運通簽帳金卡','信用卡'),resource('amex-platinum-credit','運通信用白金卡','信用卡'),resource('amex-regent','運通晶華珍饌白金卡','信用卡'),resource('amex-charge','運通簽帳卡','信用卡'),
@@ -107,3 +108,13 @@ Object.assign(NETWORK_COVERAGE_UPDATES,{
   'ihg-visa-challenge':{research_status:'selected_fields_verified_gaps_remain',source_ids:['stay-ihg-visa'],rule_ids:['R086'],note:'已讀完整五頁PDF；現期市場未含台灣，其他活動不可泛化。'},
   'cube-family':{research_status:'selected_fields_verified_gaps_remain',source_ids:['cube-details','cube-2027-full'],rule_ids:['R078','R079'],note:'已補18出口、卡別／年度及單位，夥伴端未全部互核。'}
 });
+RESOURCES.push(...HOTEL_RESOURCES);FACTS.push(...HOTEL_FACTS);
+FACTS.splice(FACTS.findIndex(item=>item.id==='allOtherLinked'),1);
+OPPORTUNITIES.push(...HOTEL_OPPORTUNITIES);
+NETWORK_SOURCES.push(...HOTEL_SOURCES);NETWORK_RULES.push(...HOTEL_RULES);NETWORK_COVERAGE.push(...HOTEL_COVERAGE);
+for(const id of ['P011','N008']){
+  const item=OPPORTUNITIES.find(op=>op.id===id);item.link={partner:'qatar',required:true};item.conditions=[];
+  if(id==='N008')item.all=['all-account','qatar-account'];
+}
+Object.assign(NETWORK_RULES.find(item=>item.id==='R074'),{source_ids:['hotel-hsbc-q4','hotel-hsbc-general','hotel-all-hsbc'],missing:['卓越紅利最低量段混寫旅遊積分與300單位，最低可操作紅利尚未確認。費用與年度總上限未列，萬豪／IHG端台灣HSBC比例未獨立互核。']});
+Object.assign(NETWORK_COVERAGE.find(item=>item.id==='all-flyingblue-partnership'),{name:'ALL×Flying Blue常設合作',research_status:'selected_fields_verified_gaps_remain',source_ids:['hotel-fb-terms','hotel-fb-main','hotel-fb-transfer-form','hotel-all-air-general'],rule_ids:['R098','R099','R100','R101'],note:'專屬手動1:1、首次資格晚／XP與12月改連規則已補；自動轉換章殘留數字、入帳模板差異與混合支付觸發仍保留。'});

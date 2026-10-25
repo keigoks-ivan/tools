@@ -1,5 +1,6 @@
-import {EXTRA_TREES,RESOURCE_BINDINGS,OP_BINDINGS} from './network-views.mjs?v=20261024-11';
-import {PARTNER_TREES,STAY_BINDINGS} from './partner-views.mjs?v=20261024-11';
+import {EXTRA_TREES,RESOURCE_BINDINGS,OP_BINDINGS} from './network-views.mjs?v=20261025-12';
+import {PARTNER_TREES,STAY_BINDINGS} from './partner-views.mjs?v=20261025-12';
+import {HOTEL_TREES,extendHotelViews} from './hotel-partners-views.mjs?v=20261025-12';
 const checked='2026-10-24';
 const source=(id,publisher,url,access,note)=>({id,publisher,url,access,note,checked_on:checked,kind:'official',ownership_group:new URL(url).hostname});
 
@@ -88,7 +89,8 @@ const sqTree=BASE_TREES.find(item=>item.id==='marriott-sq');
 sqTree.height=850;
 sqTree.nodes.push({id:'sq-silver-source',x:40,y:690,title:'新航菁英銀卡',subtitle:'萬豪目前須無高階會籍',kind:'航空會籍',status:'start',outcome:'可檢查3晚萬豪銀卡分支',resources:['sq-silver'],requirements:['萬豪目前無任何Elite等級；先比較未來一次性合作的啟用順序。'],cost:'已持有新航銀卡；新增住宿另計。',timing:'登錄後六個月。',rule_ids:['R076']},{id:'sq-silver-mb',x:400,y:690,title:'萬豪銀卡挑戰',subtitle:'六個月內3晚合格付費實住',kind:'酒店挑戰',status:'verified',outcome:'依合作取得萬豪Silver，不是Gold或Platinum',resources:['mb-silver'],opportunity_id:'N025',requirements:['新航正式Elite Silver及萬豪無Elite；本人付費合格實住。','點數、點現、免費住宿獎勵排除；MEA仍待個別確認。'],cost:'只計新增合格住宿與交通。',timing:'登錄六個月，核發效期依合作條款。',rule_ids:['R076']});
 sqTree.edges.push({id:'sqs-mbs',from:'sq-silver-source',to:'sq-silver-mb',label:'3晚合格付費實住',status:'verified'});
-export const TREES=[...BASE_TREES,...EXTRA_TREES,...PARTNER_TREES];
+export const TREES=[...BASE_TREES,...EXTRA_TREES,...PARTNER_TREES,...HOTEL_TREES];
+extendHotelViews(TREES);
 for(const graph of TREES){
   graph.goals??=graph.id==='ci-card'?['status','flight']:['status'];
   for(const item of graph.nodes){
