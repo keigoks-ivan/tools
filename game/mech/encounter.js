@@ -413,6 +413,7 @@ export class Encounter {
       }
       if (e.kind === 'tank') e.pref = rand(70, 130);   // 伏兵戰車要逼近到轉角看得到你，不在 200 m 外繞圈
       this.mine.push(e);
+      if (q.at.breach) this.breach(q.at);
       if (q.at.ground || e.vehicle) C.fx.dust(_t.set(q.at.x, C.world.height(q.at.x, q.at.z), q.at.z), e.vehicle ? 1.6 : 2.4);
     }
   }
@@ -473,8 +474,9 @@ export class Encounter {
     let wh = q.where;
     if (late && (wh === 'side' || wh === 'far')) wh = 'out';
     const base = late ? this.prog + 120 : c.s;
-    const F = { far: this.pFar, out: this.pOut, side: this.pSide, drop: this.pDrop, roof: this.pRoof, rise: this.pRise, ring: this.pRing }[wh] || this.pDrop;
+    const F = { far: this.pFar, out: this.pOut, side: this.pSide, breach: this.pBreach, drop: this.pDrop, roof: this.pRoof, rise: this.pRise, ring: this.pRing }[wh] || this.pDrop;
     let at = F.call(this, q, base, V);
+    if (!at && wh === 'breach') at = this.pSide(q, base, V);
     if (!at && q.kind === 'tank') at = this.pRing(q, base, V) || this.pOut(q, Math.min(base, this.E.len - 120), V, true);
     if (!at && q.kind === 'heli') at = this.pRise(q, base, V, true);
     return at || this.pDrop(q, base, V);
@@ -501,6 +503,47 @@ export class Encounter {
     const [di, dj] = bs[q.k % bs.length], d = 30 + Math.floor(q.k / bs.length) * 13;
     const x = V.x + di * d + (q.kind === 'tank' ? 0 : rand(-4, 4) * dj), z = V.z + dj * d + (q.kind === 'tank' ? 0 : rand(-4, 4) * di);
     return { x, z, y: this.C.world.height(x, z), tx: V.x, tz: V.z, ground: true };
+  }
+  // 破牆：你前方 ±100°、30～50 m 內，貼著大樓牆邊、在街上能站的點；敵機從牆面衝出來（碎片煙塵在 breach() 放）
+  //   找不到就退回 pSide 再退回 pDrop（place() 處理）；不會放在你背後
+  pBreach(q) {
+    const C = this.C, w = C.world, P = C.player, p = P.pos, pc = _u.set(p.x, p.y + 12, p.z), boxes = [];
+    for (let i = 0; i < 90; i++) {
+      const a = P.yaw + rand(-1.75, 1.75), r = rand(30, 50);
+      const x = p.x + Math.sin(a) * r, z = p.z + Math.cos(a) * r;
+      if (Math.abs(x) > 680 || Math.abs(z) > 680) continue;
+      const h = w.height(x, z);
+      if (w.support(x, z, 5, h + 0.5) > h + 0.5 || w.collide(_t.set(x, h, z), 5, h)) continue;
+      let wall = null, bd = 9;
+      for (const b of w.blds || []) {
+        if (b.st !== 0 || b.box.top - b.gy < 9 || this.used.has(b.box) || b.x1 - b.x0 < 8 || b.z1 - b.z0 < 8) continue;
+        const qx = clamp(x, b.x0, b.x1), qz = clamp(z, b.z0, b.z1), d = Math.hypot(x - qx, z - qz);
+        if (d > 4 && d < bd) { bd = d; wall = { b: b.box, qx, qz, d }; }
+      }
+      // 戰場地圖沒有大樓時，退而求其次用岩壁、要塞牆這類夠高夠寬的碰撞盒
+      if (!wall) for (const b of w.nearBoxes(x, z, 18, boxes)) {
+        if (b.bld && b.bld.st !== 0 || b.top - h < 9 || this.used.has(b) || b.x1 - b.x0 < 5 || b.z1 - b.z0 < 5) continue;
+        const qx = clamp(x, b.x0, b.x1), qz = clamp(z, b.z0, b.z1), d = Math.hypot(x - qx, z - qz);
+        if (d > 4 && d < 16) { wall = { b, qx, qz, d }; break; }
+      }
+      if (!wall) continue;
+      if (i < 60 && w.raycast(_t.set(x, h + 12, z), pc, null) >= 0) continue;   // 先挑你看得到的
+      this.used.add(wall.b);
+      const nx = (x - wall.qx) / wall.d, nz = (z - wall.qz) / wall.d;
+      return { x, z, y: h, tx: p.x, tz: p.z, ground: true, breach: { x: wall.qx, z: wall.qz, y: h + 8, nx, nz } };
+    }
+    return null;
+  }
+  // 破牆出場的特效與提示：牆面碎裂＋煙塵、撞擊聲、鏡頭一震、HUD 標方向
+  breach(at) {
+    const C = this.C, w = C.world, B = at.breach, p = C.player, hp = _t.set(B.x + B.nx * 0.4, B.y, B.z + B.nz * 0.4), n = _u.set(B.nx, 0, B.nz);
+    C.fx.crumble(hp, n, 3); C.fx.crumble(_t.set(B.x + B.nx * 0.4, B.y + 5, B.z + B.nz * 0.4), n, 2);
+    C.fx.explosion(_t.set(B.x + B.nx * 2, B.y, B.z + B.nz * 2), 0.8);
+    C.fx.dust(_t.set(B.x + B.nx * 3, w.height(B.x, B.z), B.z + B.nz * 3), 2.6);
+    C.audio.impact(hp, 'building'); C.audio.explosion(hp, 1);
+    C.cockpit.kick('land', 0.4);
+    const a = wrap(Math.atan2(B.x - p.pos.x, B.z - p.pos.z) - p.yaw);   // >0＝在你左邊
+    C.note(`CONTACT  CLOSE  ${Math.abs(a) < 0.35 ? '▲ 正前方' : a > 0 ? '◀ 左前方' : '右前方 ▶'}`, 'am');
   }
   pDrop(q, base, V) {
     const E = this.E, w = this.C.world, p = this.C.player.pos, last = this.cur.last;

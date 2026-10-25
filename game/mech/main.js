@@ -19,7 +19,7 @@ async function game() {
   const { Post } = await import('./post.js');
   const { Cockpit } = await import('./cockpit.js');
   const { Input } = await import('./input.js');
-  const { Player } = await import('./player.js');
+  const { Player, WEIGHT, BodyTurn } = await import('./player.js');
   const { Combat, STAGES, stageWeight } = await import('./combat.js');
   const { HUD } = await import('./hud.js');
   const { Audio: Sound } = await import('./audio.js');
@@ -71,6 +71,7 @@ async function game() {
   const player = new Player(hero, world, {
     land: (s) => {
       audio.land(s); cockpit.kick('land', s);
+      weightBump(WEIGHT.land, s * (1 + Math.max(0, s - WEIGHT.land.big)), 0);
       hero.landV = (hero.landV || 0) + s * 7;
       if (s > 0.35) fx.dust(new THREE.Vector3(player.pos.x, player.pos.y, player.pos.z), 0.8 + s);
     },
@@ -78,7 +79,16 @@ async function game() {
     jump: () => audio.jump(),
     stomp: (o) => { audio.trample(new THREE.Vector3(o.x ?? player.pos.x, player.pos.y, o.z ?? player.pos.z), o.kind); cockpit.kick('step', 0.5, 0); },
     enOut: () => combat && combat.note('EN OUT', 'rd'),
-  });
+  }, { heavy: true });
+  // 重量感：腳步／落地的鏡頭衝量（駕駛艙視角走 cockpit.bump，後方視角走下面的彈簧）；暫停選單「鏡頭晃動」可關
+  let shake = (() => { try { return localStorage.getItem('mech.shake') !== '0'; } catch (e) { return true; } })();
+  const cb = { y: 0, vy: 0, r: 0, rv: 0 };
+  function weightBump(c, s, dir) {
+    if (!shake) return;
+    cockpit.bump(s, c, dir);
+    cb.vy -= c.drop * s; cb.rv += c.roll * dir * s;
+  }
+  const bodyTurn = new BodyTurn();
   player.apMax = 9000;
   // n＝關卡（遭遇戰從路線起點、面向第一段出發）；cp＝檢查點
   function resetPlayer(n = 0, cp = null) {
@@ -113,6 +123,7 @@ async function game() {
   // 機體正後上方視角：機體置中、鏡頭高過頭部，略微俯看；跟著瞄準方向轉。
   //   鏡頭正前方＝瞄準方向，所以畫面中央（準心）就是子彈會去的地方。
   //   撞到建築：先縮抬高量、再縮後退距離（縮短立刻、恢復慢慢來，轉角不會一直跳）
+  const chaseQ = new THREE.Quaternion(), chaseZ = new THREE.Vector3(0, 0, 1);
   const chasePivot = new THREE.Vector3(), chaseLift = new THREE.Vector3(), chaseOff = new THREE.Vector3(), chaseN = new THREE.Vector3(), chaseE = new THREE.Euler();
   let chaseK = 1, chaseBack = 9, chaseSkip = 0, chaseLiftK = 1;   // 後退距離被擠短的比例、實際離機體多遠、鏡頭到機體中心沿瞄準線多遠（公尺）
   function chaseCam(dt) {
@@ -130,6 +141,12 @@ async function game() {
     const want = hit >= 0 && hit <= 1 ? Math.max(0.03, hit - 0.04) : 1;
     chaseK = want < chaseK ? want : Math.min(want, chaseK + dt * 1.5);
     camera.position.lerpVectors(chaseLift, chaseOff, chaseK);
+    // 重量感：腳步／落地彈簧（只動位置與側傾，瞄準方向不變）
+    for (let i = 0, n = Math.max(1, Math.ceil(dt / 0.008)), h = dt / n; i < n; i++) {
+      cb.vy += (-170 * cb.y - 12 * cb.vy) * h; cb.y += cb.vy * h; cb.rv += (-170 * cb.r - 12 * cb.rv) * h; cb.r += cb.rv * h;
+    }
+    camera.position.y += clamp(cb.y, -0.2, 0.2) * WEIGHT.chase.drop * k;
+    camera.quaternion.multiply(chaseQ.setFromAxisAngle(chaseZ, clamp(cb.r, -0.05, 0.05) * WEIGHT.chase.roll));
     chaseBack = chaseD * k * chaseK;
     const gy = world.height(camera.position.x, camera.position.z) + 2;
     if (camera.position.y < gy) camera.position.y = gy;
@@ -201,6 +218,9 @@ async function game() {
   document.querySelectorAll('[data-q]').forEach((b) => b.addEventListener('click', () => setQuality(+b.dataset.q)));
   const sens = $('sens');
   input.sens = store.get('sens', 1); sens.value = input.sens;
+  const shakeB = document.querySelectorAll('[data-shake]');
+  const setShake = (on) => { shake = on; try { localStorage.setItem('mech.shake', on ? '1' : '0'); } catch (e) {} shakeB.forEach((b) => { b.style.background = (b.dataset.shake === '1') === on ? 'rgba(127,243,255,0.25)' : ''; }); };
+  setShake(shake); shakeB.forEach((b) => b.addEventListener('click', () => setShake(b.dataset.shake === '1')));
   sens.addEventListener('input', () => { input.sens = +sens.value; store.set('sens', sens.value); });
   // 音量（全部聲音／配樂），記在這台瀏覽器；?mute 測試時維持靜音
   const vol = $('vol'), mvol = $('mvol');
@@ -445,8 +465,17 @@ async function game() {
 
     // ---- 自機
     player.update(dt, inp);
+    const legPre = hero.legYaw;
     hero.animate(dt, player.animState(combat.aimPoint));
+    // 機身轉向變慢：腿的朝向再限速，差角由軀幹扭腰補回（瞄準方向、準心不變）
+    if (state === 'play' || state === 'boot') {
+      if (Math.abs(Math.atan2(Math.sin(legPre - bodyTurn.out), Math.cos(legPre - bodyTurn.out))) > 0.02) bodyTurn.reset();   // 被外部重設（重生、換關）
+      const bt = bodyTurn.step(hero.legYaw, dt);
+      hero.legYaw = bt.yaw; hero.root.rotation.y = bt.yaw; hero.bones.torso.rotation.y += bt.twist;
+      bodyTurn.out = bt.yaw;
+    } else bodyTurn.reset();
     if (hero.footfall) {
+      weightBump(WEIGHT.step, clamp(player.speed / 14, 0.4, 1) * (player.boosting ? WEIGHT.step.runK : 1) * (player.grounded ? 1 : 0), hero.footfall);
       const s = clamp(player.speed / 16, 0.35, 1.3);
       audio.footstep(s);
       cockpit.kick('step', s, hero.footfall);

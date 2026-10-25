@@ -443,6 +443,7 @@ export class HUD {
     }
     if (C.critMark > 0) this.text('CRITICAL', x, y - 46 * s, 16, 'am', C.critMark, 'center', 700);
     if (C.killMark > 0) this.text('DESTROYED', x, y + 52 * s, 15, 'rd', C.killMark, 'center', 700);
+    if (C.parryMark > 0) this.text('PARRY', x, y - 68 * s, 22, 'cy', C.parryMark, 'center', 700);
   }
 
   // 橫條：深色底框＋底色＋填色（ticks＝四分刻度）

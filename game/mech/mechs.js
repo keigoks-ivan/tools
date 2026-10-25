@@ -535,6 +535,12 @@ const SCHEMES = {
     frame: P(0x3c3e42, 0.8, 0.5), dark: P(0x171718, 0.2, 0.66), weapon: P(0x2b2c2f, 0.45, 0.5), sole: P(0x131415, 0, 0.9),
     eye: [3.5, 0.35, 0.55], wear: 'dirty',
   },
+  // 突擊型量產機：暗紅＋黑＋橘色警示條（近戰突擊兵）
+  brawler: {
+    main: P(0x5a1f1d, 0, 0.68), second: P(0x1f2023, 0, 0.7), accent: P(0xd9661a, 0, 0.58), yellow: P(0xe07a1e, 0, 0.52),
+    frame: P(0x34363a, 0.8, 0.5), dark: P(0x141415, 0.2, 0.68), weapon: P(0x2a2b2e, 0.45, 0.52), sole: P(0x111213, 0, 0.9),
+    eye: [3.5, 0.35, 0.55], wear: 'dirty',
+  },
   heavy: {
     main: P(0x4a4d51, 0, 0.7), second: P(0x2d3034, 0, 0.72), accent: P(0x8c5428, 0, 0.62), yellow: P(0x8c5428, 0, 0.62),
     frame: P(0x3a3d41, 0.8, 0.5), dark: P(0x161617, 0.2, 0.7), weapon: P(0x2c2e32, 0.5, 0.5), sole: P(0x121314, 0, 0.9),
@@ -568,7 +574,7 @@ export class Mech {
   build(style, schemeKey) {
     this.style = style;
     this.schemeKey = schemeKey;
-    const S = (this.S = SCHEMES[schemeKey]);
+    const S = (this.S = SCHEMES[schemeKey] || SCHEMES[style] || SCHEMES.grunt);   // 未知配色退回該機型預設
     this.root = new THREE.Group();
     this.bones = {};
     this.parts = new Map();
@@ -717,6 +723,7 @@ export class Mech {
     for (const [bone, list] of this.parts) {
       const g = mergeGeometries(list);
       const p = g.attributes.position, pbr = g.attributes.pbr, dcl = g.attributes.dcl;
+      if (this.style === 'hero') this.bulkUp(bone, p);
       const w = new THREE.Vector3();
       let unit = false;
       for (let i = 0; i < p.count; i++) {
@@ -738,6 +745,30 @@ export class Mech {
       this.meshes.push(mesh);
     }
     this.parts.clear();
+  }
+
+  // 主角機加量感：合併後依骨頭把裝甲往外「長肉」（肩甲、胸、上臂、前臂、大腿、小腿加寬加厚），腰與骨架位置不變
+  // 為了不擋住胸口艙門與駕駛艙視線，胸甲前緣（z>0）不動，只加寬、加厚背側
+  bulkUp(bone, p) {
+    const B = this.bones, sm = THREE.MathUtils.smoothstep;
+    let f = null;
+    for (const n of ['R', 'L']) {
+      const sx = n === 'L' ? 1 : -1;
+      if (bone === B['shoulder' + n]) f = (x, y, z) => {
+        const t = sm(y, -1.4, 0.2);                      // 0＝上臂段、1＝肩甲段
+        const k = 1.22 + 0.1 * t;
+        return [x * k + sx * 0.32 * t, y > -0.6 ? y + 0.18 * t : y, z * (1.2 + 0.1 * t)];
+      };
+      else if (bone === B['elbow' + n]) f = (x, y, z) => { const t = sm(y, -3.2, -0.3); return [x * (1.2 + 0.04 * t), y, z * (1.2 + 0.04 * t)]; };
+      else if (bone === B['hip' + n]) f = (x, y, z) => { const t = 1 - sm(y, -1.4, -0.2); return [x * (1 + 0.2 * t) + sx * 0.2 * t, y, z * (1 + 0.2 * t)]; };
+      else if (bone === B['knee' + n]) f = (x, y, z) => { const t = 1 - sm(y, -0.6, 0.6); return [x * (1 + 0.2 * t) + sx * 0.2 * t, y, z * (1 + 0.16 * t)]; };
+    }
+    if (bone === B.torso) f = (x, y, z) => {
+      const t = sm(y, 0.9, 2.4) * (1 - sm(y, 5.4, 6.4));   // 胸段
+      return [x * (1 + 0.13 * t), y, z < 0 ? z * (1 + 0.14 * t) : z];
+    };
+    if (!f) return;
+    for (let i = 0; i < p.count; i++) { const r = f(p.getX(i), p.getY(i), p.getZ(i)); p.setXYZ(i, r[0], r[1], r[2]); }
   }
 
   // ======================= 主角機 XG-01「蒼焰」 =======================

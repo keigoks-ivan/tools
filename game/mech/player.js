@@ -12,9 +12,42 @@ export const P = {
   cBoost: 11, cBoostAir: 15, cHover: 17, cQB: 16, cJump: 6,
 };
 
+// 重量感（只有 new Player(..., { heavy: true }) 才啟用；續作、前傳不傳就維持舊行為）。數值集中在這，方便調
+export const WEIGHT = {
+  // 加速：到全速要幾秒（地面；線性加速）、停下滑行要幾秒。快速閃避（qb）與空中不受影響
+  walkT: 0.55, boostT: 0.95, stopT: 0.6,
+  // 機身（腿）跟上瞄準：最大轉速 rad/s、追趕速度、最多落後瞄準多少 rad（超過就由軀幹扭腰吸收，準心不受影響）
+  turnMax: 2.2, turnK: 4, turnLag: 1.1,
+  // 落地：超過 lockS 才有硬直，lock0＋超出部分 × lockK 秒（上限 lockMax）
+  lockS: 0.8, lock0: 0.3, lockK: 0.25, lockMax: 0.45,
+  // 鏡頭：每步下沉／前點／左右傾（跑步／衝刺乘 runK）；落地（乘落地強度 s，另加 s 的平方讓大落差更重）
+  step: { drop: 0.9, pitch: 0.5, roll: 0.3, vib: 0.4, runK: 0.5 },
+  land: { drop: 2.2, pitch: 1.6, roll: 0, vib: 1.0, big: 0.8 },
+  // 後方視角彈簧：把上面的衝量（彈簧位移）換算成鏡頭下沉公尺數、側傾弧度
+  chase: { drop: 3.5, roll: 1 },
+};
+
+// 機身（腿）朝向濾波：把動作系統算出的 legYaw 再限速、再落後一點；軀幹補回差角（扭腰），所以瞄準方向不變
+export class BodyTurn {
+  constructor() { this.out = null; this.init = false; }
+  reset() { this.init = false; }
+  // want＝動作系統算出的腿朝向；回傳濾波後朝向與要補到軀幹的差角（want − 濾波後）
+  step(want, dt, W = WEIGHT) {
+    const wrap = (a) => Math.atan2(Math.sin(a), Math.cos(a));
+    if (!this.init) { this.out = want; this.init = true; return { yaw: want, twist: 0 }; }
+    let d = wrap(want - this.out);
+    const v = clamp(d * W.turnK, -W.turnMax, W.turnMax);
+    this.out = wrap(this.out + v * dt);
+    d = wrap(want - this.out);
+    if (Math.abs(d) > W.turnLag) this.out = wrap(this.out + Math.sign(d) * Math.min(Math.abs(d) - W.turnLag, W.turnMax * 2 * dt));   // 落後太多：加快追，但仍限速
+    return { yaw: this.out, twist: wrap(want - this.out) };
+  }
+}
+
 export class Player {
-  // hooks：{ land(s), qb(dir), jump(), stomp(o), enOut(), hover(on) }
-  constructor(mech, world, hooks = {}) {
+  // hooks：{ land(s), qb(dir), jump(), stomp(o), enOut(), hover(on) }；opts：{ heavy }
+  constructor(mech, world, hooks = {}, opts = {}) {
+    this.heavy = !!opts.heavy;
     this.m = mech; this.world = world; this.hooks = hooks;
     this.pos = mech.root.position;
     this.vel = new THREE.Vector3();
@@ -82,6 +115,7 @@ export class Player {
     // 加速度：地面反應快、空中慢；超速（閃避後）慢慢收
     const hv = new THREE.Vector3(this.vel.x, 0, this.vel.z), sp = hv.length();
     let rate = this.grounded ? (hasIn || this.boosting ? (this.boosting ? 60 : 30) : 36) : this.flying ? (this.boosting?55:25) : (this.boosting ? 40 : 12);
+    if (this.heavy && this.grounded && !this.flying) rate = hasIn || this.boosting ? (this.boosting ? P.boost / WEIGHT.boostT : P.walk / WEIGHT.walkT) : P.walk / WEIGHT.stopT;
     if (sp > vmax + 2) rate = this.grounded ? 42 : 20;
     if (this.qbT > 0) rate = 0;
     const dv = target.sub(hv);
@@ -143,7 +177,8 @@ export class Player {
     } else if (p.y <= ground && this.vel.y <= 0) {
       const s = clamp(-this.vel.y / 26, 0, 1.6);
       p.y = ground; this.grounded = true; this.flying=false;this.hovering=0;
-      if (s > 0.9) this.lockMove = 0.28;
+      if (this.heavy) { if (s > WEIGHT.lockS) this.lockMove = Math.min(WEIGHT.lockMax, WEIGHT.lock0 + (s - WEIGHT.lockS) * WEIGHT.lockK); }
+      else if (s > 0.9) this.lockMove = 0.28;
       this.vel.y = 0;
       if (H.land) H.land(s);
     }

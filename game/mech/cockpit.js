@@ -688,6 +688,10 @@ export class Cockpit {
     } else if (kind === 'fire') { sp.pv += 0.25 * s; this.vib = Math.max(this.vib, 0.25 * s); this.sticks[0].rec = 1; }
     else if (kind === 'qb') { this.fovKick = Math.max(this.fovKick, 7 * s); this.vib = Math.max(this.vib, 0.7 * s); }
   }
+  // 重量感衝量（參數由 main.js 的 WEIGHT 給；舊流程不呼叫）：drop 頭部下沉、pitch 前點、roll 左右傾（dir 帶正負）
+  bump(s, { drop, pitch, roll, vib }, dir = 0) {
+    this.offV.y -= drop * s; this.sp.pv -= pitch * s; this.sp.rv += roll * dir * s; this.vib = Math.max(this.vib, vib * s);
+  }
   // 閃光（開火、爆炸）：c＝THREE.Color，i＝強度，pos＝方向（艙內座標，可省略）
   flashAt(c, i, x = 0.3, y = 0.1, z = -1.2) {
     if (i < this.flash.i) return;

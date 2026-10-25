@@ -365,13 +365,14 @@ export class MechMotion {
     const wind = t < 0.3 ? t / 0.3 : 1;
     const cut = t < 0.3 ? 0 : Math.min(1, (t - 0.3) / 0.25);
     const e = cut * cut * (3 - 2 * cut);
-    sh.rotation.y = lerp(-0.2 - wind * 0.7, 0.9, e);
+    const sd = m.swingSide || 1;   // -1＝反手（連段第二刀鏡像）
+    sh.rotation.y = lerp(-0.2 - wind * 0.7, 0.9, e) * sd;
     sh.rotation.x = lerp(-0.4 - wind * 1.5, -1.3, e);
-    sh.rotation.z = lerp(-0.3, 0.2, e);
+    sh.rotation.z = lerp(-0.3, 0.2, e) * sd;
     el.rotation.x = lerp(-1.1, -0.35, e);
     // 整個上身參與揮砍——蓄力時左肩往前、往右扭，砍下去時往左扭、往前壓
     const power = m.stance ? 1 : 0.75;
-    b.torso.rotation.y += lerp(-0.45 * wind, 0.55, e) * power; b.torso.rotation.x += (0.08 * wind + 0.18 * e) * power;
+    b.torso.rotation.y += lerp(-0.45 * wind, 0.55, e) * power * sd; b.torso.rotation.x += (0.08 * wind + 0.18 * e) * power;
     this.armLX.x = sh.rotation.x; this.armLX.v = 0;
     if (m.saber) m.saber.visible = true;
   }
