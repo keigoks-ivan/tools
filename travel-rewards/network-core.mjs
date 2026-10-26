@@ -7,23 +7,12 @@ export function cleanNetworkState(value={}){
   const facts={};for(const field of FACTS)if(value.facts?.[field.id]==='unknown'||field.options.some(([id])=>id===value.facts?.[field.id]))facts[field.id]=value.facts[field.id];
   return {resources,facts,removed};
 }
-export function profileResources(profile={}){
-  const ids=[];
-  const card={'amex-plat':'amex-platinum-charge','amex-eva-plat':'amex-eva-platinum-card','amex-mr':'amex-mr'}[profile.card];if(card)ids.push(card);
-  if(profile.card==='ci'){
-    const ci={priority:'ctbc-ci-priority',precious:'ctbc-ci-precious',signature:'ctbc-ci-signature'}[profile.ciTier];if(ci)ids.push(ci);
-  }
-  const mb={none:'mb-base',silver:'mb-silver',gold:'mb-gold',platinum:'mb-platinum'}[profile.marriott];if(mb)ids.push(mb);
-  const hh={base:'hh-base',silver:'hh-silver',gold:'hh-gold',diamond:'hh-diamond'}[profile.hilton];if(hh)ids.push(hh);
-  const sq={member:'sq-member',silver:'sq-silver',gold:'sq-gold'}[profile.krisflyer];if(sq)ids.push(sq);
-  return ids;
+export function selectedResources(saved){
+  const value=cleanNetworkState(saved);
+  return new Set(value.resources.filter(id=>!value.removed.includes(id)));
 }
-export function selectedResources(saved,profile={}){
-  const own=cleanNetworkState(saved).resources,overrides=new Set(own.map(id=>resourceMap.get(id)?.exclusive).filter(Boolean));
-  return new Set([...profileResources(profile).filter(id=>!overrides.has(resourceMap.get(id)?.exclusive)),...own].filter(id=>!saved.removed?.includes(id)));
-}
-export function effectiveResources(saved,profile={}){
-  const result=selectedResources(saved,profile);
+export function effectiveResources(saved){
+  const result=selectedResources(saved);
   if(['ctbc-ci-priority','ctbc-ci-precious','ctbc-marriott-priority','ctbc-marriott-infinite','ctbc-marriott-priority-limited'].some(id=>result.has(id)))result.add('visa-infinite');
   if(['mb-platinum-exact','mb-titanium','mb-ambassador'].some(id=>result.has(id)))result.add('mb-platinum');
   if(['jal-base','jal-crystal','jal-sapphire','jal-premier','jal-diamond','jal-metal'].some(id=>result.has(id)))result.add('jal-account');
@@ -32,9 +21,8 @@ export function effectiveResources(saved,profile={}){
   if(result.has('fb-miles'))result.add('fb-account');
   return result;
 }
-export function effectiveFacts(saved,profile={}){
-  const facts={marriottSource:profile.provenance,partnerUsed:profile.linked,otherSqChallenge:profile.otherChallenge,hiltonUsed:profile.hiltonMatched};
-  return {...facts,...cleanNetworkState(saved).facts};
+export function effectiveFacts(saved){
+  return cleanNetworkState(saved).facts;
 }
 export function evaluateOpportunity(op,resources,facts={},today=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Taipei',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())){
   const missing=[],blocked=[];const label=id=>resourceMap.get(id)?.label||id;

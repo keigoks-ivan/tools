@@ -1,7 +1,7 @@
 import {DEFAULT_PROFILE,evaluateRoute,routeStartingPoint,partitionPlanRoutes,redemptionValue,challengeCost,cardFee,nonNegative} from './core.mjs?v=20261025-12';
 import {ROUTES,CARD_EN,ASSETS,RULE_EN} from './content.mjs?v=20261025-12';
 import {localizeRuleValues} from './fields.mjs?v=20261025-12';
-import {mountTree} from './tree.mjs?v=20261026-13';
+import {mountTree} from './tree.mjs?v=20261026-14';
 import {TREE_SOURCES} from './tree-data.mjs?v=20261025-12';
 import {NETWORK_SOURCES,NETWORK_RULES,NETWORK_COVERAGE,NETWORK_COVERAGE_UPDATES} from './network-data.mjs?v=20261025-12';
 import {stayNodeSummary} from './stay.mjs?v=20261025-12';
@@ -256,7 +256,7 @@ async function init(){
     data.rules=[...data.rules,...NETWORK_RULES];data.coverage=[...data.coverage,...NETWORK_COVERAGE].map(item=>{const update=NETWORK_COVERAGE_UPDATES[item.id];return update?{...item,...update,source_ids:[...new Set([...item.source_ids,...(update.source_ids||[])])],rule_ids:[...new Set([...item.rule_ids,...(update.rule_ids||[])])]}:item;});
     ruleMap=new Map(data.rules.map(rule=>[rule.id,rule]));sourceMap=new Map(data.sources.map(source=>[source.id,source]));cardMap=new Map(data.cards.map(card=>[card.id,card]));routeMap=new Map(ROUTES.map(route=>[route.id,route]));
     for(const [key,value]of Object.entries(state.profile)){const el=$('#profile-form').elements.namedItem(key);if(el.tagName==='SELECT'&&!el.classList.contains('yes-no')){if([...el.options].some(option=>option.value===value))el.value=value;else state.profile[key]='unknown';}else if(el.type==='number'){el.value=nonNegative(value)===null?'':value;state.profile[key]=el.value;}}
-    treeUI=mountTree($('#tree-explorer'),{data,getProfile:()=>state.profile,inspect:(html,trigger)=>showDialog(html,trigger,true),onChange:({treeId,start,target})=>{const params=new URLSearchParams({tree:treeId});if(start!=='all')params.set('start',start);if(target)params.set('node',target);history.replaceState(null,'','#'+params.toString());}});
+    treeUI=mountTree($('#tree-explorer'),{data,inspect:(html,trigger)=>showDialog(html,trigger,true),onChange:({treeId,start,target})=>{const params=new URLSearchParams({tree:treeId});if(start!=='all')params.set('start',start);if(target)params.set('node',target);history.replaceState(null,'','#'+params.toString());}});
     bindEvents();renderAll();openHash();$('#app').hidden=false;$('#loading').hidden=true;
   }catch(error){console.error('Reward Routes failed to initialize',error);$('#loading').hidden=true;$('#load-error').hidden=false;}
 }

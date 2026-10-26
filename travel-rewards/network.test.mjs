@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {RESOURCES,OPPORTUNITIES,NETWORK_RULES,NETWORK_SOURCES,NETWORK_COVERAGE} from './network-data.mjs';
 import {TREES,TREE_SOURCES} from './tree-data.mjs';
-import {cleanNetworkState,effectiveResources,selectedResources,evaluateOpportunity,relatedViews,traceResources,coverageSummary} from './network-core.mjs';
+import {cleanNetworkState,effectiveResources,effectiveFacts,selectedResources,evaluateOpportunity,relatedViews,traceResources,coverageSummary} from './network-core.mjs';
 import {RULE_FIELD_LABELS} from './fields.mjs';
 import {readFile} from 'node:fs/promises';
 import {ROUTES} from './content.mjs';
@@ -31,6 +31,17 @@ test('manual resource overrides preserve multiple cards and one current tier per
   assert.ok(!resources.has('mb-gold')&&!resources.has('ctbc-ci-precious'));
   assert.equal(saved.facts.partnerUsed,'unknown');assert.ok(!('evil' in saved.facts));
   assert.ok(!selectedResources({resources:['ctbc-ci-precious']}).has('visa-infinite'));
+});
+test('resource inventory starts empty despite a saved planning profile and keeps only explicit choices',()=>{
+  const profile={card:'ci',ciTier:'precious',marriott:'gold',provenance:'earned',linked:'no',otherChallenge:'no',hiltonMatched:'no'};
+  const empty=cleanNetworkState();
+  assert.equal(selectedResources(empty,profile).size,0);
+  assert.equal(effectiveResources(empty,profile).size,0);
+  assert.deepEqual(effectiveFacts(empty,profile),{});
+  const saved=cleanNetworkState(JSON.parse(JSON.stringify({resources:['mb-gold'],facts:{marriottSource:'card'}})));
+  assert.deepEqual([...selectedResources(saved,profile)],['mb-gold']);
+  assert.deepEqual(effectiveFacts(saved,profile),{marriottSource:'card'});
+  assert.equal(effectiveResources(empty,profile).has('visa-infinite'),false);
 });
 test('Hilton needs source status AND recent stay proof AND allowed current tier',()=>{
   const facts={hiltonUsed:'no',competitorStay:'yes'};
