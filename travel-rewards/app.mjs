@@ -1,7 +1,7 @@
 import {DEFAULT_PROFILE,evaluateRoute,routeStartingPoint,partitionPlanRoutes,redemptionValue,challengeCost,cardFee,nonNegative} from './core.mjs?v=20261025-12';
 import {ROUTES,CARD_EN,ASSETS,RULE_EN} from './content.mjs?v=20261025-12';
 import {localizeRuleValues} from './fields.mjs?v=20261025-12';
-import {mountTree} from './tree.mjs?v=20261025-12';
+import {mountTree} from './tree.mjs?v=20261026-13';
 import {TREE_SOURCES} from './tree-data.mjs?v=20261025-12';
 import {NETWORK_SOURCES,NETWORK_RULES,NETWORK_COVERAGE,NETWORK_COVERAGE_UPDATES} from './network-data.mjs?v=20261025-12';
 import {stayNodeSummary} from './stay.mjs?v=20261025-12';
@@ -201,7 +201,7 @@ function setView(view,updateHash=true){
   if(!views.includes(view))view='plan';
   state.view=view;
   views.forEach(name=>{$('#view-'+name).hidden=name!==view;$('#tab-'+name).setAttribute('aria-selected',String(name===view));});
-  if(updateHash)history.replaceState(null,'','#'+view);
+  if(updateHash){history.replaceState(null,'','#'+view);window.scrollTo(0,0);}
   renderComparison();
 }
 function renderAll(){applyLanguage();renderPlan();renderExplore();renderCards();renderLibrary();renderCalculators();renderComparison();}
