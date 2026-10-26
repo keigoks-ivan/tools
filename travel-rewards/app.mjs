@@ -1,18 +1,19 @@
 import {DEFAULT_PROFILE,evaluateRoute,routeStartingPoint,partitionPlanRoutes,redemptionValue,challengeCost,cardFee,nonNegative} from './core.mjs?v=20261025-12';
 import {ROUTES,CARD_EN,ASSETS,RULE_EN} from './content.mjs?v=20261025-12';
 import {localizeRuleValues} from './fields.mjs?v=20261025-12';
-import {mountTree} from './tree.mjs?v=20261026-14';
+import {mountTree} from './tree.mjs?v=20261026-15';
 import {TREE_SOURCES} from './tree-data.mjs?v=20261025-12';
 import {NETWORK_SOURCES,NETWORK_RULES,NETWORK_COVERAGE,NETWORK_COVERAGE_UPDATES} from './network-data.mjs?v=20261025-12';
 import {stayNodeSummary} from './stay.mjs?v=20261025-12';
 import {selectHotelProgram,hotelNodeSummary} from './hotel-use.mjs?v=20261025-12';
+import {mountSetup} from './setup.mjs?v=20261026-15';
 
 const $=selector=>document.querySelector(selector);
 const $$=selector=>[...document.querySelectorAll(selector)];
 const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const STORE='imq-reward-routes-v1';
 const views=['plan','explore','cards','calculators','library'];
-let data, ruleMap, sourceMap, cardMap, routeMap, toastTimer, lastDialogTrigger, treeUI;
+let data, ruleMap, sourceMap, cardMap, routeMap, toastTimer, lastDialogTrigger, treeUI, setupUI;
 const state={view:'plan',goal:'flight',profile:{...DEFAULT_PROFILE},cabin:'economy',routeCompare:[],cardCompare:[]};
 try{
   const saved=JSON.parse(localStorage.getItem(STORE)||'null');
@@ -208,6 +209,7 @@ function renderAll(){applyLanguage();renderPlan();renderExplore();renderCards();
 function bindEvents(){
   document.addEventListener('click',event=>{
     const button=event.target.closest('button');if(!button)return;
+    if(button.hasAttribute('data-start-setup')){if($('#detail-dialog').open)$('#detail-dialog').close();setupUI.open();return;}
     if(button.hasAttribute('data-show-coverage')){setView('library');$('#library-kind').value='coverage';renderLibrary();return;}
     if(button.dataset.view){setView(button.dataset.view);return;}
     if(button.dataset.exploreMode){setExploreMode(button.dataset.exploreMode);return;}
@@ -257,7 +259,11 @@ async function init(){
     ruleMap=new Map(data.rules.map(rule=>[rule.id,rule]));sourceMap=new Map(data.sources.map(source=>[source.id,source]));cardMap=new Map(data.cards.map(card=>[card.id,card]));routeMap=new Map(ROUTES.map(route=>[route.id,route]));
     for(const [key,value]of Object.entries(state.profile)){const el=$('#profile-form').elements.namedItem(key);if(el.tagName==='SELECT'&&!el.classList.contains('yes-no')){if([...el.options].some(option=>option.value===value))el.value=value;else state.profile[key]='unknown';}else if(el.type==='number'){el.value=nonNegative(value)===null?'':value;state.profile[key]=el.value;}}
     treeUI=mountTree($('#tree-explorer'),{data,inspect:(html,trigger)=>showDialog(html,trigger,true),onChange:({treeId,start,target})=>{const params=new URLSearchParams({tree:treeId});if(start!=='all')params.set('start',start);if(target)params.set('node',target);history.replaceState(null,'','#'+params.toString());}});
-    bindEvents();renderAll();openHash();$('#app').hidden=false;$('#loading').hidden=true;
+    setupUI=mountSetup($('#setup-dialog'),{getInventory:treeUI.getInventory,apply:({inventory,goal})=>{
+      treeUI.setInventory(inventory);setView('explore',false);setExploreMode('tree');treeUI.showSuggestions(goal);window.scrollTo(0,0);document.querySelector('.setup-matches h2')?.focus();
+    },onDismiss:({initial})=>{if(initial)openHash();}});
+    bindEvents();renderAll();setView('explore',false);$('#app').hidden=false;$('#loading').hidden=true;
+    if(!setupUI.offer()){const home=!location.hash;if(setupUI.goal)treeUI.showSuggestions(setupUI.goal,true);openHash();if(home&&setupUI.goal)treeUI.showSuggestions(setupUI.goal);}
   }catch(error){console.error('Reward Routes failed to initialize',error);$('#loading').hidden=true;$('#load-error').hidden=false;}
 }
 $('#reload').addEventListener('click',()=>location.reload());

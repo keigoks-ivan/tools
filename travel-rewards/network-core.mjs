@@ -5,7 +5,24 @@ export function cleanNetworkState(value={}){
   const resources=[...new Set((Array.isArray(value.resources)?value.resources:[]).filter(id=>resourceMap.has(id)))];
   const removed=[...new Set((Array.isArray(value.removed)?value.removed:[]).filter(id=>resourceMap.has(id)))];
   const facts={};for(const field of FACTS)if(value.facts?.[field.id]==='unknown'||field.options.some(([id])=>id===value.facts?.[field.id]))facts[field.id]=value.facts[field.id];
-  return {resources,facts,removed};
+  const balances={};
+  for(const id of resources){
+    const raw=value.balances?.[id],amount=typeof raw==='number'||(typeof raw==='string'&&raw.trim())?Number(raw):NaN;
+    if(resourceMap.get(id)?.group==='點數與帳戶'&&!id.endsWith('account')&&Number.isFinite(amount)&&amount>=0&&amount<=Number.MAX_SAFE_INTEGER)balances[id]=amount;
+  }
+  return {resources,facts,removed,balances};
+}
+export function toggleNetworkResource(saved,id,checked){
+  const value=cleanNetworkState(saved),item=resourceMap.get(id);if(!item)return value;
+  if(checked){
+    const others=item.exclusive?RESOURCES.filter(other=>other.exclusive===item.exclusive&&other.id!==id).map(other=>other.id):[];
+    value.resources=[...new Set([...value.resources.filter(resource=>!others.includes(resource)),id])];
+    value.removed=[...new Set([...value.removed.filter(resource=>resource!==id),...others])];
+  }else{
+    value.resources=value.resources.filter(resource=>resource!==id);
+    value.removed=[...new Set([...value.removed,id])];delete value.balances[id];
+  }
+  return cleanNetworkState(value);
 }
 export function selectedResources(saved){
   const value=cleanNetworkState(saved);
