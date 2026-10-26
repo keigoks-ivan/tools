@@ -19,7 +19,7 @@ async function game() {
   const { Post } = await import('./post.js');
   const { Cockpit } = await import('./cockpit.js');
   const { Input } = await import('./input.js');
-  const { Player, WEIGHT, BodyTurn } = await import('./player.js');
+  const { Player, WEIGHT } = await import('./player.js');
   const { Combat, STAGES, stageWeight } = await import('./combat.js');
   const { HUD } = await import('./hud.js');
   const { Audio: Sound } = await import('./audio.js');
@@ -67,6 +67,7 @@ async function game() {
   // ---------------------------------------------------------------- 自機
   const SPAWN = new THREE.Vector3(0, 0, -70);
   const hero = new Mech('hero', 'hero');
+  hero.heavy = true;   // 重量模式（anim.js HEAVY）：機身轉向限速、落腳更沉；前傳、續作不開
   scene.add(hero.root);
   const player = new Player(hero, world, {
     land: (s) => {
@@ -88,7 +89,6 @@ async function game() {
     cockpit.bump(s, c, dir);
     cb.vy -= c.drop * s; cb.rv += c.roll * dir * s;
   }
-  const bodyTurn = new BodyTurn();
   player.apMax = 9000;
   // n＝關卡（遭遇戰從路線起點、面向第一段出發）；cp＝檢查點
   function resetPlayer(n = 0, cp = null) {
@@ -465,15 +465,7 @@ async function game() {
 
     // ---- 自機
     player.update(dt, inp);
-    const legPre = hero.legYaw;
     hero.animate(dt, player.animState(combat.aimPoint));
-    // 機身轉向變慢：腿的朝向再限速，差角由軀幹扭腰補回（瞄準方向、準心不變）
-    if (state === 'play' || state === 'boot') {
-      if (Math.abs(Math.atan2(Math.sin(legPre - bodyTurn.out), Math.cos(legPre - bodyTurn.out))) > 0.02) bodyTurn.reset();   // 被外部重設（重生、換關）
-      const bt = bodyTurn.step(hero.legYaw, dt);
-      hero.legYaw = bt.yaw; hero.root.rotation.y = bt.yaw; hero.bones.torso.rotation.y += bt.twist;
-      bodyTurn.out = bt.yaw;
-    } else bodyTurn.reset();
     if (hero.footfall) {
       weightBump(WEIGHT.step, clamp(player.speed / 14, 0.4, 1) * (player.boosting ? WEIGHT.step.runK : 1) * (player.grounded ? 1 : 0), hero.footfall);
       const s = clamp(player.speed / 16, 0.35, 1.3);

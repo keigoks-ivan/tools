@@ -30,6 +30,13 @@ export const STAGES = STAGE_DATA.map((D, i) => {
 });
 // 評價用的「關卡份量」：雜兵機＝1、重裝 1.5、王牌 2；載具是砲灰，只算零頭
 const WEIGHT = { grunt: 1, heavy: 1.5, ace: 2, brawler: 1.3 };
+// 光劍突擊的突進計畫：回傳 {t 突進秒數, v 速度}；揮下前固定再 0.45 s（e.lunge 從 0.45+t 倒數）
+export function lungePlan(LG, dist, rnd = Math.random) {
+  if (!LG.arrive) return { t: 0.45, v: LG.v };
+  const go = Math.max(0, dist - (LG.arrive[0] + rnd() * (LG.arrive[1] - LG.arrive[0])));
+  const t = clamp(go / LG.v, LG.tMin, LG.tMax);
+  return { t, v: go / t };
+}
 export function stageWeight(D) { return D.groups.flat().reduce((a, k) => a + (WEIGHT[k] ?? VKIND[k]?.weight ?? 1), 0); }
 // 每關的難度：
 //   atk＝同一時間最多幾台敵機出手（其他台包抄找射角）——前段兩台、後段四台
@@ -44,7 +51,7 @@ const TIER = [
   { atk: 4, fire: 0.92, aim: 0.95, dmg: 1.05, ap: 1.1, alt: true },
 ];
 // 玩家武器
-const W = {
+export const W = {
   rifle: { dmg: 430, stag: 24, mag: 40, rof: 0.27, reload: 2.0 },
   msl: { n: 6, dmg: 330, stag: 34, cd: 7, lockStep: 0.09, cone: 0.6, range: 900 },
   saber: { dmg: 1500, stag: 90, cd: 2.4, reach: 170 },
@@ -54,7 +61,8 @@ const W = {
   // 架刀：敵人衝刺剩 win 秒到揮下之前（lunge 0.45..0.45+win）、距離 range 內、正前方 cone（cos）以內按 F；成功後敵人硬直 stagT 秒、光劍冷卻補滿
   parry: { win: 0.3, range: 55, cone: 0.3, stagT: 1.5, dur: 0.35, stop: 0.12 },
   // 突擊型敵機的光劍突擊（王牌維持原值）：r＝觸發距離、v＝衝刺速度、dmg＝傷害、max＝同時最多幾台在突擊
-  lunge: { ace: { r: 90, v: 95, dmg: 1100, max: 9 }, brawler: { r: 110, v: 115, dmg: 800, max: 2 } },
+  //   brawler 另有 arrive（抵達時離你幾公尺，隨機取）、tMin／tMax（突進秒數範圍）：依觸發距離算突進時間與速度，揮下時剛好貼身；沒有 arrive＝照 v 衝滿 0.45 s
+  lunge: { ace: { r: 90, v: 95, dmg: 1100, max: 9 }, brawler: { r: 110, v: 115, dmg: 800, max: 2, arrive: [15, 25], tMin: 0.3, tMax: 0.9 } },
   // 突擊型散彈：距離 range 內才開火，charge＝預兆（槍口閃光＋舉槍）秒數，n 發、單發 dmg、spread＝散布（每公尺）
   brawler: { range: 80, charge: 0.45, n: 7, dmg: 55, spread: 0.075 },
   // 光波砲：充能 charge 秒 → 粗光束掃 dur 秒（每 tick 秒結算一次）→ 冷卻 cd 秒
@@ -1045,7 +1053,8 @@ export class Combat {
         const LG = W.lunge[e.kind];
         if (LG && dist < LG.r && Math.abs(e.pos.y-pl.pos.y)<45 && e.fireCd < 0.8 && e.lunge <= 0 && (e.kind !== 'brawler' || e.charge <= 0) && e.los && Math.random() < dt * 1.2 && this.canAttack(e)
           && (LG.max >= 9 || this.enemies.reduce((n, o) => n + (o.lunge > 0 ? 1 : 0), 0) < LG.max)) {
-          e.lunge = 0.9; this.note('WARNING  MELEE', 'rd'); this.audio.alert('lock');
+          const pn = lungePlan(LG, dist); e.lunge = 0.45 + pn.t; e.lungeV = pn.v;
+          this.note('WARNING  MELEE', 'rd'); this.audio.alert('lock');
           e.m.swing = 0;
         }
         if (e.jumpCd <= 0 && e.grounded) {
@@ -1065,7 +1074,7 @@ export class Combat {
       // 光劍突擊
       if (e.lunge > 0) {
         e.lunge -= dt;
-        if (e.lunge > 0.45) { const lv = W.lunge[e.kind].v; e.vel.x = dirP.x * lv; e.vel.z = dirP.z * lv; if(e.airborne)e.vel.y=clamp((pl.pos.y-e.pos.y)*3,-32,32); e.thrust = 1; }
+        if (e.lunge > 0.45) { const lv = e.lungeV || W.lunge[e.kind].v; e.vel.x = dirP.x * lv; e.vel.z = dirP.z * lv; if(e.airborne)e.vel.y=clamp((pl.pos.y-e.pos.y)*3,-32,32); e.thrust = 1; }
         else if (!e.lungeHit) {
           e.lungeHit = true; e.m.swing = 1;
           this.audio.saberSwing();
@@ -1079,8 +1088,10 @@ export class Combat {
         }
         if (e.lunge <= 0) { e.lungeHit = false; e.m.swing = 0; e.fireCd = rand(1.5, 2.5); }
       }
+      if (e.rushT > 0) { e.vel.x = e.rushV.x; e.vel.z = e.rushV.z; e.thrust = 1; }   // 破牆伏擊：穿牆突進（不做碰撞）
       this.moveEnemy(e, dt, false);
-      const thr = Math.max(e.airborne ? .7 : 0,e.boostT > 0 ? 1 : 0, e.qbT > 0 ? 1 : 0, e.hover > 0 ? 1 : 0, e.lunge > 0.45 ? 1 : 0);
+      if (e.rushT > 0) { e.rushT -= dt; this.fx.trackDust(e.pos, e.vel, 1); if (e.rushT <= 0) { e.vel.x *= 0.2; e.vel.z *= 0.2; } }   // 衝到牆前就收速
+      const thr = Math.max(e.rushT > 0 ? 1 : 0, e.airborne ? .7 : 0,e.boostT > 0 ? 1 : 0, e.qbT > 0 ? 1 : 0, e.hover > 0 ? 1 : 0, e.lunge > 0.45 ? 1 : 0);
       e.thrust = damp(e.thrust, thr, 10, dt);
       this.audio.enemyBoost(e.id, e.pos, e.thrust);
 
@@ -1121,7 +1132,7 @@ export class Combat {
       if (!e.airborne && e.hover > 0 && !dying) { e.hover -= dt; e.vel.y = Math.min(12, e.vel.y + 36 * dt); }
     }
     e.pos.addScaledVector(e.vel, dt);
-    e.bumped = w.collide(e.pos, r, e.pos.y);
+    e.bumped = e.rushT > 0 ? false : w.collide(e.pos, r, e.pos.y);
     if (e.bumped && !dying && !(e.noLos > 1.2)) { e.strafe *= -1; e.strafeT = rand(1.5, 3); }
     e.pos.x = clamp(e.pos.x, -700, 700); e.pos.z = clamp(e.pos.z, -700, 700);
     const g = w.support(e.pos.x, e.pos.z, r, e.pos.y);

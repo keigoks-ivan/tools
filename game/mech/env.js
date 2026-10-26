@@ -2177,7 +2177,8 @@ export class World {
     const detail = new GeoBucket(), civic = new GeoBucket(), shops = new GeoBucket();
     const normal = (a,b,c) => new THREE.Vector3().subVectors(new THREE.Vector3(...b),new THREE.Vector3(...a)).cross(new THREE.Vector3().subVectors(new THREE.Vector3(...c),new THREE.Vector3(...a))).normalize().toArray();
     const streets = [];
-    for (const x of [-480, -360, -240, -120, 120, 240]) for (const z of [-420, -360, -300, -240, -180, -120, -60, 0, 60, 120]) if (!blocked(x + 16, z, .3)) streets.push([x + 16, z, -Math.PI / 2, 0, streets.length % 2 ? 7 : 6]);
+    // 落在東西向大街上的那根（z 是 120 的倍數）挪 20 m 到路面外，不擋在車道正中
+    for (const x of [-480, -360, -240, -120, 120, 240]) for (const z0 of [-420, -360, -300, -240, -180, -120, -60, 0, 60, 120]) { const z = z0 % CITY.block ? z0 : z0 + 20; if (!blocked(x + 16, z, .3)) streets.push([x + 16, z, -Math.PI / 2, 0, streets.length % 2 ? 7 : 6]); }
     const arcade = this.blocks.filter(b=>b.kind==='lot'&&b.x< -120&&b.z<360).sort((a,b)=>Math.hypot(a.x+300,a.z+180)-Math.hypot(b.x+300,b.z+180))[0];
     const sites = { tower: port ? [port.x, port.z, 1, 0] : null, maritime: port ? [port.x-75,780,.75,0] : null, waterfront: port ? [port.x-120,port.x+50,746,818] : null, shrine: shrine ? [shrine.x, shrine.z - 6, 1.4, 0] : null, streets,
       arcade: arcade ? [arcade.lx0+4,arcade.lx1-4,arcade.z,8,0] : null,

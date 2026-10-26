@@ -16,8 +16,7 @@ export const P = {
 export const WEIGHT = {
   // 加速：到全速要幾秒（地面；線性加速）、停下滑行要幾秒。快速閃避（qb）與空中不受影響
   walkT: 0.55, boostT: 0.95, stopT: 0.6,
-  // 機身（腿）跟上瞄準：最大轉速 rad/s、追趕速度、最多落後瞄準多少 rad（超過就由軀幹扭腰吸收，準心不受影響）
-  turnMax: 2.2, turnK: 4, turnLag: 1.1,
+  // 機身轉向限速在 anim.js 的 HEAVY（mech.heavy = true）
   // 落地：超過 lockS 才有硬直，lock0＋超出部分 × lockK 秒（上限 lockMax）
   lockS: 0.8, lock0: 0.3, lockK: 0.25, lockMax: 0.45,
   // 鏡頭：每步下沉／前點／左右傾（跑步／衝刺乘 runK）；落地（乘落地強度 s，另加 s 的平方讓大落差更重）
@@ -26,23 +25,6 @@ export const WEIGHT = {
   // 後方視角彈簧：把上面的衝量（彈簧位移）換算成鏡頭下沉公尺數、側傾弧度
   chase: { drop: 3.5, roll: 1 },
 };
-
-// 機身（腿）朝向濾波：把動作系統算出的 legYaw 再限速、再落後一點；軀幹補回差角（扭腰），所以瞄準方向不變
-export class BodyTurn {
-  constructor() { this.out = null; this.init = false; }
-  reset() { this.init = false; }
-  // want＝動作系統算出的腿朝向；回傳濾波後朝向與要補到軀幹的差角（want − 濾波後）
-  step(want, dt, W = WEIGHT) {
-    const wrap = (a) => Math.atan2(Math.sin(a), Math.cos(a));
-    if (!this.init) { this.out = want; this.init = true; return { yaw: want, twist: 0 }; }
-    let d = wrap(want - this.out);
-    const v = clamp(d * W.turnK, -W.turnMax, W.turnMax);
-    this.out = wrap(this.out + v * dt);
-    d = wrap(want - this.out);
-    if (Math.abs(d) > W.turnLag) this.out = wrap(this.out + Math.sign(d) * Math.min(Math.abs(d) - W.turnLag, W.turnMax * 2 * dt));   // 落後太多：加快追，但仍限速
-    return { yaw: this.out, twist: wrap(want - this.out) };
-  }
-}
 
 export class Player {
   // hooks：{ land(s), qb(dir), jump(), stomp(o), enOut(), hover(on) }；opts：{ heavy }

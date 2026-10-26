@@ -647,6 +647,7 @@ export class Mech {
   add(bone, g, paint, pos = [0, 0, 0], rot = [0, 0, 0], scl = null) {
     _m4.compose(_v.set(...pos), _q.setFromEuler(_e.set(rot[0], rot[1], rot[2], 'XYZ')), scl ? _s.set(...scl) : _s.set(1, 1, 1));
     g.applyMatrix4(_m4);
+    if (this._rg && !g.userData.rg) g.userData.rg = this._rg;   // 小零件群組（加壯時整組只平移）
     const n = g.attributes.position.count, e = g.userData.edge, dsrc = g.userData.dcl;
     const col = new Float32Array(n * 3), pbr = new Float32Array(n * 4), dcl = new Float32Array(n * 4);
     // 每片零件的漆色有一點批次差（金屬件不變），整台看起來不是同一桶漆刷出來的
@@ -684,9 +685,12 @@ export class Mech {
     return m;
   }
   // 噴漆標示：g 由 sten()/digits() 產生；paint＝底下那片裝甲的漆（標示以外的地方看起來就是同一片）
-  label(bone, g, paint, pos, rot = [0, 0, 0]) { return this.add(bone, g, paint, pos, rot); }
+  label(bone, g, paint, pos, rot = [0, 0, 0]) { g.userData.decal = true; return this.add(bone, g, paint, pos, rot); }
+  // 小零件群組：fn 裡加的所有零件在 bulkUp 時當成一個剛體，只平移不縮放
+  rigid(fn) { const o = this._rg; this._rg = o || {}; try { fn(); } finally { this._rg = o; } }
   // 油壓缸：缸體＋防塵環＋鍍鉻活塞桿＋兩端耳座
-  piston(bone, a, b, r, S, body = S.frame) {
+  piston(bone, a, b, r, S, body = S.frame) { this.rigid(() => this.piston_(bone, a, b, r, S, body)); }
+  piston_(bone, a, b, r, S, body) {
     const L = (t) => a.map((v, i) => v + (b[i] - v) * t);
     this.add(bone, rod(a, L(0.58), r, r, 10), body);
     this.add(bone, rod(L(0.52), L(0.61), r * 1.2, r * 1.2, 10), S.dark);
@@ -695,14 +699,16 @@ export class Mech {
     this.add(bone, sph(r * 0.85, 8, 5), S.frame, b);
   }
   // 百葉散熱口：暗色底板＋斜葉片（面朝 +Z，再用 pos/rot 擺）
-  vent(bone, w, h, n, S, pos, rot = [0, 0, 0], slat = S.frame) {
+  vent(bone, w, h, n, S, pos, rot = [0, 0, 0], slat = S.frame) { this.rigid(() => this.vent_(bone, w, h, n, S, pos, rot, slat)); }
+  vent_(bone, w, h, n, S, pos, rot, slat) {
     this.add(bone, blk(w, h, 0.06, 0.015), S.dark, pos, rot);
     const list = [];
     for (let k = 0; k < n; k++) list.push(at(blk(w * 0.94, (h / n) * 0.62, 0.05, 0.01), [0, -h / 2 + (k + 0.5) * (h / n), 0.05], [0.55, 0, 0]));
     this.add(bone, merge(list), slat, pos, rot);
   }
   // 一圈螺帽（圓心 c、半徑 r、軸向：'x' 或 'z'）
-  nutRing(bone, c, r, n, S, axis = 'z', size = 0.06, a0 = 0) {
+  nutRing(bone, c, r, n, S, axis = 'z', size = 0.06, a0 = 0) { this.rigid(() => this.nutRing_(bone, c, r, n, S, axis, size, a0)); }
+  nutRing_(bone, c, r, n, S, axis, size, a0) {
     const list = [];
     for (let k = 0; k < n; k++) {
       const a = a0 + (k / n) * Math.PI * 2, u = Math.cos(a) * r, v = Math.sin(a) * r;
@@ -723,7 +729,7 @@ export class Mech {
     for (const [bone, list] of this.parts) {
       const g = mergeGeometries(list);
       const p = g.attributes.position, pbr = g.attributes.pbr, dcl = g.attributes.dcl;
-      if (this.style === 'hero') this.bulkUp(bone, p);
+      if (this.style === 'hero') this.bulkUp(bone, g, list);
       const w = new THREE.Vector3();
       let unit = false;
       for (let i = 0; i < p.count; i++) {
@@ -749,7 +755,8 @@ export class Mech {
 
   // 主角機加量感：合併後依骨頭把裝甲往外「長肉」（肩甲、胸、上臂、前臂、大腿、小腿加寬加厚），腰與骨架位置不變
   // 為了不擋住胸口艙門與駕駛艙視線，胸甲前緣（z>0）不動，只加寬、加厚背側
-  bulkUp(bone, p) {
+  // 法線用位移函數的雅可比逆轉置重算（硬邊保留）；小零件群組（螺栓、散熱口、活塞、推進器、小貼花）只平移不縮放
+  bulkUp(bone, g, list) {
     const B = this.bones, sm = THREE.MathUtils.smoothstep;
     let f = null;
     for (const n of ['R', 'L']) {
@@ -757,7 +764,8 @@ export class Mech {
       if (bone === B['shoulder' + n]) f = (x, y, z) => {
         const t = sm(y, -1.4, 0.2);                      // 0＝上臂段、1＝肩甲段
         const k = 1.22 + 0.1 * t;
-        return [x * k + sx * 0.32 * t, y > -0.6 ? y + 0.18 * t : y, z * (1.2 + 0.1 * t)];
+        const xs = x * sx > 0 ? k : 1 + 0.22 * (1 - t);   // 肩甲段只往外側長，內緣（朝胸甲）不動
+        return [x * xs + sx * 0.42 * t, y > -0.6 ? y + 0.18 * t : y, z * (1.2 + 0.1 * t)];
       };
       else if (bone === B['elbow' + n]) f = (x, y, z) => { const t = sm(y, -3.2, -0.3); return [x * (1.2 + 0.04 * t), y, z * (1.2 + 0.04 * t)]; };
       else if (bone === B['hip' + n]) f = (x, y, z) => { const t = 1 - sm(y, -1.4, -0.2); return [x * (1 + 0.2 * t) + sx * 0.2 * t, y, z * (1 + 0.2 * t)]; };
@@ -768,7 +776,45 @@ export class Mech {
       return [x * (1 + 0.13 * t), y, z < 0 ? z * (1 + 0.14 * t) : z];
     };
     if (!f) return;
-    for (let i = 0; i < p.count; i++) { const r = f(p.getX(i), p.getY(i), p.getZ(i)); p.setXYZ(i, r[0], r[1], r[2]); }
+    const p = g.attributes.position, nm = g.attributes.normal, N = p.count, h = 1e-3;
+    // 分組：每個 userData.rg 一組；大小 < 1.2 的貼花各自一組；其餘逐頂點變形
+    const grp = new Int32Array(N).fill(-1), groups = [];
+    const gid = new Map();
+    let o = 0;
+    for (const q of list) {
+      const c = q.attributes.position.count;
+      let id = -1;
+      if (q.userData.rg) { if (!gid.has(q.userData.rg)) { gid.set(q.userData.rg, groups.length); groups.push([]); } id = gid.get(q.userData.rg); }
+      else if (q.userData.decal) {
+        q.computeBoundingBox(); const bb = q.boundingBox;
+        if (Math.max(bb.max.x - bb.min.x, bb.max.y - bb.min.y, bb.max.z - bb.min.z) < 1.2) { id = groups.length; groups.push([]); }
+      }
+      if (id >= 0) for (let i = o; i < o + c; i++) { grp[i] = id; groups[id].push(i); }
+      o += c;
+    }
+    for (const idx of groups) {
+      let x0 = 1e9, y0 = 1e9, z0 = 1e9, x1 = -1e9, y1 = -1e9, z1 = -1e9;
+      for (const i of idx) { const x = p.getX(i), y = p.getY(i), z = p.getZ(i); x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); z0 = Math.min(z0, z); z1 = Math.max(z1, z); }
+      const c = [(x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2], r = f(...c);
+      const d = [r[0] - c[0], r[1] - c[1], r[2] - c[2]];
+      for (const i of idx) p.setXYZ(i, p.getX(i) + d[0], p.getY(i) + d[1], p.getZ(i) + d[2]);
+    }
+    const J = new THREE.Matrix3(), nv = new THREE.Vector3();
+    for (let i = 0; i < N; i++) {
+      if (grp[i] >= 0) continue;
+      const x = p.getX(i), y = p.getY(i), z = p.getZ(i), r = f(x, y, z);
+      if (nm) {
+        const a = f(x + h, y, z), b = f(x, y + h, z), c = f(x, y, z + h);   // 雅可比各欄；法線乘逆轉置
+        J.set((a[0] - r[0]) / h, (b[0] - r[0]) / h, (c[0] - r[0]) / h, (a[1] - r[1]) / h, (b[1] - r[1]) / h, (c[1] - r[1]) / h, (a[2] - r[2]) / h, (b[2] - r[2]) / h, (c[2] - r[2]) / h);
+        if (Math.abs(J.determinant()) > 1e-6) {
+          J.invert().transpose();
+          nv.set(nm.getX(i), nm.getY(i), nm.getZ(i)).applyMatrix3(J).normalize();
+          nm.setXYZ(i, nv.x, nv.y, nv.z);
+        }
+      }
+      p.setXYZ(i, r[0], r[1], r[2]);
+    }
+    p.needsUpdate = true; if (nm) nm.needsUpdate = true;
   }
 
   // ======================= 主角機 XG-01「蒼焰」 =======================
@@ -788,7 +834,7 @@ export class Mech {
     };
     // 旋轉過的板子上某點（板子自己的 u, v、離板心 d）換成骨頭座標
     const onP = (c, r, u, v, d) => new THREE.Vector3(u, v, d).applyEuler(new THREE.Euler(r[0], r[1], r[2], 'XYZ')).add(new THREE.Vector3(...c)).toArray();
-    const nuts = (bone, pts, r = 0.045, rot = [PI / 2, 0, 0]) => A(bone, merge(pts.map((p) => at(nut(r), p, rot))), S.frame);
+    const nuts = (bone, pts, r = 0.045, rot = [PI / 2, 0, 0]) => this.rigid(() => A(bone, merge(pts.map((p) => at(nut(r), p, rot))), S.frame));
     // 中央稜線板：把 'z'／'-z' 板沿中線切成左右兩半、外側各往後折 a，做出有稜角的裝甲（不是平的一大片）；回傳 [左半, 右半]
     const half = (P, sg) => {
       const out = [];
@@ -802,7 +848,7 @@ export class Mech {
     const RPL = (bone, dir, outline, t, o, paint, pos, rot = [0, 0, 0], a = 0.13) => [-1, 1].map((sg) =>
       PL(bone, dir, half(outline, sg), t, { ...o, nx: Math.max(2, Math.ceil((o.nx || 6) / 2)) }, paint, pos, [rot[0], rot[1] + (dir === '-z' ? -1 : 1) * sg * a, rot[2]]));
     // 小型姿態推進器（噴口朝 rot 方向的 -Y）
-    const thr = (bone, pos, rot, r = 0.16) => { A(bone, bell(r, r * 1.8), S.dark, pos, rot); A(bone, cyl(r * 0.9, r * 0.9, r * 0.5, 12), S.frame, pos, rot); };
+    const thr = (bone, pos, rot, r = 0.16) => this.rigid(() => { A(bone, bell(r, r * 1.8), S.dark, pos, rot); A(bone, cyl(r * 0.9, r * 0.9, r * 0.5, 12), S.frame, pos, rot); });
 
     for (const [n, sx] of [['R', -1], ['L', 1]]) {
       const ank = b['ankle' + n], kn = b['knee' + n], hp = b['hip' + n];
@@ -1277,7 +1323,7 @@ export class Mech {
   // ======================= 單眼敵機 AGX-9 =======================
   buildGrunt(S, style) {
     const b = this.bones, A = this.add.bind(this);
-    const heavy = style === 'heavy', ace = this.schemeKey === 'ace';
+    const heavy = style === 'heavy', ace = this.schemeKey === 'ace', brawler = this.schemeKey === 'brawler';
     this.units = ace ? ['01'] : UNITS;
     for (const [n, sx] of [['R', -1], ['L', 1]]) {
       const ank = b['ankle' + n], kn = b['knee' + n], hp = b['hip' + n];
@@ -1315,6 +1361,12 @@ export class Mech {
       // 前脛甲：包覆的曲面板（往前下方傾）
       const sg = PL(kn, 'z', [[-0.75, -1.42], [0.75, -1.42], [0.85, -0.6], [0.66, 1.4], [-0.66, 1.4], [-0.85, -0.6]], 0.3, { bev: 0.07, nx: 5, ny: 6, bx: 1.3 }, S.second, [0, -2.2, 1.42], [-0.24, 0, 0]);
       sg.put(sten('caution', 0.8, 0.2, { tint: 3, seg: 3 }), 0, 0.85);
+      if (brawler) {
+        // 膝甲加厚：護膝罩＋兩側翼板
+        const kg = PL(kn, 'z', [[-1.05, -0.6], [1.05, -0.6], [1.15, 0.3], [0.6, 0.95], [-0.6, 0.95], [-1.15, 0.3]], 0.55, { bev: 0.11, nx: 5, ny: 5, bx: 1.2 }, S.main, [0, -0.25, 1.5], [-0.15, 0, 0]);
+        kg.put(sten('danger', 0.8, 0.2, { tint: 3 }), 0, 0.1);
+        for (const s2 of [-1, 1]) A(kn, blk(0.4, 1.3, 1.1, 0.1), S.second, [s2 * 1.2, -0.2, 0.8]);
+      }
       A(kn, blk(0.13, 1.6, 1.5, 0.04), S.second, [sx * 1.08, -2.45, -0.15], [0, 0, sx * 0.09]);
       A(kn, merge([[-0.55, -1.85], [0.4, -1.85], [-0.55, -3.05], [0.4, -3.05]].map(([z, y]) => at(nut(0.055), [sx * (1.08 + 0.075) + sx * (-2.45 - y) * 0.09, y, z - 0.15], [0, 0, Math.PI / 2 + sx * 0.09]))), S.frame);
       this.label(kn, sten('hyd', 1.2, 0.13, { face: fx, tint: 1 }), S.second, [sx * (1.08 + 0.075), -2.45, -0.15], [0, 0, sx * 0.09]);
@@ -1555,6 +1607,16 @@ export class Mech {
       A(el, cyl(0.62, 0.64, 0.26, 16), S.frame, [0, -2.98, 0]);
       A(el, cyl(0.45, 0.45, 0.6), S.frame, [0, -3.0, 0]);
       this.buildHand(b['hand' + n], S, sx, true);
+      if (brawler) {
+        // 近戰感：前臂加厚拳套護甲（外側、前側、背側＋指節蓋）、肩上往前突出的衝撞板
+        this.pl(el, sx > 0 ? 'x' : '-x', [[-1.12, -2.75], [1.12, -2.75], [1.22, -1.3], [0.85, -0.6], [-0.85, -0.6], [-1.22, -1.3]], 0.5, { bev: 0.1, nx: 5, ny: 5, bx: 1.05 }, S.main, [sx * 1.02, 0, 0]);
+        const gf = this.pl(el, 'z', [[-1.0, -2.75], [1.0, -2.75], [1.06, -0.95], [-1.06, -0.95]], 0.48, { bev: 0.1, nx: 5, ny: 4, bx: 1.1 }, S.second, [0, 0, 1.1]);
+        gf.put(sten('hazard', 1.5, 0.16, { tint: 5, seg: 4 }), 0, -2.3);
+        this.pl(el, '-z', [[-0.95, -2.7], [0.95, -2.7], [1.0, -1.0], [-1.0, -1.0]], 0.4, { bev: 0.08, nx: 4, ny: 4, bx: 1.1 }, S.main, [0, 0, -1.05]);
+        A(el, blk(2.4, 0.55, 2.4, 0.14), S.accent, [0, -2.9, 0]);
+        A(sh, prof([[0, -0.75], [1.5, -0.4], [1.85, 0.3], [1.55, 0.95], [0, 1.15]], 2.0, 0.14), S.second, [sx * 1.45, 0.65, 1.15]);
+        A(sh, blk(2.0, 0.28, 0.3, 0.06), S.accent, [sx * 1.45, 0.95, 3.0]);
+      }
     }
     // ---- 武器
     const W = new THREE.Group();

@@ -1,7 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
-import { Player, P, WEIGHT, BodyTurn } from '../player.js';
+import { Player, P, WEIGHT } from '../player.js';
+import { MechMotion, HEAVY } from '../anim.js';
 
 const world = {
   height: () => 0, support: () => 0, collide: () => false, stomp() {}, raycast: () => -1,
@@ -47,18 +48,58 @@ test('瞄準（yaw）不受重量模式影響', () => {
   assert.equal(a, b);
 });
 
-test('機身轉向：限速、落後不超過 turnLag，差角由軀幹補回', () => {
-  const bt = new BodyTurn(); bt.step(0, 0.016);
-  let want = 0, prev = 0, maxV = 0;
-  for (let i = 0; i < 120; i++) {
-    want = 2.5; const r = bt.step(want, 1 / 60);
-    maxV = Math.max(maxV, Math.abs(r.yaw - prev) * 60); prev = r.yaw;
-    assert.ok(Math.abs(r.twist) <= 2.5);
-    assert.ok(Math.abs(r.yaw + r.twist - want) < 1e-9);
-    if (i === 10) assert.ok(Math.abs(r.twist) > WEIGHT.turnLag * 0.5, '轉大角度時有扭腰量');
+function rig(heavy, stance = false) {
+  const root = new THREE.Group(), bones = {};
+  const bone = (name, parent, x, y, z = 0) => { const o = bones[name] = new THREE.Group(); o.position.set(x, y, z); parent.add(o); return o; };
+  const pelvis = bone('pelvis', root, 0, 9.75), torso = bone('torso', pelvis, 0, 0.7);
+  bone('head', torso, 0, 5.15, 0.55);
+  for (const [n, s] of [['R', -1], ['L', 1]]) {
+    const hip = bone('hip' + n, pelvis, s * 1.55, -0.55), knee = bone('knee' + n, hip, 0, -4.15, 0.15);
+    bone('ankle' + n, knee, 0, -3.75, -0.1);
+    const sh = bone('shoulder' + n, torso, s * 3.4, 3.95, 0.05); sh.rotation.order = 'YXZ';
+    bone('elbow' + n, sh, 0, -2.9);
   }
-  assert.ok(maxV <= WEIGHT.turnMax * 3 + 1e-6, `最大轉速 ${maxV}`);
-  assert.ok(Math.abs(prev - 2.5) < 0.05, '最後仍會跟上');
+  torso.rotation.order = 'YXZ';
+  const m = { root, bones, L: { pelvis: 9.75 }, schemeKey: 'grunt', scale: 1, pose: { boost: 0, air: 0 }, land: 0, landV: 0, legYaw: 0, recoil: 0, swing: 0, thrust: 0, flames: [] };
+  if (stance) m.stance = { w: 1.3, toe: 0.1, fwd: 0.4, bend: 0.2, chest: 0.05, knee: 0.05 };
+  if (heavy !== undefined) m.heavy = heavy;
+  m.motion = new MechMotion(m); return m;
+}
+const st = (o = {}) => ({ vel: new THREE.Vector3(), grounded: true, boost: 0, torsoYaw: 0, aim: null, ...o });
+function tick(m, s, dt = 1 / 60) { m.root.position.addScaledVector(s.vel, dt); m.motion.update(dt, s); m.root.updateMatrixWorld(true); }
+
+test('機身轉向（anim.js）：預設不限速；重量模式限速、落後不超過上限、差角由軀幹補回', () => {
+  const W = HEAVY, dt = 1 / 60, run = (heavy) => {
+    const m = rig(heavy), out = [];
+    for (let i = 0; i < 90; i++) { tick(m, st({ torsoYaw: 2.5 }), dt); out.push([m.legYaw, m.bones.torso.rotation.y]); }
+    return out;
+  };
+  const maxRate = (o) => Math.max(...o.map((r, i) => i ? Math.abs(r[0] - o[i - 1][0]) * 60 : 0));
+  const off = run(undefined), hv = run(true);
+  assert.ok(maxRate(off) > W.turnMax * 2 + 0.2, `預設應快於限速 ${maxRate(off)}`);
+  assert.ok(maxRate(hv) <= W.turnMax * 2 + 1e-6, `重量模式轉速 ${maxRate(hv)}`);
+  assert.ok(hv.some((r) => Math.abs(r[1]) > W.turnLag * 0.5), '轉大角度時有扭腰量');
+  assert.deepEqual(run(false), off);
+  // 瞄準方向（腿＋軀幹）最後仍對準
+  const m = rig(true); for (let i = 0; i < 400; i++) tick(m, st({ torsoYaw: 2.5 }), dt);
+  assert.ok(Math.abs(m.legYaw + m.bones.torso.rotation.y - 2.5) < 0.05 && Math.abs(m.legYaw - 2.5) < 0.05);
+});
+
+test('重量步伐：預設骨盆軌跡不變；開啟後落腳更沉、落地期加長、上身有晃動', () => {
+  for (const stance of [false, true]) {
+    const trace = (heavy) => {
+      const m = rig(heavy, stance), s = st({ vel: new THREE.Vector3(0, 0, 8) }), y = [], r = [];
+      for (let i = 0; i < 480; i++) { tick(m, s); if (i > 120) { y.push(m.bones.pelvis.position.y); r.push(m.bones.torso.rotation.z); } }
+      return { y, r, m };
+    };
+    const a = trace(undefined), b = trace(false), h = trace(true);
+    assert.deepEqual(a.y, b.y);
+    const span = (v) => Math.max(...v) - Math.min(...v);
+    assert.ok(span(h.y) > span(a.y) * 1.05, `骨盆起伏 ${span(h.y)} > ${span(a.y)}`);
+    assert.ok(span(h.y) < 1.2, `幅度克制 ${span(h.y)}`);
+    assert.ok(span(h.r) >= span(a.r), '上身側傾不小於預設');
+    assert.ok(Math.abs(h.m.stepCount - a.m.stepCount) <= 2, `步頻不變 ${h.m.stepCount} vs ${a.m.stepCount}`);
+  }
 });
 
 test('落地硬直：重落地比舊版更明確、輕落地不鎖', () => {

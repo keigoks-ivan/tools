@@ -17,6 +17,18 @@ export const edgeKey = (i, j, i2, j2) => (i + i2 + 20) * 100 + (j + j2 + 20);
 
 // 關卡路線、伏兵寫法都搬到 stages.js
 
+// 牆的種類：bld 城市大樓／bunker 戰場要塞建物／cover 路障貨櫃（或城市裡沒標記的盒）／rock 戰場裡沒標記的碰撞盒（岩壁、土坡）
+export function wallKind(world, box) {
+  if (box.bld) return world.battlefield === 'city' ? 'bld' : 'bunker';
+  if (box.on !== undefined) return 'cover';
+  return world.battlefield && world.battlefield !== 'city' ? 'rock' : 'cover';
+}
+// 敵人在你的哪一邊（yaw 慣例：前方＝(sin yaw, cos yaw)，yaw=0 時 +x 在你左手邊）
+export function closeDir(pos, yaw, x, z) {
+  const a = wrap(Math.atan2(x - pos.x, z - pos.z) - yaw);   // >0＝在你左邊
+  return Math.abs(a) < 0.35 ? '▲ 正前方' : a > 0 ? '◀ 左前方' : '右前方 ▶';
+}
+
 export function parse(R, n) {
   const P = R.pts.map(([x, z]) => ({ x, z, s: 0 }));
   for (let i = 1; i < P.length; i++) P[i].s = P[i - 1].s + Math.hypot(P[i].x - P[i - 1].x, P[i].z - P[i - 1].z);
@@ -394,6 +406,7 @@ export class Encounter {
   updQueue(dt) {
     const C = this.C;
     let live = this.alive(), armed = 0;
+    for (const e of this.mine) if (e.chargeT > 0 && !e.dead) { e.chargeT -= dt; this.C.fx.trackDust(e.pos, e.vel, 1); }
     for (const q of this.queue) if (q.at) armed++;
     for (let i = 0; i < this.queue.length; i++) {
       const q = this.queue[i];
@@ -414,6 +427,12 @@ export class Encounter {
       if (e.kind === 'tank') e.pref = rand(70, 130);   // 伏兵戰車要逼近到轉角看得到你，不在 200 m 外繞圈
       this.mine.push(e);
       if (q.at.breach) this.breach(q.at);
+      else if (q.at.charge) this.closeNote(q.at.x, q.at.z);
+      if (q.at.rush) {   // 穿牆突進：從牆後衝到牆前（combat 這段時間不做碰撞）
+        const R = q.at.rush; e.rushT = R.t; e.rushV = { x: R.vx, z: R.vz }; e.boostT = R.t + 0.3;
+        if (R.hop) { e.vel.y = R.hop; e.grounded = false; }
+      }
+      if (q.at.charge) { e.chargeT = 1.3; e.boostT = 1.6; e.vel.multiplyScalar(1.8); }   // 側面高速衝入：拖煙、速度加快
       if (q.at.ground || e.vehicle) C.fx.dust(_t.set(q.at.x, C.world.height(q.at.x, q.at.z), q.at.z), e.vehicle ? 1.6 : 2.4);
     }
   }
@@ -476,10 +495,10 @@ export class Encounter {
     const base = late ? this.prog + 120 : c.s;
     const F = { far: this.pFar, out: this.pOut, side: this.pSide, breach: this.pBreach, drop: this.pDrop, roof: this.pRoof, rise: this.pRise, ring: this.pRing }[wh] || this.pDrop;
     let at = F.call(this, q, base, V);
-    if (!at && wh === 'breach') at = this.pSide(q, base, V);
+    if (!at && wh === 'breach') at = this.pCharge(q) || this.pSide(q, base, V);
     if (!at && q.kind === 'tank') at = this.pRing(q, base, V) || this.pOut(q, Math.min(base, this.E.len - 120), V, true);
     if (!at && q.kind === 'heli') at = this.pRise(q, base, V, true);
-    return at || this.pDrop(q, base, V);
+    return at || this.pDrop(q, base, V);   // at.how＝取點種類（bld／rock／bunker／cover／charge／side／drop），統計與除錯用
   }
   pFar(q) {
     const c = this.cur, pt = pointAt(this.E, c.turn ? c.s - 22 - q.k * 20 : c.s + 50 + q.k * 20);
@@ -502,10 +521,11 @@ export class Encounter {
     if (!bs.length) return null;
     const [di, dj] = bs[q.k % bs.length], d = 30 + Math.floor(q.k / bs.length) * 13;
     const x = V.x + di * d + (q.kind === 'tank' ? 0 : rand(-4, 4) * dj), z = V.z + dj * d + (q.kind === 'tank' ? 0 : rand(-4, 4) * di);
-    return { x, z, y: this.C.world.height(x, z), tx: V.x, tz: V.z, ground: true };
+    return { x, z, y: this.C.world.height(x, z), tx: V.x, tz: V.z, ground: true, how: 'side' };
   }
-  // 破牆：你前方 ±100°、30～50 m 內，貼著大樓牆邊、在街上能站的點；敵機從牆面衝出來（碎片煙塵在 breach() 放）
-  //   找不到就退回 pSide 再退回 pDrop（place() 處理）；不會放在你背後
+  // 破牆：你前方 ±100°、30～50 m 內，貼著高牆、在街上能站的點；依牆的種類換出場演出（breach() 放特效）
+  //   大樓＝牆面碎裂、敵機直接出現在牆前；岩壁／碉堡／掩體＝敵機起點在牆後，0.3～0.5 s 穿牆衝到牆前（at.rush）
+  //   找不到就退回 pCharge（側面高速衝入）再退 pSide、pDrop（place() 處理）；不會放在你背後
   pBreach(q) {
     const C = this.C, w = C.world, P = C.player, p = P.pos, pc = _u.set(p.x, p.y + 12, p.z), boxes = [];
     for (let i = 0; i < 90; i++) {
@@ -528,22 +548,65 @@ export class Encounter {
       }
       if (!wall) continue;
       if (i < 60 && w.raycast(_t.set(x, h + 12, z), pc, null) >= 0) continue;   // 先挑你看得到的
+      const nx = (x - wall.qx) / wall.d, nz = (z - wall.qz) / wall.d, kind = wallKind(w, wall.b);
+      const at = { x, z, y: h, tx: p.x, tz: p.z, ground: true, how: kind, breach: { x: wall.qx, z: wall.qz, y: h + 8, nx, nz, kind } };
+      if (kind !== 'bld') {
+        // 起點放在牆後：沿法線往牆裡面走「牆厚＋5 m」，那裡要能站；牆太厚（>30 m）不用
+        const bb = wall.b, th = Math.abs(nx) > Math.abs(nz) ? bb.x1 - bb.x0 : bb.z1 - bb.z0;
+        if (th > 30) continue;
+        const bx = wall.qx - nx * (th + 5), bz = wall.qz - nz * (th + 5), bh = w.height(bx, bz);
+        if (Math.abs(bx) > 680 || Math.abs(bz) > 680 || w.support(bx, bz, 5, bh + 0.5) > bh + 0.5 || w.collide(_t.set(bx, bh, bz), 5, bh)) continue;
+        const T = rand(0.3, 0.5), v = (th + 5 + wall.d) / T;
+        at.fl = { x, z }; at.x = bx; at.z = bz; at.y = bh;
+        at.rush = { t: T, vx: nx * v, vz: nz * v, hop: kind === 'rock' ? 0 : 18 };
+      }
       this.used.add(wall.b);
-      const nx = (x - wall.qx) / wall.d, nz = (z - wall.qz) / wall.d;
-      return { x, z, y: h, tx: p.x, tz: p.z, ground: true, breach: { x: wall.qx, z: wall.qz, y: h + 8, nx, nz } };
+      return at;
     }
     return null;
   }
-  // 破牆出場的特效與提示：牆面碎裂＋煙塵、撞擊聲、鏡頭一震、HUD 標方向
+  // 破牆出場的特效與提示：依牆的種類，撞擊聲、鏡頭一震、HUD 標方向
   breach(at) {
-    const C = this.C, w = C.world, B = at.breach, p = C.player, hp = _t.set(B.x + B.nx * 0.4, B.y, B.z + B.nz * 0.4), n = _u.set(B.nx, 0, B.nz);
-    C.fx.crumble(hp, n, 3); C.fx.crumble(_t.set(B.x + B.nx * 0.4, B.y + 5, B.z + B.nz * 0.4), n, 2);
-    C.fx.explosion(_t.set(B.x + B.nx * 2, B.y, B.z + B.nz * 2), 0.8);
-    C.fx.dust(_t.set(B.x + B.nx * 3, w.height(B.x, B.z), B.z + B.nz * 3), 2.6);
-    C.audio.impact(hp, 'building'); C.audio.explosion(hp, 1);
-    C.cockpit.kick('land', 0.4);
-    const a = wrap(Math.atan2(B.x - p.pos.x, B.z - p.pos.z) - p.yaw);   // >0＝在你左邊
-    C.note(`CONTACT  CLOSE  ${Math.abs(a) < 0.35 ? '▲ 正前方' : a > 0 ? '◀ 左前方' : '右前方 ▶'}`, 'am');
+    const C = this.C, w = C.world, B = at.breach, hp = _t.set(B.x + B.nx * 0.4, B.y, B.z + B.nz * 0.4), n = _u.set(B.nx, 0, B.nz);
+    const gy = w.height(B.x, B.z), fr = at.fl || at;
+    if (B.kind === 'rock') {   // 岩壁：碎石＋大量塵土，牆後一團、牆前再一團
+      C.fx.crumble(_t.set(B.x + B.nx * 0.4, gy + 5, B.z + B.nz * 0.4), n, 2.5); C.fx.crumble(_t.set(B.x + B.nx * 0.4, gy + 10, B.z + B.nz * 0.4), n, 2);
+      C.fx.dust(_t.set(B.x - B.nx * 2, gy, B.z - B.nz * 2), 3.2);
+      C.events.push({ t: at.rush.t * 0.7, fn: () => { C.fx.dust(_t.set(fr.x, w.height(fr.x, fr.z), fr.z), 3.6); C.fx.dust(_t.set(B.x + B.nx * 3, gy, B.z + B.nz * 3), 2.6); } });
+      C.audio.impact(hp, 'building'); C.cockpit.kick('land', 0.35);
+    } else if (B.kind === 'bunker' || B.kind === 'cover') {   // 碉堡／掩體：從後面翻越，牆頂碎屑＋塵土
+      C.fx.crumble(_t.set(B.x + B.nx * 0.4, B.y + 2, B.z + B.nz * 0.4), n, 2);
+      C.fx.dust(_t.set(B.x - B.nx * 2, gy, B.z - B.nz * 2), 2.4);
+      C.events.push({ t: at.rush.t * 0.75, fn: () => { C.fx.dust(_t.set(fr.x, w.height(fr.x, fr.z), fr.z), 3); C.fx.explosion(_t.set(B.x + B.nx * 2, gy + 1, B.z + B.nz * 2), 0.4); } });
+      C.audio.impact(hp, 'building'); C.cockpit.kick('land', 0.3);
+    } else {   // 大樓：牆面碎裂
+      C.fx.crumble(hp, n, 3); C.fx.crumble(_t.set(B.x + B.nx * 0.4, B.y + 5, B.z + B.nz * 0.4), n, 2);
+      C.fx.explosion(_t.set(B.x + B.nx * 2, B.y, B.z + B.nz * 2), 0.8);
+      C.fx.dust(_t.set(B.x + B.nx * 3, gy, B.z + B.nz * 3), 2.6);
+      C.audio.impact(hp, 'building'); C.audio.explosion(hp, 1);
+      C.cockpit.kick('land', 0.4);
+    }
+    this.closeNote(B.x, B.z);
+  }
+  closeNote(x, z) {
+    const p = this.C.player;
+    this.C.note(`CONTACT  CLOSE  ${closeDir(p.pos, p.yaw, x, z)}`, 'am');
+  }
+  // 近距離側面高速衝入：你前方 ±100°、40～60 m 的街上／空地，帶 boost 拖煙衝過來（找不到牆時用，取代空降）
+  pCharge(q) {
+    const C = this.C, w = C.world, P = C.player, p = P.pos, pc = _u.set(p.x, p.y + 12, p.z);
+    let any = null;
+    for (let i = 0; i < 60; i++) {
+      const a = P.yaw + rand(-1.745, 1.745), r = rand(40, 60);
+      const x = p.x + Math.sin(a) * r, z = p.z + Math.cos(a) * r;
+      if (Math.abs(x) > 680 || Math.abs(z) > 680) continue;
+      const h = w.height(x, z);
+      if (w.support(x, z, 5, h + 0.5) > h + 0.5 || w.collide(_t.set(x, h, z), 5, h)) continue;
+      const at = { x, z, y: h, tx: p.x, tz: p.z, ground: true, charge: true, how: 'charge' };
+      if (w.raycast(_t.set(x, h + 12, z), pc, null) < 0) return at;   // 先挑你看得到的
+      any = any || at;
+    }
+    return any;
   }
   pDrop(q, base, V) {
     const E = this.E, w = this.C.world, p = this.C.player.pos, last = this.cur.last;
@@ -554,10 +617,10 @@ export class Encounter {
       if (Math.hypot(x - p.x, z - p.z) < 50) continue;
       const h = w.height(x, z);
       if (w.support(x, z, 5, 1e4) > h + 0.5 || w.collide(_t.set(x, h, z), 5, h)) continue;
-      return { x, z, y: h };
+      return { x, z, y: h, how: 'drop' };
     }
     const pt = pointAt(E, Math.min(base + 90, E.len));
-    return { x: pt.x, z: pt.z, y: w.height(pt.x, pt.z) };
+    return { x: pt.x, z: pt.z, y: w.height(pt.x, pt.z), how: 'drop' };
   }
   pRoof(q, base) {
     const E = this.E, w = this.C.world, p = this.C.player.pos, list = [];
@@ -621,6 +684,7 @@ export class Encounter {
   // ---------------------------------------------------------------- 光柱、警示光、雷達路線（每幀）
   flare(at, T) {
     const B = this.B, w = this.C.world;
+    if (at.fl) at = { ...at, x: at.fl.x, z: at.fl.z };   // 牆後出場：警示標在牆前
     const y = at.roof ? at.y + 6 : at.ground || at.tx !== undefined ? w.height(at.x, at.z) + 6 : at.y > w.height(at.x, at.z) + 5 ? at.y : w.height(at.x, at.z) + 6;
     this.warn.push({ x: at.x, y, z: at.z, t: T + 0.9 });
     if (!B) return;

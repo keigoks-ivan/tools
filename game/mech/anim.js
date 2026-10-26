@@ -11,6 +11,13 @@ const GAITS = {
   ace: { support: 0.62, stride: 3.4, max: 7.2, lift: 0.48, sway: 0.3, weight: 0.8, stance: 1.12, bend: 0.2 },
   heavy: { support: 0.72, stride: 4.2, max: 7.8, lift: 0.28, sway: 0.5, weight: 1.35, stance: 1.24, bend: 0.25 },
 };
+// 重量模式（mech.heavy = true 才啟用，預設關閉＝舊行為）：機身轉向限速、落腳多沉＋落地相位拉長、上身微晃
+export const HEAVY = {
+  turnMax: 2.2, turnLag: 1.1,   // 機身（腿）最大轉速 rad/s；落後瞄準超過 turnLag 時可加快到 2 倍，其餘差角由軀幹扭腰吸收（準心不變）
+  dip: 1.45, bob: 1.35,         // 落腳下沉衝量、步伐起伏幅度的倍率
+  hold: 0.04,                   // 支撐相位加長（落地停頓感）；步頻不變，擺動期變短
+  tilt: 0.2, roll: 0.08,        // 落腳時上身前點（dip 位移 × tilt）、隨骨盆左右晃（sway × roll）
+};
 const _v = new THREE.Vector3(), _inv = new THREE.Matrix4();
 const UP = new THREE.Vector3(0, 1, 0), _footQ = new THREE.Quaternion(), _parentQ = new THREE.Quaternion();
 const clamp = THREE.MathUtils.clamp, lerp = THREE.MathUtils.lerp;
@@ -87,6 +94,15 @@ export class MechMotion {
   // 外部撞擊／著地（0..1+）
   impact(s) { this.dip.v -= 5 * s; this.shock = Math.max(this.shock, Math.min(1.5, s)); }
 
+  // 重量模式：機身朝向限速（軀幹的 twist 彈簧會把差角補回去，瞄準方向不變）；關閉時原樣回傳
+  turnLimit(want, st, dt) {
+    const m = this.m;
+    if (!m.heavy) return want;
+    const prev = m.legYaw;
+    const lim = HEAVY.turnMax * dt * (Math.abs(wrap(st.torsoYaw - prev)) > HEAVY.turnLag ? 2 : 1);
+    return wrap(prev + clamp(wrap(want - prev), -lim, lim));
+  }
+
   update(dt, st) {
     const m = this.m, b = m.bones, L = m.L, k = m.scale;
     dt = Math.min(dt, 0.05);
@@ -101,9 +117,9 @@ export class MechMotion {
       if (Math.abs(diff) > 1.9) hd = wrap(hd + Math.PI);
       diff = wrap(hd - st.torsoYaw);
       if (Math.abs(diff) > 1.2) hd = st.torsoYaw + Math.sign(diff) * 1.2;
-      m.legYaw = lerpAngle(m.legYaw, hd, 1 - Math.exp(-dt * 5));
+      m.legYaw = this.turnLimit(lerpAngle(m.legYaw, hd, 1 - Math.exp(-dt * 5)), st, dt);
     } else {
-      m.legYaw = lerpAngle(m.legYaw, st.torsoYaw, 1 - Math.exp(-dt * (st.boost > 0.5 ? 6 : 2.2)));
+      m.legYaw = this.turnLimit(lerpAngle(m.legYaw, st.torsoYaw, 1 - Math.exp(-dt * (st.boost > 0.5 ? 6 : 2.2))), st, dt);
     }
     const yawRate = this.yawPrev === null ? 0 : wrap(m.legYaw - this.yawPrev) / Math.max(dt, 1e-4);
     this.yawPrev = m.legYaw;
@@ -142,11 +158,11 @@ export class MechMotion {
     const gT = walkW * Math.max(smooth(0.6, 2.6, vg), settle ? 0.45 : 0);
     this.g = damp(this.g, gT, gT > this.g ? 5 : 3.5, dt);
     const g = this.g;
-    const D = P ? P.support : 0.64;
+    const D0 = P ? P.support : 0.64, D = m.heavy ? D0 + HEAVY.hold : D0;   // D0 只管步頻，重量模式加長的 D 只拉長落地期
     const S = P ? clamp(P.stride + af * 0.34, P.stride, P.max) : clamp(2.4 + af * 0.3, 2.4, 6.6);             // 步幅
     if (af > 0.4) this.dir = fwd < 0 ? -1 : 1;
     else if (Math.abs(yawRate) > 0.1) this.dir = 1;
-    if (g > 0.02 || (!this.feet.R.stance || !this.feet.L.stance)) this.cyc += dt * Math.max(vg, 2.4) * D / S;
+    if (g > 0.02 || (!this.feet.R.stance || !this.feet.L.stance)) this.cyc += dt * Math.max(vg, 2.4) * D0 / S;
     this.cyc -= Math.floor(this.cyc);
     for (const [n, off] of [['R', 0], ['L', 0.5]]) {
       const f = this.feet[n];
@@ -162,7 +178,7 @@ export class MechMotion {
 
     // ---- 骨盆：落腳下沉、支撐期升起；重心移到支撐腳；隨步伐扭腰
     const pc = this.cyc * TAU;
-    const bob = -(P ? 0.07 : 0.13) * g * Math.cos(2 * (pc - 0.15));
+    const bob = -(P ? 0.07 : 0.13) * (m.heavy ? HEAVY.bob : 1) * g * Math.cos(2 * (pc - 0.15));
     const sway = -(P ? P.sway : 0.34) * g * Math.sin(pc - 0.45);
     m.landV += (-m.land * 90 - m.landV * 14) * dt;
     m.land = Math.max(-0.1, m.land + m.landV * dt);
@@ -204,7 +220,7 @@ export class MechMotion {
         if (g > 0.25 && walkW > 0.6) {
           m.footfall = n === 'R' ? 1 : -1; m.stepCount++;
           const weight = (0.35 + Math.min(1, af / 16) * 0.55) * (P ? P.weight : 1);
-          this.dip.v -= 1.65 * weight; this.shock = Math.max(this.shock, weight);
+          this.dip.v -= 1.65 * weight * (m.heavy ? HEAVY.dip : 1); this.shock = Math.max(this.shock, weight);
         }
       }
       foot.stance = inSt; this.st[n] = inSt;
@@ -280,6 +296,10 @@ export class MechMotion {
       // 走路時上身跟著步伐反向扭一點；站著時慢慢呼吸（機體不會完全僵住）
       b.torso.rotation.y += -0.07 * g * Math.sin(pc) * this.dir;
       b.torso.rotation.x += 0.012 * Math.sin(this.t * 1.7) * (1 - g) * walkW;
+    }
+    if (m.heavy) {   // 落腳時上身跟著點一下、隨骨盆重心左右晃一點
+      b.torso.rotation.x -= this.dip.x * HEAVY.tilt * walkW;
+      b.torso.rotation.z += sway * HEAVY.roll * walkW;
     }
     // 翼板：衝刺、飛行、推進時展開（往外放平、翼尖往前），平常收合
     if (m.wings) {

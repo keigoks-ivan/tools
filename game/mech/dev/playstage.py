@@ -41,7 +41,12 @@ BOT = r'''(frames) => {
     if (goal && E.state === 'move') {
       const dx = goal.x - P.pos.x, dz = goal.z - P.pos.z, d = Math.hypot(dx, dz);
       P.yaw = Math.atan2(dx, dz); P.pitch = 0; fake = { mx: 0, my: d > 8 ? 1 : 0, boost: d > 70 };
+      // 正對電線桿之類細長障礙會卡死（碰撞往回推、沒有側向分量）：停住超過 20 幀就橫移 50 幀繞開，下次換邊
+      b.still = (b.prev && P.pos.distanceTo(b.prev) < 0.05 && d > 8) ? (b.still || 0) + 1 : 0;
+      if (b.still > 20) { b.side = 50; b.dir = -(b.dir || -1); b.still = 0; }
+      if (b.side > 0) { b.side--; fake.mx = b.dir; }
     }
+    b.prev = P.pos.clone();
     G.fake = fake;
     for (const e of C.enemies) {
       if (e.dead || e.dropping) continue;
@@ -82,9 +87,9 @@ with sync_playwright() as p:
     total = pg.evaluate('__stages.length')
     for n in stages(A.stage, total):
         name = pg.evaluate(f'__stages[{n - 1}].name')
+        pg.evaluate(f'()=>{{window.__B=null; __game.launch({n}); __game.run(4)}}')   # 先出擊再檢查：目標大樓要等這一關的世界建好才找得到
         bad = pg.evaluate(CHECK, n)
         print(f'==== 第 {n} 關 {name}　檢查：', '全部 OK' if not bad else f'{len(bad)} 個問題'); [print('  !!', x) for x in bad]
-        pg.evaluate(f'()=>{{window.__B=null; __game.launch({n}); __game.run(4)}}')
         t0, shot, res = time.time(), 0, None
         while time.time() - t0 < 5000:
             r = pg.evaluate(BOT, 300)
