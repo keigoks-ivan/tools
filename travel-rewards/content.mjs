@@ -20,6 +20,7 @@ export const ROUTES = [
 export const CARD_EN = ['Amex Platinum Charge','Amex EVA Platinum Charge','Amex Gold Charge','Amex EVA Gold Charge','Amex Platinum Credit','Amex Regent Platinum Credit','Amex Green Charge','CTBC China Airlines Priority Infinite','CTBC China Airlines Precious Infinite','CTBC China Airlines Business Signature','CTBC Marriott Priority Infinite','CTBC Marriott Infinite','CTBC Marriott Signature','CTBC Marriott Priority Infinite Limited'];
 
 export const ASSETS = {
+  HSBC_TW_TRAVELLER:['滙豐旅人旅遊積分','HSBC Traveller points'],
   AMEX_TW_MR:['Amex台灣MR積分','Taiwan Amex MR points'],
   EVA_redeemable_miles:['長榮可兌換哩程','EVA redeemable miles'],
   CTBC_CI_card_points_to_Dynasty_miles:['銀行點數→華夏哩程','Card points → Dynasty miles'],

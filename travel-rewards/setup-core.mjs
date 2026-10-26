@@ -1,5 +1,5 @@
-import {RESOURCES,OPPORTUNITIES} from './network-data.mjs?v=20261025-12';
-import {cleanNetworkState,effectiveResources,effectiveFacts,evaluateOpportunity} from './network-core.mjs?v=20261026-15';
+import {RESOURCES,OPPORTUNITIES} from './network-data.mjs?v=20261027-16';
+import {cleanNetworkState,effectiveResources,effectiveFacts,evaluateOpportunity} from './network-core.mjs?v=20261027-16';
 
 export const SETUP_STORE='imq-reward-setup-v1';
 export const SETUP_GOALS=[
@@ -22,6 +22,7 @@ export function cleanSetupPreference(value){
 export function setupMatches(goal,saved,today){
   if(!SETUP_GOALS.some(item=>item.id===goal))return [];
   const inventory=cleanNetworkState(saved),resources=effectiveResources(inventory),facts=effectiveFacts(inventory);
+  for(const [id,amount] of Object.entries(inventory.balances))if(amount===0)resources.delete(id);
   return OPPORTUNITIES.filter(op=>goal==='all'||op.goal===goal).flatMap(op=>{
     const inputs=[...new Set([...op.any,...op.all,...(op.allGroups||[]).flat()])],anchors=inputs.filter(id=>resources.has(id)&&inventory.balances[id]!==0).length;
     if(!anchors)return [];

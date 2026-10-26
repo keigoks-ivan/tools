@@ -1,9 +1,10 @@
 import {EXT_RESOURCES,EXT_FACTS,EXT_OPPORTUNITIES,EXT_SOURCES,EXT_RULES,EXT_COVERAGE} from './extensions-data.mjs?v=20261025-12';
-import {HOTEL_RESOURCES,HOTEL_FACTS,HOTEL_OPPORTUNITIES,HOTEL_SOURCES,HOTEL_RULES,HOTEL_COVERAGE} from './hotel-partners-data.mjs?v=20261025-12';
+import {HOTEL_RESOURCES,HOTEL_FACTS,HOTEL_OPPORTUNITIES,HOTEL_SOURCES,HOTEL_RULES,HOTEL_COVERAGE} from './hotel-partners-data.mjs?v=20261027-16';
+import {BANK_RESOURCES,BANK_OPPORTUNITIES,BANK_SOURCES,BANK_RULES} from './bank-entries-data.mjs?v=20261027-16';
 const resource=(id,label,group,extra={})=>({id,label,group,...extra});
 export const RESOURCES=[
   resource('amex-platinum-charge','運通簽帳白金卡','信用卡'),resource('amex-eva-platinum-card','長榮運通簽帳白金卡','信用卡'),resource('amex-gold-current','運通耀金卡','信用卡'),resource('amex-eva-gold-card','長榮運通簽帳金卡','信用卡'),resource('amex-platinum-credit','運通信用白金卡','信用卡'),resource('amex-regent','運通晶華珍饌白金卡','信用卡'),resource('amex-charge','運通簽帳卡','信用卡'),
-  resource('ctbc-ci-priority','華航鼎尊無限卡','信用卡'),resource('ctbc-ci-precious','華航璀璨無限卡','信用卡'),resource('ctbc-ci-signature','華航商務御璽卡','信用卡'),resource('ctbc-marriott-priority','萬豪鼎尊無限卡','信用卡'),resource('ctbc-marriott-infinite','萬豪無限卡','信用卡'),resource('ctbc-marriott-signature','萬豪御璽卡','信用卡'),resource('ctbc-marriott-priority-limited','萬豪鼎尊限量版（已持有）','信用卡'),resource('visa-infinite','其他 Visa 無限卡','信用卡'),resource('mc-elite','Mastercard 世界之極','信用卡'),
+  resource('ctbc-ci-priority','華航鼎尊無限卡','信用卡'),resource('ctbc-ci-precious','華航璀璨無限卡','信用卡'),resource('ctbc-ci-signature','華航商務御璽卡','信用卡'),resource('ctbc-marriott-priority','萬豪鼎尊無限卡','信用卡'),resource('ctbc-marriott-infinite','萬豪無限卡','信用卡'),resource('ctbc-marriott-signature','萬豪御璽卡','信用卡'),resource('ctbc-marriott-priority-limited','萬豪鼎尊無限卡限量版','信用卡',{note:'原申請梯次已截止；原持卡者可選'}),resource('visa-infinite','其他 Visa 無限卡','信用卡'),resource('mc-elite','Mastercard 世界之極','信用卡'),
   resource('mb-base','萬豪一般會員','酒店會籍',{exclusive:'marriott'}),resource('mb-silver','萬豪銀卡','酒店會籍',{exclusive:'marriott'}),resource('mb-gold','萬豪金卡','酒店會籍',{exclusive:'marriott'}),resource('mb-platinum','萬豪白金以上','酒店會籍',{exclusive:'marriott'}),
   resource('hh-base','Hilton 一般會員','酒店會籍',{exclusive:'hilton'}),resource('hh-silver','Hilton 銀卡','酒店會籍',{exclusive:'hilton'}),resource('hh-gold','Hilton 金卡','酒店會籍',{exclusive:'hilton'}),resource('hh-diamond','Hilton 鑽卡','酒店會籍',{exclusive:'hilton'}),
   resource('gha-titanium','GHA 鈦金','酒店會籍'),resource('wyndham-diamond','Wyndham 鑽卡','酒店會籍'),resource('bw-diamond','BW 鑽石／精選鑽石','酒店會籍'),resource('scandic-five','Scandic 第5級','酒店會籍'),resource('radisson-premium','Radisson Premium','酒店會籍'),
@@ -118,3 +119,8 @@ for(const id of ['P011','N008']){
 }
 Object.assign(NETWORK_RULES.find(item=>item.id==='R074'),{source_ids:['hotel-hsbc-q4','hotel-hsbc-general','hotel-all-hsbc'],missing:['卓越紅利最低量段混寫旅遊積分與300單位，最低可操作紅利尚未確認。費用與年度總上限未列，萬豪／IHG端台灣HSBC比例未獨立互核。']});
 Object.assign(NETWORK_COVERAGE.find(item=>item.id==='all-flyingblue-partnership'),{name:'ALL×Flying Blue常設合作',research_status:'selected_fields_verified_gaps_remain',source_ids:['hotel-fb-terms','hotel-fb-main','hotel-fb-transfer-form','hotel-all-air-general'],rule_ids:['R098','R099','R100','R101'],note:'專屬手動1:1、首次資格晚／XP與12月改連規則已補；自動轉換章殘留數字、入帳模板差異與混合支付觸發仍保留。'});
+
+RESOURCES.push(...BANK_RESOURCES);OPPORTUNITIES.push(...BANK_OPPORTUNITIES);NETWORK_SOURCES.push(...BANK_SOURCES);NETWORK_RULES.push(...BANK_RULES);
+for(const id of ['hsbc-traveller-infinite','hsbc-traveller-signature','hsbc-traveller-light'])NETWORK_COVERAGE_UPDATES[id]={research_status:'selected_fields_verified_gaps_remain',source_ids:['bank-hsbc-q4','bank-hsbc-compare','bank-hsbc-light','bank-hsbc-welcome'],rule_ids:['R102','R103','R106'],note:'2026/10/27補上三卡年費、Q4基本累積、條件迎新、逐月效期及轉點入口；財管與生日加碼仍待核。R005保留過期Q3歷史，當期迎新改見R103。'};
+NETWORK_COVERAGE_UPDATES['dbs-flying-family']={research_status:'partial_sources_found',source_ids:['bank-dbs-cards','bank-dbs-transfer'],rule_ids:['R104'],note:'已補四種持卡入口與飛行積金路線；逐卡年費、基本累積、迎新及排除仍待完整比較。'};
+NETWORK_COVERAGE_UPDATES['ctbc-ana-family']={research_status:'partial_sources_found',source_ids:['bank-ana-cards'],rule_ids:['R105'],note:'已補六種持卡入口及獨立ANA哩程餘額；銀行逐卡當期條款與獎勵票規則仍待完整查核。'};

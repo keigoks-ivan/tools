@@ -1,12 +1,14 @@
 import {DEFAULT_PROFILE,evaluateRoute,routeStartingPoint,partitionPlanRoutes,redemptionValue,challengeCost,cardFee,nonNegative} from './core.mjs?v=20261025-12';
-import {ROUTES,CARD_EN,ASSETS,RULE_EN} from './content.mjs?v=20261025-12';
+import {ROUTES,CARD_EN,ASSETS,RULE_EN} from './content.mjs?v=20261027-16';
 import {localizeRuleValues} from './fields.mjs?v=20261025-12';
-import {mountTree} from './tree.mjs?v=20261026-15';
-import {TREE_SOURCES} from './tree-data.mjs?v=20261025-12';
-import {NETWORK_SOURCES,NETWORK_RULES,NETWORK_COVERAGE,NETWORK_COVERAGE_UPDATES} from './network-data.mjs?v=20261025-12';
+import {mountTree} from './tree.mjs?v=20261027-16';
+import {TREE_SOURCES} from './tree-data.mjs?v=20261027-16';
+import {NETWORK_SOURCES,NETWORK_RULES,NETWORK_COVERAGE,NETWORK_COVERAGE_UPDATES} from './network-data.mjs?v=20261027-16';
 import {stayNodeSummary} from './stay.mjs?v=20261025-12';
 import {selectHotelProgram,hotelNodeSummary} from './hotel-use.mjs?v=20261025-12';
-import {mountSetup} from './setup.mjs?v=20261026-15';
+import {mountSetup} from './setup.mjs?v=20261027-16';
+
+import {BANK_CARDS,normalizeRewardSearch} from './bank-entries-data.mjs?v=20261027-16';
 
 const $=selector=>document.querySelector(selector);
 const $$=selector=>[...document.querySelectorAll(selector)];
@@ -89,24 +91,27 @@ function renderPlan(){
   $('#plan-other-routes').innerHTML=groups.other.map(route=>{const start=routeStartingPoint(route,state.profile);return routeCard(route,start.connected?{}:{reason:['目前接不上：'+start.reason,'']});}).join('');
 }
 function renderExplore(){
-  const query=$('#route-search').value.trim().toLocaleLowerCase(),goal=$('#explore-goal').value;
-  const routes=ROUTES.filter(route=>(goal==='all'||route.goals.includes(goal))&&JSON.stringify([route.name,route.target,route.tags,route.summary]).toLocaleLowerCase().includes(query));
+  const query=normalizeRewardSearch($('#route-search').value),goal=$('#explore-goal').value;
+  const routes=ROUTES.filter(route=>(goal==='all'||route.goals.includes(goal))&&normalizeRewardSearch(JSON.stringify([route.name,route.target,route.tags,route.summary])).includes(query));
   $('#explore-count').textContent=t(number(routes.length)+'條候選路線；資格沿用你的規劃條件。',number(routes.length)+' candidate routes; eligibility uses your planning conditions.');
   $('#explore-routes').innerHTML=routes.length?routes.map(route=>routeCard(route)).join(''):'<div class="empty">'+t('沒有符合的路線，試試其他品牌或關鍵字。','No routes found. Try another program or keyword.')+'</div>';
 }
 function cardName(card){return card.name;}
 function feeText(card){
   const f=cardFee(card);
+  if(card.fees.waiver_note)return '新戶首年NT$0；續年NT$'+number(card.fees.annual_twd)+'（符合條件可免）';
   if(f.amount===null)return t('續年費用待核','Renewal fee pending');
   if(f.period==='first')return money(f.amount)+' '+t('首年','first year')+(card.fees.subsequent_year_twd?' / '+money(card.fees.subsequent_year_twd)+' '+t('次年','renewal'):'');
   return money(f.amount)+' '+(f.period==='promotion'?t('上市優惠','launch offer'):t('／年','/ year'));
 }
 function baseText(card){
   const n=card.earning.base_twd_per_point??card.earning.base_twd_per_card_point??card.earning.base_twd_per_mile;
+  if(card.earning.overseas_twd_per_point)return '國內NT$'+n+'／點 · 海外NT$'+card.earning.overseas_twd_per_point+'／點';
   return n?t('一般消費NT$'+n+'＝1'+(card.asset==='EVA_redeemable_miles'?'哩':'點'),'Base spend NT$'+n+' = 1 '+(card.asset==='EVA_redeemable_miles'?'mile':'point')):t('基本比例待核','Base rate pending');
 }
 function cardAlert(card){
   if(card.availability.startsWith('new_application'))return t('原梯次收件已截止','Original receipt window closed');
+  if(card.asset==='HSBC_TW_TRAVELLER')return '旅遊積分與卓越紅利分開；迎新、續卡及轉點另有條件';
   if(card.asset==='EVA_redeemable_miles')return t('直接累積長榮哩，不是MR','Earns EVA miles directly, not MR');
   if(card.id==='amex-charge')return t('優遊常客計劃另收NT$1,800／年','Frequent-traveller program adds NT$1,800/year');
   if(card.asset==='Marriott_Bonvoy_points')return t('飯店類有季度上限，滿額後回饋待核','Hotel category has a quarterly cap; post-cap earning pending');
@@ -114,22 +119,22 @@ function cardAlert(card){
   return t('續卡、迎新與轉點費用分開核對','Check renewal, welcome and transfer fees separately');
 }
 function renderCards(){
-  const query=$('#card-search').value.trim().toLocaleLowerCase(),issuer=$('#card-issuer').value,asset=$('#card-asset').value;
-  const cards=data.cards.filter(card=>(issuer==='all'||(issuer==='amex'?card.issuer==='台灣美國運通':card.issuer==='中國信託'))&&(asset==='all'||asset===card.asset)&&(card.name+' '+CARD_EN[data.cards.indexOf(card)]+' '+text(ASSETS[card.asset])).toLocaleLowerCase().includes(query));
+  const query=normalizeRewardSearch($('#card-search').value),issuer=$('#card-issuer').value,asset=$('#card-asset').value;
+  const cards=data.cards.filter(card=>(issuer==='all'||card.issuer===({amex:'台灣美國運通',ctbc:'中國信託',hsbc:'滙豐台灣'}[issuer]))&&(asset==='all'||asset===card.asset)&&normalizeRewardSearch(card.name+' '+(card.issuer==='滙豐台灣'?'HSBC Traveller TravelOne':'')+' '+(CARD_EN[data.cards.indexOf(card)]||'')+' '+text(ASSETS[card.asset])).includes(query));
   $('#card-count').textContent=t(number(cards.length)+'張卡／版本；未宣稱涵蓋全市場。',number(cards.length)+' card editions; not a complete market survey.');
   $('#card-list').innerHTML=cards.length?cards.map(card=>{
-    const closed=card.availability.startsWith('new_application'),selected=state.cardCompare.includes(card.id),art=card.asset==='Marriott_Bonvoy_points'?'marriott':card.issuer==='台灣美國運通'?'amex':'ci';
-    return '<article class="credit-card"><div class="card-art '+art+'" aria-hidden="true"><span class="art-bank">'+(card.issuer==='台灣美國運通'?'美國運通':'中國信託')+'</span><span class="art-chip"></span><span class="art-currency">'+esc(text(ASSETS[card.asset]))+'</span></div><div class="card-top"><span class="tag '+(closed?'closed':'neutral')+'">'+(closed?t('原梯次截止','Original offer closed'):t('選定欄位已查','Selected fields checked'))+'</span></div><h3>'+esc(cardName(card))+'</h3><p class="card-asset">'+esc(text(ASSETS[card.asset]))+'</p><p class="card-fee">'+esc(feeText(card))+'</p><p class="card-base">'+esc(baseText(card))+'</p><p class="card-note">'+esc(cardAlert(card))+'</p><div class="route-actions card-actions"><button type="button" class="button secondary" data-card="'+card.id+'">'+t('完整條件','Conditions')+'</button><button type="button" class="button secondary '+(selected?'selected':'')+'" data-compare-card="'+card.id+'" aria-pressed="'+selected+'">'+(selected?t('✓ 比較中','✓ Comparing'):t('＋ 比較','＋ Compare'))+'</button></div></article>';
+    const closed=card.availability.startsWith('new_application'),selected=state.cardCompare.includes(card.id),art=card.issuer==='滙豐台灣'?'hsbc':card.asset==='Marriott_Bonvoy_points'?'marriott':card.issuer==='台灣美國運通'?'amex':'ci';
+    return '<article class="credit-card"><div class="card-art '+art+'" aria-hidden="true"><span class="art-bank">'+esc(card.issuer==='台灣美國運通'?'美國運通':card.issuer)+'</span><span class="art-chip"></span><span class="art-currency">'+esc(text(ASSETS[card.asset]))+'</span></div><div class="card-top"><span class="tag '+(closed?'closed':'neutral')+'">'+(closed?t('原梯次截止','Original offer closed'):t('選定欄位已查','Selected fields checked'))+'</span></div><h3>'+esc(cardName(card))+'</h3><p class="card-asset">'+esc(text(ASSETS[card.asset]))+'</p><p class="card-fee">'+esc(feeText(card))+'</p><p class="card-base">'+esc(baseText(card))+'</p><p class="card-note">'+esc(cardAlert(card))+'</p><div class="route-actions card-actions"><button type="button" class="button secondary" data-card="'+card.id+'">'+t('完整條件','Conditions')+'</button><button type="button" class="button secondary '+(selected?'selected':'')+'" data-compare-card="'+card.id+'" aria-pressed="'+selected+'">'+(selected?t('✓ 比較中','✓ Comparing'):t('＋ 比較','＋ Compare'))+'</button></div></article>';
   }).join(''):'<div class="empty">'+t('沒有符合的卡片。','No matching cards.')+'</div>';
 }
 function knownEvidence(rule){const status=ruleStatus(rule);return '<span class="tag '+status[1]+'">'+esc(status[0])+'</span>';}
 function renderLibrary(){
-  const query=$('#library-search').value.trim().toLocaleLowerCase(),kind=$('#library-kind').value;
+  const query=normalizeRewardSearch($('#library-search').value),kind=$('#library-kind').value;
   $('#research-stats').innerHTML=[[data.rules.length,t('規則／待核線索','rules / research leads')],[data.sources.length,t('來源紀錄','source records')],[data.cards.length,t('卡片／版本','card editions')],[data.coverage.length,t('研究目標・含待查','research targets, including queued')]].map(([n,label])=>'<div><strong>'+number(n)+'</strong><span>'+label+'</span></div>').join('');
   let rows=[];
-  if(kind==='rules')rows=data.rules.filter(rule=>(rule.id+' '+rule.summary+' '+RULE_EN[rule.id]+' '+JSON.stringify(rule.values)).toLocaleLowerCase().includes(query)).map(rule=>'<article class="research-item"><div class="card-top">'+knownEvidence(rule)+'<span class="evidence-label">'+esc(rule.id)+' · '+esc(rule.checked_on)+'</span></div><h3>'+esc(t(rule.summary,RULE_EN[rule.id]||rule.summary))+'</h3><div class="research-meta">'+(rule.validity?.effective_from?t('生效 ','Effective ')+esc(rule.validity.effective_from):'')+(rule.validity?.effective_until?' · '+t('此規則期限 ','Term end ')+esc(rule.validity.effective_until):'')+'</div>'+links(rule.source_ids.map(id=>sourceMap.get(id)).filter(Boolean))+'<details><summary>'+t('數值、限制與未確認項目','Values, limits and unresolved items')+'</summary><pre class="research-values">'+esc(JSON.stringify(localizeRuleValues(rule.values),null,2))+'</pre>'+originalNotes(rule.missing||[])+'</details></article>');
-  else if(kind==='sources')rows=data.sources.filter(source=>JSON.stringify(source).toLocaleLowerCase().includes(query)).map(source=>'<article class="research-item"><div class="card-top"><span class="tag neutral">'+(source.kind==='official'?t('官方來源','Official source'):t('外部報導／線索','External report / lead'))+'</span><span class="evidence-label">'+esc(source.checked_on)+'</span></div><h3>'+esc(source.publisher)+'</h3><p>'+accessText(source.access)+'</p><div class="source-links"><a href="'+esc(sourceUrl(source.url))+'" target="_blank" rel="noopener noreferrer">'+esc(new URL(source.url).hostname)+' ↗</a></div><details><summary>'+t('查核註記原文','Original research note')+'</summary><p>'+esc(source.note)+'</p></details></article>');
-  else rows=data.coverage.filter(item=>JSON.stringify(item).toLocaleLowerCase().includes(query)).map(item=>'<article class="research-item"><div class="card-top"><span class="tag '+(item.research_status==='queued'?'warn':'neutral')+'">'+(item.research_status==='queued'?t('待研究','Queued'):item.research_status?.startsWith('application_window_closed')?t('申請梯次已截止','Application window closed'):t('部分資料已查，仍有缺口','Partial research; gaps remain'))+'</span></div><h3>'+esc(item.name)+'</h3><p>'+esc(item.note||t('納入研究範圍，尚未宣稱完整。','In scope; not claimed complete.'))+'</p>'+links((item.source_ids||[]).map(id=>sourceMap.get(id)).filter(Boolean))+'</article>');
+  if(kind==='rules')rows=data.rules.filter(rule=>normalizeRewardSearch(rule.id+' '+rule.summary+' '+RULE_EN[rule.id]+' '+JSON.stringify(rule.values)).includes(query)).map(rule=>'<article class="research-item"><div class="card-top">'+knownEvidence(rule)+'<span class="evidence-label">'+esc(rule.id)+' · '+esc(rule.checked_on)+'</span></div><h3>'+esc(t(rule.summary,RULE_EN[rule.id]||rule.summary))+'</h3><div class="research-meta">'+(rule.validity?.effective_from?t('生效 ','Effective ')+esc(rule.validity.effective_from):'')+(rule.validity?.effective_until?' · '+t('此規則期限 ','Term end ')+esc(rule.validity.effective_until):'')+'</div>'+links(rule.source_ids.map(id=>sourceMap.get(id)).filter(Boolean))+'<details><summary>'+t('數值、限制與未確認項目','Values, limits and unresolved items')+'</summary><pre class="research-values">'+esc(JSON.stringify(localizeRuleValues(rule.values),null,2))+'</pre>'+originalNotes(rule.missing||[])+'</details></article>');
+  else if(kind==='sources')rows=data.sources.filter(source=>normalizeRewardSearch(JSON.stringify(source)).includes(query)).map(source=>'<article class="research-item"><div class="card-top"><span class="tag neutral">'+(source.kind==='official'?t('官方來源','Official source'):t('外部報導／線索','External report / lead'))+'</span><span class="evidence-label">'+esc(source.checked_on)+'</span></div><h3>'+esc(source.publisher)+'</h3><p>'+accessText(source.access)+'</p><div class="source-links"><a href="'+esc(sourceUrl(source.url))+'" target="_blank" rel="noopener noreferrer">'+esc(new URL(source.url).hostname)+' ↗</a></div><details><summary>'+t('查核註記原文','Original research note')+'</summary><p>'+esc(source.note)+'</p></details></article>');
+  else rows=data.coverage.filter(item=>normalizeRewardSearch(JSON.stringify(item)).includes(query)).map(item=>'<article class="research-item"><div class="card-top"><span class="tag '+(item.research_status==='queued'?'warn':'neutral')+'">'+(item.research_status==='queued'?t('待研究','Queued'):item.research_status?.startsWith('application_window_closed')?t('申請梯次已截止','Application window closed'):t('部分資料已查，仍有缺口','Partial research; gaps remain'))+'</span></div><h3>'+esc(item.name)+'</h3><p>'+esc(item.note||t('納入研究範圍，尚未宣稱完整。','In scope; not claimed complete.'))+'</p>'+links((item.source_ids||[]).map(id=>sourceMap.get(id)).filter(Boolean))+'</article>');
   $('#library-list').innerHTML='<p class="small muted">'+t(number(rows.length)+'筆結果；同機構多頁不算獨立機構互證。',number(rows.length)+' results. Multiple pages from one institution are not independent counterpart verification.')+'</p>'+(rows.length?rows.join(''):'<div class="empty">'+t('沒有符合的資料。','No results found.')+'</div>');
 }
 function accessText(access){return /live_browser/.test(access)?t('已讀即時頁面與可見條款','Live page and visible terms read'):/pdf_text/.test(access)?t('已擷取PDF文字','PDF text extracted'):/failed|stale|conflict/.test(access)?t('擷取或時效差異，詳見註記','Access/freshness issue; see note'):/body/.test(access)?t('已讀本文','Page body read'):t('索引／摘要線索','Indexed excerpt / lead');}
@@ -150,10 +155,12 @@ function cardDialog(card,trigger){
   if(earn.monthly_bonus_cap_primary)extras.push(t('主卡每月加碼上限：','Monthly primary bonus cap: ')+number(earn.monthly_bonus_cap_primary));
   if(earn.foreign_and_eva_ticket_bonus_percent)extras.push(t('海外／指定長榮消費額外加碼：','Extra bonus on foreign / designated EVA spend: ')+earn.foreign_and_eva_ticket_bonus_percent+'%');
   if(earn.monthly_first_miles_per_category)extras.push(t('各類每月首','First ')+number(earn.monthly_first_miles_per_category)+t('哩有階梯加碼；之後依基本比例。',' miles per monthly category have tiered bonuses; base rate thereafter.'));
+  if(earn.overseas_twd_per_point)extras.push('海外一般消費NT$'+earn.overseas_twd_per_point+'／點；須符合台灣以外交易且列收國外交易手續費。');
   if(earn.foreign_physical_twd_per_point)extras.push(t('海外實體：NT$','Overseas physical spend: NT$')+earn.foreign_physical_twd_per_point+t('／點；網路消費不同。',' / point; online purchases differ.'));
   if(earn.qualifying_hotel_twd_per_point)extras.push(t('合格飯店：NT$','Qualifying hotels: NT$')+earn.qualifying_hotel_twd_per_point+t('／點，每季類別上限',' / point; quarterly category cap ')+number(earn.hotel_quarter_point_cap));
   if(card.fees.frequent_traveller_program_annual_twd)extras.push(t('優遊常客計劃另收：','Additional frequent-traveller program fee: ')+money(card.fees.frequent_traveller_program_annual_twd)+t('／年','/year'));
-  if(card.fees.first_year_waived)extras.push(t('次年牌告年費','Listed renewal fee ')+money(card.fees.annual_twd)+t('；減免條件另核。','; waiver conditions need checking.'));
+  if(card.fees.waiver_note)extras.push(card.fees.waiver_note);
+  else if(card.fees.first_year_waived)extras.push(t('次年牌告年費','Listed renewal fee ')+money(card.fees.annual_twd)+t('；減免條件另核。','; waiver conditions need checking.'));
   showDialog('<h2 id="dialog-title">'+esc(cardName(card))+'</h2><p class="dialog-lede">'+esc(text(ASSETS[card.asset]))+' · '+esc(card.network)+' · '+t('台灣發卡','Taiwan issuance')+'</p><div class="detail-grid"><section class="detail-section"><h3>'+t('主卡年費與基本累積','Primary annual fee and base earning')+'</h3><p class="card-fee">'+esc(feeText(card))+'</p><p>'+esc(baseText(card))+'</p></section><section class="detail-section tradeoffs"><h3>'+t('額外條件','Additional conditions')+'</h3><ul><li>'+esc(cardAlert(card))+'</li>'+extras.map(value=>'<li>'+esc(value)+'</li>').join('')+'</ul></section></div><section class="dialog-section"><h3>'+t('迎新、續卡、會籍與轉點','Welcome, renewal, status and transfers')+'</h3>'+ruleDetails(rules)+'</section><section class="dialog-section"><h3>'+t('尚待確認','Still to verify')+'</h3>'+originalNotes(card.gaps)+'</section><div class="route-actions"><button type="button" class="button secondary '+(selected?'selected':'')+'" data-compare-card="'+card.id+'" aria-pressed="'+selected+'">'+(selected?t('✓ 比較中','✓ Comparing'):t('＋ 加入比較','＋ Compare'))+'</button></div>',trigger);
 }
 function renderComparison(){
@@ -253,7 +260,7 @@ function openHash(){
 }
 async function init(){
   try{
-    const response=await fetch('./data.json?v=20261025-12');if(!response.ok)throw new Error('Research HTTP '+response.status);data=await response.json();
+    const response=await fetch('./data.json?v=20261025-12');if(!response.ok)throw new Error('Research HTTP '+response.status);data=await response.json();data.cards.push(...BANK_CARDS);
     data.sources=[...new Map([...data.sources,...TREE_SOURCES,...NETWORK_SOURCES].map(source=>[source.id,source])).values()];
     data.rules=[...data.rules,...NETWORK_RULES];data.coverage=[...data.coverage,...NETWORK_COVERAGE].map(item=>{const update=NETWORK_COVERAGE_UPDATES[item.id];return update?{...item,...update,source_ids:[...new Set([...item.source_ids,...(update.source_ids||[])])],rule_ids:[...new Set([...item.rule_ids,...(update.rule_ids||[])])]}:item;});
     ruleMap=new Map(data.rules.map(rule=>[rule.id,rule]));sourceMap=new Map(data.sources.map(source=>[source.id,source]));cardMap=new Map(data.cards.map(card=>[card.id,card]));routeMap=new Map(ROUTES.map(route=>[route.id,route]));

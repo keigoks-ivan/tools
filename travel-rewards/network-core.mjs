@@ -1,4 +1,4 @@
-import {RESOURCES,FACTS,OPPORTUNITIES} from './network-data.mjs?v=20261025-12';
+import {RESOURCES,FACTS,OPPORTUNITIES} from './network-data.mjs?v=20261027-16';
 import {traceTree} from './tree-core.mjs?v=20261025-12';
 const resourceMap=new Map(RESOURCES.map(item=>[item.id,item]));
 export function cleanNetworkState(value={}){
@@ -10,7 +10,8 @@ export function cleanNetworkState(value={}){
     const raw=value.balances?.[id],amount=typeof raw==='number'||(typeof raw==='string'&&raw.trim())?Number(raw):NaN;
     if(resourceMap.get(id)?.group==='點數與帳戶'&&!id.endsWith('account')&&Number.isFinite(amount)&&amount>=0&&amount<=Number.MAX_SAFE_INTEGER)balances[id]=amount;
   }
-  return {resources,facts,removed,balances};
+  const unlisted={};for(const key of ['cards','status','points'])if(typeof value.unlisted?.[key]==='string'&&value.unlisted[key].trim())unlisted[key]=value.unlisted[key].trim().slice(0,500);
+  return {resources,facts,removed,balances,unlisted};
 }
 export function toggleNetworkResource(saved,id,checked){
   const value=cleanNetworkState(saved),item=resourceMap.get(id);if(!item)return value;
@@ -30,7 +31,7 @@ export function selectedResources(saved){
 }
 export function effectiveResources(saved){
   const result=selectedResources(saved);
-  if(['ctbc-ci-priority','ctbc-ci-precious','ctbc-marriott-priority','ctbc-marriott-infinite','ctbc-marriott-priority-limited'].some(id=>result.has(id)))result.add('visa-infinite');
+  if(['hsbc-traveller-infinite','ctbc-ana-infinite','ctbc-ci-priority','ctbc-ci-precious','ctbc-marriott-priority','ctbc-marriott-infinite','ctbc-marriott-priority-limited'].some(id=>result.has(id)))result.add('visa-infinite');
   if(['mb-platinum-exact','mb-titanium','mb-ambassador'].some(id=>result.has(id)))result.add('mb-platinum');
   if(['jal-base','jal-crystal','jal-sapphire','jal-premier','jal-diamond','jal-metal'].some(id=>result.has(id)))result.add('jal-account');
   if(['all-points','all-silver','all-gold','all-platinum','all-diamond'].some(id=>result.has(id)))result.add('all-account');

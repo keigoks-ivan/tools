@@ -1,12 +1,12 @@
-import {TREES,TREE_STATUS} from './tree-data.mjs?v=20261025-12';
+import {TREES,TREE_STATUS} from './tree-data.mjs?v=20261027-16';
 import {traceTree,treePosition,validateTree} from './tree-core.mjs?v=20261025-12';
 
-import {RESOURCES,FACTS,OPPORTUNITIES} from './network-data.mjs?v=20261025-12';
-import {cleanNetworkState,selectedResources,effectiveResources,effectiveFacts,evaluateOpportunity,traceResources,relatedViews,coverageSummary,relevantNetworkFacts,toggleNetworkResource} from './network-core.mjs?v=20261026-15';
+import {RESOURCES,FACTS,OPPORTUNITIES} from './network-data.mjs?v=20261027-16';
+import {cleanNetworkState,selectedResources,effectiveResources,effectiveFacts,evaluateOpportunity,traceResources,relatedViews,coverageSummary,relevantNetworkFacts,toggleNetworkResource} from './network-core.mjs?v=20261027-16';
 import {stayHub,stayNodeSummary,wireStayTools} from './stay.mjs?v=20261025-12';
 import {cubePanel,wireCubeTools} from './cube.mjs?v=20261025-12';
 import {hotelPanel,hotelNodeSummary,wireHotelTools} from './hotel-use.mjs?v=20261025-12';
-import {setupMatches,SETUP_GOALS} from './setup-core.mjs?v=20261026-15';
+import {setupMatches,SETUP_GOALS} from './setup-core.mjs?v=20261027-16';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const W=194,H=112;
@@ -64,7 +64,7 @@ export function mountTree(root,{data,inspect,onChange}){
   }
   function inventoryMarkup(){
     const selected=selectedResources(inventory),current=facts(),questions=relevantNetworkFacts(tree());
-    return '<details class="network-inventory" '+(state.inventoryOpen?'open':'')+'><summary>我的資源 <b id="network-owned-count">'+selected.size+' 項</b><span>編輯起點</span></summary><div class="network-inventory-body"><p>預設不選任何資源。請自行勾選實際持有的卡片、已核准會籍及點數；卡片禮遇仍要另外申請。資料只存於此瀏覽器。下方只問目前子圖相關的條件，其他已填答案仍保留。</p><button type="button" class="text-button" data-start-setup>重新設定我的起點 ↗</button>'+[...new Set(RESOURCES.map(item=>item.group))].map(group=>'<fieldset><legend>'+esc(group)+'</legend><div class="network-resource-grid">'+RESOURCES.filter(item=>item.group===group).map(item=>'<label><input type="checkbox" data-network-resource="'+item.id+'" '+(selected.has(item.id)?'checked':'')+'>'+esc(item.label)+'</label>').join('')+'</div></fieldset>').join('')+'<fieldset '+(questions.length?'':'hidden')+'><legend>這張圖的來源與一次性條件</legend><div class="network-fact-grid">'+questions.map(item=>'<label>'+esc(item.label)+'<select data-network-fact="'+item.id+'"><option value="unknown">不確定／未填</option>'+item.options.map(([id,label])=>'<option value="'+id+'" '+(current[item.id]===id?'selected':'')+'>'+esc(label)+'</option>').join('')+'</select></label>').join('')+'</div></fieldset><button type="button" class="text-button" data-network-clear>清空我的資源與條件</button></div></details>';
+    return '<details class="network-inventory" '+(state.inventoryOpen?'open':'')+'><summary>我的資源 <b id="network-owned-count">'+selected.size+' 項</b><span>編輯起點</span></summary><div class="network-inventory-body"><p>預設不選任何資源。請自行勾選實際持有的卡片、已核准會籍及點數；卡片禮遇仍要另外申請。資料只存於此瀏覽器。下方只問目前子圖相關的條件，其他已填答案仍保留。</p><button type="button" class="text-button" data-start-setup>重新設定我的起點 ↗</button>'+[...new Set(RESOURCES.map(item=>item.group))].map(group=>'<fieldset><legend>'+esc(group)+'</legend><div class="network-resource-grid">'+RESOURCES.filter(item=>item.group===group).map(item=>'<label><input type="checkbox" data-network-resource="'+item.id+'" '+(selected.has(item.id)?'checked':'')+'>'+esc(item.label)+'</label>').join('')+'</div></fieldset>').join('')+(Object.keys(inventory.unlisted).length?'<fieldset><legend>其他起點 · 待核</legend>'+Object.entries(inventory.unlisted).map(([key,value])=>'<p class="setup-unlisted-note">'+({cards:'信用卡',status:'會籍',points:'點數'}[key])+'：'+esc(value)+'</p>').join('')+'<p>只作記錄，尚未用來判定路線。可從上方重新設定修改。</p></fieldset>':'')+'<fieldset '+(questions.length?'':'hidden')+'><legend>這張圖的來源與一次性條件</legend><div class="network-fact-grid">'+questions.map(item=>'<label>'+esc(item.label)+'<select data-network-fact="'+item.id+'"><option value="unknown">不確定／未填</option>'+item.options.map(([id,label])=>'<option value="'+id+'" '+(current[item.id]===id?'selected':'')+'>'+esc(label)+'</option>').join('')+'</select></label>').join('')+'</div></fieldset><button type="button" class="text-button" data-network-clear>清空我的資源與條件</button></div></details>';
   }
   function directoryMarkup(){
     const list=OPPORTUNITIES.filter(op=>state.goal==='all'||op.goal===state.goal),resources=owned(),current=facts(),summary=coverageSummary(data,OPPORTUNITIES,TREES);

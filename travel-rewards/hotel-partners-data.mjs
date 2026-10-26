@@ -28,7 +28,7 @@ export const HOTEL_SOURCES=[
 ];
 const r=(id,label,group,exclusive)=>({id,label,group,...(exclusive?{exclusive}:{})});
 export const HOTEL_RESOURCES=[
-  r('hsbc-premier-points','滙豐卓越紅利積分','點數與帳戶'),r('ihg-points','IHG獎勵點數','點數與帳戶'),r('chase-ihg-select','美國Chase IHG Premier Select（已持有）','信用卡'),
+  r('hsbc-premier-points','滙豐卓越紅利積分','點數與帳戶'),r('ihg-points','IHG獎勵點數','點數與帳戶'),r('chase-ihg-select','美國 Chase IHG Premier Select','信用卡'),
   ...[['all-silver','ALL銀卡'],['all-gold','ALL金卡'],['all-platinum','ALL白金'],['all-diamond','ALL鑽卡以上']].map(([id,label])=>r(id,label,'酒店會籍','all')),
   ...[['qr-silver','Qatar Silver'],['qr-gold','Qatar Gold'],['qr-platinum','Qatar Platinum']].map(([id,label])=>r(id,label,'航空會籍','qatar')),
   r('fb-account','Flying Blue帳戶','點數與帳戶'),r('fb-miles','Flying Blue可兌換哩程','點數與帳戶')
