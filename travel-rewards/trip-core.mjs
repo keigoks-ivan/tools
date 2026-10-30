@@ -117,3 +117,8 @@ export function fillTemplate(template,values){
     return parsed.href;
   }catch{return url;}
 }
+
+// 外站票工具也要判斷「這家計畫你接不接得上」
+export function programAccess(programId,inventory,transfers,need,today){
+  return access(programId,new Set(inventory.resources||[]),inventory.balances||{},transfers,need,today);
+}

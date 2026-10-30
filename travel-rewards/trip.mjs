@@ -1,5 +1,5 @@
-import {TRIP_CITIES} from './trip-cities.mjs?v=20261031-1';
-import {flightOptions,hotelOptions,fillTemplate,cashValue} from './trip-core.mjs?v=20261031-1';
+import {TRIP_CITIES} from './trip-cities.mjs?v=20261031-2';
+import {flightOptions,hotelOptions,fillTemplate,cashValue} from './trip-core.mjs?v=20261031-2';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const num=value=>new Intl.NumberFormat('zh-TW').format(value);
@@ -28,8 +28,8 @@ export function linkValues({query,checkin,checkout,adults}){
   const nights=ci&&co?Math.round((Date.UTC(co[0],co[1]-1,co[2])-Date.UTC(ci[0],ci[1]-1,ci[2]))/86400000):'';
   return {query,checkin:checkin||'',checkout:checkout||'',adults,checkin_mdy:mdy(ci),checkout_mdy:mdy(co),ci_day:ci?String(ci[2]):'',co_day:co?String(co[2]):'',ci_my:my(ci),co_my:my(co),nights:nights>0?String(nights):''};
 }
-function flightsUrl(to,checkin,checkout,from='TPE'){
-  const q='Flights from '+from+' to '+to+(checkin?' on '+checkin:'')+(checkin&&checkout?' through '+checkout:checkin?' oneway':'');
+function flightsUrl(to,checkin,checkout){
+  const q='Flights from TPE to '+to+(checkin?' on '+checkin:'')+(checkin&&checkout?' through '+checkout:checkin?' oneway':'');
   return 'https://www.google.com/travel/flights?q='+encodeURIComponent(q)+'&curr=TWD&hl=zh-TW';
 }
 function load(){try{return JSON.parse(localStorage.getItem(STORE))||{};}catch{return {};}}
@@ -37,15 +37,13 @@ function save(value){try{localStorage.setItem(STORE,JSON.stringify(value));}catc
 
 export function mountTrip(root,{getInventory,data,hotelPrograms,resourceLabel,today}){
   const saved=load();
-  const ORIGINS=[{id:'TPE',zh:'台北',airport:'TPE'},{id:'HKG',zh:'香港',airport:'HKG'},{id:'TYO',zh:'東京',airport:'TYO'}];
-  const form={origin:ORIGINS.some(o=>o.id===saved.origin)?saved.origin:'TPE',city:TRIP_CITIES.some(c=>c.id===saved.city)?saved.city:'TYO',cabin:saved.cabin==='C'?'C':'Y',trip:saved.trip==='roundtrip'?'roundtrip':'oneway',pax:Math.min(9,Math.max(1,Number(saved.pax)||1)),cash:0,tax:{},checkin:'',checkout:''};
-  if(form.city===form.origin)form.city=form.origin==='TYO'?'OSA':'TYO';
+  const form={city:TRIP_CITIES.some(c=>c.id===saved.city)?saved.city:'TYO',cabin:saved.cabin==='C'?'C':'Y',trip:saved.trip==='roundtrip'?'roundtrip':'oneway',pax:Math.min(9,Math.max(1,Number(saved.pax)||1)),cash:0,tax:{},checkin:'',checkout:''};
   const label=id=>resourceLabel(id)||id;
   const sourceUrl=id=>data.sources.find(item=>item.id===id)?.url;
 
   function controls(){
-    const options=REGIONS.map(region=>'<optgroup label="'+region+'">'+TRIP_CITIES.filter(c=>c.region===region&&c.id!==form.origin).map(c=>'<option value="'+c.id+'" '+(c.id===form.city?'selected':'')+'>'+esc(c.zh)+'</option>').join('')+'</optgroup>').join('');
-    return '<form class="trip-form" data-trip-form><label class="trip-origin"><span>出發地</span><select name="origin">'+ORIGINS.map(o=>'<option value="'+o.id+'" '+(o.id===form.origin?'selected':'')+'>'+esc(o.zh)+(o.id==='TPE'?'（桃園）':'（外站）')+'</option>').join('')+'</select></label><label class="trip-city"><span>目的地</span><select name="city">'+options+'</select></label>'+
+    const options=REGIONS.map(region=>'<optgroup label="'+region+'">'+TRIP_CITIES.filter(c=>c.region===region).map(c=>'<option value="'+c.id+'" '+(c.id===form.city?'selected':'')+'>'+esc(c.zh)+'</option>').join('')+'</optgroup>').join('');
+    return '<form class="trip-form" data-trip-form><label class="trip-city"><span>目的地</span><select name="city">'+options+'</select></label>'+
       '<label><span>去程</span><input type="date" name="checkin" value="'+form.checkin+'"></label><label><span>回程</span><input type="date" name="checkout" value="'+form.checkout+'"></label>'+
       '<label><span>人數</span><select name="pax">'+[1,2,3,4,5,6].map(n=>'<option '+(n===form.pax?'selected':'')+'>'+n+'</option>').join('')+'</select></label>'+
       '<fieldset class="trip-seg"><legend>艙等</legend>'+Object.entries(CABIN).map(([k,v])=>'<label><input type="radio" name="cabin" value="'+k+'" '+(form.cabin===k?'checked':'')+'>'+v+'</label>').join('')+'</fieldset>'+
@@ -90,16 +88,6 @@ export function mountTrip(root,{getInventory,data,hotelPrograms,resourceLabel,to
     const tax=form.tax[item.program.id]||'';
     return '<div class="trip-value"><p>'+valueText(item)+'</p><label><span>這張獎勵票要付的稅金與附加費（每人，NT$）</span><input type="number" inputmode="numeric" min="0" step="100" data-tax="'+esc(item.program.id)+'" value="'+tax+'"></label></div>';
   }
-  // 外站票：先從台北飛到外站，回程也從外站回台北；各取所有計畫裡最少的哩數
-  function positioning(origin,inv){
-    const cheapest=list=>list.filter(x=>x.need).sort((a,b)=>a.need.each-b.need.each)[0];
-    const base={transfers:data.transfers,inventory:inv,cabin:form.cabin,pax:1,trip:'oneway',today};
-    const go=cheapest(flightOptions({...base,awards:data.awards,city:origin.id}));
-    const back=cheapest(flightOptions({...base,awards:awardsFromOrigin(origin.id),city:'TPE'}));
-    const part=(x,txt)=>x?txt+'最少 '+num(x.need.each)+' 哩（'+esc(x.program.name)+'）':txt+'查不到固定表';
-    return '<p class="trip-note trip-outstation">外站票要先飛到'+esc(origin.zh)+'，最後也要從'+esc(origin.zh)+'回台灣。'+part(go,'台北到'+esc(origin.zh))+'；'+part(back,esc(origin.zh)+'回台北')+'。下面的哩數只算'+esc(origin.zh)+'出發這一段；長榮、華航經台北轉機的價格是依官網範例推得，標參考值。</p>';
-  }
-  function awardsFromOrigin(id){return data.awards.map(p=>({...p,cities:data.outstation?.awards?.[id]?.[p.id]||{}}));}
   function flightCard(item,city){
     const [pill,tone]=flightPill(item),p=item.program,n=item.need,e=n?.option||item.entry;
     const per=n?(n.roundtripOnly?'每人來回 ':'每人單程 ')+num(n.each)+' 哩':p.no_chart_note?'官方沒有公布標準表':'這個艙等沒有固定表';
@@ -108,19 +96,19 @@ export function mountTrip(root,{getInventory,data,hotelPrograms,resourceLabel,to
     const routes=item.state==='combo'?comboLines:item.routes.filter(r=>r.input).map(r=>'<li>從'+esc(label(r.from))+'轉 '+num(r.input)+' 點 → '+num(r.output)+' 哩'+(r.sourceBalance!=null?'（你有 '+num(r.sourceBalance)+'）':'')+(r.timing?'・'+esc(r.timing):'')+'</li>').join('')+comboLines;
     const value=cashLine(item);
     const search=data.awardSearch[p.id]?.url||p.award_search_url,login=data.awardSearch[p.id]?.login_required;
-    const flights=flightsUrl(city.airports[0],form.checkin,form.checkout,ORIGINS.find(o=>o.id===form.origin).airport);
+    const flights=flightsUrl(city.airports[0],form.checkin,form.checkout);
     return '<article class="trip-card '+tone+'" data-card="'+esc(p.id)+'"><span class="op-pill '+tone+'">'+esc(pill)+'</span><h3>'+esc(p.name)+'</h3><p class="trip-route">'+esc(e.route||'')+'</p><p class="trip-miles"><b>'+esc(per)+'</b>'+total+(n?'<small>'+CABIN[form.cabin]+'・官方表最低一級</small>':'')+'</p>'+(routes?'<ul class="trip-transfers">'+routes+'</ul>':'')+value+(n?.alts?.length?'<details class="trip-paths"><summary>還有 '+n.alts.length+' 種走法</summary><ol>'+n.alts.map(alt=>'<li><span>'+esc(alt.option.route||'')+(alt.option.stops!=null?'・'+(alt.option.stops?'轉機 '+alt.option.stops+' 次':'直飛'):'')+(alt.option.estimate?'・參考值':'')+'</span><b>'+(alt.option.roundtrip_only?'來回 ':'')+num(alt.each)+' 哩</b></li>').join('')+'</ol></details>':'')+(!n&&p.no_chart_note?'<p class="trip-note">'+esc(p.no_chart_note)+'</p>':'')+(e.estimate?'<p class="trip-note trip-estimate">參考值：這個數字不是官方表直接寫的，是依飛行距離自算，或依官網範例推得；訂之前登入官網核對。</p>':'')+(e.note?'<details class="trip-fees"><summary>這條路線的細節</summary><p>'+esc(e.note)+'</p></details>':'')+(p.fees_note?'<details class="trip-fees"><summary>稅金與燃油附加費</summary><p>'+esc(p.fees_note)+'</p></details>':'')+'<div class="trip-actions">'+(search?'<a class="button secondary" href="'+esc(search)+'" target="_blank" rel="noopener">到官網查位子'+(login?'（要登入）':'')+'</a>':'')+(flights?'<a class="text-button" href="'+esc(flights)+'" target="_blank" rel="noopener">看誰飛這條航線</a>':'')+'</div></article>';
   }
   // 手上的卡自帶、出去玩用得到的權益（升等券、住宿優惠、續卡贈哩）
   // 目的地照片署名：img/cities/credits.json，讀不到就不顯示照片
   let credits=null;
-  fetch(new URL('./img/cities/credits.json?v=20261031-1',import.meta.url)).then(r=>r.ok?r.json():{}).then(json=>{credits=json;render();}).catch(()=>{credits={};});
-  function hero(origin,city,flights){
+  fetch(new URL('./img/cities/credits.json?v=20261031-2',import.meta.url)).then(r=>r.ok?r.json():{}).then(json=>{credits=json;render();}).catch(()=>{credits={};});
+  function hero(city,flights){
     const usable=flights.filter(item=>item.state!=='none'&&item.need),min=flights.filter(item=>item.need).sort((a,b)=>a.need.each-b.need.each)[0];
     const lede=usable.length?'你手上的哩程和點數，接得上 <b>'+usable.length+'</b> 家計畫；最少的一張要 <b>'+num(usable.sort((a,b)=>a.need.each-b.need.each)[0].need.each)+'</b> 哩。':min?'各家最少要 <b>'+num(min.need.each)+'</b> 哩。選了你手上的卡和點數，會告訴你夠不夠。':'這條航線目前查不到固定的獎勵表。';
     const c=credits?.[city.id],src=new URL('./img/cities/'+city.id+'-1600.webp',import.meta.url).href,small=new URL('./img/cities/'+city.id+'-800.webp',import.meta.url).href;
     const photo=c?'<figure class="trip-photo"><div class="ph"><img src="'+small+'" srcset="'+small+' 800w, '+src+' 1600w" sizes="(max-width:760px) 100vw, 58vw" alt="'+esc(city.zh)+'" loading="lazy"></div><figcaption>照片：'+esc(c.author||'')+'・<a href="'+esc(c.license_url||c.file_page||'')+'" target="_blank" rel="noopener">'+esc(c.license||'')+'</a>・<a href="'+esc(c.file_page||'')+'" target="_blank" rel="noopener">Wikimedia Commons</a>・已裁切</figcaption></figure>':'';
-    return '<section class="trip-hero'+(photo?'':' no-photo')+'"><div class="trip-hero-text"><span class="trip-kicker">'+esc(origin.zh)+'出發・'+esc(city.region)+'・'+CABIN[form.cabin]+(form.trip==='roundtrip'?'來回':'單程')+'</span><h2>'+esc(city.zh)+'</h2><p class="trip-lede">'+lede+'</p></div>'+photo+'</section>';
+    return '<section class="trip-hero'+(photo?'':' no-photo')+'"><div class="trip-hero-text"><span class="trip-kicker">台北出發・'+esc(city.region)+'・'+CABIN[form.cabin]+(form.trip==='roundtrip'?'來回':'單程')+'</span><h2>'+esc(city.zh)+'</h2><p class="trip-lede">'+lede+'</p></div>'+photo+'</section>';
   }
   function perksSection(owned){
     const rows=(data.perks||[]).filter(x=>owned.has(x.card));
@@ -139,18 +127,16 @@ export function mountTrip(root,{getInventory,data,hotelPrograms,resourceLabel,to
   }
   function render(){
     const inv=getInventory(),owned=new Set(inv.resources||[]),city=TRIP_CITIES.find(c=>c.id===form.city);
-    const origin=ORIGINS.find(o=>o.id===form.origin),out=origin.id!=='TPE';
-    const awardsFrom=id=>id==='TPE'?data.awards:data.awards.map(p=>({...p,cities:data.outstation?.awards?.[id]?.[p.id]||{}}));
-    const flights=flightOptions({awards:awardsFrom(origin.id),transfers:data.transfers,inventory:inv,city:form.city,cabin:form.cabin,pax:form.pax,trip:form.trip,today});
+    const flights=flightOptions({awards:data.awards,transfers:data.transfers,inventory:inv,city:form.city,cabin:form.cabin,pax:form.pax,trip:form.trip,today});
     const hotels=hotelOptions({programs:hotelPrograms,transfers:data.transfers,inventory:inv,today});
     if(form.cash)flights.sort((a,b)=>(valueOf(b)??-1)-(valueOf(a)??-1));
     shown=flights;
     const usable=flights.filter(item=>item.state!=='none'),other=flights.filter(item=>item.state==='none');
-    const nonstop=out?{}:data.routes[form.city]?.nonstop||{},carriers=[...new Set(Object.values(nonstop).flat())].map(code=>data.carriers[code]?.zh||code);
+    const nonstop=data.routes[form.city]?.nonstop||{},carriers=[...new Set(Object.values(nonstop).flat())].map(code=>data.carriers[code]?.zh||code);
     const dynamic=data.dynamic.filter(item=>owned.has(item.id));
     const empty=!owned.size?'<div class="trip-empty"><p>還沒選你手上的卡和點數，下面只列各計畫要多少哩。選完會告訴你夠不夠、差多少要從哪裡轉。</p><button type="button" class="button" data-start-setup>選我手上的卡</button></div>':'';
-    root.querySelector('[data-trip-results]').innerHTML=empty+hero(origin,city,flights)+
-      '<section class="trip-section"><h2>機票・'+esc(origin.zh)+'到'+esc(city.zh)+'</h2>'+(out?positioning(origin,inv):'')+(carriers.length?'<p class="small muted">桃園直飛：'+esc(carriers.join('、'))+'</p>':'')+
+    root.querySelector('[data-trip-results]').innerHTML=empty+hero(city,flights)+
+      '<section class="trip-section"><h2>機票・台北到'+esc(city.zh)+'</h2>'+(carriers.length?'<p class="small muted">桃園直飛：'+esc(carriers.join('、'))+'</p>':'')+
       (usable.length?'<div class="trip-grid">'+usable.map(item=>flightCard(item,city)).join('')+'</div>':owned.size?'<div class="empty">你手上的哩程和點數，在這條航線還沒有接得上的計畫。下面是其他計畫要多少哩。</div>':'')+
       (other.length?(owned.size?'<details class="plan-other"><summary><b>其他計畫（'+other.length+'）</b><small>你目前沒有這些哩程，也沒有能轉過去的點數</small></summary><div class="trip-grid">'+other.map(item=>flightCard(item,city)).join('')+'</div></details>':'<div class="trip-grid">'+other.map(item=>flightCard(item,city)).join('')+'</div>'):'')+
       (dynamic.length?'<p class="trip-note">'+esc(dynamic.map(item=>item.name).join('、'))+' 是浮動價，沒有固定表，到官網查。</p>':'')+'<details class="trip-fees"><summary>哪些計畫沒列出來</summary><p>聯航 MileagePlus、Flying Blue 是浮動價，沒有固定表。卡達 Avios 官方計算器查不到台灣出發的數字；國泰亞洲萬里通要登入才看得到哩數。日航只列官方表上有的直飛城市與夥伴表，經東京轉往歐美沒有官方連程價。英航 Avios 只查到經香港到倫敦。各計畫的稅金與燃油附加費只查到下限，訂票時另付。</p></details></section>'+
@@ -169,12 +155,11 @@ export function mountTrip(root,{getInventory,data,hotelPrograms,resourceLabel,to
   root.addEventListener('change',event=>{
     const f=event.target.closest('[data-trip-form]');
     if(!f)return;
-    const before=JSON.stringify(form),prevOrigin=form.origin;
-    form.origin=f.origin.value;form.city=f.city.value===form.origin?(form.origin==='TYO'?'OSA':'TYO'):f.city.value;form.pax=Number(f.pax.value);form.cabin=f.cabin.value;form.trip=f.trip.value;form.checkin=f.checkin.value;form.checkout=f.checkout.value;form.cash=Math.max(0,Math.round(Number(f.cash.value)||0));
+    const before=JSON.stringify(form);
+    form.city=f.city.value;form.pax=Number(f.pax.value);form.cabin=f.cabin.value;form.trip=f.trip.value;form.checkin=f.checkin.value;form.checkout=f.checkout.value;form.cash=Math.max(0,Math.round(Number(f.cash.value)||0));
     if(form.checkout&&form.trip==='oneway'){form.trip='roundtrip';f.querySelector('[name=trip][value=roundtrip]').checked=true;}
     if(JSON.stringify(form)===before)return;
-    save({origin:form.origin,city:form.city,cabin:form.cabin,trip:form.trip,pax:form.pax});
-    if(form.origin!==prevOrigin)f.outerHTML=controls();
+    save({city:form.city,cabin:form.cabin,trip:form.trip,pax:form.pax});
     render();
   });
   root.querySelector('[data-trip-results]').addEventListener('input',event=>{

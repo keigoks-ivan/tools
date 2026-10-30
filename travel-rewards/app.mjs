@@ -1,25 +1,26 @@
-import {redemptionValue,challengeCost,cardFee} from './core.mjs?v=20261031-1';
-import {ROUTES,CARD_EN,ASSETS,RULE_EN} from './content.mjs?v=20261031-1';
-import {localizeRuleValues} from './fields.mjs?v=20261031-1';
-import {mountTree} from './tree.mjs?v=20261031-1';
-import {TREES,TREE_STATUS,TREE_SOURCES} from './tree-data.mjs?v=20261031-1';
-import {traceTree} from './tree-core.mjs?v=20261031-1';
-import {RESOURCES,OPPORTUNITIES,NETWORK_SOURCES,NETWORK_RULES,NETWORK_COVERAGE,NETWORK_COVERAGE_UPDATES} from './network-data.mjs?v=20261031-1';
-import {cleanNetworkState,selectedResources,effectiveResources,traceResources} from './network-core.mjs?v=20261031-1';
-import {planGroups,cardIssuer} from './setup-core.mjs?v=20261031-1';
-import {mountSetup} from './setup.mjs?v=20261031-1';
-import {selectHotelProgram,HOTEL_PROGRAMS} from './hotel-use.mjs?v=20261031-1';
-import {mountTrip} from './trip.mjs?v=20261031-1';
-import {TRIP_DATA} from './trip-data.mjs?v=20261031-1';
+import {redemptionValue,challengeCost,cardFee} from './core.mjs?v=20261031-2';
+import {ROUTES,CARD_EN,ASSETS,RULE_EN} from './content.mjs?v=20261031-2';
+import {localizeRuleValues} from './fields.mjs?v=20261031-2';
+import {mountTree} from './tree.mjs?v=20261031-2';
+import {TREES,TREE_STATUS,TREE_SOURCES} from './tree-data.mjs?v=20261031-2';
+import {traceTree} from './tree-core.mjs?v=20261031-2';
+import {RESOURCES,OPPORTUNITIES,NETWORK_SOURCES,NETWORK_RULES,NETWORK_COVERAGE,NETWORK_COVERAGE_UPDATES} from './network-data.mjs?v=20261031-2';
+import {cleanNetworkState,selectedResources,effectiveResources,traceResources} from './network-core.mjs?v=20261031-2';
+import {planGroups,cardIssuer} from './setup-core.mjs?v=20261031-2';
+import {mountSetup} from './setup.mjs?v=20261031-2';
+import {selectHotelProgram,HOTEL_PROGRAMS} from './hotel-use.mjs?v=20261031-2';
+import {mountTrip} from './trip.mjs?v=20261031-2';
+import {mountOutstation} from './outstation.mjs?v=20261031-2';
+import {TRIP_DATA} from './trip-data.mjs?v=20261031-2';
 
-import {BANK_CARDS,normalizeRewardSearch} from './bank-entries-data.mjs?v=20261031-1';
+import {BANK_CARDS,normalizeRewardSearch} from './bank-entries-data.mjs?v=20261031-2';
 
 const $=selector=>document.querySelector(selector);
 const $$=selector=>[...document.querySelectorAll(selector)];
 const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
-const views=['plan','trip','explore','cards','more','calculators','library'];
-const TAB_FOR={calculators:'more',library:'more'};
-let data, ruleMap, sourceMap, cardMap, routeMap, toastTimer, lastDialogTrigger, treeUI, setupUI, tripUI;
+const views=['plan','trip','explore','cards','more','outstation','calculators','library'];
+const TAB_FOR={outstation:'more',calculators:'more',library:'more'};
+let data, ruleMap, sourceMap, cardMap, routeMap, toastTimer, lastDialogTrigger, treeUI, setupUI, tripUI, outstationUI;
 const state={view:'plan',goal:'all',cardCompare:[]};
 const t=zh=>zh;
 const text=pair=>Array.isArray(pair)?pair[0]:pair;
@@ -226,6 +227,7 @@ function setView(view,updateHash=true){
   $$('.nav-inner [data-view]').forEach(button=>{const on=button.dataset.view===tab;button.setAttribute('aria-selected',String(on));if(on)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');});
   if(view==='plan')renderPlan();
   if(view==='trip')tripUI?.render();
+  if(view==='outstation')outstationUI?.render();
   if(view==='explore')renderExplore();
   if(view==='cards')renderCards();
   if(updateHash){history.replaceState(null,'','#'+view);window.scrollTo(0,0);}
@@ -271,15 +273,16 @@ function openHash(){
 }
 async function init(){
   try{
-    const response=await fetch('./data.json?v=20261031-1');if(!response.ok)throw new Error('Research HTTP '+response.status);data=await response.json();data.cards.push(...BANK_CARDS);
+    const response=await fetch('./data.json?v=20261031-2');if(!response.ok)throw new Error('Research HTTP '+response.status);data=await response.json();data.cards.push(...BANK_CARDS);
     data.sources=[...new Map([...data.sources,...TREE_SOURCES,...NETWORK_SOURCES].map(source=>[source.id,source])).values()];
     data.rules=[...data.rules,...NETWORK_RULES];data.coverage=[...data.coverage,...NETWORK_COVERAGE].map(item=>{const update=NETWORK_COVERAGE_UPDATES[item.id];return update?{...item,...update,source_ids:[...new Set([...item.source_ids,...(update.source_ids||[])])],rule_ids:[...new Set([...item.rule_ids,...(update.rule_ids||[])])]}:item;});
     ruleMap=new Map(data.rules.map(rule=>[rule.id,rule]));sourceMap=new Map(data.sources.map(source=>[source.id,source]));cardMap=new Map(data.cards.map(card=>[card.id,card]));routeMap=new Map(ROUTES.map(route=>[route.id,route]));
     treeUI=mountTree($('#tree-explorer'),{data,inspect:(html,trigger)=>showDialog(html,trigger,true),onChange:({treeId,start,target})=>{const params=new URLSearchParams({tree:treeId});if(start!=='all')params.set('start',start);if(target)params.set('node',target);history.replaceState(null,'','#'+params.toString());}});
     setupUI=mountSetup($('#setup-dialog'),{getInventory:treeUI.getInventory,apply:({inventory:value})=>{
-      treeUI.setInventory(value);state.goal='all';tripUI?.render();setView(state.view==='trip'?'trip':'plan');window.scrollTo(0,0);document.querySelector('#plan-main h1')?.focus();
+      treeUI.setInventory(value);state.goal='all';tripUI?.render();outstationUI?.render();setView(state.view==='trip'?'trip':'plan');window.scrollTo(0,0);document.querySelector('#plan-main h1')?.focus();
     },onDismiss:()=>{if(!selectedResources(inventory()).size)setView('explore');}});
     tripUI=mountTrip($('#trip-root'),{getInventory:inventory,data:TRIP_DATA,hotelPrograms:HOTEL_PROGRAMS,resourceLabel:id=>resourceMap.get(id)?.label.replace(/\s*餘額$/,''),today:currentAsOf()});
+    outstationUI=mountOutstation($('#outstation-root'),{getInventory:inventory,data:TRIP_DATA,resourceLabel:id=>resourceMap.get(id)?.label.replace(/\s*餘額$/,''),today:currentAsOf()});
     bindEvents();renderAll();$('#app').hidden=false;$('#loading').hidden=true;
     openHash();
   }catch(error){console.error('Reward Routes failed to initialize',error);$('#loading').hidden=true;$('#load-error').hidden=false;}
