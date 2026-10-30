@@ -1,5 +1,5 @@
-import {networkNode as n,networkEdge as e} from './network-views.mjs?v=20261030-18';
-import {HSBC_CARD_IDS,DBS_CARD_IDS,ANA_CARD_IDS} from './bank-entries-data.mjs?v=20261030-18';
+import {networkNode as n,networkEdge as e} from './network-views.mjs?v=20261030-19';
+import {HSBC_CARD_IDS,DBS_CARD_IDS,ANA_CARD_IDS} from './bank-entries-data.mjs?v=20261030-19';
 export const BANK_TREES=[{id:'bank-cards',name:'銀行卡、積分與航空哩程',goals:['flight','hotel'],width:1100,height:1090,description:'先選確切信用卡，再看可累積的資產；已有積分或哩程可從中段開始。',note:'箭頭表示可規劃的累積或轉點關係。持卡不會自動增加餘額、領取迎新或產生會籍；轉點前仍需足夠餘額及本人有效帳戶。',nodes:[
   n('hsbc-card',20,25,'滙豐旅人三卡','無限／御璽／輕旅',HSBC_CARD_IDS,null,['R102','R103'],['卡別、年費與國內／海外累積不同。','Q4迎新與基本刷卡分開；迎新有申辦、核卡、首刷、App、帳單與年費等條件。'],'無限8,000元／御璽2,500元；輕旅2,000元及減免條件另核。','基本比例現列至2026/12/31。','start',{kind:'信用卡'}),
   n('hsbc-earn',380,25,'累積旅遊積分','餘額請在點數步驟另填',['hsbc-travel'],'B001',['R102'],['無限國內18／海外10元一點；御璽18／15；輕旅20／20。','僅合格一般消費。各卡餘額不可自行合併；附卡歸所屬正卡。'],'年費、海外交易費與放棄的現金回饋。','36個月逐月到期，卡片效期較早時有例外。','verified',{kind:'銀行點數'}),

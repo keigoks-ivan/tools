@@ -1,7 +1,7 @@
-import {EXT_RESOURCES,EXT_FACTS,EXT_OPPORTUNITIES,EXT_SOURCES,EXT_RULES,EXT_COVERAGE} from './extensions-data.mjs?v=20261030-18';
-import {HOTEL_RESOURCES,HOTEL_FACTS,HOTEL_OPPORTUNITIES,HOTEL_SOURCES,HOTEL_RULES,HOTEL_COVERAGE} from './hotel-partners-data.mjs?v=20261030-18';
-import {BANK_RESOURCES,BANK_OPPORTUNITIES,BANK_SOURCES,BANK_RULES} from './bank-entries-data.mjs?v=20261030-18';
-import {IH_SOURCES,IH_RESOURCES,IH_FACTS,IH_OPPORTUNITIES,IH_RULES,IH_COVERAGE,IH_COVERAGE_UPDATES} from './ihg-hyatt-data.mjs?v=20261030-18';
+import {EXT_RESOURCES,EXT_FACTS,EXT_OPPORTUNITIES,EXT_SOURCES,EXT_RULES,EXT_COVERAGE} from './extensions-data.mjs?v=20261030-19';
+import {HOTEL_RESOURCES,HOTEL_FACTS,HOTEL_OPPORTUNITIES,HOTEL_SOURCES,HOTEL_RULES,HOTEL_COVERAGE} from './hotel-partners-data.mjs?v=20261030-19';
+import {BANK_RESOURCES,BANK_OPPORTUNITIES,BANK_SOURCES,BANK_RULES} from './bank-entries-data.mjs?v=20261030-19';
+import {IH_SOURCES,IH_RESOURCES,IH_FACTS,IH_OPPORTUNITIES,IH_RULES,IH_COVERAGE,IH_COVERAGE_UPDATES} from './ihg-hyatt-data.mjs?v=20261030-19';
 const resource=(id,label,group,extra={})=>({id,label,group,...extra});
 export const RESOURCES=[
   resource('amex-platinum-charge','運通簽帳白金卡','信用卡'),resource('amex-eva-platinum-card','長榮運通簽帳白金卡','信用卡'),resource('amex-gold-current','運通耀金卡','信用卡'),resource('amex-eva-gold-card','長榮運通簽帳金卡','信用卡'),resource('amex-platinum-credit','運通信用白金卡','信用卡'),resource('amex-regent','運通晶華珍饌白金卡','信用卡'),resource('amex-charge','運通簽帳卡','信用卡'),
@@ -128,3 +128,5 @@ NETWORK_COVERAGE_UPDATES['ctbc-ana-family']={research_status:'partial_sources_fo
 // IHG與Hyatt 2026-10-30 官方條款
 RESOURCES.push(...IH_RESOURCES);FACTS.push(...IH_FACTS);OPPORTUNITIES.push(...IH_OPPORTUNITIES);NETWORK_SOURCES.push(...IH_SOURCES);NETWORK_RULES.push(...IH_RULES);NETWORK_COVERAGE.push(...IH_COVERAGE);
 Object.assign(NETWORK_COVERAGE_UPDATES,IH_COVERAGE_UPDATES);
+// 其他台灣銀行點數：2026-10-30 讀各行官方兌換頁，只用在「出去玩」的轉點計算（比例在 trip-data.mjs）
+RESOURCES.push(...[['esun-epoint','玉山 e point'],['taishin-points','台新 Point'],['ctbc-points','中信紅利點數'],['fubon-points','富邦紅利點數'],['fubon-miles','富邦 a miles 卡哩程'],['firstbank-points','第一銀行紅利點數'],['kgi-points','凱基紅利點數'],['kgi-cash-points','凱基現金點'],['kgi-mile-points','凱基哩程點'],['ba-avios','英航 Avios']].map(([id,label])=>({id,label,group:'點數與帳戶'})));

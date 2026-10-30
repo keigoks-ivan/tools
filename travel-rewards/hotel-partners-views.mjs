@@ -1,4 +1,4 @@
-import {networkNode as n,networkEdge as e} from './network-views.mjs?v=20261030-18';
+import {networkNode as n,networkEdge as e} from './network-views.mjs?v=20261030-19';
 const note='轉點、實際兌房、資格點與會籍分開。先看每一段的必要條件；亮線不代表帳戶核准或房況可訂。';
 export const HOTEL_TREES=[
   {id:'hotel-use',name:'飯店點數怎麼用',goals:['hotel'],width:1100,height:690,description:'先選要住哪一家，再看連住優惠、房型與會員條件，最後用同日期、同房型現金價試算。',note,nodes:[

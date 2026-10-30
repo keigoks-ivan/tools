@@ -1,4 +1,4 @@
-import {CUBE_PARTNERS,cubeQuote,cubeIhgPromotion} from './cube-data.mjs?v=20261030-18';
+import {CUBE_PARTNERS,cubeQuote,cubeIhgPromotion} from './cube-data.mjs?v=20261030-19';
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const num=value=>new Intl.NumberFormat('zh-TW').format(value);
 const tableHint='<p class="cube-table-hint">左右滑動表格，查看餘額試算與查核範圍 →</p>';

@@ -1,5 +1,5 @@
-import {TRIP_CITIES} from './trip-cities.mjs?v=20261030-18';
-import {flightOptions,hotelOptions,fillTemplate} from './trip-core.mjs?v=20261030-18';
+import {TRIP_CITIES} from './trip-cities.mjs?v=20261030-19';
+import {flightOptions,hotelOptions,fillTemplate} from './trip-core.mjs?v=20261030-19';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const num=value=>new Intl.NumberFormat('zh-TW').format(value);
@@ -55,7 +55,7 @@ export function mountTrip(root,{getInventory,data,hotelPrograms,resourceLabel,to
     if(item.state==='topup')return ['還差 '+num(item.shortfall)+' 哩，可從'+label(first.from)+'補','warn'];
     if(item.state==='transfer-enough')return ['可從'+label(item.routes.find(r=>r.enough)?.from||first.from)+'轉，點數夠','ok'];
     if(item.state==='have')return [item.balance==null?'你有這種哩程・餘額沒填':item.shortfall==null?'你有 '+num(item.balance)+' 哩':'還差 '+num(item.shortfall)+' 哩','warn'];
-    if(item.state==='transfer')return ['可從'+label(first.from)+'轉'+(item.need?'・餘額沒填':''),'warn'];
+    if(item.state==='transfer')return ['可從'+label(first.from)+'轉'+(!item.need?'':first.sourceBalance!=null?'，點數不夠':'・餘額沒填'),'warn'];
     return ['你目前沒有入口','neutral'];
   }
   function flightCard(item,city){
@@ -65,7 +65,7 @@ export function mountTrip(root,{getInventory,data,hotelPrograms,resourceLabel,to
     const routes=item.routes.filter(r=>r.input).map(r=>'<li>從'+esc(label(r.from))+'轉 '+num(r.input)+' 點 → '+num(r.output)+' 哩'+(r.sourceBalance!=null?'（你有 '+num(r.sourceBalance)+'）':'')+(r.timing?'・'+esc(r.timing):'')+'</li>').join('');
     const search=data.awardSearch[p.id]?.url||p.award_search_url,login=data.awardSearch[p.id]?.login_required;
     const flights=flightsUrl(city.airports[0],form.checkin,form.checkout);
-    return '<article class="trip-card '+tone+'"><span class="op-pill '+tone+'">'+esc(pill)+'</span><h3>'+esc(p.name)+'</h3><p class="trip-route">'+esc(e.route||'')+'</p><p class="trip-miles"><b>'+esc(per)+'</b>'+total+'<small>'+CABIN[form.cabin]+'・官方表最低一級</small></p>'+(routes?'<ul class="trip-transfers">'+routes+'</ul>':'')+(n?.alts?.length?'<p class="trip-note">另一條路線：'+n.alts.map(alt=>esc(alt.option.route||'')+'，每人 '+num(alt.each)+' 哩').join('；')+'</p>':'')+(!n&&p.no_chart_note?'<p class="trip-note">'+esc(p.no_chart_note)+'</p>':'')+(e.estimate?'<p class="trip-note trip-estimate">參考值：官方沒有台灣出發專表，按距離區推算，訂之前登入官網核對。</p>':'')+(e.note?'<details class="trip-fees"><summary>這條路線的細節</summary><p>'+esc(e.note)+'</p></details>':'')+(p.fees_note?'<details class="trip-fees"><summary>稅金與燃油附加費</summary><p>'+esc(p.fees_note)+'</p></details>':'')+'<div class="trip-actions">'+(search?'<a class="button secondary" href="'+esc(search)+'" target="_blank" rel="noopener">到官網查位子'+(login?'（要登入）':'')+'</a>':'')+(flights?'<a class="text-button" href="'+esc(flights)+'" target="_blank" rel="noopener">看誰飛這條航線</a>':'')+'</div></article>';
+    return '<article class="trip-card '+tone+'"><span class="op-pill '+tone+'">'+esc(pill)+'</span><h3>'+esc(p.name)+'</h3><p class="trip-route">'+esc(e.route||'')+'</p><p class="trip-miles"><b>'+esc(per)+'</b>'+total+(n?'<small>'+CABIN[form.cabin]+'・官方表最低一級</small>':'')+'</p>'+(routes?'<ul class="trip-transfers">'+routes+'</ul>':'')+(n?.alts?.length?'<p class="trip-note">另一條路線：'+n.alts.map(alt=>esc(alt.option.route||'')+'，每人 '+num(alt.each)+' 哩').join('；')+'</p>':'')+(!n&&p.no_chart_note?'<p class="trip-note">'+esc(p.no_chart_note)+'</p>':'')+(e.estimate?'<p class="trip-note trip-estimate">參考值：官方表依整趟飛行距離計價，距離是本站按航段估算；訂之前登入官網核對。</p>':'')+(e.note?'<details class="trip-fees"><summary>這條路線的細節</summary><p>'+esc(e.note)+'</p></details>':'')+(p.fees_note?'<details class="trip-fees"><summary>稅金與燃油附加費</summary><p>'+esc(p.fees_note)+'</p></details>':'')+'<div class="trip-actions">'+(search?'<a class="button secondary" href="'+esc(search)+'" target="_blank" rel="noopener">到官網查位子'+(login?'（要登入）':'')+'</a>':'')+(flights?'<a class="text-button" href="'+esc(flights)+'" target="_blank" rel="noopener">看誰飛這條航線</a>':'')+'</div></article>';
   }
   function hotelCard(item,city){
     const p=item.program,link=data.hotelLinks[p.id];
@@ -73,7 +73,8 @@ export function mountTrip(root,{getInventory,data,hotelPrograms,resourceLabel,to
     const pill=item.state==='points'?(item.balance!=null?'你有 '+num(item.balance)+' 點':'你有點數・餘額沒填'):item.state==='member'?'你是'+label(item.tier):item.state==='transfer'?'可從'+label(item.routes[0].from)+'轉入':'你目前沒有入口';
     const tone=item.state==='none'?'neutral':item.state==='transfer'?'warn':'ok';
     const perk=hotelPerk(p.id,item.tier,new Set(getInventory().resources||[]));
-    return '<article class="trip-card '+tone+'"><span class="op-pill '+tone+'">'+esc(pill)+'</span><h3>'+esc(p.name)+'</h3><p class="trip-note">'+esc(HOTEL_POINTS[p.id]||'')+'</p>'+(perk?'<p class="trip-route">'+esc(perk)+'</p>':'')+'<div class="trip-actions">'+(url?'<a class="button secondary" href="'+esc(url)+'" target="_blank" rel="noopener">用點數搜尋'+esc(city.zh)+'</a>':'')+(link&&!link.points_preset?'<small class="muted">打開後要登入，再切換「用點數」。</small>':link&&link.results_verified===false?'<small class="muted">若沒看到點數價，在結果頁勾選「使用點數」。</small>':'')+'</div></article>';
+    const checked=p.id==='hyatt'?(data.hyattCheck||[]).filter(row=>row.read&&!row.has_hyatt).length:0;
+    return '<article class="trip-card '+tone+'"><span class="op-pill '+tone+'">'+esc(pill)+'</span><h3>'+esc(p.name)+'</h3><p class="trip-note">'+esc(HOTEL_POINTS[p.id]||'')+'</p>'+(perk?'<p class="trip-route">'+esc(perk)+'</p>':'')+(checked?'<p class="trip-note">台灣銀行點數轉不進 Hyatt：運通、星展、國泰世華，以及另外 '+checked+' 家銀行的官方兌換頁都沒有 Hyatt。</p>':'')+'<div class="trip-actions">'+(url?'<a class="button secondary" href="'+esc(url)+'" target="_blank" rel="noopener">用點數搜尋'+esc(city.zh)+'</a>':'')+(link&&!link.points_preset?'<small class="muted">打開後要登入，再切換「用點數」。</small>':link&&link.results_verified===false?'<small class="muted">若沒看到點數價，在結果頁勾選「使用點數」。</small>':'')+'</div></article>';
   }
   function render(){
     const inv=getInventory(),owned=new Set(inv.resources||[]),city=TRIP_CITIES.find(c=>c.id===form.city);
@@ -87,7 +88,7 @@ export function mountTrip(root,{getInventory,data,hotelPrograms,resourceLabel,to
       '<section class="trip-section"><h2>機票・台北到'+esc(city.zh)+'</h2>'+(carriers.length?'<p class="small muted">桃園直飛：'+esc(carriers.join('、'))+'</p>':'')+
       (usable.length?'<div class="trip-grid">'+usable.map(item=>flightCard(item,city)).join('')+'</div>':owned.size?'<div class="empty">你手上的哩程和點數，在這條航線還沒有接得上的計畫。下面是其他計畫要多少哩。</div>':'')+
       (other.length?(owned.size?'<details class="plan-other"><summary><b>其他計畫（'+other.length+'）</b><small>你目前沒有這些哩程，也沒有能轉過去的點數</small></summary><div class="trip-grid">'+other.map(item=>flightCard(item,city)).join('')+'</div></details>':'<div class="trip-grid">'+other.map(item=>flightCard(item,city)).join('')+'</div>'):'')+
-      (dynamic.length?'<p class="trip-note">'+esc(dynamic.map(item=>item.name).join('、'))+' 是浮動價，沒有固定表，到官網查。</p>':'')+'<details class="trip-fees"><summary>哪些計畫沒列出來</summary><p>聯航 MileagePlus、Flying Blue 是浮動價，沒有固定表。卡達 Avios 官方計算器查不到台灣出發的數字。長榮的星空夥伴表讀不到，所以長榮只列自家直飛的城市。各計畫的稅金與燃油附加費只查到下限，訂票時另付。</p></details></section>'+
+      (dynamic.length?'<p class="trip-note">'+esc(dynamic.map(item=>item.name).join('、'))+' 是浮動價，沒有固定表，到官網查。</p>':'')+'<details class="trip-fees"><summary>哪些計畫沒列出來</summary><p>聯航 MileagePlus、Flying Blue 是浮動價，沒有固定表。卡達 Avios 官方計算器查不到台灣出發的數字；國泰亞洲萬里通要登入才看得到哩數。日航只列官方表上有的直飛城市與夥伴表，經東京轉往歐美沒有官方連程價。英航 Avios 只查到經香港到倫敦。各計畫的稅金與燃油附加費只查到下限，訂票時另付。</p></details></section>'+
       '<section class="trip-section"><h2>飯店・'+esc(city.zh)+'</h2><div class="trip-grid">'+hotels.map(item=>hotelCard(item,city)).join('')+'</div></section>'+
       '<section class="trip-section trip-next"><p>在官網看到點數價和同日期的現金價，可以算一點值多少錢，划不划算。</p><button type="button" class="button secondary" data-open-calc>試算值不值得</button><p class="small muted">哩程數字是官方獎勵表的最低一級，查核日 '+esc(data.checked_on)+'；有沒有位子、要不要加價，以官網為準。</p></section>';
   }
