@@ -1,7 +1,7 @@
-import {EXT_RESOURCES,EXT_FACTS,EXT_OPPORTUNITIES,EXT_SOURCES,EXT_RULES,EXT_COVERAGE} from './extensions-data.mjs?v=20261030-19';
-import {HOTEL_RESOURCES,HOTEL_FACTS,HOTEL_OPPORTUNITIES,HOTEL_SOURCES,HOTEL_RULES,HOTEL_COVERAGE} from './hotel-partners-data.mjs?v=20261030-19';
-import {BANK_RESOURCES,BANK_OPPORTUNITIES,BANK_SOURCES,BANK_RULES} from './bank-entries-data.mjs?v=20261030-19';
-import {IH_SOURCES,IH_RESOURCES,IH_FACTS,IH_OPPORTUNITIES,IH_RULES,IH_COVERAGE,IH_COVERAGE_UPDATES} from './ihg-hyatt-data.mjs?v=20261030-19';
+import {EXT_RESOURCES,EXT_FACTS,EXT_OPPORTUNITIES,EXT_SOURCES,EXT_RULES,EXT_COVERAGE} from './extensions-data.mjs?v=20261031-1';
+import {HOTEL_RESOURCES,HOTEL_FACTS,HOTEL_OPPORTUNITIES,HOTEL_SOURCES,HOTEL_RULES,HOTEL_COVERAGE} from './hotel-partners-data.mjs?v=20261031-1';
+import {BANK_RESOURCES,BANK_OPPORTUNITIES,BANK_SOURCES,BANK_RULES} from './bank-entries-data.mjs?v=20261031-1';
+import {IH_SOURCES,IH_RESOURCES,IH_FACTS,IH_OPPORTUNITIES,IH_RULES,IH_COVERAGE,IH_COVERAGE_UPDATES} from './ihg-hyatt-data.mjs?v=20261031-1';
 const resource=(id,label,group,extra={})=>({id,label,group,...extra});
 export const RESOURCES=[
   resource('amex-platinum-charge','運通簽帳白金卡','信用卡'),resource('amex-eva-platinum-card','長榮運通簽帳白金卡','信用卡'),resource('amex-gold-current','運通耀金卡','信用卡'),resource('amex-eva-gold-card','長榮運通簽帳金卡','信用卡'),resource('amex-platinum-credit','運通信用白金卡','信用卡'),resource('amex-regent','運通晶華珍饌白金卡','信用卡'),resource('amex-charge','運通簽帳卡','信用卡'),

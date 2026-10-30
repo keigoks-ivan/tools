@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {usableTransfers,transferInput,transferOutput,flightOptions,hotelOptions,fillTemplate} from './trip-core.mjs';
+import {usableTransfers,transferInput,transferOutput,combineTransfers,cashValue,flightOptions,hotelOptions,fillTemplate} from './trip-core.mjs';
 
 const cube={from:'cube-credit',to:'asia-miles',in:360,out:1000,min:360,unit:360};
 const awards=[
@@ -64,4 +64,22 @@ test('future and card-specific transfer rows are filtered',()=>{
 test('templates drop empty date parameters',()=>{
   const url=fillTemplate('https://example.com/s?q={query}&in={checkin}&out={checkout}',{query:'Tokyo, Japan',checkin:'',checkout:''});
   assert.equal(url,'https://example.com/s?q=Tokyo%2C+Japan');
+});
+
+test('several point sources combine when none is enough alone; cheaper ratio goes first',()=>{
+  const hsbc={from:'hsbc-travel',to:'eva-miles',in:1,out:1,min:3000,unit:500,sourceBalance:12300};
+  const ctbc={from:'ctbc-points',to:'eva-miles',in:5,out:1,min:3000,unit:5,sourceBalance:100000};
+  const combo=combineTransfers(20000,[ctbc,hsbc]);
+  assert.deepEqual(combo.parts.map(p=>[p.from,p.input,p.output]),[['hsbc-travel',12000,12000],['ctbc-points',40000,8000]]);
+  assert.equal(combo.left,0);
+  assert.equal(combineTransfers(50000,[ctbc,hsbc]).left,50000-12000-20000);
+  const awardsEva=[{id:'eva-miles',cities:{HKT:{Y:20000}}}];
+  const item=flightOptions({awards:awardsEva,transfers:[{...hsbc,sourceBalance:undefined},{...ctbc,sourceBalance:undefined}],inventory:{resources:['hsbc-travel','ctbc-points'],balances:{'hsbc-travel':12300,'ctbc-points':60000}},city:'HKT',cabin:'Y',pax:1,trip:'oneway',today:'2026-10-30'})[0];
+  assert.equal(item.state,'combo');assert.equal(item.combo.parts.length,2);
+});
+
+test('cash value subtracts taxes and divides by miles',()=>{
+  assert.equal(cashValue(12000,2000,20000),0.5);
+  assert.equal(cashValue(0,0,20000),null);
+  assert.equal(cashValue(1000,2000,20000),0);
 });

@@ -1,47 +1,136 @@
 /* 出去玩：目的地、機票、飯店 */
-.plan-trip{display:grid;grid-template-columns:1fr auto;align-items:center;gap:2px 10px;width:100%;padding:14px 16px;border:1px solid #4a6236;border-radius:14px;background:#d1f8930d;color:var(--ink);font:inherit;text-align:left;cursor:pointer}
-.plan-trip b{font-size:16px;color:var(--accent)}
-.plan-trip span{grid-column:1;font-size:13px;color:#b7c6d6}
-.plan-trip i{grid-row:1/3;grid-column:2;font-style:normal;font-size:24px;color:var(--accent)}
-#view-trip .page-heading{max-width:1180px}
-.trip-form{display:grid;grid-template-columns:2fr 1fr 1fr .7fr auto auto;gap:12px;align-items:end;max-width:1180px;padding:14px;border:1px solid var(--line);border-radius:16px;background:var(--white)}
-.trip-form label{display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--muted);min-width:0}
-.trip-form select,.trip-form input[type=date]{min-height:44px;padding:0 10px;border:1px solid #34495c;border-radius:10px;background:#0b1623;color:var(--ink);font:inherit;font-size:15px;color-scheme:dark;min-width:0;width:100%}
-.trip-seg{display:flex;gap:4px;margin:0;padding:0;border:0;min-width:0}
-.trip-seg legend{font-size:12px;color:var(--muted);margin-bottom:6px;padding:0}
-.trip-seg label{position:relative;flex-direction:row;align-items:center;min-height:44px;padding:0 12px;border:1px solid #34495c;border-radius:10px;font-size:14px;color:#b7c6d6;cursor:pointer;white-space:nowrap}
+.plan-trip{display:grid;grid-template-columns:1fr auto;align-items:center;gap:2px 10px;width:100%;padding:14px 16px;border:1px solid var(--ink);border-radius:0;background:var(--white);color:var(--ink);font:inherit;text-align:left;cursor:pointer}
+.plan-trip:hover{background:var(--hover)}
+
+.plan-trip b{font-family:var(--serif);font-size:17px;color:var(--accent)}
+
+.plan-trip span{grid-column:1;font-size:14px;color:var(--muted)}
+
+.plan-trip i{grid-row:1/3;grid-column:2;font-style:normal;font-size:24px;color:var(--ink)}
+
+#view-trip .page-heading{max-width:none}
+
+.trip-form{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px 16px;align-items:end;max-width:none;padding:18px 0 4px;border:0;border-top:3px solid var(--ink);background:transparent}
+
+.trip-form label{display:flex;flex-direction:column;gap:6px;font-size:12px;font-weight:700;color:var(--ink);min-width:0}
+
+.trip-form select,.trip-form input[type=date]{min-height:46px;padding:0 10px;border:1px solid var(--ink);border-radius:0;background:var(--white);color:var(--ink);font:inherit;font-size:15px;font-weight:400;min-width:0;width:100%}
+
+.trip-seg{display:flex;gap:0;margin:0;padding:0;border:0;min-width:0}
+
+.trip-seg legend{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:6px;padding:0}
+
+.trip-seg label{position:relative;flex-direction:row;align-items:center;min-height:46px;padding:0 14px;border:1px solid var(--ink);border-radius:0;font-size:14px;font-weight:400;color:var(--ink);cursor:pointer;white-space:nowrap}
+.trip-seg label+label{margin-left:-1px}
+
 .trip-seg input{position:absolute;opacity:0;width:1px;height:1px}
-.trip-seg label:has(input:checked){background:var(--accent);border-color:var(--accent);color:#0b1520;font-weight:700}
-.trip-seg label:has(input:focus-visible){outline:2px solid #8ed9ef;outline-offset:2px}
-[data-trip-results]{max-width:1180px}
-.trip-empty{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:16px;padding:14px;border-radius:14px;background:#302a23;color:#f2d6ad;font-size:14px;line-height:1.7}
+
+.trip-seg label:has(input:checked){background:var(--ink);border-color:var(--ink);color:#fff;font-weight:700}
+
+.trip-seg label:has(input:focus-visible){outline:2px solid var(--focus);outline-offset:2px}
+
+[data-trip-results]{max-width:none}
+
+.trip-empty{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:16px;padding:14px 16px;border-left:3px solid var(--warn-line);background:var(--warn-bg);color:var(--ink);font-size:14px;line-height:1.7}
+
 .trip-empty p{flex:1;min-width:220px;margin:0}
-.trip-section{margin-top:26px}
-.trip-section h2{margin:0 0 6px;font-size:20px}
+
+.trip-section{margin-top:36px;border-top:3px solid var(--ink);padding-top:16px}
+
+.trip-section h2{margin:0 0 6px;font-size:26px;font-weight:900}
+
 .trip-section>.small{margin:0 0 12px}
-.trip-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:10px}
-.trip-card{display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--white)}
-.trip-card.neutral{background:#0d1824}
-.trip-card h3{margin:0;font-size:17px}
-.trip-route{margin:0;font-size:14px;line-height:1.6;color:#c4d3df}
+
+.trip-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 48px;margin-top:10px}
+
+.trip-card{display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:22px 0;border:0;border-top:1px solid var(--line);border-radius:0;background:transparent}
+
+.trip-card.neutral{background:transparent}
+
+.trip-card h3{margin:0;font-size:20px;font-weight:700}
+
+.trip-route{margin:0;font-size:15px;line-height:1.7;color:var(--ink)}
+
 .trip-miles{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 12px;margin:0}
-.trip-miles b{font-size:20px;color:var(--ink)}
+
+.trip-miles b{font-family:var(--serif);font-size:30px;font-weight:900;line-height:1.2;color:var(--ink)}
+
 .trip-total{font-size:15px;color:var(--accent);font-weight:700}
-.trip-miles small{flex-basis:100%;font-size:12px;color:var(--muted)}
-.trip-transfers{margin:0;padding-left:18px;font-size:13px;line-height:1.7;color:#edc183}
-.trip-note{margin:0;font-size:13px;line-height:1.7;color:var(--muted)}
-.trip-fees summary{min-height:36px;display:flex;align-items:center;font-size:13px;color:var(--accent);cursor:pointer}
-.trip-fees p{margin:0;font-size:13px;line-height:1.7;color:#c4d3df}
+
+.trip-miles small{flex-basis:100%;font-size:13px;color:var(--muted)}
+
+.trip-transfers{margin:0;padding-left:18px;font-size:14px;line-height:1.7;color:var(--warn)}
+
+.trip-note{margin:0;font-size:14px;line-height:1.7;color:var(--muted)}
+
+.trip-fees summary{min-height:36px;display:flex;align-items:center;font-size:14px;color:var(--accent);font-weight:700;cursor:pointer}
+
+.trip-fees p{margin:0;font-size:14px;line-height:1.7;color:var(--ink)}
+
 .trip-actions{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;margin-top:auto;padding-top:4px}
+
 .trip-actions .button{min-height:44px;display:inline-flex;align-items:center;text-decoration:none}
+
 .trip-actions .text-button{min-height:44px;display:inline-flex;align-items:center}
-.trip-next{padding:16px;border:1px solid var(--line);border-radius:16px}
-.trip-next p{margin:0 0 10px;font-size:14px;line-height:1.7}
+
+.trip-next{padding:16px 0;border:0;border-top:3px solid var(--ink);border-radius:0}
+
+.trip-next p{margin:0 0 10px;font-size:15px;line-height:1.7}
+
 .trip-next .small{margin:12px 0 0}
-@media(max-width:1000px){.trip-form{grid-template-columns:1fr 1fr}.trip-city{grid-column:1/-1}}
+
+@media(max-width:1000px){.trip-form{grid-template-columns:1fr 1fr}
+.trip-city{grid-column:1/-1}}
+
 @media(max-width:760px){
   .nav-inner{grid-template-columns:repeat(5,minmax(0,1fr))}
+
   .trip-grid{grid-template-columns:1fr}
+
   .trip-seg label{flex:1;justify-content:center}
+
 }
-.trip-estimate{color:#f3a985}
+
+.trip-estimate{color:var(--unv);font-weight:700}
+
+.trip-combo-head{list-style:none;margin-left:-18px;color:var(--ink);font-weight:700}
+
+.trip-value{display:flex;flex-direction:column;gap:6px;width:100%;padding:10px 12px;border-left:3px solid var(--accent);background:var(--tint)}
+
+.trip-value p{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 10px;margin:0}
+
+.trip-value b{color:var(--accent);font-size:17px}
+
+.trip-value small{font-size:13px;color:var(--muted)}
+
+.trip-value label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--ink)}
+
+.trip-value input,.trip-cash input{min-height:42px;padding:0 10px;border:1px solid var(--ink);border-radius:0;background:var(--white);color:var(--ink);font:inherit;font-size:15px;max-width:220px}
+
+.trip-cash input{max-width:none;width:100%;min-height:44px}
+
+.trip-cash{grid-column:span 2}
+/* 目的地大圖：雜誌開頭 */
+.trip-hero{display:grid;grid-template-columns:5fr 7fr;gap:32px;align-items:start;margin:28px 0 8px}
+.trip-hero-text{display:flex;flex-direction:column;gap:14px}
+.trip-kicker{font-size:13px;font-weight:700;letter-spacing:.2em;color:var(--accent)}
+.trip-hero h2{font-family:var(--serif);font-size:clamp(56px,7vw,104px);font-weight:900;line-height:1;letter-spacing:-.02em;margin:0}
+.trip-lede{font-size:18px;line-height:1.75;color:#333;margin:0}
+.trip-lede b{font-family:var(--serif);font-weight:900;color:var(--ink)}
+.trip-photo{margin:0;display:flex;flex-direction:column;gap:6px}
+.trip-photo .ph{aspect-ratio:16/9;background:var(--photo);overflow:hidden}
+.trip-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.trip-photo figcaption{font-size:11px;line-height:1.5;color:var(--muted)}
+.trip-photo figcaption a{color:inherit}
+.trip-paths summary{min-height:36px;display:flex;align-items:center;font-size:13px;color:var(--accent);cursor:pointer}
+.trip-paths ol{margin:4px 0 0;padding-left:20px;font-size:13px;line-height:1.6}
+.trip-paths li{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid var(--line)}
+.trip-paths li b{font-family:var(--serif);white-space:nowrap}
+.trip-perks ul{list-style:none;margin:12px 0 0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 48px}
+.trip-perks li{display:grid;grid-template-columns:88px 1fr;gap:14px;padding:14px 0;border-top:1px solid var(--line);margin:0}
+.trip-perk-kind{font-size:12px;font-weight:700;letter-spacing:.1em;color:var(--accent)}
+.trip-perks p{margin:4px 0;font-size:14px;line-height:1.6;color:#333}
+.trip-perks small{font-size:12px;line-height:1.6;color:var(--muted)}
+.trip-outstation{padding:12px 14px;background:var(--surface);border-left:3px solid var(--accent);margin:6px 0 4px}
+@media(max-width:760px){.trip-hero{grid-template-columns:1fr;gap:18px}.trip-photo{order:-1}.trip-perks ul{grid-template-columns:1fr}.trip-lede{font-size:16px}}
+.trip-hero.no-photo{grid-template-columns:1fr}

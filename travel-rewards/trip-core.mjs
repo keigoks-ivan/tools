@@ -25,6 +25,35 @@ export function transferInput(need,row){
   return Math.max(rounded,minIn);
 }
 export function transferOutput(input,row){return Math.floor(input/row.in)*row.out;}
+// 單一來源都不夠時，把幾家點數湊起來：先用每哩花點數較少的來源（同比例照原順序），每家照最低量與單位取整
+// 回傳 {parts,left}；left>0 表示全部湊起來還差多少哩。比較比例用交叉相乘，留在整數空間
+export function combineTransfers(shortfall,routes){
+  if(!(shortfall>0))return null;
+  const best=new Map();
+  for(const row of routes){
+    if(!Number.isFinite(row.sourceBalance))continue;
+    const prev=best.get(row.from);
+    if(!prev||row.in*prev.out<prev.in*row.out)best.set(row.from,row);
+  }
+  const rows=[...best.values()].sort((a,b)=>a.in*b.out-b.in*a.out);
+  let left=shortfall;const parts=[];
+  for(const row of rows){
+    if(left<=0)break;
+    const need=transferInput(left,row);
+    if(need<=row.sourceBalance){parts.push({...row,input:need,output:transferOutput(need,row)});left=0;break;}
+    const unitIn=row.unit||row.in,minIn=row.min||row.in;
+    const max=Math.floor(row.sourceBalance/unitIn)*unitIn,out=transferOutput(max,row);
+    if(max<minIn||out<=0)continue;
+    parts.push({...row,input:max,output:out});left-=out;
+  }
+  return parts.length?{parts,left:Math.max(0,left)}:null;
+}
+// 用現金票價換算每一哩值多少：扣掉獎勵票自付的稅金與附加費，再除以哩數
+export function cashValue(cash,tax,milesTotal){
+  if(!(cash>0)||!(milesTotal>0))return null;
+  const net=cash-(tax>0?tax:0);
+  return net>0?net/milesTotal:0;
+}
 
 // 一個城市可能有自家與夥伴兩張表；依艙等挑哩數較少的一條，其他留作「另一條路線」
 function miles(entry,cabin,pax,trip){
@@ -44,15 +73,16 @@ function access(programId,owned,balances,transfers,need,today){
     const input=shortfall?transferInput(shortfall,row):0,have=Number.isFinite(balances[row.from])?balances[row.from]:null;
     return {...row,input,output:transferOutput(input,row),sourceBalance:have,enough:have==null?null:have>=input};
  }).sort((a,b)=>Number(b.enough===true)-Number(a.enough===true));
-  let state='none';
+  let state='none',combo=null;
   if(has&&balance!=null&&need!=null&&balance>=need)state='enough';
   else if(routes.some(route=>route.enough===true)&&(has||routes.length))state=has?'topup':'transfer-enough';
+  else if(shortfall>0&&(combo=combineTransfers(shortfall,routes))&&combo.parts.length>1&&combo.left===0)state='combo';
   else if(has)state='have';
   else if(routes.length)state='transfer';
-  return {has,balance,shortfall,routes,state};
+  return {has,balance,shortfall,routes,state,combo:combo&&combo.parts.length>1?combo:null};
 }
 
-const ORDER={enough:0,topup:1,'transfer-enough':2,have:3,transfer:4,none:5};
+const ORDER={enough:0,topup:1,'transfer-enough':2,combo:3,have:4,transfer:5,none:6};
 export function flightOptions({awards,transfers,inventory,city,cabin='Y',pax=1,trip='oneway',today}){
   const owned=new Set(inventory.resources||[]),balances=inventory.balances||{};
   const list=[];
