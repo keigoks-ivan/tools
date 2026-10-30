@@ -1,4 +1,4 @@
-import {networkNode as n,networkEdge as e} from './network-views.mjs?v=20261025-12';
+import {networkNode as n,networkEdge as e} from './network-views.mjs?v=20261030-17';
 const note='轉點、實際兌房、資格點與會籍分開。先看每一段的必要條件；亮線不代表帳戶核准或房況可訂。';
 export const HOTEL_TREES=[
   {id:'hotel-use',name:'飯店點數怎麼用',goals:['hotel'],width:1100,height:690,description:'先選要住哪一家，再看連住優惠、房型與會員條件，最後用同日期、同房型現金價試算。',note,nodes:[
@@ -34,8 +34,8 @@ export const HOTEL_TREES=[
 ];
 export function extendHotelViews(trees){
   const hotel=trees.find(item=>item.id==='points-hotel');
-  hotel.nodes.push(n('hsbc-premier',20,650,'滙豐卓越紅利','2:1；最低單位有疑義',['hsbc-premier-points'],'N030',['R090'],['不是旅人旅遊積分，不能套旅人3,000／500單位。','銀行卓越段用詞混寫，最低可操作紅利數尚未確認。'],'轉點費與年度總上限未列。','Q4：2026/10/1–12/31。','pending',{kind:'銀行點數',hotel_program:'choose'}));
-  hotel.nodes.push(n('premier-check',390,650,'先釐清紅利門檻','不要套旅人3,000／500',[],null,['R090'],['卓越是紅利積分2:1，不是旅人旅遊積分1:1。','銀行最低單位用詞混寫，未釐清前不提供假定可操作的最低數。'],'費用與年度上限未明列。','完整Q4條款與本人操作需核對。','pending',{kind:'申請條件',hotel_program:'choose'}));
+  hotel.nodes.push(n('hsbc-premier',20,650,'滙豐卓越紅利','2:1；最低單位有疑義',['hsbc-premier-points'],'N030',['R090'],['不是旅人旅遊積分，不能套旅人3,000／500單位。','銀行卓越段用詞混寫，最低可操作紅利數尚未確認。'],'轉點費與年度總上限未列。','Q4：2026/10/1–12/31。','unverified',{kind:'銀行點數',hotel_program:'choose'}));
+  hotel.nodes.push(n('premier-check',390,650,'先釐清紅利門檻','不要套旅人3,000／500',[],null,['R090'],['卓越是紅利積分2:1，不是旅人旅遊積分1:1。','銀行最低單位用詞混寫，未釐清前不提供假定可操作的最低數。'],'費用與年度上限未明列。','完整Q4條款與本人操作需核對。','unverified',{kind:'申請條件',hotel_program:'choose'}));
   hotel.height=805;
   hotel.nodes.find(item=>item.id==='mr-marriott').hotel_program='marriott';
   hotel.nodes.find(item=>item.id==='mr-hilton').hotel_program='hilton';

@@ -1,5 +1,5 @@
-import {RESOURCES,FACTS,OPPORTUNITIES} from './network-data.mjs?v=20261027-16';
-import {traceTree} from './tree-core.mjs?v=20261025-12';
+import {RESOURCES,FACTS,OPPORTUNITIES} from './network-data.mjs?v=20261030-17';
+import {traceTree} from './tree-core.mjs?v=20261030-17';
 const resourceMap=new Map(RESOURCES.map(item=>[item.id,item]));
 export function cleanNetworkState(value={}){
   const resources=[...new Set((Array.isArray(value.resources)?value.resources:[]).filter(id=>resourceMap.has(id)))];
@@ -37,6 +37,8 @@ export function effectiveResources(saved){
   if(['all-points','all-silver','all-gold','all-platinum','all-diamond'].some(id=>result.has(id)))result.add('all-account');
   if(['avios','qr-silver','qr-gold','qr-platinum'].some(id=>result.has(id)))result.add('qatar-account');
   if(result.has('fb-miles'))result.add('fb-account');
+  if(['hyatt-discoverist','hyatt-explorist','hyatt-globalist'].some(id=>result.has(id)))result.add('hyatt-account');
+  if(['ihg-club','ihg-silver','ihg-gold','ihg-platinum','ihg-diamond','ihg-points'].some(id=>result.has(id)))result.add('ihg-account');
   return result;
 }
 export function effectiveFacts(saved){

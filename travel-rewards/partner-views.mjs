@@ -1,9 +1,9 @@
-import {networkNode as n,networkEdge as e} from './network-views.mjs?v=20261025-12';
+import {networkNode as n,networkEdge as e} from './network-views.mjs?v=20261030-17';
 const note='每條線只代表這一段合作；核准、實際轉點與完成住宿／飛行分開。來源、有效期與一次性機會仍需逐項確認。';
 export const PARTNER_TREES=[
   {id:'cube-points',name:'小樹點的18個出口',goals:['flight','hotel','status'],width:1100,height:700,description:'先選信用卡點數、卡別及年度，再比較各家門檻。CUBE Level影響累點速度，世界卡資格影響指定三家轉點比例，兩者不同。',note:'下方列出18個現行出口及試算。2027只有9家調整公告；未列不當作取消，也不擅自沿用。',nodes:[
     n('cube-card',20,30,'CUBE等適用卡','依指定方案與Level累點',['cube-card'],null,['R078'],['先看消費是否在選定方案與合格項目；不是所有消費3%或3.3%。','Level1／2／3指定方案2%／3%／3.3%，另有達標條件、切換與上限。','長榮／亞洲萬里通等自有回饋聯名卡，不套用CUBE小樹點刷卡累積。'],'年費、原現金回饋與合格消費另比較。','本圖累點說明限2026。','start',{kind:'信用卡',source_ids:['cube-card-level','cube-2026-full']}),
-    n('cube-life',20,230,'小樹點（生活）','尚未確認可接此轉點入口',['cube-life'],null,['R078'],['不可把合併顯示的生活點當作信用卡點可轉餘額。','官方FAQ與年度公告對轉換方向有不同文字，未確認生活點可轉成信用卡點。'],'不使用尚未確認可轉的餘額。','轉換方向待核。','pending',{kind:'銀行點數',source_ids:['cube-credit-life','cube-2026-full']}),
+    n('cube-life',20,230,'小樹點（生活）','尚未確認可接此轉點入口',['cube-life'],null,['R078'],['不可把合併顯示的生活點當作信用卡點可轉餘額。','官方FAQ與年度公告對轉換方向有不同文字，未確認生活點可轉成信用卡點。'],'不使用尚未確認可轉的餘額。','轉換方向待核。','unverified',{kind:'銀行點數',source_ids:['cube-credit-life','cube-2026-full']}),
     n('cube-world',20,440,'世界卡轉點優惠','限合格卡；不看CUBE Level',['cube-world'],null,['R078'],['2026長榮／亞洲萬里通300轉1,000，華航720轉1,000。','亞洲萬里通世界卡與Visa無限卡按其他卡別，不享此世界卡專屬比例。'],'不可為了較低門檻忽略卡費及實際可兌換價值。','世界卡2027專屬比例尚未明列。','start',{kind:'信用卡'}),
     n('cube-balance',350,30,'小樹點（信用卡）','先確認可轉餘額與有效期',['cube-credit'],null,['R078'],['正卡本人、同名有效會員帳戶，透過CUBE App操作。','一般點數效期3年；歷史例外及個人餘額仍以App為準。','轉點不可撤銷；不會因此得到航空高階會籍。'],'每點先比較其他實際可用用途；一般手續費與總上限未明列。','華航／亞洲萬里通3–14工作日；其餘原則即時，系統異常另計。','start',{kind:'銀行點數'}),
     n('cube-air',750,30,'14個航空出口','最低量／單位各自不同',[],'N010',['R078'],['長榮、華航、亞洲萬里通、新航、JAL、泰航、聯航、Flying Blue、Aeroplan、Emirates、Etihad、AirAsia、BA、Qatar。','下方表格可選卡別及餘額試算；不能因為同聯盟就把不同哩程混為一池。'],'先查目標獎勵票、稅費、空位，再轉點。','2026現行表；不保證轉點後空位仍在。','verified',{kind:'航空里程',cube_panel:true}),

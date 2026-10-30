@@ -1,7 +1,8 @@
-import {EXTRA_TREES,RESOURCE_BINDINGS,OP_BINDINGS} from './network-views.mjs?v=20261025-12';
-import {PARTNER_TREES,STAY_BINDINGS} from './partner-views.mjs?v=20261025-12';
-import {HOTEL_TREES,extendHotelViews} from './hotel-partners-views.mjs?v=20261025-12';
-import {BANK_TREES} from './bank-entries-views.mjs?v=20261027-16';
+import {EXTRA_TREES,RESOURCE_BINDINGS,OP_BINDINGS} from './network-views.mjs?v=20261030-17';
+import {PARTNER_TREES,STAY_BINDINGS} from './partner-views.mjs?v=20261030-17';
+import {HOTEL_TREES,extendHotelViews} from './hotel-partners-views.mjs?v=20261030-17';
+import {BANK_TREES} from './bank-entries-views.mjs?v=20261030-17';
+import {IH_TREES,extendIhViews} from './ihg-hyatt-data.mjs?v=20261030-17';
 const checked='2026-10-24';
 const source=(id,publisher,url,access,note)=>({id,publisher,url,access,note,checked_on:checked,kind:'official',ownership_group:new URL(url).hostname});
 
@@ -23,7 +24,8 @@ export const TREE_STATUS={
   scheduled:{label:'已公告，尚未生效',short:'未來版本',tone:'scheduled'},
   start:{label:'先確認資源',short:'起點',tone:'start'},
   verified:{label:'這一段規則已查',short:'官方規則',tone:'verified'},
-  pending:{label:'須核准／待核',short:'待核關卡',tone:'pending'},
+  pending:{label:'規則已查，須申請或核准',short:'須申請',tone:'pending'},
+  unverified:{label:'條款還沒查實',short:'條款待核',tone:'unverified'},
   blocked:{label:'台灣未列適用地區',short:'地區限制',tone:'blocked'},
   excluded:{label:'串接來源遭條款排除',short:'來源排除',tone:'blocked'},
   closed:{label:'本梯次新件已截止',short:'新件截止',tone:'historical'},
@@ -38,10 +40,10 @@ const BASE_TREES=[
       {id:'visa',x:24,y:90,title:'Visa 無限卡',subtitle:'先確認實際卡等',kind:'信用卡',status:'start',outcome:'可檢查 Visa 的 GHA 會籍禮遇',requirements:['不是所有Visa卡都配鈦金；無限卡與御璽／白金卡的目標等級不同。','華航聯名卡也要再確認卡別，不能只看聯名品牌。'],cost:'依原信用卡年費；不要把既有年費重算成這次新增支出。',timing:'先通過Visa官方卡片資格驗證，再登錄會籍。',source_ids:['tree-visa-gha']},
       {id:'mastercard',x:24,y:290,title:'Mastercard',subtitle:'世界之極等指定卡等',kind:'信用卡',status:'start',outcome:'GHA指定卡等規則已讀，Wyndham分支仍待核',requirements:['GHA當期活動列台灣指定卡：World Legend／世界之極配鈦金，世界卡配白金，白金／鈦金卡配金卡。','實際卡片須通過入口驗證；Wyndham分支尚未取得完整卡別條款。'],cost:'GHA會籍配對列免費；信用卡年費與Wyndham方案另外核對。',timing:'GHA活動至2026-12-31；Wyndham個別方案與期限待核。',source_ids:['tree-mc-gha','tree-mc-wyndham']},
       {id:'gha',x:260,y:110,title:'GHA 鈦金',subtitle:'由合格卡片申請',kind:'酒店會籍',status:'pending',outcome:'取得正式核准的GHA會籍後，才有後續配對來源',claim:'文章提到經由Visa白金秘書取得GHA鈦金。',verdict:'秘書服務名稱不能用來判定卡等。目前Visa台灣頁列無限卡配鈦金、御璽／白金卡配白金，須看實際卡片。',requirements:['Visa無限卡規則已讀；仍須卡片驗證並完成官方登錄。','Mastercard世界之極等合格卡對應鈦金；入住與退房須出示合格同名Mastercard。'],cost:'Visa及Mastercard頁均列免費會籍配對；信用卡年費另按實際卡別。',timing:'Visa優惠至2027-12-31，Mastercard至2026-12-31；會籍效期依加入年及後一曆年規則。',source_ids:['tree-visa-gha','tree-mc-gha']},
-      {id:'wyndham',x:260,y:340,title:'Wyndham 鑽卡',subtitle:'Mastercard 候選分支',kind:'酒店會籍',status:'pending',outcome:'須先確認實際獲發鑽卡，才能當作下一段來源',requirements:['官方索引列世界之極及台灣發卡市場，但未取得個別卡號的完整活動條款。','活動次數、期限、既有會籍與實際核准結果待驗。'],cost:'索引描述為贈送快升；完整費用及限制待核。',timing:'以實際當期入口及核准通知為準。',source_ids:['tree-mc-wyndham']},
+      {id:'wyndham',x:260,y:340,title:'Wyndham 鑽卡',subtitle:'Mastercard 候選分支',kind:'酒店會籍',status:'unverified',outcome:'須先確認實際獲發鑽卡，才能當作下一段來源',requirements:['官方索引列世界之極及台灣發卡市場，但未取得個別卡號的完整活動條款。','活動次數、期限、既有會籍與實際核准結果待驗。'],cost:'索引描述為贈送快升；完整費用及限制待核。',timing:'以實際當期入口及核准通知為準。',source_ids:['tree-mc-wyndham']},
       {id:'bw',x:496,y:210,title:'Best Western',subtitle:'目標：鑽石／精選鑽石',kind:'酒店配對',status:'pending',outcome:'BW核准的等級，不保證一定為精選鑽石',claim:'文章以GHA鈦金或Wyndham鑽卡配對BW黑鑽／鑽卡。',verdict:'官方有免費配對機制，但對應等級由BW審核；下一段若要求精選鑽石，拿到較低等級不能視為同樣接通。',requirements:['提出其他酒店高階會籍與姓名一致的有效證明。','台灣屬北美以外，官方頁列聯絡信箱為 bwr.service@bestwestern.com。','取得書面核准與實際等級，再評估Choice或Scandic。'],cost:'官方配對程序免費；不代送申請或個人證件。',timing:'依品牌審核；來源及BW會籍效期須分別保存。',source_ids:['bw-match']},
       {id:'choice',x:732,y:20,title:'Choice 白金',subtitle:'BW 旁支，非必經',kind:'額外酒店會籍',status:'blocked',outcome:'保留文章中的支線，不列為台灣居民可直接使用',requirements:['公開活動適用地區未列台灣。','即使住在其他適用地區，是否接受BW來源、配對到哪級仍由品牌核准。','Choice分支不是接到SAS的必要步驟。'],cost:'不在台灣適用性未明時安排額外住宿或申請費。',timing:'公開配對有終身次數與效期規則；當期適用性先核對。',source_ids:['tree-choice-status','tree-choice-rules']},
-      {id:'scandic',x:732,y:210,title:'Scandic 第 5 級',subtitle:'四晚挑戰：先取得核准',kind:'酒店挑戰',status:'pending',outcome:'完成帳戶適用挑戰後，才可能取得第5級',claim:'文章描述用BW精選鑽石開啟四晚挑戰，今年免D-Number。',verdict:'未取得2026年對台灣會員普遍開放的四晚挑戰正式條款；四晚與免D-Number均保留為待核線索。',requirements:['先向Scandic確認是否接受你的BW等級及取得來源。','取得書面核准、合格房晚、起迄、效期及D-Number要求。','不要把SAS合作存在，當成四晚挑戰也一定存在。'],cost:'取得核准後才計算新增合格住宿、交通及其他支出。',timing:'依個別核准；不預設人人四晚都能升等。',source_ids:['tree-scandic-sas'],route_id:'P009'},
+      {id:'scandic',x:732,y:210,title:'Scandic 第 5 級',subtitle:'四晚挑戰：先取得核准',kind:'酒店挑戰',status:'unverified',outcome:'完成帳戶適用挑戰後，才可能取得第5級',claim:'文章描述用BW精選鑽石開啟四晚挑戰，今年免D-Number。',verdict:'未取得2026年對台灣會員普遍開放的四晚挑戰正式條款；四晚與免D-Number均保留為待核線索。',requirements:['先向Scandic確認是否接受你的BW等級及取得來源。','取得書面核准、合格房晚、起迄、效期及D-Number要求。','不要把SAS合作存在，當成四晚挑戰也一定存在。'],cost:'取得核准後才計算新增合格住宿、交通及其他支出。',timing:'依個別核准；不預設人人四晚都能升等。',source_ids:['tree-scandic-sas'],route_id:'P009'},
       {id:'sas',x:968,y:210,title:'SAS 金卡',subtitle:'天合聯盟高階會籍',kind:'航空配對',status:'verified',outcome:'適格Scandic第5級可對應EuroBonus金卡',claim:'文章寫兩個帳戶都須滿30天，並可取得固定12個月SAS金卡。',verdict:'官方目前要求至少一個帳戶成立30天；SAS配對後效期跟隨Scandic來源等級，不能一律寫12個月。',requirements:['至少一個計畫帳戶成立30天，且年滿18歲。','兩邊姓名、電郵、電話及生日等會員資料須一致。','確認Scandic實際等級、來源效期及帳戶是否符合配對資格。'],cost:'這一段以官方帳戶連結與配對為主；前段挑戰住宿成本仍另計。',timing:'至少一帳成立30天；金卡到期日沿用Scandic來源等級。',source_ids:['tree-sas-scandic','tree-scandic-sas'],rule_ids:['R016','R017','R018']},
       {id:'turkish',x:968,y:370,title:'土耳其航空 Elite',subtitle:'星空聯盟候選分支',kind:'航空挑戰',status:'historical',outcome:'需取得目前有效的土航配對或挑戰核准',claim:'文章描述四個月挑戰、先飛一次，再延長金卡。',verdict:'查到的官方SAS專案公告為2024年8月，不能據此確認2026年仍可申請；本文的四個月與延長條件尚待當期書面核准。',requirements:['確認目前是否接受SAS金卡及配對取得的會籍來源。','先取得帳戶適用的核准，再確認首航、航段、艙等、里程與期限。','未核准前，不把任何土航機票當作必然可完成挑戰。'],cost:'新增合格付費機票與定位費另計，未確認前不報固定總價。',timing:'目前只確認歷史公告存在；2026方案待核。',source_ids:['tree-tk-sas-history']},
       {id:'royal',x:968,y:530,title:'約旦航空金卡',subtitle:'串接來源排除＋地區限制',kind:'付費航空配對',status:'excluded',outcome:'這條串接配對來源不符合當期約旦條款',claim:'文章以土航金卡申請約旦航空，並提醒可能驗證身分。',verdict:'現行一般條款1.4(j)排除串接配對取得的來源會籍，因此本圖經Scandic取得SAS、再配土航的來源不能直接接到約旦。另有居住地與證件限制，台灣未列。',requirements:['來源會籍若經其他計畫串接配對取得，現行條款明列拒絕；臨時或挑戰會籍亦可能不被接受。','即使另有實際飛行取得的SAS或土航會籍，也須符合列名居住地及相應國家身分文件；台灣未列。','FAQ列SAS與土航來源不代表所有取得方式均適用；本人帳戶、同名證明與每人一次等條件另核。'],cost:'當期金卡申請費牌告149美元；其他方案、稅費及退款依條款。',timing:'核准後12個月；活動可變更或提前結束。',source_ids:['tree-rj-faq','tree-rj-terms']}
@@ -90,8 +92,9 @@ const sqTree=BASE_TREES.find(item=>item.id==='marriott-sq');
 sqTree.height=850;
 sqTree.nodes.push({id:'sq-silver-source',x:40,y:690,title:'新航菁英銀卡',subtitle:'萬豪目前須無高階會籍',kind:'航空會籍',status:'start',outcome:'可檢查3晚萬豪銀卡分支',resources:['sq-silver'],requirements:['萬豪目前無任何Elite等級；先比較未來一次性合作的啟用順序。'],cost:'已持有新航銀卡；新增住宿另計。',timing:'登錄後六個月。',rule_ids:['R076']},{id:'sq-silver-mb',x:400,y:690,title:'萬豪銀卡挑戰',subtitle:'六個月內3晚合格付費實住',kind:'酒店挑戰',status:'verified',outcome:'依合作取得萬豪Silver，不是Gold或Platinum',resources:['mb-silver'],opportunity_id:'N025',requirements:['新航正式Elite Silver及萬豪無Elite；本人付費合格實住。','點數、點現、免費住宿獎勵排除；MEA仍待個別確認。'],cost:'只計新增合格住宿與交通。',timing:'登錄六個月，核發效期依合作條款。',rule_ids:['R076']});
 sqTree.edges.push({id:'sqs-mbs',from:'sq-silver-source',to:'sq-silver-mb',label:'3晚合格付費實住',status:'verified'});
-export const TREES=[...BASE_TREES,...EXTRA_TREES,...PARTNER_TREES,...HOTEL_TREES,...BANK_TREES];
+export const TREES=[...BASE_TREES,...EXTRA_TREES,...PARTNER_TREES,...HOTEL_TREES,...BANK_TREES,...IH_TREES];
 extendHotelViews(TREES);
+extendIhViews(TREES);
 for(const graph of TREES){
   graph.goals??=graph.id==='ci-card'?['status','flight']:['status'];
   for(const item of graph.nodes){

@@ -1,6 +1,7 @@
-import {EXT_RESOURCES,EXT_FACTS,EXT_OPPORTUNITIES,EXT_SOURCES,EXT_RULES,EXT_COVERAGE} from './extensions-data.mjs?v=20261025-12';
-import {HOTEL_RESOURCES,HOTEL_FACTS,HOTEL_OPPORTUNITIES,HOTEL_SOURCES,HOTEL_RULES,HOTEL_COVERAGE} from './hotel-partners-data.mjs?v=20261027-16';
-import {BANK_RESOURCES,BANK_OPPORTUNITIES,BANK_SOURCES,BANK_RULES} from './bank-entries-data.mjs?v=20261027-16';
+import {EXT_RESOURCES,EXT_FACTS,EXT_OPPORTUNITIES,EXT_SOURCES,EXT_RULES,EXT_COVERAGE} from './extensions-data.mjs?v=20261030-17';
+import {HOTEL_RESOURCES,HOTEL_FACTS,HOTEL_OPPORTUNITIES,HOTEL_SOURCES,HOTEL_RULES,HOTEL_COVERAGE} from './hotel-partners-data.mjs?v=20261030-17';
+import {BANK_RESOURCES,BANK_OPPORTUNITIES,BANK_SOURCES,BANK_RULES} from './bank-entries-data.mjs?v=20261030-17';
+import {IH_SOURCES,IH_RESOURCES,IH_FACTS,IH_OPPORTUNITIES,IH_RULES,IH_COVERAGE,IH_COVERAGE_UPDATES} from './ihg-hyatt-data.mjs?v=20261030-17';
 const resource=(id,label,group,extra={})=>({id,label,group,...extra});
 export const RESOURCES=[
   resource('amex-platinum-charge','運通簽帳白金卡','信用卡'),resource('amex-eva-platinum-card','長榮運通簽帳白金卡','信用卡'),resource('amex-gold-current','運通耀金卡','信用卡'),resource('amex-eva-gold-card','長榮運通簽帳金卡','信用卡'),resource('amex-platinum-credit','運通信用白金卡','信用卡'),resource('amex-regent','運通晶華珍饌白金卡','信用卡'),resource('amex-charge','運通簽帳卡','信用卡'),
@@ -124,3 +125,6 @@ RESOURCES.push(...BANK_RESOURCES);OPPORTUNITIES.push(...BANK_OPPORTUNITIES);NETW
 for(const id of ['hsbc-traveller-infinite','hsbc-traveller-signature','hsbc-traveller-light'])NETWORK_COVERAGE_UPDATES[id]={research_status:'selected_fields_verified_gaps_remain',source_ids:['bank-hsbc-q4','bank-hsbc-compare','bank-hsbc-light','bank-hsbc-welcome'],rule_ids:['R102','R103','R106'],note:'2026/10/27補上三卡年費、Q4基本累積、條件迎新、逐月效期及轉點入口；財管與生日加碼仍待核。R005保留過期Q3歷史，當期迎新改見R103。'};
 NETWORK_COVERAGE_UPDATES['dbs-flying-family']={research_status:'partial_sources_found',source_ids:['bank-dbs-cards','bank-dbs-transfer'],rule_ids:['R104'],note:'已補四種持卡入口與飛行積金路線；逐卡年費、基本累積、迎新及排除仍待完整比較。'};
 NETWORK_COVERAGE_UPDATES['ctbc-ana-family']={research_status:'partial_sources_found',source_ids:['bank-ana-cards'],rule_ids:['R105'],note:'已補六種持卡入口及獨立ANA哩程餘額；銀行逐卡當期條款與獎勵票規則仍待完整查核。'};
+// IHG與Hyatt 2026-10-30 官方條款
+RESOURCES.push(...IH_RESOURCES);FACTS.push(...IH_FACTS);OPPORTUNITIES.push(...IH_OPPORTUNITIES);NETWORK_SOURCES.push(...IH_SOURCES);NETWORK_RULES.push(...IH_RULES);NETWORK_COVERAGE.push(...IH_COVERAGE);
+Object.assign(NETWORK_COVERAGE_UPDATES,IH_COVERAGE_UPDATES);

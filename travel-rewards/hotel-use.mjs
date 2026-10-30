@@ -1,12 +1,13 @@
-import {redemptionValue,nonNegative} from './core.mjs?v=20261025-12';
-import {CUBE_PARTNERS} from './cube-data.mjs?v=20261025-12';
+import {redemptionValue,nonNegative} from './core.mjs?v=20261030-17';
+import {CUBE_PARTNERS} from './cube-data.mjs?v=20261030-17';
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const number=value=>new Intl.NumberFormat('zh-TW',{maximumFractionDigits:2}).format(value);
 export const HOTEL_PROGRAMS=[
   {id:'marriott',name:'萬豪',tag:'住五付四',intro:'任何會員；同一訂單五個連續全點數標準兌換晚，免全段最低點數的一晚。',rules:['免的不是任意最後一晚；10晚按整段最低兩晚處理。','免房券、點數＋現金與升等部分不能直接套用；用官方已含優惠的全段總點數試算，不再扣一次。','點數房是否計正常資格房晚，與新航／JAL等付費挑戰是否接受，是另外兩項規則。'],sources:['hotel-mb-five','hotel-mb-five-faq'],tree:'hotel-use',node:'use-marriott'},
   {id:'hilton',name:'Hilton',tag:'銀卡以上第五晚免費',intro:'限已核准銀卡以上、同酒店全點數標準房五連晚以上；最多20晚中的四個免費晚。',rules:['一般會員沒有這項第五晚權益；運通贈Gold仍要先完成申請。','Premium房、Points & Money及部分套裝／活動不能套用。依官方預訂的第5／10／15／20晚及總點數確認。','獎勵房可用於住宿，不代表Hilton公開會籍配對挑戰接受Reward Stays。'],sources:['hotel-hilton-five','hotel-hilton-terms'],tree:'hotel-use',node:'use-hilton'},
   {id:'all',name:'雅高 ALL',tag:'1,000點抵20歐元',intro:'官網1,000點起；2,000點以上依2,000倍數。台灣等列名地區酒店櫃檯另可500點起抵10歐元。',rules:['銀行轉入的最低量，和飯店可使用的最低量不同；例如旅人最低轉3,000，不代表一次可在線上用3,000。','IntercityHotel、Steigenberger、Steigenberger Icon、MAXX、Jaz in the City、Zleep等列名品牌不提供此住宿折抵；其他酒店仍要參與計畫。','部分稅款、Day Use、不可退預付房價有不同限制；預付價須有部分卡款。台幣折抵依Accor實際換匯，不預設固定匯率。'],sources:['hotel-all-use','hotel-all-book'],tree:'hotel-use',node:'use-all'},
-  {id:'ihg',name:'IHG',tag:'第四晚須指定海外卡',intro:'本輪已核的第四晚免費入口是美國Chase IHG Premier Select主卡＋同酒店連續全點數標準獎勵住宿。',rules:['台灣滙豐或CUBE可轉IHG點數；IHG白金與這項Chase持卡權益分開。','第四晚免費不適用現金房或Points & Cash，仍須付適用雜費及度假村費。房價與點數均可能動態變動。','其他Chase卡與本人既有版本另核；免年費卡官方已公告2027起須曆年消費5,000美元。不能把所有卡當作同一方案。'],sources:['hotel-ihg-faq','hotel-ihg-select','hotel-ihg-2026','hotel-ihg-traveler-2027'],tree:'hotel-use',node:'use-ihg'}
+  {id:'ihg',name:'IHG',tag:'第四晚須指定海外卡',intro:'本輪已核的第四晚免費入口是美國Chase IHG Premier Select主卡＋同酒店連續全點數標準獎勵住宿。',rules:['台灣滙豐或CUBE可轉IHG點數；IHG白金與這項Chase持卡權益分開。','第四晚免費不適用現金房或Points & Cash，仍須付適用雜費及度假村費。房價與點數均可能動態變動。','其他Chase卡與本人既有版本另核；免年費卡官方已公告2027起須曆年消費5,000美元。不能把所有卡當作同一方案。','Points & Cash是「現有點數加訂房時購買的點數」，不是折現金；每曆年最多購買200,000點，1,000為單位。','Platinum與Diamond有獎勵晚折扣，Club、Silver、Gold沒有；折扣比例條款未列。','點數：Elite不到期；Club會員12個月無活動到期。'],sources:['hotel-ihg-faq','hotel-ihg-select','hotel-ihg-2026','hotel-ihg-traveler-2027','ihg-member-tc-1030','ihg-faq-1030'],tree:'hotel-use',node:'use-ihg'},
+  {id:'hyatt',name:'Hyatt',tag:'五級點數表，Points + Cash對半',intro:'獎勵住宿按酒店類別1–8與當晚五級（Lowest到Top）定價，標準房無停售日；Points + Cash為該晚點數的一半加現金。',rules:['2026年5月起每個類別分五級；同一家酒店不同日期的點數不同，先到Hyatt點數日曆查當晚等級。','Points + Cash：點數為免費晚的一半，現金為標準價的五至七折；標準房可線上訂，套房要打電話。','官方條款、FAQ、獎勵頁都沒查到連住優惠，不要套用萬豪或Hilton的第五晚規則。','Explorist、Globalist與Hyatt聯名卡主卡（美國發行）有獎勵晚提前訂房，天數條款沒寫。點數24個月無活動作廢。'],sources:['hyatt-free-nights-chart','hyatt-award-chart-news','hyatt-terms-1015','hyatt-faq-general'],tree:'hotel-use',node:'use-hyatt'}
 ];
 export function hotelTransferRows(program){
   const rows=[];
@@ -21,6 +22,7 @@ export function hotelTransferRows(program){
     rows.push({source:'已連結Qatar Avios',ratio:'3,500 → 1,000',minimum:'已確認最低；增量／上限未明列',timing:'最多六週',note:'ALL須選Qatar合作，不能同時掛FB；兩方向不可逆',tree:'all-qatar',node:'qatar-to-all'});
     rows.push({source:'已連結Flying Blue哩程',ratio:'4,000 → 1,000',minimum:'已確認最低；增量／上限未明列',timing:'專屬條款列即時',note:'ALL須選FB合作；不能把反向轉點當作取消原交易',tree:'all-flyingblue',node:'fb-all-transfer'});
   }
+  if(program==='hyatt')rows.push({source:'台灣銀行點數（運通MR、星展飛行積金、滙豐、國泰世華）',ratio:'沒有轉入入口',minimum:'不適用',timing:'不適用',note:'四家頁面逐頁讀過都沒有Hyatt；可購買點數（2,000起、1,000為單位、每年自購上限55,000）或會員互贈',tree:'points-hotel',node:'hsbc-hotels'});
   return rows;
 }
 export function hotelValue(input){

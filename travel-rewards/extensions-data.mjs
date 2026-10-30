@@ -38,11 +38,12 @@ export const EXT_SOURCES=[
 ];
 const res=(id,label,group,exclusive)=>({id,label,group,...(exclusive?{exclusive}: {})});
 export const EXT_RESOURCES=[
+  ...[['ihg-club','IHG Club會員'],['ihg-silver','IHG銀卡 Silver Elite'],['ihg-gold','IHG金卡 Gold Elite'],['ihg-platinum','IHG白金 Platinum Elite'],['ihg-diamond','IHG鑽石 Diamond Elite']].map(([id,label])=>res(id,label,'酒店會籍','ihg')),
   res('cube-card','國泰世華 CUBE 卡','信用卡'),res('cube-world','國泰世華世界卡（非亞洲萬里通世界卡）','信用卡'),res('cube-asia-world','國泰世華亞洲萬里通世界卡','信用卡'),res('cube-credit','小樹點（信用卡）餘額','點數與帳戶'),res('cube-life','小樹點（生活）餘額','點數與帳戶'),
   res('mb-platinum-exact','萬豪白金（確切等級）','酒店會籍','marriott'),res('mb-titanium','萬豪鈦金','酒店會籍','marriott'),res('mb-ambassador','萬豪大使','酒店會籍','marriott'),
   ...[['jal-base','JAL一般會員'],['jal-crystal','JAL Crystal'],['jal-sapphire','JAL Sapphire'],['jal-premier','JGC Premier'],['jal-diamond','JAL Diamond'],['jal-metal','JAL Diamond Metal']].map(([id,label])=>res(id,label,'航空會籍','jal')),
   res('jal-account','JAL Mileage Bank帳戶','點數與帳戶'),res('ua-silver','聯航 Premier Silver','航空會籍','united'),res('ua-gold','聯航 Premier Gold','航空會籍','united'),res('ua-platinum','聯航 Premier Platinum','航空會籍','united'),res('ua-1k','聯航 Premier 1K','航空會籍','united'),res('ua-miles','聯航可兌換哩程','點數與帳戶'),
-  res('ap-account','Aeroplan帳戶','點數與帳戶'),res('ap-elite','Aeroplan 25K以上正式會籍','航空會籍'),res('ap-premium-card','活動列名的Aeroplan高階主卡','信用卡'),res('hyatt-account','World of Hyatt帳戶','點數與帳戶'),res('hyatt-explorist','Hyatt冒險家 Explorist','酒店會籍','hyatt'),res('hyatt-globalist','Hyatt環球客 Globalist','酒店會籍','hyatt'),res('ihg-account','IHG帳戶','點數與帳戶'),res('visa-overseas','指定海外市場發行Visa御璽／無限卡','信用卡')
+  res('ap-account','Aeroplan帳戶','點數與帳戶'),res('ap-elite','Aeroplan 25K以上正式會籍','航空會籍'),res('ap-premium-card','活動列名的Aeroplan高階主卡','信用卡'),res('hyatt-account','World of Hyatt帳戶','點數與帳戶'),res('hyatt-discoverist','Hyatt探索者 Discoverist','酒店會籍','hyatt'),res('hyatt-explorist','Hyatt冒險家 Explorist','酒店會籍','hyatt'),res('hyatt-globalist','Hyatt環球客 Globalist','酒店會籍','hyatt'),res('ihg-account','IHG帳戶','點數與帳戶'),res('visa-overseas','指定海外市場發行Visa御璽／無限卡','信用卡')
 ];
 export const EXT_FACTS=[
   {id:'jalLinked',label:'JAL×萬豪是否尚未使用帳戶連結',options:[['no','尚未連結'],['yes','已連結，年度資格未確認'],['annual','已確認本人當年度可再領取']]},
