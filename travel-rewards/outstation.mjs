@@ -1,5 +1,5 @@
-import {TRIP_CITIES} from './trip-cities.mjs?v=20261031-2';
-import {OUTSTATIONS,outstationPlans} from './outstation-core.mjs?v=20261031-2';
+import {TRIP_CITIES} from './trip-cities.mjs?v=20261031-3';
+import {OUTSTATIONS,outstationPlans} from './outstation-core.mjs?v=20261031-3';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const num=value=>new Intl.NumberFormat('zh-TW').format(value);

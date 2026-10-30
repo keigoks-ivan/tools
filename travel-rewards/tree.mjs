@@ -1,15 +1,15 @@
-import {TREES,TREE_STATUS} from './tree-data.mjs?v=20261031-2';
-import {traceTree,treePosition,validateTree} from './tree-core.mjs?v=20261031-2';
+import {TREES,TREE_STATUS} from './tree-data.mjs?v=20261031-3';
+import {traceTree,treePosition,validateTree} from './tree-core.mjs?v=20261031-3';
 
-import {RESOURCES,FACTS,OPPORTUNITIES} from './network-data.mjs?v=20261031-2';
-import {cleanNetworkState,selectedResources,effectiveResources,effectiveFacts,evaluateOpportunity,traceResources,relatedViews,coverageSummary,relevantNetworkFacts,toggleNetworkResource} from './network-core.mjs?v=20261031-2';
-import {stayHub,stayNodeSummary,wireStayTools} from './stay.mjs?v=20261031-2';
-import {cubePanel,wireCubeTools} from './cube.mjs?v=20261031-2';
-import {hotelPanel,hotelNodeSummary,wireHotelTools} from './hotel-use.mjs?v=20261031-2';
-import {setupMatches,SETUP_GOALS} from './setup-core.mjs?v=20261031-2';
+import {RESOURCES,FACTS,OPPORTUNITIES} from './network-data.mjs?v=20261031-3';
+import {cleanNetworkState,selectedResources,effectiveResources,effectiveFacts,evaluateOpportunity,traceResources,relatedViews,coverageSummary,relevantNetworkFacts,toggleNetworkResource} from './network-core.mjs?v=20261031-3';
+import {stayHub,stayNodeSummary,wireStayTools} from './stay.mjs?v=20261031-3';
+import {cubePanel,wireCubeTools} from './cube.mjs?v=20261031-3';
+import {hotelPanel,hotelNodeSummary,wireHotelTools} from './hotel-use.mjs?v=20261031-3';
+import {setupMatches,SETUP_GOALS} from './setup-core.mjs?v=20261031-3';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const W=194,H=112;
+const W=194,H=112,TOP_PAD=36;
 const compact=value=>{let units=0,result='';for(const char of value){units+=/[ -~]/.test(char)?.55:1;if(units>12)return result+'…';result+=char;}return result;};
 const icon={銀行點數:'點',酒店點數:'點',資格房晚:'晚',申請條件:'核',會員帳戶:'連',雙重累積:'雙',升等權益:'升',信用卡:'卡',酒店會籍:'住',酒店配對:'配',額外酒店會籍:'支',酒店挑戰:'住',航空配對:'飛',航空挑戰:'飛',付費航空配對:'飛',航空會籍:'飛',航空里程:'哩',航空資格點:'資',旅行目標:'票'};
 
@@ -42,27 +42,39 @@ export function mountTree(root,{data,inspect,onChange}){
   // 接到「條款還沒查實」節點的待核連線，跟節點同色
   function edgeStatus(edge){return edge.status==='pending'&&tree().nodes.find(n=>n.id===edge.to)?.status==='unverified'?'unverified':edge.status;}
   function edgePath(edge){
-    const graph=tree(),from=graph.nodes.find(n=>n.id===edge.from),to=graph.nodes.find(n=>n.id===edge.to);
-    if(Number.isFinite(edge.viaX))return 'M '+(from.x+W)+' '+(from.y+H/2)+' H '+edge.viaX+' V '+(to.y+H/2)+' H '+to.x;
+    const graph=tree(),from=graph.nodes.find(n=>n.id===edge.from),to=graph.nodes.find(n=>n.id===edge.to),AY=48;
+    if(Number.isFinite(edge.viaX))return 'M '+(from.x+W+4)+' '+(from.y+AY)+' H '+edge.viaX+' V '+(to.y+AY)+' H '+(to.x-8);
     if(edge.side==='right'){
-      const x=from.x+W,y=from.y+H/2,endY=to.y+H/2,bend=graph.width-26;
-      return 'M '+x+' '+y+' C '+bend+' '+y+' '+bend+' '+endY+' '+(to.x+W)+' '+endY;
+      const x=from.x+W+4,y=from.y+AY,endY=to.y+AY,bend=graph.width-26;
+      return 'M '+x+' '+y+' C '+bend+' '+y+' '+bend+' '+endY+' '+(to.x+W+8)+' '+endY;
     }
-    if(from.x===to.x){const x=from.x+W/2,y=from.y+H,end=to.y;return 'M '+x+' '+y+' C '+x+' '+((y+end)/2)+' '+x+' '+((y+end)/2)+' '+x+' '+end;}
-    const x=from.x+W,y=from.y+H/2,endX=to.x,endY=to.y+H/2,mid=(x+endX)/2;
+    if(from.x===to.x){const x=from.x+W/2,y=from.y+H+2,end=to.y-6;return 'M '+x+' '+y+' C '+x+' '+((y+end)/2)+' '+x+' '+((y+end)/2)+' '+x+' '+end;}
+    const x=from.x+W+4,y=from.y+AY,endX=to.x-8,endY=to.y+AY,mid=(x+endX)/2;
     return 'M '+x+' '+y+' C '+mid+' '+y+' '+mid+' '+endY+' '+endX+' '+endY;
   }
+  const stageOf=kind=>kind.includes('配對')?'配對':kind.includes('挑戰')?'挑戰':kind==='額外酒店會籍'?'酒店會籍':kind;
+  // 依 x 位置分欄（相差 40 以內視為同一欄），欄名取該欄節點類別
+  function columnsOf(graph){
+    const cols=[];
+    [...graph.nodes].sort((m,n)=>m.x-n.x).forEach(node=>{const col=cols.find(item=>Math.abs(item.x-node.x)<40);if(col)col.nodes.push(node);else cols.push({x:node.x,nodes:[node]});});
+    return cols.map((col,index)=>{
+      const count={};col.nodes.forEach(node=>{const key=stageOf(node.kind);count[key]=(count[key]||0)+1;});
+      const names=Object.keys(count).sort((m,n)=>count[n]-count[m]).slice(0,3);
+      return {x:col.x,label:(index===0?'起點・':'')+names.join('・')};
+    });
+  }
+  const nodeNo=(graph,node)=>String(graph.nodes.indexOf(node)+1).padStart(2,'0');
   function nodeMarkup(node){
-    const status=TREE_STATUS[node.status],label=node.title+'，'+node.subtitle+'，'+status.label;
-    return '<g class="tree-node '+status.tone+'" data-tree-node="'+node.id+'" transform="translate('+node.x+' '+node.y+')" role="button" tabindex="0" aria-label="'+esc(label)+'" aria-pressed="false"><title>'+esc(label)+'</title><rect class="tree-node-halo" x="-5" y="-5" width="'+(W+10)+'" height="'+(H+10)+'" rx="20"/><rect class="tree-node-body" width="'+W+'" height="'+H+'" rx="15"/><rect class="tree-node-icon" x="14" y="13" width="27" height="25" rx="7"/><text class="tree-node-symbol" x="27.5" y="31" text-anchor="middle">'+esc(icon[node.kind]||'會')+'</text><text class="tree-node-kind" x="49" y="31">'+esc(node.kind)+'</text><circle class="tree-node-dot" cx="175" cy="25" r="4"/><text class="tree-node-title" x="15" y="65">'+esc(node.title)+'</text><text class="tree-node-subtitle" x="15" y="92">'+esc(compact(node.subtitle))+'</text><g class="tree-owned-badge" aria-hidden="true"><circle cx="175" cy="94" r="9"/><text x="175" y="98" text-anchor="middle">✓</text></g></g>';
+    const graph=tree(),status=TREE_STATUS[node.status],label=node.title+'，'+node.subtitle+'，'+status.label;
+    return '<g class="tree-node '+status.tone+(node.status==='start'?' is-start':'')+'" data-tree-node="'+node.id+'" transform="translate('+node.x+' '+node.y+')" role="button" tabindex="0" aria-label="'+esc(label)+'" aria-pressed="false"><title>'+esc(label)+'</title><rect class="tree-node-hit" width="'+W+'" height="'+H+'"/><rect class="tree-node-rule" width="'+W+'" height="1"/><rect class="tree-node-rule-strong" width="'+W+'" height="3"/><text class="tree-node-no" x="0" y="27">'+nodeNo(graph,node)+'</text><text class="tree-node-kind" x="26" y="26">'+esc(node.kind)+'</text><text class="tree-node-own" x="'+W+'" y="26" text-anchor="end">你有</text><text class="tree-node-title" x="0" y="58">'+esc(node.title)+'</text><text class="tree-node-subtitle" x="0" y="80">'+esc(compact(node.subtitle))+'</text><text class="tree-node-state" x="0" y="102">'+esc(status.label)+'</text></g>';
   }
   function graphMarkup(){
     const graph=tree();
-    return '<svg id="rewards-tree-svg" class="tree-svg" preserveAspectRatio="xMidYMin meet" viewBox="0 0 '+graph.width+' '+graph.height+'" role="group" aria-label="'+esc(graph.name)+'互動樹狀圖" tabindex="0"><defs>'+Object.keys(TREE_STATUS).map(key=>'<marker id="tree-arrow-'+key+'" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="tree-marker '+key+'" d="M1 1 L7 4 L1 7 Z"/></marker>').join('')+'</defs><g class="tree-edges">'+graph.edges.map(edge=>{const status=edgeStatus(edge);return '<g class="tree-edge '+status+'" data-tree-edge="'+edge.id+'"><title>'+esc(edge.label+'：'+TREE_STATUS[status].label)+'</title><path d="'+edgePath(edge)+'" marker-end="url(#tree-arrow-'+status+')"/></g>';}).join('')+'</g><g>'+graph.nodes.map(nodeMarkup).join('')+'</g></svg>';
+    return '<svg id="rewards-tree-svg" class="tree-svg" preserveAspectRatio="xMidYMin meet" viewBox="0 '+(-TOP_PAD)+' '+graph.width+' '+(graph.height+TOP_PAD)+'" role="group" aria-label="'+esc(graph.name)+'互動樹狀圖" tabindex="0"><defs>'+Object.keys(TREE_STATUS).map(key=>'<marker id="tree-arrow-'+key+'" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="tree-marker '+key+'" d="M1 1 L7 4 L1 7 Z"/></marker>').join('')+'</defs><g class="tree-columns" aria-hidden="true">'+columnsOf(graph).map(col=>'<text x="'+col.x+'" y="-12">'+esc(col.label)+'</text>').join('')+'</g><g class="tree-edges">'+graph.edges.map(edge=>{const status=edgeStatus(edge);return '<g class="tree-edge '+status+'" data-tree-edge="'+edge.id+'"><title>'+esc(edge.label+'：'+TREE_STATUS[status].label)+'</title><path d="'+edgePath(edge)+'" marker-end="url(#tree-arrow-'+status+')"/></g>';}).join('')+'</g><g>'+graph.nodes.map(nodeMarkup).join('')+'</g></svg>';
   }
   function stepsMarkup(){
     const graph=tree();
-    return '<p class="tree-step-caption">各卡片列出承接來源；「或」是替代入口，「＋」須同時具備。請逐段核對條件。</p><ol class="tree-step-list">'+graph.nodes.map(node=>{const parents=graph.edges.filter(edge=>edge.to===node.id).map(edge=>graph.nodes.find(n=>n.id===edge.from).title);return '<li><button type="button" class="tree-step '+node.status+'" data-tree-node="'+node.id+'" aria-pressed="false"><span class="tree-step-icon">'+esc(icon[node.kind]||'會')+'</span><span class="tree-step-copy"><small>'+esc(node.kind)+(parents.length?' · 承接 '+esc(parents.join(node.join==='all'?' ＋ ':' 或 ')):' · 可選起點')+'</small><b>'+esc(node.title)+'</b><span>'+esc(node.subtitle)+'</span><em>'+esc(TREE_STATUS[node.status].label)+'</em></span><span aria-hidden="true">↗</span></button></li>';}).join('')+'</ol>';
+    return '<p class="tree-step-caption">各步列出承接來源；「或」是替代入口，「＋」須同時具備。請逐段核對條件。</p><ol class="tree-step-list">'+graph.nodes.map(node=>{const parents=graph.edges.filter(edge=>edge.to===node.id).map(edge=>graph.nodes.find(n=>n.id===edge.from).title);return '<li class="'+TREE_STATUS[node.status].tone+'"><button type="button" class="tree-step '+node.status+'" data-tree-node="'+node.id+'" aria-pressed="false"><span class="tree-step-no">'+nodeNo(graph,node)+'</span><span class="tree-step-copy"><small>'+esc(node.kind)+(parents.length?' · 承接 '+esc(parents.join(node.join==='all'?' ＋ ':' 或 ')):' · 可選起點')+'</small><b>'+esc(node.title)+'</b><span>'+esc(node.subtitle)+'</span><em>'+esc(TREE_STATUS[node.status].label)+'<i class="tree-step-own"> · 你有</i></em></span></button></li>';}).join('')+'</ol>';
   }
   function inventoryMarkup(){
     const selected=selectedResources(inventory),current=facts(),questions=relevantNetworkFacts(tree());
@@ -87,8 +99,12 @@ export function mountTree(root,{data,inspect,onChange}){
   function render(){
     const graph=tree();
     const available=TREES.filter(item=>state.goal==='all'||item.goals.includes(state.goal));
-    const legend='<div class="tree-legend"><span class="owned">藍框：已填資源</span><span class="verified">實線：規則已查</span><span class="pending">黃虛線：規則已查，須申請或核准</span><span class="unverified">橘虛線：條款還沒查實，先別花錢</span><span class="blocked">粉紅：排除條件</span><span class="historical">灰色：歷史／未生效</span></div>';
-    root.innerHTML='<div class="network-controls"><div class="network-goals" role="group" aria-label="選擇探索目標">'+[['all','全部'],['status','會籍'],['flight','機票'],['hotel','飯店']].map(([id,label])=>'<button type="button" data-network-goal="'+id+'" aria-pressed="'+(state.goal===id)+'">'+label+'</button>').join('')+'</div>'+inventoryMarkup()+'<details class="network-tools"><summary aria-label="更多工具"><span class="tools-label">更多工具</span><span aria-hidden="true">⋯</span></summary><div><button type="button" data-start-setup>重新設定我的起點 ↗</button><button type="button" data-open-tree="cube-points" data-scroll-cube>小樹點18個出口 ↗</button><button type="button" data-open-tree="hotel-use" data-hotel-focus-program="marriott">飯店點數怎麼用 ↗</button><button type="button" data-stay-hub>訂房前查認列 ↗</button></div></details></div><div id="setup-match-results">'+suggestionsMarkup()+'</div><section class="tree-workspace"><div class="tree-workspace-top"><label class="tree-route-picker"><span>切換路線 <small>'+available.length+' 張</small></span><select id="tree-family-select" aria-label="選擇路線">'+available.map(item=>'<option value="'+item.id+'" '+(item.id===graph.id?'selected':'')+'>'+esc(item.name)+'</option>').join('')+'</select></label><div class="tree-mode" role="group" aria-label="圖表顯示方式"><button type="button" data-tree-mode="map" aria-pressed="'+(state.mode==='map')+'">地圖</button><button type="button" data-tree-mode="steps" aria-pressed="'+(state.mode==='steps')+'">步驟</button></div></div><div class="tree-toolbar"><label>起點<select id="tree-start" aria-label="從哪裡開始看"><option value="all" '+(state.start==='all'?'selected':'')+'>全部起點</option><option value="owned" '+(state.start==='owned'?'selected':'')+'>我的資源</option>'+graph.nodes.map(node=>'<option value="'+node.id+'" '+(node.id===state.start?'selected':'')+'>'+esc(node.title)+'</option>').join('')+'</select></label><div class="tree-map-controls" '+(state.mode==='steps'?'hidden':'')+'><button type="button" data-tree-zoom="out" aria-label="縮小路線圖">−</button><output id="tree-zoom-value">100%</output><button type="button" data-tree-zoom="in" aria-label="放大路線圖">＋</button><button type="button" data-tree-fit>看全圖</button><button type="button" data-tree-expand aria-label="切換放大檢視">⛶</button></div></div><div class="tree-canvas" '+(state.mode==='steps'?'hidden':'')+'>'+graphMarkup()+'<div class="tree-canvas-hint">拖曳移動 · Ctrl／⌘＋滾輪縮放</div></div><div class="tree-step-view" '+(state.mode==='map'?'hidden':'')+'>'+stepsMarkup()+'</div><div class="tree-map-footer"><div id="tree-trace-summary" class="tree-trace-summary" role="status"></div><details class="tree-map-guide"><summary>圖例與說明</summary>'+legend+'<p>'+esc(graph.description)+'</p><p>'+esc(graph.note)+'</p></details><button type="button" class="text-button" data-tree-share aria-label="複製這張路線圖連結">分享 ↗</button></div></section>'+(graph.id==='cube-points'?cubePanel():'')+(['points-hotel','hotel-use'].includes(graph.id)?hotelPanel(data.sources):'')+stayHub(data.sources)+'<div id="network-directory-wrap">'+directoryMarkup()+'</div>';
+    const legend='<div class="tree-legend"><span class="owned">粗頂線：起點或已填資源</span><span class="verified">實線：規則已查</span><span class="pending">黃虛線：規則已查，須申請或核准</span><span class="unverified">橘虛線：條款還沒查實，先別花錢</span><span class="blocked">紅字：排除條件</span><span class="historical">灰字：歷史／未生效</span></div>';
+    // 大標上方一句話：只講要申請、還沒查實、走不通各幾段
+    const count=keys=>graph.nodes.filter(node=>keys.includes(node.status)).length;
+    const tally=[[count(['pending']),'段要申請或核准'],[count(['unverified','historical']),'段條款還沒查實'],[count(['blocked','excluded','closed']),'段目前走不通']].filter(([n])=>n).map(([n,text])=>n+' '+text).join('・')||'每一段規則都已查';
+    const modeTabs='<div class="explore-mode" role="group" aria-label="探索方式"><button type="button" data-explore-mode="tree" aria-pressed="true">路線圖</button><button type="button" data-explore-mode="catalog" aria-pressed="false">清單</button></div>';
+    root.innerHTML='<div class="network-controls">'+modeTabs+'<div class="network-goals" role="group" aria-label="選擇探索目標">'+[['all','全部'],['status','會籍'],['flight','機票'],['hotel','飯店']].map(([id,label])=>'<button type="button" data-network-goal="'+id+'" aria-pressed="'+(state.goal===id)+'">'+label+'</button>').join('')+'</div>'+inventoryMarkup()+'<details class="network-tools"><summary aria-label="更多工具"><span class="tools-label">更多工具</span><span aria-hidden="true">⋯</span></summary><div><button type="button" data-start-setup>重新設定我的起點 ↗</button><button type="button" data-open-tree="cube-points" data-scroll-cube>小樹點18個出口 ↗</button><button type="button" data-open-tree="hotel-use" data-hotel-focus-program="marriott">飯店點數怎麼用 ↗</button><button type="button" data-stay-hub>訂房前查認列 ↗</button></div></details></div><div id="setup-match-results">'+suggestionsMarkup()+'</div><section class="tree-workspace"><div class="route-hero"><div class="route-hero-text"><p class="route-kicker">共 '+graph.nodes.length+' 段・'+esc(tally)+'</p><h2 class="route-title">'+esc(graph.name)+'</h2></div><label class="route-switch"><span>換一條路線 <small>'+available.length+' 張</small></span><select id="tree-family-select" aria-label="選擇路線">'+available.map(item=>'<option value="'+item.id+'" '+(item.id===graph.id?'selected':'')+'>'+esc(item.name)+'</option>').join('')+'</select></label></div><div class="tree-toolbar"><label>起點<select id="tree-start" aria-label="從哪裡開始看"><option value="all" '+(state.start==='all'?'selected':'')+'>全部起點</option><option value="owned" '+(state.start==='owned'?'selected':'')+'>我的資源</option>'+graph.nodes.map(node=>'<option value="'+node.id+'" '+(node.id===state.start?'selected':'')+'>'+esc(node.title)+'</option>').join('')+'</select></label><div class="tree-mode" role="group" aria-label="圖表顯示方式"><button type="button" data-tree-mode="map" aria-pressed="'+(state.mode==='map')+'">地圖</button><button type="button" data-tree-mode="steps" aria-pressed="'+(state.mode==='steps')+'">步驟</button></div><div class="tree-map-controls" '+(state.mode==='steps'?'hidden':'')+'><button type="button" data-tree-zoom="out" aria-label="縮小路線圖">−</button><output id="tree-zoom-value">100%</output><button type="button" data-tree-zoom="in" aria-label="放大路線圖">＋</button><button type="button" data-tree-fit>看全圖</button><button type="button" data-tree-expand aria-label="切換放大檢視">⛶</button></div></div><div class="tree-canvas" style="--ar:'+(graph.width/(graph.height+TOP_PAD)).toFixed(3)+'" '+(state.mode==='steps'?'hidden':'')+'>'+graphMarkup()+'<div class="tree-canvas-hint">拖曳移動 · Ctrl／⌘＋滾輪縮放</div></div><div class="tree-step-view" '+(state.mode==='map'?'hidden':'')+'>'+stepsMarkup()+'</div><div class="tree-map-footer"><div id="tree-trace-summary" class="tree-trace-summary" role="status"></div><details class="tree-map-guide"><summary>圖例與說明</summary>'+legend+'<p>'+esc(graph.description)+'</p><p>'+esc(graph.note)+'</p></details><button type="button" class="text-button" data-tree-share aria-label="複製這張路線圖連結">分享 ↗</button></div></section>'+(graph.id==='cube-points'?cubePanel():'')+(['points-hotel','hotel-use'].includes(graph.id)?hotelPanel(data.sources):'')+stayHub(data.sources)+'<div id="network-directory-wrap">'+directoryMarkup()+'</div>';
     q('.network-inventory').addEventListener('toggle',event=>state.inventoryOpen=event.target.open);
     q('#network-directory-wrap').addEventListener('toggle',event=>{if(event.target.matches('.network-directory'))state.catalogOpen=event.target.open;},true);
     paintFocus();updatePosition();updateProfile();syncExpanded();
@@ -102,7 +118,7 @@ export function mountTree(root,{data,inspect,onChange}){
   }
   function updatePosition(){
     const position=treePosition(tree(),state.zoom,state.offset);state.zoom=position.zoom;
-    q('#rewards-tree-svg')?.setAttribute('viewBox',[position.x,position.y,position.width,position.height].join(' '));
+    q('#rewards-tree-svg')?.setAttribute('viewBox',[position.x,position.y-TOP_PAD,position.width,position.height+TOP_PAD].join(' '));
     q('#tree-zoom-value').textContent=Math.round(state.zoom*100)+'%';
   }
   function syncExpanded(){

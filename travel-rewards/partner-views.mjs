@@ -1,4 +1,4 @@
-import {networkNode as n,networkEdge as e} from './network-views.mjs?v=20261031-2';
+import {networkNode as n,networkEdge as e} from './network-views.mjs?v=20261031-3';
 const note='每條線只代表這一段合作；核准、實際轉點與完成住宿／飛行分開。來源、有效期與一次性機會仍需逐項確認。';
 export const PARTNER_TREES=[
   {id:'cube-points',name:'小樹點的18個出口',goals:['flight','hotel','status'],width:1100,height:700,description:'先選信用卡點數、卡別及年度，再比較各家門檻。CUBE Level影響累點速度，世界卡資格影響指定三家轉點比例，兩者不同。',note:'下方列出18個現行出口及試算。2027只有9家調整公告；未列不當作取消，也不擅自沿用。',nodes:[

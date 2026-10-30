@@ -1,19 +1,19 @@
-import {redemptionValue,challengeCost,cardFee} from './core.mjs?v=20261031-2';
-import {ROUTES,CARD_EN,ASSETS,RULE_EN} from './content.mjs?v=20261031-2';
-import {localizeRuleValues} from './fields.mjs?v=20261031-2';
-import {mountTree} from './tree.mjs?v=20261031-2';
-import {TREES,TREE_STATUS,TREE_SOURCES} from './tree-data.mjs?v=20261031-2';
-import {traceTree} from './tree-core.mjs?v=20261031-2';
-import {RESOURCES,OPPORTUNITIES,NETWORK_SOURCES,NETWORK_RULES,NETWORK_COVERAGE,NETWORK_COVERAGE_UPDATES} from './network-data.mjs?v=20261031-2';
-import {cleanNetworkState,selectedResources,effectiveResources,traceResources} from './network-core.mjs?v=20261031-2';
-import {planGroups,cardIssuer} from './setup-core.mjs?v=20261031-2';
-import {mountSetup} from './setup.mjs?v=20261031-2';
-import {selectHotelProgram,HOTEL_PROGRAMS} from './hotel-use.mjs?v=20261031-2';
-import {mountTrip} from './trip.mjs?v=20261031-2';
-import {mountOutstation} from './outstation.mjs?v=20261031-2';
-import {TRIP_DATA} from './trip-data.mjs?v=20261031-2';
+import {redemptionValue,challengeCost,cardFee} from './core.mjs?v=20261031-3';
+import {ROUTES,CARD_EN,ASSETS,RULE_EN} from './content.mjs?v=20261031-3';
+import {localizeRuleValues} from './fields.mjs?v=20261031-3';
+import {mountTree} from './tree.mjs?v=20261031-3';
+import {TREES,TREE_STATUS,TREE_SOURCES} from './tree-data.mjs?v=20261031-3';
+import {traceTree} from './tree-core.mjs?v=20261031-3';
+import {RESOURCES,OPPORTUNITIES,NETWORK_SOURCES,NETWORK_RULES,NETWORK_COVERAGE,NETWORK_COVERAGE_UPDATES} from './network-data.mjs?v=20261031-3';
+import {cleanNetworkState,selectedResources,effectiveResources,traceResources} from './network-core.mjs?v=20261031-3';
+import {planGroups,cardIssuer} from './setup-core.mjs?v=20261031-3';
+import {mountSetup} from './setup.mjs?v=20261031-3';
+import {selectHotelProgram,HOTEL_PROGRAMS} from './hotel-use.mjs?v=20261031-3';
+import {mountTrip} from './trip.mjs?v=20261031-3';
+import {mountOutstation} from './outstation.mjs?v=20261031-3';
+import {TRIP_DATA} from './trip-data.mjs?v=20261031-3';
 
-import {BANK_CARDS,normalizeRewardSearch} from './bank-entries-data.mjs?v=20261031-2';
+import {BANK_CARDS,normalizeRewardSearch} from './bank-entries-data.mjs?v=20261031-3';
 
 const $=selector=>document.querySelector(selector);
 const $$=selector=>[...document.querySelectorAll(selector)];
@@ -103,11 +103,47 @@ function renderPlan(){
   const main=section(groups.ready,'接得上','ok')+section(groups.missing,'起點對上，還缺條件','warn','補上條件再決定要不要登錄；條件可以在路線圖的「我的資源」補填。')+section(groups.unverified,'有一段條款還沒查實','unverified','先寫信確認，拿到書面核准前不要訂房或付費。');
   $('#plan-groups').innerHTML=(main||'<div class="empty">你填的起點，在這個目標下還沒有接得上的路線。可以補填其他卡片或會籍，或看下方其他路線。</div>')+(groups.other.length?'<details class="plan-other"><summary><b>其他路線（'+groups.other.length+'）</b><small>需要另外的卡或會籍，或已截止、尚未生效</small></summary><div class="op-list">'+groups.other.map(opCard).join('')+'</div></details>':'');
 }
+// 清單依狀態分區；區別沿用 opPill 的判斷，不另訂規則
+const EXPLORE_SECTIONS=[
+  ['ready','接得上','ok',''],
+  ['gap','起點對上，還缺條件','warn','補上條件再決定要不要登錄；條件可以在路線圖的「我的資源」補填。'],
+  ['unverified','條款還沒查實','unverified','先寫信確認，拿到書面核准前不要訂房或付費。'],
+  ['nostart','還缺起點','warn',''],
+  ['ended','已截止、未生效或不適用','closed','']
+];
+function exploreBucket(item){
+  const state=item.check.state;
+  if(state==='connected')return 'ready';
+  if(['lead','conflict'].includes(state))return 'unverified';
+  if(['blocked','closed','scheduled'].includes(state))return 'ended';
+  return item.anchors?.length?'gap':'nostart';
+}
+// 「還缺：需其中一項：A／B／C／D」只列前兩項，完整名單在詳情裡
+function shortNext(item){
+  const {op,check}=item,first=check.missing[0];
+  if(check.blocked[0]||!first)return opNext(item);
+  const owned=effectiveResources(inventory());
+  let labels=null,prefix='';
+  if(first.startsWith('需其中一項：')){labels=op.any;prefix='還缺其中一項：';}
+  else if(first.startsWith('另需其中一項：')){labels=(op.allGroups||[]).find(group=>!group.some(id=>owned.has(id)));prefix='另缺其中一項：';}
+  if(!labels||labels.length<=2)return opNext(item);
+  const names=labels.map(id=>resourceMap.get(id)?.label||id);
+  return prefix+names.slice(0,2).join('／')+' 等 '+names.length+' 項';
+}
+function exploreRow(item){
+  const [label,tone]=opPill(item),path=opPath(item.op,effectiveResources(inventory()));
+  const unverified=path.nodes.filter(node=>node.status==='unverified').map(node=>node.title);
+  const warn=unverified.length?'待核：'+(unverified.length>2?unverified.slice(0,2).join('、')+' 等 '+unverified.length+' 段':unverified.join('、')):'';
+  return '<button type="button" class="cat-row '+tone+'" data-open-op="'+item.op.id+'"><b>'+esc(item.op.title)+'</b><span class="cat-next">'+esc(shortNext(item))+'</span><span class="cat-meta"><span class="cat-state '+tone+'">'+esc(label)+'</span>'+(path.nodes.length?'<span>'+path.nodes.length+' 段</span>':'')+(warn?'<span class="cat-warn">'+esc(warn)+'</span>':'')+'<span>'+esc(path.tree?.name||'')+'</span></span></button>';
+}
 function renderExplore(){
   const query=normalizeRewardSearch($('#route-search').value),goal=$('#explore-goal').value,groups=planGroups('all',inventory(),currentAsOf());
   const items=[...groups.ready,...groups.missing,...groups.unverified,...groups.other].filter(item=>(goal==='all'||item.op.goal===goal)&&normalizeRewardSearch(item.op.title+' '+(item.op.warning||'')+' '+JSON.stringify(routeMap.get(item.op.id)?.name||'')).includes(query));
   $('#explore-count').textContent='共 '+number(items.length)+' 種玩法；狀態依你在「我的路線」填的起點。';
-  $('#explore-routes').innerHTML=items.length?items.map(opCard).join(''):'<div class="empty">沒有符合的路線，試試其他品牌或關鍵字。</div>';
+  $('#explore-routes').innerHTML=items.length?EXPLORE_SECTIONS.map(([key,title,tone,note])=>{
+    const list=items.filter(item=>exploreBucket(item)===key);
+    return list.length?'<section class="cat-section"><h2 class="cat-title '+tone+'">'+title+'<span>'+list.length+' 條</span></h2>'+(note?'<p class="cat-note">'+note+'</p>':'')+'<div class="cat-list">'+list.map(exploreRow).join('')+'</div></section>':'';
+  }).join(''):'<div class="empty">沒有符合的路線，試試其他品牌或關鍵字。</div>';
 }
 function cardName(card){return card.name;}
 function feeText(card){
@@ -273,7 +309,7 @@ function openHash(){
 }
 async function init(){
   try{
-    const response=await fetch('./data.json?v=20261031-2');if(!response.ok)throw new Error('Research HTTP '+response.status);data=await response.json();data.cards.push(...BANK_CARDS);
+    const response=await fetch('./data.json?v=20261031-3');if(!response.ok)throw new Error('Research HTTP '+response.status);data=await response.json();data.cards.push(...BANK_CARDS);
     data.sources=[...new Map([...data.sources,...TREE_SOURCES,...NETWORK_SOURCES].map(source=>[source.id,source])).values()];
     data.rules=[...data.rules,...NETWORK_RULES];data.coverage=[...data.coverage,...NETWORK_COVERAGE].map(item=>{const update=NETWORK_COVERAGE_UPDATES[item.id];return update?{...item,...update,source_ids:[...new Set([...item.source_ids,...(update.source_ids||[])])],rule_ids:[...new Set([...item.rule_ids,...(update.rule_ids||[])])]}:item;});
     ruleMap=new Map(data.rules.map(rule=>[rule.id,rule]));sourceMap=new Map(data.sources.map(source=>[source.id,source]));cardMap=new Map(data.cards.map(card=>[card.id,card]));routeMap=new Map(ROUTES.map(route=>[route.id,route]));

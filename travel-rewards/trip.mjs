@@ -1,5 +1,5 @@
-import {TRIP_CITIES} from './trip-cities.mjs?v=20261031-2';
-import {flightOptions,hotelOptions,fillTemplate,cashValue} from './trip-core.mjs?v=20261031-2';
+import {TRIP_CITIES} from './trip-cities.mjs?v=20261031-3';
+import {flightOptions,hotelOptions,fillTemplate,cashValue} from './trip-core.mjs?v=20261031-3';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const num=value=>new Intl.NumberFormat('zh-TW').format(value);
@@ -102,7 +102,7 @@ export function mountTrip(root,{getInventory,data,hotelPrograms,resourceLabel,to
   // 手上的卡自帶、出去玩用得到的權益（升等券、住宿優惠、續卡贈哩）
   // 目的地照片署名：img/cities/credits.json，讀不到就不顯示照片
   let credits=null;
-  fetch(new URL('./img/cities/credits.json?v=20261031-2',import.meta.url)).then(r=>r.ok?r.json():{}).then(json=>{credits=json;render();}).catch(()=>{credits={};});
+  fetch(new URL('./img/cities/credits.json?v=20261031-3',import.meta.url)).then(r=>r.ok?r.json():{}).then(json=>{credits=json;render();}).catch(()=>{credits={};});
   function hero(city,flights){
     const usable=flights.filter(item=>item.state!=='none'&&item.need),min=flights.filter(item=>item.need).sort((a,b)=>a.need.each-b.need.each)[0];
     const lede=usable.length?'你手上的哩程和點數，接得上 <b>'+usable.length+'</b> 家計畫；最少的一張要 <b>'+num(usable.sort((a,b)=>a.need.each-b.need.each)[0].need.each)+'</b> 哩。':min?'各家最少要 <b>'+num(min.need.each)+'</b> 哩。選了你手上的卡和點數，會告訴你夠不夠。':'這條航線目前查不到固定的獎勵表。';

@@ -1,5 +1,5 @@
-import {RESOURCES,FACTS,OPPORTUNITIES} from './network-data.mjs?v=20261031-2';
-import {traceTree} from './tree-core.mjs?v=20261031-2';
+import {RESOURCES,FACTS,OPPORTUNITIES} from './network-data.mjs?v=20261031-3';
+import {traceTree} from './tree-core.mjs?v=20261031-3';
 const resourceMap=new Map(RESOURCES.map(item=>[item.id,item]));
 export function cleanNetworkState(value={}){
   const resources=[...new Set((Array.isArray(value.resources)?value.resources:[]).filter(id=>resourceMap.has(id)))];
@@ -46,7 +46,7 @@ export function effectiveFacts(saved){
 }
 export function evaluateOpportunity(op,resources,facts={},today=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Taipei',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date())){
   const missing=[],blocked=[];const label=id=>resourceMap.get(id)?.label||id;
-  for(const id of op.all||[])if(!resources.has(id))missing.push('需 '+label(id));
+  for(const id of op.all||[])if(!resources.has(id))missing.push('需'+(/^[A-Za-z0-9]/.test(label(id))?' ':'')+label(id));
   if(op.any?.length&&!op.any.some(id=>resources.has(id)))missing.push('需其中一項：'+op.any.map(label).join('／'));
   for(const group of op.allGroups||[])if(!group.some(id=>resources.has(id)))missing.push('另需其中一項：'+group.map(label).join('／'));
   for(const id of op.forbidden||[])if(resources.has(id))blocked.push('已持有'+label(id)+'，不適用此分支');

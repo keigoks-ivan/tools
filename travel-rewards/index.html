@@ -11,13 +11,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@700;900&display=swap">
-<link rel="stylesheet" href="./style.css?v=20261031-2">
-<link rel="stylesheet" href="./tree.css?v=20261031-2">
-<link rel="stylesheet" href="./atlas.css?v=20261031-2">
-<link rel="stylesheet" href="./setup.css?v=20261031-2">
-<link rel="stylesheet" href="./flow.css?v=20261031-2">
-<link rel="stylesheet" href="./trip.css?v=20261031-2">
-<script type="module" src="./app.mjs?v=20261031-2"></script>
+<link rel="stylesheet" href="./style.css?v=20261031-3">
+<link rel="stylesheet" href="./tree.css?v=20261031-3">
+<link rel="stylesheet" href="./atlas.css?v=20261031-3">
+<link rel="stylesheet" href="./setup.css?v=20261031-3">
+<link rel="stylesheet" href="./flow.css?v=20261031-3">
+<link rel="stylesheet" href="./trip.css?v=20261031-3">
+<script type="module" src="./app.mjs?v=20261031-3"></script>
 </head>
 <body>
 <a class="skip" href="#main" data-zh="跳至內容">跳至內容</a>
@@ -57,9 +57,8 @@
     <section id="view-trip" role="tabpanel" aria-labelledby="tab-trip" hidden><div id="trip-root"></div></section>
     <section id="view-explore" role="tabpanel" aria-labelledby="tab-explore" hidden>
       <div class="page-heading tree-heading"><p class="eyebrow"><span class="atlas-signal" aria-hidden="true"></span>台灣出發 · 里程、會籍與飯店</p><h1>把點數，接成下一站<span aria-hidden="true">↗</span></h1><p>選一條路線，點開每一步的資格與成本。</p></div>
-      <div class="explore-mode" role="group" aria-label="探索方式"><button type="button" data-explore-mode="tree" aria-pressed="true">路線圖</button><button type="button" data-explore-mode="catalog" aria-pressed="false">清單</button></div>
       <div id="tree-explorer" class="tree-explorer"></div>
-      <div id="explore-catalog" hidden><div class="filter-bar"><label class="search-field"><span>搜尋路線、品牌或目標</span><input id="route-search" type="search" placeholder="SAS、萬豪、Amex…"></label><label class="field"><span>旅行目標</span><select id="explore-goal"><option value="all">全部目標</option><option value="flight">機票與升等</option><option value="status">會籍與挑戰</option><option value="hotel">飯店點數</option></select></label></div><p id="explore-count" class="small muted"></p><div id="explore-routes" class="op-list two-columns"></div></div>
+      <div id="explore-catalog" hidden><div class="network-controls"><div class="explore-mode" role="group" aria-label="探索方式"><button type="button" data-explore-mode="tree" aria-pressed="false">路線圖</button><button type="button" data-explore-mode="catalog" aria-pressed="true">清單</button></div></div><div class="filter-bar"><label class="search-field"><span>搜尋路線、品牌或目標</span><input id="route-search" type="search" placeholder="SAS、萬豪、Amex…"></label><label class="field"><span>旅行目標</span><select id="explore-goal"><option value="all">全部目標</option><option value="flight">機票與升等</option><option value="status">會籍與挑戰</option><option value="hotel">飯店點數</option></select></label></div><p id="explore-count" class="small muted"></p><div id="explore-routes"></div></div>
     </section>
     <section id="view-cards" role="tabpanel" aria-labelledby="tab-cards" hidden><div class="page-heading"><p class="eyebrow" data-zh="同一張卡的名字，還不夠">同一張卡的名字，還不夠</p><h1 data-zh="選對卡，累積才有方向。">選對卡，累積才有方向。</h1><p data-zh="年費、基本累積和這張卡能接的路線；一次性活動分開寫。">年費、基本累積和這張卡能接的路線；一次性活動分開寫。</p></div><div class="filter-bar"><label class="search-field"><span data-zh="卡片名稱">卡片名稱</span><input id="card-search" type="search" placeholder="滙豐、Amex、華航、Marriott…"></label><label class="field"><span data-zh="發卡機構">發卡機構</span><select id="card-issuer"><option value="all" data-zh="全部">全部</option><option value="amex">美國運通</option><option value="ctbc" data-zh="中國信託">中國信託</option><option value="hsbc">滙豐台灣</option></select></label><label class="field"><span data-zh="獎勵資產">獎勵資產</span><select id="card-asset"><option value="all" data-zh="全部">全部</option><option value="HSBC_TW_TRAVELLER">滙豐旅人旅遊積分</option><option value="AMEX_TW_MR">運通會員酬賓積分</option><option value="EVA_redeemable_miles" data-zh="長榮哩程">長榮哩程</option><option value="CTBC_CI_card_points_to_Dynasty_miles" data-zh="華夏哩程">華夏哩程</option><option value="Marriott_Bonvoy_points">萬豪旅享家點數</option></select></label></div><div class="notice subtle"><p data-zh="不同計畫的一點價值不同。「最佳幾元一哩」可能包含生日、海外實體、滿額或續卡條件。以下先列基本比例。">不同計畫的一點價值不同。「最佳幾元一哩」可能包含生日、海外實體、滿額或續卡條件。以下先列基本比例。</p></div><p id="card-count" class="small muted"></p><div id="card-list" class="cards-grid"></div></section>
     <section id="view-more" role="tabpanel" aria-labelledby="tab-more" hidden><div class="page-heading"><h1>更多</h1><p>試算、查核資料，或重新設定你的起點。</p></div><div class="more-grid"><button type="button" data-view="outstation"><b>外站票</b><small>從外站開一張票，在台北停留，一次飛兩趟</small></button><button type="button" data-view="calculators"><b>試算</b><small>兌票、兌房值多少；會籍挑戰多花多少</small></button><button type="button" data-view="library"><b>資料庫</b><small>規則、官方來源、研究範圍與缺口</small></button><button type="button" data-start-setup><b>調整我的起點</b><small>卡片、會籍、點數</small></button></div></section>

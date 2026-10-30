@@ -1,8 +1,8 @@
-import {EXTRA_TREES,RESOURCE_BINDINGS,OP_BINDINGS} from './network-views.mjs?v=20261031-2';
-import {PARTNER_TREES,STAY_BINDINGS} from './partner-views.mjs?v=20261031-2';
-import {HOTEL_TREES,extendHotelViews} from './hotel-partners-views.mjs?v=20261031-2';
-import {BANK_TREES} from './bank-entries-views.mjs?v=20261031-2';
-import {IH_TREES,extendIhViews} from './ihg-hyatt-data.mjs?v=20261031-2';
+import {EXTRA_TREES,RESOURCE_BINDINGS,OP_BINDINGS} from './network-views.mjs?v=20261031-3';
+import {PARTNER_TREES,STAY_BINDINGS} from './partner-views.mjs?v=20261031-3';
+import {HOTEL_TREES,extendHotelViews} from './hotel-partners-views.mjs?v=20261031-3';
+import {BANK_TREES} from './bank-entries-views.mjs?v=20261031-3';
+import {IH_TREES,extendIhViews} from './ihg-hyatt-data.mjs?v=20261031-3';
 const checked='2026-10-24';
 const source=(id,publisher,url,access,note)=>({id,publisher,url,access,note,checked_on:checked,kind:'official',ownership_group:new URL(url).hostname});
 
