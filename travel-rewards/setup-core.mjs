@@ -1,5 +1,5 @@
-import {RESOURCES,OPPORTUNITIES} from './network-data.mjs?v=20261030-17';
-import {cleanNetworkState,effectiveResources,effectiveFacts,evaluateOpportunity} from './network-core.mjs?v=20261030-17';
+import {RESOURCES,OPPORTUNITIES} from './network-data.mjs?v=20261030-18';
+import {cleanNetworkState,effectiveResources,effectiveFacts,evaluateOpportunity} from './network-core.mjs?v=20261030-18';
 
 export const SETUP_STORE='imq-reward-setup-v1';
 export const SETUP_GOALS=[

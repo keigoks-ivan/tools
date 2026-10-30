@@ -1,8 +1,8 @@
-import {RESOURCES} from './network-data.mjs?v=20261030-17';
-import {cleanNetworkState,toggleNetworkResource,selectedResources} from './network-core.mjs?v=20261030-17';
-import {SETUP_STORE,SETUP_STEPS,CARD_ISSUERS,cardIssuer,setupResources,cleanSetupPreference} from './setup-core.mjs?v=20261030-17';
+import {RESOURCES} from './network-data.mjs?v=20261030-18';
+import {cleanNetworkState,toggleNetworkResource,selectedResources} from './network-core.mjs?v=20261030-18';
+import {SETUP_STORE,SETUP_STEPS,CARD_ISSUERS,cardIssuer,setupResources,cleanSetupPreference} from './setup-core.mjs?v=20261030-18';
 
-import {normalizeRewardSearch,resourceSearchText} from './bank-entries-data.mjs?v=20261030-17';
+import {normalizeRewardSearch,resourceSearchText} from './bank-entries-data.mjs?v=20261030-18';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
 const programNames={marriott:'萬豪',hilton:'Hilton',ihg:'IHG',hyatt:'凱悅 Hyatt',krisflyer:'新航 KrisFlyer',jal:'日本航空 JAL',united:'聯合航空',all:'雅高 ALL',qatar:'卡達航空 Qatar'};

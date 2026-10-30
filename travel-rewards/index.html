@@ -7,18 +7,20 @@
 <meta name="description" content="以台灣為起點，比較航空里程、信用卡、飯店點數與會籍挑戰。逐條查看資格、期限、成本與查核來源。">
 <meta name="color-scheme" content="dark">
 <title>里程路線｜InvestMQuest</title>
-<link rel="stylesheet" href="./style.css?v=20261030-17">
-<link rel="stylesheet" href="./tree.css?v=20261030-17">
-<link rel="stylesheet" href="./atlas.css?v=20261030-17">
-<link rel="stylesheet" href="./setup.css?v=20261030-17">
-<link rel="stylesheet" href="./flow.css?v=20261030-17">
-<script type="module" src="./app.mjs?v=20261030-17"></script>
+<link rel="stylesheet" href="./style.css?v=20261030-18">
+<link rel="stylesheet" href="./tree.css?v=20261030-18">
+<link rel="stylesheet" href="./atlas.css?v=20261030-18">
+<link rel="stylesheet" href="./setup.css?v=20261030-18">
+<link rel="stylesheet" href="./flow.css?v=20261030-18">
+<link rel="stylesheet" href="./trip.css?v=20261030-18">
+<script type="module" src="./app.mjs?v=20261030-18"></script>
 </head>
 <body>
 <a class="skip" href="#main" data-zh="跳至內容">跳至內容</a>
 <header class="site-header">
   <div class="header-inner"><a class="brand" href="./" aria-label="里程路線首頁"><span class="brand-mark" aria-hidden="true">↗</span><span><b data-zh="里程路線">里程路線</b><small>INVESTMQUEST</small></span></a><nav class="main-nav" aria-label="工具頁面"><div class="nav-inner" role="tablist" aria-label="主要功能">
   <button type="button" id="tab-plan" role="tab" aria-controls="view-plan" aria-selected="true" data-view="plan"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19 19 5M9 5h10v10"/></svg><span>我的路線</span></button>
+  <button type="button" id="tab-trip" role="tab" aria-controls="view-trip" aria-selected="false" data-view="trip"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 16l20-6-3-3-6 2-6-5-2 1 4 6-5 2-2-2-1 1z"/></svg><span>出去玩</span></button>
   <button type="button" id="tab-explore" role="tab" aria-controls="view-explore" aria-selected="false" data-view="explore"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="6" r="2"/><circle cx="19" cy="6" r="2"/><circle cx="12" cy="18" r="2"/><path d="M7 6h10M6 8l5 8M18 8l-5 8"/></svg><span>路線圖</span></button>
   <button type="button" id="tab-cards" role="tab" aria-controls="view-cards" aria-selected="false" data-view="cards"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/></svg><span>信用卡</span></button>
   <button type="button" id="tab-more" role="tab" aria-controls="view-more" aria-selected="false" data-view="more"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg><span>更多</span></button>
@@ -42,11 +44,13 @@
       <div id="plan-main" hidden>
         <div class="plan-head"><h1 tabindex="-1">我的路線</h1>
           <div class="plan-start"><div><small id="plan-start-label"></small><span id="plan-start-names"></span></div><button type="button" class="text-button" data-start-setup>調整</button></div>
+          <button type="button" class="plan-trip" data-view="trip"><b>要出去玩？</b><span>選目的地，看哩程和點數夠不夠、去哪裡訂</span><i aria-hidden="true">›</i></button>
           <div id="plan-goals" class="plan-goals" role="group" aria-label="旅行目標"></div>
         </div>
         <div id="plan-groups" aria-live="polite"></div>
       </div>
     </section>
+    <section id="view-trip" role="tabpanel" aria-labelledby="tab-trip" hidden><div id="trip-root"></div></section>
     <section id="view-explore" role="tabpanel" aria-labelledby="tab-explore" hidden>
       <div class="page-heading tree-heading"><p class="eyebrow"><span class="atlas-signal" aria-hidden="true"></span>台灣出發 · 里程、會籍與飯店</p><h1>把點數，接成下一站<span aria-hidden="true">↗</span></h1><p>選一條路線，點開每一步的資格與成本。</p></div>
       <div class="explore-mode" role="group" aria-label="探索方式"><button type="button" data-explore-mode="tree" aria-pressed="true">路線圖</button><button type="button" data-explore-mode="catalog" aria-pressed="false">清單</button></div>
