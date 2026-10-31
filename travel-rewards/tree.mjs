@@ -1,12 +1,12 @@
-import {TREES,TREE_STATUS} from './tree-data.mjs?v=20261031-3';
-import {traceTree,treePosition,validateTree} from './tree-core.mjs?v=20261031-3';
+import {TREES,TREE_STATUS} from './tree-data.mjs?v=20261031-4';
+import {traceTree,treePosition,validateTree} from './tree-core.mjs?v=20261031-4';
 
-import {RESOURCES,FACTS,OPPORTUNITIES} from './network-data.mjs?v=20261031-3';
-import {cleanNetworkState,selectedResources,effectiveResources,effectiveFacts,evaluateOpportunity,traceResources,relatedViews,coverageSummary,relevantNetworkFacts,toggleNetworkResource} from './network-core.mjs?v=20261031-3';
-import {stayHub,stayNodeSummary,wireStayTools} from './stay.mjs?v=20261031-3';
-import {cubePanel,wireCubeTools} from './cube.mjs?v=20261031-3';
-import {hotelPanel,hotelNodeSummary,wireHotelTools} from './hotel-use.mjs?v=20261031-3';
-import {setupMatches,SETUP_GOALS} from './setup-core.mjs?v=20261031-3';
+import {RESOURCES,FACTS,OPPORTUNITIES} from './network-data.mjs?v=20261031-4';
+import {cleanNetworkState,selectedResources,effectiveResources,effectiveFacts,evaluateOpportunity,traceResources,relatedViews,coverageSummary,relevantNetworkFacts,toggleNetworkResource} from './network-core.mjs?v=20261031-4';
+import {stayHub,stayNodeSummary,wireStayTools} from './stay.mjs?v=20261031-4';
+import {cubePanel,wireCubeTools} from './cube.mjs?v=20261031-4';
+import {hotelPanel,hotelNodeSummary,wireHotelTools} from './hotel-use.mjs?v=20261031-4';
+import {setupMatches,SETUP_GOALS} from './setup-core.mjs?v=20261031-4';
 
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const W=194,H=112,TOP_PAD=36;

@@ -1,5 +1,5 @@
-import {RESOURCES,FACTS,OPPORTUNITIES} from './network-data.mjs?v=20261031-3';
-import {traceTree} from './tree-core.mjs?v=20261031-3';
+import {RESOURCES,FACTS,OPPORTUNITIES} from './network-data.mjs?v=20261031-4';
+import {traceTree} from './tree-core.mjs?v=20261031-4';
 const resourceMap=new Map(RESOURCES.map(item=>[item.id,item]));
 export function cleanNetworkState(value={}){
   const resources=[...new Set((Array.isArray(value.resources)?value.resources:[]).filter(id=>resourceMap.has(id)))];

@@ -1,19 +1,19 @@
-import {redemptionValue,challengeCost,cardFee} from './core.mjs?v=20261031-3';
-import {ROUTES,CARD_EN,ASSETS,RULE_EN} from './content.mjs?v=20261031-3';
-import {localizeRuleValues} from './fields.mjs?v=20261031-3';
-import {mountTree} from './tree.mjs?v=20261031-3';
-import {TREES,TREE_STATUS,TREE_SOURCES} from './tree-data.mjs?v=20261031-3';
-import {traceTree} from './tree-core.mjs?v=20261031-3';
-import {RESOURCES,OPPORTUNITIES,NETWORK_SOURCES,NETWORK_RULES,NETWORK_COVERAGE,NETWORK_COVERAGE_UPDATES} from './network-data.mjs?v=20261031-3';
-import {cleanNetworkState,selectedResources,effectiveResources,traceResources} from './network-core.mjs?v=20261031-3';
-import {planGroups,cardIssuer} from './setup-core.mjs?v=20261031-3';
-import {mountSetup} from './setup.mjs?v=20261031-3';
-import {selectHotelProgram,HOTEL_PROGRAMS} from './hotel-use.mjs?v=20261031-3';
-import {mountTrip} from './trip.mjs?v=20261031-3';
-import {mountOutstation} from './outstation.mjs?v=20261031-3';
-import {TRIP_DATA} from './trip-data.mjs?v=20261031-3';
+import {redemptionValue,challengeCost,cardFee} from './core.mjs?v=20261031-4';
+import {ROUTES,CARD_EN,ASSETS,RULE_EN} from './content.mjs?v=20261031-4';
+import {localizeRuleValues} from './fields.mjs?v=20261031-4';
+import {mountTree} from './tree.mjs?v=20261031-4';
+import {TREES,TREE_STATUS,TREE_SOURCES} from './tree-data.mjs?v=20261031-4';
+import {traceTree} from './tree-core.mjs?v=20261031-4';
+import {RESOURCES,OPPORTUNITIES,NETWORK_SOURCES,NETWORK_RULES,NETWORK_COVERAGE,NETWORK_COVERAGE_UPDATES} from './network-data.mjs?v=20261031-4';
+import {cleanNetworkState,selectedResources,effectiveResources,traceResources} from './network-core.mjs?v=20261031-4';
+import {planGroups,cardIssuer} from './setup-core.mjs?v=20261031-4';
+import {mountSetup} from './setup.mjs?v=20261031-4';
+import {selectHotelProgram,HOTEL_PROGRAMS} from './hotel-use.mjs?v=20261031-4';
+import {mountTrip} from './trip.mjs?v=20261031-4';
+import {mountOutstation} from './outstation.mjs?v=20261031-4';
+import {TRIP_DATA} from './trip-data.mjs?v=20261031-4';
 
-import {BANK_CARDS,normalizeRewardSearch} from './bank-entries-data.mjs?v=20261031-3';
+import {BANK_CARDS,normalizeRewardSearch} from './bank-entries-data.mjs?v=20261031-4';
 
 const $=selector=>document.querySelector(selector);
 const $$=selector=>[...document.querySelectorAll(selector)];
@@ -309,7 +309,7 @@ function openHash(){
 }
 async function init(){
   try{
-    const response=await fetch('./data.json?v=20261031-3');if(!response.ok)throw new Error('Research HTTP '+response.status);data=await response.json();data.cards.push(...BANK_CARDS);
+    const response=await fetch('./data.json?v=20261031-4');if(!response.ok)throw new Error('Research HTTP '+response.status);data=await response.json();data.cards.push(...BANK_CARDS);
     data.sources=[...new Map([...data.sources,...TREE_SOURCES,...NETWORK_SOURCES].map(source=>[source.id,source])).values()];
     data.rules=[...data.rules,...NETWORK_RULES];data.coverage=[...data.coverage,...NETWORK_COVERAGE].map(item=>{const update=NETWORK_COVERAGE_UPDATES[item.id];return update?{...item,...update,source_ids:[...new Set([...item.source_ids,...(update.source_ids||[])])],rule_ids:[...new Set([...item.rule_ids,...(update.rule_ids||[])])]}:item;});
     ruleMap=new Map(data.rules.map(rule=>[rule.id,rule]));sourceMap=new Map(data.sources.map(source=>[source.id,source]));cardMap=new Map(data.cards.map(card=>[card.id,card]));routeMap=new Map(ROUTES.map(route=>[route.id,route]));

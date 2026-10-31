@@ -1,6 +1,6 @@
 // IHG One Rewards 與 World of Hyatt：2026-10-30 讀官方條款、等級頁、獎勵表與台灣四家銀行頁
 // 所有現行規則都以來源頁面為準；查不到的寫在各規則 missing，不當成「沒有」
-import {networkNode as n,networkEdge as e} from './network-views.mjs?v=20261031-3';
+import {networkNode as n,networkEdge as e} from './network-views.mjs?v=20261031-4';
 
 const checkedNow='2026-10-30';
 const sourceNow=(id,publisher,group,url,note,access='page_body')=>({id,publisher,ownership_group:group,url,note,access,kind:'official',checked_on:checkedNow});

@@ -1,6 +1,6 @@
 // 外站票：從外站開一張來回獎勵票，在台北停留，一張票飛兩趟（目的地一趟、外站一趟）
 // 比法：同樣兩趟旅行，一張外站票要幾哩，對上同一家計畫分開換「台北來回目的地」＋「台北來回外站」
-import {programAccess} from './trip-core.mjs?v=20261031-3';
+import {programAccess} from './trip-core.mjs?v=20261031-4';
 
 export const OUTSTATIONS=[{id:'HKG',zh:'香港'},{id:'TYO',zh:'東京'}];
 const TPE={lat:25.0797,lng:121.2342};

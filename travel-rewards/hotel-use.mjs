@@ -1,5 +1,5 @@
-import {redemptionValue,nonNegative} from './core.mjs?v=20261031-3';
-import {CUBE_PARTNERS} from './cube-data.mjs?v=20261031-3';
+import {redemptionValue,nonNegative} from './core.mjs?v=20261031-4';
+import {CUBE_PARTNERS} from './cube-data.mjs?v=20261031-4';
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const number=value=>new Intl.NumberFormat('zh-TW',{maximumFractionDigits:2}).format(value);
 export const HOTEL_PROGRAMS=[
