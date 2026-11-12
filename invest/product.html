@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第 2 步 選產品：[品牌名稱]</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="invest.css">
+<script src="invest.js"></script>
+</head>
+<body data-root="" data-nav="product">
+<div class="page">
+<div id="site-header"></div>
+
+<ol class="steps" aria-label="進度">
+<li>01 選配置</li>
+<li aria-current="step">02 選產品</li>
+<li>03 設定定期買入</li>
+<li>04 定期檢查配置</li>
+<li>05 查證據</li>
+</ol>
+
+<h1 class="h1" style="margin-top:36px">同樣是全球股票 ETF，<br>買美國掛牌還是愛爾蘭掛牌？</h1>
+<p class="lead" style="margin-top:16px;max-width:700px">兩種買到的股票差不多，差在美國課的兩種稅：股息預扣和遺產稅。選你住的地方和打算放的金額，看差多少。</p>
+
+<div class="row" style="margin-top:40px">
+<section class="col-side card cond" aria-label="條件" style="padding:24px">
+<h2>你住在哪裡</h2>
+<div class="pills" id="countries"></div>
+<h2>打算放多少（美元）</h2>
+<div class="pills" id="amounts"></div>
+<h2>假設每年配息率</h2>
+<div class="pills" id="yields"></div>
+<p class="fine" style="margin-top:20px">配息率是你自己設的假設，不是預測。金額只用來判斷有沒有超過遺產稅免稅額。</p>
+</section>
+
+<section class="col-main">
+<div class="card res">
+<h2>住在<span id="v-country"></span>的結果</h2>
+<p style="margin-top:12px" id="v-div"></p>
+<p style="margin-top:8px" id="v-est"></p>
+</div>
+
+<div class="tbl">
+<table>
+<thead>
+<tr><th scope="col"></th><th scope="col">美國掛牌</th><th scope="col">愛爾蘭掛牌</th></tr>
+</thead>
+<tbody>
+<tr><td>美國股息預扣稅率</td><td id="v-usrate"></td><td>15%</td></tr>
+<tr><td>每年因此少掉的報酬</td><td id="v-usdrag"></td><td id="v-iedrag"></td></tr>
+<tr><td>美國遺產稅，最多占持有金額</td><td><span id="v-usest"></span><span class="s" id="v-usestsub"></span></td><td><span>0%</span><span class="s">待律師確認</span></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="card note">
+<h2>這張表怎麼算的</h2>
+<ul>
+<li>美國掛牌的預扣稅率：沒有租稅協定是 30%，有協定的國家照協定稅率。來源是美國國稅局 Publication 515。</li>
+<li>遺產稅：不住美國的外國人免稅額 6 萬美元，超過的部分最高 40%。這裡用 40% 算上限，實際稅率是累進的，會低一些。來源是 Form 706-NA 說明。</li>
+<li>愛爾蘭掛牌的 15% 和不課美國遺產稅，目前只有二手資料，上線前要找律師確認。15% 只適用基金裡的美國股票。</li>
+<li>每年少掉的報酬＝配息率 × 預扣稅率。沒有算基金費用、交易成本和你居住地的稅。</li>
+</ul>
+</div>
+
+<div class="card note">
+<h2>稅以外還要看三件事</h2>
+<ul>
+<li>你的券商買不買得到愛爾蘭掛牌的 ETF。</li>
+<li>基金每年收的費用，兩邊差多少。</li>
+<li>股息是發給你，還是留在基金裡自動再投資。</li>
+</ul>
+</div>
+
+<div class="cta-row">
+<span class="btn off" aria-disabled="true">下一步：到券商設定定期買入<small>還沒做</small></span>
+<a class="link" href="allocate.html">回上一步改比例</a>
+</div>
+<p class="fine" style="margin-top:8px;max-width:720px">本頁是一般性資訊，不是稅務或投資建議。稅法會改，各人情況不同，金額大的請找稅務專業人士確認。</p>
+</section>
+</div>
+</div>
+<script>
+(function () {
+  var C = {
+    tw: { name: '台灣', rate: 30, treaty: false },
+    hk: { name: '香港', rate: 30, treaty: false },
+    sg: { name: '新加坡', rate: 30, treaty: false },
+    my: { name: '馬來西亞', rate: 30, treaty: false },
+    jp: { name: '日本', rate: 10, treaty: true },
+    kr: { name: '南韓', rate: 15, treaty: false },
+    uk: { name: '英國', rate: 15, treaty: true }
+  };
+  var st = { country: 'tw', amt: 200000, yld: 150 };
+  var groups = [];
+
+  function pct(bp) { return (bp / 100).toFixed(2) + '%'; }
+  function $(id) { return document.getElementById(id); }
+
+  function build(elId, list, key) {
+    var el = $(elId), btns = [];
+    list.forEach(function (o) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'pill';
+      b.textContent = o.label;
+      b.addEventListener('click', function () { st[key] = o.v; render(); });
+      el.appendChild(b);
+      btns.push({ b: b, v: o.v });
+    });
+    groups.push({ key: key, btns: btns });
+  }
+  build('countries', Object.keys(C).map(function (k) { return { v: k, label: C[k].name }; }), 'country');
+  build('amounts', [{ v: 50000, label: '5 萬' }, { v: 200000, label: '20 萬' }, { v: 1000000, label: '100 萬' }], 'amt');
+  build('yields', [{ v: 100, label: '1%' }, { v: 150, label: '1.5%' }, { v: 200, label: '2%' }], 'yld');
+
+  function render() {
+    groups.forEach(function (g) {
+      g.btns.forEach(function (x) { x.b.setAttribute('aria-pressed', x.v === st[g.key] ? 'true' : 'false'); });
+    });
+    var c = C[st.country], amt = st.amt, yld = st.yld, out = {};
+    var usBp = yld * c.rate / 100, ieBp = yld * 15 / 100, diff = Math.round(usBp - ieBp);
+    out.countryName = c.name;
+    out.usRate = c.rate + '%';
+    out.usDrag = pct(usBp);
+    out.ieDrag = pct(ieBp);
+    if (diff > 0) out.verdictDiv = '股息：美國掛牌每年多扣 ' + (diff / 100).toFixed(2) + ' 個百分點。';
+    else if (diff < 0) out.verdictDiv = '股息：美國掛牌每年少扣 ' + (-diff / 100).toFixed(2) + ' 個百分點，這一項美國掛牌比較划算。';
+    else out.verdictDiv = '股息：兩邊扣的一樣多。';
+    if (c.treaty) {
+      out.usEstate = '不估';
+      out.usEstateSub = c.name + '和美國有遺產稅協定';
+      out.verdictEst = '遺產稅：' + c.name + '和美國有遺產稅協定，算法不同，這裡不估。';
+    } else if (amt > 60000) {
+      var e = Math.round((amt - 60000) * 40 / amt * 10) / 10;
+      out.usEstate = e.toFixed(1) + '%';
+      out.usEstateSub = '超過 6 萬美元的部分 × 40%';
+      out.verdictEst = '遺產稅：金額超過 6 萬美元。持有人過世時，美國掛牌最多可能被課掉持有金額的 ' + e.toFixed(1) + '%。';
+    } else {
+      out.usEstate = '0%';
+      out.usEstateSub = '沒超過 6 萬美元免稅額';
+      out.verdictEst = '遺產稅：金額沒超過 6 萬美元免稅額，美國掛牌也不用課。';
+    }
+    $('v-country').textContent = out.countryName;
+    $('v-div').textContent = out.verdictDiv;
+    $('v-est').textContent = out.verdictEst;
+    $('v-usrate').textContent = out.usRate;
+    $('v-usdrag').textContent = out.usDrag;
+    $('v-iedrag').textContent = out.ieDrag;
+    $('v-usest').textContent = out.usEstate;
+    $('v-usestsub').textContent = out.usEstateSub;
+  }
+  render();
+})();
+</script>
+</body>
+</html>

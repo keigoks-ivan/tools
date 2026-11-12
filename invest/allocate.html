@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>第 1 步 選配置：[品牌名稱]</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="invest.css">
+<script src="invest.js"></script>
+</head>
+<body data-root="" data-nav="allocate">
+<div class="page">
+<div id="site-header"></div>
+
+<ol class="steps" aria-label="進度">
+<li aria-current="step">01 選配置</li>
+<li>02 選產品</li>
+<li>03 設定定期買入</li>
+<li>04 定期檢查配置</li>
+<li>05 查證據</li>
+</ol>
+
+<h1 class="h1" style="margin-top:36px">股票和債券，你要各放多少？</h1>
+<p class="lead" style="margin-top:16px;max-width:680px">股票放越多，長期賺越多，中途跌得也越深。選一種，看它過去最慘的樣子，再決定你撐不撐得住。</p>
+
+<div class="row" style="margin-top:40px">
+<section class="col-side allocate-side" aria-label="選一種比例">
+<div id="options" style="display:flex;flex-direction:column;gap:10px"></div>
+<p class="fine" style="margin-top:8px">深色那段是股票，淺色那段是債券。這四種是測過的比例，不是推薦。</p>
+</section>
+
+<section class="col-main">
+<div class="card">
+<div class="ask-k">你選的是 <span id="v-name"></span></div>
+<div class="ask-l">2008 年最慘的那一天，帳戶比高點少了</div>
+<div class="ask-big" id="v-left"></div>
+<p class="ask-p" id="v-ask"></p>
+</div>
+<div class="stats3">
+<div class="stat"><div class="k">年化報酬</div><div class="v" id="v-cagr"></div></div>
+<div class="stat"><div class="k">最大跌幅</div><div class="v" id="v-mdd"></div></div>
+<div class="stat"><div class="k">漲回要多久</div><div class="v sm" id="v-rec"></div></div>
+</div>
+<div class="card bars">
+<h2>跟另外三種比：最大跌幅</h2>
+<div class="bars-list" id="bars"></div>
+<p>撐完 23 年，累計報酬是 <span id="v-end"></span>。</p>
+</div>
+<div class="cta-row">
+<a class="btn" href="product.html">用這個比例，下一步選產品</a>
+<a class="link" href="evidence/allocation-drawdown.html">看完整走勢圖和資料來源</a>
+</div>
+<p class="fine" style="margin-top:8px;max-width:720px">之後想改比例，隨時可以回來重選。本頁是一般性資訊，不是針對個人的投資建議。數字是初算，未對帳：SPY、AGG 含股息價格，2003-09-30 至 2026-11-11，每日調回目標比例，未計費用、稅和匯率。只含一次大型股災，股票用的是美國大型股。</p>
+</section>
+</div>
+</div>
+<script>
+(function () {
+  var M = {
+    p100: { name: '全部股票', sub: '股票 100%', w: 100, label: '100／0', cagr: '11.1%', mdd: '−55.2%', mddW: 100, rec: '4 年 10 個月', left: '55.2%', end: '+1,045%', ask: '跌掉一半以上，要再漲 123% 才回到原點，實際花了 4 年 10 個月。這段時間你會不會賣掉？會的話，往下選債券多一點的。' },
+    p80: { name: '股八債二', sub: '股票 80%、債券 20%', w: 80, label: '80／20', cagr: '9.8%', mdd: '−45.7%', mddW: 82.8, rec: '3 年 6 個月', left: '45.7%', end: '+762%', ask: '要再漲 84% 才回到原點，實際花了 3 年 6 個月。這段時間你會不會賣掉？會的話，往下選債券多一點的。' },
+    p60: { name: '股六債四', sub: '股票 60%、債券 40%', w: 60, label: '60／40', cagr: '8.3%', mdd: '−34.7%', mddW: 62.9, rec: '3 年 1 個月', left: '34.7%', end: '+527%', ask: '要再漲 53% 才回到原點，實際花了 3 年 1 個月。這段時間你會不會賣掉？會的話，往下選債券多一點的。' },
+    p40: { name: '股四債六', sub: '股票 40%、債券 60%', w: 40, label: '40／60', cagr: '6.6%', mdd: '−22.6%', mddW: 40.9, rec: '1 年 6 個月', left: '22.6%', end: '+341%', ask: '要再漲 29% 才回到原點，實際花了 1 年 6 個月。四種裡跌得最淺，長期報酬也最低。' }
+  };
+  var keys = ['p100', 'p80', 'p60', 'p40'];
+  var picked = 'p100';
+  var optsEl = document.getElementById('options'), barsEl = document.getElementById('bars');
+  var btns = {}, rows = {}, bars = {};
+
+  keys.forEach(function (k) {
+    var m = M[k];
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'opt';
+    b.innerHTML = '<b></b><span class="sub"></span><span class="mix" aria-hidden="true"><i></i><i></i></span>';
+    b.querySelector('b').textContent = m.name;
+    b.querySelector('.sub').textContent = m.sub;
+    b.querySelector('.mix i').style.width = m.w + '%';
+    b.addEventListener('click', function () { picked = k; render(); });
+    optsEl.appendChild(b);
+    btns[k] = b;
+
+    var r = document.createElement('div');
+    r.className = 'brow';
+    r.innerHTML = '<span class="l"></span><span class="track"><span class="bar"></span></span><span class="val"></span>';
+    r.querySelector('.l').textContent = m.label;
+    r.querySelector('.val').textContent = m.mdd;
+    r.querySelector('.bar').style.width = m.mddW + '%';
+    barsEl.appendChild(r);
+    rows[k] = r;
+  });
+
+  function render() {
+    keys.forEach(function (k) {
+      btns[k].setAttribute('aria-pressed', k === picked ? 'true' : 'false');
+      rows[k].className = 'brow' + (k === picked ? ' on' : '');
+    });
+    var m = M[picked];
+    document.getElementById('v-name').textContent = m.name;
+    document.getElementById('v-left').textContent = m.left;
+    document.getElementById('v-ask').textContent = m.ask;
+    document.getElementById('v-cagr').textContent = m.cagr;
+    document.getElementById('v-mdd').textContent = m.mdd;
+    document.getElementById('v-rec').textContent = m.rec;
+    document.getElementById('v-end').textContent = m.end;
+  }
+  render();
+})();
+</script>
+</body>
+</html>
