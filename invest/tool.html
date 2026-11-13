@@ -41,6 +41,10 @@
 <li>最大跌幅、最長等待、最差一年，都用不含新投入的淨值（時間加權）計算，所以每月投入不會讓跌幅看起來比較淺。</li>
 <li>最差一年：任何一天往前推滿一年的報酬裡，最低的那一個。</li>
 <li>年化 ÷ 最大跌幅：每承受 1 個百分點的最大跌幅，換到多少年化報酬。組合有任何一檔資料不到 5 年，或回測期間不到 5 年，就不顯示。</li>
+<li>夏普值：每天的（組合淨值報酬 − 同一天台幣定存報酬）取平均，除以這個差值的標準差（樣本標準差），再乘以一年的交易日數開根號。台幣定存用資料裡的 100% 台幣定存。組合本身就是台幣定存時差值沒有起伏，標示為不適用。期間不到 5 年或有資產不到 5 年時不顯示。</li>
+<li>不同時間進場：把期間內每一個交易日都當成進場日，單筆買進，抱到往後整數年的同月同日（當天不是交易日就用之前最近的交易日），年化報酬 =（終值 ÷ 起值）開年數次方再減 1。終點超出資料的起點不算。可用起點少於 250 個（約一年份）的年數不給統計。「期末是賠的」指抱滿後的淨值低於進場那天。用不含新投入的淨值計算，與投入方式無關。</li>
+<li>跌得最深的五次：從創新高那天起，到淨值回到或超過前高那天為止算一次下跌，期間最低點是谷底，各次不重疊。依跌幅由深到淺取前五次，淺於 5% 的不列。</li>
+<li>期間快捷鍵：近 N 年是資料最後一天往前推 N 年。2008 金融海嘯用 2007-07-02 到 2010-03-31，2020 疫情用 2019-11-01 到 2021-03-31，2022 升息用 2021-10-01 到 2023-12-29，都是前高前約三個月到谷底後約一年，日期是固定寫死的。</li>
 </ul>
 </details>
 
@@ -65,7 +69,16 @@
 <div><label for="rebal">再平衡</label><select id="rebal"><option value="none">不再平衡</option><option value="annual">每年一次</option></select></div>
 </div>
 <div class="dnote" id="dateNote" style="display:none" aria-live="polite"></div>
-<div style="margin-top:10px"><button type="button" class="sbtn" id="resetDates">起訖日改回最長共同期間</button></div>
+<div class="qrow" id="quick" role="group" aria-label="期間快捷鍵">
+<button type="button" class="sbtn" id="resetDates" data-q="all">全部期間</button>
+<button type="button" class="sbtn" data-q="y10">近 10 年</button>
+<button type="button" class="sbtn" data-q="y5">近 5 年</button>
+<button type="button" class="sbtn" data-q="y3">近 3 年</button>
+<button type="button" class="sbtn" data-q="c08">2008 金融海嘯</button>
+<button type="button" class="sbtn" data-q="c20">2020 疫情</button>
+<button type="button" class="sbtn" data-q="c22">2022 升息</button>
+</div>
+<p class="t-note" id="quickNote" style="display:none"></p>
 </section>
 
 <section class="sec" id="out" style="margin-top:40px" aria-label="結果">
@@ -73,28 +86,62 @@
 <div id="warns"></div>
 <div id="msg" class="gerr" aria-live="polite"></div>
 <div id="results" style="display:none">
+<div class="actions">
+<button type="button" class="sbtn" id="copyLink">複製這組設定的連結</button>
+<button type="button" class="sbtn" id="dlCsv">下載每日數字（CSV）</button>
+<span id="copied" class="copied" aria-live="polite"></span>
+</div>
 <h3 class="ctitle">統計</h3>
 <p class="csub">報酬和最大跌幅放在一起看。</p>
 <div class="dwrap"><table class="dtbl rtbl" id="stats"></table></div>
+
+<details class="adv" id="adv">
+<summary>進階數字</summary>
+<div class="dwrap"><table class="dtbl rtbl" id="statsAdv"></table></div>
+
+<h3 class="ctitle">不同時間進場，結果差多少</h3>
+<p class="csub">把期間內每一個交易日都當成進場日，單筆買進後抱滿 N 年，看年化報酬的分布。以單筆持有計算，和上面選的投入方式無關。「期末是賠的」是抱滿後的淨值低於進場那天。</p>
+<div class="dwrap"><table class="dtbl rtbl rolltbl" id="roll"></table></div>
+<div class="chartbox">
+<div class="rollbtns" id="rollBtns" role="group" aria-label="選擇持有年數"></div>
+<div class="legend" id="legend3"></div>
+<div class="chart" id="chartRoll" role="img" aria-label="各組合在每一天進場、抱滿所選年數的年化報酬折線圖，可用左右方向鍵逐日查看"></div>
+<p class="csrc"></p>
+</div>
+
+<h3 class="ctitle">跌得最深的五次</h3>
+<p class="csub">從創新高那天算到淨值回到前高那天為一次下跌，各次不重疊。依跌幅由深到淺列出前五次，淺於 5% 的不列。</p>
+<div id="dd5"></div>
+</details>
 
 <h3 class="ctitle">淨值走勢</h3>
 <p class="csub" id="navSub"></p>
 <div class="chartbox">
 <div class="legend" id="legend1"></div>
 <label class="logt"><input type="checkbox" id="logChk">對數座標（相同的漲幅在圖上等高）</label>
-<div class="chart" id="chartNav" role="img" aria-label="三組組合的淨值走勢圖，滑鼠移上去可看各日數值"></div>
+<div class="chart" id="chartNav" role="img" aria-label="各組合的淨值走勢圖，滑鼠移上去或用左右方向鍵可看各日數值"></div>
+<p class="csrc"></p>
 </div>
 
 <h3 class="ctitle">從前高跌多少</h3>
-<p class="csub">每一天的淨值，比到那天為止的最高點低了多少。</p>
+<p class="csub">每一天的淨值，比到那天為止的最高點低了多少。圖上的圓點是最大跌幅。</p>
 <div class="chartbox">
 <div class="legend" id="legend2"></div>
-<div class="chart" id="chartDD" role="img" aria-label="各組合距離前高的跌幅走勢圖"></div>
+<div class="chart" id="chartDD" role="img" aria-label="各組合距離前高的跌幅走勢圖，滑鼠移上去或用左右方向鍵可看各日數值"></div>
+<p class="csrc"></p>
 </div>
 
 <h3 class="ctitle">每年報酬</h3>
 <p class="csub">日曆年度的報酬，用不含新投入的淨值計算。</p>
+<div class="chartbox">
+<div class="legend" id="legend4"></div>
+<div class="chart" id="chartYear" role="img" aria-label="各組合每年報酬的分組柱狀圖，滑鼠移上去或用左右方向鍵可看各年數值"></div>
+<p class="csrc"></p>
+</div>
+<p class="t-note" id="yearlyNote"></p>
+<details class="yd"><summary>看每年數字</summary>
 <div class="dwrap"><table class="dtbl rtbl" id="yearly"></table></div>
+</details>
 </div>
 <p class="fine">這是歷史資料的計算，是一般資訊，不是對個人的投資建議。</p>
 </section>
@@ -110,15 +157,25 @@
     { on: false, name: '', items: [{ id: '0050', w: '100' }] }
   ];
   var userStart = null, userEnd = null;
+  var logUser = null;   // null＝使用者沒動過，依期間長短自動決定
+  var rollN = 5;
   var amounts = { lump: '1000000', monthly: '10000' };
   var last = null; // 最近一次計算結果，給重畫圖用
-  var ui = null;
+  var ui = null, copyTimer = null;
+  var QUICK = {
+    all: { s: null, e: null },
+    y10: { yrs: 10 }, y5: { yrs: 5 }, y3: { yrs: 3 },
+    c08: { s: '2007-07-02', e: '2010-03-31' },
+    c20: { s: '2019-11-01', e: '2021-03-31' },
+    c22: { s: '2021-10-01', e: '2023-12-29' }
+  };
 
   function $(id) { return document.getElementById(id); }
+  function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
 
   function applyUrl() {
     var P = T.parseParams(location.search), any = false;
-    P.groups.forEach(function (items, i) { if (items) { groups[i].items = items; groups[i].on = true; any = true; } });
+    P.groups.forEach(function (items, i) { if (items) { groups[i].items = items; groups[i].on = true; if (P.names[i]) groups[i].name = P.names[i]; any = true; } });
     if (any) P.groups.forEach(function (items, i) { if (!items && i < 2) groups[i].on = false; });
     if (any && !groups[0].on && groups[1].on) { groups[0] = groups[1]; groups[1] = { on: false, name: '', items: [{ id: '0050', w: '100' }] }; }
     if (P.mode) {
@@ -130,6 +187,7 @@
     if (P.rebal) $('rebal').value = P.rebal;
     if (P.start) userStart = P.start;
     if (P.end) userEnd = P.end;
+    if (P.log !== null) { logUser = P.log; $('logChk').checked = P.log; }
     if (userStart) $('start').value = userStart;
     if (userEnd) $('end').value = userEnd;
   }
@@ -146,8 +204,94 @@
     $('dataEnd').textContent = d.slice(0, 4) + ' 年 ' + (+d.slice(5, 7)) + ' 月 ' + (+d.slice(8, 10)) + ' 日';
     $('start').min = $('end').min = T.dates()[0];
     $('start').max = $('end').max = d;
+    var src = '含息報酬，台幣計價。資料到 ' + d + '。資料來源見頁面上方「各資產的資料來源與已知限制」。';
+    Array.prototype.forEach.call(document.querySelectorAll('.csrc'), function (p) { p.textContent = src; });
   }
 
+  /* ---------- 期間快捷鍵 ---------- */
+  function yearsBack(n) { var d = T.dataEnd(); return (+d.slice(0, 4) - n) + d.slice(4); }
+  function quickRange(k) {
+    var q = QUICK[k];
+    return q.yrs ? { s: yearsBack(q.yrs), e: null } : { s: q.s, e: q.e };
+  }
+  function updateQuick() {
+    // 所選資產中資料最晚開始的一檔
+    var cs = 0, lim = null;
+    groups.forEach(function (g) {
+      if (!g.on) return;
+      g.items.forEach(function (it) {
+        if (!(parseInt(it.w, 10) > 0)) return;
+        var a = T.asset(it.id); if (a && a.i0 > cs) { cs = a.i0; lim = a; }
+      });
+    });
+    var anyOff = false;
+    Array.prototype.forEach.call(document.querySelectorAll('#quick button'), function (b) {
+      var k = b.getAttribute('data-q'), r = quickRange(k), off = false;
+      if (r.s && T.idxOnOrAfter(r.s) < cs) off = true;
+      b.disabled = off; if (off) anyOff = true;
+      b.title = off ? '所選資產在這段期間還沒有資料' : '';
+      var on = k === 'all' ? (!userStart && !userEnd) : (userStart === r.s && userEnd === r.e);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    var qn = $('quickNote');
+    qn.style.display = anyOff ? '' : 'none';
+    qn.textContent = anyOff && lim ? '停用的按鈕，是因為所選資產在那段期間還沒有資料：' + lim.name + ' ' + lim.start + ' 才有資料。' : '';
+  }
+
+  /* ---------- 網址、複製、下載 ---------- */
+  function writeUrl() {
+    try {
+      var extra = { mode: document.querySelector('input[name=mode]:checked').value, amt: $('amount').value };
+      if (userStart) extra.start = userStart;
+      if (userEnd) extra.end = userEnd;
+      extra.rebal = $('rebal').value;
+      if (logUser !== null) extra.log = logUser ? '1' : '0';
+      history.replaceState(null, '', location.pathname + T.buildParams(groups, extra) + location.hash);
+    } catch (e) { /* 不能改網址就算了 */ }
+  }
+  function flashCopied(ok) {
+    var el = $('copied'); el.textContent = ok ? '已複製' : '沒辦法自動複製，請從瀏覽器網址列複製';
+    clearTimeout(copyTimer); copyTimer = setTimeout(function () { el.textContent = ''; }, ok ? 2000 : 4000);
+  }
+  function fallbackCopy(text) {
+    var ta = document.createElement('input'); ta.type = 'text'; ta.value = text; ta.setAttribute('readonly', ''); ta.setAttribute('aria-hidden', 'true');
+    ta.style.cssText = 'position:fixed;left:0;top:0;width:1px;height:1px;opacity:0';
+    document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0, text.length);
+    var ok = false; try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+    document.body.removeChild(ta); flashCopied(ok);
+  }
+  function copyLink() {
+    writeUrl();
+    var text = location.href;
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(text).then(function () { flashCopied(true); }, function () { fallbackCopy(text); });
+    else fallbackCopy(text);
+  }
+  function csvText() {
+    var res = last, ds = T.dates(), n = res.e - res.s + 1;
+    function q(v) { v = String(v); return /[",\r\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
+    var head = ['日期'];
+    res.out.forEach(function (o) { head.push(T.tag(o.g) + '（' + o.comp + '）帳戶金額'); });
+    res.out.forEach(function (o) { head.push(T.tag(o.g) + '（' + o.comp + '）淨值（起點為 1）'); });
+    var lines = [head.map(q).join(',')];
+    for (var t = 0; t < n; t++) {
+      var row = [ds[res.s + t]];
+      res.out.forEach(function (o) { row.push(o.sim.val[t].toFixed(2)); });
+      res.out.forEach(function (o) { row.push(o.sim.nav[t].toFixed(6)); });
+      lines.push(row.join(','));
+    }
+    return '﻿' + lines.join('\r\n');
+  }
+  function downloadCsv() {
+    if (!last) return;
+    var ds = T.dates();
+    var blob = new Blob([csvText()], { type: 'text/csv;charset=utf-8' });
+    var a = document.createElement('a'), url = URL.createObjectURL(blob);
+    a.href = url; a.download = 'backtest_' + ds[last.s] + '_' + ds[last.e] + '.csv';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+
+  /* ---------- 計算與畫面 ---------- */
   function recompute() {
     var mode = document.querySelector('input[name=mode]:checked').value;
     var rebal = $('rebal').value;
@@ -156,6 +300,7 @@
     groups.forEach(function (g, gi) { if (g.on) vs.push({ gi: gi, g: g, v: T.validate(g) }); });
     T.paintCards($('groups'), vs);
     $('warns').innerHTML = '';
+    updateQuick();
     var okG = vs.filter(function (o) { return !o.v.err; });
     var msg = $('msg'); msg.textContent = '';
     $('results').style.display = 'none';
@@ -173,27 +318,57 @@
     if (!userStart) $('start').value = ds[res.s];
     if (!userEnd) $('end').value = ds[res.e];
     last = res;
+    if (logUser === null) $('logChk').checked = res.mode === 'lump' && T.dayDiff(res.s, res.e) / 365.25 > 10;
     render();
+    writeUrl();
+  }
+
+  function pickRollN() {
+    var av = T.rollAvailable(last);
+    if (!av.length) { rollN = null; return av; }
+    if (av.indexOf(rollN) < 0) rollN = av.indexOf(5) >= 0 ? 5 : av[av.length - 1];
+    return av;
+  }
+  function paintRollBtns(av) {
+    var h = '';
+    T.ROLL_N.forEach(function (n) {
+      var ok = av.indexOf(n) >= 0;
+      h += '<button type="button" class="sbtn" data-n="' + n + '" aria-pressed="' + (ok && n === rollN ? 'true' : 'false') + '"' + (ok ? '' : ' disabled title="這段期間不夠長，沒有足夠的起點"') + '>' + n + ' 年</button>';
+    });
+    $('rollBtns').innerHTML = '<span class="rl">持有</span>' + h;
+  }
+  function drawRoll() {
+    if (!last || !$('adv').open) return;
+    var host = $('chartRoll');
+    if (rollN == null) { host.innerHTML = '<p class="t-note" style="margin:8px 0">這段期間太短，每個持有年數的可用起點都少於 250 個，所以不畫圖。</p>'; return; }
+    T.rollChart(host, last, rollN);
   }
 
   function render() {
     if (!last) return;
     $('results').style.display = '';
     $('warns').innerHTML = T.warnsHtml(last);
-    $('stats').innerHTML = T.statsHtml(last);
+    $('stats').innerHTML = T.statsHtml(last, T.BASIC_ROWS);
+    $('statsAdv').innerHTML = T.statsHtml(last, T.ADV_ROWS);
+    $('roll').innerHTML = T.rollHtml(last);
+    $('dd5').innerHTML = T.dd5Html(last);
+    paintRollBtns(pickRollN());
     var yr = T.yearlyHtml(last);
     $('yearly').innerHTML = yr.html;
-    var yn = $('yearlyNote'); if (!yn) { yn = document.createElement('p'); yn.id = 'yearlyNote'; yn.className = 't-note'; $('yearly').parentNode.parentNode.insertBefore(yn, $('yearly').parentNode.nextSibling); }
-    yn.textContent = yr.partial ? '† 該年度只有部分期間（起點或終點落在年度中間）。' : '';
-    var leg = T.legendHtml(last);
-    $('legend1').innerHTML = leg; $('legend2').innerHTML = leg;
-    $('navSub').textContent = last.mode === 'lump' ? '起始投入 ' + T.money(last.amount) + '，之後不再投入。' : '每月投入 ' + T.money(last.amount) + '，圖上是帳戶總金額。';
+    $('yearlyNote').textContent = yr.partial ? '† 該年度只有部分期間（起點或終點落在年度中間），圖上這類年份的柱子顏色較淡。' : '';
+    $('legend1').innerHTML = T.legendHtml(last);
+    $('legend2').innerHTML = T.legendHtml(last, { noContrib: true });
+    $('legend3').innerHTML = T.legendHtml(last, { noContrib: true });
+    $('legend4').innerHTML = T.barLegendHtml(last);
+    $('navSub').textContent = (last.mode === 'lump' ? '起始投入 ' + T.money(last.amount) + '，之後不再投入。' : '每月投入 ' + T.money(last.amount) + '，圖上是帳戶總金額。') + '滑鼠移上去、手指按住，或用左右方向鍵，可逐日查看；三張圖的位置會連動。';
     drawCharts();
   }
   function drawCharts() {
     if (!last) return;
     T.navChart($('chartNav'), last, $('logChk').checked);
     T.ddChart($('chartDD'), last);
+    T.barChart($('chartYear'), last);
+    drawRoll();
   }
 
   function wire() {
@@ -210,7 +385,14 @@
     $('rebal').addEventListener('change', recompute);
     $('start').addEventListener('change', function (e) { userStart = e.target.value || null; recompute(); });
     $('end').addEventListener('change', function (e) { userEnd = e.target.value || null; recompute(); });
-    $('resetDates').addEventListener('click', function () { userStart = null; userEnd = null; recompute(); });
+    Array.prototype.forEach.call(document.querySelectorAll('#quick button'), function (b) {
+      b.addEventListener('click', function () {
+        var r = quickRange(b.getAttribute('data-q'));
+        userStart = r.s; userEnd = r.e;
+        $('start').value = userStart || ''; $('end').value = userEnd || '';
+        recompute();
+      });
+    });
     $('addC').addEventListener('click', function () {
       // 第三組預設挑一個前兩組沒用到的標的，免得跟組合 A 一模一樣、看起來沒變化
       var used = {}; groups.forEach(function (g, i) { if (i < 2 && g.on) g.items.forEach(function (it) { used[it.id] = 1; }); });
@@ -218,7 +400,18 @@
       groups[2].items = [{ id: pick, w: '100' }];
       groups[2].on = true; ui.render(); recompute();
     });
-    $('logChk').addEventListener('change', drawCharts);
+    $('logChk').addEventListener('change', function () { logUser = $('logChk').checked; writeUrl(); drawCharts(); });
+    $('copyLink').addEventListener('click', copyLink);
+    $('dlCsv').addEventListener('click', downloadCsv);
+    $('rollBtns').addEventListener('click', function (e) {
+      var b = e.target.closest ? e.target.closest('button[data-n]') : null;
+      if (!b || b.disabled) return;
+      rollN = +b.getAttribute('data-n'); paintRollBtns(T.rollAvailable(last)); drawRoll();
+      var nb = $('rollBtns').querySelector('button[data-n="' + rollN + '"]'); if (nb) nb.focus();
+    });
+    var adv = $('adv');
+    if (store('invest-tool-adv') === '1') adv.open = true;
+    adv.addEventListener('toggle', function () { store('invest-tool-adv', adv.open ? '1' : '0'); if (adv.open) drawRoll(); });
     var rt; window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(drawCharts, 120); });
   }
 
