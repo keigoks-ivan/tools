@@ -11,6 +11,44 @@
 <link rel="stylesheet" href="../invest.css">
 <link rel="stylesheet" href="../tool.css">
 <link rel="stylesheet" href="../pages.css">
+<style>
+.doc .sec{margin-top:72px;scroll-margin-top:16px}
+.doc .sec h2{font-size:23px}
+.doc .sec h3.t-lab{margin-top:36px;font-size:16px}
+.doc .lead{font-weight:600;color:var(--ink)}
+.toc{margin-top:20px;border:1px solid var(--line);padding:14px 20px 12px}
+.toc .toc-h{font-family:var(--serif);font-weight:700;font-size:17px;color:var(--navy)}
+.toc p{margin:6px 0 0;font-size:14px;line-height:1.8;color:var(--muted)}
+.toc ol{margin:8px 0 0;padding-left:24px;font-size:15px;line-height:1.9}
+.toc li span{display:block;font-size:13px;line-height:1.6;color:var(--muted);margin-bottom:4px}
+.doc .dtbl.cmp th,.doc .dtbl.cmp td{padding:10px 8px;font-size:14px;line-height:1.6}
+.doc .dtbl.cmp thead th{text-align:right;white-space:normal}
+.doc .dtbl.cmp thead th:first-child{text-align:left}
+.doc .dtbl.cmp tbody td{text-align:right}
+.doc .dtbl.cmp tbody th{font-size:14px;font-weight:500}
+.doc .dtbl.cmp .nw{white-space:nowrap}
+.doc .dtbl.cmp .tag{font-size:12px;color:var(--muted)}
+.doc .dwrap{overflow-x:visible}
+.doc .qa-answer,.doc .pre-box,.doc .toc,.doc .dwrap,.doc details.more,.doc .qa-fig,.doc .dlist{max-width:720px;margin-left:0;margin-right:0;box-sizing:border-box}
+.doc .steps{list-style:disc;margin:14px 0 0;padding-left:22px;font-size:17px;line-height:1.8;color:var(--ink2);max-width:720px}
+.doc .steps li+li{margin-top:6px}
+.doc .qa-fig{margin-top:32px}
+.doc .figs{margin-top:8px}
+details.more{margin-top:20px;border:1px solid var(--line);border-radius:0;background:var(--card)}
+details.more>summary{cursor:pointer;padding:12px 16px;font-size:15px;font-weight:700;line-height:1.6;color:var(--ink);list-style:none}
+details.more>summary::-webkit-details-marker{display:none}
+details.more>summary::before{content:"＋";display:inline-block;width:1.4em;color:var(--navy)}
+details.more[open]>summary::before{content:"－"}
+details.more[open]>summary{border-bottom:1px solid var(--line)}
+details.more .in{padding:0 0 4px}
+details.more .in>p{padding:0 16px}
+details.more .in .dwrap{margin-top:12px;border:0;margin-left:-1px;margin-right:-1px}
+.nw{white-space:nowrap}
+.doc .dtbl.cmp tbody th .tag{display:block;margin-top:2px;border:0;padding:0;background:none;font-size:12px;color:var(--muted)}
+details.more .in>p{margin:14px 0 0}
+.doc .sec h2{text-wrap:balance}
+@media (max-width:760px){.doc .dwrap{overflow-x:auto}}
+</style>
 <script src="../invest.js"></script>
 <script src="../qchart.js"></script>
 </head>
@@ -20,28 +58,133 @@
 
 <p class="t-link" style="margin-top:28px"><a href="../questions.html">回到全部題目</a></p>
 <h1 class="h1" style="margin-top:12px">市場震盪時自動減碼，能少賠又不少賺嗎？</h1>
-<div class="qa-answer"><div class="k">一句話答案</div><p>減碼規則在 QQQ 上最寬鬆的一檔把年化報酬做到與買進持有打平，最大跌幅少約 11 個百分點；指定的 20% 一檔，年化少 0.5 個百分點。</p></div>
-<aside class="pre-box" aria-labelledby="pre-t"><div class="pre-h" id="pre-t">讀這個結果之前</div><h4>少賠又不少賺，只在目標波動設到最寬鬆時出現</h4><p>規則是近期波動越大，持股越少，波動等於目標波動時滿倉。事先指定的 QQQ 目標波動 20%，年化比買進持有少 0.5 個百分點。目標設得越嚴，最大跌幅越淺，年化也越低。</p><p>目標放寬到 25%，年化 15.21% 與買進持有打平，最大跌幅少 11.4 個百分點。這一格是整條曲線裡報酬剛好打平的一格。</p><h4>這篇沒有回答的事</h4><ul><li>這篇只有一段 21 年的歷史，大跌只有 2008 年與 2022 年兩段，所以結論靠這兩段。</li><li>每次調整持股的成本只假設單邊 0.07%，沒有計稅，所以實際拿到的會少一點。</li><li>減下來的現金計短期利率，假設隨時能拿到，現實中的狀況沒有測。</li></ul><p class="pre-fine">QQQ 與 SPY 含股息，2005 年 1 月至 2026 年 7 月 16 日，已扣調整成本，沒有計稅。</p><p class="pre-link"><a href="#limits">完整的弱點見「這個結果的弱點」一節</a></p></aside>
-
+<div class="qa-answer"><div class="k">一句話答案</div><p>QQQ 照波動減碼，事先指定的目標 20% 讓最大跌幅從 −53.4% 縮到 −38.3%。年化少 0.5 個百分點，14.68% 對 15.19%。年化打平要把目標放寬到 25% 以上，這個範圍是看過整條曲線才找到的。</p></div>
+<aside class="pre-box" aria-labelledby="pre-t"><div class="pre-h" id="pre-t">讀這個結果之前</div><h4>QQQ 的 5 次大跌都跌得較淺，年化的代價看目標設多寬</h4><p>規則是近期波動越大，持股越少。QQQ 從 2005 年起跌超過 20% 的 5 次，目標 20% 每次都比買進持有淺，淺 3.4 到 17.4 個百分點，代價是年化少 0.5 個百分點。</p><p>目標放寬到 25%，年化 15.21% 與買進持有打平，2025 年那次只淺 1.4 個百分點。這是歷史次數統計，不是下一次會怎樣。</p><h4>這篇沒有回答的事</h4><ul><li>5 次裡只有 2008 年與 2022 年跌超過三成，其餘 3 次只跌兩成多，結論主要靠這兩段。</li><li>減下來的現金計短期利率、隨時拿得到，沒有計稅。</li><li>只測了 QQQ 與 SPY 兩檔美股大盤基金。</li></ul><p class="pre-fine">含股息，2005 年 1 月 3 日至 2026 年 7 月 16 日，已扣單邊 0.07% 的調整成本。最大跌幅是從高點跌到之後最低點的幅度。</p><p class="pre-link"><a href="#limits">完整的弱點見「這個結果的弱點」一節</a></p></aside>
+<nav class="toc" aria-label="本文目錄"><div class="toc-h">本文目錄</div><ol>
+<li><a href="#what">測了什麼</a><span>規則、對照、事先指定的目標</span></li>
+<li><a href="#curve">整條曲線</a><span>QQQ 與 SPY，不同目標波動的年化與最大跌幅</span></li>
+<li><a href="#years">逐年：少賺在哪幾年</a><span>QQQ 目標 20% 的 22 個年份、兩種分組</span></li>
+<li><a href="#list">逐次清單：5 次跌超過 20%</a><span>跌多少、谷底後一年漲多少，加 10% 到 20% 的 14 次與 SPY</span></li>
+<li><a href="#months">高波動月份的持股與報酬</a><span>持股比例、少賠與少賺各多少</span></li>
+<li><a href="#sub">5 個子期間</a><span>每一段的年化與最大跌幅</span></li>
+<li><a href="#limits">這個結果的弱點</a><span>完整列出</span></li>
+<li><a href="#src">資料來源與接著看</a><span></span></li>
+</ol></nav>
+<section class="sec" id="what"><h2>測了什麼</h2>
+<p class="t-body lead">每天按近期波動調整持股：波動越大持股越少，平穩時滿倉，對照同一段期間的買進持有。</p>
+<h3 class="t-lab">規則</h3>
+<ul class="steps">
+<li>持股比例＝目標波動 ÷ 近期已實現波動（年化），最高 100%，從不加槓桿。</li>
+<li>減下來的部分放現金，計美國短期國庫券利率，不借錢。</li>
+<li>目標 20% 時，近期波動 40% 持股 50%，近期波動 15% 持股 100%。</li>
+</ul>
+<h3 class="t-lab">口徑</h3>
+<p class="t-body">標的是 QQQ 與 SPY，用含股息的還原日價格，2005 年 1 月 3 日到 2026 年 7 月 16 日。每次調整的單邊成本 0.07%，訊號隔天收盤執行，持股與目標差不到 0.5 個百分點不調。對照是同一段期間的買進持有。</p>
+<p class="t-body">事先指定的目標是 QQQ 20%、SPY 15%，寫在原研究的規格書裡；規格書與結果是同一天存檔的，紀錄上無法確認是看結果之前訂的。其他目標值是整條曲線，後面並排列出，不挑哪一個。表格裡 QQQ 的 10%、30%、35% 與 SPY 的 25%、30% 是補算的。</p>
+</section>
+<section class="sec" id="curve"><h2>整條曲線</h2>
+<p class="t-body lead">目標設得越嚴，最大跌幅越淺、年化越低；QQQ 目標 25% 以上，年化與買進持有差不到 0.1 個百分點。</p>
+<h3 class="t-lab">QQQ</h3>
+<p class="t-note" style="margin:0 0 6px">平均持股比例是每天持股占資產的平均。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">QQQ</th><th scope="col">年化</th><th scope="col">最大跌幅</th><th scope="col">平均持股</th></tr></thead><tbody><tr><th scope="row">QQQ 買進持有</th><td class="nw">15.19%</td><td class="nw">−53.4%</td><td class="nw">100%</td></tr><tr><th scope="row">目標波動 10%</th><td class="nw">10.04%</td><td class="nw">−20.1%</td><td class="nw">63%</td></tr><tr><th scope="row">目標波動 15%</th><td class="nw">13.08%</td><td class="nw">−29.7%</td><td class="nw">82%</td></tr><tr><th scope="row">目標波動 20%<span class="tag">事先指定</span></th><td class="nw">14.68%</td><td class="nw">−38.3%</td><td class="nw">91%</td></tr><tr><th scope="row">目標波動 25%</th><td class="nw">15.21%</td><td class="nw">−42.0%</td><td class="nw">95%</td></tr><tr><th scope="row">目標波動 30%</th><td class="nw">15.25%</td><td class="nw">−44.9%</td><td class="nw">98%</td></tr><tr><th scope="row">目標波動 35%</th><td class="nw">15.20%</td><td class="nw">−47.4%</td><td class="nw">99%</td></tr></tbody></table></div>
 <figure class="qa-fig">
-<div class="ttl">QQQ：目標波動設得越寬鬆，報酬越接近買進持有，最大跌幅也越深</div>
-<div class="cap">每組兩根長條：年化報酬和最大跌幅。最左邊是不減碼的買進持有。2005 年 1 月至 2026 年 7 月 16 日，含股息，已扣調整成本。</div>
-<div class="tool"><div class="chartbox" id="cbox0"><div class="legend"></div><div class="chart" role="img" aria-label="QQQ 買進持有與三種目標波動的年化報酬和最大跌幅並排長條圖"></div></div></div>
+<div class="ttl">圖 2.1　QQQ：目標波動與年化、最大跌幅</div>
+<div class="tool"><div class="chartbox" id="f1"><div class="legend"></div><div class="chart" role="img" aria-label="QQQ 買進持有與六種目標波動的年化報酬和最大跌幅並排長條圖，滑鼠移上去可看數值"></div></div></div>
 </figure>
-
-<section class="sec"><h2>測了什麼</h2><p class="t-body">規則是每天看過去 20 個交易日的已實現波動（年化），持股比例等於目標波動除以近 20 日波動，最高 100%。市場平穩就滿倉，波動超過目標就按比例減碼，晃兩倍就持有一半，從不加槓桿。減下來的部分放現金，計短期利率，不借錢。</p><p class="t-body">回測用 QQQ 與 SPY，2005 年 1 月起到 2026 年 7 月 16 日，含股息，每次調整的單邊成本 0.07%，次日收盤執行，0.5% 的再平衡帶以內不動。對照是同一段期間的買進持有。目標波動事先指定 SPY 15%、QQQ 20%，但下表列出整條曲線。</p></section>
-<section class="sec"><h2>結果</h2><div class="dwrap"><p class="t-note" style="margin:0 0 6px">2005 年 1 月至 2026 年 7 月 16 日，含股息、已扣成本。對照是同一段期間的買進持有。</p><table class="dtbl"><thead><tr><th>標的與做法</th><th class="num">年化報酬</th><th class="num">最大跌幅</th></tr></thead><tbody><tr><th scope="row">QQQ 買進持有</th><td class="num">15.19%</td><td class="num">−53.4%</td></tr><tr><th scope="row">QQQ 目標波動 15%</th><td class="num">13.08%</td><td class="num">−29.7%</td></tr><tr><th scope="row">QQQ 目標波動 20%</th><td class="num">14.68%</td><td class="num">−38.3%</td></tr><tr><th scope="row">QQQ 目標波動 25%</th><td class="num">15.21%</td><td class="num">−42.0%</td></tr><tr><th scope="row">SPY 買進持有</th><td class="num">10.88%</td><td class="num">−55.2%</td></tr><tr><th scope="row">SPY 目標波動 10%</th><td class="num">8.09%</td><td class="num">−24.3%</td></tr><tr><th scope="row">SPY 目標波動 15%</th><td class="num">10.04%</td><td class="num">−34.0%</td></tr><tr><th scope="row">SPY 目標波動 20%</th><td class="num">10.87%</td><td class="num">−39.9%</td></tr></tbody></table></div><p class="t-body">目標設得越嚴，最大跌幅越淺，年化報酬也越低。QQQ 目標 15% 時最大跌幅少 23.7 個百分點，年化少 2.1 個百分點。目標放寬到 25%，年化 15.21% 與買進持有的 15.19% 打平，最大跌幅 −42.0%，少 11.4 個百分點。「報酬打平」只出現在曲線最寬鬆的一端，事先指定的 QQQ 20% 年化比買進持有少 0.5 個百分點。</p><p class="t-body">減碼的代價集中在急彈的牛市年。以 QQQ 目標 20% 的逐年對照：2008 年 −27.45% 對買進持有 −41.73%，2022 年 −24.44% 對 −32.58%；但 2009 年 +39.65% 對 +54.68%，2020 年 +32.73% 對 +48.41%，2025 年 +12.97% 對 +20.77%。波動大的時候少持有，急跌時少虧，隨後的快速反彈也少賺。</p><p class="t-body">疊在趨勢規則上，好處變小。把同一套減碼加在一套週線長期趨勢規則（跌破 52 週均線出場）上，QQQ 版本的最大跌幅從 −32.2% 降到 −20.6%（目標 15%），年化 8.65% 對 8.60%，幾乎不變。但這條趨勢規則本身的年化只有 8.60%，買進持有是 15.19%。</p></section>
-<section class="sec"><h2 id="limits">這個結果的弱點</h2><ul class="dlist"><li>「年化報酬打平」用的是 QQQ 目標 25%，是整條曲線中報酬剛好打平的一格，不是事先指定的 20%。</li><li>只有一段 21 年的歷史，大跌只有 2008 年與 2022 年兩段，結論靠這兩段撐起。</li><li>成本假設單邊 0.07%，成本加倍到 0.14% 每年只多吃 0.31 個百分點，但沒有計稅。</li><li>減下來的現金計短期利率，假設隨時能拿到。5 個子期間的最大跌幅都有改善，但 AI 牛市那一期年化代價最大，QQQ 少 4.2 個百分點。</li><li>資料止於 2026 年 7 月 16 日，之後的走勢沒有納入。</li></ul></section>
-<section class="sec"><h2>資料來源</h2><ul class="dlist"><li>QQQ 與 SPY 含股息還原日價格，2005 年 1 月到 2026 年 7 月 16 日；短期利率用美國國庫券利率。</li></ul></section>
+<p class="t-note">最左邊是不減碼的買進持有。2005 年 1 月 3 日至 2026 年 7 月 16 日，含股息，已扣成本。</p>
+<p class="t-body">同樣六格，跟買進持有比差多少，以及每年調整持股的單邊換手量（以資產的倍數計）：</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">QQQ 對買進持有</th><th scope="col">年化差（個百分點）</th><th scope="col">最大跌幅差（個百分點）</th><th scope="col">每年單邊換手（倍）</th></tr></thead><tbody><tr><th scope="row">目標波動 10%</th><td class="nw">−5.15</td><td class="nw">+33.3</td><td class="nw">5.25</td></tr><tr><th scope="row">目標波動 15%</th><td class="nw">−2.11</td><td class="nw">+23.7</td><td class="nw">3.73</td></tr><tr><th scope="row">目標波動 20%</th><td class="nw">−0.51</td><td class="nw">+15.2</td><td class="nw">2.24</td></tr><tr><th scope="row">目標波動 25%</th><td class="nw">+0.02</td><td class="nw">+11.4</td><td class="nw">1.37</td></tr><tr><th scope="row">目標波動 30%</th><td class="nw">+0.06</td><td class="nw">+8.5</td><td class="nw">0.79</td></tr><tr><th scope="row">目標波動 35%</th><td class="nw">+0.01</td><td class="nw">+6.0</td><td class="nw">0.46</td></tr></tbody></table></div>
+<p class="t-body">目標 15% 的年化少 2.1 個百分點，最大跌幅少 23.7 個百分點。目標 20%（事先指定）年化少 0.5，最大跌幅少 15.2。目標 25% 年化 15.21% 對 15.19%，最大跌幅少 11.4。這個打平點是看過整條曲線才選出來的。再往寬放，30% 與 35% 的年化也與買進持有差不到 0.1 個百分點，最大跌幅 −44.9%、−47.4%，所以打平出現在 25% 以上的一整段，不限 25% 一格。</p>
+<h3 class="t-lab">SPY</h3>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">SPY</th><th scope="col">年化</th><th scope="col">最大跌幅</th><th scope="col">平均持股</th></tr></thead><tbody><tr><th scope="row">SPY 買進持有</th><td class="nw">10.88%</td><td class="nw">−55.2%</td><td class="nw">100%</td></tr><tr><th scope="row">目標波動 10%</th><td class="nw">8.09%</td><td class="nw">−24.3%</td><td class="nw">74%</td></tr><tr><th scope="row">目標波動 15%<span class="tag">事先指定</span></th><td class="nw">10.04%</td><td class="nw">−34.0%</td><td class="nw">89%</td></tr><tr><th scope="row">目標波動 20%</th><td class="nw">10.87%</td><td class="nw">−39.9%</td><td class="nw">95%</td></tr><tr><th scope="row">目標波動 25%</th><td class="nw">11.18%</td><td class="nw">−43.2%</td><td class="nw">97%</td></tr><tr><th scope="row">目標波動 30%</th><td class="nw">11.20%</td><td class="nw">−46.5%</td><td class="nw">98%</td></tr></tbody></table></div>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">SPY 對買進持有</th><th scope="col">年化差（個百分點）</th><th scope="col">最大跌幅差（個百分點）</th><th scope="col">每年單邊換手（倍）</th></tr></thead><tbody><tr><th scope="row">目標波動 10%</th><td class="nw">−2.79</td><td class="nw">+30.9</td><td class="nw">4.35</td></tr><tr><th scope="row">目標波動 15%</th><td class="nw">−0.84</td><td class="nw">+21.2</td><td class="nw">2.50</td></tr><tr><th scope="row">目標波動 20%</th><td class="nw">−0.01</td><td class="nw">+15.3</td><td class="nw">1.43</td></tr><tr><th scope="row">目標波動 25%</th><td class="nw">+0.29</td><td class="nw">+12.0</td><td class="nw">0.82</td></tr><tr><th scope="row">目標波動 30%</th><td class="nw">+0.32</td><td class="nw">+8.6</td><td class="nw">0.47</td></tr></tbody></table></div>
+<p class="t-body">SPY 事先指定的 15% 年化少 0.84 個百分點，最大跌幅少 21.2 個百分點。目標 20% 的年化 10.87% 對 10.88%，幾乎打平，最大跌幅 −39.9%，少 15.3。目標 25% 與 30% 的年化 11.18%、11.20%，比買進持有高約 0.3 個百分點。這份回測沒有查高出來的部分來自哪裡。</p>
+</section>
+<section class="sec" id="years"><h2>逐年：少賺在哪幾年</h2>
+<p class="t-body lead">QQQ 目標 20% 少賺的年份，多半緊接在跌超過 20% 的那次之後：這 5 年平均每年少賺 5.6 個百分點，其餘 12 年平均少賺 0.5。這個分組是看過逐年結果才訂的，事先訂的 2008、2022 分組看不出來。</p>
+<p class="t-body">全部 22 個日曆年（2026 年只到 7 月 16 日）連乘，減碼版的終值是買進持有的 0.91 倍。下面用兩種方式把年份分組。</p>
+<h3 class="t-lab">分組一：只看 2008、2022 兩年</h3>
+<p class="t-body">這個分組在算之前就訂了。大跌年是買進持有日曆年報酬在 −20% 以下的年份，只有 2008 與 2022。大跌後一年是 2009 與 2023。其他是剩下的 18 年。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">分組</th><th scope="col">年數</th><th scope="col">減碼（累積）</th><th scope="col">買進持有（累積）</th></tr></thead><tbody><tr><th scope="row">大跌年</th><td class="nw">2</td><td class="nw">−45.2%</td><td class="nw">−60.7%</td></tr><tr><th scope="row">大跌後一年</th><td class="nw">2</td><td class="nw">+114%</td><td class="nw">+140%</td></tr><tr><th scope="row">其他</th><td class="nw">18</td><td class="nw">+1,525%</td><td class="nw">+2,131%</td></tr></tbody></table></div>
+<p class="t-body">兩個大跌年，減碼版累積 −45.2%，買進持有 −60.7%，終值是買進持有的 1.40 倍。兩個大跌後一年是 0.89 倍。其他 18 年是 0.73 倍。平均每年的差，大跌年多 11.2 個百分點，大跌後一年少 8.3，其他 18 年少 2.3。少賺的總量在其他 18 年比較大，只看 2008、2022 之後的兩年解釋不了。</p>
+<h3 class="t-lab">分組二：5 次跌超過 20% 的谷底年與下一年</h3>
+<p class="t-body">這個分組是看過分組一的結果才訂的。「逐次清單」一節列出 5 次跌超過 20% 的事件，谷底分別在 2008、2018、2020、2022、2025 年，下一年是 2009、2019、2021、2023、2026。2026 年只到 7 月 16 日。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">分組</th><th scope="col">年數</th><th scope="col">減碼（累積）</th><th scope="col">買進持有（累積）</th></tr></thead><tbody><tr><th scope="row">事件的谷底年</th><td class="nw">5</td><td class="nw">−17.3%</td><td class="nw">−29.7%</td></tr><tr><th scope="row">事件的下一年</th><td class="nw">5</td><td class="nw">+300%</td><td class="nw">+389%</td></tr><tr><th scope="row">其他</th><td class="nw">12</td><td class="nw">+477%</td><td class="nw">+511%</td></tr></tbody></table></div>
+<p class="t-body">谷底年的終值是買進持有的 1.18 倍，下一年是 0.82 倍，其他 12 年是 0.94 倍。平均每年的差，谷底年 −0.1 個百分點，下一年 −5.6，其他 12 年 −0.5。少賺集中在谷底的下一年。谷底年裡 2020 與 2025 少賺很多（−15.7、−7.8 個百分點），被 2008 與 2022 多賺的幅度蓋過。</p>
+<h3 class="t-lab">逐年對照</h3>
+<figure class="qa-fig">
+<div class="ttl">圖 3.1　QQQ 目標 20% 減買進持有，逐年報酬差</div>
+<div class="tool"><div class="chartbox" id="f2"><div class="legend"></div><div class="chart" role="img" aria-label="QQQ 目標波動 20% 的逐年報酬減買進持有的逐年報酬，單位百分點，2005 到 2026 年，滑鼠移上去可看數值"></div></div></div>
+</figure>
+<p class="t-note">單位是百分點。負的是減碼版少賺。2026 年只到 7 月 16 日。</p>
+<p class="t-body">少賺最多的 5 年如下。這個排序是看過逐年結果才列的。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">年份</th><th scope="col">減碼</th><th scope="col">買進持有</th><th scope="col">差（個百分點）</th></tr></thead><tbody><tr><th scope="row">2020<span class="tag">谷底年</span></th><td class="nw">+32.73%</td><td class="nw">+48.41%</td><td class="nw">−15.7</td></tr><tr><th scope="row">2009<span class="tag">谷底下一年</span></th><td class="nw">+39.65%</td><td class="nw">+54.68%</td><td class="nw">−15.0</td></tr><tr><th scope="row">2025<span class="tag">谷底年</span></th><td class="nw">+12.97%</td><td class="nw">+20.77%</td><td class="nw">−7.8</td></tr><tr><th scope="row">2019<span class="tag">谷底下一年</span></th><td class="nw">+32.12%</td><td class="nw">+38.96%</td><td class="nw">−6.8</td></tr><tr><th scope="row">2011</th><td class="nw">−0.60%</td><td class="nw">+3.48%</td><td class="nw">−4.1</td></tr></tbody></table></div>
+<p class="t-body">前兩名是 2020 與 2009，都是跌超過 20% 之後的反彈年。第 3、4 名 2025 與 2019 也是同一類。第 5 名 2011 年的最大回落是 −16.1%，沒到 20%。</p>
+<details class="more"><summary>看 22 個年份的逐年報酬</summary><div class="in"><div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">年份</th><th scope="col">減碼</th><th scope="col">買進持有</th><th scope="col">差（個百分點）</th></tr></thead><tbody><tr><th scope="row">2005</th><td class="nw">+4.49%</td><td class="nw">+2.65%</td><td class="nw">+1.8</td></tr><tr><th scope="row">2006</th><td class="nw">+7.74%</td><td class="nw">+7.14%</td><td class="nw">+0.6</td></tr><tr><th scope="row">2007</th><td class="nw">+17.53%</td><td class="nw">+19.03%</td><td class="nw">−1.5</td></tr><tr><th scope="row">2008<span class="tag">大跌年</span></th><td class="nw">−27.45%</td><td class="nw">−41.73%</td><td class="nw">+14.3</td></tr><tr><th scope="row">2009<span class="tag">大跌後一年</span></th><td class="nw">+39.65%</td><td class="nw">+54.68%</td><td class="nw">−15.0</td></tr><tr><th scope="row">2010</th><td class="nw">+20.90%</td><td class="nw">+20.14%</td><td class="nw">+0.8</td></tr><tr><th scope="row">2011</th><td class="nw">−0.60%</td><td class="nw">+3.48%</td><td class="nw">−4.1</td></tr><tr><th scope="row">2012</th><td class="nw">+17.79%</td><td class="nw">+18.11%</td><td class="nw">−0.3</td></tr><tr><th scope="row">2013</th><td class="nw">+36.63%</td><td class="nw">+36.63%</td><td class="nw">0.0</td></tr><tr><th scope="row">2014</th><td class="nw">+18.31%</td><td class="nw">+19.18%</td><td class="nw">−0.9</td></tr><tr><th scope="row">2015</th><td class="nw">+8.59%</td><td class="nw">+9.44%</td><td class="nw">−0.8</td></tr><tr><th scope="row">2016</th><td class="nw">+6.66%</td><td class="nw">+7.10%</td><td class="nw">−0.4</td></tr><tr><th scope="row">2017</th><td class="nw">+32.67%</td><td class="nw">+32.66%</td><td class="nw">0.0</td></tr><tr><th scope="row">2018</th><td class="nw">+0.59%</td><td class="nw">−0.13%</td><td class="nw">+0.7</td></tr><tr><th scope="row">2019</th><td class="nw">+32.12%</td><td class="nw">+38.96%</td><td class="nw">−6.8</td></tr><tr><th scope="row">2020</th><td class="nw">+32.73%</td><td class="nw">+48.41%</td><td class="nw">−15.7</td></tr><tr><th scope="row">2021</th><td class="nw">+23.68%</td><td class="nw">+27.42%</td><td class="nw">−3.7</td></tr><tr><th scope="row">2022<span class="tag">大跌年</span></th><td class="nw">−24.44%</td><td class="nw">−32.58%</td><td class="nw">+8.1</td></tr><tr><th scope="row">2023<span class="tag">大跌後一年</span></th><td class="nw">+53.36%</td><td class="nw">+54.86%</td><td class="nw">−1.5</td></tr><tr><th scope="row">2024</th><td class="nw">+24.01%</td><td class="nw">+25.58%</td><td class="nw">−1.6</td></tr><tr><th scope="row">2025</th><td class="nw">+12.97%</td><td class="nw">+20.77%</td><td class="nw">−7.8</td></tr><tr><th scope="row">2026</th><td class="nw">+14.31%</td><td class="nw">+15.19%</td><td class="nw">−0.9</td></tr></tbody></table></div><p>2026 年只到 7 月 16 日。標「大跌年」「大跌後一年」的是分組一。</p></div></details>
+</section>
+<section class="sec" id="list"><h2>逐次清單：5 次跌超過 20%</h2>
+<p class="t-body lead">QQQ 跌超過 20% 的 5 次，目標 20% 每次都比買進持有淺，淺 3.4 到 17.4 個百分點；谷底後一年少漲，只有 2008 與 2022 兩次把兩段合起來仍領先。</p>
+<p class="t-body">這是歷史次數統計，不是下一次會怎樣。大跌的定義是買進持有的還原價從前高回落超過 20%，這個門檻在算之前訂。跌幅從前高那天算到谷底那天，減碼版用同樣兩個日期。5 次都已經回到前高。</p>
+<h3 class="t-lab">每一次跌多少</h3>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">高點到谷底</th><th scope="col">買進持有</th><th scope="col">減碼 20%</th><th scope="col">淺多少（個百分點）</th></tr></thead><tbody><tr><th scope="row">2007/10–2008/11<span class="tag">267 個交易日</span></th><td class="nw">−53.4%</td><td class="nw">−36.0%</td><td class="nw">+17.4</td></tr><tr><th scope="row">2018/08–2018/12<span class="tag">80 個交易日</span></th><td class="nw">−22.8%</td><td class="nw">−17.4%</td><td class="nw">+5.4</td></tr><tr><th scope="row">2020/02–2020/03<span class="tag">18 個交易日</span></th><td class="nw">−28.6%</td><td class="nw">−17.8%</td><td class="nw">+10.7</td></tr><tr><th scope="row">2021/12–2022/11<span class="tag">216 個交易日</span></th><td class="nw">−35.1%</td><td class="nw">−25.7%</td><td class="nw">+9.4</td></tr><tr><th scope="row">2025/02–2025/04<span class="tag">34 個交易日</span></th><td class="nw">−22.8%</td><td class="nw">−19.4%</td><td class="nw">+3.4</td></tr></tbody></table></div>
+<figure class="qa-fig">
+<div class="ttl">圖 4.1　QQQ 5 次大跌，買進持有與目標 20% 各跌多少</div>
+<div class="tool"><div class="chartbox" id="f3"><div class="legend"></div><div class="chart" role="img" aria-label="QQQ 五次跌超過 20% 的事件，買進持有與目標波動 20% 的高點到谷底跌幅長條圖，滑鼠移上去可看數值"></div></div></div>
+</figure>
+<p class="t-note">越往下跌得越深。</p>
+<p class="t-body">淺的幅度從 2025 年的 3.4 個百分點到 2008 年的 17.4。這 5 次每次都淺，沒有哪一次幾乎沒差；目標放寬到 25% 時（見下方收合表），2025 年那次只淺 1.4，2018 年淺 2.7，2020 年淺 8.7，2008 年淺 14.2，2022 年淺 4.2。</p>
+<p class="t-body">跌 10% 到 20% 的 14 次（收合表）裡，淺不到 1 個百分點的有 9 次，其中 1 次比買進持有略深。</p>
+<h3 class="t-lab">谷底後一年</h3>
+<p class="t-body">同樣 5 次，從谷底再往後 252 個交易日，兩邊各漲多少。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">谷底後一年</th><th scope="col">買進持有</th><th scope="col">減碼 20%</th><th scope="col">少漲（個百分點）</th></tr></thead><tbody><tr><th scope="row">2008/11</th><td class="nw">+70.9%</td><td class="nw">+39.1%</td><td class="nw">−31.8</td></tr><tr><th scope="row">2018/12</th><td class="nw">+48.9%</td><td class="nw">+37.8%</td><td class="nw">−11.1</td></tr><tr><th scope="row">2020/03</th><td class="nw">+90.4%</td><td class="nw">+46.0%</td><td class="nw">−44.4</td></tr><tr><th scope="row">2022/11</th><td class="nw">+42.7%</td><td class="nw">+38.9%</td><td class="nw">−3.8</td></tr><tr><th scope="row">2025/04</th><td class="nw">+47.6%</td><td class="nw">+32.1%</td><td class="nw">−15.5</td></tr></tbody></table></div>
+<p class="t-body">5 次減碼版都少漲，少漲 3.8 到 44.4 個百分點。最大的是 2020 年那次，18 個交易日跌了 28.6%，隨後一年漲 90.4%，減碼版只漲 46.0%。</p>
+<h3 class="t-lab">從高點到谷底後一年合計</h3>
+<p class="t-body">把跌的一段與谷底後一年連乘，看減碼版有沒有領先。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">高點到谷底後一年</th><th scope="col">買進持有</th><th scope="col">減碼 20%</th><th scope="col">領先的是</th></tr></thead><tbody><tr><th scope="row">2007/10–2008/11</th><td class="nw">−20.4%</td><td class="nw">−11.0%</td><td class="nw">減碼</td></tr><tr><th scope="row">2018/08–2018/12</th><td class="nw">+15.0%</td><td class="nw">+13.8%</td><td class="nw">買進持有</td></tr><tr><th scope="row">2020/02–2020/03</th><td class="nw">+36.0%</td><td class="nw">+20.0%</td><td class="nw">買進持有</td></tr><tr><th scope="row">2021/12–2022/11</th><td class="nw">−7.4%</td><td class="nw">+3.2%</td><td class="nw">減碼</td></tr><tr><th scope="row">2025/02–2025/04</th><td class="nw">+14.0%</td><td class="nw">+6.5%</td><td class="nw">買進持有</td></tr></tbody></table></div>
+<p class="t-body">兩段合計，減碼版領先的只有 2008 與 2022 這兩次。其餘 3 次，谷底後一年少漲的幅度蓋過跌的時候少跌的幅度。</p>
+<h3 class="t-lab">高點當天持股多少</h3>
+<p class="t-body">5 次裡有 4 次，高點當天近期波動低於目標 20%，持股是滿倉：2007 年 19.9%、2018 年 9.7%、2020 年 16.4%、2025 年 16.6%。2021 年 12 月那次高點的近期波動是 26.3%，持股 75%。高點到谷底之間，平均持股是 65% 到 83%。</p>
+<p class="t-body">2020 年那次只有 18 個交易日，減碼版仍然少跌 10.7 個百分點。最大跌幅沒有保證：減碼版自己從前高到回復前高之間的最深回落，2008 年那次是 −38.3%，比用買進持有的高點與谷底日期算的 −36.0% 深，2022 年那次是 −26.5% 對 −25.7%。</p>
+<details class="more"><summary>看目標 15% 與 25% 在這 5 次的跌幅</summary><div class="in"><p>三個目標值並排，同樣 5 次。</p><div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">高點到谷底</th><th scope="col">買進持有</th><th scope="col">目標 15%</th><th scope="col">目標 25%</th></tr></thead><tbody><tr><th scope="row">2007/10–2008/11</th><td class="nw">−53.4%</td><td class="nw">−27.9%</td><td class="nw">−39.2%</td></tr><tr><th scope="row">2018/08–2018/12</th><td class="nw">−22.8%</td><td class="nw">−15.3%</td><td class="nw">−20.1%</td></tr><tr><th scope="row">2020/02–2020/03</th><td class="nw">−28.6%</td><td class="nw">−14.6%</td><td class="nw">−19.9%</td></tr><tr><th scope="row">2021/12–2022/11</th><td class="nw">−35.1%</td><td class="nw">−19.4%</td><td class="nw">−30.9%</td></tr><tr><th scope="row">2025/02–2025/04</th><td class="nw">−22.8%</td><td class="nw">−15.8%</td><td class="nw">−21.4%</td></tr></tbody></table></div></div></details>
+<details class="more"><summary>看跌 10% 到 20% 的 14 次（目標 20%）</summary><div class="in"><p>這張表是為了看有沒有幾乎沒差的事件，看過 5 次的結果後才加。淺 1 個百分點以上有 5 次，淺 0.1 到 1 個百分點有 4 次，差不到 0.1 個百分點有 4 次，比買進持有深 0.3 個百分點有 1 次。</p><div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">高點到谷底</th><th scope="col">買進持有</th><th scope="col">減碼 20%</th><th scope="col">淺多少（個百分點）</th></tr></thead><tbody><tr><th scope="row">2005/01–2005/04<span class="tag">74 個交易日</span></th><td class="nw">−12.2%</td><td class="nw">−10.6%</td><td class="nw">+1.6</td></tr><tr><th scope="row">2006/01–2006/07<span class="tag">132 個交易日</span></th><td class="nw">−17.3%</td><td class="nw">−16.7%</td><td class="nw">+0.6</td></tr><tr><th scope="row">2011/07–2011/08<span class="tag">18 個交易日</span></th><td class="nw">−16.1%</td><td class="nw">−13.4%</td><td class="nw">+2.7</td></tr><tr><th scope="row">2012/04–2012/06<span class="tag">42 個交易日</span></th><td class="nw">−11.5%</td><td class="nw">−11.5%</td><td class="nw">0.0</td></tr><tr><th scope="row">2012/09–2012/11<span class="tag">39 個交易日</span></th><td class="nw">−11.6%</td><td class="nw">−11.6%</td><td class="nw">0.0</td></tr><tr><th scope="row">2015/07–2015/08<span class="tag">26 個交易日</span></th><td class="nw">−13.9%</td><td class="nw">−13.9%</td><td class="nw">0.0</td></tr><tr><th scope="row">2015/12–2016/02<span class="tag">47 個交易日</span></th><td class="nw">−16.1%</td><td class="nw">−14.0%</td><td class="nw">+2.1</td></tr><tr><th scope="row">2018/01–2018/02<span class="tag">9 個交易日</span></th><td class="nw">−10.2%</td><td class="nw">−9.9%</td><td class="nw">+0.3</td></tr><tr><th scope="row">2018/03–2018/04<span class="tag">14 個交易日</span></th><td class="nw">−10.5%</td><td class="nw">−10.0%</td><td class="nw">+0.5</td></tr><tr><th scope="row">2019/05–2019/06<span class="tag">20 個交易日</span></th><td class="nw">−11.0%</td><td class="nw">−11.0%</td><td class="nw">0.0</td></tr><tr><th scope="row">2020/09–2020/09<span class="tag">14 個交易日</span></th><td class="nw">−12.7%</td><td class="nw">−10.5%</td><td class="nw">+2.3</td></tr><tr><th scope="row">2021/02–2021/03<span class="tag">15 個交易日</span></th><td class="nw">−10.9%</td><td class="nw">−10.1%</td><td class="nw">+0.7</td></tr><tr><th scope="row">2024/07–2024/08<span class="tag">20 個交易日</span></th><td class="nw">−13.6%</td><td class="nw">−12.5%</td><td class="nw">+1.1</td></tr><tr><th scope="row">2025/10–2026/03<span class="tag">103 個交易日</span></th><td class="nw">−12.0%</td><td class="nw">−12.3%</td><td class="nw">−0.3</td></tr></tbody></table></div><p>第一列的高點是回測第一天。</p></div></details>
+<details class="more"><summary>看 SPY 跌超過 20% 的 3 次（目標 15%）</summary><div class="in"><div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">高點到谷底</th><th scope="col">買進持有</th><th scope="col">減碼 15%</th><th scope="col">淺多少（個百分點）</th></tr></thead><tbody><tr><th scope="row">2007/10–2009/03<span class="tag">355 個交易日</span></th><td class="nw">−55.2%</td><td class="nw">−34.0%</td><td class="nw">+21.2</td></tr><tr><th scope="row">2020/02–2020/03<span class="tag">23 個交易日</span></th><td class="nw">−33.7%</td><td class="nw">−16.9%</td><td class="nw">+16.9</td></tr><tr><th scope="row">2022/01–2022/10<span class="tag">195 個交易日</span></th><td class="nw">−24.5%</td><td class="nw">−18.7%</td><td class="nw">+5.8</td></tr></tbody></table></div><p>谷底後一年，買進持有 +71.9%、+77.5%、+22.9%，減碼 +32.5%、+32.8%、+16.5%。</p></div></details>
+</section>
+<section class="sec" id="months"><h2>高波動月份的持股與報酬</h2>
+<p class="t-body lead">高波動月份的平均持股是 73.8%，其他月份 99.6%；高波動月份下跌的月份月均少跌 1.24 個百分點，上漲的月份月均少漲 1.75 個百分點，只算這 84 個月連乘，減碼 −18.4%，買進持有 −13.5%。</p>
+<p class="t-body">高波動月份的定義是月內近期波動的平均高於目標 20%，QQQ 的 259 個月裡有 84 個。月報酬是月底到月底。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">月份</th><th scope="col">月數</th><th scope="col">平均持股</th></tr></thead><tbody><tr><th scope="row">高波動月</th><td class="nw">84</td><td class="nw">73.8%</td></tr><tr><th scope="row">其他月</th><td class="nw">175</td><td class="nw">99.6%</td></tr></tbody></table></div>
+<p class="t-body">把月份再按買進持有當月漲跌分開，看減碼版比買進持有少賠、少賺多少：</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">月份與當月買進持有</th><th scope="col">月數</th><th scope="col">買進持有月均</th><th scope="col">減碼月均</th></tr></thead><tbody><tr><th scope="row">高波動月，下跌</th><td class="nw">44</td><td class="nw">−5.48%</td><td class="nw">−4.25%</td></tr><tr><th scope="row">高波動月，上漲</th><td class="nw">40</td><td class="nw">+6.21%</td><td class="nw">+4.46%</td></tr><tr><th scope="row">其他月，下跌</th><td class="nw">57</td><td class="nw">−2.61%</td><td class="nw">−2.59%</td></tr><tr><th scope="row">其他月，上漲</th><td class="nw">118</td><td class="nw">+4.11%</td><td class="nw">+4.06%</td></tr></tbody></table></div>
+<p class="t-body">高波動月份裡，買進持有下跌的 44 個月，減碼版少跌 1.24 個百分點；上漲的 40 個月，少漲 1.75 個百分點。只把這 84 個月的月報酬連乘（月份之間不連續），減碼版 −18.4%，買進持有 −13.5%。其他月份兩邊的月均差不到 0.1 個百分點。</p>
+</section>
+<section class="sec" id="sub"><h2>5 個子期間</h2>
+<p class="t-body lead">QQQ 目標 20% 在 5 個子期間的最大跌幅都比買進持有淺；年化 2005 到 2009 年多 2.7 個百分點，其餘 4 段少 1.0 到 5.9。</p>
+<p class="t-body">子期間是 5 年一段，每段從該段第一天重新算。最後一段 2025 年 1 月到 2026 年 7 月 16 日，不滿 5 年。</p>
+<h3 class="t-lab">年化</h3>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">子期間</th><th scope="col">買進持有</th><th scope="col">減碼 20%</th><th scope="col">差（個百分點）</th></tr></thead><tbody><tr><th scope="row">2005–2009</th><td class="nw">3.4%</td><td class="nw">6.0%</td><td class="nw">+2.7</td></tr><tr><th scope="row">2010–2014</th><td class="nw">18.7%</td><td class="nw">17.7%</td><td class="nw">−1.0</td></tr><tr><th scope="row">2015–2019</th><td class="nw">16.7%</td><td class="nw">15.4%</td><td class="nw">−1.3</td></tr><tr><th scope="row">2020–2024</th><td class="nw">19.5%</td><td class="nw">18.3%</td><td class="nw">−1.2</td></tr><tr><th scope="row">2025–2026</th><td class="nw">24.2%</td><td class="nw">18.3%</td><td class="nw">−5.9</td></tr></tbody></table></div>
+<h3 class="t-lab">最大跌幅</h3>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">子期間</th><th scope="col">買進持有</th><th scope="col">減碼 20%</th><th scope="col">差（個百分點）</th></tr></thead><tbody><tr><th scope="row">2005–2009</th><td class="nw">−53.4%</td><td class="nw">−38.3%</td><td class="nw">+15.2</td></tr><tr><th scope="row">2010–2014</th><td class="nw">−16.1%</td><td class="nw">−14.9%</td><td class="nw">+1.2</td></tr><tr><th scope="row">2015–2019</th><td class="nw">−22.8%</td><td class="nw">−17.4%</td><td class="nw">+5.4</td></tr><tr><th scope="row">2020–2024</th><td class="nw">−35.1%</td><td class="nw">−27.1%</td><td class="nw">+8.0</td></tr><tr><th scope="row">2025–2026</th><td class="nw">−22.8%</td><td class="nw">−19.4%</td><td class="nw">+3.4</td></tr></tbody></table></div>
+<p class="t-body">最大跌幅 5 段都比較淺，淺 1.2 到 15.2 個百分點。2005 到 2009 年那一段包含 2008 年，該年減碼版少跌 14.3 個百分點。2025 年起的一段少賺最多，這一段含 2025 年 2 月到 4 月的 −22.8%，2025 年減碼版少賺 7.8 個百分點。</p>
+<p class="t-body">目標 15% 與 25% 在 5 段的年化差：2005–2009 +2.6／+2.8；2010–2014 −3.1／−0.6；2015–2019 −3.3／−0.2；2020–2024 −3.3／−1.1；2025–2026 −8.4／−4.1（個百分點，前者 15%，後者 25%）。</p>
+</section>
+<section class="sec" id="limits"><h2>這個結果的弱點</h2><ul class="dlist"><li>「年化打平」要把目標放到 25% 以上，這個範圍是看過整條曲線才找到的，事先指定的是 20%。</li><li>只有一段 21 年的歷史，跌超過三成的只有 2008 年與 2022 年兩段。2025 年、2020 年、2018 年三次只跌兩成多。</li><li>分組二的年份是看過分組一的結果後才訂的，少賺集中在谷底下一年這個結論，沒有在事前訂好的分組裡出現。</li><li>5 次大跌的前高當天，有 4 次持股已經是滿倉；跌 10% 到 20% 的 14 次裡，有 1 次減碼版比買進持有略深 0.3 個百分點。所以最大跌幅沒有保證。</li><li>SPY 目標 20% 的年化 10.87% 對買進持有 10.88%，幾乎打平。</li><li>成本假設單邊 0.07%，目標 20% 每年單邊換手約 2.2 倍。成本加倍到 0.14%，年化少 0.18 個百分點。沒有計稅。</li><li>減下來的現金計短期利率，假設隨時拿得到。</li><li>資料止於 2026 年 7 月 16 日，之後的走勢沒有納入。</li></ul></section>
+<section class="sec" id="src"><h2>資料來源</h2><ul class="dlist"><li>QQQ 與 SPY 含股息還原日價格與未調整收盤價，2005 年 1 月 3 日到 2026 年 7 月 16 日（更早的價格只用來算近期波動）；現金報酬用美國 13 週國庫券利率。</li><li>QQQ 跌超過 20% 的事件，到資料截止日都已回到前高。最後一筆完整事件的前高是 2025 年 2 月 19 日，谷底 2025 年 4 月 8 日，回到前高是 2025 年 6 月 24 日。</li></ul></section>
+<section class="sec"><h2>接著看</h2><ul class="dlist"><li><a href="volatility-tax.html">槓桿 ETF 的波動稅，每年吃掉多少？</a></li><li><a href="stocks-plus-bonds.html">股票加公債，跌幅少多少、報酬少多少？</a></li></ul></section>
 
 <p class="fine qa-back">這是歷史資料的計算，是一般資訊，不是對個人的投資建議。過去的結果不代表未來。</p>
 </div>
 <script>
-  (function () {
-    var cfg = {"cats": ["買進持有", "目標 15%", "目標 20%", "目標 25%"], "series": [{"name": "年化報酬", "values": [15.19, 13.08, 14.68, 15.21]}, {"name": "最大跌幅", "values": [-53.4, -29.7, -38.3, -42.0]}], "extra": null, "ref": null};
-    cfg.fmt = QCHART.fmt.pct1; cfg.axisFmt = QCHART.fmt.pct0;
-    QCHART.mount(document.getElementById('cbox0'), cfg);
-  })();
+(function () {
+  var B1 = {"cats": ["買進持有", "目標 10%", "目標 15%", "目標 20%", "目標 25%", "目標 30%", "目標 35%"], "series": [{"name": "年化報酬", "values": [15.19, 10.04, 13.08, 14.68, 15.21, 15.25, 15.2]}, {"name": "最大跌幅", "values": [-53.4, -20.1, -29.7, -38.3, -42.0, -44.9, -47.4]}]}, B2 = {"cats": ["2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025", "2026"], "series": [{"name": "減碼減買進持有", "values": [1.84, 0.6, -1.5, 14.27, -15.04, 0.76, -4.07, -0.33, 0.0, -0.87, -0.84, -0.44, 0.0, 0.72, -6.84, -15.68, -3.74, 8.13, -1.49, -1.57, -7.81, -0.87]}]}, B3 = {"cats": ["2007/10–08/11", "2018/08–18/12", "2020/02–20/03", "2021/12–22/11", "2025/02–25/04"], "series": [{"name": "買進持有", "values": [-53.4, -22.8, -28.6, -35.1, -22.8]}, {"name": "目標 20%", "values": [-36.0, -17.4, -17.8, -25.7, -19.4]}]};
+  function pct(v, d) { return (v < 0 ? '−' : '') + Math.abs(v).toFixed(d) + '%'; }
+  function pt(v, d) { return (v < 0 ? '−' : '+') + Math.abs(v).toFixed(d); }
+  QCHART.mount(document.getElementById('f1'), { cats: B1.cats, series: B1.series,
+    fmt: function (v) { return pct(v, 2); }, axisFmt: function (v) { return pct(v, 0); }, barFmt: function (v) { return pct(v, 1); } });
+  QCHART.mount(document.getElementById('f2'), { cats: B2.cats, series: B2.series,
+    fmt: function (v) { return pt(v, 2) + ' 個百分點'; }, axisFmt: function (v) { return pt(v, 0); }, barFmt: function (v) { return pt(v, 0); } });
+  QCHART.mount(document.getElementById('f3'), { cats: B3.cats, series: B3.series, max: 0,
+    fmt: function (v) { return pct(v, 1); }, axisFmt: function (v) { return pct(v, 0); }, barFmt: function (v) { return pct(v, 1); } });
+})();
 </script>
 </body>
 </html>
