@@ -129,7 +129,19 @@
     for (y = y0; y <= y1; y++) { var li = lastI[String(y)]; yearly[y] = nav[li] / prevNav - 1; prevNav = nav[li]; }
     var drawdown = new Float64Array(n), pk = nav[0];
     for (i = 0; i < n; i++) { if (nav[i] > pk) pk = nav[i]; drawdown[i] = nav[i] / pk - 1; }
-    return { finalV: finalV, contributed: contributed, ann: ann, mdd: mdd, mddP: mddP, mddT: mddT, longest: longest, worst: worst, yearly: yearly, drawdown: drawdown, years: years };
+    // 年化波動：每日報酬的標準差，換算成一年（用這段期間實際的每年交易日數）
+    var sum = 0, sq = 0, m = n - 1;
+    for (i = 1; i < n; i++) { var r1 = nav[i] / nav[i - 1] - 1; sum += r1; sq += r1 * r1; }
+    var vol = m > 20 ? Math.sqrt(Math.max(0, (sq - sum * sum / m) / (m - 1))) * Math.sqrt(m / years) : null;
+    // 最差單月：月底對上個月底，只算完整的月份
+    var worstM = null, prevEnd = -1;
+    for (i = 0; i < n; i++) {
+      var k2 = s + i, isEnd = k2 === NN - 1 ? true : dates[k2 + 1].slice(0, 7) !== dates[k2].slice(0, 7);
+      if (!isEnd || (i === n - 1 && k2 !== NN - 1 && dates[k2 + 1].slice(0, 7) === dates[k2].slice(0, 7))) continue;
+      if (prevEnd >= 0) { var rm = nav[i] / nav[prevEnd] - 1; if (worstM === null || rm < worstM.r) worstM = { r: rm, end: i }; }
+      prevEnd = i;
+    }
+    return { vol: vol, worstM: worstM, finalV: finalV, contributed: contributed, ann: ann, mdd: mdd, mddP: mddP, mddT: mddT, longest: longest, worst: worst, yearly: yearly, drawdown: drawdown, years: years };
   }
   function partialYear(s, e) {
     return {
@@ -180,7 +192,7 @@
   }
 
   /* ---------- 表格與圖例（回傳 HTML） ---------- */
-  var ROWS = ['principal', 'final', 'ann', 'mdd', 'mddPeriod', 'longest', 'worst', 'ratio'];
+  var ROWS = ['principal', 'final', 'ann', 'mdd', 'mddPeriod', 'longest', 'worst', 'worstM', 'vol', 'ratio'];
   function statsHtml(res, rowKeys) {
     var out = res.out, s = res.s, mode = res.mode;
     var annLab = mode === 'lump' ? '含息年化報酬' : '含息年化報酬<span class="sub">資金加權：每一筆投入各自放了多久都算進去</span>';
@@ -192,7 +204,9 @@
       mddPeriod: ['最大跌幅的期間<span class="sub">前高日 → 谷底日</span>', function (o) { return o.st.mdd === 0 ? '沒有回落' : dates[s + o.st.mddP] + ' → ' + dates[s + o.st.mddT]; }],
       longest: ['最長等多久才回到前高<span class="sub">從前高日算到再創高</span>', function (o) { var l = o.st.longest; if (l.days === 0) return '沒有低於前高'; return span(l.days) + (l.rec ? '' : '（到終點還沒回到）'); }, true],
       worst: ['最差一年<span class="sub">任何連續 12 個月裡最低的</span>', function (o) { var w = o.st.worst; return w ? pct(w.r, 1) + '（至 ' + dates[s + w.end] + '）' : '期間不到 1 年'; }],
-      ratio: ['年化 ÷ 最大跌幅<span class="sub">每承受 1 個百分點的跌幅，換到多少年化報酬</span>', function (o) {
+      worstM: ['最差單月<span class="sub">完整月份裡，月底對上個月底最低的</span>', function (o) { var w = o.st.worstM; return w ? pct(w.r, 1) + '（' + dates[s + w.end].slice(0, 7) + '）' : '期間不到 2 個月'; }],
+      vol: ['年化波動<span class="sub">每日漲跌的標準差換算成一年，數字越大起伏越大</span>', function (o) { return o.st.vol == null ? '期間太短' : pct(o.st.vol, 1); }],
+      ratio: ['年化 ÷ 最大跌幅（Calmar）<span class="sub">每承受 1 個百分點的跌幅，換到多少年化報酬</span>', function (o) {
         if (o.warn) return '不顯示';
         if (o.st.mdd === 0) return '沒有回落';
         return (o.st.ann / Math.abs(o.st.mdd)).toFixed(2);
