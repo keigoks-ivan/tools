@@ -145,6 +145,35 @@
 </div>
 <p class="fine">這是歷史資料的計算，是一般資訊，不是對個人的投資建議。</p>
 </section>
+
+<section class="sec" id="size" style="margin-top:40px" aria-label="買多少：股票比例與跌幅">
+<h2 style="font-size:22px">買多少：股票比例與跌幅</h2>
+<p class="t-note">同一檔資產，拿多少比例買股票、其餘放台幣定存，過去的含息年化報酬和最大跌幅差多少。這一區和上面的三組組合無關，但起點、終點與投入方式用上面的設定。</p>
+<div id="sizeMsg" class="gerr" aria-live="polite"></div>
+<div id="sizeBody" style="display:none">
+<div class="szctl">
+<div><label for="szAsset">資產（其餘放台幣定存）</label><select id="szAsset"></select></div>
+<div class="szslide"><label for="szRange">股票比例</label><output id="szVal" class="szval" for="szRange"></output>
+<input type="range" id="szRange" min="0" max="100" step="10" value="100" aria-valuetext="股票 100%，定存 0%">
+<div class="szends" aria-hidden="true"><span>0%　全放定存</span><span>100%　全買股票</span></div></div>
+</div>
+<p class="t-note" id="szPeriod"></p>
+<div id="szWarn"></div>
+<div class="szcards" id="szCards"></div>
+<h3 class="ctitle">11 種比例的對照</h3>
+<p class="csub">點表格的任何一列，上面的拉桿會跟著移到那一格。</p>
+<div class="dwrap"><table class="dtbl sztbl" id="szTbl"><caption class="sr">股票比例從 0% 到 100% 的歷史結果</caption></table></div>
+<h3 class="ctitle">比例和結果的關係</h3>
+<p class="csub">深色的那一根是拉桿目前的比例。滑鼠移上去或手指按住，可看各比例的數字。</p>
+<div class="chartbox">
+<div class="szch">年化報酬</div>
+<div class="chart" id="szChartAnn" role="img" aria-label="股票比例從 0% 到 100% 的含息年化報酬長條圖"></div>
+<div class="szch">最大跌幅</div>
+<div class="chart" id="szChartDD" role="img" aria-label="股票比例從 0% 到 100% 的最大跌幅長條圖"></div>
+<p class="szrule">規則：每年第一個交易日把比例調回設定值（每年再平衡，起始那一年不調）。定存用資料裡的台幣定存序列。沒有計入交易成本與稅。這是歷史結果，不是預測。</p>
+</div>
+</div>
+</section>
 </div>
 
 <script>
@@ -162,6 +191,8 @@
   var amounts = { lump: '1000000', monthly: '10000' };
   var last = null; // 最近一次計算結果，給重畫圖用
   var ui = null, copyTimer = null;
+  var szAsset = '0050', szPct = 100, szTouched = false; // 「買多少」這一區的選擇；沒動過就不寫進網址
+  var szCalc = null;
   var QUICK = {
     all: { s: null, e: null },
     y10: { yrs: 10 }, y5: { yrs: 5 }, y3: { yrs: 3 },
@@ -190,6 +221,8 @@
     if (P.log !== null) { logUser = P.log; $('logChk').checked = P.log; }
     if (userStart) $('start').value = userStart;
     if (userEnd) $('end').value = userEnd;
+    var sz = /^([^:]+):(\d{1,3})$/.exec(new URLSearchParams(location.search).get('sz') || '');
+    if (sz && T.asset(sz[1]) && sz[1] !== 'CASH_TWD' && +sz[2] <= 100 && +sz[2] % 10 === 0) { szAsset = sz[1]; szPct = +sz[2]; szTouched = true; }
   }
 
   function buildSources() {
@@ -246,7 +279,9 @@
       if (userEnd) extra.end = userEnd;
       extra.rebal = $('rebal').value;
       if (logUser !== null) extra.log = logUser ? '1' : '0';
-      history.replaceState(null, '', location.pathname + T.buildParams(groups, extra) + location.hash);
+      var qs = T.buildParams(groups, extra);
+      if (szTouched) qs += (qs ? '&' : '?') + 'sz=' + encodeURIComponent(szAsset) + ':' + szPct;
+      history.replaceState(null, '', location.pathname + qs + location.hash);
     } catch (e) { /* 不能改網址就算了 */ }
   }
   function flashCopied(ok) {
@@ -304,7 +339,8 @@
     var okG = vs.filter(function (o) { return !o.v.err; });
     var msg = $('msg'); msg.textContent = '';
     $('results').style.display = 'none';
-    if (!(amount >= 1)) { msg.textContent = '金額要大於 0。'; $('dateNote').style.display = 'none'; return; }
+    if (!(amount >= 1)) { msg.textContent = '金額要大於 0。'; $('dateNote').style.display = 'none'; sizeOff('上面的金額要大於 0，這一區才算得出來。'); return; }
+    sizeUpdate(mode, amount);
     if (!okG.length) { msg.textContent = '請先把每組的比例調成合計 100%，才會顯示結果。'; $('dateNote').style.display = 'none'; return; }
     if (okG.length < vs.length) msg.textContent = '有組合的比例不合格，下面只顯示比例合計 100% 的組合。';
     var res = T.compute({
@@ -321,6 +357,48 @@
     if (logUser === null) $('logChk').checked = res.mode === 'lump' && T.dayDiff(res.s, res.e) / 365.25 > 10;
     render();
     writeUrl();
+  }
+
+  /* ---------- 買多少：股票比例與跌幅 ---------- */
+  function sizeOff(text) { $('sizeBody').style.display = 'none'; $('sizeMsg').textContent = text; szCalc = null; }
+  function sizeUpdate(mode, amount) {
+    var c = T.sizeCalc(szAsset, { mode: mode, amount: amount, userStart: userStart, userEnd: userEnd });
+    if (c.err) { sizeOff(c.err); return; }
+    szCalc = c;
+    $('sizeMsg').textContent = '';
+    $('sizeBody').style.display = '';
+    var ds = T.dates();
+    $('szPeriod').textContent = '計算期間：' + ds[c.s] + ' 到 ' + ds[c.e] + '，共 ' + c.years.toFixed(1) + ' 年。起點取這檔資產與台幣定存都有資料的最早一天。' + (mode === 'monthly' ? '投入方式是每月固定投入，各比例的年化報酬用資金加權計算。' : '');
+    $('szWarn').innerHTML = c.warn ? '<p class="warn c1">' + T.esc(c.warn) + '</p>' : '';
+    sizePaint();
+  }
+  function sizePaint() {
+    if (!szCalc) return;
+    $('szRange').value = szPct;
+    $('szRange').setAttribute('aria-valuetext', '股票 ' + szPct + '%，定存 ' + (100 - szPct) + '%');
+    $('szVal').textContent = '股票 ' + szPct + '%，定存 ' + (100 - szPct) + '%';
+    $('szCards').innerHTML = T.sizeCardsHtml(szCalc, szPct);
+    var tb = $('szTbl'), cap = tb.querySelector('caption');
+    tb.innerHTML = T.sizeTableHtml(szCalc, szPct);
+    tb.insertBefore(cap, tb.firstChild);
+    T.sizeBars($('szChartAnn'), szCalc, szPct, 'ann', '含息年化報酬');
+    T.sizeBars($('szChartDD'), szCalc, szPct, 'mdd', '最大跌幅');
+  }
+  function sizeSet(v) { szPct = v; szTouched = true; sizePaint(); writeUrl(); }
+  function sizeInit() {
+    var h = '';
+    T.CATS.forEach(function (c) {
+      var list = T.assets().filter(function (a) { return a.cat === c && a.id !== 'CASH_TWD'; });
+      if (!list.length) return;
+      h += '<optgroup label="' + c + '">' + list.map(function (a) { return '<option value="' + a.id + '"' + (a.id === szAsset ? ' selected' : '') + '>' + T.esc(a.name) + '　' + a.start.slice(0, 7) + ' 起</option>'; }).join('') + '</optgroup>';
+    });
+    $('szAsset').innerHTML = h;
+    $('szRange').addEventListener('input', function (e) { sizeSet(+e.target.value); });
+    $('szAsset').addEventListener('change', function (e) { szAsset = e.target.value; szTouched = true; recompute(); });
+    $('szTbl').addEventListener('click', function (e) {
+      var tr = e.target.closest ? e.target.closest('tr[data-w]') : null;
+      if (tr) sizeSet(+tr.getAttribute('data-w'));
+    });
   }
 
   function pickRollN() {
@@ -364,6 +442,7 @@
     drawCharts();
   }
   function drawCharts() {
+    sizePaint();
     if (!last) return;
     T.navChart($('chartNav'), last, $('logChk').checked);
     T.ddChart($('chartDD'), last);
@@ -419,7 +498,7 @@
     buildSources();
     applyUrl();
     ui = T.groupsUI($('groups'), groups, { onChange: recompute, addBtn: $('addC'), removeFrom: 2 });
-    ui.render(); wire(); recompute();
+    ui.render(); wire(); sizeInit(); recompute();
   }).catch(function (err) {
     $('msg').textContent = '資料載入失敗：' + err.message;
   });

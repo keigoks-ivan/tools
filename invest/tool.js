@@ -791,6 +791,117 @@
     return p.length ? '?' + p.join('&') : '';
   }
 
+  /* ---------- 買多少：股票比例與跌幅 ----------
+     同一檔資產配 0%～100% 股票（每格 10%），其餘放台幣定存，每年第一個交易日調回，用上面同一套 simulate()／stats()。
+     期間用「該資產與台幣定存都有資料」的共同期間，11 個比例共用同一段。 */
+  var SIZE_STEPS = [0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100];
+  function sizeCalc(assetId, spec) {
+    var res = compute({ groups: [{ gi: 0, name: '', items: [{ id: assetId, w: 50 }, { id: 'CASH_TWD', w: 50 }] }], mode: spec.mode, amount: spec.amount, rebal: 'annual', userStart: spec.userStart, userEnd: spec.userEnd });
+    if (res.err) return { err: res.err };
+    var s = res.s, e = res.e;
+    var rows = SIZE_STEPS.map(function (w) {
+      var items = [];
+      if (w > 0) items.push({ id: assetId, w: w });
+      if (w < 100) items.push({ id: 'CASH_TWD', w: 100 - w });
+      var st = stats(simulate(items, s, e, spec.mode, spec.amount, 'annual'), s, e, spec.mode, spec.amount);
+      return { w: w, st: st };
+    });
+    var years = rows[rows.length - 1].st.years;
+    return { assetId: assetId, s: s, e: e, rows: rows, years: years, warn: shortNote([{ id: assetId, w: 100 }], s, e, years) };
+  }
+  function sizeRow(calc, w) { return calc.rows[w / 10]; }
+  function r1(x) { return Math.round(x * 1000) / 10; }            // 小數換成百分點，取到小數 1 位
+  function d1(x) { return Math.round(x * 10) / 10; }
+  function sizeRatio(calc, st) {
+    if (calc.warn) return '不顯示';
+    if (st.mdd > -1e-9) return '沒有回落';   // 台幣定存的淨值連乘有 1e-16 等級的誤差
+    return (st.ann / Math.abs(st.mdd)).toFixed(2);
+  }
+  function sizeLongest(l) { return l.days === 0 ? '沒有低於前高' : span(l.days) + (l.rec ? '' : '（到終點還沒回到）'); }
+  function sizeWorst(st) { return st.worst ? pct(st.worst.r, 1) : '期間不到 1 年'; }
+  function sizeCardsHtml(calc, cur) {
+    var c = sizeRow(calc, cur).st, b = sizeRow(calc, 100).st, base = cur === 100, V = '全部買股票';
+    function cmp(d, more, less, unit) { // d 已是 1 位小數的百分點差
+      if (base) return '這是' + V + '的數字';
+      if (d === 0) return '和' + V + '相同';
+      return '比' + V + (d > 0 ? more : less) + ' ' + Math.abs(d).toFixed(1) + ' 個百分點';
+    }
+    var tAnn = cmp(d1(r1(c.ann) - r1(b.ann)), '多', '少');
+    var dm = d1(r1(c.mdd) - r1(b.mdd));
+    var tMdd = base ? '這是' + V + '的數字' : dm === 0 ? '和' + V + '相同' : '跌幅比' + V + (dm > 0 ? '少' : '多') + ' ' + Math.abs(dm).toFixed(1) + ' 個百分點';
+    var tLong;
+    var dl = c.longest.days - b.longest.days;
+    if (base) tLong = '這是' + V + '的數字';
+    else if (dl === 0) tLong = '和' + V + '相同';
+    else if (Math.abs(dl) < 15) tLong = '和' + V + '相差不到 1 個月';
+    else tLong = '比' + V + (dl > 0 ? '多' : '少') + ' ' + span(Math.abs(dl));
+    var tWorst;
+    if (!c.worst || !b.worst) tWorst = '';
+    else {
+      var dw = d1(r1(c.worst.r) - r1(b.worst.r));
+      tWorst = base ? '這是' + V + '的數字' : dw === 0 ? '和' + V + '相同' : '比' + V + (dw > 0 ? '高' : '低') + ' ' + Math.abs(dw).toFixed(1) + ' 個百分點';
+    }
+    function card(lab, val, note) { return '<div class="szcard"><div class="szk">' + lab + '</div><div class="szv">' + val + '</div><div class="szn">' + note + '</div></div>'; }
+    return card('含息年化報酬', pct(c.ann, 1), tAnn) + card('最大跌幅', pct(c.mdd, 1), tMdd) + card('最長等多久才回到前高', sizeLongest(c.longest), tLong) + card('最差一年', sizeWorst(c), tWorst);
+  }
+  function sizeTableHtml(calc, cur) {
+    var h = '<thead><tr><th scope="col">股票比例</th><th scope="col">含息年化報酬</th><th scope="col">最大跌幅</th><th scope="col">最差一年</th><th scope="col">年化 ÷ 最大跌幅</th></tr></thead><tbody>';
+    calc.rows.forEach(function (r) {
+      var on = r.w === cur;
+      h += '<tr data-w="' + r.w + '"' + (on ? ' aria-current="true" class="on"' : '') + '><th scope="row">' + r.w + '%' + (on ? '<span class="here">目前</span>' : '') + '</th><td>' + pct(r.st.ann, 1) + '</td><td>' + pct(r.st.mdd, 1) + '</td><td>' + sizeWorst(r.st) + '</td><td>' + sizeRatio(calc, r.st) + '</td></tr>';
+    });
+    return h + '</tbody>';
+  }
+  /* 一張小長條圖：橫軸股票比例 0%～100%，目前這一根用深色、其他淡色；沿用折線圖的刻度與提示框寫法 */
+  function sizeBars(host, calc, cur, key, label) {
+    var NS = 'http://www.w3.org/2000/svg', rows = calc.rows, n = rows.length;
+    host.innerHTML = '';
+    var W = Math.max(host.clientWidth || 600, 260), narrow = W < 520, H = narrow ? 168 : 190;
+    var vals = rows.map(function (r) { return r.st[key]; });
+    var mn = Math.min.apply(null, vals), mx = Math.max.apply(null, vals);
+    var nt = key === 'mdd' ? niceTicks(Math.min(mn, -0.05), 0, null, 0) : niceTicks(Math.min(mn, 0), Math.max(mx, 0.01));
+    var m = { l: 40, r: 10, t: 18, b: 24 };
+    function tf(v) { return pct(v, Math.abs(v * 100 - Math.round(v * 100)) < 1e-9 ? 0 : 1); }
+    m.l = Math.max(narrow ? 40 : 56, Math.ceil(Math.max.apply(null, nt.ticks.map(function (v) { return tw(tf(v), 11); }))) + 12);
+    var pw = W - m.l - m.r, ph = H - m.t - m.b, gw = pw / n, bw = Math.min(gw * 0.7, 40);
+    function yPos(v) { return m.t + (nt.hi - v) / (nt.hi - nt.lo) * ph; }
+    var svg = document.createElementNS(NS, 'svg');
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H); svg.setAttribute('width', W); svg.setAttribute('height', H);
+    svg.style.fontVariantNumeric = 'tabular-nums';
+    function mk(tg, attrs, txt) { var el = document.createElementNS(NS, tg); for (var k in attrs) el.setAttribute(k, attrs[k]); if (txt != null) el.textContent = txt; svg.appendChild(el); return el; }
+    nt.ticks.forEach(function (v) {
+      var y = yPos(v);
+      mk('line', { x1: m.l, x2: m.l + pw, y1: y, y2: y, stroke: 'var(--line)', 'stroke-width': 0.8, 'stroke-opacity': 0.8 });
+      mk('text', { x: m.l - 6, y: y + 4, 'text-anchor': 'end', fill: 'var(--muted)', 'font-size': 11 }, tf(v));
+    });
+    var hl = mk('rect', { x: 0, y: m.t, width: gw, height: ph, fill: 'var(--muted)', 'fill-opacity': 0.14, visibility: 'hidden' });
+    var step = gw < 34 ? 2 : 1, z = yPos(0);
+    rows.forEach(function (r, i) {
+      var v = vals[i], y = yPos(v), top = Math.min(y, z), hgt = Math.max(1, Math.abs(y - z)), on = r.w === cur, cx = m.l + i * gw + gw / 2;
+      mk('rect', { x: cx - bw / 2, y: top, width: bw, height: hgt, fill: on ? 'var(--navy)' : 'var(--s40)' });
+      if (on) mk('text', { x: cx, y: v >= 0 ? top - 4 : top + hgt + 12, 'text-anchor': 'middle', fill: 'var(--ink)', 'font-size': 11, 'font-weight': 700 }, pct(v, 1));
+      if (i % step === 0) mk('text', { x: cx, y: H - 7, 'text-anchor': 'middle', fill: 'var(--muted)', 'font-size': 11 }, r.w + '%');
+    });
+    mk('line', { x1: m.l, x2: m.l + pw, y1: z, y2: z, stroke: 'var(--ink2)', 'stroke-width': 1.2 });
+    var ov = mk('rect', { x: m.l, y: m.t, width: pw, height: ph, fill: 'transparent' });
+    host.appendChild(svg);
+    var tip = document.createElement('div'); tip.className = 'tip'; host.appendChild(tip);
+    function hide() { hl.setAttribute('visibility', 'hidden'); tip.style.display = 'none'; }
+    function show(i) {
+      hl.setAttribute('x', m.l + i * gw); hl.setAttribute('visibility', 'visible');
+      tip.innerHTML = '<div><b>股票 ' + rows[i].w + '%，定存 ' + (100 - rows[i].w) + '%</b></div><div>' + label + '　' + pct(vals[i], 1) + '</div>';
+      tip.style.display = 'block';
+      var r = svg.getBoundingClientRect(), k = r.width / W, tw_ = tip.offsetWidth, th = tip.offsetHeight, cx = (m.l + i * gw + gw / 2) * k, left = cx + 14;
+      if (left + tw_ > r.width) left = cx - tw_ - 14;
+      tip.style.left = Math.min(Math.max(0, left), Math.max(0, r.width - tw_)) + 'px';
+      tip.style.top = Math.max(0, Math.min(8, r.height - th)) + 'px';
+    }
+    function fromX(cx) { var r = svg.getBoundingClientRect(), px_ = (cx - r.left) * (W / r.width); return Math.max(0, Math.min(n - 1, Math.floor((px_ - m.l) / gw))); }
+    ov.addEventListener('pointermove', function (ev) { show(fromX(ev.clientX)); });
+    ov.addEventListener('pointerdown', function (ev) { show(fromX(ev.clientX)); });
+    ov.addEventListener('pointerleave', hide);
+  }
+
   var API = {
     CATS: CATS, LET: LET, DASH: DASH,
     esc: esc, pct: pct, money: money, shortMoney: shortMoney, span: span,
@@ -803,6 +914,7 @@
     idxOnOrAfter: idxOnOrAfter, idxOnOrBefore: idxOnOrBefore, dayDiff: dayDiff,
     groupsUI: groupsUI, paintCards: paintCards,
     parseParams: parseParams, buildParams: buildParams,
+    SIZE_STEPS: SIZE_STEPS, sizeCalc: sizeCalc, sizeRow: sizeRow, sizeCardsHtml: sizeCardsHtml, sizeTableHtml: sizeTableHtml, sizeBars: sizeBars,
     gname: gname, tag: tag, isDef: isDef
   };
   root.TOOL = API;
