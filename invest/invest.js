@@ -1,26 +1,5 @@
 (function () {
   'use strict';
-  var KEY = 'invest-theme';
-  var root = document.documentElement;
-
-  function stored() { try { var v = localStorage.getItem(KEY); return (v === 'dark' || v === 'light') ? v : null; } catch (e) { return null; } }
-  function store(v) { try { localStorage.setItem(KEY, v); } catch (e) {} }
-  function systemTheme() {
-    try { return window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'; } catch (e) { return 'dark'; }
-  }
-  function current() { return root.getAttribute('data-theme') || systemTheme(); }
-
-  var s0 = stored();
-  if (s0) root.setAttribute('data-theme', s0);
-
-  function syncButtons() {
-    var cur = current();
-    var bs = document.querySelectorAll('.theme button');
-    for (var i = 0; i < bs.length; i++) {
-      bs[i].setAttribute('aria-pressed', bs[i].getAttribute('data-set') === cur ? 'true' : 'false');
-    }
-  }
-
   function buildHeader() {
     var host = document.getElementById('site-header');
     if (!host) return;
@@ -30,37 +9,23 @@
     function link(key, href, label) {
       return '<a href="' + base + href + '"' + (act === key ? ' aria-current="page"' : '') + '>' + label + '</a>';
     }
-    host.innerHTML =
-      '<header class="hdr">' +
+    var html =
+      '<div class="topbar"><div class="topbar-in"><div class="tag-l">用歷史資料檢驗投資說法</div>' +
+      '<a href="' + base + 'index.html#about">數字怎麼算</a></div></div>' +
+      '<header class="hdr"><div class="hdr-in">' +
       '<a class="brand" href="' + base + 'index.html">[品牌名稱]</a>' +
-      '<div class="hdr-r">' +
       '<nav class="nav" aria-label="主選單">' +
-      link('tool', 'tool.html', '回測工具') +
       link('questions', 'questions.html', '測過的說法') +
+      link('tool', 'tool.html', '回測工具') +
       link('about', 'index.html#about', '關於數字') +
-      '</nav>' +
-      '<div class="theme" role="group" aria-label="主題">' +
-      '<button type="button" data-set="dark" aria-pressed="false">深色</button>' +
-      '<button type="button" data-set="light" aria-pressed="false">淺色</button>' +
-      '</div></div></header>' +
-      '<p class="trial">試作版：數字是初算，還沒經專業人士確認。</p>';
-    var bs = host.querySelectorAll('.theme button');
-    for (var i = 0; i < bs.length; i++) {
-      bs[i].addEventListener('click', function (e) {
-        var v = e.currentTarget.getAttribute('data-set');
-        root.setAttribute('data-theme', v);
-        store(v);
-        syncButtons();
-      });
-    }
-    syncButtons();
+      '</nav></div></header>' +
+      '<div class="trial-bar"><p class="trial">試作版：數字是初算，還沒經專業人士確認。</p></div>';
+    var wrap = document.createElement('div');
+    wrap.id = 'site-top';
+    wrap.innerHTML = html;
+    document.body.insertBefore(wrap, document.body.firstChild);
+    host.parentNode.removeChild(host);
   }
-
-  try {
-    var mq = window.matchMedia('(prefers-color-scheme: light)');
-    var onChange = function () { syncButtons(); };
-    if (mq.addEventListener) mq.addEventListener('change', onChange);
-  } catch (e) {}
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', buildHeader);
   else buildHeader();
