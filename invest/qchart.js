@@ -1,6 +1,6 @@
 /* 文章主圖：原生 SVG 長條圖（分組、可含負值、可畫一條參考線）。
    不依賴任何套件；顏色用 tool.css 的 --g1／--g2／--g3，第二組加斜線、第三組只畫框，不只靠顏色。
-   用法：QCHART.bars(host, { cats, series:[{name, values}], fmt, ref:{value,label}, extra:[每個類別的補充一行], height }) */
+   用法：QCHART.bars(host, { cats, series:[{name, values}], fmt, ref:{value,label}, extra:[每個類別的補充一行], height, max, min（可選，縱軸上下限，沒給就自動） }) */
 (function () {
   'use strict';
   var NS = 'http://www.w3.org/2000/svg', uid = 0;
@@ -27,7 +27,9 @@
     var mn = 0, mx = 0;
     cfg.series.forEach(function (S) { S.values.forEach(function (v) { if (v == null) return; if (v < mn) mn = v; if (v > mx) mx = v; }); });
     if (cfg.ref) { mx = Math.max(mx, cfg.ref.value); mn = Math.min(mn, cfg.ref.value); }
-    var sc = nice(mn * 1.12, mx * 1.06);
+    var sc = nice(cfg.min != null ? cfg.min : mn * 1.12, cfg.max != null ? cfg.max : mx * 1.06);
+    if (cfg.max != null) { sc.ticks = sc.ticks.filter(function (t) { return t <= cfg.max + 1e-9; }); sc.hi = cfg.max; }
+    if (cfg.min != null) { sc.ticks = sc.ticks.filter(function (t) { return t >= cfg.min - 1e-9; }); sc.lo = cfg.min; }
     function yPos(v) { return m.t + (sc.hi - v) / (sc.hi - sc.lo) * ph; }
     var gw = pw / n, bw = Math.max(2, Math.min(34, gw * 0.78 / ns)), y0 = yPos(0);
     var svg = document.createElementNS(NS, 'svg');
