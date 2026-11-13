@@ -11,8 +11,48 @@
 <link rel="stylesheet" href="../invest.css">
 <link rel="stylesheet" href="../tool.css">
 <link rel="stylesheet" href="../pages.css">
+<style>
+.doc .sec{margin-top:72px;scroll-margin-top:16px}
+.doc .sec h2{font-size:23px}
+.doc .sec h3.t-lab{margin-top:36px;font-size:16px}
+.doc .lead{font-weight:600;color:var(--ink)}
+.toc{margin-top:20px;border:1px solid var(--line);padding:14px 20px 12px}
+.toc .toc-h{font-family:var(--serif);font-weight:700;font-size:17px;color:var(--navy)}
+.toc p{margin:6px 0 0;font-size:14px;line-height:1.8;color:var(--muted)}
+.toc ol{margin:8px 0 0;padding-left:24px;font-size:15px;line-height:1.9}
+.toc li span{display:block;font-size:13px;line-height:1.6;color:var(--muted);margin-bottom:4px}
+.doc .dtbl.cmp th,.doc .dtbl.cmp td{padding:10px 8px;font-size:14px;line-height:1.6}
+.doc .dtbl.cmp thead th{text-align:right;white-space:normal}
+.doc .dtbl.cmp thead th:first-child{text-align:left}
+.doc .dtbl.cmp tbody td{text-align:right}
+.doc .dtbl.cmp tbody th{font-size:14px;font-weight:500}
+.doc .dtbl.cmp .nw{white-space:nowrap}
+.doc .dtbl.cmp .tag{font-size:12px;color:var(--muted)}
+.doc .dwrap{overflow-x:visible}
+.doc .qa-answer,.doc .pre-box,.doc .toc,.doc .dwrap,.doc details.more,.doc .qa-fig,.doc .dlist{max-width:720px;margin-left:0;margin-right:0;box-sizing:border-box}
+.doc .steps{list-style:disc;margin:14px 0 0;padding-left:22px;font-size:17px;line-height:1.8;color:var(--ink2);max-width:720px}
+.doc .steps li+li{margin-top:6px}
+.doc .qa-fig{margin-top:32px}
+.doc .figs{margin-top:8px}
+details.more{margin-top:20px;border:1px solid var(--line);border-radius:0;background:var(--card)}
+details.more>summary{cursor:pointer;padding:12px 16px;font-size:15px;font-weight:700;line-height:1.6;color:var(--ink);list-style:none}
+details.more>summary::-webkit-details-marker{display:none}
+details.more>summary::before{content:"＋";display:inline-block;width:1.4em;color:var(--navy)}
+details.more[open]>summary::before{content:"－"}
+details.more[open]>summary{border-bottom:1px solid var(--line)}
+details.more .in{padding:0 0 4px}
+details.more .in>p{padding:0 16px}
+details.more .in .dwrap{margin-top:12px;border:0;margin-left:-1px;margin-right:-1px}
+.nw{white-space:nowrap}
+.doc .dtbl.cmp tbody th .tag{display:block;margin-top:2px;border:0;padding:0;background:none;font-size:12px;color:var(--muted)}
+details.more .in>p{margin:14px 0 0}
+.doc .sec h2{text-wrap:balance}
+@media (max-width:760px){.doc .dwrap{overflow-x:auto}}
+.doc .dtbl.cmp tbody tr.hl th,.doc .dtbl.cmp tbody tr.hl td{background:var(--card)}
+</style>
 <script src="../invest.js"></script>
 <script src="../qchart.js"></script>
+<script src="../qline.js"></script>
 </head>
 <body data-root="../" data-nav="q">
 <div class="page doc">
@@ -20,28 +60,145 @@
 
 <p class="t-link" style="margin-top:28px"><a href="../questions.html">回到全部題目</a></p>
 <h1 class="h1" style="margin-top:12px">持有股票再賣出買權收權利金，會比單純持有好嗎？</h1>
-<div class="qa-answer"><div class="k">一句話答案</div><p>備兌買權的年化報酬比買進持有少約 5 個百分點，最大跌幅淺約 15 個百分點。</p></div>
-<aside class="pre-box" aria-labelledby="pre-t"><div class="pre-h" id="pre-t">讀這個結果之前</div><h4>這個結果只適用每月賣出價平買權的固定做法</h4><p>備兌買權是持有股票，同時每月賣出一份買權收權利金。股價漲過履約價，也就是約定買進的價格，漲過的部分被買方拿走。</p><p>S&amp;P 500 這組，2006 年 1 月至 2026 年 6 月，備兌買權年化 6.05%，買進持有 SPY 是 10.94%，少約 5 個百分點。最大跌幅則淺約 15 個百分點。</p><h4>這篇沒有回答的事</h4><ul><li>賣出約定價格高於現價的買權，或改成每週賣出，沒有測。</li><li>數字是 Cboe 指數的結果，沒扣成本、管理費和稅，市面上賣出買權的 ETF 實際報酬還要再扣費用。</li><li>納斯達克 100 那組從 2009 年才有資料，沒有包含 2008 年金融海嘯。</li></ul><p class="pre-fine">S&amp;P 500 為 2006 年 1 月至 2026 年 6 月，買進持有含股息，指數沒扣成本。</p><p class="pre-link"><a href="#limits">完整的弱點見「這個結果的弱點」一節</a></p></aside>
+<div class="qa-answer"><div class="k">一句話答案</div><p>2006 年 1 月到 2026 年 10 月，備兌買權指數的最大跌幅是 −40.1%，買進持有 SPY 是 −55.2%。七成 SPY 加三成國庫券的最大跌幅是 −40.7%，年化比備兌買權高 2.25 個百分點。2009 到 2015 年近零利率那段，跌幅相同的股票加國庫券反而少賺 0.17 個百分點。</p></div>
+<aside class="pre-box" aria-labelledby="pre-t"><div class="pre-h" id="pre-t">讀這個結果之前</div><h4>同跌幅下股票加國庫券較好，這個差距在 2009 到 2015 年近零利率那段幾乎消失</h4><p>備兌買權是持有股票，同時賣出買權收權利金，股價漲過約定價的部分歸買方。2006 年 1 月到 2026 年 10 月，Cboe 的備兌買權指數年化 6.37%，買進持有 SPY 是 11.09%，最大跌幅 −40.1% 對 −55.2%。</p><p>把 SPY 的比例降到 70%、其餘放國庫券，最大跌幅和備兌買權差不多，年化高 2.25 個百分點。2009 到 2015 年國庫券年化只有 0.08%，同跌幅的比較變成備兌買權略高。這些是歷史次數統計，不是下一次會怎樣。</p><h4>這篇沒有回答的事</h4><ul><li>只測 Cboe 指數的固定做法，台股沒有可比的基準指數。</li><li>指數沒扣成本、管理費與稅，市面上商品的實際報酬另計。</li><li>納斯達克 100 版從 2009 年 9 月起，沒有包含 2008 年。</li></ul><p class="pre-fine">年化是用每日淨值換算成平均每年的報酬率。最大跌幅是從高點跌到之後最低點的幅度，兩邊都用日資料算。</p><p class="pre-link"><a href="#limits">完整的弱點見「這個結果的弱點」一節</a></p></aside>
 
+<nav class="toc" aria-label="本文目錄"><div class="toc-h">本文目錄</div><ol>
+<li><a href="#what">測了什麼</a><span>三條指數、期間、口徑</span></li>
+<li><a href="#table">備兌買權跌得比較淺，也賺得比較少</a><span>SPY、備兌買權、賣出賣權總表</span></li>
+<li><a href="#same">同樣的跌幅，股票加國庫券能賺多少</a><span>五種比例、三段期間、納斯達克 100</span></li>
+<li><a href="#months">上漲月與下跌月各拿到多少</a><span>月報酬加總</span></li>
+<li><a href="#list">逐次清單：SPY 跌超過 10% 的 7 次</a><span>SPY、備兌買權、七成組合各跌多少</span></li>
+<li><a href="#years">逐年表</a><span>小跌或持平的年份備兌買權較好</span></li>
+<li><a href="#limits">這個結果的弱點</a><span>完整列出</span></li>
+<li><a href="#src">資料來源與接著看</a><span></span></li>
+</ol></nav>
+
+<section class="sec" id="what"><h2>測了什麼</h2>
+<p class="t-body lead">三條 Cboe 指數與買進持有 SPY 比年化與最大跌幅，再用 SPY 加國庫券做出跌幅相近的對照組。</p>
+<h3 class="t-lab">三條指數</h3>
+<ul class="steps">
+<li>備兌買權：Cboe S&amp;P 500 BuyWrite 指數，持有標普 500 同時賣出買權。</li>
+<li>賣出賣權：Cboe S&amp;P 500 PutWrite 指數，以國庫券當擔保，賣出賣權。</li>
+<li>買進持有：SPY 含股息的還原價。</li>
+</ul>
+<p class="t-body">買權是有權在約定價格買進股票的合約。賣出買權的人先收權利金，股價漲過約定價的部分要讓給買方。指數都是機械式執行的結果，做法細節以 Cboe 公布的指數方法為準，本篇只用指數的歷史報酬。</p>
+<h3 class="t-lab">口徑</h3>
+<p class="t-body">期間是 2006 年 1 月 3 日到 2026 年 10 月 15 日。年化與最大跌幅全部用每日資料算，年化是首末淨值換算成平均每年的報酬率。賣出賣權指數在 Cboe 檔案裡 2007 年 1 月 3 日才有每日資料，所以它的比較另用 2007 年 1 月 3 日起算。</p>
+<p class="t-body">同跌幅對照組是 SPY 加 3 個月國庫券，每年第一個交易日開始前調回原比例。國庫券用 3 個月國庫券總報酬的日序列。稅與交易成本都沒有扣。台股沒有可比較的備兌買權基準指數，這篇沒有台股結果。</p>
+</section>
+
+<section class="sec" id="table"><h2>備兌買權跌得比較淺，也賺得比較少</h2>
+<p class="t-body lead">備兌買權年化 6.37%，比 SPY 的 11.09% 少 4.72 個百分點，最大跌幅 −40.14%，比 SPY 的 −55.19% 淺 15.05 個百分點。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">2006-01-03 至 2026-10-15</th><th scope="col">年化</th><th scope="col">最大跌幅</th><th scope="col">期末是起始的幾倍</th></tr></thead><tbody><tr><th scope="row">買進持有 SPY</th><td class="nw">11.09%</td><td class="nw">−55.19%</td><td class="nw">8.89 倍</td></tr><tr><th scope="row">備兌買權（Cboe BuyWrite 指數）</th><td class="nw">6.37%</td><td class="nw">−40.14%</td><td class="nw">3.61 倍</td></tr></tbody></table></div>
 <figure class="qa-fig">
-<div class="ttl">S&amp;P 500：買進持有、備兌買權、賣出賣權的年化報酬與最大跌幅</div>
-<div class="cap">2006 年 1 月 3 日至 2026 年 6 月 11 日。備兌買權與賣出賣權用 Cboe 的指數，是機械式執行的結果，沒有扣交易成本與管理費。</div>
-<div class="tool"><div class="chartbox" id="cbox0"><div class="legend"></div><div class="chart" role="img" aria-label="買進持有 SPY、備兌買權指數與賣出賣權指數的年化報酬與最大跌幅並排長條圖"></div></div></div>
+<div class="ttl">圖 1.1　SPY 與備兌買權的年化與最大跌幅</div>
+<div class="tool"><div class="chartbox" id="f1"><div class="legend"></div><div class="chart" role="img" aria-label="買進持有 SPY 與備兌買權指數的年化報酬與最大跌幅並排長條圖，2006 年 1 月到 2026 年 10 月，滑鼠移上去可看數值"></div></div></div>
 </figure>
+<p class="t-note">每日資料。以起始 100 萬美元計，期末約 361 萬對 889 萬。</p>
+<p class="t-body">賣出賣權指數放在另一張表，因為它的每日資料從 2007 年 1 月 3 日才開始，同一段期間也列 SPY 與備兌買權。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">2007-01-03 至 2026-10-15</th><th scope="col">年化</th><th scope="col">最大跌幅</th><th scope="col">期末是起始的幾倍</th></tr></thead><tbody><tr><th scope="row">買進持有 SPY</th><td class="nw">10.96%</td><td class="nw">−55.19%</td><td class="nw">7.83 倍</td></tr><tr><th scope="row">備兌買權（BuyWrite）</th><td class="nw">6.10%</td><td class="nw">−40.14%</td><td class="nw">3.22 倍</td></tr><tr><th scope="row">賣出賣權，現金擔保（PutWrite）</th><td class="nw">7.27%</td><td class="nw">−37.09%</td><td class="nw">4.01 倍</td></tr></tbody></table></div>
+<p class="t-note">賣出賣權年化 7.27%、最大跌幅 −37.09%，年化介於 SPY 與備兌買權之間，最大跌幅比兩者都淺，年化高過備兌買權 1.18 個百分點。</p>
+</section>
 
-<section class="sec"><h2>測了什麼</h2><p class="t-body">買權（call）是有權利在指定價格買進股票的合約。備兌買權的做法是持有股票，同時每月賣出一份價平的買權收權利金；股價漲過履約價的部分被買方拿走，所以上檔被封住，下跌時權利金提供一點緩衝。</p><p class="t-body">主要對照用 Cboe S&amp;P 500 BuyWrite 指數，它用真實成交價機械式執行這個做法，與買進持有 SPY（還原價，股息已算進去）比較。期間 2006 年 1 月 3 日至 2026 年 6 月 11 日。另一組是 Cboe 的 Nasdaq-100 版本對買進持有 QQQ，期間 2009 年 9 月至 2026 年 7 月。這兩組都有買進持有的對照。</p></section>
-<section class="sec"><h2>結果</h2><div class="dwrap"><table class="dtbl"><thead><tr><th>2006 年 1 月至 2026 年 6 月</th><th class="num">年化報酬</th><th class="num">最大跌幅</th></tr></thead><tbody><tr><th scope="row">買進持有 SPY</th><td class="num">10.94%</td><td class="num">−55.19%</td></tr><tr><th scope="row">備兌買權（Cboe S&amp;P 500 BuyWrite 指數）</th><td class="num">6.05%</td><td class="num">−40.14%</td></tr><tr><th scope="row">賣出價平賣權，現金擔保（Cboe PutWrite 指數）</th><td class="num">7.25%</td><td class="num">−37.09%</td></tr></tbody></table></div><p class="t-body">備兌買權年化報酬比買進持有低 4.89 個百分點，最大跌幅淺 15.05 個百分點。以起始 100 萬美元計，期末約 334 萬對 841 萬。賣出現金擔保賣權的結果介於兩者之間，年化 7.25%，最大跌幅 −37.09%。</p><p class="t-body">納斯達克 100 的版本方向相同，年化報酬的落差更大：</p><div class="dwrap"><table class="dtbl"><thead><tr><th>2009 年 9 月至 2026 年 7 月</th><th class="num">年化報酬</th><th class="num">最大跌幅</th><th class="num">期末是起始的幾倍</th></tr></thead><tbody><tr><th scope="row">買進持有 QQQ</th><td class="num">19.42%</td><td class="num">−35.12%</td><td class="num">19.75 倍</td></tr><tr><th scope="row">備兌買權（Cboe Nasdaq-100 BuyWrite 指數）</th><td class="num">8.70%</td><td class="num">−24.98%</td><td class="num">4.06 倍</td></tr></tbody></table></div><p class="t-body">16.7 年下來，備兌買權的終值只有買進持有的約五分之一，最大跌幅淺約 10 個百分點。</p></section>
-<section class="sec"><h2 id="limits">這個結果的弱點</h2><ul class="dlist"><li>指數版沒有扣交易成本、管理費和稅。市面上收租型 ETF 的實際報酬還要再扣費用，也不是這裡測的指數。</li><li>只測了 S&amp;P 500 和 Nasdaq-100，每月賣價平買權的固定做法；賣價外買權、改週選擇權等沒有測。</li><li>納斯達克 100 版的指數資料從 2009 年才有，沒有包含 2008 年金融海嘯。</li><li>台股沒有可比較的備兌買權基準指數，這篇沒有台股結果。</li></ul></section>
-<section class="sec"><h2>資料來源</h2><ul class="dlist"><li>Cboe BuyWrite、PutWrite 指數與 SPY 還原價，2006 年 1 月 3 日到 2026 年 6 月 11 日；Cboe Nasdaq-100 BuyWrite 指數與 QQQ，2009 年 9 月 18 日到 2026 年 7 月 10 日。</li></ul></section>
+<section class="sec" id="same"><h2>同樣的跌幅，股票加國庫券能賺多少</h2>
+<p class="t-body lead">SPY 70%、國庫券 30% 的最大跌幅是 −40.69%，和備兌買權的 −40.14% 差 0.55 個百分點，年化 8.62%，比備兌買權高 2.25 個百分點。</p>
+<p class="t-body">比例 70% 是看過備兌買權的最大跌幅才挑的，不是事前訂的。為了看結果是否靠這一檔，下表把 60%、65%、70%、75%、80% 五檔都列出。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">2006-01-03 至 2026-10-15</th><th scope="col">年化</th><th scope="col">最大跌幅</th><th scope="col">年化減備兌買權</th></tr></thead><tbody><tr><th scope="row">備兌買權</th><td class="nw">6.37%</td><td class="nw">−40.14%</td><td class="nw">—</td></tr><tr><th scope="row">SPY 100%</th><td class="nw">11.09%</td><td class="nw">−55.19%</td><td class="nw">+4.72 個百分點</td></tr><tr><th scope="row">SPY 60%＋國庫券 40%</th><td class="nw">7.73%</td><td class="nw">−35.36%</td><td class="nw">+1.36 個百分點</td></tr><tr><th scope="row">SPY 65%＋國庫券 35%</th><td class="nw">8.18%</td><td class="nw">−38.06%</td><td class="nw">+1.81 個百分點</td></tr><tr class="hl"><th scope="row">SPY 70%＋國庫券 30%<span class="tag">看過備兌買權的跌幅才挑</span></th><td class="nw">8.62%</td><td class="nw">−40.69%</td><td class="nw">+2.25 個百分點</td></tr><tr><th scope="row">SPY 75%＋國庫券 25%</th><td class="nw">9.05%</td><td class="nw">−43.26%</td><td class="nw">+2.68 個百分點</td></tr><tr><th scope="row">SPY 80%＋國庫券 20%</th><td class="nw">9.48%</td><td class="nw">−45.77%</td><td class="nw">+3.11 個百分點</td></tr></tbody></table></div>
+<figure class="qa-fig">
+<div class="ttl">圖 2.1　備兌買權與五種 SPY 加國庫券比例的年化與最大跌幅</div>
+<div class="tool"><div class="chartbox" id="f2"><div class="legend"></div><div class="chart" role="img" aria-label="備兌買權、SPY 六成到八成加國庫券、SPY 全部的年化與最大跌幅並排長條圖，滑鼠移上去可看數值"></div></div></div>
+</figure>
+<p class="t-note">橫軸「70／30」是 SPY 70%、國庫券 30%。每年第一個交易日開始前調回，日資料。</p>
+<p class="t-body">五檔裡，比例 65% 的最大跌幅 −38.06% 比備兌買權淺，年化 8.18% 仍高 1.81 個百分點。80% 的跌幅深 5.63 個百分點，年化高 3.11。</p>
+<p class="t-body">把比例從 40% 到 100% 每 0.5 個百分點掃一遍，最大跌幅與備兌買權最接近的是 SPY 69.0%，年化 8.53%，最大跌幅 −40.17%。反過來，年化與備兌買權最接近的是 SPY 45.5%，年化 6.39%，最大跌幅只有 −27.17%。這兩個比例是看過結果才找出來的。</p>
+<h3 class="t-lab">分三段期間看，2009 到 2015 年近零利率那段</h3>
+<p class="t-body">國庫券年化在 2006 至 2008 年是 3.61%，2009 至 2015 年是 0.08%，2016 年起到 2026 年 10 月是 2.36%。下面每段都找出跌幅最接近備兌買權的 SPY 加國庫券比例，從 30% 到 100% 每 0.5 個百分點掃出來，每段重新起算淨值。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">2006 至 2008 年</th><th scope="col">SPY 比例</th><th scope="col">年化</th><th scope="col">最大跌幅</th></tr></thead><tbody><tr><th scope="row">備兌買權</th><td class="nw">—</td><td class="nw">−5.23%</td><td class="nw">−36.65%</td></tr><tr><th scope="row">跌幅最接近的 SPY 加國庫券</th><td class="nw">72.0%</td><td class="nw">−4.78%</td><td class="nw">−36.68%</td></tr><tr><th scope="row">SPY 100%</th><td class="nw">100%</td><td class="nw">−8.90%</td><td class="nw">−50.76%</td></tr></tbody></table></div>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">2009 至 2015 年</th><th scope="col">SPY 比例</th><th scope="col">年化</th><th scope="col">最大跌幅</th></tr></thead><tbody><tr><th scope="row">備兌買權</th><td class="nw">—</td><td class="nw">9.12%</td><td class="nw">−16.90%</td></tr><tr><th scope="row">跌幅最接近的 SPY 加國庫券</th><td class="nw">62.0%</td><td class="nw">8.95%</td><td class="nw">−16.84%</td></tr><tr><th scope="row">SPY 100%</th><td class="nw">100%</td><td class="nw">14.23%</td><td class="nw">−27.13%</td></tr></tbody></table></div>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">2016 至 2026 年 10 月</th><th scope="col">SPY 比例</th><th scope="col">年化</th><th scope="col">最大跌幅</th></tr></thead><tbody><tr><th scope="row">備兌買權</th><td class="nw">—</td><td class="nw">7.98%</td><td class="nw">−30.26%</td></tr><tr><th scope="row">跌幅最接近的 SPY 加國庫券</th><td class="nw">89.5%</td><td class="nw">13.88%</td><td class="nw">−30.32%</td></tr><tr><th scope="row">SPY 100%</th><td class="nw">100%</td><td class="nw">15.13%</td><td class="nw">−33.72%</td></tr></tbody></table></div>
+<p class="t-note">三段的最大跌幅各自在該段內計算。2009 至 2015 年那段，備兌買權年化 9.12%，SPY 62.0% 加國庫券是 8.95%，備兌買權高 0.17 個百分點。</p>
+<p class="t-body">方向在 2009 至 2015 年變了：備兌買權的年化比跌幅相同的股票加國庫券高一點點，差距 0.17 個百分點。2006 至 2008 年，股票加國庫券高 0.45 個百分點；2016 至 2026 年 10 月，高 5.90 個百分點，後一段包含 2020 年與 2022 年兩次大跌。另外兩段都是股票加國庫券較高。</p>
+<h3 class="t-lab">納斯達克 100 版</h3>
+<p class="t-body">Cboe 的納斯達克 100 備兌買權指數（BXN）從 2009 年 9 月 18 日起有每日資料，對照買進持有 QQQ，到 2026 年 10 月 15 日。比較方式相同：QQQ 加 3 個月國庫券，每年調回，每日資料。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">2009-09 至 2026-10</th><th scope="col">年化</th><th scope="col">最大跌幅</th><th scope="col">年化減 BXN</th></tr></thead><tbody><tr><th scope="row">備兌買權（BXN）</th><td class="nw">8.76%</td><td class="nw">−24.98%</td><td class="nw">—</td></tr><tr><th scope="row">QQQ 60%＋國庫券 40%</th><td class="nw">12.50%</td><td class="nw">−20.76%</td><td class="nw">+3.74 點</td></tr><tr><th scope="row">QQQ 65%＋國庫券 35%</th><td class="nw">13.36%</td><td class="nw">−22.56%</td><td class="nw">+4.60 點</td></tr><tr><th scope="row">QQQ 70%＋國庫券 30%</th><td class="nw">14.21%</td><td class="nw">−24.35%</td><td class="nw">+5.46 點</td></tr><tr><th scope="row">QQQ 75%＋國庫券 25%</th><td class="nw">15.05%</td><td class="nw">−26.14%</td><td class="nw">+6.30 點</td></tr><tr><th scope="row">QQQ 80%＋國庫券 20%</th><td class="nw">15.89%</td><td class="nw">−27.94%</td><td class="nw">+7.13 點</td></tr><tr><th scope="row">QQQ 100%</th><td class="nw">19.12%</td><td class="nw">−35.12%</td><td class="nw">+10.37 點</td></tr></tbody></table></div>
+<p class="t-note">五檔比例沿用 60% 到 80%，不是依 BXN 的跌幅另外挑的。年化減 BXN 是各列年化減 BXN 年化，單位是個百分點。</p>
+<p class="t-body">BXN 的最大跌幅是 −24.98%。從 20% 到 100% 每 0.5 個百分點掃一遍，跌幅最接近的是 QQQ 71.5%，年化 14.46%，比 BXN 的 8.76% 高 5.71 個百分點。年化最接近 BXN 的是 QQQ 39.0%，最大跌幅 −13.16%。</p>
+<p class="t-body">分成 2009 年 9 月至 2015 年與 2016 年起兩段，結論和整段相同。2009 年 9 月至 2015 年，跌幅最接近的 QQQ 90.0% 加國庫券年化 16.21%，BXN 是 7.54%。2016 年起，QQQ 71.5% 加國庫券年化 15.55%，BXN 是 9.59%。納斯達克 100 版在近零利率那段沒有出現 S&amp;P 500 版的方向反轉，差距反而最大。</p>
+<p class="t-body">這一組起點是 2009 年 9 月，沒有包含 2008 年。QQQ 在 2009 年 9 月至 2015 年的最大跌幅只有 −16.10%，那段 BXN 的最大跌幅是 −14.59%，兩者跌幅本來就接近。</p>
+</section>
+
+<section class="sec" id="months"><h2>上漲月與下跌月各拿到多少</h2>
+<p class="t-body lead">備兌買權在 SPY 上漲的月份拿到 SPY 加總的 58.6%，在下跌的月份拿到 59.1%，兩邊差不多。</p>
+<p class="t-body">月報酬用月底值算，分成 SPY 當月上漲與下跌兩組，各組把月報酬直接加總。250 個月裡，上漲 168 個、下跌 82 個。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">SPY 當月的漲跌</th><th scope="col">SPY 月報酬加總</th><th scope="col">備兌買權加總</th><th scope="col">七成組合加總</th></tr></thead><tbody><tr><th scope="row">上漲月（168 個）</th><td class="nw">553%</td><td class="nw">324%</td><td class="nw">396%</td></tr><tr><th scope="row">下跌月（82 個）</th><td class="nw">−310%</td><td class="nw">−183%</td><td class="nw">−213%</td></tr></tbody></table></div>
+<figure class="qa-fig">
+<div class="ttl">圖 3.1　SPY 上漲月與下跌月的月報酬加總</div>
+<div class="tool"><div class="chartbox" id="f3"><div class="legend"></div><div class="chart" role="img" aria-label="SPY 上漲月與下跌月，SPY、備兌買權、七成組合各自的月報酬加總長條圖，滑鼠移上去可看數值"></div></div></div>
+</figure>
+<p class="t-note">月報酬加總是把每個月的報酬率直接相加，不是複利。七成組合是 SPY 70%、國庫券 30%，每年調回。</p>
+<p class="t-body">七成組合拿到的比例，上漲月 71.6%、下跌月 68.5%。備兌買權在 82 個下跌月裡有 71 個比 SPY 跌得少，在 168 個上漲月裡只有 35 個賺得比 SPY 多。</p>
+<p class="t-body">備兌買權的日報酬年化波動 14.0%，SPY 是 19.2%，兩者日報酬相關 0.91。</p>
+</section>
+
+<section class="sec" id="list"><h2>逐次清單：SPY 跌超過 10% 的 7 次</h2>
+<p class="t-body lead">7 次裡備兌買權都比 SPY 跌得少，七成組合也都比 SPY 少；七成組合比備兌買權少跌的有 5 次。</p>
+<p class="t-body">一次下跌是 SPY 含息從歷史高點回落超過 10%，報酬從高點日算到谷底日。七成組合用 2006 年起每年調回的淨值路線，所以從高點到谷底之間若跨年，會包含那次調回。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">期間（SPY 高點到谷底）</th><th scope="col">SPY</th><th scope="col">備兌買權</th><th scope="col">七成組合</th></tr></thead><tbody><tr><th scope="row">2007/10–2009/03<span class="tag">355 個交易日</span></th><td class="nw">−55.19%</td><td class="nw">−39.06%</td><td class="nw">−40.69%</td></tr><tr><th scope="row">2015/07–2016/02<span class="tag">143 個交易日</span></th><td class="nw">−13.02%</td><td class="nw">−8.10%</td><td class="nw">−9.19%</td></tr><tr><th scope="row">2018/01–2018/02<span class="tag">9 個交易日</span></th><td class="nw">−10.10%</td><td class="nw">−7.72%</td><td class="nw">−7.20%</td></tr><tr><th scope="row">2018/09–2018/12<span class="tag">64 個交易日</span></th><td class="nw">−19.35%</td><td class="nw">−15.17%</td><td class="nw">−13.74%</td></tr><tr><th scope="row">2020/02–2020/03<span class="tag">23 個交易日</span></th><td class="nw">−33.72%</td><td class="nw">−30.23%</td><td class="nw">−23.92%</td></tr><tr><th scope="row">2022/01–2022/10<span class="tag">195 個交易日</span></th><td class="nw">−24.50%</td><td class="nw">−17.19%</td><td class="nw">−16.84%</td></tr><tr><th scope="row">2025/02–2025/04<span class="tag">34 個交易日</span></th><td class="nw">−18.76%</td><td class="nw">−15.46%</td><td class="nw">−13.12%</td></tr></tbody></table></div>
+<figure class="qa-fig">
+<div class="ttl">圖 4.1　SPY 跌超過 10% 的 7 次，三者各跌多少</div>
+<div class="tool"><div class="chartbox" id="f4"><div class="legend"></div><div class="chart" role="img" aria-label="SPY 跌超過百分之十的 7 次下跌，SPY、備兌買權、七成組合各跌多少的長條圖，滑鼠移上去可看數值"></div></div></div>
+</figure>
+<p class="t-note">備兌買權跌幅占 SPY 跌幅的比例，7 次從 62% 到 90% 不等：2007 至 2009 年 71%，2020 年 90%，2022 年 70%。</p>
+<p class="t-body">備兌買權比七成組合跌得少的是 2007 至 2009 年（−39.1% 對 −40.7%）與 2015 至 2016 年（−8.1% 對 −9.2%）。其餘 5 次，七成組合跌得少，差距最大的是 2020 年 2 月到 3 月，−23.9% 對 −30.2%。</p>
+<p class="t-body">這 7 次高點到谷底之間，SPY 回到前一個高點的日期依序是 2012-08-16、2016-04-18、2018-08-06、2019-04-12、2020-08-10、2023-12-13、2025-06-26，全部已經回到前高。</p>
+</section>
+
+<section class="sec" id="years"><h2>逐年表</h2>
+<p class="t-body lead">備兌買權在 21 個年度裡只有 5 年比 SPY 高，這 5 年 SPY 的年報酬都不超過 5.1%。</p>
+<p class="t-body">SPY 年報酬在 5.1% 以下的年度共 6 個（2007、2008、2011、2015、2018、2022），備兌買權在其中 5 年較高，只有 2018 年略低。粗體是備兌買權高過 SPY 的年度。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">年度報酬</th><th scope="col">SPY</th><th scope="col">備兌買權</th><th scope="col">七成組合</th></tr></thead><tbody><tr><th scope="row">2006</th><td class="nw">+13.8%</td><td class="nw">+12.0%</td><td class="nw">+11.2%</td></tr><tr><th scope="row">2007</th><td class="nw">+5.1%</td><td class="nw"><strong>+6.6%</strong></td><td class="nw">+5.0%</td></tr><tr><th scope="row">2008</th><td class="nw">−36.8%</td><td class="nw"><strong>−28.7%</strong></td><td class="nw">−25.3%</td></tr><tr><th scope="row">2009</th><td class="nw">+26.4%</td><td class="nw">+25.9%</td><td class="nw">+18.5%</td></tr><tr><th scope="row">2010</th><td class="nw">+15.1%</td><td class="nw">+5.9%</td><td class="nw">+10.6%</td></tr><tr><th scope="row">2011</th><td class="nw">+1.9%</td><td class="nw"><strong>+5.7%</strong></td><td class="nw">+1.3%</td></tr><tr><th scope="row">2012</th><td class="nw">+16.0%</td><td class="nw">+5.2%</td><td class="nw">+11.2%</td></tr><tr><th scope="row">2013</th><td class="nw">+32.3%</td><td class="nw">+13.3%</td><td class="nw">+22.6%</td></tr><tr><th scope="row">2014</th><td class="nw">+13.5%</td><td class="nw">+5.6%</td><td class="nw">+9.4%</td></tr><tr><th scope="row">2015</th><td class="nw">+1.2%</td><td class="nw"><strong>+5.2%</strong></td><td class="nw">+0.9%</td></tr><tr><th scope="row">2016</th><td class="nw">+12.0%</td><td class="nw">+7.1%</td><td class="nw">+8.5%</td></tr><tr><th scope="row">2017</th><td class="nw">+21.7%</td><td class="nw">+13.0%</td><td class="nw">+15.5%</td></tr><tr><th scope="row">2018</th><td class="nw">−4.6%</td><td class="nw">−4.8%</td><td class="nw">−2.6%</td></tr><tr><th scope="row">2019</th><td class="nw">+31.2%</td><td class="nw">+15.7%</td><td class="nw">+22.5%</td></tr><tr><th scope="row">2020</th><td class="nw">+18.3%</td><td class="nw">−2.8%</td><td class="nw">+12.9%</td></tr><tr><th scope="row">2021</th><td class="nw">+28.7%</td><td class="nw">+20.5%</td><td class="nw">+20.1%</td></tr><tr><th scope="row">2022</th><td class="nw">−18.2%</td><td class="nw"><strong>−11.4%</strong></td><td class="nw">−12.1%</td></tr><tr><th scope="row">2023</th><td class="nw">+26.2%</td><td class="nw">+11.8%</td><td class="nw">+19.9%</td></tr><tr><th scope="row">2024</th><td class="nw">+24.9%</td><td class="nw">+20.1%</td><td class="nw">+19.0%</td></tr><tr><th scope="row">2025</th><td class="nw">+17.7%</td><td class="nw">+8.9%</td><td class="nw">+13.7%</td></tr><tr><th scope="row">2026（至 10/15）</th><td class="nw">+14.1%</td><td class="nw">+12.2%</td><td class="nw">+10.7%</td></tr></tbody></table></div>
+<p class="t-note">2006 年從 1 月 3 日起算，2026 年只到 10 月 15 日。年度報酬用年底淨值算。備兌買權高過七成組合的年度有 9 個（2006、2007、2009、2011、2015、2021、2022、2024、2026），七成組合較高的有 12 個。</p>
+<figure class="qa-fig">
+<div class="ttl">圖 5.1　SPY、備兌買權、七成組合的淨值，2006 年初為 100</div>
+<div class="tool"><div class="chartbox" id="f5"><div class="legend"></div><div class="chart" role="img" aria-label="SPY、備兌買權、七成組合的月底淨值折線圖，2006 年到 2026 年，滑鼠移上去可看數值"></div></div></div>
+</figure>
+<p class="t-note">線性刻度，月底值，不含成本。實線 SPY，虛線備兌買權，點線七成組合。</p>
+</section>
+
+<section class="sec" id="limits"><h2>這個結果的弱點</h2>
+<ul class="dlist">
+<li>只有約 20 年，最大跌幅由 2007 至 2009 年一次決定，那次備兌買權跌了 −39.1%，沒有第二次同類危機可以對照。</li>
+<li>70% 這一檔是看過備兌買權的最大跌幅才挑的，比例掃描找出的 69.0% 與 45.5% 也是看過結果才找出來的。</li>
+<li>三段期間的切法依近零利率那段訂，換一個切法，三段的差距會變。</li>
+<li>7 次下跌只有 7 個樣本，彼此也不一定獨立。逐年表與上漲月、下跌月的分組都是看過資料才分的。</li>
+<li>指數沒有扣交易成本、管理費和稅。SPY 用 Yahoo 的含息還原價，國庫券用 3 個月國庫券總報酬，都不是可以實際成交的價格。</li>
+<li>只測了標普 500 與納斯達克 100 兩組，賣出價格較高的買權、改變賣出頻率等做法沒有測。台股沒有可比的基準指數。</li>
+<li>納斯達克 100 版起點 2009 年 9 月，沒有包含 2008 年，最大跌幅只有 2022 年一次大跌可看。</li>
+</ul></section>
+
+<section class="sec" id="src"><h2>資料來源</h2><ul class="dlist"><li>Cboe BuyWrite、PutWrite、納斯達克 100 BuyWrite 指數日線（BuyWrite 2006 年 1 月 3 日起，PutWrite 2007 年 1 月 3 日起，BXN 2009 年 9 月 18 日起）；SPY 與 QQQ 為 Yahoo 含息還原日價；國庫券為 3 個月國庫券總報酬日序列。</li><li>計算期間到 2026 年 10 月 15 日，是這些序列共同的最後一天。最後一筆完整的 SPY 下跌是 2025 年 2 月 19 日到 4 月 8 日，6 月 26 日回到前高。</li><li>國庫券調回規則：每年第一個交易日開盤前，用前一個交易日收盤價把比例調回。</li></ul></section>
+<section class="sec"><h2>接著看</h2><ul class="dlist"><li><a href="stocks-plus-bonds.html">股票加公債，跌幅少多少、報酬少多少？</a></li><li><a href="volatility-tax.html">波動拖累：同樣的平均報酬，波動大的為什麼長期少賺？</a></li></ul></section>
 
 <p class="fine qa-back">這是歷史資料的計算，是一般資訊，不是對個人的投資建議。過去的結果不代表未來。</p>
 </div>
 <script>
-  (function () {
-    var cfg = {"cats": ["買進持有 SPY", "備兌買權", "賣出賣權"], "series": [{"name": "年化報酬", "values": [10.94, 6.05, 7.25]}, {"name": "最大跌幅", "values": [-55.19, -40.14, -37.09]}], "extra": null, "ref": null};
-    cfg.fmt = QCHART.fmt.pct1; cfg.axisFmt = QCHART.fmt.pct0;
-    QCHART.mount(document.getElementById('cbox0'), cfg);
-  })();
+(function () {
+  var F1 = {"cats": ["買進持有 SPY", "備兌買權"], "series": [{"name": "年化", "values": [11.09, 6.37]}, {"name": "最大跌幅", "values": [-55.19, -40.14]}]}, F2 = {"cats": ["備兌買權", "60／40", "65／35", "70／30", "75／25", "80／20", "SPY 全部"], "series": [{"name": "年化", "values": [6.37, 7.73, 8.18, 8.62, 9.05, 9.48, 11.09]}, {"name": "最大跌幅", "values": [-40.14, -35.36, -38.06, -40.69, -43.26, -45.77, -55.19]}]}, F3 = {"cats": ["上漲月 168 個", "下跌月 82 個"], "series": [{"name": "SPY", "values": [553.1, -310.1]}, {"name": "備兌買權", "values": [324.1, -183.2]}, {"name": "七成組合", "values": [396.2, -212.5]}]}, F4 = {"cats": ["2007/10–2009/03", "2015/07–2016/02", "2018/01–2018/02", "2018/09–2018/12", "2020/02–2020/03", "2022/01–2022/10", "2025/02–2025/04"], "series": [{"name": "SPY", "values": [-55.2, -13.0, -10.1, -19.3, -33.7, -24.5, -18.8]}, {"name": "備兌買權", "values": [-39.1, -8.1, -7.7, -15.2, -30.2, -17.2, -15.5]}, {"name": "七成組合", "values": [-40.7, -9.2, -7.2, -13.7, -23.9, -16.8, -13.1]}]}, F5 = {"x": ["2006-01", "2006-02", "2006-03", "2006-04", "2006-05", "2006-06", "2006-07", "2006-08", "2006-09", "2006-10", "2006-11", "2006-12", "2007-01", "2007-02", "2007-03", "2007-04", "2007-05", "2007-06", "2007-07", "2007-08", "2007-09", "2007-10", "2007-11", "2007-12", "2008-01", "2008-02", "2008-03", "2008-04", "2008-05", "2008-06", "2008-07", "2008-08", "2008-09", "2008-10", "2008-11", "2008-12", "2009-01", "2009-02", "2009-03", "2009-04", "2009-05", "2009-06", "2009-07", "2009-08", "2009-09", "2009-10", "2009-11", "2009-12", "2010-01", "2010-02", "2010-03", "2010-04", "2010-05", "2010-06", "2010-07", "2010-08", "2010-09", "2010-10", "2010-11", "2010-12", "2011-01", "2011-02", "2011-03", "2011-04", "2011-05", "2011-06", "2011-07", "2011-08", "2011-09", "2011-10", "2011-11", "2011-12", "2012-01", "2012-02", "2012-03", "2012-04", "2012-05", "2012-06", "2012-07", "2012-08", "2012-09", "2012-10", "2012-11", "2012-12", "2013-01", "2013-02", "2013-03", "2013-04", "2013-05", "2013-06", "2013-07", "2013-08", "2013-09", "2013-10", "2013-11", "2013-12", "2014-01", "2014-02", "2014-03", "2014-04", "2014-05", "2014-06", "2014-07", "2014-08", "2014-09", "2014-10", "2014-11", "2014-12", "2015-01", "2015-02", "2015-03", "2015-04", "2015-05", "2015-06", "2015-07", "2015-08", "2015-09", "2015-10", "2015-11", "2015-12", "2016-01", "2016-02", "2016-03", "2016-04", "2016-05", "2016-06", "2016-07", "2016-08", "2016-09", "2016-10", "2016-11", "2016-12", "2017-01", "2017-02", "2017-03", "2017-04", "2017-05", "2017-06", "2017-07", "2017-08", "2017-09", "2017-10", "2017-11", "2017-12", "2018-01", "2018-02", "2018-03", "2018-04", "2018-05", "2018-06", "2018-07", "2018-08", "2018-09", "2018-10", "2018-11", "2018-12", "2019-01", "2019-02", "2019-03", "2019-04", "2019-05", "2019-06", "2019-07", "2019-08", "2019-09", "2019-10", "2019-11", "2019-12", "2020-01", "2020-02", "2020-03", "2020-04", "2020-05", "2020-06", "2020-07", "2020-08", "2020-09", "2020-10", "2020-11", "2020-12", "2021-01", "2021-02", "2021-03", "2021-04", "2021-05", "2021-06", "2021-07", "2021-08", "2021-09", "2021-10", "2021-11", "2021-12", "2022-01", "2022-02", "2022-03", "2022-04", "2022-05", "2022-06", "2022-07", "2022-08", "2022-09", "2022-10", "2022-11", "2022-12", "2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12", "2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06", "2026-07", "2026-08", "2026-09", "2026-10"], "spy": [100.6, 101.2, 102.9, 104.2, 101.0, 101.3, 101.8, 104.0, 106.8, 110.2, 112.3, 113.8, 115.6, 113.3, 114.6, 119.7, 123.7, 121.9, 118.1, 119.6, 124.3, 125.9, 121.1, 119.7, 112.5, 109.6, 108.6, 113.8, 115.5, 105.8, 104.9, 106.5, 96.5, 80.5, 74.9, 75.7, 69.4, 62.0, 67.1, 73.8, 78.1, 78.1, 83.9, 87.0, 90.1, 88.4, 93.8, 95.6, 92.1, 95.0, 100.8, 102.3, 94.2, 89.3, 95.4, 91.1, 99.3, 103.1, 103.1, 110.0, 112.5, 116.5, 116.5, 119.8, 118.5, 116.5, 114.2, 107.9, 100.4, 111.4, 110.9, 112.1, 117.3, 122.4, 126.3, 125.5, 117.9, 122.7, 124.2, 127.3, 130.5, 128.1, 128.8, 130.0, 136.6, 138.4, 143.6, 146.4, 149.9, 147.9, 155.5, 150.8, 155.6, 162.8, 167.6, 172.0, 165.9, 173.5, 174.9, 176.1, 180.2, 183.9, 181.5, 188.6, 186.0, 190.4, 195.6, 195.1, 189.4, 200.0, 196.9, 198.8, 201.4, 197.3, 201.7, 189.4, 184.6, 200.3, 201.0, 197.6, 187.7, 187.6, 200.2, 201.0, 204.4, 205.1, 212.6, 212.8, 212.8, 209.2, 216.9, 221.3, 225.2, 234.1, 234.4, 236.7, 240.0, 241.6, 246.5, 247.2, 252.2, 258.2, 266.1, 269.3, 284.5, 274.1, 266.6, 268.0, 274.5, 276.1, 286.3, 295.4, 297.2, 276.7, 281.8, 257.0, 277.6, 286.6, 291.7, 303.7, 284.3, 304.1, 308.7, 303.5, 309.4, 316.2, 327.7, 337.2, 337.1, 310.4, 271.6, 306.1, 320.7, 326.4, 345.6, 369.7, 355.9, 347.0, 384.8, 399.0, 395.0, 405.9, 424.4, 446.8, 449.8, 459.9, 471.1, 485.1, 462.5, 494.9, 491.0, 513.7, 486.6, 472.2, 490.0, 447.0, 448.0, 411.0, 448.9, 430.6, 390.8, 422.5, 446.0, 420.3, 446.7, 435.5, 451.7, 458.9, 461.0, 490.9, 506.9, 498.7, 475.0, 464.7, 507.2, 530.3, 538.8, 566.9, 585.4, 561.8, 590.2, 611.1, 618.5, 632.9, 646.2, 640.4, 678.6, 662.3, 680.1, 671.5, 634.0, 628.6, 668.1, 702.4, 718.6, 733.3, 759.4, 777.5, 779.0, 779.7, 791.2, 784.3, 745.6, 823.9, 867.3, 858.3, 858.6, 881.7, 878.8, 889.3], "bxm": [100.8, 101.9, 102.9, 104.4, 102.3, 103.6, 105.3, 106.6, 108.2, 109.5, 111.1, 112.0, 114.1, 112.7, 112.9, 113.8, 116.3, 116.2, 113.7, 115.0, 116.6, 119.4, 117.2, 119.4, 112.3, 113.4, 115.2, 118.0, 119.5, 112.3, 112.4, 114.5, 107.9, 91.7, 81.9, 85.2, 81.9, 76.7, 83.0, 86.1, 89.9, 91.7, 96.1, 97.4, 99.2, 98.7, 104.5, 107.2, 102.8, 106.8, 108.4, 108.1, 101.5, 97.3, 103.7, 103.5, 107.4, 108.7, 109.8, 113.5, 114.7, 116.0, 115.2, 117.7, 118.4, 116.3, 115.4, 107.2, 103.3, 113.7, 116.3, 120.0, 121.7, 124.1, 126.0, 126.6, 121.3, 125.7, 127.2, 128.4, 129.5, 128.5, 126.1, 126.3, 129.0, 129.5, 132.3, 134.4, 133.8, 132.4, 134.1, 132.4, 133.5, 138.3, 140.1, 143.0, 140.2, 146.1, 146.5, 148.0, 150.8, 151.1, 150.8, 154.8, 152.3, 149.7, 149.3, 151.1, 148.9, 153.1, 153.6, 155.8, 157.3, 156.6, 161.0, 153.2, 152.9, 159.4, 160.3, 159.0, 152.2, 154.7, 157.8, 158.5, 161.0, 162.8, 164.1, 165.7, 165.8, 166.2, 170.0, 170.2, 174.0, 176.4, 177.0, 178.6, 181.8, 182.5, 184.9, 185.4, 187.1, 188.2, 191.1, 192.3, 194.2, 191.4, 189.3, 191.9, 195.9, 195.8, 201.5, 205.3, 205.4, 194.2, 198.5, 183.2, 189.5, 192.2, 195.6, 198.6, 192.2, 202.0, 204.1, 201.8, 203.1, 207.3, 210.0, 211.9, 209.5, 193.7, 164.8, 172.5, 180.1, 179.9, 186.8, 191.6, 191.6, 184.6, 202.5, 206.1, 206.3, 208.4, 217.9, 219.6, 223.9, 228.9, 230.1, 236.1, 232.0, 242.9, 239.2, 248.2, 242.1, 240.4, 250.3, 238.5, 229.6, 222.9, 231.6, 220.5, 206.0, 218.7, 222.9, 220.0, 229.2, 228.9, 233.1, 235.8, 238.1, 243.1, 246.5, 242.6, 236.2, 234.5, 241.3, 246.0, 250.4, 255.2, 260.8, 257.3, 260.1, 264.7, 267.7, 275.5, 279.4, 278.0, 289.1, 295.5, 302.0, 300.4, 286.4, 281.7, 284.3, 291.8, 293.9, 296.8, 302.1, 309.9, 316.7, 321.9, 325.5, 328.5, 318.9, 331.1, 338.0, 342.5, 348.6, 354.1, 357.1, 361.0], "mix": [100.5, 101.0, 102.3, 103.4, 101.3, 101.6, 102.0, 103.7, 105.8, 108.3, 110.0, 111.2, 112.5, 111.1, 112.1, 115.7, 118.6, 117.5, 115.0, 116.2, 119.5, 120.8, 117.5, 116.7, 111.8, 109.9, 109.3, 112.8, 114.1, 107.5, 106.9, 108.1, 101.3, 90.4, 86.6, 87.1, 82.1, 76.1, 80.3, 85.7, 89.1, 89.1, 93.8, 96.3, 98.8, 97.4, 101.8, 103.2, 100.6, 102.8, 107.2, 108.3, 102.2, 98.5, 103.1, 99.9, 106.1, 108.9, 108.9, 114.2, 116.0, 118.9, 118.9, 121.3, 120.4, 118.9, 117.2, 112.6, 107.2, 115.2, 114.8, 115.7, 119.4, 123.1, 126.0, 125.4, 119.9, 123.4, 124.4, 126.7, 129.0, 127.3, 127.8, 128.7, 133.3, 134.5, 138.1, 140.0, 142.4, 141.1, 146.4, 143.1, 146.4, 151.4, 154.8, 157.8, 153.9, 158.7, 159.7, 160.5, 163.1, 165.5, 163.9, 168.5, 166.8, 169.6, 173.0, 172.7, 169.1, 175.7, 173.7, 174.9, 176.5, 174.0, 176.7, 169.1, 166.1, 175.9, 176.3, 174.2, 168.1, 168.0, 175.8, 176.3, 178.5, 178.9, 183.5, 183.7, 183.7, 181.5, 186.2, 189.0, 191.4, 196.7, 196.9, 198.3, 200.4, 201.3, 204.3, 204.8, 207.9, 211.5, 216.2, 218.2, 226.9, 221.1, 217.0, 217.8, 221.6, 222.6, 228.6, 233.9, 235.0, 223.5, 226.5, 212.6, 224.6, 229.9, 233.1, 240.1, 229.0, 240.6, 243.4, 240.5, 244.0, 248.0, 254.8, 260.4, 260.4, 246.1, 225.1, 243.8, 251.7, 254.8, 265.2, 278.2, 270.7, 265.9, 286.3, 294.1, 292.0, 297.6, 307.1, 318.7, 320.2, 325.5, 331.2, 338.5, 326.8, 343.6, 341.5, 353.2, 340.2, 333.3, 341.9, 321.3, 321.8, 304.2, 322.6, 314.0, 295.1, 310.8, 322.5, 310.5, 324.5, 319.0, 327.8, 331.9, 333.4, 349.3, 358.0, 354.2, 342.4, 337.5, 359.9, 372.3, 377.0, 391.3, 400.8, 389.8, 404.3, 415.0, 419.2, 426.7, 433.8, 431.4, 450.6, 443.0, 451.8, 448.2, 431.2, 429.1, 448.0, 464.6, 472.7, 480.0, 492.8, 501.7, 502.8, 503.6, 509.2, 506.5, 489.5, 525.4, 545.4, 541.9, 542.5, 553.4, 552.6, 557.7]};
+  function pct(v, d) { return (v < 0 ? '−' : '') + Math.abs(v).toFixed(d) + '%'; }
+  function mk(id, cfg, d) {
+    QCHART.mount(document.getElementById(id), { cats: cfg.cats, series: cfg.series, fmt: function (v) { return pct(v, d); }, axisFmt: function (v) { return pct(v, 0); }, barFmt: function (v) { return pct(v, d); } });
+  }
+  mk('f1', F1, 2); mk('f2', F2, 2); mk('f3', F3, 0); mk('f4', F4, 1);
+  var ticks = ['2006-01', '2010-01', '2014-01', '2018-01', '2022-01', '2026-01'], idx = [];
+  ticks.forEach(function (p) { for (var i = 0; i < F5.x.length; i++) if (F5.x[i].indexOf(p) === 0) { idx.push(i); break; } });
+  QLINE.mount(document.getElementById('f5'), {
+    x: F5.x, xticks: idx, xtitle: '年份', height: 300,
+    series: [{ name: 'SPY', values: F5.spy, style: 0 }, { name: '備兌買權', values: F5.bxm, style: 1 }, { name: '七成組合', values: F5.mix, style: 2 }],
+    xfmt: function (v, tip) { return tip ? v : v.slice(0, 4); },
+    yfmt: function (v) { return v.toFixed(0); }, yaxis: function (v) { return v.toFixed(0); }
+  });
+})();
 </script>
 </body>
 </html>
