@@ -11,6 +11,45 @@
 <link rel="stylesheet" href="../invest.css">
 <link rel="stylesheet" href="../tool.css">
 <link rel="stylesheet" href="../pages.css">
+<style>
+.doc .sec{margin-top:72px;scroll-margin-top:16px}
+.doc .sec h2{font-size:23px}
+.doc .sec h3.t-lab{margin-top:36px;font-size:16px}
+.doc .lead{font-weight:600;color:var(--ink)}
+.toc{margin-top:20px;border:1px solid var(--line);padding:14px 20px 12px}
+.toc .toc-h{font-family:var(--serif);font-weight:700;font-size:17px;color:var(--navy)}
+.toc p{margin:6px 0 0;font-size:14px;line-height:1.8;color:var(--muted)}
+.toc ol{margin:8px 0 0;padding-left:24px;font-size:15px;line-height:1.9}
+.toc li span{display:block;font-size:13px;line-height:1.6;color:var(--muted);margin-bottom:4px}
+.doc .dtbl.cmp th,.doc .dtbl.cmp td{padding:10px 8px;font-size:14px;line-height:1.6}
+.doc .dtbl.cmp thead th{text-align:right;white-space:normal}
+.doc .dtbl.cmp thead th:first-child{text-align:left}
+.doc .dtbl.cmp tbody td{text-align:right}
+.doc .dtbl.cmp tbody th{font-size:14px;font-weight:500}
+.doc .dtbl.cmp .nw{white-space:nowrap}
+.doc .dtbl.cmp .tag{font-size:12px;color:var(--muted)}
+.doc .dwrap{overflow-x:visible}
+.doc .qa-answer,.doc .pre-box,.doc .toc,.doc .dwrap,.doc details.more,.doc .qa-fig,.doc .dlist{max-width:720px;margin-left:0;margin-right:0;box-sizing:border-box}
+.doc .steps{list-style:disc;margin:14px 0 0;padding-left:22px;font-size:17px;line-height:1.8;color:var(--ink2);max-width:720px}
+.doc .steps li+li{margin-top:6px}
+.doc .qa-fig{margin-top:32px}
+.doc .figs{margin-top:8px}
+details.more{margin-top:20px;border:1px solid var(--line);border-radius:0;background:var(--card)}
+details.more>summary{cursor:pointer;padding:12px 16px;font-size:15px;font-weight:700;line-height:1.6;color:var(--ink);list-style:none}
+details.more>summary::-webkit-details-marker{display:none}
+details.more>summary::before{content:"＋";display:inline-block;width:1.4em;color:var(--navy)}
+details.more[open]>summary::before{content:"－"}
+details.more[open]>summary{border-bottom:1px solid var(--line)}
+details.more .in{padding:0 0 4px}
+details.more .in>p{padding:0 16px}
+details.more .in .dwrap{margin-top:12px;border:0;margin-left:-1px;margin-right:-1px}
+.nw{white-space:nowrap}
+.doc .dtbl.cmp tbody th .tag{display:block;margin-top:2px;border:0;padding:0;background:none;font-size:12px;color:var(--muted)}
+details.more .in>p{margin:14px 0 0}
+.doc .sec h2{text-wrap:balance}
+@media (max-width:760px){.doc .dwrap{overflow-x:auto}}
+.doc .t-note{max-width:720px}
+</style>
 <script src="../invest.js"></script>
 <script src="../qchart.js"></script>
 </head>
@@ -20,28 +59,197 @@
 
 <p class="t-link" style="margin-top:28px"><a href="../questions.html">回到全部題目</a></p>
 <h1 class="h1" style="margin-top:12px">長期持有股票，挑時機買賣權避險划算嗎？</h1>
-<div class="qa-answer"><div class="k">一句話答案</div><p>用 14 種訊號挑時機買賣權，56 個組合的賣權本身損益全部是負。作為基準的每月都買，每年花約 3 個百分點，最大跌幅從 −55% 縮到 −42%，報酬從 10.96% 掉到 8.04%。</p></div>
-<aside class="pre-box" aria-labelledby="pre-t"><div class="pre-h" id="pre-t">讀這個結果之前</div><h4>這個結果的賣權價格多半是公式合成，期間也只有 22 年</h4><p>賣權是有權利在指定價格賣出股票的合約，股價大跌時會賺錢，平時要付權利金。歷史選擇權價格沒有免費資料，所以大部分組合用公式合成。</p><p>公式算出的成本比真實成交價高，會把避險成本高估。評估期是 2004 年起約 22 年，真正的大崩盤只有 2008 年和 2020 年兩次。</p><h4>這篇沒有回答的事</h4><ul><li>這篇主要測 14 種訊號配兩種規格，共 56 個組合，另外延伸測了不同出場方式，合計 100 多個設定。</li><li>測這麼多組之後，少數看起來好的組合是預期會出現的雜訊。</li><li>其他避險方式沒有測。</li></ul><p class="pre-fine">SPY、QQQ 含股息再投入，Cboe PPUT 指數與 S&P 500 總報酬指數，表中用 2004 至 2026 年。</p><p class="pre-link"><a href="#limits">完整的弱點見「這個結果的弱點」一節</a></p></aside>
+<div class="qa-answer"><div class="k">一句話答案</div><p>2004 年到 2026 年 7 月，長期持有 SPY 或 QQQ，用 14 種訊號挑時機買賣權，56 個組合的賣權本身損益全部是負的，付 1 元權利金，中位數只拿回 0.46 元。每月都買賣權的真實成交價指數，每年少賺 2.92 個百分點，換到最大跌幅從 −55.3% 縮到 −42.0%。同樣的最大跌幅，不買賣權、只把標普 500 的股票降到 71%（事後才知道的比例）、其餘放現金，年化 8.60%，比賣權指數的 8.04% 高。</p></div>
+<aside class="pre-box" aria-labelledby="pre-t"><div class="pre-h" id="pre-t">讀這個結果之前</div><h4>賣權價格多半是公式合成，期間 22 年只有兩次大崩盤</h4><p>賣權是有權利在指定價格賣出股票的合約，股價大跌時會賺錢，平時要付權利金。歷史賣權價格沒有免費資料，56 個組合的價格用公式合成。只有標普 500 有真實成交價的指數可以對照，QQQ 沒有。公式算出的成本比真實價高，全期每年多估 2.24 個百分點，五段裡四段如此，2009–13 年相反。</p><p>期間是 2004 年 1 月到 2026 年 7 月，大崩盤只有 2008 年和 2020 年兩次，2022 年是跌了十個月的緩跌。這是歷史次數的統計，不是下一次會怎樣。</p><h4>這篇沒有回答的事</h4><ul><li>賣權以外的避險方式沒有測。</li><li>56 個組合改用真實成交價重算，損益會改善多少，沒有量。</li><li>100 多個設定裡少數看起來好的格子，是測這麼多組之後預期會出現的雜訊，第 7 節量了預期有幾組。</li></ul><p class="pre-fine">年化是把整段報酬換算成平均每年的報酬率。最大跌幅是從高點跌到之後最低點的幅度。SPY、QQQ 報酬含股息再投入。賣權保護指數（PPUT）是 Cboe 編的指數：持有標普 500，每月買一檔價外賣權，用真實成交價計算。資料到 2026 年 7 月 16 日。</p><p class="pre-link"><a href="#limits">完整的弱點見「這個結果的弱點」一節</a></p></aside>
 
+<nav class="toc" aria-label="本文目錄"><div class="toc-h">本文目錄</div><ol>
+<li><a href="#what">測了什麼</a><span>14 種訊號、兩種賣權、兩個基準</span></li>
+<li><a href="#real">每月都買賣權的真實成交價指數</a><span>每年成本與七個時期</span></li>
+<li><a href="#grid">56 個組合的賣權損益</a><span>付 1 元拿回多少</span></li>
+<li><a href="#best">看起來最好的那一格</a><span>QQQ 布林上緣，逐次下跌與逐筆買進</span></li>
+<li><a href="#cash">同樣的最大跌幅，只降股票比例</a><span>其餘放現金，相鄰幾檔比例並列</span></li>
+<li><a href="#calib">合成價與真實價的差距</a><span>公式多估多少</span></li>
+<li><a href="#noise">100 多個設定裡的好看格子</a><span>隨機進場日的過關比例</span></li>
+<li><a href="#limits">這個結果的弱點</a><span>完整列出</span></li>
+<li><a href="#src">資料來源與接著看</a><span></span></li>
+</ol></nav>
+
+<section class="sec" id="what"><h2>測了什麼</h2>
+<p class="t-body lead">長期持有 SPY 或 QQQ，用 14 種訊號決定何時買賣權，共 56 個組合，另有一個每月都買的真實成交價指數當基準。</p>
+<h3 class="t-lab">14 種訊號</h3>
+<ul class="steps">
+<li>每月無條件買，1 種。</li>
+<li>隱含波動率偏高、偏低，2 種。隱含波動率是選擇權市場預期的未來波動，這裡用 VIX（標普 500）和 VXN（那斯達克 100）兩個波動率指數代替。</li>
+<li>隱含波動率相對近期實際波動偏高、偏低，2 種，也就是賣權相對貴或便宜。</li>
+<li>價格漲到布林通道上緣，兩種門檻。布林通道是以近期均價為中心、上下各畫一段波動幅度的帶子。</li>
+<li>價格高於長期均線，小段、中段、大段，3 種。</li>
+<li>波動率期限結構倒掛、平靜，2 種，也就是短期波動預期比遠期高或低。</li>
+<li>價格接近一年新高，1 種。</li>
+<li>價格跌破中期均線，1 種。</li>
+</ul>
+<h3 class="t-lab">兩種賣權、兩個基準</h3>
+<p class="t-body">賣權有兩種規格：一種價外、期限較長，一種價平、期限較短。2 檔標的、2 種規格、14 種訊號，共 56 個組合，買進後持有到期。訊號在收盤判斷，隔一個交易日買進。權利金每邊另加 1% 的成本，為了買賣權賣出或買回股票，每邊 0.07%。</p>
+<p class="t-body">基準有兩個。一個是同一檔 ETF 買進持有，不含賣權。另一個是 Cboe 的賣權保護指數：持有標普 500，每月買一檔價外賣權，用真實成交價計算，對照的是標普 500 總報酬指數。</p>
+<p class="t-body">評估期從 2004 年 1 月 2 日到 2026 年 7 月 16 日。</p>
+</section>
+
+<section class="sec" id="real"><h2>每月都買賣權的真實成交價指數</h2>
+<p class="t-body lead">每月都買賣權，每年少賺 2.92 個百分點，最大跌幅從 −55.3% 縮到 −42.0%。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">2004–2026</th><th scope="col">年化</th><th scope="col">最大跌幅</th></tr></thead><tbody><tr><th scope="row">標普 500 總報酬</th><td class="nw">10.96%</td><td class="nw">−55.3%</td></tr><tr><th scope="row">賣權保護指數（每月買）</th><td class="nw">8.04%</td><td class="nw">−42.0%</td></tr></tbody></table></div>
+<p class="t-body">兩者的年化差 2.92 個百分點，是每年的避險成本。買賣權換到的是最大跌幅淺 13.3 個百分點。</p>
+<h3 class="t-lab">分七個時期看</h3>
+<p class="t-body lead">七段裡六段的成本為正，只有含 2008 年的 2004–08 年是負的。</p>
+<p class="t-body">七段從 1988 年起算：前兩段各 8 年，中間四段各 5 年，最後一段只到 2026 年 7 月，約 2.5 年，這一段的成本是 4.81 個百分點。</p>
 <figure class="qa-fig">
-<div class="ttl">每個時期，每月買價外 5% 賣權每年的避險成本</div>
-<div class="cap">用真實成交價的買賣權指數算：S&amp;P 500 總報酬的年化，減去「持有 S&amp;P 500 加每月買價外 5% 賣權」的年化。正數是避險拖累報酬，負數是避險賺錢。七段裡六段為正。</div>
-<div class="tool"><div class="chartbox" id="cbox0"><div class="legend"></div><div class="chart" role="img" aria-label="七個五年期間每年的買賣權避險成本長條圖，只有 2004 至 2008 年為負值"></div></div></div>
+<div class="ttl">圖 2.1　每月買賣權，每年的避險成本</div>
+<div class="tool"><div class="chartbox" id="f21"><div class="legend" style="display:none"></div><div class="chart" role="img" aria-label="七個時期每年的買賣權避險成本長條圖，只有 2004 至 2008 年為負值，滑鼠移上去可看數值"></div></div></div>
 </figure>
+<p class="t-note">標普 500 總報酬年化減賣權保護指數年化，單位是個百分點。正數是避險拖累報酬，負數是避險賺錢。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">期間</th><th scope="col">標普 500 年化</th><th scope="col">賣權指數年化</th><th scope="col">每年成本</th></tr></thead><tbody><tr><th scope="row">1988–95</th><td class="nw">15.20%</td><td class="nw">10.21%</td><td class="nw">4.99</td></tr><tr><th scope="row">1996–03</th><td class="nw">9.28%</td><td class="nw">5.53%</td><td class="nw">3.76</td></tr><tr><th scope="row">2004–08</th><td class="nw">−2.13%</td><td class="nw">−0.58%</td><td class="nw">−1.56</td></tr><tr><th scope="row">2009–13</th><td class="nw">17.23%</td><td class="nw">10.31%</td><td class="nw">6.92</td></tr><tr><th scope="row">2014–18</th><td class="nw">8.70%</td><td class="nw">5.66%</td><td class="nw">3.04</td></tr><tr><th scope="row">2019–23</th><td class="nw">15.70%</td><td class="nw">12.89%</td><td class="nw">2.81</td></tr><tr><th scope="row">2024–26</th><td class="nw">21.59%</td><td class="nw">16.78%</td><td class="nw">4.81</td></tr></tbody></table></div>
+<p class="t-body">2004–08 年包含 2008 年，指數年化 −0.58%，比標普 500 的 −2.13% 好 1.56 個百分點，是七段裡唯一賣權賺錢的一段。2019–23 年包含 2020 年的急跌和 2022 年的下跌，成本仍有 2.81 個百分點。1996–03 年包含 2000 年到 2002 年的緩跌，成本是 3.76 個百分點。</p>
+<p class="t-body">最大跌幅在七段裡每一段都變淺，淺 2.2 到 16.6 個百分點。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">期間</th><th scope="col">標普 500 最大跌幅</th><th scope="col">賣權指數最大跌幅</th></tr></thead><tbody><tr><th scope="row">1988–95</th><td class="nw">−19.18%</td><td class="nw">−17.01%</td></tr><tr><th scope="row">1996–03</th><td class="nw">−47.41%</td><td class="nw">−38.55%</td></tr><tr><th scope="row">2004–08</th><td class="nw">−50.71%</td><td class="nw">−34.10%</td></tr><tr><th scope="row">2009–13</th><td class="nw">−27.19%</td><td class="nw">−22.66%</td></tr><tr><th scope="row">2014–18</th><td class="nw">−19.36%</td><td class="nw">−14.82%</td></tr><tr><th scope="row">2019–23</th><td class="nw">−33.79%</td><td class="nw">−22.14%</td></tr><tr><th scope="row">2024–26</th><td class="nw">−18.75%</td><td class="nw">−12.90%</td></tr></tbody></table></div>
+<p class="t-note">每段各自重新計算最大跌幅。</p>
+</section>
 
-<section class="sec"><h2>測了什麼</h2><p class="t-body">賣權（put）是有權利在指定價格賣出股票的合約，股價大跌時會賺錢，平時要付權利金。這裡的做法是長期持有 SPY 或 QQQ（股息再投入），再用 14 種訊號挑時機買賣權，例如隱含波動率偏高、價格漲到布林通道上緣、離 200 日均線太遠。賣權有兩種規格：價外 5%、剩 60 天；價平、剩 30 天。共測 56 個組合，另外用不同的出場方式和多輪延伸測了 100 多個設定。</p><p class="t-body">選擇權的歷史價格沒有免費資料，這裡用公式合成。校正用的是 Cboe 的 PPUT 指數：它用真實成交價，計算每月買價外 5% 賣權、持有 S&amp;P 500 的結果。對照是買進持有同一檔 ETF，不含任何賣權。</p></section>
-<section class="sec"><h2>結果</h2><div class="dwrap"><p class="t-note" style="margin:0 0 6px">前兩列用真實成交價；後面四列的賣權價格是公式合成。</p><table class="dtbl"><thead><tr><th>2004 至 2026 年</th><th class="num">年化報酬</th><th class="num">最大跌幅</th></tr></thead><tbody><tr><th scope="row">S&amp;P 500 總報酬（買進持有）</th><td class="num">10.96%</td><td class="num">−55.3%</td></tr><tr><th scope="row">每月買價外 5% 賣權、持有 S&amp;P 500（真實成交價指數）</th><td class="num">8.04%</td><td class="num">−42.0%</td></tr><tr><th scope="row">SPY 買進持有（股息再投入）</th><td class="num">10.85%</td><td class="num">−55.19%</td></tr><tr><th scope="row">QQQ 買進持有（股息再投入）</th><td class="num">14.94%</td><td class="num">−53.40%</td></tr><tr><th scope="row">QQQ，布林通道上緣訊號時買賣權（合成價格）</th><td class="num">15.02%</td><td class="num">−42.29%</td></tr><tr><th scope="row">QQQ，無條件永遠買賣權（合成價格）</th><td class="num">7.04%</td><td class="num">−38.76%</td></tr></tbody></table></div><p class="t-body">每月都買的做法，一年付出的避險成本是 2.92 個百分點，最大跌幅從 −55.3% 縮到 −42.0%。同期 S&amp;P 500 總報酬 10.96%，加了賣權變成 8.04%。全表只有一種做法最大跌幅明顯變淺、報酬又沒掉，就是 QQQ 的布林上緣訊號（15.02%、−42.29%）。但拆開來看，這一格在評估期內最需要的三次大跌，買賣權的部位當下都是空的，是路徑巧合。</p><p class="t-body">賣權本身的損益，56 個組合全部是負的：付 1 元權利金，平均拿回 0.20 到 0.80 元。14 種訊號沒有一個把這個數字翻正。</p><p class="t-body">分時期來看，七段裡有六段避險成本為正，從每年 2.81 到 6.92 個百分點，只有含 2008 年金融海嘯的 2004–2008 一段是 −1.56 個百分點（避險賺錢）。2019–2023 年這段包含 2020 年急跌和 2022 年熊市，成本仍是每年 2.81 個百分點。</p></section>
-<section class="sec"><h2 id="limits">這個結果的弱點</h2><ul class="dlist"><li>賣權價格是合成的。用 S&amp;P 500 同規格校正後發現，公式算出的成本比真實成交價高，用公式合成的結果會把避險成本高估。</li><li>QQQ 沒有真實成交價的指數可以校正，成本誤差比 SPY 大。</li><li>評估期只有 2004 年起約 22 年，真正的大崩盤只有 2008 年和 2020 年兩次，結論對這兩次的權重很高。</li><li>組合超過 100 個，其中少數組合的年化報酬除以最大跌幅看起來好，是測這麼多組之後預期會出現的雜訊。</li></ul></section>
-<section class="sec"><h2>資料來源</h2><ul class="dlist"><li>Cboe PPUT 指數與 S&amp;P 500 總報酬指數：1986 年起，表中用 2004 至 2026 年；SPY、QQQ 含股息還原日價格，2004 年起，這份測試沒有記錄最後一個交易日的日期，只標到 2026 年。</li></ul></section>
+<section class="sec" id="grid"><h2>56 個組合的賣權損益</h2>
+<p class="t-body lead">56 個組合的賣權本身損益全部是負的，付 1 元權利金，中位數只拿回 0.46 元。</p>
+<p class="t-body">賣權本身損益是把每一筆買進的到期收回金額，除以當初付出的權利金（含成本）。拿回 1 元以上才是賺。56 個組合裡，拿回最少的是 0，最多的是 0.80 元。</p>
+<p class="t-body">下表每組是 14 種訊號的分布，單位是付 1 元權利金拿回幾元。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">組別（各 14 個組合）</th><th scope="col">最少</th><th scope="col">中位數</th><th scope="col">最多</th></tr></thead><tbody><tr><th scope="row">SPY，價外、期限較長</th><td class="nw">0.00</td><td class="nw">0.29</td><td class="nw">0.61</td></tr><tr><th scope="row">SPY，價平、期限較短</th><td class="nw">0.32</td><td class="nw">0.51</td><td class="nw">0.69</td></tr><tr><th scope="row">QQQ，價外、期限較長</th><td class="nw">0.26</td><td class="nw">0.37</td><td class="nw">0.73</td></tr><tr><th scope="row">QQQ，價平、期限較短</th><td class="nw">0.40</td><td class="nw">0.56</td><td class="nw">0.80</td></tr></tbody></table></div>
+<figure class="qa-fig">
+<div class="ttl">圖 3.1　付 1 元權利金拿回幾元</div>
+<div class="tool"><div class="chartbox" id="f31"><div class="legend"></div><div class="chart" role="img" aria-label="四組賣權設定各 14 個訊號付 1 元權利金拿回金額的最少、中位數、最多長條圖，全部低於 1 元，滑鼠移上去可看數值"></div></div></div>
+</figure>
+<p class="t-note">虛線是付 1 元拿回 1 元。每組 14 個訊號，買進筆數從 8 筆到 270 筆。</p>
+<p class="t-body">拿回 0 的那一組是 SPY 價外規格、高於長期均線大段的訊號，只買了 8 筆，8 筆到期都沒有價值。拿回最多的是 QQQ 價平規格、同一個訊號，40 筆，拿回 0.80 元。</p>
+<h3 class="t-lab">年化與最大跌幅</h3>
+<p class="t-body">56 個組合裡，年化比同一檔純持有高的只有 1 個，是 QQQ 的布林上緣（15.02% 對 14.94%）。其餘 55 個都比純持有低。</p>
+<p class="t-body">最大跌幅比純持有淺 2 個百分點以上的，SPY 有 28 個裡的 14 個，QQQ 有 28 個裡的 20 個。同時年化少不到 1 個百分點的，SPY 沒有，QQQ 有 2 個。這個門檻是事前訂的。</p>
+<details class="more"><summary>看 56 個組合的年化、最大跌幅與賣權損益</summary><div class="in"><p>SPY，價外、期限較長的賣權</p><div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">訊號</th><th scope="col">年化</th><th scope="col">最大跌幅</th><th scope="col">付 1 元拿回</th></tr></thead><tbody><tr><th scope="row">SPY買進持有</th><td class="nw">10.85%</td><td class="nw">−55.19%</td><td class="nw">—</td></tr><tr><th scope="row">每月無條件買</th><td class="nw">4.91%</td><td class="nw">−39.72%</td><td class="nw">0.27</td></tr><tr><th scope="row">隱含波動率偏低</th><td class="nw">8.93%</td><td class="nw">−55.19%</td><td class="nw">0.24</td></tr><tr><th scope="row">隱含波動率偏高</th><td class="nw">7.25%</td><td class="nw">−43.52%</td><td class="nw">0.33</td></tr><tr><th scope="row">漲到布林上緣（低門檻）</th><td class="nw">9.15%</td><td class="nw">−51.34%</td><td class="nw">0.18</td></tr><tr><th scope="row">漲到布林上緣（高門檻）</th><td class="nw">10.42%</td><td class="nw">−54.76%</td><td class="nw">0.25</td></tr><tr><th scope="row">高於長期均線（小段）</th><td class="nw">7.18%</td><td class="nw">−55.49%</td><td class="nw">0.15</td></tr><tr><th scope="row">高於長期均線（中段）</th><td class="nw">9.95%</td><td class="nw">−55.19%</td><td class="nw">0.44</td></tr><tr><th scope="row">高於長期均線（大段）</th><td class="nw">10.00%</td><td class="nw">−55.19%</td><td class="nw">0.00</td></tr><tr><th scope="row">隱含波動相對實際偏低</th><td class="nw">8.78%</td><td class="nw">−45.10%</td><td class="nw">0.47</td></tr><tr><th scope="row">隱含波動相對實際偏高</th><td class="nw">6.27%</td><td class="nw">−52.05%</td><td class="nw">0.33</td></tr><tr><th scope="row">波動率期限結構倒掛</th><td class="nw">6.58%</td><td class="nw">−47.79%</td><td class="nw">0.30</td></tr><tr><th scope="row">波動率期限結構平靜</th><td class="nw">9.79%</td><td class="nw">−50.35%</td><td class="nw">0.61</td></tr><tr><th scope="row">接近一年新高</th><td class="nw">8.07%</td><td class="nw">−55.49%</td><td class="nw">0.22</td></tr><tr><th scope="row">跌破中期均線</th><td class="nw">7.72%</td><td class="nw">−48.13%</td><td class="nw">0.43</td></tr></tbody></table></div><p>SPY，價平、期限較短的賣權</p><div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">訊號</th><th scope="col">年化</th><th scope="col">最大跌幅</th><th scope="col">付 1 元拿回</th></tr></thead><tbody><tr><th scope="row">SPY買進持有</th><td class="nw">10.85%</td><td class="nw">−55.19%</td><td class="nw">—</td></tr><tr><th scope="row">每月無條件買</th><td class="nw">−0.03%</td><td class="nw">−34.81%</td><td class="nw">0.58</td></tr><tr><th scope="row">隱含波動率偏低</th><td class="nw">6.01%</td><td class="nw">−55.19%</td><td class="nw">0.45</td></tr><tr><th scope="row">隱含波動率偏高</th><td class="nw">7.48%</td><td class="nw">−32.51%</td><td class="nw">0.59</td></tr><tr><th scope="row">漲到布林上緣（低門檻）</th><td class="nw">7.32%</td><td class="nw">−52.89%</td><td class="nw">0.42</td></tr><tr><th scope="row">漲到布林上緣（高門檻）</th><td class="nw">10.16%</td><td class="nw">−54.66%</td><td class="nw">0.37</td></tr><tr><th scope="row">高於長期均線（小段）</th><td class="nw">4.24%</td><td class="nw">−54.71%</td><td class="nw">0.51</td></tr><tr><th scope="row">高於長期均線（中段）</th><td class="nw">8.85%</td><td class="nw">−55.19%</td><td class="nw">0.55</td></tr><tr><th scope="row">高於長期均線（大段）</th><td class="nw">9.94%</td><td class="nw">−55.19%</td><td class="nw">0.32</td></tr><tr><th scope="row">隱含波動相對實際偏低</th><td class="nw">7.83%</td><td class="nw">−46.81%</td><td class="nw">0.69</td></tr><tr><th scope="row">隱含波動相對實際偏高</th><td class="nw">1.63%</td><td class="nw">−54.22%</td><td class="nw">0.43</td></tr><tr><th scope="row">波動率期限結構倒掛</th><td class="nw">5.45%</td><td class="nw">−46.98%</td><td class="nw">0.46</td></tr><tr><th scope="row">波動率期限結構平靜</th><td class="nw">6.12%</td><td class="nw">−53.93%</td><td class="nw">0.51</td></tr><tr><th scope="row">接近一年新高</th><td class="nw">7.91%</td><td class="nw">−54.71%</td><td class="nw">0.60</td></tr><tr><th scope="row">跌破中期均線</th><td class="nw">7.46%</td><td class="nw">−45.65%</td><td class="nw">0.63</td></tr></tbody></table></div><p>QQQ，價外、期限較長的賣權</p><div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">訊號</th><th scope="col">年化</th><th scope="col">最大跌幅</th><th scope="col">付 1 元拿回</th></tr></thead><tbody><tr><th scope="row">QQQ買進持有</th><td class="nw">14.94%</td><td class="nw">−53.40%</td><td class="nw">—</td></tr><tr><th scope="row">每月無條件買</th><td class="nw">7.04%</td><td class="nw">−38.76%</td><td class="nw">0.27</td></tr><tr><th scope="row">隱含波動率偏低</th><td class="nw">12.72%</td><td class="nw">−53.40%</td><td class="nw">0.73</td></tr><tr><th scope="row">隱含波動率偏高</th><td class="nw">11.27%</td><td class="nw">−40.47%</td><td class="nw">0.31</td></tr><tr><th scope="row">漲到布林上緣（低門檻）</th><td class="nw">13.83%</td><td class="nw">−43.77%</td><td class="nw">0.69</td></tr><tr><th scope="row">漲到布林上緣（高門檻）</th><td class="nw">15.02%</td><td class="nw">−42.29%</td><td class="nw">0.39</td></tr><tr><th scope="row">高於長期均線（小段）</th><td class="nw">9.74%</td><td class="nw">−50.01%</td><td class="nw">0.31</td></tr><tr><th scope="row">高於長期均線（中段）</th><td class="nw">11.26%</td><td class="nw">−53.48%</td><td class="nw">0.32</td></tr><tr><th scope="row">高於長期均線（大段）</th><td class="nw">13.72%</td><td class="nw">−53.70%</td><td class="nw">0.35</td></tr><tr><th scope="row">隱含波動相對實際偏低</th><td class="nw">11.45%</td><td class="nw">−39.09%</td><td class="nw">0.39</td></tr><tr><th scope="row">隱含波動相對實際偏高</th><td class="nw">9.28%</td><td class="nw">−50.51%</td><td class="nw">0.26</td></tr><tr><th scope="row">波動率期限結構倒掛</th><td class="nw">10.22%</td><td class="nw">−43.71%</td><td class="nw">0.26</td></tr><tr><th scope="row">波動率期限結構平靜</th><td class="nw">13.14%</td><td class="nw">−50.68%</td><td class="nw">0.61</td></tr><tr><th scope="row">接近一年新高</th><td class="nw">12.55%</td><td class="nw">−53.42%</td><td class="nw">0.70</td></tr><tr><th scope="row">跌破中期均線</th><td class="nw">10.89%</td><td class="nw">−44.55%</td><td class="nw">0.40</td></tr></tbody></table></div><p>QQQ，價平、期限較短的賣權</p><div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">訊號</th><th scope="col">年化</th><th scope="col">最大跌幅</th><th scope="col">付 1 元拿回</th></tr></thead><tbody><tr><th scope="row">QQQ買進持有</th><td class="nw">14.94%</td><td class="nw">−53.40%</td><td class="nw">—</td></tr><tr><th scope="row">每月無條件買</th><td class="nw">2.87%</td><td class="nw">−35.31%</td><td class="nw">0.59</td></tr><tr><th scope="row">隱含波動率偏低</th><td class="nw">10.18%</td><td class="nw">−53.40%</td><td class="nw">0.56</td></tr><tr><th scope="row">隱含波動率偏高</th><td class="nw">10.62%</td><td class="nw">−39.88%</td><td class="nw">0.54</td></tr><tr><th scope="row">漲到布林上緣（低門檻）</th><td class="nw">10.65%</td><td class="nw">−52.76%</td><td class="nw">0.54</td></tr><tr><th scope="row">漲到布林上緣（高門檻）</th><td class="nw">14.54%</td><td class="nw">−51.60%</td><td class="nw">0.52</td></tr><tr><th scope="row">高於長期均線（小段）</th><td class="nw">5.93%</td><td class="nw">−49.37%</td><td class="nw">0.51</td></tr><tr><th scope="row">高於長期均線（中段）</th><td class="nw">9.65%</td><td class="nw">−51.21%</td><td class="nw">0.52</td></tr><tr><th scope="row">高於長期均線（大段）</th><td class="nw">14.56%</td><td class="nw">−51.21%</td><td class="nw">0.80</td></tr><tr><th scope="row">隱含波動相對實際偏低</th><td class="nw">10.02%</td><td class="nw">−41.12%</td><td class="nw">0.68</td></tr><tr><th scope="row">隱含波動相對實際偏高</th><td class="nw">7.88%</td><td class="nw">−37.53%</td><td class="nw">0.56</td></tr><tr><th scope="row">波動率期限結構倒掛</th><td class="nw">8.39%</td><td class="nw">−45.51%</td><td class="nw">0.40</td></tr><tr><th scope="row">波動率期限結構平靜</th><td class="nw">9.55%</td><td class="nw">−53.30%</td><td class="nw">0.57</td></tr><tr><th scope="row">接近一年新高</th><td class="nw">13.08%</td><td class="nw">−51.21%</td><td class="nw">0.76</td></tr><tr><th scope="row">跌破中期均線</th><td class="nw">10.19%</td><td class="nw">−50.02%</td><td class="nw">0.58</td></tr></tbody></table></div><p>付 1 元拿回：到期收回金額除以付出的權利金，沒有算還沒到期的部位，截止日沒有未了部位。</p></div></details>
+</section>
+
+<section class="sec" id="best"><h2>看起來最好的那一格</h2>
+<p class="t-body lead">QQQ 的布林上緣（價外、期限較長、高門檻）年化 15.02%、最大跌幅 −42.29%，跌幅變淺全來自 2008 年和 2018 年兩次買進。</p>
+<p class="t-body">QQQ 純持有是 14.94% 和 −53.40%。這一格的賣權本身付 1 元拿回 0.39 元，是負的。</p>
+<h3 class="t-lab">QQQ 跌 20% 以上的 5 次</h3>
+<p class="t-body">以 QQQ 含息的高點到谷底算，2004 年到 2026 年 7 月跌過 20% 以上的有 5 次。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">高點到谷底</th><th scope="col">純持有</th><th scope="col">加賣權</th><th scope="col">賣權部位</th></tr></thead><tbody><tr><th scope="row">2007/10–2008/11</th><td class="nw">−53.4%</td><td class="nw">−42.3%</td><td class="nw">2008/08 買進</td></tr><tr><th scope="row">2018/08–2018/12</th><td class="nw">−22.8%</td><td class="nw">−17.1%</td><td class="nw">2018/08 買進</td></tr><tr><th scope="row">2020/02–2020/03</th><td class="nw">−28.6%</td><td class="nw">−28.6%</td><td class="nw">無</td></tr><tr><th scope="row">2021/12–2022/11</th><td class="nw">−35.1%</td><td class="nw">−35.1%</td><td class="nw">無</td></tr><tr><th scope="row">2025/02–2025/04</th><td class="nw">−22.8%</td><td class="nw">−22.8%</td><td class="nw">無</td></tr></tbody></table></div>
+<figure class="qa-fig">
+<div class="ttl">圖 4.1　QQQ 跌 20% 以上的 5 次：純持有與加賣權</div>
+<div class="tool"><div class="chartbox" id="f41"><div class="legend"></div><div class="chart" role="img" aria-label="QQQ 跌 20% 以上的五次，純持有與加賣權的最大跌幅長條圖，只有 2008 年與 2018 年兩次加賣權後跌幅較淺，滑鼠移上去可看數值"></div></div></div>
+</figure>
+<p class="t-note">越往下跌得越深。</p>
+<p class="t-body">5 次裡有 3 次，高點到谷底之間完全沒有賣權部位，加賣權後的跌幅和純持有一樣：2020 年 2 月、2021 年 12 月到 2022 年 11 月、2025 年 2 月。2020 年那次，前一筆賣權是 2019 年 12 月買的，在 2020 年 2 月 18 日到期，一天後才是高點。</p>
+<p class="t-body">有部位的 2 次，都是下跌途中才買進。2008 年那次，高點在 2007 年 10 月，賣權是 2008 年 8 月 7 日買的。2018 年那次，高點在 8 月 29 日，賣權是隔天買的，10 月 29 日到期，12 月才到谷底。</p>
+<p class="t-body">2007–08 年那次，純持有是 −53.4%，加賣權後是 −42.3%。整段 22 年的最大跌幅，就是這一次。</p>
+<h3 class="t-lab">29 次買進</h3>
+<p class="t-body">這一格 22 年買了 29 次賣權，5 次拿回的錢比付出的多，24 次拿回的比付出的少。其中 23 次到期時拿回 0 元。</p>
+<p class="t-body">賺錢的 5 次裡，2018 年 8 月、2008 年 8 月、2012 年 9 月這 3 次，占全部賺錢金額的 93%。2020 年 10 月以後的 8 次買進，到期都是虧的。</p>
+<details class="more"><summary>看 29 次買進的逐筆結果</summary><div class="in"><div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">買進日</th><th scope="col">到期日</th><th scope="col">付 1 元拿回</th></tr></thead><tbody><tr><th scope="row">2004-04-05</th><td class="nw">2004-06-04</td><td class="nw">0.00</td></tr><tr><th scope="row">2006-08-17</th><td class="nw">2006-10-16</td><td class="nw">0.00</td></tr><tr><th scope="row">2006-11-15</th><td class="nw">2007-01-16</td><td class="nw">0.00</td></tr><tr><th scope="row">2008-08-07</th><td class="nw">2008-10-06</td><td class="nw">8.93</td></tr><tr><th scope="row">2009-02-09</th><td class="nw">2009-04-13</td><td class="nw">0.00</td></tr><tr><th scope="row">2009-12-23</th><td class="nw">2010-02-22</td><td class="nw">0.00</td></tr><tr><th scope="row">2010-10-18</th><td class="nw">2010-12-17</td><td class="nw">0.00</td></tr><tr><th scope="row">2011-01-06</th><td class="nw">2011-03-07</td><td class="nw">0.00</td></tr><tr><th scope="row">2011-04-25</th><td class="nw">2011-06-24</td><td class="nw">1.59</td></tr><tr><th scope="row">2011-07-05</th><td class="nw">2011-09-06</td><td class="nw">2.56</td></tr><tr><th scope="row">2012-03-14</th><td class="nw">2012-05-14</td><td class="nw">0.00</td></tr><tr><th scope="row">2012-09-17</th><td class="nw">2012-11-16</td><td class="nw">5.78</td></tr><tr><th scope="row">2013-04-11</th><td class="nw">2013-06-10</td><td class="nw">0.00</td></tr><tr><th scope="row">2013-10-21</th><td class="nw">2013-12-20</td><td class="nw">0.00</td></tr><tr><th scope="row">2014-05-28</th><td class="nw">2014-07-28</td><td class="nw">0.00</td></tr><tr><th scope="row">2016-05-25</th><td class="nw">2016-07-25</td><td class="nw">0.00</td></tr><tr><th scope="row">2017-04-25</th><td class="nw">2017-06-26</td><td class="nw">0.00</td></tr><tr><th scope="row">2017-10-30</th><td class="nw">2017-12-29</td><td class="nw">0.00</td></tr><tr><th scope="row">2018-06-05</th><td class="nw">2018-08-06</td><td class="nw">0.00</td></tr><tr><th scope="row">2018-08-30</th><td class="nw">2018-10-29</td><td class="nw">7.19</td></tr><tr><th scope="row">2019-12-17</th><td class="nw">2020-02-18</td><td class="nw">0.00</td></tr><tr><th scope="row">2020-10-13</th><td class="nw">2020-12-14</td><td class="nw">0.00</td></tr><tr><th scope="row">2021-01-21</th><td class="nw">2021-03-22</td><td class="nw">0.00</td></tr><tr><th scope="row">2021-08-24</th><td class="nw">2021-10-25</td><td class="nw">0.00</td></tr><tr><th scope="row">2023-07-14</th><td class="nw">2023-09-12</td><td class="nw">0.00</td></tr><tr><th scope="row">2023-12-13</th><td class="nw">2024-02-12</td><td class="nw">0.00</td></tr><tr><th scope="row">2024-06-13</th><td class="nw">2024-08-12</td><td class="nw">0.39</td></tr><tr><th scope="row">2024-11-08</th><td class="nw">2025-01-07</td><td class="nw">0.00</td></tr><tr><th scope="row">2025-10-28</th><td class="nw">2025-12-29</td><td class="nw">0.00</td></tr></tbody></table></div><p>付 1 元拿回：到期收回金額除以付出的權利金。最後一筆在 2025 年 12 月到期。</p></div></details>
+<p class="t-body">5 次大跌裡 3 次沒有部位，另外 2 次的部位是在高點之後才買。這一格的最大跌幅變淺只靠這 2 筆買進；5 次的樣本分不出是訊號有用還是碰巧，第 7 節的隨機進場也有 5% 到 25% 會過同樣的門檻。</p>
+</section>
+
+<section class="sec" id="cash"><h2>同樣的最大跌幅，只降股票比例</h2>
+<p class="t-body lead">標普 500 的股票降到 71%、其餘放現金，最大跌幅和賣權指數同為 −42.0%，年化 8.60%，比賣權指數的 8.04% 高 0.56 個百分點。</p>
+<p class="t-body">這個對照不買賣權，只持有一部分股票，其餘放 13 週國庫券，每個交易日把比例調回。現金報酬用 13 週國庫券殖利率，2004 年到 2026 年 7 月平均每年 1.73%。</p>
+<p class="t-body">71.05% 這個比例，是看完全部資料、倒推出最大跌幅等於 −42.0% 才找到的，事前不可能知道。所以下表並列相鄰的比例。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">標普 500</th><th scope="col">年化</th><th scope="col">最大跌幅</th><th scope="col">年化減 8.04%</th></tr></thead><tbody><tr><th scope="row">每月買賣權的指數（真實成交價）</th><td class="nw">8.04%</td><td class="nw">−42.0%</td><td class="nw">—</td></tr><tr><th scope="row">股票 100%</th><td class="nw">10.96%</td><td class="nw">−55.3%</td><td class="nw">＋2.92</td></tr><tr><th scope="row">股票 85%，其餘現金</th><td class="nw">9.77%</td><td class="nw">−48.7%</td><td class="nw">＋1.73</td></tr><tr><th scope="row">股票 80%，其餘現金</th><td class="nw">9.36%</td><td class="nw">−46.3%</td><td class="nw">＋1.32</td></tr><tr><th scope="row">股票 75%，其餘現金</th><td class="nw">8.94%</td><td class="nw">−43.9%</td><td class="nw">＋0.90</td></tr><tr><th scope="row">股票 71.05%，其餘現金</th><td class="nw">8.60%</td><td class="nw">−42.0%</td><td class="nw">＋0.56</td></tr><tr><th scope="row">股票 70%，其餘現金</th><td class="nw">8.51%</td><td class="nw">−41.4%</td><td class="nw">＋0.47</td></tr><tr><th scope="row">股票 65%，其餘現金</th><td class="nw">8.07%</td><td class="nw">−38.8%</td><td class="nw">＋0.03</td></tr><tr><th scope="row">股票 60%，其餘現金</th><td class="nw">7.63%</td><td class="nw">−36.2%</td><td class="nw">−0.41</td></tr></tbody></table></div>
+<p class="t-note">年化減 8.04% 是各列的年化減賣權指數的年化，單位是個百分點。</p>
+<p class="t-body">股票比例在 65% 以上，年化都不低於賣權指數；降到 60%，最大跌幅是 −36.2%，年化 7.63%，低於賣權指數。賣權指數的最大跌幅 −42.0%，介於股票 70%（−41.4%）與 75%（−43.9%）之間。</p>
+<h3 class="t-lab">QQQ 那一格</h3>
+<p class="t-body lead">QQQ 那一格的年化比同樣最大跌幅的降比例做法高約 3.1 個百分點。</p>
+<p class="t-body">股票 74.43%、其餘現金，最大跌幅 −42.29%，年化 11.89%。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">QQQ</th><th scope="col">年化</th><th scope="col">最大跌幅</th><th scope="col">年化減 15.02%</th></tr></thead><tbody><tr><th scope="row">QQQ，布林上緣訊號買賣權</th><td class="nw">15.02%</td><td class="nw">−42.29%</td><td class="nw">—</td></tr><tr><th scope="row">股票 100%</th><td class="nw">14.94%</td><td class="nw">−53.40%</td><td class="nw">−0.08</td></tr><tr><th scope="row">股票 85%，其餘現金</th><td class="nw">13.18%</td><td class="nw">−47.11%</td><td class="nw">−1.84</td></tr><tr><th scope="row">股票 80%，其餘現金</th><td class="nw">12.58%</td><td class="nw">−44.87%</td><td class="nw">−2.44</td></tr><tr><th scope="row">股票 75%，其餘現金</th><td class="nw">11.97%</td><td class="nw">−42.56%</td><td class="nw">−3.05</td></tr><tr><th scope="row">股票 74.43%，其餘現金</th><td class="nw">11.89%</td><td class="nw">−42.29%</td><td class="nw">−3.13</td></tr><tr><th scope="row">股票 70%，其餘現金</th><td class="nw">11.34%</td><td class="nw">−40.17%</td><td class="nw">−3.68</td></tr><tr><th scope="row">股票 65%，其餘現金</th><td class="nw">10.71%</td><td class="nw">−37.70%</td><td class="nw">−4.31</td></tr></tbody></table></div>
+<p class="t-note">年化減 15.02% 是各列的年化減那一格的年化，單位是個百分點。</p>
+<p class="t-body">這個差距來自第 4 節的 2008 年與 2018 年兩次買進。降股票比例的結果不依賴任何一筆買進的時間點。</p>
+<p class="t-body">QQQ 每月無條件買賣權的組合（價外、期限較長，合成價），年化 7.04%，最大跌幅 −38.76%。股票降到 67.13%，最大跌幅同樣是 −38.76%，年化 10.98%。</p>
+<figure class="qa-fig">
+<div class="ttl">圖 5.1　同樣的最大跌幅，買賣權與降股票比例的年化</div>
+<div class="tool"><div class="chartbox" id="f51"><div class="legend"></div><div class="chart" role="img" aria-label="三組比較：標普 500 每月買賣權、QQQ 布林上緣訊號、QQQ 每月買賣權，各自與最大跌幅相同的降股票比例做法的年化長條圖，滑鼠移上去可看數值"></div></div></div>
+</figure>
+<p class="t-note">每組兩根的最大跌幅相同。降股票比例的比例都是事後才知道的。</p>
+</section>
+
+<section class="sec" id="calib"><h2>合成價與真實價的差距</h2>
+<p class="t-body lead">公式合成的賣權價格比真實成交價貴，全期每年多估 2.24 個百分點，也就是 56 個組合的結果把賣權的成本算高了。</p>
+<p class="t-body">校正用同一個規格：價外、一個月期、每月無條件買。合成版用 SPY，真實版用賣權保護指數，各自的成本都是跟自己的純持有比。合成版年化 5.70%、最大跌幅 −49.0%，真實指數是 8.04% 和 −42.0%。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">期間</th><th scope="col">合成價每年成本</th><th scope="col">真實價每年成本</th><th scope="col">合成多估</th></tr></thead><tbody><tr><th scope="row">2004–2026 全期</th><td class="nw">5.16</td><td class="nw">2.92</td><td class="nw">＋2.24</td></tr><tr><th scope="row">2004–08</th><td class="nw">3.05</td><td class="nw">−1.56</td><td class="nw">＋4.61</td></tr><tr><th scope="row">2009–13</th><td class="nw">6.37</td><td class="nw">6.92</td><td class="nw">−0.55</td></tr><tr><th scope="row">2014–18</th><td class="nw">4.32</td><td class="nw">3.04</td><td class="nw">＋1.28</td></tr><tr><th scope="row">2019–23</th><td class="nw">5.76</td><td class="nw">2.81</td><td class="nw">＋2.95</td></tr><tr><th scope="row">2024–26</th><td class="nw">5.13</td><td class="nw">4.81</td><td class="nw">＋0.32</td></tr></tbody></table></div>
+<p class="t-note">單位是個百分點。合成多估是合成價每年成本減真實價每年成本。</p>
+<figure class="qa-fig">
+<div class="ttl">圖 6.1　每年的避險成本：合成價與真實價</div>
+<div class="tool"><div class="chartbox" id="f61"><div class="legend"></div><div class="chart" role="img" aria-label="全期與五個時期，合成價與真實價每年避險成本的長條圖，滑鼠移上去可看數值"></div></div></div>
+</figure>
+<p class="t-note">單位是個百分點。</p>
+<p class="t-body">五段裡四段合成價比真實價貴，2004–08 年差得最多，4.61 個百分點：合成價的成本是正的 3.05，真實指數是 −1.56。2009–13 年相反，合成價比真實價低 0.55 個百分點。</p>
+<p class="t-body">第 3 節的賣權損益用的是合成價，若同樣高估成本，賣權損益會被低估。但真實成交價指數每年的成本仍是正的 2.92 個百分點，七段裡六段為正。第 3 節 56 個組合的兩種規格和本節校正的規格不同，改用真實價會好多少，沒有量。</p>
+<p class="t-body">QQQ 沒有真實成交價的指數可以校正，它的誤差大小不知道。</p>
+</section>
+
+<section class="sec" id="noise"><h2>100 多個設定裡的好看格子</h2>
+<p class="t-body lead">隨機挑進場日，也有 5% 到 25% 的設定通過事前門檻，所以少數好看的格子在預期之內。</p>
+<p class="t-body">事前門檻是：最大跌幅比純持有淺 2 個百分點以上，年化少不到 1 個百分點。56 個組合裡通過的有 2 個，都是 QQQ，SPY 沒有。</p>
+<p class="t-body">對照的做法是把訊號換成隨機的進場日，進場筆數大致跟真訊號相近，每種設定模擬 1,000 次，看有多少比例通過門檻。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">設定</th><th scope="col">平均進場筆數</th><th scope="col">最大跌幅淺 2 點以上</th><th scope="col">兩項門檻都過</th></tr></thead><tbody><tr><th scope="row">SPY，價外、期限較長</th><td class="nw">27</td><td class="nw">31.9%</td><td class="nw">21.9%</td></tr><tr><th scope="row">SPY，價外、期限較長</th><td class="nw">58</td><td class="nw">61.0%</td><td class="nw">10.5%</td></tr><tr><th scope="row">SPY，價平、期限較短</th><td class="nw">25</td><td class="nw">33.0%</td><td class="nw">22.0%</td></tr><tr><th scope="row">SPY，價平、期限較短</th><td class="nw">65</td><td class="nw">54.8%</td><td class="nw">7.9%</td></tr><tr><th scope="row">QQQ，價外、期限較長</th><td class="nw">28</td><td class="nw">35.7%</td><td class="nw">24.9%</td></tr><tr><th scope="row">QQQ，價外、期限較長</th><td class="nw">60</td><td class="nw">60.2%</td><td class="nw">5.0%</td></tr><tr><th scope="row">QQQ，價平、期限較短</th><td class="nw">27</td><td class="nw">30.6%</td><td class="nw">20.3%</td></tr><tr><th scope="row">QQQ，價平、期限較短</th><td class="nw">68</td><td class="nw">56.7%</td><td class="nw">7.5%</td></tr></tbody></table></div>
+<p class="t-note">進場筆數約 27 筆和約 60 筆各一列。真訊號的買進筆數，中位數是 81 筆，從 8 筆到 270 筆。</p>
+<p class="t-body">進場筆數約 60 筆的四列，通過比例平均 7.7%；進場筆數約 27 筆的四列，平均 22.3%。用這兩個比例乘上 56 個組合，隨機進場預期有 4 到 12 組通過；乘上 100 個設定，是 8 到 22 組。56 個組合實際通過 2 組，沒有比隨機進場多。</p>
+<p class="t-body">最大跌幅淺 2 個百分點以上這一項，隨機進場就有 31% 到 61% 的機率達到。最大跌幅是整條路徑上的一個點，少數幾筆剛好買在崩盤途中，就會讓它變淺。</p>
+</section>
+
+<section class="sec" id="limits"><h2>這個結果的弱點</h2>
+<ul class="dlist">
+<li>賣權價格是公式合成，第 6 節量出公式比真實價貴（五段裡四段，2009–13 年相反）。56 個組合沒有用真實價重算，QQQ 沒有真實價指數可以校正。</li>
+<li>期間 22 年，大崩盤只有 2008 年和 2020 年兩次，結論對這兩次的權重很高。</li>
+<li>第 4 節的 5 次下跌只有 5 個樣本，彼此不一定獨立。</li>
+<li>第 7 節的隨機進場是每天獨立抽籤，真訊號的進場日會集中在某些時段，兩者的筆數分布不完全相同，預期組數是粗估。</li>
+<li>降股票比例的對照，比例是看完結果倒推的，現金用 13 週國庫券殖利率，沒有扣稅與交易成本。</li>
+<li>14 種訊號和兩種賣權規格是事前訂的粗格點，其他訊號、其他規格沒有測。</li>
+<li>權利金每邊 1% 和換股 0.07% 是假設值，稅沒有計。</li>
+</ul></section>
+
+<section class="sec" id="src"><h2>資料來源</h2><ul class="dlist"><li>SPY、QQQ 用含息還原日價格，波動率用 VIX 與 VXN，無風險利率用 13 週國庫券殖利率。賣權價格是公式合成，波動率取自 VIX 與 VXN，價外部位另加偏斜調整。</li><li>賣權保護指數（Cboe PPUT）與標普 500 總報酬指數，各時期的區間從 1988 年起，2004–2026 年的表是 2004 年 1 月 2 日到 2026 年 7 月 16 日。</li><li>最後一筆賣權買進在 2025 年 10 月 28 日，2025 年 12 月 29 日到期，截止日沒有未了的部位。</li></ul></section>
+<section class="sec"><h2>接著看</h2><ul class="dlist"><li><a href="covered-call.html">持有股票再賣出買權收權利金，會比單純持有好嗎？</a></li><li><a href="vol-targeting.html">市場震盪時自動減碼，能少賠又不少賺嗎？</a></li></ul></section>
 
 <p class="fine qa-back">這是歷史資料的計算，是一般資訊，不是對個人的投資建議。過去的結果不代表未來。</p>
 </div>
+
 <script>
-  (function () {
-    var cfg = {"cats": ["1988–95", "1996–03", "2004–08", "2009–13", "2014–18", "2019–23", "2024–26"], "series": [{"name": "避險成本", "values": [4.99, 3.76, -1.56, 6.92, 3.04, 2.81, 4.81]}], "extra": ["", "", "2004–08 含 2008 年金融海嘯，是唯一避險賺錢的一段", "", "", "", ""], "ref": null};
-    cfg.fmt = QCHART.fmt.pct2; cfg.axisFmt = QCHART.fmt.pct0;
-    QCHART.mount(document.getElementById('cbox0'), cfg);
-  })();
+(function () {
+  function p1(v) { return (v < 0 ? '−' : '') + Math.abs(v).toFixed(1) + '%'; }
+  function p0(v) { return (v < 0 ? '−' : '') + Math.abs(v).toFixed(0) + '%'; }
+  function p2(v) { return (v < 0 ? '−' : '') + Math.abs(v).toFixed(2) + '%'; }
+  function n2(v) { return (v < 0 ? '−' : '') + Math.abs(v).toFixed(2); }
+  var C2 = ["1988–95", "1996–03", "2004–08", "2009–13", "2014–18", "2019–23", "2024–26"], V2 = [4.99, 3.76, -1.56, 6.92, 3.04, 2.81, 4.81];
+  QCHART.mount(document.getElementById('f21'), {
+    cats: C2, series: [{ name: '每年成本', values: V2 }],
+    fmt: function (v) { return n2(v) + ' 個百分點'; }, axisFmt: function (v) { return v.toFixed(0); }, barFmt: function (v) { return n2(v); },
+    extra: ["", "", "含 2008 年，唯一避險賺錢的一段", "", "", "", "只到 2026 年 7 月"]
+  });
+  QCHART.mount(document.getElementById('f31'), {
+    cats: ['SPY 價外', 'SPY 價平', 'QQQ 價外', 'QQQ 價平'],
+    series: [{ name: '最少', values: [0.00, 0.32, 0.26, 0.40] }, { name: '中位數', values: [0.29, 0.51, 0.37, 0.56] }, { name: '最多', values: [0.61, 0.69, 0.73, 0.80] }],
+    fmt: function (v) { return n2(v) + ' 元'; }, axisFmt: function (v) { return v.toFixed(1); }, barFmt: function (v) { return n2(v); },
+    ref: { value: 1, label: '付 1 元' }, min: 0, max: 1.1
+  });
+  QCHART.mount(document.getElementById('f41'), {
+    cats: ["2007/10–2008/11", "2018/08–2018/12", "2020/02–2020/03", "2021/12–2022/11", "2025/02–2025/04"],
+    series: [{ name: '純持有', values: [-53.4, -22.8, -28.6, -35.1, -22.8] }, { name: '加賣權', values: [-42.3, -17.1, -28.6, -35.1, -22.8] }],
+    fmt: p1, axisFmt: p0, barFmt: p1, max: 0,
+    extra: ["2008 年 8 月買進一筆", "2018 年 8 月買進一筆", "沒有部位", "沒有部位", "沒有部位"]
+  });
+  QCHART.mount(document.getElementById('f51'), {
+    cats: ['標普 500 每月買', 'QQQ 布林上緣', 'QQQ 每月買'],
+    series: [{ name: '買賣權', values: [8.04, 15.02, 7.04] }, { name: '降股票比例', values: [8.60, 11.89, 10.98] }],
+    fmt: p2, axisFmt: p0, barFmt: function (v) { return v.toFixed(1) + '%'; }, min: 0,
+    extra: ["最大跌幅 −42.0%，股票 71.05%", "最大跌幅 −42.29%，股票 74.43%", "最大跌幅 −38.76%，股票 67.13%"]
+  });
+  QCHART.mount(document.getElementById('f61'), {
+    cats: ["全期", "2004–08", "2009–13", "2014–18", "2019–23", "2024–26"],
+    series: [{ name: '合成價', values: [5.16, 3.05, 6.37, 4.32, 5.76, 5.13] }, { name: '真實價', values: [2.92, -1.56, 6.92, 3.04, 2.81, 4.81] }],
+    fmt: function (v) { return n2(v) + ' 個百分點'; }, axisFmt: function (v) { return v.toFixed(0); }, barFmt: function (v) { return n2(v); }
+  });
+})();
+
 </script>
 </body>
 </html>
