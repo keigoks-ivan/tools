@@ -11,6 +11,44 @@
 <link rel="stylesheet" href="../invest.css">
 <link rel="stylesheet" href="../tool.css">
 <link rel="stylesheet" href="../pages.css">
+<style>
+.doc .sec{margin-top:72px;scroll-margin-top:16px}
+.doc .sec h2{font-size:23px}
+.doc .sec h3.t-lab{margin-top:36px;font-size:16px}
+.doc .lead{font-weight:600;color:var(--ink)}
+.toc{margin-top:20px;border:1px solid var(--line);padding:14px 20px 12px}
+.toc .toc-h{font-family:var(--serif);font-weight:700;font-size:17px;color:var(--navy)}
+.toc p{margin:6px 0 0;font-size:14px;line-height:1.8;color:var(--muted)}
+.toc ol{margin:8px 0 0;padding-left:24px;font-size:15px;line-height:1.9}
+.toc li span{display:block;font-size:13px;line-height:1.6;color:var(--muted);margin-bottom:4px}
+.doc .dtbl.cmp th,.doc .dtbl.cmp td{padding:10px 8px;font-size:14px;line-height:1.6}
+.doc .dtbl.cmp thead th{text-align:right;white-space:normal}
+.doc .dtbl.cmp thead th:first-child{text-align:left}
+.doc .dtbl.cmp tbody td{text-align:right}
+.doc .dtbl.cmp tbody th{font-size:14px;font-weight:500}
+.doc .dtbl.cmp .nw{white-space:nowrap}
+.doc .dtbl.cmp .tag{font-size:12px;color:var(--muted)}
+.doc .dwrap{overflow-x:visible}
+@media (max-width:760px){.doc .dwrap{overflow-x:auto}}
+.doc .qa-answer,.doc .pre-box,.doc .toc,.doc .dwrap,.doc details.more,.doc .qa-fig,.doc .dlist{max-width:720px;margin-left:0;margin-right:0;box-sizing:border-box}
+.doc .steps{list-style:disc;margin:14px 0 0;padding-left:22px;font-size:17px;line-height:1.8;color:var(--ink2);max-width:720px}
+.doc .steps li+li{margin-top:6px}
+.doc .qa-fig{margin-top:32px}
+.doc .figs{margin-top:8px}
+details.more{margin-top:20px;border:1px solid var(--line);border-radius:0;background:var(--card)}
+details.more>summary{cursor:pointer;padding:12px 16px;font-size:15px;font-weight:700;line-height:1.6;color:var(--ink);list-style:none}
+details.more>summary::-webkit-details-marker{display:none}
+details.more>summary::before{content:"＋";display:inline-block;width:1.4em;color:var(--navy)}
+details.more[open]>summary::before{content:"－"}
+details.more[open]>summary{border-bottom:1px solid var(--line)}
+details.more .in{padding:0 0 4px}
+details.more .in>p{padding:0 16px}
+details.more .in .dwrap{margin-top:12px;border:0;margin-left:-1px;margin-right:-1px}
+.nw{white-space:nowrap}
+.doc .dtbl.cmp tr.grp th{text-align:left;font-weight:700;background:var(--card);color:var(--ink)}
+details.more .in>h3{padding:0 16px}
+.doc .qa-back{max-width:720px;margin-left:0;margin-right:0;box-sizing:border-box}
+</style>
 <script src="../invest.js"></script>
 <script src="../qchart.js"></script>
 </head>
@@ -20,22 +58,179 @@
 
 <p class="t-link" style="margin-top:28px"><a href="../questions.html">回到全部題目</a></p>
 <h1 class="h1" style="margin-top:12px">股票少買一點，跌幅和報酬各少多少？</h1>
-<div class="qa-answer"><div class="k">一句話答案</div><p>0050 的股票比例從 100% 降到 40%，最大跌幅從 −55.8% 縮到 −23.4%，年化從 14.5% 降到 7.3%。</p></div>
-<aside class="pre-box" aria-labelledby="pre-t"><div class="pre-h" id="pre-t">讀這個結果之前</div><h4>降低股票比例，最大跌幅都變淺，年化的變化在三個市場不同</h4><p>台股、美股、日本都一樣，股票比例降低，最大跌幅變淺。0050 的股票比例從 100% 降到 40%，年化從 14.5% 降到 7.3%。</p><p>日本 1989 年起，現金報酬記為 0，只算股價的股票年化是 1.2%，跟現金差不多。股票比例降到 40%，年化是 1.1%，幾乎不動。可能的原因是這段期間股票沒有比現金多賺，這份結果沒有把原因拆開驗證。假設現金每年 1%，40% 的年化反而有 1.7%。</p><h4>這篇沒有回答的事</h4><ul><li>這篇只測了股票占 100% 到 40% 四種比例，低於 40% 沒有測。</li><li>其餘的錢只放現金，放債券或黃金沒有測。手續費與稅也沒有算。</li></ul><p class="pre-fine">台股 0050、美股大盤 SPY含股息、台幣計價，2003 年 6 月至 2026 年 10 月。日本是日經 225 指數，只算股價、沒算股息，1965 年起。不計手續費與稅。</p><p class="pre-link"><a href="#limits">完整的弱點見「這個結果的弱點」一節</a></p></aside>
+<div class="qa-answer"><div class="k">一句話答案</div><p>0050 的股票比例從 100% 降到 40%，最大跌幅從 −55.8% 縮到 −23.4%（2003 年 6 月至 2026 年 10 月，其餘放台幣定存，每年調回比例）。同期年化從 14.5% 降到 7.3%，少賺多少看股票比現金多賺多少。日本 1989 年起只算股價、現金記 0，降到 40% 年化只少 0.1 個百分點，是每年調回補回的，不調回時 40% 的年化是 0.6%。</p></div>
+<aside class="pre-box" aria-labelledby="pre-t"><div class="pre-h" id="pre-t">讀這個結果之前</div><h4>最大跌幅幾乎是比例乘股票跌幅，年化少多少則要看股票比現金多賺多少</h4><p>0050 的股票比例降到 40%，最大跌幅是 100% 那組的 0.42 倍。2003 年 6 月以來有 8 次從高點跌超過 20%，40% 那組每次的跌幅，跟「0.4 × 0050 的跌幅」最多差 2.2 個百分點。差距來自兩件事：每年只調回一次，高點那天的實際占比已偏離 40%；現金還有利息。</p><p>0050 的股票年化 14.5%、現金年化 1.4%，少持有 60% 的股票，按差額算會少 7.9 個百分點，實際少 7.2。日本 1989 年起股票年化只有 1.2%，現金記 0，降到 40% 年化 1.1%，只少 0.1 個百分點。日本股票只比現金多賺 1.2 個百分點，按差額算 40% 該少 0.7，每年調回又補回 0.6。這個結果不能搬到別的市場。</p><h4>這篇沒有回答的事</h4><ul><li>股票比例低於 40% 與 0% 沒有測，少賺的幅度只量到 40% 為止。</li><li>其餘的錢只放現金，放債券或黃金沒有測，手續費與稅也沒有算。</li><li>下一次下跌會跌多少，這份歷史只有一條路徑，不能回答。</li></ul><p class="pre-fine">台股 0050 與美股大盤 SPY 含股息，台幣計價，2003 年 6 月 30 日至 2026 年 10 月 30 日。日本是日經 225 指數，只算股價、沒算股息，日圓計價，1965 年 1 月起，另列 1989 年 12 月 29 日起。不計手續費與稅。</p><p class="pre-link"><a href="#limits">完整的弱點見「這個結果的弱點」一節</a></p></aside>
+
+<nav class="toc" aria-label="本文目錄"><div class="toc-h">本文目錄</div><ol>
+<li><a href="#what">測了什麼</a><span>進場、比例、調回、現金怎麼算</span></li>
+<li><a href="#table">三個市場、四個比例</a><span>台股、美股、日本的年化與最大跌幅，圖 1.1，年化 ÷ 最大跌幅的來源</span></li>
+<li><a href="#drops">0050 每一次跌超過兩成</a><span>8 次逐次表，圖 2.1</span></li>
+<li><a href="#recon">比例乘股票跌幅，差在哪</a><span>40% 那組逐次拆成四項，圖 3.1</span></li>
+<li><a href="#ann">年化少多少</a><span>比例乘（股票年化減現金年化）對實際，日本兩個假設，圖 4.1</span></li>
+<li><a href="#uw">最長沒創新高</a><span>圖 5.1</span></li>
+<li><a href="#limits">這個結果的弱點</a><span>完整列出</span></li>
+<li><a href="#src">資料來源與接著看</a><span></span></li>
+</ol></nav>
+
+<section class="sec" id="what"><h2>測了什麼</h2>
+<p class="t-body lead">進場固定在期間第一天，之後不賣，只決定股票占多少、其餘放現金。</p>
+<ul class="steps">
+<li>股票比例：100%、80%、60%、40% 四種，其餘放現金。</li>
+<li>調回：每年第一個交易日把股票與現金調回原比例，一年中間不動，所以年中的實際占比會隨漲跌偏離設定值。</li>
+<li>現金：台股與美股用台幣一年期定存牌告利率，整段期間平均年化 1.4%。日本現金記 0。</li>
+<li>最大跌幅：淨值從歷史高點跌到之後最低點的最深幅度。</li>
+<li>年化 ÷ 最大跌幅：年化報酬除以最大跌幅的絕對值，用來看每承受 1 個百分點的最大跌幅，換到多少年化。</li>
+<li>最長沒創新高：淨值從一個高點出發，到下一次創新高之間最長的年數。</li>
+</ul>
+<p class="t-body">日本是日經 225 價格指數，沒算股息，現金又記 0，報酬水準不能和台股、美股比，只比它自己四個比例之間的變化。</p>
+</section>
+
+<section class="sec" id="table"><h2>三個市場、四個比例</h2>
+<p class="t-body lead">三個市場都是股票比例越低，最大跌幅越淺；年化在台股與美股跟著降，日本 1989 年起不單調。</p>
 <figure class="qa-fig">
-<div class="ttl">不同股票比例的最大跌幅（橫軸是股票比例）</div>
-<div class="cap">進場固定在期間第一天，不賣，股票以外放現金，每年第一個交易日調回原比例。台股是 0050，美股是美股大盤（SPY），兩者都是 2003 年起。日本是日經 225 指數 1965 年起的全期間，只算股價、沒算股息。</div>
-<div class="tool"><div class="chartbox" id="cbox"><div class="legend"></div><div class="chart" role="img" aria-label="股票比例 100%、80%、60%、40% 在台股、美股、日本的最大跌幅長條圖"></div></div></div>
+<div class="ttl">圖 1.1　不同股票比例的最大跌幅（橫軸是股票比例）</div>
+<div class="cap">台股 0050 與美股 SPY 是 2003 年 6 月起。日本是日經 225 1965 年起的全期間，只算股價。</div>
+<div class="tool"><div class="chartbox" id="f11"><div class="legend"></div><div class="chart" role="img" aria-label="股票比例 100%、80%、60%、40% 在台股、美股、日本的最大跌幅長條圖"></div></div></div>
 </figure>
-<section class="sec"><h2>測了什麼</h2><p class="t-body">進場固定在期間第一天，之後不賣。股票占 100%、80%、60%、40%，其餘放現金，每年第一個交易日調回原比例。現金在台股與美股是台幣定存，在日本記 0。日本的報酬水準不和台美比。</p></section>
-<section class="sec"><h2>結果</h2><h3 class="t-lab" id="tw">台股結果（0050，2003 年 6 月起）</h3><div class="dwrap"><table class="dtbl"><thead><tr><th>股票比例</th><th class="num">年化</th><th class="num">最大跌幅</th><th class="num">最長沒創<br>新高（年）</th></tr></thead><tbody><tr><th scope="row">100%</th><td class="num">14.5%</td><td class="num">−55.8%</td><td class="num">3.2</td></tr><tr><th scope="row">80%</th><td class="num">12.4%</td><td class="num">−45.6%</td><td class="num">3.1</td></tr><tr><th scope="row">60%</th><td class="num">10.0%</td><td class="num">−34.7%</td><td class="num">2.3</td></tr><tr><th scope="row">40%</th><td class="num">7.3%</td><td class="num">−23.4%</td><td class="num">2.0</td></tr></tbody></table></div><p class="t-body">比例每降 20 個百分點，最大跌幅少約 9 到 16 個百分點，台股、美股、日本都一樣。</p><h3 class="t-lab" id="us">美股結果（美股大盤 SPY，同期 2003 年 6 月起）</h3><div class="dwrap"><table class="dtbl"><thead><tr><th>股票比例</th><th class="num">年化</th><th class="num">最大跌幅</th><th class="num">最長沒創<br>新高（年）</th></tr></thead><tbody><tr><th scope="row">100%</th><td class="num">10.9%</td><td class="num">−52.1%</td><td class="num">5.4</td></tr><tr><th scope="row">80%</th><td class="num">9.2%</td><td class="num">−43.0%</td><td class="num">5.3</td></tr><tr><th scope="row">60%</th><td class="num">7.3%</td><td class="num">−32.9%</td><td class="num">4.8</td></tr><tr><th scope="row">40%</th><td class="num">5.4%</td><td class="num">−21.9%</td><td class="num">4.3</td></tr></tbody></table></div><h3 class="t-lab" id="jp">日本結果（日經 225 指數）</h3><p class="t-body">全期間，股票比例從 100% 降到 40%，年化從 6.5% 降到 3.2%，最大跌幅從 −81.9% 縮到 −42.9%。</p><div class="dwrap"><table class="dtbl"><thead><tr><th>1989 年起</th><th class="num">年化</th><th class="num">最大跌幅</th><th class="num">最長沒創<br>新高（年）</th></tr></thead><tbody><tr><th scope="row">100%</th><td class="num">1.2%</td><td class="num">−81.9%</td><td class="num">34.1</td></tr><tr><th scope="row">80%</th><td class="num">1.4%</td><td class="num">−71.6%</td><td class="num">33.5</td></tr><tr><th scope="row">60%</th><td class="num">1.3%</td><td class="num">−58.7%</td><td class="num">31.0</td></tr><tr><th scope="row">40%</th><td class="num">1.1%</td><td class="num">−42.9%</td><td class="num">30.9</td></tr></tbody></table></div><p class="t-body">1989 年 12 月 29 日起，年化在 1.1% 到 1.4% 之間，沒有隨比例單調變動，最大跌幅從 −81.9% 縮到 −42.9%。可能的原因是這段期間只算股價的年化只有 1.2%，跟記 0 的現金差不多，每年調回比例也可能有一點作用。這份結果沒有把原因拆開驗證。</p><p class="t-body">改兩個假設重算，結果如下。2% 股息與 1% 現金利率是假設值，不是資料：</p><figure class="qa-fig">
-<div class="ttl">日本 1989 年起，不同假設下的年化（橫軸是股票比例）</div>
-<div class="cap">主表是只算股價、現金記 0。「假設加股息 2%」是股票價格每年額外加 2%，現金記 0。「假設現金 1%」是股票不加，現金每年 1%。</div>
-<div class="tool"><div class="chartbox" id="cbox2"><div class="legend"></div><div class="chart" role="img" aria-label="日本 1989 年起，三種假設下股票比例 100%、80%、60%、40% 的年化長條圖"></div></div></div>
+<p class="t-body">比例每降 20 個百分點，最大跌幅少約 9 到 16 個百分點，三個市場都一樣。</p>
+<h3 class="t-lab" id="tw">台股結果（0050，2003 年 6 月起）</h3>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">股票比例</th><th scope="col">年化</th><th scope="col">最大跌幅</th><th scope="col">年化 ÷ 最大跌幅</th></tr></thead><tbody><tr><th scope="row">100%</th><td class="nw">14.5%</td><td class="nw">−55.8%</td><td class="nw">0.26</td></tr><tr><th scope="row">80%</th><td class="nw">12.4%</td><td class="nw">−45.6%</td><td class="nw">0.27</td></tr><tr><th scope="row">60%</th><td class="nw">10.0%</td><td class="nw">−34.7%</td><td class="nw">0.29</td></tr><tr><th scope="row">40%</th><td class="nw">7.3%</td><td class="nw">−23.4%</td><td class="nw">0.31</td></tr></tbody></table></div>
+<p class="t-note">同樣四個比例，最差 12 個月與最長沒創新高的年數。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">股票比例</th><th scope="col">最差 12 個月</th><th scope="col">最長沒創新高（年）</th></tr></thead><tbody><tr><th scope="row">100%</th><td class="nw">−53.9%</td><td class="nw">3.2</td></tr><tr><th scope="row">80%</th><td class="nw">−43.9%</td><td class="nw">3.1</td></tr><tr><th scope="row">60%</th><td class="nw">−33.4%</td><td class="nw">2.3</td></tr><tr><th scope="row">40%</th><td class="nw">−22.1%</td><td class="nw">2.0</td></tr></tbody></table></div>
+<p class="t-note">0050 100% 的最大跌幅是 2007-10-29 到 2008-11-20。40% 那組的最大跌幅低點在 2009-01-21，比 100% 晚兩個月。</p>
+<h3 class="t-lab" id="us">美股結果（美股大盤 SPY，同期 2003 年 6 月起）</h3>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">股票比例</th><th scope="col">年化</th><th scope="col">最大跌幅</th><th scope="col">年化 ÷ 最大跌幅</th></tr></thead><tbody><tr><th scope="row">100%</th><td class="nw">10.9%</td><td class="nw">−52.1%</td><td class="nw">0.21</td></tr><tr><th scope="row">80%</th><td class="nw">9.2%</td><td class="nw">−43.0%</td><td class="nw">0.21</td></tr><tr><th scope="row">60%</th><td class="nw">7.3%</td><td class="nw">−32.9%</td><td class="nw">0.22</td></tr><tr><th scope="row">40%</th><td class="nw">5.4%</td><td class="nw">−21.9%</td><td class="nw">0.25</td></tr></tbody></table></div>
+<p class="t-note">同樣四個比例，最差 12 個月與最長沒創新高的年數。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">股票比例</th><th scope="col">最差 12 個月</th><th scope="col">最長沒創新高（年）</th></tr></thead><tbody><tr><th scope="row">100%</th><td class="nw">−45.0%</td><td class="nw">5.4</td></tr><tr><th scope="row">80%</th><td class="nw">−35.4%</td><td class="nw">5.3</td></tr><tr><th scope="row">60%</th><td class="nw">−25.9%</td><td class="nw">4.8</td></tr><tr><th scope="row">40%</th><td class="nw">−16.3%</td><td class="nw">4.3</td></tr></tbody></table></div>
+<h3 class="t-lab" id="jp">日本結果（日經 225 指數）</h3>
+<p class="t-body">1965 年起的全期間，股票比例從 100% 降到 40%，年化從 6.5% 降到 3.2%，最大跌幅從 −81.9% 縮到 −42.9%。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">股票比例</th><th scope="col">年化</th><th scope="col">最大跌幅</th><th scope="col">年化 ÷ 最大跌幅</th></tr></thead><tbody><tr><th scope="row">100%</th><td class="nw">6.5%</td><td class="nw">−81.9%</td><td class="nw">0.079</td></tr><tr><th scope="row">80%</th><td class="nw">5.6%</td><td class="nw">−71.6%</td><td class="nw">0.078</td></tr><tr><th scope="row">60%</th><td class="nw">4.5%</td><td class="nw">−58.7%</td><td class="nw">0.076</td></tr><tr><th scope="row">40%</th><td class="nw">3.2%</td><td class="nw">−42.9%</td><td class="nw">0.074</td></tr></tbody></table></div>
+<p class="t-note">同樣四個比例，最差 12 個月與最長沒創新高的年數。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">股票比例</th><th scope="col">最差 12 個月</th><th scope="col">最長沒創新高（年）</th></tr></thead><tbody><tr><th scope="row">100%</th><td class="nw">−56.6%</td><td class="nw">34.1</td></tr><tr><th scope="row">80%</th><td class="nw">−46.1%</td><td class="nw">33.5</td></tr><tr><th scope="row">60%</th><td class="nw">−35.2%</td><td class="nw">31.0</td></tr><tr><th scope="row">40%</th><td class="nw">−23.9%</td><td class="nw">30.9</td></tr></tbody></table></div>
+<p class="t-body">1989 年 12 月 29 日起，年化在 1.1% 到 1.4% 之間，沒有隨比例單調變動，最大跌幅從 −81.9% 縮到 −42.9%。這段的起點是歷史高點。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">股票比例</th><th scope="col">年化</th><th scope="col">最大跌幅</th><th scope="col">年化 ÷ 最大跌幅</th></tr></thead><tbody><tr><th scope="row">100%</th><td class="nw">1.2%</td><td class="nw">−81.9%</td><td class="nw">0.015</td></tr><tr><th scope="row">80%</th><td class="nw">1.4%</td><td class="nw">−71.6%</td><td class="nw">0.020</td></tr><tr><th scope="row">60%</th><td class="nw">1.3%</td><td class="nw">−58.7%</td><td class="nw">0.023</td></tr><tr><th scope="row">40%</th><td class="nw">1.1%</td><td class="nw">−42.9%</td><td class="nw">0.026</td></tr></tbody></table></div>
+<p class="t-note">同樣四個比例，最差 12 個月與最長沒創新高的年數。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">股票比例</th><th scope="col">最差 12 個月</th><th scope="col">最長沒創新高（年）</th></tr></thead><tbody><tr><th scope="row">100%</th><td class="nw">−56.6%</td><td class="nw">34.1</td></tr><tr><th scope="row">80%</th><td class="nw">−46.1%</td><td class="nw">33.5</td></tr><tr><th scope="row">60%</th><td class="nw">−35.2%</td><td class="nw">31.0</td></tr><tr><th scope="row">40%</th><td class="nw">−23.9%</td><td class="nw">30.9</td></tr></tbody></table></div>
+<p class="t-note">100% 與 80% 的最大跌幅低點是 2009-03-10，60% 與 40% 是 2003-04-28。</p>
+
+<h3 class="t-lab">年化 ÷ 最大跌幅為什麼隨比例變好</h3>
+<p class="t-body">0050 的比值從 0.26 升到 0.31，SPY 從 0.21 升到 0.25，日本 1989 年起從 0.015 升到 0.026。日本 1965 年起走相反方向，從 0.079 降到 0.074。這一欄只列出，不拿來排名。</p>
+<p class="t-body">把現金利息拿掉重算，0050 的比值是 0.261、0.262、0.263、0.259，幾乎不動。SPY 拿掉利息後從 0.208 降到 0.195。所以台股與美股的比值變好，是台幣定存利息造成的，一般報酬的部分並沒有變得更划算。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">股票比例</th><th scope="col">實際（定存利息＋每年調回）</th><th scope="col">現金利息記 0、每年調回</th></tr></thead><tbody><tr><th scope="row" class="nw">100%</th><td class="nw">0.261</td><td class="nw">0.261</td></tr><tr><th scope="row" class="nw">80%</th><td class="nw">0.271</td><td class="nw">0.262</td></tr><tr><th scope="row" class="nw">60%</th><td class="nw">0.287</td><td class="nw">0.263</td></tr><tr><th scope="row" class="nw">40%</th><td class="nw">0.314</td><td class="nw">0.259</td></tr></tbody></table></div>
+<p class="t-note">0050，2003 年 6 月起，列是股票比例，數字是年化 ÷ 最大跌幅。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">股票比例</th><th scope="col">實際（定存利息＋每年調回）</th><th scope="col">現金利息記 0、每年調回</th></tr></thead><tbody><tr><th scope="row" class="nw">100%</th><td class="nw">0.208</td><td class="nw">0.208</td></tr><tr><th scope="row" class="nw">80%</th><td class="nw">0.213</td><td class="nw">0.204</td></tr><tr><th scope="row" class="nw">60%</th><td class="nw">0.223</td><td class="nw">0.199</td></tr><tr><th scope="row" class="nw">40%</th><td class="nw">0.249</td><td class="nw">0.195</td></tr></tbody></table></div>
+<p class="t-note">SPY，同期，同上。</p>
+<p class="t-body">日本現金本來就記 0，比值變好來自每年調回。不調回時，四個比例的比值是 0.015、0.016、0.016、0.017；每年調回是 0.015、0.020、0.023、0.026。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">股票比例</th><th scope="col">每年調回</th><th scope="col">不調回</th></tr></thead><tbody><tr><th scope="row" class="nw">100%</th><td class="nw">0.015</td><td class="nw">0.015</td></tr><tr><th scope="row" class="nw">80%</th><td class="nw">0.020</td><td class="nw">0.016</td></tr><tr><th scope="row" class="nw">60%</th><td class="nw">0.023</td><td class="nw">0.016</td></tr><tr><th scope="row" class="nw">40%</th><td class="nw">0.026</td><td class="nw">0.017</td></tr></tbody></table></div>
+<p class="t-note">日本 1989 年起，現金記 0，列是股票比例。</p>
+</section>
+
+<section class="sec" id="drops"><h2>0050 每一次跌超過兩成</h2>
+<p class="t-body lead">2003 年 6 月以來 0050 有 8 次從高點跌超過 20%，股票比例降到 40% 時，每次的跌幅是 100% 那組的 0.38 到 0.50 倍。</p>
+<p class="t-body">一次下跌的定義是：0050 100% 的淨值離前一個高點跌超過 20%，從高點到之後最低點為止。下表每個比例都量同一個高點日到同一個低點日，所以 40% 那組在 2007 年那一次的跌幅（−23.1%），和主表 40% 的最大跌幅（−23.4%，低點晚兩個月）不是同一個數字。</p>
+<figure class="qa-fig">
+<div class="ttl">圖 2.1　0050 八次下跌，四個股票比例各跌多少（橫軸是低點的年月）</div>
+<div class="tool"><div class="chartbox" id="f21"><div class="legend"></div><div class="chart" role="img" aria-label="0050 八次跌超過 20% 的下跌，股票比例 100%、80%、60%、40% 各跌多少的長條圖"></div></div></div>
 </figure>
-<p class="t-body">假設加股息 2%，股票 100% 的年化是 3.3%，40% 是 1.9%，降比例要付報酬。假設現金 1%，100% 是 1.2%，40% 是 1.7%，降比例反而多賺。主表年化不動，換假設就不同，最大跌幅則在三種假設下都隨比例降低。</p></section>
-<section class="sec"><h2 id="limits">這個結果的弱點</h2><ul class="dlist"><li>只有三個市場，其中美股與台股共用 2003 年起同一段期間，兩者不獨立。</li><li>0050 的最大跌幅 −55.8% 是 2007 年 10 月 29 日到 2008 年 11 月 20 日那一次。</li><li>日本只算股價、現金記 0，報酬水準與台美不可比。1989 年起只有一個起點，而且起點是歷史高點。</li><li>只測 100%、80%、60%、40% 四個比例，沒有測 0%。測的比例不同，最大跌幅的範圍就不同。</li><li>只測每年調回一種做法，沒有算手續費與稅。</li><li>每個市場只有一條歷史上的四條淨值線，等於一條路徑。表裡沒放最差 12 個月，日本全期間的各比例也只用一句話帶過。</li></ul></section>
-<section class="sec"><h2>資料來源</h2><ul class="dlist"><li>台股：證交所官方還原日線 0050（2003 年 6 月 30 日起至 2026 年 10 月 30 日），現金用台幣一年期定存牌告利率。美股：美股大盤（SPY）含息，台幣計價，同一期間。日本：日經 225 指數，只算股價、沒算股息，日圓計價，1965 年 1 月 5 日起至 2026 年 11 月 11 日。</li></ul></section>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">高點</th><th scope="col">低點</th><th scope="col">100%</th></tr></thead><tbody><tr><th scope="row" class="nw">2004-03-04</th><td class="nw">2004-05-17</td><td class="nw">−22.8%</td></tr><tr><th scope="row" class="nw">2007-10-29</th><td class="nw">2008-11-20</td><td class="nw">−55.8%</td></tr><tr><th scope="row" class="nw">2011-01-28</th><td class="nw">2011-12-19</td><td class="nw">−23.0%</td></tr><tr><th scope="row" class="nw">2015-04-27</th><td class="nw">2015-08-24</td><td class="nw">−21.0%</td></tr><tr><th scope="row" class="nw">2020-01-14</th><td class="nw">2020-03-19</td><td class="nw">−28.2%</td></tr><tr><th scope="row" class="nw">2022-01-17</th><td class="nw">2022-10-25</td><td class="nw">−34.0%</td></tr><tr><th scope="row" class="nw">2024-07-11</th><td class="nw">2024-08-05</td><td class="nw">−21.3%</td></tr><tr><th scope="row" class="nw">2025-01-07</th><td class="nw">2025-04-09</td><td class="nw">−27.5%</td></tr></tbody></table></div>
+<p class="t-note">同樣八次，80%、60%、40% 的跌幅。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">高點</th><th scope="col">80%</th><th scope="col">60%</th><th scope="col">40%</th></tr></thead><tbody><tr><th scope="row" class="nw">2004-03-04</th><td class="nw">−18.6%</td><td class="nw">−14.2%</td><td class="nw">−9.6%</td></tr><tr><th scope="row" class="nw">2007-10-29</th><td class="nw">−45.6%</td><td class="nw">−34.7%</td><td class="nw">−23.1%</td></tr><tr><th scope="row" class="nw">2011-01-28</th><td class="nw">−18.3%</td><td class="nw">−13.5%</td><td class="nw">−8.6%</td></tr><tr><th scope="row" class="nw">2015-04-27</th><td class="nw">−17.0%</td><td class="nw">−12.8%</td><td class="nw">−8.6%</td></tr><tr><th scope="row" class="nw">2020-01-14</th><td class="nw">−22.6%</td><td class="nw">−16.9%</td><td class="nw">−11.2%</td></tr><tr><th scope="row" class="nw">2022-01-17</th><td class="nw">−27.2%</td><td class="nw">−20.3%</td><td class="nw">−13.4%</td></tr><tr><th scope="row" class="nw">2024-07-11</th><td class="nw">−18.3%</td><td class="nw">−14.8%</td><td class="nw">−10.7%</td></tr><tr><th scope="row" class="nw">2025-01-07</th><td class="nw">−22.1%</td><td class="nw">−16.7%</td><td class="nw">−11.1%</td></tr></tbody></table></div>
+<p class="t-note">同樣八次，100% 回到高點的日子。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">高點</th><th scope="col">100% 回到高點</th></tr></thead><tbody><tr><th scope="row" class="nw">2004-03-04</th><td class="nw">2005-12-26</td></tr><tr><th scope="row" class="nw">2007-10-29</th><td class="nw">2011-01-28</td></tr><tr><th scope="row" class="nw">2011-01-28</th><td class="nw">2013-05-16</td></tr><tr><th scope="row" class="nw">2015-04-27</th><td class="nw">2016-08-08</td></tr><tr><th scope="row" class="nw">2020-01-14</th><td class="nw">2020-07-13</td></tr><tr><th scope="row" class="nw">2022-01-17</th><td class="nw">2024-02-15</td></tr><tr><th scope="row" class="nw">2024-07-11</th><td class="nw">2025-01-06</td></tr><tr><th scope="row" class="nw">2025-01-07</th><td class="nw">2025-07-17</td></tr></tbody></table></div>
+<p class="t-note">四個比例是高點到低點的淨值變化。「100% 回到高點」是 0050 淨值重新超過該高點的日子。</p>
+<p class="t-body">40% 那組八次裡，最淺是 −8.6%，最深是 −23.1%；100% 那組最淺是 −21.0%，最深是 −55.8%。2008 年那一次，四個比例各跌 −55.8%、−45.6%、−34.7%、−23.1%。</p>
+<p class="t-body">比值最高的一次是 2024 年 7 月 11 日到 8 月 5 日，只有 15 個交易日，40% 那組是 100% 那組的 0.50 倍。原因是那年年初調回後 0050 一路上漲，到 7 月 11 日 40% 那組的股票已經占到 50.4%。下一節把這種偏離逐項算出來。</p>
+<p class="t-body">這 8 次不是 8 個獨立事件。2011 年 1 月那一次的高點，就是 2008 年那一次回到高點的同一天，2024 年 7 月與 2025 年 1 月兩次也只隔半年。</p>
+</section>
+
+<section class="sec" id="recon"><h2>比例乘股票跌幅，差在哪</h2>
+<p class="t-body lead">40% 那組每次下跌的實際跌幅，等於「0.4 × 0050 的跌幅」加上三項調整，四項相加對得上實際，不過這是會計拆解，調回的影響是用其餘三項倒算的餘項，所以相加必然等於實際，不是獨立驗證。</p>
+<p class="t-body">四項的意思如下，單位都是占高點日淨值的百分點。</p>
+<ul class="steps">
+<li>比例 × 股票跌幅：設定的 40% 乘上 0050 這段的跌幅。</li>
+<li>高點日占比偏離：高點那天股票實際占比與 40% 的差，乘上 0050 這段的跌幅。每年只在第一個交易日調回，之後股票漲得比現金多，占比就會高於 40%。</li>
+<li>調回的影響：下跌期間若跨過年初的調回，股票部分實際損益與「高點日占比 × 股票跌幅」的差。8 次裡只有 2008 年那一次的期間跨過年初。</li>
+<li>現金利息：現金部分在這段期間賺的利息。</li>
+</ul>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">高點</th><th scope="col">股票跌幅</th><th scope="col">比例 × 股票跌幅</th><th scope="col">實際跌幅</th></tr></thead><tbody><tr><th scope="row" class="nw">2004-03-04</th><td class="nw">−22.8%</td><td class="nw">−9.13</td><td class="nw">−9.60%</td></tr><tr><th scope="row" class="nw">2007-10-29</th><td class="nw">−55.8%</td><td class="nw">−22.30</td><td class="nw">−23.13%</td></tr><tr><th scope="row" class="nw">2011-01-28</th><td class="nw">−23.0%</td><td class="nw">−9.20</td><td class="nw">−8.65%</td></tr><tr><th scope="row" class="nw">2015-04-27</th><td class="nw">−21.0%</td><td class="nw">−8.38</td><td class="nw">−8.56%</td></tr><tr><th scope="row" class="nw">2020-01-14</th><td class="nw">−28.2%</td><td class="nw">−11.29</td><td class="nw">−11.25%</td></tr><tr><th scope="row" class="nw">2022-01-17</th><td class="nw">−34.0%</td><td class="nw">−13.58</td><td class="nw">−13.38%</td></tr><tr><th scope="row" class="nw">2024-07-11</th><td class="nw">−21.3%</td><td class="nw">−8.52</td><td class="nw">−10.68%</td></tr><tr><th scope="row" class="nw">2025-01-07</th><td class="nw">−27.5%</td><td class="nw">−11.00</td><td class="nw">−11.09%</td></tr></tbody></table></div>
+<p class="t-note">同樣八次，三項調整各是多少。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">高點</th><th scope="col">高點日占比偏離的影響</th><th scope="col">調回的影響</th><th scope="col">現金利息</th></tr></thead><tbody><tr><th scope="row" class="nw">2004-03-04</th><td class="nw">−0.63</td><td class="nw">0.00</td><td class="nw">+0.16</td></tr><tr><th scope="row" class="nw">2007-10-29</th><td class="nw">−2.81</td><td class="nw">0.43</td><td class="nw">+1.55</td></tr><tr><th scope="row" class="nw">2011-01-28</th><td class="nw">−0.13</td><td class="nw">0.00</td><td class="nw">+0.69</td></tr><tr><th scope="row" class="nw">2015-04-27</th><td class="nw">−0.43</td><td class="nw">0.00</td><td class="nw">+0.26</td></tr><tr><th scope="row" class="nw">2020-01-14</th><td class="nw">−0.06</td><td class="nw">0.00</td><td class="nw">+0.10</td></tr><tr><th scope="row" class="nw">2022-01-17</th><td class="nw">−0.30</td><td class="nw">0.00</td><td class="nw">+0.50</td></tr><tr><th scope="row" class="nw">2024-07-11</th><td class="nw">−2.22</td><td class="nw">0.00</td><td class="nw">+0.06</td></tr><tr><th scope="row" class="nw">2025-01-07</th><td class="nw">−0.34</td><td class="nw">0.00</td><td class="nw">+0.25</td></tr></tbody></table></div>
+<p class="t-note">前四個數字欄單位是百分點，四項相加等於「實際跌幅」（調回項是用其餘三項倒算的餘項，所以必然相加等於實際，不是獨立驗證），8 次逐次加總與實際的差不到 0.0000001 個百分點，表中四捨五入到小數兩位。</p>
+<figure class="qa-fig">
+<div class="ttl">圖 3.1　40% 那組，「比例 × 股票跌幅」對實際跌幅（橫軸是低點的年月）</div>
+<div class="tool"><div class="chartbox" id="f31"><div class="legend"></div><div class="chart" role="img" aria-label="八次下跌，40% 股票比例的比例乘股票跌幅與實際跌幅長條圖"></div></div></div>
+</figure>
+<p class="t-body">8 次裡有 7 次，實際跌幅與「0.4 × 股票跌幅」的差不到 1 個百分點。2008 年那次，實際比預估深 0.82 個百分點：高點日占比偏離多跌 2.81，調回少跌 0.43，現金利息少跌 1.55。2024 年那次差 2.16 個百分點，幾乎全來自占比偏離（−2.22）。</p>
+<p class="t-body">現金利息一項八次都是正的，單次最多 1.55 個百分點（2008 年那一次），只是讓跌幅少一點。</p>
+<details class="more"><summary>看 60% 與 80% 的拆解</summary><div class="in">
+<h3 class="t-lab">60% 那組</h3>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">高點</th><th scope="col">股票跌幅</th><th scope="col">比例 × 股票跌幅</th><th scope="col">實際跌幅</th></tr></thead><tbody><tr><th scope="row" class="nw">2004-03-04</th><td class="nw">−22.8%</td><td class="nw">−13.69</td><td class="nw">−14.20%</td></tr><tr><th scope="row" class="nw">2007-10-29</th><td class="nw">−55.8%</td><td class="nw">−33.45</td><td class="nw">−34.73%</td></tr><tr><th scope="row" class="nw">2011-01-28</th><td class="nw">−23.0%</td><td class="nw">−13.81</td><td class="nw">−13.48%</td></tr><tr><th scope="row" class="nw">2015-04-27</th><td class="nw">−21.0%</td><td class="nw">−12.58</td><td class="nw">−12.83%</td></tr><tr><th scope="row" class="nw">2020-01-14</th><td class="nw">−28.2%</td><td class="nw">−16.93</td><td class="nw">−16.93%</td></tr><tr><th scope="row" class="nw">2022-01-17</th><td class="nw">−34.0%</td><td class="nw">−20.37</td><td class="nw">−20.34%</td></tr><tr><th scope="row" class="nw">2024-07-11</th><td class="nw">−21.3%</td><td class="nw">−12.78</td><td class="nw">−14.78%</td></tr><tr><th scope="row" class="nw">2025-01-07</th><td class="nw">−27.5%</td><td class="nw">−16.49</td><td class="nw">−16.67%</td></tr></tbody></table></div>
+<p class="t-note">同樣八次，三項調整各是多少。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">高點</th><th scope="col">高點日占比偏離的影響</th><th scope="col">調回的影響</th><th scope="col">現金利息</th></tr></thead><tbody><tr><th scope="row" class="nw">2004-03-04</th><td class="nw">−0.62</td><td class="nw">0.00</td><td class="nw">+0.11</td></tr><tr><th scope="row" class="nw">2007-10-29</th><td class="nw">−2.70</td><td class="nw">0.42</td><td class="nw">+1.00</td></tr><tr><th scope="row" class="nw">2011-01-28</th><td class="nw">−0.13</td><td class="nw">0.00</td><td class="nw">+0.46</td></tr><tr><th scope="row" class="nw">2015-04-27</th><td class="nw">−0.42</td><td class="nw">0.00</td><td class="nw">+0.17</td></tr><tr><th scope="row" class="nw">2020-01-14</th><td class="nw">−0.06</td><td class="nw">0.00</td><td class="nw">+0.07</td></tr><tr><th scope="row" class="nw">2022-01-17</th><td class="nw">−0.30</td><td class="nw">0.00</td><td class="nw">+0.33</td></tr><tr><th scope="row" class="nw">2024-07-11</th><td class="nw">−2.04</td><td class="nw">0.00</td><td class="nw">+0.04</td></tr><tr><th scope="row" class="nw">2025-01-07</th><td class="nw">−0.34</td><td class="nw">0.00</td><td class="nw">+0.17</td></tr></tbody></table></div>
+<h3 class="t-lab">80% 那組</h3>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">高點</th><th scope="col">股票跌幅</th><th scope="col">比例 × 股票跌幅</th><th scope="col">實際跌幅</th></tr></thead><tbody><tr><th scope="row" class="nw">2004-03-04</th><td class="nw">−22.8%</td><td class="nw">−18.26</td><td class="nw">−18.61%</td></tr><tr><th scope="row" class="nw">2007-10-29</th><td class="nw">−55.8%</td><td class="nw">−44.60</td><td class="nw">−45.58%</td></tr><tr><th scope="row" class="nw">2011-01-28</th><td class="nw">−23.0%</td><td class="nw">−18.41</td><td class="nw">−18.27%</td></tr><tr><th scope="row" class="nw">2015-04-27</th><td class="nw">−21.0%</td><td class="nw">−16.77</td><td class="nw">−16.97%</td></tr><tr><th scope="row" class="nw">2020-01-14</th><td class="nw">−28.2%</td><td class="nw">−22.57</td><td class="nw">−22.58%</td></tr><tr><th scope="row" class="nw">2022-01-17</th><td class="nw">−34.0%</td><td class="nw">−27.17</td><td class="nw">−27.20%</td></tr><tr><th scope="row" class="nw">2024-07-11</th><td class="nw">−21.3%</td><td class="nw">−17.04</td><td class="nw">−18.28%</td></tr><tr><th scope="row" class="nw">2025-01-07</th><td class="nw">−27.5%</td><td class="nw">−21.99</td><td class="nw">−22.13%</td></tr></tbody></table></div>
+<p class="t-note">同樣八次，三項調整各是多少。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">高點</th><th scope="col">高點日占比偏離的影響</th><th scope="col">調回的影響</th><th scope="col">現金利息</th></tr></thead><tbody><tr><th scope="row" class="nw">2004-03-04</th><td class="nw">−0.40</td><td class="nw">0.00</td><td class="nw">+0.05</td></tr><tr><th scope="row" class="nw">2007-10-29</th><td class="nw">−1.73</td><td class="nw">0.27</td><td class="nw">+0.48</td></tr><tr><th scope="row" class="nw">2011-01-28</th><td class="nw">−0.09</td><td class="nw">0.00</td><td class="nw">+0.23</td></tr><tr><th scope="row" class="nw">2015-04-27</th><td class="nw">−0.28</td><td class="nw">0.00</td><td class="nw">+0.08</td></tr><tr><th scope="row" class="nw">2020-01-14</th><td class="nw">−0.04</td><td class="nw">0.00</td><td class="nw">+0.03</td></tr><tr><th scope="row" class="nw">2022-01-17</th><td class="nw">−0.20</td><td class="nw">0.00</td><td class="nw">+0.17</td></tr><tr><th scope="row" class="nw">2024-07-11</th><td class="nw">−1.26</td><td class="nw">0.00</td><td class="nw">+0.02</td></tr><tr><th scope="row" class="nw">2025-01-07</th><td class="nw">−0.22</td><td class="nw">0.00</td><td class="nw">+0.08</td></tr></tbody></table></div>
+<p class="t-note">欄位定義同 40%。四項相加與實際的差都在 0.000001 個百分點以內，同樣是倒算出來的餘項，不是獨立驗證。</p>
+</div></details>
+</section>
+
+<section class="sec" id="ann"><h2>年化少多少</h2>
+<p class="t-body lead">年化少多少，大致是少持有的股票比例，乘上股票年化與現金年化的差；實際比這個近似式高 0.2 到 0.7 個百分點，大部分來自每年調回壓低了波動拖累。</p>
+<p class="t-body">近似式是：現金年化 + 股票比例 ×（股票年化 − 現金年化）。以 0050 為例，現金年化 1.4%、股票年化 14.5%，40% 的近似是 6.7%，實際 7.3%。</p>
+<h3 class="t-lab">台股（0050，2003 年 6 月起）</h3>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">股票比例</th><th scope="col">近似</th><th scope="col">實際</th><th scope="col">實際 − 近似（百分點）</th></tr></thead><tbody><tr><th scope="row">100%</th><td class="nw">14.5%</td><td class="nw">14.5%</td><td class="nw">0.0</td></tr><tr><th scope="row">80%</th><td class="nw">11.9%</td><td class="nw">12.4%</td><td class="nw">0.5</td></tr><tr><th scope="row">60%</th><td class="nw">9.3%</td><td class="nw">10.0%</td><td class="nw">0.7</td></tr><tr><th scope="row">40%</th><td class="nw">6.7%</td><td class="nw">7.3%</td><td class="nw">0.7</td></tr></tbody></table></div>
+<p class="t-note">同樣四個比例，不調回的實際年化。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">股票比例</th><th scope="col">不調回的實際</th></tr></thead><tbody><tr><th scope="row">100%</th><td class="nw">14.5%</td></tr><tr><th scope="row">80%</th><td class="nw">13.5%</td></tr><tr><th scope="row">60%</th><td class="nw">12.2%</td></tr><tr><th scope="row">40%</th><td class="nw">10.5%</td></tr></tbody></table></div>
+<h3 class="t-lab">美股（SPY，同期）</h3>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">股票比例</th><th scope="col">近似</th><th scope="col">實際</th><th scope="col">實際 − 近似（百分點）</th></tr></thead><tbody><tr><th scope="row">100%</th><td class="nw">10.9%</td><td class="nw">10.9%</td><td class="nw">0.0</td></tr><tr><th scope="row">80%</th><td class="nw">9.0%</td><td class="nw">9.2%</td><td class="nw">0.2</td></tr><tr><th scope="row">60%</th><td class="nw">7.1%</td><td class="nw">7.3%</td><td class="nw">0.3</td></tr><tr><th scope="row">40%</th><td class="nw">5.2%</td><td class="nw">5.4%</td><td class="nw">0.3</td></tr></tbody></table></div>
+<p class="t-note">同樣四個比例，不調回的實際年化。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">股票比例</th><th scope="col">不調回的實際</th></tr></thead><tbody><tr><th scope="row">100%</th><td class="nw">10.9%</td></tr><tr><th scope="row">80%</th><td class="nw">10.0%</td></tr><tr><th scope="row">60%</th><td class="nw">8.8%</td></tr><tr><th scope="row">40%</th><td class="nw">7.4%</td></tr></tbody></table></div>
+<p class="t-note">年化都是一般複利年化。「不調回的實際」是進場後完全不調回、讓股票與現金各自漲跌。</p>
+<p class="t-body">實際年化都比近似式高：0050 高 0.5 到 0.7 個百分點，SPY 高 0.2 到 0.3。差距來自波動拖累。一檔股票每年上下震盪，複利年化會比算術平均少大約 σ² ÷ 2（σ 是年化波動）。每年把比例調回之後，股票只占比例 w，拖累縮到 w² × σ² ÷ 2。所以持有比例 w 的組合，近似式要再加 (w − w²) × σ² ÷ 2。</p>
+<p class="t-body">這個修正項在三個市場的數字如下，年化波動是日報酬換算的：0050 20.4%、SPY 18.5%、日經 225（1989 年起）23.4%。加進去之後，SPY 的差距縮到 0.07 個百分點以內，日本縮到 0.06。0050 還剩 0.19 到 0.32 個百分點沒有解釋，這份結果沒有再拆。</p>
+<details class="more"><summary>看修正項的逐項數字（連續複利年化）</summary><div class="in">
+<p class="t-body">這張表換成連續複利年化，因為 σ² ÷ 2 的關係式在連續複利下才成立。「一階」是現金 + 比例 ×（股票 − 現金），「加波動修正」是再加 (w − w²) × σ² ÷ 2，「實際」是每年調回的結果。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">股票比例</th><th scope="col">一階近似</th><th scope="col">加波動修正</th><th scope="col">實際</th></tr></thead><tbody><tr class="grp"><th scope="colgroup" colspan="4">台股 0050 2003-06 起</th></tr><tr><th scope="row" class="nw">80%</th><td class="nw">11.13%</td><td class="nw">11.46%</td><td class="nw">11.66%</td></tr><tr><th scope="row" class="nw">60%</th><td class="nw">8.70%</td><td class="nw">9.20%</td><td class="nw">9.50%</td></tr><tr><th scope="row" class="nw">40%</th><td class="nw">6.26%</td><td class="nw">6.76%</td><td class="nw">7.08%</td></tr><tr class="grp"><th scope="colgroup" colspan="4">美股 SPY 同期</th></tr><tr><th scope="row" class="nw">80%</th><td class="nw">8.53%</td><td class="nw">8.80%</td><td class="nw">8.76%</td></tr><tr><th scope="row" class="nw">60%</th><td class="nw">6.74%</td><td class="nw">7.15%</td><td class="nw">7.09%</td></tr><tr><th scope="row" class="nw">40%</th><td class="nw">4.96%</td><td class="nw">5.37%</td><td class="nw">5.31%</td></tr><tr class="grp"><th scope="colgroup" colspan="4">日本 1989 起：主表（股票不加、現金 0）</th></tr><tr><th scope="row" class="nw">80%</th><td class="nw">0.98%</td><td class="nw">1.42%</td><td class="nw">1.39%</td></tr><tr><th scope="row" class="nw">60%</th><td class="nw">0.74%</td><td class="nw">1.39%</td><td class="nw">1.34%</td></tr><tr><th scope="row" class="nw">40%</th><td class="nw">0.49%</td><td class="nw">1.15%</td><td class="nw">1.09%</td></tr><tr class="grp"><th scope="colgroup" colspan="4">日本 1989 起：假設股票每年加 2%</th></tr><tr><th scope="row" class="nw">80%</th><td class="nw">2.57%</td><td class="nw">3.01%</td><td class="nw">2.98%</td></tr><tr><th scope="row" class="nw">60%</th><td class="nw">1.93%</td><td class="nw">2.58%</td><td class="nw">2.53%</td></tr><tr><th scope="row" class="nw">40%</th><td class="nw">1.28%</td><td class="nw">1.94%</td><td class="nw">1.89%</td></tr><tr class="grp"><th scope="colgroup" colspan="4">日本 1989 起：假設現金每年 1%</th></tr><tr><th scope="row" class="nw">80%</th><td class="nw">1.18%</td><td class="nw">1.62%</td><td class="nw">1.59%</td></tr><tr><th scope="row" class="nw">60%</th><td class="nw">1.14%</td><td class="nw">1.79%</td><td class="nw">1.74%</td></tr><tr><th scope="row" class="nw">40%</th><td class="nw">1.09%</td><td class="nw">1.74%</td><td class="nw">1.68%</td></tr></tbody></table></div>
+<p class="t-note">同樣的情境與比例，實際與一階、修正後的差（百分點）。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">股票比例</th><th scope="col">實際 − 一階</th><th scope="col">實際 − 修正後</th></tr></thead><tbody><tr class="grp"><th scope="colgroup" colspan="3">台股 0050</th></tr><tr><th scope="row" class="nw">80%</th><td class="nw">0.53</td><td class="nw">0.19</td></tr><tr><th scope="row" class="nw">60%</th><td class="nw">0.80</td><td class="nw">0.30</td></tr><tr><th scope="row" class="nw">40%</th><td class="nw">0.82</td><td class="nw">0.32</td></tr><tr class="grp"><th scope="colgroup" colspan="3">美股 SPY</th></tr><tr><th scope="row" class="nw">80%</th><td class="nw">0.23</td><td class="nw">−0.04</td></tr><tr><th scope="row" class="nw">60%</th><td class="nw">0.34</td><td class="nw">−0.07</td></tr><tr><th scope="row" class="nw">40%</th><td class="nw">0.35</td><td class="nw">−0.06</td></tr><tr class="grp"><th scope="colgroup" colspan="3">日本：主表</th></tr><tr><th scope="row" class="nw">80%</th><td class="nw">0.41</td><td class="nw">−0.03</td></tr><tr><th scope="row" class="nw">60%</th><td class="nw">0.60</td><td class="nw">−0.06</td></tr><tr><th scope="row" class="nw">40%</th><td class="nw">0.60</td><td class="nw">−0.06</td></tr><tr class="grp"><th scope="colgroup" colspan="3">日本：股票加息假設</th></tr><tr><th scope="row" class="nw">80%</th><td class="nw">0.41</td><td class="nw">−0.03</td></tr><tr><th scope="row" class="nw">60%</th><td class="nw">0.61</td><td class="nw">−0.05</td></tr><tr><th scope="row" class="nw">40%</th><td class="nw">0.61</td><td class="nw">−0.05</td></tr><tr class="grp"><th scope="colgroup" colspan="3">日本：現金利率假設</th></tr><tr><th scope="row" class="nw">80%</th><td class="nw">0.41</td><td class="nw">−0.03</td></tr><tr><th scope="row" class="nw">60%</th><td class="nw">0.60</td><td class="nw">−0.06</td></tr><tr><th scope="row" class="nw">40%</th><td class="nw">0.59</td><td class="nw">−0.06</td></tr></tbody></table></div>
+</div></details>
+<h3 class="t-lab">日本 1989 年起的兩個假設</h3>
+<p class="t-body">日本這段的股票年化是 1.2%，現金記 0，近似式預期 40% 是 0.5%，實際 1.1%。不調回時 40% 是 0.6%。每年調回多賺的 0.6 個百分點，和上面的波動修正項接近：日經 225 年化波動 23.4%，40% 的修正是 0.24 × σ² ÷ 2 = 0.66 個百分點。</p>
+<p class="t-body">換兩個假設重算。2% 股息與 1% 現金利率是假設值，不是資料。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">股票比例（日本 1989 年起）</th><th scope="col">近似</th><th scope="col">每年調回的實際</th><th scope="col">不調回的實際</th></tr></thead><tbody><tr class="grp"><th scope="colgroup" colspan="4">主表：只算股價、現金記 0</th></tr><tr><th scope="row" class="nw">100%</th><td class="nw">1.2%</td><td class="nw">1.2%</td><td class="nw">1.2%</td></tr><tr><th scope="row" class="nw">80%</th><td class="nw">1.0%</td><td class="nw">1.4%</td><td class="nw">1.0%</td></tr><tr><th scope="row" class="nw">60%</th><td class="nw">0.7%</td><td class="nw">1.3%</td><td class="nw">0.8%</td></tr><tr><th scope="row" class="nw">40%</th><td class="nw">0.5%</td><td class="nw">1.1%</td><td class="nw">0.6%</td></tr><tr class="grp"><th scope="colgroup" colspan="4">假設股票每年加 2%、現金記 0</th></tr><tr><th scope="row" class="nw">100%</th><td class="nw">3.3%</td><td class="nw">3.3%</td><td class="nw">3.3%</td></tr><tr><th scope="row" class="nw">80%</th><td class="nw">2.6%</td><td class="nw">3.0%</td><td class="nw">2.8%</td></tr><tr><th scope="row" class="nw">60%</th><td class="nw">2.0%</td><td class="nw">2.6%</td><td class="nw">2.4%</td></tr><tr><th scope="row" class="nw">40%</th><td class="nw">1.3%</td><td class="nw">1.9%</td><td class="nw">1.8%</td></tr><tr class="grp"><th scope="colgroup" colspan="4">假設股票不加、現金每年 1%</th></tr><tr><th scope="row" class="nw">100%</th><td class="nw">1.2%</td><td class="nw">1.2%</td><td class="nw">1.2%</td></tr><tr><th scope="row" class="nw">80%</th><td class="nw">1.2%</td><td class="nw">1.6%</td><td class="nw">1.2%</td></tr><tr><th scope="row" class="nw">60%</th><td class="nw">1.1%</td><td class="nw">1.8%</td><td class="nw">1.1%</td></tr><tr><th scope="row" class="nw">40%</th><td class="nw">1.1%</td><td class="nw">1.7%</td><td class="nw">1.1%</td></tr></tbody></table></div>
+<figure class="qa-fig">
+<div class="ttl">圖 4.1　日本 1989 年起，不同假設下的年化（橫軸是股票比例）</div>
+<div class="cap">每年調回。「假設加股息 2%」是股票價格每年額外加 2%、現金記 0。「假設現金 1%」是股票不加、現金每年 1%。</div>
+<div class="tool"><div class="chartbox" id="f41"><div class="legend"></div><div class="chart" role="img" aria-label="日本 1989 年起，三種假設下股票比例 100%、80%、60%、40% 的年化長條圖"></div></div></div>
+</figure>
+<p class="t-body">假設加股息 2%，股票 100% 的年化是 3.3%，40% 是 1.9%，降比例要付報酬。假設現金 1%，100% 是 1.2%，40% 是 1.7%，降比例反而多賺，近似式與不調回的結果都是 1.1% 左右，多出來的也是調回。</p>
+<p class="t-body">這只說明日經 225 這條路徑上每年調回有 0.4 到 0.6 個百分點的貢獻，沒有測過別的調回頻率，也不表示調回一定加分。</p>
+</section>
+
+<section class="sec" id="uw"><h2>最長沒創新高</h2>
+<p class="t-body lead">股票比例降到 40%，最長沒創新高的時間都縮短，但縮短的幅度差很多：0050 從 3.2 年縮到 2.0 年，SPY 從 5.4 年縮到 4.3 年，日本 1989 年起從 34.1 年縮到 30.9 年。</p>
+<figure class="qa-fig">
+<div class="ttl">圖 5.1　最長沒創新高的年數（橫軸是股票比例）</div>
+<div class="cap">日本是 1989 年 12 月 29 日起。每個比例用自己的淨值判斷是否創新高。</div>
+<div class="tool"><div class="chartbox" id="f51"><div class="legend"></div><div class="chart" role="img" aria-label="股票比例 100%、80%、60%、40% 在台股、美股、日本最長沒創新高的年數長條圖"></div></div></div>
+</figure>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">股票比例</th><th scope="col">最長沒創新高（年）</th><th scope="col">從</th><th scope="col">到</th></tr></thead><tbody><tr class="grp"><th scope="colgroup" colspan="4">台股 0050</th></tr><tr><th scope="row" class="nw">100%</th><td class="nw">3.2</td><td class="nw">2007-10-29</td><td class="nw">2011-01-28</td></tr><tr><th scope="row" class="nw">80%</th><td class="nw">3.1</td><td class="nw">2007-10-29</td><td class="nw">2010-12-06</td></tr><tr><th scope="row" class="nw">60%</th><td class="nw">2.3</td><td class="nw">2011-01-28</td><td class="nw">2013-05-06</td></tr><tr><th scope="row" class="nw">40%</th><td class="nw">2.0</td><td class="nw">2007-10-29</td><td class="nw">2009-11-16</td></tr><tr class="grp"><th scope="colgroup" colspan="4">美股 SPY</th></tr><tr><th scope="row" class="nw">100%</th><td class="nw">5.4</td><td class="nw">2007-10-09</td><td class="nw">2013-03-04</td></tr><tr><th scope="row" class="nw">80%</th><td class="nw">5.3</td><td class="nw">2007-10-09</td><td class="nw">2013-01-25</td></tr><tr><th scope="row" class="nw">60%</th><td class="nw">4.8</td><td class="nw">2007-10-09</td><td class="nw">2012-08-08</td></tr><tr><th scope="row" class="nw">40%</th><td class="nw">4.3</td><td class="nw">2007-10-09</td><td class="nw">2012-02-06</td></tr><tr class="grp"><th scope="colgroup" colspan="4">日本 1989 年起</th></tr><tr><th scope="row" class="nw">100%</th><td class="nw">34.1</td><td class="nw">1989-12-29</td><td class="nw">2024-02-22</td></tr><tr><th scope="row" class="nw">80%</th><td class="nw">33.5</td><td class="nw">1989-12-29</td><td class="nw">2023-06-13</td></tr><tr><th scope="row" class="nw">60%</th><td class="nw">31.0</td><td class="nw">1989-12-29</td><td class="nw">2021-01-08</td></tr><tr><th scope="row" class="nw">40%</th><td class="nw">30.9</td><td class="nw">1989-12-29</td><td class="nw">2020-11-06</td></tr></tbody></table></div>
+<p class="t-note">「從」是那段沒創新高的起點（最後一次創新高），「到」是之後第一次回到該高點的日子。</p>
+<p class="t-body">0050 在 60% 的最長一段是 2011 年 1 月到 2013 年 5 月，不是 2008 年那一次，因為 60% 那組在 2008 年那一次較早回到前高。日本 40% 在 2020 年 11 月就回到 1989 年底的淨值，100% 要到 2024 年 2 月。日本三個比例的年數都在 30 年以上，降比例並沒有把這段時間縮到可以忽略。</p>
+</section>
+
+<section class="sec" id="limits"><h2>這個結果的弱點</h2><ul class="dlist">
+<li>只有三個市場，其中美股與台股共用 2003 年起同一段期間，兩者不獨立。0050 8 次下跌也不獨立，其中兩次相隔不到一年。</li>
+<li>0050 的最大跌幅 −55.8% 是 2007 年 10 月 29 日到 2008 年 11 月 20 日那一次，最大跌幅這一欄的數字都由這一次決定。</li>
+<li>日本只算股價、現金記 0，報酬水準與台美不可比。1989 年起只有一個起點，而且起點是歷史高點。日本兩個假設（股息 2%、現金 1%）是設定值，不是資料。</li>
+<li>只測 100%、80%、60%、40% 四個比例，沒有測低於 40% 與 0%。測的比例不同，最大跌幅的範圍就不同。</li>
+<li>只測每年第一個交易日調回一種做法，沒有算手續費與稅。調回對日本年化有 0.4 到 0.6 個百分點的貢獻，換一種調回頻率結果會不同。</li>
+<li>每個市場只有一條歷史路徑。年化 ÷ 最大跌幅隨比例變好，在台股與美股來自定存利息，換一段利率不同的期間數字會變。</li>
+<li>0050 年化的近似式與實際還剩 0.2 到 0.3 個百分點的差，這份結果沒有拆開。</li>
+</ul></section>
+
+<section class="sec" id="src"><h2>資料來源</h2><ul class="dlist"><li>台股：證交所官方還原日線 0050（2003 年 6 月 30 日起至 2026 年 10 月 30 日），現金用台幣一年期定存牌告利率。美股：美股大盤（SPY）含息，台幣計價，同一期間。日本：日經 225 指數，只算股價、沒算股息，日圓計價，1965 年 1 月 5 日起至 2026 年 11 月 11 日。</li></ul></section>
 <section class="sec"><h2>自己用工具算一次</h2><p class="qa-try"><a class="btn" href="../tool.html?sz=0050:60">0050 股票 60% 的結果</a></p><p class="t-note">工具最下面有股票比例拉桿，其餘放台幣定存，每年第一個交易日調回原比例。工具的期間與本篇可能不同，數字不會完全一樣。</p></section>
 <section class="sec"><h2>同一組測試的另外兩篇</h2><ul class="dlist"><li><a href="entry-timing.html">進場的那一天，影響有多大？挑得到好時點嗎？</a></li><li><a href="exit-rules.html">設了出場規則，少跌多少、少賺多少？</a></li></ul></section>
 
@@ -43,16 +238,12 @@
 </div>
 <script>
 (function () {
-  (function () {
-    var cfg = {"cats": ["100%", "80%", "60%", "40%"], "series": [{"name": "台股", "values": [-55.8, -45.6, -34.7, -23.4]}, {"name": "美股", "values": [-52.1, -43.0, -32.9, -21.9]}, {"name": "日本", "values": [-81.9, -71.6, -58.7, -42.9]}]};
-    cfg.fmt = QCHART.fmt.pct1; cfg.axisFmt = QCHART.fmt.pct0;
-    QCHART.mount(document.getElementById('cbox'), cfg);
-  })();
-  (function () {
-    var cfg = {"cats": ["100%", "80%", "60%", "40%"], "series": [{"name": "主表", "values": [1.2, 1.4, 1.3, 1.1]}, {"name": "假設加股息 2%", "values": [3.3, 3.0, 2.6, 1.9]}, {"name": "假設現金 1%", "values": [1.2, 1.6, 1.8, 1.7]}]};
-    cfg.fmt = QCHART.fmt.pct1; cfg.axisFmt = QCHART.fmt.pct0;
-    QCHART.mount(document.getElementById('cbox2'), cfg);
-  })();
+  function m(id, cfg) { cfg.fmt = QCHART.fmt.pct1; cfg.axisFmt = QCHART.fmt.pct0; QCHART.mount(document.getElementById(id), cfg); }
+  m('f11', {"cats": ["100%", "80%", "60%", "40%"], "series": [{"name": "\u53f0\u80a1", "values": [-55.8, -45.6, -34.7, -23.4]}, {"name": "\u7f8e\u80a1", "values": [-52.1, -43.0, -32.9, -21.9]}, {"name": "\u65e5\u672c", "values": [-81.9, -71.6, -58.7, -42.9]}]});
+  m('f21', {"cats": ["2004/05", "2008/11", "2011/12", "2015/08", "2020/03", "2022/10", "2024/08", "2025/04"], "series": [{"name": "100%", "values": [-22.8, -55.8, -23.0, -21.0, -28.2, -34.0, -21.3, -27.5]}, {"name": "80%", "values": [-18.6, -45.6, -18.3, -17.0, -22.6, -27.2, -18.3, -22.1]}, {"name": "60%", "values": [-14.2, -34.7, -13.5, -12.8, -16.9, -20.3, -14.8, -16.7]}, {"name": "40%", "values": [-9.6, -23.1, -8.6, -8.6, -11.2, -13.4, -10.7, -11.1]}]});
+  m('f31', {"cats": ["2004/05", "2008/11", "2011/12", "2015/08", "2020/03", "2022/10", "2024/08", "2025/04"], "series": [{"name": "\u6bd4\u4f8b \u00d7 \u80a1\u7968\u8dcc\u5e45", "values": [-9.1, -22.3, -9.2, -8.4, -11.3, -13.6, -8.5, -11.0]}, {"name": "\u5be6\u969b\u8dcc\u5e45", "values": [-9.6, -23.1, -8.6, -8.6, -11.2, -13.4, -10.7, -11.1]}]});
+  m('f41', {"cats": ["100%", "80%", "60%", "40%"], "series": [{"name": "\u4e3b\u8868", "values": [1.2, 1.4, 1.3, 1.1]}, {"name": "\u5047\u8a2d\u52a0\u80a1\u606f 2%", "values": [3.3, 3.0, 2.6, 1.9]}, {"name": "\u5047\u8a2d\u73fe\u91d1 1%", "values": [1.2, 1.6, 1.8, 1.7]}]});
+  var c5 = {"cats": ["100%", "80%", "60%", "40%"], "series": [{"name": "\u53f0\u80a1", "values": [3.2, 3.1, 2.3, 2.0]}, {"name": "\u7f8e\u80a1", "values": [5.4, 5.3, 4.8, 4.3]}, {"name": "\u65e5\u672c", "values": [34.1, 33.5, 31.0, 30.9]}]}; c5.fmt = function (v) { return v.toFixed(1) + ' 年'; }; c5.axisFmt = function (v) { return v + ''; }; QCHART.mount(document.getElementById('f51'), c5);
 })();
 </script>
 </body>
