@@ -99,10 +99,25 @@
     for (var it = 0; it < 200; it++) { var mid = (lo + hi) / 2; if (f(mid) > 0) lo = mid; else hi = mid; }
     return (lo + hi) / 2;
   }
+  /* 資金加權年化（XIRR）：解 r 使 Σ 投入 ×(1+r)^(距終點年數) = 期末金額；二分法 −99%～+1000%，容差 1e-7；無解或期間不到一年回傳 null */
+  function xirr(flows, e, finalV) {
+    if (dayDiff(flows[0][0], e) / 365.25 < 1) return null;
+    function f(r) {
+      var tot = -finalV;
+      for (var i = 0; i < flows.length; i++) tot += flows[i][1] * Math.pow(1 + r, dayDiff(flows[i][0], e) / 365.25);
+      return tot;
+    }
+    var lo = -0.99, hi = 10, flo = f(lo), fhi = f(hi);
+    if (!(flo < 0 && fhi > 0)) return null;
+    for (var it = 0; it < 200 && hi - lo > 1e-7; it++) { var mid = (lo + hi) / 2; if (f(mid) < 0) lo = mid; else hi = mid; }
+    return (lo + hi) / 2;
+  }
   function stats(sim, s, e, mode, amount) {
     var n = e - s + 1, nav = sim.nav, i;
     var finalV = sim.val[n - 1], contributed = sim.contrib[n - 1];
     var years = dayDiff(s, e) / 365.25;
+    var twr = years > 0 ? Math.pow(nav[n - 1], 1 / years) - 1 : null;
+    var xi = mode === 'lump' ? null : xirr(sim.flows, e, finalV);
     var ann = mode === 'lump' ? Math.pow(finalV / amount, 1 / years) - 1 : irr(sim.flows, s, e, finalV);
     var peak = nav[0], peakI = 0, mdd = 0, mddP = 0, mddT = 0, longest = { days: 0, p: 0, r: 0, rec: true }, uwStart = -1;
     for (i = 1; i < n; i++) {
@@ -165,7 +180,7 @@
     if (trI >= 0) eps.push({ p: pkI, t: trI, r: n - 1, depth: trD, rec: false });
     var dd5 = eps.map(function (x, ix) { x.ix = ix; return x; }).sort(function (a, b) { return a.depth - b.depth || a.ix - b.ix; })
       .filter(function (x) { return x.depth <= -0.05; }).slice(0, 5);
-    return { sharpe: sharpe, sharpeNA: sharpeNA, dd5: dd5, vol: vol, worstM: worstM, finalV: finalV, contributed: contributed, ann: ann, mdd: mdd, mddP: mddP, mddT: mddT, longest: longest, worst: worst, yearly: yearly, drawdown: drawdown, years: years };
+    return { sharpe: sharpe, sharpeNA: sharpeNA, dd5: dd5, vol: vol, worstM: worstM, finalV: finalV, contributed: contributed, ann: ann, twr: twr, xirr: xi, mdd: mdd, mddP: mddP, mddT: mddT, longest: longest, worst: worst, yearly: yearly, drawdown: drawdown, years: years };
   }
   function partialYear(s, e) {
     return {
@@ -218,15 +233,20 @@
   /* ---------- 表格與圖例（回傳 HTML） ---------- */
   var BASIC_ROWS;
   BASIC_ROWS = ['principal', 'final', 'ann', 'mdd', 'longest', 'worst'];
+  var YOURS = '你的錢實際的年化報酬';
   var ADV_ROWS = ['mddPeriod', 'worstM', 'vol', 'ratio', 'sharpe'];
   var ROWS = BASIC_ROWS.concat(ADV_ROWS);
   function statsHtml(res, rowKeys) {
     var out = res.out, s = res.s, mode = res.mode;
-    var annLab = mode === 'lump' ? '含息年化報酬' : '含息年化報酬<span class="sub">資金加權：每一筆投入各自放了多久都算進去</span>';
+    var annLab = '含息年化報酬';
+    var xiLab = YOURS + '<span class="sub">每一筆錢投入的時間不同，這個數字反映的是你實際放進去的錢賺了多少</span>';
+    var twLab = '這個組合本身的年化報酬<span class="sub">不管什麼時候投入，組合本身每年漲多少。用來跟別的組合或單筆比較</span>';
     var defs = {
       principal: ['投入本金', function (o) { return money(o.st.contributed); }],
       final: ['期末金額', function (o) { return money(o.st.finalV); }],
       ann: [annLab, function (o) { return pct(o.st.ann, 1); }, true],
+      xirr: [xiLab, function (o) { return o.st.xirr == null ? '不顯示' + (o.st.years < 1 ? '<span class="sub">期間不到 1 年</span>' : '') : pct(o.st.xirr, 1); }, true],
+      twr: [twLab, function (o) { return pct(o.st.twr, 1); }, true],
       mdd: ['最大跌幅', function (o) { return pct(o.st.mdd, 1); }, true],
       mddPeriod: ['最大跌幅的期間<span class="sub">前高日 → 谷底日</span>', function (o) { return o.st.mdd === 0 ? '沒有回落' : dates[s + o.st.mddP] + ' → ' + dates[s + o.st.mddT]; }],
       longest: ['最長等多久才回到前高<span class="sub">從前高日算到再創高</span>', function (o) { var l = o.st.longest; if (l.days === 0) return '沒有低於前高'; return span(l.days) + (l.rec ? '' : '（到終點還沒回到）'); }, true],
@@ -246,7 +266,9 @@
       }]
     };
     var h = '<thead><tr><th></th>' + out.map(function (o) { return '<th class="gh" style="color:var(--g' + (o.gi + 1) + ')"><i>' + esc(tag(o.g)) + '</i><span class="sub" style="color:var(--muted)">' + esc(o.comp) + '</span></th>'; }).join('') + '</tr></thead><tbody>';
-    (rowKeys || ROWS).forEach(function (k) {
+    var keys = [];
+    (rowKeys || ROWS).forEach(function (k) { if (k === 'ann' && mode !== 'lump') keys.push('xirr', 'twr'); else keys.push(k); });
+    keys.forEach(function (k) {
       var r = defs[k];
       h += '<tr data-k="' + k + '"><th scope="row">' + r[0] + '</th>' + out.map(function (o) { return '<td' + (r[2] ? ' style="font-weight:700"' : '') + '>' + r[1](o) + '</td>'; }).join('') + '</tr>';
     });
@@ -807,8 +829,9 @@
       return { w: w, st: st };
     });
     var years = rows[rows.length - 1].st.years;
-    return { assetId: assetId, s: s, e: e, rows: rows, years: years, warn: shortNote([{ id: assetId, w: 100 }], s, e, years) };
+    return { mode: spec.mode, assetId: assetId, s: s, e: e, rows: rows, years: years, warn: shortNote([{ id: assetId, w: 100 }], s, e, years) };
   }
+  function annName(calc) { return calc.mode === 'monthly' ? YOURS : '含息年化報酬'; }
   function sizeRow(calc, w) { return calc.rows[w / 10]; }
   function r1(x) { return Math.round(x * 1000) / 10; }            // 小數換成百分點，取到小數 1 位
   function d1(x) { return Math.round(x * 10) / 10; }
@@ -842,10 +865,10 @@
       tWorst = base ? '這是' + V + '的數字' : dw === 0 ? '和' + V + '相同' : '比' + V + (dw > 0 ? '高' : '低') + ' ' + Math.abs(dw).toFixed(1) + ' 個百分點';
     }
     function card(lab, val, note) { return '<div class="szcard"><div class="szk">' + lab + '</div><div class="szv">' + val + '</div><div class="szn">' + note + '</div></div>'; }
-    return card('含息年化報酬', pct(c.ann, 1), tAnn) + card('最大跌幅', pct(c.mdd, 1), tMdd) + card('最長等多久才回到前高', sizeLongest(c.longest), tLong) + card('最差一年', sizeWorst(c), tWorst);
+    return card(annName(calc), pct(c.ann, 1), tAnn) + card('最大跌幅', pct(c.mdd, 1), tMdd) + card('最長等多久才回到前高', sizeLongest(c.longest), tLong) + card('最差一年', sizeWorst(c), tWorst);
   }
   function sizeTableHtml(calc, cur) {
-    var h = '<thead><tr><th scope="col">股票比例</th><th scope="col">含息年化報酬</th><th scope="col">最大跌幅</th><th scope="col">最差一年</th><th scope="col">年化 ÷ 最大跌幅</th></tr></thead><tbody>';
+    var h = '<thead><tr><th scope="col">股票比例</th><th scope="col">' + annName(calc) + '</th><th scope="col">最大跌幅</th><th scope="col">最差一年</th><th scope="col">年化 ÷ 最大跌幅</th></tr></thead><tbody>';
     calc.rows.forEach(function (r) {
       var on = r.w === cur;
       h += '<tr data-w="' + r.w + '"' + (on ? ' aria-current="true" class="on"' : '') + '><th scope="row">' + r.w + '%' + (on ? '<span class="here">目前</span>' : '') + '</th><td>' + pct(r.st.ann, 1) + '</td><td>' + pct(r.st.mdd, 1) + '</td><td>' + sizeWorst(r.st) + '</td><td>' + sizeRatio(calc, r.st) + '</td></tr>';
@@ -914,7 +937,7 @@
     idxOnOrAfter: idxOnOrAfter, idxOnOrBefore: idxOnOrBefore, dayDiff: dayDiff,
     groupsUI: groupsUI, paintCards: paintCards,
     parseParams: parseParams, buildParams: buildParams,
-    SIZE_STEPS: SIZE_STEPS, sizeCalc: sizeCalc, sizeRow: sizeRow, sizeCardsHtml: sizeCardsHtml, sizeTableHtml: sizeTableHtml, sizeBars: sizeBars,
+    annName: annName, SIZE_STEPS: SIZE_STEPS, sizeCalc: sizeCalc, sizeRow: sizeRow, sizeCardsHtml: sizeCardsHtml, sizeTableHtml: sizeTableHtml, sizeBars: sizeBars,
     gname: gname, tag: tag, isDef: isDef
   };
   root.TOOL = API;

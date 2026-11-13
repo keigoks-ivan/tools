@@ -37,7 +37,8 @@
 <li>每月投入：起始日收盤投入第一筆，之後每個日曆月的第一個交易日收盤投入一筆，依設定的比例分配，不賣出已有的部位。終點剛好是月初第一個交易日時，那一天不再投入。</li>
 <li>每年再平衡：每年第一個交易日收盤，把各檔調回設定的比例。起始那一年不調。有每月投入時，先投入再調整。</li>
 <li>起始日若不是交易日，用之後第一個交易日。</li>
-<li>含息年化報酬：單筆是（期末金額 ÷ 投入金額）開年數次方再減 1。每月投入用資金加權年化，也就是把每一筆投入各自放了多久都算進去，解出讓所有投入剛好等於期末金額的年化利率。年數是實際日數 ÷ 365.25。</li>
+<li>含息年化報酬：單筆是（期末金額 ÷ 投入金額）開年數次方再減 1，年數是實際日數 ÷ 365.25。</li>
+<li>每月投入時有兩個年化。「你的錢實際的年化報酬」把每一筆投入的時間點都算進去：解出一個年利率 r，使每一筆投入金額 ×（1 + r）的（距終點年數）次方，加總後剛好等於期末金額。較晚投入的錢放得比較短，所以影響比較小。這個數字用二分法在 −99% 到 +1000% 之間求解，無解或期間不到 1 年時不顯示。「這個組合本身的年化報酬」是不含新投入的淨值（時間加權）算出來的年化，與投入時點無關，可以跟單筆或別的組合比較。兩者不同，是因為每月投入的錢大多放得比期間總長短。「年化 ÷ 最大跌幅」與「買多少」那一區的年化，在每月投入時用「你的錢實際的年化報酬」。</li>
 <li>最大跌幅、最長等待、最差一年，都用不含新投入的淨值（時間加權）計算，所以每月投入不會讓跌幅看起來比較淺。</li>
 <li>最差一年：任何一天往前推滿一年的報酬裡，最低的那一個。</li>
 <li>年化 ÷ 最大跌幅：每承受 1 個百分點的最大跌幅，換到多少年化報酬。組合有任何一檔資料不到 5 年，或回測期間不到 5 年，就不顯示。</li>
@@ -166,7 +167,7 @@
 <h3 class="ctitle">比例和結果的關係</h3>
 <p class="csub">深色的那一根是拉桿目前的比例。滑鼠移上去或手指按住，可看各比例的數字。</p>
 <div class="chartbox">
-<div class="szch">年化報酬</div>
+<div class="szch" id="szAnnTitle">年化報酬</div>
 <div class="chart" id="szChartAnn" role="img" aria-label="股票比例從 0% 到 100% 的含息年化報酬長條圖"></div>
 <div class="szch">最大跌幅</div>
 <div class="chart" id="szChartDD" role="img" aria-label="股票比例從 0% 到 100% 的最大跌幅長條圖"></div>
@@ -368,7 +369,7 @@
     $('sizeMsg').textContent = '';
     $('sizeBody').style.display = '';
     var ds = T.dates();
-    $('szPeriod').textContent = '計算期間：' + ds[c.s] + ' 到 ' + ds[c.e] + '，共 ' + c.years.toFixed(1) + ' 年。起點取這檔資產與台幣定存都有資料的最早一天。' + (mode === 'monthly' ? '投入方式是每月固定投入，各比例的年化報酬用資金加權計算。' : '');
+    $('szPeriod').textContent = '計算期間：' + ds[c.s] + ' 到 ' + ds[c.e] + '，共 ' + c.years.toFixed(1) + ' 年。起點取這檔資產與台幣定存都有資料的最早一天。' + (mode === 'monthly' ? '投入方式是每月固定投入，各比例的年化報酬是「你的錢實際的年化報酬」（把每一筆投入的時間點算進去）。' : '');
     $('szWarn').innerHTML = c.warn ? '<p class="warn c1">' + T.esc(c.warn) + '</p>' : '';
     sizePaint();
   }
@@ -381,7 +382,8 @@
     var tb = $('szTbl'), cap = tb.querySelector('caption');
     tb.innerHTML = T.sizeTableHtml(szCalc, szPct);
     tb.insertBefore(cap, tb.firstChild);
-    T.sizeBars($('szChartAnn'), szCalc, szPct, 'ann', '含息年化報酬');
+    $('szAnnTitle').textContent = T.annName(szCalc);
+    T.sizeBars($('szChartAnn'), szCalc, szPct, 'ann', T.annName(szCalc));
     T.sizeBars($('szChartDD'), szCalc, szPct, 'mdd', '最大跌幅');
   }
   function sizeSet(v) { szPct = v; szTouched = true; sizePaint(); writeUrl(); }
