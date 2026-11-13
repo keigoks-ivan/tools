@@ -17,12 +17,17 @@
     var W = Math.max(host.clientWidth || 600, 260), narrow = W < 520, H = cfg.height || (narrow ? 280 : 330);
     var maxName = 0; cfg.series.forEach(function (S) { maxName = Math.max(maxName, S.name.length); });
     var mr = narrow ? Math.min(78, 14 + 12 * Math.min(maxName, 5)) : Math.min(130, 14 + 12 * Math.min(maxName, 9));
-    var m = { l: narrow ? 44 : 56, r: mr, t: 14, b: 26 };
-    var pw = W - m.l - m.r, ph = H - m.t - m.b;
+    var m = { l: narrow ? 44 : 56, r: ns > 1 ? mr : 12, t: 14, b: 26 };
+    var pw = W - m.l - m.r;
+    // 類別標籤放不下時改成斜放，每一個都標出來（類別太多才隔幾個標一個）
+    var maxLen = 0; cfg.cats.forEach(function (c) { maxLen = Math.max(maxLen, String(c).length); });
+    var need = maxLen * 7 + 10, gw0 = pw / n, rot = need > gw0 && gw0 >= 11, ang = gw0 >= 16 ? -40 : -90;
+    if (rot) m.b = (ang === -90 ? Math.round(maxLen * 6.6) : Math.round(maxLen * 7 * 0.64)) + 22;
+    var ph = H - m.t - m.b;
     var mn = 0, mx = 0;
     cfg.series.forEach(function (S) { S.values.forEach(function (v) { if (v == null) return; if (v < mn) mn = v; if (v > mx) mx = v; }); });
     if (cfg.ref) { mx = Math.max(mx, cfg.ref.value); mn = Math.min(mn, cfg.ref.value); }
-    var sc = nice(mn, mx * 1.06);
+    var sc = nice(mn * 1.12, mx * 1.06);
     function yPos(v) { return m.t + (sc.hi - v) / (sc.hi - sc.lo) * ph; }
     var gw = pw / n, bw = Math.max(2, Math.min(34, gw * 0.78 / ns)), y0 = yPos(0);
     var svg = document.createElementNS(NS, 'svg');
@@ -52,23 +57,27 @@
     if (cfg.ref) {
       var yr = yPos(cfg.ref.value);
       mk('line', { x1: m.l, x2: m.l + pw, y1: yr, y2: yr, stroke: 'var(--ink2)', 'stroke-width': 1.5, 'stroke-dasharray': '5 4' });
-      mk('text', { x: m.l + 4, y: yr - 5, fill: 'var(--ink2)', 'font-size': 11 }, cfg.ref.label);
+      mk('text', { x: m.l + pw - 4, y: yr - 5, 'text-anchor': 'end', fill: 'var(--ink2)', 'font-size': 11 }, cfg.ref.label);
     }
     // 類別標籤：放得下才全部顯示，否則隔幾個顯示一個
-    var maxLen = 0; cfg.cats.forEach(function (c) { maxLen = Math.max(maxLen, String(c).length); });
-    var need = maxLen * 7 + 10, every = Math.max(1, Math.ceil(need / gw));
+    var every = rot ? 1 : Math.max(1, Math.ceil(need / gw));
     cfg.cats.forEach(function (c, i) {
       if (i % every) return;
-      mk('text', { x: m.l + gw * (i + 0.5), y: H - 8, 'text-anchor': 'middle', fill: 'var(--muted)', 'font-size': 11 }, c);
+      var cx0 = m.l + gw * (i + 0.5);
+      if (rot) mk('text', { x: cx0 + 4, y: H - m.b + (ang === -90 ? 8 : 14), 'text-anchor': 'end', transform: 'rotate(' + ang + ' ' + (cx0 + 4) + ' ' + (H - m.b + (ang === -90 ? 8 : 14)) + ')', fill: 'var(--muted)', 'font-size': 11 }, c);
+      else mk('text', { x: cx0, y: H - 8, 'text-anchor': 'middle', fill: 'var(--muted)', 'font-size': 11 }, c);
     });
-    var showVal = bw >= 26;
+    // 柱上數字：用短格式（cfg.barFmt），估寬度放不下就不標，數字留給滑鼠提示
+    var vf = cfg.barFmt || cfg.fmt, vmax = 0;
+    cfg.series.forEach(function (S) { S.values.forEach(function (v) { if (v != null) vmax = Math.max(vmax, String(vf(v)).length); }); });
+    var showVal = bw >= 26 && vmax * 6.4 <= (ns > 1 ? bw : gw) - 1;
     cfg.series.forEach(function (S, si) {
       S.values.forEach(function (v, i) {
         if (v == null) return;
         var cx = m.l + gw * (i + 0.5), x = cx - (ns * bw) / 2 + si * bw, y = yPos(v), top = Math.min(y, y0), h = Math.max(Math.abs(y - y0), 1);
         var a = fillOf(si); a.x = x + (ns > 1 ? 0.5 : 0); a.y = top; a.width = bw - (ns > 1 ? 1 : 0); a.height = h;
         mk('rect', a);
-        if (showVal) mk('text', { x: x + bw / 2, y: v >= 0 ? top - 4 : top + h + 12, 'text-anchor': 'middle', fill: 'var(--ink)', 'font-size': 11, 'font-weight': 600 }, cfg.fmt(v));
+        if (showVal) mk('text', { x: x + bw / 2, y: v >= 0 ? top - 4 : top + h + 12, 'text-anchor': 'middle', fill: 'var(--ink)', 'font-size': ns > 1 ? 10 : 11, 'font-weight': 600 }, vf(v));
       });
     });
     // 直接標籤：標在最後一個有值的柱子頂端高度，避免重疊
@@ -78,7 +87,7 @@
     }).sort(function (a, b) { return a.y - b.y; });
     for (var li = 1; li < lab.length; li++) if (lab[li].y - lab[li - 1].y < 15) lab[li].y = lab[li - 1].y + 15;
     var maxc = narrow ? 5 : 9;
-    lab.forEach(function (L) {
+    if (ns > 1) lab.forEach(function (L) {
       var nm = L.S.name.length > maxc ? L.S.name.slice(0, maxc) + '…' : L.S.name;
       mk('text', { x: m.l + pw + 6, y: L.y + 4, fill: 'var(--g' + (L.si + 1) + ')', 'font-size': 12, 'font-weight': 700 }, nm);
     });
