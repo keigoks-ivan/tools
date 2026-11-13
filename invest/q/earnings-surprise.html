@@ -11,8 +11,44 @@
 <link rel="stylesheet" href="../invest.css">
 <link rel="stylesheet" href="../tool.css">
 <link rel="stylesheet" href="../pages.css">
+<style>
+.doc .sec{margin-top:72px;scroll-margin-top:16px}
+.doc .sec h2{font-size:23px}
+.doc .sec h3.t-lab{margin-top:36px;font-size:16px}
+.doc .lead{font-weight:600;color:var(--ink)}
+.toc{margin-top:20px;border:1px solid var(--line);padding:14px 20px 12px}
+.toc .toc-h{font-family:var(--serif);font-weight:700;font-size:17px;color:var(--navy)}
+.toc p{margin:6px 0 0;font-size:14px;line-height:1.8;color:var(--muted)}
+.toc ol{margin:8px 0 0;padding-left:24px;font-size:15px;line-height:1.9}
+.toc li span{display:block;font-size:13px;line-height:1.6;color:var(--muted);margin-bottom:4px}
+.doc .dtbl.cmp th,.doc .dtbl.cmp td{padding:10px 8px;font-size:14px;line-height:1.6}
+.doc .dtbl.cmp thead th{text-align:right;white-space:normal}
+.doc .dtbl.cmp thead th:first-child{text-align:left}
+.doc .dtbl.cmp tbody td{text-align:right}
+.doc .dtbl.cmp tbody th{font-size:14px;font-weight:500}
+.doc .dtbl.cmp .nw{white-space:nowrap}
+.doc .dtbl.cmp .tag{font-size:12px;color:var(--muted)}
+.doc .dwrap{overflow-x:visible}
+@media (max-width:760px){.doc .dwrap{overflow-x:auto}}
+.doc .qa-answer,.doc .pre-box,.doc .toc,.doc .dwrap,.doc details.more,.doc .qa-fig,.doc .dlist{max-width:720px;margin-left:0;margin-right:0;box-sizing:border-box}
+.doc .steps{list-style:disc;margin:14px 0 0;padding-left:22px;font-size:17px;line-height:1.8;color:var(--ink2);max-width:720px}
+.doc .steps li+li{margin-top:6px}
+.doc .qa-fig{margin-top:32px}
+details.more{margin-top:20px;border:1px solid var(--line);border-radius:0;background:var(--card)}
+details.more>summary{cursor:pointer;padding:12px 16px;font-size:15px;font-weight:700;line-height:1.6;color:var(--ink);list-style:none}
+details.more>summary::-webkit-details-marker{display:none}
+details.more>summary::before{content:"＋";display:inline-block;width:1.4em;color:var(--navy)}
+details.more[open]>summary::before{content:"－"}
+details.more[open]>summary{border-bottom:1px solid var(--line)}
+details.more .in{padding:0 0 4px}
+details.more .in>p{padding:0 16px;margin:14px 0 0}
+details.more .in .dwrap{margin-top:12px;border:0;margin-left:-1px;margin-right:-1px}
+.nw{white-space:nowrap}
+.doc .sec h2{text-wrap:balance}
+</style>
 <script src="../invest.js"></script>
 <script src="../qchart.js"></script>
+<script src="../qline.js"></script>
 </head>
 <body data-root="../" data-nav="q">
 <div class="page doc">
@@ -20,28 +56,182 @@
 
 <p class="t-link" style="margin-top:28px"><a href="../questions.html">回到全部題目</a></p>
 <h1 class="h1" style="margin-top:12px">每股盈餘比去年同季明顯好轉的公司，之後股價還會繼續漲嗎？</h1>
-<div class="qa-answer"><div class="k">一句話答案</div><p>會，但很小。這裡的「驚喜」，指這一季每股盈餘比去年同一季多出多少，不是和分析師預期比。2011 年底至 2026 年 6 月共 59 次分組（財報與股價資料從 2009 年起），驚喜最大的一組比最小的一組，每年多賺約 3.3 個百分點。全期剛好在統計上站得住，拆成前後兩段就都站不住，只有 2023 年以後這一段站得住。</p></div>
-<aside class="pre-box" aria-labelledby="pre-t"><div class="pre-h" id="pre-t">讀這個結果之前</div><h4>全期的價差，只有 2023 年以後那一段站得住</h4><p>這篇把美股大型股依這一季每股盈餘比去年同季多出多少，分五組，多出的幅度叫驚喜。全期 59 次分組，驚喜最大的一組比最小的一組每年多賺 3.35 個百分點，統計上剛好站得住，拆成前後兩段各自都站不住。</p><p>只有 2023 年以後站得住，價差年化 8.98%，但只有 14 季。2020 至 2021 年是 −4.43%。</p><h4>這篇沒有回答的事</h4><ul><li>驚喜只和去年同季比，沒有和分析師預期比。</li><li>價差是做多一組、同時放空另一組，放空要付的借券成本沒有算。</li><li>那斯達克 100 用現行名單，被剔除的公司不在裡面，這篇也沒有計算最大跌幅。</li></ul><p class="pre-fine">美國 S&amp;P 500 歷來成分股與現行那斯達克 100，2011 年底至 2026 年 6 月分組，含股息，已扣交易成本。</p><p class="pre-link"><a href="#limits">完整的弱點見「這個結果的弱點」一節</a></p></aside>
+<div class="qa-answer"><div class="k">一句話答案</div><p>在這段美國大型股（2011 年底至 2026 年 3 月分組）裡，每股盈餘比去年同一季好轉最多的一組，財報公布後 60 個交易日只比同池平均多漲 0.71%。換成每季一多一空的價差，扣掉多空兩邊的成本後每年約 2.29 點，拆成前後兩段各自都站不住（意思是差距小於它自己逐季的起伏，換一段期間就可能消失）。這裡的「驚喜」是和去年同一季比，不是和分析師預期比。</p></div>
+<aside class="pre-box" aria-labelledby="pre-t"><div class="pre-h" id="pre-t">讀這個結果之前</div><h4>結論只限這段美國大型股，而且幅度很小</h4><p>股票池是 S&amp;P 500 歷來成分股加現行那斯達克 100 名單，偏向還活著的公司，各組年化都可能偏高。同池平均指同一股票池全部股票的平均。0.71% 對照的是驚喜最小的一組，同樣 60 個交易日少漲 0.34%。</p><p>58 次分組都出自同一段 15 年，同一季的公司同時受大盤影響，不是 58 次獨立的試驗。這是歷史次數的統計，不是下一次財報季會怎樣。</p><h4>這篇沒有回答的事</h4><ul><li>驚喜只和去年同季比，沒有和分析師預期比。</li><li>多空價差是做多一組、同時放空另一組，放空的借券成本沒有算。</li><li>價差是訊號檢驗，不是可以照做的績效；只買最大一組的結果在第 6 節。</li></ul><p class="pre-fine">美國 S&amp;P 500 歷來成分股與現行那斯達克 100，2011 年底至 2026 年 3 月分組，含股息，每筆已扣 14 個基點（0.14%）的來回成本。</p><p class="pre-link"><a href="#limits">完整的弱點見「這個結果的弱點」一節</a></p></aside>
 
+<nav class="toc" aria-label="本文目錄"><div class="toc-h">本文目錄</div><ol>
+<li><a href="#what">測了什麼</a><span>驚喜怎麼算、怎麼分組、股票池</span></li>
+<li><a href="#car">財報後 60 個交易日</a><span>最大一組多漲 0.71%，最小一組少漲 0.34%</span></li>
+<li><a href="#groups">五組年化與每年一多一空的價差</a><span>3.43 點和 0.71% 差在哪</span></li>
+<li><a href="#cost">價差扣掉成本之後</a><span>原來的結果沒有扣到多空兩腿</span></li>
+<li><a href="#stable">價差穩不穩</a><span>前後兩段、年代、逐年、58 季逐季</span></li>
+<li><a href="#long">只買驚喜最大的一組</a><span>對同池平均與 SPY 的年化與最大跌幅</span></li>
+<li><a href="#limits">這個結果的弱點</a><span>完整列出</span></li>
+<li><a href="#src">資料來源</a><span></span></li>
+</ol></nav>
+
+<section class="sec" id="what"><h2>測了什麼</h2>
+<p class="t-body lead">把美國大型股每一季的財報，依「這一季每股盈餘比去年同一季多出多少」分成五組，看哪一組之後漲得多。</p>
+<h3 class="t-lab">驚喜怎麼算</h3>
+<p class="t-body">驚喜是這一季每股盈餘減去去年同一季，再除以過去 8 季這個差距的波動。數字越大，代表這一季比去年同季多賺得越多，也越超出該公司往常的幅度。</p>
+<p class="t-body">這不是分析師預估。當時真的看得到、又免費的預估資料不存在，所以這裡的「超預期」指的是比自己的歷史走勢好很多。</p>
+<h3 class="t-lab">怎麼分組、怎麼持有</h3>
+<ul class="steps">
+<li>財報公布後的下一個交易日買進，持有 60 個交易日，或持有到下一次財報公布為止，兩者先到的為準。</li>
+<li>每季底，把前 90 天內公布財報的公司（每家取最後一次公布的）依驚喜由小到大分五組，每組等權重。第 1 組驚喜最小，第 5 組最大。「分組日」只是這一批的標籤：實際買進是各公司財報公布的隔天，不是在季底一次買進；五等分的門檻用同一季全部公司的驚喜算出（見第 7 節）。</li>
+<li>每筆扣 14 個基點的來回成本。基點是 0.01%，14 個基點是 0.14%。</li>
+<li>報酬含股息，用還原股價計算。</li>
+</ul>
+<h3 class="t-lab">股票池</h3>
+<p class="t-body">股票池是 S&amp;P 500 歷來成分股與現行那斯達克 100 名單，不重複合計 835 檔。其中 625 檔通過資料檢查（查得到財報、有股價、至少有一季可用的財報資料），其餘 210 檔沒有進入計算。實際進入分組的公司數每季不同，平均約 442 檔，最少 31 檔（第一次分組），最多 564 檔。</p>
+<p class="t-body">財報與股價資料從 2009 年起。驚喜指標要先累積 8 季的資料，所以第一次分組在 2011 年底，最後一次完整的分組在 2026 年 3 月底，共 58 次。下文與表中的年份都是分組日，不是資料期間。</p>
+<p class="t-body">這篇用兩種方式量「多漲多少」：第 2 節看每一筆財報之後 60 個交易日的累積差，第 3 節看每季一多一空的價差，兩者在第 3 節對照。</p>
+</section>
+
+<section class="sec" id="car"><h2>財報後 60 個交易日</h2>
+<p class="t-body lead">驚喜最大的一組，財報公布後 60 個交易日比同池平均多漲 0.71%；驚喜最小的一組少漲 0.34%。</p>
+<p class="t-body">這裡的累積超額報酬，是每一筆財報事件從買進日起算的累積報酬，減去同一段時間同池全部股票每天等權平均的累積報酬（兩者都用對數報酬）。同池平均就是這個比較的底線。每筆事件固定看 60 個交易日，平均約漲 3.6%，所以 0.71% 是這個漲幅之外多出來的一小部分。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">累積超額報酬</th><th scope="col">+5 個交易日</th><th scope="col">+20 個交易日</th><th scope="col">+60 個交易日</th></tr></thead><tbody><tr><th scope="row">驚喜最大的一組</th><td class="nw">+0.15%</td><td class="nw">+0.38%</td><td class="nw">+0.71%</td></tr><tr><th scope="row">驚喜最小的一組</th><td class="nw">−0.09%</td><td class="nw">−0.18%</td><td class="nw">−0.34%</td></tr></tbody></table></div>
+<p class="t-note">事件數：驚喜最大的一組 5,145 筆，最小的一組 5,154 筆。最小的一組有 6 檔已下市股票缺價格，無法完整重算，這一列的數字誤差約 ±0.03 個百分點。</p>
 <figure class="qa-fig">
-<div class="ttl">財報驚喜五等分各組的年化報酬（含股息、扣交易成本）</div>
-<div class="cap">第 1 組是財報驚喜最小的 20%，第 5 組是最大的 20%。每季底重新分組，各組等權重。實際第一次分組在 2011 年底，因為驚喜指標需要先累積 8 個季度的資料。</div>
-<div class="tool"><div class="chartbox" id="cbox0"><div class="legend"></div><div class="chart" role="img" aria-label="財報驚喜五等分各組年化報酬的並排長條圖，三個期間的第 4 組與第 5 組都高於第 1 組"></div></div></div>
+<div class="ttl">圖 2.1　財報後累積超額報酬，驚喜最大與最小的一組</div>
+<div class="tool"><div class="chartbox" id="f1"><div class="legend"></div><div class="chart" role="img" aria-label="財報後 5、20、60 個交易日的累積超額報酬長條圖，驚喜最大的一組為正且逐漸增加，最小的一組為負"></div></div></div>
 </figure>
+<p class="t-note">每一組在三個時點與同池平均的差。滑鼠移上去可看數值。</p>
+<p class="t-body">差距是慢慢拉開的。驚喜最大的一組在第 5 個交易日已多漲 0.15%，最小的一組在第 5 日少漲 0.09%。兩組在第 5 日的差距，各約占 60 日數字的五分之一到四分之一，其餘在之後 55 個交易日逐步累積。</p>
+<p class="t-body">這 5,145 筆事件分布在 58 個分組季，同一季的事件受同一個大盤影響，彼此不獨立。筆數多不代表證據多，所以下面幾節改用「每季一個價差」來檢查穩不穩。</p>
+</section>
 
-<section class="sec"><h2>測了什麼</h2><p class="t-body">驚喜的算法：這一季每股盈餘減去去年同一季，再除以過去 8 季這個差距的波動。數字越大，代表這一季比去年同季多賺得越多、越出乎往常。這不是分析師預估，因為沒有免費、而且當時真的看得到的預估資料，所以這裡的「超預期」指的是比自己的歷史走勢好很多。</p><p class="t-body">做法：財報公布後的下一個交易日買進，持有 60 個交易日或到下一次財報為止。每季底把過去 90 天內公布財報的股票，依驚喜分成五等分，每組等權重，扣掉每筆 14 個基點的來回成本。</p><p class="t-body">股票池是美國 S&amp;P 500 歷來成分股與現行那斯達克 100 名單，不重複合計 835 檔。其中 625 檔通過資料檢查（查得到財報、有股價、至少有一季可用的財報資料），其餘 210 檔沒有進入計算。實際進入分組的檔數每季不同，平均每次約 445 檔，最少 31 檔（2011 年底第一次分組），最多 565 檔。報酬含股息（用還原股價），財報與股價資料從 2009 年起、到 2026 年 8 月。第一次分組在 2011 年底，最後一次在 2026 年 6 月底，共 59 次；下文與表中的年份都是分組日，不是資料期間。</p><p class="t-body">對照是驚喜最小的一組，以及財報後同一時段的同池股票平均。沒有和買進持有指數比較，也沒有計算最大跌幅。</p></section>
-<section class="sec"><h2>結果</h2><div class="dwrap"><table class="dtbl"><thead><tr><th>期間（分組次數）</th><th class="num">第 1 組</th><th class="num">第 2 組</th><th class="num">第 3 組</th><th class="num">第 4 組</th><th class="num">第 5 組</th><th class="num">第 5 組減第 1 組</th></tr></thead><tbody><tr><th scope="row">2011 年底–2018 年（29 季）</th><td class="num">10.52%</td><td class="num">11.82%</td><td class="num">11.18%</td><td class="num">14.48%</td><td class="num">14.03%</td><td class="num">+3.10%</td></tr><tr><th scope="row">2019–2026 年 6 月（30 季）</th><td class="num">13.09%</td><td class="num">14.63%</td><td class="num">11.47%</td><td class="num">16.85%</td><td class="num">17.40%</td><td class="num">+3.59%</td></tr><tr><th scope="row">全期（59 季）</th><td class="num">11.82%</td><td class="num">13.24%</td><td class="num">11.32%</td><td class="num">15.68%</td><td class="num">15.73%</td><td class="num">+3.35%</td></tr></tbody></table></div><p class="t-body">驚喜最大的兩組報酬最高，但名次不整齊：第 3 組比第 2 組低，各組不是一路往上。全期第 5 組年化 15.73%，第 1 組 11.82%。表中的價差是逐季相減之後再年化，所以和兩組年化報酬直接相減（15.73% 減 11.82%）不同。</p><p class="t-body">財報公布後，驚喜最大的一組隨時間慢慢拉開。公布後 60 個交易日，累積比同池股票的平均多漲 0.66%；驚喜最小的一組少漲 0.37%。</p><div class="dwrap"><table class="dtbl"><thead><tr><th>財報後累積超額報酬</th><th class="num">+5 個交易日</th><th class="num">+20 個交易日</th><th class="num">+60 個交易日</th><th class="num">事件數</th></tr></thead><tbody><tr><th scope="row">驚喜最大的一組</th><td class="num">+0.15%</td><td class="num">+0.35%</td><td class="num">+0.66%</td><td class="num">5,258</td></tr><tr><th scope="row">驚喜最小的一組</th><td class="num">−0.10%</td><td class="num">−0.20%</td><td class="num">−0.37%</td><td class="num">5,267</td></tr></tbody></table></div><p class="t-body">全期的價差 3.35%，統計上剛好站得住；拆成 2011 年底–2018 年與 2019–2026 年 6 月兩段，各自都站不住。分年代看，只有 2023 年以後（價差年化 8.98%，14 季）站得住，2020–2021 年是 −4.43%（8 季），2013–2019 年（28 季）是 2.34%，都站不住；2011 年底–2012 年與 2022 年各只有 5 季和 4 季，數字不可靠。</p><p class="t-body">驚喜最小的一組年化報酬仍是正的 11.82%，這段期間大致是多頭。價差是一組多、一組空的比較，只買其中一組拿不到這個數字。</p></section>
-<section class="sec"><h2 id="limits">這個結果的弱點</h2><ul class="dlist"><li>驚喜是和去年同期比較，沒有用到分析師預估。這個結果不能直接拿來回答「財報比分析師預期好」之後的走勢。</li><li>股票池只有 S&amp;P 500 與那斯達克 100 的大型股。那斯達克 100 用的是現在的名單，被剔除的公司不在裡面；835 檔裡，47 檔是現行與歷史代碼都查不到財報代碼的公司，182 檔是已離開名單、在股價來源完全找不到資料的公司。這兩個數字是分開統計的，彼此有重疊（相加 229 檔，大於沒進入計算的 210 檔），不能和 625 檔相加湊成 835。結果偏向還活著的公司。</li><li>價差是做多一組、放空另一組，放空的借券成本沒有算。只做多驚喜最大的一組，年化 15.73%，沒有和同期的指數買進持有對照。</li><li>全期剛過統計門檻，但分成前後兩段都過不了，近三年半貢獻最多，只有 14 季。</li><li>沒有計算最大跌幅。</li></ul></section>
-<section class="sec"><h2>資料來源</h2><ul class="dlist"><li>美國證券交易委員會（SEC）逐季財報，使用公布當時可得的版本；Yahoo Finance 還原股價，2009 年到 2026 年 8 月。</li><li>S&amp;P 500 歷史成分變動表（維基百科）與那斯達克 100 現行名單。</li></ul></section>
+<section class="sec" id="groups"><h2>五組年化與每年一多一空的價差</h2>
+<p class="t-body lead">驚喜最大的兩組報酬最高，但名次不整齊；每季一多一空的價差，全期年化是 3.43 點。</p>
+<p class="t-body">下表是各組持有期報酬依每季接起來之後的年化，含股息、每筆已扣 14 個基點。最後一列是第 5 組減第 1 組，逐季相減之後再年化，所以和兩組年化直接相減不同：全期 15.70% 減 11.71% 是 3.99 點，價差列是 3.43 點。這裡的年化是把每批 60 個交易日以內的報酬接起來，和第 6 節逐日估算的年化口徑不同。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">年化報酬</th><th scope="col">2011 年底–2018 年<br>（29 季）</th><th scope="col">2019–2026 年 3 月<br>（29 季）</th><th scope="col">全期<br>（58 季）</th></tr></thead><tbody>
+<tr><th scope="row">第 1 組（驚喜最小）</th><td class="nw">10.52%</td><td class="nw">12.90%</td><td class="nw">11.71%</td></tr>
+<tr><th scope="row">第 2 組</th><td class="nw">11.82%</td><td class="nw">14.12%</td><td class="nw">12.97%</td></tr>
+<tr><th scope="row">第 3 組</th><td class="nw">11.18%</td><td class="nw">10.75%</td><td class="nw">10.96%</td></tr>
+<tr><th scope="row">第 4 組</th><td class="nw">14.48%</td><td class="nw">16.20%</td><td class="nw">15.33%</td></tr>
+<tr><th scope="row">第 5 組（驚喜最大）</th><td class="nw">14.03%</td><td class="nw">17.41%</td><td class="nw">15.70%</td></tr>
+<tr><th scope="row">第 5 組減第 1 組</th><td class="nw">+3.10 點</td><td class="nw">+3.76 點</td><td class="nw">+3.43 點</td></tr>
+</tbody></table></div>
+<figure class="qa-fig">
+<div class="ttl">圖 3.1　財報驚喜五等分各組的年化報酬</div>
+<div class="tool"><div class="chartbox" id="f2"><div class="legend"></div><div class="chart" role="img" aria-label="財報驚喜五等分各組年化報酬的並排長條圖，三個期間的第 4 組與第 5 組都高於第 1 組"></div></div></div>
+</figure>
+<p class="t-note">第 1 組是驚喜最小的 20%，第 5 組是最大的 20%。</p>
+<p class="t-body">名次不是一路往上。全期第 3 組（10.96%）比第 2 組（12.97%）低，也比第 1 組（11.71%）低。第 4 組和第 5 組各自領先前三組，兩組之間只差 0.37 點。驚喜最小的一組年化仍是 11.71%，這段期間大致是多頭，一多一空的價差拿掉了這個共同的漲幅。</p>
+<h3 class="t-lab">0.71% 和 3.43 點差在哪</h3>
+<p class="t-body">兩個數字量的是同一件事的不同面：</p>
+<ul class="steps">
+<li>0.71%：每一筆財報事件，公布後 60 個交易日的累積報酬，減去同池等權平均，對最大一組的 5,145 筆取平均。只看多的那一邊，用對數報酬，固定看 60 個交易日。</li>
+<li>3.43 點：每季把最大一組和最小一組各自的平均報酬相減，58 季接起來再換算成每年。多與空兩邊都算，用一般報酬，持有到 60 個交易日或下一次財報。</li>
+</ul>
+<p class="t-body">用第 2 節的數字粗略換算：最大一組多漲 0.71%，最小一組少漲 0.34%，合計 1.05 點，每年 4 季，約 4.2 點；本節的價差每季平均 0.85%，換成每年是 3.43 點。兩者量級接近，但不相等。三處定義不同：對數與一般報酬、固定 60 日與遇到下一次財報提早出場、對照的是同池平均或另一組。這篇沒有把差距拆成各占多少。</p>
+</section>
+
+<section class="sec" id="cost"><h2>價差扣掉成本之後</h2>
+<p class="t-body lead">原來的價差實際上沒有扣到成本；多空兩邊都付 14 個基點之後，全期價差從 3.43 點降到 2.29 點，前後兩段各自還是站不住。</p>
+<p class="t-body">原來每一筆事件都扣了 14 個基點，做多的一組扣、放空的一組也扣，兩邊相減時成本互相抵消。扣成本前的全期價差是 3.429 點，扣成本後是 3.424 點，只差 0.005 點。真的一多一空，兩邊每季都要換股，各付一次：每季 2 × 0.14% ＝ 0.28%，一年約 1.1 點。</p>
+<p class="t-body">下表把這 0.28% 從每季價差扣掉再年化。t 值是平均價差除以它自己的誤差範圍，一般要超過約 2，才算差距大於逐季起伏、站得住。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">價差（年化，點）</th><th scope="col">扣成本前</th><th scope="col">扣兩腿成本後</th><th scope="col">扣後的 t 值</th></tr></thead><tbody><tr><th scope="row">2011 年底–2018 年</th><td class="nw">3.10</td><td class="nw">1.96</td><td class="nw">0.88</td></tr><tr><th scope="row">2019–2026 年 3 月</th><td class="nw">3.76</td><td class="nw">2.61</td><td class="nw">1.10</td></tr><tr><th scope="row">全期</th><td class="nw">3.43</td><td class="nw">2.29</td><td class="nw">1.42</td></tr></tbody></table></div>
+<p class="t-note">假設每季全部換股，每筆來回 14 個基點。放空要付的借券與融券費用沒有算，真實的剩餘會更少。</p>
+<p class="t-body">扣成本之前，全期的 t 值是 2.12，剛過 2；扣成本之後降到 1.42，沒有過。成本是否可以這樣算，取決於實際放空的價差與手續費，這篇只能列出「沿用 14 個基點」的結果。</p>
+</section>
+
+<section class="sec" id="stable"><h2>價差穩不穩</h2>
+<p class="t-body lead">58 季裡價差為正的有 37 季，前後兩段各自都站不住；全期價差的約 63% 集中在 2023 年以後的 13 季。</p>
+<p class="t-body">前後兩段（以 2018 年與 2019 年分界）的價差是 3.10 點與 3.76 點，t 值是 1.39 與 1.57，各自都沒過 2（t 值的意思見第 4 節）。全期合在一起是 2.12，剛好過。</p>
+<h3 class="t-lab">依年代切開看</h3>
+<p class="t-body">下面這幾個切法是看過結果才決定的，只當描述，不是事前訂好的檢驗。價差是第 5 組減第 1 組，未扣多空兩腿成本，與第 3 節的表同口徑。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">分組期間</th><th scope="col">季數</th><th scope="col">價差（年化）</th><th scope="col">能不能站得住</th></tr></thead><tbody>
+<tr><th scope="row">2011 年底–2012 年</th><td class="nw">5</td><td class="nw">+6.68 點</td><td class="nw">站不住</td></tr>
+<tr><th scope="row">2013–2019 年</th><td class="nw">28</td><td class="nw">+2.34 點</td><td class="nw">站不住</td></tr>
+<tr><th scope="row">2020–2021 年</th><td class="nw">8</td><td class="nw">−4.43 點</td><td class="nw">站不住</td></tr>
+<tr><th scope="row">2022 年</th><td class="nw">4</td><td class="nw">+3.00 點</td><td class="nw">站不住</td></tr>
+<tr><th scope="row">2023 年以後</th><td class="nw">13</td><td class="nw">+9.81 點</td><td class="nw">站得住</td></tr>
+</tbody></table></div>
+<p class="t-note">2011 年底–2012 年與 2022 年只有 5 季與 4 季，數字不可靠。</p>
+<p class="t-body">把 2023 年以後的 13 季拿掉，前面 45 季的價差年化 1.64 點，t 值 0.88，沒有過 2。2020 至 2021 年的 8 季是負的。這些切法有 5 段，只有最後一段站得住，這是在多個切法裡挑出來的結果，不能當成價差在某個時代會出現的證據。</p>
+<h3 class="t-lab">逐年</h3>
+<p class="t-body">每一年各季價差相加，約等於那一年一多一空的價差。2012 到 2025 年共 14 個完整年份，3 年為負：2016、2018、2020 年。最大的單季價差是 2024 年 9 月底那次，+8.02 點；最小的是 2020 年 12 月底那次，−9.49 點。最好的 5 季合計占全期 58 季價差總和的 58%，把這 5 季拿掉，其餘 53 季的價差年化 1.57 點。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">分組年份</th><th scope="col">分組次數</th><th scope="col">各季價差相加（百分點）</th><th scope="col">價差為正的季數</th></tr></thead><tbody><tr><th scope="row">2011</th><td class="nw">1</td><td class="nw">5.41</td><td class="nw">1 季</td></tr><tr><th scope="row">2012</th><td class="nw">4</td><td class="nw">2.73</td><td class="nw">3 季</td></tr><tr><th scope="row">2013</th><td class="nw">4</td><td class="nw">3.84</td><td class="nw">3 季</td></tr><tr><th scope="row">2014</th><td class="nw">4</td><td class="nw">4.46</td><td class="nw">2 季</td></tr><tr><th scope="row">2015</th><td class="nw">4</td><td class="nw">8.35</td><td class="nw">3 季</td></tr><tr><th scope="row">2016</th><td class="nw">4</td><td class="nw">−8.24</td><td class="nw">0 季</td></tr><tr><th scope="row">2017</th><td class="nw">4</td><td class="nw">9.72</td><td class="nw">4 季</td></tr><tr><th scope="row">2018</th><td class="nw">4</td><td class="nw">−4.08</td><td class="nw">1 季</td></tr><tr><th scope="row">2019</th><td class="nw">4</td><td class="nw">2.17</td><td class="nw">3 季</td></tr><tr><th scope="row">2020</th><td class="nw">4</td><td class="nw">−9.26</td><td class="nw">1 季</td></tr><tr><th scope="row">2021</th><td class="nw">4</td><td class="nw">0.26</td><td class="nw">2 季</td></tr><tr><th scope="row">2022</th><td class="nw">4</td><td class="nw">2.96</td><td class="nw">3 季</td></tr><tr><th scope="row">2023</th><td class="nw">4</td><td class="nw">8.26</td><td class="nw">4 季</td></tr><tr><th scope="row">2024</th><td class="nw">4</td><td class="nw">13.35</td><td class="nw">3 季</td></tr><tr><th scope="row">2025</th><td class="nw">4</td><td class="nw">5.31</td><td class="nw">3 季</td></tr><tr><th scope="row">2026</th><td class="nw">1</td><td class="nw">3.79</td><td class="nw">1 季</td></tr></tbody></table></div>
+<p class="t-note">2011 年只有 1 次分組、2026 年只有 1 次分組（3 月底），未扣多空兩腿成本。</p>
+<figure class="qa-fig">
+<div class="ttl">圖 5.1　每季價差累積，全期 58 季</div>
+<div class="tool"><div class="chartbox" id="f3"><div class="legend"></div><div class="chart" role="img" aria-label="第 5 組減第 1 組每季價差累積淨值折線圖，兩條線，一條未扣多空兩腿成本，一條已扣，2011 年底到 2026 年 3 月"></div></div></div>
+</figure>
+<p class="t-note">起點為 1.00，每季把價差複利接起來，分組日當季才計入。滑鼠移上去可看數值。扣成本那條每季多扣 0.28%。</p>
+<details class="more"><summary>看 58 季逐季價差</summary><div class="in"><p>每一季的第 5 組與第 1 組平均報酬（持有期報酬，每筆已扣 14 個基點），以及兩者的差。分組日是季底。</p><div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">分組日</th><th scope="col">第 5 組</th><th scope="col">第 1 組</th><th scope="col">第 5 組減第 1 組</th></tr></thead><tbody><tr><th scope="row">2011/12/31</th><td class="nw">7.42%</td><td class="nw">2.01%</td><td class="nw">+5.41%</td></tr><tr><th scope="row">2012/03/31</th><td class="nw">1.70%</td><td class="nw">−1.54%</td><td class="nw">+3.24%</td></tr><tr><th scope="row">2012/06/30</th><td class="nw">1.12%</td><td class="nw">−3.00%</td><td class="nw">+4.12%</td></tr><tr><th scope="row">2012/09/30</th><td class="nw">4.36%</td><td class="nw">3.26%</td><td class="nw">+1.09%</td></tr><tr><th scope="row">2012/12/31</th><td class="nw">7.67%</td><td class="nw">13.40%</td><td class="nw">−5.73%</td></tr><tr><th scope="row">2013/03/31</th><td class="nw">5.76%</td><td class="nw">8.35%</td><td class="nw">−2.59%</td></tr><tr><th scope="row">2013/06/30</th><td class="nw">6.38%</td><td class="nw">4.98%</td><td class="nw">+1.40%</td></tr><tr><th scope="row">2013/09/30</th><td class="nw">6.51%</td><td class="nw">4.11%</td><td class="nw">+2.40%</td></tr><tr><th scope="row">2013/12/31</th><td class="nw">5.17%</td><td class="nw">2.53%</td><td class="nw">+2.64%</td></tr><tr><th scope="row">2014/03/31</th><td class="nw">1.94%</td><td class="nw">3.09%</td><td class="nw">−1.15%</td></tr><tr><th scope="row">2014/06/30</th><td class="nw">6.58%</td><td class="nw">2.97%</td><td class="nw">+3.62%</td></tr><tr><th scope="row">2014/09/30</th><td class="nw">2.32%</td><td class="nw">3.21%</td><td class="nw">−0.89%</td></tr><tr><th scope="row">2014/12/31</th><td class="nw">4.98%</td><td class="nw">2.10%</td><td class="nw">+2.89%</td></tr><tr><th scope="row">2015/03/31</th><td class="nw">0.40%</td><td class="nw">0.92%</td><td class="nw">−0.51%</td></tr><tr><th scope="row">2015/06/30</th><td class="nw">0.99%</td><td class="nw">−4.53%</td><td class="nw">+5.52%</td></tr><tr><th scope="row">2015/09/30</th><td class="nw">−1.07%</td><td class="nw">−2.16%</td><td class="nw">+1.09%</td></tr><tr><th scope="row">2015/12/31</th><td class="nw">−9.36%</td><td class="nw">−11.61%</td><td class="nw">+2.25%</td></tr><tr><th scope="row">2016/03/31</th><td class="nw">7.85%</td><td class="nw">13.99%</td><td class="nw">−6.14%</td></tr><tr><th scope="row">2016/06/30</th><td class="nw">6.05%</td><td class="nw">7.02%</td><td class="nw">−0.97%</td></tr><tr><th scope="row">2016/09/30</th><td class="nw">−1.32%</td><td class="nw">−1.23%</td><td class="nw">−0.09%</td></tr><tr><th scope="row">2016/12/31</th><td class="nw">8.96%</td><td class="nw">10.00%</td><td class="nw">−1.04%</td></tr><tr><th scope="row">2017/03/31</th><td class="nw">1.90%</td><td class="nw">0.32%</td><td class="nw">+1.58%</td></tr><tr><th scope="row">2017/06/30</th><td class="nw">4.91%</td><td class="nw">4.28%</td><td class="nw">+0.63%</td></tr><tr><th scope="row">2017/09/30</th><td class="nw">10.21%</td><td class="nw">5.62%</td><td class="nw">+4.59%</td></tr><tr><th scope="row">2017/12/31</th><td class="nw">9.80%</td><td class="nw">6.88%</td><td class="nw">+2.92%</td></tr><tr><th scope="row">2018/03/31</th><td class="nw">−0.62%</td><td class="nw">−2.22%</td><td class="nw">+1.60%</td></tr><tr><th scope="row">2018/06/30</th><td class="nw">6.12%</td><td class="nw">6.46%</td><td class="nw">−0.34%</td></tr><tr><th scope="row">2018/09/30</th><td class="nw">−7.52%</td><td class="nw">−5.12%</td><td class="nw">−2.41%</td></tr><tr><th scope="row">2018/12/31</th><td class="nw">0.56%</td><td class="nw">3.50%</td><td class="nw">−2.94%</td></tr><tr><th scope="row">2019/03/31</th><td class="nw">5.98%</td><td class="nw">2.50%</td><td class="nw">+3.49%</td></tr><tr><th scope="row">2019/06/30</th><td class="nw">3.95%</td><td class="nw">1.03%</td><td class="nw">+2.93%</td></tr><tr><th scope="row">2019/09/30</th><td class="nw">1.97%</td><td class="nw">6.48%</td><td class="nw">−4.52%</td></tr><tr><th scope="row">2019/12/31</th><td class="nw">3.80%</td><td class="nw">3.53%</td><td class="nw">+0.27%</td></tr><tr><th scope="row">2020/03/31</th><td class="nw">−11.68%</td><td class="nw">−13.53%</td><td class="nw">+1.85%</td></tr><tr><th scope="row">2020/06/30</th><td class="nw">18.26%</td><td class="nw">19.13%</td><td class="nw">−0.87%</td></tr><tr><th scope="row">2020/09/30</th><td class="nw">5.55%</td><td class="nw">6.30%</td><td class="nw">−0.75%</td></tr><tr><th scope="row">2020/12/31</th><td class="nw">15.42%</td><td class="nw">24.91%</td><td class="nw">−9.49%</td></tr><tr><th scope="row">2021/03/31</th><td class="nw">8.83%</td><td class="nw">8.29%</td><td class="nw">+0.54%</td></tr><tr><th scope="row">2021/06/30</th><td class="nw">4.21%</td><td class="nw">5.13%</td><td class="nw">−0.92%</td></tr><tr><th scope="row">2021/09/30</th><td class="nw">5.95%</td><td class="nw">6.08%</td><td class="nw">−0.14%</td></tr><tr><th scope="row">2021/12/31</th><td class="nw">−3.21%</td><td class="nw">−3.98%</td><td class="nw">+0.77%</td></tr><tr><th scope="row">2022/03/31</th><td class="nw">−2.75%</td><td class="nw">−5.42%</td><td class="nw">+2.67%</td></tr><tr><th scope="row">2022/06/30</th><td class="nw">0.86%</td><td class="nw">−1.06%</td><td class="nw">+1.93%</td></tr><tr><th scope="row">2022/09/30</th><td class="nw">−2.01%</td><td class="nw">−4.31%</td><td class="nw">+2.30%</td></tr><tr><th scope="row">2022/12/31</th><td class="nw">8.04%</td><td class="nw">11.97%</td><td class="nw">−3.93%</td></tr><tr><th scope="row">2023/03/31</th><td class="nw">−2.57%</td><td class="nw">−4.23%</td><td class="nw">+1.66%</td></tr><tr><th scope="row">2023/06/30</th><td class="nw">10.23%</td><td class="nw">9.21%</td><td class="nw">+1.02%</td></tr><tr><th scope="row">2023/09/30</th><td class="nw">−7.00%</td><td class="nw">−9.77%</td><td class="nw">+2.77%</td></tr><tr><th scope="row">2023/12/31</th><td class="nw">17.03%</td><td class="nw">14.22%</td><td class="nw">+2.81%</td></tr><tr><th scope="row">2024/03/31</th><td class="nw">2.73%</td><td class="nw">3.80%</td><td class="nw">−1.06%</td></tr><tr><th scope="row">2024/06/30</th><td class="nw">4.59%</td><td class="nw">2.98%</td><td class="nw">+1.61%</td></tr><tr><th scope="row">2024/09/30</th><td class="nw">12.06%</td><td class="nw">4.04%</td><td class="nw">+8.02%</td></tr><tr><th scope="row">2024/12/31</th><td class="nw">3.12%</td><td class="nw">−1.66%</td><td class="nw">+4.79%</td></tr><tr><th scope="row">2025/03/31</th><td class="nw">−4.57%</td><td class="nw">−6.77%</td><td class="nw">+2.20%</td></tr><tr><th scope="row">2025/06/30</th><td class="nw">11.11%</td><td class="nw">8.99%</td><td class="nw">+2.12%</td></tr><tr><th scope="row">2025/09/30</th><td class="nw">6.67%</td><td class="nw">5.06%</td><td class="nw">+1.60%</td></tr><tr><th scope="row">2025/12/31</th><td class="nw">3.97%</td><td class="nw">4.58%</td><td class="nw">−0.61%</td></tr><tr><th scope="row">2026/03/31</th><td class="nw">4.66%</td><td class="nw">0.87%</td><td class="nw">+3.79%</td></tr></tbody></table></div></div></details>
+</section>
+
+<section class="sec" id="long"><h2>只買驚喜最大的一組</h2>
+<p class="t-body lead">只買驚喜最大的一組，年化比同池平均高約 3.0 點、比 SPY 高約 3.3 點，最大跌幅比 SPY 深。</p>
+<p class="t-body">下表逐日估算：每天把持有中的事件等權平均，資金全程在場，每筆在出場日扣 14 個基點。SPY 是同一段期間買進持有，沒有扣成本。期間是 2011 年 10 月 10 日到 2026 年 6 月 25 日。年化÷跌幅是年化報酬除以最大跌幅的絕對值。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">逐日估算</th><th scope="col">年化</th><th scope="col">最大跌幅</th><th scope="col">年化÷跌幅</th></tr></thead><tbody>
+<tr><th scope="row">只買第 5 組（最大）</th><td class="nw">18.65%</td><td class="nw">−38.6%</td><td class="nw">0.48</td></tr>
+<tr><th scope="row">同池平均</th><td class="nw">15.67%</td><td class="nw">−40.3%</td><td class="nw">0.39</td></tr>
+<tr><th scope="row">SPY 買進持有</th><td class="nw">15.40%</td><td class="nw">−33.7%</td><td class="nw">0.46</td></tr>
+<tr><th scope="row">只買第 1 組（最小）</th><td class="nw">13.65%</td><td class="nw">−42.0%</td><td class="nw">0.32</td></tr>
+</tbody></table></div>
+<p class="t-note">第 1 組的起點是 2011 年 10 月 27 日，晚於其他三列。</p>
+<figure class="qa-fig">
+<div class="ttl">圖 6.1　淨值走勢，只買第 5 組、同池平均與 SPY</div>
+<div class="tool"><div class="chartbox" id="f4"><div class="legend"></div><div class="chart" role="img" aria-label="只買驚喜最大一組、同池平均與 SPY 的淨值折線圖，月底取樣，起點為 1，2011 年 10 月到 2026 年 6 月"></div></div></div>
+</figure>
+<p class="t-note">月底取樣，起點為 1.00，最後一點是 2026 年 6 月 25 日。滑鼠移上去可看數值。</p>
+<p class="t-body">三條線的最大跌幅都出現在同一段：2020 年 2 月到 3 月 23 日。只買第 5 組從 2 月 20 日的高點跌 38.6%，同池平均跌 40.3%，SPY 跌 33.7%。年化報酬多出的部分，換來更深的跌幅；年化÷跌幅是 0.48 對 0.46，差不多。</p>
+<p class="t-body">多出來的年化主要來自「挑第 5 組」，不是來自股票池本身：第 5 組比同池平均多 2.98 點，同池平均比 SPY 只多 0.27 點。</p>
+<h3 class="t-lab">用第 3 節的口徑再看一次</h3>
+<p class="t-body">第 3 節的年化是把每季一批、每批 60 個交易日的報酬接起來，批與批之間的空檔不計，和逐日估算的年化不同。用同一口徑，只買第 5 組年化 15.70%，同池平均 13.37%，SPY 在同樣的持有期間是 13.54%。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">逐季鏈口徑</th><th scope="col">年化</th><th scope="col">每季底粗算最大跌幅</th></tr></thead><tbody><tr><th scope="row">只買第 5 組</th><td class="nw">15.70%</td><td class="nw">−11.7%</td></tr><tr><th scope="row">同池平均</th><td class="nw">13.37%</td><td class="nw">−13.9%</td></tr><tr><th scope="row">SPY（同池平均的進出場日）</th><td class="nw">13.54%</td><td class="nw">−15.4%</td></tr></tbody></table></div>
+<p class="t-note">口徑是各組「每季底粗算」，只在每個分組季結束時看淨值，看不到季中的跌幅，所以最大跌幅比逐日估算淺很多。SPY 取與同池平均相同的每筆進出場日。</p>
+<p class="t-body">兩種口徑方向一致：第 5 組比同池平均多 2.34 點（逐季鏈）或 2.98 點（逐日），比 SPY 多 2.16 點或 3.25 點。逐季鏈的最大跌幅看起來比 SPY 淺，逐日估算看起來比 SPY 深，原因是逐季鏈看不到季中的下跌。</p>
+</section>
+
+<section class="sec" id="limits"><h2>這個結果的弱點</h2>
+<ul class="dlist">
+<li>驚喜是和去年同期比較，沒有用到分析師預估。這個結果不能直接拿來回答「財報比分析師預期好」之後的走勢。</li>
+<li>股票池只有 S&amp;P 500 與那斯達克 100 的大型股。那斯達克 100 用的是現行名單，被剔除的公司不在裡面；835 檔裡，47 檔是現行與歷史代碼都查不到財報代碼的公司，182 檔是已離開名單、在股價來源完全找不到資料的公司。這兩個數字是分開統計的，彼此有重疊（相加 229 檔，大於沒進入計算的 210 檔），不能和 625 檔相加湊成 835。結果偏向還活著的公司，這個偏誤對價差的影響沒有量過。</li>
+<li>價差是做多一組、放空另一組，放空的借券成本沒有算。多空兩腿各付 14 個基點的成本之後，全期價差剩 2.29 點，t 值 1.42（第 4 節）。</li>
+<li>58 次分組出自同一段 15 年，前後兩段各自都站不住；價差集中在 2023 年以後的 13 季，這個切法是看過結果才切的。</li>
+<li>每一季的五等分門檻，用該季 90 天內全部公司的驚喜算出。較早公布財報的公司，買進當天還看不到同一季較晚公布的財報，門檻有一點事後的成分。</li>
+<li>只算持有期走完的分組：最後一次完整的分組是 2026 年 3 月底，之後一次（2026 年 6 月底）的持有期被資料終點截短，沒有納入任何表、圖與數字。</li>
+<li>第 6 節的 SPY 沒有扣成本，只買第 5 組每筆扣了 14 個基點；逐日估算與每季底粗算的最大跌幅口徑不同。</li>
+<li>這段期間美國股市大致是多頭，驚喜最小的一組年化也有 11.71%。</li>
+</ul></section>
+
+<section class="sec" id="src"><h2>資料來源</h2><ul class="dlist"><li>美國證券交易委員會（SEC）逐季財報，使用公布當時可得的版本；Yahoo Finance 還原股價，2009 年到 2026 年 9 月初。SPY 用還原收盤。</li><li>S&amp;P 500 歷史成分變動表（維基百科）與那斯達克 100 現行名單。</li><li>最後一次完整的分組是 2026 年 3 月底；6 月底那一次的持有期被資料終點截短，沒有納入。</li></ul></section>
 
 <p class="fine qa-back">這是歷史資料的計算，是一般資訊，不是對個人的投資建議。過去的結果不代表未來。</p>
 </div>
 <script>
-  (function () {
-    var cfg = {"cats": ["第 1 組（最小）", "第 2 組", "第 3 組", "第 4 組", "第 5 組（最大）"], "series": [{"name": "2011 年底–2018 年", "values": [10.52, 11.82, 11.18, 14.48, 14.03]}, {"name": "2019–2026 年 6 月", "values": [13.09, 14.63, 11.47, 16.85, 17.4]}, {"name": "全期", "values": [11.82, 13.24, 11.32, 15.68, 15.73]}], "extra": null, "ref": null};
-    cfg.fmt = QCHART.fmt.pct1; cfg.axisFmt = QCHART.fmt.pct0;
-    QCHART.mount(document.getElementById('cbox0'), cfg);
-  })();
+(function () {
+  var CUM = {"x": ["2011-12", "2012-03", "2012-06", "2012-09", "2012-12", "2013-03", "2013-06", "2013-09", "2013-12", "2014-03", "2014-06", "2014-09", "2014-12", "2015-03", "2015-06", "2015-09", "2015-12", "2016-03", "2016-06", "2016-09", "2016-12", "2017-03", "2017-06", "2017-09", "2017-12", "2018-03", "2018-06", "2018-09", "2018-12", "2019-03", "2019-06", "2019-09", "2019-12", "2020-03", "2020-06", "2020-09", "2020-12", "2021-03", "2021-06", "2021-09", "2021-12", "2022-03", "2022-06", "2022-09", "2022-12", "2023-03", "2023-06", "2023-09", "2023-12", "2024-03", "2024-06", "2024-09", "2024-12", "2025-03", "2025-06", "2025-09", "2025-12", "2026-03"], "a": [1.0541, 1.0883, 1.1331, 1.1455, 1.0799, 1.052, 1.0667, 1.0922, 1.1211, 1.1082, 1.1482, 1.138, 1.1708, 1.1648, 1.2291, 1.2425, 1.2705, 1.1925, 1.181, 1.1799, 1.1676, 1.186, 1.1934, 1.2482, 1.2847, 1.3053, 1.3009, 1.2695, 1.2322, 1.2752, 1.3125, 1.2532, 1.2566, 1.2799, 1.2687, 1.2592, 1.1397, 1.1458, 1.1353, 1.1338, 1.1425, 1.173, 1.1956, 1.223, 1.175, 1.1945, 1.2067, 1.2402, 1.275, 1.2614, 1.2817, 1.3845, 1.4508, 1.4827, 1.5141, 1.5384, 1.529, 1.5869], "b": [1.0513, 1.0825, 1.124, 1.1332, 1.0651, 1.0345, 1.0461, 1.0682, 1.0934, 1.0778, 1.1138, 1.1007, 1.1294, 1.1204, 1.1792, 1.1887, 1.2121, 1.1343, 1.1202, 1.116, 1.1013, 1.1156, 1.1194, 1.1677, 1.1985, 1.2144, 1.2069, 1.1744, 1.1366, 1.173, 1.2041, 1.1463, 1.1462, 1.1642, 1.1509, 1.139, 1.0277, 1.0304, 1.018, 1.0138, 1.0187, 1.0431, 1.0603, 1.0816, 1.0361, 1.0504, 1.0582, 1.0846, 1.112, 1.097, 1.1117, 1.1977, 1.2516, 1.2757, 1.2992, 1.3163, 1.3046, 1.3504]};
+  var NAV = {"x": ["2011-10", "2011-11", "2011-12", "2012-01", "2012-02", "2012-03", "2012-04", "2012-05", "2012-06", "2012-07", "2012-08", "2012-09", "2012-10", "2012-11", "2012-12", "2013-01", "2013-02", "2013-03", "2013-04", "2013-05", "2013-06", "2013-07", "2013-08", "2013-09", "2013-10", "2013-11", "2013-12", "2014-01", "2014-02", "2014-03", "2014-04", "2014-05", "2014-06", "2014-07", "2014-08", "2014-09", "2014-10", "2014-11", "2014-12", "2015-01", "2015-02", "2015-03", "2015-04", "2015-05", "2015-06", "2015-07", "2015-08", "2015-09", "2015-10", "2015-11", "2015-12", "2016-01", "2016-02", "2016-03", "2016-04", "2016-05", "2016-06", "2016-07", "2016-08", "2016-09", "2016-10", "2016-11", "2016-12", "2017-01", "2017-02", "2017-03", "2017-04", "2017-05", "2017-06", "2017-07", "2017-08", "2017-09", "2017-10", "2017-11", "2017-12", "2018-01", "2018-02", "2018-03", "2018-04", "2018-05", "2018-06", "2018-07", "2018-08", "2018-09", "2018-10", "2018-11", "2018-12", "2019-01", "2019-02", "2019-03", "2019-04", "2019-05", "2019-06", "2019-07", "2019-08", "2019-09", "2019-10", "2019-11", "2019-12", "2020-01", "2020-02", "2020-03", "2020-04", "2020-05", "2020-06", "2020-07", "2020-08", "2020-09", "2020-10", "2020-11", "2020-12", "2021-01", "2021-02", "2021-03", "2021-04", "2021-05", "2021-06", "2021-07", "2021-08", "2021-09", "2021-10", "2021-11", "2021-12", "2022-01", "2022-02", "2022-03", "2022-04", "2022-05", "2022-06", "2022-07", "2022-08", "2022-09", "2022-10", "2022-11", "2022-12", "2023-01", "2023-02", "2023-03", "2023-04", "2023-05", "2023-06", "2023-07", "2023-08", "2023-09", "2023-10", "2023-11", "2023-12", "2024-01", "2024-02", "2024-03", "2024-04", "2024-05", "2024-06", "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12", "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12", "2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06"], "q5": [1.079, 1.055, 1.038, 1.125, 1.181, 1.228, 1.228, 1.152, 1.189, 1.188, 1.238, 1.26, 1.253, 1.272, 1.281, 1.354, 1.356, 1.406, 1.425, 1.459, 1.441, 1.518, 1.475, 1.568, 1.63, 1.689, 1.731, 1.703, 1.776, 1.789, 1.8, 1.844, 1.907, 1.869, 1.963, 1.926, 2.007, 2.054, 2.067, 2.043, 2.161, 2.16, 2.123, 2.161, 2.132, 2.184, 2.079, 2.045, 2.18, 2.196, 2.134, 2.02, 2.013, 2.161, 2.151, 2.211, 2.219, 2.303, 2.304, 2.301, 2.243, 2.359, 2.404, 2.459, 2.561, 2.56, 2.579, 2.624, 2.667, 2.728, 2.748, 2.874, 2.975, 3.104, 3.12, 3.335, 3.209, 3.194, 3.173, 3.26, 3.267, 3.377, 3.535, 3.505, 3.174, 3.285, 2.944, 3.259, 3.392, 3.435, 3.615, 3.462, 3.686, 3.723, 3.646, 3.687, 3.705, 3.857, 3.928, 3.885, 3.582, 2.955, 3.402, 3.622, 3.723, 3.967, 4.138, 4.012, 4.01, 4.539, 4.691, 4.753, 4.955, 5.17, 5.411, 5.553, 5.601, 5.668, 5.873, 5.633, 6.074, 6.016, 6.482, 5.988, 5.884, 6.218, 5.762, 5.825, 5.26, 5.868, 5.765, 5.251, 5.846, 6.272, 5.932, 6.291, 6.107, 6.138, 6.085, 5.955, 6.505, 6.83, 6.636, 6.295, 6.063, 6.698, 7.131, 7.195, 7.708, 8.126, 7.719, 8.048, 8.107, 8.384, 8.704, 9.002, 8.945, 9.712, 9.127, 9.568, 9.465, 8.984, 8.938, 9.53, 9.908, 10.053, 10.132, 10.474, 10.463, 10.617, 10.596, 10.88, 11.044, 10.453, 11.157, 12.768, 12.367], "pool": [1.075, 1.07, 1.059, 1.133, 1.165, 1.186, 1.179, 1.098, 1.137, 1.141, 1.173, 1.2, 1.196, 1.207, 1.237, 1.315, 1.327, 1.378, 1.406, 1.438, 1.419, 1.498, 1.453, 1.526, 1.584, 1.624, 1.671, 1.634, 1.706, 1.719, 1.718, 1.758, 1.807, 1.765, 1.842, 1.791, 1.856, 1.91, 1.919, 1.868, 1.984, 1.974, 1.974, 2.002, 1.967, 1.982, 1.881, 1.818, 1.945, 1.953, 1.904, 1.802, 1.829, 1.981, 2.003, 2.042, 2.039, 2.139, 2.147, 2.152, 2.097, 2.219, 2.245, 2.296, 2.376, 2.382, 2.401, 2.426, 2.469, 2.516, 2.512, 2.602, 2.653, 2.756, 2.777, 2.904, 2.831, 2.823, 2.824, 2.882, 2.9, 2.998, 3.075, 3.073, 2.843, 2.936, 2.645, 2.912, 3.036, 3.055, 3.169, 2.951, 3.189, 3.218, 3.103, 3.206, 3.237, 3.359, 3.464, 3.382, 3.107, 2.521, 2.914, 3.088, 3.164, 3.323, 3.506, 3.428, 3.448, 4.014, 4.198, 4.265, 4.536, 4.822, 5.059, 5.175, 5.206, 5.264, 5.394, 5.191, 5.49, 5.354, 5.678, 5.417, 5.338, 5.509, 5.145, 5.185, 4.661, 5.13, 4.991, 4.533, 5.01, 5.375, 5.099, 5.519, 5.302, 5.251, 5.245, 5.079, 5.517, 5.759, 5.577, 5.306, 5.061, 5.557, 6.007, 5.947, 6.243, 6.565, 6.224, 6.418, 6.392, 6.71, 6.828, 7.017, 6.937, 7.445, 6.964, 7.236, 7.11, 6.786, 6.626, 6.983, 7.279, 7.381, 7.678, 7.802, 7.727, 7.87, 7.912, 8.144, 8.257, 7.801, 8.324, 8.968, 8.504], "spy": [1.085, 1.08, 1.091, 1.142, 1.192, 1.23, 1.222, 1.148, 1.195, 1.209, 1.239, 1.271, 1.248, 1.255, 1.266, 1.331, 1.348, 1.399, 1.426, 1.46, 1.44, 1.514, 1.469, 1.516, 1.586, 1.633, 1.675, 1.616, 1.69, 1.704, 1.715, 1.755, 1.791, 1.767, 1.837, 1.812, 1.854, 1.905, 1.901, 1.844, 1.948, 1.917, 1.936, 1.961, 1.921, 1.965, 1.845, 1.798, 1.951, 1.958, 1.924, 1.828, 1.827, 1.95, 1.957, 1.991, 1.997, 2.07, 2.073, 2.073, 2.037, 2.112, 2.155, 2.193, 2.28, 2.282, 2.305, 2.338, 2.353, 2.401, 2.408, 2.456, 2.514, 2.591, 2.623, 2.77, 2.67, 2.596, 2.61, 2.673, 2.689, 2.788, 2.877, 2.894, 2.694, 2.744, 2.503, 2.703, 2.791, 2.841, 2.957, 2.769, 2.961, 3.006, 2.956, 3.013, 3.08, 3.191, 3.284, 3.283, 3.023, 2.646, 2.981, 3.124, 3.179, 3.366, 3.601, 3.466, 3.38, 3.747, 3.886, 3.847, 3.954, 4.133, 4.352, 4.38, 4.479, 4.588, 4.724, 4.504, 4.82, 4.782, 5.003, 4.739, 4.599, 4.772, 4.353, 4.363, 4.003, 4.372, 4.193, 3.806, 4.115, 4.344, 4.093, 4.351, 4.242, 4.399, 4.469, 4.49, 4.781, 4.937, 4.857, 4.626, 4.526, 4.939, 5.165, 5.247, 5.521, 5.702, 5.472, 5.749, 5.951, 6.023, 6.164, 6.294, 6.237, 6.609, 6.45, 6.624, 6.54, 6.175, 6.122, 6.506, 6.841, 6.998, 7.142, 7.396, 7.572, 7.587, 7.593, 7.705, 7.639, 7.261, 8.024, 8.447, 8.22]};
+  function ticksOf(x, list) { var idx = []; list.forEach(function (p) { for (var i = 0; i < x.length; i++) if (x[i].indexOf(p) === 0) { idx.push(i); break; } }); return idx; }
+  QCHART.mount(document.getElementById('f1'), {
+    cats: ['+5 個交易日', '+20 個交易日', '+60 個交易日'],
+    series: [{ name: '驚喜最大', values: [0.15, 0.38, 0.71] }, { name: '驚喜最小', values: [-0.09, -0.18, -0.34] }],
+    fmt: QCHART.fmt.pct2, axisFmt: QCHART.fmt.pct2
+  });
+  QCHART.mount(document.getElementById('f2'), {
+    cats: ['第 1 組（最小）', '第 2 組', '第 3 組', '第 4 組', '第 5 組（最大）'],
+    series: [{ name: '2011 年底–2018 年', values: [10.52, 11.82, 11.18, 14.48, 14.03] }, { name: '2019–2026 年 3 月', values: [12.9, 14.12, 10.75, 16.2, 17.41] }, { name: '全期', values: [11.71, 12.97, 10.96, 15.33, 15.7] }],
+    fmt: QCHART.fmt.pct1, axisFmt: QCHART.fmt.pct0
+  });
+  function n2(v) { return v.toFixed(2); }
+  QLINE.mount(document.getElementById('f3'), {
+    x: CUM.x, xticks: ticksOf(CUM.x, ['2012-03', '2016-03', '2020-03', '2024-03']), xtitle: '分組年份', height: 300,
+    series: [{ name: '未扣多空兩腿成本', values: CUM.a, style: 0 }, { name: '扣多空兩腿成本', values: CUM.b, style: 1 }],
+    xfmt: function (v, tip) { return tip ? v : v.slice(0, 4); },
+    yfmt: n2, yaxis: n2, base: { value: 1, label: '1.00' }
+  });
+  QLINE.mount(document.getElementById('f4'), {
+    x: NAV.x, xticks: ticksOf(NAV.x, ['2012-01', '2016-01', '2020-01', '2024-01']), xtitle: '年份', height: 300,
+    series: [{ name: '只買第 5 組', values: NAV.q5, style: 0 }, { name: '同池平均', values: NAV.pool, style: 1 }, { name: 'SPY', values: NAV.spy, style: 2 }],
+    xfmt: function (v, tip) { return tip ? v : v.slice(0, 4); },
+    yfmt: function (v) { return v.toFixed(2) + ' 倍'; }, yaxis: function (v) { return v.toFixed(0); }, base: { value: 1, label: '1' }
+  });
+})();
 </script>
 </body>
 </html>
