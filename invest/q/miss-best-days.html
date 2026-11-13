@@ -11,6 +11,43 @@
 <link rel="stylesheet" href="../invest.css">
 <link rel="stylesheet" href="../tool.css">
 <link rel="stylesheet" href="../pages.css">
+<style>
+.doc .sec{margin-top:72px;scroll-margin-top:16px}
+.doc .sec h2{font-size:23px}
+.doc .sec h3.t-lab{margin-top:36px;font-size:16px}
+.doc .lead{font-weight:600;color:var(--ink)}
+.toc{margin-top:20px;border:1px solid var(--line);padding:14px 20px 12px}
+.toc .toc-h{font-family:var(--serif);font-weight:700;font-size:17px;color:var(--navy)}
+.toc p{margin:6px 0 0;font-size:14px;line-height:1.8;color:var(--muted)}
+.toc ol{margin:8px 0 0;padding-left:24px;font-size:15px;line-height:1.9}
+.toc li span{display:block;font-size:13px;line-height:1.6;color:var(--muted);margin-bottom:4px}
+.doc .dtbl.cmp th,.doc .dtbl.cmp td{padding:10px 8px;font-size:14px;line-height:1.6}
+.doc .dtbl.cmp thead th{text-align:right;white-space:normal}
+.doc .dtbl.cmp thead th:first-child{text-align:left}
+.doc .dtbl.cmp tbody td{text-align:right}
+.doc .dtbl.cmp tbody th{font-size:14px;font-weight:500}
+.doc .dtbl.cmp .nw{white-space:nowrap}
+.doc .dtbl.cmp .tag{font-size:12px;color:var(--muted)}
+.doc .dwrap{overflow-x:visible}@media (max-width:760px){.doc .dwrap{overflow-x:auto}}
+.doc .qa-answer,.doc .pre-box,.doc .toc,.doc .dwrap,.doc details.more,.doc .qa-fig,.doc .dlist{max-width:720px;margin-left:0;margin-right:0;box-sizing:border-box}
+.doc .steps{list-style:disc;margin:14px 0 0;padding-left:22px;font-size:17px;line-height:1.8;color:var(--ink2);max-width:720px}
+.doc .steps li+li{margin-top:6px}
+.doc .qa-fig{margin-top:32px}
+.doc .figs{margin-top:8px}
+details.more{margin-top:20px;border:1px solid var(--line);border-radius:0;background:var(--card)}
+details.more>summary{cursor:pointer;padding:12px 16px;font-size:15px;font-weight:700;line-height:1.6;color:var(--ink);list-style:none}
+details.more>summary::-webkit-details-marker{display:none}
+details.more>summary::before{content:"＋";display:inline-block;width:1.4em;color:var(--navy)}
+details.more[open]>summary::before{content:"－"}
+details.more[open]>summary{border-bottom:1px solid var(--line)}
+details.more .in{padding:0 0 4px}
+details.more .in>p{padding:0 16px}
+details.more .in .dwrap{margin-top:12px;border:0;margin-left:-1px;margin-right:-1px}
+.nw{white-space:nowrap}
+.doc .dtbl.cmp tbody th .tag{display:block;margin-top:2px;border:0;padding:0;background:none;font-size:12px;color:var(--muted)}
+details.more .in>p{margin:14px 0 0}
+.doc .sec h2{text-wrap:balance}
+</style>
 <script src="../invest.js"></script>
 <script src="../qchart.js"></script>
 </head>
@@ -20,31 +57,157 @@
 
 <p class="t-link" style="margin-top:28px"><a href="../questions.html">回到全部題目</a></p>
 <h1 class="h1" style="margin-top:12px">錯過漲最多的幾天會怎樣？</h1>
-<div class="qa-answer"><div class="k">一句話答案</div><p>0050 含息年化 14.91%，拿掉漲最多的 10 天剩 11.31%，拿掉 30 天剩 6.37%。美股同期的損失幅度接近。</p></div>
-<aside class="pre-box" aria-labelledby="pre-t"><div class="pre-h" id="pre-t">讀這個結果之前</div><h4>這個結果只來自一條 23 年的路徑，而且最好的日子多半出現在大跌之後</h4><p>0050 漲最多的 30 天裡，有 23 天發生在前一天指數已比高點低 20% 以上的時候，全部交易日只有 10% 處在這個狀態。</p><p>最好與最壞各 30 天共 60 個極端日，有 24 天落在 2008 年。其餘散在 2004、2009、2020、2024 等年。</p><h4>這篇沒有回答的事</h4><ul><li>空手那幾天假設事後完美知道，現實中做不到，只顯示錯過的代價。</li><li>最大跌幅只用收盤價，沒有盤中。</li><li>美股的同期、1990 年起、1962 年起三組期間不同，彼此不能直接比。</li></ul><p class="pre-fine">0050 含息日報酬，2003 年 7 月 1 日至 2026 年 9 月 30 日，美股用美國全市場含息日報酬。</p><p class="pre-link"><a href="#limits">完整的弱點見「這個結果的弱點」一節</a></p></aside>
+<div class="qa-answer"><div class="k">一句話答案</div><p>「錯過最好的 10 天」只算了一半。0050 漲最多的 30 天裡有 23 天，出現在指數已從高點跌兩成以上的時候，和跌最多的日子擠在一起。只拿掉最好 10 天，年化從 14.91% 降到 11.31%。最好、最壞各 10 天一起拿掉，年化 15.04%，一直抱著是 14.91%。</p></div>
+<aside class="pre-box" aria-labelledby="pre-t"><div class="pre-h" id="pre-t">讀這個結果之前</div><h4>這是事後完美知道哪幾天的算法，而且 60 個極端日有 24 天在 2008 年</h4><p>最好與最壞各 30 天共 60 個極端日，24 天落在 2008 年，其中最好日 13 天、最壞日 11 天。扣掉 2008 年，最好 30 天剩 17 天，仍有 10 天在已跌兩成以上的狀態。</p><p>被拿掉的日子報酬記 0，這要事先知道是哪幾天，現實中做不到。唯一做得到的是第 5 節跌破年線就賣的規則，它在 27 個看得到的最好日裡有 20 天空手。</p><h4>這篇沒有回答的事</h4><ul><li>只有 0050 一條 23 年的路徑，美股三組期間彼此重疊，不是獨立的證據。</li><li>最大跌幅只用收盤價，沒有盤中。</li><li>最好日與最壞日出現在同一種狀態，這篇只描述，沒有檢驗是不是這個狀態造成的，也沒有檢驗能不能事先認出來。</li></ul><p class="pre-fine">0050 含息日報酬，2003 年 7 月 1 日至 2026 年 9 月 30 日。美股用 Ken French 全市場含息日報酬。最大跌幅是從高點跌到之後最低點的幅度。</p><p class="pre-link"><a href="#limits">完整的弱點見「這個結果的弱點」一節</a></p></aside>
 
+<nav class="toc" aria-label="本文目錄"><div class="toc-h">本文目錄</div><ol>
+<li><a href="#what">測了什麼</a><span>拿掉的做法、資料期間、「已跌兩成以上」的定義</span></li>
+<li><a href="#s1">1　只拿掉最好的天數</a><span>年化與最大跌幅一起列</span></li>
+<li><a href="#s2">2　最好的 30 天，逐筆</a><span>日期、漲幅、前一天離高點多遠、附近有沒有最壞日</span></li>
+<li><a href="#s3">3　已跌兩成以上的日子，單日波動約 1.9 倍</a><span>兩種狀態的比較</span></li>
+<li><a href="#s4">4　最好和最壞一起拿掉</a><span>幾乎互相抵消，躲掉最壞日也很值錢</span></li>
+<li><a href="#s5">5　跌破年線就賣，會錯過哪一邊</a><span>唯一做得到的版本</span></li>
+<li><a href="#s6">6　美股同期、1990 年起、1962 年起</a><span>方向相同</span></li>
+<li><a href="#limits">這個結果的弱點</a><span>完整列出</span></li>
+<li><a href="#src">資料來源與接著看</a><span></span></li>
+</ol></nav>
+
+<section class="sec" id="what"><h2>測了什麼</h2>
+<p class="t-body lead">把 0050 含息日報酬裡漲最多或跌最多的幾天拿掉，看長期年化與最大跌幅怎麼變。</p>
+<p class="t-body">拿掉的日子報酬記 0（空手），其他日子照舊。期間是 2003 年 7 月 1 日到 2026 年 9 月 30 日，共 5,720 個交易日。排序用單日報酬，同報酬取日期早者，第 10、20、30 名與下一名沒有並列。</p>
+<p class="t-body">美股對照用 Ken French 全市場含息日報酬，起點對齊 0050，另列 1990 年與 1962 年起。</p>
+<p class="t-body">「已跌兩成以上」指前一天收盤的含息淨值，比到前一天為止的最高點低 20% 以上。用前一天，是為了不讓當天的漲幅影響狀態的判斷。</p>
+<p class="t-body">第 1 到 4 節的「拿掉」全是事後才知道哪幾天，沒辦法照著做。第 5 節是唯一可以執行的版本。</p>
+</section>
+
+<section class="sec" id="s1"><span id="tw"></span><h2>1　只拿掉最好的天數</h2>
+<p class="t-body lead">0050 只拿掉漲最多的 10 天，年化從 14.91% 降到 11.31%；拿掉 30 天降到 6.37%，最大跌幅同時從 −55.75% 加深到 −79.11%。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">0050</th><th scope="col">年化</th><th scope="col">最大跌幅</th><th scope="col">年化<br>÷最大跌幅</th><th scope="col">美股同期<br>年化</th></tr></thead><tbody><tr><th scope="row">一直抱著</th><td class="nw">14.91%</td><td class="nw">−55.75%</td><td class="nw">0.27</td><td class="nw">11.54%</td></tr><tr><th scope="row">拿掉最好 10 天</th><td class="nw">11.31%</td><td class="nw">−65.08%</td><td class="nw">0.17</td><td class="nw">7.80%</td></tr><tr><th scope="row">拿掉最好 20 天</th><td class="nw">8.60%</td><td class="nw">−78.12%</td><td class="nw">0.11</td><td class="nw">5.42%</td></tr><tr><th scope="row">拿掉最好 30 天</th><td class="nw">6.37%</td><td class="nw">−79.11%</td><td class="nw">0.08</td><td class="nw">3.52%</td></tr></tbody></table></div>
+<p class="t-body">拿掉 10 天少 3.60 個百分點，拿掉 20 天少 6.31，拿掉 30 天少 8.53。0050 最好的 30 天連乘是 6.02 倍：一直抱著的期末倍數是 25.3，拿掉這 30 天剩 4.2。</p>
+<p class="t-body">台股單日漲跌幅限制 10%，0050 最好的一天是 +10.0%，所以損失的大小由天數決定。</p>
 <figure class="qa-fig">
-<div class="ttl">拿掉漲最多的幾天之後，含息年化報酬</div>
-<div class="cap">那幾天空手、報酬記 0。2003 年 7 月 1 日到 2026 年 9 月 30 日。</div>
-<div class="tool"><div class="chartbox" id="cbox"><div class="legend"></div><div class="chart" role="img" aria-label="拿掉漲最多的 10、20、30 天之後含息年化報酬的長條圖，台股 0050 與美股同期並排"></div></div></div>
+<div class="ttl">圖 1.1　拿掉漲最多的幾天之後，含息年化報酬</div>
+<div class="tool"><div class="chartbox" id="f11"><div class="legend"></div><div class="chart" role="img" aria-label="拿掉漲最多的 10、20、30 天之後含息年化報酬長條圖，台股 0050 與美股同期並排，滑鼠移上去可看數值"></div></div></div>
 </figure>
+<p class="t-note">拿掉的日子空手、報酬記 0。美股同期是 2003 年 7 月起的 Ken French 全市場。</p>
+<p class="t-body">最大跌幅也一起變深。一直抱著的最大跌幅是 −55.75%，高點在 2007-10-29，谷底在 2008-11-20。拿掉最好 10 天，谷底延到 2009-01-21，最大跌幅 −65.08%。拿掉 30 天是 −79.11%。</p>
+<p class="t-body">最好的 30 天有 13 天在 2008 年。拿掉之後，2008 年底的反彈少了這些日子，淨值的谷底就更低、更晚。下一節逐筆看這 30 天。</p>
+<figure class="qa-fig">
+<div class="ttl">圖 1.2　拿掉漲最多的幾天之後，最大跌幅</div>
+<div class="tool"><div class="chartbox" id="f12"><div class="legend"></div><div class="chart" role="img" aria-label="拿掉漲最多的 10、20、30 天之後最大跌幅長條圖，台股 0050 與美股同期並排，越往下跌得越深"></div></div></div>
+</figure>
+<p class="t-note">越往下跌得越深。只用收盤價。</p>
+</section>
 
-<section class="sec"><h2>測了什麼</h2><p class="t-body">把一段期間裡漲最多的幾天拿掉，看長期年化報酬少多少。做法是把那幾天的報酬記成 0（空手），其他日子照舊。同時看拿掉跌最多的幾天會多賺多少。</p><p class="t-body">台股用 0050 含息日報酬，2003 年 7 月 1 日到 2026 年 9 月 30 日，共 5,720 個交易日。美股對照用美國全市場含息日報酬，起點對齊 0050，另列 1990 年與 1962 年起的結果。報酬含息。</p></section>
-<section class="sec"><h2>結果</h2><h3 class="t-lab" id="tw">台股結果（0050、加權報酬指數）</h3><div class="dwrap"><table class="dtbl"><thead><tr><th>資料</th><th>期間</th><th class="num">全程持有年化</th><th class="num">拿掉最好 10 天</th><th class="num">拿掉最好 20 天</th><th class="num">拿掉最好 30 天</th><th class="num">拿掉最壞 10 天</th><th class="num">最好＋最壞各 10 天</th><th class="num">最好＋最壞各 30 天</th></tr></thead><tbody><tr><th scope="row">台股 0050 含息</th><td class="nw">2003-07-01～2026-09-30</td><td class="num">14.91%</td><td class="num">11.31%</td><td class="num">8.60%</td><td class="num">6.37%</td><td class="num">18.76%</td><td class="num">15.04%</td><td class="num">15.02%</td></tr><tr><th scope="row">加權報酬指數（含息）</th><td class="nw">2003-01-03～2026-09-30</td><td class="num">14.42%</td><td class="num">11.44%</td><td class="num">9.27%</td><td class="num">7.40%</td><td class="num">17.82%</td><td class="num">14.75%</td><td class="num">15.22%</td></tr></tbody></table></div><p class="t-body">錯過漲最多的少數幾天，長期報酬掉很多。0050 全程年化 14.91%，拿掉最好 10 天剩 11.31%，少 3.6 個百分點；拿掉最好 30 天剩 6.37%，少 8.5 個百分點。</p><p class="t-body">台股單日漲跌幅限 10%，0050 最好的一天是 +10.0%，最壞的一天是 −10.0%。決定損失大小的是那幾天的數量，不是單日幅度。</p><p class="t-body">最好的日子和最壞的日子擠在一起。0050 漲最多的 30 天裡，有 23 天發生在前一天指數已比高點低 20% 以上的時候，全部交易日只有 10% 處在這個狀態。</p><div class="dwrap"><table class="dtbl"><thead><tr><th>資料</th><th>最好 30 天中，前一天指數已比高點低 20% 以上</th><th>最好 30 天中，前後 10 日內有最壞 30 天之一</th></tr></thead><tbody><tr><th scope="row">台股 0050 含息</th><td class="nw">23／30（全部交易日占 10%）</td><td class="nw">17／30（全部交易日占 7.4%）</td></tr></tbody></table></div><p class="t-body">一起避開最壞的日子，長期報酬會大幅上升，但這要事後完美知道是哪幾天。最好、最壞各 10 天都拿掉，0050 年化 15.04%，只比全程持有的 14.91% 多 0.13 個百分點。</p><div class="dwrap"><table class="dtbl"><thead><tr><th>資料</th><th>期間</th><th class="num">全程持有最大跌幅</th><th class="num">拿掉最好 10 天</th><th class="num">拿掉最好 20 天</th><th class="num">拿掉最好 30 天</th><th class="num">拿掉最壞 10 天</th><th class="num">最好＋最壞各 10 天</th><th class="num">最好＋最壞各 30 天</th></tr></thead><tbody><tr><th scope="row">台股 0050 含息</th><td class="nw">2003-07-01～2026-09-30</td><td class="num">−55.75%</td><td class="num">−65.08%</td><td class="num">−78.12%</td><td class="num">−79.11%</td><td class="num">−44.30%</td><td class="num">−52.07%</td><td class="num">−58.56%</td></tr><tr><th scope="row">加權報酬指數（含息）</th><td class="nw">2003-01-03～2026-09-30</td><td class="num">−56.02%</td><td class="num">−62.96%</td><td class="num">−66.14%</td><td class="num">−72.34%</td><td class="num">−47.78%</td><td class="num">−56.02%</td><td class="num">−57.10%</td></tr></tbody></table></div><p class="t-body">最大跌幅也一起變深。0050 全程持有的最大跌幅是 −55.75%（2007 年 10 月到 2008 年 11 月）；空手漲最多的 10 天，最大跌幅擴大到 −65.08%；空手 30 天，擴大到 −79.11%。錯過的不只是報酬，連回落也更深，因為漲最多的日子多半出現在大跌之後的反彈，這是事後的觀察，不是因果檢定。拿掉最壞 10 天，最大跌幅是 −44.30%。</p><p class="t-note">最大跌幅用每日含息淨值計算，取歷史高點到之後最低點的最大跌幅；拿掉的日子報酬記 0，只用收盤價，沒有盤中。</p><h3 class="t-lab" id="us">美股結果</h3><div class="dwrap"><table class="dtbl"><thead><tr><th>資料</th><th>期間</th><th class="num">全程持有年化</th><th class="num">拿掉最好 10 天</th><th class="num">拿掉最好 20 天</th><th class="num">拿掉最好 30 天</th><th class="num">拿掉最壞 10 天</th><th class="num">最好＋最壞各 10 天</th><th class="num">最好＋最壞各 30 天</th></tr></thead><tbody><tr><th scope="row">美股同期</th><td class="nw">2003-07-01～2026-09-30</td><td class="num">11.54%</td><td class="num">7.80%</td><td class="num">5.42%</td><td class="num">3.52%</td><td class="num">15.76%</td><td class="num">11.88%</td><td class="num">12.32%</td></tr><tr><th scope="row">美股 1990 年起</th><td class="nw">1990-01-05～2026-09-30</td><td class="num">10.97%</td><td class="num">8.60%</td><td class="num">7.02%</td><td class="num">5.70%</td><td class="num">13.62%</td><td class="num">11.20%</td><td class="num">11.54%</td></tr><tr><th scope="row">美股 1962 年起</th><td class="nw">1962-01-03～2026-09-30</td><td class="num">10.59%</td><td class="num">9.21%</td><td class="num">8.28%</td><td class="num">7.49%</td><td class="num">12.33%</td><td class="num">10.92%</td><td class="num">11.21%</td></tr></tbody></table></div><div class="dwrap"><table class="dtbl"><thead><tr><th>資料</th><th>最好 30 天中，前一天指數已比高點低 20% 以上</th><th>最好 30 天中，前後 10 日內有最壞 30 天之一</th></tr></thead><tbody><tr><th scope="row">美股同期</th><td class="nw">23／30（全部交易日占 9%）</td><td class="nw">23／30（全部交易日占 4.4%）</td></tr><tr><th scope="row">美股 1990 年起</th><td class="nw">23／30（全部交易日占 16%）</td><td class="nw">17／30（全部交易日占 3.3%）</td></tr></tbody></table></div><div class="dwrap"><table class="dtbl"><thead><tr><th>資料</th><th>期間</th><th class="num">全程持有最大跌幅</th><th class="num">拿掉最好 10 天</th><th class="num">拿掉最好 20 天</th><th class="num">拿掉最好 30 天</th><th class="num">拿掉最壞 10 天</th><th class="num">最好＋最壞各 10 天</th><th class="num">最好＋最壞各 30 天</th></tr></thead><tbody><tr><th scope="row">美股同期</th><td class="nw">2003-07-01～2026-09-30</td><td class="num">−54.57%</td><td class="num">−67.25%</td><td class="num">−72.02%</td><td class="num">−78.53%</td><td class="num">−30.22%</td><td class="num">−46.98%</td><td class="num">−39.14%</td></tr><tr><th scope="row">美股 1990 年起</th><td class="nw">1990-01-05～2026-09-30</td><td class="num">−54.57%</td><td class="num">−67.25%</td><td class="num">−70.80%</td><td class="num">−76.75%</td><td class="num">−47.75%</td><td class="num">−53.60%</td><td class="num">−57.16%</td></tr><tr><th scope="row">美股 1962 年起</th><td class="nw">1962-01-03～2026-09-30</td><td class="num">−54.57%</td><td class="num">−65.20%</td><td class="num">−70.80%</td><td class="num">−74.58%</td><td class="num">−49.23%</td><td class="num">−51.36%</td><td class="num">−57.11%</td></tr></tbody></table></div><p class="t-body">美股同期全程持有的最大跌幅是 −54.57%，拿掉最好 10 天擴大到 −67.25%，拿掉 30 天擴大到 −78.53%，方向與 0050 相同。拿掉最壞 10 天是 −30.22%。</p><h3 class="t-lab">兩個市場對照</h3><p class="t-body">美股同期全程年化 11.54%，拿掉漲最多的 10 天剩 7.80%，拿掉 30 天剩 3.52%，損失幅度接近。</p></section>
-<section class="sec"><h2 id="limits">這個結果的弱點</h2><ul class="dlist"><li>「空手那幾天」假設事後完美知道是哪幾天，現實中做不到。這題只顯示錯過的代價。</li><li>只有一條 23 年的路徑。0050 最好與最壞各 30 天共 60 個極端日，有 24 天落在 2008 年，其餘散在 2004、2009、2020、2024 等年。</li><li>不含息的加權價格指數（1990 年起）全程年化只有 4.40%，拿掉最好 30 天變成 −0.94%。它的長期報酬本來就低，這個比較的基準不一樣。</li><li>拿掉某些日子之後，最大跌幅發生的時期會改變；美股不同起點（同期、1990 年起、1962 年起）的列期間不同，彼此不能直接比。</li><li>美股 1990 年與 1962 年的對照是美國全市場，不是單一指數。</li></ul></section>
-<section class="sec"><h2>資料來源</h2><ul class="dlist"><li>0050：證交所官方還原日線，2003 年 7 月 1 日到 2026 年 9 月 30 日。加權報酬指數、加權價格指數：證交所。</li><li>美股：Ken French 全市場日報酬。排序用單日報酬，同報酬取日期早者；漲最多第 10、20、30 名與下一名沒有並列。</li></ul></section>
+<section class="sec" id="s2"><h2>2　最好的 30 天，逐筆</h2>
+<p class="t-body lead">最好的 30 天裡，23 天的前一天指數已比高點低 20% 以上，17 天的前後 10 個交易日內有最壞 30 天之一。</p>
+<p class="t-body">30 天前一天離高點的中位數是 −28.8%。17 天附近有最壞日的，最近一個最壞日與它相隔的交易日數，中位數是 3 天。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">日期</th><th scope="col">當日<br>漲幅</th><th scope="col">前一天<br>離高點</th><th scope="col">前後 10 個交易日內，最壞 30 天之一</th></tr></thead><tbody><tr><th scope="row"><span class="nw">2004-03-29</span></th><td class="nw">+4.9%</td><td class="nw">−12.0%</td><td>2004-03-22，−7.0%</td></tr><tr><th scope="row"><span class="nw">2004-05-19</span><span class="tag">已跌兩成以上</span></th><td class="nw">+7.0%</td><td class="nw">−21.5%</td><td>2004-05-17，−7.0%（共 2 天，取最近一天）</td></tr><tr><th scope="row"><span class="nw">2004-06-07</span></th><td class="nw">+5.1%</td><td class="nw">−19.1%</td><td>沒有</td></tr><tr><th scope="row"><span class="nw">2008-02-14</span><span class="tag">已跌兩成以上</span></th><td class="nw">+5.5%</td><td class="nw">−22.4%</td><td>沒有</td></tr><tr><th scope="row"><span class="nw">2008-07-17</span><span class="tag">已跌兩成以上</span></th><td class="nw">+5.5%</td><td class="nw">−29.9%</td><td>沒有</td></tr><tr><th scope="row"><span class="nw">2008-07-21</span><span class="tag">已跌兩成以上</span></th><td class="nw">+5.4%</td><td class="nw">−27.8%</td><td>沒有</td></tr><tr><th scope="row"><span class="nw">2008-09-08</span><span class="tag">已跌兩成以上</span></th><td class="nw">+6.9%</td><td class="nw">−31.2%</td><td>2008-09-15，−4.7%</td></tr><tr><th scope="row"><span class="nw">2008-09-19</span><span class="tag">已跌兩成以上</span></th><td class="nw">+7.0%</td><td class="nw">−37.0%</td><td>2008-09-15，−4.7%（共 2 天，取最近一天）</td></tr><tr><th scope="row"><span class="nw">2008-10-14</span><span class="tag">已跌兩成以上</span></th><td class="nw">+7.0%</td><td class="nw">−45.0%</td><td>2008-10-08，−6.4%（共 3 天，取最近一天）</td></tr><tr><th scope="row"><span class="nw">2008-10-28</span><span class="tag">已跌兩成以上</span></th><td class="nw">+6.9%</td><td class="nw">−54.9%</td><td>2008-10-27，−6.9%（共 2 天，取最近一天）</td></tr><tr><th scope="row"><span class="nw">2008-10-30</span><span class="tag">已跌兩成以上</span></th><td class="nw">+7.0%</td><td class="nw">−51.7%</td><td>2008-10-27，−6.9%（共 3 天，取最近一天）</td></tr><tr><th scope="row"><span class="nw">2008-10-31</span><span class="tag">已跌兩成以上</span></th><td class="nw">+6.1%</td><td class="nw">−48.3%</td><td>2008-10-27，−6.9%（共 3 天，取最近一天）</td></tr><tr><th scope="row"><span class="nw">2008-11-27</span><span class="tag">已跌兩成以上</span></th><td class="nw">+6.0%</td><td class="nw">−53.6%</td><td>2008-12-02，−5.8%（共 3 天，取最近一天）</td></tr><tr><th scope="row"><span class="nw">2008-12-08</span><span class="tag">已跌兩成以上</span></th><td class="nw">+7.0%</td><td class="nw">−54.7%</td><td>2008-12-02，−5.8%（共 2 天，取最近一天）</td></tr><tr><th scope="row"><span class="nw">2008-12-10</span><span class="tag">已跌兩成以上</span></th><td class="nw">+5.9%</td><td class="nw">−51.6%</td><td>2008-12-12，−5.3%（共 2 天，取最近一天）</td></tr><tr><th scope="row"><span class="nw">2008-12-15</span><span class="tag">已跌兩成以上</span></th><td class="nw">+4.7%</td><td class="nw">−52.0%</td><td>2008-12-12，−5.3%（共 2 天，取最近一天）</td></tr><tr><th scope="row"><span class="nw">2009-04-30</span><span class="tag">已跌兩成以上</span></th><td class="nw">+7.0%</td><td class="nw">−40.9%</td><td>沒有</td></tr><tr><th scope="row"><span class="nw">2009-05-04</span><span class="tag">已跌兩成以上</span></th><td class="nw">+7.0%</td><td class="nw">−36.8%</td><td>沒有</td></tr><tr><th scope="row"><span class="nw">2009-05-27</span><span class="tag">已跌兩成以上</span></th><td class="nw">+5.3%</td><td class="nw">−31.6%</td><td>沒有</td></tr><tr><th scope="row"><span class="nw">2011-12-21</span><span class="tag">已跌兩成以上</span></th><td class="nw">+4.9%</td><td class="nw">−22.6%</td><td>沒有</td></tr><tr><th scope="row"><span class="nw">2020-03-20</span><span class="tag">已跌兩成以上</span></th><td class="nw">+8.0%</td><td class="nw">−28.2%</td><td>2020-03-19，−5.8%（共 2 天，取最近一天）</td></tr><tr><th scope="row"><span class="nw">2020-03-24</span><span class="tag">已跌兩成以上</span></th><td class="nw">+4.9%</td><td class="nw">−25.9%</td><td>2020-03-19，−5.8%（共 2 天，取最近一天）</td></tr><tr><th scope="row"><span class="nw">2020-07-27</span></th><td class="nw">+4.9%</td><td class="nw">−0.5%</td><td>沒有</td></tr><tr><th scope="row"><span class="nw">2022-11-11</span><span class="tag">已跌兩成以上</span></th><td class="nw">+5.3%</td><td class="nw">−29.3%</td><td>沒有</td></tr><tr><th scope="row"><span class="nw">2024-02-15</span></th><td class="nw">+4.7%</td><td class="nw">−1.4%</td><td>沒有</td></tr><tr><th scope="row"><span class="nw">2024-08-06</span><span class="tag">已跌兩成以上</span></th><td class="nw">+5.5%</td><td class="nw">−21.3%</td><td>2024-08-05，−9.1%（共 2 天，取最近一天）</td></tr><tr><th scope="row"><span class="nw">2025-04-10</span><span class="tag">已跌兩成以上</span></th><td class="nw">+10.0%</td><td class="nw">−27.5%</td><td>2025-04-09，−4.6%（共 2 天，取最近一天）</td></tr><tr><th scope="row"><span class="nw">2026-04-08</span></th><td class="nw">+5.2%</td><td class="nw">−7.2%</td><td>沒有</td></tr><tr><th scope="row"><span class="nw">2026-05-29</span></th><td class="nw">+4.9%</td><td class="nw">−2.0%</td><td>沒有</td></tr><tr><th scope="row"><span class="nw">2026-07-31</span></th><td class="nw">+10.0%</td><td class="nw">−15.4%</td><td>2026-07-17，−5.9%</td></tr></tbody></table></div>
+<p class="t-note">「前一天離高點」是前一天收盤的含息淨值相對到那天為止的最高點。「共 N 天」是前後 10 個交易日內有 N 個最壞 30 天之一。2015 年 6 月以前，台股漲跌幅限制是 7%，表中 +6.9% 以上的日子多是碰到當時的上限。</p>
+<p class="t-body">沒有落在已跌兩成以上的 7 天，前一天離高點是 −0.5% 到 −19.1%。其中 2024 年 2 月以後的 4 天，離高點 1.4% 到 15.4%。最好的日子也會出現在接近高點的時候，只是這 30 天裡的少數。</p>
+<h3 class="t-lab">按年份看</h3>
+<p class="t-body">30 個最好日分布在 9 個年份。2008 年 13 天，2004、2009、2020、2026 年各 3 天，2024 年 2 天，2011、2022、2025 年各 1 天。最壞 30 天也是 2008 年最多，11 天。</p>
+<figure class="qa-fig">
+<div class="ttl">圖 2.1　最好 30 天與最壞 30 天，按年份的天數</div>
+<div class="tool"><div class="chartbox" id="f21"><div class="legend"></div><div class="chart" role="img" aria-label="最好 30 天與最壞 30 天各落在哪些年份的長條圖，2008 年最多"></div></div></div>
+</figure>
+<p class="t-note">只列有極端日的年份。2008 年合計 24 天，占 60 個極端日的 40%。</p>
+</section>
+
+<section class="sec" id="s3"><h2>3　已跌兩成以上的日子，單日波動約 1.9 倍</h2>
+<p class="t-body lead">已跌兩成以上的日子只占 10% 的交易日，卻有 23／30 個最好日與 14／30 個最壞日；這些日子的日報酬標準差是 2.22%，其餘日子是 1.15%。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">狀態</th><th scope="col">交易日</th><th scope="col">占全部</th><th scope="col">日報酬<br>標準差</th><th scope="col">平均絕對<br>漲跌幅</th><th scope="col">最好<br>30 天</th><th scope="col">最壞<br>30 天</th></tr></thead><tbody><tr><th scope="row">前一天已比高點低 20% 以上</th><td class="nw">577</td><td class="nw">10.1%</td><td class="nw">2.22%</td><td class="nw">1.56%</td><td class="nw">23</td><td class="nw">14</td></tr><tr><th scope="row">其餘</th><td class="nw">5,143</td><td class="nw">89.9%</td><td class="nw">1.15%</td><td class="nw">0.81%</td><td class="nw">7</td><td class="nw">16</td></tr><tr><th scope="row">全部</th><td class="nw">5,720</td><td class="nw">100.0%</td><td class="nw">1.30%</td><td class="nw">0.89%</td><td class="nw">30</td><td class="nw">30</td></tr></tbody></table></div>
+<p class="t-note">日報酬標準差是每天漲跌幅的起伏大小，數字越大，單日漲跌越大。平均絕對漲跌幅是不分方向的平均單日漲跌。</p>
+<p class="t-body">如果最好日平均分散在所有交易日，30 天裡約只有 3 天會落在這個狀態，實際是 23 天。最壞日也是約 3 天，實際是 14 天。兩種極端日合計 37 天，擠在 10% 的交易日裡。</p>
+<p class="t-body">把最好、最壞各 30 天拿掉之後，已跌兩成以上的日子標準差仍是 1.64%，其餘日子是 1.08%。</p>
+<figure class="qa-fig">
+<div class="ttl">圖 3.1　兩種狀態的日報酬標準差</div>
+<div class="tool"><div class="chartbox" id="f31"><div class="legend"></div><div class="chart" role="img" aria-label="已跌兩成以上與其餘日子的日報酬標準差長條圖，一組含全部日子，一組拿掉最好最壞各 30 天"></div></div></div>
+</figure>
+<p class="t-note">實心是全部日子，斜線是拿掉最好、最壞各 30 天之後。</p>
+<h3 class="t-lab">這個狀態集中在哪幾年</h3>
+<p class="t-body">已跌兩成以上的 577 天，2008 到 2010 年占 393 天，2022 年占 110 天，其餘年份合計 74 天。扣掉 2008 年，這個狀態剩 435 天，占 8.0%，最好 17 天中仍有 10 天在其中，最壞 19 天中有 5 天。標準差是 1.87% 對 1.14%。這個狀態的基準占比只有 8.0%。</p>
+</section>
+
+<section class="sec" id="s4"><h2>4　最好和最壞一起拿掉</h2>
+<p class="t-body lead">最好、最壞各拿掉 10 天，年化 15.04%，一直抱著是 14.91%；各拿掉 30 天是 15.02%，最大跌幅 −58.56%，比抱著深。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">0050</th><th scope="col">年化</th><th scope="col">最大跌幅</th><th scope="col">期末倍數</th></tr></thead><tbody><tr><th scope="row">一直抱著</th><td class="nw">14.91%</td><td class="nw">−55.75%</td><td class="nw">25.3</td></tr><tr><th scope="row">拿掉最好 10 天</th><td class="nw">11.31%</td><td class="nw">−65.08%</td><td class="nw">12.1</td></tr><tr><th scope="row">拿掉最好 30 天</th><td class="nw">6.37%</td><td class="nw">−79.11%</td><td class="nw">4.2</td></tr><tr><th scope="row">拿掉最壞 10 天</th><td class="nw">18.76%</td><td class="nw">−44.30%</td><td class="nw">54.5</td></tr><tr><th scope="row">拿掉最壞 30 天</th><td class="nw">24.24%</td><td class="nw">−38.65%</td><td class="nw">155.6</td></tr><tr><th scope="row">最好、最壞各拿掉 10 天</th><td class="nw">15.04%</td><td class="nw">−52.07%</td><td class="nw">26.0</td></tr><tr><th scope="row">最好、最壞各拿掉 30 天</th><td class="nw">15.02%</td><td class="nw">−58.56%</td><td class="nw">25.9</td></tr></tbody></table></div>
+<p class="t-body">最好的 30 天連乘 6.02 倍，最壞的 30 天連乘 0.163 倍，也就是 6.15 分之一。兩邊一起拿掉，期末倍數從 25.3 變成 25.9。</p>
+<p class="t-body">最大跌幅的方向不一致。各拿掉 10 天是 −52.07%，比抱著淺 3.68 個百分點；各拿掉 30 天是 −58.56%，比抱著深 2.81 個百分點。</p>
+<p class="t-body">躲掉最壞的日子很值錢。只拿掉最壞 10 天，年化 18.76%、最大跌幅 −44.30%，比抱著多賺 3.85 個百分點；拿掉最壞 30 天，年化 24.24%、最大跌幅 −38.65%。這個多賺的幅度，和錯過最好 10 天少賺的 3.60 個百分點差不多。</p>
+<p class="t-body">「錯過最好的日子」只算了損失的一半，另一半是同一批日子旁邊的最壞日。兩邊都事後知道才能拿掉，所以這一節不是可執行的做法。</p>
+</section>
+
+<section class="sec" id="s5"><h2>5　跌破年線就賣，會錯過哪一邊</h2>
+<p class="t-body lead">跌破年線就賣，空手期間涵蓋 27 個最好日裡的 20 天、27 個最壞日裡的 19 天，錯過的漲幅合計比躲掉的跌幅大。</p>
+<p class="t-body">規則和<a href="sell-below-ma.html">跌破年線要不要賣？</a>、<a href="exit-rules.html">設了出場規則，少跌多少、少賺多少？</a>相同：含息收盤低於 240 日均線，下一個交易日收盤全部賣出放現金；收盤站回均線之上，下一個交易日收盤買回。評價期從有 240 日均線的 2004 年 6 月 11 日開始，到 2026 年 9 月 30 日，共 5,481 個交易日。</p>
+<p class="t-body">第 2 節的最好、最壞各 30 天，各有 3 天在 2004 年 6 月 11 日以前，規則還沒開始，剩 27 天。下表只算規則賺到現金之前那幾天的股票報酬，沒有算現金利息與交易成本。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">0050，2004-06-11 起</th><th scope="col">天數</th><th scope="col">空手</th><th scope="col">空手日<br>報酬加總</th><th scope="col">空手日<br>報酬連乘</th></tr></thead><tbody><tr><th scope="row">最好 30 天裡，規則看得到的</th><td class="nw">27</td><td class="nw">20（74%）</td><td class="nw">+127.8 個百分點</td><td class="nw">+244.6%</td></tr><tr><th scope="row">最壞 30 天裡，規則看得到的</th><td class="nw">27</td><td class="nw">19（70%）</td><td class="nw">−109.6 個百分點</td><td class="nw">−67.7%</td></tr><tr><th scope="row">全部交易日</th><td class="nw">5,481</td><td class="nw">1,306（23.8%）</td><td class="nw">+64.2 個百分點</td><td class="nw">+55.1%</td></tr></tbody></table></div>
+<p class="t-body">空手的日子只占全部交易日的 23.8%，卻涵蓋 74% 的最好日與 70% 的最壞日。兩邊都比全部日子的占比高很多，和第 3 節看到的擠在一起一致。</p>
+<p class="t-body">錯過的 20 個最好日，單日報酬加總 +127.8 個百分點；連乘是 3.45 倍（+244.6%），也就是空手讓期末資產少乘了 3.45 倍。躲掉的 19 個最壞日，加總 −109.6 個百分點；連乘是 0.323 倍（−67.7%），也就是空手讓期末資產多乘了 3.10 倍（1÷0.323）。兩邊相乘，這 39 天如果抱著是 3.45 × 0.323 ≈ 1.11 倍，空手則是 1 倍，所以空手這 39 天的淨效果是期末資產少約 10%（1÷1.11 ≈ 0.90）。錯過的比躲掉的多。</p>
+<p class="t-body">規則空手的全部 1,306 個交易日，0050 連乘上漲 55.1%。空手期間股票是漲的。跌破年線要不要賣那篇算完整結果（含現金利息與交易成本）：0050 年化 11.5%，一直抱著 14.8%；最大跌幅 −30.9%，一直抱著 −55.8%。</p>
+<h3 class="t-lab">2008 年和其餘年份分開</h3>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">期間</th><th scope="col">最好日<br>看得到</th><th scope="col">最好日<br>空手</th><th scope="col">錯過的漲幅<br>連乘</th><th scope="col">最壞日<br>看得到</th><th scope="col">最壞日<br>空手</th><th scope="col">躲掉的跌幅<br>連乘</th></tr></thead><tbody><tr><th scope="row">2008 年</th><td class="nw">13</td><td class="nw">13</td><td class="nw">+119.0%</td><td class="nw">11</td><td class="nw">11</td><td class="nw">−47.5%</td></tr><tr><th scope="row">其餘年份</th><td class="nw">14</td><td class="nw">7</td><td class="nw">+57.4%</td><td class="nw">16</td><td class="nw">8</td><td class="nw">−38.5%</td></tr></tbody></table></div>
+<p class="t-body">2008 年 13 個最好日、11 個最壞日全部空手：錯過的漲幅連乘 +119.0%，躲掉的跌幅連乘 −47.5%。規則在 2008 年錯過的比躲掉的多。</p>
+<p class="t-body">其餘年份，16 個最壞日有 8 天空手，連乘 −38.5%；14 個最好日有 7 天空手，連乘 +57.4%。這一邊，躲掉的略多於錯過的（1.63 倍對 1.57 倍）。</p>
+<p class="t-body">這個比較只涵蓋 54 個極端日裡的 39 個空手日，規則另外 1,267 個空手日不在裡面。</p>
+<details class="more"><summary>看每一天：最好 30 天，規則當天空手還是持有</summary><div class="in"><div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">日期</th><th scope="col">當日漲跌</th><th scope="col">規則當天</th></tr></thead><tbody><tr><th scope="row"><span class="nw">2004-03-29</span></th><td class="nw">+4.9%</td><td class="nw">窗外</td></tr><tr><th scope="row"><span class="nw">2004-05-19</span></th><td class="nw">+7.0%</td><td class="nw">窗外</td></tr><tr><th scope="row"><span class="nw">2004-06-07</span></th><td class="nw">+5.1%</td><td class="nw">窗外</td></tr><tr><th scope="row"><span class="nw">2008-02-14</span></th><td class="nw">+5.5%</td><td class="nw">空手</td></tr><tr><th scope="row"><span class="nw">2008-07-17</span></th><td class="nw">+5.5%</td><td class="nw">空手</td></tr><tr><th scope="row"><span class="nw">2008-07-21</span></th><td class="nw">+5.4%</td><td class="nw">空手</td></tr><tr><th scope="row"><span class="nw">2008-09-08</span></th><td class="nw">+6.9%</td><td class="nw">空手</td></tr><tr><th scope="row"><span class="nw">2008-09-19</span></th><td class="nw">+7.0%</td><td class="nw">空手</td></tr><tr><th scope="row"><span class="nw">2008-10-14</span></th><td class="nw">+7.0%</td><td class="nw">空手</td></tr><tr><th scope="row"><span class="nw">2008-10-28</span></th><td class="nw">+6.9%</td><td class="nw">空手</td></tr><tr><th scope="row"><span class="nw">2008-10-30</span></th><td class="nw">+7.0%</td><td class="nw">空手</td></tr><tr><th scope="row"><span class="nw">2008-10-31</span></th><td class="nw">+6.1%</td><td class="nw">空手</td></tr><tr><th scope="row"><span class="nw">2008-11-27</span></th><td class="nw">+6.0%</td><td class="nw">空手</td></tr><tr><th scope="row"><span class="nw">2008-12-08</span></th><td class="nw">+7.0%</td><td class="nw">空手</td></tr><tr><th scope="row"><span class="nw">2008-12-10</span></th><td class="nw">+5.9%</td><td class="nw">空手</td></tr><tr><th scope="row"><span class="nw">2008-12-15</span></th><td class="nw">+4.7%</td><td class="nw">空手</td></tr><tr><th scope="row"><span class="nw">2009-04-30</span></th><td class="nw">+7.0%</td><td class="nw">空手</td></tr><tr><th scope="row"><span class="nw">2009-05-04</span></th><td class="nw">+7.0%</td><td class="nw">空手</td></tr><tr><th scope="row"><span class="nw">2009-05-27</span></th><td class="nw">+5.3%</td><td class="nw">持有</td></tr><tr><th scope="row"><span class="nw">2011-12-21</span></th><td class="nw">+4.9%</td><td class="nw">空手</td></tr><tr><th scope="row"><span class="nw">2020-03-20</span></th><td class="nw">+8.0%</td><td class="nw">空手</td></tr><tr><th scope="row"><span class="nw">2020-03-24</span></th><td class="nw">+4.9%</td><td class="nw">空手</td></tr><tr><th scope="row"><span class="nw">2020-07-27</span></th><td class="nw">+4.9%</td><td class="nw">持有</td></tr><tr><th scope="row"><span class="nw">2022-11-11</span></th><td class="nw">+5.3%</td><td class="nw">空手</td></tr><tr><th scope="row"><span class="nw">2024-02-15</span></th><td class="nw">+4.7%</td><td class="nw">持有</td></tr><tr><th scope="row"><span class="nw">2024-08-06</span></th><td class="nw">+5.5%</td><td class="nw">持有</td></tr><tr><th scope="row"><span class="nw">2025-04-10</span></th><td class="nw">+10.0%</td><td class="nw">空手</td></tr><tr><th scope="row"><span class="nw">2026-04-08</span></th><td class="nw">+5.2%</td><td class="nw">持有</td></tr><tr><th scope="row"><span class="nw">2026-05-29</span></th><td class="nw">+4.9%</td><td class="nw">持有</td></tr><tr><th scope="row"><span class="nw">2026-07-31</span></th><td class="nw">+10.0%</td><td class="nw">持有</td></tr></tbody></table></div><p class="t-note">「窗外」是 2004 年 6 月 11 日以前，規則還沒有 240 日均線。</p></div></details>
+<details class="more"><summary>看每一天：最壞 30 天，規則當天空手還是持有</summary><div class="in"><div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">日期</th><th scope="col">當日漲跌</th><th scope="col">規則當天</th></tr></thead><tbody><tr><th scope="row"><span class="nw">2004-03-22</span></th><td class="nw">−7.0%</td><td class="nw">窗外</td></tr><tr><th scope="row"><span class="nw">2004-05-05</span></th><td class="nw">−4.9%</td><td class="nw">窗外</td></tr><tr><th scope="row"><span class="nw">2004-05-17</span></th><td class="nw">−7.0%</td><td class="nw">窗外</td></tr><tr><th scope="row"><span class="nw">2008-01-07</span></th><td class="nw">−4.6%</td><td class="nw">空手</td></tr><tr><th scope="row"><span class="nw">2008-01-22</span></th><td class="nw">−6.9%</td><td class="nw">空手</td></tr><tr><th scope="row"><span class="nw">2008-09-15</span></th><td class="nw">−4.7%</td><td class="nw">空手</td></tr><tr><th scope="row"><span class="nw">2008-10-06</span></th><td class="nw">−4.5%</td><td class="nw">空手</td></tr><tr><th scope="row"><span class="nw">2008-10-08</span></th><td class="nw">−6.4%</td><td class="nw">空手</td></tr><tr><th scope="row"><span class="nw">2008-10-27</span></th><td class="nw">−6.9%</td><td class="nw">空手</td></tr><tr><th scope="row"><span class="nw">2008-11-06</span></th><td class="nw">−7.0%</td><td class="nw">空手</td></tr><tr><th scope="row"><span class="nw">2008-11-13</span></th><td class="nw">−5.6%</td><td class="nw">空手</td></tr><tr><th scope="row"><span class="nw">2008-11-20</span></th><td class="nw">−4.7%</td><td class="nw">空手</td></tr><tr><th scope="row"><span class="nw">2008-12-02</span></th><td class="nw">−5.8%</td><td class="nw">空手</td></tr><tr><th scope="row"><span class="nw">2008-12-12</span></th><td class="nw">−5.3%</td><td class="nw">空手</td></tr><tr><th scope="row"><span class="nw">2009-01-08</span></th><td class="nw">−6.4%</td><td class="nw">空手</td></tr><tr><th scope="row"><span class="nw">2009-01-15</span></th><td class="nw">−4.6%</td><td class="nw">空手</td></tr><tr><th scope="row"><span class="nw">2011-08-05</span></th><td class="nw">−5.9%</td><td class="nw">空手</td></tr><tr><th scope="row"><span class="nw">2018-02-06</span></th><td class="nw">−4.7%</td><td class="nw">持有</td></tr><tr><th scope="row"><span class="nw">2018-10-11</span></th><td class="nw">−7.0%</td><td class="nw">持有</td></tr><tr><th scope="row"><span class="nw">2020-01-30</span></th><td class="nw">−5.7%</td><td class="nw">持有</td></tr><tr><th scope="row"><span class="nw">2020-03-16</span></th><td class="nw">−4.6%</td><td class="nw">空手</td></tr><tr><th scope="row"><span class="nw">2020-03-19</span></th><td class="nw">−5.8%</td><td class="nw">空手</td></tr><tr><th scope="row"><span class="nw">2022-10-11</span></th><td class="nw">−5.2%</td><td class="nw">空手</td></tr><tr><th scope="row"><span class="nw">2024-04-19</span></th><td class="nw">−5.1%</td><td class="nw">持有</td></tr><tr><th scope="row"><span class="nw">2024-08-02</span></th><td class="nw">−5.1%</td><td class="nw">持有</td></tr><tr><th scope="row"><span class="nw">2024-08-05</span></th><td class="nw">−9.1%</td><td class="nw">持有</td></tr><tr><th scope="row"><span class="nw">2024-09-04</span></th><td class="nw">−4.9%</td><td class="nw">持有</td></tr><tr><th scope="row"><span class="nw">2025-04-07</span></th><td class="nw">−10.0%</td><td class="nw">空手</td></tr><tr><th scope="row"><span class="nw">2025-04-09</span></th><td class="nw">−4.6%</td><td class="nw">空手</td></tr><tr><th scope="row"><span class="nw">2026-07-17</span></th><td class="nw">−5.9%</td><td class="nw">持有</td></tr></tbody></table></div></div></details>
+</section>
+
+<section class="sec" id="s6"><span id="us"></span><h2>6　美股同期、1990 年起、1962 年起</h2>
+<p class="t-body lead">美股三個起點，拿掉最好 30 天都少 3.1 到 8.0 個百分點，最好最壞各拿掉 10 天都只比一直抱著多 0.2 到 0.3 個百分點。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">美股，起點</th><th scope="col">全程<br>年化</th><th scope="col">拿掉最好<br>10 天</th><th scope="col">拿掉最好<br>30 天</th><th scope="col">拿掉最壞<br>10 天</th><th scope="col">最好最壞<br>各 10 天</th></tr></thead><tbody><tr><th scope="row">2003-07</th><td class="nw">11.54%</td><td class="nw">7.80%</td><td class="nw">3.52%</td><td class="nw">15.76%</td><td class="nw">11.88%</td></tr><tr><th scope="row">1990-01</th><td class="nw">10.97%</td><td class="nw">8.60%</td><td class="nw">5.70%</td><td class="nw">13.62%</td><td class="nw">11.20%</td></tr><tr><th scope="row">1962-01</th><td class="nw">10.59%</td><td class="nw">9.21%</td><td class="nw">7.49%</td><td class="nw">12.33%</td><td class="nw">10.92%</td></tr></tbody></table></div>
+<p class="t-body">拿掉最好 30 天，年化少的幅度：2003-07 起 8.02 個百分點，1990-01 起 5.27，1962-01 起 3.10。起點越早，期間越長，少的幅度越小。最好最壞各拿掉 10 天，分別多 0.34、0.23、0.33 個百分點。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">美股，起點</th><th scope="col">全程持有<br>最大跌幅</th><th scope="col">拿掉最好<br>30 天</th><th scope="col">最好 30 天中<br>已跌兩成以上</th><th scope="col">最好 30 天中，前後 10 日<br>有最壞 30 天之一</th></tr></thead><tbody><tr><th scope="row">2003-07</th><td class="nw">−54.6%</td><td class="nw">−78.5%</td><td class="nw">23／30（全部交易日 9%）</td><td class="nw">23／30（全部交易日 4.4%）</td></tr><tr><th scope="row">1990-01</th><td class="nw">−54.6%</td><td class="nw">−76.8%</td><td class="nw">23／30（全部交易日 16%）</td><td class="nw">17／30（全部交易日 3.3%）</td></tr><tr><th scope="row">1962-01</th><td class="nw">−54.6%</td><td class="nw">−74.6%</td><td class="nw">24／30（全部交易日 14%）</td><td class="nw">18／30（全部交易日 2.2%）</td></tr></tbody></table></div>
+<p class="t-note">括號內是全部交易日中，符合同一條件的占比。</p>
+<p class="t-body">最大跌幅的方向和 0050 相同：拿掉最好 30 天，三個起點都從 −54.57% 加深到 −74.58% 至 −78.53%。最好 30 天落在已跌兩成以上的天數，三組分別是 23、23、24 天，1962 年起的基準占比是 14%。</p>
+<p class="t-body">美股用的是全市場日報酬，不是單一指數。三組起點的期間重疊，樣本不獨立。</p>
+</section>
+
+<section class="sec" id="limits"><h2>這個結果的弱點</h2>
+<ul class="dlist">
+<li>「拿掉的日子」假設事後完美知道，現實中做不到。第 5 節是唯一可以執行的版本，它只測了跌破 240 日均線這一條規則。</li>
+<li>只有一條 23 年的路徑。60 個極端日有 24 天在 2008 年；扣掉 2008 年，最好 30 天剩 17 天的樣本，其中 10 天在已跌兩成以上。</li>
+<li>已跌兩成以上的 577 天，393 天在 2008 到 2010 年，110 天在 2022 年，這個狀態只有幾段大跌。</li>
+<li>第 5 節的比較只有 54 個極端日，其中 24 天在 2008 年；沒有計入現金利息與交易成本。</li>
+<li>跌兩成的門檻與「前後 10 個交易日」是事前訂的，換成別的數字，計數會變，這篇沒有測。</li>
+<li>最好日與最壞日出現在同一種狀態，這篇只描述，沒有檢驗成因，也沒有檢驗能不能事先認出這個狀態。</li>
+<li>最大跌幅只用收盤價。美股是全市場日報酬，報酬只有兩位小數，最好第 30 名與第 31 名並列時取日期早者，不影響年化。</li>
+</ul></section>
+
+<section class="sec" id="src"><h2>資料來源</h2><ul class="dlist"><li>0050：證交所官方還原日線，2003 年 7 月 1 日到 2026 年 9 月 30 日，以收盤價計算，除息還原。</li><li>美股：Ken French 全市場含息日報酬。排序用單日報酬，同報酬取日期早者。</li><li>第 5 節的跌破年線規則：與跌破年線要不要賣那篇同一段程式，評價期 2004 年 6 月 11 日起。</li></ul></section>
+<section class="sec"><h2>接著看</h2><ul class="dlist"><li><a href="sell-below-ma.html">跌破年線要不要賣？</a></li><li><a href="exit-rules.html">設了出場規則，少跌多少、少賺多少？</a></li><li><a href="wait-for-crash.html">等大跌再買會比較好嗎？</a></li></ul></section>
 
 <section class="sec"><h2>自己用工具算一次</h2>
-<p class="qa-try"><a class="btn" href="../tool.html?p1=0050:100">0050 單筆投入</a></p><p class="t-note">工具不能把特定幾天拿掉。可以用它看 0050 完整期間的含息年化與最大跌幅，作為「全程持有」的基準。</p>
+<p class="qa-try"><a class="btn" href="../tool.html?p1=0050:100">0050 單筆投入</a></p><p class="t-note">工具不能把特定幾天拿掉。可以用它看 0050 完整期間的含息年化與最大跌幅，作為「一直抱著」的基準。</p>
 </section>
 
 <p class="fine qa-back">這是歷史資料的計算，是一般資訊，不是對個人的投資建議。過去的結果不代表未來。</p>
 </div>
 <script>
 (function () {
-  var cfg = {"cats": ["全程持有", "拿掉最好 10 天", "拿掉最好 20 天", "拿掉最好 30 天"], "series": [{"name": "台股 0050", "values": [14.91, 11.31, 8.6, 6.37]}, {"name": "美股同期", "values": [11.54, 7.8, 5.42, 3.52]}], "ref": null};
-  cfg.fmt = QCHART.fmt.pct2; cfg.axisFmt = QCHART.fmt.pct0;
-  QCHART.mount(document.getElementById('cbox'), cfg);
+  function pct(v, d) { return (v < 0 ? '\u2212' : '') + Math.abs(v).toFixed(d) + '%'; }
+  QCHART.mount(document.getElementById('f11'), {
+    cats: ["一直抱著", "拿掉最好 10 天", "拿掉最好 20 天", "拿掉最好 30 天"],
+    series: [{ name: "台股 0050", values: [14.91, 11.31, 8.6, 6.37] }, { name: "美股同期", values: [11.54, 7.8, 5.42, 3.52] }],
+    fmt: QCHART.fmt.pct2, axisFmt: QCHART.fmt.pct0, min: 0
+  });
+  QCHART.mount(document.getElementById('f12'), {
+    cats: ["一直抱著", "拿掉最好 10 天", "拿掉最好 20 天", "拿掉最好 30 天"],
+    series: [{ name: "台股 0050", values: [-55.75, -65.08, -78.12, -79.11] }, { name: "美股同期", values: [-54.57, -67.25, -72.02, -78.53] }],
+    fmt: QCHART.fmt.pct2, axisFmt: QCHART.fmt.pct0, max: 0
+  });
+  QCHART.mount(document.getElementById('f21'), {
+    cats: ["2004", "2008", "2009", "2011", "2018", "2020", "2022", "2024", "2025", "2026"],
+    series: [{"name": "最好 30 天", "values": [3, 13, 3, 1, 0, 3, 1, 2, 1, 3]}, {"name": "最壞 30 天", "values": [3, 11, 2, 1, 2, 3, 1, 4, 2, 1]}],
+    fmt: function (v) { return v.toFixed(0) + ' 天'; }, axisFmt: function (v) { return v.toFixed(0); }, min: 0
+  });
+  QCHART.mount(document.getElementById('f31'), {
+    cats: ["已跌兩成以上", "其餘日子"],
+    series: [{ name: "全部日子", values: [2.22, 1.15] }, { name: "拿掉最好最壞各 30 天", values: [1.64, 1.08] }],
+    fmt: function (v) { return v.toFixed(2) + '%'; }, axisFmt: function (v) { return v.toFixed(1) + '%'; }, min: 0
+  });
 })();
 </script>
 </body>
