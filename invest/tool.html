@@ -211,7 +211,13 @@
     $('start').addEventListener('change', function (e) { userStart = e.target.value || null; recompute(); });
     $('end').addEventListener('change', function (e) { userEnd = e.target.value || null; recompute(); });
     $('resetDates').addEventListener('click', function () { userStart = null; userEnd = null; recompute(); });
-    $('addC').addEventListener('click', function () { groups[2].on = true; ui.render(); recompute(); });
+    $('addC').addEventListener('click', function () {
+      // 第三組預設挑一個前兩組沒用到的標的，免得跟組合 A 一模一樣、看起來沒變化
+      var used = {}; groups.forEach(function (g, i) { if (i < 2 && g.on) g.items.forEach(function (it) { used[it.id] = 1; }); });
+      var pick = ['SPY', 'TAIEX_TR', 'QQQ', '0056', '0050'].filter(function (id) { return !used[id]; })[0] || 'SPY';
+      groups[2].items = [{ id: pick, w: '100' }];
+      groups[2].on = true; ui.render(); recompute();
+    });
     $('logChk').addEventListener('change', drawCharts);
     var rt; window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(drawCharts, 120); });
   }
