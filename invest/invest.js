@@ -26,7 +26,7 @@
     if (!host) return;
     var base = document.body.getAttribute('data-root') || '';
     var here = document.body.getAttribute('data-nav') || '';
-    var act = { tool: 'tool', questions: 'questions', q: 'questions', evidence: 'questions', route: 'route', allocate: 'route', product: 'route' }[here] || '';
+    var act = { tool: 'tool', questions: 'questions', q: 'questions', evidence: 'questions' }[here] || '';
     function link(key, href, label) {
       return '<a href="' + base + href + '"' + (act === key ? ' aria-current="page"' : '') + '>' + label + '</a>';
     }
@@ -36,15 +36,14 @@
       '<div class="hdr-r">' +
       '<nav class="nav" aria-label="主選單">' +
       link('tool', 'tool.html', '回測工具') +
-      link('questions', 'questions.html', '常見問題') +
-      link('route', 'index.html#route', '新手路線') +
+      link('questions', 'questions.html', '測過的說法') +
       link('about', 'index.html#about', '關於數字') +
       '</nav>' +
       '<div class="theme" role="group" aria-label="主題">' +
       '<button type="button" data-set="dark" aria-pressed="false">深色</button>' +
       '<button type="button" data-set="light" aria-pressed="false">淺色</button>' +
       '</div></div></header>' +
-      '<p class="trial">試作版：數字是初算，稅務內容還沒經專業人士確認。</p>';
+      '<p class="trial">試作版：數字是初算，還沒經專業人士確認。</p>';
     var bs = host.querySelectorAll('.theme button');
     for (var i = 0; i < bs.length; i++) {
       bs[i].addEventListener('click', function (e) {
