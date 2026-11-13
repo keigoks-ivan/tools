@@ -11,8 +11,47 @@
 <link rel="stylesheet" href="../invest.css">
 <link rel="stylesheet" href="../tool.css">
 <link rel="stylesheet" href="../pages.css">
+<style>
+.doc .sec{margin-top:72px;scroll-margin-top:16px}
+.doc .sec h2{font-size:23px}
+.doc .sec h3.t-lab{margin-top:36px;font-size:16px}
+.doc .lead{font-weight:600;color:var(--ink)}
+.toc{margin-top:20px;border:1px solid var(--line);padding:14px 20px 12px}
+.toc .toc-h{font-family:var(--serif);font-weight:700;font-size:17px;color:var(--navy)}
+.toc p{margin:6px 0 0;font-size:14px;line-height:1.8;color:var(--muted)}
+.toc ol{margin:8px 0 0;padding-left:24px;font-size:15px;line-height:1.9}
+.toc li span{display:block;font-size:13px;line-height:1.6;color:var(--muted);margin-bottom:4px}
+.doc .dtbl.cmp th,.doc .dtbl.cmp td{padding:10px 8px;font-size:14px;line-height:1.6}
+.doc .dtbl.cmp thead th{text-align:right;white-space:normal}
+.doc .dtbl.cmp thead th:first-child{text-align:left}
+.doc .dtbl.cmp tbody td{text-align:right}
+.doc .dtbl.cmp tbody th{font-size:14px;font-weight:500}
+.doc .dtbl.cmp .nw{white-space:nowrap}
+.doc .dtbl.cmp .tag{font-size:12px;color:var(--muted)}
+.doc .dwrap{overflow-x:visible}
+.doc .qa-answer,.doc .pre-box,.doc .toc,.doc .dwrap,.doc details.more,.doc .qa-fig,.doc .dlist{max-width:720px;margin-left:0;margin-right:0;box-sizing:border-box}
+.doc .steps{list-style:disc;margin:14px 0 0;padding-left:22px;font-size:17px;line-height:1.8;color:var(--ink2);max-width:720px}
+.doc .steps li+li{margin-top:6px}
+.doc .qa-fig{margin-top:32px}
+.doc .figs{margin-top:8px}
+details.more{margin-top:20px;border:1px solid var(--line);border-radius:0;background:var(--card)}
+details.more>summary{cursor:pointer;padding:12px 16px;font-size:15px;font-weight:700;line-height:1.6;color:var(--ink);list-style:none}
+details.more>summary::-webkit-details-marker{display:none}
+details.more>summary::before{content:"＋";display:inline-block;width:1.4em;color:var(--navy)}
+details.more[open]>summary::before{content:"－"}
+details.more[open]>summary{border-bottom:1px solid var(--line)}
+details.more .in{padding:0 0 4px}
+details.more .in>p{padding:0 16px}
+details.more .in .dwrap{margin-top:12px;border:0;margin-left:-1px;margin-right:-1px}
+.nw{white-space:nowrap}
+.doc .dtbl.cmp tbody th .tag{display:block;margin-top:2px;border:0;padding:0;background:none;font-size:12px;color:var(--muted)}
+details.more .in>p{margin:14px 0 0}
+.doc .sec h2{text-wrap:balance}
+@media (max-width:760px){.doc .dwrap{overflow-x:auto}}
+</style>
 <script src="../invest.js"></script>
 <script src="../qchart.js"></script>
+<script src="../qline.js"></script>
 </head>
 <body data-root="../" data-nav="q">
 <div class="page doc">
@@ -20,38 +59,172 @@
 
 <p class="t-link" style="margin-top:28px"><a href="../questions.html">回到全部題目</a></p>
 <h1 class="h1" style="margin-top:12px">股票的長期漲跌靠獲利還是靠估值？用過去的獲利成長選股有用嗎？</h1>
-<div class="qa-answer"><div class="k">一句話答案</div><p>持有越久，報酬差異越由獲利成長決定；但用過去的獲利成長選股，看不出贏家。</p></div>
-<aside class="pre-box" aria-labelledby="pre-t"><div class="pre-h" id="pre-t">讀這個結果之前</div><h4>持有越久，報酬差異越由獲利成長決定</h4><p>把不同股票的報酬高低差異拆開：持有 1 年，獲利成長解釋 32.3%，本益比變化也就是估值倍數變化解釋 68.2%。持有 5 年，獲利成長解釋 66.9%。</p><p>這個拆解只描述已經發生的報酬由什麼組成，不能用來預測下一段。用過去的每股盈餘年增率把股票分五組，最高組減最低組的年化報酬差距是 −1.3 個百分點，統計上站不住，也就是看不出和 0 有差別。</p><h4>這篇沒有回答的事</h4><ul><li>Nasdaq-100 只用現行成分股，後來消失的公司不在裡面，所以絕對報酬偏高。</li><li>分組沒有扣交易成本也沒有算最大跌幅，不能當成可交易的策略績效。</li><li>這篇只涵蓋 2009 至 2026 年的 835 檔美股，其他市場沒有測。</li></ul><p class="pre-fine">835 檔 S&amp;P 500 與 Nasdaq-100 成分股，2009 至 2026 年，財報用當時已公布的版本。沒扣交易成本。</p><p class="pre-link"><a href="#limits">完整的弱點見「這個結果的弱點」一節</a></p></aside>
+<div class="qa-answer"><div class="k">一句話答案</div><p>2010 至 2026 年這段美國大型股裡，持有 5 年時股票之間報酬高低的差異有 67% 來自獲利成長，這是事後的算式拆解，只描述已經發生的。事前用過去的獲利成長把股票分五組，最高組減最低組每年是 −1.3 個百分點，小於它逐年的起伏，統計上站不住。若能事先知道之後 4 季的獲利成長，同一種分法每年是 +24.2 個百分點，但那要偷看未來，不能交易。</p></div>
+<aside class="pre-box" aria-labelledby="pre-t"><div class="pre-h" id="pre-t">讀這個結果之前</div><h4>獲利成長解釋了事後的報酬差異，事前分組卻沒有價差</h4><p>「解釋」指算式拆解：把同一段期間股票之間報酬高低的差異，拆成每股盈餘變化、本益比變化和股息三塊，看每塊占差異的多少。持有 1 年，獲利成長占 32%；持有 5 年占 67%。這只描述已經發生的報酬由什麼組成。</p><p>事前分組是另一件事：每季末用過去 12 個月的每股盈餘成長把股票分五組，看之後一季各組漲多少。最高組減最低組每年 −1.3 個百分點，小於它逐年的起伏，統計上站不住，意思是換一段期間，方向可能會變。四個過去的指標裡，只有獲利殖利率站得住，是 −5.8 個百分點。</p><h4>這篇沒有回答的事</h4><ul><li>股票池是 S&amp;P 500 歷來成分，加上 Nasdaq-100 取得名單時的成分，後來消失的公司多半不在裡面，存活者偏誤使絕對報酬偏高。</li><li>分組價差是訊號檢驗，沒扣交易成本，也沒算最大跌幅，不是可交易的績效。</li><li>這是歷史統計，不是下一次會怎樣，也只涵蓋美國大型股。</li></ul><p class="pre-fine">835 檔成分股裡，625 檔同時有財報與股價，拆解與分組只用這 625 檔。財報用當時已公布的版本。分組期間是 2011 年 7 月至 2026 年 6 月，各指標的起點見第二節。</p><p class="pre-link"><a href="#limits">完整的弱點見「這個結果的弱點」一節</a></p></aside>
 
-<figure class="qa-fig">
-<div class="ttl">持有越久，獲利成長解釋的報酬差異越多</div>
-<div class="cap">把一檔股票的報酬拆成獲利成長、本益比（估值倍數）變化、股息三塊，看各解釋了「不同股票之間報酬高低差異」的多少比例。股息那塊是小幅負值，所以前兩塊加起來略高於 100%。</div>
-<div class="tool"><div class="chartbox" id="cbox0"><div class="legend"></div><div class="chart" role="img" aria-label="持有 1 年、3 年、5 年時，獲利成長與估值變化解釋報酬差異比例的長條圖"></div></div></div>
-</figure>
-<figure class="qa-fig">
-<div class="ttl">依過去的指標選股：最高組減最低組的年化報酬差距</div>
-<div class="cap">每季末把股票依指標分五組，等權持有一季，比最高組和最低組。「偷看未來」用接下來 4 季實際公布的盈餘成長排序，只用來量上限，無法真的交易。2009 至 2026 年。</div>
-<div class="tool"><div class="chartbox" id="cbox1"><div class="legend"></div><div class="chart" role="img" aria-label="四項過去指標與偷看未來指標的最高組減最低組年化報酬差距長條圖，只有偷看未來明顯大於零"></div></div></div>
-</figure>
+<nav class="toc" aria-label="本文目錄"><div class="toc-h">本文目錄</div><ol>
+<li><a href="#decomp">事後拆解</a><span>1 年、3 年、5 年，獲利成長解釋多少</span></li>
+<li><a href="#groups">事前分組</a><span>四個過去的指標，最高組減最低組</span></li>
+<li><a href="#foresight">偷看之後 4 季</a><span>價差的上限，不可交易</span></li>
+<li><a href="#rank">過去與之後的成長</a><span>跟一年後的成長幾乎沒有關係</span></li>
+<li><a href="#split">分成前後兩段</a><span>方向是否一致</span></li>
+<li><a href="#limits">這個結果的弱點</a><span>完整列出</span></li>
+<li><a href="#src">資料來源</a><span></span></li>
+</ol></nav>
 
-<section class="sec"><h2>測了什麼</h2><p class="t-body">先回頭拆報酬。一檔股票的報酬等於獲利成長、本益比（估值倍數）變化、股息三塊相加，算式必然成立。每季末抓一批股票，往前看持有 1 年、3 年、5 年的總報酬，算獲利那塊和估值那塊各解釋了報酬高低差異的多少比例。</p><p class="t-body">再拿過去的資料選股。每季末把股票依一項指標分五組，等權持有一季，比最高組和最低組的年化報酬差距。指標有四個：每股盈餘年增率、營收年增率、過去 12 個月扣掉最近 1 個月的漲幅（動能）、獲利殖利率（盈餘除以股價）。另有一組「偷看未來」的版本，只拿來量上限。</p><p class="t-body">股票池是 835 檔 S&amp;P 500 與 Nasdaq-100 成分股，2009 年至 2026 年；財報用當時已公布的版本。S&amp;P 500 部分按歷史成分重建，Nasdaq-100 部分只有現行成分股。</p></section>
-<section class="sec"><h2>結果</h2><p class="t-body">第一，持有期拉長，獲利取代估值成為報酬差異的主因。持有 1 年，估值變化的影響大於獲利；持有 5 年，獲利成長的影響是估值的將近兩倍。</p><div class="dwrap"><table class="dtbl"><thead><tr><th>持有期</th><th class="num">獲利成長解釋的比例</th><th class="num">估值變化解釋的比例</th><th class="num">股息</th></tr></thead><tbody><tr><th scope="row">1 年</th><td class="num">32.3%</td><td class="num">68.2%</td><td class="num">−0.5%</td></tr><tr><th scope="row">3 年</th><td class="num">63.3%</td><td class="num">38.5%</td><td class="num">−1.8%</td></tr><tr><th scope="row">5 年</th><td class="num">66.9%</td><td class="num">35.7%</td><td class="num">−2.7%</td></tr></tbody></table></div><p class="t-body">第二，用過去的指標選股，最高組和最低組的年化價差要離 0 夠遠，統計上才算站得住：</p><div class="dwrap"><table class="dtbl"><thead><tr><th>2009–2026，最高組減最低組</th><th class="num">年化價差</th><th>統計上站得住？</th></tr></thead><tbody><tr><th scope="row">每股盈餘年增率</th><td class="num">−1.3 個百分點</td><td class="nw">不</td></tr><tr><th scope="row">營收年增率</th><td class="num">+1.1 個百分點</td><td class="nw">不</td></tr><tr><th scope="row">12-1 月動能（過去 12 個月扣掉最近 1 個月的漲幅）</th><td class="num">−1.5 個百分點</td><td class="nw">不</td></tr><tr><th scope="row">獲利殖利率（盈餘除以股價）</th><td class="num">−5.8 個百分點</td><td class="nw">站得住，方向是便宜的反而輸</td></tr><tr><th scope="row">偷看未來 4 季的每股盈餘成長（不可交易）</th><td class="num">+24.2 個百分點</td><td class="nw">站得住</td></tr></tbody></table></div><p class="t-body">偷看未來 4 季的結果顯示，獲利成長本身會帶動股價，問題是過去的成長不能預測未來的成長。把 2009 至 2018 年當設計期、2019 至 2026 年當驗證期，兩段的獲利成長價差也都不顯著：設計期 −3.7 個百分點，驗證期 +1.4 個百分點。</p><p class="t-body">獲利殖利率唯一站得住的結果，方向是相反的：盈餘殖利率最高（最便宜）的那組，年化少賺 5.8 個百分點。這段期間大型成長股的估值持續擴張，可能是原因之一，這個歸因沒有另外檢驗。</p></section>
-<section class="sec"><h2 id="limits">這個結果的弱點</h2><ul class="dlist"><li>股票池含存活者偏誤：Nasdaq-100 只用現行成分股，後來消失的公司不在裡面，絕對報酬偏高。</li><li>沒有扣交易成本，也沒有算最大跌幅。這些分組只是用來回答「訊號有沒有用」，不是可以交易的策略，所以沒有買進持有的對照，也沒有報酬與跌幅的比較。</li><li>變異分解是算式恆等式，只描述已發生的報酬由什麼組成，不能用來預測下一段。</li><li>驗證期（2019 至 2026 年）裡「一路持有到底」那一組只有 23 筆觀察，算出的獲利解釋比例超過 100%，是小樣本雜訊，這裡不引用。</li><li>獲利解釋比例只算期初和期末盈餘都是正的股票；任一端盈餘為負的，改用營收替代計算，不在這個比例裡。</li></ul></section>
-<section class="sec"><h2>資料來源</h2><ul class="dlist"><li>835 檔 S&amp;P 500 與 Nasdaq-100 成分股的價格與當時已公布的財報，2009 年到 2026 年，這份測試沒有記錄最後一天的日期。</li></ul></section>
+<section class="sec" id="decomp"><h2>事後拆解：持有越久，獲利成長解釋的越多</h2>
+<p class="t-body lead">持有 1 年，獲利成長解釋股票之間報酬差異的 32%；持有 5 年是 67%。</p>
+<p class="t-body">每季末當一個起點，往後持有 1 年、3 年、5 年，算每檔股票含股息的總報酬。股價等於每股盈餘乘本益比，所以總報酬可以拆成三塊：每股盈餘變化、本益比變化（也就是估值倍數變化）、股息。例如每股盈餘增加 20%、本益比下降 10%，股價是 1.2 × 0.9 = 1.08 倍，上漲 8%。三塊相加必然等於總報酬，這是算式，不是估計。</p>
+<p class="t-body">「解釋比例」是這一塊和總報酬一起起伏的程度，除以總報酬自己的起伏。三塊加起來剛好 100%。股息那塊是小幅負值，所以前兩塊加起來略高於 100%。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">持有期</th><th scope="col">獲利成長</th><th scope="col">估值變化</th><th scope="col">股息</th></tr></thead><tbody><tr><th scope="row">1 年</th><td class="nw">32.3%</td><td class="nw">68.2%</td><td class="nw">−0.5%</td></tr><tr><th scope="row">3 年</th><td class="nw">63.3%</td><td class="nw">38.5%</td><td class="nw">−1.8%</td></tr><tr><th scope="row">5 年</th><td class="nw">66.9%</td><td class="nw">35.7%</td><td class="nw">−2.7%</td></tr></tbody></table></div>
+<figure class="qa-fig">
+<div class="ttl">圖 1.1　持有越久，獲利成長解釋的報酬差異越多</div>
+<div class="tool"><div class="chartbox" id="f11"><div class="legend"></div><div class="chart" role="img" aria-label="持有 1 年、3 年、5 年時，獲利成長與估值變化解釋報酬差異比例的長條圖，滑鼠移上去可看數值"></div></div></div>
+</figure>
+<p class="t-note">每季末起算，持有 1 年、3 年、5 年的總報酬。樣本是盈餘為正的股票，1 年 25,071 筆，3 年 20,584 筆，5 年 16,681 筆。相鄰季的窗口互相重疊，筆數不是獨立樣本。</p>
+<p class="t-body">這個拆解只描述已經發生的報酬由什麼組成，不能用來預測下一段。一檔股票事前不知道自己之後的獲利成長，也就拿不到這個比例的好處。第二節起量的是事前能不能用。</p>
+
+<h3 class="t-lab">1 年的比例為什麼比較低</h3>
+<p class="t-body">本益比的分母是每股盈餘，盈餘一變，本益比就反向動。持有 1 年，獲利變化與估值變化的相關是 −0.93，3 年是 −0.89，5 年是 −0.84。兩塊各自的起伏都很大，1 年的標準差是 0.77 與 0.79，總報酬只有 0.28，所以兩塊互相抵銷了大半。持有期拉長，總報酬的起伏變大，抵銷的比例變小。</p>
+<p class="t-body">兩塊互相抵銷，也使比例對算法敏感：1 年的比例在下表四種算法裡落在 29% 到 41%，5 年落在 67% 到 73%。標準差是把報酬取對數後算的。</p>
+
+<h3 class="t-lab">換算法看</h3>
+<p class="t-body">上面的 32%、63%、67% 把不同起點的樣本放在一起，其中有一部分差異來自起點不同（例如某一年全部股票一起漲）。下面兩種做法各自處理一種差異。第一種是同一個起點季內，每個數字先減掉當季平均，只剩股票之間的差異。第二種是三個持有期只用同一批起點，也就是 2010 年第一季到 2021 年第二季，這一批起點三種持有期都算得出來。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">獲利成長的解釋比例</th><th scope="col">1 年</th><th scope="col">3 年</th><th scope="col">5 年</th></tr></thead><tbody><tr><th scope="row">原算法</th><td class="nw">32.3%</td><td class="nw">63.3%</td><td class="nw">66.9%</td></tr><tr><th scope="row">同一起點季內去平均</th><td class="nw">40.6%</td><td class="nw">67.4%</td><td class="nw">73.4%</td></tr><tr><th scope="row">只用同一批起點</th><td class="nw">29.0%</td><td class="nw">64.9%</td><td class="nw">66.9%</td></tr><tr><th scope="row">兩種並用</th><td class="nw">39.1%</td><td class="nw">70.4%</td><td class="nw">73.4%</td></tr></tbody></table></div>
+<p class="t-note">四種算法的股息與估值兩塊，加上獲利成長後仍是 100%。同一批起點的 1 年筆數是 17,624，3 年 17,013，5 年 16,681。</p>
+<p class="t-body">四種算法都是 1 年最低、5 年最高，順序不變。去掉起點差異後，各期比例都高一些：1 年 40.6%，5 年 73.4%。</p>
+
+<h3 class="t-lab">分前後兩段看</h3>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">起點期間</th><th scope="col">1 年</th><th scope="col">3 年</th><th scope="col">5 年</th></tr></thead><tbody><tr><th scope="row">2010 至 2018 年起算</th><td class="nw">34.1%</td><td class="nw">68.6%</td><td class="nw">71.2%</td></tr><tr><th scope="row">2019 年起算</th><td class="nw">31.3%</td><td class="nw">58.9%</td><td class="nw">57.9%</td></tr></tbody></table></div>
+<p class="t-note">2019 年起算的 5 年窗口，起點只到 2021 年第二季，筆數 4,134。</p>
+<p class="t-body">兩段都是 1 年最低。後段的 3 年與 5 年比前段低 10 個百分點以上，而且 5 年（57.9%）略低於 3 年（58.9%），所以「持有越久越高」在後段只到 3 年為止。</p>
+
+<h3 class="t-lab">被排除的樣本</h3>
+<p class="t-body">拆解要求期初與期末的每股盈餘都是正的。盈餘為負的樣本，1 年占 17.9%，3 年占 19.5%，5 年占 19.9%，改用營收替代計算，不在上面的比例裡。這些股票的獲利解釋比例低很多：營收替代版 1 年只有 1.2%，5 年 33.4%。所以 32% 與 67% 只描述盈餘為正的那五分之四。</p>
+</section>
+
+<section class="sec" id="groups"><h2>事前分組：過去的指標只有獲利殖利率有價差</h2>
+<p class="t-body lead">四個過去的指標裡，只有獲利殖利率的最高組減最低組站得住，每年 −5.8 個百分點；過去獲利成長是 −1.3 個百分點。</p>
+<p class="t-body">每季末把股票依一項指標分五組，每組約 78 檔，等權持有一季，下一季末重新分組。比的是最高組和最低組的年化報酬差。四個指標都只用該季末已經公布的資料：</p>
+<ul class="steps">
+<li>每股盈餘成長：過去 12 個月每股盈餘，比前一年同樣 12 個月增減多少，除以前一年的絕對值。</li>
+<li>營收成長：過去 12 個月營收，比前一年同樣 12 個月增減多少。</li>
+<li>動能：過去 12 個月的漲幅，扣掉最後 1 個月。</li>
+<li>獲利殖利率：過去 12 個月每股盈餘除以股價，數字越高越便宜。</li>
+</ul>
+<p class="t-body">「站得住」的標準是：平均差距要大於它自己估計誤差的 2 倍，否則換一段期間就可能變號。下表最後一欄就是這個倍數。年化價差是每季「最高組報酬減最低組報酬」的平均，再換算成年化，與兩組各自的年化報酬直接相減會有一點差，差多少見各分組表下的說明。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">最高組減最低組</th><th scope="col">年化價差</th><th scope="col">是誤差的<br>幾倍</th><th scope="col">季數</th></tr></thead><tbody><tr><th scope="row">每股盈餘成長</th><td class="nw">−1.3 點</td><td class="nw">0.5</td><td class="nw">60</td></tr><tr><th scope="row">營收成長</th><td class="nw">+1.1 點</td><td class="nw">0.4</td><td class="nw">60</td></tr><tr><th scope="row">動能</th><td class="nw">−1.5 點</td><td class="nw">0.3</td><td class="nw">69</td></tr><tr><th scope="row">獲利殖利率</th><td class="nw">−5.8 點</td><td class="nw">2.2</td><td class="nw">64</td></tr></tbody></table></div>
+<p class="t-note">點是個百分點。起點：每股盈餘與營收 2011 年 6 月底，動能 2009 年 3 月底，獲利殖利率 2010 年 6 月底，持有到 2026 年 6 月底。四項合算的季數不同，改成都用 2011 年 6 月底起的同樣 60 季：每股盈餘 −1.3，營收 +1.1，動能 +3.0，獲利殖利率 −5.8，結論相同。</p>
+<p class="t-body">測了四個指標，一個過關，而且只超過 2 倍一點點。多測幾項，本來就容易有一項剛好過關。動能換成 60 季的窗口後符號從 −1.5 變成 +3.0，也說明這種差距對起點很敏感。</p>
+
+<h3 class="t-lab">過去獲利成長：逐年看價差</h3>
+<p class="t-body">把每年四季的最高組累積報酬減最低組累積報酬，14 年裡 6 年為正、8 年為負。2020 年是 −47.9 個百分點，其餘 13 年落在 −14.2 到 +13.8 之間，逐年價差的標準差是 15.0 個百分點。−1.3 的平均差距，比它自己年年的起伏小得多。拿掉 2020 年的 4 季，其餘 56 季的年化價差是 +0.9 個百分點，是誤差的 0.5 倍，符號由負轉正，所以 −1.3 這個負值受 2020 年一年的影響很大。</p>
+<figure class="qa-fig">
+<div class="ttl">圖 2.1　過去獲利成長分組，每年的最高組減最低組</div>
+<div class="tool"><div class="chartbox" id="f21"><div class="legend" style="display:none"></div><div class="chart" role="img" aria-label="2012 到 2025 年，過去獲利成長最高組減最低組的逐年報酬差長條圖，6 年為正、8 年為負，滑鼠移上去可看數值"></div></div></div>
+</figure>
+<p class="t-note">每年的四個持有季，各組報酬複利後相減，單位是個百分點。年份是持有季所屬的年。2011 年只有部分季有值，不列。</p>
+
+<h3 class="t-lab">五組各自的年化</h3>
+<p class="t-body">五組的年化報酬沒有照過去獲利成長由低排到高：第 1 組最高，第 3 組最低，中間凹下去。最高組（第 5 組）的 14.3% 與同池等權平均 13.4%、SPY 的 14.2% 相近。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">過去獲利成長</th><th scope="col">年化</th><th scope="col">季底<br>最大跌幅</th></tr></thead><tbody><tr><th scope="row">第 1 組（最低）</th><td class="nw">15.6%</td><td class="nw">−29.0%</td></tr><tr><th scope="row">第 2 組</th><td class="nw">13.0%</td><td class="nw">−28.0%</td></tr><tr><th scope="row">第 3 組</th><td class="nw">11.3%</td><td class="nw">−26.1%</td></tr><tr><th scope="row">第 4 組</th><td class="nw">12.3%</td><td class="nw">−26.5%</td></tr><tr><th scope="row">第 5 組（最高）</th><td class="nw">14.3%</td><td class="nw">−24.2%</td></tr><tr><th scope="row">同池等權平均</th><td class="nw">13.4%</td><td class="nw">−25.5%</td></tr><tr><th scope="row">SPY</th><td class="nw">14.2%</td><td class="nw">−23.9%</td></tr></tbody></table></div>
+<p class="t-note">2011 年 7 月至 2026 年 6 月，60 季。含股息，沒扣成本。最大跌幅只用季底的點算，比逐日算淺。這些組是訊號檢驗，只用來看有沒有價差，不是可買進的組合。</p>
+
+<h3 class="t-lab">獲利殖利率：便宜的反而輸</h3>
+<p class="t-body">獲利殖利率最高（最便宜）的第 5 組，年化 12.5%，比最低（最貴）的第 1 組少 5.8 個百分點（兩組年化直接相減是 6.7，上表用每季價差平均再年化是 5.8，全篇用後者）。這是這段期間唯一站得住的分組結果，方向是便宜的反而輸。這份回測沒有檢驗原因，只記錄數字。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">獲利殖利率</th><th scope="col">年化</th><th scope="col">季底<br>最大跌幅</th></tr></thead><tbody><tr><th scope="row">第 1 組（最貴）</th><td class="nw">19.2%</td><td class="nw">−30.6%</td></tr><tr><th scope="row">第 2 組</th><td class="nw">14.3%</td><td class="nw">−25.4%</td></tr><tr><th scope="row">第 3 組</th><td class="nw">14.6%</td><td class="nw">−21.5%</td></tr><tr><th scope="row">第 4 組</th><td class="nw">15.0%</td><td class="nw">−24.9%</td></tr><tr><th scope="row">第 5 組（最便宜）</th><td class="nw">12.5%</td><td class="nw">−39.6%</td></tr><tr><th scope="row">同池等權平均</th><td class="nw">15.3%</td><td class="nw">−25.3%</td></tr><tr><th scope="row">SPY</th><td class="nw">15.2%</td><td class="nw">−23.9%</td></tr></tbody></table></div>
+<p class="t-note">2010 年 7 月至 2026 年 6 月，64 季。含股息，沒扣成本，最大跌幅用季底的點算。逐年看，15 年裡只有 4 年的最便宜組贏過最貴組，逐年價差的標準差是 8.1 個百分點。</p>
+</section>
+
+<section class="sec" id="foresight"><h2>偷看之後 4 季：價差的上限是 +24.2 個百分點</h2>
+<p class="t-body lead">如果每季末事先知道之後一年的獲利成長，最高組減最低組每年 +24.2 個百分點，而且 15 年每一年都是正的，但這做不到。</p>
+<p class="t-body">這個分法用的是每檔股票之後約 4 季的實際每股盈餘成長：一年後已公布的最新 12 個月每股盈餘，相對於當下的 12 個月每股盈餘。這些數字在分組那一天沒有人知道，所以不能交易，只能當作「獲利成長若能預知，價差最多有多大」的上限。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">依之後獲利成長分組</th><th scope="col">年化</th><th scope="col">季底<br>最大跌幅</th></tr></thead><tbody><tr><th scope="row">第 1 組（之後成長最低）</th><td class="nw">3.5%</td><td class="nw">−41.9%</td></tr><tr><th scope="row">第 2 組</th><td class="nw">8.3%</td><td class="nw">−27.1%</td></tr><tr><th scope="row">第 3 組</th><td class="nw">14.1%</td><td class="nw">−23.7%</td></tr><tr><th scope="row">第 4 組</th><td class="nw">22.8%</td><td class="nw">−18.5%</td></tr><tr><th scope="row">第 5 組（之後成長最高）</th><td class="nw">28.7%</td><td class="nw">−18.8%</td></tr><tr><th scope="row">同池等權平均</th><td class="nw">15.3%</td><td class="nw">−25.2%</td></tr><tr><th scope="row">SPY</th><td class="nw">15.2%</td><td class="nw">−23.9%</td></tr></tbody></table></div>
+<p class="t-note">2010 年 7 月至 2026 年 6 月，64 季。含股息，沒扣成本，最大跌幅用季底的點算。這是偷看之後的盈餘排出來的結果，不是可買進的組合。第 5 組與第 1 組的年化直接相減是 25.2 個百分點，本節的 +24.2 是每季價差平均再年化的算法。五組由低到高依序上升，每一組都比前一組高。</p>
+<p class="t-body">最高組減最低組是 +24.2 個百分點。換成和過去獲利成長分組同樣的 60 季，是 +24.9。最後幾個起點之後的 4 季還沒有全部公布，只留 4 季都已公布的 61 季，是 +23.6。三種算法差不多。</p>
+<figure class="qa-fig">
+<div class="ttl">圖 3.1　兩種分法，每年的最高組減最低組</div>
+<div class="tool"><div class="chartbox" id="f31"><div class="legend"></div><div class="chart" role="img" aria-label="2011 到 2025 年，依過去獲利成長與依之後獲利成長分組的最高組減最低組逐年報酬差長條圖，偷看之後的 15 年全為正，滑鼠移上去可看數值"></div></div></div>
+</figure>
+<p class="t-note">每年四個持有季各組報酬複利後相減，單位是個百分點。偷看之後的最小是 2011 年的 +12.5，最大是 2020 年的 +46.3。過去獲利成長在 2011 年沒有值。</p>
+<p class="t-body">這張圖說明獲利成長本身和股價同向：之後獲利成長最快的那組，股價漲得最多。但分組那一天要靠過去的資料猜，下一節看過去的成長跟之後的成長有沒有關係。</p>
+</section>
+
+<section class="sec" id="rank"><h2>過去的獲利成長，跟一年後的成長幾乎沒有關係</h2>
+<p class="t-body lead">每一季把同一批股票依過去 12 個月的獲利成長排名，再依一年後那 12 個月的成長排名，兩個名次的相關中位數是 −0.03，53 季裡 18 季為正，接近互不相干。</p>
+<p class="t-body">排名相關看的是兩個名次是否一致：+1 是完全一致，0 是互不相干，−1 是完全相反。把之後的成長改成緊接著的那一年，相關中位數會變成 −0.17、57 季全部為負，但這個負值大部分是算式造成的：兩個成長率共用同一個「當下的 12 個月每股盈餘」，一個在分子、一個在分母，這一季盈餘偶然偏高，過去成長就偏高、之後成長就偏低，名次自然傾向相反。所以本節用錯開一年的 −0.03 當主要結果，緊接著那一年的數字放在後面。</p>
+<h3 class="t-lab">緊接著那一年：受算式影響的版本</h3>
+<p class="t-body">每季約 400 檔（中位數 403 檔）。57 季的最大值是 −0.05，最小值是 −0.52。相鄰兩季的窗口重疊，57 季大約相當於 14 年，不是 57 個獨立樣本。</p>
+<figure class="qa-fig">
+<div class="ttl">圖 4.1　過去成長與之後成長的排名相關，逐季</div>
+<div class="tool"><div class="chartbox" id="f41"><div class="legend" style="display:none"></div><div class="chart" role="img" aria-label="2011 年 6 月到 2025 年 6 月，每季過去獲利成長與之後獲利成長的排名相關折線圖，全部低於零，滑鼠移上去可看數值"></div></div></div>
+</figure>
+<p class="t-note">橫軸是分組的季末。這張圖是緊接著那一年的版本，0 以下表示兩個名次傾向相反，大部分來自共用同一個盈餘數字的算式，不表示過去成長快的公司之後真的成長變慢。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">期間</th><th scope="col">季數</th><th scope="col">中位數</th><th scope="col">範圍<br>（第 10 到 90 百分位）</th></tr></thead><tbody><tr><th scope="row">全部</th><td class="nw">57</td><td class="nw">−0.17</td><td class="nw">−0.35 至 −0.10</td></tr><tr><th scope="row">2011 至 2018 年</th><td class="nw">31</td><td class="nw">−0.18</td><td class="nw">−0.40 至 −0.10</td></tr><tr><th scope="row">2019 年起</th><td class="nw">26</td><td class="nw">−0.16</td><td class="nw">−0.31 至 −0.09</td></tr></tbody></table></div>
+<p class="t-note">只用之後一年的盈餘都已公布的 57 季（最後一季是 2025 年 6 月底）。</p>
+<h3 class="t-lab">最高組與最低組的去向（緊接著那一年）</h3>
+<p class="t-body">用五等分看，同樣受上面的算式影響。若兩個名次互不相干，過去在最高 20% 的股票，之後落在最高 20%、最低 20% 的比例都應該是 20%。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">過去成長</th><th scope="col">之後成長落在</th><th scope="col">占比</th></tr></thead><tbody><tr><th scope="row">最高 20%</th><td class="nw">最高 20%</td><td class="nw">19.2%</td></tr><tr><th scope="row">最高 20%</th><td class="nw">最低 20%</td><td class="nw">33.4%</td></tr><tr><th scope="row">最低 20%</th><td class="nw">最高 20%</td><td class="nw">47.2%</td></tr></tbody></table></div>
+<p class="t-note">各季占比的平均。互不相干時是 20%。</p>
+<p class="t-body">過去成長最快的 20% 只有 19.2% 之後仍在最快的 20%，33.4% 掉到最慢的 20%。過去成長最慢的 20% 有 47.2% 之後升到最快的 20%。所以第二節的價差是 −1.3，第三節是 +24.2：兩種分法把不同的股票放進最高組。</p>
+<h3 class="t-lab">錯開一年的算法</h3>
+<p class="t-body">把之後的成長改成再下一年（第 2 年相對第 1 年），兩個成長就不共用同一個盈餘數字。這樣算，53 季的排名相關中位數是 −0.03，第 10 到 90 百分位是 −0.14 到 +0.05，18 季為正。相關從 −0.17 縮到接近 0，緊接著那一年的負相關大部分來自共用的盈餘數字，剩下多少是真的反轉，這裡沒有拆。兩種算法的共同點是：都沒有看到過去成長快的股票之後成長也快。</p>
+</section>
+
+<section class="sec" id="split"><h2>分成前後兩段：過去獲利成長的價差變號</h2>
+<p class="t-body lead">把期間切成 2018 年以前與 2019 年起，過去獲利成長的價差分別是 −3.7 與 +1.4 個百分點，方向相反，兩段各自都達不到誤差的 2 倍。</p>
+<p class="t-body">四個指標在這份回測裡是固定的，沒有調過參數，所以切兩段只是看方向是否一致。前段是起點到 2018 年底，後段是 2019 年第一季起。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">最高組減最低組</th><th scope="col">2018 年以前</th><th scope="col">2019 年起</th><th scope="col">方向</th></tr></thead><tbody><tr><th scope="row">每股盈餘成長</th><td class="nw">−3.7 點</td><td class="nw">+1.4 點</td><td class="nw">相反</td></tr><tr><th scope="row">營收成長</th><td class="nw">−2.6 點</td><td class="nw">+5.1 點</td><td class="nw">相反</td></tr><tr><th scope="row">動能</th><td class="nw">−6.9 點</td><td class="nw">+6.4 點</td><td class="nw">相反</td></tr><tr><th scope="row">獲利殖利率</th><td class="nw">−4.6 點</td><td class="nw">−7.2 點</td><td class="nw">相同</td></tr><tr><th scope="row">偷看之後 4 季</th><td class="nw">+19.1 點</td><td class="nw">+30.7 點</td><td class="nw">相同</td></tr></tbody></table></div>
+<p class="t-note">點是個百分點。起點：每股盈餘與營收 2011 年 6 月底，動能 2009 年 3 月底，獲利殖利率與偷看之後 4 季 2010 年 6 月底。前段的季數依序是 31、31、40、35、35，後段都是 29。偷看之後 4 季不可交易。</p>
+<p class="t-body">過去獲利成長、營收成長、動能三項在兩段的方向相反，每一格都小於誤差的 2 倍（0.3 到 1.6 倍）。獲利殖利率兩段都是負的，但各段單獨看也只有 1.5 與 1.6 倍，要合起來 64 季才過 2 倍。偷看之後的兩段都在 7 倍以上。</p>
+<p class="t-body">切點只試了 2019 年這一種，沒有換切點再測。</p>
+</section>
+
+<section class="sec" id="limits"><h2>這個結果的弱點</h2><ul class="dlist">
+<li>股票池含存活者偏誤。S&amp;P 500 部分按歷史成分重建，Nasdaq-100 只用取得名單時的成分，後來消失的公司不在裡面。835 檔裡 182 檔找不到股價，都是曾離開 S&amp;P 500 的公司，只剩 625 檔可用。</li>
+<li>沒有扣交易成本，也沒有算逐日最大跌幅。表內的最大跌幅只用季底的點，比逐日算淺，只供對照。這些分組是用來回答訊號有沒有用，不是可交易的績效。</li>
+<li>變異拆解是算式恆等式，只描述已發生的報酬由什麼組成，不能用來預測下一段。比例只涵蓋期初與期末盈餘都是正的股票，另外約五分之一的樣本用營收替代，不在比例裡。</li>
+<li>拆解的窗口每季重疊，筆數不是獨立樣本。排名相關的 57 季也一樣，大約相當於 14 年。</li>
+<li>四個指標的起點不同，營收與盈餘從 2011 年 6 月底，獲利殖利率從 2010 年 6 月底，動能從 2009 年 3 月底。第二節附了同樣 60 季的版本，動能的符號因此改變。</li>
+<li>測了四個指標，只有獲利殖利率超過誤差的 2 倍，而且只有 2.2 倍。前後兩段各自的倍數是 1.5 與 1.6。這個結果的原因沒有檢驗。</li>
+<li>偷看之後 4 季的分法，最後幾個起點之後的盈餘還沒有全部公布，已在第三節單獨列出只留 4 季齊全的版本。</li>
+<li>前後兩段只用 2019 年一個切點。</li>
+</ul></section>
+
+<section class="sec" id="src"><h2>資料來源</h2><ul class="dlist"><li>S&amp;P 500 歷來成分（按公開的成分異動紀錄回推）與 Nasdaq-100 成分，共 835 檔，其中 625 檔有可用的財報與股價。財報用 SEC 申報的每股盈餘與營收，以公布日為準，只用分組當天已公布的版本。股價與股息用日資料，已調整拆股。SPY 用含息還原收盤。</li><li>分組期間 2011 年 7 月至 2026 年 6 月（獲利殖利率從 2010 年 7 月，動能從 2009 年 4 月）。最後一個完整的持有季是 2026 年 3 月底到 6 月底。事後拆解最後一個 1 年窗口從 2025 年 6 月底起算。</li></ul></section>
 
 <p class="fine qa-back">這是歷史資料的計算，是一般資訊，不是對個人的投資建議。過去的結果不代表未來。</p>
 </div>
 <script>
-  (function () {
-    var cfg = {"cats": ["持有 1 年", "持有 3 年", "持有 5 年"], "series": [{"name": "獲利成長", "values": [32.3, 63.3, 66.9]}, {"name": "估值變化", "values": [68.2, 38.5, 35.7]}, {"name": "股息", "values": [-0.5, -1.8, -2.7]}], "extra": null, "ref": null};
-    cfg.fmt = QCHART.fmt.pct1; cfg.axisFmt = QCHART.fmt.pct0;
-    QCHART.mount(document.getElementById('cbox0'), cfg);
-  })();
-  (function () {
-    var cfg = {"cats": ["盈餘成長", "營收成長", "動能", "獲利殖利率", "偷看未來"], "series": [{"name": "最高組減最低組", "values": [-1.3, 1.1, -1.5, -5.8, 24.2]}], "extra": ["每股盈餘年增率", "營收年增率", "過去 12 個月扣掉最近 1 個月的漲幅", "盈餘除以股價，數字越高越便宜", "不可交易，只量上限"], "ref": null};
-    cfg.fmt = QCHART.fmt.pct1; cfg.axisFmt = QCHART.fmt.pct0;
-    QCHART.mount(document.getElementById('cbox1'), cfg);
-  })();
+(function () {
+  function pct(v, d) { return (v < 0 ? '−' : '') + Math.abs(v).toFixed(d) + '%'; }
+  function pt(v, d) { return (v < 0 ? '−' : '+') + Math.abs(v).toFixed(d) + ' 點'; }
+  function pt0(v) { return (v < 0 ? '−' : '') + Math.abs(v).toFixed(0); }
+  function n2(v) { return (v < 0 ? '−' : '') + Math.abs(v).toFixed(2); }
+  QCHART.mount(document.getElementById('f11'), {
+    cats: ['持有 1 年', '持有 3 年', '持有 5 年'],
+    series: [{ name: '獲利成長', values: [32.3, 63.3, 66.9] }, { name: '估值變化', values: [68.2, 38.5, 35.7] }, { name: '股息', values: [-0.5, -1.8, -2.7] }],
+    fmt: function (v) { return pct(v, 1); }, axisFmt: function (v) { return pct(v, 0); }
+  });
+  QCHART.mount(document.getElementById('f21'), {
+    cats: ["2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025"],
+    series: [{ name: '最高組減最低組', values: [-14.2, -2.6, -10.2, -6.3, -1.9, 0.5, -2.8, 3.9, -47.9, 4.9, -7.1, 10.8, 8.0, 13.8] }],
+    fmt: function (v) { return pt(v, 1); }, axisFmt: pt0
+  });
+  QCHART.mount(document.getElementById('f31'), {
+    cats: ["2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025"],
+    series: [{ name: '依過去獲利成長', values: [null, -14.2, -2.6, -10.2, -6.3, -1.9, 0.5, -2.8, 3.9, -47.9, 4.9, -7.1, 10.8, 8.0, 13.8] }, { name: '偷看之後 4 季', values: [12.5, 24.2, 20.7, 22.0, 18.4, 26.5, 16.4, 15.3, 38.9, 46.3, 20.5, 22.8, 23.0, 28.0, 27.3] }],
+    fmt: function (v) { return pt(v, 1); }, axisFmt: pt0
+  });
+  var RX = ["2011-06", "2011-09", "2011-12", "2012-03", "2012-06", "2012-09", "2012-12", "2013-03", "2013-06", "2013-09", "2013-12", "2014-03", "2014-06", "2014-09", "2014-12", "2015-03", "2015-06", "2015-09", "2015-12", "2016-03", "2016-06", "2016-09", "2016-12", "2017-03", "2017-06", "2017-09", "2017-12", "2018-03", "2018-06", "2018-09", "2018-12", "2019-03", "2019-06", "2019-09", "2019-12", "2020-03", "2020-06", "2020-09", "2020-12", "2021-03", "2021-06", "2021-09", "2021-12", "2022-03", "2022-06", "2022-09", "2022-12", "2023-03", "2023-06", "2023-09", "2023-12", "2024-03", "2024-06", "2024-09", "2024-12", "2025-03", "2025-06"], RV = [-0.135, -0.063, -0.052, -0.15, -0.179, -0.144, -0.254, -0.195, -0.232, -0.238, -0.148, -0.199, -0.208, -0.238, -0.213, -0.189, -0.159, -0.1, -0.124, -0.184, -0.197, -0.158, -0.116, -0.099, -0.116, -0.165, -0.122, -0.405, -0.461, -0.501, -0.524, -0.163, -0.17, -0.129, -0.113, -0.08, -0.165, -0.311, -0.397, -0.473, -0.309, -0.206, -0.131, -0.088, -0.061, -0.183, -0.137, -0.199, -0.247, -0.187, -0.092, -0.172, -0.139, -0.144, -0.13, -0.148, -0.174], RT = [0, 4, 16, 28, 40, 52];
+  QLINE.mount(document.getElementById('f41'), {
+    x: RX, xticks: RT, xtitle: '分組的季末', height: 300,
+    series: [{ name: '排名相關', values: RV, style: 0 }],
+    xfmt: function (v, tip) { return tip ? v : v.slice(0, 4); },
+    yfmt: n2, yaxis: function (v) { return n2(v).replace(/\.?0+$/, '') || '0'; },
+    base: { value: 0, label: '0' }
+  });
+})();
 </script>
 </body>
 </html>
