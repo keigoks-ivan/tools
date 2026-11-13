@@ -391,17 +391,17 @@
     return { ticks: best ? best.t : [mn, mx], lo: lo, hi: hi };
   }
   function xTicks(x0, x1, pw) {
-    var spanM = (x1 - x0) / (30.4375 * DAY), cands = [1, 2, 3, 6, 12, 24, 60, 120, 240], c = cands[cands.length - 1];
-    var short = spanM < 36, need = short ? 60 : 46;
-    for (var i = 0; i < cands.length; i++) if (pw / Math.max(1, spanM / cands[i]) >= need) { c = cands[i]; break; }
-    var d0 = new Date(x0), y = d0.getUTCFullYear(), mo = d0.getUTCMonth(), out = [];
-    for (var k = 0; k < 2000; k++) {
-      var mi = y * 12 + mo + k, t = Date.UTC(Math.floor(mi / 12), mi % 12, 1);
+    // 橫軸只標年份（每年 1 月 1 日的位置）；期間長就隔 2、5、10、20 年標一次
+    var spanM = (x1 - x0) / (30.4375 * DAY), cands = [12, 24, 60, 120, 240], c = cands[cands.length - 1];
+    for (var i = 0; i < cands.length; i++) if (pw / Math.max(1, spanM / cands[i]) >= 46) { c = cands[i]; break; }
+    var d0 = new Date(x0), y = d0.getUTCFullYear(), out = [];
+    for (var yy = y; yy < y + 400; yy++) {
+      var t = Date.UTC(yy, 0, 1);
       if (t > x1) break;
-      if (t < x0 || mi % c) continue;
-      var yy = Math.floor(mi / 12), mm = mi % 12 + 1;
-      out.push({ t: t, label: short || c < 12 ? yy + '/' + (mm < 10 ? '0' : '') + mm : String(yy) });
+      if (t < x0 || (yy * 12) % c) continue;
+      out.push({ t: t, label: String(yy) });
     }
+    if (!out.length) out.push({ t: x0, label: String(y) });
     return out;
   }
   /* cfg: { xs:[ms], dates:[字串], series:[{gi,y,name,tip,lab:[行],endVal,mark:{i,text}}], ref, scale:'lin'|'log'|'dd'|'sym', fmt, tipFmt, height,
@@ -451,10 +451,11 @@
       mk('line', { x1: m.l, x2: m.l + pw, y1: y, y2: y, stroke: 'var(--line)', 'stroke-width': 0.8, 'stroke-opacity': 0.8 });
       mk('text', { x: m.l - 6, y: y + 4, 'text-anchor': 'end', fill: 'var(--muted)', 'font-size': 11 }, cfg.fmt(v));
     });
+    var xLabs = [];
     xTicks(x0, x1, pw).forEach(function (tk) {
       var x = xPos(tk.t);
       mk('line', { x1: x, x2: x, y1: m.t, y2: m.t + ph, stroke: 'var(--line)', 'stroke-width': 0.8, 'stroke-dasharray': '2 4' });
-      mk('text', { x: x, y: H - 8, 'text-anchor': 'middle', fill: 'var(--muted)', 'font-size': 11 }, tk.label);
+      xLabs.push(mk('text', { x: x, y: H - 8, 'text-anchor': 'middle', fill: 'var(--muted)', 'font-size': 11 }, tk.label));
     });
     if (cfg.zero) mk('line', { x1: m.l, x2: m.l + pw, y1: yPos(0), y2: yPos(0), stroke: 'var(--ink2)', 'stroke-width': 1.2 });
     var dec = Math.ceil(xs.length / 1800);
@@ -528,6 +529,16 @@
     var dots = cfg.series.map(function (S) { return mk('circle', { r: 4, fill: 'var(--g' + (S.gi + 1) + ')', stroke: 'var(--bg)', 'stroke-width': 1.5, visibility: 'hidden' }); });
     var ov = mk('rect', { x: m.l, y: m.t, width: pw, height: ph, fill: 'transparent' });
     host.appendChild(svg);
+    // 瀏覽器設了最小字級時，實際字寬會比估的大：量實際寬度，重疊的刻度字隱藏
+    (function () {
+      var lastR = -Infinity;
+      xLabs.forEach(function (el) {
+        var bb; try { bb = el.getBBox(); } catch (e) { return; }
+        if (!bb || !bb.width) return;
+        if (bb.x < lastR + 8 || bb.x + bb.width > W) el.setAttribute('visibility', 'hidden');
+        else lastR = bb.x + bb.width;
+      });
+    })();
     var tip = document.createElement('div'); tip.className = 'tip'; host.appendChild(tip);
     function idxOf(date) { var a = 0, b = ds.length - 1; while (a < b) { var md = (a + b) >> 1; if (ds[md] < date) a = md + 1; else b = md; } return ds[a] === date ? a : -1; }
     function hide() { cross.setAttribute('visibility', 'hidden'); dots.forEach(function (d) { d.setAttribute('visibility', 'hidden'); }); tip.style.display = 'none'; }
