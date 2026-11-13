@@ -26,19 +26,19 @@
     if (!host) return;
     var base = document.body.getAttribute('data-root') || '';
     var here = document.body.getAttribute('data-nav') || '';
+    var act = { tool: 'tool', questions: 'questions', q: 'questions', evidence: 'questions', route: 'route', allocate: 'route', product: 'route' }[here] || '';
     function link(key, href, label) {
-      return '<a href="' + base + href + '"' + (here === key ? ' aria-current="page"' : '') + '>' + label + '</a>';
+      return '<a href="' + base + href + '"' + (act === key ? ' aria-current="page"' : '') + '>' + label + '</a>';
     }
-    function off(label) { return '<span class="off" aria-disabled="true">' + label + '<small>還沒做</small></span>'; }
     host.innerHTML =
       '<header class="hdr">' +
       '<a class="brand" href="' + base + 'index.html">[品牌名稱]</a>' +
       '<div class="hdr-r">' +
       '<nav class="nav" aria-label="主選單">' +
-      link('allocate', 'allocate.html', '配置') +
-      link('product', 'product.html', '選產品') +
-      link('evidence', 'evidence/allocation-drawdown.html', '證據庫') +
-      off('美國稅務') + off('EN') +
+      link('tool', 'tool.html', '回測工具') +
+      link('questions', 'questions.html', '常見問題') +
+      link('route', 'index.html#route', '新手路線') +
+      link('about', 'index.html#about', '關於數字') +
       '</nav>' +
       '<div class="theme" role="group" aria-label="主題">' +
       '<button type="button" data-set="dark" aria-pressed="false">深色</button>' +

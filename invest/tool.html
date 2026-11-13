@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>回測工具：[品牌名稱]</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="invest.css">
+<link rel="stylesheet" href="tool.css">
+<script src="invest.js"></script>
+<script src="tool.js"></script>
+</head>
+<body data-root="" data-nav="tool">
+<div class="page doc tool">
+<div id="site-header"></div>
+
+<h1 class="h1" style="margin-top:36px">回測工具</h1>
+<p class="t-lead">選幾檔 ETF、設比例，看過去的含息報酬，和同一段期間最深跌了多少。一律用台幣計價。</p>
+
+<ul class="notes">
+<li>這是用歷史價格做的計算，不是預測，也不是投資建議。過去的結果不代表未來，下一次的跌幅可能比歷史更深。</li>
+<li>價格都是含息總報酬。ETF 的內扣費用已經反映在淨值裡。沒有計入買賣手續費、證交稅、股利所得稅和換匯成本。</li>
+<li>美元資產用中央銀行每日美元兌台幣收盤匯率換成台幣。美股收盤時台灣已經是隔天，這裡直接按同一個日期對齊，沒有調整。台股與美股休市日不同，缺的日子沿用前一天的價格。</li>
+<li>資料到 <span id="dataEnd">2026 年 10 月 30 日</span>，也就是央行匯率的最後一天。</li>
+</ul>
+<details id="sources">
+<summary>各資產的資料來源與已知限制</summary>
+<ul id="srcList"></ul>
+</details>
+<details>
+<summary>計算規則（日期怎麼算）</summary>
+<ul>
+<li>單筆：起始日收盤一次買進，各檔比例照設定。</li>
+<li>每月投入：起始日收盤投入第一筆，之後每個日曆月的第一個交易日收盤投入一筆，依設定的比例分配，不賣出已有的部位。終點剛好是月初第一個交易日時，那一天不再投入。</li>
+<li>每年再平衡：每年第一個交易日收盤，把各檔調回設定的比例。起始那一年不調。有每月投入時，先投入再調整。</li>
+<li>起始日若不是交易日，用之後第一個交易日。</li>
+<li>含息年化報酬：單筆是（期末金額 ÷ 投入金額）開年數次方再減 1。每月投入用資金加權年化，也就是把每一筆投入各自放了多久都算進去，解出讓所有投入剛好等於期末金額的年化利率。年數是實際日數 ÷ 365.25。</li>
+<li>最大跌幅、最長等待、最差一年，都用不含新投入的淨值（時間加權）計算，所以每月投入不會讓跌幅看起來比較淺。</li>
+<li>最差一年：任何一天往前推滿一年的報酬裡，最低的那一個。</li>
+<li>年化 ÷ 最大跌幅：每承受 1 個百分點的最大跌幅，換到多少年化報酬。組合有任何一檔資料不到 5 年，或回測期間不到 5 年，就不顯示。</li>
+</ul>
+</details>
+
+<section class="sec" style="margin-top:40px" aria-label="組合設定">
+<h2 style="font-size:22px">1. 設定組合</h2>
+<p class="t-note">每組的比例用整數填，合計要等於 100。最多比較三組。</p>
+<div class="grid" id="groups"></div>
+<div style="margin-top:12px"><button type="button" class="sbtn" id="addC">加入第三組</button></div>
+</section>
+
+<section class="sec" style="margin-top:36px" aria-label="共用設定">
+<h2 style="font-size:22px">2. 共用設定</h2>
+<div class="cfg">
+<div><div class="lab">投入方式</div>
+<div class="radios" role="radiogroup" aria-label="投入方式">
+<label><input type="radio" name="mode" value="lump" checked>單筆</label>
+<label><input type="radio" name="mode" value="monthly">每月固定投入</label>
+</div></div>
+<div><label for="amount" id="amountLab">單筆金額（元）</label><input type="number" id="amount" min="1" step="1" value="1000000" inputmode="numeric"></div>
+<div><label for="start">起點</label><input type="date" id="start"></div>
+<div><label for="end">終點</label><input type="date" id="end"></div>
+<div><label for="rebal">再平衡</label><select id="rebal"><option value="none">不再平衡</option><option value="annual">每年一次</option></select></div>
+</div>
+<div class="dnote" id="dateNote" style="display:none" aria-live="polite"></div>
+<div style="margin-top:10px"><button type="button" class="sbtn" id="resetDates">起訖日改回最長共同期間</button></div>
+</section>
+
+<section class="sec" id="out" style="margin-top:40px" aria-label="結果">
+<h2 style="font-size:22px">3. 結果</h2>
+<div id="warns"></div>
+<div id="msg" class="gerr" aria-live="polite"></div>
+<div id="results" style="display:none">
+<h3 class="ctitle">統計</h3>
+<p class="csub">報酬和最大跌幅放在一起看。</p>
+<div class="dwrap"><table class="dtbl rtbl" id="stats"></table></div>
+
+<h3 class="ctitle">淨值走勢</h3>
+<p class="csub" id="navSub"></p>
+<div class="chartbox">
+<div class="legend" id="legend1"></div>
+<label class="logt"><input type="checkbox" id="logChk">對數座標（相同的漲幅在圖上等高）</label>
+<div class="chart" id="chartNav" role="img" aria-label="三組組合的淨值走勢圖，滑鼠移上去可看各日數值"></div>
+</div>
+
+<h3 class="ctitle">從前高跌多少</h3>
+<p class="csub">每一天的淨值，比到那天為止的最高點低了多少。</p>
+<div class="chartbox">
+<div class="legend" id="legend2"></div>
+<div class="chart" id="chartDD" role="img" aria-label="各組合距離前高的跌幅走勢圖"></div>
+</div>
+
+<h3 class="ctitle">每年報酬</h3>
+<p class="csub">日曆年度的報酬，用不含新投入的淨值計算。</p>
+<div class="dwrap"><table class="dtbl rtbl" id="yearly"></table></div>
+</div>
+<p class="fine">這是歷史資料的計算，是一般資訊，不是對個人的投資建議。</p>
+</section>
+</div>
+
+<script>
+(function () {
+  'use strict';
+  var T = window.TOOL;
+  var groups = [
+    { on: true, name: '', items: [{ id: '0050', w: '100' }] },
+    { on: true, name: '', items: [{ id: '0050', w: '60' }, { id: 'IEF', w: '40' }] },
+    { on: false, name: '', items: [{ id: '0050', w: '100' }] }
+  ];
+  var userStart = null, userEnd = null;
+  var amounts = { lump: '1000000', monthly: '10000' };
+  var last = null; // 最近一次計算結果，給重畫圖用
+  var ui = null;
+
+  function $(id) { return document.getElementById(id); }
+
+  function applyUrl() {
+    var P = T.parseParams(location.search), any = false;
+    P.groups.forEach(function (items, i) { if (items) { groups[i].items = items; groups[i].on = true; any = true; } });
+    if (any) P.groups.forEach(function (items, i) { if (!items && i < 2) groups[i].on = false; });
+    if (any && !groups[0].on && groups[1].on) { groups[0] = groups[1]; groups[1] = { on: false, name: '', items: [{ id: '0050', w: '100' }] }; }
+    if (P.mode) {
+      document.querySelector('input[name=mode][value=' + P.mode + ']').checked = true;
+      $('amountLab').textContent = P.mode === 'lump' ? '單筆金額（元）' : '每月投入金額（元）';
+      $('amount').value = amounts[P.mode];
+    }
+    if (P.amount) { var mm = document.querySelector('input[name=mode]:checked').value; amounts[mm] = P.amount; $('amount').value = P.amount; }
+    if (P.rebal) $('rebal').value = P.rebal;
+    if (P.start) userStart = P.start;
+    if (P.end) userEnd = P.end;
+    if (userStart) $('start').value = userStart;
+    if (userEnd) $('end').value = userEnd;
+  }
+
+  function buildSources() {
+    var ul = $('srcList'), h = '';
+    T.CATS.forEach(function (c) {
+      T.assets().filter(function (a) { return a.cat === c; }).forEach(function (a) {
+        h += '<li><b>' + T.esc(a.name) + '</b>（' + a.start + ' 起）：' + T.esc(a.source) + '</li>';
+      });
+    });
+    ul.innerHTML = h;
+    var d = T.dataEnd();
+    $('dataEnd').textContent = d.slice(0, 4) + ' 年 ' + (+d.slice(5, 7)) + ' 月 ' + (+d.slice(8, 10)) + ' 日';
+    $('start').min = $('end').min = T.dates()[0];
+    $('start').max = $('end').max = d;
+  }
+
+  function recompute() {
+    var mode = document.querySelector('input[name=mode]:checked').value;
+    var rebal = $('rebal').value;
+    var amount = Number($('amount').value);
+    var vs = [];
+    groups.forEach(function (g, gi) { if (g.on) vs.push({ gi: gi, g: g, v: T.validate(g) }); });
+    T.paintCards($('groups'), vs);
+    $('warns').innerHTML = '';
+    var okG = vs.filter(function (o) { return !o.v.err; });
+    var msg = $('msg'); msg.textContent = '';
+    $('results').style.display = 'none';
+    if (!(amount >= 1)) { msg.textContent = '金額要大於 0。'; $('dateNote').style.display = 'none'; return; }
+    if (!okG.length) { msg.textContent = '請先把每組的比例調成合計 100%，才會顯示結果。'; $('dateNote').style.display = 'none'; return; }
+    if (okG.length < vs.length) msg.textContent = '有組合的比例不合格，下面只顯示比例合計 100% 的組合。';
+    var res = T.compute({
+      groups: okG.map(function (o) { return { gi: o.gi, name: o.g.name, items: o.v.items }; }),
+      mode: mode, amount: amount, rebal: rebal, userStart: userStart, userEnd: userEnd
+    });
+    if (res.err) { msg.textContent = res.err; return; }
+    var note = $('dateNote');
+    note.style.display = res.note ? '' : 'none'; note.textContent = res.note;
+    var ds = T.dates();
+    if (!userStart) $('start').value = ds[res.s];
+    if (!userEnd) $('end').value = ds[res.e];
+    last = res;
+    render();
+  }
+
+  function render() {
+    if (!last) return;
+    $('results').style.display = '';
+    $('warns').innerHTML = T.warnsHtml(last);
+    $('stats').innerHTML = T.statsHtml(last);
+    var yr = T.yearlyHtml(last);
+    $('yearly').innerHTML = yr.html;
+    var yn = $('yearlyNote'); if (!yn) { yn = document.createElement('p'); yn.id = 'yearlyNote'; yn.className = 't-note'; $('yearly').parentNode.parentNode.insertBefore(yn, $('yearly').parentNode.nextSibling); }
+    yn.textContent = yr.partial ? '† 該年度只有部分期間（起點或終點落在年度中間）。' : '';
+    var leg = T.legendHtml(last);
+    $('legend1').innerHTML = leg; $('legend2').innerHTML = leg;
+    $('navSub').textContent = last.mode === 'lump' ? '起始投入 ' + T.money(last.amount) + '，之後不再投入。' : '每月投入 ' + T.money(last.amount) + '，圖上是帳戶總金額。';
+    drawCharts();
+  }
+  function drawCharts() {
+    if (!last) return;
+    T.navChart($('chartNav'), last, $('logChk').checked);
+    T.ddChart($('chartDD'), last);
+  }
+
+  function wire() {
+    Array.prototype.forEach.call(document.querySelectorAll('input[name=mode]'), function (r) {
+      r.addEventListener('change', function () {
+        var prev = r.value === 'lump' ? 'monthly' : 'lump';
+        amounts[prev] = $('amount').value;
+        $('amount').value = amounts[r.value];
+        $('amountLab').textContent = r.value === 'lump' ? '單筆金額（元）' : '每月投入金額（元）';
+        recompute();
+      });
+    });
+    $('amount').addEventListener('input', recompute);
+    $('rebal').addEventListener('change', recompute);
+    $('start').addEventListener('change', function (e) { userStart = e.target.value || null; recompute(); });
+    $('end').addEventListener('change', function (e) { userEnd = e.target.value || null; recompute(); });
+    $('resetDates').addEventListener('click', function () { userStart = null; userEnd = null; recompute(); });
+    $('addC').addEventListener('click', function () { groups[2].on = true; ui.render(); recompute(); });
+    $('logChk').addEventListener('change', drawCharts);
+    var rt; window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(drawCharts, 120); });
+  }
+
+  T.load('data/tool_assets.json').then(function () {
+    buildSources();
+    applyUrl();
+    ui = T.groupsUI($('groups'), groups, { onChange: recompute, addBtn: $('addC'), removeFrom: 2 });
+    ui.render(); wire(); recompute();
+  }).catch(function (err) {
+    $('msg').textContent = '資料載入失敗：' + err.message;
+  });
+})();
+</script>
+</body>
+</html>

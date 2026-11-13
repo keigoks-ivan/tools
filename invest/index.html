@@ -9,72 +9,84 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap">
 <link rel="stylesheet" href="invest.css">
+<link rel="stylesheet" href="tool.css">
+<link rel="stylesheet" href="pages.css">
 <script src="invest.js"></script>
+<script src="tool.js"></script>
 </head>
 <body data-root="" data-nav="">
 <div class="page">
 <div id="site-header"></div>
 
-<section class="hero hero1">
-<div class="hero-t">
+<section class="home-hero">
 <h1>最省事的投資方法，就夠好</h1>
-<p class="lead">買全球股票指數、每月固定買、一年看一次。難的只有一件事：跌的時候抱得住。</p>
+<p class="lead">用過去的資料試算：選資產、設比例，看含息報酬，也看最深跌了多少。</p>
+</section>
+
+<section class="mini tool" id="mini" aria-label="回測工具精簡版">
+<div class="mini-wrap">
+<div class="mini-in">
+<div class="grid" id="miniGroups"></div>
+<div class="cta">
+<a class="btn" id="fullLink" href="tool.html">開完整工具</a>
 </div>
-<div class="num3">
-<div class="stat"><div class="v">91%</div><div class="k">美國大型股基金 20 年下來輸給指數的比例</div></div>
-<div class="stat"><div class="v">1.2 個百分點</div><div class="k">基金投資人自己進出，每年比基金本身少賺的報酬</div></div>
-<div class="stat"><div class="v">−50.3%</div><div class="k">全放股票過去最深的跌幅，花了 4 年 4 個月才漲回</div></div>
+<p class="mini-note">完整工具可以改投入方式、起訖日、每年再平衡，最多比較三組。</p>
 </div>
+<div class="mini-out">
+<div id="miniMsg" class="gerr" aria-live="polite"></div>
+<div id="miniOut" style="display:none">
+<div id="miniWarns"></div>
+<div class="dwrap"><table class="dtbl rtbl" id="miniStats"></table></div>
+<div class="chartbox">
+<div class="legend" id="miniLegend"></div>
+<div class="chart" id="miniChart" role="img" aria-label="兩組組合的淨值走勢圖，滑鼠移上去可看各日數值"></div>
+</div>
+<p class="mini-note" id="miniSub"></p>
+<p class="mini-note dnote" id="miniDate" style="display:none"></p>
+</div>
+</div>
+</div>
+<p class="mini-note">單筆投入 100 萬元，一律用台幣計價。這是用歷史價格做的計算，不是預測。價格是含息總報酬，沒有計入手續費、證交稅與股利所得稅。資料到 <span id="miniEnd"></span>。</p>
 </section>
 
-<section class="sec">
-<h2>省事的做法</h2>
-<ol class="easy">
-<li>買一檔全球股票指數 ETF。</li>
-<li>每月固定金額買進。</li>
-<li>一年看一次，比例偏了才調整。</li>
-</ol>
-<p class="sub">不用選股、不用看盤、不用挑基金。扣掉費用後，美國大型股基金 20 年下來有 91% 輸給指數。</p>
-<a class="link" href="evidence/active-vs-passive.html" style="display:inline-block;margin-top:12px">主動投資為什麼很難贏被動投資</a>
-</section>
-
-<section class="sec">
-<h2>唯一難的事是抱得住</h2>
-<p class="sub">1972 年以來美國股票的年化報酬是 11.2%，但很多人沒有拿到完整的報酬，原因是中途賣掉，或一直換方法。</p>
-<ul class="hold">
-<li>台灣證交所 1995 到 1999 年的全部交易資料：散戶整體每年因交易少賺 3.8 個百分點。</li>
-<li>全放股票，過去最深跌 −50.3%，花了 4 年 4 個月才漲回。</li>
-<li>股票只放四成，最深跌 −22.7%。</li>
-</ul>
-<p class="sub">所以第一個決定是股票放幾成。選一個跌到最深時你還抱得住的比例。</p>
-<div class="hero-btns"><a class="btn" href="allocate.html">選一個抱得住的比例</a></div>
-</section>
-
-<section class="sec">
-<h2>你想試的方法，我們測過了</h2>
-<p class="sub">每一題點進去，第一行就是答案。還沒測完的照實標明。</p>
+<section class="sec" id="questions">
+<h2>大家最常問的</h2>
+<p class="sub">每題先給答案，再列測了什麼和結果的弱點。</p>
 <div class="qgrid">
-<a class="qcard" href="evidence/active-vs-passive.html"><h3>主動基金會比較好嗎？</h3><p>美國大型股基金 20 年有 91% 輸給指數。</p></a>
-<a class="qcard" href="allocate.html#equity"><h3>只買美股或那斯達克會比較好嗎？</h3><p>過去二十多年報酬較高，但 2000 年代順序相反，那斯達克跌過 81%。</p></a>
-<a class="qcard" href="allocate.html#defensive"><h3>加公債或黃金有幫助嗎？</h3><p>最深跌幅從 −33.0% 縮到 −30.3% 至 −27.6%，哪一種好要看起點。</p></a>
-<a class="qcard" href="allocate.html#share"><h3>股票放幾成，最慘會跌多少？</h3><p>從 −50.3% 到 −22.7%。</p></a>
-<div class="qcard off" aria-disabled="true"><h3>等大跌再買會比較好嗎？</h3><small>還沒測完</small></div>
-<div class="qcard off" aria-disabled="true"><h3>跌破年線先賣掉好不好？</h3><small>還沒測完</small></div>
-<div class="qcard off" aria-disabled="true"><h3>一次買還是分批買？</h3><small>還沒測完</small></div>
-<div class="qcard off" aria-disabled="true"><h3>高股息比較好嗎？</h3><small>還沒測完</small></div>
+<a class="qcard" href="q/highdiv-vs-0050.html"><h3>高股息 ETF 比 0050 好嗎？</h3><p>五檔高股息 ETF 在各自上市以來，含息年化都低於同期的 0050。</p><span class="qn">10.29% 對 14.07%<small>0056 對 0050 的含息年化，2008 年起</small></span></a>
+<a class="qcard" href="q/leveraged-2x.html"><h3>正二（00631L）能不能長抱？</h3><p>上市以來年化 33.7%，但這段期間台股大致上漲，2008 年的數字是合成，不是實際產品。</p><span class="qn">−82.8%<small>2008 年合成資料的最大跌幅；實際產品上市以來 −55.1%</small></span></a>
+<a class="qcard" href="q/active-etf.html"><h3>主動式 ETF 值不值得買？</h3><p>台灣的資料太短，還不能下結論。</p><span class="qn">1.2 年<small>台股主動式 ETF 最長的資料</small></span></a>
+<a class="qcard" href="q/lump-vs-dca.html"><h3>一次投入，還是分 12 個月投入？</h3><p>一次投入的終值多半較高，代價是頭 12 個月的帳面跌幅比較深。</p><span class="qn">73%<small>0050 一次投入贏過分批的起點比例，1 年期</small></span></a>
+<a class="qcard" href="q/wait-for-crash.html"><h3>等大跌再買會比較好嗎？</h3><p>台股與美股多半比每月直接買差。全球股票 1990 年起是例外，等跌再買在多數 20 年窗反而較好。</p><span class="qn">81%<small>0050 等跌 20% 才買，全期間終值是每月直接買的 81%</small></span></a>
+<a class="qcard" href="q/miss-best-days.html"><h3>錯過漲最多的幾天會怎樣？</h3><p>只錯過漲最多的 10 天，長期年化就少 3.6 個百分點。</p><span class="qn">14.91% → 11.31%<small>0050 年化，拿掉漲最多的 10 天</small></span></a>
+<a class="qcard" href="q/buy-at-peak.html"><h3>買在最高點會怎樣？</h3><p>買在後來跌超過 20% 的高點，10 年後仍是正報酬，但低於所有起點的中位數。</p><span class="qn">8.1%<small>0050 買在這類高點的 10 年年化中位數；所有起點 10.1%</small></span></a>
+<a class="qcard" href="q/recovery-time.html"><h3>跌下去要等多久才漲回來？</h3><p>2003 年以來 0050 有 8 次跌超過 20%，截至 2026 年 9 月底都已漲回前高。</p><span class="qn">18.6 個月<small>高點到漲回的中位數；最長 39.0 個月</small></span></a>
+<div class="qcard off" aria-disabled="true"><h3>跌破年線先賣掉好不好？</h3><small>整理中</small></div>
+<div class="qcard off" aria-disabled="true"><h3>創新高之後會繼續漲嗎？</h3><small>整理中</small></div>
+<div class="qcard off" aria-disabled="true"><h3>均線交叉買賣有用嗎？</h3><small>整理中</small></div>
 </div>
+<p class="sec-more"><a class="link" href="questions.html">看全部題目與進度</a></p>
 </section>
 
-<section class="two">
+<section class="sec" id="route">
+<h2>新手入門路線</h2>
+<p class="sub">剛開始的人，照順序走三步。</p>
+<ol class="route">
+<li><a href="allocate.html"><span class="n">01</span><b>選配置</b><span class="d">股票放幾成、剩下的放哪裡。看每種比例過去最深跌多少再決定。</span></a></li>
+<li><a href="product.html"><span class="n">02</span><b>選產品</b><span class="d">美國掛牌還是愛爾蘭掛牌的 ETF。差別在稅，用試算比一次。</span></a></li>
+<li><span class="off" aria-disabled="true"><span class="n">03</span><b>稅</b><small>還沒做</small></span></li>
+</ol>
+<p class="sec-more"><a class="link" href="evidence/active-vs-passive.html">想先知道為什麼買指數就好：主動投資為什麼很難贏被動投資</a></p>
+</section>
+
+<section class="two" id="about">
 <div class="card">
 <h2>買美國掛牌的 ETF，先知道兩種美國稅</h2>
 <div class="big">
 <div><div class="k">遺產稅免稅額</div><div class="v">6 萬美元</div><div class="d">超過的部分最高課 40%</div></div>
 <div><div class="k">股息預扣</div><div class="v">30%</div><div class="d">有租稅協定的國家較低</div></div>
 </div>
-<p style="margin-top:20px;font-size:15px;line-height:1.8;color:var(--ink2)">不住美國、不是美國人也適用。選你住的國家，看適用的稅率。</p>
 <span class="off link-off" aria-disabled="true">看美國稅務說明<small>還沒做</small></span>
-<p class="fine" style="margin-top:16px;font-size:12px;line-height:1.5">來源：美國國稅局 Form 706-NA 說明、Publication 515。</p>
 </div>
 <div class="card">
 <h2>這個網站的規矩</h2>
@@ -87,19 +99,57 @@
 </div>
 </section>
 
-<section class="sec">
-<h2>五個步驟</h2>
-<p class="sub">前三步做一次。後兩步是之後偶爾回來用的。</p>
-<ol class="steps5">
-<li><div class="n">01</div><h3>選配置</h3><p>股票放幾成、剩下的放哪裡。看每種比例過去最深跌多少再決定。</p></li>
-<li><div class="n">02</div><h3>選產品</h3><p>美國掛牌還是愛爾蘭掛牌的 ETF。差別在稅，用試算比一次。</p></li>
-<li><div class="n">03</div><h3>設定定期買入</h3><p>到你自己的券商設定。這裡給一張各家通用的檢查清單。</p></li>
-<li><div class="n">04</div><h3>定期檢查配置</h3><p>比例跑掉多少要調回來，輸入現在的金額就算給你看。</p></li>
-<li><div class="n">05</div><h3>有新想法，先查證據</h3><p>想加黃金、想等大跌再買，先看這個做法過去的結果。</p></li>
-</ol>
-</section>
-
-<footer class="foot">數字來源：美國股票加現金 1972 到 2026 年，每月調回比例；S&amp;P Dow Jones Indices, SPIVA U.S. Scorecard Mid-Year 2025；Morningstar, Mind the Gap 2026；Barber, Lee, Liu, Odean (2009)。這是過去的統計，未來可能不同。本頁是一般資訊，不是對個人的投資建議。</footer>
+<footer class="foot">資料來源：回測工具的價格資料與各資產的限制，見<a href="tool.html#sources">回測工具頁</a>；每題的數字與弱點，見各篇文章最後的資料來源；美國稅務數字來自美國國稅局 Form 706-NA 說明、Publication 515。這是過去的統計，未來可能不同。本頁是一般資訊，不是對個人的投資建議。</footer>
 </div>
+
+<script>
+(function () {
+  'use strict';
+  var T = window.TOOL;
+  var groups = [
+    { on: true, name: '', items: [{ id: '0050', w: '100' }] },
+    { on: true, name: '', items: [{ id: '0056', w: '100' }] },
+    { on: false, name: '', items: [{ id: '0050', w: '100' }] }
+  ];
+  var last = null;
+  function $(id) { return document.getElementById(id); }
+
+  function recompute() {
+    var vs = [];
+    groups.forEach(function (g, gi) { if (g.on) vs.push({ gi: gi, g: g, v: T.validate(g) }); });
+    T.paintCards($('miniGroups'), vs);
+    var okG = vs.filter(function (o) { return !o.v.err; });
+    $('fullLink').href = 'tool.html' + T.buildParams(groups);
+    $('miniOut').style.display = 'none'; last = null;
+    if (!okG.length) { $('miniMsg').textContent = '請先把每組的比例調成合計 100%，才會顯示結果。'; return; }
+    $('miniMsg').textContent = okG.length < vs.length ? '有組合的比例不合格，下面只顯示比例合計 100% 的組合。' : '';
+    var res = T.compute({
+      groups: okG.map(function (o) { return { gi: o.gi, name: o.v.items.length === 1 ? o.v.items[0].id : '', items: o.v.items }; }),
+      mode: 'lump', amount: 1000000, rebal: 'none', userStart: null, userEnd: null
+    });
+    if (res.err) { $('miniMsg').textContent = res.err; return; }
+    last = res;
+    $('miniOut').style.display = '';
+    $('miniWarns').innerHTML = T.warnsHtml(res);
+    $('miniStats').innerHTML = T.statsHtml(res, ['ann', 'mdd', 'longest']);
+    $('miniLegend').innerHTML = T.legendHtml(res);
+    var ds = T.dates();
+    $('miniSub').textContent = '期間 ' + ds[res.s] + ' 到 ' + ds[res.e] + '，起始投入 ' + T.money(res.amount) + '，之後不再投入。';
+    var dn = $('miniDate'); dn.style.display = res.note ? '' : 'none'; dn.textContent = res.note;
+    draw();
+  }
+  function draw() { if (last) T.navChart($('miniChart'), last, false, 300); }
+
+  T.load('data/tool_assets.json').then(function () {
+    var d = T.dataEnd();
+    $('miniEnd').textContent = d.slice(0, 4) + ' 年 ' + (+d.slice(5, 7)) + ' 月 ' + (+d.slice(8, 10)) + ' 日';
+    T.groupsUI($('miniGroups'), groups, { onChange: recompute, noName: true, maxItems: 4 }).render();
+    recompute();
+    var rt; window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(draw, 120); });
+  }).catch(function (err) {
+    $('miniMsg').textContent = '資料載入失敗：' + err.message;
+  });
+})();
+</script>
 </body>
 </html>
