@@ -11,10 +11,47 @@
 <link rel="stylesheet" href="../invest.css">
 <link rel="stylesheet" href="../tool.css">
 <link rel="stylesheet" href="../pages.css">
+<style>
+.doc .sec{margin-top:72px;scroll-margin-top:16px}
+.doc .sec h2{font-size:23px}
+.doc .sec h3.t-lab{margin-top:36px;font-size:16px}
+.doc .lead{font-weight:600;color:var(--ink)}
+.toc{margin-top:20px;border:1px solid var(--line);padding:14px 20px 12px}
+.toc .toc-h{font-family:var(--serif);font-weight:700;font-size:17px;color:var(--navy)}
+.toc p{margin:6px 0 0;font-size:14px;line-height:1.8;color:var(--muted)}
+.toc ol{margin:8px 0 0;padding-left:24px;font-size:15px;line-height:1.9}
+.toc li span{display:block;font-size:13px;line-height:1.6;color:var(--muted);margin-bottom:4px}
+.doc .dtbl.cmp th,.doc .dtbl.cmp td{padding:10px 8px;font-size:14px;line-height:1.6}
+.doc .dtbl.cmp thead th{text-align:right;white-space:normal}
+.doc .dtbl.cmp thead th:first-child{text-align:left}
+.doc .dtbl.cmp tbody td{text-align:right}
+.doc .dtbl.cmp tbody th{font-size:14px;font-weight:500}
+.doc .dtbl.cmp .nw{white-space:nowrap}
+.doc .dtbl.cmp .tag{font-size:12px;color:var(--muted)}
+.doc .dwrap{overflow-x:visible}
+@media (max-width:760px){.doc .dwrap{overflow-x:auto}}
+.doc .qa-answer,.doc .pre-box,.doc .toc,.doc .dwrap,.doc details.more,.doc .qa-fig,.doc .dlist{max-width:720px;margin-left:0;margin-right:0;box-sizing:border-box}
+.doc .steps{list-style:disc;margin:14px 0 0;padding-left:22px;font-size:17px;line-height:1.8;color:var(--ink2);max-width:720px}
+.doc .steps li+li{margin-top:6px}
+.doc .qa-fig{margin-top:32px}
+details.more{margin-top:20px;border:1px solid var(--line);border-radius:0;background:var(--card)}
+details.more>summary{cursor:pointer;padding:12px 16px;font-size:15px;font-weight:700;line-height:1.6;color:var(--ink);list-style:none}
+details.more>summary::-webkit-details-marker{display:none}
+details.more>summary::before{content:"＋";display:inline-block;width:1.4em;color:var(--navy)}
+details.more[open]>summary::before{content:"－"}
+details.more[open]>summary{border-bottom:1px solid var(--line)}
+details.more .in{padding:0 0 4px}
+details.more .in>p{padding:0 16px;margin:14px 0 0}
+details.more .in .dwrap{margin-top:12px;border:0;margin-left:-1px;margin-right:-1px}
+.nw{white-space:nowrap}
+.doc .dtbl.cmp tbody th .tag{display:block;margin-top:2px;border:0;padding:0;background:none;font-size:12px;color:var(--muted)}
+.doc .sec h2{text-wrap:balance}
+.doc .qa-fig .chartbox{padding-bottom:34px}
+.doc .qa-fig .chartbox svg{overflow:visible}
+</style>
 <script src="../invest.js"></script>
 <script src="../qchart.js"></script>
 <script src="../qline.js"></script>
-<style>#cbox0 svg{overflow:visible}#cbox0{padding-bottom:34px}</style>
 </head>
 <body data-root="../" data-nav="q">
 <div class="page doc">
@@ -22,63 +59,137 @@
 
 <p class="t-link" style="margin-top:28px"><a href="../questions.html">回到全部題目</a></p>
 <h1 class="h1" style="margin-top:12px">同一條規則分散到 12 個期貨市場，比只做一個穩嗎？</h1>
-<div class="qa-answer"><div class="k">一句話答案</div><p>這個組合年化 2.25%，標普 500 是 11.39%。原始的最大跌幅只有 −10.1%，但大部分是每個市場只放一小部分。把波動調成一樣再比，和只抱標普 500 差不多。</p></div>
-<aside class="pre-box" aria-labelledby="pre-t"><div class="pre-h" id="pre-t">讀這個結果之前</div><h4>12 個市場合起來跌得淺，是因為每個市場只放一小部分</h4><p>12 個市場合起來，最大跌幅是 −10.1%，單一市場的中位數是 −30.5%，中位數是排在中間的那個。組合的波動只有 4.6%，單一市場平均 10.7%。波動是報酬上下起伏的幅度。</p><p>把每條的部位放大或縮小，讓波動一樣再比，組合是 −20.9%，只抱標普 500 是 −21.1%。測試期間約 15 年，沒有 2008 年。</p><h4>這篇沒有回答的事</h4><ul><li>這篇用一條 12 個月趨勢規則和期貨的歷史價格，其他規則、期貨帳戶、保證金與稅沒有算。</li><li>測試的是 2011 年 7 月以後的 12 個市場，更早的年份與其他市場沒有測。</li></ul><p class="pre-fine">美國期貨 12 個市場，美元計價，2011 年 7 月 1 日至 2026 年 11 月 6 日，已扣假設的交易成本。</p><p class="pre-link"><a href="#limits">完整的弱點見「這個結果的弱點」一節</a></p></aside>
-<section class="sec"><h2>測了什麼</h2><p class="t-body">期貨是先約定價格、以後才交割的合約，可以做多，也可以做空。做空是價格跌時賺錢。</p><p class="t-body">規則只有一條：過去 12 個月漲就做多，跌就做空，每個月底看一次。每個市場的部位大小，讓波動差不多。</p><p class="t-body">12 個期貨市場，約四類：股指 4 個、公債 2 個、原物料 4 個、外匯 2 個，涵蓋標普 500、那斯達克 100、道瓊、羅素 2000、十年期與三十年期公債、原油、黃金、銅、白銀、歐元、日圓。</p><p class="t-body">組合是 12 個市場各放一份合起來。最大跌幅是從高點跌到谷底最深的那一段。波動是報酬上下起伏的幅度。中位數是 12 個結果排在中間的那個。</p><p class="t-body">對照組是一直做多，也就是買進不賣。資料從 2010 年 6 月起，規則要先看 12 個月，所以比較從 2011 年 7 月開始。</p></section>
-<section class="sec"><h2>結果</h2>
-<h3 class="t-lab" id="cost">代價</h3>
-<p class="t-body">這個組合年化 2.25%。同一段期間一直做多標普 500 是 11.39%，那斯達克 100 是 15.93%，12 條單一市場裡最好的趨勢那斯達克 100 是 6.55%。</p>
-<h3 class="t-lab" id="raw">原始數字淺很多</h3>
-<p class="t-body">組合的最大跌幅是 −10.1%。12 條單一市場的中位數是 −30.5%。</p>
-<p class="t-body">差距大部分來自部位變小。組合的波動是 4.6%，單一市場平均 10.7%。每個市場只占十二分之一，起伏又互相抵掉一部分。</p>
-<h3 class="t-lab" id="same">調到同樣波動再比</h3>
-<p class="t-body">調到同樣波動，是把每條的部位放大或縮小，讓年化波動都是 10%。倍數事後才知道，實際上做不到。</p>
-<div class="dwrap"><table class="dtbl"><thead><tr><th>調到 10% 波動</th><th class="num">年化</th><th class="num">最大跌幅</th></tr></thead><tbody>
-<tr><th scope="row">趨勢組合</th><td class="num">4.65%</td><td class="num">−20.9%</td></tr>
-<tr><th scope="row">趨勢單一市場中位數</th><td class="num">1.56%</td><td class="num">−27.5%</td></tr>
-<tr><th scope="row">一直做多，平均分配</th><td class="num">3.85%</td><td class="num">−21.4%</td></tr>
-<tr><th scope="row">做多標普 500</th><td class="num">6.86%</td><td class="num">−21.1%</td></tr>
-<tr><th scope="row">做多那斯達克 100</th><td class="num">7.91%</td><td class="num">−18.3%</td></tr>
-<tr><th scope="row">做多道瓊</th><td class="num">6.10%</td><td class="num">−23.9%</td></tr>
-</tbody></table></div>
-<p class="t-body">組合的 −20.9% 比中位數 −27.5% 淺，和標普 500 的 −21.1% 差不多，那斯達克 100 的 −18.3% 還更淺。</p>
-<figure class="qa-fig">
-<div class="ttl">調到同樣波動後的最大跌幅</div>
-<div class="cap">長條越短，跌得越淺。</div>
-<div class="tool"><div class="chartbox" id="cbox0"><div class="legend" style="display:none"></div><div class="chart" role="img" aria-label="調到同樣波動後六種做法的最大跌幅長條圖，趨勢組合負 20.9%，標普 500 負 21.1%"></div></div></div>
-</figure>
-<h3 class="t-lab" id="crash">股市大跌的 8 段</h3>
-<p class="t-body">標普 500 回落 10% 以上的有 8 段，組合 3 段賺、5 段虧。</p>
-<div class="dwrap"><table class="dtbl"><thead><tr><th>高點到谷底</th><th class="num">標普 500</th><th class="num">趨勢組合</th></tr></thead><tbody>
-<tr><th scope="row" style="white-space:nowrap">2011-04 到 10</th><td class="num">−19.7%</td><td class="num">−0.4%</td></tr>
-<tr><th scope="row" style="white-space:nowrap">2012-03 到 06</th><td class="num">−10.1%</td><td class="num">+1.5%</td></tr>
-<tr><th scope="row" style="white-space:nowrap">2015-07 到 2016-02</th><td class="num">−13.2%</td><td class="num">−1.3%</td></tr>
-<tr><th scope="row" style="white-space:nowrap">2018-01 到 04</th><td class="num">−10.3%</td><td class="num">−4.1%</td></tr>
-<tr><th scope="row" style="white-space:nowrap">2018-09 到 12</th><td class="num">−20.4%</td><td class="num">−5.0%</td></tr>
-<tr><th scope="row" style="white-space:nowrap">2020-02 到 03</th><td class="num">−34.2%</td><td class="num">+0.4%</td></tr>
-<tr><th scope="row" style="white-space:nowrap">2022-01 到 10</th><td class="num">−25.2%</td><td class="num">+9.8%</td></tr>
-<tr><th scope="row" style="white-space:nowrap">2024-12 到 2025-04</th><td class="num">−19.5%</td><td class="num">−2.3%</td></tr>
-</tbody></table></div>
-<p class="t-note">標普 500 的 −19.7% 從 2011 年 4 月的高點算起。這個組合 7 月才開始有結果，−0.4% 是 7 月 1 日起的數字，同一段時間標普 500 是 −17.2%。</p>
-<p class="t-body">標普 500 最差的 18 個月裡，組合 10 個月賺、8 個月虧，平均每月 +0.04%，最差一個月 −3.5%。同樣這 18 個月，標普 500 平均 −7.3%。</p>
-<p class="t-body">組合和股市的關聯小。這不等於大跌時會賺。</p>
-<h3 class="t-lab" id="why">為什麼「平均比中位數好」不稀奇</h3>
-<p class="t-body">事前訂了四項比較，組合對單一市場中位數全部通過。但這個比較很容易過。</p>
-<p class="t-body">最大跌幅看的是最糟的一段。不同市場最糟的時候多半不在同一段，所以幾條平均起來，最糟的一段多半比單獨一條淺。</p>
-<p class="t-body">從 11 條趨勢單一市場任取 3 條平均，再調到同樣波動，最大跌幅比單一市場中位數淺的有 71.5%。任取 6 條有 94.6%。羅素 2000 資料較短，這裡只用另外 11 個。</p>
-<p class="t-body">再把各市場的時間打亂，讓它們互不相干，最大跌幅平均 −18.4%，11 條照實際順序平均是 −19.1%，差不多。這是粗略對照，不是正式檢定。</p>
+<div class="qa-answer"><div class="k">一句話答案</div><p>2011 年 7 月到 2026 年 11 月，12 個期貨市場合起來的趨勢組合，最大跌幅是 −10.1%，單一市場的中位數是 −30.5%，主要因為每個市場只放一小部分。調到同樣 10% 的波動再比（倍數事後才算得出來），最大跌幅組合 −20.9%、只抱標普 500 −21.1%。同樣波動下，年化組合 4.65%、標普 500 6.86%，都不含現金利息。</p></div>
+<aside class="pre-box" aria-labelledby="pre-t"><div class="pre-h" id="pre-t">讀這個結果之前</div><h4>組合跌得淺，主要因為每個市場只放一小部分</h4><p>12 個市場各放十二分之一，組合的年化波動是 4.6%，單一市場平均 10.7%。12 條單一市場裡最淺的最大跌幅也有 −18.6%，組合是 −10.1%。波動是報酬上下起伏的幅度。</p><p>把部位放大或縮小，讓波動都是 10% 再比，組合 −20.9%，標普 500 −21.1%，跌幅差不多，組合年化較低。放大的倍數要看完整段資料才算得出來，事前做不到。標普 500 回落 10% 以上的 8 段是歷史次數統計，不是下一次會怎樣。</p><h4>這篇沒有回答的事</h4><ul><li>只測一條簡單的趨勢規則，其他規則沒有測。</li><li>只測 2011 年 7 月以後的 12 個市場，沒有 2008 年。</li><li>期貨帳戶、保證金、換月與稅沒有算。</li></ul><p class="pre-fine">美國期貨 12 個市場，美元計價，2011 年 7 月 1 日至 2026 年 11 月 6 日，已扣假設的交易成本。最大跌幅是從高點跌到之後最低點的幅度。</p><p class="pre-link"><a href="#limits">完整的弱點見「這個結果的弱點」一節</a></p></aside>
+
+<nav class="toc" aria-label="本文目錄"><div class="toc-h">本文目錄</div><ol>
+<li><a href="#what">測了什麼</a><span>規則、12 個市場、對照組、期間</span></li>
+<li><a href="#raw">原始數字：組合跌得淺</a><span>代價、12 個市場逐一、波動 4.6% 對 10.7%</span></li>
+<li><a href="#same">調到同樣波動再比</a><span>組合、單一市場、一直做多、標普 500</span></li>
+<li><a href="#why">「平均比中位數好」不稀奇</a><span>任取 3 條、任取 6 條、打亂時間</span></li>
+<li><a href="#crash">標普 500 回落 10% 的 8 段</a><span>逐段清單、最差 18 個月</span></li>
+<li><a href="#seg">三段年化與拿掉 2022 年</a><span>分三段、逐年、拿掉任一年</span></li>
+<li><a href="#eff">實際分散比 12 少</a><span>相關、換算、各市場相關最高的兩個</span></li>
+<li><a href="#limits">這個結果的弱點</a><span>完整列出</span></li>
+<li><a href="#src">資料來源與接著看</a><span></span></li>
+</ol></nav>
+
+<section class="sec" id="what"><h2>測了什麼</h2>
+<p class="t-body lead">12 個期貨市場各用同一條趨勢規則，再各放十二分之一，合成一個組合。</p>
+<p class="t-body">期貨是先約定價格、以後才交割的合約，可以做多，也可以做空。做空是價格跌時賺錢。</p>
+<p class="t-body">規則依各市場自己的價格趨勢決定做多或做空，定期調整。每個市場的部位大小，讓波動差不多。</p>
+<p class="t-body">12 個市場約四類：股指 4 個（標普 500、那斯達克 100、道瓊、羅素 2000）、公債 2 個（10 年期、30 年期）、商品 4 個（原油、黃金、銅、白銀）、外匯 2 個（歐元、日圓）。</p>
+<p class="t-body">對照組是一直做多，也就是買進不賣。比較期間從 2011 年 7 月 1 日到 2026 年 11 月 6 日，約 15 年。規則需要先累積一段價格才能判斷，所以比較從 2011 年 7 月開始。羅素 2000 加入得晚，一直做多從 2017 年 8 月、趨勢從 2018 年 8 月才有結果，用自己的期間。</p>
+<p class="t-body">最大跌幅是從高點跌到之後最低點的幅度。波動是報酬上下起伏的幅度。中位數是排在中間的那個。成本只算手續費和一個最小跳動的價差，稅沒有算。</p>
 </section>
-<section class="sec"><h2 id="limits">這個結果的弱點</h2><ul class="dlist"><li>只有 2011 年 7 月起約 15 年，一條路徑，沒有做統計檢定。</li><li>三段年化差很多：2011 年 7 月到 2014 年 5.26%，2015 到 2019 年 0.34%，2020 年起 2.14%。</li><li>2022 年這個組合 +5.5%，拿掉這一年，年化從 2.23% 降到 2.01%。這個算法以 252 天為一年，和 2.25% 的口徑略有不同。</li><li>12 個市場約四類。股指之間的日報酬相關是 0.86，兩檔公債之間是 0.93，實際分散的程度比 12 個少。</li><li>做這題之前，已看過同一批期貨上另一條類似規則的彙總結果，那條偏弱。規則、期間與判讀方式是跑之前定的，沒有因結果調整。</li><li>羅素 2000 加入得晚，趨勢版從 2018 年 8 月才有結果。</li><li>成本是假設值，只算手續費和一個最小跳動的價差，稅沒有算。</li><li>一般人不容易做期貨，要有期貨帳戶和保證金，每月還要換月。</li><li>另一套獨立重算，單一市場的最大跌幅和本文差 0.2 到 0.3 個百分點，原因沒查清。</li></ul></section>
-<section class="sec"><h2>資料來源</h2><ul class="dlist"><li>美國期貨交易所 12 個期貨的連續合約日資料，2010 年 6 月起，美元計價。</li><li>本文不提供原始價格。</li></ul></section>
+
+<section class="sec" id="raw"><h2>原始數字：組合跌得淺</h2>
+<p class="t-body lead">組合的最大跌幅是 −10.1%，12 條單一市場最淺的也有 −18.6%，中位數是 −30.5%。</p>
+<p class="t-body">下表是 12 個市場各自用趨勢規則的結果，第一列是 12 個合起來的組合，期間都是 2011 年 7 月起，羅素 2000 從 2018 年 8 月起。單一市場 12 條的年化中位數是 1.65%，波動平均 10.7%，最大跌幅中位數 −30.5%。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">原始數字</th><th scope="col">年化</th><th scope="col">年化波動</th><th scope="col">最大跌幅</th></tr></thead><tbody><tr><th scope="row">趨勢組合（12 個市場）</th><td class="nw">2.25%</td><td class="nw">4.6%</td><td class="nw">−10.1%</td></tr><tr><th scope="row">標普 500</th><td class="nw">3.34%</td><td class="nw">11.4%</td><td class="nw">−31.5%</td></tr><tr><th scope="row">那斯達克 100</th><td class="nw">6.55%</td><td class="nw">10.9%</td><td class="nw">−18.6%</td></tr><tr><th scope="row">道瓊</th><td class="nw">3.22%</td><td class="nw">11.4%</td><td class="nw">−30.5%</td></tr><tr><th scope="row">羅素 2000</th><td class="nw">−3.84%</td><td class="nw">10.6%</td><td class="nw">−38.3%</td></tr><tr><th scope="row">10 年公債</th><td class="nw">2.84%</td><td class="nw">10.2%</td><td class="nw">−23.9%</td></tr><tr><th scope="row">30 年公債</th><td class="nw">0.51%</td><td class="nw">10.4%</td><td class="nw">−30.4%</td></tr><tr><th scope="row">原油</th><td class="nw">2.18%</td><td class="nw">11.0%</td><td class="nw">−25.9%</td></tr><tr><th scope="row">黃金</th><td class="nw">1.11%</td><td class="nw">10.8%</td><td class="nw">−38.3%</td></tr><tr><th scope="row">銅</th><td class="nw">−0.37%</td><td class="nw">10.4%</td><td class="nw">−23.9%</td></tr><tr><th scope="row">白銀</th><td class="nw">−1.21%</td><td class="nw">11.1%</td><td class="nw">−43.4%</td></tr><tr><th scope="row">歐元</th><td class="nw">−0.20%</td><td class="nw">10.2%</td><td class="nw">−36.3%</td></tr><tr><th scope="row">日圓</th><td class="nw">5.04%</td><td class="nw">10.6%</td><td class="nw">−24.2%</td></tr></tbody></table></div>
+<figure class="qa-fig">
+<div class="ttl">圖 2.1　組合與 12 條單一市場的最大跌幅</div>
+<div class="tool"><div class="chartbox" id="f1"><div class="legend" style="display:none"></div><div class="chart" role="img" aria-label="組合與 12 條單一市場趨勢結果的最大跌幅長條圖，組合負 10.1%，單一市場從負 18.6% 到負 43.4%，滑鼠移上去可看年化"></div></div></div>
+</figure>
+<p class="t-note">長條越短，跌得越淺。滑鼠移上去可看年化。</p>
+<h3 class="t-lab" id="why-shallow">為什麼淺</h3>
+<p class="t-body">組合的年化波動是 4.6%，單一市場平均 10.7%，相差 2.33 倍。每個市場只占十二分之一，12 條趨勢損益之間兩兩相關平均只有 0.11，起伏互相抵掉一部分。</p>
+<p class="t-body">用算術看分量：最深的白銀跌了 −43.4%，只占十二分之一，按比例約 −3.6%（只算它自己的跌幅，沒有計入其他市場同時的損益）。「實際分散比 12 少」一節會說明，12 個市場實際分散的程度比 12 個少。</p>
+<h3 class="t-lab" id="cost">代價</h3>
+<p class="t-body">組合年化 2.25%，12 條單一市場的中位數是 1.65%。同一段期間一直做多標普 500 是 11.39%，那斯達克 100 是 15.93%，12 條單一市場裡最好的是趨勢那斯達克 100，6.55%。</p>
+<p class="t-body">以上都沒有計現金利息。整個淨值放三個月國庫券賺利息，組合年化是 3.95%，只持有國庫券是 1.66%。</p>
+</section>
+
+<section class="sec" id="same"><h2>調到同樣波動再比</h2>
+<p class="t-body lead">下表每一列都乘上一個固定倍數，讓年化波動都是 10%。倍數是事後才知道的：要看完整段資料才算得出來，事前算不出，所以這張表只能用來比較，沒辦法照著做。</p>
+<p class="t-body">調到同樣波動後，組合的最大跌幅 −20.9%，和只抱標普 500 的 −21.1% 差不多，年化 4.65% 比標普 500 的 6.86% 少 2.21 個百分點。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">調到 10% 波動</th><th scope="col">倍數</th><th scope="col">年化</th><th scope="col">最大跌幅</th></tr></thead><tbody><tr><th scope="row">趨勢組合</th><td class="nw">×2.17</td><td class="nw">4.65%</td><td class="nw">−20.9%</td></tr><tr><th scope="row">趨勢單一市場中位數</th><td class="nw">—</td><td class="nw">1.56%</td><td class="nw">−27.5%</td></tr><tr><th scope="row">一直做多，平均分配</th><td class="nw">×0.97</td><td class="nw">3.85%</td><td class="nw">−21.4%</td></tr><tr><th scope="row">做多標普 500</th><td class="nw">×0.58</td><td class="nw">6.86%</td><td class="nw">−21.1%</td></tr><tr><th scope="row">做多那斯達克 100</th><td class="nw">×0.48</td><td class="nw">7.91%</td><td class="nw">−18.3%</td></tr><tr><th scope="row">做多道瓊</th><td class="nw">×0.61</td><td class="nw">6.10%</td><td class="nw">−23.9%</td></tr></tbody></table></div>
+<p class="t-note">倍數小於 1 是只放那個比例，其餘放現金，現金沒有計利息。羅素 2000 從 2017 年 8 月起，一直做多是 3.05%、−20.0%。「一直做多，平均分配」是 12 個市場等金額買進不賣。</p>
+<figure class="qa-fig">
+<div class="ttl">圖 3.1　調到同樣波動後的最大跌幅</div>
+<div class="tool"><div class="chartbox" id="f2"><div class="legend" style="display:none"></div><div class="chart" role="img" aria-label="調到同樣波動後六種做法的最大跌幅長條圖，趨勢組合負 20.9%，標普 500 負 21.1%"></div></div></div>
+</figure>
+<p class="t-note">長條越短，跌得越淺。</p>
+<p class="t-body">組合的 −20.9% 比單一市場中位數 −27.5% 淺。12 條單一市場調到同樣波動後，有 11 條比組合深，只有趨勢那斯達克 100 的 −17.1% 更淺。一直做多那斯達克 100 是 −18.3%，也比組合淺。</p>
+<p class="t-body">組合的倍數是 2.17，原始的平均總曝險（各市場部位金額不分多空加總，各次調整日的平均）是淨值的 0.83 倍，乘上 2.17 後約 1.8 倍。組合要在這個條件下才有 4.65% 的年化。放大用到的保證金與融資成本沒有算。</p>
+</section>
+
+<section class="sec" id="why"><h2>「平均比中位數好」不稀奇</h2>
+<p class="t-body lead">從 11 條趨勢單一市場任取 3 條平均，調到同樣波動後，最大跌幅比單一市場中位數淺的有 71.5%；任取 6 條有 94.6%。</p>
+<p class="t-body">事前訂了四項比較，組合對單一市場中位數全部通過，組合的最大跌幅確實比單一市場中位數淺。但這四項都是拿平均對中位數，比較容易過。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">事前登記的比較</th><th scope="col">趨勢組合</th><th scope="col">單一市場中位數</th></tr></thead><tbody><tr><th scope="row">最大跌幅</th><td class="nw">−10.1%</td><td class="nw">−30.5%</td></tr><tr><th scope="row">最長沒創新高</th><td class="nw">42.7 個月</td><td class="nw">90.3 個月</td></tr><tr><th scope="row">最糟單年</th><td class="nw">−6.8%</td><td class="nw">−13.2%</td></tr><tr><th scope="row">夏普</th><td class="nw">0.50</td><td class="nw">0.20</td></tr></tbody></table></div>
+<p class="t-note">最糟單年在登記稿裡包含不完整的年份。只算完整日曆年，單一市場中位數是 −12.2%，組合同為 −6.8%。夏普是年化算術平均除以波動。</p>
+<h3 class="t-lab">任取幾條平均</h3>
+<p class="t-body">只用 11 個全長市場，羅素 2000 資料較短，不放進來。每條先調到 10% 波動，11 條的最大跌幅中位數是 −27.0%。再把任取的幾條平均，調到 10% 波動，和 −27.0% 比。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">任取幾條平均</th><th scope="col">取法數</th><th scope="col">比中位數淺的比例</th></tr></thead><tbody><tr><th scope="row">任取 3 條</th><td class="nw">165 種</td><td class="nw">71.5%</td></tr><tr><th scope="row">任取 6 條</th><td class="nw">462 種</td><td class="nw">94.6%</td></tr></tbody></table></div>
+<p class="t-body">12 條趨勢單一市場的損益之間，兩兩相關平均只有 0.11，彼此不太同步，所以隨便湊幾條平均，最糟的一段就比單獨一條淺。</p>
+<h3 class="t-lab">打亂時間</h3>
+<p class="t-body">把 11 條各自做循環位移：序列首尾接成一圈，每條隨機轉到不同的起點，每條自己的先後順序不變，只拆掉條與條之間的對齊。位移後再平均、調到 10% 波動，重複 2,000 次，每次的位移量都重抽，隨機種子固定。照實際時間順序的平均是 −19.1%，落在打亂結果的中間，61% 的打亂版本比它淺。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">11 條平均，調到 10% 波動</th><th scope="col">最大跌幅</th></tr></thead><tbody><tr><th scope="row">時間打亂 2,000 次的平均</th><td class="nw">−18.4%</td></tr><tr><th scope="row">時間打亂的 5% 到 95% 區間</th><td class="nw">−25.2% 到 −13.3%</td></tr><tr><th scope="row">照實際時間順序</th><td class="nw">−19.1%</td></tr></tbody></table></div>
+<p class="t-body">真實的時間順序，沒有讓組合比各條互不相干時更穩。這是粗略對照，不是統計檢定。這裡的 −19.1% 是 11 條不含羅素 2000 的簡單平均，做法與前面組合的 −20.9% 不同，兩者不能直接對照。</p>
+</section>
+
+<section class="sec" id="crash"><h2>標普 500 回落 10% 的 8 段</h2>
+<p class="t-body lead">標普 500 回落 10% 以上的有 8 段，組合 3 段賺、5 段虧，每一段的結果都比標普 500 和單做趨勢標普 500 好。</p>
+<p class="t-body">這是歷史次數統計，不是下一次會怎樣。「一段」的定義：標普 500 期貨從資料起點以來的歷史高點回落至少 10%，算到之後的最低點；回到前高才算結束，下一段再從新高點起算。段落由標普 500 一條序列定出來，從高點日（不含）到谷底日（含），在算任何組合之前就定了。本節用原始倍數，組合波動 4.6%，標普 500 約 17%，不是上一節調到同樣波動的版本。換成同樣波動（組合乘 2.17、標普 500 乘 0.58），8 段裡組合有 7 段比標普 500 好，2018 年 1 月那段較差。同樣波動下組合最深的一段是 2022 年 10 月到 2024 年 8 月，那段標普 500 在上漲，兩邊的最大跌幅發生在不同時間。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">高點到谷底</th><th scope="col">標普 500</th><th scope="col">趨勢標普 500</th><th scope="col">趨勢組合</th></tr></thead><tbody><tr><th scope="row">2011-04 到 10</th><td class="nw">−19.7%</td><td class="nw">−7.3%</td><td class="nw">−0.4%</td></tr><tr><th scope="row">2012-03 到 06</th><td class="nw">−10.1%</td><td class="nw">−4.3%</td><td class="nw">1.5%</td></tr><tr><th scope="row">2015-07 到 2016-02</th><td class="nw">−13.2%</td><td class="nw">−4.6%</td><td class="nw">−1.3%</td></tr><tr><th scope="row">2018-01 到 04</th><td class="nw">−10.3%</td><td class="nw">−12.5%</td><td class="nw">−4.1%</td></tr><tr><th scope="row">2018-09 到 12</th><td class="nw">−20.4%</td><td class="nw">−15.0%</td><td class="nw">−5.0%</td></tr><tr><th scope="row">2020-02 到 03</th><td class="nw">−34.2%</td><td class="nw">−25.4%</td><td class="nw">0.4%</td></tr><tr><th scope="row">2022-01 到 10</th><td class="nw">−25.2%</td><td class="nw">−3.6%</td><td class="nw">9.8%</td></tr><tr><th scope="row">2024-12 到 2025-04</th><td class="nw">−19.5%</td><td class="nw">−14.9%</td><td class="nw">−2.3%</td></tr></tbody></table></div>
+<p class="t-note">標普 500 的 −19.7% 從 2011 年 4 月的高點算起。組合 7 月才開始有結果，−0.4% 是 7 月 1 日起的數字，同一段時間標普 500 是 −17.2%，趨勢標普 500 是 −7.3%。</p>
+<figure class="qa-fig">
+<div class="ttl">圖 5.1　標普 500 回落 10% 的 8 段，三種做法的損益</div>
+<div class="tool"><div class="chartbox" id="f4"><div class="legend"></div><div class="chart" role="img" aria-label="標普 500 回落 10% 的 8 段，標普 500、趨勢標普 500、趨勢組合三種做法的損益長條圖，組合 3 段為正"></div></div></div>
+</figure>
+<p class="t-note">橫軸是各段的高點月份。標普 500 是高點到谷底的回落幅度，趨勢標普是趨勢標普 500。</p>
+<p class="t-body">賺的 3 段是 2012 年的 +1.5%、2020 年的 +0.4%、2022 年的 +9.8%。虧的 5 段在 −0.4% 到 −5.0% 之間。拿掉 2022 年那一段，剩 2 段賺、5 段虧。單做趨勢標普 500，8 段全部虧，−3.6% 到 −25.4%。</p>
+<p class="t-body">8 段的起點分屬 7 個不同年份，2018 年有兩段，所以 8 次不是 8 個獨立樣本。</p>
+<h3 class="t-lab" id="worst18">標普 500 最差的 18 個月</h3>
+<p class="t-body">184 個完整月裡，標普 500 最差的 10% 是 18 個月，平均 −7.3%。同樣這 18 個月，組合 10 個月賺、8 個月虧，平均每月 +0.04%，最差一個月 −3.5%。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">標普 500 最差 18 個月</th><th scope="col">平均月報酬</th><th scope="col">賺錢月數</th><th scope="col">最差一月</th></tr></thead><tbody><tr><th scope="row">趨勢組合</th><td class="nw">+0.04%</td><td class="nw">10／18</td><td class="nw">−3.5%</td></tr><tr><th scope="row">趨勢標普 500</th><td class="nw">−2.98%</td><td class="nw">4／18</td><td class="nw">−9.6%</td></tr><tr><th scope="row">趨勢那斯達克 100</th><td class="nw">−2.78%</td><td class="nw">3／18</td><td class="nw">−6.5%</td></tr><tr><th scope="row">一直做多標普 500</th><td class="nw">−7.30%</td><td class="nw">0／18</td><td class="nw">−13.8%</td></tr></tbody></table></div>
+<p class="t-body">組合和標普 500 的月報酬相關是 0.01，日報酬相關是 0.21。關聯小，不等於大跌時一定會賺：8 段裡有 5 段是虧的。</p>
+</section>
+
+<section class="sec" id="seg"><h2>三段年化與拿掉 2022 年</h2>
+<p class="t-body lead">組合的年化三段差很多，依序是 5.26%、0.34%、2.14%，整段是 2.25%。</p>
+<p class="t-body">下表把同一份每日報酬切成三段，每段重新從 1 起算。</p>
+<div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">期間</th><th scope="col">趨勢組合</th><th scope="col">單一市場中位數</th><th scope="col">做多標普 500</th></tr></thead><tbody><tr><th scope="row">2011 年 7 月到 2014</th><td class="nw">5.26%</td><td class="nw">5.37%</td><td class="nw">15.59%</td></tr><tr><th scope="row">2015 到 2019</th><td class="nw">0.34%</td><td class="nw">−0.23%</td><td class="nw">9.67%</td></tr><tr><th scope="row">2020 年起</th><td class="nw">2.14%</td><td class="nw">1.08%</td><td class="nw">10.55%</td></tr></tbody></table></div>
+<p class="t-note">組合每段的最大跌幅依序是 −5.4%、−9.1%、−10.1%。三段的年化都低於做多標普 500。</p>
+<p class="t-body">第一段組合和單一市場中位數差不多。後兩段組合比中位數高 0.57 和 1.06 個百分點。</p>
+<h3 class="t-lab">逐年</h3>
+<p class="t-body">2012 到 2025 年共 14 個完整年，組合 10 年賺、4 年虧，最好是 2013 年的 +14.1%，最差是 2016 年的 −6.8%。標普 500 一直做多 11 年賺、3 年虧。組合比標普 500 好的只有 3 年，就是標普 500 虧的那 3 年：2015、2018、2022（2018 年組合也虧 −1.8%）。依標普 500 當年漲跌分組，是看過逐年結果後才分的，不是事前訂的。</p>
+<figure class="qa-fig">
+<div class="ttl">圖 6.1　2012 到 2025 年逐年報酬</div>
+<div class="tool"><div class="chartbox" id="f5"><div class="legend"></div><div class="chart" role="img" aria-label="2012 到 2025 年逐年報酬長條圖，趨勢組合與做多標普 500 兩組"></div></div></div>
+</figure>
+<details class="more"><summary>看逐年數字</summary><div class="in"><div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">完整日曆年</th><th scope="col">趨勢組合</th><th scope="col">做多標普 500</th></tr></thead><tbody><tr><th scope="row">2012</th><td class="nw">−0.5%</td><td class="nw">15.5%</td></tr><tr><th scope="row">2013</th><td class="nw">14.1%</td><td class="nw">31.4%</td></tr><tr><th scope="row">2014</th><td class="nw">7.4%</td><td class="nw">14.0%</td></tr><tr><th scope="row">2015</th><td class="nw">3.4%</td><td class="nw">−0.4%</td></tr><tr><th scope="row">2016</th><td class="nw">−6.8%</td><td class="nw">11.2%</td></tr><tr><th scope="row">2017</th><td class="nw">6.8%</td><td class="nw">19.6%</td></tr><tr><th scope="row">2018</th><td class="nw">−1.8%</td><td class="nw">−6.7%</td></tr><tr><th scope="row">2019</th><td class="nw">0.6%</td><td class="nw">28.3%</td></tr><tr><th scope="row">2020</th><td class="nw">2.6%</td><td class="nw">17.4%</td></tr><tr><th scope="row">2021</th><td class="nw">2.0%</td><td class="nw">28.0%</td></tr><tr><th scope="row">2022</th><td class="nw">5.5%</td><td class="nw">−19.8%</td></tr><tr><th scope="row">2023</th><td class="nw">−4.2%</td><td class="nw">19.4%</td></tr><tr><th scope="row">2024</th><td class="nw">2.6%</td><td class="nw">17.6%</td></tr><tr><th scope="row">2025</th><td class="nw">3.8%</td><td class="nw">12.1%</td></tr></tbody></table></div></div></details>
+<h3 class="t-lab">拿掉 2022 年</h3>
+<p class="t-body">2022 年組合 +5.5%，是標普 500 −19.8% 的那一年。拿掉 2022 年所有交易日，年化從 2.23% 降到 2.01%。拿掉任何一年，年化落在 1.46%（拿掉 2013 年）到 2.89%（拿掉 2016 年）之間。這幾個數字用 252 天為一年，和 2.25% 的口徑略有不同。</p>
+<p class="t-body">組合最深的那一段 −10.1%，高點在 2022 年 10 月，谷底在 2024 年 8 月，歷時約 22 個月。</p>
+</section>
+
+<section class="sec" id="eff"><h2>實際分散比 12 少</h2>
+<p class="t-body lead">實際分散比 12 少：股指 4 檔之間的日報酬相關是 0.86，兩檔公債之間是 0.93。</p>
+<p class="t-body">相關是兩樣東西一起漲跌的程度，1 是完全同步，0 是各走各的。下面的 0.86、0.93 與本節的 66 對，都是 12 個市場本身價格日報酬的相關，12 個市場兩兩相比共 66 對，平均 0.20。跨類別的 52 對平均只有 0.09，相關高的集中在同類之內。</p>
+<p class="t-body">12 個市場裡有 4 個是股指，等權放進去，等於把三分之一放在價格彼此幾乎同步的東西上。趨勢規則的損益比價格分散一些：股指四檔的損益之間相關 0.41，兩檔公債 0.81。</p>
+<p class="t-body">另一個量法是波動：組合的波動是單一市場平均的 1/2.33（4.6% 對 10.7%）。如果 12 個市場波動相同、又互不相干，這個倍數會是 √12，約 3.46。實際的 2.33 比 3.46 小，也是分散比 12 少的結果。</p> <details class="more"><summary>看各類別與各市場的相關</summary><div class="in"><p>日報酬兩兩相關，2011 年 7 月起，羅素 2000 只用兩邊都有成交的日子。</p><div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">分類（對數）</th><th scope="col">平均</th><th scope="col">最高</th><th scope="col">最低</th></tr></thead><tbody><tr><th scope="row">股指之間（6 對）</th><td class="nw">0.86</td><td class="nw">0.95</td><td class="nw">0.77</td></tr><tr><th scope="row">兩檔公債（1 對）</th><td class="nw">0.93</td><td class="nw">0.93</td><td class="nw">0.93</td></tr><tr><th scope="row">商品之間（6 對）</th><td class="nw">0.34</td><td class="nw">0.79</td><td class="nw">0.07</td></tr><tr><th scope="row">兩檔外匯（1 對）</th><td class="nw">0.38</td><td class="nw">0.38</td><td class="nw">0.38</td></tr><tr><th scope="row">跨類別（52 對）</th><td class="nw">0.09</td><td class="nw">0.48</td><td class="nw">−0.26</td></tr></tbody></table></div><p>每個市場相關最高的兩個。</p><div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">市場</th><th scope="col">相關最高</th><th scope="col">第二高</th></tr></thead><tbody><tr><th scope="row">歐元</th><td class="nw">日圓　0.38</td><td class="nw">黃金　0.33</td></tr><tr><th scope="row">日圓</th><td class="nw">10 年公債　0.48</td><td class="nw">30 年公債　0.42</td></tr><tr><th scope="row">原油</th><td class="nw">銅　0.26</td><td class="nw">標普 500　0.25</td></tr><tr><th scope="row">標普 500</th><td class="nw">道瓊　0.95</td><td class="nw">那斯達克 100　0.93</td></tr><tr><th scope="row">黃金</th><td class="nw">白銀　0.79</td><td class="nw">日圓　0.35</td></tr><tr><th scope="row">銅</th><td class="nw">白銀　0.45</td><td class="nw">標普 500　0.39</td></tr><tr><th scope="row">那斯達克 100</th><td class="nw">標普 500　0.93</td><td class="nw">道瓊　0.82</td></tr><tr><th scope="row">羅素 2000</th><td class="nw">標普 500　0.87</td><td class="nw">道瓊　0.85</td></tr><tr><th scope="row">白銀</th><td class="nw">黃金　0.79</td><td class="nw">銅　0.45</td></tr><tr><th scope="row">道瓊</th><td class="nw">標普 500　0.95</td><td class="nw">羅素 2000　0.85</td></tr><tr><th scope="row">30 年公債</th><td class="nw">10 年公債　0.93</td><td class="nw">日圓　0.42</td></tr><tr><th scope="row">10 年公債</th><td class="nw">30 年公債　0.93</td><td class="nw">日圓　0.48</td></tr></tbody></table></div></div></details>
+</section>
+
+<section class="sec" id="limits"><h2>這個結果的弱點</h2><ul class="dlist"><li>只有 2011 年 7 月起約 15 年，一條路徑，沒有做統計檢定。</li><li>沒有 2008 年。測試期間沒有包含那種多市場同時崩跌的時期。</li><li>三段年化差很多，單一年度也有分量，拿掉 2022 年年化從 2.23% 降到 2.01%。</li><li>四項事前登記的比較全部通過，但拿平均對中位數，隨便湊 3 條就有 71.5% 通過。</li><li>調到同樣波動的倍數事後才知道，放大用到的保證金、融資與現金利息沒有算。</li><li>標普 500 回落 10% 的 8 段只有 8 個樣本，起點分屬 7 個年份，賺的 3 段裡 2022 年占最多。</li><li>12 個市場約四類，股指 4 個，等權放在一起；股指之間相關 0.86，兩檔公債 0.93。</li><li>羅素 2000 加入得晚，趨勢版從 2018 年 8 月才有結果。</li><li>成本是假設值，只算手續費和一個最小跳動的價差，稅沒有算。</li><li>做這題之前，已看過同一批期貨上另一條類似規則的彙總結果，那條偏弱。規則、期間與判讀方式是跑之前定的，沒有因結果調整。</li><li>一般人不容易做期貨，要有期貨帳戶和保證金，還要定期換月。</li><li>另一套獨立重算，單一市場的最大跌幅和本文差 0.2 到 0.3 個百分點，本文的跌幅較深，原因沒查清。</li></ul></section>
+<section class="sec" id="src"><h2>資料來源</h2><ul class="dlist"><li>美國期貨交易所 12 個期貨的連續合約日資料，美元計價，已換月調整。本文不提供原始價格。</li><li>本文的「標普 500」是 E-mini 標普 500 期貨的連續合約報酬，不是指數，不含股息，高點與谷底日可能和指數差幾週。</li><li>資料到 2026 年 11 月 6 日。標普 500 回落 10% 的最後一筆完整事件是 2024 年 12 月到 2025 年 4 月。</li><li>組合與單一市場的年化是扣成本的幾何年化，不含現金利息。</li></ul></section>
 <section class="sec"><h2>接著看</h2><ul class="dlist"><li><a href="trend-in-crashes.html">跟著趨勢做多做空，股市大跌時會賺嗎？</a></li><li><a href="gold-oil-trend.html">加兩成黃金和原油的趨勢規則，組合會比較穩嗎？</a></li><li><a href="stock-bond-correlation.html">股票跌的時候，公債還會跟著漲嗎？</a></li></ul></section>
 <p class="fine qa-back">這是歷史資料的計算，是一般資訊，不是對個人的投資建議。過去的結果不代表未來。</p>
 </div>
 <script>
-  (function () {
-    var cfg = {"cats": ["趨勢組合", "標普 500", "那斯達克 100", "道瓊", "一直做多平均分配", "單一市場中位數"], "series": [{"name": "最大跌幅", "values": [-20.9, -21.1, -18.3, -23.9, -21.4, -27.5]}], "extra": null, "ref": null, "max": 0, "min": -30};
-    cfg.fmt = QCHART.fmt.pct1; cfg.axisFmt = QCHART.fmt.pct0;
-    QCHART.mount(document.getElementById('cbox0'), cfg);
-  })();
+(function () {
+  var D = {"F1": {"cats": ["組合", "那斯達克 100", "銅", "10 年公債", "日圓", "原油", "30 年公債", "道瓊", "標普 500", "歐元", "羅素 2000", "黃金", "白銀"], "series": [{"name": "最大跌幅", "values": [-10.1, -18.6, -23.9, -23.9, -24.2, -25.9, -30.4, -30.5, -31.5, -36.3, -38.3, -38.3, -43.4]}], "extra": ["年化 2.25%", "年化 6.55%", "年化 −0.37%", "年化 2.84%", "年化 5.04%", "年化 2.18%", "年化 0.51%", "年化 3.22%", "年化 3.34%", "年化 −0.20%", "年化 −3.84%", "年化 1.11%", "年化 −1.21%"], "max": 0, "min": -50}, "F2": {"cats": ["趨勢組合", "標普 500", "那斯達克 100", "道瓊", "一直做多平均分配", "單一市場中位數"], "series": [{"name": "最大跌幅", "values": [-20.9, -21.1, -18.3, -23.9, -21.4, -27.5]}], "extra": null, "max": 0, "min": -30}, "F4": {"cats": ["2011-04 高點", "2012-03 高點", "2015-07 高點", "2018-01 高點", "2018-09 高點", "2020-02 高點", "2022-01 高點", "2024-12 高點"], "series": [{"name": "標普 500", "values": [-19.7, -10.1, -13.2, -10.3, -20.4, -34.2, -25.2, -19.5]}, {"name": "趨勢標普", "values": [-7.3, -4.3, -4.6, -12.5, -15.0, -25.4, -3.6, -14.9]}, {"name": "趨勢組合", "values": [-0.4, 1.5, -1.3, -4.1, -5.0, 0.4, 9.8, -2.3]}], "extra": null, "max": 10, "min": -40}, "F5": {"cats": ["2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025"], "series": [{"name": "趨勢組合", "values": [-0.5, 14.1, 7.4, 3.4, -6.8, 6.8, -1.8, 0.6, 2.6, 2.0, 5.5, -4.2, 2.6, 3.8]}, {"name": "做多標普 500", "values": [15.5, 31.4, 14.0, -0.4, 11.2, 19.6, -6.7, 28.3, 17.4, 28.0, -19.8, 19.4, 17.6, 12.1]}], "extra": null, "max": 40, "min": -30}};
+  function mount(id, cfg, o) {
+    cfg.fmt = QCHART.fmt.pct1; cfg.axisFmt = QCHART.fmt.pct0; cfg.ref = null;
+    for (var k in o) cfg[k] = o[k];
+    QCHART.mount(document.getElementById(id), cfg);
+  }
+  mount('f1', D.F1, {});
+  mount('f2', D.F2, {});
+  mount('f4', D.F4, {});
+  mount('f5', D.F5, {});
+})();
 </script>
 </body>
 </html>
