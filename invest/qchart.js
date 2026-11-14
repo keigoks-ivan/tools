@@ -16,8 +16,9 @@
     var n = cfg.cats.length, ns = cfg.series.length;
     var W = Math.max(host.clientWidth || 600, 260), narrow = W < 520, H = cfg.height || (narrow ? 280 : 330);
     var maxName = 0; cfg.series.forEach(function (S) { maxName = Math.max(maxName, S.name.length); });
-    var mr = narrow ? Math.min(78, 14 + 12 * Math.min(maxName, 5)) : Math.min(130, 14 + 12 * Math.min(maxName, 9));
-    var m = { l: narrow ? 44 : 56, r: ns > 1 ? mr : 12, t: 14, b: 26 };
+    var labelSeries = ns > 1 && !narrow;
+    var mr = Math.min(130, 14 + 12 * Math.min(maxName, 9));
+    var m = { l: narrow ? 44 : 56, r: labelSeries ? mr : 12, t: 14, b: 26 };
     var pw = W - m.l - m.r;
     // 類別標籤放不下時改成斜放，每一個都標出來（類別太多才隔幾個標一個）
     var maxLen = 0; cfg.cats.forEach(function (c) { maxLen = Math.max(maxLen, String(c).length); });
@@ -88,9 +89,8 @@
       return { S: S, si: si, y: yPos(lv == null ? 0 : lv) };
     }).sort(function (a, b) { return a.y - b.y; });
     for (var li = 1; li < lab.length; li++) if (lab[li].y - lab[li - 1].y < 15) lab[li].y = lab[li - 1].y + 15;
-    var maxc = narrow ? 5 : 9;
-    if (ns > 1) lab.forEach(function (L) {
-      var nm = L.S.name.length > maxc ? L.S.name.slice(0, maxc) + '…' : L.S.name;
+    if (labelSeries) lab.forEach(function (L) {
+      var nm = L.S.name.length > 9 ? L.S.name.slice(0, 9) + '…' : L.S.name;
       mk('text', { x: m.l + pw + 6, y: L.y + 4, fill: 'var(--g' + (L.si + 1) + ')', 'font-size': 12, 'font-weight': 700 }, nm);
     });
     var band = mk('rect', { x: 0, y: m.t, width: gw, height: ph, fill: 'var(--ink)', 'fill-opacity': 0.07, visibility: 'hidden' });
