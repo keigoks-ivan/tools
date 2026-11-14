@@ -5,7 +5,12 @@
     if (!host) return;
     var base = document.body.getAttribute('data-root') || '';
     var here = document.body.getAttribute('data-nav') || '';
-    var act = { tool: 'tool', questions: 'questions', q: 'questions', evidence: 'questions' }[here] || '';
+    var act = { tool: 'tool', questions: 'questions', q: 'questions', evidence: 'questions', leveraged: 'leveraged', active: 'active' }[here] || '';
+    if (here === 'q') {
+      var path = window.location.pathname;
+      if (/\/leveraged-2x(?:-catchup)?\.html$/.test(path)) act = 'leveraged';
+      else if (/\/active-etf\.html$/.test(path)) act = 'active';
+    }
     function link(key, href, label) {
       return '<a href="' + base + href + '"' + (act === key ? ' aria-current="page"' : '') + '>' + label + '</a>';
     }
@@ -13,11 +18,13 @@
       '<div class="topbar"><div class="topbar-in"><div class="tag-l">用歷史資料檢驗投資說法</div>' +
       '<a href="' + base + 'index.html#about">數字怎麼算</a></div></div>' +
       '<header class="hdr"><div class="hdr-in">' +
-      '<a class="brand" href="' + base + 'index.html">[品牌名稱]</a>' +
+      '<a class="brand" href="' + base + 'index.html">InvestMQuest</a>' +
       '<nav class="nav" aria-label="主選單">' +
-      link('questions', 'questions.html', '測過的說法') +
+      link('questions', 'questions.html', '投資問題回測') +
+      link('leveraged', 'leveraged.html', '正二系列') +
+      link('active', 'active.html', '主動式 ETF 系列') +
       link('tool', 'tool.html', '回測工具') +
-      link('about', 'index.html#about', '關於數字') +
+      link('about', 'index.html#about', '資料與方法') +
       '</nav></div></header>' +
       '<div class="trial-bar"><p class="trial">試作版：數字是初算，還沒經專業人士確認。</p></div>';
     var wrap = document.createElement('div');

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="robots" content="noindex">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>回測工具：[品牌名稱]</title>
+<title>回測工具：InvestMQuest</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;700&display=swap">
@@ -19,9 +19,17 @@
 
 <h1 class="h1" style="margin-top:36px">回測工具</h1>
 <p class="t-lead">選幾檔 ETF、設比例，看過去的含息報酬，和同一段期間最深跌了多少。一律用台幣計價。</p>
-
+<p class="caveat">以下是歷史資料的回測，未來表現可能和過去不同。</p>
+<nav class="presets" aria-label="快速比較範例">
+<span class="presets-label">快速比較</span>
+<a class="preset-link" href="?p1=00631L%3A100&amp;p2=0050%3A100">00631L 正二與 0050</a>
+<a class="preset-link" href="?p1=00631L%3A50%2CCASH_TWD%3A50&amp;p2=0050%3A100&amp;rebal=annual">半正二半定存與 0050</a>
+<a class="preset-link secondary" href="?p1=0050%3A100&amp;p2=0056%3A100">0050 與 0056</a>
+<a class="preset-link secondary" href="active.html">主動式 ETF 系列</a>
+</nav>
+<details class="method-notes">
+<summary>資料、計價方式與計算規則</summary>
 <ul class="notes">
-<li>這是用歷史價格做的計算，不是預測，也不是投資建議。過去的結果不代表未來，下一次的跌幅可能比歷史更深。</li>
 <li>價格都是含息總報酬。ETF 的內扣費用已經反映在淨值裡。沒有計入買賣手續費、證交稅、股利所得稅和換匯成本。</li>
 <li>美元資產用中央銀行每日美元兌台幣收盤匯率換成台幣。美股收盤時台灣已經是隔天，這裡直接按同一個日期對齊，沒有調整。台股與美股休市日不同，缺的日子沿用前一天的價格。</li>
 <li>資料到 <span id="dataEnd">2026 年 10 月 30 日</span>，也就是央行匯率的最後一天。</li>
@@ -47,6 +55,7 @@
 <li>跌得最深的五次：從創新高那天起，到淨值回到或超過前高那天為止算一次下跌，期間最低點是谷底，各次不重疊。依跌幅由深到淺取前五次，淺於 5% 的不列。</li>
 <li>期間快捷鍵：近 N 年是資料最後一天往前推 N 年。2008 金融海嘯用 2007-07-02 到 2010-03-31，2020 疫情用 2019-11-01 到 2021-03-31，2022 升息用 2021-10-01 到 2023-12-29，都是前高前約三個月到谷底後約一年，日期是固定寫死的。</li>
 </ul>
+</details>
 </details>
 
 <section class="sec" style="margin-top:40px" aria-label="組合設定">
@@ -94,6 +103,7 @@
 </div>
 <h3 class="ctitle">統計</h3>
 <p class="csub">報酬和最大跌幅放在一起看。</p>
+<p class="readout" id="readout" aria-live="polite"></p>
 <div class="dwrap"><table class="dtbl rtbl" id="stats"></table></div>
 
 <details class="adv" id="adv">
@@ -429,6 +439,14 @@
     $('results').style.display = '';
     $('warns').innerHTML = T.warnsHtml(last);
     $('stats').innerHTML = T.statsHtml(last, T.BASIC_ROWS);
+    $('readout').textContent = last.out.map(function (o) {
+      var name = (o.g.name || '').trim() || ('組合 ' + String.fromCharCode(65 + o.gi));
+      var wait = o.st.longest;
+      var waiting = wait.days === 0 ? '這段期間沒有低於前高' :
+        '最長 ' + T.span(wait.days) + (wait.rec ? '才回到前高' : '仍未回到前高');
+      return name + ' 最後累積 ' + T.money(o.st.finalV) + '，最深跌 ' +
+        (Math.abs(o.st.mdd) * 100).toFixed(1) + '%，' + waiting + '。';
+    }).join(' ');
     $('statsAdv').innerHTML = T.statsHtml(last, T.ADV_ROWS);
     $('roll').innerHTML = T.rollHtml(last);
     $('dd5').innerHTML = T.dd5Html(last);
@@ -498,6 +516,11 @@
 
   T.load('data/tool_assets.json').then(function () {
     buildSources();
+    if (location.hash === '#sources') {
+      document.querySelector('.method-notes').open = true;
+      $('sources').open = true;
+      $('sources').scrollIntoView();
+    }
     applyUrl();
     ui = T.groupsUI($('groups'), groups, { onChange: recompute, addBtn: $('addC'), removeFrom: 2 });
     ui.render(); wire(); sizeInit(); recompute();
