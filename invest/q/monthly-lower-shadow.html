@@ -46,6 +46,17 @@ details.more .in>p{padding:0 16px}
 details.more .in .dwrap{margin-top:12px;border:0;margin-left:-1px;margin-right:-1px}
 .nw{white-space:nowrap}
 .doc .dtbl.cmp .sub{font-size:12px;font-weight:400;color:var(--muted)}
+.research .shadow-example .figure-body{max-width:380px}
+.shadow-level{display:grid;grid-template-columns:44px 24px 1fr;align-items:center;gap:10px;min-height:30px;font-size:14px}
+.shadow-level>span{text-align:right;font-variant-numeric:tabular-nums}
+.shadow-level>i{height:2px;background:#21425c}
+.shadow-level b{font-weight:600;color:#254b52}
+.shadow-length{min-height:64px}
+.shadow-length i{height:56px;width:2px;justify-self:center;background:#a3562b}
+.shadow-length b{color:#a3562b}
+.research .shadow-figure .figure-body{padding-top:0}
+.research .shadow-figure .chartbox{margin:0;padding:0;border:0}
+@media(max-width:600px){.research .shadow-figure .chart svg text[font-weight="700"]{display:none}}
 </style>
 <script src="../invest.js"></script>
 <script src="../qchart.js"></script>
@@ -57,16 +68,13 @@ details.more .in .dwrap{margin-top:12px;border:0;margin-left:-1px;margin-right:-
 <div class="k">月內先大跌再拉回，後來有沒有漲要看是哪一波行情</div>
 <p>有時股市月中跌很深，月底又拉回來，月線圖上就會留下長下影線。這篇想知道，看見這種走勢後再買，下一年會不會漲得比較多。</p>
 <p>三個市場共找到 24 次。表現最好的一批有 14 次，集中在五個全球市場大跌的月份。其餘 10 次一年後報酬的中間值是 6.0%，一般月份是 8.8%。資料還分不清是線形有用，還是那幾波大跌之後本來就反彈。</p>
-</div></header><div class="research-stats"><div class="research-stat"><strong>24 次</strong><span>三市場符合長下影線條件的月份總數；價格指數、不含股息</span></div><div class="research-stat"><strong>6.0%</strong><span>非五個全球大跌月的長下影線事件，一年後報酬中位數</span></div><div class="research-stat"><strong>8.8%</strong><span>一般月份一年後報酬中位數；同市場對照</span></div></div><div class="research-grid"><main><section class="sec" id="what"><h2>怎麼做這次比較？</h2>
+</div><div class="research-downloads"><a href="#chart-example">看下影線怎麼量</a><a href="#cluster">看結果集中在哪幾個月</a></div></header><div class="research-stats"><div class="research-stat"><strong>24 次</strong><span>三市場符合長下影線條件的月份總數；價格指數、不含股息</span></div><div class="research-stat"><strong>6.0%</strong><span>非五個全球大跌月的長下影線事件，一年後報酬中位數</span></div><div class="research-stat"><strong>8.8%</strong><span>一般月份一年後報酬中位數；同市場對照</span></div></div><div class="research-grid"><main><section class="sec" id="what"><h2>怎麼做這次比較？</h2>
 <p class="t-body lead">挑出下影線超過 10% 的月份，算接下來半年和一年的報酬，再跟平常任一個月買進的結果比。</p>
 <h3 class="t-lab">常見的說法</h3>
 <p class="t-body">常見的說法認為，月線留下很長的下影線，代表跌下去有人接。出現在低檔是買點，出現在高檔是警告。這篇只檢查歷史上的數字。</p>
 <h3 class="t-lab">月線和下影線</h3>
 <p class="t-body">月線是把一個月的價格畫成一根線，有開盤、最高、最低、收盤四個價。下影線是當月最低價，比開盤與收盤中較低的那一個低多少，再除以開盤價。</p>
-<ul class="steps">
-<li>例子：開盤 100，最低 85，收盤 98。</li>
-<li>開盤與收盤中較低的是 98。98 減 85 等於 13，除以開盤 100，下影線是 13%。</li>
-</ul>
+<p>下方的價格示意用開盤 100、收盤 98、最低 85 說明計算方式。</p>
 <h3 class="t-lab">事件與高低檔</h3>
 <p class="t-body">下影線超過 10% 算一次事件。事件月的收盤在近 12 個月月收盤平均之上算高檔，在之下算低檔。這個平均叫 12 個月均線。</p>
 <p class="t-body">高低檔的分法是說法提出者看過結果之後才有的，沒有從資料裡找最佳的切法。</p>
@@ -82,7 +90,22 @@ details.more .in .dwrap{margin-top:12px;border:0;margin-left:-1px;margin-right:-
 <li>沒留長下影線：下影線在 5% 以下。</li>
 <li>三個市場、月線資料的範圍都跟事件相同。一年後的報酬還沒走完的月份不列不評。</li>
 </ul>
-<details class="research-method-notes"><summary>展開：比較條件與閱讀前須知</summary><aside aria-labelledby="pre-t" class="pre-box"><div class="pre-h" id="pre-t">看結果前，先留意這幾個條件</div><ul><li>好結果集中在 5 個月：2008 年 10、11 月，2020 年 3 月，2024 年 8 月，2025 年 4 月。這 14 次一年後全部上漲，中位數漲了約四成。</li><li>拿掉這 5 個月，其餘 10 次一年後的中位數約 6%，比任何一個月的 9% 略低。</li><li>盤中深跌但沒留長下影線的 82 次，一年後中位數約 10%，跟任何一個月差不多。</li><li>那 5 個月裡盤中跌超過 10% 的市場，下影線全都超過 10%，同一批月份裡找不到沒留影線的對照。</li></ul><h4>這次試算涵蓋哪些情況？</h4><ul><li>這是歷史次數統計，不是下一次會怎樣。全球大跌月份只有 5 個。</li><li>搭配其他指標的做法沒有測。</li></ul><p class="pre-fine">台股 1997 年、美股 1962 年、日股 1989 年起，價格指數，不含股息，沒扣手續費與稅。</p><p class="pre-link"><a href="#limits">看完整的回測限制</a></p></aside></details></section><section class="sec" id="list"><h2>逐次結果：24 次，一次一列</h2>
+<details class="research-method-notes"><summary>展開：比較條件與閱讀前須知</summary><aside aria-labelledby="pre-t" class="pre-box"><div class="pre-h" id="pre-t">看結果前，先留意這幾個條件</div><ul><li>好結果集中在 5 個月：2008 年 10、11 月，2020 年 3 月，2024 年 8 月，2025 年 4 月。這 14 次一年後全部上漲，中位數漲了約四成。</li><li>拿掉這 5 個月，其餘 10 次一年後的中位數約 6%，比任何一個月的 9% 略低。</li><li>盤中深跌但沒留長下影線的 82 次，一年後中位數約 10%，跟任何一個月差不多。</li><li>那 5 個月裡盤中跌超過 10% 的市場，下影線全都超過 10%，同一批月份裡找不到沒留影線的對照。</li></ul><h4>這次試算涵蓋哪些情況？</h4><ul><li>這是歷史次數統計，不是下一次會怎樣。全球大跌月份只有 5 個。</li><li>搭配其他指標的做法沒有測。</li></ul><p class="pre-fine">台股 1997 年、美股 1962 年、日股 1989 年起，價格指數，不含股息，沒扣手續費與稅。</p><p class="pre-link"><a href="#limits">看完整的回測限制</a></p></aside></details></section><section class="sec" id="chart-example">
+<h2>長下影線量的是哪一段價格？</h2>
+<p>先取開盤和收盤中較低的一個，再看它離當月最低點多遠。最後用這段距離除以開盤價。下圖用一個假設月份說明。</p>
+<figure class="research-figure shadow-example">
+<figcaption><span class="figure-number">圖 01</span><span class="figure-title">假設開盤 100，最低 85，收盤 98</span></figcaption>
+<div class="figure-body">
+<div class="shadow-level"><span>100</span><i></i><b>月初開盤</b></div>
+<div class="shadow-level"><span>98</span><i></i><b>月底收盤</b></div>
+<div class="shadow-level shadow-length"><span></span><i></i><b>下影線長度 13</b></div>
+<div class="shadow-level"><span>85</span><i></i><b>月內最低</b></div>
+</div>
+<p class="figure-note">位置為示意。計算是（98 − 85）÷ 100，所以下影線為 13%，達到本文的條件。</p>
+</figure>
+<p>三個市場共出現 24 次。當中 14 次落在五個市場同步下跌的月份，一年後報酬中位數為 40.1%。其餘 10 次的中位數是 6.0%，一般月份是 8.8%。</p>
+</section>
+<section class="sec" id="list"><h2>逐次結果：24 次，一次一列</h2>
 <p class="t-body lead">表裡每一列是一個市場在某個月出現一次長下影線。如果同一場全球股災讓好幾個市場在同一個月都出現訊號，表裡就會有好幾列。</p>
 <p class="t-body">一年內最深，是事件後 12 個月裡月收盤最低的那一次，比事件月收盤低多少。正數表示最低的那一次仍比事件月收盤高。粗體是 2008-10、2008-11、2020-03、2024-08、2025-04 這 5 個月。</p>
 <h3 class="t-lab">台股，9 次</h3>
@@ -91,9 +114,9 @@ details.more .in .dwrap{margin-top:12px;border:0;margin-left:-1px;margin-right:-
 <div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">月份與高低檔</th><th scope="col">半年後</th><th scope="col">一年後</th><th scope="col">一年內最深</th></tr></thead><tbody><tr><th scope="row"><span class="nw">1987-10 低檔</span><br/><span class="sub">下影線 10.98%</span></th><td class="nw">3.8%</td><td class="nw">10.8%</td><td class="nw">−8.5%</td></tr><tr><th scope="row"><span class="nw">2002-07 低檔</span><br/><span class="sub">下影線 13.73%</span></th><td class="nw">−6.1%</td><td class="nw">8.6%</td><td class="nw">−10.6%</td></tr><tr><th scope="row"><span class="nw"><b>2008-10 低檔</b></span><br/><span class="sub">下影線 11.08%</span></th><td class="nw">−9.9%</td><td class="nw">7.0%</td><td class="nw">−24.1%</td></tr><tr><th scope="row"><span class="nw"><b>2008-11 低檔</b></span><br/><span class="sub">下影線 16.02%</span></th><td class="nw">2.6%</td><td class="nw">22.2%</td><td class="nw">−18.0%</td></tr><tr><th scope="row"><span class="nw"><b>2020-03 低檔</b></span><br/><span class="sub">下影線 13.20%</span></th><td class="nw">30.1%</td><td class="nw">53.7%</td><td class="nw">12.7%</td></tr><tr><th scope="row"><span class="nw"><b>2025-04 低檔</b></span><br/><span class="sub">下影線 13.11%</span></th><td class="nw">22.8%</td><td class="nw">29.4%</td><td class="nw">6.2%</td></tr></tbody></table></div>
 <h3 class="t-lab">日股，9 次</h3>
 <div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">月份與高低檔</th><th scope="col">半年後</th><th scope="col">一年後</th><th scope="col">一年內最深</th></tr></thead><tbody><tr><th scope="row"><span class="nw">1992-08 低檔</span><br/><span class="sub">下影線 10.74%</span></th><td class="nw">−6.1%</td><td class="nw">16.4%</td><td class="nw">−7.2%</td></tr><tr><th scope="row"><span class="nw">2001-03 低檔</span><br/><span class="sub">下影線 10.75%</span></th><td class="nw">−24.8%</td><td class="nw">−15.2%</td><td class="nw">−24.8%</td></tr><tr><th scope="row"><span class="nw"><b>2008-10 低檔</b></span><br/><span class="sub">下影線 13.88%</span></th><td class="nw">2.9%</td><td class="nw">17.0%</td><td class="nw">−11.8%</td></tr><tr><th scope="row"><span class="nw"><b>2008-11 低檔</b></span><br/><span class="sub">下影線 12.71%</span></th><td class="nw">11.9%</td><td class="nw">9.8%</td><td class="nw">−11.1%</td></tr><tr><th scope="row"><span class="nw">2011-03 低檔</span><br/><span class="sub">下影線 14.31%</span></th><td class="nw">−10.8%</td><td class="nw">3.4%</td><td class="nw">−13.5%</td></tr><tr><th scope="row"><span class="nw">2014-10 高檔</span><br/><span class="sub">下影線 10.17%</span></th><td class="nw">18.9%</td><td class="nw">16.3%</td><td class="nw">5.9%</td></tr><tr><th scope="row"><span class="nw"><b>2020-03 低檔</b></span><br/><span class="sub">下影線 12.27%</span></th><td class="nw">22.6%</td><td class="nw">54.2%</td><td class="nw">6.7%</td></tr><tr><th scope="row"><span class="nw"><b>2024-08 高檔</b></span><br/><span class="sub">下影線 19.32%</span></th><td class="nw">−3.9%</td><td class="nw">10.5%</td><td class="nw">−7.8%</td></tr><tr><th scope="row"><span class="nw"><b>2025-04 低檔</b></span><br/><span class="sub">下影線 14.37%</span></th><td class="nw">45.4%</td><td class="nw">64.5%</td><td class="nw">5.3%</td></tr></tbody></table></div>
-</section><section class="sec" id="cluster"><h2>24 次只有 5 次全球大跌</h2>
-<p class="t-body lead">好數字幾乎全來自 5 個全球恐慌的月份，那 5 個月的 14 次，一年後全部上漲。</p>
-<p class="t-body">2008-10、2008-11、2020-03、2025-04 在三個市場都出現，2024-08 在台股和日股出現，合計 14 次。這 14 次一年後全部上漲，中位數 40.1%，半年後中位數 22.7%，12 次上漲。這對說法有利，數字照實列在這裡。</p>
+</section><section class="sec" id="cluster"><h2>24 次訊號中，14 次集中在五個月份</h2>
+<p class="t-body lead">五個跨市場下跌的月份有 14 次訊號，一年後全部上漲。</p>
+<p class="t-body">2008-10、2008-11、2020-03、2025-04 在三個市場都出現，2024-08 在台股和日股出現，合計 14 次。這 14 次一年後全部上漲，中位數 40.1%，半年後中位數 22.7%，12 次上漲。</p>
 <p class="t-body">同一次大跌被三個市場各數一次，24 次只有 15 個不同的月份，其中 5 個是全球大跌。</p>
 <h3 class="t-lab">其餘 10 次：高檔對高檔，低檔對低檔</h3>
 <div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">其餘 10 次</th><th scope="col">半年後</th><th scope="col">一年後</th><th scope="col">一年後上漲</th></tr></thead><tbody>
@@ -109,10 +132,11 @@ details.more .in .dwrap{margin-top:12px;border:0;margin-left:-1px;margin-right:-
 <tr><th scope="row"><span class="nw">任何一個月</span></th><td class="nw">4.3%</td><td class="nw">8.8%</td><td class="nw">67.6%</td></tr>
 </tbody></table></div>
 <p class="t-note">三個市場合併，門檻 8%。其餘 30 次裡有 1 次還沒走完半年與一年，不計入報酬，上漲占比以 29 次計算。這一組混了高檔和低檔。</p>
-<figure class="qa-fig"><span class="figure-number">圖 3.1</span>
-<div class="ttl">半年後與一年後中位數：5 個月、其餘、任何一個月</div>
-<div class="tool"><div class="chartbox" id="f1"><div class="legend"></div><div aria-label="長條圖，比較門檻 10% 落在 5 個月的 14 次、其餘 10 次、門檻 8% 的其餘 30 次、任何一個月的半年後與一年後中位數，滑鼠移上去可看數值" class="chart" role="img"></div></div></div>
-<p class="figure-read">圖 3.1 顯示五個全球大跌月拉高了事件組的後續報酬，其餘長下影線月份的中位數較低。</p></figure>
+<figure class="research-figure shadow-figure">
+<figcaption><span class="figure-number">圖 02</span><span class="figure-title">14 次集中訊號與其餘訊號，後續報酬差多少？</span></figcaption>
+<div class="figure-body tool"><div class="chartbox" id="f1"><div class="legend"></div><div class="chart" role="img" aria-label="長條圖，比較門檻 10% 落在 5 個月的 14 次、其餘 10 次、門檻 8% 的其餘 30 次、任何一個月的半年後與一年後中位數，滑鼠移上去可看數值"></div></div></div>
+<p class="figure-note">價格指數報酬，不含股息。各柱為組內中位數。</p><p class="figure-read">五個同步下跌的月份，明顯拉高整組的後續報酬。</p>
+</figure>
 <p class="t-note">單位是百分比，從事件月收盤起算。半年後與一年後，依序是：14 次 22.7% 與 40.1%，其餘 10 次 −6.1% 與 6.0%，8% 的其餘 30 次 −1.5% 與 8.6%，任何一個月 4.3% 與 8.8%。</p>
 <p class="t-body">事件之間有重疊，實際只有 5 次全球大跌可以看。這 14 次的數字照實列出，沒有剔除。</p>
 </section><section class="sec" id="control"><h2>深跌但沒留長下影線的月份</h2>
@@ -126,9 +150,10 @@ details.more .in .dwrap{margin-top:12px;border:0;margin-left:-1px;margin-right:-
 </tbody></table></div>
 <p class="t-note">三個市場合併。這 5 個月留長下影線的市場都算在事件那邊，深跌沒留長下影線的 82 次裡沒有這 5 個月。</p>
 <p class="t-body">82 次裡，一年後報酬超過 24 次長下影線中位數 13.6% 的有 37 次，超過 40.1% 的有 4 次，最高是台股 2009 年 1 月的 79.9%。深跌之後的一年，多數是普通的結果，少數很好。</p>
-<figure class="qa-fig"><span class="figure-number">圖 4.1</span>
-<div class="ttl">半年後與一年後中位數：長下影線與深跌沒留長下影線</div>
-<div class="tool"><div class="chartbox" id="f3"><div class="legend"></div><div aria-label="長條圖，比較長下影線在 5 個月的 14 次、其餘 10 次、深跌沒留長下影線的 82 次、任何一個月的半年後與一年後中位數，滑鼠移上去可看數值" class="chart" role="img"></div></div></div>
+<figure class="research-figure shadow-figure">
+<figcaption><span class="figure-number">圖 03</span><span class="figure-title">同樣月內跌很深，有無長下影線的結果</span></figcaption>
+<div class="figure-body tool"><div class="chartbox" id="f3"><div class="legend"></div><div class="chart" role="img" aria-label="長條圖，比較長下影線在 5 個月的 14 次、其餘 10 次、深跌沒留長下影線的 82 次、任何一個月的半年後與一年後中位數，滑鼠移上去可看數值"></div></div></div>
+<p class="figure-note">深跌對照為盤中低於開盤逾 10%，下影線低於 5%。</p><p class="figure-read">扣除五個同步月份後，長下影線事件的一年中位數是 6.0%，深跌對照是 9.9%。</p>
 </figure>
 <p class="t-note">單位是百分比，從事件月收盤起算。半年後與一年後，依序是：14 次 22.7% 與 40.1%，其餘 10 次 −6.1% 與 6.0%，深跌沒留長下影線 82 次 3.0% 與 9.9%，任何一個月 4.3% 與 8.8%。</p>
 <h3 class="t-lab">分高低檔</h3>
@@ -171,9 +196,10 @@ details.more .in .dwrap{margin-top:12px;border:0;margin-left:-1px;margin-right:-
 <p class="t-note">每格上方是事件，小字是任何一個月。對照的月數，半年後是 1,566 個月，一年後是 1,548 個月。</p>
 <p class="t-body">合併的差距有一部分來自日股的對照特別低。日股任何一個月的一年後上漲占比只有 54.5%，中位數 2.0%。台股事件與對照幾乎一樣，上漲占比 66.7% 對 66.8%。</p>
 <p class="t-body">半年後，台股和美股低於任何一個月，日股高於。</p>
-<figure class="qa-fig"><span class="figure-number">圖 5.1</span>
-<div class="ttl">一年後中位數：事件對任何一個月</div>
-<div class="tool"><div class="chartbox" id="f2"><div class="legend"></div><div aria-label="長條圖，台股、美股、日股與三個合計，各比較事件與任何一個月的一年後中位數，滑鼠移上去可看數值" class="chart" role="img"></div></div></div>
+<figure class="research-figure shadow-figure">
+<figcaption><span class="figure-number">圖 04</span><span class="figure-title">分市場看，事件後一年和一般月份差多少？</span></figcaption>
+<div class="figure-body tool"><div class="chartbox" id="f2"><div class="legend"></div><div class="chart" role="img" aria-label="長條圖，台股、美股、日股與三個合計，各比較事件與任何一個月的一年後中位數，滑鼠移上去可看數值"></div></div></div>
+<p class="figure-note">價格指數報酬，不含股息。各市場比較期間見表格。</p><p class="figure-read">各市場符合條件的月份都少，兩根柱子的差距會受個別事件影響。</p>
 </figure>
 <p class="t-note">單位是百分比。合併是三個市場 24 次。事件對任何一個月，依序是：台股 10.9% 對 8.7%，美股 16.5% 對 10.7%，日股 16.3% 對 2.0%，合併 13.6% 對 8.8%。</p>
 <h3 class="t-lab" id="sample">隨機抽樣的粗略對照</h3>
@@ -236,7 +262,7 @@ details.more .in .dwrap{margin-top:12px;border:0;margin-left:-1px;margin-right:-
 <li>是價格指數，不含股息，報酬會略低估。事件要等月底收盤才知道，實際進場價會不同。</li>
 <li>門檻 10% 和 12 個月均線是事前訂的，沒有測其他均線長度，也沒有測其他指標的組合。</li>
 <li>手續費與稅沒有扣。</li>
-</ul></section><section class="sec" id="reader-questions"><h2>讀者常問</h2><div class="research-faq"><details><summary>長下影線出現後，股市比較容易上漲嗎？</summary><p>現有樣本無法確定。表現較好的事件集中在五個全球大跌月份，其餘事件一年後中位數反而低於一般月份。</p></details><details><summary>長下影線能否當作市場底部訊號？</summary><p>本文不能支持這種用法。下影線不代表低點已確認，且危機後反彈與形態效果無法由這些少量事件分開。</p></details></div></section><section class="sec" id="article-data"><h2>查看與下載本篇數據</h2><p>圖表下方可查看完整數字，也可以下載該圖的 CSV。下方提供整篇表格與圖表數列，期間、單位和比較條件請對照各節說明。</p><div class="research-downloads"><a download="" href="../data/article-snapshots/monthly-lower-shadow.csv">下載表格 CSV</a><a href="../data/article-snapshots/monthly-lower-shadow.json">查看表格與圖表資料</a><a href="../methods.html">回測數字怎麼讀？</a></div><p class="source-note">這是本篇使用的整理資料，不包含重新取得行情與執行完整策略的程式。核對數字與重跑回測，是不同的工作。</p></section><section class="sec" id="src"><h2>資料來源</h2><ul class="dlist"><li>台股加權指數、標普 500、日經 225 的日線開高低收，由日線合成月線。月線的開盤是當月第一個交易日的開盤，收盤是最後一個交易日的收盤。資料最後一個完整月份是 2026 年 10 月，未收完的月份不計入。最後一次長下影線事件是 2025 年 4 月。</li><li>台股 1997 年 7 月以前沒有開高低，只有證交所的收盤資料。美股 1961 年以前每天的開高低收都相同，日股 1988 年有 26.8% 的日子最高價等於最低價，這些年份不採用。</li></ul></section><section class="sec" id="reading-14"><h2>接著看</h2><ul class="dlist"><li><a href="sell-below-ma.html">跌破年線要不要賣？</a></li><li><a href="wait-for-crash.html">等大跌再買會比較好嗎？</a></li><li><a href="false-breakout.html">假突破、假跌破之後反向做，會比隨機買賣贏嗎？</a></li></ul></section><p class="fine qa-back">本文依歷史資料試算，僅供一般參考。過去的結果不代表未來。</p></main><aside class="research-sidebar"><nav aria-label="文章目錄" class="toc"><div class="toc-h">本文目錄</div><ol><li><a href="#what">怎麼做這次比較？</a></li><li><a href="#list">逐次結果：24 次，一次一列</a></li><li><a href="#cluster">24 次只有 5 次全球大跌</a></li><li><a href="#control">深跌但沒留長下影線的月份</a></li><li><a href="#compare">跟平常比</a></li><li><a href="#level">低檔 18 次，高檔 6 次</a></li><li><a href="#bottom">出現之後就是底了嗎</a></li><li><a href="#variants">換個條件再算一次</a></li><li><a href="#reading-9">是下影線有用，還是大跌後本來就反彈？</a></li><li><a href="#limits">回測限制</a></li><li><a href="#reader-questions">讀者常問</a></li><li><a href="#article-data">查看與下載本篇數據</a></li><li><a href="#src">資料來源</a></li><li><a href="#reading-14">接著看</a></li></ol></nav><a class="research-side-link" href="../methods.html">回測數字怎麼讀？ →</a><a class="research-side-link" href="../questions.html">← 全部投資問題</a></aside></div>
+</ul></section><section class="sec" id="reader-questions"><h2>讀者常問</h2><div class="research-faq"><details><summary>長下影線出現後，股市比較容易上漲嗎？</summary><p>現有樣本無法確定。表現較好的事件集中在五個全球大跌月份，其餘事件一年後中位數反而低於一般月份。</p></details><details><summary>長下影線能否當作市場底部訊號？</summary><p>本文不能支持這種用法。下影線不代表低點已確認，且危機後反彈與形態效果無法由這些少量事件分開。</p></details></div></section><section class="sec" id="article-data"><h2>查看與下載本篇數據</h2><p>圖表下方可查看完整數字，也可以下載該圖的 CSV。下方提供整篇表格與圖表數列，期間、單位和比較條件請對照各節說明。</p><div class="research-downloads"><a download href="../data/article-snapshots/monthly-lower-shadow-events.csv">下載三市場 24 次事件</a><a download="" href="../data/article-snapshots/monthly-lower-shadow.csv">下載表格 CSV</a><a href="../data/article-snapshots/monthly-lower-shadow.json">查看表格與圖表資料</a><a href="../methods.html">回測數字怎麼讀？</a></div><p class="source-note">事件明細列出市場、年月、下影線占開盤比例、下一年報酬，以及是否屬於五個同步下跌的月份。</p></section><section class="sec" id="src"><h2>資料來源</h2><ul class="dlist"><li><a href="https://www.twse.com.tw/zh/indices/taiex/mi-5min-hist.html">臺灣加權股價指數</a>、<a href="https://www.spglobal.com/spdji/en/indices/equity/sp-500/">S&amp;P 500</a>、<a href="https://indexes.nikkei.co.jp/en/nkave/factsheet?idx=nk225">日經 225</a>。</li><li>台股加權指數、標普 500、日經 225 的日線開高低收，由日線合成月線。月線的開盤是當月第一個交易日的開盤，收盤是最後一個交易日的收盤。資料最後一個完整月份是 2026 年 10 月，未收完的月份不計入。最後一次長下影線事件是 2025 年 4 月。</li><li>台股 1997 年 7 月以前沒有開高低，只有證交所的收盤資料。美股 1961 年以前每天的開高低收都相同，日股 1988 年有 26.8% 的日子最高價等於最低價，這些年份不採用。</li></ul></section><section class="sec" id="reading-14"><h2>接著看</h2><ul class="dlist"><li><a href="sell-below-ma.html">跌破年線要不要賣？</a></li><li><a href="wait-for-crash.html">等大跌再買會比較好嗎？</a></li><li><a href="false-breakout.html">假突破、假跌破之後反向做，會比隨機買賣贏嗎？</a></li></ul></section><p class="fine qa-back">本文依歷史資料試算，僅供一般參考。過去的結果不代表未來。</p></main><aside class="research-sidebar"><nav aria-label="文章目錄" class="toc"><div class="toc-h">本文目錄</div><ol><li><a href="#what">怎麼做這次比較？</a></li><li><a href="#chart-example">長下影線量的是哪一段價格？</a></li><li><a href="#list">逐次結果：24 次，一次一列</a></li><li><a href="#cluster">24 次訊號中，14 次集中在五個月份</a></li><li><a href="#control">深跌但沒留長下影線的月份</a></li><li><a href="#compare">跟平常比</a></li><li><a href="#level">低檔 18 次，高檔 6 次</a></li><li><a href="#bottom">出現之後就是底了嗎</a></li><li><a href="#variants">換個條件再算一次</a></li><li><a href="#reading-9">是下影線有用，還是大跌後本來就反彈？</a></li><li><a href="#limits">回測限制</a></li><li><a href="#reader-questions">讀者常問</a></li><li><a href="#article-data">查看與下載本篇數據</a></li><li><a href="#src">資料來源</a></li><li><a href="#reading-14">接著看</a></li></ol></nav><a class="research-side-link" href="../methods.html">回測數字怎麼讀？ →</a><a class="research-side-link" href="../questions.html">← 全部投資問題</a></aside></div>
 </div>
 <script>
 (function () {
