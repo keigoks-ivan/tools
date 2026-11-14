@@ -49,131 +49,13 @@ details.more .in .dwrap{margin-top:12px;border:0;margin-left:-1px;margin-right:-
 .doc .dtbl.cmp tr.grp th{text-align:left;font-weight:700;background:var(--card);color:var(--ink)}
 details.more .in>h3{padding:0 16px}
 .doc .qa-back{max-width:720px;margin-left:0;margin-right:0;box-sizing:border-box}
+.research .exit-figure .figure-body{padding-top:0}
+.research .exit-figure .chartbox{margin:0;padding:0;border:0}
+@media(max-width:600px){.research .exit-figure .chart svg text[font-weight="700"]{display:none}}
 </style>
 <script src="../invest.js"></script>
 <script src="../qchart.js"></script>
-<script>
-/* 文章主圖：原生 SVG 折線圖（可含一條色帶、一條基準線）。需先載入 qchart.js。
-   用法：QLINE.mount(box, { x:[…], xtitle, xfmt, series:[{name, values, style}], band:{lo,hi,name}, base:{value,label}, yfmt, tipExtra })
-   style：0 實線、1 虛線、2 點線、3 灰實線；顏色用 tool.css 的 --g1／--g2／--g3，線型不同，不只靠顏色。 */
-(function () {
-  'use strict';
-  var NS = 'http://www.w3.org/2000/svg';
-  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
-  function nice(min, max) {
-    var span = Math.max(max - min, 1e-9), raw = span / 5, p = Math.pow(10, Math.floor(Math.log10(raw))), f = raw / p;
-    var step = (f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10) * p, lo = Math.floor(min / step + 1e-9) * step, hi = Math.ceil(max / step - 1e-9) * step, t = [];
-    for (var v = lo; v <= hi + step * 0.001; v += step) t.push(v);
-    return { ticks: t, lo: lo, hi: hi };
-  }
-  var COL = ['var(--g1)', 'var(--g2)', 'var(--g3)', 'var(--muted)'];
-  var DASH = ['', '7 4', '2 4', ''];
-  function sty(S, i) { return S.style != null ? S.style : i; }
-  function draw(host, cfg) {
-    host.innerHTML = '';
-    var n = cfg.x.length, W = Math.max(host.clientWidth || 600, 260), narrow = W < 520, H = cfg.height || (narrow ? 280 : 330);
-    var maxName = 0; cfg.series.forEach(function (S) { maxName = Math.max(maxName, S.name.length); });
-    var mr = narrow ? Math.min(78, 14 + 12 * Math.min(maxName, 5)) : Math.min(150, 14 + 12 * Math.min(maxName, 11));
-    var m = { l: narrow ? 44 : 52, r: mr, t: 14, b: 40 };
-    var pw = W - m.l - m.r, ph = H - m.t - m.b;
-    var mn = Infinity, mx = -Infinity;
-    function acc(v) { if (v == null) return; if (v < mn) mn = v; if (v > mx) mx = v; }
-    cfg.series.forEach(function (S) { S.values.forEach(acc); });
-    if (cfg.band) { cfg.band.lo.forEach(acc); cfg.band.hi.forEach(acc); }
-    if (cfg.base) acc(cfg.base.value);
-    if (cfg.ymin != null) acc(cfg.ymin);
-    if (cfg.ymax != null) acc(cfg.ymax);
-    var sc = nice(mn, mx);
-    function yPos(v) { return m.t + (sc.hi - v) / (sc.hi - sc.lo) * ph; }
-    function xPos(i) { return m.l + (n === 1 ? pw / 2 : pw * i / (n - 1)); }
-    var svg = document.createElementNS(NS, 'svg');
-    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H); svg.setAttribute('width', W); svg.setAttribute('height', H);
-    function mk(tg, attrs, txt) { var el = document.createElementNS(NS, tg); for (var k in attrs) el.setAttribute(k, attrs[k]); if (txt != null) el.textContent = txt; svg.appendChild(el); return el; }
-    sc.ticks.forEach(function (v) {
-      var y = yPos(v);
-      mk('line', { x1: m.l, x2: m.l + pw, y1: y, y2: y, stroke: 'var(--line)', 'stroke-width': 1 });
-      mk('text', { x: m.l - 6, y: y + 4, 'text-anchor': 'end', fill: 'var(--muted)', 'font-size': 11 }, (cfg.yaxis || cfg.yfmt)(v));
-    });
-    var xt = cfg.xticks || [];
-    xt.forEach(function (i) {
-      mk('line', { x1: xPos(i), x2: xPos(i), y1: m.t + ph, y2: m.t + ph + 4, stroke: 'var(--muted)', 'stroke-width': 1 });
-      mk('text', { x: xPos(i), y: m.t + ph + 17, 'text-anchor': 'middle', fill: 'var(--muted)', 'font-size': 11 }, cfg.xfmt(cfg.x[i]));
-    });
-    if (cfg.xtitle) mk('text', { x: m.l + pw / 2, y: H - 6, 'text-anchor': 'middle', fill: 'var(--muted)', 'font-size': 11 }, cfg.xtitle);
-    if (cfg.band) {
-      var d = '', i;
-      for (i = 0; i < n; i++) d += (i ? 'L' : 'M') + xPos(i) + ' ' + yPos(cfg.band.hi[i]);
-      for (i = n - 1; i >= 0; i--) d += 'L' + xPos(i) + ' ' + yPos(cfg.band.lo[i]);
-      mk('path', { d: d + 'Z', fill: 'var(--g1)', 'fill-opacity': 0.14, stroke: 'none' });
-    }
-    if (cfg.base) {
-      var yb = yPos(cfg.base.value);
-      mk('line', { x1: m.l, x2: m.l + pw, y1: yb, y2: yb, stroke: 'var(--ink2)', 'stroke-width': 1, 'stroke-dasharray': '2 3' });
-    }
-    if (cfg.vline != null) {
-      mk('line', { x1: xPos(cfg.vline), x2: xPos(cfg.vline), y1: m.t, y2: m.t + ph, stroke: 'var(--ink2)', 'stroke-width': 1, 'stroke-dasharray': '2 3' });
-      if (cfg.vlabel) mk('text', { x: xPos(cfg.vline) + 5, y: m.t + 12, fill: 'var(--ink2)', 'font-size': 11 }, cfg.vlabel);
-    }
-    cfg.series.forEach(function (S, si) {
-      var k = sty(S, si), d = '', started = false;
-      S.values.forEach(function (v, i) { if (v == null) { started = false; return; } d += (started ? 'L' : 'M') + xPos(i).toFixed(1) + ' ' + yPos(v).toFixed(1); started = true; });
-      var a = { d: d, fill: 'none', stroke: COL[k], 'stroke-width': 2.2, 'stroke-linejoin': 'round' };
-      if (DASH[k]) a['stroke-dasharray'] = DASH[k];
-      mk('path', a);
-    });
-    var lab = cfg.series.map(function (S, si) {
-      var lv = null; for (var i = S.values.length - 1; i >= 0; i--) if (S.values[i] != null) { lv = S.values[i]; break; }
-      return { S: S, k: sty(S, si), y: yPos(lv == null ? 0 : lv) };
-    }).sort(function (a, b) { return a.y - b.y; });
-    for (var li = 1; li < lab.length; li++) if (lab[li].y - lab[li - 1].y < 15) lab[li].y = lab[li - 1].y + 15;
-    var maxc = narrow ? 5 : 11;
-    lab.forEach(function (L) {
-      var nm = L.S.name.length > maxc ? L.S.name.slice(0, maxc) + '…' : L.S.name;
-      mk('text', { x: m.l + pw + 6, y: L.y + 4, fill: COL[L.k], 'font-size': 12, 'font-weight': 700 }, nm);
-    });
-    var cur = mk('line', { x1: 0, x2: 0, y1: m.t, y2: m.t + ph, stroke: 'var(--ink)', 'stroke-opacity': 0.35, visibility: 'hidden' });
-    var ov = mk('rect', { x: m.l, y: m.t, width: pw, height: ph, fill: 'transparent' });
-    host.appendChild(svg);
-    var tip = document.createElement('div'); tip.className = 'tip'; host.appendChild(tip);
-    function show(clientX) {
-      var r = svg.getBoundingClientRect(), px = (clientX - r.left) * (W / r.width);
-      var i = Math.max(0, Math.min(n - 1, Math.round((px - m.l) / pw * (n - 1))));
-      cur.setAttribute('x1', xPos(i)); cur.setAttribute('x2', xPos(i)); cur.setAttribute('visibility', 'visible');
-      var h = '<div><b>' + esc(cfg.xfmt(cfg.x[i], true)) + '</b></div>';
-      cfg.series.forEach(function (S, si) {
-        var v = S.values[i], k = sty(S, si);
-        h += '<div><b style="color:' + COL[k] + '">' + esc(S.name) + '</b>　' + (v == null ? '沒有資料' : esc(cfg.yfmt(v))) + '</div>';
-      });
-      if (cfg.band) h += '<div>' + esc(cfg.band.name) + '　' + esc(cfg.yfmt(cfg.band.lo[i])) + ' 到 ' + esc(cfg.yfmt(cfg.band.hi[i])) + '</div>';
-      tip.innerHTML = h; tip.style.display = 'block';
-      var tw = tip.offsetWidth, cx = xPos(i) * (r.width / W), left = cx + 14;
-      if (left + tw > r.width) left = cx - tw - 14;
-      tip.style.left = Math.max(0, left) + 'px'; tip.style.top = '8px';
-    }
-    function hide() { cur.setAttribute('visibility', 'hidden'); tip.style.display = 'none'; }
-    ov.addEventListener('pointermove', function (ev) { show(ev.clientX); });
-    ov.addEventListener('pointerdown', function (ev) { show(ev.clientX); });
-    ov.addEventListener('pointerleave', hide);
-  }
-  function legend(host, cfg) {
-    var h = '';
-    cfg.series.forEach(function (S, si) {
-      var k = sty(S, si);
-      h += '<span><svg width="22" height="10" aria-hidden="true"><line x1="0" x2="22" y1="5" y2="5" stroke="' + COL[k] + '" stroke-width="2.4"' + (DASH[k] ? ' stroke-dasharray="' + DASH[k] + '"' : '') + '/></svg><b style="color:' + COL[k] + '">' + esc(S.name) + '</b></span>';
-    });
-    if (cfg.band) h += '<span><svg width="22" height="10" aria-hidden="true"><rect width="22" height="10" fill="var(--g1)" fill-opacity=".25"/></svg><b style="color:var(--ink2)">' + esc(cfg.band.name) + '</b></span>';
-    host.innerHTML = h;
-  }
-  function mount(box, cfg) {
-    var lg = box.querySelector('.legend'), ch = box.querySelector('.chart');
-    function go() { legend(lg, cfg); draw(ch, cfg); }
-    go();
-    var rt; window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(go, 120); });
-  }
-  window.QLINE = { mount: mount };
-})();
-
-</script>
+<script src="../qline.js"></script>
 <link href="../research.css" rel="stylesheet"/><script defer="" src="../research.js"></script></head>
 <body class="research-body" data-nav="q" data-root="../">
 <div class="page doc research">
@@ -182,7 +64,7 @@ details.more .in>h3{padding:0 16px}
 <div class="k">出場能少跌多少，也要看你什麼時候買回來</div>
 <p>跌破年線就賣，或者等股價從高點跌兩成才賣。兩條規則各在四個市場試一次，再和一路持有比較。八組裡有七組的年化報酬較低。</p>
 <p>以 0050 為例，跌破年線賣出，最大跌幅從約 56% 縮到 31%，年化也從 14.8% 降到 11.5%。另一條規則賣出後要等創新高才買回，空手更久，年化只有 6.8%。</p>
-</div></header><div class="research-stats"><div class="research-stat"><strong>11.5%</strong><span>0050 跌破 240 日均線賣出、站回買回的年化；2004-06-11 起</span></div><div class="research-stat"><strong>14.8%</strong><span>同期 0050 一路持有年化；含息並計交易成本口徑見文內設定</span></div><div class="research-stat"><strong>−30.9%</strong><span>0050 年線規則最大跌幅；同期間一路持有為 −55.8%</span></div></div><div class="research-grid"><main><section class="sec" id="what"><h2>規則與設定</h2>
+</div><div class="research-downloads"><a href="#buyback-example">看三種買回條件</a><a href="#result">看四個市場比較</a></div></header><div class="research-stats"><div class="research-stat"><strong>11.5%</strong><span>0050 跌破 240 日均線賣出、站回買回的年化；2004-06-11 起</span></div><div class="research-stat"><strong>14.8%</strong><span>同期 0050 一路持有年化；含息並計交易成本口徑見文內設定</span></div><div class="research-stat"><strong>−30.9%</strong><span>0050 年線規則最大跌幅；同期間一路持有為 −55.8%</span></div></div><div class="research-grid"><main><section class="sec" id="what"><h2>規則與設定</h2>
 <p class="t-body lead">四個市場都用同樣兩種賣出規則。各市場從第一次算得出 240 日均線那天開始，規則和一路持有從同一天算到 2026 年 9 月 30 日。</p>
 <p class="t-body">三條淨值線：</p>
 <ul class="steps">
@@ -202,13 +84,23 @@ details.more .in>h3{padding:0 16px}
 <p class="t-body">0050 不賣的年化在這篇是 14.8%（2004 年 6 月 11 日起），在〈股票少買一點，跌幅和報酬各少多少？〉與〈進場的那一天，影響有多大？〉是 14.5%（2003 年 6 月 30 日到 10 月 30 日的起點與終點），差在起訖日不同。這篇的 0050 年線規則是年化 11.5%、最大跌幅 −30.9%、賣出 73 次，與〈<a href="sell-below-ma.html">跌破年線要不要賣？</a>〉同一組設定，數字一致。</p>
 <p class="t-body">空手時間占比是賣出後持有現金的交易日，占全部交易日的比例。年化÷最大跌幅把兩個數字併成一個比值，只列出來，不作排名。交易次數是買加賣的總次數。</p>
 <p class="t-body">兩條規則的差別在買回：年線規則站回均線就買，高點跌 20% 的規則要等價格高過賣出前的高點。後面「買回條件決定空手多久」那一節，把買回條件換成別的做法，看空手時間與結果怎麼變。</p>
-<details class="research-method-notes"><summary>展開：比較條件與閱讀前須知</summary><aside aria-labelledby="pre-t" class="pre-box"><div class="pre-h" id="pre-t">看結果前，先留意這幾個條件</div><ul><li>跌破年線就賣會少賺，是因為空手的時候錯過了上漲：0050 大約四分之一的時間空手，年化從 14.8% 掉到 11.5%。</li><li>唯一贏過一直持有的是 QQQ，靠的是 2000 到 2002 年那次跌掉八成多的崩盤。從 2003 年起算，規則反而少賺。</li><li>起點換成 2010 年，測的 8 組全部輸給一直持有。</li><li>日經 225 從 1989 年高點起算是另一個例外。過去的結果不代表未來。</li></ul><h4>這次試算涵蓋哪些情況？</h4><ul><li>賣出條件只測兩種，沒測停損價與其他賣法。</li><li>日經只算股價、現金不計息，年化不能和另外三個市場比。</li><li>四個市場各只有一段歷史，崩盤年份有重疊。</li></ul><p class="pre-fine">各市場從 240 日均線第一天起算，規則與不賣同一天開始，到 2026 年 9 月 30 日。年化是把整段報酬換算成平均每年的報酬率，最大跌幅是從高點跌到之後最低點的幅度。空手是賣出後持有現金。與〈跌破年線要不要賣？〉同一組設定。</p><p class="pre-link"><a href="#limits">看完整的回測限制</a></p></aside></details></section><section class="sec" id="result"><h2>四個市場兩條規則的結果</h2>
+<details class="research-method-notes"><summary>展開：比較條件與閱讀前須知</summary><aside aria-labelledby="pre-t" class="pre-box"><div class="pre-h" id="pre-t">看結果前，先留意這幾個條件</div><ul><li>跌破年線就賣會少賺，是因為空手的時候錯過了上漲：0050 大約四分之一的時間空手，年化從 14.8% 掉到 11.5%。</li><li>唯一贏過一直持有的是 QQQ，靠的是 2000 到 2002 年那次跌掉八成多的崩盤。從 2003 年起算，規則反而少賺。</li><li>起點換成 2010 年，測的 8 組全部輸給一直持有。</li><li>日經 225 從 1989 年高點起算是另一個例外。過去的結果不代表未來。</li></ul><h4>這次試算涵蓋哪些情況？</h4><ul><li>賣出條件只測兩種，沒測停損價與其他賣法。</li><li>日經只算股價、現金不計息，年化不能和另外三個市場比。</li><li>四個市場各只有一段歷史，崩盤年份有重疊。</li></ul><p class="pre-fine">各市場從 240 日均線第一天起算，規則與不賣同一天開始，到 2026 年 9 月 30 日。年化是把整段報酬換算成平均每年的報酬率，最大跌幅是從高點跌到之後最低點的幅度。空手是賣出後持有現金。與〈跌破年線要不要賣？〉同一組設定。</p><p class="pre-link"><a href="#limits">看完整的回測限制</a></p></aside></details></section><section class="sec" id="buyback-example">
+<h2>同樣跌兩成賣出，換個買回條件差多少？</h2>
+<p>用 0050 同一段歷史，把賣出的規則固定為較持有期間的前高跌兩成。賣出後，分別在收盤站回年線、突破原前高，或從賣出訊號之後的低點反彈兩成時，於下一個交易日收盤買回。</p>
+<figure class="research-figure exit-figure">
+<figcaption><span class="figure-number">圖 01</span><span class="figure-title">0050 的三種買回條件，報酬和跌幅一起看</span></figcaption>
+<div class="figure-body tool"><div class="chartbox" id="buyback-choices"><div class="legend"></div><div class="chart" role="img" aria-label="同樣跌兩成賣出，三種買回條件的年化報酬與最大跌幅"></div></div></div>
+<p class="figure-note">2004 年 6 月 11 日至 2026 年 9 月 30 日，含息。空手計定存利息，成交扣手續費，賣出另扣證交稅。</p><p class="figure-read">等到突破原前高才買回，這段有 37.5% 的交易日空手，年化 6.8%。站回年線就買回，空手占 10.0%，年化 11.6%。</p>
+</figure>
+<p>從低點反彈兩成才買回，年化約 11.9%，最大跌幅約 47.8%。三個條件會改變買回後重新承受的風險，也會改變下一次賣出的前高基準。</p>
+</section>
+<section class="sec" id="result"><h2>四個市場兩條規則的結果</h2>
 <p class="t-body lead">四個市場各試兩條賣出規則。八種結果全都比一路持有少跌，但有七種把整段年化報酬也一起降下來。若只看報酬和跌幅，唯一兩項都改善的是 QQQ 的年線規則。</p>
-<figure class="qa-fig"><span class="figure-number">圖 2.1</span>
-<div class="ttl">四個市場、三條淨值線的最大跌幅</div>
-<div class="cap">各市場從 240 日均線第一天起算到 2026 年 9 月 30 日：0050 2004 年 6 月、SPY 1994 年 1 月、QQQ 2000 年 2 月、日經 225 1965 年 12 月（只算股價）。</div>
-<div class="tool"><div class="chartbox" id="f11"><div class="legend"></div><div aria-label="三條出場規則在 0050、SPY、QQQ、日經的最大跌幅長條圖，滑鼠移上去可看數值" class="chart" role="img"></div></div></div>
-<p class="figure-read">圖 2.1 顯示四市場年線與 20% 出場規則的最大跌幅都淺於持有策略，但個別策略改善幅度各異。</p></figure>
+<figure class="research-figure exit-figure">
+<figcaption><span class="figure-number">圖 02</span><span class="figure-title">四個市場，出場規則和持有的最大跌幅</span></figcaption>
+<div class="figure-body tool"><div class="chartbox" id="f11"><div class="legend"></div><div class="chart" role="img" aria-label="三條出場規則在 0050、SPY、QQQ、日經的最大跌幅長條圖，滑鼠移上去可看數值"></div></div></div>
+<p class="figure-note">各市場從同一評價起點比較三種做法，截止 2026 年 9 月 30 日。</p><p class="figure-read">兩條出場規則在四個市場都少跌，改善幅度因市場而異。</p>
+</figure>
 <h3 class="t-lab" id="tw">台股結果（0050，2004 年 6 月 11 日起）</h3>
 <div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">出場規則</th><th scope="col">年化</th><th scope="col">最大跌幅</th><th scope="col">空手<br/>時間占比</th></tr>
 </thead><tbody><tr><th scope="row">不賣</th><td class="nw">14.8%</td><td class="nw">−55.8%</td><td class="nw">0.0%</td></tr>
@@ -417,9 +309,10 @@ details.more .in>h3{padding:0 16px}
 <tr><th scope="row">換成一般年化的差</th><td class="nw">−3.5</td><td class="nw">−2.9</td></tr>
 </tbody></table></div>
 <p class="t-note">最後一列把連續複利換成一般年化：各市場的一般年化差距與前面主表相同。日經 225 的現金不計息，所以現金利息是 0.00。</p>
-<figure class="qa-fig"><span class="figure-number">圖 3.1</span>
-<div class="ttl">0050 兩條規則比不賣少賺的各項來源，連續複利年化，單位個百分點</div>
-<div class="tool"><div class="chartbox" id="f21"><div class="legend"></div><div aria-label="0050 年線規則與 20% 規則的錯過漲幅、躲掉跌幅、現金利息、交易成本與合計的長條圖" class="chart" role="img"></div></div></div>
+<figure class="research-figure exit-figure">
+<figcaption><span class="figure-number">圖 03</span><span class="figure-title">0050 出場後少賺的來源</span></figcaption>
+<div class="figure-body tool"><div class="chartbox" id="f21"><div class="legend"></div><div class="chart" role="img" aria-label="0050 年線規則與 20% 規則的錯過漲幅、躲掉跌幅、現金利息、交易成本與合計的長條圖"></div></div></div>
+<p class="figure-note">連續複利年化差，單位為個百分點。空手的避跌、錯過上漲、現金利息及交易成本分開計算。</p><p class="figure-read">每個項目加總可核對兩條規則的整段報酬差。</p>
 </figure>
 <p class="t-body">年線規則錯過的漲幅每年 4.34 個百分點，躲掉的跌幅 2.37 個百分點，只抵掉 55%。20% 規則 7 段空手期間股票全部是漲的，錯過的漲幅每年 7.56 個百分點，沒有躲掉任何跌幅。四個市場的 20% 規則加起來 23 段空手，股票全部是漲的。</p>
 <p class="t-body">四個市場的年線規則，錯過的漲幅都在每年 4.3 到 5.6 個百分點之間，躲掉的跌幅在 2.4 到 6.6 個百分點之間。躲掉多於錯過的只有 QQQ（6.64 對 5.57）。日經 225 的年線規則躲掉 4.42、錯過 4.61，幾乎打平，年化少的幅度主要是成本 0.61 個百分點。</p>
@@ -596,9 +489,10 @@ details.more .in>h3{padding:0 16px}
 <tr><th scope="row">2024/07–2024/08<span class="tag">25 天</span></th><td class="nw">0.2%</td><td class="nw">0.2%</td><td class="nw">−16.6%</td></tr>
 <tr><th scope="row">2025/01–2025/04<span class="tag">92 天</span></th><td class="nw">0.6%</td><td class="nw">−5.9%</td><td class="nw">−23.8%</td></tr>
 </tbody></table></div>
-<figure class="qa-fig"><span class="figure-number">圖 5.1</span>
-<div class="ttl">0050 7 次下跌，高點到谷底，三條規則各跌多少</div>
-<div class="tool"><div class="chartbox" id="f31"><div class="legend"></div><div aria-label="0050 各次下跌中不賣、年線規則、20% 規則從高點到谷底的跌幅長條圖，滑鼠移上去可看日期" class="chart" role="img"></div></div></div>
+<figure class="research-figure exit-figure">
+<figcaption><span class="figure-number">圖 04</span><span class="figure-title">0050 七段下跌，三種做法各跌多少？</span></figcaption>
+<div class="figure-body tool"><div class="chartbox" id="f31"><div class="legend"></div><div class="chart" role="img" aria-label="0050 各次下跌中不賣、年線規則、20% 規則從高點到谷底的跌幅長條圖，滑鼠移上去可看日期"></div></div></div>
+<p class="figure-note">每次都從同一個 0050 高點算到谷底。</p><p class="figure-read">同一段下跌，規則是否已賣出會影響帳戶跌幅。</p>
 </figure>
 <h3 class="t-lab">年線規則</h3>
 <p class="t-body">年線規則在 6 次少跌，最大的一次是 2007 年 10 月到 2008 年 11 月，−27.3% 對 −55.8%。到不賣回到前高那天，這一次規則是 2.7%，不賣是 0.1%，規則領先。7 次裡規則累積高於不賣的有 2 次。其他次到不賣回前高時，規則的累積有賺有賠：2011/01 是 −1.1%、2015/04 是 −9.7%、2020/01 是 −7.0%、2022/01 是 +7.9%、2024/07 是 +0.2%、2025/01 是 −5.9%。</p>
@@ -715,9 +609,10 @@ details.more .in>h3{padding:0 16px}
 <tr><th scope="row">日經 225</th><td class="nw">34.1</td><td class="nw">16.0</td><td class="nw">36.4</td></tr>
 </tbody></table></div>
 <p class="t-note">單位是年。</p>
-<figure class="qa-fig"><span class="figure-number">圖 6.1</span>
-<div class="ttl">0050 三條規則的淨值距前高跌幅，每週一點</div>
-<div class="tool"><div class="chartbox" id="f41"><div class="legend"></div><div aria-label="0050 不賣、年線規則、20% 規則的淨值距前高跌幅折線圖，滑鼠移上去可看數值" class="chart" role="img"></div></div></div>
+<figure class="research-figure exit-figure">
+<figcaption><span class="figure-number">圖 05</span><span class="figure-title">三種做法距帳戶前高有多遠？</span></figcaption>
+<div class="figure-body tool"><div class="chartbox" id="f41"><div class="legend"></div><div class="chart" role="img" aria-label="0050 不賣、年線規則、20% 規則的淨值距前高跌幅折線圖，滑鼠移上去可看數值"></div></div></div>
+<p class="figure-note">週資料，每個帳戶以自己的前高計算跌幅。</p><p class="figure-read">同一市場中，出場規則可以改變跌幅，也可以改變回到前高的時間。</p>
 </figure>
 <p class="t-body">20% 規則的 11.9 年，是賣出後等創新高買回累積出來的。2007 年 10 月的高點之後，2008 年 1 月賣出，空手到 2011 年 2 月，股票漲 23.4%。2011 年 9 月再賣，空手到 2013 年 5 月，股票漲 27.3%。2015 年 8 月又賣，空手到 2016 年 8 月，股票漲 22.5%。三次賣價都比前高低 17.5% 以上，買回價都在前高之上，淨值始終沒回到 2007 年的高點，直到 2019 年 10 月 9 日。</p>
 <p class="t-body">年線規則不一定縮短回復時間：日經 225 的年線規則 16.0 年，來自 368 筆交易的反覆賣出買回。</p>
@@ -768,9 +663,9 @@ details.more .in>h3{padding:0 16px}
 <li>固定股票比例的對照只有 30、50、70、90% 四種比例，年度調回、不計調整成本。「年化最接近」的那一格是用年化挑的，只當描述，也不代表可以直接買到。</li>
 <li>買回條件三種、賣出條件兩種，共 6 組全部列出。這一節是看到 20% 規則的結果之後才加的，沒有事前登記。20% 反彈的幅度只測 20%，其他幅度沒有測。年線天數只換過 0050 的。</li>
 <li>同一條年線規則在〈跌破年線要不要賣？〉的數字（年化 11.5%、賣出 73 次）與本篇一致。與〈股票少買一點，跌幅和報酬各少多少？〉、〈進場的那一天，影響有多大？〉的 0050 數字不同，是因為那兩篇起訖日是 2003 年 6 月 30 日到 10 月 30 日。</li>
-</ul></section><section class="sec" id="reader-questions"><h2>讀者常問</h2><div class="research-faq"><details><summary>跌破年線賣出一定能減少最大跌幅嗎？</summary><p>本次四個市場的完整起點下，規則都比一路持有少跌，但單一市場、單一時段的歷史結果不能保證未來。</p></details><details><summary>為什麼賣出後的買回條件重要？</summary><p>買回條件決定空手時間及重新進場價格；例如等到創新高會延長空手，可能錯過反彈並降低年化報酬。</p></details></div></section><section class="sec" id="article-data"><h2>查看與下載本篇數據</h2><p>圖表下方可查看完整數字，也可以下載該圖的 CSV。下方提供整篇表格與圖表數列，期間、單位和比較條件請對照各節說明。</p><div class="research-downloads"><a download="" href="../data/article-snapshots/exit-rules.csv">下載表格 CSV</a><a href="../data/article-snapshots/exit-rules.json">查看表格與圖表資料</a><a href="../methods.html">回測數字怎麼讀？</a></div><p class="source-note">這是本篇使用的整理資料，不包含重新取得行情與執行完整策略的程式。核對數字與重跑回測，是不同的工作。</p></section><section class="sec" id="src"><h2>資料來源</h2><ul class="dlist"><li>台股：證交所官方還原日線 0050（2003 年 6 月 30 日起，240 日均線 2004 年 6 月 10 日起算得出來），現金用台幣一年期定存牌告利率。美股：SPY（1993 年 1 月 29 日起）與 QQQ（1999 年 3 月 10 日起）含息還原價，現金用美國 3 個月國庫券日報酬。日本：日經 225 指數，只算股價、沒算股息，現金不計息，1965 年 1 月 5 日起。四個市場的終點都是 2026 年 9 月 30 日。</li><li>0050 最後一筆完整的下跌事件，是 2025 年 1 月到 4 月那次（2025 年 7 月 17 日回到前高）。</li><li>逐段、逐次與買回條件的數字，由底稿程式依上述資料算出，加總與主表一致。</li></ul></section><section class="sec" id="reading-13"><h2>同一組回測的其他文章</h2>
+</ul></section><section class="sec" id="reader-questions"><h2>讀者常問</h2><div class="research-faq"><details><summary>跌破年線賣出一定能減少最大跌幅嗎？</summary><p>本次四個市場的完整起點下，規則都比一路持有少跌，但單一市場、單一時段的歷史結果不能保證未來。</p></details><details><summary>為什麼賣出後的買回條件重要？</summary><p>買回條件決定空手時間及重新進場價格；例如等到創新高會延長空手，可能錯過反彈並降低年化報酬。</p></details></div></section><section class="sec" id="article-data"><h2>查看與下載本篇數據</h2><p>圖表下方可查看完整數字，也可以下載該圖的 CSV。下方提供整篇表格與圖表數列，期間、單位和比較條件請對照各節說明。</p><div class="research-downloads"><a download href="../data/article-snapshots/exit-rules-0050-rebuy.csv">下載 0050 買回條件比較</a><a download="" href="../data/article-snapshots/exit-rules.csv">下載表格 CSV</a><a href="../data/article-snapshots/exit-rules.json">查看表格與圖表資料</a><a href="../methods.html">回測數字怎麼讀？</a></div><p class="source-note">0050 買回比較列出年化、最大跌幅、空手交易日占比、買賣次數和期末倍數。含息價格與定存資料可從<a href="sell-below-ma.html#article-data">年線篇的逐日明細</a>取得。</p></section><section class="sec" id="src"><h2>資料來源</h2><ul class="dlist"><li><a href="https://www.twse.com.tw/zh/ETFortune/etfInfo/0050">證交所 0050 商品與配息資料</a>、<a href="https://www.twse.com.tw/zh/about/company/guide.html">證交所交易費用說明</a>、<a href="https://cpx.cbc.gov.tw/Data/ExportToAPIInfo">央行五大銀行存放款利率</a>。</li><li>台股：證交所官方還原日線 0050（2003 年 6 月 30 日起，240 日均線 2004 年 6 月 10 日起算得出來），現金用台幣一年期定存牌告利率。美股：SPY（1993 年 1 月 29 日起）與 QQQ（1999 年 3 月 10 日起）含息還原價，現金用美國 3 個月國庫券日報酬。日本：日經 225 指數，只算股價、沒算股息，現金不計息，1965 年 1 月 5 日起。四個市場的終點都是 2026 年 9 月 30 日。</li><li>0050 最後一筆完整的下跌事件，是 2025 年 1 月到 4 月那次（2025 年 7 月 17 日回到前高）。</li><li>逐段、逐次與買回條件的數字，由底稿程式依上述資料算出，加總與主表一致。</li></ul></section><section class="sec" id="reading-13"><h2>同一組回測的其他文章</h2>
 <p class="t-body">〈股票少買一點，跌幅和報酬各少多少？〉與〈進場的那一天，影響有多大？〉用 2003 年 6 月 30 日到 10 月 30 日的 0050 與 SPY，起點與終點跟這篇不同。〈跌破年線要不要賣？〉與這篇用同一組設定。</p>
-<ul class="dlist"><li><a href="entry-timing.html">進場的那一天，影響有多大？挑得到好時點嗎？</a></li><li><a href="position-size.html">股票少買一點，跌幅和報酬各少多少？</a></li><li><a href="sell-below-ma.html">跌破年線要不要賣？</a></li></ul></section><section class="sec" id="reading-14"><h2>接著看</h2><ul class="dlist"><li><a href="sell-below-ma.html">跌破年線要不要賣？</a></li><li><a href="recovery-time.html">股市大跌後，多久能漲回去？</a></li></ul></section><p class="fine qa-back">本文依歷史資料試算，僅供一般參考。過去的結果不代表未來。</p></main><aside class="research-sidebar"><nav aria-label="文章目錄" class="toc"><div class="toc-h">本文目錄</div><ol><li><a href="#what">規則與設定</a></li><li><a href="#result">四個市場兩條規則的結果</a></li><li><a href="#gap">少賺去了哪裡</a></li><li><a href="#qqq">QQQ 與其他年化不低於不賣的例外組合</a></li><li><a href="#episodes">0050 每次下跌超過 20%，規則對不賣各跌多少</a></li><li><a href="#rebuy">買回條件決定空手多久</a></li><li><a href="#japan">日本換成 1989 年的起點</a></li><li><a href="#reading-8">賣出規則的結果由買回條件共同決定</a></li><li><a href="#limits">回測限制</a></li><li><a href="#reader-questions">讀者常問</a></li><li><a href="#article-data">查看與下載本篇數據</a></li><li><a href="#src">資料來源</a></li><li><a href="#reading-13">同一組回測的其他文章</a></li><li><a href="#reading-14">接著看</a></li></ol></nav><a class="research-side-link" href="../methods.html">回測數字怎麼讀？ →</a><a class="research-side-link" href="../questions.html">← 全部投資問題</a></aside></div>
+<ul class="dlist"><li><a href="entry-timing.html">進場的那一天，影響有多大？挑得到好時點嗎？</a></li><li><a href="position-size.html">股票少買一點，跌幅和報酬各少多少？</a></li><li><a href="sell-below-ma.html">跌破年線要不要賣？</a></li></ul></section><section class="sec" id="reading-14"><h2>接著看</h2><ul class="dlist"><li><a href="sell-below-ma.html">跌破年線要不要賣？</a></li><li><a href="recovery-time.html">股市大跌後，多久能漲回去？</a></li></ul></section><p class="fine qa-back">本文依歷史資料試算，僅供一般參考。過去的結果不代表未來。</p></main><aside class="research-sidebar"><nav aria-label="文章目錄" class="toc"><div class="toc-h">本文目錄</div><ol><li><a href="#what">規則與設定</a></li><li><a href="#buyback-example">同樣跌兩成賣出，換個買回條件差多少？</a></li><li><a href="#result">四個市場兩條規則的結果</a></li><li><a href="#gap">少賺去了哪裡</a></li><li><a href="#qqq">QQQ 與其他年化不低於不賣的例外組合</a></li><li><a href="#episodes">0050 每次下跌超過 20%，規則對不賣各跌多少</a></li><li><a href="#rebuy">買回條件決定空手多久</a></li><li><a href="#japan">日本換成 1989 年的起點</a></li><li><a href="#reading-8">賣出規則的結果由買回條件共同決定</a></li><li><a href="#limits">回測限制</a></li><li><a href="#reader-questions">讀者常問</a></li><li><a href="#article-data">查看與下載本篇數據</a></li><li><a href="#src">資料來源</a></li><li><a href="#reading-13">同一組回測的其他文章</a></li><li><a href="#reading-14">接著看</a></li></ol></nav><a class="research-side-link" href="../methods.html">回測數字怎麼讀？ →</a><a class="research-side-link" href="../questions.html">← 全部投資問題</a></aside></div>
 </div>
 <script>
 (function () {
@@ -781,6 +676,10 @@ details.more .in>h3{padding:0 16px}
 
   function pct(v, d) { return (v < 0 ? '\u2212' : '') + Math.abs(v).toFixed(d) + '%'; }
   function num2(v) { return (v < 0 ? '\u2212' : (v > 0 ? '+' : '')) + Math.abs(v).toFixed(2); }
+  var buyback = {"cats": ["站回年線", "突破原前高", "反彈兩成"], "series": [{"name": "年化報酬", "values": [11.649422, 6.834054, 11.904836]}, {"name": "最大跌幅", "values": [-32.235925, -38.932948, -47.814489]}], "extra": ["空手 10.0% 的交易日，買賣共 16 次", "空手 37.5% 的交易日，買賣共 14 次", "空手 15.8% 的交易日，買賣共 16 次"]};
+  buyback.fmt = QCHART.fmt.pct1;
+  buyback.axisFmt = QCHART.fmt.pct0;
+  QCHART.mount(document.getElementById('buyback-choices'), buyback);
   QCHART.mount(document.getElementById('f11'), { cats: BAR1.cats, series: BAR1.series, fmt: QCHART.fmt.pct1, axisFmt: QCHART.fmt.pct0 });
   QCHART.mount(document.getElementById('f21'), { cats: BAR2.cats, series: BAR2.series, fmt: function (v) { return num2(v) + ' 個百分點'; }, axisFmt: function (v) { return v.toFixed(0); }, barFmt: function (v) { return v.toFixed(1); } });
   QCHART.mount(document.getElementById('f31'), { cats: BAR3.cats, series: BAR3.series, extra: BAR3.extra, fmt: QCHART.fmt.pct1, axisFmt: QCHART.fmt.pct0, barFmt: function (v) { return v.toFixed(0); } });
