@@ -53,129 +53,7 @@ details.more .in>h3{padding:0 16px}
 </style>
 <script src="../invest.js"></script>
 <script src="../qchart.js"></script>
-<script>
-/* 文章主圖：原生 SVG 折線圖（可含一條色帶、一條基準線）。需先載入 qchart.js。
-   用法：QLINE.mount(box, { x:[…], xtitle, xfmt, series:[{name, values, style}], band:{lo,hi,name}, base:{value,label}, yfmt, tipExtra })
-   style：0 實線、1 虛線、2 點線、3 灰實線；顏色用 tool.css 的 --g1／--g2／--g3，線型不同，不只靠顏色。 */
-(function () {
-  'use strict';
-  var NS = 'http://www.w3.org/2000/svg';
-  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
-  function nice(min, max) {
-    var span = Math.max(max - min, 1e-9), raw = span / 5, p = Math.pow(10, Math.floor(Math.log10(raw))), f = raw / p;
-    var step = (f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10) * p, lo = Math.floor(min / step + 1e-9) * step, hi = Math.ceil(max / step - 1e-9) * step, t = [];
-    for (var v = lo; v <= hi + step * 0.001; v += step) t.push(v);
-    return { ticks: t, lo: lo, hi: hi };
-  }
-  var COL = ['var(--g1)', 'var(--g2)', 'var(--g3)', 'var(--muted)'];
-  var DASH = ['', '7 4', '2 4', ''];
-  function sty(S, i) { return S.style != null ? S.style : i; }
-  function draw(host, cfg) {
-    host.innerHTML = '';
-    var n = cfg.x.length, W = Math.max(host.clientWidth || 600, 260), narrow = W < 520, H = cfg.height || (narrow ? 280 : 330);
-    var maxName = 0; cfg.series.forEach(function (S) { maxName = Math.max(maxName, S.name.length); });
-    var mr = narrow ? Math.min(78, 14 + 12 * Math.min(maxName, 5)) : Math.min(150, 14 + 12 * Math.min(maxName, 11));
-    var m = { l: narrow ? 44 : 52, r: mr, t: 14, b: 40 };
-    var pw = W - m.l - m.r, ph = H - m.t - m.b;
-    var mn = Infinity, mx = -Infinity;
-    function acc(v) { if (v == null) return; if (v < mn) mn = v; if (v > mx) mx = v; }
-    cfg.series.forEach(function (S) { S.values.forEach(acc); });
-    if (cfg.band) { cfg.band.lo.forEach(acc); cfg.band.hi.forEach(acc); }
-    if (cfg.base) acc(cfg.base.value);
-    if (cfg.ymin != null) acc(cfg.ymin);
-    if (cfg.ymax != null) acc(cfg.ymax);
-    var sc = nice(mn, mx);
-    function yPos(v) { return m.t + (sc.hi - v) / (sc.hi - sc.lo) * ph; }
-    function xPos(i) { return m.l + (n === 1 ? pw / 2 : pw * i / (n - 1)); }
-    var svg = document.createElementNS(NS, 'svg');
-    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H); svg.setAttribute('width', W); svg.setAttribute('height', H);
-    function mk(tg, attrs, txt) { var el = document.createElementNS(NS, tg); for (var k in attrs) el.setAttribute(k, attrs[k]); if (txt != null) el.textContent = txt; svg.appendChild(el); return el; }
-    sc.ticks.forEach(function (v) {
-      var y = yPos(v);
-      mk('line', { x1: m.l, x2: m.l + pw, y1: y, y2: y, stroke: 'var(--line)', 'stroke-width': 1 });
-      mk('text', { x: m.l - 6, y: y + 4, 'text-anchor': 'end', fill: 'var(--muted)', 'font-size': 11 }, (cfg.yaxis || cfg.yfmt)(v));
-    });
-    var xt = cfg.xticks || [];
-    xt.forEach(function (i) {
-      mk('line', { x1: xPos(i), x2: xPos(i), y1: m.t + ph, y2: m.t + ph + 4, stroke: 'var(--muted)', 'stroke-width': 1 });
-      mk('text', { x: xPos(i), y: m.t + ph + 17, 'text-anchor': 'middle', fill: 'var(--muted)', 'font-size': 11 }, cfg.xfmt(cfg.x[i]));
-    });
-    if (cfg.xtitle) mk('text', { x: m.l + pw / 2, y: H - 6, 'text-anchor': 'middle', fill: 'var(--muted)', 'font-size': 11 }, cfg.xtitle);
-    if (cfg.band) {
-      var d = '', i;
-      for (i = 0; i < n; i++) d += (i ? 'L' : 'M') + xPos(i) + ' ' + yPos(cfg.band.hi[i]);
-      for (i = n - 1; i >= 0; i--) d += 'L' + xPos(i) + ' ' + yPos(cfg.band.lo[i]);
-      mk('path', { d: d + 'Z', fill: 'var(--g1)', 'fill-opacity': 0.14, stroke: 'none' });
-    }
-    if (cfg.base) {
-      var yb = yPos(cfg.base.value);
-      mk('line', { x1: m.l, x2: m.l + pw, y1: yb, y2: yb, stroke: 'var(--ink2)', 'stroke-width': 1, 'stroke-dasharray': '2 3' });
-    }
-    if (cfg.vline != null) {
-      mk('line', { x1: xPos(cfg.vline), x2: xPos(cfg.vline), y1: m.t, y2: m.t + ph, stroke: 'var(--ink2)', 'stroke-width': 1, 'stroke-dasharray': '2 3' });
-      if (cfg.vlabel) mk('text', { x: xPos(cfg.vline) + 5, y: m.t + 12, fill: 'var(--ink2)', 'font-size': 11 }, cfg.vlabel);
-    }
-    cfg.series.forEach(function (S, si) {
-      var k = sty(S, si), d = '', started = false;
-      S.values.forEach(function (v, i) { if (v == null) { started = false; return; } d += (started ? 'L' : 'M') + xPos(i).toFixed(1) + ' ' + yPos(v).toFixed(1); started = true; });
-      var a = { d: d, fill: 'none', stroke: COL[k], 'stroke-width': 2.2, 'stroke-linejoin': 'round' };
-      if (DASH[k]) a['stroke-dasharray'] = DASH[k];
-      mk('path', a);
-      if (cfg.markers) S.values.forEach(function (v, i) { if (v != null) mk('circle', { cx: xPos(i).toFixed(1), cy: yPos(v).toFixed(1), r: 3.4, fill: 'var(--bg, #fff)', stroke: COL[k], 'stroke-width': 1.8 }); });
-    });
-    var lab = cfg.series.map(function (S, si) {
-      var lv = null; for (var i = S.values.length - 1; i >= 0; i--) if (S.values[i] != null) { lv = S.values[i]; break; }
-      return { S: S, k: sty(S, si), y: yPos(lv == null ? 0 : lv) };
-    }).sort(function (a, b) { return a.y - b.y; });
-    for (var li = 1; li < lab.length; li++) if (lab[li].y - lab[li - 1].y < 15) lab[li].y = lab[li - 1].y + 15;
-    var maxc = narrow ? 5 : 11;
-    lab.forEach(function (L) {
-      var nm = L.S.name.length > maxc ? L.S.name.slice(0, maxc) + '…' : L.S.name;
-      mk('text', { x: m.l + pw + 6, y: L.y + 4, fill: COL[L.k], 'font-size': 12, 'font-weight': 700 }, nm);
-    });
-    var cur = mk('line', { x1: 0, x2: 0, y1: m.t, y2: m.t + ph, stroke: 'var(--ink)', 'stroke-opacity': 0.35, visibility: 'hidden' });
-    var ov = mk('rect', { x: m.l, y: m.t, width: pw, height: ph, fill: 'transparent' });
-    host.appendChild(svg);
-    var tip = document.createElement('div'); tip.className = 'tip'; host.appendChild(tip);
-    function show(clientX) {
-      var r = svg.getBoundingClientRect(), px = (clientX - r.left) * (W / r.width);
-      var i = Math.max(0, Math.min(n - 1, Math.round((px - m.l) / pw * (n - 1))));
-      cur.setAttribute('x1', xPos(i)); cur.setAttribute('x2', xPos(i)); cur.setAttribute('visibility', 'visible');
-      var h = '<div><b>' + esc(cfg.xfmt(cfg.x[i], true)) + '</b></div>';
-      cfg.series.forEach(function (S, si) {
-        var v = S.values[i], k = sty(S, si);
-        h += '<div><b style="color:' + COL[k] + '">' + esc(S.name) + '</b>　' + (v == null ? '沒有資料' : esc(cfg.yfmt(v))) + '</div>';
-      });
-      if (cfg.band) h += '<div>' + esc(cfg.band.name) + '　' + esc(cfg.yfmt(cfg.band.lo[i])) + ' 到 ' + esc(cfg.yfmt(cfg.band.hi[i])) + '</div>';
-      tip.innerHTML = h; tip.style.display = 'block';
-      var tw = tip.offsetWidth, cx = xPos(i) * (r.width / W), left = cx + 14;
-      if (left + tw > r.width) left = cx - tw - 14;
-      tip.style.left = Math.max(0, left) + 'px'; tip.style.top = '8px';
-    }
-    function hide() { cur.setAttribute('visibility', 'hidden'); tip.style.display = 'none'; }
-    ov.addEventListener('pointermove', function (ev) { show(ev.clientX); });
-    ov.addEventListener('pointerdown', function (ev) { show(ev.clientX); });
-    ov.addEventListener('pointerleave', hide);
-  }
-  function legend(host, cfg) {
-    var h = '';
-    cfg.series.forEach(function (S, si) {
-      var k = sty(S, si);
-      h += '<span><svg width="22" height="10" aria-hidden="true"><line x1="0" x2="22" y1="5" y2="5" stroke="' + COL[k] + '" stroke-width="2.4"' + (DASH[k] ? ' stroke-dasharray="' + DASH[k] + '"' : '') + '/></svg><b style="color:' + COL[k] + '">' + esc(S.name) + '</b></span>';
-    });
-    if (cfg.band) h += '<span><svg width="22" height="10" aria-hidden="true"><rect width="22" height="10" fill="var(--g1)" fill-opacity=".25"/></svg><b style="color:var(--ink2)">' + esc(cfg.band.name) + '</b></span>';
-    host.innerHTML = h;
-  }
-  function mount(box, cfg) {
-    var lg = box.querySelector('.legend'), ch = box.querySelector('.chart');
-    function go() { legend(lg, cfg); draw(ch, cfg); }
-    go();
-    var rt; window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(go, 120); });
-  }
-  window.QLINE = { mount: mount };
-})();
-
-</script>
+<script src="../qline.js"></script>
 <link href="../research.css" rel="stylesheet"/><script defer="" src="../research.js"></script></head>
 <body class="research-body" data-nav="q" data-root="../">
 <div class="page doc research">
@@ -187,7 +65,7 @@ details.more .in>h3{padding:0 16px}
 </div></header><div class="research-stats"><div class="research-stat"><strong>+5.86 個百分點</strong><span>2010–2018 年第 5 減第 1 組年度價差平均；9 次</span></div><div class="research-stat"><strong>−3.67 個百分點</strong><span>2019–2025 年同一價差平均；7 次</span></div><div class="research-stat"><strong>1.14</strong><span>2026 年 6 月價差累積淨值；2022 年高點 1.98</span></div></div><div class="research-grid"><main><section class="sec" id="what"><h2>怎麼分組、怎麼檢驗</h2>
 <p class="t-body lead">每年 6 月底，按過去一年的股數變化分成五組，各持有一年。從股數減少最多到增加最多，一共比較 16 次。</p>
 <h3 class="t-lab">股數變化怎麼量</h3>
-<p class="t-body">看的是每家公司過去 12 個月稀釋後加權平均股數的變化，拆股已調整。本文沒有列出財報公布日的逐筆檢查，因此還無法確認每筆股數在分組當天都已公開。股數減少最多的是第 5 組，增加最多的是第 1 組。股數增加來自增資、發行新股，也包括員工股票獎酬造成的稀釋。這裡看的是股數增減，不是公司宣布買回或增資的事件。</p>
+<p class="t-body">股數取最近一期已申報的年報，和前一年的年報相比，先調整拆股。優先用稀釋後加權平均股數，缺值時採基本股數或年報封面股數。核對 6,372 筆分組資料，最近一期的申報日都在分組日或之前。其中 3 筆在分組當天申報，資料只有日期，無法確認是否在收盤前公開。股數減少最多的是第 5 組，增加最多的是第 1 組。股數增加來自增資、發行新股，也包括員工股票獎酬造成的稀釋。這裡看的是股數增減，不是公司宣布買回或增資的事件。</p>
 <h3 class="t-lab">選股範圍與每次分組的檔數</h3>
 <p class="t-body">選股範圍是美國 S&amp;P 500 歷來成分股與那斯達克 100 現行名單，不重複合計 835 檔。其中 625 檔通過資料檢查（查得到財報、有股價、至少有一季可用的財報資料），其餘 210 檔沒有進入計算。實際進入分組的檔數每年不同，平均約 398 檔，最多 492 檔。2010 年第一次分組只有 154 檔，每組約 31 檔，後來每組增加到約 100 檔。每組等權重，每筆扣 14 個基點的來回成本。</p>
 <h3 class="t-lab">先看出現象，再檢查</h3>
@@ -201,6 +79,11 @@ details.more .in>h3{padding:0 16px}
 <div class="tool"><div class="chartbox" id="f1"><div class="legend" style="display:none"></div><div aria-label="2010 到 2025 年每年分組的價差長條圖，前段多數年份為正，後段多數年份為負，滑鼠移上去可看數值" class="chart" role="img"></div></div></div>
 <p class="figure-read">圖 1.1 的年度價差以 2020 年 +26.30 點和 2025 年 −30.35 點最突出，少數年份對平均影響很大。</p></figure>
 <p class="t-note">每根長條都從該年 6 月底分組後算一年，表示兩組的報酬差，單位是百分點。把滑鼠移到長條可看各組的報酬。</p>
+<figure class="qa-fig">
+<div class="ttl">股數減少這組，年度平均報酬差由正轉負</div>
+<div class="tool"><div class="chartbox" id="spread-by-period"><div class="legend"></div><div class="chart" role="img" aria-label="前九次分組平均領先 5.86 個百分點，後七次平均落後 3.67 個百分點"></div></div></div>
+<p class="figure-read">每年先用股數減少最多一組的報酬減去股數增加最多一組，再算各期間的平均。後段只有 7 次，單一年度就可能改變平均差的正負。</p>
+</figure>
 <h3 class="t-lab">前段：平均多賺 5.86 個百分點</h3>
 <p class="t-body">2010 到 2018 年 9 次價差的平均是 +5.86 個百分點。要看這個平均是不是只是運氣，做法是把平均價差除以它的標準誤，也就是年度價差的樣本標準差除以樣本數的平方根，算出 t 值，前段得到 2.22。只有 9 筆時，這個比值要到約 2.31，才大致可以說不像單靠運氣。</p>
 <p class="t-body">2.22 接近 2.31 但沒到，所以前段本身也只是接近能說有差。第一次分組的價差是 +23.25 個百分點，但那次每組只有約 31 檔。9 次每次拿掉其中一年，前段平均價差落在 +3.7（拿掉 2010 年）到 +7.1（拿掉 2015 年）個百分點，每一種都是正的。</p>
@@ -253,7 +136,7 @@ details.more .in>h3{padding:0 16px}
 <div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">分組年</th><th scope="col">第 5 組</th><th scope="col">參與比較的股票平均</th><th scope="col">SPY</th></tr></thead><tbody><tr><th scope="row">2010</th><td class="nw">44.4%</td><td class="nw">35.9%</td><td class="nw">30.4%</td></tr><tr><th scope="row">2011</th><td class="nw">4.5%</td><td class="nw">2.1%</td><td class="nw">5.3%</td></tr><tr><th scope="row">2012</th><td class="nw">30.3%</td><td class="nw">26.2%</td><td class="nw">19.4%</td></tr><tr><th scope="row">2013</th><td class="nw">27.2%</td><td class="nw">27.2%</td><td class="nw">23.8%</td></tr><tr><th scope="row">2014</th><td class="nw">13.1%</td><td class="nw">8.5%</td><td class="nw">7.2%</td></tr><tr><th scope="row">2015</th><td class="nw">2.1%</td><td class="nw">4.9%</td><td class="nw">4.0%</td></tr><tr><th scope="row">2016</th><td class="nw">24.9%</td><td class="nw">19.7%</td><td class="nw">17.8%</td></tr><tr><th scope="row">2017</th><td class="nw">17.0%</td><td class="nw">13.9%</td><td class="nw">14.3%</td></tr><tr><th scope="row">2018</th><td class="nw">9.0%</td><td class="nw">10.1%</td><td class="nw">10.3%</td></tr><tr><th scope="row">2019</th><td class="nw">−4.8%</td><td class="nw">−2.3%</td><td class="nw">6.1%</td></tr><tr><th scope="row">2020</th><td class="nw">65.0%</td><td class="nw">51.7%</td><td class="nw">40.9%</td></tr><tr><th scope="row">2021</th><td class="nw">−10.3%</td><td class="nw">−9.4%</td><td class="nw">−10.6%</td></tr><tr><th scope="row">2022</th><td class="nw">12.8%</td><td class="nw">16.1%</td><td class="nw">19.4%</td></tr><tr><th scope="row">2023</th><td class="nw">19.1%</td><td class="nw">13.8%</td><td class="nw">24.5%</td></tr><tr><th scope="row">2024</th><td class="nw">18.2%</td><td class="nw">16.4%</td><td class="nw">13.9%</td></tr><tr><th scope="row">2025</th><td class="nw">25.5%</td><td class="nw">26.7%</td><td class="nw">22.2%</td></tr></tbody></table></div>
 <p class="t-note">分組年是 6 月底，持有到次年 6 月底。報酬含股息，第 5 組與參與比較的股票平均已扣 14 個基點，SPY 未扣。</p>
 </div></details>
-</section><section class="sec" id="reading-6"><h2>股數變化不等於買回事件</h2><p>分組看的是過去 12 個月稀釋後加權平均股數變化。減少可能和買回有關，也可能受其他股本變動及資料期間影響；增加可能源於新股或員工獎酬。這裡沒有單獨辨認買回公告，也未逐筆核實財報數字在分組日是否公開，所以能回答的是股數排序後的歷史報酬，不是買回事件的因果效果。</p><p>前段排序未在後段延續，亦不代表反向訊號有效。後段只有七次分組，平均價差 −3.67 個百分點的 t 值 −0.55，年度起伏遠大於平均差；2025 年單次 −30.35 個百分點尤其影響結果。產業比例只能描述兩組不同，沒有解釋方向反轉。這裡能說的是：前一段的優勢沒有在後一段延續，還不能因此改說增加股數的公司比較值得買。</p></section><section class="sec" id="reading-7"><h2 id="limits">回測限制</h2><ul class="dlist"><li>分組只有 16 次，前段 9 次、後段 7 次。前段平均價差除以標準誤是 2.22，要到約 2.31 才大致不像運氣；後段 −0.55，全期 0.50，次數太少，看不準。</li><li>前段的價差有一大塊來自第一次分組的 +23.25，那一次每組只有約 31 檔。</li><li>價差是一組多、一組空的比較。放空股數增加最多的公司，借券成本與實際可行性都沒有算。</li><li>選股範圍是歷來與現行的大型成分股，已下市而查不到股價的公司缺漏，今天名單上的公司也是事後才知道會留下，各組報酬可能偏高。835 檔裡，47 檔是現行與歷史代碼都查不到財報代碼的公司，182 檔是已離開名單、在股價來源完全找不到資料的公司。這兩個數字是分開統計的，彼此有重疊（相加 229 檔，大於沒進入計算的 210 檔），不能和 625 檔相加湊成 835。</li><li>只買第 5 組的最大跌幅，全期、後段都由 2020 年 2 月到 3 月同一次下跌決定，是單一事件。後段 7 次每次拿掉一年，第 5 組對參與比較的股票平均的年化超額落在 −0.2 到 +1.9 個百分點，只有拿掉 2020 年這一種是負的。</li><li>產業組成用現行分類的快照，不是各年當時的分類，沒有歸類的 4% 到 8% 不在占比裡。</li><li>累積淨值只用每年 6 月的點，年中的回落可能更深或更淺。</li><li>看的是一年內的股數變化，不是公司宣布買回的事件，兩者不能互相替代。</li></ul></section><section class="sec" id="reader-questions"><h2>讀者常問</h2><div class="research-faq"><details><summary>減股數最多等於宣布買回嗎？</summary><p>不等於；這是股數變化分組，未拆分變化原因或公告事件。</p></details><details><summary>後段價差為負是否應做多增股數組？</summary><p>不能；後段只有七次分組，差距相對年度波動很小。</p></details></div></section><section class="sec" id="article-data"><h2>查看與下載本篇數據</h2><p>圖表下方可查看完整數字，也可以下載該圖的 CSV。下方提供整篇表格與圖表數列，期間、單位和比較條件請對照各節說明。</p><div class="research-downloads"><a download="" href="../data/article-snapshots/buyback-issuance.csv">下載表格 CSV</a><a href="../data/article-snapshots/buyback-issuance.json">查看表格與圖表資料</a><a href="../methods.html">回測數字怎麼讀？</a></div><p class="source-note">這是本篇使用的整理資料，不包含重新取得行情與執行完整策略的程式。核對數字與重跑回測，是不同的工作。</p></section><section class="sec" id="src"><h2>資料來源</h2><ul class="dlist"><li>美國證券交易委員會（SEC）年度財報的股數資料；Yahoo Finance 還原股價。最後一次完整持有期是 2025 年 6 月底分組、持有到 2026 年 6 月底。</li><li>S&amp;P 500 歷史成分變動表（維基百科）與那斯達克 100 現行名單；產業分類用 2026 年 10 月的 GICS 名單快照。</li></ul></section><section class="sec" id="reading-11"><h2>接著看</h2><ul class="dlist"><li><a href="earnings-surprise.html">每股盈餘比去年同季好很多，股價還會漲嗎？</a></li><li><a href="return-source.html">股票長期漲多少，獲利和估值各有多重要？</a></li></ul></section><p class="fine qa-back">本文依歷史資料試算，僅供一般參考。過去的結果不代表未來。</p></main><aside class="research-sidebar"><nav aria-label="文章目錄" class="toc"><div class="toc-h">本文目錄</div><ol><li><a href="#what">怎麼分組、怎麼檢驗</a></li><li><a href="#years">16 次分組，逐年的價差</a></li><li><a href="#groups">五組的年化，前段有順序、後段沒有</a></li><li><a href="#nav">價差累積淨值：1.00 到 1.98，再回到 1.14</a></li><li><a href="#long">只買股數減少最多那組</a></li><li><a href="#reading-6">股數變化不等於買回事件</a></li><li><a href="#reading-7">回測限制</a></li><li><a href="#reader-questions">讀者常問</a></li><li><a href="#article-data">查看與下載本篇數據</a></li><li><a href="#src">資料來源</a></li><li><a href="#reading-11">接著看</a></li></ol></nav><a class="research-side-link" href="../methods.html">回測數字怎麼讀？ →</a><a class="research-side-link" href="../questions.html">← 全部投資問題</a></aside></div>
+</section><section class="sec" id="reading-6"><h2>股數變化不等於買回事件</h2><p>分組看的是過去 12 個月稀釋後加權平均股數變化。減少可能和買回有關，也可能受其他股本變動及資料期間影響；增加可能源於新股或員工獎酬。本文用已申報的年報股數排序，衡量接下來一年的歷史報酬。要檢驗買回公告的效果，還需要公告與實際執行紀錄。</p><p>前段排序未在後段延續，亦不代表反向訊號有效。後段只有七次分組，平均價差 −3.67 個百分點的 t 值 −0.55，年度起伏遠大於平均差；2025 年單次 −30.35 個百分點尤其影響結果。產業比例只能描述兩組不同，沒有解釋方向反轉。這裡能說的是：前一段的優勢沒有在後一段延續，還不能因此改說增加股數的公司比較值得買。</p></section><section class="sec" id="reading-7"><h2 id="limits">回測限制</h2><ul class="dlist"><li>分組只有 16 次，前段 9 次、後段 7 次。前段平均價差除以標準誤是 2.22，要到約 2.31 才大致不像運氣；後段 −0.55，全期 0.50，次數太少，看不準。</li><li>前段的價差有一大塊來自第一次分組的 +23.25，那一次每組只有約 31 檔。</li><li>價差是一組多、一組空的比較。放空股數增加最多的公司，借券成本與實際可行性都沒有算。</li><li>選股範圍是歷來與現行的大型成分股，已下市而查不到股價的公司缺漏，今天名單上的公司也是事後才知道會留下，各組報酬可能偏高。835 檔裡，47 檔是現行與歷史代碼都查不到財報代碼的公司，182 檔是已離開名單、在股價來源完全找不到資料的公司。這兩個數字是分開統計的，彼此有重疊（相加 229 檔，大於沒進入計算的 210 檔），不能和 625 檔相加湊成 835。</li><li>只買第 5 組的最大跌幅，全期、後段都由 2020 年 2 月到 3 月同一次下跌決定，是單一事件。後段 7 次每次拿掉一年，第 5 組對參與比較的股票平均的年化超額落在 −0.2 到 +1.9 個百分點，只有拿掉 2020 年這一種是負的。</li><li>產業組成用現行分類的快照，不是各年當時的分類，沒有歸類的 4% 到 8% 不在占比裡。</li><li>累積淨值只用每年 6 月的點，年中的回落可能更深或更淺。</li><li>看的是一年內的股數變化，不是公司宣布買回的事件，兩者不能互相替代。</li></ul></section><section class="sec" id="reader-questions"><h2>讀者常問</h2><div class="research-faq"><details><summary>減股數最多等於宣布買回嗎？</summary><p>不等於；這是股數變化分組，未拆分變化原因或公告事件。</p></details><details><summary>後段價差為負是否應做多增股數組？</summary><p>不能；後段只有七次分組，差距相對年度波動很小。</p></details></div></section><section class="sec" id="article-data"><h2>查看與下載本篇數據</h2><p>圖表下方可查看完整數字，也可以下載該圖的 CSV。下方提供整篇表格與圖表數列，期間、單位和比較條件請對照各節說明。</p><div class="research-downloads"><a download href="../data/article-snapshots/buyback-issuance-16-cohorts.csv">下載 16 年分組與申報核對</a><a download="" href="../data/article-snapshots/buyback-issuance.csv">下載表格 CSV</a><a href="../data/article-snapshots/buyback-issuance.json">查看表格與圖表資料</a><a href="../methods.html">回測數字怎麼讀？</a></div><p class="source-note">這是本篇使用的整理資料，不包含重新取得行情與執行完整策略的程式。核對數字與重跑回測，是不同的工作。</p></section><section class="sec" id="src"><h2>資料來源</h2><ul class="dlist"><li>美國證券交易委員會（SEC）年度財報的股數資料；Yahoo Finance 還原股價。最後一次完整持有期是 2025 年 6 月底分組、持有到 2026 年 6 月底。</li><li>S&amp;P 500 歷史成分變動表（維基百科）與那斯達克 100 現行名單；產業分類用 2026 年 10 月的 GICS 名單快照。</li></ul></section><section class="sec" id="reading-11"><h2>接著看</h2><ul class="dlist"><li><a href="earnings-surprise.html">每股盈餘比去年同季好很多，股價還會漲嗎？</a></li><li><a href="return-source.html">股票長期漲多少，獲利和估值各有多重要？</a></li></ul></section><p class="fine qa-back">本文依歷史資料試算，僅供一般參考。過去的結果不代表未來。</p></main><aside class="research-sidebar"><nav aria-label="文章目錄" class="toc"><div class="toc-h">本文目錄</div><ol><li><a href="#what">怎麼分組、怎麼檢驗</a></li><li><a href="#years">16 次分組，逐年的價差</a></li><li><a href="#groups">五組的年化，前段有順序、後段沒有</a></li><li><a href="#nav">價差累積淨值：1.00 到 1.98，再回到 1.14</a></li><li><a href="#long">只買股數減少最多那組</a></li><li><a href="#reading-6">股數變化不等於買回事件</a></li><li><a href="#reading-7">回測限制</a></li><li><a href="#reader-questions">讀者常問</a></li><li><a href="#article-data">查看與下載本篇數據</a></li><li><a href="#src">資料來源</a></li><li><a href="#reading-11">接著看</a></li></ol></nav><a class="research-side-link" href="../methods.html">回測數字怎麼讀？ →</a><a class="research-side-link" href="../questions.html">← 全部投資問題</a></aside></div>
 </div>
 <script>
 (function () {
@@ -266,6 +149,10 @@ details.more .in>h3{padding:0 16px}
     cats: SP.cats, series: SP.series, extra: SP.extra,
     fmt: function (v) { return pp(v, 2) + ' 個百分點'; }, axisFmt: function (v) { return pp(v, 0); }, barFmt: function (v) { return pp(v, 1); }
   });
+  var spreadByPeriod = {"cats": ["2010–2018", "2019–2025"], "series": [{"name": "平均年度報酬差", "values": [5.86, -3.67]}], "extra": ["9 次分組，其中 7 次領先", "7 次分組，其中 3 次領先"]};
+  spreadByPeriod.fmt = function(v) { return pp(v, 2) + ' 個百分點'; };
+  spreadByPeriod.axisFmt = function(v) { return pp(v, 0); };
+  QCHART.mount(document.getElementById('spread-by-period'), spreadByPeriod);
   QCHART.mount(document.getElementById('f2'), {
     cats: GP.cats, series: GP.series,
     fmt: function (v) { return pct(v, 2); }, axisFmt: function (v) { return pct(v, 0); }
