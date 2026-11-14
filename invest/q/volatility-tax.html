@@ -48,143 +48,25 @@ details.more .in .dwrap{margin-top:12px;border:0;margin-left:-1px;margin-right:-
 .doc .dtbl.cmp tr.grp th{text-align:left;font-weight:700;background:var(--card);color:var(--ink)}
 details.more .in>h3{padding:0 16px}
 .doc .qa-back{max-width:720px;margin-left:0;margin-right:0;box-sizing:border-box}
+.research .volatility-figure .figure-body{padding-top:0}
+.research .volatility-figure .chartbox{margin:0;padding:0;border:0}
+@media(max-width:600px){.research .volatility-figure .chart svg text[font-weight="700"]{display:none}}
 </style>
 <script src="../invest.js"></script>
 <script src="../qchart.js"></script>
-<script>
-/* 文章主圖：原生 SVG 折線圖（可含一條色帶、一條基準線）。需先載入 qchart.js。
-   用法：QLINE.mount(box, { x:[…], xtitle, xfmt, series:[{name, values, style}], band:{lo,hi,name}, base:{value,label}, yfmt, tipExtra })
-   style：0 實線、1 虛線、2 點線、3 灰實線；顏色用 tool.css 的 --g1／--g2／--g3，線型不同，不只靠顏色。 */
-(function () {
-  'use strict';
-  var NS = 'http://www.w3.org/2000/svg';
-  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
-  function nice(min, max) {
-    var span = Math.max(max - min, 1e-9), raw = span / 5, p = Math.pow(10, Math.floor(Math.log10(raw))), f = raw / p;
-    var step = (f <= 1 ? 1 : f <= 2 ? 2 : f <= 5 ? 5 : 10) * p, lo = Math.floor(min / step + 1e-9) * step, hi = Math.ceil(max / step - 1e-9) * step, t = [];
-    for (var v = lo; v <= hi + step * 0.001; v += step) t.push(v);
-    return { ticks: t, lo: lo, hi: hi };
-  }
-  var COL = ['var(--g1)', 'var(--g2)', 'var(--g3)', 'var(--muted)'];
-  var DASH = ['', '7 4', '2 4', ''];
-  function sty(S, i) { return S.style != null ? S.style : i; }
-  function draw(host, cfg) {
-    host.innerHTML = '';
-    var n = cfg.x.length, W = Math.max(host.clientWidth || 600, 260), narrow = W < 520, H = cfg.height || (narrow ? 280 : 330);
-    var maxName = 0; cfg.series.forEach(function (S) { maxName = Math.max(maxName, S.name.length); });
-    var mr = narrow ? Math.min(78, 14 + 12 * Math.min(maxName, 5)) : Math.min(150, 14 + 12 * Math.min(maxName, 11));
-    var m = { l: narrow ? 44 : 52, r: mr, t: 14, b: 40 };
-    var pw = W - m.l - m.r, ph = H - m.t - m.b;
-    var mn = Infinity, mx = -Infinity;
-    function acc(v) { if (v == null) return; if (v < mn) mn = v; if (v > mx) mx = v; }
-    cfg.series.forEach(function (S) { S.values.forEach(acc); });
-    if (cfg.band) { cfg.band.lo.forEach(acc); cfg.band.hi.forEach(acc); }
-    if (cfg.base) acc(cfg.base.value);
-    if (cfg.ymin != null) acc(cfg.ymin);
-    if (cfg.ymax != null) acc(cfg.ymax);
-    var sc = nice(mn, mx);
-    function yPos(v) { return m.t + (sc.hi - v) / (sc.hi - sc.lo) * ph; }
-    function xPos(i) { return m.l + (n === 1 ? pw / 2 : pw * i / (n - 1)); }
-    var svg = document.createElementNS(NS, 'svg');
-    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H); svg.setAttribute('width', W); svg.setAttribute('height', H);
-    function mk(tg, attrs, txt) { var el = document.createElementNS(NS, tg); for (var k in attrs) el.setAttribute(k, attrs[k]); if (txt != null) el.textContent = txt; svg.appendChild(el); return el; }
-    sc.ticks.forEach(function (v) {
-      var y = yPos(v);
-      mk('line', { x1: m.l, x2: m.l + pw, y1: y, y2: y, stroke: 'var(--line)', 'stroke-width': 1 });
-      mk('text', { x: m.l - 6, y: y + 4, 'text-anchor': 'end', fill: 'var(--muted)', 'font-size': 11 }, (cfg.yaxis || cfg.yfmt)(v));
-    });
-    var xt = cfg.xticks || [];
-    xt.forEach(function (i) {
-      mk('line', { x1: xPos(i), x2: xPos(i), y1: m.t + ph, y2: m.t + ph + 4, stroke: 'var(--muted)', 'stroke-width': 1 });
-      mk('text', { x: xPos(i), y: m.t + ph + 17, 'text-anchor': 'middle', fill: 'var(--muted)', 'font-size': 11 }, cfg.xfmt(cfg.x[i]));
-    });
-    if (cfg.xtitle) mk('text', { x: m.l + pw / 2, y: H - 6, 'text-anchor': 'middle', fill: 'var(--muted)', 'font-size': 11 }, cfg.xtitle);
-    if (cfg.band) {
-      var d = '', i;
-      for (i = 0; i < n; i++) d += (i ? 'L' : 'M') + xPos(i) + ' ' + yPos(cfg.band.hi[i]);
-      for (i = n - 1; i >= 0; i--) d += 'L' + xPos(i) + ' ' + yPos(cfg.band.lo[i]);
-      mk('path', { d: d + 'Z', fill: 'var(--g1)', 'fill-opacity': 0.14, stroke: 'none' });
-    }
-    if (cfg.base) {
-      var yb = yPos(cfg.base.value);
-      mk('line', { x1: m.l, x2: m.l + pw, y1: yb, y2: yb, stroke: 'var(--ink2)', 'stroke-width': 1, 'stroke-dasharray': '2 3' });
-    }
-    if (cfg.vline != null) {
-      mk('line', { x1: xPos(cfg.vline), x2: xPos(cfg.vline), y1: m.t, y2: m.t + ph, stroke: 'var(--ink2)', 'stroke-width': 1, 'stroke-dasharray': '2 3' });
-      if (cfg.vlabel) mk('text', { x: xPos(cfg.vline) + 5, y: m.t + 12, fill: 'var(--ink2)', 'font-size': 11 }, cfg.vlabel);
-    }
-    cfg.series.forEach(function (S, si) {
-      var k = sty(S, si), d = '', started = false;
-      S.values.forEach(function (v, i) { if (v == null) { started = false; return; } d += (started ? 'L' : 'M') + xPos(i).toFixed(1) + ' ' + yPos(v).toFixed(1); started = true; });
-      var a = { d: d, fill: 'none', stroke: COL[k], 'stroke-width': 2.2, 'stroke-linejoin': 'round' };
-      if (DASH[k]) a['stroke-dasharray'] = DASH[k];
-      mk('path', a);
-    });
-    var lab = cfg.series.map(function (S, si) {
-      var lv = null; for (var i = S.values.length - 1; i >= 0; i--) if (S.values[i] != null) { lv = S.values[i]; break; }
-      return { S: S, k: sty(S, si), y: yPos(lv == null ? 0 : lv) };
-    }).sort(function (a, b) { return a.y - b.y; });
-    for (var li = 1; li < lab.length; li++) if (lab[li].y - lab[li - 1].y < 15) lab[li].y = lab[li - 1].y + 15;
-    var maxc = narrow ? 5 : 11;
-    lab.forEach(function (L) {
-      var nm = L.S.name.length > maxc ? L.S.name.slice(0, maxc) + '…' : L.S.name;
-      mk('text', { x: m.l + pw + 6, y: L.y + 4, fill: COL[L.k], 'font-size': 12, 'font-weight': 700 }, nm);
-    });
-    var cur = mk('line', { x1: 0, x2: 0, y1: m.t, y2: m.t + ph, stroke: 'var(--ink)', 'stroke-opacity': 0.35, visibility: 'hidden' });
-    var ov = mk('rect', { x: m.l, y: m.t, width: pw, height: ph, fill: 'transparent' });
-    host.appendChild(svg);
-    var tip = document.createElement('div'); tip.className = 'tip'; host.appendChild(tip);
-    function show(clientX) {
-      var r = svg.getBoundingClientRect(), px = (clientX - r.left) * (W / r.width);
-      var i = Math.max(0, Math.min(n - 1, Math.round((px - m.l) / pw * (n - 1))));
-      cur.setAttribute('x1', xPos(i)); cur.setAttribute('x2', xPos(i)); cur.setAttribute('visibility', 'visible');
-      var h = '<div><b>' + esc(cfg.xfmt(cfg.x[i], true)) + '</b></div>';
-      cfg.series.forEach(function (S, si) {
-        var v = S.values[i], k = sty(S, si);
-        h += '<div><b style="color:' + COL[k] + '">' + esc(S.name) + '</b>　' + (v == null ? '沒有資料' : esc(cfg.yfmt(v))) + '</div>';
-      });
-      if (cfg.band) h += '<div>' + esc(cfg.band.name) + '　' + esc(cfg.yfmt(cfg.band.lo[i])) + ' 到 ' + esc(cfg.yfmt(cfg.band.hi[i])) + '</div>';
-      tip.innerHTML = h; tip.style.display = 'block';
-      var tw = tip.offsetWidth, cx = xPos(i) * (r.width / W), left = cx + 14;
-      if (left + tw > r.width) left = cx - tw - 14;
-      tip.style.left = Math.max(0, left) + 'px'; tip.style.top = '8px';
-    }
-    function hide() { cur.setAttribute('visibility', 'hidden'); tip.style.display = 'none'; }
-    ov.addEventListener('pointermove', function (ev) { show(ev.clientX); });
-    ov.addEventListener('pointerdown', function (ev) { show(ev.clientX); });
-    ov.addEventListener('pointerleave', hide);
-  }
-  function legend(host, cfg) {
-    var h = '';
-    cfg.series.forEach(function (S, si) {
-      var k = sty(S, si);
-      h += '<span><svg width="22" height="10" aria-hidden="true"><line x1="0" x2="22" y1="5" y2="5" stroke="' + COL[k] + '" stroke-width="2.4"' + (DASH[k] ? ' stroke-dasharray="' + DASH[k] + '"' : '') + '/></svg><b style="color:' + COL[k] + '">' + esc(S.name) + '</b></span>';
-    });
-    if (cfg.band) h += '<span><svg width="22" height="10" aria-hidden="true"><rect width="22" height="10" fill="var(--g1)" fill-opacity=".25"/></svg><b style="color:var(--ink2)">' + esc(cfg.band.name) + '</b></span>';
-    host.innerHTML = h;
-  }
-  function mount(box, cfg) {
-    var lg = box.querySelector('.legend'), ch = box.querySelector('.chart');
-    function go() { legend(lg, cfg); draw(ch, cfg); }
-    go();
-    var rt; window.addEventListener('resize', function () { clearTimeout(rt); rt = setTimeout(go, 120); });
-  }
-  window.QLINE = { mount: mount };
-})();
-
-</script>
+<script src="../qline.js"></script>
 <link href="../research.css" rel="stylesheet"/><script defer="" src="../research.js"></script></head>
 <body class="research-body" data-nav="q" data-root="../">
 <div class="page doc research">
 <div id="site-header"></div>
-<p class="t-link" style="margin-top:28px"><a href="../questions.html">回到投資問題列表</a> · <a href="../leveraged.html">正二研究系列</a></p><header class="research-hero"><p class="research-kicker">投資問題研究 / 每日槓桿的波動損耗</p><h1 class="h1" style="margin-top:12px">市場震盪會吃掉槓桿 ETF 多少報酬？</h1><div class="research-meta"><span>InvestMQuest</span><span>各組資料期間見圖表與文末說明</span><span>表格與圖表可下載</span></div><div class="qa-answer">
-<div class="k">先跌後漲回原點，兩倍槓桿卻可能還在虧</div>
+<p class="t-link" style="margin-top:28px"><a href="../questions.html">回到投資問題列表</a> · <a href="../leveraged.html">正二研究系列</a></p><header class="research-hero"><p class="research-kicker">投資問題研究 / 每日槓桿的波動損耗</p><h1 class="h1" style="margin-top:12px">市場震盪會吃掉槓桿 ETF 多少報酬？</h1><div class="research-meta"><span>InvestMQuest</span><span>資料截至 2026 年 11 月，各市場期間見圖表</span><span>表格與圖表可下載</span></div><div class="qa-answer">
+<div class="k">指數漲回原點，每日兩倍仍可能虧錢</div>
 <p>假設原本的指數先跌 10%，隔天漲約 11.1%，兩天後剛好回到原點。每天做兩倍的版本先跌 20%，隔天漲約 22.2%，兩天後仍虧約 2.2%。</p>
-<p>本文把每日兩倍的結果，和把原型累積倍數平方的結果比較。台股 22 個完整年度裡，按連續複利算，差距的中間值是 2.69 個百分點。</p>
-</div></header><div class="research-stats"><div class="research-stat"><strong>3.67%／年</strong><span>2003 年 1 月至 2026 年 11 月，台股加權報酬指數每日兩倍的連續複利波動稅</span></div><div class="research-stat"><strong>2.69%</strong><span>台股 22 個完整年度波動稅的中位數</span></div><div class="research-stat"><strong>11.45%</strong><span>台股完整年度中波動稅最高值，發生於 2008 年</span></div></div><div class="research-grid"><main><section class="sec" id="what"><h2>波動稅是什麼</h2>
+<p>每天乘二後，漲跌會作用在每天不同的本金上。用台股加權報酬指數模擬，22 個完整年度的波動損耗中位數是 2.69 個百分點，2008 年達 11.45 個百分點。兩個數字都用連續複利衡量。</p>
+</div></header><div class="research-stats"><div class="research-stat"><strong>3.67 個百分點</strong><span>台股加權報酬指數全期模擬的年化波動損耗，採連續複利</span></div><div class="research-stat"><strong>2.69 個百分點</strong><span>台股 22 個完整年度的損耗中位數</span></div><div class="research-stat"><strong>11.45 個百分點</strong><span>台股樣本損耗最大的一年，2008 年</span></div></div><div class="research-grid"><main><section class="sec" id="what"><h2>波動稅是什麼</h2>
 <p class="t-body lead">槓桿每天調回兩倍，遇到股價反覆上漲、下跌時，最後的報酬會受影響。這裡把波動造成的差額稱為「波動稅」。</p>
 <h3 class="t-lab">怎麼定義</h3>
-<p class="t-body">波動稅是兩個結果的差。第一個是用來比較的算術基準，把原型這段期間的累積倍數自己乘一次。原型漲 18% 是 1.18 倍，這個基準算出 1.18 × 1.18 = 1.39 倍，也就是漲 39%。第二個是 2 倍每日調回實際拿到的結果。</p>
+<p class="t-body">波動稅是兩個結果的差。第一個是用來比較的算術基準，把原型這段期間的累積倍數自己乘一次。原型漲 18% 是 1.18 倍，這個基準算出 1.18 × 1.18 = 1.39 倍，也就是漲 39%。第二個是逐日把原本報酬乘二後，按日累乘得到的模擬結果。兩種結果都先用同一口徑換算，再相減。</p>
 <h3 class="t-lab">兩天的算例</h3>
 <p class="t-body">原型第一天跌 10%，第二天漲 11.1%，兩天後回到原點。2 倍每日調回的淨值從 100 開始。</p>
 <div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">日子</th><th scope="col">原型漲跌</th><th scope="col">原型</th><th scope="col">2 倍每日調回</th></tr></thead><tbody>
@@ -192,7 +74,7 @@ details.more .in>h3{padding:0 16px}
 <tr><th scope="row">第一天</th><td>−10%</td><td>90</td><td>80</td></tr>
 <tr><th scope="row">第二天</th><td>+11.1%</td><td>100.0</td><td>97.8</td></tr>
 </tbody></table></div>
-<p class="t-body">原型倍數是 0.9 × 1.111 = 1，自己乘自己還是 1，所以應有的結果是 100。實際第一天剩 80，第二天漲 22.2% 只漲回 97.8，少了 2.2。這 2.2 就是波動稅。</p>
+<p class="t-body">指數回到 100 元。每日兩倍第一天只剩 80 元，第二天即使漲約 22.2%，也只回到約 97.8 元。少掉的約 2.2 元是這個例子的資產差額，換成本文採用的連續複利口徑約為 2.25 個百分點。</p>
 <h3 class="t-lab">這篇怎麼量</h3>
 <ul class="steps">
 <li>原型：被放大的指數或 ETF。</li>
@@ -209,11 +91,11 @@ details.more .in>h3{padding:0 16px}
 <details class="research-method-notes"><summary>展開：比較條件與閱讀前須知</summary><aside aria-labelledby="pre-t" class="pre-box"><div class="pre-h" id="pre-t">看結果前，先留意這幾個條件</div><ul>
 <li>每年都有波動稅，是算術使然：只要當年有一天的漲跌不是零，2 倍每日調回就會比指數全年倍數自乘少一點，所以這篇量的是稅有多大。</li>
 <li>稅大致等於年化波動的平方。台股低波動的年份約一個百分點多，高波動的年份約五個百分點，2008 年超過十一個百分點。</li>
-<li>拿掉 2008 年，其餘 21 年平均仍有 3%，沒有被那一年拉高。</li>
+<li>排除 2008 年後，其餘 21 年的平均損耗仍有 3.05 個百分點。</li>
 <li>這裡算的是不含費用的理想 2 倍，過去的結果不代表未來。</li>
 </ul><h4>這次試算涵蓋哪些情況？</h4><ul><li>下一年的波動會多大。</li><li>實際基金多扣的那一塊是什麼，00631L 約 3 個百分點，原因沒查。</li><li>四個市場的年份互相重疊，140 年不能當成 140 次各自的結果。</li></ul><p class="pre-fine">台股用加權報酬指數，含股息，2003 年 1 月至 2026 年 11 月。SPY 與 QQQ 用還原收盤，日經 225 是價格指數，不含股息。費用先不扣。</p><p class="pre-link"><a href="#limits">看完整的回測限制</a></p></aside></details></section><section class="sec" id="size"><h2>量出來多大</h2>
 <p class="t-body lead">以台股加權報酬指數從 2003 年 1 月到 2026 年 11 月的走勢來算，每日重設兩倍槓桿，波動造成的差額換算成每年約 3.67%。這是把整段行情合在一起計算的結果。</p>
-<p class="t-body">這筆稅大約是年化波動的平方。年化波動 20%，0.2 × 0.2 = 0.04，也就是每年少 4%。波動 40% 就是 16%。</p>
+<p class="t-body">日漲跌幅不太大時，年化損耗約等於年化波動率的平方。波動率 20% 時，估計約少 4 個百分點。波動率升到 40% 時，估計約少 16 個百分點。這裡用的是連續複利年化。</p>
 <div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">市場</th><th scope="col">年化波動</th><th scope="col">估計值</th><th scope="col">實際值</th></tr></thead><tbody><tr><th scope="row">台股加權報酬指數</th><td class="nw">19.3%</td><td class="nw">3.73%</td><td class="nw">3.67%</td></tr><tr><th scope="row">SPY</th><td class="nw">18.5%</td><td class="nw">3.44%</td><td class="nw">3.45%</td></tr><tr><th scope="row">QQQ</th><td class="nw">26.9%</td><td class="nw">7.22%</td><td class="nw">7.23%</td></tr><tr><th scope="row">日經 225，價格指數</th><td class="nw">20.5%</td><td class="nw">4.20%</td><td class="nw">4.12%</td></tr></tbody></table></div>
 <p class="t-note">估計值用年化波動率的平方，實際值用回測算出的報酬差。台股資料從 2003 年 1 月起、SPY 從 1993 年 1 月起、QQQ 從 1999 年 3 月起、日經 225 從 1965 年 1 月起，都算到 2026 年 11 月。</p>
 <p class="t-body">四個市場全期的估計值和實際值，差距都不到 0.1 個百分點。逐年看差距大一些：台股 22 個完整年最大差 0.13 個百分點，SPY 0.26，日經 225 0.33，QQQ 0.48。這個準確度有一部分是算術使然。單日少掉的幅度，在日報酬不大時，幾乎就等於當天報酬的平方；全期加起來，就約等於年化波動的平方。所以準，只說明這筆稅由波動大小決定，不能用來預測某一檔基金的報酬。</p>
@@ -223,11 +105,11 @@ details.more .in>h3{padding:0 16px}
 <p class="t-note">兩個例子的波動稅都用年化波動的平方估算，算式是倍數乘 e 的負波動稅次方。</p>
 </section><section class="sec" id="years"><h2>哪些年份扣最多</h2>
 <p class="t-body lead">台股 22 個完整年的波動稅，最大是 2008 年的 11.45%，最小是 2017 年的 0.72%，中位數 2.69%。</p>
-<figure class="qa-fig"><span class="figure-number">圖 1</span>
-<div class="ttl">台股加權報酬指數逐年波動稅，2004 到 2025 年</div>
-<div class="tool"><div class="chartbox" id="f1"><div class="legend"></div><div aria-label="台股加權報酬指數 2004 到 2025 年每年的波動稅長條圖，2008 年最高，2017 年最低，滑鼠移上去可看數值" class="chart" role="img"></div></div></div>
-<p class="figure-read">圖 1 顯示台股完整年度波動稅逐年變動，2008 年達 11.45%，而 2017 年低至 0.72%。</p></figure>
-<p class="t-note">單位是每年百分點。2003 年與 2026 年不滿一年，不畫。22 個完整年的簡單平均是 3.43%，整段 2003 年 1 月到 2026 年 11 月按連續複利算是 3.67%，兩個數字算法不同。</p>
+<figure class="research-figure volatility-figure">
+<figcaption><span class="figure-number">圖 1</span><span class="figure-title">台股 22 個完整年度，2008 年損耗最大</span></figcaption>
+<div class="figure-body"><div class="tool"><div class="chartbox" id="f1"><div class="legend"></div><div aria-label="台股加權報酬指數 2004 到 2025 年每年的波動稅長條圖，2008 年最高，2017 年最低，滑鼠移上去可看數值" class="chart" role="img"></div></div></div></div>
+<p class="figure-note">2004 到 2025 年，台股加權報酬指數模擬每日兩倍。單位為連續複利年化的個百分點。</p><p class="figure-read">2008 年損耗達 11.45 個百分點，2017 年只有 0.72 個百分點。排除 2008 年，其餘 21 年平均仍為 3.05 個百分點。</p>
+</figure>
 <h3 class="t-lab">台股逐年</h3>
 <details class="research-method-notes"><summary>展開完整明細（24 列）</summary><div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">年份</th><th scope="col">原型報酬</th><th scope="col">年化波動</th><th scope="col">波動稅</th></tr></thead><tbody><tr><th scope="row">2003 <span class="tag">不滿一年</span></th><td class="nw">33.1%</td><td class="nw">21.4%</td><td class="nw">4.56%</td></tr><tr><th scope="row">2004</th><td class="nw">7.6%</td><td class="nw">23.6%</td><td class="nw">5.58%</td></tr><tr><th scope="row">2005</th><td class="nw">10.9%</td><td class="nw">13.0%</td><td class="nw">1.65%</td></tr><tr><th scope="row">2006</th><td class="nw">24.4%</td><td class="nw">16.3%</td><td class="nw">2.64%</td></tr><tr><th scope="row">2007</th><td class="nw">12.5%</td><td class="nw">21.0%</td><td class="nw">4.33%</td></tr><tr><th scope="row">2008</th><td class="nw">−43.1%</td><td class="nw">33.8%</td><td class="nw">11.45%</td></tr><tr><th scope="row">2009</th><td class="nw">83.3%</td><td class="nw">24.4%</td><td class="nw">6.05%</td></tr><tr><th scope="row">2010</th><td class="nw">13.6%</td><td class="nw">16.6%</td><td class="nw">2.74%</td></tr><tr><th scope="row">2011</th><td class="nw">−18.0%</td><td class="nw">21.9%</td><td class="nw">4.72%</td></tr><tr><th scope="row">2012</th><td class="nw">12.9%</td><td class="nw">15.5%</td><td class="nw">2.39%</td></tr><tr><th scope="row">2013</th><td class="nw">15.1%</td><td class="nw">11.6%</td><td class="nw">1.33%</td></tr><tr><th scope="row">2014</th><td class="nw">11.4%</td><td class="nw">11.0%</td><td class="nw">1.19%</td></tr><tr><th scope="row">2015</th><td class="nw">−6.9%</td><td class="nw">15.8%</td><td class="nw">2.44%</td></tr><tr><th scope="row">2016</th><td class="nw">15.6%</td><td class="nw">13.3%</td><td class="nw">1.72%</td></tr><tr><th scope="row">2017</th><td class="nw">19.5%</td><td class="nw">8.5%</td><td class="nw">0.72%</td></tr><tr><th scope="row">2018</th><td class="nw">−4.8%</td><td class="nw">15.7%</td><td class="nw">2.44%</td></tr><tr><th scope="row">2019</th><td class="nw">28.9%</td><td class="nw">10.6%</td><td class="nw">1.10%</td></tr><tr><th scope="row">2020</th><td class="nw">27.1%</td><td class="nw">21.3%</td><td class="nw">4.45%</td></tr><tr><th scope="row">2021</th><td class="nw">27.1%</td><td class="nw">17.0%</td><td class="nw">2.82%</td></tr><tr><th scope="row">2022</th><td class="nw">−18.7%</td><td class="nw">19.9%</td><td class="nw">3.90%</td></tr><tr><th scope="row">2023</th><td class="nw">31.5%</td><td class="nw">12.5%</td><td class="nw">1.50%</td></tr><tr><th scope="row">2024</th><td class="nw">31.7%</td><td class="nw">21.0%</td><td class="nw">4.33%</td></tr><tr><th scope="row">2025</th><td class="nw">29.5%</td><td class="nw">24.6%</td><td class="nw">5.93%</td></tr><tr><th scope="row">2026 <span class="tag">不滿一年</span></th><td class="nw">46.2%</td><td class="nw">30.4%</td><td class="nw">8.73%</td></tr></tbody></table></div></details>
 <p class="t-note">不滿一年的兩列，原型報酬是實際期間的報酬，年化波動與波動稅已按實際天數換成年率。2026 年到 11 月 9 日。</p>
@@ -240,32 +122,32 @@ details.more .in>h3{padding:0 16px}
 <p class="t-body">2009 年原型漲 83.3%，稅仍有 6.05%，是 22 年裡第二高。上漲的年份不會免稅，那一年的年化波動是 24.4%。</p>
 <h3 class="t-lab">SPY 的兩端</h3>
 <p class="t-body">SPY 完整年裡，波動稅最大是 2008 年的 17.10%，最小是 2017 年的 0.47%。下面兩張圖是這兩年的一整年。</p>
-<figure class="qa-fig"><span class="figure-number">圖 2.1</span>
-<div class="ttl">SPY 2008 年，波動稅最大的一年</div>
-<div class="tool"><div class="chartbox" id="f2a"><div class="legend"></div><div aria-label="SPY 2008 年原型、應有的結果、2 倍每日調回三條累積報酬線，滑鼠移上去可看數值" class="chart" role="img"></div></div></div>
+<figure class="research-figure volatility-figure">
+<figcaption><span class="figure-number">圖 2.1</span><span class="figure-title">2008 年下跌，SPY 的每日兩倍跌得更深</span></figcaption>
+<div class="figure-body"><div class="tool"><div class="chartbox" id="f2a"><div class="legend"></div><div aria-label="SPY 2008 年原型、應有的結果、2 倍每日調回三條累積報酬線，滑鼠移上去可看數值" class="chart" role="img"></div></div></div></div>
+<p class="figure-note">各線從 2007 年底設為 0% 報酬。平方基準用 SPY 當時的累積倍數平方，實線的每日兩倍採逐日模擬。</p><p class="figure-read">年底 SPY 跌 36.8%。平方基準跌 60.1%，每日兩倍跌 66.3%。按連續複利衡量，後兩者相差 17.10 個百分點。</p>
 </figure>
-<p class="t-note">年末原型 −36.8%，倍數 0.632。應有的結果是 0.632 × 0.632 = 0.399 倍，也就是 −60.1%。2 倍每日調回是 −66.3%。</p>
-<figure class="qa-fig"><span class="figure-number">圖 2.2</span>
-<div class="ttl">SPY 2017 年，波動稅最小的一年</div>
-<div class="tool"><div class="chartbox" id="f2b"><div class="legend"></div><div aria-label="SPY 2017 年原型、應有的結果、2 倍每日調回三條累積報酬線，滑鼠移上去可看數值" class="chart" role="img"></div></div></div>
+<figure class="research-figure volatility-figure">
+<figcaption><span class="figure-number">圖 2.2</span><span class="figure-title">2017 年波動較低，兩條槓桿線走得很近</span></figcaption>
+<div class="figure-body"><div class="tool"><div class="chartbox" id="f2b"><div class="legend"></div><div aria-label="SPY 2017 年原型、應有的結果、2 倍每日調回三條累積報酬線，滑鼠移上去可看數值" class="chart" role="img"></div></div></div></div>
+<p class="figure-note">各線從 2016 年底起算，顯示到 2017 年底的累積報酬。每日兩倍模擬未扣費用。</p><p class="figure-read">年底 SPY 漲 21.7%。平方基準漲 48.1%，每日兩倍漲 47.4%。兩者的連續複利差距為 0.47 個百分點。</p>
 </figure>
-<p class="t-note">年末原型 21.7%，倍數 1.217。應有的結果是 1.217 × 1.217 = 1.481 倍，也就是 48.1%。2 倍每日調回是 47.4%。虛線與實線幾乎重疊。</p>
 <details class="more"><summary>看 SPY 逐年</summary><div class="in"><div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">年份</th><th scope="col">原型報酬</th><th scope="col">年化波動</th><th scope="col">波動稅</th></tr></thead><tbody><tr><th scope="row">1993 <span class="tag">不滿一年</span></th><td class="nw">8.7%</td><td class="nw">9.1%</td><td class="nw">0.84%</td></tr><tr><th scope="row">1994</th><td class="nw">0.4%</td><td class="nw">10.5%</td><td class="nw">1.11%</td></tr><tr><th scope="row">1995</th><td class="nw">38.0%</td><td class="nw">8.5%</td><td class="nw">0.76%</td></tr><tr><th scope="row">1996</th><td class="nw">22.5%</td><td class="nw">13.1%</td><td class="nw">1.73%</td></tr><tr><th scope="row">1997</th><td class="nw">33.5%</td><td class="nw">20.1%</td><td class="nw">4.11%</td></tr><tr><th scope="row">1998</th><td class="nw">28.7%</td><td class="nw">22.3%</td><td class="nw">5.01%</td></tr><tr><th scope="row">1999</th><td class="nw">20.4%</td><td class="nw">18.1%</td><td class="nw">3.27%</td></tr><tr><th scope="row">2000</th><td class="nw">−9.7%</td><td class="nw">23.9%</td><td class="nw">5.67%</td></tr><tr><th scope="row">2001</th><td class="nw">−11.8%</td><td class="nw">22.1%</td><td class="nw">4.83%</td></tr><tr><th scope="row">2002</th><td class="nw">−21.6%</td><td class="nw">26.4%</td><td class="nw">6.93%</td></tr><tr><th scope="row">2003</th><td class="nw">28.2%</td><td class="nw">16.5%</td><td class="nw">2.73%</td></tr><tr><th scope="row">2004</th><td class="nw">10.7%</td><td class="nw">11.2%</td><td class="nw">1.24%</td></tr><tr><th scope="row">2005</th><td class="nw">4.8%</td><td class="nw">10.3%</td><td class="nw">1.06%</td></tr><tr><th scope="row">2006</th><td class="nw">15.8%</td><td class="nw">10.0%</td><td class="nw">1.00%</td></tr><tr><th scope="row">2007</th><td class="nw">5.1%</td><td class="nw">15.9%</td><td class="nw">2.54%</td></tr><tr><th scope="row">2008</th><td class="nw">−36.8%</td><td class="nw">41.2%</td><td class="nw">17.10%</td></tr><tr><th scope="row">2009</th><td class="nw">26.4%</td><td class="nw">26.6%</td><td class="nw">7.07%</td></tr><tr><th scope="row">2010</th><td class="nw">15.1%</td><td class="nw">17.9%</td><td class="nw">3.22%</td></tr><tr><th scope="row">2011</th><td class="nw">1.9%</td><td class="nw">23.1%</td><td class="nw">5.36%</td></tr><tr><th scope="row">2012</th><td class="nw">16.0%</td><td class="nw">12.7%</td><td class="nw">1.61%</td></tr><tr><th scope="row">2013</th><td class="nw">32.3%</td><td class="nw">11.1%</td><td class="nw">1.25%</td></tr><tr><th scope="row">2014</th><td class="nw">13.5%</td><td class="nw">11.3%</td><td class="nw">1.27%</td></tr><tr><th scope="row">2015</th><td class="nw">1.2%</td><td class="nw">15.5%</td><td class="nw">2.39%</td></tr><tr><th scope="row">2016</th><td class="nw">12.0%</td><td class="nw">13.1%</td><td class="nw">1.71%</td></tr><tr><th scope="row">2017</th><td class="nw">21.7%</td><td class="nw">6.7%</td><td class="nw">0.47%</td></tr><tr><th scope="row">2018</th><td class="nw">−4.6%</td><td class="nw">17.1%</td><td class="nw">2.91%</td></tr><tr><th scope="row">2019</th><td class="nw">31.2%</td><td class="nw">12.5%</td><td class="nw">1.60%</td></tr><tr><th scope="row">2020</th><td class="nw">18.3%</td><td class="nw">33.6%</td><td class="nw">11.58%</td></tr><tr><th scope="row">2021</th><td class="nw">28.7%</td><td class="nw">13.0%</td><td class="nw">1.71%</td></tr><tr><th scope="row">2022</th><td class="nw">−18.2%</td><td class="nw">24.3%</td><td class="nw">5.87%</td></tr><tr><th scope="row">2023</th><td class="nw">26.2%</td><td class="nw">13.1%</td><td class="nw">1.70%</td></tr><tr><th scope="row">2024</th><td class="nw">24.9%</td><td class="nw">12.6%</td><td class="nw">1.60%</td></tr><tr><th scope="row">2025</th><td class="nw">17.7%</td><td class="nw">19.3%</td><td class="nw">3.66%</td></tr><tr><th scope="row">2026 <span class="tag">不滿一年</span></th><td class="nw">11.9%</td><td class="nw">14.0%</td><td class="nw">1.98%</td></tr></tbody></table></div></div></details>
 </section><section class="sec" id="path"><h2>同樣漲 18%，一年少 5 個百分點，另一年少 15 個</h2>
 <p class="t-body lead">SPY 2025 年與 2020 年，原型都漲約 18%，2 倍每日調回比應有的結果分別少 5.0 與 15.3 個百分點。</p>
 <div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">SPY</th><th scope="col">原型漲幅</th><th scope="col">應有的結果</th><th scope="col">2 倍每日調回</th></tr></thead><tbody><tr><th scope="row">2025 年</th><td class="nw">17.7%</td><td class="nw">38.6%</td><td class="nw">33.6%</td></tr><tr><th scope="row">2020 年</th><td class="nw">18.3%</td><td class="nw">40.0%</td><td class="nw">24.7%</td></tr></tbody></table></div>
-<p class="t-body">2025 年年化波動 19.3%，2020 年 33.6%。原型漲幅一樣，波動大的那一年少得多。</p>
+<p class="t-body">2025 年年化波動 19.3%，2020 年 33.6%。兩年的 SPY 報酬接近，波動較大的 2020 年，模擬每日兩倍的報酬與平方基準差得更多。</p>
 <p class="t-body">這一對是用固定規則，從 SPY 所有年份的配對裡挑出來的。規則是全年報酬相差 2 個百分點以內，年化波動差最大。它是極端的一對，不代表一般年份。</p>
-<figure class="qa-fig"><span class="figure-number">圖 3.1</span>
-<div class="ttl">SPY 2025 年，年化波動 19.3%</div>
-<div class="tool"><div class="chartbox" id="f3a"><div class="legend"></div><div aria-label="SPY 2025 年原型、應有的結果、2 倍每日調回三條累積報酬線，縱軸範圍與圖 3.2 相同，滑鼠移上去可看數值" class="chart" role="img"></div></div></div>
+<figure class="research-figure volatility-figure">
+<figcaption><span class="figure-number">圖 3.1</span><span class="figure-title">2025 年 SPY 漲 17.7%，每日兩倍模擬漲 33.6%</span></figcaption>
+<div class="figure-body"><div class="tool"><div class="chartbox" id="f3a"><div class="legend"></div><div aria-label="SPY 2025 年原型、應有的結果、2 倍每日調回三條累積報酬線，縱軸範圍與圖 3.2 相同，滑鼠移上去可看數值" class="chart" role="img"></div></div></div></div>
+<p class="figure-note">從前一年年底收盤起算，縱軸和 2020 年圖相同。SPY 當年的年化波動是 19.3%。</p><p class="figure-read">年底平方基準漲 38.6%，每日兩倍少約 5.0 個百分點。這裡用一般累積報酬相減。</p>
 </figure>
-<p class="t-note">年末原型 17.7%，應有的結果 38.6%，2 倍每日調回 33.6%。縱軸範圍與圖 3.2 相同。</p>
-<figure class="qa-fig"><span class="figure-number">圖 3.2</span>
-<div class="ttl">SPY 2020 年，年化波動 33.6%</div>
-<div class="tool"><div class="chartbox" id="f3b"><div class="legend"></div><div aria-label="SPY 2020 年原型、應有的結果、2 倍每日調回三條累積報酬線，縱軸範圍與圖 3.1 相同，滑鼠移上去可看數值" class="chart" role="img"></div></div></div>
+<figure class="research-figure volatility-figure">
+<figcaption><span class="figure-number">圖 3.2</span><span class="figure-title">2020 年 SPY 漲 18.3%，每日兩倍模擬漲 24.7%</span></figcaption>
+<div class="figure-body"><div class="tool"><div class="chartbox" id="f3b"><div class="legend"></div><div aria-label="SPY 2020 年原型、應有的結果、2 倍每日調回三條累積報酬線，縱軸範圍與圖 3.1 相同，滑鼠移上去可看數值" class="chart" role="img"></div></div></div></div>
+<p class="figure-note">從前一年年底收盤起算，縱軸和 2025 年圖相同。SPY 當年的年化波動是 33.6%。</p><p class="figure-read">年底平方基準漲 40.0%，每日兩倍少約 15.3 個百分點。SPY 年末漲幅接近 2025 年，途中波動大得多。</p>
 </figure>
-<p class="t-note">年末原型 18.3%，應有的結果 40.0%，2 倍每日調回 24.7%。</p>
 </section><section class="sec" id="up"><h2>大漲的年份，2 倍會比直接乘 2 還多</h2>
 <p class="t-body lead">連續上漲時，2 倍每日調回的漲幅會比原型漲幅直接乘 2 還多。</p>
 <p class="t-body">兩天各漲 10%，原型是 1.1 × 1.1 = 1.21 倍，漲 21%。2 倍每日調回是 1.2 × 1.2 = 1.44 倍，漲 44%，比 21% 乘 2 的 42% 多 2 個百分點。後面的日子是在更大的本金上賺 2 倍。</p>
@@ -275,18 +157,18 @@ details.more .in>h3{padding:0 16px}
 <div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">原型的年份</th><th scope="col">年數</th><th scope="col">波動稅中位數</th></tr></thead><tbody><tr><th scope="row"><span class="nw">上漲低波動</span></th><td class="nw">63</td><td class="nw">1.65%</td></tr><tr><th scope="row"><span class="nw">上漲高波動</span></th><td class="nw">40</td><td class="nw">5.03%</td></tr><tr><th scope="row"><span class="nw">下跌低波動</span></th><td class="nw">7</td><td class="nw">2.44%</td></tr><tr><th scope="row"><span class="nw">下跌高波動</span></th><td class="nw">30</td><td class="nw">6.19%</td></tr></tbody></table></div>
 <p class="t-note">四個市場是台股加權報酬指數、SPY、QQQ、日經 225。下跌且低波動的年份只有 7 年，看個大概就好。</p>
 </section><section class="sec" id="real"><h2>實際的基金還多扣一塊</h2>
-<p class="t-body lead">00631L 每年落後 0050 應有的 2 倍 6.92%，其中 0050 自己的波動稅 3.81%，其餘 3.11%。</p>
-<p class="t-body">00631L 追的是臺灣 50 指數的單日正向 2 倍，所以原型用 0050 含息。拆法是 2 × 0050 的連續複利年化，減去 00631L 的連續複利年化。再拆成 0050 自己的波動稅，和相減剩下的其餘。</p>
+<p class="t-body lead">以 0050 的累積倍數平方為基準，00631L 的年化差距是 6.92 個百分點。其中 3.81 個百分點來自模擬每日兩倍的波動損耗，另有 3.11 個百分點是實際基金相對這條模擬線的差距。</p>
+<p class="t-body">00631L 的操作目標是臺灣 50 指數的單日兩倍報酬。本文以追蹤同一指數的 0050 含息資料作為比較序列。拆法是 2 × 0050 的連續複利年化，減去 00631L 的連續複利年化。再拆成 0050 自己的波動稅，和相減剩下的其餘。</p>
 <div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">產品</th><th scope="col">每年落後原型兩倍</th><th scope="col">其中波動稅</th><th scope="col">其餘</th></tr></thead><tbody><tr><th scope="row">00631L，對 0050 含息</th><td class="nw">6.92%</td><td class="nw">3.81%</td><td class="nw">3.11%</td></tr><tr><th scope="row">00631L，對加權報酬指數，對照</th><td class="nw">3.80%</td><td class="nw">3.24%</td><td class="nw">0.56%</td></tr><tr><th scope="row">SSO，對 SPY</th><td class="nw">6.96%</td><td class="nw">3.76%</td><td class="nw">3.20%</td></tr><tr><th scope="row">QLD，對 QQQ</th><td class="nw">8.12%</td><td class="nw">4.91%</td><td class="nw">3.21%</td></tr></tbody></table></div>
 <p class="t-note">00631L 的期間是 2014 年 10 月 31 日收盤起算，到 2026 年 11 月 10 日。對加權報酬指數的對照到 11 月 9 日。SSO 與 QLD 是 2006 年 6 月 22 日到 2026 年 11 月 12 日。</p>
 <p class="t-body">00631L 的連續複利年化是 29.1%，一般年化是 33.7%。0050 是 18.0% 與 19.7%。加權報酬指數是 16.2% 與 17.6%。</p>
 <p class="t-body">兩個原型算出來差很多，是因為這段期間 0050 漲得比加權報酬指數多。2 倍放大之後，落後的幅度也跟著放大。</p>
-<p class="t-body">其餘是相減剩下的，沒有逐項驗證。對 0050 的其餘有 3.11%，比對加權報酬指數的 0.56% 大很多。差別主要在兩條指數不同：到 11 月 9 日的共同交易日，0050 一般年化 19.5%，加權報酬指數 17.6%（上面的 19.7% 多算到 11 月 10 日）。00631L 的走勢比較貼近加權報酬指數的 2 倍。分段看，對 0050 的其餘在上市到 2022 年底是每年 −2.6 個百分點，2023 年起是 +15.3，兩段差很多，並沒有每年固定的一筆。這兩個數字用連續複利算。正二那篇的正文改用一般年化，同樣兩段是 −3.1 與 +27.5，數字大很多，因為一般年化在報酬高的時期會把差距放得更大，正負方向一致。剩下的部分沒有再拆。SSO 與 QLD 的其餘約 3.2%，原因同樣沒有查。</p>
+<p class="t-body">其餘是相減剩下的，沒有逐項驗證。對 0050 的其餘有 3.11%，比對加權報酬指數的 0.56% 大很多。差別主要在兩條指數不同：到 11 月 9 日的共同交易日，0050 一般年化 19.5%，加權報酬指數 17.6%（上面的 19.7% 多算到 11 月 10 日）。在這段期間，換成加權報酬指數後，年化差距縮小。分段看，對 0050 的其餘在上市到 2022 年底是每年 −2.6 個百分點，2023 年起是 +15.3，兩段差很多，並沒有每年固定的一筆。這兩個數字用連續複利算。正二那篇的正文改用一般年化，同樣兩段是 −3.1 與 +27.5，數字大很多，因為一般年化在報酬高的時期會把差距放得更大，正負方向一致。剩下的部分沒有再拆。SSO 與 QLD 的其餘約 3.2%，原因同樣沒有查。</p>
 <p class="t-body">波動稅占落後的比例，00631L 對 0050 是 55%，SSO 是 54%，QLD 是 60%。</p>
-<p class="t-body">正二那篇圖 3.1 把同一段的波動稅寫成 5.4，是用一般年化相減，報酬越高差距越大。這篇用連續複利，同一段是 3.81。兩個都是對的，口徑不同。</p>
+<p class="t-body">正二那篇圖 3.1 把同一段的波動稅寫成 5.4，是用一般年化相減，報酬越高差距越大。這篇用連續複利，同一段是 3.81。要比較這兩個數字，先把年化口徑統一。</p>
 </section><section class="sec" id="lose"><h2>把定義移項：2 倍什麼時候輸給原型</h2>
-<p class="t-body lead">這一節是算術說明，沒有量出新的結果。把波動稅的定義移項，2 倍輸給原型的條件就是原型年化報酬低於波動稅加費用。</p>
-<p class="t-body">所以 31 個五年期間乘三種費用共 93 次，判斷與實際在這份資料裡必然一致，對得上不代表發現了什麼。下面逐段列出，是讓讀者看見這個條件在歷史上落在哪裡。</p>
+<p class="t-body lead">若用連續複利計算，原本的年化報酬要高於波動損耗與假設費用的總和，模擬每日兩倍才會領先。</p>
+<p class="t-body">這個條件直接從算式得出。下表用各市場歷史報酬對照這個條件。表中的估計差距採連續複利口徑。</p>
 <p class="t-body">31 個五年期間裡 10 個輸。輸的那些，原型的一般年化最高只有 3.2%。贏的那些，最低是 6.4%。</p>
 <p class="t-body">五年期間從各市場第一個完整年起，每 5 個完整年切一段。最後不足 5 年的一段不算。下表以每年 2% 費用為例，費用 0 與 1% 的結果相同。</p>
 <div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">期間</th><th scope="col"><span class="nw">原型年化</span></th><th scope="col">估計的波動稅加 2% 費用</th><th scope="col"><span class="nw">2 倍結果</span></th></tr></thead><tbody><tr class="grp"><th colspan="4" scope="colgroup">台股加權報酬指數</th></tr><tr><th scope="row"><span class="nw">2004–2008</span></th><td class="nw">−1.0%</td><td class="nw">7.17%</td><td class="nw"><b>輸給原型</b></td></tr><tr><th scope="row"><span class="nw">2009–2013</span></th><td class="nw">16.0%</td><td class="nw">5.47%</td><td class="nw">贏過原型</td></tr><tr><th scope="row"><span class="nw">2014–2018</span></th><td class="nw">6.2%</td><td class="nw">3.73%</td><td class="nw">贏過原型</td></tr><tr><th scope="row"><span class="nw">2019–2023</span></th><td class="nw">16.0%</td><td class="nw">4.84%</td><td class="nw">贏過原型</td></tr><tr class="grp"><th colspan="4" scope="colgroup">SPY</th></tr><tr><th scope="row"><span class="nw">1994–1998</span></th><td class="nw">21.4%</td><td class="nw">4.51%</td><td class="nw">贏過原型</td></tr><tr><th scope="row"><span class="nw">1999–2003</span></th><td class="nw">−0.7%</td><td class="nw">6.71%</td><td class="nw"><b>輸給原型</b></td></tr><tr><th scope="row"><span class="nw">2004–2008</span></th><td class="nw">−2.3%</td><td class="nw">6.58%</td><td class="nw"><b>輸給原型</b></td></tr><tr><th scope="row"><span class="nw">2009–2013</span></th><td class="nw">16.4%</td><td class="nw">5.69%</td><td class="nw">贏過原型</td></tr><tr><th scope="row"><span class="nw">2014–2018</span></th><td class="nw">8.0%</td><td class="nw">3.74%</td><td class="nw">贏過原型</td></tr><tr><th scope="row"><span class="nw">2019–2023</span></th><td class="nw">14.5%</td><td class="nw">6.44%</td><td class="nw">贏過原型</td></tr></tbody></table></div>
@@ -297,7 +179,7 @@ details.more .in>h3{padding:0 16px}
 <p class="t-body">輸的集中在三件事：2000 到 2003 年的網路泡沫、2008 年的金融海嘯、1990 年代以後的日本。</p>
 <h3 class="t-lab">離條件最近的一段</h3>
 <p class="t-body">最接近條件的一段是日經 225 的 2016 到 2020 年，原型年化高出波動稅加費用 1.09 個百分點。</p>
-<p class="t-body">00631L 上市後，連續複利年化 29.1%，一般年化 33.7%。0050 同期連續複利年化 18.0%，一般年化 19.7%。放大 2 倍是 36.0%，實際少了 6.92 個百分點，剩下 29.1%。領先是因為 0050 這段的報酬，遠高於少掉的幅度。同樣的波動稅放在台股 2004 到 2008 年，加權報酬指數連續複利年化 −1.0%，一般年化 −1.0%，2 倍就輸給原型。</p>
+<p class="t-body">00631L 上市後，連續複利年化 29.1%，一般年化 33.7%。0050 同期連續複利年化 18.0%，一般年化 19.7%。以 0050 的連續複利年化乘二作基準，約為 36.0%。00631L 低了 6.92 個百分點，實際約為 29.1%。領先是因為 0050 這段的報酬，遠高於少掉的幅度。同樣的波動稅放在台股 2004 到 2008 年，加權報酬指數連續複利年化 −1.0%，一般年化 −1.0%，2 倍就輸給原型。</p>
 <p class="t-body">贏的期間也帶著更深的跌幅。台股加權報酬指數 2 倍的全期最大跌幅是 −82.7%，原型是 −56.0%。</p>
 </section><section class="sec" id="mult"><h2>不同倍數的歷史</h2>
 <p class="t-body lead">這張表只是描述，前後兩半可以相反。QQQ 的 2 倍前半年化 −5.2%，後半 36.2%。3 倍在 QQQ 與日經 225 的全期最大跌幅接近 <span class="nw">−100%</span>。</p>
@@ -305,7 +187,9 @@ details.more .in>h3{padding:0 16px}
 <p class="t-body">每日調回，不扣費用。年化報酬是一般年化，也就是每年複利成長率。前半與後半是把交易日數對半切。最大跌幅是從高點跌到低點的最大幅度。</p>
 <h3 class="t-lab">台股加權報酬指數</h3><p class="t-note">全期 2003-01-03 至 2026-11-09，前半 2003-01-03 至 2014-10-27，後半 2014-10-28 至 2026-11-09</p><p class="t-body" style="margin-top:14px"><b>一般年化報酬</b></p><div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">倍數</th><th scope="col">全期</th><th scope="col">前半</th><th scope="col">後半</th></tr></thead><tbody><tr><th scope="row">1 倍</th><td class="nw">13.7%</td><td class="nw">9.4%</td><td class="nw">18.0%</td></tr><tr><th scope="row">1.5 倍</th><td class="nw">19.6%</td><td class="nw">12.7%</td><td class="nw">26.6%</td></tr><tr><th scope="row">2 倍</th><td class="nw">24.6%</td><td class="nw">15.0%</td><td class="nw">34.8%</td></tr><tr><th scope="row">3 倍</th><td class="nw">31.5%</td><td class="nw">15.9%</td><td class="nw">49.0%</td></tr></tbody></table></div><p class="t-body" style="margin-top:14px"><b>最大跌幅</b></p><div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">倍數</th><th scope="col">全期</th><th scope="col">前半</th><th scope="col">後半</th></tr></thead><tbody><tr><th scope="row">1 倍</th><td class="nw">−56.0%</td><td class="nw">−56.0%</td><td class="nw">−28.6%</td></tr><tr><th scope="row">1.5 倍</th><td class="nw">−72.0%</td><td class="nw">−72.0%</td><td class="nw">−40.2%</td></tr><tr><th scope="row">2 倍</th><td class="nw">−82.7%</td><td class="nw">−82.7%</td><td class="nw">−50.7%</td></tr><tr><th scope="row">3 倍</th><td class="nw">−94.0%</td><td class="nw">−94.0%</td><td class="nw">−68.4%</td></tr></tbody></table></div><h3 class="t-lab">SPY</h3><p class="t-note">全期 1993-02-01 至 2026-11-12，前半 1993-02-01 至 2009-12-15，後半 2009-12-16 至 2026-11-12</p><p class="t-body" style="margin-top:14px"><b>一般年化報酬</b></p><div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">倍數</th><th scope="col">全期</th><th scope="col">前半</th><th scope="col">後半</th></tr></thead><tbody><tr><th scope="row">1 倍</th><td class="nw">10.7%</td><td class="nw">7.6%</td><td class="nw">14.0%</td></tr><tr><th scope="row">1.5 倍</th><td class="nw">15.1%</td><td class="nw">9.9%</td><td class="nw">20.4%</td></tr><tr><th scope="row">2 倍</th><td class="nw">18.5%</td><td class="nw">11.2%</td><td class="nw">26.2%</td></tr><tr><th scope="row">3 倍</th><td class="nw">22.4%</td><td class="nw">10.5%</td><td class="nw">35.6%</td></tr></tbody></table></div><p class="t-body" style="margin-top:14px"><b>最大跌幅</b></p><div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">倍數</th><th scope="col">全期</th><th scope="col">前半</th><th scope="col">後半</th></tr></thead><tbody><tr><th scope="row">1 倍</th><td class="nw">−55.2%</td><td class="nw">−55.2%</td><td class="nw">−33.7%</td></tr><tr><th scope="row">1.5 倍</th><td class="nw">−72.2%</td><td class="nw">−72.2%</td><td class="nw">−47.3%</td></tr><tr><th scope="row">2 倍</th><td class="nw">−83.7%</td><td class="nw">−83.7%</td><td class="nw">−58.8%</td></tr><tr><th scope="row">3 倍</th><td class="nw">−96.4%</td><td class="nw">−96.4%</td><td class="nw">−76.1%</td></tr></tbody></table></div><h3 class="t-lab">QQQ</h3><p class="t-note">全期 1999-03-11 至 2026-11-12，前半 1999-03-11 至 2013-01-09，後半 2013-01-10 至 2026-11-12</p><p class="t-body" style="margin-top:14px"><b>一般年化報酬</b></p><div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">倍數</th><th scope="col">全期</th><th scope="col">前半</th><th scope="col">後半</th></tr></thead><tbody><tr><th scope="row">1 倍</th><td class="nw">10.5%</td><td class="nw">2.4%</td><td class="nw">19.3%</td></tr><tr><th scope="row">1.5 倍</th><td class="nw">13.1%</td><td class="nw">−0.2%</td><td class="nw">28.2%</td></tr><tr><th scope="row">2 倍</th><td class="nw">13.7%</td><td class="nw">−5.2%</td><td class="nw">36.2%</td></tr><tr><th scope="row">3 倍</th><td class="nw">8.6%</td><td class="nw">−20.6%</td><td class="nw">48.7%</td></tr></tbody></table></div><p class="t-body" style="margin-top:14px"><b>最大跌幅</b></p><div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">倍數</th><th scope="col">全期</th><th scope="col">前半</th><th scope="col">後半</th></tr></thead><tbody><tr><th scope="row">1 倍</th><td class="nw">−83.0%</td><td class="nw">−83.0%</td><td class="nw">−35.1%</td></tr><tr><th scope="row">1.5 倍</th><td class="nw">−94.6%</td><td class="nw">−94.6%</td><td class="nw">−49.8%</td></tr><tr><th scope="row">2 倍</th><td class="nw">−98.5%</td><td class="nw">−98.5%</td><td class="nw">−62.2%</td></tr><tr><th scope="row">3 倍</th><td class="nw">−100.0%</td><td class="nw">−100.0%</td><td class="nw">−80.3%</td></tr></tbody></table></div><h3 class="t-lab">日經 225，價格指數</h3><p class="t-note">全期 1965-01-06 至 2026-11-11，前半 1965-01-06 至 1995-11-01，後半 1995-11-02 至 2026-11-11</p><p class="t-body" style="margin-top:14px"><b>一般年化報酬</b></p><div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">倍數</th><th scope="col">全期</th><th scope="col">前半</th><th scope="col">後半</th></tr></thead><tbody><tr><th scope="row">1 倍</th><td class="nw">6.5%</td><td class="nw">8.9%</td><td class="nw">4.1%</td></tr><tr><th scope="row">1.5 倍</th><td class="nw">8.2%</td><td class="nw">12.5%</td><td class="nw">4.1%</td></tr><tr><th scope="row">2 倍</th><td class="nw">8.8%</td><td class="nw">15.3%</td><td class="nw">2.7%</td></tr><tr><th scope="row">3 倍</th><td class="nw">6.6%</td><td class="nw">18.5%</td><td class="nw">−4.1%</td></tr></tbody></table></div><p class="t-body" style="margin-top:14px"><b>最大跌幅</b></p><div class="dwrap"><table class="dtbl cmp"><thead><tr><th scope="col">倍數</th><th scope="col">全期</th><th scope="col">前半</th><th scope="col">後半</th></tr></thead><tbody><tr><th scope="row">1 倍</th><td class="nw">−81.9%</td><td class="nw">−63.2%</td><td class="nw">−68.9%</td></tr><tr><th scope="row">1.5 倍</th><td class="nw">−95.0%</td><td class="nw">−80.0%</td><td class="nw">−87.2%</td></tr><tr><th scope="row">2 倍</th><td class="nw">−99.0%</td><td class="nw">−90.1%</td><td class="nw">−95.7%</td></tr><tr><th scope="row">3 倍</th><td class="nw">−100.0%</td><td class="nw">−98.1%</td><td class="nw">−99.7%</td></tr></tbody></table></div>
 </div></details>
-</section><section class="sec" id="reading-9"><h2>波動損耗取決於路徑，不只看終點漲跌</h2><p>每日兩倍調整會讓每一天的損益作用在當時淨值上。原型先跌再漲回原點時，槓桿部位的本金已縮小，後續反彈便不足以回到起點；若原型連續上漲，較大的本金也會放大後續收益。因此同一個原型期末報酬，可以因中途每天的漲跌幅度不同，產生不同的每日槓桿結果。</p><p>本文把「原型累積倍數平方」當成比較基準，與每日兩倍實際結果的差稱為波動稅，並用連續複利年化表達。這是特定定義下的算術差額，不等於基金實際的總成本。歷史全期估計接近年化波動平方，是因為小幅日報酬下的每日損耗近似報酬平方加總；這一關係說明損耗如何形成，不能直接預測未來某年的數值。</p><p>實際產品還會有管理費、融資與追蹤差異等其他落後來源；頁面對 00631L、SSO、QLD 的拆解把剩餘部分列為未查明。四個市場跨越期間也不相同，且年份互相重疊，不能把 140 個市場年度當成獨立樣本。這套概念適合比較每日重設機制的路徑風險，不能單獨決定槓桿倍數是否適合持有。</p><p>使用連續複利口徑是為了讓不同期間的對數成長率可相減；一般年化報酬換算後的百分點差會隨報酬水準變動。因此文中 00631L 的連續複利波動稅與另一篇用一般年化呈現的數值不同，不能視為算錯或直接比較。</p></section><section class="sec" id="limits"><h2>回測限制</h2>
+</section><section class="sec" id="reading-9"><h2>拿到兩檔基金的數字，可以怎麼比？</h2>
+<p>先把買進日和截止日對齊，再分別看期末報酬和中途跌幅。SPY 在 2020 年和 2025 年都漲約 18%，每日兩倍模擬的年末報酬卻差近 9 個百分點。若直接比較實際基金，還要看各自追蹤的指數和市價。</p>
+<p>可以<a href="../tool.html?p1=00631L:100&amp;p2=0050:100">試算正二和 0050 的同期表現</a>，調整開始日期，看看哪段行情拉開報酬差，以及途中各跌多深。工具使用基金實際資料，依工具所列的日期計算。</p></section><section class="sec" id="limits"><h2>回測限制</h2>
 <ul class="dlist">
 <li>日經 225 是價格指數，不含股息。1965 年起的日資料沒有逐項稽核。</li>
 <li>台股、SPY、QQQ 受同一批全球事件影響，四個市場合併的 140 個完整年互相重疊，不能當成 140 次各自的結果。五年期間的 27 段也一樣。</li>
@@ -314,7 +198,7 @@ details.more .in>h3{padding:0 16px}
 <li>只有四個市場，沒有其他國家、債券或商品。</li>
 <li>五年分段從各市場第一個完整年起切，是事前訂的，換起點會換段。最接近門檻的一段只差 1.09 個百分點。</li>
 <li>倍數表只描述這幾段歷史，不能用來選倍數。3 倍遇到原型單日跌 33.3% 以上就歸零，這份資料最大的單日跌幅沒碰到。</li>
-</ul></section><section class="sec" id="reader-questions"><h2>讀者常問</h2><div class="research-faq"><details><summary>波動稅是否等於槓桿 ETF 的全部費用？</summary><p>不是。這裡量的是理想每日兩倍相對於原型累積倍數平方的差；實際產品另有費用與其他追蹤差異。</p></details><details><summary>年化波動 20% 是否代表下一年一定損失 4%？</summary><p>不是。平方關係是歷史算術近似，下一年的實際波動與報酬路徑未知，不能當成確定預測。</p></details></div></section><section class="sec" id="article-data"><h2>查看與下載本篇數據</h2><p>圖表下方可選擇觀察點，查看完整數字，也可以下載該圖的 CSV。下方提供整篇表格與圖表數列，期間、單位和比較條件請對照各節說明。</p><div class="research-downloads"><a download="" href="../data/article-snapshots/volatility-tax.csv">下載表格 CSV</a><a href="../data/article-snapshots/volatility-tax.json">查看表格與圖表資料</a><a href="../methods.html">回測數字怎麼讀？</a></div><p class="source-note">這是本篇使用的整理資料，不包含重新取得行情與執行完整策略的程式。核對數字與重跑回測，是不同的工作。</p></section><section class="sec" id="src"><h2>資料來源</h2><ul class="dlist"><li>台股加權報酬指數：證交所發布，含股息。0050：證交所官方還原日線。00631L：證交所官方日線。</li><li>SPY、QQQ、SSO、QLD：Yahoo Finance 還原收盤。日經 225：Yahoo Finance，價格指數。</li><li>資料截至 2026 年 11 月 9 日至 12 日，各序列最後一個交易日不同。00631L 與原型只用共同交易日。</li></ul></section><section class="sec" id="reading-14"><h2>接著看</h2><ul class="dlist"><li><a href="leveraged-2x.html">正二（00631L）能不能長抱？</a></li><li><a href="leveraged-2x-catchup.html">在大跌前買正二，多久追得上 0050？</a></li><li><a href="vol-targeting.html">市場震盪時自動減碼，能少賠又不少賺嗎？</a></li></ul></section><p class="fine qa-back">本文依歷史資料試算，僅供一般參考。過去的結果不代表未來。</p></main><aside class="research-sidebar"><nav aria-label="文章目錄" class="toc"><div class="toc-h">本文目錄</div><ol><li><a href="#what">波動稅是什麼</a></li><li><a href="#size">量出來多大</a></li><li><a href="#years">哪些年份扣最多</a></li><li><a href="#path">同樣漲 18%，一年少 5 個百分點，另一年少 15 個</a></li><li><a href="#up">大漲的年份，2 倍會比直接乘 2 還多</a></li><li><a href="#real">實際的基金還多扣一塊</a></li><li><a href="#lose">把定義移項：2 倍什麼時候輸給原型</a></li><li><a href="#mult">不同倍數的歷史</a></li><li><a href="#reading-9">波動損耗取決於路徑，不只看終點漲跌</a></li><li><a href="#limits">回測限制</a></li><li><a href="#reader-questions">讀者常問</a></li><li><a href="#article-data">查看與下載本篇數據</a></li><li><a href="#src">資料來源</a></li><li><a href="#reading-14">接著看</a></li></ol></nav><a class="research-side-link" href="../methods.html">回測數字怎麼讀？ →</a><a class="research-side-link" href="../questions.html">← 全部投資問題</a></aside></div>
+</ul></section><section class="sec" id="reader-questions"><h2>讀者常問</h2><div class="research-faq"><details><summary>波動稅是否等於槓桿 ETF 的全部費用？</summary><p>波動損耗來自逐日複利。基金另有管理費等成本，也可能出現追蹤差異。表中的剩餘差額尚未逐項歸因。</p></details><details><summary>年化波動 20% 是否代表下一年一定損失 4%？</summary><p>4 個百分點是假設年化波動確實為 20% 時的近似值，使用連續複利口徑。下一年的波動要等行情走完才能核算。</p></details></div></section><section class="sec" id="article-data"><h2>查看與下載本篇數據</h2><p>圖表下方可選擇觀察點，查看完整數字，也可以下載該圖的 CSV。下方提供整篇表格與圖表數列，期間、單位和比較條件請對照各節說明。</p><div class="research-downloads"><a download="" href="../data/article-snapshots/volatility-tax.csv">下載表格 CSV</a><a href="../data/article-snapshots/volatility-tax.json">查看表格與圖表資料</a><a href="../methods.html">回測數字怎麼讀？</a></div><p class="source-note">下載檔收錄刊登的表格和圖表數列。折線圖是抽樣日期，重算每日兩倍須使用完整日線。</p></section><section class="sec" id="src"><h2>資料來源</h2><ul class="dlist"><li>台股加權報酬指數：證交所發布，含股息。0050：證交所官方還原日線。00631L 使用證交所官方日線。基金操作目標見<a href="https://www.yuantaetfs.com/product/detail/00631L/Basic_information">元大投信 00631L 基本資料</a>。</li><li>SPY、QQQ、SSO、QLD：Yahoo Finance 還原收盤。日經 225：Yahoo Finance，價格指數。</li><li>資料截至 2026 年 11 月 9 日至 12 日，各序列最後一個交易日不同。00631L 與原型只用共同交易日。</li></ul></section><section class="sec" id="reading-14"><h2>接著看</h2><ul class="dlist"><li><a href="leveraged-2x.html">正二（00631L）能不能長抱？</a></li><li><a href="leveraged-2x-catchup.html">在大跌前買正二，多久追得上 0050？</a></li><li><a href="vol-targeting.html">市場震盪時自動減碼，能少賠又不少賺嗎？</a></li></ul></section><p class="fine qa-back">本文依歷史資料試算，僅供一般參考。過去的結果不代表未來。</p></main><aside class="research-sidebar"><nav aria-label="文章目錄" class="toc"><div class="toc-h">本文目錄</div><ol><li><a href="#what">波動稅是什麼</a></li><li><a href="#size">量出來多大</a></li><li><a href="#years">哪些年份扣最多</a></li><li><a href="#path">同樣漲 18%，一年少 5 個百分點，另一年少 15 個</a></li><li><a href="#up">大漲的年份，2 倍會比直接乘 2 還多</a></li><li><a href="#real">實際的基金還多扣一塊</a></li><li><a href="#lose">把定義移項：2 倍什麼時候輸給原型</a></li><li><a href="#mult">不同倍數的歷史</a></li><li><a href="#reading-9">拿到兩檔基金的數字，可以怎麼比？</a></li><li><a href="#limits">回測限制</a></li><li><a href="#reader-questions">讀者常問</a></li><li><a href="#article-data">查看與下載本篇數據</a></li><li><a href="#src">資料來源</a></li><li><a href="#reading-14">接著看</a></li></ol></nav><a class="research-side-link" href="../methods.html">回測數字怎麼讀？ →</a><a class="research-side-link" href="../questions.html">← 全部投資問題</a></aside></div>
 </div>
 <script>
 (function () {
@@ -325,29 +209,19 @@ details.more .in>h3{padding:0 16px}
     ticks.forEach(function (pf) { for (var i = 0; i < F.x.length; i++) if (F.x[i].indexOf(pf) === 0) { idx.push(i); break; } });
     var cfg = {
       x: F.x, xticks: idx, xtitle: '月份', height: 300,
-      series: [{ name: '原型', values: F.p, style: 3 }, { name: '應有的結果', values: F.i, style: 1 }, { name: '2 倍每日調回', values: F.d, style: 0 }],
+      series: [{ name: 'SPY', values: F.p, style: 3 }, { name: '平方基準', values: F.i, style: 1 }, { name: '模擬每日兩倍', values: F.d, style: 0 }],
       xfmt: function (v, tip) { return tip ? v : String(parseInt(v.slice(5, 7), 10)) + ' 月'; },
       yfmt: function (v) { return pct(v, 1); },
       yaxis: function (v) { return pct(v, 0); },
       base: { value: 0, label: '0' }
     };
     if (lim) { cfg.ymin = lim[0]; cfg.ymax = lim[1]; }
-    var box = document.getElementById(id);
-    QLINE.mount(box, cfg);
-    var ch = box.querySelector('.chart');
-    function fix() {
-      ch.querySelectorAll('text').forEach(function (t) {
-        var x = t.textContent;
-        if (x.indexOf('2 倍每日') === 0 && x.slice(-1) === '\u2026') t.textContent = '2 倍';
-      });
-    }
-    fix();
-    new MutationObserver(fix).observe(ch, { childList: true });
+    QLINE.mount(document.getElementById(id), cfg);
   }
   QCHART.mount(document.getElementById('f1'), {
     cats: ["2004", "2005", "2006", "2007", "2008", "2009", "2010", "2011", "2012", "2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022", "2023", "2024", "2025"],
     series: [{ name: '波動稅', values: [5.58, 1.65, 2.64, 4.33, 11.45, 6.05, 2.74, 4.72, 2.39, 1.33, 1.19, 2.44, 1.72, 0.72, 2.44, 1.1, 4.45, 2.82, 3.9, 1.5, 4.33, 5.93] }],
-    fmt: function (v) { return v.toFixed(2) + '%'; }, axisFmt: function (v) { return v.toFixed(0) + '%'; },
+    fmt: function (v) { return v.toFixed(2) + ' 個百分點'; }, axisFmt: function (v) { return v.toFixed(0); },
     barFmt: function (v) { return v.toFixed(1); }, min: 0,
     extra: ["年化波動 23.6%，原型報酬 7.6%", "年化波動 13.0%，原型報酬 10.9%", "年化波動 16.3%，原型報酬 24.4%", "年化波動 21.0%，原型報酬 12.5%", "年化波動 33.8%，原型報酬 −43.1%", "年化波動 24.4%，原型報酬 83.3%", "年化波動 16.6%，原型報酬 13.6%", "年化波動 21.9%，原型報酬 −18.0%", "年化波動 15.5%，原型報酬 12.9%", "年化波動 11.6%，原型報酬 15.1%", "年化波動 11.0%，原型報酬 11.4%", "年化波動 15.8%，原型報酬 −6.9%", "年化波動 13.3%，原型報酬 15.6%", "年化波動 8.5%，原型報酬 19.5%", "年化波動 15.7%，原型報酬 −4.8%", "年化波動 10.6%，原型報酬 28.9%", "年化波動 21.3%，原型報酬 27.1%", "年化波動 17.0%，原型報酬 27.1%", "年化波動 19.9%，原型報酬 −18.7%", "年化波動 12.5%，原型報酬 31.5%", "年化波動 21.0%，原型報酬 31.7%", "年化波動 24.6%，原型報酬 29.5%"]
   });

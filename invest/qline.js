@@ -26,6 +26,8 @@
     cfg.series.forEach(function (S) { S.values.forEach(acc); });
     if (cfg.band) { cfg.band.lo.forEach(acc); cfg.band.hi.forEach(acc); }
     if (cfg.base) acc(cfg.base.value);
+    acc(cfg.ymin);
+    acc(cfg.ymax);
     var sc = nice(mn, mx);
     function yPos(v) { return m.t + (sc.hi - v) / (sc.hi - sc.lo) * ph; }
     function xPos(i) { return m.l + (n === 1 ? pw / 2 : pw * i / (n - 1)); }
