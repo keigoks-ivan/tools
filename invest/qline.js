@@ -108,6 +108,8 @@
     host.innerHTML = h;
   }
   function mount(box, cfg) {
+    box.__researchChart = cfg;
+    box.__researchChartKind = "line";
     var lg = box.querySelector('.legend'), ch = box.querySelector('.chart');
     function go() { legend(lg, cfg); draw(ch, cfg); }
     go();

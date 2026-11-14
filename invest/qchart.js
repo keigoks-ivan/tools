@@ -130,6 +130,8 @@
   }
   /* 一次畫好：host 內放 .legend 與 .chart 兩個子元素 */
   function mount(box, cfg) {
+    box.__researchChart = cfg;
+    box.__researchChartKind = "bar";
     var lg = box.querySelector('.legend'), ch = box.querySelector('.chart');
     function draw() { legend(lg, cfg.series); bars(ch, cfg); }
     draw();
