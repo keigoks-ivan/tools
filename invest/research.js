@@ -10,6 +10,24 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
 (function(){'use strict';
 function el(tag,cls,text){var x=document.createElement(tag);if(cls)x.className=cls;if(text!=null)x.textContent=text;return x;}
 function csvCell(value){var s=value==null?'':String(value);if(/^[=+@]/.test(s))s="'"+s;return '"'+s.replace(/"/g,'""')+'"';}
+function addValueTable(controls,xs,label,series,fmt,extra){
+var details=el('details','research-chart-values'),wrap=el('div','research-chart-table'),table=el('table');
+var summary=el('summary','','查看圖表數值');
+wrap.setAttribute('tabindex','0');
+wrap.setAttribute('role','region');
+wrap.setAttribute('aria-label','圖表數值');
+var head=table.createTHead().insertRow(),body=table.createTBody();
+var headers=['項目'].concat(series.map(function(s){return s.name;}));
+var hasExtra=extra&&extra.some(Boolean);
+if(hasExtra)headers.push('說明');
+headers.forEach(function(text){var th=el('th','',text);th.scope='col';head.appendChild(th);});
+xs.forEach(function(_,i){
+var row=body.insertRow(),th=el('th','',label(i));th.scope='row';row.appendChild(th);
+series.forEach(function(s){var v=s.values[i];row.insertCell().textContent=v==null?'—':fmt(v);});
+if(hasExtra)row.insertCell().textContent=extra[i]||'';
+});
+wrap.appendChild(table);details.append(summary,wrap);controls.appendChild(details);
+}
 function init(){if(!document.querySelector('.research'))return;
 document.querySelectorAll('.chartbox').forEach(function(box,index){
 var cfg=box.__researchChart;if(!cfg||box.querySelector('.research-chart-control'))return;
@@ -18,11 +36,15 @@ if(!xs||!xs.length)return;
 var label=function(i){return line&&cfg.xfmt?cfg.xfmt(xs[i],true):String(xs[i]);};
 var series=cfg.series.slice();if(cfg.band){series.push({name:cfg.band.name+' 下界',values:cfg.band.lo});series.push({name:cfg.band.name+' 上界',values:cfg.band.hi});}
 var controls=el('div','curve-control research-chart-control'),id='research-point-'+index;
-var lab=el('label','',line?'選擇觀察點，查看完整數值':'選擇比較項目，查看完整數值');lab.htmlFor=id;
+if(line){
+var lab=el('label','','選擇觀察點，查看完整數值');lab.htmlFor=id;
 var input=el('input');input.type='range';input.id=id;input.min=0;input.max=xs.length-1;input.step=1;input.value=0;
 var output=el('output','curve-readout');output.setAttribute('aria-live','polite');
 function show(){var i=Number(input.value);output.replaceChildren(el('b','',label(i)));series.forEach(function(s){var v=s.values[i];output.appendChild(el('span','',s.name+'：'+(v==null?'沒有資料':fmt(v))));});if(cfg.extra&&cfg.extra[i])output.appendChild(el('span','',cfg.extra[i]));input.setAttribute('aria-valuetext',output.textContent);}
 input.addEventListener('input',show);controls.append(lab,input,output);show();
+}else{
+addValueTable(controls,xs,label,series,fmt,cfg.extra);
+}
 var actions=el('div','research-chart-actions'),button=el('button','','下載本圖 CSV');button.type='button';button.addEventListener('click',function(){
 var rows=[['項目'].concat(series.map(function(s){return s.name;})).concat(['補充說明'])];
 xs.forEach(function(_,i){rows.push([label(i)].concat(series.map(function(s){return s.values[i];})).concat([cfg.extra&&cfg.extra[i]||'']));});

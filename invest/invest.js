@@ -18,7 +18,7 @@
       '<div class="topbar"><div class="topbar-in"><div class="tag-l">用歷史資料檢驗投資說法</div>' +
       '<a href="' + base + 'index.html#about">數字怎麼算</a></div></div>' +
       '<header class="hdr"><div class="hdr-in">' +
-      '<a class="brand" href="' + base + 'index.html">InvestMQuest</a>' +
+      '<a class="brand" href="' + base + 'index.html">投資研究</a>' +
       '<nav class="nav" aria-label="主選單">' +
       link('questions', 'questions.html', '投資問題回測') +
       link('leveraged', 'leveraged.html', '正二系列') +
