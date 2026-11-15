@@ -474,7 +474,7 @@
       mk('text', { x: m.l - 6, y: y + 4, 'text-anchor': 'end', fill: 'var(--muted)', 'font-size': 11 }, cfg.fmt(v));
     });
     var xLabs = [];
-    xTicks(x0, x1, pw).forEach(function (tk) {
+    (cfg.xTicks || xTicks(x0, x1, pw)).forEach(function (tk) {
       var x = xPos(tk.t);
       mk('line', { x1: x, x2: x, y1: m.t, y2: m.t + ph, stroke: 'var(--line)', 'stroke-width': 0.8, 'stroke-dasharray': '2 4' });
       xLabs.push(mk('text', { x: x, y: H - 8, 'text-anchor': 'middle', fill: 'var(--muted)', 'font-size': 11 }, tk.label));
