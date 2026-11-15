@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b141f">
+<title>跌下來了，你會補嗎？｜半正二半定存</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;600;700;800;900&display=swap">
+<link rel="stylesheet" href="0050.css?v=2">
+<link rel="stylesheet" href="half-2x.css?v=1">
+<script type="module" src="half-2x.js?v=1"></script>
+</head>
+<body class="half-game">
+<header class="top shell">
+  <a class="article-link" href="../q/leveraged-2x-cash.html"><span aria-hidden="true">‹</span> 回到回測文章</a>
+  <span class="top-title">半正二半定存</span>
+  <a class="article-link" href="0050.html">玩定期定額關 <span aria-hidden="true">›</span></a>
+</header>
+<main class="shell">
+  <section id="hub" aria-labelledby="game-title">
+    <div class="hero">
+      <div class="hero-content">
+        <p class="kicker">100 萬元起步 · 10 次決定</p>
+        <h1 id="game-title">跌下來了，<br>你會補嗎？</h1>
+        <p class="hero-summary">50 萬買正二，50 萬留定存。行情一變，兩邊就不再各半。<br class="desktop-only">要動用定存把正二補回去，還是再等等？</p>
+        <button class="primary" id="start" type="button" disabled>載入行情中…</button>
+      </div>
+    </div>
+    <p class="load-error" id="load-error" role="alert" hidden></p>
+  </section>
+  <section id="board" aria-labelledby="board-title" hidden>
+    <div class="board-heading">
+      <div>
+        <button type="button" class="text-button" data-hub>‹ 回開場</button>
+        <p class="kicker">半正二半定存</p>
+        <h1 id="board-title" tabindex="-1">現在調整嗎？</h1>
+      </div>
+      <div class="time"><span class="time-caption">決策進度</span><b id="turn"></b></div>
+    </div>
+    <progress id="progress" max="10" value="0" aria-label="關卡進度"></progress>
+    <div class="board-grid">
+      <section class="panel market">
+        <div class="market-heading">
+          <div><h2>行情走到這裡</h2><p>到目前收盤為止，起點為 100</p></div>
+        </div>
+        <div class="chart-key"><span>正二</span><span>0050</span></div>
+        <canvas id="market-chart" role="img"></canvas>
+        <div class="market-caption"><span id="market-start-label"></span><span>目前收盤</span></div>
+      </section>
+      <section class="panel orders">
+        <h2>你的部位</h2>
+        <div class="portfolio-amount" id="portfolio-total"></div>
+        <div class="mix-caption">
+          <span>正二 <b id="leveraged-weight"></b></span>
+          <span>定存 <b id="deposit-weight"></b></span>
+        </div>
+        <div class="mix-track" aria-hidden="true"><div id="mix-fill"></div></div>
+        <div class="mix-middle" aria-hidden="true">50／50</div>
+        <p class="rebalance-preview" id="rebalance-preview"></p>
+        <div class="action-grid">
+          <button type="button" class="action action-buy" data-move="rebalance"><strong>調回各半</strong><small>下一個交易日收盤成交</small></button>
+          <button type="button" class="action" data-move="hold"><strong>先不調整</strong><small>持有股數照舊</small></button>
+        </div>
+        <div class="round-message" id="round-message" role="status"></div>
+      </section>
+    </div>
+  </section>
+  <section id="result" aria-labelledby="result-title" hidden>
+    <div class="reveal">
+      <button type="button" class="text-button" data-hub>‹ 回開場</button>
+      <p class="kicker" id="reveal-period"></p>
+      <h1 id="result-title" tabindex="-1">從 2024 年 7 月高點出發</h1>
+      <p>你走過了當年 8 月的急跌，接著又遇到隔年 4 月的下探。每次挪錢回正二，都會改變下一段行情裡的持股比重。</p>
+    </div>
+    <div class="result-stats">
+      <div><span>你的期末資產</span><b id="result-total"></b></div>
+      <div><span>你的最大跌幅</span><b id="result-dd"></b></div>
+      <div><span>動手調整</span><b id="trade-count"></b></div>
+    </div>
+    <div class="result-grid">
+      <section class="panel score-panel">
+        <div class="score-heading">
+          <div><h2>同一筆 100 萬元</h2><p>點選做法，查看兩組帳戶的差距</p></div>
+          <label class="result-select"><span>定期調整</span>
+            <select id="frequency"><option value="annual">每年</option><option value="quarterly">每季</option><option value="monthly">每月</option></select>
+          </label>
+        </div>
+        <div id="score" class="score" aria-label="三種基準的期末資產和最大跌幅"></div>
+        <p id="comparison" role="status"></p>
+      </section>
+      <section class="panel result-chart-panel">
+        <div class="comparison-heading">
+          <div><h2>資產走勢</h2><p>圖上可點選任一天</p></div>
+        </div>
+        <div class="chart-key"><span>你的操作</span><span id="benchmark-label"></span></div>
+        <canvas id="result-chart" role="img"></canvas>
+        <div class="market-caption result-dates"><span id="chart-start"></span><span id="chart-end"></span></div>
+        <div class="result-steps" aria-label="回看帳戶走勢">
+          <button type="button" id="previous-point" aria-label="前一個交易日">‹</button>
+          <button type="button" id="spotlight">跳到你的最深跌幅</button>
+          <button type="button" id="next-point" aria-label="下一個交易日">›</button>
+        </div>
+        <div id="result-detail" class="result-detail" role="status"></div>
+      </section>
+    </div>
+    <details class="panel replay-log">
+      <summary>回看你的每一次決定</summary>
+      <ol id="replay-log"></ol>
+    </details>
+    <div class="result-footer">
+      <button type="button" class="primary" id="retry">換個做法重玩 <span aria-hidden="true">→</span></button>
+      <a href="../q/leveraged-2x-cash.html#frequency">回文章核對回測</a>
+    </div>
+  </section>
+</main>
+<footer class="shell foot">正二採分割調整後市價，0050 採含息還原價，定存依台銀一年期利率序列。未計交易費與稅。</footer>
+<noscript><p class="shell load-error">需要開啟 JavaScript 才能重播行情。</p></noscript>
+</body>
+</html>
