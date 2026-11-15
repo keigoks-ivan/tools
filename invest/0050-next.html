@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="輸入目前 0050 市值與每月投入，用同一段歷史比較續買、只改新扣款、先換一部分三種做法。">
+<title>已有 0050，下一筆怎麼買？</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Noto+Sans+TC:wght@400;500;700&amp;family=Noto+Serif+TC:wght@500;700&amp;display=swap">
+<link rel="stylesheet" href="invest.css">
+<link rel="stylesheet" href="tool.css">
+<link rel="stylesheet" href="workspace.css">
+<link rel="stylesheet" href="0050-next.css">
+<script defer src="invest.js"></script>
+<script defer src="tool.js"></script>
+<script defer src="0050-next.js"></script>
+</head>
+<body class="investment-layout" data-nav="tool" data-root="">
+<div id="site-header"></div>
+<main class="work-page next-page">
+<header class="next-hero">
+  <h1><span>已有 0050，</span><wbr><span>下一筆怎麼買？</span></h1>
+  <p>用同一段歷史比較三種做法。看看舊部位留多少、每月怎麼買，對最後金額和跌幅有什麼影響。</p>
+</header>
+
+<form id="next-form" class="next-settings" aria-labelledby="next-settings-title">
+  <div class="next-settings-head">
+    <h2 id="next-settings-title">輸入你的金額</h2>
+    <span>新台幣</span>
+  </div>
+  <div class="next-fields">
+    <label>現在持有的 0050 市值<input id="holding" type="number" inputmode="numeric" min="1" max="999999999999" step="1" value="600000" required></label>
+    <label>每月投入股市的金額<input id="monthly" type="number" inputmode="numeric" min="0" max="999999999999" step="1" value="12000" required></label>
+    <label>方案三先換幾％<input id="swap" type="number" inputmode="numeric" min="1" max="99" step="1" value="50" required></label>
+    <label>比較期間<select id="period">
+      <option value="10">最近 10 年</option>
+      <option value="5">最近 5 年</option>
+      <option value="all">最長共同期間</option>
+      <option value="2020">2020 年疫情急跌</option>
+      <option value="2022">2022 年升息下跌</option>
+      <option value="custom">自訂日期</option>
+    </select></label>
+  </div>
+  <div id="date-fields" class="next-fields next-dates" hidden>
+    <label>開始日期<input id="start" type="date" required disabled></label>
+    <label>結算日期<input id="end" type="date" required disabled></label>
+  </div>
+  <p class="next-help">預填的是文章範例。每月有一部分要留現金或定存，這裡填剩下要買股票的金額。方案二和三的新投入都買全球股票 ETF（VT）。</p>
+  <details class="next-fees">
+    <summary>交易成本<span>預設各為 0% · 可調整</span></summary>
+    <div class="next-fields next-fee-fields">
+      <label>買 0050 成本（%）<input id="buy-tw" type="number" inputmode="decimal" min="0" max="99.99" step="0.01" value="0" required></label>
+      <label>賣 0050 成本（%）<input id="sell-tw" type="number" inputmode="decimal" min="0" max="99.99" step="0.01" value="0" required></label>
+      <label>買 VT 成本（%）<input id="buy-world" type="number" inputmode="decimal" min="0" max="99.99" step="0.01" value="0" required></label>
+    </div>
+    <p class="next-help">可把證交稅填進賣出成本，把換匯點差填進 VT 買入成本。每筆按交易金額內扣，未另計固定費用、個人稅負或股息預扣。</p>
+  </details>
+  <div class="next-submit">
+    <button id="next-run" class="work-button" type="submit" disabled>比較三種做法 <span aria-hidden="true">↓</span></button>
+    <p id="next-status" role="status">正在載入歷史資料…</p>
+  </div>
+  <p id="next-error" class="next-error" role="alert" hidden></p>
+  <noscript><p class="next-error">請開啟 JavaScript 後使用試算。</p></noscript>
+</form>
+
+<section id="next-results" class="next-results" aria-labelledby="next-results-title" hidden>
+  <div class="next-results-head">
+    <div>
+      <h2 id="next-results-title" tabindex="-1">三種做法的結果</h2>
+      <p id="next-period"></p>
+    </div>
+    <button id="next-download" class="quiet-button" type="button">下載比較報告</button>
+  </div>
+  <p id="next-comparison" class="next-comparison"></p>
+  <div id="next-cards" class="next-cards"></div>
+  <figure class="next-figure tool">
+    <figcaption>帳戶金額怎麼變</figcaption>
+    <p>金額包括每月投入。圖上的 A、B、C 對應上方三張卡。</p>
+    <div class="chart" id="next-chart" aria-label="帳戶金額走勢。可按左右方向鍵查看各日數值。"></div>
+  </figure>
+  <div class="next-notes" id="next-assumptions"></div>
+  <p class="next-research"><a href="q/0050-voo-or-vt.html#allocation">看 0050 搭配 VT 後，國家和個股比重怎麼變 →</a></p>
+</section>
+</main>
+</body>
+</html>
