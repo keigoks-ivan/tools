@@ -10,23 +10,165 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;700&display=swap">
 <link rel="stylesheet" href="invest.css">
 <link rel="stylesheet" href="tool.css">
+<link rel="stylesheet" href="workspace.css">
 <script src="invest.js"></script>
 <script src="tool.js"></script>
 </head>
-<body data-root="" data-nav="tool">
-<div class="page doc tool">
+<body class="investment-layout" data-root="" data-nav="tool">
 <div id="site-header"></div>
+<main class="work-page doc tool tool-workspace">
 
-<h1 class="h1" style="margin-top:36px">回測工具</h1>
-<p class="t-lead">選幾檔 ETF、設比例，看過去的含息報酬，和同一段期間最深跌了多少。一律用台幣計價。</p>
-<p class="caveat">以下是歷史資料的回測，未來表現可能和過去不同。</p>
-<nav class="presets" aria-label="快速比較範例">
-<span class="presets-label">快速比較</span>
-<a class="preset-link" href="?p1=00631L%3A100&amp;p2=0050%3A100">00631L 正二與 0050</a>
+<header class="tool-work-heading">
+<div><h1>投資組合回測</h1><p>設定資產和比例，以台幣比較過去的含息報酬、跌幅與恢復時間。</p></div>
+<a href="questions.html">看相關投資問題 →</a>
+</header>
+<div class="tool-workspace-grid">
+<aside class="compare-settings" aria-label="回測設定">
+<div class="settings-heading"><h2>設定比較</h2><a href="#out">看結果 ↓</a></div>
+<nav class="presets" aria-label="快速載入範例">
+<span class="presets-label">載入範例</span>
+<a class="preset-link" href="?p1=00631L%3A100&amp;p2=0050%3A100">正二與 0050</a>
 <a class="preset-link" href="?p1=00631L%3A50%2CCASH_TWD%3A50&amp;p2=0050%3A100&amp;rebal=annual">半正二半定存與 0050</a>
-<a class="preset-link secondary" href="?p1=0050%3A100&amp;p2=0056%3A100">0050 與 0056</a>
-<a class="preset-link secondary" href="active.html">主動式 ETF 系列</a>
+<a class="preset-link" href="?p1=0050%3A100&amp;p2=0056%3A100">0050 與 0056</a>
 </nav>
+<details class="setting-block" open>
+<summary>組合與比例</summary>
+<div class="setting-content">
+<p class="t-note">每組的比例用整數填，合計要等於 100。最多比較三組。</p>
+<div class="grid" id="groups"></div>
+<div class="add-comparison"><button type="button" class="sbtn" id="addC">＋ 加入第三組</button></div>
+</div>
+</details>
+
+<details class="setting-block" open>
+<summary>投入方式與期間</summary>
+<div class="setting-content">
+<div class="cfg">
+<div><div class="lab">投入方式</div>
+<div class="radios" role="radiogroup" aria-label="投入方式">
+<label><input type="radio" name="mode" value="lump" checked>單筆</label>
+<label><input type="radio" name="mode" value="monthly">每月固定投入</label>
+</div></div>
+<div><label for="amount" id="amountLab">單筆金額（元）</label><input type="number" id="amount" min="1" step="1" value="1000000" inputmode="numeric"></div>
+<div><label for="start">起點</label><input type="date" id="start"></div>
+<div><label for="end">終點</label><input type="date" id="end"></div>
+<div><label for="rebal">再平衡</label><select id="rebal"><option value="none">不再平衡</option><option value="annual">每年一次</option></select></div>
+</div>
+<div class="dnote" id="dateNote" style="display:none" aria-live="polite"></div>
+<div class="qrow" id="quick" role="group" aria-label="期間快捷鍵">
+<button type="button" class="sbtn" id="resetDates" data-q="all">全部期間</button>
+<button type="button" class="sbtn" data-q="y10">近 10 年</button>
+<button type="button" class="sbtn" data-q="y5">近 5 年</button>
+<button type="button" class="sbtn" data-q="y3">近 3 年</button>
+<button type="button" class="sbtn" data-q="c08">2008 金融海嘯</button>
+<button type="button" class="sbtn" data-q="c20">2020 疫情</button>
+<button type="button" class="sbtn" data-q="c22">2022 升息</button>
+</div>
+<p class="t-note" id="quickNote" style="display:none"></p>
+</div>
+</details>
+</aside>
+
+<section class="comparison-results" id="out" aria-labelledby="comparison-heading">
+<div class="comparison-heading"><h2 id="comparison-heading">回測結果</h2><span>台幣計價</span></div>
+<div id="warns"></div>
+<div id="msg" class="gerr" aria-live="polite"></div>
+<div id="results" style="display:none">
+<div class="actions">
+<button type="button" class="sbtn" id="copyLink">複製這組設定的連結</button>
+<button type="button" class="sbtn" id="dlCsv">下載每日數字（CSV）</button>
+<span id="copied" class="copied" aria-live="polite"></span>
+</div>
+<h3 class="ctitle">報酬與跌幅</h3>
+<p class="readout" id="readout" aria-live="polite"></p>
+<ul class="result-cards" id="resultCards" aria-label="各組結果摘要"></ul>
+<details class="result-stats" id="summaryStats" open>
+<summary>完整統計表</summary>
+<div class="dwrap"><table class="dtbl rtbl" id="stats"></table></div>
+</details>
+
+<nav class="chart-navigation" aria-label="結果章節">
+<a href="#net-value">淨值走勢</a><a href="#drawdowns">歷史跌幅</a><a href="#year-returns">每年報酬</a><a href="#size">股票比例試算</a>
+</nav>
+<h3 class="ctitle" id="net-value">淨值走勢</h3>
+<p class="csub" id="navSub"></p>
+<div class="chartbox">
+<div class="legend" id="legend1"></div>
+<label class="logt"><input type="checkbox" id="logChk">對數座標（相同的漲幅在圖上等高）</label>
+<div class="chart" id="chartNav" role="img" aria-label="各組合的淨值走勢圖，滑鼠移上去或用左右方向鍵可看各日數值"></div>
+<p class="csrc"></p>
+</div>
+
+<h3 class="ctitle" id="drawdowns">從前高跌多少</h3>
+<p class="csub">每一天的淨值，比到那天為止的最高點低了多少。圖上的圓點是最大跌幅。</p>
+<div class="chartbox">
+<div class="legend" id="legend2"></div>
+<div class="chart" id="chartDD" role="img" aria-label="各組合距離前高的跌幅走勢圖，滑鼠移上去或用左右方向鍵可看各日數值"></div>
+<p class="csrc"></p>
+</div>
+
+<h3 class="ctitle" id="year-returns">每年報酬</h3>
+<p class="csub">日曆年度的報酬，用不含新投入的淨值計算。</p>
+<div class="chartbox">
+<div class="legend" id="legend4"></div>
+<div class="chart" id="chartYear" role="img" aria-label="各組合每年報酬的分組柱狀圖，滑鼠移上去或用左右方向鍵可看各年數值"></div>
+<p class="csrc"></p>
+</div>
+<p class="t-note" id="yearlyNote"></p>
+<details class="yd"><summary>看每年數字</summary>
+<div class="dwrap"><table class="dtbl rtbl" id="yearly"></table></div>
+</details>
+<details class="adv" id="adv">
+<summary>進階數字</summary>
+<div class="dwrap"><table class="dtbl rtbl" id="statsAdv"></table></div>
+
+<h3 class="ctitle">不同時間進場，結果差多少</h3>
+<p class="csub">把期間內每一個交易日都當成進場日，單筆買進後抱滿 N 年，看年化報酬的分布。以單筆持有計算，和上面選的投入方式無關。「期末是賠的」是抱滿後的淨值低於進場那天。</p>
+<div class="dwrap"><table class="dtbl rtbl rolltbl" id="roll"></table></div>
+<div class="chartbox">
+<div class="rollbtns" id="rollBtns" role="group" aria-label="選擇持有年數"></div>
+<div class="legend" id="legend3"></div>
+<div class="chart" id="chartRoll" role="img" aria-label="各組合在每一天進場、抱滿所選年數的年化報酬折線圖，可用左右方向鍵逐日查看"></div>
+<p class="csrc"></p>
+</div>
+
+<h3 class="ctitle">跌得最深的五次</h3>
+<p class="csub">從創新高那天算到淨值回到前高那天為一次下跌，各次不重疊。依跌幅由深到淺列出前五次，淺於 5% 的不列。</p>
+<div id="dd5"></div>
+</details>
+</div>
+</section>
+</div>
+
+<section class="sec" id="size" aria-labelledby="size-heading">
+<h2 id="size-heading">股票比例試算</h2>
+<p class="t-note">同一檔資產，拿多少比例買股票、其餘放台幣定存，過去的含息年化報酬和最大跌幅差多少。這一區和上面的三組組合無關，但起點、終點與投入方式用上面的設定。</p>
+<div id="sizeMsg" class="gerr" aria-live="polite"></div>
+<div id="sizeBody" style="display:none">
+<div class="szctl">
+<div><label for="szAsset">資產（其餘放台幣定存）</label><select id="szAsset"></select></div>
+<div class="szslide"><label for="szRange">股票比例</label><output id="szVal" class="szval" for="szRange"></output>
+<input type="range" id="szRange" min="0" max="100" step="10" value="100" aria-valuetext="股票 100%，定存 0%">
+<div class="szends" aria-hidden="true"><span>0%　全放定存</span><span>100%　全買股票</span></div></div>
+</div>
+<p class="t-note" id="szPeriod"></p>
+<div id="szWarn"></div>
+<div class="szcards" id="szCards"></div>
+<h3 class="ctitle">11 種比例的對照</h3>
+<p class="csub">點表格的任何一列，上面的拉桿會跟著移到那一格。</p>
+<div class="dwrap"><table class="dtbl sztbl" id="szTbl"><caption class="sr">股票比例從 0% 到 100% 的歷史結果</caption></table></div>
+<h3 class="ctitle">比例和結果的關係</h3>
+<p class="csub">深色的那一根是拉桿目前的比例。滑鼠移上去或手指按住，可看各比例的數字。</p>
+<div class="chartbox">
+<div class="szch" id="szAnnTitle">年化報酬</div>
+<div class="chart" id="szChartAnn" role="img" aria-label="股票比例從 0% 到 100% 的含息年化報酬長條圖"></div>
+<div class="szch">最大跌幅</div>
+<div class="chart" id="szChartDD" role="img" aria-label="股票比例從 0% 到 100% 的最大跌幅長條圖"></div>
+<p class="szrule">規則：每年第一個交易日把比例調回設定值（每年再平衡，起始那一年不調）。定存用資料裡的台幣定存序列。沒有計入交易成本與稅。這是歷史結果，不是預測。</p>
+</div>
+</div>
+</section>
+<footer class="tool-work-footer">
 <details class="method-notes">
 <summary>資料、計價方式與計算規則</summary>
 <ul class="notes">
@@ -57,135 +199,9 @@
 </ul>
 </details>
 </details>
-
-<section class="sec" style="margin-top:40px" aria-label="組合設定">
-<h2 style="font-size:22px">1. 設定組合</h2>
-<p class="t-note">每組的比例用整數填，合計要等於 100。最多比較三組。</p>
-<div class="grid" id="groups"></div>
-<div style="margin-top:12px"><button type="button" class="sbtn" id="addC">加入第三組</button></div>
-</section>
-
-<section class="sec" style="margin-top:36px" aria-label="共用設定">
-<h2 style="font-size:22px">2. 共用設定</h2>
-<div class="cfg">
-<div><div class="lab">投入方式</div>
-<div class="radios" role="radiogroup" aria-label="投入方式">
-<label><input type="radio" name="mode" value="lump" checked>單筆</label>
-<label><input type="radio" name="mode" value="monthly">每月固定投入</label>
-</div></div>
-<div><label for="amount" id="amountLab">單筆金額（元）</label><input type="number" id="amount" min="1" step="1" value="1000000" inputmode="numeric"></div>
-<div><label for="start">起點</label><input type="date" id="start"></div>
-<div><label for="end">終點</label><input type="date" id="end"></div>
-<div><label for="rebal">再平衡</label><select id="rebal"><option value="none">不再平衡</option><option value="annual">每年一次</option></select></div>
-</div>
-<div class="dnote" id="dateNote" style="display:none" aria-live="polite"></div>
-<div class="qrow" id="quick" role="group" aria-label="期間快捷鍵">
-<button type="button" class="sbtn" id="resetDates" data-q="all">全部期間</button>
-<button type="button" class="sbtn" data-q="y10">近 10 年</button>
-<button type="button" class="sbtn" data-q="y5">近 5 年</button>
-<button type="button" class="sbtn" data-q="y3">近 3 年</button>
-<button type="button" class="sbtn" data-q="c08">2008 金融海嘯</button>
-<button type="button" class="sbtn" data-q="c20">2020 疫情</button>
-<button type="button" class="sbtn" data-q="c22">2022 升息</button>
-</div>
-<p class="t-note" id="quickNote" style="display:none"></p>
-</section>
-
-<section class="sec" id="out" style="margin-top:40px" aria-label="結果">
-<h2 style="font-size:22px">3. 結果</h2>
-<div id="warns"></div>
-<div id="msg" class="gerr" aria-live="polite"></div>
-<div id="results" style="display:none">
-<div class="actions">
-<button type="button" class="sbtn" id="copyLink">複製這組設定的連結</button>
-<button type="button" class="sbtn" id="dlCsv">下載每日數字（CSV）</button>
-<span id="copied" class="copied" aria-live="polite"></span>
-</div>
-<h3 class="ctitle">統計</h3>
-<p class="csub">報酬和最大跌幅放在一起看。</p>
-<p class="readout" id="readout" aria-live="polite"></p>
-<div class="dwrap"><table class="dtbl rtbl" id="stats"></table></div>
-
-<details class="adv" id="adv">
-<summary>進階數字</summary>
-<div class="dwrap"><table class="dtbl rtbl" id="statsAdv"></table></div>
-
-<h3 class="ctitle">不同時間進場，結果差多少</h3>
-<p class="csub">把期間內每一個交易日都當成進場日，單筆買進後抱滿 N 年，看年化報酬的分布。以單筆持有計算，和上面選的投入方式無關。「期末是賠的」是抱滿後的淨值低於進場那天。</p>
-<div class="dwrap"><table class="dtbl rtbl rolltbl" id="roll"></table></div>
-<div class="chartbox">
-<div class="rollbtns" id="rollBtns" role="group" aria-label="選擇持有年數"></div>
-<div class="legend" id="legend3"></div>
-<div class="chart" id="chartRoll" role="img" aria-label="各組合在每一天進場、抱滿所選年數的年化報酬折線圖，可用左右方向鍵逐日查看"></div>
-<p class="csrc"></p>
-</div>
-
-<h3 class="ctitle">跌得最深的五次</h3>
-<p class="csub">從創新高那天算到淨值回到前高那天為一次下跌，各次不重疊。依跌幅由深到淺列出前五次，淺於 5% 的不列。</p>
-<div id="dd5"></div>
-</details>
-
-<h3 class="ctitle">淨值走勢</h3>
-<p class="csub" id="navSub"></p>
-<div class="chartbox">
-<div class="legend" id="legend1"></div>
-<label class="logt"><input type="checkbox" id="logChk">對數座標（相同的漲幅在圖上等高）</label>
-<div class="chart" id="chartNav" role="img" aria-label="各組合的淨值走勢圖，滑鼠移上去或用左右方向鍵可看各日數值"></div>
-<p class="csrc"></p>
-</div>
-
-<h3 class="ctitle">從前高跌多少</h3>
-<p class="csub">每一天的淨值，比到那天為止的最高點低了多少。圖上的圓點是最大跌幅。</p>
-<div class="chartbox">
-<div class="legend" id="legend2"></div>
-<div class="chart" id="chartDD" role="img" aria-label="各組合距離前高的跌幅走勢圖，滑鼠移上去或用左右方向鍵可看各日數值"></div>
-<p class="csrc"></p>
-</div>
-
-<h3 class="ctitle">每年報酬</h3>
-<p class="csub">日曆年度的報酬，用不含新投入的淨值計算。</p>
-<div class="chartbox">
-<div class="legend" id="legend4"></div>
-<div class="chart" id="chartYear" role="img" aria-label="各組合每年報酬的分組柱狀圖，滑鼠移上去或用左右方向鍵可看各年數值"></div>
-<p class="csrc"></p>
-</div>
-<p class="t-note" id="yearlyNote"></p>
-<details class="yd"><summary>看每年數字</summary>
-<div class="dwrap"><table class="dtbl rtbl" id="yearly"></table></div>
-</details>
-</div>
-<p class="fine">這是歷史資料的計算，是一般資訊，不是對個人的投資建議。</p>
-</section>
-
-<section class="sec" id="size" style="margin-top:40px" aria-label="買多少：股票比例與跌幅">
-<h2 style="font-size:22px">買多少：股票比例與跌幅</h2>
-<p class="t-note">同一檔資產，拿多少比例買股票、其餘放台幣定存，過去的含息年化報酬和最大跌幅差多少。這一區和上面的三組組合無關，但起點、終點與投入方式用上面的設定。</p>
-<div id="sizeMsg" class="gerr" aria-live="polite"></div>
-<div id="sizeBody" style="display:none">
-<div class="szctl">
-<div><label for="szAsset">資產（其餘放台幣定存）</label><select id="szAsset"></select></div>
-<div class="szslide"><label for="szRange">股票比例</label><output id="szVal" class="szval" for="szRange"></output>
-<input type="range" id="szRange" min="0" max="100" step="10" value="100" aria-valuetext="股票 100%，定存 0%">
-<div class="szends" aria-hidden="true"><span>0%　全放定存</span><span>100%　全買股票</span></div></div>
-</div>
-<p class="t-note" id="szPeriod"></p>
-<div id="szWarn"></div>
-<div class="szcards" id="szCards"></div>
-<h3 class="ctitle">11 種比例的對照</h3>
-<p class="csub">點表格的任何一列，上面的拉桿會跟著移到那一格。</p>
-<div class="dwrap"><table class="dtbl sztbl" id="szTbl"><caption class="sr">股票比例從 0% 到 100% 的歷史結果</caption></table></div>
-<h3 class="ctitle">比例和結果的關係</h3>
-<p class="csub">深色的那一根是拉桿目前的比例。滑鼠移上去或手指按住，可看各比例的數字。</p>
-<div class="chartbox">
-<div class="szch" id="szAnnTitle">年化報酬</div>
-<div class="chart" id="szChartAnn" role="img" aria-label="股票比例從 0% 到 100% 的含息年化報酬長條圖"></div>
-<div class="szch">最大跌幅</div>
-<div class="chart" id="szChartDD" role="img" aria-label="股票比例從 0% 到 100% 的最大跌幅長條圖"></div>
-<p class="szrule">規則：每年第一個交易日把比例調回設定值（每年再平衡，起始那一年不調）。定存用資料裡的台幣定存序列。沒有計入交易成本與稅。這是歷史結果，不是預測。</p>
-</div>
-</div>
-</section>
-</div>
+<p class="fine">歷史回測供一般研究參考。資料期間與假設見上方說明。</p>
+</footer>
+</main>
 
 <script>
 (function () {
@@ -439,14 +455,27 @@
     $('results').style.display = '';
     $('warns').innerHTML = T.warnsHtml(last);
     $('stats').innerHTML = T.statsHtml(last, T.BASIC_ROWS);
-    $('readout').textContent = last.out.map(function (o) {
-      var name = (o.g.name || '').trim() || ('組合 ' + String.fromCharCode(65 + o.gi));
+    var summaries = last.out.map(function (o) {
       var wait = o.st.longest;
-      var waiting = wait.days === 0 ? '這段期間沒有低於前高' :
-        '最長 ' + T.span(wait.days) + (wait.rec ? '才回到前高' : '仍未回到前高');
-      return name + ' 最後累積 ' + T.money(o.st.finalV) + '，最深跌 ' +
-        (Math.abs(o.st.mdd) * 100).toFixed(1) + '%，' + waiting + '。';
+      return {
+        name: (o.g.name || '').trim() || ('組合 ' + String.fromCharCode(65 + o.gi)),
+        composition: o.comp,
+        group: o.gi + 1,
+        final: T.money(o.st.finalV),
+        drawdown: (Math.abs(o.st.mdd) * 100).toFixed(1) + '%',
+        waiting: wait.days === 0 ? '這段期間沒有低於前高' :
+          '最長 ' + T.span(wait.days) + (wait.rec ? '才回到前高' : '仍未回到前高')
+      };
+    });
+    $('readout').textContent = summaries.map(function (s) {
+      return s.name + ' 最後累積 ' + s.final + '，最深跌 ' + s.drawdown + '，' + s.waiting + '。';
     }).join(' ');
+    $('resultCards').innerHTML = summaries.map(function (s) {
+      return '<li class="result-card c' + s.group + '"><div class="result-card-heading"><strong>' +
+        T.esc(s.name) + '</strong><span>' + T.esc(s.composition) + '</span></div>' +
+        '<dl><div><dt>期末金額</dt><dd>' + s.final + '</dd></div>' +
+        '<div><dt>最大跌幅</dt><dd>' + (s.drawdown === '0.0%' ? '' : '−') + s.drawdown + '</dd></div></dl><p>' + s.waiting + '</p></li>';
+    }).join('');
     $('statsAdv').innerHTML = T.statsHtml(last, T.ADV_ROWS);
     $('roll').innerHTML = T.rollHtml(last);
     $('dd5').innerHTML = T.dd5Html(last);
@@ -508,6 +537,10 @@
       rollN = +b.getAttribute('data-n'); paintRollBtns(T.rollAvailable(last)); drawRoll();
       var nb = $('rollBtns').querySelector('button[data-n="' + rollN + '"]'); if (nb) nb.focus();
     });
+    var narrow = window.matchMedia('(max-width:640px)');
+    function setStatsDisclosure() { $('summaryStats').open = !narrow.matches; }
+    setStatsDisclosure();
+    if (narrow.addEventListener) narrow.addEventListener('change', setStatsDisclosure);
     var adv = $('adv');
     if (store('invest-tool-adv') === '1') adv.open = true;
     adv.addEventListener('toggle', function () { store('invest-tool-adv', adv.open ? '1' : '0'); if (adv.open) drawRoll(); });

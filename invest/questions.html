@@ -1,98 +1,276 @@
-<!DOCTYPE html>
-
+<!doctype html>
 <html lang="zh-Hant">
 <head>
-<meta charset="utf-8"/>
-<meta content="noindex" name="robots"/>
-<meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>常見投資問題｜歷史回測</title>
-<link href="https://fonts.googleapis.com" rel="preconnect"/>
-<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Noto+Sans+TC:wght@400;500;700&amp;family=Noto+Serif+TC:wght@500;700&amp;display=swap" rel="stylesheet"/>
-<link href="invest.css" rel="stylesheet"/>
-<link href="pages.css" rel="stylesheet"/>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>投資問題｜歷史回測</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@500;700&display=swap">
+<link rel="stylesheet" href="invest.css">
+<link rel="stylesheet" href="workspace.css">
 <script src="invest.js"></script>
+<script src="list.js?v=2" defer></script>
 </head>
-<body data-nav="questions" data-root="">
+<body class="investment-layout" data-nav="questions" data-root="">
 <div id="site-header"></div>
-<div class="home-body q-body">
-<div class="q-top">
-<h1 class="q-h1">常見投資問題</h1>
-<p class="lead q-lead">等大跌再買划算嗎？跌破年線要不要賣？這裡用歷史資料一題一題試算。目前有 <span data-online-count="">44</span> 篇可以讀。</p>
+<main class="work-page question-directory">
+<header class="directory-heading">
+<div><h1>投資問題回測</h1><p>從選 ETF、買賣時機到資產配置，找出和你在意的問題最接近的歷史比較。</p></div>
+<a href="tool.html">自己設定組合 →</a>
+</header>
+<form class="directory-search" id="question-search" method="get" role="search" hidden>
+<label for="question-query">搜尋投資問題<span class="search-hint">可用代號或關鍵字</span></label>
+<div class="search-controls"><input id="question-query" name="q" type="search" autocomplete="off" placeholder="例如 0050、年線、降息"><button class="work-button" type="submit">搜尋</button></div>
+</form>
+<section class="directory-topics" id="question-topics" aria-labelledby="topic-heading" hidden>
+<div class="directory-section-heading"><h2 id="topic-heading">依主題找文章</h2><a href="?topic=all" data-topic="all">看全部 <span id="article-count">50</span> 篇 →</a></div>
+<div class="topic-grid">
+<div class="topic-group">
+<h3>ETF</h3>
+<ul><li><a class="topic-link" href="?topic=leveraged" data-topic="leveraged"><span class="topic-label">正二與槓桿 ETF</span><span class="topic-count">5 篇</span><span class="topic-description">每日兩倍、長抱、搭配定存</span></a></li>
+<li><a class="topic-link" href="?topic=active" data-topic="active"><span class="topic-label">主動式 ETF</span><span class="topic-count">9 篇</span><span class="topic-description">跟 0050 比、選股、持股重疊</span></a></li>
+<li><a class="topic-link" href="?topic=etf-comparisons" data-topic="etf-comparisons"><span class="topic-label">ETF 比較與配息</span><span class="topic-count">2 篇</span><span class="topic-description">0050、0056、00981A 等</span></a></li></ul>
 </div>
-<nav aria-label="熱門研究主題" class="topic-shortcuts">
-<a href="leveraged.html">正二研究系列 →</a>
-<a href="active.html">主動式 ETF 研究系列 →</a>
-<a href="tool.html?p1=00631L:100&amp;p2=0050:100">自己試算正二與 0050 →</a>
+<div class="topic-group">
+<h3>進出場與配置</h3>
+<ul><li><a class="topic-link" href="?topic=entry" data-topic="entry"><span class="topic-label">買進時機與分批</span><span class="topic-count">5 篇</span><span class="topic-description">單筆、定期投入、等大跌</span></a></li>
+<li><a class="topic-link" href="?topic=exit" data-topic="exit"><span class="topic-label">賣出與停損</span><span class="topic-count">2 篇</span><span class="topic-description">跌破年線、減碼與買回</span></a></li>
+<li><a class="topic-link" href="?topic=recovery" data-topic="recovery"><span class="topic-label">大跌與漲回</span><span class="topic-count">3 篇</span><span class="topic-description">熊市、回到前高、錯過反彈</span></a></li>
+<li><a class="topic-link" href="?topic=stock-bond" data-topic="stock-bond"><span class="topic-label">股債與持股比例</span><span class="topic-count">3 篇</span><span class="topic-description">股票放幾成，搭現金或公債</span></a></li>
+<li><a class="topic-link" href="?topic=diversifiers" data-topic="diversifiers"><span class="topic-label">黃金與 REITs</span><span class="topic-count">2 篇</span><span class="topic-description">加入其他資產會少跌嗎</span></a></li></ul>
+</div>
+<div class="topic-group">
+<h3>投資策略與市場</h3>
+<ul><li><a class="topic-link" href="?topic=technical" data-topic="technical"><span class="topic-label">技術訊號與強勢股</span><span class="topic-count">4 篇</span><span class="topic-description">均線、突破、下影線</span></a></li>
+<li><a class="topic-link" href="?topic=trend" data-topic="trend"><span class="topic-label">趨勢與風格輪動</span><span class="topic-count">4 篇</span><span class="topic-description">多市場趨勢、成長與價值</span></a></li>
+<li><a class="topic-link" href="?topic=hedging" data-topic="hedging"><span class="topic-label">選擇權、放空與避險</span><span class="topic-count">4 篇</span><span class="topic-description">備兌買權、賣權、波動減碼</span></a></li>
+<li><a class="topic-link" href="?topic=fundamentals" data-topic="fundamentals"><span class="topic-label">財報、獲利與股本</span><span class="topic-count">3 篇</span><span class="topic-description">財報好轉、股數變動、估值</span></a></li>
+<li><a class="topic-link" href="?topic=macro" data-topic="macro"><span class="topic-label">利率、景氣與市場事件</span><span class="topic-count">4 篇</span><span class="topic-description">降息、倒掛、選舉、房價</span></a></li></ul>
+</div>
+</div>
+</section>
+<section class="directory-results" id="question-results" aria-labelledby="results-heading">
+<div class="directory-section-heading">
+<div><a href="?" class="browse-back" data-topic="" hidden id="browse-back">← 所有主題</a><h2 id="results-heading" tabindex="-1">全部文章</h2></div>
+<p id="question-count" role="status"></p>
+</div>
+<div class="directory-filters" id="question-filters" hidden>
+<label>市場<select id="question-market"><option value="">所有市場</option><option>台股</option><option>美股</option><option>多國</option></select></label>
+<label>研究角度<select id="question-angle"><option value="">所有角度</option><option>進場</option><option>出場</option><option>買多少</option><option>選標的</option><option>觀察</option></select></label>
+<button type="button" class="quiet-button" id="reset-filters" hidden>清除篩選</button>
+</div>
+<div id="question-list">
+<article class="question-row" data-topic="leveraged" data-angle="買多少" data-markets="台股 美股" data-search="本文把每日兩倍的結果，和把原型累積倍數平方的結果比較。台股 22 個完整年度裡，按連續複利算，差距的中間值是 2.69 個百分點。">
+<div><h3><a href="q/volatility-tax.html">市場震盪會吃掉槓桿 ETF 多少報酬？</a></h3><p class="question-answer" data-market="">先跌後漲回原點，兩倍槓桿卻可能還在虧</p></div>
+<div class="question-markets"><span data-market="台股">台股</span><span data-market="美股">美股</span></div>
+</article>
+<article class="question-row" data-topic="leveraged" data-angle="買多少" data-markets="台股" data-search="正二每天追求台灣 50 指數當天漲跌的兩倍。拉長到好幾年，結果要看每天怎麼漲跌。2008 年時這檔 ETF 還沒上市，那段只能用別的指數近似模擬。">
+<div><h3><a href="q/leveraged-2x.html">正二（00631L）可以長期持有嗎？</a></h3><p class="question-answer" data-market="">正二遇上大多頭賺得多，遇到下跌也會放大虧損</p></div>
+<div class="question-markets"><span data-market="台股">台股</span></div>
+</article>
+<article class="question-row" data-topic="leveraged" data-angle="買多少" data-markets="台股" data-search="把兩者放在相同起點比較，檢查何時第一次追上，以及之後是否又落後。00631L 上市前的行情使用模擬資料。">
+<div><h3><a href="q/leveraged-2x-catchup.html">正二買在高點，多久追得上 0050？</a></h3><p class="question-answer" data-market="">回到本金，和追上 0050，是兩個不同的時間</p></div>
+<div class="question-markets"><span data-market="台股">台股</span></div>
+</article>
+<article class="question-row" data-topic="leveraged" data-angle="買多少" data-markets="台股" data-search="">
+<div><h3><a href="q/leveraged-2x-cash.html">半正二半定存，和全買 0050 差在哪？</a></h3><p class="question-answer" data-market="">用同一段期間，比全買正二、搭定存及全買 0050。</p></div>
+<div class="question-markets"><span data-market="台股">台股</span></div>
+</article>
+<article class="question-row" data-topic="leveraged" data-angle="出場" data-markets="台股" data-search="">
+<div><h3><a href="q/leveraged-2x-rules.html">定期買、再平衡、跌破年線賣，正二差多少？</a></h3><p class="question-answer" data-market="">比較定期買、再平衡與跌破年線的報酬和跌幅。</p></div>
+<div class="question-markets"><span data-market="台股">台股</span></div>
+</article>
+<article class="question-row" data-topic="active" data-angle="選標的" data-markets="台股" data-search="">
+<div><h3><a href="q/active-etf-basics.html">主動式 ETF 和指數型 ETF 差在哪？</a></h3><p class="question-answer" data-market="">從成分股、調整持股的權限，到費用與折溢價。</p></div>
+<div class="question-markets"><span data-market="台股">台股</span></div>
+</article>
+<article class="question-row" data-topic="active" data-angle="選標的" data-markets="台股" data-search="這些 ETF 最長只上市約一年半。換一天結算，報酬會變，能一起比較的基金也可能變多。2026 年夏天那波下跌，當時已上市的 19 檔都比 0050 跌得深。">
+<div><h3><a href="q/active-etf.html">主動式 ETF 比 0050 好嗎？</a></h3><p class="question-answer" data-market="">現在還看不出主動式 ETF 長期能不能贏 0050</p></div>
+<div class="question-markets"><span data-market="台股">台股</span></div>
+</article>
+<article class="question-row" data-topic="active" data-angle="觀察" data-markets="台股" data-search="">
+<div><h3><a href="q/active-etf-attribution.html">主動式 ETF 領先 0050，來自持股配置還是選股？</a></h3><p class="question-answer" data-market="">拆開台積電權重、其餘持股與績效差距。</p></div>
+<div class="question-markets"><span data-market="台股">台股</span></div>
+</article>
+<article class="question-row" data-topic="active" data-angle="選標的" data-markets="台股" data-search="從 2026 年 6 月 22 日到 7 月 30 日，0050 下跌 15.4%。有完整資料的 19 檔主動式 ETF，跌幅介於 17.8% 到 32.8%。有經理人調整持股，不等於這段期間有成功避開下跌。">
+<div><h3><a href="q/active-etf-drawdowns.html">主動式 ETF 有經理人操作，下跌時就會少跌嗎？</a></h3><p class="question-answer" data-market="">2026 年夏天這波下跌，19 檔都比 0050 跌得多。</p></div>
+<div class="question-markets"><span data-market="台股">台股</span></div>
+</article>
+<article class="question-row" data-topic="active" data-angle="選標的" data-markets="台股" data-search="">
+<div><h3><a href="q/active-etf-monitoring.html">主動式 ETF 怎麼挑，買了之後追蹤什麼？</a></h3><p class="question-answer" data-market="">比同期績效、費用與持股，建立買進後的追蹤清單。</p></div>
+<div class="question-markets"><span data-market="台股">台股</span></div>
+</article>
+<article class="question-row" data-topic="active" data-angle="選標的" data-markets="台股" data-search="研究把同一批 11 檔基金的表現分成前後兩段。前一段有 9 檔贏過 0050，後一段 11 檔全都落後。短期排行榜能告訴你誰剛好表現好，還不足以告訴你接下來該買誰。">
+<div><h3><a href="q/active-etf-persistence.html">買績效最好的主動式 ETF，之後也會比較好嗎？</a></h3><p class="question-answer" data-market="">前一段贏過 0050，下一段未必繼續贏。</p></div>
+<div class="question-markets"><span data-market="台股">台股</span></div>
+</article>
+<article class="question-row" data-topic="active" data-angle="選標的" data-markets="台股" data-search="研究在三段共同期間裡，都看到主動式 ETF 的每日漲跌高度同步。分給不同經理人管理，可以減少只依賴一位經理人的風險；但如果大家都偏重相似的股票，遇到市場下跌仍可能一起跌。">
+<div><h3><a href="q/active-etf-diversification.html">主動式 ETF 多買幾檔，真的有比較分散嗎？</a></h3><p class="question-answer" data-market="">基金名字不同，漲跌仍可能很像。</p></div>
+<div class="question-markets"><span data-market="台股">台股</span></div>
+</article>
+<article class="question-row" data-topic="active" data-angle="選標的" data-markets="台股" data-search="持股差異可以看出基金有多不像 0050；換股頻率可以看出部位變動多不多。這兩個數字都不能直接回答「會不會多賺」。要評估值不值得，仍要回到費用、實際報酬和承擔的風險。">
+<div><h3><a href="q/active-etf-activeness.html">持股越不一樣、換股越勤，主動式 ETF 就越值得買嗎？</a></h3><p class="question-answer" data-market="">選得不一樣，不等於選得比較好。</p></div>
+<div class="question-markets"><span data-market="台股">台股</span></div>
+</article>
+<article class="question-row" data-topic="active" data-angle="選標的" data-markets="美股 多國" data-search="比較長期表現時也要算進後來合併或清算的基金。以美國國內股票基金來看，期初有的基金，二十年後還在的只有約 37%。">
+<div><h3><a href="evidence/active-vs-passive.html">主動基金贏得了指數嗎？</a></h3><p class="question-answer" data-market="">美國大型股基金，拉長到二十年，多數落後指數</p></div>
+<div class="question-markets"><span data-market="美股">美股</span><span data-market="多國">多國</span></div>
+</article>
+<article class="question-row" data-topic="etf-comparisons" data-angle="選標的" data-markets="台股" data-search="另外試算 2022 至 2025 年每月領 3,000 元。0056 配息入帳較多，0050 期末剩餘資產較多。">
+<div><h3><a href="q/highdiv-vs-0050.html">高股息 ETF 比 0050 好嗎？</a></h3><p class="question-answer" data-market="">配息再投入，0056 長期報酬低於同期 0050</p></div>
+<div class="question-markets"><span data-market="台股">台股</span></div>
+</article>
+<article class="question-row" data-topic="etf-comparisons" data-angle="選標的" data-markets="台股" data-search="兩者都可能比 0050 賺得多，也可能跌得更深。但賺賠的原因不同，不能只挑最近報酬較高的那一檔。下面把三者放在相同期間，比較賺了多少，以及中途曾經跌多深。">
+<div><h3><a href="q/active-etf-vs-leveraged.html">00981A 和正二，都是想多賺一點，差在哪裡？</a></h3><p class="question-answer" data-market="">正二放大每日市場漲跌；00981A 則把選股交給經理人。</p></div>
+<div class="question-markets"><span data-market="台股">台股</span></div>
+</article>
+<article class="question-row" data-topic="entry" data-angle="進場" data-markets="台股 美股 多國" data-search="0050 的 267 個起點中，約七成是一次買一年後累積較多。用 12 萬元看 2008 與 2025 年兩個起點，兩種買法各有一次領先。 從 1926 年起，約 69% 的開始日期是一次買累積得多。只看 1930 年代，這個比例約一半。 1990 年起的全球股票回測裡，分別看 1、10 或 20 年，約 68% 到 69% 的開始日期是一次買累積得多。">
+<div><h3><a href="q/lump-vs-dca.html">手上有一筆錢，一次買完還是分一年買？</a></h3><p class="question-answer" data-market="台股"><span class="answer-market">台股</span> 一年後，195 次是一次買較多</p><p class="question-answer" data-market="美股" hidden><span class="answer-market">美股</span> 一次買較常領先，也有只打平的年代</p><p class="question-answer" data-market="多國" hidden><span class="answer-market">多國</span> 約三分之二是一次買較多</p></div>
+<div class="question-markets"><a href="q/lump-vs-dca.html#tw" data-market="台股" aria-label="台股篇章">台股</a><a href="q/lump-vs-dca.html#us" data-market="美股" aria-label="美股篇章">美股</a><a href="q/lump-vs-dca.html#global" data-market="多國" aria-label="多國篇章">多國</a></div>
+</article>
+<article class="question-row" data-topic="entry" data-angle="進場" data-markets="台股 美股 多國" data-search="每月存 1 萬元，從 2003 年 7 月到 2026 年 9 月。等跌兩成才買，期末約 2,307 萬元，每月直接買約 2,864 萬元。 美股同期試算，等跌才買的帳戶最後約是每月直接買的 91%。 等跌兩成、投資二十年，結果排在中間的那筆比每月買多 1.2%。若從 1990 年一路算到資料截止，最後卻只有每月買的 88.1%。">
+<div><h3><a href="q/wait-for-crash.html">等大跌再買會比較好嗎？</a></h3><p class="question-answer" data-market="台股"><span class="answer-market">台股</span> 等跌兩成，最後累積約八成</p><p class="question-answer" data-market="美股" hidden><span class="answer-market">美股</span> 等跌兩成，最後累積約九成</p><p class="question-answer" data-market="多國" hidden><span class="answer-market">多國</span> 換個開始時間，結果會變</p></div>
+<div class="question-markets"><a href="q/wait-for-crash.html#tw" data-market="台股" aria-label="台股篇章">台股</a><a href="q/wait-for-crash.html#us" data-market="美股" aria-label="美股篇章">美股</a><a href="q/wait-for-crash.html#global" data-market="多國" aria-label="多國篇章">多國</a></div>
+</article>
+<article class="question-row" data-topic="entry" data-angle="進場" data-markets="台股 美股 多國" data-search="從拿到錢起算五年。0050 等跌兩成才買，有 53% 的起點領先，平均年化差約 −0.01 個百分點。改成訊號隔天買，約 −0.07 個百分點。 用台幣計價 SPY 試算，等站回年線才買，五年後只有約 5% 的開始日期領先；分一年買約 22%。 以日經 225 股價來看，從 1989 年之後的日期開始、抱十年，約 48% 的開始日期到期時仍虧錢。">
+<div><h3><a href="q/entry-timing.html">拿到一筆錢就買，還是等個好時機？</a></h3><p class="question-answer" data-market="台股"><span class="answer-market">台股</span> 等跌兩成，平均幾乎一樣</p><p class="question-answer" data-market="美股" hidden><span class="answer-market">美股</span> 等站回年線，很少贏過當天買</p><p class="question-answer" data-market="多國" hidden><span class="answer-market">多國</span> 抱十年仍可能虧</p></div>
+<div class="question-markets"><a href="q/entry-timing.html#tw" data-market="台股" aria-label="台股篇章">台股</a><a href="q/entry-timing.html#us" data-market="美股" aria-label="美股篇章">美股</a><a href="q/entry-timing.html#jp" data-market="多國" aria-label="多國篇章">多國</a></div>
+</article>
+<article class="question-row" data-topic="entry" data-angle="進場" data-markets="台股 美股" data-search="八個事後辨認的 0050 高點，一年後報酬中位數為 −9.7%。2007 年高點的 10 萬元案例，到谷底剩約 4.4 萬元。 買在大跌前高點，十年累積報酬的中間值約 104%。一般月底買進約 189%。扣通膨後，八個高點有四個抱十年仍虧。">
+<div><h3><a href="q/buy-at-peak.html">買在大跌前的最高點，十年後會怎樣？</a></h3><p class="question-answer" data-market="台股"><span class="answer-market">台股</span> 買完一年，典型結果仍是虧損</p><p class="question-answer" data-market="美股" hidden><span class="answer-market">美股</span> 每年差距變小，累積差距還在</p></div>
+<div class="question-markets"><a href="q/buy-at-peak.html#tw" data-market="台股" aria-label="台股篇章">台股</a><a href="q/buy-at-peak.html#us" data-market="美股" aria-label="美股篇章">美股</a></div>
+</article>
+<article class="question-row" data-topic="entry" data-angle="進場" data-markets="美股" data-search="過去三年年化漲逾兩成的 254 個月底，逐月算是 4.1%，按 19 段行情等權算是 8.9%。一般月底是 9.6%。">
+<div><h3><a href="q/chasing-returns.html">股市已經連漲好幾年，現在買還來得及嗎？</a></h3><p class="question-answer" data-market="">市場漲了三年，還看不出買進後會少賺</p></div>
+<div class="question-markets"><span data-market="美股">美股</span></div>
+</article>
+<article class="question-row" data-topic="exit" data-angle="出場" data-markets="台股 美股" data-search="2004 至 2026 年，照年線買賣的最大跌幅約 31%，全程持有約 56%。同樣投入 10 萬元，期末約為 113 萬元與 216 萬元。 標普 500 的最大跌幅約從 55% 降到 25%。QQQ 從網路泡沫前開始，規則多賺。從 2003 年中開始，結果就變成少賺。">
+<div><h3><a href="q/sell-below-ma.html">跌破年線要不要賣？</a></h3><p class="question-answer" data-market="台股"><span class="answer-market">台股</span> 0050 最深跌得少，年化也少</p><p class="question-answer" data-market="美股" hidden><span class="answer-market">美股</span> 標普少跌。QQQ 是否多賺要看起點</p></div>
+<div class="question-markets"><a href="q/sell-below-ma.html#tw" data-market="台股" aria-label="台股篇章">台股</a><a href="q/sell-below-ma.html#us" data-market="美股" aria-label="美股篇章">美股</a></div>
+</article>
+<article class="question-row" data-topic="exit" data-angle="出場" data-markets="台股 美股 多國" data-search="跌破年線就賣，0050 的年化是 11.5%，一路持有是 14.8%。若跌兩成才賣、等創高買回，年化是 6.8%。 SPY 照年線出場，整段少賺。QQQ 同一規則多賺，主要靠躲過 2000 到 2002 年的大跌。 日經 225 從 1965 年起，照年線賣，最大跌幅約 51%，一路持有約 82%。各自最長沒回前高的時間約 16 年和 34 年。">
+<div><h3><a href="q/exit-rules.html">設了出場規則，會少跌多少、少賺多少？</a></h3><p class="question-answer" data-market="台股"><span class="answer-market">台股</span> 兩種賣出規則，這段都少賺</p><p class="question-answer" data-market="美股" hidden><span class="answer-market">美股</span> QQQ 是這次唯一年化較高的一組</p><p class="question-answer" data-market="多國" hidden><span class="answer-market">多國</span> 賣出能少跌，仍可能等十幾年才回前高</p></div>
+<div class="question-markets"><a href="q/exit-rules.html#tw" data-market="台股" aria-label="台股篇章">台股</a><a href="q/exit-rules.html#us" data-market="美股" aria-label="美股篇章">美股</a><a href="q/exit-rules.html#jp" data-market="多國" aria-label="多國篇章">多國</a></div>
+</article>
+<article class="question-row" data-topic="recovery" data-angle="觀察" data-markets="台股 美股" data-search="0050 八次已回到前高的兩成以上跌勢，從高點算約等 5.9 到 39.0 個月。圖中分開標示下跌與漲回各花多久。 美股的 13 次大跌有這個傾向。但拖得久的幾次通常也跌得深，兩個原因分不開。">
+<div><h3><a href="q/recovery-time.html">股市大跌後，多久能漲回去？</a></h3><p class="question-answer" data-market="台股"><span class="answer-market">台股</span> 跌得久的幾次，漲回也偏慢</p><p class="question-answer" data-market="美股" hidden><span class="answer-market">美股</span> 下跌拖越久，漲回也常等越久</p></div>
+<div class="question-markets"><a href="q/recovery-time.html#tw" data-market="台股" aria-label="台股篇章">台股</a><a href="q/recovery-time.html#us" data-market="美股" aria-label="美股篇章">美股</a></div>
+</article>
+<article class="question-row" data-topic="recovery" data-angle="觀察" data-markets="美股 多國" data-search="七個市場跌到一成的 116 次中，61 次在跌兩成前回到前高，32 次後來成為慢熊。當天可見的 11 個指標未能清楚分辨。">
+<div><h3><a href="q/slow-bear.html">剛跌 10%，看得出會不會拖成漫長的熊市嗎？</a></h3><p class="question-answer" data-market="">剛跌一成，還很難看出跌勢會不會拖好幾個月</p></div>
+<div class="question-markets"><span data-market="美股">美股</span><span data-market="多國">多國</span></div>
+</article>
+<article class="question-row" data-topic="recovery" data-angle="出場" data-markets="台股 美股" data-search="0050 漲最多的 30 天，有 23 天前一天已比高點跌超過兩成。只拿掉漲最多的十天，年化從 14.91% 降到 11.31%。 只去掉漲最多的十天，年化從 11.54% 降到 7.80%。如果跌最多的十天也去掉，年化是 11.88%。">
+<div><h3><a href="q/miss-best-days.html">錯過股市漲最多的幾天，會少賺多少？</a></h3><p class="question-answer" data-market="台股"><span class="answer-market">台股</span> 大漲常出現在股市還跌很深的時候</p><p class="question-answer" data-market="美股" hidden><span class="answer-market">美股</span> 漲跌最多的十天都拿掉，年化接近原來</p></div>
+<div class="question-markets"><a href="q/miss-best-days.html#tw" data-market="台股" aria-label="台股篇章">台股</a><a href="q/miss-best-days.html#us" data-market="美股" aria-label="美股篇章">美股</a></div>
+</article>
+<article class="question-row" data-topic="stock-bond" data-angle="買多少" data-markets="台股 美股 多國" data-search="少買股票，其餘放定存、每年調回比例。0050 整段平均每年報酬也從 14.5% 降到 7.3%。 以台幣計價 SPY 試算。把股票降到四成後，整段年化從 10.9% 降到 5.4%。 從 1989 年高點算起，只算股價，股票降到四成後，最大跌幅約從 82% 降到 43%，年化從 1.2% 降到 1.1%。">
+<div><h3><a href="q/position-size.html">股票少買一點，會少跌多少、少賺多少？</a></h3><p class="question-answer" data-market="台股"><span class="answer-market">台股</span> 股票降到四成，最大跌幅約從 56% 變 23%</p><p class="question-answer" data-market="美股" hidden><span class="answer-market">美股</span> 股票降到四成，最大跌幅約從 52% 變 22%</p><p class="question-answer" data-market="多國" hidden><span class="answer-market">多國</span> 日經從高點算，少跌不少，年化只差一點</p></div>
+<div class="question-markets"><a href="q/position-size.html#tw" data-market="台股" aria-label="台股篇章">台股</a><a href="q/position-size.html#us" data-market="美股" aria-label="美股篇章">美股</a><a href="q/position-size.html#jp" data-market="多國" aria-label="多國篇章">多國</a></div>
+</article>
+<article class="question-row" data-topic="stock-bond" data-angle="買多少" data-markets="台股 美股" data-search="0050 換四成美國公債，最大跌幅約從 56% 縮到 31%。只把四成改放短期國庫券，也能少跌約 22 個百分點。 美股換四成中期公債，最多跌約 30%。四成改放短期國庫券約 36%，全買股票約 55%。">
+<div><h3><a href="q/stocks-plus-bonds.html">把一部分股票換成公債，會少跌多少？</a></h3><p class="question-answer" data-market="台股"><span class="answer-market">台股</span> 換成公債少跌，其中大半留現金也有</p><p class="question-answer" data-market="美股" hidden><span class="answer-market">美股</span> 公債比現金多擋的跌幅，多在金融海嘯</p></div>
+<div class="question-markets"><a href="q/stocks-plus-bonds.html#tw" data-market="台股" aria-label="台股篇章">台股</a><a href="q/stocks-plus-bonds.html#us" data-market="美股" aria-label="美股篇章">美股</a></div>
+</article>
+<article class="question-row" data-topic="stock-bond" data-angle="觀察" data-markets="美股" data-search="1998 到 2021 年，公債在這類日子上漲的比例約 86%。更早的 1962 到 1997 年只有 33%，2022 年起到資料截止約 46%，且後一段的大跌日較少。">
+<div><h3><a href="q/stock-bond-correlation.html">股票大跌時，公債會上漲嗎？</a></h3><p class="question-answer" data-market="">公債常在股票大跌時上漲，主要出現在一段歷史</p></div>
+<div class="question-markets"><span data-market="美股">美股</span></div>
+</article>
+<article class="question-row" data-topic="diversifiers" data-angle="買多少" data-markets="台股 美股" data-search="0050 六成、公債四成，拿兩成資金從公債換成黃金。年化從 10.71% 升到 12.06%，最大跌幅從約 31% 變成 34%。 美元計價的美股組合加黃金後，最大跌幅多約半個百分點。從 1971 年起用月資料算，反而少跌 3.8 個百分點，主要來自 1972 到 1974 年。">
+<div><h3><a href="q/gold-diversifier.html">股票和公債裡加一點黃金，能讓組合更穩嗎？</a></h3><p class="question-answer" data-market="台股"><span class="answer-market">台股</span> 加黃金後，報酬較高，也跌得更深</p><p class="question-answer" data-market="美股" hidden><span class="answer-market">美股</span> 這 22 年跌得更深，拉長時間結果不同</p></div>
+<div class="question-markets"><a href="q/gold-diversifier.html#ret" data-market="台股" aria-label="台股篇章">台股</a><a href="q/gold-diversifier.html#ret" data-market="美股" aria-label="美股篇章">美股</a></div>
+</article>
+<article class="question-row" data-topic="diversifiers" data-angle="買多少" data-markets="美股" data-search="七段美股下跌裡，加了 REITs 有四段跌得比較少。不過美股跌最深的三段，加了 REITs 都跌得更多。這篇只測了美國這一檔。">
+<div><h3><a href="q/reits-diversifier.html">股票加上 REITs，能分散下跌風險嗎？</a></h3><p class="question-answer" data-market="">換成四成美國 REITs，最深的一次跌得更多</p></div>
+<div class="question-markets"><span data-market="美股">美股</span></div>
+</article>
+<article class="question-row" data-topic="technical" data-angle="進場" data-markets="台股 美股 多國" data-search="三市場共 24 次。五個同步下跌的月份占了 14 次，一年後報酬中位數為 40.1%。其餘 10 次為 6.0%，一般月份為 8.8%。">
+<div><h3><a href="q/monthly-lower-shadow.html">月線留下長下影線，之後比較容易漲嗎？</a></h3><p class="question-answer" data-market="">月內先大跌再拉回，後來有沒有漲要看是哪一波行情</p></div>
+<div class="question-markets"><span data-market="台股">台股</span><span data-market="美股">美股</span><span data-market="多國">多國</span></div>
+</article>
+<article class="question-row" data-topic="technical" data-angle="進場" data-markets="台股 美股" data-search="要知道均線靠近有沒有幫助，得和同一天也突破的股票比。台股只有 100 筆能這樣比，還看不準。 和同一天也突破的股票比，均線靠近那組在 20 個交易日後平均多漲 0.49 個百分點。較早的資料方向相反。">
+<div><h3><a href="q/ma-squeeze-breakout.html">幾條均線擠在一起，突破後會漲得更多嗎？</a></h3><p class="question-answer" data-market="台股"><span class="answer-market">台股</span> 台股可直接比較的只有 100 筆</p><p class="question-answer" data-market="美股" hidden><span class="answer-market">美股</span> 美股只多漲一點，還看不準</p></div>
+<div class="question-markets"><a href="q/ma-squeeze-breakout.html#tw" data-market="台股" aria-label="台股篇章">台股</a><a href="q/ma-squeeze-breakout.html#us" data-market="美股" aria-label="美股篇章">美股</a></div>
+</article>
+<article class="question-row" data-topic="technical" data-angle="進場" data-markets="台股 美股" data-search="按每筆訊號比較，32 種設定裡有五種勝過同一天隨機挑股，這五種在美股都沒重現。 按每筆訊號比較，32 種設定裡有三種勝過同一天隨機挑股，這三種在台股都沒重現。">
+<div><h3><a href="q/false-breakout.html">假突破、假跌破，反過來做有勝算嗎？</a></h3><p class="question-answer" data-market="台股"><span class="answer-market">台股</span> 有五種設定在台股過關</p><p class="question-answer" data-market="美股" hidden><span class="answer-market">美股</span> 有三種設定在美股過關</p></div>
+<div class="question-markets"><a href="q/false-breakout.html#tw" data-market="台股" aria-label="台股篇章">台股</a><a href="q/false-breakout.html#us" data-market="美股" aria-label="美股篇章">美股</a></div>
+</article>
+<article class="question-row" data-topic="technical" data-angle="選標的" data-markets="美股" data-search="2015 年初其實有 503 檔成分股。缺的股票可能改變選股結果。這套重建也替換了書上兩個條件，所以這裡能回答的是這份規則跑得怎樣。">
+<div><h3><a href="q/minervini-screen.html">照書上的強勢股規則選股，贏得過大盤嗎？</a></h3><p class="question-answer" data-market="">照書重建的選股規則，在兩種歷史名單測試都落後</p></div>
+<div class="question-markets"><span data-market="美股">美股</span></div>
+</article>
+<article class="question-row" data-topic="trend" data-angle="選標的" data-markets="美股" data-search="從 2005 年起，輪流持有最深跌約 32%，各半持有約 55%。年化則是 8.9% 對 11.1%。只用均線轉現金、平常仍各買一半，這段最多跌約 23%。">
+<div><h3><a href="q/growth-value-rotation.html">成長股和價值股輪流買，會比各買一半好嗎？</a></h3><p class="question-answer" data-market="">輪流持有成長股和價值股，這段少跌也少賺</p></div>
+<div class="question-markets"><span data-market="美股">美股</span></div>
+</article>
+<article class="question-row" data-topic="trend" data-angle="觀察" data-markets="美股" data-search="八段下跌裡，賺錢的是拖比較久的三段。若拿兩成資金放這套策略，整段最大跌幅只比兩成改放國庫券少 1.69 個百分點。">
+<div><h3><a href="q/trend-in-crashes.html">跟著趨勢做多做空，股市大跌時能避險嗎？</a></h3><p class="question-answer" data-market="">跟著趨勢做，八段股市下跌只在三段賺錢</p></div>
+<div class="question-markets"><span data-market="美股">美股</span></div>
+</article>
+<article class="question-row" data-topic="trend" data-angle="買多少" data-markets="美股" data-search="兩成改放國庫券，帳戶最多約跌 47%。也就是說，從 55% 降到 43% 的改善，有約七成只靠少買股票就能做到。多出的保護和年化優勢會隨測試期間變動。">
+<div><h3><a href="q/gold-oil-trend.html">拿兩成資金做黃金和原油趨勢交易，會少跌嗎？</a></h3><p class="question-answer" data-market="">拿兩成做黃金和原油交易，少跌的大半用國庫券也能做到</p></div>
+<div class="question-markets"><span data-market="美股">美股</span></div>
+</article>
+<article class="question-row" data-topic="trend" data-angle="買多少" data-markets="美股" data-search="以 10% 為波動目標，依不同算法，組合的最大跌幅少 0.2 到 4.4 個百分點。用當時資料估槓桿，在六段可比較的標普下跌中，組合有五段表現較好。">
+<div><h3><a href="q/twelve-markets.html">同一套規則分散到 12 個期貨市場，會穩多少？</a></h3><p class="question-answer" data-market="">分散到十二個期貨市場，調到相近波動後，跌幅優勢縮小</p></div>
+<div class="question-markets"><span data-market="美股">美股</span></div>
+</article>
+<article class="question-row" data-topic="hedging" data-angle="選標的" data-markets="美股" data-search="">
+<div><h3><a href="q/covered-call.html">持有股票再賣買權收權利金，划算嗎？</a></h3><p class="question-answer" data-market="">比較三種履約價規則。賣得更價外，這段保留較多漲幅，也跌得更深。</p></div>
+<div class="question-markets"><span data-market="美股">美股</span></div>
+</article>
+<article class="question-row" data-topic="hedging" data-angle="進場" data-markets="美股" data-search="標普 500 的六段大空頭，規則有五段賺錢。但把其他年份一起算進去，年化仍低於只拿國庫券利息。QQQ 的回測整段年化約 −2.46%，同期國庫券約 +1.52%。">
+<div><h3><a href="q/short-selling.html">放空美股大盤賺得到錢嗎？</a></h3><p class="question-answer" data-market="">放空在一些大跌能賺，整段仍輸給國庫券</p></div>
+<div class="question-markets"><span data-market="美股">美股</span></div>
+</article>
+<article class="question-row" data-topic="hedging" data-angle="進場" data-markets="美股" data-search="把模型裡的權利金假設降一些，有 2 組拿回至少 1 元。再降更多，會變成 27 組。這些是假設下的結果，還無法從這次比較確定真實成交會付多少。">
+<div><h3><a href="q/put-timing.html">長期抱股票，挑時間買賣權避險划算嗎？</a></h3><p class="question-answer" data-market="">買賣權像付保費，保費多少會左右回測結果</p></div>
+<div class="question-markets"><span data-market="美股">美股</span></div>
+</article>
+<article class="question-row" data-topic="hedging" data-angle="買多少" data-markets="美股" data-search="以 20% 為波動目標，2005 年起這段回測的最大跌幅約 38%，一路抱著約 53%。平均每年少賺約半個百分點。換成固定七成 QQQ，也能把跌幅壓到約 39%，但這段的年化較低。">
+<div><h3><a href="q/vol-targeting.html">市場越震盪就少買一點，能少跌多少？</a></h3><p class="question-answer" data-market="">市場越震盪就減碼，這段 QQQ 回測跌得比較少</p></div>
+<div class="question-markets"><span data-market="美股">美股</span></div>
+</article>
+<article class="question-row" data-topic="fundamentals" data-angle="選標的" data-markets="美股" data-search="">
+<div><h3><a href="q/earnings-surprise.html">每股盈餘比去年同季好很多，股價還會漲嗎？</a></h3><p class="question-answer" data-market="">季底排名已知才買，持有 60 日的優勢主要出現在 2023 年以後。</p></div>
+<div class="question-markets"><span data-market="美股">美股</span></div>
+</article>
+<article class="question-row" data-topic="fundamentals" data-angle="選標的" data-markets="美股" data-search="2010 到 2018 年，股數減少組平均每年多 5.86 個百分點。2019 到 2025 年，反而少 3.67 個百分點。前一段看到的優勢，後一段沒有延續。">
+<div><h3><a href="q/buyback-issuance.html">股數減少的公司，股價比較容易漲嗎？</a></h3><p class="question-answer" data-market="">股數減少的公司，前一段多賺，後一段少賺</p></div>
+<div class="question-markets"><span data-market="美股">美股</span></div>
+</article>
+<article class="question-row" data-topic="fundamentals" data-angle="觀察" data-markets="美股" data-search="如果只用買進時已知道的盈餘成長來挑股票，每季重選，過去成長最快的一組也沒有穩定贏過最慢的一組。這個選股測試每次只抱一季。">
+<div><h3><a href="q/return-source.html">股票長期漲多少，獲利和估值各有多重要？</a></h3><p class="question-answer" data-market="">獲利能解釋過去的漲幅，用它挑下一季的股票是另一件事</p></div>
+<div class="question-markets"><span data-market="美股">美股</span></div>
+</article>
+<article class="question-row" data-topic="macro" data-angle="觀察" data-markets="台股 美股 多國" data-search="">
+<div><h3><a href="q/first-cut.html">央行第一次降息後，股市會漲嗎？</a></h3><p class="question-answer" data-market="">和同一國此前走勢相近的月份比，66 次只有 32 次在降息後一年賺得更多。</p></div>
+<div class="question-markets"><span data-market="台股">台股</span><span data-market="美股">美股</span><span data-market="多國">多國</span></div>
+</article>
+<article class="question-row" data-topic="macro" data-angle="出場" data-markets="台股 美股 多國" data-search="1997 到 2026 年，按原規則賣出累積漲 124%，一路持有漲 360%，都不含股息。原規則有使用事後資料。 1957 年起的價格指數裡，倒掛賣出的最大跌幅約 48%，一路持有約 53%。原規則在賣出時用了事後資料。 美國從 1990 年起，滿三個月才賣的年化是 10.24%，一路持有是 11.30%。多國比較另受股息和買回日期的假設影響。">
+<div><h3><a href="q/yield-curve-inversion.html">殖利率曲線倒掛，股票要先賣嗎？</a></h3><p class="question-answer" data-market="台股"><span class="answer-market">台股</span> 三次倒掛，賣出後整段少賺</p><p class="question-answer" data-market="美股" hidden><span class="answer-market">美股</span> 原規則少跌，也少賺</p><p class="question-answer" data-market="多國" hidden><span class="answer-market">多國</span> 滿三個月才賣，美國含息仍落後</p></div>
+<div class="question-markets"><span data-market="台股">台股</span><span data-market="美股">美股</span><a href="q/yield-curve-inversion.html#global" data-market="多國" aria-label="多國篇章">多國</a></div>
+</article>
+<article class="question-row" data-topic="macro" data-angle="觀察" data-markets="美股" data-search="">
+<div><h3><a href="q/midterm-election.html">美國選舉前後買股票，有差嗎？</a></h3><p class="question-answer" data-market="">等到選後才買，19 次中有 17 次跌得較淺，平均報酬略低。</p></div>
+<div class="question-markets"><span data-market="美股">美股</span></div>
+</article>
+<article class="question-row" data-topic="macro" data-angle="觀察" data-markets="多國" data-search="增幅相對自己常態最快的一組，192 筆裡有約一半五年後房價較低。增幅最慢的一組，約十分之一。這是在比較國家和年份的歷史紀錄，兩者為什麼一起出現還要另外研究。">
+<div><h3><a href="q/housing-income-credit.html">所得和家庭貸款增加，房價就會跟著漲嗎？</a></h3><p class="question-answer" data-market="">家庭貸款比平常增得快的年份，後來房價較常跌</p></div>
+<div class="question-markets"><span data-market="多國">多國</span></div>
+</article>
+</div>
+<p id="question-empty" class="question-empty" hidden>找不到符合條件的文章。可以換個關鍵字或清除篩選。</p>
+<nav class="directory-pages" id="question-pages" aria-label="文章分頁" hidden>
+<button class="quiet-button" id="previous-page" type="button">← 上一頁</button>
+<span id="page-position"></span>
+<button class="quiet-button" id="next-page" type="button">下一頁 →</button>
 </nav>
-<div class="home-cols">
-<main class="home-main">
-<div aria-label="市場" class="mseg" id="mseg" role="group"></div>
-<div class="ledger" id="ledger">
-<div aria-hidden="true" class="lhead"><span>投資問題</span><span>回測結果</span><span>怎麼解讀</span></div>
-<a class="lrow" data-cat="選哪一種 ETF" data-mkt="台股" data-test="選標的" href="q/highdiv-vs-0050.html"><span class="l-claim">高股息 ETF 比 0050 好嗎？</span><span class="l-concl">配息再投入，0056 長期報酬低於同期 0050</span><span class="l-num">另外試算 2022 至 2025 年每月領 3,000 元。0056 配息入帳較多，0050 期末剩餘資產較多。</span></a>
-<a class="lrow" data-cat="選哪一種 ETF" data-mkt="台股" data-test="買多少" href="q/leveraged-2x.html"><span class="l-claim">正二（00631L）可以長期持有嗎？</span><span class="l-concl">正二遇上大多頭賺得多，遇到下跌也會放大虧損</span><span class="l-num">正二每天追求台灣 50 指數當天漲跌的兩倍。拉長到好幾年，結果要看每天怎麼漲跌。2008 年時這檔 ETF 還沒上市，那段只能用別的指數近似模擬。</span></a><a class="lrow" data-cat="選哪一種 ETF" data-mkt="台股" data-test="買多少" href="q/leveraged-2x-catchup.html"><span class="l-claim">正二買在高點，多久追得上 0050？</span><span class="l-concl">回到本金，和追上 0050，是兩個不同的時間</span><span class="l-num">把兩者放在相同起點比較，檢查何時第一次追上，以及之後是否又落後。00631L 上市前的行情使用模擬資料。</span></a>
-<a class="lrow" data-cat="選哪一種 ETF" data-mkt="台股" data-test="選標的" href="q/active-etf.html"><span class="l-claim">主動式 ETF 比 0050 好嗎？</span><span class="l-concl">現在還看不出主動式 ETF 長期能不能贏 0050</span><span class="l-num">這些 ETF 最長只上市約一年半。換一天結算，報酬會變，能一起比較的基金也可能變多。2026 年夏天那波下跌，當時已上市的 19 檔都比 0050 跌得深。</span></a>
-<a class="lrow" data-cat="選哪一種 ETF" data-mkt="台股" data-test="選標的" href="q/active-etf-persistence.html"><span class="l-claim">買績效最好的主動式 ETF，之後也會比較好嗎？</span><span class="l-concl">前一段贏過 0050，下一段未必繼續贏。</span><span class="l-num">研究把同一批 11 檔基金的表現分成前後兩段。前一段有 9 檔贏過 0050，後一段 11 檔全都落後。短期排行榜能告訴你誰剛好表現好，還不足以告訴你接下來該買誰。</span></a>
-<a class="lrow" data-cat="選哪一種 ETF" data-mkt="台股" data-test="選標的" href="q/active-etf-drawdowns.html"><span class="l-claim">主動式 ETF 有經理人操作，下跌時就會少跌嗎？</span><span class="l-concl">2026 年夏天這波下跌，19 檔都比 0050 跌得多。</span><span class="l-num">從 2026 年 6 月 22 日到 7 月 30 日，0050 下跌 15.4%。有完整資料的 19 檔主動式 ETF，跌幅介於 17.8% 到 32.8%。有經理人調整持股，不等於這段期間有成功避開下跌。</span></a>
-<a class="lrow" data-cat="選哪一種 ETF" data-mkt="台股" data-test="選標的" href="q/active-etf-diversification.html"><span class="l-claim">主動式 ETF 多買幾檔，真的有比較分散嗎？</span><span class="l-concl">基金名字不同，漲跌仍可能很像。</span><span class="l-num">研究在三段共同期間裡，都看到主動式 ETF 的每日漲跌高度同步。分給不同經理人管理，可以減少只依賴一位經理人的風險；但如果大家都偏重相似的股票，遇到市場下跌仍可能一起跌。</span></a>
-<a class="lrow" data-cat="選哪一種 ETF" data-mkt="台股" data-test="選標的" href="q/active-etf-activeness.html"><span class="l-claim">持股越不一樣、換股越勤，主動式 ETF 就越值得買嗎？</span><span class="l-concl">選得不一樣，不等於選得比較好。</span><span class="l-num">持股差異可以看出基金有多不像 0050；換股頻率可以看出部位變動多不多。這兩個數字都不能直接回答「會不會多賺」。要評估值不值得，仍要回到費用、實際報酬和承擔的風險。</span></a>
-<a class="lrow" data-cat="選哪一種 ETF" data-mkt="台股" data-test="選標的" href="q/active-etf-vs-leveraged.html"><span class="l-claim">00981A 和正二，都是想多賺一點，差在哪裡？</span><span class="l-concl">正二放大每日市場漲跌；00981A 則把選股交給經理人。</span><span class="l-num">兩者都可能比 0050 賺得多，也可能跌得更深。但賺賠的原因不同，不能只挑最近報酬較高的那一檔。下面把三者放在相同期間，比較賺了多少，以及中途曾經跌多深。</span></a>
-<a class="lrow" data-cat="選哪一種 ETF" data-mkt="美股" data-test="選標的" href="q/covered-call.html"><span class="l-claim">持有股票再賣買權收權利金，划算嗎？</span><span class="l-concl">收權利金能緩衝下跌，市場大漲時也會少跟到一些</span><span class="l-num">從 2006 年起的這段回測，備兌買權最多跌約 40%，SPY 約 55%。只拿五成或六成資金買 SPY、剩下買國庫券，整段跌得更少、賺得也更多。只看 2009 至 2015 年，這兩組就沒有同時做到。</span></a>
-<a class="lrow" data-cat="選哪一種 ETF" data-mkt="美股 多國" data-test="選標的" href="evidence/active-vs-passive.html"><span class="l-claim">主動基金贏得了指數嗎？</span><span class="l-concl">美國大型股基金，拉長到二十年，多數落後指數</span><span class="l-num">比較長期表現時也要算進後來合併或清算的基金。以美國國內股票基金來看，期初有的基金，二十年後還在的只有約 37%。</span></a>
-<div class="lrow split" data-cat="怎麼進場" data-mkt="台股 美股 多國" data-test="進場"><a class="l-claim" href="q/lump-vs-dca.html">手上有一筆錢，一次買完還是分一年買？</a><div class="l-mks"><div class="l-mk" data-m="台股"><span class="l-ct"><a class="l-tag l-tag-a" href="q/lump-vs-dca.html#tw">台股</a><span class="l-concl">一年後，195 次是一次買較多</span></span><span class="l-num">0050 的 267 個起點中，約七成是一次買一年後累積較多。用 12 萬元看 2008 與 2025 年兩個起點，兩種買法各有一次領先。</span></div><div class="l-mk" data-m="美股"><span class="l-ct"><a class="l-tag l-tag-a" href="q/lump-vs-dca.html#us">美股</a><span class="l-concl">一次買較常領先，也有只打平的年代</span></span><span class="l-num">從 1926 年起，約 69% 的開始日期是一次買累積得多。只看 1930 年代，這個比例約一半。</span></div><div class="l-mk" data-m="多國"><span class="l-ct"><a class="l-tag l-tag-a" href="q/lump-vs-dca.html#global">全球</a><span class="l-concl">約三分之二是一次買較多</span></span><span class="l-num">1990 年起的全球股票回測裡，分別看 1、10 或 20 年，約 68% 到 69% 的開始日期是一次買累積得多。</span></div></div></div>
-<div class="lrow split" data-cat="怎麼進場" data-mkt="台股 美股 多國" data-test="進場"><a class="l-claim" href="q/wait-for-crash.html">等大跌再買會比較好嗎？</a><div class="l-mks"><div class="l-mk" data-m="台股"><span class="l-ct"><a class="l-tag l-tag-a" href="q/wait-for-crash.html#tw">台股</a><span class="l-concl">等跌兩成，最後累積約八成</span></span><span class="l-num">每月存 1 萬元，從 2003 年 7 月到 2026 年 9 月。等跌兩成才買，期末約 2,307 萬元，每月直接買約 2,864 萬元。</span></div><div class="l-mk" data-m="美股"><span class="l-ct"><a class="l-tag l-tag-a" href="q/wait-for-crash.html#us">美股</a><span class="l-concl">等跌兩成，最後累積約九成</span></span><span class="l-num">美股同期試算，等跌才買的帳戶最後約是每月直接買的 91%。</span></div><div class="l-mk" data-m="多國"><span class="l-ct"><a class="l-tag l-tag-a" href="q/wait-for-crash.html#global">全球</a><span class="l-concl">換個開始時間，結果會變</span></span><span class="l-num">等跌兩成、投資二十年，結果排在中間的那筆比每月買多 1.2%。若從 1990 年一路算到資料截止，最後卻只有每月買的 88.1%。</span></div></div></div>
-<div class="lrow split" data-cat="怎麼進場" data-mkt="台股 美股 多國" data-test="進場"><a class="l-claim" href="q/entry-timing.html">拿到一筆錢就買，還是等個好時機？</a><div class="l-mks"><div class="l-mk" data-m="台股"><span class="l-ct"><a class="l-tag l-tag-a" href="q/entry-timing.html#tw">台股</a><span class="l-concl">等跌兩成，平均幾乎一樣</span></span><span class="l-num">從拿到錢起算五年。0050 等跌兩成才買，有 53% 的起點領先，平均年化差約 −0.01 個百分點。改成訊號隔天買，約 −0.07 個百分點。</span></div><div class="l-mk" data-m="美股"><span class="l-ct"><a class="l-tag l-tag-a" href="q/entry-timing.html#us">美股</a><span class="l-concl">等站回年線，很少贏過當天買</span></span><span class="l-num">用台幣計價 SPY 試算，等站回年線才買，五年後只有約 5% 的開始日期領先；分一年買約 22%。</span></div><div class="l-mk" data-m="多國"><span class="l-ct"><a class="l-tag l-tag-a" href="q/entry-timing.html#jp">日本</a><span class="l-concl">抱十年仍可能虧</span></span><span class="l-num">以日經 225 股價來看，從 1989 年之後的日期開始、抱十年，約 48% 的開始日期到期時仍虧錢。</span></div></div></div>
-<div class="lrow split" data-cat="怎麼進場" data-mkt="台股 美股" data-test="進場"><a class="l-claim" href="q/buy-at-peak.html">買在大跌前的最高點，十年後會怎樣？</a><div class="l-mks"><div class="l-mk" data-m="台股"><span class="l-ct"><a class="l-tag l-tag-a" href="q/buy-at-peak.html#tw">台股</a><span class="l-concl">買完一年，典型結果仍是虧損</span></span><span class="l-num">八個事後辨認的 0050 高點，一年後報酬中位數為 −9.7%。2007 年高點的 10 萬元案例，到谷底剩約 4.4 萬元。</span></div><div class="l-mk" data-m="美股"><span class="l-ct"><a class="l-tag l-tag-a" href="q/buy-at-peak.html#us">美股</a><span class="l-concl">每年差距變小，累積差距還在</span></span><span class="l-num">買在大跌前高點，十年累積報酬的中間值約 104%。一般月底買進約 189%。扣通膨後，八個高點有四個抱十年仍虧。</span></div></div></div>
-<a class="lrow" data-cat="怎麼進場" data-mkt="美股" data-test="進場" href="q/chasing-returns.html"><span class="l-claim">股市已經連漲好幾年，現在買還來得及嗎？</span><span class="l-concl">市場漲了三年，還看不出買進後會少賺</span><span class="l-num">過去三年年化漲逾兩成的 254 個月底，逐月算是 4.1%，按 19 段行情等權算是 8.9%。一般月底是 9.6%。</span></a>
-<div class="lrow split" data-cat="下跌與漲回" data-mkt="台股 美股" data-test="觀察"><a class="l-claim" href="q/recovery-time.html">股市大跌後，多久能漲回去？</a><div class="l-mks"><div class="l-mk" data-m="台股"><span class="l-ct"><a class="l-tag l-tag-a" href="q/recovery-time.html#tw">台股</a><span class="l-concl">跌得久的幾次，漲回也偏慢</span></span><span class="l-num">0050 八次已回到前高的兩成以上跌勢，從高點算約等 5.9 到 39.0 個月。圖中分開標示下跌與漲回各花多久。</span></div><div class="l-mk" data-m="美股"><span class="l-ct"><a class="l-tag l-tag-a" href="q/recovery-time.html#us">美股</a><span class="l-concl">下跌拖越久，漲回也常等越久</span></span><span class="l-num">美股的 13 次大跌有這個傾向。但拖得久的幾次通常也跌得深，兩個原因分不開。</span></div></div></div>
-<a class="lrow" data-cat="下跌與漲回" data-mkt="美股 多國" data-test="觀察" href="q/slow-bear.html"><span class="l-claim">剛跌 10%，看得出會不會拖成漫長的熊市嗎？</span><span class="l-concl">剛跌一成，還很難看出跌勢會不會拖好幾個月</span><span class="l-num">七個市場跌到一成的 116 次中，61 次在跌兩成前回到前高，32 次後來成為慢熊。當天可見的 11 個指標未能清楚分辨。</span></a>
-<div class="lrow split" data-cat="下跌與漲回" data-mkt="台股 美股" data-test="出場"><a class="l-claim" href="q/miss-best-days.html">錯過股市漲最多的幾天，會少賺多少？</a><div class="l-mks"><div class="l-mk" data-m="台股"><span class="l-ct"><a class="l-tag l-tag-a" href="q/miss-best-days.html#tw">台股</a><span class="l-concl">大漲常出現在股市還跌很深的時候</span></span><span class="l-num">0050 漲最多的 30 天，有 23 天前一天已比高點跌超過兩成。只拿掉漲最多的十天，年化從 14.91% 降到 11.31%。</span></div><div class="l-mk" data-m="美股"><span class="l-ct"><a class="l-tag l-tag-a" href="q/miss-best-days.html#us">美股</a><span class="l-concl">漲跌最多的十天都拿掉，年化接近原來</span></span><span class="l-num">只去掉漲最多的十天，年化從 11.54% 降到 7.80%。如果跌最多的十天也去掉，年化是 11.88%。</span></div></div></div>
-<a class="lrow" data-cat="均線與趨勢訊號" data-mkt="台股 美股 多國" data-test="進場" href="q/monthly-lower-shadow.html"><span class="l-claim">月線留下長下影線，之後比較容易漲嗎？</span><span class="l-concl">月內先大跌再拉回，後來有沒有漲要看是哪一波行情</span><span class="l-num">三市場共 24 次。五個同步下跌的月份占了 14 次，一年後報酬中位數為 40.1%。其餘 10 次為 6.0%，一般月份為 8.8%。</span></a>
-<div class="lrow split" data-cat="均線與趨勢訊號" data-mkt="台股 美股" data-test="出場"><a class="l-claim" href="q/sell-below-ma.html">跌破年線要不要賣？</a><div class="l-mks"><div class="l-mk" data-m="台股"><span class="l-ct"><a class="l-tag l-tag-a" href="q/sell-below-ma.html#tw">台股</a><span class="l-concl">0050 最深跌得少，年化也少</span></span><span class="l-num">2004 至 2026 年，照年線買賣的最大跌幅約 31%，全程持有約 56%。同樣投入 10 萬元，期末約為 113 萬元與 216 萬元。</span></div><div class="l-mk" data-m="美股"><span class="l-ct"><a class="l-tag l-tag-a" href="q/sell-below-ma.html#us">美股</a><span class="l-concl">標普少跌。QQQ 是否多賺要看起點</span></span><span class="l-num">標普 500 的最大跌幅約從 55% 降到 25%。QQQ 從網路泡沫前開始，規則多賺。從 2003 年中開始，結果就變成少賺。</span></div></div></div>
-<div class="lrow split" data-cat="均線與趨勢訊號" data-mkt="台股 美股 多國" data-test="出場"><a class="l-claim" href="q/exit-rules.html">設了出場規則，會少跌多少、少賺多少？</a><div class="l-mks"><div class="l-mk" data-m="台股"><span class="l-ct"><a class="l-tag l-tag-a" href="q/exit-rules.html#tw">台股</a><span class="l-concl">兩種賣出規則，這段都少賺</span></span><span class="l-num">跌破年線就賣，0050 的年化是 11.5%，一路持有是 14.8%。若跌兩成才賣、等創高買回，年化是 6.8%。</span></div><div class="l-mk" data-m="美股"><span class="l-ct"><a class="l-tag l-tag-a" href="q/exit-rules.html#us">美股</a><span class="l-concl">QQQ 是這次唯一年化較高的一組</span></span><span class="l-num">SPY 照年線出場，整段少賺。QQQ 同一規則多賺，主要靠躲過 2000 到 2002 年的大跌。</span></div><div class="l-mk" data-m="多國"><span class="l-ct"><a class="l-tag l-tag-a" href="q/exit-rules.html#jp">日本</a><span class="l-concl">賣出能少跌，仍可能等十幾年才回前高</span></span><span class="l-num">日經 225 從 1965 年起，照年線賣，最大跌幅約 51%，一路持有約 82%。各自最長沒回前高的時間約 16 年和 34 年。</span></div></div></div>
-<div class="lrow split" data-cat="均線與趨勢訊號" data-mkt="台股 美股" data-test="進場"><a class="l-claim" href="q/ma-squeeze-breakout.html">幾條均線擠在一起，突破後會漲得更多嗎？</a><div class="l-mks"><div class="l-mk" data-m="台股"><span class="l-ct"><a class="l-tag l-tag-a" href="q/ma-squeeze-breakout.html#tw">台股</a><span class="l-concl">台股可直接比較的只有 100 筆</span></span><span class="l-num">要知道均線靠近有沒有幫助，得和同一天也突破的股票比。台股只有 100 筆能這樣比，還看不準。</span></div><div class="l-mk" data-m="美股"><span class="l-ct"><a class="l-tag l-tag-a" href="q/ma-squeeze-breakout.html#us">美股</a><span class="l-concl">美股只多漲一點，還看不準</span></span><span class="l-num">和同一天也突破的股票比，均線靠近那組在 20 個交易日後平均多漲 0.49 個百分點。較早的資料方向相反。</span></div></div></div>
-<div class="lrow split" data-cat="突破與線型" data-mkt="台股 美股" data-test="進場"><a class="l-claim" href="q/false-breakout.html">假突破、假跌破，反過來做有勝算嗎？</a><div class="l-mks"><div class="l-mk" data-m="台股"><span class="l-ct"><a class="l-tag l-tag-a" href="q/false-breakout.html#tw">台股</a><span class="l-concl">有五種設定在台股過關</span></span><span class="l-num">按每筆訊號比較，32 種設定裡有五種勝過同一天隨機挑股，這五種在美股都沒重現。</span></div><div class="l-mk" data-m="美股"><span class="l-ct"><a class="l-tag l-tag-a" href="q/false-breakout.html#us">美股</a><span class="l-concl">有三種設定在美股過關</span></span><span class="l-num">按每筆訊號比較，32 種設定裡有三種勝過同一天隨機挑股，這三種在台股都沒重現。</span></div></div></div>
-<div class="lrow split" data-cat="總經與事件" data-mkt="台股 美股 多國" data-test="出場"><a class="l-claim" href="q/yield-curve-inversion.html">殖利率曲線倒掛，股票要先賣嗎？</a><div class="l-mks"><div class="l-mk" data-m="台股"><span class="l-ct"><span class="l-tag">台股</span><span class="l-concl">三次倒掛，賣出後整段少賺</span></span><span class="l-num">1997 到 2026 年，按原規則賣出累積漲 124%，一路持有漲 360%，都不含股息。原規則有使用事後資料。</span></div><div class="l-mk" data-m="美股"><span class="l-ct"><span class="l-tag">美股</span><span class="l-concl">原規則少跌，也少賺</span></span><span class="l-num">1957 年起的價格指數裡，倒掛賣出的最大跌幅約 48%，一路持有約 53%。原規則在賣出時用了事後資料。</span></div><div class="l-mk" data-m="多國"><span class="l-ct"><a class="l-tag l-tag-a" href="q/yield-curve-inversion.html#global">八國</a><span class="l-concl">滿三個月才賣，美國含息仍落後</span></span><span class="l-num">美國從 1990 年起，滿三個月才賣的年化是 10.24%，一路持有是 11.30%。多國比較另受股息和買回日期的假設影響。</span></div></div></div>
-<a class="lrow" data-cat="總經與事件" data-mkt="多國" data-test="觀察" href="q/first-cut.html"><span class="l-claim">央行第一次降息後，股市會漲嗎？</span><span class="l-concl">首次降息後一年，樣本漲得較多，但差距還看不準</span><span class="l-num">換成一般報酬，降息組的中間值約 11.0%，平常月份約 7.9%。幾個國家常在同一波景氣下同時降息，把這些月份放在一起重新抽樣後，差距還看不準。</span></a>
-<a class="lrow" data-cat="總經與事件" data-mkt="美股" data-test="觀察" href="q/midterm-election.html"><span class="l-claim">美國選舉前後買股票，有差嗎？</span><span class="l-concl">期中選舉後半年常漲，從年初算就沒那麼明顯</span><span class="l-num">期中選舉年在選前通常漲得較少。把選前也算進去，從年初到選後半年只多漲 2.9 個百分點。只看 1990 年以後的九次，結果反而落後其他年份。</span></a>
-<a class="lrow" data-cat="總經與事件" data-mkt="美股" data-test="選標的" href="q/earnings-surprise.html"><span class="l-claim">每股盈餘比去年同季好很多，股價還會漲嗎？</span><span class="l-concl">財報好轉後只多漲一點，當時也還不知道誰進前段班</span><span class="l-num">較早公布的公司，在財報公布隔天還不知道其他公司的成績。這個排名是回頭排出來的。若改用買進當時已公布的財報排名，結果目前未知。</span></a>
-<a class="lrow" data-cat="選股方法" data-mkt="美股" data-test="選標的" href="q/minervini-screen.html"><span class="l-claim">照書上的強勢股規則選股，贏得過大盤嗎？</span><span class="l-concl">照書重建的選股規則，在兩種歷史名單測試都落後</span><span class="l-num">2015 年初其實有 503 檔成分股。缺的股票可能改變選股結果。這套重建也替換了書上兩個條件，所以這裡能回答的是這份規則跑得怎樣。</span></a>
-<a class="lrow" data-cat="選股方法" data-mkt="美股" data-test="選標的" href="q/buyback-issuance.html"><span class="l-claim">股數減少的公司，股價比較容易漲嗎？</span><span class="l-concl">股數減少的公司，前一段多賺，後一段少賺</span><span class="l-num">2010 到 2018 年，股數減少組平均每年多 5.86 個百分點。2019 到 2025 年，反而少 3.67 個百分點。前一段看到的優勢，後一段沒有延續。</span></a>
-<a class="lrow" data-cat="選股方法" data-mkt="美股" data-test="觀察" href="q/return-source.html"><span class="l-claim">股票長期漲多少，獲利和估值各有多重要？</span><span class="l-concl">獲利能解釋過去的漲幅，用它挑下一季的股票是另一件事</span><span class="l-num">如果只用買進時已知道的盈餘成長來挑股票，每季重選，過去成長最快的一組也沒有穩定贏過最慢的一組。這個選股測試每次只抱一季。</span></a>
-<a class="lrow" data-cat="槓桿、放空與避險" data-mkt="美股" data-test="進場" href="q/short-selling.html"><span class="l-claim">放空美股大盤賺得到錢嗎？</span><span class="l-concl">放空在一些大跌能賺，整段仍輸給國庫券</span><span class="l-num">標普 500 的六段大空頭，規則有五段賺錢。但把其他年份一起算進去，年化仍低於只拿國庫券利息。QQQ 的回測整段年化約 −2.46%，同期國庫券約 +1.52%。</span></a>
-<a class="lrow" data-cat="槓桿、放空與避險" data-mkt="美股" data-test="進場" href="q/put-timing.html"><span class="l-claim">長期抱股票，挑時間買賣權避險划算嗎？</span><span class="l-concl">買賣權像付保費，保費多少會左右回測結果</span><span class="l-num">把模型裡的權利金假設降一些，有 2 組拿回至少 1 元。再降更多，會變成 27 組。這些是假設下的結果，還無法從這次比較確定真實成交會付多少。</span></a>
-<a class="lrow" data-cat="槓桿、放空與避險" data-mkt="美股" data-test="買多少" href="q/vol-targeting.html"><span class="l-claim">市場越震盪就少買一點，能少跌多少？</span><span class="l-concl">市場越震盪就減碼，這段 QQQ 回測跌得比較少</span><span class="l-num">以 20% 為波動目標，2005 年起這段回測的最大跌幅約 38%，一路抱著約 53%。平均每年少賺約半個百分點。換成固定七成 QQQ，也能把跌幅壓到約 39%，但這段的年化較低。</span></a>
-<a class="lrow" data-cat="槓桿、放空與避險" data-mkt="台股 美股" data-test="買多少" href="q/volatility-tax.html"><span class="l-claim">市場震盪會吃掉槓桿 ETF 多少報酬？</span><span class="l-concl">先跌後漲回原點，兩倍槓桿卻可能還在虧</span><span class="l-num">本文把每日兩倍的結果，和把原型累積倍數平方的結果比較。台股 22 個完整年度裡，按連續複利算，差距的中間值是 2.69 個百分點。</span></a>
-<a class="lrow" data-cat="資產配置與輪動" data-mkt="美股" data-test="選標的" href="q/growth-value-rotation.html"><span class="l-claim">成長股和價值股輪流買，會比各買一半好嗎？</span><span class="l-concl">輪流持有成長股和價值股，這段少跌也少賺</span><span class="l-num">從 2005 年起，輪流持有最深跌約 32%，各半持有約 55%。年化則是 8.9% 對 11.1%。只用均線轉現金、平常仍各買一半，這段最多跌約 23%。</span></a>
-<div class="lrow split" data-cat="資產配置與輪動" data-mkt="台股 美股 多國" data-test="買多少"><a class="l-claim" href="q/position-size.html">股票少買一點，會少跌多少、少賺多少？</a><div class="l-mks"><div class="l-mk" data-m="台股"><span class="l-ct"><a class="l-tag l-tag-a" href="q/position-size.html#tw">台股</a><span class="l-concl">股票降到四成，最大跌幅約從 56% 變 23%</span></span><span class="l-num">少買股票，其餘放定存、每年調回比例。0050 整段平均每年報酬也從 14.5% 降到 7.3%。</span></div><div class="l-mk" data-m="美股"><span class="l-ct"><a class="l-tag l-tag-a" href="q/position-size.html#us">美股</a><span class="l-concl">股票降到四成，最大跌幅約從 52% 變 22%</span></span><span class="l-num">以台幣計價 SPY 試算。把股票降到四成後，整段年化從 10.9% 降到 5.4%。</span></div><div class="l-mk" data-m="多國"><span class="l-ct"><a class="l-tag l-tag-a" href="q/position-size.html#jp">日本</a><span class="l-concl">日經從高點算，少跌不少，年化只差一點</span></span><span class="l-num">從 1989 年高點算起，只算股價，股票降到四成後，最大跌幅約從 82% 降到 43%，年化從 1.2% 降到 1.1%。</span></div></div></div>
-<div class="lrow split" data-cat="資產配置與輪動" data-mkt="台股 美股" data-test="買多少"><a class="l-claim" href="q/stocks-plus-bonds.html">把一部分股票換成公債，會少跌多少？</a><div class="l-mks"><div class="l-mk" data-m="台股"><span class="l-ct"><a class="l-tag l-tag-a" href="q/stocks-plus-bonds.html#tw">台股</a><span class="l-concl">換成公債少跌，其中大半留現金也有</span></span><span class="l-num">0050 換四成美國公債，最大跌幅約從 56% 縮到 31%。只把四成改放短期國庫券，也能少跌約 22 個百分點。</span></div><div class="l-mk" data-m="美股"><span class="l-ct"><a class="l-tag l-tag-a" href="q/stocks-plus-bonds.html#us">美股</a><span class="l-concl">公債比現金多擋的跌幅，多在金融海嘯</span></span><span class="l-num">美股換四成中期公債，最多跌約 30%。四成改放短期國庫券約 36%，全買股票約 55%。</span></div></div></div>
-<a class="lrow" data-cat="資產配置與輪動" data-mkt="美股" data-test="觀察" href="q/stock-bond-correlation.html"><span class="l-claim">股票大跌時，公債會上漲嗎？</span><span class="l-concl">公債常在股票大跌時上漲，主要出現在一段歷史</span><span class="l-num">1998 到 2021 年，公債在這類日子上漲的比例約 86%。更早的 1962 到 1997 年只有 33%，2022 年起到資料截止約 46%，且後一段的大跌日較少。</span></a>
-<a class="lrow" data-cat="均線與趨勢訊號" data-mkt="美股" data-test="觀察" href="q/trend-in-crashes.html"><span class="l-claim">跟著趨勢做多做空，股市大跌時能避險嗎？</span><span class="l-concl">跟著趨勢做，八段股市下跌只在三段賺錢</span><span class="l-num">八段下跌裡，賺錢的是拖比較久的三段。若拿兩成資金放這套策略，整段最大跌幅只比兩成改放國庫券少 1.69 個百分點。</span></a>
-<a class="lrow" data-cat="資產配置與輪動" data-mkt="美股" data-test="買多少" href="q/gold-oil-trend.html"><span class="l-claim">拿兩成資金做黃金和原油趨勢交易，會少跌嗎？</span><span class="l-concl">拿兩成做黃金和原油交易，少跌的大半用國庫券也能做到</span><span class="l-num">兩成改放國庫券，帳戶最多約跌 47%。也就是說，從 55% 降到 43% 的改善，有約七成只靠少買股票就能做到。多出的保護和年化優勢會隨測試期間變動。</span></a>
-<a class="lrow" data-cat="資產配置與輪動" data-mkt="美股" data-test="買多少" href="q/twelve-markets.html"><span class="l-claim">同一套規則分散到 12 個期貨市場，會穩多少？</span><span class="l-concl">分散到十二個期貨市場，調到相近波動後，跌幅優勢縮小</span><span class="l-num">以 10% 為波動目標，依不同算法，組合的最大跌幅少 0.2 到 4.4 個百分點。用當時資料估槓桿，在六段可比較的標普下跌中，組合有五段表現較好。</span></a>
-<a class="lrow" data-cat="資產配置與輪動" data-mkt="美股" data-test="買多少" href="q/reits-diversifier.html"><span class="l-claim">股票加上 REITs，能分散下跌風險嗎？</span><span class="l-concl">換成四成美國 REITs，最深的一次跌得更多</span><span class="l-num">七段美股下跌裡，加了 REITs 有四段跌得比較少。不過美股跌最深的三段，加了 REITs 都跌得更多。這篇只測了美國這一檔。</span></a>
-<div class="lrow split" data-cat="資產配置與輪動" data-mkt="台股 美股" data-test="買多少"><a class="l-claim" href="q/gold-diversifier.html">股票和公債裡加一點黃金，能讓組合更穩嗎？</a><div class="l-mks"><div class="l-mk" data-m="台股"><span class="l-ct"><a class="l-tag l-tag-a" href="q/gold-diversifier.html#ret">台股</a><span class="l-concl">加黃金後，報酬較高，也跌得更深</span></span><span class="l-num">0050 六成、公債四成，拿兩成資金從公債換成黃金。年化從 10.71% 升到 12.06%，最大跌幅從約 31% 變成 34%。</span></div><div class="l-mk" data-m="美股"><span class="l-ct"><a class="l-tag l-tag-a" href="q/gold-diversifier.html#ret">美股</a><span class="l-concl">這 22 年跌得更深，拉長時間結果不同</span></span><span class="l-num">美元計價的美股組合加黃金後，最大跌幅多約半個百分點。從 1971 年起用月資料算，反而少跌 3.8 個百分點，主要來自 1972 到 1974 年。</span></div></div></div>
-<a class="lrow" data-cat="房價與其他" data-mkt="多國" data-test="觀察" href="q/housing-income-credit.html"><span class="l-claim">所得和家庭貸款增加，房價就會跟著漲嗎？</span><span class="l-concl">家庭貸款比平常增得快的年份，後來房價較常跌</span><span class="l-num">增幅相對自己常態最快的一組，192 筆裡有約一半五年後房價較低。增幅最慢的一組，約十分之一。這是在比較國家和年份的歷史紀錄，兩者為什麼一起出現還要另外研究。</span></a>
-<p class="l-empty" hidden="" id="fempty">找不到符合條件的題目</p>
-</div>
-<p class="fine qhint">標示「整理中」的題目還在補資料或核對結果。</p>
+</section>
+<footer class="directory-footer"><a href="methods.html">回測數字怎麼讀？ →</a></footer>
 </main>
-<aside class="home-side">
-<div class="finder" id="finder">
-<div class="f-title">找投資問題</div>
-<label class="f-q"><span class="f-lab">關鍵字</span><input autocomplete="off" id="fq" placeholder="例如：高股息、年線" type="search"/></label>
-<div class="f-lab f-gap" id="testLab">想看哪類問題？</div>
-<div aria-labelledby="testLab" class="f-list f-tests" id="testBox" role="group"></div>
-<p class="f-note">進場和出場看買賣時機，買多少看持股比例或槓桿，選標的看買哪一種。觀察類題目整理的是市場現象。</p>
-<div class="f-lab f-gap">分類</div>
-<div class="f-list" id="catBox"></div>
-<p aria-live="polite" class="f-count" id="fcount"></p>
-<button class="f-clear" hidden="" id="fclear" type="button">清除篩選</button>
-</div>
-</aside>
-</div>
-</div>
-<script src="list.js"></script>
 </body>
 </html>
