@@ -4,6 +4,8 @@ import {
   validDecision, play, runBenchmark, biggestChange
 } from './0050-engine.js?v=1';
 
+import { SCENE_COUNT, sceneAt, optionFor, movesFor } from './0050-scenes.js?v=1';
+
 const get = id => document.getElementById(id);
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
@@ -22,12 +24,13 @@ let result;
 let selection = 'direct';
 let selectedPoint = 0;
 let resultPlot;
+let storyTurn;
 let fileLoading = false;
 
 const save = readProgress();
 
 function readProgress() {
-  const fresh = { sessions: {}, complete: [] };
+  const fresh = { sessions: {}, complete: [], reveals: {} };
   try {
     const raw = JSON.parse(localStorage.getItem(savedKey));
     if (!raw) return fresh;
@@ -36,6 +39,9 @@ function readProgress() {
       if (Array.isArray(history) && history.length <= 60 && history.every(validDecision)) {
         fresh.sessions[start] = history;
       }
+      const stage = raw.reveals?.[start];
+      if (stage && Number.isInteger(stage.from) && stage.from >= 0 && stage.from < 60
+          && typeof stage.choice === 'string') fresh.reveals[start] = stage;
     }
     if (Array.isArray(raw.complete)) {
       fresh.complete = CHAPTERS.filter(item => raw.complete.includes(item.start)).map(item => item.start);
@@ -61,15 +67,17 @@ function make(tag, text, className) {
   return node;
 }
 
+function focusTop(id) {
+  window.scrollTo(0, 0);
+  const target = get(id);
+  target.tabIndex = -1;
+  target.focus({ preventScroll: true });
+}
+
 function show(which, focus) {
   view = which;
-  for (const name of ['hub', 'board', 'result']) get(name).hidden = name !== which;
-  if (focus) {
-    window.scrollTo(0, 0);
-    const target = get(focus);
-    target.tabIndex = -1;
-    target.focus({ preventScroll: true });
-  }
+  for (const name of ['hub', 'board', 'turn-reveal', 'result']) get(name).hidden = name !== which;
+  if (focus) focusTop(focus);
 }
 
 function nextUnfinished(from = -1) {
@@ -101,11 +109,9 @@ function renderHub() {
 }
 
 function setChoices() {
-  for (const id of ['compare-rule', 'autoplay-rule']) {
-    const select = get(id);
-    for (const [key, option] of Object.entries(benchmarks)) {
-      select.append(new Option(option.label, key));
-    }
+  const select = get('compare-rule');
+  for (const [key, option] of Object.entries(benchmarks)) {
+    select.append(new Option(option.label, key));
   }
 }
 
@@ -136,101 +142,192 @@ function history() {
   return save.sessions[key] ??= [];
 }
 
+function renderProgress(id, index, revealed) {
+  const segments = Array.from({ length: SCENE_COUNT }, (_, number) => {
+    const li = make('li', String(number + 1), number < index || revealed && number === index ? 'filled' : '');
+    if (!revealed && number === index) li.setAttribute('aria-current', 'step');
+    return li;
+  });
+  get(id).replaceChildren(...segments);
+}
+
+function sceneContext(from) {
+  const scenario = scenarios[current];
+  const previous = history().slice(0, from);
+  const account = play(scenario, previous);
+  return { previous, account, ...sceneAt(scenario.chapter.start, from, account.cash) };
+}
+
 function openChapter(index, restart = false) {
   if (!scenarios) return;
   current = index;
+  const { chapter, turns } = scenarios[current];
   if (restart) {
-    save.sessions[CHAPTERS[current].start] = [];
+    save.sessions[chapter.start] = [];
+    delete save.reveals[chapter.start];
     persist();
   }
-  const scenario = scenarios[current];
-  if (history().length === scenario.turns.length) {
-    finish(play(scenario, history()));
+
+  const saved = save.reveals[chapter.start];
+  if (saved) {
+    const context = sceneContext(saved.from);
+    if (context.keys?.includes(saved.choice) && context.end === history().length) {
+      showReveal(context, saved.choice);
+      return;
+    }
+  }
+  if (history().length === turns.length) {
+    finish(play(scenarios[current], history()));
     return;
   }
-  get('board-title').textContent = scenario.chapter.label;
-  get('chapter-counter').textContent = `第 ${index + 1} 關／共 ${CHAPTERS.length} 關`;
-  $('input[name="step"][value="1"]').checked = true;
-  const previousPolicy = history().at(-1)?.policy ?? 'month';
-  const selection = previousPolicy === 'monthDailyHigh' ? 'month' : previousPolicy.replace('Cap', '');
-  $(`input[name="policy"][value="${selection}"]`).checked = true;
-  get('deadline').checked = previousPolicy.endsWith('Cap');
-  get('autoplay').open = false;
-  get('autoplay-rule').value = 'direct';
-  get('round-message').textContent = history().length
-    ? '回到上次停下的月份。' : '第一筆預算已就緒。選好做法，時間才會往前。';
-  show('board', 'board-title');
+  show('board');
   renderBoard();
+  focusTop('board-title');
 }
 
-function renderBoard(account = play(scenarios[current], history())) {
+function renderBoard() {
   const scenario = scenarios[current];
-  const played = history().length;
-  get('progress').value = played;
-  get('turn').textContent = `第 ${played + 1}／${scenario.turns.length} 月`;
+  const from = history().length;
+  const { account, index, end, prompt, keys } = sceneContext(from);
+  get('chapter-counter').textContent = `第 ${current + 1} 關 · 第 ${index + 1} 次決定`;
+  renderProgress('scene-progress', index, false);
+  get('scene-budget').textContent = `接下來 ${end - from} 個月 · 每月 ${money(10000)}`;
+  get('board-title').textContent = prompt;
   get('account-value').textContent = money(account.total);
   get('account-cash').textContent = money(account.cash);
-  get('account-principal').textContent = money(account.principal);
   const dd = scenario.data[account.observed].dailyDrawdown;
   get('market-drawdown').textContent = percent(dd);
-  get('market-drawdown').classList.toggle('negative', dd <= -20);
-  get('boost').disabled = account.cash < 0.5;
-  const maxSteps = scenario.turns.length - played;
-  const step = $('input[name="step"][value="3"]');
-  step.disabled = maxSteps < 3;
-  if (step.disabled) $('input[name="step"][value="1"]').checked = true;
-  renderSettings();
-  drawMarket();
+  get('market-drawdown').style.color = dd <= -20 ? 'var(--negative)' : 'var(--mint)';
+  get('market-disclosure').open = false;
+  get('scene-choices').replaceChildren(...keys.map(key => {
+    const [label, description] = optionFor(key);
+    const button = make('button', '', 'scene-choice');
+    button.type = 'button';
+    button.dataset.choice = key;
+    button.append(make('span', label), make('small', description));
+    button.addEventListener('click', () => advance(key));
+    return button;
+  }));
 }
 
-function renderSettings() {
-  const steps = +$('input[name="step"]:checked').value;
-  get('step-note').textContent = steps === 1
-    ? '決定後，下個收盤價才會揭曉。'
-    : '同一個決定會沿用三個月，下面的金額是每月預算。';
-  const policy = $('input[name="policy"]:checked').value;
-  get('deadline').disabled = policy === 'manual';
-  get('policy-note').textContent = {
-    month: '用最高月底收盤算跌幅，月底確認跌兩成，下一個交易日買。',
-    daily: '用最高單日收盤算跌幅，每天檢查，確認跌兩成後隔天買。',
-    manual: '先放定存。你點「全買再加碼」時才會買進。'
-  }[policy];
-  if (policy !== 'manual' && get('deadline').checked) {
-    get('policy-note').textContent += ' 每筆錢存滿半年，就在當月月底買進。';
-  }
-}
-
-function currentPolicy() {
-  const policy = $('input[name="policy"]:checked').value;
-  return policy !== 'manual' && get('deadline').checked ? policy + 'Cap' : policy;
-}
-
-function advance(rule, count) {
+function advance(key) {
   if (view !== 'board') return;
-  const scenario = scenarios[current];
-  const moves = history();
-  const before = play(scenario, moves);
-  const used = Math.min(count, scenario.turns.length - moves.length);
-  for (let index = 0; index < used; index++) moves.push({ policy: rule.policy, action: rule.action });
-  const after = play(scenario, moves);
+  const from = history().length;
+  const context = sceneContext(from);
+  if (!context.keys.includes(key)) return;
+  history().push(...movesFor(key, context.end - from));
+  save.reveals[CHAPTERS[current].start] = { from, choice: key };
   persist();
-  if (moves.length === scenario.turns.length) {
-    finish(after);
-    return;
+  showReveal(context, key);
+}
+
+function largestDrop(during) {
+  let peak = during[0].price;
+  let decline = 0;
+  for (const day of during) {
+    peak = Math.max(peak, day.price);
+    decline = Math.max(decline, 1 - day.price / peak);
   }
-  const a = scenario.data[before.observed].price;
-  const b = scenario.data[after.observed].price;
-  const released = after.trades.filter(trade => trade.date > scenario.data[before.observed].date && trade.reserve)
-    .reduce((total, trade) => total + trade.reserve, 0);
-  get('round-message').textContent = `往前 ${used} 個月，0050 ${plus((b / a - 1) * 100)}。`
-    + (released ? `這段動用了 ${money(released)} 預留金。` : '');
-  renderBoard(after);
+  return decline * 100;
+}
+
+function showReveal(context, choice) {
+  const scenario = scenarios[current];
+  const { previous, account, index, end, keys } = context;
+  const count = end - previous.length;
+  const branches = Object.fromEntries(keys.map(key => [key,
+    play(scenario, previous.concat(movesFor(key, count)))]));
+  const played = branches[choice];
+  const days = scenario.data.slice(account.observed, played.observed + 1);
+  const endReturn = (days.at(-1).price / days[0].price - 1) * 100;
+  const deepest = largestDrop(days);
+  storyTurn = { context, choice, branches, compared: keys.find(key => key !== choice) };
+  get('reveal-counter').textContent = `第 ${current + 1} 關 · 第 ${index + 1} 次結果`;
+  get('reveal-period-length').textContent = `這段 ${count} 個月 · 入帳 ${money(count * 10000)}`;
+  renderProgress('reveal-progress', index, true);
+  get('turn-reveal-title').textContent = deepest >= 20
+    ? `0050 一度跌 ${percent(deepest)}`
+    : `0050 這段${endReturn < 0 ? '跌了' : '漲了'} ${percent(Math.abs(endReturn))}`;
+  const marketLine = deepest >= 20
+    ? `從這段起點到結束，0050 ${plus(endReturn)}。`
+    : `途中從前高最多跌了 ${percent(deepest)}。`;
+  const close = scenario.chapter.start === '2019-01' && index === 1
+    ? days.find(day => day.date === '2020-03-31') : null;
+  const periodComparison = close
+    ? `這段最後一個月底，用最高單日收盤算跌 ${percent(-close.dailyDrawdown)}，用最高月底收盤算跌 ${percent(-close.monthlyDrawdown)}。` : '';
+  get('reveal-context').textContent = marketLine + periodComparison;
+  get('continue-turn').textContent = end === scenario.turns.length ? '看五年結算 →' : '下一次決定 →';
+  get('turn-chart-end').textContent = end === scenario.turns.length ? '到結算' : '到下次決策前';
+  get('branch-options').replaceChildren(...keys.map(key => {
+    const button = make('button', '', 'scene-choice branch-option');
+    button.type = 'button';
+    button.dataset.branch = key;
+    button.append(make('span', optionFor(key)[0] + (key === choice ? '（你選的）' : '')),
+      make('b', money(branches[key].total)));
+    button.addEventListener('click', () => {
+      storyTurn.compared = key;
+      renderBranch();
+    });
+    return button;
+  }));
+  show('turn-reveal', 'turn-reveal-title');
+  renderBranch();
   if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    get('round-message').animate([
-      { backgroundColor: '#25404b', transform: 'translateY(3px)' },
-      { backgroundColor: '#101e2c', transform: 'translateY(0)' }
-    ], { duration: 360, easing: 'ease-out' });
+    get('turn-chart').animate([{ clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0)' }],
+      { duration: 700, easing: 'ease-out' });
   }
+}
+
+function flowNote(variant, observed) {
+  const days = scenarios[current].data;
+  const fills = variant.trades.filter(trade => trade.reserve && trade.date > days[observed].date);
+  const invested = fills.reduce((sum, trade) => sum + trade.reserve, 0);
+  if (!fills.length) return '這段沒有動用預留金，手上還有 ' + money(variant.cash) + '。';
+  const first = days.findIndex((day, index) => index > observed && day.date === fills[0].date);
+  return `第 ${first - observed} 個交易日首次動用預留金，這段共買入 ${money(invested)}，還留有 ${money(variant.cash)}。`;
+}
+
+function renderBranch() {
+  const { choice, compared, branches, context } = storyTurn;
+  const mine = branches[choice];
+  const other = branches[compared];
+  const diff = other.total - mine.total;
+  const title = Math.abs(diff) < 0.5 ? '走到這裡，兩種做法差不到 1 元'
+    : `改選這個，帳戶會${diff > 0 ? '多' : '少'} ${money(Math.abs(diff))}`;
+  get('branch-details').replaceChildren(make('h2', compared === choice ? '這就是你的選擇' : title),
+    make('p', '你選的做法：' + flowNote(mine, context.account.observed)));
+  if (choice !== compared) {
+    get('branch-details').append(make('p', '另一種做法：' + flowNote(other, context.account.observed)));
+  }
+  get('turn-alternative-label').textContent = optionFor(compared)[0];
+  $$('[data-branch]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.branch === compared)));
+  drawTurnChart();
+}
+
+function drawTurnChart() {
+  if (view !== 'turn-reveal') return;
+  const { context, choice, compared, branches } = storyTurn;
+  const a = branches[choice].months.slice(context.previous.length).map(point => point.total);
+  const b = branches[compared].months.slice(context.previous.length).map(point => point.total);
+  a.unshift(context.account.total);
+  b.unshift(context.account.total);
+  a.push(branches[choice].total);
+  b.push(branches[compared].total);
+  const min = 10000 * Math.floor(Math.min(...a, ...b) / 10000);
+  const max = 10000 * Math.ceil(Math.max(...a, ...b) / 10000) || 10000;
+  const canvas = get('turn-chart');
+  canvas.setAttribute('aria-label', `你的帳戶 ${money(a.at(-1))}，另一種做法 ${money(b.at(-1))}`);
+  pathChart(canvas, [
+    { values: b, color: colors.mint, dash: true },
+    { values: a, color: colors.gold }
+  ], { minimum: min, maximum: Math.max(min + 10000, max), axis: x => Math.round(x / 10000) + '萬' });
+}
+
+function proceed() {
+  if (view !== 'turn-reveal') return;
+  delete save.reveals[CHAPTERS[current].start];
+  persist();
+  openChapter(current);
 }
 
 function finish(player) {
@@ -377,11 +474,8 @@ $$('[data-hub]').forEach(btn => btn.addEventListener('click', () => {
   renderHub();
   show('hub', 'game-title');
 }));
-$$('input[name="policy"], input[name="step"], #deadline').forEach(field => field.addEventListener('change', renderSettings));
-$$('[data-action]').forEach(btn => btn.addEventListener('click', () => {
-  advance({ action: btn.dataset.action, policy: currentPolicy() }, +$('input[name="step"]:checked').value);
-}));
-get('run-rule').addEventListener('click', () => advance(benchmarks[get('autoplay-rule').value], 60));
+get('market-disclosure').addEventListener('toggle', drawMarket);
+get('continue-turn').addEventListener('click', proceed);
 get('compare-rule').addEventListener('change', event => chooseBenchmark(event.target.value));
 $$('input[name="score-mode"]').forEach(field => field.addEventListener('change', () => {
   const key = field.value === 'half' ? 'split_month' : 'month';
@@ -416,6 +510,7 @@ get('next-chapter').addEventListener('click', () => {
 get('retry').addEventListener('click', () => openChapter(current, true));
 window.addEventListener('resize', () => {
   drawMarket();
+  drawTurnChart();
   drawResult();
 });
 

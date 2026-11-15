@@ -10,9 +10,10 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;600;700;800;900&display=swap">
 <link rel="stylesheet" href="0050.css?v=2">
-<script type="module" src="0050.js?v=2"></script>
+<link rel="stylesheet" href="0050-story.css?v=1">
+<script type="module" src="0050.js?v=3"></script>
 </head>
-<body>
+<body class="story-game">
 <header class="top shell">
   <a class="article-link" href="../q/0050-dca-timing.html"><span aria-hidden="true">‹</span> 回到回測文章</a>
   <span class="top-title">0050 歷史回放</span>
@@ -25,100 +26,69 @@
       <div class="hero-content">
         <p class="kicker">每月 1 萬元 · 真實行情</p>
         <h1 id="game-title">這個月，<br>你會買嗎？</h1>
-        <p class="hero-summary">下一個月會漲會跌，你還不知道。<br>這筆錢現在買，還是再等一下？</p>
+        <p class="hero-summary">選一種做法，當場看另一個選擇會差多少。<br>一局五次決定，年份留到最後揭曉。</p>
         <button class="primary" id="start" type="button" disabled>載入關卡中…</button>
       </div>
     </div>
     <div class="chapter-heading">
       <h2>選一段行情</h2>
-      <span>每關五年，年份留到結算</span>
+      <span>每關重播五年真實行情</span>
     </div>
     <div class="chapters" id="chapters"></div>
     <p class="load-error" id="load-error" role="alert" hidden></p>
   </section>
 
   <section id="board" aria-labelledby="board-title" hidden>
-    <div class="board-heading">
-      <div>
-        <button type="button" class="text-button" data-hub>‹ 選關</button>
-        <p class="kicker" id="chapter-counter"></p>
+    <div class="story-head">
+      <button type="button" class="text-button" data-hub>‹ 選關</button>
+      <p class="kicker" id="chapter-counter"></p>
+    </div>
+    <ol id="scene-progress" class="scene-progress" aria-label="這一關的決策進度"></ol>
+    <section class="story-decision">
+      <header>
+        <p id="scene-budget" class="story-budget"></p>
         <h1 id="board-title" tabindex="-1"></h1>
+      </header>
+      <div class="story-state" aria-label="目前已知資訊">
+        <div><span>離日線高點</span><b id="market-drawdown"></b></div>
+        <div><span>帳戶資產</span><b id="account-value"></b></div>
+        <div><span>還在等的錢</span><b id="account-cash"></b></div>
       </div>
-      <div class="time">
-        <span class="time-caption">目前進度</span>
-        <b id="turn"></b>
-      </div>
+      <div class="scene-choices" id="scene-choices" aria-label="選擇這一段的做法"></div>
+      <p class="scene-note">每月底入帳 1 萬元。先前留下的錢依原規則等待，除非你選擇動用。</p>
+      <details id="market-disclosure" class="scene-market">
+        <summary>看下決定前的行情</summary>
+        <canvas id="market-chart" role="img"></canvas>
+        <div class="market-caption"><span>約半年前</span><span>虛線為跌兩成</span><span>下單前收盤</span></div>
+      </details>
+    </section>
+  </section>
+
+  <section id="turn-reveal" aria-labelledby="turn-reveal-title" hidden>
+    <div class="story-head">
+      <button type="button" class="text-button" data-hub>‹ 選關</button>
+      <p class="kicker" id="reveal-counter"></p>
     </div>
-    <progress id="progress" max="60" value="0" aria-label="關卡進度"></progress>
-    <div class="board-grid">
-      <div class="market-area">
-        <section class="panel market" aria-labelledby="market-title">
-          <div class="market-heading">
-            <div>
-              <h2 id="market-title">市場近況</h2>
-              <p>截至下單前一個交易日</p>
-            </div>
-            <div class="market-quote">
-              <span>距最高單日收盤</span>
-              <strong id="market-drawdown"></strong>
-            </div>
-          </div>
-          <canvas id="market-chart" role="img"></canvas>
-          <div class="market-caption"><span>約半年前</span><span class="chart-guide">虛線為跌兩成</span><span>最新收盤</span></div>
-        </section>
-
-        <div class="account" aria-label="你的帳戶">
-          <div><span>帳戶資產</span><b id="account-value"></b></div>
-          <div><span>預留金</span><b id="account-cash"></b></div>
-          <div><span>累計投入</span><b id="account-principal"></b></div>
+    <ol id="reveal-progress" class="scene-progress" aria-label="這一關的決策進度"></ol>
+    <section class="story-reveal">
+      <p class="story-budget" id="reveal-period-length"></p>
+      <h1 id="turn-reveal-title" tabindex="-1"></h1>
+      <p class="reveal-context" id="reveal-context"></p>
+      <h2 class="reveal-options-title">如果剛才選另一種？</h2>
+      <div id="branch-options" class="branch-options"></div>
+      <div class="reveal-grid">
+        <div>
+          <div class="chart-key"><span>你的做法</span><span id="turn-alternative-label"></span></div>
+          <canvas id="turn-chart" role="img"></canvas>
+          <div class="market-caption"><span>這段開始</span><span id="turn-chart-end"></span></div>
         </div>
-        <div class="round-message" id="round-message" role="status">第一筆預算已就緒。選好做法，時間才會往前。</div>
+        <div id="branch-details" class="branch-details" aria-live="polite"></div>
       </div>
-
-      <section class="panel orders" aria-labelledby="orders-title">
-        <div class="orders-heading">
-          <h2 id="orders-title">本月可用 <strong>$10,000</strong></h2>
-          <fieldset class="steps" aria-label="這次前進多久">
-            <label><input type="radio" name="step" value="1" checked><span>1 個月</span></label>
-            <label><input type="radio" name="step" value="3"><span>3 個月</span></label>
-          </fieldset>
-        </div>
-        <p class="step-note" id="step-note">決定後，下個收盤價才會揭曉。</p>
-        <div class="action-grid">
-          <button type="button" class="action action-buy" data-action="buy">
-            <strong>本月全買</strong><small>投入 $10,000</small>
-          </button>
-          <button type="button" class="action" data-action="half">
-            <strong>只買一半</strong><small>投入 $5,000</small>
-          </button>
-          <button type="button" class="action" data-action="wait">
-            <strong>本月先等</strong><small>預留 $10,000</small>
-          </button>
-          <button type="button" class="action" data-action="boost" id="boost">
-            <strong>全買再加碼</strong><small>連預留金一起買</small>
-          </button>
-        </div>
-
-        <fieldset class="reserve-settings">
-          <legend>這次留的錢，什麼時候買？</legend>
-          <div class="policy">
-            <label><input type="radio" name="policy" value="month" checked><span>月底看</span></label>
-            <label><input type="radio" name="policy" value="daily"><span>每天看</span></label>
-            <label><input type="radio" name="policy" value="manual"><span>自己決定</span></label>
-          </div>
-          <label class="deadline"><input type="checkbox" id="deadline"> 等不到兩成，最多等半年</label>
-          <p id="policy-note"></p>
-        </fieldset>
-
-        <details class="autoplay" id="autoplay">
-          <summary>照一條規則跑到結算</summary>
-          <div class="autoplay-controls">
-            <select id="autoplay-rule" aria-label="剩下月份採用的規則"></select>
-            <button type="button" class="secondary" id="run-rule">跑完剩下月份</button>
-          </div>
-        </details>
-      </section>
-    </div>
+      <div class="reveal-actions">
+        <p>其他做法從同一個帳戶重算。接下來沿用你的選擇。</p>
+        <button type="button" class="primary" id="continue-turn">下一次決定 →</button>
+      </div>
+    </section>
   </section>
 
   <section id="result" aria-labelledby="result-title" hidden>
@@ -136,7 +106,7 @@
     <div class="result-grid">
       <section class="panel result-chart-panel">
         <div class="comparison-heading">
-          <div><h2>同一段行情，兩個帳戶</h2><p>每月底總資產，含尚未買進的現金</p></div>
+          <div><h2>兩個帳戶的走勢</h2><p>每月底總資產，含尚未買進的現金</p></div>
           <label class="result-select"><span>比較規則</span><select id="compare-rule"></select></label>
         </div>
         <div class="chart-key" aria-hidden="true"><span>你的操作</span><span id="benchmark-label"></span></div>
