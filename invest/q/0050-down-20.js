@@ -78,7 +78,8 @@
       var note = ['每月買進 ' + T.money(monthly), '每月留在定存 ' + T.money(monthly), '第一天加買 ' + T.money(cash / 2)][i];
       return '<section class="drop-card drop-card-' + i + '"><h3><span aria-hidden="true">' + T.LET[i] + '</span> ' + result.name +
         '</h3><p>' + note + '</p><dl><dt>六個月期末</dt><dd>' + T.money(result.final) + '</dd><dt>最大跌幅</dt><dd>' +
-        T.pct(result.drawdown, 2) + '</dd></dl>' + (i ? '<p>' + difference + '</p>' : '') + '</section>';
+        T.pct(result.drawdown, 2) + '</dd></dl><p class="drop-stress">馬上再跌兩成會少 <strong>' +
+        T.money((stock + (i === 2 ? cash / 2 : 0)) * 0.2) + '</strong></p>' + (i ? '<p>' + difference + '</p>' : '') + '</section>';
     }).join('');
     message.textContent = cash === 0 ? '起點現金為 0，續扣和加碼會相同。' : '已更新下方結果。';
     output.hidden = false;
