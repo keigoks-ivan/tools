@@ -105,6 +105,36 @@ test('infantry actually retreats from a peek point and releases its firing slot'
   const e = soldierFixture(); e.update(0.1);
   assert.ok(e.pos.z < 0); assert.equal(e.burst, 0); assert.equal(e.phase, 'hide');
 });
+test('infantry chooses the other end of tall cover when the visible peek would overlap a barrier', () => {
+  const e = soldierFixture(), { solid } = e.G;
+  const old = Math.random; Math.random = () => 0.5;
+  try {
+    solid.add({ x0: 6, x1: 6.4, y0: 0, y1: 3, z0: -1, z1: 1 });
+    solid.add({ x0: 7.08, x1: 7.3, y0: 0, y1: .58, z0: 1, z1: 1.7 });
+    const blocked = V(6.95, 1.5, 1.45);
+    assert(solid.sees(e.G.playerEye, blocked));
+    assert(solid.pushOut(blocked.clone().setY(0), .34, 0, 1.7, .45));
+    const cover = e.findCover();
+    assert(cover.protected && cover.peek.z < -1);
+    assert(!solid.pushOut(cover.peek.clone(), .34, 0, 1.7, .45));
+  } finally { Math.random = old; }
+});
+test('infantry navigates to the selected peek instead of routing around an obstacle beyond it', () => {
+  const e = soldierFixture(); e.sees = false; e.phase = 'peek'; e.cover.copy(e.pos);
+  e.cover.peek = V(10, 0, 1.3); e.cover.protected = true;
+  e.G.solid.add({ x0: 9.5, x1: 10.5, y0: 0, y1: 3, z0: 1.72, z1: 3.5 });
+  e.update(.1);
+  assert.equal(e.nav.x, 0);
+  assert(e.pos.z > 0);
+});
+test('a long side peek reserves its cover until the soldier has time to fire', () => {
+  const e = soldierFixture(); e.sees = false; e.cover.copy(e.pos); e.phaseT = .01; e.coverT = .25;
+  e.cover.peek = V(10, 0, 4.8); e.cover.protected = true;
+  e.update(.1);
+  assert.equal(e.phase, 'peek');
+  assert(e.phaseT >= 5.59);
+  assert(e.coverT >= e.phaseT);
+});
 test('infantry losing sight cancels its unfinished burst', () => {
   const e = soldierFixture(); e.phase = 'peek'; e.sees = false; e.cover.copy(e.pos); e.update(0.1);
   assert.equal(e.burst, 0);

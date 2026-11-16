@@ -51,6 +51,7 @@ export function spotScout(e, dt) {
 }
 
 const MAG = { trooper: 18, officer: 24, heavy: 40, sniper: 4 };
+const PEEK_SPEED = 1.6;
 
 export class Trooper {
   constructor(G, def) {
@@ -180,7 +181,7 @@ export class Trooper {
     }
     if (this.state !== 'combat') this.inspectBodies(dt);
     const mv = new THREE.Vector3();
-    let speed = 0, face = s.yaw, mode = 'patrol';
+    let speed = 0, face = s.yaw, mode = 'patrol', moveGoal = null;
     if (this.state === 'patrol' || this.state === 'idle') {
       if (this.patrol) {
         const tp = this.patrol[this.pi];
@@ -194,7 +195,7 @@ export class Trooper {
       if (this.searchT > 0) {
         this.searchT -= dt; _v.subVectors(this.lastSeen, this.pos).setY(0);
         face = Math.atan2(_v.x, _v.z);
-        if (_v.length() > 2 && !this.post) { mv.copy(_v).normalize(); speed = T.walk * 1.15; }
+        if (_v.length() > 2 && !this.post) { mv.copy(_v).normalize(); speed = T.walk * 1.15; moveGoal = this.lastSeen; }
         else { speed = 0; face += Math.sin(G.t * 1.8 + this.id) * .65; }
         if (this.searchT <= 0 && !this.sees) { this.aware = Math.min(this.aware, .25); this.cover = null; this.path = {}; }
       } else if (this.aware > 0.3) { face = Math.atan2(this.lastSeen.x - this.pos.x, this.lastSeen.z - this.pos.z); speed = 0; }
@@ -246,6 +247,7 @@ export class Trooper {
         if (L < 0.5) { this.phase = this.cover.protected === false ? 'peek' : 'hide'; this.phaseT = this.phase === 'peek' ? rr(2.6, 4.4) : rr(0.3, 0.9); }
         else {
           mv.copy(_v).divideScalar(L);
+          moveGoal = this.cover;
           speed = L > 3 ? T.run : T.walk * 1.4;
           // 移動中看得到玩家：邊走邊打（不跑時）
           mode = speed > T.walk * 2 ? 'run' : 'aim';
@@ -260,13 +262,22 @@ export class Trooper {
         // 從探頭點真正退回掩體；走到遮蔽處才開始等下一次探頭。
         if (this.cover) {
           _v.set(this.cover.x - this.pos.x, 0, this.cover.z - this.pos.z);
-          if (_v.length() > 0.2) { mv.copy(_v).normalize(); speed = T.walk * 1.5; this.phaseT = Math.max(this.phaseT, 0.3); }
+          if (_v.length() > 0.2) { mv.copy(_v).normalize(); moveGoal = this.cover; speed = T.walk * 1.5; this.phaseT = Math.max(this.phaseT, 0.3); }
         }
-        if (this.phaseT <= 0) { this.phase = 'peek'; this.phaseT = rr(2.6, 4.4); this.burst = 0; this.aimT = 0; this.aimedT = 0; this.duckAt = rr(0.3, 0.7); }
+        if (this.phaseT <= 0) {
+          this.phase = 'peek';
+          const approach = this.cover?.peek ? this.pos.distanceTo(this.cover.peek) / PEEK_SPEED : 0;
+          this.phaseT = rr(2.6, 4.4) + approach;
+          if (approach) this.coverT = Math.max(this.coverT, this.phaseT);
+          this.burst = 0; this.aimT = 0; this.aimedT = 0; this.duckAt = rr(0.3, 0.7);
+        }
       } else if (this.phase === 'peek') {
         s.crouchT = this.cover && this.cover.crouch && this.cover.peekCrouch ? 1 : 0;
         mode = 'aim'; face = toP;
-        if (this.cover && this.cover.peek) { _v.set(this.cover.peek.x - this.pos.x, 0, this.cover.peek.z - this.pos.z); if (_v.length() > 0.2) { mv.copy(_v).normalize(); speed = 1.6; } }
+        if (this.cover?.peek) {
+          _v.set(this.cover.peek.x - this.pos.x, 0, this.cover.peek.z - this.pos.z);
+          if (_v.length() > 0.2) { mv.copy(_v).normalize(); moveGoal = this.cover.peek; speed = PEEK_SPEED; }
+        }
         if (this.phaseT <= 0 || (this.burst <= 0 && this.aimT > 3)) {
           if (this.cover.protected === false) this.coverT = 0;
           else { this.phase = 'hide'; this.phaseT = rr(0.7, 1.8); if (Math.random() < 0.3) this.coverT = 0; }
@@ -287,6 +298,7 @@ export class Trooper {
       // 太近：退後＋側移，邊打
       if (targetSeen && dist < 4.5 && !this.post) {
         mv.set(this.pos.x - attack.pos.x, 0, this.pos.z - attack.pos.z).normalize().add(_v.set(Math.cos(G.t + this.id), 0, Math.sin(G.t + this.id)).multiplyScalar(0.6)).normalize();
+        moveGoal = null;
         speed = T.walk * 1.6; mode = 'aim'; s.crouchT = 0; this.phase = 'peek'; this.phaseT = Math.max(this.phaseT, 0.5);
       }
       // 瞄準：看得到（或剛看不到）時對準玩家身體
@@ -331,7 +343,7 @@ export class Trooper {
           for (const [x, z] of [[mx, mz], [bx, bz]]) if (Math.abs(G.solid.floorAt(x, z, this.pos.y + 0.5) - this.pos.y) > 0.6) return false;
           return true;
         };
-        const goal = this.state !== 'combat' && this.searchT > 0 ? this.lastSeen : (!targetSeen || dist >= 4.5) && this.cover && (this.phase === 'move' || this.phase === 'hide') ? this.cover : { x: this.pos.x + mv.x * 6, z: this.pos.z + mv.z * 6 };
+        const goal = moveGoal ?? { x: this.pos.x + mv.x * 6, z: this.pos.z + mv.z * 6 };
         const path = routeDirection(this.path || (this.path = {}), this.pos, goal, clear, G.t, 1.5);
         const routed = path && this.path.points.length;
         const nav = steer(routed ? path.x : mv.x, routed ? path.z : mv.z, (x, z) => {
@@ -447,12 +459,15 @@ export class Trooper {
         let peek = null, peekOK = false;
         if (low) peekOK = S.sees(eye, _w.set(p.x, p.y + 1.5, p.z));
         else {
-          // 高的：往旁邊跨一步探頭
-          const side = new THREE.Vector3(-nz, 0, nx);
-          for (const sg of [1, -1]) {
-            const q = p.clone().addScaledVector(side, sg * ((nx !== 0 ? fz : fx) / 2 + 0.2));
-            if (Math.abs(q.x - p.x) + Math.abs(q.z - p.z) > 5) continue;
-            if (S.sees(eye, _w.set(q.x, q.y + 1.5, q.z))) { peek = q; peekOK = true; break; }
+          // 高掩體從最近的邊緣探頭，站位需要同層空間和可用射界。
+          const nearestSide = (nx !== 0 ? p.z - cz : p.x - cx) < 0 ? -1 : 1;
+          for (const sg of [nearestSide, -nearestSide]) {
+            const x = nz !== 0 ? (sg > 0 ? b.x1 + 0.45 : b.x0 - 0.45) : p.x;
+            const z = nx !== 0 ? (sg > 0 ? b.z1 + 0.45 : b.z0 - 0.45) : p.z;
+            if (Math.abs(x - p.x) + Math.abs(z - p.z) > 5 || !S.sees(eye, _w.set(x, p.y + 1.5, z))) continue;
+            const y = S.floorAt(x, z, p.y + 0.5);
+            if (Math.abs(y - p.y) > 0.45 || S.pushOut(_w.set(x, y, z), 0.34, y, y + 1.7, 0.45)) continue;
+            peek = new THREE.Vector3(x, y, z); peekOK = true; break;
           }
         }
         const dp = p.distanceTo(PP), dm = p.distanceTo(this.pos);

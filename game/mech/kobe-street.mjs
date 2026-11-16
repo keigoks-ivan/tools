@@ -115,7 +115,10 @@ export function kobeBlockStreets(out, { frontages = [], parking = [], service = 
   const paint=[.67,.68,.61,0,6],ochre=[.66,.48,.16,0,6],green=[.15,.24,.18,0,6];
   let faces=0;
   const face=(a,b,c,d,col)=>{out.face(a,b,c,d,col);faces++;};
-  const local=({x,z,ry=0,ground=.025})=>(u,y,v)=>[x+u*Math.cos(ry)+v*Math.sin(ry),ground+y,z-u*Math.sin(ry)+v*Math.cos(ry)];
+  const local=({x,z,ry=0,ground=.025})=>{
+    const c=Math.cos(ry),s=Math.sin(ry);
+    return (u,y,v)=>[x+u*c+v*s,ground+y,z-u*s+v*c];
+  };
   const plane=(P,a,b,y,c,d,col)=>face(P(a,y,d),P(b,y,d),P(b,y,c),P(a,y,c),col);
   function block(P,a,b,y0,y1,c,d,col) {
     const p=[P(a,y0,c),P(b,y0,c),P(b,y0,d),P(a,y0,d)],q=p.map(v=>[v[0],v[1]+y1-y0,v[2]]);
@@ -136,28 +139,61 @@ export function kobeBlockStreets(out, { frontages = [], parking = [], service = 
     for(let k=0;k<7;k++)plane(P,u-.39+k*.12,u-.355+k*.12,y+.03,v-.13,v+.13,steel);
     for(const d of [-.15,.13])plane(P,u-.43,u+.43,y+.031,v+d,v+d+.02,steel);
   }
-  for(const site of frontages) {
-    const {length,depth=1.4,kind='shopping',gaps=[],curb=true}=site,P=local(site),a=-length/2,b=length/2;
-    const spans=[];let from=a;
-    for(const [lo,hi]of [...gaps].sort((p,q)=>p[0]-q[0])){if(lo>from)spans.push([from,Math.min(b,lo)]);from=Math.max(from,hi);}
-    if(from<b)spans.push([from,b]);
-    const tone=kind==='service'?[.44,.46,.44,0,8]:kind==='residential'?[.55,.55,.51,0,8]:stone;
-    plane(P,a,b,.019,0,depth,tone);
-    // 鋪面尺寸與牆腳接觸帶，避免步道是一大片沒有尺度的底色。
-    plane(P,a,b,.023,0,.065,[.29,.32,.3,0,1]);
-    const spacing=kind==='service'?3:kind==='residential'?2.4:1.5;
-    for(let u=a+spacing;u<b-.1;u+=spacing)plane(P,u,u+.012,.024,.08,depth-.08,[.40,.41,.38,0,8]);
-    for(const [lo,hi]of spans) {
-      if(hi-lo<.2)continue;
-      if(curb)block(P,lo,hi,-.12,.018,depth-.1,depth+.08,kerb);
-      plane(P,lo,hi,.018,depth+.08,depth+.37,[.28,.30,.29,0,1]);
-      for(let u=lo+1.6;u<hi-.3;u+=2.4)plane(P,u,u+.015,.023,depth-.09,depth+.35,[.36,.38,.35,0,1]);
-      for(let u=lo+2;u<hi-1;u+=11)drain(P,u,depth+.22);
-      if(kind!=='service')for(let u=lo+4;u<hi-2;u+=13) {
-        plane(P,u-.2,u+.2,.026,.48,.86,dark);
-        for(const d of [.5,.82])plane(P,u-.18,u+.18,.029,d,d+.02,steel);
+  function paving(P,lo,hi,width,tone,spacing) {
+    if(hi-lo<.02)return;
+    plane(P,lo,hi,.017,0,width,[.34,.35,.32,0,8]);
+    const rows=width<.95?1:width<3?2:3;
+    const slabLength=spacing*rows;
+    for(let row=0;row<rows;row++) {
+      const inner=width*row/rows,outer=width*(row+1)/rows;
+      const shift=row*slabLength/rows;
+      for(let u=lo-shift;u<hi;u+=slabLength) {
+        const from=Math.max(lo,u),to=Math.min(hi,u+slabLength-.013);
+        if(to-from<.015)continue;
+        const tint=.94+Math.abs(Math.floor((u+40)*13+row*7)%11)*.012;
+        plane(P,from,to,.021,inner+(row ? .008 : 0),outer,tone.map((value,i)=>i<3?value*tint:value));
       }
     }
+  }
+  for(const site of frontages) {
+    const {length,depth=1.4,kind='shopping',gaps=[],curb=true,ground=.025}=site,P=local(site),a=-length/2,b=length/2;
+    const spans=[];let from=a;
+    for(const [start,end]of [...gaps].sort((p,q)=>p[0]-q[0])){
+      const lo=Math.max(a,from,start),hi=Math.min(b,end);
+      if(hi<=lo)continue;
+      if(lo>from)spans.push([from,lo,false]);
+      spans.push([lo,hi,true]);from=hi;
+    }
+    if(from<b)spans.push([from,b,false]);
+    const tone=kind==='service'?[.44,.46,.44,0,8]:kind==='residential'?[.55,.55,.51,0,8]:stone;
+    const spacing=kind==='service'?3:kind==='residential'?2.4:1.5;
+    const gutter=Math.min(.01,.034-ground),rampStart=depth-Math.min(.8,depth*.45);
+    for(const [lo,hi,cut]of spans) {
+      paving(P,lo,hi,cut?rampStart:depth,tone,spacing);
+      if(cut) {
+        // 車道口的鋪石向排水溝下降，立體緣石分開而鋪面仍連續。
+        face(P(lo,gutter,depth+.08),P(hi,gutter,depth+.08),P(hi,.021,rampStart),P(lo,.021,rampStart),tone);
+        continue;
+      }
+      if(hi-lo<.2)continue;
+      if(curb) {
+        const inner=depth-.1,edge=depth+.035,outer=depth+.095,top=.024;
+        plane(P,lo,hi,top,inner,edge,kerb);
+        face(P(lo,gutter,outer),P(hi,gutter,outer),P(hi,top,edge),P(lo,top,edge),[.60,.59,.55,0,1]);
+        face(P(lo,gutter,inner),P(lo,top,inner),P(hi,top,inner),P(hi,gutter,inner),kerb);
+        face(P(lo,gutter,inner),P(lo,gutter,outer),P(lo,top,edge),P(lo,top,inner),kerb);
+        face(P(hi,gutter,outer),P(hi,gutter,inner),P(hi,top,inner),P(hi,top,edge),kerb);
+      }
+      plane(P,lo,hi,gutter,depth+.08,depth+.37,[.28,.30,.29,0,1]);
+      for(let u=lo+1.6;u<hi-.3;u+=2.4)plane(P,u,u+.015,gutter+.002,depth+.095,depth+.35,[.36,.38,.35,0,1]);
+      for(let u=lo+2;u<hi-1;u+=11)drain(P,u,depth+.22,gutter-.019);
+      if(kind!=='service')for(let u=lo+4;u<hi-2;u+=13) {
+        const v=Math.min(.86,depth*.82);
+        plane(P,u-.2,u+.2,.026,v-.22,v,dark);
+        for(const d of [v-.2,v-.035])plane(P,u-.18,u+.18,.029,d,d+.02,steel);
+      }
+    }
+    plane(P,a,b,.023,0,.065,[.29,.32,.3,0,1]);
   }
   for(const site of parking) {
     const {stalls=3,bayWidth=2.5,bayDepth=5}=site,P=local(site),w=stalls*bayWidth;

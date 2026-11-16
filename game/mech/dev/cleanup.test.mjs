@@ -169,7 +169,10 @@ test('both campaign entrypoints resolve the updated shared main and HUD with mat
     const imports = JSON.parse(html.match(/<script type="importmap">([\s\S]*?)<\/script>/)[1]).imports;
     const page = new URL(path, import.meta.url), base = new URL(html.match(/<base href="([^"]+)"/)?.[1] || './', page);
     const main = new URL(html.match(/<script type="module" src="([^"]+)"/)[1], base);
-    const hud = new URL(imports['./hud.js'], base);
+    const hudPath = new URL('./hud.js', main).href;
+    const hudAlias = Object.keys(imports).find(key => new URL(key, base).href === hudPath);
+    assert(hudAlias);
+    const hud = new URL(imports[hudAlias], base);
     assert(Number(main.searchParams.get('v')) >= 29); assert(Number(hud.searchParams.get('v')) >= 8);
     assert.equal(new URL(imports['../zero/main.js'], base).href, main.href);
     await readFile(new URL(main.pathname, 'file://'), 'utf8');

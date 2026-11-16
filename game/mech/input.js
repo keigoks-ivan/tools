@@ -15,7 +15,7 @@ export class Input {
     this._mouseMode = 'idle';this._fallbackReady = false;this._mouseAnchor = null;this._mouseOnCanvas = false;this._mouseFocused = true;
     this._lockPending = false;this._lockToken = 0;this._lockTimer = null;this._lockAttempt = 0;this._lockUsesPromise = false;
     this.mouseFallbackReason = null;this.onMouseModeChange = null;
-    this.touch = { on: false, mx: 0, my: 0, look: null, pad: null };
+    this.touch = { on: false, mx: 0, my: 0, look: null, pad: null, buttons: new Map() };
     this.shiftT = 0;            // Shift 按住多久（分辨點一下＝閃避、按住＝衝刺）
     this.onLockChange = null;
 
@@ -88,6 +88,7 @@ export class Input {
     this.keys.clear(); this.down.clear(); this.up.clear();
     this.mdx = this.mdy = this.shiftT = 0;
     this.touch.mx = this.touch.my = 0; this.touch.pad = this.touch.look = null;
+    this.touch.buttons.clear();
     this._mouseAnchor=null;this._mouseOnCanvas=false;
     if(this.mouseFallback)this._cancelLockAttempt();
     const knob = document.querySelector('#tPad i');
@@ -95,7 +96,7 @@ export class Input {
   }
 
   get enabled(){return this._enabled;}
-  set enabled(value){this._enabled=!!value;if(!this._enabled&&this.mouseFallback&&this.touch)this.reset();this._refreshMouseMode();}
+  set enabled(value){this._enabled=!!value;if(!this._enabled&&(this.mouseFallback||this.touch.on))this.reset();this._refreshMouseMode();}
   get mouseMode(){return this._mouseMode;}
   _refreshMouseMode(){
     const mode=this.enabled&&this._mouseFocused&&!document.hidden&&!this.touch?.on?(this.locked?'locked':this._fallbackReady?'fallback':'idle'):'idle';
@@ -208,10 +209,11 @@ export class Input {
     if (!coarse) return;
     T.on = true;
     const knob = pad.querySelector('i');
-    pad.addEventListener('pointerdown', (e) => { if(this.mouseFallback&&!this.enabled)return;T.pad = e.pointerId; pad.setPointerCapture(e.pointerId); move(e); });
+    const releaseEvents = ['pointerup', 'pointercancel', 'lostpointercapture'];
+    // 每個區域保留第一根手指，另一根手指落在同處時不搶走操作。
+    pad.addEventListener('pointerdown', (e) => { if (!this.enabled || T.pad !== null) return; T.pad = e.pointerId; pad.setPointerCapture(e.pointerId); move(e); });
     const move = (e) => {
-      if(this.mouseFallback&&!this.enabled)return;
-      if (e.pointerId !== T.pad) return;
+      if (!this.enabled || e.pointerId !== T.pad) return;
       const r = pad.getBoundingClientRect();
       let x = (e.clientX - r.left) / r.width * 2 - 1, y = (e.clientY - r.top) / r.height * 2 - 1;
       const L = Math.hypot(x, y); if (L > 1) { x /= L; y /= L; }
@@ -220,22 +222,29 @@ export class Input {
     };
     pad.addEventListener('pointermove', move);
     const end = (e) => { if (e.pointerId !== T.pad) return; T.pad = null; T.mx = T.my = 0; knob.style.transform = ''; };
-    pad.addEventListener('pointerup', end); pad.addEventListener('pointercancel', end);
+    for (const type of releaseEvents) pad.addEventListener(type, end);
     let last = null;
-    look.addEventListener('pointerdown', (e) => { if(this.mouseFallback&&!this.enabled)return;T.look = e.pointerId; last = [e.clientX, e.clientY]; look.setPointerCapture(e.pointerId); });
+    look.addEventListener('pointerdown', (e) => { if (!this.enabled || T.look !== null) return; T.look = e.pointerId; last = [e.clientX, e.clientY]; look.setPointerCapture(e.pointerId); });
     look.addEventListener('pointermove', (e) => {
-      if(this.mouseFallback&&!this.enabled)return;
-      if (e.pointerId !== T.look) return;
+      if (!this.enabled || e.pointerId !== T.look) return;
       this.mdx += (e.clientX - last[0]) * 2.2; this.mdy += (e.clientY - last[1]) * 2.2;
       last = [e.clientX, e.clientY];
     });
-    const lend = (e) => { if (e.pointerId === T.look) T.look = null; };
-    look.addEventListener('pointerup', lend); look.addEventListener('pointercancel', lend);
+    const lend = (e) => { if (e.pointerId === T.look) { T.look = null; last = null; } };
+    for (const type of releaseEvents) look.addEventListener(type, lend);
     const btn = (id, key) => {
       const b = el(id); if (!b) return;
-      b.addEventListener('pointerdown', (e) => { if(this.mouseFallback&&!this.enabled)return;e.stopPropagation(); this.keys.add(key); this.down.add(key); b.setPointerCapture(e.pointerId); });
-      const off = () => { if (this.keys.has(key)) this.up.add(key); this.keys.delete(key); };
-      b.addEventListener('pointerup', off); b.addEventListener('pointercancel', off);
+      b.addEventListener('pointerdown', (e) => {
+        if (!this.enabled || T.buttons.has(key)) return;
+        e.stopPropagation(); T.buttons.set(key, e.pointerId);
+        this.keys.add(key); this.down.add(key); b.setPointerCapture(e.pointerId);
+      });
+      const off = (e) => {
+        if (T.buttons.get(key) !== e.pointerId) return;
+        T.buttons.delete(key);
+        if (this.keys.delete(key)) this.up.add(key);
+      };
+      for (const type of releaseEvents) b.addEventListener(type, off);
     };
     btn('tFire', 'Tfire'); btn('tBoost', 'Tboost'); btn('tJump', 'Tjump'); btn('tMsl', 'Tmsl'); btn('tSaber', 'Tsaber'); btn('tCannon', 'Tcannon'); btn('tOd', 'Tod'); btn('tLock', 'Tlock'); btn('tView', 'Tview'); btn('tNade', 'Tnade'); btn('tSupport', 'Tsupport'); btn('tScout', 'Tscout'); btn('tFlight','Tflight'); btn('tDescend','Tdescend');
   }

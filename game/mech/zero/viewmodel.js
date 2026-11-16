@@ -7,6 +7,7 @@ import { HANDLING_PROFILES, ResponsiveHandling } from './handling.mjs';
 
 const clamp = THREE.MathUtils.clamp, lerp = THREE.MathUtils.lerp;
 const ease = (t) => t * t * (3 - 2 * t);
+const REFLEX_ADS = .82;
 const _v = new THREE.Vector3(), _q = new THREE.Quaternion(), _e = new THREE.Euler();
 
 // 武器數值：dmg＝軀幹、head＝頭、limb＝四肢；rof＝最短射擊間隔；spread＝站著不動、第一發的腰射散布（弧度）
@@ -49,6 +50,7 @@ export class ViewModel {
   get W() { return WEAPONS[this.cur]; }
   get model() { return this.g[this.cur]; }
   get busy() { return this.reloadT >= 0 || this.swapT >= 0 || this.nadeT >= 0; }
+  get reflexReady() { return this.cur === 'smg' && this.ads >= REFLEX_ADS && !this.busy && this.sprintK < .35; }
   setHandlingProfile(profile='classic') {
     if(!Object.hasOwn(HANDLING_PROFILES,profile))throw new TypeError('Unknown weapon handling profile');
     this.handlingProfile=HANDLING_PROFILES[profile];this.handling=profile==='responsive'?new ResponsiveHandling():null;
@@ -236,6 +238,13 @@ export class ViewModel {
     }
     // 開槍時發熱抖動
     if (this.heat > 1) pos.x += (Math.random() - 0.5) * 0.001 * this.heat;
+    // 開放式瞄窗以準心為支點，保留後座、晃動和翻滾，避免把實際射線擠到框外。
+    if (this.cur === 'smg' && this.ads > .45 && !this.busy) {
+      const align = ease(clamp((this.ads - .45) / (REFLEX_ADS - .45), 0, 1));
+      const sight = _v.set(0, ud.sightY, ud.sightZ).applyEuler(rot);
+      pos.x -= (pos.x + sight.x) * align;
+      pos.y -= (pos.y + sight.y) * align;
+    }
     // 若在陰影中，視角場景的太陽變暗
     const H = this.holder;
     H.position.lerp(pos, 1); H.rotation.copy(rot);

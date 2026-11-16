@@ -33,6 +33,25 @@ test('街緣設施旋轉後保持有效外形，鋪面朝上，只寫入既有�
   assert(scene.children.every(o=>!o.isLight));
 });
 
+test('人行道有錯縫石板，車道口從步道向下接到側溝', () => {
+  const faces=[];
+  const out={face:(a,b,c,d,color)=>faces.push({points:[a,b,c,d],color})};
+  const site={x:0,z:0,length:18,depth:2,ground:.15,gaps:[[-2,2]]};
+  kobeBlockStreets(out,{frontages:[site]});
+  const cuts=faces.filter(({points})=>points.every(p=>Math.abs(p[0])===2)&&points.some(p=>p[1]<.05));
+  const ramp=cuts.find(({points})=>new Set(points.map(p=>p[0])).size===2);
+  assert(ramp,'車道留白要有同一塊斜面連接步道與側溝');
+  assert(ramp.points.some(p=>p[2]<1.3&&p[1]>.17));
+  assert(ramp.points.some(p=>p[2]>2&&p[1]<.04));
+  const slabs=faces.filter(({points,color})=>color[4]===8&&points.every(p=>p[0]<=-2&&Math.abs(p[1]-.171)<.001));
+  assert(new Set(slabs.map(({color})=>color[0])).size>2,'相鄰石板有不同的細微色調');
+  const firstRow=slabs.filter(({points})=>points.every(p=>p[2]<=1));
+  const secondRow=slabs.filter(({points})=>points.every(p=>p[2]>1));
+  const seams=row=>row.map(({points})=>Math.max(...points.map(p=>p[0]))).sort();
+  assert(firstRow.length>1&&secondRow.length>1);
+  assert.notDeepEqual(seams(firstRow),seams(secondRow),'兩列石縫錯開');
+});
+
 function mapFixture(build,harbor) {
   const gradient={addColorStop(){}};
   const ctx=new Proxy({measureText:s=>({width:String(s).length*12}),createLinearGradient:()=>gradient,createRadialGradient:()=>gradient},

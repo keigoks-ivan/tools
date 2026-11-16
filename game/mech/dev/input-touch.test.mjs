@@ -84,3 +84,68 @@ test('movement, aim and rapid firing still work together with zoom prevention', 
   assert.equal(state.fire, false);
   assert.equal(input.touch.look, null);
 });
+
+test('a second finger cannot take over a held joystick, aim gesture, or trigger', t => {
+  const { input, nodes } = browser(t);
+  input.enabled = true;
+  pointer(nodes.tPad, 'pointerdown', 1, 150, 75);
+  pointer(nodes.tLook, 'pointerdown', 2, 300, 100);
+  pointer(nodes.tFire, 'pointerdown', 3);
+  input.endFrame();
+  pointer(nodes.tPad, 'pointerdown', 4, 0, 75);
+  pointer(nodes.tLook, 'pointerdown', 5, 700, 100);
+  pointer(nodes.tFire, 'pointerdown', 6);
+  assert.equal(input.pressed('Tfire'), false);
+  pointer(nodes.tPad, 'pointerup', 4);
+  pointer(nodes.tLook, 'pointercancel', 5);
+  pointer(nodes.tFire, 'pointerup', 6);
+  pointer(nodes.tLook, 'pointermove', 2, 320, 110);
+  const state = input.state(1 / 60);
+  assert.equal(state.mx, 1);
+  assert.equal(state.lookX, 20 * 2.2 * .0022);
+  assert.equal(state.lookY, 10 * 2.2 * .0022);
+  assert.equal(state.fire, true);
+  assert.equal(input.released('Tfire'), false);
+});
+
+test('lost capture stops only its own action and each control can be touched again', t => {
+  const { input, nodes } = browser(t);
+  input.enabled = true;
+  pointer(nodes.tPad, 'pointerdown', 1, 150, 75);
+  pointer(nodes.tLook, 'pointerdown', 2, 300, 100);
+  pointer(nodes.tFire, 'pointerdown', 3);
+  pointer(nodes.tPad, 'lostpointercapture', 1);
+  assert.equal(input.state(1 / 60).mx, 0);
+  assert.equal(nodes.tPad.knob.style.transform, '');
+  assert.equal(input.state(1 / 60).fire, true);
+  pointer(nodes.tLook, 'lostpointercapture', 2);
+  pointer(nodes.tLook, 'pointermove', 2, 350, 100);
+  assert.equal(input.state(1 / 60).lookX, 0);
+  pointer(nodes.tFire, 'lostpointercapture', 3);
+  assert.equal(input.state(1 / 60).fire, false);
+  input.endFrame();
+  pointer(nodes.tPad, 'pointerdown', 4, 0, 75);
+  pointer(nodes.tLook, 'pointerdown', 5, 750, 150);
+  pointer(nodes.tLook, 'pointermove', 5, 760, 145);
+  pointer(nodes.tFire, 'pointerdown', 6);
+  const state = input.state(1 / 60);
+  assert.equal(state.mx, -1);
+  assert.equal(state.lookX, 10 * 2.2 * .0022);
+  assert.equal(state.fire, true);
+});
+
+test('leaving gameplay clears touch owners even without the mouse fallback', t => {
+  const { input, nodes } = browser(t);
+  input.enabled = true;
+  pointer(nodes.tPad, 'pointerdown', 1, 150, 75);
+  pointer(nodes.tFire, 'pointerdown', 2);
+  input.enabled = false;
+  pointer(nodes.tPad, 'pointerdown', 3, 0, 75);
+  pointer(nodes.tFire, 'pointerdown', 4);
+  assert.equal(input.state(1 / 60).mx, 0);
+  assert.equal(input.state(1 / 60).fire, false);
+  input.enabled = true;
+  pointer(nodes.tFire, 'pointerdown', 5);
+  pointer(nodes.tFire, 'lostpointercapture', 2);
+  assert.equal(input.state(1 / 60).fire, true);
+});

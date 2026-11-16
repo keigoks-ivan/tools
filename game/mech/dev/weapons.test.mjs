@@ -42,3 +42,32 @@ test('reload interruption preserves ammunition, and chapter refill restores ever
   v.ammo.rifle = v.ammo.pistol = v.ammo.smg = 0; v.refill();
   for (const k in WEAPONS) assert.equal(v.ammo[k], WEAPONS[k].mag);
 });
+
+test('SMG keeps the sight window on the actual aim ray during movement and recoil', () => {
+  const vm = fixture();
+  vm.cur = 'smg';
+  vm.holder = new THREE.Group(); vm.arms = { root: new THREE.Group() };
+  vm.g = { smg: new THREE.Group() };
+  vm.holder.add(vm.model);
+  vm._pose = ViewModel.prototype._pose;
+  vm._hands = noop;
+  vm.bobT = .6; vm.landK = .8;
+  vm.handling = { pose: () => ({ side: -.025, vertical: -.045, yaw: .14, pitch: -.13, back: .025, lift: .08, roll: .035 }) };
+  const mag = new THREE.Group();
+  vm.model.userData = { mag, magHome: mag.position.clone(), sightY: .122, sightZ: .285 };
+  const sight = () => vm.model.localToWorld(new THREE.Vector3(0, .122, .285));
+  vm.ads = .6;
+  vm._pose(1 / 60, 1, .8);
+  assert.equal(vm.reflexReady, false);
+  assert(Math.abs(sight().x) > .001);
+  for (const ads of [.82, 1]) {
+    vm.ads = ads;
+    vm._pose(1 / 60, 1, .8);
+    assert.equal(vm.reflexReady, true);
+    const center = sight();
+    assert(Math.hypot(center.x, center.y) < 1e-8 && center.z < 0);
+    assert(Math.abs(vm.holder.rotation.x) > .05 && Math.abs(vm.holder.rotation.z) > .02);
+  }
+  vm.reloadT = .5;
+  assert.equal(vm.reflexReady, false);
+});

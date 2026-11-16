@@ -36,7 +36,7 @@ test('pause resets touch, held triggers and accumulated mouse movement', () => {
   globalThis.document = { querySelector: () => knob };
   const input = Object.assign(Object.create(Input.prototype), {
     keys: new Set(['KeyW', 'M0']), down: new Set(['KeyG']), up: new Set(['M2']),
-    mdx: 75, mdy: 50, shiftT: 1, sens: 1, touch: { mx: 1, my: 1, pad: 9, look: 10 },
+    mdx: 75, mdy: 50, shiftT: 1, sens: 1, touch: { mx: 1, my: 1, pad: 9, look: 10, buttons: new Map([['Tfire', 11]]) },
   });
   input.reset();
   const next = input.state(1 / 60);
@@ -44,4 +44,5 @@ test('pause resets touch, held triggers and accumulated mouse movement', () => {
   assert.equal(next.fire, false); assert.equal(next.lockRelease, false);
   assert.equal(next.lookX, 0); assert.equal(next.lookY, 0);
   assert.equal(input.touch.pad, null); assert.equal(knob.style.transform, '');
+  assert.equal(input.touch.buttons.size, 0);
 });
