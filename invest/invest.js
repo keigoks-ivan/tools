@@ -5,11 +5,12 @@
     if (!host) return;
     var base = document.body.getAttribute('data-root') || '';
     var here = document.body.getAttribute('data-nav') || '';
-    var act = { tool: 'tool', questions: 'questions', q: 'questions', evidence: 'questions', leveraged: 'leveraged', active: 'active' }[here] || '';
+    var act = { tool: 'tool', questions: 'questions', q: 'questions', evidence: 'questions', leveraged: 'leveraged', active: 'active', highdiv: 'highdiv' }[here] || '';
     if (here === 'q') {
       var path = window.location.pathname;
       if (/\/leveraged-2x(?:-catchup)?\.html$/.test(path)) act = 'leveraged';
       else if (/\/active-etf\.html$/.test(path)) act = 'active';
+      else if (/\/highdiv-(?:vs-0050|etf-compare|principal)\.html$/.test(path)) act = 'highdiv';
     }
     function link(key, href, label) {
       return '<a href="' + base + href + '"' + (act === key ? ' aria-current="page"' : '') + '>' + label + '</a>';
@@ -23,6 +24,7 @@
       link('questions', 'questions.html', '投資問題回測') +
       link('leveraged', 'leveraged.html', '正二系列') +
       link('active', 'active.html', '主動式 ETF 系列') +
+      link('highdiv', 'highdiv.html', '高股息系列') +
       link('tool', 'tool.html', '回測工具') +
       link('about', 'index.html#about', '資料與方法') +
       '</nav></div></header>' +
