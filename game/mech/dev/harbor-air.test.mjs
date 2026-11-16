@@ -9,7 +9,7 @@ const V = (x = 0, y = 0, z = 0) => new THREE.Vector3(x, y, z);
 const noop = () => {};
 const silent = new Proxy({}, { get: () => noop });
 
-function fixture() {
+function fixture(relay) {
   // The production mech needs a small CanvasTexture for the eye. Geometry and
   // motion are kept real; the test only replaces the render/audio environment.
   globalThis.document ||= { createElement: () => ({ getContext: () => ({
@@ -25,7 +25,7 @@ function fixture() {
     stats: { time: 0, hits: 0, kills: 0, score: 0, chain: 0, maxChain: 0, lastKill: -99 }, rifle: { reload: -1 },
     saber: {}, cannon: {}, msl: { locks: [] }, hurt: noop,
   });
-  const battle = new HarborAirBattle({ combat, player, world });
+  const battle = new HarborAirBattle({ combat, player, world, relay });
   const tick = (seconds, until) => {
     const dt = 1 / 60;
     for (let i = 0; i < seconds * 60; i++) {
@@ -76,4 +76,56 @@ test('boss changes its attack, warns before launching a single capped volley, an
   const armor = e.ap; hit(e, 1000); assert.equal(armor - e.ap, 1250);
   hit(e, 1e5); assert.equal(battle.update(), 'won');
   assert.equal(combat.missiles.length, 0); assert.equal(combat.phase, 'done');
+});
+
+function reachRelayCharge({ battle, combat, tick, hit }) {
+  const boss = battle.startBoss();
+  hit(boss, 1e5);
+  tick(8, () => combat.missiles.length === 4);
+  assert.equal(combat.missiles.length, 4, 'player faces the first missile salvo before the relay is targeted');
+  assert.equal(battle.relayState, 'intact');
+  tick(5);
+  assert.equal(battle.relayState, 'intact', 'no relay charge while enemy missiles are still live');
+  combat.missiles.length = 0;
+  tick(7, () => battle.relayState === 'charging');
+  assert.equal(battle.relayState, 'charging');
+  assert.equal(battle.relaySeconds, 5);
+  return boss;
+}
+
+test('real damage can break the one relay charge without making the boss invulnerable or spawning help', () => {
+  const game = fixture(V(10, 5, 160));
+  const { battle, combat, hit, tick } = game;
+  const boss = reachRelayCharge(game);
+  const armor = boss.ap;
+  hit(boss, 650); tick(1);
+  assert.equal(battle.relayState, 'charging');
+  assert.ok(battle.relaySeconds > 3.9 && battle.relaySeconds < 4.1);
+  assert.equal(battle.relayProgress, 650 / 1200);
+  hit(boss, 550);
+  assert.equal(boss.ap, armor - 1200);
+  assert.equal(battle.relayState, 'saved');
+  assert.equal(battle.relayProgress, 1);
+  assert.equal(battle.relaySeconds, 0);
+  assert.equal(combat.alive.length, 1);
+  tick(10);
+  assert.equal(battle.relayState, 'saved');
+  assert.ok(combat.missiles.length > 0, 'missile combat resumes but the relay attack does not');
+});
+
+test('uninterrupted relay beam visibly connects and marks the backup disabled, but combat continues', () => {
+  const target = V(10, 5, 160), game = fixture(target);
+  const { battle, combat, tick, hit } = game;
+  const boss = reachRelayCharge(game), beams = [], explosions = [];
+  combat.fx = new Proxy({ beam: (from, to) => beams.push({ from, to }), explosion: (p) => explosions.push(p) }, { get: (o, k) => o[k] || noop });
+  tick(6, () => battle.relayState === 'disabled');
+  assert.equal(battle.relayState, 'disabled');
+  assert.equal(battle.status, 'boss2');
+  assert.equal(beams.length, 1);
+  assert.ok(beams[0].from.y > target.y + 10 && beams[0].to.equals(target));
+  assert.ok(explosions[0].equals(target));
+  assert.equal(combat.alive.length, 1);
+  hit(boss, 1e5);
+  assert.equal(battle.update(), 'won');
+  assert.equal(battle.relayState, 'disabled');
 });

@@ -817,6 +817,11 @@ export class Combat {
     if (shift) dmg = Math.max(0, e.ap - e.apMax * .55);
     if (e.vehicle) dmg = Math.min(dmg, Math.max(1, e.ap));   // 載具：不多算溢出的分數
     e.ap -= dmg; e.lastHit = 0;
+    const relay = air?.relay;
+    if (relay?.state === 'charging') {
+      relay.progress = Math.min(1, relay.progress + dmg / 1200);
+      if (relay.progress >= 1 || e.ap <= 0) this.finishHarborRelay(e, false);
+    }
     this.stats.hits++;
     this.stats.score += Math.round(dmg / 10);
     if (!this.od.active) this.od.gauge = Math.min(1, this.od.gauge + dmg / 9000);
@@ -932,6 +937,7 @@ export class Combat {
       if (e.gone || e.vehicle) continue;   // 載具在 vehicles.js 裡動
       const m = e.m, K = e.K, k = e.scale;
       const air = e.harborAir;
+      const relay = air?.relay?.state === 'charging' ? air.relay : null;
       if (e.fled) {   // 撤退中：噴射升空飛遠，3.5 秒後消失
         e.fleeT += dt; e.vel.y = Math.min(70, e.vel.y + 30 * dt); e.pos.addScaledVector(e.vel, dt); e.thrust = 1;
         m.animate(dt, { vel: e.vel, grounded: false, boost: 1, torsoYaw: Math.atan2(e.vel.x, e.vel.z), pitch: 0, thrust: 1, aim: null, lean: 0.3 });
@@ -966,7 +972,8 @@ export class Combat {
       const dist = toP.length();
       const dirP = toP.divideScalar(Math.max(1, dist));
       e.noLos = e.los ? 0 : (e.noLos || 0) + dt;
-      e.face = e.face + wrap(Math.atan2(dirP.x, dirP.z) - e.face) * (1 - Math.exp(-dt * (e.stagT > 0 ? 0.5 : 4)));
+      const heading = relay ? Math.atan2(relay.target.x - e.pos.x, relay.target.z - e.pos.z) : Math.atan2(dirP.x, dirP.z);
+      e.face = e.face + wrap(heading - e.face) * (1 - Math.exp(-dt * (e.stagT > 0 ? 0.5 : 4)));
 
       if (e.dropping) {
         // 從天而降：快落地時噴射減速
@@ -1001,7 +1008,8 @@ export class Combat {
       } else if(e.airborne&&(e.los&&!highPlayer||e.airContact<=0))e.airborne=false;
       if(e.airborne) {
         e.airNavT-=dt;
-        if(e.airNavT<=0) {
+        if (relay) e.airHeight = relay.height;
+        else if(e.airNavT<=0) {
           e.airNavT=.35;
           const roof=Math.max(w.support(e.pos.x,e.pos.z,5*k,1e4),w.support(e.pos.x+e.vel.x*1.4,e.pos.z+e.vel.z*1.4,5*k,1e4));
           const missilePhase = air?.phase === 'missiles';
@@ -1075,7 +1083,7 @@ export class Combat {
         }
         if (wish.lengthSq() > 1) wish.normalize();
         // 避障每四分之一秒重算一次；同一側持續繞牆，避免每幀左右翻轉。
-        if (e.navT <= 0) {
+        if (!relay && e.navT <= 0) {
           e.navT = 0.25;
           const probe = V3();
           const boxes = [], clear = (ax, az, bx, bz) => {
@@ -1094,9 +1102,10 @@ export class Combat {
           }, e.strafe);
           e.nav.set(nav.x, 0, nav.z);
         }
-        wish.copy(e.nav);
-        e.lockReact = e.locks > 0 ? e.lockReact + dt : 0;
-        if (e.lockReact > 0.5 && e.kind !== 'heavy' && e.qbCd <= 0) { this.enemyQB(e, 1); e.lockReact = 0; }
+        if (!relay) wish.copy(e.nav);
+        else { wish.set(0, 0, 0); e.boostT = 0; }
+        e.lockReact = !relay && e.locks > 0 ? e.lockReact + dt : 0;
+        if (!relay && e.lockReact > 0.5 && e.kind !== 'heavy' && e.qbCd <= 0) { this.enemyQB(e, 1); e.lockReact = 0; }
         // 王牌近身：光劍突擊
         const LG = W.lunge[e.kind];
         if (LG && air?.phase !== 'missiles' && dist < LG.r && Math.abs(e.pos.y-pl.pos.y)<45 && e.fireCd < 0.8 && e.lunge <= 0 && (e.kind !== 'brawler' || e.charge <= 0) && e.los && Math.random() < dt * 1.2 && this.canAttack(e)
@@ -1144,9 +1153,13 @@ export class Combat {
       this.audio.enemyBoost(e.id, e.pos, e.thrust);
 
       // ---- 開火
-      const aim = e.los && dist < K.range + 150 && e.stagT <= 0 ? playerChest : null;
-      if (e.stagT <= 0 && e.lunge <= 0) this.enemyFire(e, dt, dist, playerChest);
-      m.animate(dt, { vel: e.vel, grounded: e.grounded, boost: e.grounded && (e.boostT > 0 || e.qbT > 0) ? 1 : 0, torsoYaw: e.face, pitch: 0, thrust: e.thrust, aim, lean: e.stagT > 0 ? 0.35 : 0, flight:e.airborne?1:0, groundAt: e.groundAt, brace: e.burst > 0 || e.charge > 0 || e.volley > 0 ? 1 : 0 });
+      const aim = relay ? relay.target : e.los && dist < K.range + 150 && e.stagT <= 0 ? playerChest : null;
+      if (relay && !this.dead) {
+        relay.left = Math.max(0, relay.left - dt);
+        e.warn = 1;
+        if (relay.left <= 0) this.finishHarborRelay(e, true);
+      } else if (e.stagT <= 0 && e.lunge <= 0) this.enemyFire(e, dt, dist, playerChest);
+      m.animate(dt, { vel: e.vel, grounded: e.grounded, boost: e.grounded && (e.boostT > 0 || e.qbT > 0) ? 1 : 0, torsoYaw: e.face, pitch: 0, thrust: e.thrust, aim, lean: e.stagT > 0 ? 0.35 : 0, flight:e.airborne?1:0, groundAt: e.groundAt, brace: relay || e.burst > 0 || e.charge > 0 || e.volley > 0 ? 1 : 0 });
       if (m.footfall) {
         const fp = m.bones[m.footfall > 0 ? 'ankleR' : 'ankleL'].getWorldPosition(_b); fp.y -= m.motion.ankleY * k;
         this.audio.enemyStep(fp, e.kind === 'heavy' ? 1.3 : 0.9);
@@ -1307,7 +1320,7 @@ export class Combat {
     }
   }
   harborMissiles(e, dt, dist, pc) {
-    const air = e.harborAir;
+    const air = e.harborAir, relay = air.relay;
     if (air.shiftT > 0) { e.warn = 1; return; }
     if (e.volley > 0) {
       air.warning = Math.max(0, air.warning - dt);
@@ -1322,11 +1335,50 @@ export class Combat {
       this.missiles.push({ own: 'enemy', harbor: true, pos: p, vel: v, target: 'player', t: 0, speed: v.length(), vmax: 126, acc: 95, turn: 1.8, dmg: 420,
         h: this.fx.missile('enemy'), life: 4.8, from: e.pos.clone() });
       this.audio.missileLaunch3d(p);
-      if (!e.volley) { air.exposed = 2.2; e.fireCd = 4.1; this.note('夜鷺裝甲露出　趁現在反擊', 'am'); }
-    } else if (e.fireCd <= 0 && e.los && dist < 460 && !this.missiles.some(m => m.harbor)) {
+      if (!e.volley) {
+        if (relay) relay.salvos++;
+        air.exposed = 2.2; e.fireCd = 4.1; this.note('夜鷺裝甲露出　趁現在反擊', 'am');
+      }
+    } else if (e.fireCd <= 0 && !this.missiles.some(m => m.harbor)) {
+      if (relay?.state === 'intact' && relay.salvos > 0 && !this.dead) {
+        relay.probe -= dt;
+        if (relay.probe <= 0) {
+          relay.probe = .45;
+          const from = e.m.muzzle.getWorldPosition(_b);
+          if (from.distanceToSquared(relay.target) < 460 ** 2 && this.world.raycast(from, relay.target, null) < 0) {
+            relay.state = 'charging'; relay.left = 5; relay.height = e.pos.y;
+            e.qbT = 0; e.boostT = 0; e.warn = 1;
+            this.say('夜鷺瞄準中繼台', '集中火力命中夜鷺，打斷蓄力', 3, 'rd');
+            this.audio.alert('lock');
+            return;
+          }
+        }
+      }
+      if (!e.los || dist >= 460) return;
       e.volley = 4; e.volleyT = air.warning = 1.15; e.warn = 1;
       this.note('飛彈鎖定！看到飛彈接近再點 Shift', 'rd'); this.audio.alert('lock');
     }
+  }
+  finishHarborRelay(e, fire) {
+    const air = e.harborAir, relay = air.relay;
+    relay.left = 0; e.warn = 0; e.fireCd = 4.5; e.airNavT = e.navT = 0;
+    if (fire) {
+      const from = e.m.muzzle.getWorldPosition(V3());
+      const hit = this.world.raycast(from, relay.target, _n);
+      const end = hit < 0 ? relay.target : V3().lerpVectors(from, relay.target, hit);
+      this.fx.beam(from, end, 'enemy'); this.audio.enemyBeam(from);
+      e.m.recoil = .85;
+      if (hit < 0) {
+        relay.state = 'disabled';
+        this.fx.explosion(end, 1.5); this.audio.explosion(end, 1.5);
+        this.say('中繼台斷電', '先擊落夜鷺，再降落走手動旁路', 3, 'rd');
+        return;
+      }
+      this.fx.impact(end, _n, 'building');
+    }
+    relay.state = 'saved'; relay.progress = 1; air.exposed = 1.8;
+    this.say('中繼台保住了', fire ? '掩體擋住了光束' : '蓄力已打斷，繼續攻擊夜鷺', 2.7, 'gr');
+    this.audio.ui('confirm');
   }
   // 突擊型散彈：一次 n 發，各自散布、各自判定，單發傷害低；打到幾發算幾發（合成一次受傷）
   shotgun(e, from, pc, dist) {

@@ -6,8 +6,8 @@ import { qualityLevel, pixelRatio, FrameGate } from './runtime.js';
 import { ScenicMusic } from './scenic-music.mjs';
 import { HistoryReader } from './kobe-history.mjs';
 import { createHistoryPlaques } from './kobe-history-plaques.mjs';
-import { CODA_START, CODA_STOPS, CODA_ARCHIVE, CODA_SCENES, codaApproach, codaStations } from './harbor-coda.js?v=3';
-import { HarborAirBattle } from './harbor-air.mjs?v=1';
+import { CODA_START, CODA_STOPS, CODA_BYPASS, CODA_ARCHIVE, CODA_SCENES, codaApproach, codaStationPoint, codaStations } from './harbor-coda.js?v=4';
+import { HarborAirBattle } from './harbor-air.mjs?v=2';
 import { HarborCinematic } from './harbor-cinematic.mjs?v=1';
 
 const q = new URLSearchParams(location.search);
@@ -279,6 +279,7 @@ async function game() {
   let pausedFrom = 'play', coda = null, stations = null;
   const codaHUD = $('codaHUD'), codaObjective = $('codaObjective'), codaDistance = $('codaDistance');
   const codaHint = $('codaHint'), codaHeading = $('codaHeading'), codaEnd = $('codaEnd');
+  const codaEmergency = $('codaEmergency'), codaInterrupt = $('codaInterrupt');
   const codaFilm = $('codaFilm'), codaFail = $('codaFail'), cinematic = new HarborCinematic(camera, world);
   const history = new HistoryReader({onOpen:()=>{pause();input.unlock();},onClose:()=>{input.reset();resume();},onRead:()=>{try{localStorage.setItem('mech.history',JSON.stringify(history.snapshot()));}catch{}}});
   const historyPlaques=createHistoryPlaques(scene,world.kitano);
@@ -432,6 +433,7 @@ async function game() {
     codaHUD.hidden = true;
     codaEnd.hidden = true;
     codaFilm.hidden = true; codaFail.hidden = true;
+    codaEmergency.hidden = true;
     delete touchUI.dataset.coda;
     $('tCannon').textContent = '光波砲';
   }
@@ -471,7 +473,8 @@ async function game() {
     applyView();
     codaEnd.hidden = true; codaFail.hidden = true;
     stations ||= codaStations(scene, world);
-    coda = { index: 0, wait: 0, arrival: 0, air: null, film: null, checkpoint: null };
+    stations.setBackupDamaged(false);
+    coda = { index: 0, wait: 0, arrival: 0, air: null, film: null, checkpoint: null, relayDamageShown: false };
     syncCodaUI();
     stations.show(coda.index);
     combat.lines([['白鷺', '市區停火了。先到交接站讀一下回報，我等你。']], false, 3.9);
@@ -479,10 +482,12 @@ async function game() {
     updateCoda(0, false);
   }
 
+  const relayDisabled = () => coda?.air?.relayState === 'disabled';
+
   function codaTarget() {
     if (!coda) return null;
     if (coda.air?.fighting) return { step: coda.air.status };
-    const stop = CODA_STOPS[coda.index];
+    const stop = relayDisabled() && coda.index >= 2 ? CODA_BYPASS[coda.index - 2] : CODA_STOPS[coda.index];
     if (!stop) return { step: 'linked' };
     const ground = world.height(stop.x, stop.z);
     return { ...stop, y: ground + stop.height, ...codaApproach(stop, player, ground) };
@@ -495,7 +500,7 @@ async function game() {
     cockpitView(false); cockpit.root.visible = false; seeOff();
     const actors = kind === 'intercept' ? coda.air.interceptors : kind === 'boss' ? [focus] : [];
     cinematic.start(kind, { hero, focus, player, actors });
-    $('codaFilmTitle').textContent = CODA_SCENES[kind].title;
+    $('codaFilmTitle').textContent = kind === 'reveal' && relayDisabled() ? '隼留下的手動旁路' : CODA_SCENES[kind].title;
     coda.filmLine = -1;
     updateCodaFilmText(); syncCodaUI();
     input.reset();
@@ -526,6 +531,8 @@ async function game() {
     state = 'codaEnd'; store.set('harborCoda', 1);
     input.reset(); input.enabled = false; input.unlock();
     syncCodaUI(); codaEnd.hidden = false;
+    $('codaRelayOutcome').textContent = relayDisabled() ? '備援中繼台受損；手動旁路已接通。'
+      : coda.air?.relayState === 'saved' ? '夜鷺未能切斷備援中繼台，港務醫療線已接通。' : '備援中繼台完好；港務醫療線已接通。';
     const url = new URL('./lastline/', location.href); url.searchParams.set('from', 'mech');
     if (q.has('mute')) url.searchParams.set('mute', '');
     $('continueLastLine').href = url.href;
@@ -533,7 +540,7 @@ async function game() {
   }
 
   function startCodaFight(kind, film) {
-    if (!coda.air) coda.air = new HarborAirBattle({ combat, player, world });
+    if (!coda.air) coda.air = new HarborAirBattle({ combat, player, world, relay: codaStationPoint(CODA_STOPS[2], world) });
     coda.checkpoint = kind;
     if (kind === 'boss') coda.air.startBoss(); else coda.air.start();
     if (film) startCodaFilm(kind === 'boss' ? 'boss' : 'intercept', coda.air.focus);
@@ -548,7 +555,8 @@ async function game() {
     player.pos.y += height + 3;
     player.flightAltitude = player.pos.y; player.flying = true; player.grounded = false;
     codaCombat();
-    coda.air = null; coda.wait = 0;
+    coda.air = null; coda.wait = 0; coda.relayDamageShown = false;
+    stations.setBackupDamaged(false); stations.show(2, false);
     state = 'coda'; codaFail.hidden = true;
     input.reset(); input.enabled = true; if (!input.touch.on) input.lock();
     applyView();
@@ -558,6 +566,10 @@ async function game() {
   function stepCodaFight(dt) {
     if (!coda?.air?.fighting || combat.dead) return;
     const status = coda.air.update(dt);
+    if (relayDisabled() && !coda.relayDamageShown) {
+      coda.relayDamageShown = true;
+      stations.setBackupDamaged(true);
+    }
     if (status === 'awaitingBoss') {
       player.ap = Math.min(player.apMax, player.ap + player.apMax * .22);
       player.en = 100; player.overheat = 0;
@@ -566,7 +578,7 @@ async function game() {
     } else if (status === 'won') {
       combat.phase = 'done'; combat.lockTarget = null; combat.soft = null;
       stations.show(2);
-      combat.lines([['白鷺', '上空乾淨了。降到備援台，走隼留下的線路。']], true, 3.4);
+      combat.lines([['白鷺', relayDisabled() ? '主機燒了。先落地關電，再到前面的維修箱接旁路。' : '上空乾淨了。備援台還能用，降落接上隼的線路。']], true, 3.4);
       audio.music('off'); syncCodaUI();
     }
   }
@@ -578,18 +590,29 @@ async function game() {
     coda.arrival += dt;
     codaHUD.classList.toggle('coda-intro', coda.arrival < 3.4);
     const text = (el, value) => { if (el.textContent !== value) el.textContent = value; };
+    const charging = coda.air?.relayState === 'charging';
+    codaEmergency.hidden = !charging;
     if (coda.air?.fighting) {
-      const p = coda.air.boss ? coda.air.boss.pos : coda.air.focus?.pos;
       codaHeading.hidden = true;
+      if (charging) {
+        text(codaObjective, '夜鷺正瞄準備援中繼台');
+        text(codaDistance, `剩 ${coda.air.relaySeconds.toFixed(1)} 秒`);
+        text(codaHint, '集中攻擊夜鷺，打斷光束蓄力。');
+        codaInterrupt.value = coda.air.relayProgress;
+        return;
+      }
+      const p = coda.air.boss ? coda.air.boss.pos : coda.air.focus?.pos;
       text(codaObjective, point.step === 'boss2' ? '夜鷺・第二階段' : point.step === 'boss1' ? '夜鷺・第一階段' : '擊退空中攔截隊');
       text(codaDistance, p ? `${Math.round(player.pos.distanceTo(p))} m` : '');
-      text(codaHint, point.step === 'boss2' ? '追蹤飛彈接近時橫移或變換高度，等它收招再反擊。' : '用高度差避開射線；鎖定飛彈能追上空中目標。');
+      text(codaHint, relayDisabled() ? '備援台遭擊中。先擊退夜鷺，再落地接手動旁路。'
+        : point.step === 'boss2' ? '追蹤飛彈接近時橫移或變換高度，等它收招再反擊。' : '用高度差避開射線；鎖定飛彈能追上空中目標。');
       return;
     }
     if (point.step === 'linked') return;
     const a = Math.atan2(point.x - player.pos.x, point.z - player.pos.z) - player.yaw;
     codaHeading.hidden = false; codaHeading.style.transform = `rotate(${a}rad)`;
-    text(codaObjective, `${coda.index + 1} / ${CODA_STOPS.length}　${point.name}`);
+    const count = CODA_STOPS.length + (relayDisabled() ? CODA_BYPASS.length - 1 : 0);
+    text(codaObjective, `${coda.index + 1} / ${count}　${point.name}`);
     const dy = Math.round(point.y - player.pos.y);
     text(codaDistance, `${Math.round(point.distance)} m${point.height && dy ? ` · ${dy > 0 ? '上方' : '下方'} ${Math.abs(dy)} m` : ''}`);
     text(codaHint, coda.wait > 0 ? '接收通訊中…'
@@ -607,9 +630,13 @@ async function game() {
     } else if (point.step === 'relay') {
       stations.show(coda.index, false);
       startCodaFight('interceptors', true);
+    } else if (point.step === 'isolate') {
+      combat.lines([['白鷺', '短路隔開了。前面的維修箱還能供電，去接通它。']], false, 2.8);
+      coda.wait = combat.talkLeft + .05;
+      stations.show(coda.index);
     } else {
       stations.show(coda.index);
-      startCodaFilm('reveal', new THREE.Vector3(point.x + 10, world.height(point.x + 10, point.z), point.z));
+      startCodaFilm('reveal', codaStationPoint(point, world));
     }
     updateCoda(0, false);
   }

@@ -2,13 +2,17 @@ export const HARBOR_BOSS = '封港指揮機・夜鷺';
 
 // 第 11 章使用正式戰鬥系統，波次由這裡管理，避免動到本篇原本關卡。
 export class HarborAirBattle {
-  constructor({ combat, player, world }) {
+  constructor({ combat, player, world, relay }) {
     Object.assign(this, { combat, player, world });
+    this.relay = relay ? { target: relay.clone(), state: 'intact', left: 0, progress: 0, probe: 0, salvos: 0 } : null;
     this.status = 'idle'; this.interceptors = []; this.boss = null;
   }
 
   get fighting() { return this.status === 'interceptors' || this.status === 'boss1' || this.status === 'boss2'; }
   get focus() { return this.boss || this.interceptors.find(e => !e.dead) || this.interceptors[0] || null; }
+  get relayState() { return this.relay?.state || 'intact'; }
+  get relaySeconds() { return this.relay?.left || 0; }
+  get relayProgress() { return this.relay?.progress || 0; }
 
   spawn(kind, i, x, z, height, profile) {
     const ground = this.world.height(x, z), roof = this.world.support(x, z, 6, 1e4);
@@ -40,7 +44,7 @@ export class HarborAirBattle {
     if (this.status !== 'idle' && this.status !== 'awaitingBoss') return this.boss;
     const C = this.combat;
     C.phase = 'harbor'; this.status = 'boss1';
-    const e = this.spawn('ace', 0, 4, 274, 76, { role: 'boss', phase: 'beam', side: 1, warning: 0, exposed: 0, shiftT: 0 });
+    const e = this.spawn('ace', 0, 4, 274, 76, { role: 'boss', phase: 'beam', side: 1, warning: 0, exposed: 0, shiftT: 0, relay: this.relay });
     e.ap = e.apMax = 9900; e.bossName = HARBOR_BOSS; e.label = '夜鷺';
     C.boss = this.boss = e;
     C.say(HARBOR_BOSS, '第一階段・高空光束', 3.5, 'am');

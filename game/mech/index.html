@@ -64,6 +64,8 @@
   #codaHeading[hidden], #codaEnd[hidden], #codaFail[hidden], #codaFilm[hidden] { display:none; }
   #codaDistance { margin-left:8px; color:#ffd092; }
   #codaHint { color:#bbd9dd; }
+  #codaEmergency:not([hidden]) { display:block; margin-top:6px; color:#ffd092; }
+  #codaInterrupt { width:min(160px,42vw); margin-left:7px; vertical-align:middle; accent-color:var(--am); }
   #codaIntro { display:none; position:fixed; top:21%; left:0; right:0; text-align:center; font-size:clamp(19px,3.6vw,36px); letter-spacing:.2em; text-shadow:0 2px 6px #000, 0 0 22px #000; }
   .coda-intro #codaIntro { display:block; animation:coda-title 3.4s both; }
   @keyframes coda-title { 0%,100%{opacity:0} 15%,78%{opacity:1} }
@@ -82,7 +84,7 @@
   #codaFilmSpeaker { display:block; color:var(--am); font-size:.75em; }
   #skipCodaFilm { position:absolute; z-index:1; bottom:max(6px,2vh); right:12px; margin:0; padding:5px 10px; font-size:12px; letter-spacing:.05em; }
 </style>
-<script type="importmap">{"imports": {"./mechs.js": "./mechs.js?v=3", "./streetfront.js": "./streetfront.js?v=2", "./urban.js": "./urban.js?v=10", "three": "../lib/three.module.js", "three/addons/": "../lib/addons/", "./roofline.js": "./roofline.js?v=3", "./env.js": "./env.js?v=24", "./battlefields.js": "./battlefields.js?v=5", "./fieldart.js": "./fieldart.js?v=4", "./encounter.js": "./encounter.js?v=5", "./anim.js": "./anim.js?v=3", "./combat.js": "./combat.js?v=8", "./tactics.js": "./tactics.js?v=4", "./stages.js": "./stages.js?v=7", "./input.js": "./input.js?v=5", "./textures.js": "./textures.js?v=5", "./japan.js": "./japan.js?v=6", "./zero/map.js": "./zero/map.js?v=15", "./zero/kit.js": "./zero/kit.js?v=3", "./lastline/map.js": "./lastline/map.js?v=15", "./zero/script.js": "./zero/script.js?v=10", "./lastline/script.js": "./lastline/script.js?v=13", "./lastline/mission.js": "./lastline/mission.js?v=8", "./kobe-relief.mjs": "./kobe-relief.mjs?v=1", "./kobe-city.mjs": "./kobe-city.mjs?v=4", "./player.js": "./player.js?v=2", "./flight.mjs": "./flight.mjs?v=1", "./vehicles.js": "./vehicles.js?v=1", "./hud.js": "./hud.js?v=2", "./zero/human.js": "./zero/human.js?v=1", "./kobe-street.mjs": "./kobe-street.mjs?v=4", "./kobe-autumn.js": "./kobe-autumn.js?v=3", "./kobe-harbor.mjs": "./kobe-harbor.mjs?v=1", "./post.js": "./post.js?v=1", "./preview.js": "./preview.js?v=1", "./zero/props.js": "./zero/props.js?v=2", "./japanese-cars.mjs": "./japanese-cars.mjs?v=1", "./car-material.js": "./car-material.js?v=2", "./kobe-kitano.js": "./kobe-kitano.js?v=1", "./kobe-garden.mjs": "./kobe-garden.mjs?v=1", "./kobe-heritage.mjs": "./kobe-heritage.mjs?v=1", "./scenic-music.mjs": "./scenic-music.mjs?v=1", "./audio.js": "./audio.js?v=1", "./kobe-history.mjs": "./kobe-history.mjs?v=1", "./kobe-history-plaques.mjs": "./kobe-history-plaques.mjs?v=1", "./zero/vehicle-ops.mjs": "./zero/vehicle-ops.mjs?v=1", "./zero/vehicle-story.mjs": "./zero/vehicle-story.mjs?v=1", "./zero/vehicle-routes.mjs": "./zero/vehicle-routes.mjs?v=1", "./zero/vehicle-model.mjs": "./zero/vehicle-model.mjs?v=1", "./zero/ground-vehicle.mjs": "./zero/ground-vehicle.mjs?v=1"}}</script>
+<script type="importmap">{"imports": {"./mechs.js": "./mechs.js?v=3", "./streetfront.js": "./streetfront.js?v=2", "./urban.js": "./urban.js?v=10", "three": "../lib/three.module.js", "three/addons/": "../lib/addons/", "./roofline.js": "./roofline.js?v=3", "./env.js": "./env.js?v=24", "./battlefields.js": "./battlefields.js?v=5", "./fieldart.js": "./fieldart.js?v=4", "./encounter.js": "./encounter.js?v=5", "./anim.js": "./anim.js?v=3", "./combat.js": "./combat.js?v=9", "./tactics.js": "./tactics.js?v=4", "./stages.js": "./stages.js?v=7", "./input.js": "./input.js?v=5", "./textures.js": "./textures.js?v=5", "./japan.js": "./japan.js?v=6", "./zero/map.js": "./zero/map.js?v=15", "./zero/kit.js": "./zero/kit.js?v=3", "./lastline/map.js": "./lastline/map.js?v=15", "./zero/script.js": "./zero/script.js?v=10", "./lastline/script.js": "./lastline/script.js?v=13", "./lastline/mission.js": "./lastline/mission.js?v=8", "./kobe-relief.mjs": "./kobe-relief.mjs?v=1", "./kobe-city.mjs": "./kobe-city.mjs?v=4", "./player.js": "./player.js?v=2", "./flight.mjs": "./flight.mjs?v=1", "./vehicles.js": "./vehicles.js?v=1", "./hud.js": "./hud.js?v=2", "./zero/human.js": "./zero/human.js?v=1", "./kobe-street.mjs": "./kobe-street.mjs?v=4", "./kobe-autumn.js": "./kobe-autumn.js?v=3", "./kobe-harbor.mjs": "./kobe-harbor.mjs?v=1", "./post.js": "./post.js?v=1", "./preview.js": "./preview.js?v=1", "./zero/props.js": "./zero/props.js?v=2", "./japanese-cars.mjs": "./japanese-cars.mjs?v=1", "./car-material.js": "./car-material.js?v=2", "./kobe-kitano.js": "./kobe-kitano.js?v=1", "./kobe-garden.mjs": "./kobe-garden.mjs?v=1", "./kobe-heritage.mjs": "./kobe-heritage.mjs?v=1", "./scenic-music.mjs": "./scenic-music.mjs?v=1", "./audio.js": "./audio.js?v=1", "./kobe-history.mjs": "./kobe-history.mjs?v=1", "./kobe-history-plaques.mjs": "./kobe-history-plaques.mjs?v=1", "./zero/vehicle-ops.mjs": "./zero/vehicle-ops.mjs?v=1", "./zero/vehicle-story.mjs": "./zero/vehicle-story.mjs?v=1", "./zero/vehicle-routes.mjs": "./zero/vehicle-routes.mjs?v=1", "./zero/vehicle-model.mjs": "./zero/vehicle-model.mjs?v=1", "./zero/ground-vehicle.mjs": "./zero/ground-vehicle.mjs?v=1"}}</script>
 </head>
 <body>
 <canvas id="gl"></canvas>
@@ -174,6 +176,7 @@
   <small>第 11 章　港口未停火</small>
   <div><span id="codaHeading" aria-hidden="true">↑</span><b id="codaObjective" aria-live="polite"></b><span id="codaDistance"></span></div>
   <div id="codaHint"></div>
+  <label id="codaEmergency" hidden>打斷蓄力 <progress id="codaInterrupt" max="1" value="0"></progress></label>
   <div id="codaIntro" aria-hidden="true">停火後・神戶市政廣場</div>
 </div>
 <div id="codaFilm" hidden aria-label="第十一章過場">
@@ -190,6 +193,7 @@
 <section id="codaEnd" class="screen" aria-labelledby="codaTitle" hidden>
   <div style="color:#9ce9ee;letter-spacing:.2em">港務醫療線・通訊紀錄</div>
   <h2 id="codaTitle">名單上還有人</h2>
+  <p id="codaRelayOutcome"></p>
   <p>官方登記：零人　｜　米拉回報：六十四人、兩輛醫療車</p>
   <p>指揮部的封港令與截擊令用了同一枚簽章。白鷺已留下通訊備份。</p>
   <p>停火當日，蒼焰留在港邊修船棚。零號沿維修通道徒步進港。</p>
@@ -198,6 +202,6 @@
     <button class="btn" id="codaExit">回選關</button>
   </div>
 </section>
-<script type="module" src="./main.js?v=33"></script>
+<script type="module" src="./main.js?v=34"></script>
 </body>
 </html>
