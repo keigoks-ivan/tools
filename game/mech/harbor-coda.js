@@ -7,11 +7,12 @@ export const CODA_STOPS = [
   { step: 'backup', x: 0, z: 160, height: 0, radius: 13, name: '降落到備援中繼台', action: '切換港務醫療線' },
 ];
 
-export const CODA_LINES = [
-  [['交接站', '市區停火，港區列為已清空。登記待撤：零人。'], ['白鷺', '等等，天線還收到兩組短訊號。飛上去聽一下。']],
-  [['米拉', '這裡是港務醫療線！兩台車都還在，六十……'], ['聯邦指揮部', '頻道已封存。蒼焰請返回，準備接收回收指令。'], ['白鷺', '指揮部切斷了上行。前面有備援台，我們改走隼留下的醫療線。']],
-  [['米拉', '……聽得到嗎？兩輛醫療車，六十四人。我一個個點過了。'], ['白鷺', '封港命令是我們這邊簽的。米拉，車先別動。'], ['零號', '六十四。我聽到了。等我。']],
-];
+export const CODA_ARCHIVE = [['交接站', '市區停火，港區列為已清空。登記待撤：零人。'], ['白鷺', '天線還收到兩組短訊號。飛上去聽一下。']];
+export const CODA_SCENES = {
+  intercept: { title: '訊號遭截', lines: [['米拉', '港務醫療線呼叫。兩輛醫療車，還有六十──'], ['聯邦指揮部', '回報封存。攔截隊，帶蒼焰回來。']] },
+  boss: { title: '封港指揮機・夜鷺', lines: [['白鷺', '那是聯邦的識別碼……不是獵犬。'], ['夜鷺', '蒼焰，立即降落。港區沒有活人。']] },
+  reveal: { title: '隼留下的線路', lines: [['米拉', '兩輛醫療車，六十四人。我一個個點過了。'], ['白鷺', '兩份命令的簽章一樣。攔截我們的人，也下令封港。']] },
+};
 
 export function codaApproach(stop, player, ground) {
   const p = player.pos, distance = Math.hypot(p.x - stop.x, p.z - stop.z);
@@ -58,11 +59,11 @@ export function codaStations(scene, world) {
   root.visible = false; scene.add(root);
   return {
     hide() { root.visible = false; },
-    show(index) {
+    show(index, guide = true) {
       root.visible = true;
       stations.forEach(({ light, zone }, i) => {
         light.material = i === index ? amber : i < index && i !== 1 ? cold : dark;
-        zone.visible = i === index;
+        zone.visible = guide && i === index;
       });
     },
   };

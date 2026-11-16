@@ -6,7 +6,9 @@ import { qualityLevel, pixelRatio, FrameGate } from './runtime.js';
 import { ScenicMusic } from './scenic-music.mjs';
 import { HistoryReader } from './kobe-history.mjs';
 import { createHistoryPlaques } from './kobe-history-plaques.mjs';
-import { CODA_START, CODA_STOPS, CODA_LINES, codaApproach, codaStations } from './harbor-coda.js?v=2';
+import { CODA_START, CODA_STOPS, CODA_ARCHIVE, CODA_SCENES, codaApproach, codaStations } from './harbor-coda.js?v=3';
+import { HarborAirBattle } from './harbor-air.mjs?v=1';
+import { HarborCinematic } from './harbor-cinematic.mjs?v=1';
 
 const q = new URLSearchParams(location.search);
 // 大檔案（貼圖、HDR、模型）改從 jsDelivr 下載，網站主機給大檔很慢；不能用時照舊從本站（見 cdn.js）
@@ -181,9 +183,9 @@ async function game() {
   let combat = null, stageNo = 1;
   // 可破壞建築：特效／音效／座艙震動／HUD 提示
   world.hook({ fx, audio, cockpit, player, note: (t, c) => combat && combat.note(t, c) });
-  function newCombat(n = stageNo, cp = null) {
+  function newCombat(n = stageNo, cp = null, keepBuildings = false) {
     if (combat) combat.dispose();
-    world.resetBuildings();   // 每次開關／重來／回標題：大樓全部復原
+    if (!keepBuildings) world.resetBuildings();   // 尾聲接續同一個戰場，保留決戰破壞
     fx.clear();
     stageNo = n;
     combat = new Combat({ scene, world, camera, player, hero, fx, audio, cockpit, post, onEnd: finish, stage: n, cp });
@@ -277,6 +279,7 @@ async function game() {
   let pausedFrom = 'play', coda = null, stations = null;
   const codaHUD = $('codaHUD'), codaObjective = $('codaObjective'), codaDistance = $('codaDistance');
   const codaHint = $('codaHint'), codaHeading = $('codaHeading'), codaEnd = $('codaEnd');
+  const codaFilm = $('codaFilm'), codaFail = $('codaFail'), cinematic = new HarborCinematic(camera, world);
   const history = new HistoryReader({onOpen:()=>{pause();input.unlock();},onClose:()=>{input.reset();resume();},onRead:()=>{try{localStorage.setItem('mech.history',JSON.stringify(history.snapshot()));}catch{}}});
   const historyPlaques=createHistoryPlaques(scene,world.kitano);
   world.cityObjects.push(...historyPlaques.meshes);
@@ -304,6 +307,9 @@ async function game() {
   $('playCoda').addEventListener('click', () => startCoda());
   $('replayCoda').addEventListener('click', () => startCoda(true));
   $('codaExit').addEventListener('click', toTitle);
+  $('codaFailExit').addEventListener('click', toTitle);
+  $('retryCoda').addEventListener('click', retryCoda);
+  $('skipCodaFilm').addEventListener('click', endCodaFilm);
   $('menu').addEventListener('click', toTitle);
   $('quit').addEventListener('click', toTitle);
   input.onLockChange = (locked) => { if (!locked && !input.touch.on) pause(); };
@@ -370,7 +376,7 @@ async function game() {
     if (state !== 'play' && state !== 'boot' && state !== 'coda') return;
     pausedFrom = state;
     state = 'paused';
-    if (pausedFrom === 'coda') { codaHUD.hidden = true; touchUI.style.display = 'none'; }
+    if (pausedFrom === 'coda') { codaHUD.hidden = true; codaFilm.hidden = true; touchUI.style.display = 'none'; }
     $('pause').style.display = 'flex';
     audio.setPaused(true); input.reset();
   }
@@ -380,7 +386,7 @@ async function game() {
     audio.setPaused(false);
     if (!input.touch.on) input.lock();
     state = pausedFrom;
-    if (state === 'coda') { codaHUD.hidden = false; touchUI.style.display = input.touch.on ? 'block' : 'none'; }
+    if (state === 'coda') syncCodaUI();
     clock.getDelta();
   }
   function finish(win) {
@@ -421,11 +427,36 @@ async function game() {
 
   function leaveCoda() {
     coda = null;
+    cinematic.finish();
     stations?.hide();
     codaHUD.hidden = true;
     codaEnd.hidden = true;
+    codaFilm.hidden = true; codaFail.hidden = true;
     delete touchUI.dataset.coda;
     $('tCannon').textContent = '光波砲';
+  }
+
+  function codaCombat() {
+    newCombat(STAGES.length, null, true);
+    combat.enc = null;
+    combat.phase = 'done';
+    combat.onEnd = () => {
+      if (state !== 'coda' || !coda?.air) return;
+      state = 'codaFail';
+      input.reset(); input.enabled = false; input.unlock();
+      syncCodaUI(); codaFail.hidden = false;
+      $('codaFailSub').textContent = coda.checkpoint === 'boss' ? '從夜鷺進場前重新出擊' : '從攔截隊出現前重新出擊';
+      audio.setDanger(false); audio.setLockAlert(0); audio.music('fail');
+    };
+  }
+
+  function syncCodaUI() {
+    const active = state === 'coda', film = !!coda?.film, fighting = !!coda?.air?.fighting;
+    codaHUD.hidden = !active || film;
+    codaFilm.hidden = !active || !film;
+    touchUI.style.display = active && !film && input.touch.on ? 'block' : 'none';
+    if (fighting) delete touchUI.dataset.coda; else touchUI.dataset.coda = '1';
+    $('tCannon').textContent = fighting ? '光波砲' : '互動';
   }
 
   function startCoda(fromTitle = false) {
@@ -434,19 +465,14 @@ async function game() {
     $('title').classList.add('hide');
     $('result').style.display = 'none';
     resetPlayer(n, CODA_START);
-    if (fromTitle) newCombat(n);
-    combat.enc?.dispose(); combat.enc = null; setRoute(world, null);
-    combat.phase = 'done'; combat.events.length = 0; combat.sub = null; combat.subQ.length = 0;
-    combat.banner = null; combat.notes.length = 0; combat.slowmo = 0; combat.hitstop = 0; combat.timeScale = 1;
-    combat.cannon.phase = null; combat.od.active = false; combat.damageFx = 0;
+    codaCombat(); setRoute(world, null);
     boot = 1; state = 'coda'; historyButton.hidden = true;
     input.reset(); input.enabled = true; if (!input.touch.on) input.lock();
     applyView();
-    touchUI.dataset.coda = '1'; $('tCannon').textContent = '互動';
-    touchUI.style.display = input.touch.on ? 'block' : 'none';
-    codaEnd.hidden = true; codaHUD.hidden = false;
+    codaEnd.hidden = true; codaFail.hidden = true;
     stations ||= codaStations(scene, world);
-    coda = { index: 0, wait: 0, arrival: 0 };
+    coda = { index: 0, wait: 0, arrival: 0, air: null, film: null, checkpoint: null };
+    syncCodaUI();
     stations.show(coda.index);
     combat.lines([['白鷺', '市區停火了。先到交接站讀一下回報，我等你。']], false, 3.9);
     audio.music('off');
@@ -455,33 +481,112 @@ async function game() {
 
   function codaTarget() {
     if (!coda) return null;
+    if (coda.air?.fighting) return { step: coda.air.status };
     const stop = CODA_STOPS[coda.index];
     if (!stop) return { step: 'linked' };
     const ground = world.height(stop.x, stop.z);
     return { ...stop, y: ground + stop.height, ...codaApproach(stop, player, ground) };
   }
 
+  function startCodaFilm(kind, focus) {
+    coda.film = kind;
+    combat.sub = null; combat.subQ.length = 0;
+    combat.banner = null;
+    cockpitView(false); cockpit.root.visible = false; seeOff();
+    const actors = kind === 'intercept' ? coda.air.interceptors : kind === 'boss' ? [focus] : [];
+    cinematic.start(kind, { hero, focus, player, actors });
+    $('codaFilmTitle').textContent = CODA_SCENES[kind].title;
+    coda.filmLine = -1;
+    updateCodaFilmText(); syncCodaUI();
+    input.reset();
+  }
+
+  function updateCodaFilmText() {
+    const i = cinematic.progress >= .5 ? 1 : 0;
+    if (i === coda.filmLine) return;
+    coda.filmLine = i;
+    const [who, line] = CODA_SCENES[coda.film].lines[i];
+    $('codaFilmSpeaker').textContent = who;
+    $('codaFilmLine').textContent = line;
+    audio.ui(i ? 'confirm' : 'hover');
+  }
+
+  function endCodaFilm() {
+    if (state !== 'coda' || !coda?.film) return;
+    const kind = coda.film;
+    coda.film = null; cinematic.finish();
+    input.reset(); applyView();
+    if (kind === 'reveal') { finishCoda(); return; }
+    syncCodaUI();
+    audio.music(kind === 'boss' ? 'final' : 'battle', { stage: 5 });
+    combat.say(kind === 'boss' ? '夜鷺' : '空中攔截', kind === 'boss' ? '改變高度，走出射線' : '鎖定空中目標，迴避側翼夾擊', 3, 'am');
+  }
+
+  function finishCoda() {
+    state = 'codaEnd'; store.set('harborCoda', 1);
+    input.reset(); input.enabled = false; input.unlock();
+    syncCodaUI(); codaEnd.hidden = false;
+    const url = new URL('./lastline/', location.href); url.searchParams.set('from', 'mech');
+    if (q.has('mute')) url.searchParams.set('mute', '');
+    $('continueLastLine').href = url.href;
+    audio.music('clear');
+  }
+
+  function startCodaFight(kind, film) {
+    if (!coda.air) coda.air = new HarborAirBattle({ combat, player, world });
+    coda.checkpoint = kind;
+    if (kind === 'boss') coda.air.startBoss(); else coda.air.start();
+    if (film) startCodaFilm(kind === 'boss' ? 'boss' : 'intercept', coda.air.focus);
+    else audio.music(kind === 'boss' ? 'final' : 'battle', { stage: 5 });
+    syncCodaUI();
+  }
+
+  function retryCoda() {
+    if (state !== 'codaFail' || !coda?.checkpoint) return;
+    const { x, z, height } = CODA_STOPS[1];
+    resetPlayer(STAGES.length, { x, z, yaw: 0 });
+    player.pos.y += height + 3;
+    player.flightAltitude = player.pos.y; player.flying = true; player.grounded = false;
+    codaCombat();
+    coda.air = null; coda.wait = 0;
+    state = 'coda'; codaFail.hidden = true;
+    input.reset(); input.enabled = true; if (!input.touch.on) input.lock();
+    applyView();
+    startCodaFight(coda.checkpoint, false);
+  }
+
+  function stepCodaFight(dt) {
+    if (!coda?.air?.fighting || combat.dead) return;
+    const status = coda.air.update(dt);
+    if (status === 'awaitingBoss') {
+      player.ap = Math.min(player.apMax, player.ap + player.apMax * .22);
+      player.en = 100; player.overheat = 0;
+      combat.rifle.ammo = combat.rifle.mag; combat.rifle.reload = -1;
+      startCodaFight('boss', true);
+    } else if (status === 'won') {
+      combat.phase = 'done'; combat.lockTarget = null; combat.soft = null;
+      stations.show(2);
+      combat.lines([['白鷺', '上空乾淨了。降到備援台，走隼留下的線路。']], true, 3.4);
+      audio.music('off'); syncCodaUI();
+    }
+  }
+
   function updateCoda(dt, use) {
     const point = codaTarget();
-    if (!point || state !== 'coda') return;
+    if (!point || state !== 'coda' || coda.film) return;
     coda.wait = Math.max(0, coda.wait - dt);
     coda.arrival += dt;
     codaHUD.classList.toggle('coda-intro', coda.arrival < 3.4);
     const text = (el, value) => { if (el.textContent !== value) el.textContent = value; };
-    if (point.step === 'linked') {
-      text(codaObjective, '港務醫療線已接通');
-      text(codaDistance, '備援頻道');
+    if (coda.air?.fighting) {
+      const p = coda.air.boss ? coda.air.boss.pos : coda.air.focus?.pos;
       codaHeading.hidden = true;
-      text(codaHint, '接收米拉的撤離回報');
-      if (coda.wait > 0) return;
-      state = 'codaEnd'; store.set('harborCoda', 1);
-      input.reset(); input.enabled = false; input.unlock();
-      touchUI.style.display = 'none'; codaHUD.hidden = true; codaEnd.hidden = false;
-      const url = new URL('./lastline/', location.href); url.searchParams.set('from', 'mech');
-      if (q.has('mute')) url.searchParams.set('mute', '');
-      $('continueLastLine').href = url.href;
+      text(codaObjective, point.step === 'boss2' ? '夜鷺・第二階段' : point.step === 'boss1' ? '夜鷺・第一階段' : '擊退空中攔截隊');
+      text(codaDistance, p ? `${Math.round(player.pos.distanceTo(p))} m` : '');
+      text(codaHint, point.step === 'boss2' ? '追蹤飛彈接近時橫移或變換高度，等它收招再反擊。' : '用高度差避開射線；鎖定飛彈能追上空中目標。');
       return;
     }
+    if (point.step === 'linked') return;
     const a = Math.atan2(point.x - player.pos.x, point.z - player.pos.z) - player.yaw;
     codaHeading.hidden = false; codaHeading.style.transform = `rotate(${a}rad)`;
     text(codaObjective, `${coda.index + 1} / ${CODA_STOPS.length}　${point.name}`);
@@ -492,13 +597,20 @@ async function game() {
         : point.height ? (input.touch.on ? '按飛行，升到天線旁的光圈' : 'T 起飛，空白鍵上升；靠近空中的光圈')
           : player.grounded ? '跟著指示接近地面的光圈' : (input.touch.on ? '用下降鍵落地' : '按 C 降落；落地後才能接通'));
     if (!use || !point.near || coda.wait > 0) return;
-    const lines = CODA_LINES[coda.index++];
+    coda.index++;
     combat.sub = null; combat.subQ.length = 0;
-    combat.lines(lines, false, 4.3);
-    coda.wait = combat.talkLeft + .05;
-    stations.show(coda.index);
     audio.ui('confirm');
-    if (coda.index === 2) combat.say('上行已中斷', '改用港務醫療備援線', 3, 'am');
+    if (point.step === 'archive') {
+      combat.lines(CODA_ARCHIVE, false, 3.4);
+      coda.wait = combat.talkLeft + .05;
+      stations.show(coda.index);
+    } else if (point.step === 'relay') {
+      stations.show(coda.index, false);
+      startCodaFight('interceptors', true);
+    } else {
+      stations.show(coda.index);
+      startCodaFilm('reveal', new THREE.Vector3(point.x + 10, world.height(point.x + 10, point.z), point.z));
+    }
     updateCoda(0, false);
   }
 
@@ -511,7 +623,7 @@ async function game() {
   let t = 0, odV = 0, speedV = 0, flashV = 0, dangerV = 0;
   const fwd = new THREE.Vector3(), tmp = new THREE.Vector3(), foot = new THREE.Vector3();
   const idle = { mx: 0, my: 0, lookX: 0, lookY: 0 };
-  window.__game = { fake: null, launch: (n) => launch(n), toTitle: () => toTitle(), player, hero, world, post, cockpit, camera, get combat() { return combat; }, get state() { return state; }, get coda() { return codaTarget(); }, fx, audio, input };
+  window.__game = { fake: null, launch: (n) => launch(n), toTitle: () => toTitle(), player, hero, world, post, cockpit, camera, get combat() { return combat; }, get state() { return state; }, get coda() { return codaTarget(); }, get codaFilm() { return coda?.film || null; }, get airFight() { return coda?.air || null; }, fx, audio, input };
 
   // 每秒最多畫 60 張：120Hz 螢幕不會多畫一倍（?fps=0 不限、?fps=30 之類可改）
   const FPS = q.has('fps') ? +q.get('fps') : 60;
@@ -556,6 +668,16 @@ async function game() {
     let inp = input.state(rdt);
     if (window.__game.fake) Object.assign(inp, window.__game.fake);
     if (inp.pause && live) { input.unlock(); pause(); input.endFrame(); return; }
+    if (inCoda && coda.film) {
+      const done = input.pressed('Space') || input.pressed('Enter') || cinematic.update(rdt);
+      if (!done) updateCodaFilmText();
+      hud.clear(); post.u.boot.value = 1; post.u.damage.value = 0; post.u.speed.value = 0;
+      post.u.flash.value = 0; post.u.danger.value = 0; post.u.overdrive.value = 0;
+      world.followShadow(player.pos);
+      post.render(t); input.endFrame();
+      if (done) endCodaFilm();
+      return;
+    }
     if (inp.view && live) { tpView = !tpView; store.set('view', tpView ? 1 : 0); applyView(); }
     const canMove = live && (state !== 'boot' || boot > 0.85) && !combat.dead;
     if (!canMove) inp = Object.assign({}, inp, idle, { fire: false, lockHold: false, qb: false, boost: false, jump: false, hover: false, flight:false,descend:false,flightBlocked:true, saber: false, cannon: false, hardLock: false, od: false, reload: false, lookX: state === 'result' ? 0 : inp.lookX, lookY: state === 'result' ? 0 : inp.lookY });
@@ -566,6 +688,8 @@ async function game() {
     // ---- 自機
     player.update(dt, inp);
     if (inCoda) updateCoda(rdt, inp.cannon);
+    // 互動當下即交給過場鏡頭，不讓這一幀的 E 在新戰鬥裡變成光波砲。
+    if (inCoda && coda.film) { input.endFrame(); return; }
     hero.animate(dt, player.animState(combat.aimPoint));
     if (hero.footfall) {
       weightBump(WEIGHT.step, clamp(player.speed / 14, 0.4, 1) * (player.boosting ? WEIGHT.step.runK : 1) * (player.grounded ? 1 : 0), hero.footfall);
@@ -598,7 +722,10 @@ async function game() {
     C.aimSkip = tpView ? chaseSkip : 0;
 
     // ---- 戰鬥、特效、世界
-    C.update(dt, inCoda || !live ? null : inp, rdt);
+    const airCombat = inCoda && coda.air?.fighting;
+    C.update(dt, !live || (inCoda && !airCombat) ? null : inp, rdt);
+    if (airCombat) stepCodaFight(rdt);
+    if (coda?.film) { hud.clear(); input.endFrame(); return; }
     fx.update(dt);
     world.update(dt);
     world.followShadow(player.pos);
@@ -617,7 +744,7 @@ async function game() {
       scenic = scenicMusic.update(rdt,player.pos,world.battlefield === 'city' ? world.kitano?.bounds : null,scenicThreat || C.lockAlert > .1 || C.damageFx > .04);
       audio.music(scenic ? 'kitano' : 'battle', { stage: STAGES[stageNo - 1].music || stageNo });
     }
-    audio.setIntensity(state !== 'play' ? 0.15 : scenic ? .22 : clamp(0.2 + near * 0.08 + C.lockAlert * 0.25 + C.damageFx * 0.3 + (danger ? 0.2 : 0) + odV * 0.35, 0, 1));
+    audio.setIntensity(state !== 'play' && !airCombat ? 0.15 : scenic ? .22 : clamp(0.2 + near * 0.08 + C.lockAlert * 0.25 + C.damageFx * 0.3 + (danger ? 0.2 : 0) + odV * 0.35, 0, 1));
 
     // ---- 畫面後製
     odV += ((C.od.active ? 1 : 0) - odV) * (1 - Math.exp(-rdt * 4));
@@ -632,12 +759,13 @@ async function game() {
     post.u.danger.value = dangerV;
     post.u.flash.value = flashV;
     // 瞄準鏡頭：鎖定時另拍一張小的放大畫面，貼在側邊面板
-    cockpit.targetView(renderer, scene, C.lockTarget);
+    // 第十一章低畫質保留主 HUD 鎖定，省去莢艙的第二次場景渲染。後視鏡頭看不到莢艙，也不必重畫。
+    cockpit.targetView(renderer, scene, coda && (quality === 0 || tpView) ? null : C.lockTarget);
     seeThrough(C);
     post.render(t);
 
     hud.draw(rdt, { boot: state === 'boot' ? boot : 1, combat: C, player, stages: STAGES.length, groundY: world.height(player.pos.x, player.pos.z), tp: tpView,
-      label: coda ? `STAGE ${STAGES.length + 1}` : undefined, ceasefire: !!coda });
+      label: coda ? `STAGE ${STAGES.length + 1}` : undefined, ceasefire: !!coda && !airCombat });
     input.endFrame();
   }
   requestAnimationFrame(frame);

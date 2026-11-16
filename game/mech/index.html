@@ -61,7 +61,7 @@
   #codaHUD { position:fixed; z-index:2; top:12px; left:12px; max-width:min(390px,calc(100vw - 24px)); box-sizing:border-box; padding:10px 14px; pointer-events:none; background:rgba(5,15,20,.9); border-left:2px solid var(--cy); font:500 13px/1.65 'Noto Sans TC',sans-serif; }
   #codaHUD small { color:#9bc9ce; letter-spacing:.1em; }
   #codaHeading { display:inline-block; color:var(--am); margin-right:7px; font-weight:700; }
-  #codaHeading[hidden], #codaEnd[hidden] { display:none; }
+  #codaHeading[hidden], #codaEnd[hidden], #codaFail[hidden], #codaFilm[hidden] { display:none; }
   #codaDistance { margin-left:8px; color:#ffd092; }
   #codaHint { color:#bbd9dd; }
   #codaIntro { display:none; position:fixed; top:21%; left:0; right:0; text-align:center; font-size:clamp(19px,3.6vw,36px); letter-spacing:.2em; text-shadow:0 2px 6px #000, 0 0 22px #000; }
@@ -72,8 +72,17 @@
   #codaEnd h2 { margin:.25em 0; font-size:clamp(24px,4.5vw,48px); letter-spacing:.16em; }
   #codaEnd p { max-width:36em; margin:6px 0; color:#d5edf0; line-height:1.7; }
   #codaEnd .btn { letter-spacing:.12em; }
+  #codaFail { z-index:6; background:rgba(5,9,12,.83); padding:20px; box-sizing:border-box; }
+  #codaFail h2 { font-size:clamp(25px,4.5vw,48px); margin:6px 0; }
+  #codaFilm { position:fixed; inset:0; z-index:6; pointer-events:none; }
+  #codaFilm::before, #codaFilm::after { content:''; position:absolute; left:0; right:0; height:min(11vh,70px); background:#05090e; }
+  #codaFilm::before { top:0; } #codaFilm::after { bottom:0; }
+  #codaFilmTitle { position:absolute; z-index:1; top:clamp(10px,3vh,20px); left:clamp(12px,3vw,40px); color:#9ce9ee; font:700 clamp(13px,2vw,20px) 'Noto Sans TC',sans-serif; letter-spacing:.15em; }
+  #codaFilmCaption { position:absolute; z-index:1; bottom:max(12vh,29px); left:50%; transform:translateX(-50%); width:max-content; max-width:calc(100vw - 32px); box-sizing:border-box; padding:9px 15px; text-align:center; background:rgba(5,12,16,.87); border-top:1px solid rgba(127,243,255,.45); font:500 clamp(14px,2vw,19px)/1.6 'Noto Sans TC',sans-serif; }
+  #codaFilmSpeaker { display:block; color:var(--am); font-size:.75em; }
+  #skipCodaFilm { position:absolute; z-index:1; bottom:max(6px,2vh); right:12px; margin:0; padding:5px 10px; font-size:12px; letter-spacing:.05em; }
 </style>
-<script type="importmap">{"imports": {"./mechs.js": "./mechs.js?v=3", "./streetfront.js": "./streetfront.js?v=2", "./urban.js": "./urban.js?v=10", "three": "../lib/three.module.js", "three/addons/": "../lib/addons/", "./roofline.js": "./roofline.js?v=3", "./env.js": "./env.js?v=24", "./battlefields.js": "./battlefields.js?v=5", "./fieldart.js": "./fieldart.js?v=4", "./encounter.js": "./encounter.js?v=5", "./anim.js": "./anim.js?v=3", "./combat.js": "./combat.js?v=7", "./tactics.js": "./tactics.js?v=4", "./stages.js": "./stages.js?v=7", "./input.js": "./input.js?v=5", "./textures.js": "./textures.js?v=5", "./japan.js": "./japan.js?v=6", "./zero/map.js": "./zero/map.js?v=15", "./zero/kit.js": "./zero/kit.js?v=3", "./lastline/map.js": "./lastline/map.js?v=15", "./zero/script.js": "./zero/script.js?v=10", "./lastline/script.js": "./lastline/script.js?v=13", "./lastline/mission.js": "./lastline/mission.js?v=8", "./kobe-relief.mjs": "./kobe-relief.mjs?v=1", "./kobe-city.mjs": "./kobe-city.mjs?v=4", "./player.js": "./player.js?v=2", "./flight.mjs": "./flight.mjs?v=1", "./vehicles.js": "./vehicles.js?v=1", "./hud.js": "./hud.js?v=2", "./zero/human.js": "./zero/human.js?v=1", "./kobe-street.mjs": "./kobe-street.mjs?v=4", "./kobe-autumn.js": "./kobe-autumn.js?v=3", "./kobe-harbor.mjs": "./kobe-harbor.mjs?v=1", "./post.js": "./post.js?v=1", "./preview.js": "./preview.js?v=1", "./zero/props.js": "./zero/props.js?v=2", "./japanese-cars.mjs": "./japanese-cars.mjs?v=1", "./car-material.js": "./car-material.js?v=2", "./kobe-kitano.js": "./kobe-kitano.js?v=1", "./kobe-garden.mjs": "./kobe-garden.mjs?v=1", "./kobe-heritage.mjs": "./kobe-heritage.mjs?v=1", "./scenic-music.mjs": "./scenic-music.mjs?v=1", "./audio.js": "./audio.js?v=1", "./kobe-history.mjs": "./kobe-history.mjs?v=1", "./kobe-history-plaques.mjs": "./kobe-history-plaques.mjs?v=1", "./zero/vehicle-ops.mjs": "./zero/vehicle-ops.mjs?v=1", "./zero/vehicle-story.mjs": "./zero/vehicle-story.mjs?v=1", "./zero/vehicle-routes.mjs": "./zero/vehicle-routes.mjs?v=1", "./zero/vehicle-model.mjs": "./zero/vehicle-model.mjs?v=1", "./zero/ground-vehicle.mjs": "./zero/ground-vehicle.mjs?v=1"}}</script>
+<script type="importmap">{"imports": {"./mechs.js": "./mechs.js?v=3", "./streetfront.js": "./streetfront.js?v=2", "./urban.js": "./urban.js?v=10", "three": "../lib/three.module.js", "three/addons/": "../lib/addons/", "./roofline.js": "./roofline.js?v=3", "./env.js": "./env.js?v=24", "./battlefields.js": "./battlefields.js?v=5", "./fieldart.js": "./fieldart.js?v=4", "./encounter.js": "./encounter.js?v=5", "./anim.js": "./anim.js?v=3", "./combat.js": "./combat.js?v=8", "./tactics.js": "./tactics.js?v=4", "./stages.js": "./stages.js?v=7", "./input.js": "./input.js?v=5", "./textures.js": "./textures.js?v=5", "./japan.js": "./japan.js?v=6", "./zero/map.js": "./zero/map.js?v=15", "./zero/kit.js": "./zero/kit.js?v=3", "./lastline/map.js": "./lastline/map.js?v=15", "./zero/script.js": "./zero/script.js?v=10", "./lastline/script.js": "./lastline/script.js?v=13", "./lastline/mission.js": "./lastline/mission.js?v=8", "./kobe-relief.mjs": "./kobe-relief.mjs?v=1", "./kobe-city.mjs": "./kobe-city.mjs?v=4", "./player.js": "./player.js?v=2", "./flight.mjs": "./flight.mjs?v=1", "./vehicles.js": "./vehicles.js?v=1", "./hud.js": "./hud.js?v=2", "./zero/human.js": "./zero/human.js?v=1", "./kobe-street.mjs": "./kobe-street.mjs?v=4", "./kobe-autumn.js": "./kobe-autumn.js?v=3", "./kobe-harbor.mjs": "./kobe-harbor.mjs?v=1", "./post.js": "./post.js?v=1", "./preview.js": "./preview.js?v=1", "./zero/props.js": "./zero/props.js?v=2", "./japanese-cars.mjs": "./japanese-cars.mjs?v=1", "./car-material.js": "./car-material.js?v=2", "./kobe-kitano.js": "./kobe-kitano.js?v=1", "./kobe-garden.mjs": "./kobe-garden.mjs?v=1", "./kobe-heritage.mjs": "./kobe-heritage.mjs?v=1", "./scenic-music.mjs": "./scenic-music.mjs?v=1", "./audio.js": "./audio.js?v=1", "./kobe-history.mjs": "./kobe-history.mjs?v=1", "./kobe-history-plaques.mjs": "./kobe-history-plaques.mjs?v=1", "./zero/vehicle-ops.mjs": "./zero/vehicle-ops.mjs?v=1", "./zero/vehicle-story.mjs": "./zero/vehicle-story.mjs?v=1", "./zero/vehicle-routes.mjs": "./zero/vehicle-routes.mjs?v=1", "./zero/vehicle-model.mjs": "./zero/vehicle-model.mjs?v=1", "./zero/ground-vehicle.mjs": "./zero/ground-vehicle.mjs?v=1"}}</script>
 </head>
 <body>
 <canvas id="gl"></canvas>
@@ -167,16 +176,28 @@
   <div id="codaHint"></div>
   <div id="codaIntro" aria-hidden="true">停火後・神戶市政廣場</div>
 </div>
+<div id="codaFilm" hidden aria-label="第十一章過場">
+  <div id="codaFilmTitle"></div>
+  <div id="codaFilmCaption" aria-live="polite"><b id="codaFilmSpeaker"></b><span id="codaFilmLine"></span></div>
+  <button class="btn" id="skipCodaFilm">略過過場 · 空白鍵</button>
+</div>
+<section id="codaFail" class="screen" aria-labelledby="codaFailTitle" hidden>
+  <div style="color:#ffb347;letter-spacing:.14em">第 11 章　港口未停火</div>
+  <h2 id="codaFailTitle">蒼焰失去戰鬥能力</h2>
+  <p id="codaFailSub"></p>
+  <div class="row"><button class="btn" id="retryCoda">從空戰檢查點繼續</button><button class="btn" id="codaFailExit">回選關</button></div>
+</section>
 <section id="codaEnd" class="screen" aria-labelledby="codaTitle" hidden>
   <div style="color:#9ce9ee;letter-spacing:.2em">港務醫療線・通訊紀錄</div>
   <h2 id="codaTitle">名單上還有人</h2>
   <p>官方登記：零人　｜　米拉回報：六十四人、兩輛醫療車</p>
+  <p>指揮部的封港令與截擊令用了同一枚簽章。白鷺已留下通訊備份。</p>
   <p>停火當日，蒼焰留在港邊修船棚。零號沿維修通道徒步進港。</p>
   <div class="row">
     <a class="btn" id="continueLastLine" href="./lastline/">接續《失落防線》 →</a>
     <button class="btn" id="codaExit">回選關</button>
   </div>
 </section>
-<script type="module" src="./main.js?v=32"></script>
+<script type="module" src="./main.js?v=33"></script>
 </body>
 </html>

@@ -243,7 +243,10 @@ export class Combat {
       if (w.raycast(_c.set(x, h + 12, z), pc, null) < 0) found = true;
     }
     if (!found && (fx || fz)) { x = fx; z = fz; }
-    if (at && at.ground) {
+    if (at?.harborAir) {
+      e.pos.set(x, at.y, z); e.dropping = false; e.airborne = true;
+      e.airHeight = at.y; e.harborAir = at.harborAir;
+    } else if (at && at.ground) {
       // 從轉角衝出來：落在街上、朝路口噴射衝刺，晚一點才開火
       const a = Math.atan2((at.tx ?? p.x) - x, (at.tz ?? p.z) - z);
       e.pos.set(x, w.height(x, z), z); e.dropping = false; e.grounded = true;
@@ -807,6 +810,11 @@ export class Combat {
     if (e.dead) return;
     if (e.fleeAt && e.ap - dmg <= e.apMax * e.fleeAt) { e.ap = e.apMax * e.fleeAt; this.flee(e); return; }
     if (e.stagT > 0 && !crit) dmg *= 1.4;
+    const air = e.harborAir;
+    if (air?.exposed > 0) { dmg *= 1.25; stag *= 1.2; }
+    if (air?.shiftT > 0) dmg *= 0.25;
+    const shift = air?.phase === 'beam' && e.ap - dmg <= e.apMax * .55;
+    if (shift) dmg = Math.max(0, e.ap - e.apMax * .55);
     if (e.vehicle) dmg = Math.min(dmg, Math.max(1, e.ap));   // 載具：不多算溢出的分數
     e.ap -= dmg; e.lastHit = 0;
     this.stats.hits++;
@@ -824,7 +832,17 @@ export class Combat {
         this.audio.impact(pos, 'armor');
       }
     }
-    if (e.ap <= 0) this.kill(e);
+    if (shift) this.shiftHarborBoss(e);
+    else if (e.ap <= 0) this.kill(e);
+  }
+  shiftHarborBoss(e) {
+    const air = e.harborAir;
+    air.phase = 'missiles'; air.shiftT = .95; air.exposed = 0; air.warning = 0;
+    e.charge = 0; e.lunge = 0; e.volley = 0; e.m.swing = 0;
+    e.stag = 0; e.stagT = 0; e.warn = 1; e.fireCd = 1.5; e.airNavT = 0; e.navT = 0;
+    this.say('第二階段・追蹤飛彈', '夜鷺正在爬升；齊射後裝甲會露出', 3.5, 'am');
+    this.audio.alert('lock');
+    this.fx.impact(e.chest(V3()), UP, 'armor');
   }
   kill(e) {
     e.dead = true; e.dying = e.kind === 'grunt' ? 0.45 : 0.9; e.ap = 0;
@@ -844,14 +862,17 @@ export class Combat {
     const c = e.chest(V3()), w = this.world;
     this.fx.explosion(c, 3);
     this.audio.explosion(c, 3);
-    w.blast(c, 32, 5);
-    this.fx.smokeColumn(_a.set(e.pos.x, w.height(e.pos.x, e.pos.z), e.pos.z), 45);
+    if (!e.harborAir || e.pos.y - w.height(e.pos.x, e.pos.z) < 20) {
+      w.blast(c, 32, 5);
+      this.fx.smokeColumn(_a.set(e.pos.x, w.height(e.pos.x, e.pos.z), e.pos.z), 45);
+    }
     const dist = c.distanceTo(this.player.pos);
     const s = clamp(1 - dist / 260, 0, 1);
     if (s > 0) { this.cockpit.kick('hit', s * 0.8, 0); this.cockpit.flashAt(ORANGE, 14 * s, 0, 0.2, -1.4); }
     if (dist < 32) this.hurt(900 * (1 - dist / 32), c, 'blast');
     // 拆成碎片飛出去
-    for (const pc of e.m.shatter()) {
+    const pieces = e.m.shatter();
+    for (const pc of e.harborAir ? pieces.slice(0, 12) : pieces) {
       const mesh = pc.mesh;
       if (!mesh.visible) continue;
       mesh.removeFromParent();
@@ -910,6 +931,7 @@ export class Combat {
     for (const e of this.enemies) {
       if (e.gone || e.vehicle) continue;   // 載具在 vehicles.js 裡動
       const m = e.m, K = e.K, k = e.scale;
+      const air = e.harborAir;
       if (e.fled) {   // 撤退中：噴射升空飛遠，3.5 秒後消失
         e.fleeT += dt; e.vel.y = Math.min(70, e.vel.y + 30 * dt); e.pos.addScaledVector(e.vel, dt); e.thrust = 1;
         m.animate(dt, { vel: e.vel, grounded: false, boost: 1, torsoYaw: Math.atan2(e.vel.x, e.vel.z), pitch: 0, thrust: 1, aim: null, lean: 0.3 });
@@ -971,13 +993,21 @@ export class Combat {
       if(!e.airborne&&highPlayer&&e.los&&e.kind!=='heavy'&&airSlots>0&&dist<600&&e.stagT<=0) {
         e.airborne=true;airSlots--;e.grounded=false;e.vel.y=Math.max(e.vel.y,14);e.airNavT=0;
       }
-      if(e.airborne&&(e.los&&!highPlayer||e.airContact<=0))e.airborne=false;
+      if (air) {
+        e.airborne = true;
+        air.shiftT = Math.max(0, (air.shiftT || 0) - dt);
+        air.exposed = Math.max(0, (air.exposed || 0) - dt);
+        if (e.grounded && e.stagT <= 0) { e.grounded = false; e.vel.y = 12; }
+      } else if(e.airborne&&(e.los&&!highPlayer||e.airContact<=0))e.airborne=false;
       if(e.airborne) {
         e.airNavT-=dt;
         if(e.airNavT<=0) {
           e.airNavT=.35;
           const roof=Math.max(w.support(e.pos.x,e.pos.z,5*k,1e4),w.support(e.pos.x+e.vel.x*1.4,e.pos.z+e.vel.z*1.4,5*k,1e4));
-          e.airHeight=airInterceptHeight(w.height(e.pos.x,e.pos.z),roof,e.lastSeen.y,e.flankSide,this.stats.time);
+          const missilePhase = air?.phase === 'missiles';
+          const aimY = air ? Math.max(e.lastSeen.y, w.height(e.lastSeen.x, e.lastSeen.z)+43)
+            + (missilePhase ? 35 + 22 * Math.sin(this.stats.time * .9) : air.role === 'boss' ? 23 : air.heightBias) : e.lastSeen.y;
+          e.airHeight=airInterceptHeight(w.height(e.pos.x,e.pos.z),roof,aimY,e.flankSide,this.stats.time);
         }
         e.cover=null;e.coverT=0;
       }
@@ -986,10 +1016,14 @@ export class Combat {
       const wish = V3();
       if (e.stagT > 0) {
         e.stagT -= dt;
+        if (air) {
+          if (e.volley) e.fireCd = Math.max(e.fireCd, 2.2);
+          e.charge = 0; e.volley = 0; e.warn = 0; air.warning = 0;
+        }
       } else {
         const [lo, hi] = K.pref;
         const hunt = e.noLos > 1.2;
-        if (e.los && e.role === 'flank' && e.pushCd <= 0 && dist > lo && dist < K.range && (this.rifle.reload >= 0 || coveringFire(this.enemies, e))) {
+        if (!air && e.los && e.role === 'flank' && e.pushCd <= 0 && dist > lo && dist < K.range && (this.rifle.reload >= 0 || coveringFire(this.enemies, e))) {
           const goal = squadFlank(e.pos, e.lastSeen, this.enemies, e, e.flankSide, Math.max(lo, dist - 70));
           const side = Math.sign((e.pos.z - e.lastSeen.z) * (goal.x - e.lastSeen.x) - (e.pos.x - e.lastSeen.x) * (goal.z - e.lastSeen.z)) || e.flankSide;
           if (flankAvailable(this.enemies, e, side)) { e.pushGoal.set(goal.x, e.pos.y, goal.z); e.pushT = 2.5; e.pushCd = 5; e.pushSide = side; e.navT = 0; }
@@ -1010,7 +1044,7 @@ export class Combat {
         wish.copy(dirP).multiplyScalar(radial).addScaledVector(perp, hunt ? 0.35 : 0.85);
         e.navGoal.copy(e.pos).addScaledVector(wish, 70);
         // 側翼繞到另一個射角；失去視線只追最後看見的位置。
-        if (hunt || e.role === 'flank' && dist > lo) {
+        if (!air && (hunt || e.role === 'flank' && dist > lo)) {
           const goal = rush ? e.pushGoal : hunt ? dist < 60 ? searchPoint(e.lastSeen, e.noLos, e.flankSide, 40, e.id) : e.lastSeen
             : squadFlank(e.pos, e.lastSeen, this.enemies, e, e.flankSide, (lo + hi) * 0.5);
           e.navGoal.set(goal.x, e.pos.y, goal.z);
@@ -1024,6 +1058,20 @@ export class Combat {
           e.navGoal.copy(e.cover);
           wish.set(e.cover.x - e.pos.x, 0, e.cover.z - e.pos.z);
           if (wish.lengthSq() < 16) wish.set(0, 0, 0); else wish.normalize();
+        }
+        if (air) {
+          const missilePhase = air.phase === 'missiles';
+          const aimRange = missilePhase ? 170 : air.role === 'boss' ? 100 : air.range;
+          const arc = missilePhase ? (air.exposed > 0 ? .24 : 1.05) : .65;
+          const push = clamp((dist - aimRange) / 35, -1, 1);
+          wish.set(dirP.x * push + dirP.z * arc * air.side, 0, dirP.z * push - dirP.x * arc * air.side);
+          if (!e.los && e.noLos > .6) wish.addScaledVector(dirP, .65);
+          // Keep long passes above the fight area, without teleporting or moving through buildings.
+          const cx = clamp(e.pos.x, -140, 140), cz = clamp(e.pos.z, -70, 385);
+          wish.x += (cx - e.pos.x) / 20; wish.z += (cz - e.pos.z) / 20;
+          e.navGoal.copy(e.pos).addScaledVector(wish, 55);
+          if (air.exposed > 0) e.boostT = 0;
+          else if (missilePhase && (air.shiftT > 0 || air.warning > 0)) e.boostT = Math.max(e.boostT, .25);
         }
         if (wish.lengthSq() > 1) wish.normalize();
         // 避障每四分之一秒重算一次；同一側持續繞牆，避免每幀左右翻轉。
@@ -1051,7 +1099,7 @@ export class Combat {
         if (e.lockReact > 0.5 && e.kind !== 'heavy' && e.qbCd <= 0) { this.enemyQB(e, 1); e.lockReact = 0; }
         // 王牌近身：光劍突擊
         const LG = W.lunge[e.kind];
-        if (LG && dist < LG.r && Math.abs(e.pos.y-pl.pos.y)<45 && e.fireCd < 0.8 && e.lunge <= 0 && (e.kind !== 'brawler' || e.charge <= 0) && e.los && Math.random() < dt * 1.2 && this.canAttack(e)
+        if (LG && air?.phase !== 'missiles' && dist < LG.r && Math.abs(e.pos.y-pl.pos.y)<45 && e.fireCd < 0.8 && e.lunge <= 0 && (e.kind !== 'brawler' || e.charge <= 0) && e.los && Math.random() < dt * 1.2 && this.canAttack(e)
           && (LG.max >= 9 || this.enemies.reduce((n, o) => n + (o.lunge > 0 ? 1 : 0), 0) < LG.max)) {
           const pn = lungePlan(LG, dist); e.lunge = 0.45 + pn.t; e.lungeV = pn.v;
           this.note('WARNING  MELEE', 'rd'); this.audio.alert('lock');
@@ -1062,7 +1110,7 @@ export class Combat {
           if (Math.random() < (e.kind === 'ace' ? 0.8 : e.kind === 'grunt' ? 0.35 : 0.1)) { e.vel.y = 20; e.grounded = false; e.hover = e.kind === 'ace' ? rand(0.8, 2) : rand(0, 0.6); }
         }
       }
-      const vmax = e.airborne ? (e.boostT>0?Math.max(64,K.boost):32) : e.boostT > 0 ? K.boost : K.walk;
+      const vmax = e.airborne ? (e.boostT>0?Math.max(64,K.boost):air?.exposed>0?19:32) : e.boostT > 0 ? K.boost : K.walk;
       const hv = _b.set(e.vel.x, 0, e.vel.z);
       const tgtV = wish.multiplyScalar(vmax);
       let rate = e.grounded ? 26 : e.airborne?28:10;
@@ -1187,6 +1235,7 @@ export class Combat {
   enemyFire(e, dt, dist, pc) {
     const K = e.K, T = this.tier;
     e.fireCd -= dt; e.altCd -= dt; e.warn = Math.max(0, e.warn - dt * 2);
+    if (e.harborAir?.phase === 'missiles') { this.harborMissiles(e, dt, dist, pc); return; }
     const canSee = e.los && dist < K.range;
     const muz = () => { e.m.muzzle.updateWorldMatrix(true, false); return e.m.muzzle.getWorldPosition(V3()); };
     if (e.kind === 'grunt') {
@@ -1255,6 +1304,28 @@ export class Combat {
         if (this.canAttack(e)) { e.volley = 6; e.volleyT = 1.1; e.fireCd = rand(8, 11) * T.fire; this.audio.alert('lock'); } else e.fireCd = rand(0.4, 1);
       }
       if (e.altCd <= 0 && canSee) { e.altCd = rand(3.5, 5.5) * T.fire; if (this.canAttack(e)) this.shell(e, muz(), pc, 210, 800); }
+    }
+  }
+  harborMissiles(e, dt, dist, pc) {
+    const air = e.harborAir;
+    if (air.shiftT > 0) { e.warn = 1; return; }
+    if (e.volley > 0) {
+      air.warning = Math.max(0, air.warning - dt);
+      if (air.warning > 0) e.warn = 1;
+      e.volleyT -= dt;
+      if (e.volleyT > 0) return;
+      e.volley--; e.volleyT = .16; e.m.recoil = .28;
+      const side = e.volley % 2 ? 1 : -1;
+      const p = e.m.bones.torso.localToWorld(V3(2.4 * side, 5.2, -1));
+      const v = V3(Math.sin(e.face), 0, Math.cos(e.face)).multiplyScalar(33);
+      v.y = clamp((pc.y - p.y) * .5, -24, 30); v.x += Math.cos(e.face) * side * 13; v.z -= Math.sin(e.face) * side * 13;
+      this.missiles.push({ own: 'enemy', harbor: true, pos: p, vel: v, target: 'player', t: 0, speed: v.length(), vmax: 126, acc: 95, turn: 1.8, dmg: 420,
+        h: this.fx.missile('enemy'), life: 4.8, from: e.pos.clone() });
+      this.audio.missileLaunch3d(p);
+      if (!e.volley) { air.exposed = 2.2; e.fireCd = 4.1; this.note('夜鷺裝甲露出　趁現在反擊', 'am'); }
+    } else if (e.fireCd <= 0 && e.los && dist < 460 && !this.missiles.some(m => m.harbor)) {
+      e.volley = 4; e.volleyT = air.warning = 1.15; e.warn = 1;
+      this.note('飛彈鎖定！看到飛彈接近再點 Shift', 'rd'); this.audio.alert('lock');
     }
   }
   // 突擊型散彈：一次 n 發，各自散布、各自判定，單發傷害低；打到幾發算幾發（合成一次受傷）
