@@ -6,10 +6,11 @@ import { Pilot } from '../zero/player.js';
 import { buildMap as zeroMap } from '../zero/map.js';
 import { buildMap as harborMap } from '../lastline/map.js';
 import { FOOT_EXTENT as ZERO_EXTENT } from '../zero/script.js';
-import { FOOT_EXTENT as HARBOR_EXTENT } from '../lastline/script.js';
+import { ENCOUNTERS as HARBOR_ENCOUNTERS, FOOT_EXTENT as HARBOR_EXTENT } from '../lastline/script.js';
 import { GroundVehicle, VEHICLE_TYPES, sweepVehiclePose } from '../zero/ground-vehicle.mjs';
 import { VEHICLE_MISSIONS, validateVehicleRoute } from '../zero/vehicle-story.mjs';
 import { VEHICLE_ROUTES, vehicleRoutePoses, vehicleRouteLength } from '../zero/vehicle-routes.mjs';
+import { syncMissionProps } from '../zero/mission-props.mjs';
 
 // Geometry/colliders are the production maps. The canvas and scanned asset handles
 // are stubbed, as in street-layout.test.mjs; no WebGL context is needed.
@@ -40,6 +41,24 @@ function walk(solid,points,name) {
     assert(Math.abs(pilot.pos.y-y)<.35,`${name}: unsupported foot route`);
   }
 }
+
+test('從續作入口能步行到兩輛車旁接聽；既有存檔與重玩同步車隊狀態',()=>{
+  const {solid,map}=maps.lastline;
+  const opening=HARBOR_ENCOUNTERS[0],contact=map.items[opening.pickups[0].id];
+  const {trucks}=map.openingConvoy;
+  assert.equal(trucks.length,2);assert(trucks.every(truck=>truck.visible));
+  assert(contact.h.visible&&!contact.h.installed);
+  assert(opening.trigger(contact.p));
+  walk(solid,[map.marks.start.toArray(),[contact.p.x,0,contact.p.z],[-180,0,-215]],'港務醫療線開場');
+  const parked=trucks.map(truck=>solid.floorAt(truck.position.x,truck.position.z,5));
+  assert(parked.every(height=>height>2));
+  syncMissionProps(map,HARBOR_ENCOUNTERS,new Set(['B','C7']),new Set());
+  assert(contact.h.visible&&contact.h.installed);
+  assert(trucks.every(truck=>!truck.visible&&solid.floorAt(truck.position.x,truck.position.z,5)<.1));
+  syncMissionProps(map,HARBOR_ENCOUNTERS,new Set(),new Set());
+  assert(contact.h.visible&&!contact.h.installed);
+  assert(trucks.every(truck=>truck.visible&&solid.floorAt(truck.position.x,truck.position.z,5)>2));
+});
 
 test('五條支線的車型、操作停車點與劇情順序一致，路程有200至600公尺',()=>{
   assert.equal(Object.keys(VEHICLE_ROUTES).length,5);

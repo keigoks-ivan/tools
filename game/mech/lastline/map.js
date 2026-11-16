@@ -10,6 +10,7 @@ import { buildAutumnTrees } from '../kobe-autumn.js';
 import { KOBE_RELIEF, kobeCityHeight } from '../kobe-relief.mjs';
 import { kobeHarborScenery, harborWindow } from '../kobe-harbor.mjs';
 import { ENCOUNTERS } from './script.js';
+import { createConvoy } from './convoy.js';
 import { kitanoBuilder, kitanoSignMaterial, kitanoSignUV } from '../kobe-kitano.js';
 import { kitanoGardenMaterial } from '../kobe-garden.mjs';
 import { kitanoHeritageMaterial } from '../kobe-heritage.mjs';
@@ -299,16 +300,22 @@ export function buildMap(scene, mats, solid, PL, A, world) {
       detail(x,.04,z,.78,.27,.54,[.39,.3,.18]);detail(x,.315,z,.66,.025,.43,darkPanel);
       detail(x,.32,z-.29,.78,.35,.055,[.39,.3,.18]);
       for(const dx of [-.19,.19])detail(x+dx,.34,z,.11,.05,.38,brass);
-    } else table(x,z,y-.035);
-    const h=visual(()=>id==='radio'?radio(x,y,z):id==='fuse'?cartridge(x,.34,z):documents(x,y,z,id==='smap'));
-    if(id==='radio') {
+    } else table(x+(id==='port_call'?.2:0),z,y-.035,id==='port_call'?1.55:1.1);
+    const isRadio=id==='radio'||id==='port_call';
+    const h=visual(()=>{
+      if(isRadio||id==='rec_c')radio(x,y,z);
+      else if(id==='fuse')cartridge(x,.34,z);
+      else documents(x,y,z,id==='smap');
+      if(id==='port_call')documents(x+.52,y,z);
+    });
+    if(isRadio) {
       const signal=visual(()=>detail(x-.16,y+.21,z+.168,.06,.025,.012,[.64,.34,.12])),show=h.show.bind(h),hide=h.hide.bind(h);
       let connected=false;Object.defineProperty(h,'installed',{get:()=>connected});
       h.signal=signal;h.triangles+=signal.triangles;
       h.show=()=>{show();signal.show();};h.hide=()=>{hide();signal.hide();};
       h.install=()=>{connected=true;h.show();signal.tint([.18,.65,.32]);};h.reset=()=>{connected=false;h.show();signal.resetTint();};
     }
-    M.items[id]={h,p:V(x,z,y),pin:h.bounds.getCenter(new THREE.Vector3()),persistent:id==='radio',kind:id==='radio'?'radio':id==='fuse'?'fuse':id==='smap'?'map':'documents'};
+    M.items[id]={h,p:V(x,z,y),pin:h.bounds.getCenter(new THREE.Vector3()),persistent:isRadio,kind:isRadio?'radio':id==='rec_c'?'recorder':id==='fuse'?'fuse':id==='smap'?'map':'documents'};
   }
   function operationProp(point,kind) {
     const x=point[0],z=point[1]+.8;
@@ -409,6 +416,16 @@ export function buildMap(scene, mats, solid, PL, A, world) {
 
   // 第 1 章：不是住宅後巷，而是貨運鐵道、海關倉庫與通訊室。
   M.marks.start = V(-180, -232); M.marks.ch2 = V(-105, -100); M.marks.ch3 = V(0, 5);
+  item('port_call', 'radio', -183, -224, .8);
+  // 與機甲章同款醫療車；名單交接才離開這個停車點。
+  const openingConvoy=M.openingConvoy=createConvoy(scene);
+  openingConvoy.update(null,0,()=>0,i=>({pos:[-187-7.2*i,-221-4*i],yaw:0}));
+  const openingTruckBoxes=openingConvoy.trucks.map((truck,i)=>{
+    truck.name=`lastline-waiting-medical-${i+1}`;
+    const {min,max}=new THREE.Box3().setFromObject(truck);
+    return solid.add({x0:min.x,x1:max.x,y0:0,y1:max.y,z0:min.z,z1:max.z,mat:'metal',openingTruck:true});
+  });
+  const showOpeningConvoy=on=>openingConvoy.trucks.forEach((truck,i)=>{truck.visible=on;openingTruckBoxes[i].dead=!on;});
   for (const x of [-228, -226.5]) beam([x, .04, -320], [x, .04, 280], .065, 'rust');
   for (let z = -315; z < 280; z += 1.2) b.deco('rust', -229, -225.5, .025, .08, z, z + .15, {skip:'ny nx px nz pz'});
   for (const z of [-96, -80, 24, 40]) {
@@ -513,6 +530,9 @@ export function buildMap(scene, mats, solid, PL, A, world) {
     D2:['power','lock'],D2C:['relay'],KEY2:['terminal','terminal'],F3:['crane','crane'],G3:['fuse','fuse','pump']};
   for(const E of ENCOUNTERS)if(E.operation?.kind==='console')
     M.operationProps[E.id]=E.operation.points.map((point,i)=>operationProp(point,operationKinds[E.id]?.[i]||'terminal'));
+  const manifest=M.operationProps.C7[0],installManifest=manifest.install,resetManifest=manifest.reset;
+  manifest.install=()=>{installManifest();showOpeningConvoy(false);};
+  manifest.reset=()=>{resetManifest();showOpeningConvoy(true);};
   for (const z of [57, 70, 84, 98]) {
     beam([11, 22, z], [69, 22, z], .17); beam([11, 23.5, z], [69, 23.5, z], .14);
     for (let x = 11; x < 68; x += 6) beam([x, 22, z], [x + 6, 23.5, z], .075);

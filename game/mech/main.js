@@ -6,6 +6,7 @@ import { qualityLevel, pixelRatio, FrameGate } from './runtime.js';
 import { ScenicMusic } from './scenic-music.mjs';
 import { HistoryReader } from './kobe-history.mjs';
 import { createHistoryPlaques } from './kobe-history-plaques.mjs';
+import { CODA_START, CODA_STOPS, CODA_LINES, codaApproach, codaStations } from './harbor-coda.js?v=1';
 
 const q = new URLSearchParams(location.search);
 // 大檔案（貼圖、HDR、模型）改從 jsDelivr 下載，網站主機給大檔很慢；不能用時照舊從本站（見 cdn.js）
@@ -21,6 +22,7 @@ async function game() {
   const { Input } = await import('./input.js');
   const { Player, WEIGHT } = await import('./player.js');
   const { Combat, STAGES, stageWeight } = await import('./combat.js');
+  const { setRoute } = await import('./encounter.js');
   const { HUD } = await import('./hud.js');
   const { Audio: Sound } = await import('./audio.js');
   const clamp = THREE.MathUtils.clamp;
@@ -265,10 +267,16 @@ async function game() {
       return `<button class="stg${lock ? ' lock' : ''}${n === nx ? ' next' : ''}" data-s="${n}"${lock ? ' disabled' : ''}>`
         + `${D.enc ? `<em>${D.fieldLabel || '遭遇戰'}</em>` : ''}<b>${n}</b><span>${lock ? 'LOCKED' : D.name}</span>${best ? `<i>${RANKS[best]}</i>` : ''}</button>`;
     }).join('');
+    const codaButton = $('replayCoda');
+    codaButton.hidden = store.get('cleared', 0) < STAGES.length;
+    codaButton.textContent = store.get('harborCoda', 0) ? '重玩第 11 章　港口未停火' : '第 11 章　港口未停火';
   }
 
   // ---------------------------------------------------------------- 流程
   let state = 'title', boot = 0, bootLen = 3.4, titleT = 0;
+  let pausedFrom = 'play', coda = null, stations = null;
+  const codaHUD = $('codaHUD'), codaObjective = $('codaObjective'), codaDistance = $('codaDistance');
+  const codaHint = $('codaHint'), codaHeading = $('codaHeading'), codaEnd = $('codaEnd');
   const history = new HistoryReader({onOpen:()=>{pause();input.unlock();},onClose:()=>{input.reset();resume();},onRead:()=>{try{localStorage.setItem('mech.history',JSON.stringify(history.snapshot()));}catch{}}});
   const historyPlaques=createHistoryPlaques(scene,world.kitano);
   world.cityObjects.push(...historyPlaques.meshes);
@@ -293,9 +301,12 @@ async function game() {
   $('next').addEventListener('click', () => { const n = stageNo + 1; $('result').style.display = 'none'; resetPlayer(n); newCombat(n); brief(n, () => startBoot(1.6)); });
   $('again').addEventListener('click', () => replay(stageNo));
   $('cont').addEventListener('click', () => replay(stageNo, combat.cp));   // 遭遇戰：從檢查點繼續
+  $('playCoda').addEventListener('click', () => startCoda());
+  $('replayCoda').addEventListener('click', () => startCoda(true));
+  $('codaExit').addEventListener('click', toTitle);
   $('menu').addEventListener('click', toTitle);
   $('quit').addEventListener('click', toTitle);
-  input.onLockChange = (locked) => { if (!locked && (state === 'play' || state === 'boot') && !input.touch.on) pause(); };
+  input.onLockChange = (locked) => { if (!locked && !input.touch.on) pause(); };
 
   function launch(n = nextStage()) {
     audio.unlock();
@@ -328,6 +339,7 @@ async function game() {
   }
   // 回標題選關：清掉戰場、機體擺回展示鏡頭
   function toTitle() {
+    leaveCoda();
     historyButton.hidden=true;
     $('result').style.display = 'none'; $('pause').style.display = 'none';
     audio.setPaused(false); audio.setDanger(false); audio.setLockAlert(0); audio.boost(0);
@@ -355,16 +367,20 @@ async function game() {
     audio.music('battle', { stage: STAGES[stageNo - 1].music || stageNo });
   }
   function pause() {
-    if (state !== 'play' && state !== 'boot') return;
+    if (state !== 'play' && state !== 'boot' && state !== 'coda') return;
+    pausedFrom = state;
     state = 'paused';
+    if (pausedFrom === 'coda') { codaHUD.hidden = true; touchUI.style.display = 'none'; }
     $('pause').style.display = 'flex';
     audio.setPaused(true); input.reset();
   }
   function resume() {
+    if (state !== 'paused') return;
     $('pause').style.display = 'none';
     audio.setPaused(false);
     if (!input.touch.on) input.lock();
-    state = boot < 1 ? 'boot' : 'play';
+    state = pausedFrom;
+    if (state === 'coda') { codaHUD.hidden = false; touchUI.style.display = input.touch.on ? 'block' : 'none'; }
     clock.getDelta();
   }
   function finish(win) {
@@ -383,15 +399,16 @@ async function game() {
         : 0.4 * clamp((35 * w + 30 - S.time) / (25 * w + 15), 0, 1) + 0.4 * clamp(1 - S.dmgTaken / player.apMax, 0, 1) + 0.2 * acc;
       if (S.cont) r = Math.min(r, 0.71);
       rank = r >= 0.72 ? 'S' : r >= 0.56 ? 'A' : r >= 0.4 ? 'B' : 'C';
-      if (n > cleared()) store.set('cleared', n);
+      if (n > store.get('cleared', 0)) store.set('cleared', n);
       if (RANKS.indexOf(rank) > store.get('best' + n, 0)) store.set('best' + n, RANKS.indexOf(rank));
     }
     audio.music(win ? (last ? 'allclear' : 'clear') : 'fail');
-    $('resTitle').textContent = win ? (last ? '全部過關' : `第 ${n} 關完成`) : `第 ${n} 關失敗`;
-    $('resSub').textContent = win ? (last ? 'ALL CLEAR' : 'STAGE CLEAR') : 'MISSION FAILED';
+    $('resTitle').textContent = win ? (last ? '神戶市區停火' : `第 ${n} 關完成`) : `第 ${n} 關失敗`;
+    $('resSub').textContent = win ? (last ? 'CEASEFIRE' : 'STAGE CLEAR') : 'MISSION FAILED';
     $('resRank').textContent = rank;
     $('resRank').style.display = win ? '' : 'none';
     $('next').style.display = win && !last ? '' : 'none';
+    $('playCoda').hidden = !(win && last);
     $('again').textContent = win ? '再打一次 RETRY' : '再試一次 RETRY';
     $('cont').style.display = !win && combat.cp ? '' : 'none';
     const mm = Math.floor(S.time / 60), ss = String(Math.floor(S.time % 60)).padStart(2, '0');
@@ -400,6 +417,89 @@ async function game() {
     if (S.cont) rows.push(['續關', `${S.cont} 次（評價最高 A）`]);
     $('resTable').innerHTML = rows.map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join('');
     $('result').style.display = 'flex';
+  }
+
+  function leaveCoda() {
+    coda = null;
+    stations?.hide();
+    codaHUD.hidden = true;
+    codaEnd.hidden = true;
+    delete touchUI.dataset.coda;
+    $('tCannon').textContent = '光波砲';
+  }
+
+  function startCoda(fromTitle = false) {
+    const n = STAGES.length;
+    if (fromTitle ? state !== 'title' || store.get('cleared', 0) < n : state !== 'result' || $('playCoda').hidden || stageNo !== n) return;
+    $('title').classList.add('hide');
+    $('result').style.display = 'none';
+    resetPlayer(n, CODA_START);
+    if (fromTitle) newCombat(n);
+    combat.enc?.dispose(); combat.enc = null; setRoute(world, null);
+    combat.phase = 'done'; combat.events.length = 0; combat.sub = null; combat.subQ.length = 0;
+    combat.banner = null; combat.notes.length = 0; combat.slowmo = 0; combat.hitstop = 0; combat.timeScale = 1;
+    combat.cannon.phase = null; combat.od.active = false; combat.damageFx = 0;
+    boot = 1; state = 'coda'; historyButton.hidden = true;
+    input.reset(); input.enabled = true; if (!input.touch.on) input.lock();
+    applyView();
+    touchUI.dataset.coda = '1'; $('tCannon').textContent = '互動';
+    touchUI.style.display = input.touch.on ? 'block' : 'none';
+    codaEnd.hidden = true; codaHUD.hidden = false;
+    stations ||= codaStations(scene, world);
+    coda = { index: 0, wait: 0, arrival: 0 };
+    stations.show(coda.index);
+    combat.lines([['白鷺', '市區停火了。先到交接站讀一下回報，我等你。']], false, 3.9);
+    audio.music('off');
+    updateCoda(0, false);
+  }
+
+  function codaTarget() {
+    if (!coda) return null;
+    const stop = CODA_STOPS[coda.index];
+    if (!stop) return { step: 'linked' };
+    const ground = world.height(stop.x, stop.z);
+    return { ...stop, y: ground + stop.height, ...codaApproach(stop, player, ground) };
+  }
+
+  function updateCoda(dt, use) {
+    const point = codaTarget();
+    if (!point || state !== 'coda') return;
+    coda.wait = Math.max(0, coda.wait - dt);
+    coda.arrival += dt;
+    codaHUD.classList.toggle('coda-intro', coda.arrival < 3.4);
+    const text = (el, value) => { if (el.textContent !== value) el.textContent = value; };
+    if (point.step === 'linked') {
+      text(codaObjective, '港務醫療線已接通');
+      text(codaDistance, '備援頻道');
+      codaHeading.hidden = true;
+      text(codaHint, '接收米拉的撤離回報');
+      if (coda.wait > 0) return;
+      state = 'codaEnd'; store.set('harborCoda', 1);
+      input.reset(); input.enabled = false; input.unlock();
+      touchUI.style.display = 'none'; codaHUD.hidden = true; codaEnd.hidden = false;
+      const url = new URL('./lastline/', location.href); url.searchParams.set('from', 'mech');
+      if (q.has('mute')) url.searchParams.set('mute', '');
+      $('continueLastLine').href = url.href;
+      return;
+    }
+    const a = Math.atan2(point.x - player.pos.x, point.z - player.pos.z) - player.yaw;
+    codaHeading.hidden = false; codaHeading.style.transform = `rotate(${a}rad)`;
+    text(codaObjective, `${coda.index + 1} / ${CODA_STOPS.length}　${point.name}`);
+    const dy = Math.round(point.y - player.pos.y);
+    text(codaDistance, `${Math.round(point.distance)} m${point.height && dy ? ` · ${dy > 0 ? '上方' : '下方'} ${Math.abs(dy)} m` : ''}`);
+    text(codaHint, coda.wait > 0 ? '接收通訊中…'
+      : point.near ? `${input.touch.on ? '觸碰互動' : '按 E'}　${point.action}`
+        : point.height ? (input.touch.on ? '按飛行，升到天線旁的光圈' : 'T 起飛，空白鍵上升；靠近空中的光圈')
+          : player.grounded ? '跟著指示接近地面的光圈' : (input.touch.on ? '用下降鍵落地' : '按 C 降落；落地後才能接通'));
+    if (!use || !point.near || coda.wait > 0) return;
+    const lines = CODA_LINES[coda.index++];
+    combat.sub = null; combat.subQ.length = 0;
+    combat.lines(lines, false, 4.3);
+    coda.wait = combat.talkLeft + .05;
+    stations.show(coda.index);
+    audio.ui('confirm');
+    if (coda.index === 2) combat.say('上行已中斷', '改用港務醫療備援線', 3, 'am');
+    updateCoda(0, false);
   }
 
   // 標題畫面：外部鏡頭繞著機體轉
@@ -411,7 +511,7 @@ async function game() {
   let t = 0, odV = 0, speedV = 0, flashV = 0, dangerV = 0;
   const fwd = new THREE.Vector3(), tmp = new THREE.Vector3(), foot = new THREE.Vector3();
   const idle = { mx: 0, my: 0, lookX: 0, lookY: 0 };
-  window.__game = { fake: null, launch: (n) => launch(n), toTitle: () => toTitle(), player, hero, world, post, cockpit, camera, get combat() { return combat; }, get state() { return state; }, fx, audio, input };
+  window.__game = { fake: null, launch: (n) => launch(n), toTitle: () => toTitle(), player, hero, world, post, cockpit, camera, get combat() { return combat; }, get state() { return state; }, get coda() { return codaTarget(); }, fx, audio, input };
 
   // 每秒最多畫 60 張：120Hz 螢幕不會多畫一倍（?fps=0 不限、?fps=30 之類可改）
   const FPS = q.has('fps') ? +q.get('fps') : 60;
@@ -451,13 +551,13 @@ async function game() {
       boot = Math.min(1, boot + rdt / bootLen);
       if (boot >= 1) { state = 'play'; combat.start(); }
     }
-    const live = state === 'play' || state === 'boot';
+    const inCoda = state === 'coda', live = state === 'play' || state === 'boot' || inCoda;
     if(state==='play'&&input.pressed('KeyJ')){history.open(historyAt());input.endFrame();return;}
     let inp = input.state(rdt);
     if (window.__game.fake) Object.assign(inp, window.__game.fake);
     if (inp.pause && live) { input.unlock(); pause(); input.endFrame(); return; }
     if (inp.view && live) { tpView = !tpView; store.set('view', tpView ? 1 : 0); applyView(); }
-    const canMove = (state === 'play' || boot > 0.85) && !combat.dead && state !== 'result';
+    const canMove = live && (state !== 'boot' || boot > 0.85) && !combat.dead;
     if (!canMove) inp = Object.assign({}, inp, idle, { fire: false, lockHold: false, qb: false, boost: false, jump: false, hover: false, flight:false,descend:false,flightBlocked:true, saber: false, cannon: false, hardLock: false, od: false, reload: false, lookX: state === 'result' ? 0 : inp.lookX, lookY: state === 'result' ? 0 : inp.lookY });
 
     // 光波砲充能／發射中：機體要撐住後座——轉向變慢、走不快、不能衝刺
@@ -465,6 +565,7 @@ async function game() {
 
     // ---- 自機
     player.update(dt, inp);
+    if (inCoda) updateCoda(rdt, inp.cannon);
     hero.animate(dt, player.animState(combat.aimPoint));
     if (hero.footfall) {
       weightBump(WEIGHT.step, clamp(player.speed / 14, 0.4, 1) * (player.boosting ? WEIGHT.step.runK : 1) * (player.grounded ? 1 : 0), hero.footfall);
@@ -497,7 +598,7 @@ async function game() {
     C.aimSkip = tpView ? chaseSkip : 0;
 
     // ---- 戰鬥、特效、世界
-    C.update(dt, state === 'result' ? null : inp, rdt);
+    C.update(dt, inCoda || !live ? null : inp, rdt);
     fx.update(dt);
     world.update(dt);
     world.followShadow(player.pos);

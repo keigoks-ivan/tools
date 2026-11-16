@@ -568,7 +568,7 @@ function updateEncounters() {
     markDone(a.E.id);
     for (const [w, t, now] of a.E.done) hud.say(w, t, 3.6, now);
     if (a.E.done.length) audio.radio('in');
-    hud.note(a.E.pickup ? '取得啟動金鑰' : a.E.operation?.bypass ? '任務完成・巡邏隊仍在附近' : '區域清除', '#ffb347');
+    hud.note(a.E.pickup ? (campaign ? '取得備援授權卡' : '取得啟動金鑰') : a.E.operation?.bypass ? '任務完成・巡邏隊仍在附近' : '區域清除', '#ffb347');
     checkpoint = { p: player.pos.clone(), yaw: player.yaw, done: [...done], ch: chapter, nades: G.nadeN, patrols: patrols.snapshot(), field: G.field.snapshot(), vehicles: G.ground.snapshot() };
     saveFoot();
     const nx = objective();
@@ -1043,6 +1043,7 @@ function renderChapters() {
   }
 }
 status.textContent = '選擇章節';
+if (campaign && $('storyHandoff')) $('storyHandoff').hidden = q.get('from') !== 'mech';
 bar.style.width = '100%';
 renderChapters();
 $('chapters').style.display = 'flex';
