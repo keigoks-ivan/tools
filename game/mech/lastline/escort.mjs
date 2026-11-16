@@ -41,7 +41,14 @@ export class Escort {
     Object.assign(this, { pos: [...s.pos], index: s.index, hp: s.hp, choice: s.choice, time: Number.isFinite(s.time) ? Math.max(0, s.time) : 0 }); return true;
   }
 }
-export function ending(choice, hp) {
-  return choice === 'rescue' ? { title: '誰也沒有被留下', text: '橋頭小隊與車隊一起撤出。倖存者把清除命令公諸於世；白鷺離開指揮部，留下自己的通訊頻道。蒼焰在防波堤外停下，第一次沒有收到下一份命令。' }
-    : { title: '沉默的砲台', text: `你摧毀了追擊砲陣，車隊穿過撤離閘門${hp >= 70 ? '，車身上的白色標記仍清楚可見' : '，帶著彈痕與受傷的人'}。橋頭小隊自行撤離後失去聯絡。證據抵達港外，指揮部再也無法宣稱北區已經空無一人。` };
+export function ending(choice, hp, broadcast) {
+  const confirmed = typeof broadcast?.evidence === 'boolean' && typeof broadcast?.manifest === 'boolean';
+  const evidence = confirmed && broadcast.evidence, manifest = confirmed && broadcast.manifest;
+  const delivery = evidence && manifest ? '港外救援站收到了原始命令和六十四人的名單。'
+    : evidence ? '港外救援站收到了原始命令。救援人員正在逐一核對撤離者的身分。'
+      : manifest ? '港外救援站收到了六十四人的名單。清除命令的原始證據仍待查證。'
+        : confirmed ? '港外救援站收到了現場紀錄，已派人接應。車隊抵達後再核對撤離資料。'
+          : '車隊已把撤離資料帶到港外。救援人員會在現場清點傷員、核對資料。';
+  return choice === 'rescue' ? { title: '誰也沒有被留下', delivery, text: `橋頭小隊與車隊一起撤出。${delivery}白鷺離開指揮部，留下自己的通訊頻道。蒼焰在防波堤外停下，第一次沒有收到下一份命令。` }
+    : { title: '沉默的砲台', delivery, text: `你摧毀了追擊砲陣，車隊穿過撤離閘門${hp >= 70 ? '，車身上的白色標記仍清楚可見' : '，帶著彈痕與受傷的人'}。橋頭小隊自行撤離後失去聯絡。${delivery}` };
 }

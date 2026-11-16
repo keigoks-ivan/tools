@@ -279,6 +279,12 @@ let mechWalk = null, finale = null, hatchOpen = 0, alarmOn = false;   // M6＝�
 const progress = () => clamp(store.get('ch', 1), 1, S.CHAPTERS.length);
 function saveFoot() {
   if (!checkpoint) return;
+  if (campaign && G.ground.story.support.size) {
+    const operations = readSave('operations') || {};
+    const vehicleSupport = Array.isArray(operations.vehicleSupport) ? operations.vehicleSupport : [];
+    const earned = [...G.ground.story.support].filter(id => !vehicleSupport.includes(id));
+    if (earned.length) writeSave('operations', { ...operations, vehicleSupport: [...vehicleSupport, ...earned] });
+  }
   const foot = { layout: S.LAYOUT||'zero-v1', p: checkpoint.p.toArray(), yaw: checkpoint.yaw, done: checkpoint.done, nades: checkpoint.nades, picked: [...pickedItems], patrols: checkpoint.patrols, field: checkpoint.field, vehicles: checkpoint.vehicles };
   if (openingRelay) foot.relay = openingRelay;
   writeSave('checkpoint', { chapter, foot, stats: G.stats });
@@ -936,7 +942,8 @@ function startFinale() {
   audio.mechBoot(finale.to);
   if (campaign) {
     store.set('ch', Math.max(S.FIRST_MECH, progress()));
-    writeSave('checkpoint', { chapter: S.FIRST_MECH, customsClue: S.customsClueForEscort(readSave('operations')) });
+    const operations = readSave('operations');
+    writeSave('checkpoint', { chapter: S.FIRST_MECH, customsClue: S.customsClueForEscort(operations), support: S.escortSupport(operations) });
   }
   else { store.set('ch', S.CHAPTERS.length); store.set('clear', 1); }
 }
@@ -975,10 +982,13 @@ async function startMech() {
       post.u.vignette.value=.3;
     }
     let config = S.MECH_CONFIGS?.[chapter];
-    if (campaign && chapter === S.FIRST_MECH) {
-      const clue = S.customsClueForEscort(readSave('operations'), savedEscort);
-      config = S.customsConvoyConfig(config, clue);
-      if (savedEscort?.chapter !== chapter) writeSave('checkpoint', { chapter, customsClue: clue });
+    if (campaign) {
+      const operations = readSave('operations');
+      const saved = savedEscort?.chapter === chapter ? savedEscort : null;
+      const support = S.escortSupport(operations, saved?.support);
+      if (chapter === S.FIRST_MECH) config = S.customsConvoyConfig(config, S.customsClueForEscort(operations, saved));
+      config = S.applyEscortSupport(config, support);
+      if (!saved) writeSave('checkpoint', { chapter, support, ...(chapter === S.FIRST_MECH ? { customsClue: config.customsClue ?? null } : {}) });
     }
     M6 = await go({ renderer, scene, camera, vScene, vCam, post, world, hero, audio, input, zhud: hud, solid, D, fxl: fx, G, S: config ? { ...S, MECH6: config } : S, $, pause, resumeSave, saveChapter: (n) => store.set('ch', Math.max(n, progress())), exit: (u) => { location.href = u; } });
     M6.setQuality(quality);
@@ -1131,7 +1141,11 @@ function begin(n) {
   const restore = foot && foot.layout === (S.LAYOUT||'zero-v1') && Array.isArray(foot.p) && foot.p.length === 3 && foot.p.every(Number.isFinite) && Math.max(Math.abs(foot.p[0]), Math.abs(foot.p[2])) < (S.FOOT_EXTENT || 140) && foot.p[1] >= 0 && foot.p[1] < 40 && Number.isFinite(foot.yaw) && Array.isArray(foot.done) && foot.done.every(id => ids.has(id));
   startChapter(n, !campaign || !restore);
   if (campaign || resumeSave) {
-    if(campaign&&n===1&&!resumeSave)writeSave('operations',{});
+    if (campaign && n === 1 && !resumeSave) {
+      writeSave('operations', {});
+      writeSave('arrival', null);
+      writeSave('choice', null);
+    }
     if (restore) {
       if (campaign && openingRelay && foot.done.includes('B2') && foot.done.includes('C4')) {
         // 舊版存檔若已在海關完成查驗，從同一份步兵檢查點恢復線索。

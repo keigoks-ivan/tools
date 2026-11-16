@@ -2,6 +2,7 @@
 import * as THREE from 'three';
 import { MECH6 as PREQUEL_CONTROLS } from '../zero/script.js';
 export { customsClueForEscort, customsConvoyConfig } from './convoy-plan.mjs';
+export { escortSupport, applyEscortSupport } from './campaign-support.mjs';
 const OP = '白鷺', ME = '零號', CIV = '車隊長・米拉', YUI = '乘客・結衣', HQ = '聯邦指揮部', EN = '獵犬港區分隊';
 const HAYA = '隼（錄音）';
 const V = (x, z, y = 0) => new THREE.Vector3(x, y, z);

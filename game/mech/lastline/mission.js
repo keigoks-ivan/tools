@@ -8,7 +8,10 @@ const read = k => { try { return JSON.parse(localStorage.getItem('lastline.' + k
 const write = (k, v) => { try { localStorage.setItem('lastline.' + k, JSON.stringify(v)); } catch {} };
 const page = new URL('./', import.meta.url);
 export function createMission({ scene, world, player, fx, config, combat, zhud, input, G, fail, resumeSave, saveChapter }) {
-  const completed=read('operations')||{};
+  const completed = config.support ?? read('operations') ?? {};
+  const vehicleSupport = Array.isArray(completed.vehicleSupport) ? completed.vehicleSupport : [];
+  const warningSeconds = Math.min(7, (completed.frequency ? 5 : 3.5)
+    + (vehicleSupport.includes('channel-warning') ? 1.25 : 0) + (vehicleSupport.includes('quiet-channel') ? .75 : 0));
   const customsClue = config.chapter === 4 ? config.customsClue ?? null : null;
   const customsSupport = customsClue === 'shift-log' ? '值勤紀錄・海側轉運道'
     : customsClue === 'fax-copy' ? '傳真底聯・港務維修支援' : '';
@@ -80,6 +83,7 @@ export function createMission({ scene, world, player, fx, config, combat, zhud, 
     if (convoy.choice === 'rescue' && checkpoint?.wave !== wave) convoy.hp = Math.min(100, convoy.hp + (completed.medicine?9:6));
     checkpoint = { chapter: config.chapter, wave, convoy: convoy.snapshot(), kills, time, operation:operation?.snapshot()||null };
     if (config.chapter === 4) checkpoint.customsClue = customsClue;
+    if (config.support) checkpoint.support = config.support;
     write('checkpoint', checkpoint); saveChapter(config.chapter);
   }
   function failPanel() {
@@ -110,7 +114,14 @@ export function createMission({ scene, world, player, fx, config, combat, zhud, 
       if (config.chapter === 4 && k > config.choiceAt && !convoy.choice) { if (!choosing) showChoice(); return false; }
       return !this.blocked && convoy.ready(k, [player.pos.x, player.pos.z], W.go[2]);
     },
-    onWave(k) { cooldown = 7; pending = null;setupOperation(k);if(checkpoint?.wave===k)operation?.restore(checkpoint.operation);if(operation)zhud.say('白鷺',operation.kind==='defend'?'留在指定區域保護作業，離開區域會停止進度。':'前往現場控制站，按住 B 接通。放開或受擊會中斷；已完成的控制站會保留。',5,true);saveWave(k); },
+    onWave(k) {
+      cooldown = 7; pending = null; setupOperation(k);
+      if (checkpoint?.wave === k) operation?.restore(checkpoint.operation);
+      const connect = input.touch.on ? '按住接通' : '按住 B 接通';
+      if (operation) zhud.say('白鷺', operation.kind === 'defend' ? '留在指定區域保護作業，離開區域會停止進度。'
+        : `前往現場控制站，${connect}。放開或受擊會中斷；已完成的控制站會保留。`, 5, true);
+      saveWave(k);
+    },
     restart() {
       close(); pending = null; cooldown = 7; finished = false;setupOperation(checkpoint?.wave??0);
       if (checkpoint) { convoy.restore(checkpoint.convoy); kills = checkpoint.kills; time = checkpoint.time; operation?.restore(checkpoint.operation); }
@@ -135,7 +146,6 @@ export function createMission({ scene, world, player, fx, config, combat, zhud, 
             zhud.say('米拉', restored ? `港務維修隊交接完成。車隊耐久恢復 ${restored}%。` : '港務維修隊確認兩輛車都能正常行駛。車隊耐久全滿。', 4, true);
           }
           checkpoint.operation=operation.snapshot();write('checkpoint',checkpoint);
-          if(config.chapter===5&&C.group===2&&operation.done){write('broadcast',true);zhud.say('白鷺','城外收到原始簽章了。現在他們無法銷毀證據。',4,true);}
         }
         const due=Math.min(3,Math.floor(operation.time/8));
         if(!operation.done&&pressure<due&&(C.group!==1||!C.events.some(e=>e.spawn))&&C.enemies.filter(e=>!e.dead&&!e.gone).length+C.events.filter(e=>e.spawn).length<7){
@@ -148,7 +158,7 @@ export function createMission({ scene, world, player, fx, config, combat, zhud, 
       if (!clear) fireAtConvoy(dt, C);
       if(config.bombardment&&!this.waveComplete&&convoy.choice!=='artillery') {
         salvoCd-=dt;
-        if(!salvo&&salvoCd<=0){salvo={x:player.pos.x,z:player.pos.z,t:completed.frequency?5:3.5};warning.position.set(salvo.x,world.height(salvo.x,salvo.z)+.08,salvo.z);warning.visible=true;zhud.say('楠','砲擊落點已確認！離開紅色標記！',2,true);}
+        if(!salvo&&salvoCd<=0){salvo={x:player.pos.x,z:player.pos.z,t:warningSeconds};warning.position.set(salvo.x,world.height(salvo.x,salvo.z)+.08,salvo.z);warning.visible=true;zhud.say('楠','砲擊落點已確認！離開紅色標記！',2,true);}
         if(salvo){salvo.t-=dt;warning.scale.setScalar(.95+.05*Math.sin(time*12));if(salvo.t<=0){const p=new THREE.Vector3(salvo.x,world.height(salvo.x,salvo.z)+1,salvo.z);fx.explosion(p,.7);C.audio.explosion(p,.7);if(player.pos.distanceTo(p)<12)C.hurt(player.apMax*.1,p);if(Math.hypot(convoy.pos[0]-salvo.x,convoy.pos[1]-salvo.z)<15)convoy.damage(6);salvo=null;warning.visible=false;salvoCd=12;}}
       } else {salvo=null;warning.visible=false;}
       if (convoy.hp <= 0) { C.dead = true; C.phase = 'done'; fail(false); }
@@ -180,25 +190,31 @@ export function createMission({ scene, world, player, fx, config, combat, zhud, 
       }
       X.restore(); h._f = null;
       if(operation&&!operation.done){
-        const p=operation.point,goal=h.proj(Q.set(p[0],world.height(p[0],p[1])+5,p[1]),{}),label=operation.kind==='defend'?`${p.label} ${Math.ceil(p.seconds-operation.progress)} 秒`:`${Math.abs(player.pos.y-world.height(...p))>=4?'降落後按住 B':'按住 B'}・${p.label} ${Math.round(operation.fraction*100)}%`;
+        const p=operation.point,goal=h.proj(Q.set(p[0],world.height(p[0],p[1])+5,p[1]),{}),connect=input.touch.on?'按住接通':'按住 B';
+        const label=operation.kind==='defend'?`${p.label} ${Math.ceil(p.seconds-operation.progress)} 秒`:`${Math.abs(player.pos.y-world.height(...p))>=4?'降落後':''}${connect}・${p.label} ${Math.round(operation.fraction*100)}%`;
         if(goal.front)h.text(label,goal.x,goal.y-25*s,14,'am',1,'center',700);else h.edgeMark(goal,'am','現場作業',w,h.h,1);
       }
       if(salvo){const p=h.proj(Q.set(salvo.x,world.height(salvo.x,salvo.z)+1,salvo.z),{});if(p.front)h.text(`砲擊落點 ${salvo.t.toFixed(1)} 秒`,p.x,p.y,16,'rd',1,'center',700);}
     },
     onEnd(ok) {
       if (!ok) { failPanel(); return; }
+      if (finished) return;
       finished = true; pending = null; kills += combat().stats.kills;
+      if (config.chapter === 5 && checkpoint?.wave === config.waves.length - 1 && operation?.kind === 'defend' && operation.done) {
+        const broadcast = { evidence: completed.evidence === true, manifest: completed.manifest === true };
+        write('operations', { ...read('operations'), broadcast });
+      }
       if (!config.final) { write('arrival', { hp: convoy.hp }); write('choice', convoy.choice); }
-      const E = ending(convoy.choice, convoy.hp);
       if (config.final) {
-        config.end = [['米拉', '最後一輛車通過了。六十四個人，都在。'], ['白鷺', convoy.choice === 'rescue' ? '橋頭小隊也到了。醫療兵正在替孩子包紮。' : '砲陣沉默了。橋頭小隊最後回報：自行撤離。'], ['零號', '把名單念出來。每一個名字。']];
+        const E = ending(convoy.choice, convoy.hp, completed.broadcast);
+        config.end = [['米拉', '最後一輛車通過了。六十四個人，都在。'], ['白鷺', convoy.choice === 'rescue' ? '橋頭小隊也到了。醫療兵正在替孩子包紮。' : '砲陣沉默了。橋頭小隊最後回報：自行撤離。'], ['零號', E.delivery]];
         config.fin = [E.title, '全篇完　IRON DUSK · LAST LINE'];
       }
     },
     finish() {
       if (config.next) { saveChapter(config.next); write('checkpoint', { chapter: config.next }); location.href = new URL('?ch='+config.next + (new URLSearchParams(location.search).has('mute') ? '&mute' : ''), page).href; return; }
       write('clear', 1); write('checkpoint', null); saveChapter(config.chapter);
-      const E = ending(convoy.choice, convoy.hp); panel.hidden = false; input.reset(); input.unlock();
+      const E = ending(convoy.choice, convoy.hp, completed.broadcast); panel.hidden = false; input.reset(); input.unlock();
       panel.innerHTML = `<div class="campaign-card"><small>IRON DUSK · LAST LINE / 全篇完</small><h2>${E.title}</h2><p>${E.text}</p><div class="campaign-stats">六十四人撤離　車隊耐久 ${Math.ceil(convoy.hp)}%<br>最後防線擊倒 ${kills}　作戰 ${Math.floor(time / 60)} 分 ${Math.floor(time % 60)} 秒</div><p class="campaign-fine">製作：InvestMQuest · 神戶港場景獨立設計；機體、角色與掃描材質沿用系列素材。<br>感謝你走完這道防線。</p><div class="row"><a class="btn" href="${new URL('?ch=1', page).href}">重新開始</a><a class="btn" href="${page.href}">章節選擇</a><a class="btn" href="/games/">遊戲大廳</a></div></div>`;
     },
   };
