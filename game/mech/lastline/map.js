@@ -9,7 +9,7 @@ import { kobeStreetDetails, kobeBlockStreets } from '../kobe-street.mjs';
 import { buildAutumnTrees } from '../kobe-autumn.js';
 import { KOBE_RELIEF, kobeCityHeight } from '../kobe-relief.mjs';
 import { kobeHarborScenery, harborWindow } from '../kobe-harbor.mjs';
-import { ENCOUNTERS } from './script.js';
+import { ENCOUNTERS, RELAY_RESTORE } from './script.js';
 import { createConvoy } from './convoy.js';
 import { kitanoBuilder, kitanoSignMaterial, kitanoSignUV } from '../kobe-kitano.js';
 import { kitanoGardenMaterial } from '../kobe-garden.mjs';
@@ -333,6 +333,22 @@ export function buildMap(scene, mats, solid, PL, A, world) {
           if(kind==='manifest')documents(x+.35,.78,z);
           if(kind==='relay')detail(x+.4,.77,z-.15,.018,.88,.018,darkPanel);
         }
+      } else if(kind==='portableRelay') {
+        // 折疊架、提把和天線直接併入巡檢區原有的材質桶。
+        detail(x,.035,z,.75,.11,.49,darkPanel);
+        for(const dx of [-.26,.26])detail(x+dx,.145,z,.045,.79,.33,enamel);
+        detail(x,.84,z,.7,.055,.46,enamel);
+        detail(x,.895,z,.67,.39,.4,[.29,.36,.29]);
+        detail(x,1.285,z,.7,.065,.43,enamel);
+        detail(x,1.355,z,.30,.045,.045,darkPanel);
+        for(const dx of [-.13,.13])detail(x+dx,1.349,z,.035,.05,.045,darkPanel);
+        detail(x,1.015,z-.21,.57,.24,.025,darkPanel);
+        detail(x-.115,1.108,z-.23,.23,.092,.01,[.33,.44,.39]);
+        for(const dx of [-.21,.03,.085])detail(x+dx,1.049,z-.235,.028,.027,.014,brass);
+        detail(x+.17,1.044,z-.228,.105,.039,.024,[.7,.36,.17]);
+        detail(x+.24,.19,z+.08,.024,.70,.024,darkPanel);
+        detail(x+.25,1.34,z+.13,.055,.10,.055,brass);
+        detail(x+.25,1.44,z+.13,.018,.50,.018,darkPanel);
       } else if(kind==='oxygen') {
         detail(x,.06,z,.55,.09,.46,darkPanel);cylinder(x,.68,z,.17,1.08,[.28,.43,.34]);
         cylinder(x,1.25,z,.095,.1,brass);detail(x,1.29,z,.28,.045,.045,brass);
@@ -355,7 +371,10 @@ export function buildMap(scene, mats, solid, PL, A, world) {
       }
     });
     const lampY=['terminal','manifest','relay'].includes(kind)?1.38:kind==='medicine'?1.12:kind==='oxygen'?1.35:kind==='pump'?.85:kind==='lock'?1.4:kind==='crane'?1.04:1.5;
-    const lamp=visual(()=>detail(x+(kind==='lock'?.1:kind==='pump'?.33:kind==='oxygen'?.16:.2),lampY,z-(kind==='medicine'?.26:.17),.075,.04,.035,[.64,.34,.12]));
+    const lamp=visual(()=>{
+      if(kind==='portableRelay')detail(x+.173,1.126,z-.248,.06,.035,.015,[.64,.34,.12]);
+      else detail(x+(kind==='lock'?.1:kind==='pump'?.33:kind==='oxygen'?.16:.2),lampY,z-(kind==='medicine'?.26:.17),.075,.04,.035,[.64,.34,.12]);
+    });
     const installed=kind==='fuse'?visual(()=>cartridge(x,1,z-.185,'y')):null;
     installed?.hide();let complete=false;
     const h={p:V(point[0],point[1]),pin:body.bounds.getCenter(new THREE.Vector3()),kind,body,lamp,installedPart:installed,get installed(){return complete;},
@@ -530,6 +549,13 @@ export function buildMap(scene, mats, solid, PL, A, world) {
     D2:['power','lock'],D2C:['relay'],KEY2:['terminal','terminal'],F3:['crane','crane'],G3:['fuse','fuse','pump']};
   for(const E of ENCOUNTERS)if(E.operation?.kind==='console')
     M.operationProps[E.id]=E.operation.points.map((point,i)=>operationProp(point,operationKinds[E.id]?.[i]||'terminal'));
+  const restoreProps=RELAY_RESTORE.operation.points.map(point=>operationProp(point,'portableRelay'));
+  for(const h of restoreProps)h.hide();
+  M.setRelayOpening=relay=>{
+    const id=RELAY_RESTORE.id, active=!!M.operationProps[id];
+    if(relay==='damaged'&&!active){M.operationProps[id]=restoreProps;for(const h of restoreProps)h.reset();}
+    else if(relay!=='damaged'&&active){delete M.operationProps[id];for(const h of restoreProps)h.hide();}
+  };
   const manifest=M.operationProps.C7[0],installManifest=manifest.install,resetManifest=manifest.reset;
   manifest.install=()=>{installManifest();showOpeningConvoy(false);};
   manifest.reset=()=>{resetManifest();showOpeningConvoy(true);};

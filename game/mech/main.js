@@ -534,6 +534,7 @@ async function game() {
     $('codaRelayOutcome').textContent = relayDisabled() ? '備援中繼台受損；手動旁路已接通。'
       : coda.air?.relayState === 'saved' ? '夜鷺未能切斷備援中繼台，港務醫療線已接通。' : '備援中繼台完好；港務醫療線已接通。';
     const url = new URL('./lastline/', location.href); url.searchParams.set('from', 'mech');
+    url.searchParams.set('relay', relayDisabled() ? 'damaged' : 'intact');
     if (q.has('mute')) url.searchParams.set('mute', '');
     $('continueLastLine').href = url.href;
     audio.music('clear');

@@ -29,6 +29,8 @@ THREE.DefaultLoadingManager.setURLModifier((u) => { const v = lite(u); return cd
 const q = new URLSearchParams(location.search);
 const scenicMusic = new ScenicMusic();
 const campaign = document.body.dataset.campaign === 'lastline';
+const relayMode = value => value === 'intact' || value === 'damaged' ? value : null;
+const linkedRelay = campaign && q.get('from') === 'mech' ? relayMode(q.get('relay')) : null;
 let resumeSave = false;
 const readSave = (key) => { try { return JSON.parse(localStorage.getItem((campaign?'lastline.':'zero.') + key)); } catch { return null; } };
 const writeSave = (key, value) => { try { localStorage.setItem((campaign?'lastline.':'zero.') + key, JSON.stringify(value)); } catch {} };
@@ -271,12 +273,15 @@ addEventListener('resize', () => {
 // ---------------------------------------------------------------- 章節／遭遇戰
 const done = new Set();         // 已清完的遭遇
 let active = [];                // 進行中 {E, list}
+let encounters = S.ENCOUNTERS, openingRelay = null;
 let chapter = 1, checkpoint = null, stage = 'play';
 let mechWalk = null, finale = null, hatchOpen = 0, alarmOn = false;   // M6＝第 6 章（mech6.js）進行中
 const progress = () => clamp(store.get('ch', 1), 1, S.CHAPTERS.length);
 function saveFoot() {
   if (!checkpoint) return;
-  writeSave('checkpoint', { chapter, foot: { layout: S.LAYOUT||'zero-v1', p: checkpoint.p.toArray(), yaw: checkpoint.yaw, done: checkpoint.done, nades: checkpoint.nades, picked: [...pickedItems], patrols: checkpoint.patrols, field: checkpoint.field, vehicles: checkpoint.vehicles }, stats: G.stats });
+  const foot = { layout: S.LAYOUT||'zero-v1', p: checkpoint.p.toArray(), yaw: checkpoint.yaw, done: checkpoint.done, nades: checkpoint.nades, picked: [...pickedItems], patrols: checkpoint.patrols, field: checkpoint.field, vehicles: checkpoint.vehicles };
+  if (openingRelay) foot.relay = openingRelay;
+  writeSave('checkpoint', { chapter, foot, stats: G.stats });
 }
 
 // 手榴彈的樣子：墨綠色小圓柱＋一顆閃爍的紅燈（越接近爆炸閃越快）
@@ -323,7 +328,7 @@ function spawn(def) {
   const e = def.type === 'drone' ? new Drone(G, def) : new Trooper(G, def);
   G.enemies.push(e); return e;
 }
-const patrols = new Patrols(G, [...S.ENCOUNTERS, ...(S.OUTPOSTS || [])], spawn);
+const patrols = new Patrols(G, [...encounters, ...(S.OUTPOSTS || [])], spawn);
 G.contacts = new Contacts(); G.scout = new Scout(G); G.onScoutLost = bodyCamera;
 G.patrols = patrols; G.footExtent = S.FOOT_EXTENT || 140; G.arrivalExtent = campaign ? 320 : 140;
 G.field = new FieldOps(G, S.OUTPOSTS || []);
@@ -441,7 +446,7 @@ function updateMissions(dt) {
   for (const e of bodies.slice(0, Math.max(0, bodies.length - 12))) if (G.t - e.retireAt > 4) { e.dispose(); G.enemies.splice(G.enemies.indexOf(e), 1); }
 }
 // 下一段還沒清的遭遇
-function objective() { return S.ENCOUNTERS.find((E) => E.ch === chapter && !done.has(E.id)); }
+function objective() { return encounters.find((E) => E.ch === chapter && !done.has(E.id)); }
 // 遭遇開打前的導引點
 function guideFor(E) {
   const z = E.guide || [0, 0];
@@ -517,15 +522,16 @@ function updatePickup() {
 }
 const toCockpit = () => { G.objText = '爬上維修架，進入駕駛艙'; hud.obj = routeObj(S.HATCH_ROUTE); };
 
-function startChapter(n) {
+function startChapter(n, announce = true) {
   if ($('tScout')) $('tScout').style.display = '';
   pickedItems.clear();
   clearEnemies(); fx.clear(); D.clear(); active = [];
   chapter = n;
   const C = S.CHAPTERS[n - 1];
   done.clear();
-  for (const E of S.ENCOUNTERS) if (E.ch < n) markDone(E.id, true);
-  syncMissionProps(map, S.ENCOUNTERS, done, pickedItems);
+  for (const E of encounters) if (E.ch < n) markDone(E.id, true);
+  map.setRelayOpening?.(n === 1 ? openingRelay : null);
+  syncMissionProps(map, encounters, done, pickedItems);
   G.ground.reset();G.ground.chapter=n;G.ground.done=done;
   player.reset(map.marks[C.start].clone(), C.yaw);
   G.nadeN = NADE_START;
@@ -539,7 +545,7 @@ function startChapter(n) {
   G.objText = first ? first.obj : '';
   hud.obj = first ? guideObj(first) : null;
   hud.title(`第 ${n} 章　${C.name}`, C.en, 4);
-  const L = S.LINES[n === 1 ? 'start' : 'ch' + n];
+  const L = announce && (n === 1 && campaign ? S.lastLineOpeningLines(openingRelay) : S.LINES[n === 1 ? 'start' : 'ch' + n]);
   if (L) { setTimeout(() => audio.radio('in'), 1500); for (const [w, t] of L) hud.say(w, t, 3.8); }
   scenicMusic.reset();
   audio.music('battle', { stage: C.music });
@@ -553,9 +559,9 @@ function startChapter(n) {
 function updateEncounters() {
   const p = player.pos;
   // 觸發（依順序：前一段清完才會觸發下一段）
-  for (const E of S.ENCOUNTERS) {
+  for (const E of encounters) {
     if (E.ch !== chapter || done.has(E.id) || active.some((a) => a.E === E)) continue;
-    const idx = S.ENCOUNTERS.indexOf(E), prev = S.ENCOUNTERS.slice(0, idx).filter((x) => x.ch === chapter);
+    const idx = encounters.indexOf(E), prev = encounters.slice(0, idx).filter((x) => x.ch === chapter);
     if (!prev.every((x) => done.has(x.id))) continue;
     if (E.after ? done.has(E.after) && G.t - (doneT[E.after] ?? 0) > (E.wait || 0) : E.trigger(p)) startEncounter(E);
   }
@@ -568,7 +574,7 @@ function updateEncounters() {
     markDone(a.E.id);
     for (const [w, t, now] of a.E.done) hud.say(w, t, 3.6, now);
     if (a.E.done.length) audio.radio('in');
-    hud.note(a.E.pickup ? (campaign ? '取得備援授權卡' : '取得啟動金鑰') : a.E.operation?.bypass ? '任務完成・巡邏隊仍在附近' : '區域清除', '#ffb347');
+    if (!a.E.operation?.success) hud.note(a.E.pickup ? (campaign ? '取得備援授權卡' : '取得啟動金鑰') : a.E.operation?.bypass ? '任務完成・巡邏隊仍在附近' : '區域清除', '#ffb347');
     checkpoint = { p: player.pos.clone(), yaw: player.yaw, done: [...done], ch: chapter, nades: G.nadeN, patrols: patrols.snapshot(), field: G.field.snapshot(), vehicles: G.ground.snapshot() };
     saveFoot();
     const nx = objective();
@@ -621,6 +627,7 @@ function nextChapter(n) {
   const C = S.CHAPTERS[n - 1];
   hud.title(`第 ${n} 章　${C.name}`, C.en, 4);
   chapter = n;
+  map.setRelayOpening?.(null);
   G.ground.chapter=n;
   G.chapterTag = `CHAPTER ${n}　${C.en}`;
   const L = S.LINES['ch' + n]; if (L) { audio.radio('in'); for (const [w, t] of L) hud.say(w, t, 3.8); }
@@ -881,8 +888,9 @@ function respawn() {
   const cp = checkpoint;
   clearEnemies(); active = [];
   done.clear(); for (const id of cp.done) markDone(id, true);
-  syncMissionProps(map, S.ENCOUNTERS, done, pickedItems);
   chapter = cp.ch;
+  map.setRelayOpening?.(chapter === 1 ? openingRelay : null);
+  syncMissionProps(map, encounters, done, pickedItems);
   G.ground.restore(cp.vehicles);G.ground.chapter=chapter;G.ground.done=done;
   player.reset(cp.p, cp.yaw); vm.refill(); G.nadeN = cp.nades ?? NADE_START;
   G.field.reset(cp.field);
@@ -1043,7 +1051,12 @@ function renderChapters() {
   }
 }
 status.textContent = '選擇章節';
-if (campaign && $('storyHandoff')) $('storyHandoff').hidden = q.get('from') !== 'mech';
+if (campaign && $('storyHandoff')) {
+  $('storyHandoff').hidden = q.get('from') !== 'mech';
+  if (linkedRelay) $('storyHandoff').textContent = linkedRelay === 'intact'
+    ? '接續本篇・中繼台完好。選第一章，直接接應醫療車隊。繼續檢查點則沿用原本的進度。'
+    : '接續本篇・中繼台受損。選第一章，先在港區接通備用電台。繼續檢查點則沿用原本的進度。';
+}
 bar.style.width = '100%';
 renderChapters();
 $('chapters').style.display = 'flex';
@@ -1063,12 +1076,20 @@ function launch(n) {
   audio.unlock();
   $('title').classList.add('hide');
   G.stats = { shots: 0, hits: 0, kills: 0, heads: 0, taken: 0, time: 0 };
+  if (campaign) {
+    openingRelay = resumeSave ? relayMode(readSave('checkpoint')?.foot?.relay) : n === 1 ? linkedRelay : null;
+    encounters = S.lastLineEncounters(openingRelay);
+    // Patrols 使用遭遇物件身分分組，必須和目前選用的劇本共用同一份物件。
+    patrols.encounters = [...encounters, ...(S.OUTPOSTS || [])];
+    G.relayOpening = openingRelay;
+  }
   if (n === 1 && !resumeSave && !q.has('x') && !q.has('ch')) intro(() => begin(n)); else begin(n);
 }
 function intro(then) {
   const el = $('intro'), box = $('introText');
   el.style.display = 'flex';
-  box.innerHTML = S.INTRO.map((t) => `<p>${t}</p>`).join('');
+  const lines = campaign ? S.lastLineIntro(openingRelay) : S.INTRO;
+  box.innerHTML = lines.map((t) => `<p>${t}</p>`).join('');
   const ps = [...box.querySelectorAll('p')];
   let i = 0, tm = null, over = false;
   const next = () => { if (over) return; if (i < ps.length) { ps[i++].classList.add('on'); tm = setTimeout(next, 2600); } else tm = setTimeout(finish, 1800); };
@@ -1087,12 +1108,13 @@ function begin(n) {
     startMech(); return;
   }
   for(const id of ['tFlight','tDescend']){const b=$(id);if(b)b.style.display='none';}
-  startChapter(n);
+  const saved = resumeSave ? readSave('checkpoint') : null, foot = saved?.chapter === n ? saved.foot : null;
+  const ids = foot && new Set(encounters.filter(e => e.ch <= n).map(e => e.id));
+  const restore = foot && foot.layout === (S.LAYOUT||'zero-v1') && Array.isArray(foot.p) && foot.p.length === 3 && foot.p.every(Number.isFinite) && Math.max(Math.abs(foot.p[0]), Math.abs(foot.p[2])) < (S.FOOT_EXTENT || 140) && foot.p[1] >= 0 && foot.p[1] < 40 && Number.isFinite(foot.yaw) && Array.isArray(foot.done) && foot.done.every(id => ids.has(id));
+  startChapter(n, !campaign || !restore);
   if (campaign || resumeSave) {
     if(campaign&&n===1&&!resumeSave)writeSave('operations',{});
-    const saved = resumeSave ? readSave('checkpoint') : null, foot = saved?.chapter === n ? saved.foot : null;
-    const ids = new Set(S.ENCOUNTERS.filter(e => e.ch <= n).map(e => e.id));
-    if (foot && foot.layout === (S.LAYOUT||'zero-v1') && Array.isArray(foot.p) && foot.p.length === 3 && foot.p.every(Number.isFinite) && Math.max(Math.abs(foot.p[0]), Math.abs(foot.p[2])) < (S.FOOT_EXTENT || 140) && foot.p[1] >= 0 && foot.p[1] < 40 && Number.isFinite(foot.yaw) && Array.isArray(foot.done) && foot.done.every(id => ids.has(id))) {
+    if (restore) {
       checkpoint = { p: new THREE.Vector3(...foot.p), yaw: foot.yaw, done: foot.done, ch: n, nades: clamp(foot.nades || 0, 0, NADE_MAX), patrols: foot.patrols, field: foot.field, vehicles: foot.vehicles };
       pickedItems.clear(); for (const id of Array.isArray(foot.picked) ? foot.picked : []) if (map.items[id]) pickedItems.add(id);
       respawn();
@@ -1101,7 +1123,7 @@ function begin(n) {
     if(campaign)vm.swap('smg');
   }
   saveFoot();
-  if (q.has('final')) { for (const E of S.ENCOUNTERS) done.add(E.id); player.reset(new THREE.Vector3(14, 0, 90), 0); toCockpit(); }
+  if (q.has('final')) { for (const E of encounters) done.add(E.id); player.reset(new THREE.Vector3(14, 0, 90), 0); toCockpit(); }
   state = 'play'; stage = 'play'; G.playing = true;
   input.enabled = true;
   if (!input.touch.on) input.lock();
@@ -1125,6 +1147,7 @@ function toTitle() {
   audio.setPaused(false); audio.lowHealth(false); if (alarmOn) { alarmOn = false; audio.alarm(false); }
   input.unlock(); input.enabled = false; touchUI.style.display = 'none';
   clearEnemies(); G.playing = false; state = 'title';
+  map.setRelayOpening?.(null);
   renderChapters(); audio.music('title');
   $('title').classList.remove('hide');
 }

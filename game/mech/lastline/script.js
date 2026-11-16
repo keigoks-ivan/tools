@@ -244,3 +244,46 @@ export const OUTPOSTS = [
     soldier(105, 72, 'officer'), soldier(92, 72),
   ] },
 ];
+
+// 本篇留下的線路只影響接應車隊前這一段。之後沿用同一組任務與巡邏兵。
+export const RELAY_RESTORE = encounter('B0', 1, '接通鐵道旁的備用電台', [-165, -229], [], {
+  operation: {
+    ...consoleOp([node(-165, -229, '接通港區短波電台', 3)]),
+    success: '港區短波電台上線',
+  },
+  lines: [[OP, '這台是鐵道的舊值班電台。接上它，我們才聽得到車隊的回話。']],
+  done: [[CIV, '港務醫療線……零號？這次聽得見了。兩輛車都還在入口旁，沿掩體過來。', true]],
+});
+
+const convoyContact = ENCOUNTERS.find(e => e.id === 'B');
+const contactWith = (lines) => ({ ...convoyContact, pickups: [{ ...convoyContact.pickups[0], lines }] });
+const intactContact = contactWith([
+  [CIV, '你保住的中繼台還在發訊號。兩輛車都沒動，我把手抄名單放在車邊了。'],
+  [YUI, '剛才我跟弟弟說，電台裡那個人真的會來。現在我可以叫醒他了嗎？'],
+  [ME, '讓他再睡一下。米拉，我去海關查放行紀錄，先別發動。'],
+]);
+const damagedContact = contactWith([
+  [CIV, '你接通短波前，我們一直收不到回音。兩輛車都在，但我們差一點就照通行單開出去了。'],
+  [YUI, '我弟問我，你是不是找不到我們。等門開了，兩輛車能一起走嗎？'],
+  [ME, '一起走。米拉，把對講機留在短波頻道，我去海關查放行紀錄。'],
+]);
+const intactOpening = ENCOUNTERS.map(e => e === convoyContact ? intactContact : e);
+const damagedOpening = [RELAY_RESTORE, ...ENCOUNTERS.map(e => e === convoyContact ? damagedContact : e)];
+
+export function lastLineEncounters(relay) {
+  return relay === 'damaged' ? damagedOpening : relay === 'intact' ? intactOpening : ENCOUNTERS;
+}
+
+const intactLines = [[OP, '中繼台還在工作，米拉已回報停車點。到入口旁兩輛白色醫療車，直接用車旁的對講機。']];
+const damagedLines = [[OP, '隼的旁路只傳出了那通求救。港區的車隊聽不到我們，先去鐵道東側接通備用電台。']];
+
+export function lastLineOpeningLines(relay) {
+  return relay === 'damaged' ? damagedLines : relay === 'intact' ? intactLines : LINES.start;
+}
+
+const intactIntro = [...INTRO.slice(0, 3), '你保住的中繼台還在運作。米拉已回報停車點；天亮前，他們得找到能走的出口。'];
+const damagedIntro = [...INTRO.slice(0, 3), '受損中繼台的旁路傳出了求救，車隊卻收不到回話。零號得先接通港內的備用電台。'];
+
+export function lastLineIntro(relay) {
+  return relay === 'damaged' ? damagedIntro : relay === 'intact' ? intactIntro : INTRO;
+}
