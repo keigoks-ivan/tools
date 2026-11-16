@@ -260,8 +260,15 @@ async function game() {
 
   // ---------------------------------------------------------------- 進度（打過第幾關、每關最佳評價；?all 全開）
   const RANKS = ['', 'C', 'B', 'A', 'S'];
+  const RELAY_OUTCOMES = ['', 'intact', 'damaged'];
   const cleared = () => (q.has('all') ? STAGES.length : store.get('cleared', 0));
   const nextStage = () => Math.min(STAGES.length, cleared() + 1);
+  function lastLineURL(relay) {
+    const url = new URL('./lastline/', location.href);
+    if (relay) { url.searchParams.set('from', 'mech'); url.searchParams.set('relay', relay); }
+    if (q.has('mute')) url.searchParams.set('mute', '');
+    return url.href;
+  }
   function renderStages() {
     const nx = nextStage();
     $('stages').innerHTML = STAGES.map((D, i) => {
@@ -272,6 +279,10 @@ async function game() {
     const codaButton = $('replayCoda');
     codaButton.hidden = store.get('cleared', 0) < STAGES.length;
     codaButton.textContent = store.get('harborCoda', 0) ? '重玩第 11 章　港口未停火' : '第 11 章　港口未停火';
+    const relay = RELAY_OUTCOMES[store.get('harborRelay', 0)], sequel = $('titleLastLine');
+    sequel.href = lastLineURL(relay);
+    sequel.textContent = relay === 'intact' ? '接續《失落防線》・中繼台完好 →'
+      : relay === 'damaged' ? '接續《失落防線》・中繼台受損 →' : '續作：失落防線 →';
   }
 
   // ---------------------------------------------------------------- 流程
@@ -529,14 +540,13 @@ async function game() {
 
   function finishCoda() {
     state = 'codaEnd'; store.set('harborCoda', 1);
+    const relay = relayDisabled() ? 'damaged' : 'intact';
+    store.set('harborRelay', RELAY_OUTCOMES.indexOf(relay));
     input.reset(); input.enabled = false; input.unlock();
     syncCodaUI(); codaEnd.hidden = false;
-    $('codaRelayOutcome').textContent = relayDisabled() ? '備援中繼台受損；手動旁路已接通。'
+    $('codaRelayOutcome').textContent = relay === 'damaged' ? '備援中繼台受損；手動旁路已接通。'
       : coda.air?.relayState === 'saved' ? '夜鷺未能切斷備援中繼台，港務醫療線已接通。' : '備援中繼台完好；港務醫療線已接通。';
-    const url = new URL('./lastline/', location.href); url.searchParams.set('from', 'mech');
-    url.searchParams.set('relay', relayDisabled() ? 'damaged' : 'intact');
-    if (q.has('mute')) url.searchParams.set('mute', '');
-    $('continueLastLine').href = url.href;
+    $('continueLastLine').href = lastLineURL(relay);
     audio.music('clear');
   }
 

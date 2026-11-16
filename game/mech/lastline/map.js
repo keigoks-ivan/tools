@@ -9,7 +9,7 @@ import { kobeStreetDetails, kobeBlockStreets } from '../kobe-street.mjs';
 import { buildAutumnTrees } from '../kobe-autumn.js';
 import { KOBE_RELIEF, kobeCityHeight } from '../kobe-relief.mjs';
 import { kobeHarborScenery, harborWindow } from '../kobe-harbor.mjs';
-import { ENCOUNTERS, RELAY_RESTORE } from './script.js';
+import { ENCOUNTERS, RELAY_CUSTOMS, RELAY_RESTORE } from './script.js';
 import { createConvoy } from './convoy.js';
 import { kitanoBuilder, kitanoSignMaterial, kitanoSignUV } from '../kobe-kitano.js';
 import { kitanoGardenMaterial } from '../kobe-garden.mjs';
@@ -333,6 +333,23 @@ export function buildMap(scene, mats, solid, PL, A, world) {
           if(kind==='manifest')documents(x+.35,.78,z);
           if(kind==='relay')detail(x+.4,.77,z-.15,.018,.88,.018,darkPanel);
         }
+      } else if(kind==='customsLog'||kind==='transferFax') {
+        table(x,z,.76,1.32,.78);
+        documents(x-.34,.76,z+.05);
+        if(kind==='customsLog') {
+          detail(x+.27,.76,z+.045,.57,.085,.49,[.35,.4,.34]);
+          detail(x+.27,.845,z+.15,.55,.38,.22,enamel);
+          detail(x+.27,.92,z+.031,.40,.23,.02,darkPanel);
+          detail(x+.24,1.062,z+.014,.24,.037,.012,[.34,.52,.42]);
+          for(const dz of [-.125,-.065,0])detail(x+.27,.849,z+dz,.43,.016,.032,[.25,.28,.27]);
+        } else {
+          detail(x+.29,.76,z+.08,.57,.20,.48,[.53,.55,.49]);
+          detail(x+.29,.806,z-.173,.42,.06,.025,darkPanel);
+          detail(x+.29,.795,z-.26,.38,.012,.20,paper);
+          detail(x+.29,.961,z+.03,.44,.047,.29,enamel);
+          detail(x+.29,1.008,z+.018,.31,.013,.042,darkPanel);
+          detail(x+.12,1.009,z+.11,.055,.013,.10,[.22,.26,.24]);
+        }
       } else if(kind==='portableRelay') {
         // 折疊架、提把和天線直接併入巡檢區原有的材質桶。
         detail(x,.035,z,.75,.11,.49,darkPanel);
@@ -373,6 +390,8 @@ export function buildMap(scene, mats, solid, PL, A, world) {
     const lampY=['terminal','manifest','relay'].includes(kind)?1.38:kind==='medicine'?1.12:kind==='oxygen'?1.35:kind==='pump'?.85:kind==='lock'?1.4:kind==='crane'?1.04:1.5;
     const lamp=visual(()=>{
       if(kind==='portableRelay')detail(x+.173,1.126,z-.248,.06,.035,.015,[.64,.34,.12]);
+      else if(kind==='customsLog')detail(x+.491,.88,z+.027,.05,.026,.014,[.64,.34,.12]);
+      else if(kind==='transferFax')detail(x+.475,1.009,z+.11,.038,.012,.034,[.64,.34,.12]);
       else detail(x+(kind==='lock'?.1:kind==='pump'?.33:kind==='oxygen'?.16:.2),lampY,z-(kind==='medicine'?.26:.17),.075,.04,.035,[.64,.34,.12]);
     });
     const installed=kind==='fuse'?visual(()=>cartridge(x,1,z-.185,'y')):null;
@@ -465,6 +484,18 @@ export function buildMap(scene, mats, solid, PL, A, world) {
     solid.add({ x0: -229.8, x1: -224.2, z0: z - 6.7, z1: z + 6.7, y0: 0, y1: 4.2, mat: 'metal' });
   }
   shed(-208, -152, -205, -130, 8, 'z', 3, true);
+  // 南門的值勤隔間。靠著南牆到值班桌時，倉庫主走道的巡邏看不到桌面。
+  box('corr', -197, -183.5, 0, 2.65, -197.35, -196.95, { tint: [.54, .58, .52] });
+  for (const x of [-197, -192.5, -188, -183.5])
+    box('metal', x - .055, x + .055, 0, 2.68, -197.4, -196.9, { tint: [.49, .55, .5], solid: false });
+  box('metal', -197.12, -183.38, 2.61, 2.73, -197.43, -196.87, { tint: [.53, .58, .54], solid: false });
+  // 裝卸車道的防撞墩給東側繞行者兩個蹲低停靠的位置。
+  for (const x of [-166.2, -154.6]) {
+    box('concrete', x - 3.2, x + 3.2, 0, 1.3, -123.35, -122.72, { tint: [.62, .62, .58] });
+    box('concrete', x - 3.24, x + 3.24, 0, .16, -123.42, -122.67, { tint: [.49, .48, .43], solid: false });
+    for (const dx of [-2.7, 2.7])
+      box('rust', x + dx - .20, x + dx + .20, 1.28, 1.34, -123.19, -122.89, { tint: [.7, .51, .23], solid: false });
+  }
   shed(-149, -113, -122, -78, 6.2, 'x', 1.8);
   // 西翼拘留室與臨時救護站有自己的門路，任務不靠站在空地上讀文字。
   shed(-222,-210,-184,-153,5.2,'z',1.6);
@@ -550,11 +581,19 @@ export function buildMap(scene, mats, solid, PL, A, world) {
   for(const E of ENCOUNTERS)if(E.operation?.kind==='console')
     M.operationProps[E.id]=E.operation.points.map((point,i)=>operationProp(point,operationKinds[E.id]?.[i]||'terminal'));
   const restoreProps=RELAY_RESTORE.operation.points.map(point=>operationProp(point,'portableRelay'));
-  for(const h of restoreProps)h.hide();
+  const intactProps=RELAY_CUSTOMS.intact.operation.points.map(point=>operationProp(point,'customsLog'));
+  const damagedProps=RELAY_CUSTOMS.damaged.operation.points.map(point=>operationProp(point,'transferFax'));
+  for(const h of [...restoreProps,...intactProps,...damagedProps])h.hide();
   M.setRelayOpening=relay=>{
     const id=RELAY_RESTORE.id, active=!!M.operationProps[id];
     if(relay==='damaged'&&!active){M.operationProps[id]=restoreProps;for(const h of restoreProps)h.reset();}
     else if(relay!=='damaged'&&active){delete M.operationProps[id];for(const h of restoreProps)h.hide();}
+    const customsId=RELAY_CUSTOMS.intact.id, previous=M.operationProps[customsId];
+    const next=relay==='intact'?intactProps:relay==='damaged'?damagedProps:undefined;
+    if(next===previous)return;
+    for(const h of previous||[])h.hide();
+    if(next){M.operationProps[customsId]=next;for(const h of next)h.reset();}
+    else delete M.operationProps[customsId];
   };
   const manifest=M.operationProps.C7[0],installManifest=manifest.install,resetManifest=manifest.reset;
   manifest.install=()=>{installManifest();showOpeningConvoy(false);};

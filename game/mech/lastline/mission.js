@@ -52,7 +52,13 @@ export function createMission({ scene, world, player, fx, config, combat, zhud, 
     write('choice', choice); close();
     const text = choice === 'rescue' ? '橋頭小隊登車。醫療兵修復車輛，之後每個安全路口都會補修。' : '砲台座標已傳給反抗軍。敵方對車隊的遠程砲擊停止。';
     zhud.say('白鷺', text, 5, true);
-    checkpoint = { ...checkpoint, convoy: convoy.snapshot() }; write('checkpoint', checkpoint);
+    if (checkpoint) {
+      // 選擇要保留，車隊位置、機甲出生點和現場作業仍須回到同一個安全路口。
+      const retryConvoy = new Escort(config.route, checkpoint.convoy.hp);
+      retryConvoy.choose(choice);
+      checkpoint = { ...checkpoint, convoy: { ...checkpoint.convoy, choice, hp: retryConvoy.hp } };
+      write('checkpoint', checkpoint);
+    }
   }
   function showChoice() {
     choosing = true; panel.hidden = false;
@@ -174,7 +180,7 @@ export function createMission({ scene, world, player, fx, config, combat, zhud, 
       }
     },
     finish() {
-      if (config.next) { saveChapter(config.next); write('checkpoint', null); location.href = new URL('?ch='+config.next + (new URLSearchParams(location.search).has('mute') ? '&mute' : ''), page).href; return; }
+      if (config.next) { saveChapter(config.next); write('checkpoint', { chapter: config.next }); location.href = new URL('?ch='+config.next + (new URLSearchParams(location.search).has('mute') ? '&mute' : ''), page).href; return; }
       write('clear', 1); write('checkpoint', null); saveChapter(config.chapter);
       const E = ending(convoy.choice, convoy.hp); panel.hidden = false; input.reset(); input.unlock();
       panel.innerHTML = `<div class="campaign-card"><small>IRON DUSK · LAST LINE / 全篇完</small><h2>${E.title}</h2><p>${E.text}</p><div class="campaign-stats">六十四人撤離　車隊耐久 ${Math.ceil(convoy.hp)}%<br>最後防線擊倒 ${kills}　作戰 ${Math.floor(time / 60)} 分 ${Math.floor(time % 60)} 秒</div><p class="campaign-fine">製作：InvestMQuest · 神戶港場景獨立設計；機體、角色與掃描材質沿用系列素材。<br>感謝你走完這道防線。</p><div class="row"><a class="btn" href="${new URL('?ch=1', page).href}">重新開始</a><a class="btn" href="${page.href}">章節選擇</a><a class="btn" href="/games/">遊戲大廳</a></div></div>`;

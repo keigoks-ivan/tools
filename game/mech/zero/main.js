@@ -20,7 +20,7 @@ const LITE = new Set(['grass_diff', 'grass_nor', 'grass_arm', 'asphalt_diff', 'a
 const lite = (u) => {
   if (!u.startsWith('./assets/')) return u;
   const name = u.slice(9), base = name.replace(/\.jpg$/, '');
-  return LITE.has(base) ? './assets/env/' + base + '.webp' : '../assets/' + name;
+  return new URL(LITE.has(base) ? './assets/env/' + base + '.webp' : '../assets/' + name, import.meta.url).href;
 };
 // 大檔案改從 jsDelivr 下載（見 ../cdn.js；不能用時照舊從本站）
 const cdn = await import('../cdn.js').then((m) => m.useCDN()).catch(() => null);
@@ -424,7 +424,7 @@ function updateMissions(dt) {
         const it = map.items[P.id]; if (!it) { a.got.add(i); return; }
         hud.pins.push({ p: it.pin || it.p, h: it.pin ? .25 : .6 });
         const near = Math.hypot(player.pos.x - it.p.x, player.pos.z - it.p.z) < 2 && Math.abs(player.pos.y - it.p.y) < 1.6;
-        if (!near || player.dead) return;
+        if (!near || player.dead || G.scout.active) return;
         hud.prompt = P.text || '按 E　拿取';
         if (input.pressed('KeyE') || input.pressed('Tlock')) {
           a.got.add(i); pickedItems.add(P.id); hud.prompt = null; collectMissionItem(it);
@@ -608,7 +608,7 @@ function updateFoes() {
   if (E.stealth && !a.spotted) sub.push('別被發現');
   if (a.tg) sub.push(`${E.tgName || '目標'} ${a.tg.filter((o) => !o.alive).length}/${a.tg.length}`);
   if (E.pickups) sub.push(`${E.itemName || '情報'} ${a.got.size}/${E.pickups.length}`);
-  if (left.length) sub.push(`還剩 ${left.length} 個敵人`);
+  if (left.length) sub.push(E.operation?.bypass ? `附近有 ${left.length} 名巡邏兵` : `還剩 ${left.length} 個敵人`);
   if (a.reinforcements.pending.length) sub.push(`增援接近 ${a.reinforcements.pending.length} 人`);
   G.objSub = sub.join('　');
   if (left.length < a.n) { a.n = left.length; a.t0 = G.t; }   // 有人倒下也算「剛打到」
@@ -637,6 +637,7 @@ function nextChapter(n) {
   scenicMusic.reset();
   audio.music('battle', { stage: C.music });
   if (n > progress()) store.set('ch', n);
+  saveFoot();
 }
 
 // ---------------------------------------------------------------- 開槍
@@ -896,7 +897,14 @@ function respawn() {
   G.field.reset(cp.field);
   patrols.reset(done, cp.patrols); patrols.update(0, true);
   const nx = objective();
-  if (done.has('G2')) toCockpit(); else if (nx) { G.objText = nx.obj; hud.obj = guideObj(nx); }
+  if (done.has('G2')) toCockpit();
+  else if (nx) { G.objText = nx.obj; hud.obj = guideObj(nx); }
+  else {
+    const exitId = S.CHAPTERS[chapter - 1].end?.after;
+    const exit = done.has(exitId) && encounters.find(E => E.id === exitId && E.ch === chapter);
+    G.objText = exit?.mark ? exit.next || exit.obj : '';
+    hud.obj = exit?.mark ? markObj(exit) : null;
+  }
   if (alarmOn) { alarmOn = false; audio.alarm(false); }
   stage = 'play'; input.lock();
 }

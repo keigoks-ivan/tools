@@ -17,7 +17,8 @@ export function createFootOperation(E,G,input) {
     update(dt) {
       const p=G.player.pos,at=task.point;
       const threat=def.kind==='escort'&&G.enemies.some(e=>!e.dead&&Math.hypot(e.pos.x-at[0],e.pos.z-at[1])<10&&G.solid.sees(e.pos.clone().add(new THREE.Vector3(0,1.4,0)),new THREE.Vector3(at[0],1.2,at[1])));
-      task.step(dt,{player:[p.x,p.z],held:input.keys.has('KeyE')||input.keys.has('Tlock'),hurt:G.player.hurtT<.25,threat});
+      const onFoot=!G.scout?.active&&!G.player.dead;
+      task.step(dt,{player:[p.x,p.z],held:onFoot&&(input.keys.has('KeyE')||input.keys.has('Tlock')),hurt:G.player.hurtT<.25,threat});
       if(task.index!==shownIndex){for(let i=shownIndex;i<task.index;i++)props[i]?.install();shownIndex=task.index;}
       for(const [i,s] of crew.entries()) {
         const previous=s.pos.clone(),x=task.pos[0]+i*.65,z=task.pos[1]-i*.7;
@@ -28,7 +29,7 @@ export function createFootOperation(E,G,input) {
       }
       if(!task.done) {
         const point=task.point,prop=props[task.index];G.hud.pins.push({p:prop?.pin||prop?.p||new THREE.Vector3(point[0],point.y||0,point[1]),h:prop?.pin ? .25 : 1.2});
-        if(Math.hypot(p.x-point[0],p.z-point[1])<(def.radius||2)&&def.kind==='console')G.hud.prompt=`按住 E　${point.label} ${Math.round(task.fraction*100)}%`;
+        if(onFoot&&Math.hypot(p.x-point[0],p.z-point[1])<(def.radius||2)&&def.kind==='console')G.hud.prompt=`${input.touch?.on?'按住互動':'按住 E'}　${point.label} ${Math.round(task.fraction*100)}%`;
       }
     },
     complete() {

@@ -35,7 +35,7 @@ test('所有港區 E 拿取與控制站即使沒有掃描資產也有對應實�
   assert.equal(map.meshes.length,15);assert.equal(map.totalMeshes,20);assert(map.baseTriangles<130000);assert(map.kitano.triangles<44000);
   assert(trucks.length*triangles<4000);assert(trucks.reduce((n,truck)=>n+truck.children.length,0)<=12);
   const truckBoxes=solid.list.filter(box=>box.openingTruck);
-  assert.equal(truckBoxes.length,2);assert.equal(map.baseColliders-truckBoxes.length,2887,'只有兩輛停放的車新增碰撞，互動道具沒有碰撞');
+  assert.equal(truckBoxes.length,2);assert.equal(map.baseColliders-truckBoxes.length,2890,'南門隔板和兩座防撞墩增加三個碰撞，互動道具沿用無碰撞的模型');
 });
 test('拿取與安裝可重設，操作只更新道具本身，不更動其他合併幾何',()=>{
   const {map}=harbor(),item=map.items.codes.h,peer=map.items.smap.h;

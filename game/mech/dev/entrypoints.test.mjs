@@ -12,3 +12,11 @@ test('the three campaign pages each point to a shipped module entry', async () =
     await assert.doesNotReject(readFile(module), `${page} points to missing ${module.pathname}`);
   }
 });
+
+test('Last Line has one import-map version per module path', async () => {
+  const url = new URL('../lastline/index.html', import.meta.url);
+  const html = await readFile(url, 'utf8');
+  const { imports } = JSON.parse(html.match(/<script type="importmap">([^<]+)<\/script>/)[1]);
+  const paths = Object.keys(imports).map(path => new URL(path, url).href);
+  assert.equal(new Set(paths).size, paths.length);
+});

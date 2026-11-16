@@ -245,7 +245,7 @@ export const OUTPOSTS = [
   ] },
 ];
 
-// 本篇留下的線路只影響接應車隊前這一段。之後沿用同一組任務與巡邏兵。
+// 兩條開場沿用海關任務的 ID 和巡邏兵，保留舊檢查點的進度。
 export const RELAY_RESTORE = encounter('B0', 1, '接通鐵道旁的備用電台', [-165, -229], [], {
   operation: {
     ...consoleOp([node(-165, -229, '接通港區短波電台', 3)]),
@@ -256,19 +256,43 @@ export const RELAY_RESTORE = encounter('B0', 1, '接通鐵道旁的備用電台'
 });
 
 const convoyContact = ENCOUNTERS.find(e => e.id === 'B');
-const contactWith = (lines) => ({ ...convoyContact, pickups: [{ ...convoyContact.pickups[0], lines }] });
+const customs = ENCOUNTERS.find(e => e.id === 'B2');
+const evidence = ENCOUNTERS.find(e => e.id === 'C4');
+const contactWith = (lines, done) => ({ ...convoyContact, fight: '接應米拉，確認進入海關的路線', pickups: [{ ...convoyContact.pickups[0], lines }], done });
 const intactContact = contactWith([
   [CIV, '你保住的中繼台還在發訊號。兩輛車都沒動，我把手抄名單放在車邊了。'],
   [YUI, '剛才我跟弟弟說，電台裡那個人真的會來。現在我可以叫醒他了嗎？'],
   [ME, '讓他再睡一下。米拉，我去海關查放行紀錄，先別發動。'],
-]);
+], [[CIV, '值夜班的人剛用原頻道回報。南門敞著，左側值班桌還有交班紀錄。沿貨架過去。', true]]);
 const damagedContact = contactWith([
   [CIV, '你接通短波前，我們一直收不到回音。兩輛車都在，但我們差一點就照通行單開出去了。'],
   [YUI, '我弟問我，你是不是找不到我們。等門開了，兩輛車能一起走嗎？'],
   [ME, '一起走。米拉，把對講機留在短波頻道，我去海關查放行紀錄。'],
-]);
-const intactOpening = ENCOUNTERS.map(e => e === convoyContact ? intactContact : e);
-const damagedOpening = [RELAY_RESTORE, ...ENCOUNTERS.map(e => e === convoyContact ? damagedContact : e)];
+], [[CIV, '有人聽見我們的短波，正在往南門確認。沿東牆到底，利用防撞墩掩護，北側貨門裡有傳真底聯。', true]]);
+
+export const RELAY_CUSTOMS = {
+  intact: encounter('B2', 1, '從南門潛入，複製海關值勤紀錄', [-184.5, -201], customs.enemies, {
+    route: [[-184.5, -208]], fight: '複製值勤紀錄，避開倉庫巡邏', stealth: customs.stealth,
+    operation: { ...consoleOp([node(-187.5, -201, '複製海關值勤紀錄', 2.5)], null, true), success: '值勤紀錄已複製' },
+    lines: [[OP, '進門貼著南牆往左，隔板後是值班桌。蹲低複製紀錄，守衛可以繞過去。']],
+    done: [[ME, '停火後，值班員重印過一份命令。我們有交接的時間了。'], ...customs.done],
+  }),
+  damaged: encounter('B2', 1, '沿東牆繞到海關北側貨門', [-180, -137], customs.enemies, {
+    route: [[-166, -218], [-147.8, -212], [-147.8, -127.4], [-180, -127.4]], fight: '查驗傳真底聯，清除倉庫守衛', stealth: customs.stealth,
+    operation: { ...consoleOp([node(-178, -140, '抄錄傳真底聯的識別號', 2.5)]), success: '海關傳真底聯已抄錄' },
+    lines: [[OP, '右前方的出貨桌有傳真底聯。這裡是守軍的退路，把倉庫裡的守衛清掉。']],
+    done: [[ME, '傳真底聯標的是聯邦線。米拉收到的假放行單，就是從這裡送出去的。'], ...customs.done],
+  }),
+};
+
+const branchEncounters = (contact, entry, clue) => ENCOUNTERS.map(e => {
+  if (e === convoyContact) return contact;
+  if (e === customs) return entry;
+  if (e === evidence) return { ...evidence, lines: [[ME, clue], ...evidence.lines] };
+  return e;
+});
+const intactOpening = branchEncounters(intactContact, RELAY_CUSTOMS.intact, '交班紀錄上寫著重印的時間。我拿這個時間去找原始簽章。');
+const damagedOpening = [RELAY_RESTORE, ...branchEncounters(damagedContact, RELAY_CUSTOMS.damaged, '我用傳真底聯的識別號找到了原檔。放行單和封鎖令出自同一條聯邦線。')];
 
 export function lastLineEncounters(relay) {
   return relay === 'damaged' ? damagedOpening : relay === 'intact' ? intactOpening : ENCOUNTERS;
