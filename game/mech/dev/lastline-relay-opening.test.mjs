@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { CHAPTERS, ENCOUNTERS, INTRO, LINES, RELAY_CUSTOMS, RELAY_RESTORE, lastLineEncounters, lastLineIntro, lastLineOpeningLines } from '../lastline/script.js';
+import { createFootOperation } from '../lastline/foot-ops.js';
 import { Operation } from '../lastline/operations.mjs';
 
 test('only the damaged handoff requires a local radio before convoy contact', () => {
@@ -50,4 +51,31 @@ test('the contact restore requires staying at the radio and holding the interact
   assert.equal(task.fraction, 0);
   tick(3, at, true);
   assert.ok(task.done);
+});
+
+test('completing both customs verification terminals records only the earned clue', t => {
+  const key = 'lastline.operations', files = new Map();
+  const before = Object.getOwnPropertyDescriptor(globalThis, 'localStorage');
+  Object.defineProperty(globalThis, 'localStorage', { configurable: true, value: {
+    getItem: id => files.get(id) ?? null,
+    setItem: (id, value) => files.set(id, value),
+  } });
+  t.after(() => {
+    if (before) Object.defineProperty(globalThis, 'localStorage', before);
+    else delete globalThis.localStorage;
+  });
+  for (const [route, clue] of [[null, undefined], ['intact', 'shift-log'], ['damaged', 'fax-copy']]) {
+    files.set(key, JSON.stringify({ power: true }));
+    const verify = lastLineEncounters(route).find(e => e.id === 'C4');
+    const G = { player: { pos: {}, hurtT: 1 }, hud: { pins: [], note() {} } };
+    const work = createFootOperation(verify, G, { keys: new Set(['KeyE']) });
+    for (const point of verify.operation.points) {
+      G.player.pos = { x: point[0], z: point[1] };
+      for (let i = 0; i < point.seconds * 10; i++) work.update(.1);
+      assert.deepEqual(JSON.parse(files.get(key)), { power: true });
+    }
+    assert(work.done);
+    work.complete();
+    assert.deepEqual(JSON.parse(files.get(key)), { power: true, evidence: true, ...(clue ? { customsClue: clue } : {}) });
+  }
 });

@@ -35,7 +35,12 @@ export function createFootOperation(E,G,input) {
     complete() {
       if(!rewarded) {
         rewarded=true;
-        if(def.reward)try{const record=JSON.parse(localStorage.getItem('lastline.operations'))||{};record[def.reward]=true;localStorage.setItem('lastline.operations',JSON.stringify(record));}catch{}
+        if(def.reward)try {
+          const record=JSON.parse(localStorage.getItem('lastline.operations'))||{};
+          record[def.reward]=true;
+          if(def.customsClue)record.customsClue=def.customsClue;
+          localStorage.setItem('lastline.operations',JSON.stringify(record));
+        }catch{}
         G.hud.note(def.success||'現場任務完成','#a5d9ad');
       }
     },

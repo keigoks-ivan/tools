@@ -934,7 +934,10 @@ function startFinale() {
   player.frozen = true; hud.prompt = null; hud.obj = null; G.objText = ''; G.playing = false;
   audio.music('off');
   audio.mechBoot(finale.to);
-  if (campaign) { store.set('ch', Math.max(S.FIRST_MECH, progress())); writeSave('checkpoint', null); }
+  if (campaign) {
+    store.set('ch', Math.max(S.FIRST_MECH, progress()));
+    writeSave('checkpoint', { chapter: S.FIRST_MECH, customsClue: S.customsClueForEscort(readSave('operations')) });
+  }
   else { store.set('ch', S.CHAPTERS.length); store.set('clear', 1); }
 }
 function updateFinale(dt) {
@@ -957,6 +960,7 @@ function updateFinale(dt) {
 }
 // 第 6 章：開蒼焰，每一幀交給 mech6.js；載入失敗就照舊直接接本篇
 async function startMech() {
+  const savedEscort = campaign && (resumeSave || finale) ? readSave('checkpoint') : null;
   G.ground.suspend();
   if ($('tScout')) $('tScout').style.display = 'none';
   finale = null; stage = 'mech'; $('fieldOpen').hidden = true; chapter = S.CHAPTERS[chapter - 1].mech ? chapter : (S.FIRST_MECH || 6); G.playing = false; player.frozen = true;
@@ -970,7 +974,13 @@ async function startMech() {
       world.hemi.color.setRGB(.46,.52,.62);world.hemi.groundColor.setRGB(.25,.23,.20);world.hemi.intensity=.65;
       post.u.vignette.value=.3;
     }
-    M6 = await go({ renderer, scene, camera, vScene, vCam, post, world, hero, audio, input, zhud: hud, solid, D, fxl: fx, G, S: S.MECH_CONFIGS ? { ...S, MECH6: S.MECH_CONFIGS[chapter] } : S, $, pause, resumeSave, saveChapter: (n) => store.set('ch', Math.max(n, progress())), exit: (u) => { location.href = u; } });
+    let config = S.MECH_CONFIGS?.[chapter];
+    if (campaign && chapter === S.FIRST_MECH) {
+      const clue = S.customsClueForEscort(readSave('operations'), savedEscort);
+      config = S.customsConvoyConfig(config, clue);
+      if (savedEscort?.chapter !== chapter) writeSave('checkpoint', { chapter, customsClue: clue });
+    }
+    M6 = await go({ renderer, scene, camera, vScene, vCam, post, world, hero, audio, input, zhud: hud, solid, D, fxl: fx, G, S: config ? { ...S, MECH6: config } : S, $, pause, resumeSave, saveChapter: (n) => store.set('ch', Math.max(n, progress())), exit: (u) => { location.href = u; } });
     M6.setQuality(quality);
   } catch (e) {
     console.error('[zero] 機體章節載入失敗', e);
@@ -1123,6 +1133,12 @@ function begin(n) {
   if (campaign || resumeSave) {
     if(campaign&&n===1&&!resumeSave)writeSave('operations',{});
     if (restore) {
+      if (campaign && openingRelay && foot.done.includes('B2') && foot.done.includes('C4')) {
+        // 舊版存檔若已在海關完成查驗，從同一份步兵檢查點恢復線索。
+        const operations = readSave('operations') || {};
+        const clue = encounters.find(E => E.id === 'C4')?.operation?.customsClue;
+        if (clue && operations.customsClue !== clue) writeSave('operations', { ...operations, customsClue: clue });
+      }
       checkpoint = { p: new THREE.Vector3(...foot.p), yaw: foot.yaw, done: foot.done, ch: n, nades: clamp(foot.nades || 0, 0, NADE_MAX), patrols: foot.patrols, field: foot.field, vehicles: foot.vehicles };
       pickedItems.clear(); for (const id of Array.isArray(foot.picked) ? foot.picked : []) if (map.items[id]) pickedItems.add(id);
       respawn();

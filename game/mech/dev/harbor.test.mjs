@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { Solid, SURFACES } from '../zero/kit.js';
 import { buildMap, SHORE } from '../lastline/map.js';
 import * as S from '../lastline/script.js';
+import { customsClueForEscort, customsConvoyConfig } from '../lastline/convoy-plan.mjs';
 import { Pilot } from '../zero/player.js';
 
 function harbor() {
@@ -36,7 +37,9 @@ test('港區獨立地圖：所有章節入口、任務導引、敵人和互動�
 });
 test('車隊整條路線和後車延伸留有至少 12 公尺寬，敵機降落區不在屋內或海上', () => {
   const { solid } = harbor();
-  for (const C of Object.values(S.MECH_CONFIGS)) {
+  const base = S.MECH_CONFIGS[4];
+  const alternatives = ['shift-log', 'fax-copy'].map(clue => customsConvoyConfig(base, clue));
+  for (const C of [...Object.values(S.MECH_CONFIGS), ...alternatives]) {
     for (let j = 1; j < C.route.length; j++) {
       const a = C.route[j - 1], b = C.route[j], d = Math.hypot(b[0] - a[0], b[1] - a[1]);
       for (let t = j === 1 ? -20 : 0; t <= d + (C.final && j === C.route.length - 1 ? 85 : 0); t += 2) {
@@ -46,12 +49,43 @@ test('車隊整條路線和後車延伸留有至少 12 公尺寬，敵機降落�
           assert(x < box.x0 - 6 || x > box.x1 + 6 || z < box.z0 - 6 || z > box.z1 + 6, `第 ${C.chapter} 章車隊 ${x},${z} 被結構擋住 ${JSON.stringify(box)}`);
       }
     }
-    for (const W of C.waves) for (const [kind, x, z] of W.list) if (kind !== 'heli') {
+    for (const W of C.waves) for (const [kind, x, z] of [...W.list, ...(W.reinforce || [])]) if (kind !== 'heli') {
       assert(x < SHORE - 4);
       for (const box of solid.list) if (!box.noMove && box.y1 > 3.35)
         assert(x < box.x0 - 3 || x > box.x1 + 3 || z < box.z0 - 3 || z > box.z1 + 3, kind + ' ' + x + ',' + z + ' 降落在結構內 ' + JSON.stringify(box));
     }
   }
+  for (const C of alternatives) {
+    const W = C.waves[2], candidates = [W.cp, ...W.operation.points];
+    assert.deepEqual(C.route[2], W.go.slice(0, 2));
+    for (const [x, z] of candidates) {
+      assert(Math.hypot(x - W.go[0], z - W.go[1]) < W.go[2]);
+      for (const box of solid.list) if (!box.noMove && box.y1 > .5 && box.y0 < 5)
+        assert(x < box.x0 - 6 || x > box.x1 + 6 || z < box.z0 - 6 || z > box.z1 + 6, `${W.title} 操作或重試點被結構擋住`);
+    }
+  }
+});
+test('海關線索只修改第 4 章對應的轉運段，讀檔使用存下的道路', () => {
+  const base = S.MECH_CONFIGS[4];
+  const log = customsConvoyConfig(base, 'shift-log'), fax = customsConvoyConfig(base, 'fax-copy');
+  assert.equal(customsConvoyConfig(base, null), base);
+  assert.equal(customsConvoyConfig(S.MECH_CONFIGS[5], 'shift-log'), S.MECH_CONFIGS[5]);
+  assert.deepEqual(log.route, [[192, -120], [360, -120], [600, -120], [600, 120]]);
+  assert.equal(fax.route, base.route);
+  assert.equal(fax.waves[2].operation.convoyRepair, 25);
+  assert.equal(base.waves[2].operation.convoyRepair, undefined);
+  for (const plan of [log, fax]) {
+    assert.equal(plan.waves.length, base.waves.length);
+    assert.equal(plan.choiceAt, base.choiceAt);
+    assert.equal(plan.waves[0], base.waves[0]);
+    assert.equal(plan.waves[1], base.waves[1]);
+    assert.equal(plan.waves[3], base.waves[3]);
+  }
+  const operations = { customsClue: 'shift-log' };
+  assert.equal(customsClueForEscort(operations, null), 'shift-log');
+  assert.equal(customsClueForEscort(operations, { chapter: 4, wave: 2 }), null);
+  assert.equal(customsClueForEscort(operations, { chapter: 4, customsClue: 'fax-copy' }), 'fax-copy');
+  assert.equal(customsClueForEscort({ customsClue: 'fake' }, null), null);
 });
 test('登機引導的兩段樓梯與胸前平台有連續承重面；街區含汽車低於 13 萬三角形', () => {
   const { scene, solid, map } = harbor();

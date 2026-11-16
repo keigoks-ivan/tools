@@ -8,7 +8,7 @@ const site = Object.assign([360, -120], { label: '接通車隊設施', seconds: 
 const waves = [{}, { operation: { kind: 'console', points: [site] } }, {}, {}];
 
 function fixture(t) {
-  const storage = new Map(), chapters = [], noop = () => {};
+  const storage = new Map(), chapters = [], said = [], noop = () => {};
   const globals = {
     document: { body: { append: noop }, createElement: () => ({
       addEventListener(type, handler) { this[type] = handler; }
@@ -31,16 +31,16 @@ function fixture(t) {
       else delete globalThis[key];
     }
   });
-  const make = (chapter, resumeSave = false) => createMission({
-    config: { chapter, next: chapter + 1, choiceAt: 1, route, waves }, resumeSave,
+  const make = (chapter, resumeSave = false, overrides = {}) => createMission({
+    config: { chapter, next: chapter + 1, choiceAt: 1, route, waves, ...overrides }, resumeSave,
     scene: new THREE.Scene(), world: { height: () => 0 },
     player: { pos: new THREE.Vector3(360, 0, -120) },
-    combat: () => fight, zhud: { say: noop },
+    combat: () => fight, zhud: { say: (...line) => said.push(line) },
     input: { reset: noop, unlock: noop, touch: { on: true }, keys: new Set(['KeyB']) },
     saveChapter: chapter => chapters.push(chapter),
   });
   const fight = { stats: { kills: 3 }, phase: 'fight', damageFx: 0, enemies: [], events: [], note: noop };
-  return { make, chapters, read: key => JSON.parse(storage.get('lastline.' + key) ?? 'null') };
+  return { make, chapters, said, read: key => JSON.parse(storage.get('lastline.' + key) ?? 'null') };
 }
 
 for (const [choice, liveHP, savedHP] of [['rescue', 49, 90], ['artillery', 31, 72]]) {
@@ -94,3 +94,47 @@ test('第 4 到 6 章交接先保留下一章入口，第一戰前也有檢查�
   }
   assert.deepEqual(chapters, [5, 6, 7]);
 });
+
+for (const [clue, repair] of [[null, 0], ['fax-copy', 25]]) {
+  test(`第 4 章 ${clue ?? '原路線'} 的維修支援效果隨檢查點保存且不重複發放`, t => {
+    const { make, read, said } = fixture(t);
+    const operation = { kind: 'defend', points: [site], ...(repair ? { convoyRepair: repair } : {}) };
+    const config = { customsClue: clue, waves: [waves[0], waves[1], { operation }, waves[3]] };
+    const mission = make(4, false, config), convoy = mission.convoy;
+    while (convoy.index < 2) convoy.step(.1, true, convoy.pos);
+    convoy.damage(20);
+    mission.onWave(2);
+    const initial = read('checkpoint');
+    assert.equal(initial.customsClue, clue);
+    assert.equal(initial.convoy.hp, 80);
+    convoy.damage(26);
+    mission.tick(.1);
+    assert.equal(convoy.hp, 54);
+    mission.tick(.1);
+    assert.equal(convoy.hp, 54 + repair);
+    const saved = read('checkpoint');
+    assert.equal(saved.convoy.hp, Math.min(100, 80 + repair));
+    assert.deepEqual(saved.convoy.pos, initial.convoy.pos);
+    assert.equal(saved.operation.done, true);
+    const repairs = () => said.filter(([speaker, line]) => speaker === '米拉' && line.includes('恢復 25%')).length;
+    assert.equal(repairs(), repair ? 1 : 0);
+
+    convoy.damage(5);
+    mission.tick(.1);
+    assert.equal(convoy.hp, 49 + repair);
+    assert.equal(mission.restart(), 2);
+    assert.equal(convoy.hp, saved.convoy.hp);
+    assert.equal(mission.operation.done, true);
+    convoy.damage(6);
+    mission.tick(.1);
+    assert.equal(convoy.hp, saved.convoy.hp - 6);
+
+    const resumed = make(4, true, config);
+    assert.equal(resumed.startWave, 2);
+    resumed.onWave(2);
+    resumed.convoy.damage(6);
+    resumed.tick(.1);
+    assert.equal(resumed.convoy.hp, saved.convoy.hp - 6);
+    assert.equal(repairs(), repair ? 1 : 0);
+  });
+}

@@ -1,6 +1,7 @@
 // 續作港口撤離線：前三章有自己的地圖、觸發區與敵人，僅共用操作介面。
 import * as THREE from 'three';
 import { MECH6 as PREQUEL_CONTROLS } from '../zero/script.js';
+export { customsClueForEscort, customsConvoyConfig } from './convoy-plan.mjs';
 const OP = '白鷺', ME = '零號', CIV = '車隊長・米拉', YUI = '乘客・結衣', HQ = '聯邦指揮部', EN = '獵犬港區分隊';
 const HAYA = '隼（錄音）';
 const V = (x, z, y = 0) => new THREE.Vector3(x, y, z);
@@ -285,14 +286,22 @@ export const RELAY_CUSTOMS = {
   }),
 };
 
-const branchEncounters = (contact, entry, clue) => ENCOUNTERS.map(e => {
+const branchEncounters = (contact, entry, clue, customsClue, support) => ENCOUNTERS.map(e => {
   if (e === convoyContact) return contact;
   if (e === customs) return entry;
-  if (e === evidence) return { ...evidence, lines: [[ME, clue], ...evidence.lines] };
+  if (e === evidence) return {
+    ...evidence, lines: [[ME, clue], ...evidence.lines],
+    operation: { ...evidence.operation, customsClue },
+    done: [...evidence.done, [OP, support]],
+  };
   return e;
 });
-const intactOpening = branchEncounters(intactContact, RELAY_CUSTOMS.intact, '交班紀錄上寫著重印的時間。我拿這個時間去找原始簽章。');
-const damagedOpening = [RELAY_RESTORE, ...branchEncounters(damagedContact, RELAY_CUSTOMS.damaged, '我用傳真底聯的識別號找到了原檔。放行單和封鎖令出自同一條聯邦線。')];
+const intactOpening = branchEncounters(intactContact, RELAY_CUSTOMS.intact,
+  '交班紀錄上寫著重印的時間。我拿這個時間去找原始簽章。', 'shift-log',
+  '交班紀錄也有東岸卸貨車道的開放時間。我把那班空檔留給醫療車隊。');
+const damagedOpening = [RELAY_RESTORE, ...branchEncounters(damagedContact, RELAY_CUSTOMS.damaged,
+  '我用傳真底聯的識別號找到了原檔。放行單和封鎖令出自同一條聯邦線。', 'fax-copy',
+  '筒倉的維修隊也收到這張假命令。我把底聯發給他們，請他們留一組人給醫療車。')];
 
 export function lastLineEncounters(relay) {
   return relay === 'damaged' ? damagedOpening : relay === 'intact' ? intactOpening : ENCOUNTERS;

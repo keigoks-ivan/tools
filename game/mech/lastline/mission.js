@@ -9,6 +9,9 @@ const write = (k, v) => { try { localStorage.setItem('lastline.' + k, JSON.strin
 const page = new URL('./', import.meta.url);
 export function createMission({ scene, world, player, fx, config, combat, zhud, input, G, fail, resumeSave, saveChapter }) {
   const completed=read('operations')||{};
+  const customsClue = config.chapter === 4 ? config.customsClue ?? null : null;
+  const customsSupport = customsClue === 'shift-log' ? '值勤紀錄・海側轉運道'
+    : customsClue === 'fax-copy' ? '傳真底聯・港務維修支援' : '';
   const convoy = new Escort(config.route, config.chapter > 4 ? read('arrival')?.hp : 100);
   const truck = createConvoy(scene), P = new THREE.Vector3(), Q = new THREE.Vector3();
   const evacGate = config.final ? createEvacGate(scene, 600, -405, world.height(600, -405)) : null;
@@ -76,6 +79,7 @@ export function createMission({ scene, world, player, fx, config, combat, zhud, 
     kills += C.stats.kills; C.stats.kills = 0;
     if (convoy.choice === 'rescue' && checkpoint?.wave !== wave) convoy.hp = Math.min(100, convoy.hp + (completed.medicine?9:6));
     checkpoint = { chapter: config.chapter, wave, convoy: convoy.snapshot(), kills, time, operation:operation?.snapshot()||null };
+    if (config.chapter === 4) checkpoint.customsClue = customsClue;
     write('checkpoint', checkpoint); saveChapter(config.chapter);
   }
   function failPanel() {
@@ -121,7 +125,18 @@ export function createMission({ scene, world, player, fx, config, combat, zhud, 
       if(operation&&!operation.done&&C.phase==='fight') {
         const before=operation.index;
         operation.step(dt,{player:[player.pos.x,player.pos.z],altitude:player.pos.y-world.height(...operation.point),held:input.keys.has('KeyB')||input.keys.has('Tsupport'),hurt:C.damageFx>.35});
-        if(operation.index!==before){C.note('現場作業完成','gr');checkpoint.operation=operation.snapshot();write('checkpoint',checkpoint);if(config.chapter===5&&C.group===2&&operation.done){write('broadcast',true);zhud.say('白鷺','城外收到原始簽章了。現在他們無法銷毀證據。',4,true);}}
+        if(operation.index!==before) {
+          C.note('現場作業完成','gr');
+          if (operation.done && operation.def.convoyRepair) {
+            const hp = convoy.hp, repair = operation.def.convoyRepair;
+            convoy.hp = Math.min(100, hp + repair);
+            checkpoint.convoy.hp = Math.min(100, checkpoint.convoy.hp + repair);
+            const restored = Math.round(convoy.hp - hp);
+            zhud.say('米拉', restored ? `港務維修隊交接完成。車隊耐久恢復 ${restored}%。` : '港務維修隊確認兩輛車都能正常行駛。車隊耐久全滿。', 4, true);
+          }
+          checkpoint.operation=operation.snapshot();write('checkpoint',checkpoint);
+          if(config.chapter===5&&C.group===2&&operation.done){write('broadcast',true);zhud.say('白鷺','城外收到原始簽章了。現在他們無法銷毀證據。',4,true);}
+        }
         const due=Math.min(3,Math.floor(operation.time/8));
         if(!operation.done&&pressure<due&&(C.group!==1||!C.events.some(e=>e.spawn))&&C.enemies.filter(e=>!e.dead&&!e.gone).length+C.events.filter(e=>e.spawn).length<7){
           const source=config.waves[C.group-1]?.list.find(e=>e[0]==='grunt'||e[0]==='heavy');
@@ -148,11 +163,12 @@ export function createMission({ scene, world, player, fx, config, combat, zhud, 
       const X = h.x, w = h.w, s = h.s;
       X.save(); X.globalAlpha = 1; X.textAlign = 'left'; X.textBaseline = 'alphabetic';
       const x = 24 * s, y = 115 * s, width = 245 * s;
-      X.fillStyle = 'rgba(5,13,18,.85)'; X.fillRect(x, y, width, 63 * s);
+      X.fillStyle = 'rgba(5,13,18,.85)'; X.fillRect(x, y, width, (customsSupport ? 80 : 63) * s);
       X.fillStyle = '#b6c9ca'; X.font = `${13 * s}px "Noto Sans TC",sans-serif`; X.fillText('撤離車隊  /  EVAC 02', x + 12 * s, y + 21 * s);
       X.fillStyle = '#23373e'; X.fillRect(x + 12 * s, y + 34 * s, width - 24 * s, 5 * s);
       X.fillStyle = convoy.hp < 30 ? '#ff6659' : '#a5d9ad'; X.fillRect(x + 12 * s, y + 34 * s, (width - 24 * s) * convoy.hp / 100, 5 * s);
       X.fillText(`${Math.ceil(convoy.hp)}%　${pending ? '⚠ 敵機標定中' : this.blocked ? '等待指令' : Math.hypot(player.pos.x - convoy.pos[0], player.pos.z - convoy.pos[1]) > 110 ? '等待護衛靠近' : '清路後前進'}`, x + 12 * s, y + 56 * s);
+      if (customsSupport) { X.fillStyle = '#e6ae68'; X.fillText(customsSupport, x + 12 * s, y + 72 * s); }
       // 車隊座標標記與距離，避免把車輛當成環境道具。
       const p = h.proj(Q.set(convoy.pos[0], world.height(...convoy.pos) + 7, convoy.pos[1]), {});
       if (p.front && p.x > 30 && p.x < w - 30 && p.y > 30 && p.y < h.h - 30) h.text('EVAC · ' + Math.round(Math.hypot(player.pos.x - convoy.pos[0], player.pos.z - convoy.pos[1])) + 'm', p.x, p.y, 12, 'gr', 1, 'center', 700);
