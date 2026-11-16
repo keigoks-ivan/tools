@@ -134,8 +134,9 @@ export function buildMap(scene, mats, solid, PL, A, world) {
   }
   function shed(x0, x1, z0, z1, h, doors = 'z', rise = 3, masonry = false) {
     const door = 6, midX = (x0 + x1) / 2, midZ = (z0 + z1) / 2;
+    const drydock = x0 === 10 && z0 === 52;
     if (doors === 'z') {
-      if (x0 === 10 && z0 === 52) {
+      if (drydock) {
         box('brick', x0, x0 + .45, 0, h, z0, 102);
         box('brick', x0, x0 + .45, 0, h, 107, z1);
         box('brick', x0, x0 + .45, 0, 12.25, 102, 107);
@@ -143,8 +144,10 @@ export function buildMap(scene, mats, solid, PL, A, world) {
       } else box('brick', x0, x0 + .45, 0, h, z0, z1);
       box('brick', x1 - .45, x1, 0, h, z0, z1);
       for (const z of [z0, z1 - .4]) {
-        box(masonry ? 'brick' : 'wall', x0, midX - door, 0, h, z, z + .4); box(masonry ? 'brick' : 'wall', midX + door, x1, 0, h, z, z + .4);
-        box('metal', midX - door, midX + door, Math.min(4.8,h-.4), h, z, z + .4);
+        const width = drydock && z === z0 ? 10 : door;
+        const height = drydock && z === z0 ? 22 : Math.min(4.8, h - .4);
+        box(masonry ? 'brick' : 'wall', x0, midX - width, 0, h, z, z + .4); box(masonry ? 'brick' : 'wall', midX + width, x1, 0, h, z, z + .4);
+        box('metal', midX - width, midX + width, height, h, z, z + .4);
       }
     } else {
       box('wall', x0, x1, 0, h, z0, z0 + .4); box('wall', x0, x1, 0, h, z1 - .4, z1);
@@ -183,6 +186,7 @@ export function buildMap(scene, mats, solid, PL, A, world) {
     // 工業高窗、窗框與窗台；玻璃共用一個材質，不用住宅立面貼圖。
     const wy = h * .55, wh = Math.min(2.2, h * .22);
     for (const z of [z0 - .012, z1 + .012]) for (let x = x0 + 3; x < x1 - 4; x += 6) {
+      if (drydock && z < z0 && x + 4.12 > midX - 10 && x - .12 < midX + 10) continue;
       if (doors === 'z' && Math.abs(x + 2 - midX) < door + 1 && wy < 5) continue;
       if(masonry) {
         harborWindow(portArt,x+2,z,{ry:z<midZ?Math.PI:0,base:wy-.2,spring:wy+1.1,radius:1.1});

@@ -5,6 +5,7 @@ import { Solid, SURFACES } from '../zero/kit.js';
 import { buildMap, SHORE } from '../lastline/map.js';
 import * as S from '../lastline/script.js';
 import { customsClueForEscort, customsConvoyConfig } from '../lastline/convoy-plan.mjs';
+import { drydockBreakoutConfig } from '../lastline/drydock-breakout.mjs';
 import { Pilot } from '../zero/player.js';
 
 function harbor() {
@@ -33,6 +34,39 @@ test('港區獨立地圖：所有章節入口、任務導引、敵人和互動�
     for(const p of E.operation?.points||[])clear(p[0],p.y||0,p[1],E.id+' 操作點');
     const route=E.operation?.route||[];
     for(let i=1;i<route.length;i++)for(let t=0;t<=1;t+=.02){const a=route[i-1],b=route[i];clear(a[0]+(b[0]-a[0])*t,0,a[1]+(b[1]-a[1])*t,E.id+' 護送路線');}
+  }
+});
+test('修船棚南門可通過蒼焰，突圍路線、作業點、敵人與檢查點皆在港內淨空', () => {
+  const { map, solid } = harbor();
+  const config = drydockBreakoutConfig(S.MECH_CONFIGS[4]);
+  const clear = (x, z, r, y0, y1, name) => {
+    const wall = solid.list.find(b => !b.dead && !b.noMove && b.y0 < y1 && b.y1 > y0
+      && x + r > b.x0 && x - r < b.x1 && z + r > b.z0 && z - r < b.z1);
+    assert(!wall, `${name} ${x},${z} 被實體結構擋住 ${JSON.stringify(wall)}`);
+  };
+  for (let z = config.start.z; z >= 45; z--) clear(40, z, 7, .4, 19, '蒼焰外型通過南門');
+  const glass = map.b.B.portGlass.mesh.geometry.attributes.position.array;
+  for (let i = 0; i < glass.length; i += 3) {
+    const x = glass[i], y = glass[i + 1], z = glass[i + 2];
+    assert(x <= 30 || x >= 50 || y >= 22 || Math.abs(z - 52) > .1, '工業窗遮住棚門');
+  }
+  const opening = solid.list.find(b => b.x0 === 30 && b.x1 === 50 && b.z0 === 52 && b.y0 === 22);
+  assert(opening, '南門需要 20 公尺寬、22 公尺高的開口');
+  const W0 = config.waves[0];
+  assert(W0.go[1] + W0.go[2] < opening.z0, '須離開修船棚才進入第一場戰鬥');
+  const route = [[config.start.x, config.start.z], ...config.waves.map(w => w.go), S.MECH_CONFIGS[4].route[0]];
+  for (let i = 1; i < route.length; i++) {
+    const [x, z] = route[i - 1], [nx, nz] = route[i], steps = Math.ceil(Math.hypot(nx - x, nz - z));
+    for (let t = 0; t <= steps; t++) clear(x + (nx - x) * t / steps, z + (nz - z) * t / steps, 4, .4, 3.35, '突圍路線');
+  }
+  for (const W of config.waves) {
+    assert(Math.hypot(W.cp[0] - W.go[0], W.cp[1] - W.go[1]) < W.go[2], `${W.title} 檢查點應能重新進戰`);
+    clear(W.cp[0], W.cp[1], 4, .4, 3.35, W.title + ' 檢查點');
+    for (const point of W.operation.points) clear(point[0], point[1], 4, (point.altitude ?? 0) + .4, (point.altitude ?? 0) + 3.35, point.label);
+    for (const [kind, x, z, y = 0] of W.list) {
+      assert(x < SHORE - 4, `${W.title} ${kind} 應在岸線內`);
+      clear(x, z, 4, y + .4, y + 3.35, `${W.title} ${kind}`);
+    }
   }
 });
 test('車隊整條路線和後車延伸留有至少 12 公尺寬，敵機降落區不在屋內或海上', () => {

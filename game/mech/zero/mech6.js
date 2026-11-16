@@ -287,7 +287,7 @@ export async function startMech(X) {
   if (M6.mission) {
     const { createMission } = await import(M6.mission);
     mission = createMission({ scene, world, player, fx, config: M6, combat: () => C, zhud, input, G, fail: onEnd, resumeSave: X.resumeSave, saveChapter: X.saveChapter });
-    if (mission.startWave) { wave = mission.startWave; cp = cpOf(M6.waves[wave]); place(cp); }
+    if (mission.startWave || (M6.breakout && mission.hasCheckpoint)) { wave = mission.startWave; cp = cpOf(M6.waves[wave]); place(cp); }
   }
   world.hook({ fx, audio: au, cockpit, player, note: (t, c) => C && C.note(t, c) });   // 城市大樓打得爛
   function fight(from) { C.start(); C.group = from; started = true; }
@@ -440,11 +440,12 @@ export async function startMech(X) {
   // ---------------------------------------------------------------- 開場
   let T = 0, boot = 0, odV = 0, speedV = 0, flashV = 0, dangerV = 0;
   zhud.sub = null; zhud.subQ.length = 0;   // 上一章（駕駛艙）還沒播完的字幕不帶過來
-  zhud.title(`第 ${M6.chapter || 6} 章　${M6.name}`, M6.en, 4.5);
+  zhud.title(M6.breakout ? M6.label : `第 ${M6.chapter || 6} 章　${M6.name}`, M6.en, 4.5);
   for (const [w, t] of M6.start.lines) zhud.say(w, t, 3.6);
   audio.music('battle', { stage: 4 });
   $('fade').style.transition = 'opacity 1.2s'; $('fade').style.opacity = 0;
   const fwd = new THREE.Vector3(), foot = new THREE.Vector3(), tmp = new THREE.Vector3();
+  const [fadeAt, cardAt, exitAt, exitLimit] = M6.breakout ? [4.5, 6.3, 9, 11] : [12, 14.2, 19, 26];
 
   function tick(rdt) {
     if (mission && ending?.go) return;
@@ -492,7 +493,7 @@ export async function startMech(X) {
     C.aimSkip = tpView ? chaseSkip : 0;
 
     // ---- 流程：走出機庫大門（或開場 30 秒）才開打
-    if (!started && (player.pos.x > HANGAR.x1 + 2 || T > 30)) fight(mission?.startWave || 0);
+    if (!started && (M6.breakout || player.pos.x > HANGAR.x1 + 2 || T > 30)) fight(mission?.startWave || 0);
     if (!started && T > 5 && T - rdt <= 5) C.say(M6.goal[0], M6.goal[1], 5, 'cy');
     // 基地的黑犬打到剩四成：撤退（僚機留下來掩護）
     if (boss && boss.flee && !boss.fleeing && !boss.dead && !boss.dropping && boss.ap <= boss.apMax * boss.flee) {
@@ -554,9 +555,9 @@ export async function startMech(X) {
     // ---- 結尾：對白 → 黑畫面 → 字卡 → 接本篇（最後一句對白講完才接，最晚 26 秒）
     if (ending) {
       ending.t += rdt;
-      if (ending.t > 12 && !ending.fade) { ending.fade = true; $('fade').style.transition = 'opacity 2s'; $('fade').style.opacity = 1; }
-      if (ending.t > 14.2 && !ending.card) { ending.card = true; zhud.title(M6.fin[0], M6.fin[1], 5); }
-      if (ending.t > 19 && (!(zhud.sub || zhud.subQ.length) || ending.t > 26) && !ending.go) { ending.go = true; if (mission) mission.finish(); else exit('../?zero=1'); }
+      if (ending.t > fadeAt && !ending.fade) { ending.fade = true; $('fade').style.transition = 'opacity 2s'; $('fade').style.opacity = 1; }
+      if (ending.t > cardAt && !ending.card) { ending.card = true; zhud.title(M6.fin[0], M6.fin[1], 5); }
+      if (ending.t > exitAt && (!(zhud.sub || zhud.subQ.length) || ending.t > exitLimit) && !ending.go) { ending.go = true; if (mission) mission.finish(); else exit('../?zero=1'); }
     }
   }
   // 蒼焰走過去：腳邊的車、油桶、木箱直接踩爛

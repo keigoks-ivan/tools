@@ -8,6 +8,7 @@ const read = k => { try { return JSON.parse(localStorage.getItem('lastline.' + k
 const write = (k, v) => { try { localStorage.setItem('lastline.' + k, JSON.stringify(v)); } catch {} };
 const page = new URL('./', import.meta.url);
 export function createMission({ scene, world, player, fx, config, combat, zhud, input, G, fail, resumeSave, saveChapter }) {
+  const breakout = config.breakout === true;
   const completed = config.support ?? read('operations') ?? {};
   const vehicleSupport = Array.isArray(completed.vehicleSupport) ? completed.vehicleSupport : [];
   const warningSeconds = Math.min(7, (completed.frequency ? 5 : 3.5)
@@ -15,9 +16,9 @@ export function createMission({ scene, world, player, fx, config, combat, zhud, 
   const customsClue = config.chapter === 4 ? config.customsClue ?? null : null;
   const customsSupport = customsClue === 'shift-log' ? '值勤紀錄・海側轉運道'
     : customsClue === 'fax-copy' ? '傳真底聯・港務維修支援' : '';
-  const convoy = new Escort(config.route, config.chapter > 4 ? read('arrival')?.hp : 100);
-  const truck = createConvoy(scene), P = new THREE.Vector3(), Q = new THREE.Vector3();
-  const evacGate = config.final ? createEvacGate(scene, 600, -405, world.height(600, -405)) : null;
+  const convoy = breakout ? null : new Escort(config.route, config.chapter > 4 ? read('arrival')?.hp : 100);
+  const truck = convoy ? createConvoy(scene) : null, P = new THREE.Vector3(), Q = new THREE.Vector3();
+  const evacGate = convoy && config.final ? createEvacGate(scene, 600, -405, world.height(600, -405)) : null;
   let operation=null,pressure=0,salvo=null,salvoCd=10;
   const markers=new THREE.Group();scene.add(markers);
   // 現場控制箱有底座、立柱、切角外殼與按鍵；各站共用一個網格和材質。
@@ -31,12 +32,17 @@ export function createMission({ scene, world, player, fx, config, combat, zhud, 
   for(let i=0;i<4;i++)part(new THREE.BoxGeometry(.09,.09,.045),-.3+i*.2,1.78,.44,i===3?[.73,.36,.15]:dark);
   part(new THREE.CylinderGeometry(.025,.025,.9,6),.53,3.42,0,dark);
   const beaconGeo=mergeGeometries(parts),beaconMat=new THREE.MeshStandardMaterial({vertexColors:true,roughness:.75,metalness:.1});parts.forEach(g=>g.dispose());
-  const ringGeo=new THREE.RingGeometry(11.7,12,32).rotateX(-Math.PI/2),ringMat=new THREE.MeshBasicMaterial({color:0xff8054,transparent:true,opacity:.75,side:THREE.DoubleSide,depthWrite:false});
-  const warning=new THREE.Mesh(ringGeo,ringMat);warning.visible=false;warning.name='lastline-salvo-warning';scene.add(warning);
+  let warning = null;
+  if (convoy) {
+    const ringGeo=new THREE.RingGeometry(11.7,12,32).rotateX(-Math.PI/2),ringMat=new THREE.MeshBasicMaterial({color:0xff8054,transparent:true,opacity:.75,side:THREE.DoubleSide,depthWrite:false});
+    warning=new THREE.Mesh(ringGeo,ringMat);warning.visible=false;warning.name='lastline-salvo-warning';scene.add(warning);
+  }
   function setupOperation(k) {
-    operation=config.waves[k]?.operation?new Operation(config.waves[k].operation):null;pressure=0;salvoCd=10;salvo=null;warning.visible=false;
+    operation=config.waves[k]?.operation?new Operation(config.waves[k].operation):null;pressure=0;salvoCd=10;salvo=null;
+    if (warning) warning.visible=false;
     markers.clear();
     for(const p of operation?.def.points||[]) {
+      if (p.altitude) continue;
       const m=new THREE.Mesh(beaconGeo,beaconMat);m.position.set(p[0],world.height(p[0],p[1]),p[1]);m.castShadow=m.receiveShadow=true;markers.add(m);
     }
   }
@@ -46,11 +52,12 @@ export function createMission({ scene, world, player, fx, config, combat, zhud, 
   if(config.bombardment&&convoy.choice==='artillery')config.start.lines[1]=['白鷺','反抗軍正在壓制主砲，但出口供電仍被敵方控制站鎖住。清除守軍，接通旁路。'];
   const saved = resumeSave ? read('checkpoint') : null;
   let startWave = 0;
-  if (saved?.chapter === config.chapter && Number.isInteger(saved.wave) && saved.wave >= 0 && saved.wave < config.waves.length && convoy.restore(saved.convoy)) {
+  if (saved?.chapter === config.chapter && (saved.breakout === true) === breakout && Number.isInteger(saved.wave)
+    && saved.wave >= 0 && saved.wave < config.waves.length && (breakout || convoy.restore(saved.convoy))) {
     startWave = saved.wave; kills = Number.isFinite(saved.kills) ? Math.max(0, saved.kills) : 0; time = Number.isFinite(saved.time) ? Math.max(0, saved.time) : 0; checkpoint = { ...saved, kills, time };
   }
   const terrain = (x, z) => world.height(x, z), trail = i => convoy.pose(i * 16);
-  truck.update(convoy.pos, 0, terrain, trail);
+  if (truck) truck.update(convoy.pos, 0, terrain, trail);
   const panel = document.createElement('section'); panel.className = 'campaign-panel'; panel.hidden = true; document.body.append(panel);
   function close() { panel.hidden = true; choosing = false; stopped = false; input.reset(); if (!input.touch.on) input.lock(); }
   function choose(choice) {
@@ -80,15 +87,18 @@ export function createMission({ scene, world, player, fx, config, combat, zhud, 
   function saveWave(wave) {
     const C = combat();
     kills += C.stats.kills; C.stats.kills = 0;
-    if (convoy.choice === 'rescue' && checkpoint?.wave !== wave) convoy.hp = Math.min(100, convoy.hp + (completed.medicine?9:6));
-    checkpoint = { chapter: config.chapter, wave, convoy: convoy.snapshot(), kills, time, operation:operation?.snapshot()||null };
+    if (convoy?.choice === 'rescue' && checkpoint?.wave !== wave) convoy.hp = Math.min(100, convoy.hp + (completed.medicine?9:6));
+    checkpoint = { chapter: config.chapter, wave, ...(breakout ? { breakout: true } : { convoy: convoy.snapshot() }), kills, time, operation:operation?.snapshot()||null };
     if (config.chapter === 4) checkpoint.customsClue = customsClue;
     if (config.support) checkpoint.support = config.support;
     write('checkpoint', checkpoint); saveChapter(config.chapter);
   }
   function failPanel() {
     stopped = true; choosing = false; pending = null; panel.hidden = false; input.reset(); input.unlock();
-    panel.innerHTML = '<div class="campaign-card"><small>撤離中斷</small><h2>' + (convoy.hp <= 0 ? '車隊失去行動能力' : '蒼焰失去戰力') + '</h2><p>從上一個安全路口再來。車隊耐久、波次、選擇與已接通的控制站一起恢復。</p><button class="btn" data-retry>從檢查點繼續</button><a class="btn" href="' + page.href + '">回標題</a></div>';
+    const title = breakout ? '船塢突圍中斷' : '撤離中斷';
+    const heading = convoy?.hp <= 0 ? '車隊失去行動能力' : '蒼焰失去戰力';
+    const retry = breakout ? '從目前的作戰區域再來。已完成的現場作業會保留。' : '從上一個安全路口再來。車隊耐久、波次、選擇與已接通的控制站一起恢復。';
+    panel.innerHTML = `<div class="campaign-card"><small>${title}</small><h2>${heading}</h2><p>${retry}</p><button class="btn" data-retry>從檢查點繼續</button><a class="btn" href="${page.href}">回標題</a></div>`;
   }
   function fireAtConvoy(dt, C) {
     cooldown -= dt;
@@ -108,9 +118,17 @@ export function createMission({ scene, world, player, fx, config, combat, zhud, 
     const enemy = C.enemies.find(e => !e.dead && !e.gone && !e.vehicle && Math.hypot(e.pos.x - convoy.pos[0], e.pos.z - convoy.pos[1]) < 230);
     if (enemy) { pending = { enemy, t: 2.8 }; zhud.say('米拉', '車隊被砲陣標定！先打掉正在瞄準的敵機！', 2, true); }
   }
+  function drawOperation(h) {
+    if (!operation || operation.done) return;
+    const p=operation.point,ground=world.height(p[0],p[1]),goal=h.proj(Q.set(p[0],ground+(p.altitude??5),p[1]),{}),connect=input.touch.on?'按住接通':'按住 B';
+    const label=operation.kind==='defend'?`${p.label} ${Math.ceil(p.seconds-operation.progress)} 秒`:`${Math.abs(player.pos.y-ground)>=4?'降落後':''}${connect}・${p.label} ${Math.round(operation.fraction*100)}%`;
+    if(goal.front)h.text(label,goal.x,goal.y-25*h.s,14,'am',1,'center',700);else h.edgeMark(goal,'am',p.altitude?'空中作業':'現場作業',h.w,h.h,1);
+  }
   return {
     convoy, truck, panel, evacGate, get operation(){return operation;},get waveComplete(){return !operation||operation.done;},get blocked() { return choosing || stopped || finished; }, get startWave() { return startWave; },
+    get hasCheckpoint() { return checkpoint !== null; },
     ready(k, W) {
+      if (breakout) return !this.blocked && Math.hypot(player.pos.x - W.go[0], player.pos.z - W.go[1]) < W.go[2];
       if (config.chapter === 4 && k > config.choiceAt && !convoy.choice) { if (!choosing) showChoice(); return false; }
       return !this.blocked && convoy.ready(k, [player.pos.x, player.pos.z], W.go[2]);
     },
@@ -118,13 +136,17 @@ export function createMission({ scene, world, player, fx, config, combat, zhud, 
       cooldown = 7; pending = null; setupOperation(k);
       if (checkpoint?.wave === k) operation?.restore(checkpoint.operation);
       const connect = input.touch.on ? '按住接通' : '按住 B 接通';
-      if (operation) zhud.say('白鷺', operation.kind === 'defend' ? '留在指定區域保護作業，離開區域會停止進度。'
-        : `前往現場控制站，${connect}。放開或受擊會中斷；已完成的控制站會保留。`, 5, true);
+      if (operation) {
+        const altitude = operation.point?.altitude;
+        const objective = altitude ? `升至離地 ${altitude} 公尺，在標記空域掩護作業。` : '留在指定區域保護作業，離開區域會停止進度。';
+        zhud.say('白鷺', operation.kind === 'defend' ? objective
+          : `前往現場控制站，${connect}。放開或受擊會中斷；已完成的控制站會保留。`, 5, true);
+      }
       saveWave(k);
     },
     restart() {
       close(); pending = null; cooldown = 7; finished = false;setupOperation(checkpoint?.wave??0);
-      if (checkpoint) { convoy.restore(checkpoint.convoy); kills = checkpoint.kills; time = checkpoint.time; operation?.restore(checkpoint.operation); }
+      if (checkpoint) { convoy?.restore(checkpoint.convoy); kills = checkpoint.kills; time = checkpoint.time; operation?.restore(checkpoint.operation); }
       // 恢復的安全波次已到達，可立刻重新開打。
       return checkpoint?.wave ?? 0;
     },
@@ -132,13 +154,13 @@ export function createMission({ scene, world, player, fx, config, combat, zhud, 
       if (this.blocked) return;
       const C = combat(); if (C.dead || C.phase === 'done') return;
       time += dt;
-      const clear = C.phase === 'fight' && !C.enemies.some(e => !e.gone) && !C.events.some(e => e.spawn);
+      const clear = convoy && C.phase === 'fight' && !C.enemies.some(e => !e.gone) && !C.events.some(e => e.spawn);
       if(operation&&!operation.done&&C.phase==='fight') {
-        const before=operation.index;
-        operation.step(dt,{player:[player.pos.x,player.pos.z],altitude:player.pos.y-world.height(...operation.point),held:input.keys.has('KeyB')||input.keys.has('Tsupport'),hurt:C.damageFx>.35});
+        const before=operation.index, p=operation.point;
+        operation.step(dt,{player:[player.pos.x,player.pos.z],altitude:player.pos.y-world.height(p[0],p[1])-(p.altitude??0),held:input.keys.has('KeyB')||input.keys.has('Tsupport'),hurt:C.damageFx>.35});
         if(operation.index!==before) {
           C.note('現場作業完成','gr');
-          if (operation.done && operation.def.convoyRepair) {
+          if (convoy && operation.done && operation.def.convoyRepair) {
             const hp = convoy.hp, repair = operation.def.convoyRepair;
             convoy.hp = Math.min(100, hp + repair);
             checkpoint.convoy.hp = Math.min(100, checkpoint.convoy.hp + repair);
@@ -148,11 +170,12 @@ export function createMission({ scene, world, player, fx, config, combat, zhud, 
           checkpoint.operation=operation.snapshot();write('checkpoint',checkpoint);
         }
         const due=Math.min(3,Math.floor(operation.time/8));
-        if(!operation.done&&pressure<due&&(C.group!==1||!C.events.some(e=>e.spawn))&&C.enemies.filter(e=>!e.dead&&!e.gone).length+C.events.filter(e=>e.spawn).length<7){
+        if(!breakout&&!operation.done&&pressure<due&&(C.group!==1||!C.events.some(e=>e.spawn))&&C.enemies.filter(e=>!e.dead&&!e.gone).length+C.events.filter(e=>e.spawn).length<7){
           const source=config.waves[C.group-1]?.list.find(e=>e[0]==='grunt'||e[0]==='heavy');
           if(source){C.spawn('grunt',0,1,{x:source[1],z:source[2],ground:true,tx:player.pos.x,tz:player.pos.z});zhud.say('白鷺','敵方正在逼近作業區，掩護還沒有結束！',2,true);}pressure++;
         }
       }
+      if (breakout) return;
       convoy.step(dt, clear&&this.waveComplete, [player.pos.x, player.pos.z]);
       truck.update(convoy.pos, 0, terrain, trail);
       if (!clear) fireAtConvoy(dt, C);
@@ -170,6 +193,7 @@ export function createMission({ scene, world, player, fx, config, combat, zhud, 
       truck.update(convoy.pos, Math.PI, terrain, i => convoy.pose(i * 16, distance));
     },
     draw(h) {
+      if (breakout) { drawOperation(h); return; }
       const X = h.x, w = h.w, s = h.s;
       X.save(); X.globalAlpha = 1; X.textAlign = 'left'; X.textBaseline = 'alphabetic';
       const x = 24 * s, y = 115 * s, width = 245 * s;
@@ -189,17 +213,14 @@ export function createMission({ scene, world, player, fx, config, combat, zhud, 
         else h.edgeMark(warning, 'rd', '標定', w, h.h, 1);
       }
       X.restore(); h._f = null;
-      if(operation&&!operation.done){
-        const p=operation.point,goal=h.proj(Q.set(p[0],world.height(p[0],p[1])+5,p[1]),{}),connect=input.touch.on?'按住接通':'按住 B';
-        const label=operation.kind==='defend'?`${p.label} ${Math.ceil(p.seconds-operation.progress)} 秒`:`${Math.abs(player.pos.y-world.height(...p))>=4?'降落後':''}${connect}・${p.label} ${Math.round(operation.fraction*100)}%`;
-        if(goal.front)h.text(label,goal.x,goal.y-25*s,14,'am',1,'center',700);else h.edgeMark(goal,'am','現場作業',w,h.h,1);
-      }
+      drawOperation(h);
       if(salvo){const p=h.proj(Q.set(salvo.x,world.height(salvo.x,salvo.z)+1,salvo.z),{});if(p.front)h.text(`砲擊落點 ${salvo.t.toFixed(1)} 秒`,p.x,p.y,16,'rd',1,'center',700);}
     },
     onEnd(ok) {
       if (!ok) { failPanel(); return; }
       if (finished) return;
       finished = true; pending = null; kills += combat().stats.kills;
+      if (breakout) return;
       if (config.chapter === 5 && checkpoint?.wave === config.waves.length - 1 && operation?.kind === 'defend' && operation.done) {
         const broadcast = { evidence: completed.evidence === true, manifest: completed.manifest === true };
         write('operations', { ...read('operations'), broadcast });
@@ -212,6 +233,12 @@ export function createMission({ scene, world, player, fx, config, combat, zhud, 
       }
     },
     finish() {
+      if (breakout) {
+        saveChapter(config.chapter);
+        write('checkpoint', { chapter: config.chapter, fromBreakout: true, customsClue, support: completed });
+        location.href = new URL(`?ch=${config.chapter}&fromDrydock${new URLSearchParams(location.search).has('mute') ? '&mute' : ''}`, page).href;
+        return;
+      }
       if (config.next) { saveChapter(config.next); write('checkpoint', { chapter: config.next }); location.href = new URL('?ch='+config.next + (new URLSearchParams(location.search).has('mute') ? '&mute' : ''), page).href; return; }
       write('clear', 1); write('checkpoint', null); saveChapter(config.chapter);
       const E = ending(convoy.choice, convoy.hp, completed.broadcast); panel.hidden = false; input.reset(); input.unlock();

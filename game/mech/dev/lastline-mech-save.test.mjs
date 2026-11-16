@@ -32,18 +32,91 @@ function fixture(t) {
       else delete globalThis[key];
     }
   });
+  const pilot = { pos: new THREE.Vector3(360, 0, -120) };
   const make = (chapter, resumeSave = false, overrides = {}) => createMission({
     config: { chapter, next: chapter + 1, choiceAt: 1, route, waves, ...overrides }, resumeSave,
     scene, world: { height: () => 0 }, fx: { explosion: noop },
-    player: { pos: new THREE.Vector3(360, 0, -120) },
+    player: pilot,
     combat: () => fight, zhud: { say: (...line) => said.push(line) },
     input: { reset: noop, unlock: noop, touch: { on: true }, keys: new Set(['KeyB']) },
     saveChapter: chapter => chapters.push(chapter),
   });
   const fight = { stats: { kills: 3 }, phase: 'fight', damageFx: 0, enemies: [], events: [], note: noop, hurt: noop, audio: { explosion: noop } };
-  return { make, chapters, said, scene, fight, read: key => JSON.parse(storage.get('lastline.' + key) ?? 'null'),
+  return { make, chapters, said, scene, fight, pilot, read: key => JSON.parse(storage.get('lastline.' + key) ?? 'null'),
     write: (key, value) => storage.set('lastline.' + key, JSON.stringify(value)) };
 }
+
+test('船塢突圍獨立保存地面作業、空中戰區與車隊交接', t => {
+  const { make, chapters, said, scene, fight, pilot, read, write } = fixture(t);
+  const air = Object.assign([...site], { label: '掩護測試空域', altitude: 38, seconds: .2 });
+  const groundWave = { go: [360, -120, 35], operation: { kind: 'console', points: [site] } };
+  const airWave = { go: [360, -120, 50], list: [['grunt', 370, -100]], operation: { kind: 'defend', radius: 14, points: [air] } };
+  const support = { alarm: true, vehicleSupport: ['ground-crew'] };
+  const breakout = { breakout: true, route: undefined, waves: [groundWave, airWave, {}], customsClue: 'fax-copy', support };
+  const arrival = { hp: 89 };
+  write('arrival', arrival);
+  write('choice', 'rescue');
+  write('checkpoint', { chapter: 4, breakout: true, customsClue: 'fax-copy', support });
+  const fresh = make(4, true, breakout);
+  assert.equal(fresh.hasCheckpoint, false);
+  assert.equal(fresh.convoy, null);
+  assert.equal(fresh.truck, null);
+  assert.equal(scene.getObjectByName('lastline-salvo-warning'), undefined);
+  assert(fresh.ready(0, groundWave));
+  assert.equal(fresh.ready(1, { go: [430, -120, 50] }), false);
+  fresh.onWave(0);
+  fresh.tick(.1); fresh.tick(.1);
+  const groundSave = read('checkpoint');
+  assert.equal(groundSave.breakout, true);
+  assert.equal(groundSave.convoy, undefined);
+  assert.equal(groundSave.operation.done, true);
+  const resumed = make(4, true, breakout);
+  assert.equal(resumed.hasCheckpoint, true);
+  assert.equal(resumed.startWave, 0);
+  resumed.onWave(0);
+  assert(resumed.waveComplete);
+
+  fight.group = 2;
+  resumed.onWave(1);
+  assert(said.some(([, line]) => line.includes('離地 38 公尺')));
+  for (let i = 0; i < 90; i++) resumed.tick(.1);
+  assert.equal(resumed.operation.progress, 0);
+  const drawn = [];
+  resumed.draw({ s: 1, proj: pos => { drawn.push(pos.y); return { front: true, x: 400, y: 300 }; }, text: () => {} });
+  assert.deepEqual(drawn, [38]);
+  pilot.pos.y = 38;
+  resumed.tick(.1); resumed.tick(.1);
+  assert(resumed.waveComplete);
+  resumed.onEnd(false);
+  assert.match(resumed.panel.innerHTML, /船塢突圍中斷/);
+  assert.equal(resumed.restart(), 1);
+  assert(resumed.waveComplete);
+  assert.equal(make(4, true, breakout).startWave, 1);
+  resumed.onEnd(true);
+  resumed.finish();
+  assert.deepEqual(read('checkpoint'), { chapter: 4, fromBreakout: true, customsClue: 'fax-copy', support });
+  assert.deepEqual(read('arrival'), arrival);
+  assert.equal(read('choice'), 'rescue');
+  assert.equal(read('clear'), null);
+  const destination = new URL(location.href);
+  assert.equal(destination.searchParams.get('ch'), '4');
+  assert(destination.searchParams.has('fromDrydock'));
+  assert(destination.searchParams.has('mute'));
+  assert(chapters.every(chapter => chapter === 4));
+});
+
+test('同為第 4 章的突圍與護送檢查點互不套用', t => {
+  const { make, read, write } = fixture(t);
+  const escort = make(4);
+  escort.onWave(1);
+  const legacy = read('checkpoint');
+  const breakout = { breakout: true, route: undefined };
+  assert.equal(make(4, true, breakout).hasCheckpoint, false);
+  assert.equal(make(4, true).startWave, 1);
+  write('checkpoint', { ...legacy, breakout: true });
+  assert.equal(make(4, true, breakout).startWave, 1);
+  assert.equal(make(4, true).hasCheckpoint, false);
+});
 
 for (const [choice, liveHP, savedHP] of [['rescue', 49, 90], ['artillery', 31, 72]]) {
   test(`橋頭選擇 ${choice} 留在原檢查點，車隊在重試與重載一起倒回安全路口`, t => {

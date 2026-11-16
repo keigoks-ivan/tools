@@ -944,7 +944,7 @@ function startFinale() {
   if (campaign) {
     store.set('ch', Math.max(S.FIRST_MECH, progress()));
     const operations = readSave('operations');
-    writeSave('checkpoint', { chapter: S.FIRST_MECH, customsClue: S.customsClueForEscort(operations), support: S.escortSupport(operations) });
+    writeSave('checkpoint', { chapter: S.FIRST_MECH, breakout: true, customsClue: S.customsClueForEscort(operations), support: S.escortSupport(operations) });
   }
   else { store.set('ch', S.CHAPTERS.length); store.set('clear', 1); }
 }
@@ -967,8 +967,10 @@ function updateFinale(dt) {
   if (F.t > 6.2 && !F.go) { F.go = true; startMech(); }
 }
 // 第 6 章：開蒼焰，每一幀交給 mech6.js；載入失敗就照舊直接接本篇
-async function startMech() {
-  const savedEscort = campaign && (resumeSave || finale) ? readSave('checkpoint') : null;
+async function startMech(replayBreakout = false) {
+  const boarding = !!finale, fromDrydock = campaign && q.has('fromDrydock');
+  const savedEscort = campaign && (resumeSave || boarding || fromDrydock) ? readSave('checkpoint') : null;
+  const resumeArrival = fromDrydock && savedEscort?.chapter === S.FIRST_MECH && savedEscort.breakout !== true;
   G.ground.suspend();
   if ($('tScout')) $('tScout').style.display = 'none';
   finale = null; stage = 'mech'; $('fieldOpen').hidden = true; chapter = S.CHAPTERS[chapter - 1].mech ? chapter : (S.FIRST_MECH || 6); G.playing = false; player.frozen = true;
@@ -985,13 +987,22 @@ async function startMech() {
     let config = S.MECH_CONFIGS?.[chapter];
     if (campaign) {
       const operations = readSave('operations');
-      const saved = savedEscort?.chapter === chapter ? savedEscort : null;
+      const saved = (resumeSave || boarding || resumeArrival) && savedEscort?.chapter === chapter ? savedEscort : null;
       const support = S.escortSupport(operations, saved?.support);
-      if (chapter === S.FIRST_MECH) config = S.customsConvoyConfig(config, S.customsClueForEscort(operations, saved));
-      config = S.applyEscortSupport(config, support);
-      if (!saved) writeSave('checkpoint', { chapter, support, ...(chapter === S.FIRST_MECH ? { customsClue: config.customsClue ?? null } : {}) });
+      const first = chapter === S.FIRST_MECH;
+      const breakout = first && (boarding || replayBreakout || saved?.breakout === true);
+      const entry = { chapter, support };
+      if (first) entry.customsClue = S.customsClueForEscort(operations, saved);
+      if (breakout) {
+        entry.breakout = true;
+        config = S.drydockBreakoutConfig(config, entry);
+      } else {
+        if (first) config = S.customsConvoyConfig(config, entry.customsClue);
+        config = S.applyEscortSupport(config, support);
+      }
+      if (!saved) writeSave('checkpoint', entry);
     }
-    M6 = await go({ renderer, scene, camera, vScene, vCam, post, world, hero, audio, input, zhud: hud, solid, D, fxl: fx, G, S: config ? { ...S, MECH6: config } : S, $, pause, resumeSave, saveChapter: (n) => store.set('ch', Math.max(n, progress())), exit: (u) => { location.href = u; } });
+    M6 = await go({ renderer, scene, camera, vScene, vCam, post, world, hero, audio, input, zhud: hud, solid, D, fxl: fx, G, S: config ? { ...S, MECH6: config } : S, $, pause, resumeSave: resumeSave || resumeArrival, saveChapter: (n) => store.set('ch', Math.max(n, progress())), exit: (u) => { location.href = u; } });
     M6.setQuality(quality);
   } catch (e) {
     console.error('[zero] 機體章節載入失敗', e);
@@ -1076,7 +1087,12 @@ function renderChapters() {
   if ($('campaignResume')) {
     const saved = readSave('checkpoint');
     $('campaignResume').hidden = !saved || !S.CHAPTERS[saved.chapter - 1];
+    $('campaignResume').textContent = saved?.breakout === true ? '從突圍檢查點繼續' : '繼續上次檢查點';
     $('campaignResume').onclick = () => { const cp = readSave('checkpoint'); if (cp && S.CHAPTERS[cp.chapter - 1]) { resumeSave = true; launch(cp.chapter); } };
+  }
+  if ($('replayBreakout')) {
+    $('replayBreakout').hidden = nx < S.FIRST_MECH;
+    $('replayBreakout').onclick = () => { resumeSave = false; launch(S.FIRST_MECH, true); };
   }
 }
 status.textContent = '選擇章節';
@@ -1101,7 +1117,7 @@ $('cont').addEventListener('click', respawn);
 input.onLockChange = (locked) => { if (!locked && state === 'play' && (stage === 'play' || M6) && !input.touch.on && !finale && !M6?.holdsInput) pause(); };
 const touchUI = $('touch');
 
-function launch(n) {
+function launch(n, replayBreakout = false) {
   audio.unlock();
   $('title').classList.add('hide');
   G.stats = { shots: 0, hits: 0, kills: 0, heads: 0, taken: 0, time: 0 };
@@ -1112,7 +1128,7 @@ function launch(n) {
     patrols.encounters = [...encounters, ...(S.OUTPOSTS || [])];
     G.relayOpening = openingRelay;
   }
-  if (n === 1 && !resumeSave && !q.has('x') && !q.has('ch')) intro(() => begin(n)); else begin(n);
+  if (n === 1 && !resumeSave && !q.has('x') && !q.has('ch')) intro(() => begin(n)); else begin(n, replayBreakout);
 }
 function intro(then) {
   const el = $('intro'), box = $('introText');
@@ -1128,13 +1144,13 @@ function intro(then) {
   audio.music('off');
   tm = setTimeout(next, 500);
 }
-function begin(n) {
+function begin(n, replayBreakout = false) {
   n = clamp(Math.floor(n) || 1, 1, S.CHAPTERS.length);
   chapter = n;
   if (S.CHAPTERS[n - 1].mech) {
     state = 'play'; input.enabled = true; if (!input.touch.on) input.lock();
     touchUI.style.display = input.touch.on ? 'block' : 'none';
-    startMech(); return;
+    startMech(replayBreakout); return;
   }
   for(const id of ['tFlight','tDescend']){const b=$(id);if(b)b.style.display='none';}
   const saved = resumeSave ? readSave('checkpoint') : null, foot = saved?.chapter === n ? saved.foot : null;
