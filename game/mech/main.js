@@ -6,7 +6,7 @@ import { qualityLevel, pixelRatio, FrameGate } from './runtime.js';
 import { ScenicMusic } from './scenic-music.mjs';
 import { HistoryReader } from './kobe-history.mjs';
 import { createHistoryPlaques } from './kobe-history-plaques.mjs';
-import { CODA_START, CODA_STOPS, CODA_LINES, codaApproach, codaStations } from './harbor-coda.js?v=1';
+import { CODA_START, CODA_STOPS, CODA_LINES, codaApproach, codaStations } from './harbor-coda.js?v=2';
 
 const q = new URLSearchParams(location.search);
 // 大檔案（貼圖、HDR、模型）改從 jsDelivr 下載，網站主機給大檔很慢；不能用時照舊從本站（見 cdn.js）
