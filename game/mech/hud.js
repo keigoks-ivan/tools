@@ -210,10 +210,13 @@ export class HUD {
     // ---- 上方：第幾關／區域、敵數、分數、時間
     const EN = C.enc, tY = this.tp(0, 0.5)[1];
     this.text(g.label || (EN ? `STAGE ${C.stage}  AREA ${Math.min(EN.sec + 1, EN.N)}/${EN.N}` : `STAGE ${C.stage}/${g.stages}`), W / 2 - 12 * s, tY, 14, 'cy', 1, 'right', 700);
-    const alive = C.enemies.filter((e) => !e.dead).length + C.events.filter((ev) => ev.spawn).length + (EN && EN.queue ? EN.queue.length : 0);
-    this.text(`HOSTILES ${alive}`, W / 2 + 12 * s, tY, 14, alive ? 'rd' : 'dim', 1, 'left', 700);
-    const mm = Math.floor(C.stats.time / 60), ss = Math.floor(C.stats.time % 60);
-    this.text(`SCORE ${C.stats.score.toLocaleString()}   ${mm}:${String(ss).padStart(2, '0')}`, W / 2, tY + 17 * s, 11, 'cy', 0.75, 'center');
+    if (g.ceasefire) this.text('COMMS ONLY', W / 2 + 12 * s, tY, 14, 'dim', 1, 'left', 700);
+    else {
+      const alive = C.enemies.filter((e) => !e.dead).length + C.events.filter((ev) => ev.spawn).length + (EN && EN.queue ? EN.queue.length : 0);
+      this.text(`HOSTILES ${alive}`, W / 2 + 12 * s, tY, 14, alive ? 'rd' : 'dim', 1, 'left', 700);
+      const mm = Math.floor(C.stats.time / 60), ss = Math.floor(C.stats.time % 60);
+      this.text(`SCORE ${C.stats.score.toLocaleString()}   ${mm}:${String(ss).padStart(2, '0')}`, W / 2, tY + 17 * s, 11, 'cy', 0.75, 'center');
+    }
 
     // ---- 航向帶：±30°、每 5° 一格、每 10° 標數字（N／E／S／W）；中央框＝目前航向，下方小三角＝機頭
     const hx = W / 2, hy = this.tp(0, 0.4)[1], hw = 150 * s, kp = hw / 30;
@@ -242,7 +245,7 @@ export class HUD {
       X.beginPath(); X.moveTo(x, hy + 3 * s); X.lineTo(x + q, hy + 3 * s + q); X.lineTo(x, hy + 3 * s + q * 2); X.lineTo(x - q, hy + 3 * s + q); X.closePath();
       this.sk('cy', Math.abs(rb) > 30 ? 0.55 : 1, 1.3);
     }
-    const chainOn = C.stats.chain > 1 && C.stats.time - C.stats.lastKill < 8;
+    const chainOn = !g.ceasefire && C.stats.chain > 1 && C.stats.time - C.stats.lastKill < 8;
     if (chainOn) this.text(`CHAIN ×${C.stats.chain}`, W / 2, hy + 24 * s, 13, 'am', 1, 'center', 700);
     if (EN) this.objective(EN, hy + (chainOn ? 42 : 25) * s, W, H);
 
