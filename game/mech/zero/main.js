@@ -497,14 +497,15 @@ function updateGuide(dt) {
   let d = Math.hypot(o.p.x - P.x, o.p.z - P.z);
   for (let j = o.i; j < R.length - 1; j++) d += R[j].distanceTo(R[j + 1]);
   o.left = d;
-  // 光柱：立在下一個點，從建築後面也看得到；快到最後一點時淡掉
+  // 光柱：立在下一個點；快到終點或舉槍對準時讓出畫面。
   const last = o.i === R.length - 1, dd = Math.hypot(o.p.x - P.x, o.p.z - P.z);
-  beacon.visible = !(last && dd < 3);
+  beacon.visible = !vm.reflexReady && !vm.scoped && !(last && dd < 3);
   beacon.position.set(o.p.x, o.p.y - 1.2, o.p.z);
   beaconT += dt; beacon.children[0].material.opacity = 0.16 + 0.07 * Math.sin(beaconT * 3); beacon.children[1].rotation.z += dt * 0.8;
 }
 let beaconT = 0;
 const beacon = new THREE.Group();
+beacon.name = 'mission-route-beacon';
 {
   const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.45, 34, 14, 1, true).translate(0, 17, 0),
     new THREE.MeshBasicMaterial({ color: new THREE.Color(2.2, 1.1, 0.25), transparent: true, opacity: 0.2, blending: THREE.AdditiveBlending, depthWrite: false, side: THREE.DoubleSide }));
