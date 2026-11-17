@@ -24,6 +24,8 @@ node workers/mech-duel/test/socket-smoke.mjs
 
 WebSocket 連上後，`welcome` 提供座位 `slot`、重連金鑰 `resume`、最後收到的控制序號 `ack`、`members`、`ready` 與 `paused`。重連金鑰僅保存在各玩家的工作階段，分享連結只帶房號。兩個玩家各傳 `{t:"ready",value:true}` 後，伺服器以 `{t:"state",state,ack}` 傳送對局。輸入用 `{t:"input",seq,input}`，已確認的序號須遞增。結算後雙方各傳 `{t:"rematch"}` 即開下一場。
 
+機體外型使用 `{t:"mech",id:"cangyan"|"bailu"|"tiechao"}` 選擇。`welcome` 與 `room` 提供 `mechs`、`canSelect`，對戰快照也帶有 `mechs`。選擇保存在座位中；尚未準備的大廳或結算畫面可以更換，準備後與交戰期間鎖定。外型資料不參與移動、碰撞、血量與武器規則，舊客戶端可忽略新增欄位。
+
 有玩家離線時，戰鬥時間暫停，保留原座位 45 秒。逾時後 `{t:"aborted",reason:"disconnect"}` 會把仍在房間的玩家帶回大廳。主動傳送 `{t:"leave"}` 會立即釋出座位。房間大廳閒置 20 分鐘後到期。
 
 ## 部署

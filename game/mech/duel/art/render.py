@@ -1,16 +1,32 @@
 from pathlib import Path
-import sys, math
+import sys, math, os
 import bpy
 from mathutils import Vector
 WORK=Path(__file__).resolve().parent
 sys.path.insert(0,str(WORK))
 from geometry import OUT
-bpy.ops.wm.open_mainfile(filepath=str(OUT/'M-07-蒼焰-v8.blend'))
+bpy.ops.wm.open_mainfile(filepath=str(OUT/'M-07-蒼焰-v9.blend'))
 scene=bpy.context.scene
+variant=os.environ.get('M07_VARIANT','cangyan')
+for obj in bpy.data.objects:
+ if 'mechVariant' in obj:obj.hide_render=obj.hide_viewport=obj['mechVariant'] not in ('common',variant)
+if variant!='cangyan':
+ factors=(5.4,4.45,3.75) if variant=='bailu' else (1.80,1.29,.77)
+ for key in ('blue','blue2','navy'):
+  mat=bpy.data.materials.get(key)
+  if not mat:continue
+  original=tuple(mat.diffuse_color)
+  for node in mat.node_tree.nodes:
+   for socket in node.inputs:
+    if socket.type=='RGBA' and not socket.is_linked and all(abs(a-b)<.00001 for a,b in zip(socket.default_value,original)):
+     socket.default_value=tuple(min(1,c*f) for c,f in zip(original[:3],factors))+(1,)
+
 quick='--quick' in sys.argv
+portrait='--portrait' in sys.argv
 views=['hero','front','side','rear','head']
 requested=next((v for v in views if '--'+v in sys.argv),None)
 if requested:views=[requested]
+if portrait:views=['hero']
 
 def aim(o,pt):o.rotation_euler=(Vector(pt)-o.location).to_track_quat('-Z','Y').to_euler()
 def area(name,loc,at,power,color,size,size_y):
@@ -30,6 +46,7 @@ m=bpy.data.materials.new('攝影棚石墨地面');m.use_nodes=True
 m.node_tree.nodes['Principled BSDF'].inputs['Base Color'].default_value=(.034,.038,.042,1)
 m.node_tree.nodes['Principled BSDF'].inputs['Roughness'].default_value=.6
 floor.data.materials.append(m)
+if portrait:floor.hide_render=True;scene.render.film_transparent=True
 d=bpy.data.cameras.new('真實模型檢視');camera=bpy.data.objects.new('真實模型檢視',d);scene.collection.objects.link(camera);scene.camera=camera
 scene.render.engine='CYCLES';scene.cycles.samples=12 if quick else 40
 scene.cycles.use_denoising=True;scene.cycles.adaptive_threshold=.05 if quick else .025
@@ -37,7 +54,7 @@ scene.cycles.max_bounces=5;scene.cycles.diffuse_bounces=2;scene.cycles.glossy_bo
 scene.render.threads_mode='FIXED';scene.render.threads=6
 scene.view_settings.view_transform='AgX';scene.view_settings.look='AgX - Medium High Contrast';scene.view_settings.exposure=0
 scene.render.resolution_percentage=100
-scene.render.image_settings.file_format='PNG';scene.render.image_settings.color_mode='RGB'
+scene.render.image_settings.file_format='PNG';scene.render.image_settings.color_mode='RGBA' if portrait else 'RGB'
 # Hand, forearm and rifle move as one at their elbow.
 bpy.data.objects['M07_Rifle'].rotation_euler.x=1.08
 for view in views:
@@ -46,9 +63,10 @@ for view in views:
  elif view=='front':camera.location=(0,-50,8.2);target=(0,0,8.5);d.ortho_scale=13.4;size=(780,1150)
  elif view=='side':camera.location=(50,0,8.2);target=(0,0,8.5);d.ortho_scale=10.8;size=(640,1150)
  elif view=='rear':camera.location=(-20,43,14);target=(0,0,8.5);d.ortho_scale=14.7;size=(850,1150)
- elif view=='head':camera.location=(7,-16,15.6);target=(0,-.95,15.3);d.ortho_scale=4.5;size=(1000,850)
+ elif view=='head':camera.location=(7,-16,15.6);target=(0,-.90,15.7);d.ortho_scale=4.1;size=(1000,850)
+ if portrait:d.ortho_scale=13.6;size=(240,300)
  aim(camera,target)
- scene.render.resolution_x,scene.render.resolution_y=[int(n*(.65 if quick else 1)) for n in size]
- scene.render.filepath=str(OUT/(view+('-quick' if quick else '')+'.png'))
+ scene.render.resolution_x,scene.render.resolution_y=[int(n*(.65 if quick and not portrait else 1)) for n in size]
+ scene.render.filepath=str(OUT/(variant+('-portrait' if portrait else '-'+view+('-quick' if quick else ''))+'.png'))
  bpy.ops.render.render(write_still=True)
  print('RENDERED',scene.render.filepath,flush=True)

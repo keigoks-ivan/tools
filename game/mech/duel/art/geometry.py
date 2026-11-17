@@ -1,6 +1,6 @@
 """M-07: explicit hard-surface geometry in game coordinates (Y up, +Z forward)."""
 from pathlib import Path
-from math import sin, cos, pi, tau
+from math import sin, cos, pi, tau, atan2
 import random
 import os
 import numpy as np
@@ -12,11 +12,11 @@ OUT = Path(os.environ.get('M07_ART_OUTPUT', str(Path(__file__).resolve().parent/
 OUT.mkdir(parents=True, exist_ok=True)
 # Pigmented armor, phosphate chassis and exposed machined surfaces remain distinct.
 PALETTE = {
-    'blue': (0x344853, .43, .40, 1),
-    'blue2': (0x425661, .46, .34, 1),
-    'navy': (0x293840, .46, .39, 1),
-    'armor': (0x343b42, .48, .48, 0),
-    'armor2': (0x474e52, .52, .36, 0),
+    'blue': (0x344853, .39, .06, 1),
+    'blue2': (0x425661, .43, .08, 1),
+    'navy': (0x293840, .37, .05, 1),
+    'armor': (0x343b42, .42, .14, 0),
+    'armor2': (0x474e52, .44, .12, 0),
     'edge': (0x6b7071, .34, .76, 0),
     'steel': (0x717b7f, .30, .82, 0),
     'chrome': (0xadb7b7, .23, .91, 0),
@@ -25,7 +25,7 @@ PALETTE = {
     'recess': (0x10171b, .64, .24, 0),
     'orange': (0xbc592d, .56, .18, 0),
     'orange2': (0x9a4425, .60, .13, 0),
-    'visor': (0x142831, .16, .46, 0),
+    'visor': (0x07151c, .10, .0, 0),
     'edge_dark': (0x4b5358, .32, .74, 0),
     'bone': (0xb1ae99, .63, .12, 0),
     'cyan': (0x61d7e9, .24, .08, 1),
@@ -41,6 +41,17 @@ for s in 'LR':
  PARENTS['M07_Thigh_'+s]='M07_Body'
  PARENTS['M07_Shin_'+s]='M07_Thigh_'+s
  PARENTS['M07_Foot_'+s]='M07_Shin_'+s
+
+def proportion(p):
+ # Lengthen the actual leg assemblies while retaining the common combat height.
+ # The same mapping moves armor, bearings and rig pivots, so joints stay seated.
+ x,y,z=p
+ width=.88-.04*min(1,max(0,(y-10.12)/1.4))
+ if y<1.20:height=y*.94
+ elif y<6.42:height=1.128+(y-1.20)*(5.832/5.22)
+ elif y<10.12:height=6.96+(y-6.42)*(4.02/3.70)
+ else:height=10.98+(y-10.12)*.91
+ return Vector((x*width,height,z*.94))
 
 def convert(p): return Vector((p[0],-p[2],p[1]))
 def linear(v): return v/12.92 if v<.04045 else ((v+.055)/1.055)**2.4
@@ -68,18 +79,22 @@ def material(key,glow=False):
 class Builder:
  def __init__(self):
   self.col=bpy.data.collections.new('蒼焰｜原創重裝機體');bpy.context.scene.collection.children.link(self.col)
-  self.parts={p:[] for p in PIVOTS};self.rig={};self.rng=random.Random(7017)
+  self.variant='common';self.parts={p:[] for p in PIVOTS};self.rig={};self.rng=random.Random(7017)
   for name,pos in PIVOTS.items():
    o=bpy.data.objects.new(name,None);self.col.objects.link(o)
    parent=PARENTS.get(name)
    if parent:o.parent=self.rig[parent]
-   o.location=convert(Vector(pos)-Vector(PIVOTS[parent] if parent else (0,0,0)))
+   o.location=convert(proportion(pos)-proportion(PIVOTS[parent] if parent else (0,0,0)))
    o.empty_display_size=.15;self.rig[name]=o
+  upper=self.rig['M07_Upper']
+  upper['exhaustOrigins']=[list(proportion((side*1.78,9.540,-4.722))) for side in (-1,1)]
+  direction=proportion((1.78,9.540-.56,-4.722-.83))-proportion((1.78,9.540,-4.722))
+  upper['exhaustPitch']=atan2(direction.z,direction.y)
 
  def mesh(self,j,name,verts,faces,key='armor',bevel=0,smooth=False,glow=False,face_keys=None):
   if getattr(self,'transform',None):verts=[self.transform(p) for p in verts]
   me=bpy.data.meshes.new(name)
-  me.from_pydata([convert(Vector(p)-Vector(PIVOTS[j])) for p in verts],[],faces);me.validate();me.update()
+  me.from_pydata([convert(proportion(p)-proportion(PIVOTS[j])) for p in verts],[],faces);me.validate();me.update()
   bm=bmesh.new();bm.from_mesh(me);bmesh.ops.recalc_face_normals(bm,faces=list(bm.faces));bm.to_mesh(me);bm.free()
   obj=bpy.data.objects.new(name,me);self.col.objects.link(obj);obj.parent=self.rig[j]
   keys=list(dict.fromkeys(face_keys if face_keys else [key]))
@@ -97,6 +112,8 @@ class Builder:
    me.set_sharp_from_angle(angle=.52)
    wn=obj.modifiers.new('平面加權法線','WEIGHTED_NORMAL');wn.keep_sharp=True;wn.weight=50
    bpy.ops.object.modifier_apply(modifier=wn.name)
+  obj['mechVariant']=self.variant
+  obj['surfaceKind']='optics' if glow else 'glass' if key=='visor' else 'armor'
   self.parts[j].append((obj,glow));return obj
 
  def loft(self,j,name,rings,key='armor',bevel=.0,smooth=False):
@@ -183,8 +200,9 @@ class Builder:
   bpy.context.view_layer.update()
   temps=[]
   for j,parts in self.parts.items():
-   for glow in (False,True):
-    objs=[obj for obj,g in parts if g==glow]
+   for variant,kind in [(v,k) for v in ('common','cangyan','bailu','tiechao') for k in ('armor','optics','glass')]:
+    glow=kind=='optics'
+    objs=[obj for obj,g in parts if obj['mechVariant']==variant and obj['surfaceKind']==kind]
     if not objs:continue
     def detail(obj):
      return any(k in obj.name for k in ('緊固件','螺孔','磨耗','嵌環','密封','指節','散熱縫','刻線','銘牌','排線扣','散熱口','冷卻槽','止滑齒','扣件','卡榫','護環','內環','外蓋')) or max(obj.dimensions)<.30
@@ -220,11 +238,11 @@ class Builder:
      m=bpy.data.materials.new('M07_Optics' if glow else 'M07_Armor');m.use_nodes=True
      a=m.node_tree.nodes.new('ShaderNodeVertexColor');a.layer_name='SurfaceColor'
      m.node_tree.links.new(a.outputs['Color'],m.node_tree.nodes.get('Principled BSDF').inputs['Base Color'])
-    if glow:me.materials.append(m)
+    if kind!='armor':me.materials.append(m)
     else:
      for src in source_mats:me.materials.append(src)
      for face,index in zip(me.polygons,face_mats):face.material_index=index
-    o=bpy.data.objects.new(j+('_optics' if glow else '_armor'),me);self.col.objects.link(o);o.parent=self.rig[j];o['lowDetailIndexCount']=low_indices;temps.append(o)
+    o=bpy.data.objects.new(j+('' if variant=='common' else '_'+variant)+'_'+kind,me);self.col.objects.link(o);o.parent=self.rig[j];o['lowDetailIndexCount']=low_indices;o['mechVariant']=variant;temps.append(o)
   __import__('atlas').bake(self,temps)
   bpy.ops.object.select_all(action='DESELECT')
   for obj in [*self.rig.values(),*temps]:obj.select_set(True)

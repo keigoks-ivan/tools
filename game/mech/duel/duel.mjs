@@ -1,6 +1,7 @@
+import { MECHS, DEFAULT_MECH, mechInfo } from './mech-roster.mjs';
 import { STEP, LIMITS, advancePilot, sanitizeInput } from './rules.mjs';
-import { createArena } from './arena-view.mjs?v=8';
-import { loadDuelMechArt } from './duel-mech-art.mjs?v=8';
+import { createArena } from './arena-view.mjs?v=9';
+import { loadDuelMechArt } from './duel-mech-art.mjs?v=9';
 import { createControls } from './controls.mjs';
 
 const $ = id => document.getElementById(id);
@@ -30,6 +31,7 @@ const pilotNames = ['青藍', '赭紅'];
 const lerp = (a, b, t) => a + (b - a) * t;
 const lerpAngle = (a, b, t) => a + Math.atan2(Math.sin(b - a), Math.cos(b - a)) * t;
 
+let artAvailable=false;
 let arena = null, socket = null, room = null, seat = null, retries = 0, retryTimer = 0;
 let members = [false, false], ready = [false, false], paused = false, opening = false;
 let state = null, frames = [], seq = -1, pending = [], predicted = null, correction = [0, 0, 0];
@@ -38,6 +40,35 @@ let low = localQuality === null ? matchMedia('(pointer:coarse)').matches : local
 let toastTimer = 0, focusOn = false, sound = null, lastSoundEvent = -1;
 let sentInputAt = 0, simBudget = 0, lastFrame = 0, lastRendered = 0;
 let priorPhase = null, priorRound = 0;
+let selectedMech=mechInfo(read('localStorage','iron-dusk-duel.mech')).id;
+let mechs=[selectedMech,DEFAULT_MECH], canSelect=true;
+const picker=$('mech-picker');
+for (const mech of MECHS) {
+  const button=document.createElement('button');button.type='button';button.className='mech-option';
+  button.dataset.mech=mech.id;button.setAttribute('aria-pressed',String(mech.id===selectedMech));
+  button.setAttribute('aria-label',mech.name+'，'+mech.style);
+  const image=document.createElement('img');image.src='./portraits/'+mech.id+'.png?v=9';image.alt='';image.width=120;image.height=100;
+  const name=document.createElement('strong');name.textContent=mech.name;
+  const code=document.createElement('span');code.textContent=mech.code;
+  button.append(image,name,code);picker.querySelector('.mech-options').append(button);
+  button.addEventListener('click',()=>{
+    if (button.disabled) return;
+    if (seat===null) {selectedMech=mech.id;mechs=[selectedMech,DEFAULT_MECH];syncMechs();}
+    else transmit({t:'mech',id:mech.id});
+  });
+}
+function syncMechs() {
+  const active=seat===null?selectedMech:mechs[seat];
+  selectedMech=mechInfo(active).id;
+  write('localStorage','iron-dusk-duel.mech',selectedMech);
+  arena?.setMechs(mechs,seat??0);
+  const locked=opening || (seat!==null && (!canSelect || ready[seat] || socket?.readyState!==WebSocket.OPEN));
+  picker.querySelectorAll('[data-mech]').forEach(button=>{
+    button.disabled=locked || !arena || !artAvailable;button.setAttribute('aria-pressed',String(button.dataset.mech===selectedMech));
+  });
+  $('mech-note').textContent=arena&&!artAvailable?'機體外型未載入，可以重新整理重試。':ready[seat]?'取消準備後可更換外型。':!canSelect?'對戰期間鎖定外型，再戰前可重新選擇。':'三款外型，血量、速度、武器與命中範圍完全相同。';
+}
+
 
 const controls = createControls(canvas, {
   move: $('touch-move'), look: $('touch-look'), buttons: [...document.querySelectorAll('[data-drive]')],
@@ -56,6 +87,7 @@ const controls = createControls(canvas, {
 });
 
 const mechArt = await loadDuelMechArt().catch(error => { console.warn('[duel] M-07 model',error); return null; });
+artAvailable=Boolean(mechArt);
 try { arena = createArena(canvas,mechArt); }
 catch (error) { console.error('[duel] renderer', error); announce('這台裝置無法啟用 3D。請確認瀏覽器允許硬體加速。', true); }
 function setQuality(value) {
@@ -65,7 +97,7 @@ function setQuality(value) {
   write('localStorage', 'iron-dusk-duel.low', low ? '1' : '0');
 }
 $('quality').addEventListener('click', () => setQuality(!low));
-setQuality(low);
+setQuality(low);syncMechs();
 addEventListener('resize', () => arena?.resize());
 addEventListener('pointerdown', activateAudio, {once: true});
 addEventListener('keydown', activateAudio, {once: true});
@@ -139,6 +171,7 @@ function leave(close = true, forget = true, clear = true) {
   const ws = socket;
   socket = null; ws?.close();
   room = seat = null; members = [false,false]; ready = [false,false]; paused = false; retries = 0; opening = false;
+  mechs=[selectedMech,DEFAULT_MECH];canSelect=true;
   resetMatch();
   if (clear) reflectRoom(null);
   refresh();
@@ -169,7 +202,9 @@ function connect(code, retry = false) {
       clearTimeout(helloTimeout);
       seat = packet.slot; seq = packet.ack; pending = []; retries = 0; opening = false;
       write('sessionStorage', seatKey(code), packet.resume);
+      const preferred=selectedMech;
       updateLobby(packet);
+      if (!resume && canSelect && !ready[seat] && preferred!==mechs[seat]) transmit({t:'mech',id:preferred});
       if (activeOverlay === 'reconnect') hideOverlay();
       if (focusOn || controls.mode === 'pad') $('ready').focus();
       refresh();
@@ -206,6 +241,10 @@ function connect(code, retry = false) {
 }
 function updateLobby(packet) {
   members = packet.members; ready = packet.ready; paused = packet.paused === true;
+  mechs=(packet.mechs??[DEFAULT_MECH,DEFAULT_MECH]).map(id=>mechInfo(id).id);
+  canSelect=packet.canSelect===true;
+  if(state?.phase==='matchEnd')state.mechs=mechs.slice();
+  syncMechs();
   if (paused && state && activeOverlay !== 'reconnect') showOverlay('wait');
   if (!paused && activeOverlay === 'wait') hideOverlay();
 }
@@ -226,11 +265,14 @@ function refresh() {
     const connected = socket?.readyState === WebSocket.OPEN && !opening;
     $('room-label').textContent = room;
     for (let i = 0; i < 2; i++) $('pilot-' + i).textContent =
-      `${pilotNames[i]}${i === seat ? '（你）' : ''} · ${ready[i] ? '就緒' : members[i] ? '已加入' : '等待加入'}`;
+      `${pilotNames[i]}${i === seat ? '（你）' : ''} · ${members[i]?mechInfo(mechs[i]).name+' · ':''}${ready[i] ? '就緒' : members[i] ? '已加入' : '等待加入'}`;
     $('ready').textContent = ready[seat] ? '取消準備' : '準備';
     $('ready').disabled = !connected || !members.every(Boolean);
     if (connected && !playing) announce(members.every(Boolean) ? '兩位駕駛員都準備後開始。' : '複製邀請連結給朋友，等待對方加入。');
   }
+  const pickerParent=state?.phase==='matchEnd'?$('roster-result'):$('roster-home');
+  if(picker.parentNode!==pickerParent)pickerParent.append(picker);
+  syncMechs();
   controls.setDriving(playing && !paused && !activeOverlay && state.phase !== 'matchEnd');
   $('touch-controls').hidden = controls.mode !== 'touch' || !playing || Boolean(activeOverlay);
   showInputTip();
@@ -314,6 +356,8 @@ function acceptState(next, ack) {
   if (frames.length > 5) frames.shift();
   const first = !state;
   state = next; priorRound = next.round;
+  canSelect=next.phase==='matchEnd';
+  if(next.mechs)mechs=next.mechs.map(id=>mechInfo(id).id);
   if (state.phase === 'matchEnd' && !paused) showOverlay('result');
   else if (priorPhase === 'matchEnd' && activeOverlay === 'result') hideOverlay();
   if (first || priorPhase !== next.phase || resuming) refresh();

@@ -1,6 +1,7 @@
+import { mechInfo } from './mech-roster.mjs';
 import * as THREE from '../../lib/three.module.js';
 
-const model = new URL('./m07-cangyan-v8.glb', import.meta.url);
+const model = new URL('./m07-cangyan-v9.glb', import.meta.url);
 const jointNames = ['M07_Body','M07_Upper','M07_Rifle',
   ...['L','R'].flatMap(side => ['Thigh','Shin','Foot'].map(segment => `M07_${segment}_${side}`))];
 
@@ -15,7 +16,7 @@ export async function loadDuelMechArt() {
     const {geometry} = mesh;
     const finish = geometry.getAttribute('uv');
     if (!finish || !geometry.getAttribute('color')) throw new Error('M-07 GLB: missing surface data');
-    if (!mesh.name.endsWith('_optics') && (!geometry.getAttribute('uv1') || !mesh.material.map || !mesh.material.roughnessMap)) throw new Error('M-07 GLB: missing baked armor maps');
+    if (mesh.name.endsWith('_armor') && (!geometry.getAttribute('uv1') || !mesh.material.map || !mesh.material.roughnessMap)) throw new Error('M-07 GLB: missing baked armor maps');
     geometry.setAttribute('armorFinish',finish);
   });
   return scene;
@@ -27,6 +28,7 @@ function applySurface(material, slot, optics, surface) {
   material.onBeforeCompile = shader => {
     shader.uniforms.armorTint = {value:tint};
     shader.uniforms.armorSignal = {value:signal};
+    shader.uniforms.armorLivery = {value:material.userData.livery};
     shader.vertexShader = shader.vertexShader
       .replace('#include <common>', `#include <common>
         attribute vec2 armorFinish;
@@ -38,6 +40,7 @@ function applySurface(material, slot, optics, surface) {
     shader.fragmentShader = shader.fragmentShader.replace('#include <common>', `#include <common>
       uniform vec3 armorTint;
       uniform vec3 armorSignal;
+      uniform vec3 armorLivery;
       varying vec2 vArmorFinish;
       varying float vArmorTeam;`);
     if (optics) {
@@ -66,7 +69,7 @@ function applySurface(material, slot, optics, surface) {
             grain = finishGrain.r - 0.5;
           }
           float steel = smoothstep(0.09, 0.60, vArmorFinish.y);
-          diffuseColor.rgb *= mix(vec3(1.0), armorTint, vArmorTeam) * (1.0 + grain * steel * 0.18);`)
+          diffuseColor.rgb *= mix(vec3(1.0), armorTint * armorLivery, vArmorTeam) * (1.0 + grain * steel * 0.10);`)
         .replace('#include <roughnessmap_fragment>', `#include <roughnessmap_fragment>
           roughnessFactor = clamp(roughnessFactor + (finishGrain.g - 0.5) * 0.12, 0.13, 1.0);`)
         .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
@@ -79,7 +82,7 @@ function applySurface(material, slot, optics, surface) {
           }`);
     }
   };
-  material.customProgramCacheKey = () => optics ? 'm07-optics-v8' : 'm07-armor-v8';
+  material.customProgramCacheKey = () => optics ? 'm07-optics-v9' : 'm07-armor-v9';
 }
 
 export function instantiateDuelMechArt(art, slot, surface) {
@@ -90,21 +93,44 @@ export function instantiateDuelMechArt(art, slot, surface) {
     map:source.map, roughnessMap:source.roughnessMap, metalnessMap:source.roughnessMap,
     roughness:1, metalness:1, envMap:surface.environment, envMapIntensity:1.15,
   });
+  armor.userData.livery=new THREE.Vector3(1,1,1);
+  const glass = new THREE.MeshPhysicalMaterial({vertexColors:true,roughness:.10,metalness:0,clearcoat:.85,clearcoatRoughness:.08,envMap:surface.environment,envMapIntensity:1.20});
   const optics = new THREE.MeshBasicMaterial({vertexColors:true,toneMapped:false});
+  optics.userData.livery=armor.userData.livery;
   applySurface(armor,slot,false,surface);
   applySurface(optics,slot,true,surface);
   model.traverse(mesh => {
     if (!mesh.isMesh) return;
     const isOptic = mesh.name.endsWith('_optics');
-    mesh.material = isOptic ? optics : armor;
+    mesh.material = isOptic ? optics : mesh.name.endsWith('_glass') ? glass : armor;
     mesh.castShadow = !isOptic;
     mesh.receiveShadow = !isOptic;
   });
+  setDuelMechAppearance(model,'cangyan');
   return model;
 }
 
+export function setDuelMechAppearance(model, id) {
+  const mech=mechInfo(id);
+  model.userData.mech=mech.id;
+  model.traverse(part => {
+    if (!part.isMesh) return;
+    const variant=part.userData.mechVariant;
+    if (variant) part.visible=variant==='common' || variant===mech.id;
+    part.material.userData.livery?.set(...mech.livery);
+  });
+}
+
 // A small static reflection source for the armor. The convolution is shared by both pilots.
-function createArmorEnvironment(renderer) {
+function createArmorEnvironment(renderer, scene) {
+  if (scene) {
+    const cube=new THREE.WebGLCubeRenderTarget(128,{type:THREE.HalfFloatType});
+    const camera=new THREE.CubeCamera(.5,3000,cube);
+    camera.position.set(0,14,0);
+    const pmrem=new THREE.PMREMGenerator(renderer);
+    try { camera.update(renderer,scene); return pmrem.fromCubemap(cube.texture); }
+    finally { pmrem.dispose();cube.dispose(); }
+  }
   const w = 128, h = 64, data = new Float32Array(w*h*4);
   const spot = (u,v,x,y,sx,sy) => {
     const dx = Math.min(Math.abs(u-x),1-Math.abs(u-x))/sx;
@@ -174,8 +200,8 @@ function createArmorGrain() {
   return texture;
 }
 
-export function createArmorSurface(renderer) {
-  const target=createArmorEnvironment(renderer),grain=createArmorGrain();
+export function createArmorSurface(renderer, scene = null) {
+  const target=createArmorEnvironment(renderer,scene),grain=createArmorGrain();
   return {
     environment:target.texture,grain,grainStrength:{value:0},
     dispose(){target.dispose();grain.dispose();},

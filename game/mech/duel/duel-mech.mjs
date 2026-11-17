@@ -1,6 +1,6 @@
 import * as THREE from '../../lib/three.module.js';
 import { beveledProfile, MeshBatch } from './mesh-batch.mjs';
-import { instantiateDuelMechArt } from './duel-mech-art.mjs?v=8';
+import { instantiateDuelMechArt, setDuelMechAppearance } from './duel-mech-art.mjs?v=9';
 
 const STEEL = 0x51595b, DARK = 0x20262b, METAL = 0x89969a, RUBBER = 0x14191d;
 const GLASS = 0x152932, WHITE = 0xc9c8b7, WARNING = 0xda8248, SHELL = 0x39434a;
@@ -213,10 +213,10 @@ function artRig(art, slot, surface) {
   const upper = root.getObjectByName('M07_Upper');
   const gun = root.getObjectByName('M07_Rifle');
   const exhaust = exhaustMaterial(slot);
-  const jets = [-1,1].map(side => {
+  const jets = [-1,1].map((side,index) => {
     const jet = new THREE.Mesh(jetGeometry,exhaust);
-    jet.position.set(side*1.78,9.540,-4.722);
-    jet.rotation.x = -2.164;
+    jet.position.fromArray(upper.userData.exhaustOrigins?.[index] ?? [side*1.78,9.540,-4.722]);
+    jet.rotation.x = upper.userData.exhaustPitch ?? -2.164;
     jet.visible = false;
     upper.add(jet);
     return jet;
@@ -244,6 +244,9 @@ export function createDuelMech(slot = 0, art = null, surface = null) {
   const {root,body,upper,gun,jets,legs,exhaust} = art ? artRig(art,slot,surface) : fallbackRig(slot);
   root.name = 'M-07 蒼焰';
   let cycle = 0, stride = 0;
+  function setMech(id) {
+    if (art && root.userData.mech !== id) setDuelMechAppearance(root,id);
+  }
   function pose(p, dt) {
     root.position.set(p.x,p.y,p.z);
     root.rotation.y=p.yaw;
@@ -269,7 +272,7 @@ export function createDuelMech(slot = 0, art = null, surface = null) {
       if(flying)jet.scale.set(1,p.boosting?1.45: .69 + Math.sin(cycle*3)*.12,1);
     }
   }
-  return {root,pose};
+  return {root,pose,setMech};
 }
 
 export function disposeMech(root) {

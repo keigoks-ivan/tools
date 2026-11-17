@@ -1,6 +1,6 @@
 import { strict as assert } from 'node:assert';
 import { test } from 'node:test';
-import { makeResumeToken, makeRoomCode, originAllowed, readPacket, roomCode, validResumeToken } from '../src/protocol.mjs';
+import { makeResumeToken, makeRoomCode, originAllowed, readPacket, roomCode, selectMech, validResumeToken } from '../src/protocol.mjs';
 
 test('邀請與重連用各自的格式，無法將其中一種代填另一種', () => {
   const rooms = new Set(Array.from({ length: 128 }, makeRoomCode));
@@ -33,4 +33,28 @@ test('控制訊息接受明確型別與遞增所用的安全整數，拒絕客�
   for (const packet of ['{"t":"ready","value":1}', '{"t":"input","seq":-1,"input":{}}', '{"t":"input","seq":1,"input":[]}', '{"t":"matchEnd","winner":0}', new Uint8Array(8), ' '.repeat(769), '{']) {
     assert.equal(readPacket(packet), null);
   }
+});
+
+
+test('外型只接受登錄的機體，準備或交戰後不能切換', () => {
+  for(const id of ['cangyan','bailu','tiechao']) assert.deepEqual(readPacket(JSON.stringify({t:'mech',id,hp:99999})),{t:'mech',id});
+  for(const id of ['unknown','../model.glb',null,1,{},['bailu']]) assert.equal(readPacket(JSON.stringify({t:'mech',id})),null);
+  const record={slots:[{ready:false},{ready:false}],match:null};
+  assert(selectMech(record,0,'bailu'));
+  assert.equal(record.slots[0].mech,'bailu');
+  assert.equal(record.slots[1].mech,undefined);
+  record.slots[0].ready=true;
+  assert.equal(selectMech(record,0,'tiechao'),false);
+  record.slots[0].ready=false;
+  for(const phase of ['countdown','fight','roundEnd']) {
+    record.match={phase,players:[{hp:9000,ammo:40}],wins:[0,0]};
+    const before=structuredClone(record.match);
+    assert.equal(selectMech(record,0,'tiechao'),false);
+    assert.deepEqual(record.match,before);
+  }
+  record.match.phase='matchEnd';
+  const ended=structuredClone(record.match);
+  assert(selectMech(record,0,'tiechao'));
+  assert.deepEqual(record.match,ended);
+  assert.equal(selectMech(record,9,'cangyan'),false);
 });

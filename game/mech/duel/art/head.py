@@ -11,21 +11,17 @@ def build(b):
  # The dome is elongated front-to-back. Its rear is low and the forehead is swept.
  b.loft(J,'戰機頭盔內部殼體',[
   section(14.16,0,.60,.77,.77,.22),section(14.57,0,.65,1.10,1.00,.29),
-  section(15.30,0,.72,1.28,1.22,.34),section(15.94,0,.55,1.12,1.08,.31),
-  section(16.38,0,.34,.72,.73,.24),section(16.48,0,.25,.46,.48,.17)
+  section(15.30,0,.72,1.28,1.22,.34),section(15.68,0,.55,1.03,.93,.27),
+  section(16.08,0,.34,.64,.62,.20),section(16.12,0,.25,.40,.43,.15)
  ],'dark',.045)
  # Upper shell wraps over the side of the visor; each slice is a real solid volume.
  def crown(z,cy,w,h):
   return [(-w*.68,cy+h,z),(w*.68,cy+h,z),(w,cy+h*.40,z),(w,cy-h*.54,z),(w*.68,cy-h,z),(-w*.68,cy-h,z),(-w,cy-h*.54,z),(-w,cy+h*.40,z)]
  b.loft(J,'流線額部主裝甲',[
-  crown(-.55,15.62,.74,.60),crown(.18,15.72,1.16,.72),
-  crown(1.17,15.59,1.25,.61),crown(1.94,15.43,1.05,.36),crown(2.48,15.36,.61,.17)
- ],'navy',0,True)
- # A faceted dorsal ridge replaces decorative antennae.
- b.loft(J,'中央後掠額脊',[
-  [(-.19,15.42,2.10),(.19,15.42,2.10),(.20,15.49,2.03),(.16,15.56,1.91),(-.16,15.56,1.91),(-.20,15.49,2.03)],
-  [(-.24,16.36,.20),(.24,16.36,.20),(.28,16.47,.12),(.22,16.55,-.02),(-.22,16.55,-.02),(-.28,16.47,.12)]
- ],'blue',.015)
+  crown(-.55,15.69,.74,.49),crown(.18,15.78,1.12,.57),
+  crown(1.17,15.63,1.22,.46),crown(1.94,15.43,1.05,.36),crown(2.48,15.36,.61,.17)
+ ],'navy',.020)
+ b.panel(J,'頭盔上方平嵌檢修蓋',[(-.24,16.34,.07),(.24,16.34,.07),(.29,16.14,1.13),(.18,15.76,1.96),(-.18,15.76,1.96),(-.29,16.14,1.13)],(0,-.045,-.015),'blue',.012)
  # Continuous panoramic visor, curved around the helmet's front corners.
  samples=17
  rows=[]

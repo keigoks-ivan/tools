@@ -1,3 +1,5 @@
+import { isMechId } from '../../../game/mech/duel/mech-roster.mjs';
+
 const ALPHABET = '0123456789abcdefghjkmnpqrstvwxyz';
 const ROOM_CODE = /^[0-9abcdefghjkmnpqrstvwxyz]{24}$/;
 const RESUME_TOKEN = /^[0-9a-f]{32}$/;
@@ -47,6 +49,8 @@ export function readPacket(message) {
   switch (packet?.t) {
     case 'ready':
       return typeof packet.value === 'boolean' ? { t: 'ready', value: packet.value } : null;
+    case 'mech':
+      return isMechId(packet.id) ? {t:'mech',id:packet.id} : null;
     case 'rematch':
       return { t: 'rematch' };
     case 'leave':
@@ -57,4 +61,13 @@ export function readPacket(message) {
     default:
       return null;
   }
+}
+
+// A selection never touches a pilot, weapon or collision value.
+export function selectMech(record, slot, id) {
+  const seat=record?.slots?.[slot];
+  if (!seat || seat.ready || !isMechId(id) || (record.match && record.match.phase !== 'matchEnd')) return false;
+  if (seat.mech === id) return false;
+  seat.mech=id;
+  return true;
 }

@@ -34,8 +34,7 @@ def build(b):
   b.cyl(J,'腹部環形承力層',(0,y-d/2,-.12),(0,y+d/2,-.12),r,c,16)
  b.box(J,'腹部內嵌電控模組',(0,11.39,.62),(.71,.56,.36),'dark',.04)
  pelvis(b)
- shoulders(b)
- packs(b)
+
 
 def pelvis(b):
  j='M07_Body'

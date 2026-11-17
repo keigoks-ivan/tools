@@ -1,8 +1,8 @@
 import * as THREE from '../../lib/three.module.js';
 import { ARENA } from './arena-layout.mjs';
 import { aimTarget, pilotAim } from './rules.mjs';
-import { createDuelMech } from './duel-mech.mjs?v=8';
-import { createArmorSurface } from './duel-mech-art.mjs?v=8';
+import { createDuelMech } from './duel-mech.mjs?v=9';
+import { createArmorSurface } from './duel-mech-art.mjs?v=9';
 import { buildHarbor } from './harbor-view.mjs';
 
 const team = [new THREE.Color(0x66ddee),new THREE.Color(0xff985e)];
@@ -131,7 +131,7 @@ export function createArena(canvas, art = null) {
   const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(59,1,.65,4100);
   const {time:waterTime,sun}=buildHarbor(scene);
   const relay=relayMarker();scene.add(relay.g);
-  const armorSurface=art ? createArmorSurface(renderer) : null;
+  const armorSurface=art ? createArmorSurface(renderer,scene) : null;
   const vehicles=[createDuelMech(0,art,armorSurface),createDuelMech(1,art,armorSurface)];
   const shadowGe=new THREE.PlaneGeometry(1,1).rotateX(-Math.PI/2), shadowTex=shadowTexture();
   const shadows=vehicles.map(({root})=>{
@@ -145,6 +145,11 @@ export function createArena(canvas, art = null) {
   const center=new THREE.Vector3(), dir=new THREE.Vector3(), horizontal=new THREE.Vector3(), target=new THREE.Vector3();
   const follow=new THREE.Vector3(), collision=new THREE.Vector3(), tmp=new THREE.Vector3(), cameraRay=new THREE.Ray();
   let worldTime=0, currentWidth=0,currentHeight=0, cameraDistance=0, lastLocal=false;
+  let previewSlot=0;
+  function setMechs(ids,focus=0) {
+    previewSlot=focus===1?1:0;
+    vehicles.forEach((v,i)=>v.setMech(ids?.[i]));
+  }
   function resize() {
     const w=Math.max(1,canvas.clientWidth), h=Math.max(1,canvas.clientHeight);
     if(w===currentWidth&&h===currentHeight)return;
@@ -167,7 +172,8 @@ export function createArena(canvas, art = null) {
   }
   function render(state,slot,dt,cameraInput) {
     resize();
-    const players=state?.players??preview;
+    const players=state?.players??(previewSlot===1?[preview[1],preview[0]]:preview);
+    if(state?.mechs)vehicles.forEach((v,i)=>v.setMech(state.mechs[i]));
     const p=state?.players?.[slot];
     worldTime+=dt;waterTime.value=worldTime;
     for(let i=0;i<vehicles.length;i++){
@@ -230,5 +236,5 @@ export function createArena(canvas, art = null) {
     armorSurface?.dispose();sun.shadow.dispose();renderer.dispose();
   }
   setQuality(0);
-  return {render,setQuality,resize,dispose,aimPoint};
+  return {render,setQuality,resize,dispose,aimPoint,setMechs};
 }

@@ -1,6 +1,7 @@
+import { mechInfo } from '../../../game/mech/duel/mech-roster.mjs';
 import { DurableObject } from 'cloudflare:workers';
 import { STEP, createMatch, sanitizeInput, snapshotMatch, tickMatch } from '../../../game/mech/duel/rules.mjs';
-import { CLOSE, PROTOCOL, makeResumeToken, makeRoomCode, originAllowed, readPacket, roomCode, validResumeToken } from './protocol.mjs';
+import { CLOSE, PROTOCOL, makeResumeToken, makeRoomCode, originAllowed, readPacket, roomCode, selectMech, validResumeToken } from './protocol.mjs';
 
 const LEASE = 45_000;
 const IDLE = 20 * 60_000;
@@ -99,6 +100,8 @@ export class DuelRoom extends DurableObject {
   status() {
     return {
       members: this.peers.map(Boolean),
+      mechs: this.record.slots.map(seat => mechInfo(seat?.mech).id),
+      canSelect: !this.record.match || this.record.match.phase === 'matchEnd',
       ready: this.record.slots.map(seat => seat?.ready === true),
       paused: Boolean(this.playing && !this.peers.every(Boolean)),
     };
@@ -114,7 +117,7 @@ export class DuelRoom extends DurableObject {
   }
 
   snapshots() {
-    const state = snapshotMatch(this.record.match);
+    const state = {...snapshotMatch(this.record.match),mechs:this.status().mechs};
     this.peers.forEach((ws, slot) => this.send(ws, { t: 'state', state, ack: this.record.slots[slot]?.ack ?? -1 }));
   }
 
@@ -211,6 +214,14 @@ export class DuelRoom extends DurableObject {
       if (!this.playing || packet.seq <= seat.ack) return;
       seat.ack = packet.seq;
       this.input[slot] = { value: sanitizeInput(packet.input), until: now + INPUT_TIMEOUT };
+      return;
+    }
+    if (packet.t === 'mech') {
+      if (selectMech(this.record,slot,packet.id)) {
+        this.record.idleUntil=now+IDLE;
+        this.broadcast({t:'room',...this.status()});
+        await this.saveRoom();
+      }
       return;
     }
     const canReady = packet.t === 'ready' && !match;

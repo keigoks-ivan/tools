@@ -7,9 +7,9 @@
   <meta name="description" content="鋼鐵黃昏的神戶港機甲對戰。分享房間連結，和朋友進行即時地空決鬥。">
   <title>神戶港決鬥｜鋼鐵黃昏</title>
   <link rel="icon" href="data:,">
-  <link rel="stylesheet" href="./duel.css?v=1">
+  <link rel="stylesheet" href="./duel.css?v=9">
   <script type="importmap">{"imports":{"three":"../../lib/three.module.js"}}</script>
-  <script type="module" src="./duel.mjs?v=8"></script>
+  <script type="module" src="./duel.mjs?v=9"></script>
 </head>
 <body>
   <canvas id="arena" aria-label="神戶港機甲對戰畫面"></canvas>
@@ -21,10 +21,17 @@
   <main id="menu">
     <section class="intro">
       <h1>神戶港決鬥</h1>
-      <p>開房邀請一位朋友，駕駛 M-07 蒼焰進行地空對戰。</p>
+      <p>選擇你的機體，邀請一位朋友在神戶港進行地空對戰。</p>
     </section>
     <section id="lobby" class="panel" aria-labelledby="lobby-title">
       <h2 id="lobby-title">好友對戰 <span>1 對 1</span></h2>
+      <div id="roster-home">
+        <fieldset id="mech-picker" aria-describedby="mech-note">
+          <legend>選擇機體</legend>
+          <div class="mech-options"></div>
+          <p id="mech-note">三款外型，血量、速度、武器與命中範圍完全相同。</p>
+        </fieldset>
+      </div>
       <div id="entry">
         <button id="create" class="primary" type="button" disabled>建立房間</button>
         <form id="join">
@@ -80,6 +87,7 @@
   <section id="overlay" class="panel" aria-labelledby="overlay-title" hidden>
     <h2 id="overlay-title"></h2>
     <p id="overlay-text"></p>
+    <div id="roster-result"></div>
     <div class="actions">
       <button id="overlay-main" class="primary" type="button"></button>
       <button id="overlay-leave" type="button">離開房間</button>

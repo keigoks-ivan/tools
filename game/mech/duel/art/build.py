@@ -12,11 +12,22 @@ sys.path.insert(0,str(WORK))
 from geometry import Builder, OUT
 bpy.ops.wm.read_factory_settings(use_empty=True)
 b=Builder()
-for module in ('chassis','legs','arms','head'):
+for module in ('chassis','legs','arms'):
  __import__(module).build(b)
+b.variant='cangyan'
+__import__('head').build(b)
+__import__('chassis').shoulders(b)
+__import__('chassis').packs(b)
+for variant in ('bailu','tiechao'):
+ b.variant=variant
+ __import__('variants').build(b,variant)
+b.variant='common'
+__import__('refinement').build(b)
 __import__('surface').install()
 bpy.context.scene.unit_settings.system='METRIC'
 if '--draft' not in sys.argv:b.export(OUT/'m07-cangyan.raw.glb')
+for parts in b.parts.values():
+ for obj,_ in parts:obj.hide_render=obj.hide_viewport=obj['mechVariant'] not in ('common','cangyan')
 b.rig['M07_Rifle'].rotation_euler.x=1.08
 bpy.ops.object.select_all(action='DESELECT')
 for screen in bpy.data.screens:
@@ -26,4 +37,4 @@ for screen in bpy.data.screens:
    s.region_3d.view_rotation=Vector((-19,34,-12)).to_track_quat('-Z','Y');s.clip_end=500
    s.shading.color_type='MATERIAL';s.overlay.show_extras=False
 bpy.context.preferences.filepaths.save_version=0
-bpy.ops.wm.save_as_mainfile(filepath=str(OUT/'M-07-蒼焰-v8.blend'),compress=True)
+bpy.ops.wm.save_as_mainfile(filepath=str(OUT/'M-07-蒼焰-v9.blend'),compress=True)
