@@ -1,0 +1,25 @@
+name = "mech-duel"
+main = "src/index.mjs"
+compatibility_date = "2025-09-01"
+workers_dev = true
+
+[[durable_objects.bindings]]
+name = "ROOMS"
+class_name = "DuelRoom"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["DuelRoom"]
+
+[[ratelimits]]
+name = "CREATE_LIMIT"
+namespace_id = "72831"
+simple = { limit = 12, period = 60 }
+
+[[ratelimits]]
+name = "JOIN_LIMIT"
+namespace_id = "72832"
+simple = { limit = 36, period = 60 }
+
+[vars]
+ALLOWED_ORIGINS = "https://tools.investmquest.com,http://localhost:*,http://127.0.0.1:*"

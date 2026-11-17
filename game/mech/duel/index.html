@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#101b23">
+  <meta name="description" content="鋼鐵黃昏的神戶港機甲對戰。分享房間連結，和朋友進行即時地空決鬥。">
+  <title>神戶港決鬥｜鋼鐵黃昏</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="./duel.css?v=1">
+  <script type="module" src="./duel.mjs?v=1"></script>
+</head>
+<body>
+  <canvas id="arena" aria-label="神戶港機甲對戰畫面"></canvas>
+  <div id="veil" aria-hidden="true"></div>
+  <header id="top">
+    <a class="home" href="../">鋼鐵黃昏</a>
+    <button id="quality" type="button" aria-pressed="false">省效能</button>
+  </header>
+  <main id="menu">
+    <section class="intro">
+      <h1>神戶港決鬥</h1>
+      <p>開房邀請一位朋友，駕駛 M-07 鹽隼進行地空對戰。</p>
+    </section>
+    <section id="lobby" class="panel" aria-labelledby="lobby-title">
+      <h2 id="lobby-title">好友對戰 <span>1 對 1</span></h2>
+      <div id="entry">
+        <button id="create" class="primary" type="button">建立房間</button>
+        <form id="join">
+          <label class="sr" for="room-code">房號</label>
+          <input id="room-code" type="text" inputmode="text" autocomplete="off" spellcheck="false" placeholder="輸入房號" maxlength="512">
+          <button type="submit">加入</button>
+        </form>
+      </div>
+      <div id="seated" hidden>
+        <div class="room-info"><span>房號</span><strong id="room-label"></strong><button id="copy" type="button">複製邀請</button></div>
+        <div class="pilot-list"><p><span class="badge azure"></span><span id="pilot-0"></span></p><p><span class="badge amber"></span><span id="pilot-1"></span></p></div>
+        <div class="actions"><button class="primary" id="ready" type="button">準備</button><button id="leave" type="button">離開</button></div>
+        <p id="copy-note" class="message" role="status" hidden></p>
+      </div>
+      <p id="status" class="message" role="status">兩位駕駛員都準備後開始。</p>
+    </section>
+    <details id="guide">
+      <summary>操作說明</summary>
+      <dl>
+        <div><dt>鍵鼠</dt><dd>WASD 移動 · 滑鼠瞄準 · 左鍵步槍 · 右鍵按住鎖定，放開發射 · 空白上升 · C 下降 · Shift 衝刺</dd></div>
+        <div><dt>手把</dt><dd>左搖桿移動 · 右搖桿瞄準 · RT 步槍 · LT 鎖定飛彈 · RB 上升 · LB 下降 · 按下左搖桿衝刺。選單用方向鍵與 A。</dd></div>
+        <div><dt>觸控</dt><dd>左側搖桿移動 · 右側拖曳瞄準 · 按住步槍可同時追瞄 · 按住飛彈鎖定，放開發射。</dd></div>
+      </dl>
+    </details>
+  </main>
+  <section id="hud" aria-label="對戰儀表" hidden>
+    <div class="score">
+      <strong id="wins-0" class="azure-text">0</strong>
+      <div><span id="round">第 1 回合</span><b id="clock">02:00</b></div>
+      <strong id="wins-1" class="amber-text">0</strong>
+    </div>
+    <div id="objective" class="objective" hidden><span id="objective-title"></span><progress id="objective-bar" max="1" value="0"></progress></div>
+    <div id="crosshair" aria-hidden="true"><i></i></div>
+    <div id="announcer" aria-live="polite" hidden></div>
+    <div id="pilot-hud">
+      <div class="vital"><span>裝甲 <b id="hp-label"></b></span><progress id="hp" max="9000" value="9000"></progress></div>
+      <div class="vital"><span>能量 <b id="energy-label"></b></span><progress id="energy" max="100" value="100"></progress></div>
+      <div class="vital"><span>步槍 <b id="ammo">40</b></span><span>飛彈 <b id="missile">就緒</b></span></div>
+    </div>
+    <div id="battle-tip">點擊畫面啟用滑鼠瞄準</div>
+    <div id="touch-controls" hidden>
+      <div id="touch-look"></div>
+      <div id="touch-move" aria-label="移動"><i></i></div>
+      <div id="touch-actions">
+        <button type="button" data-drive="missile">飛彈</button>
+        <button type="button" data-drive="fire">步槍</button>
+        <button type="button" data-drive="boost">衝刺</button>
+        <button type="button" data-drive="descend">下降</button>
+        <button type="button" data-drive="ascend">上升</button>
+      </div>
+    </div>
+  </section>
+  <section id="overlay" class="panel" aria-labelledby="overlay-title" hidden>
+    <h2 id="overlay-title"></h2>
+    <p id="overlay-text"></p>
+    <div class="actions">
+      <button id="overlay-main" class="primary" type="button"></button>
+      <button id="overlay-leave" type="button">離開房間</button>
+    </div>
+  </section>
+  <div id="toast" aria-live="polite" hidden></div>
+</body>
+</html>
