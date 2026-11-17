@@ -1,6 +1,6 @@
 import * as THREE from '../../lib/three.module.js';
 
-const model = new URL('./m07-cangyan-v5.glb', import.meta.url);
+const model = new URL('./m07-cangyan-v6.glb', import.meta.url);
 const jointNames = ['M07_Body','M07_Upper','M07_Rifle',
   ...['L','R'].flatMap(side => ['Thigh','Shin','Foot'].map(segment => `M07_${segment}_${side}`))];
 

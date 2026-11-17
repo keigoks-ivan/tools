@@ -1,6 +1,6 @@
 import * as THREE from '../../lib/three.module.js';
 import { beveledProfile, MeshBatch } from './mesh-batch.mjs';
-import { instantiateDuelMechArt } from './duel-mech-art.mjs?v=5';
+import { instantiateDuelMechArt } from './duel-mech-art.mjs?v=6';
 
 const STEEL = 0x51595b, DARK = 0x20262b, METAL = 0x89969a, RUBBER = 0x14191d;
 const GLASS = 0x152932, WHITE = 0xc9c8b7, WARNING = 0xda8248, SHELL = 0x39434a;
