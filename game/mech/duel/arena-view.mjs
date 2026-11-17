@@ -1,7 +1,8 @@
 import * as THREE from '../../lib/three.module.js';
 import { ARENA } from './arena-layout.mjs';
 import { aimTarget, pilotAim } from './rules.mjs';
-import { createDuelMech } from './duel-mech.mjs';
+import { createDuelMech } from './duel-mech.mjs?v=3';
+import { createArmorEnvironment } from './duel-mech-art.mjs?v=3';
 import { buildHarbor } from './harbor-view.mjs';
 
 const team = [new THREE.Color(0x66ddee),new THREE.Color(0xff985e)];
@@ -121,7 +122,7 @@ function effectPool(scene) {
   return {update};
 }
 
-export function createArena(canvas) {
+export function createArena(canvas, art = null) {
   const renderer=new THREE.WebGLRenderer({canvas, antialias:false, powerPreference:'high-performance'});
   renderer.outputColorSpace=THREE.SRGBColorSpace;
   renderer.toneMapping=THREE.ACESFilmicToneMapping;
@@ -130,7 +131,8 @@ export function createArena(canvas) {
   const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(59,1,.65,4100);
   const {time:waterTime,sun}=buildHarbor(scene);
   const relay=relayMarker();scene.add(relay.g);
-  const vehicles=[createDuelMech(0),createDuelMech(1)];
+  const armorEnvironment=art ? createArmorEnvironment(renderer) : null;
+  const vehicles=[createDuelMech(0,art,armorEnvironment?.texture),createDuelMech(1,art,armorEnvironment?.texture)];
   const shadowGe=new THREE.PlaneGeometry(1,1).rotateX(-Math.PI/2), shadowTex=shadowTexture();
   const shadows=vehicles.map(({root})=>{
     const marker=new THREE.Mesh(shadowGe,new THREE.MeshBasicMaterial({
@@ -214,7 +216,7 @@ export function createArena(canvas) {
     });
     for(const geo of geometries)geo.dispose();
     for(const mat of materials){mat.map?.dispose();mat.dispose();}
-    sun.shadow.dispose();renderer.dispose();
+    armorEnvironment?.dispose();sun.shadow.dispose();renderer.dispose();
   }
   setQuality(0);
   return {render,setQuality,resize,dispose,aimPoint};

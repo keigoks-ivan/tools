@@ -1,5 +1,6 @@
 import * as THREE from '../../lib/three.module.js';
 import { beveledProfile, MeshBatch } from './mesh-batch.mjs';
+import { instantiateDuelMechArt } from './duel-mech-art.mjs?v=3';
 
 const STEEL = 0x51595b, DARK = 0x20262b, METAL = 0x89969a, RUBBER = 0x14191d;
 const GLASS = 0x152932, WHITE = 0xc9c8b7, WARNING = 0xda8248, SHELL = 0x39434a;
@@ -169,14 +170,41 @@ function leg(root, side, color) {
   return {upper,lower,foot,side};
 }
 
-/** Original model; no browser/renderer needed to create or export the group. */
-export function createDuelMech(slot = 0) {
+function artRig(art, slot, environment) {
+  const root = instantiateDuelMechArt(art,slot,environment);
+  const body = root.getObjectByName('M07_Body');
+  const upper = root.getObjectByName('M07_Upper');
+  const gun = root.getObjectByName('M07_Rifle');
+  const jets = [-1,1].map(side => {
+    const jet = new THREE.Mesh(jetGeometry,jointGlow);
+    jet.position.set(side*1.72,8.67,-4.9);
+    jet.rotation.x = -2.19;
+    jet.visible = false;
+    upper.add(jet);
+    return jet;
+  });
+  const legs = ['L','R'].map((side,index) => ({
+    upper:root.getObjectByName('M07_Thigh_'+side),
+    lower:root.getObjectByName('M07_Shin_'+side),
+    foot:root.getObjectByName('M07_Foot_'+side),
+    side:index*2-1,
+  }));
+  return {root,body,upper,gun,jets,legs};
+}
+
+function fallbackRig(slot) {
   const root = new THREE.Group(), color = paint[slot] ?? paint[0], signal = glow[slot] ?? glow[0];
   const body = new THREE.Group();
-  root.name = 'M-07 鹽隼'; root.add(body);
+  root.add(body);
   const {group:upper,jets} = hull(body,color,signal);
   const gun = weapon(upper,color,signal);
   const legs = [-1,1].map(side=>leg(body,side,color));
+  return {root,body,upper,gun,jets,legs};
+}
+
+export function createDuelMech(slot = 0, art = null, environment = null) {
+  const {root,body,upper,gun,jets,legs} = art ? artRig(art,slot,environment) : fallbackRig(slot);
+  root.name = 'M-07 蒼焰';
   let cycle = 0, stride = 0;
   function pose(p, dt) {
     root.position.set(p.x,p.y,p.z);

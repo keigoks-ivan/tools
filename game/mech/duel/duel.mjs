@@ -1,5 +1,6 @@
 import { STEP, LIMITS, advancePilot, sanitizeInput } from './rules.mjs';
-import { createArena } from './arena-view.mjs';
+import { createArena } from './arena-view.mjs?v=3';
+import { loadDuelMechArt } from './duel-mech-art.mjs?v=3';
 import { createControls } from './controls.mjs';
 
 const $ = id => document.getElementById(id);
@@ -54,7 +55,8 @@ const controls = createControls(canvas, {
   },
 });
 
-try { arena = createArena(canvas); }
+const mechArt = await loadDuelMechArt().catch(error => { console.warn('[duel] M-07 model',error); return null; });
+try { arena = createArena(canvas,mechArt); }
 catch (error) { console.error('[duel] renderer', error); announce('這台裝置無法啟用 3D。請確認瀏覽器允許硬體加速。', true); }
 function setQuality(value) {
   low = value;
