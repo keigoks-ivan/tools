@@ -16,8 +16,8 @@ for module in ('chassis','legs','arms','head'):
  __import__(module).build(b)
 __import__('surface').install()
 bpy.context.scene.unit_settings.system='METRIC'
-b.export(OUT/'m07-cangyan.raw.glb')
-b.rig['M07_Rifle'].rotation_euler.x=.98
+if '--draft' not in sys.argv:b.export(OUT/'m07-cangyan.raw.glb')
+b.rig['M07_Rifle'].rotation_euler.x=1.08
 bpy.ops.object.select_all(action='DESELECT')
 for screen in bpy.data.screens:
  for area in screen.areas:
@@ -26,4 +26,4 @@ for screen in bpy.data.screens:
    s.region_3d.view_rotation=Vector((-19,34,-12)).to_track_quat('-Z','Y');s.clip_end=500
    s.shading.color_type='MATERIAL';s.overlay.show_extras=False
 bpy.context.preferences.filepaths.save_version=0
-bpy.ops.wm.save_as_mainfile(filepath=str(OUT/'M-07-蒼焰-v7.blend'),compress=True)
+bpy.ops.wm.save_as_mainfile(filepath=str(OUT/'M-07-蒼焰-v8.blend'),compress=True)

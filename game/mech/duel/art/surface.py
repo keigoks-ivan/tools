@@ -1,52 +1,67 @@
-"""Deterministic small, tiling finish map; mirrored in the browser's shared surface."""
-import math, random
-from pathlib import Path
+"""Painted alloy finishes baked once into a shared game atlas."""
 import bpy
-from geometry import PALETTE, material, OUT
-
-SIZE=256
-
-def generate():
- def h(x,y):
-  n=((int(x)+29)*0x21f0aaad)^((int(y)+47)*0x735a2d97)
-  n&=0xffffffff
-  return ((((n^(n>>14))*0x9e3779b9)&0xffffffff)>>24)/255
- def noise(x,y,span):
-  gx=x/span;gy=y/span;ix=math.floor(gx);iy=math.floor(gy);fx=gx-ix;fy=gy-iy
-  fx=fx*fx*(3-2*fx);fy=fy*fy*(3-2*fy)
-  a=h(ix,iy)*(1-fx)+h(ix+1,iy)*fx;b=h(ix,iy+1)*(1-fx)+h(ix+1,iy+1)*fx
-  return a*(1-fy)+b*fy
- data=[]
- for y in range(SIZE):
-  for x in range(SIZE):
-   patch=noise(x,y,32)-.5; grain=h(x,y)-.5;brush=h(x,1)-.5
-   data.extend([.50+.32*patch+.10*grain,.50+.34*patch+.10*brush,.50+.10*grain+.10*brush,1.])
- for k in range(320):
-  x=int(h(k,13)*255);y=int(h(k,17)*255);length=2+int(h(k,21)*37)
-  dark=h(k,41)<.62
-  for i in range(length):
-   pos=(((y+i)%SIZE)*SIZE+(x+int(i*.06))%SIZE)*4
-   fade=math.sin(math.pi*(i+1)/(length+1));amount=(-.24 if dark else .22)*fade
-   data[pos]+=amount;data[pos+1]+=(.21 if dark else -.19)*fade;data[pos+2]-=.20*fade
- image=bpy.data.images.new('合金表面微紋',width=SIZE,height=SIZE,alpha=True)
- image.colorspace_settings.name='Non-Color';image.pixels.foreach_set(data)
- image.file_format='PNG';image.filepath_raw=str(OUT/'surface.png');image.save();image.pack()
- return image
+from geometry import PALETTE, material
 
 def install():
- image=generate()
  for key in PALETTE:
-  if key in ('cyan','amber','recess','rubber'):continue
+  if key in ('cyan','amber'):continue
   mat=material(key);nodes=mat.node_tree.nodes;links=mat.node_tree.links;p=nodes.get('Principled BSDF')
-  coord=nodes.new('ShaderNodeTexCoord');scale=nodes.new('ShaderNodeVectorMath');scale.operation='SCALE';scale.inputs[3].default_value=1/2.6
-  links.new(coord.outputs['Object'],scale.inputs[0])
-  tex=nodes.new('ShaderNodeTexImage');tex.image=image;tex.projection='BOX';tex.projection_blend=.08;tex.extension='REPEAT'
-  links.new(scale.outputs[0],tex.inputs[0]);sep=nodes.new('ShaderNodeSeparateColor');links.new(tex.outputs['Color'],sep.inputs[0])
-  mul=nodes.new('ShaderNodeMath');mul.operation='MULTIPLY_ADD';mul.inputs[1].default_value=.64;mul.inputs[2].default_value=.68;links.new(sep.outputs[0],mul.inputs[0])
-  rgb=nodes.new('ShaderNodeRGB');rgb.outputs[0].default_value=p.inputs['Base Color'].default_value
-  tint=nodes.new('ShaderNodeMixRGB');tint.blend_type='MULTIPLY';tint.inputs[0].default_value=1
-  links.new(rgb.outputs[0],tint.inputs[1]);links.new(mul.outputs[0],tint.inputs[2]);links.new(tint.outputs[0],p.inputs['Base Color'])
-  rough=nodes.new('ShaderNodeMath');rough.operation='MULTIPLY_ADD';rough.inputs[1].default_value=.36;rough.inputs[2].default_value=PALETTE[key][1]-.18
-  links.new(sep.outputs[1],rough.inputs[0]);links.new(rough.outputs[0],p.inputs['Roughness'])
-  bump=nodes.new('ShaderNodeBump');bump.inputs['Strength'].default_value=.40;bump.inputs['Distance'].default_value=.0025
-  links.new(sep.outputs[2],bump.inputs['Height']);links.new(bump.outputs[0],p.inputs['Normal'])
+  if key=='visor':
+   p.inputs['Coat Weight'].default_value=.65;p.inputs['Coat Roughness'].default_value=.11
+   continue
+  if key in ('rubber','recess'):continue
+  def node(typ):return nodes.new(typ)
+  def math(op,a,b=0,c=0):
+   n=node('ShaderNodeMath');n.operation=op
+   for i,v in enumerate((a,b,c)):
+    if i>=len(n.inputs):break
+    if isinstance(v,(int,float)):n.inputs[i].default_value=v
+    else:links.new(v,n.inputs[i])
+   return n.outputs[0]
+  def mix(a,b,f,mode='MIX'):
+   n=node('ShaderNodeMixRGB');n.blend_type=mode
+   for i,v in enumerate((f,a,b)):
+    if isinstance(v,(int,float)):n.inputs[i].default_value=v
+    elif isinstance(v,tuple):n.inputs[i].default_value=v
+    else:links.new(v,n.inputs[i])
+   return n.outputs[0]
+  def ramp(value,stops):
+   n=node('ShaderNodeValToRGB');r=n.color_ramp
+   while len(r.elements)>2:r.elements.remove(r.elements[-1])
+   r.elements[0].position=stops[0][0];r.elements[0].color=(stops[0][1],)*3+(1,)
+   r.elements[1].position=stops[-1][0];r.elements[1].color=(stops[-1][1],)*3+(1,)
+   for pos,c in stops[1:-1]:e=r.elements.new(pos);e.color=(c,c,c,1)
+   links.new(value,n.inputs[0]);return n.outputs[0]
+  geo=node('ShaderNodeNewGeometry')
+  def noise(scale,detail=3,rough=.65):
+   n=node('ShaderNodeTexNoise');n.inputs['Scale'].default_value=scale;n.inputs['Detail'].default_value=detail;n.inputs['Roughness'].default_value=rough
+   links.new(geo.outputs['Position'],n.inputs['Vector']);return n.outputs['Fac']
+  broad=noise(1.9,4);fine=noise(38,3);micro=noise(180,2)
+  # Broken chips follow convex machined edges; broad faces keep their pigment.
+  bevel=node('ShaderNodeBevel');bevel.inputs['Radius'].default_value=.085;bevel.samples=4
+  dot=node('ShaderNodeVectorMath');dot.operation='DOT_PRODUCT';links.new(geo.outputs['Normal'],dot.inputs[0]);links.new(bevel.outputs['Normal'],dot.inputs[1])
+  edge=ramp(math('SUBTRACT',1,dot.outputs['Value']),[(.001,0),(.065,1)])
+  breakup=ramp(fine,[(.36,0),(.56,1)])
+  wear=math('MULTIPLY',edge,breakup)
+  paint=p.inputs['Base Color'].default_value[:]
+  variation=math('MULTIPLY_ADD',broad,.78,.64)
+  base=mix(paint,variation,1,'MULTIPLY')
+  is_paint=key in ('blue','blue2','navy','armor','armor2','orange','orange2','bone')
+  if is_paint:
+   # A dark primer halo sits just inside chipped, exposed steel.
+   halo=math('MULTIPLY',edge,.36)
+   base=mix(base,(.025,.029,.032,1),halo)
+   base=mix(base,(.19,.205,.21,1),math('MULTIPLY',wear,.88))
+  ao=node('ShaderNodeAmbientOcclusion');ao.inputs['Distance'].default_value=.38;ao.samples=8
+  base=mix(base,ao.outputs['Color'],.62,'MULTIPLY')
+  links.new(base,p.inputs['Base Color'])
+  rough=math('MULTIPLY_ADD',broad,.28,PALETTE[key][1]-.11)
+  if is_paint:rough=math('SUBTRACT',rough,math('MULTIPLY',wear,.13))
+  links.new(rough,p.inputs['Roughness'])
+  metal=math('MULTIPLY_ADD',wear,.54 if is_paint else .06,PALETTE[key][2])
+  links.new(metal,p.inputs['Metallic'])
+  p.inputs['Coat Weight'].default_value=.13 if is_paint else .0
+  p.inputs['Coat Roughness'].default_value=.32
+  bump=node('ShaderNodeBump');bump.inputs['Strength'].default_value=.24;bump.inputs['Distance'].default_value=.018
+  links.new(math('ADD',math('MULTIPLY',fine,.65),math('MULTIPLY',micro,.35)),bump.inputs['Height'])
+  links.new(bump.outputs[0],p.inputs['Normal'])

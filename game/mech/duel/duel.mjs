@@ -1,6 +1,6 @@
 import { STEP, LIMITS, advancePilot, sanitizeInput } from './rules.mjs';
-import { createArena } from './arena-view.mjs?v=7';
-import { loadDuelMechArt } from './duel-mech-art.mjs?v=7';
+import { createArena } from './arena-view.mjs?v=8';
+import { loadDuelMechArt } from './duel-mech-art.mjs?v=8';
 import { createControls } from './controls.mjs';
 
 const $ = id => document.getElementById(id);

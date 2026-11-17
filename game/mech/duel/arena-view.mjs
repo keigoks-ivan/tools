@@ -1,8 +1,8 @@
 import * as THREE from '../../lib/three.module.js';
 import { ARENA } from './arena-layout.mjs';
 import { aimTarget, pilotAim } from './rules.mjs';
-import { createDuelMech } from './duel-mech.mjs?v=7';
-import { createArmorSurface } from './duel-mech-art.mjs?v=7';
+import { createDuelMech } from './duel-mech.mjs?v=8';
+import { createArmorSurface } from './duel-mech-art.mjs?v=8';
 import { buildHarbor } from './harbor-view.mjs';
 
 const team = [new THREE.Color(0x66ddee),new THREE.Color(0xff985e)];
@@ -216,13 +216,17 @@ export function createArena(canvas, art = null) {
     renderer.render(scene,camera);
   }
   function dispose() {
-    const geometries=new Set(), materials=new Set();
+    const geometries=new Set(), materials=new Set(), textures=new Set();
     scene.traverse(o=>{
       if(o.geometry)geometries.add(o.geometry);
       if(o.material)materials.add(o.material);
     });
     for(const geo of geometries)geo.dispose();
-    for(const mat of materials){mat.map?.dispose();mat.dispose();}
+    for(const mat of materials){
+      for(const key of ['map','roughnessMap','metalnessMap']) if(mat[key])textures.add(mat[key]);
+      mat.dispose();
+    }
+    for(const texture of textures)texture.dispose();
     armorSurface?.dispose();sun.shadow.dispose();renderer.dispose();
   }
   setQuality(0);

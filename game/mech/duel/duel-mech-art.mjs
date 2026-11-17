@@ -1,6 +1,6 @@
 import * as THREE from '../../lib/three.module.js';
 
-const model = new URL('./m07-cangyan-v7.glb', import.meta.url);
+const model = new URL('./m07-cangyan-v8.glb', import.meta.url);
 const jointNames = ['M07_Body','M07_Upper','M07_Rifle',
   ...['L','R'].flatMap(side => ['Thigh','Shin','Foot'].map(segment => `M07_${segment}_${side}`))];
 
@@ -15,6 +15,7 @@ export async function loadDuelMechArt() {
     const {geometry} = mesh;
     const finish = geometry.getAttribute('uv');
     if (!finish || !geometry.getAttribute('color')) throw new Error('M-07 GLB: missing surface data');
+    if (!mesh.name.endsWith('_optics') && (!geometry.getAttribute('uv1') || !mesh.material.map || !mesh.material.roughnessMap)) throw new Error('M-07 GLB: missing baked armor maps');
     geometry.setAttribute('armorFinish',finish);
   });
   return scene;
@@ -65,9 +66,9 @@ function applySurface(material, slot, optics, surface) {
             grain = finishGrain.r - 0.5;
           }
           float steel = smoothstep(0.09, 0.60, vArmorFinish.y);
-          diffuseColor.rgb *= mix(vec3(1.0), armorTint, vArmorTeam) * (1.0 + grain * steel * 0.64);`)
+          diffuseColor.rgb *= mix(vec3(1.0), armorTint, vArmorTeam) * (1.0 + grain * steel * 0.18);`)
         .replace('#include <roughnessmap_fragment>', `#include <roughnessmap_fragment>
-          roughnessFactor = clamp(vArmorFinish.x + (finishGrain.g - 0.5) * 0.36, 0.13, 1.0);`)
+          roughnessFactor = clamp(roughnessFactor + (finishGrain.g - 0.5) * 0.12, 0.13, 1.0);`)
         .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
           if (armorGrainStrength > 0.0) {
             vec3 dx = dFdx(-vViewPosition), dy = dFdy(-vViewPosition);
@@ -75,17 +76,19 @@ function applySurface(material, slot, optics, surface) {
             float det = dot(dx, rx);
             vec3 slope = dFdx(finishGrain.b) * rx + dFdy(finishGrain.b) * ry;
             normal = normalize(abs(det) * normal - sign(det) * slope * 0.0015);
-          }`)
-        .replace('#include <metalnessmap_fragment>', '#include <metalnessmap_fragment>\nmetalnessFactor *= vArmorFinish.y;');
+          }`);
     }
   };
-  material.customProgramCacheKey = () => optics ? 'm07-optics-v7' : 'm07-armor-v7';
+  material.customProgramCacheKey = () => optics ? 'm07-optics-v8' : 'm07-armor-v8';
 }
 
 export function instantiateDuelMechArt(art, slot, surface) {
   const model = art.clone(true);
+  let source;
+  art.traverse(mesh => { if (mesh.isMesh && mesh.material.map) source ??= mesh.material; });
   const armor = new THREE.MeshStandardMaterial({
-    vertexColors:true, roughness:1, metalness:1, envMap:surface.environment, envMapIntensity:1.15,
+    map:source.map, roughnessMap:source.roughnessMap, metalnessMap:source.roughnessMap,
+    roughness:1, metalness:1, envMap:surface.environment, envMapIntensity:1.15,
   });
   const optics = new THREE.MeshBasicMaterial({vertexColors:true,toneMapped:false});
   applySurface(armor,slot,false,surface);

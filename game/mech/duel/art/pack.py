@@ -7,7 +7,7 @@ import os
 
 root=Path(os.environ.get('M07_ART_OUTPUT', str(Path(__file__).resolve().parent/'output')))
 old_path=root/'m07-cangyan.raw.glb'
-output_path=root/'m07-cangyan-v7.glb'
+output_path=root/'m07-cangyan-v8.glb'
 raw=old_path.read_bytes()
 jlen,jtype=struct.unpack_from('<II',raw,12)
 assert jtype==0x4e4f534a
@@ -60,6 +60,9 @@ def add(semantic,idx,team_idx=None):
         component=5123
         fmt='<HH'
         stride=4
+    elif semantic=='TEXCOORD_2':
+        rows=[tuple(round(max(0,min(1,v))*65535) for v in row) for row in rows]
+        component=5123;fmt='<HH';stride=4
     elif semantic=='COLOR_0':
         assert a['type']=='VEC4' and a['componentType']==5123 and a['normalized']
         rows=[tuple(round(v/257) for v in row) for row in rows]
@@ -102,17 +105,32 @@ def add(semantic,idx,team_idx=None):
 for mesh in gltf['meshes']:
     for p in mesh['primitives']:
         old=p['attributes']
-        p['attributes']={name:add(name,i,old['TEXCOORD_1'] if name=='TEXCOORD_0' else None)
+        p['attributes']={('TEXCOORD_1' if name=='TEXCOORD_2' else name):add(name,i,old['TEXCOORD_1'] if name=='TEXCOORD_0' else None)
                          for name,i in old.items() if name!='TEXCOORD_1'}
         p['indices']=add('indices',p['indices'])
 for node in gltf['nodes']:
     if 'mesh' not in node:continue
     assert 'scale' not in node and 'matrix' not in node and not node.get('children'),node
     node['scale']=[scale]*3
+# Embedded textures are independent bufferViews, not accessor-backed geometry.
+for image in gltf.get('images',[]):
+    old_view=all_views[image['bufferView']]
+    packed.extend(b'\0'*((-len(packed))%4))
+    payload=data[old_view.get('byteOffset',0):old_view.get('byteOffset',0)+old_view['byteLength']]
+    image['bufferView']=len(views)
+    views.append({'buffer':0,'byteOffset':len(packed),'byteLength':len(payload)})
+    packed.extend(payload)
+def remap_texcoords(value):
+    if isinstance(value,dict):
+        if value.get('texCoord')==2:value['texCoord']=1
+        for child in value.values():remap_texcoords(child)
+    elif isinstance(value,list):
+        for child in value:remap_texcoords(child)
+remap_texcoords(gltf.get('materials',[]))
 gltf['accessors']=accessors
 gltf['bufferViews']=views
-gltf['extensionsUsed']=['KHR_mesh_quantization']
-gltf['extensionsRequired']=['KHR_mesh_quantization']
+gltf['extensionsUsed']=list(dict.fromkeys(gltf.get('extensionsUsed',[])+['KHR_mesh_quantization']))
+gltf['extensionsRequired']=list(dict.fromkeys(gltf.get('extensionsRequired',[])+['KHR_mesh_quantization']))
 packed.extend(b'\0'*((-len(packed))%4))
 gltf['buffers']=[{'byteLength':len(packed)}]
 js=json.dumps(gltf,ensure_ascii=False,separators=(',',':')).encode()

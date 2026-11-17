@@ -7,16 +7,15 @@ import numpy as np
 import bpy
 import bmesh
 from mathutils import Vector, Matrix, Euler
-from mathutils.bvhtree import BVHTree
 
 OUT = Path(os.environ.get('M07_ART_OUTPUT', str(Path(__file__).resolve().parent/'output')))
 OUT.mkdir(parents=True, exist_ok=True)
 # Pigmented armor, phosphate chassis and exposed machined surfaces remain distinct.
 PALETTE = {
-    'blue': (0x35454f, .52, .28, 1),
-    'blue2': (0x40515b, .53, .26, 1),
+    'blue': (0x344853, .43, .40, 1),
+    'blue2': (0x425661, .46, .34, 1),
     'navy': (0x293840, .46, .39, 1),
-    'armor': (0x353b40, .57, .30, 0),
+    'armor': (0x343b42, .48, .48, 0),
     'armor2': (0x474e52, .52, .36, 0),
     'edge': (0x6b7071, .34, .76, 0),
     'steel': (0x717b7f, .30, .82, 0),
@@ -26,14 +25,16 @@ PALETTE = {
     'recess': (0x10171b, .64, .24, 0),
     'orange': (0xbc592d, .56, .18, 0),
     'orange2': (0x9a4425, .60, .13, 0),
+    'visor': (0x142831, .16, .46, 0),
+    'edge_dark': (0x4b5358, .32, .74, 0),
     'bone': (0xb1ae99, .63, .12, 0),
     'cyan': (0x61d7e9, .24, .08, 1),
     'amber': (0xffb149, .25, .13, 0),
 }
 PIVOTS = {
- 'M07_Body':(0,0,0), 'M07_Upper':(0,0,0), 'M07_Rifle':(4.05,10.89,.10),
- 'M07_Thigh_L':(-1.58,9.41,-.03), 'M07_Shin_L':(-2.10,6.25,.35), 'M07_Foot_L':(-2.53,.88,-.04),
- 'M07_Thigh_R':(1.58,9.41,-.03), 'M07_Shin_R':(2.10,6.25,.35), 'M07_Foot_R':(2.53,.88,-.04),
+ 'M07_Body':(0,0,0), 'M07_Upper':(0,0,0), 'M07_Rifle':(4.46,11.26,.05),
+ 'M07_Thigh_L':(-1.70,10.12,-.08), 'M07_Shin_L':(-2.14,6.42,.40), 'M07_Foot_L':(-2.72,1.20,-.10),
+ 'M07_Thigh_R':(1.70,10.12,-.08), 'M07_Shin_R':(2.14,6.42,.40), 'M07_Foot_R':(2.72,1.20,-.10),
 }
 PARENTS = {'M07_Upper':'M07_Body','M07_Rifle':'M07_Upper'}
 for s in 'LR':
@@ -76,9 +77,6 @@ class Builder:
    o.empty_display_size=.15;self.rig[name]=o
 
  def mesh(self,j,name,verts,faces,key='armor',bevel=0,smooth=False,glow=False,face_keys=None):
-  if j=='M07_Body': verts=[(p[0],p[1]+1.45,p[2]) for p in verts]
-  elif any(t in name for t in ('腰','腹部')):
-   verts=[(p[0],9.9+(p[1]-8.45)*.396 if p[1]<10.85 else p[1],p[2]) for p in verts]
   if getattr(self,'transform',None):verts=[self.transform(p) for p in verts]
   me=bpy.data.meshes.new(name)
   me.from_pydata([convert(Vector(p)-Vector(PIVOTS[j])) for p in verts],[],faces);me.validate();me.update()
@@ -95,8 +93,8 @@ class Builder:
    mod=obj.modifiers.new('微小切削倒角','BEVEL');mod.width=bevel;mod.segments=1;mod.limit_method='ANGLE';mod.angle_limit=.27
    mod.harden_normals=True
    bpy.ops.object.modifier_apply(modifier=mod.name)
-   for f in me.polygons:f.use_smooth=True
-   me.set_sharp_from_angle(angle=1.05)
+   for f in me.polygons:f.use_smooth=False
+   me.set_sharp_from_angle(angle=.52)
    wn=obj.modifiers.new('平面加權法線','WEIGHTED_NORMAL');wn.keep_sharp=True;wn.weight=50
    bpy.ops.object.modifier_apply(modifier=wn.name)
   self.parts[j].append((obj,glow));return obj
@@ -183,26 +181,6 @@ class Builder:
 
  def export(self,path):
   bpy.context.view_layer.update()
-  # Bake restrained contact occlusion into vertex colors once, keeping mobile
-  # runtime free of a screen-space AO pass or extra textures.
-  av=[];af=[]
-  for parts in self.parts.values():
-   for obj,glow in parts:
-    if glow:continue
-    off=len(av);av.extend(obj.matrix_world@v.co for v in obj.data.vertices)
-    af.extend(tuple(off+i for i in p.vertices) for p in obj.data.polygons)
-  tree=BVHTree.FromPolygons(av,af,epsilon=.0001);ao_cache={}
-  def occlusion(p,n):
-   key=tuple(round(v,3) for v in (*p,*n))
-   if key in ao_cache:return ao_cache[key]
-   u=n.cross(Vector((0,0,1) if abs(n.z)<.9 else (0,1,0))).normalized();v=n.cross(u)
-   blocked=0
-   for i in range(12):
-    z=.24+.72*(i+.5)/12;r=(1-z*z)**.5;phi=i*2.399963
-    ray=n*z+(u*cos(phi)+v*sin(phi))*r
-    hit,_,_,distance=tree.ray_cast(p+n*.024,ray,1.05)
-    if hit is not None:blocked+=(1-distance/1.05)**.65
-   value=1-.44*blocked/12;ao_cache[key]=value;return value
   temps=[]
   for j,parts in self.parts.items():
    for glow in (False,True):
@@ -212,7 +190,7 @@ class Builder:
      return any(k in obj.name for k in ('緊固件','螺孔','磨耗','嵌環','密封','指節','散熱縫','刻線','銘牌','排線扣','散熱口','冷卻槽','止滑齒','扣件','卡榫','護環','內環','外蓋')) or max(obj.dimensions)<.30
     if not glow:objs.sort(key=detail)
     low_indices=sum((len(face.vertices)-2)*3 for obj in objs if glow or not detail(obj) for face in obj.data.polygons)
-    vs=[];fs=[];colors=[];finishes=[];teams=[];ns=[]
+    vs=[];fs=[];colors=[];finishes=[];teams=[];ns=[];source_mats=[];face_mats=[]
     for o in objs:
      mesh=o.data;mesh.calc_loop_triangles()
      offset=len(vs);vs.extend(v.co[:] for v in mesh.vertices)
@@ -220,6 +198,8 @@ class Builder:
      for face in mesh.polygons:
       fs.append(tuple(offset+i for i in face.vertices))
       mat=mesh.materials[face.material_index];p=mat.node_tree.nodes.get('Principled BSDF')
+      if mat not in source_mats:source_mats.append(mat)
+      face_mats.append(source_mats.index(mat))
       color=p.inputs['Base Color'].default_value[:]
       key=mat.name.replace(' emission','').split('.')[0]
       mask=PALETTE[key][3]
@@ -227,10 +207,7 @@ class Builder:
       rough=p.inputs['Roughness'].default_value;metal=p.inputs['Metallic'].default_value
       for loop in face.loop_indices:
        normal=normals[loop].vector
-       world_normal=(o.matrix_world.to_3x3()@normal).normalized()
-       world_pos=o.matrix_world@mesh.vertices[mesh.loops[loop].vertex_index].co
-       ao=1 if glow else occlusion(world_pos,world_normal)
-       colors.append((*[c*ao for c in color[:3]],color[3]));finishes.append((rough,1-metal));teams.append((mask,0));ns.append(normal[:])
+       colors.append(color);finishes.append((rough,1-metal));teams.append((mask,0));ns.append(normal[:])
     me=bpy.data.meshes.new(j+' merged');me.from_pydata(vs,[],fs);me.update()
     for p in me.polygons:p.use_smooth=True
     me.normals_split_custom_set(ns)
@@ -243,8 +220,12 @@ class Builder:
      m=bpy.data.materials.new('M07_Optics' if glow else 'M07_Armor');m.use_nodes=True
      a=m.node_tree.nodes.new('ShaderNodeVertexColor');a.layer_name='SurfaceColor'
      m.node_tree.links.new(a.outputs['Color'],m.node_tree.nodes.get('Principled BSDF').inputs['Base Color'])
-    me.materials.append(m)
+    if glow:me.materials.append(m)
+    else:
+     for src in source_mats:me.materials.append(src)
+     for face,index in zip(me.polygons,face_mats):face.material_index=index
     o=bpy.data.objects.new(j+('_optics' if glow else '_armor'),me);self.col.objects.link(o);o.parent=self.rig[j];o['lowDetailIndexCount']=low_indices;temps.append(o)
+  __import__('atlas').bake(self,temps)
   bpy.ops.object.select_all(action='DESELECT')
   for obj in [*self.rig.values(),*temps]:obj.select_set(True)
   bpy.ops.export_scene.gltf(filepath=str(path),export_format='GLB',use_selection=True,export_yup=True,export_normals=True,export_texcoords=True,export_vertex_color='ACTIVE',export_materials='EXPORT',export_animations=False,export_extras=True)

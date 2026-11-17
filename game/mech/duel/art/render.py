@@ -5,7 +5,7 @@ from mathutils import Vector
 WORK=Path(__file__).resolve().parent
 sys.path.insert(0,str(WORK))
 from geometry import OUT
-bpy.ops.wm.open_mainfile(filepath=str(OUT/'M-07-蒼焰-v7.blend'))
+bpy.ops.wm.open_mainfile(filepath=str(OUT/'M-07-蒼焰-v8.blend'))
 scene=bpy.context.scene
 quick='--quick' in sys.argv
 views=['hero','front','side','rear','head']
@@ -39,14 +39,14 @@ scene.view_settings.view_transform='AgX';scene.view_settings.look='AgX - Medium 
 scene.render.resolution_percentage=100
 scene.render.image_settings.file_format='PNG';scene.render.image_settings.color_mode='RGB'
 # Hand, forearm and rifle move as one at their elbow.
-bpy.data.objects['M07_Rifle'].rotation_euler.x=.98
+bpy.data.objects['M07_Rifle'].rotation_euler.x=1.08
 for view in views:
  d.type='ORTHO';d.sensor_fit='HORIZONTAL'
- if view=='hero':camera.location=(22,-43,16);target=(0,0,8.1);d.ortho_scale=14.0;size=(900,1150)
- elif view=='front':camera.location=(0,-50,8.2);target=(0,0,8.2);d.ortho_scale=12.5;size=(780,1150)
- elif view=='side':camera.location=(50,0,8.2);target=(0,0,8.2);d.ortho_scale=10;size=(640,1150)
- elif view=='rear':camera.location=(-20,43,14);target=(0,0,8.1);d.ortho_scale=13.5;size=(850,1150)
- elif view=='head':camera.location=(7,-16,15.6);target=(0,-.45,14.8);d.ortho_scale=4.4;size=(1000,850)
+ if view=='hero':camera.location=(22,-43,12);target=(0,0,8.5);d.ortho_scale=15.4;size=(900,1150)
+ elif view=='front':camera.location=(0,-50,8.2);target=(0,0,8.5);d.ortho_scale=13.4;size=(780,1150)
+ elif view=='side':camera.location=(50,0,8.2);target=(0,0,8.5);d.ortho_scale=10.8;size=(640,1150)
+ elif view=='rear':camera.location=(-20,43,14);target=(0,0,8.5);d.ortho_scale=14.7;size=(850,1150)
+ elif view=='head':camera.location=(7,-16,15.6);target=(0,-.95,15.3);d.ortho_scale=4.5;size=(1000,850)
  aim(camera,target)
  scene.render.resolution_x,scene.render.resolution_y=[int(n*(.65 if quick else 1)) for n in size]
  scene.render.filepath=str(OUT/(view+('-quick' if quick else '')+'.png'))
