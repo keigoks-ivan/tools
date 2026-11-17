@@ -1,8 +1,8 @@
 import * as THREE from '../../lib/three.module.js';
 import { ARENA } from './arena-layout.mjs';
 import { aimTarget, pilotAim } from './rules.mjs';
-import { createDuelMech } from './duel-mech.mjs?v=3';
-import { createArmorEnvironment } from './duel-mech-art.mjs?v=3';
+import { createDuelMech } from './duel-mech.mjs?v=4';
+import { createArmorSurface } from './duel-mech-art.mjs?v=4';
 import { buildHarbor } from './harbor-view.mjs';
 
 const team = [new THREE.Color(0x66ddee),new THREE.Color(0xff985e)];
@@ -12,7 +12,7 @@ const cover = ARENA.cover.map(({x,z,width,depth,height})=>new THREE.Box3(
   new THREE.Vector3(x-width/2-.62,-1,z-depth/2-.62),new THREE.Vector3(x+width/2+.62,height+.62,z+depth/2+.62),
 ));
 const preview = [
-  {x:-21,y:0,z:-3,yaw:1.91,pitch:.045,preview:true},
+  {x:-16,y:0,z:-3,yaw:1.99,pitch:.045,preview:true},
   {x:-27,y:0,z:33,yaw:1.60,pitch:.035,preview:true},
 ];
 
@@ -131,8 +131,8 @@ export function createArena(canvas, art = null) {
   const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(59,1,.65,4100);
   const {time:waterTime,sun}=buildHarbor(scene);
   const relay=relayMarker();scene.add(relay.g);
-  const armorEnvironment=art ? createArmorEnvironment(renderer) : null;
-  const vehicles=[createDuelMech(0,art,armorEnvironment?.texture),createDuelMech(1,art,armorEnvironment?.texture)];
+  const armorSurface=art ? createArmorSurface(renderer) : null;
+  const vehicles=[createDuelMech(0,art,armorSurface),createDuelMech(1,art,armorSurface)];
   const shadowGe=new THREE.PlaneGeometry(1,1).rotateX(-Math.PI/2), shadowTex=shadowTexture();
   const shadows=vehicles.map(({root})=>{
     const marker=new THREE.Mesh(shadowGe,new THREE.MeshBasicMaterial({
@@ -156,6 +156,7 @@ export function createArena(canvas, art = null) {
     const low=level===0 || level==='low';
     renderer.setPixelRatio(Math.min(globalThis.devicePixelRatio||1,low?1:1.4));
     renderer.shadowMap.enabled=!low;sun.castShadow=!low;
+    if(armorSurface)armorSurface.grainStrength.value=low?0:1;
     currentWidth=0;resize();
   }
   function render(state,slot,dt,cameraInput) {
@@ -178,8 +179,8 @@ export function createArena(canvas, art = null) {
     aimPoint.visible=false;
     if(!p){
       const orbit=Math.sin(worldTime*.1);
-      camera.position.set(14+orbit*5,14+orbit,-37-orbit*2);
-      camera.lookAt(0,8,5);
+      camera.position.set(8+orbit*3,11.5+orbit,-26-orbit*2);
+      camera.lookAt(-2.4-Math.max(0,(1.26-camera.aspect)*16),8.4,5);
     } else {
       const yaw=cameraInput?.yaw??p.yaw,pitch=cameraInput?.pitch??p.pitch;
       const pilot={x:p.x,y:p.y,z:p.z,yaw,pitch};
@@ -216,7 +217,7 @@ export function createArena(canvas, art = null) {
     });
     for(const geo of geometries)geo.dispose();
     for(const mat of materials){mat.map?.dispose();mat.dispose();}
-    armorEnvironment?.dispose();sun.shadow.dispose();renderer.dispose();
+    armorSurface?.dispose();sun.shadow.dispose();renderer.dispose();
   }
   setQuality(0);
   return {render,setQuality,resize,dispose,aimPoint};

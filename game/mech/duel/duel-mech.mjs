@@ -1,6 +1,6 @@
 import * as THREE from '../../lib/three.module.js';
 import { beveledProfile, MeshBatch } from './mesh-batch.mjs';
-import { instantiateDuelMechArt } from './duel-mech-art.mjs?v=3';
+import { instantiateDuelMechArt } from './duel-mech-art.mjs?v=4';
 
 const STEEL = 0x51595b, DARK = 0x20262b, METAL = 0x89969a, RUBBER = 0x14191d;
 const GLASS = 0x152932, WHITE = 0xc9c8b7, WARNING = 0xda8248, SHELL = 0x39434a;
@@ -170,13 +170,51 @@ function leg(root, side, color) {
   return {upper,lower,foot,side};
 }
 
-function artRig(art, slot, environment) {
-  const root = instantiateDuelMechArt(art,slot,environment);
+function exhaustMaterial(slot) {
+  return new THREE.ShaderMaterial({
+    transparent:true,depthWrite:false,blending:THREE.AdditiveBlending,
+    uniforms:{
+      exhaustColor:{value:new THREE.Color(slot===1?0xff9151:0x52dcff)},
+      exhaustTime:{value:0},exhaustPower:{value:0},
+    },
+    vertexShader:`
+      varying float vJetLength;
+      varying vec3 vJetNormal;
+      varying vec3 vJetEye;
+      void main(){
+        vec4 view = modelViewMatrix * vec4(position, 1.0);
+        vJetLength = clamp(position.y / 3.9, 0.0, 1.0);
+        vJetNormal = normalMatrix * normal;
+        vJetEye = -view.xyz;
+        gl_Position = projectionMatrix * view;
+      }`,
+    fragmentShader:`
+      uniform vec3 exhaustColor;
+      uniform float exhaustTime;
+      uniform float exhaustPower;
+      varying float vJetLength;
+      varying vec3 vJetNormal;
+      varying vec3 vJetEye;
+      void main(){
+        float t = vJetLength;
+        float skin = smoothstep(0.05, 0.75, abs(dot(normalize(vJetNormal), normalize(vJetEye))));
+        float curl = 0.90 + 0.10 * sin(24.0*t - 18.0*exhaustTime);
+        float a = skin * curl * (1.0 - smoothstep(0.22, 1.0, t)) * exhaustPower;
+        vec3 color = mix(vec3(0.83, 0.96, 1.0), exhaustColor, smoothstep(0.0, 0.63, t));
+        gl_FragColor = vec4(color, a);
+        #include <colorspace_fragment>
+      }`,
+  });
+}
+
+function artRig(art, slot, surface) {
+  const root = instantiateDuelMechArt(art,slot,surface);
   const body = root.getObjectByName('M07_Body');
   const upper = root.getObjectByName('M07_Upper');
   const gun = root.getObjectByName('M07_Rifle');
+  const exhaust = exhaustMaterial(slot);
   const jets = [-1,1].map(side => {
-    const jet = new THREE.Mesh(jetGeometry,jointGlow);
+    const jet = new THREE.Mesh(jetGeometry,exhaust);
     jet.position.set(side*1.72,8.67,-4.9);
     jet.rotation.x = -2.19;
     jet.visible = false;
@@ -189,7 +227,7 @@ function artRig(art, slot, environment) {
     foot:root.getObjectByName('M07_Foot_'+side),
     side:index*2-1,
   }));
-  return {root,body,upper,gun,jets,legs};
+  return {root,body,upper,gun,jets,legs,exhaust};
 }
 
 function fallbackRig(slot) {
@@ -202,8 +240,8 @@ function fallbackRig(slot) {
   return {root,body,upper,gun,jets,legs};
 }
 
-export function createDuelMech(slot = 0, art = null, environment = null) {
-  const {root,body,upper,gun,jets,legs} = art ? artRig(art,slot,environment) : fallbackRig(slot);
+export function createDuelMech(slot = 0, art = null, surface = null) {
+  const {root,body,upper,gun,jets,legs,exhaust} = art ? artRig(art,slot,surface) : fallbackRig(slot);
   root.name = 'M-07 蒼焰';
   let cycle = 0, stride = 0;
   function pose(p, dt) {
@@ -221,6 +259,10 @@ export function createDuelMech(slot = 0, art = null, environment = null) {
       thigh.rotation.x = flying ? .29+(side<0?.07:0) : -.42*step;
       lower.rotation.x = flying ? .38 : Math.max(0,step)*.6;
       foot.rotation.x = flying ? .23 : -thigh.rotation.x-lower.rotation.x;
+    }
+    if (exhaust && flying) {
+      exhaust.uniforms.exhaustTime.value = cycle;
+      exhaust.uniforms.exhaustPower.value = p.boosting ? .9 : .58;
     }
     for(const jet of jets) {
       jet.visible = flying;
