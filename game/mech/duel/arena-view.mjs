@@ -1,8 +1,8 @@
 import * as THREE from '../../lib/three.module.js';
 import { ARENA } from './arena-layout.mjs';
 import { aimTarget, pilotAim } from './rules.mjs';
-import { createDuelMech } from './duel-mech.mjs?v=4';
-import { createArmorSurface } from './duel-mech-art.mjs?v=4';
+import { createDuelMech } from './duel-mech.mjs?v=5';
+import { createArmorSurface } from './duel-mech-art.mjs?v=5';
 import { buildHarbor } from './harbor-view.mjs';
 
 const team = [new THREE.Color(0x66ddee),new THREE.Color(0xff985e)];
