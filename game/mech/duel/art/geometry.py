@@ -42,11 +42,14 @@ for s in 'LR':
  PARENTS['M07_Shin_'+s]='M07_Thigh_'+s
  PARENTS['M07_Foot_'+s]='M07_Shin_'+s
 
-def proportion(p):
+def proportion(p,waist=False):
  # Lengthen the actual leg assemblies while retaining the common combat height.
  # The same mapping moves armor, bearings and rig pivots, so joints stay seated.
  x,y,z=p
  width=.88-.04*min(1,max(0,(y-10.12)/1.4))
+ if waist:
+  taper=max(0,min(1,(y-7.1)/1.3,(12.4-y)/1.3))
+  width*=1-.14*taper*taper*(3-2*taper)
  if y<1.20:height=y*.94
  elif y<6.42:height=1.128+(y-1.20)*(5.832/5.22)
  elif y<10.12:height=6.96+(y-6.42)*(4.02/3.70)
@@ -79,13 +82,14 @@ def material(key,glow=False):
 class Builder:
  def __init__(self):
   self.col=bpy.data.collections.new('蒼焰｜原創重裝機體');bpy.context.scene.collection.children.link(self.col)
-  self.variant='common';self.parts={p:[] for p in PIVOTS};self.rig={};self.rng=random.Random(7017)
+  self.variant='common';self.waist=False;self.parts={p:[] for p in PIVOTS};self.rig={};self.heads={};self.rng=random.Random(7017)
   for name,pos in PIVOTS.items():
    o=bpy.data.objects.new(name,None);self.col.objects.link(o)
    parent=PARENTS.get(name)
    if parent:o.parent=self.rig[parent]
-   o.location=convert(proportion(pos)-proportion(PIVOTS[parent] if parent else (0,0,0)))
+   o.location=convert(proportion(pos,name.startswith('M07_Thigh'))-proportion(PIVOTS[parent] if parent else (0,0,0),bool(parent and parent.startswith('M07_Thigh'))))
    o.empty_display_size=.15;self.rig[name]=o
+  self.rig['M07_Body']['idleStance']={'spread':.11,'turn':.12,'toe':.21}
   upper=self.rig['M07_Upper']
   upper['exhaustOrigins']=[list(proportion((side*1.78,9.540,-4.722))) for side in (-1,1)]
   direction=proportion((1.78,9.540-.56,-4.722-.83))-proportion((1.78,9.540,-4.722))
@@ -94,7 +98,7 @@ class Builder:
  def mesh(self,j,name,verts,faces,key='armor',bevel=0,smooth=False,glow=False,face_keys=None):
   if getattr(self,'transform',None):verts=[self.transform(p) for p in verts]
   me=bpy.data.meshes.new(name)
-  me.from_pydata([convert(proportion(p)-proportion(PIVOTS[j])) for p in verts],[],faces);me.validate();me.update()
+  me.from_pydata([convert(proportion(p,self.waist)-proportion(PIVOTS[j],j.startswith('M07_Thigh'))) for p in verts],[],faces);me.validate();me.update()
   bm=bmesh.new();bm.from_mesh(me);bmesh.ops.recalc_face_normals(bm,faces=list(bm.faces));bm.to_mesh(me);bm.free()
   obj=bpy.data.objects.new(name,me);self.col.objects.link(obj);obj.parent=self.rig[j]
   keys=list(dict.fromkeys(face_keys if face_keys else [key]))
@@ -195,6 +199,28 @@ class Builder:
 
  def tube(self,j,name,points,r=.055,key='rubber',n=8):
   for a,b in zip(points,points[1:]):self.cyl(j,name,a,b,r,key,n)
+
+ def fit_heads(self):
+  # Nine head lengths, measured from helmet crown to soles in the grounded pose.
+  # Neck bearings, antennas above the crown and propulsion packs are not body height.
+  crown=16.70;standing_height=crown+self.rig['M07_Body'].location.z
+  height=standing_height/9;measurements={}
+  for variant,objects in self.heads.items():
+   assert not any('肩' in obj.name or '推進' in obj.name for obj in objects),variant
+   points=[v.co for obj in objects for v in obj.data.vertices]
+   low=min(p.z for p in points);high=max(p.z for p in points)
+   depth=(min(p.y for p in points)+max(p.y for p in points))*.5
+   vertical=height/(high-low);horizontal=min(1,vertical)
+   for obj in objects:
+    obj['headVariant']=variant
+    mesh=obj.data;normals=[n.vector.copy() for n in mesh.corner_normals]
+    for v in mesh.vertices:
+     v.co.x*=horizontal;v.co.y=depth+(v.co.y-depth)*horizontal
+     v.co.z=crown-(high-v.co.z)*vertical
+    mesh.update()
+    mesh.normals_split_custom_set([Vector((n.x/horizontal,n.y/horizontal,n.z/vertical)).normalized() for n in normals])
+   measurements[variant]={'headHeight':height,'standingHeight':standing_height,'heads':9}
+  self.rig['M07_Upper']['headProportions']=measurements
 
  def export(self,path):
   bpy.context.view_layer.update()

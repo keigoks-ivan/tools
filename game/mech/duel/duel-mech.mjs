@@ -1,6 +1,6 @@
 import * as THREE from '../../lib/three.module.js';
 import { beveledProfile, MeshBatch } from './mesh-batch.mjs';
-import { instantiateDuelMechArt, setDuelMechAppearance } from './duel-mech-art.mjs?v=9';
+import { instantiateDuelMechArt, setDuelMechAppearance } from './duel-mech-art.mjs?v=10';
 
 const STEEL = 0x51595b, DARK = 0x20262b, METAL = 0x89969a, RUBBER = 0x14191d;
 const GLASS = 0x152932, WHITE = 0xc9c8b7, WARNING = 0xda8248, SHELL = 0x39434a;
@@ -243,7 +243,15 @@ function fallbackRig(slot) {
 export function createDuelMech(slot = 0, art = null, surface = null) {
   const {root,body,upper,gun,jets,legs,exhaust} = art ? artRig(art,slot,surface) : fallbackRig(slot);
   root.name = 'M-07 蒼焰';
-  let cycle = 0, stride = 0;
+  let cycle = 0, stride = 0, stanceWeight = 1;
+  const stance=body.userData.idleStance ?? {spread:.11,turn:.12,toe:.21};
+  const ankle=new THREE.Vector3(), parentRotation=new THREE.Quaternion(), soleRotation=new THREE.Quaternion();
+  const soleEuler=new THREE.Euler(0,0,0,'YXZ');
+  root.updateMatrixWorld(true);
+  for(const leg of legs) {
+    const bounds=new THREE.Box3().setFromObject(leg.foot);
+    leg.soleY=bounds.min.y-leg.foot.getWorldPosition(ankle).y;
+  }
   function setMech(id) {
     if (art && root.userData.mech !== id) setDuelMechAppearance(root,id);
   }
@@ -253,16 +261,24 @@ export function createDuelMech(slot = 0, art = null, surface = null) {
     const speed=Math.hypot(p.vx||0,p.vz||0), flying=!!p.flying, walking=flying?0:Math.min(1,speed/19);
     stride += (walking-stride)*(1-Math.exp(-8*dt));
     cycle += dt*(2.8+speed*.14);
-    body.position.y = flying ? .2*Math.sin(cycle) : Math.abs(Math.sin(cycle))*stride*.3;
+    stanceWeight+=((flying?.28:1-.65*stride)-stanceWeight)*(1-Math.exp(-8*dt));
     upper.rotation.x = Math.max(-.36,Math.min(.36,-p.pitch*.26+(flying&&p.boosting?.1:0)));
     upper.rotation.z = flying ? Math.sin(cycle*.42)*.042 : stride*Math.sin(cycle)*.034;
     gun.rotation.x = (p.preview ? .93 : -.59*p.pitch);
-    for (const {upper:thigh, lower, foot, side} of legs) {
+    let floor=Infinity;
+    for (const {upper:thigh, lower, foot, side, soleY} of legs) {
       const step = Math.sin(cycle)*side*stride;
-      thigh.rotation.x = flying ? .29+(side<0?.07:0) : -.42*step;
+      thigh.rotation.set(flying ? .29+(side<0?.07:0) : -.42*step,side*stance.turn*stanceWeight,side*stance.spread*stanceWeight);
       lower.rotation.x = flying ? .38 : Math.max(0,step)*.6;
-      foot.rotation.x = flying ? .23 : -thigh.rotation.x-lower.rotation.x;
+      // Cancel hip/knee bank at the ankle so the sole stays level while toes turn out.
+      parentRotation.multiplyQuaternions(thigh.quaternion,lower.quaternion).invert();
+      soleRotation.setFromEuler(soleEuler.set(flying?thigh.rotation.x+lower.rotation.x+.23:0,side*stance.toe*stanceWeight,0));
+      foot.quaternion.multiplyQuaternions(parentRotation,soleRotation);
+      ankle.copy(foot.position).applyQuaternion(lower.quaternion).add(lower.position)
+        .applyQuaternion(thigh.quaternion).add(thigh.position);
+      floor=Math.min(floor,ankle.y+soleY);
     }
+    body.position.y = flying ? .2*Math.sin(cycle) : -floor;
     if (exhaust && flying) {
       exhaust.uniforms.exhaustTime.value = cycle;
       exhaust.uniforms.exhaustPower.value = p.boosting ? .9 : .58;

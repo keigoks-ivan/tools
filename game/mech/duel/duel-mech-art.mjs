@@ -1,7 +1,7 @@
 import { mechInfo } from './mech-roster.mjs';
 import * as THREE from '../../lib/three.module.js';
 
-const model = new URL('./m07-cangyan-v9.glb', import.meta.url);
+const model = new URL('./m07-cangyan-v10.glb', import.meta.url);
 const jointNames = ['M07_Body','M07_Upper','M07_Rifle',
   ...['L','R'].flatMap(side => ['Thigh','Shin','Foot'].map(segment => `M07_${segment}_${side}`))];
 

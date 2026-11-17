@@ -29,6 +29,7 @@ def neck(b):
 
 def scout(b):
  neck(b)
+ start=len(b.parts[J])
  # A narrow swept reconnaissance head, with a pronounced low forehead.
  b.loft(J,'白鷺修長頭盔',[
   section(14.35,0,.56,.63,.75,.16),section(14.91,0,.72,.86,1.12,.22),
@@ -36,12 +37,15 @@ def scout(b):
  ],'blue2',.024)
  b.panel(J,'白鷺後掠額甲',[(-.78,15.64,1.53),(-.28,16.29,.40),(.28,16.29,.40),(.78,15.64,1.53),(.46,15.49,2.02),(-.46,15.49,2.02)],(0,-.16,-.12),'blue',.018)
  visor(b,'白鷺窄幅光學面罩',.87,1.08,1.04,15.43,14.96)
+ heads=[obj for obj,_ in b.parts[J][start:]]
  for s in (-1,1):
+  start=len(b.parts[J])
   p=lambda x,y,z:(s*x,y,z)
   b.panel(J,'白鷺斜收頰甲',[p(.15,14.73,1.93),p(.76,14.95,1.77),p(.91,14.89,.72),p(.53,14.39,.44),p(.21,14.35,1.10)],(-s*.12,0,-.14),'navy',.02)
   b.box(J,'白鷺側面光學模組',p(.99,15.26,.40),(.28,.58,.74),'dark',.035)
   b.cyl(J,'白鷺側面測距鏡片',p(1.015,15.29,.82),p(1.015,15.29,.85),.11,'visor',16)
   b.cyl(J,'白鷺短距天線',p(.90,15.30,-.33),p(1.10,16.44,-.76),.034,'dark',8)
+  heads.extend(obj for obj,_ in b.parts[J][start:])
   # Folded swept shoulder blades remain inside the common hit envelope.
   poly=[p(2.25,14.29,1.63),p(3.52,14.70,1.38),p(5.22,15.17,-1.05),p(4.81,15.48,-2.23),p(3.11,15.30,-1.87),p(2.16,14.79,-.32)]
   b.panel(J,'白鷺後掠肩部主甲',poly,(0,-.57,-.07),'blue2',.040)
@@ -54,8 +58,11 @@ def scout(b):
   # Slim outboard fairing makes the profile legible from behind too.
   b.panel(J,'白鷺側向推力導流片',[p(2.60,14.63,-2.43),p(3.65,15.64,-3.37),p(3.44,12.22,-3.50),p(2.67,11.73,-2.86)],(-s*.16,0,.10),'blue2',.023)
 
+ b.heads[b.variant]=heads
+
 def sentinel(b):
  neck(b)
+ start=len(b.parts[J])
  # A broad recessed sensor turret, separate from Cangyan's fighter helmet.
  b.loft(J,'鐵潮裝甲感測頭座',[
   section(14.16,0,.39,1.01,.91,.22),section(14.66,0,.59,1.25,1.15,.29),
@@ -64,10 +71,13 @@ def sentinel(b):
  b.panel(J,'鐵潮厚額防護甲',[(-1.17,15.49,1.46),(-.79,15.80,.47),(.79,15.80,.47),(1.17,15.49,1.46),(.92,15.32,1.94),(-.92,15.32,1.94)],(0,-.22,-.07),'blue',.03)
  visor(b,'鐵潮裝甲光學窗',1.13,.94,1.14,15.20,14.66)
  b.panel(J,'鐵潮下顎防護框',[(-1.04,14.55,1.95),(1.04,14.55,1.95),(.81,14.13,1.63),(-.81,14.13,1.63)],(0,0,-.24),'armor2',.03)
+ heads=[obj for obj,_ in b.parts[J][start:]]
  for s in (-1,1):
+  start=len(b.parts[J])
   p=lambda x,y,z:(s*x,y,z)
   b.box(J,'鐵潮側面感測防護盒',p(1.25,14.96,.52),(.37,.79,1.01),'armor',.05)
   for y in (14.77,14.93,15.09):b.box(J,'鐵潮側向散熱格柵',p(1.446,y,.50),(.03,.053,.51),'recess',.006)
+  heads.extend(obj for obj,_ in b.parts[J][start:])
   # High rectangular ramparts with an articulated outer cheek, not larger hitboxes.
   rows=[section(13.58,3.64,.10,1.37,1.43,.28),section(14.15,3.69,.14,1.70,1.75,.34),section(15.10,3.65,-.05,1.66,1.69,.32),section(15.49,3.42,-.26,1.33,1.40,.30)]
   b.loft(J,'鐵潮堡壘式肩甲',[[p(*q) for q in row] for row in rows],'armor',.035)
@@ -83,6 +93,8 @@ def sentinel(b):
    b.bolt(J,p(x,y,z),r=.06)
   b.cyl(J,'鐵潮肩甲下方橫軸',p(2.1,13.4,-.1),p(4.0,13.3,-.1),.76,'dark',18)
   b.piston(J,'鐵潮肩甲承載油壓桿',p(3.15,13.13,-1.02),p(4.31,14.29,-1.44),.23)
+
+ b.heads[b.variant]=heads
 
 def engines(b,variant):
  scout=variant=='bailu'

@@ -7,7 +7,7 @@ import os
 
 root=Path(os.environ.get('M07_ART_OUTPUT', str(Path(__file__).resolve().parent/'output')))
 old_path=root/'m07-cangyan.raw.glb'
-output_path=root/'m07-cangyan-v9.glb'
+output_path=root/'m07-cangyan-v10.glb'
 raw=old_path.read_bytes()
 jlen,jtype=struct.unpack_from('<II',raw,12)
 assert jtype==0x4e4f534a

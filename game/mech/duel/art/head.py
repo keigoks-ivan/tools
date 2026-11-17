@@ -8,6 +8,7 @@ def build(b):
  for y,r,h,key in ((13.65,.76,.16,'armor'),(13.82,.69,.11,'steel'),(14.02,.65,.17,'dark')):
   b.cyl(J,'頸部防塵軸環',(0,y-h/2,.44),(0,y+h/2,.44),r,key,20)
  b.loft(J,'頭盔下方深嵌護圈',[section(13.73,0,.49,.90,.90,.22),section(14.10,0,.45,.98,.99,.24)],'navy',.035)
+ start=len(b.parts[J])
  # The dome is elongated front-to-back. Its rear is low and the forehead is swept.
  b.loft(J,'戰機頭盔內部殼體',[
   section(14.16,0,.60,.77,.77,.22),section(14.57,0,.65,1.10,1.00,.29),
@@ -72,3 +73,5 @@ def build(b):
  # A small amber rangefinding aperture is inset into the left brow.
  b.ring(J,'額側測距器金屬座',(-.88,15.50,1.79),(0,.2,1),.115,.075,'edge_dark',.075,14)
  b.cyl(J,'額側測距器鏡片',(-.88,15.49,1.78),(-.88,15.50,1.83),.069,'amber',14,glow=True)
+
+ b.heads[b.variant]=[obj for obj,_ in b.parts[J][start:]]
