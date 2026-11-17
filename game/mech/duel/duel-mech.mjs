@@ -1,6 +1,6 @@
 import * as THREE from '../../lib/three.module.js';
 import { beveledProfile, MeshBatch } from './mesh-batch.mjs';
-import { instantiateDuelMechArt } from './duel-mech-art.mjs?v=6';
+import { instantiateDuelMechArt } from './duel-mech-art.mjs?v=7';
 
 const STEEL = 0x51595b, DARK = 0x20262b, METAL = 0x89969a, RUBBER = 0x14191d;
 const GLASS = 0x152932, WHITE = 0xc9c8b7, WARNING = 0xda8248, SHELL = 0x39434a;
@@ -215,8 +215,8 @@ function artRig(art, slot, surface) {
   const exhaust = exhaustMaterial(slot);
   const jets = [-1,1].map(side => {
     const jet = new THREE.Mesh(jetGeometry,exhaust);
-    jet.position.set(side*1.72,8.67,-4.9);
-    jet.rotation.x = -2.19;
+    jet.position.set(side*1.62,9.20,-3.79);
+    jet.rotation.x = -2.377;
     jet.visible = false;
     upper.add(jet);
     return jet;

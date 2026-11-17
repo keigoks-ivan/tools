@@ -1,8 +1,8 @@
 import * as THREE from '../../lib/three.module.js';
 import { ARENA } from './arena-layout.mjs';
 import { aimTarget, pilotAim } from './rules.mjs';
-import { createDuelMech } from './duel-mech.mjs?v=6';
-import { createArmorSurface } from './duel-mech-art.mjs?v=6';
+import { createDuelMech } from './duel-mech.mjs?v=7';
+import { createArmorSurface } from './duel-mech-art.mjs?v=7';
 import { buildHarbor } from './harbor-view.mjs';
 
 const team = [new THREE.Color(0x66ddee),new THREE.Color(0xff985e)];
@@ -156,7 +156,13 @@ export function createArena(canvas, art = null) {
     const low=level===0 || level==='low';
     renderer.setPixelRatio(Math.min(globalThis.devicePixelRatio||1,low?1:1.4));
     renderer.shadowMap.enabled=!low;sun.castShadow=!low;
-    if(armorSurface)armorSurface.grainStrength.value=low?0:1;
+    if(armorSurface) {
+      armorSurface.grainStrength.value=low?0:1;
+      for(const {root} of vehicles) root.traverse(part=>{
+        const count=part.userData.lowDetailIndexCount;
+        if(part.isMesh && Number.isInteger(count)) part.geometry.setDrawRange(0,low?count:Infinity);
+      });
+    }
     currentWidth=0;resize();
   }
   function render(state,slot,dt,cameraInput) {

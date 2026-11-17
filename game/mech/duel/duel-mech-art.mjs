@@ -1,6 +1,6 @@
 import * as THREE from '../../lib/three.module.js';
 
-const model = new URL('./m07-cangyan-v6.glb', import.meta.url);
+const model = new URL('./m07-cangyan-v7.glb', import.meta.url);
 const jointNames = ['M07_Body','M07_Upper','M07_Rifle',
   ...['L','R'].flatMap(side => ['Thigh','Shin','Foot'].map(segment => `M07_${segment}_${side}`))];
 
@@ -58,18 +58,28 @@ function applySurface(material, slot, optics, surface) {
           uniform float armorGrainStrength;
           varying vec2 vArmorGrain;`)
         .replace('#include <color_fragment>', `#include <color_fragment>
+          vec3 finishGrain = vec3(0.5);
           float grain = 0.0;
           if (armorGrainStrength > 0.0) {
-            grain = texture2D(armorGrain, vArmorGrain).r - 0.5;
+            finishGrain = texture2D(armorGrain, vArmorGrain).rgb;
+            grain = finishGrain.r - 0.5;
           }
           float steel = smoothstep(0.09, 0.60, vArmorFinish.y);
           diffuseColor.rgb *= mix(vec3(1.0), armorTint, vArmorTeam) * (1.0 + grain * steel * 0.64);`)
         .replace('#include <roughnessmap_fragment>', `#include <roughnessmap_fragment>
-          roughnessFactor = clamp(roughnessFactor * vArmorFinish.x - grain * steel * 0.14, 0.13, 1.0);`)
+          roughnessFactor = clamp(vArmorFinish.x + (finishGrain.g - 0.5) * 0.36, 0.13, 1.0);`)
+        .replace('#include <normal_fragment_maps>', `#include <normal_fragment_maps>
+          if (armorGrainStrength > 0.0) {
+            vec3 dx = dFdx(-vViewPosition), dy = dFdy(-vViewPosition);
+            vec3 rx = cross(dy, normal), ry = cross(normal, dx);
+            float det = dot(dx, rx);
+            vec3 slope = dFdx(finishGrain.b) * rx + dFdy(finishGrain.b) * ry;
+            normal = normalize(abs(det) * normal - sign(det) * slope * 0.0015);
+          }`)
         .replace('#include <metalnessmap_fragment>', '#include <metalnessmap_fragment>\nmetalnessFactor *= vArmorFinish.y;');
     }
   };
-  material.customProgramCacheKey = () => optics ? 'm07-optics-v4' : 'm07-armor-v4';
+  material.customProgramCacheKey = () => optics ? 'm07-optics-v7' : 'm07-armor-v7';
 }
 
 export function instantiateDuelMechArt(art, slot, surface) {
@@ -85,6 +95,7 @@ export function instantiateDuelMechArt(art, slot, surface) {
     const isOptic = mesh.name.endsWith('_optics');
     mesh.material = isOptic ? optics : armor;
     mesh.castShadow = !isOptic;
+    mesh.receiveShadow = !isOptic;
   });
   return model;
 }
@@ -119,23 +130,40 @@ function createArmorEnvironment(renderer) {
 }
 
 function createArmorGrain() {
-  const width=128, data=new Uint8Array(width*width);
-  const random = (x,y) => {
-    const n = Math.imul(x+29,0x21f0aaad) ^ Math.imul(y+47,0x735a2d97);
+  // One small static map shared by both robots; RGB carries pigment, roughness
+  // and shallow machining marks. Low quality bypasses the texture sampling.
+  const width=256, data=new Uint8Array(width*width*4);
+  const random=(x,y)=>{
+    const n=Math.imul(x+29,0x21f0aaad)^Math.imul(y+47,0x735a2d97);
     return (Math.imul(n^(n>>>14),0x9e3779b9)>>>24)/255;
   };
-  for(let y=0;y<width;y++) for(let x=0;x<width;x++) {
-    data[y*width+x] = 106 + 37*random(x,1) + 15*random(x,y);
+  const noise=(x,y,span)=>{
+    const gx=x/span,gy=y/span,ix=Math.floor(gx),iy=Math.floor(gy);
+    let fx=gx-ix,fy=gy-iy;
+    fx=fx*fx*(3-2*fx);fy=fy*fy*(3-2*fy);
+    const a=random(ix,iy)*(1-fx)+random(ix+1,iy)*fx;
+    const b=random(ix,iy+1)*(1-fx)+random(ix+1,iy+1)*fx;
+    return a*(1-fy)+b*fy;
+  };
+  for(let y=0;y<width;y++)for(let x=0;x<width;x++){
+    const patch=noise(x,y,32)-.5,grain=random(x,y)-.5,brush=random(x,1)-.5;
+    data.set([
+      Math.round((.50+.32*patch+.10*grain)*255),
+      Math.round((.50+.34*patch+.10*brush)*255),
+      Math.round((.50+.10*grain+.10*brush)*255),255,
+    ],(y*width+x)*4);
   }
-  for(let n=0;n<89;n++){
-    const x=Math.floor(random(n,2)*width), y=Math.floor(random(n,3)*width), length=4+Math.floor(random(n,4)*30);
+  for(let k=0;k<320;k++){
+    const x=Math.floor(random(k,13)*255),y=Math.floor(random(k,17)*255);
+    const length=2+Math.floor(random(k,21)*37),dark=random(k,41)<.62;
     for(let i=0;i<length;i++){
-      const pos=((y+i)%width)*width+(x+Math.floor(i*.12))%width;
-      const abrasion=Math.sin(Math.PI*(i+1)/(length+1));
-      data[pos]=Math.min(242,data[pos]+92*abrasion);
+      const pos=(((y+i)%width)*width+(x+Math.floor(i*.06))%width)*4;
+      const fade=Math.sin(Math.PI*(i+1)/(length+1));
+      for(const [channel,amount] of [[0,dark?-.24:.22],[1,dark?.21:-.19],[2,-.20]])
+        data[pos+channel]=Math.max(0,Math.min(255,data[pos+channel]+Math.round(amount*fade*255)));
     }
   }
-  const texture = new THREE.DataTexture(data,width,width,THREE.RedFormat);
+  const texture=new THREE.DataTexture(data,width,width,THREE.RGBAFormat);
   texture.wrapS=texture.wrapT=THREE.RepeatWrapping;
   texture.minFilter=THREE.LinearMipmapLinearFilter;
   texture.magFilter=THREE.LinearFilter;
