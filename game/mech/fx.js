@@ -407,11 +407,13 @@ const RIB_FS = /* glsl */`
   void main() {
     float side = vI.x, age = clamp(vI.y, 0.0, 1.0);
     float fa = 1.0 - age; fa *= fa;
-    // 外緣柔化，最亮的線落在刀尖內側一點；越靠劍柄越淡
-    float rim = 1.0 - smoothstep(0.93, 1.0, side);
-    float edge = side * side * side * side;
-    vec3 c = vC * (0.035 + 1.0 * edge) * fa * rim;
-    c += vec3(1.0) * smoothstep(0.84, 0.96, side) * rim * fa * fa * fa * (vC.r + vC.g + vC.b) * 0.3;
+    // 新的刀位留一條白熱前緣，後面的薄光幕快速消退；端點柔化，沒有整片實心色塊。
+    float rim = 1.0 - smoothstep(0.94, 1.0, side);
+    float root = smoothstep(0.0, 0.12, side);
+    float edge = pow(side, 4.0);
+    float fresh = exp(-age * 24.0);
+    vec3 c = vC * (0.10 * root + 0.88 * edge) * fa * rim;
+    c += vec3(1.0, 0.88, 0.94) * fresh * root * rim * (0.28 + edge * 0.5);
     gl_FragColor = vec4(c * (1.0 - vF), 0.0);
   }`;
 

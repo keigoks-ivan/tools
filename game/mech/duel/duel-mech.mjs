@@ -1,6 +1,7 @@
 import * as THREE from '../../lib/three.module.js';
+import { createFootContactShadows } from '../foot-contact.mjs?v=1';
 import { beveledProfile, MeshBatch } from './mesh-batch.mjs';
-import { instantiateDuelMechArt, setDuelMechAppearance } from './duel-mech-art.mjs?v=10';
+import { instantiateDuelMechArt, setDuelMechAppearance } from './duel-mech-art.mjs?v=11';
 
 const STEEL = 0x51595b, DARK = 0x20262b, METAL = 0x89969a, RUBBER = 0x14191d;
 const GLASS = 0x152932, WHITE = 0xc9c8b7, WARNING = 0xda8248, SHELL = 0x39434a;
@@ -240,7 +241,7 @@ function fallbackRig(slot) {
   return {root,body,upper,gun,jets,legs};
 }
 
-export function createDuelMech(slot = 0, art = null, surface = null) {
+export function createDuelMech(slot = 0, art = null, surface = null, floorAt = () => 0) {
   const {root,body,upper,gun,jets,legs,exhaust} = art ? artRig(art,slot,surface) : fallbackRig(slot);
   root.name = 'M-07 蒼焰';
   let cycle = 0, stride = 0, stanceWeight = 1;
@@ -252,6 +253,8 @@ export function createDuelMech(slot = 0, art = null, surface = null) {
     const bounds=new THREE.Box3().setFromObject(leg.foot);
     leg.soleY=bounds.min.y-leg.foot.getWorldPosition(ankle).y;
   }
+  const contacts = createFootContactShadows(root, legs.map(leg => leg.foot));
+  const contactState = { groundAt: (x, z) => floorAt(x, root.position.y, z), grounded: true };
   function setMech(id) {
     if (art && root.userData.mech !== id) setDuelMechAppearance(root,id);
   }
@@ -279,6 +282,7 @@ export function createDuelMech(slot = 0, art = null, surface = null) {
       floor=Math.min(floor,ankle.y+soleY);
     }
     body.position.y = flying ? .2*Math.sin(cycle) : -floor;
+    contactState.grounded = !flying; contacts.update(contactState);
     if (exhaust && flying) {
       exhaust.uniforms.exhaustTime.value = cycle;
       exhaust.uniforms.exhaustPower.value = p.boosting ? .9 : .58;

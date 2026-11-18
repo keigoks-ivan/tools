@@ -7,9 +7,17 @@ import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { stencilAtlas, stencilUV, detailMaps } from './textures.js';
 import { MechMotion, wrap, lerpAngle, damp } from './anim.js';
+import { createFootContactShadows } from './foot-contact.mjs?v=1';
 
 // ================================================================ 材質
 const MATS = {};
+let heroBuilder;
+export async function loadHeroMech() {
+  const module = await import('./campaign-mech.mjs?v=1');
+  await module.loadCampaignHero();
+  heroBuilder = module.buildCampaignHero;
+  TPL.delete('hero|hero');
+}
 const TPL = new Map();      // 'style|scheme' → 樣板（只建一次）
 // 後方視角透視（只接到主角機的漆）：被機體擋住的地方用網點挖空，看得到後面的敵人。main.js 每幀設定；全部 0＝不挖
 //   c＝準心、t＝鎖定目標：xy＝畫面位置（畫面高＝1、左下角為原點）、z＝半徑、w＝挖掉幾成；a＝整台淡掉幾成；res＝畫面像素
@@ -555,7 +563,8 @@ export class Mech {
     let T = TPL.get(key);
     if (!T) {
       T = Object.create(Mech.prototype);
-      T.build(style, schemeKey);
+      if (style === 'hero' && heroBuilder) heroBuilder(T, SEE);
+      else T.build(style, schemeKey);
       T.variants = new Map();
       TPL.set(key, T);
     }
@@ -564,6 +573,7 @@ export class Mech {
     this.legYaw = 0; this.pose = { boost: 0, air: 0 };
     this.land = 0; this.landV = 0; this.thrust = 0; this.recoil = 0; this.swing = 0;
     this.motion = new MechMotion(this);
+    if (this.root.userData.originalCangyan) this.footContacts = createFootContactShadows(this.root, [this.bones.ankleR, this.bones.ankleL]);
     this.muzzle = new THREE.Object3D();
     this.muzzle.position.copy(this.muzzleLocal);
     this.weapon.add(this.muzzle);
@@ -1732,7 +1742,7 @@ export class Mech {
   }
 
   // 動作全部在 anim.js（MechMotion）；st = { vel, grounded, boost, torsoYaw, pitch, thrust, aim(Vector3|null), lean }
-  animate(dt, st) { this.motion.update(dt, st); }
+  animate(dt, st) { this.motion.update(dt, st); this.footContacts?.update(st); }
   impact(s) { this.motion.impact(s); }
 
   capsule() {

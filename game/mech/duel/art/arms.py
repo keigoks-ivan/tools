@@ -5,6 +5,7 @@ J='M07_Upper'
 
 def build(b):
  for side in (-1,1):
+  b.role='Arm_R' if side==1 else 'Arm_L'
   p=lambda x,y,z:(side*x,y,z)
   b.loft(J,'上臂完整承力軀殼',[[p(*v) for v in r] for r in [section(11.56,4.38,.03,.54,.61,.17),section(12.48,4.12,-.11,.72,.85,.23),section(13.37,3.70,-.25,.66,.78,.22)]],'dark',.048)
   b.loft(J,'上臂立體包覆裝甲',[[p(*v) for v in r] for r in [section(11.66,4.29,.17,.53,.69,.19),section(12.42,4.12,.05,.71,.92,.24),section(13.11,3.78,-.09,.61,.84,.21)]],'armor',.042)
@@ -16,11 +17,13 @@ def build(b):
    b.cyl(J,'肘部大徑承力樞軸',p(lo,11.26,.05),p(hi,11.26,.05),r,key,18)
   b.ring(J,'肘部外蓋嵌環',p(5.43,11.26,.05),(side,0,0),.28,.19,'dark',.06,16)
   forearm(b,side)
+ b.role=None
  rifle(b)
 
 def forearm(b,s):
  # Right forearm, gripping hand and gun share the elbow pivot, including in preview.
  j='M07_Rifle' if s==1 else J
+ b.role='Forearm_R' if s==1 else 'Forearm_L'
  def f(u,t,q):
   return (s*(4.46+u*1.15),11.26+q*1.1,.05+t*.85) if s==1 else (s*(4.46+u*1.15),11.26-t*.85,.05+q*1.1)
  def panel(name,pts,key='blue',depth=.17):
@@ -58,6 +61,7 @@ def forearm(b,s):
  b.cyl(j,'拇指末節',f(-.53,2.71,-.22),f(-.31,2.86,-.38),.112,'armor2',10)
 
 def rifle(b):
+ b.role=None
  j='M07_Rifle';x=4.05
  b.transform=lambda p:(p[0]+.41,p[1]+1.05,p[2]-.22)
  # Mechanical receiver above the right hand; muzzle bore has real depth.

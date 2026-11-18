@@ -2,6 +2,7 @@
 //   流程：標題（選章節）→ 開場字卡 → 第一人稱戰鬥（章節／遭遇戰／檢查點）→ 機庫爬上鋼彈 → 跳進駕駛艙 → 接到《鋼鐵黃昏》的駕駛艙
 //   除錯：?ch=1..3 直接開章、?x=&z=&yaw= 指定位置、?god 無敵、?mute 靜音、?final 直接到最後一幕
 import * as THREE from 'three';
+import { frameTitle, createHangarTitleLighting } from '../title-visual.mjs?v=1';
 import { carMaterials } from './props.js';
 import { Reinforcements } from '../reinforcements.mjs';
 import { Patrols, arrivalPoint, updateInfantry, MAX_ACTORS } from './patrol.js';
@@ -39,7 +40,7 @@ const clamp = THREE.MathUtils.clamp, lerp = THREE.MathUtils.lerp;
 const bar = document.querySelector('#bar i'), status = $('status');
 let prog = 0; const step = (k) => { prog = Math.min(1, prog + k); bar.style.width = (prog * 100).toFixed(0) + '%'; };
 
-const [{ loadAssets, World }, { Post }, { Mech, initMechMaterials }, { loadSurfaces, Solid }, { buildMap }, { HumanKit, wrap }, { ViewModel, WEAPONS }, { FXL }, { HUD }, { Pilot }, { Trooper, Drone, hearNoise }, { Input }, S, { Models, Placer }] = await Promise.all([
+const [{ loadAssets, World }, { Post }, { Mech, loadHeroMech, initMechMaterials }, { loadSurfaces, Solid }, { buildMap }, { HumanKit, wrap }, { ViewModel, WEAPONS }, { FXL }, { HUD }, { Pilot }, { Trooper, Drone, hearNoise }, { Input }, S, { Models, Placer }] = await Promise.all([
   import('../env.js'), import('../post.js'), import('../mechs.js'), import('./kit.js'), import(campaign ? '../lastline/map.js' : './map.js'), import('./human.js'), import('./viewmodel.js'),
   import('./fxl.js'), import('./hud.js'), import('./player.js'), import('./ai.js'), import('../input.js'), import(campaign ? '../lastline/script.js' : './script.js'), import('./models.js'),
 ]);
@@ -65,7 +66,7 @@ const vCam = new THREE.PerspectiveCamera(54, innerWidth / innerHeight, 0.01, 10)
 status.textContent = '載入城市';
 const [A, SURF, MODELS, kit] = await Promise.all([
   loadAssets(renderer, () => step(0.008)), loadSurfaces(renderer, () => step(0.008)), Models.load(() => step(0.008), Math.min(8, renderer.capabilities.getMaxAnisotropy())),
-  HumanKit.load(new URL('./assets/soldier.glb', import.meta.url).href).then((k) => { step(0.1); return k; }),
+  HumanKit.load(new URL('./assets/soldier.glb', import.meta.url).href).then((k) => { step(0.1); return k; }), loadHeroMech(),
 ]);
 status.textContent = campaign ? '建立港區' : '建立街區';
 await new Promise((r) => setTimeout(r, 0));
@@ -164,11 +165,16 @@ const vm = new ViewModel(kit, vScene, audio, fx);
 const hero = new Mech('hero', 'hero');
 hero.root.position.copy(map.marks.mech); hero.legYaw = Math.PI;
 scene.add(hero.root);
+const titleHero = new Mech('hero', 'hero');
+titleHero.root.position.copy(map.marks.mech).add(new THREE.Vector3(0, 0, -14)); titleHero.legYaw = Math.PI - .25;
+scene.add(titleHero.root);
+const titleLighting = await createHangarTitleLighting(scene, titleHero.root.position);
+const titleIdle = { vel: new THREE.Vector3(), grounded: true, boost: 0, torsoYaw: Math.PI - .25, pitch: 0, thrust: 0, aim: null, lean: 0 };
 const idleSt = { vel: new THREE.Vector3(), grounded: true, boost: 0, torsoYaw: Math.PI, pitch: 0.05, thrust: 0, aim: null, lean: 0 };
 for (let i = 0; i < 30; i++) hero.animate(1 / 30, idleSt);
 const hound = new Mech('grunt', 'grunt');
 hound.root.visible = false; scene.add(hound.root);
-window.__renderer = renderer; window.__post = post; window.__scene = scene; window.__solid = solid; window.__map = map; window.__hero = hero; window.__world = world;
+window.__renderer = renderer; window.__post = post; window.__scene = scene; window.__solid = solid; window.__map = map; window.__hero = hero; window.__titleHero = titleHero; window.__world = world;
 
 // ---------------------------------------------------------------- 遊戲狀態（AI 也讀這個）
 const NADE_START = 3, NADE_MAX = 5;   // 玩家手榴彈：每章開頭至少幾顆、最多帶幾顆
@@ -963,7 +969,7 @@ function updateFinale(dt) {
   vm.holder.visible = false; vm.arms.root.visible = false;
   const fade = clamp((F.t - 1.7) / 0.6, 0, 1);
   $('fade').style.transition = 'none'; $('fade').style.opacity = fade;
-  if (F.t > 2.4 && !F.card) { F.card = true; hud.title('XG-01　蒼焰', '系統啟動中……　SYSTEM BOOT', 3.5); }
+  if (F.t > 2.4 && !F.card) { F.card = true; hud.title('M-07　蒼焰', '系統啟動中……　SYSTEM BOOT', 3.5); }
   if (F.t > 6.2 && !F.go) { F.go = true; startMech(); }
 }
 // 第 6 章：開蒼焰，每一幀交給 mech6.js；載入失敗就照舊直接接本篇
@@ -1145,6 +1151,7 @@ function intro(then) {
   tm = setTimeout(next, 500);
 }
 function begin(n, replayBreakout = false) {
+  frameTitle(camera, false);
   n = clamp(Math.floor(n) || 1, 1, S.CHAPTERS.length);
   chapter = n;
   if (S.CHAPTERS[n - 1].mech) {
@@ -1219,18 +1226,24 @@ function frame(now = performance.now()) {
   const dt = Math.min(0.05, clock.getDelta());
   if (state === 'paused') { input.endFrame(); return; }
   G.t += dt;
+  titleLighting.set(state === 'title', titleHero);
+  titleHero.root.visible = state === 'title'; hero.root.visible = state !== 'title';
   if (state === 'title') {
     // 標題：鏡頭慢慢繞著機庫裡的蒼焰
     titleT += dt * 0.08;
-    const c = map.marks.mech;
-    camera.fov = FOV; camera.updateProjectionMatrix();
-    camera.position.set(c.x + Math.sin(titleT) * 16, 9 + Math.sin(titleT * 0.7) * 2, c.z - 16 + Math.cos(titleT) * 5);
-    camera.lookAt(c.x, 11, c.z);
+    const c = titleHero.root.position;
+    titleHero.animate(dt, titleIdle);
+    titleHero.bones.shoulderR.rotation.set(-.16, .03, .08); titleHero.bones.elbowR.rotation.x = -.32;
+    titleHero.bones.head.rotation.set(-.025, .08, 0);
+    frameTitle(camera, true);
+    camera.position.set(c.x + 10 + Math.sin(titleT) * .8, 9.5, c.z - 27 + Math.cos(titleT) * .6);
+    camera.lookAt(c.x, 8.8, c.z);
     vm.holder.visible = false; vm.arms.root.visible = false;
     world.followShadow(camera.position); world.update(dt); fx.update(dt);
     post.render(clock.elapsedTime); hud.draw(dt, null);
     input.endFrame(); return;
   }
+  frameTitle(camera, false);
   if (stage === 'mech') { if (M6) M6.tick(dt); input.endFrame(); return; }   // 第 6 章（載入中先停在黑畫面）
   const c = input.state(dt), K = input.keys;
   if(stage==='play'&&!finale&&!player.dead&&input.pressed('KeyK')){G.ground.openMenu();input.endFrame();return;}

@@ -6,8 +6,10 @@ import struct
 import os
 
 root=Path(os.environ.get('M07_ART_OUTPUT', str(Path(__file__).resolve().parent/'output')))
-old_path=root/'m07-cangyan.raw.glb'
-output_path=root/'m07-cangyan-v10.glb'
+campaign=os.environ.get('M07_CAMPAIGN')=='1'
+stem='m07-cangyan-campaign' if campaign else 'm07-cangyan'
+old_path=root/(stem+'.raw.glb')
+output_path=root/(stem+'-v11.glb')
 raw=old_path.read_bytes()
 jlen,jtype=struct.unpack_from('<II',raw,12)
 assert jtype==0x4e4f534a

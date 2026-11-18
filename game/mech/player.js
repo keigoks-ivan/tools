@@ -32,6 +32,7 @@ export class Player {
     this.heavy = !!opts.heavy;
     this.m = mech; this.world = world; this.hooks = hooks;
     this.pos = mech.root.position;
+    this.groundAt = (x, z) => world.support(x, z, .25, this.pos.y);
     this.vel = new THREE.Vector3();
     this.yaw = mech.legYaw; this.pitch = 0;
     this.grounded = true; this.airT = 0;
@@ -180,7 +181,7 @@ export class Player {
   animState(aim) {
     return {
       vel: this.vel, grounded: this.grounded, boost: this.grounded ? Math.max(this.boosting, this.qbT > 0 ? 1 : 0) : 0,
-      torsoYaw: this.yaw, pitch: this.pitch, thrust: this.thrust, aim, lean: this.dashT > 0 ? 0.25 : 0, flight: this.flying?1:0,
+      torsoYaw: this.yaw, pitch: this.pitch, thrust: this.thrust, aim, lean: this.dashT > 0 ? 0.25 : 0, flight: this.flying?1:0, groundAt: this.groundAt,
     };
   }
 }

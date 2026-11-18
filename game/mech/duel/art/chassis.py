@@ -7,11 +7,13 @@ J='M07_Upper'
 def build(b):
  # The outer chest is carried by a deep, tapered cast frame.
  b.loft(J,'胸腔完整承力殼',[section(11.67,0,-.10,1.43,1.15,.29),section(12.36,0,-.08,2.13,1.48,.38),section(13.52,0,-.14,2.43,1.57,.39),section(14.32,0,-.18,1.84,1.24,.33)],'dark',.075)
+ b.role='Hatch'
  b.loft(J,'前胸中央厚實龍骨',[section(11.57,0,1.26,.38,.43,.14),section(12.12,0,1.59,.61,.56,.18),section(13.48,0,1.72,.86,.59,.23),section(14.15,0,1.35,.64,.43,.20)],'blue',.045)
  # Front inset ends before the machined glancing surfaces around the chest.
  b.panel(J,'胸甲中央檢修蓋',[(-.53,13.77,2.07),(.53,13.77,2.07),(.63,13.31,2.34),(.49,12.56,2.28),(-.49,12.56,2.28),(-.63,13.31,2.34)],(0,0,-.055),'blue2',.019)
  for k in range(3):b.box(J,'中央排熱柵',(0,13.08-k*.078,2.335),(.53,.032,.035),'recess',.006)
  for x,y,z in ((-.45,13.57,2.24),(.45,13.57,2.24),(-.36,12.72,2.31),(.36,12.72,2.31)):b.bolt(J,(x,y,z),r=.041)
+ b.role=None
  for s in (-1,1):
   p=lambda x,y,z:(s*x,y,z)
   def rings(rows):return [[p(*v) for v in section(*r)] for r in rows]
@@ -28,6 +30,12 @@ def build(b):
   b.tube(J,'腹部編織管線',[p(1.97,12.10,-.38),p(1.90,11.58,-.59),p(1.50,10.87,-.44)],.095)
   b.box(J,'腹部液壓閥體',p(1.31,10.90,.83),(.37,.39,.45),'armor2',.047,rot=(0,0,s*.17))
   for x,y,z in ((1.11,13.71,1.86),(1.94,13.48,1.89),(1.66,12.49,1.75)):b.bolt(J,p(x,y,z),r=.045)
+ b.box(J,'駕駛艙內嵌暗室',(0,13.10,1.64),(.98,1.57,.14),'rubber',.04)
+ b.box(J,'駕駛艙座椅靠背',(0,12.91,1.76),(.46,.70,.12),'dark',.045)
+ b.box(J,'駕駛艙座墊',(0,12.54,1.90),(.46,.12,.31),'rubber',.03)
+ for s in (-1,1):
+  b.box(J,'駕駛艙側控制台',(s*.37,12.91,1.82),(.16,.22,.29),'dark',.025)
+  b.cyl(J,'駕駛艙側屏幕',(s*.37,13.01,1.86),(s*.37,13.04,1.89),.055,'cyan',8,glow=True)
  # A short, layered rotating abdomen leaves room for the diagonal struts.
  b.cyl(J,'腹部旋轉主軸',(0,10.45,-.12),(0,12.10,-.12),.70,'recess',16)
  for y,r,d,c in ((10.75,.91,.21,'dark'),(11.03,.84,.13,'steel'),(11.30,.80,.19,'dark'),(11.59,.86,.13,'edge_dark')):
@@ -58,42 +66,36 @@ def pelvis(b):
 def shoulders(b):
  for s in (-1,1):
   p=lambda x,y,z:(s*x,y,z)
-  outline=[(2.02,-1.91),(2.65,-2.36),(4.57,-2.20),(5.50,-1.34),(5.50,1.71),(4.94,2.83),(2.72,2.81),(2.15,2.25),(1.95,.57)]
-  def deck_y(x,z):return 15.21-.34*z-.13*(x-2.5)
-  # A full wraparound cover with a deep front rim and independent upper tiles.
+  # A compact swept shell: the leading edge narrows to a bevel rather than a vertical wall.
+  outline=[(2.04,-1.52),(2.76,-1.92),(3.91,-1.73),(4.53,-.92),(4.49,.66),(3.98,1.66),(3.00,1.87),(2.16,1.08),(1.98,-.06)]
+  def deck_y(x,z):return 14.96-.23*z-.21*(x-2.5)
   cx=sum(x for x,z in outline)/len(outline);cz=sum(z for x,z in outline)/len(outline)
   def ring(scale,height):
-   return [p(cx+(x-cx)*scale,deck_y(x,z)+height,cz+(z-cz)*scale) for x,z in outline]
-  b.loft(J,'肩甲鑄造包覆外殼',[ring(.97,-.78),ring(1.0,-.70),ring(1.0,-.03),ring(.99,.025)],'armor',.035)
-  b.loft(J,'肩甲下緣承力框',[ring(.88,-1.01),ring(.94,-.82),ring(.92,-.73)],'dark',.035)
-  def tile(name,poly,key='armor',offset=.10):
-   return b.panel(J,name,[p(x,deck_y(x,z)+offset,z) for x,z in poly],(0,-.13,0),key,.026)
-  tile('肩甲內側分層長甲',[(2.16,-1.77),(2.71,-2.19),(3.25,-2.14),(3.20,-.39),(2.85,1.12),(2.63,2.55),(2.30,2.15),(2.10,.54)],'armor2')
-  tile('肩甲上層後段面板',[(3.34,-2.08),(4.51,-2.03),(5.16,-1.43),(5.34,-.34),(3.28,-.25)],'armor')
-  tile('肩甲上層前段面板',[(3.25,-.14),(5.35,-.20),(5.24,1.58),(4.88,2.37),(4.48,2.64),(2.84,2.59),(2.98,1.20)],'armor2')
+   return [p(cx+(x-cx)*scale,deck_y(cx+(x-cx)*scale,cz+(z-cz)*scale)+height,cz+(z-cz)*scale) for x,z in outline]
+  b.loft(J,'肩甲後掠楔形外殼',[ring(.86,-.34),ring(.98,-.17),ring(1.0,-.015),ring(.96,.035)],'armor',.022)
+  b.loft(J,'肩甲內縮承力框',[ring(.69,-.51),ring(.81,-.34),ring(.83,-.27)],'dark',.025)
+  def tile(name,poly,key='armor',offset=.095):
+   return b.panel(J,name,[p(x,deck_y(x,z)+offset,z) for x,z in poly],(0,-.08,0),key,.018)
+  tile('肩甲內側斜收護脊',[(2.16,-1.40),(2.79,-1.76),(3.10,-1.70),(2.95,-.33),(2.71,.90),(2.94,1.63),(2.30,1.01),(2.12,-.08)],'armor2')
+  tile('肩甲後掠上層面板',[(3.21,-1.62),(3.85,-1.56),(4.35,-.88),(4.32,.26),(3.68,.18),(3.08,-.24)],'armor')
+  tile('肩甲斜切前緣護片',[(3.03,-.10),(3.64,.31),(4.31,.40),(3.86,1.50),(3.10,1.67),(2.87,.96)],'armor2')
   if s==-1:
-   for poly in [[(3.58,-1.78),(4.37,-1.77),(4.72,-.44),(3.52,-.35)],[(3.46,.02),(4.76,-.06),(4.59,1.57),(3.14,1.83)]]:
-    tile('肩甲嵌入橘色識別甲',poly,'orange',.136)
+   tile('肩甲橘色窄幅識別甲',[(3.34,-1.43),(3.76,-1.39),(4.11,-.72),(3.91,-.18),(3.30,-.40)],'orange',.12)
   else:
-   for z in (-1.71,-1.42,-1.13):tile('肩甲深層排氣孔',[(3.83,z),(4.58,z-.05),(4.60,z+.065),(3.81,z+.11)],'recess',.14)
-  for coords in [[(2.50,-.95),(3.05,-.91),(3.02,-.77)],[(4.92,.55),(4.90,1.35),(4.54,1.62)]]:
-   b.tube(J,'肩甲凹入式工藝接縫',[p(x,deck_y(x,z)+.133,z) for x,z in coords],.013,'recess',4)
-  for x,z in ((2.53,-1.42),(4.97,-.61)):
-   yy=deck_y(x,z)+.13
-   b.box(J,'肩甲平嵌維修鎖座',p(x,yy,z),(.23,.045,.33),'recess',.012)
-   b.box(J,'肩甲嵌入式鎖銷',p(x,yy+.014,z),(.065,.033,.24),'edge_dark',.009)
-  # Service latches descend over the armored leading lip rather than float on top.
-  for x in (2.89,3.57,4.30,4.82):
-   y=deck_y(x,2.72)
-   b.box(J,'肩甲前緣緊固卡榫',p(x,y-.06,2.77),(.22,.43,.20),'edge_dark',.028,rot=(.18,0,0))
-   b.bolt(J,p(x,y-.03,2.885),r=.043)
-  for x,z in ((2.49,1.83),(4.84,1.62),(4.85,-1.12),(2.75,-1.78),(3.55,.30),(4.42,2.30)):
-   b.bolt(J,p(x,deck_y(x,z)+.15,z),(0,1,0),.051)
-  # Deep shoulder machinery under the projected armor.
-  b.cyl(J,'肩部主承力橫軸',p(2.04,13.44,-.10),p(4.01,13.20,-.12),.77,'dark',18)
-  b.ring(J,'肩部外側承力環',p(3.85,13.21,-.10),(s,0,0),.78,.57,'steel',.19,18)
-  b.loft(J,'肩甲下方關節護罩',[[p(*v) for v in r] for r in [section(12.87,3.60,-.23,.67,.78,.18),section(13.74,3.60,-.24,.84,.96,.24),section(14.22,3.22,-.50,.70,.80,.22)]],'dark',.04)
-  b.piston(J,'肩甲掀起液壓桿',p(3.17,13.14,-.70),p(3.50,14.68,-1.50),.19)
+   for z in (-1.21,-.98,-.75):tile('肩甲平嵌排熱縫',[(3.35,z),(3.91,z+.11),(3.94,z+.18),(3.33,z+.07)],'recess',.12)
+  for coords in [[(2.39,-.86),(2.80,-.68),(2.77,-.50)],[(3.65,.55),(3.51,1.15),(3.17,1.30)]]:
+   b.tube(J,'肩甲凹入式接縫',[p(x,deck_y(x,z)+.116,z) for x,z in coords],.010,'recess',4)
+  for x,z in ((2.57,-1.14),(4.09,-.29)):
+   yy=deck_y(x,z)+.11
+   b.box(J,'肩甲平嵌維修鎖座',p(x,yy,z),(.16,.035,.24),'recess',.008)
+   b.box(J,'肩甲平嵌鎖銷',p(x,yy+.012,z),(.045,.026,.16),'edge_dark',.006)
+  for x,z in ((2.37,.66),(3.80,1.16),(4.12,-.75),(2.85,-1.53)):
+   b.bolt(J,p(x,deck_y(x,z)+.13,z),(0,1,0),.040)
+  # The bearing still meets the unchanged arm axis; only the cover loses bulk.
+  b.cyl(J,'肩部主承力橫軸',p(2.04,13.44,-.10),p(3.90,13.22,-.12),.64,'dark',18)
+  b.ring(J,'肩部外側承力環',p(3.85,13.23,-.10),(s,0,0),.66,.48,'steel',.15,18)
+  b.loft(J,'肩甲內縮關節護罩',[[p(*v) for v in r] for r in [section(12.95,3.62,-.23,.53,.63,.18),section(13.73,3.58,-.24,.66,.73,.24),section(14.23,3.24,-.42,.54,.65,.22)]],'dark',.03)
+  b.piston(J,'肩甲掀起液壓桿',p(3.17,13.14,-.70),p(3.44,14.58,-1.20),.16)
 
 def packs(b):
  b.box(J,'雙推進艙背架',(0,12.66,-2.08),(1.20,4.95,1.06),'dark',.09)

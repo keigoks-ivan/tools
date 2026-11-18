@@ -3,7 +3,7 @@
 //   ?x=&y=&z=&yaw=&pitch=           自由鏡頭
 import * as THREE from 'three';
 import { loadAssets, World } from './env.js';
-import { Mech, initMechMaterials } from './mechs.js';
+import { Mech, loadHeroMech, initMechMaterials } from './mechs.js';
 import { Post } from './post.js';
 import { qualityLevel, pixelRatio } from './runtime.js';
 
@@ -22,7 +22,7 @@ const cockpit = new THREE.Scene();
 const cockCam = new THREE.PerspectiveCamera(62, innerWidth / innerHeight, 0.05, 20);
 
 const bar = document.querySelector('#bar i');
-const A = await loadAssets(renderer, (p) => { bar.style.width = (p * 100).toFixed(0) + '%'; });
+const [A] = await Promise.all([loadAssets(renderer, (p) => { bar.style.width = (p * 100).toFixed(0) + '%'; }), loadHeroMech()]);
 initMechMaterials(A);
 const world = new World(renderer, scene, A);
 const post = new Post(renderer, scene, camera, cockpit, cockCam);

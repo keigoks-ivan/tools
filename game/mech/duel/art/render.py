@@ -5,7 +5,7 @@ from mathutils import Vector
 WORK=Path(__file__).resolve().parent
 sys.path.insert(0,str(WORK))
 from geometry import OUT
-bpy.ops.wm.open_mainfile(filepath=str(OUT/'M-07-蒼焰-v10.blend'))
+bpy.ops.wm.open_mainfile(filepath=str(OUT/'M-07-蒼焰-v11.blend'))
 scene=bpy.context.scene
 variant=os.environ.get('M07_VARIANT','cangyan')
 for obj in bpy.data.objects:

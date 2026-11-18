@@ -94,7 +94,7 @@ export const ENCOUNTERS = [
     lines: [[OP, '配電箱都在地面。東側有狙擊手，先清掉再過去。']], done: [[OP, '供電回來了。我把隼的備援接上啟動回路。']] }),
   encounter('G4', 3, '守住修船棚，完成離線啟動', [40, 65], [], {
     after: 'G3', wait: 2, hold: { t: 40, gap: 5, waves: [[soldier(36, 48)], [drone(40, 42, 12)], [soldier(43, 48, 'officer')], [soldier(37, 116)], [drone(43, 108, 12)], [soldier(44, 48, 'heavy')], [soldier(40, 116)]] },
-    lines: [[HQ, 'XG-01，執行遠端停機。', true], [OP, '蒼焰拒絕了停機令。隼的備援通過驗證了。先守住西側電箱，再接通東側冷卻回路。']], done: [[ME, '蒼焰由駕駛艙接管。米拉，準備發車。', true]] }),
+    lines: [[HQ, 'M-07，執行遠端停機。', true], [OP, '蒼焰拒絕了停機令。隼的備援通過驗證了。先守住西側電箱，再接通東側冷卻回路。']], done: [[ME, '蒼焰由駕駛艙接管。米拉，準備發車。', true]] }),
   encounter('G2', 3, '擊退修船棚增援', [40, 70], [soldier(37, 47, 'heavy', { alert: true }), soldier(43, 47, 'heavy', { alert: true }), soldier(40, 118, 'officer', { alert: true }), drone(40, 116, 12)], {
     response:{delay:7,enemies:[soldier(37,47), soldier(43,47)]},
     after: 'G4', wait: 2, done: [[OP, '修船棚安全。西側樓梯上維修架，進胸前艙門。'], [CIV, '我們在碼頭接應路。零號，別遲到。']] }),

@@ -1,7 +1,7 @@
 import { MECHS, DEFAULT_MECH, mechInfo } from './mech-roster.mjs';
 import { STEP, LIMITS, advancePilot, sanitizeInput } from './rules.mjs';
-import { createArena } from './arena-view.mjs?v=10';
-import { loadDuelMechArt } from './duel-mech-art.mjs?v=10';
+import { createArena } from './arena-view.mjs?v=11';
+import { loadDuelMechArt } from './duel-mech-art.mjs?v=11';
 import { createControls } from './controls.mjs';
 
 const $ = id => document.getElementById(id);
@@ -47,7 +47,7 @@ for (const mech of MECHS) {
   const button=document.createElement('button');button.type='button';button.className='mech-option';
   button.dataset.mech=mech.id;button.setAttribute('aria-pressed',String(mech.id===selectedMech));
   button.setAttribute('aria-label',mech.name+'，'+mech.style);
-  const image=document.createElement('img');image.src='./portraits/'+mech.id+'.png?v=10';image.alt='';image.width=120;image.height=100;
+  const image=document.createElement('img');image.src='./portraits/'+mech.id+'.png?v=11';image.alt='';image.width=120;image.height=100;
   const name=document.createElement('strong');name.textContent=mech.name;
   const code=document.createElement('span');code.textContent=mech.code;
   button.append(image,name,code);picker.querySelector('.mech-options').append(button);

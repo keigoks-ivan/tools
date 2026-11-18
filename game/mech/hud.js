@@ -530,7 +530,7 @@ export class HUD {
   // 開機自我檢測（BIT）：逐行跑出來，狀態字綠色；下方進度條
   drawBoot(g) {
     const X = this.x, W = this.w, H = this.h, b = g.boot, s = this.s;
-    const lines = ['XG-01 AZURE FLAME', 'OS  IRON DUSK  COMBAT SYSTEM  v7.2', 'REACTOR ........ ONLINE', 'FRAME ........... OK', 'FCS ............. OK', 'THRUSTERS ....... OK', 'ALL-VIEW ........ ON'];
+    const lines = ['M-07 AZURE FLAME', 'OS  IRON DUSK  COMBAT SYSTEM  v7.2', 'REACTOR ........ ONLINE', 'FRAME ........... OK', 'FCS ............. OK', 'THRUSTERS ....... OK', 'ALL-VIEW ........ ON'];
     const n = Math.floor(clamp(b / 0.7, 0, 1) * lines.length), x0 = W * 0.5 - 170 * s, y0 = H * 0.35;
     for (let i = 0; i < n; i++) {
       const Ln = lines[i], y = y0 + i * 22 * s;

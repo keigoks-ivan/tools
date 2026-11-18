@@ -42,4 +42,6 @@ for screen in bpy.data.screens:
    s.region_3d.view_rotation=Vector((-19,34,-12)).to_track_quat('-Z','Y');s.clip_end=500
    s.shading.color_type='MATERIAL';s.overlay.show_extras=False
 bpy.context.preferences.filepaths.save_version=0
-bpy.ops.wm.save_as_mainfile(filepath=str(OUT/'M-07-蒼焰-v10.blend'),compress=True)
+bpy.ops.wm.save_as_mainfile(filepath=str(OUT/'M-07-蒼焰-v11.blend'),compress=True)
+
+if '--draft' not in sys.argv:__import__('campaign').export(b,OUT/'m07-cangyan-campaign.raw.glb')

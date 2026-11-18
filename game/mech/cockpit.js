@@ -168,7 +168,7 @@ function stripeTex() {
   return ctex(c, [5, 1], true);
 }
 // 噴漆標示字（印在面板上；原創字樣，帶一點噴漆顆粒）
-const LABELS = ['RADAR', 'RNG 600', 'STATUS', 'ARMS', 'FCS', 'SPD', 'ALT', 'EN CELL', 'BALANCER', 'CAUTION', 'XG-01', 'MSL ARM', 'SYS 1', 'SYS 2', 'IFF', 'COMM', 'HOT', 'VENT', 'GEN', 'LINK',
+const LABELS = ['RADAR', 'RNG 600', 'STATUS', 'ARMS', 'FCS', 'SPD', 'ALT', 'EN CELL', 'BALANCER', 'CAUTION', 'M-07', 'MSL ARM', 'SYS 1', 'SYS 2', 'IFF', 'COMM', 'HOT', 'VENT', 'GEN', 'LINK',
   'EJECT', 'PULL', 'MASTER ARM', 'OVRD', 'BRT', 'NO STEP', 'SAFE', 'ARM', 'HYD', 'ELEC', 'DANGER'];
 function labelTex() {
   const W = 1024, H = 512, [c, x] = canvas(W, H), r = rng(3);
@@ -181,7 +181,7 @@ function labelTex() {
     if (px + w > W) { px = 6; py += 42; }
     const warn = s === 'CAUTION' || s === 'HOT' || s === 'DANGER';
     if (warn) { x.fillStyle = '#d9a21a'; x.fillRect(px, py, w, 36); x.fillStyle = '#111'; }
-    else x.fillStyle = s === 'XG-01' || s === 'EJECT' ? '#e8ecef' : '#b9c3c8';
+    else x.fillStyle = s === 'M-07' || s === 'EJECT' ? '#e8ecef' : '#b9c3c8';
     x.fillText(s, px + 7, py + 19);
     rect[s] = [px, py, w, 36];
     px += w + 8;
@@ -463,7 +463,7 @@ export class Cockpit {
       // 上蓋分段的面板線＋固定螺絲＋噴漆字
       for (const z of [-0.2, -0.44]) P.add(M.matte, rb(0.128, 0.0014, 0.002, 0.0006), [X + sx * 0.006, -0.4658, z]);
       for (const z of [-0.15, -0.26, -0.39]) for (const dd of [-0.052, 0.058]) screw([X + sx * dd, -0.4654, z]);
-      label(null, sx < 0 ? 'NO STEP' : 'XG-01', [X + sx * 0.012, -0.4655, -0.31], 0.0085);
+      label(null, sx < 0 ? 'NO STEP' : 'M-07', [X + sx * 0.012, -0.4655, -0.31], 0.0085);
       // 操縱桿座：底盤＋陽極飾圈＋六顆螺絲＋發光環
       P.add(M.matte, cyl(0.046, 0.014, 28), [X, -0.461, -0.51]);
       P.add(M.anod, cyl(0.042, 0.002, 32), [X, -0.4532, -0.51]);
@@ -1349,7 +1349,7 @@ export class Cockpit {
     part(pc.armL, [[50, 28], [88, 34], [92, 128], [66, 132], [56, 60]]);
     part(pc.legR, [[-24, 124], [-4, 124], [-8, 226], [-40, 232], [-36, 180]]);
     part(pc.legL, [[24, 124], [4, 124], [8, 226], [40, 232], [36, 180]]);
-    this.tx(x, 'XG-01', 20, 56, COL.wh, 20, true);
+    this.tx(x, 'M-07', 20, 56, COL.wh, 20, true);
     // 右半：裝甲、能量、各部位、狀態
     const ap = ui.ap ?? 1, apMax = ui.apMax ?? 1, en = ui.en ?? 1, f = clamp(ap / apMax, 0, 1), X0 = 236, WW = 258;
     this.tx(x, 'ARMOR', X0, 58, COL.dim, 19);

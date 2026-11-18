@@ -1,8 +1,8 @@
 import * as THREE from '../../lib/three.module.js';
 import { ARENA } from './arena-layout.mjs';
 import { aimTarget, pilotAim } from './rules.mjs';
-import { createDuelMech } from './duel-mech.mjs?v=10';
-import { createArmorSurface } from './duel-mech-art.mjs?v=10';
+import { createDuelMech } from './duel-mech.mjs?v=11';
+import { createArmorSurface } from './duel-mech-art.mjs?v=11';
 import { buildHarbor } from './harbor-view.mjs';
 
 const team = [new THREE.Color(0x66ddee),new THREE.Color(0xff985e)];
@@ -15,6 +15,12 @@ const preview = [
   {x:-16,y:0,z:-3,yaw:1.99,pitch:.045,preview:true},
   {x:-27,y:0,z:33,yaw:1.60,pitch:.035,preview:true},
 ];
+// 視覺接觸面使用實際屋頂邊界；不把玩家碰撞半徑的外擴當成地板。
+function contactGround(x,y,z) {
+  let floor=0;
+  for(const c of ARENA.cover) if(y>=c.height-.05 && Math.abs(x-c.x)<=c.width/2 && Math.abs(z-c.z)<=c.depth/2) floor=Math.max(floor,c.height);
+  return floor;
+}
 
 function relayMarker() {
   const {x,z,radius}=ARENA.relay, g=new THREE.Group();
@@ -132,7 +138,7 @@ export function createArena(canvas, art = null) {
   const {time:waterTime,sun}=buildHarbor(scene);
   const relay=relayMarker();scene.add(relay.g);
   const armorSurface=art ? createArmorSurface(renderer,scene) : null;
-  const vehicles=[createDuelMech(0,art,armorSurface),createDuelMech(1,art,armorSurface)];
+  const vehicles=[createDuelMech(0,art,armorSurface,contactGround),createDuelMech(1,art,armorSurface,contactGround)];
   const shadowGe=new THREE.PlaneGeometry(1,1).rotateX(-Math.PI/2), shadowTex=shadowTexture();
   const shadows=vehicles.map(({root})=>{
     const marker=new THREE.Mesh(shadowGe,new THREE.MeshBasicMaterial({
@@ -181,9 +187,11 @@ export function createArena(canvas, art = null) {
       if(!pilot)continue;
       const vehicle=vehicles[i], shadow=shadows[i];
       vehicle.pose(pilot,dt);
-      shadow.material.opacity=.83/(1+pilot.y*.062);
-      shadow.position.set(pilot.x,.044,pilot.z);
-      shadow.scale.set(17+pilot.y*.04,1,13+pilot.y*.045);
+      const floor=contactGround(pilot.x,pilot.y,pilot.z), altitude=pilot.y-floor;
+      shadow.visible=altitude>.35;
+      shadow.material.opacity=.16/(1+altitude*.062);
+      shadow.position.set(pilot.x,floor+.024,pilot.z);
+      shadow.scale.set(17+altitude*.04,1,13+altitude*.045);
     }
     relay.paint(state?.objective,worldTime);
     fx.update(state,dt);

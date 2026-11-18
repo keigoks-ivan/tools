@@ -2,6 +2,8 @@
 //   流程：標題（機體展示鏡頭＋選關）→ 開機（擋板升起）→ 戰鬥（一關）→ 暫停／結算 → 下一關
 //   ?show=… 或 ?free 會改載入 preview.js（美術／動作預覽）
 import * as THREE from 'three';
+import { frameTitle } from './title-visual.mjs?v=1';
+import { createTitleHarbor } from './title-harbor.mjs?v=1';
 import { qualityLevel, pixelRatio, FrameGate } from './runtime.js';
 import { ScenicMusic } from './scenic-music.mjs';
 import { HistoryReader } from './kobe-history.mjs';
@@ -18,7 +20,7 @@ else await game();
 
 async function game() {
   const { loadAssets, World } = await import('./env.js');
-  const { Mech, initMechMaterials, SEE } = await import('./mechs.js');
+  const { Mech, loadHeroMech, initMechMaterials, SEE } = await import('./mechs.js');
   const { Post } = await import('./post.js');
   const { Cockpit } = await import('./cockpit.js');
   const { Input } = await import('./input.js');
@@ -44,7 +46,7 @@ async function game() {
   const cockCam = new THREE.PerspectiveCamera(70, innerWidth / innerHeight, 0.05, 20);
 
   const bar = document.querySelector('#bar i'), status = $('status');
-  const A = await loadAssets(renderer, (p) => { bar.style.width = (p * 90).toFixed(0) + '%'; });
+  const [A] = await Promise.all([loadAssets(renderer, (p) => { bar.style.width = (p * 90).toFixed(0) + '%'; }), loadHeroMech()]);
   status.textContent = '建立城市';
   initMechMaterials(A);
   const world = new World(renderer, scene, A);
@@ -73,6 +75,7 @@ async function game() {
   const hero = new Mech('hero', 'hero');
   hero.heavy = true;   // 重量模式（anim.js HEAVY）：機身轉向限速、落腳更沉；前傳、續作不開
   scene.add(hero.root);
+  const titleVisual = createTitleHarbor(renderer, new Mech('hero', 'hero'), world, post);
   const player = new Player(hero, world, {
     land: (s) => {
       audio.land(s); cockpit.kick('land', s);
@@ -661,7 +664,7 @@ async function game() {
   let t = 0, odV = 0, speedV = 0, flashV = 0, dangerV = 0;
   const fwd = new THREE.Vector3(), tmp = new THREE.Vector3(), foot = new THREE.Vector3();
   const idle = { mx: 0, my: 0, lookX: 0, lookY: 0 };
-  window.__game = { fake: null, launch: (n) => launch(n), toTitle: () => toTitle(), player, hero, world, post, cockpit, camera, get combat() { return combat; }, get state() { return state; }, get coda() { return codaTarget(); }, get codaFilm() { return coda?.film || null; }, get airFight() { return coda?.air || null; }, fx, audio, input };
+  window.__game = { fake: null, titleVisual, launch: (n) => launch(n), toTitle: () => toTitle(), player, hero, world, post, cockpit, camera, get combat() { return combat; }, get state() { return state; }, get coda() { return codaTarget(); }, get codaFilm() { return coda?.film || null; }, get airFight() { return coda?.air || null; }, fx, audio, input };
 
   // 每秒最多畫 60 張：120Hz 螢幕不會多畫一倍（?fps=0 不限、?fps=30 之類可改）
   const FPS = q.has('fps') ? +q.get('fps') : 60;
@@ -681,21 +684,14 @@ async function game() {
     const dt = rdt * (combat ? combat.timeScale : 1);
 
     if (state === 'title') {
-      titleT += rdt;
-      hero.animate(rdt, { vel: tmp.set(0, 0, 0), grounded: true, boost: 0, torsoYaw: 0, pitch: 0, thrust: 0, aim: null, lean: 0 });
-      const a = 0.7 + titleT * 0.06, p = player.pos;
-      camera.position.set(p.x + Math.sin(a) * 30, p.y + 7 + Math.sin(titleT * 0.2) * 1.5, p.z + Math.cos(a) * 30);
-      camera.lookAt(p.x, p.y + 11, p.z);
-      world.followShadow(p);
-      world.update(rdt);
-      fx.update(rdt);
-      post.u.boot.value = 1;
+      frameTitle(camera, true);
+      titleVisual.render(rdt, camera);
       hud.clear();
-      post.render(t);
       input.endFrame();
       return;
     }
 
+    frameTitle(camera, false);
     // ---- 開機
     if (state === 'boot') {
       boot = Math.min(1, boot + rdt / bootLen);
@@ -814,7 +810,7 @@ async function game() {
     tl.style.background = '#000';
     for (const el of kids) el.style.display = 'none';
     const msg = document.createElement('div');
-    msg.innerHTML = '<div class="logo" style="font-size:clamp(28px,5vw,56px)">XG-01<small>SYSTEM STANDBY</small></div><div class="zh">蒼焰　待命</div>'
+    msg.innerHTML = '<div class="logo" style="font-size:clamp(28px,5vw,56px)">M-07<small>SYSTEM STANDBY</small></div><div class="zh">蒼焰　待命</div>'
       + '<div style="margin-top:40px;font-size:13px;letter-spacing:0.3em;color:#8aa3ab">按任意鍵或點一下，啟動機體</div>';
     tl.appendChild(msg);
     const go = () => {

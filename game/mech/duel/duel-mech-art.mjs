@@ -1,15 +1,15 @@
 import { mechInfo } from './mech-roster.mjs';
 import * as THREE from '../../lib/three.module.js';
 
-const model = new URL('./m07-cangyan-v10.glb', import.meta.url);
+const model = new URL('./m07-cangyan-v11.glb', import.meta.url);
 const jointNames = ['M07_Body','M07_Upper','M07_Rifle',
   ...['L','R'].flatMap(side => ['Thigh','Shin','Foot'].map(segment => `M07_${segment}_${side}`))];
 
-export async function loadDuelMechArt() {
+export async function loadDuelMechArt(url = model, timeout = 7000) {
   const { GLTFLoader } = await import('../../lib/addons/loaders/GLTFLoader.js');
-  const response = await fetch(model, {signal:AbortSignal.timeout(7000)});
+  const response = await fetch(url, {signal:AbortSignal.timeout(timeout)});
   if (!response.ok) throw new Error(`M-07 GLB: HTTP ${response.status}`);
-  const {scene} = await new GLTFLoader().parseAsync(await response.arrayBuffer(), model.href);
+  const {scene} = await new GLTFLoader().parseAsync(await response.arrayBuffer(), url.href);
   if (jointNames.some(name => !scene.getObjectByName(name))) throw new Error('M-07 GLB: missing pivot');
   scene.traverse(mesh => {
     if (!mesh.isMesh) return;
@@ -158,7 +158,7 @@ function createArmorEnvironment(renderer, scene) {
   finally { pmrem.dispose();texture.dispose(); }
 }
 
-function createArmorGrain() {
+export function createArmorGrain() {
   // One small static map shared by both robots; RGB carries pigment, roughness
   // and shallow machining marks. Low quality bypasses the texture sampling.
   const width=256, data=new Uint8Array(width*width*4);

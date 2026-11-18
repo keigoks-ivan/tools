@@ -117,6 +117,7 @@ class Builder:
    wn=obj.modifiers.new('平面加權法線','WEIGHTED_NORMAL');wn.keep_sharp=True;wn.weight=50
    bpy.ops.object.modifier_apply(modifier=wn.name)
   obj['mechVariant']=self.variant
+  if getattr(self,'role',None):obj['campaignRole']=self.role
   obj['surfaceKind']='optics' if glow else 'glass' if key=='visor' else 'armor'
   self.parts[j].append((obj,glow));return obj
 

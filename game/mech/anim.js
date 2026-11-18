@@ -138,6 +138,7 @@ export class MechMotion {
     const Flight=this.flight, flightSpeed=Flight*smooth(8,75,sp);
     const walkW = (1 - Bst) * (1 - Air);
     const P = this.gait, HR = !!m.stance;   // 主角機：衝刺／飛行用英雄機的誇張姿勢（前傾、雙腳往後拖、盾在前）
+    const groundAware = P || m.root.userData.originalCangyan;
 
     // ---- 步態：週期 cyc（0..1），右腳 0 起步、左腳差半拍；支撐期依機種調整（兩腳同時著地的片刻＝沉重感）
     const af = Math.hypot(fwd, side);
@@ -200,7 +201,7 @@ export class MechMotion {
       const neutralW = m.root.localToWorld(foot.neutralW.copy(neutral));
       const reset = !foot.ready || teleported || walkW < 0.25;
       if (reset) {
-        if (P && st.grounded && st.groundAt && walkW > 0.6) neutralW.y = this.contactHeight(st, neutralW, k);
+        if (groundAware && st.grounded && st.groundAt && walkW > 0.6) neutralW.y = this.contactHeight(st, neutralW, k);
         foot.anchor.copy(neutralW); foot.from.copy(neutralW); foot.to.copy(neutralW);
         foot.yaw = foot.fromYaw = foot.toYaw = m.legYaw + sx * toe;
         foot.stance = true; foot.ready = true;
@@ -212,7 +213,7 @@ export class MechMotion {
         const turn = clamp(yawRate * lead, -0.35, 0.35);
         foot.to.copy(neutral).applyAxisAngle(UP, turn); m.root.localToWorld(foot.to);
         foot.to.addScaledVector(st.vel, lead * walkW);
-        foot.to.y = P && st.grounded && st.groundAt ? this.contactHeight(st, foot.to, k) : neutralW.y;
+        foot.to.y = groundAware && st.grounded && st.groundAt ? this.contactHeight(st, foot.to, k) : neutralW.y;
         foot.toYaw = m.legYaw + turn + sx * toe;
       }
       if (inSt && !foot.stance) {
@@ -228,7 +229,7 @@ export class MechMotion {
       if (inSt) {
         // 固定支撐腳的水平落點；低頻更新地面高度，避免坡地或樓體倒塌後懸空。
         foot.sampleT -= dt;
-        if (P && st.grounded && st.groundAt && foot.sampleT <= 0) {
+        if (groundAware && st.grounded && st.groundAt && foot.sampleT <= 0) {
           foot.anchor.y = this.contactHeight(st, foot.anchor, k); foot.sampleT = 0.15;
         }
         _v.copy(foot.anchor);
@@ -237,7 +238,7 @@ export class MechMotion {
         const w = (u - D) / (1 - D), e = w * w * w * (w * (w * 6 - 15) + 10);
         if (af < 0.6 && w < 0.85) {
           // 急停時收回水平落點，保留已採樣的地面高度。
-          const y = foot.to.y; foot.to.lerp(neutralW, 1 - Math.exp(-dt * 10)); if (P) foot.to.y = y;
+          const y = foot.to.y; foot.to.lerp(neutralW, 1 - Math.exp(-dt * 10)); if (groundAware) foot.to.y = y;
         }
         _v.lerpVectors(foot.from, foot.to, e);
         _v.y += H * k * Math.pow(Math.sin(Math.PI * w), 2);

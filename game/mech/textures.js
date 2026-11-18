@@ -574,7 +574,7 @@ export function stencilAtlas() {
   text('intake', 'DANGER  -  INTAKE  -  KEEP CLEAR', 44);
   text('rotor', 'DANGER  -  KEEP CLEAR OF ROTOR', 42);
   text('ground', 'GROUND HERE  -  STATIC', 40);
-  text('xg01', 'XG-01  AZURE FLAME', 44);
+  text('xg01', 'M-07  AZURE FLAME', 44);
   text('tow', 'TOW  -  MAX 60 t', 42);
   text('agx9c', 'AGX-9C  COMMAND  UNIT', 42);
   text('agx9h', 'AGX-9H  HEAVY  ASSAULT', 42);

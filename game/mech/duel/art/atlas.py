@@ -91,7 +91,7 @@ def prioritize_islands(objects):
   for face in mesh.polygons:islands.setdefault(find(face.index),[]).append(face)
   for faces in islands.values():
    loops=[i for f in faces for i in f.loop_indices];area=sum(f.area for f in faces)
-   head=obj.name.startswith('M07_Upper') and any(all(mesh.vertices[v].co.z>14.02 and abs(mesh.vertices[v].co.x)<1.55 for v in f.vertices) for f in faces)
+   head=obj.name.startswith(('M07_Upper','M07_Head')) and any(all(mesh.vertices[v].co.z>14.02 and abs(mesh.vertices[v].co.x)<1.55 for v in f.vertices) for f in faces)
    scale=2.05 if head else .48 if area<.015 else .76 if area<.08 else 1
    center=sum((uv[i].uv for i in loops),uv[loops[0]].uv.copy()*0)/len(loops)
    for i in loops:uv[i].uv=center+(uv[i].uv-center)*scale
