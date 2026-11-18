@@ -366,6 +366,14 @@
       return dot(s.lat, s.lon, { radius: Math.max(5, Math.sqrt(s.s || 100) / 4), color: '#1e3a5f', weight: 1.5, fillColor: '#60a5fa', fillOpacity: 0.75 })
         .bindPopup('<b>' + esc(s.n) + '</b><br>學生數（114 學年）：' + fmt(s.s) + pb(s.lat, s.lon));
     }));
+    var BIZCOL = ['#db2777', '#0284c7', '#ca8a04', '#4d7c0f'], BIZK = [];
+    D.biz.cats.forEach(function (c, i) {
+      BIZK.push('biz' + i);
+      L_['biz' + i] = L.layerGroup(D.biz.pts[c].map(function (q) {
+        return dot(q[0], q[1], { radius: Math.min(11, 3.5 + 1.6 * Math.sqrt(q[2] - 1)), color: '#fff', weight: 1, fillColor: BIZCOL[i], fillOpacity: 0.85 })
+          .bindPopup('<b>' + esc(c) + '</b><br>這個門牌營業中 ' + q[2] + ' 家' + (q[3] ? '，其中 ' + q[3] + ' 家 2021～2025 年新設' : '') + pb(q[0], q[1]));
+      }));
+    });
     L_.vill = L.geoJSON(D.vill, { pane: 'pVill', style: function (f) { return { color: '#92400e', weight: 1, fillColor: vcolor(f.properties.age611), fillOpacity: 0.55 }; },
       onEachFeature: function (f, l) { l.bindPopup('<b>' + esc(f.properties.village) + '</b><br>6～11 歲兒童（2025 年 12 月）：' + fmt(f.properties.age611) + ' 人'); } });
 
@@ -390,9 +398,11 @@
       ['pipe', '未完工建案', 0, '<span class="sw sq" style="background:#7c3aed"></span>'],
       ['sch', '國小', 0, '<span class="sw" style="background:#60a5fa"></span>'],
       ['vill', '各里國小年齡兒童數', 0, '<span class="sw poly" style="background:#f59e0b"></span>'],
-      ['zone', '土地使用分區', 0, '<span class="sw poly" style="background:#5f9de0"></span>']];
+      ['zone', '土地使用分區', 0, '<span class="sw poly" style="background:#5f9de0"></span>']].concat(
+      D.biz.cats.map(function (c, i) { return ['biz' + i, c + '（' + fmt(D.biz.n[c]) + ' 家）', 0, '<span class="sw" style="background:' + BIZCOL[i] + '"></span>', i === 0]; }));
     var bar = document.getElementById('layerBar'), on = {};
     LAYERS.forEach(function (l) {
+      if (l[4]) { var gh = document.createElement('div'); gh.className = 'lyr-group'; gh.textContent = '營業中的店家（依商業登記）'; bar.appendChild(gh); }
       var lab = document.createElement('label');
       lab.innerHTML = '<input type="checkbox" data-k="' + l[0] + '"' + (l[2] ? ' checked' : '') + '> ' + l[3] + l[1];
       bar.appendChild(lab); on[l[0]] = !!l[2];
@@ -412,6 +422,8 @@
       if (on.areas) h += '<div class="g2">' + ['LK03', 'LK01', 'LK02', 'LK06', 'LK04', 'LK09', 'LK07', 'LK05', 'LK08'].map(function (k) { var r = S[k]; return r ? '<div class="row"><span class="bar" style="background:' + COLORS[k] + '"></span>' + esc(r.name.replace('生活圈', '').replace('工一新北國際AI+智慧園區', '工一 AI+')) + (r.mature === '成熟' ? '（成熟）' : '') + '</div>' : ''; }).join('') + '</div>';
       if (on.l591) h += '<div class="row"><span class="sw" style="background:#dc2626"></span>591 出售 <span class="sw" style="background:#16a34a"></span>出租</div>';
       if (on.edu) h += '<div class="row"><span class="sw" style="background:#7c3aed"></span>補習班 <span class="sw" style="background:#f59e0b"></span>課後照顧</div>';
+      var bz = BIZK.filter(function (k) { return on[k]; });
+      if (bz.length) h += '<div class="row">' + bz.map(function (k) { var i = +k.slice(3); return '<span class="sw" style="background:' + BIZCOL[i] + '"></span>' + esc(D.biz.cats[i]); }).join(' ') + '</div><div style="color:#4a6080">圓點越大，同一門牌的店家越多</div>';
       if (on.vill) { h += '<div>6～11 歲兒童數（人）</div>' + VBINS.map(function (b) { return '<div class="row"><span class="bar" style="background:' + b[2] + '"></span>' + (b[1] > 1e8 ? b[0] + ' 以上' : b[0] + '～' + b[1]) + '</div>'; }).join(''); }
       if (on.zone) {
         h += '<div>土地使用分區</div>' + [['#cfe3f7', '第一種住宅區（淺）'], ['#5f9de0', '第二至四種'], ['#17458f', '第五種住宅區（深）'], ['#e11d48', '中心、建成、鄰里商業區'], ['#a16207', '乙種工業區'], ['#9ca3af', '其他用地']]
@@ -611,13 +623,13 @@
   }
 
   /* ---------------- 啟動 ---------------- */
-  Promise.all(['summary.json', 'charts.json', 'areas_geo.json', 'villages_geo.json', 'buildings.json', 'listings591.json', 'edu.json', 'schools.json', 'pipeline.json', 'catch.json', 'roads.json'].map(jget))
+  Promise.all(['summary.json', 'charts.json', 'areas_geo.json', 'villages_geo.json', 'buildings.json', 'listings591.json', 'edu.json', 'schools.json', 'pipeline.json', 'catch.json', 'roads.json', 'bizmap.json'].map(jget))
     .then(function (a) {
       var S = a[0], C = a[1];
       buildTables(S);
       buildCalc();
       buildCharts(C);
       buildRoads(a[10]);
-      buildMap({ catchData: a[9], villGeo: a[3], summary: S, areas: a[2], vill: a[3], bld: a[4], l591: a[5], edu: a[6], sch: a[7], pipe: a[8] });
+      buildMap({ catchData: a[9], villGeo: a[3], summary: S, areas: a[2], vill: a[3], bld: a[4], l591: a[5], edu: a[6], sch: a[7], pipe: a[8], biz: a[11] });
     }).catch(function (e) { console.error('linkou load', e); });
 })();
