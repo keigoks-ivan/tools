@@ -539,6 +539,11 @@ const SCHEMES = {
     frame: P(0x3c3f42, 0.75, 0.52), dark: P(0x18191a, 0.2, 0.7), weapon: P(0x2e3134, 0.45, 0.55), sole: P(0x131415, 0, 0.9),
     eye: [3.5, 0.35, 0.55], wear: 'dirty',
   },
+  ally: {
+    main: P(0xa4b5b3, 0.07, 0.51), second: P(0x254c59, 0.06, 0.54), accent: P(0x438383, 0.15, 0.48), yellow: P(0xd4b46b, 0.18, 0.47),
+    frame: P(0x39464b, 0.8, 0.49), dark: P(0x141d21, 0.17, 0.79), weapon: P(0x303e45, 0.48, 0.52), sole: P(0x151c1f, 0.08, 0.86),
+    eye: [0.35, 2.6, 2.2], wear: 'dirty',
+  },
   ace: {
     main: P(0x6c2a2a, 0, 0.66), second: P(0x3d1c1e, 0, 0.68), accent: P(0x2a2a2d, 0, 0.62), yellow: P(0x9a7a3a, 0, 0.55),
     frame: P(0x3c3e42, 0.8, 0.5), dark: P(0x171718, 0.2, 0.66), weapon: P(0x2b2c2f, 0.45, 0.5), sole: P(0x131415, 0, 0.9),

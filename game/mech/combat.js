@@ -6,6 +6,7 @@ import { parse, encGroups, setRoute, Encounter } from './encounter.js';
 import { STAGE_DATA } from './stages.js';
 import { steer, squadFlank, searchPoint, coveringFire, shareContact, flankAvailable, segmentBox, routeDirection, allyInLane } from './tactics.js';
 import { FLIGHT, airInterceptHeight, rayCapsule } from './flight.mjs';
+import { companionSpawn, MechCompanion } from './mech-companion.mjs?v=1';
 
 const clamp = THREE.MathUtils.clamp;
 const rand = (a, b) => a + Math.random() * (b - a);
@@ -53,7 +54,7 @@ const TIER = [
 // 玩家武器
 export const W = {
   rifle: { dmg: 430, stag: 24, mag: 40, rof: 0.27, reload: 2.0 },
-  msl: { n: 6, dmg: 330, stag: 34, cd: 7, lockStep: 0.09, cone: 0.6, range: 900 },
+  msl: { n: 6, dmg: 480, stag: 48, cd: 5, lockStep: 0.09, cone: 0.6, range: 900, speed: 230, acceleration: 320, turn: 6.6 },
   shield: { duration: 2.5, capacity: 1500, cooldown: 9 },
   // 突擊型敵機的光劍突擊（王牌維持原值）：r＝觸發距離、v＝衝刺速度、dmg＝傷害、max＝同時最多幾台在突擊
   //   brawler 另有 arrive（抵達時離你幾公尺，隨機取）、tMin／tMax（突進秒數範圍）：依觸發距離算突進時間與速度，揮下時剛好貼身；沒有 arrive＝照 v 衝滿 0.45 s
@@ -133,12 +134,14 @@ export class Combat {
     if (o.stageDef) Object.defineProperty(this, 'def', { value: o.stageDef, configurable: true, writable: true });
     this.sub = null; this.subQ = [];   // 無線電對白（正在播的一句、排隊的）
     this.boss = null;                  // 畫面上方顯示血條的頭目
+    this.companion = null;
+    this.companionCheck = 0;
     this.enemies = []; this.missiles = []; this.debris = []; this.events = [];
     this.stage = clamp(o.stage || 1, 1, STAGES.length);   // 第幾關
     this.group = 0; this.phase = 'idle'; this.phaseT = 0; this.nextId = 1;   // group＝已出動幾批敵機
     this.stats = { shots: 0, hits: 0, kills: 0, dmgTaken: 0, time: 0, chain: 0, maxChain: 0, lastKill: -99, score: 0 };
     this.rifle = { ammo: W.rifle.mag, mag: W.rifle.mag, reload: -1, cd: 0 };
-    this.msl = { cd: 1, locks: [], lockT: 0, locking: false, max: W.msl.n };
+    this.msl = { cd: 1, cooldownSeconds: W.msl.cd, locks: [], lockT: 0, locking: false, max: W.msl.n };
     this.shield = {
       remaining: 0, hp: 0, cooldown: 0, feedback: 0,
       get active() { return this.remaining > 0; },
@@ -166,7 +169,23 @@ export class Combat {
     if (this.cp) { this.cp.used++; Object.assign(this.stats, JSON.parse(JSON.stringify(this.cp.stats)), { cont: this.cp.used }); }
     this.enc = this.def.enc ? new Encounter(this, this.def.enc, this.cp ? this.cp.sec : 0) : null;
   }
-  prep() { if (this.enc) this.enc.prep(); }
+  prep() {
+    if (this.enc) this.enc.prep();
+    this.joinCompanion(0);
+  }
+
+  joinCompanion(dt) {
+    const order = this.def.companion;
+    if (!order || !this.enc || this.enc.sec < order.afterAreas || this.companion) return;
+    this.companionCheck -= dt;
+    if (this.companionCheck > 0) return;
+    this.companionCheck = .55;
+    const spawn = companionSpawn(this.world, this.player);
+    if (!spawn) return;
+    this.companion = new MechCompanion(this, order, spawn);
+    if (this.phase === 'fight') this.note('斑鳩加入編隊', 'gr');
+    this.companion.update(0);
+  }
 
   get alive() { return this.enemies.filter((e) => !e.dead); }
 
@@ -312,6 +331,10 @@ export class Combat {
     this.updateShield(dt, canFight && inp.shield);
     this.updateAim();
     if (canFight) this.playerWeapons(dt, inp);
+    if (canFight && this.phase === 'fight') {
+      this.joinCompanion(dt);
+      this.companion?.update(dt);
+    }
     this.updateEnemies(dt);
     this.vehicles.update(dt);
     this.updateMissiles(dt);
@@ -534,10 +557,10 @@ export class Combat {
   }
 
   launchSalvo(locks) {
-    const hero = this.hero, n = W.msl.n;
+    const hero = this.hero, missile = W.msl;
     this.msl.cd = 0;
     hero.bones.torso.updateWorldMatrix(true, false);
-    for (let i = 0; i < n; i++) {
+    for (let i = 0; i < missile.n; i++) {
       const target = locks.length ? locks[i % locks.length] : null;
       this.events.push({
         t: i * 0.07, fn: () => {
@@ -547,7 +570,8 @@ export class Combat {
           const r = _b.set(-f.z, 0, f.x);
           const v = V3().copy(f).multiplyScalar(18).addScaledVector(r, -side * rand(8, 16)).add(_c.set(0, rand(18, 26), 0));
           const aim = target ? null : V3().copy(this.eye).addScaledVector(this.aimDir, 700).add(_c.set(rand(-20, 20), rand(-10, 10), rand(-20, 20)));
-          this.missiles.push({ own: 'player', pos: p, vel: v, target, aim, t: 0, speed: v.length(), vmax: 200, acc: 260, turn: 5.2, dmg: W.msl.dmg, h: this.fx.missile('player'), life: 6 });
+          this.missiles.push({ own: 'player', pos: p, vel: v, target, aim, t: 0, speed: v.length(), vmax: missile.speed,
+            acc: missile.acceleration, turn: missile.turn, dmg: missile.dmg, h: this.fx.missile('player'), life: 6 });
           this.audio.missileLaunch(i);
         },
       });
@@ -684,8 +708,8 @@ export class Combat {
   }
 
   // ---------------------------------------------------------------- 傷害
-  damageEnemy(e, dmg, stag, pos, dir, crit = false) {
-    if (e.dead) return;
+  damageEnemy(e, dmg, stag, pos, dir, crit = false, support = false) {
+    if (e.dead || (support && (e === this.boss || e.bossName || e.fleeAt))) return;
     if (e.fleeAt && e.ap - dmg <= e.apMax * e.fleeAt) { e.ap = e.apMax * e.fleeAt; this.flee(e); return; }
     if (e.stagT > 0 && !crit) dmg *= 1.4;
     const air = e.harborAir;
@@ -694,17 +718,24 @@ export class Combat {
     const shift = air?.phase === 'beam' && e.ap - dmg <= e.apMax * .55;
     if (shift) dmg = Math.max(0, e.ap - e.apMax * .55);
     if (e.vehicle) dmg = Math.min(dmg, Math.max(1, e.ap));   // 載具：不多算溢出的分數
+    if (support) {
+      // 掩護火力保留敵人的最後一段耐久，玩家收尾、照常結算成績。
+      dmg = Math.min(dmg, e.ap - Math.ceil(e.apMax * .25));
+      if (dmg <= 0) return;
+    }
     e.ap -= dmg; e.lastHit = 0;
     const relay = air?.relay;
     if (relay?.state === 'charging') {
       relay.progress = Math.min(1, relay.progress + dmg / 1200);
       if (relay.progress >= 1 || e.ap <= 0) this.finishHarborRelay(e, false);
     }
-    this.stats.hits++;
-    this.stats.score += Math.round(dmg / 10);
-    if (!this.od.active) this.od.gauge = Math.min(1, this.od.gauge + dmg / 9000);
-    this.hitMark = 1;
-    if (!this.quiet) this.audio.hitmarker();
+    if (!support) {
+      this.stats.hits++;
+      this.stats.score += Math.round(dmg / 10);
+      if (!this.od.active) this.od.gauge = Math.min(1, this.od.gauge + dmg / 9000);
+      this.hitMark = 1;
+      if (!this.quiet) this.audio.hitmarker();
+    }
     e.m.impact(clamp(dmg / 900, 0.25, 1.2));
     if (e.stagT <= 0) {
       e.stag += stag;
@@ -1377,11 +1408,20 @@ export class Combat {
       const tw = w.raycast(prev, M.pos, _n);
       if (tw >= 0) hit = V3().lerpVectors(prev, M.pos, tw);
       if (M.own === 'player') {
+        // 高速飛彈檢查整段飛行路徑，只命中掩體前方最近的敵人。
+        const length = prev.distanceTo(M.pos);
+        let closest = tw < 0 ? length + 1e-6 : tw * length;
         for (const e of this.enemies) {
           if (e.dead || e.gone) continue;
-          const c = e.chest(_b);
-          if (e.vehicle ? segDist(prev, M.pos, c) < e.K.hitR : c.distanceTo(M.pos) < 7 * e.scale) { hitE = e; hit = M.pos.clone(); break; }
+          const delta = e.chest(_b).sub(prev), radius = e.vehicle ? e.K.hitR : 7 * e.scale;
+          const along = delta.dot(dir);
+          if (along < -radius || along > closest + radius) continue;
+          const reach = radius * radius - (delta.lengthSq() - along * along);
+          if (reach < 0) continue;
+          const entry = Math.max(0, along - Math.sqrt(reach));
+          if (entry < closest) { closest = entry; hitE = e; }
         }
+        if (hitE) hit = V3().copy(prev).addScaledVector(dir, closest);
       } else if (!this.dead) {
         const cap = this.hero.capsule();
         const dx = M.pos.x - cap.x, dz = M.pos.z - cap.z;
@@ -1397,7 +1437,12 @@ export class Combat {
         w.blast(hit, M.shell ? 9 : 8, M.own === 'player' ? 1 : M.shell ? 1 : 0.6);   // 爆炸波及建築
         if (M.own === 'player') {
           if (hitE) this.damageEnemy(hitE, M.dmg * (this.od.active ? 1.25 : 1), W.msl.stag, hit, M.vel.clone().normalize());
-          for (const e of this.enemies) if (e !== hitE && !e.dead && e.chest(_b).distanceTo(hit) < 14) this.damageEnemy(e, M.dmg * 0.4, 10, hit, M.vel.clone().normalize());
+          const splash = _d.copy(hit);
+          if (tw >= 0 && !hitE) splash.addScaledVector(dir, -.15);
+          for (const e of this.enemies) {
+            if (e === hitE || e.dead || e.gone || e.chest(_b).distanceToSquared(hit) >= 14 ** 2) continue;
+            if (w.raycast(splash, _b, null) < 0) this.damageEnemy(e, M.dmg * .4, 10, hit, M.vel.clone().normalize());
+          }
         } else {
           const d = hit.distanceTo(pc);
           if (d < 14) this.hurt(M.dmg * (1 - d / 22), M.from || hit, M.shell ? 'shell' : 'missile');
@@ -1453,6 +1498,7 @@ export class Combat {
   // 雷達資料
   radar() {
     const out = [];
+    if (this.companion) out.push({ x: this.companion.pos.x, z: this.companion.pos.z, kind: 'ally' });
     for (const e of this.enemies) if (!e.gone) out.push({ x: e.pos.x, z: e.pos.z, kind: e.dead ? 'wreck' : e.kind, locked: e === this.lockTarget || e === this.soft });
     for (const M of this.missiles) if (M.own === 'enemy') out.push({ x: M.pos.x, z: M.pos.z, kind: 'missile' });
     return out;
@@ -1461,6 +1507,8 @@ export class Combat {
   // 清場（重新開始用）
   dispose() {
     this.stopShield();
+    this.companion?.dispose();
+    this.companion = null;
     if (this.enc) this.enc.dispose();
     for (const e of this.enemies) e.m.root.removeFromParent();
     for (const d of this.debris) d.mesh.removeFromParent();

@@ -200,6 +200,7 @@ export const STAGE_DATA = [
   // ================================================================ 第 5 關
   // 北邊繞一大圈到北郊山麓林地：黑犬隊的王牌機首次登場；中途黑犬試探（剩三成撤退），公園裡再打一次（又撤退，活到第 9 關）
   { battlefield: 'forest', fieldLabel: '山麓林地', name: '黑犬', en: 'BLACK DOG', tip: '新敵人：王牌機——槍口發光就閃，靠近會拔劍', music: 4, tier: 4,
+    companion: { afterAreas: 8, tanks: true },
     brief: ['重砲群散了以後，獵犬軍團的通訊裡一直出現同一個代號：黑犬。', '他在第七機庫被你打到彈射逃生，這次開著新的王牌機回來。', '黑犬把第三裝甲連圍在北郊山麓林地，公開呼叫蒼焰過去。', '王牌機的槍口一發光就要閃。貼得太近，他會拔劍。'],
     start: [[DOG, '蒼焰的駕駛，聽得到吧？'], [DOG, '第三裝甲連被我圍在北郊山麓林地。想救就過來。'], [OP, '是陷阱。……可是我們沒有別人能派。']],
     end: [[ALLY, '蒼焰……第三裝甲連全員都還在。謝了。'], [OP, '黑犬撤回巢穴了。下一次，他會拼上全力。']],
@@ -226,7 +227,7 @@ export const STAGE_DATA = [
         { at: 8, amb: 'heavy@drop brawler@breach brawler@side tank@out*2', amb2: 'heli@rise*2 tank@side grunt@drop grunt@side', amb3: 'grunt@drop*2 tank@out grunt@side',
           clear: [[OP, '公園就在前面，第三裝甲連在裡面。']] },
         { at: 9, amb: 'grunt@roof ace@drop tank@out*2', amb2: 'tank@out*2 heavy@drop grunt@side', amb3: 'heli@rise*2 grunt@drop grunt@side',
-          go: [[ALLY, '看到你了，蒼焰！公園四周都是他們的人。']] },
+          go: [[ALLY, '看到你了，蒼焰！公園四周都是他們的人。'], ['斑鳩', '斑鳩加入編隊。我壓住外圍，你去對付黑犬。']] },
         { at: 10, amb: 'heli@rise*2 grunt@drop tank@out*2', amb2: 'grunt@roof tank@out*2 heavy@drop grunt@side', amb3: 'grunt@drop*2 tank@out grunt@side' },
         { at: 11, amb: 'brawler@breach*2 heavy@drop heli@rise', amb2: 'ace@drop grunt@roof grunt@side', tip: '公園入口：清掉守衛就能進去',
           lines: [[OP, '零號，黑犬就在公園裡。專心閃。']] },
@@ -276,8 +277,9 @@ export const STAGE_DATA = [
       ] } },
   // ================================================================ 第 7 關
   { battlefield: 'badlands', fieldLabel: '荒野防線', name: '鋼鐵洪流', en: 'IRON TIDE', tip: '邊打邊退，到防線再守——守點區要撐到倒數結束', music: 5, tier: 5,
+    companion: { afterAreas: 0, tanks: true },
     brief: ['補給被切斷後，獵犬軍團把剩下的戰車全部押上。', '裝甲大軍從東郊荒原沿大道壓向市中心，帶頭的是重裝大隊長「鐵獒」。', '零號和第三裝甲連守在東郊前哨。先邊打邊退，退到大道防線。', '守住防線，再反攻奪回前哨。'],
-    start: [[ALLY, '地平線上全是戰車，數不完。'], [OP, '零號，別硬拚。掩護裝甲連撤到防線。']],
+    start: [[ALLY, '地平線上全是戰車，數不完。斑鳩，跟著蒼焰掩護撤退。'], [OP, '零號，別硬拚。掩護裝甲連撤到防線。']],
     end: [[ALLY, '前哨拿回來了。開戰以來頭一次。'], [OP, '敵方裝甲兵力折損過半。辛苦了，零號。'], [WOLF, '……有意思。']],
     route:
     // 東郊前哨（東緣空地）→ 沿北側的街往西撤（z＝120）→ 第一道防線 → 大道防線（240,0）→ 沿大道反攻、繞南側 → 奪回前哨
@@ -352,8 +354,9 @@ export const STAGE_DATA = [
   // ================================================================ 第 9 關
   // 城北官署區（獵犬軍團司令部）：從東邊沿 z=360、z=480 往西打，倒通訊塔、守點接線、拆碉堡，最後在司令部後面的閱兵場（空地）跟黑犬單挑
   { battlefield: 'fortress', fieldLabel: '山隘要塞', name: '獵犬巢穴', en: 'THE DEN', tip: '琥珀色框的大樓是目標——打倒它、清光敵人，這一區才算過', music: 5, tier: 6,
+    companion: { afterAreas: 0, tanks: true },
     brief: ['防空陣地拆掉了，聯邦的飛機終於能飛進神戶。', '獵犬軍團的司令部設在城北山隘要塞，外圍有碉堡，中間有一座通訊塔。', '先打倒通訊塔，切斷司令部和各部隊的聯絡，再攻進去。', '黑犬撤回了司令部。這一次，他後面沒有路了。'],
-    start: [[OP, '零號，這裡是白鷺。今天的目標是獵犬的司令部。'], [ALLY, '第三裝甲連跟在後面。機體歸你，戰車歸我們。']],
+    start: [[OP, '零號，這裡是白鷺。今天的目標是獵犬的司令部。'], [ALLY, '斑鳩跟你進要塞，幫你壓住沿路的戰車。']],
     end: [[ME, '……我記住了。'], [OP, '黑犬確認擊墜。司令部拿下了。'], [WOLF, '（公開頻道）這裡是灰狼。全軍撤回市政廣場。'], [OP, '最後一仗在廣場。零號，先回來補給。']],
     route:
     { cp: [4, 8, 11], arena: 175, fin: 60, par: 660, over: 2,
@@ -395,6 +398,7 @@ export const STAGE_DATA = [
   // ================================================================ 第 10 關
   // 黃昏：從東北角沿 x=600、480、360、240 一路往西南打，從東邊進市政廣場（市中心空地）；中途兩次守點，最後跟灰狼的超重型機決戰
   { name: '黃昏決戰', en: 'LAST LIGHT', tip: '最終關：王牌、重裝、戰車、直升機、戰機全部出動', music: 6, tier: 6,
+    companion: { afterAreas: 5, tanks: true },
     brief: ['司令部失守，灰狼帶著剩下的部隊退進神戶中心的市政廣場。', '他本人坐進一台超重型機體，親自守在廣場上。', '聯邦主力正從東邊渡河。在他們趕到之前，蒼焰要先打開通往廣場的路。', '黃昏出擊。這是最後一仗。'],
     start: [[ALLY, '渡河部隊遭到砲擊，先頭車堵在橋上！', NOW], [OP, '灰狼把最後的兵力全壓過來了。零號，先替他們打開橋口。'], [ME, '收到。這次一起回去。']],
     end: [[OP, '陸上各區都回報停火。獵犬的市區部隊正在繳械。'], [ALLY, '聽到了嗎！神戶市區拿回來了！'], [OP, '（隔天清晨）零號，看東邊。'], [ME, '……天亮了。'],
@@ -414,7 +418,7 @@ export const STAGE_DATA = [
         { at: 5, hold: 45, gap: 16, amb: 'grunt@drop tank@side*2 heli@rise', amb2: 'tank@out*2 grunt@roof jet@rise grunt@side', amb3: 'heavy@drop tank@side tank@out grunt@side', tip: '守住 45 秒——第三裝甲連正在過河',
           go: [[OP, '他們要四十五秒才過得來。'], [OP, '守住這個路口，別讓敵人繞到河邊。']],
           lines: [[EN, '聯邦的戰車要過河了！全力阻止！', NOW]],
-          clear: [[ALLY, '久等了！第三裝甲連，到！'], [ALLY, '小子，剩下的路一起打。']] },
+          clear: [[ALLY, '久等了！第三裝甲連，到！'], ['斑鳩', '蒼焰，看到你了。剩下的路一起打。']] },
         { at: 6, amb: 'brawler@breach brawler@side grunt@roof tank@out*2 heli@rise', amb2: 'ace@drop jet@rise tank@side grunt@side',
           go: [[ALLY, '戰車交給我們，你專心打機體！']] },
         { at: 7, pre: 'tank@far*2', amb: 'heavy@drop heavy@roof tank@side grunt@side', amb2: 'grunt@drop*2 heli@rise*2 grunt@side', tip: '兩台重裝機——躲到樓後面再換位置',

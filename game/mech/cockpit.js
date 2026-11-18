@@ -1289,6 +1289,10 @@ export class Cockpit {
       x.globalAlpha = edge ? 0.6 : 1 - age / (Math.PI * 2) * 0.65;
       if (o.kind === 'missile') { x.fillStyle = COL.am; x.beginPath(); x.arc(px, py, 5, 0, Math.PI * 2); x.fill(); }
       else if (o.kind === 'wreck') { x.strokeStyle = '#5a6a70'; x.beginPath(); x.moveTo(px - 6, py - 6); x.lineTo(px + 6, py + 6); x.moveTo(px + 6, py - 6); x.lineTo(px - 6, py + 6); x.stroke(); }
+      else if (o.kind === 'ally') {
+        x.strokeStyle = COL.gr; x.beginPath(); x.moveTo(px, py - 7); x.lineTo(px + 7, py);
+        x.lineTo(px, py + 7); x.lineTo(px - 7, py); x.closePath(); x.stroke();
+      }
       else if (o.kind === 'tank' || o.kind === 'apc' || o.kind === 'heli' || o.kind === 'jet') {
         // 載具：小一號（戰車／裝甲車＝方塊、直升機＝圓點、戰鬥機＝三角形）
         x.fillStyle = '#ff8a6a';
@@ -1328,7 +1332,7 @@ export class Cockpit {
     x.fillStyle = COL.bg; x.fillRect(cx - 36, cy - R - 44, 72, 30);
     x.strokeStyle = COL.cy; x.lineWidth = 2; x.strokeRect(cx - 36, cy - R - 44, 72, 30);
     this.tx(x, pad(hdg), cx, cy - R - 28, COL.wh, 24, true, 'center');
-    const ne = (ui.radar || []).filter((o) => o.kind !== 'missile' && o.kind !== 'wreck').length;
+    const ne = (ui.radar || []).filter((o) => o.kind !== 'missile' && o.kind !== 'wreck' && o.kind !== 'ally').length;
     this.tx(x, `HOSTILE ${ne}`, 18, h - 58, ne ? COL.rd : COL.dim, 20, true);
     this.tx(x, 'RNG 600', w - 18, h - 58, COL.dim, 18, false, 'right');
   }
@@ -1433,7 +1437,7 @@ export class Cockpit {
   }
   // 引擎頁（右上）：敵數與威脅狀態、反應爐溫度錶、能量錶、熱量、推力
   drawGauge(x, w, h, ui) {
-    const t = this.t, n = (ui.radar || []).filter((o) => o.kind !== 'missile' && o.kind !== 'wreck').length;
+    const t = this.t, n = (ui.radar || []).filter((o) => o.kind !== 'missile' && o.kind !== 'wreck' && o.kind !== 'ally').length;
     this.tx(x, 'TGT', 14, 52, COL.dim, 17); this.tx(x, pad(n, 2), 58, 52, n ? COL.am : COL.cy, 22, true);
     const lk = ui.lockAlert > 0.01;
     this.tx(x, lk ? 'LOCK!' : 'CLEAR', w - 14, 52, lk ? (Math.sin(t * 16) > 0 ? COL.rd : '#5a1410') : COL.gr, 20, true, 'right');

@@ -106,6 +106,18 @@ export class HUD {
     this.ladder();
     this.fpm(P, ax, ay);
 
+    const ally = C.companion;
+    if (ally && ally.pos.distanceToSquared(P.pos) < 180 ** 2) {
+      const marker = this.proj(_w.copy(ally.pos).add(_c.set(0, ally.mech.height + 2, 0)));
+      if (marker.front && marker.x > 26 && marker.x < W - 26 && marker.y > 28 && marker.y < H - 44) {
+        const r = 4 * s;
+        X.beginPath(); X.moveTo(marker.x, marker.y - r); X.lineTo(marker.x + r, marker.y);
+        X.lineTo(marker.x, marker.y + r); X.lineTo(marker.x - r, marker.y); X.closePath();
+        this.sk('gr');
+        this.text(`友軍 ${ally.name}`, marker.x, marker.y - 11 * s, 12, 'gr', .98, 'center', 700, SANS);
+      }
+    }
+
     // ---- 鎖定目標的接近率
     const tgt = C.fireTarget(), LT = C.lockTarget, L = LT && !LT.dead && !LT.gone ? LT : null;
     if (L) {
@@ -297,7 +309,7 @@ export class HUD {
       this.bar(x, wy + 8 * s, w, 2 * s, v, col);
     };
     chip(0, 'RIFLE', R.reload >= 0 ? 'RELOAD' : `${R.ammo}/${R.mag}`, R.reload >= 0 ? R.reload : R.ammo / R.mag, R.reload >= 0 || R.ammo <= 3 ? 'am' : 'cy', true);
-    chip(1, 'MSL', M.cd >= 1 ? 'READY' : `${Math.ceil((1 - M.cd) * 7)}s`, M.cd, M.cd >= 1 ? 'gr' : 'dim', M.cd >= 1);
+    chip(1, 'MSL', M.cd >= 1 ? 'READY' : `${Math.ceil((1 - M.cd) * M.cooldownSeconds)}s`, M.cd, M.cd >= 1 ? 'gr' : 'dim', M.cd >= 1);
     const shieldReady = SH.cooldown <= 0 && !SH.active;
     const shieldText = SH.active ? `ON ${Math.ceil(SH.level * 100)}%` : shieldReady ? 'READY' : `${Math.ceil(SH.cooldown)}s`;
     chip(2, 'SHIELD F', shieldText, SH.level, SH.active ? (SH.level < 0.3 ? 'am' : 'cy') : shieldReady ? 'gr' : 'dim', shieldReady || SH.active);
