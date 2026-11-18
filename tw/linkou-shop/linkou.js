@@ -44,50 +44,199 @@
   }
 
   /* ---------------- 圖表 ---------------- */
-  function mk(id, opt) {
+  var INK = '#1e3a5f', MUTED = '#5a7a9a', GRID = '#edf1f5', BASE = '#cfd8e3';
+  function mk(id, opt, h) {
     var el = document.getElementById(id);
+    if (h) el.style.height = h + 'px';
     var c = echarts.init(el);
     opt.textStyle = { fontFamily: FONT, fontSize: 11 };
+    opt.animationDuration = 600; opt.animationEasing = 'cubicOut';
     c.setOption(opt);
     charts.push(c);
     return c;
   }
-  var AX = { axisLabel: { color: '#5a7a9a', fontSize: 11 }, axisLine: { lineStyle: { color: '#ccd9e8' } }, splitLine: { lineStyle: { color: '#eceff3' } } };
-  var TIP = { trigger: 'axis', textStyle: { fontSize: 12 }, valueFormatter: function (v) { return typeof v === 'number' ? fmt(v) : v; } };
+  /* 座標軸：無 y 軸線、實線細格線、x 軸基線，無軸標題 */
+  function xAx(extra) {
+    return Object.assign({ type: 'category', axisTick: { show: false }, axisLine: { lineStyle: { color: BASE, width: 1 } },
+      axisLabel: { color: MUTED, fontSize: 11 }, splitLine: { show: false } }, extra || {});
+  }
+  function yAx(extra) {
+    return Object.assign({ type: 'value', axisLine: { show: false }, axisTick: { show: false },
+      axisLabel: { color: MUTED, fontSize: 11 }, splitLine: { lineStyle: { color: GRID, width: 1, type: 'solid' } } }, extra || {});
+  }
+  /* 提示卡：白底無框、圓角 8、柔影；每列＝色點＋名稱＋右對齊數值 */
+  function tip(unit, titleFn, extra) {
+    return Object.assign({ trigger: 'axis', backgroundColor: '#fff', borderWidth: 0, padding: [10, 12], confine: true,
+      extraCssText: 'border-radius:8px;box-shadow:0 6px 20px rgba(30,58,95,.16);',
+      textStyle: { color: INK, fontSize: 12, fontFamily: FONT },
+      axisPointer: { type: 'line', lineStyle: { color: BASE, width: 1 } },
+      formatter: function (ps) {
+        ps = Array.isArray(ps) ? ps : [ps];
+        var h = '<div style="font-size:11px;color:' + MUTED + ';margin-bottom:6px">' + (titleFn ? titleFn(ps[0]) : ps[0].axisValueLabel) + '</div>';
+        ps.forEach(function (p) {
+          var v = Array.isArray(p.value) ? p.value[1] : p.value;
+          if (v === null || v === undefined) return;
+          h += '<div style="display:flex;align-items:center;gap:14px;line-height:20px"><span style="display:flex;align-items:center"><i style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + p.color + ';margin-right:7px"></i>' + p.seriesName + '</span><b style="margin-left:auto;font-variant-numeric:tabular-nums">' + fmt(v) + (unit || '') + '</b></div>';
+        });
+        return h;
+      } }, extra || {});
+  }
+  var LEG = { top: 0, left: 0, icon: 'circle', itemWidth: 8, itemHeight: 8, itemGap: 16, textStyle: { fontSize: 11, color: '#4a6080' } };
+  function endDot(coord, color) {
+    return { symbol: 'circle', symbolSize: 8, coord: coord, itemStyle: { color: color, borderColor: '#fff', borderWidth: 2 }, label: { show: false } };
+  }
+
+  /* 小圖並排：一個 ECharts 實例、六個 grid，共用 y 軸刻度 */
+  function multiples(id, o) {
+    var el = document.getElementById(id), W = el.clientWidth || 600, narrow = W < 560;
+    var cols = narrow ? 2 : 3, rows = Math.ceil(o.ord.length / cols), cellW = W / cols, cellH = narrow ? 176 : 188, gt = 30;
+    var opt = { title: [], grid: [], xAxis: [], yAxis: [], series: [], tooltip: tip(o.unit, function (p) { return p.axisValueLabel; }) };
+    var ymax = 0;
+    o.ord.forEach(function (k) { o.data[k].forEach(function (v) { if (v > ymax) ymax = v; }); });
+    var step = o.step, top = Math.ceil(ymax * 1.08 / step) * step;
+    o.ord.forEach(function (k, i) {
+      var cx = (i % cols) * cellW, cy = Math.floor(i / cols) * cellH, first = (i % cols) === 0, n = o.years.length;
+      var padL = first ? 40 : 20, padR = 22;
+      opt.title.push({ left: cx + 4, top: cy + 2, text: '{n|' + o.nm[k] + '}  {s|' + o.sub(k) + '}',
+        textStyle: { rich: { n: { fontSize: 12.5, fontWeight: 700, color: o.colors[k] }, s: { fontSize: 11, fontWeight: 400, color: MUTED, lineHeight: 16 } } } });
+      opt.grid.push({ left: cx + padL, top: cy + gt, width: cellW - padL - padR, height: cellH - gt - 30, containLabel: false });
+      opt.xAxis.push(xAx({ gridIndex: i, data: o.years, boundaryGap: o.type === 'bar',
+        axisLabel: { color: MUTED, fontSize: 11, interval: function (j) { return j === 0 || j === n - 1 || (!narrow && j === Math.floor((n - 1) / 2)); }, formatter: function (v) { return String(v); } } }));
+      opt.yAxis.push(yAx({ gridIndex: i, min: 0, max: top, interval: o.step, axisLabel: { show: first, color: MUTED, fontSize: 11, formatter: o.yfmt || function (v) { return fmt(v); } } }));
+      var data = o.data[k], col = o.colors[k], s;
+      if (o.type === 'bar') {
+        var mx = Math.max.apply(null, data);
+        s = { name: o.nm[k], type: 'bar', xAxisIndex: i, yAxisIndex: i, barMaxWidth: 18, itemStyle: { color: col, borderRadius: [4, 4, 0, 0] },
+          data: data.map(function (v, j) { return (v === mx && mx > 0 && o.peak) ? { value: v, label: { show: true, position: 'top', color: INK, fontSize: 11, fontWeight: 600, formatter: String(v) } } : v; }) };
+      } else {
+        s = { name: o.nm[k], type: 'line', xAxisIndex: i, yAxisIndex: i, data: data, showSymbol: false, symbol: 'circle', symbolSize: 6,
+          lineStyle: { color: col, width: 2, cap: 'round', join: 'round' }, itemStyle: { color: col }, areaStyle: { color: col, opacity: 0.10 },
+          markPoint: { silent: true, animation: false, data: [Object.assign(endDot([n - 1, data[n - 1]], col), { label: { show: true, position: 'top', color: INK, fontSize: 11, fontWeight: 600, formatter: fmt(data[n - 1]), offset: [-10, 0] } })] } };
+      }
+      opt.series.push(s);
+    });
+    var c = mk(id, opt, rows * cellH + 4);
+    c.__multi = { id: id, o: o };
+    return c;
+  }
+
   function buildCharts(C) {
     var ord = C.order, nm = C.names;
     var narrow = window.innerWidth < 700;
-    var legend = { top: 0, type: 'scroll', itemWidth: 12, itemHeight: 8, itemGap: narrow ? 10 : 16, pageIconSize: 10, textStyle: { fontSize: 11, color: '#4a6080' } };
-    var grid = { left: 44, right: 14, top: 40, bottom: 28 };
-    function bars(years, data, stack) {
-      return ord.map(function (k) { return { name: nm[k], type: 'bar', stack: stack, data: data[k], itemStyle: { color: COL[k] } }; });
+    var sum = function (a) { return a.reduce(function (x, y) { return x + y; }, 0); };
+
+    /* 圖 1：每年完工的店面大樓，六個商圈各一格 */
+    multiples('fig1', { ord: ord, nm: nm, colors: COL, years: C.fig1.years, data: C.fig1.data, type: 'bar', unit: ' 棟', step: 4, peak: true,
+      sub: function (k) { return '合計 ' + sum(C.fig1.data[k]) + ' 棟'; }, xfmt: function (v) { return String(v); } });
+
+    /* 圖 2：兩張熱度表 */
+    buildHeat(C, ord, nm);
+
+    /* 圖 3：兒童數兩條線，標出各自最高點與最新值 */
+    var f3 = C.fig3, L = f3.labels.length;
+    function peakOf(a) { var m = Math.max.apply(null, a); return a.indexOf(m); }
+    function lineSeries(name, a, col, peakPos) {
+      var pi = peakOf(a), yr = f3.labels[pi].slice(0, 4);
+      return { name: name, type: 'line', data: a, symbol: 'circle', showSymbol: false, lineStyle: { color: col, width: 2, cap: 'round', join: 'round' }, itemStyle: { color: col },
+        areaStyle: { color: col, opacity: 0.06 },
+        endLabel: { show: true, formatter: function (p) { return fmt(p.value); }, color: col, fontSize: 11, fontWeight: 600, distance: 10 },
+        markPoint: { silent: true, animation: false, data: [
+          Object.assign(endDot([pi, a[pi]], col), { label: { show: true, position: peakPos, color: col, fontSize: 11, fontWeight: 600, formatter: yr + ' 年 ' + fmt(a[pi]), distance: 8 } }),
+          endDot([L - 1, a[L - 1]], col)] } };
     }
-    mk('fig1', { tooltip: TIP, legend: legend, grid: grid, xAxis: Object.assign({ type: 'category', data: C.fig1.years }, AX),
-      yAxis: Object.assign({ type: 'value' }, AX), series: bars(C.fig1.years, C.fig1.data, 's') });
-    var f2 = C.fig2;
-    mk('fig2', { tooltip: TIP, legend: legend,
-      title: [{ text: '未完工戶數', left: '25%', top: 24, textAlign: 'center', textStyle: { fontSize: 12, color: '#1e3a5f' } },
-              { text: '已簽約店面（間）', left: '75%', top: 24, textAlign: 'center', textStyle: { fontSize: 12, color: '#1e3a5f' } }],
-      grid: [{ left: 48, right: '54%', top: 60, bottom: 28 }, { left: '58%', right: 12, top: 60, bottom: 28 }],
-      xAxis: [Object.assign({ type: 'category', data: f2.years, gridIndex: 0 }, AX), Object.assign({ type: 'category', data: f2.years, gridIndex: 1 }, AX)],
-      yAxis: [Object.assign({ type: 'value', gridIndex: 0 }, AX), Object.assign({ type: 'value', gridIndex: 1 }, AX)],
-      series: ord.map(function (k) { return { name: nm[k], type: 'bar', stack: 'u', xAxisIndex: 0, yAxisIndex: 0, data: f2.units[k], itemStyle: { color: COL[k] } }; })
-        .concat(ord.map(function (k) { return { name: nm[k], type: 'bar', stack: 'g', xAxisIndex: 1, yAxisIndex: 1, data: f2.signed[k], itemStyle: { color: COL[k] } }; })) });
-    var f3 = C.fig3;
-    mk('fig3', { tooltip: { trigger: 'axis', valueFormatter: function (v) { return fmt(v) + ' 人'; } }, legend: legend, grid: { left: 52, right: 14, top: 40, bottom: 28 },
-      xAxis: Object.assign({ type: 'category', data: f3.labels }, AX), yAxis: Object.assign({ type: 'value', min: 5000 }, AX),
-      series: [{ name: '0～5 歲', type: 'line', data: f3.a05, symbolSize: 6, itemStyle: { color: '#d97706' }, lineStyle: { color: '#d97706' } },
-               { name: '6～11 歲', type: 'line', data: f3.a611, symbolSize: 6, itemStyle: { color: '#2563eb' }, lineStyle: { color: '#2563eb' } }] });
-    mk('fig4', { tooltip: TIP, legend: legend, grid: { left: 52, right: 14, top: 40, bottom: 28 },
-      xAxis: Object.assign({ type: 'category', data: C.fig4.years }, AX), yAxis: Object.assign({ type: 'value' }, AX),
-      series: ord.map(function (k) { return { name: nm[k], type: 'line', data: C.fig4.data[k], symbolSize: 5, itemStyle: { color: COL[k] }, lineStyle: { color: COL[k] } }; }) });
-    mk('fig5', { tooltip: TIP, legend: legend, grid: grid,
-      xAxis: Object.assign({ type: 'category', data: C.fig5.years }, AX), yAxis: Object.assign({ type: 'value' }, AX),
-      series: ord.map(function (k) { return { name: nm[k], type: 'line', data: C.fig5.data[k], symbolSize: 5, itemStyle: { color: COL[k] }, lineStyle: { color: COL[k] } }; }) });
-    mk('fig6', { tooltip: { trigger: 'axis', valueFormatter: function (v) { return fmt(v) + ' 人次'; } }, grid: { left: 52, right: 14, top: 20, bottom: 28 },
-      xAxis: Object.assign({ type: 'category', data: C.fig6.months }, AX, { axisLabel: { color: '#5a7a9a', fontSize: 11, interval: narrow ? 23 : 11 } }),
-      yAxis: Object.assign({ type: 'value' }, AX), series: [{ type: 'line', data: C.fig6.v, showSymbol: false, itemStyle: { color: '#2563eb' }, areaStyle: { color: 'rgba(37,99,235,.10)' } }] });
-    window.addEventListener('resize', function () { charts.forEach(function (c) { c.resize(); }); });
+    mk('fig3', { tooltip: tip(' 人'), legend: LEG, grid: { left: 44, right: 56, top: 40, bottom: 28 },
+      xAxis: xAx({ data: f3.labels, boundaryGap: false, axisLabel: { color: MUTED, fontSize: 11, interval: narrow ? 1 : 0, formatter: function (v) { return v.indexOf('年') > 0 ? '2026' : v; } } }),
+      yAxis: yAx({ min: 5000, max: 12000, interval: 1000, axisLabel: { color: MUTED, fontSize: 11, formatter: function (v) { return fmt(v); } } }),
+      series: [lineSeries('6～11 歲', f3.a611, '#1e3a5f', 'top'), lineSeries('0～5 歲', f3.a05, '#d97706', 'bottom')] }, narrow ? 300 : 340);
+
+    /* 圖 4：各商圈人口，小圖並排 */
+    var yrs4 = C.fig4.years, i19 = yrs4.indexOf(2019), last4 = yrs4.length - 1;
+    function chg4(k) { var d = C.fig4.data[k]; return (d[last4] / d[i19] - 1) * 100; }
+    multiples('fig4', { ord: ord, nm: nm, colors: COL, years: yrs4, data: C.fig4.data, type: 'area', unit: ' 人', step: 10000,
+      yfmt: function (v) { return v === 0 ? '0' : fmt(v / 10000) + ' 萬'; },
+      sub: function (k) { return (chg4(k) >= 0 ? '+' : '') + fmt(chg4(k), 1) + '%'; } });
+
+    /* 圖 5：每年淨增商家，小圖並排 */
+    var last5 = C.fig5.years.length - 1;
+    multiples('fig5', { ord: ord, nm: nm, colors: COL, years: C.fig5.years, data: C.fig5.data, type: 'bar', unit: ' 家', step: 40, peak: false,
+      sub: function (k) { return C.fig5.years[last5] + ' 年 ' + fmt(C.fig5.data[k][last5]) + ' 家'; } });
+
+    /* 圖 6：A9 站日均運量 */
+    var mo = C.fig6.months, vv = C.fig6.v, n6 = vv.length, col6 = '#3b5b82';
+    var a = mo.indexOf('2021-05'), b = mo.indexOf('2021-07');
+    var ml = mo[n6 - 1].split('-');
+    mk('fig6', { tooltip: tip(' 人次', function (p) { var s = p.axisValue.split('-'); return s[0] + ' 年 ' + (+s[1]) + ' 月'; }),
+      grid: { left: 44, right: 78, top: 24, bottom: 28 },
+      xAxis: xAx({ data: mo, boundaryGap: false, axisLabel: { color: MUTED, fontSize: 11, interval: function (i) { return mo[i].slice(5) === '01' && (!narrow || (+mo[i].slice(0, 4) - 2019) % 2 === 0); }, formatter: function (v) { return v.slice(0, 4); } } }),
+      yAxis: yAx({ min: 0, axisLabel: { color: MUTED, fontSize: 11, formatter: function (v) { return fmt(v); } } }),
+      series: [{ name: 'A9 林口站', type: 'line', data: vv, showSymbol: false, symbol: 'circle', lineStyle: { color: col6, width: 2, cap: 'round', join: 'round' }, itemStyle: { color: col6 },
+        areaStyle: { color: col6, opacity: 0.10 },
+        endLabel: { show: true, distance: 10, color: INK, fontSize: 11, fontWeight: 600, formatter: function (p) { return fmt(p.value) + '\n{m|' + ml[0] + ' 年 ' + (+ml[1]) + ' 月}'; }, rich: { m: { fontSize: 10.5, color: MUTED, fontWeight: 400, lineHeight: 15 } } },
+        markPoint: { silent: true, animation: false, data: [endDot([n6 - 1, vv[n6 - 1]], col6)] },
+        markArea: (a >= 0 && b >= 0) ? { silent: true, itemStyle: { color: 'rgba(90,122,154,.14)' }, label: { color: MUTED, fontSize: 11, position: 'insideTop' },
+          data: [[{ xAxis: mo[a], name: '三級警戒' }, { xAxis: mo[b] }]] } : undefined }] }, narrow ? 280 : 320);
+
+    var rt = null;
+    window.addEventListener('resize', function () {
+      clearTimeout(rt);
+      rt = setTimeout(function () {
+        charts.slice().forEach(function (c) {
+          if (c.__multi) { var m = c.__multi, el = document.getElementById(m.id); el.style.height = ''; c.dispose(); charts.splice(charts.indexOf(c), 1); multiples(m.id, m.o); }
+          else c.resize();
+        });
+      }, 120);
+    });
+  }
+
+  /* 圖 2：兩張熱度表（單一藍色，深淺＝數值，格內印數字） */
+  function heatColor(t) {
+    var a = [205, 226, 251], z = [24, 79, 149];
+    return 'rgb(' + a.map(function (x, i) { return Math.round(x + (z[i] - x) * t); }).join(',') + ')';
+  }
+  function heatTable(title, ord, nm, years, data) {
+    var mx = 0;
+    ord.forEach(function (k) { data[k].forEach(function (v) { if (v > mx) mx = v; }); });
+    var h = '<div class="heat"><div class="heat-t">' + title + '</div><table><thead><tr><th></th>' + years.map(function (y) { return '<th>' + y + '</th>'; }).join('') + '<th class="tot">合計</th></tr></thead><tbody>';
+    ord.forEach(function (k) {
+      var tot = data[k].reduce(function (x, y) { return x + y; }, 0);
+      h += '<tr><td class="an"><span class="chip" style="background:' + COL[k] + '"></span>' + nm[k] + '</td>';
+      data[k].forEach(function (v) {
+        if (!v) { h += '<td class="z">–</td>'; return; }
+        var t = v / mx;
+        h += '<td style="background:' + heatColor(t) + ';color:' + (t > 0.5 ? '#fff' : INK) + '">' + fmt(v) + '</td>';
+      });
+      h += '<td class="tot">' + (tot ? fmt(tot) : '–') + '</td></tr>';
+    });
+    return h + '</tbody></table></div>';
+  }
+  function buildHeat(C, ord, nm) {
+    var f = C.fig2;
+    document.getElementById('fig2').innerHTML = '<div class="heat-wrap">' + heatTable('未完工戶數', ord, nm, f.years, f.units) + heatTable('已簽約店面（間）', ord, nm, f.years, f.signed) + '</div>';
+  }
+
+  /* 各路段的店面供給：HTML 長條表 */
+  function buildRoads(R) {
+    var el = document.getElementById('roadCards'), sc = R.scale;
+    function bar(v, mx, col) {
+      if (!v) return '<div class="rb"><b class="z">–</b></div>';
+      return '<div class="rb"><i style="flex:0 0 calc((100% - 40px) * ' + (v / mx).toFixed(4) + ');background:' + col + '"></i><b>' + fmt(v) + '</b></div>';
+    }
+    var h = '';
+    R.areas.forEach(function (a) {
+      var col = COL[a.id];
+      h += '<div class="rcard"><div class="rc-h"><span class="chip" style="background:' + col + '"></span><b>' + esc(a.name) + '</b><span class="rc-c">' + esc(a.claim) + '</span></div>';
+      h += '<div class="rr rh"><span class="rn"></span><span>2016 年後完工（棟）</span><span>2015 年前完工（棟）</span><span>未完工戶數</span><span>已簽約店面（間）</span></div>';
+      a.rows.forEach(function (r) {
+        h += '<div class="rr' + ((r.other || r.road === '路段不明') ? ' mu' : '') + '"><span class="rn">' + esc(r.road) + '</span>' +
+          bar(r.b16, sc.b16, col) + bar(r.b15, sc.b15, '#c3ccd8') + bar(r.units, sc.units, '#6b8cae') +
+          '<div class="rb">' + (r.signed ? '<b>' + fmt(r.signed) + '</b>' : '<b class="z">–</b>') + '</div></div>';
+      });
+      h += '</div>';
+    });
+    el.innerHTML = h;
+    var ny = R.areas.filter(function (a) { return a.noyear; }).map(function (a) { return a.name + ' ' + a.noyear + ' 棟'; });
+    var n2 = document.getElementById('roadNoYear');
+    if (n2 && ny.length) n2.textContent = '另有' + ny.join('、') + '查不到完工年，沒有列入 2016 年後或 2015 年前兩欄。';
   }
 
   /* ---------------- 試算 ---------------- */
@@ -462,12 +611,13 @@
   }
 
   /* ---------------- 啟動 ---------------- */
-  Promise.all(['summary.json', 'charts.json', 'areas_geo.json', 'villages_geo.json', 'buildings.json', 'listings591.json', 'edu.json', 'schools.json', 'pipeline.json', 'catch.json'].map(jget))
+  Promise.all(['summary.json', 'charts.json', 'areas_geo.json', 'villages_geo.json', 'buildings.json', 'listings591.json', 'edu.json', 'schools.json', 'pipeline.json', 'catch.json', 'roads.json'].map(jget))
     .then(function (a) {
       var S = a[0], C = a[1];
       buildTables(S);
       buildCalc();
       buildCharts(C);
+      buildRoads(a[10]);
       buildMap({ catchData: a[9], villGeo: a[3], summary: S, areas: a[2], vill: a[3], bld: a[4], l591: a[5], edu: a[6], sch: a[7], pipe: a[8] });
     }).catch(function (e) { console.error('linkou load', e); });
 })();

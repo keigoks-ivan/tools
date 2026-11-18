@@ -159,6 +159,43 @@
     .calc-grid input { min-height: 40px; }
   }
 
+
+  /* 圖卡：主張標題＋灰色說明 */
+  .fig h3 { font-size: 15px; font-weight: 700; margin: 0 0 2px; line-height: 1.5; }
+  .fig .cap { font-size: 12px; color: #5a7a9a; line-height: 1.6; margin: 0 0 10px; }
+  .sub-h { font-size: 15px; font-weight: 700; color: #1e3a5f; margin: 22px 0 6px; }
+  .chart-html { width: 100%; }
+  .heat-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .heat-t { font-size: 12.5px; font-weight: 700; color: #1e3a5f; margin: 0 0 6px; }
+  .heat table { width: 100%; border-collapse: separate; border-spacing: 2px; table-layout: fixed; font-variant-numeric: tabular-nums; }
+  .heat th { font-size: 11px; font-weight: 400; color: #5a7a9a; text-align: center; padding: 2px 0; }
+  .heat td { font-size: 12px; text-align: center; padding: 8px 0; border-radius: 4px; color: #1e3a5f; }
+  .heat td.an { text-align: left; white-space: nowrap; padding-left: 0; font-size: 12px; }
+  .heat td.z { color: #b3c0cf; background: #f6f8fb; }
+  .heat td.tot, .heat th.tot { font-weight: 700; background: none; }
+  .heat th:first-child, .heat td.an { width: 74px; }
+  /* 各路段長條表 */
+  .rcard { background: #fff; border: 0.5px solid #ccd9e8; border-radius: 8px; padding: 12px 14px 8px; margin: 12px 0; box-shadow: 0 1px 3px rgba(30,58,95,.08); }
+  .rc-h { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin-bottom: 8px; font-size: 14px; color: #1e3a5f; }
+  .rc-h .chip { align-self: center; margin-right: -4px; }
+  .rc-c { font-size: 13px; color: #4a6080; line-height: 1.6; }
+  .rr { display: grid; grid-template-columns: minmax(120px, 1.2fr) 1.5fr 1.3fr 1.6fr 90px; gap: 0 14px; align-items: center; padding: 5px 0; border-top: 0.5px solid #edf1f5; font-size: 12.5px; color: #1e3a5f; }
+  .rr.rh { border-top: 0; font-size: 11px; color: #5a7a9a; padding: 2px 0 6px; align-items: end; line-height: 1.4; }
+  .rr.mu .rn { color: #5a7a9a; }
+  .rr .rn { overflow-wrap: anywhere; }
+  .rb { display: flex; align-items: center; gap: 6px; min-width: 0; font-variant-numeric: tabular-nums; }
+  .rb i { display: block; height: 10px; min-width: 2px; border-radius: 0 4px 4px 0; }
+  .rb b { font-weight: 600; font-size: 12.5px; }
+  .rb b.z { font-weight: 400; color: #b3c0cf; }
+  @media (max-width: 700px) {
+    .heat-wrap { grid-template-columns: 1fr; gap: 14px; }
+    .rr { grid-template-columns: 1.1fr .9fr 1.2fr .6fr; gap: 2px 8px; padding: 6px 0; }
+    .rr .rn { grid-column: 1 / -1; font-weight: 600; }
+    .rr.rh .rn { display: none; }
+    .rr.rh { padding-bottom: 4px; }
+    .rb { gap: 4px; }
+  }
+
   .src-list { margin: 8px 0 8px 18px; padding: 0; }
   .src-list li { font-size: 12px; line-height: 1.85; color: #4a6080; margin-bottom: 4px; }
   .foot-link { margin: 26px 0 8px; font-size: 14px; }
@@ -336,18 +373,22 @@
   <h2 class="section-heading" id="supply">供給</h2>
   <div class="sec-sub">新店面還在增加，後段最多</div>
   <div class="prose"><p>林口的店面總數只能用推的。新北市使用執照只記整棟大樓的用途，看不出一樓有幾間店，所以這裡從三個方向看：有店面成交或出租紀錄的大樓、商業用途的使用執照、預售簽約的店面。</p></div>
-  <div class="fig"><h3>圖 1：各商圈每年完工的店面大樓數（2016～2026，依實價登錄的完工年）</h3><div class="chart" id="fig1"></div></div>
-  <div class="fig"><h3>圖 2：各商圈未完工建案的戶數與已簽約店面數，依預計完工年（2026～2030）</h3><div class="chart tall" id="fig2"></div></div>
+  <div class="fig"><h3>184 棟新店面大樓，147 棟在後段、前段、中段</h3><div class="cap">圖 1：各商圈每年完工的店面大樓數（2016～2026，依實價登錄的完工年）</div><div class="chart" id="fig1"></div></div>
+  <div class="fig"><h3>未完工 3,894 戶，已簽約店面 224 間</h3><div class="cap">圖 2：各商圈未完工建案的戶數與已簽約店面數，依預計完工年（2026～2030）</div><div class="chart-html" id="fig2"></div></div>
   <p class="fine">預計完工年是用建照年加 4 年推的，不是建商公告。已簽約店面只算到實價登錄有登記的，是最少的數字。</p>
+
+  <h3 class="sub-h" id="roadsupply">各路段的店面供給</h3>
+  <p class="fine">後段、前段、中段各一張表。2016 年後完工指 2016～2026 年完工的店面大樓棟數，2015 年前完工指更早完工的棟數，預售案不計。未完工戶數和已簽約店面的算法跟圖 2 一樣，三張表加起來等於圖 1、圖 2 的數字。同一欄的長條在三張表用同一個比例，可以直接比較。寫成路口的地址（例如信義路與吉祥路交叉口）算在先寫的那條路。「段別未載」是建案只寫路名、沒寫第幾段，沒有併進任何一段。<span id="roadNoYear"></span></p>
+  <div id="roadCards"></div>
 
   <!-- ===== 需求 ===== -->
   <h2 class="section-heading" id="demand">需求</h2>
   <div class="sec-sub">人還在搬進來，小孩數已經到頂</div>
   <div class="prose"><p>林口總人口 2026 年約 13.95 萬，還在增加。6 到 11 歲兒童 2023 年最多，有 11,112 人，2026 年 10 月是 10,748 人。0 到 5 歲 2021 年最多，有 8,265 人，現在是 6,885 人，少了 17%，比 6 到 11 歲少約 3,900 人。</p></div>
-  <div class="fig"><h3>圖 3：林口 0～5 歲、6～11 歲兒童數（每年 12 月，2018～2026）</h3><div class="chart" id="fig3"></div></div>
-  <div class="fig"><h3>圖 4：各商圈人口（2018～2025）</h3><div class="chart" id="fig4"></div></div>
-  <div class="fig"><h3>圖 5：各商圈開在店面的商家，每年新設減關閉（2016～2025）</h3><div class="chart" id="fig5"></div></div>
-  <div class="fig"><h3>圖 6：機場捷運 A9 林口站日均運量</h3><div class="chart" id="fig6"></div></div>
+  <div class="fig"><h3>6～11 歲 2023 年見頂，0～5 歲 2021 年見頂</h3><div class="cap">圖 3：林口 0～5 歲、6～11 歲兒童數（每年 12 月，2018～2026）</div><div class="chart" id="fig3"></div></div>
+  <div class="fig"><h3>南勢人口 6 年增 53.3%，後段、前段、中段增約三成</h3><div class="cap">圖 4：各商圈人口（2018～2025），小圖上的百分比是 2019 到 2025 年的變化</div><div class="chart" id="fig4"></div></div>
+  <div class="fig"><h3>2025 年中段淨增 129 家，六個商圈最多</h3><div class="cap">圖 5：各商圈開在店面的商家，每年新設減關閉（2016～2025）</div><div class="chart" id="fig5"></div></div>
+  <div class="fig"><h3>A9 林口站 2025 年日均運量是 2019 年的 1.8 倍</h3><div class="cap">圖 6：機場捷運 A9 林口站每月日均運量（2019 年 1 月～2026 年 9 月）</div><div class="chart" id="fig6"></div></div>
   <div class="fine"><ul>
     <li>各商圈人口是把各里人口，依門牌點落在哪個商圈的比例分攤，高樓區一個門牌住很多戶，所以新興商圈可能被低估。</li>
     <li>商家資料合併財政部稅籍、經濟部公司與商業登記。有 1,677 家查不到現況和行業，本頁沒有算進店面型商家。把它們全部當成還在營業的店面型商家，各商圈淨增的排名也不變，只是數字變大，例如中段的 444 家最多變成 676 家。許多公司把登記地址設在住家，商家數不等於實際開店數。</li>
@@ -440,6 +481,6 @@
 
 <footer class="footer">A project by <span>InvestMQuest</span></footer>
 
-<script src="linkou.js?v=20261119a"></script>
+<script src="linkou.js?v=20261119b"></script>
 </body>
 </html>
