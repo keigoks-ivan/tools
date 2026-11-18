@@ -18,7 +18,7 @@ const clamp = THREE.MathUtils.clamp;
 const HANGAR = { x0: 10.5, x1: 69.5, z0: 52.5, z1: 111.5, h: 28 };
 // 每段最多三台輪流出手，耐打度維持七折；靠射擊頻率與包抄增加壓力。
 const TIER = { atk: 3, fire: 1.15, aim: 1.1, dmg: 0.6, ap: 0.7, alt: false };
-const IDLE = { mx: 0, my: 0, lookX: 0, lookY: 0, fire: false, lockHold: false, qb: false, boost: false, jump: false, hover: false, flight:false,descend:false,flightBlocked:true, saber: false, cannon: false, hardLock: false, od: false, reload: false };
+const IDLE = { mx: 0, my: 0, lookX: 0, lookY: 0, fire: false, lockHold: false, qb: false, boost: false, jump: false, hover: false, flight:false,descend:false,flightBlocked:true, shield: false, cannon: false, hardLock: false, od: false, reload: false };
 // 前傳改成人聲版的幾個音效（受傷、跳、落地、換彈、子彈呼嘯），這章換回本篇機體版
 const MECH_SFX = new Set(['hurt', 'jump', 'land', 'reload', 'whiz']);
 // 戰車不走的路段：基地正中央那九個路口（x、z＝-120、0、120）連出去的路都被前傳的建築壓著（同 encounter.js 的 edgeKey）
@@ -127,7 +127,7 @@ export async function startMech(X) {
     player.vel.set(0, 0, 0); player.yaw = P.yaw; player.pitch = 0; hero.legYaw = P.yaw;
     player.grounded = true; player.en = 100; player.overheat = 0; player.odT = 0; player.dashT = 0; player.lockMove = 0; player.flying=false;player.flightCut=false;player.hovering=0;player.airT=0;
     player.ap = player.apMax;
-    hero.swing = 0; hero.saber.visible = false;
+    hero.swing = 0; hero.shieldField.update(0, false, 0);
   }
   place(M6.start);
 
@@ -137,8 +137,8 @@ export async function startMech(X) {
     hero.setFirstPerson(on);
     if (!on) return;
     const shadowMat = hero.meshes.map((m) => m.material).find((m) => m.colorWrite === false);
-    for (const m of hero.meshes) if (m.parent !== hero.saber && shadowMat) m.material = shadowMat;
-    for (const gl of hero.glows) { let o = gl, keep = false; while (o) { if (o === hero.saber) keep = true; o = o.parent; } gl.visible = keep; }
+    for (const m of hero.meshes) if (shadowMat) m.material = shadowMat;
+    for (const gl of hero.glows) gl.visible = false;
   }
   function applyView() {
     if (tpView && Math.abs(player.pitch) < 0.02) player.pitch = -0.12;
@@ -449,7 +449,7 @@ export async function startMech(X) {
 
   function tick(rdt) {
     if (mission && ending?.go) return;
-    if (mission?.blocked && !ending) { if (input.state(rdt).pause) { input.unlock(); pause(); } return; }
+    if (mission?.blocked && !ending) { C.stopShield(); if (input.state(rdt).pause) { input.unlock(); pause(); } return; }
     T += rdt;
     const dt = rdt * C.timeScale;
     boot = Math.min(1, boot + rdt / 2.6);
@@ -485,7 +485,7 @@ export async function startMech(X) {
       boost: player.boosting, hover: player.hovering, speed: player.speed, alt: agl, vs: player.vel.y,
       ap: player.ap, apMax: player.apMax, en: player.en / 100, parts: C.parts,
       rifle: C.rifle, msl: { ready: C.msl.cd >= 1 ? 6 : 0, max: 6, cd: C.msl.cd, locks: C.msl.locks.length },
-      saber: C.saber.cd, cannon: C.cannon, od: C.od, lockAlert: C.lockAlert, danger: player.ap / player.apMax < 0.3 ? 1 : 0,
+      shield: C.shield, cannon: C.cannon, od: C.od, lockAlert: C.lockAlert, danger: player.ap / player.apMax < 0.3 ? 1 : 0,
       radar: C.radar(), px: player.pos.x, pz: player.pos.z,
       route: gate ? [player.pos.x, player.pos.z, gate.x, gate.z] : null, wp: gate ? { x: gate.x, z: gate.z } : null,
     });

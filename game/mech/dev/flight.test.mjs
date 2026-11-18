@@ -4,7 +4,6 @@ import * as T from 'three';
 import { Player } from '../player.js';
 import { FLIGHT, airInterceptHeight, rayCapsule } from '../flight.mjs';
 import { Input } from '../input.js';
-import { Combat } from '../combat.js';
 
 const V=(x=0,y=0,z=0)=>new T.Vector3(x,y,z);
 const idle={mx:0,my:0,lookX:0,lookY:0};
@@ -41,11 +40,11 @@ test('stationary flight recovers EN, altitude has a ceiling, restart and blocked
   const {p}=fixture();p.pos.y=200;p.grounded=false;p.airT=2;p.update(1/60,{...idle,flight:true});p.en=35;
   step(p,2);assert(p.en>40);
   p.odT=40;step(p,18,{hover:true});assert(p.pos.y<=FLIGHT.ceiling+.2&&p.pos.y>FLIGHT.ceiling-1);
-  p.dash(V(0,1,1).normalize(),105,.4);step(p,.3);assert(p.pos.y<=FLIGHT.ceiling,'光劍追擊也遵守飛行高度上限');
+  p.dash(V(0,1,1).normalize(),105,.4);step(p,.3);assert(p.pos.y<=FLIGHT.ceiling,'突進也遵守飛行高度上限');
   p.update(1/60,{...idle,flight:true,flightBlocked:true});assert(!p.flying);
   step(p,8);assert(p.grounded);
 });
-test('flight respects wall collision and roof landing; air saber dash follows height as well as horizontal direction',()=>{
+test('flight respects wall collision and roof landing; air dash follows height as well as horizontal direction',()=>{
   const {p,world}=fixture();world.collide=pos=>{if(pos.z>30){pos.z=30;return true;}return false;};
   world.support=(x,z)=>z>=20?12:0;p.pos.set(0,35,0);p.grounded=false;p.airT=2;p.update(1/60,{...idle,flight:true});
   step(p,3,{my:1});assert(p.pos.z<=30);
@@ -71,9 +70,4 @@ test('flight input uses one key edge; Ctrl/C descent does not become another jum
   const i=Object.assign(Object.create(Input.prototype),{keys:new Set(['KeyT','ControlLeft']),down:new Set(['KeyT']),up:new Set(),touch:{on:false},mdx:0,mdy:0,shiftT:0,sens:1});
   assert(i.state(1/60).flight&&i.state(1/60).descend&&!i.state(1/60).jump);
   i.endFrame();assert(!i.state(1/60).flight&&i.state(1/60).descend);
-});
-test('air saber pursuit rotates aim toward the target height before the swing',()=>{
-  const {p}=fixture();p.flying=true;p.grounded=false;p.dashT=1;
-  const c=Object.assign(Object.create(Combat.prototype),{player:p,saber:{phase:'dash',t:0,target:{pos:V(0,80,0),dead:false}},hero:{swing:0,saber:{visible:false}}});
-  c.updateSaber(.1);assert(p.pitch>.8&&p.pitch<=FLIGHT.pitch&&c.saber.phase==='dash');
 });

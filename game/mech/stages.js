@@ -32,7 +32,7 @@ export const OP = '白鷺（指揮所）', ME = '零號', EN = '獵犬軍團通�
 
 export const STAGE_DATA = [
   // ================================================================ 第 1 關
-  //   沿大街往東推進（教學關：射擊、Tab、懸浮、閃避、飛彈、光劍、光波砲、覺醒一區教一樣），拆掉獵犬的中繼站，到東區公園和第三裝甲連會合
+  //   沿大街往東推進（教學關：射擊、Tab、懸浮、閃避、飛彈、防護罩、光波砲、覺醒一區教一樣），拆掉獵犬的中繼站，到東區公園和第三裝甲連會合
   { name: '初陣', en: 'FIRST SORTIE', tip: '跟著藍色光柱沿街推進——左鍵射擊，Tab 換目標，戰車一發就爆', music: 1, tier: 1,
     brief: ['昨晚，零號在第七機庫啟動了試驗機「蒼焰」，把獵犬軍團趕出了基地。',
       '神戶東區，第三裝甲連困在大街盡頭的公園，彈藥只剩兩成。',
@@ -58,7 +58,7 @@ export const STAGE_DATA = [
         { at: 6, amb: 'heli@rise tank@side tank@out', amb2: 'heli@rise tank@out*2 grunt@drop grunt@side', tip: '直升機從樓後面升起——飛彈追得上它',
           go: [[ALLY, '砲彈又落在我們頭上！他們看得見我們！'], [OP, '有人在替砲兵報位置。我在找。']],
           lines: [[OP, '直升機，從樓後面上來了。']] },
-        { at: 7, amb: 'brawler@breach grunt@side tank@out', amb2: 'grunt@drop tank@out*2 grunt@side', tip: '突擊型貼過來了——F 連按三刀；牠衝過來時按 F 架刀',
+        { at: 7, amb: 'brawler@breach grunt@side tank@out', amb2: 'grunt@drop tank@out*2 grunt@side', tip: '突擊型貼過來了！等它出手前按 F 開防護罩',
           lines: [[OP, '機體從支路貼過來了。']], clear: [[OP, '找到了。前面兩棟樓，中繼站和觀測所。']] },
         { at: 8, amb: 'tank@out grunt@roof tank@side', amb2: 'tank@out*2 grunt@drop grunt@side', tip: '按 E 發射光波砲——一道光能打穿兩棟樓',
           targets: [{ x: 162, z: -199, name: '中繼站' }, { x: 205, z: -199, name: '觀測所' }],

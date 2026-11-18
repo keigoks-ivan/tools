@@ -720,7 +720,7 @@ export class Cockpit {
   }
 
   // 每幀：擺鏡頭、擺駕駛艙、更新燈光與儀表
-  // ui：{ yaw, pitch（瞄準，機體朝向慣例）, boot, move:{x,y}, turn:{x,y}, boost, hover, speed, alt, vs, ap, apMax, en, parts, rifle, msl, saber, cannon, od, lockAlert, danger, radar, px, pz, route?, wp? }
+  // ui：{ yaw, pitch（瞄準，機體朝向慣例）, boot, move:{x,y}, turn:{x,y}, boost, hover, speed, alt, vs, ap, apMax, en, parts, rifle, msl, shield, cannon, od, lockAlert, danger, radar, px, pz, route?, wp? }
   update(dt, mech, ui) {
     this.t += dt;
     const cam = this.camera, b = mech.bones;
@@ -1372,7 +1372,7 @@ export class Cockpit {
     this.tx(x, 'GEN', X0 + 136, 310, COL.dim, 17); this.tx(x, 'ON', X0 + 254, 310, COL.gr, 18, true, 'right');
   }
 
-  // 武裝頁（存量管理）：主武裝保險、光束步槍（彈匣格、換彈）、飛彈莢艙（鎖定／冷卻）、光劍、覺醒
+  // 武裝頁（存量管理）：主武裝保險、光束步槍（彈匣格、換彈）、飛彈莢艙（鎖定／冷卻）、防護罩、覺醒
   drawArms(x, w, h, ui) {
     const t = this.t, L = 16, Rr = w - 16;
     this.tx(x, 'MSTR ARM', L, 56, COL.dim, 17); this.tx(x, 'ARM', L + 104, 56, COL.gr, 18, true);
@@ -1394,10 +1394,10 @@ export class Cockpit {
       x.fillStyle = c; x.beginPath(); x.moveTo(px, 180); x.lineTo(px + pw - 22, 180); x.lineTo(px + pw - 8, 190); x.lineTo(px + pw - 22, 200); x.lineTo(px, 200); x.closePath(); x.fill();
     }
     if (ms.cd < 1) this.hb(x, L, 208, w - 32, 5, ms.cd, COL.am);
-    // 光劍
-    const sb = ui.saber ?? 1;
-    this.tx(x, 'SBR', L, 230, COL.dim, 18); this.tx(x, 'BEAM SABER', L + 50, 230, COL.wh, 19);
-    this.tx(x, sb >= 1 ? 'READY' : `${Math.round(sb * 100)}%`, Rr, 230, sb >= 1 ? COL.gr : COL.am, 20, true, 'right');
+    const shield = ui.shield;
+    const shieldText = shield?.active ? `ON ${Math.ceil(shield.level * 100)}%` : shield?.cooldown > 0 ? `${Math.ceil(shield.cooldown)}s` : 'READY [F]';
+    this.tx(x, 'SHD', L, 230, COL.dim, 18); this.tx(x, 'ENERGY SHIELD', L + 50, 230, COL.wh, 19);
+    this.tx(x, shieldText, Rr, 230, shield?.active ? COL.cy : shield?.cooldown > 0 ? COL.am : COL.gr, 20, true, 'right');
     // 光波砲：充能中閃、冷卻中顯示百分比
     const cn = ui.cannon || { cd: 1, phase: null };
     this.tx(x, 'CAN', L, 260, COL.dim, 18); this.tx(x, 'BEAM CANNON', L + 50, 260, COL.wh, 19);

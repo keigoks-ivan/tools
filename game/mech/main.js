@@ -3,13 +3,13 @@
 //   ?show=… 或 ?free 會改載入 preview.js（美術／動作預覽）
 import * as THREE from 'three';
 import { frameTitle } from './title-visual.mjs?v=1';
-import { createTitleHarbor } from './title-harbor.mjs?v=1';
+import { createTitleHarbor } from './title-harbor.mjs?v=2';
 import { qualityLevel, pixelRatio, FrameGate } from './runtime.js';
 import { ScenicMusic } from './scenic-music.mjs';
 import { HistoryReader } from './kobe-history.mjs';
 import { createHistoryPlaques } from './kobe-history-plaques.mjs';
 import { CODA_START, CODA_STOPS, CODA_BYPASS, CODA_ARCHIVE, CODA_SCENES, codaApproach, codaStationPoint, codaStations } from './harbor-coda.js?v=4';
-import { HarborAirBattle } from './harbor-air.mjs?v=2';
+import { HarborAirBattle } from './harbor-air.mjs?v=3';
 import { HarborCinematic } from './harbor-cinematic.mjs?v=1';
 
 const q = new URLSearchParams(location.search);
@@ -109,17 +109,17 @@ async function game() {
     player.vel.set(0, 0, 0); player.yaw = yaw; player.pitch = 0; hero.legYaw = yaw;
     player.grounded = true; player.en = 100; player.overheat = 0; player.odT = 0; player.dashT = 0; player.lockMove = 0; player.flying=false;player.flightCut=false;player.hovering=0;player.airT=0;
     player.ap = player.apMax;
-    hero.swing = 0; hero.saber.visible = false;
+    hero.swing = 0; hero.shieldField.update(0, false, 0);
   }
   resetPlayer();
-  // 駕駛艙視角：整台自機只投影子（手臂也藏，免得擋窗），光劍照常看得到
+  // 駕駛艙視角：整台自機只投影子（手臂也藏，免得擋窗）
   function cockpitView(on) {
     hero.setFirstPerson(on);
     cockMask.visible = on;
     if (!on) return;
     const shadowMat = hero.meshes.map((m) => m.material).find((m) => m.colorWrite === false);
-    for (const m of hero.meshes) if (m.parent !== hero.saber && shadowMat) m.material = shadowMat;
-    for (const gl of hero.glows) { let o = gl, keep = false; while (o) { if (o === hero.saber) keep = true; o = o.parent; } gl.visible = keep; }
+    for (const m of hero.meshes) if (shadowMat) m.material = shadowMat;
+    for (const gl of hero.glows) gl.visible = false;
   }
 
   function applyView() {
@@ -714,7 +714,7 @@ async function game() {
     }
     if (inp.view && live) { tpView = !tpView; store.set('view', tpView ? 1 : 0); applyView(); }
     const canMove = live && (state !== 'boot' || boot > 0.85) && !combat.dead;
-    if (!canMove) inp = Object.assign({}, inp, idle, { fire: false, lockHold: false, qb: false, boost: false, jump: false, hover: false, flight:false,descend:false,flightBlocked:true, saber: false, cannon: false, hardLock: false, od: false, reload: false, lookX: state === 'result' ? 0 : inp.lookX, lookY: state === 'result' ? 0 : inp.lookY });
+    if (!canMove) inp = Object.assign({}, inp, idle, { fire: false, lockHold: false, qb: false, boost: false, jump: false, hover: false, flight:false,descend:false,flightBlocked:true, shield: false, cannon: false, hardLock: false, od: false, reload: false, lookX: state === 'result' ? 0 : inp.lookX, lookY: state === 'result' ? 0 : inp.lookY });
 
     // 光波砲充能／發射中：機體要撐住後座——轉向變慢、走不快、不能衝刺
     if (combat && combat.cannon.phase) inp = Object.assign({}, inp, { lookX: inp.lookX * 0.45, lookY: inp.lookY * 0.45, mx: inp.mx * 0.35, my: inp.my * 0.35, boost: false });
@@ -749,7 +749,7 @@ async function game() {
       boost: player.boosting, hover: player.hovering, speed: player.speed, alt: agl, vs: player.vel.y,
       ap: player.ap, apMax: player.apMax, en: player.en / 100, parts: C.parts,
       rifle: C.rifle, msl: { ready: C.msl.cd >= 1 ? 6 : 0, max: 6, cd: C.msl.cd, locks: C.msl.locks.length },
-      saber: C.saber.cd, cannon: C.cannon, od: C.od, lockAlert: C.lockAlert, danger: player.ap / player.apMax < 0.3 ? 1 : 0,
+      shield: C.shield, cannon: C.cannon, od: C.od, lockAlert: C.lockAlert, danger: player.ap / player.apMax < 0.3 ? 1 : 0,
       radar, px: player.pos.x, pz: player.pos.z, route: C.enc && C.enc.ahead, wp: C.enc && C.enc.wp,
     });
     if (tpView) chaseCam(rdt);

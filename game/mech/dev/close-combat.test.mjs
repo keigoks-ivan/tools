@@ -51,15 +51,6 @@ test('brawler 突進：觸發距離 40～110 m，揮下時離你 15～25 m；ace
   const A = lungePlan(W.lunge.ace, 80);
   assert.equal(A.t, 0.45); assert.equal(A.v, 95);
 });
-test('架刀窗是「揮下前 0.3 s」的相對定義，窗口內離你 <= parry.range', () => {
-  const LG = W.lunge.brawler, P = W.parry;
-  for (const dist of [45, 70, 110]) {
-    const { t, v } = lungePlan(LG, dist, () => 0.5);
-    // e.lunge 從 0.45+t 倒數；窗口＝lunge 在 (0.45, 0.45+win]，即突進最後 min(win,t) 秒
-    const dAtWindow = dist - v * Math.max(0, t - P.win);   // 窗口剛開啟時的距離
-    assert(dAtWindow - 20 <= P.range + 1e-6 || dist <= P.range, `dist ${dist} 窗口開啟時 ${dAtWindow}`);
-  }
-});
 test('破牆方向提示：左右與座艙畫面一致（yaw 慣例＝前方 (sin,cos)）', () => {
   const cam = (yaw) => { const q = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, yaw + Math.PI, 0, 'YXZ')); return { f: new THREE.Vector3(0, 0, -1).applyQuaternion(q), r: new THREE.Vector3(1, 0, 0).applyQuaternion(q) }; };
   for (const yaw of [0, 0.7, 2, -1.3, 3.0]) {

@@ -58,8 +58,7 @@ export class HarborAirBattle {
     C.missiles.length = 0;
     C.lockTarget = C.soft = null;
     C.msl.locks.length = 0; C.msl.locking = false; C.snapT = 0;
-    C.saber.phase = null; C.saber.win = 0; C.saber.target = null;
-    C.hero.saber.visible = false; C.hero.swing = 0; C.audio.saberOff();
+    C.stopShield();
     C.cannon.phase = null; C.cannon.I = 0;
     this.player.dashT = 0;
   }

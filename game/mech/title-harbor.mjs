@@ -51,8 +51,8 @@ export function createTitleHarbor(renderer, hero, world, post) {
     elapsed += dt; hero.animate(dt, st);
     const b = hero.bones;
     b.shoulderR.rotation.set(-.16, .03, .08); b.elbowR.rotation.x = -.32;
-    b.shoulderL.rotation.set(-.35, -.95, -.35); b.elbowL.rotation.x = -.35;
-    b.head.rotation.set(-.025, .09, 0); hero.saber.visible = true;
+    b.shoulderL.rotation.set(.04, -.08, -.10); b.elbowL.rotation.x = -.18;
+    b.head.rotation.set(-.025, .09, 0);
     const orbit = Math.sin(elapsed * .10) * .8;
     camera.position.set(quay.x - 16 + orbit, 10.4, quay.z + 28); camera.lookAt(target);
     sky.position.copy(camera.position);

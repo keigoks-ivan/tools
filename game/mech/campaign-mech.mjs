@@ -1,8 +1,6 @@
-// 三部曲的原創蒼焰：沿用 Blender 造型，接到既有瞄準、近戰與登機骨架。
+// 三部曲的原創蒼焰：沿用 Blender 造型，接到既有瞄準與登機骨架。
 import * as THREE from 'three';
 import { loadDuelMechArt, instantiateDuelMechArt, createArmorGrain } from './duel/duel-mech-art.mjs?v=11';
-
-import { createCampaignSaber } from './campaign-saber.mjs?v=1';
 
 let art, loading, surface;
 export async function loadCampaignHero() {
@@ -114,8 +112,6 @@ export function buildCampaignHero(m, see) {
     else m.meshes.push(mesh);
   }
   m.mat = m.meshes.find(mesh => mesh.name.endsWith('_armor')).material;
-  const saber = createCampaignSaber();
-  m.saber = saber.group; m.meshes.push(...saber.solid); m.glows.push(...saber.glow); b.handL.add(m.saber);
   upper.userData.exhaustOrigins.forEach(pos => m.nozzles.push({ bone: b.back, pos: V(...pos).sub(torsoOrigin).toArray(), rot: [upper.userData.exhaustPitch + Math.PI, 0, 0], r: .83, len: 4.3 }));
   m.buildFlames();
   m.L = { pelvis: pelvisY }; m.height = 16.7; m.footToe = 2.0; m.footHeel = 1.25;

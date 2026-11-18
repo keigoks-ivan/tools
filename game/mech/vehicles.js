@@ -19,7 +19,7 @@ const ONE = new THREE.Vector3(1, 1, 1);
 const STUB = { removeFromParent() {} };
 
 // ---------------------------------------------------------------- 種類
-//   ap＝耐久（步槍 430、飛彈 330、濺射 132 都一發死）；score＝擊毀分；scale＝給 HUD 框、光劍距離用的「體型」
+//   ap＝耐久（步槍 430、飛彈 330、濺射 132 都一發死）；score＝擊毀分；scale＝給 HUD 框用的「體型」
 //   cy＝胸口（瞄準點）離原點的高度；hitR＝飛彈近炸半徑；weight＝評價時間用的份量（雜兵機＝1）
 export const VKIND = {
   tank: { ap: 120, score: 40, label: 'TNK', scale: 0.4, cy: 1.8, hitR: 5.5, stag: 1e9, weight: 0.25 },
@@ -1358,7 +1358,7 @@ export class Vehicles {
       }
       if (best) M.target = best; else { M.target = null; M.aim = e.chest(V3()); }
     }
-    const how = e.killHow || (C.saber.phase === 'swing' ? 'saber' : 'shot');
+    const how = e.killHow || 'shot';
     const c = e.chest(V3());
     const near = clamp(1 - c.distanceTo(C.player.pos) / 200, 0, 1);
     if (e.kind === 'tank') {
@@ -1378,8 +1378,7 @@ export class Vehicles {
         C.audio.explosion(c, 1.6);
         e.cook = rand(0.35, 0.8);
         e.vel.set(Math.sin(e.yaw), 0, Math.cos(e.yaw)).multiplyScalar(e.speed);
-        if (how === 'saber') { e.vel.y += 8; e.rollV = rand(3, 5) * (Math.random() < 0.5 ? -1 : 1); e.air = true; this.popTurret(e); }
-        else if (Math.random() < 0.7) this.popTurret(e);
+        if (Math.random() < 0.7) this.popTurret(e);
         C.fx.smokeColumn(_a.set(e.pos.x, e.pos.y + 1, e.pos.z), 9);
         if (near > 0) C.cockpit.kick('hit', near * 0.5, 0);
       }

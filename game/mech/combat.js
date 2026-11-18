@@ -1,4 +1,4 @@
-// 戰鬥：敵機 AI、玩家武器（光束步槍、多重鎖定飛彈、光劍、覺醒）、子彈與飛彈、傷害與失衡、擊毀碎片、波次
+// 戰鬥：敵機 AI、玩家武器（光束步槍、多重鎖定飛彈、防護罩、覺醒）、子彈與飛彈、傷害與失衡、擊毀碎片、波次
 import * as THREE from 'three';
 import { Mech } from './mechs.js';
 import { Vehicles, VKIND } from './vehicles.js';
@@ -54,12 +54,7 @@ const TIER = [
 export const W = {
   rifle: { dmg: 430, stag: 24, mag: 40, rof: 0.27, reload: 2.0 },
   msl: { n: 6, dmg: 330, stag: 34, cd: 7, lockStep: 0.09, cone: 0.6, range: 900 },
-  saber: { dmg: 1500, stag: 90, cd: 2.4, reach: 170 },
-  // 光劍三連段：揮完後 win 秒內再按 F 接下一刀；near 內直接揮不衝刺、reach＝連段判定距離；以下陣列依序＝第一、二、三刀
-  //   dmg＝傷害倍率、stag＝失衡、knock／up＝水平／向上擊退、stagT＝硬直秒、dur＝揮劍時間、stop＝命中停頓、shake＝鏡頭震動
-  combo: { win: 0.45, near: 50, reach: 52, dmg: [1, 1, 1.6], stag: [90, 100, 220], knock: [34, 16, 80], up: [6, 4, 16], stagT: [0.9, 0.9, 1.4], dur: [0.8, 0.55, 0.62], stop: [0.1, 0.06, 0.1], shake: [0.6, 0.5, 1] },
-  // 架刀：敵人衝刺剩 win 秒到揮下之前（lunge 0.45..0.45+win）、距離 range 內、正前方 cone（cos）以內按 F；成功後敵人硬直 stagT 秒、光劍冷卻補滿
-  parry: { win: 0.3, range: 55, cone: 0.3, stagT: 1.5, dur: 0.35, stop: 0.12 },
+  shield: { duration: 2.5, capacity: 1500, cooldown: 9 },
   // 突擊型敵機的光劍突擊（王牌維持原值）：r＝觸發距離、v＝衝刺速度、dmg＝傷害、max＝同時最多幾台在突擊
   //   brawler 另有 arrive（抵達時離你幾公尺，隨機取）、tMin／tMax（突進秒數範圍）：依觸發距離算突進時間與速度，揮下時剛好貼身；沒有 arrive＝照 v 衝滿 0.45 s
   lunge: { ace: { r: 90, v: 95, dmg: 1100, max: 9 }, brawler: { r: 110, v: 115, dmg: 800, max: 2, arrive: [15, 25], tMin: 0.3, tMax: 0.9 } },
@@ -71,7 +66,7 @@ export const W = {
 };
 // 鎖定輔助：自動鎖定的錐角、準心吸附的錐角與力道、Tab 換目標時鏡頭轉過去的速度
 const LOCK = { auto: 0.62, assistCone: 0.38, assist: 4.5, snap: 13, snapT: 0.4 };
-const PINK = new THREE.Color(1, 0.35, 0.8), ORANGE = new THREE.Color(1, 0.55, 0.2), SABER = new THREE.Color(3, 0.5, 1.8), CANNON = new THREE.Color(0.8, 1.6, 3);
+const PINK = new THREE.Color(1, 0.35, 0.8), ORANGE = new THREE.Color(1, 0.55, 0.2), SHIELD_COLOR = new THREE.Color(0.24, 1.25, 2), CANNON = new THREE.Color(0.8, 1.6, 3);
 
 const ENEMY_SABER = new THREE.Color(3, 0.6, 0.2);
 // 光劍刀身兩端（世界座標）；沒有光劍模型的機體用左手往前算
@@ -144,7 +139,11 @@ export class Combat {
     this.stats = { shots: 0, hits: 0, kills: 0, dmgTaken: 0, time: 0, chain: 0, maxChain: 0, lastKill: -99, score: 0 };
     this.rifle = { ammo: W.rifle.mag, mag: W.rifle.mag, reload: -1, cd: 0 };
     this.msl = { cd: 1, locks: [], lockT: 0, locking: false, max: W.msl.n };
-    this.saber = { cd: 1, phase: null, t: 0, target: null, hit: false, n: 0, chain: 0, win: 0, dur: W.combo.dur[0], parry: false, keepCd: false };
+    this.shield = {
+      remaining: 0, hp: 0, cooldown: 0, feedback: 0,
+      get active() { return this.remaining > 0; },
+      get level() { return this.active ? this.hp / W.shield.capacity : 1 - this.cooldown / W.shield.cooldown; },
+    };
     this.cannon = { cd: 1, phase: null, t: 0, tick: 0, I: 0, dir: V3(0, 0, 1), from: V3(), to: V3(), n: V3(), stop: 'air', hit: new Set(),
       nb: 0, bld: [], bp: [V3(), V3(), V3()], bn: [V3(), V3(), V3()] };
     this.od = { gauge: 0, active: false, told: false };
@@ -152,7 +151,7 @@ export class Combat {
     this.hitstop = 0; this.slowmo = 0; this.timeScale = 1;
     this.parts = { head: 1, torso: 1, armL: 1, armR: 1, legL: 1, legR: 1 };
     this.dmgDirs = [];
-    this.hitMark = 0; this.critMark = 0; this.killMark = 0; this.parryMark = 0;
+    this.hitMark = 0; this.critMark = 0; this.killMark = 0;
     this.banner = null; this.notes = [];
     this.incoming = 0; this.lockAlert = 0;
     this.aimPoint = V3(); this.aimDir = V3(0, 0, 1); this.eye = V3();
@@ -286,7 +285,7 @@ export class Combat {
     this.updRadio(rdt);
     for (const nt of this.notes) nt.t -= rdt;
     this.notes = this.notes.filter((nt) => nt.t > 0);
-    this.hitMark = Math.max(0, this.hitMark - rdt * 5); this.critMark = Math.max(0, this.critMark - rdt * 2.5); this.parryMark = Math.max(0, this.parryMark - rdt * 1.8); this.killMark = Math.max(0, this.killMark - rdt * 1.6);
+    this.hitMark = Math.max(0, this.hitMark - rdt * 5); this.critMark = Math.max(0, this.critMark - rdt * 2.5); this.killMark = Math.max(0, this.killMark - rdt * 1.6);
     this.damageFx = Math.max(0, this.damageFx - rdt * 3);
     for (const d of this.dmgDirs) d.t -= rdt;
     this.dmgDirs = this.dmgDirs.filter((d) => d.t > 0);
@@ -308,8 +307,11 @@ export class Combat {
     }
 
     if (this.enc) this.enc.fx(dt);
+    const canFight = !this.dead && this.phase !== 'done' && inp;
+    if (!canFight) this.stopShield();
+    this.updateShield(dt, canFight && inp.shield);
     this.updateAim();
-    if (!this.dead && this.phase !== 'done' && inp) this.playerWeapons(dt, inp);
+    if (canFight) this.playerWeapons(dt, inp);
     this.updateEnemies(dt);
     this.vehicles.update(dt);
     this.updateMissiles(dt);
@@ -358,7 +360,7 @@ export class Combat {
 
   // ---------------------------------------------------------------- 玩家武器
   playerWeapons(dt, inp) {
-    const R = this.rifle, M = this.msl, SB = this.saber, CN = this.cannon, OD = this.od, pl = this.player;
+    const R = this.rifle, M = this.msl, CN = this.cannon, OD = this.od, pl = this.player;
     // 硬鎖定切換
     // Tab：換下一個目標（全方位，依離準心的角度排），鏡頭自動轉過去
     if (inp.hardLock) {
@@ -379,7 +381,7 @@ export class Combat {
       R.reload += dt / W.rifle.reload;
       if (R.reload >= 1) { R.reload = -1; R.ammo = R.mag; }
     } else if (inp.reload && R.ammo < R.mag) this.startReload();
-    if (inp.fire && SB.phase === null && CN.phase === null) this.fireRifle();
+    if (inp.fire && CN.phase === null) this.fireRifle();
     // 飛彈：按住右鍵掃過敵人上鎖，放開發射
     if (M.cd < 1) M.cd = Math.min(1, M.cd + dt / W.msl.cd);
     if (inp.lockHold && M.cd >= 1) {
@@ -409,21 +411,9 @@ export class Combat {
       for (const e of M.locks) e.locks = 0;
       M.locks = [];
     }
-    // 光劍
-    if (SB.cd < 1 && SB.phase === null) SB.cd = Math.min(1, SB.cd + dt / W.saber.cd);
-    // F 按下的瞬間才算一次（連段、架刀用）；按住不放仍照舊在冷卻好時出第一刀
-    const press = !!inp.saber && !this.sabHeld; this.sabHeld = !!inp.saber;
-    const parried = press && this.tryParry();
-    if (!parried && SB.win > 0 && SB.phase === null) {
-      SB.win -= dt;
-      if (press && CN.phase === null) { SB.win = 0; this.startSaber(SB.chain); }
-      else if (SB.win <= 0) { SB.cd = SB.keepCd ? 1 : 0; SB.keepCd = false; SB.chain = 0; this.hero.saber.visible = false; this.audio.saberOff(); }
-    }
-    if (inp.saber && SB.cd >= 1 && SB.phase === null && SB.win <= 0 && CN.phase === null) this.startSaber();
-    this.updateSaber(dt);
     // 光波砲（覺醒中冷卻快一倍）
     if (CN.cd < 1 && CN.phase === null) CN.cd = Math.min(1, CN.cd + dt / W.cannon.cd * (OD.active ? 2 : 1));
-    if (inp.cannon && CN.cd >= 1 && CN.phase === null && SB.phase === null) this.startCannon();
+    if (inp.cannon && CN.cd >= 1 && CN.phase === null) this.startCannon();
     this.updateCannon(dt);
     // 覺醒
     if (OD.active) {
@@ -469,7 +459,7 @@ export class Combat {
   aimAssist(dt) {
     const L = this.lockTarget, pl = this.player;
     this.snapT = Math.max(0, (this.snapT || 0) - dt);
-    if (!L || L.dead || this.saber.phase === 'dash') return;
+    if (!L || L.dead) return;
     const snap = this.snapT > 0;
     if (!snap && (!L.los || this.angTo(L) > LOCK.assistCone)) return;
     const c = L.chest(_a).sub(this.eye);
@@ -564,126 +554,31 @@ export class Combat {
     }
   }
 
-  startSaber(step = 0) {
-    const SB = this.saber, pl = this.player, C = W.combo;
-    let tgt = step > 0 && SB.target && !SB.target.dead ? SB.target : this.fireTarget() || this.lockTarget, bs = 1e9;
-    if (!tgt) for (const e of this.enemies) {
-      if (e.dead) continue;
-      const c = e.chest(_a).sub(this.eye), d = c.length();
-      if (d > W.saber.reach) continue;
-      const ang = Math.acos(clamp(c.dot(this.aimDir) / d, -1, 1));
-      if (ang < 0.8 && ang + d / 500 < bs) { bs = ang + d / 500; tgt = e; }
+  updateShield(dt, activate) {
+    const shield = this.shield;
+    shield.feedback = Math.max(0, shield.feedback - dt);
+    if (shield.active) {
+      if (shield.remaining <= dt) {
+        this.stopShield();
+        return;
+      }
+      shield.remaining -= dt;
+    } else {
+      shield.cooldown = Math.max(0, shield.cooldown - dt);
+      if (!activate || shield.cooldown > 0) return;
+      shield.remaining = W.shield.duration;
+      shield.hp = W.shield.capacity;
+      this.audio.ui('confirm');
     }
-    if (tgt && tgt.pos.distanceTo(pl.pos) > W.saber.reach) tgt = null;
-    SB.target = tgt; SB.phase = 'dash'; SB.t = 0; SB.hit = false; SB.n = step; SB.parry = false; SB.keepCd = false; SB.dur = C.dur[step];
-    this.hero.swingSide = step % 2 ? -1 : 1;
-    if (step === 0) this.audio.saberOn();
-    this.hero.saber.visible = true;
-    // 連段：目標在近處（或沒目標）就原地直接揮，不再衝刺
-    if (step > 0 && (!tgt || tgt.pos.distanceTo(pl.pos) <= C.near)) {
-      if (tgt) pl.yaw += wrap(Math.atan2(tgt.pos.x - pl.pos.x, tgt.pos.z - pl.pos.z) - pl.yaw);
-      SB.phase = 'swing'; this.hero.swing = 1; this.audio.saberSwing();
-      return;
-    }
-    if (tgt) {
-      const d = _a.subVectors(tgt.pos, pl.pos); const dist = d.length();
-      pl.dash(d.normalize(), 105, clamp((dist - 16) / 105, 0.08, 0.7));
-      this.cockpit.kick('qb', 1.2);
-    } else pl.dash(_a.copy(this.aimDir), 45, 0.18);
+    this.hero.shieldField?.update(dt, true, shield.level);
   }
-  updateSaber(dt) {
-    const SB = this.saber, pl = this.player, hero = this.hero;
-    if (SB.phase === null) return;
-    SB.t += dt;
-    const tgt = SB.target && !SB.target.dead ? SB.target : null;
-    if (SB.phase === 'dash') {
-      if (tgt) {
-        const dir = _a.subVectors(tgt.pos, pl.pos);
-        pl.yaw = damp(pl.yaw, pl.yaw + wrap(Math.atan2(dir.x, dir.z) - pl.yaw), 10, dt);
-        if(pl.flying)pl.pitch=damp(pl.pitch,clamp(Math.atan2(dir.y,Math.hypot(dir.x,dir.z)),-FLIGHT.pitch,FLIGHT.pitch),10,dt);
-      }
-      const close = tgt ? tgt.pos.distanceTo(pl.pos) < 26 : true;
-      if (pl.dashT <= 0 || close || SB.t > 0.8) { SB.phase = 'swing'; hero.swing = 1; this.audio.saberSwing(); if (tgt) pl.dashT = 0; }
-      hero.swing = 0;
-      hero.saber.visible = true;
-    }
-    if (SB.phase === 'swing') {
-      hero.swing = Math.max(0, hero.swing - dt / SB.dur);
-      const p = 1 - hero.swing;
-      if (p > 0.25 && p < 0.62) {   // 刀光殘影
-        const [a, b] = blade(hero);
-        this.fx.saberArc(a, b, SABER);
-      }
-      if (!SB.hit && p > 0.36) {
-        SB.hit = true;
-        let hitE = null;
-        const cands = tgt ? [tgt] : this.enemies;
-        for (const e of cands) {
-          if (e.dead) continue;
-          const d = _a.subVectors(e.pos, pl.pos);
-          const dist = d.length();
-          if (dist > (SB.n > 0 ? W.combo.reach : 30) * (0.5 + 0.5 * e.scale)) continue;
-          if (e.vehicle && Math.abs(e.chest(_c).y - (pl.pos.y + 8)) > 22) continue;   // 天上的直升機砍不到
-          const facing=_b.set(Math.sin(pl.yaw)*Math.cos(pl.pitch),Math.sin(pl.pitch),Math.cos(pl.yaw)*Math.cos(pl.pitch));
-          if (d.normalize().dot(facing) < 0.2) continue;
-          hitE = e; break;
-        }
-        if (hitE) {
-          const CB = W.combo, n = SB.n;
-          // 連段自己打出來的硬直不算破綻；第一刀、架刀成功後的反擊才吃弱點加成
-          const crit = hitE.stagT > 0 && (n === 0 || this.stats.time < (hitE.parryUntil || 0));
-          const dmg = W.saber.dmg * CB.dmg[n] * (crit ? 2.4 : 1) * (this.od.active ? 1.3 : 1);
-          const hp = hitE.chest(V3());
-          const dir = _c.subVectors(hitE.pos, pl.pos).setY(0).normalize();
-          this.damageEnemy(hitE, dmg, n === 0 ? W.saber.stag : CB.stag[n], hp, dir, crit);
-          hitE.vel.addScaledVector(dir, CB.knock[n]); hitE.vel.y += CB.up[n]; hitE.grounded = false;
-          if (!hitE.dead) hitE.stagT = Math.max(hitE.stagT, CB.stagT[n]);
-          this.fx.impact(hp, _n.copy(dir).negate(), 'armor');
-          this.fx.impact(hp, _n.copy(dir).negate(), 'beam');
-          this.audio.impact(hp, 'saber');
-          this.hitstop = Math.max(this.hitstop, crit ? 0.16 : CB.stop[n]);
-          this.cockpit.kick('hit', crit ? 0.9 : CB.shake[n], 0);
-          if (n === 2) { this.cockpit.kick('land', 0.6); this.fx.impact(hp, _n.copy(dir).negate(), 'beam'); }
-          this.cockpit.flashAt(SABER, 7, -0.3, 0, -1.2);
-          if (crit) { this.critMark = 1; this.note('CRITICAL', 'am'); }
-        } else this.saberWall();
-      }
-      if (hero.swing <= 0) {
-        SB.phase = null;
-        if (SB.n < 2) { SB.win = W.combo.win; SB.chain = SB.n + 1; SB.cd = 1; }   // 連段視窗：刀留著，等下一次按 F
-        else { SB.cd = 0; SB.chain = 0; hero.saber.visible = false; this.audio.saberOff(); }
-      }
-    }
-  }
-  // 架刀：有敵人正在衝刺（還沒揮下）、在前方近處時按 F → 擋下；沒有合適目標回傳 false，照原本出刀
-  tryParry() {
-    const SB = this.saber, P = W.parry, pl = this.player, hero = this.hero;
-    if (SB.phase !== null || this.cannon.phase !== null || this.dead) return false;
-    let best = null, bd = 1e9;
-    const fw = _b.set(Math.sin(pl.yaw), 0, Math.cos(pl.yaw));
-    for (const e of this.enemies) {
-      if (e.dead || e.lungeHit || !(e.lunge > 0.45 && e.lunge <= 0.45 + P.win)) continue;
-      const d = _a.subVectors(e.pos, pl.pos), dist = d.length();
-      if (dist > P.range || d.setY(0).normalize().dot(fw) < P.cone) continue;
-      if (dist < bd) { bd = dist; best = e; }
-    }
-    if (!best) return false;
-    const e = best, dir = _c.subVectors(e.pos, pl.pos).setY(0).normalize();
-    e.lunge = 0; e.lungeHit = false; e.m.swing = 0; e.fireCd = rand(1.5, 2.5);
-    e.stagT = Math.max(e.stagT, P.stagT); e.parryUntil = this.stats.time + P.stagT + 0.1;
-    e.vel.set(dir.x * 14, 0, dir.z * 14);
-    pl.yaw += wrap(Math.atan2(e.pos.x - pl.pos.x, e.pos.z - pl.pos.z) - pl.yaw);
-    const hp = V3().lerpVectors(pl.pos, e.pos, 0.5); hp.y = pl.pos.y + 9;
-    this.fx.impact(hp, _n.copy(dir).negate(), 'armor');
-    this.fx.impact(hp, _n.copy(dir).negate(), 'beam');
-    hero.saber.visible = true; hero.swingSide = 1; hero.swing = 1;
-    const [a, b] = blade(hero); this.fx.saberArc(a, b, SABER);
-    this.audio.saberOn(); this.audio.saberSwing(); this.audio.impact(hp, 'saber'); this.audio.impact(hp, 'armor');
-    this.hitstop = Math.max(this.hitstop, P.stop);
-    this.cockpit.kick('hit', 0.7, 0); this.cockpit.flashAt(SABER, 9, -0.3, 0, -1.2);
-    this.parryMark = 1; this.note('PARRY', 'cy');
-    SB.phase = 'swing'; SB.n = 0; SB.hit = true; SB.parry = true; SB.dur = P.dur; SB.target = e; SB.win = 0; SB.cd = 1; SB.keepCd = true;
-    return true;
+
+  stopShield(broken = false) {
+    if (!this.shield.active) return;
+    this.shield.remaining = 0;
+    this.shield.cooldown = W.shield.cooldown;
+    this.hero.shieldField?.update(0, false, 0);
+    if (broken) this.note('防護罩破裂', 'am');
   }
 
   // ---------------------------------------------------------------- 光波砲
@@ -788,23 +683,6 @@ export class Combat {
     }
   }
 
-  // 光劍砍牆：胸口高度往前 22 公尺內有建築就重擊
-  saberWall() {
-    const pl = this.player, w = this.world;
-    const from = _a.set(pl.pos.x, pl.pos.y + 8, pl.pos.z), fw = _b.set(Math.sin(pl.yaw), 0, Math.cos(pl.yaw));
-    const end = _c.copy(from).addScaledVector(fw, 22);
-    const t = w.raycast(from, end, _n);
-    if (t < 0) return;
-    const hp = V3().lerpVectors(from, end, t);
-    if (!w.hitBuilding(hp, this.od.active ? 6.5 : 5, _n)) return;
-    this.fx.impact(hp, _n, 'building');
-    this.fx.impact(hp, _n, 'beam');
-    this.audio.impact(hp, 'saber');
-    this.hitstop = Math.max(this.hitstop, 0.08);
-    this.cockpit.kick('land', 0.45);
-    this.cockpit.flashAt(SABER, 6, -0.3, 0, -1.2);
-  }
-
   // ---------------------------------------------------------------- 傷害
   damageEnemy(e, dmg, stag, pos, dir, crit = false) {
     if (e.dead) return;
@@ -897,6 +775,21 @@ export class Combat {
     if (this.dead || this.phase === 'done') return;
     const pl = this.player;
     if (this.od.active) dmg *= 0.75;
+    const shield = this.shield;
+    if (shield.active && dmg > 0) {
+      const absorbed = Math.min(dmg, shield.hp);
+      shield.hp -= absorbed;
+      dmg -= absorbed;
+      this.hero.shieldField?.hit(from);
+      if (shield.feedback <= 0) {
+        shield.feedback = 0.18;
+        this.audio.impact(from, 'beam');
+        this.cockpit.flashAt(SHIELD_COLOR, 2.5);
+      }
+      if (shield.hp <= 0) this.stopShield(true);
+      else this.hero.shieldField?.update(0, true, shield.level);
+      if (dmg <= 0) return;
+    }
     pl.ap -= dmg;
     this.stats.dmgTaken += dmg;
     const src = this.stats.src || (this.stats.src = {});
@@ -1567,6 +1460,7 @@ export class Combat {
 
   // 清場（重新開始用）
   dispose() {
+    this.stopShield();
     if (this.enc) this.enc.dispose();
     for (const e of this.enemies) e.m.root.removeFromParent();
     for (const d of this.debris) d.mesh.removeFromParent();

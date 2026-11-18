@@ -289,7 +289,7 @@ export class HUD {
     this.bar(x0, y0 + 10 * s, bw, 2 * s, P.en / 100, enC);
     if (P.overheat > 0) this.text('EN OVERHEAT', cx, y0 + 22 * s, 11, 'rd', 1, 'center', 700);
     else if(P.flying)this.text('空白 ↑　C／Ctrl ↓　Shift 推進　T 降落',cx,y0+22*s,11,'cy',.9,'center',600,SANS);
-    const M = C.msl, SB = C.saber, CN = C.cannon, OD = C.od, cb = 560 * s, cw = cb / 5, wy = y0 + 38 * s;
+    const M = C.msl, SH = C.shield, CN = C.cannon, OD = C.od, cb = 560 * s, cw = cb / 5, wy = y0 + 38 * s;
     const chip = (i, label, val, v, col, hot) => {   // 五格武器：比血條寬一點，字才不會擠在一起
       const x = cx - cb / 2 + i * cw + 4 * s, w = cw - 8 * s;
       this.text(label, x, wy, 10, hot ? col : 'dim', 0.95);
@@ -298,7 +298,9 @@ export class HUD {
     };
     chip(0, 'RIFLE', R.reload >= 0 ? 'RELOAD' : `${R.ammo}/${R.mag}`, R.reload >= 0 ? R.reload : R.ammo / R.mag, R.reload >= 0 || R.ammo <= 3 ? 'am' : 'cy', true);
     chip(1, 'MSL', M.cd >= 1 ? 'READY' : `${Math.ceil((1 - M.cd) * 7)}s`, M.cd, M.cd >= 1 ? 'gr' : 'dim', M.cd >= 1);
-    chip(2, 'SABER F', SB.cd >= 1 ? 'READY' : '', SB.cd, SB.cd >= 1 ? 'pk' : 'dim', SB.cd >= 1);
+    const shieldReady = SH.cooldown <= 0 && !SH.active;
+    const shieldText = SH.active ? `ON ${Math.ceil(SH.level * 100)}%` : shieldReady ? 'READY' : `${Math.ceil(SH.cooldown)}s`;
+    chip(2, 'SHIELD F', shieldText, SH.level, SH.active ? (SH.level < 0.3 ? 'am' : 'cy') : shieldReady ? 'gr' : 'dim', shieldReady || SH.active);
     chip(3, 'CANNON E', CN.phase ? (CN.phase === 'charge' ? 'CHARGE' : 'FIRE') : CN.cd >= 1 ? 'READY' : `${Math.ceil((1 - CN.cd) * 20)}s`, CN.phase ? 1 : CN.cd, CN.phase || CN.cd >= 1 ? 'cy' : 'dim', CN.cd >= 1 || !!CN.phase);
     chip(4, 'OD Q', OD.active ? 'ACTIVE' : OD.gauge >= 1 ? 'READY' : `${Math.floor(OD.gauge * 100)}%`, OD.gauge, 'pk', OD.gauge >= 1 || OD.active);
 
@@ -446,7 +448,6 @@ export class HUD {
     }
     if (C.critMark > 0) this.text('CRITICAL', x, y - 46 * s, 16, 'am', C.critMark, 'center', 700);
     if (C.killMark > 0) this.text('DESTROYED', x, y + 52 * s, 15, 'rd', C.killMark, 'center', 700);
-    if (C.parryMark > 0) this.text('PARRY', x, y - 68 * s, 22, 'cy', C.parryMark, 'center', 700);
   }
 
   // 橫條：深色底框＋底色＋填色（ticks＝四分刻度）

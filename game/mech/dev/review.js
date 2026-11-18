@@ -211,9 +211,11 @@ async function flight() {
       const e=interceptors[0];e.pos.copy(p.pos).add(new T.Vector3(0,80,0));e.m.root.updateMatrixWorld(true);
       C.lockTarget=null;C.soft=null;C.eye.copy(p.pos).add(new T.Vector3(0,10,0));C.aimDir.set(0,1,0);C.aimSkip=0;C.rifle.cd=0;C.rifle.reload=-1;
       const hp=e.ap;C.fireRifle();assert(e.ap<hp,'實際步槍能命中正上方敵機');
-      C.lockTarget=e;C.saber.phase=null;C.startSaber();assert(p.dashV.y>90,'光劍突進能追向上方敵機');p.dashT=0;C.saber.phase=null;
-      C.saber.phase='swing';C.saber.target=e;C.saber.hit=false;hero.swing=.6;
-      const farHp=e.ap;C.updateSaber(.02);assert(e.ap===farHp,'高度差八十公尺不能隔空砍中');C.saber.phase=null;
+      const armor=p.ap;
+      assert(C.shield.cooldown===0,'防護罩可用');
+      C.updateShield(1/60,true);C.hurt(520,e.pos,'beam');
+      assert(C.shield.active&&hero.shieldField.mesh.visible&&C.shield.level<1&&p.ap===armor,'防護罩在空中吸收上方敵機的攻擊');
+      C.stopShield();assert(!hero.shieldField.mesh.visible&&C.shield.cooldown>0,'防護罩收起並開始冷卻');
       const ray=W.raycast.bind(W);W.raycast=()=>.5;for(const f of foes)f.losT=0;
       for(let i=0;i<210;i++)C.updateEnemies(1/60);W.raycast=ray;
       assert(foes.every(f=>!f.airborne),'失去目視三秒後停止追蹤空中高度');

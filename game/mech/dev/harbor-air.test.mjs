@@ -23,7 +23,7 @@ function fixture(relay) {
   const combat = Object.assign(Object.create(Combat.prototype), { scene, world, player, hero, audio: silent, fx: silent, cockpit: silent, stage: 10,
     phase: 'done', events: [], enemies: [], debris: [], missiles: [], notes: [], nextId: 1, od: { gauge: 0 }, hitstop: 0,
     stats: { time: 0, hits: 0, kills: 0, score: 0, chain: 0, maxChain: 0, lastKill: -99 }, rifle: { reload: -1 },
-    saber: {}, cannon: {}, msl: { locks: [] }, hurt: noop,
+    shield: { active: false }, cannon: {}, msl: { locks: [] }, hurt: noop,
   });
   const battle = new HarborAirBattle({ combat, player, world, relay });
   const tick = (seconds, until) => {

@@ -8,12 +8,13 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { stencilAtlas, stencilUV, detailMaps } from './textures.js';
 import { MechMotion, wrap, lerpAngle, damp } from './anim.js';
 import { createFootContactShadows } from './foot-contact.mjs?v=1';
+import { createShieldField } from './shield-field.mjs';
 
 // ================================================================ 材質
 const MATS = {};
 let heroBuilder;
 export async function loadHeroMech() {
-  const module = await import('./campaign-mech.mjs?v=1');
+  const module = await import('./campaign-mech.mjs?v=2');
   await module.loadCampaignHero();
   heroBuilder = module.buildCampaignHero;
   TPL.delete('hero|hero');
@@ -573,7 +574,11 @@ export class Mech {
     this.legYaw = 0; this.pose = { boost: 0, air: 0 };
     this.land = 0; this.landV = 0; this.thrust = 0; this.recoil = 0; this.swing = 0;
     this.motion = new MechMotion(this);
-    if (this.root.userData.originalCangyan) this.footContacts = createFootContactShadows(this.root, [this.bones.ankleR, this.bones.ankleL]);
+    if (this.root.userData.originalCangyan) {
+      this.footContacts = createFootContactShadows(this.root, [this.bones.ankleR, this.bones.ankleL]);
+      this.shieldField = createShieldField();
+      this.root.add(this.shieldField.mesh);
+    }
     this.muzzle = new THREE.Object3D();
     this.muzzle.position.copy(this.muzzleLocal);
     this.weapon.add(this.muzzle);

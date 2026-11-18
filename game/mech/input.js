@@ -189,7 +189,7 @@ export class Input {
       hover: K.has('Space') || K.has('Tjump'),
       flight: this.down.has('KeyT') || this.down.has('Tflight'),
       descend: K.has('KeyC') || K.has('ControlLeft') || K.has('ControlRight') || K.has('Tdescend'),
-      saber: this.down.has('KeyF') || this.down.has('Tsaber'),
+      shield: this.down.has('KeyF') || this.down.has('Tshield'),
       cannon: this.down.has('KeyE') || this.down.has('Tcannon'),
       hardLock: this.down.has('Tab') || this.down.has('M1') || this.down.has('Tlock'),
       od: this.down.has('KeyQ') || this.down.has('Tod'),
@@ -246,6 +246,6 @@ export class Input {
       };
       for (const type of releaseEvents) b.addEventListener(type, off);
     };
-    btn('tFire', 'Tfire'); btn('tBoost', 'Tboost'); btn('tJump', 'Tjump'); btn('tMsl', 'Tmsl'); btn('tSaber', 'Tsaber'); btn('tCannon', 'Tcannon'); btn('tOd', 'Tod'); btn('tLock', 'Tlock'); btn('tView', 'Tview'); btn('tNade', 'Tnade'); btn('tSupport', 'Tsupport'); btn('tScout', 'Tscout'); btn('tFlight','Tflight'); btn('tDescend','Tdescend');
+    btn('tFire', 'Tfire'); btn('tBoost', 'Tboost'); btn('tJump', 'Tjump'); btn('tMsl', 'Tmsl'); btn('tShield', 'Tshield'); btn('tCannon', 'Tcannon'); btn('tOd', 'Tod'); btn('tLock', 'Tlock'); btn('tView', 'Tview'); btn('tNade', 'Tnade'); btn('tSupport', 'Tsupport'); btn('tScout', 'Tscout'); btn('tFlight','Tflight'); btn('tDescend','Tdescend');
   }
 }
