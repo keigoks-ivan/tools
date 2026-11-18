@@ -96,6 +96,7 @@ var ZONES = [
       {en:'Reports & Courses',zh:'報告與課程',links:[
         {href:'/docs/dd/',en:'KL Project Reports',zh:'吉隆坡建案報告'},
         {href:'/tw/qingpu/',en:'Qingpu Price Tracker',zh:'青埔房價追蹤'},
+        {href:'/tw/linkou-shop/',en:'Linkou Storefront Finder',zh:'林口店面選址'},
         {href:'/learn-resi/',en:'Residential Course',zh:'住宅房產課程'},
         {href:'/learn-cre/',en:'Commercial Course',zh:'商用房產課程'}]}
     ]},

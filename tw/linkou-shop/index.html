@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>林口店面選址</title>
+<meta name="description" content="林口店面選址">
+<link rel="stylesheet" href="../../css/style.css">
+<link rel="stylesheet" href="../tw.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<style>
+  .container { max-width: 1160px; padding: 20px 16px; }
+  .page-header { padding: 16px; }
+  .page-header h1 { font-size: 22px; line-height: 1.35; }
+  .page-header .eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .06em; color: #c2410c; margin-bottom: 6px; }
+  .page-header .subtitle { font-size: 14px; line-height: 1.7; margin-top: 6px; color: #1e3a5f; }
+  .container h2.section-heading { font-size: 15px; letter-spacing: 0.04em; text-transform: none; margin: 34px 0 6px; }
+  .sec-sub { font-size: 14px; font-weight: 600; color: #1e3a5f; margin: 8px 0 12px; line-height: 1.7; }
+  .prose p { font-size: 14px; line-height: 1.9; color: #1e3a5f; margin: 0 0 12px; }
+  .prose ul, .prose ol { margin: 6px 0 12px 20px; padding: 0; }
+  .prose li { font-size: 14px; line-height: 1.85; color: #1e3a5f; margin-bottom: 4px; }
+  .fine { font-size: 12px; line-height: 1.8; color: #4a6080; margin: 8px 0; }
+  .fine ul { margin: 4px 0 4px 18px; padding: 0; }
+
+  /* 地圖 */
+  .layer-bar { display: flex; flex-wrap: wrap; gap: 6px 14px; padding: 10px 12px; background: #eef3f9; border-radius: 8px; margin-bottom: 8px; }
+  .layer-bar label { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: #1e3a5f; cursor: pointer; line-height: 1.5; }
+  .layer-bar input { margin: 0; }
+  .sw { display: inline-block; width: 11px; height: 11px; border-radius: 50%; flex: 0 0 auto; border: 1px solid rgba(0,0,0,.25); }
+  .sw.sq { border-radius: 2px; }
+  .sw.poly { border-radius: 2px; }
+  #map { height: 560px; width: 100%; border: 0.5px solid #ccd9e8; border-radius: 8px; z-index: 0; }
+  .map-legend { background: rgba(255,255,255,.93); padding: 8px 10px; border-radius: 6px; font-size: 11px; line-height: 1.7; color: #1e3a5f; box-shadow: 0 0 6px rgba(0,0,0,.2); max-width: 230px; }
+  .map-legend .lg-btn { font: inherit; font-size: 12px; font-weight: 700; color: #1e3a5f; background: none; border: 0; padding: 0 2px; min-height: 26px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+  .map-legend .lg-arrow { transition: transform .15s; }
+  .map-legend.collapsed .lg-body { display: none; }
+  .map-legend.collapsed .lg-arrow { transform: rotate(-90deg); }
+  .map-legend .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 8px; }
+  .map-legend .row { display: flex; align-items: center; gap: 6px; }
+  .map-legend .bar { display: inline-block; width: 14px; height: 10px; border: 1px solid rgba(0,0,0,.15); }
+  .leaflet-popup-content { font-size: 12px; line-height: 1.7; color: #1e3a5f; margin: 10px 12px; }
+  .leaflet-popup-content b { font-size: 13px; }
+  .leaflet-popup-content a { color: #2563eb; }
+  .sq-icon { width: 11px; height: 11px; background: #7c3aed; border: 1.5px solid #fff; box-shadow: 0 0 0 1px #4c1d95; }
+
+  /* 表格 */
+  .tbl-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; border: 0.5px solid #ccd9e8; border-radius: 8px; background: #fff; }
+  table.dt { border-collapse: collapse; width: 100%; font-size: 12px; color: #1e3a5f; }
+  table.dt th, table.dt td { padding: 8px 10px; border-bottom: 1px solid #e8f0f9; text-align: right; vertical-align: top; line-height: 1.5; }
+  table.dt th { background: #f4f7fc; font-weight: 600; font-size: 12px; text-align: center; vertical-align: middle; }
+  table.dt td:first-child, table.dt th:first-child { text-align: left; position: sticky; left: 0; background: #fff; font-weight: 600; z-index: 1; }
+  table.dt th:first-child { background: #f4f7fc; }
+  table.dt td.l { text-align: left; }
+  table.dt.wide th, table.dt.wide td { min-width: 78px; }
+  table.dt.wide td:first-child, table.dt.wide th:first-child { min-width: 92px; }
+  table.dt.cmp td, table.dt.cmp th { text-align: left; }
+  table.dt.cmp td:first-child { position: static; }
+  table.dt.cmp th:first-child { position: static; }
+  table.dt.cmp td { min-width: 150px; }
+  table.dt.cmp td:first-child { min-width: 70px; }
+
+  /* 商圈卡片 */
+  .area-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; margin: 12px 0; }
+  .area-card { background: #fff; border: 0.5px solid #ccd9e8; border-left: 3px solid #5a7a9a; border-radius: 8px; padding: 14px 16px; }
+  .area-card h3 { font-size: 15px; color: #1e3a5f; margin: 0 0 4px; }
+  .area-card .claim { font-size: 13px; font-weight: 600; color: #b45309; margin-bottom: 6px; line-height: 1.6; }
+  .area-card ul { margin: 0 0 8px 18px; padding: 0; }
+  .area-card li { font-size: 13px; line-height: 1.8; color: #1e3a5f; margin-bottom: 3px; }
+  .area-card .concl { font-size: 13px; font-weight: 600; color: #1e3a5f; background: #f4f7fc; border-left: 3px solid #1e3a5f; padding: 6px 10px; border-radius: 0 4px 4px 0; line-height: 1.7; }
+  .area-card.other { border-left-color: #94a3b8; }
+
+  /* 圖 */
+  .fig { background: #fff; border: 0.5px solid #ccd9e8; border-radius: 8px; padding: 14px 14px 8px; margin: 14px 0; }
+  .fig h3 { font-size: 13px; color: #1e3a5f; margin: 0 0 6px; line-height: 1.6; }
+  .chart { width: 100%; height: 340px; }
+  .chart.tall { height: 400px; }
+
+  /* 試算 */
+  .calc { background: #fff; border: 0.5px solid #ccd9e8; border-radius: 8px; padding: 14px 16px; margin: 12px 0; }
+  .preset-bar { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+  .preset-bar button { font: inherit; font-size: 13px; padding: 8px 14px; border-radius: 6px; border: 1px solid #ccd9e8; background: #f4f7fc; color: #1e3a5f; cursor: pointer; line-height: 1.4; }
+  .preset-bar button.on { background: #1e3a5f; color: #fff; border-color: #1e3a5f; }
+  .calc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px 14px; margin-bottom: 14px; }
+  .calc-grid label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: #5a7a9a; line-height: 1.4; }
+  .calc-grid input { font: inherit; font-size: 14px; padding: 8px 10px; border: 1px solid #ccd9e8; border-radius: 6px; color: #1e3a5f; width: 100%; box-sizing: border-box; background: #fff; }
+  .calc-out { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }
+  .calc-out .o { background: #f4f7fc; border-radius: 8px; padding: 10px 12px; border-left: 3px solid #5a7a9a; }
+  .calc-out .o.key { border-left-color: #d97706; background: #fff7ed; }
+  .calc-out .o .k { font-size: 12px; color: #5a7a9a; line-height: 1.5; }
+  .calc-out .o .v { font-size: 20px; font-weight: 600; color: #1e3a5f; font-family: 'JetBrains Mono', monospace; margin-top: 2px; word-break: break-all; }
+
+
+  /* 選址工具 */
+  .radius-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 8px; }
+  .radius-bar .rb-k { font-size: 13px; color: #1e3a5f; font-weight: 600; }
+  .radius-bar button { font: inherit; font-size: 13px; padding: 7px 12px; border-radius: 6px; border: 1px solid #ccd9e8; background: #f4f7fc; color: #1e3a5f; cursor: pointer; line-height: 1.4; }
+  .radius-bar button.on { background: #1e3a5f; color: #fff; border-color: #1e3a5f; }
+  .radius-bar .rb-c { font-size: 12px; color: #b45309; line-height: 1.6; flex: 1 1 220px; }
+  .finder { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 14px; align-items: start; }
+  .finder-map, .finder-panel { min-width: 0; }
+  .finder-panel { background: #fff; border: 0.5px solid #ccd9e8; border-radius: 8px; padding: 12px 14px; font-size: 13px; color: #1e3a5f; line-height: 1.7; }
+  .cp-head { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+  .cp-sec { border-top: 1px solid #e8f0f9; padding: 8px 0 4px; }
+  .cp-sec:first-of-type { border-top: 0; }
+  .cp-sec h4 { font-size: 13px; margin: 0 0 4px; color: #b45309; }
+  .cp-row { display: flex; justify-content: space-between; gap: 10px; }
+  .cp-row .k { color: #5a7a9a; }
+  .cp-row .v { text-align: right; font-weight: 600; }
+  .cp-note { font-size: 11.5px; color: #4a6080; line-height: 1.7; margin: 3px 0 4px; }
+  .cp-bar { display: grid; grid-template-columns: 62px 1fr 74px; gap: 6px; align-items: center; font-size: 12px; }
+  .cp-bar .bg { height: 9px; background: #eef3f9; border-radius: 2px; position: relative; }
+  .cp-bar .fg { height: 100%; background: #5f9de0; border-radius: 2px; }
+  .cp-bar .v { text-align: right; font-family: 'JetBrains Mono', monospace; font-size: 11.5px; }
+  table.cp-t { border-collapse: collapse; width: 100%; font-size: 12px; }
+  table.cp-t th, table.cp-t td { padding: 3px 6px; border-bottom: 1px solid #eef3f9; text-align: right; white-space: nowrap; }
+  table.cp-t th:first-child, table.cp-t td:first-child { text-align: left; }
+  table.cp-t th { background: #f4f7fc; font-weight: 600; }
+  .pick-btn { font: inherit; font-size: 12px; margin-top: 4px; padding: 5px 10px; border-radius: 5px; border: 1px solid #1e3a5f; background: #1e3a5f; color: #fff; cursor: pointer; }
+  @media (max-width: 900px) { .finder { grid-template-columns: minmax(0, 1fr); } }
+
+
+  /* ===== 視覺整理 ===== */
+  body, .container { font-variant-numeric: tabular-nums; }
+  .container h2.section-heading { margin: 40px 0 6px; padding-top: 4px; border-top: 1px solid #e3ebf5; padding-top: 22px; }
+  .stat-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 14px 0 18px; }
+  .stat { background: #fff; border: 0.5px solid #ccd9e8; border-top: 3px solid #1e3a5f; border-radius: 8px; padding: 12px 14px; box-shadow: 0 1px 3px rgba(30,58,95,.08); }
+  .stat .n { font-size: 26px; font-weight: 700; color: #1e3a5f; line-height: 1.2; }
+  .stat .l { font-size: 12px; color: #5a7a9a; line-height: 1.5; margin-top: 4px; }
+  .area-card, .fig, .calc, .finder-panel, .tbl-wrap, .cp-card { box-shadow: 0 1px 3px rgba(30,58,95,.08); }
+  .area-card { border-left-width: 4px; }
+  .area-card .claim { font-size: 15px; font-weight: 700; color: #1e3a5f; }
+  .area-card li, .area-card .concl { font-variant-numeric: tabular-nums; }
+  .chip { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: baseline; }
+  table.dt th { background: #eef3f9; color: #1e3a5f; }
+  .tag { display: inline-block; font-size: 11.5px; font-weight: 600; padding: 1px 7px; border-radius: 10px; line-height: 1.6; white-space: nowrap; }
+  .tag.up { background: #dcfce7; color: #166534; }
+  .tag.dn { background: #fee2e2; color: #991b1b; }
+  .tag.fl { background: #eef3f9; color: #4a6080; }
+  .finder-panel { position: sticky; top: 12px; height: 560px; overflow-y: auto; padding: 10px; background: #f4f7fc; }
+  .cp-ctx { background: #1e3a5f; color: #fff; border-radius: 8px; padding: 9px 12px; margin-bottom: 8px; font-size: 13px; line-height: 1.6; }
+  .cp-ctx b { font-size: 14px; }
+  .cp-card { background: #fff; border: 0.5px solid #ccd9e8; border-radius: 8px; padding: 9px 12px 7px; margin-bottom: 8px; }
+  .cp-card h4 { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 12.5px; margin: 0 0 6px; color: #5a7a9a; font-weight: 600; }
+  .cp-card h4 .big { font-size: 18px; font-weight: 700; color: #1e3a5f; text-align: right; }
+  .cp-row .v { display: flex; align-items: center; justify-content: flex-end; gap: 6px; flex-wrap: wrap; }
+  .cp-bar .fg { background: var(--c, #5f9de0); }
+  .finder-panel table.cp-t th { background: #eef3f9; }
+  @media (max-width: 900px) { .finder-panel { position: static; height: auto; overflow: visible; } }
+  @media (max-width: 700px) {
+    .stat-row { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .stat .n { font-size: 22px; }
+    .radius-bar button, .preset-bar button, .pick-btn { min-height: 40px; }
+    .radius-bar button { flex: 1 1 28%; }
+    .layer-bar label { min-height: 40px; }
+    .layer-bar input { width: 18px; height: 18px; }
+    .calc-grid input { min-height: 40px; }
+  }
+
+  .src-list { margin: 8px 0 8px 18px; padding: 0; }
+  .src-list li { font-size: 12px; line-height: 1.85; color: #4a6080; margin-bottom: 4px; }
+  .foot-link { margin: 26px 0 8px; font-size: 14px; }
+  .foot-link a { color: #2563eb; font-weight: 600; }
+
+  @media (max-width: 700px) {
+    #map { height: 60vh; }
+    .chart { height: 300px; }
+    .chart.tall { height: 360px; }
+    .area-grid { grid-template-columns: 1fr; }
+    .calc-grid { grid-template-columns: 1fr 1fr; }
+    .page-header h1 { font-size: 19px; }
+  }
+</style>
+</head>
+<body>
+<div id="nav-root"></div>
+<script src="../../js/navbar.js"></script>
+
+<div class="container">
+
+  <div class="page-header">
+    <div class="eyebrow">新北市林口區・店面研究｜資料更新 2026 年 11 月</div>
+    <h1>林口店面選址：各商圈的人口、店家與行情</h1>
+    <div class="subtitle">在地圖上點任一點，看周圍住多少人、所得多少、有幾家同業、店面租多少。</div>
+  </div>
+
+  <div class="stat-row" id="statRow">
+    <div class="stat"><div class="n" id="st_pop">139,547</div><div class="l">林口人口（2026 年 10 月）</div></div>
+    <div class="stat" style="border-top-color:#dc2626"><div class="n" id="st_shops">—</div><div class="l">中段營業中商家</div></div>
+    <div class="stat" style="border-top-color:#ea580c"><div class="n" id="st_sale">—</div><div class="l">後段店面成交每坪（2023 年以來中位數）</div></div>
+    <div class="stat" style="border-top-color:#ea580c"><div class="n" id="st_pipe">—</div><div class="l">後段未完工戶數</div></div>
+  </div>
+
+  <div class="prose">
+    <p>林口 2016 年後完工、一樓有店面的新大樓，集中在前段、中段、後段三個商圈，各有 47 到 72 棟有成交或出租紀錄。南勢有 26 棟，舊街和麗園加起來 22 棟。</p>
+    <p>中段是林口的商業中心。營業中商家 2,147 家，2021～2025 年開在店面的商家淨增 444 家，2023 年以來新店面成交中位數每坪 80 萬，三項都是全區最高。後段店面最便宜，2023 年以來成交中位數每坪 54 萬；每千位居民只有 23 家店面型商家，是主要商圈裡最少的。</p>
+    <p>後段的風險在供給。還沒完工的建案約 1,640 戶，已經賣出 134 間店面，2026 年就有 944 戶交屋。承租的人選擇會變多；買來收租的人，要把這批新店面算進去。</p>
+    <ul>
+      <li>林口人口 2026 年 10 月 139,547 人，比 2019 年底多 23,965 人。</li>
+      <li>各里所得差很大：112 年度綜合所得中位數，南勢里 100.2 萬元，瑞平里 39.5 萬元。</li>
+      <li>店面租金 2023 年起上漲。前段每坪月租中位數，由 2016～2019 年的 811 元升到 1,493 元。</li>
+      <li>中段店家增加最快，2021～2025 年開在店面的商家淨增 444 家。</li>
+      <li>中段也最貴，2023 年以來新店面成交中位數每坪 80 萬。</li>
+      <li>後段買價最低，2023 年以來店面成交中位數每坪 54 萬。</li>
+      <li>買店面收租的毛報酬率多在 2% 上下，後段和舊街約 2.6% 到 2.7%。</li>
+      <li>一樓店面單價約是同棟樓上住家的 1.6 倍。</li>
+      <li>南勢人口六年增加 53%，但店面少，2023 年以來成交只有 9 筆。</li>
+    </ul>
+  </div>
+
+  <!-- ===== 選址工具（含地圖） ===== -->
+  <h2 class="section-heading" id="finder">選址工具</h2>
+  <div class="sec-sub">點一個位置，看周圍的住戶、所得、人流和同業</div>
+  <div class="prose">
+    <p>在地圖上點一下，選半徑 300、500 或 1,000 公尺，下方（電腦版在右側）會列出這個範圍內的：</p>
+    <ol>
+      <li>住戶：人口、戶數、年齡結構（0～9、10～19 歲……70 歲以上），以及跟 2016 年底、2019 年底比的增減</li>
+      <li>所得：範圍內各里 112 年度綜合所得中位數、平均數（依人口加權），以及跟 105 年度比的變化</li>
+      <li>人流替代指標：最近的機場捷運站、距離、日均運量走勢；範圍內公車站數、經過的路線數</li>
+      <li>店家：餐飲、零售、補習與教育、美容美髮、醫療診所、其他生活服務各幾家，以及 2021～2025 年新設、關閉家數</li>
+      <li>店面行情：範圍內 2023 年以來店面成交與租金中位數（含筆數），591 一樓目前的出售、出租掛牌</li>
+      <li>未來住戶：範圍內還沒完工的建案戶數與預計完工年</li>
+    </ol>
+  </div>
+
+  <div class="sec-sub" id="map-sec" style="margin-bottom:6px">店面、掛牌、同業和小孩在哪裡</div>
+  <div class="layer-bar" id="layerBar" role="group" aria-label="圖層開關"></div>
+  <div class="radius-bar" id="radiusBar" role="group" aria-label="分析半徑">
+    <span class="rb-k">半徑</span>
+    <button type="button" data-r="300">300 公尺</button>
+    <button type="button" data-r="500" class="on">500 公尺</button>
+    <button type="button" data-r="1000">1,000 公尺</button>
+    <span class="rb-c" id="centerLabel"></span>
+  </div>
+  <div class="finder">
+    <div class="finder-map"><div id="map" role="application" aria-label="林口店面地圖"></div></div>
+    <div class="finder-panel" id="catchPanel" aria-live="polite"></div>
+  </div>
+  <p class="fine">座標是用門牌比對 OpenStreetMap 推出來的，有些只對到路段，位置可能差幾百公尺。商圈名稱來自房仲和新聞，新北市沒有官方劃分。</p>
+  <div class="fine"><ul>
+    <li>住戶人口來自內政部最小統計區，林口分成 612 格。每格人口依格內門牌點的分布，分到 100 公尺的方格再加總。2015 年以後蓋好的大社區，如果落在面積很大的格子裡，位置會不準。</li>
+    <li>所得只有里的資料，範圍內的所得是各里數字依人口加權。</li>
+    <li>人流沒有逐街的資料，這裡用捷運站運量、公車站和路線數代替。用手機訊號推估的人流，細到里要付費購買，本頁沒有用。</li>
+    <li>店家用的是登記地址，許多公司登記在住家，家數不等於實際開店數。</li>
+  </ul></div>
+
+  <!-- ===== 商圈總覽 ===== -->
+  <h2 class="section-heading" id="overview">商圈總覽</h2>
+  <div class="sec-sub">六個主要商圈並排比較</div>
+  <div class="tbl-wrap"><table class="dt wide" id="tblOverview"></table></div>
+  <p class="fine">591 出租的坪數是使用坪數，實價登錄是含公設的總面積，所以 591 的每坪月租看起來會高約一半。表裡已經用一樓出售物件的公設比中位數 32% 換算，換算後兩邊大多接近，只有中段的開價明顯高於成交。</p>
+
+  <!-- ===== 各商圈 ===== -->
+  <h2 class="section-heading" id="areas">各商圈</h2>
+  <div class="area-grid">
+    <div class="area-card" data-a="LK03">
+      <h3>後段（中山路後段）</h3>
+      <div class="claim">價格最低、店家相對居民最少，但新店面也最多</div>
+      <ul>
+        <li>2016 年後完工的店面 72 棟，三個新興商圈裡最多。</li>
+        <li>2023 年以來成交中位數每坪 54 萬，租金每坪 1,419 元，毛報酬率約 2.6%。</li>
+        <li>每千位居民 23 家店面型商家，主要商圈裡最少；補習班每 100 名國小年齡兒童 1.07 家，也是新興商圈最少。</li>
+        <li>還沒完工的建案約 1,640 戶，已賣出 134 間店面，2026 年有 944 戶交屋。</li>
+        <li>0 到 5 歲兒童 2019 到 2025 年減少 8.5%。</li>
+      </ul>
+      <div class="concl">適合先用租的進場，等新店面交屋後再挑。</div>
+    </div>
+    <div class="area-card" data-a="LK01">
+      <h3>前段（A9、三井 Outlet 一帶）</h3>
+      <div class="claim">人潮最多，開價和成交的差距最大</div>
+      <ul>
+        <li>機場捷運 A9 林口站日均運量，由 2019 年 7 月的 3,809 人次增加到 2026 年 7 月的 6,710 人次。</li>
+        <li>591 一樓出售開價中位數每坪 90 萬，2023 年以來成交中位數 69 萬。</li>
+        <li>租金每坪 1,493 元，2016～2019 年只有 811 元，各商圈漲最多。</li>
+        <li>每 100 名兒童 1.84 家補習班。</li>
+        <li>未完工約 1,700 戶，多數預計 2027 年完工。這批建案只對到路名，歸在前段不一定準。</li>
+      </ul>
+      <div class="concl">人潮主要來自購物和通勤，補教業要付的是餐飲零售的租金。</div>
+    </div>
+    <div class="area-card" data-a="LK02">
+      <h3>中段（家樂福一帶）</h3>
+      <div class="claim">林口的商業中心，最貴、同業也最多</div>
+      <ul>
+        <li>營業中商家 2,147 家，2021～2025 年開在店面的商家淨增 444 家，都是全區最多。</li>
+        <li>2023 年以來新店面成交中位數每坪 80 萬。</li>
+        <li>實價登錄租金每坪 1,272 元，591 開價換算後 1,881 元，兩者差距各商圈最大。</li>
+        <li>每 100 名兒童 2.04 家補習班，全區最高。</li>
+        <li>國小年齡兒童約 2,450 人，各商圈最多。</li>
+      </ul>
+      <div class="concl">客源最多，但同業最多、買價最高。</div>
+    </div>
+    <div class="area-card" data-a="LK06">
+      <h3>南勢</h3>
+      <div class="claim">人口成長最快，能挑的店面最少</div>
+      <ul>
+        <li>人口 2019 到 2025 年增加 53%，0 到 5 歲增加 17%，是唯一幼兒還在增加的商圈。</li>
+        <li>2016 年後完工的店面 26 棟，不少是 7 層華廈的一樓，部分可能沒有實際當店面用。</li>
+        <li>2023 年以來成交 9 筆，中位數每坪 57 萬；租賃 8 筆，中位數每坪 1,162 元。</li>
+        <li>每 100 名兒童 1.83 家補習班。</li>
+      </ul>
+      <div class="concl">需求在增加，但店面少、價格樣本也少。</div>
+    </div>
+    <div class="area-card" data-a="LK07">
+      <h3>林口舊街</h3>
+      <div class="claim">以老店面為主，租金沒有漲</div>
+      <ul>
+        <li>2016 年後完工的店面只有 20 棟。</li>
+        <li>2023 年以來租金每坪 851 元，比 2016～2019 年的 960 元還低。</li>
+        <li>毛報酬率約 2.7%，主要是買價低，2023 年以來成交每坪 42 萬。</li>
+        <li>0 到 5 歲兒童減少 16%，各商圈減最多。</li>
+      </ul>
+      <div class="concl">不符合新大樓的條件。</div>
+    </div>
+    <div class="area-card" data-a="LK05">
+      <h3>麗園東勢</h3>
+      <div class="claim">住宅區，店面很少</div>
+      <ul>
+        <li>有店面成交或出租的大樓 20 棟，2016 年後完工的只有 2 棟。</li>
+        <li>0 到 5 歲兒童減少 12%。</li>
+        <li>林口 8 家立案課後照顧中心，有 4 家在這裡。</li>
+      </ul>
+      <div class="concl">店面選擇太少。</div>
+    </div>
+    <div class="area-card other" style="grid-column:1/-1">
+      <h3>其他商圈</h3>
+      <ul>
+        <li>選手村社宅：一樓店鋪由新北市標租。最近一批只有 1 間，192.9 坪，月租底價 323,033 元（含稅），每坪約 1,675 元；改作補教用途要出租人書面同意，並辦變更使用。</li>
+        <li>工二工業區、工一 AI+ 智慧園區：以工廠和辦公為主，店面很少。</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ===== 供給 ===== -->
+  <h2 class="section-heading" id="supply">供給</h2>
+  <div class="sec-sub">新店面還在增加，後段最多</div>
+  <div class="prose"><p>林口的店面總數只能用推的。新北市使用執照只記整棟大樓的用途，看不出一樓有幾間店，所以這裡從三個方向看：有店面成交或出租紀錄的大樓、商業用途的使用執照、預售簽約的店面。</p></div>
+  <div class="fig"><h3>圖 1：各商圈每年完工的店面大樓數（2016～2026，依實價登錄的完工年）</h3><div class="chart" id="fig1"></div></div>
+  <div class="fig"><h3>圖 2：各商圈未完工建案的戶數與已簽約店面數，依預計完工年（2026～2030）</h3><div class="chart tall" id="fig2"></div></div>
+  <p class="fine">預計完工年是用建照年加 4 年推的，不是建商公告。已簽約店面只算到實價登錄有登記的，是最少的數字。</p>
+
+  <!-- ===== 需求 ===== -->
+  <h2 class="section-heading" id="demand">需求</h2>
+  <div class="sec-sub">人還在搬進來，小孩數已經到頂</div>
+  <div class="prose"><p>林口總人口 2026 年約 13.95 萬，還在增加。6 到 11 歲兒童 2023 年最多，有 11,112 人，2026 年 10 月是 10,748 人。0 到 5 歲 2021 年最多，有 8,265 人，現在是 6,885 人，少了 17%，比 6 到 11 歲少約 3,900 人。</p></div>
+  <div class="fig"><h3>圖 3：林口 0～5 歲、6～11 歲兒童數（每年 12 月，2018～2026）</h3><div class="chart" id="fig3"></div></div>
+  <div class="fig"><h3>圖 4：各商圈人口（2018～2025）</h3><div class="chart" id="fig4"></div></div>
+  <div class="fig"><h3>圖 5：各商圈開在店面的商家，每年新設減關閉（2016～2025）</h3><div class="chart" id="fig5"></div></div>
+  <div class="fig"><h3>圖 6：機場捷運 A9 林口站日均運量</h3><div class="chart" id="fig6"></div></div>
+  <div class="fine"><ul>
+    <li>各商圈人口是把各里人口，依門牌點落在哪個商圈的比例分攤，高樓區一個門牌住很多戶，所以新興商圈可能被低估。</li>
+    <li>商家資料合併財政部稅籍、經濟部公司與商業登記。有 1,677 家查不到現況和行業，本頁沒有算進店面型商家。把它們全部當成還在營業的店面型商家，各商圈淨增的排名也不變，只是數字變大，例如中段的 444 家最多變成 676 家。許多公司把登記地址設在住家，商家數不等於實際開店數。</li>
+  </ul></div>
+
+  <!-- ===== 買還是租 ===== -->
+  <h2 class="section-heading" id="buyrent">買還是租</h2>
+  <div class="sec-sub">毛報酬率 2% 上下，買店面收租的現金流很薄</div>
+  <div class="fine" style="margin-bottom:6px">各商圈成交中位數、租金中位數、毛報酬率（同棟或同路段、時間相近的成交和租賃配對）</div>
+  <div class="tbl-wrap"><table class="dt" id="tblYield"></table></div>
+  <div class="prose" style="margin-top:12px"><p>一樓店面單價約是同棟樓上住家的 1.6 倍（2016 年後完工的店面，185 筆配對）。</p></div>
+
+  <h3 style="font-size:15px;color:#1e3a5f;margin:18px 0 8px">試算</h3>
+  <div class="calc">
+    <div class="preset-bar" id="presetBar">
+      <button type="button" data-p="0">後段 40 坪</button>
+      <button type="button" data-p="1">全林口新店面 40 坪</button>
+    </div>
+    <p class="fine">「後段」用後段店面 2023 年以來的成交與租金中位數，每坪 54 萬、月租 1,419 元；「全林口新店面」用 2016 年後完工店面 2023 年以來的中位數，每坪 69 萬、月租 1,462 元。</p>
+    <div class="calc-grid" id="calcIn"></div>
+    <div class="calc-out" id="calcOut"></div>
+  </div>
+  <p class="fine">預設的貸款成數、利率、稅費比例都是假設，請用銀行和地政士給的實際條件。</p>
+
+  <!-- ===== 開安親班或才藝班 ===== -->
+  <h2 class="section-heading" id="rules">開安親班或才藝班要過的關</h2>
+  <div class="sec-sub">安親班門檻比才藝班高，200 平方公尺是建築消防的分界</div>
+  <div class="prose">
+    <p>這一節給要開安親班或才藝班的人看。先看客源和同業：</p>
+    <ul>
+      <li>林口國小年齡兒童 2023 年到頂，0 到 5 歲比高峰少 17%。</li>
+      <li>林口立案補習班 180 家，立案的課後照顧中心只有 8 家。</li>
+      <li>每 100 名國小年齡兒童分到的補習班，後段 1.07 家最少，中段 2.04 家最多。</li>
+    </ul>
+  </div>
+  <div class="tbl-wrap"><table class="dt cmp">
+    <thead><tr><th>項目</th><th>安親班（兒童課後照顧服務中心）</th><th>才藝班（短期補習班）</th></tr></thead>
+    <tbody>
+      <tr><td>主管機關</td><td colspan="2">都是新北市教育局</td></tr>
+      <tr><td>樓層</td><td>只能在一至四樓（兒童課後照顧服務班與中心設立及管理辦法第 26 條）</td><td>收未滿六歲的孩子不能在四樓以上（短期補習班設立及管理準則第 12 條）</td></tr>
+      <tr><td>面積</td><td>兒童活動面積 70 平方公尺以上、室內每人 1.5 平方公尺</td><td>教室總面積 30 平方公尺以上、每生 1.2 平方公尺（準則第 12 條），新北市要求班舍 70 平方公尺</td></tr>
+      <tr><td>人員</td><td>每 25 人一位服務人員、要專任主任</td><td>沒有師生比</td></tr>
+      <tr><td>兼營</td><td colspan="2">補習班不得經營安親，要另外立案、場地分開（準則第 38 條）</td></tr>
+      <tr><td>建築使用類別</td><td colspan="2">兩者都是 D-5，一樓店面多是 G-3，原則上要辦變更使用</td></tr>
+      <tr><td>消防</td><td colspan="2">兩者都屬乙類第三目場所（各類場所消防安全設備設置標準第 12 條）</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="prose" style="margin-top:16px">
+    <p><b>200 平方公尺的分界：</b></p>
+    <ul>
+      <li>新北市規定，一樓（可含夾層）或二樓、未滿 200 平方公尺，可以免辦變更使用；補習班不能小於 30 平方公尺。目前查到最新的是 2022 年 9 月版。</li>
+      <li>這份免辦的對照表只列短期補習班，沒有列兒童課後照顧中心；林口第一種住宅區也沒有列。開安親班，或店面在第一種住宅區，要先向工務局確認能不能免辦。</li>
+      <li>補習班班舍 200 平方公尺以上要設防火管理人（準則第 12 條）。</li>
+      <li>免辦變更使用，室內裝修審查仍然要送。300 平方公尺以下審核費 1 萬元、查驗費 1.2 萬元。</li>
+      <li>開班後每年都要做建築物公共安全檢查申報。</li>
+    </ul>
+    <p><b>看店面時先確認：</b></p>
+    <ol>
+      <li>使用執照上這一戶的用途類別，以及面積是否超過 200 平方公尺</li>
+      <li>土地使用分區：可以先看本頁地圖的分區圖層。林口特定區 2016 年版的管制要點規定，第一種住宅區只能開安親班、不能開補習班；之後有沒有修正沒查到，要向城鄉局確認</li>
+      <li>大樓規約有沒有限制補習、安親用途，管委會願不願意配合消防系統併接</li>
+      <li>新隔間的偵煙器、撒水頭要接大樓的消防總機，要管委會提供圖說</li>
+      <li>一樓以外的空間（夾層、二樓）是否合法</li>
+      <li>面積扣掉廁所、辦公室、樓梯後，活動面積是否達標</li>
+      <li>門口能不能讓家長短暫停車接送</li>
+    </ol>
+    <p>業者公開的費用與時間（只能當參考）：立案前期 16 萬～28 萬元，裝潢加消防約 68 萬～73 萬元（以收 50 人為例），整個流程 3～12 個月。</p>
+  </div>
+
+  <!-- ===== 資料來源與限制 ===== -->
+  <h2 class="section-heading" id="sources">資料來源與限制</h2>
+  <ul class="src-list">
+    <li>成交、租賃：內政部實價登錄，成交到 2026-10-14，租賃到 2026-09-30。民國 109 年第 4 季起，買賣紀錄不再標「店面」，本頁用「一樓＋商業用途」認定，會混到少數一樓辦公室。</li>
+    <li>租賃只有經過仲介或代管的案子必須登錄，屋主自己出租的通常不在裡面。</li>
+    <li>掛牌：591，2026-11-18 抓取，出售 275 筆、出租 317 筆。開價不等於成交；出售坪數含車位。</li>
+    <li>內政部最小統計區人口（社會經濟資料服務平台、data.gov.tw，政府資料開放授權條款第 1 版）</li>
+    <li>財政部綜稅村里統計（105～112 年度）</li>
+    <li>新北市公車站位</li>
+    <li>人口：內政部戶政司各里年齡人口。2026 年 7 月林口由 17 里重劃為 21 里，本頁分攤到商圈用的是 2025 年 12 月的 17 里資料。</li>
+    <li>補習班、課後照顧中心：教育部短期補習班資訊管理系統、新北市教育局。</li>
+    <li>商家：財政部全國營業（稅籍）登記、經濟部公司與商業登記清冊。</li>
+    <li>商圈範圍：依房仲與新聞的說法劃分，邊界用 OpenStreetMap 道路與門牌點畫出。</li>
+    <li>土地使用分區圖：新北市政府資料開放平臺「新北市都市計畫土地使用分區及範圍圖」，2026-02-26 版，政府資料開放授權條款第 1 版。</li>
+    <li>法規條文：全國法規資料庫、新北市法規查詢。法規可能修正，簽約前請向主管機關確認。</li>
+  </ul>
+
+  <div class="foot-link"><a href="https://twhousing.investmquest.com/report.html?code=65000170" target="_blank" rel="noopener">林口區完整房市數字</a></div>
+</div>
+
+<footer class="footer">A project by <span>InvestMQuest</span></footer>
+
+<script src="linkou.js?v=20261118d"></script>
+</body>
+</html>
