@@ -159,7 +159,7 @@
 
   function buildMap(D) {
     var map = L.map('map', { preferCanvas: true, scrollWheelZoom: false }).setView([25.075, 121.372], 13);
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> 貢獻者' }).addTo(map);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, referrerPolicy: 'strict-origin', attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> 貢獻者' }).addTo(map);
     map.createPane('pZone').style.zIndex = 305;
     map.createPane('pVill').style.zIndex = 310;
     map.createPane('pArea').style.zIndex = 320;
