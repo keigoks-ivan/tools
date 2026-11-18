@@ -8,6 +8,7 @@
   var query = document.getElementById('question-query');
   var market = document.getElementById('question-market');
   var angle = document.getElementById('question-angle');
+  var level = document.getElementById('question-level');
   var topics = document.getElementById('question-topics');
   var results = document.getElementById('question-results');
   var filters = document.getElementById('question-filters');
@@ -35,6 +36,7 @@
       topic: node.dataset.topic,
       markets: node.dataset.markets.split(' '),
       angle: node.dataset.angle,
+      level: node.dataset.level === 'advanced' ? 'advanced' : 'basic',
       answers: Array.from(node.querySelectorAll('.question-answer')),
       text: normalize(node.textContent + ' ' + node.dataset.search + ' ' +
         node.dataset.markets + ' ' + node.dataset.angle + ' ' + (topicLabels.get(node.dataset.topic) || ''))
@@ -61,13 +63,14 @@
       topic: topic === 'all' || topicLabels.has(topic) ? topic : '',
       market: selectOption(market, params.get('market')),
       angle: selectOption(angle, params.get('angle')),
+      level: selectOption(level, params.get('level')),
       page: Number.isSafeInteger(number) && number > 0 ? number : 1
     };
   }
 
   function syncLocation(action) {
     var params = new URLSearchParams(location.search);
-    ['topic', 'q', 'market', 'angle', 'page'].forEach(function (key) {
+    ['topic', 'q', 'market', 'angle', 'level', 'page'].forEach(function (key) {
       var value = key === 'page' && state.page === 1 ? '' : state[key];
       if (value) params.set(key, value);
       else params.delete(key);
@@ -81,12 +84,13 @@
 
   function render() {
     var words = normalize(state.q).split(/\s+/).filter(Boolean);
-    var filtered = words.length > 0 || state.market !== '' || state.angle !== '';
+    var filtered = words.length > 0 || state.market !== '' || state.angle !== '' || state.level !== '';
     var browsing = !state.topic && !filtered;
     var matched = articles.filter(function (article) {
       return (!state.topic || state.topic === 'all' || article.topic === state.topic) &&
         (!state.market || article.markets.includes(state.market)) &&
         (!state.angle || article.angle === state.angle) &&
+        (!state.level || article.level === state.level) &&
         words.every(function (word) { return article.text.includes(word); });
     });
     var totalPages = Math.max(1, Math.ceil(matched.length / PAGE_SIZE));
@@ -97,6 +101,7 @@
     query.value = state.q;
     market.value = state.market;
     angle.value = state.angle;
+    level.value = state.level;
     topics.hidden = !browsing;
     results.hidden = browsing;
     filters.hidden = browsing;
@@ -132,7 +137,7 @@
     link.addEventListener('click', function (event) {
       if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       event.preventDefault();
-      choose({ topic: link.dataset.topic, q: '', market: '', angle: '' }, 'push', true);
+      choose({ topic: link.dataset.topic, q: '', market: '', angle: '', level: '' }, 'push', true);
     });
   });
 
@@ -147,8 +152,9 @@
   query.addEventListener('compositionend', searchInput);
   market.addEventListener('change', function () { choose({ market: market.value }, 'push'); });
   angle.addEventListener('change', function () { choose({ angle: angle.value }, 'push'); });
+  level.addEventListener('change', function () { choose({ level: level.value }, 'push'); });
   reset.addEventListener('click', function () {
-    choose({ q: '', market: '', angle: '' }, 'push');
+    choose({ q: '', market: '', angle: '', level: '' }, 'push');
     query.focus();
   });
 
