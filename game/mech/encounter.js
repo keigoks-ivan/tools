@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { carGeometry } from './env.js';
 import { instancedCarMaterial } from './car-material.js';
+import { createCampaignSetpiece } from './campaign-setpieces.mjs?v=1';
 
 const rand = (a, b) => a + Math.random() * (b - a);
 const clamp = THREE.MathUtils.clamp;
@@ -40,7 +41,8 @@ export function parse(R, n) {
   const secs = R.secs.map((c, i) => {
     const a = P[c.at - 1], b = P[c.at], d = P[c.at + 1];
     const turn = !!d && Math.abs((b.x - a.x) * (d.z - b.z) - (b.z - a.z) * (d.x - b.x)) > 1;
-    return { i, at: c.at, s: b.s, turn, tip: c.tip, last: i === N - 1, trig: i === N - 1 ? R.fin : 58, pre: L(c.pre), waves: [c.amb, c.amb2, c.amb3].filter(Boolean).map(L),
+    return { i, at: c.at, s: b.s, turn, tip: c.tip, last: i === N - 1, trig: c.operation?.approach ?? (i === N - 1 ? R.fin : 58), pre: L(c.pre), waves: [c.amb, c.amb2, c.amb3].filter(Boolean).map(L),
+      operation: c.operation,
       go: c.go, lines: c.lines, talkClear: c.clear, hold: c.hold, gap: c.gap, waveGap: c.waveGap,
       boss: c.boss ? { ...c.boss, halfWave: L(c.boss.halfWave), lowWave: L(c.boss.lowWave) } : null,
       beats: (c.beats || []).map(b => ({ ...b, spawn: L(b.spawn) })), targets: c.targets };
@@ -304,6 +306,7 @@ export class Encounter {
     this.wp = null; this.ahead = []; this.dist = 0; this.peak = 0;
     this.holdT = 0; this.tg = []; this.bossE = null; this.bossTalk = 0;
     this.fightT = 0; this.beatSeen = new Set();
+    this.operation = null; this.finishedOperation = null;
     C.stats.healed = C.stats.healed || 0;
   }
   get cur() { return this.E.secs[this.sec]; }
@@ -338,9 +341,19 @@ export class Encounter {
     this.updQueue(dt);
     const live = this.alive() + this.queue.length;
     if (live > this.peak) this.peak = live;
+    if (this.state === 'operation') return this.stepOperation(dt);
     if (this.state === 'move') {
       const V = E.pts[c.at];
-      if (this.prog >= c.s - c.trig || Math.hypot(p.x - V.x, p.z - V.z) < c.trig * 0.8) this.ambush(1);
+      if (this.prog >= c.s - c.trig || Math.hypot(p.x - V.x, p.z - V.z) < c.trig * 0.8) {
+        if (c.operation) {
+          this.operation = createCampaignSetpiece(C, c.operation);
+          this.state = 'operation';
+          C.say(c.operation.title, c.tip, 3, 'cy');
+          C.lines(c.lines, true);
+          return this.stepOperation(dt);
+        }
+        this.ambush(1);
+      }
     } else if (this.state === 'fight') {
       this.fightT += dt;
       for (let i = 0; i < c.beats.length; i++) {
@@ -374,6 +387,14 @@ export class Encounter {
     // 目標大樓倒了：提示一次
     for (const t of this.tg) if (!t.told && t.b.st !== 0) { t.told = true; C.note(`${t.name || '目標'} 摧毀　${this.tg.filter((o) => o.b.st !== 0).length}/${this.tg.length}`, 'am'); C.audio.ui('confirm'); }
     return false;
+  }
+  stepOperation(dt) {
+    const operation = this.operation;
+    if (operation.state !== 'done') { operation.update(dt); return false; }
+    this.finishedOperation?.dispose();
+    this.finishedOperation = operation;
+    this.operation = null;
+    return this.clear(this.cur);
   }
   cleared(c) {
     const C = this.C;
@@ -703,13 +724,14 @@ export class Encounter {
       wp = wp || E.pts[c.at];
     }
     const move = this.state === 'move' || this.state === 'idle';
-    this.wp = move && wp ? { x: wp.x, y: w.height(wp.x, wp.z) + 38, z: wp.z } : null;
-    this.dist = c ? Math.max(0, c.s - this.prog) : 0;
+    this.wp = this.operation?.marker || (move && wp ? { x: wp.x, y: w.height(wp.x, wp.z) + 38, z: wp.z } : null);
+    this.dist = this.operation ? C.player.pos.distanceTo(this.wp) : c ? Math.max(0, c.s - this.prog) : 0;
     const A = this.ahead; A.length = 0;
-    if (c && this.state !== 'done') { const q = pointAt(E, this.prog); A.push(q.x, q.z); for (const P of E.pts) if (P.s > this.prog + 1) A.push(P.x, P.z); }
+    if (this.operation) A.push(C.player.pos.x, C.player.pos.z, this.wp.x, this.wp.z);
+    else if (c && this.state !== 'done') { const q = pointAt(E, this.prog); A.push(q.x, q.z); for (const P of E.pts) if (P.s > this.prog + 1) A.push(P.x, P.z); }
     if (this.R) { const on = Math.sin(this.t * 5) > 0; this.R.la.color.setRGB(on ? 6 : 0.3, on ? 0.45 : 0.02, on ? 0.2 : 0.01); this.R.lb.color.setRGB(on ? 0.3 : 6, on ? 0.02 : 0.45, on ? 0.01 : 0.2); }
     if (!B) return;
-    B.a += ((this.wp ? 1 : 0) - B.a) * (1 - Math.exp(-dt * 3));
+    B.a += ((this.wp && !this.operation ? 1 : 0) - B.a) * (1 - Math.exp(-dt * 3));
     if (wp) B.root.position.set(wp.x, w.height(wp.x, wp.z), wp.z);
     const T = this.t;
     B.mat.uniforms.t.value = T; B.mat.uniforms.a.value = B.a;
@@ -727,6 +749,8 @@ export class Encounter {
   }
   dispose() {
     const B = this.B;
+    this.operation?.dispose(); this.finishedOperation?.dispose();
+    this.operation = this.finishedOperation = null;
     this.queue.length = 0; this.warn.length = 0;
     if (!B) return;
     B.a = 0; B.root.visible = false;
