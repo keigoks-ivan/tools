@@ -1,11 +1,12 @@
 import { MECHS, DEFAULT_MECH, mechInfo } from './mech-roster.mjs';
-import { STEP, LIMITS, advancePilot, sanitizeInput } from './rules.mjs';
-import { createArena } from './arena-view.mjs?v=11';
+import { STEP, LIMITS, advancePilot, sanitizeInput } from './rules.mjs?v=12';
+import { createArena } from './arena-view.mjs?v=12';
 import { loadDuelMechArt } from './duel-mech-art.mjs?v=11';
-import { createControls } from './controls.mjs';
+import { createControls } from './controls.mjs?v=12';
 
 const $ = id => document.getElementById(id);
 const canvas = $('arena'), menu = $('menu'), hud = $('hud'), overlay = $('overlay');
+const shieldControl = $('touch-shield'), shieldVital = $('shield-vital'), shieldState = $('shield-state'), shieldMeter = $('shield-meter');
 const query = new URLSearchParams(location.search);
 const loopback = ['localhost', '127.0.0.1', '[::1]'].includes(location.hostname);
 const relay = new URL(loopback ? 'http://127.0.0.1:8791/' : 'https://mech-duel.keigoks.workers.dev/');
@@ -23,6 +24,7 @@ const roomErrors = {
   room_full: '這個房間已有兩位駕駛員。',
   resume_expired: '原本的座位已逾時，請重新加入。',
   replaced: '這個座位已由另一個分頁接管。',
+  update_required: '這場對戰需要新版操作。請重新整理再加入。',
   rate_limit: '連線次數過多，請稍後再試。',
   origin: '此網址無法連上對戰服務。',
   unavailable: '暫時無法建立房間，請再試一次。',
@@ -115,10 +117,11 @@ function playEvent(event) {
   if (!local && event.hit !== seat) return;
   const audio = sound.createOscillator(), volume = sound.createGain(), t = sound.currentTime;
   const kind = event.type;
-  const duration = kind === 'rifle' ? .08 : .23;
-  audio.type = kind === 'rifle' ? 'sawtooth' : kind === 'launch' ? 'triangle' : 'sine';
-  audio.frequency.setValueAtTime(kind === 'rifle' ? 115 : kind === 'launch' ? 320 : 76, t);
-  audio.frequency.exponentialRampToValueAtTime(kind === 'launch' ? 135 : 39, t + duration);
+  const blocked = event.absorbed > 0 && event.hit === seat;
+  const duration = blocked ? .19 : kind === 'rifle' ? .08 : .23;
+  audio.type = blocked ? 'sine' : kind === 'rifle' ? 'sawtooth' : kind === 'launch' ? 'triangle' : 'sine';
+  audio.frequency.setValueAtTime(blocked ? 420 : kind === 'rifle' ? 115 : kind === 'launch' ? 320 : 76, t);
+  audio.frequency.exponentialRampToValueAtTime(blocked ? 172 : kind === 'launch' ? 135 : 39, t + duration);
   volume.gain.setValueAtTime(local ? .064 : .045, t);
   volume.gain.exponentialRampToValueAtTime(.001, t + duration);
   audio.connect(volume); volume.connect(sound.destination);
@@ -189,6 +192,7 @@ function connect(code, retry = false) {
   const url = new URL('ws', relay);
   url.protocol = url.protocol === 'https:' ? 'wss:' : 'ws:';
   url.searchParams.set('room', code);
+  url.searchParams.set('shield', '1');
   const resume = read('sessionStorage', seatKey(code));
   if (resume) url.searchParams.set('resume', resume);
   const ws = new WebSocket(url);
@@ -229,7 +233,7 @@ function connect(code, retry = false) {
       connect(code, true); return;
     }
     if (event.reason in roomErrors || (!resume && seat === null) || retries >= 9) {
-      leave(false, event.reason !== 'replaced');
+      leave(false, event.reason !== 'replaced' && event.reason !== 'update_required', event.reason !== 'update_required');
       announce(roomErrors[event.reason] || '無法連上對戰服務，請檢查網路後再試。', true);
       return;
     }
@@ -361,6 +365,7 @@ function acceptState(next, ack) {
   if (state.phase === 'matchEnd' && !paused) showOverlay('result');
   else if (priorPhase === 'matchEnd' && activeOverlay === 'result') hideOverlay();
   if (first || priorPhase !== next.phase || resuming) refresh();
+  if (first && !next.shieldEnabled) toast('這場沿用原版規則。兩人重新整理後再開一場，就能使用防護罩。');
   priorPhase = next.phase;
   for (const event of next.events) {
     if (event.id <= lastSoundEvent) continue;
@@ -382,6 +387,22 @@ function updateHUD() {
   $('energy').value = p.en; $('energy-label').textContent = Math.floor(p.en) + '%';
   $('ammo').textContent = p.reload ? '換彈中' : p.ammo;
   $('missile').textContent = p.lock >= 1 ? '已鎖定' : p.lock > 0 ? '鎖定中' : p.missileCooldown > 0 ? `${Math.ceil(p.missileCooldown)} 秒` : '就緒';
+  const shieldEnabled = state.shieldEnabled === true, shieldActive = p.shieldHp > 0, cooling = p.shieldCooldown > 0;
+  const shieldReady = shieldEnabled && state.phase === 'fight' && !shieldActive && !cooling;
+  const shieldText = shieldActive ? `${Math.ceil(p.shieldHp * 100 / LIMITS.shieldCapacity)}%`
+    : cooling ? `${Math.ceil(p.shieldCooldown)} 秒` : shieldReady ? '就緒' : '等待';
+  const shieldStatus = shieldActive ? 'active' : cooling ? 'cooling' : shieldReady ? 'ready' : 'waiting';
+  shieldVital.hidden = shieldControl.hidden = !shieldEnabled;
+  if (shieldEnabled) {
+    shieldMeter.value = shieldActive ? p.shieldHp / LIMITS.shieldCapacity : 1 - (p.shieldCooldown || 0) / LIMITS.shieldCooldown;
+    if (shieldVital.dataset.state !== shieldStatus) {
+      shieldVital.dataset.state = shieldControl.dataset.state = shieldStatus;
+      shieldControl.setAttribute('aria-disabled', String(!shieldReady));
+    }
+    if (shieldState.textContent !== shieldText) {
+      shieldState.textContent = shieldControl.lastElementChild.textContent = shieldText;
+    }
+  }
   $('crosshair').classList.toggle('locked', p.lock >= 1);
   $('objective').hidden = !state.objective.open || state.phase !== 'fight';
   $('objective-title').textContent = state.objective.owner === seat ? '正在占領' : state.objective.owner === null ? '爭奪中央中繼台' : '敵機正在占領';
@@ -403,6 +424,7 @@ function displayState(now, dt, input) {
   const blend = a === b ? 1 : Math.max(0,Math.min(1,(t-a.time)/(b.time-a.time)));
   const other = 1 - seat, left = a.state.players[other], right = b.state.players[other];
   const remote = {...right};
+  remote.shieldHp = state.players[other].shieldHp;
   for (const key of ['x','y','z','vx','vy','vz','pitch']) remote[key] = lerp(left[key],right[key],blend);
   remote.yaw = lerpAngle(left.yaw,right.yaw,blend);
   const local = {...predicted};
@@ -417,8 +439,8 @@ function frame(now) {
   requestAnimationFrame(frame);
   if (document.hidden) { lastFrame = now; simBudget = 0; return; }
   const dt = Math.min(.07,(now-(lastFrame || now))/1000); lastFrame = now;
-  const input = controls.sample(dt,now);
   const live = state?.phase === 'fight' && !paused && !activeOverlay;
+  const input = controls.sample(dt,now,live);
   if (live) {
     simBudget = Math.min(.1, simBudget + dt);
     while (simBudget >= STEP) {
@@ -427,7 +449,7 @@ function frame(now) {
       if (transmit({t:'input',seq:seq+1,input:packet})) {
         pending.push({seq:++seq,input:packet}); sentInputAt = now;
         advancePilot(predicted,packet);
-        controls.acknowledgeInput(); input.missileCancel = false;
+        controls.acknowledgeInput(); input.missileCancel = false; input.shield = false;
       }
     }
   } else {

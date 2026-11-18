@@ -4,6 +4,7 @@ import { ARENA } from './arena-layout.mjs';
 export const STEP = 1 / 30;
 export const LIMITS = Object.freeze({
   hp: 9000, energy: 100, magazine: 40, reload: 2, missileCooldown: 7,
+  shieldCapacity: 1500, shieldDuration: 2.5, shieldCooldown: 9,
   roundSeconds: 120, relaySeconds: 30, captureSeconds: 4,
   countdownSeconds: 3, intermissionSeconds: 3, rounds: 3, wins: 2,
 });
@@ -42,6 +43,7 @@ export function sanitizeInput(raw) {
     ascend: raw?.ascend === true, descend: raw?.descend === true,
     boost: raw?.boost === true, fire: raw?.fire === true,
     missile: raw?.missile === true, missileCancel: raw?.missileCancel === true,
+    ...(raw?.shield === true ? { shield: true } : {}),
   };
 }
 
@@ -50,6 +52,7 @@ function createPilot(slot) {
   return {
     x, y: 0, z, yaw, pitch: 0, vx: 0, vy: 0, vz: 0, hp: LIMITS.hp, en: LIMITS.energy,
     ammo: LIMITS.magazine, reload: 0, rifleCooldown: 0, missileCooldown: 0, lock: 0,
+    shieldHp: 0, shieldUntil: 0, shieldReadyAt: 0,
     flying: false, boosting: false, missileHeld: false, overheat: false, recoveryWait: 0,
   };
 }
@@ -186,6 +189,29 @@ function event(match, type, fields) {
   match.events.push({ id: match.nextId++, tick: match.tick, type, ...fields });
 }
 
+function closeShield(pilot, tick) {
+  pilot.shieldHp = 0;
+  pilot.shieldReadyAt = tick + ticks(LIMITS.shieldCooldown);
+}
+
+function stepShield(pilot, tick, activate) {
+  if (pilot.shieldHp > 0 && tick >= pilot.shieldUntil) closeShield(pilot, tick);
+  if (!activate || pilot.hp <= 0 || pilot.shieldHp > 0 || tick < pilot.shieldReadyAt) return;
+  pilot.shieldHp = LIMITS.shieldCapacity;
+  pilot.shieldUntil = tick + ticks(LIMITS.shieldDuration);
+}
+
+function absorbDamage(match, slot, amount, damage) {
+  const pilot = match.players[slot];
+  const absorbed = match.shieldEnabled ? Math.min(amount, pilot.shieldHp) : 0;
+  if (absorbed > 0) {
+    pilot.shieldHp -= absorbed;
+    if (pilot.shieldHp === 0) closeShield(pilot, match.tick);
+  }
+  damage[slot] += amount - absorbed;
+  return absorbed;
+}
+
 function weapons(match, slot, input, damage) {
   const p = match.players[slot], target = match.players[1 - slot];
   p.rifleCooldown = Math.max(0, p.rifleCooldown - STEP);
@@ -206,8 +232,9 @@ function weapons(match, slot, input, damage) {
     p.rifleCooldown = RIFLE_INTERVAL;
     if (p.ammo === 0) p.reload = LIMITS.reload;
     const { distance, struck } = rifleImpact(from, dir, target);
-    if (struck) damage[1 - slot] += Math.round(430 * clamp(1 - (distance - 200) / 700, .55, 1));
-    event(match, 'rifle', { owner: slot, from: posArray(from), to: posArray(pointAt(from, dir, distance)), hit: struck ? 1 - slot : null });
+    const absorbed = struck ? absorbDamage(match, 1 - slot, Math.round(430 * clamp(1 - (distance - 200) / 700, .55, 1)), damage) : 0;
+    event(match, 'rifle', { owner: slot, from: posArray(from), to: posArray(pointAt(from, dir, distance)), hit: struck ? 1 - slot : null,
+      ...(absorbed > 0 ? { absorbed } : {}) });
   }
   if (p.missileCooldown > EPSILON || (!p.missileHeld && !release)) return;
   const course = heading(from, target);
@@ -244,9 +271,10 @@ function moveMissiles(match, damage) {
     Object.assign(missile, pointAt(missile, dir, struck ? hit : stop), {
       vx: dir.x * MISSILE_SPEED, vy: dir.y * MISSILE_SPEED, vz: dir.z * MISSILE_SPEED, life: missile.life - STEP,
     });
-    if (struck) damage[slot] += 1750;
     if (struck || stop < distance || missile.life <= 0) {
-      event(match, 'impact', { owner: missile.owner, at: posArray(missile), hit: struck ? slot : null });
+      const absorbed = struck ? absorbDamage(match, slot, 1750, damage) : 0;
+      event(match, 'impact', { owner: missile.owner, at: posArray(missile), hit: struck ? slot : null,
+        ...(absorbed > 0 ? { absorbed } : {}) });
       match.projectiles.splice(i, 1);
     }
   }
@@ -254,10 +282,10 @@ function moveMissiles(match, damage) {
 
 function emptyObjective() { return { open: false, owner: null, progress: 0 }; }
 
-export function createMatch() {
+export function createMatch({ shieldEnabled = true } = {}) {
   return {
     tick: 0, phase: 'countdown', phaseTicks: ticks(LIMITS.countdownSeconds), round: 1, wins: [0, 0], winner: null,
-    reason: null, players: [createPilot(0), createPilot(1)], projectiles: [], events: [], nextId: 1, objective: emptyObjective(),
+    reason: null, shieldEnabled, players: [createPilot(0), createPilot(1)], projectiles: [], events: [], nextId: 1, objective: emptyObjective(),
   };
 }
 
@@ -318,7 +346,11 @@ export function tickMatch(match, rawInputs = []) {
   }
 
   const damage = [0, 0];
-  for (let slot = 0; slot < 2; slot++) advancePilot(match.players[slot], rawInputs[slot]);
+  for (let slot = 0; slot < 2; slot++) {
+    const pilot = match.players[slot];
+    advancePilot(pilot, rawInputs[slot]);
+    if (match.shieldEnabled) stepShield(pilot, match.tick, rawInputs[slot]?.shield === true);
+  }
   for (let slot = 0; slot < 2; slot++) {
     const input = sanitizeInput(rawInputs[slot]);
     if (rawInputs[slot] == null) input.missileCancel = true;
@@ -338,11 +370,15 @@ export function snapshotMatch(match) {
   return {
     tick: match.tick, phase: match.phase, clock: rounded(match.phaseTicks * STEP), round: match.round,
     wins: match.wins.slice(), winner: match.winner, reason: match.reason,
+    ...(match.shieldEnabled ? { shieldEnabled: true } : {}),
     players: match.players.map(p => ({
       x: rounded(p.x), y: rounded(p.y), z: rounded(p.z), yaw: roundedAngle(p.yaw), pitch: roundedAngle(p.pitch),
       vx: rounded(p.vx), vy: rounded(p.vy), vz: rounded(p.vz), hp: p.hp, en: rounded(p.en), ammo: p.ammo,
       reload: rounded(p.reload), missileCooldown: rounded(p.missileCooldown), lock: rounded(p.lock), flying: p.flying,
       boosting: p.boosting, overheat: p.overheat, recoveryWait: rounded(p.recoveryWait),
+      ...(match.shieldEnabled && match.phase === 'fight' && p.shieldHp > 0 ? { shieldHp: p.shieldHp } : {}),
+      ...(match.shieldEnabled && match.phase === 'fight' && p.shieldReadyAt > match.tick
+        ? { shieldCooldown: rounded((p.shieldReadyAt - match.tick) * STEP) } : {}),
     })),
     projectiles: match.projectiles.map(p => ({ id: p.id, owner: p.owner, x: rounded(p.x), y: rounded(p.y), z: rounded(p.z),
       vx: rounded(p.vx), vy: rounded(p.vy), vz: rounded(p.vz) })),

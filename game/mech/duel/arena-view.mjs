@@ -1,12 +1,14 @@
 import * as THREE from '../../lib/three.module.js';
 import { ARENA } from './arena-layout.mjs';
-import { aimTarget, pilotAim } from './rules.mjs';
+import { aimTarget, LIMITS, pilotAim } from './rules.mjs?v=12';
 import { createDuelMech } from './duel-mech.mjs?v=11';
 import { createArmorSurface } from './duel-mech-art.mjs?v=11';
 import { buildHarbor } from './harbor-view.mjs';
+import { createShieldField } from '../shield-field.mjs';
 
 const team = [new THREE.Color(0x66ddee),new THREE.Color(0xff985e)];
 const impactColor = new THREE.Color(0xffc784);
+const shieldImpact = new THREE.Color(0x72ecff);
 const up=new THREE.Vector3(0,1,0);
 const cover = ARENA.cover.map(({x,z,width,depth,height})=>new THREE.Box3(
   new THREE.Vector3(x-width/2-.62,-1,z-depth/2-.62),new THREE.Vector3(x+width/2+.62,height+.62,z+depth/2+.62),
@@ -60,7 +62,7 @@ function shadowTexture() {
   return texture;
 }
 
-function effectPool(scene) {
+function effectPool(scene, shields) {
   const traces=new THREE.InstancedMesh(new THREE.CylinderGeometry(1,1,1,5),new THREE.MeshBasicMaterial({toneMapped:false}),22);
   const flashes=new THREE.InstancedMesh(new THREE.IcosahedronGeometry(1,0),new THREE.MeshBasicMaterial({toneMapped:false}),18);
   const bolts=new THREE.InstancedMesh(new THREE.ConeGeometry(.63,3.9,6).translate(0,-1.2,0),
@@ -92,11 +94,13 @@ function effectPool(scene) {
       for(const evt of state.events??[]) {
         if(evt.id<=lastEvent) continue;
         lastEvent=evt.id;
+        const shielded = evt.absorbed > 0;
+        if (shielded && shields[evt.hit]?.mesh.visible) shields[evt.hit].hit(a.fromArray(evt.from ?? evt.at));
         if(evt.type==='rifle') {
           trail.push({from:evt.from,to:evt.to,slot:evt.owner,t:.17});
-          if(evt.hit!==null)sparks.push({at:evt.to,t:.24,dur:.24,scale:1.58});
+          if(evt.hit!==null)sparks.push({at:evt.to,t:.24,dur:.24,scale:1.58,shielded});
         }
-        if(evt.type==='impact')sparks.push({at:evt.at,t:.32,dur:.32,scale:3.35});
+        if(evt.type==='impact')sparks.push({at:evt.at,t:.32,dur:.32,scale:3.35,shielded});
       }
     }
     for(let i=trail.length-1;i>=0;i--)if((trail[i].t-=dt)<=0)trail.splice(i,1);
@@ -110,7 +114,7 @@ function effectPool(scene) {
     for(let i=0;i<flashes.count;i++){
       const p=sparks[sparks.length-flashes.count+i], pulse=Math.sin(Math.PI*(1-p.t/p.dur))*.73+.27;
       object.position.fromArray(p.at);object.rotation.set(.524,.3,0);object.scale.setScalar(p.scale*pulse);
-      object.updateMatrix();flashes.setMatrixAt(i,object.matrix);flashes.setColorAt(i,impactColor);
+      object.updateMatrix();flashes.setMatrixAt(i,object.matrix);flashes.setColorAt(i,p.shielded?shieldImpact:impactColor);
     }
     const missiles=state?.projectiles??[];
     bolts.count=ribbons.count=Math.min(bolts.instanceMatrix.count,missiles.length);
@@ -139,6 +143,11 @@ export function createArena(canvas, art = null) {
   const relay=relayMarker();scene.add(relay.g);
   const armorSurface=art ? createArmorSurface(renderer,scene) : null;
   const vehicles=[createDuelMech(0,art,armorSurface,contactGround),createDuelMech(1,art,armorSurface,contactGround)];
+  const shields = vehicles.map(({root}) => {
+    const shield = createShieldField();
+    root.add(shield.mesh);
+    return shield;
+  });
   const shadowGe=new THREE.PlaneGeometry(1,1).rotateX(-Math.PI/2), shadowTex=shadowTexture();
   const shadows=vehicles.map(({root})=>{
     const marker=new THREE.Mesh(shadowGe,new THREE.MeshBasicMaterial({
@@ -146,7 +155,7 @@ export function createArena(canvas, art = null) {
     }));
     marker.renderOrder=1;scene.add(root,marker);return marker;
   });
-  const fx=effectPool(scene);
+  const fx=effectPool(scene,shields);
   const aimPoint={x:.5,y:.5,visible:false};
   const center=new THREE.Vector3(), dir=new THREE.Vector3(), horizontal=new THREE.Vector3(), target=new THREE.Vector3();
   const follow=new THREE.Vector3(), collision=new THREE.Vector3(), tmp=new THREE.Vector3(), cameraRay=new THREE.Ray();
@@ -187,6 +196,8 @@ export function createArena(canvas, art = null) {
       if(!pilot)continue;
       const vehicle=vehicles[i], shadow=shadows[i];
       vehicle.pose(pilot,dt);
+      const shieldHp = pilot.shieldHp || 0;
+      shields[i].update(dt, shieldHp > 0, shieldHp / LIMITS.shieldCapacity);
       const floor=contactGround(pilot.x,pilot.y,pilot.z), altitude=pilot.y-floor;
       shadow.visible=altitude>.35;
       shadow.material.opacity=.16/(1+altitude*.062);

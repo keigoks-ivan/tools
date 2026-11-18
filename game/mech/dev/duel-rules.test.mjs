@@ -22,11 +22,11 @@ const openLane = (match, left = -40, right = 40) => {
 
 test('countdown freezes controls; packets carry bounded axes and actions only', () => {
   const match = createMatch();
-  assert.deepEqual(sanitizeInput({mx: 15, mz: -.5, yaw: Infinity, pitch: -9, boost: true, fire: 'true', missile: 1, hp: 0}), {
+  assert.deepEqual(sanitizeInput({mx: 15, mz: -.5, yaw: Infinity, pitch: -9, boost: true, fire: 'true', missile: 1, shield: 1, hp: 0}), {
     mx: 1, mz: -.5, yaw: null, pitch: -1.38, ascend: false, descend: false,
     boost: true, fire: false, missile: false, missileCancel: false,
   });
-  span(match, LIMITS.countdownSeconds, [{...forward, fire: true, boost: true, ascend: true}]);
+  span(match, LIMITS.countdownSeconds, [{...forward, fire: true, boost: true, ascend: true, shield: true}]);
   const state = snapshotMatch(match);
   assert.equal(state.phase, 'fight');
   assert.equal(state.clock, LIMITS.roundSeconds);
@@ -34,6 +34,7 @@ test('countdown freezes controls; packets carry bounded axes and actions only', 
   assert.equal(state.players[0].y, 0);
   assert.equal(state.players[0].ammo, LIMITS.magazine);
   assert.equal(state.players[0].en, LIMITS.energy);
+  assert.equal(state.players[0].shieldHp, undefined);
 });
 
 test('ground movement slides against cover, flight clears it and lands on the actual roof', () => {
@@ -114,6 +115,44 @@ test('rifle can hit across altitudes when the pilot really aims at the target', 
   assert.equal(opponent.hp, LIMITS.hp - 430);
 });
 
+test('shields apply to both pilots before either rifle hits and only overflow reaches armor', () => {
+  const match = fighting();
+  openLane(match);
+  const input = { fire: true, shield: true };
+  tickMatch(match, [input, input]);
+  const [a, b] = match.players;
+  assert.equal(a.hp, LIMITS.hp);
+  assert.equal(b.hp, LIMITS.hp);
+  assert.deepEqual(match.events.slice(-2).map(e => [e.hit, e.absorbed]), [[1, 430], [0, 430]]);
+  assert.deepEqual(snapshotMatch(match).players.map(p => p.shieldHp), [1070, 1070]);
+  span(match, .9, [{ fire: true }, { fire: true }]);
+  assert.deepEqual(match.players.map(p => p.hp), [LIMITS.hp - 220, LIMITS.hp - 220]);
+  assert(match.players.every(p => p.shieldHp === 0));
+  assert.deepEqual(match.events.slice(-2).map(e => e.absorbed), [210, 210]);
+  tickMatch(match, [{ shield: true }, { shield: true }]);
+  assert(snapshotMatch(match).players.every(p => p.shieldCooldown > 8));
+});
+
+test('shield expires, recharges on the server clock and stays unavailable in legacy matches', () => {
+  const match = fighting();
+  tickMatch(match, [{ shield: true }]);
+  span(match, LIMITS.shieldDuration - STEP);
+  assert.equal(snapshotMatch(match).players[0].shieldHp, LIMITS.shieldCapacity);
+  tickMatch(match);
+  assert.equal(snapshotMatch(match).players[0].shieldHp, undefined);
+  assert.equal(snapshotMatch(match).players[0].shieldCooldown, LIMITS.shieldCooldown);
+  span(match, LIMITS.shieldCooldown - STEP);
+  tickMatch(match, [{ shield: true }]);
+  assert.equal(snapshotMatch(match).players[0].shieldHp, LIMITS.shieldCapacity);
+
+  const legacy = createMatch({ shieldEnabled: false });
+  span(legacy, LIMITS.countdownSeconds);
+  openLane(legacy);
+  tickMatch(legacy, [{ shield: true }, { fire: true, shield: true }]);
+  assert.equal(legacy.players[0].hp, LIMITS.hp - 430);
+  assert.equal(snapshotMatch(legacy).shieldEnabled, undefined);
+});
+
 test('missile requires sight and deliberate release; blur or missing input cancels a lock', () => {
   const match = fighting();
   span(match, .8, [{missile: true}]);
@@ -142,6 +181,18 @@ test('missile requires sight and deliberate release; blur or missing input cance
   assert.equal(match.projectiles.length, 0);
   assert.equal(match.players[1].hp, LIMITS.hp - 1750);
   assert.equal(match.events.at(-1).hit, 1);
+});
+
+test('a shield absorbs missile damage during flight and the remaining damage carries through', () => {
+  const match = fighting();
+  openLane(match);
+  for (const p of match.players) Object.assign(p, { y: 24, flying: true });
+  span(match, .6, [{ missile: true }]);
+  tickMatch(match, [{}, { shield: true }]);
+  span(match, .6);
+  assert.equal(match.players[1].hp, LIMITS.hp - 250);
+  assert.equal(match.events.at(-1).absorbed, LIMITS.shieldCapacity);
+  assert(snapshotMatch(match).players[1].shieldCooldown > 0);
 });
 
 test('cover destroys a live guided missile when the defender breaks behind a stack', () => {

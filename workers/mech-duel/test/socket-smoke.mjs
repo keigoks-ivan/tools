@@ -17,10 +17,11 @@ async function wait(read, until, label, timeout = 5000) {
   throw new Error(`等待逾時：${label}`);
 }
 
-function connect(room, resume) {
+function connect(room, resume, shield = true) {
   const url = new URL(base.replace(/^http/, 'ws') + '/ws');
   url.searchParams.set('room', room);
   if (resume) url.searchParams.set('resume', resume);
+  if (shield) url.searchParams.set('shield', '1');
   const socket = new WebSocket(url, { headers: { Origin: origin } });
   const client = { socket, status: null, welcome: null, state: null, close: null, seq: 0 };
   peers.push(client);
@@ -76,6 +77,15 @@ try {
   await wait(() => second.state, s => s?.state.phase === 'fight', '第二位同步開局');
   assert.deepEqual(first.state.state.mechs,['bailu','tiechao']);
   assert(first.state.state.players.every(p=>p.hp===9000&&p.ammo===40));
+  assert.equal(first.state.state.shieldEnabled, true);
+  first.input({shield:true}); first.input({});
+  second.input({shield:true}); second.input({});
+  for (const client of [first, second]) {
+    await wait(() => client.state, s => s?.state.players.every(p => p.shieldHp === 1500), '兩邊剛點就放也能開罩');
+  }
+  await expectClose(connect(room, b.resume, false), 'update_required');
+  assert.equal(second.close, null);
+  console.log('PASS 雙方同步防護罩、快速點擊保留、舊版重連不會接管正在對戰的座位');
   second.send({t:'mech',id:'cangyan'});
   await sleep(100);
   assert.deepEqual(second.state.state.mechs,['bailu','tiechao']);
@@ -134,10 +144,17 @@ try {
   console.log('PASS 真實伺服器步槍命中、雙方勝負一致、雙方同意後重新開戰');
   rejoin.send({ t: 'leave' });
   assert.deepEqual(await wait(() => rejoin.close, Boolean, '主動離開'), { code: 1000, reason: 'left' });
-  const replacement = connect(room);
+  const replacement = connect(room, null, false);
   assert.equal((await wait(() => replacement.welcome, Boolean, '新的玩家加入')).slot, 1);
   assert.equal(replacement.state, null);
   console.log('PASS 主動離開後座位可立即讓新對手加入');
+  first.send({t:'ready',value:true}); replacement.send({t:'ready',value:true});
+  await wait(() => first.state, s => s?.state.phase === 'fight', '新舊兩台同步開局');
+  assert.equal(first.state.state.shieldEnabled, undefined);
+  first.input({shield:true});
+  await wait(() => first.state, s => s?.ack === first.seq - 1, '收到舊版對局的防護罩按鍵');
+  assert.equal(first.state.state.players[0].shieldHp, undefined);
+  console.log('PASS 新舊客戶端同場時雙方採用相同的舊版規則');
 } finally {
   for (const { socket } of peers) if (socket.readyState < WebSocket.CLOSING) socket.close();
 }

@@ -60,6 +60,7 @@ export default {
       if (resume !== null && !validResumeToken(resume)) return rejectSocket('resume_expired');
       const internal = new URL('https://room.internal/socket');
       if (resume) internal.searchParams.set('resume', resume);
+      if (url.searchParams.get('shield') === '1') internal.searchParams.set('shield', '1');
       return env.ROOMS.getByName(room).fetch(new Request(internal, { headers: { Upgrade: 'websocket' } }));
     }
     return json({ error: 'not_found' }, 404, cors(origin));
@@ -173,6 +174,8 @@ export class DuelRoom extends DurableObject {
     const { slots, room } = this.record;
     const slot = slots.findIndex(seat => token ? seat?.resume === token : seat === null);
     if (slot < 0) return rejectSocket(token ? 'resume_expired' : 'room_full');
+    const shield = url.searchParams.get('shield') === '1';
+    if (!shield && this.playing && this.record.match.shieldEnabled) return rejectSocket('update_required');
     const old = this.peers[slot];
     if (old) {
       old.serializeAttachment(null);
@@ -186,7 +189,7 @@ export class DuelRoom extends DurableObject {
     const pair = new WebSocketPair();
     this.peers[slot] = pair[1];
     this.ctx.acceptWebSocket(pair[1]);
-    pair[1].serializeAttachment({ slot });
+    pair[1].serializeAttachment({ slot, shield });
     this.send(pair[1], { t: 'welcome', slot, room, resume: seat.resume, ack: seat.ack, ...this.status() });
     this.broadcast({ t: 'room', ...this.status() });
     if (this.record.match) this.snapshots();
@@ -213,7 +216,10 @@ export class DuelRoom extends DurableObject {
     if (packet.t === 'input') {
       if (!this.playing || packet.seq <= seat.ack) return;
       seat.ack = packet.seq;
-      this.input[slot] = { value: sanitizeInput(packet.input), until: now + INPUT_TIMEOUT };
+      const value = sanitizeInput(packet.input), previous = this.input[slot];
+      if (match.phase !== 'fight' || !match.shieldEnabled) delete value.shield;
+      else if (previous?.until > now && previous.value.shield) value.shield = true;
+      this.input[slot] = { value, until: now + INPUT_TIMEOUT };
       return;
     }
     if (packet.t === 'mech') {
@@ -235,7 +241,8 @@ export class DuelRoom extends DurableObject {
   }
 
   beginMatch() {
-    this.record.match = createMatch();
+    const shieldEnabled = this.peers.every(ws => ws.deserializeAttachment()?.shield === true);
+    this.record.match = createMatch({ shieldEnabled });
     this.record.slots.forEach(seat => { seat.ready = false; });
     this.input = [null, null];
     this.broadcast({ t: 'room', ...this.status() });
@@ -270,6 +277,7 @@ export class DuelRoom extends DurableObject {
     // Keep a short, bounded catch-up after a late timer and send one state.
     while (this.nextTick <= now + 1 && this.playing && count < 4) {
       tickMatch(match, input);
+      for (const value of input) if (value?.shield) delete value.shield;
       this.nextTick += TICK_MS;
       count++;
     }

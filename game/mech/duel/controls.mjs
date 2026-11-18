@@ -1,11 +1,12 @@
 const clamp = (value, low, high) => Math.max(low, Math.min(high, value));
 const axis = value => Math.abs(value) > .16 ? Math.sign(value) * ((Math.abs(value) - .16) / .84) ** 1.55 : 0;
-const driveKeys = new Set(['KeyW', 'KeyA', 'KeyS', 'KeyD', 'Space', 'KeyC', 'ControlLeft', 'ShiftLeft', 'ShiftRight', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown']);
+const driveKeys = new Set(['KeyW', 'KeyA', 'KeyS', 'KeyD', 'KeyF', 'Space', 'KeyC', 'ControlLeft', 'ShiftLeft', 'ShiftRight', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown']);
 
 export function createControls(canvas, nodes, {onMode, onEscape}) {
   const keys = new Set(), fingers = new Map();
   let driving = false, yaw = 0, pitch = 0, mode = matchMedia('(pointer: coarse)').matches ? 'touch' : 'mouse';
   let drag = null, mouse = 0, missileCancel = false, seenPad = false, padUsed = false, padId = -1;
+  let shieldTap = false, padShieldHeld = false;
   let menuSignal = '', menuNext = 0;
   const pressed = (pad, index) => (pad.buttons[index]?.value || 0) > .35;
   const sayMode = value => { if (value !== mode) { mode = value; onMode(value); } };
@@ -14,7 +15,7 @@ export function createControls(canvas, nodes, {onMode, onEscape}) {
     pitch = clamp(pitch - dy, -1.18, 1.18);
   };
   function cancel() {
-    keys.clear(); mouse = 0; drag = null;
+    keys.clear(); mouse = 0; drag = null; shieldTap = false;
     for (const finger of fingers.values()) finger.target.removeAttribute('data-held');
     fingers.clear(); nodes.move.firstElementChild.style.transform = '';
     missileCancel = true;
@@ -25,6 +26,7 @@ export function createControls(canvas, nodes, {onMode, onEscape}) {
   addEventListener('keydown', event => {
     if (event.code === 'Escape' && !event.repeat) onEscape();
     if (!driving || !driveKeys.has(event.code) || event.target.closest?.('button,input,a,summary')) return;
+    if (event.code === 'KeyF' && !event.repeat) shieldTap = true;
     sayMode('mouse'); keys.add(event.code); event.preventDefault();
   });
   addEventListener('keyup', event => keys.delete(event.code));
@@ -79,11 +81,13 @@ export function createControls(canvas, nodes, {onMode, onEscape}) {
   function bindFinger(target, action) {
     target.addEventListener('pointerdown', event => {
       if (event.pointerType !== 'touch' || !driving || [...fingers.values()].some(finger => finger.action === action)) return;
+      if (action === 'shield' && target.getAttribute('aria-disabled') === 'true') return;
       sayMode('touch');
       const finger = {target, action, x: event.clientX, y: event.clientY};
       fingers.set(event.pointerId, finger);
       target.setPointerCapture?.(event.pointerId);
       target.setAttribute('data-held', '');
+      if (action === 'shield') shieldTap = true;
       moveFinger(finger, event);
       event.preventDefault();
     });
@@ -135,9 +139,13 @@ export function createControls(canvas, nodes, {onMode, onEscape}) {
       if (!driving && document.pointerLockElement === canvas) document.exitPointerLock();
     },
     setAim(a, b) { yaw = a; pitch = b; },
-    sample(dt, now) {
+    sample(dt, now, live) {
       const pads = typeof navigator.getGamepads === 'function' ? [...navigator.getGamepads()] : [];
       const pad = pads.find(p => p && p.index === padId) || pads.find(p => p?.connected && p.buttons.length >= 8);
+      const padShield = Boolean(pad && pressed(pad, 3));
+      if (!live) shieldTap = false;
+      else if (driving && padShield && !padShieldHeld) shieldTap = true;
+      padShieldHeld = padShield;
       let padX = 0, padZ = 0;
       if (pad) {
         padId = pad.index; seenPad = true;
@@ -165,6 +173,7 @@ export function createControls(canvas, nodes, {onMode, onEscape}) {
         boost: down('ShiftLeft', 10, 'boost') || keys.has('ShiftRight'),
         fire: down('', 7, 'fire') || Boolean(mouse & 1),
         missile: down('', 6, 'missile') || Boolean(mouse & 2),
+        shield: shieldTap,
         missileCancel,
       };
       if (driving && mode === 'mouse') {
@@ -174,6 +183,6 @@ export function createControls(canvas, nodes, {onMode, onEscape}) {
       }
       return input;
     },
-    acknowledgeInput() { missileCancel = false; },
+    acknowledgeInput() { missileCancel = false; shieldTap = false; },
   };
 }

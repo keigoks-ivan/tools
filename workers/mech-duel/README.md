@@ -28,6 +28,8 @@ WebSocket 連上後，`welcome` 提供座位 `slot`、重連金鑰 `resume`、�
 
 有玩家離線時，戰鬥時間暫停，保留原座位 45 秒。逾時後 `{t:"aborted",reason:"disconnect"}` 會把仍在房間的玩家帶回大廳。主動傳送 `{t:"leave"}` 會立即釋出座位。房間大廳閒置 20 分鐘後到期。
 
+兩端都用 `/ws` 的 `shield=1` 宣告支援防護罩，新對局的 `state.shieldEnabled` 才會為 `true`。輸入 `shield:true` 代表一次按下，剩餘吸收量 `shieldHp` 和冷卻秒數 `shieldCooldown` 由伺服器提供。舊客戶端可繼續玩原規則的對局。
+
 ## 部署
 
 使用 `wrangler deploy --config workers/mech-duel/wrangler.toml` 部署獨立 Worker。正式前端透過 `https://mech-duel.keigoks.workers.dev` 連線，前端網域需列在 `ALLOWED_ORIGINS`。等待、結束或暫停時房間可休眠，對局開始後才持續執行。容量與成本依實測的並發房間數與狀態流量估算。

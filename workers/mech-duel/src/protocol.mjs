@@ -11,6 +11,7 @@ export const CLOSE = {
   resume_expired: 4410,
   replaced: 4411,
   room_expired: 4412,
+  update_required: 4413,
   rate_limit: 4429,
 };
 
