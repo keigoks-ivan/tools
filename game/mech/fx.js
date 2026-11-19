@@ -759,7 +759,7 @@ export class FX {
         this._spike(x, y, z, d[0] * l, d[1] * l, d[2] * l, 0.22, 1, 0.62, 0.25, 10, 0.04);
       }
       if (Math.random() < 0.7) {
-        const i = this._smoke(x + dx, y + dy, z + dz, dx * rr(4, 8) + rr(-0.5, 0.5), dy * 5 + 0.6, dz * rr(4, 8) + rr(-0.5, 0.5), rr(0.8, 1.2), 0.45, rr(1.8, 2.6), 0.28, 0.42, 0.41, 0.4);
+        const i = this._smoke(x + dx, y + dy, z + dz, dx * rr(4, 8) + rr(-0.5, 0.5), dy * 5 + 0.6, dz * rr(4, 8) + rr(-0.5, 0.5), rr(0.6, 0.9), 0.35, rr(1.3, 1.9), 0.2, 0.42, 0.41, 0.4);
         if (i >= 0) { this.V.drag[i] = 3; this.V.rise[i] = 0.8; this.V.cell[i] = 7; }
       }
     } else if (kind === 'cannon') {
@@ -776,7 +776,7 @@ export class FX {
         const i = this._flame(x, y, z, dx * sp + rr(-2, 2), dy * sp + rr(-2, 2), dz * sp + rr(-2, 2), rr(0.7, 1.2), 1.0, rr(0.14, 0.22));
         if (i >= 0) { this.V.dragB[i] = 8; this.V.cell[i] = 4.5; this.V.asp[i] = 1; this.V.fin[i] = 0; this.V.fout[i] = 0.2; }
       }
-      const n = Math.round(12 * (0.5 + 0.5 * qn));
+      const n = Math.round(7 * (0.5 + 0.5 * qn));
       for (let k = 0; k < n; k++) {
         let vx, vy, vz;
         if (k & 1) { this._cone(dx, dy, dz, 0.35); const sp = rr(8, 30), d = this._d; vx = d[0] * sp; vy = d[1] * sp; vz = d[2] * sp; }
@@ -785,16 +785,16 @@ export class FX {
           vx = sx * sp + dx * 3; vy = rr(0, 2); vz = sz * sp + dz * 3;
         }
         const br = rr(0.9, 1.05);
-        const i = this._smoke(x, y, z, vx, vy, vz, rr(2.2, 3.8), rr(0.8, 1.2), rr(3.5, 6), 0.42, 0.44 * br, 0.43 * br, 0.41 * br);
+        const i = this._smoke(x, y, z, vx, vy, vz, rr(1.3, 2.2), rr(0.6, 0.9), rr(2.3, 3.8), 0.28, 0.44 * br, 0.43 * br, 0.41 * br);
         if (i >= 0) { const V = this.V; V.dragB[i] = 3; V.drag[i] = 0.8; V.rise[i] = 0.8; V.glow[i] = 2; V.glowK[i] = 8; V.cell[i] = (k % 3 === 0) ? 7 : (Math.random() * 4) | 0; V.erode[i] = 0.6; }
       }
       this._flash(x + dx * 3, y + dy * 3, z + dz * 3, 0.45);
     } else { // missile
       this._glow(x, y, z, 2.2, 1, 0.7, 0.4, 8, 0.1, 1.5);
-      const n = Math.round(8 * (0.5 + 0.5 * qn));
+      const n = Math.round(5 * (0.5 + 0.5 * qn));
       for (let k = 0; k < n; k++) {
         const sp = rr(6, 20);
-        const i = this._smoke(x, y, z, -dx * sp + rr(-3, 3), -dy * sp + rr(-2, 3), -dz * sp + rr(-3, 3), rr(1.8, 3), rr(0.8, 1.2), rr(4, 6.5), 0.5, 0.55, 0.55, 0.53);
+        const i = this._smoke(x, y, z, -dx * sp + rr(-3, 3), -dy * sp + rr(-2, 3), -dz * sp + rr(-3, 3), rr(1.1, 1.8), rr(0.6, 0.9), rr(2.4, 3.8), 0.3, 0.55, 0.55, 0.53);
         if (i >= 0) { this.V.dragB[i] = 2.5; this.V.drag[i] = 0.9; this.V.rise[i] = 0.7; this.V.glow[i] = 2.5; this.V.glowK[i] = 6; }
       }
       for (let k = 0; k < 3; k++) {
@@ -826,21 +826,21 @@ export class FX {
         if (i >= 0) { V.cell[i] = 4.5; V.asp[i] = 1; V.s1[i] = rr(1.6, 2.2); V.dragB[i] = 4; }
       }
       for (let k = 0; k < 2; k++) {
-        const i = this._smoke(x + nx * 0.6, y + ny * 0.6, z + nz * 0.6, nx * 2 + rr(-0.6, 0.6), ny * 2 + 1.2, nz * 2 + rr(-0.6, 0.6), rr(1.6, 2.6), rr(0.5, 0.8), rr(3, 4.5), 0.5, 0.07, 0.065, 0.06);
+        const i = this._smoke(x + nx * 0.6, y + ny * 0.6, z + nz * 0.6, nx * 2 + rr(-0.6, 0.6), ny * 2 + 1.2, nz * 2 + rr(-0.6, 0.6), rr(1.1, 1.8), rr(0.4, 0.65), rr(2.1, 3.1), 0.32, 0.07, 0.065, 0.06);
         if (i >= 0) { V.rise[i] = 1.8; V.drag[i] = 1.5; V.glow[i] = 1.5; V.glowK[i] = 4; V.erode[i] = 0.65; }
       }
     } else if (kind === 'ground') {
-      const n = Math.round(9 * qn) + 4;
+      const n = Math.round(6 * qn) + 3;
       for (let k = 0; k < n; k++) {
         this._cone(nx * 0.7, ny * 0.7 + 0.5, nz * 0.7, 0.55);
         const sp = rr(6, 20);
         const br = rr(0.8, 1.2);
-        const i = this._smoke(x + rr(-0.5, 0.5), y + 0.3, z + rr(-0.5, 0.5), d[0] * sp, d[1] * sp, d[2] * sp, rr(1.3, 2.4), rr(0.6, 1.1), rr(3, 5.5), 0.75, 0.2 * br, 0.16 * br, 0.12 * br);
+        const i = this._smoke(x + rr(-0.5, 0.5), y + 0.3, z + rr(-0.5, 0.5), d[0] * sp, d[1] * sp, d[2] * sp, rr(0.9, 1.7), rr(0.5, 0.8), rr(2.1, 3.6), 0.43, 0.2 * br, 0.16 * br, 0.12 * br);
         if (i >= 0) { V.grav[i] = 6; V.drag[i] = 1.2; V.rise[i] = 0; V.cell[i] = Math.random() < 0.5 ? 7 : 6; V.gy[i] = gy; V.flags[i] |= F_GROUND; V.erode[i] = 0.6; V.fout[i] = 0.35; }
       }
       for (let k = 0; k < 4; k++) {
         const a = Math.random() * 6.283, sp = rr(1.5, 4);
-        const i = this._smoke(x, gy + 0.6, z, Math.cos(a) * sp, rr(0.5, 1.5), Math.sin(a) * sp, rr(3, 5), rr(1.2, 2), rr(5, 8), 0.34, 0.3, 0.26, 0.21);
+        const i = this._smoke(x, gy + 0.6, z, Math.cos(a) * sp, rr(0.5, 1.5), Math.sin(a) * sp, rr(1.6, 2.6), rr(0.8, 1.4), rr(3.2, 5.2), 0.22, 0.3, 0.26, 0.21);
         if (i >= 0) { V.rise[i] = 0.3; V.drag[i] = 1.4; V.cell[i] = 6; V.gy[i] = gy; V.flags[i] |= F_GROUND; }
       }
       const m = Math.round(18 * qn) + 5;
@@ -850,12 +850,12 @@ export class FX {
         this._debris(x, y + 0.2, z, d[0] * sp, d[1] * sp, d[2] * sp, rr(1.2, 2.2), rr(0.05, 0.14), 0.13, 0.105, 0.08, 0);
       }
     } else if (kind === 'building') {
-      const n = Math.round(8 * qn) + 4;
+      const n = Math.round(5 * qn) + 3;
       for (let k = 0; k < n; k++) {
         this._cone(nx, ny, nz, 0.7);
         const sp = rr(2.5, 10);
         const br = rr(0.9, 1.1);
-        const i = this._smoke(x + nx * 0.5, y + ny * 0.5, z + nz * 0.5, d[0] * sp, d[1] * sp + 0.5, d[2] * sp, rr(2.5, 4.5), rr(0.9, 1.5), rr(5, 9), 0.6, 0.42 * br, 0.4 * br, 0.37 * br);
+        const i = this._smoke(x + nx * 0.5, y + ny * 0.5, z + nz * 0.5, d[0] * sp, d[1] * sp + 0.5, d[2] * sp, rr(1.5, 2.6), rr(0.7, 1.1), rr(3.2, 5.5), 0.38, 0.42 * br, 0.4 * br, 0.37 * br);
         if (i >= 0) { V.drag[i] = 1.6; V.grav[i] = 0.6; V.rise[i] = -0.3; V.cell[i] = [6, 7, 0, 2][k & 3]; V.gy[i] = gy; V.erode[i] = 0.55; }
       }
       const m = Math.round(12 * qn) + 4;
@@ -1129,7 +1129,7 @@ export class FX {
 
   trail(pos) {
     const V = this.V;
-    const i = this._smoke(pos.x + rr(-0.3, 0.3), pos.y + rr(-0.3, 0.3), pos.z + rr(-0.3, 0.3), rr(-0.5, 0.5), 1, rr(-0.5, 0.5), rr(1.8, 2.8), rr(0.8, 1.4), rr(3.5, 5.5), 0.55, 0.08, 0.075, 0.07);
+    const i = this._smoke(pos.x + rr(-0.3, 0.3), pos.y + rr(-0.3, 0.3), pos.z + rr(-0.3, 0.3), rr(-0.5, 0.5), 1, rr(-0.5, 0.5), rr(1.1, 1.8), rr(0.6, 1), rr(2.2, 3.5), 0.34, 0.08, 0.075, 0.07);
     if (i >= 0) { V.rise[i] = 1.8; V.drag[i] = 1.2; V.wf[i] = 0.8; V.erode[i] = 0.6; }
   }
 
@@ -1426,7 +1426,7 @@ export class FX {
     this._glow(x, y + R * 0.3, z, D * 1.5, 1, 0.52, 0.22, secondary ? 0.4 : 0.7, 0.3, 1.5);
     this._flash(x, y + R * 0.7 + 2, z, secondary ? s * 0.8 : s);
     // 火球：一開始白熱、急速膨脹，冷卻後變成翻滾上升的黑煙
-    const nF = Math.round((10 + 12 * s) * (0.55 + 0.45 * qn));
+    const nF = Math.round((8 + 8 * s) * (0.55 + 0.45 * qn));
     for (let k = 0; k < nF; k++) {
       this._cone(0, 0, 0, 1);
       let dx = d[0], dy = d[1], dz = d[2];
@@ -1437,13 +1437,13 @@ export class FX {
       const sp = R * rr(4, 8);
       V.x[i] = x + dx * off; V.y[i] = Math.max(y + dy * off, gy + R * 0.25); V.z[i] = z + dz * off;
       V.vx[i] = dx * sp; V.vy[i] = dy * sp; V.vz[i] = dz * sp;
-      V.life[i] = (2.5 + 3.5 * s) * rr(0.8, 1.25);
-      V.s0[i] = R * rr(0.3, 0.45); V.s1[i] = R * rr(0.75, 1.1); V.sk[i] = rr(5, 8); V.grow[i] = R * rr(0.05, 0.1);
+      V.life[i] = (1.5 + 1.8 * s) * rr(0.8, 1.2);
+      V.s0[i] = R * rr(0.26, 0.40); V.s1[i] = R * rr(0.48, 0.74); V.sk[i] = rr(5, 8); V.grow[i] = R * rr(0.025, 0.05);
       const inner = 1 - off / (R * 0.3);
       V.temp[i] = rr(0.85, 1.0) + 0.1 * inner; V.hold[i] = rr(0.03, 0.1) * Math.sqrt(s);
       V.cool[i] = rr(1.4, 2.0) / (0.3 + 0.3 * s) * (1.2 - 0.4 * inner);
       V.drag[i] = rr(0.5, 0.9); V.dragB[i] = 9; V.rise[i] = rr(1, 2.5) + 0.8 * s; V.buoy[i] = 1.5 * s; V.wf[i] = 0.6;
-      V.a0[i] = rr(0.8, 0.95); V.fin[i] = 0; V.fout[i] = 0.5; V.erode[i] = 0.7;
+      V.a0[i] = rr(0.7, 0.85); V.fin[i] = 0; V.fout[i] = 0.32; V.erode[i] = 0.7;
       const c = rr(0.03, 0.05);
       V.r[i] = c * 1.1; V.g[i] = c; V.b[i] = c * 0.9; V.lit[i] = 1.5;
       V.glow[i] = 2; V.glowK[i] = 2 / Math.sqrt(s);
@@ -1455,21 +1455,21 @@ export class FX {
     }
     // 地面衝擊波塵環
     if (nearG && s >= 0.8) {
-      const nR = Math.round((12 + 14 * s) * (0.5 + 0.5 * qn));
+      const nR = Math.round((8 + 9 * s) * (0.5 + 0.5 * qn));
       const sp = 16 + 16 * s;
       for (let k = 0; k < nR; k++) {
         const a = (k / nR) * 6.2832 + rr(-0.12, 0.12), ca = Math.cos(a), sa = Math.sin(a);
         const br = rr(0.85, 1.1);
         const i = this._smoke(x + ca * R * 0.4, gy + 0.5, z + sa * R * 0.4, ca * sp * rr(0.7, 1.1), rr(0.5, 2), sa * sp * rr(0.7, 1.1),
-          rr(2.5, 4) * (0.7 + 0.3 * s), 1.5 * s + 1, (5 + 4 * s) * rr(0.8, 1.2), Math.min(0.38, 0.22 + 0.06 * s), 0.3 * br, 0.25 * br, 0.2 * br);
-        if (i >= 0) { V.drag[i] = 1.8; V.rise[i] = 0.4; V.wf[i] = 0.4; V.sk[i] = 1.2; V.grow[i] = 0.4 * s; V.cell[i] = 6; V.gy[i] = gy; V.flags[i] |= F_GROUND; V.fout[i] = 0.35; V.fin[i] = 0.03; }
+          rr(1.4, 2.4) * (0.7 + 0.3 * s), s + 0.8, (3.4 + 2.6 * s) * rr(0.8, 1.2), Math.min(0.24, 0.14 + 0.04 * s), 0.3 * br, 0.25 * br, 0.2 * br);
+        if (i >= 0) { V.drag[i] = 1.8; V.rise[i] = 0.4; V.wf[i] = 0.4; V.sk[i] = 1.2; V.grow[i] = 0.22 * s; V.cell[i] = 6; V.gy[i] = gy; V.flags[i] |= F_GROUND; V.fout[i] = 0.35; V.fin[i] = 0.03; }
       }
       // 噴起的土
-      const nD = Math.round(5 * s * (0.5 + 0.5 * qn));
+      const nD = Math.round(3 * s * (0.5 + 0.5 * qn));
       for (let k = 0; k < nD; k++) {
         this._cone(0, 1, 0, 0.6);
         const sp2 = rr(10, 22) * Math.sqrt(s), br = rr(0.8, 1.1);
-        const i = this._smoke(x, gy + 1, z, d[0] * sp2, d[1] * sp2, d[2] * sp2, rr(2, 3.5), R * 0.25, R * rr(0.6, 0.9), 0.7, 0.18 * br, 0.14 * br, 0.1 * br);
+        const i = this._smoke(x, gy + 1, z, d[0] * sp2, d[1] * sp2, d[2] * sp2, rr(1.2, 2.1), R * 0.18, R * rr(0.36, 0.58), 0.42, 0.18 * br, 0.14 * br, 0.1 * br);
         if (i >= 0) { V.grav[i] = 7; V.drag[i] = 0.9; V.rise[i] = 0; V.cell[i] = 7; V.gy[i] = gy; V.flags[i] |= F_GROUND; V.erode[i] = 0.6; }
       }
     }
@@ -1659,11 +1659,11 @@ export class FX {
       if (E.type[j] === 0) {
         // 燃燒殘骸：火＋濃煙柱
         const fade = 1 - sstep(0.75, 1, t / dur);
-        E.accS[j] += 3.2 * (0.55 + 0.45 * qn) * fade * dt;
+        E.accS[j] += 1.8 * (0.55 + 0.45 * qn) * fade * dt;
         while (E.accS[j] >= 1) {
           E.accS[j] -= 1;
-          const i = this._smoke(x + rr(-2, 2), y + rr(1, 3), z + rr(-2, 2), rr(-0.6, 0.6), rr(6, 9), rr(-0.6, 0.6), rr(14, 20), rr(3, 5), rr(28, 42), 0.85, 0.06, 0.055, 0.05);
-          if (i >= 0) { V.drag[i] = 0.25; V.rise[i] = rr(5, 7); V.sk[i] = 0.12; V.grow[i] = 0.4; V.glow[i] = rr(1.8, 2.6); V.glowK[i] = 0.9; V.lit[i] = 1.2; V.erode[i] = 0.55; V.fout[i] = 0.5; V.flags[i] |= F_TURB; V.turb[i] = 0.5; }
+          const i = this._smoke(x + rr(-2, 2), y + rr(1, 3), z + rr(-2, 2), rr(-0.6, 0.6), rr(6, 9), rr(-0.6, 0.6), rr(7, 10), rr(2.4, 3.5), rr(14, 24), 0.46, 0.06, 0.055, 0.05);
+          if (i >= 0) { V.drag[i] = 0.25; V.rise[i] = rr(5, 7); V.sk[i] = 0.12; V.grow[i] = 0.22; V.glow[i] = rr(1.8, 2.6); V.glowK[i] = 0.9; V.lit[i] = 1.2; V.erode[i] = 0.55; V.fout[i] = 0.5; V.flags[i] |= F_TURB; V.turb[i] = 0.5; }
         }
         E.accF[j] += 10 * qn * fade * dt;
         while (E.accF[j] >= 1) {
@@ -1680,11 +1680,11 @@ export class FX {
       } else {
         // 爆炸後：從火球位置持續冒出上升的黑煙，越來越少
         const R = E.sc[j], k01 = t / dur;
-        E.accS[j] += 7 * (0.55 + 0.45 * qn) * (1 - k01) * dt;
+        E.accS[j] += 3.5 * (0.55 + 0.45 * qn) * (1 - k01) * dt;
         while (E.accS[j] >= 1) {
           E.accS[j] -= 1;
-          const i = this._smoke(x + rr(-0.4, 0.4) * R, y + rr(0, 0.5) * R, z + rr(-0.4, 0.4) * R, rr(-2, 2), rr(5, 9), rr(-2, 2), rr(14, 22), R * rr(0.4, 0.6), R * rr(1.8, 2.6), 0.85, 0.04, 0.036, 0.032);
-          if (i >= 0) { V.drag[i] = 0.3; V.rise[i] = rr(3, 5); V.sk[i] = 0.18; V.grow[i] = R * 0.04; V.glow[i] = 2.5 * (1 - k01); V.glowK[i] = 0.8; V.lit[i] = 1.5; V.cell[i] = Math.random() < 0.5 ? 4 : (Math.random() * 4) | 0; V.erode[i] = 0.6; V.flags[i] |= F_TURB; V.turb[i] = 0.8; V.fout[i] = 0.5; }
+          const i = this._smoke(x + rr(-0.4, 0.4) * R, y + rr(0, 0.5) * R, z + rr(-0.4, 0.4) * R, rr(-2, 2), rr(5, 9), rr(-2, 2), rr(7, 10), R * rr(0.28, 0.42), R * rr(0.85, 1.35), 0.44, 0.04, 0.036, 0.032);
+          if (i >= 0) { V.drag[i] = 0.3; V.rise[i] = rr(3, 5); V.sk[i] = 0.18; V.grow[i] = R * 0.022; V.glow[i] = 2.5 * (1 - k01); V.glowK[i] = 0.8; V.lit[i] = 1.5; V.cell[i] = Math.random() < 0.5 ? 4 : (Math.random() * 4) | 0; V.erode[i] = 0.6; V.flags[i] |= F_TURB; V.turb[i] = 0.8; V.fout[i] = 0.5; }
         }
         E.accF[j] += 6 * qn * (1 - k01) * dt;
         while (E.accF[j] >= 1) {
@@ -1734,7 +1734,7 @@ export class FX {
       this._imm(tx, ty, tz, tx - dx * fL, ty - dy * fL, tz - dz * fL, 0.42, K_SPARK, 10 * fl, 10 * eg * 0.8 * fl, 10 * eb * 0.6 * fl, 0.05);
       // 煙跡：每隔一段距離放一團（遠處、粒子多時放寬間距）
       const cd = Math.hypot(p.x - this.camPos.x, p.y - this.camPos.y, p.z - this.camPos.z);
-      let spacing = 1.1 * Math.max(1, cd / 150) / (0.5 + 0.5 * this.qn);
+      let spacing = 1.55 * Math.max(1, cd / 150) / (0.5 + 0.5 * this.qn);
       if (this.vCount > VMAX * 0.6) spacing *= 2;
       if (this.vCount > VMAX * 0.85) spacing *= 3;
       let lx = h._last.x, ly = h._last.y, lz = h._last.z;
@@ -1746,7 +1746,7 @@ export class FX {
         while (seg >= spacing && guard++ < 40) {
           lx += sx * spacing; ly += sy * spacing; lz += sz * spacing; seg -= spacing;
           const br = rr(0.9, 1.05);
-          const i = this._smoke(lx, ly, lz, -dx * rr(2, 5) + rr(-1, 1), -dy * rr(2, 5) + rr(-0.6, 1), -dz * rr(2, 5) + rr(-1, 1), rr(2.2, 3.2), 1.0, rr(3.5, 5) * Math.max(1, spacing / 1.6), 0.4, 0.6 * br, 0.6 * br, 0.58 * br);
+          const i = this._smoke(lx, ly, lz, -dx * rr(2, 5) + rr(-1, 1), -dy * rr(2, 5) + rr(-0.6, 1), -dz * rr(2, 5) + rr(-1, 1), rr(1.3, 2.1), 0.8, rr(2.2, 3.2), 0.28, 0.6 * br, 0.6 * br, 0.58 * br);
           if (i >= 0) { V.drag[i] = 1.2; V.rise[i] = 0.6; V.wf[i] = 0.6; V.sk[i] = 1.3; V.grow[i] = 0.3; V.glow[i] = 2.5; V.glowK[i] = 8; V.erode[i] = 0.4; V.fin[i] = 0.02; V.fout[i] = 0.45; V.cell[i] = Math.random() < 0.3 ? 7 : (Math.random() * 4) | 0; }
         }
         h._last.set(lx, ly, lz);
@@ -1798,7 +1798,7 @@ export class FX {
       const env = sstep(0, V.fin[i] + 1e-4, lt) * (1 - sstep(V.fout[i], 1, lt));
       let a = V.a0[i] * env;
       let to = V.temp[i];
-      if (fl & F_FIREBALL) { const c = to > 1 ? 1 : to; a *= 0.8 + 0.2 * (1 - c); }
+      if (fl & F_FIREBALL) { const c = to > 1 ? 1 : to; a *= 0.5 + 0.5 * c; }
       if (fl & F_FLAME) to *= env;
       V.sz[i] = size; V.ao[i] = a; V.to[i] = to; V.lf[i] = lt;
       V.eo[i] = V.erode[i] * sstep(0.25, 1, lt);
@@ -1849,7 +1849,7 @@ export class FX {
             if (j >= 0) { V.cell[j] = 4.5; V.asp[j] = 1; V.a0[j] = 0.3; }
           } else {
             const hot = fl & S_FIRETRAIL ? 1 : 0;
-            const j = this._smoke(S.x[i], S.y[i], S.z[i], S.vx[i] * 0.08 + rr(-0.3, 0.3), S.vy[i] * 0.08 + 0.5, S.vz[i] * 0.08 + rr(-0.3, 0.3), rr(1.8, 2.8), rr(1.6, 2.2), rr(4.5, 6.5), 0.4, 0.04, 0.036, 0.032);
+            const j = this._smoke(S.x[i], S.y[i], S.z[i], S.vx[i] * 0.08 + rr(-0.3, 0.3), S.vy[i] * 0.08 + 0.5, S.vz[i] * 0.08 + rr(-0.3, 0.3), rr(1.0, 1.7), rr(0.9, 1.4), rr(2.6, 4.1), 0.25, 0.04, 0.036, 0.032);
             if (j >= 0) { V.rise[j] = 1.2; V.drag[j] = 1.2; V.glow[j] = hot * 2; V.glowK[j] = 4; V.erode[j] = 0.6; V.fin[j] = 0.03; V.sk[j] = 1.2; }
           }
         }
