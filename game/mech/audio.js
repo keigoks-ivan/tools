@@ -1,4 +1,4 @@
-// 音效：全部用 Web Audio 即時合成（振盪器、雜訊、濾波、包絡、殘響），不需要任何音檔。
+// 音效用 Web Audio 即時合成；戰役配樂在入關後非同步載入共用管弦樂取樣。
 // 聲音分四條匯流排：
 //   hull ：自機結構音（腳步、液壓、推進器、落地），在座艙裡聽到，低通＋低頻加強，悶而厚。
 //   arm  ：自機武器（光束、飛彈、光劍），稍亮，帶一點城市回音。
@@ -6,9 +6,10 @@
 //   world：外界（敵機、爆炸、彈著），立體聲定位＋距離衰減＋距離低通＋座艙隔音低通＋城市回音；遠方爆炸有音速延遲。
 // 全部 → 壓縮器 → 限幅器 → 軟削波 → 主音量 → 暫停閘 → 喇叭；大爆炸也不會爆音。
 // 配樂（music）另走一條匯流排：曲目 → 閃避 → 危急低通 → 配樂音量 → 同一組壓縮／限幅；大撞擊時自動把配樂與環境音壓低。
-// 配樂一樣全部即時合成（弦樂墊、銅管、合唱共振峰、FM 鐘琴、鼓組取樣都在第一次播放時用程式算出），原創旋律。
+// 原創樂譜即時排程；錄音尚未就緒時，同一份樂譜以合成樂器演奏。
 
-import { CHAPTER_SCORES } from './chapter-scores.mjs';
+import { loadOrchestra, playOrchestra } from './orchestra.mjs';
+import { CHAPTER_SCORES } from './chapter-scores.mjs?v=2';
 
 const SOS = 343;          // 音速（公尺／秒）
 const MAX_DELAY = 1.5;    // 遠方爆炸最大延遲（秒）
@@ -261,7 +262,7 @@ function battleScore(o) {
   }
   // 終章：第 24～30 小節整段升調（動畫高潮式的直接轉調），第 31 小節回到原調屬和弦接回循環
   if (o.lift) for (let s = (IN + 24) * 16; s < (IN + 31) * 16; s++) for (const e of S.ev[s]) e.tx = o.lift;
-  Object.assign(S, { loop: true, from: IN, tr: o.tr, padFc: o.bright ? 2600 : 1900, fin: !!o.fin, mix: {pad:8.1,lead:4.3,dr:o.fin?.65:.8} });
+  Object.assign(S, { orchestra:true, loop: true, from: IN, tr: o.tr, padFc: o.bright ? 2600 : 1900, fin: !!o.fin, mix: {pad:8.1,lead:4.3,dr:o.fin?.65:.8} });
   return S;
 }
 
@@ -326,6 +327,14 @@ function kitanoScore() {
   return S;
 }
 
+// Keep the melody on top of an open brass chord. The other desks play the missing chord tones.
+function fanfare(third,root,top) {
+  const below=(pc,limit)=>limit-((limit-pc)%12+12)%12;
+  const middle=below(top%12===third?(root+7)%12:third,top-3);
+  const bottom=below(top%12===root?(root+7)%12:root,middle-5);
+  return [bottom,middle,top];
+}
+
 function chapterScore(cue) {
   const S=new Score(24,cue.bpm),changes=cue.harmony.split(' ');
   let last=null;
@@ -333,7 +342,7 @@ function chapterScore(cue) {
     const B=i*4,phrase=i%8,bridge=i>=8&&i<16,reprise=i>=16;
     const chord=chordOf(changes[i%16]),notes=voiceLeadChord(chord,last),bass=bassOf(chord);
     last=notes;
-    S.at(B,{k:'pad',n:notes,d:3.9,v:.80});
+    S.at(B,{k:'pad',n:notes,d:3.9,v:bridge?.56:reprise?.85:.70});
     // Piano attacks make the inner third and seventh legible on small speakers.
     const accent=phrase%2===0?1.5:0;
     S.at(B+accent,{k:'pno',m:notes[0],d:1.6,v:.51});
@@ -355,10 +364,26 @@ function chapterScore(cue) {
       for(const q of cue.drums)S.at(B+q,{k:'s',v:q===cue.drums[0]?.55:.39,min:.29});
     }
     S.at(B,{k:i%4===0?'b':'ti',m:bass,v:bridge?.35:.63});
-    if(reprise&&phrase%2===0)S.at(B,{k:'choir',n:[notes[1],notes[3]],d:3.4,v:.61,min:.55});
+    const third=(chord.r+chord.iv[1])%12;
+    if(cue.section==='chorale'&&!bridge){
+      // A second group of horns answers across the valley, then joins in the reprise.
+      if(phrase%2===1||reprise)S.at(B+(reprise?0:1),{k:'brass',n:fanfare(third,chord.r,notes[3]),d:reprise?3.6:2.5,v:reprise?.76:.65});
+      if(phrase%4===0)S.mel(B,'ctr',[[bass+12,2],[bass+19,1.8]],{v:.80});
+    }else if(cue.section==='motor'&&!bridge){
+      for(const q of [0,.75,1.5,2.5,3.25])S.at(B+q,{k:'ost',bow:true,m:bass+(q===2.5?7:12),d:.42,v:.83,min:.15});
+      if(phrase%2===1)for(const q of [0,1.5])S.at(B+q,{k:'brass',n:fanfare(third,chord.r,notes[2]),d:q?.92:.59,v:.72});
+    }else if(cue.section==='flight'&&!bridge){
+      if(phrase%2===0)S.at(B,{k:'brass',n:fanfare(third,chord.r,notes[3]),d:3.6,v:.70});
+      if(phrase%2===1)S.mel(B,'str',[[notes[2]+12,2],[notes[3]+12,1.75]],{v:.64});
+    }else if(reprise&&phrase%2===0){
+      S.at(B,{k:'brass',n:fanfare(third,chord.r,notes[3]),d:2.65,v:.74,min:.34});
+    }
+    if(reprise&&phrase%2===0)S.at(B,{k:'choir',n:[notes[0],notes[1],notes[3]],d:3.4,v:.69,min:.45});
+    if(phrase===7&&!reprise)for(const [j,q] of [2.5,3,3.5,3.75].entries())
+      S.at(B+q,{k:'ti',m:bass+(j<2?7:12),v:.27+j*.13});
     if(phrase===7)S.at(B+3,{k:'sw',d:1,v:.46});
   }
-  Object.assign(S,{loop:true,padA:.36,padFc:2250,rv:.23,mix:{pad:8.1,pno:2.8,str:7,horn:4.8,dr:.76}});
+  Object.assign(S,{orchestra:true,loop:true,padA:.36,padFc:2250,rv:.27,mix:{pad:8.1,pno:2.8,str:7,horn:4.8,dr:.76}});
   return S;
 }
 
@@ -370,8 +395,39 @@ const TIDE_HARMONY=[
   ['Dmadd9','Cadd9','Bbmaj7','A7','Gm7','Dm7','Bbmaj7','Asus'],
   ['Bbmaj7','Fadd9','Dm7','Am7','Gm7','Fmaj7','Bbmaj7','Asus'],
   ['Dm7','Gm7','Bbmaj7','A7','Fmaj7','Cadd9','Gm7','A7'],
-  ['Bbmaj7','Cadd9','Dm7','Fadd9','Gm7','Bbmaj7','Asus','A7'],
+  ['Dmadd9','Dm7','Bbmaj7','Asus','Dmadd9','Bbmaj7','Gm7','A7',
+    'Fadd9','Cadd9','Dm7','Bbmaj7','Ebmaj7','Gm7','Asus','Dadd9'],
 ];
+// Four phrases for the tower: a distant signal, the squad's reply, the high strings, and a major cadence.
+const TOWER_MELODY=[
+  [[62,2],[69,1.5],[67,.5]],[[65,2.75],[null,.25],[64,1]],[[65,1],[70,1],[74,2]],[[76,2],[74,1],[null,1]],
+  [[74,1.5],[81,.5],[79,1],[77,1]],[[77,2],[74,1.5],[70,.5]],[[79,1.5],[77,.5],[74,1],[70,1]],[[73,2.75],[null,1.25]],
+  [[77,2],[81,2]],[[79,3],[76,1]],[[77,1.5],[81,.5],[86,2]],[[82,2],[77,2]],
+  [[79,1.5],[82,.5],[86,2]],[[82,1],[81,1],[79,2]],[[76,2],[74,1],[null,1]],[[78,1],[81,1],[86,2]]
+];
+function towerBar(S,B,i,ch,notes,root) {
+  const line=TOWER_MELODY[i],third=(ch.r+ch.iv[1])%12;
+  const opening=i<4,strings=i>=8&&i<12,lift=i>=12;
+  S.at(B,{k:'pad',n:notes,d:i===7?2.7:3.84,v:i<2?.30:opening?.48:.76});
+  S.at(B,{k:'bass',m:opening?38:root,d:i===7?2.5:3.7,v:i<2?.30:opening?.52:.79});
+  if(opening||strings)S.mel(B,strings?'str':'horn',line,{v:strings?1.04:i<2?.43:.71});
+  else{
+    let t=B;
+    for(const [m,d] of line){
+      if(m!==null)S.at(t,{k:'brass',n:fanfare(third,ch.r,m),d:d*.93,v:lift?1:.88});
+      t+=d;
+    }
+  }
+  if(i===0||(!opening&&i!==7&&i%2===0))
+    S.at(B,{k:'choir',n:i===0?[50,57]:notes,d:3.65,v:opening?.30:lift?.87:.66});
+  if(i===2||strings)S.at(B+1,{k:'brass',n:fanfare(third,ch.r,notes[2]),d:2.65,v:.67});
+  if(!opening&&i!==7)for(const q of [0,1.5,2.25,3])S.at(B+q,{k:'ost',bow:true,m:root+(q===2.25?7:12),d:.54,v:.81});
+  if(i>=4&&!strings&&i!==7)S.mel(B+.5,'str',[[notes[1]+12,1.5],[notes[2]+12,1.7]],{v:.69});
+  if(i>=2)S.at(B,{k:'ti',m:root,v:i===4||i===12?.99:.66});
+  if(i===3||i===11||i===14)for(const [j,q] of [2,2.5,3,3.25,3.5,3.75].entries())
+    S.at(B+q,{k:'ti',m:root+(j%2?12:7),v:.24+j*.11});
+  if(i===4||i===12||i===15){S.at(B,{k:'b',v:.91});S.at(B,{k:'c',v:.73});}
+}
 function tideScore() {
   const bars=16,S=new Score(TIDE_HARMONY.length*bars,116);
   S.partSteps=bars*16;
@@ -379,9 +435,10 @@ function tideScore() {
     let previous=null;
     for(let i=0;i<bars;i++) {
       const B=(part*bars+i)*4,phrase=i%8;
-      const chord=chordOf(i>=8&&phrase===5?'Gm7':chords[phrase]);
+      const chord=chordOf(part===4?chords[i]:i>=8&&phrase===5?'Gm7':chords[phrase]);
       const notes=voiceLeadChord(chord,previous),root=bassOf(chord);
       previous=notes;
+      if(part===4){towerBar(S,B,i,chord,notes,root);continue;}
       S.at(B,{k:'pad',n:notes,d:3.75,v:part===0?.50:.66});
       if(part===0||part===2){
         S.at(B,{k:'sub',m:root,d:3.2,v:.48});
@@ -391,22 +448,21 @@ function tideScore() {
         if(part===2&&i>=8)S.at(B+2,{k:'bell',m:notes[3],v:.39});
         continue;
       }
-      const march=part===3,climax=part===4;
-      const bassBeats=march?[0,1.5,3]:climax?[0,1,2.5,3]:[0,2];
+      const march=part===3;
+      const bassBeats=march?[0,1.5,3]:[0,2];
       for(const q of bassBeats)S.at(B+q,{k:'bass',m:root+(q===3?12:0),d:q===0?.86:.43,v:.74});
       S.at(B,{k:'ti',m:root,v:.70});
       for(const q of march?[1,2.75,3.5]:[1,3])S.at(B+q,{k:'s',v:q===1?.50:.36});
-      if(phrase%4===0)S.mel(B,climax?'horn':'str',shift(TIDE_CALL,climax?12:0),{v:.88});
-      else if(phrase%4===2)S.mel(B,climax?'str':'horn',i<8?TIDE_REPLY:[[69,1],[70,.5],[72,.5],[74,2]],{v:.82});
+      if(phrase%4===0)S.mel(B,'str',TIDE_CALL,{v:.88});
+      else if(phrase%4===2)S.mel(B,'horn',i<8?TIDE_REPLY:[[69,1],[70,.5],[72,.5],[74,2]],{v:.82});
       else S.mel(B,'str',[[notes[2],1.5],[notes[3],.5],[notes[i<8?1:2],2]],{v:.68});
-      if(march||climax)for(const [j,q] of [0,.75,1.5,2.5,3.25].entries())
-        S.at(B+q,{k:'ost',m:notes[j%4],d:.4,v:.48,p:0});
-      if(climax&&phrase%2===0)S.at(B,{k:'choir',n:[notes[1],notes[3]],d:3.5,v:.60});
-      if(climax&&phrase%4===3)S.at(B+2,{k:'brass',n:[notes[0],notes[2]],d:1.45,v:.74});
+      if(march)for(const [j,q] of [0,.75,1.5,2.5,3.25].entries())
+        S.at(B+q,{k:'ost',bow:true,m:notes[j%4]-12,d:.4,v:.73,p:0});
+      if(phrase===3||phrase===6)S.at(B,{k:'brass',n:fanfare((chord.r+chord.iv[1])%12,chord.r,notes[3]),d:2.8,v:.70});
       if(phrase===7)S.at(B+3,{k:'sw',d:1,v:.56});
     }
   }
-  Object.assign(S,{loop:true,flat:true,padA:.52,rv:.22,mix:{...MUS_MIX,pno:3,sub:.8}});
+  Object.assign(S,{orchestra:true,loop:true,flat:true,padA:.52,rv:.29,mix:{...MUS_MIX,pno:3,sub:.8}});
   return S;
 }
 function tideHomeScore() {
@@ -419,7 +475,7 @@ function tideHomeScore() {
   S.mel(0,'pno',TIDE_CALL,{v:.82});
   S.mel(4,'horn',[[65,2],[69,2],[67,3],[64,1],[65,3.5]],{v:.74});
   S.at(12,{k:'bell',m:77,d:3,v:.4});
-  Object.assign(S,{flat:true,tail:3,rv:.28,mix:{...TITLE_MIX,horn:4}});
+  Object.assign(S,{orchestra:true,flat:true,tail:3,rv:.28,mix:{...TITLE_MIX,horn:4}});
   return S;
 }
 
@@ -777,6 +833,7 @@ export class Audio {
 
   setVolume(v) {
     this.vol = clamp(num(v, this.vol), 0, 1);
+    if(this.mtr?.S.orchestra)this._prepareOrchestra();
     if (this._ready) this.masterG.gain.setTargetAtTime(this.vol, this.ctx.currentTime, 0.04);
   }
 
@@ -1716,7 +1773,16 @@ export class Audio {
   // 配樂音量 0..1（預設 0.7，明顯壓在音效底下）
   setMusicVolume(v) {
     this.musVol = clamp(num(v, this.musVol), 0, 1);
+    if(this.mtr?.S.orchestra)this._prepareOrchestra();
     if (this._ready) this.musVolG.gain.setTargetAtTime(this.musVol * MUS_K, this.ctx.currentTime, 0.05);
+  }
+
+  _prepareOrchestra() {
+    if(!this.ctx||!this.vol||!this.musVol)return;
+    if(!this.bankReady)this.bankReady=loadOrchestra(this.ctx).then(bank=>{this.bank=bank;}).catch(()=>{
+      this.bankReady=null;
+    });
+    return this.bankReady;
   }
 
   _musStart(key) {
@@ -1727,6 +1793,7 @@ export class Audio {
       this.mtr = null;
     }
     if (!S) return;
+    if(S.orchestra)this._prepareOrchestra();
     this._mBuf();
     const t0 = now + 0.06, tr = this._mTrack(S, t0);
     const g = tr.out.gain;
@@ -1795,6 +1862,7 @@ export class Audio {
       pass = 1 + Math.floor((s - n) / L);
       s = S.from * 16 + ((s - n) % L);
     }
+    if(S.orchestra&&gs%16===0)tr.bank=this.bank;
     const I = S.flat ? 1 : this.musI;
     for (const e of S.ev[s]) {
       if (I < (e.min || 0) || I >= (e.max ?? 9)) continue;
@@ -1877,6 +1945,11 @@ export class Audio {
     tr.padR = R.pan(tr.padIn); if (tr.padR.pan) tr.padR.pan.value = 0.7;
     tr.strIn = R.filt('lowpass', 2600, 0.5, L.str);
     tr.ctrIn = R.filt('lowpass', 4200, 0.6, L.ctr);
+    if(S.orchestra){
+      const seat=(dest,pan)=>{const node=R.pan(dest);if(node.pan)node.pan.value=pan;return node;};
+      tr.violin=seat(tr.strIn,-.31);tr.cello=seat(tr.ctrIn,.29);
+      tr.trumpet=seat(L.brass,.24);tr.trombone=seat(L.brass,-.18);
+    }
     tr.pl = R.pan(L.dr); if (tr.pl.pan) tr.pl.pan.value = -0.35;
     tr.pr = R.pan(L.dr); if (tr.pr.pan) tr.pr.pan.value = 0.35;
     L.lead.connect(R.gain(0.22, this.musDlyIn));
@@ -1920,6 +1993,7 @@ export class Audio {
 
   _mPlay(tr, e, t) {
     const T = (tr.S.tr || 0) + (e.tx || 0), v = e.v ?? 1, mb = this.mb, beat = tr.spb;
+    if(tr.bank&&playOrchestra(this,tr,e,t,T))return;
     switch (e.k) {
       case 'k': return this._mSamp(mb.kick, 0, t, v * 0.9, tr.L.dr, 1);
       case 's': return this._mSamp(mb.snare, 0, t, v * 0.55, tr.L.dr, 1);

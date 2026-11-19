@@ -93,3 +93,26 @@ test('the landing score changes section on a downbeat, reuses its track, and res
   assert.equal(tr.part,2);assert(played.some(e=>e.k==='pno'));
   assert(!musicScore('landingHome').loop);
 });
+
+test('the tower signal grows into an open brass chorale with a rest before the high strings',()=>{
+  const s=musicScore('landing');
+  const bars=Array.from({length:16},(_,i)=>s.ev.slice(4*s.partSteps+i*16,4*s.partSteps+(i+1)*16).flat());
+  assert(bars[0].some(e=>e.k==='horn')&&!bars[0].some(e=>e.k==='brass'));
+  const chords=bars[4].filter(e=>e.k==='brass');
+  assert.equal(chords.length,4);
+  assert(chords.every(e=>e.n.length===3&&e.n[2]-e.n[0]>=12));
+  assert(bars[4].some(e=>e.k==='ost'&&e.bow)&&bars[4].some(e=>e.k==='c'));
+  assert(bars[7].filter(e=>e.k==='brass').every(e=>e.d<3));
+  assert(bars[8].some(e=>e.k==='str'&&e.m>=81));
+  assert(bars[15].some(e=>e.k==='brass'&&e.n.includes(78)));
+});
+
+test('the recorded desks enter together on the next downbeat and silent playback skips loading',()=>{
+  const a=new Audio(),s=musicScore('landing'),tr={S:s};
+  a._mPlay=()=>{};a._mStep(tr,0,0);
+  assert.equal(tr.bank,undefined);
+  a.bank={};a._mStep(tr,7,0);assert.equal(tr.bank,undefined);
+  a._mStep(tr,16,0);assert.equal(tr.bank,a.bank);
+  a.ctx={};a.vol=0;assert.equal(a._prepareOrchestra(),undefined);
+  a.vol=1;a.musVol=0;assert.equal(a._prepareOrchestra(),undefined);
+});

@@ -157,7 +157,7 @@
   </section>
 </div>
 
-<script type="importmap">{"imports":{"three":"../../lib/three.module.js","../audio.js":"../audio.js?v=2"}}</script>
+<script type="importmap">{"imports":{"three":"../../lib/three.module.js","../audio.js":"../audio.js?v=3"}}</script>
 <script type="module">
 import { Audio as MechAudio } from '../audio.js';
 
@@ -349,7 +349,7 @@ $('meter').onclick = async () => {
 
 // ───── 配樂離線量測：每 0.1 秒暫停一次讓排程器排下一段（等同遊戲裡的計時器） ─────
 // setup(a) 在 0 秒呼叫；ev = [[秒, fn], ...] 在指定時間呼叫；回傳峰值、整段 RMS、最大 400 ms RMS、長度、渲染時間
-async function renderMusic(setup, sec = 20, ev = []) {
+async function renderMusic(setup, sec = 20, ev = [], preloadOrchestra = false) {
   const ctx = new OfflineAudioContext(2, SR * sec, SR);
   const a = new MechAudio();
   a._attach(ctx, false);
@@ -374,7 +374,9 @@ async function renderMusic(setup, sec = 20, ev = []) {
     v.done=()=>{done();if(v.last){const ended=v.last.onended;v.last.onended=()=>{ended?.();voices.delete(v);};}else voices.delete(v);};
     tally();return v;
   };
+  if(preloadOrchestra)await a._prepareOrchestra();
   setup(a);
+  if(a.bankReady)await a.bankReady;
   const evs = ev.slice();
   for (let i = 1; i < sec * 10; i++) {
     const t = i / 10;

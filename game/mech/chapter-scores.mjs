@@ -7,6 +7,7 @@ export const CHAPTER_SCORES = {
       [[67,.75],[69,.25],[71,2],[74,1],[71,2],[69,1],[67,1]],[[64,2],[69,1],[72,1],[71,2.5],[66,.5],[63,1]]],
   },
   ridgeline: {
+    section:'chorale',
     bpm:102, lead:'horn', answer:'str', pulse:[0,2.5], drums:[2,3.5],
     harmony:'Fadd9 Bbmaj7 Dm7 Cadd9 Bbmaj7 Fmaj7 Gm7 C7 Dm7 Am7 Bbmaj7 Fmaj7 Gm7 Dm7 Csus C7',
     theme:[[[65,1],[69,1],[72,2],[74,2],[72,1],[70,1]],[[69,3],[65,1],[67,2],[64,1],[null,1]],
@@ -25,12 +26,14 @@ export const CHAPTER_SCORES = {
       [[69,.5],[72,.5],[76,1.5],[74,.5],[72,1],[67,3],[64,1]],[[65,2],[69,.75],[72,.25],[71,1],[68,2.5],[null,1.5]]],
   },
   supply: {
+    section:'motor',
     bpm:140, lead:'pno', answer:'horn', pulse:[0,.75,1.5,2.5,3.25], drums:[1,2.5,3.75],
     harmony:'Gm7 Ebmaj7 Cm7 D7 Gm7 Bbmaj7 Ebmaj7 D7 Cm7 Ebmaj7 Fadd9 Bbmaj7 Cm7 Gm7 Dsus D7',
     theme:[[[67,.75],[70,.75],[74,1.5],[72,1],[70,.75],[67,1.25],[63,2]],[[67,.75],[72,.75],[75,1.5],[72,1],[69,2],[66,2]],
       [[70,.75],[74,.75],[77,1.5],[74,1],[72,1.5],[70,.5],[65,2]],[[67,1.5],[70,.5],[75,2],[74,1],[69,1],[66,2]]],
   },
   airfield: {
+    section:'flight',
     bpm:148, lead:'str', answer:'horn', pulse:[0,1,2.5], drums:[1,3],
     harmony:'Gadd9 Dadd9 Em7 Cmaj7 Gmaj7 Bm7 Am7 D7 Em7 Bm7 Cmaj7 Gadd9 Am7 Cmaj7 Dsus D7',
     theme:[[[67,1],[74,2],[78,1],[76,2],[74,2]],[[71,1],[74,1],[79,2],[76,3],[72,1]],
