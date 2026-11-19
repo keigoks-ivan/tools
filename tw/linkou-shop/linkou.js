@@ -432,23 +432,22 @@
       return dot(s.lat, s.lon, { radius: Math.max(5, Math.sqrt(s.s || 100) / 4), color: '#1e3a5f', weight: 1.5, fillColor: '#60a5fa', fillOpacity: 0.75 })
         .bindPopup('<b>' + esc(s.n) + '</b><br>學生數（114 學年）：' + fmt(s.s) + pb(s.lat, s.lon));
     }));
-    var BIZCOL = ['#db2777', '#0284c7', '#ca8a04', '#4d7c0f'], BIZK = [];
+    var BIZCOL = ['#2a78d6', '#eb6834', '#1baf7a', '#eda100', '#e87ba4', '#008300', '#6250d6'];
     var FLOOR_ON = [true, false];   /* 樓層群：0 一樓（含地下室、沒寫樓層）、1 二樓以上 */
-    function fillBiz(i) {
-      var c = D.biz.cats[i], lg = L_['biz' + i];
-      lg.clearLayers();
-      D.biz.pts[c].forEach(function (q) {
-        if (!FLOOR_ON[q[4]]) return;
-        lg.addLayer(dot(q[0], q[1], { radius: Math.min(11, 3.5 + 1.6 * Math.sqrt(q[2] - 1)), color: '#fff', weight: 1, fillColor: BIZCOL[i], fillOpacity: 0.85 })
-          .bindPopup('<b>' + esc(c) + '</b><br>樓層：' + (q[4] ? '二樓以上' : FLOOR_ONE) + '<br>這個門牌營業中 ' + q[2] + ' 家' + (q[3] ? '，其中 ' + q[3] + ' 家 2021～2025 年新設' : '') + pb(q[0], q[1])));
-      });
+    var BIZ = { cat: '', sub: [] };   /* 目前選的業態，以及該業態各細分類是否勾選 */
+    L_.biz = L.layerGroup();
+    function subCount(c, i) { return (FLOOR_ON[0] ? D.biz.n[c][i][0] : 0) + (FLOOR_ON[1] ? D.biz.n[c][i][1] : 0); }
+    function catCount(c) { var t = 0; D.biz.subs[c].forEach(function (x, i) { t += subCount(c, i); }); return t; }
+    function drawBiz() {
+      L_.biz.clearLayers();
+      var c = BIZ.cat; if (!c) return;
+      D.biz.pts[c].filter(function (q) { return BIZ.sub[q[2]] && FLOOR_ON[q[5]]; })
+        .sort(function (x, y) { return y[3] - x[3]; })   /* 大圈先畫，小圈壓在上面才點得到 */
+        .forEach(function (q) {
+          L_.biz.addLayer(dot(q[0], q[1], { radius: Math.min(11, 3.5 + 1.6 * Math.sqrt(q[3] - 1)), color: '#fff', weight: 1, fillColor: BIZCOL[q[2]], fillOpacity: 0.85 })
+            .bindPopup('<b>' + esc(D.biz.subs[c][q[2]]) + '</b>（' + esc(c) + '）<br>樓層：' + (q[5] ? '二樓以上' : FLOOR_ONE) + '<br>這個門牌營業中 ' + q[3] + ' 家<br>2021～2025 年新設 ' + q[4] + ' 家' + pb(q[0], q[1])));
+        });
     }
-    function bizCount(c) { return (FLOOR_ON[0] ? D.biz.n[c][0] : 0) + (FLOOR_ON[1] ? D.biz.n[c][1] : 0); }
-    D.biz.cats.forEach(function (c, i) {
-      BIZK.push('biz' + i);
-      L_['biz' + i] = L.layerGroup();
-      fillBiz(i);
-    });
     L_.vill = L.geoJSON(D.vill, { pane: 'pVill', style: function (f) { return { color: '#92400e', weight: 1, fillColor: vcolor(f.properties.age611), fillOpacity: 0.55 }; },
       onEachFeature: function (f, l) { l.bindPopup('<b>' + esc(f.properties.village) + '</b><br>6～11 歲兒童（2025 年 12 月）：' + fmt(f.properties.age611) + ' 人'); } });
 
@@ -473,20 +472,39 @@
       ['pipe', '未完工建案', 0, '<span class="sw sq" style="background:#7c3aed"></span>'],
       ['sch', '國小', 0, '<span class="sw" style="background:#60a5fa"></span>'],
       ['vill', '各里國小年齡兒童數', 0, '<span class="sw poly" style="background:#f59e0b"></span>'],
-      ['zone', '土地使用分區', 0, '<span class="sw poly" style="background:#5f9de0"></span>']].concat(
-      D.biz.cats.map(function (c, i) { return ['biz' + i, '<span class="bl">' + c + '（' + fmt(bizCount(c)) + ' 家）</span>', 0, '<span class="sw" style="background:' + BIZCOL[i] + '"></span>', i === 0]; }));
+      ['zone', '土地使用分區', 0, '<span class="sw poly" style="background:#5f9de0"></span>']];
     var bar = document.getElementById('layerBar'), on = {};
     LAYERS.forEach(function (l) {
-      if (l[4]) {
-        var gh = document.createElement('div'); gh.className = 'lyr-group'; gh.textContent = '營業中的店家（依商業登記）'; bar.appendChild(gh);
-        var fr = document.createElement('div'); fr.className = 'fl-row'; fr.id = 'floorRow';
-        fr.innerHTML = '<span class="fl-k">樓層：</span><label><input type="checkbox" data-fl="0" checked> 一樓（含地下室、沒寫樓層）</label><label><input type="checkbox" data-fl="1"> 二樓以上</label>';
-        bar.appendChild(fr);
-      }
       var lab = document.createElement('label');
       lab.innerHTML = '<input type="checkbox" data-k="' + l[0] + '"' + (l[2] ? ' checked' : '') + '> ' + l[3] + l[1];
       bar.appendChild(lab); on[l[0]] = !!l[2];
     });
+    (function () {
+      var gh = document.createElement('div'); gh.className = 'lyr-group'; gh.textContent = '營業中的店家（依商業登記，一次看一個業態）'; bar.appendChild(gh);
+      var cr = document.createElement('div'); cr.className = 'fl-row'; cr.id = 'bizCatRow';
+      cr.innerHTML = '<span class="fl-k">業態：</span><label><input type="radio" name="bizcat" value="" checked> 不顯示</label>' +
+        D.biz.cats.map(function (c) { return '<label><input type="radio" name="bizcat" value="' + esc(c) + '"> <span class="bl" data-cat="' + esc(c) + '">' + esc(c) + '（' + fmt(catCount(c)) + ' 家）</span></label>'; }).join('');
+      bar.appendChild(cr);
+      var fr = document.createElement('div'); fr.className = 'fl-row'; fr.id = 'floorRow';
+      fr.innerHTML = '<span class="fl-k">樓層：</span><label><input type="checkbox" data-fl="0" checked> 一樓（含地下室、沒寫樓層）</label><label><input type="checkbox" data-fl="1"> 二樓以上</label>';
+      bar.appendChild(fr);
+      var sr = document.createElement('div'); sr.className = 'fl-row'; sr.id = 'bizSubRow'; sr.style.display = 'none'; bar.appendChild(sr);
+    })();
+    function renderSubRow() {
+      var sr = document.getElementById('bizSubRow'), c = BIZ.cat;
+      if (!c) { sr.style.display = 'none'; sr.innerHTML = ''; return; }
+      sr.style.display = '';
+      sr.innerHTML = '<span class="fl-k">細分類：</span>' + D.biz.subs[c].map(function (nm, i) {
+        var tot = D.biz.n[c][i][0] + D.biz.n[c][i][1];
+        if (!tot) return '';   /* 這個細分類在資料裡一家都沒有就不列 */
+        return '<label><input type="checkbox" data-sub="' + i + '"' + (BIZ.sub[i] ? ' checked' : '') + '> <span class="sw" style="background:' + BIZCOL[i] + '"></span><span class="bl">' + esc(nm) + '（' + fmt(subCount(c, i)) + ' 家）</span></label>';
+      }).join('');
+    }
+    function updateBizCounts() {
+      D.biz.cats.forEach(function (c) { var sp = bar.querySelector('.bl[data-cat="' + c + '"]'); if (sp) sp.textContent = c + '（' + fmt(catCount(c)) + ' 家）'; });
+      var c = BIZ.cat; if (!c) return;
+      bar.querySelectorAll('#bizSubRow input[data-sub]').forEach(function (inp) { inp.parentNode.querySelector('.bl').textContent = D.biz.subs[c][+inp.getAttribute('data-sub')] + '（' + fmt(subCount(c, +inp.getAttribute('data-sub'))) + ' 家）'; });
+    }
     var legendDiv;
     var Legend = L.control({ position: 'bottomright' });
     var legendBody;
@@ -502,8 +520,10 @@
       if (on.areas) h += '<div class="g2">' + ['LK03', 'LK01', 'LK02', 'LK06', 'LK04', 'LK09', 'LK07', 'LK05', 'LK08'].map(function (k) { var r = S[k]; return r ? '<div class="row"><span class="bar" style="background:' + COLORS[k] + '"></span>' + esc(r.name.replace('生活圈', '').replace('工一新北國際AI+智慧園區', '工一 AI+')) + (r.mature === '成熟' ? '（成熟）' : '') + '</div>' : ''; }).join('') + '</div>';
       if (on.l591) h += '<div class="row"><span class="sw" style="background:#dc2626"></span>591 出售 <span class="sw" style="background:#16a34a"></span>出租</div>';
       if (on.edu) h += '<div class="row"><span class="sw" style="background:#7c3aed"></span>補習班 <span class="sw" style="background:#f59e0b"></span>課後照顧</div>';
-      var bz = BIZK.filter(function (k) { return on[k]; });
-      if (bz.length) h += '<div class="row">' + bz.map(function (k) { var i = +k.slice(3); return '<span class="sw" style="background:' + BIZCOL[i] + '"></span>' + esc(D.biz.cats[i]); }).join(' ') + '</div><div style="color:#4a6080">圓點越大，同一門牌的店家越多。樓層：' + (FLOOR_ON[0] && FLOOR_ON[1] ? '一樓和二樓以上' : FLOOR_ON[0] ? '一樓（含地下室、沒寫樓層）' : FLOOR_ON[1] ? '二樓以上' : '都沒選') + '</div>';
+      if (BIZ.cat) {
+        var vs = D.biz.subs[BIZ.cat].map(function (nm, i) { return BIZ.sub[i] && (D.biz.n[BIZ.cat][i][0] + D.biz.n[BIZ.cat][i][1]) ? '<span style="display:inline-flex;align-items:center;gap:4px;margin-right:8px"><span class="sw" style="background:' + BIZCOL[i] + '"></span>' + esc(nm) + '</span>' : ''; }).join('');
+        h += '<div>店家：' + esc(BIZ.cat) + '</div><div style="line-height:1.7">' + vs + '</div>' + '<div style="color:#4a6080">圓點越大，同一門牌的店家越多。樓層：' + (FLOOR_ON[0] && FLOOR_ON[1] ? '一樓和二樓以上' : FLOOR_ON[0] ? '一樓（含地下室、沒寫樓層）' : FLOOR_ON[1] ? '二樓以上' : '都沒選') + '</div>';
+      }
       if (on.vill) { h += '<div>6～11 歲兒童數（人）</div>' + VBINS.map(function (b) { return '<div class="row"><span class="bar" style="background:' + b[2] + '"></span>' + (b[1] > 1e8 ? b[0] + ' 以上' : b[0] + '～' + b[1]) + '</div>'; }).join(''); }
       if (on.zone) {
         h += '<div>土地使用分區</div>' + [['#cfe3f7', '第一種住宅區（淺）'], ['#5f9de0', '第二至四種'], ['#17458f', '第五種住宅區（深）'], ['#e11d48', '中心、建成、鄰里商業區'], ['#a16207', '乙種工業區'], ['#9ca3af', '其他用地']]
@@ -523,23 +543,30 @@
       var fl = e.target.getAttribute('data-fl');
       if (fl !== null) {
         FLOOR_ON[+fl] = e.target.checked;
-        D.biz.cats.forEach(function (c, i) {
-          fillBiz(i);
-          var sp = bar.querySelector('[data-k=biz' + i + ']').parentNode.querySelector('.bl');
-          if (sp) sp.textContent = c + '（' + fmt(bizCount(c)) + ' 家）';
-        });
-        renderLegend();
+        updateBizCounts(); drawBiz(); renderLegend();
         return;
       }
+      if (e.target.name === 'bizcat') {
+        // 選了業態時，關掉其他點狀圖層，避免顏色混在一起；商圈範圍等面狀圖層保留，使用者可以再自己勾回來
+        if (e.target.value && !BIZ.cat) ['newb', 'oldb', 'l591', 'edu', 'pipe', 'sch'].forEach(function (k) {
+          if (on[k]) { on[k] = false; var cb = bar.querySelector('[data-k=' + k + ']'); if (cb) cb.checked = false; apply(k); }
+        });
+        BIZ.cat = e.target.value; BIZ.sub = D.biz.subs[BIZ.cat] ? D.biz.subs[BIZ.cat].map(function () { return true; }) : [];
+        renderSubRow(); drawBiz(); renderLegend();
+        return;
+      }
+      var sb = e.target.getAttribute('data-sub');
+      if (sb !== null) { BIZ.sub[+sb] = e.target.checked; drawBiz(); renderLegend(); return; }
       var k = e.target.getAttribute('data-k'); if (!k) return;
       on[k] = e.target.checked;
       if (k === 'zone' && on[k]) loadZone(function () { if (on.zone) { zoneLayer.addTo(map); } renderLegend(); });
       else apply(k);
     });
     LAYERS.forEach(function (l) { if (l[2]) L_[l[0]].addTo(map); });
+    L_.biz.addTo(map);
     renderLegend();
     buildFinder(map, D, L_.areas);
-    window.__map = { map: map, layers: L_, floors: FLOOR_ON, toggle: function (k, v) { var c = bar.querySelector('[data-k=' + k + ']'); c.checked = v; c.dispatchEvent(new Event('change', { bubbles: true })); } };
+    window.__map = { map: map, layers: L_, floors: FLOOR_ON, biz: BIZ, toggle: function (k, v) { var c = bar.querySelector('[data-k=' + k + ']'); c.checked = v; c.dispatchEvent(new Event('change', { bubbles: true })); } };
   }
 
   /* ---------------- 選址工具 ---------------- */
