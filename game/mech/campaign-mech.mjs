@@ -9,7 +9,7 @@ export async function loadCampaignHero() {
       if (model.getObjectByName('M07_Upper').userData.campaignRig !== 1) throw new Error('蒼焰的劇情關節不完整');
       art = model;
       // 使用關卡現有的環境反射，不再渲染另一套動態反射。
-      surface = { environment: null, grain: createArmorGrain(), grainStrength: { value: 0 } };
+      surface = { environment: null, grain: createArmorGrain(), grainStrength: { value: 1 } };
     }).catch(error => { loading = null; throw error; });
   await loading;
 }
@@ -38,6 +38,33 @@ function seeThrough(material, see) {
   material.customProgramCacheKey = () => key + '-campaign-see-v1';
 }
 
+function campaignFinish(material) {
+  if (material.isMeshPhysicalMaterial) {
+    material.roughness = .16;
+    material.clearcoat = .94;
+    material.clearcoatRoughness = .075;
+  }
+  if (!material.metalnessMap) return;
+  const previous = material.onBeforeCompile, key = material.customProgramCacheKey();
+  material.onBeforeCompile = shader => {
+    previous(shader);
+    shader.fragmentShader = shader.fragmentShader
+      .replace('#include <metalnessmap_fragment>', `#include <metalnessmap_fragment>
+        // Finish atlas distinguishes exposed alloy from paint and dark joint seals.
+        float machined = smoothstep(.54,.84,metalnessFactor);
+        float enamel = (1.0-machined)*(1.0-smoothstep(.51,.73,roughnessFactor));
+        float fineGrain = finishGrain.r-.5;
+        float abrasion = (1.0-smoothstep(-.24,-.105,fineGrain))*enamel;
+        diffuseColor.rgb *= 1.0 + fineGrain * mix(.21,.63,enamel);
+        diffuseColor.rgb = mix(diffuseColor.rgb,vec3(.15,.17,.18),abrasion*.50);
+        diffuseColor.rgb *= mix(vec3(1.0),vec3(1.04,1.08,1.11),machined);
+        roughnessFactor = clamp(roughnessFactor + (finishGrain.g-.5)*.21*enamel + .12*abrasion - .061*machined,.15,1.0);`)
+      .replace('#include <aomap_fragment>', `#include <aomap_fragment>
+        reflectedLight.indirectSpecular *= 1.0 + .22*machined + .095*enamel;`);
+  };
+  material.customProgramCacheKey = () => key + '-campaign-finish-v1';
+}
+
 export function buildCampaignHero(m, see) {
   if (!art) throw new Error('蒼焰模型尚未載入');
   const source = instantiateDuelMechArt(art, 0, surface);
@@ -48,7 +75,10 @@ export function buildCampaignHero(m, see) {
   source.updateMatrixWorld(true);
   const meshes = [];
   source.traverse(o => { if (o.isMesh) meshes.push({ mesh: o, joint: o.parent.name, world: o.matrixWorld.clone() }); });
-  for (const material of new Set(meshes.map(o => o.mesh.material))) seeThrough(material, see);
+  for (const material of new Set(meshes.map(o => o.mesh.material))) {
+    campaignFinish(material);
+    seeThrough(material, see);
+  }
   const at = name => source.getObjectByName(name).getWorldPosition(V());
   const hipR = at('M07_Thigh_L'), kneeR = at('M07_Shin_L'), ankleR = at('M07_Foot_L');
   const thighLength = hipR.distanceTo(kneeR), shinLength = kneeR.distanceTo(ankleR);

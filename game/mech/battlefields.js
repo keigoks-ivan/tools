@@ -31,8 +31,11 @@ export function fieldHeight(x, z, profile, route, base = 0) {
     if(x<landingShore(z))return h+(base-h)*smooth(4100,5000,Math.max(Math.abs(x),Math.abs(z)));
     const upper=smooth(430,1180,x)*F.relief;
     const ridge=.45+.55*(1-Math.abs(noise.noise(x/318,7,z/333)));
+    const valleys=noise.noise(z/440,24,x/1050);
+    const outerRidge=Math.pow(1-Math.abs(noise.noise((x+valleys*290)/495,18,z/650)),2.3);
+    const foothills=smooth(550,1410,x)*F.relief*(outerRidge*.76+valleys*.42);
     const edge=Math.max(smooth(1400,4500,x),smooth(4100,5000,Math.abs(z)));
-    return (h+upper*ridge)*(1-edge)+base*edge;
+    return (h+upper*ridge+foothills)*(1-edge)+base*edge;
   }
   const r = Math.hypot(x, z);
   if (r > 2400) {

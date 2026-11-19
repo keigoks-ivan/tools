@@ -2,11 +2,21 @@ import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { LANDING, SHORE_GLSL } from './landing-layout.mjs?v=1';
 
-function material(world, color, roughness, metalness, surface) {
+function material(world, color, roughness, metalness, surface, vertexColors = false) {
   const A = world.A;
-  const map = surface === 'concrete' ? A?.rubD : surface === 'asphalt' ? A?.asphD : null;
-  const normalMap = surface === 'concrete' ? A?.rubN : surface === 'asphalt' ? A?.asphN : surface === 'paint' ? A?.wearN : null;
-  return new THREE.MeshStandardMaterial({ color, roughness, metalness, map, normalMap, normalScale: new THREE.Vector2(.18,.18) });
+  const stone = surface === 'concrete' || surface === 'precast';
+  const map = stone ? A?.rubD : surface === 'asphalt' ? A?.asphD : null;
+  const normalMap = stone ? A?.rubN : surface === 'asphalt' ? A?.asphN : surface === 'paint' ? A?.wearN : null;
+  const mat = new THREE.MeshStandardMaterial({ color, roughness, metalness, map, normalMap, vertexColors, normalScale: new THREE.Vector2(.18,.18) });
+  if(surface==='precast' && map) {
+    mat.onBeforeCompile=shader=>{
+      shader.fragmentShader=shader.fragmentShader.replace('#include <map_fragment>',`
+        vec3 aggregate=texture2D(map,vMapUv).rgb;
+        diffuseColor.rgb*=mix(vec3(.72),aggregate,.36);
+      `);
+    };
+  }
+  return mat;
 }
 
 class PropBatch {
@@ -14,41 +24,58 @@ class PropBatch {
     this.materials = materials;
     this.parts = new Map();
     this.cube = new THREE.BoxGeometry();
+    this.plane = new THREE.PlaneGeometry(1,1,8,2).rotateX(-Math.PI/2);
     this.matrix = new THREE.Matrix4();
     this.origin = new THREE.Vector3();
     this.size = new THREE.Vector3();
     this.rotation = new THREE.Euler();
     this.quat = new THREE.Quaternion();
+    this.color = new THREE.Color();
   }
-  add(key, geometry, x,y,z, w=1,h=1,d=1, rx=0,ry=0,rz=0) {
+  add(key, geometry, x,y,z, w=1,h=1,d=1, rx=0,ry=0,rz=0, tint=0xffffff) {
     this.matrix.compose(this.origin.set(x,y,z),this.quat.setFromEuler(this.rotation.set(rx,ry,rz)),this.size.set(w,h,d));
     const mesh = geometry.clone().applyMatrix4(this.matrix);
+    this.collect(key,mesh,tint);
+  }
+  collect(key, mesh, tint) {
     const p = mesh.attributes.position, n = mesh.attributes.normal, uv = mesh.attributes.uv;
+    const colors = this.materials[key].vertexColors ? new Float32Array(p.count*3) : null;
+    this.color.setHex(tint);
     for (let i=0; i<p.count; i++) {
       const x = p.getX(i), y = p.getY(i), z = p.getZ(i);
       if (Math.abs(n.getY(i))>.7) uv.setXY(i,x/4.2,z/4.2);
       else if (Math.abs(n.getX(i))>.7) uv.setXY(i,z/4.2,y/4.2);
       else uv.setXY(i,x/4.2,y/4.2);
+      if(colors)this.color.toArray(colors,i*3);
     }
+    if(colors)mesh.setAttribute('color',new THREE.BufferAttribute(colors,3));
     if (!this.parts.has(key)) this.parts.set(key,[]);
     this.parts.get(key).push(mesh);
   }
   box(key,...args) { this.add(key,this.cube,...args); }
+  ground(world,key,x,z,w,d,lift) {
+    const mesh=this.plane.clone().scale(w,1,d).translate(x,0,z);
+    const p=mesh.attributes.position;
+    for(let i=0;i<p.count;i++)p.setY(i,world.height(p.getX(i),p.getZ(i))+lift);
+    mesh.computeVertexNormals();
+    this.collect(key,mesh,0xffffff);
+  }
   finish(root) {
     for (const [key, geometries] of this.parts) {
       const g=mergeGeometries(geometries);
       geometries.forEach(o=>o.dispose());
       const m=new THREE.Mesh(g,this.materials[key]);
-      m.name=key; m.castShadow=key!=='asphalt'&&key!=='mark';m.receiveShadow=true;
+      m.name=key; m.castShadow=key!=='asphalt'&&key!=='mark'&&key!=='stripe';m.receiveShadow=true;
       m.userData.fieldGeometry=true;root.add(m);
     }
     this.cube.dispose();
+    this.plane.dispose();
     this.parts.clear();
   }
 }
 
 function shoreWater() {
-  const mat=new THREE.MeshStandardMaterial({color:0x32616a,roughness:.25,metalness:.18,envMapIntensity:.75});
+  const mat=new THREE.MeshStandardMaterial({color:0x315965,roughness:.24,metalness:0});
   const time={value:0},bow={value:LANDING.departure},moving={value:0};
   mat.onBeforeCompile=shader=>{
     Object.assign(shader.uniforms,{tideTime:time,tideBow:bow,tideMoving:moving});
@@ -70,35 +97,38 @@ function shoreWater() {
       .replace('#include <map_fragment>',`#include <map_fragment>
         vec2 p=vLandingSea;
         float edge=p.x-${shore};
-        float runup=sin(tideTime*1.75+p.y*.066)*1.15+sin(tideTime*2.6+p.y*.178)*.35;
-        if(edge>1.7+runup*.6) discard;
-        float disturbed=edge-runup+seaDetail(p*.8)*.8;
-        float localFoam=smoothstep(.79,.99,sin(disturbed*1.14-tideTime*.65)*.5+.5);
-        float breaker=abs(edge+8.0+sin(tideTime*1.49+p.y*.062)*3.2+seaDetail(p*.36)*1.2);
-        float wash=(1.0-smoothstep(0.0,4.4,abs(disturbed)))*.75
-          +(1.0-smoothstep(.43,2.1,breaker))*.86
-          +(1.0-smoothstep(5.0,27.0,abs(disturbed)))*localFoam*.62;
+        float runup=sin(tideTime*1.45+p.y*.05)*.91+sin(tideTime*2.2+p.y*.176)*.27;
+        float shoreLine=edge-runup+seaDetail(p*vec2(.58,.24))*.36;
+        if(shoreLine>1.05) discard;
+        float curl=edge+tideTime*2.75+sin(p.y*.051)*2.9+sin(p.y*.18)*.45;
+        float breakLine=abs(fract(curl/11.0)-.48)*11.0;
+        float width=max(.15,fwidth(curl));
+        float foamLace=seaDetail(vec2(p.x*.88-tideTime*.43,p.y*.31))*.66+
+          seaDetail(p*vec2(1.73,.74)+tideTime*.26)*.34;
+        float streak=smoothstep(-.36,.51,foamLace);
+        float wash=(1.0-smoothstep(.08,.72+width,abs(shoreLine)))*(.23+.53*streak);
+        float breaker=(1.0-smoothstep(.15,.88+width,breakLine))*
+          smoothstep(-33.0,-9.0,edge)*(1.0-smoothstep(-4.5,-.2,edge));
         float behind=tideBow-65.0-p.x;
         float wakeDist=abs(abs(p.y)-18.0-max(0.0,behind)*.19);
         float wake=smoothstep(0.0,5.0,behind)*(1.0-smoothstep(55.0,185.0,behind))*(1.0-smoothstep(1.4,9.0,wakeDist));
         float bowWash=(1.0-smoothstep(5.0,27.0,length(vec2(p.x-tideBow,p.y*.84))))*tideMoving*.48;
-        float grain=smoothstep(.04,.78,seaDetail(p*.64+vec2(tideTime*.31,0.0)));
-        float crest=smoothstep(.985,1.0,sin(dot(p,vec2(.088,.035))-tideTime*1.6))*grain*.16;
-        float foam=clamp((wash+wake*tideMoving*.9+bowWash)*grain+crest,0.0,.85);
+        float foam=clamp(wash+(breaker*.78+wake*tideMoving*.61+bowWash)*streak,0.0,.84);
         float bank=smoothstep(-35.0,0.0,edge);
-        diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.125,.208,.19),bank*.56);
-        diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.50,.59,.58),foam);
+        diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.10,.177,.149),bank*.66);
+        diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.59,.65,.61),foam);
       `)
       .replace('#include <normal_fragment_maps>',`#include <normal_fragment_maps>
         float p1=dot(p,vec2(.088,.035))-tideTime*1.6;
         float p2=dot(p,vec2(.15,-.05))-tideTime*2.25;
         vec2 gradient=vec2(.088,.035)*cos(p1)*.45+vec2(.15,-.05)*cos(p2)*.17;
-        gradient+=vec2(.58,.88)*cos(dot(p,vec2(.58,.88))+tideTime*2.5)*.031;
-        gradient+=vec2(-1.3,.72)*cos(dot(p,vec2(-1.3,.72))-tideTime*2.1)*.009;
+        float fineWaves=1.0-smoothstep(.4,1.9,fwidth(curl));
+        gradient+=vec2(.65,.79)*cos(dot(p,vec2(.65,.79))+tideTime*2.5)*.027*fineWaves;
+        gradient+=vec2(-1.55,.83)*cos(dot(p,vec2(-1.55,.83))-tideTime*2.1)*.012*fineWaves;
         normal=normalize(mat3(viewMatrix)*vec3(-gradient.x,1.0,-gradient.y));`)
-      .replace('#include <roughnessmap_fragment>','#include <roughnessmap_fragment>\nroughnessFactor=mix(.20,.35,smoothstep(-22.0,2.0,edge));');
+      .replace('#include <roughnessmap_fragment>','#include <roughnessmap_fragment>\nroughnessFactor=mix(.23,.52,foam);');
   };
-  mat.customProgramCacheKey=()=> 'landing-outer-bay';
+  mat.customProgramCacheKey=()=> 'landing-outer-bay-v2';
   const geometry=new THREE.PlaneGeometry(1,1,67,69).rotateX(-Math.PI/2);
   const positions=geometry.attributes.position;
   for(let i=0;i<positions.count;i++){
@@ -132,6 +162,10 @@ function portArchitecture(world, root, materials) {
   const tetra=new THREE.CylinderGeometry(.5,1,1.25,6);
   const tower=new THREE.CylinderGeometry(.80,.91,1,14);
   const pebble=new THREE.SphereGeometry(1,6,3);
+  const barrier=new THREE.BoxGeometry();
+  const corners=barrier.attributes.position;
+  for(let i=0;i<corners.count;i++)if(corners.getY(i)>0)corners.setXYZ(i,corners.getX(i)*.91,.5,corners.getZ(i)*.81);
+  barrier.computeVertexNormals();
   const fix=(x,z,wide,deep,h)=>world.addCollider({x0:x-wide/2,x1:x+wide/2,z0:z-deep/2,z1:z+deep/2,top:world.height(x,z)+h});
   // 長海堤、兩處施工通道、朝海一側排列的消波塊。
   for(const [z,length] of [[-323,474],[0,83],[327,473]]) {
@@ -157,8 +191,10 @@ function portArchitecture(world, root, materials) {
   }
   for(const z of [LANDING.northGap,LANDING.southGap]) {
     const x=LANDING.seawall,y=world.height(x,z);
-    b.box('asphalt',x,y+.055,z,83,.11,24.5);
-    for(const iz of [-10,10])for(let i=0;i<11;i++)b.box('mark',x-34+i*6.4,y+.14,z+iz,3.05,.04,.25);
+    b.ground(world,'asphalt',x,z,83,24.5,.065);
+    b.ground(world,'stripe',x,z-10,83,.25,.093);
+    b.ground(world,'stripe',x,z+10,83,.25,.093);
+    for(let i=0;i<10;i++)b.ground(world,'mark',x-36+i*7.8,z,4,.22,.093);
     for(const iz of [-12.4,12.4]){
       b.box('trim',x+2,y+.45,z+iz,17.5,.85,.7);
       for(const ix of [-9,10])b.add('darkRock',collar,x+ix,y+.88,z+iz,1,.95,1);
@@ -173,9 +209,20 @@ function portArchitecture(world, root, materials) {
     [201,72,19,27,10.2],[221,-61,16,21,9.6],[319,34,18,25,8.5],
   ]){
     const y=world.height(x,z);
-    b.box('concrete',x,y+h/2,z,w,h,d);
-    b.box('trim',x,y+h,z,w+.3,.36,d+.38);
+    if(x<0)b.add('concrete',barrier,x,y+h/2,z,w,h,d);
+    else{
+      b.box('concrete',x,y+h/2,z,w,h,d);
+      b.box('concrete',x,y+h,z,w+.3,.36,d+.38);
+    }
     b.box('darkRock',x-w/2-.05,y+.45,z,.14,.85,d);
+    if(x>0){
+      b.box('hull',x-w/2-.1,y+h*.46,z,.26,h*.72,d*.76);
+      b.box('cargo',x-w/2-.25,y+h*.46,z,.18,h*.61,d*.68,0,0,0,0x73827d);
+      for(let dy=1.8;dy<h*.71;dy+=.85)b.box('hull',x-w/2-.36,y+dy,z,.15,.12,d*.70);
+      for(const side of [-1,1])b.box('trim',x-w/2-.36,y+h*.46,z+side*d*.36,.15,h*.73,.24);
+      b.box('paint',x-w*.24,y+h+.49,z+d*.16,w*.20,.81,d*.35);
+      b.box('darkRock',x-w*.24,y+h+.91,z+d*.16,w*.16,.13,d*.24);
+    }
     fix(x,z,w,d,h+.18);
   }
   for(const [x,z] of [[-300,-22],[-301,20],[-263,-60],[-262,65],[-165,79],[-151,-85],[64,-102],[85,104]]) {
@@ -190,30 +237,63 @@ function portArchitecture(world, root, materials) {
   }
 
   // 港區泊橋、冷鏈倉庫、繫船樁與岸橋。保留兩條可走的貨櫃走廊。
-  for(const [x,z,length,width] of [[139,0,258,31],[107,88,204,23],[166,-91,192,23],[249,4,137,61]]) {
-    const y=world.height(x,z);
-    b.box('asphalt',x,y+.02,z,length,.12,width);
+  for(const [x,z,length,width] of [[139,0,258,31],[107,88,204,23],[166,-91,192,23]]) {
+    b.ground(world,'asphalt',x,z,length,width,.065);
+    for(const side of [-1,1])b.ground(world,'stripe',x,z+side*(width*.5-1.15),length,.23,.095);
+    for(let dx=-length/2+12;dx<length/2-7;dx+=17)b.ground(world,'mark',x+dx,z,7,.27,.095);
+  }
+  b.ground(world,'asphalt',249,4,137,61,.04);
+  for(const z of [-24,32]){
+    b.ground(world,'stripe',252,z,128,.23,.096);
+    for(let x=196;x<=312;x+=14)b.ground(world,'stripe',x,z+Math.sign(z)*2, .23,4,.096);
   }
   for(const [x,z,k] of [
-    [76,-125,'paint'],[109,-125,'hull'],[142,-125,'mark'],[180,-130,'paint'],[213,-130,'hull'],
-    [70,125,'mark'],[104,125,'hull'],[146,125,'paint'],[196,123,'paint'],[236,123,'hull'],[276,113,'mark'],[313,118,'paint'],
-    [153,-54,'paint'],[171,47,'mark'],[295,-45,'hull'],
+    [76,-125,0x516f7e],[109,-125,0x9a5a47],[142,-125,0x8a8d78],[180,-130,0x496c61],[213,-130,0x9b9c93],
+    [70,125,0x9b7860],[104,125,0x496c61],[146,125,0x647887],[196,123,0x9a5a47],[236,123,0x9b9c93],[276,113,0x986835],[313,118,0x4d6971],
+    [153,-54,0x596f79],[171,47,0x9c634e],[295,-45,0x768479],
   ]){
     const y=world.height(x,z), stacked=x%3===0;
     for(let level=0;level<(stacked?2:1);level++){
-      b.box(k,x,y+3.4+level*6.8,z,26,6.8,7.5);
-      for(const dz of [-3.83,3.83])for(let dx=-11;dx<12;dx+=2.25)b.box(k,x+dx,y+3.4+level*6.8,z+dz,.21,6.4,.31);
-      for(const dz of [-3.78,3.78]) b.box('darkRock',x,y+.35+level*6.8,z+dz,26.1,.25,.35);
+      const cy=y+3.4+level*6.8;
+      b.box('cargo',x,cy,z,26,6.8,7.5,0,0,0,k);
+      for(const dz of [-3.83,3.83]){
+        for(let dx=-11.2;dx<12;dx+=1.86)b.box('cargo',x+dx,cy,z+dz,.32,6.25,.32,0,0,0,k);
+        b.box('hull',x,cy-3.14,z+dz,26.1,.23,.29);
+        b.box('cargo',x,cy+3.12,z+dz,26.1,.24,.29,0,0,0,k);
+        for(const dx of [-12.8,12.8])b.box('hull',x+dx,cy,z+dz,.29,6.8,.32);
+      }
+      b.box('hull',x-13.025,cy,z,.11,6.1,6.92);
+      for(const dz of [-1.73,1.73]){
+        b.box('cargo',x-13.11,cy,z+dz,.18,5.86,3.28,0,0,0,k);
+        const bar=z+dz*.57;
+        b.box('trim',x-13.25,cy,bar,.14,5.72,.17);
+        b.box('trim',x-13.27,cy-.85,bar+Math.sign(dz)*.37,.15,.14,.84);
+      }
     }
     fix(x,z,26,7.5,stacked?13.6:6.8);
   }
   for(const [x,z,w,d,h] of [[336,-125,54,37,23],[350,106,53,43,20],[411,-23,72,48,29],[415,86,68,35,17]]) {
     const y=world.height(x,z);
-    b.box('concrete',x,y+h*.5,z,w,h,d);
-    b.box('hull',x,y+h+.4,z,w+1.4,1.2,d+1.7);
-    for(let dz=-d/2+4;dz<d/2-2;dz+=6)
-      for(let dy=6;dy<h-2;dy+=6)b.box('glass',x-w/2-.09,y+dy,z+dz,.24,2.9,4.4);
-    b.box('trim',x-2,y+h+2.1,z-7,w*.36,2.9,d*.22);
+    const front=x-w*.5, slope=.09, eave=y+h;
+    b.box('cargo',x,y+h*.5,z,w,h,d,0,0,0,x%2?0xa4aba5:0x889e9f);
+    b.box('concrete',x,y+1.35,z,w+.18,2.7,d+.18);
+    for(const side of [-1,1]){
+      b.box('hull',x,eave+d*slope*.25,z+side*d*.25,w+2.3,.44,d*.51+1.1,side*slope);
+      b.box('trim',x,eave-.16,z+side*(d*.5+.45),w+2.1,.57,.42);
+    }
+    for(let dz=-d/2+3;dz<d/2-1;dz+=4.8){
+      b.box('paint',front-.09,y+h*.53,z+dz,.18,h*.85,.16);
+      b.box('glass',front-.17,y+h-3.2,z+dz+2,.28,2.8,3.4);
+      b.box('trim',front-.31,y+h-4.65,z+dz+2,.31,.17,3.7);
+    }
+    for(const dz of [-d*.23,d*.24]){
+      const wDoor=d*.23;
+      b.box('hull',front-.2,y+4.4,z+dz,.37,8.8,wDoor+.56);
+      b.box('cargo',front-.44,y+4.35,z+dz,.21,8.35,wDoor,0,0,0,0x718285);
+      for(let dy=.9;dy<8.2;dy+=.85)b.box('hull',front-.58,y+dy,z+dz,.13,.10,wDoor);
+      b.box('trim',front-1.18,y+9.0,z+dz,2.55,.25,wDoor+1.2);
+    }
+    b.box('trim',x-2,eave+2.1,z-7,w*.29,2.35,d*.14);
     fix(x,z,w,d,h+.8);
   }
   for(const x of [181,329,462]){
@@ -228,6 +308,14 @@ function portArchitecture(world, root, materials) {
     b.box('hull',x,y+53,0,5,5.8,79);
     b.box('paint',x,y+57,0,4.1,3,80);
     for(let z=-40;z<44;z+=10)b.box('trim',x,y+58.0,z,4.5,.45,7.4);
+    for(let z=-33;z<=33;z+=11){
+      b.box('hull',x-2.6,y+54.6,z,.23,4.5,.32);
+      b.box('trim',x-2.68,y+57.5,z,.19,2.0,.2);
+      if(z<33)b.box('trim',x-2.6,y+53.2,z+5.5,.21,11.8,.28,(z+33)%22?1.22:-1.22);
+    }
+    b.box('mark',x-2.8,y+58.8,0,.15,.3,71);
+    b.box('cargo',x+3.35,y+50,-7,5.45,4.2,7.25,0,0,0,0x879c9b);
+    b.box('glass',x+3.6,y+50.8,-10.68,4.5,2.1,.21);
     b.box('hull',x+11,y+62,-7,32,2.7,4,0,0,-.25);
     b.box('darkRock',x-4,y+42,-7,.43,20,.43);
   }
@@ -246,7 +334,7 @@ function portArchitecture(world, root, materials) {
   b.box('hull',181,24,0,2.1,.58,46);
   b.box('trim',181,14,-19,.48,13,.55);
   b.box('trim',181,14,19,.48,13,.55);
-  b.finish(root);collar.dispose();tetra.dispose();tower.dispose();pebble.dispose();
+  b.finish(root);collar.dispose();tetra.dispose();tower.dispose();pebble.dispose();barrier.dispose();
   return sign(world,root);
 }
 
@@ -325,12 +413,14 @@ export function buildLandingSite(world, root) {
   const materials={
     hull:material(world,0x4a5b60,.59,.48,'paint'),
     trim:material(world,0xa0a9a3,.67,.31,'paint'),
-    paint:material(world,0x587680,.67,.24,'paint'),
+    paint:material(world,0x587680,.58,.24,'paint'),
+    cargo:material(world,0xf5f2e9,.54,.23,'paint',true),
     glass:material(world,0x183a49,.24,.56),
-    concrete:material(world,0xad9f8b,.94,.04,'concrete'),
+    concrete:material(world,0x95938b,.88,.02,'precast'),
     darkRock:material(world,0x51534d,.85,.09,'concrete'),
     asphalt:material(world,0x999991,.88,.12,'asphalt'),
     mark:material(world,0xd69b45,.77,.12,'paint'),
+    stripe:material(world,0xc7c9b9,.82,.02),
   };
   const {water,time,bow,moving}=shoreWater();root.add(water);
   const scenery=new THREE.Group();scenery.name='神戶外港・海堤與港區';root.add(scenery);

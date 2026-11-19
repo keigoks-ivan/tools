@@ -14,7 +14,7 @@ import { createShieldField } from './shield-field.mjs';
 const MATS = {};
 let heroBuilder;
 export async function loadHeroMech() {
-  const module = await import('./campaign-mech.mjs?v=2');
+  const module = await import('./campaign-mech.mjs?v=3');
   await module.loadCampaignHero();
   heroBuilder = module.buildCampaignHero;
   TPL.delete('hero|hero');
