@@ -10,6 +10,7 @@ import { Contacts, Scout } from './recon.js';
 import { FieldOps, FieldMap } from './field.js';
 import { qualityLevel, pixelRatio, FrameGate } from '../runtime.js';
 import { collectMissionItem, syncMissionProps } from './mission-props.mjs';
+import { footCue } from './campaign-cues.mjs';
 import { ScenicMusic } from '../scenic-music.mjs';
 import { VehicleOps } from './vehicle-ops.mjs';
 import { cleanupTargets } from './cleanup.mjs';
@@ -561,7 +562,6 @@ function startChapter(n, announce = true) {
   const L = announce && (n === 1 && campaign ? S.lastLineOpeningLines(openingRelay) : S.LINES[n === 1 ? 'start' : 'ch' + n]);
   if (L) { setTimeout(() => audio.radio('in'), 1500); for (const [w, t] of L) hud.say(w, t, 3.8); }
   scenicMusic.reset();
-  audio.music('battle', { stage: C.music });
   mechWalk = null; hound.root.visible = false;
   if (alarmOn) { alarmOn = false; audio.alarm(false); }
   finale = null; hatchOpen = 0; if (hero.hatchOpen) hero.hatchOpen(0);
@@ -648,7 +648,7 @@ function nextChapter(n) {
   G.objText = first ? first.obj : ''; hud.obj = first ? guideObj(first) : null;
   checkpoint = { p: player.pos.clone(), yaw: player.yaw, done: [...done], ch: n, nades: G.nadeN, patrols: patrols.snapshot(), field: G.field.snapshot(), vehicles: G.ground.snapshot() };
   scenicMusic.reset();
-  audio.music('battle', { stage: C.music });
+  audio.music(footCue(campaign, n, done, false, openingRelay));
   if (n > progress()) store.set('ch', n);
   saveFoot();
 }
@@ -945,7 +945,7 @@ function startFinale() {
   G.scout.return();
   finale = { t: 0, from: G.playerEye.clone(), yaw: player.yaw, pitch: player.pitch, to: hatchWorld() };
   player.frozen = true; hud.prompt = null; hud.obj = null; G.objText = ''; G.playing = false;
-  audio.music('off');
+  audio.music(campaign ? 'lBreak' : 'zIgnite');
   audio.mechBoot(finale.to);
   if (campaign) {
     store.set('ch', Math.max(S.FIRST_MECH, progress()));
@@ -1115,7 +1115,7 @@ $('chapters').addEventListener('click', (ev) => { const b = ev.target.closest('.
 document.addEventListener('mouseover', (ev) => { const b = ev.target.closest('.chp:not(.lock), .btn'); if (b && !b.contains(ev.relatedTarget)) audio.ui('hover'); });
 document.addEventListener('click', (ev) => { if (ev.target.closest('.btn, .chp')) audio.ui('click'); });
 for (const k of ['pointerdown', 'keydown']) addEventListener(k, () => audio.unlock(), { once: true });
-audio.music('title');
+audio.music(campaign ? 'lTheme' : 'zTheme');
 $('resume').addEventListener('click', resume);
 $('quit').addEventListener('click', toTitle);
 $('menu').addEventListener('click', toTitle);
@@ -1147,7 +1147,6 @@ function intro(then) {
   const finish = () => { if (over) return; over = true; clearTimeout(tm); el.style.display = 'none'; removeEventListener('keydown', skip); el.removeEventListener('pointerdown', skip); then(); };
   const skip = () => { if (i < ps.length) { ps.forEach((p) => p.classList.add('on')); i = ps.length; clearTimeout(tm); tm = setTimeout(finish, 900); } else finish(); };
   addEventListener('keydown', skip); el.addEventListener('pointerdown', skip);
-  audio.music('off');
   tm = setTimeout(next, 500);
 }
 function begin(n, replayBreakout = false) {
@@ -1184,6 +1183,7 @@ function begin(n, replayBreakout = false) {
     }
     if(campaign)vm.swap('smg');
   }
+  audio.music(footCue(campaign, n, done, false, openingRelay));
   saveFoot();
   if (q.has('final')) { for (const E of encounters) done.add(E.id); player.reset(new THREE.Vector3(14, 0, 90), 0); toCockpit(); }
   state = 'play'; stage = 'play'; G.playing = true;
@@ -1210,7 +1210,7 @@ function toTitle() {
   input.unlock(); input.enabled = false; touchUI.style.display = 'none';
   clearEnemies(); G.playing = false; state = 'title';
   map.setRelayOpening?.(null);
-  renderChapters(); audio.music('title');
+  renderChapters(); audio.music(campaign ? 'lTheme' : 'zTheme');
   $('title').classList.remove('hide');
 }
 
@@ -1324,13 +1324,13 @@ function frame(now = performance.now()) {
   audio.lowHealth(player.hp < 35 && !player.dead && stage === 'play');
   audio.setListener(camera.position, camera.getWorldDirection(_w));
   audio.breath(player.stam);
-  let scenic = false;
+  let scenic = false, threat = false;
   if (stage === 'play' && !finale && !player.dead) {
-    const threat = player.hurtT < 2 || G.enemies.some(e => !e.dead && (e.state === 'combat' || e.sees) && e.pos.distanceToSquared(player.pos) < 95 * 95);
+    threat = player.hurtT < 2 || G.enemies.some(e => !e.dead && (e.state === 'combat' || e.sees) && e.pos.distanceToSquared(player.pos) < 95 * 95);
     scenic = scenicMusic.update(dt,player.pos,G.kitano?.bounds,threat);
-    audio.music(scenic ? 'kitano' : 'battle', { stage: S.CHAPTERS[chapter - 1].music });
+    audio.music(footCue(campaign, chapter, done, scenic, openingRelay));
   }
-  audio.setIntensity(scenic ? .22 : active.length ? 1 : 0.3);
+  audio.setIntensity(scenic ? .22 : (threat || active.some(a => a.E.fight)) ? 1 : 0.3);
   world.followShadow(camera.position);
   world.update(dt);
   fx.update(dt, true);

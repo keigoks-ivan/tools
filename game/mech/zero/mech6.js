@@ -6,6 +6,7 @@
 //   本篇的模組一行都沒改：Combat 的 def／tier／spawnGroup／say／damageEnemy 在這裡換掉；目標點（HUD、光柱、雷達）也畫在這裡
 //   波次、對白都在 script.js 的 MECH6；main.js 的 frame() 在這章把每一幀交給這裡的 tick()
 import * as THREE from 'three';
+import { mechCue } from './campaign-cues.mjs';
 import { Audio as BaseAudio } from '../audio.js';
 import { Player } from '../player.js';
 import { Combat } from '../combat.js';
@@ -43,6 +44,12 @@ export async function startMech(X) {
   const { renderer, scene, camera, vScene, vCam, post, world, hero, audio, input, zhud, solid, D, fxl, G, S, $, pause, exit } = X;
   const M6 = { ...S.MECH6 };
   let mission = null;
+  const sequel = S.SAVE_KEY === 'lastline';
+  let scoredChoice;
+  function scoreWave(k, engaged) {
+    scoredChoice = mission?.convoy?.choice;
+    audio.music(mechCue(sequel, M6, k, engaged, scoredChoice));
+  }
   let FX = null;
   try { ({ FX } = await import('../fx.js')); } catch (e) { console.warn('[zero] fx.js 載入失敗，改用空殼', e); }
 
@@ -229,7 +236,7 @@ export async function startMech(X) {
     this.audio.ui('wave');
     const noDog = W.boss && W.boss.flee && fled;   // 黑犬已經逃了：從這一波重來時只剩掩護他的那幾台
     if (!noDog) for (const [w, t, now] of W.lines) zhud.say(w, t, 3.6, now);
-    if (W.music) audio.music('battle', { stage: W.music });
+    scoreWave(k, !noDog);
     const A = W.go ? { x: W.go[0], z: W.go[1] } : { x: player.pos.x, z: player.pos.z };
     const list = [...W.list, ...W.reinforce || []];
     list.forEach(([kind, x, z, y], i) => {
@@ -246,6 +253,7 @@ export async function startMech(X) {
     const W = M6.waves[k];
     gate = { k, W, x: W.go[0], z: W.go[1], t: 0 };
     wave = k;
+    if (!C.dead) scoreWave(k, false);
     if (told.has(k) || C.dead) return;   // 大破畫面中：重來之後才講
     told.add(k);
     flushTalk();
@@ -296,16 +304,16 @@ export async function startMech(X) {
     if (mission) wave = mission.restart();
     newCombat(); place(cp); fight(wave); boot = 0.7;
     for (const [w, t] of M6.down) zhud.say(w, t, 3.4, true);
-    audio.music('battle', { stage: M6.waves[wave].music || 4 });
+    scoreWave(wave, false);
   }
   let ending = null;
   function onEnd(ok) {
     if (mission) mission.onEnd(ok);
-    if (!ok) { if (!mission) setTimeout(restart, 3400); return; }   // 大破畫面由本篇 HUD 顯示（AP ZERO）
+    if (!ok) { audio.music('fail'); if (!mission) setTimeout(restart, 3400); return; }   // 大破畫面由本篇 HUD 顯示（AP ZERO）
     ending = { t: 0 };
     gate = null;
     flushTalk();
-    audio.music('clear');
+    audio.music(!sequel ? 'zHome' : M6.final ? 'lHome' : 'clear');
     for (const [w, t] of M6.end) zhud.say(w, t, 3.8);
   }
 
@@ -442,7 +450,7 @@ export async function startMech(X) {
   zhud.sub = null; zhud.subQ.length = 0;   // 上一章（駕駛艙）還沒播完的字幕不帶過來
   zhud.title(M6.breakout ? M6.label : `第 ${M6.chapter || 6} 章　${M6.name}`, M6.en, 4.5);
   for (const [w, t] of M6.start.lines) zhud.say(w, t, 3.6);
-  audio.music('battle', { stage: 4 });
+  scoreWave(wave, false);
   $('fade').style.transition = 'opacity 1.2s'; $('fade').style.opacity = 0;
   const fwd = new THREE.Vector3(), foot = new THREE.Vector3(), tmp = new THREE.Vector3();
   const [fadeAt, cardAt, exitAt, exitLimit] = M6.breakout ? [4.5, 6.3, 9, 11] : [12, 14.2, 19, 26];
@@ -516,6 +524,7 @@ export async function startMech(X) {
 
     // ---- 戰鬥、特效、世界
     mission?.tick(dt);
+    if (!ending && !C.dead && M6.chapter === 4 && scoredChoice !== mission?.convoy?.choice) scoreWave(wave, false);
     if (ending) mission?.cinematic(rdt);
     if (!mission?.blocked || ending) C.update(dt, ending ? null : inp, rdt);
     updFlyers(dt); updPods(dt); tankGuard();

@@ -91,11 +91,11 @@ export function voiceLeadChord(ch, previous = null, lo = 52, hi = 76) {
   if(!best)throw new RangeError('Chord does not fit four music voices');
   return best;
 }
-const bassOf = (ch) => 33 + ((ch.r - 9 + 12) % 12);   // 貝斯根音落在 A1～G#2
+export const bassOf = (ch) => 33 + ((ch.r - 9 + 12) % 12);   // 貝斯根音落在 A1～G#2
 const shift = (list, k) => list.map(([m, d]) => [m == null ? null : m + k, d]);
 
 // 樂譜：一格＝十六分音符。事件 { k: 樂器, m: 音高, n: 和弦音, d: 拍數, v: 力度, min/max: 強度閘, pz: 只在奇/偶輪, p: 0＝可丟棄 }
-class Score {
+export class Score {
   constructor(bars, bpm) {
     this.bpm = bpm;
     this.len = Math.round(bars * 16);
@@ -328,7 +328,7 @@ function kitanoScore() {
 }
 
 // Keep the melody on top of an open brass chord. The other desks play the missing chord tones.
-function fanfare(third,root,top) {
+export function fanfare(third,root,top) {
   const below=(pc,limit)=>limit-((limit-pc)%12+12)%12;
   const middle=below(top%12===third?(root+7)%12:third,top-3);
   const bottom=below(top%12===root?(root+7)%12:root,middle-5);
@@ -1755,7 +1755,7 @@ export class Audio {
     const st = clamp(num(opts && opts.stage, 1) | 0, 1, 6);
     if (n === 'battle' && st >= 6) n = 'final';
     const key = n === 'battle' ? 'battle' + st : n;
-    if (key !== 'off' && !SCORES[key]) return;
+    if (key !== 'off' && !SCORES[key] && !this.campaignScores?.[key]) return;
     if(key==='landing')this._tidePart=clamp(num(opts?.part,0)|0,0,TIDE_HARMONY.length-1);
     if (key === this._musKey) return;
     this._musKey = key;
@@ -1787,7 +1787,7 @@ export class Audio {
 
   _musStart(key) {
     const c = this.ctx, now = c.currentTime, old = this.mtr;
-    const S = key === 'off' ? null : scoreOf(key);
+    const S = key === 'off' ? null : (this.campaignScores?.[key]?.() ?? scoreOf(key));
     if (old) {
       this._mFade(old, now, S && !S.loop ? 0.35 : 1.0);
       this.mtr = null;
@@ -1863,6 +1863,7 @@ export class Audio {
       s = S.from * 16 + ((s - n) % L);
     }
     if(S.orchestra&&gs%16===0)tr.bank=this.bank;
+    if (!this.vol || !this.musVol) return; // Keep musical time without scheduling inaudible notes.
     const I = S.flat ? 1 : this.musI;
     for (const e of S.ev[s]) {
       if (I < (e.min || 0) || I >= (e.max ?? 9)) continue;

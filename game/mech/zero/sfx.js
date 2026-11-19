@@ -7,6 +7,7 @@
 // 沿用父類：music、explosion、impact、debris、ui、enemyStep（巨型敵機）、setPaused、setVolume、setIntensity、setDanger。
 
 import { Audio } from '../audio.js';
+import { fieldScores } from './campaign-score.mjs';
 
 const SOS = 343;
 const E = 0.0001;
@@ -63,6 +64,7 @@ class Rig {
 export class ZeroAudio extends Audio {
   constructor() {
     super();
+    this.campaignScores = fieldScores;
     this.dn = new Map();       // 無人機循環（id → Rig）
     this.hb = null;            // 低血量心跳循環
     this.al = null;            // 基地警報循環

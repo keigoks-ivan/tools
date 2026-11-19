@@ -349,9 +349,9 @@ $('meter').onclick = async () => {
 
 // ───── 配樂離線量測：每 0.1 秒暫停一次讓排程器排下一段（等同遊戲裡的計時器） ─────
 // setup(a) 在 0 秒呼叫；ev = [[秒, fn], ...] 在指定時間呼叫；回傳峰值、整段 RMS、最大 400 ms RMS、長度、渲染時間
-async function renderMusic(setup, sec = 20, ev = [], preloadOrchestra = false) {
+async function renderMusic(setup, sec = 20, ev = [], preloadOrchestra = false, AudioType = MechAudio) {
   const ctx = new OfflineAudioContext(2, SR * sec, SR);
-  const a = new MechAudio();
+  const a = new AudioType();
   a._attach(ctx, false);
   const t0 = performance.now();
   const voices=new Set(),tracks=new Set();let mvMax=0,nodeMax=0;
