@@ -6,7 +6,7 @@ import { parse, encGroups, setRoute, Encounter } from './encounter.js';
 import { STAGE_DATA } from './stages.js';
 import { steer, squadFlank, searchPoint, coveringFire, shareContact, flankAvailable, segmentBox, routeDirection, allyInLane } from './tactics.js';
 import { FLIGHT, airInterceptHeight, rayCapsule } from './flight.mjs';
-import { companionSpawn, MechCompanion } from './mech-companion.mjs?v=1';
+import { companionSpawn, MechCompanion } from './mech-companion.mjs?v=2';
 
 const clamp = THREE.MathUtils.clamp;
 const rand = (a, b) => a + Math.random() * (b - a);
@@ -135,6 +135,7 @@ export class Combat {
     this.sub = null; this.subQ = [];   // 無線電對白（正在播的一句、排隊的）
     this.boss = null;                  // 畫面上方顯示血條的頭目
     this.companion = null;
+    this.secondaryCompanion = null;
     this.companionCheck = 0;
     this.enemies = []; this.missiles = []; this.debris = []; this.events = [];
     this.stage = clamp(o.stage || 1, 1, STAGES.length);   // 第幾關
@@ -176,15 +177,19 @@ export class Combat {
 
   joinCompanion(dt) {
     const order = this.def.companion;
-    if (!order || !this.enc || this.enc.sec < order.afterAreas || this.companion) return;
+    const first = this.companion;
+    const assignment = first ? order?.second : order;
+    if (!assignment || !this.enc || this.enc.sec < order.afterAreas || this.secondaryCompanion) return;
     this.companionCheck -= dt;
     if (this.companionCheck > 0) return;
     this.companionCheck = .55;
-    const spawn = companionSpawn(this.world, this.player);
+    const spawn = companionSpawn(this.world, this.player, first ? -first.side : 1, first?.pos);
     if (!spawn) return;
-    this.companion = new MechCompanion(this, order, spawn);
-    if (this.phase === 'fight') this.note('斑鳩加入編隊', 'gr');
-    this.companion.update(0);
+    const wingman = new MechCompanion(this, assignment, spawn);
+    if (first) this.secondaryCompanion = wingman;
+    else this.companion = wingman;
+    if (this.phase === 'fight') this.note(wingman.name + '加入編隊', 'gr');
+    wingman.update(0);
   }
 
   get alive() { return this.enemies.filter((e) => !e.dead); }
@@ -337,7 +342,8 @@ export class Combat {
     } : inp);
     if (canFight && this.phase === 'fight') {
       this.joinCompanion(dt);
-      this.companion?.update(dt);
+      if (!this.enc?.front) this.companion?.update(dt);
+      this.secondaryCompanion?.update(dt);
     }
     this.updateEnemies(dt);
     this.vehicles.update(dt);
@@ -713,7 +719,8 @@ export class Combat {
 
   // ---------------------------------------------------------------- 傷害
   damageEnemy(e, dmg, stag, pos, dir, crit = false, support = false) {
-    if (e.dead || (support && (e === this.boss || e.bossName || e.fleeAt))) return;
+    const frontline = support === 'frontline';
+    if (e.dead || (support && !frontline && (e === this.boss || e.bossName || e.fleeAt))) return;
     if (e.fleeAt && e.ap - dmg <= e.apMax * e.fleeAt) { e.ap = e.apMax * e.fleeAt; this.flee(e); return; }
     if (e.stagT > 0 && !crit) dmg *= 1.4;
     const air = e.harborAir;
@@ -722,7 +729,7 @@ export class Combat {
     const shift = air?.phase === 'beam' && e.ap - dmg <= e.apMax * .55;
     if (shift) dmg = Math.max(0, e.ap - e.apMax * .55);
     if (e.vehicle) dmg = Math.min(dmg, Math.max(1, e.ap));   // 載具：不多算溢出的分數
-    if (support) {
+    if (support && (!frontline || e === this.boss)) {
       // 掩護火力保留敵人的最後一段耐久，玩家收尾、照常結算成績。
       dmg = Math.min(dmg, e.ap - Math.ceil(e.apMax * .25));
       if (dmg <= 0) return;
@@ -751,7 +758,7 @@ export class Combat {
       }
     }
     if (shift) this.shiftHarborBoss(e);
-    else if (e.ap <= 0) this.kill(e);
+    else if (e.ap <= 0) this.kill(e, frontline);
   }
   shiftHarborBoss(e) {
     const air = e.harborAir;
@@ -762,7 +769,7 @@ export class Combat {
     this.audio.alert('lock');
     this.fx.impact(e.chest(V3()), UP, 'armor');
   }
-  kill(e) {
+  kill(e, byAlly = false) {
     e.dead = true; e.dying = e.kind === 'grunt' ? 0.45 : 0.9; e.ap = 0;
     if (this.lockTarget === e) this.lockTarget = null;
     if (e.training) {
@@ -771,6 +778,7 @@ export class Combat {
       this.fx.explosion(point, .9); this.audio.explosion(point, .75);
       return;
     }
+    if (byAlly) { if (e.vehicle) this.vehicles.killed(e); return; }
     const S = this.stats;
     S.kills++;
     S.chain = S.time - S.lastKill < 8 ? S.chain + 1 : 1;
@@ -869,6 +877,7 @@ export class Combat {
     for(const e of this.enemies)if(e.airborne&&!e.dead&&!e.gone)airSlots--;
     for (const e of this.enemies) {
       if (e.gone || e.vehicle) continue;   // 載具在 vehicles.js 裡動
+      if (e.frontActor && !e.dead) continue;
       const m = e.m, K = e.K, k = e.scale;
       const air = e.harborAir;
       const relay = air?.relay?.state === 'charging' ? air.relay : null;
@@ -1509,6 +1518,8 @@ export class Combat {
   radar() {
     const out = [];
     if (this.companion) out.push({ x: this.companion.pos.x, z: this.companion.pos.z, kind: 'ally' });
+    if (this.secondaryCompanion) out.push({ x: this.secondaryCompanion.pos.x, z: this.secondaryCompanion.pos.z, kind: 'ally' });
+    this.enc?.front?.radar(out);
     for (const e of this.enemies) if (!e.gone) out.push({ x: e.pos.x, z: e.pos.z, kind: e.dead ? 'wreck' : e.kind, locked: e === this.lockTarget || e === this.soft });
     for (const M of this.missiles) if (M.own === 'enemy') out.push({ x: M.pos.x, z: M.pos.z, kind: 'missile' });
     return out;
@@ -1519,6 +1530,8 @@ export class Combat {
     this.stopShield();
     this.companion?.dispose();
     this.companion = null;
+    this.secondaryCompanion?.dispose();
+    this.secondaryCompanion = null;
     if (this.enc) this.enc.dispose();
     for (const e of this.enemies) e.m.root.removeFromParent();
     for (const d of this.debris) d.mesh.removeFromParent();

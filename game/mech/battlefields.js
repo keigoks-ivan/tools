@@ -9,6 +9,7 @@ export const BATTLEFIELDS = {
   badlands: { mode: 4, label: '荒野防線', relief: 130, trees: 0, rocks: 130 },
   airfield: { mode: 5, label: '高原航空基地', relief: 55, trees: 20, rocks: 35 },
   fortress: { mode: 6, label: '山隘要塞', relief: 270, trees: 140, rocks: 105 },
+  freight: { mode: 3, label: '神戶貨運站', relief: 118, trees: 32, rocks: 30 },
 };
 const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
 export function routeDistance(x, z, pts) {
@@ -31,16 +32,19 @@ export function fieldHeight(x, z, profile, route, base = 0) {
   }
   // 近處為可作戰的緩坡，山稜從戰場邊緣抬起；路線與目標旁保留安全走廊。
   let clear = routeDistance(x, z, route.pts);
+  if (profile === 'freight') clear = Math.max(0, clear - 103);
   if (profile === 'airfield') clear = Math.min(clear, Math.hypot(Math.max(0,Math.abs(x+420)-48),Math.max(0,Math.abs(z)-900)));
   for (const sec of route.secs) for (const t of sec.targets || []) clear = Math.min(clear, Math.hypot(x - t.x, z - t.z));
   for (const t of route.pads || []) clear = Math.min(clear, Math.hypot(x - t.x, z - t.z));
   const wx=x+noise.noise(x/600,7,z/600)*180,wz=z+noise.noise(x/600,19,z/600)*180;
   const ridge = .24+Math.pow(1-Math.abs(noise.noise(wx/350,11,wz/350)),2)*.65+noise.noise(wx/130,23,wz/130)*.18;
   const outer = smooth(650, 1250, r), inner = smooth(70, 170, clear);
-  const h = F.relief * ridge * (outer + (1 - outer) * 0.24) * inner;
+  const cut = profile === 'freight' ? 3.1*smooth(-465,-391,x)*(1-smooth(75,137,x))*smooth(-132,-108,z)*(1-smooth(-90,-68,z)) : 0;
+  const h = F.relief * ridge * (outer + (1 - outer) * 0.24) * inner - cut;
   return h * (1 - smooth(1650, 2400, r)) + base * smooth(1650, 2400, r);
 }
 export function fieldLayout(profile, route) {
+  if (profile === 'freight') return { ...BATTLEFIELDS.freight, structures: [] };
   const targets = route.secs.flatMap(s => s.targets || []).map(t => ({ x: t.x, z: t.z, target: true, name: t.name }));
   const structures = [...targets];
   for (let i = 1; i < route.pts.length; i += 2) {

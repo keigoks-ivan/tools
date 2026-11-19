@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { BATTLEFIELDS, fieldHeight, fieldLayout, routeDistance } from '../battlefields.js';
 import { STAGE_DATA } from '../stages.js';
 
-test('六種戶外場地保留全部任務目標，路線與目標地面整平', () => {
+test('各戶外場地保留全部任務目標，路線與目標地面整平', () => {
   const types = new Set();
   for (const D of STAGE_DATA) {
     if (!D.battlefield) continue;
@@ -19,7 +19,7 @@ test('六種戶外場地保留全部任務目標，路線與目標地面整平',
       if(!S.target) assert.ok(routeDistance(S.x,S.z,R.pts)>=42);
     }
   }
-  assert.equal(types.size,6);
+  assert.equal(types.size,7);
 });
 
 test('新地形接回原本遠山，不產生非有限值或邊界裂縫', () => {

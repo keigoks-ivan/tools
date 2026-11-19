@@ -1,3 +1,5 @@
+import { FREIGHT_ROUTE } from './freight-yard.mjs?v=1';
+
 // 鋼鐵黃昏：全部關卡的資料（劇情＋路線＋任務），一關一個物件，順序＝第幾關
 //   combat.js 讀這裡組出 STAGES；route（沿街推進的遭遇戰）由 encounter.js 的 parse() 解析
 //
@@ -120,41 +122,15 @@ export const STAGE_DATA = [
           go: [[OP, '直升機到了。守住廣場，直到最後一架起飛。']], lines: [[OP, '第一架降落。別讓獵犬靠近廣場。']] },
       ] } },
   // ================================================================ 第 3 關
-  // 西區：拆掉河濱公園周圍的砲兵觀測所，再打開西河大橋的出口。
-  { name: '救援', en: 'RESCUE', tip: '打掉樓頂的觀測所：琥珀色框的大樓，打到整棟倒下', music: 2, tier: 2,
-    brief: ['包圍網打開了，可是西區的河濱公園還困著上千名難民。', '公園裡的臨時醫院一直挨砲擊，砲彈由高樓頂上的觀測所導引。', '拆掉觀測所，再突破西河大橋的封鎖，替車隊打開出口。'],
-    start: [[OP, '零號，這裡是白鷺。醫院每三分鐘挨一輪砲。'], [OP, '觀測所會用琥珀色框標出來，整棟打倒才算數。']],
-    end: [[ALLY, '最後一輛車過橋了。蒼焰，這次欠你一次。'], [OP, '難民全數撤出。零號，回來補給。']],
-    route:
-    { cp: [4, 8, 10], arena: 130, fin: 90, par: 550, over: 2,
-      pts: [[-690, 240], [-600, 240], [-600, 120], [-600, 0], [-600, -120], [-480, -120], [-360, -120], [-240, -120], [-240, 0], [-240, 120], [-360, 120], [-360, 0], [-420, 0]],
-      secs: [
-        { at: 1, amb: 'tank@out*2 tank@side heli@rise', amb2: 'tank@out*2 grunt@drop grunt@side', tip: '直升機低空繞圈：鎖定它，用飛彈打',
-          lines: [[OP, '路口有戰車守著，清掉再往前。']] },
-        { at: 2, pre: 'tank@far*2', amb: 'grunt@drop tank@side*2', amb2: 'grunt@roof tank@out*2 grunt@side',
-          go: [[OP, '前面街上停著兩台戰車，先從遠處打掉。']] },
-        { at: 3, targets: [{ x: -627, z: 60, name: '砲兵觀測所' }], amb: 'grunt@roof tank@out*2 heli@rise', amb2: 'tank@side*2 grunt@drop grunt@side', tip: '打倒琥珀色框的大樓：樓倒了、敵人清光才算過',
-          go: [[OP, '第一個觀測所就在前方路口，框起來那棟。']], lines: [[EN, '觀測所遭到攻擊！附近部隊回防！']],
-          clear: [[OP, '觀測所倒了。醫院回報，砲彈打偏了。']] },
-        { at: 4, amb: 'tank@side tank@out*2 grunt@drop', amb2: 'heli@rise*2 tank@out grunt@side' },
-        { at: 5, targets: [{ x: -522, z: -157, name: '砲兵觀測所' }], amb: 'grunt@roof grunt@drop tank@out', amb2: 'heli@rise tank@side*2 grunt@side',
-          go: [[OP, '路旁那片樹林就是河濱公園，醫院在裡面。'], [OP, '第二個觀測所在下一個路口。']],
-          clear: [[OP, '第二個觀測所摧毀，剩最後一個。']] },
-        { at: 6, pre: 'tank@far*2', amb: 'brawler@breach tank@side grunt@drop heli@rise', amb2: 'grunt@roof tank@out*2 grunt@side',
-          lines: [[ALLY, '這裡是醫院，砲彈又落下來了！']] },
-        { at: 7, targets: [{ x: -179, z: -59, name: '砲兵觀測塔' }], amb: 'grunt@side tank@out*2 grunt@roof', amb2: 'heli@rise tank@side*2 grunt@side', amb3: 'grunt@drop*2 tank@out grunt@side', tip: '高樓比較耐打：對準同一棟連續射擊',
-          go: [[OP, '最後一個在前方的高樓頂上，比較耐打。']], lines: [[EN, '觀測塔告急！把那台藍色的擋下來！']],
-          clear: [[OP, '觀測所全毀，砲擊停了。'], [ALLY, '先讓傷員上車。橋口還被封著。']] },
-        { at: 8, amb: 'tank@out*2 tank@side brawler@breach', amb2: 'grunt@roof heli@rise tank@out*2 grunt@side',
-          lines: [[EN, '砲兵失去觀測。地面部隊，直接攻進醫院。'], [OP, '他們改派地面部隊了。擋在醫院前面。']] },
-        { at: 9, amb: 'heli@rise*2 grunt@side tank@out', amb2: 'tank@out*2 grunt@drop grunt@roof grunt@side',
-          go: [[OP, '掉頭繞回公園，沿路清掉追兵。']] },
-        { at: 10, amb: 'grunt@drop*2 tank@side*2', amb2: 'heli@rise tank@out*2 grunt@roof grunt@side',
-          go: [[ALLY, '傷員都上車了，橋口還有敵軍。']], clear: [[OP, '往西河大橋推進。清出出口，車隊就能走。']] },
-        { at: 12, amb: 'tank@ring*2 grunt@drop*2', tip: '突破西河大橋的封鎖',
-          lines: [[OP, '橋頭就是最後一道封鎖。蒼焰，打開出口。']],
-          clear: [[ALLY, '橋頭已淨空。救護車隊，通過！']] },
-      ] } },
+  { battlefield: 'freight', fieldLabel: '神戶貨運站', name: '救援', en: 'RESCUE', frontline: true, music: 2, tier: 3,
+    tip: '突破貨運站封鎖，替救護車隊打開撤離通道',
+    brief: ['西區臨時醫院的傷員已經上車。唯一能通行的撤離道路，經過貨運站旁的西河大橋。',
+      '獵犬軍團佔了貨站並封住橋頭。第三裝甲連在裝卸線外和敵軍交火，正等蒼焰打開缺口。',
+      '沿裝卸線正面摧毀重砲與戰車，或從左側低地切入。兩路都能打進貨運站。'],
+    start: [[ALLY, '斑鳩在裝卸線外。兩輛戰車就位，敵人把重砲搬進了貨站。'],
+      [OP, '蒼焰，正面有戰車掩護。想繞過重砲，就走左側低地。']],
+    end: [[ALLY, '最後一輛救護車已經過橋。蒼焰，這次欠你一次。'], [OP, '收到。傷員交給後方，下一站是北部山谷。']],
+    route: FREIGHT_ROUTE },
   // ================================================================ 第 4 關
   // 西南角切進來往北：長直路上的遠程自走砲、重裝機首次登場，打掉射控雷達、彈藥庫，最後在北邊打倒砲兵指揮所
   { battlefield: 'valley', fieldLabel: '山谷砲兵陣地', name: '重砲', en: 'HEAVY GUNS', tip: '新敵人：重裝機——響飛彈警報就點 SHIFT 閃', music: 3, tier: 3,
@@ -275,9 +251,9 @@ export const STAGE_DATA = [
       ] } },
   // ================================================================ 第 7 關
   { battlefield: 'badlands', fieldLabel: '荒野防線', name: '鋼鐵洪流', en: 'IRON TIDE', tip: '邊打邊退，到防線再守——守點區要撐到倒數結束', music: 5, tier: 5,
-    companion: { afterAreas: 0, tanks: true },
+    companion: { afterAreas: 0, tanks: true, second: { name: '白隼', aggressors: true } },
     brief: ['補給被切斷後，獵犬軍團把剩下的戰車全部押上。', '裝甲大軍從東郊荒原沿大道壓向市中心，帶頭的是重裝大隊長「鐵獒」。', '零號和第三裝甲連守在東郊前哨。先邊打邊退，退到大道防線。', '守住防線，再反攻奪回前哨。'],
-    start: [[ALLY, '地平線上全是戰車，數不完。斑鳩，跟著蒼焰掩護撤退。'], [OP, '零號，別硬拚。掩護裝甲連撤到防線。']],
+    start: [[ALLY, '地平線上全是戰車。斑鳩壓正面，白隼注意側翼，跟著蒼焰。'], [OP, '零號，別硬拚。掩護裝甲連撤到防線。']],
     end: [[ALLY, '前哨拿回來了。開戰以來頭一次。'], [OP, '敵方裝甲兵力折損過半。辛苦了，零號。'], [WOLF, '……有意思。']],
     route:
     // 東郊前哨（東緣空地）→ 沿北側的街往西撤（z＝120）→ 第一道防線 → 大道防線（240,0）→ 沿大道反攻、繞南側 → 奪回前哨

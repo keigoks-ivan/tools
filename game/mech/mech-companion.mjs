@@ -12,18 +12,20 @@ const clamp = THREE.MathUtils.clamp;
 const point = () => new THREE.Vector3();
 
 // 優先從側面加入編隊，窄街才退到玩家身後。沒有空位時下次再試。
-export function companionSpawn(world, player) {
+export function companionSpawn(world, player, preferred = 1, occupied = null) {
   const { pos, yaw } = player;
   const sx = Math.sin(yaw), cz = Math.cos(yaw);
   const result = point();
-  for (const [side, along] of [[20, 12], [-20, 12], [20, -18], [-20, -18], [0, -24], [0, 22]]) {
+  for (const [lateral, along] of [[20, 12], [-20, 12], [20, -18], [-20, -18], [0, -24], [0, 22]]) {
+    const side=lateral*preferred;
     const x = clamp(pos.x + side * cz + along * sx, -697, 697);
     const z = clamp(pos.z - side * sx + along * cz, -697, 697);
     if (Math.hypot(x - pos.x, z - pos.z) < 13) continue;
     const ground = world.support(x, z, RADIUS, pos.y);
     const y = Math.max(ground, player.flying ? pos.y - 5 : ground);
     result.set(x, y, z);
-    if (!world.collide(result, RADIUS, y)) return { position: result, side: Math.sign(side) || 1 };
+    if(occupied && result.distanceToSquared(occupied)<15**2)continue;
+    if (!world.collide(result, RADIUS, y)) return { position: result, side: Math.sign(side) || preferred };
   }
   return null;
 }
@@ -32,10 +34,10 @@ export class MechCompanion {
   constructor(combat, order, spawn) {
     this.combat = combat;
     this.order = order;
-    this.name = '斑鳩';
+    this.name = order.name || '斑鳩';
     this.mech = new Mech('grunt', 'ally');
     this.root = this.mech.root;
-    this.root.name = '第三裝甲連・斑鳩';
+    this.root.name = '第三裝甲連・' + this.name;
     this.root.position.copy(spawn.position);
     this.root.updateMatrixWorld(true);
     this.mech.footContacts = createFootContactShadows(this.root, [this.mech.bones.ankleR, this.mech.bones.ankleL]);
@@ -99,7 +101,8 @@ export class MechCompanion {
       const distance = enemy.chest(this.aim).distanceTo(this.pos);
       if (distance > RANGE) continue;
       const score = distance - (enemy === C.lockTarget ? 65 : 0) - (enemy.warn > .6 ? 34 : 0)
-        - (this.order.tanks && enemy.kind === 'tank' ? 76 : 0);
+        - (this.order.tanks && enemy.kind === 'tank' ? 76 : 0)
+        - (this.order.aggressors && (enemy.kind === 'brawler' || enemy.kind === 'ace') ? 82 : 0);
       list.push({ enemy, score });
     }
     list.sort((a, b) => a.score - b.score);

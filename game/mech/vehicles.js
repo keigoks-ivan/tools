@@ -940,7 +940,7 @@ export class Vehicles {
           v.los = C.world.raycast(ec, pc, null) < 0 || C.world.raycast(ec, _b.copy(pc).setY(pc.y + 6), null) < 0;
         }
         v.noLos = v.los ? 0 : v.noLos + dt;
-        if (!v.training) {
+        if (!v.training && !v.frontActor) {
           if (v.kind === 'tank') this.updTank(v, dt, pc);
           else if (v.kind === 'heli') this.updHeli(v, dt, pc);
           else this.updJet(v, dt, pc);
@@ -1064,7 +1064,7 @@ export class Vehicles {
     const L = this.list;
     for (let i = 0; i < L.length; i++) {
       const a = L[i];
-      if (a.kind !== 'tank' || a.state !== 'alive') continue;
+      if (a.kind !== 'tank' || a.state !== 'alive' || a.frontActor) continue;
       for (let j = 0; j < L.length; j++) {
         const b = L[j];
         if (b === a || b.kind !== 'tank') continue;
@@ -1080,7 +1080,7 @@ export class Vehicles {
     const moving = pl.speed > 1.5 || this.landing || pl.qbT > 0 || (pl.dashT || 0) > 0;
     const reach = pl.boosting || pl.qbT > 0 ? 5.5 : 3.6;
     for (const v of L) {
-      if (v.state !== 'alive' || v.training) continue;
+      if (v.state !== 'alive' || v.training || v.frontActor) continue;
       if (v.kind === 'tank') {
         if (pl.pos.y > v.pos.y + 3.2 || pl.pos.y < v.pos.y - 3) continue;
         const dx = pl.pos.x - v.pos.x, dz = pl.pos.z - v.pos.z;
@@ -1547,7 +1547,7 @@ export class Vehicles {
     const R = this.R, t = performance.now() / 1000;
     for (const v of this.list) {
       const burnt = v.state !== 'alive';
-      const [r, g, b] = burnt ? BURNT : [1, 1, 1];
+      const [r, g, b] = burnt ? BURNT : v.frontFriendly ? [.61, .86, 1.24] : [1, 1, 1];
       if (v.kind === 'tank') {
         _s.set(v.flat < 1 ? 1.08 : 1, v.flat, v.flat < 1 ? 1.04 : 1);
         _m.compose(v.pos, v.q, _s);

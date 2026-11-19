@@ -47,7 +47,7 @@ test('the tutorial waits for movement, both target hits and shield activation in
 test('later stages and checkpoint restarts start directly on the normal route', () => {
   const make = (i, cp) => {
     const def = STAGE_DATA[i];
-    return new Encounter({ def, stats: {}, cp }, parse(def.route, i + 1), cp?.sec);
+    return new Encounter({ def, stats: {}, cp, world: { height: () => 0 }, player: { pos: new Vector3() } }, parse(def.route, i + 1), cp?.sec);
   };
   assert(make(0, null).wantsTutorial);
   assert(!make(0, { sec: 4 }).wantsTutorial);

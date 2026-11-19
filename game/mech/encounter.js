@@ -6,6 +6,7 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { carGeometry } from './env.js';
 import { instancedCarMaterial } from './car-material.js';
 import { MechTutorial } from './tutorial.mjs?v=1';
+import { FreightFront } from './freight-front.mjs?v=1';
 
 const rand = (a, b) => a + Math.random() * (b - a);
 const clamp = THREE.MathUtils.clamp;
@@ -306,20 +307,26 @@ export class Encounter {
     this.holdT = 0; this.tg = []; this.bossE = null; this.bossTalk = 0;
     this.fightT = 0; this.beatSeen = new Set();
     this.training = null;
+    this.front = C.def?.frontline ? new FreightFront(C, this) : null;
     C.stats.healed = C.stats.healed || 0;
   }
   get cur() { return this.E.secs[this.sec]; }
   get wantsTutorial() { return !!this.C.def.tutorial && !this.C.cp && this.sec === 0; }
   // 開機時：擺路障、先擺好第一區的遠處戰車，光柱／警示光先畫一次（編好 shader，第一次出現不卡）
   prep() {
-    this.R = setRoute(this.C.world, this.E);
+    if (!this.front) this.R = setRoute(this.C.world, this.E);
     this.B = markers(this.C.scene);
     this.B.root.visible = true; this.B.a = 0;
     this.B.flares[0].s.visible = true;
-    if (!this.wantsTutorial) this.stock();
+    if (!this.front && !this.wantsTutorial) this.stock();
     this.fx(0);
   }
   begin() {
+    if (this.front) {
+      this.state = 'fight';
+      this.front.begin();
+      return;
+    }
     if (this.wantsTutorial) {
       this.state = 'training';
       this.training = new MechTutorial(this.C, [18, 54, 97].map(s => pointAt(this.E, s)));
@@ -350,6 +357,7 @@ export class Encounter {
   update(dt) {
     const C = this.C, E = this.E, p = C.player.pos, c = this.cur;
     if (C.dead || this.state === 'done') return false;
+    if (this.front) return this.front.update(dt);
     if (this.training) {
       if (this.training.update(dt)) this.endTraining();
       return false;
@@ -725,16 +733,16 @@ export class Encounter {
       wp = wp || E.pts[c.at];
     }
     const move = this.state === 'move' || this.state === 'idle';
-    const target = this.training?.marker;
+    const target = this.training?.marker || this.front?.marker;
     this.wp = target || (move && wp ? { x: wp.x, y: w.height(wp.x, wp.z) + 38, z: wp.z } : null);
     this.dist = target ? C.player.pos.distanceTo(target) : c ? Math.max(0, c.s - this.prog) : 0;
     const A = this.ahead; A.length = 0;
     if (target) A.push(C.player.pos.x, C.player.pos.z, target.x, target.z);
-    else if (c && this.state !== 'done' && !this.training) { const q = pointAt(E, this.prog); A.push(q.x, q.z); for (const P of E.pts) if (P.s > this.prog + 1) A.push(P.x, P.z); }
+    else if (c && this.state !== 'done' && !this.training && !this.front) { const q = pointAt(E, this.prog); A.push(q.x, q.z); for (const P of E.pts) if (P.s > this.prog + 1) A.push(P.x, P.z); }
     if (this.R) { const on = Math.sin(this.t * 5) > 0; this.R.la.color.setRGB(on ? 6 : 0.3, on ? 0.45 : 0.02, on ? 0.2 : 0.01); this.R.lb.color.setRGB(on ? 0.3 : 6, on ? 0.02 : 0.45, on ? 0.01 : 0.2); }
     if (!B) return;
     B.a += ((this.wp ? 1 : 0) - B.a) * (1 - Math.exp(-dt * 3));
-    const pillar = this.training?.marker || wp;
+    const pillar = target || wp;
     if (pillar) B.root.position.set(pillar.x, w.height(pillar.x, pillar.z), pillar.z);
     const T = this.t;
     B.mat.uniforms.t.value = T; B.mat.uniforms.a.value = B.a;

@@ -106,8 +106,8 @@ export class HUD {
     this.ladder();
     this.fpm(P, ax, ay);
 
-    const ally = C.companion;
-    if (ally && ally.pos.distanceToSquared(P.pos) < 180 ** 2) {
+    for (const ally of [C.companion, C.secondaryCompanion]) {
+      if (!ally || ally.pos.distanceToSquared(P.pos) >= 180 ** 2) continue;
       const marker = this.proj(_w.copy(ally.pos).add(_c.set(0, ally.mech.height + 2, 0)));
       if (marker.front && marker.x > 26 && marker.x < W - 26 && marker.y > 28 && marker.y < H - 44) {
         const r = 4 * s;
@@ -492,6 +492,20 @@ export class HUD {
   // 遭遇戰：前進距離、目標點（菱形／畫面外箭頭）、伏兵警示（紅色 !）
   objective(EN, y, W, H) {
     const X = this.x, s = this.s;
+    const front = EN.front?.objective;
+    if (front) {
+      this.text(front.title, W / 2, y, 19, 'cy', 1, 'center', 700, SANS);
+      this.text(front.hint, W / 2, y + 20 * s, 14, 'ink2', .96, 'center', 700, SANS);
+      for (const { name, position } of EN.front.waypoints) {
+        const p = this.proj(position, {});
+        if (!p.front || p.x < 30 || p.x > W - 30 || p.y < 30 || p.y > H - 35) this.edgeMark(p, 'cy', name, W, H);
+        else {
+          const r = 7 * s;
+          X.beginPath();X.moveTo(p.x,p.y-r);X.lineTo(p.x+r,p.y);X.lineTo(p.x,p.y+r);X.lineTo(p.x-r,p.y);X.closePath();this.sk('cy');
+          this.text(name,p.x,p.y+17*s,14,'cy',1,'center',700,SANS);
+        }
+      }
+    }
     // 要打爛的大樓：琥珀色框＋名字（還立著的才畫）
     for (const t of EN.tg || []) {
       if (t.b.st !== 0) continue;
@@ -516,7 +530,7 @@ export class HUD {
       this.text('!', p.x, p.y + 2 * s, 13, 'rd', a, 'center', 700);
     }
     if (!EN.wp) return;
-    if (!(hl !== null && hl !== undefined) && !(EN.tg && EN.tg.length && EN.state === 'fight')) this.text(`前進 ▶ ${Math.round(EN.dist)}m`, W / 2, y, 15, 'cy', 0.8 + 0.2 * Math.sin(this.t * 4), 'center', 700, SANS);
+    if (!front && hl == null && !(EN.tg && EN.tg.length && EN.state === 'fight')) this.text(`前進 ▶ ${Math.round(EN.dist)}m`, W / 2, y, 15, 'cy', 0.8 + 0.2 * Math.sin(this.t * 4), 'center', 700, SANS);
     const p = this.proj(_o.set(EN.wp.x, EN.wp.y, EN.wp.z), {});
     if (!(p.front && p.x > 30 && p.x < W - 30 && p.y > 30 && p.y < H - 30)) { this.edgeMark(p, 'cy', `${Math.round(EN.dist)}m`, W, H, 0.9); return; }
     const r = 11 * s, b = 1 + 0.12 * Math.sin(this.t * 5);
