@@ -1,4 +1,5 @@
 import { FREIGHT_ROUTE } from './freight-yard.mjs?v=1';
+import { LANDING_ROUTE } from './landing-layout.mjs?v=1';
 
 // 鋼鐵黃昏：全部關卡的資料（劇情＋路線＋任務），一關一個物件，順序＝第幾關
 //   combat.js 讀這裡組出 STAGES；route（沿街推進的遭遇戰）由 encounter.js 的 parse() 解析
@@ -250,43 +251,15 @@ export const STAGE_DATA = [
           lines: [[EN, '總站所有單位，出擊！']] },
       ] } },
   // ================================================================ 第 7 關
-  { battlefield: 'badlands', fieldLabel: '荒野防線', name: '鋼鐵洪流', en: 'IRON TIDE', tip: '邊打邊退，到防線再守——守點區要撐到倒數結束', music: 5, tier: 5,
+  { battlefield: 'landing', fieldLabel: '神戶外港登陸', name: '鋼鐵洪流', en: 'IRON TIDE', frontline: 'landing',
+    tip: '與斑鳩、白隼一同登岸，穿過海堤，擊退鐵獒', music: 5, tier: 5,
     companion: { afterAreas: 0, tanks: true, second: { name: '白隼', aggressors: true } },
-    brief: ['補給被切斷後，獵犬軍團把剩下的戰車全部押上。', '裝甲大軍從東郊荒原沿大道壓向市中心，帶頭的是重裝大隊長「鐵獒」。', '零號和第三裝甲連守在東郊前哨。先邊打邊退，退到大道防線。', '守住防線，再反攻奪回前哨。'],
-    start: [[ALLY, '地平線上全是戰車。斑鳩壓正面，白隼注意側翼，跟著蒼焰。'], [OP, '零號，別硬拚。掩護裝甲連撤到防線。']],
-    end: [[ALLY, '前哨拿回來了。開戰以來頭一次。'], [OP, '敵方裝甲兵力折損過半。辛苦了，零號。'], [WOLF, '……有意思。']],
-    route:
-    // 東郊前哨（東緣空地）→ 沿北側的街往西撤（z＝120）→ 第一道防線 → 大道防線（240,0）→ 沿大道反攻、繞南側 → 奪回前哨
-    { cp: [3, 5, 8], arena: 175, fin: 60, par: 560, over: 2,
-      pts: [[660, 60], [600, 120], [480, 120], [360, 120], [240, 120], [240, 0], [360, 0], [480, 0], [480, -120], [600, -120], [600, 0], [660, 60]],
-      secs: [
-        { at: 1, amb: 'tank@out*3 heli@rise grunt@drop', amb2: 'tank@out*3 grunt@drop grunt@side', tip: '邊打邊退——別停在同一個地方',
-          clear: [[OP, '大道已經被截斷。走北側的運輸道撤。']] },
-        { at: 2, amb: 'tank@side*2 grunt@side heavy@drop', amb2: 'tank@out*3 grunt@roof grunt@side',
-          lines: [[ALLY, '該死，前面也有！牠們繞過來了！']] },
-        { at: 3, hold: 45, gap: 15, amb: 'tank@side*3 grunt@drop heli@rise', amb2: 'heavy@drop tank@side*2 tank@out grunt@side', amb3: 'tank@side*3 grunt@drop jet@out grunt@side', tip: '守住 45 秒——敵人會一波接一波從支路湧出',
-          go: [[OP, '裝甲連在前面路口架好了砲。守住四十五秒。']], lines: [[ALLY, '砲口朝外！撐到大道那邊準備好！']], clear: [[ALLY, '時間夠了！全連撤到大道防線！']] },
-        { at: 4, amb: 'brawler@breach*2 tank@side*2 heli@rise', amb2: 'tank@out*3 grunt@roof grunt@side',
-          lines: [[EN, '聯邦部隊在撤退。咬住牠們！']] },
-        { at: 5, hold: 60, gap: 15, amb: 'tank@out*4 grunt@drop', amb2: 'tank@out*3 heavy@drop heli@rise grunt@side', amb3: 'tank@side*2 tank@out*2 grunt@drop jet@out grunt@side', tip: '守住 60 秒——大道上的戰車會一直衝過來',
-          beats: [{ t: 22, lines: [[ALLY, '北側防線破了！他們繞到我們背後！'], [OP, '零號，接住側翼。大道交給裝甲連。']], spawn: 'grunt@side' },
-            { t: 46, lines: [[WOLF, '讓鐵獒上去。我要那台機體的殘骸。']] }],
-          go: [[OP, '大道路口是最後一道防線。再退就是市中心。']], lines: [[ALLY, '全連就位。一步都不准退！'], [WOLF, '推平它。']], clear: [[OP, '防線守住了……等等，有大型重裝機接近。']] },
-        { at: 6, amb: 'tank@out*2 grunt@drop', amb2: 'grunt@drop tank@out*2 heli@rise grunt@side', tip: '敵方指揮官：重裝機火力很強——拿大樓擋飛彈',
-          boss: { kind: 'heavy', name: '鐵獒', ap: 3, where: 'drop',
-            halfWave: 'grunt@side',
-            half: [['鐵獒（獵犬軍團）', '有兩下子。全隊，火力集中！']], low: [[OP, '牠的裝甲快撐不住了，壓上去！']] },
-          lines: [['鐵獒（獵犬軍團）', '就是你趕跑了黑犬？讓我看看。']], clear: [[ALLY, '鐵獒倒了！全連，反攻！']] },
-        { at: 7, pre: 'tank@far*3', amb: 'tank@out*2 brawler@breach brawler@side heli@rise', amb2: 'grunt@roof tank@out*3 grunt@side',
-          lines: [[EN, '指揮官陣亡！前鋒，誰來接手指揮？']], clear: [[OP, '大道被殘骸堵住了。從南側繞過去。']] },
-        { at: 8, amb: 'tank@side*2 grunt@drop jet@out', amb2: 'heavy@drop tank@out*2 grunt@side' },
-        { at: 9, amb: 'grunt@side*2 tank@out*2 heli@rise', amb2: 'tank@side*2 grunt@drop jet@out grunt@side',
-          lines: [[ALLY, '前哨就在前面。推回去！']] },
-        { at: 10, amb: 'grunt@drop*2 tank@out*2 heli@rise', amb2: 'tank@out*3 jet@out grunt@side',
-          clear: [[OP, '前哨還有殘敵。清乾淨，就拿回來了。']] },
-        { at: 11, amb: 'tank@ring*4 heavy@drop grunt@drop', amb2: 'grunt@drop*2 heli@rise tank@ring*3 grunt@side', amb3: 'heavy@drop jet@out tank@ring*3 grunt@drop grunt@side', tip: '奪回前哨——清光殘敵就過關',
-          lines: [[EN, '後路被切斷了！死守前哨！']] },
-      ] } },
+    brief: ['獵犬軍團的補給線已斷，卻仍控制神戶外港與岸防火力。聯邦改走海路，從外港搶回裝卸區。',
+      '蒼焰、斑鳩與白隼搭乘近岸登陸艇。跳板落下後穿過濕灘，再從海堤兩處缺口突入港區。',
+      '鐵獒率重裝大隊守在裝卸區。擊退牠，聯邦才能開啟通往高原機場的道路。'],
+    start: [[OP, '外港就在正前方。岸防機的位置已標在顯示器。'], ['斑鳩', '艇靠岸我走左邊。'], ['白隼', '右邊我來。一起往前。']],
+    end: [[ALLY, '外港裝卸區已拿下。第二組，接手通道。'], [OP, '下一步是機場。關掉防空網，讓空軍飛進來。']],
+    route: LANDING_ROUTE },
   // ================================================================ 第 8 關
   { battlefield: 'airfield', fieldLabel: '高原航空基地', name: '制空權', en: 'AIR SUPREMACY', tip: 'T 啟動飛行；空白上升、C／Ctrl 下降，放開升降鍵定高；Shift 高速推進', music: 4, tier: 5,
     brief: ['聯邦空軍整備完成，但城南高原航空基地的防空網讓飛機一架也進不來。', '展開蒼焰的空戰翼。按 T 起飛，以不同高度繞過火力線。', '沿路打垮防空陣地和雷達，替最後的總攻打開空中走廊。', '敵方機甲會升空攔截，戰機則從上方俯衝。高速推進消耗 EN，定高停留可緩慢回充。'],

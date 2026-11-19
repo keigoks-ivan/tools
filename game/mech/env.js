@@ -20,6 +20,8 @@ import { kitanoHeritageMaterial } from './kobe-heritage.mjs';
 import { Solid } from './zero/kit.js';
 import { BATTLEFIELDS, fieldHeight, fieldLayout, routeDistance, fieldGridCoordinate, fieldGridIndex } from './battlefields.js';
 import { buildFreightYard } from './freight-yard.mjs?v=1';
+import { buildLandingSite } from './landing-art.mjs?v=1';
+import { SHORE_GLSL } from './landing-layout.mjs?v=1';
 
 import { fieldTreeGeometry, fieldShrubGeometry, fieldRockGeometry, fieldArchitecture, fieldLeafMaterial, fieldRadar, fieldGroundMask } from './fieldart.js';
 
@@ -486,6 +488,21 @@ function terrainMaterial(A) {
         vec3 lot = mix(rub * 0.9, grass * 0.8, smoothstep(0.35, 0.65, tfbm(vTW.xz / 30.0)));
         base = mix(base, lot, inCity * (1.0 - G.x) * (1.0 - G.y) * (1.0 - step(0.5, battlefield)));
         base=mix(base,asph*.82,paved*.9);
+        float landingWet=0.0;
+        if(battlefield>6.5){
+          float fromSea=vTW.x-${SHORE_GLSL.replaceAll('Z','vTW.z')};
+          float grain=tn(vTW.xz*1.17)*.26+tn(vTW.xz*.16)*.13;
+          float worn=texture2D(rubD,vTW.xz/6.2).r;
+          float tide=fromSea+tn(vTW.xz*.15)*11.0;
+          landingWet=(1.0-smoothstep(5.0,39.0,tide))*smoothstep(-8.0,2.0,fromSea);
+          vec3 drySand=vec3(.56,.478,.345)*(.73+grain+worn*.29);
+          vec3 wetSand=vec3(.185,.152,.112)*(.78+grain+worn*.25);
+          vec3 foreshore=mix(drySand,wetSand,landingWet);
+          float sweep=smoothstep(.92,1.0,sin(tide*.51+tn(vTW.xz*.55))*0.5+.5)*(1.0-smoothstep(20.0,67.0,fromSea));
+          foreshore*=1.0-.13*sweep;
+          base=mix(base,foreshore,1.0-smoothstep(-127.0,-52.0,vTW.x));
+          base=mix(base,asph*.88,smoothstep(-42.0,18.0,vTW.x)*(1.0-smoothstep(340.0,510.0,vTW.x))*.91);
+        }
         base = mix(base, walkC, G.y);
         vec2 lane = mod(vTW.xz + 60.0, 120.0) - 60.0;
         float wheel = (1.0 - smoothstep(0.35, 1.1, abs(abs(lane.x) - 4.2))) + (1.0 - smoothstep(0.35, 1.1, abs(abs(lane.y) - 4.2)));
@@ -516,6 +533,7 @@ function terrainMaterial(A) {
         roughnessFactor = mix(roughnessFactor, 0.46 + roadWear * 0.18, G.x * min(wheel, 1.0) * 0.7);
         roughnessFactor = mix(roughnessFactor, 0.55, G.z * 0.6);
         roughnessFactor = mix(roughnessFactor,.32,roadDamp*G.x*.65);
+        roughnessFactor = mix(roughnessFactor,.39,landingWet*.9);
       `)
       .replace('vec3 mapN = texture2D( normalMap, vNormalMapUv ).xyz * 2.0 - 1.0;', `
         vec3 nG = texture2D( normalMap, vNormalMapUv ).xyz * 2.0 - 1.0;
@@ -1196,6 +1214,7 @@ export class World {
     if (!BATTLEFIELDS[profile] || !route) profile = 'city';
     if (this.battlefield === profile && (profile === 'city' || this.fieldRoute === route)) return;
     this.resetBuildings();
+    this.landingSite?.dispose(); this.landingSite=null;
     if (this.fieldGroup) {
       this.fieldGroup.traverse(o => { if (o.userData.fieldGeometry) o.geometry.dispose(); if (o.isInstancedMesh) o.dispose(); });
       this.fieldGroup.removeFromParent(); this.fieldGroup = null;
@@ -1212,22 +1231,29 @@ export class World {
     }
     p.needsUpdate = uv.needsUpdate = true; this.terrainMesh.geometry.computeVertexNormals(); this.terrainMesh.geometry.computeBoundingSphere();
     this.terrainMesh.material.userData.battlefield.value = F.mode;
-    this.scene.fog.density = F.mode ? profile === 'forest' ? .00018 : .00012 : .00024;
+    this.scene.fog.density = F.mode ? profile === 'landing' ? .00024 : profile === 'forest' ? .00018 : .00012 : .00024;
     this.scene.environmentIntensity=F.mode?.43:.7;
-    if(F.mode) {
+    if(profile==='landing')this.lightDir.set(.51,.33,-.79).normalize();
+    else if(F.mode) {
       const az=Math.atan2(this.sunDir.z,this.sunDir.x),el=Math.max(Math.asin(this.sunDir.y),THREE.MathUtils.degToRad(32));
       this.lightDir.set(Math.cos(az)*Math.cos(el),Math.sin(el),Math.sin(az)*Math.cos(el));
     } else this.lightDir.copy(this.cityLightDir);
     this.skyDome.material.uniforms.sunDir.value.copy(this.lightDir);
-    this.skyDome.material.uniforms.skyRotation.value.setFromMatrix4(new THREE.Matrix4().makeRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(this.lightDir,this.sunDir)));
+    const skyRotation=new THREE.Matrix4();
+    if(profile==='landing') {
+      // 海面可直接看見整條地平線，只旋轉天空的方位，避免拉扯近海雲層。
+      const bearing=Math.atan2(this.lightDir.z,this.lightDir.x)-Math.atan2(this.sunDir.z,this.sunDir.x);
+      skyRotation.makeRotationY(bearing);
+    } else skyRotation.makeRotationFromQuaternion(new THREE.Quaternion().setFromUnitVectors(this.lightDir,this.sunDir));
+    this.skyDome.material.uniforms.skyRotation.value.setFromMatrix4(skyRotation);
     // 戶外反射與補光由同一個可見天空烘焙，首次進場一次；之後所有場地共用。
     if(F.mode && !this.fieldEnvMap) {
       this.fieldEnvTarget=this.captureSky();this.fieldEnvMap=this.fieldEnvTarget.texture;
     }
     this.scene.environment=F.mode?this.fieldEnvMap:this.envMap;
-    this.sun.intensity=F.mode?3.5:3.1;
-    this.sun.color.setRGB(1,F.mode?.91:.95,F.mode?.79:.86);
-    this.hemi.intensity=F.mode?.32:.46;
+    this.sun.intensity=profile==='landing'?3.15:F.mode?3.5:3.1;
+    this.sun.color.setRGB(1,profile==='landing'?.93:F.mode?.91:.95,profile==='landing'?.84:F.mode?.79:.86);
+    this.hemi.intensity=profile==='landing'?.46:F.mode?.32:.46;
     const sc=this.sun.shadow.camera,extent=F.mode?190:180;
     sc.near=600;sc.far=1800;
     sc.left=sc.bottom=-extent;sc.right=sc.top=extent;sc.updateProjectionMatrix();
@@ -1251,6 +1277,7 @@ export class World {
   buildBattlefield(profile, layout) {
     const group = this.fieldGroup = new THREE.Group(); this.scene.add(group);
     if (profile === 'freight') buildFreightYard(this, group);
+    if (profile === 'landing') this.landingSite=buildLandingSite(this,group);
     const r = rng(601 + layout.mode * 91), walls = new GeoBucket(), roofs = new GeoBucket(), records = [], contacts = [];
     const put = (bucket, mat, shadow = true) => {
       const geo = bucket.geo = bucket.geometry();
@@ -1296,6 +1323,7 @@ export class World {
           const p=this.fieldRoute.pts[Math.floor(r()*this.fieldRoute.pts.length)];
           x=p[0]+(r()-.5)*520; z=p[1]+(r()-.5)*520;
         }
+        if (profile === 'landing' && x < 460) continue;
         if (routeDistance(x,z,this.fieldRoute.pts) < size + (profile === 'freight' ? 126 : 32) || layout.structures.some(t => Math.hypot(t.x-x,t.z-z) < size + 42)) continue;
         if (profile === 'airfield' && Math.abs(x + 420) < 65 && Math.abs(z) < 930) continue;
         const y = this.height(x,z);
@@ -1392,12 +1420,16 @@ export class World {
         const l = this.grid.get(gx * 10007 + gz);
         if (l) for (const i of l) if (!seen.has(i)) { seen.add(i); out.push(this.boxes[i]); }
       }
+    if(this.landingSite)for(const b of this.landingSite.boxes) {
+      if(b.top>=0&&x+r>b.x0&&x-r<b.x1&&z+r>b.z0&&z-r<b.z1)out.push(b);
+    }
     return out;
   }
 
   // 腳下支撐高度：地形或屋頂（只算腳底下方、可以踩上去的）
   support(x, z, r, feetY) {
     let h = this.height(x, z);
+    if(this.landingSite)h=Math.max(h,this.landingSite.floorAt(x,z,feetY));
     const kb = this.kitano?.bounds;
     if (kb && this.battlefield === 'city' && x >= kb.x0-r && x <= kb.x1+r && z >= kb.z0-r && z <= kb.z1+r) h = Math.max(h, this.kitanoSolid.floorAt(x, z, feetY + 1.5, r * .5));
     for (const b of this.nearBoxes(x, z, r, this._tmpA || (this._tmpA = []))) {

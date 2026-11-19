@@ -6,7 +6,8 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { carGeometry } from './env.js';
 import { instancedCarMaterial } from './car-material.js';
 import { MechTutorial } from './tutorial.mjs?v=1';
-import { FreightFront } from './freight-front.mjs?v=1';
+import { FreightFront } from './freight-front.mjs?v=2';
+import { LandingFront } from './landing-front.mjs?v=1';
 
 const rand = (a, b) => a + Math.random() * (b - a);
 const clamp = THREE.MathUtils.clamp;
@@ -307,7 +308,7 @@ export class Encounter {
     this.holdT = 0; this.tg = []; this.bossE = null; this.bossTalk = 0;
     this.fightT = 0; this.beatSeen = new Set();
     this.training = null;
-    this.front = C.def?.frontline ? new FreightFront(C, this) : null;
+    this.front = C.def?.frontline === 'landing' ? new LandingFront(C, this) : C.def?.frontline ? new FreightFront(C, this) : null;
     C.stats.healed = C.stats.healed || 0;
   }
   get cur() { return this.E.secs[this.sec]; }
@@ -315,6 +316,7 @@ export class Encounter {
   // 開機時：擺路障、先擺好第一區的遠處戰車，光柱／警示光先畫一次（編好 shader，第一次出現不卡）
   prep() {
     if (!this.front) this.R = setRoute(this.C.world, this.E);
+    this.front?.prepare?.();
     this.B = markers(this.C.scene);
     this.B.root.visible = true; this.B.a = 0;
     this.B.flares[0].s.visible = true;

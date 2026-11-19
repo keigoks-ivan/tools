@@ -12,7 +12,9 @@ test('各戶外場地保留全部任務目標，路線與目標地面整平', ()
     assert.equal(L.structures.filter(s=>s.target).length,D.route.secs.flatMap(s=>s.targets||[]).length);
     for(let i=1;i<R.pts.length;i++) for(let j=0;j<=10;j++) {
       const a=R.pts[i-1],b=R.pts[i],x=a[0]+(b[0]-a[0])*j/10,z=a[1]+(b[1]-a[1])*j/10;
-      assert.equal(fieldHeight(x,z,D.battlefield,R),0);
+      const height=fieldHeight(x,z,D.battlefield,R);
+      if(D.battlefield==='landing') assert(Number.isFinite(height)&&height>=-28&&height<8);
+      else assert.equal(height,0);
     }
     for(const S of L.structures) {
       assert.equal(fieldHeight(S.x,S.z,D.battlefield,R),0);

@@ -176,6 +176,7 @@ export class Combat {
   }
 
   joinCompanion(dt) {
+    if (this.enc?.front) return;
     const order = this.def.companion;
     const first = this.companion;
     const assignment = first ? order?.second : order;
@@ -342,8 +343,10 @@ export class Combat {
     } : inp);
     if (canFight && this.phase === 'fight') {
       this.joinCompanion(dt);
-      if (!this.enc?.front) this.companion?.update(dt);
-      this.secondaryCompanion?.update(dt);
+      if (!this.enc?.front) {
+        this.companion?.update(dt);
+        this.secondaryCompanion?.update(dt);
+      }
     }
     this.updateEnemies(dt);
     this.vehicles.update(dt);

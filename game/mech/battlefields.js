@@ -1,4 +1,5 @@
 import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
+import { landingGround, landingShore } from './landing-layout.mjs?v=1';
 const noise = new ImprovedNoise();
 // 關卡場地：沿用既有任務路線，路線周圍整平，地形與掩體只在換關時建立。
 export const BATTLEFIELDS = {
@@ -10,6 +11,7 @@ export const BATTLEFIELDS = {
   airfield: { mode: 5, label: '高原航空基地', relief: 55, trees: 20, rocks: 35 },
   fortress: { mode: 6, label: '山隘要塞', relief: 270, trees: 140, rocks: 105 },
   freight: { mode: 3, label: '神戶貨運站', relief: 118, trees: 32, rocks: 30 },
+  landing: { mode: 7, label: '神戶外港', relief: 142, trees: 36, rocks: 20 },
 };
 const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
 export function routeDistance(x, z, pts) {
@@ -24,6 +26,14 @@ export function routeDistance(x, z, pts) {
 export function fieldHeight(x, z, profile, route, base = 0) {
   const F = BATTLEFIELDS[profile];
   if (!F || !F.mode) return base;
+  if (profile === 'landing') {
+    const h=landingGround(x,z);
+    if(x<landingShore(z))return h+(base-h)*smooth(4100,5000,Math.max(Math.abs(x),Math.abs(z)));
+    const upper=smooth(430,1180,x)*F.relief;
+    const ridge=.45+.55*(1-Math.abs(noise.noise(x/318,7,z/333)));
+    const edge=Math.max(smooth(1400,4500,x),smooth(4100,5000,Math.abs(z)));
+    return (h+upper*ridge)*(1-edge)+base*edge;
+  }
   const r = Math.hypot(x, z);
   if (r > 2400) {
     const strength=smooth(2400,3400,r)*(1-smooth(4400,5000,Math.max(Math.abs(x),Math.abs(z))));
@@ -44,6 +54,7 @@ export function fieldHeight(x, z, profile, route, base = 0) {
   return h * (1 - smooth(1650, 2400, r)) + base * smooth(1650, 2400, r);
 }
 export function fieldLayout(profile, route) {
+  if (profile === 'landing') return { ...BATTLEFIELDS.landing, structures: [] };
   if (profile === 'freight') return { ...BATTLEFIELDS.freight, structures: [] };
   const targets = route.secs.flatMap(s => s.targets || []).map(t => ({ x: t.x, z: t.z, target: true, name: t.name }));
   const structures = [...targets];

@@ -749,6 +749,7 @@ async function game() {
     if (combat && combat.cannon.phase) inp = Object.assign({}, inp, { lookX: inp.lookX * 0.45, lookY: inp.lookY * 0.45, mx: inp.mx * 0.35, my: inp.my * 0.35, boost: false });
 
     // ---- 自機
+    if (combat.enc?.front?.pilot) inp = combat.enc.front.pilot(dt, inp);
     player.update(dt, inp);
     if (inCoda) updateCoda(rdt, inp.cannon);
     // 互動當下即交給過場鏡頭，不讓這一幀的 E 在新戰鬥裡變成光波砲。
@@ -765,7 +766,8 @@ async function game() {
     }
     if (hero.servo > 0.05) audio.servo(hero.servo);
     audio.boost(player.thrust);
-    const agl = player.pos.y - world.height(player.pos.x, player.pos.z);
+    const groundY = world.landingSite ? Math.max(0, world.support(player.pos.x, player.pos.z, .45, player.pos.y)) : world.height(player.pos.x, player.pos.z);
+    const agl = player.pos.y - groundY;
     if (player.thrust > 0.2 && agl < 22) fx.thrusterWash(tmp.set(player.pos.x, player.pos.y - agl, player.pos.z), player.thrust * (1 - agl / 22));
     if (player.grounded && player.boosting) fx.skid(player.pos, player.vel, 0.6);
 
@@ -828,7 +830,7 @@ async function game() {
     seeThrough(C);
     post.render(t);
 
-    hud.draw(rdt, { boot: state === 'boot' ? boot : 1, combat: C, player, stages: STAGES.length, groundY: world.height(player.pos.x, player.pos.z), tp: tpView,
+    hud.draw(rdt, { boot: state === 'boot' ? boot : 1, combat: C, player, stages: STAGES.length, groundY, tp: tpView,
       label: coda ? `STAGE ${STAGES.length + 1}` : undefined, ceasefire: !!coda && !airCombat });
     input.endFrame();
   }
