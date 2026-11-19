@@ -11,6 +11,7 @@ import { createHistoryPlaques } from './kobe-history-plaques.mjs';
 import { CODA_START, CODA_STOPS, CODA_BYPASS, CODA_ARCHIVE, CODA_SCENES, codaApproach, codaStationPoint, codaStations } from './harbor-coda.js?v=4';
 import { HarborAirBattle } from './harbor-air.mjs?v=3';
 import { HarborCinematic } from './harbor-cinematic.mjs?v=1';
+import { LESSONS } from './tutorial.mjs?v=1';
 
 const q = new URLSearchParams(location.search);
 // 大檔案（貼圖、HDR、模型）改從 jsDelivr 下載，網站主機給大檔很慢；不能用時照舊從本站（見 cdn.js）
@@ -304,6 +305,32 @@ async function game() {
   const historyAt=()=>historyPlaques.items.find(it=>it.p.distanceTo(player.pos)<12)?.id;
   historyButton.onclick=()=>{if(state==='play')history.open(historyAt());};
   const touchUI = $('touch');
+  const lessonPanel = $('pilotLesson'), skipLesson = $('skipLesson');
+  let lastLesson = null;
+  function syncLesson() {
+    const step = state === 'play' ? combat.enc?.training?.step ?? null : null;
+    if (step === lastLesson) return;
+    lastLesson = step;
+    lessonPanel.hidden = !step;
+    if (!step) { delete touchUI.dataset.lesson; return; }
+    const l = LESSONS[step];
+    $('lessonCount').textContent = `機甲操作教學 ${l.number} / 4`;
+    $('lessonTitle').textContent = l.title;
+    $('lessonKeys').textContent = input.touch.on ? l.touch : l.desktop;
+    $('lessonGoal').textContent = l.goal;
+    touchUI.dataset.lesson = step;
+    skipLesson.textContent = input.touch.on ? '跳過教學' : 'Enter　跳過教學';
+    skipLesson.hidden = step === 'done';
+  }
+  function skipTraining() {
+    if (state !== 'play' || !combat.enc?.training) return;
+    combat.enc.endTraining(); syncLesson();
+  }
+  skipLesson.addEventListener('click', skipTraining);
+  addEventListener('keydown', (e) => {
+    if (e.code !== 'Enter' || state !== 'play' || !combat.enc?.training) return;
+    e.preventDefault(); skipTraining();
+  });
   status.textContent = '選擇關卡';
   renderStages();
   $('stages').style.display = 'grid';
@@ -371,6 +398,7 @@ async function game() {
     for (const k of ['damage', 'overdrive', 'speed', 'danger', 'flash']) post.u[k].value = 0;
     odV = speedV = flashV = dangerV = 0;
     state = 'title'; titleT = 0;
+    syncLesson();
     renderStages();
     audio.music('title');
     $('title').classList.remove('hide');
@@ -391,6 +419,7 @@ async function game() {
     if (state !== 'play' && state !== 'boot' && state !== 'coda') return;
     pausedFrom = state;
     state = 'paused';
+    syncLesson();
     if (pausedFrom === 'coda') { codaHUD.hidden = true; codaFilm.hidden = true; touchUI.style.display = 'none'; }
     $('pause').style.display = 'flex';
     audio.setPaused(true); input.reset();
@@ -758,6 +787,7 @@ async function game() {
     // ---- 戰鬥、特效、世界
     const airCombat = inCoda && coda.air?.fighting;
     C.update(dt, !live || (inCoda && !airCombat) ? null : inp, rdt);
+    syncLesson();
     if (airCombat) stepCodaFight(rdt);
     if (coda?.film) { hud.clear(); input.endFrame(); return; }
     fx.update(dt);

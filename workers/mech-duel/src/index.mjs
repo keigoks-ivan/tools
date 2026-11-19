@@ -38,6 +38,7 @@ export default {
     const origin = request.headers.get('Origin');
     if (!originAllowed(origin, env.ALLOWED_ORIGINS)) return json({ error: 'origin' }, 403);
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors(origin) });
+    if (env.DUEL_PAUSED === 'true' && (path === '/rooms' || path === '/ws')) return json({ error: 'paused' }, 503, cors(origin));
     const address = request.headers.get('CF-Connecting-IP') ?? 'local';
 
     if (path === '/rooms' && request.method === 'POST') {
@@ -199,6 +200,7 @@ export class DuelRoom extends DurableObject {
   }
 
   async webSocketMessage(ws, message) {
+    if (this.env.DUEL_PAUSED === 'true') { ws.close(1012, 'paused'); return; }
     const slot = ws.deserializeAttachment()?.slot;
     if (this.peers[slot] !== ws) return;
     const now = Date.now();
@@ -251,7 +253,7 @@ export class DuelRoom extends DurableObject {
   }
 
   startLoop() {
-    if (this.timer !== null || !this.playing || !this.peers.every(Boolean)) return;
+    if (this.env.DUEL_PAUSED === 'true' || this.timer !== null || !this.playing || !this.peers.every(Boolean)) return;
     this.nextTick = Date.now() + TICK_MS;
     this.schedule();
   }

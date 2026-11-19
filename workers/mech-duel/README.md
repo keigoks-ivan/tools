@@ -7,7 +7,7 @@
 在專案根目錄使用 Node.js 22 以上及現有 Wrangler 安裝。若本機尚未安裝 Wrangler，可執行 `npm ci --prefix workers/coop-relay`。
 
 ```sh
-workers/coop-relay/node_modules/.bin/wrangler dev --config workers/mech-duel/wrangler.toml --port 8791
+workers/coop-relay/node_modules/.bin/wrangler dev --config workers/mech-duel/wrangler.toml --port 8791 --var DUEL_PAUSED:false
 node --test workers/mech-duel/test/protocol.test.mjs
 node workers/mech-duel/test/socket-smoke.mjs
 ```
@@ -31,5 +31,7 @@ WebSocket 連上後，`welcome` 提供座位 `slot`、重連金鑰 `resume`、�
 兩端都用 `/ws` 的 `shield=1` 宣告支援防護罩，新對局的 `state.shieldEnabled` 才會為 `true`。輸入 `shield:true` 代表一次按下，剩餘吸收量 `shieldHp` 和冷卻秒數 `shieldCooldown` 由伺服器提供。舊客戶端可繼續玩原規則的對局。
 
 ## 部署
+
+正式版目前設定 `DUEL_PAUSED = "true"`。建立房間和加入邀請均回傳 503。重新開放時，先恢復前端大廳與入口，再以 `DUEL_PAUSED = "false"` 部署。
 
 使用 `wrangler deploy --config workers/mech-duel/wrangler.toml` 部署獨立 Worker。正式前端透過 `https://mech-duel.keigoks.workers.dev` 連線，前端網域需列在 `ALLOWED_ORIGINS`。等待、結束或暫停時房間可休眠，對局開始後才持續執行。容量與成本依實測的並發房間數與狀態流量估算。

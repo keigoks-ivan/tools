@@ -189,7 +189,7 @@ export class Combat {
 
   get alive() { return this.enemies.filter((e) => !e.dead); }
 
-  start() { this.phase = 'intro'; this.phaseT = 1.2; this.group = 0; this.lines(this.def.start); }
+  start() { this.phase = 'intro'; this.phaseT = 1.2; this.group = 0; if (!this.enc?.wantsTutorial) this.lines(this.def.start); }
   get def() { return STAGES[this.stage - 1]; }
   get tier() { return TIER[clamp((this.def.tier ?? this.stage) - 1, 0, TIER.length - 1)]; }
   // 無線電對白：一句一句排隊播；now＝戰鬥喊話，插隊馬上播，被打斷的劇情句還沒看完七成就放回最前面重播
@@ -327,10 +327,14 @@ export class Combat {
 
     if (this.enc) this.enc.fx(dt);
     const canFight = !this.dead && this.phase !== 'done' && inp;
+    const lesson = this.enc?.training?.step || (this.phase !== 'fight' && this.enc?.wantsTutorial ? 'move' : null);
     if (!canFight) this.stopShield();
-    this.updateShield(dt, canFight && inp.shield);
+    this.updateShield(dt, canFight && inp.shield && (!lesson || lesson === 'shield'));
     this.updateAim();
-    if (canFight) this.playerWeapons(dt, inp);
+    if (canFight) this.playerWeapons(dt, lesson ? {
+      fire: lesson === 'rifle' && inp.fire, reload: lesson === 'rifle' && inp.reload,
+      lockHold: lesson === 'missile' && inp.lockHold, lockRelease: lesson === 'missile' && inp.lockRelease,
+    } : inp);
     if (canFight && this.phase === 'fight') {
       this.joinCompanion(dt);
       this.companion?.update(dt);
@@ -430,7 +434,7 @@ export class Combat {
     }
     if (M.locking && (!inp.lockHold || inp.lockRelease)) {
       M.locking = false;
-      this.launchSalvo(M.locks.slice());
+      if (this.enc?.training?.step !== 'missile' || M.locks.length) this.launchSalvo(M.locks.slice());
       for (const e of M.locks) e.locks = 0;
       M.locks = [];
     }
@@ -767,6 +771,12 @@ export class Combat {
   kill(e) {
     e.dead = true; e.dying = e.kind === 'grunt' ? 0.45 : 0.9; e.ap = 0;
     if (this.lockTarget === e) this.lockTarget = null;
+    if (e.training) {
+      e.gone = e.remove = true;
+      const point = e.chest(V3());
+      this.fx.explosion(point, .9); this.audio.explosion(point, .75);
+      return;
+    }
     const S = this.stats;
     S.kills++;
     S.chain = S.time - S.lastKill < 8 ? S.chain + 1 : 1;

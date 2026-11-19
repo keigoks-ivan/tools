@@ -6,6 +6,7 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { carGeometry } from './env.js';
 import { instancedCarMaterial } from './car-material.js';
 import { createCampaignSetpiece } from './campaign-setpieces.mjs?v=1';
+import { MechTutorial } from './tutorial.mjs?v=1';
 
 const rand = (a, b) => a + Math.random() * (b - a);
 const clamp = THREE.MathUtils.clamp;
@@ -307,24 +308,41 @@ export class Encounter {
     this.holdT = 0; this.tg = []; this.bossE = null; this.bossTalk = 0;
     this.fightT = 0; this.beatSeen = new Set();
     this.operation = null; this.finishedOperation = null;
+    this.training = null;
     C.stats.healed = C.stats.healed || 0;
   }
   get cur() { return this.E.secs[this.sec]; }
+  get wantsTutorial() { return !!this.C.def.tutorial && !this.C.cp && this.sec === 0; }
   // 開機時：擺路障、先擺好第一區的遠處戰車，光柱／警示光先畫一次（編好 shader，第一次出現不卡）
   prep() {
     this.R = setRoute(this.C.world, this.E);
     this.B = markers(this.C.scene);
     this.B.root.visible = true; this.B.a = 0;
     this.B.flares[0].s.visible = true;
-    this.stock();
+    if (!this.wantsTutorial) this.stock();
     this.fx(0);
   }
   begin() {
+    if (this.wantsTutorial) {
+      this.state = 'training';
+      this.training = new MechTutorial(this.C, [18, 54, 97].map(s => pointAt(this.E, s)));
+      return;
+    }
+    this.beginRoute();
+  }
+  beginRoute() {
     const C = this.C, D = C.def;
     C.say(`STAGE ${C.stage}　${D.name}`, this.sec ? `從檢查點繼續——區域 ${this.sec + 1}/${this.N}` : D.tip, 4, 'cy');
     C.audio.ui('wave');
     this.state = 'move';
     C.lines(this.cur.go);
+  }
+  endTraining() {
+    if (!this.training) return;
+    this.training.finish(); this.training = null;
+    this.stock();
+    this.beginRoute();
+    this.C.lines(this.C.def.start);
   }
   // 守點剩幾秒（HUD 用；不是守點區＝null）
   get holdLeft() { const c = this.cur; return c && c.hold && this.state === 'fight' ? Math.max(0, c.hold - this.holdT) : null; }
@@ -335,6 +353,10 @@ export class Encounter {
   update(dt) {
     const C = this.C, E = this.E, p = C.player.pos, c = this.cur;
     if (C.dead || this.state === 'done') return false;
+    if (this.training) {
+      if (this.training.update(dt)) this.endTraining();
+      return false;
+    }
     this.beatT += dt;
     const pr = project(E, p.x, p.z, this.prog - 40, this.prog + 260);
     if (pr && pr.d < 90) this.prog = Math.max(this.prog, pr.s);
@@ -724,15 +746,17 @@ export class Encounter {
       wp = wp || E.pts[c.at];
     }
     const move = this.state === 'move' || this.state === 'idle';
-    this.wp = this.operation?.marker || (move && wp ? { x: wp.x, y: w.height(wp.x, wp.z) + 38, z: wp.z } : null);
-    this.dist = this.operation ? C.player.pos.distanceTo(this.wp) : c ? Math.max(0, c.s - this.prog) : 0;
+    const target = this.training?.marker || this.operation?.marker;
+    this.wp = target || (move && wp ? { x: wp.x, y: w.height(wp.x, wp.z) + 38, z: wp.z } : null);
+    this.dist = target ? C.player.pos.distanceTo(target) : c ? Math.max(0, c.s - this.prog) : 0;
     const A = this.ahead; A.length = 0;
-    if (this.operation) A.push(C.player.pos.x, C.player.pos.z, this.wp.x, this.wp.z);
-    else if (c && this.state !== 'done') { const q = pointAt(E, this.prog); A.push(q.x, q.z); for (const P of E.pts) if (P.s > this.prog + 1) A.push(P.x, P.z); }
+    if (target) A.push(C.player.pos.x, C.player.pos.z, target.x, target.z);
+    else if (c && this.state !== 'done' && !this.training) { const q = pointAt(E, this.prog); A.push(q.x, q.z); for (const P of E.pts) if (P.s > this.prog + 1) A.push(P.x, P.z); }
     if (this.R) { const on = Math.sin(this.t * 5) > 0; this.R.la.color.setRGB(on ? 6 : 0.3, on ? 0.45 : 0.02, on ? 0.2 : 0.01); this.R.lb.color.setRGB(on ? 0.3 : 6, on ? 0.02 : 0.45, on ? 0.01 : 0.2); }
     if (!B) return;
     B.a += ((this.wp && !this.operation ? 1 : 0) - B.a) * (1 - Math.exp(-dt * 3));
-    if (wp) B.root.position.set(wp.x, w.height(wp.x, wp.z), wp.z);
+    const pillar = this.training?.marker || wp;
+    if (pillar) B.root.position.set(pillar.x, w.height(pillar.x, pillar.z), pillar.z);
     const T = this.t;
     B.mat.uniforms.t.value = T; B.mat.uniforms.a.value = B.a;
     B.ring.material.opacity = 0.8 * B.a;

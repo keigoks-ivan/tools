@@ -940,9 +940,11 @@ export class Vehicles {
           v.los = C.world.raycast(ec, pc, null) < 0 || C.world.raycast(ec, _b.copy(pc).setY(pc.y + 6), null) < 0;
         }
         v.noLos = v.los ? 0 : v.noLos + dt;
-        if (v.kind === 'tank') this.updTank(v, dt, pc);
-        else if (v.kind === 'heli') this.updHeli(v, dt, pc);
-        else this.updJet(v, dt, pc);
+        if (!v.training) {
+          if (v.kind === 'tank') this.updTank(v, dt, pc);
+          else if (v.kind === 'heli') this.updHeli(v, dt, pc);
+          else this.updJet(v, dt, pc);
+        }
       } else if (v.kind === 'tank') this.tankWreck(v, dt);
       else if (v.kind === 'heli') this.heliDown(v, dt);
       else this.jetDown(v, dt);
@@ -1078,7 +1080,7 @@ export class Vehicles {
     const moving = pl.speed > 1.5 || this.landing || pl.qbT > 0 || (pl.dashT || 0) > 0;
     const reach = pl.boosting || pl.qbT > 0 ? 5.5 : 3.6;
     for (const v of L) {
-      if (v.state !== 'alive') continue;
+      if (v.state !== 'alive' || v.training) continue;
       if (v.kind === 'tank') {
         if (pl.pos.y > v.pos.y + 3.2 || pl.pos.y < v.pos.y - 3) continue;
         const dx = pl.pos.x - v.pos.x, dz = pl.pos.z - v.pos.z;
