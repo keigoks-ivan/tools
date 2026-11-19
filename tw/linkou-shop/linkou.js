@@ -27,9 +27,12 @@
   }
 
   /* ---------------- 表格 ---------------- */
+  /* 商圈名稱已經以「商圈」「生活圈」「園區」等結尾的不再加「商圈」 */
+  function areaLabel(a) { return /(商圈|生活圈|園區|工業區|社宅)$/.test(a) ? a : a + '商圈'; }
+
   function buildTables(S) {
     var R = S.rows, ord = S.order;
-    var head = ['商圈', '新興或成熟', '2016 後完工店面棟數', '未完工戶數', '成交中位數（2023 起，萬／坪，括號筆數）',
+    var head = ['商圈', '新興或成熟', '2016 後完工或預售店面棟數', '未完工戶數', '成交中位數（2023 起，萬／坪，括號筆數）',
       '實價登錄月租中位數（2023 起，元／坪，括號筆數）', '591 一樓月租開價（換成含公設口徑，元／坪）', '毛報酬率',
       '人口變化 2019→2025', '6～11 歲兒童（2025）', '每 100 名兒童的補習班數', '店面型商家淨增（2021～2025）'];
     var h = '<thead><tr>' + head.map(function (x) { return '<th>' + x + '</th>'; }).join('') + '</tr></thead><tbody>';
@@ -414,7 +417,7 @@
     function pb(lat, lon) { return '<br><button type="button" class="pick-btn" data-lat="' + lat + '" data-lon="' + lon + '">以這裡為中心分析</button>'; }
     var newB = [], oldB = [];
     D.bld.forEach(function (b) {
-      var pop = '<b>' + esc(b.n) + '</b><br>完工年：' + (b.y || '不明') + '<br>成交：' + (b.ns ? b.ns + ' 筆，每坪中位數 ' + fmt(b.sm) + ' 萬' : '無有效成交') +
+      var pop = '<b>' + esc(b.n) + '</b><br>完工年：' + (b.y || (b.new ? '還沒有完工紀錄，只有預售成交' : '不明')) + '<br>成交：' + (b.ns ? b.ns + ' 筆，每坪中位數 ' + fmt(b.sm) + ' 萬' : '無有效成交') +
         '<br>租賃：' + (b.nr ? b.nr + ' 筆，每坪月租中位數 ' + fmt(b.rm) + ' 元' : '無有效租賃') + '<br>最近交易日：' + (b.d || '—') +
         (b.gp !== 'building' ? '<br><i>座標只對到路段</i>' : '') + pb(b.lat, b.lon);
       if (b.new) newB.push(dot(b.lat, b.lon, { radius: 5, color: '#fff', weight: 1, fillColor: '#0d9488', fillOpacity: 0.9 }).bindPopup(pop));
@@ -475,7 +478,7 @@
 
     var LAYERS = [
       ['areas', '商圈範圍（新興飽和色、成熟灰藍虛線）', 1, '<span class="sw poly" style="background:#ea580c"></span><span class="sw poly" style="background:#52708f"></span>'],
-      ['newb', '2016 年後完工的店面大樓', 1, '<span class="sw" style="background:#0d9488"></span>'],
+      ['newb', '2016 年後完工或預售的店面大樓', 1, '<span class="sw" style="background:#0d9488"></span>'],
       ['l591', '591 一樓出售、出租', 1, '<span class="sw" style="background:#dc2626"></span><span class="sw" style="background:#16a34a"></span>'],
       ['edu', '補習班、課後照顧中心', 1, '<span class="sw" style="background:#7c3aed"></span><span class="sw" style="background:#f59e0b"></span>'],
       ['oldb', '較舊的店面大樓（2015 年以前完工）', 0, '<span class="sw" style="background:#6b7280"></span>'],
@@ -662,7 +665,7 @@
 
     function render(o, w) {
       var h = '', A = o.age.reduce(function (t, x) { return t + x; }, 0), A8 = o.age08.reduce(function (t, x) { return t + x; }, 0);
-      h += '<div class="cp-ctx">' + (state.label || (state.demo ? '示範位置' : '你點選的位置')) + '：<b>' + (w.area ? esc(w.area) + '商圈' : '商圈範圍外') + '</b>' + (w.vill ? '・' + esc(w.vill) : '') + '<br>分析半徑 <b>' + fmt(o.R) + ' 公尺</b></div>';
+      h += '<div class="cp-ctx">' + (state.label || (state.demo ? '示範位置' : '你點選的位置')) + '：<b>' + (w.area ? esc(areaLabel(w.area)) : '商圈範圍外') + '</b>' + (w.vill ? '・' + esc(w.vill) : '') + '<br>分析半徑 <b>' + fmt(o.R) + ' 公尺</b></div>';
       // 1 住戶
       var b = '';
       if (!o.pop) { b = '<div class="cp-note">這個範圍內沒有住戶資料。</div>'; }
@@ -845,7 +848,7 @@
 
     function onResult(x) {
       var o = x.o, w = x.w, st = x.state, sale = o.sale.n ? fmt(o.sale.med, 1) + ' 萬／坪' : '無成交', rent = o.rent.n ? fmt(o.rent.med) + ' 元／坪' : '無租賃';
-      sum.innerHTML = '<div class="s-t"><b>' + esc(st.label || (w.area ? w.area + '商圈' : '商圈範圍外')) + '</b>' + (w.vill && !st.label ? '・' + esc(w.vill) : '') + '<span class="s-r">半徑 ' + fmt(o.R) + ' 公尺</span></div>' +
+      sum.innerHTML = '<div class="s-t"><b>' + esc(st.label || (w.area ? areaLabel(w.area) : '商圈範圍外')) + '</b>' + (w.vill && !st.label ? '・' + esc(w.vill) : '') + '<span class="s-r">半徑 ' + fmt(o.R) + ' 公尺</span></div>' +
         '<div class="s-k"><span><i>人口</i><b>' + (o.pop ? fmt(o.pop) : '—') + '</b></span><span><i>營業中店家</i><b>' + fmt(x.bizTotal) + '</b></span><span><i>一樓成交中位數</i><b>' + sale + '</b></span></div>';
       var tp = document.getElementById('mpTip'); if (tp) tp.classList.add('gone');
       if (mq.matches && sheet === 'hide') setSheet('peek');
@@ -862,8 +865,9 @@
     if (init && mq.matches) setSheet('peek', true);
 
     function go(lat, lon, z, label) {
-      map.setView([lat, lon], Math.max(map.getZoom(), z || 16));
       fin.set(lat, lon, false, label);
+      /* 把整個分析圈放進畫面：上方留給搜尋列，手機下方留給抽屜 */
+      map.fitBounds(L.latLng(lat, lon).toBounds(fin.state.r * 2.2), { paddingTopLeft: [12, 120], paddingBottomRight: [12, mq.matches ? 170 : 12], maxZoom: z || 17 });
       if (mq.matches && sheet === 'full') setSheet('peek');
     }
     function toast(t) { var el = document.getElementById('mpToast'); el.textContent = t; el.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(function () { el.classList.remove('on'); }, 3600); }

@@ -208,7 +208,7 @@
           [fmt(r.pop25), '人口（2025 年底），比 2019 年底 ' + (chg >= 0 ? '+' : '') + fmt(chg, 1) + '%'],
           [fmt(r.shops_alive), '營業中商家（所有行業）'],
           [sgn(r.shop_net), '2021～2025 年開在店面的商家淨增'],
-          [fmt(r.new10_bld) + ' 棟', '2016 年後完工、有成交或出租紀錄的店面大樓'],
+          [fmt(r.new10_bld) + ' 棟', '2016 年後完工或預售的店面大樓，已完工 ' + fmt(C.fig1.data[k].reduce(function (a, b) { return a + b; }, 0)) + ' 棟'],
           [fmt(r.sale_med) + ' 萬', '一樓店面成交中位數每坪（2023 年以來，' + r.sale_n + ' 筆）'],
           [fmt(r.rent_med) + ' 元', '一樓店面月租中位數每坪（2023 年以來，' + r.rent_n + ' 筆）'],
           [fmt(r['yield'], 1) + '%', '毛報酬率（成交與租賃配對）'],
@@ -228,10 +228,10 @@
         BLD.forEach(function (b) {
           if (!b.new || !LK.inGeom(b.lat, b.lon, g)) return;
           L.circleMarker([b.lat, b.lon], { radius: 5, color: '#fff', weight: 1, fillColor: '#0d9488', fillOpacity: 0.9, bubblingMouseEvents: false })
-            .bindPopup('<b>' + esc(b.n) + '</b><br>完工年：' + (b.y || '不明') + '<br>成交：' + (b.ns ? b.ns + ' 筆，每坪中位數 ' + fmt(b.sm) + ' 萬' : '無有效成交')).addTo(map);
+            .bindPopup('<b>' + esc(b.n) + '</b><br>完工年：' + (b.y || (b.new ? '還沒有完工紀錄，只有預售成交' : '不明')) + '<br>成交：' + (b.ns ? b.ns + ' 筆，每坪中位數 ' + fmt(b.sm) + ' 萬' : '無有效成交')).addTo(map);
         });
         q('arOpen').href = 'map.html?lat=' + rp[0].toFixed(5) + '&lon=' + rp[1].toFixed(5) + '&r=500';
-        q('arMapNote').textContent = '綠點是 2016 年後完工、有成交或出租紀錄的店面大樓。';
+        q('arMapNote').textContent = '綠點是 2016 年後完工或預售的店面大樓，只有預售成交的點開會註明。';
 
         /* 圖：人口、每年淨增、每年完工、未完工 */
         var yrs4 = C.fig4.years, i19 = yrs4.indexOf(2019), l4 = yrs4.length - 1, pc = (C.fig4.data[k][l4] / C.fig4.data[k][i19] - 1) * 100;
