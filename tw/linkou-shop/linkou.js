@@ -162,14 +162,14 @@
     var narrow = window.innerWidth < 700;
     var sum = function (a) { return a.reduce(function (x, y) { return x + y; }, 0); };
 
-    /* 圖 1：每年完工的店面大樓，六個商圈各一格 */
+    /* 圖 4：每年完工的店面大樓，六個商圈各一格 */
     multiples('fig1', { ord: ord, nm: nm, colors: COL, years: C.fig1.years, data: C.fig1.data, type: 'bar', unit: ' 棟', step: 4, peak: true,
       sub: function (k) { return '合計 ' + sum(C.fig1.data[k]) + ' 棟'; }, xfmt: function (v) { return String(v); } });
 
-    /* 圖 2：兩張熱度表 */
+    /* 圖 5：兩張熱度表 */
     buildHeat(C, ord, nm);
 
-    /* 圖 3：兒童數兩條線，標出各自最高點與最新值 */
+    /* 圖 6：兒童數兩條線，標出各自最高點與最新值 */
     var f3 = C.fig3, L = f3.labels.length;
     function peakOf(a) { var m = Math.max.apply(null, a); return a.indexOf(m); }
     function lineSeries(name, a, col, peakPos) {
@@ -186,19 +186,19 @@
       yAxis: yAx({ min: 5000, max: 12000, interval: 1000, axisLabel: { color: MUTED, fontSize: 11, formatter: function (v) { return fmt(v); } } }),
       series: [lineSeries('6～11 歲', f3.a611, '#1e3a5f', 'top'), lineSeries('0～5 歲', f3.a05, '#d97706', 'bottom')] }, narrow ? 300 : 340);
 
-    /* 圖 4：各商圈人口，小圖並排 */
+    /* 圖 1：各商圈人口，小圖並排 */
     var yrs4 = C.fig4.years, i19 = yrs4.indexOf(2019), last4 = yrs4.length - 1;
     function chg4(k) { var d = C.fig4.data[k]; return (d[last4] / d[i19] - 1) * 100; }
     multiples('fig4', { ord: ord, nm: nm, colors: COL, years: yrs4, data: C.fig4.data, type: 'area', unit: ' 人', step: 10000,
       yfmt: function (v) { return v === 0 ? '0' : fmt(v / 10000) + ' 萬'; },
       sub: function (k) { return (chg4(k) >= 0 ? '+' : '') + fmt(chg4(k), 1) + '%'; } });
 
-    /* 圖 5：每年淨增商家，小圖並排 */
+    /* 圖 2：每年淨增商家，小圖並排 */
     var last5 = C.fig5.years.length - 1;
     multiples('fig5', { ord: ord, nm: nm, colors: COL, years: C.fig5.years, data: C.fig5.data, type: 'bar', unit: ' 家', step: 40, peak: false,
       sub: function (k) { return C.fig5.years[last5] + ' 年 ' + fmt(C.fig5.data[k][last5]) + ' 家'; } });
 
-    /* 圖 6：A9 站日均運量 */
+    /* 圖 3：A9 站日均運量 */
     var mo = C.fig6.months, vv = C.fig6.v, n6 = vv.length, col6 = '#3b5b82';
     var a = mo.indexOf('2021-05'), b = mo.indexOf('2021-07');
     var ml = mo[n6 - 1].split('-');
@@ -225,7 +225,7 @@
     });
   }
 
-  /* 圖 1：一樓店面／二到四樓辦公、商業 兩種版本 */
+  /* 圖 4：一樓店面／二到四樓辦公、商業 兩種版本 */
   var FIG1_ORIG = null;
   function drawFig1(mode) {
     var h = document.getElementById('fig1H'), cap = document.getElementById('fig1C'), el = document.getElementById('fig1');
@@ -235,12 +235,12 @@
     var sum = function (a) { return a.reduce(function (x, y) { return x + y; }, 0); };
     var F = mode === 'up' ? UP.fig1 : CH.fig1;
     h.textContent = mode === 'up' ? F.title : FIG1_ORIG.h;
-    cap.textContent = mode === 'up' ? '圖 1：各商圈每年完工、有二到四樓辦公或商業成交或租賃紀錄的大樓數（2016～2026，依實價登錄的完工年；二到四樓指登記為辦公或商業用途的 2～4 樓）' : FIG1_ORIG.c;
+    cap.textContent = mode === 'up' ? '圖 4：各商圈每年完工、有二到四樓辦公或商業成交或租賃紀錄的大樓數（2016～2026，依實價登錄的完工年；二到四樓指登記為辦公或商業用途的 2～4 樓）' : FIG1_ORIG.c;
     multiples('fig1', { ord: CH.order, nm: CH.names, colors: COL, years: F.years, data: F.data, type: 'bar', unit: ' 棟', step: mode === 'up' ? 1 : 4, peak: true,
       sub: function (k) { return '合計 ' + sum(F.data[k]) + ' 棟'; }, xfmt: function (v) { return String(v); } });
   }
 
-  /* 圖 2：兩張熱度表（單一藍色，深淺＝數值，格內印數字） */
+  /* 圖 5：兩張熱度表（單一藍色，深淺＝數值，格內印數字） */
   function heatColor(t) {
     var a = [205, 226, 251], z = [24, 79, 149];
     return 'rgb(' + a.map(function (x, i) { return Math.round(x + (z[i] - x) * t); }).join(',') + ')';
@@ -296,7 +296,7 @@
     });
     el.innerHTML = h;
     if (up) {
-      note.innerHTML = '後段、前段、中段各一張表。2016 年後完工、2015 年前完工是有二到四樓辦公、商業成交或租賃紀錄的大樓棟數，三張表的 2016 年後完工加起來等於圖 1。二到四樓成交是實價登錄 2～4 樓、登記辦公或商業用途的全部買賣筆數，含特殊交易和算不出單價的筆數，只計該商圈。未完工戶數是整個建案的戶數，不分樓層，跟一樓店面那一版相同。已簽約店面是一樓預售店面，這一版不列。同一欄的長條在三張表用同一個比例。寫成路口的地址算在先寫的那條路，「段別未載」是建案只寫路名、沒寫第幾段。';
+      note.innerHTML = '後段、前段、中段各一張表。2016 年後完工、2015 年前完工是有二到四樓辦公、商業成交或租賃紀錄的大樓棟數，三張表的 2016 年後完工加起來等於圖 4。二到四樓成交是實價登錄 2～4 樓、登記辦公或商業用途的全部買賣筆數，含特殊交易和算不出單價的筆數，只計該商圈。未完工戶數是整個建案的戶數，不分樓層，跟一樓店面那一版相同。已簽約店面是一樓預售店面，這一版不列。同一欄的長條在三張表用同一個比例。寫成路口的地址算在先寫的那條路，「段別未載」是建案只寫路名、沒寫第幾段。';
       return;
     }
     note.innerHTML = ROAD_NOTE1;
