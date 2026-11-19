@@ -120,9 +120,9 @@ export const STAGE_DATA = [
           go: [[OP, '直升機到了。守住廣場，直到最後一架起飛。']], lines: [[OP, '第一架降落。別讓獵犬靠近廣場。']] },
       ] } },
   // ================================================================ 第 3 關
-  // 西區：繞河濱公園拆掉砲兵觀測所，最後用導光陣列切斷備援電源。
+  // 西區：拆掉河濱公園周圍的砲兵觀測所，再打開西河大橋的出口。
   { name: '救援', en: 'RESCUE', tip: '打掉樓頂的觀測所：琥珀色框的大樓，打到整棟倒下', music: 2, tier: 2,
-    brief: ['包圍網打開了，可是西區的河濱公園還困著上千名難民。', '公園裡的臨時醫院一直挨砲擊，砲彈由高樓頂上的觀測所導引。', '打掉觀測所，再利用公園的導光板切斷備援砲線，打開過橋的路。'],
+    brief: ['包圍網打開了，可是西區的河濱公園還困著上千名難民。', '公園裡的臨時醫院一直挨砲擊，砲彈由高樓頂上的觀測所導引。', '拆掉觀測所，再突破西河大橋的封鎖，替車隊打開出口。'],
     start: [[OP, '零號，這裡是白鷺。醫院每三分鐘挨一輪砲。'], [OP, '觀測所會用琥珀色框標出來，整棟打倒才算數。']],
     end: [[ALLY, '最後一輛車過橋了。蒼焰，這次欠你一次。'], [OP, '難民全數撤出。零號，回來補給。']],
     route:
@@ -144,19 +144,16 @@ export const STAGE_DATA = [
           lines: [[ALLY, '這裡是醫院，砲彈又落下來了！']] },
         { at: 7, targets: [{ x: -179, z: -59, name: '砲兵觀測塔' }], amb: 'grunt@side tank@out*2 grunt@roof', amb2: 'heli@rise tank@side*2 grunt@side', amb3: 'grunt@drop*2 tank@out grunt@side', tip: '高樓比較耐打：對準同一棟連續射擊',
           go: [[OP, '最後一個在前方的高樓頂上，比較耐打。']], lines: [[EN, '觀測塔告急！把那台藍色的擋下來！']],
-          clear: [[OP, '觀測所全毀。但還有備援砲線。'], [ALLY, '我們先讓傷員上車，等你切斷最後兩座電源。']] },
+          clear: [[OP, '觀測所全毀，砲擊停了。'], [ALLY, '先讓傷員上車。橋口還被封著。']] },
         { at: 8, amb: 'tank@out*2 tank@side brawler@breach', amb2: 'grunt@roof heli@rise tank@out*2 grunt@side',
           lines: [[EN, '砲兵失去觀測。地面部隊，直接攻進醫院。'], [OP, '他們改派地面部隊了。擋在醫院前面。']] },
         { at: 9, amb: 'heli@rise*2 grunt@side tank@out', amb2: 'tank@out*2 grunt@drop grunt@roof grunt@side',
           go: [[OP, '掉頭繞回公園，沿路清掉追兵。']] },
         { at: 10, amb: 'grunt@drop*2 tank@side*2', amb2: 'heli@rise tank@out*2 grunt@roof grunt@side',
-          go: [[ALLY, '車隊裝好了。備援砲線還守著橋口。']],
-          clear: [[OP, '電源藏在鋼板後面。用路中央的導光板從側面打。']] },
-        { at: 12, operation: { type: 'reflect', title: '反射攻擊', approach: 210,
-          pairs: [{ plate: [-360, 65, 11], cell: [-377, 65, 11] }, { plate: [-360, 8, 17], cell: [-343, 8, 17] }] },
-          tip: '瞄準青色導光板，讓光束轉向側面的電源。',
-          lines: [[OP, '沿著公園外的道路找青色導光板。用步槍射板，不用打穿鋼殼。']],
-          clear: [[OP, '兩座電源都斷了。橋上可以通行。']] },
+          go: [[ALLY, '傷員都上車了，橋口還有敵軍。']], clear: [[OP, '往西河大橋推進。清出出口，車隊就能走。']] },
+        { at: 12, amb: 'tank@ring*2 grunt@drop*2', tip: '突破西河大橋的封鎖',
+          lines: [[OP, '橋頭就是最後一道封鎖。蒼焰，打開出口。']],
+          clear: [[ALLY, '橋頭已淨空。救護車隊，通過！']] },
       ] } },
   // ================================================================ 第 4 關
   // 西南角切進來往北：長直路上的遠程自走砲、重裝機首次登場，打掉射控雷達、彈藥庫，最後在北邊打倒砲兵指揮所
@@ -240,7 +237,7 @@ export const STAGE_DATA = [
       ] } },
   // ================================================================ 第 6 關
   { battlefield: 'depot', fieldLabel: '工業補給基地', name: '補給線', en: 'SUPPLY LINE', tip: '琥珀色框的大樓是目標——整棟打垮才算數', music: 3, tier: 4,
-    brief: ['黑犬撤走了，但獵犬軍團的油料和彈藥還源源不絕。', '補給從東南郊外進城，沿著南郊工業區的運輸道設了油庫和倉庫。', '零號單機深入，先打掉油庫，再趁散熱閘開啟時打穿彈藥庫。', '偵察報告：敵方戰鬥機已經進駐補給站。'],
+    brief: ['黑犬撤走了，但獵犬軍團的油料和彈藥還源源不絕。', '補給從東南郊外進城，沿著南郊工業區的運輸道設了油庫和倉庫。', '零號單機深入，把標示的油庫、倉庫全部打垮。', '偵察報告：敵方戰鬥機已經進駐補給站。'],
     start: [[OP, '這次是單機深入，沒有援軍。'], [OP, '目標我會標在畫面上，打到整棟倒下為止。'], [ME, '收到，出發。']],
     end: [[OP, '補給總站瓦解。牠們的油撐不了幾天。'], [EN, '全軍注意：司令部下令，拂曉發動總攻。'], [OP, '聽到了嗎？牠們要孤注一擲了。']],
     route:
@@ -257,11 +254,9 @@ export const STAGE_DATA = [
           go: [[OP, '公路旁那兩棟低矮建築是油庫。']], lines: [[EN, '牠衝著油庫來了！全力攔截！']], clear: [[OP, '兩座油庫都燒起來了。前線的戰車要斷油了。']] },
         { at: 5, amb: 'jet@out tank@out*2 tank@side', amb2: 'jet@out*2 grunt@drop grunt@side', amb3: 'tank@out*2 heli@rise grunt@side', tip: '新敵人：戰鬥機——掠過後會繞回來，用飛彈鎖定',
           lines: [[OP, '雷達上有高速目標！是戰鬥機，小心掃射！']] },
-        { at: 6, operation: { type: 'freight', title: '突襲彈藥庫核心', approach: 83,
-          panel: [430, -610, 4.8], gate: [455, -600], core: [475, -600, 10.5], seconds: 5.5 },
-          tip: '射開閘控制箱，趁散熱閘升起時連打核心三發。',
-          go: [[OP, '彈藥庫裝了散熱閘。擊中路旁控制箱，門只會開幾秒。']],
-          clear: [[OP, '核心熔毀。這批彈藥送不出去了。']] },
+        { at: 6, amb: 'grunt@side tank@side heli@rise tank@out*2', amb2: 'grunt@drop*2 tank@out*2 grunt@side', tip: '打垮兩座彈藥倉庫',
+          targets: [{ x: 395, z: -660, name: '彈藥倉庫' }, { x: 438, z: -660, name: '彈藥倉庫' }],
+          go: [[OP, '下一個路口旁是彈藥倉庫。兩棟都要倒。']], lines: [[EN, '別讓牠靠近彈藥庫！']], clear: [[OP, '彈藥倉庫炸掉了。牠們的砲彈至少少一半。']] },
         { at: 7, pre: 'tank@far*2', amb: 'heavy@drop tank@side*2 grunt@roof', amb2: 'grunt@drop tank@out*3 grunt@side', amb3: 'heli@rise*2 tank@side grunt@side', tip: '重裝機的飛彈會追人——響警報就點 SHIFT 閃',
           lines: [[EN, '重裝隊，把牠壓在路口！']] },
         { at: 8, amb: 'heli@rise*2 tank@out*2 grunt@drop', amb2: 'jet@out*2 tank@side*2 grunt@side', amb3: 'grunt@roof tank@out*2 grunt@side',
@@ -318,7 +313,7 @@ export const STAGE_DATA = [
       ] } },
   // ================================================================ 第 8 關
   { battlefield: 'airfield', fieldLabel: '高原航空基地', name: '制空權', en: 'AIR SUPREMACY', tip: 'T 啟動飛行；空白上升、C／Ctrl 下降，放開升降鍵定高；Shift 高速推進', music: 4, tier: 5,
-    brief: ['聯邦空軍整備完成，但城南高原航空基地的防空網讓飛機一架也進不來。', '先起飛，在不同高度追瞄三個來回飛行的干擾器。', '沿路打垮防空陣地和雷達，替最後的總攻打開空中走廊。', '敵方機甲會升空攔截，戰機則從上方俯衝。高速推進消耗 EN，定高停留可緩慢回充。'],
+    brief: ['聯邦空軍整備完成，但城南高原航空基地的防空網讓飛機一架也進不來。', '展開蒼焰的空戰翼。按 T 起飛，以不同高度繞過火力線。', '沿路打垮防空陣地和雷達，替最後的總攻打開空中走廊。', '敵方機甲會升空攔截，戰機則從上方俯衝。高速推進消耗 EN，定高停留可緩慢回充。'],
     start: [[OP, '防空網不倒，空軍就飛不進來。'], [OP, '按 T 展開空戰翼。空白上升，C 或 Ctrl 下降；放開就定高。'], [OP, 'Shift 高速推進，EN 低就減速停留。防空砲在掩體頂上，拆掉掩體才能清空走廊。']],
     end: [[OP, '防空網瓦解。空軍，路開了。'], ['聯邦空軍', '鷹群進入神戶空域。謝了，蒼焰。'], [DOG, '藍色的，我在巢穴等你。']],
     route:
@@ -326,11 +321,7 @@ export const STAGE_DATA = [
     { cp: [4, 8], arena: 175, fin: 60, par: 550, over: 2,
       pts: [[60, -60], [0, -120], [0, -240], [0, -360], [0, -480], [120, -480], [240, -480], [240, -360], [120, -360], [120, -240], [120, -120], [240, -120], [300, -180]],
       secs: [
-        { at: 1, operation: { type: 'flightShot', title: '三段高度射擊', approach: 100,
-          nodes: [[36, -101, 36], [0, -154, 68], [5, -208, 39]] },
-          tip: '起飛後對齊干擾器的高度，等光環轉青再射。',
-          lines: [[OP, '干擾器從上下包住了感應頭。飛到與它平行的高度，等光環轉青，用步槍打掉。']],
-          clear: [[OP, '干擾解除。現在能看見前方的防空陣地了。']] },
+        { at: 1, amb: 'heli@rise*2 tank@out grunt@drop', amb2: 'heli@rise tank@side*2 grunt@drop grunt@side', tip: '按 T 起飛，拉高後用飛彈鎖定直升機；空戰機甲會爬升追擊' },
         { at: 2, amb: 'heli@rise*2 tank@side grunt@roof', amb2: 'jet@out tank@out*2 heli@rise grunt@side', amb3: 'grunt@drop heli@rise*2 grunt@side', tip: '打垮兩座防空陣地',
           targets: [{ x: 37, z: -205, name: '防空陣地' }, { x: -41, z: -300, name: '防空陣地' }],
           go: [[OP, '前面路口兩側的樓頂有防空砲。']], lines: [[EN, '防空陣地遭到攻擊！']], clear: [[OP, '兩座防空砲沉默了。']] },

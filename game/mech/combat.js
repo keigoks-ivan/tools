@@ -507,11 +507,8 @@ export class Combat {
     hero.muzzle.updateWorldMatrix(true, false);
     const from = hero.muzzle.getWorldPosition(V3());
     let to = V3(), hitE = null, kind = 'ground';
-    const operation = this.enc?.operation;
-    const prop = operation?.state === 'active' ? operation.aim(this.eye, this.aimDir, this.aimSkip) : null;
-    const tgt = prop ? null : this.fireTarget();
-    if (prop) to.copy(prop.center);
-    else if (tgt) {
+    const tgt = this.fireTarget();
+    if (tgt) {
       tgt.chest(to);
       const sc = Math.min(1, tgt.scale);   // 載具很矮，散布跟著縮（不然會打進地面）
       to.x += rand(-1.2, 1.2) * sc; to.y += rand(-2.5, 2.5) * sc; to.z += rand(-1.2, 1.2) * sc;
@@ -537,8 +534,8 @@ export class Combat {
     }
     // 被建築或地形擋住
     const dir = _d.subVectors(to, from);
-    const len = dir.length(); dir.divideScalar(Math.max(len, 1e-6));
-    const ext = _b.copy(to).addScaledVector(dir, hitE || prop ? 0 : 200);
+    const len = dir.length(); dir.divideScalar(len);
+    const ext = _b.copy(to).addScaledVector(dir, hitE ? 0 : 200);
     const tw = w.raycast(from, ext, _n);
     if (tw >= 0) {
       const hitP = V3().lerpVectors(from, ext, tw);
@@ -550,10 +547,7 @@ export class Combat {
     hero.recoil = 1;
     this.cockpit.kick('fire', 1);
     this.cockpit.flashAt(PINK, 5, 0.45, -0.25, -1.1);
-    if (prop && tw < 0) {
-      if (operation.hit(prop) !== false) this.stats.hits++;
-      this.fx.impact(to, _n.copy(dir).negate(), 'beam');
-    } else if (hitE) {
+    if (hitE) {
       const d = from.distanceTo(to), fall = d > 600 ? clamp(1 - (d - 600) / 800, 0.5, 1) : 1;
       this.damageEnemy(hitE, W.rifle.dmg * fall * (this.od.active ? 1.25 : 1), W.rifle.stag, to, dir);
       this.fx.impact(to, _n.copy(dir).negate(), 'beam');

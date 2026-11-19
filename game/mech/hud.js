@@ -492,13 +492,6 @@ export class HUD {
   // 遭遇戰：前進距離、目標點（菱形／畫面外箭頭）、伏兵警示（紅色 !）
   objective(EN, y, W, H) {
     const X = this.x, s = this.s;
-    const mission = EN.operation?.hud;
-    if (mission) {
-      const cx = W / 2;
-      this.text(mission.title, cx, y, 18, mission.color, 1, 'center', 700, SANS);
-      this.text(mission.hint, cx, y + 20 * s, 13, 'ink2', .92, 'center', 600, SANS);
-      if (mission.value !== null) this.bar(cx - 69 * s, y + 33 * s, 138 * s, 2 * s, mission.value, mission.color);
-    }
     // 要打爛的大樓：琥珀色框＋名字（還立著的才畫）
     for (const t of EN.tg || []) {
       if (t.b.st !== 0) continue;
@@ -523,7 +516,7 @@ export class HUD {
       this.text('!', p.x, p.y + 2 * s, 13, 'rd', a, 'center', 700);
     }
     if (!EN.wp) return;
-    if (!mission && hl == null && !(EN.tg && EN.tg.length && EN.state === 'fight')) this.text(`前進 ▶ ${Math.round(EN.dist)}m`, W / 2, y, 15, 'cy', 0.8 + 0.2 * Math.sin(this.t * 4), 'center', 700, SANS);
+    if (!(hl !== null && hl !== undefined) && !(EN.tg && EN.tg.length && EN.state === 'fight')) this.text(`前進 ▶ ${Math.round(EN.dist)}m`, W / 2, y, 15, 'cy', 0.8 + 0.2 * Math.sin(this.t * 4), 'center', 700, SANS);
     const p = this.proj(_o.set(EN.wp.x, EN.wp.y, EN.wp.z), {});
     if (!(p.front && p.x > 30 && p.x < W - 30 && p.y > 30 && p.y < H - 30)) { this.edgeMark(p, 'cy', `${Math.round(EN.dist)}m`, W, H, 0.9); return; }
     const r = 11 * s, b = 1 + 0.12 * Math.sin(this.t * 5);
