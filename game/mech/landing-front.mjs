@@ -1,5 +1,5 @@
 import { BattleLine } from './battle-line.mjs?v=3';
-import { LANDING, landingShore } from './landing-layout.mjs?v=3';
+import { LANDING, landingShore } from './landing-layout.mjs?v=4';
 
 import { BASE_OPS } from './base-layout.mjs';
 
@@ -25,11 +25,15 @@ export class LandingFront extends BattleLine {
     this.defenders=[];
     this.boss=null;
     this.barrageTime=0;this.nextBurst=0;this.bursts=[];
+    this.escortGun={friendly:true,hits:0};
+    this.escortRounds=6;this.escortNext=0;
   }
 
   prepare() {
     this.site=this.C.world.landingSite;
     this.site.doors.reset(this.secured);
+    this.site.fleetReleased=this.ashore;
+    this.site.fleetRun=this.ashore?1:0;
     this.wallMarkers=[{name:'左側・攔截機',position:this.point(LANDING.seawall,lanes.left)},
       {name:'右側・裝甲車',position:this.point(LANDING.seawall,lanes.right)}];
     this.wallMarkers.forEach(m=>{m.position.y+=12;});
@@ -149,6 +153,7 @@ export class LandingFront extends BattleLine {
     cannon.entity.label='岸防重裝機'; guard.entity.label='灘岸反應機';
     tank.entity.ap=tank.entity.apMax=1750;
     this.defenders=[cannon,guard,tank];
+    this.shoreCannon=cannon;
     this.order(guard,[-250,20],[-246,38]);
     this.order(tank,[-219,61],[-226,60]);
     C.say('神戶外港・登陸','斑鳩、白隼，與蒼焰同艇進場',3,'cy');
@@ -165,7 +170,35 @@ export class LandingFront extends BattleLine {
     this.order(this.ikaru,[-324,-14],[-274,-21],[-230,-16]);
     this.order(this.hayabusa,[-324,13],[-268,24],[-230,18]);
     this.C.say('第一波・跳板放下','穿過濕灘，擊破岸防火力',2.6,'cy');
-    this.C.lines([['斑鳩','我走左側。蒼焰，跟我把那台重裝機打下來。'],['白隼','右側我來。射線一打開就往前。']],true,2.7);
+    this.C.lines([['三號艇','我看得到你們的跳板。岸砲還在，我這一列靠不進去。'],['斑鳩','蒼焰，左前方那台重裝機。讓後面的艇也能上岸。']],true,2.7);
+  }
+
+  escortFire() {
+    if(!this.site.fleetReleased){
+      if(!this.shoreCannon.entity.dead)return;
+      this.site.fleetReleased=true;
+      this.C.lines([['三號艇','岸砲停了！全隊跟上。白隼，你右邊那條灘我看得到。']],true,3);
+    }
+    if(this.site.fleetRun<.16||!this.escortRounds||this.clock<this.escortNext||this.shots.length>=14)return;
+    this.escortNext=this.clock+.7;
+    const north=this.escortRounds%2===0;
+    const from=this.site.flotilla.position.clone();
+    from.x+=north?-29:-7;from.y+=7.2;from.z+=north?-82:89;
+    for(const target of this.foes){
+      if(!this.canFight(target))continue;
+      const end=target.pos.clone();end.y+=target.vehicle?2.3:11;
+      if(this.C.world.raycast(from,end,null)>=0)continue;
+      this.C.fx.shellTracer(from,end,255);this.C.audio.cannon(from);
+      this.shots.push({from,end,target,shell:true,t:from.distanceTo(end)/255,damage:820,actor:this.escortGun});
+      this.actualShots.ally++;
+      this.escortRounds--;this.escortNext=this.clock+2.8;
+      break;
+    }
+  }
+
+  shoreCleared() {
+    return cleared(this.defenders)&&!this.reinforcements.pending.length&&
+      !this.foes.some(a=>a.post===this.phase&&this.canFight(a));
   }
 
   checkpoint(sec,x,z) {
@@ -196,6 +229,8 @@ export class LandingFront extends BattleLine {
     this.order(left,[-183,-66],[-201,-52]);this.order(right,[-158,54],[-193,49]);
     this.order(gun,[-143,-14]);
     this.defenders=[left,right,gun];
+    this.platoon('grunt tank grunt',[-126,-85],this.phase,[-189,-53]);
+    this.platoon('brawler grunt tank',[-113,86],this.phase,[-171,42]);
     this.C.say('第二波・灘岸反擊','敵機正在兩側出現，與僚機一起清出前路',3,'am');
   }
 
@@ -242,6 +277,7 @@ export class LandingFront extends BattleLine {
     const reserve=this.unit(lane==='left'?'brawler':'tank',75,z*1.49,false,'crossing');
     this.order(guard,[35,z*.79],[21,z*.67]);this.order(reserve,[47,z*1.13]);
     this.defenders=[guard,reserve];
+    this.platoon(lane==='left'?'brawler grunt brawler':'tank grunt tank',[82,z*1.18],this.phase,[33,z]);
     this.C.say('第四波・海堤後方反擊','擊退內側預備隊，往裝卸區推進',3,'am');
   }
 
@@ -262,6 +298,8 @@ export class LandingFront extends BattleLine {
     this.order(guard,[152,-5]);this.order(screen,[118,18],[136,41]);
     this.order(tank,[160,39]);
     this.defenders=[guard,screen,tank];
+    this.platoon('tank grunt heavy',[197,-58],this.phase,[142,-37]);
+    this.platoon('brawler grunt',[208,61],this.phase,[156,35]);
     this.C.say('第五波・裝卸區防線','穿過貨櫃通道，打掉鐵獒的前衛',3,'am');
   }
 
@@ -290,6 +328,7 @@ export class LandingFront extends BattleLine {
     const reserve=this.unit('brawler',267,side*65,false,'boss');
     this.order(reserve,[238,side*47],[204,side*27]);
     this.defenders.push(reserve);
+    this.platoon('grunt tank brawler',[269,-side*67],'boss',[215,-side*38]);
     this.C.say('第七波・港區最後反撲','護衛機從側面進場，清出最後通道',3,'am');
     if(!boss.entity.dead)this.C.lines([[DOG,'主路交給支援組。我換陣地。']],true,2.8);
   }
@@ -306,30 +345,34 @@ export class LandingFront extends BattleLine {
     }else this.beginBase(open[0]);
   }
   beginBase(op) {
-    this.phase='base';this.op=op;this.wave=0;this.sideSupport=false;this.bayOpen=false;
+    const duel=op.id==='hq'&&this.C.cp?.commandDuel;
+    this.phase='base';this.op=op;this.wave=duel?op.waves.length-1:0;this.sideSupport=false;this.bayOpen=false;
     this.boss=null;this.C.boss=null;
     this.repairAt=this.clock+8;
     const [x,z]=op.point;
     this.waypoint(x,z);
     this.order(this.ikaru,[x-16,z-25],[x-16,z-6]);
     this.order(this.hayabusa,[x+16,z-25],[x+16,z-6]);
-    if(op.id==='hq') {
-      const boss=this.boss=this.unit('heavy',x,z+19,false,'command');
-      boss.boss=true;boss.entity.bossName='基地司令機・白夜';
-      boss.maxAP=18500;boss.entity.ap=boss.entity.apMax=boss.maxAP;
-      boss.weapon={...boss.weapon,damage:840,cool:2.25,range:405,speed:16};
-      this.C.boss=boss.entity;
-    }
     this.baseWave();
-    this.C.say(op.name,op.hint,3,'cy');
+    if(!duel)this.C.say(op.name,op.hint,3,'cy');
+    if(op.id==='hq'&&!duel)this.C.lines([['白隼','我看到指揮塔了。從海上看，它只有一根火柴那麼小。'],['斑鳩','三號艇還在聽。把頻道開著吧。']],true,2.8);
   }
   baseWave() {
     const op=this.op,index=this.wave++;
     const list=op.waves[index].split(' ');
     const [x,z]=op.point, swap=index%2;
-    this.platoon(list.slice(0,2).join(' '),op.entries[swap],op.id,[x-13,z-8]);
-    const second=op.bay&&index===2?op.bay.inside:[x+13,z+3];
-    this.platoon(list.slice(2).join(' '),op.entries[1-swap],op.id,second);
+    const mid=Math.ceil(list.length/2);
+    this.platoon(list.slice(0,mid).join(' '),op.entries[swap],op.id,[x-13,z-8]);
+    const second=op.bay&&this.bayOpen?op.bay.inside:[x+13,z+3];
+    this.platoon(list.slice(mid).join(' '),op.entries[1-swap],op.id,second);
+    if(op.id==='hq'&&this.wave===op.waves.length){
+      const boss=this.boss=this.unit('heavy',x,z+19,false,'command');
+      boss.boss=true;boss.entity.bossName='基地司令機・白夜';
+      boss.maxAP=18500;boss.entity.ap=boss.entity.apMax=boss.maxAP;
+      boss.weapon={...boss.weapon,damage:840,cool:2.25,range:405,speed:16};
+      this.C.boss=boss.entity;
+      this.C.say('司令機・白夜出庭','近衛列隊，司令機正從塔下接近',3,'am');
+    }
   }
   baseUpdate() {
     const {op}=this,live=this.foes.filter(u=>this.canFight(u));
@@ -351,7 +394,12 @@ export class LandingFront extends BattleLine {
       this.boss.shifted=true;this.boss.weapon={...this.boss.weapon,cool:1.52};
       this.order(this.boss,[x-29,z+7],[x-34,z-14]);
       this.platoon('brawler heavy brawler',op.entries[0],op.id,[x-16,z+3]);
-      this.C.say('白夜啟動備用驅動','近衛已離開北側機塢',2.6,'am');
+      this.platoon('tank grunt brawler',op.entries[1],op.id,[x+16,z+3]);
+      this.regroup();
+      this.order(this.ikaru,[x-37,z-20],[x-26,z+2]);
+      this.order(this.hayabusa,[x+39,z-13],[x+19,z+12]);
+      this.C.say('白夜啟動備用驅動','斑鳩與白隼向指揮塔合流',2.8,'am');
+      this.C.lines([['斑鳩','我到塔下了。白隼，還聽得到嗎？'],['白隼','抬頭，我在另一邊。蒼焰，我們三台都到了。']],true,2.5);
     }
     if(this.reinforcements.pending.length)return false;
     if(op.bay&&!this.bayOpen&&this.wave===2&&live.length<=2&&near) {
@@ -362,18 +410,24 @@ export class LandingFront extends BattleLine {
       this.C.say('機庫捲門開啟','進入機庫，接管整備架',2.5,'cy');
     }
     const capture=op.bay?op.bay.inside:op.point;
-    if(this.wave<op.waves.length&&near&&live.length<=2) {
+    const beforeDuel=op.id==='hq'&&this.wave===op.waves.length-1;
+    if(this.wave<op.waves.length&&near&&live.length<=(beforeDuel?0:2)) {
+      if(beforeDuel){
+        this.resupply(2200);
+        this.setCheckpoint(this.enc.sec,x,z-31,0,{lane:this.lane,secured:[...this.secured],commandDuel:true});
+      }
       this.baseWave();this.C.note(op.name+'・第 '+this.wave+' 梯隊','am');
     }else if(this.wave===op.waves.length&&!live.length&&this.nearby(this.C.player.pos,capture,op.bay?14:30)){
       this.secured.push(op.id);
       if(op.id==='hq'){
         this.phase=this.enc.state='done';this.marker=null;
-        this.C.lines([[COMMAND,'基地指揮權確認移交。跑道方向已經沒有敵機出擊。']],true);
+        this.C.lines([['白隼','三號艇，指揮塔聽得見。你們到了嗎？']],true);
         return true;
       }
       this.resupply(2000);
       this.setCheckpoint(3+this.secured.length,x,z,0,{lane:this.lane,secured:[...this.secured]});
-      this.C.lines([['斑鳩',op.name+'已接管。白隼，我們往下一區。']],true,2.5);
+      if(op.id==='transfer')this.C.lines([['三號艇','剛才同艇的小隊都上岸了。海上看得見你們走過的整條路。']],true,3);
+      else if(op.id!=='launch')this.C.lines([['斑鳩',op.name+'已接管。白隼，我們往下一區。']],true,2.5);
       this.nextBase();
     }
     return false;
@@ -388,15 +442,16 @@ export class LandingFront extends BattleLine {
 
   update(dt) {
     const p=this.C.player.pos;
+    if(this.phase==='beach'||this.phase==='beachCounter')this.escortFire();
     if(this.phase==='beach'&&p.x>-261&&Math.abs(p.z)<115&&cleared(this.defenders))this.beachCounter();
-    else if(this.phase==='beachCounter'&&p.x>-212&&cleared(this.defenders))this.enterSeawall();
+    else if(this.phase==='beachCounter'&&p.x>-212&&this.shoreCleared())this.enterSeawall();
     else if(this.phase==='seawall'&&p.x>-78){
       const lane=p.z<0?'left':'right';
       if(Math.abs(p.z-lanes[lane])<29&&cleared(this.wallGuards[lane]))this.crossWall(lane);
-    } else if(this.phase==='crossing'&&p.x>20&&Math.abs(p.z)<116&&cleared(this.defenders))this.enterYard();
-    else if(this.phase==='yard'&&p.x>91&&Math.abs(p.z)<116&&cleared(this.defenders))this.beginBoss();
+    } else if(this.phase==='crossing'&&p.x>20&&Math.abs(p.z)<116&&this.shoreCleared())this.enterYard();
+    else if(this.phase==='yard'&&p.x>91&&Math.abs(p.z)<116&&this.shoreCleared())this.beginBoss();
     if(this.phase==='boss'&&!this.boss.shifted&&this.boss.entity.ap<this.boss.maxAP*.55)this.bossReserve();
-    if(this.phase==='boss'&&this.boss.entity.dead&&cleared(this.defenders)) {
+    if(this.phase==='boss'&&this.boss.entity.dead&&this.shoreCleared()) {
       this.phase='link';this.waypoint(248,108);
       this.retire((e,z)=>[[e.pos.x+25,e.pos.z],[361,z]]);
       this.C.say('鐵獒倒下','向右轉，沿聯絡道攻進內陸機甲基地',2.8,'gr');
@@ -419,7 +474,7 @@ export class LandingFront extends BattleLine {
   get objective() {
     if(this.phase==='inbound')return {title:'近岸登陸',hint:'可瞄準與開火，準備跨過跳板'};
     if(this.phase==='ramp')return {title:'接岸',hint:'艏部跳板正在下降'};
-    if(this.phase==='beach')return {title:'突破灘岸',hint:'擊破岸防重裝機和快速反應機'};
+    if(this.phase==='beach')return {title:'為第二列登陸艇開路',hint:this.site.fleetReleased?'艇隊正在靠岸，清除灘頭守軍':'擊破左前方的岸防重裝機，讓艇隊駛入'};
     if(this.phase==='beachCounter')return {title:'灘岸反擊',hint:'擊退第二線的預備隊，往海堤靠近'};
     if(this.phase==='seawall')return {title:'選一側突破海堤',hint:'左側攔截機　／　右側岸防戰車'};
     if(this.phase==='crossing')return {title:'海堤內側反擊',hint:'清掉缺口後方的預備隊'};
@@ -427,14 +482,23 @@ export class LandingFront extends BattleLine {
     if(this.phase==='boss')return {title:'奪回外港裝卸區',hint:'擊退鐵獒和護衛機'};
     if(this.phase==='link')return {title:'登陸完成・轉入基地作戰',hint:'沿碼頭右側聯絡道向南門集結'};
     if(this.phase==='wings')return {title:'選擇先奪取的設施',hint:'西翼供電所支援裝甲修復，東翼車輛庫派出增援'};
-    if(this.phase==='base')return {title:'機甲基地 '+(this.secured.length+1)+'/8　'+this.op.name,hint:(this.bayOpen?'進入已開門的機庫，清除守軍並接管整備架':this.op.hint)+'　'+this.wave+'/3'};
+    if(this.phase==='base')return {title:'機甲基地 '+(this.secured.length+1)+'/8　'+this.op.name,hint:(this.bayOpen?'進入已開門的機庫，清除守軍並接管整備架':this.op.hint)+'　'+this.wave+'/'+this.op.waves.length};
     return null;
   }
 
   get waypoints() {
     if(this.phase==='seawall')return this.wallMarkers;
     if(this.phase==='wings')return this.baseMarkers;
-    return this.phase==='base'&&this.wave===this.op.waves.length?this.lastDefenders():[];
+    if(this.phase==='base'&&this.wave>=this.op.waves.length-(this.op.id==='hq'?1:0))return this.lastDefenders();
+    return ['beachCounter','crossing','yard','boss'].includes(this.phase)?this.lastDefenders():[];
+  }
+  get scorePart() {
+    if(this.phase==='idle'&&this.C.cp?.commandDuel)return 4;
+    if(this.op?.id==='hq'&&(this.boss||this.phase==='done'))return 4;
+    if(this.phase==='link'||this.phase==='wings')return 2;
+    if(this.enc.sec>=3)return 3;
+    if(this.enc.sec||this.ashore)return 1;
+    return 0;
   }
   // 兩台僚機沿用 Combat 的雷達標記。
   radar() {}

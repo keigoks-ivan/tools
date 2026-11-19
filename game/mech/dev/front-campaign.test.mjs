@@ -92,3 +92,14 @@ test('a visible, damaged guard takes verified cover and resumes its post, an uns
   mech.target=null;mech.kind='brawler';mech.contactAt=-100;f.clock=26;
   f.maneuver(mech);assert.equal(mech.maneuver,null);
 });
+
+test('a command duel checkpoint rebuilds the commander and final six guards without replaying earlier companies',()=>{
+  const hq=BASE_OPS.at(-1),cp={lane:'right',commandDuel:true,secured:BASE_OPS.slice(0,-1).map(o=>o.id)};
+  const C={world:{height:()=>0},player:{pos:pos(...hq.point)},cp,say(){}};
+  const front=new LandingFront(C,{sec:10});
+  front.order=()=>{};front.unit=()=>({entity:{},weapon:{}});
+  front.nextBase();
+  assert.equal(front.wave,hq.waves.length);assert.equal(front.scorePart,4);
+  assert.equal(front.reinforcements.pending.length,6);assert.equal(C.boss.bossName,'基地司令機・白夜');
+  assert.equal(BASE_OPS.flatMap(op=>op.waves.join(' ').split(' ')).length,145);
+});

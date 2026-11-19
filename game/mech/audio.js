@@ -8,6 +8,8 @@
 // 配樂（music）另走一條匯流排：曲目 → 閃避 → 危急低通 → 配樂音量 → 同一組壓縮／限幅；大撞擊時自動把配樂與環境音壓低。
 // 配樂一樣全部即時合成（弦樂墊、銅管、合唱共振峰、FM 鐘琴、鼓組取樣都在第一次播放時用程式算出），原創旋律。
 
+import { CHAPTER_SCORES } from './chapter-scores.mjs';
+
 const SOS = 343;          // 音速（公尺／秒）
 const MAX_DELAY = 1.5;    // 遠方爆炸最大延遲（秒）
 const E = 0.0001;         // 包絡的「靜音」值（指數曲線不能到 0）
@@ -246,12 +248,20 @@ function battleScore(o) {
     if (i === 16) {
       S.mel(B, 'lead', TH, { min: o.fin ? 0.25 : 0.4 });          // 銅管主旋律（高強度）
       S.mel(B, 'str', shift(TH, -12));                             // 弦樂低八度（任何強度都唱主題）
-      if (o.fin) S.mel(B, 'horn', shift(TH, -12), { v: 0.7, min: 0.5 });   // 終章：法國號齊奏
     }
+  }
+  // Leave space under the lead for a moving inner voice, especially through the final modulation.
+  for(let i=0;i<32;i+=2){
+    const B=(IN+i)*4;
+    const c=ch(i,0),next=ch(i+1,0);
+    const inner=voiceIn(c,55),reply=voiceIn(next,55);
+    S.mel(B+.5,o.fin?'horn':'str',[[inner[1],1.5],[inner[2],2],[reply[1],2.5]],{v:o.fin?.68:.53});
+    S.at(B+4,{k:'pno',m:reply[0],d:1.4,v:.42,max:.42});
+    S.at(B+4,{k:'pno',m:reply[2],d:1.4,v:.40,max:.42});
   }
   // 終章：第 24～30 小節整段升調（動畫高潮式的直接轉調），第 31 小節回到原調屬和弦接回循環
   if (o.lift) for (let s = (IN + 24) * 16; s < (IN + 31) * 16; s++) for (const e of S.ev[s]) e.tx = o.lift;
-  Object.assign(S, { loop: true, from: IN, tr: o.tr, padFc: o.bright ? 2600 : 1900, fin: !!o.fin, mix: o.fin ? { dr: 0.65 } : {} });
+  Object.assign(S, { loop: true, from: IN, tr: o.tr, padFc: o.bright ? 2600 : 1900, fin: !!o.fin, mix: {pad:8.1,lead:4.3,dr:o.fin?.65:.8} });
   return S;
 }
 
@@ -313,6 +323,103 @@ function kitanoScore() {
   }
   Object.assign(S,{loop:true,flat:true,padA:.75,padFc:1350,rv:.28,
     mix:{pad:5.4,pno:2.8,str:4.2,sub:.55,bell:1.3}});
+  return S;
+}
+
+function chapterScore(cue) {
+  const S=new Score(24,cue.bpm),changes=cue.harmony.split(' ');
+  let last=null;
+  for(let i=0;i<24;i++){
+    const B=i*4,phrase=i%8,bridge=i>=8&&i<16,reprise=i>=16;
+    const chord=chordOf(changes[i%16]),notes=voiceLeadChord(chord,last),bass=bassOf(chord);
+    last=notes;
+    S.at(B,{k:'pad',n:notes,d:3.9,v:.80});
+    // Piano attacks make the inner third and seventh legible on small speakers.
+    const accent=phrase%2===0?1.5:0;
+    S.at(B+accent,{k:'pno',m:notes[0],d:1.6,v:.51});
+    S.at(B+accent,{k:'pno',m:notes[2],d:1.7,v:.55});
+    S.at(B,{k:'bass',m:bass,d:bridge?2.9:1.8,v:.69});
+    if(!bridge)for(const q of cue.pulse.slice(1))
+      S.at(B+q,{k:'bass',m:q>=3?bass+7:bass,d:.34,v:.59,min:.40});
+    if(bridge){
+      S.mel(B,'str',[[notes[2],1.5],[notes[3],.5],[notes[1],1.75]],{v:.8});
+      if(phrase%2===0)S.mel(B+2,'pno',[[notes[0]+12,1],[notes[2]+12,1]],{v:.65});
+    }else{
+      if(i%2===0){
+        const line=cue.theme[phrase/2];
+        const lead=reprise?cue.answer:cue.lead;
+        if(lead==='horn')S.mel(B,'str',line,{v:.80,max:.45});
+        S.mel(B,lead,line,{v:lead==='pno'?.94:.84,min:lead==='horn'?.4:0});
+      }
+      if(i%2||reprise)S.mel(B+.5,'ctr',[[notes[0],1.5],[notes[1],1.75]],{v:.61,min:.48});
+      for(const q of cue.drums)S.at(B+q,{k:'s',v:q===cue.drums[0]?.55:.39,min:.29});
+    }
+    S.at(B,{k:i%4===0?'b':'ti',m:bass,v:bridge?.35:.63});
+    if(reprise&&phrase%2===0)S.at(B,{k:'choir',n:[notes[1],notes[3]],d:3.4,v:.61,min:.55});
+    if(phrase===7)S.at(B+3,{k:'sw',d:1,v:.46});
+  }
+  Object.assign(S,{loop:true,padA:.36,padFc:2250,rv:.23,mix:{pad:8.1,pno:2.8,str:7,horn:4.8,dr:.76}});
+  return S;
+}
+
+// 《潮聲點名》：同一段呼號從低音號傳到弦樂，最後由返航的鋼琴接回。
+const TIDE_CALL=[[62,1.5],[69,.5],[67,1],[65,1]];
+const TIDE_REPLY=[[69,1],[72,1.5],[70,.5],[69,1]];
+const TIDE_HARMONY=[
+  ['Dmadd9','Bbmaj7','Gm7','Asus','Dm7','Fadd9','Gm7','A7'],
+  ['Dmadd9','Cadd9','Bbmaj7','A7','Gm7','Dm7','Bbmaj7','Asus'],
+  ['Bbmaj7','Fadd9','Dm7','Am7','Gm7','Fmaj7','Bbmaj7','Asus'],
+  ['Dm7','Gm7','Bbmaj7','A7','Fmaj7','Cadd9','Gm7','A7'],
+  ['Bbmaj7','Cadd9','Dm7','Fadd9','Gm7','Bbmaj7','Asus','A7'],
+];
+function tideScore() {
+  const bars=16,S=new Score(TIDE_HARMONY.length*bars,116);
+  S.partSteps=bars*16;
+  for(const [part,chords] of TIDE_HARMONY.entries()) {
+    let previous=null;
+    for(let i=0;i<bars;i++) {
+      const B=(part*bars+i)*4,phrase=i%8;
+      const chord=chordOf(i>=8&&phrase===5?'Gm7':chords[phrase]);
+      const notes=voiceLeadChord(chord,previous),root=bassOf(chord);
+      previous=notes;
+      S.at(B,{k:'pad',n:notes,d:3.75,v:part===0?.50:.66});
+      if(part===0||part===2){
+        S.at(B,{k:'sub',m:root,d:3.2,v:.48});
+        if(phrase%4===0)S.mel(B,part===0?'horn':'pno',TIDE_CALL,{v:.8});
+        if(phrase%4===2)S.mel(B,part===0?'str':'pno',[[notes[2],2],[notes[1],1],[null,1]],{v:.66});
+        if(part===0&&i%2===1)S.at(B+3,{k:'ti',m:38,v:.31});
+        if(part===2&&i>=8)S.at(B+2,{k:'bell',m:notes[3],v:.39});
+        continue;
+      }
+      const march=part===3,climax=part===4;
+      const bassBeats=march?[0,1.5,3]:climax?[0,1,2.5,3]:[0,2];
+      for(const q of bassBeats)S.at(B+q,{k:'bass',m:root+(q===3?12:0),d:q===0?.86:.43,v:.74});
+      S.at(B,{k:'ti',m:root,v:.70});
+      for(const q of march?[1,2.75,3.5]:[1,3])S.at(B+q,{k:'s',v:q===1?.50:.36});
+      if(phrase%4===0)S.mel(B,climax?'horn':'str',shift(TIDE_CALL,climax?12:0),{v:.88});
+      else if(phrase%4===2)S.mel(B,climax?'str':'horn',i<8?TIDE_REPLY:[[69,1],[70,.5],[72,.5],[74,2]],{v:.82});
+      else S.mel(B,'str',[[notes[2],1.5],[notes[3],.5],[notes[i<8?1:2],2]],{v:.68});
+      if(march||climax)for(const [j,q] of [0,.75,1.5,2.5,3.25].entries())
+        S.at(B+q,{k:'ost',m:notes[j%4],d:.4,v:.48,p:0});
+      if(climax&&phrase%2===0)S.at(B,{k:'choir',n:[notes[1],notes[3]],d:3.5,v:.60});
+      if(climax&&phrase%4===3)S.at(B+2,{k:'brass',n:[notes[0],notes[2]],d:1.45,v:.74});
+      if(phrase===7)S.at(B+3,{k:'sw',d:1,v:.56});
+    }
+  }
+  Object.assign(S,{loop:true,flat:true,padA:.52,rv:.22,mix:{...MUS_MIX,pno:3,sub:.8}});
+  return S;
+}
+function tideHomeScore() {
+  const S=new Score(4,88);
+  let notes=null;
+  for(const [i,name] of ['Dmadd9','Bbmaj7','Cadd9','Fadd9'].entries()){
+    notes=voiceLeadChord(chordOf(name),notes);
+    S.at(i*4,{k:'pad',n:notes,d:3.8,v:.57});
+  }
+  S.mel(0,'pno',TIDE_CALL,{v:.82});
+  S.mel(4,'horn',[[65,2],[69,2],[67,3],[64,1],[65,3.5]],{v:.74});
+  S.at(12,{k:'bell',m:77,d:3,v:.4});
+  Object.assign(S,{flat:true,tail:3,rv:.28,mix:{...TITLE_MIX,horn:4}});
   return S;
 }
 
@@ -391,7 +498,8 @@ const STAGES = [
   { tr: 3, bpm: 160, dense: true, ctr: true, bright: true, taiko: true },
 ];
 const SCORES = {
-  title: titleScore, kitano: kitanoScore,
+  title: titleScore, kitano: kitanoScore, landing: tideScore, landingHome: tideHomeScore,
+  ...Object.fromEntries(Object.entries(CHAPTER_SCORES).map(([key,cue])=>[key,()=>chapterScore(cue)])),
   battle1: () => battleScore(STAGES[0]), battle2: () => battleScore(STAGES[1]), battle3: () => battleScore(STAGES[2]),
   battle4: () => battleScore(STAGES[3]), battle5: () => battleScore(STAGES[4]),
   // 終章：E 小調 170 BPM，第 24～30 小節升到 F♯ 小調
@@ -1591,6 +1699,7 @@ export class Audio {
     if (n === 'battle' && st >= 6) n = 'final';
     const key = n === 'battle' ? 'battle' + st : n;
     if (key !== 'off' && !SCORES[key]) return;
+    if(key==='landing')this._tidePart=clamp(num(opts?.part,0)|0,0,TIDE_HARMONY.length-1);
     if (key === this._musKey) return;
     this._musKey = key;
     if (!this._ready) { this._musWant = key === 'off' ? null : key; return; }
@@ -1667,7 +1776,14 @@ export class Audio {
   _mStep(tr, gs, t) {
     const S = tr.S, n = S.len;
     let s = gs, pass = 0;
-    if (s >= n) {
+    if(S.partSteps){
+      // Switch on a downbeat without restarting the transport, the reverb or the instrument rack.
+      const part=this._tidePart??0;
+      if(gs%16===0&&tr.part!==part){tr.part=part;tr.partAt=gs;}
+      const elapsed=gs-tr.partAt;
+      s=tr.part*S.partSteps+elapsed%S.partSteps;
+      pass=Math.floor(elapsed/S.partSteps);
+    } else if (s >= n) {
       if (!S.loop) {
         // 短曲結束：留尾音後收掉
         tr.done = true;

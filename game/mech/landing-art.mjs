@@ -1,13 +1,13 @@
 import * as THREE from 'three';
 import { fieldMaterial as material, PropBatch, signAtlas } from './front-scenery.mjs';
 import { buildBase, bayDoors } from './base-art.mjs';
-import { LANDING, SHORE_GLSL } from './landing-layout.mjs?v=3';
+import { LANDING, SHORE_GLSL } from './landing-layout.mjs?v=4';
 
 function shoreWater() {
   const mat=new THREE.MeshStandardMaterial({color:0x315965,roughness:.24,metalness:0});
-  const time={value:0},bow={value:LANDING.departure},moving={value:0};
+  const time={value:0},bow={value:LANDING.departure},moving={value:0},escort={value:new THREE.Vector2()};
   mat.onBeforeCompile=shader=>{
-    Object.assign(shader.uniforms,{tideTime:time,tideBow:bow,tideMoving:moving});
+    Object.assign(shader.uniforms,{tideTime:time,tideBow:bow,tideMoving:moving,tideEscort:escort});
     const shore=SHORE_GLSL.replaceAll('Z','p.y');
     shader.vertexShader=shader.vertexShader
       .replace('#include <common>','#include <common>\nuniform float tideTime; varying vec2 vLandingSea;')
@@ -19,7 +19,7 @@ function shoreWater() {
         transformed.y+=swell*(sin(dot(p,vec2(.088,.035))-tideTime*1.6)*.38+sin(dot(p,vec2(.15,-.05))-tideTime*2.25)*.15);`);
     shader.fragmentShader=shader.fragmentShader
       .replace('#include <common>',`#include <common>
-        uniform float tideTime,tideBow,tideMoving;
+        uniform float tideTime,tideBow,tideMoving; uniform vec2 tideEscort;
         varying vec2 vLandingSea;
         float seaDetail(vec2 p){return sin(p.x*1.43+sin(p.y*.73))*cos(p.y*1.07+sin(p.x*.86));}
         float vesselWake(vec2 p,float stern,float center,float beam) {
@@ -43,13 +43,13 @@ function shoreWater() {
         float wash=(1.0-smoothstep(.08,.72+width,abs(shoreLine)))*(.23+.53*streak);
         float breaker=(1.0-smoothstep(.15,.88+width,breakLine))*
           smoothstep(-33.0,-9.0,edge)*(1.0-smoothstep(-4.5,-.2,edge));
-        float wake=vesselWake(p,tideBow-65.0,0.0,18.0);
-        if(p.x<tideBow-66.0){
-          wake=max(wake,vesselWake(p,tideBow-84.0,-82.0,13.5)*.71);
-          wake=max(wake,vesselWake(p,tideBow-66.0,89.0,13.5)*.71);
+        float wake=vesselWake(p,tideBow-65.0,0.0,18.0)*tideMoving;
+        if(p.x<tideEscort.x-49.0){
+          wake=max(wake,vesselWake(p,tideEscort.x-71.0,-82.0,13.5)*tideEscort.y);
+          wake=max(wake,vesselWake(p,tideEscort.x-49.0,89.0,13.5)*tideEscort.y);
         }
         float bowWash=(1.0-smoothstep(5.0,27.0,length(vec2(p.x-tideBow,p.y*.84))))*tideMoving*.48;
-        float foam=clamp(wash+(breaker*.78+wake*tideMoving*.61+bowWash)*streak,0.0,.84);
+        float foam=clamp(wash+(breaker*.78+wake*.61+bowWash)*streak,0.0,.84);
         float bank=smoothstep(-35.0,0.0,edge);
         diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.10,.177,.149),bank*.66);
         diffuseColor.rgb=mix(diffuseColor.rgb,vec3(.59,.65,.61),foam);
@@ -64,7 +64,7 @@ function shoreWater() {
         normal=normalize(mat3(viewMatrix)*vec3(-gradient.x,1.0,-gradient.y));`)
       .replace('#include <roughnessmap_fragment>','#include <roughnessmap_fragment>\nroughnessFactor=mix(.23,.52,foam);');
   };
-  mat.customProgramCacheKey=()=> 'landing-outer-bay-v2';
+  mat.customProgramCacheKey=()=> 'landing-outer-bay-v3';
   const geometry=new THREE.PlaneGeometry(1,1,55,53).rotateX(-Math.PI/2);
   const positions=geometry.attributes.position;
   for(let i=0;i<positions.count;i++){
@@ -75,7 +75,7 @@ function shoreWater() {
   const water=new THREE.Mesh(geometry,mat);
   water.name='神戶外港・近岸碎浪';water.receiveShadow=true;
   water.userData.fieldGeometry=true;water.userData.noAO=true;
-  return {water,time,bow,moving};
+  return {water,time,bow,moving,escort};
 }
 
 function portArchitecture(world, root, materials) {
@@ -356,6 +356,8 @@ function buildFlankingCraft(root, materials) {
       b.box('trim',x-39.98,8.95,z-8+dz,.31,1.48,2.55);
     b.box('trim',x-48,8.9,z-2.02,6.3,1.45,.14);
     b.box('trim',x-44,4.25,z+8,9,1.2,5.1);
+    b.box('hull',x-19,5.55,z,6.2,3.0,5.6);
+    b.box('trim',x-14,6.9,z,7.2,.65,.65,0,0,.09);
     b.box('trim',x-49,13.9,z-8,.25,10,.25);
     b.box('trim',x-49,17.5,z-8,.17,.26,4.5);
     for(const side of [-1,1]){
@@ -380,7 +382,7 @@ export function buildLandingSite(world, root) {
     mark:material(world,0xd69b45,.77,.12,'paint'),
     stripe:material(world,0xc7c9b9,.82,.02),
   };
-  const {water,time,bow,moving}=shoreWater();root.add(water);
+  const {water,time,bow,moving,escort}=shoreWater();root.add(water);
   const scenery=new THREE.Group();scenery.name='神戶外港・海堤與港區';root.add(scenery);
   const map=portArchitecture(world,scenery,materials);
   const doors=bayDoors(world,scenery,materials.cargo);
@@ -391,13 +393,19 @@ export function buildLandingSite(world, root) {
   const gate={z0:-19,z1:19};
   const site={
     ship,ramp,flotilla,water,scenery,time,bow,moving,doors,progress:0,open:0,boxes:[...sidewalls,gate],
+    fleetReleased:false,fleetRun:0,
     setPose(progress,open,dt=0){
       this.progress=progress;this.open=open;
       time.value+=dt;doors.tick(dt);
       const x=THREE.MathUtils.lerp(LANDING.departure,LANDING.berth,progress);
       ship.position.x=x;ship.position.y=Math.sin(time.value*1.83)*.32*(1-progress);
       ship.rotation.x=Math.sin(time.value*1.47)*.016*(1-progress);
-      flotilla.position.set(x-14,Math.sin(time.value*1.55+.6)*.24*(1-progress),0);
+      // The second wave holds offshore until the coastal cannon is silenced.
+      if(this.fleetReleased)this.fleetRun=Math.min(1,this.fleetRun+dt/7);
+      const run=this.fleetRun,advance=run*run*(3-2*run);
+      const escortX=x-14-42*progress+60*advance;
+      flotilla.position.set(escortX,Math.sin(time.value*1.55+.6)*.24,0);
+      escort.value.set(escortX,Math.min(1,1-progress+4*run*(1-run))*.71);
       ramp.rotation.z=THREE.MathUtils.lerp(1.43,rampAngle,open);
       bow.value=x;moving.value=1-progress;
       for(const b of sidewalls){b.x0=x-75;b.x1=x+.3;b.top=LANDING.deck+1.8;}

@@ -1,5 +1,5 @@
 import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
-import { landingGround, landingShore } from './landing-layout.mjs?v=3';
+import { landingGround, landingShore } from './landing-layout.mjs?v=4';
 const noise = new ImprovedNoise();
 // 關卡場地：沿用既有任務路線，路線周圍整平，地形與掩體只在換關時建立。
 export const BATTLEFIELDS = {

@@ -20,8 +20,8 @@ import { kitanoHeritageMaterial } from './kobe-heritage.mjs';
 import { Solid } from './zero/kit.js';
 import { BATTLEFIELDS, fieldHeight, fieldLayout, routeDistance, fieldGridCoordinate, fieldGridIndex } from './battlefields.js';
 import { buildHillside } from './hillside-art.mjs';
-import { buildLandingSite } from './landing-art.mjs?v=4';
-import { SHORE_GLSL } from './landing-layout.mjs?v=3';
+import { buildLandingSite } from './landing-art.mjs?v=5';
+import { SHORE_GLSL } from './landing-layout.mjs?v=4';
 
 import { fieldTreeGeometry, fieldShrubGeometry, fieldRockGeometry, fieldArchitecture, fieldLeafMaterial, fieldRadar, fieldGroundMask } from './fieldart.js';
 

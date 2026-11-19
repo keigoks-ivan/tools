@@ -404,6 +404,14 @@ async function game() {
     audio.music('title');
     $('title').classList.remove('hide');
   }
+  function missionMusic(scenic=false) {
+    const part=combat.enc?.front?.scorePart;
+    if(part!==undefined)audio.music(combat.enc.front.phase==='done'?'landingHome':'landing',{part});
+    else {
+      const stage=STAGES[stageNo-1];
+      audio.music(scenic?'kitano':stage.score||'battle',{stage:stage.music||stageNo});
+    }
+  }
   function startBoot(len) {
     historyButton.hidden=false;
     combat.prep();   // 遭遇戰：擺路障、第一區的遠處目標
@@ -416,7 +424,7 @@ async function game() {
     else applyView();
     audio.ui('boot');
     scenicMusic.reset();
-    audio.music('battle', { stage: STAGES[stageNo - 1].music || stageNo });
+    missionMusic();
   }
   function pause() {
     if (state !== 'play' && state !== 'boot' && state !== 'coda') return;
@@ -455,7 +463,7 @@ async function game() {
       if (n > store.get('cleared', 0)) store.set('cleared', n);
       if (RANKS.indexOf(rank) > store.get('best' + n, 0)) store.set('best' + n, RANKS.indexOf(rank));
     }
-    audio.music(win ? (last ? 'allclear' : 'clear') : 'fail');
+    audio.music(win ? (last ? 'allclear' : D.frontline==='landing' ? 'landingHome' : 'clear') : 'fail');
     $('resTitle').textContent = win ? (last ? '神戶市區停火' : `第 ${n} 關完成`) : `第 ${n} 關失敗`;
     $('resSub').textContent = win ? (last ? 'CEASEFIRE' : 'STAGE CLEAR') : 'MISSION FAILED';
     $('resRank').textContent = rank;
@@ -569,7 +577,7 @@ async function game() {
     input.reset(); applyView();
     if (kind === 'reveal') { finishCoda(); return; }
     syncCodaUI();
-    audio.music(kind === 'boss' ? 'final' : 'battle', { stage: 5 });
+    audio.music(kind === 'boss' ? 'nightHeron' : 'intercept');
     combat.say(kind === 'boss' ? '夜鷺' : '空中攔截', kind === 'boss' ? '改變高度，走出射線' : '鎖定空中目標，迴避側翼夾擊', 3, 'am');
   }
 
@@ -590,7 +598,7 @@ async function game() {
     coda.checkpoint = kind;
     if (kind === 'boss') coda.air.startBoss(); else coda.air.start();
     if (film) startCodaFilm(kind === 'boss' ? 'boss' : 'intercept', coda.air.focus);
-    else audio.music(kind === 'boss' ? 'final' : 'battle', { stage: 5 });
+    else audio.music(kind === 'boss' ? 'nightHeron' : 'intercept');
     syncCodaUI();
   }
 
@@ -819,7 +827,7 @@ async function game() {
     }
     if (state === 'play') {
       scenic = scenicMusic.update(rdt,player.pos,world.battlefield === 'city' ? world.kitano?.bounds : null,scenicThreat || C.lockAlert > .1 || C.damageFx > .04);
-      audio.music(scenic ? 'kitano' : 'battle', { stage: STAGES[stageNo - 1].music || stageNo });
+      missionMusic(scenic);
     }
     audio.setIntensity(state !== 'play' && !airCombat ? 0.15 : scenic ? .22 : clamp(0.2 + near * 0.08 + C.lockAlert * 0.25 + C.damageFx * 0.3 + (danger ? 0.2 : 0) + odV * 0.35, 0, 1));
 

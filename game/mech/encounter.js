@@ -7,7 +7,7 @@ import { carGeometry } from './env.js';
 import { instancedCarMaterial } from './car-material.js';
 import { MechTutorial } from './tutorial.mjs?v=1';
 import { HillsideFront } from './hillside-front.mjs';
-import { LandingFront } from './landing-front.mjs?v=3';
+import { LandingFront } from './landing-front.mjs?v=4';
 
 const rand = (a, b) => a + Math.random() * (b - a);
 const clamp = THREE.MathUtils.clamp;

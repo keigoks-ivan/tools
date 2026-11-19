@@ -6,13 +6,13 @@ export const LANDING = {
 };
 
 export const LANDING_ROUTE = {
-  cp: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], arena: 175, fin: 65, par: 680, over: 2,
+  cp: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], arena: 175, fin: 65, par: 830, over: 2,
   pts: [[LANDING.departure + LANDING.offset, 0], [-187, 0], [54, 0], [LANDING.yard, 0], ...BASE_OPS.map(op=>op.point)],
   secs: [
     { at: 1, amb: 'heavy@out grunt@side tank@out' },
     { at: 2, amb: 'brawler@side grunt@side tank@out' },
     { at: 3, amb: 'heavy@out grunt@side tank@out' },
-    ...BASE_OPS.map((op,i)=>({at:i+4,amb:op.waves[0],amb2:op.waves[1],amb3:op.waves[2]})),
+    ...BASE_OPS.map((op,i)=>({at:i+4,amb:op.waves[0],amb2:op.waves[1],amb3:op.waves.slice(2).join(' ')})),
   ],
 };
 

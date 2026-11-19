@@ -44,3 +44,14 @@ test('stage seven uses advancement checkpoints and a capped static landing scene
   assert.equal(site.water.material.transparent,false);
   site.dispose();
 });
+
+test('the following craft hold offshore until release, then move independently of the ramp',()=>{
+  const root=new THREE.Group(),site=buildLandingSite({height:landingGround,addCollider(){}},root);
+  site.setPose(1,1);const hold=site.flotilla.position.x;
+  site.setPose(1,1,8);assert.equal(site.flotilla.position.x,hold);
+  site.fleetReleased=true;site.setPose(1,1,3);
+  assert(site.flotilla.position.x>hold&&site.flotilla.position.x<hold+60);
+  site.setPose(1,1,9);assert.equal(site.flotilla.position.x,hold+60);
+  assert.equal(site.ship.position.x,LANDING.berth);
+  site.dispose();
+});

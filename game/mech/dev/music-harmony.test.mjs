@@ -59,3 +59,37 @@ test('兩種 Audio 在解鎖前接受北野曲，音量、暫停、切曲與關�
     a.music('off');assert.equal(a._musWant,null);assert.equal(a.ctx,null);assert.equal(a.lastError,null);
   }
 });
+
+test('chapter themes have complete eight-beat phrases, four-part harmony and separate bass and inner parts', async()=>{
+  const {CHAPTER_SCORES}=await import('../chapter-scores.mjs');
+  const melodies=new Set();
+  for(const [key,cue] of Object.entries(CHAPTER_SCORES)){
+    const s=musicScore(key);
+    assert(s.loop&&s.len===24*16,key);
+    for(const phrase of cue.theme)assert.equal(phrase.reduce((sum,[,beats])=>sum+beats,0),8,key);
+    melodies.add(JSON.stringify(cue.theme));
+    for(let bar=0;bar<24;bar++){
+      const ch=chordOf(cue.harmony.split(' ')[bar%16]);
+      const events=s.ev.slice(bar*16,(bar+1)*16).flat(),pad=events.find(e=>e.k==='pad');
+      assert.equal(pad.n.length,4);
+      assert(pad.n.every(m=>ch.iv.some(iv=>(ch.r+iv)%12===m%12)),key);
+      assert(events.some(e=>e.k==='bass')&&events.filter(e=>e.k==='pno').length>=2,key);
+    }
+  }
+  assert.equal(melodies.size,Object.keys(CHAPTER_SCORES).length);
+});
+
+test('the landing score changes section on a downbeat, reuses its track, and resolves with its own cadence',()=>{
+  const a=new Audio(),s=musicScore('landing'),tr={S:s},played=[];
+  a._mPlay=(track,event)=>played.push(event);
+  function step(i){played.length=0;a._mStep(tr,i,0);}
+  a.music('landing',{part:0});step(0);assert.equal(tr.part,0);
+  a.music('landing',{part:4});step(15);assert.equal(tr.part,0);
+  step(16);assert.equal(tr.part,4);assert.equal(tr.partAt,16);
+  const opening=played.slice();
+  assert(opening.some(e=>e.k==='choir')&&opening.some(e=>e.k==='pad'&&e.n.length===4));
+  step(16+s.partSteps);assert.deepEqual(played,opening);
+  a.music('landing',{part:2});step(32+s.partSteps);
+  assert.equal(tr.part,2);assert(played.some(e=>e.k==='pno'));
+  assert(!musicScore('landingHome').loop);
+});
