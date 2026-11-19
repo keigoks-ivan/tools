@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
 export const FREIGHT_ROUTE = {
-  cp: [1], arena: 145, fin: 85, par: 360, over: 1,
+  cp: [1], arena: 145, fin: 85, par: 510, over: 1,
   pts: [[-460, 4], [-152, 4], [182, 4]],
   secs: [
     { at: 1, amb: 'heavy@out grunt@out tank@out brawler@side grunt@side' },
@@ -86,6 +86,18 @@ export function buildFreightYard(world, group) {
   for (const [x,z,w,d] of [[-262,36,318,10],[-55,61,330,9],[192,37,230,11]]) {
     cover(x,z,w,d,2.15); box(8,x,2.41,z-d/2+.35,w,.11,.48);
   }
+  // 站外的維修通路與車棚裝卸線，以不同的地面標線接起兩條動線。
+  for (const [x,z,w] of [[-257,-96,296],[-23,-91,170],[122,-81,107]]) {
+    for (const side of [-1,1]) {
+      part(7,flat,matrix.makeScale(w,1,.27).setPosition(x,world.height(x,z+side*4)+.14,z+side*4));
+    }
+  }
+  for (const [x,z,w] of [[-138,10,105],[39,9,183],[176,12,74]]) {
+    part(0,flat,matrix.makeScale(w,1,11).setPosition(x,world.height(x,z)+.09,z));
+    for (let dx=-w/2+6;dx<w/2;dx+=14) {
+      part(8,flat,matrix.makeScale(6,1,.27).setPosition(x+dx,world.height(x+dx,z)+.14,z));
+    }
+  }
   // 發車區兩側的混凝土壓邊與貨車。中線保持視野，北側則由箱體隔出較窄的低地通路。
   for (const [x,z,w,d,h] of [
     [-415,17,5,36,5],[-365,65,5,18,4],[-324,-34,53,8,10],[-256,-41,54,8,13],
@@ -124,6 +136,13 @@ export function buildFreightYard(world, group) {
     box(i%4===1?3:4,(x0+x1)/2,roof,z,w+4,1.05,d/15+.24,pitch);
   }
   for (const x of [134,188,242,292]) box(7,x,29.9,(z0+z1)/2,1.6,.72,d+2);
+  for (const x of [149,214,272]) {
+    for (const z of [-22,96]) {
+      box(3,x,22.5,z,15,.46,.87);
+      box(8,x-4.7,21.9,z,4.8,.29,.76);
+      box(2,x+5,19.8,z,.32,5.2,.58);
+    }
+  }
   for (const z of [-18,45,94]) box(8,x0-.45,12,z,1.3,.75,3.8);
   const sign=stationSign(world);
   if(sign){

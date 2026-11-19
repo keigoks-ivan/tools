@@ -899,6 +899,17 @@ export class FX {
 
   explosion(pos, size) { this._explode(pos.x, pos.y, pos.z, size === undefined ? 1 : size, false); }
 
+  waterImpact(pos) {
+    const { x,y,z }=pos, V=this.V;
+    const n=Math.round(9+this.qn*7);
+    for(let k=0;k<n;k++) {
+      const a=rr(0,Math.PI*2), outward=k%3===0, sp=outward?rr(6,13):rr(1.4,6);
+      const i=this._smoke(x,y+.2,z,Math.cos(a)*sp,outward?rr(1,4):rr(32,48),Math.sin(a)*sp,
+        rr(.78,1.28),rr(.8,1.6),outward?rr(2.0,4.3):rr(2.6,4.0),outward?.31:.70,.68,.76,.79);
+      if(i>=0){ V.grav[i]=22; V.drag[i]=.63; V.asp[i]=outward?1:1.6; V.cell[i]=7; V.fin[i]=.025; V.fout[i]=.28; V.gy[i]=y; V.flags[i]|=F_GROUND; }
+    }
+  }
+
   smokeColumn(pos, seconds) {
     const j = this._ea(0, pos.x, pos.y, pos.z, seconds === undefined ? 60 : seconds, 1);
     return j;

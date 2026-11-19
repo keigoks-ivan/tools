@@ -23,6 +23,21 @@ function rig(kind='grunt') {
 function tick(m,st,dt=1/60) { m.root.position.addScaledVector(st.vel,dt); m.motion.update(dt,st); m.root.updateMatrixWorld(true); }
 const state = (vel=V()) => ({vel,grounded:true,boost:0,torsoYaw:0,aim:null});
 
+test('planted feet move with the deck without taking steps or sliding',()=>{
+  const m=rig(), st=state();
+  st.groundAt=()=>m.root.position.y;
+  for(let i=0;i<20;i++)tick(m,st);
+  const before=m.motion.feet.R.anchor.clone().sub(m.root.position);
+  for(let i=0;i<90;i++){
+    const dy=Math.cos(i*.2)*.018;
+    m.root.position.x+=.23; m.root.position.y+=dy;
+    m.motion.carry(.23,dy,0);
+    tick(m,st);
+    assert(m.motion.feet.R.anchor.clone().sub(m.root.position).distanceTo(before)<1e-5);
+  }
+  assert.equal(m.stepCount,0);
+});
+
 test('enemy support feet stay planted while the root advances; heavy cadence is slower',()=>{
   const counts=[];
   for(const kind of ['grunt','ace','heavy']) {

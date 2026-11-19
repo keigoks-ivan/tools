@@ -145,7 +145,7 @@ export function buildCampaignHero(m, see) {
   upper.userData.exhaustOrigins.forEach(pos => m.nozzles.push({ bone: b.back, pos: V(...pos).sub(torsoOrigin).toArray(), rot: [upper.userData.exhaustPitch + Math.PI, 0, 0], r: .83, len: 4.3 }));
   m.buildFlames();
   m.L = { pelvis: pelvisY }; m.height = 16.7; m.footToe = 2.0; m.footHeel = 1.25;
-  m.stance = { w: 2.68, toe: .21, fwd: .15, bend: .04, knee: 0, chest: 0, armR: .07, armL: -.12 };
+  m.stance = { w: Math.abs(ankleR.x / hipR.x), toe: .16, fwd: .15, bend: .04, knee: 0, chest: 0, armR: .07, armL: -.12 };
   m.wings = null; m.eye = null; m.unitMeshes = []; m.variants = new Map();
   m.root.updateMatrixWorld(true);
 }

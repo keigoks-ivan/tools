@@ -40,8 +40,9 @@ export class BattleLine {
     const unit={kind,entity,mech,pos:entity.pos,vel:V(),goal:pos.clone(),route:[],friendly,post,
       active:true,fallback:false,leave:false,weapon:arsenal[kind],cool:.45+(this.allies.length+this.foes.length)%4*.34,
       ap, maxAP:ap, shots:0, hits:0, face:friendly?Math.PI/2:-Math.PI/2,vehicle:kind==='tank'};
+    unit.origin=pos.clone();unit.changeAt=2.8+this.actors.length%4*.43;
     entity.frontActor=unit; entity.frontFriendly=friendly;
-    unit.pose={vel:unit.vel,grounded:true,groundAt:(a,b)=>this.floor(unit,a,b),lean:0,boost:0,pitch:0,thrust:0};
+    unit.pose={vel:V(),grounded:true,groundAt:(a,b)=>this.floor(unit,a,b),lean:0,boost:0,pitch:0,thrust:0};
     if (entity.vel) entity.vel.set(0,0,0);
     if (!friendly) { entity.ap=entity.apMax=unit.maxAP; entity.los=false; }
     if (unit.vehicle) { entity.speed=0; entity.yaw=unit.face; entity.tYaw=0; }
@@ -79,6 +80,7 @@ export class BattleLine {
   }
   move(actor,dt) {
     const { pos, vel, goal, route }=actor, w=this.C.world, v=actor.entity;
+    const x0=pos.x,z0=pos.z;
     const dx=goal.x-pos.x,dz=goal.z-pos.z, d=Math.hypot(dx,dz);
     if(d<3.7 && route.length) goal.copy(route.shift());
     else if(d<4 && actor.leave) { this.remove(actor); return; }
@@ -98,6 +100,7 @@ export class BattleLine {
       v.tYaw=lerpAngle(v.tYaw,targetYaw-v.yaw,1-Math.exp(-dt*4));
       v.rk+=dt; v.q.setFromAxisAngle(BattleLine.up,v.yaw);
     } else {
+      if(dt>0)actor.pose.vel.set((pos.x-x0)/dt,0,(pos.z-z0)/dt).clampLength(0,Math.max(speed,vel.length()));
       actor.pose.aim=aim; actor.pose.torsoYaw=actor.face;
       actor.mech.animate(dt,actor.pose);
       if(actor.mech.footfall) this.C.audio.enemyStep(pos,.72);
@@ -152,6 +155,29 @@ export class BattleLine {
   }
   react() {}
 
+  changeAngle(actor,dt) {
+    if(actor.friendly||actor.vehicle||actor.boss||actor.leave||actor.post==='seawall'||this.phase==='inbound'||this.phase==='ramp')return;
+    actor.changeAt-=dt;
+    if(actor.changeAt>0||actor.route.length||actor.pos.distanceToSquared(actor.goal)>25)return;
+    const target=actor.target;
+    if(!target)return;
+    actor.changeAt=3.1+actor.shots%3*.5;
+    const from=center(actor,this.aim), aim=center(target,this.dir);
+    const dx=aim.x-from.x,dz=aim.z-from.z,len=Math.hypot(dx,dz);
+    if(len<10)return;
+    const side=actor.shots%2===0?1:-1, moving=actor.kind==='brawler'&&len>44?12:-3;
+    for(const sign of [side,-side]){
+      const x=actor.pos.x+(dx*moving+dz*sign*17)/len,z=actor.pos.z+(dz*moving-dx*sign*17)/len;
+      const goal=this.point(x,z);
+      if(goal.distanceToSquared(actor.origin)>105**2||Math.abs(goal.y-actor.pos.y)>4)continue;
+      const w=this.C.world;
+      goal.y+=5;
+      if(w.raycast(from,goal,null)>=0||w.raycast(goal,aim,null)>=0)continue;
+      this.order(actor,[x,z]);
+      break;
+    }
+  }
+
   stepBattle(dt) {
     const C=this.C;
     this.think-=dt;
@@ -165,6 +191,7 @@ export class BattleLine {
         if(!actor.friendly)actor.entity.los=C.world.raycast(center(actor,V()),center(this.player,V()),null)<0;
         this.react(actor);
       }
+      this.changeAngle(actor,dt);
       this.move(actor,dt);
       if(!actor.active||!actor.target||!this.canFight(actor)||(!actor.target.player&&!this.canFight(actor.target)))continue;
       actor.cool-=dt;

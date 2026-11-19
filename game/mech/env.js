@@ -19,9 +19,9 @@ import { kitanoGardenMaterial } from './kobe-garden.mjs';
 import { kitanoHeritageMaterial } from './kobe-heritage.mjs';
 import { Solid } from './zero/kit.js';
 import { BATTLEFIELDS, fieldHeight, fieldLayout, routeDistance, fieldGridCoordinate, fieldGridIndex } from './battlefields.js';
-import { buildFreightYard } from './freight-yard.mjs?v=1';
-import { buildLandingSite } from './landing-art.mjs?v=2';
-import { SHORE_GLSL } from './landing-layout.mjs?v=1';
+import { buildFreightYard } from './freight-yard.mjs?v=2';
+import { buildLandingSite } from './landing-art.mjs?v=3';
+import { SHORE_GLSL } from './landing-layout.mjs?v=2';
 
 import { fieldTreeGeometry, fieldShrubGeometry, fieldRockGeometry, fieldArchitecture, fieldLeafMaterial, fieldRadar, fieldGroundMask } from './fieldart.js';
 

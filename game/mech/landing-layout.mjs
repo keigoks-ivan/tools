@@ -4,7 +4,7 @@ export const LANDING = {
 };
 
 export const LANDING_ROUTE = {
-  cp: [1, 2], arena: 175, fin: 65, par: 375, over: 2,
+  cp: [1, 2], arena: 175, fin: 65, par: 575, over: 2,
   pts: [[LANDING.departure + LANDING.offset, 0], [-187, 0], [54, 0], [LANDING.yard, 0]],
   secs: [
     { at: 1, amb: 'heavy@out grunt@side tank@out' },

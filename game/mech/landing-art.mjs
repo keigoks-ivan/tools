@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { LANDING, SHORE_GLSL } from './landing-layout.mjs?v=1';
+import { LANDING, SHORE_GLSL } from './landing-layout.mjs?v=2';
 
 function material(world, color, roughness, metalness, surface, vertexColors = false) {
   const A = world.A;
@@ -93,6 +93,11 @@ function shoreWater() {
         uniform float tideTime,tideBow,tideMoving;
         varying vec2 vLandingSea;
         float seaDetail(vec2 p){return sin(p.x*1.43+sin(p.y*.73))*cos(p.y*1.07+sin(p.x*.86));}
+        float vesselWake(vec2 p,float stern,float center,float beam) {
+          float aft=stern-p.x;
+          float arms=abs(abs(p.y-center)-beam-max(0.0,aft)*.19);
+          return smoothstep(0.0,5.0,aft)*(1.0-smoothstep(52.0,172.0,aft))*(1.0-smoothstep(1.4,8.3,arms));
+        }
       `)
       .replace('#include <map_fragment>',`#include <map_fragment>
         vec2 p=vLandingSea;
@@ -109,9 +114,11 @@ function shoreWater() {
         float wash=(1.0-smoothstep(.08,.72+width,abs(shoreLine)))*(.23+.53*streak);
         float breaker=(1.0-smoothstep(.15,.88+width,breakLine))*
           smoothstep(-33.0,-9.0,edge)*(1.0-smoothstep(-4.5,-.2,edge));
-        float behind=tideBow-65.0-p.x;
-        float wakeDist=abs(abs(p.y)-18.0-max(0.0,behind)*.19);
-        float wake=smoothstep(0.0,5.0,behind)*(1.0-smoothstep(55.0,185.0,behind))*(1.0-smoothstep(1.4,9.0,wakeDist));
+        float wake=vesselWake(p,tideBow-65.0,0.0,18.0);
+        if(p.x<tideBow-66.0){
+          wake=max(wake,vesselWake(p,tideBow-84.0,-82.0,13.5)*.71);
+          wake=max(wake,vesselWake(p,tideBow-66.0,89.0,13.5)*.71);
+        }
         float bowWash=(1.0-smoothstep(5.0,27.0,length(vec2(p.x-tideBow,p.y*.84))))*tideMoving*.48;
         float foam=clamp(wash+(breaker*.78+wake*tideMoving*.61+bowWash)*streak,0.0,.84);
         float bank=smoothstep(-35.0,0.0,edge);
@@ -409,6 +416,32 @@ function buildCraft(root, materials) {
   return {ship,ramp};
 }
 
+function buildFlankingCraft(root, materials) {
+  const flotilla=new THREE.Group();
+  flotilla.name='側翼登陸艇';
+  const hull=hullGeometry(), b=new PropBatch(materials);
+  hull.setIndex(Array.from({length:hull.attributes.position.count},(_,i)=>i));
+  for(const [x,z] of [[-18,-82],[4,89]]) {
+    b.add('hull',hull,x,0,z,.79,.82,.75);
+    b.box('hull',x-30,3.7,z,58,.6,30);
+    b.box('hull',x,8.0,z,.95,11.1,28,0,0,-.13);
+    b.box('hull',x-47,6.9,z-8,13.8,6.9,11.7);
+    b.box('trim',x-47,10.45,z-8,14.4,.35,12.2);
+    for(const dz of [-3.5,0,3.5])
+      b.box('trim',x-39.98,8.95,z-8+dz,.31,1.48,2.55);
+    b.box('trim',x-48,8.9,z-2.02,6.3,1.45,.14);
+    b.box('trim',x-44,4.25,z+8,9,1.2,5.1);
+    b.box('trim',x-49,13.9,z-8,.25,10,.25);
+    b.box('trim',x-49,17.5,z-8,.17,.26,4.5);
+    for(const side of [-1,1]){
+      b.box('trim',x-29,5.4,z+side*15.2,55,.17,.22);
+      for(let dx=-51;dx<-4;dx+=9.4)b.box('trim',x+dx,4.75,z+side*15.15,.22,1.65,.22);
+    }
+  }
+  b.finish(flotilla); hull.dispose(); root.add(flotilla);
+  return flotilla;
+}
+
 export function buildLandingSite(world, root) {
   const materials={
     hull:material(world,0x4a5b60,.59,.48,'paint'),
@@ -426,17 +459,19 @@ export function buildLandingSite(world, root) {
   const scenery=new THREE.Group();scenery.name='神戶外港・海堤與港區';root.add(scenery);
   const map=portArchitecture(world,scenery,materials);
   const {ship,ramp}=buildCraft(root,materials);
+  const flotilla=buildFlankingCraft(root,materials);
   const rampAngle=-.175;
   const sidewalls=[{z0:-23.0,z1:-20.5},{z0:20.5,z1:23.0}];
   const gate={z0:-19,z1:19};
   const site={
-    ship,ramp,water,scenery,time,bow,moving,progress:0,open:0,boxes:[...sidewalls,gate],
+    ship,ramp,flotilla,water,scenery,time,bow,moving,progress:0,open:0,boxes:[...sidewalls,gate],
     setPose(progress,open,dt=0){
       this.progress=progress;this.open=open;
       time.value+=dt;
       const x=THREE.MathUtils.lerp(LANDING.departure,LANDING.berth,progress);
       ship.position.x=x;ship.position.y=Math.sin(time.value*1.83)*.32*(1-progress);
       ship.rotation.x=Math.sin(time.value*1.47)*.016*(1-progress);
+      flotilla.position.set(x-14,Math.sin(time.value*1.55+.6)*.24*(1-progress),0);
       ramp.rotation.z=THREE.MathUtils.lerp(1.43,rampAngle,open);
       bow.value=x;moving.value=1-progress;
       for(const b of sidewalls){b.x0=x-75;b.x1=x+.3;b.top=LANDING.deck+1.8;}

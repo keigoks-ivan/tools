@@ -290,7 +290,7 @@ async function game() {
   }
 
   // ---------------------------------------------------------------- 流程
-  let state = 'title', boot = 0, bootLen = 3.4, titleT = 0;
+  let state = 'title', boot = 0, bootLen = 3.4, titleT = 0, landingOpening = false;
   let pausedFrom = 'play', coda = null, stations = null;
   const codaHUD = $('codaHUD'), codaObjective = $('codaObjective'), codaDistance = $('codaDistance');
   const codaHint = $('codaHint'), codaHeading = $('codaHeading'), codaEnd = $('codaEnd');
@@ -398,6 +398,7 @@ async function game() {
     for (const k of ['damage', 'overdrive', 'speed', 'danger', 'flash']) post.u[k].value = 0;
     odV = speedV = flashV = dangerV = 0;
     state = 'title'; titleT = 0;
+    landingOpening = false;
     syncLesson();
     renderStages();
     audio.music('title');
@@ -410,7 +411,9 @@ async function game() {
     input.enabled = true;
     if (!input.touch.on) input.lock();
     touchUI.style.display = input.touch.on ? 'block' : 'none';
-    applyView();
+    landingOpening = !!combat.enc?.front?.site && !combat.cp;
+    if (landingOpening) { cockpitView(false); cockpit.root.visible = false; seeOff(); }
+    else applyView();
     audio.ui('boot');
     scenicMusic.reset();
     audio.music('battle', { stage: STAGES[stageNo - 1].music || stageNo });
@@ -741,6 +744,10 @@ async function game() {
       if (done) endCodaFilm();
       return;
     }
+    if (landingOpening && (state !== 'boot' || boot >= .86 || inp.view || inp.fire || input.pressed('Space') || input.pressed('Enter'))) {
+      landingOpening = false;
+      applyView();
+    }
     if (inp.view && live) { tpView = !tpView; store.set('view', tpView ? 1 : 0); applyView(); }
     const canMove = live && (state !== 'boot' || boot > 0.85) && !combat.dead;
     if (!canMove) inp = Object.assign({}, inp, idle, { fire: false, lockHold: false, qb: false, boost: false, jump: false, hover: false, flight:false,descend:false,flightBlocked:true, shield: false, cannon: false, hardLock: false, od: false, reload: false, lookX: state === 'result' ? 0 : inp.lookX, lookY: state === 'result' ? 0 : inp.lookY });
@@ -783,7 +790,11 @@ async function game() {
       shield: C.shield, cannon: C.cannon, od: C.od, lockAlert: C.lockAlert, danger: player.ap / player.apMax < 0.3 ? 1 : 0,
       radar, px: player.pos.x, pz: player.pos.z, route: C.enc && C.enc.ahead, wp: C.enc && C.enc.wp,
     });
-    if (tpView) chaseCam(rdt);
+    if (landingOpening) {
+      const bow = world.landingSite.ship.position.x;
+      camera.position.set(bow - 155 + 31 * boot, 64 - 12 * boot, -143 + 24 * boot);
+      camera.lookAt(bow + 39, 7, 14);
+    } else if (tpView) chaseCam(rdt);
     C.aimSkip = tpView ? chaseSkip : 0;
 
     // ---- 戰鬥、特效、世界
@@ -818,7 +829,7 @@ async function game() {
     dangerV += ((danger ? 0.6 : 0) - dangerV) * (1 - Math.exp(-rdt * 3));
     flashV = Math.max(0, flashV - rdt * 3);
     if (C.hitstop > 0 && C.killMark > 0.9) flashV = Math.max(flashV, 0.06);
-    post.u.boot.value = state === 'boot' ? boot : 1;
+    post.u.boot.value = state === 'boot' && !landingOpening ? boot : 1;
     post.u.damage.value = Math.min(1, C.damageFx * 0.8);
     post.u.overdrive.value = odV;
     post.u.speed.value = speedV;
@@ -826,11 +837,13 @@ async function game() {
     post.u.flash.value = flashV;
     // 瞄準鏡頭：鎖定時另拍一張小的放大畫面，貼在側邊面板
     // 第十一章低畫質保留主 HUD 鎖定，省去莢艙的第二次場景渲染。後視鏡頭看不到莢艙，也不必重畫。
-    cockpit.targetView(renderer, scene, coda && (quality === 0 || tpView) ? null : C.lockTarget);
-    seeThrough(C);
+    cockpit.targetView(renderer, scene, landingOpening || coda && (quality === 0 || tpView) ? null : C.lockTarget);
+    if (landingOpening) seeOff();
+    else seeThrough(C);
     post.render(t);
 
-    hud.draw(rdt, { boot: state === 'boot' ? boot : 1, combat: C, player, stages: STAGES.length, groundY, tp: tpView,
+    if (landingOpening) hud.clear();
+    else hud.draw(rdt, { boot: state === 'boot' ? boot : 1, combat: C, player, stages: STAGES.length, groundY, tp: tpView,
       label: coda ? `STAGE ${STAGES.length + 1}` : undefined, ceasefire: !!coda && !airCombat });
     input.endFrame();
   }

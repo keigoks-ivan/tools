@@ -94,6 +94,19 @@ export class MechMotion {
   // 外部撞擊／著地（0..1+）
   impact(s) { this.dip.v -= 5 * s; this.shock = Math.max(this.shock, Math.min(1.5, s)); }
 
+  // 腳掌的世界錨點要跟著移動中的甲板走。
+  carry(dx, dy, dz) {
+    for (const [name] of LEGS) {
+      const foot = this.feet[name];
+      foot.anchor.x += dx; foot.anchor.y += dy; foot.anchor.z += dz;
+      foot.from.x += dx; foot.from.y += dy; foot.from.z += dz;
+      foot.to.x += dx; foot.to.y += dy; foot.to.z += dz;
+    }
+    if (this.rootPrev) {
+      this.rootPrev.x += dx; this.rootPrev.y += dy; this.rootPrev.z += dz;
+    }
+  }
+
   // 重量模式：機身朝向限速（軀幹的 twist 彈簧會把差角補回去，瞄準方向不變）；關閉時原樣回傳
   turnLimit(want, st, dt) {
     const m = this.m;
@@ -138,7 +151,8 @@ export class MechMotion {
     const Flight=this.flight, flightSpeed=Flight*smooth(8,75,sp);
     const walkW = (1 - Bst) * (1 - Air);
     const P = this.gait, HR = !!m.stance;   // 主角機：衝刺／飛行用英雄機的誇張姿勢（前傾、雙腳往後拖、盾在前）
-    const groundAware = P || m.root.userData.originalCangyan;
+    const campaign = !!m.root.userData.originalCangyan;
+    const groundAware = P || campaign;
 
     // ---- 步態：週期 cyc（0..1），右腳 0 起步、左腳差半拍；支撐期依機種調整（兩腳同時著地的片刻＝沉重感）
     const af = Math.hypot(fwd, side);
@@ -160,7 +174,7 @@ export class MechMotion {
     this.g = damp(this.g, gT, gT > this.g ? 5 : 3.5, dt);
     const g = this.g;
     const D0 = P ? P.support : 0.64, D = m.heavy ? D0 + HEAVY.hold : D0;   // D0 只管步頻，重量模式加長的 D 只拉長落地期
-    const S = P ? clamp(P.stride + af * 0.34, P.stride, P.max) : clamp(2.4 + af * 0.3, 2.4, 6.6);             // 步幅
+    const S = P ? clamp(P.stride + af * 0.34, P.stride, P.max) : campaign ? Math.min(6.7, 3.35 + af * .235) : clamp(2.4 + af * 0.3, 2.4, 6.6);
     if (af > 0.4) this.dir = fwd < 0 ? -1 : 1;
     else if (Math.abs(yawRate) > 0.1) this.dir = 1;
     if (g > 0.02 || (!this.feet.R.stance || !this.feet.L.stance)) this.cyc += dt * Math.max(vg, 2.4) * D0 / S;
@@ -175,7 +189,7 @@ export class MechMotion {
     }
     this.supportDrop = Math.max(Math.min(1.8, reachCrouch), damp(this.supportDrop || 0, Math.min(1.8, reachCrouch), 8, dt));
     const crouch = Math.max(0.3 + (Sn ? Sn.bend : P.bend) * idle + this.brace * 0.12 * idle + g * Math.min(0.75, af * 0.045), this.supportDrop * walkW);    // 跑越快蹲越低
-    const H = (P ? P.lift + Math.min(0.65, af * 0.035) : 0.55 + Math.min(1.2, af * 0.075)) * g;          // 抬腳高度
+    const H = (P ? P.lift + Math.min(0.65, af * 0.035) : campaign ? .41 + Math.min(.52, af * .038) : 0.55 + Math.min(1.2, af * 0.075)) * g;
 
     // ---- 骨盆：落腳下沉、支撐期升起；重心移到支撐腳；隨步伐扭腰
     const pc = this.cyc * TAU;
@@ -242,7 +256,7 @@ export class MechMotion {
         }
         _v.lerpVectors(foot.from, foot.to, e);
         _v.y += H * k * Math.pow(Math.sin(Math.PI * w), 2);
-        pitch = Math.sin(TAU * w) * 0.18 * g * this.dir;
+        pitch = -Math.sin(TAU * w) * (campaign ? .13 : .18) * g * this.dir;
         _v.y += k * ((pitch < 0 ? this.toe : this.heel) * Math.abs(Math.sin(pitch)) + this.ankleY * (Math.cos(pitch) - 1));
         footYaw = lerpAngle(foot.fromYaw, foot.toYaw, e);
       }

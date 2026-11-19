@@ -1,5 +1,5 @@
 import { Vector3 } from 'three';
-import { BattleLine } from './battle-line.mjs?v=1';
+import { BattleLine } from './battle-line.mjs?v=2';
 
 const BLUE = '第三裝甲連', CONTROL = '白鷺（指揮所）';
 const POSTS = {
@@ -28,7 +28,26 @@ export class FreightFront extends BattleLine {
     this.unit('grunt',-247,2,false,'screen');
     this.unit('brawler',-223,-103,false,'flank');
     this.unit('grunt',-165,-86,false,'flank');
+    this.C.say('第一波・貨站外圍','正面走裝卸線，左側走北側低地',3,'cy');
   }
+
+  counter() {
+    const {C,lane}=this, flank=lane==='flank', z=flank?-94:42;
+    this.phase='counter';
+    this.marker=this.point(-177,z);this.marker.y+=17;
+    const first=this.unit(flank?'brawler':'tank',-192,z,false,'counter');
+    const second=this.unit(flank?'grunt':'heavy',-130,z+(flank?-17:35),false,'counter');
+    const screen=this.unit('grunt',-153,flank?-61:16,false,'counter');
+    first.entity.label=flank?'北線攔截機':'調車場裝甲反擊';
+    second.entity.label=flank?'低地火力組':'裝卸線重砲';
+    this.order(first,[-219,z],[-246,z]);this.order(second,[-181,z+(flank?-10:29)]);
+    this.order(screen,[-198,flank?-74:23]);
+    this.currentWave=[first,second,screen];
+    this.order(this.wing,[-217,flank?-91:11],[-191,flank?-90:15]);
+    if(!flank)this.tanks.forEach((t,i)=>this.order(t,[-217-i*24,47+28*i]));
+    C.say('第二波・站外預備隊',flank?'敵機轉進低地，清出北側通道':'戰車沿裝卸線壓上，和盟軍一起擊退它們',3,'am');
+  }
+
   advance(phase) {
     const { C, lane }=this;
     this.phase=phase;
@@ -57,58 +76,86 @@ export class FreightFront extends BattleLine {
         const z=e.post==='flank'?-118:e.pos.z;
         this.order(e,[e.pos.x+25,z],[80,z]);
       }
+    }else if(phase==='platform'){
+      const flank=lane==='flank';
+      this.marker=this.point(87,flank?-75:12); this.marker.y+=20;
+      const postZ=flank?-100:62;
+      const mobile=this.unit(flank?'brawler':'grunt',61,postZ,false,'platform');
+      const covering=this.unit('grunt',104,flank?-46:-17,false,'platform');
+      const heavy=this.unit('tank',94,77,false,'platform');
+      this.order(mobile,[18,postZ],[-12,flank?-83:48]);
+      this.order(covering,[64,flank?-77:9]);
+      this.order(heavy,[56,76]);
+      this.currentWave=[mobile,covering,heavy];
+      if(flank)this.order(this.wing,[-42,-85],[36,-81],[77,-72]);
+      else{
+        this.order(this.wing,[-25,7],[60,10]);
+        this.tanks.forEach((t,i)=>this.order(t,[45-i*18,47+28*i]));
+      }
+      C.say('第三波・月台反擊','敵軍正在調車線和北側月台之間換位',3,'am');
     }else if(phase==='station'){
       this.marker=this.point(181,14); this.marker.y+=24;
       const tankLead=lane==='main';
       if(tankLead) this.tanks.forEach((t,i)=>this.order(t,[84-i*26,47+28*i]));
       else this.order(this.wing,[-46,-81],[45,-78],[114,-65]);
       if(tankLead) this.order(this.wing,[96,4]);
-      this.unit('tank',99,76,false,'station');
-      this.unit('grunt',80,tankLead?-12:-104,false,'station');
-      const boss=this.boss=this.unit('heavy',156,19,false,'station');
-      boss.boss=true;boss.maxAP=9400;boss.entity.ap=boss.entity.apMax=boss.maxAP;
+      const guard=this.unit(tankLead?'tank':'brawler',158,tankLead?64:-72,false,'station');
+      this.order(guard,[141,tankLead?54:-47],[134,tankLead?37:-34]);
+      this.currentWave=[guard];
+      const boss=this.boss=this.unit('heavy',179,19,false,'station');
+      boss.boss=true;boss.maxAP=10500;boss.entity.ap=boss.entity.apMax=boss.maxAP;
+      boss.weapon={...boss.weapon,damage:540,range:340};
       boss.entity.bossName='獵犬軍團重裝指揮機';
       C.boss=boss.entity;
-      C.say('貨運站反擊','擊退重裝指揮機，打開撤離通道',3,'am');
+      C.say('第四波・車棚指揮機','突破重裝機和護衛，打開撤離通道',3,'am');
       C.lines([[CONTROL,'重裝指揮機進站了。那台機倒下，貨站就能通行。']],true);
     }
   }
   react(actor) {
-    const C=this.C;
-    if(actor.kind==='brawler'&&actor.target&&actor.target.pos.z<-63) {
+    if(!actor.friendly&&!actor.leave&&actor.kind==='brawler'&&actor.post==='flank'&&actor.target&&actor.target.pos.z<-63) {
       const p=actor.target.pos;
-      actor.goal.copy(this.point(Math.max(-293,p.x+32),Math.max(-120,Math.min(-65,p.z-10))));
+      actor.goal.copy(this.point(Math.max(-293,p.x+26),Math.max(-118,Math.min(-70,p.z-14))));
     }
     if(actor.kind==='grunt'&&!actor.leave&&!actor.shifted&&actor.entity.ap<actor.maxAP*.58) {
       actor.shifted=true;
       this.order(actor,[actor.pos.x+21,actor.pos.z+(actor.post==='flank'?-9:7)]);
     }
-    if(actor.boss && !actor.shifted && actor.entity.ap<actor.maxAP*.55) {
-      actor.shifted=true;
-      actor.weapon={...actor.weapon,damage:720,cool:1.55};
-      this.order(actor,[180,24],[209,this.lane==='flank'?-7:7]);
-      C.note('重裝指揮機轉移火力','am');
-    }
+  }
+  stationReserve() {
+    const boss=this.boss,z=this.lane==='flank'?51:-47;
+    boss.shifted=true;
+    boss.weapon={...boss.weapon,damage:700,cool:1.62,speed:13};
+    this.order(boss,[210,20],[234,7]);
+    const lead=this.unit('brawler',235,z,false,'station');
+    const backup=this.unit('grunt',252,-z*.68,false,'station');
+    this.order(lead,[193,z*.77],[174,z*.52]);
+    this.order(backup,[220,-z*.53],[179,-z*.44]);
+    this.currentWave.push(lead,backup);
+    this.C.say('第五波・貨站最後反擊','重裝指揮機轉移，兩側護衛支援進場',3,'am');
   }
   update(dt) {
     const C=this.C,p=C.player.pos;
     if(this.phase==='breach') {
-      if(!this.lane&&p.x>-374&&(p.z>=-27||p.z<=-65)) {
+      if(!this.lane&&p.x>-361&&(p.z>=-18||p.z<=-65)) {
         this.lane=p.z<=-65?'flank':'main';
         C.note(POSTS[this.lane].name+'・'+POSTS[this.lane].route,'cy');
         if(this.lane==='flank') this.order(this.wing,[-384,-95],[-306,-92]);
       }
-      if(this.lane && !this.foes.some(u=>u.post===this.lane&&this.canFight(u))) this.advance('approach');
+      if(this.lane&&p.x>-285&&!this.foes.some(u=>u.post===this.lane&&this.canFight(u)))this.counter();
     }
-    if(this.phase==='approach' && p.x>-87 && Math.abs(p.z)<140) this.advance('station');
-    if(this.phase==='station' && this.boss.entity.dead) {
+    if(this.phase==='counter'&&p.x>-212&&this.currentWave.every(u=>u.entity.dead))this.advance('approach');
+    if(this.phase==='approach'&&p.x>-87&&Math.abs(p.z)<140)this.advance('platform');
+    if(this.phase==='platform'&&p.x>42&&Math.abs(p.z)<140&&this.currentWave.every(u=>u.entity.dead))this.advance('station');
+    if(this.phase==='station'&&!this.boss.shifted&&this.boss.entity.ap<this.boss.maxAP*.55)this.stationReserve();
+    if(this.phase==='station'&&this.boss.entity.dead&&this.currentWave.every(u=>u.entity.dead)) {
       this.phase='capture';
+      this.marker=this.point(222,15);this.marker.y+=21;
       for(const e of this.foes) if(this.canFight(e)) {
         e.leave=true;e.target=null;this.order(e,[e.pos.x+28,e.pos.z],[318,e.pos.z]);
       }
       C.say('重裝指揮機倒下','進入貨運站，打開撤離路線',2.4,'gr');
     }
-    if(this.phase==='capture' && inside(p,181,15,58,60)) {
+    if(this.phase==='capture' && inside(p,222,15,17,28)) {
       this.phase='done';this.enc.state='done';this.marker=null;
       C.lines([[BLUE,'貨站到手。救護車隊，撤離路線已開。']],true);
       return true;
@@ -122,6 +169,8 @@ export class FreightFront extends BattleLine {
       ? postHint(this.lane,this.foes.filter(u=>u.post===this.lane&&this.canFight(u)).length)
       : {title:'選擇突破方向',hint:'正面・裝卸線　／　左側・低地通道'};
     if(this.phase==='approach')return {title:'前線已推進',hint:this.lane==='main'?'跟上前壓的盟軍戰車':'跟上北側的斑鳩'};
+    if(this.phase==='counter')return {title:'站外預備隊反擊',hint:'擊退預備隊，向貨站推進'};
+    if(this.phase==='platform')return {title:'穿越月台',hint:'清除調車線和月台上的敵機'};
     return this.phase==='station'?{title:'奪回貨運站',hint:'擊退重裝指揮機'}:{title:'封鎖解除',hint:'進入貨運站開放撤離路線'};
   }
   get waypoints() {

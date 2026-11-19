@@ -6,8 +6,8 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { carGeometry } from './env.js';
 import { instancedCarMaterial } from './car-material.js';
 import { MechTutorial } from './tutorial.mjs?v=1';
-import { FreightFront } from './freight-front.mjs?v=2';
-import { LandingFront } from './landing-front.mjs?v=1';
+import { FreightFront } from './freight-front.mjs?v=3';
+import { LandingFront } from './landing-front.mjs?v=2';
 
 const rand = (a, b) => a + Math.random() * (b - a);
 const clamp = THREE.MathUtils.clamp;
@@ -736,7 +736,7 @@ export class Encounter {
     }
     const move = this.state === 'move' || this.state === 'idle';
     const target = this.training?.marker || this.front?.marker;
-    this.wp = target || (move && wp ? { x: wp.x, y: w.height(wp.x, wp.z) + 38, z: wp.z } : null);
+    this.wp = target || (move && wp && !this.front ? { x: wp.x, y: w.height(wp.x, wp.z) + 38, z: wp.z } : null);
     this.dist = target ? C.player.pos.distanceTo(target) : c ? Math.max(0, c.s - this.prog) : 0;
     const A = this.ahead; A.length = 0;
     if (target) A.push(C.player.pos.x, C.player.pos.z, target.x, target.z);
