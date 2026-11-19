@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>林口店面選址・我要開某種店</title>
+<meta name="description" content="先選行業，看林口六個主要商圈的同業家數、每千位居民家數、2021 到 2025 年增減，以及店面租金或買價。">
+<link rel="stylesheet" href="../../css/style.css">
+<link rel="stylesheet" href="../tw.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<link rel="stylesheet" href="linkou.css?v=20261119g">
+</head>
+<body data-view="industry">
+<div id="nav-root"></div>
+<script src="../../js/navbar.js"></script>
+
+<div class="container">
+  <div class="page-header">
+    <div class="eyebrow">新北市林口區・店面研究｜資料更新 2026 年 11 月</div>
+    <h1>我要開某種店：先選行業，再看六個商圈</h1>
+    <div class="subtitle">選一個行業，並排看六個主要商圈的同業家數、五年增減，以及店面的租金或買價。表只列數字，順序固定，不排名。</div>
+    <div class="pg-links"><a href="index.html">← 林口店面選址</a><span class="cur">我要開某種店</span><a href="map.html">點地圖找位置</a><a href="area.html">看某個商圈</a></div>
+  </div>
+
+  <div class="ind-step"><span>1</span>選行業</div>
+  <div class="ind-pick" id="indPick" aria-label="行業"></div>
+  <div class="ind-step"><span>2</span>租還是買</div>
+  <div class="seg2" id="indM" role="group" aria-label="租還是買"><button type="button" data-m="rent" class="on">租</button><button type="button" data-m="buy">買</button></div>
+
+  <div class="ind-res">
+    <h2 id="indTitle">—</h2>
+    <p class="ind-lead" id="indLead"></p>
+    <div id="indTbl" class="ind-t" aria-live="polite"></div>
+    <p class="fine" id="indPriceNote"></p>
+  </div>
+
+  <div class="ind-mh"><h3 class="sub-h">這個行業的店在哪裡</h3><span class="fine" id="indMapCount" style="margin:0"></span></div>
+  <div class="ind-leg" id="indLegend"></div>
+  <div id="indMap" role="application" aria-label="這個行業的店面分布"></div>
+  <p class="fine" id="indMapNote"></p>
+
+  <h3 class="sub-h">數字怎麼來的</h3>
+  <div class="fine"><ul>
+    <li>家數依商業登記（財政部稅籍、經濟部公司與商業登記）。登記不等於實際開店，許多公司把登記地址設在住家，家數會比實際開店數多。</li>
+    <li>只算營業中、樓層登記在一樓、地下或沒寫樓層的店面型商家（一樓群）。登記在二樓以上的多半是網路商店或辦公室，不算。</li>
+    <li>有 <span id="indUnknown">—</span> 家查不到現況和行業，沒有算進來。</li>
+    <li>各商圈人口是把各里人口，依門牌點落在哪個商圈的比例分攤。高樓區一個門牌住很多戶，新興商圈的人口可能被低估，每千位居民的家數會因此偏高。</li>
+    <li>淨增是 2021～2025 年新設家數減關閉家數，只算查得到的。</li>
+    <li>補習班與安親班用教育部短期補習班名冊、新北市教育局課後照顧中心名冊，沒有樓層，也沒有關閉紀錄，所以欄位改列新立案家數，不是淨增。</li>
+    <li>六個商圈以外（工業區、其他商圈、商圈外）的店，沒有列入表。</li>
+  </ul></div>
+  <details class="ind-det"><summary>這裡的淨增，跟報告的「店面型商家淨增」怎麼對</summary>
+    <p class="fine">報告各商圈的店面型商家淨增（例如中段 345 家）包含所有樓層，也包含不在這四個業態的店面型行業：補習與教育、醫療診所，以及辦公與其他（不動產仲介、銀行分行等通常開在一樓的行業）。本頁只列四個業態的一樓群。下表把其餘部分加回去，合計跟報告一致。</p>
+    <div class="tbl-wrap"><div id="indRecon"></div></div>
+  </details>
+
+  <h3 class="sub-h">還可以這樣看</h3>
+  <div class="pg-more">
+    <a class="entry-card" href="map.html" style="--ec:#ea580c"><span class="ec-t">點地圖找位置</span><span class="ec-d">已經有候選店面，點它看半徑內的住戶、所得和同業。</span><span class="ec-go" aria-hidden="true">→</span></a>
+    <a class="entry-card" href="area.html" style="--ec:#0d9488"><span class="ec-t">看某個商圈</span><span class="ec-d">一個商圈一頁：人口、新店面、同業增減和價格。</span><span class="ec-go" aria-hidden="true">→</span></a>
+  </div>
+  <div class="foot-link"><a href="index.html">回到林口店面選址完整報告</a></div>
+</div>
+
+<footer class="footer">A project by <span>InvestMQuest</span></footer>
+<script src="linkou.js?v=20261119g"></script>
+<script src="linkou-pages.js?v=20261119g"></script>
+</body>
+</html>

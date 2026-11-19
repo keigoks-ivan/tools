@@ -48,17 +48,21 @@
     document.getElementById('st_pipe').textContent = '約 ' + fmt(Math.round(R.LK03.pipe_units / 10) * 10);
     Array.prototype.forEach.call(document.querySelectorAll('.area-card[data-a]'), function (el) { el.style.borderLeftColor = COLORS[el.getAttribute('data-a')]; });
 
+    document.getElementById('tblYield').innerHTML = yieldTbl(S, ord);
+  }
+  function yieldTbl(S, ord) {
+    var R = S.rows;
     var y = '<thead><tr><th>商圈</th><th>成交中位數（萬／坪）</th><th>租金中位數（元／坪／月）</th><th>毛報酬率</th></tr></thead><tbody>';
     ord.forEach(function (k) {
       var r = R[k];
       y += '<tr><td><span class="chip" style="background:' + COLORS[k] + '"></span>' + r.name + '</td><td>' + fmt(r.sale_med) + '（' + r.sale_n + '）</td><td>' + fmt(r.rent_med) + '（' + r.rent_n + '）</td><td>' + fmt(r.yield, 1) + '%</td></tr>';
     });
-    document.getElementById('tblYield').innerHTML = y + '</tbody>';
+    return y + '</tbody>';
   }
 
   /* 二到四樓版的價格表：空樣本顯示「–」加筆數 */
-  function buildYieldUp(S) {
-    var U = UP.rows, ord = S.order;
+  function buildYieldUp(S, only) {
+    var U = UP.rows, ord = only ? [only] : S.order;
     function cell(v, n) { return (v === null || v === undefined ? '–' : fmt(v)) + '（' + n + '）'; }
     var y = '<thead><tr><th>商圈</th><th>成交中位數（萬／坪）</th><th>租金中位數（元／坪／月）</th><th>毛報酬率</th></tr></thead><tbody>';
     ord.forEach(function (k) {
@@ -67,7 +71,7 @@
         '</td><td>' + (r['yield'] === null ? '–' : fmt(r['yield'], 1) + '%') + '（' + r.yield_n + '）</td></tr>';
     });
     document.getElementById('tblYield').innerHTML = y + '</tbody>';
-    var o = UP.overall, mx = Math.max.apply(null, ord.map(function (k) { return U[k].sale_n; })), mn = Math.min.apply(null, ord.map(function (k) { return U[k].sale_n; }));
+    var allk = S.order, o = UP.overall, mx = Math.max.apply(null, allk.map(function (k) { return U[k].sale_n; })), mn = Math.min.apply(null, allk.map(function (k) { return U[k].sale_n; }));
     document.getElementById('yieldNote').innerHTML = '二到四樓是 2～4 樓、登記為辦公或商業用途的單位，不含 5 樓以上。這類單位多數在住宅大樓裡（428 筆買賣中有 366 筆），有些實際當住家用，行情可能偏低。2023 年以來進統計的成交全林口只有 ' + o.sale_n + ' 筆，各商圈 ' + mn + ' 到 ' + mx +
       ' 筆，租賃 ' + o.rent_n + ' 筆，中位數只能看大方向。同一期間全林口二到四樓成交中位數每坪 ' + fmt(o.sale_med) + ' 萬，一樓 ' + fmt(o.sale_one_med) + ' 萬（' + o.sale_one_n +
       ' 筆）；二到四樓月租每坪 ' + fmt(o.rent_med) + ' 元，一樓 ' + fmt(o.rent_one_med) + ' 元（' + o.rent_one_n + ' 筆）。毛報酬率用全期間的租賃，配對同棟或同路段、前後兩年內的成交算出，括號內，成交、租金是筆數，毛報酬率是配對到的租賃筆數。';
@@ -126,7 +130,7 @@
   /* 小圖並排：一個 ECharts 實例、六個 grid，共用 y 軸刻度 */
   function multiples(id, o) {
     var el = document.getElementById(id), W = el.clientWidth || 600, narrow = W < 560;
-    var cols = narrow ? 2 : 3, rows = Math.ceil(o.ord.length / cols), cellW = W / cols, cellH = narrow ? 176 : 188, gt = 30;
+    var cols = o.cols || (narrow ? 2 : 3), rows = Math.ceil(o.ord.length / cols), cellW = W / cols, cellH = narrow ? 176 : 188, gt = 30;
     var opt = { title: [], grid: [], xAxis: [], yAxis: [], series: [], tooltip: tip(o.unit, function (p) { return p.axisValueLabel; }) };
     var ymax = 0;
     o.ord.forEach(function (k) { o.data[k].forEach(function (v) { if (v > ymax) ymax = v; }); });
@@ -213,6 +217,9 @@
         markArea: (a >= 0 && b >= 0) ? { silent: true, itemStyle: { color: 'rgba(90,122,154,.14)' }, label: { color: MUTED, fontSize: 11, position: 'insideTop' },
           data: [[{ xAxis: mo[a], name: '三級警戒' }, { xAxis: mo[b] }]] } : undefined }] }, narrow ? 280 : 320);
 
+    attachResize();
+  }
+  function attachResize() {
     var rt = null;
     window.addEventListener('resize', function () {
       clearTimeout(rt);
@@ -245,9 +252,9 @@
     var a = [205, 226, 251], z = [24, 79, 149];
     return 'rgb(' + a.map(function (x, i) { return Math.round(x + (z[i] - x) * t); }).join(',') + ')';
   }
-  function heatTable(title, ord, nm, years, data) {
-    var mx = 0;
-    ord.forEach(function (k) { data[k].forEach(function (v) { if (v > mx) mx = v; }); });
+  function heatTable(title, ord, nm, years, data, mxIn) {
+    var mx = mxIn || 0;
+    if (!mxIn) ord.forEach(function (k) { data[k].forEach(function (v) { if (v > mx) mx = v; }); });
     var h = '<div class="heat"><div class="heat-t">' + title + '</div><table><thead><tr><th></th>' + years.map(function (y) { return '<th>' + y + '</th>'; }).join('') + '<th class="tot">合計</th></tr></thead><tbody>';
     ord.forEach(function (k) {
       var tot = data[k].reduce(function (x, y) { return x + y; }, 0);
@@ -268,7 +275,7 @@
 
   /* 各路段的店面供給：HTML 長條表 */
   var ROAD_NOTE1 = null;
-  function buildRoads(R, mode) {
+  function buildRoads(R, mode, only) {
     var up = mode === 'up';
     if (up) R = UP.roads;
     var el = document.getElementById('roadCards'), sc = R.scale;
@@ -279,7 +286,7 @@
       return '<div class="rb"><i style="flex:0 0 calc((100% - 40px) * ' + (v / mx).toFixed(4) + ');background:' + col + '"></i><b>' + fmt(v) + '</b></div>';
     }
     var h = '';
-    R.areas.forEach(function (a) {
+    R.areas.filter(function (a) { return !only || a.id === only; }).forEach(function (a) {
       var col = COL[a.id];
       h += '<div class="rcard"><div class="rc-h"><span class="chip" style="background:' + col + '"></span><b>' + esc(a.name) + '</b><span class="rc-c">' + esc(a.claim) + '</span></div>';
       if (up) h += '<div class="rr up rh"><span class="rn"></span><span>2016 年後完工（棟）</span><span>2015 年前完工（棟）</span><span>二到四樓成交（筆）</span><span>未完工戶數</span></div>';
@@ -300,7 +307,7 @@
       return;
     }
     note.innerHTML = ROAD_NOTE1;
-    var ny = R.areas.filter(function (a) { return a.noyear; }).map(function (a) { return a.name + ' ' + a.noyear + ' 棟'; });
+    var ny = R.areas.filter(function (a) { return a.noyear && (!only || a.id === only); }).map(function (a) { return a.name + ' ' + a.noyear + ' 棟'; });
     var n2 = document.getElementById('roadNoYear');
     if (n2 && ny.length) n2.textContent = '另有' + ny.join('、') + '查不到完工年，沒有列入 2016 年後或 2015 年前兩欄。';
   }
@@ -369,11 +376,17 @@
     if (z === '乙種工業區') return { fillColor: '#a16207', fillOpacity: 0.55, color: '#a16207', weight: 0.5, opacity: 0.8 };
     return { fillColor: '#9ca3af', fillOpacity: 0.18, color: '#9ca3af', weight: 0.3, opacity: 0.35 };
   }
+  function areaStyle(f, S) {
+    var r = S[f.properties.id]; var old = r && r.mature === '成熟', c = COLORS[f.properties.id] || '#94a3b8';
+    return { color: c, weight: old ? 1.5 : 2.5, dashArray: old ? '5 4' : null, fillColor: c, fillOpacity: old ? 0.12 : 0.2 };
+  }
   var VBINS = [[0, 500, '#fef3c7'], [500, 700, '#fcd34d'], [700, 900, '#f59e0b'], [900, 1100, '#d97706'], [1100, 1e9, '#92400e']];
   function vcolor(n) { for (var i = 0; i < VBINS.length; i++) if (n >= VBINS[i][0] && n < VBINS[i][1]) return VBINS[i][2]; return '#ccc'; }
 
-  function buildMap(D) {
-    var map = L.map('map', { preferCanvas: true, scrollWheelZoom: false }).setView([25.075, 121.372], 13);
+  function buildMap(D, opts) {
+    opts = opts || {};   /* 全螢幕地圖頁傳進來：wheel、zoomPos、legendPos、noDemo、initial、onResult、onChange */
+    var map = L.map('map', { preferCanvas: true, scrollWheelZoom: !!opts.wheel, zoomControl: !opts.zoomPos }).setView([25.075, 121.372], 13);
+    if (opts.zoomPos) L.control.zoom({ position: opts.zoomPos }).addTo(map);
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, referrerPolicy: 'strict-origin', attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> 貢獻者' }).addTo(map);
     map.createPane('pZone').style.zIndex = 305;
     map.createPane('pVill').style.zIndex = 310;
@@ -392,10 +405,7 @@
       return h;
     }
     var L_ = {};
-    L_.areas = L.geoJSON(D.areas, { pane: 'pArea', style: function (f) {
-        var r = S[f.properties.id]; var old = r && r.mature === '成熟', c = COLORS[f.properties.id] || '#94a3b8';
-        return { color: c, weight: old ? 1.5 : 2.5, dashArray: old ? '5 4' : null, fillColor: c, fillOpacity: old ? 0.12 : 0.2 };
-      }, onEachFeature: function (f, l) { var r = S[f.properties.id]; if (r) l.bindPopup(areaPopup(r), { maxWidth: 280 }); } });
+    L_.areas = L.geoJSON(D.areas, { pane: 'pArea', style: function (f) { return areaStyle(f, S); }, onEachFeature: function (f, l) { var r = S[f.properties.id]; if (r) l.bindPopup(areaPopup(r), { maxWidth: 280 }); } });
     var bb = L.latLngBounds([]);
     L_.areas.eachLayer(function (l) { if (/^LK/.test(l.feature.properties.id)) bb.extend(l.getBounds()); });
     if (bb.isValid()) map.fitBounds(bb, { padding: [12, 12] });
@@ -506,7 +516,7 @@
       bar.querySelectorAll('#bizSubRow input[data-sub]').forEach(function (inp) { inp.parentNode.querySelector('.bl').textContent = D.biz.subs[c][+inp.getAttribute('data-sub')] + '（' + fmt(subCount(c, +inp.getAttribute('data-sub'))) + ' 家）'; });
     }
     var legendDiv;
-    var Legend = L.control({ position: 'bottomright' });
+    var Legend = L.control({ position: opts.legendPos || 'bottomright' });
     var legendBody;
     Legend.onAdd = function () {
       legendDiv = L.DomUtil.create('div', 'map-legend' + (window.innerWidth < 700 ? ' collapsed' : ''));
@@ -565,8 +575,8 @@
     LAYERS.forEach(function (l) { if (l[2]) L_[l[0]].addTo(map); });
     L_.biz.addTo(map);
     renderLegend();
-    buildFinder(map, D, L_.areas);
-    window.__map = { map: map, layers: L_, floors: FLOOR_ON, biz: BIZ, toggle: function (k, v) { var c = bar.querySelector('[data-k=' + k + ']'); c.checked = v; c.dispatchEvent(new Event('change', { bubbles: true })); } };
+    var fin = buildFinder(map, D, L_.areas, opts);
+    window.__map = { map: map, layers: L_, floors: FLOOR_ON, biz: BIZ, finder: fin, toggle: function (k, v) { var c = bar.querySelector('[data-k=' + k + ']'); c.checked = v; c.dispatchEvent(new Event('change', { bubbles: true })); } };
   }
 
   /* ---------------- 選址工具 ---------------- */
@@ -583,10 +593,14 @@
   }
   function row(k, v) { return '<div class="cp-row"><span class="k">' + k + '</span><span class="v">' + v + '</span></div>'; }
 
-  function buildFinder(map, D, areasLayer) {
+  /* 點在多邊形內（射線法）；經度當 x、緯度當 y */
+  function inRing(lat, lon, ring) { var c = false; for (var i = 0, j = ring.length - 1; i < ring.length; j = i++) { var xi = ring[i][0], yi = ring[i][1], xj = ring[j][0], yj = ring[j][1]; if (((yi > lat) !== (yj > lat)) && (lon < (xj - xi) * (lat - yi) / (yj - yi) + xi)) c = !c; } return c; }
+  function inGeom(lat, lon, g) { var polys = g.type === 'Polygon' ? [g.coordinates] : g.coordinates; return polys.some(function (pl) { return inRing(lat, lon, pl[0]); }); }
+  function buildFinder(map, D, areasLayer, opts) {
+    opts = opts || {};
     var C = D.catchData, M = D.summary.overall, AGEL = C.meta.age_labels, CATS = C.meta.cats;
     var PUB = M.public_ratio_med;
-    var state = { lat: null, lon: null, r: 500, demo: true };
+    var state = { lat: null, lon: null, r: 500, demo: true, label: null };
     var circle = null, mark = null, findR = null;
 
     function analyze(lat, lon, R) {
@@ -639,8 +653,6 @@
     function tag(n) { if (n === null || n === undefined || !isFinite(n)) return ''; var r = Math.round(n * 10) / 10; return '<span class="tag ' + (r > 0 ? 'up' : (r < 0 ? 'dn' : 'fl')) + '">' + pc(n) + '</span>'; }
     function rowT(k, v, t) { return '<div class="cp-row"><span class="k">' + k + '</span><span class="v">' + (t || '') + '<span>' + v + '</span></span></div>'; }
     function card(title, big, body) { return '<div class="cp-card"><h4><span>' + title + '</span><span class="big">' + big + '</span></h4>' + body + '</div>'; }
-    function inRing(lat, lon, ring) { var c = false; for (var i = 0, j = ring.length - 1; i < ring.length; j = i++) { var xi = ring[i][0], yi = ring[i][1], xj = ring[j][0], yj = ring[j][1]; if (((yi > lat) !== (yj > lat)) && (lon < (xj - xi) * (lat - yi) / (yj - yi) + xi)) c = !c; } return c; }
-    function inGeom(lat, lon, g) { var polys = g.type === 'Polygon' ? [g.coordinates] : g.coordinates; return polys.some(function (pl) { return inRing(lat, lon, pl[0]); }); }
     function where(lat, lon) {
       var a = null, v = null;
       areasLayer.eachLayer(function (l) { var id = l.feature.properties.id; if (!a && /^LK/.test(id) && inGeom(lat, lon, l.feature.geometry)) a = D.summary.rows[id] ? D.summary.rows[id].name : id; });
@@ -650,7 +662,7 @@
 
     function render(o, w) {
       var h = '', A = o.age.reduce(function (t, x) { return t + x; }, 0), A8 = o.age08.reduce(function (t, x) { return t + x; }, 0);
-      h += '<div class="cp-ctx">' + (state.demo ? '示範位置' : '你點選的位置') + '：<b>' + (w.area ? esc(w.area) + '商圈' : '商圈範圍外') + '</b>' + (w.vill ? '・' + esc(w.vill) : '') + '<br>分析半徑 <b>' + fmt(o.R) + ' 公尺</b></div>';
+      h += '<div class="cp-ctx">' + (state.label || (state.demo ? '示範位置' : '你點選的位置')) + '：<b>' + (w.area ? esc(w.area) + '商圈' : '商圈範圍外') + '</b>' + (w.vill ? '・' + esc(w.vill) : '') + '<br>分析半徑 <b>' + fmt(o.R) + ' 公尺</b></div>';
       // 1 住戶
       var b = '';
       if (!o.pop) { b = '<div class="cp-note">這個範圍內沒有住戶資料。</div>'; }
@@ -715,6 +727,7 @@
       }
       h += card('6 未來住戶・未完工', fmt(o.pipe.hh) + ' 戶', b);
       document.getElementById('catchPanel').innerHTML = h;
+      if (opts.onResult) opts.onResult({ o: o, w: w, state: state, bizTotal: tt[0] });
     }
 
     function update() {
@@ -724,11 +737,14 @@
       if (!findR) findR = L.svg({ pane: 'pFind' });
       circle = L.circle([state.lat, state.lon], { pane: 'pFind', renderer: findR, radius: state.r, color: '#9a3412', weight: 3, dashArray: '7 5', fillColor: '#f59e0b', fillOpacity: 0.14, interactive: false }).addTo(map);
       mark = L.circleMarker([state.lat, state.lon], { pane: 'pFind', renderer: findR, radius: 7, color: '#fff', weight: 2.5, fillColor: '#9a3412', fillOpacity: 1, interactive: false }).addTo(map);
-      document.getElementById('centerLabel').textContent = state.demo ? '示範位置（中段商圈），點地圖換位置' : '中心：' + state.lat.toFixed(5) + ', ' + state.lon.toFixed(5) + '（點地圖或在彈出視窗按「以這裡為中心分析」換位置）';
+      var cl = document.getElementById('centerLabel');
+      if (cl) cl.textContent = state.demo ? '示範位置（中段商圈），點地圖換位置' : '中心：' + state.lat.toFixed(5) + ', ' + state.lon.toFixed(5) + '（點地圖或在彈出視窗按「以這裡為中心分析」換位置）';
       Array.prototype.forEach.call(document.querySelectorAll('#radiusBar button'), function (b) { b.classList.toggle('on', +b.getAttribute('data-r') === state.r); });
       render(analyze(state.lat, state.lon, state.r), where(state.lat, state.lon));
+      if (opts.onChange) opts.onChange(state);
     }
-    function setCenter(lat, lon, demo) { state.lat = lat; state.lon = lon; state.demo = !!demo; update(); }
+    function setCenter(lat, lon, demo, label) { state.lat = lat; state.lon = lon; state.demo = !!demo; state.label = label || null; update(); }
+    function setRadius(r) { state.r = r; update(); }
     window.__finder = { set: function (la, lo) { setCenter(la, lo, false); }, radius: function (r) { state.r = r; update(); }, state: state };
 
     map.on('click', function (e) { setCenter(e.latlng.lat, e.latlng.lng, false); });
@@ -739,24 +755,190 @@
     document.getElementById('radiusBar').addEventListener('click', function (e) {
       var r = e.target.getAttribute && e.target.getAttribute('data-r'); if (!r) return; state.r = +r; update();
     });
+    if (opts.initial && opts.initial.r) state.r = opts.initial.r;
     // 預設中心：中段商圈（LK02）多邊形的中心
     var c = null;
     areasLayer.eachLayer(function (l) { if (l.feature.properties.id === 'LK02') { var ring = l.feature.geometry.coordinates[0]; var cc = centroid(ring); c = [cc[1], cc[0]]; } });
     if (!c) c = [25.0785, 121.3745];
-    setCenter(c[0], c[1], true);
+    if (opts.initial && opts.initial.lat !== undefined) setCenter(opts.initial.lat, opts.initial.lon, false);
+    else if (!opts.noDemo) setCenter(c[0], c[1], true);
+    else { Array.prototype.forEach.call(document.querySelectorAll('#radiusBar button'), function (b) { b.classList.toggle('on', +b.getAttribute('data-r') === state.r); }); }
+    return { set: setCenter, radius: setRadius, state: state, where: where, inLinkou: function (lat, lon) { return D.villGeo.features.some(function (f) { return inGeom(lat, lon, f.geometry); }); } };
+  }
+
+  /* ---------------- 全螢幕地圖頁（map.html）：搜尋、圖層面板、定位、底部抽屜 ---------------- */
+  var SRCH = null, ADDR = null;
+  function normQ(q) {
+    q = String(q || '').replace(/[\uFF10-\uFF19]/g, function (c) { return String.fromCharCode(c.charCodeAt(0) - 0xFEE0); }).replace(/\s+/g, '').replace(/臺/g, '台');
+    return q.replace(/(\d)段/g, function (m, d) { return '〇一二三四五六七八九'.charAt(+d) + '段'; });
+  }
+  function lookup(q) {
+    var n = normQ(q), out = [];
+    if (!n || !SRCH) return out;
+    var m = n.match(/^(.*?[^\d\-])(\d+)(?:-\d+)?號?$/), st = m ? m[1] : n, no = m ? +m[2] : null;
+    if (no !== null && ADDR) {
+      SRCH.streets.forEach(function (s) {
+        if (s.n.indexOf(st) < 0 || !ADDR.a[s.n]) return;
+        var arr = ADDR.a[s.n], best = null, ex = null;
+        arr.forEach(function (a) { var d = Math.abs(a[0] - no); if (a[0] === no) ex = a; if (!best || d < best[1]) best = [a, d]; });
+        var a = ex || best[0];
+        out.push({ t: '門牌', n: s.n + ' ' + (ex ? no + ' 號' : '附近（最近的門牌 ' + a[0] + ' 號）'), lat: ADDR.b0[0] + a[1] / 1e5, lon: ADDR.b0[1] + a[2] / 1e5, w: ex ? 0 : 1, z: 17 });
+      });
+      out.sort(function (a, b) { return a.w - b.w; });
+      out = out.slice(0, 4);
+    }
+    var rank = function (nm) { var j = nm.replace(/\s/g, '').indexOf(st); return j < 0 ? 99 : j; };
+    var pool = SRCH.places.concat(SRCH.streets).filter(function (p) { return rank(p.n) < 99 || (st.length >= 2 && p.n.replace(/商圈|生活圈|站|（.*）/g, '').indexOf(st.replace(/商圈|生活圈|站/g, '')) >= 0); });
+    pool.sort(function (a, b) { return rank(a.n) - rank(b.n) || a.n.length - b.n.length; });
+    pool.slice(0, 8).forEach(function (p) { out.push({ t: p.t, n: p.n, lat: p.lat, lon: p.lon, z: p.t === '商圈' ? 15 : (p.t === '路' ? 16 : 16) }); });
+    return out.slice(0, 8);
+  }
+
+  function bootMap(D) {
+    var qs = new URLSearchParams(location.search), side = document.getElementById('mpSide'), sum = document.getElementById('mpSum');
+    var lat = parseFloat(qs.get('lat')), lon = parseFloat(qs.get('lon')), r = parseInt(qs.get('r'), 10);
+    var init = isFinite(lat) && isFinite(lon) && lat > 24.9 && lat < 25.3 && lon > 121.1 && lon < 121.6 ? { lat: lat, lon: lon, r: [300, 500, 1000].indexOf(r) >= 0 ? r : 500 } : null;
+    var mq = window.matchMedia('(max-width: 899px)'), sheet = 'hide', peekH = 124;
+
+    /* 抽屜：hide 收在畫面外、peek 露出標題列、full 展開到 85% 高 */
+    function ty(st) { var h = side.offsetHeight; return st === 'full' ? 0 : st === 'peek' ? Math.max(0, h - peekH) : h + 8; }
+    function setSheet(st, instant) {
+      sheet = st;
+      if (!mq.matches) { side.style.transform = ''; side.removeAttribute('data-sheet'); return; }
+      side.setAttribute('data-sheet', st);
+      side.style.transition = instant ? 'none' : '';
+      side.style.transform = 'translateY(' + ty(st) + 'px)';
+    }
+    function pulse() { sum.classList.remove('pulse'); void sum.offsetWidth; sum.classList.add('pulse'); }
+    mq.addEventListener('change', function () { setSheet(sheet === 'hide' && !finderState().lat ? 'hide' : (sheet === 'hide' ? 'peek' : sheet), true); });
+    window.addEventListener('resize', function () { setSheet(sheet, true); });
+    function finderState() { return fin ? fin.state : {}; }
+
+    var dragY0 = null, dragT0 = 0, dragMoved = false, dragBase = 0, lastY = 0, lastT = 0, vel = 0;
+    function onDown(e) {
+      if (!mq.matches) return;
+      dragY0 = e.clientY; dragBase = ty(sheet); dragMoved = false; lastY = e.clientY; lastT = e.timeStamp; vel = 0;
+      side.style.transition = 'none';
+      try { e.currentTarget.setPointerCapture(e.pointerId); } catch (x) { /* 舊瀏覽器沒有也沒關係 */ }
+    }
+    function onMove(e) {
+      if (dragY0 === null) return;
+      var dy = e.clientY - dragY0;
+      if (Math.abs(dy) > 4) dragMoved = true;
+      var dt = e.timeStamp - lastT; if (dt > 0) vel = (e.clientY - lastY) / dt; lastY = e.clientY; lastT = e.timeStamp;
+      var y = Math.min(ty('hide'), Math.max(0, dragBase + dy));
+      side.style.transform = 'translateY(' + y + 'px)';
+    }
+    function onUp(e) {
+      if (dragY0 === null) return;
+      var dy = e.clientY - dragY0; dragY0 = null;
+      if (!dragMoved) { setSheet(sheet === 'full' ? 'peek' : 'full'); return; }   /* 點一下：展開或收回 */
+      var y = dragBase + dy, h = side.offsetHeight, st;
+      if (Math.abs(vel) > 0.5) st = vel < 0 ? 'full' : (sheet === 'full' ? 'peek' : 'hide');
+      else { var cand = ['full', 'peek']; st = Math.abs(y - ty('full')) < Math.abs(y - ty('peek')) ? 'full' : 'peek'; if (y > ty('peek') + h * 0.12) st = 'peek'; }
+      setSheet(st === 'hide' ? 'peek' : st);   /* 已經有結果就不整個藏掉，最少露出標題列 */
+    }
+    ['mpGrip', 'mpSum'].forEach(function (id) {
+      var el = document.getElementById(id);
+      el.addEventListener('pointerdown', onDown); el.addEventListener('pointermove', onMove); el.addEventListener('pointerup', onUp); el.addEventListener('pointercancel', onUp);
+    });
+
+    function onResult(x) {
+      var o = x.o, w = x.w, st = x.state, sale = o.sale.n ? fmt(o.sale.med, 1) + ' 萬／坪' : '無成交', rent = o.rent.n ? fmt(o.rent.med) + ' 元／坪' : '無租賃';
+      sum.innerHTML = '<div class="s-t"><b>' + esc(st.label || (w.area ? w.area + '商圈' : '商圈範圍外')) + '</b>' + (w.vill && !st.label ? '・' + esc(w.vill) : '') + '<span class="s-r">半徑 ' + fmt(o.R) + ' 公尺</span></div>' +
+        '<div class="s-k"><span><i>人口</i><b>' + (o.pop ? fmt(o.pop) : '—') + '</b></span><span><i>營業中店家</i><b>' + fmt(x.bizTotal) + '</b></span><span><i>一樓成交中位數</i><b>' + sale + '</b></span></div>';
+      var tp = document.getElementById('mpTip'); if (tp) tp.classList.add('gone');
+      if (mq.matches && sheet === 'hide') setSheet('peek');
+      pulse();
+    }
+    function onChange(st) {
+      var u = '?lat=' + st.lat.toFixed(5) + '&lon=' + st.lon.toFixed(5) + '&r=' + st.r;
+      try { history.replaceState(null, '', u); } catch (e) { /* 分享站或本機檔案開啟時可能不能改網址 */ }
+    }
+    buildMap(D, { wheel: true, zoomPos: 'topright', legendPos: mq.matches ? 'topright' : 'bottomright', noDemo: true, initial: init, onResult: onResult, onChange: onChange });
+    var fin = window.__map.finder, map = window.__map.map;
+    if (init) map.setView([init.lat, init.lon], 16);
+    setSheet('hide', true);
+    if (init && mq.matches) setSheet('peek', true);
+
+    function go(lat, lon, z, label) {
+      map.setView([lat, lon], Math.max(map.getZoom(), z || 16));
+      fin.set(lat, lon, false, label);
+      if (mq.matches && sheet === 'full') setSheet('peek');
+    }
+    function toast(t) { var el = document.getElementById('mpToast'); el.textContent = t; el.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(function () { el.classList.remove('on'); }, 3600); }
+
+    /* 搜尋 */
+    var qi = document.getElementById('mpQ'), hits = document.getElementById('mpHits'), cur = [];
+    function loadIdx(needAddr) {
+      var ps = [];
+      if (!SRCH) ps.push(jget('search.json').then(function (j) { SRCH = j; }));
+      if (needAddr && !ADDR) ps.push(jget('addr.json').then(function (j) { ADDR = j; }));
+      return Promise.all(ps);
+    }
+    function showHits() {
+      var q = qi.value; if (!q.trim()) { hits.innerHTML = ''; hits.hidden = true; return; }
+      loadIdx(/\d/.test(q)).then(function () {
+        if (qi.value !== q) return;
+        cur = lookup(q);
+        hits.innerHTML = cur.length ? cur.map(function (h, i) { return '<li role="option" data-i="' + i + '"><span class="h-t">' + esc(h.t) + '</span>' + esc(h.n) + '</li>'; }).join('') : '<li class="none">找不到。可以輸入路名、路名加門牌（例：仁愛路二段 502）、商圈、里、捷運站或國小。</li>';
+        hits.hidden = false;
+      });
+    }
+    function pick(i) {
+      var h = cur[i]; if (!h) return;
+      hits.hidden = true; qi.value = h.n; qi.blur();
+      go(h.lat, h.lon, h.z, h.n);
+    }
+    qi.addEventListener('input', showHits);
+    qi.addEventListener('focus', function () { loadIdx(false); if (qi.value) showHits(); });
+    qi.addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); if (hits.hidden || !cur.length) { showHits(); return; } pick(0); } if (e.key === 'Escape') hits.hidden = true; });
+    hits.addEventListener('click', function (e) { var li = e.target.closest('li[data-i]'); if (li) pick(+li.getAttribute('data-i')); });
+    document.getElementById('mpQclr').addEventListener('click', function () { qi.value = ''; hits.hidden = true; qi.focus(); });
+    document.addEventListener('click', function (e) { if (!e.target.closest('.mp-search')) hits.hidden = true; });
+
+    /* 圖層面板 */
+    var lp = document.getElementById('mpLayerPanel'), lb = document.getElementById('mpLayers');
+    function layerPanel(open) { lp.hidden = !open; lb.classList.toggle('on', open); lb.setAttribute('aria-expanded', open ? 'true' : 'false'); if (open && mq.matches && sheet === 'full') setSheet('peek'); }
+    lb.addEventListener('click', function () { layerPanel(lp.hidden); });
+    document.getElementById('mpLayersX').addEventListener('click', function () { layerPanel(false); });
+    map.on('click', function () { if (mq.matches) layerPanel(false); });
+
+    /* 我的位置 */
+    document.getElementById('mpLoc').addEventListener('click', function () {
+      if (!navigator.geolocation) { toast('這個瀏覽器不能定位。'); return; }
+      toast('定位中…');
+      navigator.geolocation.getCurrentPosition(function (p) {
+        var la = p.coords.latitude, lo = p.coords.longitude;
+        if (!fin.inLinkou(la, lo)) { toast('你的位置在林口範圍外，地圖沒有移動。'); return; }
+        go(la, lo, 16, '我的位置');
+      }, function (er) { toast(er && er.code === 1 ? '沒有取得定位權限，請在瀏覽器設定允許。' : '定位失敗，請稍後再試。'); }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 });
+    });
+    window.__mp = { setSheet: setSheet, sheet: function () { return sheet; }, lookup: lookup, go: go, fin: fin };
   }
 
   /* ---------------- 啟動 ---------------- */
-  Promise.all(['summary.json', 'charts.json', 'areas_geo.json', 'villages_geo.json', 'buildings.json', 'listings591.json', 'edu.json', 'schools.json', 'pipeline.json', 'catch.json', 'roads.json', 'bizmap.json', 'upper.json'].map(jget))
-    .then(function (a) {
-      var S = a[0], C = a[1];
-      UP = a[12]; CH = C; ROAD1 = a[10]; SUM1 = S;
-      buildTables(S);
-      buildCalc();
-      buildCharts(C);
-      buildRoads(a[10], '1f');
-      seg('supplySwitch', function (m) { drawFig1(m); buildRoads(ROAD1, m); });
-      seg('yieldSwitch', setYieldMode);
-      buildMap({ catchData: a[9], villGeo: a[3], summary: S, areas: a[2], vill: a[3], bld: a[4], l591: a[5], edu: a[6], sch: a[7], pipe: a[8], biz: a[11] });
-    }).catch(function (e) { console.error('linkou load', e); });
+  var VIEW = (document.body && document.body.getAttribute('data-view')) || 'report';
+  window.LK = { jget: jget, fmt: fmt, esc: esc, sgn: sgn, COLORS: COLORS, FONT: FONT, INK: INK, MUTED: MUTED, multiples: multiples, heatTable: heatTable, buildRoads: buildRoads, buildYieldUp: buildYieldUp, yieldTbl: yieldTbl, attachResize: attachResize, areaStyle: areaStyle, inGeom: inGeom, FLOOR_ONE: FLOOR_ONE,
+    setUP: function (u) { UP = u; }, centroid: centroid, tip: tip, xAx: xAx, yAx: yAx, mk: mk, endDot: endDot, charts: charts };
+  if (VIEW === 'map') {
+    Promise.all(['summary.json', 'areas_geo.json', 'villages_geo.json', 'buildings.json', 'listings591.json', 'edu.json', 'schools.json', 'pipeline.json', 'catch.json', 'bizmap.json', 'upper.json'].map(jget))
+      .then(function (a) {
+        UP = a[10];
+        bootMap({ summary: a[0], areas: a[1], villGeo: a[2], vill: a[2], bld: a[3], l591: a[4], edu: a[5], sch: a[6], pipe: a[7], catchData: a[8], biz: a[9] });
+      }).catch(function (e) { console.error('linkou map load', e); });
+  } else if (VIEW === 'report') {
+    Promise.all(['summary.json', 'charts.json', 'areas_geo.json', 'villages_geo.json', 'buildings.json', 'listings591.json', 'edu.json', 'schools.json', 'pipeline.json', 'catch.json', 'roads.json', 'bizmap.json', 'upper.json'].map(jget))
+      .then(function (a) {
+        var S = a[0], C = a[1];
+        UP = a[12]; CH = C; ROAD1 = a[10]; SUM1 = S;
+        buildTables(S);
+        buildCalc();
+        buildCharts(C);
+        buildRoads(a[10], '1f');
+        seg('supplySwitch', function (m) { drawFig1(m); buildRoads(ROAD1, m); });
+        seg('yieldSwitch', setYieldMode);
+        buildMap({ catchData: a[9], villGeo: a[3], summary: S, areas: a[2], vill: a[3], bld: a[4], l591: a[5], edu: a[6], sch: a[7], pipe: a[8], biz: a[11] });
+      }).catch(function (e) { console.error('linkou load', e); });
+  }
 })();
