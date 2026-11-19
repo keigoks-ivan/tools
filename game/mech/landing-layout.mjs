@@ -1,15 +1,18 @@
+import { BASE_OPS } from './base-layout.mjs';
+
 export const LANDING = {
   departure: -441, berth: -346, offset: -33, deck: 4.8, ramp: 27, travel: 7.8,
   seawall: -43, northGap: -61, southGap: 63, yard: 255,
 };
 
 export const LANDING_ROUTE = {
-  cp: [1, 2], arena: 175, fin: 65, par: 575, over: 2,
-  pts: [[LANDING.departure + LANDING.offset, 0], [-187, 0], [54, 0], [LANDING.yard, 0]],
+  cp: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], arena: 175, fin: 65, par: 680, over: 2,
+  pts: [[LANDING.departure + LANDING.offset, 0], [-187, 0], [54, 0], [LANDING.yard, 0], ...BASE_OPS.map(op=>op.point)],
   secs: [
     { at: 1, amb: 'heavy@out grunt@side tank@out' },
     { at: 2, amb: 'brawler@side grunt@side tank@out' },
     { at: 3, amb: 'heavy@out grunt@side tank@out' },
+    ...BASE_OPS.map((op,i)=>({at:i+4,amb:op.waves[0],amb2:op.waves[1],amb3:op.waves[2]})),
   ],
 };
 

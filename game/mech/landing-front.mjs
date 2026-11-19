@@ -1,5 +1,7 @@
-import { BattleLine } from './battle-line.mjs?v=2';
-import { LANDING, landingShore } from './landing-layout.mjs?v=2';
+import { BattleLine } from './battle-line.mjs?v=3';
+import { LANDING, landingShore } from './landing-layout.mjs?v=3';
+
+import { BASE_OPS } from './base-layout.mjs';
 
 const COMMAND = '白鷺（指揮所）';
 const DOG = '鐵獒（獵犬軍團）';
@@ -19,6 +21,7 @@ export class LandingFront extends BattleLine {
     this.lower=0;
     this.ashore=Boolean(combat.cp?.sec);
     this.lane=combat.cp?.lane??null;
+    this.secured=[...(combat.cp?.secured??[])];
     this.defenders=[];
     this.boss=null;
     this.barrageTime=0;this.nextBurst=0;this.bursts=[];
@@ -26,6 +29,7 @@ export class LandingFront extends BattleLine {
 
   prepare() {
     this.site=this.C.world.landingSite;
+    this.site.doors.reset(this.secured);
     this.wallMarkers=[{name:'左側・攔截機',position:this.point(LANDING.seawall,lanes.left)},
       {name:'右側・裝甲車',position:this.point(LANDING.seawall,lanes.right)}];
     this.wallMarkers.forEach(m=>{m.position.y+=12;});
@@ -112,7 +116,9 @@ export class LandingFront extends BattleLine {
   }
 
   deployAllies(checkpoint) {
-    const pair=checkpoint===2?[[54,-45],[52,48]]
+    const restored=this.C.cp;
+    const pair=checkpoint>=3?[[restored.x-12,restored.z-12],[restored.x+12,restored.z-12]]
+      :checkpoint===2?[[54,-45],[52,48]]
       :checkpoint===1?[[-159,-46],[-175,51]]
         :[[this.site.ship.position.x-21,-12],[this.site.ship.position.x-21,12]];
     this.ikaru=this.unit('ally',...pair[0],true,'blue',{name:'斑鳩',tanks:true});
@@ -132,6 +138,7 @@ export class LandingFront extends BattleLine {
     if(!this.site)this.prepare();
     const checkpoint=this.enc.sec;
     if(!this.ikaru)this.deployAllies(checkpoint);
+    if(checkpoint>=3) { this.nextBase();return; }
     if(checkpoint===2) { this.enterYard(false);return; }
     if(checkpoint===1) { this.enterSeawall(false);return; }
     this.phase='inbound';
@@ -287,15 +294,96 @@ export class LandingFront extends BattleLine {
     if(!boss.entity.dead)this.C.lines([[DOG,'主路交給支援組。我換陣地。']],true,2.8);
   }
 
+  nextBase() {
+    const open=BASE_OPS.filter(op=>!this.secured.includes(op.id));
+    this.enc.sec=3+this.secured.length;
+    if(open[0].id==='power'&&open[1]?.id==='motor'){
+      this.phase='wings';this.marker=null;
+      this.options=open.slice(0,2);
+      this.baseMarkers=this.options.map(op=>({name:op.name,position:this.point(...op.point)}));
+      this.baseMarkers.forEach(m=>m.position.y+=21);
+      this.C.say('機庫兩翼','先斷電可停掉修復，先奪車庫可截斷增援戰車',4,'cy');
+    }else this.beginBase(open[0]);
+  }
+  beginBase(op) {
+    this.phase='base';this.op=op;this.wave=0;this.sideSupport=false;this.bayOpen=false;
+    this.boss=null;this.C.boss=null;
+    this.repairAt=this.clock+8;
+    const [x,z]=op.point;
+    this.waypoint(x,z);
+    this.order(this.ikaru,[x-16,z-25],[x-16,z-6]);
+    this.order(this.hayabusa,[x+16,z-25],[x+16,z-6]);
+    if(op.id==='hq') {
+      const boss=this.boss=this.unit('heavy',x,z+19,false,'command');
+      boss.boss=true;boss.entity.bossName='基地司令機・白夜';
+      boss.maxAP=18500;boss.entity.ap=boss.entity.apMax=boss.maxAP;
+      boss.weapon={...boss.weapon,damage:840,cool:2.25,range:405,speed:16};
+      this.C.boss=boss.entity;
+    }
+    this.baseWave();
+    this.C.say(op.name,op.hint,3,'cy');
+  }
+  baseWave() {
+    const op=this.op,index=this.wave++;
+    const list=op.waves[index].split(' ');
+    const [x,z]=op.point, swap=index%2;
+    this.platoon(list.slice(0,2).join(' '),op.entries[swap],op.id,[x-13,z-8]);
+    const second=op.bay&&index===2?op.bay.inside:[x+13,z+3];
+    this.platoon(list.slice(2).join(' '),op.entries[1-swap],op.id,second);
+  }
+  baseUpdate() {
+    const {op}=this,live=this.foes.filter(u=>this.canFight(u));
+    const [x,z]=op.point,near=this.nearby(this.C.player.pos,op.point,93);
+    if(op.id==='motor'&&!this.secured.includes('power')&&this.clock>=this.repairAt) {
+      this.repairAt=this.clock+8;
+      const damaged=live.find(u=>u.entity.ap<u.entity.apMax*.9&&this.nearby(u.pos,op.point,58));
+      if(damaged){
+        damaged.entity.ap=Math.min(damaged.entity.apMax,damaged.entity.ap+damaged.entity.apMax*.20);
+        this.C.note('西翼供電中・守軍裝甲修復','am');
+      }
+    }
+    if(!this.sideSupport&&op.id==='power'&&!this.secured.includes('motor')&&near) {
+      this.sideSupport=true;
+      this.platoon('tank tank tank',op.entries[1],op.id,[x+18,z-6]);
+      this.C.note('東翼車輛庫派出增援','am');
+    }
+    if(this.boss&&!this.boss.shifted&&this.boss.entity.ap<this.boss.maxAP*.55) {
+      this.boss.shifted=true;this.boss.weapon={...this.boss.weapon,cool:1.52};
+      this.order(this.boss,[x-29,z+7],[x-34,z-14]);
+      this.platoon('brawler heavy brawler',op.entries[0],op.id,[x-16,z+3]);
+      this.C.say('白夜啟動備用驅動','近衛已離開北側機塢',2.6,'am');
+    }
+    if(this.reinforcements.pending.length)return false;
+    if(op.bay&&!this.bayOpen&&this.wave===2&&live.length<=2&&near) {
+      this.bayOpen=true;this.site.doors.open(op.id);
+      const [ix,iz]=op.bay.inside;
+      this.waypoint(ix,iz);
+      this.order(this.ikaru,[ix-9,iz+4]);this.order(this.hayabusa,[ix+9,iz]);
+      this.C.say('機庫捲門開啟','進入機庫，接管整備架',2.5,'cy');
+    }
+    const capture=op.bay?op.bay.inside:op.point;
+    if(this.wave<op.waves.length&&near&&live.length<=2) {
+      this.baseWave();this.C.note(op.name+'・第 '+this.wave+' 梯隊','am');
+    }else if(this.wave===op.waves.length&&!live.length&&this.nearby(this.C.player.pos,capture,op.bay?14:30)){
+      this.secured.push(op.id);
+      if(op.id==='hq'){
+        this.phase=this.enc.state='done';this.marker=null;
+        this.C.lines([[COMMAND,'基地指揮權確認移交。跑道方向已經沒有敵機出擊。']],true);
+        return true;
+      }
+      this.resupply(2000);
+      this.setCheckpoint(3+this.secured.length,x,z,0,{lane:this.lane,secured:[...this.secured]});
+      this.C.lines([['斑鳩',op.name+'已接管。白隼，我們往下一區。']],true,2.5);
+      this.nextBase();
+    }
+    return false;
+  }
+
   react(actor) {
     if(actor.kind==='brawler'&&actor.post==='seawall'&&!actor.leave&&actor.target&&actor.target.pos.z<-33) {
       actor.goal.copy(this.point(clamp(actor.target.pos.x+36,-100,-14),lanes.left));
     }
-    if(!actor.friendly&&actor.kind==='grunt'&&!actor.leave&&!actor.shifted&&actor.target&&actor.entity.ap<actor.maxAP*.62){
-      actor.shifted=true;
-      const side=actor.pos.z>actor.target.pos.z?1:-1;
-      this.order(actor,[actor.pos.x+14,actor.pos.z+side*16],[actor.pos.x+26,actor.pos.z+side*21]);
-    }
+
   }
 
   update(dt) {
@@ -309,14 +397,21 @@ export class LandingFront extends BattleLine {
     else if(this.phase==='yard'&&p.x>91&&Math.abs(p.z)<116&&cleared(this.defenders))this.beginBoss();
     if(this.phase==='boss'&&!this.boss.shifted&&this.boss.entity.ap<this.boss.maxAP*.55)this.bossReserve();
     if(this.phase==='boss'&&this.boss.entity.dead&&cleared(this.defenders)) {
-      this.phase='capture';
+      this.phase='link';this.waypoint(248,108);
       this.retire((e,z)=>[[e.pos.x+25,e.pos.z],[361,z]]);
-      this.C.say('鐵獒倒下','進入裝卸區，完成登陸',2.8,'gr');
+      this.C.say('鐵獒倒下','向右轉，沿聯絡道攻進內陸機甲基地',2.8,'gr');
     }
-    if(this.phase==='capture'&&p.x>LANDING.yard-35&&Math.abs(p.z)<94){
-      this.phase='done';this.marker=null;this.enc.state='done';
-      return true;
-    }
+    if(this.phase==='link') {
+      if(this.nearby(p,[248,108],45)) {
+        this.order(this.ikaru,[248,108],[238,158]);
+        this.order(this.hayabusa,[263,108],[259,158]);
+        this.setCheckpoint(3,247,146,0,{lane:this.lane,secured:[]});
+        this.resupply(2400);
+        this.nextBase();
+      }
+    } else if(this.phase==='wings') {
+      for(const op of this.options)if(this.nearby(p,op.point,70)){this.beginBase(op);break;}
+    } else if(this.phase==='base'&&this.baseUpdate())return true;
     this.stepBattle(dt);
     return false;
   }
@@ -330,11 +425,17 @@ export class LandingFront extends BattleLine {
     if(this.phase==='crossing')return {title:'海堤內側反擊',hint:'清掉缺口後方的預備隊'};
     if(this.phase==='yard')return {title:'攻入外港裝卸區',hint:'擊破鐵獒的前衛再往前推'};
     if(this.phase==='boss')return {title:'奪回外港裝卸區',hint:'擊退鐵獒和護衛機'};
-    if(this.phase==='capture')return {title:'港區通道打開',hint:'跟盟軍進入裝卸區'};
+    if(this.phase==='link')return {title:'登陸完成・轉入基地作戰',hint:'沿碼頭右側聯絡道向南門集結'};
+    if(this.phase==='wings')return {title:'選擇先奪取的設施',hint:'西翼供電所支援裝甲修復，東翼車輛庫派出增援'};
+    if(this.phase==='base')return {title:'機甲基地 '+(this.secured.length+1)+'/8　'+this.op.name,hint:(this.bayOpen?'進入已開門的機庫，清除守軍並接管整備架':this.op.hint)+'　'+this.wave+'/3'};
     return null;
   }
 
-  get waypoints() { return this.phase==='seawall'?this.wallMarkers:[]; }
+  get waypoints() {
+    if(this.phase==='seawall')return this.wallMarkers;
+    if(this.phase==='wings')return this.baseMarkers;
+    return this.phase==='base'&&this.wave===this.op.waves.length?this.lastDefenders():[];
+  }
   // 兩台僚機沿用 Combat 的雷達標記。
   radar() {}
 }

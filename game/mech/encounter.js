@@ -6,8 +6,8 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { carGeometry } from './env.js';
 import { instancedCarMaterial } from './car-material.js';
 import { MechTutorial } from './tutorial.mjs?v=1';
-import { FreightFront } from './freight-front.mjs?v=3';
-import { LandingFront } from './landing-front.mjs?v=2';
+import { HillsideFront } from './hillside-front.mjs';
+import { LandingFront } from './landing-front.mjs?v=3';
 
 const rand = (a, b) => a + Math.random() * (b - a);
 const clamp = THREE.MathUtils.clamp;
@@ -308,7 +308,7 @@ export class Encounter {
     this.holdT = 0; this.tg = []; this.bossE = null; this.bossTalk = 0;
     this.fightT = 0; this.beatSeen = new Set();
     this.training = null;
-    this.front = C.def?.frontline === 'landing' ? new LandingFront(C, this) : C.def?.frontline ? new FreightFront(C, this) : null;
+    this.front = C.def?.frontline === 'landing' ? new LandingFront(C, this) : C.def?.frontline ? new HillsideFront(C, this) : null;
     C.stats.healed = C.stats.healed || 0;
   }
   get cur() { return this.E.secs[this.sec]; }

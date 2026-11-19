@@ -29,7 +29,7 @@ test('stage seven uses advancement checkpoints and a capped static landing scene
   const d=STAGES[6];
   assert.equal(d.frontline,'landing');
   assert.equal(d.battlefield,'landing');
-  assert.deepEqual(d.route.cp,[1,2]);
+  assert.deepEqual(d.route.cp,[1,2,3,4,5,6,7,8,9,10]);
   assert(d.route.secs.every(s=>!s.hold));
   const root=new THREE.Group(),site=buildLandingSite({height:()=>0,addCollider(){}},root);
   let meshes=0,triangles=0;

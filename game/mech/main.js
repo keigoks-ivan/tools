@@ -411,7 +411,7 @@ async function game() {
     input.enabled = true;
     if (!input.touch.on) input.lock();
     touchUI.style.display = input.touch.on ? 'block' : 'none';
-    landingOpening = !!combat.enc?.front?.site && !combat.cp;
+    landingOpening = combat.def?.frontline==='landing' && !!world.landingSite && !combat.cp;
     if (landingOpening) { cockpitView(false); cockpit.root.visible = false; seeOff(); }
     else applyView();
     audio.ui('boot');

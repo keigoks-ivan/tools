@@ -19,9 +19,9 @@ import { kitanoGardenMaterial } from './kobe-garden.mjs';
 import { kitanoHeritageMaterial } from './kobe-heritage.mjs';
 import { Solid } from './zero/kit.js';
 import { BATTLEFIELDS, fieldHeight, fieldLayout, routeDistance, fieldGridCoordinate, fieldGridIndex } from './battlefields.js';
-import { buildFreightYard } from './freight-yard.mjs?v=2';
-import { buildLandingSite } from './landing-art.mjs?v=3';
-import { SHORE_GLSL } from './landing-layout.mjs?v=2';
+import { buildHillside } from './hillside-art.mjs';
+import { buildLandingSite } from './landing-art.mjs?v=4';
+import { SHORE_GLSL } from './landing-layout.mjs?v=3';
 
 import { fieldTreeGeometry, fieldShrubGeometry, fieldRockGeometry, fieldArchitecture, fieldLeafMaterial, fieldRadar, fieldGroundMask } from './fieldart.js';
 
@@ -1220,6 +1220,7 @@ export class World {
     if (!BATTLEFIELDS[profile] || !route) profile = 'city';
     if (this.battlefield === profile && (profile === 'city' || this.fieldRoute === route)) return;
     this.resetBuildings();
+    this.hillsideSite?.dispose(); this.hillsideSite=null;
     this.landingSite?.dispose(); this.landingSite=null;
     if (this.fieldGroup) {
       this.fieldGroup.traverse(o => { if (o.userData.fieldGeometry) o.geometry.dispose(); if (o.isInstancedMesh) o.dispose(); });
@@ -1282,7 +1283,7 @@ export class World {
 
   buildBattlefield(profile, layout) {
     const group = this.fieldGroup = new THREE.Group(); this.scene.add(group);
-    if (profile === 'freight') buildFreightYard(this, group);
+    if (profile === 'hillside') this.hillsideSite=buildHillside(this,group);
     if (profile === 'landing') this.landingSite=buildLandingSite(this,group);
     const r = rng(601 + layout.mode * 91), walls = new GeoBucket(), roofs = new GeoBucket(), records = [], contacts = [];
     const put = (bucket, mat, shadow = true) => {
@@ -1330,7 +1331,7 @@ export class World {
           x=p[0]+(r()-.5)*520; z=p[1]+(r()-.5)*520;
         }
         if (profile === 'landing' && x < 460) continue;
-        if (routeDistance(x,z,this.fieldRoute.pts) < size + (profile === 'freight' ? 126 : 32) || layout.structures.some(t => Math.hypot(t.x-x,t.z-z) < size + 42)) continue;
+        if (routeDistance(x,z,this.fieldRoute.pts) < size + (profile === 'hillside' ? 65 : 32) || layout.structures.some(t => Math.hypot(t.x-x,t.z-z) < size + 42)) continue;
         if (profile === 'airfield' && Math.abs(x + 420) < 65 && Math.abs(z) < 930) continue;
         const y = this.height(x,z);
         contacts.push({x,z,r:size*(foliage?3:1.2),tree:foliage});

@@ -1,78 +1,7 @@
 import * as THREE from 'three';
-import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
-import { LANDING, SHORE_GLSL } from './landing-layout.mjs?v=2';
-
-function material(world, color, roughness, metalness, surface, vertexColors = false) {
-  const A = world.A;
-  const stone = surface === 'concrete' || surface === 'precast';
-  const map = stone ? A?.rubD : surface === 'asphalt' ? A?.asphD : null;
-  const normalMap = stone ? A?.rubN : surface === 'asphalt' ? A?.asphN : surface === 'paint' ? A?.wearN : null;
-  const mat = new THREE.MeshStandardMaterial({ color, roughness, metalness, map, normalMap, vertexColors, normalScale: new THREE.Vector2(.18,.18) });
-  if(surface==='precast' && map) {
-    mat.onBeforeCompile=shader=>{
-      shader.fragmentShader=shader.fragmentShader.replace('#include <map_fragment>',`
-        vec3 aggregate=texture2D(map,vMapUv).rgb;
-        diffuseColor.rgb*=mix(vec3(.72),aggregate,.36);
-      `);
-    };
-  }
-  return mat;
-}
-
-class PropBatch {
-  constructor(materials) {
-    this.materials = materials;
-    this.parts = new Map();
-    this.cube = new THREE.BoxGeometry();
-    this.plane = new THREE.PlaneGeometry(1,1,8,2).rotateX(-Math.PI/2);
-    this.matrix = new THREE.Matrix4();
-    this.origin = new THREE.Vector3();
-    this.size = new THREE.Vector3();
-    this.rotation = new THREE.Euler();
-    this.quat = new THREE.Quaternion();
-    this.color = new THREE.Color();
-  }
-  add(key, geometry, x,y,z, w=1,h=1,d=1, rx=0,ry=0,rz=0, tint=0xffffff) {
-    this.matrix.compose(this.origin.set(x,y,z),this.quat.setFromEuler(this.rotation.set(rx,ry,rz)),this.size.set(w,h,d));
-    const mesh = geometry.clone().applyMatrix4(this.matrix);
-    this.collect(key,mesh,tint);
-  }
-  collect(key, mesh, tint) {
-    const p = mesh.attributes.position, n = mesh.attributes.normal, uv = mesh.attributes.uv;
-    const colors = this.materials[key].vertexColors ? new Float32Array(p.count*3) : null;
-    this.color.setHex(tint);
-    for (let i=0; i<p.count; i++) {
-      const x = p.getX(i), y = p.getY(i), z = p.getZ(i);
-      if (Math.abs(n.getY(i))>.7) uv.setXY(i,x/4.2,z/4.2);
-      else if (Math.abs(n.getX(i))>.7) uv.setXY(i,z/4.2,y/4.2);
-      else uv.setXY(i,x/4.2,y/4.2);
-      if(colors)this.color.toArray(colors,i*3);
-    }
-    if(colors)mesh.setAttribute('color',new THREE.BufferAttribute(colors,3));
-    if (!this.parts.has(key)) this.parts.set(key,[]);
-    this.parts.get(key).push(mesh);
-  }
-  box(key,...args) { this.add(key,this.cube,...args); }
-  ground(world,key,x,z,w,d,lift) {
-    const mesh=this.plane.clone().scale(w,1,d).translate(x,0,z);
-    const p=mesh.attributes.position;
-    for(let i=0;i<p.count;i++)p.setY(i,world.height(p.getX(i),p.getZ(i))+lift);
-    mesh.computeVertexNormals();
-    this.collect(key,mesh,0xffffff);
-  }
-  finish(root) {
-    for (const [key, geometries] of this.parts) {
-      const g=mergeGeometries(geometries);
-      geometries.forEach(o=>o.dispose());
-      const m=new THREE.Mesh(g,this.materials[key]);
-      m.name=key; m.castShadow=key!=='asphalt'&&key!=='mark'&&key!=='stripe';m.receiveShadow=true;
-      m.userData.fieldGeometry=true;root.add(m);
-    }
-    this.cube.dispose();
-    this.plane.dispose();
-    this.parts.clear();
-  }
-}
+import { fieldMaterial as material, PropBatch, signAtlas } from './front-scenery.mjs';
+import { buildBase, bayDoors } from './base-art.mjs';
+import { LANDING, SHORE_GLSL } from './landing-layout.mjs?v=3';
 
 function shoreWater() {
   const mat=new THREE.MeshStandardMaterial({color:0x315965,roughness:.24,metalness:0});
@@ -136,7 +65,7 @@ function shoreWater() {
       .replace('#include <roughnessmap_fragment>','#include <roughnessmap_fragment>\nroughnessFactor=mix(.23,.52,foam);');
   };
   mat.customProgramCacheKey=()=> 'landing-outer-bay-v2';
-  const geometry=new THREE.PlaneGeometry(1,1,67,69).rotateX(-Math.PI/2);
+  const geometry=new THREE.PlaneGeometry(1,1,55,53).rotateX(-Math.PI/2);
   const positions=geometry.attributes.position;
   for(let i=0;i<positions.count;i++){
     const u=positions.getX(i)+.5, v=positions.getZ(i)*2;
@@ -147,20 +76,6 @@ function shoreWater() {
   water.name='神戶外港・近岸碎浪';water.receiveShadow=true;
   water.userData.fieldGeometry=true;water.userData.noAO=true;
   return {water,time,bow,moving};
-}
-
-function sign(world, root) {
-  if(typeof document==='undefined')return;
-  const c=document.createElement('canvas');c.width=512;c.height=112;
-  const ctx=c.getContext('2d');
-  ctx.fillStyle='#244653';ctx.fillRect(0,0,512,112);
-  ctx.strokeStyle='#9dafad';ctx.lineWidth=3;ctx.strokeRect(6,6,500,100);
-  ctx.textAlign='center';ctx.fillStyle='#f0f2ed';ctx.font='bold 42px sans-serif';
-  ctx.fillText('神戸外港',256,55);ctx.font='bold 18px sans-serif';ctx.fillText('KOBE OUTER HARBOR',256,88);
-  const map=new THREE.CanvasTexture(c);map.colorSpace=THREE.SRGBColorSpace;
-  const m=new THREE.Mesh(new THREE.PlaneGeometry(35,7.66),new THREE.MeshStandardMaterial({map,roughness:.61}));
-  m.position.set(180,20,0);m.rotation.y=-Math.PI/2;m.userData.fieldGeometry=true;root.add(m);
-  return map;
 }
 
 function portArchitecture(world, root, materials) {
@@ -186,7 +101,7 @@ function portArchitecture(world, root, materials) {
       b.box('hull',x-11.09,y+7.0,q,.20,14,.18);
       if(Math.round(q)%3!==0)b.box('trim',x-11.16,y+7.3,q+5.7,.22,.36,10.9);
     }
-    for(let q=z-length/2+3,i=0;q<z+length/2-1;q+=9.2,i++){
+    for(let q=z-length/2+3,i=0;q<z+length/2-1;q+=Math.abs(q)>145?16:9.2,i++){
       const p=x-24+(i%3)*2;
       const h=2.45+Math.sin(i*2.17)*.46;
       b.add(i%5===0?'darkRock':'concrete',tetra,p,y+h*.72,q,3.2,h,3.1,.15,i*.54,1.18);
@@ -264,7 +179,7 @@ function portArchitecture(world, root, materials) {
       const cy=y+3.4+level*6.8;
       b.box('cargo',x,cy,z,26,6.8,7.5,0,0,0,k);
       for(const dz of [-3.83,3.83]){
-        for(let dx=-11.2;dx<12;dx+=1.86)b.box('cargo',x+dx,cy,z+dz,.32,6.25,.32,0,0,0,k);
+        for(let dx=-11.2;dx<12;dx+=2.55)b.box('cargo',x+dx,cy,z+dz,.32,6.25,.32,0,0,0,k);
         b.box('hull',x,cy-3.14,z+dz,26.1,.23,.29);
         b.box('cargo',x,cy+3.12,z+dz,26.1,.24,.29,0,0,0,k);
         for(const dx of [-12.8,12.8])b.box('hull',x+dx,cy,z+dz,.29,6.8,.32);
@@ -341,8 +256,17 @@ function portArchitecture(world, root, materials) {
   b.box('hull',181,24,0,2.1,.58,46);
   b.box('trim',181,14,-19,.48,13,.55);
   b.box('trim',181,14,19,.48,13,.55);
+  buildBase(world,b);
   b.finish(root);collar.dispose();tetra.dispose();tower.dispose();pebble.dispose();barrier.dispose();
-  return sign(world,root);
+  return signAtlas(root,[
+    ['神戸外港',180,20,0,-Math.PI/2,35],
+    ['機動部隊整備基地',247,world.height(247,178)+28,178,Math.PI,48],
+    ['受変電設備',76,world.height(76,399)+15,399,Math.PI,23],
+    ['車両整備庫',366,world.height(366,402)+15,402,Math.PI,23],
+    ['機体整備庫',91,world.height(91,556)+23,556,Math.PI,34],
+    ['出撃管制所',352,world.height(352,565)+19,565,Math.PI,27],
+    ['中央指揮所',226,world.height(226,655)+22,655,Math.PI,36],
+  ]);
 }
 
 function hullGeometry() {
@@ -402,15 +326,16 @@ function buildCraft(root, materials) {
   const ramp=new THREE.Group();ramp.name='艏部跳板';ramp.position.y=deck;ship.add(ramp);
   const r=new PropBatch(materials),L=LANDING.ramp;
   r.box('hull',L/2,-.5,0,L,1.06,37.4);
-  for(const z of [-18.3,18.3])r.box('trim',L/2,.18,z,L,.37,1.2);
+  const strip=(tint,x,y,z,w,h,d,ry=0)=>r.box('cargo',x,y,z,w,h,d,0,ry,0,tint);
+  for(const z of [-18.3,18.3])strip(0xa0a9a3,L/2,.18,z,L,.37,1.2);
   for(let x=1.4;x<L-1;x+=2.2) {
-    r.box('trim',x,.02,0,.32,.15,34.3);
-    for(const z of [-14.7,14.7])r.box('mark',x,.12,z,.92,.045,.8);
+    strip(0xa0a9a3,x,.02,0,.32,.15,34.3);
+    for(const z of [-14.7,14.7])strip(0xd69b45,x,.12,z,.92,.045,.8);
   }
-  r.box('trim',L-.24,-.37,0,.48,1.18,36.1);
+  strip(0xa0a9a3,L-.24,-.37,0,.48,1.18,36.1);
   for(const z of [-11.3,11.3]){
     r.box('hull',L*.5,.061,z,L-.8,.12,2.55);
-    for(const x of [3,9,17,23])r.box('mark',x,.145,z,.55,.06,1.6,0,z<0?-.67:.67,0);
+    for(const x of [3,9,17,23])strip(0xd69b45,x,.145,z,.55,.06,1.6,z<0?-.67:.67);
   }
   r.finish(ramp);
   return {ship,ramp};
@@ -458,16 +383,17 @@ export function buildLandingSite(world, root) {
   const {water,time,bow,moving}=shoreWater();root.add(water);
   const scenery=new THREE.Group();scenery.name='神戶外港・海堤與港區';root.add(scenery);
   const map=portArchitecture(world,scenery,materials);
+  const doors=bayDoors(world,scenery,materials.cargo);
   const {ship,ramp}=buildCraft(root,materials);
   const flotilla=buildFlankingCraft(root,materials);
   const rampAngle=-.175;
   const sidewalls=[{z0:-23.0,z1:-20.5},{z0:20.5,z1:23.0}];
   const gate={z0:-19,z1:19};
   const site={
-    ship,ramp,flotilla,water,scenery,time,bow,moving,progress:0,open:0,boxes:[...sidewalls,gate],
+    ship,ramp,flotilla,water,scenery,time,bow,moving,doors,progress:0,open:0,boxes:[...sidewalls,gate],
     setPose(progress,open,dt=0){
       this.progress=progress;this.open=open;
-      time.value+=dt;
+      time.value+=dt;doors.tick(dt);
       const x=THREE.MathUtils.lerp(LANDING.departure,LANDING.berth,progress);
       ship.position.x=x;ship.position.y=Math.sin(time.value*1.83)*.32*(1-progress);
       ship.rotation.x=Math.sin(time.value*1.47)*.016*(1-progress);
@@ -487,7 +413,7 @@ export function buildLandingSite(world, root) {
     },
     dispose() {
       for(const m of new Set([...Object.values(materials),water.material]))m.dispose();
-      if(map){scenery.children.find(o=>o.material.map===map)?.material.dispose();map.dispose();}
+      map?.dispose();
     },
   };
   site.setPose(0,0);

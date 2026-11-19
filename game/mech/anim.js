@@ -188,7 +188,8 @@ export class MechMotion {
       }
     }
     this.supportDrop = Math.max(Math.min(1.8, reachCrouch), damp(this.supportDrop || 0, Math.min(1.8, reachCrouch), 8, dt));
-    const crouch = Math.max(0.3 + (Sn ? Sn.bend : P.bend) * idle + this.brace * 0.12 * idle + g * Math.min(0.75, af * 0.045), this.supportDrop * walkW);    // 跑越快蹲越低
+    this.low=damp(this.low||0,st.low||0,6,dt);
+    const crouch = Math.max(0.3 + this.low*.78 + (Sn ? Sn.bend : P.bend) * idle + this.brace * 0.12 * idle + g * Math.min(0.75, af * 0.045), this.supportDrop * walkW);    // 跑越快蹲越低
     const H = (P ? P.lift + Math.min(0.65, af * 0.035) : campaign ? .41 + Math.min(.52, af * .038) : 0.55 + Math.min(1.2, af * 0.075)) * g;
 
     // ---- 骨盆：落腳下沉、支撐期升起；重心移到支撐腳；隨步伐扭腰
@@ -387,7 +388,7 @@ export class MechMotion {
   freeArm(dt, g, pc, Bst, Air) {
     const m = this.m, b = m.bones, sh = b.shoulderL, el = b.elbowL;
     const swing = -Math.sin(pc) * (this.gait ? 0.13 : 0.22) * g * this.dir * (1 - this.brace * 0.75);
-    sh.rotation.y = damp(sh.rotation.y, 0.1, 8, dt);
+    sh.rotation.y = damp(sh.rotation.y, 0.1 + (this.gait ? this.brace*.26 : 0), 8, dt);
     const HR = !!m.stance;   // 主角機：衝刺時盾舉在身前；空中雙臂稍微張開保持平衡
     sh.rotation.x = this.armLX.step(-0.12 + swing - Bst * (HR ? 1.0 : 0.35) - Air * (HR ? 0.45 : 0.2) - this.brace * 0.65, dt);
     sh.rotation.z = this.armLZ.step((HR ? m.stance.armL : -0.1) + (HR ? Air * 0.3 - Bst * 0.15 : -Air * 0.18 - Bst * 0.08), dt);

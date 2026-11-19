@@ -115,9 +115,10 @@ class Enemy {
     this.warn = 0;            // 準備開火的警示（HUD 用）0..1
     this.aim = V3();
     this.jumpCd = rand(3, 8);
-    this.lastSeen = V3(); this.nav = V3(); this.navT = 0;
+    this.contactDir=V3(); this.walkVelocity=V3(); this.lastSeen = V3(); this.nav = V3(); this.navT = 0;
     this.cover = null; this.coverCd = 0; this.coverT = 0; this.lockReact = 0;
     this.role = kind === 'heavy' ? 'support' : kind === 'ace' || id % 3 === 0 ? 'flank' : 'line';
+    this.reportedAt=-Infinity;
     this.flankSide = id % 2 ? 1 : -1; this.path = {}; this.navGoal = V3();
     this.reportT = rand(0, 1); this.pushT = 0; this.pushCd = 0; this.pushSide = this.flankSide; this.pushGoal = V3();
   }
@@ -913,8 +914,13 @@ export class Combat {
         e.los = w.raycast(ec, playerChest, null) < 0 || w.raycast(_c.set(ec.x, ec.y + 5 * k, ec.z), _n.copy(playerChest).setY(playerChest.y + 4), null) < 0;
         if (e.los) e.lastSeen.copy(pl.pos);
       }
-      if (e.los && e.reportT <= 0 && !e.dropping) { e.reportT = e.kind === 'ace' ? 0.7 : 1.1; shareContact(this.enemies, e, 320); }
-      const toP = _a.subVectors(e.los ? pl.pos : e.lastSeen, e.pos); toP.y = 0;
+      if (e.los && e.reportT <= 0 && !e.dropping) {
+        e.reportT = e.kind === 'ace' ? 0.7 : 1.1;
+        shareContact(this.enemies,e,320,(ally,seen)=>{
+          if(!ally.los){ally.lastSeen.copy(seen);ally.reportedAt=this.stats.time;}
+        });
+      }
+      const toP = e.contactDir.subVectors(e.los ? pl.pos : e.lastSeen, e.pos); toP.y = 0;
       const dist = toP.length();
       const dirP = toP.divideScalar(Math.max(1, dist));
       e.noLos = e.los ? 0 : (e.noLos || 0) + dt;
@@ -977,7 +983,8 @@ export class Combat {
       } else {
         const [lo, hi] = K.pref;
         const hunt = e.noLos > 1.2;
-        if (!air && e.los && e.role === 'flank' && e.pushCd <= 0 && dist > lo && dist < K.range && (this.rifle.reload >= 0 || coveringFire(this.enemies, e))) {
+        const recentContact=e.los||this.stats.time-e.reportedAt<1.8;
+        if (!air && recentContact && e.role === 'flank' && e.pushCd <= 0 && dist > lo && dist < K.range && (e.los && this.rifle.reload >= 0 || coveringFire(this.enemies, e))) {
           const goal = squadFlank(e.pos, e.lastSeen, this.enemies, e, e.flankSide, Math.max(lo, dist - 70));
           const side = Math.sign((e.pos.z - e.lastSeen.z) * (goal.x - e.lastSeen.x) - (e.pos.x - e.lastSeen.x) * (goal.z - e.lastSeen.z)) || e.flankSide;
           if (flankAvailable(this.enemies, e, side)) { e.pushGoal.set(goal.x, e.pos.y, goal.z); e.pushT = 2.5; e.pushCd = 5; e.pushSide = side; e.navT = 0; }
@@ -1005,6 +1012,9 @@ export class Combat {
           wish.set(goal.x - e.pos.x, 0, goal.z - e.pos.z).normalize();
         }
         if (rush) e.boostT = Math.max(e.boostT, 0.5);
+        if(e.cover&&e.coverT>0&&e.navT<=0&&e.los&&w.raycast(playerChest,_c.copy(e.cover).addScaledVector(UP,10.5*k),null)<0){
+          e.cover=null;e.coverT=0;e.coverCd=0;
+        }
         if (!e.airborne && e.coverCd <= 0 && e.lastHit < 1.2 && (e.role === 'support' || e.ap < e.apMax * 0.4)) {
           e.coverCd = 4; e.cover = this.enemyCover(e, e.los ? playerChest : e.lastSeen.clone().add(V3(0, 12, 0))); e.coverT = e.cover ? 3 : 0;
         }
@@ -1062,12 +1072,13 @@ export class Combat {
         }
         if (e.jumpCd <= 0 && e.grounded) {
           e.jumpCd = rand(4, 10);
-          if (Math.random() < (e.kind === 'ace' ? 0.8 : e.kind === 'grunt' ? 0.35 : 0.1)) { e.vel.y = 20; e.grounded = false; e.hover = e.kind === 'ace' ? rand(0.8, 2) : rand(0, 0.6); }
+          if ((e.bumped || e.pushT>0&&e.lastHit<.5 || e.locks>=2) && e.kind!=='heavy') { e.vel.y = 20; e.grounded = false; e.hover = e.kind === 'ace' ? rand(0.8, 2) : rand(0, 0.6); }
         }
       }
       const vmax = e.airborne ? (e.boostT>0?Math.max(64,K.boost):air?.exposed>0?19:32) : e.boostT > 0 ? K.boost : K.walk;
       const hv = _b.set(e.vel.x, 0, e.vel.z);
-      const tgtV = wish.multiplyScalar(vmax);
+      const braced=e.grounded&&e.kind==='heavy'&&(e.charge>0||e.volley>0);
+      const tgtV = wish.multiplyScalar(vmax*(braced?.25:1));
       let rate = e.grounded ? 26 : e.airborne?28:10;
       if (hv.length() > vmax + 2) rate = e.grounded ? 36 : 14;
       if (e.qbT > 0) rate = 0;
@@ -1092,7 +1103,13 @@ export class Combat {
         if (e.lunge <= 0) { e.lungeHit = false; e.m.swing = 0; e.fireCd = rand(1.5, 2.5); }
       }
       if (e.rushT > 0) { e.vel.x = e.rushV.x; e.vel.z = e.rushV.z; e.thrust = 1; }   // 破牆伏擊：穿牆突進（不做碰撞）
+      const lastX=e.pos.x,lastZ=e.pos.z;
       this.moveEnemy(e, dt, false);
+      e.walkVelocity.copy(e.vel);
+      if(dt>0&&e.grounded){
+        e.walkVelocity.x=(e.pos.x-lastX)/dt;e.walkVelocity.z=(e.pos.z-lastZ)/dt;
+        e.walkVelocity.clampLength(0,Math.max(1,e.vel.length()));
+      }
       if (e.rushT > 0) { e.rushT -= dt; this.fx.trackDust(e.pos, e.vel, 1); if (e.rushT <= 0) { e.vel.x *= 0.2; e.vel.z *= 0.2; } }   // 衝到牆前就收速
       const thr = Math.max(e.rushT > 0 ? 1 : 0, e.airborne ? .7 : 0,e.boostT > 0 ? 1 : 0, e.qbT > 0 ? 1 : 0, e.hover > 0 ? 1 : 0, e.lunge > 0.45 ? 1 : 0);
       e.thrust = damp(e.thrust, thr, 10, dt);
@@ -1105,7 +1122,7 @@ export class Combat {
         e.warn = 1;
         if (relay.left <= 0) this.finishHarborRelay(e, true);
       } else if (e.stagT <= 0 && e.lunge <= 0) this.enemyFire(e, dt, dist, playerChest);
-      m.animate(dt, { vel: e.vel, grounded: e.grounded, boost: e.grounded && (e.boostT > 0 || e.qbT > 0) ? 1 : 0, torsoYaw: e.face, pitch: 0, thrust: e.thrust, aim, lean: e.stagT > 0 ? 0.35 : 0, flight:e.airborne?1:0, groundAt: e.groundAt, brace: relay || e.burst > 0 || e.charge > 0 || e.volley > 0 ? 1 : 0 });
+      m.animate(dt, { vel: e.walkVelocity, low:braced?.7:e.cover&&e.coverT>0?.55:0, grounded: e.grounded, boost: e.grounded && (e.boostT > 0 || e.qbT > 0) ? 1 : 0, torsoYaw: e.face, pitch: 0, thrust: e.thrust, aim, lean: e.stagT > 0 ? 0.35 : 0, flight:e.airborne?1:0, groundAt: e.groundAt, brace: relay || e.burst > 0 || e.charge > 0 || e.volley > 0 ? 1 : 0 });
       if (m.footfall) {
         const fp = m.bones[m.footfall > 0 ? 'ankleR' : 'ankleL'].getWorldPosition(_b); fp.y -= m.motion.ankleY * k;
         this.audio.enemyStep(fp, e.kind === 'heavy' ? 1.3 : 0.9);
@@ -1139,8 +1156,9 @@ export class Combat {
       if (!e.airborne && e.hover > 0 && !dying) { e.hover -= dt; e.vel.y = Math.min(12, e.vel.y + 36 * dt); }
     }
     e.pos.addScaledVector(e.vel, dt);
+    const wasBlocked=e.bumped;
     e.bumped = e.rushT > 0 ? false : w.collide(e.pos, r, e.pos.y);
-    if (e.bumped && !dying && !(e.noLos > 1.2)) { e.strafe *= -1; e.strafeT = rand(1.5, 3); }
+    if (e.bumped && !wasBlocked && !dying && !(e.noLos > 1.2)) { e.strafe *= -1; e.strafeT = rand(1.5, 3); }
     e.pos.x = clamp(e.pos.x, -700, 700); e.pos.z = clamp(e.pos.z, -700, 700);
     const g = w.support(e.pos.x, e.pos.z, r, e.pos.y);
     if (e.grounded) {
