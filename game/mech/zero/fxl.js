@@ -198,8 +198,8 @@ export class FXL {
     this.beams.push({ a: a.clone(), b: b.clone(), t: 0, life: big ? 0.22 : 0.08, w: big ? 0.05 : 0.018, c: big ? [0.5, 2.6, 4.5] : [0.6, 2.2, 3.8] });
     if (big) {
       const d = _v.subVectors(b, a), L = d.length(); d.normalize();
-      for (let s = 1.5; s < Math.min(L, 60); s += 1.3 + Math.random()) {
-        this.smoke.add({ p: a.clone().addScaledVector(d, s), v: new THREE.Vector3(rr(-0.2, 0.2), rr(0, 0.3), rr(-0.2, 0.2)), t: 0, life: rr(0.8, 1.6), s0: 0.04, s1: 0.35, a: 0.16, c: new THREE.Color(0.75, 0.8, 0.85), rot: rr(0, 6), rise: 0.2 });
+      for (let s = 1.5; s < Math.min(L, 60); s += 2.1 + Math.random()) {
+        this.smoke.add({ p: a.clone().addScaledVector(d, s), v: new THREE.Vector3(rr(-0.2, 0.2), rr(0, 0.3), rr(-0.2, 0.2)), t: 0, life: rr(0.55, 1.1), s0: 0.04, s1: 0.24, a: 0.11, c: new THREE.Color(0.75, 0.8, 0.85), rot: rr(0, 6), rise: 0.2 });
       }
     }
   }
@@ -216,14 +216,14 @@ export class FXL {
     }
     this.glow.add({ p: p.clone().addScaledVector(n, 0.05), v: new THREE.Vector3(), t: 0, life: 0.12, s0: 0.25 * scale, s1: 0.45 * scale, a: 1, c: new THREE.Color(color[0] * 0.6, color[1] * 0.6, color[2] * 0.6), rot: 0, rise: 0 });
     const dust = kind === 'concrete' ? [0.55, 0.52, 0.48] : kind === 'body' || kind === 'armor' ? [0.25, 0.25, 0.25] : [0.4, 0.4, 0.42];
-    for (let i = 0; i < 3 * scale; i++) this.smoke.add({ p: p.clone().addScaledVector(n, 0.1), v: n.clone().multiplyScalar(rr(0.5, 1.8)).add(new THREE.Vector3(rr(-0.4, 0.4), rr(0, 0.5), rr(-0.4, 0.4))), t: 0, life: rr(0.7, 1.6), s0: 0.1, s1: rr(0.5, 0.9) * scale, a: kind === 'concrete' ? 0.5 : 0.3, c: new THREE.Color(...dust), rot: rr(0, 6), rise: 0.25, heat: false });
+    for (let i = 0; i < 2 * scale; i++) this.smoke.add({ p: p.clone().addScaledVector(n, 0.1), v: n.clone().multiplyScalar(rr(0.5, 1.8)).add(new THREE.Vector3(rr(-0.4, 0.4), rr(0, 0.5), rr(-0.4, 0.4))), t: 0, life: rr(0.45, 1.0), s0: 0.08, s1: rr(0.35, 0.65) * scale, a: kind === 'concrete' ? 0.32 : 0.2, c: new THREE.Color(...dust), rot: rr(0, 6), rise: 0.25, heat: false });
     if (kind !== 'body' && kind !== 'armor' && kind !== 'glass') this.decals.add(p, n, rr(0.18, 0.28) * scale);
     this.flash(p.clone().addScaledVector(n, 0.3), new THREE.Color(color[0], color[1], color[2]).multiplyScalar(0.3), 6 * scale, 5, 0.1);
   }
   explode(p, s = 1) {
     this.flash(p, new THREE.Color(1, 0.55, 0.25), 120 * s, 18 * s, 0.35);
     for (let i = 0; i < 8; i++) this.glow.add({ p: p.clone().add(new THREE.Vector3(rr(-0.4, 0.4), rr(-0.3, 0.4), rr(-0.4, 0.4)).multiplyScalar(s)), v: new THREE.Vector3(rr(-2, 2), rr(0, 3), rr(-2, 2)), t: 0, life: rr(0.25, 0.5), s0: 0.5 * s, s1: 1.6 * s, a: 1, c: new THREE.Color(2.2, 0.9, 0.3), rot: rr(0, 6), rise: 1 });
-    for (let i = 0; i < 12; i++) this.smoke.add({ p: p.clone(), v: new THREE.Vector3(rr(-3, 3), rr(0.5, 4), rr(-3, 3)).multiplyScalar(s), t: 0, life: rr(1.5, 3), s0: 0.4 * s, s1: rr(1.5, 2.6) * s, a: 0.6, c: new THREE.Color(0.18, 0.17, 0.16), rot: rr(0, 6), rise: 0.6, heat: true, drag: 2.2 });
+    for (let i = 0; i < 8; i++) this.smoke.add({ p: p.clone(), v: new THREE.Vector3(rr(-3, 3), rr(0.5, 4), rr(-3, 3)).multiplyScalar(s), t: 0, life: rr(0.9, 1.8), s0: 0.32 * s, s1: rr(1, 1.7) * s, a: 0.4, c: new THREE.Color(0.18, 0.17, 0.16), rot: rr(0, 6), rise: 0.6, heat: true, drag: 2.2 });
     for (let i = 0; i < 50; i++) { const v = new THREE.Vector3(rr(-1, 1), rr(-0.3, 1), rr(-1, 1)).normalize().multiplyScalar(rr(4, 16) * s); this.sparks.push({ p: p.clone(), v, t: 0, life: rr(0.4, 1.4), w: rr(0.01, 0.025), c: [3, 1.3, 0.4], grav: 9 }); }
   }
   // 火花從某點噴出（電線走火、損壞的無人機）
@@ -231,7 +231,7 @@ export class FXL {
     for (let i = 0; i < n; i++) this.sparks.push({ p: p.clone(), v: dir.clone().multiplyScalar(rr(1, 4)).add(new THREE.Vector3(rr(-1, 1), rr(0, 1), rr(-1, 1))), t: 0, life: rr(0.2, 0.7), w: 0.008, c, grav: 9 });
   }
   puff(p, color = [0.5, 0.48, 0.45], s = 1) {
-    this.smoke.add({ p: p.clone(), v: new THREE.Vector3(rr(-0.5, 0.5), rr(0.2, 0.6), rr(-0.5, 0.5)), t: 0, life: rr(1, 2), s0: 0.2 * s, s1: rr(0.8, 1.3) * s, a: 0.4, c: new THREE.Color(...color), rot: rr(0, 6), rise: 0.2 });
+    this.smoke.add({ p: p.clone(), v: new THREE.Vector3(rr(-0.5, 0.5), rr(0.2, 0.6), rr(-0.5, 0.5)), t: 0, life: rr(0.7, 1.3), s0: 0.16 * s, s1: rr(0.55, 0.9) * s, a: 0.28, c: new THREE.Color(...color), rot: rr(0, 6), rise: 0.2 });
   }
   clear() {
     this.sparks.length = this.beams.length = this.bolts.length = 0;
