@@ -7,11 +7,24 @@
   var COL = COLORS;
   var FONT = '-apple-system, BlinkMacSystemFont, "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif';
   var charts = [];
+  var UP = null, CH = null, ROAD1 = null, SUM1 = null;   /* upper.json、charts.json、roads.json、summary.json */
+  var FLOOR_ONE = '一樓（含地下室、沒寫樓層）';
 
   function jget(f) { return fetch('data/' + f).then(function (r) { if (!r.ok) throw new Error(f); return r.json(); }); }
   function fmt(n, d) { if (n === null || n === undefined || isNaN(n)) return '—'; return Number(n).toLocaleString('en-US', { minimumFractionDigits: d || 0, maximumFractionDigits: d || 0 }); }
   function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
   function sgn(n, d) { if (n === null || n === undefined) return '—'; return (n > 0 ? '+' : '') + fmt(n, d); }
+
+  /* 樓層切換（分段按鈕，樣式同半徑列） */
+  function seg(id, cb) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('click', function (e) {
+      var v = e.target.getAttribute && e.target.getAttribute('data-fl'); if (!v) return;
+      Array.prototype.forEach.call(el.querySelectorAll('button'), function (b) { b.classList.toggle('on', b === e.target); });
+      cb(v);
+    });
+  }
 
   /* ---------------- 表格 ---------------- */
   function buildTables(S) {
@@ -41,6 +54,30 @@
       y += '<tr><td><span class="chip" style="background:' + COLORS[k] + '"></span>' + r.name + '</td><td>' + fmt(r.sale_med) + '（' + r.sale_n + '）</td><td>' + fmt(r.rent_med) + '（' + r.rent_n + '）</td><td>' + fmt(r.yield, 1) + '%</td></tr>';
     });
     document.getElementById('tblYield').innerHTML = y + '</tbody>';
+  }
+
+  /* 二到四樓版的價格表：空樣本顯示「–」加筆數 */
+  function buildYieldUp(S) {
+    var U = UP.rows, ord = S.order;
+    function cell(v, n) { return (v === null || v === undefined ? '–' : fmt(v)) + '（' + n + '）'; }
+    var y = '<thead><tr><th>商圈</th><th>成交中位數（萬／坪）</th><th>租金中位數（元／坪／月）</th><th>毛報酬率</th></tr></thead><tbody>';
+    ord.forEach(function (k) {
+      var r = U[k];
+      y += '<tr><td><span class="chip" style="background:' + COLORS[k] + '"></span>' + r.name + '</td><td>' + cell(r.sale_med, r.sale_n) + '</td><td>' + cell(r.rent_med, r.rent_n) +
+        '</td><td>' + (r['yield'] === null ? '–' : fmt(r['yield'], 1) + '%') + '（' + r.yield_n + '）</td></tr>';
+    });
+    document.getElementById('tblYield').innerHTML = y + '</tbody>';
+    var o = UP.overall, mx = Math.max.apply(null, ord.map(function (k) { return U[k].sale_n; })), mn = Math.min.apply(null, ord.map(function (k) { return U[k].sale_n; }));
+    document.getElementById('yieldNote').innerHTML = '二到四樓是 2～4 樓、登記為辦公或商業用途的單位，不含 5 樓以上。這類單位多數在住宅大樓裡（428 筆買賣中有 366 筆），有些實際當住家用，行情可能偏低。2023 年以來進統計的成交全林口只有 ' + o.sale_n + ' 筆，各商圈 ' + mn + ' 到 ' + mx +
+      ' 筆，租賃 ' + o.rent_n + ' 筆，中位數只能看大方向。同一期間全林口二到四樓成交中位數每坪 ' + fmt(o.sale_med) + ' 萬，一樓 ' + fmt(o.sale_one_med) + ' 萬（' + o.sale_one_n +
+      ' 筆）；二到四樓月租每坪 ' + fmt(o.rent_med) + ' 元，一樓 ' + fmt(o.rent_one_med) + ' 元（' + o.rent_one_n + ' 筆）。毛報酬率用全期間的租賃，配對同棟或同路段、前後兩年內的成交算出，括號內，成交、租金是筆數，毛報酬率是配對到的租賃筆數。';
+  }
+  function setYieldMode(m) {
+    if (m === 'up') buildYieldUp(SUM1);
+    else {
+      buildTables(SUM1);
+      document.getElementById('yieldNote').textContent = '';
+    }
   }
 
   /* ---------------- 圖表 ---------------- */
@@ -188,6 +225,21 @@
     });
   }
 
+  /* 圖 1：一樓店面／二到四樓辦公、商業 兩種版本 */
+  var FIG1_ORIG = null;
+  function drawFig1(mode) {
+    var h = document.getElementById('fig1H'), cap = document.getElementById('fig1C'), el = document.getElementById('fig1');
+    if (!FIG1_ORIG) FIG1_ORIG = { h: h.textContent, c: cap.textContent };
+    charts.slice().forEach(function (c) { if (c.__multi && c.__multi.id === 'fig1') { c.dispose(); charts.splice(charts.indexOf(c), 1); } });
+    el.style.height = '';
+    var sum = function (a) { return a.reduce(function (x, y) { return x + y; }, 0); };
+    var F = mode === 'up' ? UP.fig1 : CH.fig1;
+    h.textContent = mode === 'up' ? F.title : FIG1_ORIG.h;
+    cap.textContent = mode === 'up' ? '圖 1：各商圈每年完工、有二到四樓辦公或商業成交或租賃紀錄的大樓數（2016～2026，依實價登錄的完工年；二到四樓指登記為辦公或商業用途的 2～4 樓）' : FIG1_ORIG.c;
+    multiples('fig1', { ord: CH.order, nm: CH.names, colors: COL, years: F.years, data: F.data, type: 'bar', unit: ' 棟', step: mode === 'up' ? 1 : 4, peak: true,
+      sub: function (k) { return '合計 ' + sum(F.data[k]) + ' 棟'; }, xfmt: function (v) { return String(v); } });
+  }
+
   /* 圖 2：兩張熱度表（單一藍色，深淺＝數值，格內印數字） */
   function heatColor(t) {
     var a = [205, 226, 251], z = [24, 79, 149];
@@ -215,8 +267,13 @@
   }
 
   /* 各路段的店面供給：HTML 長條表 */
-  function buildRoads(R) {
+  var ROAD_NOTE1 = null;
+  function buildRoads(R, mode) {
+    var up = mode === 'up';
+    if (up) R = UP.roads;
     var el = document.getElementById('roadCards'), sc = R.scale;
+    var note = document.getElementById('roadNote');
+    if (ROAD_NOTE1 === null) ROAD_NOTE1 = note.innerHTML;
     function bar(v, mx, col) {
       if (!v) return '<div class="rb"><b class="z">–</b></div>';
       return '<div class="rb"><i style="flex:0 0 calc((100% - 40px) * ' + (v / mx).toFixed(4) + ');background:' + col + '"></i><b>' + fmt(v) + '</b></div>';
@@ -225,15 +282,24 @@
     R.areas.forEach(function (a) {
       var col = COL[a.id];
       h += '<div class="rcard"><div class="rc-h"><span class="chip" style="background:' + col + '"></span><b>' + esc(a.name) + '</b><span class="rc-c">' + esc(a.claim) + '</span></div>';
-      h += '<div class="rr rh"><span class="rn"></span><span>2016 年後完工（棟）</span><span>2015 年前完工（棟）</span><span>未完工戶數</span><span>已簽約店面（間）</span></div>';
+      if (up) h += '<div class="rr up rh"><span class="rn"></span><span>2016 年後完工（棟）</span><span>2015 年前完工（棟）</span><span>二到四樓成交（筆）</span><span>未完工戶數</span></div>';
+      else h += '<div class="rr rh"><span class="rn"></span><span>2016 年後完工（棟）</span><span>2015 年前完工（棟）</span><span>未完工戶數</span><span>已簽約店面（間）</span></div>';
       a.rows.forEach(function (r) {
-        h += '<div class="rr' + ((r.other || r.road === '路段不明') ? ' mu' : '') + '"><span class="rn">' + esc(r.road) + '</span>' +
+        var mu = (r.other || r.road === '路段不明') ? ' mu' : '';
+        if (up) h += '<div class="rr up' + mu + '"><span class="rn">' + esc(r.road) + '</span>' +
+          bar(r.b16, sc.b16, col) + bar(r.b15, sc.b15, '#c3ccd8') + bar(r.sales, sc.sales, '#8b7fb8') + bar(r.units, sc.units, '#6b8cae') + '</div>';
+        else h += '<div class="rr' + mu + '"><span class="rn">' + esc(r.road) + '</span>' +
           bar(r.b16, sc.b16, col) + bar(r.b15, sc.b15, '#c3ccd8') + bar(r.units, sc.units, '#6b8cae') +
           '<div class="rb">' + (r.signed ? '<b>' + fmt(r.signed) + '</b>' : '<b class="z">–</b>') + '</div></div>';
       });
       h += '</div>';
     });
     el.innerHTML = h;
+    if (up) {
+      note.innerHTML = '後段、前段、中段各一張表。2016 年後完工、2015 年前完工是有二到四樓辦公、商業成交或租賃紀錄的大樓棟數，三張表的 2016 年後完工加起來等於圖 1。二到四樓成交是實價登錄 2～4 樓、登記辦公或商業用途的全部買賣筆數，含特殊交易和算不出單價的筆數，只計該商圈。未完工戶數是整個建案的戶數，不分樓層，跟一樓店面那一版相同。已簽約店面是一樓預售店面，這一版不列。同一欄的長條在三張表用同一個比例。寫成路口的地址算在先寫的那條路，「段別未載」是建案只寫路名、沒寫第幾段。';
+      return;
+    }
+    note.innerHTML = ROAD_NOTE1;
     var ny = R.areas.filter(function (a) { return a.noyear; }).map(function (a) { return a.name + ' ' + a.noyear + ' 棟'; });
     var n2 = document.getElementById('roadNoYear');
     if (n2 && ny.length) n2.textContent = '另有' + ny.join('、') + '查不到完工年，沒有列入 2016 年後或 2015 年前兩欄。';
@@ -367,12 +433,21 @@
         .bindPopup('<b>' + esc(s.n) + '</b><br>學生數（114 學年）：' + fmt(s.s) + pb(s.lat, s.lon));
     }));
     var BIZCOL = ['#db2777', '#0284c7', '#ca8a04', '#4d7c0f'], BIZK = [];
+    var FLOOR_ON = [true, false];   /* 樓層群：0 一樓（含地下室、沒寫樓層）、1 二樓以上 */
+    function fillBiz(i) {
+      var c = D.biz.cats[i], lg = L_['biz' + i];
+      lg.clearLayers();
+      D.biz.pts[c].forEach(function (q) {
+        if (!FLOOR_ON[q[4]]) return;
+        lg.addLayer(dot(q[0], q[1], { radius: Math.min(11, 3.5 + 1.6 * Math.sqrt(q[2] - 1)), color: '#fff', weight: 1, fillColor: BIZCOL[i], fillOpacity: 0.85 })
+          .bindPopup('<b>' + esc(c) + '</b><br>樓層：' + (q[4] ? '二樓以上' : FLOOR_ONE) + '<br>這個門牌營業中 ' + q[2] + ' 家' + (q[3] ? '，其中 ' + q[3] + ' 家 2021～2025 年新設' : '') + pb(q[0], q[1])));
+      });
+    }
+    function bizCount(c) { return (FLOOR_ON[0] ? D.biz.n[c][0] : 0) + (FLOOR_ON[1] ? D.biz.n[c][1] : 0); }
     D.biz.cats.forEach(function (c, i) {
       BIZK.push('biz' + i);
-      L_['biz' + i] = L.layerGroup(D.biz.pts[c].map(function (q) {
-        return dot(q[0], q[1], { radius: Math.min(11, 3.5 + 1.6 * Math.sqrt(q[2] - 1)), color: '#fff', weight: 1, fillColor: BIZCOL[i], fillOpacity: 0.85 })
-          .bindPopup('<b>' + esc(c) + '</b><br>這個門牌營業中 ' + q[2] + ' 家' + (q[3] ? '，其中 ' + q[3] + ' 家 2021～2025 年新設' : '') + pb(q[0], q[1]));
-      }));
+      L_['biz' + i] = L.layerGroup();
+      fillBiz(i);
     });
     L_.vill = L.geoJSON(D.vill, { pane: 'pVill', style: function (f) { return { color: '#92400e', weight: 1, fillColor: vcolor(f.properties.age611), fillOpacity: 0.55 }; },
       onEachFeature: function (f, l) { l.bindPopup('<b>' + esc(f.properties.village) + '</b><br>6～11 歲兒童（2025 年 12 月）：' + fmt(f.properties.age611) + ' 人'); } });
@@ -399,10 +474,15 @@
       ['sch', '國小', 0, '<span class="sw" style="background:#60a5fa"></span>'],
       ['vill', '各里國小年齡兒童數', 0, '<span class="sw poly" style="background:#f59e0b"></span>'],
       ['zone', '土地使用分區', 0, '<span class="sw poly" style="background:#5f9de0"></span>']].concat(
-      D.biz.cats.map(function (c, i) { return ['biz' + i, c + '（' + fmt(D.biz.n[c]) + ' 家）', 0, '<span class="sw" style="background:' + BIZCOL[i] + '"></span>', i === 0]; }));
+      D.biz.cats.map(function (c, i) { return ['biz' + i, '<span class="bl">' + c + '（' + fmt(bizCount(c)) + ' 家）</span>', 0, '<span class="sw" style="background:' + BIZCOL[i] + '"></span>', i === 0]; }));
     var bar = document.getElementById('layerBar'), on = {};
     LAYERS.forEach(function (l) {
-      if (l[4]) { var gh = document.createElement('div'); gh.className = 'lyr-group'; gh.textContent = '營業中的店家（依商業登記）'; bar.appendChild(gh); }
+      if (l[4]) {
+        var gh = document.createElement('div'); gh.className = 'lyr-group'; gh.textContent = '營業中的店家（依商業登記）'; bar.appendChild(gh);
+        var fr = document.createElement('div'); fr.className = 'fl-row'; fr.id = 'floorRow';
+        fr.innerHTML = '<span class="fl-k">樓層：</span><label><input type="checkbox" data-fl="0" checked> 一樓（含地下室、沒寫樓層）</label><label><input type="checkbox" data-fl="1"> 二樓以上</label>';
+        bar.appendChild(fr);
+      }
       var lab = document.createElement('label');
       lab.innerHTML = '<input type="checkbox" data-k="' + l[0] + '"' + (l[2] ? ' checked' : '') + '> ' + l[3] + l[1];
       bar.appendChild(lab); on[l[0]] = !!l[2];
@@ -423,7 +503,7 @@
       if (on.l591) h += '<div class="row"><span class="sw" style="background:#dc2626"></span>591 出售 <span class="sw" style="background:#16a34a"></span>出租</div>';
       if (on.edu) h += '<div class="row"><span class="sw" style="background:#7c3aed"></span>補習班 <span class="sw" style="background:#f59e0b"></span>課後照顧</div>';
       var bz = BIZK.filter(function (k) { return on[k]; });
-      if (bz.length) h += '<div class="row">' + bz.map(function (k) { var i = +k.slice(3); return '<span class="sw" style="background:' + BIZCOL[i] + '"></span>' + esc(D.biz.cats[i]); }).join(' ') + '</div><div style="color:#4a6080">圓點越大，同一門牌的店家越多</div>';
+      if (bz.length) h += '<div class="row">' + bz.map(function (k) { var i = +k.slice(3); return '<span class="sw" style="background:' + BIZCOL[i] + '"></span>' + esc(D.biz.cats[i]); }).join(' ') + '</div><div style="color:#4a6080">圓點越大，同一門牌的店家越多。樓層：' + (FLOOR_ON[0] && FLOOR_ON[1] ? '一樓和二樓以上' : FLOOR_ON[0] ? '一樓（含地下室、沒寫樓層）' : FLOOR_ON[1] ? '二樓以上' : '都沒選') + '</div>';
       if (on.vill) { h += '<div>6～11 歲兒童數（人）</div>' + VBINS.map(function (b) { return '<div class="row"><span class="bar" style="background:' + b[2] + '"></span>' + (b[1] > 1e8 ? b[0] + ' 以上' : b[0] + '～' + b[1]) + '</div>'; }).join(''); }
       if (on.zone) {
         h += '<div>土地使用分區</div>' + [['#cfe3f7', '第一種住宅區（淺）'], ['#5f9de0', '第二至四種'], ['#17458f', '第五種住宅區（深）'], ['#e11d48', '中心、建成、鄰里商業區'], ['#a16207', '乙種工業區'], ['#9ca3af', '其他用地']]
@@ -440,6 +520,17 @@
       renderLegend();
     }
     bar.addEventListener('change', function (e) {
+      var fl = e.target.getAttribute('data-fl');
+      if (fl !== null) {
+        FLOOR_ON[+fl] = e.target.checked;
+        D.biz.cats.forEach(function (c, i) {
+          fillBiz(i);
+          var sp = bar.querySelector('[data-k=biz' + i + ']').parentNode.querySelector('.bl');
+          if (sp) sp.textContent = c + '（' + fmt(bizCount(c)) + ' 家）';
+        });
+        renderLegend();
+        return;
+      }
       var k = e.target.getAttribute('data-k'); if (!k) return;
       on[k] = e.target.checked;
       if (k === 'zone' && on[k]) loadZone(function () { if (on.zone) { zoneLayer.addTo(map); } renderLegend(); });
@@ -448,7 +539,7 @@
     LAYERS.forEach(function (l) { if (l[2]) L_[l[0]].addTo(map); });
     renderLegend();
     buildFinder(map, D, L_.areas);
-    window.__map = { map: map, layers: L_, toggle: function (k, v) { var c = bar.querySelector('[data-k=' + k + ']'); c.checked = v; c.dispatchEvent(new Event('change', { bubbles: true })); } };
+    window.__map = { map: map, layers: L_, floors: FLOOR_ON, toggle: function (k, v) { var c = bar.querySelector('[data-k=' + k + ']'); c.checked = v; c.dispatchEvent(new Event('change', { bubbles: true })); } };
   }
 
   /* ---------------- 選址工具 ---------------- */
@@ -503,6 +594,9 @@
       var sv = C.sales.filter(function (x) { return hav(lat, lon, x[0], x[1]) <= R; }).map(function (x) { return x[2]; });
       var rv = C.rents.filter(function (x) { return hav(lat, lon, x[0], x[1]) <= R; }).map(function (x) { return x[2]; });
       o.sale = { n: sv.length, med: median(sv) }; o.rent = { n: rv.length, med: median(rv) };
+      var sv2 = UP.sales.filter(function (x) { return hav(lat, lon, x[0], x[1]) <= R; }).map(function (x) { return x[2]; });
+      var rv2 = UP.rents.filter(function (x) { return hav(lat, lon, x[0], x[1]) <= R; }).map(function (x) { return x[2]; });
+      o.sale2 = { n: sv2.length, med: median(sv2) }; o.rent2 = { n: rv2.length, med: median(rv2) };
       var ls = [], lr = [];
       D.l591.forEach(function (x) { if (hav(lat, lon, x.lat, x.lon) <= R && x.u) (x.t === 'sale' ? ls : lr).push(x.u); });
       o.l591s = { n: ls.length, med: median(ls) };
@@ -575,12 +669,15 @@
       h += card('4 店家・營業中', fmt(tt[0]) + ' 家', b);
       // 5 行情
       function few(n) { return n < 5 ? '，樣本少' : ''; }
-      b = rowT('成交中位數（2023 年以來）', o.sale.n ? fmt(o.sale.med, 1) + ' 萬／坪（' + o.sale.n + ' 筆' + few(o.sale.n) + '）' : '無成交紀錄');
-      b += rowT('租金中位數（2023 年以來）', o.rent.n ? fmt(o.rent.med) + ' 元／坪／月（' + o.rent.n + ' 筆' + few(o.rent.n) + '）' : '無租賃紀錄');
+      b = rowT('一樓成交中位數', o.sale.n ? fmt(o.sale.med, 1) + ' 萬／坪（' + o.sale.n + ' 筆' + few(o.sale.n) + '）' : '–（0 筆）');
+      b += rowT('一樓租金中位數', o.rent.n ? fmt(o.rent.med) + ' 元／坪／月（' + o.rent.n + ' 筆' + few(o.rent.n) + '）' : '–（0 筆）');
+      b += rowT('二到四樓成交中位數', o.sale2.n ? fmt(o.sale2.med, 1) + ' 萬／坪（' + o.sale2.n + ' 筆' + few(o.sale2.n) + '）' : '–（0 筆）');
+      b += rowT('二到四樓租金中位數', o.rent2.n ? fmt(o.rent2.med) + ' 元／坪／月（' + o.rent2.n + ' 筆' + few(o.rent2.n) + '）' : '–（0 筆）');
+      b += '<div class="cp-note">成交、租金中位數都是 2023 年以來；二到四樓指登記為辦公或商業用途的 2～4 樓，不含 5 樓以上。</div>';
       b += rowT('591 一樓出售掛牌', o.l591s.n ? fmt(o.l591s.med, 1) + ' 萬／坪（' + o.l591s.n + ' 筆' + few(o.l591s.n) + '）' : '無掛牌');
       b += rowT('591 一樓出租掛牌', o.l591r.n ? fmt(o.l591r.med) + ' 元／坪／月（' + o.l591r.n + ' 筆' + few(o.l591r.n) + '）' : '無掛牌');
-      b += '<div class="cp-note">591 的出租坪數是使用坪數，已用一樓出售物件的公設比中位數 ' + fmt(PUB) + '% 換算成含公設口徑（原始開價中位數' + (o.l591r.raw ? ' ' + fmt(o.l591r.raw) + ' 元' : '無') + '），才能跟實價登錄的租金比。成交與租金座標取自店面大樓，有些只對到路段。</div>';
-      h += card('5 店面行情・成交中位數', o.sale.n ? fmt(o.sale.med, 1) + ' 萬／坪' : '無成交', b);
+      b += '<div class="cp-note">591 的出租坪數是使用坪數，已用一樓出售物件的公設比中位數 ' + fmt(PUB) + '% 換算成含公設口徑（原始開價中位數' + (o.l591r.raw ? ' ' + fmt(o.l591r.raw) + ' 元' : '無') + '），才能跟實價登錄的租金比。成交與租金座標取自大樓，有些只對到路段。</div>';
+      h += card('5 店面行情・一樓成交中位數', o.sale.n ? fmt(o.sale.med, 1) + ' 萬／坪' : '無成交', b);
       // 6 未來住戶
       b = '';
       if (!o.pipe.n) b = '<div class="cp-note">範圍內沒有還沒完工的建案。</div>';
@@ -623,13 +720,16 @@
   }
 
   /* ---------------- 啟動 ---------------- */
-  Promise.all(['summary.json', 'charts.json', 'areas_geo.json', 'villages_geo.json', 'buildings.json', 'listings591.json', 'edu.json', 'schools.json', 'pipeline.json', 'catch.json', 'roads.json', 'bizmap.json'].map(jget))
+  Promise.all(['summary.json', 'charts.json', 'areas_geo.json', 'villages_geo.json', 'buildings.json', 'listings591.json', 'edu.json', 'schools.json', 'pipeline.json', 'catch.json', 'roads.json', 'bizmap.json', 'upper.json'].map(jget))
     .then(function (a) {
       var S = a[0], C = a[1];
+      UP = a[12]; CH = C; ROAD1 = a[10]; SUM1 = S;
       buildTables(S);
       buildCalc();
       buildCharts(C);
-      buildRoads(a[10]);
+      buildRoads(a[10], '1f');
+      seg('supplySwitch', function (m) { drawFig1(m); buildRoads(ROAD1, m); });
+      seg('yieldSwitch', setYieldMode);
       buildMap({ catchData: a[9], villGeo: a[3], summary: S, areas: a[2], vill: a[3], bld: a[4], l591: a[5], edu: a[6], sch: a[7], pipe: a[8], biz: a[11] });
     }).catch(function (e) { console.error('linkou load', e); });
 })();

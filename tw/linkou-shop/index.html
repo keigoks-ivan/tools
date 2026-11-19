@@ -197,6 +197,20 @@
     .rb { gap: 4px; }
   }
 
+  /* 樓層切換、地圖樓層列、二到四樓路段表 */
+  .fl-row { flex-basis: 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; }
+  .fl-row .fl-k { font-size: 13px; font-weight: 600; color: #1e3a5f; }
+  .seg-bar { margin: 10px 0 8px; }
+  .cp-row .v > span { white-space: nowrap; }
+  .rr.up { grid-template-columns: minmax(120px, 1.2fr) 1.5fr 1.3fr 1.3fr 1.5fr; }
+  @media (max-width: 700px) {
+    .rr.up { grid-template-columns: 1fr 1fr 1fr 1fr; }
+    .fl-row label { min-height: 40px; }
+    .fl-row input { width: 18px; height: 18px; }
+    .seg-bar button { flex: 1 1 40%; }
+    .seg-bar .rb-k { flex: 1 1 100%; }
+  }
+
   .src-list { margin: 8px 0 8px 18px; padding: 0; }
   .src-list li { font-size: 12px; line-height: 1.85; color: #4a6080; margin-bottom: 4px; }
   .foot-link { margin: 26px 0 8px; font-size: 14px; }
@@ -276,7 +290,7 @@
     <div class="finder-map"><div id="map" role="application" aria-label="林口店面地圖"></div></div>
     <div class="finder-panel" id="catchPanel" aria-live="polite"></div>
   </div>
-  <p class="fine">座標是用門牌比對 OpenStreetMap 推出來的，有些只對到路段，位置可能差幾百公尺。商圈名稱來自房仲和新聞，新北市沒有官方劃分。店家圖層來自財政部稅籍和經濟部商業、公司登記，只畫營業中、門牌對得到的店家。登記在二樓以上的不畫，這類多半是網路商店或辦公室，零售有 725 家屬於這種。診所向衛生局登記，不在商業登記裡，所以沒有診所圖層。</p>
+  <p class="fine">座標是用門牌比對 OpenStreetMap 推出來的，有些只對到路段，位置可能差幾百公尺。商圈名稱來自房仲和新聞，新北市沒有官方劃分。店家圖層來自財政部稅籍和經濟部商業、公司登記，只畫營業中、門牌對得到的店家。圖層上方的「樓層」預設只畫一樓（含地下室和登記沒寫樓層的店家），勾選「二樓以上」會加畫登記在二樓以上的店家，這類多半是網路商店或辦公室，不一定有實體店面；零售登記在二樓以上的有 725 家，其中 629 家門牌對得到、畫在地圖上。診所向衛生局登記，不在商業登記裡，所以沒有診所圖層。</p>
   <div class="fine"><ul>
     <li>住戶人口來自內政部最小統計區，林口分成 612 格。每格人口依格內門牌點的分布，分到 100 公尺的方格再加總。2015 年以後蓋好的大社區，如果落在面積很大的格子裡，位置會不準。</li>
     <li>所得只有里的資料，範圍內的所得是各里數字依人口加權。</li>
@@ -374,12 +388,13 @@
   <h2 class="section-heading" id="supply">供給</h2>
   <div class="sec-sub">新店面還在增加，後段最多</div>
   <div class="prose"><p>林口的店面總數只能用推的。新北市使用執照只記整棟大樓的用途，看不出一樓有幾間店，所以這裡從三個方向看：有店面成交或出租紀錄的大樓、商業用途的使用執照、預售簽約的店面。</p></div>
-  <div class="fig"><h3>184 棟新店面大樓，147 棟在後段、前段、中段</h3><div class="cap">圖 1：各商圈每年完工的店面大樓數（2016～2026，依實價登錄的完工年）</div><div class="chart" id="fig1"></div></div>
+  <div class="radius-bar seg-bar" id="supplySwitch" role="group" aria-label="供給的樓層"><span class="rb-k">樓層</span><button type="button" data-fl="1f" class="on">一樓店面</button><button type="button" data-fl="up">二到四樓辦公、商業</button></div>
+  <div class="fig"><h3 id="fig1H">184 棟新店面大樓，147 棟在後段、前段、中段</h3><div class="cap" id="fig1C">圖 1：各商圈每年完工的店面大樓數（2016～2026，依實價登錄的完工年）</div><div class="chart" id="fig1"></div></div>
   <div class="fig"><h3>未完工 3,894 戶，已簽約店面 224 間</h3><div class="cap">圖 2：各商圈未完工建案的戶數與已簽約店面數，依預計完工年（2026～2030）</div><div class="chart-html" id="fig2"></div></div>
   <p class="fine">預計完工年是用建照年加 4 年推的，不是建商公告。已簽約店面只算到實價登錄有登記的，是最少的數字。</p>
 
   <h3 class="sub-h" id="roadsupply">各路段的店面供給</h3>
-  <p class="fine">後段、前段、中段各一張表。2016 年後完工指 2016～2026 年完工的店面大樓棟數，2015 年前完工指更早完工的棟數，預售案不計。未完工戶數和已簽約店面的算法跟圖 2 一樣，三張表加起來等於圖 1、圖 2 的數字。同一欄的長條在三張表用同一個比例，可以直接比較。寫成路口的地址（例如信義路與吉祥路交叉口）算在先寫的那條路。「段別未載」是建案只寫路名、沒寫第幾段，沒有併進任何一段。<span id="roadNoYear"></span></p>
+  <p class="fine" id="roadNote">後段、前段、中段各一張表。2016 年後完工指 2016～2026 年完工的店面大樓棟數，2015 年前完工指更早完工的棟數，預售案不計。未完工戶數和已簽約店面的算法跟圖 2 一樣，三張表加起來等於圖 1、圖 2 的數字。同一欄的長條在三張表用同一個比例，可以直接比較。寫成路口的地址（例如信義路與吉祥路交叉口）算在先寫的那條路。「段別未載」是建案只寫路名、沒寫第幾段，沒有併進任何一段。<span id="roadNoYear"></span></p>
   <div id="roadCards"></div>
 
   <!-- ===== 需求 ===== -->
@@ -399,7 +414,9 @@
   <h2 class="section-heading" id="buyrent">買還是租</h2>
   <div class="sec-sub">毛報酬率 2% 上下，買店面收租的現金流很薄</div>
   <div class="fine" style="margin-bottom:6px">各商圈成交中位數、租金中位數、毛報酬率（同棟或同路段、時間相近的成交和租賃配對）</div>
+  <div class="radius-bar seg-bar" id="yieldSwitch" role="group" aria-label="價格表的樓層"><span class="rb-k">樓層</span><button type="button" data-fl="1f" class="on">一樓店面</button><button type="button" data-fl="up">二到四樓辦公、商業</button></div>
   <div class="tbl-wrap"><table class="dt" id="tblYield"></table></div>
+  <p class="fine" id="yieldNote"></p>
   <div class="prose" style="margin-top:12px"><p>一樓店面單價約是同棟樓上住家的 1.6 倍（2016 年後完工的店面，185 筆配對）。</p></div>
 
   <h3 style="font-size:15px;color:#1e3a5f;margin:18px 0 8px">試算</h3>
@@ -465,6 +482,7 @@
   <ul class="src-list">
     <li>成交、租賃：內政部實價登錄，成交到 2026-10-14，租賃到 2026-09-30。民國 109 年第 4 季起，買賣紀錄不再標「店面」，本頁用「一樓＋商業用途」認定，會混到少數一樓辦公室。</li>
     <li>租賃只有經過仲介或代管的案子必須登錄，屋主自己出租的通常不在裡面。</li>
+    <li>二到四樓：實價登錄樓層全部落在 2～4 樓、建物型態為住宅大樓、華廈、公寓或辦公商業大樓，且登記用途是辦公或商業的買賣 428 筆（進統計 120 筆）、租賃 79 筆（進統計 52 筆）。買賣取辦公用、商業用，租賃取事務所、零售、餐飲等，住商用、住辦用、住家用和「見其他登記事項」不算。5 樓以上多半是住宅大樓登記成辦公，不計。進統計的條件同一樓：排除特殊交易、算不出單價、面積不在 3～300 坪。</li>
     <li>掛牌：591，2026-11-18 抓取，出售 275 筆、出租 317 筆。開價不等於成交；出售坪數含車位。</li>
     <li>內政部最小統計區人口（社會經濟資料服務平台、data.gov.tw，政府資料開放授權條款第 1 版）</li>
     <li>財政部綜稅村里統計（105～112 年度）</li>
@@ -482,6 +500,6 @@
 
 <footer class="footer">A project by <span>InvestMQuest</span></footer>
 
-<script src="linkou.js?v=20261119c"></script>
+<script src="linkou.js?v=20261119d"></script>
 </body>
 </html>
