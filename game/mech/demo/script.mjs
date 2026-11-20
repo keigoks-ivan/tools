@@ -42,12 +42,44 @@ export const routes = {
     talk: [['斑鳩','我在貨運道。坦克堵著出口，幫我開一條路，我就跟你飛。',true]],
     lines: [['白鷺','綠色訊號在貨櫃後方。打掉路口的封鎖部隊。']] },
 };
+const follow = {
+  sky: { title:'風中的黑盒', sub:'追上正在傘降的記錄器', obj:'飛向港池上空，接應失事機的記錄器',
+    go:[213,18,38], cp:[204,22,Math.PI/2], list:[['jet',295,-17,85],['heli',269,22,65]], cue:'lAir',
+    talk:[['白鷺','剛才那架的記錄器彈出來了。它收過夜鷺的編隊訊號。',true]],
+    lines:[['零號','看見橘色傘了。我去接。'],['白鷺','錯過也能到路面撿。別讓追兵咬住你。']] },
+  pier: { title:'把車帶出彎道', sub:'到頭車前方領路，和斑鳩打開路口', obj:'到醫療車前方與米拉會合',
+    go:[240,-69,34], cp:[240,-84,0], list:[['grunt',270,-120],['tank',317,-120]], cue:'lConvoy',
+    talk:[['米拉','我們停在轉角前。後車看不清路，讓我看著你的背影開。',true]],
+    lines:[['斑鳩','路口交給我。你到頭車前方，把兩輛帶過右彎。']] },
+};
+export const sections = ['launch','distress','crossing','supply','ambush','commander'];
+export const modules = {
+  magazine: { point:[207,-237], name:'擴充彈匣' },
+  shield: { point:[273,-243], name:'護盾電容' },
+};
 export function applyRoute(config, route) {
   if (!Object.hasOwn(routes, route)) return false;
   config.waves[1] = { ...routes[route], repair: .22 };
-  config.waves[2].list = route === 'pier'
+  config.waves[2] = { ...follow[route] };
+  config.waves.at(-1).list = route === 'pier'
     ? [['ace',382,-156,52],['heli',415,-138,46]] : [['ace',382,-156,52]];
   return true;
+}
+export function readSortieCheckpoint(saved) {
+  const fresh = { wave:0, route:null, module:null, recovered:false, corner:0 };
+  if (saved?.chapter !== 2) return fresh;
+  const route = Object.hasOwn(routes,saved.route) ? saved.route : null;
+  let wave = sections.indexOf(saved.section);
+  // The original sortie saved the commander at wave 2. Keep those pilots at the gate.
+  if (wave < 0) {
+    if (saved.section !== undefined) return fresh;
+    wave = saved.wave === 1 ? 1 : 0;
+    if (saved.wave === 2 && route) wave = sections.indexOf('commander');
+  }
+  if (wave > 1 && !route) return fresh;
+  return { wave, route, module:wave >= 3 && Object.hasOwn(modules,saved.module) ? saved.module : null,
+    recovered:wave >= 2 && route === 'sky' && saved.recovered === true,
+    corner:wave >= 2 && route === 'pier' && [1,2].includes(saved.corner) ? saved.corner : 0 };
 }
 export function makeSortie() {
   return {
@@ -60,6 +92,15 @@ export function makeSortie() {
       { title: '蒼焰出棚', sub: '以步槍和鎖定飛彈擊退追兵', obj: '駛出南側棚門', go: [40,38,21], cp: [40,48,Math.PI], list: [['grunt',22,10],['grunt',67,12]], cue: 'zSortie',
         lines: [['斑鳩','兩架在你正前方。我被卡在貨運道了，先顧你那邊。']] },
       { go: [40,38,21], cp: [40,38,Math.PI/2], list: [], obj: '選擇支援方向', cue: 'lConvoy' },
+      { ...follow.sky },
+      { title:'最後一節電池', sub:'靠近一座補給架，接上蒼焰', obj:'前往東側維修岔口',
+        go:[240,-218,32], cp:[240,-196,Math.PI], list:[['grunt',196,-240],['heli',278,-215,58]], cue:'lBatteryRun', repair:.18,
+        talk:[['米拉','我們把備用電池留在維修岔口了。兩座架子，只夠接通一座。',true]],
+        lines:[['白鷺','橘架有六十發彈匣，藍架能讓盾提早回充。靠近要接的那一座。']] },
+      { title:'第三盞藍燈', sub:'找出發送假訊號的重型指揮機', obj:'沿東側堤道追查冒用的車隊呼號',
+        go:[357,-240,42], cp:[332,-240,Math.PI/2], list:[['grunt',381,-240],['heavy',423,-240],['grunt',360,-276]], cue:'lRadio',
+        talk:[['米拉','有人用我的聲音，叫二號車往海裡開。我根本沒發話。',true]],
+        lines:[['白鷺','重型機在轉發假呼號。兩架護衛靠它指揮，你可以直接打領隊。',true]] },
       { title: '防波堤上空', sub: '擊破封港指揮機・夜鷺', obj: '前往港口閘門迎擊夜鷺', go: [350,-120,62], cp: [325,-120,Math.PI/2], repair: .36,
         list: [['ace',382,-156,52]], boss: { ap: 1.35, airborne: true, name: '封港指揮機・夜鷺' }, cue: 'lCaptain',
         talk: [['米拉','兩輛都到閘口了。那台藍燈的機體又跟上來了。',true]],

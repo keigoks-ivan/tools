@@ -33,6 +33,7 @@ const scenicMusic = new ScenicMusic();
 const campaign = document.body.dataset.campaign === 'lastline';
 const relayMode = value => value === 'intact' || value === 'damaged' ? value : null;
 const demo = campaign && q.has('demo');
+const replayRoute = demo && ['pier','sky'].includes(q.get('replay')) ? q.get('replay') : null;
 const linkedRelay = campaign && !demo && q.get('from') === 'mech' ? relayMode(q.get('relay')) : null;
 let resumeSave = false;
 const readSave = (key) => { try { return JSON.parse(localStorage.getItem((S.SAVE_KEY || 'zero') + '.' + key)); } catch { return null; } };
@@ -1096,6 +1097,11 @@ let state = 'title';
 function renderChapters() {
   const nx = q.has('all') ? S.CHAPTERS.length : progress();
   $('chapters').innerHTML = demo ? '<button class="chp next" data-c="1"><span>開始試玩</span></button>' : S.CHAPTERS.map((C) => `<button class="chp${C.n > nx ? ' lock' : ''}${C.n === nx ? ' next' : ''}" data-c="${C.n}"${C.n > nx ? ' disabled' : ''}><b>CHAPTER ${C.n}</b><span>${C.n > nx ? 'LOCKED' : C.name}</span></button>`).join('');
+  if (replayRoute) {
+    const button=$('chapters').querySelector('button');
+    button.dataset.c=S.FIRST_MECH;
+    button.querySelector('span').textContent=replayRoute==='pier'?'出擊・碼頭救援':'出擊・空中攔截';
+  }
   if ($('campaignResume')) {
     const saved = readSave('checkpoint');
     $('campaignResume').hidden = !saved || !S.CHAPTERS[saved.chapter - 1];
@@ -1117,7 +1123,13 @@ if (campaign && $('storyHandoff')) {
 bar.style.width = '100%';
 renderChapters();
 $('chapters').style.display = 'flex';
-$('chapters').addEventListener('click', (ev) => { const b = ev.target.closest('.chp'); if (b && !b.disabled) { resumeSave = false; writeSave('checkpoint', null); launch(+b.dataset.c); } });
+$('chapters').addEventListener('click', (ev) => {
+  const b=ev.target.closest('.chp');
+  if (!b || b.disabled) return;
+  resumeSave=!!replayRoute;
+  writeSave('checkpoint',replayRoute ? { chapter:S.FIRST_MECH, section:'distress', route:replayRoute } : null);
+  launch(+b.dataset.c);
+});
 document.addEventListener('mouseover', (ev) => { const b = ev.target.closest('.chp:not(.lock), .btn'); if (b && !b.contains(ev.relatedTarget)) audio.ui('hover'); });
 document.addEventListener('click', (ev) => { if (ev.target.closest('.btn, .chp')) audio.ui('click'); });
 for (const k of ['pointerdown', 'keydown']) addEventListener(k, () => audio.unlock(), { once: true });
