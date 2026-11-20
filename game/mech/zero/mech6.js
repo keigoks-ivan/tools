@@ -232,8 +232,7 @@ export async function startMech(X) {
     wave = k; gate = null;
     if (W.go) cp = cpOf(W);
     mission?.onWave(k);
-    if (M6.demo && k === 0) this.note(W.sub, 'cy');
-    else this.say(W.title, W.sub, 3.6, W.boss ? 'am' : 'cy');
+    if (!M6.demo || k !== 0) this.say(W.title, W.sub, 3.6, W.boss ? 'am' : 'cy');
     this.audio.ui('wave');
     const noDog = W.boss && W.boss.flee && fled;   // 黑犬已經逃了：從這一波重來時只剩掩護他的那幾台
     if (!noDog) for (const [w, t, now] of W.lines) zhud.say(w, t, 3.6, now);

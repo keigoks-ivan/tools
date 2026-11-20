@@ -31,6 +31,7 @@ export const ENCOUNTERS = [
 ];
 
 const start = { x: 40, z: 89, yaw: Math.PI };
+const apron = [40,36,Math.PI];
 export const routes = {
   sky: { title: '越過吊臂', sub: '升至二十五公尺，擊落兩架攔截機', obj: '起飛至吊車上空（高度 25 公尺）',
     go: [138,38,44], cp: [126,38,Math.PI/2], altitude: 25,
@@ -87,10 +88,10 @@ export function makeSortie(atDoor = false) {
     mission: new URL('./mission.mjs', import.meta.url).href,
     keys: [['左鍵', '步槍命中・追擊彈跟射'], ['右鍵按住', '鎖定，放開齊射'], ['F', '展盾・擋下第一擊補彈'], ['WASD／Shift', '移動／點按閃避，按住衝刺']],
     touch: [...portControls.touch.filter(([key]) => key !== 'tSupport'), ['tBoost','衝刺']],
-    start: { ...start, z:atDoor ? 48 : start.z, lines: [['米拉', '那架衝著頭車來了！'], ['白鷺', '瞄準開火。步槍一命中，肩上的三枚追擊彈就會跟上。']] },
+    start: { ...start, z:atDoor ? apron[1] : start.z, lines: [['米拉', '那架衝著頭車來了！'], ['白鷺', '瞄準開火。步槍一命中，肩上的三枚追擊彈就會跟上。']] },
     restart: start, goal: ['駛出棚口', '沿軌道前往首個路標'],
     waves: [
-      { title: '撕開封鎖線', sub: '步槍命中，肩射飛彈追擊', obj: '駛出南側棚門', go: [40,38,21], cp: [40,48,Math.PI],
+      { title: '撕開封鎖線', sub: '步槍命中，肩射飛彈追擊', obj: '駛出南側棚門', go: [40,29,12], cp: apron,
         list: [['grunt',40,-8],['grunt',66,-12],['heli',76,-31,42]], arrivals:[.2,2.8,5.1], groundEntry:true, cue:'zSortie',
         lines: [['斑鳩','我左邊還有一架。擊破目標，追擊彈就能再裝一組。']] },
       { go: [40,38,21], cp: [40,38,Math.PI/2], list: [], obj: '選擇支援方向', cue: 'lConvoy' },
