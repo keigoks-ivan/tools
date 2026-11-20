@@ -58,7 +58,7 @@ export class MechCompanion {
     this.thinkIn = 0;
     this.fireIn = .65;
     this.groundAt = (x, z) => combat.world.support(x, z, .45, this.pos.y);
-    this.pose = { vel: this.vel, groundAt: this.groundAt, pitch: 0, lean: 0 };
+    this.pose = { vel: point(), groundAt: this.groundAt, pitch: 0, lean: 0 };
     combat.scene.add(this.root);
   }
 
@@ -120,6 +120,7 @@ export class MechCompanion {
     if (this.thinkIn <= 0) { this.plan(); this.thinkIn = THINK; }
     vel.x = damp(vel.x, move.x, 5, dt);
     vel.z = damp(vel.z, move.z, 5, dt);
+    const oldX = pos.x, oldZ = pos.z;
     pos.x = clamp(pos.x + vel.x * dt, -700, 700);
     pos.z = clamp(pos.z + vel.z * dt, -700, 700);
     C.world.collide(pos, RADIUS, pos.y);
@@ -129,9 +130,10 @@ export class MechCompanion {
     pos.y = desiredY - ground < .05 && pos.y - ground < .3 ? ground : Math.max(ground, pos.y + vel.y * dt);
     const grounded = pos.y === ground;
     const target = this.canSupport(this.target) ? this.target : null;
-    const speed = Math.hypot(vel.x, vel.z);
+    pose.vel.set(pos.x - oldX, 0, pos.z - oldZ).multiplyScalar(dt > 0 ? 1 / dt : 0).clampLength(0, Math.hypot(vel.x, vel.z));
+    const speed = pose.vel.length();
     if (target) target.chest(aim);
-    const face = target ? Math.atan2(aim.x - pos.x, aim.z - pos.z) : speed > 1.5 ? Math.atan2(vel.x, vel.z) : this.heading;
+    const face = target ? Math.atan2(aim.x - pos.x, aim.z - pos.z) : speed > 1.5 ? Math.atan2(pose.vel.x, pose.vel.z) : this.heading;
     this.face = lerpAngle(this.face, face, 1 - Math.exp(-dt * 6));
     pose.grounded = grounded;
     pose.boost = grounded && speed > 26 ? 1 : 0;
@@ -139,6 +141,7 @@ export class MechCompanion {
     pose.flight = grounded ? 0 : 1;
     pose.torsoYaw = this.face;
     pose.aim = target ? aim : null;
+    pose.brace = grounded && target ? .7 * (1 - clamp(this.fireIn / .35, 0, 1)) : 0;
     mech.animate(dt, pose);
     if (target && this.fireIn <= 0 && Math.cos(this.face - face) > .97) this.fire(target);
     if (mech.footfall) C.audio.enemyStep(pos, .55);

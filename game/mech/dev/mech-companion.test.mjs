@@ -2,7 +2,24 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
 import { Combat, STAGES } from '../combat.js';
-import { companionSpawn } from '../mech-companion.mjs';
+import { companionSpawn, MechCompanion } from '../mech-companion.mjs';
+
+test('a companion walks along a wall and stops stepping when both axes are blocked', () => {
+  const v=(x=0,z=0)=>new THREE.Vector3(x,0,z);
+  const companion=Object.assign(Object.create(MechCompanion.prototype), {
+    pos:v(),vel:v(28,8),move:v(28,8),pose:{vel:v()},aim:v(),mech:{animate(){}},
+    face:0,heading:0,thinkIn:1,fireIn:1,
+    combat:{world:{collide(pos){pos.x=0;},support:()=>0}},
+  });
+  companion.update(1/60);
+  assert.deepEqual(companion.pose.vel.toArray(),[0,0,8]);
+  assert.equal(companion.pose.boost,0);
+  const lastZ=companion.pos.z;
+  companion.combat.world.collide=pos=>pos.set(0,0,lastZ);
+  companion.update(1/60);
+  assert.equal(companion.pose.vel.lengthSq(),0);
+  assert(companion.vel.x>25);
+});
 
 test('a companion joins on a clear flank and defers arrival if both sides and the route are blocked', () => {
   const player = { pos: new THREE.Vector3(), yaw: 0 };

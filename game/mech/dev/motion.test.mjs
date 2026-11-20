@@ -23,6 +23,52 @@ function rig(kind='grunt') {
 function tick(m,st,dt=1/60) { m.root.position.addScaledVector(st.vel,dt); m.motion.update(dt,st); m.root.updateMatrixWorld(true); }
 const state = (vel=V()) => ({vel,grounded:true,boost:0,torsoYaw:0,aim:null});
 
+test('small aim changes keep both soles planted; a large turn repositions the feet and settles',()=>{
+  for(const kind of ['ally','ace','heavy']) {
+    const m=rig(kind), st=state(); tick(m,st);
+    const start=m.motion.feet.R.anchor.clone();
+    for(let i=0;i<120;i++){st.torsoYaw=.3*Math.sin(i/25);tick(m,st);}
+    assert.equal(m.legYaw,0);assert.equal(m.stepCount,0);
+    assert(m.motion.feet.R.anchor.distanceTo(start)<1e-6);
+    assert(Math.abs(m.bones.torso.rotation.y)>.2);
+    st.torsoYaw=2.1;
+    for(let i=0;i<240;i++)tick(m,st);
+    assert(Math.abs(m.legYaw-st.torsoYaw)<.04 && m.stepCount>0);
+    assert(m.motion.feet.R.stance && m.motion.feet.L.stance);
+    const steps=m.stepCount;for(let i=0;i<120;i++)tick(m,st);
+    assert.equal(m.stepCount,steps);
+  }
+});
+
+test('side steps leave space for both soles and keep the hips steady while tracking a flank',()=>{
+  for(const dt of [1/30,1/60])for(const kind of ['ally','grunt','heavy']) {
+    const m=rig(kind),st=state(),sep=V(),right=V();
+    for(let i=0;i<240;i++){
+      const angle=i<120?Math.PI/2:1.9+.025*Math.sin(i*.65);
+      st.vel.set(10*Math.sin(angle),0,10*Math.cos(angle));
+      const yaw=m.legYaw;tick(m,st,dt);
+      if(i>30 && i<120){
+        m.bones.ankleL.getWorldPosition(sep).sub(m.bones.ankleR.getWorldPosition(right));
+        assert((sep.x*Math.cos(m.legYaw)-sep.z*Math.sin(m.legYaw))/m.scale>2.6);
+      }
+      if(i>150)assert(Math.abs(m.legYaw-yaw)/dt<.5);
+    }
+  }
+});
+
+test('an early swing redirects towards a new heading while the supporting foot stays put',()=>{
+  const m=rig('ally'),st=state(V(0,0,8));let checked=false;
+  for(let i=0;i<180&&!checked;i++) {
+    const feet=m.motion.feet,wasPlanted=feet.L.stance;tick(m,st);
+    if(i<80||!wasPlanted||feet.L.stance)continue;
+    const old=feet.L.to.clone(),support=feet.R.anchor.clone();st.vel.set(8,0,0);
+    for(let j=0;j<5;j++)tick(m,st);
+    assert(!feet.L.stance && feet.L.to.x>old.x+.55 && feet.L.to.z<old.z-.55);
+    assert(feet.R.stance && feet.R.anchor.distanceTo(support)<1e-6);checked=true;
+  }
+  assert(checked);
+});
+
 test('planted feet move with the deck without taking steps or sliding',()=>{
   const m=rig(), st=state();
   st.groundAt=()=>m.root.position.y;
@@ -41,16 +87,20 @@ test('planted feet move with the deck without taking steps or sliding',()=>{
 test('enemy support feet stay planted while the root advances; heavy cadence is slower',()=>{
   const counts=[];
   for(const kind of ['grunt','ace','heavy']) {
-    const m=rig(kind), st=state(V(0,0,8)); let checked=0;
+    const m=rig(kind), st=state(V(0,0,8)), motion=m.motion; let checked=0,heels=0,toes=0;
     for(let i=0;i<600;i++) {
       tick(m,st);
       for(const n of ['R','L']) {
         const f=m.motion.feet[n]; if(!f.stance||i<60) continue;
-        const actual=m.bones['ankle'+n].getWorldPosition(V());
-        assert(actual.distanceTo(f.anchor)<.06, `${kind} ${n} planted error ${actual.distanceTo(f.anchor)}`); checked++;
+        const ankle=m.bones['ankle'+n],heel=ankle.localToWorld(V(0,-motion.ankleY,-motion.heel)),toe=ankle.localToWorld(V(0,-motion.ankleY,motion.toe));
+        const atHeel=heel.y<toe.y,pivot=atHeel?-motion.heel:motion.toe;
+        const expected=f.anchor.clone().add(V(Math.sin(f.yaw)*pivot,-motion.ankleY,Math.cos(f.yaw)*pivot).multiplyScalar(m.scale));
+        const error=(atHeel?heel:toe).distanceTo(expected);
+        assert(error<.06,`${kind} ${n} planted contact error ${error}`);checked++;
+        if(toe.y-heel.y>.12)heels++;if(heel.y-toe.y>.12)toes++;
       }
     }
-    assert(checked>400); counts.push(m.stepCount);
+    assert(checked>400 && heels>20 && toes>20); counts.push(m.stepCount);
   }
   assert(counts[2]<counts[0] && counts[2]<counts[1],JSON.stringify(counts));
 });
