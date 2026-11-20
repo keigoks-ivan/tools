@@ -32,10 +32,11 @@ const q = new URLSearchParams(location.search);
 const scenicMusic = new ScenicMusic();
 const campaign = document.body.dataset.campaign === 'lastline';
 const relayMode = value => value === 'intact' || value === 'damaged' ? value : null;
-const linkedRelay = campaign && q.get('from') === 'mech' ? relayMode(q.get('relay')) : null;
+const demo = campaign && q.has('demo');
+const linkedRelay = campaign && !demo && q.get('from') === 'mech' ? relayMode(q.get('relay')) : null;
 let resumeSave = false;
-const readSave = (key) => { try { return JSON.parse(localStorage.getItem((campaign?'lastline.':'zero.') + key)); } catch { return null; } };
-const writeSave = (key, value) => { try { localStorage.setItem((campaign?'lastline.':'zero.') + key, JSON.stringify(value)); } catch {} };
+const readSave = (key) => { try { return JSON.parse(localStorage.getItem((S.SAVE_KEY || 'zero') + '.' + key)); } catch { return null; } };
+const writeSave = (key, value) => { try { localStorage.setItem((S.SAVE_KEY || 'zero') + '.' + key, JSON.stringify(value)); } catch {} };
 const $ = (id) => document.getElementById(id);
 const clamp = THREE.MathUtils.clamp, lerp = THREE.MathUtils.lerp;
 const bar = document.querySelector('#bar i'), status = $('status');
@@ -43,7 +44,7 @@ let prog = 0; const step = (k) => { prog = Math.min(1, prog + k); bar.style.widt
 
 const [{ loadAssets, World }, { Post }, { Mech, loadHeroMech, initMechMaterials }, { loadSurfaces, Solid }, { buildMap }, { HumanKit, wrap }, { ViewModel, WEAPONS }, { FXL }, { HUD }, { Pilot }, { Trooper, Drone, hearNoise }, { Input }, S, { Models, Placer }] = await Promise.all([
   import('../env.js'), import('../post.js'), import('../mechs.js'), import('./kit.js'), import(campaign ? '../lastline/map.js' : './map.js'), import('./human.js'), import('./viewmodel.js'),
-  import('./fxl.js'), import('./hud.js'), import('./player.js'), import('./ai.js'), import('../input.js'), import(campaign ? '../lastline/script.js' : './script.js'), import('./models.js'),
+  import('./fxl.js'), import('./hud.js'), import('./player.js'), import('./ai.js'), import('../input.js'), import(demo ? '../demo/script.mjs' : campaign ? '../lastline/script.js' : './script.js'), import('./models.js'),
 ]);
 const { Destruct } = await import('./destruct.js');
 let Audio;
@@ -126,6 +127,7 @@ scene.traverse((o) => {
 const solid = new Solid();
 const placer = new Placer(MODELS, solid);
 const map = buildMap(scene, SURF, solid, placer, A, world);
+if (demo) map.operationProps.G2 = [map.operationProps.G3[0]];
 world.refreshEnvironment();
 const fieldItems = {};
 for (const o of S.OUTPOSTS || []) {
@@ -283,6 +285,7 @@ let active = [];                // 進行中 {E, list}
 let encounters = S.ENCOUNTERS, openingRelay = null;
 let chapter = 1, checkpoint = null, stage = 'play';
 let mechWalk = null, finale = null, hatchOpen = 0, alarmOn = false;   // M6＝第 6 章（mech6.js）進行中
+const footMusic = (n, scenic = false) => demo ? (done.has('F2') ? 'zIgnite' : 'zFall') : footCue(campaign, n, done, scenic, openingRelay);
 const progress = () => clamp(store.get('ch', 1), 1, S.CHAPTERS.length);
 function saveFoot() {
   if (!checkpoint) return;
@@ -351,7 +354,7 @@ G.onFieldClaim = () => {
 };
 const fieldMap = new FieldMap(G, S.FIELD_BOUNDS, () => { fieldMap.close(); input.reset(); resume(); });
 G.ground = new VehicleOps({G,campaign:campaign?'lastline':'zero',materials:carMaterials(),surfaces:SURF,map,input,camera,pause,resume,
-  canOpen:()=>state==='play'&&stage==='play'&&!finale&&!player.dead,
+  canOpen:()=>!demo&&state==='play'&&stage==='play'&&!finale&&!player.dead,
   fallback:()=>map.marks[S.CHAPTERS[chapter-1].start],spawn:d=>G.enemies.filter(e=>!e.dead).length<MAX_ACTORS?spawn(d):null,shoot:vehicleShoot,
   changed:()=>{if(!checkpoint)return;checkpoint={p:player.pos.clone(),yaw:player.yaw,done:[...done],ch:chapter,nades:G.nadeN,patrols:patrols.snapshot(),field:G.field.snapshot(),vehicles:G.ground.snapshot()};saveFoot();}
 });
@@ -558,8 +561,8 @@ function startChapter(n, announce = true) {
   const first = objective();
   G.objText = first ? first.obj : '';
   hud.obj = first ? guideObj(first) : null;
-  hud.title(`第 ${n} 章　${C.name}`, C.en, 4);
-  const L = announce && (n === 1 && campaign ? S.lastLineOpeningLines(openingRelay) : S.LINES[n === 1 ? 'start' : 'ch' + n]);
+  hud.title(`第 ${n} 章　${C.name}`, demo ? (input.touch.on ? '左側移動・右側瞄準・點射擊與互動' : 'WASD 移動・滑鼠瞄準・左鍵射擊・E 互動') : C.en, demo ? 6 : 4);
+  const L = announce && (n === 1 && campaign && !demo ? S.lastLineOpeningLines(openingRelay) : S.LINES[n === 1 ? 'start' : 'ch' + n]);
   if (L) { setTimeout(() => audio.radio('in'), 1500); for (const [w, t] of L) hud.say(w, t, 3.8); }
   scenicMusic.reset();
   mechWalk = null; hound.root.visible = false;
@@ -648,7 +651,7 @@ function nextChapter(n) {
   G.objText = first ? first.obj : ''; hud.obj = first ? guideObj(first) : null;
   checkpoint = { p: player.pos.clone(), yaw: player.yaw, done: [...done], ch: n, nades: G.nadeN, patrols: patrols.snapshot(), field: G.field.snapshot(), vehicles: G.ground.snapshot() };
   scenicMusic.reset();
-  audio.music(footCue(campaign, n, done, false, openingRelay));
+  audio.music(footMusic(n));
   if (n > progress()) store.set('ch', n);
   saveFoot();
 }
@@ -947,7 +950,9 @@ function startFinale() {
   player.frozen = true; hud.prompt = null; hud.obj = null; G.objText = ''; G.playing = false;
   audio.music(campaign ? 'lBreak' : 'zIgnite');
   audio.mechBoot(finale.to);
-  if (campaign) {
+  if (demo) {
+    store.set('ch', S.FIRST_MECH); writeSave('checkpoint', { chapter: S.FIRST_MECH });
+  } else if (campaign) {
     store.set('ch', Math.max(S.FIRST_MECH, progress()));
     const operations = readSave('operations');
     writeSave('checkpoint', { chapter: S.FIRST_MECH, breakout: true, customsClue: S.customsClueForEscort(operations), support: S.escortSupport(operations) });
@@ -991,7 +996,8 @@ async function startMech(replayBreakout = false) {
       post.u.vignette.value=.3;
     }
     let config = S.MECH_CONFIGS?.[chapter];
-    if (campaign) {
+    if (demo) config = S.makeSortie();
+    else if (campaign) {
       const operations = readSave('operations');
       const saved = (resumeSave || boarding || resumeArrival) && savedEscort?.chapter === chapter ? savedEscort : null;
       const support = S.escortSupport(operations, saved?.support);
@@ -1008,7 +1014,7 @@ async function startMech(replayBreakout = false) {
       }
       if (!saved) writeSave('checkpoint', entry);
     }
-    M6 = await go({ renderer, scene, camera, vScene, vCam, post, world, hero, audio, input, zhud: hud, solid, D, fxl: fx, G, S: config ? { ...S, MECH6: config } : S, $, pause, resumeSave: resumeSave || resumeArrival, saveChapter: (n) => store.set('ch', Math.max(n, progress())), exit: (u) => { location.href = u; } });
+    M6 = await go({ renderer, scene, camera, vScene, vCam, post, world, hero, audio, input, zhud: hud, solid, D, fxl: fx, G, S: config ? { ...S, MECH6: config } : S, $, pause, resumeSave: resumeSave || resumeArrival, readSave, writeSave, saveChapter: (n) => store.set('ch', Math.max(n, progress())), exit: (u) => { location.href = u; } });
     M6.setQuality(quality);
   } catch (e) {
     console.error('[zero] 機體章節載入失敗', e);
@@ -1089,7 +1095,7 @@ function updateMechWalk(dt) {
 let state = 'title';
 function renderChapters() {
   const nx = q.has('all') ? S.CHAPTERS.length : progress();
-  $('chapters').innerHTML = S.CHAPTERS.map((C) => `<button class="chp${C.n > nx ? ' lock' : ''}${C.n === nx ? ' next' : ''}" data-c="${C.n}"${C.n > nx ? ' disabled' : ''}><b>CHAPTER ${C.n}</b><span>${C.n > nx ? 'LOCKED' : C.name}</span></button>`).join('');
+  $('chapters').innerHTML = demo ? '<button class="chp next" data-c="1"><span>開始試玩</span></button>' : S.CHAPTERS.map((C) => `<button class="chp${C.n > nx ? ' lock' : ''}${C.n === nx ? ' next' : ''}" data-c="${C.n}"${C.n > nx ? ' disabled' : ''}><b>CHAPTER ${C.n}</b><span>${C.n > nx ? 'LOCKED' : C.name}</span></button>`).join('');
   if ($('campaignResume')) {
     const saved = readSave('checkpoint');
     $('campaignResume').hidden = !saved || !S.CHAPTERS[saved.chapter - 1];
@@ -1097,13 +1103,13 @@ function renderChapters() {
     $('campaignResume').onclick = () => { const cp = readSave('checkpoint'); if (cp && S.CHAPTERS[cp.chapter - 1]) { resumeSave = true; launch(cp.chapter); } };
   }
   if ($('replayBreakout')) {
-    $('replayBreakout').hidden = nx < S.FIRST_MECH;
+    $('replayBreakout').hidden = demo || nx < S.FIRST_MECH;
     $('replayBreakout').onclick = () => { resumeSave = false; launch(S.FIRST_MECH, true); };
   }
 }
-status.textContent = '選擇章節';
+status.textContent = demo ? '修船棚已就緒' : '選擇章節';
 if (campaign && $('storyHandoff')) {
-  $('storyHandoff').hidden = q.get('from') !== 'mech';
+  $('storyHandoff').hidden = demo || q.get('from') !== 'mech';
   if (linkedRelay) $('storyHandoff').textContent = linkedRelay === 'intact'
     ? '接續本篇・中繼台完好。選第一章，直接接應醫療車隊。繼續檢查點則沿用原本的進度。'
     : '接續本篇・中繼台受損。選第一章，先在港區接通備用電台。繼續檢查點則沿用原本的進度。';
@@ -1115,7 +1121,7 @@ $('chapters').addEventListener('click', (ev) => { const b = ev.target.closest('.
 document.addEventListener('mouseover', (ev) => { const b = ev.target.closest('.chp:not(.lock), .btn'); if (b && !b.contains(ev.relatedTarget)) audio.ui('hover'); });
 document.addEventListener('click', (ev) => { if (ev.target.closest('.btn, .chp')) audio.ui('click'); });
 for (const k of ['pointerdown', 'keydown']) addEventListener(k, () => audio.unlock(), { once: true });
-audio.music(campaign ? 'lTheme' : 'zTheme');
+audio.music(campaign && !demo ? 'lTheme' : 'zTheme');
 $('resume').addEventListener('click', resume);
 $('quit').addEventListener('click', toTitle);
 $('menu').addEventListener('click', toTitle);
@@ -1127,14 +1133,14 @@ function launch(n, replayBreakout = false) {
   audio.unlock();
   $('title').classList.add('hide');
   G.stats = { shots: 0, hits: 0, kills: 0, heads: 0, taken: 0, time: 0 };
-  if (campaign) {
+  if (campaign && !demo) {
     openingRelay = resumeSave ? relayMode(readSave('checkpoint')?.foot?.relay) : n === 1 ? linkedRelay : null;
     encounters = S.lastLineEncounters(openingRelay);
     // Patrols 使用遭遇物件身分分組，必須和目前選用的劇本共用同一份物件。
     patrols.encounters = [...encounters, ...(S.OUTPOSTS || [])];
     G.relayOpening = openingRelay;
   }
-  if (n === 1 && !resumeSave && !q.has('x') && !q.has('ch')) intro(() => begin(n)); else begin(n, replayBreakout);
+  if (!demo && n === 1 && !resumeSave && !q.has('x') && !q.has('ch')) intro(() => begin(n)); else begin(n, replayBreakout);
 }
 function intro(then) {
   const el = $('intro'), box = $('introText');
@@ -1183,7 +1189,7 @@ function begin(n, replayBreakout = false) {
     }
     if(campaign)vm.swap('smg');
   }
-  audio.music(footCue(campaign, n, done, false, openingRelay));
+  audio.music(footMusic(n));
   saveFoot();
   if (q.has('final')) { for (const E of encounters) done.add(E.id); player.reset(new THREE.Vector3(14, 0, 90), 0); toCockpit(); }
   state = 'play'; stage = 'play'; G.playing = true;
@@ -1204,13 +1210,13 @@ function resume() {
 function toTitle() {
   G.ground.suspend();
   fieldMap.close();
-  if (M6 || stage === 'mech') { location.href = location.pathname; return; }   // 第 6 章換了整套機體系統：直接重新載入回標題
+  if (M6 || stage === 'mech') { location.href = demo ? '../demo/' + (q.has('mute') ? '?mute' : '') : location.pathname; return; }   // 第 6 章換了整套機體系統：直接重新載入回標題
   $('pause').style.display = 'none'; $('result').style.display = 'none';
   audio.setPaused(false); audio.lowHealth(false); if (alarmOn) { alarmOn = false; audio.alarm(false); }
   input.unlock(); input.enabled = false; touchUI.style.display = 'none';
   clearEnemies(); G.playing = false; state = 'title';
   map.setRelayOpening?.(null);
-  renderChapters(); audio.music(campaign ? 'lTheme' : 'zTheme');
+  renderChapters(); audio.music(campaign && !demo ? 'lTheme' : 'zTheme');
   $('title').classList.remove('hide');
 }
 
@@ -1246,8 +1252,8 @@ function frame(now = performance.now()) {
   frameTitle(camera, false);
   if (stage === 'mech') { if (M6) M6.tick(dt); input.endFrame(); return; }   // 第 6 章（載入中先停在黑畫面）
   const c = input.state(dt), K = input.keys;
-  if(stage==='play'&&!finale&&!player.dead&&input.pressed('KeyK')){G.ground.openMenu();input.endFrame();return;}
-  if(stage==='play'&&!finale&&!player.dead&&input.pressed('KeyJ')){G.ground.reader.open(G.ground.historyId());input.endFrame();return;}
+  if(!demo&&stage==='play'&&!finale&&!player.dead&&input.pressed('KeyK')){G.ground.openMenu();input.endFrame();return;}
+  if(!demo&&stage==='play'&&!finale&&!player.dead&&input.pressed('KeyJ')){G.ground.reader.open(G.ground.historyId());input.endFrame();return;}
   if (stage === 'play' && !finale && input.pressed('KeyM')) { showFieldMap(); input.endFrame(); return; }
   if (c.pause && !finale) { pause(); input.endFrame(); return; }
   if (!G.scout.active && (input.pressed('KeyC') || input.pressed('Tod'))) crouchToggle = !crouchToggle;
@@ -1312,7 +1318,7 @@ function frame(now = performance.now()) {
   if (stage === 'play' && !finale) {
     if(!G.ground.occupied){updateEncounters();updateHatch(dt);updateMissions(dt);updatePickup();updateLoot();G.field.update(input);}
     else hud.prompt=null;
-    G.ground.update(dt,chapter,done);
+    if (!demo) G.ground.update(dt,chapter,done);
   }   // updateHatch 每幀先清提示，任務的「按 E」要排在它後面
   updateFoes();
   updateGuide(dt);
@@ -1328,7 +1334,7 @@ function frame(now = performance.now()) {
   if (stage === 'play' && !finale && !player.dead) {
     threat = player.hurtT < 2 || G.enemies.some(e => !e.dead && (e.state === 'combat' || e.sees) && e.pos.distanceToSquared(player.pos) < 95 * 95);
     scenic = scenicMusic.update(dt,player.pos,G.kitano?.bounds,threat);
-    audio.music(footCue(campaign, chapter, done, scenic, openingRelay));
+    audio.music(footMusic(chapter, scenic));
   }
   audio.setIntensity(scenic ? .22 : (threat || active.some(a => a.E.fight)) ? 1 : 0.3);
   world.followShadow(camera.position);
@@ -1340,4 +1346,4 @@ function frame(now = performance.now()) {
   input.endFrame();
 }
 frame();
-if (q.has('ch')) launch(+q.get('ch'));
+if (!demo && q.has('ch')) launch(+q.get('ch'));

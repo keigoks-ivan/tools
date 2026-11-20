@@ -90,7 +90,7 @@ export class MechCompanion {
 
   canSupport(enemy) {
     return enemy && !enemy.dead && !enemy.gone && !enemy.dropping && enemy.ap > Math.ceil(enemy.apMax * .25)
-      && !enemy.bossName && !enemy.fleeAt && enemy !== this.combat.boss;
+      && !enemy.fleeAt && (enemy === this.combat.boss ? this.order.supportBoss === true : !enemy.bossName);
   }
 
   pickTarget() {
@@ -159,7 +159,8 @@ export class MechCompanion {
     C.fx.muzzle(from, direction, 'mg');
     C.fx.impact(aim, this.hitNormal.copy(direction).negate(), 'armor');
     C.audio.mg(from);
-    C.damageEnemy(target, target.vehicle ? 72 : 260, 34, aim, direction, false, true);
+    const support = this.order.supportBoss && target === C.boss ? 'frontline' : true;
+    C.damageEnemy(target, target.vehicle ? 72 : 260, 34, aim, direction, false, support);
   }
 
   dispose() {

@@ -48,7 +48,7 @@ export async function startMech(X) {
   let scoredChoice;
   function scoreWave(k, engaged) {
     scoredChoice = mission?.convoy?.choice;
-    audio.music(mechCue(sequel, M6, k, engaged, scoredChoice));
+    audio.music(M6.demo ? (M6.waves[k].boss && !engaged ? 'lGate' : M6.waves[k].cue) : mechCue(sequel, M6, k, engaged, scoredChoice));
   }
   let FX = null;
   try { ({ FX } = await import('../fx.js')); } catch (e) { console.warn('[zero] fx.js 載入失敗，改用空殼', e); }
@@ -227,7 +227,7 @@ export async function startMech(X) {
     const W = M6.waves[this.group]; if (!W) return;   // 已經沒有下一波（Combat 下一幀就判過關）
     const k = this.group;
     // 市區的波次：先出現目標點，走到了才開打（Combat 每一幀都會叫這裡，沒到就先不動）
-    if (W.go && !(mission ? mission.ready(k, W) : reached(W))) { arm(k); return; }
+    if (W.go && !(mission ? mission.ready(k, W) : reached(W))) { if (!M6.demo || !mission?.blocked) arm(k); return; }
     this.group++;
     wave = k; gate = null;
     if (W.go) cp = cpOf(W);
@@ -242,8 +242,14 @@ export async function startMech(X) {
     list.forEach(([kind, x, z, y], i) => {
       if (kind === 'ace' && noDog) return;
       this.events.push({ spawn: true, t: waveArrivalTime(W, i, k === 0), fn: () => {
-        const e = this.spawn(kind, i, list.length, x === undefined ? null : { x, z, y: y ?? 0, tx: A.x, tz: A.z });
-        if (kind === 'ace' && W.boss) { boss = e; e.ap = e.apMax = Math.round(e.apMax * W.boss.ap); e.flee = W.boss.flee || 0; e.label = 'BLACK DOG'; }
+        const at = x === undefined ? null : { x, z, y: y ?? 0, tx: A.x, tz: A.z };
+        if (kind === 'ace' && W.boss?.airborne) {
+          at.y = Math.max(world.height(x,z) + y, world.support(x,z,6,1e4) + 18);
+          at.harborAir = { role: 'boss', phase: 'beam', side: 1, warning: 0, exposed: 0, shiftT: 0 };
+        }
+        const e = this.spawn(kind, i, list.length, at);
+        if (W.boss?.name && kind === 'ace') { this.boss = e; e.bossName = W.boss.name; }
+        if (kind === 'ace' && W.boss) { boss = e; e.ap = e.apMax = Math.round(e.apMax * W.boss.ap); e.flee = W.boss.flee || 0; e.label = W.boss.name || 'BLACK DOG'; }
       } });
     });
   }
@@ -284,17 +290,17 @@ export async function startMech(X) {
     C.say = (text, sub, t, color) => (text === 'STAGE CLEAR' || text === 'ALL CLEAR' ? say(M6.clear[0], M6.clear[1], 4, 'am') : say(text, sub, t, color));
     // 基地的黑犬：怎麼打都不會在這裡倒（留一點血，下一幀 tick() 讓他撤退）；撤退中完全打不到
     const dmg0 = C.damageEnemy.bind(C);
-    C.damageEnemy = (e, dmg, stag, pos, dir, crit = false) => {
+    C.damageEnemy = (e, dmg, stag, pos, dir, crit = false, support = false) => {
       if (e.fleeing) return;
       if (e.flee) dmg = Math.min(dmg, Math.max(0, (e.ap - 1) / (e.stagT > 0 && !crit ? 1.4 : 1)));
-      dmg0(e, dmg, stag, pos, dir, crit);
+      dmg0(e, dmg, stag, pos, dir, crit, support);
     };
     boss = null; bossTold = false; gate = null;
   }
   newCombat();
   if (M6.mission) {
     const { createMission } = await import(M6.mission);
-    mission = createMission({ scene, world, player, fx, config: M6, combat: () => C, zhud, input, G, fail: onEnd, resumeSave: X.resumeSave, saveChapter: X.saveChapter });
+    mission = createMission({ scene, world, camera, player, fx, readSave: X.readSave, writeSave: X.writeSave, config: M6, combat: () => C, zhud, input, G, fail: onEnd, resumeSave: X.resumeSave, saveChapter: X.saveChapter });
     if (mission.startWave || (M6.breakout && mission.hasCheckpoint)) { wave = mission.startWave; cp = cpOf(M6.waves[wave]); place(cp); }
   }
   world.hook({ fx, audio: au, cockpit, player, note: (t, c) => C && C.note(t, c) });   // 城市大樓打得爛
@@ -302,6 +308,7 @@ export async function startMech(X) {
   // 大破：從這一波重來（基地裡擺在機庫大門外；市區擺在最後一個走到的目標點）
   function restart() {
     if (mission) wave = mission.restart();
+    if (M6.demo) cp = cpOf(M6.waves[wave]);
     newCombat(); place(cp); fight(wave); boot = 0.7;
     for (const [w, t] of M6.down) zhud.say(w, t, 3.4, true);
     scoreWave(wave, false);
@@ -311,9 +318,13 @@ export async function startMech(X) {
     if (mission) mission.onEnd(ok);
     if (!ok) { audio.music('fail'); if (!mission) setTimeout(restart, 3400); return; }   // 大破畫面由本篇 HUD 顯示（AP ZERO）
     ending = { t: 0 };
+    if (M6.demo) {
+      tpView = true; applyView();
+      cv.hidden = true; keys.hidden = true; $('touch').style.display = 'none';
+    }
     gate = null;
     flushTalk();
-    audio.music(!sequel ? 'zHome' : M6.final ? 'lHome' : 'clear');
+    audio.music(M6.final ? 'lHome' : !sequel ? 'zHome' : 'clear');
     for (const [w, t] of M6.end) zhud.say(w, t, 3.8);
   }
 
@@ -453,7 +464,7 @@ export async function startMech(X) {
   scoreWave(wave, false);
   $('fade').style.transition = 'opacity 1.2s'; $('fade').style.opacity = 0;
   const fwd = new THREE.Vector3(), foot = new THREE.Vector3(), tmp = new THREE.Vector3();
-  const [fadeAt, cardAt, exitAt, exitLimit] = M6.breakout ? [4.5, 6.3, 9, 11] : [12, 14.2, 19, 26];
+  const [fadeAt, cardAt, exitAt, exitLimit] = M6.demo ? [10.5, 12, 14.2, 17] : M6.breakout ? [4.5, 6.3, 9, 11] : [12, 14.2, 19, 26];
 
   function tick(rdt) {
     if (mission && ending?.go) return;
@@ -501,7 +512,7 @@ export async function startMech(X) {
     C.aimSkip = tpView ? chaseSkip : 0;
 
     // ---- 流程：走出機庫大門（或開場 30 秒）才開打
-    if (!started && (M6.breakout || player.pos.x > HANGAR.x1 + 2 || T > 30)) fight(mission?.startWave || 0);
+    if (!started && (M6.demo || M6.breakout || player.pos.x > HANGAR.x1 + 2 || T > 30)) fight(mission?.startWave || 0);
     if (!started && T > 5 && T - rdt <= 5) C.say(M6.goal[0], M6.goal[1], 5, 'cy');
     // 基地的黑犬打到剩四成：撤退（僚機留下來掩護）
     if (boss && boss.flee && !boss.fleeing && !boss.dead && !boss.dropping && boss.ap <= boss.apMax * boss.flee) {
