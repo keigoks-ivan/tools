@@ -562,6 +562,11 @@ export class Combat {
       this.damageEnemy(hitE, W.rifle.dmg * fall * (this.od.active ? 1.25 : 1), W.rifle.stag, to, dir);
       this.fx.impact(to, _n.copy(dir).negate(), 'beam');
       this.audio.impact(to, 'beam');
+      if (this.pursuit?.ready && !hitE.dead && !hitE.gone) {
+        this.pursuit.ready = false;
+        this.queueMissiles([hitE], 3, true);
+        this.note('追擊齊射 ×3', 'cy');
+      }
     } else if (tw >= 0) {
       this.fx.impact(to, _n, kind);
       this.audio.impact(to, kind);
@@ -571,10 +576,14 @@ export class Combat {
   }
 
   launchSalvo(locks) {
-    const hero = this.hero, missile = W.msl;
     this.msl.cd = 0;
+    this.queueMissiles(locks, W.msl.n);
+  }
+
+  queueMissiles(locks, count, direct = false) {
+    const hero = this.hero, missile = W.msl;
     hero.bones.torso.updateWorldMatrix(true, false);
-    for (let i = 0; i < missile.n; i++) {
+    for (let i = 0; i < count; i++) {
       const target = locks.length ? locks[i % locks.length] : null;
       this.events.push({
         t: i * 0.07, fn: () => {
@@ -582,10 +591,14 @@ export class Combat {
           const p = hero.bones.torso.localToWorld(V3(side * 2.4, 5.2 + row * 0.5, -1.6));
           const f = _a.copy(this.aimDir).setY(0).normalize();
           const r = _b.set(-f.z, 0, f.x);
-          const v = V3().copy(f).multiplyScalar(18).addScaledVector(r, -side * rand(8, 16)).add(_c.set(0, rand(18, 26), 0));
+          const v = V3();
+          if (direct) {
+            target.chest(v).sub(p).normalize().multiplyScalar(38).addScaledVector(r, -side * 10);
+            v.y += 6;
+          } else v.copy(f).multiplyScalar(18).addScaledVector(r, -side * rand(8, 16)).add(_c.set(0, rand(18, 26), 0));
           const aim = target ? null : V3().copy(this.eye).addScaledVector(this.aimDir, 700).add(_c.set(rand(-20, 20), rand(-10, 10), rand(-20, 20)));
           this.missiles.push({ own: 'player', pos: p, vel: v, target, aim, t: 0, speed: v.length(), vmax: missile.speed,
-            acc: missile.acceleration, turn: missile.turn, dmg: missile.dmg, h: this.fx.missile('player'), life: 6 });
+            acc: missile.acceleration, turn: missile.turn, guideDelay:direct ? 0 : .28, dmg: missile.dmg, h: this.fx.missile('player'), life: 6 });
           this.audio.missileLaunch(i);
         },
       });
@@ -783,6 +796,7 @@ export class Combat {
       return;
     }
     if (byAlly) { if (e.vehicle) this.vehicles.killed(e); return; }
+    if (this.pursuit) this.pursuit.ready = true;
     const S = this.stats;
     S.kills++;
     S.chain = S.time - S.lastKill < 8 ? S.chain + 1 : 1;
@@ -825,12 +839,16 @@ export class Combat {
 
   hurt(dmg, from, kind = 'bullet') {
     dmg *= this.tier.dmg;
-    if (this.dead || this.phase === 'done') return;
+    if (this.dead || this.phase === 'done') return false;
     const pl = this.player;
     if (this.od.active) dmg *= 0.75;
     const shield = this.shield;
     if (shield.active && dmg > 0) {
       const absorbed = Math.min(dmg, shield.hp);
+      if (this.pursuit && !this.pursuit.ready && shield.hp === W.shield.capacity && absorbed > 0) {
+        this.pursuit.ready = true;
+        this.note('格擋成功・追擊彈就緒', 'cy');
+      }
       shield.hp -= absorbed;
       dmg -= absorbed;
       this.hero.shieldField?.hit(from);
@@ -841,7 +859,7 @@ export class Combat {
       }
       if (shield.hp <= 0) this.stopShield(true);
       else this.hero.shieldField?.update(0, true, shield.level);
-      if (dmg <= 0) return;
+      if (dmg <= 0) return true;  // 防護罩完整吸收這次命中。
     }
     pl.ap -= dmg;
     this.stats.dmgTaken += dmg;
@@ -869,6 +887,7 @@ export class Combat {
       this.events.push({ t: 0.5, fn: () => { this.fx.explosion(c, 3); this.audio.explosion(c, 3); this.cockpit.kick('hit', 1.5, 0); this.cockpit.flashAt(ORANGE, 30); } });
       this.events.push({ t: 2.2, fn: () => this.onEnd(false) });
     }
+    return false;
   }
 
   // ---------------------------------------------------------------- 敵機
@@ -1259,7 +1278,18 @@ export class Combat {
           this.fx.beam(from, end, 'enemy');
           this.fx.muzzle(from, _a.subVectors(to, from), 'beam');
           this.audio.enemyBeam(from);
-          if (!miss && !blocked) { this.hurt(520, from, 'beam'); this.fx.impact(to, _n.subVectors(from, to).normalize(), 'beam'); }
+          if (!miss && !blocked) {
+            const counter = this.pursuit && e === this.boss && this.shield.remaining >= W.shield.duration - .6;
+            const absorbed = this.hurt(520, from, 'beam');
+            this.fx.impact(to, _n.subVectors(from, to).normalize(), 'beam');
+            if (counter && absorbed) {
+              const target = e.chest(V3()), direction = V3().subVectors(target, to).normalize();
+              this.fx.beam(to, target, 'player');
+              this.damageEnemy(e, 760, 90, target, direction, true);
+              this.critMark = 1;
+              this.note('精準格擋・光束反射', 'cy');
+            }
+          }
           else { this.note(e.dodged ? 'DODGED' : 'MISS', 'gr'); if (tw >= 0) { this.fx.impact(end, _n, 'building'); this.world.hitBuilding(end, 1.5, _n); } }
           e.dodged = false;
         }
@@ -1432,7 +1462,7 @@ export class Combat {
       else if (M.aim) tp = M.aim;
       M.speed = Math.min(M.vmax, M.speed + M.acc * dt);
       const dir = _c.copy(M.vel).normalize();
-      if (tp && M.t > 0.28 && M.turn > 0) {
+      if (tp && M.t > (M.guideDelay ?? .28) && M.turn > 0) {
         const want = _d.subVectors(tp, M.pos).normalize();
         const ang = dir.angleTo(want), mx = M.turn * dt;
         if (ang > 1e-4) { const ax = _n.crossVectors(dir, want).normalize(); dir.applyAxisAngle(ax, Math.min(ang, mx)); }

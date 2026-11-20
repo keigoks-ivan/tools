@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
-import { Combat } from '../combat.js';
+import { Combat, W } from '../combat.js';
 import { Mech, initMechMaterials } from '../mechs.js';
 import { HarborAirBattle, HARBOR_BOSS } from '../harbor-air.mjs';
 
@@ -38,6 +38,23 @@ function fixture(relay) {
   const hit = (e, damage) => combat.damageEnemy(e, damage, 0, e.pos.clone(), V(0, 0, 1), true);
   return { battle, combat, player, tick, hit };
 }
+
+test('only the demo returns an unblocked boss beam caught at the start of a shield', t => {
+  t.mock.method(Math,'random',()=>.9);
+  const { combat, battle }=fixture(), boss=battle.startBoss(), full=boss.ap;
+  combat.hurt=Combat.prototype.hurt;
+  function beam(remaining) {
+    Object.assign(combat.shield,{active:true, remaining, hp:W.shield.capacity, feedback:0});
+    boss.charge=.01; boss.los=true;
+    combat.enemyFire(boss,.025,120,combat.player.pos);
+  }
+  beam(2.4); assert.equal(boss.ap,full);
+  combat.pursuit={ready:false};
+  beam(1.6); assert.equal(boss.ap,full); assert.equal(combat.pursuit.ready,true);
+  beam(2.4); assert.equal(boss.ap,full-760);
+  combat.world.raycast=()=>.4;
+  beam(2.4); assert.equal(boss.ap,full-760);
+});
 
 test('two local interceptors stay airborne when the pilot lands or is hidden, and the boss does not overlap their wave', () => {
   const { battle, combat, player, tick, hit } = fixture();

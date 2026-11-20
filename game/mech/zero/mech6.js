@@ -232,7 +232,8 @@ export async function startMech(X) {
     wave = k; gate = null;
     if (W.go) cp = cpOf(W);
     mission?.onWave(k);
-    this.say(W.title, W.sub, 3.6, W.boss ? 'am' : 'cy');
+    if (M6.demo && k === 0) this.note(W.sub, 'cy');
+    else this.say(W.title, W.sub, 3.6, W.boss ? 'am' : 'cy');
     this.audio.ui('wave');
     const noDog = W.boss && W.boss.flee && fled;   // 黑犬已經逃了：從這一波重來時只剩掩護他的那幾台
     if (!noDog) for (const [w, t, now] of W.lines) zhud.say(w, t, 3.6, now);
@@ -241,8 +242,9 @@ export async function startMech(X) {
     const list = [...W.list, ...W.reinforce || []];
     list.forEach(([kind, x, z, y], i) => {
       if (kind === 'ace' && noDog) return;
-      this.events.push({ spawn: true, t: waveArrivalTime(W, i, k === 0), fn: () => {
+      this.events.push({ spawn: true, t: W.arrivals?.[i] ?? waveArrivalTime(W, i, k === 0), fn: () => {
         const at = x === undefined ? null : { x, z, y: y ?? 0, tx: A.x, tz: A.z };
+        if (at && W.groundEntry) at.ground = true;
         if (kind === 'ace' && W.boss?.airborne) {
           at.y = Math.max(world.height(x,z) + y, world.support(x,z,6,1e4) + 18);
           at.harborAir = { role: 'boss', phase: 'beam', side: 1, warning: 0, exposed: 0, shiftT: 0 };
@@ -280,7 +282,8 @@ export async function startMech(X) {
     flyers.length = 0; pods.length = 0;
     C = new Combat({ scene, world, camera, player, hero, fx, audio: au, cockpit, post, onEnd, stage: 3, stageDef: DEF });
     Object.defineProperty(C, 'tier', { value: TIER });
-    C.enemyCap = S.FIRST_MECH === 4 ? 7 : 9;
+    C.enemyCap = M6.demo ? 3 : S.FIRST_MECH === 4 ? 7 : 9;
+    if (M6.demo) C.pursuit = { ready:true };
     Object.defineProperty(C, 'def', { value: DEF });
     world.blocked = BLOCK;   // Combat 開場會把路障清掉（setRoute），這裡再封一次
     C.spawnGroup = spawnGroup;
@@ -457,9 +460,9 @@ export async function startMech(X) {
   }
 
   // ---------------------------------------------------------------- 開場
-  let T = 0, boot = 0, odV = 0, speedV = 0, flashV = 0, dangerV = 0;
+  let T = 0, boot = M6.demo ? 1 : 0, odV = 0, speedV = 0, flashV = 0, dangerV = 0;
   zhud.sub = null; zhud.subQ.length = 0;   // 上一章（駕駛艙）還沒播完的字幕不帶過來
-  zhud.title(M6.breakout ? M6.label : `第 ${M6.chapter || 6} 章　${M6.name}`, M6.en, 4.5);
+  if (!M6.demo) zhud.title(M6.breakout ? M6.label : `第 ${M6.chapter || 6} 章　${M6.name}`, M6.en, 4.5);
   for (const [w, t] of M6.start.lines) zhud.say(w, t, 3.6);
   scoreWave(wave, false);
   $('fade').style.transition = 'opacity 1.2s'; $('fade').style.opacity = 0;
@@ -473,6 +476,7 @@ export async function startMech(X) {
     const dt = rdt * C.timeScale;
     boot = Math.min(1, boot + rdt / 2.6);
     let inp = input.state(rdt);
+    if (M6.demo && (input.pressed('Tfire') || input.pressed('M0'))) inp.fire = true;
     if (window.__m6.fake) Object.assign(inp, window.__m6.fake);
     if (inp.pause && !ending) { input.unlock(); pause(); return; }
     if (inp.view && !ending) { tpView = !tpView; applyView(); }

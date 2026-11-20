@@ -997,7 +997,7 @@ async function startMech(replayBreakout = false) {
       post.u.vignette.value=.3;
     }
     let config = S.MECH_CONFIGS?.[chapter];
-    if (demo) config = S.makeSortie();
+    if (demo) config = S.makeSortie(!boarding);
     else if (campaign) {
       const operations = readSave('operations');
       const saved = (resumeSave || boarding || resumeArrival) && savedEscort?.chapter === chapter ? savedEscort : null;
@@ -1096,10 +1096,9 @@ function updateMechWalk(dt) {
 let state = 'title';
 function renderChapters() {
   const nx = q.has('all') ? S.CHAPTERS.length : progress();
-  $('chapters').innerHTML = demo ? '<button class="chp next" data-c="1"><span>開始試玩</span></button>' : S.CHAPTERS.map((C) => `<button class="chp${C.n > nx ? ' lock' : ''}${C.n === nx ? ' next' : ''}" data-c="${C.n}"${C.n > nx ? ' disabled' : ''}><b>CHAPTER ${C.n}</b><span>${C.n > nx ? 'LOCKED' : C.name}</span></button>`).join('');
+  $('chapters').innerHTML = demo ? '<button class="chp next" data-c="2"><span>直接駕駛蒼焰</span></button><button class="chp" data-c="1"><span>從步兵序章開始</span></button>' : S.CHAPTERS.map((C) => `<button class="chp${C.n > nx ? ' lock' : ''}${C.n === nx ? ' next' : ''}" data-c="${C.n}"${C.n > nx ? ' disabled' : ''}><b>CHAPTER ${C.n}</b><span>${C.n > nx ? 'LOCKED' : C.name}</span></button>`).join('');
   if (replayRoute) {
     const button=$('chapters').querySelector('button');
-    button.dataset.c=S.FIRST_MECH;
     button.querySelector('span').textContent=replayRoute==='pier'?'出擊・碼頭救援':'出擊・空中攔截';
   }
   if ($('campaignResume')) {
@@ -1126,8 +1125,8 @@ $('chapters').style.display = 'flex';
 $('chapters').addEventListener('click', (ev) => {
   const b=ev.target.closest('.chp');
   if (!b || b.disabled) return;
-  resumeSave=!!replayRoute;
-  writeSave('checkpoint',replayRoute ? { chapter:S.FIRST_MECH, section:'distress', route:replayRoute } : null);
+  resumeSave=!!replayRoute && +b.dataset.c===S.FIRST_MECH;
+  writeSave('checkpoint',resumeSave ? { chapter:S.FIRST_MECH, section:'distress', route:replayRoute } : null);
   launch(+b.dataset.c);
 });
 document.addEventListener('mouseover', (ev) => { const b = ev.target.closest('.chp:not(.lock), .btn'); if (b && !b.contains(ev.relatedTarget)) audio.ui('hover'); });

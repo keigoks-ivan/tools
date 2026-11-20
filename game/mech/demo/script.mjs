@@ -81,16 +81,18 @@ export function readSortieCheckpoint(saved) {
     recovered:wave >= 2 && route === 'sky' && saved.recovered === true,
     corner:wave >= 2 && route === 'pier' && [1,2].includes(saved.corner) ? saved.corner : 0 };
 }
-export function makeSortie() {
+export function makeSortie(atDoor = false) {
   return {
     demo: true, chapter: 2, final: true, name: '逆潮出港', en: 'BREAKWATER', label: '逆潮　／　機甲出擊',
     mission: new URL('./mission.mjs', import.meta.url).href,
-    keys: portControls.keys.filter(([key]) => key !== 'B'), touch: portControls.touch.filter(([key]) => key !== 'tSupport'),
-    start: { ...start, lines: [['零號', '米拉，打開前燈，我帶你們走。'], ['白鷺', '先把棚口的追兵引開。步槍開火，按住鎖定再鬆開就能發射飛彈。']] },
+    keys: [['左鍵', '步槍命中・追擊彈跟射'], ['右鍵按住', '鎖定，放開齊射'], ['F', '展盾・擋下第一擊補彈'], ['WASD／Shift', '移動／點按閃避，按住衝刺']],
+    touch: [...portControls.touch.filter(([key]) => key !== 'tSupport'), ['tBoost','衝刺']],
+    start: { ...start, z:atDoor ? 48 : start.z, lines: [['米拉', '那架衝著頭車來了！'], ['白鷺', '瞄準開火。步槍一命中，肩上的三枚追擊彈就會跟上。']] },
     restart: start, goal: ['駛出棚口', '沿軌道前往首個路標'],
     waves: [
-      { title: '蒼焰出棚', sub: '以步槍和鎖定飛彈擊退追兵', obj: '駛出南側棚門', go: [40,38,21], cp: [40,48,Math.PI], list: [['grunt',22,10],['grunt',67,12]], cue: 'zSortie',
-        lines: [['斑鳩','兩架在你正前方。我被卡在貨運道了，先顧你那邊。']] },
+      { title: '撕開封鎖線', sub: '步槍命中，肩射飛彈追擊', obj: '駛出南側棚門', go: [40,38,21], cp: [40,48,Math.PI],
+        list: [['grunt',40,-8],['grunt',66,-12],['heli',76,-31,42]], arrivals:[.2,2.8,5.1], groundEntry:true, cue:'zSortie',
+        lines: [['斑鳩','我左邊還有一架。擊破目標，追擊彈就能再裝一組。']] },
       { go: [40,38,21], cp: [40,38,Math.PI/2], list: [], obj: '選擇支援方向', cue: 'lConvoy' },
       { ...follow.sky },
       { title:'最後一節電池', sub:'靠近一座補給架，接上蒼焰', obj:'前往東側維修岔口',
@@ -104,7 +106,7 @@ export function makeSortie() {
       { title: '防波堤上空', sub: '擊破封港指揮機・夜鷺', obj: '前往港口閘門迎擊夜鷺', go: [350,-120,62], cp: [325,-120,Math.PI/2], repair: .36,
         list: [['ace',382,-156,52]], boss: { ap: 1.35, airborne: true, name: '封港指揮機・夜鷺' }, cue: 'lCaptain',
         talk: [['米拉','兩輛都到閘口了。那台藍燈的機體又跟上來了。',true]],
-        lines: [['白鷺','光束來之前會蓄光。開盾撐過第一輪，抓它收束的空檔。',true]] },
+        lines: [['白鷺','看它的槍口。亮起來再展盾，把這一發還給它。',true]] },
     ],
     bossDown: [['斑鳩','藍燈熄了。米拉，現在！',true]], down: [['白鷺','已回到上一個安全點。這次換個角度接戰。']],
     clear: ['航道打通', '醫療車通行'], end: [['米拉','一號車通過。二號車……也過了。'], ['乘客','媽媽，剛才在窗外的那個人，他也有地方回去嗎？']],

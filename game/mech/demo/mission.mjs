@@ -185,7 +185,16 @@ export function createMission({ scene, world, camera, player, config, combat, zh
       if (wave===4) updateAmbush();
     },
     draw(hud) {
-      if (won || defeated || !route) return;
+      if (won || defeated) return;
+      const c=combat();
+      if (active && c.enemies.some(e=>!e.dead && !e.gone)) {
+        if (c.boss?.charge>0 && c.boss.harborAir?.phase==='beam') {
+          hud.text(input.touch.on?'展開防護罩！':'F 展盾反射！',hud.w/2,hud.h*.6,19,'am',1,'center',700);
+        } else if (c.pursuit.ready) {
+          hud.text('追擊彈就緒　步槍命中即發',hud.w/2,hud.h*.6,13,'cy',.95,'center',700);
+        }
+      }
+      if (!route) return;
       let hint='';
       const height=Math.round(player.pos.y-terrain(player.pos.x,player.pos.z));
       if (checkpoint===1 && route==='sky' && !active && height<25) {

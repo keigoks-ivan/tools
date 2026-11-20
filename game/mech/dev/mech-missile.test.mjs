@@ -52,3 +52,18 @@ test('a fast missile hits the closest crossed mech and a solid wall blocks the r
   assert.deepEqual(hits, []);
   assert.equal(combat.missiles.length, 0);
 });
+
+test('the demo shoulder rack can intercept a closing target without spending the manual salvo', () => {
+  const { combat, hits } = missileFixture();
+  const pos=vector(0,8,54), target={ scale:1, chest:out=>out.copy(pos) };
+  combat.enemies.push(target);
+  combat.queueMissiles([target],3,true);
+  for (let frame=0; frame<70; frame++) {
+    pos.z-=20/60;
+    combat.updateEvents(1/60);
+    combat.updateMissiles(1/60);
+  }
+  assert.equal(combat.msl.cd,1);
+  assert.equal(hits.length,3);
+  assert.ok(hits.every(hit=>hit.enemy===target && hit.damage===W.msl.dmg));
+});
