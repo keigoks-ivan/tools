@@ -3,7 +3,7 @@ import { Mech } from './mechs.js';
 import { damp, lerpAngle } from './anim.js';
 import { createFootContactShadows } from './foot-contact.mjs?v=1';
 import { rayCapsule } from './flight.mjs';
-import { routeDirection, segmentBox, steer } from './tactics.js';
+import { routeDirection, segmentBox, steer, brakeForTurn } from './tactics.js';
 
 const RADIUS = 3.5;
 const RANGE = 320;
@@ -118,8 +118,9 @@ export class MechCompanion {
     const C = this.combat, { pos, vel, move, mech, pose, aim } = this;
     this.thinkIn -= dt; this.fireIn -= dt;
     if (this.thinkIn <= 0) { this.plan(); this.thinkIn = THINK; }
-    vel.x = damp(vel.x, move.x, 5, dt);
-    vel.z = damp(vel.z, move.z, 5, dt);
+    const steering = pose.grounded === false ? 5 : 5 + 5 * brakeForTurn(vel, move.x, move.z);
+    vel.x = damp(vel.x, move.x, steering, dt);
+    vel.z = damp(vel.z, move.z, steering, dt);
     const oldX = pos.x, oldZ = pos.z;
     pos.x = clamp(pos.x + vel.x * dt, -700, 700);
     pos.z = clamp(pos.z + vel.z * dt, -700, 700);

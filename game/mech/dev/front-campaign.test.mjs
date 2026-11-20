@@ -12,6 +12,19 @@ import { landingGround } from '../landing-layout.mjs';
 import { BattleLine } from '../battle-line.mjs';
 
 const pos=(x=0,z=0)=>new THREE.Vector3(x,0,z);
+test('frontline mechs brake into a reversal on the first tick of a new waypoint',()=>{
+  const front=new BattleLine({player:{pos:pos()},world:{height:()=>0,collide:()=>false}},{});
+  for(const kind of ['ally','grunt','heavy']){
+    const actor={kind,entity:{},pos:pos(),vel:pos(12),goal:pos(),route:[pos(-50)],weapon:{speed:12},
+      face:0,pose:{vel:pos()},mech:{animate(){}},friendly:kind==='ally'};
+    front.move(actor,1/60);assert(actor.vel.x<10 && actor.pose.vel.x===actor.vel.x);
+    for(let i=0;i<5;i++)front.move(actor,1/60);
+    assert(actor.vel.x<0);
+    for(let i=0;i<30;i++)front.move(actor,1/60);
+    assert(actor.vel.x >= -12 && actor.vel.x < -10);
+  }
+});
+
 test('a hillside post changes hands by local presence, and the convoy follows secured lines',()=>{
   const C={player:{pos:pos(-400,68)},world:{height:()=>0},note(){},say(){}};
   const front=new HillsideFront(C,{sec:0});

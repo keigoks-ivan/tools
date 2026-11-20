@@ -9,6 +9,15 @@ export function steer(dx, dz, blocked, side = 1) {
   }
   return { x: 0, z: 0 };
 }
+// 方向相同時沿用巡航加速。急轉、折返或要求停步時先卸掉原方向的速度。
+export function brakeForTurn(velocity, nextX, nextZ) {
+  const speed2 = velocity.x * velocity.x + velocity.z * velocity.z;
+  if (speed2 < 1) return 0;
+  const wanted2 = nextX * nextX + nextZ * nextZ;
+  if (wanted2 < 1) return 1;
+  const alignment = (velocity.x * nextX + velocity.z * nextZ) / Math.sqrt(speed2 * wanted2);
+  return Math.max(0, Math.min(1, .5 - .75 * alignment));
+}
 export function flankPoint(pos, target, side, distance, angle = 0.65) {
   const dx = pos.x - target.x, dz = pos.z - target.z, a = Math.atan2(dx, dz) + side * angle;
   return { x: target.x + Math.sin(a) * distance, z: target.z + Math.cos(a) * distance };

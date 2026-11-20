@@ -4,7 +4,7 @@ import { Mech } from './mechs.js';
 import { Vehicles, VKIND } from './vehicles.js';
 import { parse, encGroups, setRoute, Encounter } from './encounter.js';
 import { STAGE_DATA } from './stages.js';
-import { steer, squadFlank, searchPoint, coveringFire, shareContact, flankAvailable, segmentBox, routeDirection, allyInLane } from './tactics.js';
+import { steer, squadFlank, searchPoint, coveringFire, shareContact, flankAvailable, segmentBox, routeDirection, allyInLane, brakeForTurn } from './tactics.js';
 import { FLIGHT, airInterceptHeight, rayCapsule } from './flight.mjs';
 import { companionSpawn, MechCompanion } from './mech-companion.mjs?v=2';
 
@@ -1100,6 +1100,9 @@ export class Combat {
       const tgtV = wish.multiplyScalar(vmax*(braced?.25:1));
       let rate = e.grounded ? 26 : e.airborne?28:10;
       if (hv.length() > vmax + 2) rate = e.grounded ? 36 : 14;
+      if (e.grounded && !braced && e.stagT <= 0 && !e.airborne) {
+        rate *= 1 + brakeForTurn(hv, tgtV.x, tgtV.z) * (e.kind === 'heavy' ? .35 : .85);
+      }
       if (e.qbT > 0) rate = 0;
       const dv = tgtV.sub(hv), L = dv.length();
       if (L > rate * dt) dv.multiplyScalar(rate * dt / L);

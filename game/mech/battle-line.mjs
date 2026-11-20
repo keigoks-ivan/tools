@@ -1,5 +1,5 @@
 import { Vector3 } from 'three';
-import { segmentBox, routeDirection, allyInLane } from './tactics.js';
+import { segmentBox, routeDirection, allyInLane, brakeForTurn } from './tactics.js';
 import { Reinforcements } from './reinforcements.mjs';
 import { MechCompanion } from './mech-companion.mjs?v=2';
 import { damp, lerpAngle } from './anim.js';
@@ -115,9 +115,9 @@ export class BattleLine {
   move(actor,dt) {
     const { pos, vel, goal, route }=actor, w=this.C.world, v=actor.entity;
     const x0=pos.x,z0=pos.z;
+    if(route.length && Math.hypot(goal.x-pos.x,goal.z-pos.z)<3.7) goal.copy(route.shift());
     const dx=goal.x-pos.x,dz=goal.z-pos.z, d=Math.hypot(dx,dz);
-    if(d<3.7 && route.length) goal.copy(route.shift());
-    else if(d<4 && actor.leave) { this.remove(actor); return; }
+    if(d<4 && !route.length && actor.leave) { this.remove(actor); return; }
     const dash=actor.maneuver?.kind==='dash';
     const brace=!actor.friendly&&!actor.vehicle&&actor.kind==='heavy'&&actor.target&&actor.cool<.52;
     const speed=Math.min(actor.weapon.speed*(actor.leave?2:dash?2.15:brace?.32:1),d*2);
@@ -136,7 +136,8 @@ export class BattleLine {
       else actor.detour=routeDirection(actor.path,pos,goal,clear,this.clock,11);
     }
     const vx=d>2?(actor.detour?.x??dx/d)*speed:0,vz=d>2?(actor.detour?.z??dz/d)*speed:0;
-    vel.set(damp(vel.x,vx,5,dt),0,damp(vel.z,vz,5,dt));
+    const steering = actor.vehicle ? 5 : 5 + brakeForTurn(vel,vx,vz) * (actor.kind==='heavy' ? 2 : 5);
+    vel.set(damp(vel.x,vx,steering,dt),0,damp(vel.z,vz,steering,dt));
     pos.addScaledVector(vel,dt);
     pos.y=this.floor(actor,pos.x,pos.z);
     if(w.collide(pos,actor.vehicle?2.4:4,pos.y)&&d>5)actor.stuck=true;

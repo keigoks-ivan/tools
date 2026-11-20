@@ -23,6 +23,60 @@ function rig(kind='grunt') {
 function tick(m,st,dt=1/60) { m.root.position.addScaledVector(st.vel,dt); m.motion.update(dt,st); m.root.updateMatrixWorld(true); }
 const state = (vel=V()) => ({vel,grounded:true,boost:0,torsoYaw:0,aim:null});
 
+test('grounded mechs initiate a step from rest and finish sharp turns at their own pace',()=>{
+  for(const dt of [1/30,1/60]){
+    const times=[];
+    for(const kind of ['ace','ally','heavy']){
+      const m=rig(kind),st=state();tick(m,st,dt);
+      st.torsoYaw=Math.PI/2;
+      let turned=0;
+      for(let i=1;i<=2/dt;i++){
+        tick(m,st,dt);if(!turned && m.legYaw>=st.torsoYaw*.9)turned=i*dt;
+      }
+      assert(turned>0 && turned<.82);times.push(turned);
+      const walk=rig(kind),start=state();tick(walk,start,dt);
+      let first=0;
+      for(let i=1;i<=.5/dt;i++){
+        start.vel.z=Math.min(8,i*dt*20);tick(walk,start,dt);
+        if(!walk.motion.st.R){first=i*dt;assert(walk.motion.st.L);break;}
+      }
+      assert(first>0 && first<.18);
+    }
+    assert(times[0]<times[1] && times[1]<times[2]);
+  }
+});
+
+test('side boosts load opposite knees when changing direction and return to planted feet',()=>{
+  for(const kind of ['ally','grunt','heavy']){
+    const m=rig(kind),st=state();st.boost=1;
+    for(const side of [1,-1,1]){
+      st.vel.x=side*26;
+      for(let i=0;i<30;i++)tick(m,st);
+      const knees=m.bones.kneeL.rotation.x-m.bones.kneeR.rotation.x;
+      assert(knees*side>.45);
+      assert(m.bones.torso.rotation.z*side<-.1);
+    }
+    st.boost=0;st.vel.x=0;
+    for(let i=0;i<180;i++)tick(m,st);
+    assert(m.motion.st.L && m.motion.st.R && m.pose.boost<.001);
+  }
+});
+
+test('level-ground thrust clears both soles through forward, reverse and lateral travel',()=>{
+  for(const kind of ['ally','heavy'])for(const [x,z] of [[26,0],[-26,0],[0,26],[0,-26]]){
+    const m=rig(kind),st=state(V(x,0,z));st.boost=1;
+    for(let i=0;i<90;i++)tick(m,st);
+    for(const n of ['R','L']){
+      const ankle=m.bones['ankle'+n],motion=m.motion;
+      const toe=ankle.localToWorld(V(0,-motion.ankleY,motion.toe));
+      const heel=ankle.localToWorld(V(0,-motion.ankleY,-motion.heel));
+      const clearance=Math.min(heel.y,toe.y)/m.scale;
+      assert(clearance>=0 && clearance<1);
+      assert(Math.abs(heel.y-toe.y)/m.scale<.55);
+    }
+  }
+});
+
 test('small aim changes keep both soles planted; a large turn repositions the feet and settles',()=>{
   for(const kind of ['ally','ace','heavy']) {
     const m=rig(kind), st=state(); tick(m,st);

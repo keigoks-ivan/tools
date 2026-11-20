@@ -7,9 +7,9 @@ import * as THREE from 'three';
 const TAU = Math.PI * 2;
 const LEGS = [['R', 0, -1], ['L', 0.5, 1]];
 const GAITS = {
-  grunt: { support: 0.68, stride: 3.6, max: 7.2, lift: 0.38, sway: 0.42, weight: 1, stance: 1.16, bend: 0.15 },
-  ace: { support: 0.62, stride: 3.4, max: 7.2, lift: 0.48, sway: 0.3, weight: 0.8, stance: 1.12, bend: 0.2 },
-  heavy: { support: 0.72, stride: 4.2, max: 7.8, lift: 0.28, sway: 0.5, weight: 1.35, stance: 1.24, bend: 0.25 },
+  grunt: { support: 0.68, stride: 3.6, max: 7.2, lift: 0.38, sway: 0.42, weight: 1, stance: 1.16, bend: 0.15, pivot: 4.6 },
+  ace: { support: 0.62, stride: 3.4, max: 7.2, lift: 0.48, sway: 0.3, weight: 0.8, stance: 1.12, bend: 0.2, pivot: 5.5 },
+  heavy: { support: 0.72, stride: 4.2, max: 7.8, lift: 0.28, sway: 0.5, weight: 1.35, stance: 1.24, bend: 0.25, pivot: 3.1 },
 };
 // 重量模式（mech.heavy = true 才啟用，預設關閉＝舊行為）：機身轉向限速、落腳多沉＋落地相位拉長、上身微晃
 export const HEAVY = {
@@ -69,7 +69,8 @@ export class MechMotion {
     this.ankleZ = b.hipR.position.z + th.z + sh.z;
     this.toe = m.footToe || (this.gait ? 2.5 : 2.3); this.heel = m.footHeel || (this.gait ? 1.95 : 1.7);
     this.cyc = 0; this.g = 0; this.dir = 1;
-    this.turning = false; this.forwardStride = 0;
+    this.turning = false; this.forwardStride = 0; this.sideStride = 0;
+    this.readyToStep = true; this.boostLead = 1; this.boosting = false;
     this.st = { R: true, L: true };
     this.feet = Object.fromEntries(['R', 'L'].map((n) => [n, { anchor: new THREE.Vector3(), from: new THREE.Vector3(), to: new THREE.Vector3(), yaw: 0, fromYaw: 0, toYaw: 0, ready: false, stance: true, sampleT: 0, neutral: new THREE.Vector3(), neutralW: new THREE.Vector3() }]));
     this.rootPrev = null;
@@ -86,6 +87,7 @@ export class MechMotion {
     this.rec = new Spring(34, 0.35);
     if (this.gait) {
       this.dip.z = 0.85; this.lean.z = this.roll.z = 0.82; this.twist.z = 0.9;
+      this.lean.w = this.roll.w = 6 + this.gait.pivot;
       this.armLX.z = this.armLZ.z = this.headY.z = this.headX.z = this.rec.z = 0.85;
     }
     this.look = { y: 0, x: 0, eye: 0, next: 0.5, eyeNext: 0.2 };
@@ -138,11 +140,12 @@ export class MechMotion {
         hd = st.torsoYaw + clamp(wrap(hd - st.torsoYaw), -1.2, 1.2);
       }
       this.turning = false;
-      m.legYaw = this.turnLimit(lerpAngle(m.legYaw, hd, 1 - Math.exp(-dt * 5)), st, dt);
+      m.legYaw = this.turnLimit(lerpAngle(m.legYaw, hd, 1 - Math.exp(-dt * (P ? P.pivot + 2 : 5))), st, dt);
     } else {
       const angle = Math.abs(wrap(st.torsoYaw - m.legYaw));
       this.turning = !P || !st.grounded || sp > 1.5 || angle > (this.turning ? .035 : .43);
-      if (this.turning) m.legYaw = this.turnLimit(lerpAngle(m.legYaw, st.torsoYaw, 1 - Math.exp(-dt * (st.boost > 0.5 ? 6 : 2.2))), st, dt);
+      const turnRate = st.boost > .5 ? 6 : P && st.grounded ? P.pivot : 2.2;
+      if (this.turning) m.legYaw = this.turnLimit(lerpAngle(m.legYaw, st.torsoYaw, 1 - Math.exp(-dt * turnRate)), st, dt);
     }
     const yawRate = this.yawPrev === null ? 0 : wrap(m.legYaw - this.yawPrev) / Math.max(dt, 1e-4);
     this.yawPrev = m.legYaw;
@@ -167,7 +170,13 @@ export class MechMotion {
     // ---- 步態：週期 cyc（0..1），右腳 0 起步、左腳差半拍；支撐期依機種調整（兩腳同時著地的片刻＝沉重感）
     const af = Math.hypot(fwd, side);
     const lateral = Math.abs(side) / Math.max(1, af);
-    if (P) this.forwardStride = damp(this.forwardStride, fwd / Math.max(af, 1), 9, dt);
+    if (P) {
+      this.forwardStride = damp(this.forwardStride, fwd / Math.max(af, 1), 11, dt);
+      this.sideStride = damp(this.sideStride, side / Math.max(af, 2), 12, dt);
+      const boost = st.grounded && st.boost > .5;
+      if (boost && !this.boosting) this.boostLead = this.cyc < .5 ? 1 : -1;
+      this.boosting = boost;
+    }
     const vg = af + Math.abs(yawRate) * 3.2;                // 原地轉身也要踏步
     let settle = false, reachCrouch = 0;
     // 站姿：主角機靜止時兩腳張開、左腳在前、膝蓋微彎朝外（走起來收回一般步態）；toe＝腳尖外八
@@ -185,10 +194,17 @@ export class MechMotion {
       if (foot.stance) reachCrouch = Math.max(reachCrouch, this.legLen - Math.sqrt(Math.max(4, this.legLen * this.legLen - d2)) + 0.35);
     }
     const gT = walkW * Math.max(smooth(0.6, 2.6, vg), settle ? 0.45 : 0);
-    if (P && this.g < .02 && gT > .25 && lateral > .75 && Math.abs(side) > 1.5) {
-      this.cyc = P.support - (side > 0 ? .5 : 0) - .06;
+    if (P && walkW > .85 && this.feet.R.stance && this.feet.L.stance) {
+      if (atRest && !settle && this.g < .16) this.readyToStep = true;
+      else if (this.readyToStep && (af > 1.25 || Math.abs(yawRate) > .55)) {
+        // 橫移先出同側腳，轉身先打開內側腳，向前起步則抬起站在後方的腳。
+        const leftFirst = af <= 1.25 ? yawRate > 0 : lateral > .65 ? side > 0 : fwd < 0;
+        this.cyc = P.support - (leftFirst ? .5 : 0) - .045;
+        this.readyToStep = false;
+      }
     }
-    this.g = damp(this.g, gT, gT > this.g ? 5 : 3.5, dt);
+    const engage = P ? 4 + P.pivot : 5, release = P ? 2 + P.pivot * .65 : 3.5;
+    this.g = damp(this.g, gT, gT > this.g ? engage : release, dt);
     const g = this.g;
     const D0 = P ? P.support : 0.64, D = m.heavy ? D0 + HEAVY.hold : D0;   // D0 只管步頻，重量模式加長的 D 只拉長落地期
     const S = P ? clamp(P.stride + af * 0.34, P.stride, P.max) * (1 - .38 * lateral ** 2) : campaign ? Math.min(6.7, 3.35 + af * .235) : clamp(2.4 + af * 0.3, 2.4, 6.6);
@@ -218,7 +234,8 @@ export class MechMotion {
     m.landV += (-m.land * 90 - m.landV * 14) * dt;
     m.land = Math.max(-0.1, m.land + m.landV * dt);
     const dip = this.dip.step(0, dt);
-    b.pelvis.position.set(sway, L.pelvis - crouch + bob + dip - Bst * (HR ? -0.9 : 0.8) - m.land * 1.3, 0);
+    const boostDrop = HR ? -.9 : .15 + .18 * Math.abs(this.sideStride);
+    b.pelvis.position.set(sway, L.pelvis - crouch + bob + dip - Bst * boostDrop - m.land * 1.3, 0);
     b.pelvis.rotation.set(0.05 * g * Math.min(1, af / 12) + (HR ? Bst * 0.3 + Air * 0.12 : 0), 0.045 * g * Math.sin(pc - 3.39) * this.dir, -sway * 0.06);
     b.pelvis.updateMatrix();
     _inv.copy(b.pelvis.matrix).invert();
@@ -318,13 +335,18 @@ export class MechMotion {
       // 衝刺滑行（一前一後、腳尖朝下）／空中（收腿）
       const r = n === 'R';
       // 主角機衝刺：身體往前壓、兩腳往後拖、腳尖朝下（貼地飛行）；空中：一腳收、一腳往後，像在飛
-      const bh = HR ? (r ? 0.15 : 0.5) : r ? -0.38 : 0.28, bk = HR ? (r ? 0.75 : 1.25) : r ? 0.55 : 0.95, ba = HR ? (r ? 0.45 : 0.6) : r ? 0.05 : 0.35;
+      // 側推時同側膝收起、另一腿蹬開；縱向衝刺從起推當下的步態接續。
+      const lead = sx * clamp(this.sideStride + this.boostLead * this.forwardStride, -1, 1);
+      const bh = HR ? (r ? .15 : .5) : -.1 - .34 * lead;
+      const bk = HR ? (r ? .75 : 1.25) : .76 + .32 * lead;
+      const ba = HR ? (r ? .45 : .6) : -(bh + bk) + .035 - .04 * lead;
       const ah = HR ? (r ? -0.45 : 0.2) : r ? -0.6 : -0.12, ak = HR ? (r ? 1.0 : 1.1) : r ? 1.1 : 0.55, aa = HR ? (r ? 0.35 : 0.5) : r ? 0.2 : 0.4;
       const bw = Bst * (1 - Air), aw = Air;
       hipA = lerp(lerp(hipA, bh, bw), ah+flightSpeed*.45, aw) + shake;
       kneeA = lerp(lerp(kneeA, bk, bw), ak+flightSpeed*.25, aw) - shake;
       ank = lerp(lerp(ank, ba, bw), aa, aw);
-      roll = lerp(roll, -sx * (HR ? 0.08 : 0.05), bw) * (1 - aw) + (-sx * (HR ? 0.16 : 0.1)) * aw;
+      const boostRoll = HR ? -sx * .08 : sx * .09 - .21 * this.sideStride;
+      roll = lerp(roll, boostRoll, bw) * (1 - aw) + (-sx * (HR ? 0.16 : 0.1)) * aw;
       hipA -= m.land * 0.4; kneeA += m.land * 0.85; ank -= m.land * 0.45;
       hp.rotation.set(hipA, Sn ? sx * Sn.knee * idle * walkW : 0, roll, 'ZXY');
       b['knee' + n].rotation.x = kneeA;
@@ -346,8 +368,9 @@ export class MechMotion {
     const tw = wrap(st.torsoYaw - m.legYaw) - b.pelvis.rotation.y;
     const twist = this.twist.step(P ? clamp(tw, -1.08, 1.08) : this.twist.x + wrap(tw - this.twist.x), dt);
     if (Math.abs(this.twist.v) > 2.5) m.servo = Math.min(1, Math.abs(this.twist.v) / 6);
-    const leanT = clamp(this.accF * 0.02, -0.3, 0.3) + Bst * (HR ? 0.45 : 0.2) + Air * (HR ? 0.15 : 0.05) + flightSpeed*.4 + 0.04 * g * Math.min(1, af / 12) + (st.lean || 0) + (m.stance ? m.stance.chest * (1 - g) : 0);
-    const rollT = clamp(-this.accS * 0.012, -0.2, 0.2) - Flight*clamp(yawRate*.16,-.32,.32) - (Bst > 0.3 ? side * 0.006 : 0) + sway * 0.05;
+    const leanT = clamp(this.accF * 0.02, -0.3, 0.3) + Bst * (HR ? 0.45 : .2 * this.forwardStride) + Air * (HR ? 0.15 : 0.05) + flightSpeed*.4 + 0.04 * g * Math.min(1, af / 12) + (st.lean || 0) + (m.stance ? m.stance.chest * (1 - g) : 0);
+    const bank = P ? Bst * .22 * this.sideStride : Bst > .3 ? side * .006 : 0;
+    const rollT = clamp(-this.accS * 0.012, -0.2, 0.2) - Flight*clamp(yawRate*.16,-.32,.32) - bank + sway * 0.05;
     const quake = this.shock * (P ? 0.006 : 0.02);
     b.torso.rotation.y = twist;
     b.torso.rotation.x = this.lean.step(leanT + (P ? this.brace * 0.06 - rc * 0.09 : 0), dt) + Math.sin(this.t * 47) * quake;
