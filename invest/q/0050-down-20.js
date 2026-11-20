@@ -81,7 +81,7 @@
         T.pct(result.drawdown, 2) + '</dd></dl><p class="drop-stress">馬上再跌兩成會少 <strong>' +
         T.money((stock + (i === 2 ? cash / 2 : 0)) * 0.2) + '</strong></p>' + (i ? '<p>' + difference + '</p>' : '') + '</section>';
     }).join('');
-    message.textContent = cash === 0 ? '起點現金為 0，續扣和加碼會相同。' : '已更新下方結果。';
+    message.textContent = cash === 0 ? '起點現金為 0，續扣和加碼會相同。' : '已更新結果。';
     output.hidden = false;
     plot();
     if (moveFocus) el('result-title').focus();
@@ -116,6 +116,6 @@
     el('submit').disabled = false;
     render(false);
   }).catch(function () {
-    message.textContent = '無法載入歷史行情。重新整理可再試，或先看下方的八次結果。';
+    message.textContent = '無法載入歷史行情。八次結果見表格。';
   });
 })();
