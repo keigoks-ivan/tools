@@ -1753,7 +1753,7 @@ export class Mech {
 
   // 動作全部在 anim.js（MechMotion）；st = { vel, grounded, boost, torsoYaw, pitch, thrust, aim(Vector3|null), lean }
   animate(dt, st) { this.motion.update(dt, st); this.footContacts?.update(st); }
-  impact(s) { this.motion.impact(s); }
+  impact(s, travel) { this.motion.impact(s, travel); }
 
   capsule() {
     const p = this.root.position, k = this.scale;

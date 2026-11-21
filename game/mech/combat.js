@@ -764,7 +764,7 @@ export class Combat {
       this.hitMark = 1;
       if (!this.quiet) this.audio.hitmarker();
     }
-    e.m.impact(clamp(dmg / 900, 0.25, 1.2));
+    e.m.impact(clamp(dmg / 900, 0.25, 1.2), dir);
     if (e.stagT <= 0) {
       e.stag += stag;
       if (e.stag >= e.K.stag) {
@@ -963,7 +963,7 @@ export class Combat {
           if (ds > 0) this.cockpit.kick('step', ds * 1.5, 0);
         }
         this.audio.enemyBoost(e.id, e.pos, e.thrust);
-        m.animate(dt, { vel: e.vel, grounded: e.grounded, boost: 0, torsoYaw: e.face, pitch: 0, thrust: e.thrust, aim: null, lean: 0, groundAt: e.groundAt });
+        m.animate(dt, { vel: e.vel, grounded: e.grounded, clearance: Math.max(0,e.pos.y-g), boost: 0, torsoYaw: e.face, pitch: 0, thrust: e.thrust, aim: null, lean: 0, groundAt: e.groundAt });
         continue;
       }
 
@@ -1144,7 +1144,13 @@ export class Combat {
         e.warn = 1;
         if (relay.left <= 0) this.finishHarborRelay(e, true);
       } else if (e.stagT <= 0 && e.lunge <= 0) this.enemyFire(e, dt, dist, playerChest);
-      m.animate(dt, { vel: e.walkVelocity, low:braced?.7:e.cover&&e.coverT>0?.55:0, grounded: e.grounded, boost: e.grounded && (e.boostT > 0 || e.qbT > 0) ? 1 : 0, torsoYaw: e.face, pitch: 0, thrust: e.thrust, aim, lean: e.stagT > 0 ? 0.35 : 0, flight:e.airborne?1:0, groundAt: e.groundAt, brace: relay || e.burst > 0 || e.charge > 0 || e.volley > 0 ? 1 : 0 });
+      m.animate(dt, {
+        vel: e.walkVelocity, grounded: e.grounded, clearance: e.clearance, groundAt: e.groundAt,
+        boost: e.grounded && (e.boostT > 0 || e.qbT > 0) ? 1 : 0, flight: e.airborne ? 1 : 0,
+        torsoYaw: e.face, pitch: 0, thrust: e.thrust, aim, low: braced ? .7 : 0,
+        guard: !!e.cover && e.coverT > 0, stagger: e.stagT,
+        brace: relay || e.burst > 0 || e.charge > 0 || e.volley > 0 ? 1 : 0,
+      });
       if (m.footfall) {
         const fp = m.bones[m.footfall > 0 ? 'ankleR' : 'ankleL'].getWorldPosition(_b); fp.y -= m.motion.ankleY * k;
         this.audio.enemyStep(fp, e.kind === 'heavy' ? 1.3 : 0.9);
@@ -1192,6 +1198,7 @@ export class Combat {
       e.m.impact(s); e.m.landV = (e.m.landV || 0) + s * 6;
       if (s > 0.3) { this.fx.dust(_c.set(e.pos.x, g, e.pos.z), 1.2 * s * k); this.audio.enemyStep(e.pos, s * 1.3); }
     }
+    e.clearance = Math.max(0, e.pos.y - g);
     const sp = Math.hypot(e.vel.x, e.vel.z);
     if (e.grounded && sp > 3) w.stomp(e.pos.x, e.pos.z, 4 * k, e.vel.x, e.vel.z, (o) => this.audio.trample(_c.set(o.x, 0, o.z), o.kind));
   }

@@ -167,6 +167,7 @@ export class LandingFront extends BattleLine {
   enterBeach() {
     this.phase='beach';
     this.waypoint(-203,-1);
+    this.ikaru.mech.motion.signalAdvance();
     this.order(this.ikaru,[-324,-14],[-274,-21],[-230,-16]);
     this.order(this.hayabusa,[-324,13],[-268,24],[-230,18]);
     this.C.say('第一波・跳板放下','穿過濕灘，擊破岸防火力',2.6,'cy');

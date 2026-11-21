@@ -12,6 +12,21 @@ import { landingGround } from '../landing-layout.mjs';
 import { BattleLine } from '../battle-line.mjs';
 
 const pos=(x=0,z=0)=>new THREE.Vector3(x,0,z);
+test('confirmed frontline hits push either team along the incoming shot; a miss has no reaction',()=>{
+  const hits=[],C={player:{pos:pos()},world:{raycast:()=>-1},fx:{impact(){}},
+    damageEnemy(entity,damage,stagger,point,travel){hits.push(travel.clone());}};
+  const front=new BattleLine(C,{}),target={active:true,entity:{},pos:pos(),ap:2000,
+    mech:{impact(power,travel){hits.push(travel.clone());}}};
+  const end=pos();end.y=11;
+  for(const [friendly,source] of [[true,-40],[false,40],[false,40]]){
+    const from=end.clone();from.x=source;
+    front.shots.push({t:0,from,end:end.clone(),target,damage:330,actor:{friendly,hits:0}});
+    if(hits.length===2)target.pos.z=20;
+    front.impacts(1/60);
+  }
+  assert.deepEqual(hits.map(v=>v.x),[1,-1]);assert.equal(target.ap,1670);
+});
+
 test('frontline mechs brake into a reversal on the first tick of a new waypoint',()=>{
   const front=new BattleLine({player:{pos:pos()},world:{height:()=>0,collide:()=>false}},{});
   for(const kind of ['ally','grunt','heavy']){

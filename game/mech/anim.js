@@ -61,6 +61,10 @@ export class MechMotion {
     this.gait = m.stance ? null : GAITS[m.schemeKey] || GAITS.grunt;
     this.brace = 0;
     const b = m.bones, L = m.L;
+    this.shoulderZ = b.shoulderR.position.z;
+    this.guard = 0; this.stagger = 0; this.aimReady = 0;
+    this.landingPrep = 0; this.touchdown = 0; this.descent = 0; this.wasAirborne = false;
+    this.signalLeft = 0;
     const th = b.kneeR.position, sh = b.ankleR.position;
     this.Lt = Math.hypot(th.y, th.z); this.Ls = Math.hypot(sh.y, sh.z);
     this.a0 = Math.atan2(th.z, -th.y); this.b0 = Math.atan2(sh.z, -sh.y);
@@ -96,7 +100,20 @@ export class MechMotion {
   }
 
   // 外部撞擊／著地（0..1+）
-  impact(s) { this.dip.v -= 5 * s; this.shock = Math.max(this.shock, Math.min(1.5, s)); }
+  impact(s, travel) {
+    this.dip.v -= 5 * s;
+    if (this.gait) this.dip.v = Math.max(-10, this.dip.v);
+    this.shock = Math.max(this.shock, Math.min(1.5, s));
+    if (!this.gait || !travel) return;
+    const yaw = this.m.legYaw, sin = Math.sin(yaw), cos = Math.cos(yaw);
+    const side = travel.x * cos - travel.z * sin, fore = travel.x * sin + travel.z * cos;
+    const impulse = 7 * Math.min(s, 1.2) / this.gait.weight;
+    this.roll.v = clamp(this.roll.v - side * impulse, -6, 6);
+    this.lean.v = clamp(this.lean.v + fore * impulse, -6, 6);
+    this.headX.v = clamp(this.headX.v + s * 2.4, -4, 4);
+  }
+
+  signalAdvance() { this.signalLeft = 1.2; }
 
   // 腳掌的世界錨點要跟著移動中的甲板走。
   carry(dx, dy, dz) {
@@ -129,6 +146,22 @@ export class MechMotion {
     // ---- 腳的朝向：往移動方向；往後退時朝軀幹方向倒退走
     const sp = Math.hypot(st.vel.x, st.vel.z);
     const P = this.gait;
+    if (P) {
+      this.guard = damp(this.guard, st.guard ? 1 : 0, 9, dt);
+      this.stagger = damp(this.stagger, clamp((st.stagger || 0) / .4, 0, 1), 11, dt);
+      this.aimReady = damp(this.aimReady, st.aim ? 1 : 0, st.aim ? 12 : 5, dt);
+      this.signalLeft = Math.max(0, this.signalLeft - dt);
+      this.touchdown *= Math.exp(-5 * dt);
+      if (!st.grounded) this.descent = Math.max(-(st.vel.y || 0), this.descent * Math.exp(-4 * dt));
+      else if (this.wasAirborne) {
+        this.touchdown = clamp(this.descent / 22, 0, 1);
+        this.descent = 0;
+      }
+      this.wasAirborne = !st.grounded;
+      const nearGround = !st.grounded && st.vel.y < 0 && Number.isFinite(st.clearance)
+        ? 1 - smooth(k, 10 * k, st.clearance) : 0;
+      this.landingPrep = damp(this.landingPrep, nearGround, 14, dt);
+    }
     if (sp > 1.5 && st.grounded && st.boost < 0.5) {
       let hd = Math.atan2(st.vel.x, st.vel.z);
       const diff = wrap(hd - st.torsoYaw);
@@ -224,7 +257,7 @@ export class MechMotion {
     const drop = Math.min(P ? 1.8 + .55 * lateral : 1.8, reachCrouch);
     this.supportDrop = Math.max(drop, damp(this.supportDrop || 0, drop, 8, dt));
     this.low=damp(this.low||0,st.low||0,6,dt);
-    const crouch = Math.max(0.3 + this.low*.78 + (Sn ? Sn.bend : P.bend) * idle + this.brace * 0.12 * idle + g * Math.min(0.75, af * 0.045), this.supportDrop * walkW);    // 跑越快蹲越低
+    const crouch = Math.max(0.3 + Math.max(this.low*.78, this.guard*.85, this.stagger*1.25) + (Sn ? Sn.bend : P.bend) * idle + this.brace * 0.12 * idle + g * Math.min(0.75, af * 0.045), this.supportDrop * walkW);
     const H = (P ? P.lift + Math.min(0.65, af * 0.035) : campaign ? .41 + Math.min(.52, af * .038) : 0.55 + Math.min(1.2, af * 0.075)) * g;
 
     // ---- 骨盆：落腳下沉、支撐期升起；重心移到支撐腳；隨步伐扭腰
@@ -235,7 +268,8 @@ export class MechMotion {
     m.land = Math.max(-0.1, m.land + m.landV * dt);
     const dip = this.dip.step(0, dt);
     const boostDrop = HR ? -.9 : .15 + .18 * Math.abs(this.sideStride);
-    b.pelvis.position.set(sway, L.pelvis - crouch + bob + dip - Bst * boostDrop - m.land * 1.3, 0);
+    const compression = P ? Math.max(m.land * 1.3, .65 * this.touchdown) : m.land * 1.3;
+    b.pelvis.position.set(sway, L.pelvis - crouch + bob + dip - Bst * boostDrop - compression, 0);
     b.pelvis.rotation.set(0.05 * g * Math.min(1, af / 12) + (HR ? Bst * 0.3 + Air * 0.12 : 0), 0.045 * g * Math.sin(pc - 3.39) * this.dir, -sway * 0.06);
     b.pelvis.updateMatrix();
     _inv.copy(b.pelvis.matrix).invert();
@@ -342,9 +376,10 @@ export class MechMotion {
       const ba = HR ? (r ? .45 : .6) : -(bh + bk) + .035 - .04 * lead;
       const ah = HR ? (r ? -0.45 : 0.2) : r ? -0.6 : -0.12, ak = HR ? (r ? 1.0 : 1.1) : r ? 1.1 : 0.55, aa = HR ? (r ? 0.35 : 0.5) : r ? 0.2 : 0.4;
       const bw = Bst * (1 - Air), aw = Air;
-      hipA = lerp(lerp(hipA, bh, bw), ah+flightSpeed*.45, aw) + shake;
-      kneeA = lerp(lerp(kneeA, bk, bw), ak+flightSpeed*.25, aw) - shake;
-      ank = lerp(lerp(ank, ba, bw), aa, aw);
+      const prep = this.landingPrep;
+      hipA = lerp(lerp(hipA, bh, bw), lerp(ah + flightSpeed*.45, -.24, prep), aw) + shake;
+      kneeA = lerp(lerp(kneeA, bk, bw), lerp(ak + flightSpeed*.25, .45, prep), aw) - shake;
+      ank = lerp(lerp(ank, ba, bw), lerp(aa, -.21, prep), aw);
       const boostRoll = HR ? -sx * .08 : sx * .09 - .21 * this.sideStride;
       roll = lerp(roll, boostRoll, bw) * (1 - aw) + (-sx * (HR ? 0.16 : 0.1)) * aw;
       hipA -= m.land * 0.4; kneeA += m.land * 0.85; ank -= m.land * 0.45;
@@ -376,6 +411,8 @@ export class MechMotion {
     b.torso.rotation.x = this.lean.step(leanT + (P ? this.brace * 0.06 - rc * 0.09 : 0), dt) + Math.sin(this.t * 47) * quake;
     b.torso.rotation.z = this.roll.step(rollT, dt) - b.pelvis.rotation.z * 0.8 + Math.sin(this.t * 39) * quake * 0.7;
     if (P) {
+      b.shoulderR.position.z = this.shoulderZ - clamp(rc, 0, 1.2) * .78;
+      b.torso.rotation.x += .22 * this.guard + .31 * this.stagger + .12 * this.touchdown;
       b.torso.rotation.y -= 0.055 * g * Math.sin(pc) * this.dir;
       b.torso.rotation.z -= sway * 0.06;
     }
@@ -418,7 +455,7 @@ export class MechMotion {
       m.servo = Math.max(m.servo, 0.5);
     }
     b.head.rotation.y = this.headY.step(lk.y, dt);
-    b.head.rotation.x = this.headX.step(lk.x, dt);
+    b.head.rotation.x = this.headX.step(lk.x + .16 * this.guard + .38 * this.stagger, dt);
     if (m.eye) {
       if (this.t > lk.eyeNext) { lk.eye = (Math.random() * 2 - 1) * 0.35; lk.eyeNext = this.t + 0.25 + Math.random() * 1.1; }
       const ea = clamp(this.eyeS.step(st.aim ? 0 : lk.eye, dt), -1.1, 1.1);
@@ -448,8 +485,12 @@ export class MechMotion {
       const pit = clamp(Math.atan2(lp.y + 1.5, Math.hypot(lp.x, lp.z)), -0.9, 1.0);
       px = -0.95 - pit; ex = -0.62;
     } else {
-      yaw = 0.25; px = -0.45 - pitch * 0.5; ex = -0.95;
+      yaw = 0.25; px = (this.gait ? -.24 : -.45) - pitch * 0.5; ex = this.gait ? -.68 : -.95;
       if (this.gait) px += .12 * Math.cos(this.cyc * TAU - .3) * this.forwardStride * g;
+    }
+    if (this.gait) {
+      px += .38 * this.stagger;
+      ex -= .22 * this.guard;
     }
     sh.rotation.y = damp(sh.rotation.y, yaw, 14, dt);
     sh.rotation.x = this.gait ? damp(sh.rotation.x, px + rc * 0.22, 14, dt) : damp(sh.rotation.x, px, 14, dt) + rc * 0.22;
@@ -460,11 +501,29 @@ export class MechMotion {
   freeArm(dt, g, pc, Bst, Air) {
     const m = this.m, b = m.bones, sh = b.shoulderL, el = b.elbowL;
     const swing = (this.gait ? -.28 * Math.cos(pc - .3) * this.forwardStride : -.22 * Math.sin(pc) * this.dir) * g * (1 - this.brace * 0.75);
-    sh.rotation.y = damp(sh.rotation.y, 0.1 + (this.gait ? this.brace*.26 : 0), 8, dt);
     const HR = !!m.stance;   // 主角機：衝刺時盾舉在身前；空中雙臂稍微張開保持平衡
-    sh.rotation.x = this.armLX.step(-0.12 + swing - Bst * (HR ? 1.0 : 0.35) - Air * (HR ? 0.45 : 0.2) - this.brace * 0.65, dt);
-    sh.rotation.z = this.armLZ.step((HR ? m.stance.armL : -0.1) + (HR ? Air * 0.3 - Bst * 0.15 : -Air * 0.18 - Bst * 0.08), dt);
-    el.rotation.x = damp(el.rotation.x, -0.45 - g * 0.15 - Air * 0.4 - (HR ? Bst * 0.55 : 0) - this.brace * 0.55, 8, dt);
+    let yaw = .1 + this.brace * .26;
+    let raise = -.12 + swing - Bst * (HR ? 1 : .35) - Air * (HR ? .45 : .2) - this.brace * .65;
+    let spread = (HR ? m.stance.armL : -.1) + (HR ? Air * .3 - Bst * .15 : -Air * .18 - Bst * .08);
+    let elbow = -.45 - g * .15 - Air * .4 - (HR ? Bst * .55 : 0) - this.brace * .55;
+    if (this.gait) {
+      yaw -= .3 * this.aimReady + .46 * this.guard;
+      raise -= .35 * this.aimReady + .67 * this.guard;
+      elbow -= .24 * this.aimReady + .58 * this.guard;
+      spread += .45 * this.stagger + .52 * Math.max(this.landingPrep, this.touchdown);
+      if (this.signalLeft > 0) {
+        const t = 1.2 - this.signalLeft, sweep = smooth(.32, .64, t);
+        const signal = smooth(0, .19, t) * (1 - smooth(.82, 1.2, t)) * (1 - this.stagger);
+        yaw = lerp(yaw, .17 - .47 * sweep, signal);
+        raise = lerp(raise, -.75 - .85 * sweep, signal);
+        spread = lerp(spread, .95 - .8 * sweep, signal);
+        elbow = lerp(elbow, -1.65 + 1.44 * sweep, signal);
+      }
+    }
+    sh.rotation.y = damp(sh.rotation.y, yaw, 8, dt);
+    sh.rotation.x = this.armLX.step(raise, dt);
+    sh.rotation.z = this.armLZ.step(spread, dt);
+    el.rotation.x = damp(el.rotation.x, elbow, 8, dt);
     if (m.saber) m.saber.visible = false;
   }
   saberPose() {

@@ -154,9 +154,11 @@ export class BattleLine {
       if(dt>0)actor.pose.vel.set((pos.x-x0)/dt,0,(pos.z-z0)/dt).clampLength(0,Math.max(speed,vel.length()));
       actor.pose.aim=aim;actor.pose.torsoYaw=actor.face;
       actor.pose.brace=brace?1:aim&&actor.cool<.3?.65:0;
-      actor.pose.low=actor.maneuver?.kind==='cover'?.8:brace?.55:0;
+      actor.pose.low=brace?.55:0;
+      actor.pose.guard=actor.maneuver?.kind==='cover'||actor.fallback;
+      actor.pose.stagger=actor.entity.stagT||0;
       actor.pose.boost=actor.pose.thrust=dash?.75:0;
-      actor.pose.lean=dash?.14:actor.entity.stagT>0?.19:0;
+      actor.pose.lean=dash?.14:0;
       actor.mech.animate(dt,actor.pose);
       if(actor.mech.footfall) this.C.audio.enemyStep(pos,.72);
     }
@@ -179,7 +181,7 @@ export class BattleLine {
     if(this.shots.length>=14 || distance>actor.weapon.range) { actor.cool=.22;return; }
     actor.cool=actor.weapon.cool; actor.entity.rk=0;
     actor.entity.warn=0;
-    if(actor.mech?.bones)actor.mech.recoil=.7;
+    if(actor.mech?.bones)actor.mech.recoil=shell?1.2:.7;
     C.fx.muzzle(from,this.dir.subVectors(end,from).normalize(),shell?'cannon':'mg');
     if(shell){
       C.fx.shellTracer(from,end,205); C.audio.cannon(from);
@@ -203,12 +205,14 @@ export class BattleLine {
       if(chest.distanceTo(s.end)>(s.shell?12:6) || w.raycast(s.from,chest,null)>=0) continue;
       C.fx.impact(chest,this.dir.subVectors(s.from,chest).normalize(),'armor');
       if(target.player){ C.hurt(s.damage,s.from,s.shell?'shell':'bullet');continue; }
+      this.dir.negate(); // 火花朝外，機身承受的衝量則沿彈道方向。
       s.actor.hits++;
       if(s.actor.friendly) {
         this.actualShots.allyHits++;
         C.damageEnemy(target.entity,s.damage,26,chest,this.dir,false,'frontline');
       } else {
         this.actualShots.enemyAllyHits++;target.ap-=s.damage;
+        if(!target.vehicle)target.mech.impact(Math.min(1.2,s.damage/900),this.dir);
         if(target.ap<=0) {
           target.ap=0; target.fallback=true; target.target=null;
           this.order(target,[target.pos.x-65,target.pos.z]);

@@ -133,6 +133,8 @@ export class MechCompanion {
     const target = this.canSupport(this.target) ? this.target : null;
     pose.vel.set(pos.x - oldX, 0, pos.z - oldZ).multiplyScalar(dt > 0 ? 1 / dt : 0).clampLength(0, Math.hypot(vel.x, vel.z));
     const speed = pose.vel.length();
+    pose.vel.y = grounded ? 0 : vel.y;
+    pose.clearance = pos.y - ground;
     if (target) target.chest(aim);
     const face = target ? Math.atan2(aim.x - pos.x, aim.z - pos.z) : speed > 1.5 ? Math.atan2(pose.vel.x, pose.vel.z) : this.heading;
     this.face = lerpAngle(this.face, face, 1 - Math.exp(-dt * 6));

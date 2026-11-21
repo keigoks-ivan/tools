@@ -23,6 +23,47 @@ function rig(kind='grunt') {
 function tick(m,st,dt=1/60) { m.root.position.addScaledVector(st.vel,dt); m.motion.update(dt,st); m.root.updateMatrixWorld(true); }
 const state = (vel=V()) => ({vel,grounded:true,boost:0,torsoYaw:0,aim:null});
 
+test('cover, stagger and the advance gesture produce distinct poses and release the free arm',()=>{
+  const m=rig('ally'),s=state();s.aim=V(0,12,90);
+  const run=n=>{for(let i=0;i<n;i++)tick(m,s);};
+  run(90);const b=m.bones,ready=b.shoulderL.rotation.x,hip=b.pelvis.position.y;
+  s.guard=true;run(45);
+  assert(b.shoulderL.rotation.x<ready-.5 && b.pelvis.position.y<hip-.55);
+  s.guard=false;s.stagger=2;run(45);
+  assert(b.shoulderL.rotation.z>.25 && b.pelvis.position.y<hip-.8);
+  s.stagger=0;run(100);m.motion.signalAdvance();run(20);
+  const raised=b.shoulderL.rotation.z;assert(raised>.4);
+  run(30);assert(b.shoulderL.rotation.z<raised && b.shoulderL.rotation.x<-1.25);
+  run(90);assert(Math.abs(b.shoulderL.rotation.x-ready)<.015);
+});
+
+test('hits roll with projectile travel in mech space and recoil returns the shoulder to its socket',()=>{
+  for(const yaw of [0,Math.PI]){
+    const m=rig('ace'),s=state();m.legYaw=s.torsoYaw=yaw;s.aim=V(0,12,80*Math.cos(yaw));
+    for(let i=0;i<80;i++)tick(m,s);
+    m.motion.impact(.95,V(1,0,0));m.recoil=1;
+    for(let i=0;i<5;i++)tick(m,s);
+    assert(m.bones.torso.rotation.z*Math.cos(yaw)<-.1);
+    assert(m.bones.shoulderR.position.z<m.motion.shoulderZ-.2);
+    for(let i=0;i<90;i++)tick(m,s);
+    assert(Math.abs(m.bones.shoulderR.position.z-m.motion.shoulderZ)<.001);
+    assert(Math.abs(m.bones.torso.rotation.z)<.005);
+  }
+});
+
+test('descending mechs extend their legs near the surface, absorb contact and stand up again',()=>{
+  const m=rig('grunt'),s=state();s.grounded=false;s.vel.y=-12;s.clearance=50;
+  for(let i=0;i<60;i++)m.motion.update(1/60,s);
+  const tucked=m.bones.kneeR.rotation.x;
+  s.clearance=1;
+  for(let i=0;i<30;i++)m.motion.update(1/60,s);
+  assert(m.bones.kneeR.rotation.x<tucked-.45);
+  s.grounded=true;s.vel.y=0;m.motion.update(1/60,s);
+  const hip=m.bones.pelvis.position.y;assert(m.motion.touchdown>.5);
+  for(let i=0;i<90;i++)m.motion.update(1/60,s);
+  assert(m.motion.touchdown<.01 && m.bones.pelvis.position.y>hip+.25);
+});
+
 test('grounded mechs initiate a step from rest and finish sharp turns at their own pace',()=>{
   for(const dt of [1/30,1/60]){
     const times=[];
