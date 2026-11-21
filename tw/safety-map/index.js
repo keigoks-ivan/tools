@@ -218,10 +218,11 @@
     var nw = D.news2026;
     document.getElementById('d-news').innerHTML = '<tr><th>地區</th><th>期間（2026 年）</th><th>用詞</th><th class="r">件數</th><th class="r">去年同期</th><th>出處</th></tr>' +
       nw.rows.map(function (r) {
-        return '<tr><td>' + r.area + '</td><td>' + md(r.start) + '～' + md(r.end) + (r.end_is_pub ? '＊' : '') + '</td><td>' + r.metric + '</td><td class="r"><b>' + SM.fmt(r.value) + '</b></td><td class="r">' +
+        return '<tr><td>' + r.area + (r.dagger ? '†' : '') + '</td><td>' + md(r.start) + '～' + md(r.end) + (r.end_is_pub ? '＊' : '') + '</td><td>' + r.metric + '</td><td class="r"><b>' + SM.fmt(r.value) + '</b></td><td class="r">' +
           (r.cmp == null ? '—' : SM.fmt(r.cmp)) + '</td><td><a href="' + r.url + '" target="_blank" rel="noopener">' + r.outlet + '</a> ' + md(r.pub) + '</td></tr>';
       }).join('');
     document.getElementById('d-news-none').textContent = nw.none.join('、');
+    document.getElementById('d-news-dagger').textContent = nw.rows.filter(function (r) { return r.dagger; }).map(function (r) { return '†' + r.dagger; }).join(' ');
 
     /* 事故 */
     var c2 = echarts.init(document.getElementById('d-crash'));
