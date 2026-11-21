@@ -46,9 +46,9 @@
     h += '<tr><td>選手村社宅</td><td class="l" colspan="11">一樓店鋪由新北市標租。最近一批只有 1 間，192.9 坪，月租底價 323,033 元（含稅），每坪約 1,675 元；改作補教用途要出租人書面同意，並辦變更使用。</td></tr>';
     h += '<tr><td>工二工業區、工一 AI+ 智慧園區</td><td class="l" colspan="11">以工廠和辦公為主，店面很少。</td></tr></tbody>';
     document.getElementById('tblOverview').innerHTML = h;
+    document.getElementById('st_pop_mid').textContent = fmt(R.LK02.pop25);
     document.getElementById('st_shops').textContent = fmt(R.LK02.shops_alive);
-    document.getElementById('st_sale').textContent = fmt(R.LK03.sale_med) + ' 萬';
-    document.getElementById('st_pipe').textContent = '約 ' + fmt(Math.round(R.LK03.pipe_units / 10) * 10);
+    document.getElementById('st_sale').textContent = fmt(R.LK02.sale_med) + ' 萬';
     Array.prototype.forEach.call(document.querySelectorAll('.area-card[data-a]'), function (el) { el.style.borderLeftColor = COLORS[el.getAttribute('data-a')]; });
 
     document.getElementById('tblYield').innerHTML = yieldTbl(S, ord);
@@ -322,8 +322,74 @@
     ['hold', '持有年數', 'number', 1], ['hg', '每年房價變動（%）', 'number', 0.5], ['rg', '每年租金調整（%）', 'number', 0.5],
     ['fee', '每年稅費與管理費占總價比例（%）', 'number', 0.1]];
   var PRESETS = [
-    { area: 40, price: 55, rent: 1374, ltv: 60, rate: 2.8, years: 20, hold: 10, hg: 0, rg: 0, fee: 0.5 },
+    { area: 40, price: 73, rent: 1351, ltv: 60, rate: 2.8, years: 20, hold: 10, hg: 0, rg: 0, fee: 0.5 },
     { area: 40, price: 69, rent: 1462, ltv: 60, rate: 2.8, years: 20, hold: 10, hg: 0, rg: 0, fee: 0.5 }];
+  /* 中段專題：以四維路切兩半的示意圖、比較表、每年淨增 */
+  var MIDC = { W: '#b91c1c', E: '#f87171' };
+  function midMap(M) {
+    var g = M.geo, b = g.bbox, kx = Math.cos((b[1] + b[3]) / 2 * Math.PI / 180), W = 600, pad = 10;
+    var sc = (W - 2 * pad) / ((b[2] - b[0]) * kx), H = Math.round((b[3] - b[1]) * sc + 2 * pad);
+    function P(c) { return [(pad + (c[0] - b[0]) * kx * sc).toFixed(1), (pad + (b[3] - c[1]) * sc).toFixed(1)]; }
+    function path(polys) { var d = ''; polys.forEach(function (poly) { poly.forEach(function (ring) { ring.forEach(function (c, i) { var q = P(c); d += (i ? 'L' : 'M') + q[0] + ' ' + q[1]; }); d += 'Z'; }); }); return d; }
+    var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="中段以四維路分成兩半的示意圖">';
+    ['W', 'E'].forEach(function (k) { s += '<path class="mm-a" d="' + path(g[k]) + '" style="fill:' + MIDC[k] + ';fill-opacity:' + (k === 'W' ? .42 : .3) + '"/>'; });
+    g.roads.forEach(function (r) {
+      var d = r.p.map(function (c, i) { var q = P(c); return (i ? 'L' : 'M') + q[0] + ' ' + q[1]; }).join('');
+      var key = r.n === '四維路' ? ' mm-key' : '';
+      s += '<path class="mm-r' + key + '" d="' + d + '"/>';
+    });
+    var LAB = { '忠孝路': '忠孝路', '四維路': '四維路', '中山路': '中山路', '信義路': '信義路', '文化一路一段': '文化一路', '文化二路一段': '文化二路', '文化三路一段': '文化三路', '文化北路一段': '文化北路' };
+    g.roads.forEach(function (r) {
+      if (!LAB[r.n]) return;
+      var q = P(r.p[Math.floor(r.p.length / 2)]);
+      s += '<text class="mm-t' + (r.n === '四維路' ? ' mm-key' : '') + '" x="' + q[0] + '" y="' + q[1] + '" text-anchor="middle">' + LAB[r.n] + '</text>';
+    });
+    g.marks.forEach(function (m) { var q = P([m.lon, m.lat]); s += '<g class="mm-m"><circle cx="' + q[0] + '" cy="' + q[1] + '" r="5"/><text x="' + (+q[0] + 9) + '" y="' + (+q[1] + 4) + '">' + esc(m.n) + '</text></g>'; });
+    s += '</svg><div class="mm-leg"><span><i style="background:' + MIDC.W + '"></i>' + esc(M.names.W) + '</span><span><i style="background:' + MIDC.E + '"></i>' + esc(M.names.E) + '</span></div>';
+    document.getElementById('midMap').innerHTML = s;
+  }
+  function buildMid(M) {
+    var w = M.halves.W, e = M.halves.E, k = M.back;
+    function n1(v) { return fmt(v, 1); }
+    function pct(v) { return sgn(v, 1) + '%'; }
+    function wn(v, n) { return fmt(v, 1) + '（' + n + '）'; }
+    function rn(v, n) { return fmt(v) + '（' + n + '）'; }
+    var G = [
+      ['住戶', [
+        ['人口（2025 年底）', function (x) { return fmt(x.pop25); }],
+        ['人口比 2019 年底', function (x) { return pct(x.pop_chg); }],
+        ['6～11 歲兒童', function (x) { return fmt(x.kids611); }],
+        ['0～5 歲比 2019 年底', function (x) { return pct(x.age05_chg); }]]],
+      ['店家', [
+        ['店面型商家（營業中）', function (x) { return fmt(x.shop_alive); }],
+        ['每千位居民', function (x) { return n1(x.shop_k1k); }],
+        ['　餐飲（每千位居民）', function (x) { return n1(x.cat_k1k['餐飲']); }],
+        ['　零售（每千位居民）', function (x) { return n1(x.cat_k1k['零售']); }],
+        ['　美容美髮（每千位居民）', function (x) { return n1(x.cat_k1k['美容美髮']); }],
+        ['補習班（每 100 名 6～11 歲兒童）', function (x) { return fmt(x.cram_per100, 2); }],
+        ['店面型商家淨增（2021～2025）', function (x) { return fmt(x.shop_net); }]]],
+      ['供給', [
+        ['2016 年後完工或預售店面大樓（棟）', function (x) { return fmt(x.new10_bld); }],
+        ['未完工戶數（2026 年起完工）', function (x) { return fmt(x.pipe_units); }],
+        ['　其中 2026 年交屋', function (x) { return fmt(x.pipe_2026); }],
+        ['已賣出的預售店面（間）', function (x) { return fmt(x.pipe_signed); }],
+        ['591 一樓出租掛牌（筆）', function (x) { return fmt(x.l591_rent); }],
+        ['　出租坪數中位數（使用坪）', function (x) { return n1(x.l591_rent_area); }]]],
+      ['價格（2023 年以來，括號筆數）', [
+        ['成交中位數（萬／坪）', function (x) { return wn(x.sale_med, x.sale_n); }],
+        ['實價登錄月租中位數（元／坪）', function (x) { return rn(x.rent_med, x.rent_n); }],
+        ['591 一樓月租開價（換成含公設口徑，元／坪）', function (x) { return fmt(x.l591_rent_conv); }]]]];
+    var h = '<thead><tr><th></th><th><span class="chip" style="background:' + MIDC.W + '"></span>' + esc(M.names.W) + '</th><th><span class="chip" style="background:' + MIDC.E + '"></span>' + esc(M.names.E) + '</th><th><span class="chip" style="background:' + COLORS.LK03 + '"></span>後段（參考）</th></tr></thead><tbody>';
+    G.forEach(function (grp) {
+      h += '<tr class="grp"><td colspan="4">' + grp[0] + '</td></tr>';
+      grp[1].forEach(function (r) { h += '<tr><td class="l">' + r[0] + '</td><td>' + r[1](w) + '</td><td>' + r[1](e) + '</td><td>' + r[1](k) + '</td></tr>'; });
+    });
+    document.getElementById('tblMid').innerHTML = h + '</tbody>';
+    midMap(M);
+    var yl = M.net_years.length - 1;
+    multiples('figMid', { ord: ['W', 'E'], nm: { W: '四維路以西', E: '四維路以東' }, colors: MIDC, years: M.net_years, data: M.net, type: 'bar', unit: ' 家', step: 20, peak: false, cols: 2,
+      sub: function (x) { return M.net_years[yl] + ' 年 ' + fmt(M.net[x][yl]) + ' 家'; } });
+  }
   function wan(v) { return fmt(v / 1e4, 1) + ' 萬'; }
   function calc() {
     var v = {};
@@ -987,12 +1053,13 @@
         bootMap({ summary: a[0], areas: a[1], villGeo: a[2], vill: a[2], bld: a[3], l591: a[4], edu: a[5], sch: a[6], pipe: a[7], catchData: a[8], biz: a[9] });
       }).catch(function (e) { console.error('linkou map load', e); });
   } else if (VIEW === 'report') {
-    Promise.all(['summary.json', 'charts.json', 'areas_geo.json', 'villages_geo.json', 'buildings.json', 'listings591.json', 'edu.json', 'schools.json', 'pipeline.json', 'catch.json', 'roads.json', 'bizmap.json', 'upper.json'].map(jget))
+    Promise.all(['summary.json', 'charts.json', 'areas_geo.json', 'villages_geo.json', 'buildings.json', 'listings591.json', 'edu.json', 'schools.json', 'pipeline.json', 'catch.json', 'roads.json', 'bizmap.json', 'upper.json', 'mid.json'].map(jget))
       .then(function (a) {
         var S = a[0], C = a[1];
         UP = a[12]; CH = C; ROAD1 = a[10]; SUM1 = S;
         buildTables(S);
         buildCalc();
+        buildMid(a[13]);
         buildCharts(C);
         buildRoads(a[10], '1f');
         seg('supplySwitch', function (m) { drawFig1(m); buildRoads(ROAD1, m); });
