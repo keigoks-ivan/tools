@@ -322,7 +322,7 @@
     ['hold', '持有年數', 'number', 1], ['hg', '每年房價變動（%）', 'number', 0.5], ['rg', '每年租金調整（%）', 'number', 0.5],
     ['fee', '每年稅費與管理費占總價比例（%）', 'number', 0.1]];
   var PRESETS = [
-    { area: 40, price: 54, rent: 1419, ltv: 60, rate: 2.8, years: 20, hold: 10, hg: 0, rg: 0, fee: 0.5 },
+    { area: 40, price: 55, rent: 1374, ltv: 60, rate: 2.8, years: 20, hold: 10, hg: 0, rg: 0, fee: 0.5 },
     { area: 40, price: 69, rent: 1462, ltv: 60, rate: 2.8, years: 20, hold: 10, hg: 0, rg: 0, fee: 0.5 }];
   function wan(v) { return fmt(v / 1e4, 1) + ' 萬'; }
   function calc() {
