@@ -4,7 +4,7 @@
   var THEFT = { '住宅竊盜': 1, '汽車竊盜': 1, '機車竊盜': 1 };
 
   Promise.all([
-    SM.load(['towns', 'crime_town', 'crime_national', 'drug', 'pop_county', 'news2026']),
+    SM.load(['towns', 'crime_town', 'crime_national', 'drug', 'pop_county', 'news2026', 'county_drug']),
     fetch('data/towns.topo.json').then(function (r) { return r.json(); })
   ]).then(function (res) {
     var D = res[0], topo = res[1];
@@ -223,6 +223,19 @@
       }).join('');
     document.getElementById('d-news-none').textContent = nw.none.join('、');
     document.getElementById('d-news-dagger').textContent = nw.rows.filter(function (r) { return r.dagger; }).map(function (r) { return '†' + r.dagger; }).join(' ');
+
+    /* 縣市四項指標 */
+    var cd = D.county_drug;
+    var COLS = [['stu', '學生通報', '2022～24 年', 3, 1], ['pros', '檢察署施用被告', '2025 年', 1, 0], ['crash', '毒駕事故', '2018～25 年', 8, 2], ['cit', '毒駕舉發', '2025 年', 1, 0]];
+    var cell = function (k, o) {
+      var bg = SM.relColor(o.v, cd.nat[k[0]], o.n), dark = bg === '#a83a14' || bg === '#2f7d6d';
+      var unit = k[0] === 'stu' ? '人' : k[0] === 'pros' ? '人' : '件';
+      return '<td class="r" style="background:' + bg + (dark ? ';color:#fff' : '') + '" title="' + (k[3] > 1 ? k[3] + ' 年合計 ' : '') + SM.fmt(o.n) + ' ' + unit + '">' + o.v.toFixed(k[4]) + '</td>';
+    };
+    document.getElementById('d-county').innerHTML = '<tr><th>地區</th>' + COLS.map(function (k) { return '<th class="r">' + k[1] + '<br><span style="font-weight:400">' + k[2] + '</span></th>'; }).join('') + '</tr>' +
+      '<tr><td><b>全國</b></td>' + COLS.map(function (k) { return '<td class="r"><b>' + cd.nat[k[0]].toFixed(k[4]) + '</b></td>'; }).join('') + '</tr>' +
+      cd.rows.map(function (r) { return '<tr><td>' + r.g + '</td>' + COLS.map(function (k) { return cell(k, r[k[0]]); }).join('') + '</tr>'; }).join('');
+    document.getElementById('d-county-legend').innerHTML = SM.relLegendHtml('跟全國平均比');
 
     /* 事故 */
     var c2 = echarts.init(document.getElementById('d-crash'));
