@@ -194,6 +194,7 @@
       function show(k) {
         if (ord.indexOf(k) < 0) k = ord[0];
         dispose(); cur = k;
+        if (LK.heroCur) LK.heroCur(k);
         var r = S.rows[k], col = COLORS[k];
         Array.prototype.forEach.call(document.querySelectorAll('#arPills .pill'), function (el) { var on = el.getAttribute('data-a') === k; el.classList.toggle('on', on); if (on) el.setAttribute('aria-current', 'page'); else el.removeAttribute('aria-current'); });
 
@@ -213,7 +214,7 @@
           [fmt(r.rent_med) + ' 元', '一樓店面月租中位數每坪（2023 年以來，' + r.rent_n + ' 筆）'],
           [fmt(r['yield'], 1) + '%', '毛報酬率（成交與租賃配對）'],
           [fmt(r.pipe_units) + ' 戶', '未完工建案戶數，已簽約店面 ' + fmt(r.pipe_signed) + ' 間']];
-        q('arStats').innerHTML = stats.map(function (s) { return '<div class="stat" style="border-top-color:' + col + '"><div class="n">' + s[0] + '</div><div class="l">' + s[1] + '</div></div>'; }).join('');
+        q('arStats').innerHTML = stats.map(function (s) { return '<div class="stat lk-ac" style="--ac:' + col + '"><div class="n">' + s[0] + '</div><div class="l">' + s[1] + '</div></div>'; }).join('');
 
         /* 地圖 */
         var g = geom[k], rp = repPoint(g);
@@ -258,7 +259,7 @@
         yieldMode = '1f'; setYield();
 
         document.title = '林口店面選址・' + r.name;
-        q('arH1').textContent = r.name + '：人口、新店面、同業和價格';
+        q('arH1').innerHTML = '<span class="h1a">' + esc(r.name) + '</span><span class="h1c">：</span><span class="h1b">人口、新店面、同業和價格</span>';
       }
       q('arPills').addEventListener('click', function (e) {
         var el = e.target.closest('a.pill'); if (!el || e.metaKey || e.ctrlKey || e.shiftKey) return;

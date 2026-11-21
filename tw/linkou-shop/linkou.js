@@ -88,7 +88,7 @@
   }
 
   /* ---------------- 圖表 ---------------- */
-  var INK = '#1e3a5f', MUTED = '#5a7a9a', GRID = '#edf1f5', BASE = '#cfd8e3';
+  var INK = '#211d18', MUTED = '#6f665a', GRID = '#ece5d7', BASE = '#d6cbb7';
   function mk(id, opt, h) {
     var el = document.getElementById(id);
     if (h) el.style.height = h + 'px';
@@ -110,8 +110,8 @@
   }
   /* 提示卡：白底無框、圓角 8、柔影；每列＝色點＋名稱＋右對齊數值 */
   function tip(unit, titleFn, extra) {
-    return Object.assign({ trigger: 'axis', backgroundColor: '#fff', borderWidth: 0, padding: [10, 12], confine: true,
-      extraCssText: 'border-radius:8px;box-shadow:0 6px 20px rgba(30,58,95,.16);',
+    return Object.assign({ trigger: 'axis', backgroundColor: '#fffdf8', borderWidth: 0, padding: [10, 12], confine: true,
+      extraCssText: 'border-radius:4px;box-shadow:0 6px 20px rgba(33,29,24,.16);',
       textStyle: { color: INK, fontSize: 12, fontFamily: FONT },
       axisPointer: { type: 'line', lineStyle: { color: BASE, width: 1 } },
       formatter: function (ps) {
@@ -125,7 +125,7 @@
         return h;
       } }, extra || {});
   }
-  var LEG = { top: 0, left: 0, icon: 'circle', itemWidth: 8, itemHeight: 8, itemGap: 16, textStyle: { fontSize: 11, color: '#4a6080' } };
+  var LEG = { top: 0, left: 0, icon: 'circle', itemWidth: 8, itemHeight: 8, itemGap: 16, textStyle: { fontSize: 11, color: '#3a342c' } };
   function endDot(coord, color) {
     return { symbol: 'circle', symbolSize: 8, coord: coord, itemStyle: { color: color, borderColor: '#fff', borderWidth: 2 }, label: { show: false } };
   }
@@ -217,7 +217,7 @@
         areaStyle: { color: col6, opacity: 0.10 },
         endLabel: { show: true, distance: 10, color: INK, fontSize: 11, fontWeight: 600, formatter: function (p) { return fmt(p.value) + '\n{m|' + ml[0] + ' 年 ' + (+ml[1]) + ' 月}'; }, rich: { m: { fontSize: 10.5, color: MUTED, fontWeight: 400, lineHeight: 15 } } },
         markPoint: { silent: true, animation: false, data: [endDot([n6 - 1, vv[n6 - 1]], col6)] },
-        markArea: (a >= 0 && b >= 0) ? { silent: true, itemStyle: { color: 'rgba(90,122,154,.14)' }, label: { color: MUTED, fontSize: 11, position: 'insideTop' },
+        markArea: (a >= 0 && b >= 0) ? { silent: true, itemStyle: { color: 'rgba(111,102,90,.12)' }, label: { color: MUTED, fontSize: 11, position: 'insideTop' },
           data: [[{ xAxis: mo[a], name: '三級警戒' }, { xAxis: mo[b] }]] } : undefined }] }, narrow ? 280 : 320);
 
     attachResize();
@@ -252,7 +252,7 @@
 
   /* 圖 5：兩張熱度表（單一藍色，深淺＝數值，格內印數字） */
   function heatColor(t) {
-    var a = [205, 226, 251], z = [24, 79, 149];
+    var a = [242, 235, 222], z = [96, 66, 38];
     return 'rgb(' + a.map(function (x, i) { return Math.round(x + (z[i] - x) * t); }).join(',') + ')';
   }
   function heatTable(title, ord, nm, years, data, mxIn) {
@@ -297,9 +297,9 @@
       a.rows.forEach(function (r) {
         var mu = (r.other || r.road === '路段不明') ? ' mu' : '';
         if (up) h += '<div class="rr up' + mu + '"><span class="rn">' + esc(r.road) + '</span>' +
-          bar(r.b16, sc.b16, col) + bar(r.b15, sc.b15, '#c3ccd8') + bar(r.sales, sc.sales, '#8b7fb8') + bar(r.units, sc.units, '#6b8cae') + '</div>';
+          bar(r.b16, sc.b16, col) + bar(r.b15, sc.b15, '#cbbfaa') + bar(r.sales, sc.sales, '#8b7fb8') + bar(r.units, sc.units, '#6b8cae') + '</div>';
         else h += '<div class="rr' + mu + '"><span class="rn">' + esc(r.road) + '</span>' +
-          bar(r.b16, sc.b16, col) + bar(r.b15, sc.b15, '#c3ccd8') + bar(r.units, sc.units, '#6b8cae') +
+          bar(r.b16, sc.b16, col) + bar(r.b15, sc.b15, '#cbbfaa') + bar(r.units, sc.units, '#6b8cae') +
           '<div class="rb">' + (r.signed ? '<b>' + fmt(r.signed) + '</b>' : '<b class="z">–</b>') + '</div></div>';
       });
       h += '</div>';
@@ -921,10 +921,65 @@
     window.__mp = { setSheet: setSheet, sheet: function () { return sheet; }, lookup: lookup, go: go, fin: fin };
   }
 
+  /* ---------------- 頁首商圈示意圖 ---------------- */
+  /* 六個主要商圈上色、其他灰色虛線，加捷運 A8、A9；商圈頁（data-view="area"）把當頁商圈加深 */
+  var HERO_NAME = { LK03: '後段', LK01: '前段', LK02: '中段', LK06: '南勢', LK07: '舊街', LK05: '麗園東勢' };
+  var heroBox = null, heroK = null;
+  function heroCur(k) {
+    heroK = k;
+    if (!heroBox) return;
+    Array.prototype.forEach.call(heroBox.querySelectorAll('[data-a]'), function (el) {
+      var on = el.getAttribute('data-a') === k;
+      if (el.tagName.toLowerCase() === 'text') { el.classList.toggle('hm-lcur', on); el.classList.toggle('hm-ldim', !on); }
+      else if (!el.classList.contains('hm-o')) { el.classList.toggle('hm-cur', on); el.classList.toggle('hm-dim', !on); }
+    });
+  }
+  function heroMap(box) {
+    var isArea = document.body.getAttribute('data-view') === 'area';
+    Promise.all([jget('areas_geo.json'), jget('search.json')]).then(function (res) {
+      var fs = res[0].features, pl = res[1].places;
+      function rings(g) { return g.type === 'Polygon' ? [g.coordinates] : g.coordinates; }
+      var x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+      fs.forEach(function (ft) {
+        var id = ft.properties.id;
+        if (!HERO_NAME[id] && id !== 'LK04') return;
+        rings(ft.geometry).forEach(function (poly) { poly.forEach(function (ring) { ring.forEach(function (c) {
+          x0 = Math.min(x0, c[0]); x1 = Math.max(x1, c[0]); y0 = Math.min(y0, c[1]); y1 = Math.max(y1, c[1]);
+        }); }); });
+      });
+      var st = pl.filter(function (p) { return p.t === '捷運' && /A8|A9/.test(p.n); });
+      st.forEach(function (p) { y0 = Math.min(y0, p.lat); });
+      var kx = Math.cos((y0 + y1) / 2 * Math.PI / 180), W = 600, pad = 18;
+      var sc = (W - 2 * pad) / ((x1 - x0) * kx), H = Math.round((y1 - y0) * sc + 2 * pad);
+      function P(lon, lat) { return [pad + (lon - x0) * kx * sc, pad + (y1 - lat) * sc]; }
+      var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="林口主要商圈示意圖">';
+      fs.slice().sort(function (a, b) { return (HERO_NAME[a.properties.id] ? 1 : 0) - (HERO_NAME[b.properties.id] ? 1 : 0); }).forEach(function (ft) {
+        var id = ft.properties.id, d = '', main = !!HERO_NAME[id];
+        rings(ft.geometry).forEach(function (poly) { poly.forEach(function (ring) {
+          ring.forEach(function (c, i) { var p = P(c[0], c[1]); d += (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1); });
+          d += 'Z';
+        }); });
+        s += '<path class="hm-a' + (main ? '' : ' hm-o') + '" data-a="' + id + '" d="' + d + '"' + (main ? ' style="--c:' + COLORS[id] + '"' : '') + '/>';
+      });
+      st.forEach(function (p) {
+        var q = P(p.lon, p.lat);
+        s += '<g class="hm-st"><circle cx="' + q[0].toFixed(1) + '" cy="' + q[1].toFixed(1) + '" r="4.5"/><text x="' + (q[0] + 9).toFixed(1) + '" y="' + (q[1] + 4).toFixed(1) + '">捷運' + esc(p.n.replace(/站.*/, '')) + '</text></g>';
+      });
+      pl.filter(function (p) { return p.t === '商圈' && HERO_NAME[p.k]; }).forEach(function (p) {
+        var q = P(p.lon, p.lat);
+        s += '<text class="hm-l" data-a="' + p.k + '" x="' + q[0].toFixed(1) + '" y="' + q[1].toFixed(1) + '" text-anchor="middle">' + HERO_NAME[p.k] + '</text>';
+      });
+      box.innerHTML = s + '</svg><div class="hm-cap">' + (isArea ? '林口主要商圈，深色是這一頁的商圈' : '林口六個主要商圈與機場捷運站') + '</div>';
+      heroBox = box;
+      if (isArea && heroK) heroCur(heroK);
+    }).catch(function (e) { console.error('hero map', e); });
+  }
+
   /* ---------------- 啟動 ---------------- */
   var VIEW = (document.body && document.body.getAttribute('data-view')) || 'report';
   window.LK = { jget: jget, fmt: fmt, esc: esc, sgn: sgn, COLORS: COLORS, FONT: FONT, INK: INK, MUTED: MUTED, multiples: multiples, heatTable: heatTable, buildRoads: buildRoads, buildYieldUp: buildYieldUp, yieldTbl: yieldTbl, attachResize: attachResize, areaStyle: areaStyle, inGeom: inGeom, FLOOR_ONE: FLOOR_ONE,
-    setUP: function (u) { UP = u; }, centroid: centroid, tip: tip, xAx: xAx, yAx: yAx, mk: mk, endDot: endDot, charts: charts };
+    setUP: function (u) { UP = u; }, heroCur: heroCur, centroid: centroid, tip: tip, xAx: xAx, yAx: yAx, mk: mk, endDot: endDot, charts: charts };
+  if (document.getElementById('lkHeroMap')) heroMap(document.getElementById('lkHeroMap'));
   if (VIEW === 'map') {
     Promise.all(['summary.json', 'areas_geo.json', 'villages_geo.json', 'buildings.json', 'listings591.json', 'edu.json', 'schools.json', 'pipeline.json', 'catch.json', 'bizmap.json', 'upper.json'].map(jget))
       .then(function (a) {
