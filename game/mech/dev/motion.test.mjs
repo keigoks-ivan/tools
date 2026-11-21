@@ -51,6 +51,22 @@ test('hits roll with projectile travel in mech space and recoil returns the shou
   }
 });
 
+test('walking and airborne mechs keep distinct foot lanes at both frame rates',()=>{
+  for(const dt of [1/30,1/60])for(const kind of ['ally','ace','heavy']){
+    const m=rig(kind),s=state(),left=V(),right=V();
+    const span=()=>m.bones.ankleL.getWorldPosition(left).sub(m.bones.ankleR.getWorldPosition(right)).x/m.scale;
+    tick(m,s,dt);assert(span()>4.65);
+    s.vel.z=12;let low=Infinity,high=-Infinity;
+    for(let i=0;i<3/dt;i++){
+      tick(m,s,dt);if(i<1/dt)continue;
+      low=Math.min(low,span());high=Math.max(high,span());
+    }
+    assert(low>4.05 && high-low>.24);
+    s.grounded=false;for(let i=0;i<2/dt;i++)tick(m,s,dt);
+    assert(span()>5 && m.bones.hipL.rotation.z>.15 && m.bones.hipR.rotation.z<-.15);
+  }
+});
+
 test('descending mechs extend their legs near the surface, absorb contact and stand up again',()=>{
   const m=rig('grunt'),s=state();s.grounded=false;s.vel.y=-12;s.clearance=50;
   for(let i=0;i<60;i++)m.motion.update(1/60,s);

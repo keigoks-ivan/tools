@@ -7,9 +7,9 @@ import * as THREE from 'three';
 const TAU = Math.PI * 2;
 const LEGS = [['R', 0, -1], ['L', 0.5, 1]];
 const GAITS = {
-  grunt: { support: 0.68, stride: 3.6, max: 7.2, lift: 0.38, sway: 0.42, weight: 1, stance: 1.16, bend: 0.15, pivot: 4.6 },
-  ace: { support: 0.62, stride: 3.4, max: 7.2, lift: 0.48, sway: 0.3, weight: 0.8, stance: 1.12, bend: 0.2, pivot: 5.5 },
-  heavy: { support: 0.72, stride: 4.2, max: 7.8, lift: 0.28, sway: 0.5, weight: 1.35, stance: 1.24, bend: 0.25, pivot: 3.1 },
+  grunt: { support: 0.68, stride: 3.6, max: 7.2, lift: 0.38, sway: 0.42, weight: 1, stance: 1.63, bend: 0.15, pivot: 4.6 },
+  ace: { support: 0.62, stride: 3.4, max: 7.2, lift: 0.48, sway: 0.3, weight: 0.8, stance: 1.57, bend: 0.2, pivot: 5.5 },
+  heavy: { support: 0.72, stride: 4.2, max: 7.8, lift: 0.28, sway: 0.5, weight: 1.35, stance: 1.72, bend: 0.25, pivot: 3.1 },
 };
 // 重量模式（mech.heavy = true 才啟用，預設關閉＝舊行為）：機身轉向限速、落腳多沉＋落地相位拉長、上身微晃
 export const HEAVY = {
@@ -212,9 +212,12 @@ export class MechMotion {
     }
     const vg = af + Math.abs(yawRate) * 3.2;                // 原地轉身也要踏步
     let settle = false, reachCrouch = 0;
-    // 站姿：主角機靜止時兩腳張開、左腳在前、膝蓋微彎朝外（走起來收回一般步態）；toe＝腳尖外八
+    // 支撐腳各走自己的落腳線，側移時再拉開。左腳略前，右腳留在身後承重。
     const Sn = m.stance, idle = 1 - this.g;
-    const sw = Sn ? lerp(Sn.w, 1.1, this.g) : lerp(P.stance, 1.04 + .52 * lateral, this.g), toe = Sn ? Sn.toe * idle : 0.08 * idle, fw = Sn ? Sn.fwd * idle : 0.55 * idle;
+    const restingWidth = Sn ? Math.max(1.6, Sn.w) : P.stance;
+    const sw = lerp(restingWidth, Math.max(1.44, restingWidth * .8) + .43 * lateral, this.g);
+    const toe = lerp(Sn?.toe ?? .16, .065, this.g);
+    const fw = lerp(Math.max(Sn?.fwd ?? 0, this.legLen * .13), .16, this.g);
     const atRest = af < .6 && Math.abs(yawRate) < .2;
     const fz = (n) => (n === 'L' ? fw : -fw * 0.5);
     for (const n of ['R', 'L']) {
@@ -304,10 +307,10 @@ export class MechMotion {
         _landing.copy(neutral).applyAxisAngle(UP, turn).applyMatrix4(m.root.matrixWorld);
         _landing.x += st.vel.x * remaining * walkW; _landing.z += st.vel.z * remaining * walkW;
         const other = this.feet[n === 'R' ? 'L' : 'R'];
-        if (P && !reset && other.ready && other.stance) {
+        if (!reset && other.ready && other.stance) {
           // 落點至少隔一個腳掌寬。橫移時收回後腳，不能把它踩到支撐腳裡。
           const gap = sx * ((_landing.x - other.anchor.x) * cL - (_landing.z - other.anchor.z) * sL);
-          const shift = sx * Math.max(0, 2.75 * k - gap);
+          const shift = sx * Math.max(0, this.legLen * .46 * k - gap);
           _landing.x += cL * shift; _landing.z -= sL * shift;
         }
         const correction = liftOff ? 1 : (1 - Math.exp(-18 * dt)) * (1 - smooth(.35, .68, swingPhase));
@@ -348,7 +351,10 @@ export class MechMotion {
         }
         _v.lerpVectors(foot.from, foot.to, e);
         if (foot.checkedLanding) _v.y += e * foot.heightDelta * (1 - smooth(.68, 1, w));
-        _v.y += H * k * Math.pow(Math.sin(Math.PI * w), 2);
+        const arc = Math.sin(Math.PI * w) ** 2;
+        const outward = sx * this.legLen * .055 * arc * g * k;
+        _v.x += cL * outward; _v.z -= sL * outward;
+        _v.y += (H + .28 * g) * k * arc;
         pitch = P ? (lerp(-.17, .11, smooth(.12, .83, w)) - .07 * Math.sin(TAU * w)) * g * this.forwardStride : -Math.sin(TAU * w) * (campaign ? .13 : .18) * g * this.dir;
         footYaw = lerpAngle(foot.fromYaw, foot.toYaw, e);
       }
@@ -377,11 +383,11 @@ export class MechMotion {
       const ah = HR ? (r ? -0.45 : 0.2) : r ? -0.6 : -0.12, ak = HR ? (r ? 1.0 : 1.1) : r ? 1.1 : 0.55, aa = HR ? (r ? 0.35 : 0.5) : r ? 0.2 : 0.4;
       const bw = Bst * (1 - Air), aw = Air;
       const prep = this.landingPrep;
-      hipA = lerp(lerp(hipA, bh, bw), lerp(ah + flightSpeed*.45, -.24, prep), aw) + shake;
-      kneeA = lerp(lerp(kneeA, bk, bw), lerp(ak + flightSpeed*.25, .45, prep), aw) - shake;
-      ank = lerp(lerp(ank, ba, bw), lerp(aa, -.21, prep), aw);
-      const boostRoll = HR ? -sx * .08 : sx * .09 - .21 * this.sideStride;
-      roll = lerp(roll, boostRoll, bw) * (1 - aw) + (-sx * (HR ? 0.16 : 0.1)) * aw;
+      hipA = lerp(lerp(hipA, bh, bw), lerp(ah + flightSpeed*.45, -.24 - sx * .09, prep), aw) + shake;
+      kneeA = lerp(lerp(kneeA, bk, bw), lerp(ak + flightSpeed*.25, .45 + sx * .06, prep), aw) - shake;
+      ank = lerp(lerp(ank, ba, bw), lerp(aa, -.21 + sx * .03, prep), aw);
+      const boostRoll = sx * .19 - (P ? .16 * this.sideStride : 0);
+      roll = lerp(roll, boostRoll, bw) * (1 - aw) + sx * (.20 + .045 * prep) * aw;
       hipA -= m.land * 0.4; kneeA += m.land * 0.85; ank -= m.land * 0.45;
       hp.rotation.set(hipA, Sn ? sx * Sn.knee * idle * walkW : 0, roll, 'ZXY');
       b['knee' + n].rotation.x = kneeA;

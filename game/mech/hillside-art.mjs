@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { PropBatch, fieldMaterial, signAtlas } from './front-scenery.mjs';
-import { HILL_LINES, HILL_EXIT } from './hillside-layout.mjs';
+import { HILL_LINES, HILL_EXIT, HILL_COVER } from './hillside-layout.mjs';
 
 export function buildHillside(world,root) {
   const materials={
@@ -112,6 +112,29 @@ export function buildHillside(world,root) {
       signs.push([jp,x-18.7,height(x-19,z+24)+16,z+24,-Math.PI/2,21]);
     }
   }
+  for(const {x,z,w,d,h,type} of HILL_COVER){
+    // 擋土牆、設備間及橋墩的主體就是碰撞體；護角、洩水孔和檢修門併入靜態場景。
+    const skin=type===0?'stone':'concrete';
+    box(skin,x,z,h/2-1,w,h+2,d);solid(x,z,w,d,h);
+    box('stone',x,z,h-.35,w+.3,.7,d+.3);
+    if(type===0){
+      for(const dz of [-.39,.39])box('concrete',x-w/2-.7,z+dz*d,h*.46,1.7,h*.91,1.4,0,0,-.065);
+      for(const y of [h*.34,h*.67])box('concrete',x-w/2-.06,z,y,.14,.22,d);
+      for(const dz of [-.32,0,.32])for(const y of [3.8,9.4])
+        box('steel',x-w/2-.06,z+dz*d,y,.14,.48,.74);
+    }else if(type===1){
+      box('steel',x+w*.15,z,h+.56,w*.39,1.12,d*.32);
+      paint(x-w/2-.08,z,h*.25,.18,h*.49,d*.34,0x627374);
+      for(let n=0;n<4;n++)box('steel',x-w/2-.16,z,h*.70+n*.46,.34,.25,d*.48);
+    }else{
+      box('steel',x,z,h+.52,w+.65,.55,d+1.2,.06);
+      for(const dz of [-.22,.22])paint(x-w/2-.12,z+dz*d,4.6,.26,9.2,d*.34,0x586567);
+      for(const side of [-1,1]){
+        box('stone',x-w/2-.17,z+side*d*.43,h*.5,.4,h,.84);
+        paint(x-w/2-.41,z+side*d*.43,3.5,.13,1.2,.85,0xd3a959);
+      }
+    }
+  }
   // 雙洞口保留實際可通過的淨空；隧道內的頂燈沿拱圈延伸。
   for(const z of [10,66]){
     for(let i=0;i<9;i++){
@@ -141,7 +164,7 @@ export function buildHillside(world,root) {
   for(const [i,line] of HILL_LINES.entries())for(const [j,[x,z]] of line.posts.entries()){
     const zz=z+(j?-17:17);
     flags.setMatrixAt(i*2+j,matrix.makeTranslation(x-13.65,height(x-13,zz)+12,zz));
-    flags.setColorAt(i*2+j,color.setHex(0xfb6947));
+    flags.setColorAt(i*2+j,color.setHex(0x586462));
   }
   const escapeRoad=[[-577,10],...HILL_LINES.map(line=>line.posts[0]),[627,10],[688,10]];
   let section=0,travel=0,destination=0;
@@ -164,6 +187,7 @@ export function buildHillside(world,root) {
       if(travel>=Math.hypot(gx-x,gz-z)){section++;travel=0;}
       park();
     },
+    get convoyPosition(){return ambulance.position;},
     get evacuated(){return section===escapeRoad.length-1;},
     dispose(){flags.material.dispose();atlas?.dispose();Object.values(materials).forEach(m=>m.dispose());},
   };

@@ -1,4 +1,4 @@
-// 山麓的虛構疏散道路。每一橫列都是可以失守、奪回的兩個實體陣地。
+// 山麓疏散道路。每段各有公路、山側兩個攔截點，車隊在後線待命。
 export const HILL_LINES = [
   {name:'山腳巴士場', posts:[[-406,68,'巴士總站'],[-389,-78,'候車廊']], reserves:['tank grunt tank','grunt brawler grunt']},
   {name:'坡道住宅區', posts:[[-240,118,'坡道口'],[-210,-70,'診所庭院']], reserves:['grunt heavy tank','brawler grunt brawler']},
@@ -7,14 +7,26 @@ export const HILL_LINES = [
   {name:'林道轉運場', posts:[[323,101,'林道下口'],[355,-101,'纜車舊站']], reserves:['heavy tank grunt','grunt brawler brawler']},
   {name:'疏散隧道', posts:[[506,77,'隧道引道'],[542,-75,'換氣井']], reserves:['heavy grunt tank','brawler heavy grunt']},
 ];
-export const HILL_GARRISON=['tank grunt heavy','grunt brawler grunt'];
+export const HILL_VANGUARD=['tank grunt heavy','grunt brawler grunt'];
 export const HILL_RAID=['brawler grunt brawler tank','grunt tank heavy'];
 export const HILL_RELIEF=['heavy grunt brawler','grunt tank'];
 export const HILL_EXIT=[627,10];
+// 兩翼各有前沿、後撤掩體，兩翼之間再設一處可停靠的轉角。
+export const HILL_COVER = HILL_LINES.flatMap(({posts},sector)=>{
+  const walls=posts.flatMap(([x,z],i)=>{
+    const side=i?-1:1;
+    return [
+      {x:x-18,z:z-side*(sector===0&&!i?25:19),w:9,d:19,h:18,type:(sector+i)%3},
+      {x:x-64,z:z+side*(sector===3&&!i?32:21),w:13,d:16,h:20,type:(sector+i+1)%3},
+    ];
+  });
+  walls.push({x:(posts[0][0]+posts[1][0])/2-32,z:(posts[0][1]+posts[1][1])/2,w:12,d:24,h:19,type:2});
+  return walls;
+});
 export const HILL_ROUTE = {
   cp:[1,2,3,4,5], arena:145, fin:50, par:560, over:2,
   pts:[[-579,6],...HILL_LINES.flatMap(l=>l.posts.map(([x,z])=>[x,z])),HILL_EXIT],
   secs:HILL_LINES.map((line,i)=>({at:2+i*2,
-    amb:HILL_GARRISON.join(' ').replaceAll('brawler','brawler@side'),
+    amb:HILL_VANGUARD.join(' ').replaceAll('brawler','brawler@side'),
     amb2:line.reserves.join(' '),amb3:[...HILL_RAID,...HILL_RELIEF].join(' ')})),
 };

@@ -1,128 +1,134 @@
 import { BattleLine } from './battle-line.mjs?v=3';
-import { HILL_LINES, HILL_EXIT, HILL_GARRISON, HILL_RAID, HILL_RELIEF } from './hillside-layout.mjs';
+import { HILL_LINES, HILL_EXIT, HILL_VANGUARD, HILL_RAID, HILL_RELIEF } from './hillside-layout.mjs';
 
 const COMMAND='白鷺（指揮所）';
 const TANKS='第三裝甲連';
+const WAVES=['先遣隊接近','主力下坡','側翼突擊','最後梯隊'];
 
 export class HillsideFront extends BattleLine {
   constructor(combat,encounter) {
     super(combat,encounter);
     this.site=combat.world.hillsideSite;
+    this.reinforcements.gap=2.1;
   }
   begin() {
     const {sec}=this.enc, start=this.C.cp;
     const x=start?.x??-550,z=start?.z??10;
+    this.integrity=start?.integrity??3;
     this.wing=this.unit('ally',x-10,z-16,true);
     this.tanks=[this.unit('tank',x+9,z+13,true),this.unit('tank',x-18,z+21,true)];
-    for(let i=0;i<HILL_LINES.length;i++)for(let j=0;j<2;j++)this.site?.signal(i,j,i<sec);
-    this.site?.reset(sec);
+    this.site.reset(sec);
+    for(let i=0;i<sec;i++)for(let j=0;j<2;j++)this.site.signal(i,j,true);
     this.startLine(sec);
   }
   startLine(sec) {
     this.enc.sec=sec;
-    this.phase='line';
     this.line=HILL_LINES[sec];
-    this.posts=this.line.posts.map(([x,z,name],i)=>({x,z,name,i,owned:false,taken:false,contested:false,
-      waypoint:{name,position:this.point(x,z)}}));
-    this.reserve=false;this.raid=false;this.relief=false;this.first=null;
-    this.visited=false;this.boss=null;
+    this.phase='deploy';this.echelon=-1;this.boss=null;
+    this.posts=this.line.posts.map(([x,z,name],i)=>{
+      const position=this.point(x,z);position.y+=16;
+      this.site.signal(sec,i,true);
+      return {x,z,name,i,breached:false,waypoint:{name,position}};
+    });
     const [road,path]=this.posts;
-    this.order(this.tanks[0],[road.x-48,road.z-6]);
-    this.order(this.tanks[1],[road.x-58,road.z+10]);
-    this.order(this.wing,[path.x-52,path.z+9]);
-    for(const p of this.posts) {
-      p.waypoint.position.y+=16;
-      for(const [i,kind] of HILL_GARRISON[p.i].split(' ').entries()){
-        const u=this.unit(kind,p.x+(i-1)*14,p.z+(i===1?13:-9),false,p.i);
-        u.garrison=true;
-      }
-    }
-    if(sec===HILL_LINES.length-1) {
-      const u=this.boss=this.foes.find(a=>a.garrison&&a.kind==='heavy'&&this.canFight(a));
-      u.boss=true;u.maxAP=11200;u.entity.ap=u.entity.apMax=u.maxAP;u.entity.bossName='隧道守備隊長・赤嶺';
-      this.C.boss=u.entity;
-    }
-    this.C.say(this.line.name,'裝甲連走公路，斑鳩走山側。兩處陣地都得拿下',3,'cy');
+    this.order(this.tanks[0],[road.x-10,road.z+6]);
+    this.order(this.tanks[1],[road.x-30,road.z-4]);
+    this.order(this.wing,[path.x-11,path.z+4]);
+    this.marker=this.point((road.x+path.x)/2,(road.z+path.z)/2);this.marker.y+=14;
+    if(!sec)this.attack();
+    else this.C.say(this.line.name,'車隊正在轉移，前往任一翼接防',3,'cy');
   }
-  send(i,kinds,depth,offset=0) {
-    const p=this.posts[i];
-    this.platoon(kinds,[p.x+depth,p.z+offset],i,[p.x,p.z]);
-  }
-  orderForward() {
-    const [road,path]=this.posts;
-    this.order(this.tanks[0],[road.x-5,road.z+7]);
-    this.order(this.tanks[1],[road.x-15,road.z-7]);
-    this.order(this.wing,[path.x-6,path.z+5]);
-  }
-  pressure() {
-    const C=this.C, pending=this.reinforcements.pending.length;
-    const live=this.foes.filter(a=>this.canFight(a));
-    for(const p of this.posts) {
-      const position=[p.x,p.z], pilot=this.nearby(C.player.pos,position,30);
-      if(pilot)this.visited=true;
-      const friends=this.allies.filter(a=>this.canFight(a)&&this.nearby(a.pos,position,29)).length;
-      const opposition=live.filter(a=>this.nearby(a.pos,position,30)).length;
-      p.contested=opposition>0&&(pilot||friends>0);
-      if(p.owned&&opposition>friends+(pilot?3:0)) {
-        p.owned=false;
-        C.say(p.name+'失守','敵軍已佔回陣地，回到標記處重新奪取',2.8,'am');
-        this.site?.signal(this.enc.sec,p.i,false);
-      } else if(!p.owned&&!opposition&&(pilot||friends)) {
-        p.owned=p.taken=true;
-        this.first??=p.i;
-        this.site?.signal(this.enc.sec,p.i,true);
-        C.note(p.name+'已升起盟軍識別燈','gr');
-      }
-      const state=p.owned?(p.contested?'交戰中':'我軍'):p.contested?'爭奪中':'敵軍';
-      p.waypoint.name=p.name+'・'+state;
+  attack() {
+    this.phase='line';this.marker=null;this.echelon++;
+    const wave=this.echelon;
+    const kinds=[HILL_VANGUARD,this.line.reserves,HILL_RAID,HILL_RELIEF][wave];
+    const lead=(wave+this.enc.sec)%2;
+    for(const lane of [lead,1-lead]){
+      const p=this.posts[lane],depth=[204,184,154,211][wave];
+      this.platoon(kinds[lane],[p.x+depth,p.z+(lane?-1:1)*(wave===2?28:8)],lane,[p.x,p.z]);
     }
-    if(!this.reserve&&live.length<=3) {
-      this.reserve=true;
-      this.posts.forEach(p=>this.send(p.i,this.line.reserves[p.i],74,p.i?-14:14));
-      this.orderForward();
-    } else if(this.first!==null&&this.reserve&&!this.raid&&pending===0&&live.length<=4) {
-      this.raid=true;
-      this.send(this.first,HILL_RAID[0],83,this.first?29:-29);
-      this.send(1-this.first,HILL_RAID[1],68);
-      C.say('敵軍反奪'+this.posts[this.first].name,'留意後方識別燈，兩翼必須連成一線',3,'am');
-    } else if(this.raid&&!this.relief&&pending===0&&live.length<=2) {
-      this.relief=true;
-      this.send(1-this.first,HILL_RELIEF[0],72,18);
-      this.send(this.first,HILL_RELIEF[1],63,-19);
-      C.note('最後一支預備隊已進場','am');
-    } else if(this.relief&&!pending&&!live.length&&this.visited&&this.posts.every(p=>p.owned)) {
-      const sec=this.enc.sec+1;
-      this.C.lines([[TANKS,this.line.name+'兩翼接通，裝甲連向前移動。']],true,2.3);
-      this.resupply(2100);
-      this.site?.advance(sec);
-      if(sec===HILL_LINES.length) {
-        this.phase='evacuate';
-        this.marker=this.point(...HILL_EXIT);this.marker.y+=13;
-        this.C.say('隧道口已解封','帶救護車穿過最後一段引道',3,'gr');
-      } else {
-        const {x,z}=this.posts[this.first];
-        this.setCheckpoint(sec,x,z,Math.PI/2);
-        this.startLine(sec);
-      }
+    this.C.say(this.line.name+'・'+WAVES[wave],this.posts[lead].name+'先接敵，留意另一翼',2.6,'am');
+  }
+  entryPoint(x,z,kind) {
+    // 先找到整台機體都容得下的入口，並留出下坡的第一步。只在增援進場時查詢。
+    const w=this.C.world,r=kind==='tank'?2.6:4.2;
+    const spot=this.point(x,z);
+    for(const side of [0,18,-18])for(let step=0;step<=8;step++){
+      const px=Math.min(693,x)-step*7,pz=z+side;
+      spot.set(px-7,w.height(px-7,pz),pz);
+      if(w.collide(spot,r,spot.y))continue;
+      spot.set(px,w.height(px,pz),pz);
+      if(!w.collide(spot,r,spot.y))return spot;
     }
+    return spot;
+  }
+  unit(kind,x,z,friendly,post,assignment) {
+    if(!friendly){const entry=this.entryPoint(x,z,kind);x=entry.x;z=entry.z;}
+    const u=super.unit(kind,x,z,friendly,post,assignment);
+    if(!friendly){u.marchSpeed=u.weapon.speed;u.weapon={...u.weapon};}
+    if(!friendly&&kind==='heavy'&&this.enc.sec===HILL_LINES.length-1&&this.echelon===3&&!this.boss){
+      this.boss=u;u.boss=true;u.maxAP=11200;u.entity.ap=u.entity.apMax=u.maxAP;
+      u.entity.bossName='突擊隊長・赤嶺';this.C.boss=u.entity;
+    }
+    return u;
   }
   react(a) {
-    if(this.phase!=='line'||a.friendly||a.leave||a.garrison||a.boss)return;
-    const post=this.posts[a.post];
-    if(!post)return;
-    // 反攻隊以佔地為先，無視遠方誘餌。受創的單位在陣地邊緣換射角。
-    if(!a.shifted&&a.entity.ap<a.maxAP*.55&&this.nearby(a.pos,[post.x,post.z],26)) {
-      a.shifted=true;this.order(a,[post.x+13,post.z+(a.kind==='brawler'?-13:12)]);
+    if(this.phase!=='line'||a.friendly||!this.canFight(a))return;
+    const p=this.posts[a.post],convoy=this.site.convoyPosition;
+    a.weapon.speed=a.marchSpeed*(a.entity.stagT>0?.22:a.target&&!a.through?.72:.9);
+    if(!a.through&&this.nearby(a.pos,[p.x,p.z],21)){
+      a.through=true;a.maneuver=null;
+      if(!p.breached)this.C.say(p.name+'被突破','攔下越線敵機，救護車在後方！',3,'rd');
+      p.breached=true;this.site.signal(this.enc.sec,p.i,false);
+      this.order(a,[convoy.x,convoy.z]);
+    }
+    if(!a.through||a.struck)return;
+    if(!a.maneuver&&Math.hypot(a.goal.x-convoy.x,a.goal.z-convoy.z)>12)this.order(a,[convoy.x,convoy.z]);
+    if(!this.nearby(a.pos,[convoy.x,convoy.z],19))return;
+    // 進入車列、而且地物沒有隔開，才算實際突入。每個敵人只造成一次損失。
+    this.aim.copy(convoy);this.aim.y+=2;
+    this.dir.copy(a.pos);this.dir.y+=a.vehicle?2.3:11;
+    if(this.C.world.raycast(this.dir,this.aim,null)>=0)return;
+    a.struck=true;this.integrity--;
+    if(this.integrity>0)this.C.say('救護車遭突入',this.integrity===1?'最後警戒！再被突入一次就會失守':'車列仍能移動，立即截擊後續敵機',3,'rd');
+    else {
+      this.phase='lost';this.C.phase='done';
+      this.C.say('疏散線失守','敵機已切斷車列，傷員無法撤離',4,'rd');
+      this.C.events.push({t:2.2,fn:()=>this.C.onEnd(false)});
     }
   }
-  changeAngle(a,dt) {
-    if(a.garrison||this.phase==='line'&&!a.friendly&&this.nearby(a.pos,[this.posts[a.post].x,this.posts[a.post].z],30))return;
-    super.changeAngle(a,dt);
+  pressure() {
+    const live=this.foes.filter(a=>this.canFight(a));
+    for(const p of this.posts){
+      const broken=live.some(a=>a.post===p.i&&a.through&&!a.struck);
+      if(p.breached!==broken)this.site.signal(this.enc.sec,p.i,!broken);
+      p.breached=broken;
+      p.waypoint.name=p.name+(broken?'・追擊越線敵機':'・防線');
+    }
+    if(this.reinforcements.pending.length)return;
+    if(this.echelon<3){
+      if(live.length<=2)this.attack();
+      return;
+    }
+    if(live.length)return;
+    const sec=this.enc.sec+1;
+    this.resupply(2100);this.site.advance(sec);
+    if(sec===HILL_LINES.length){
+      this.phase='evacuate';this.marker=this.point(...HILL_EXIT);this.marker.y+=13;
+      this.C.say('敵軍撤退','最後一段已安全，去隧道口接應救護車',3,'gr');
+    }else{
+      const [x,z]=this.line.posts[0];
+      this.setCheckpoint(sec,x-16,z,Math.PI/2,{integrity:this.integrity});
+      this.C.lines([[TANKS,'這一段守住了。讓救護車先走，我們到下一翼接防。']],true,2.3);
+      this.startLine(sec);
+    }
   }
   update(dt) {
+    if(this.C.dead||this.phase==='lost')return false;
     const planning=this.stepBattle(dt);
-    if(this.phase==='line'&&planning)this.pressure();
-    if(this.phase==='evacuate') {
+    if(this.phase==='deploy'&&planning&&this.posts.some(p=>this.nearby(this.C.player.pos,[p.x,p.z],115)))this.attack();
+    else if(this.phase==='line'&&planning)this.pressure();
+    if(this.phase==='evacuate'){
       if(this.nearby(this.C.player.pos,HILL_EXIT,39))this.site.advance(HILL_LINES.length+2);
       if(this.site.evacuated){
         this.phase=this.enc.state='done';this.marker=null;
@@ -130,19 +136,23 @@ export class HillsideFront extends BattleLine {
         return true;
       }
     }
-    this.site?.update(dt);
-    return false;
+    this.site.update(dt);return false;
   }
   get objective() {
-    if(this.phase==='evacuate')return {title:'打通山麓疏散線',hint:'到隧道入口接應救護車'};
+    if(this.phase==='evacuate')return {title:'山麓防線守住了',hint:'到隧道入口接應最後一輛救護車'};
+    if(this.phase==='deploy')return {title:this.line.name+'・接防',hint:'跟隨車隊，前往公路或山側的識別燈'};
     if(this.phase!=='line')return null;
-    const n=this.posts.filter(p=>p.owned).length;
-    return {title:(this.enc.sec+1)+'/6　'+this.line.name+'　'+n+'/2',hint:this.raid?'反攻中，奪回失地並擊退預備隊':'公路有戰車支援，山側有斑鳩；清掉守軍後進入陣地'};
+    const threat=this.posts.find(p=>p.breached);
+    return {title:(this.enc.sec+1)+'/6　'+this.line.name+'　車隊 '+this.integrity+'/3',
+      hint:threat?threat.name+'已破，攔下標記敵機':WAVES[this.echelon]+'　守住公路和山側'};
   }
   get waypoints(){
+    if(this.phase==='deploy')return this.posts.map(p=>p.waypoint);
     if(this.phase!=='line')return [];
-    const posts=this.posts.map(p=>p.waypoint);
-    return this.relief?posts.concat(this.lastDefenders()):posts;
+    const threats=this.foes.filter(a=>this.canFight(a)&&a.through&&!a.struck);
+    if(threats.length)return threats.map(a=>({name:'攔截',position:a.pos}));
+    const last=this.echelon===3?this.lastDefenders():[];
+    return last.length?last.map(p=>({...p,name:p.name==='指揮機'?p.name:'殘存敵軍'})):this.posts.map(p=>p.waypoint);
   }
   radar(out){for(const t of this.tanks??[])if(this.canFight(t))out.push({x:t.pos.x,z:t.pos.z,kind:'ally'});}
 }
