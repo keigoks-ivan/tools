@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>鄉鎮治安</title>
+<meta name="description" content="鄉鎮的竊盜、強盜等案件件數、每十萬人比率、十年趨勢，以及跟縣市和全國比較。">
+<link rel="stylesheet" href="../../css/style.css">
+<link rel="stylesheet" href="../tw.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<link rel="stylesheet" href="safety.css?v=20261121">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
+</head>
+<body>
+<div id="nav-root"></div>
+<div class="container">
+  <p class="crumb"><a href="index.html">← 回台灣治安與毒駕地圖</a></p>
+  <div class="page-header">
+    <div class="eyebrow" id="t-eyebrow"></div>
+    <h1 id="t-title"></h1>
+    <p class="subtitle" id="t-lead"></p>
+  </div>
+
+  <div class="kpis" id="t-kpis"></div>
+
+  <h2 class="section-heading">七類案件，2023～2025 三年合計</h2>
+  <p class="sec-sub">每十萬人每年是三年平均件數除以戶籍人口。件數少於 10 件的不跟縣市比，起伏太大。</p>
+  <div class="table-wrap"><table class="data" id="t-table"></table></div>
+
+  <h2 class="section-heading">十年趨勢</h2>
+  <div class="layer-bar"><label class="grp"><span>案類</span><select id="t-type"></select></label></div>
+  <div id="t-trend" class="chart"></div>
+  <p class="chart-note">長條是本鄉鎮每年件數（左軸）；線是每十萬人件數，本鄉鎮對比縣市平均（右軸）。各年都用 2026 年 9 月的人口算。2024 年 9 月改了發生數算法，2023～2024 年部分月份資料不完整，2026 年只到 9 月。</p>
+
+  <h2 class="section-heading">地圖</h2>
+  <div class="map-grid">
+    <div id="t-map" class="map small"></div>
+    <aside class="panel" id="t-map-note"></aside>
+  </div>
+
+  <h2 class="section-heading">鄰近鄉鎮</h2>
+  <p class="sec-sub">三年合計，每十萬人每年件數。</p>
+  <div class="table-wrap"><table class="data" id="t-nb"></table></div>
+
+  <h2 class="section-heading">毒駕事故，2018～2025</h2>
+  <div id="t-drug"></div>
+
+  <p class="fine" style="margin-top:28px">資料來源：內政部警政署「犯罪資料」（每季初步統計，跟官方年度總數不完全一致）、傷亡道路交通事故資料；內政部戶政司村里人口；鄉鎮界線 taiwan-atlas（內政部資料）。授權：政府資料開放授權條款第 1 版。底圖 © OpenStreetMap 貢獻者。</p>
+</div>
+<script src="../../js/navbar.js"></script>
+<script src="common.js?v=20261121"></script>
+<script src="town.js?v=20261121"></script>
+</body>
+</html>

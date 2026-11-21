@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>台灣治安與毒駕地圖</title>
+<meta name="description" content="用警政署公開資料，看各鄉鎮的竊盜、強盜等案件，以及各縣市的毒駕取締與毒駕事故。">
+<link rel="stylesheet" href="../../css/style.css">
+<link rel="stylesheet" href="../tw.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
+<link rel="stylesheet" href="safety.css?v=20261121">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
+</head>
+<body>
+<div id="nav-root"></div>
+<div class="container">
+  <div class="page-header">
+    <div class="eyebrow">台灣・治安與交通安全</div>
+    <h1>台灣治安與毒駕地圖</h1>
+    <p class="subtitle">用警政署公開資料看兩件事：各鄉鎮的竊盜、強盜等案件，以及各縣市的毒駕取締與毒駕事故。</p>
+  </div>
+
+  <div class="tabs" role="tablist">
+    <button id="btn-crime" class="on" role="tab" data-tab="crime">治安</button>
+    <button id="btn-drug" role="tab" data-tab="drug">毒駕</button>
+  </div>
+
+  <!-- ===== 治安 ===== -->
+  <section id="tab-crime">
+    <p class="sec-sub">368 個鄉鎮，每一個都可以點進去看細項。顏色深代表每十萬人案件多。</p>
+    <div class="layer-bar">
+      <label class="grp"><span>案類</span><select id="c-type"></select></label>
+      <label class="grp"><span>期間</span><select id="c-period"></select></label>
+      <span class="grp"><span>顏色</span>
+        <label><input type="radio" name="c-metric" value="rate" checked>每十萬人</label>
+        <label><input type="radio" name="c-metric" value="n">件數</label>
+      </span>
+      <label><input type="checkbox" id="c-ty">桃園竊盜點位</label>
+    </div>
+    <div class="map-grid">
+      <div id="map-crime" class="map"></div>
+      <aside id="c-panel" class="panel"><div class="muted">滑過或點一下鄉鎮，這裡會顯示數字。</div></aside>
+    </div>
+    <p class="fine">每十萬人是「期間內每年平均件數 ÷ 戶籍人口 × 100,000」，人口用 2026 年 9 月。縣市平均只算有填鄉鎮的案件：機車竊盜有 54% 沒填鄉鎮，這些案件不在地圖上，但有算進下面的全國趨勢。金門、連江在地圖西邊，拖曳地圖可以看到。</p>
+
+    <h2 class="section-heading">全國趨勢</h2>
+    <p class="sec-sub" id="c-trend-title"></p>
+    <div id="c-trend" class="chart"></div>
+    <p class="chart-note">2024 年 9 月警政署改了「發生數」的算法，前後不能直接比。2023～2024 年有些月份資料不完整，例如住宅竊盜每季最後一個月幾乎是空的。2026 年只到 9 月。</p>
+
+    <h2 class="section-heading">讀這張地圖要注意</h2>
+    <div class="prose"><ul>
+      <li>這份是警政署每季的初步統計，跟官方年度總數對不上。2025 年住宅竊盜是官方數字的 93%，毒品只有 55%。</li>
+      <li>案件少的鄉鎮，比率起伏很大。2025 年每個鄉鎮的住宅竊盜中位數是一年 7 件，所以預設用三年合計，不排名次。</li>
+      <li>人口是戶籍人口。商業區、觀光區白天的人多，比率會偏高。</li>
+      <li>點位只有桃園市有座標，其他縣市只公布到鄉鎮。</li>
+    </ul></div>
+  </section>
+
+  <!-- ===== 毒駕 ===== -->
+  <section id="tab-drug" hidden>
+    <p class="sec-sub">毒駕有兩種數字：警察開了幾張單，和發生了幾件毒駕事故。兩者量的東西不同，分開畫。</p>
+    <div class="layer-bar">
+      <label class="grp"><span>縣市顏色</span><select id="d-year"></select></label>
+      <label class="grp"><span>事故點位</span><select id="d-ev"></select></label>
+      <span class="grp"><span class="dot" style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#7f1d1d"></span>有人死亡
+        <span class="dot" style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#f97316;margin-left:8px"></span>有人受傷</span>
+    </div>
+    <div class="map-grid">
+      <div id="map-drug" class="map"></div>
+      <aside id="d-panel" class="panel"><div class="muted">滑過縣市看取締件數，點事故圓點看那一件的時間地點。</div></aside>
+    </div>
+    <p class="fine">縣市顏色是每十萬人毒駕舉發件數，人口用 2026 年 9 月。舉發算在開單的警察機關。警政署直屬機關（多半是國道警察）開的單不在縣市裡，2025 年有 40 件。事故點位是警方判斷肇事原因為「吸食違禁物駕駛」的事故，24 小時內有人死亡畫深紅色。</p>
+
+    <h2 class="section-heading">全國毒駕取締件數</h2>
+    <p class="sec-sub">2025 年 9,261 件，是 2024 年的 4.9 倍。這一年警方開始用唾液快篩。</p>
+    <div id="d-cit" class="chart"></div>
+    <p class="chart-note"><b>①</b> 2023-12-29 刑法新增「毒品濃度超標就處罰」　<b>②</b> 2024-03-29 行政院公告各種毒品的濃度標準　<b>③</b> 2025-11 警方開始用唾液快篩。取締件數反映警方查得多勤，不等於毒駕實際有多少。2013 年只有 7 月以後。</p>
+
+    <h2 class="section-heading">各縣市取締件數</h2>
+    <p class="sec-sub">2024 到 2025 年每個縣市都大增，嘉義縣從 11 件增加到 236 件。</p>
+    <div class="table-wrap"><table class="data" id="d-table"></table></div>
+    <p class="chart-note">底色越深代表該縣市那一年越多（每列各自比）。資料來源：警政統計年報表 26，各年版本。</p>
+
+    <h2 class="section-heading">毒駕事故與酒駕事故</h2>
+    <p class="sec-sub">毒駕事故一年只有幾十件，酒駕事故一年三四千件。</p>
+    <div id="d-crash" class="chart"></div>
+    <p class="chart-note">毒駕事故是警方在現場判斷，資料裡沒有檢驗結果，應該是少算。2025 年從 34 件增加到 92 件，跟取締變多同一年，還不能確定是毒駕真的變多。酒駕只算主要原因是酒駕的事故。</p>
+
+    <h2 class="section-heading">最近的毒駕事故</h2>
+    <div class="table-wrap"><table class="data" id="d-recent"></table></div>
+  </section>
+
+  <p class="fine" style="margin-top:28px">資料來源：內政部警政署「犯罪資料」、警政統計年報、傷亡道路交通事故資料；內政部戶政司村里人口；鄉鎮界線 taiwan-atlas（內政部資料）。授權：政府資料開放授權條款第 1 版。底圖 © OpenStreetMap 貢獻者。</p>
+</div>
+<script src="../../js/navbar.js"></script>
+<script src="common.js?v=20261121"></script>
+<script src="index.js?v=20261121"></script>
+</body>
+</html>

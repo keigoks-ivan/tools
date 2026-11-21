@@ -97,6 +97,7 @@ var ZONES = [
         {href:'/docs/dd/',en:'KL Project Reports',zh:'吉隆坡建案報告'},
         {href:'/tw/qingpu/',en:'Qingpu Price Tracker',zh:'青埔房價追蹤'},
         {href:'/tw/linkou-shop/',en:'Linkou Storefront Finder',zh:'林口店面選址'},
+        {href:'/tw/safety-map/',en:'Taiwan Crime & Drug-Driving Map',zh:'治安與毒駕地圖'},
         {href:'/learn-resi/',en:'Residential Course',zh:'住宅房產課程'},
         {href:'/learn-cre/',en:'Commercial Course',zh:'商用房產課程'}]}
     ]},
