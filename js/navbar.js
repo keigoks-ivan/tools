@@ -97,7 +97,6 @@ var ZONES = [
         {href:'/docs/dd/',en:'KL Project Reports',zh:'吉隆坡建案報告'},
         {href:'/tw/qingpu/',en:'Qingpu Price Tracker',zh:'青埔房價追蹤'},
         {href:'/tw/linkou-shop/',en:'Linkou Storefront Finder',zh:'林口店面選址'},
-        {href:'/tw/safety-map/',en:'Taiwan Crime & Drug-Driving Map',zh:'治安與毒駕地圖'},
         {href:'/learn-resi/',en:'Residential Course',zh:'住宅房產課程'},
         {href:'/learn-cre/',en:'Commercial Course',zh:'商用房產課程'}]}
     ]},
@@ -110,6 +109,9 @@ var ZONES = [
     {href:'/education/sight-words/',en:'English Sight Words',zh:'英文 Sight Words'},
     {href:'/salon/',en:'Little Hair Salon',zh:'小小美髮師'},
     {href:'/little-kitchen/',en:'Little Flower Kitchen',zh:'小花食堂'}]}]},
+  {k:'safety',en:'Crime & Drug-Driving',zh:'治安與毒駕',groups:[{links:[
+    {href:'/tw/safety-map/',en:'Crime Map',zh:'治安地圖'},
+    {href:'/tw/safety-map/#drug',en:'Drug-Driving',zh:'毒駕'}]}]},
   {k:'games',en:'Games',zh:'遊戲',groups:[{links:[
     {href:'/games/airline/',en:'SKYGLAZE Airline',zh:'天青航空'},
     {href:'/games/flight/',en:'Skybound',zh:'天際航線'},
@@ -141,6 +143,7 @@ if (path === '/home.html') activeZone = null;
 else if (firstSeg === 'history' || path === '/solo-co.html' || path === '/marketing.html' || path === '/solo-co' || path === '/marketing') activeZone = 'reading';
 else if (firstSeg === 'education' || firstSeg === 'salon' || firstSeg === 'little-kitchen') activeZone = 'kids';
 else if (firstSeg === 'games' || firstSeg === 'game') activeZone = 'games';
+else if (path.indexOf('/tw/safety-map/') === 0) activeZone = 'safety';
 var showMarkets = (activeZone === 'property');
 
 /* Current-page match for menu links: exact, or folder link containing the current page. */
