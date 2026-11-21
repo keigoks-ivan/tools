@@ -92,11 +92,39 @@ var SM = (function () {
     rows.push('<div class="row"><span class="sw" style="background:' + ZERO + '"></span>沒有案件</div>');
     return rows.join('');
   }
+  /* 跟自己縣市平均比的分色（各縣市記錄方式不同，地圖不跨縣市比） */
+  var REL = [
+    { c: '#2f7d6d', t: '低 30% 以上' },
+    { c: '#9fd0bf', t: '低 10～30%' },
+    { c: '#f1ece2', t: '差不多（±10% 內）' },
+    { c: '#f9b98a', t: '高 10～30%' },
+    { c: '#e0703a', t: '高 30%～1 倍' },
+    { c: '#a83a14', t: '高 1 倍以上' }
+  ];
+  var REL_NA = '#d9dee6';
+  function relIdx(rate, ref, n) {
+    if (n < 10 || !ref) return -1;
+    var d = rate / ref - 1;
+    if (d <= -0.3) return 0;
+    if (d <= -0.1) return 1;
+    if (d < 0.1) return 2;
+    if (d < 0.3) return 3;
+    if (d < 1) return 4;
+    return 5;
+  }
+  function relColor(rate, ref, n) { var i = relIdx(rate, ref, n); return i < 0 ? REL_NA : REL[i].c; }
+  function relLegendHtml(title) {
+    var rows = ['<div><b>' + title + '</b></div>'];
+    for (var i = REL.length - 1; i >= 0; i--) rows.push('<div class="row"><span class="sw" style="background:' + REL[i].c + '"></span>' + REL[i].t + '</div>');
+    rows.push('<div class="row"><span class="sw" style="background:' + REL_NA + '"></span>件數少於 10 件，不比</div>');
+    return rows.join('');
+  }
   var YEARS = []; for (var y = 2015; y <= 2026; y++) YEARS.push(y);
   var BAD_AREA = [[{ xAxis: '2023', itemStyle: { color: 'rgba(148,163,184,.16)' }, label: { show: true, position: 'insideTop', color: '#64748b', fontSize: 11, formatter: '資料不完整' } }, { xAxis: '2024' }]];
   return {
     TYPES: TYPES, PERIODS: PERIODS, COLORS: COLORS, ZERO: ZERO, YEARS: YEARS, BAD_AREA: BAD_AREA,
     load: load, norm: norm, sumYears: sumYears, fmt: fmt, fmtRate: fmtRate, townStats: townStats,
-    compare: compare, breaks: breaks, colorFor: colorFor, baseMap: baseMap, legend: legend, legendHtml: legendHtml
+    compare: compare, breaks: breaks, colorFor: colorFor, baseMap: baseMap, legend: legend, legendHtml: legendHtml,
+    relColor: relColor, relLegendHtml: relLegendHtml
   };
 })();

@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="../../css/style.css">
 <link rel="stylesheet" href="../tw.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css">
-<link rel="stylesheet" href="safety.css?v=20261121">
+<link rel="stylesheet" href="safety.css?v=20261121b">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
@@ -30,21 +30,17 @@
 
   <!-- ===== 治安 ===== -->
   <section id="tab-crime">
-    <p class="sec-sub">368 個鄉鎮，每一個都可以點進去看細項。顏色深代表每十萬人案件多。</p>
+    <p class="sec-sub">368 個鄉鎮，每一個都可以點進去看細項。顏色是跟同縣市平均比：橘紅色比縣市平均高，綠色比較低。各縣市的記錄方式不同，所以不跨縣市比。</p>
     <div class="layer-bar">
       <label class="grp"><span>案類</span><select id="c-type"></select></label>
       <label class="grp"><span>期間</span><select id="c-period"></select></label>
-      <span class="grp"><span>顏色</span>
-        <label><input type="radio" name="c-metric" value="rate" checked>每十萬人</label>
-        <label><input type="radio" name="c-metric" value="n">件數</label>
-      </span>
       <label><input type="checkbox" id="c-ty">桃園竊盜點位</label>
     </div>
     <div class="map-grid">
       <div id="map-crime" class="map"></div>
       <aside id="c-panel" class="panel"><div class="muted">滑過或點一下鄉鎮，這裡會顯示數字。</div></aside>
     </div>
-    <p class="fine">每十萬人是「期間內每年平均件數 ÷ 戶籍人口 × 100,000」，人口用 2026 年 9 月。縣市平均只算有填鄉鎮的案件：機車竊盜有 54% 沒填鄉鎮，這些案件不在地圖上，但有算進下面的全國趨勢。金門、連江在地圖西邊，拖曳地圖可以看到。</p>
+    <p class="fine">每十萬人是「期間內每年平均件數 ÷ 戶籍人口 × 100,000」，人口用 2026 年 9 月。縣市平均只算有填鄉鎮的案件：機車竊盜 2015 年以來有 54% 沒填鄉鎮（2023～2025 年是 39%），這些案件不在地圖上，但有算進下面的全國趨勢。期間內少於 10 件的鄉鎮畫灰色。金門、連江在地圖西邊，拖曳地圖可以看到。</p>
 
     <h2 class="section-heading">全國趨勢</h2>
     <p class="sec-sub" id="c-trend-title"></p>
@@ -54,6 +50,7 @@
     <h2 class="section-heading">讀這張地圖要注意</h2>
     <div class="prose"><ul>
       <li>這份是警政署每季的初步統計，跟官方年度總數對不上。2025 年住宅竊盜是官方數字的 93%，毒品只有 55%。</li>
+      <li>各縣市的記錄方式不同。2023～2025 年住宅竊盜每十萬人每年，彰化縣 2.1 件、高雄市 2.5 件，屏東縣 31 件、澎湖縣 46 件，差了二十倍以上。這比較像是各地登錄習慣不同，不是治安真的差這麼多，所以地圖只拿鄉鎮跟自己縣市比。</li>
       <li>案件少的鄉鎮，比率起伏很大。2025 年每個鄉鎮的住宅竊盜中位數是一年 7 件，所以預設用三年合計，不排名次。</li>
       <li>人口是戶籍人口。商業區、觀光區白天的人多，比率會偏高。</li>
       <li>點位只有桃園市有座標，其他縣市只公布到鄉鎮。</li>
@@ -85,6 +82,17 @@
     <div class="table-wrap"><table class="data" id="d-table"></table></div>
     <p class="chart-note">底色越深代表該縣市那一年越多（每列各自比）。資料來源：警政統計年報表 26，各年版本。</p>
 
+    <h2 class="section-heading">2026 年各地公布的數字</h2>
+    <p class="sec-sub">官方年報要到 2027 年 9 月才有 2026 年。下面是各地警察機關在新聞稿和新聞裡公布的數字，用詞和截止日都不一樣，不能互相比，也不能跟上面的年報數字接在一起。</p>
+    <div class="table-wrap"><table class="data" id="d-news"></table></div>
+    <div class="prose" style="margin-top:8px"><ul>
+      <li>舉發是開罰單（道路交通管理處罰條例），移送是送檢察官（刑法公共危險罪），查獲和取締各地用法不一。桃園市兩種都有公布：查獲 1～7 月 1,470 件，違規舉發到 10 月 30 日是 2,390 件。</li>
+      <li>全國 6,730 件，警政署 6 月說是 1～5 月，法務部 7 月的新聞稿說是 5 月 24 日到 7 月 22 日的專案期間。這裡用較早的警政署說法。</li>
+      <li>2026 年 7 月起，警政署把毒駕事故改成任何一方毒駕都算，以前只看第一當事人，前後的死傷人數不能直接比。取締、查獲件數沒有看到改算法。</li>
+      <li>沒找到已核對的全縣累計：<span id="d-news-none"></span>。</li>
+    </ul></div>
+    <p class="chart-note">＊截止日是新聞發布日，原文只寫「到目前」。每一筆都開過原頁核對，整理到 2026 年 11 月 21 日。</p>
+
     <h2 class="section-heading">毒駕事故與酒駕事故</h2>
     <p class="sec-sub">毒駕事故一年只有幾十件，酒駕事故一年三四千件。</p>
     <div id="d-crash" class="chart"></div>
@@ -97,7 +105,7 @@
   <p class="fine" style="margin-top:28px">資料來源：內政部警政署「犯罪資料」、警政統計年報、傷亡道路交通事故資料；內政部戶政司村里人口；鄉鎮界線 taiwan-atlas（內政部資料）。授權：政府資料開放授權條款第 1 版。底圖 © OpenStreetMap 貢獻者。</p>
 </div>
 <script src="../../js/navbar.js"></script>
-<script src="common.js?v=20261121"></script>
-<script src="index.js?v=20261121"></script>
+<script src="common.js?v=20261121b"></script>
+<script src="index.js?v=20261121b"></script>
 </body>
 </html>

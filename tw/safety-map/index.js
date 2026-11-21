@@ -4,7 +4,7 @@
   var THEFT = { '住宅竊盜': 1, '汽車竊盜': 1, '機車竊盜': 1 };
 
   Promise.all([
-    SM.load(['towns', 'crime_town', 'crime_national', 'drug', 'pop_county']),
+    SM.load(['towns', 'crime_town', 'crime_national', 'drug', 'pop_county', 'news2026']),
     fetch('data/towns.topo.json').then(function (r) { return r.json(); })
   ]).then(function (res) {
     var D = res[0], topo = res[1];
@@ -37,11 +37,11 @@
     var selType = document.getElementById('c-type'), selPer = document.getElementById('c-period');
     SM.TYPES.forEach(function (t) { selType.add(new Option(t, t)); });
     SM.PERIODS.forEach(function (p) { selPer.add(new Option(p.label, p.key)); });
-    var state = { type: '住宅竊盜', period: SM.PERIODS[0], metric: 'rate' };
-    var stats, br, lockCode = null;
+    var state = { type: '住宅竊盜', period: SM.PERIODS[0] };
+    var stats, lockCode = null;
     var map = SM.baseMap('map-crime');
     map.fitBounds(TW_BOUNDS);
-    var leg = null;
+    SM.legend(map, SM.relLegendHtml('跟同縣市平均比'));
 
     var layer = L.geoJSON(townGeo, {
       style: style,
@@ -53,17 +53,13 @@
       }
     }).addTo(map);
 
-    function val(code) { var s = stats.town[code]; return state.metric === 'rate' ? s.rate : s.n; }
     function style(f) {
-      return { fillColor: stats ? SM.colorFor(val(f.properties.TOWNCODE), br) : SM.ZERO, fillOpacity: 0.78, weight: 0.5, color: '#ffffff' };
+      var code = f.properties.TOWNCODE, t = D.towns[code], s = stats && t && stats.town[code];
+      return { fillColor: s ? SM.relColor(s.rate, stats.county[t.county].rate, s.n) : SM.ZERO, fillOpacity: 0.8, weight: 0.5, color: '#ffffff' };
     }
     function recompute() {
       stats = SM.townStats(D.towns, D.crime_town, state.type, state.period.years);
-      br = SM.breaks(Object.keys(stats.town).map(val));
       layer.setStyle(style);
-      if (leg) map.removeControl(leg);
-      var unit = state.metric === 'rate' ? function (x) { return SM.fmtRate(x); } : function (x) { return SM.fmt(x); };
-      leg = SM.legend(map, SM.legendHtml(state.metric === 'rate' ? '每十萬人每年（件）' : '件數', br, unit));
       panel(lockCode);
       trend();
       points();
@@ -133,9 +129,6 @@
 
     selType.addEventListener('change', function () { state.type = selType.value; recompute(); });
     selPer.addEventListener('change', function () { state.period = SM.PERIODS.filter(function (p) { return p.key === selPer.value; })[0]; recompute(); });
-    document.querySelectorAll('input[name=c-metric]').forEach(function (r) {
-      r.addEventListener('change', function () { state.metric = r.value; recompute(); });
-    });
     recompute();
   }
 
@@ -219,6 +212,16 @@
     }).join('');
     document.getElementById('d-table').innerHTML = head + body;
     function hiRow(c) { document.querySelectorAll('#d-table tr').forEach(function (tr) { tr.classList.toggle('sel', tr.dataset.c === c); }); }
+
+    /* 2026 年新聞數字 */
+    var md = function (s) { return +s.slice(5, 7) + '/' + +s.slice(8, 10); };
+    var nw = D.news2026;
+    document.getElementById('d-news').innerHTML = '<tr><th>地區</th><th>期間（2026 年）</th><th>用詞</th><th class="r">件數</th><th class="r">去年同期</th><th>出處</th></tr>' +
+      nw.rows.map(function (r) {
+        return '<tr><td>' + r.area + '</td><td>' + md(r.start) + '～' + md(r.end) + (r.end_is_pub ? '＊' : '') + '</td><td>' + r.metric + '</td><td class="r"><b>' + SM.fmt(r.value) + '</b></td><td class="r">' +
+          (r.cmp == null ? '—' : SM.fmt(r.cmp)) + '</td><td><a href="' + r.url + '" target="_blank" rel="noopener">' + r.outlet + '</a> ' + md(r.pub) + '</td></tr>';
+      }).join('');
+    document.getElementById('d-news-none').textContent = nw.none.join('、');
 
     /* 事故 */
     var c2 = echarts.init(document.getElementById('d-crash'));
