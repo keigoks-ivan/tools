@@ -1109,13 +1109,14 @@
       })
     }, 300);
   }
-  function buildRoadPrice(R) {
-    var mode = '2016後完工';
+  function buildRoadPrice(R, only, mode0) {   /* only：商圈單頁只畫一個商圈，長條比例照樣用全部商圈 */
+    var mode = mode0 || '2016後完工';
     function yr(y) { return y[0] === y[1] ? String(y[0]) : y[0] + '～' + y[1]; }
     function draw() {
       var mx = 1;
       R.areas.forEach(function (a) { a.rows[mode].forEach(function (r) { mx = Math.max(mx, r.m); }); });
-      document.getElementById('roadPrice').innerHTML = '<div class="rh-wrap">' + R.areas.map(function (a) {
+      var list = only ? R.areas.filter(function (a) { return a.id === only; }) : R.areas;
+      document.getElementById('roadPrice').innerHTML = '<div class="rh-wrap">' + list.map(function (a) {
         var c = COL[a.id], s = a.all[mode], lv = a.lvl[mode] || {}, rows = a.rows[mode];
         var h = '<div class="rhc"><div class="rhc-h"><span class="chip" style="background:' + c + '"></span>' + esc(a.name) + '</div>' +
           '<div class="rhc-k">整個商圈每坪 ' + fmt(s[0]) + ' 萬（' + fmt(s[1]) + ' 筆）</div>';
@@ -1131,7 +1132,7 @@
       }).join('') + '</div>';
     }
     draw();
-    seg('roadPriceSwitch', function (v) { mode = v; draw(); });
+    if (!only) seg('roadPriceSwitch', function (v) { mode = v; draw(); });
   }
   var TIERC = ['#211d18', '#c2410c', '#2563eb', '#a8a29e'];   /* 已完成、施工中、已核定（含結果查不到）、提案 */
   var FUT_AREA = { LK01: '前段', LK02: '中段', LK03: '後段', LK05: '麗園東勢', LK06: '南勢', LK07: '舊街', LK09: 'AI 園區', LK04: '選手村' };
@@ -1211,7 +1212,7 @@
   /* ---------------- 啟動 ---------------- */
   var VIEW = (document.body && document.body.getAttribute('data-view')) || 'report';
   window.LK = { jget: jget, fmt: fmt, esc: esc, sgn: sgn, COLORS: COLORS, FONT: FONT, INK: INK, MUTED: MUTED, multiples: multiples, heatTable: heatTable, buildRoads: buildRoads, buildYieldUp: buildYieldUp, yieldTbl: yieldTbl, attachResize: attachResize, areaStyle: areaStyle, inGeom: inGeom, FLOOR_ONE: FLOOR_ONE,
-    setUP: function (u) { UP = u; }, heroCur: heroCur, centroid: centroid, tip: tip, xAx: xAx, yAx: yAx, mk: mk, endDot: endDot, charts: charts };
+    setUP: function (u) { UP = u; }, heroCur: heroCur, supBars: supBars, buildRoadPrice: buildRoadPrice, futLayer: futLayer, TIERC: TIERC, TIERN: TIERN, centroid: centroid, tip: tip, xAx: xAx, yAx: yAx, mk: mk, endDot: endDot, charts: charts };
   if (document.getElementById('lkHeroMap')) heroMap(document.getElementById('lkHeroMap'));
   if (VIEW === 'map') {
     Promise.all(['summary.json', 'areas_geo.json', 'villages_geo.json', 'buildings.json', 'listings591.json', 'edu.json', 'schools.json', 'pipeline.json', 'catch.json', 'bizmap.json', 'upper.json', 'deep.json'].map(jget))

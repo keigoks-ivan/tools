@@ -167,12 +167,57 @@
     return m * b;
   }
   function bootArea() {
-    Promise.all(['summary.json', 'charts.json', 'areas_geo.json', 'upper.json', 'roads.json', 'buildings.json'].map(jget).concat(
+    Promise.all(['summary.json', 'charts.json', 'areas_geo.json', 'upper.json', 'roads.json', 'buildings.json', 'deep.json'].map(jget).concat(
       fetch('index.html').then(function (r) { if (!r.ok) throw new Error('index.html'); return r.text(); }).then(function (t) { return new DOMParser().parseFromString(t, 'text/html'); }).catch(function () { return null; })
     )).then(function (a) {
-      var S = a[0], C = a[1], AREAS = a[2], UPJ = a[3], ROAD = a[4], BLD = a[5], DOC = a[6], ord = S.order;
+      var S = a[0], C = a[1], AREAS = a[2], UPJ = a[3], ROAD = a[4], BLD = a[5], DEEP = a[6], DOC = a[7], ord = S.order;
       LK.setUP(UPJ);
-      var cur = null, map = null, yieldMode = '1f';
+      var cur = null, map = null, yieldMode = '1f', rpMode = '2016後完工';
+      var rd = Math.round, neg = function (v) { return (v < 0 ? '−' : '') + fmt(Math.abs(v), 1); };
+      /* 未來建設：進度分色、離商圈邊界的距離（用邊界頂點近似） */
+      function tierIdx(t) { return /^(已完成|已開幕)/.test(t) ? 0 : /^施工/.test(t) ? 1 : /^(提案|研議)/.test(t) ? 3 : 2; }
+      function polys(g) { return g.type === 'Polygon' ? [g.coordinates] : g.coordinates; }
+      function segD(px, py, ax, ay, bx, by) {
+        var dx = bx - ax, dy = by - ay, l2 = dx * dx + dy * dy, t = l2 ? Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / l2)) : 0;
+        return Math.sqrt(Math.pow(px - ax - t * dx, 2) + Math.pow(py - ay - t * dy, 2));
+      }
+      function edgeDist(lat, lon, g) {   /* 點到商圈邊界的公尺數（邊界頂點少，要算到線段） */
+        var kx = Math.cos(lat * Math.PI / 180) * 111320, ky = 110540, m = 1e9;
+        polys(g).forEach(function (pl) { var r = pl[0]; for (var i = 0; i < r.length; i++) { var j = (i + 1) % r.length;
+          m = Math.min(m, segD(lon * kx, lat * ky, r[i][0] * kx, r[i][1] * ky, r[j][0] * kx, r[j][1] * ky)); } });
+        return m;
+      }
+      function geomDist(g1, g2) {
+        var m = 1e9;
+        [[g1, g2], [g2, g1]].forEach(function (pr) { polys(pr[0]).forEach(function (pl) { pl[0].forEach(function (c) {
+          m = Math.min(m, LK.inGeom(c[1], c[0], pr[1]) ? 0 : edgeDist(c[1], c[0], pr[1])); }); }); });
+        return m;
+      }
+      var NEAR = 500;
+      function futBlock(F, g, name) {
+        var ins = [], near = [];
+        F.pts.forEach(function (p) {
+          if (p.title) { if (geom.LK09 && geomDist(geom.LK09, g) <= NEAR) near.push(p); return; }   /* AI 園區看整個園區範圍，不看中心點 */
+          if (LK.inGeom(p.lat, p.lon, g)) ins.push(p); else if (edgeDist(p.lat, p.lon, g) <= NEAR) near.push(p);
+        });
+        var line = F.line.some(function (c) { return LK.inGeom(c[0], c[1], g); });
+        function li(p) {
+          if (p.title) return '<li><span class="fut-dot" style="background:' + LK.TIERC[p.best] + '"></span><b>' + esc(p.title.replace(/（.*）$/, '')) + '</b><br><small>園區裡有 ' + p.items.length + ' 項，清單在完整報告</small></li>';
+          return p.items.map(function (x) { return '<li><span class="fut-dot" style="background:' + LK.TIERC[tierIdx(x.tier)] + '"></span><b>' + esc(x.n) + '</b><br><small>' + esc(x.tier) + '：' + esc(x.t) + '</small></li>'; }).join('');
+        }
+        var cnt = function (ps) { return ps.reduce(function (s0, p) { return s0 + (p.title ? 1 : p.items.length); }, 0); };
+        var nIn = cnt(ins) + (line ? 1 : 0), nNear = cnt(near), h = '';
+        if (nIn) h += '<h4 class="ar-fut-k">商圈裡</h4><ul class="ar-fut">' + ins.map(li).join('') +
+          (line ? '<li><span class="fut-dot" style="background:' + LK.TIERC[3] + '"></span><b>林口輕軌（提案）</b><br><small>提案路線經過這個商圈，還沒核定，也沒有通車時間</small></li>' : '') + '</ul>';
+        if (nNear) h += '<h4 class="ar-fut-k">附近 500 公尺內</h4><ul class="ar-fut">' + near.map(li).join('') + '</ul>';
+        if (!h) h = '<p class="fine">商圈裡和附近 500 公尺內都沒有查到的建設。</p>';
+        var head = nIn ? name + '裡有 ' + nIn + ' 項建設' + (nNear ? '，附近還有 ' + nNear + ' 項' : '') : name + '裡沒有查到的建設' + (nNear ? '，附近有 ' + nNear + ' 項' : '');
+        return { h: h, head: head };
+      }
+      function drawRp() {
+        Array.prototype.forEach.call(document.querySelectorAll('#roadPriceSwitch button'), function (b) { b.classList.toggle('on', b.getAttribute('data-fl') === rpMode); });
+        LK.buildRoadPrice(DEEP.road, cur, rpMode);
+      }
       var geom = {}; AREAS.features.forEach(function (f) { geom[f.properties.id] = f.geometry; });
       var sum = function (v) { return v.reduce(function (x, y) { return x + y; }, 0); };
 
@@ -213,7 +258,7 @@
           [fmt(r.sale_med) + ' 萬', '一樓店面成交中位數每坪（2023 年以來，' + r.sale_n + ' 筆）'],
           [fmt(r.rent_med) + ' 元', '一樓店面月租中位數每坪（2023 年以來，' + r.rent_n + ' 筆）'],
           [fmt(r['yield'], 1) + '%', '毛報酬率（成交與租賃配對）'],
-          [fmt(r.pipe_units) + ' 戶', '未完工建案戶數，已簽約店面 ' + fmt(r.pipe_signed) + ' 間']];
+          [fmt(r.pipe_units) + ' 戶', '還沒交屋的住家，已賣出的預售店面 ' + fmt(r.pipe_signed) + ' 間']];
         q('arStats').innerHTML = stats.map(function (s) { return '<div class="stat lk-ac" style="--ac:' + col + '"><div class="n">' + s[0] + '</div><div class="l">' + s[1] + '</div></div>'; }).join('');
 
         /* 地圖 */
@@ -232,7 +277,8 @@
             .bindPopup('<b>' + esc(b.n) + '</b><br>完工年：' + (b.y || (b.new ? '還沒有完工紀錄，只有預售成交' : '不明')) + '<br>成交：' + (b.ns ? b.ns + ' 筆，每坪中位數 ' + fmt(b.sm) + ' 萬' : '無有效成交')).addTo(map);
         });
         q('arOpen').href = 'map.html?lat=' + rp[0].toFixed(5) + '&lon=' + rp[1].toFixed(5) + '&r=500';
-        q('arMapNote').textContent = '綠點是 2016 年後完工或預售的店面大樓，只有預售成交的點開會註明。';
+        LK.futLayer(DEEP.fut).addTo(map);
+        q('arMapNote').textContent = '綠點是 2016 年後完工或預售的店面大樓，只有預售成交的點開會註明。其他顏色的圓點是未來建設，灰色虛線是輕軌提案路線，顏色的意思寫在下面「未來建設」。';
 
         /* 圖：人口、每年淨增、每年完工、未完工 */
         var yrs4 = C.fig4.years, i19 = yrs4.indexOf(2019), l4 = yrs4.length - 1, pc = (C.fig4.data[k][l4] / C.fig4.data[k][i19] - 1) * 100;
@@ -255,8 +301,49 @@
         q('arRoadSec').hidden = !hasRoad;
         if (hasRoad) LK.buildRoads(ROAD, '1f', k);
 
+        /* 店面開了沒（deep.json occ.ta；中段是西半加東半） */
+        var OT = DEEP.occ.ta[k], OA = DEEP.occ;
+        q('arOccSec').hidden = !OT;
+        if (OT) {
+          var dif = rd(OT.pct) - rd(OA.pct);
+          q('arOccH').textContent = '店面開了沒：' + r.name + '一樓店面門牌 ' + rd(OT.pct) + '% 有營業登記，' + (Math.abs(dif) <= 2 ? '跟全林口差不多' : '比全林口' + (dif > 0 ? '高 ' : '低 ') + Math.abs(dif) + ' 個百分點');
+          q('arOcc').innerHTML = LK.supBars([
+            { name: '整個商圈', col: col, v: rd(OT.pct) },
+            { name: '2016 年後完工', col: col, v: rd(OT.new_pct) },
+            { name: '2015 年前完工', col: col, v: rd(OT.old_pct) },
+            { name: '全林口', col: '#a8a29e', v: rd(OA.pct) }], 100, '%');
+          var ot = '<p>' + fmt(OT.n) + ' 個門牌（2016 年後完工 ' + fmt(OT.new_n) + ' 個、2015 年前完工 ' + fmt(OT.old_n) + ' 個）裡，' + fmt(OT.any) + ' 個有營業中的商家登記。全林口是 ' + fmt(OA.n) + ' 個門牌裡 ' + fmt(OA.any) + ' 個。</p>';
+          if (k === 'LK02') ot += '<p>以四維路分兩半，西半 ' + rd(OA.mid.W.pct) + '%、東半 ' + rd(OA.mid.E.pct) + '%。東半的舊大樓只有 ' + rd(OA.mid.E.old_pct) + '%，新大樓 ' + rd(OA.mid.E.new_pct) + '%，但新大樓只有 ' + OA.mid.E.new_n + ' 個門牌。</p>';
+          if (OT.new_n < 30) ot += '<p>2016 年後完工的門牌只有 ' + OT.new_n + ' 個，樣本少。</p>';
+          q('arOccP').innerHTML = ot;
+        }
+
+        /* 未來建設 */
+        var fb = futBlock(DEEP.fut, g, r.name);
+        q('arFutH').textContent = fb.head;
+        q('arFut').innerHTML = fb.h;
+
         /* 價格一列 */
         yieldMode = '1f'; setYield();
+
+        /* 各路段的價格（只有後段、前段、中段有）、轉手漲幅 */
+        var RA = DEEP.road.areas.filter(function (x) { return x.id === k; })[0];
+        q('arRpSec').hidden = !RA;
+        if (RA) {
+          var rr = RA.rows['2016後完工'].length >= 2 ? RA.rows['2016後完工'] : RA.rows['全部'], hd = '各路段的價格';
+          if (rr.length >= 2) {
+            var ms = rr.map(function (x) { return x.m; }), hi = Math.max.apply(null, ms), lo = Math.min.apply(null, ms);
+            var nm = function (v) { return rr.filter(function (x) { return x.m === v; }).map(function (x) { return x.r; }).join('、'); };
+            hd += '：' + (rr === RA.rows['全部'] ? '不分屋齡，' : '') + nm(hi) + '每坪 ' + fmt(hi) + ' 萬，' + nm(lo) + ' ' + fmt(lo) + ' 萬';
+          }
+          q('arRpH').textContent = hd;
+          rpMode = rr === RA.rows['全部'] ? '全部' : '2016後完工'; drawRp();
+        }
+        var RS = DEEP.road.rs;
+        q('arRsH').textContent = '買店面過去賺多少：全林口轉手漲幅每年 ' + fmt(RS.ann, 1) + '%';
+        q('arRs').innerHTML = '<p>全林口找得到同一間店面前後兩次成交的有 ' + RS.n + ' 對，每年漲幅中位數 ' + fmt(RS.ann, 1) + '%。漲幅加上租金的毛報酬率，中位數每年 ' + fmt(RS.tot, 1) + '%，' + rd(RS.beat) + '% 的配對高過房貸利率 ' + fmt(RS.rate, 1) + '%。</p>' +
+          (k === 'LK02' ? '<p>中段只有 ' + RS.mid.n + ' 對，每年漲幅中位數 ' + neg(RS.mid.ann) + '%，樣本太少，不能當成中段的行情。</p>' : '<p>' + esc(r.name) + '的配對不到 10 對，沒有分開算。</p>') +
+          '<p class="fine">配對方法和沒扣的稅費寫在<a href="index.html#resale">完整報告</a>。</p>';
 
         document.title = '林口店面選址・' + r.name;
         q('arH1').innerHTML = '<span class="h1a">' + esc(r.name) + '</span><span class="h1c">：</span><span class="h1b">人口、新店面、同業和價格</span>';
@@ -267,6 +354,7 @@
       });
       window.addEventListener('popstate', function () { show(qs().get('a') || ord[0]); });
       q('yieldSwitch').addEventListener('click', function (e) { var b = e.target.closest('button[data-fl]'); if (!b) return; yieldMode = b.getAttribute('data-fl'); setYield(); });
+      q('roadPriceSwitch').addEventListener('click', function (e) { var b = e.target.closest('button[data-fl]'); if (!b) return; rpMode = b.getAttribute('data-fl'); drawRp(); });
       LK.attachResize();
       var a0 = qs().get('a'); show(ord.indexOf(a0) >= 0 ? a0 : ord[0]);
       if (a0 === null || ord.indexOf(a0) < 0) setUrl('a=' + cur, false);

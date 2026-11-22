@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&display=swap">
-<link rel="stylesheet" href="linkou.css?v=20261122b">
+<link rel="stylesheet" href="linkou.css?v=20261122c">
 </head>
 <body data-view="area">
 <div id="nav-root"></div>
@@ -26,7 +26,7 @@
   <div class="page-header">
     <div class="eyebrow">新北市林口區・店面研究｜資料更新 2026 年 11 月</div>
     <h1 id="arH1"><span class="h1a">看某個商圈</span></h1>
-    <div class="subtitle">六個主要商圈，一個商圈一頁。選一個商圈，看它的人口、新店面、同業增減和價格。</div>
+    <div class="subtitle">六個主要商圈，一個商圈一頁。選一個商圈，看它的人口、店面開了沒、同業增減、價格和未來建設。</div>
     <div class="pg-links"><a href="index.html">← 林口店面選址</a><a href="map.html">點地圖找位置</a><a href="industry.html">我要開某種店</a><span class="cur">看某個商圈</span></div>
   </div>
   </div>
@@ -54,18 +54,40 @@
     <div class="fig"><h3 id="ar3H">—</h3><div class="cap">每年完工的店面大樓數（2016～2026，依實價登錄的完工年）</div><div class="chart" id="ar3"></div></div>
     <div class="fig"><h3 id="ar4H">—</h3><div class="cap">未完工建案還沒交屋的住家和已賣出的預售店面，依預計交屋年（2026～2030）；顏色深淺在六個商圈用同一個比例</div><div class="chart-html" id="ar4"></div></div>
   </div>
-  <p class="fine">預計完工年是用建照年加 4 年推的，不是建商公告。已簽約店面只算到實價登錄有登記的，是最少的數字。</p>
+  <p class="fine">預計完工年是用建照年加 4 年推的，不是建商公告。已賣出的預售店面只算到實價登錄有登記的，住家戶數只算建照有寫戶數的建案，兩個都是最少的數字。</p>
   <div id="arRoadSec">
     <h3 class="sub-h">各路段的店面供給</h3>
-    <p class="fine" id="roadNote">2016 年後完工指 2016～2026 年完工的店面大樓棟數，2015 年前完工指更早完工的棟數，預售案不計。未完工戶數和已簽約店面的算法跟上面一樣。長條跟報告各路段表用同一個比例，可以直接比較。寫成路口的地址（例如信義路與吉祥路交叉口）算在先寫的那條路。「段別未載」是建案只寫路名、沒寫第幾段。<span id="roadNoYear"></span></p>
+    <p class="fine" id="roadNote">2016 年後完工指 2016～2026 年完工的店面大樓棟數，2015 年前完工指更早完工的棟數，預售案不計。還沒交屋的住家和已賣出預售店面的算法跟上面一樣。長條跟報告各路段表用同一個比例，可以直接比較。寫成路口的地址（例如信義路與吉祥路交叉口）算在先寫的那條路。「段別未載」是建案只寫路名、沒寫第幾段。<span id="roadNoYear"></span></p>
     <div id="roadCards"></div>
   </div>
+
+  <div id="arOccSec">
+    <h3 class="sub-h" id="arOccH">店面開了沒</h3>
+    <div class="ar-occ" id="arOcc"></div>
+    <div class="prose" id="arOccP"></div>
+    <p class="fine">實價登錄有一樓店面紀錄的門牌，對到商業登記裡營業中的商家（2026-11-18）。門牌只含有成交或租賃紀錄的店面，建商自持、從沒成交過的看不到。補習班、診所多半不在商業登記，店家也可能登記在隔壁門牌或樓上，所以沒對到的不全是空店。全林口估實際空著的約三成，算法在<a href="index.html#occupancy">完整報告</a>。</p>
+  </div>
+
+  <h2 class="section-heading">未來建設</h2>
+  <h3 class="sub-h" id="arFutH">—</h3>
+  <div id="arFut"></div>
+  <p class="fine">顏色是進度：黑色已完成或已開幕，橘色施工中，藍色已核定、或已開標但結果查不到，灰色是提案或研議中。「附近」是離商圈邊界 500 公尺內，工一 AI 園區用整個園區範圍算。只列查得到公開來源的項目，來源和全林口的清單在<a href="index.html#future">完整報告</a>。上面的商圈地圖也畫了這些點和輕軌提案路線。</p>
 
   <h2 class="section-heading">價格：買還是租</h2>
   <div class="fine" style="margin-bottom:6px">成交中位數、租金中位數、毛報酬率（同棟或同路段、時間相近的成交和租賃配對）</div>
   <div class="radius-bar seg-bar" id="yieldSwitch" role="group" aria-label="價格表的樓層"><span class="rb-k">樓層</span><button type="button" data-fl="1f" class="on">一樓店面</button><button type="button" data-fl="up">二到四樓辦公、商業</button></div>
   <div class="tbl-wrap"><table class="dt" id="tblYield"></table></div>
   <p class="fine" id="yieldNote"></p>
+
+  <div id="arRpSec">
+    <h3 class="sub-h" id="arRpH">各路段的價格</h3>
+    <div class="radius-bar seg-bar" id="roadPriceSwitch" role="group" aria-label="路段價格的屋齡"><span class="rb-k">屋齡</span><button type="button" data-fl="2016後完工" class="on">2016 年後完工</button><button type="button" data-fl="全部">不分屋齡</button></div>
+    <div id="roadPrice"></div>
+    <p class="fine">一樓店面每坪成交中位數，只列成交 5 筆以上的路段。用全部年份算，各路的年份範圍不同，長條下面寫筆數和年份。長條跟完整報告用同一個比例。租金拆不到路段，2023 年以來沒有一條路有 5 筆以上的租賃紀錄。</p>
+  </div>
+
+  <h3 class="sub-h" id="arRsH">買店面過去賺多少</h3>
+  <div class="prose" id="arRs"></div>
 
   <h3 class="sub-h">還可以這樣看</h3>
   <div class="pg-more">
@@ -76,7 +98,7 @@
 </div>
 
 <footer class="footer">A project by <span>InvestMQuest</span></footer>
-<script src="linkou.js?v=20261122b"></script>
-<script src="linkou-pages.js?v=20261122a"></script>
+<script src="linkou.js?v=20261122c"></script>
+<script src="linkou-pages.js?v=20261122c"></script>
 </body>
 </html>
