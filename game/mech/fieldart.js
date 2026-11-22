@@ -19,7 +19,7 @@ function branch(a,b,radius) {
   g.applyQuaternion(new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0,1,0),d.normalize()));
   return colored(g.translate(...start.add(end).multiplyScalar(.5).toArray()),[.075,.052,.033]);
 }
-export function fieldTreeGeometry(pine = true, variant = 0) {
+export function fieldTreeGeometry(pine = true, variant = 0, distant = false) {
   const lean=(variant-1)*.35, tall=variant===2?1.18:variant===1?.9:1;
   const parts=[branch([0,0,0],[lean,(pine?10.4:6.6)*tall,.15],pine?.32:.42)];
   const card=(pts,variant,tint=[.78,.83,.70])=>{
@@ -30,10 +30,11 @@ export function fieldTreeGeometry(pine = true, variant = 0) {
     parts.push(colored(g,tint,true));
   };
   if(pine) {
-    for(let level=0;level<8;level++) {
+    for(let level=0;level<8;level+=distant?2:1) {
       const y=(2.3+level*1.08)*tall,reach=(3.7-level*.39)*(variant===1?1.17:variant===2?.82:1);
-      for(let b=0;b<9;b++) {
-        const a=b/9*Math.PI*2+level*.71+variant+.2*Math.sin(b*7.3+level),cs=Math.cos(a),sn=Math.sin(a),spread=reach*(.72+.3*Math.sin(b*4.1+level*2.7+variant));
+      const branches=distant?6:9;
+      for(let b=0;b<branches;b++) {
+        const a=b/branches*Math.PI*2+level*.71+variant+.2*Math.sin(b*7.3+level),cs=Math.cos(a),sn=Math.sin(a),spread=reach*(.72+.3*Math.sin(b*4.1+level*2.7+variant));
         const pt=(d,side,h)=>[cs*d-sn*side+lean*y/11,y+h,sn*d+cs*side];
         card([pt(.1,-reach*.4,.65),pt(spread,-reach*.4,-.7),pt(spread,reach*.4,-.7),pt(.1,reach*.4,.65)],(b+level)%2);
       }
@@ -48,9 +49,10 @@ export function fieldTreeGeometry(pine = true, variant = 0) {
       const x=Math.cos(a)*dist+lean+(wide?.72:.28),z=Math.sin(a)*dist*(wide?.78:1.05)+.26;
       const width=(outer?1.52:1.12)*(1+.17*Math.sin(i*5.1+variant)),rise=wide?1.10:1.42;
       const start=[lean*.3,2.9+(i%4)*.65,.08];
-      parts.push(branch(start,[x,y-.32,z],outer?.16:.10));
-      for(let axis=0;axis<3;axis++) {
-        const t=a+axis*Math.PI/3+.17*Math.sin(i+axis),dx=Math.cos(t)*width,dz=Math.sin(t)*width;
+      if(!distant||i%3===0)parts.push(branch(start,[x,y-.32,z],outer?.16:.10));
+      const cards=distant?2:3;
+      for(let axis=0;axis<cards;axis++) {
+        const t=a+axis*Math.PI/cards+.17*Math.sin(i+axis),dx=Math.cos(t)*width,dz=Math.sin(t)*width;
         const lift=.28*Math.sin(i*2.3+axis),top=rise*(.85+.16*Math.sin(i+axis*3));
         card([[x-dx,y-rise*.55+lift,z-dz],[x+dx,y-rise*.55-lift,z+dz],
           [x+dx*.82,y+top-lift,z+dz*.82],[x-dx*.72,y+top+lift,z-dz*.72]],
@@ -226,7 +228,7 @@ export function fieldGroundMask(route, structures, contacts, createCanvas = () =
     } else if(channel===1) {
       for(const s of structures) {
         const [x,y]=point(s.x,s.z),w=s.width||(s.target?30:48),d=s.depth||34;
-        const industrial=profile==='depot'||profile==='airfield',padding=industrial?56:24;
+        const industrial=profile==='depot'||profile==='airfield',padding=industrial?56:profile==='hillside'?8:24;
         for(let pad=padding;pad>=0;pad-=4){const gray=Math.round((industrial?255:180)*(1-pad/(padding+4)));ctx.fillStyle=`rgb(${gray},${gray},${gray})`;ctx.fillRect(x-(w/2+pad)*scale,y-(d/2+pad)*scale,(w+pad*2)*scale,(d+pad*2)*scale);}
       }
     } else {

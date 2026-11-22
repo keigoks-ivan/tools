@@ -1,4 +1,5 @@
 import { ImprovedNoise } from 'three/addons/math/ImprovedNoise.js';
+import { kobeElevation } from './kobe-relief.mjs';
 import { landingGround, landingShore } from './landing-layout.mjs?v=4';
 const noise = new ImprovedNoise();
 // 關卡場地：沿用既有任務路線，路線周圍整平，地形與掩體只在換關時建立。
@@ -10,7 +11,7 @@ export const BATTLEFIELDS = {
   badlands: { mode: 4, label: '荒野防線', relief: 130, trees: 0, rocks: 130 },
   airfield: { mode: 5, label: '高原航空基地', relief: 55, trees: 20, rocks: 35 },
   fortress: { mode: 6, label: '山隘要塞', relief: 270, trees: 140, rocks: 105 },
-  hillside: { mode: 2, label: '神戶山麓疏散線', relief: 193, trees: 380, rocks: 42 },
+  hillside: { mode: 2, label: '神戶山麓疏散線', relief: 193, trees: 260, rocks: 42 },
   landing: { mode: 7, label: '神戶外港', relief: 142, trees: 36, rocks: 20 },
 };
 const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
@@ -37,6 +38,19 @@ export function fieldHeight(x, z, profile, route, base = 0) {
     const edge=Math.max(smooth(1400,4500,x),smooth(4100,5000,Math.abs(z)));
     return (h+upper*ridge+foothills)*(1-edge)+base*edge;
   }
+  if(profile==='hillside'){
+    // 戰線在坡麓緩台上。台地以北銜接既有神戶高程，以南向市區下降。
+    const bench=smooth(-650,700,x)*48,north=-z;
+    const rise=Math.max(0,north-155);
+    const terrace=bench+Math.min(rise,440)*(.085+.018*noise.noise(x/185,2,z/248));
+    const blend=Math.max(smooth(420,1150,north),smooth(165,650,z),smooth(710,1190,Math.abs(x)));
+    if(!blend)return terrace;
+    const foothill=route.relief?kobeElevation(route.relief,x-950,z-1430):
+      13+smooth(90,1750,north)*(205+80*noise.noise(x/390,4,z/460));
+    const slope=terrace+(foothill-terrace)*blend;
+    const edge=smooth(3850,5000,Math.max(Math.abs(x),Math.abs(z)));
+    return slope*(1-edge)+base*edge;
+  }
   const r = Math.hypot(x, z);
   if (r > 2400) {
     const strength=smooth(2400,3400,r)*(1-smooth(4400,5000,Math.max(Math.abs(x),Math.abs(z))));
@@ -45,15 +59,13 @@ export function fieldHeight(x, z, profile, route, base = 0) {
   }
   // 近處為可作戰的緩坡，山稜從戰場邊緣抬起；路線與目標旁保留安全走廊。
   let clear = routeDistance(x, z, route.pts);
-  if (profile === 'hillside') clear = Math.max(0, clear - 88);
   if (profile === 'airfield') clear = Math.min(clear, Math.hypot(Math.max(0,Math.abs(x+420)-48),Math.max(0,Math.abs(z)-900)));
   for (const sec of route.secs) for (const t of sec.targets || []) clear = Math.min(clear, Math.hypot(x - t.x, z - t.z));
   for (const t of route.pads || []) clear = Math.min(clear, Math.hypot(x - t.x, z - t.z));
   const wx=x+noise.noise(x/600,7,z/600)*180,wz=z+noise.noise(x/600,19,z/600)*180;
   const ridge = .24+Math.pow(1-Math.abs(noise.noise(wx/350,11,wz/350)),2)*.65+noise.noise(wx/130,23,wz/130)*.18;
   const outer = smooth(650, 1250, r), inner = smooth(70, 170, clear);
-  const hillside = profile==='hillside' ? smooth(-650,700,x)*48 + smooth(140,500,-z)*102*ridge : 0;
-  const h = F.relief * ridge * (outer + (1 - outer) * 0.24) * inner + hillside;
+  const h = F.relief * ridge * (outer + (1 - outer) * 0.24) * inner;
   return h * (1 - smooth(1650, 2400, r)) + base * smooth(1650, 2400, r);
 }
 export function fieldLayout(profile, route) {

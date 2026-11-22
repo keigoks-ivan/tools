@@ -9,6 +9,14 @@ export const HILL_LINES = [
 ];
 // 商店街在兩條疏散道路之間，東口進街、十字路口分往兩翼。
 export const HILL_ALLEY=[[-337,0],[-222,0],[-119,0]];
+// 住宅街沿商店街與兩翼排列。相鄰兩跨共用外觀，各自保有可破壞的外牆、樓板和碰撞。
+export const HILL_LOTS=[
+  // 中心 x、z、寬、深、樓層、立面樣式
+  [-291,174,31,21,4,3],[-229,179,34,22,3,2],[-173,167,29,21,4,4],
+  [-262,-121,31,20,4,4],[-191,-130,43,23,5,3],[-150,-142,25,16,3,2],
+  [-314,33,31,25,4,2],[-276,48,23,19,5,3],[-193,34,26,24,4,4],[-143,34,31,27,6,3],
+  [-308,-29,38,24,5,3],[-258,-26,27,20,3,4],[-185,-30,24,21,5,3],[-138,-27,28,22,4,2],
+];
 export const HILL_VANGUARD=['tank grunt heavy','grunt brawler grunt'];
 export const HILL_RAID=['brawler grunt brawler tank','grunt tank heavy'];
 export const HILL_RELIEF=['heavy grunt brawler','grunt tank'];

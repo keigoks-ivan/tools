@@ -1,20 +1,33 @@
 import * as THREE from 'three';
 import { PropBatch, fieldMaterial, signAtlas } from './front-scenery.mjs';
+import { RESIDENTIAL_LANES, LOCAL_LINKS, BATTLE_ROADS } from './hillside-town.mjs';
 import { HILL_LINES, HILL_EXIT, HILL_COVER, HILL_ALLEY } from './hillside-layout.mjs';
 
 export function buildHillside(world,root) {
   const materials={
     concrete:fieldMaterial(world,0xaaa391,.86,.06,'precast'),stone:fieldMaterial(world,0x706a5e,.94,.02,'concrete'),
-    asphalt:fieldMaterial(world,0x565756,.87,.08,'asphalt'),paint:fieldMaterial(world,0xffffff,.71,.22,'paint',true),
+    asphalt:fieldMaterial(world,0xffffff,.94,.015,'asphalt'),paint:fieldMaterial(world,0xffffff,.71,.22,'paint',true),
     glass:fieldMaterial(world,0x345560,.33,.41),steel:fieldMaterial(world,0x525e5b,.59,.48,'paint'),
     white:fieldMaterial(world,0xe4dfc9,.74,.12),mark:fieldMaterial(world,0xc29652,.76,.1),
+  };
+  // 同一個地面材質讀既有鋪面照片；沿路補過的瀝青比舊路深，行車線仍可辨識。
+  materials.asphalt.onBeforeCompile=sh=>{
+    sh.fragmentShader=sh.fragmentShader.replace('#include <map_fragment>',`#include <map_fragment>
+      #ifdef USE_MAP
+      vec2 at=vMapUv*4.2;
+      float grain=dot(sampledDiffuseColor.rgb,vec3(.21,.72,.07));
+      float age=.5+.5*sin(at.x*.12+sin(at.y*.19)*2.7)*sin(at.y*.086+at.x*.04);
+      vec2 panel=fract((at+vec2(sin(at.y*.31)*.12,at.x*.011))/vec2(41.,8.3));
+      float resurfaced=smoothstep(.025,.04,panel.x)*(1.-smoothstep(.38,.4,panel.x))*smoothstep(.04,.06,panel.y)*(1.-smoothstep(.66,.69,panel.y));
+      diffuseColor.rgb=vec3(.100,.104,.106)*(.64+1.60*sqrt(max(.0,grain)))*(.90+age*.13-resurfaced*.062);
+      #endif`);
   };
   const b=new PropBatch(materials),height=(x,z)=>world.height(x,z);
   const box=(k,x,z,y,w,h,d,rx=0,ry=0,rz=0,color=0xffffff)=>b.box(k,x,height(x,z)+y,z,w,h,d,rx,ry,rz,color);
   function solid(x,z,w,d,h) {world.addCollider({x0:x-w/2,x1:x+w/2,z0:z-d/2,z1:z+d/2,top:height(x,z)+h});}
   const paint=(x,z,y,w,h,d,tint)=>box('paint',x,z,y,w,h,d,0,0,0,tint);
   const cyl=new THREE.CylinderGeometry(1,1,1,14),tire=new THREE.CylinderGeometry(1,1,1,10).rotateX(Math.PI/2);
-  const road=(a,c,width,frontage=false)=>{
+  const road=(a,c,width,frontage=false,marked=true)=>{
     const [ax,az]=a,[cx,cz]=c,len=Math.hypot(cx-ax,cz-az);
     const dx=(cx-ax)/len,dz=(cz-az)/len;
     const n=Math.ceil(len/12),v=new THREE.Vector3();
@@ -22,7 +35,7 @@ export function buildHillside(world,root) {
       const xyz=[],uv=[],normal=[];
       for(const [t,offset] of [[t0,left],[t1,left],[t0,right],[t1,left],[t1,right],[t0,right]]){
         const x=ax+dx*t-dz*offset,z=az+dz*t+dx*offset;
-        v.set(x,height(x,z)+lift,z);xyz.push(v.x,v.y,v.z);uv.push(t/7,offset/7);normal.push(0,1,0);
+        v.set(x,height(x,z)+lift,z);xyz.push(v.x,v.y,v.z);uv.push(t/7,offset/7);v.set(height(x-1,z)-height(x+1,z),2,height(x,z-1)-height(x,z+1)).normalize();normal.push(v.x,v.y,v.z);
       }
       const g=new THREE.BufferGeometry();g.setIndex([0,2,1,3,5,4]);
       g.setAttribute('position',new THREE.Float32BufferAttribute(xyz,3));g.setAttribute('normal',new THREE.Float32BufferAttribute(normal,3));
@@ -31,41 +44,51 @@ export function buildHillside(world,root) {
     for(let i=0;i<n;i++){
       const t=i*len/n,end=(i+1)*len/n;
       if(frontage){
-        stripe(t,end,-34,-width*.5,'concrete',.085);
-        stripe(t,end,width*.5,34,'concrete',.085);
+        for(const side of [-1,1]){
+          const band=(a,b,k,lift)=>stripe(t,end,side>0?a:-b,side>0?b:-a,k,lift);
+          if(Math.abs(ax+dx*(t+end)*.5+222)<10)continue;
+          band(7.06,10.55,'concrete',.19);
+          band(6.88,7.12,'stone',.18);
+          band(7.98,8.27,'mark',.206);
+          for(let at=t;at<end;at+=3.6)stripe(at,Math.min(end,at+.035),side>0?7.12:-10.55,side>0?10.55:-7.12,'stone',.21);
+        }
       }
       stripe(t,end,-width*.5,width*.5,'asphalt',.16);
-      for(const side of [-1,1])stripe(t,end,side*width*.46-.14,side*width*.46+.14,'white',.24);
-      if(i%2===0)stripe(t+.4,end-.8,-.17,.17,'mark',.26);
+      if(!marked)continue;
+      const mid=(t+end)*.5,x=ax+dx*mid,z=az+dz*mid;
+      // 路口保持同一片柏油；車道線在交叉口之前收住。
+      if(crossings.some(([px,pz,sx,sz])=>Math.abs(dx*sz-dz*sx)>.42&&Math.hypot(px-x,pz-z)<12))continue;
+      for(const side of [-1,1])stripe(t,end,side*width*.46-.075,side*width*.46+.075,'white',.225);
+      if(i%2===0&&width>=14)stripe(t+.6,end-1.2,-.09,.09,'mark',.235);
     }
   };
-  const roads=[0,1].map(i=>[[-590,10],...HILL_LINES.map(l=>l.posts[i]),HILL_EXIT,[680,10]]);
-  for(const r of roads)for(let i=1;i<r.length;i++)road(r[i-1],r[i],i===1?24:20);
+  const crossings=BATTLE_ROADS.flatMap(line=>line.slice(1).flatMap(([x,z],i)=>{
+    const [a,b]=line[i],len=Math.hypot(x-a,z-b),dx=(x-a)/len,dz=(z-b)/len;
+    return [[a,b,dx,dz],[x,z,dx,dz]];
+  }));
+  crossings.push([-221,0,0,1],[-337,0,1,0],[-119,0,1,0]);
+  for(const line of BATTLE_ROADS.slice(0,2))for(let i=1;i<line.length;i++){
+    if(i===line.length-1&&line===BATTLE_ROADS[1])continue;
+    road(line[i-1],line[i],i===1?24:20);
+  }
   for(const {posts} of HILL_LINES)road(posts[0],posts[1],15);
   road(HILL_ALLEY[0],HILL_ALLEY[2],14,true);
-  road([-337,0],[-337,-75],13);road([-337,0],[-337,89],13);
-  road([-119,-80],[-119,0],14);road([-119,0],[-119,104],14);
-  for(const side of [-1,1])for(let x=-328;x<-118;x+=12){
-    // 十字路口保留轉彎和穿越空間；路緣與側溝沿坡逐段取高。
-    if(Math.abs(x+222)<15)continue;
-    box('concrete',x,side*8.65,.16,11.96,.36,3.05);
-    box('stone',x,side*7.13,.10,11.96,.22,.25);
-    box('mark',x,side*8.20,.36,11.93,.025,.37);
-    for(const dx of [-4,0,4])box('stone',x+dx,side*8.65,.35,.05,.018,2.96);
-  }
-  for(const x of [-335,-232,-211,-120])for(let k=-2;k<=2;k++)
-    box('white',x,k*2.3,.25,2.6,.035,1.05);
+  for(const line of BATTLE_ROADS.slice(-2))road(line[0],line[1],13);
+  for(const line of [...RESIDENTIAL_LANES,...LOCAL_LINKS])for(let i=1;i<line.length;i++)
+    road(line[i-1],line[i],5.2,false,false);
+  for(const x of [-334,-232,-211,-122])for(let k=-2;k<=2;k++)
+    b.ground(world,'white',x,k*2.32,2.65,.98,.23);
   // 架空配線只在電桿間垂落，行進及交火高度保持淨空。
   for(const [i,x] of [-329,-281,-233,-185,-137].entries()){
     const z=-10.4,y=height(x,z);
-    b.add('concrete',cyl,x,y+10,z,.30,20,.30);solid(x,z,.62,.62,20);
-    box('steel',x,z,19.1,.25,.34,3.6);
-    if(i%2===0)b.add('steel',cyl,x+.44,y+15.6,z,.64,1.45,.64);
-    for(const off of [-1.35,0,1.35]){
-      box('white',x,z+off,19.48,.2,.48,.2);
+    b.add('concrete',cyl,x,y+6.5,z,.23,13,.23);solid(x,z,.5,.5,13);
+    box('steel',x,z,12.25,.2,.22,3.0);
+    if(i%2===0)b.add('steel',cyl,x+.36,y+10.1,z,.39,.97,.39);
+    for(const off of [-1.14,0,1.14]){
+      box('white',x,z+off,12.46,.16,.31,.16);
       if(i===4)continue;
       for(let k=0;k<4;k++){
-        const at=t=>y+(height(x+48,z)-y)*t+19.7-4*.95*t*(1-t);
+        const at=t=>y+(height(x+48,z)-y)*t+12.64-4*1.25*t*(1-t);
         const y0=at(k/4),y1=at((k+1)/4);
         b.box('steel',x+k*12+6,(y0+y1)/2,z+off,Math.hypot(12,y1-y0),.055,.055,0,0,Math.atan2(y1-y0,12));
       }
@@ -154,6 +177,8 @@ export function buildHillside(world,root) {
       for(const y of [h*.34,h*.67])box('concrete',x-w/2-.06,z,y,.14,.22,d);
       for(const dz of [-.32,0,.32])for(const y of [3.8,9.4])
         box('steel',x-w/2-.06,z+dz*d,y,.14,.48,.74);
+    }else if(x>=-470&&x<=500){
+      box('stone',x,z,h+.12,w+.52,.25,d+.52);
     }else if(type===1){
       box('steel',x+w*.15,z,h+.56,w*.39,1.12,d*.32);
       paint(x-w/2-.08,z,h*.25,.18,h*.49,d*.34,0x627374);

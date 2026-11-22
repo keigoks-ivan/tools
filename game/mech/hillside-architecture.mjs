@@ -203,6 +203,30 @@ export function dressFloor({detail,out,signs,x0,x1,z0,z1,gy,front,lot,half,i,cou
 // 住宅街內的常設掩體沿用原碰撞外框。設備棟的檢修開口及擋土牆的洩水口分開建模。
 export function dressServiceWalls({x,z,w,d,h,type},gy,skin,details,box){
   const solid=(a,b,c,e,f,g,col)=>box(details,a,b,gy+c,gy+e,f,g,col,4);
+  if(type!==0)for(const side of [-1,1]){
+    const X=x+side*w*.5;
+    const field=(a,b,lo,hi,near,far,col)=>solid(Math.min(X+side*near,X+side*far),Math.max(X+side*near,X+side*far),lo,hi,z+a,z+b,col);
+    const front=(a,b,lo,hi,col,row)=>{
+      const at=(u,v)=>[X+side*.04,gy+lo+(hi-lo)*v,z+(side<0?a+(b-a)*u:b-(b-a)*u)];
+      skin.quad(at(0,0),at(1,0),at(1,1),at(0,1),[side,0,0],uv.map(([u,v])=>[(col+.012+.976*u)/3,(row+.012+.976*v)/4]),[.90,.89,.84]);
+    };
+    const bays=Math.max(3,Math.round(d/3.9)),bay=d/bays;
+    const floors=Math.max(3,Math.round((h-4)/3.35)),pitch=(h-4.25)/floors;
+    for(let j=0;j<bays;j++){
+      const a=-d*.5+j*bay,b=a+bay;
+      front(a,b,.025,3.69,j===1?0:2,j===1?0:1);
+      for(let f=0;f<floors;f++)front(a,b,3.92+f*pitch,3.92+(f+1)*pitch,type===2?1:2,(f+j)%4===0?3:1);
+    }
+    field(-d*.49,d*.49,3.64,3.87,.0,.53,trim);
+    field(-d*.5+.32,-d*.5+.46,.1,h-.38,.05,.22,metal);
+    const door=-d*.5+bay*1.5;
+    field(door-1.93,door+1.93,3.08,3.25,.04,1.08,metal);
+    field(door-2,door+2,-.28,.12,-.08,.91,trim);
+    for(let f=1;f<floors;f++){
+      const y=3.92+f*pitch;
+      field(-d*.49,d*.49,y-.13,y+.04,.015,.21,trim);
+    }
+  }
   for(const side of [-1,1]){
     const Z=z+side*d*.5;
     const field=(a,b,c,e,near,far,col)=>solid(a,b,c,e,Math.min(Z+side*near,Z+side*far),Math.max(Z+side*near,Z+side*far),col);

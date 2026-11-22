@@ -1,14 +1,7 @@
 import { alleySkin, dressFloor, dressServiceWalls, stairLanding } from './hillside-architecture.mjs';
-import { HILL_COVER } from './hillside-layout.mjs';
+import { buildShopYards, buildTownHouses } from './hillside-town.mjs';
+import { HILL_COVER, HILL_LOTS } from './hillside-layout.mjs';
 
-// 住宅街沿商店街與兩翼排列。相鄰兩跨共用外觀，各自保有可破壞的外牆、樓板和碰撞。
-const LOTS=[
-  // 中心 x、z、寬、深、樓層、立面樣式
-  [-291,174,31,21,4,3],[-229,179,34,22,3,2],[-173,167,29,21,4,4],
-  [-262,-121,31,20,4,4],[-191,-130,43,23,5,3],[-150,-142,25,16,3,2],
-  [-314,33,31,25,4,2],[-276,48,23,19,5,3],[-193,34,26,24,4,4],[-143,34,31,27,6,3],
-  [-308,-29,38,24,5,3],[-258,-26,27,20,3,4],[-185,-30,24,21,5,3],[-138,-27,28,22,4,2],
-];
 const stone=[.65,.59,.50,0,1], ledge=[.78,.76,.70,0,1], steel=[.19,.23,.23,0,2], room=[.12,.11,.10,0,1];
 
 
@@ -56,7 +49,7 @@ function fractureSlab(out,rec,floor,y,terrain){
 
 export function buildAlleyBuildings(world,{bucket,box,put,facades}){
   const wall=bucket(),details=bucket(),signs=bucket(),records=[];
-  for(const [lot,[cx,cz,w,d,count,style]] of LOTS.entries()){
+  for(const [lot,[cx,cz,w,d,count,style]] of HILL_LOTS.entries()){
     const F=facades[style],story=F.h/F.rows;
     const gy=world.height(cx,cz),front=cz<0?1:-1;
     for(let half=0;half<2;half++){
@@ -214,8 +207,11 @@ export function buildAlleyBuildings(world,{bucket,box,put,facades}){
     }
   }
   for(const site of HILL_COVER){
-    if(site.x>=-340&&site.x<=-115)dressServiceWalls(site,world.height(site.x,site.z),wall,details,box);
+    if(site.x>=-470&&site.x<=500)dressServiceWalls(site,world.height(site.x,site.z),wall,details,box);
   }
+  const yards=buildShopYards(world,details,box);
+  const homes=buildTownHouses(world,wall,details,signs,box,yards);
+  records.push(...homes);world.hillsideSite.yards=yards;
   put(wall,alleySkin(world));
   put(details,world.fieldRoofMaterial);put(signs,world.citySignMaterial);
   return records;

@@ -319,12 +319,13 @@ function terrainMaterial(A) {
     normalScale: new THREE.Vector2(1.1, 1.1), roughness: 1, metalness: 0,
   });
   mat.userData.battlefield = { value: 0 };
+  mat.userData.hillside = { value: 0 };
   mat.userData.fieldMask = { value: null };
   mat.userData.cityLandUse = { value: null };
   mat.userData.canopy = A.forestCanopy;
   mat.onBeforeCompile = (sh) => {
     Object.assign(sh.uniforms, {
-      battlefield: mat.userData.battlefield, fieldMask: mat.userData.fieldMask,
+      battlefield: mat.userData.battlefield, hillside: mat.userData.hillside, fieldMask: mat.userData.fieldMask,
       cityLandUse: mat.userData.cityLandUse,
       forestCanopy:mat.userData.canopy,forestReady:A.forestReady,
       surfaceAtlas:A.surfaceAtlas, surfaceReady:A.surfaceReady,
@@ -339,7 +340,7 @@ function terrainMaterial(A) {
         uniform sampler2D asphD, asphN, asphA, rubD, rubN, rockD, rockN, surfaceAtlas, forestCanopy;
         uniform float surfaceReady, forestReady;
         vec3 scanned(vec2 uv,vec2 tile){return texture2D(surfaceAtlas,tile+vec2(.008)+fract(uv)*.484).rgb;}
-        uniform float battlefield; uniform sampler2D fieldMask, cityLandUse;
+        uniform float battlefield, hillside; uniform sampler2D fieldMask, cityLandUse;
         varying vec3 vTW; varying vec3 vTN;
         float th(vec2 p){ return fract(sin(dot(p, vec2(127.1,311.7))) * 43758.5453); }
         float tn(vec2 p){ vec2 i=floor(p), f=fract(p); f=f*f*(3.0-2.0*f);
@@ -403,11 +404,16 @@ function terrainMaterial(A) {
         vec3 terrainN = normalize(vTN);
         float slope = 1.0 - terrainN.y;
         float mountain = smoothstep(battlefield > 0.5 ? 650.0 : 1350.0, battlefield > 0.5 ? 1250.0 : 1950.0, length(vTW.xz));
-        float kobe = battlefield < .5 || battlefield > 5.5 ? 1.0 : 0.0;
+        float kobe = battlefield < .5 || battlefield > 5.5 || hillside>.5 ? 1.0 : 0.0;
         mountain=mix(mountain,smoothstep(12.0,55.0,vTW.y)*smoothstep(850.0,1250.0,length(vTW.xz)),kobe);
+        if(hillside>.5)mountain=smoothstep(136.0,300.0,-vTW.z)*smoothstep(15.0,65.0,vTW.y);
         if(battlefield>6.5)mountain=smoothstep(475.0,925.0,vTW.x)*smoothstep(14.0,87.0,vTW.y);
         vec2 canopyUV=vTW.xz/128.0+vec2(macro*.24,dry*.12);
         vec4 crowns=vec4(.5);if(kobe>.5 && mountain>.001)crowns=texture2D(forestCanopy,canopyUV);
+        if(hillside>.5 && mountain>.001 && forestReady>.5) {
+          vec2 woodland=mat2(.81,.58,-.58,.81)*vTW.xz/175.0+vec2(dry*.62,macro*.30);
+          crowns=mix(crowns,texture2D(forestCanopy,woodland),.24+macro*.48);
+        }
         // 森林覆蓋由坡度與海拔決定，以貼圖表現樹冠，不建立數萬棵遠樹。
         float treeline = 0.0;
         if (mountain > 0.001) {
@@ -451,11 +457,11 @@ function terrainMaterial(A) {
         rock *= 1.0 - smoothstep(.48,.70,dry) * smoothstep(.12,.42,slope) * .15;
         float rk = smoothstep(mix(.20,.38,kobe), mix(.48,.68,kobe), slope + (macro - 0.5) * 0.14 + treeline * 0.14);
         if (battlefield > 3.5 && battlefield < 4.5) grass = mix(grass, texture2D(rubD, vTW.xz / 14.0).rgb * vec3(0.85,0.63,0.40), 0.85);
-        if (battlefield > 1.5 && battlefield < 2.5) grass *= vec3(0.65,0.83,0.64);
+        if (battlefield > 1.5 && battlefield < 2.5) grass *= mix(vec3(0.65,0.83,0.64),vec3(.94,.95,.92),hillside);
         if (battlefield > 0.5 && battlefield < 5.5) {
           vec3 soil=texture2D(rubD,vTW.xz/9.0).rgb;
           float bare=smoothstep(0.42,0.68,dry+tn(vTW.xz/18.0)*0.12);
-          if (battlefield > 1.5 && battlefield < 2.5) grass=mix(grass,soil*vec3(0.46,0.41,0.29),bare*0.65);
+          if (battlefield > 1.5 && battlefield < 2.5) grass=mix(grass,soil*vec3(0.46,0.41,0.29),bare*0.65*(1.0-hillside*mountain));
           else if (battlefield > 3.5 && battlefield < 4.5) {
             grass=mix(soil*vec3(0.70,0.49,0.29),rock*vec3(1.35,0.97,0.63),bare);
             rock*=vec3(1.38,1.05,0.73);
@@ -541,6 +547,7 @@ function terrainMaterial(A) {
         roughnessFactor = mix(roughnessFactor, 0.55, G.z * 0.6);
         roughnessFactor = mix(roughnessFactor,.32,roadDamp*G.x*.65);
         roughnessFactor = mix(roughnessFactor,.31,landingWet*.93);
+        roughnessFactor = mix(roughnessFactor,.96,hillside);
       `)
       .replace('vec3 mapN = texture2D( normalMap, vNormalMapUv ).xyz * 2.0 - 1.0;', `
         vec3 nG = texture2D( normalMap, vNormalMapUv ).xyz * 2.0 - 1.0;
@@ -551,13 +558,13 @@ function terrainMaterial(A) {
         if(battlefield > 0.5) {
           vec3 nSoil=texture2D(rubN,vTW.xz/7.0).xyz*2.0-1.0;
           mapN=mix(mapN,nSoil,max(fieldGround.r,fieldGround.g)*.75*(1.0-G.x)*(1.0-paved));
-          mapN.xy*=.6;
+          mapN.xy*=.6*(1.0-hillside*.87);
         }
         mapN = mix( mapN, vec3(0.0,0.0,1.0), (G.z + G.w) * 0.8 );
       `)
       .replace('normal = normalize( tbn * mapN );', `
         normal = normalize( tbn * mapN );
-        if(mountain>.01 && kobe>.5) {
+        if(mountain>.01 && kobe>.5 && hillside<.5) {
           vec2 cu=canopyUV,du=vec2(.0039,0.0);
           vec4 cl=texture2D(forestCanopy,cu-du),cr=texture2D(forestCanopy,cu+du),cn=texture2D(forestCanopy,cu-du.yx),cs=texture2D(forestCanopy,cu+du.yx);
           vec2 crownSlope=mix(vec2(cl.r-cr.r,cn.r-cs.r),vec2(cl.a-cr.a,cn.a-cs.a),forestReady);
@@ -1229,7 +1236,7 @@ export class World {
     }
     this.battlefield = profile; this.fieldRoute = route;
     const F = BATTLEFIELDS[profile], layout = F.mode ? fieldLayout(profile, route) : null;
-    const terrainRoute = layout ? { ...route, pads: layout.structures } : null;
+    const terrainRoute = layout ? { ...route, pads: layout.structures, relief: this.A.relief } : null;
     const T = this.terrain, p = this.terrainMesh.geometry.attributes.position, uv = this.terrainMesh.geometry.attributes.uv;
     T.detailed = !!F.mode;
     for (let i = 0; i < T.h.length; i++) {
@@ -1239,7 +1246,8 @@ export class World {
     }
     p.needsUpdate = uv.needsUpdate = true; this.terrainMesh.geometry.computeVertexNormals(); this.terrainMesh.geometry.computeBoundingSphere();
     this.terrainMesh.material.userData.battlefield.value = F.mode;
-    this.scene.fog.density = F.mode ? profile === 'landing' ? .00024 : profile === 'forest' ? .00018 : .00012 : .00024;
+    this.terrainMesh.material.userData.hillside.value = profile==='hillside' ? 1 : 0;
+    this.scene.fog.density = F.mode ? profile === 'landing' ? .00024 : profile === 'forest' ? .00018 : profile === 'hillside' ? .00069 : .00012 : .00024;
     this.scene.environmentIntensity=profile==='landing'?.57:F.mode?.43:.7;
     if(profile==='landing')this.lightDir.set(.45,.43,-.78).normalize();
     else if(profile==='hillside')this.lightDir.set(-.53,.77,-.54).normalize();
@@ -1319,7 +1327,7 @@ export class World {
     }
     // 兩個合併網格容納全部可破壞基地建築，沿用既有建材、焦痕與倒塌池。
     put(walls, this.fieldRoofMaterial); put(roofs, this.fieldRoofMaterial); this._registerBlds(records);
-    const place = (geo, material, count, type) => {
+    const place = (geo, material, count, type, fixed=[]) => {
       const foliage=type==='tree'||type==='shrub';
       const m = new THREE.InstancedMesh(geo, material, count); m.castShadow = m.receiveShadow = true;
       if(foliage){m.userData.fieldTree=true;m.userData.noAO=true;m.customDepthMaterial=this.fieldTreeDepth;m.visible=!!this.fieldFoliageReady;}
@@ -1327,14 +1335,25 @@ export class World {
       const d = new THREE.Object3D(); let n = 0;
       for (let i = 0; i < count * 12 && n < count; i++) {
         let x = (r() - 0.5) * 2400, z = (r() - 0.5) * 2400;
-        const size = type==='shrub'?.65+r()*.65:type === 'tree' ? .95 + r() * 1.85 : 2.5 + r() * 9;
+        let size = type==='shrub'?.65+r()*.65:type === 'tree' ? .95 + r() * 1.85 : 2.5 + r() * 9;
         if(type==='rock' && n%4 && contacts.length) {const c=contacts[contacts.length-1];x=c.x+(r()-.5)*55;z=c.z+(r()-.5)*55;}
         if(foliage && r() < (profile==='forest'?.78:.4)) {
           const p=this.fieldRoute.pts[Math.floor(r()*this.fieldRoute.pts.length)];
           x=p[0]+(r()-.5)*520; z=p[1]+(r()-.5)*520;
         }
+        if(profile==='hillside'&&type==='tree'&&r()<.84){
+          // 同一片林冠沿沖溝與坡腳延伸，宅地之間保留零星庭樹。
+          const grove=Math.floor(r()*18),valley=Math.sin(grove*3.17);
+          x=-825+grove*91+(r()-.5)*147;
+          z=-458+valley*91-Math.sin(grove*1.12)*108+(r()-.5)*96;
+          size=.58+r()*.69;
+        }
+        const placed=n<fixed.length;
+        if(placed)[x,z,size]=fixed[n];
+        if(profile==='hillside'&&!placed&&this.nearBoxes(x,z,size+2,[]).some(b=>
+          x>b.x0-size&&x<b.x1+size&&z>b.z0-size&&z<b.z1+size))continue;
         if (profile === 'landing' && x < 460) continue;
-        if (routeDistance(x,z,this.fieldRoute.pts) < size + (profile === 'hillside' ? 65 : 32) || layout.structures.some(t => Math.hypot(t.x-x,t.z-z) < size + 42)) continue;
+        if (!placed&&(routeDistance(x,z,this.fieldRoute.pts) < size + (profile === 'hillside' ? 65 : 32) || layout.structures.some(t => Math.hypot(t.x-x,t.z-z) < size + 42))) continue;
         if (profile === 'airfield' && Math.abs(x + 420) < 65 && Math.abs(z) < 930) continue;
         const y = this.height(x,z);
         contacts.push({x,z,r:size*(foliage?3:1.2),tree:foliage});
@@ -1366,10 +1385,35 @@ export class World {
     }
     place(this.fieldRock.geo,this.fieldRock.mat,layout.rocks,'rock');
     if(layout.trees) {
-      for(let i=0;i<6;i++)place(this.fieldTrees[i],this.fieldTreeMaterial,Math.floor(layout.trees/6)+(i<layout.trees%6?1:0),'tree');
-      place(this.fieldShrub,this.fieldTreeMaterial,Math.round(layout.trees*.25),'shrub');
+      if(profile==='hillside')this.slopeTrees??=[0,1,2].flatMap(v=>[fieldTreeGeometry(true,v,true),fieldTreeGeometry(false,v,true)]);
+      const trees=profile==='hillside'?this.slopeTrees:this.fieldTrees;
+      for(let i=0;i<6;i++)place(trees[i],this.fieldTreeMaterial,Math.floor(layout.trees/6)+(i<layout.trees%6?1:0),'tree');
+      place(this.fieldShrub,this.fieldTreeMaterial,Math.round(layout.trees*.25),'shrub',this.hillsideSite?.yards?.shrubs);
     }
-    const mask=fieldGroundMask(this.fieldRoute,layout.structures,contacts,undefined,profile);
+    if(profile==='hillside'){
+      const yards=this.hillsideSite.yards;
+      const autumn=buildAutumnTrees(group,yards.trees,(x,z)=>this.height(x,z)+.12);
+      for(const m of autumn.meshes)m.userData.fieldGeometry=true;
+      this.hillsideCarMaterial??=instancedCarMaterial(this.A.rubD,{finishAttribute:true});
+      const dummy=new THREE.Object3D(),colors=[0xb3b8b9,0x4c6976,0x8f4941,0xb5a581,0x647477];
+      for(const variant of [0,1]){
+        const spots=yards.cars.filter((_,i)=>i%2===variant);
+        if(!spots.length)continue;
+        const geo=carGeometry(variant).clone();
+        geo.setAttribute('instanceFinish',new THREE.InstancedBufferAttribute(new Float32Array(spots.length).fill(1),1));
+        const m=new THREE.InstancedMesh(geo,this.hillsideCarMaterial,spots.length);
+        m.name='hillside-parked-cars';m.castShadow=m.receiveShadow=true;m.userData.fieldGeometry=true;
+        spots.forEach(([x,z,ry],i)=>{
+          const y=this.height(x,z)+.16;
+          dummy.position.set(x,y,z);dummy.rotation.y=ry;dummy.updateMatrix();
+          m.setMatrixAt(i,dummy.matrix);m.setColorAt(i,new THREE.Color(colors[(i+variant*2)%colors.length]));
+          this.trample.push({mesh:[m],i,x,z,y,ry,r:2.4,kind:'car',variant,down:0});
+        });
+        m.computeBoundingSphere();group.add(m);
+      }
+    }
+    const foundations=profile==='hillside'?this.blds.map(b=>({x:b.cx,z:b.cz,width:b.w,depth:b.d})):layout.structures;
+    const mask=fieldGroundMask(this.fieldRoute,foundations,contacts,undefined,profile);
     if(!this.fieldGroundTexture) {this.fieldGroundTexture=new THREE.CanvasTexture(mask);this.fieldGroundTexture.generateMipmaps=false;this.fieldGroundTexture.minFilter=THREE.LinearFilter;}
     else {this.fieldGroundTexture.image=mask;this.fieldGroundTexture.needsUpdate=true;}
     this.terrainMesh.material.userData.fieldMask.value=this.fieldGroundTexture;
@@ -1829,6 +1873,10 @@ export class World {
         rh: [gy + 1.4, gy + 2.8, gy + Math.min(4.2, hM * 0.85)],
         hp: hpMax, hpMax, st: 0, t: 0, u: 0, shk: 0, bl: 0, wn: [], dirty: false, anim: false, groanT: 0, slot: -1,
       };
+      if(R.town){
+        b.top=top-gy;b.box.top=b.top0=top;b.hM=Math.min(2.8,1.04+.13*b.top);
+        b.rh=[gy+.68,gy+1.18,gy+b.hM*.85];
+      }
       if(R.alley){
         b.alley=R.alley;b.alley.normals=R.rB.geo.attributes.normal;
         b.alley.uv=R.fB.geo.attributes.uv;b.alley.wallNormals=R.fB.geo.attributes.normal;
@@ -1902,7 +1950,7 @@ export class World {
       // 傷口：之後冒煙、起火的位置（每棟最多 3 個）
       if (b.wn.length < 3 && (big || !b.wn.length || Math.random() < 0.15)) {
         const up = n && n.y > 0.7;
-        b.wn.push({ x: p.x + (n ? n.x : 0) * 1.5, y: Math.min(b.top - 2, Math.max(b.gy + 4, p.y)) + (up ? 1 : 0), z: p.z + (n ? n.z : 0) * 1.5, nx: up || !n ? 0 : n.x, nz: up || !n ? 0 : n.z, s: null });
+        b.wn.push({ x: p.x + (n ? n.x : 0) * 1.5, y: Math.min(b.top0 - 2, Math.max(b.gy + 4, p.y)) + (up ? 1 : 0), z: p.z + (n ? n.z : 0) * 1.5, nx: up || !n ? 0 : n.x, nz: up || !n ? 0 : n.z, s: null });
       }
     }
     // 燒焦：窗戶熄燈、牆面燻黑；剩四分之一以下窗內起火
@@ -2525,7 +2573,7 @@ export class World {
           o.down = 1;
           if (o.kind === 'car') {
             const d = this.dummy;
-            d.position.set(o.x, -0.1, o.z); d.rotation.set((Math.random() - 0.5) * 0.2, o.ry, (Math.random() - 0.5) * 0.3); d.scale.set(1.08, 0.32, 1.12); d.updateMatrix();
+            d.position.set(o.x, (o.y??0)-0.1, o.z); d.rotation.set((Math.random() - 0.5) * 0.2, o.ry, (Math.random() - 0.5) * 0.3); d.scale.set(1.08, 0.32, 1.12); d.updateMatrix();
             o.mesh[0].setMatrixAt(o.i, d.matrix); o.mesh[0].instanceMatrix.needsUpdate = true;
             o.mesh[0].setColorAt(o.i, new THREE.Color(0.06, 0.055, 0.05)); o.mesh[0].instanceColor.needsUpdate = true;
             const finish = o.mesh[0].geometry.attributes.instanceFinish; finish.setX(o.i, 0); finish.needsUpdate = true;
