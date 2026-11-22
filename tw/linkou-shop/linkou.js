@@ -548,6 +548,7 @@
       return L.marker([p.lat, p.lon], { bubblingMouseEvents: false, icon: L.divIcon({ className: '', html: '<div class="sq-icon"></div>', iconSize: [13, 13] }) })
         .bindPopup('<b>' + esc(p.n) + '</b><br>戶數：' + fmt(p.hh) + ' 戶<br>預計完工年：' + (p.y || '—') + '<br>已簽約店面：' + fmt(p.sg) + ' 間' + (p.gp === 'road' || p.gp === 'none' ? '<br><i>只對到路名，位置不準</i>' : '') + pb(p.lat, p.lon));
     }));
+    L_.fut = D.fut ? futLayer(D.fut) : L.layerGroup();
     L_.sch = L.layerGroup(D.sch.map(function (s) {
       return dot(s.lat, s.lon, { radius: Math.max(5, Math.sqrt(s.s || 100) / 4), color: '#1e3a5f', weight: 1.5, fillColor: '#60a5fa', fillOpacity: 0.75 })
         .bindPopup('<b>' + esc(s.n) + '</b><br>學生數（114 學年）：' + fmt(s.s) + pb(s.lat, s.lon));
@@ -590,6 +591,7 @@
       ['edu', '補習班、課後照顧中心', 1, '<span class="sw" style="background:#7c3aed"></span><span class="sw" style="background:#f59e0b"></span>'],
       ['oldb', '較舊的店面大樓（2015 年以前完工）', 0, '<span class="sw" style="background:#6b7280"></span>'],
       ['pipe', '未完工建案', 0, '<span class="sw sq" style="background:#7c3aed"></span>'],
+      ['fut', '未來建設（AI 園區、社宅、交通）', 0, '<span class="sw" style="background:#c2410c"></span><span class="sw" style="background:#2563eb"></span>'],
       ['sch', '國小', 0, '<span class="sw" style="background:#60a5fa"></span>'],
       ['vill', '各里國小年齡兒童數', 0, '<span class="sw poly" style="background:#f59e0b"></span>'],
       ['zone', '土地使用分區', 0, '<span class="sw poly" style="background:#5f9de0"></span>']];
@@ -644,6 +646,7 @@
         var vs = D.biz.subs[BIZ.cat].map(function (nm, i) { return BIZ.sub[i] && (D.biz.n[BIZ.cat][i][0] + D.biz.n[BIZ.cat][i][1]) ? '<span style="display:inline-flex;align-items:center;gap:4px;margin-right:8px"><span class="sw" style="background:' + BIZCOL[i] + '"></span>' + esc(nm) + '</span>' : ''; }).join('');
         h += '<div>店家：' + esc(BIZ.cat) + '</div><div style="line-height:1.7">' + vs + '</div>' + '<div style="color:#4a6080">圓點越大，同一門牌的店家越多。樓層：' + (FLOOR_ON[0] && FLOOR_ON[1] ? '一樓和二樓以上' : FLOOR_ON[0] ? '一樓（含地下室、沒寫樓層）' : FLOOR_ON[1] ? '二樓以上' : '都沒選') + '</div>';
       }
+      if (on.fut) h += '<div>未來建設（顏色是進度）</div>' + TIERN.map(function (n, i) { return '<div class="row"><span class="sw" style="background:' + TIERC[i] + '"></span>' + n + '</div>'; }).join('') + '<div class="row"><span class="bar" style="background:' + TIERC[3] + ';height:3px"></span>輕軌提案路線（示意）</div>';
       if (on.vill) { h += '<div>6～11 歲兒童數（人）</div>' + VBINS.map(function (b) { return '<div class="row"><span class="bar" style="background:' + b[2] + '"></span>' + (b[1] > 1e8 ? b[0] + ' 以上' : b[0] + '～' + b[1]) + '</div>'; }).join(''); }
       if (on.zone) {
         h += '<div>土地使用分區</div>' + [['#cfe3f7', '第一種住宅區（淺）'], ['#5f9de0', '第二至四種'], ['#17458f', '第五種住宅區（深）'], ['#e11d48', '中心、建成、鄰里商業區'], ['#a16207', '乙種工業區'], ['#9ca3af', '其他用地']]
@@ -668,7 +671,7 @@
       }
       if (e.target.name === 'bizcat') {
         // 選了業態時，關掉其他點狀圖層，避免顏色混在一起；商圈範圍等面狀圖層保留，使用者可以再自己勾回來
-        if (e.target.value && !BIZ.cat) ['newb', 'oldb', 'l591', 'edu', 'pipe', 'sch'].forEach(function (k) {
+        if (e.target.value && !BIZ.cat) ['newb', 'oldb', 'l591', 'edu', 'pipe', 'fut', 'sch'].forEach(function (k) {
           if (on[k]) { on[k] = false; var cb = bar.querySelector('[data-k=' + k + ']'); if (cb) cb.checked = false; apply(k); }
         });
         BIZ.cat = e.target.value; BIZ.sub = D.biz.subs[BIZ.cat] ? D.biz.subs[BIZ.cat].map(function () { return true; }) : [];
@@ -1082,19 +1085,142 @@
     }).catch(function (e) { console.error('hero map', e); });
   }
 
+  /* ---------------- 深入：空店率、路段價格、未來建設（deep.json，105_build_deep_page.py） ---------------- */
+  function buildOcc(O) {
+    var colOf = function (id) { return id === 'LK0B' ? MIDC.E : (id === 'LK02' ? MIDC.W : COL[id]); };
+    var it = O.areas.map(function (a) {
+      return { name: a.name, col: colOf(a.id), v: Math.round(a.pct),
+        tip: a.name + '：' + fmt(a.n) + ' 個門牌。2016 年後完工 ' + fmt(a.new_pct) + '%（' + a.new_n + ' 個），2015 年前完工 ' + fmt(a.old_pct) + '%（' + a.old_n + ' 個）' };
+    });
+    document.getElementById('occ6').innerHTML = supBars(it, 100, '%');
+    var cv = O.curve, cc = ['#cdb08c', '#8a6440', '#5f4126'];
+    mk('occ7', {
+      tooltip: tip('%', function (p) { return '完工後第 ' + p.axisValue + ' 年'; }),
+      legend: LEG, grid: { left: 40, right: 44, top: 40, bottom: 26 },
+      xAxis: xAx({ data: cv.years.map(String), boundaryGap: false, axisLabel: { color: MUTED, fontSize: 11, formatter: function (v) { return '第 ' + v + ' 年'; } } }),
+      yAxis: yAx({ min: 0, max: 100, interval: 20, axisLabel: { color: MUTED, fontSize: 11, formatter: '{value}%' } }),
+      series: cv.groups.map(function (g, i) {
+        var d = g.pts.map(function (p) { return p[0] === null ? null : Math.round(p[0]); });
+        while (d.length && d[d.length - 1] === null) d.pop();
+        var s = { name: g.name, type: 'line', data: d, symbol: 'circle', symbolSize: 6, lineStyle: { width: 2.5, color: cc[i] }, itemStyle: { color: cc[i] },
+          endLabel: { show: true, formatter: function (p) { return p.value + '%'; }, color: cc[i], fontSize: 11, fontWeight: 600, distance: 6 } };
+        if (i === 0) s.markLine = { silent: true, symbol: 'none', lineStyle: { color: BASE, type: 'dashed', width: 1 }, label: { formatter: '八成', color: MUTED, fontSize: 11, position: 'insideStartTop' }, data: [{ yAxis: 80 }] };
+        return s;
+      })
+    }, 300);
+  }
+  function buildRoadPrice(R) {
+    var mode = '2016後完工';
+    function yr(y) { return y[0] === y[1] ? String(y[0]) : y[0] + '～' + y[1]; }
+    function draw() {
+      var mx = 1;
+      R.areas.forEach(function (a) { a.rows[mode].forEach(function (r) { mx = Math.max(mx, r.m); }); });
+      document.getElementById('roadPrice').innerHTML = '<div class="rh-wrap">' + R.areas.map(function (a) {
+        var c = COL[a.id], s = a.all[mode], lv = a.lvl[mode] || {}, rows = a.rows[mode];
+        var h = '<div class="rhc"><div class="rhc-h"><span class="chip" style="background:' + c + '"></span>' + esc(a.name) + '</div>' +
+          '<div class="rhc-k">整個商圈每坪 ' + fmt(s[0]) + ' 萬（' + fmt(s[1]) + ' 筆）</div>';
+        if (rows.length) h += '<div class="rp">' + rows.map(function (r) {
+          return '<div class="rp-r"><span class="rp-n">' + esc(r.r) + '</span><span class="rp-b"><i style="width:' + (r.m / mx * 100).toFixed(1) + '%;background:' + c + '"></i></span><b>' + fmt(r.m) + ' 萬</b>' +
+            '<span class="rp-s">' + r.n + ' 筆，' + yr(r.y) + ' 年</span></div>';
+        }).join('') + '</div>';
+        else h += '<div class="rhc-z">沒有一條路有 ' + R.min_n + ' 筆以上成交。</div>';
+        h += '<div class="rhc-k">依道路等級</div><div class="rp-lv">' + ['主要道路', '次要道路', '巷內'].map(function (k) {
+          var v = lv[k]; return '<span>' + k + '<b>' + (v && v[0] !== null ? fmt(v[0]) + ' 萬' : '–') + '</b><small>' + (v ? fmt(v[1]) : 0) + ' 筆</small></span>';
+        }).join('') + '</div>';
+        return h + '</div>';
+      }).join('') + '</div>';
+    }
+    draw();
+    seg('roadPriceSwitch', function (v) { mode = v; draw(); });
+  }
+  var TIERC = ['#211d18', '#c2410c', '#2563eb', '#a8a29e'];   /* 已完成、施工中、已核定（含結果查不到）、提案 */
+  var FUT_AREA = { LK01: '前段', LK02: '中段', LK03: '後段', LK05: '麗園東勢', LK06: '南勢', LK07: '舊街', LK09: 'AI 園區', LK04: '選手村' };
+  var TIERN = ['已完成、已開幕', '施工中', '已核定，或已開標但結果查不到', '提案、研議中'];
+  function futLayer(F) {
+    var g = L.layerGroup();
+    L.polyline(F.line, { color: TIERC[3], weight: 5, dashArray: '2 9', lineCap: 'round', opacity: 0.95 })
+      .bindPopup('<b>林口輕軌（提案，還沒核定）</b><br>' + esc(F.line_note), { maxWidth: 280 }).addTo(g);
+    F.pts.forEach(function (p) {
+      var pop = !p.title && p.items.length === 1 ? '<b>' + esc(p.items[0].n) + '</b><br>' + esc(p.items[0].tier) + '：' + esc(p.items[0].t)
+        : '<b>' + esc(p.title || p.items[0].n) + '</b><ul style="margin:4px 0 0;padding-left:16px">' + p.items.map(function (x) {
+            return '<li>' + esc(x.n) + '<br><span style="color:#6f665a">' + esc(x.tier) + '：' + esc(x.t) + '</span></li>'; }).join('') + '</ul>';
+      L.circleMarker([p.lat, p.lon], { radius: p.title ? 11 : 8, color: '#fff', weight: 2, fillColor: TIERC[p.best], fillOpacity: 0.95, bubblingMouseEvents: false })
+        .bindPopup(pop, { maxWidth: 300 }).addTo(g);
+    });
+    return g;
+  }
+  function buildFuture(F, geo) {
+    var fs = geo.features.filter(function (ft) { return FUT_AREA[ft.properties.id]; });
+    function rings(g) { return g.type === 'Polygon' ? [g.coordinates] : g.coordinates; }
+    var x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9;
+    fs.forEach(function (ft) { rings(ft.geometry).forEach(function (poly) { poly[0].forEach(function (c) {
+      x0 = Math.min(x0, c[0]); x1 = Math.max(x1, c[0]); y0 = Math.min(y0, c[1]); y1 = Math.max(y1, c[1]); }); }); });
+    var m = 0.002, pts = F.pts.filter(function (p) { return p.lon > x0 - m && p.lon < x1 + m && p.lat > y0 - m && p.lat < y1 + m; });
+    pts.sort(function (a, b) { return a.best - b.best || b.lat - a.lat; });
+    var kx = Math.cos((y0 + y1) / 2 * Math.PI / 180), W = 640, pad = 16;
+    var sc = (W - 2 * pad) / ((x1 - x0) * kx), H = Math.round((y1 - y0) * sc + 2 * pad);
+    function P(lon, lat) { return [pad + (lon - x0) * kx * sc, pad + (y1 - lat) * sc]; }
+    var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="林口未來建設位置示意圖">';
+    fs.forEach(function (ft) {
+      var id = ft.properties.id, d = '', main = COL[id] && id !== 'LK04';
+      rings(ft.geometry).forEach(function (poly) { poly.forEach(function (ring) {
+        ring.forEach(function (c, i) { var p = P(c[0], c[1]); d += (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1); }); d += 'Z'; }); });
+      s += '<path class="mm-a" d="' + d + '" style="fill:' + (main ? COL[id] : '#a8a29e') + ';fill-opacity:' + (main ? .16 : .12) + '"/>';
+    });
+    /* 點太近就往右挪一格；商圈名稱壓到點就移到點上方 */
+    var pos = [];
+    pts.forEach(function (q) {
+      var p = P(q.lon, q.lat);
+      for (var k = 0; k < 3; k++) pos.forEach(function (o) { if (Math.abs(o[0] - p[0]) < 21 && Math.abs(o[1] - p[1]) < 21) p = [o[0] + 22, p[1]]; });
+      pos.push(p);
+    });
+    fs.forEach(function (ft) {
+      var r = rings(ft.geometry)[0][0], c = centroid(r), p = P(c[0], c[1]);
+      var hit = function (y) { return pos.some(function (o) { return Math.abs(o[0] - p[0]) < 36 && Math.abs(o[1] - (y - 5)) < 19; }); };
+      var dy = [0, -24, 24, -48, 48].filter(function (d) { return !hit(p[1] + d); })[0] || 0;
+      p = [p[0], p[1] + dy];
+      s += '<text class="mm-t" x="' + p[0].toFixed(1) + '" y="' + p[1].toFixed(1) + '" text-anchor="middle">' + esc(FUT_AREA[ft.properties.id]) + '</text>';
+    });
+    var ln = F.line.map(function (c, i) { var p = P(c[1], c[0]); return (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1); }).join('');
+    s += '<path d="' + ln + '" fill="none" stroke="' + TIERC[3] + '" stroke-width="5" stroke-linecap="round" stroke-dasharray="2 8" opacity=".95"/>';
+    pts.forEach(function (q, i) {
+      var p = pos[i], c = TIERC[q.best];
+      s += '<g class="fut-pt"><circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) + '" r="10" fill="' + c + '" stroke="#fff" stroke-width="2"/>' +
+        '<text x="' + p[0].toFixed(1) + '" y="' + (p[1] + 4).toFixed(1) + '" text-anchor="middle">' + (i + 1) + '</text></g>';
+    });
+    s += '</svg>';
+    var tn = ['已完成、已開幕', '施工中', '已核定，或已開標但結果查不到', '提案、研議中'];
+    s += '<div class="mm-leg">' + tn.map(function (t, i) { return '<span><i class="fut-sw" style="background:' + TIERC[i] + '"></i>' + t + '</span>'; }).join('') +
+      '<span><i class="fut-ln"></i>林口輕軌提案路線（文化二路段，示意）</span></div>';
+    s += '<ol class="fut-list">' + pts.map(function (q) {
+      var nm = q.title || q.items.map(function (x) { return x.n; }).join('；');
+      return '<li><span class="fut-dot" style="background:' + TIERC[q.best] + '"></span>' + esc(nm) + '</li>';
+    }).join('') + '</ol>';
+    document.getElementById('futMap').innerHTML = s;
+    var h = '<table class="dt fut-t"><thead><tr><th>名稱</th><th>在哪裡</th><th>時間</th><th>重點</th><th>來源</th></tr></thead><tbody>';
+    F.table.forEach(function (g, gi) {
+      h += '<tr class="fut-g"><td colspan="5"><span class="fut-dot" style="background:' + TIERC[gi] + '"></span>' + esc(g.g) + '</td></tr>';
+      g.rows.forEach(function (r) {
+        h += '<tr><td>' + esc(r.n) + '</td><td class="l">' + esc(r.w) + '</td><td class="l">' + esc(r.t) + '</td><td class="l">' + esc(r.k) + '</td><td class="l">' +
+          r.src.map(function (x) { return '<a href="' + esc(x[1]) + '" target="_blank" rel="noopener">' + esc(x[0]) + '</a>'; }).join('、') + '</td></tr>';
+      });
+    });
+    document.getElementById('futTable').innerHTML = h + '</tbody></table>';
+  }
+
   /* ---------------- 啟動 ---------------- */
   var VIEW = (document.body && document.body.getAttribute('data-view')) || 'report';
   window.LK = { jget: jget, fmt: fmt, esc: esc, sgn: sgn, COLORS: COLORS, FONT: FONT, INK: INK, MUTED: MUTED, multiples: multiples, heatTable: heatTable, buildRoads: buildRoads, buildYieldUp: buildYieldUp, yieldTbl: yieldTbl, attachResize: attachResize, areaStyle: areaStyle, inGeom: inGeom, FLOOR_ONE: FLOOR_ONE,
     setUP: function (u) { UP = u; }, heroCur: heroCur, centroid: centroid, tip: tip, xAx: xAx, yAx: yAx, mk: mk, endDot: endDot, charts: charts };
   if (document.getElementById('lkHeroMap')) heroMap(document.getElementById('lkHeroMap'));
   if (VIEW === 'map') {
-    Promise.all(['summary.json', 'areas_geo.json', 'villages_geo.json', 'buildings.json', 'listings591.json', 'edu.json', 'schools.json', 'pipeline.json', 'catch.json', 'bizmap.json', 'upper.json'].map(jget))
+    Promise.all(['summary.json', 'areas_geo.json', 'villages_geo.json', 'buildings.json', 'listings591.json', 'edu.json', 'schools.json', 'pipeline.json', 'catch.json', 'bizmap.json', 'upper.json', 'deep.json'].map(jget))
       .then(function (a) {
         UP = a[10];
-        bootMap({ summary: a[0], areas: a[1], villGeo: a[2], vill: a[2], bld: a[3], l591: a[4], edu: a[5], sch: a[6], pipe: a[7], catchData: a[8], biz: a[9] });
+        bootMap({ summary: a[0], areas: a[1], villGeo: a[2], vill: a[2], bld: a[3], l591: a[4], edu: a[5], sch: a[6], pipe: a[7], catchData: a[8], biz: a[9], fut: a[11].fut });
       }).catch(function (e) { console.error('linkou map load', e); });
   } else if (VIEW === 'report') {
-    Promise.all(['summary.json', 'charts.json', 'areas_geo.json', 'villages_geo.json', 'buildings.json', 'listings591.json', 'edu.json', 'schools.json', 'pipeline.json', 'catch.json', 'roads.json', 'bizmap.json', 'upper.json', 'mid.json'].map(jget))
+    Promise.all(['summary.json', 'charts.json', 'areas_geo.json', 'villages_geo.json', 'buildings.json', 'listings591.json', 'edu.json', 'schools.json', 'pipeline.json', 'catch.json', 'roads.json', 'bizmap.json', 'upper.json', 'mid.json', 'deep.json'].map(jget))
       .then(function (a) {
         var S = a[0], C = a[1];
         UP = a[12]; CH = C; ROAD1 = a[10]; SUM1 = S;
@@ -1105,8 +1231,11 @@
         buildSupply(C, a[10], a[12]);
         buildRoads(a[10], '1f');
         buildRoads(null, 'up', null, { cards: 'roadCardsUp', note: 'roadNoteUp' });
+        buildOcc(a[14].occ);
+        buildRoadPrice(a[14].road);
+        buildFuture(a[14].fut, a[2]);
         seg('yieldSwitch', setYieldMode);
-        buildMap({ catchData: a[9], villGeo: a[3], summary: S, areas: a[2], vill: a[3], bld: a[4], l591: a[5], edu: a[6], sch: a[7], pipe: a[8], biz: a[11] });
+        buildMap({ catchData: a[9], villGeo: a[3], summary: S, areas: a[2], vill: a[3], bld: a[4], l591: a[5], edu: a[6], sch: a[7], pipe: a[8], biz: a[11], fut: a[14].fut });
       }).catch(function (e) { console.error('linkou load', e); });
   }
 })();
