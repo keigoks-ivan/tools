@@ -19,6 +19,7 @@ import { kitanoGardenMaterial } from './kobe-garden.mjs';
 import { kitanoHeritageMaterial } from './kobe-heritage.mjs';
 import { Solid } from './zero/kit.js';
 import { BATTLEFIELDS, fieldHeight, fieldLayout, routeDistance, fieldGridCoordinate, fieldGridIndex } from './battlefields.js';
+import { buildAlleyBuildings, chipAlleyFace, resetAlleyFaces, settleAlley } from './hillside-street.mjs';
 import { buildHillside } from './hillside-art.mjs';
 import { buildLandingSite } from './landing-art.mjs?v=5';
 import { SHORE_GLSL } from './landing-layout.mjs?v=4';
@@ -1291,6 +1292,7 @@ export class World {
       if (!geo) return;
       const m = new THREE.Mesh(geo, mat); m.castShadow = shadow; m.receiveShadow = true; m.userData.fieldGeometry = true; group.add(m);
     };
+    if(profile==='hillside')this._registerBlds(buildAlleyBuildings(this,{bucket:()=>new GeoBucket(),box:addBox,put,facades:FACADES}));
     for (const S of layout.structures) {
       const width = S.width || (S.target ? 30 : profile === 'airfield' || profile === 'depot' ? 48 : 28);
       const oil = S.name?.includes('油庫');
@@ -1826,6 +1828,11 @@ export class World {
         rh: [gy + 1.4, gy + 2.8, gy + Math.min(4.2, hM * 0.85)],
         hp: hpMax, hpMax, st: 0, t: 0, u: 0, shk: 0, bl: 0, wn: [], dirty: false, anim: false, groanT: 0, slot: -1,
       };
+      if(R.alley){
+        b.alley=R.alley;b.alley.normals=R.rB.geo.attributes.normal;
+        b.top=top-gy;b.box.top=b.top0=top;
+        b.hp=b.hpMax=7+1.4*R.alley.floors.length;
+      }
       R.box.bld = b;
       // 瓦礫台階（第一次倒塌才加進格網；重設後 top＜0 停用）：外圈沿用原碰撞盒，往內兩層，每層高 1.4 m 以內，機體走得上去
       b.tr = [0.18, 0.34].map((f) => ({ x0: R.x0 + w * f, x1: R.x1 - w * f, z0: R.z0 + d * f, z1: R.z1 - d * f, top: -1e4, bld: b }));
@@ -1884,9 +1891,10 @@ export class World {
     b.shk = Math.min(1.4, b.shk + (0.08 + 0.2 * Math.min(dmg, 3)) * (0.5 + 1.8 * (1 - f)));
     this._anim(b);
     if (p) {
+      if(b.alley)chipAlleyFace(b,p,n,dmg);
       // 牆面剝落：碎塊往下掉＋粉塵
       if (H.fx && H.fx.crumble) H.fx.crumble(p, n, Math.min(3, dmg));
-      if (dmg >= 0.7 || Math.random() < 0.3) this._chunk(p, n, dmg >= 0.7 ? 2 + ((Math.random() * 2) | 0) : 1, 0.7 + 0.35 * Math.min(2, dmg));
+      if (dmg >= 0.7 || Math.random() < 0.3) this._chunk(p, n, b.alley ? 1 : dmg >= 0.7 ? 2 + ((Math.random() * 2) | 0) : 1, (b.alley ? .36 : .7) + .35 * Math.min(2, dmg));
       // 傷口：之後冒煙、起火的位置（每棟最多 3 個）
       if (b.wn.length < 3 && (big || !b.wn.length || Math.random() < 0.15)) {
         const up = n && n.y > 0.7;
@@ -1895,10 +1903,10 @@ export class World {
     }
     // 燒焦：窗戶熄燈、牆面燻黑；剩四分之一以下窗內起火
     const bl = f > 0.25 ? 0.7 * (1 - f) : 0.85 + 0.6 * (0.25 - f);
-    if (bl - b.bl > 0.05) this._burn(b, Math.min(1, bl));
-    if (f0 > 0.5 && f <= 0.5 && f > 0) this._smkOn(b, 1);
+    if (!b.alley && bl - b.bl > 0.05) this._burn(b, Math.min(1, bl));
+    if (!b.alley && f0 > 0.5 && f <= 0.5 && f > 0) this._smkOn(b, 1);
     if (f0 > 0.25 && f <= 0.25 && f > 0) {
-      this._smkOn(b, 2);
+      if(!b.alley)this._smkOn(b, 2);
       this.bLow.push(b); b.groanT = 2.5 + Math.random() * 3;
       if (H.audio && H.audio.groan) H.audio.groan(this._pv.set(b.cx, b.gy + Math.min(b.top * 0.6, 60), b.cz), 1);
     }
@@ -1935,7 +1943,7 @@ export class World {
   _fall(b) {
     const H = this.hooks || {};
     b.st = 1; b.t = 0; b.u = 0; b.hp = 0;
-    b.dur = 2.4 + b.top / 70;
+    b.dur = b.alley ? .35+b.alley.floors.length*.075+Math.sqrt(b.H/12) : 2.4+b.top/70;
     const a = Math.random() * Math.PI * 2;
     b.ax = Math.cos(a); b.az = Math.sin(a); b.tilt = (0.05 + Math.random() * 0.09) * (Math.random() < 0.5 ? -1 : 1); b.ph = Math.random() * 10;
     b.ckAcc = 0;
@@ -1952,20 +1960,35 @@ export class World {
     this._mound(b, 0);
     const size = Math.min(3, Math.max(0.6, b.top / 55));
     const P = this._pv.set(b.cx, b.gy + Math.min(b.top * 0.35, 40), b.cz);
-    if (H.fx && H.fx.collapse) H.fx.collapse(b, 0, 0, 0, this.nFall);
+    if (!b.alley && H.fx && H.fx.collapse) H.fx.collapse(b, 0, 0, 0, this.nFall);
     if (H.audio && H.audio.collapse) H.audio.collapse(P, size, b.dur);
     const vp = this.viewP;
     if (vp) {
       const dist = Math.hypot(vp.x - b.cx, vp.z - b.cz);
       const near = Math.max(0, 1 - dist / (250 + b.top * 1.5));
       if (near > 0 && H.cockpit) H.cockpit.kick('land', 0.5 * near);
-      if (dist < 350 + b.top && H.note) H.note('STRUCTURE COLLAPSE', 'am');
+      if (dist < 350 + b.top && H.note) H.note(b.alley?'街屋局部倒塌':'STRUCTURE COLLAPSE', 'am');
     }
   }
 
   _fallStep(b, dt) {
     const H = this.hooks || {};
     b.t += dt;
+    if(b.alley){
+      settleAlley(b,b.t);
+      b.u=Math.min(1,b.t/b.dur);this._mound(b,b.u);
+      const floors=b.alley.floors;
+      for(let i=0;i<floors.length;i++){
+        const at=.14+i*.075+Math.sqrt((floors[i].top-1.05-i*.43)/12);
+        if(b.t-dt>=at||b.t<at)continue;
+        const p=this._pv.set(b.cx,b.gy+1+i*.43,b.cz+(i%2?1:-1)*b.d*.46);
+        this._chunk(p,null,2,.75);
+        if(i===0||i===floors.length-1)H.fx?.dust?.(p,.55);
+        if(i===floors.length-1)H.audio?.debris?.(p);
+      }
+      if(b.t>=b.dur)this._down(b);
+      return;
+    }
     const T0 = 0.55, t = b.t;
     let dy, th, a;
     if (t < T0) { const u = t / T0; dy = -0.5 * u * u; th = b.tilt * 0.05 * u; a = 0.12 + 0.4 * u; }
@@ -2015,6 +2038,7 @@ export class World {
     b.box.top = b.rh[0]; b.tr[0].top = b.rh[1]; b.tr[1].top = b.rh[2];
     this._mound(b, 1);
     this._pileRocks(b);
+    if(b.alley){settleAlley(b,b.dur,true);return;}
     // 瓦礫堆餘煙：1～2 處，十幾秒就散
     const nS = b.top > 60 ? 2 : 1;
     for (let k = 0; k < nS; k++) {
@@ -2049,7 +2073,7 @@ export class World {
       const a = Math.random() * Math.PI * 2, rho = Math.sqrt(Math.random()) * 0.85;
       const x = b.cx + Math.cos(a) * rho * b.w * 0.55, z = b.cz + Math.sin(a) * rho * b.d * 0.55;
       const hy = b.hM * Math.pow(Math.max(0, 1 - rho * rho / 1.1), 1.2);
-      const slab = k < 3, s = slab ? 4 + Math.random() * 4 : 1.5 + Math.random() * 2.5;
+      const slab = k < 3, s = (slab ? 4 + Math.random() * 4 : 1.5 + Math.random() * 2.5) * (b.alley ? .54 : 1);
       e.set((Math.random() - 0.5) * (slab ? 0.8 : 3), Math.random() * 6.28, (Math.random() - 0.5) * (slab ? 0.8 : 3));
       this._m4.compose(this._pv.set(x, b.gy + hy * 0.85, z), this._qq.setFromEuler(e), slab ? this._sv.set(s, 0.35, s * 0.6) : this._sv.set(s, s * 0.6, s * 0.8));
       P.setMatrixAt(base + k, this._m4);
@@ -2171,6 +2195,7 @@ export class World {
     if (!this.blds) return;
     for (const b of this.blds) {
       if (!b.dirty) continue;
+      if(b.alley)resetAlleyFaces(b);
       for (const g of b.seg) { g.a.array.set(g.o, g.s * 3); g.a.addUpdateRange(g.s * 3, g.o.length); g.a.needsUpdate = true; }
       if (b.bl) this._burn(b, 0);
       if (b.lamp >= 0 && this.beacon && b.st !== 0) {

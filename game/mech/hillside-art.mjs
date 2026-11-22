@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { PropBatch, fieldMaterial, signAtlas } from './front-scenery.mjs';
-import { HILL_LINES, HILL_EXIT, HILL_COVER } from './hillside-layout.mjs';
+import { HILL_LINES, HILL_EXIT, HILL_COVER, HILL_ALLEY } from './hillside-layout.mjs';
 
 export function buildHillside(world,root) {
   const materials={
@@ -14,7 +14,7 @@ export function buildHillside(world,root) {
   function solid(x,z,w,d,h) {world.addCollider({x0:x-w/2,x1:x+w/2,z0:z-d/2,z1:z+d/2,top:height(x,z)+h});}
   const paint=(x,z,y,w,h,d,tint)=>box('paint',x,z,y,w,h,d,0,0,0,tint);
   const cyl=new THREE.CylinderGeometry(1,1,1,14),tire=new THREE.CylinderGeometry(1,1,1,10).rotateX(Math.PI/2);
-  const road=(a,c,width)=>{
+  const road=(a,c,width,frontage=false)=>{
     const [ax,az]=a,[cx,cz]=c,len=Math.hypot(cx-ax,cz-az);
     const dx=(cx-ax)/len,dz=(cz-az)/len;
     const n=Math.ceil(len/12),v=new THREE.Vector3();
@@ -30,6 +30,10 @@ export function buildHillside(world,root) {
     }
     for(let i=0;i<n;i++){
       const t=i*len/n,end=(i+1)*len/n;
+      if(frontage){
+        stripe(t,end,-34,-width*.5,'concrete',.085);
+        stripe(t,end,width*.5,34,'concrete',.085);
+      }
       stripe(t,end,-width*.5,width*.5,'asphalt',.16);
       for(const side of [-1,1])stripe(t,end,side*width*.46-.14,side*width*.46+.14,'white',.24);
       if(i%2===0)stripe(t+.4,end-.8,-.17,.17,'mark',.26);
@@ -38,6 +42,35 @@ export function buildHillside(world,root) {
   const roads=[0,1].map(i=>[[-590,10],...HILL_LINES.map(l=>l.posts[i]),HILL_EXIT,[680,10]]);
   for(const r of roads)for(let i=1;i<r.length;i++)road(r[i-1],r[i],i===1?24:20);
   for(const {posts} of HILL_LINES)road(posts[0],posts[1],15);
+  road(HILL_ALLEY[0],HILL_ALLEY[2],14,true);
+  road([-337,0],[-337,-75],13);road([-337,0],[-337,89],13);
+  road([-119,-80],[-119,0],14);road([-119,0],[-119,104],14);
+  for(const side of [-1,1])for(let x=-328;x<-118;x+=12){
+    // 十字路口保留轉彎和穿越空間；路緣與側溝沿坡逐段取高。
+    if(Math.abs(x+222)<15)continue;
+    box('concrete',x,side*8.65,.16,11.96,.36,3.05);
+    box('stone',x,side*7.13,.10,11.96,.22,.25);
+    box('mark',x,side*8.20,.36,11.93,.025,.37);
+    for(const dx of [-4,0,4])box('stone',x+dx,side*8.65,.35,.05,.018,2.96);
+  }
+  for(const x of [-335,-232,-211,-120])for(let k=-2;k<=2;k++)
+    box('white',x,k*2.3,.25,2.6,.035,1.05);
+  // 架空配線只在電桿間垂落，行進及交火高度保持淨空。
+  for(const [i,x] of [-329,-281,-233,-185,-137].entries()){
+    const z=-10.4,y=height(x,z);
+    b.add('concrete',cyl,x,y+10,z,.30,20,.30);solid(x,z,.62,.62,20);
+    box('steel',x,z,19.1,.25,.34,3.6);
+    if(i%2===0)b.add('steel',cyl,x+.44,y+15.6,z,.64,1.45,.64);
+    for(const off of [-1.35,0,1.35]){
+      box('white',x,z+off,19.48,.2,.48,.2);
+      if(i===4)continue;
+      for(let k=0;k<4;k++){
+        const at=t=>y+(height(x+48,z)-y)*t+19.7-4*.95*t*(1-t);
+        const y0=at(k/4),y1=at((k+1)/4);
+        b.box('steel',x+k*12+6,(y0+y1)/2,z+off,Math.hypot(12,y1-y0),.055,.055,0,0,Math.atan2(y1-y0,12));
+      }
+    }
+  }
   const roofs=[0x645448,0x706d63,0x526468,0x736457];
   function building(x,z,w,d,h,i=0) {
     box('concrete',x,z,h/2-1,w,h+2,d);solid(x,z,w,d,h);
@@ -66,8 +99,7 @@ export function buildHillside(world,root) {
     for(const dx of [-12,12])box('paint',x+dx,z,1.45,5.8,.4,1.2,0,0,0,0x845e48);
   }
   for(const [x,z,w,d,h,i] of [
-    [-458,-147,45,22,12,1],[-291,174,31,21,16,0],[-229,179,34,22,12,2],[-173,167,29,21,15,3],
-    [-262,-121,31,20,14,0],[-191,-130,43,23,13,1],[-150,-142,25,16,12,2],
+    [-458,-147,45,22,12,1],
     [99,150,30,17,14,2],[220,-187,38,23,9,1],[315,161,39,23,15,1],[372,-159,42,28,17,3],
     [463,142,35,22,11,1],[593,-132,28,18,12,2]])building(x,z,w,d,h,i);
   // 山溪兩側的護岸和橋欄。路面的行人道和排水槽沿坡取高。

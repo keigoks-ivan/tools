@@ -12,7 +12,7 @@ const arsenal = {
   brawler: { ap:2500, range:176, cool:1.02, damage:330, speed:23 },
   ally:    { ap:5100, range:295, cool:1.4, damage:330, speed:23 },
 };
-function center(unit,out) { out.copy(unit.pos); out.y += unit.vehicle ? 2.3 : 11; return out; }
+function center(unit,out) { out.copy(unit.pos); out.y += unit.wall ? 0 : unit.vehicle ? 2.3 : 11; return out; }
 const SIGHT = .3;
 
 export class BattleLine {
@@ -65,8 +65,8 @@ export class BattleLine {
     unit.goal.copy(unit.route.shift() ?? unit.pos);
   }
   // 增援從實際入口走向陣地。只為已入場的單位建立模型和執行 AI。
-  platoon(kinds,entry,post,position) {
-    const defs=kinds.split(' ').map((kind,i)=>({kind,post,
+  platoon(kinds,entry,post,position,via=[]) {
+    const defs=kinds.split(' ').map((kind,i)=>({kind,post,via,
       x:entry[0]+(i%3-1)*10,z:entry[1]+(i%2?7:-7),
       goal:[position[0]+(i%3-1)*8,position[1]+(i%2?5:-5)]}));
     this.reinforcements.add(defs,this.clock);
@@ -176,7 +176,13 @@ export class BattleLine {
       actor.cool=.32;actor.masked=true;return;
     }
     actor.masked=false;
-    if(C.world.raycast(from,end,null)>=0) { actor.cool=.25;return; }
+    const normal=this.dir, obstruction=C.world.raycast(from,end,normal);
+    let wallNormal=null;
+    if(obstruction>=0){
+      end.lerpVectors(from,end,obstruction);
+      if(!C.world.hillsideSite||!C.world.bldAt(end,.5)?.alley){actor.cool=.25;return;}
+      wallNormal=normal.clone();
+    }else if(target.wall){actor.cool=.25;return;}
     const distance=from.distanceTo(end);
     if(this.shots.length>=14 || distance>actor.weapon.range) { actor.cool=.22;return; }
     actor.cool=actor.weapon.cool; actor.entity.rk=0;
@@ -188,7 +194,7 @@ export class BattleLine {
     }else{
       C.fx.tracer(from,end); C.audio.mg(from);
     }
-    this.shots.push({t:shell?distance/205:.09,from,end,target,shell,damage:actor.weapon.damage,actor});
+    this.shots.push({t:shell?distance/205:.09,from,end,target,shell,wallNormal,damage:actor.weapon.damage,actor});
     actor.shots++;
     this.actualShots[actor.friendly?'ally':'enemy']++;
   }
@@ -200,6 +206,11 @@ export class BattleLine {
       this.shots.splice(i,1);
       const target=s.target, w=C.world;
       if(s.shell) { C.fx.explosion(s.end,.58);C.audio.explosion(s.end,.52); }
+      if(s.wallNormal){
+        w.hitBuilding(s.end,s.shell?1.8:.52,s.wallNormal);
+        C.fx.impact(s.end,s.wallNormal,'building');
+        continue;
+      }
       if(target.player ? C.dead : !this.canFight(target)) continue;
       const chest=center(target,this.aim);
       if(chest.distanceTo(s.end)>(s.shell?12:6) || w.raycast(s.from,chest,null)>=0) continue;
@@ -302,9 +313,9 @@ export class BattleLine {
     this.clock+=dt;
     if(this.reinforcements.pending.length) {
       const live=this.foes.reduce((n,u)=>n+(u.active&&!u.entity.dead),0);
-      this.reinforcements.tick(this.clock,live,({kind,x,z,post,goal})=>{
+      this.reinforcements.tick(this.clock,live,({kind,x,z,post,goal,via=[]})=>{
         const a=this.unit(kind,x,z,false,post);
-        this.order(a,goal);
+        this.order(a,...via,goal);
         return a;
       });
     }

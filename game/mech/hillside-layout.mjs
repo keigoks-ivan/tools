@@ -7,6 +7,8 @@ export const HILL_LINES = [
   {name:'林道轉運場', posts:[[323,101,'林道下口'],[355,-101,'纜車舊站']], reserves:['heavy tank grunt','grunt brawler brawler']},
   {name:'疏散隧道', posts:[[506,77,'隧道引道'],[542,-75,'換氣井']], reserves:['heavy grunt tank','brawler heavy grunt']},
 ];
+// 商店街在兩條疏散道路之間，東口進街、十字路口分往兩翼。
+export const HILL_ALLEY=[[-337,0],[-222,0],[-119,0]];
 export const HILL_VANGUARD=['tank grunt heavy','grunt brawler grunt'];
 export const HILL_RAID=['brawler grunt brawler tank','grunt tank heavy'];
 export const HILL_RELIEF=['heavy grunt brawler','grunt tank'];

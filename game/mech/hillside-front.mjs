@@ -1,5 +1,5 @@
 import { BattleLine } from './battle-line.mjs?v=3';
-import { HILL_LINES, HILL_EXIT, HILL_VANGUARD, HILL_RAID, HILL_RELIEF } from './hillside-layout.mjs';
+import { HILL_LINES, HILL_EXIT, HILL_ALLEY, HILL_VANGUARD, HILL_RAID, HILL_RELIEF } from './hillside-layout.mjs';
 
 const COMMAND='白鷺（指揮所）';
 const TANKS='第三裝甲連';
@@ -43,11 +43,13 @@ export class HillsideFront extends BattleLine {
     const wave=this.echelon;
     const kinds=[HILL_VANGUARD,this.line.reserves,HILL_RAID,HILL_RELIEF][wave];
     const lead=(wave+this.enc.sec)%2;
+    const streetWing=this.enc.sec===1&&wave===1?0:this.enc.sec===1&&wave===2?1:-1;
     for(const lane of [lead,1-lead]){
       const p=this.posts[lane],depth=[204,184,154,211][wave];
-      this.platoon(kinds[lane],[p.x+depth,p.z+(lane?-1:1)*(wave===2?28:8)],lane,[p.x,p.z]);
+      if(lane===streetWing)this.platoon(kinds[lane],[-80,0],lane,[p.x,p.z],[HILL_ALLEY[2],HILL_ALLEY[1]]);
+      else this.platoon(kinds[lane],[p.x+depth,p.z+(lane?-1:1)*(wave===2?28:8)],lane,[p.x,p.z]);
     }
-    this.C.say(this.line.name+'・'+WAVES[wave],this.posts[lead].name+'先接敵，留意另一翼',2.6,'am');
+    this.C.say(this.line.name+'・'+WAVES[wave],streetWing>=0?'敵機進入商店街，正往'+this.posts[streetWing].name+'轉進':this.posts[lead].name+'先接敵，留意另一翼',2.6,'am');
   }
   entryPoint(x,z,kind) {
     // 先找到整台機體都容得下的入口，並留出下坡的第一步。只在增援進場時查詢。
@@ -71,6 +73,26 @@ export class HillsideFront extends BattleLine {
       u.entity.bossName='突擊隊長・赤嶺';this.C.boss=u.entity;
     }
     return u;
+  }
+  pick(actor) {
+    const target=super.pick(actor);
+    if(this.enc.sec!==1||(!actor.vehicle&&actor.kind!=='heavy'))return target;
+    if(target){
+      const last=actor.lastSight??=actor.pos.clone();
+      last.copy(target.pos);last.y+=target.vehicle?2.3:11;
+      const vel=target.player?this.C.player.vel:target.vel;
+      if(vel)last.addScaledVector(vel,.34);
+      actor.seenAt=this.clock;
+      return target;
+    }
+    if(!actor.lastSight||this.clock-actor.seenAt>4.5)return null;
+    // 失去視線後只朝最後看見的位置補射。能命中的必須是眼前實際遮住那條射線的街屋。
+    const w=this.C.world,from=this.aim.copy(actor.pos);from.y+=actor.vehicle?2.3:11;
+    const t=w.raycast(from,actor.lastSight,null);
+    if(t<0||!w.bldAt(this.dir.lerpVectors(from,actor.lastSight,t),.5)?.alley)return null;
+    actor.wallTarget??={wall:true,active:true,entity:{},pos:this.point(0,0)};
+    actor.wallTarget.pos.copy(actor.lastSight);
+    return actor.wallTarget;
   }
   react(a) {
     if(this.phase!=='line'||a.friendly||!this.canFight(a))return;
@@ -140,11 +162,11 @@ export class HillsideFront extends BattleLine {
   }
   get objective() {
     if(this.phase==='evacuate')return {title:'山麓防線守住了',hint:'到隧道入口接應最後一輛救護車'};
-    if(this.phase==='deploy')return {title:this.line.name+'・接防',hint:'跟隨車隊，前往公路或山側的識別燈'};
+    if(this.phase==='deploy')return {title:this.line.name+'・接防',hint:this.enc.sec===1?'進入商店街。樓房可被擊穿，留意街口與破口':'跟隨車隊，前往公路或山側的識別燈'};
     if(this.phase!=='line')return null;
     const threat=this.posts.find(p=>p.breached);
     return {title:(this.enc.sec+1)+'/6　'+this.line.name+'　車隊 '+this.integrity+'/3',
-      hint:threat?threat.name+'已破，攔下標記敵機':WAVES[this.echelon]+'　守住公路和山側'};
+      hint:threat?threat.name+'已破，攔下標記敵機':this.enc.sec===1&&(this.echelon===1||this.echelon===2)?'敵機穿過商店街，攔截轉角來敵':WAVES[this.echelon]+'　守住公路和山側'};
   }
   get waypoints(){
     if(this.phase==='deploy')return this.posts.map(p=>p.waypoint);
