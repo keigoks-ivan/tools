@@ -169,13 +169,6 @@
     var narrow = window.innerWidth < 700;
     var sum = function (a) { return a.reduce(function (x, y) { return x + y; }, 0); };
 
-    /* 圖 4：每年完工的店面大樓，六個商圈各一格 */
-    multiples('fig1', { ord: ord, nm: nm, colors: COL, years: C.fig1.years, data: C.fig1.data, type: 'bar', unit: ' 棟', step: 4, peak: true,
-      sub: function (k) { return '合計 ' + sum(C.fig1.data[k]) + ' 棟'; }, xfmt: function (v) { return String(v); } });
-
-    /* 圖 5：兩張熱度表 */
-    buildHeat(C, ord, nm);
-
     /* 圖 6：兒童數兩條線，標出各自最高點與最新值 */
     var f3 = C.fig3, L = f3.labels.length;
     function peakOf(a) { var m = Math.max.apply(null, a); return a.indexOf(m); }
@@ -235,19 +228,71 @@
     });
   }
 
-  /* 圖 4：一樓店面／二到四樓辦公、商業 兩種版本 */
-  var FIG1_ORIG = null;
-  function drawFig1(mode) {
-    var h = document.getElementById('fig1H'), cap = document.getElementById('fig1C'), el = document.getElementById('fig1');
-    if (!FIG1_ORIG) FIG1_ORIG = { h: h.textContent, c: cap.textContent };
-    charts.slice().forEach(function (c) { if (c.__multi && c.__multi.id === 'fig1') { c.dispose(); charts.splice(charts.indexOf(c), 1); } });
-    el.style.height = '';
-    var sum = function (a) { return a.reduce(function (x, y) { return x + y; }, 0); };
-    var F = mode === 'up' ? UP.fig1 : CH.fig1;
-    h.textContent = mode === 'up' ? F.title : FIG1_ORIG.h;
-    cap.textContent = mode === 'up' ? '圖 4：各商圈每年完工、有二到四樓辦公或商業成交或租賃紀錄的大樓數（2016～2026，依實價登錄的完工年；二到四樓指登記為辦公或商業用途的 2～4 樓）' : FIG1_ORIG.c;
-    multiples('fig1', { ord: CH.order, nm: CH.names, colors: COL, years: F.years, data: F.data, type: 'bar', unit: ' 棟', step: mode === 'up' ? 1 : 4, peak: true,
-      sub: function (k) { return '合計 ' + sum(F.data[k]) + ' 棟'; }, xfmt: function (v) { return String(v); } });
+  /* 供給：橫條（HTML）。segs 有值時一條長條分段上色 */
+  var YRC = ['#5f4126', '#8a6440', '#b08b63', '#cdb08c', '#e6d7c0'];
+  function supBars(items, mx, unit) {
+    var h = '<div class="sb">';
+    items.forEach(function (it) {
+      h += '<div class="sb-r"' + (it.tip ? ' title="' + esc(it.tip) + '"' : '') + '><span class="sb-n">' + (it.col ? '<span class="chip" style="background:' + it.col + '"></span>' : '') + esc(it.name) + '</span><span class="sb-b">';
+      if (!it.v) h += '<b class="z">–</b>';
+      else {
+        h += '<span class="sb-t" style="width:calc((100% - 70px) * ' + (it.v / mx).toFixed(4) + ')">';
+        (it.segs || [{ v: it.v, c: it.col }]).forEach(function (s) { if (s.v) h += '<i style="flex:' + s.v + ' 0 0;background:' + s.c + '"' + (s.t ? ' title="' + esc(s.t) + '"' : '') + '></i>'; });
+        h += '</span><b>' + fmt(it.v) + unit + '</b>';
+      }
+      h += '</span></div>';
+    });
+    return h + '</div>';
+  }
+  /* 前 n 名；第 n 名跟後面同分時，同分的另寫一行 */
+  function topN(rows, key, n) {
+    var s = rows.filter(function (r) { return r[key] > 0; }).sort(function (a, b) { return b[key] - a[key]; });
+    if (s.length <= n || s[n][key] < s[n - 1][key]) return { top: s.slice(0, n), ties: [] };
+    var cut = s[n - 1][key];
+    return { top: s.filter(function (r) { return r[key] > cut; }), ties: s.filter(function (r) { return r[key] === cut; }), cut: cut };
+  }
+  function buildSupply(C, R, U) {
+    var nm = C.names, sum = function (a) { return a.reduce(function (x, y) { return x + y; }, 0); };
+    var ord = C.order.slice().sort(function (a, b) { return sum(C.fig1.data[b]) - sum(C.fig1.data[a]); });
+    var mxOf = function (its) { return Math.max.apply(null, its.map(function (x) { return x.v; }).concat([1])); };
+    /* 圖 4：已經蓋好的 */
+    var it4 = ord.map(function (k) { var d = C.fig1.data[k]; return { name: nm[k], col: COL[k], v: sum(d),
+      tip: C.fig1.years.map(function (y, i) { return d[i] ? y + ' 年 ' + d[i] + ' 棟' : null; }).filter(Boolean).join('、') }; });
+    document.getElementById('sup4').innerHTML = supBars(it4, mxOf(it4), ' 棟');
+    /* 圖 5：還沒交屋的，依預計交屋年分段 */
+    var f = C.fig2, yrs = f.years;
+    function panel(title, key, unit) {
+      var its = ord.map(function (k) { var d = f[key][k]; return { name: nm[k], col: COL[k], v: sum(d),
+        segs: d.map(function (v, i) { return { v: v, c: YRC[i], t: nm[k] + ' ' + yrs[i] + ' 年 ' + fmt(v) + unit }; }) }; });
+      return '<div class="sp"><div class="sp-t">' + title + '</div>' + supBars(its, mxOf(its), unit) + '</div>';
+    }
+    document.getElementById('sup5').innerHTML = '<div class="sup-leg"><span class="k">預計交屋年</span>' +
+      yrs.map(function (y, i) { return '<span><i style="background:' + YRC[i] + '"></i>' + y + '</span>'; }).join('') + '</div>' +
+      '<div class="sp-wrap">' + panel('已賣出的預售店面', 'signed', ' 間') + panel('還沒交屋的住家', 'units', ' 戶') + '</div>';
+    /* 路段重點：前段、中段、後段 */
+    var rk = function (a) { return ord.indexOf(a.id); };
+    R.areas.sort(function (a, b) { return rk(a) - rk(b); });
+    U.roads.areas.sort(function (a, b) { return rk(a) - rk(b); });
+    var rs = R.areas;
+    function list(a, key, unit, mx) {
+      var rows = (a.rows_all || a.rows).filter(function (r) { return !r.other && r.road !== '路段不明'; }), T = topN(rows, key, 4), col = COL[a.id];
+      if (!T.top.length && !T.ties.length) return '<div class="rhc-z">沒有</div>';
+      var h = supBars(T.top.map(function (r) { return { name: r.road, v: r[key], segs: [{ v: r[key], c: col }] }; }), mx, unit);
+      if (T.ties.length) h += '<div class="rhc-t">' + T.ties.map(function (r) { return esc(r.road); }).join('、') + '各 ' + T.cut + unit + '</div>';
+      return h;
+    }
+    var mxB = 1, mxS = 1;
+    rs.forEach(function (a) { (a.rows_all || a.rows).forEach(function (r) { if (!r.other && r.road !== '路段不明') { mxB = Math.max(mxB, r.b16); mxS = Math.max(mxS, r.signed); } }); });
+    document.getElementById('supRoads').innerHTML = '<div class="rh-wrap">' + rs.map(function (a) {
+      return '<div class="rhc"><div class="rhc-h"><span class="chip" style="background:' + COL[a.id] + '"></span>' + esc(a.name) + '</div>' +
+        '<div class="rhc-k">新店面大樓（2016 年後完工）</div>' + list(a, 'b16', ' 棟', mxB) +
+        '<div class="rhc-k">已賣出的預售店面</div>' + list(a, 'signed', ' 間', mxS) + '</div>';
+    }).join('') + '</div>';
+    /* 二到四樓 */
+    var ordU = C.order.slice().sort(function (a, b) { return sum(U.fig1.data[b]) - sum(U.fig1.data[a]); });
+    var itU = ordU.map(function (k) { var d = U.fig1.data[k]; return { name: nm[k], col: COL[k], v: sum(d),
+      tip: U.fig1.years.map(function (y, i) { return d[i] ? y + ' 年 ' + d[i] + ' 棟' : null; }).filter(Boolean).join('、') }; });
+    document.getElementById('supUp').innerHTML = '<div class="fig"><div class="cap" style="margin-bottom:8px">2016～2026 年完工、有二到四樓辦公或商業成交或租賃紀錄的大樓。長條跟圖 4 用同一個比例</div>' + supBars(itU, mxOf(it4), ' 棟') + '</div>';
   }
 
   /* 圖 5：兩張熱度表（單一藍色，深淺＝數值，格內印數字） */
@@ -271,19 +316,15 @@
     });
     return h + '</tbody></table></div>';
   }
-  function buildHeat(C, ord, nm) {
-    var f = C.fig2;
-    document.getElementById('fig2').innerHTML = '<div class="heat-wrap">' + heatTable('未完工戶數', ord, nm, f.years, f.units) + heatTable('已簽約店面（間）', ord, nm, f.years, f.signed) + '</div>';
-  }
 
   /* 各路段的店面供給：HTML 長條表 */
   var ROAD_NOTE1 = null;
-  function buildRoads(R, mode, only) {
+  function buildRoads(R, mode, only, tgt) {
     var up = mode === 'up';
     if (up) R = UP.roads;
-    var el = document.getElementById('roadCards'), sc = R.scale;
-    var note = document.getElementById('roadNote');
-    if (ROAD_NOTE1 === null) ROAD_NOTE1 = note.innerHTML;
+    var el = document.getElementById(tgt ? tgt.cards : 'roadCards'), sc = R.scale;
+    var note = document.getElementById(tgt ? tgt.note : 'roadNote');
+    if (ROAD_NOTE1 === null && !up) ROAD_NOTE1 = note.innerHTML;
     function bar(v, mx, col) {
       if (!v) return '<div class="rb"><b class="z">–</b></div>';
       return '<div class="rb"><i style="flex:0 0 calc((100% - 40px) * ' + (v / mx).toFixed(4) + ');background:' + col + '"></i><b>' + fmt(v) + '</b></div>';
@@ -292,8 +333,8 @@
     R.areas.filter(function (a) { return !only || a.id === only; }).forEach(function (a) {
       var col = COL[a.id];
       h += '<div class="rcard"><div class="rc-h"><span class="chip" style="background:' + col + '"></span><b>' + esc(a.name) + '</b><span class="rc-c">' + esc(a.claim) + '</span></div>';
-      if (up) h += '<div class="rr up rh"><span class="rn"></span><span>2016 年後完工（棟）</span><span>2015 年前完工（棟）</span><span>二到四樓成交（筆）</span><span>未完工戶數</span></div>';
-      else h += '<div class="rr rh"><span class="rn"></span><span>2016 年後完工（棟）</span><span>2015 年前完工（棟）</span><span>未完工戶數</span><span>已簽約店面（間）</span></div>';
+      if (up) h += '<div class="rr up rh"><span class="rn"></span><span>2016 年後完工（棟）</span><span>2015 年前完工（棟）</span><span>二到四樓成交（筆）</span><span>還沒交屋的住家（戶）</span></div>';
+      else h += '<div class="rr rh"><span class="rn"></span><span>2016 年後完工（棟）</span><span>2015 年前完工（棟）</span><span>還沒交屋的住家（戶）</span><span>已賣出的預售店面（間）</span></div>';
       a.rows.forEach(function (r) {
         var mu = (r.other || r.road === '路段不明') ? ' mu' : '';
         if (up) h += '<div class="rr up' + mu + '"><span class="rn">' + esc(r.road) + '</span>' +
@@ -306,7 +347,7 @@
     });
     el.innerHTML = h;
     if (up) {
-      note.innerHTML = '後段、前段、中段各一張表。2016 年後完工、2015 年前完工是有二到四樓辦公、商業成交或租賃紀錄的大樓棟數，三張表的 2016 年後完工加起來等於圖 4。二到四樓成交是實價登錄 2～4 樓、登記辦公或商業用途的全部買賣筆數，含特殊交易和算不出單價的筆數，只計該商圈。未完工戶數是整個建案的戶數，不分樓層，跟一樓店面那一版相同。已簽約店面是一樓預售店面，這一版不列。同一欄的長條在三張表用同一個比例。寫成路口的地址算在先寫的那條路，「段別未載」是建案只寫路名、沒寫第幾段。';
+      note.innerHTML = '2016 年後完工、2015 年前完工是有二到四樓辦公、商業成交或租賃紀錄的大樓棟數，三張表的 2016 年後完工加起來等於上面長條的前段、中段、後段。二到四樓成交是實價登錄 2～4 樓、登記辦公或商業用途的全部買賣筆數，含特殊交易和算不出單價的筆數，只計該商圈。還沒交屋的住家是整個建案的戶數，不分樓層，跟一樓那一版相同。同一欄的長條在三張表用同一個比例。寫成路口的地址算在先寫的那條路，「段別未載」是建案只寫路名、沒寫第幾段。';
       return;
     }
     note.innerHTML = ROAD_NOTE1;
@@ -1061,8 +1102,9 @@
         buildCalc();
         buildMid(a[13]);
         buildCharts(C);
+        buildSupply(C, a[10], a[12]);
         buildRoads(a[10], '1f');
-        seg('supplySwitch', function (m) { drawFig1(m); buildRoads(ROAD1, m); });
+        buildRoads(null, 'up', null, { cards: 'roadCardsUp', note: 'roadNoteUp' });
         seg('yieldSwitch', setYieldMode);
         buildMap({ catchData: a[9], villGeo: a[3], summary: S, areas: a[2], vill: a[3], bld: a[4], l591: a[5], edu: a[6], sch: a[7], pipe: a[8], biz: a[11] });
       }).catch(function (e) { console.error('linkou load', e); });

@@ -247,8 +247,8 @@
         LK.multiples('ar3', { ord: [k], cols: 1, nm: C.names, colors: COLORS, years: C.fig1.years, data: C.fig1.data, type: 'bar', unit: ' 棟', step: niceStep(Math.max.apply(null, C.fig1.data[k].concat([1]))), peak: true,
           sub: function () { return '合計 ' + sum(C.fig1.data[k]) + ' 棟'; } });
         var f2 = C.fig2, mxu = Math.max.apply(null, ord.map(function (x) { return Math.max.apply(null, f2.units[x]); })), mxs = Math.max.apply(null, ord.map(function (x) { return Math.max.apply(null, f2.signed[x]); }));
-        q('ar4H').textContent = r.name + '未完工 ' + fmt(sum(f2.units[k])) + ' 戶，已簽約店面 ' + fmt(sum(f2.signed[k])) + ' 間';
-        q('ar4').innerHTML = '<div class="heat-wrap">' + LK.heatTable('未完工戶數', [k], C.names, f2.years, f2.units, mxu) + LK.heatTable('已簽約店面（間）', [k], C.names, f2.years, f2.signed, mxs) + '</div>';
+        q('ar4H').textContent = r.name + '還沒交屋的住家 ' + fmt(sum(f2.units[k])) + ' 戶，已賣出的預售店面 ' + fmt(sum(f2.signed[k])) + ' 間';
+        q('ar4').innerHTML = '<div class="heat-wrap">' + LK.heatTable('還沒交屋的住家（戶）', [k], C.names, f2.years, f2.units, mxu) + LK.heatTable('已賣出的預售店面（間）', [k], C.names, f2.years, f2.signed, mxs) + '</div>';
 
         /* 各路段供給（只有後段、前段、中段有） */
         var hasRoad = ROAD.areas.some(function (x) { return x.id === k; });

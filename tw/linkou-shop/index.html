@@ -14,7 +14,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Huninn&display=swap">
-<link rel="stylesheet" href="linkou.css?v=20261121d">
+<link rel="stylesheet" href="linkou.css?v=20261122a">
 </head>
 <body data-view="report">
 <div id="nav-root"></div>
@@ -251,16 +251,35 @@
 
   <!-- ===== 供給 ===== -->
   <h2 class="section-heading" id="supply">供給</h2>
-  <div class="sec-sub">新店面還在增加，中段最多</div>
-  <div class="prose"><p>林口的店面總數只能用推的。新北市使用執照只記整棟大樓的用途，看不出一樓有幾間店，所以這裡從三個方向看：有店面成交或出租紀錄的大樓、商業用途的使用執照、預售簽約的店面。</p></div>
-  <div class="radius-bar seg-bar" id="supplySwitch" role="group" aria-label="供給的樓層"><span class="rb-k">樓層</span><button type="button" data-fl="1f" class="on">一樓店面</button><button type="button" data-fl="up">二到四樓辦公、商業</button></div>
-  <div class="fig"><h3 id="fig1H">187 棟新店面大樓，150 棟在中段、前段、後段</h3><div class="cap" id="fig1C">圖 4：各商圈每年完工的店面大樓數（2016～2026，依實價登錄的完工年）</div><div class="chart" id="fig1"></div></div>
-  <div class="fig"><h3>未完工 3,530 戶，已簽約店面 224 間</h3><div class="cap">圖 5：各商圈未完工建案的戶數與已簽約店面數，依預計完工年（2026～2030）</div><div class="chart-html" id="fig2"></div></div>
-  <p class="fine">預計完工年是用建照年加 4 年推的，不是建商公告。已簽約店面只算到實價登錄有登記的，是最少的數字。</p>
+  <div class="sec-sub">中段新店面最多，還有 126 間預售店面要交屋</div>
+  <div class="sup-ans">
+    <div class="sa"><div class="sa-q">已經蓋好的新店面大樓</div><div class="sa-n">187<small> 棟</small></div><div class="sa-d">2016 年後完工、一樓有店面。中段 84 棟，占 45%。</div></div>
+    <div class="sa"><div class="sa-q">已賣出、還沒交屋的店面</div><div class="sa-n">224<small> 間</small></div><div class="sa-d">預售屋的一樓店面，77% 在 2027、2028 年交屋。中段 126 間，占 56%。</div></div>
+    <div class="sa"><div class="sa-q">還沒交屋的住家</div><div class="sa-n">3,530<small> 戶</small></div><div class="sa-d">交屋後帶來新住戶。前段 1,713 戶最多，1,527 戶在 2027 年。</div></div>
+  </div>
+  <div class="fig"><h3>已經蓋好的：中段 84 棟，是前段的兩倍</h3><div class="cap">圖 4：各商圈 2016～2026 年完工、有一樓店面成交或租賃紀錄的大樓（完工年依實價登錄）。滑過長條看每年棟數</div><div id="sup4"></div></div>
+  <div class="fig"><h3>還沒交屋的：店面中段 126 間最多，住家前段 1,713 戶最多</h3><div class="cap">圖 5：各商圈未完工建案已賣出的一樓店面和住家戶數，顏色是預計交屋年</div><div id="sup5"></div></div>
 
-  <h3 class="sub-h" id="roadsupply">各路段的店面供給</h3>
-  <p class="fine" id="roadNote">後段、前段、中段各一張表。2016 年後完工指 2016～2026 年完工的店面大樓棟數，2015 年前完工指更早完工的棟數，預售案不計。未完工戶數和已簽約店面的算法跟圖 5 一樣，三張表加起來等於圖 4、圖 5 的數字。同一欄的長條在三張表用同一個比例，可以直接比較。寫成路口的地址（例如信義路與吉祥路交叉口）算在先寫的那條路。「段別未載」是建案只寫路名、沒寫第幾段，沒有併進任何一段。<span id="roadNoYear"></span></p>
+  <h3 class="sub-h" id="roadsupply">新店面在哪幾條路</h3>
+  <p class="fine">中段、前段、後段各列新店面大樓最多、已賣出預售店面最多的路。</p>
+  <div id="supRoads"></div>
+  <details class="sup-more"><summary>看三個商圈的所有路段（含 2015 年前完工的店面大樓、還沒交屋的住家）</summary>
+  <p class="fine" id="roadNote">2016 年後完工指 2016～2026 年完工的店面大樓棟數，2015 年前完工指更早完工的棟數，預售案不計。還沒交屋的住家和已賣出預售店面的算法跟圖 5 一樣，三張表加起來等於圖 4、圖 5 的前段、中段、後段。同一欄的長條在三張表用同一個比例。寫成路口的地址（例如信義路與吉祥路交叉口）算在先寫的那條路。「段別未載」是建案只寫路名、沒寫第幾段，沒有併進任何一段。<span id="roadNoYear"></span></p>
   <div id="roadCards"></div>
+  </details>
+
+  <h3 class="sub-h" id="upsupply">二到四樓辦公、商業：新大樓只有 20 棟</h3>
+  <div class="prose"><p>2016 年後完工、有二到四樓辦公或商業成交或租賃紀錄的大樓只有 20 棟，中段 11 棟最多。2015 年前完工的有 48 棟，要找樓上的空間，選擇多半在舊大樓。</p></div>
+  <div id="supUp"></div>
+  <details class="sup-more"><summary>看三個商圈二到四樓的所有路段</summary>
+  <p class="fine" id="roadNoteUp"></p>
+  <div id="roadCardsUp"></div>
+  </details>
+
+  <div class="fine"><ul>
+    <li>林口的店面總數只能用推的。新北市使用執照只記整棟大樓的用途，看不出一樓有幾間店，所以已經蓋好的用「有一樓店面成交或租賃紀錄的大樓」來數，還沒交屋的用預售屋實價登錄的店面筆數。</li>
+    <li>預計交屋年是用建照年加 4 年推的，不是建商公告。已賣出的預售店面只算到實價登錄有登記的，住家戶數只算建照有寫戶數的建案，兩個都是最少的數字。</li>
+  </ul></div>
 
   <!-- ===== 買還是租 ===== -->
   <h2 class="section-heading" id="buyrent">價格：買還是租</h2>
@@ -353,7 +372,7 @@
 
 <footer class="footer">A project by <span>InvestMQuest</span></footer>
 
-<script src="linkou.js?v=20261121d"></script>
+<script src="linkou.js?v=20261122a"></script>
 <script>
 (function () {
   var toc = document.getElementById('toc'); if (!toc) return;
