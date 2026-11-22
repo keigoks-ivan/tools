@@ -9,6 +9,8 @@
 | [city-piers-v2.webp](city-piers-v2.webp) | [灰磚與磚柱住宅](city-piers-v2.prompt.txt) |
 | [city-stone-v2.webp](city-stone-v2.webp) | [石材住宅](city-stone-v2.prompt.txt) |
 
+第三關山麓住宅街使用一張 960 × 1280 的 WebP 圖集。十二個窗戶、店面及設備間取景由內建圖像工具生成，依遊戲門窗尺寸配置。 [街屋圖集](hillside-frontages-v1.webp) · [生成提示詞](hillside-frontages-v1.prompt.txt)
+
 [field-foliage-v2.webp](field-foliage-v2.webp) 是既有 [field-foliage-v1.png](field-foliage-v1.png) 的 WebP 編碼版本，保留透明邊緣；[原生成提示詞](field-foliage-v1.prompt.txt)。
 
 2026-10-04 [秋季六甲山林冠](kobe-autumn-forest-v1.webp) 由 `imagegen` 內建工具生成，並非實地航拍。[完整提示詞](kobe-autumn-forest-v1.prompt.txt)。供三款遊戲共用：512² WebP，RGB 為林冠色彩，A 為由明暗提取的細部高度，沒有另一張法線圖或遠山樹群。材質非同步載入，失敗時使用程序林冠。

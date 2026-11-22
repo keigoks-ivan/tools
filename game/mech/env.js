@@ -1242,13 +1242,14 @@ export class World {
     this.scene.fog.density = F.mode ? profile === 'landing' ? .00024 : profile === 'forest' ? .00018 : .00012 : .00024;
     this.scene.environmentIntensity=profile==='landing'?.57:F.mode?.43:.7;
     if(profile==='landing')this.lightDir.set(.45,.43,-.78).normalize();
+    else if(profile==='hillside')this.lightDir.set(-.53,.77,-.54).normalize();
     else if(F.mode) {
       const az=Math.atan2(this.sunDir.z,this.sunDir.x),el=Math.max(Math.asin(this.sunDir.y),THREE.MathUtils.degToRad(32));
       this.lightDir.set(Math.cos(az)*Math.cos(el),Math.sin(el),Math.sin(az)*Math.cos(el));
     } else this.lightDir.copy(this.cityLightDir);
     this.skyDome.material.uniforms.sunDir.value.copy(this.lightDir);
     const skyRotation=new THREE.Matrix4();
-    if(profile==='landing') {
+    if(profile==='landing'||profile==='hillside') {
       // 海面可直接看見整條地平線，只旋轉天空的方位，避免拉扯近海雲層。
       const bearing=Math.atan2(this.lightDir.z,this.lightDir.x)-Math.atan2(this.sunDir.z,this.sunDir.x);
       skyRotation.makeRotationY(bearing);
@@ -1261,7 +1262,7 @@ export class World {
     this.scene.environment=F.mode?this.fieldEnvMap:this.envMap;
     this.sun.intensity=profile==='landing'?3.15:F.mode?3.5:3.1;
     this.sun.color.setRGB(1,profile==='landing'?.94:F.mode?.91:.95,profile==='landing'?.87:F.mode?.79:.86);
-    this.hemi.intensity=profile==='landing'?.61:F.mode?.32:.46;
+    this.hemi.intensity=profile==='hillside'?.74:profile==='landing'?.61:F.mode?.32:.46;
     const sc=this.sun.shadow.camera,extent=F.mode?190:180;
     sc.near=600;sc.far=1800;
     sc.left=sc.bottom=-extent;sc.right=sc.top=extent;sc.updateProjectionMatrix();
@@ -1830,6 +1831,9 @@ export class World {
       };
       if(R.alley){
         b.alley=R.alley;b.alley.normals=R.rB.geo.attributes.normal;
+        b.alley.uv=R.fB.geo.attributes.uv;b.alley.wallNormals=R.fB.geo.attributes.normal;
+        b.hM=1.25+.13*b.alley.floors.length;
+        b.rh=[gy+.68,gy+1.12,gy+b.hM];
         b.top=top-gy;b.box.top=b.top0=top;
         b.hp=b.hpMax=7+1.4*R.alley.floors.length;
       }
@@ -1893,7 +1897,7 @@ export class World {
     if (p) {
       if(b.alley)chipAlleyFace(b,p,n,dmg);
       // 牆面剝落：碎塊往下掉＋粉塵
-      if (H.fx && H.fx.crumble) H.fx.crumble(p, n, Math.min(3, dmg));
+      if (H.fx && H.fx.crumble) H.fx.crumble(p, n, Math.min(3, dmg)*(b.alley?.43:1));
       if (dmg >= 0.7 || Math.random() < 0.3) this._chunk(p, n, b.alley ? 1 : dmg >= 0.7 ? 2 + ((Math.random() * 2) | 0) : 1, (b.alley ? .36 : .7) + .35 * Math.min(2, dmg));
       // 傷口：之後冒煙、起火的位置（每棟最多 3 個）
       if (b.wn.length < 3 && (big || !b.wn.length || Math.random() < 0.15)) {
