@@ -49,9 +49,9 @@ def check(path):
         print('Three same-date concentration observations; not a full holdings recomputation.')
     elif path.name == 'vs-leveraged.csv':
         dates = [r['date'] for r in rows]
-        assert dates == sorted(set(dates)) and len(dates) == 346
-        assert dates[0]=='2025-05-27' and dates[-1]=='2026-11-09'
-        for code, final, maxdd in [('0050',223.7,-20.6),('00981A',248.3,-34.3),('00631L',334.5,-37.2)]:
+        assert dates == sorted(set(dates)) and len(dates) == 355
+        assert dates[0]=='2025-05-27' and dates[-1]=='2026-11-20'
+        for code, final, maxdd in [('0050',193.8,-27.5),('00981A',200.0,-43.1),('00631L',245.8,-49.3)]:
             wealth=[float(r['wealth_'+code]) for r in rows]
             dd=[float(r['drawdown_'+code+'_pct']) for r in rows]
             assert wealth[0]==100 and wealth[-1]==final
