@@ -240,7 +240,10 @@ export class IkarugaCombat extends Combat {
         const dmg=spec.dmg*(ap?1.16:1)*(this.od.active?1.25:1)*Math.pow(.82,shot.damaged.size);
         point.copy(start).addScaledVector(dir,hit.distance);
         if(hit.part)this.damagePart(hit.enemy,hit.part,dmg);
-        this.damageEnemy(hit.enemy,hit.part?dmg*.23:dmg,spec.stag,point,dir,!!hit.part);
+        const enemy=hit.enemy;
+        const lethal=precision && !hit.part && !shot.damaged.size && !enemy.vehicle && enemy!==this.boss && !enemy.bossName && !enemy.fleeAt;
+        const damage=lethal ? enemy.ap : hit.part ? dmg*.23 : dmg;
+        this.damageEnemy(enemy,damage,spec.stag,point,dir,!!hit.part);
         this.fx.impact(point,check.copy(dir).negate(),'armor');this.audio.impact(point,'armor');
         shot.damaged.add(hit.enemy);
         if(shot.damaged.size===(ap?3:1)){travel=hit.distance;shot.blocked=true;break;}

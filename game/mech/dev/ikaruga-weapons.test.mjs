@@ -50,6 +50,7 @@ function scopeShot(c){
 
 test('flat fire and the separate 1200 m scoped round use the exact sight, 36-round magazine and a single release',()=>{
   const c=mission(),near=enemy(c,0,120), far=enemy(c,0,1080);
+  far.bossName='逆光';c.boss=far;
   c.camera=new THREE.PerspectiveCamera();lookAt(c,near.chest(V()));
   c.playerWeapons(.016,{fire:true});
   assert.equal(near.ap,18000-IKARUGA_WEAPONS.rifle.dmg);
@@ -70,6 +71,18 @@ test('flat fire and the separate 1200 m scoped round use the exact sight, 36-rou
   assert.equal(far.ap,18000-2*IKARUGA_WEAPONS.msl.dmg);
   assert.equal(c.events.length,0);assert.equal(c.missiles.length,0);
   c.dispose();
+});
+
+test('a scoped hull hit destroys the first regular mech and awards one kill',()=>{
+  for(const kind of ['grunt','heavy','ace','brawler']){
+    const c=mission(),first=enemy(c,0,820,kind),rear=enemy(c,0,930);
+    c.camera=new THREE.PerspectiveCamera();lookAt(c,first.chest(V()));
+    scopeShot(c);
+    assert.equal(first.dead,true,kind);assert.equal(first.ap,0);
+    assert.equal(c.stats.kills,1);assert.equal(c.stats.shots,1);
+    assert.equal(rear.ap,rear.apMax);
+    c.dispose();
+  }
 });
 
 test('hitting visible triangles on the shoulder breaks its weapon, the rear module slows the surviving mech',()=>{
