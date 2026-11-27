@@ -16,12 +16,14 @@ import { LESSONS } from './tutorial.mjs?v=1';
 const q = new URLSearchParams(location.search);
 const taipei = q.get('campaign') === 'taipei';
 const kl = q.get('campaign') === 'kl';
-const klUnit = kl ? q.get('unit') : null;
-const falconPilot = taipei || klUnit === 'falcon';
-const ikaruga = q.get('campaign') === 'ikaruga' || klUnit === 'ikaruga';
-const sideStory = taipei || ikaruga || kl;
+const simulation = q.get('campaign') === 'sim';
+const selectable = kl || simulation;
+const unit = selectable ? q.get('unit') : null;
+const falconPilot = taipei || unit === 'falcon';
+const ikaruga = q.get('campaign') === 'ikaruga' || unit === 'ikaruga';
+const sideStory = taipei || ikaruga || selectable;
 // 大檔案（貼圖、HDR、模型）改從 jsDelivr 下載，網站主機給大檔很慢；不能用時照舊從本站（見 cdn.js）
-if (!kl || ['cangyan','falcon','ikaruga'].includes(klUnit)) {
+if (!selectable || ['cangyan','falcon','ikaruga'].includes(unit)) {
   try { const f = await (await import('./cdn.js?v=2')).useCDN(); if (f) THREE.DefaultLoadingManager.setURLModifier(f); } catch (e) {}
   if (q.has('show') || q.has('free')) await import('./preview.js');
   else await game();
@@ -44,7 +46,9 @@ async function game() {
   const falcon = falconPilot ? await import('./taipei/falcon.mjs') : null;
   const leftWing = ikaruga ? await import('./ikaruga/loadout.mjs') : null;
   const Combat = leftWing?.IkarugaCombat || falcon?.FalconCombat || KobeCombat;
-  const STAGES = kl ? prepareStages((await import('./kl/campaign.mjs')).KL_STAGES.map(stage => ({...stage,pilot:ikaruga ? '斑鳩' : falconPilot ? '白隼' : '蒼焰'})))
+  const selectableStages = simulation ? (await import('./sim/campaign.mjs')).SIM_STAGES
+    : kl ? (await import('./kl/campaign.mjs')).KL_STAGES : null;
+  const STAGES = selectableStages ? prepareStages(selectableStages.map(stage => ({...stage,pilot:ikaruga ? '斑鳩' : falconPilot ? '白隼' : '蒼焰'})))
     : taipei ? prepareStages((await import('./taipei/campaign.mjs')).TAIPEI_STAGES)
     : ikaruga ? prepareStages((await import('./ikaruga/campaign.mjs')).IKARUGA_STAGES) : kobeStages;
   // ---------------------------------------------------------------- 畫面
@@ -66,14 +70,15 @@ async function game() {
   const [A, heightSource] = await Promise.all([
     loadAssets(renderer, p => { bar.style.width = (p * 90).toFixed(0) + '%'; }, true, !sideStory),
     basin ? basin.loadBasin() : valley ? valley.loadValley().catch(()=>()=>0) : null,
-    (!sideStory || klUnit==='cangyan') ? loadHeroMech() : null,
+    (!sideStory || unit==='cangyan') ? loadHeroMech() : null,
   ]);
   status.textContent = '建立城市';
   initMechMaterials(A);
-  const world = new World(renderer, scene, A, taipei ? {city:false, terrainSegments:180, heightSource, terrainSurface:basin.basinSurface} : valley ? {city:false,terrainSegments:180,heightSource,terrainSurface:valley.valleySurface} : ikaruga ? {city:false,terrainSegments:180,heightSource:()=>0} : undefined);
+  const world = new World(renderer, scene, A, taipei ? {city:false, terrainSegments:180, heightSource, terrainSurface:basin.basinSurface} : valley ? {city:false,terrainSegments:180,heightSource,terrainSurface:valley.valleySurface} : ikaruga || simulation ? {city:false,terrainSegments:simulation?64:180,heightSource:()=>0} : undefined);
   if (taipei) world.buildTaipei = await (await import('./taipei/district.mjs')).prepareDistrict(A,heightSource);
   if (kl) world.buildKL = (await import('./kl/district.mjs')).buildKL;
-  if (ikaruga && !kl) {
+  if (simulation) world.buildExercise = (await import('./sim/scenery.mjs')).buildExercise;
+  if (ikaruga && !selectable) {
     const [{buildTokyo}, {buildFuji,frameFuji}] = await Promise.all([import('./ikaruga/tokyo.mjs'), import('./ikaruga/fuji.mjs')]);
     world.frameFuji = frameFuji;
     world.buildTokyo = (w, group) => { buildTokyo(w, group); buildFuji(w, group); };
@@ -235,6 +240,7 @@ async function game() {
   // ---------------------------------------------------------------- 設定
   // 視角：false＝駕駛艙（第一人稱）、true＝機體後方（看得到整台機體）；記住上次的選擇
   const saveKey = k => {
+    if(simulation && /^(cleared|best\d+|view)$/.test(k))return 'mech.sim.'+k;
     if(kl && /^(cleared|best\d+|view)$/.test(k))return 'mech.kl.'+k;
     if(ikaruga && /^(cleared|best\d+|view)$/.test(k))return 'mech.ikaruga.'+k;
     if(!taipei || !/^(cleared|best\d+|view)$/.test(k))return 'mech.'+k;
@@ -317,7 +323,8 @@ async function game() {
   const RANKS = ['', 'C', 'B', 'A', 'S'];
   const RELAY_OUTCOMES = ['', 'intact', 'damaged'];
   const cleared = () => (q.has('all') ? STAGES.length : store.get('cleared', 0));
-  const nextStage = () => Math.min(STAGES.length, cleared() + 1);
+  const unplayedExercise = () => STAGES.findIndex((_,i)=>!store.get('best'+(i+1),0))+1;
+  const nextStage = () => simulation ? unplayedExercise() || 1 : Math.min(STAGES.length, cleared() + 1);
   function lastLineURL(relay) {
     const url = new URL('./lastline/', location.href);
     if (relay) { url.searchParams.set('from', 'mech'); url.searchParams.set('relay', relay); }
@@ -327,7 +334,7 @@ async function game() {
   function renderStages() {
     const nx = nextStage();
     $('stages').innerHTML = STAGES.map((D, i) => {
-      const n = i + 1, lock = n > nx, best = store.get('best' + n, 0);
+      const n = i + 1, lock = !simulation && n > nx, best = store.get('best' + n, 0);
       return `<button class="stg${lock ? ' lock' : ''}${n === nx ? ' next' : ''}" data-s="${n}"${lock ? ' disabled' : ''}>`
         + `${D.enc ? `<em>${D.fieldLabel || '遭遇戰'}</em>` : ''}<b>${n}</b><span>${lock ? 'LOCKED' : D.name}</span>${best ? `<i>${RANKS[best]}</i>` : ''}</button>`;
     }).join('');
@@ -394,7 +401,7 @@ async function game() {
   audio.music('title');
   $('resume').addEventListener('click', resume);
   const replay = (n, cp = null) => { $('result').style.display = 'none'; resetPlayer(n, cp); newCombat(n, cp); startBoot(1.6); };
-  $('next').addEventListener('click', () => { const n = stageNo + 1; $('result').style.display = 'none'; resetPlayer(n); newCombat(n); brief(n, () => startBoot(1.6)); });
+  $('next').addEventListener('click', () => { const n = simulation ? nextStage() : stageNo + 1; $('result').style.display = 'none'; resetPlayer(n); newCombat(n); brief(n, () => startBoot(1.6)); });
   $('again').addEventListener('click', () => replay(stageNo));
   $('cont').addEventListener('click', () => replay(stageNo, combat.cp));   // 遭遇戰：從檢查點繼續
   $('playCoda').addEventListener('click', () => startCoda());
@@ -530,15 +537,16 @@ async function game() {
         : 0.4 * clamp((35 * w + 30 - S.time) / (25 * w + 15), 0, 1) + 0.4 * clamp(1 - S.dmgTaken / player.apMax, 0, 1) + 0.2 * acc;
       if (S.cont) r = Math.min(r, 0.71);
       rank = r >= 0.72 ? 'S' : r >= 0.56 ? 'A' : r >= 0.4 ? 'B' : 'C';
-      if (n > store.get('cleared', 0)) store.set('cleared', n);
+      if (!simulation && n > store.get('cleared', 0)) store.set('cleared', n);
       if (RANKS.indexOf(rank) > store.get('best' + n, 0)) store.set('best' + n, RANKS.indexOf(rank));
     }
-    audio.music(win ? (last ? 'allclear' : D.frontline==='landing' ? 'landingHome' : 'clear') : 'fail');
-    $('resTitle').textContent = win ? (last ? (kl ? '吉隆坡環線・全車到站' : ikaruga ? '東京左翼・三號艇靠岸' : taipei ? '台北雨線・七人全數接通' : '神戶市區停火') : `第 ${n} 關完成`) : `第 ${n} 關失敗`;
-    $('resSub').textContent = win ? (last ? (kl ? 'FOUR BELLS' : ikaruga ? 'ALL HANDS ASHORE' : taipei ? 'SIGNAL RESTORED' : 'CEASEFIRE') : 'STAGE CLEAR') : 'MISSION FAILED';
+    const allDone=simulation ? !unplayedExercise() : last;
+    audio.music(win ? (allDone ? 'allclear' : D.frontline==='landing' ? 'landingHome' : 'clear') : 'fail');
+    $('resTitle').textContent = win ? simulation ? D.name+'・演習完成' : (last ? (kl ? '吉隆坡環線・全車到站' : ikaruga ? '東京左翼・三號艇靠岸' : taipei ? '台北雨線・七人全數接通' : '神戶市區停火') : `第 ${n} 關完成`) : `第 ${n} 關失敗`;
+    $('resSub').textContent = win ? simulation ? (allDone?'三場演習全數通過':'EXERCISE COMPLETE') : (last ? (kl ? 'FOUR BELLS' : ikaruga ? 'ALL HANDS ASHORE' : taipei ? 'SIGNAL RESTORED' : 'CEASEFIRE') : 'STAGE CLEAR') : 'MISSION FAILED';
     $('resRank').textContent = rank;
     $('resRank').style.display = win ? '' : 'none';
-    $('next').style.display = win && !last ? '' : 'none';
+    $('next').style.display = win && !allDone ? '' : 'none';
     $('playCoda').hidden = sideStory || !(win && last);
     $('again').textContent = win ? '再打一次 RETRY' : '再試一次 RETRY';
     $('cont').style.display = !win && combat.cp ? '' : 'none';
@@ -878,6 +886,7 @@ async function game() {
       camera.position.set(bow - 155 + 31 * boot, 64 - 12 * boot, -143 + 24 * boot);
       camera.lookAt(bow + 39, 7, 14);
     } else if (tpView && !scopeView) chaseCam(rdt);
+    if (C.enc?.front?.cameraRoll) camera.rotateZ(C.enc.front.cameraRoll);
     C.aimSkip = tpView && !scopeView ? chaseSkip : 0;
 
     // ---- 戰鬥、特效、世界

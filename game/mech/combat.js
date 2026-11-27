@@ -324,7 +324,7 @@ export class Combat {
     else if (this.phase === 'fight' && (this.enc ? this.enc.update(dt) : this.enemies.length === 0 && this.events.length === 0 && (!this.canAdvance || this.canAdvance()))) {
       if (!this.enc && this.group < this.def.groups.length) this.spawnGroup();
       else {
-        const last = this.stage === (this.campaignLength ?? STAGES.length);
+        const last = this.def.battlefield !== 'simulation' && this.stage === (this.campaignLength ?? STAGES.length);
         this.phase = 'done'; this.slowmo = 1.4;
         this.say(last ? 'ALL CLEAR' : 'STAGE CLEAR', last ? '全部過關' : `第 ${this.stage} 關完成`, 4, 'am');
         this.audio.ui('clear');
@@ -771,6 +771,7 @@ export class Combat {
       dmg = Math.min(dmg, e.ap - Math.ceil(e.apMax * .25));
       if (dmg <= 0) return;
     }
+    if (!support) this.enc?.front?.recordImpact?.(e,dmg);
     e.ap -= dmg; e.lastHit = 0;
     const relay = air?.relay;
     if (relay?.state === 'charging') {

@@ -309,7 +309,7 @@ export class Encounter {
     this.holdT = 0; this.tg = []; this.bossE = null; this.bossTalk = 0;
     this.fightT = 0; this.beatSeen = new Set();
     this.training = null;
-    this.front = C.def?.frontline === 'landing' ? new LandingFront(C, this) : C.def?.frontline ? new HillsideFront(C, this) : null;
+    this.front = C.def?.battlefield === 'simulation' ? C.world.exerciseSite.create(C,this) : C.def?.frontline === 'landing' ? new LandingFront(C, this) : C.def?.frontline ? new HillsideFront(C, this) : null;
     C.stats.healed = C.stats.healed || 0;
   }
   get cur() { return this.E.secs[this.sec]; }
@@ -837,6 +837,7 @@ export class Encounter {
     }
   }
   dispose() {
+    this.front?.dispose?.();
     const B = this.B;
     this.queue.length = 0; this.warn.length = 0;
     if (!B) return;

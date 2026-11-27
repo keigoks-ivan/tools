@@ -1228,6 +1228,7 @@ export class World {
     if (!BATTLEFIELDS[profile] || !route) profile = 'city';
     if (this.battlefield === profile && (profile === 'city' || this.fieldRoute === route)) return;
     this.resetBuildings();
+    this.exerciseSite=null;
     this.tokyoTraffic=null; this.klConvoy=null;
     this.klSigns?.dispose(); this.klSigns=null;
     this.klReflections?.dispose(); this.klReflections=null;
@@ -1239,7 +1240,7 @@ export class World {
     }
     this.battlefield = profile; this.fieldRoute = route;
     this.bearingOffset = profile === 'tokyo' ? 180 : 0;
-    this.mountainMesh.visible = profile !== 'tokyo' && profile !== 'kl';
+    this.mountainMesh.visible = profile !== 'tokyo' && profile !== 'kl' && profile !== 'simulation';
     const F = BATTLEFIELDS[profile], layout = F.mode ? fieldLayout(profile, route) : null;
     const terrainRoute = layout ? { ...route, pads: layout.structures, relief: this.A.relief } : null;
     const T = this.terrain, p = this.terrainMesh.geometry.attributes.position, uv = this.terrainMesh.geometry.attributes.uv;
@@ -1288,6 +1289,7 @@ export class World {
     sc.near=600;sc.far=1800;
     sc.left=sc.bottom=-extent;sc.right=sc.top=extent;sc.updateProjectionMatrix();
     this.sun.shadow.bias=F.mode?-.00004:-.000035;this.sun.shadow.normalBias=.035;
+    this.terrainMesh.visible=profile!=='simulation';
     this.terrainMesh.castShadow=!!F.mode;
     for (const o of this.cityObjects) o.visible = !F.mode;
     for (const k of ['blds', 'trample', 'smokeSites', 'fireSites', 'lampSites']) this[k] = F.mode ? [] : this.cityState[k];
@@ -1306,6 +1308,7 @@ export class World {
 
   buildBattlefield(profile, layout) {
     const group = this.fieldGroup = new THREE.Group(); this.scene.add(group);
+    if (profile === 'simulation') { this.exerciseSite=this.buildExercise(this,group); return; }
     if (profile === 'kl') { this.buildKL(this,group); return; }
     if (profile === 'tokyo') { this.buildTokyo(this,group); return; }
     if (profile === 'hillside') this.hillsideSite=buildHillside(this,group);
@@ -1493,6 +1496,9 @@ export class World {
         const l = this.grid.get(gx * 10007 + gz);
         if (l) for (const i of l) if (!seen.has(i)) { seen.add(i); out.push(this.boxes[i]); }
       }
+    if(this.exerciseSite?.boxes)for(const b of this.exerciseSite.boxes){
+      if(x+r>b.x0&&x-r<b.x1&&z+r>b.z0&&z-r<b.z1)out.push(b);
+    }
     if(this.landingSite)for(const b of this.landingSite.boxes) {
       if(b.top>=0&&x+r>b.x0&&x-r<b.x1&&z+r>b.z0&&z-r<b.z1)out.push(b);
     }
