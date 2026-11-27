@@ -1,4 +1,7 @@
 export const HEIGHT=138, DECK=27;
+export const DOCK_GATES=[{x:0,z:-82},{x:-44,z:100},{x:44,z:100}];
+export const SUMMIT_TOWER={x:0,z:132};
+export const SUMMIT_APPROACHES=[{x:-94,y:65,z:34},{x:94,y:65,z:34}];
 function course(district,name,en,fieldLabel,brief,start,end,pts,opposition,par,score){
   const secs=opposition.map((amb,i)=>({at:i+1,amb}));
   return {battlefield:'simulation',name,en,fieldLabel,brief,tip:brief[1],start:[['演習管制',start]],end:[['演習管制',end]],
@@ -16,5 +19,13 @@ export const SIM_STAGES=[
   course('rail','裂軌列車','SPLIT RAIL','高速接舷',
     ['三列磁浮裝甲車穿進暴雨。每逢岔道，三條軌道會短暫靠攏，隨後整列車都會錯開。','在車頂交火，跳躍或飛行換車。錯過並行窗口可以等下一次，最後的頭目會跳上你所在的列車。'],
     '先站穩。你腳下是中央列車的最後三節，前面還有兩列。','三列車同時穿出雨牆。最後一個從車頂回來的是你。',
-    [[0,-175],[0,-60],[-44,0],[-44,130],[44,180],[0,225]],['grunt@out*2','grunt@out','ace@out*2','heavy@out*2','heavy@out ace@out'],390,'stronghold')
+    [[0,-175],[0,-60],[-44,0],[-44,130],[44,180],[0,225]],['grunt@out*2','grunt@out','ace@out*2','heavy@out*2','heavy@out ace@out'],390,'stronghold'),
+  course('dock','潮汐船塢','TIDAL LOCK','乾塢突入',
+    ['晨潮已退，兩道鋼閘仍封著船底的維修廊。吊車上的監控機握有第一道閘門的控制權。','擊破監控機，從升起的閘門底下穿過。內塢任選一道閘突入，最後沿船腹迎擊重裝塢長。'],
+    '看到鋼閘上的黃黑條紋了嗎？監控機就在閘前高台。','內塢交回船員。下一次漲潮，這艘船就能離開。',
+    [[0,-260],[0,-180],[0,-55],[0,45],[0,128],[0,252]],['grunt@out*2','ace@out','grunt@out heavy@out','ace@out*2','heavy@out ace@out'],350,'stronghold'),
+  course('summit','雲頂天文台','ABOVE THE CLOUDS','高空攔截',
+    ['觀測站的穹頂剛轉向日出，一對飛行機已貼著雪線切入。山脊把低空視野遮去了一半。','沿任一側的進場燈爬升。攔截繞塔的雙機，再追擊從圓頂後方拔高的長空。觀測平台可供落腳回能。'],
+    '日光落在主鏡上了。飛過其中一座翼燈，管制席就能把航線交給你。','空域已淨空。主鏡重新轉向，一整排圓頂又能安靜地看星星了。',
+    [[0,-240],[0,-148],[0,34],[0,132],[0,215],[0,278]],['grunt@out ace@out','ace@out','ace@out*2','heavy@out grunt@out','ace@out'],370,'encircled')
 ];

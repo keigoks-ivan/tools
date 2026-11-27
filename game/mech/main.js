@@ -543,7 +543,7 @@ async function game() {
     const allDone=simulation ? !unplayedExercise() : last;
     audio.music(win ? (allDone ? 'allclear' : D.frontline==='landing' ? 'landingHome' : 'clear') : 'fail');
     $('resTitle').textContent = win ? simulation ? D.name+'・演習完成' : (last ? (kl ? '吉隆坡環線・全車到站' : ikaruga ? '東京左翼・三號艇靠岸' : taipei ? '台北雨線・七人全數接通' : '神戶市區停火') : `第 ${n} 關完成`) : `第 ${n} 關失敗`;
-    $('resSub').textContent = win ? simulation ? (allDone?'三場演習全數通過':'EXERCISE COMPLETE') : (last ? (kl ? 'FOUR BELLS' : ikaruga ? 'ALL HANDS ASHORE' : taipei ? 'SIGNAL RESTORED' : 'CEASEFIRE') : 'STAGE CLEAR') : 'MISSION FAILED';
+    $('resSub').textContent = win ? simulation ? (allDone?'五場演習全數通過':'EXERCISE COMPLETE') : (last ? (kl ? 'FOUR BELLS' : ikaruga ? 'ALL HANDS ASHORE' : taipei ? 'SIGNAL RESTORED' : 'CEASEFIRE') : 'STAGE CLEAR') : 'MISSION FAILED';
     $('resRank').textContent = rank;
     $('resRank').style.display = win ? '' : 'none';
     $('next').style.display = win && !allDone ? '' : 'none';

@@ -7,7 +7,8 @@ import {World} from '../env.js';
 import {foldedSolids} from '../sim/fold-architecture.mjs';
 import {SIM_STAGES,HEIGHT,DECK} from '../sim/campaign.mjs';
 
-test('three independent courses build their own collision and moving geometry',()=>{
+test('five independent courses build their own collision and moving geometry',()=>{
+  assert.deepEqual(SIM_STAGES.map(s=>s.route.district),['fold','echo','rail','dock','summit']);
   for(const stage of SIM_STAGES){
     const district=stage.route.district,root=new THREE.Group(),fixed=[];
     const site=buildExercise({fieldRoute:{district},addCollider:b=>fixed.push(b)},root);
@@ -17,7 +18,7 @@ test('three independent courses build their own collision and moving geometry',(
       site.setLayer(false);assert.equal(site.city.rotation.z,0);
     }else if(district==='echo'){
       assert.equal(site.cells.length,2);assert.ok(fixed.some(b=>b.x0<0&&b.x1>0));
-    }else{
+    }else if(district==='rail'){
       assert.equal(site.boxes.length,24);
       site.moveTrains(15);
       for(const train of site.trains){
@@ -25,6 +26,20 @@ test('three independent courses build their own collision and moving geometry',(
         assert.equal(site.deckAt(x,z+174),train);assert.equal(site.deckAt(x,z+203),undefined);
         assert.equal(train.boxes[0].top,DECK);
       }
+    }else if(district==='dock'){
+      assert.equal(site.boxes.length,3);assert.ok(fixed.length>0);
+      const world=Object.create(World.prototype);
+      Object.assign(world,{grid:new Map(),cellSize:60,boxes:[],height:()=>0,exerciseSite:site});
+      const feet=new THREE.Vector3(-44,0,100);
+      assert.equal(world.collide(feet,3,0),true);
+      site.lift(1,21);feet.set(-44,0,100);assert.equal(world.collide(feet,3,0),false);
+      assert.equal(site.gates[1].group.position.y,21);
+      assert.deepEqual(site.boxes.map(b=>b.bottom),[0,21,0]);
+      assert.ok(site.boxes.every(b=>!fixed.includes(b)));
+    }else{
+      assert.equal(site.boxes.length,0);
+      assert.ok(fixed.some(b=>b.top===35&&b.x0<90&&b.x1>90&&b.z0<156&&b.z1>156));
+      assert.ok(fixed.some(b=>b.top>80&&b.x0<0&&b.x1>0&&b.z0<132&&b.z1>132));
     }
     root.traverse(o=>{if(o.isMesh){o.geometry.dispose();o.material.dispose();}});
   }

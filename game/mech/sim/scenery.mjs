@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import {mergeGeometries} from 'three/addons/utils/BufferGeometryUtils.js';
 import {building,foldedSolids} from './fold-architecture.mjs';
+import {dock,summit} from './dock-summit.mjs';
 import {createExercise} from './missions.mjs';
 
 import {HEIGHT,DECK} from './campaign.mjs';
@@ -75,6 +76,8 @@ function batch(root,name){
   }};
 }
 const palette={
+  dock:{zenith:0x75afc3,horizon:0xffdfb8,sun:0xffedc7,env:.95,fill:1.85,fog:.00078},
+  summit:{zenith:0x518ebc,horizon:0xe4e7e2,sun:0xffedcd,env:.98,fill:1.84,fog:.00092},
   fold:{zenith:0x89b7ce,horizon:0xf2dabb,sun:0xffefd0,env:1.05,fill:2.35,fog:.00072},
   echo:{zenith:0x394773,horizon:0xb9aabe,sun:0xf5d5bd,env:.76,fill:1.35,fog:.00083},
   rail:{zenith:0x344456,horizon:0x8d9da9,sun:0xe5d0b1,env:.86,fill:1.56,fog:.0012},
@@ -469,7 +472,12 @@ export function buildExercise(world,root){
   const id=world.fieldRoute.district;
   const site={boxes:[],create:(combat,enc)=>createExercise(id,site,combat,enc)};
   sky(root,world,id);
-  if(id==='fold')fold(root,site);else if(id==='echo')echo(root,site);else rail(root,site);
-  if(id!=='rail'){for(const box of site.boxes)world.addCollider(box);site.boxes.length=0;}
+  if(id==='dock'){water(root);estuary(root);dock(root,site,batch);}
+  else if(id==='summit')summit(root,site,batch,world.A);
+  else ({fold,echo,rail})[id](root,site);
+  if(id!=='rail'){
+    for(const box of site.boxes)world.addCollider(box);
+    site.boxes=site.gates?.map(g=>g.box)||[];
+  }
   return site;
 }

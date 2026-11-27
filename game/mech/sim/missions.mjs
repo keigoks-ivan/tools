@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import {HEIGHT,DECK} from './campaign.mjs';
+import {HEIGHT,DECK,DOCK_GATES,SUMMIT_TOWER,SUMMIT_APPROACHES} from './campaign.mjs';
 import {EchoTape,echoFigure,replayShot} from './tape.mjs';
 
 const V=(x=0,y=0,z=0)=>new THREE.Vector3(x,y,z);
@@ -266,6 +266,143 @@ class Rail extends Exercise{
     return false;
   }
 }
+class Dock extends Exercise {
+  prepare(){
+    this.lane=this.C.cp?.lane??0;
+    this.open=DOCK_GATES.map((_,i)=>i===0?this.sec>=2:!!this.C.cp?.opened?.includes(i));
+    this.open.forEach((up,i)=>this.site.lift(i,up?26:0));
+  }
+  enter(){
+    this.clearPoint();
+    if(this.sec===0){
+      this.text('外塢・引水道','沿黃線進塢，擊破巡邏機與護航機');
+      this.unit('grunt','引水道巡機',-28,0,-164,14);this.unit('grunt','外塢護航機',34,0,-149,9);
+    }else if(this.sec===1||this.sec===3){
+      const inner=this.sec===3;
+      this.text(inner?'內塢・雙閘分流':'外塢・起閘',inner?'任選一側擊破控閘機，沿該側閘門底下進入內塢':'擊破左方高台的監控機，再從黃黑鋼閘下方通過');
+      this.locks=(inner?[1,2]:[0]).map(i=>{
+        const g=DOCK_GATES[i],x=inner?g.x:-45,z=inner?g.z-36:-129;
+        return {i,unit:this.unit('ace',i===0?'外塢監控機':i===1?'西閘控機':'東閘控機',x,inner?0:9,z,inner?7:0)};
+      });
+      this.previous=this.p.pos.clone();
+    }else if(this.sec===2){
+      this.checkpoint();this.text('維修廊・雙側夾擊','左方重機扼住通道，右方機體從維修台開火');
+      this.unit('heavy','船腹重機',-35,0,36,11);this.unit('grunt','維修台哨機',52,9,20);
+    }else{
+      for(const lock of this.locks||[])if(lock.unit.dead)this.open[lock.i]=true;
+      const opened=[1,2].filter(i=>this.open[i]);
+      const sign=this.lane===1?-1:1;
+      const flank=this.E.mine.find(e=>!e.dead);
+      const escort=flank?{x:flank.pos.x,z:flank.pos.z,ap:flank.ap}:this.C.cp?.escort;
+      this.checkpoint({lane:this.lane,opened,escort});
+      this.text('沉錨・最後一座船台','塢長佔住船首，當心另一道閘後方的僚機');
+      if(!escort)this.text('沉錨・孤立的塢長','兩側控閘機都已擊破。集中火力攻擊船首的沉錨');
+      this.boss(this.unit('heavy','沉錨',sign*19,0,263,20),1.65);
+      if(escort){
+        this.escort=flank||this.unit('ace','控閘僚機',escort.x,0,escort.z);
+        this.open[this.lane===1?2:1]=true;
+        this.escort.ap=escort.ap;
+        this.escort.frontActor.station.slide=12;
+      }
+    }
+  }
+  get waypoints(){
+    if(this.sec!==1&&this.sec!==3)return [];
+    return this.locks.map(({i,unit:e})=>{
+      const {x,z}=DOCK_GATES[i];
+      return {name:e.dead?'穿過閘門':e.label,position:e.dead?V(x,5,z):e.pos.clone().add(V(0,16,0))};
+    });
+  }
+  step(dt){
+    const feet=this.p.pos;
+    if(this.p.grounded&&feet.y<1&&(Math.abs(feet.x)>103||feet.z< -374||feet.z>446)){
+      this.relocate(clamp(feet.x,-84,84),0,clamp(feet.z,-360,432),this.p.yaw);
+      this.previous?.copy(feet);this.C.note('落水回收・已返回塢岸','am');
+    }
+    for(let i=0;i<this.open.length;i++)if(this.open[i]&&this.site.gates[i].box.bottom<26){
+      this.site.lift(i,Math.min(26,this.site.gates[i].box.bottom+dt*16));
+    }
+    if(this.sec===1||this.sec===3){
+      const p=this.p.pos;
+      for(const {i,unit:e} of this.locks){
+        if(!e.dead)continue;
+        if(!this.open[i]){this.open[i]=true;this.C.note(e.label+'離線・閘門上升','gr');}
+        const {x,z}=DOCK_GATES[i],from=this.previous;
+        // Intersect the swept path with the opening, including high-speed boosts.
+        if(from.z<=z&&p.z>=z&&p.z>from.z){
+          const f=(z-from.z)/(p.z-from.z);
+          if(Math.abs(from.x+(p.x-from.x)*f-x)<20&&from.y+(p.y-from.y)*f+18<=this.site.gates[i].box.bottom){
+            if(i)this.lane=i;
+            return this.next();
+          }
+        }
+      }
+      this.previous.copy(p);
+      return false;
+    }
+    if(this.escort&&!this.escort.dead){
+      const s=this.escort.frontActor.station;
+      if(this.site.gates[this.lane===1?2:1].box.bottom>=19)s.z=Math.min(206,s.z+dt*14);
+    }
+    if(this.E.mine.every(e=>e.dead))return this.next();
+    return false;
+  }
+}
+
+class Summit extends Exercise {
+  prepare(){this.side=this.C.cp?.side||1;this.patrol=[];}
+  flyer(name,kind,path){
+    const {cx,cz,y,r,angle}=path;
+    const e=this.unit(kind,name,cx+r*Math.cos(angle),y,cz+r*Math.sin(angle));
+    e.airborne=true;e.grounded=false;e.frontActor.station.air=true;
+    this.patrol.push({e,...path});return e;
+  }
+  enter(){
+    this.clearPoint();
+    this.patrol=this.patrol.filter(a=>!a.e.dead);
+    const {x:cx,z:cz}=SUMMIT_TOWER;
+    if(this.sec===0){
+      this.text('山麓・掠脊來襲','擊破進場道上的警戒機，留意從穹頂旁切入的低飛機');
+      this.unit('grunt','山麓警戒機',-21,0,-128,14);
+      this.flyer('掠脊機','ace',{cx:18,cz:-87,y:24,r:35,angle:.4,speed:.23});
+    }else if(this.sec===1){
+      this.text('起飛・選擇進場線','起飛爬升至約 65 公尺，從任一側兩根青色翼燈之間飛過');
+    }else if(this.sec===2){
+      this.checkpoint({side:this.side});this.text('穹頂・雙向截擊','兩台敵機以相反方向繞塔。塔身可遮蔽射線，左右平台可降落回能');
+      for(const s of [-1,1])this.flyer(s<0?'內圈截擊機':'外圈截擊機','ace',{cx,cz,y:s<0?56:88,r:s<0?65:100,angle:s*this.side*1.4,speed:s*.20});
+    }else if(this.sec===3){
+      this.text('北側平台・貼地突襲','敵方重機已登上平台。擊破重機與從後山切入的低空僚機');
+      this.unit('heavy','平台重機',-this.side*90,35,159,11);
+      this.flyer('後山僚機','grunt',{cx:0,cz:238,y:30,r:52,angle:1.2,speed:.26});
+    }else{
+      this.checkpoint({side:this.side});
+      this.text('長空・越頂追擊','長空在大穹頂後方盤旋。趁它轉彎時瞄準，留意推進器點火拔高');
+      this.leader=this.flyer('長空','ace',{cx:0,cz:207,y:64,r:100,angle:this.side*Math.PI*.25,speed:this.side*.17});
+      this.boss(this.leader,1.95);this.climbing=false;
+    }
+  }
+  get waypoints(){return this.sec===1?SUMMIT_APPROACHES.map(({x,y,z})=>({name:x<0?'西進場線':'東進場線',position:V(x,y,z)})):[];}
+  step(dt){
+    if(this.leader&&!this.climbing&&this.leader.ap<=this.leader.apMax*.5&&!this.leader.dead){
+      this.climbing=true;this.C.note('長空拔高・航線收窄','am');
+    }
+    for(const a of this.patrol){
+      if(a.e.dead)continue;
+      const climb=a.e===this.leader&&this.climbing;
+      const agility=a.e.components?.booster?.disabled ? .38 : 1;
+      a.angle+=dt*a.speed*(climb?1.65:1)*agility;
+      if(climb){a.y=Math.min(122,a.y+dt*14);a.r=Math.max(58,a.r-dt*8);}
+      const s=a.e.frontActor.station;
+      s.x=a.cx+a.r*Math.cos(a.angle);s.z=a.cz+a.r*Math.sin(a.angle);s.y=a.y+5*Math.sin(2*a.angle);
+    }
+    if(this.sec===1){
+      for(const {x,y,z} of SUMMIT_APPROACHES)if(!this.p.grounded&&this.at(x,y,z,17)){
+        this.side=Math.sign(x);return this.next();
+      }
+    }else if(this.E.mine.every(e=>e.dead))return this.next();
+    return false;
+  }
+}
 export function createExercise(id,site,C,E){
-  const Type={fold:Fold,echo:Echo,rail:Rail}[id];return new Type(site,C,E);
+  const Type={fold:Fold,echo:Echo,rail:Rail,dock:Dock,summit:Summit}[id];return new Type(site,C,E);
 }
